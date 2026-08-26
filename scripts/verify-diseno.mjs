@@ -89,9 +89,19 @@ const BASELINE_VOSEO = {
      protege: bloquea. Es la misma ley que esta tabla ya se cobró una vez, con
      el signo invertido.* */
   'packages/api/src/wrappers/equipo.ts': 1,           // ✅ EL MATCHER — ver abajo
-  'packages/api/src/wrappers/certificados.ts': 1,     // 🔴 voz real — deuda de A
-  'packages/api/src/wrappers/pizarra.ts': 2,          // 🔴 voz real — deuda de A
-  'packages/api/src/wrappers/_despensa-comun.ts': 1,  // 🔴 voz real — deuda de A
+  /* ✅ LAS TRES DEUDAS DE A, CURADAS EN ESTE MISMO COMMIT (25-ago, noche).
+     Eran cuatro cadenas que mi barrida de 167 no podía ver: mi lista no tenía
+     `trabajá`, `atendé` ni `sos` — las destapó la lista ampliada de B (⑩ ⑪).
+     *No es que se me escaparan: es que el instrumento no las buscaba.*
+
+     Verificado ANTES de tocarlas —la lección de esta misma jornada— que
+     **ninguna es frase del motor**: censadas contra `pg_proc`, cero
+     coincidencias. Los CÓDIGOS (`no_sos_del_equipo`, `no_sos_el_vendedor`)
+     **no se tocaron**: son identificadores, no voz, y cambiarlos rompería el
+     matching sin hablarle a nadie. */
+  'packages/api/src/wrappers/certificados.ts': 0,     // ✅ «Trabajas… emite el certificado»
+  'packages/api/src/wrappers/pizarra.ts': 0,          // ✅ «No eres parte…» · «…que no atiendes»
+  'packages/api/src/wrappers/_despensa-comun.ts': 0,  // ✅ «No eres el vendedor de este pedido»
 };
 
 /**

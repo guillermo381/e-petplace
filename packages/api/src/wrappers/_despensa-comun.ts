@@ -172,7 +172,7 @@ export const MENSAJES_DESPENSA: Record<
   transicion_no_permitida:      'El pedido no puede pasar a ese estado desde donde está.',
   motivo_requerido:             'Falta el motivo.',
   no_es_tu_pedido:              'Este pedido no es tuyo.',
-  no_sos_el_vendedor:           'No sos el vendedor de este pedido.',
+  no_sos_el_vendedor:           'No eres el vendedor de este pedido.',
   no_sos_admin:                 'No tienes permiso para hacer esto.',
   pedido_terminal:              'Este pedido ya está cerrado — no hay cola donde ordenarlo.',
   lote_invalido:                'El archivo no tiene filas que cargar.',
