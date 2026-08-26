@@ -56,6 +56,17 @@ const CODIGOS_ERROR_AGENDAMIENTO = [
   // de la segunda (elegir otra hora con esa persona, o soltar la
   // elección) y no puede hacerlo si el motor las mezcla.
   'persona_no_disponible',
+  // S106 (LETRA_TELEMEDICINA v1.1 §3, requisito del abogado): la
+  // teleconsulta EXIGE consentimiento, y viaja en el MISMO acto que el
+  // hold. Sale tipado y no como error genérico porque su cura es de
+  // pantalla y es concreta: mostrar el aviso §3 y esperar el toque.
+  'consentimiento_requerido',
+  // S106: el motor DERIVA la modalidad del tipo de servicio. Este código
+  // sale si un caller intenta contradecir la derivación — en cualquiera de
+  // las dos direcciones. No debería verlo un usuario: es un error de
+  // integración, y por eso su voz manda a reintentar y no a "elegir otra
+  // hora", que sería mentirle sobre qué pasó.
+  'modalidad_invalida',
 ] as const;
 
 export type CodigoErrorAgendamiento = (typeof CODIGOS_ERROR_AGENDAMIENTO)[number];
@@ -82,6 +93,8 @@ const MENSAJES_ERROR_AGENDAMIENTO: Record<
   servicio_no_reservable: 'Este servicio todavía no se puede reservar por la app.',
   persona_no_disponible:  'Quien elegiste no tiene ese horario libre. Prueba otra hora o deja que la clínica asigne.',
   urgencia_solo_hoy:      'Las urgencias se reservan solo para hoy.',
+  consentimiento_requerido: 'Necesitamos que leas y aceptes el aviso antes de reservar la videoconsulta.',
+  modalidad_invalida:     'No pudimos preparar esta reserva. Prueba de nuevo.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:      'Ocurrió un error inesperado. Prueba de nuevo.',
 };
@@ -377,6 +390,24 @@ export interface InputCrearBloqueo {
    *  y rebota `persona_no_disponible` si no puede — elegir a alguien y
    *  recibir a otro en silencio es peor que no poder elegir. */
   empleado_id?: string;
+  /**
+   * S106 (LETRA_TELEMEDICINA v1.1 §3) — **el consentimiento de la
+   * teleconsulta, y viaja EN EL MISMO ACTO que el hold.**
+   *
+   * 🔴 **No hay una segunda llamada para registrarlo, y no debe haberla:**
+   * el motor lo inserta dentro de la misma transacción que crea la cita, así
+   * que *una teleconsulta con hold y sin consentimiento es inexpresable*.
+   * Partirlo en dos llamadas devolvería el problema que esto vino a cerrar.
+   *
+   * · Para una teleconsulta: `true`, después de que la familia tocó el aviso
+   *   §3. Si falta, el motor rebota `consentimiento_requerido`.
+   * · Para cualquier otro servicio: **no se manda**.
+   *
+   * ⚠️ **La VERSIÓN del texto NO viaja desde acá** — la pone el servidor.
+   * Misma ley que `documentosVigentes`: *la casa tiene UNA respuesta a «qué
+   * texto vio», y no la decide la pantalla.*
+   */
+  acepta_teleconsulta?: boolean;
 }
 
 /** El hold es INVISIBLE al prestador (verdad firme): nace 'pendiente'. */
@@ -391,6 +422,9 @@ export async function crearBloqueoAgenda(
     p_hora:         input.hora,
     ...(input.modalidad !== undefined ? { p_modalidad: input.modalidad } : null),
     ...(input.empleado_id !== undefined ? { p_empleado_id: input.empleado_id } : null),
+    ...(input.acepta_teleconsulta !== undefined
+      ? { p_acepta_teleconsulta: input.acepta_teleconsulta }
+      : null),
   });
 
   if (error) return mapeoErrorAResultado(error.message);
