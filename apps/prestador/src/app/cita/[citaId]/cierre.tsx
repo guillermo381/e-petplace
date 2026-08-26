@@ -48,6 +48,7 @@ import { verificarSesion } from '@/lib/api';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
+import { CitaNoDisponible } from '@/components/cita-no-disponible';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -224,7 +225,8 @@ export default function Cierre() {
         )}
 
         {pantalla.estado === 'no_existe' && (
-          <EstadoVacio
+          <CitaNoDisponible
+            citaId={citaId}
             titulo={t('cita.noDisponible')}
             descripcion={t('cita.noDisponibleDetalleCorto')}
             accion={<Boton variante="secundario" etiqueta={t('cita.volverAgenda')} onPress={() => router.back()} />}

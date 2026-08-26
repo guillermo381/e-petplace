@@ -686,6 +686,8 @@ export const prestadorEn = {
     tituloPaseo: 'Walk',
     noDisponible: 'This appointment is no longer available',
     noDisponibleDetalle: "It may have been moved or cancelled. Go back to the agenda to see today's walks.",
+    canceladaTitulo: 'This appointment was cancelled',
+    canceladaDetalle: 'Your slot is free again.',
     noDisponibleDetalleCorto: "Go back to the agenda to see today's walks.",
     volverAgenda: 'Back to agenda',
     estadoPorConfirmar: 'To confirm',

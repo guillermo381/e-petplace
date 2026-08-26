@@ -14,7 +14,7 @@ import { obtenerMisPaquetesSalidas } from './paquetes';
 import { obtenerMisGroomings } from './grooming-reserva';
 import { obtenerMisAdiestramientos } from './adiestramiento-reserva';
 
-const MENSAJE_ERROR = 'No pudimos leer tus servicios. Probá de nuevo.';
+const MENSAJE_ERROR = 'No pudimos leer tus servicios. Prueba de nuevo.';
 
 export interface ProximaDeServicio {
   /** 'YYYY-MM-DD'. */

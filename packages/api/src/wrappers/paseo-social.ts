@@ -15,11 +15,11 @@ export type CodigoErrorPaseoSocial =
   | 'datos_inconsistentes';
 
 const MENSAJES: Record<CodigoErrorPaseoSocial, string> = {
-  acceso_denegado: 'No tenés acceso para responder por esta mascota.',
+  acceso_denegado: 'No tienes acceso para responder por esta mascota.',
   respuesta_invalida: 'La respuesta no es válida.',
   mascota_sin_familia: 'Esta mascota todavía no tiene una familia armada.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido: 'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido: 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorPaseoSocial> {

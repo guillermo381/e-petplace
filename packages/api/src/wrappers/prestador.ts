@@ -52,12 +52,12 @@ export type CodigoErrorPerfilPrestador =
 const MENSAJES: Record<CodigoErrorPerfilPrestador | 'error_desconocido' | 'datos_inconsistentes', string> = {
   sin_sesion:            'No hay sesión activa.',
   sin_prestador:         'Tu usuario no tiene un prestador asociado.',
-  coordenadas_invalidas: 'La ubicación no es válida. Buscá la dirección de nuevo.',
+  coordenadas_invalidas: 'La ubicación no es válida. Busca la dirección de nuevo.',
   radio_invalido:        'El radio de cobertura no es válido.',
   // dice QUÉ falta, no "es inválido": el caso real es un número sin país.
   telefono_invalido:     'El número tiene que incluir el país (por ejemplo +593 …).',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:     'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:     'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 /**
@@ -661,7 +661,7 @@ export async function actualizarNombreComercial(
 const CODIGOS_RESERVADOR = ['error', 'datos_inconsistentes'] as const;
 export type CodigoReservador = (typeof CODIGOS_RESERVADOR)[number];
 
-const MENSAJE_RESERVADOR = 'No pudimos cargar los nombres. Probá de nuevo.';
+const MENSAJE_RESERVADOR = 'No pudimos cargar los nombres. Prueba de nuevo.';
 
 export interface NombreReservador {
   cita_id: string;

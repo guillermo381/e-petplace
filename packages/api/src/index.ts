@@ -275,6 +275,17 @@ export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-
    *Una cita cancelada aparece sólo donde la superficie promete contar lo que
    PASÓ; donde promete lo que VIENE, excluirla es correcto.* Los de arriba
    (`obtenerCitasActivas*`) prometen lo que viene y siguen filtrando bien. */
+/* S105-A · LAS TARJETAS QUE EL PROVEEDOR TIENE POR VÁLIDAS (edge de D).
+   ⚠️ NO resuelve la duplicación —es síntoma de D-921, ya curado— sino que
+   deja de ofrecer tarjetas que el proveedor ya no honra. */
+export {
+  listarTarjetasVerificadas,
+  type ListadoTarjetas,
+  type TarjetaVerificada,
+  type EstadoProveedor,
+  type CodigoTarjetas,
+} from './wrappers/pagos-tarjetas';
+
 /* S105-A · RETOMAR LA COMPRA — nace CON su motor, en la misma tanda. */
 export {
   retomarCompra,
@@ -1413,6 +1424,7 @@ export {
   type CodigoInvitacionFamilia,
   estadoCorreoInvitacion,
   type EstadoCorreoInvitacion,
+  type YaInvitada,
 } from './wrappers/familia-invitacion';
 
 // S104-A · tanda 3 — LA SALIDA. Vive en packages/api por la LEY DE PARIDAD:

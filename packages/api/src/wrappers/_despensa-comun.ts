@@ -165,7 +165,7 @@ export const MENSAJES_DESPENSA: Record<
   CodigoErrorDespensa | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  auth_requerido:               'Necesitás iniciar sesión para hacer esto.',
+  auth_requerido:               'Necesitas iniciar sesión para hacer esto.',
   pedido_no_existe:             'No encontramos ese pedido.',
   estado_no_existe:             'Ese estado de pedido no existe.',
   estado_inactivo:              'Ese paso todavía no está disponible.',
@@ -173,11 +173,11 @@ export const MENSAJES_DESPENSA: Record<
   motivo_requerido:             'Falta el motivo.',
   no_es_tu_pedido:              'Este pedido no es tuyo.',
   no_sos_el_vendedor:           'No sos el vendedor de este pedido.',
-  no_sos_admin:                 'No tenés permiso para hacer esto.',
+  no_sos_admin:                 'No tienes permiso para hacer esto.',
   pedido_terminal:              'Este pedido ya está cerrado — no hay cola donde ordenarlo.',
   lote_invalido:                'El archivo no tiene filas que cargar.',
   lote_demasiado_grande:        'El archivo supera las 500 filas. Partilo y cargalo en tandas.',
-  clave_idempotencia_requerida: 'Falta la clave de la compra. Volvé a intentar.',
+  clave_idempotencia_requerida: 'Falta la clave de la compra. Vuelve a intentar.',
   pedido_sin_items:             'El pedido no tiene productos.',
   oferta_no_publicada:          'Uno de los productos ya no está disponible.',
   item_sin_sku:                 'Uno de los productos perdió su referencia de stock.',
@@ -186,9 +186,9 @@ export const MENSAJES_DESPENSA: Record<
   // NÚMEROS (la referencia y los dos extremos), y la pantalla muestra ése.
   // *Un rechazo que no dice la banda obliga a adivinar por tanteo.*
   sin_referencia_de_precio:     'Todavía no está cargado el precio de referencia: tu cambio quedó guardado para aprobación.',
-  fuera_de_banda:               'Ese precio queda fuera del rango que podés mover: quedó guardado para aprobación.',
+  fuera_de_banda:               'Ese precio queda fuera del rango que puedes mover: quedó guardado para aprobación.',
   lote_requerido:               'Falta registrar el lote de los productos.',
-  sin_acceso_a_mascota:         'No tenés acceso a esa mascota.',
+  sin_acceso_a_mascota:         'No tienes acceso a esa mascota.',
   senal_no_existe:              'Esa señal no existe.',
   senal_inactiva:               'Esa señal está apagada.',
   // 🔴 HONESTIDAD, NO EXCUSA: el vendedor no cargó su regla de envío. La app
@@ -206,7 +206,7 @@ export const MENSAJES_DESPENSA: Record<
   repartidor_invalido:          'Ese repartidor no es de tu equipo o está inactivo.',
   repartidor_no_existe:         'No encontramos ese repartidor.',
   no_sos_el_repartidor_asignado:'Este envío está asignado a otra persona.',
-  no_podes_operar_este_envio:   'No tenés permiso sobre este envío.',
+  no_podes_operar_este_envio:   'No tienes permiso sobre este envío.',
   envio_no_existe:              'Este pedido no tiene envío todavía.',
   codigo_incorrecto:            'El código no coincide. Pedile a la familia el código de su pedido.',
   foto_requerida:               'La entrega en puerta se cierra con su foto.',
@@ -232,7 +232,7 @@ export const MENSAJES_DESPENSA: Record<
   // S96 · cupo, turnos y fecha
   metodo_entrega_invalido:      'Ese método de entrega no existe.',
   sin_turnos_de_entrega:        'Este vendedor todavía no declaró sus horarios de entrega.',
-  sin_cupo_ese_dia:             'Ese día no hay capacidad de reparto. Elegí otro.',
+  sin_cupo_ese_dia:             'Ese día no hay capacidad de reparto. Elige otro.',
   sin_capacidad_de_reparto:     'Este vendedor no tiene reparto disponible por ahora.',
   fecha_programada_invalida:    'La fecha tiene que ser un día futuro.',
   servicio_envio_inactivo:      'Ese tipo de entrega todavía no está disponible.',
@@ -240,7 +240,7 @@ export const MENSAJES_DESPENSA: Record<
   capacidad_invalida:           'La capacidad tiene que ser mayor a cero.',
   recurso_no_existe:            'No encontramos ese recurso de reparto.',
   // S96 · recurrencia
-  cadencia_invalida:            'Elegí una frecuencia o un día del mes, no los dos.',
+  cadencia_invalida:            'Elige una frecuencia o un día del mes, no los dos.',
   recurrencia_sin_items:        'La compra recurrente no tiene productos.',
   recurrencia_no_existe:        'No encontramos esa compra recurrente.',
   no_es_tu_recurrencia:         'Esa compra recurrente no es tuya.',
@@ -276,7 +276,7 @@ export const MENSAJES_DESPENSA: Record<
   foto_persona_requerida:       'Falta la foto de la persona: es obligatoria para registrarla.',
   whatsapp_requerido:           'Falta el WhatsApp: es por donde se le escribe cuando un pedido no llega.',
   datos_inconsistentes:         'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:            'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:            'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 /** Normaliza por PREFIJO (L-115): el motor manda códigos con sufijo

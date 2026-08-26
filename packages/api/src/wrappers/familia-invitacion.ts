@@ -25,6 +25,12 @@ const CODIGOS = [
   'solo_titular_revoca',
   'email_invalido',
   'ya_es_miembro',
+  /* 🔴 S105-A · La persona YA tiene una invitación viva a esta familia.
+     Antes esto lo rechazaba el índice `ux_familia_inv_pendiente` con un `23505`
+     pelado ⇒ caía en `error_desconocido` ⇒ «probá de nuevo» **sobre algo que
+     iba a fallar durante cuatro semanas**. *Un guard que vive en un índice no
+     puede explicarse: sólo puede negarse.* */
+  'ya_invitada',
   'invitacion_inexistente',
   'invitacion_ya_aceptada',
   'invitacion_no_vigente',
@@ -35,11 +41,16 @@ const CODIGOS = [
 export type CodigoInvitacionFamilia = (typeof CODIGOS)[number];
 
 const VOZ: Record<CodigoInvitacionFamilia, string> = {
-  auth_required:          'Necesitás iniciar sesión.',
+  auth_required:          'Necesitas iniciar sesión.',
   solo_titular_invita:    'Solo quien creó la familia puede invitar.',
   solo_titular_revoca:    'Solo quien creó la familia puede cancelar una invitación.',
   email_invalido:         'Ese correo no parece válido.',
   ya_es_miembro:          'Esa persona ya es parte de la familia.',
+  /* 🔴 LA VOZ NO ALCANZA SOLA: el caller tiene la fecha y el id en
+     `yaInvitada` para poder decir «ya la invitaste el 23 de agosto» y ofrecer
+     cancelar aquella. *Un código sin su dato es el mismo callejón con mejor
+     etiqueta.* */
+  ya_invitada:            'Ya invitaste a esa persona y su invitación sigue abierta.',
   invitacion_inexistente: 'No encontramos esa invitación.',
   invitacion_ya_aceptada: 'Esa invitación ya fue aceptada.',
   invitacion_no_vigente:  'Esa invitación ya no está vigente.',
@@ -47,14 +58,52 @@ const VOZ: Record<CodigoInvitacionFamilia, string> = {
   /* La voz dice el hecho SIN regalar información: no confirma a qué correo fue
      dirigida (MODELO_LOGIN §1.3 — los errores no enumeran cuentas). */
   email_no_coincide:      'Esta invitación es para otra dirección de correo.',
-  error_desconocido:      'No pudimos completar la invitación. Probá de nuevo.',
+  error_desconocido:      'No pudimos completar la invitación. Prueba de nuevo.',
 };
 
+/**
+ * Datos que acompañan a `ya_invitada`. **Sin esto la pantalla sólo podría
+ * repetir la voz genérica con otro nombre** — con esto puede decir la fecha y
+ * ofrecer cancelar la invitación previa.
+ */
+export interface YaInvitada {
+  /** `YYYY-MM-DD`, en hora de Guayaquil. */
+  fecha: string;
+  /** La invitación que sigue abierta — para poder ofrecer cancelarla. */
+  invitacionId: string;
+  /**
+   * 🔴 EL ENLACE. Sin esto sólo se podía ofrecer «cancelá la anterior», y el
+   * founder dictó **las dos salidas**: *«compartile el enlace o cancelá esa
+   * invitación»*.
+   *
+   * ⚠️ **ES UNA CREDENCIAL**: quien la tiene puede aceptar la invitación. El
+   * motor sólo se la devuelve a quien invitó —que ya la tenía cuando la creó—,
+   * así que no revela nada nuevo. **No la loguees ni la muestres suelta:** va
+   * adentro del enlace que se comparte, igual que en el alta.
+   */
+  token: string;
+}
+
 /** El motor habla por `message`; acá se traduce a código de la casa (regla 35). */
-function mapear<T>(mensaje: string): ResultadoWrapper<T, CodigoInvitacionFamilia> {
+function mapear<T>(
+  mensaje: string,
+): ResultadoWrapper<T, CodigoInvitacionFamilia> & { yaInvitada?: YaInvitada } {
   const hit = CODIGOS.find((c) => c !== 'error_desconocido' && mensaje.includes(c));
   const codigo: CodigoInvitacionFamilia = hit ?? 'error_desconocido';
-  return { ok: false, codigo, mensaje: VOZ[codigo] };
+  const base = { ok: false as const, codigo, mensaje: VOZ[codigo] };
+
+  /* 🔴 EL DATO SE EXTRAE DEL MENSAJE, que es donde el motor puede ponerlo: un
+     `RAISE` no devuelve jsonb. Formato: `ya_invitada|YYYY-MM-DD|<uuid>`.
+     *Si el formato cambiara, esto degrada a la voz sin dato en vez de romper —
+     una pantalla sin fecha es peor que ésta, pero mucho mejor que un crash.* */
+  if (codigo === 'ya_invitada') {
+    const m = /ya_invitada\|([0-9]{4}-[0-9]{2}-[0-9]{2})\|([0-9a-f-]{36})\|([0-9a-f]{32,})/
+      .exec(mensaje);
+    if (m) {
+      return { ...base, yaInvitada: { fecha: m[1], invitacionId: m[2], token: m[3] } };
+    }
+  }
+  return base;
 }
 
 export interface InvitacionCreada {
@@ -76,7 +125,15 @@ export async function invitarAFamilia(input: {
   familiaId: string;
   email: string;
   nombre?: string;
-}): Promise<ResultadoWrapper<InvitacionCreada, CodigoInvitacionFamilia>> {
+}): Promise<
+  /* 🔴 EL TIPO DECLARA LO QUE YA VIAJA EN RUNTIME. `mapear` adjunta
+     `yaInvitada` desde S105-A y el tipo público no lo decía ⇒ la pantalla
+     tenía el dato y **el compilador se lo negaba**. La pista C frenó ahí en vez
+     de castear, y tuvo razón: *un `as` sobre nuestro propio wrapper es peor
+     que sobre un borde ajeno, porque acá el tipo se puede arreglar y castear
+     taparía la única señal de que estaba mal.* */
+  ResultadoWrapper<InvitacionCreada, CodigoInvitacionFamilia> & { yaInvitada?: YaInvitada }
+> {
   const { data, error } = await getClient().rpc('invitar_a_familia', {
     p_familia_id: input.familiaId,
     p_email: normalizarEmail(input.email),
@@ -150,7 +207,7 @@ export async function revocarInvitacionFamilia(
 export async function darDeBajaCorreo(token: string): Promise<ResultadoWrapper<null, 'error_desconocido'>> {
   const { error } = await getClient().rpc('dar_de_baja_correo', { p_token: token });
   if (error) {
-    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos completar la baja. Probá de nuevo.' };
+    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos completar la baja. Prueba de nuevo.' };
   }
   return { ok: true, data: null };
 }

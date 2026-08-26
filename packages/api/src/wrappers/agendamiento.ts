@@ -64,26 +64,26 @@ const MENSAJES_ERROR_AGENDAMIENTO: Record<
   CodigoErrorAgendamiento | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:        'No tenés acceso para hacer esto.',
+  acceso_denegado:        'No tienes acceso para hacer esto.',
   rango_invalido:         'El rango de fechas no es válido.',
   prestador_inactivo:     'Este prestador no está disponible.',
   servicio_no_disponible: 'Este servicio ya no está disponible.',
   slot_invalido:          'El horario elegido no es válido.',
-  slot_en_pasado:         'Ese horario ya pasó — elegí otro.',
+  slot_en_pasado:         'Ese horario ya pasó — elige otro.',
   fuera_de_horario:       'El prestador no atiende en ese horario.',
-  slot_ocupado:           'Ese horario acaba de ocuparse — elegí otro.',
+  slot_ocupado:           'Ese horario acaba de ocuparse — elige otro.',
   cita_no_encontrada:     'La reserva no existe o ya no es accesible.',
   cita_ya_confirmada:     'Esta cita ya está confirmada y pagada.',
   cita_estado_invalido:   'La reserva no está en un estado que permita pagarla.',
-  hold_expirado:          'Este horario se liberó — elegí otro.',
+  hold_expirado:          'Este horario se liberó — elige otro.',
   pago_no_disponible:     'Este prestador todavía no puede recibir pagos por la app.',
-  prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
+  prestador_no_disponible: 'El paseador no está disponible en esas fechas — elige otro horario.',
   paseo_social_no:        'Por ahora los paseos son en grupo. Estamos armando algo para tu mascota.',
   servicio_no_reservable: 'Este servicio todavía no se puede reservar por la app.',
   persona_no_disponible:  'Quien elegiste no tiene ese horario libre. Prueba otra hora o deja que la clínica asigne.',
   urgencia_solo_hoy:      'Las urgencias se reservan solo para hoy.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:      'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorAgendamiento | 'error_desconocido' {

@@ -1391,8 +1391,40 @@ export default function DespensaCheckout() {
           </View>
         ) : fase === 'exito' ? (
           <>
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-              <Texto variante="titulo">{t('despensa.exitoCuerpo')}</Texto>
+            {/* 🔴 S105-C · EL ÉXITO EMPIEZA POR EL PAGO — hallazgo del founder
+                en el aparato: *«no hay pantalla de pago exitoso decente»*.
+                Medido, la pantalla EXISTÍA; lo que estaba mal era **la
+                jerarquía**: lo más grande decía «Tu pedido quedó creado» y la
+                confirmación del pago aparecía **en la tercera línea**.
+                *«Creado» es lo que la persona ya sabía —lo armó ella—; lo que
+                fue a averiguar es si la plata pasó.* Y debajo arrancaba la
+                recurrencia, así que la pantalla **pivotaba a ofrecer algo antes
+                de terminar de contestar**.
+
+                ⇒ **La misma anatomía que la OTRA puerta ya usa** en su éxito
+                (`checkout-reserva`: glifo 48 + título + descripción, centrado
+                y con aire). *No se inventa una forma nueva para la segunda
+                puerta: se copia la del vecino, que es lo que vuelve a las dos
+                reconocibles como la misma casa.*
+
+                El glifo es **`nodoConfirmado`**, el que la casa ya usa para el
+                escalón «Confirmado» del pedido: *el mismo hecho, el mismo
+                signo.*
+
+                **La recurrencia NO se movió ni se achicó** —§6.1 está firmada—
+                pero ahora va **después de una respuesta completa**, separada
+                por su `Separador`. */}
+            <View
+              style={{
+                paddingHorizontal: spacing[5],
+                paddingTop: spacing[4],
+                paddingBottom: spacing[2],
+                gap: spacing[3],
+                alignItems: 'center',
+              }}
+            >
+              <Icono nombre="nodoConfirmado" tamano={48} />
+              <Texto variante="titulo">{t('despensa.exitoPagoTitulo')}</Texto>
               <Texto variante="cuerpo">{t('despensa.exitoDetalle')}</Texto>
               {metodo === 'retiro' ? (
                 <Texto variante="cuerpo">{t('despensa.exitoRetiro')}</Texto>

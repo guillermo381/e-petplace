@@ -32,17 +32,17 @@ const MENSAJES_ERROR_DIRECCION: Record<
   CodigoErrorDireccion | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:      'No tenés acceso para hacer esto.',
-  direccion_requerida:  'Contanos la dirección de tu hogar.',
-  ciudad_requerida:     'Contanos en qué ciudad está tu hogar.',
+  acceso_denegado:      'No tienes acceso para hacer esto.',
+  direccion_requerida:  'Cuéntanos la dirección de tu hogar.',
+  ciudad_requerida:     'Cuéntanos en qué ciudad está tu hogar.',
   telefono_invalido:    'El teléfono no es válido — sin el signo +.',
-  coordenadas_invalidas: 'La ubicación no es válida. Buscá la dirección de nuevo.',
+  coordenadas_invalidas: 'La ubicación no es válida. Busca la dirección de nuevo.',
   alias_requerido:      'Ponele un nombre para reconocerla — «Oficina», «Casa de mamá».',
   alias_muy_largo:      'El nombre es muy largo. Con pocas palabras alcanza.',
   punto_requerido:      'Falta el punto en el mapa: es lo que encuentra la puerta.',
   direccion_no_encontrada: 'Esa dirección ya no está en tu lista.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorDireccion | 'error_desconocido' {

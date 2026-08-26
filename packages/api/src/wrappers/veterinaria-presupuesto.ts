@@ -73,15 +73,15 @@ const CODIGOS_PRESUPUESTO = [
 export type CodigoErrorPresupuesto = (typeof CODIGOS_PRESUPUESTO)[number];
 
 const MENSAJES: Record<CodigoErrorPresupuesto, string> = {
-  acceso_denegado: 'No tenés permiso para esta acción.',
+  acceso_denegado: 'No tienes permiso para esta acción.',
   no_opera_cuenta: 'No operás este negocio.',
-  sin_acceso_mascota: 'No tenés acceso a esta mascota.',
+  sin_acceso_mascota: 'No tienes acceso a esta mascota.',
   country_invalido: 'El país no es válido.',
   presupuesto_no_existe: 'Ese presupuesto ya no existe.',
   presupuesto_no_es_borrador: 'El presupuesto ya no es un borrador — no se puede editar.',
-  vence_en_requerido: 'Poné hasta cuándo vale el presupuesto.',
+  vence_en_requerido: 'Pon hasta cuándo vale el presupuesto.',
   vence_en_pasada: 'La fecha de vencimiento tiene que ser futura.',
-  presupuesto_sin_items: 'Agregá al menos un ítem antes de enviar.',
+  presupuesto_sin_items: 'Agrega al menos un ítem antes de enviar.',
   no_es_familia: 'Solo la familia puede aprobar desde la app.',
   presupuesto_no_enviado: 'El presupuesto todavía no fue enviado.',
   presupuesto_vencido: 'El presupuesto venció.',
@@ -91,10 +91,10 @@ const MENSAJES: Record<CodigoErrorPresupuesto, string> = {
   cita_ya_fijada: 'Esta cita ya tiene fecha coordinada.',
   presupuesto_no_aprobado: 'El presupuesto de esta cita todavía no está aprobado.',
   empleado_no_es_de_cuenta: 'Esa persona no pertenece a este negocio.',
-  slot_invalido: 'Elegí fecha, hora y profesional.',
+  slot_invalido: 'Elige fecha, hora y profesional.',
   slot_en_pasado: 'La fecha coordinada tiene que ser futura.',
   slot_ocupado: 'Ese horario ya está ocupado para esa persona.',
-  datos_invalidos: 'Revisá los datos del presupuesto.',
+  datos_invalidos: 'Revisa los datos del presupuesto.',
 };
 
 function normalizar(error: { code?: string; message: string }): CodigoErrorPresupuesto {

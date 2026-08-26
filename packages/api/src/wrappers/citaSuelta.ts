@@ -30,21 +30,21 @@ const MENSAJES_ERROR_SUELTO: Record<
   CodigoErrorCitaSuelta | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:       'No tenés acceso para hacer esto.',
+  acceso_denegado:       'No tienes acceso para hacer esto.',
   cita_no_encontrada:    'El paseo no existe o ya no es accesible.',
   cita_es_de_plan:       'Este paseo es parte de tu plan — se maneja desde el plan.',
   cita_es_de_paquete:    'Este paseo es de tu paquete — se maneja desde el paquete.',
   cita_estado_invalido:  'Este paseo ya no se puede modificar.',
   ventana_vencida:       'Faltan menos de 2 horas — este paseo ya no se puede mover.',
   ventana_cancelacion_vencida:
-    'Faltan menos de 24 horas — ya no se puede cancelar, pero todavía podés reagendarlo.',
+    'Faltan menos de 24 horas — ya no se puede cancelar, pero todavía puedes reagendarlo.',
   slot_invalido:         'El horario elegido no es válido.',
-  slot_en_pasado:        'Ese horario ya pasó — elegí otro.',
+  slot_en_pasado:        'Ese horario ya pasó — elige otro.',
   fuera_de_horario:      'El paseador no atiende en ese horario.',
-  slot_ocupado:          'Ese horario acaba de ocuparse — elegí otro.',
-  prestador_no_disponible: 'El paseador no está disponible en esa fecha — elegí otra.',
+  slot_ocupado:          'Ese horario acaba de ocuparse — elige otro.',
+  prestador_no_disponible: 'El paseador no está disponible en esa fecha — elige otra.',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:     'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:     'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorCitaSuelta | 'error_desconocido' {

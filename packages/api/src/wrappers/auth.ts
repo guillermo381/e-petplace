@@ -25,7 +25,7 @@ const MENSAJES_ERROR_AUTH: Record<
   CodigoErrorAuth | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  email_ya_registrado:   'Ese email ya tiene cuenta. Probá iniciar sesión.',
+  email_ya_registrado:   'Ese email ya tiene cuenta. Prueba iniciar sesión.',
   credenciales_invalidas: 'El email o la contraseña no coinciden.',
   email_invalido:        'Ese email no parece válido.',
   /* Misma voz única que `contrasena_debil` en seguridad.ts — ver el porqué
@@ -35,10 +35,10 @@ const MENSAJES_ERROR_AUTH: Record<
      clave que se tipea al crear una cuenta. */
   password_debil:
     `Necesitamos una contraseña más fuerte: mínimo ${MIN_LARGO_CONTRASENA} caracteres y evita palabras o combinaciones fáciles de identificar. Un truco: tres palabras que no tengan relación, como melon-lampara-rio.`,
-  email_no_confirmado:   'Falta confirmar tu email. Revisá tu correo.',
+  email_no_confirmado:   'Falta confirmar tu email. Revisa tu correo.',
   sin_sesion:            'No hay una sesión activa.',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:     'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:     'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 // error.code de auth-js → código de la casa.
@@ -434,7 +434,7 @@ export async function confirmarAltaConCodigo(input: {
   if (error) {
     /* Un código malo y uno vencido son la misma respuesta a propósito: decir
        cuál falló le confirma a un extraño que ese correo tiene cuenta. */
-    return { ok: false, codigo: 'codigo_invalido', mensaje: 'Ese código no es válido o ya venció. Pedí uno nuevo.' };
+    return { ok: false, codigo: 'codigo_invalido', mensaje: 'Ese código no es válido o ya venció. Pide uno nuevo.' };
   }
   if (!data.user) return mapeoErrorAuth(undefined, 'datos_inconsistentes');
 
