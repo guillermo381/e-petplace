@@ -8,7 +8,7 @@
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { palette, gradients } from '../tokens/palette'
 import { typography } from '../tokens/typography'
@@ -36,6 +36,14 @@ import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
 import { AvisoTeleconsulta } from '../components/AvisoTeleconsulta'
+import { ControlLlamada } from '../components/ControlLlamada'
+import { TemporizadorLlamada } from '../components/TemporizadorLlamada'
+import { EstadoConexion } from '../components/EstadoConexion'
+import { EncabezadoLlamada } from '../components/EncabezadoLlamada'
+import { SuperficieLlamada } from '../components/SuperficieLlamada'
+import { TileVideoPropio } from '../components/TileVideoPropio'
+import { ModalDosAlturas, AsaModal } from '../components/ModalDosAlturas'
+import { sobreVideo } from '../tokens/sobreVideo'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, HojaScroll, type HojaAltura } from '../components/Hoja'
@@ -2497,6 +2505,14 @@ function GaleriaInterna() {
   const [cruceVisible, setCruceVisible] = useState(true)
   // S106-B · el aviso previo de teleconsulta (gate del founder)
   const [avisoTele, setAvisoTele] = useState(false)
+  // S106-B tanda 2 · la videollamada (REFERENCIA, ya no gate — el founder lo
+  // reemplazó por el recorrido de usuario en docs/relevamientos/)
+  const [consentTele, setConsentTele] = useState(false)
+  const [micVivo, setMicVivo] = useState(true)
+  const [camViva, setCamViva] = useState(true)
+  const [conex, setConex] = useState<'buena' | 'inestable' | 'reconectando'>('buena')
+  const inicioLlamada = useRef(Date.now()).current
+  const [altModal, setAltModal] = useState<'cerrado' | 'medio' | 'completo'>('cerrado')
   const { theme, mode, setMode } = useTheme()
   const { mostrar } = useAviso()
   const [cargandoDemo, setCargandoDemo] = useState(false)
@@ -2604,7 +2620,9 @@ function GaleriaInterna() {
               signosCierre: 'llévala a una clínica ahora mismo.',
               transito:
                 'La videollamada no se graba y se transmite a través de la infraestructura de nuestro proveedor de video.',
+              consentimiento: 'Entendí que esta consulta no reemplaza una atención presencial.',
             }}
+            consentimiento={{ marcado: consentTele, onCambio: setConsentTele }}
             acciones={{
               urgencias: { etiqueta: 'Ir a urgencias', onPress: () => setAvisoTele(false) },
               presencial: { etiqueta: 'Reservar cita presencial', onPress: () => setAvisoTele(false) },
@@ -2658,6 +2676,125 @@ function GaleriaInterna() {
               },
             ]}
           />
+        </Seccion>
+
+        <Seccion titulo="S106-B tanda 2 · LA VIDEOLLAMADA — referencia (el gate lo reemplazó el recorrido de usuario). La clase «control sobre video»: el fondo lo pone la cámara de otro, así que cada control lleva disco + anillo. Se muestran sobre BLANCO y sobre NEGRO, que son los dos extremos contra los que se midió">
+          <Texto variante="apoyo">
+            Contrastes verificados en verify:contrast — contenido/disco 5.61 (blanco) y
+            19.58 (negro) · disco/video 5.90 separa en claro · anillo/video 4.11 separa
+            en oscuro. Cada canal cubre el extremo donde el otro no rinde.
+          </Texto>
+          <View style={{ height: spacing[3] }} />
+          {([sobreVideo.extremoClaro, sobreVideo.extremoOscuro] as const).map((fondo) => (
+            <View key={fondo} style={{ marginBottom: spacing[3] }}>
+              <Texto variante="apoyo">{fondo === sobreVideo.extremoClaro ? 'sobre video BLANCO' : 'sobre video NEGRO'}</Texto>
+              <View style={{ height: spacing[2] }} />
+              <View style={{ backgroundColor: fondo, padding: spacing[4], borderRadius: radius.md, flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+                <ControlLlamada glifo="microfono" etiqueta="Micrófono" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
+                <ControlLlamada glifo="camara" etiqueta="Cámara" activo={camViva} onPress={() => setCamViva((v) => !v)} />
+                <ControlLlamada glifo="girarCamara" etiqueta="Girar cámara" onPress={() => {}} />
+                <ControlLlamada glifo="colgar" tamaño="lg" etiqueta="Colgar" onPress={() => {}} />
+                <TemporizadorLlamada inicioTs={inicioLlamada} />
+              </View>
+            </View>
+          ))}
+
+          <Texto variante="apoyo">
+            El estado de conexión: los dos primeros son un punto; solo «reconectando»
+            crece a banda con palabras — es el único que hay que entender para no
+            colgar creyendo que se rompió.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ backgroundColor: sobreVideo.extremoOscuro, padding: spacing[4], borderRadius: radius.md, gap: spacing[3] }}>
+            {(['buena', 'inestable', 'reconectando'] as const).map((e) => (
+              <View key={e} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                <EstadoConexion
+                  estado={e}
+                  voz={{ buena: 'Conexión buena', inestable: 'Conexión inestable', reconectando: 'Reconectando…' }}
+                />
+                <Texto variante="apoyo" color="sobreVideo">{e}</Texto>
+              </View>
+            ))}
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Boton variante="secundario" etiqueta={`Estado: ${conex} — cambiar`} onPress={() => setConex((c) => (c === 'buena' ? 'inestable' : c === 'inestable' ? 'reconectando' : 'buena'))} />
+          <View style={{ height: spacing[3] }} />
+          <View style={{ backgroundColor: sobreVideo.extremoOscuro, borderRadius: radius.md, overflow: 'hidden' }}>
+            <EncabezadoLlamada
+              nombre="Clínica Aurora"
+              estado={conex}
+              vozEstado={{ buena: 'Conexión buena', inestable: 'Conexión inestable', reconectando: 'Reconectando…' }}
+              inicioTs={inicioLlamada}
+            />
+          </View>
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="apoyo">
+            La superficie completa: remoto a sangre, el tile propio arriba a la
+            derecha (tocalo para intercambiar, arrastralo y se pega a la esquina más
+            cercana), y el chrome que se va a los 4 s. Colgar NUNCA se esconde.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ height: 420, borderRadius: radius.md, overflow: 'hidden' }}>
+            <SuperficieLlamada
+              alto={420}
+              videoGrande={<View style={{ flex: 1, backgroundColor: sobreVideo.extremoOscuro, alignItems: 'center', justifyContent: 'center' }}><Texto color="sobreVideo">video remoto</Texto></View>}
+              videoChico={<View style={{ flex: 1, backgroundColor: sobreVideo.extremoClaro, alignItems: 'center', justifyContent: 'center' }}><Texto variante="apoyo">mi cámara</Texto></View>}
+              encabezado={{
+                nombre: 'Clínica Aurora',
+                estado: conex,
+                vozEstado: { buena: 'Conexión buena', inestable: 'Conexión inestable', reconectando: 'Reconectando…' },
+                inicioTs: inicioLlamada,
+              }}
+              onIntercambiar={() => {}}
+              etiquetaTile="Tu cámara. Tocá para intercambiar."
+              microfonoActivo={micVivo}
+              camaraActiva={camViva}
+              onMicrofono={() => setMicVivo((v) => !v)}
+              onCamara={() => setCamViva((v) => !v)}
+              onColgar={() => {}}
+              vozControles={{ microfono: 'Micrófono', camara: 'Cámara', colgar: 'Colgar', girarCamara: 'Girar cámara' }}
+              onGirarCamara={() => {}}
+              senalDeNota="La doctora está escribiendo en la historia de Thor"
+              pie={<AsaModal etiqueta="Abrir la ficha" onPress={() => setAltModal('medio')} />}
+            />
+          </View>
+
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="apoyo">
+            El tile propio SUELTO, para ver su imán: arrastralo dentro del marco y
+            soltalo en cualquier lado — se pega a la esquina más cercana.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ height: 260, borderRadius: radius.md, overflow: 'hidden', backgroundColor: sobreVideo.extremoOscuro }}>
+            <TileVideoPropio
+              altoDisponible={260}
+              onIntercambiar={() => {}}
+              etiqueta="Tu cámara. Tocá para intercambiar."
+            >
+              <View style={{ flex: 1, backgroundColor: sobreVideo.extremoClaro, alignItems: 'center', justifyContent: 'center' }}>
+                <Texto variante="apoyo">mi cámara</Texto>
+              </View>
+            </TileVideoPropio>
+          </View>
+
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="apoyo">
+            El modal de dos alturas (prestador): asa, tres posiciones con imán, y aun
+            en completo queda franja de video arriba — la franja es el animal.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ height: 320, borderRadius: radius.md, overflow: 'hidden', backgroundColor: sobreVideo.extremoOscuro }}>
+            <ModalDosAlturas
+              altura={altModal}
+              onAltura={setAltModal}
+              altoPantalla={320}
+              etiquetaAsa="Ficha de la consulta"
+            >
+              <Texto>Acá va la nota clínica. El teclado no empuja el video: el panel crece por dentro.</Texto>
+            </ModalDosAlturas>
+          </View>
+          <View style={{ height: spacing[2] }} />
+          <Boton variante="secundario" etiqueta={`Modal: ${altModal} — cambiar`} onPress={() => setAltModal((a) => (a === 'cerrado' ? 'medio' : a === 'medio' ? 'completo' : 'cerrado'))} />
         </Seccion>
 
         {/* ═══ S85-B13 · LOS GLIFOS QUE ESPERAN SU OJO. Suben acá por el

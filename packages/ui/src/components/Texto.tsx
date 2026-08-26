@@ -86,6 +86,7 @@ import type { ReactNode } from 'react'
 
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
+import { sobreVideo } from '../tokens/sobreVideo'
 
 export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis' | 'dato' | 'datoMd' | 'voz'
 /** S81 (pedido de C, los spreads dangerText de los cierres): entran los
@@ -97,7 +98,15 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
  *  tenía que salirse de la pieza. Su primer consumidor es la banda de
  *  desvío de `EscaleraEstados` (una entrega fallida no es un ERROR del
  *  sistema —vuelve y se reagenda—: 'danger' habría gritado de más). */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning'
+/** S106-B — entra `sobreVideo`, y NO es «un color más»: es la única entrada de
+ *  esta lista que **no sale del tema**, porque el fondo tampoco sale del tema.
+ *  Sobre un video en vivo el fondo lo pone la cámara de otra persona (la clase
+ *  de `tokens/sobreVideo.ts`), así que `theme.text.*` —calibrado contra
+ *  superficies que la casa pinta— ahí no aplica. **Su piso está medido en
+ *  `verify-contrast.ts` contra los dos extremos, blanco y negro puros.**
+ *  ⚠️ Se usa SOLO sobre video. Sobre una superficie de la casa es papel contra
+ *  papel: invisible. */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo'
 
 export type TextoProps = {
   children: ReactNode
@@ -227,13 +236,15 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
   const receta = RECETA[variante]
   const c = color ?? receta.color
   const colorResuelto =
-    c === 'danger'
+    c === 'sobreVideo'
+      ? sobreVideo.contenido
+      : c === 'danger'
       ? theme.status.dangerText
       : c === 'success'
         ? theme.status.successText
         : c === 'warning'
           ? theme.status.warningText
-          : theme.text[c]
+          : theme.text[c as Exclude<TextoColor, 'danger' | 'success' | 'warning' | 'sobreVideo'>]
 
   return (
     <Text
