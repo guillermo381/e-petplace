@@ -51,12 +51,12 @@ const MENSAJES_EXTRACCION: Record<
   CodigoErrorExtraccion | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  imagen_invalida:        'La foto no se pudo procesar. Probá con otra foto del carnet.',
+  imagen_invalida:        'La foto no se pudo procesar. Prueba con otra foto del carnet.',
   configuracion_faltante: 'El servicio de lectura no está disponible en este momento.',
-  error_modelo:           'No pudimos leer el carnet ahora. Probá de nuevo en un rato.',
-  extraccion_fallida:     'No pudimos entender el carnet. Probá con una foto más nítida y completa.',
+  error_modelo:           'No pudimos leer el carnet ahora. Prueba de nuevo en un rato.',
+  extraccion_fallida:     'No pudimos entender el carnet. Prueba con una foto más nítida y completa.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:      'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 const RE_FECHA = /^\d{4}-\d{2}-\d{2}$/;
@@ -193,12 +193,12 @@ const MENSAJES_REGISTRO: Record<
   string
 > = {
   acceso_denegado:      'Tu sesión no está activa. Iniciá sesión de nuevo.',
-  sin_acceso_mascota:   'No tenés acceso a esta mascota.',
+  sin_acceso_mascota:   'No tienes acceso a esta mascota.',
   vacunas_vacias:       'No hay vacunas para registrar.',
-  item_invalido:        'Una de las vacunas del carnet no es válida. Revisá los datos e intentá de nuevo.',
-  archivo_invalido:     'La foto del carnet no se pudo vincular. Probá de nuevo.',
+  item_invalido:        'Una de las vacunas del carnet no es válida. Revisa los datos e intenta de nuevo.',
+  archivo_invalido:     'La foto del carnet no se pudo vincular. Prueba de nuevo.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigoRegistro(raw: string): CodigoErrorRegistroVacunas | 'error_desconocido' {
@@ -283,7 +283,7 @@ export interface VacunaDeEvento {
   archivo_url: string | null;
 }
 
-const MENSAJE_VACUNA_EVENTO = 'No pudimos cargar la vacuna. Probá de nuevo.';
+const MENSAJE_VACUNA_EVENTO = 'No pudimos cargar la vacuna. Prueba de nuevo.';
 
 /** La fila tipada detrás de un evento vacuna_aplicada del timeline.
  *  RLS vacuna_select (user_tiene_acceso_a_mascota) es el guard. */

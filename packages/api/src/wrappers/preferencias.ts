@@ -20,7 +20,7 @@ const MENSAJES = {
   error_preferencias: 'No pudimos leer tus preferencias.',
   error_guardar: 'No pudimos guardar la preferencia. Prueba de nuevo.',
   categoria_no_apagable:
-    'Estos avisos siempre llegan. Podés elegir por dónde, no si te llegan.',
+    'Estos avisos siempre llegan. Puedes elegir por dónde, no si te llegan.',
   opt_in_sin_evidencia:
     'Para activar WhatsApp necesitamos tu confirmación explícita.',
   // S103 — el medio de pago preferido. Voces en TUTEO (regla de la casa).

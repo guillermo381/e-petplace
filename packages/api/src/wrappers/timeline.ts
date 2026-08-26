@@ -13,10 +13,10 @@ const CODIGOS_ERROR_TIMELINE = ['acceso_denegado', 'no_encontrado'] as const;
 export type CodigoErrorTimeline = (typeof CODIGOS_ERROR_TIMELINE)[number];
 
 const MENSAJES: Record<CodigoErrorTimeline | 'error_desconocido' | 'datos_inconsistentes', string> = {
-  acceso_denegado:      'No tenés acceso a esta mascota.',
+  acceso_denegado:      'No tienes acceso a esta mascota.',
   no_encontrado:        'No encontramos ese momento.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function fallo<T>(codigo: CodigoErrorTimeline | 'error_desconocido' | 'datos_inconsistentes'): ResultadoWrapper<T, CodigoErrorTimeline> {

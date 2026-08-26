@@ -50,18 +50,18 @@ export type CodigoErrorPresencia = (typeof CODIGOS_ERROR_PRESENCIA)[number];
 const MENSAJES: Record<CodigoErrorPresencia, string> = {
   // ① el que dispara las preguntas de §5 — NO es un error del usuario:
   //    es el producto pidiendo el material que necesita para no inventar.
-  faltan_respuestas:      'Todavía no hay con qué escribir: contanos algo tuyo primero.',
+  faltan_respuestas:      'Todavía no hay con qué escribir: cuéntanos algo tuyo primero.',
   // ② la voz del límite
   tope_regeneraciones:    'Ya generamos varios borradores. Editá el que más te guste.',
   // ③-⑥ comparten tono de fallo, y aun así llegan distinguibles
   entrada_invalida:       'No pudimos armar el borrador con esos datos.',
   configuracion_faltante: 'El asistente no está disponible ahora mismo.',
-  error_modelo:           'El asistente no respondió. Probá de nuevo en un momento.',
+  error_modelo:           'El asistente no respondió. Prueba de nuevo en un momento.',
   // el muro roto: la function prefiere no entregar nada antes que entregar
   // una afirmación que el prestador no puede sostener.
-  redaccion_fallida:      'El borrador no salió como debía. Probá de nuevo.',
+  redaccion_fallida:      'El borrador no salió como debía. Prueba de nuevo.',
   datos_inconsistentes:   'La respuesta del asistente no tiene la forma esperada.',
-  error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:      'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 export interface HechoPresencia {

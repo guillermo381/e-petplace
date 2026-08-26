@@ -64,10 +64,10 @@ type CodigoEstructurar = (typeof CODIGOS_ESTRUCTURAR)[number];
 const MENSAJES_ESTRUCTURAR: Record<CodigoEstructurar | 'error_desconocido' | 'datos_inconsistentes', string> = {
   entrada_invalida: 'No pudimos leer el dictado. Revisa el texto e intenta de nuevo.',
   configuracion_faltante: 'El asistente de notas no está disponible en este momento.',
-  error_modelo: 'No pudimos estructurar la nota ahora. Probá de nuevo en un rato.',
-  estructuracion_fallida: 'No pudimos estructurar el dictado. Revisalo y probá de nuevo.',
+  error_modelo: 'No pudimos estructurar la nota ahora. Prueba de nuevo en un rato.',
+  estructuracion_fallida: 'No pudimos estructurar el dictado. Revísalo y prueba de nuevo.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido: 'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido: 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function numOnull(v: unknown): number | null {

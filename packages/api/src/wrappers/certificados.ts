@@ -22,7 +22,7 @@ const MENSAJES = {
   sin_sesion: 'No hay sesión activa.',
   sin_permiso_clinico: 'Emitir un certificado es un acto clínico: tu rol no lo permite.',
   sin_matricula:
-    'Para emitir un certificado necesitás tu matrícula profesional cargada. Sin ella el papel no dice quién firma.',
+    'Para emitir un certificado necesitas tu matrícula profesional cargada. Sin ella el papel no dice quién firma.',
   sin_vinculo: 'No encontramos tu vínculo activo con este negocio.',
   negocio_ambiguo:
     'Trabajás en más de un negocio: emití el certificado desde la cita, así el papel dice desde cuál.',

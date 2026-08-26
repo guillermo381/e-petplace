@@ -5,7 +5,7 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-const MENSAJE_ERROR = 'No pudimos cargar los servicios. Probá de nuevo.';
+const MENSAJE_ERROR = 'No pudimos cargar los servicios. Prueba de nuevo.';
 
 export interface ServiciosPais {
   walking: boolean;

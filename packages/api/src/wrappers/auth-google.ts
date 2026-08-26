@@ -65,12 +65,12 @@ export async function iniciarSesionConGoogle(input: {
 
   const code = new URL(vuelta.url).searchParams.get('code');
   if (!code) {
-    return { ok: false, codigo: 'google_no_completo', mensaje: 'Google no completó el ingreso. Probá de nuevo.' };
+    return { ok: false, codigo: 'google_no_completo', mensaje: 'Google no completó el ingreso. Prueba de nuevo.' };
   }
 
   const { data: ses, error: errSes } = await cliente.auth.exchangeCodeForSession(code);
   if (errSes || !ses?.user) {
-    return { ok: false, codigo: 'google_no_completo', mensaje: 'No pudimos completar el ingreso. Probá de nuevo.' };
+    return { ok: false, codigo: 'google_no_completo', mensaje: 'No pudimos completar el ingreso. Prueba de nuevo.' };
   }
 
   /* 🔴 SI ES LA PRIMERA VEZ, ESTO ES UN ALTA — y un alta acepta términos.

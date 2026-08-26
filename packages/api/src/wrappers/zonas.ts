@@ -15,9 +15,9 @@ const CODIGOS_ERROR_ZONAS = ['error_zonas', 'zona_duplicada', 'no_autorizado'] a
 export type CodigoErrorZonas = (typeof CODIGOS_ERROR_ZONAS)[number];
 
 const MENSAJES: Record<CodigoErrorZonas, string> = {
-  error_zonas: 'No pudimos leer las zonas de cobertura. Probá de nuevo.',
+  error_zonas: 'No pudimos leer las zonas de cobertura. Prueba de nuevo.',
   zona_duplicada: 'Esa ciudad ya está en tu cobertura.',
-  no_autorizado: 'No podés editar la cobertura de otro prestador.',
+  no_autorizado: 'No puedes editar la cobertura de otro prestador.',
 };
 
 function mapeoError(codigo: string | null): { ok: false; codigo: CodigoErrorZonas; mensaje: string } {

@@ -30,6 +30,10 @@ import { construirArbol, hitSlopsVecinos, autoPruebaArbol } from './lib-arbol-mo
    control positivo corre solo (`node scripts/medir-png.mjs`), y una regla que
    se apoya en una medición tiene que poder señalar dónde se valida esa
    medición. */
+/* R66 · la lógica de voz vive en UN solo lugar: es el instrumento de la pista C
+   movido a biblioteca. Importar en vez de reimplementar es la regla, no una
+   preferencia — una copia del matcher divergiría sin avisar. */
+import { hitsDeVoseo } from './lib-voz.mjs';
 import { decodificar as decodificarPng, cuerpo as cuerpoPng, puntoRedondo as puntoRedondoPng } from './medir-png.mjs';
 
 /** El sha256 del isotipo de Deuna **sobre el que se hizo la cuenta de R65**.
@@ -42,6 +46,34 @@ const SHA_ISOTIPO_MEDIDO = 'c29721a65b12715984b20c2a612d2ac5d1b7ab0bdd185e75f580
  *  Dato del proveedor (grupo de soporte, 25-ago-2026). Su versión principal
  *  pide 50 px, y por eso el wordmark quedó afuera: daba 44. */
 const MIN_SIMBOLO_DEUNA = 16;
+/**
+ * R66 · el voseo que YA ESTÁ, por archivo. **Trinquete solo-baja.**
+ *
+ * ⚠️ **TODO NÚMERO DE ACÁ SE MIDE CONTRA `origin/main`, JAMÁS CONTRA EL ÁRBOL
+ * DE LA PISTA** — y está escrito porque ya se cobró:
+ *
+ * > La v1 de esta tabla puso **8** en el cliente. **Salió de mi worktree, que
+ * > no tenía el merge de la barrida de C.** En `origin/main` valía **0** desde
+ * > antes de que yo escribiera la línea que decía *«baja a 0 cuando ese merge
+ * > entre»*. **Ya había entrado.**
+ * >
+ * > Lo frenó la pista C midiendo contra `origin/main` y las ramas. *Un baseline
+ * > POR ENCIMA de la realidad no bloquea: **da permiso** — habría dejado
+ * > crecer el voseo del cliente de 0 a 8 sin que la regla dijera nada, que es
+ * > exactamente el defecto que R66 vino a cerrar.*
+ * >
+ * > **Y la trampa fina: el árbol de una pista es un objeto legítimo para
+ * > medir CUALQUIER cosa menos un techo compartido.** Un baseline es una
+ * > afirmación sobre lo que hay en la casa, no sobre lo que hay en mi mesa.
+ *
+ * `apps/prestador/src/i18n/es.ts` es **deuda declarada, sin dueño en esta
+ * mesa** — nunca se barrió entero (S77 curó 8/8 del prestador, que era otro
+ * lote). Verificado contra `origin/main`: **47**.
+ */
+const BASELINE_VOSEO = {
+  'apps/cliente/src/i18n/es.ts': 0,      // ✅ barrido por C — DURO EN 0
+  'apps/prestador/src/i18n/es.ts': 47,   // deuda: nunca barrido entero
+};
 const shaDe = (p) => createHash('sha256').update(readFileSync(p)).digest('hex');
 
 const RAICES = ['apps/cliente/src', 'apps/prestador/src'];
@@ -1888,6 +1920,15 @@ const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
+  /* R66 · el fixture usa un path de diccionario para que el ANCLA no sea lo
+     que lo ponga rojo (la regla exige ver al menos un `i18n` o se declara no
+     concluyente), y un archivo SIN baseline — que es el modo de falla real:
+     **voz nueva escrita en voseo en un archivo que nadie había medido**.
+     ⚠️ La cadena elegida usa `cancelás`, uno de los SEIS huecos que el censo
+     de segundo orden destapó: si alguien revierte esa ampliación de la lista,
+     este fixture deja de poder salir rojo y el guard estructural lo dice. */
+  R66: [{ path: 'apps/cliente/src/i18n/es.ts.fixture', src: "const a = { nota: 'Si cancelás, todo sigue como estaba.' }" },
+        { path: 'apps/cliente/src/i18n/es.ts', src: '' }],
   /* R65 · el fixture ataca el brazo A (la cuenta del área de reserva), que es
      el que se viola con UN número. Baja `ALTO_LOGO` de 32 a 28: con el isotipo
      a 22 dp y X en 4,40, el resguardo pide 30,80 y ya no entra.
@@ -5307,7 +5348,91 @@ function r65(archivos) {
   };
 }
 
-const REGLAS = { R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+/**
+ * ═══ R66 · LA VOZ NO VUELVE AL VOSEO (S105-B) ══════════════════════════════
+ *
+ * **Firmada por el founder, 25-ago-2026**, y con un caso, no con una previsión:
+ * *«hoy apareció voseo en el cliente donde el censo post-barrida de S101-D había
+ * dado 0. Las cadenas se escribieron después, y `verify:diseno` tiene 56 reglas
+ * y ninguna mira la voz.»*
+ *
+ * **La casa firmó TUTEO NEUTRO en S51** (regla 27 extendida al móvil). Desde
+ * entonces se barrió el voseo **cuatro veces** —S77 (D-533/D-534), S101-D,
+ * S105-C— y **volvió las cuatro**. *Un barrido cura el pasado; solo un guard
+ * cura el futuro.*
+ *
+ * ── DE DÓNDE SALE LA LÓGICA ────────────────────────────────────────────────
+ * **De `scripts/lib-voz.mjs`, que es el instrumento de la pista C movido a
+ * biblioteca sin cambiarle una regla** — con sus siete trampas resueltas, que
+ * son su valor real. **NO se reimplementó acá**: una segunda copia del matcher
+ * sería exactamente el defecto que la casa nombra como *«una copia que diverge
+ * sin avisar, y su modo de falla es el PEOR: funciona»*.
+ *
+ * ── LOS BASELINES, MEDIDOS HOY Y CON SU DESTINO ESCRITO ────────────────────
+ * **Por ARCHIVO y no global**, porque un contador global no ve lo que importa:
+ * *dos archivos, uno curado y otro no, suman igual.*
+ *
+ * ── ⚠️ Y NINGUNO SALE DEL CENSO VIEJO, PORQUE EL CENSO VIEJO SUBCONTABA ────
+ * Un censo de segundo orden (ver `lib-voz.mjs` ⑨) encontró **seis formas
+ * voseantes que ninguna lista tenía** — `cancelás` · `atendés` · `decís` ·
+ * `subís` · `trabajás` · `vendés`. Con ellas, el prestador **no tiene 41 sino
+ * 47**, y `packages/ui` **no tenía 1 sino 2**. *Los números de abajo son los
+ * de la lista completa.*
+ */
+function r66(archivos) {
+  const fallos = [];
+
+  /* Los diccionarios y las piezas de producto. **La galería queda AFUERA con su
+     razón**: sus cadenas son de demostración, no voz que alguien reciba — mismo
+     criterio que `ES_GALERIA` en R64. Su contador se informa aparte para que la
+     exclusión no se lea como que ahí no hay nada. */
+  let enGaleria = 0;
+  let total = 0;
+  const porArchivo = new Map();
+
+  for (const { path, src } of archivos) {
+    const n = hitsDeVoseo(src).length;
+    if (n === 0) continue;
+    if (ES_GALERIA.test(path)) { enGaleria += n; continue; }
+    porArchivo.set(path, n);
+    total += n;
+  }
+
+  /* ANCLA: si el corpus no trae ni un diccionario, la regla no puede juzgar y
+     su cero significaría «no miré» (L-192). */
+  const vioDiccionario = archivos.some((a) => /\/i18n\/(es|en)\.ts$/.test(a.path));
+  if (!vioDiccionario) {
+    fallos.push('R66: el corpus no incluye ningún diccionario `i18n` — el cero de esta regla no significaría «no hay voseo», sino «no miré».');
+    return { fallos, info: 'NO CONCLUYENTE — sin diccionarios en el corpus' };
+  }
+
+  for (const [path, n] of porArchivo) {
+    const tope = BASELINE_VOSEO[path];
+    if (tope === undefined) {
+      fallos.push(
+        `R66 **${path}** tiene ${n} cadena(s) en voseo y **no tiene baseline**. La casa firmó TUTEO NEUTRO en S51: la voz de producto no vosea. *Si es voz nueva, se escribe en tuteo; si es un archivo que nadie había medido, su número entra acá A LA VISTA y solo puede bajar.*`,
+      );
+    } else if (n > tope) {
+      fallos.push(
+        `R66 **${path}**: ${n} cadena(s) en voseo sobre un baseline de ${tope}. **Es trinquete SOLO-BAJA** — el voseo que ya está se cura cuando se toca su pantalla, pero **no puede crecer**. *Es la cuarta vez que el voseo vuelve después de una barrida: lo que falla no es la barrida, es que nada mira entre una y otra.*`,
+      );
+    }
+  }
+
+  const enCero = [...Object.keys(BASELINE_VOSEO)].filter((p) => (porArchivo.get(p) ?? 0) === 0);
+
+  return {
+    fallos,
+    info:
+      `${total} cadena(s) en voseo en ${porArchivo.size} archivo(s) de producto` +
+      (enGaleria ? ` · ${enGaleria} en galería (NO cuentan: son cadenas de demostración, ver ES_GALERIA)` : '') +
+      (enCero.length ? ` · ${enCero.length} baseline(s) YA EN 0` : '') +
+      ` · lógica de \`lib-voz.mjs\` (instrumento de C, 9 trampas)` +
+      ` · ⚠️ su verde dice «no creció», jamás «la voz está bien»: no mira gramática, ni tono, ni el inglés`,
+  };
+}
+
+const REGLAS = { R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -5685,6 +5810,13 @@ corridas.push(['R46 (el selector de indicativo no se va con el campo que muere)'
    solo array a la regla — meter dos parámetros habría dejado el brazo
    nuevo sin fixture, que es una rama sin ejecutar. */
 corridas.push(['R64 (una pantalla de cierre no promete un efecto que nadie ejecuta)', r64([...apps, ...appsCodigo, ...ui, ...galeria])]);
+/* 🔴 R66 usa el corpus de LÓGICA, no `apps`/`ui`: **los diccionarios son `.ts`
+   y aquellos solo recorren `.tsx`**. Lo cazó el ancla de la propia regla en su
+   PRIMERA corrida —dijo «no miré» en vez de un cero tranquilizador—, que es
+   exactamente el defecto que `archivosCodigo` existe para evitar desde S82.
+   *Un lint que se apaga por una extensión no dice «ya no miro»: dice un número
+   más chico, y eso se lee como progreso.* */
+corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
 corridas.push(['R62 (la prop jubilada no se sigue montando)', r62([...apps, ...ui, ...galeria])]);
