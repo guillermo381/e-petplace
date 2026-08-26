@@ -271,6 +271,17 @@ export {
 } from './wrappers/citasMascota';
 export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-elegibles';
 
+/* S105-A · LA CITA RESUELTA — para el DETALLE, jamás para listas ni agendas.
+   *Una cita cancelada aparece sólo donde la superficie promete contar lo que
+   PASÓ; donde promete lo que VIENE, excluirla es correcto.* Los de arriba
+   (`obtenerCitasActivas*`) prometen lo que viene y siguen filtrando bien. */
+export {
+  leerCitaResuelta,
+  type CitaResuelta,
+  type CausaCancelacion,
+  type CodigoCitaResuelta,
+} from './wrappers/cita-resuelta';
+
 // Perfil de mascota — S51-B2.3 (pila de módulos)
 export {
   obtenerPerfilMascota,

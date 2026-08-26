@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -18191,6 +18166,42 @@ export type Database = {
           },
         ]
       }
+      url_legal_chequeo: {
+        Row: {
+          corrida_en: string
+          es_control: boolean
+          esperado: number
+          id: number
+          ok: boolean | null
+          request_id: number | null
+          status_code: number | null
+          url: string
+          veredicto_en: string | null
+        }
+        Insert: {
+          corrida_en?: string
+          es_control?: boolean
+          esperado: number
+          id?: number
+          ok?: boolean | null
+          request_id?: number | null
+          status_code?: number | null
+          url: string
+          veredicto_en?: string | null
+        }
+        Update: {
+          corrida_en?: string
+          es_control?: boolean
+          esperado?: number
+          id?: number
+          ok?: boolean | null
+          request_id?: number | null
+          status_code?: number | null
+          url?: string
+          veredicto_en?: string | null
+        }
+        Relationships: []
+      }
       user_notificacion_prefs: {
         Row: {
           canal: string
@@ -18347,6 +18358,27 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      usuario_proveedor_uid: {
+        Row: {
+          creado_en: string
+          proveedor: string
+          uid: string
+          user_id: string
+        }
+        Insert: {
+          creado_en?: string
+          proveedor: string
+          uid: string
+          user_id: string
+        }
+        Update: {
+          creado_en?: string
+          proveedor?: string
+          uid?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       vendedor_bodegas: {
         Row: {
@@ -19977,6 +20009,30 @@ export type Database = {
         }
         Relationships: []
       }
+      v_urls_legales_caidas: {
+        Row: {
+          corrida_en: string | null
+          es_control: boolean | null
+          esperado: number | null
+          status_code: number | null
+          url: string | null
+        }
+        Insert: {
+          corrida_en?: string | null
+          es_control?: boolean | null
+          esperado?: number | null
+          status_code?: number | null
+          url?: string | null
+        }
+        Update: {
+          corrida_en?: string | null
+          es_control?: boolean | null
+          esperado?: number | null
+          status_code?: number | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       v_vitrina_publicada: {
         Row: {
           alergenos: string[] | null
@@ -20250,6 +20306,10 @@ export type Database = {
         }
         Returns: string
       }
+      _nuvei_status_detail_es_reverso: {
+        Args: { p_detail: string }
+        Returns: boolean
+      }
       _pago_aprobado: { Args: { p_crudo: Json }; Returns: boolean }
       _prestador_bloqueado: {
         Args: { p_fecha: string; p_prestador_id: string }
@@ -20507,6 +20567,15 @@ export type Database = {
       }
       alternar_recurrencia: {
         Args: { p_activo: boolean; p_recurrencia_id: string }
+        Returns: Json
+      }
+      aplicar_consulta_activa_deuna: {
+        Args: {
+          p_ambiente?: string
+          p_crudo: Json
+          p_intento_id: string
+          p_origen?: string
+        }
         Returns: Json
       }
       aplicar_evento_de_pago: { Args: { p_evento_id: string }; Returns: Json }
@@ -21476,6 +21545,10 @@ export type Database = {
         }
         Returns: Json
       }
+      mover_sujeto_por_reverso: {
+        Args: { p_intento_id: string; p_motivo?: string }
+        Returns: Json
+      }
       negocio_atiende_en_local: {
         Args: { p_prestador_id: string }
         Returns: boolean
@@ -21557,6 +21630,7 @@ export type Database = {
         Args: { p_grooming_id: string }
         Returns: Json
       }
+      obtener_cita_resuelta: { Args: { p_cita_id: string }; Returns: Json }
       obtener_citas_por_coordinar: {
         Args: { p_cuenta: string }
         Returns: {
@@ -22036,6 +22110,10 @@ export type Database = {
           tipo: string
         }[]
       }
+      obtener_uid_proveedor: {
+        Args: { p_proveedor: string; p_user_id: string }
+        Returns: string
+      }
       obtener_ultima_atencion_grooming: {
         Args: { p_mascota_id: string }
         Returns: Json
@@ -22076,11 +22154,14 @@ export type Database = {
         Returns: Json
       }
       pagos_pendientes_de_conciliar: {
-        Args: { p_minutos_de_gracia?: number }
+        Args: { p_minutos_de_gracia?: number; p_proveedor?: string }
         Returns: {
           compra_id: string
           creado_en: string
+          intento_id: string
           monto: number
+          proveedor: string
+          referencia_corta: string
           transaction_id: string
         }[]
       }
@@ -22176,6 +22257,7 @@ export type Database = {
         Args: { p_codigo: string; p_mascota_id: string }
         Returns: Json
       }
+      recolectar_urls_legales: { Args: never; Returns: Json }
       reconciliar_inventario_sku: {
         Args: { p_motivo: string; p_sku_id: string }
         Returns: Json
@@ -22384,6 +22466,26 @@ export type Database = {
           p_tipo_documento?: string
           p_user_id?: string
           p_whatsapp?: string
+        }
+        Returns: Json
+      }
+      registrar_reverso_deuna: {
+        Args: {
+          p_crudo: Json
+          p_estado_info: string
+          p_intento_id: string
+          p_monto: number
+          p_reverso_id: string
+        }
+        Returns: Json
+      }
+      registrar_reverso_nuvei: {
+        Args: {
+          p_auth_code: string
+          p_intento_id: string
+          p_refund_amount: number
+          p_reverso_id: string
+          p_status_detail: string
         }
         Returns: Json
       }
@@ -22715,7 +22817,7 @@ export type Database = {
         }[]
       }
       verificar_compuertas_pre_cobro: {
-        Args: { p_compra_id: string; p_token?: string }
+        Args: { p_compra_id: string; p_exige_token?: boolean; p_token?: string }
         Returns: Json
       }
       verificar_compuertas_recurrencia: {
@@ -22736,6 +22838,7 @@ export type Database = {
           proname: string
         }[]
       }
+      verificar_urls_legales: { Args: never; Returns: Json }
       vets_sin_matricula: {
         Args: never
         Returns: {
@@ -22970,9 +23073,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [
