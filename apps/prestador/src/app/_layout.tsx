@@ -4,6 +4,9 @@ import { useColorScheme } from 'react-native';
 // traen su GestureHandlerRootView ADENTRO del Modal (por eso nunca dolió)
 // y el raíz no tenía ninguno: gesture-handler TIRA en Android/iOS y la
 // web no lo exige (el smoke fue verde — Ley 9 confirmada por el camino).
+// S106 · parchea los globales de WebRTC ANTES de que monte cualquier
+// pantalla de video. Import por efecto: no exporta nada que se use acá.
+import '@/lib/livekit';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // S85-C3: `DefaultTheme` y `ThemeProvider` salieron con el experimento del
 // fondo transparente — eran sus dos únicos consumidores (Ley 37: lo que sale
