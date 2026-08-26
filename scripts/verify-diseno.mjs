@@ -1977,23 +1977,65 @@ const PISO_R42 = Object.values(BASELINE_R42_CLASES).filter((r) => r.startsWith('
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
-  /* R67 · EL MODO DE FALLA REAL, y es el único que importa: **el aviso con
-     CUATRO signos.** Se le pasa un diccionario del cliente con el bloque
-     `avisoTeleconsulta` completo pero **sin «sangrado»** — que compila, corre y
-     se ve perfecto. Si la regla no lo caza, no sirve para nada.
+  /* R67 · 🔴 EL FIXTURE AMPUTA **EL SEXTO**, y la elección es el discriminador
+     entero — no vale amputar cualquiera.
+
+     **Por qué el sexto y no «sangrado»** (que era lo que amputaba antes): la
+     letra enumera SEIS —*dificultad para respirar · sangrado · convulsiones ·
+     golpe fuerte · dolor intenso · decaimiento repentino*— pero los dos últimos
+     venían unidos por «o», así que **el extractor los fusionaba en uno**.
+     ⇒ *la pieza nació con una tupla de cinco y la prosa de la letra decía
+     cinco, las dos por el mismo motivo: **el instrumento fusionaba justo lo que
+     venía a vigilar**.*
+
+     **El sexto es el ÚNICO que el brazo ① no sabía nombrar**, así que es el
+     único cuya amputación prueba que la cura funcionó. Amputar «sangrado»
+     seguiría dando rojo **con el defecto vivo al lado** — un rojo por la razón
+     equivocada es tan inútil como un verde por la razón equivocada.
+
+     ✅ **Y da rojo con la letra VIEJA y con la NUEVA, medido:** con «o» falta la
+     frase compuesta; con coma falta el signo nombrado. *Un fixture que depende
+     del orden de merge de otra pista no es un fixture.*
+
+     ⚠️ El `path` TIENE que ser el del diccionario `es` del cliente: con
+     cualquier otro, el ancla ② corta antes y saldría NO CONCLUYENTE — que no
+     es verde, pero tampoco probaría que la regla sabe contar.
      ⚠️ El `path` TIENE que ser el del diccionario `es` del cliente: con
      cualquier otro, el ancla ② corta antes y saldría NO CONCLUYENTE — que no
      es verde, pero tampoco probaría que la regla sabe contar hasta cinco.
      ⚠️ Y trae el bloque ENTERO a propósito: si faltara una clave, el rojo
      vendría por «falta la clave» y no por el signo amputado, que es la razón
      equivocada. */
+  /* 🔴 EL FIXTURE ESTÁ EN LA FORMA PARTIDA **Y** LE FALTA EL SEXTO — las dos
+     cosas a la vez, y ninguna es decorativa:
+
+     · **En forma de LISTA** (`avisoTeleSigno1..5`), que es la que C depositó.
+       ⇒ **prueba que el juez SABE LEERLA.** Si el lector volviera a buscar el
+       párrafo entero en `avisoTeleNoReemplaza`, no encontraría ningún signo y
+       el rojo saldría por «faltan los seis» — *un rojo por la razón equivocada
+       es tan inútil como un verde por la razón equivocada.*
+     · **Sin el SEXTO**, que es el único que el brazo ① no sabía nombrar cuando
+       el extractor fusionaba «dolor intenso o decaimiento repentino».
+       ⇒ **prueba que la cura de la cuenta funcionó.**
+
+     **El rojo correcto nombra UNA sola cosa: «decaimiento repentino».** Si
+     nombrara seis, el juez perdió la forma; si no nombrara ninguna, perdió la
+     cuenta. *Un fixture que solo verifica que la regla «sale roja» no
+     distingue esos tres mundos.*
+
+     ⚠️ El `path` TIENE que ser el del diccionario `es` del cliente: con
+     cualquier otro, el ancla ② corta antes y saldría NO CONCLUYENTE — que no
+     es verde, pero tampoco probaría nada. */
   R67: [{
     path: 'apps/cliente/src/i18n/es.ts',
     src:
       "const a = { avisoTeleTitulo: 'Antes de continuar', avisoTeleParaQue: 'x', " +
-      "avisoTeleNoReemplaza: 'No reemplazan una atención presencial ni sirven para emergencias. " +
-      "Si notas que tu mascota está en riesgo —dificultad para respirar, convulsiones, golpe fuerte, " +
-      "dolor intenso o decaimiento repentino— llévala a una clínica ahora mismo.', " +
+      "avisoTeleNoReemplaza: 'No reemplazan una atención presencial ni sirven para emergencias.', " +
+      "avisoTeleSignosIntro: 'Si notas que tu mascota está en riesgo:', " +
+      "avisoTeleSigno1: 'Dificultad para respirar', avisoTeleSigno2: 'Sangrado', " +
+      "avisoTeleSigno3: 'Convulsiones', avisoTeleSigno4: 'Golpe fuerte', " +
+      "avisoTeleSigno5: 'Dolor intenso', " +
+      "avisoTeleSignosCierre: 'Llévala a una clínica ahora mismo.', " +
       "avisoTeleTransito: 'v' }",
   }],
   /* R66 · el fixture usa un path de diccionario para que el ANCLA no sea lo
@@ -5529,10 +5571,21 @@ function r66(archivos) {
  * seguiría verde contra la versión vieja el día que la mesa enmiende §3.
  *
  * ── LOS DOS BRAZOS, y por qué son dos ──────────────────────────────────────
- * **① LOS CINCO SIGNOS — el brazo duro.** Los cinco son sintagmas NOMINALES
+ * **① LOS SEIS SIGNOS — el brazo duro.** Los seis son sintagmas NOMINALES
  * («dificultad para respirar», «sangrado», «convulsiones», «golpe fuerte»,
- * «dolor intenso o decaimiento repentino»): **ninguno lleva verbo conjugado,
- * así que son idénticos en voseo y en tuteo.** Ese brazo es exigible HOY y es
+ * «dolor intenso», «decaimiento repentino»): **ninguno lleva verbo conjugado,
+ * así que son idénticos en voseo y en tuteo.**
+ *
+ * 🔴 **SON SEIS, Y DURANTE UN DÍA ESTA REGLA CONTÓ CINCO** (firma de mesa,
+ * 26-ago). Los dos últimos venían unidos por **«o»** en la letra y el extractor
+ * parte por COMA ⇒ **los fusionaba**. *El instrumento fusionaba exactamente lo
+ * que venía a vigilar, y por eso el defecto sobrevivió a la prosa de la letra,
+ * a la tupla de la pieza y al propio juez.*
+ * **La cura NO fue de código: la mesa firmó cambiar la «o» por coma en §3** —
+ * y la razón de fondo tampoco es técnica: *«hoy la familia que lee rápido lee
+ * "dolor intenso o decaimiento repentino" como una sola cosa, **y son dos
+ * motivos distintos para salir corriendo**»*. **La misma puntuación que arregla
+ * el juez arregla lo que se lee.** Ese brazo es exigible HOY y es
  * inmune a la enmienda de conjugación pendiente.
  *
  * **② EL CUERPO — igualdad exacta.** Intro, advertencia, entrada a los signos
@@ -5645,6 +5698,23 @@ function avisoDeLaLetra(md) {
   };
 }
 
+/**
+ * 🔴 NORMALIZA LA PUNTUACIÓN DE BORDE Y LA CAPITALIZACIÓN — **jamás el
+ * contenido**, y la frontera es lo único que hace que esto no sea un agujero.
+ *
+ * **Por qué hace falta:** partir un párrafo en fragmentos OBLIGA a capitalizar
+ * el primero («Dificultad…» donde la letra dice «dificultad…») y a cerrar la
+ * entrada con dos puntos donde el párrafo tenía un guión largo. **Eso es
+ * composición de quien parte el texto, no una edición del contenido** — y §3
+ * prohíbe *resumir, acortar y achicar*, no puntuar una lista.
+ *
+ * ⛔ **Lo que NO hace, para que nadie lo ensanche después:** no toca acentos,
+ * no ignora palabras, no acepta sinónimos, no recorta por dentro. *Un
+ * normalizador que empieza a perdonar contenido deja de ser un juez y pasa a
+ * ser una excusa con forma de función.*
+ */
+const norma = (t) => t.toLowerCase().replace(/^[\s.,:;—–-]+|[\s.,:;—–-]+$/g, '').trim()
+
 /** Lee UNA cadena del diccionario, tolerando el salto de línea de Prettier. */
 function cadena(src, clave) {
   const m = src.match(new RegExp(`\\b${clave}\\s*:\\s*(['"\`])([\\s\\S]*?)\\1`));
@@ -5689,23 +5759,70 @@ function avisoDelDiccionario(src) {
       duro: [partes[0], partes[1], signos.join(', '), partes[2]].filter(Boolean).join(' '),
       transito: cadena(trozo, 'transito'),
       acciones: [],
+      signos,
     };
   }
 
-  // ── FORMA ② · plana: la que C depositó (`veterinaria.avisoTele*`).
+  // ── FORMAS ② y ③ · las claves `avisoTele*` del cliente.
   const titulo = cadena(src, 'avisoTeleTitulo');
   if (!titulo) return null;
-  return {
-    forma: 'plana (`avisoTele*` del cliente)',
+
+  /* 🔴 FORMA ③ · LA LISTA PARTIDA (firma del founder, 26-ago: §3 pasa a lista).
+     C no partió el texto: lo convirtió en **una clave por signo**
+     (`avisoTeleSigno1..N`) con su intro y su cierre. **El juez tiene que leer
+     ESA forma, porque es la que el usuario ve** — si siguiera buscando el
+     párrafo entero en una sola clave, diría que faltan los seis justo cuando
+     están mejor presentados que antes.
+
+     *Se leen POR ÍNDICE y hasta que la serie se corta: así **el número de
+     signos lo dice el diccionario y no una constante de este archivo** — que
+     es exactamente la trampa que hizo que esta regla contara cinco durante un
+     día.* */
+  const partidos = [];
+  for (let i = 1; ; i++) {
+    const v = cadena(src, `avisoTeleSigno${i}`);
+    if (v == null) break;
+    partidos.push(v);
+  }
+
+  const comun = {
     titulo,
     intro: cadena(src, 'avisoTeleParaQue'),
-    duro: cadena(src, 'avisoTeleNoReemplaza'),
     transito: cadena(src, 'avisoTeleTransito'),
     acciones: [
       cadena(src, 'avisoTeleIrUrgencias'),
       cadena(src, 'avisoTelePresencial'),
       cadena(src, 'avisoTeleContinuar'),
     ].filter(Boolean),
+  };
+
+  if (partidos.length > 0) {
+    return {
+      ...comun,
+      forma: `LISTA partida — ${partidos.length} clave(s) \`avisoTeleSignoN\``,
+      /* El «duro» se recompone para el brazo ②: advertencia + intro + los
+         signos + cierre. **Lo que la letra protege es el CONTENIDO, y el
+         contenido está entero** — cambió cómo se guarda, no qué se lee. */
+      duro: [
+        cadena(src, 'avisoTeleNoReemplaza'),
+        cadena(src, 'avisoTeleSignosIntro'),
+        partidos.join(', '),
+        cadena(src, 'avisoTeleSignosCierre'),
+      ]
+        .filter(Boolean)
+        .join(' '),
+      signos: partidos,
+      advertencia: cadena(src, 'avisoTeleNoReemplaza'),
+      signosIntro: cadena(src, 'avisoTeleSignosIntro'),
+      signosCierre: cadena(src, 'avisoTeleSignosCierre'),
+    };
+  }
+
+  return {
+    ...comun,
+    forma: 'plana — un párrafo en `avisoTeleNoReemplaza`',
+    duro: cadena(src, 'avisoTeleNoReemplaza'),
+    signos: null,
   };
 }
 
@@ -5747,15 +5864,15 @@ function r67(archivos) {
   for (const s of faltantes) {
     fallos.push(
       `R67 **falta el signo «${s}»** en el aviso que se le muestra al dueño. ` +
-      `*«Los signos concretos no son decoración… nombrar cinco signos le da un criterio»* (§3) — ` +
-      `y **cuatro signos compilan igual que cinco**.`,
+      `*«Los signos concretos no son decoración… nombrar seis signos le da un criterio»* (§3) — ` +
+      `y **cinco signos compilan igual que seis**.`,
     );
   }
 
   // ── BRAZO ② · EL CUERPO, carácter por carácter contra la letra.
   const par = (rotulo, esperadoEn, valor) => {
     if (valor == null) { fallos.push(`R67: falta \`${rotulo}\` en el diccionario del cliente.`); return; }
-    if (!esperadoEn.includes(valor)) {
+    if (!norma(esperadoEn).includes(norma(valor))) {
       fallos.push(
         `R67 **\`${rotulo}\` no coincide con el texto firmado de §3**.\n` +
         `      renderiza: «${valor}»\n` +
@@ -5765,7 +5882,23 @@ function r67(archivos) {
   };
   par('el título', firmado.titulo, puesto.titulo);
   par('el párrafo de para-qué-sirve', firmado.intro, puesto.intro);
-  par('el párrafo de la advertencia y los signos', firmado.advertenciaYSignos, puesto.duro);
+  /* 🔴 CON LISTA, EL CUERPO SE COMPARA PIEZA POR PIEZA — jamás recompuesto.
+     **Lo destapó el discriminador, no una lectura:** al medir el escenario de C
+     apareció un SEGUNDO rojo que era RUIDO — el párrafo recompuesto («…riesgo:
+     Dificultad, Sangrado…») nunca puede coincidir con el de la letra («…riesgo
+     —dificultad, sangrado…»), porque las dos formas puntúan distinto POR
+     DISEÑO. ⇒ el brazo ② habría dado **rojo permanente** el día que C
+     mergeara, con el contenido entero.
+     *Comparar una recomposición contra un original es medir mi propio armado.*
+     Con lista se comparan las TRES piezas de prosa —advertencia · intro ·
+     cierre— y los signos los cubre el brazo ①: **más estricto, no menos.** */
+  if (puesto.signos != null) {
+    par('la advertencia dura', firmado.advertenciaYSignos, puesto.advertencia);
+    par('la entrada a los signos', firmado.advertenciaYSignos, puesto.signosIntro);
+    par('el cierre tras los signos', firmado.advertenciaYSignos, puesto.signosCierre);
+  } else {
+    par('el párrafo de la advertencia y los signos', firmado.advertenciaYSignos, puesto.duro);
+  }
   /* Tránsito y acciones: SOLO si la fuente los trae. Una regla no puede exigir
      lo que su letra no firma, ni sobre una forma que no se acordó. */
   if (firmado.transito) par('la línea de tránsito', firmado.transito, puesto.transito);
@@ -5779,7 +5912,7 @@ function r67(archivos) {
     fallos,
     info:
       `los ${esperados.length} signos firmados, verificados en el texto que se muestra` +
-      ` · forma leída: ${puesto.forma}` +
+      ` · **forma leída: ${puesto.forma}**` +
       (puesto.acciones.length ? ` · ${puesto.acciones.length} acción(es) verificadas` : '') +
       ` · vara EXTRAÍDA de \`${LETRA_TELE}\` en esta corrida (cero baseline transcrito)` +
       ` · ⚠️ **NO mide tipografía** (un verbatim en letra chica pasaría y violaría §3)` +
