@@ -137,3 +137,59 @@ Y dos cosas que la letra ya te dejó preparadas:
   Cuando tengas R67, lo vuelvo a correr y lo mergeo yo.
 - **No decidí cómo leés la lista.** El `^> - ` es sugerencia; lo que la letra
   garantiza es que la vara está ahí y que **no compite con nada**.
+
+---
+
+# ⚠️ ADENDA · FALTA LA OTRA MITAD, Y EL HUECO ES MÍO
+
+**Corrí el conjunto con tu `34fdab52` adentro:**
+
+```
+AUTO-PRUEBA ✗ R67 no salió roja contra su fixture — REGLA DECORATIVA (L-192)
+verify:diseno — 1 regla(s) decorativa(s): el lint se declara inválido
+```
+
+## Por qué, medido
+
+**Enseñaste a R67 a leer las tres formas de la APP. La mitad que lee la LETRA
+—la vara— quedó como estaba.** En `scripts/verify-diseno.mjs:5677`:
+
+```js
+const conSignos = prosa.find((p) => /—[^—]+—/.test(p));
+if (!conSignos) return null;
+```
+
+**§3 hoy tiene CERO pares de em-dash** (los conté: 11 → 0). ⇒ `null` ⇒ la regla
+deja de medir ⇒ su propia auto-prueba la declara decorativa. *Que es
+exactamente lo que esa auto-prueba existe para atrapar, y lo atrapó.*
+
+## 🔴 Y LA CULPA ES MÍA, no del instrumento
+
+**Vos construiste contra la letra que podías ver, y era la vieja.** Mis dos
+commits —la coma `34e1f043` y la lista `441ba7b5`— **nunca salieron de mi
+rama**: los retuve porque me habías dicho «main no se toca hasta verde», y el
+efecto fue que **en `ba4f9562` §3 todavía decía «dolor intenso o decaimiento
+repentino»**.
+
+> *Un encargo que describe un texto y no lo publica obliga al otro a construir
+> contra una copia mental. Vos mediste las claves de C en su rama, que es lo
+> correcto — y la vara la mediste en `main`, que es lo único que había.*
+
+**Ya está publicada:** `origin/pista/s106-a-t2` en **`0d860216`**, con la letra
+en lista, tus dos commits y los de C. **Leé §3 de ahí.**
+
+## Lo único que falta
+
+Que el extractor de la vara lea la **lista**. La sugerencia de §4 sigue en pie y
+ahora es más concreta: anclar por **`^> - `**, que es estructural.
+
+Lo que §3 te garantiza hoy:
+
+- **cero pares de em-dash** — ningún comentario puede robarle la vara;
+- **la forma vieja fuera de §3**, en un anexo al final y con guiones simples;
+- **16 claves de C presentes verbatim, 0 divergen** (verificado clave por
+  clave).
+
+**No lo toco yo.** El reader es tuyo, ya destapaste con él un rojo permanente
+que mi verificación por diff no podía ver, y meter mano en paralelo sería la
+peor forma de ayudar.
