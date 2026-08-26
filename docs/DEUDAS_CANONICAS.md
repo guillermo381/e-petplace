@@ -22407,3 +22407,82 @@ cámara abre, no que haya transporte.*
 
 ☠️ **Disparo: la in-call real de la tanda 2**, que sí lo lleva. No hay nada
 que curar en la pantalla del cable — su trabajo terminó.
+
+---
+
+### D-934 🟡 · LA MARCA DE TELECONSULTA VIAJA POR ESTRUCTURA — ¿y también al EXPORTAR e IMPRIMIR?
+
+**Nace S106 tanda 2, 26-ago-2026.** Origen: el análisis legal del 26-ago,
+punto 2, cuya **única adición** sobre la marca fue *«que la marca viaje con el
+dato cuando la ficha se exporta o imprime»*.
+
+**Lo que ya está resuelto, y por qué el análisis lo llama activo y no carga:**
+la marca **no es una columna** — el adjunto y los eventos clínicos cuelgan del
+evento padre de la cita, y la cita dice `modalidad = 'telemedicina'`
+(`LETRA_TELEMEDICINA` §7 · `BIO_EXPEDIENTE` D13.6). Su valor es jurídico:
+**delimita el estándar contra el que se juzga al veterinario — lo que podía ver
+por video, no lo que habría palpado.**
+
+🔴 **LO QUE NO SE MIDIÓ, y por eso esto es deuda y no un hecho:** que los
+caminos de **salida** del expediente arrastren esa modalidad. Hay al menos dos
+y **ninguno se auditó en esta tanda**: `exportar_mis_datos()` (el derecho de
+portabilidad) y **los cinco papeles impresos** de S90 (carnet · historia
+clínica · receta · ficha de identidad · certificado de salud).
+
+*Que el dato exista en la estructura no significa que el generador del papel lo
+lea. Un certificado impreso que no dice que la consulta fue por video afirma
+implícitamente que fue presencial* — y ésa es exactamente la afirmación que la
+marca existe para no hacer.
+
+**Disparo:** la próxima pasada que toque cualquiera de los dos caminos de
+salida, **o** antes de la primera teleconsulta con paciente real, lo que ocurra
+primero. **Dueño:** A.
+
+---
+
+### D-935 🟡 · EL ESTIMADOR DE CONSUMO PROPIO — el instrumento para saber cuándo pagar $50 está detrás de pagar $500
+
+**Nace S106 tanda 2, 26-ago-2026.** Firma del founder.
+
+**El hecho, medido por D:** la **Analytics API de LiveKit**, que es la que
+reportaría el ancho de banda facturable, **sólo existe en el plan Scale
+($500/mes)**. *O sea: el instrumento que nos diría cuándo conviene pasar al plan
+de $50 vive detrás de pagar $500.*
+
+**La vía, y su propiedad que la hace aceptable:** estimar con los eventos que
+sí tenemos —`participant_joined` / `participant_left` de
+`videollamada_hechos`— multiplicados por el **bitrate nominal** configurado
+(`app_config.video_bitrate_kbps`). **Sobreestima por construcción**, porque el
+bitrate nominal es un techo y el real baja con la red. ⇒ **la alarma suena
+antes y nunca después**, que es el único sesgo tolerable en un aviso de cuota.
+
+🔴 **NO ES UN NÚMERO DE FACTURACIÓN Y NO SE PRESENTA COMO TAL.** Si alguna
+superficie lo muestra, dice que es una estimación propia. *Un número inventado
+con cara de factura es peor que no tener número: se discute con el proveedor
+sobre un dato que no es suyo.*
+
+**Disparo: el PRIMER evento real registrado en `videollamada_hechos`.** Antes
+de eso el estimador no tiene con qué estimar, y construirlo sería un motor sin
+insumo. **Dueño:** A.
+
+**Ya está lo que necesita:** la tabla, su índice por cita y el bitrate como
+configuración. *Falta la cuenta y su disparo de alarma —el founder firmó
+mirar el panel a ~30 GB/mes, no a 3.000 minutos—, que es de la pista D.*
+
+---
+
+### D-936 🟢 · `app_config.daily_co_activo` — la llave de un proveedor de video que no usamos
+
+**Nace S106 tanda 2, 26-ago-2026.** Hallazgo de paso al medir `app_config` para
+el bitrate: existe la clave **`daily_co_activo`**, categoría `integraciones`,
+de **Daily.co** — un proveedor de video que **no es el que se eligió**. LiveKit
+quedó firmado sin condición el 26-ago tras el gate del cable.
+
+**No se tocó**, y por eso nace ficha: **no se midió si alguien la lee.** *Una
+clave de configuración muerta no hace daño; una clave de configuración muerta
+que alguien lee sí, y la diferencia son dos minutos de grep que esta tanda no
+gastó.*
+
+**Disparo:** la próxima pasada que toque `app_config`. **Cura:** censar
+consumidores y, si son cero, retirarla **con lápida** — jamás borrarla en
+silencio, que es cómo se pierde la memoria de por qué existía.
