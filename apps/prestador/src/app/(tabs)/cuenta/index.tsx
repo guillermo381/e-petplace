@@ -887,7 +887,29 @@ export default function Cuenta() {
                       ).padStart(2, '0')}`
                     : ''
                 }`
-              : 'bundle embebido / dev'}
+              /* 🔴 S106-A · LOS DOS CASOS SE SEPARAN — la cura de S103-C se
+               * había aplicado SOLO AL CLIENTE y acá quedó el literal viejo.
+               *
+               * ⏪ Decía `'bundle embebido / dev'` para los DOS casos: el
+               * bundle horneado en la APK **y** Metro sirviendo una rama
+               * cualquiera. *El discriminador ya existía en la línea de
+               * arriba (`isEmbeddedLaunch`) y el pie lo tiraba a la basura.*
+               *
+               * **Ya costó casi un veredicto falso una vez** (`L-336`): la
+               * pista A tomó el aparato mientras C tenía Metro corriendo
+               * desde su worktree, leyó `bundle embebido / dev` e iba a
+               * reportar que su gate corría sobre el bundle de la APK.
+               *
+               * **Y lo destapó preparar el gate del cable de LiveKit**, que
+               * se corre con dos teléfonos y una APK `development`: en el
+               * prestador el founder habría leído la misma cadena en los dos
+               * casos y no habría podido confirmar sobre qué corre.
+               *
+               * *La cura no era nueva: estaba escrita, firmada y aplicada a
+               * medias. Media cura mirando a la otra.* */
+              : Updates.isEmbeddedLaunch
+                ? 'bundle embebido'
+                : 'metro · dev'}
           </Texto>
 
           {/* ⭐ S86-C · D-649 — el botón vive PEGADO al marcador de arriba a

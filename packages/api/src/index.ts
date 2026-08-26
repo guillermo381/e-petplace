@@ -1468,6 +1468,7 @@ export {
 export {
   aceptarMinimosServicio,
   prestadorAceptoMinimos,
+  ventanaCancelacionMinutos,
   marcarTeleconsultaNoRealizable,
   cancelarTeleconsulta,
   type MinimosAceptados,
