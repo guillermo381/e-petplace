@@ -6,6 +6,9 @@ import { useColorScheme } from 'react-native';
 // del Modal (por eso nunca dolió) y este raíz no tenía ninguno: el gesto
 // sale MUDO al dispositivo sin avisar (L-192; la web no lo exige — el
 // smoke fue verde). Guard mecánico: scripts/verify-gestos-cliente.mjs.
+// S106 · parchea los globales de WebRTC ANTES de que monte cualquier
+// pantalla de video. Import por efecto: no exporta nada que se use acá.
+import '@/lib/livekit';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
