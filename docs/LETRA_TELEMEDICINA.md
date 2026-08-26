@@ -41,7 +41,7 @@ Antes de que el dueño confirme una teleconsulta, la app le muestra:
 >
 > **No reemplazan una atención presencial ni sirven para emergencias.** Si
 > notas que tu mascota está en riesgo —dificultad para respirar, sangrado,
-> convulsiones, golpe fuerte, dolor intenso o decaimiento repentino—
+> convulsiones, golpe fuerte, dolor intenso, decaimiento repentino—
 > llévala a una clínica ahora mismo.
 >
 > La videollamada no se graba y se transmite a través de la infraestructura
@@ -54,6 +54,27 @@ Antes de que el dueño confirme una teleconsulta, la app le muestra:
 riesgo» le pide al dueño un juicio clínico que no tiene; nombrar ~~cinco~~
 **seis** signos le da un criterio. *No se resume, no se acorta, no se
 convierte en una línea de letra chica.*
+
+> ### ✅ ENMIENDA DE PUNTUACIÓN — firma del founder, 26-ago-2026
+>
+> **La «o» que unía los dos últimos signos pasa a COMA.** La v1.1 decía
+> ~~«dolor intenso **o** decaimiento repentino»~~; ahora dice **«dolor intenso,
+> decaimiento repentino»**.
+>
+> **No viola §3 y conviene decir por qué:** no se agrega, no se quita, no se
+> resume, no se acorta — **se separa lo que ya estaba enumerado.**
+>
+> 🔴 **Esa «o» hacía dos daños a la vez, y el segundo es el que importa:**
+> ① el extractor de `R67` partía por coma y los contaba como **UNO** —de ahí su
+> *«los 5 signos firmados»* y de ahí que la tupla de `packages/ui` naciera con
+> cinco—; ② **la familia que lee rápido los lee como una sola cosa**, cuando son
+> **dos motivos distintos para salir corriendo a la clínica**.
+>
+> **Se descartó parchear el extractor** para que partiera también por « o ».
+> *Es frágil —un signo futuro con «o» adentro, como «vómito o diarrea», se
+> partiría mal— y deja el texto de la familia fundido igual.* **La puntuación
+> que arregla al juez es la misma que arregla lo que se lee**, y por eso se
+> corrige el texto y no el instrumento.
 
 > ### ✅ ENMIENDA DE CONTEO — firma de la mesa, 26-ago-2026
 >
