@@ -1,12 +1,37 @@
 # TÉRMINOS Y CONDICIONES DE USO — USUARIO PROFESIONAL
 ## Plataforma e-PetPlace
 
-**Versión:** 1.0 · **Fecha de última actualización:** 24 de agosto de 2026
+**Versión:** 1.1 · **Fecha de última actualización:** 26 de agosto de 2026
 **Vigencia:** desde su publicación y aceptación por el Usuario Profesional
 
 > **Títulos IV y V en vigencia diferida**, conforme a la **Disposición Transitoria Primera**.
 >
 > *Alcance territorial: redactado para profesionales domiciliados en el Ecuador. La operación en Colombia queda fuera y necesitará su propia versión cuando se active.*
+
+> ### Qué cambió en la versión 1.1 (26-ago-2026)
+>
+> **① §14.1 — la Comisión sobre Servicios baja del 15 % al 10 %.**
+> **Se comunica sin el preaviso de treinta (30) días de la §16.1, y se
+> explica por qué:** ese preaviso existe para proteger al Usuario
+> Profesional frente a cambios **en su perjuicio**, y una rebaja de la
+> tasa no lo es. Además, el **Título IV está en vigencia diferida** por la
+> Disposición Transitoria Primera, de modo que **la tasa del 15 % no llegó
+> a regir para ningún Usuario Profesional**. La modificación se comunica
+> por correo electrónico y notificación en la Plataforma conforme a la
+> §16.1, y rige hacia el futuro conforme a la §16.2.
+>
+> **② §25.5 — nace la condición particular por Servicio**, que permite que
+> un Servicio determinado tenga un plazo de cancelación **más favorable al
+> Usuario Cliente** que el general de la §25.1. Su primer caso es la
+> teleconsulta veterinaria.
+>
+> *Ninguna de las dos modificaciones exigía republicar la versión 1.0 con
+> carácter urgente: la primera es una rebaja y la segunda amplía derechos
+> del Usuario Cliente sin restringir los del Profesional más allá de lo que
+> él mismo configura al ofrecer el Servicio. Se versionan porque **un
+> contrato cuyo texto publicado dice una tasa distinta de la que el sistema
+> aplica deja de ser el contrato**, aunque la diferencia favorezca a la
+> otra parte.*
 
 ---
 
@@ -192,8 +217,13 @@ f) disponer de una cuenta bancaria a su nombre o al de su sociedad, para efectos
 
 | Tipo de Operación | Tasa | Base de cálculo |
 |---|---|---|
-| **Servicios** (atención veterinaria, paseo, peluquería, adiestramiento y análogos) | **15 %** | **valor del Servicio Profesional sin impuestos** |
+| **Servicios** (atención veterinaria, paseo, peluquería, adiestramiento y análogos) | **10 %** | **valor del Servicio Profesional sin impuestos** |
 | **Productos** (pedidos de la tienda) | **10 %** | **valor total con impuestos incluidos** |
+
+> *Nota de versión (v1.1, 26-ago-2026).* ~~La tasa sobre Servicios era del
+> **15 %** en la versión 1.0.~~ **Baja al 10 %.** El texto anterior se tacha
+> y no se borra: el registro histórico de tasas que la §16.4 obliga a
+> conservar empieza acá.
 
 **14.2.** Las bases de cálculo son distintas para cada tipo de Operación y así se declaran expresamente. La Comisión sobre Servicios **no se calcula sobre el impuesto al valor agregado** que el Usuario Profesional recauda y traslada al fisco.
 
@@ -329,6 +359,38 @@ Si la fecha de pago cae en día no hábil, el pago se realiza el día hábil inm
 **25.3.** En los supuestos de las §§25.1 y 25.2 no se devenga Comisión y el Usuario Profesional no percibe la Tarifa correspondiente a la Operación cancelada.
 
 **25.4.** El Usuario Profesional acepta expresamente estas reglas y se obliga a no exigir al Usuario Cliente valores por cancelaciones efectuadas dentro de estos plazos.
+
+**25.5. Condiciones particulares por Servicio.** *(Incorporada en la versión 1.1, 26-ago-2026.)* La Plataforma puede establecer, **para Servicios determinados y de manera pública en la ficha del Servicio**, un plazo de cancelación con derecho a reembolso **más favorable al Usuario Cliente** que el general de la §25.1. Cuando así ocurra:
+
+a) **el plazo particular sustituye al de la §25.1** únicamente para ese Servicio, y el umbral de inasistencia de la §26.1 se desplaza en la misma medida;
+
+b) el Usuario Profesional **conoce el plazo particular antes de ofrecer el Servicio** y lo acepta al ofrecerlo, y la §25.4 le resulta aplicable respecto de ese plazo;
+
+c) **el reverso opera a su favor y se declara expresamente:** una cancelación efectuada *dentro* del plazo particular —es decir, demasiado tarde— cierra la Operación como **no asistida** conforme a la §26, de modo que **el Usuario Profesional percibe íntegramente la Tarifa**. El fundamento es el mismo de la §26.2: comprometió y reservó su capacidad de atención.
+
+**25.6. Primer Servicio con condición particular: la teleconsulta veterinaria.** Su plazo de cancelación con derecho a reembolso es de **treinta (30) minutos** antes de la hora agendada, en lugar de las veinticuatro (24) horas de la §25.1. En consecuencia, y por aplicación de la §25.5.c, **una cancelación efectuada con menos de treinta (30) minutos de antelación cierra la Operación como no asistida y el Usuario Profesional percibe íntegramente la Tarifa.**
+
+> *Por qué esta condición no requiere preaviso, dicho sin maquillar.* La
+> franja que va de los treinta (30) minutos a las dos (2) horas **sí cambia
+> en contra del Usuario Profesional**: bajo la regla general de la §26.1 esa
+> cancelación se cerraba como no asistida y él cobraba; bajo la condición
+> particular, el Usuario Cliente cancela con reembolso y él no percibe la
+> Tarifa. **No se dice que sea neutro para él, porque no lo es.**
+>
+> Lo que sostiene que no haga falta preaviso es otra cosa, y son dos hechos:
+> **① el Título V está en vigencia diferida** por la Disposición Transitoria
+> Primera, de modo que **la regla de las dos (2) horas no llegó a regir para
+> ningún Usuario Profesional** y no hay expectativa contractual que se
+> altere; y **② el Usuario Profesional conoce el plazo particular antes de
+> ofrecer la teleconsulta y lo acepta al ofrecerla** (§25.5.b) — es un
+> Servicio que decide ofrecer o no, no una condición que se le impone sobre
+> Servicios que ya presta.
+>
+> *Y el reverso que sí lo favorece, para que no se lea solo la mitad: por
+> debajo de los treinta (30) minutos cobra igual que antes — la §25.5.c lo
+> dice expresamente, porque un plazo corto se lee como «me pueden cancelar
+> casi encima» y hay que decirle también que **por eso mismo cobra si le
+> cancelan a los veinte**.*
 
 ## 26. Inasistencia del Usuario Cliente
 
