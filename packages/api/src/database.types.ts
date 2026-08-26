@@ -21232,6 +21232,10 @@ export type Database = {
       escenario_grooming_confirmado_persistente: { Args: never; Returns: Json }
       escenario_grooming_iniciado: { Args: never; Returns: Json }
       escenario_paseo_iniciado: { Args: never; Returns: Json }
+      estado_correo_invitacion: {
+        Args: { p_invitacion_id: string }
+        Returns: Json
+      }
       existe_invitacion_pendiente: {
         Args: { p_prestador_id: string }
         Returns: boolean
@@ -22212,6 +22216,8 @@ export type Database = {
         Args: { p_prestador_id: string }
         Returns: boolean
       }
+      puede_reversar_deuna: { Args: { p_intento_id: string }; Returns: Json }
+      puede_reversar_nuvei: { Args: { p_intento_id: string }; Returns: Json }
       purgar_documentos_vencidos: {
         Args: never
         Returns: {

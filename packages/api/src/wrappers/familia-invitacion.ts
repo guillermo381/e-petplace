@@ -154,3 +154,54 @@ export async function darDeBajaCorreo(token: string): Promise<ResultadoWrapper<n
   }
   return { ok: true, data: null };
 }
+
+/**
+ * 🔴 EL ESTADO DEL CORREO — la otra mitad de la cura del 25-ago.
+ *
+ * **El defecto que cierra:** una invitación con un email malo (`karina
+ * charry@satorilatam.com`, con un espacio) se aceptaba, la persona veía
+ * «enviada», y el correo moría **20 minutos después** con un 422 del proveedor
+ * **en una fila que ninguna pantalla leía**. *Validar mejor achica el problema
+ * pero no lo cierra: una dirección puede ser válida y rebotar igual —buzón
+ * lleno, dominio caído—. Lo que no puede seguir pasando es que nadie se entere.*
+ *
+ * ⚠️ `estado: 'sin_cola'` **NO es un fallo**: si el invitado tiene cuenta, el
+ * aviso va por el motor de notificaciones y nunca pasa por esta tabla. *Pintar
+ * «no se envió» ahí inventaría un fallo donde hubo otro camino.* Por eso el
+ * booleano se llama `falloVisible` y no `enviado`.
+ */
+export async function estadoCorreoInvitacion(
+  invitacionId: string,
+): Promise<ResultadoWrapper<EstadoCorreoInvitacion, CodigoInvitacionFamilia>> {
+  const { data, error } = await getClient().rpc('estado_correo_invitacion', {
+    p_invitacion_id: invitacionId,
+  });
+  if (error) return mapear(error.message);
+  if (typeof data !== 'object' || data === null) return mapear('error_desconocido');
+  const d = data as Record<string, unknown>;
+  if (d.ok !== true) return mapear(typeof d.codigo === 'string' ? d.codigo : 'error_desconocido');
+  return {
+    ok: true,
+    data: {
+      estado: String(d.estado ?? 'sin_cola') as EstadoCorreoInvitacion['estado'],
+      falloVisible: d.fallo_visible === true,
+      intentos: typeof d.intentos === 'number' ? d.intentos : 0,
+      enviadoEn: typeof d.enviado_en === 'string' ? d.enviado_en : null,
+      /* 🔴 CRUDO DEL PROVEEDOR — para diagnóstico, **jamás para pintar**:
+         `resend_422: {"statusCode":422,…}` no es una frase que una familia deba
+         leer. La pantalla dice lo suyo; esto explica el porqué a quien tenga
+         que arreglarlo. */
+      motivoCrudo: typeof d.motivo === 'string' ? d.motivo : null,
+    },
+  };
+}
+
+export interface EstadoCorreoInvitacion {
+  /** `sin_cola` = fue por el motor de avisos, no por esta cola. No es un fallo. */
+  estado: 'pendiente' | 'enviado' | 'fallido' | 'sin_cola';
+  /** El único booleano que significa «hay que decirle algo a quien invitó». */
+  falloVisible: boolean;
+  intentos: number;
+  enviadoEn: string | null;
+  motivoCrudo: string | null;
+}
