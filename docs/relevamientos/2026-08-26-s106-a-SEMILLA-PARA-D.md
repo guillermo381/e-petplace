@@ -131,7 +131,15 @@ Con esa **misma** sesión, pedí el token de **una cita de Thor** (las de
 `ajeno_a_la_cita`. *No hace falta una tercera cuenta: «ajeno» es una relación,
 no una identidad.*
 
-### 🔴 ③ El PROFESIONAL — **no la tengo, y no debo tenerla**
+### ✅ ③ El PROFESIONAL — ~~no la tengo~~ **RESUELTO, ver la ADENDA del final**
+
+> ⚠️ **ESTA SECCIÓN QUEDÓ SUPERADA EL MISMO DÍA.** La credencial apareció: es
+> la clave compartida del keychain (`-s epetplace-siembra-s97 -a siembra`), y
+> **se verificó por login real**. El camino feliz del profesional **ya está
+> ejercido**. *Se tacha en vez de borrarse para que se vea que el bloqueo
+> existió y cómo se levantó — pero lo que rige es la adenda.*
+
+~~Lo que decía antes:~~
 
 El profesional de estas citas es un empleado de **Clínica Aurora**, cuyo titular
 es `guillo381+demovet@gmail.com`. **Esa clave la tiene el founder y no está en
@@ -154,7 +162,7 @@ distintas de `puede_entrar_a_videollamada` y una probada no prueba la otra.*
 | # | caso | con qué |
 |---|---|---|
 | 1 | **feliz · dueño** | sesión ① + cita de Zeus **con ventana abierta** |
-| 2 | **feliz · profesional** | 🔴 **bloqueado** — falta la clave (§4③) |
+| 2 | **feliz · profesional** | ✅ **YA EJERCIDO** — cita `23d215bd…`, ver ADENDA |
 | 3 | `ajeno_a_la_cita` | sesión ① + cita de **Thor** |
 | 4 | `fuera_de_ventana` | sesión ① + cita de Zeus de las **20:30** ⇒ verificá que **traiga `abre_en`** |
 | 5 | `cita_inexistente` | sesión ① + un uuid cualquiera |
@@ -181,3 +189,70 @@ hallazgo y hay que avisarlo** — no es un caso normal.
   Nuvei ni por DeUna, y no hay evento económico de proveedor.
 - **No abre el servicio.** `reservable` sigue en `false`, medido después del
   commit. **La llave es del founder y va última.**
+
+---
+
+# ✅ ADENDA · EL CAMINO FELIZ YA NO ES FE — ejercido el 26-ago a las 14:45 GYE
+
+**`video-token` dejó de ser NO CONCLUYENTE.** Se ejerció **por el camino real**
+—sesión de verdad, edge de verdad, cita de verdad— y **los dos roles sobre la
+misma sala**:
+
+```
+✅ ② PROFESIONAL asignado : TOKEN · rol=profesional · sala=23d215bd · 480 chars
+✅ ① DUEÑO (+8)           : TOKEN · rol=dueño       · sala=23d215bd · 493 chars
+```
+
+### 🔴 EL BORDE DE §4, QUE ERA EL QUE MÁS IMPORTABA, QUEDÓ EJERCIDO
+
+**El token del veterinario se emitió cuando el dueño todavía NO había entrado.**
+El profesional pidió el suyo primero y lo recibió; la llamada del dueño vino
+después, en otro proceso.
+
+*Esto no es un detalle de orden: es la letra. Si algún día alguien «arregla» la
+sala para exigir dos participantes, le saca al veterinario el derecho a cobrar
+que la letra le dio — porque el vet cobra aunque el dueño no aparezca. **Ahora
+hay una corrida que lo prueba, y romperlo va a tener que romper esta prueba.***
+
+### Y los otros tres, ejercidos en la misma pasada
+
+| caso | resultado |
+|---|---|
+| `ajeno_a_la_cita` | ⛔ correcto (sesión de +8 contra cita de otro) |
+| `fuera_de_ventana` | ⛔ correcto, **y trajo `abre_en=2026-08-27T00:45:00+00:00`** |
+| dueño camino feliz | ✅ `rol=dueño` |
+
+**`abre_en` viajó de verdad**, que es lo que el wrapper exige **por tipo** y lo
+que C necesita para decir *«abre a las HH:MM»* en vez de un «todavía no» mudo.
+
+### ⚠️ UNA CORRECCIÓN MÍA, ANOTADA PORQUE ES LA LECCIÓN DE LA PASADA
+
+**La primera corrida reportó al veterinario como `ajeno_a_la_cita`, y estuve a
+un paso de escribirlo como defecto de la RPC.** No lo era: **el motor había
+asignado esa cita a OTRO empleado** (`afdc7fb9` = `guillo381+7`), no al titular.
+*La RPC contestó bien; mi prueba preguntaba por la persona equivocada.*
+
+⇒ Las citas nuevas se sembraron **con el profesional fijado explícitamente**
+(`crear_bloqueo_agenda` acepta `p_empleado_id`, así que sigue siendo la puerta
+real y no un atajo).
+
+**Las dos citas con profesional conocido:**
+
+| hora | ventana | `cita_id` | profesional | dueño |
+|---|---|---|---|---|
+| 15:00 | 14:45–15:15 | `23d215bd-b688-484c-98c9-a527e12bbe88` | `guillo381+demovet` | `guillo381+8` |
+| 15:30 | 15:15–15:45 | `21da5acf-b36d-4ded-bea4-4008a8968aef` | `guillo381+demovet` | `guillo381+8` |
+
+### LA CREDENCIAL — dónde está, y cómo se lee sin que pase por ningún lado
+
+`docs/relevamientos/2026-08-13-s97a-matriz-cuentas-prueba.md`. **La clave es una
+sola para las cuentas `guillo381+…` y vive en el keychain**, jamás en el repo:
+
+```bash
+security find-generic-password -a siembra -s epetplace-siembra-s97 -w
+```
+
+**Se lee AL MOMENTO de usarla, dentro del script, y no se imprime nunca.**
+
+⚠️ **`guillo381+7@gmail.com` NO entra con esa clave** — medido. La unificación
+de S97 no cubrió todas las cuentas y el documento no lo dice. Ver `D-937`.

@@ -22486,3 +22486,35 @@ gastó.*
 **Disparo:** la próxima pasada que toque `app_config`. **Cura:** censar
 consumidores y, si son cero, retirarla **con lápida** — jamás borrarla en
 silencio, que es cómo se pierde la memoria de por qué existía.
+
+---
+
+### D-937 🟡 · LA MATRIZ DE CUENTAS DE PRUEBA PROMETE «UNA SOLA CLAVE» Y TIENE EXCEPCIONES SIN MARCAR
+
+**Nace S106 tanda 2, 26-ago-2026.** Hallazgo de medición al buscar la
+credencial del profesional.
+
+`docs/relevamientos/2026-08-13-s97a-matriz-cuentas-prueba.md` dice en su
+encabezado, en negrita: *«La clave es una sola para todas»*.
+
+🔴 **Medido: `guillo381+7@gmail.com` NO entra con esa clave.** Su login rebota.
+La unificación de S97 alcanzó a las cuentas que esa sesión tocó —el propio
+documento lo dice más abajo, *«11 usuarios creados por Admin API»* y *«clave
+reseteada»* caso por caso— **pero el encabezado promete un universal que el
+cuerpo no sostiene.**
+
+*El costo no es la clave que falta: es que quien lea el encabezado y falle un
+login va a diagnosticar un problema de auth que no existe. Una excepción sin
+marcar convierte cada uso futuro del documento en una investigación.*
+
+**Y la razón por la que importa ahora:** `+7` es el empleado al que el motor
+asignó una de las citas semilla. *La cuenta que no entra es justamente la que
+el balanceo elige.*
+
+**Cura:** dos columnas en la matriz — *clave unificada ✅/❌* y *login
+verificado, con fecha*. **Lo que NO se hace es unificar `+7` de paso**: tocar
+credenciales de cuentas vivas es acto del founder, no de una pista.
+**Dueño:** founder decide; A ejecuta la marca del documento.
+
+**Disparo:** la próxima sesión que necesite una cuenta de prueba que no sea
+`+8`, `+demovet` o la demo.
