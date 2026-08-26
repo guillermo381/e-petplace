@@ -269,6 +269,12 @@
       sello: 'Procesado por',
       pie: 'Tus datos de tarjeta viajan cifrados a tu procesador de pagos. e-PetPlace guarda solo la marca y los últimos cuatro dígitos, para que puedas reconocerla.',
       guardada: 'Listo, tu tarjeta quedó guardada.',
+      /* 🔴 LA ACCIÓN SIN EFECTO, firmada por el founder (26-ago) con su
+         criterio: *«agregar una tarjeta que ya tenés no es un error de la
+         persona ni un fallo — es una acción sin efecto, y se dice así.»*
+         ⇒ Ni tono de error ni tono de logro: **el estado final es el que la
+         persona quería, y eso es lo que se le confirma.** */
+      yaEstaba: 'Esa tarjeta ya está agregada.',
       noGuardada: 'No pudimos guardar la tarjeta.',
       guardadaCerrar: 'Listo, tu tarjeta quedó guardada. Ya puedes cerrar esta ventana.',
       noGuardadaCerrar: 'No pudimos guardar la tarjeta. Ya puedes cerrar esta ventana.',
@@ -312,6 +318,7 @@
       sello: 'Processed by',
       pie: 'Your card details travel encrypted to your payment processor. e-PetPlace only stores the brand and the last four digits, so you can recognize it.',
       guardada: 'Done — your card is saved.',
+      yaEstaba: 'That card is already added.',
       noGuardada: "We couldn't save the card.",
       guardadaCerrar: 'Done — your card is saved. You can close this window.',
       noGuardadaCerrar: "We couldn't save the card. You can close this window.",
@@ -514,7 +521,13 @@
      «abandonada» de un retorno sin parámetro confundiría tres cosas
      distintas: que cerró la ventana, que el navegador falló, y que el alta
      de verdad venció. Solo la fila que expiró es un hecho.*                 */
-  function terminar(desenlace, motivo) {
+  /* `vozExito` (S105-C): reemplaza SOLO el texto del camino feliz, jamás el
+     desenlace. La firma del founder pide decir «esa tarjeta ya está agregada»
+     **sin volverlo un error** ⇒ para el servidor y para la app esto sigue
+     siendo `guardada`, que es la verdad: la tarjeta está disponible.
+     *Un mensaje distinto no es un desenlace distinto, y confundirlos haría
+     que la app releyera el servidor esperando algo que no pasó.* */
+  function terminar(desenlace, motivo, vozExito) {
     /* ── 🔴 S101-B · EL RETORNO, DESPUÉS DEL DEEP LINK ROTO ────────────────
        El custom tab devolvía el control por `cliente://…` y **falló DOS veces
        en manos del founder** («página no encontrada»). Firma de mesa: el alta
@@ -533,7 +546,7 @@
           fuente: 'epetplace-alta-tarjeta', desenlace: desenlace, alta: alta,
         }));
         decir(desenlace === 'guardada'
-          ? T.guardada
+          ? (vozExito || T.guardada)
           : T.noGuardada,
           desenlace === 'guardada' ? null : 'error');
         return;
@@ -967,7 +980,16 @@
           })
         })
         .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-        .then(function () { terminar('guardada'); })
+        .then(function (r) {
+          /* 🔴 `insertada === false` EXPLÍCITO, y el `=== ` no es estilo:
+             el campo tiene TRES valores —`true` nació ahora · `false` ya la
+             tenía · `null` **no lo sabemos**— y además puede faltar si algún
+             día una página vieja habla con una edge nueva. Con `!r.insertada`,
+             tanto `null` como `undefined` dirían *«ya la tenías»* sobre una
+             tarjeta recién agregada. **Ante la duda se dice lo de siempre**,
+             que es cierto en los tres casos. */
+          terminar('guardada', null, (r && r.insertada === false) ? T.yaEstaba : null);
+        })
         .catch(function () {
           enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
           decir(T.sinTerminar, 'error');
