@@ -214,6 +214,23 @@ export const uiEs = {
     fundador: 'Prestador fundador',
     pionero: 'Prestador pionero',
   },
+  /* S106-B · LA MARCA DE MODALIDAD (`Insignia` familia `modalidad`).
+   *
+   *  ⚠️ **VOZ NUEVA — VA AL LOTE DE STRINGS DEL FOUNDER.** No está firmada.
+   *
+   *  **«Por videollamada» y no «Teleconsulta»**, y es Ley 17.2 (*nombres
+   *  del lado del usuario, jamás del sistema*): «teleconsulta» es el
+   *  vocabulario del motor y de la mesa; lo que la familia entiende es
+   *  «videollamada» — que además es la palabra que usa la propia letra
+   *  cuando le habla al dueño (§3: *«Las consultas por videollamada…»*).
+   *
+   *  Vive acá y no en el diccionario de una app porque §7 exige que la
+   *  marca diga LO MISMO en la historia y en el expediente: si cada
+   *  superficie pasara su etiqueta, el mismo hecho se nombraría distinto.
+   *  Mismo argumento que `cohorte` un bloque más arriba. */
+  modalidad: {
+    teleconsulta: 'Por videollamada',
+  },
   clipSesion: {
     reproducir: 'Reproducir el clip',
     cargando: 'Cargando el clip',

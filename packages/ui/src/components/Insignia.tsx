@@ -63,6 +63,67 @@ export type InsigniaCapa = 'vida' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
  *  cohorte fundadora es un VÍNCULO —la misma capa que `familia`, `equipo`
  *  y `contacto`—, no una credencial ante el Estado. */
 export type InsigniaDistincion = 'cohorte'
+
+/** 🔴 S106-B · LA CUARTA FAMILIA — MODALIDAD: CÓMO SE PRESTÓ EL ACTO.
+ *
+ *  Nace de `LETRA_TELEMEDICINA` §7: *«la teleconsulta deposita en la
+ *  historia clínica y en el Bio-Expediente exactamente igual que una
+ *  presencial, y lleva la marca de haber sido atendida por teleconsulta.
+ *  **La marca es VISIBLE para el dueño.»***
+ *
+ *  ── POR QUÉ FAMILIA NUEVA, con las otras tres descartadas por medición ─
+ *  El censo de S106-B (`2026-08-25-s106-b-mediciones.md` B-M1) probó las
+ *  tres contra este caso y ninguna sirve:
+ *   · `estado` describe la SITUACIÓN del sujeto (al día · atención…) y se
+ *     gana y se pierde. **Una teleconsulta fue una teleconsulta para
+ *     siempre** — no es un estado, es un hecho del pasado.
+ *   · `capa` clasifica un DOMINIO del expediente (vida · cuidado…). La
+ *     modalidad no es un dominio: **una teleconsulta y una presencial
+ *     viven en la MISMA capa.**
+ *   · `distincion` es PERTENENCIA de una persona (la cohorte). Acá no hay
+ *     nadie a quien pertenezca nada: es una propiedad del ACTO.
+ *
+ *  ⇒ *«cómo se prestó el acto» no existía en esta pieza*, y meterlo en
+ *  cualquiera de las tres sería la sustitución genérica que la casa
+ *  prohíbe un piso más arriba para los glifos (Ley 12).
+ *
+ *  ── 🔴 POR QUÉ PALABRA Y NO GLIFO, que era la otra vía de la firma ────
+ *  **El argumento decisivo es de la letra, no de diseño.** §7 dice:
+ *  *«dentro de tres años alguien va a leer ese expediente para decidir
+ *  algo, y "evaluado por pantalla" cambia cómo se lee»*.
+ *
+ *  **Un glifo hay que saber leerlo; una palabra se lee.** Un expediente
+ *  que alguien abre para decidir algo clínico no puede depender de que el
+ *  lector recuerde qué significa un ícono que vio hace tres años. Es el
+ *  mismo diagnóstico que parió `distincion` —*«un glifo de línea a 21px
+ *  no puede portar PERTENENCIA»*— aplicado a otro contenido: **tampoco
+ *  puede portar una advertencia de lectura.**
+ *
+ *  *Y hay una razón de sistema, medida: esta marca tiene que funcionar en
+ *  DOS anatomías —el nodo de `LineaDeVida`, que ya tiene un punto de capa
+ *  en su riel, y el detalle del evento, que ya monta `Insignia`—. Un chip
+ *  entra en las dos; un glifo suelto en el nodo competiría con el punto.*
+ *
+ *  ── SU ANATOMÍA: LA DE `capa`, SIN EL PUNTO ───────────────────────────
+ *  Superficie serena (`bg.elevated` + `border.subtle`) y texto en
+ *  `text.secondary`. **Sin punto** —no clasifica un dominio— y **sin fondo
+ *  pleno** —no es pertenencia—. **Es un HECHO, y los hechos no gritan.**
+ *  Cero pares WCAG nuevos: reusa los registros ya medidos.
+ *
+ *  ── LA ETIQUETA LA ARMA LA PIEZA (precedente `distincion`) ────────────
+ *  A diferencia de `estado` y `capa` —donde *«la palabra es de dominio y
+ *  la pieza no la conoce»*—, acá hay UN solo valor y **§7 exige que la
+ *  marca diga lo mismo en la historia y en el expediente**. Si cada
+ *  consumidor pasara su etiqueta, dos superficies podrían nombrar distinto
+ *  el mismo hecho. La frase se arma UNA vez, acá.
+ *
+ *  ── EXTENSIBLE A PROPÓSITO, y su segundo consumidor ya existe ─────────
+ *  El censo de S106-B midió que **el grooming a domicilio no deja marca
+ *  en ningún expediente**: un domicilio y un local dejan rastro idéntico.
+ *  Esta familia es exactamente su casa el día que la mesa lo firme —
+ *  **entra como valor nuevo, sin tocar la anatomía.** */
+export type InsigniaModalidad = 'teleconsulta'
+
 export type InsigniaTamaño = 'sm' | 'md'
 
 const TAMAÑOS: Record<InsigniaTamaño, { alto: number; fontSize: number }> = {
@@ -113,6 +174,17 @@ export type InsigniaProps =
       onPress?: () => void
     }
   | { capa: InsigniaCapa; estado?: never; soloPunto?: boolean; etiqueta: string; tamaño?: InsigniaTamaño }
+  | {
+      /** S106-B · CÓMO SE PRESTÓ EL ACTO (`LETRA_TELEMEDICINA` §7). */
+      modalidad: InsigniaModalidad
+      estado?: never
+      capa?: never
+      distincion?: never
+      soloPunto?: never
+      /** NO se pasa: la arma la pieza (ver el contrato en el tipo). */
+      etiqueta?: never
+      tamaño?: InsigniaTamaño
+    }
   | {
       distincion: InsigniaDistincion
       estado?: never
@@ -271,7 +343,11 @@ export function Insignia(props: InsigniaProps) {
   const etiqueta =
     'distincion' in props && props.distincion
       ? `${traducir('cohorte.desde')} ${props.cohorteAnio}`
-      : (props as { etiqueta: string }).etiqueta
+      : /* S106-B · `modalidad` tampoco recibe etiqueta: la arma la pieza, para
+           que el mismo hecho no se nombre distinto en dos superficies (§7). */
+        'modalidad' in props && props.modalidad
+        ? traducir(`modalidad.${props.modalidad}` as 'modalidad.teleconsulta')
+        : (props as { etiqueta: string }).etiqueta
   const t = TAMAÑOS[tamaño]
   const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
 
@@ -335,6 +411,39 @@ export function Insignia(props: InsigniaProps) {
         </Text>
         )}
       </Contenedor>
+    )
+  }
+
+  // ── MODALIDAD (S106-B): la anatomía de `capa` SIN el punto. Un hecho del
+  //    acto, sereno: superficie elevada, borde sutil, texto secundario.
+  //    No es tocable — no tiene explicación propia que abrir (a diferencia
+  //    de `distincion` y `estado`): la palabra ES la explicación.
+  if ('modalidad' in props && props.modalidad) {
+    return (
+      <View
+        accessibilityRole="text"
+        accessibilityLabel={etiqueta}
+        style={{
+          height: t.alto,
+          justifyContent: 'center',
+          paddingHorizontal: spacing[2.5],
+          borderRadius: radius.full,
+          backgroundColor: theme.bg.elevated,
+          borderWidth: theme.border.width,
+          borderColor: theme.border.subtle,
+          alignSelf: 'flex-start',
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: t.fontSize,
+            color: theme.text.secondary,
+          }}
+        >
+          {etiqueta}
+        </Text>
+      </View>
     )
   }
 

@@ -165,6 +165,11 @@ export const uiEn = {
     fundador: 'Founding provider',
     pionero: 'Pioneer provider',
   },
+  // S106-B — modality mark (`Insignia` family `modalidad`).
+  // ⚠️ NEW COPY — goes to the founder's string batch, not signed yet.
+  modalidad: {
+    teleconsulta: 'By video call',
+  },
   clipSesion: {
     reproducir: 'Play the clip',
     cargando: 'Loading the clip',

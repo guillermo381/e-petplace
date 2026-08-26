@@ -35,6 +35,7 @@ import { MapaZona } from '../components/MapaZona'
 import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
+import { AvisoTeleconsulta } from '../components/AvisoTeleconsulta'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, HojaScroll, type HojaAltura } from '../components/Hoja'
@@ -2494,6 +2495,8 @@ export function TokenGallery() {
 
 function GaleriaInterna() {
   const [cruceVisible, setCruceVisible] = useState(true)
+  // S106-B · el aviso previo de teleconsulta (gate del founder)
+  const [avisoTele, setAvisoTele] = useState(false)
   const { theme, mode, setMode } = useTheme()
   const { mostrar } = useAviso()
   const [cargandoDemo, setCargandoDemo] = useState(false)
@@ -2568,6 +2571,95 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S106 — EL AVISO PREVIO DE TELECONSULTA (§3) · qué decide: (a) que las TRES salidas se lean de PESO PAR —ninguna preside, es tu firma— y (b) que los cinco signos se lean como CRITERIO y no como letra chica. Texto: LETRA_TELEMEDICINA v1.1 (tuteo, con la línea de tránsito PROVISIONAL al pie)">
+          <Texto variante="apoyo">
+            Tres Celda, no tres botones: tres sólidos son ilegales (D-484 y el pie
+            de Hoja). El precedente es SelectorAvatar. La pieza no trunca, no
+            resume y no colapsa — si no entra, scrollea. Descartarla (swipe,
+            fondo, atrás) NO continúa.
+          </Texto>
+          <View style={{ height: spacing[3] }} />
+          <Boton
+            variante="primario"
+            etiqueta="Ver el aviso"
+            onPress={() => setAvisoTele(true)}
+          />
+          <AvisoTeleconsulta
+            visible={avisoTele}
+            onCerrar={() => setAvisoTele(false)}
+            texto={{
+              titulo: 'Antes de continuar',
+              intro:
+                'Las consultas por videollamada sirven para orientación, seguimiento y casos que el veterinario pueda evaluar viendo a tu mascota por pantalla.',
+              advertencia:
+                'No reemplazan una atención presencial ni sirven para emergencias.',
+              signosIntro: 'Si notas que tu mascota está en riesgo:',
+              signos: [
+                'dificultad para respirar',
+                'sangrado',
+                'convulsiones',
+                'golpe fuerte',
+                'dolor intenso o decaimiento repentino',
+              ],
+              signosCierre: 'llévala a una clínica ahora mismo.',
+              transito:
+                'La videollamada no se graba y se transmite a través de la infraestructura de nuestro proveedor de video.',
+            }}
+            acciones={{
+              urgencias: { etiqueta: 'Ir a urgencias', onPress: () => setAvisoTele(false) },
+              presencial: { etiqueta: 'Reservar cita presencial', onPress: () => setAvisoTele(false) },
+              continuar: { etiqueta: 'Continuar con la videoconsulta', onPress: () => setAvisoTele(false) },
+            }}
+          />
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S106 — LA MARCA DE TELECONSULTA EN EL EXPEDIENTE (§7) · qué decide: si «Por videollamada» se lee como un HECHO del acto y no como un estado — y si se separa de sus tres hermanas sin gritar. Va contra ellas, que es donde se juzga">
+          <Texto variante="apoyo">
+            Cuarta familia de Insignia. Es PALABRA y no glifo por la razón de la
+            letra: dentro de tres años alguien lee este expediente para decidir
+            algo, y un glifo hay que saber leerlo. Anatomía de «capa» sin el
+            punto — no clasifica un dominio. Cero pares WCAG nuevos.
+          </Texto>
+          <View style={{ height: spacing[3] }} />
+          <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap', alignItems: 'center' }}>
+            <Insignia modalidad="teleconsulta" />
+            <Insignia modalidad="teleconsulta" tamaño="sm" />
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">Contra sus tres hermanas:</Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap', alignItems: 'center' }}>
+            <Insignia modalidad="teleconsulta" />
+            <Insignia estado="alDia" etiqueta="Al día" />
+            <Insignia capa="cuidado" etiqueta="Cuidado" />
+            <Insignia distincion="cohorte" cohorte="fundador" cohorteAnio={2026} />
+          </View>
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="apoyo">
+            Y donde de verdad vive — en el nodo de la Línea de Vida, debajo de
+            quién atendió. El segundo nodo NO la lleva: una presencial no se
+            marca, y por eso la marca marca.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <LineaDeVida
+            items={[
+              {
+                evento_id: 'gate-s106-1',
+                tipo: 'historia_clinica_registrada',
+                fecha_evento: new Date().toISOString(),
+                titulo_fuente: 'Clínica Aurora',
+                modalidad: 'teleconsulta',
+              },
+              {
+                evento_id: 'gate-s106-2',
+                tipo: 'historia_clinica_registrada',
+                fecha_evento: new Date(Date.now() - 86400000 * 9).toISOString(),
+                titulo_fuente: 'Clínica Aurora',
+              },
+            ]}
+          />
+        </Seccion>
+
         {/* ═══ S85-B13 · LOS GLIFOS QUE ESPERAN SU OJO. Suben acá por el
             defecto que el founder encontró con el cuerpo: la insignia de cohorte
             estaban al FINAL de «Iconografía b′» —una sección de CATÁLOGO—,

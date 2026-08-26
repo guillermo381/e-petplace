@@ -117,8 +117,15 @@ export {
   type InsigniaEstado,
   type InsigniaCapa,
   type InsigniaDistincion,
+  type InsigniaModalidad,
   type InsigniaTamaño,
 } from './components/Insignia'
+// S106-B · el aviso previo de teleconsulta (LETRA_TELEMEDICINA §3)
+export {
+  AvisoTeleconsulta,
+  type AvisoTeleconsultaProps,
+  type AccionAviso,
+} from './components/AvisoTeleconsulta'
 export { Encabezado, type EncabezadoProps } from './components/Encabezado'
 export { HeroMarca, type HeroMarcaProps, type HeroMarcaVariante } from './components/HeroMarca'
 export { BarraTabs, ALTO_FILA_TABS, type BarraTabsItem } from './components/BarraTabs'

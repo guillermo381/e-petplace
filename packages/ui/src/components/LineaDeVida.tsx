@@ -52,6 +52,7 @@ import { useTraduccionUi } from '../i18n'
 import type { uiEs } from '../i18n/es'
 import type { ClaveDe } from '@epetplace/i18n'
 import { Boton } from './Boton'
+import { Insignia, type InsigniaModalidad } from './Insignia'
 import { PieRevelar } from './PieRevelar'
 import { Tarjeta } from './Tarjeta'
 import { Esqueleto, EsqueletoGrupo } from './Esqueleto'
@@ -183,6 +184,21 @@ export interface LineaDeVidaItem {
    *  UTC del día — se muestra el día calendario (partes UTC) y SIN hora.
    *  Una hora inventada + corrimiento de zona es mentirle al dueño. */
   fecha_sola?: boolean
+  /** 🔴 S106-B · CÓMO SE PRESTÓ EL ACTO (`LETRA_TELEMEDICINA` §7).
+   *
+   *  **El nodo ya decía el QUIÉN (`titulo_fuente`) y no decía el CÓMO** —
+   *  el censo de S106-B lo midió y midió también que **la casa nunca marcó
+   *  modalidad en ningún expediente**: un grooming a domicilio y uno en
+   *  local dejan hoy rastro idéntico.
+   *
+   *  Ausente/`null` = **no se dibuja nada**. *Una presencial no lleva
+   *  marca: si todo llevara marca, la marca no marcaría nada* — y la Ley
+   *  12 enmendada S71 dice justo eso, que la señal es para lo que VARÍA.
+   *
+   *  **De dónde sale el dato es del MOTOR y a esta pieza no le consta**:
+   *  derivado de la cita padre o columna propia del evento, la pieza
+   *  recibe el valor ya resuelto y no lo infiere. */
+  modalidad?: InsigniaModalidad | null
 }
 
 export type LineaDeVidaEstadoPie = 'nada' | 'mas' | 'cargando' | 'error'
@@ -287,6 +303,16 @@ function Nodo({
         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginTop: spacing[0.5] }}>
           con {item.titulo_fuente}
         </Text>
+      ) : null}
+      {/* S106-B · LA MARCA DE MODALIDAD (§7). Va DEBAJO del quién y ARRIBA de
+          la hora, y el lugar es un argumento: la línea del prestador es donde
+          el nodo habla del ACTO. Junto al título competiría con el título;
+          junto a la hora mezclaría una palabra humana con voz de máquina
+          (Ley 3). Ausente = no se dibuja: una presencial no lleva marca. */}
+      {item.modalidad ? (
+        <View style={{ marginTop: spacing[1.5] }}>
+          <Insignia modalidad={item.modalidad} tamaño="sm" />
+        </View>
       ) : null}
       {/* fecha-sola NO tiene hora: mostrarla sería inventarla (B6.3) */}
       {!item.fecha_sola && (
