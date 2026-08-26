@@ -230,7 +230,23 @@ Deno.serve(async (req) => {
   //    están autorizados.
   const ok = r.ok === true;
   return new Response(
-    JSON.stringify({ ok, codigo: ok ? null : (r.codigo ?? 'no_se_pudo_completar'), estado: r.estado ?? null }),
+    JSON.stringify({
+      ok,
+      codigo: ok ? null : (r.codigo ?? 'no_se_pudo_completar'),
+      estado: r.estado ?? null,
+      /* 🔴 `insertada` SE REENVÍA, y esta línea existe porque faltaba: la RPC
+         lo devolvía y la edge lo dejaba caer acá ⇒ **motor sin puerta un piso
+         más arriba** (`L-318`), justo la clase que la migración de al lado
+         acababa de curar un piso abajo. Lo encontró C yendo a escribir la voz
+         que yo le había dicho que ya podía escribir. *Verifiqué la RPC y lo
+         reporté como si hubiera verificado el camino.*
+
+         ⚠️ Se manda **explícito y no se infiere**: `?? null` en vez de omitir.
+         Un campo ausente llega como `undefined`, que es *falsy* ⇒ el
+         consumidor diría «ya la tenías» sobre una tarjeta nueva. `null`
+         significa «no lo sé», que es otra cosa y se puede distinguir. */
+      insertada: typeof r.insertada === 'boolean' ? r.insertada : null,
+    }),
     { status: ok ? 200 : 409, headers: cabeceras },
   );
 });
