@@ -34,9 +34,18 @@
 //
 // ⑤ `reference_label` es de QR Colombia. **No aplica** y no se manda.
 //
-// 🔴 LO QUE ESTA EDGE NO HACE: **mover el sujeto.** El pedido/cita queda como
-//    está — eso es `D-923` y es de A. La respuesta lo DICE (`sujeto_movido`),
-//    para que quien la lea no crea que el circuito cerró.
+// ✅ EL SUJETO SÍ SE MUEVE — y esta edge **no lo hace ni tiene que saberlo.**
+//    `D-923` la cerró A con un trigger `AFTER UPDATE OF estado` sobre
+//    `pagos_intentos`: al entrar a `reversado` se llama a
+//    `mover_sujeto_por_reverso`. Nuestra RPC hace ese UPDATE ⇒ se dispara solo.
+//
+//    🔴 ESTA LÍNEA ES UNA CORRECCIÓN, NO UNA DESCRIPCIÓN NUEVA: hasta la cura
+//    de A la respuesta devolvía `sujeto_movido: false` **cableado**, y el día
+//    que el trigger nació **pasó a mentir** — le decía a soporte que moviera a
+//    mano algo ya movido. *Una constante que afirma sobre el mundo se vuelve
+//    falsa el día que el mundo cambia, y no lo avisa: no hay typecheck para
+//    una verdad vencida.*
+//    ⇒ El campo ahora se **deriva de lo que la RPC contesta**, jamás se afirma.
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -223,15 +232,27 @@ Deno.serve(async (req) => {
     }, 500);
   }
 
+  /* ¿El trigger movió el sujeto? Se va a mirar. Si la lectura misma falla no
+     se inventa un veredicto: queda `null`, que la respuesta traduce a
+     «no movido» — el lado conservador, el que manda a soporte a revisar. */
+  const { data: post } = await db.from('pagos_intentos')
+    .select('payload_crudo').eq('id', intentoId).maybeSingle();
+  const sujetoNoMovido =
+    ((post?.payload_crudo ?? {}) as Record<string, unknown>).sujeto_no_movido ?? null;
+
   return json({
     ok: true,
     registro: reg,
     intentos: intento,
     status_detail: statusDetail || null,
     refund_amount: Number.isFinite(refundAmount) ? refundAmount : null,
-    /* Se repite acá lo que la RPC ya dice, porque quien llama a la edge no
-       siempre lee el objeto anidado: **el sujeto NO se movió** (`D-923`). */
-    sujeto_movido: false,
+    /* 🔴 MEDIDO, NO AFIRMADO. El trigger de A mueve el sujeto y **atrapa su
+       propio fallo a propósito** —para no revertir el registro de un reverso
+       que ya ocurrió— dejándolo escrito en `payload_crudo.sujeto_no_movido`.
+       ⇒ La única forma honesta de contestar esto es ir a mirar. Un `true`
+       cableado sería la misma clase de mentira que era el `false`. */
+    sujeto_movido: sujetoNoMovido === null,
+    ...(sujetoNoMovido ? { sujeto_no_movido: sujetoNoMovido } : {}),
     crudo: crudo.slice(0, 1200),
   });
 });
