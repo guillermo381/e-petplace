@@ -41,29 +41,20 @@
  *  sin error. */
 export const SALA_CABLE = 'cable-quito';
 
-/* ── LO QUE FALTA, Y NO SE INVENTA ────────────────────────────────────────
-   Las tres variables de LiveKit **las da el founder** (spec §4). Están
-   cargadas como secrets de Supabase para la edge de D — y ahí la CLI devuelve
-   un **digest, no el valor**, así que desde acá no se pueden leer para firmar
-   un token.
+/* ── LA URL Y EL TOKEN ────────────────────────────────────────────────────
+   **La URL es del proyecto y viene por defecto.** No es una credencial: sin
+   un token firmado no abre nada, y la mesa la pasó en claro para cablearla.
 
-   🔴 **JAMÁS pegar acá `LIVEKIT_API_SECRET` ni ninguna key de cuenta.** Lo que
-   va acá es **un token de prueba ya firmado**, que expira solo en 1 hora.
+   🔴 **EL TOKEN NO VIVE ACÁ, Y NO ES PRUDENCIA: ES QUE NO FUNCIONARÍA.**
+   La spec §4 entrega **DOS** tokens —`Dispositivo A` y `Dispositivo B`— y
+   avisa que *el mismo token en los dos no prueba nada*. Una constante en el
+   repo pondría **el mismo** en ambos aparatos ⇒ **el gate saldría verde sin
+   haber probado los dos sentidos**, que es justo lo que §5 ③ existe para
+   evitar. Se pega en pantalla, uno distinto por aparato.
 
-   Para generarlo (spec §4), con las tres variables en mano:
-
-       cd supabase/functions/video-token
-       LIVEKIT_API_KEY='…' LIVEKIT_API_SECRET='…' LIVEKIT_URL='wss://…' \
-         node generar-token-prueba.mjs
-
-   Imprime la URL y DOS tokens (`Dispositivo A` y `Dispositivo B`). Uno va en
-   cada aparato: **el mismo token en los dos no prueba nada.** */
-export const LIVEKIT_URL = '';
-export const TOKEN_PRUEBA = '';
-
-/** `true` cuando el andamio tiene con qué conectarse. Si es `false` la pantalla
- *  lo DICE — no dibuja un botón que no puede funcionar. */
-export const cableConfigurado = LIVEKIT_URL.length > 0 && TOKEN_PRUEBA.length > 0;
+   Y de paso: **jamás `LIVEKIT_API_SECRET` en el repo.** Lo que se pega es un
+   token ya firmado, que expira solo (TTL 4 h). */
+export const LIVEKIT_URL_DEFECTO = 'wss://epetplace-ilqza4vl.livekit.cloud';
 
 type ModuloLiveKit = typeof import('@livekit/react-native');
 
