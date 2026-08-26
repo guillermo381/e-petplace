@@ -972,6 +972,38 @@ export const clienteEs = {
        tiene voz propia: confundirlo con «no puedes entrar» sería afirmar algo
        que no sabemos. */
     entrarNoSePudoConsultar: 'No pudimos verificar si la sala está abierta.',
+
+    /* ══ LA VIDEOCONSULTA · pre-join e in-call (Obras 2 y 3) ══ */
+    vcTitulo: 'Videoconsulta',
+    vcVasAEntrarCon: 'Vas a entrar con {{nombre}}',
+    vcProfesional: 'tu veterinario',
+    vcEntrar: 'Entrar a la consulta',
+    vcMicApagar: 'Apagar micrófono',
+    vcMicEncender: 'Encender micrófono',
+    vcCamApagar: 'Apagar cámara',
+    vcCamEncender: 'Encender cámara',
+    /* El preview no se disimula con un rectángulo negro: si no hay cámara, lo
+       dice y da el camino. */
+    vcSinCamara: 'No podemos usar tu cámara. Revisa el permiso en Ajustes.',
+    vcTuVideo: 'Tu video',
+    vcVozMic: 'Micrófono',
+    vcVozCam: 'Cámara',
+    vcVozColgar: 'Colgar',
+    vcVozGirar: 'Girar cámara',
+    /* §2 · la señal de la nota: **sin contenido**, se desvanece sola a los 3 s.
+       Dice «me están atendiendo de verdad», no qué escribió. */
+    vcSenalNota: '{{nombre}} está escribiendo en la historia de {{mascota}}',
+    vcColgarConfirma: '¿Terminar la videoconsulta?',
+    vcColgarSi: 'Terminar',
+    vcColgarSujeto: 'la videoconsulta',
+    vcColgarNo: 'Seguir en la consulta',
+    /* Los tres estados de conexión, y ninguno miente (§1.6). */
+    vcConexionBuena: 'Conexión buena',
+    vcConexionInestable: 'Conexión inestable',
+    vcConexionReconectando: 'Reconectando…',
+    vcSinModulo: 'Esta versión de la app no puede hacer videollamadas.',
+    vcSinModuloDetalle: 'Actualiza la app desde la tienda para usar la videoconsulta.',
+    vcSinEntrada: 'No podemos abrir esta videoconsulta.',
   },
   // S63-A Bloque 3 — la reserva de adiestramiento del dueño + el parte
   // (LOTE S63, gate founder pendiente)
