@@ -80,7 +80,13 @@
           "recordAudioAndroid": true
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "@livekit/react-native-expo-plugin",
+        {
+          "enableScreenShareService": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

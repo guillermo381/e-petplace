@@ -722,6 +722,25 @@ export const clienteEn = {
     personaNoPudo: "That exact time doesn't work for them — but the clinic can make it.",
     dejarQueAsigne: 'Let the clinic assign',
     atiendeTitulo: 'Who attends',
+
+    /* ══ TELECONSULTATION NOTICE · `LETRA_TELEMEDICINA` §3 ══
+       ⚠️ **TRADUCCIÓN PROVISIONAL — NO ES TEXTO FIRMADO.**
+       Existe porque el `Espejo<D>` del riel i18n EXIGE paridad es↔en y sin
+       estas claves no compila. **La fuente firmada en inglés no existe**: la
+       letra se firmó en español y `R66` sólo vigila `es`.
+       🔴 **No se embarca a una familia anglófona sin que el founder la
+       gatee.** Los cinco signos están traducidos uno a uno a propósito: la
+       prohibición de §3 —no resumir, no acortar— vale igual acá. */
+    avisoTeleTitulo: 'Before you continue',
+    avisoTeleParaQue:
+      'Video consultations are for guidance, follow-up, and cases the vet can assess by seeing your pet on screen.',
+    avisoTeleNoReemplaza:
+      'They do not replace in-person care and are not for emergencies. If you notice your pet is at risk —difficulty breathing, bleeding, seizures, a hard blow, severe pain, or sudden lethargy— take them to a clinic right now.',
+    avisoTeleTransito:
+      'The video call is not recorded and is transmitted through our video provider’s infrastructure.',
+    avisoTeleIrUrgencias: 'Go to urgent care',
+    avisoTelePresencial: 'Book an in-person visit',
+    avisoTeleContinuar: 'Continue with the video consultation',
   },
   // S63-A Bloque 3 — training booking, owner side + the session report
   // (LOTE S63, founder gate pending)

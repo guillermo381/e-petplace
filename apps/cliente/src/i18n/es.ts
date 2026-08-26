@@ -864,6 +864,28 @@ export const clienteEs = {
     personaNoPudo: 'Justo a esa hora no puede — pero la clínica sí.',
     dejarQueAsigne: 'Dejar que la clínica asigne',
     atiendeTitulo: 'Quién atiende',
+
+    /* ══ EL AVISO PREVIO DE TELECONSULTA · `LETRA_TELEMEDICINA` §3 v1.1 ══
+       🔴 **TEXTO FIRMADO. VERBATIM. NO SE TOCA.** La letra lo prohíbe con
+       todas las letras: *«No se resume, no se acorta, no se convierte en una
+       línea de letra chica»*. Los CINCO signos concretos son el contenido,
+       no el relleno: *«decir "si creés que está en riesgo" le pide al dueño
+       un juicio clínico que no tiene; nombrar cinco signos le da un
+       criterio»*.
+       Tuteo por la enmienda ① de CP1 (25-ago): «notas» y «llévala». */
+    avisoTeleTitulo: 'Antes de continuar',
+    avisoTeleParaQue:
+      'Las consultas por videollamada sirven para orientación, seguimiento y casos que el veterinario pueda evaluar viendo a tu mascota por pantalla.',
+    avisoTeleNoReemplaza:
+      'No reemplazan una atención presencial ni sirven para emergencias. Si notas que tu mascota está en riesgo —dificultad para respirar, sangrado, convulsiones, golpe fuerte, dolor intenso o decaimiento repentino— llévala a una clínica ahora mismo.',
+    /* ⚠️ PROVISIONAL por la enmienda ② de CP1: rige hasta que el abogado
+       conteste la pregunta 4 de §10 (LOPDP), que puede exigir nombrar al
+       proveedor, su país o la base de licitud. */
+    avisoTeleTransito:
+      'La videollamada no se graba y se transmite a través de la infraestructura de nuestro proveedor de video.',
+    avisoTeleIrUrgencias: 'Ir a urgencias',
+    avisoTelePresencial: 'Reservar cita presencial',
+    avisoTeleContinuar: 'Continuar con la videoconsulta',
   },
   // S63-A Bloque 3 — la reserva de adiestramiento del dueño + el parte
   // (LOTE S63, gate founder pendiente)

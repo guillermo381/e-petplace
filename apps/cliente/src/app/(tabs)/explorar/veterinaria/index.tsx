@@ -26,7 +26,7 @@
  *    (especies_elegibles, §1bis — la DB manda).
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -80,9 +80,22 @@ export default function VeterinariaCuando() {
   // la congelaría en la del primer montaje — el defecto de r15-bis,
   // cortado antes de que ocurra. El estado local sobrevive SOLO para el
   // deep-link sin param y el log vacío.
-  const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
+  const { mascotaId: mascotaParam, tipo: tipoParam } = useLocalSearchParams<{
+    mascotaId?: string;
+    /** S106-C · el QUÉ preseleccionado. Su primer llamador es «Ir a urgencias»
+     *  del aviso de teleconsulta (LETRA_TELEMEDICINA §3): el dueño que se va a
+     *  urgencias no tiene que volver a elegir el servicio. */
+    tipo?: string;
+  }>();
   const paramMascota =
     typeof mascotaParam === 'string' && mascotaParam.trim().length > 0 ? mascotaParam : null;
+  const paramTipo = typeof tipoParam === 'string' && tipoParam.trim().length > 0 ? tipoParam : null;
+  /* SE CONSUME UNA SOLA VEZ, y el porqué es el caso que rompe: la oferta se
+     re-lee al cambiar de mascota. Sin este ref, un dueño que llegó por
+     «Ir a urgencias», eligió otro servicio a mano y después cambió de mascota
+     volvería a urgencias sin haberlo pedido — el param dejaría de ser una
+     preselección para ser un ancla. **Preseleccionar no es imponer.** */
+  const paramTipoConsumido = useRef(false);
   const [elegidaLocal, setElegidaLocal] = useState<string | null>(null);
   const mascotaId = paramMascota ?? elegidaLocal;
   const setMascotaId = setElegidaLocal;
@@ -156,7 +169,20 @@ export default function VeterinariaCuando() {
       if (!vigente) return;
       setOferta(r.ok ? r.data : 'error');
       if (r.ok && r.data.length > 0) {
-        setTipoServicio((s) => (s !== null && r.data.some((o) => o.tipo_servicio === s) ? s : r.data[0].tipo_servicio));
+        /* El param del QUÉ entra ACÁ y no antes, porque recién acá se sabe si
+           ese tipo EXISTE para esta mascota: el techo de especie es por tipo
+           (§1bis) y la oferta llega resuelta server-side. Si el tipo pedido no
+           está en la oferta, **no se fuerza nada** — cae al default de siempre
+           y la pantalla dice su verdad con los vacíos honestos que ya tiene
+           (`urgenciaSinLugarHoy`). *Un param no puede fabricar una oferta.* */
+        const pedido =
+          !paramTipoConsumido.current && paramTipo !== null && r.data.some((o) => o.tipo_servicio === paramTipo)
+            ? paramTipo
+            : null;
+        if (!paramTipoConsumido.current && paramTipo !== null) paramTipoConsumido.current = true;
+        setTipoServicio((s) =>
+          pedido ?? (s !== null && r.data.some((o) => o.tipo_servicio === s) ? s : r.data[0].tipo_servicio),
+        );
       }
     });
     return () => {
