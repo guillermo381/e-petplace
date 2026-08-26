@@ -19,7 +19,7 @@
 
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Boton } from '@epetplace/ui';
+import { AvisoTeleconsulta, Boton } from '@epetplace/ui';
 import {
   obtenerVeterinariosDisponibles,
   obtenerVitrinaNegocios,
@@ -29,7 +29,6 @@ import {
 import { useTraduccion } from '@/i18n';
 import { useReservaVeterinaria } from '@/lib/reserva/veterinaria';
 import { HojaPersonasVet } from '@/components/reserva/hoja-personas-vet';
-import { AvisoTeleconsulta } from '@/components/aviso-teleconsulta';
 
 export function BarraVeterinaria({
   prestadorId,
@@ -76,6 +75,8 @@ export function BarraVeterinaria({
     elegirPersona,
     personaRebotada,
     avisoAbierto,
+    consentimientoMarcado,
+    marcarConsentimiento,
     cerrarAviso,
     irAUrgencias,
     reservarPresencial,
@@ -106,12 +107,36 @@ export function BarraVeterinaria({
       />
       {/* EL AVISO §3 — bloqueante, antes del hold (LETRA_TELEMEDICINA v1.1) */}
       <AvisoTeleconsulta
-        abierta={avisoAbierto}
-        alCerrar={cerrarAviso}
-        alIrAUrgencias={irAUrgencias}
-        alReservarPresencial={reservarPresencial}
-        alContinuar={continuarTrasAviso}
-      />
-    </View>
+        visible={avisoAbierto}
+        onCerrar={cerrarAviso}
+        texto={{
+          titulo: t('veterinaria.avisoTeleTitulo'),
+          intro: t('veterinaria.avisoTeleParaQue'),
+          advertencia: t('veterinaria.avisoTeleNoReemplaza'),
+          signosIntro: t('veterinaria.avisoTeleSignosIntro'),
+          /* LOS SEIS. La tupla de B no compila con cinco — es el candado que
+             convirtió una discrepancia de prosa en un error de compilación. */
+          signos: [
+            t('veterinaria.avisoTeleSigno1'),
+            t('veterinaria.avisoTeleSigno2'),
+            t('veterinaria.avisoTeleSigno3'),
+            t('veterinaria.avisoTeleSigno4'),
+            t('veterinaria.avisoTeleSigno5'),
+            t('veterinaria.avisoTeleSigno6'),
+          ],
+          signosCierre: t('veterinaria.avisoTeleSignosCierre'),
+          transito: t('veterinaria.avisoTeleTransito'),
+          consentimiento: t('veterinaria.avisoTeleConsentimiento'),
+        }}
+        acciones={{
+          urgencias: { etiqueta: t('veterinaria.avisoTeleIrUrgencias'), onPress: irAUrgencias },
+          presencial: { etiqueta: t('veterinaria.avisoTelePresencial'), onPress: reservarPresencial },
+          continuar: { etiqueta: t('veterinaria.avisoTeleContinuar'), onPress: continuarTrasAviso },
+        }}
+        /* Desmarcada por defecto: habilita SOLO «Continuar». Las dos salidas
+           quedan siempre disponibles — *nadie tiene que marcar una casilla
+           para irse a urgencias.* */
+        consentimiento={{ marcado: consentimientoMarcado, onCambio: marcarConsentimiento }}
+      />    </View>
   );
 }
