@@ -59,6 +59,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { useTraduccion } from '@/i18n';
+import { CitaNoDisponible } from '@/components/cita-no-disponible';
 import { RecetaDeLaConsulta } from '@/components/receta-de-la-consulta';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 
@@ -184,7 +185,7 @@ export default function DetalleCitaVet() {
         )}
 
         {pantalla.estado === 'no_existe' && (
-          <EstadoVacio registro="pantalla" titulo={t('citaVet.noExiste')} />
+          <CitaNoDisponible registro="pantalla" citaId={citaId} titulo={t('citaVet.noExiste')} />
         )}
 
         {pantalla.estado === 'error' && (

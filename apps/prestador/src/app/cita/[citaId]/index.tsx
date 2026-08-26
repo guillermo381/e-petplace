@@ -46,6 +46,7 @@ import {
 import { verificarSesion } from '@/lib/api';
 import { SeccionDireccion } from '@/components/seccion-direccion';
 import { useTraduccion } from '@/i18n';
+import { CitaNoDisponible } from '@/components/cita-no-disponible';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -203,7 +204,8 @@ export default function DetalleCita() {
         )}
 
         {pantalla.estado === 'no_existe' && (
-          <EstadoVacio
+          <CitaNoDisponible
+            citaId={citaId}
             titulo={t('cita.noDisponible')}
             descripcion={t('cita.noDisponibleDetalle')}
             accion={<Boton variante="secundario" etiqueta={t('cita.volverAgenda')} onPress={() => router.back()} />}

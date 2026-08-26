@@ -1030,6 +1030,7 @@ export const clienteEn = {
     citaSuelta: 'Single walk',
     citaCancelada: 'Cancelled',
     citaCanceladaVoz: 'This booking was cancelled.',
+    citaCanceladaPorReverso: 'This booking was cancelled because the bank returned the payment. You were not charged.',
     detalleTitulo: 'This walk',
     ventanasVoz: 'You can cancel up to a day before; after that, you can only reschedule. With less than 2 hours, the walk is lost.',
     reagendar: 'Reschedule',
@@ -1688,12 +1689,12 @@ export const clienteEn = {
       "There's no real payment method yet: nothing is charged, nothing is invoiced. This is a test purchase and it stays marked as one.",
     pagoSimuladoRecordatorio: 'This order has a SIMULATED payment: nothing was charged.',
     exitoTitulo: 'Done',
-    exitoCuerpo: 'Your order was created.',
+    exitoPagoTitulo: 'Your payment went through',
     /* 🔴 S101-D · ⑤ — espejo de la cura de `es.ts`. Decía «We'll let you know
        when the seller confirms it»: la voz anterior al motor de pagos.
        «Your orders» es el nombre de la tab, y se conserva idéntico (Ley 17.3:
        una acción, un nombre, todo el flujo). */
-    exitoDetalle: 'Your payment is confirmed. You can follow the order in Your orders.',
+    exitoDetalle: 'You can follow your order in Your orders.',
     exitoRetiro: "When it's ready for pickup, you'll see the counter code in the order detail.",
     verTotal: 'See the total',
     pagarSimulado: 'Pay',

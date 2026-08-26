@@ -51,6 +51,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
+import { CitaNoDisponible } from '@/components/cita-no-disponible';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -182,7 +183,8 @@ export default function AntesAdiestramientoCita() {
         )}
 
         {pantalla.estado === 'no_existe' && (
-          <EstadoVacio
+          <CitaNoDisponible
+            citaId={citaId}
             titulo={t('citaAdiestramiento.noDisponible')}
             descripcion={t('citaAdiestramiento.noDisponibleDetalle')}
             accion={

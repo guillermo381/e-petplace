@@ -73,8 +73,8 @@ export const clienteEs = {
   // S104-C · verificar correo. Aparece solo cuando el proyecto exige
   // confirmar el correo (registrarse devuelve sesion_activa=false).
   verificarCorreo: {
-    titulo: 'Confirmá tu correo',
-    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escribilo para entrar.',
+    titulo: 'Confirma tu correo',
+    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escríbelo para entrar.',
     codigoLabel: 'Código',
     codigoAyuda: '8 dígitos',
     confirmar: 'Confirmar',
@@ -1198,6 +1198,15 @@ export const clienteEs = {
        hecho. Ver el pedido a A: con `motivo` en el lector, la voz gana su
        segunda linea. */
     citaCanceladaVoz: 'Esta reserva quedó cancelada.',
+    /* 🔴 LA SEGUNDA LÍNEA, que la firma del founder pedía y el lector no
+       permitía escribir hasta hoy: `causaCancelacion` distingue las causas.
+       ⚠️ **Dice «el banco devolvió el pago» y NO «se revirtió el pago», a
+       propósito:** es el MISMO marco que el aviso `pago_reversado` que ya le
+       llega al prestador. *Dos superficies contando el mismo hecho con dos
+       vocabularios se leen como dos historias.*
+       Y la segunda frase es la que contesta lo que de verdad se pregunta:
+       si quedó cobrada. */
+    citaCanceladaPorReverso: 'Esta reserva se canceló porque el banco devolvió el pago. No te cobramos nada.',
     detalleTitulo: 'Este paseo',
     ventanasVoz: 'Puedes cancelar hasta un día antes; después, solo reagendarlo. Con menos de 2 horas, el paseo se pierde.',
     reagendar: 'Reagendar',
@@ -1428,7 +1437,7 @@ export const clienteEs = {
     familiaInvitar: 'Invitar a alguien de tu familia',
     familiaInvitarPronto: 'Pronto',
     familiaInvitarSoloTitular: 'Solo quien creó la familia puede invitar.',
-    familiaInvitarAyuda: 'Le compartís un enlace para que se una a tu familia.',
+    familiaInvitarAyuda: 'Le compartes un enlace para que se una a tu familia.',
     familiaInvitarEmailLabel: 'Su correo',
     familiaInvitarNombreLabel: 'Su nombre (opcional)',
     familiaInvitarCrear: 'Crear la invitación',
@@ -1437,13 +1446,13 @@ export const clienteEs = {
     familiaInvitarComoFamiliar: 'Se une como familiar autorizado: va a poder ver el expediente de las mascotas de tu familia.',
     // avisoPorCorreo=false: el invitado no tiene cuenta, el correo NO sale —
     // la pantalla lo dice, jamás promete un correo que no va a llegar.
-    familiaInvitarSoloEnlace: 'Compartí este enlace con {{email}} — por WhatsApp, por ejemplo. Es la forma de que se una.',
+    familiaInvitarSoloEnlace: 'Comparte este enlace con {{email}} — por WhatsApp, por ejemplo. Es la forma de que se una.',
     // correoSuprimido=true: esa dirección pidió no recibir más. La invitación
     // vale y el enlace sirve, pero la casa NO le escribe. Callarlo dejaría a
     // quien invita esperando un correo que nunca sale (firma A).
-    familiaInvitarSuprimido: '{{email}} pidió no recibir nuestros correos, así que no le vamos a escribir. La invitación vale igual: compartile vos este enlace.',
+    familiaInvitarSuprimido: '{{email}} pidió no recibir nuestros correos, así que no le vamos a escribir. La invitación vale igual: compártele tú este enlace.',
     // avisoPorCorreo=true: el correo sí sale; el enlace es el respaldo.
-    familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También podés compartirle este enlace:',
+    familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También puedes compartirle este enlace:',
     familiaCopiarEnlace: 'Copiar el enlace',
     familiaEnlaceCopiado: 'Enlace copiado',
     // S104-C · «Enviar por…» (Share API nativa). La casa NO manda nada: entrega
@@ -1453,7 +1462,7 @@ export const clienteEs = {
     familiaMensajeCompartir: 'Te invito a nuestra familia en e-PetPlace para cuidar juntos a nuestras mascotas. Uníte acá: {{enlace}}',
     familiaInvitarOtra: 'Invitar a otra persona',
     familiaInvitarListo: 'Listo',
-    familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Probá más tarde.',
+    familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Prueba más tarde.',
     // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
     // — la promesa se jubila: el motor existe y ya habló una vez) y los
@@ -1838,7 +1847,7 @@ export const clienteEs = {
   // token — distinguir sería un oráculo de tokens válidos (firma A).
   baja: {
     titulo: 'Dejar de recibir correos',
-    cuerpo: '¿Querés dejar de recibir invitaciones y avisos de e-PetPlace en este correo?',
+    cuerpo: '¿Quieres dejar de recibir invitaciones y avisos de e-PetPlace en este correo?',
     confirmar: 'Sí, no quiero más correos',
     listo: 'Listo. No te vamos a escribir más a este correo.',
   },
@@ -2241,7 +2250,18 @@ export const clienteEs = {
       'Todavía no hay medio de pago real: no se cobra nada, no se factura nada. Es una compra de prueba y queda marcada así.',
     pagoSimuladoRecordatorio: 'Este pedido quedó con pago SIMULADO: no se cobró nada.',
     exitoTitulo: 'Listo',
-    exitoCuerpo: 'Tu pedido quedó creado.',
+    /* 🔴 S105-C · EL TÍTULO DEL ÉXITO PASA A SER EL PAGO, y es un cambio de
+       JERARQUÍA, no de palabras. ⏪ Lo más grande de la pantalla decía «Tu
+       pedido quedó creado» y **la confirmación del pago aparecía recién en
+       la tercera línea**. *«Creado» es lo que la persona ya sabía —lo armó
+       ella—; lo que fue a averiguar es si la plata pasó.* Y debajo arrancaba
+       la recurrencia: la pantalla pivotaba a ofrecer algo antes de terminar
+       de contestar. */
+    exitoPagoTitulo: 'Tu pago se confirmó',
+    /* ☠️ `exitoCuerpo` MURIÓ (Ley 37, S105-C). Decía «Tu pedido quedó
+       creado» y era el TÍTULO del éxito; al subir el pago a título quedó
+       sin consumidor —medido: 0—. *Una clave sin lector es una voz que
+       alguien va a volver a montar creyendo que hace falta.* */
     /* 🔴 S101-D · ⑤ LA VOZ VIEJA DEL ÉXITO. Decía «Te avisamos cuando el
        vendedor lo confirme» — la frase del mundo ANTERIOR al motor de pagos,
        cuando no había cobro y lo único que podía pasar después era que la
@@ -2253,7 +2273,9 @@ export const clienteEs = {
        síncrona que §0 de la letra prohíbe tratar como confirmación.
        ⇒ Puede decir «confirmado» sin mentir. Y NO promete un aviso que esta
        pantalla no controla: dice el hecho y ofrece el camino. */
-    exitoDetalle: 'Tu pago quedó confirmado. Puedes seguir el pedido en Tus pedidos.',
+    /* ⏪ Decía «Tu pago quedó confirmado. Puedes seguir…» — su primera frase
+       subió a título, así que acá quedaría dicha dos veces. */
+    exitoDetalle: 'Puedes seguir tu pedido en Tus pedidos.',
     exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
     verTotal: 'Ver el total',
     pagarSimulado: 'Pagar',
