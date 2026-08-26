@@ -251,6 +251,33 @@ sido atendida por teleconsulta. *(Firma ④ del founder.)*
 ⚠️ El aviso de IA de ~~T&C §14~~ **T&C §31** rige sin cambios: la
 estructuración de la nota clínica no es diagnóstico.
 
+> ### ✅ ENMIENDA — EL CUADRO CONGELADO (firma del founder, 26-ago-2026)
+>
+> Durante la teleconsulta el profesional puede **congelar un cuadro del video**
+> y adjuntarlo a la historia clínica. La firma lo define en tres líneas, y cada
+> una cierra una pregunta distinta:
+>
+> **① NO CUENTA COMO GRABACIÓN.** Un cuadro quieto no es la transmisión: es
+> una observación clínica capturada, de la misma clase que la foto que un
+> veterinario saca en el consultorio. **La promesa de §7 ⓪ —«la teleconsulta
+> no se graba»— queda intacta**, y no hay contradicción que explicar.
+>
+> **② EL DUEÑO LO VE EN EL MOMENTO.** No es una captura silenciosa: ocurre a
+> la vista de las dos partes. *Una imagen del animal de alguien que entra a su
+> expediente sin que esa persona se entere sería una captura, no un acto
+> clínico — y la diferencia entera está en que se vea cuando pasa.*
+>
+> **③ ENTRA AL EXPEDIENTE CON MARCA DE ORIGEN.** Cuelga del evento padre de la
+> cita, y la cita dice `modalidad = 'telemedicina'` ⇒ **la marca viaja por
+> estructura**, sin que nadie tenga que acordarse de copiarla. *Dentro de tres
+> años, quien mire esa imagen va a saber que se vio por pantalla y no se
+> palpó* — que es exactamente para lo que §7 pide la marca visible.
+>
+> ⚠️ **La puerta existe** (`adjuntar_cuadro_teleconsulta`, S106-A) y **la vía
+> del lado del SDK NO está medida** — C la declaró fuera de su tanda por
+> medición, no por olvido, y va a D. *La letra firma qué es y qué no es; no
+> afirma que ya funcione.*
+
 > ✅ **ENMIENDA — firma founder CP1 S106, 25-ago-2026.**
 >
 > **① La cita estaba mal y se corrige: el aviso de IA es `§31 ·

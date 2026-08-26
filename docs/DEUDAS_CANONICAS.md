@@ -22575,3 +22575,68 @@ Las dos columnas quedaron en la matriz con su fecha, y **con el comando para
 rehacerlas** — porque una tabla de estado envejece y lo único que vale es
 volver a medir.
 
+---
+
+### `L-427` — UNA SEÑAL QUE VIENE DE UNA CAPA DISTINTA A LA QUE CREÍAS ESTAR MIDIENDO
+
+**Enunciado.** Entre vos y lo que querés medir hay capas —el proceso, el
+gateway, el proveedor de auth, la plataforma de deploy—, y **cada una emite
+señales con la misma forma que las tuyas**: un exit code, un 401, un 200, un
+«listo». **Cuando una de ellas contesta primero, la medición sale verosímil y
+falsa**, porque el instrumento midió bien… otra cosa.
+
+🔴 **Su modo de falla es que la señal ajena se parece a la propia.** No hay
+error, no hay excepción, no hay nada raro que mirar. *Es la familia de «un
+mensaje de éxito prueba que algo pasó, no que fuera lo tuyo», generalizada:
+también un mensaje de FRACASO prueba que algo falló, no que fuera lo tuyo.*
+
+### Los tres casos, medidos el mismo día (26-ago-2026, S106-D)
+
+| # | qué creía medir | quién contestó de verdad | cómo se veía |
+|---|---|---|---|
+| ① | *«el arnés corrió»* | **el proceso**: `bash` rechazó el `.env.local` (comentario sin `#`) y el script salió con **`exit 0`** | el task informó **«completed (exit code 0)»** — éxito perfecto de una corrida que **nunca ocurrió** |
+| ② | *«mi guard rebota»* | **el gateway de Supabase**: desplegué sin `--no-verify-jwt` y exigió JWT **antes de mi código** | los **tres rojos** rebotaron con 401, impecables. **Mi guard nunca se ejecutó** |
+| ③ | *«el proveedor de auth se cayó»* | **el auth funcionando bien**: devolvía **403 `bad_jwt`** ante la anon key | mi 503 disfrazaba el agujero de `D-714` **de incidente de infraestructura** |
+
+*(Y dos parientes del mismo día: el `NOT_FOUND` de una function no desplegada
+que mi arnés leía como «entregó token», y el `Deployed Functions` de Supabase
+—que prueba que aceptó el archivo, no que el código corra.)*
+
+### 🔴 LA CURA, y es UNA para los tres
+
+> ### No midas «¿falló?». Medí **«¿falló CON MI VOZ?»**
+> Exigí que la respuesta lleve **una marca que sólo tu código pueda haber
+> puesto** — un `ok` booleano, un código de error propio, un claim tuyo. Si no
+> la lleva, **no es NO CONCLUYENTE por prudencia: es que no llegaste**.
+
+Aplicado en los tres: el arnés pasó a exigir `typeof cuerpo.ok === 'boolean'`
+*(y si no, dice **NO CONCLUYENTE**, no «entregó token»)* · el guard se verifica
+por **`despacho_no_autorizado`**, no por «401» · el deploy se verifica **por
+respuesta**, no por «Deployed».
+
+### 🔴 EL COROLARIO QUE CUESTA MÁS CARO OLVIDAR
+
+> **El caso que descubre la capa intrusa suele ser EL VERDE, no el rojo.**
+
+En ② los tres rojos se veían perfectos y **habrían pasado por buenos**. Lo que
+delató al gateway fue que **el caso que debía PASAR también rebotó**.
+⇒ *un discriminador que sólo ejerce el rechazo no prueba que el guard exista:
+prueba que algo, en alguna capa, dice que no.*
+
+### Cómo se reconoce en el campo
+**Cuando todos los casos dan el mismo resultado —los buenos y los malos—**,
+sospechá de una capa de más. *Un guard real distingue; una capa intrusa
+uniformiza.*
+
+> **Depositada por A el 26-ago-2026, VERBATIM del texto de D** (`docs/loop/S106-D-T2.md`).
+> **Número verificado POR GREP contra este archivo**, no de memoria: el tope
+> real era `L-426`. *(`L-714` es la lápida declarada del typo de `D-714`, no
+> una lección — se dejó intacta.)*
+>
+> 🔴 **Y A la pagó el mismo día, dos veces, sin haberla leído todavía:** un
+> censo de 42 logins seguidos donde **los `429` del rate limiter se leyeron
+> como «esta cuenta no tiene la clave»** —hallazgo falso que llegó al canon y
+> hubo que retractar—, y un reporte de que `video-consumo` no tenía guard,
+> **medido en la rama en vez de en el objeto desplegado** (que sí lo tiene).
+> *Dos capas distintas contestando con la forma de la respuesta que A
+> esperaba.*
