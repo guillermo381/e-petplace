@@ -1471,6 +1471,10 @@ export const clienteEs = {
     familiaYaInvitada: 'Ya invitaste a esta persona el {{fecha}} y su invitación sigue abierta.',
     /* ⚠️ **Dice lo que el botón ROMPE.** Cancelar invalida el enlace anterior,
        y quien ya lo compartió necesita saberlo ANTES de tocar. */
+    /* La salida BARATA, y por eso va primero: el enlace ya existe y sigue
+       sirviendo. **Tuteo** — R66 es trinquete solo-baja y toda voz nueva nace
+       así, tenga el archivo el baseline que tenga. */
+    familiaYaInvitadaCompartir: 'Compartir ese enlace',
     familiaYaInvitadaCancelar: 'Cancelar la anterior',
     familiaYaInvitadaAviso: 'Si la cancelas, el enlace que compartiste deja de funcionar.',
     familiaYaInvitadaCancelada: 'Listo, cancelamos la invitación anterior. Ya puedes volver a invitarla.',

@@ -1228,6 +1228,7 @@ export const clienteEn = {
     familiaInvitarOtra: 'Invite someone else',
     familiaInvitarListo: 'Done',
     familiaYaInvitada: 'You already invited this person on {{fecha}}, and that invitation is still open.',
+    familiaYaInvitadaCompartir: 'Share that link',
     familiaYaInvitadaCancelar: 'Cancel the previous one',
     familiaYaInvitadaAviso: 'If you cancel it, the link you shared stops working.',
     familiaYaInvitadaCancelada: 'Done, we cancelled the previous invitation. You can invite them again.',
