@@ -177,7 +177,24 @@ export default function VideollamadaProfesional() {
           onMic={() => setMicActivo((v) => !v)}
           onCam={() => setCamaraActiva((v) => !v)}
           onGirar={alternarCamara}
-          onSalir={() => router.back()}
+          /* 🔴 EL BORRADOR NO MUERE AL COLGAR (firma del founder, 26-ago).
+             Cae en el Durante que el vet ya conoce de las presenciales, con su
+             confirmación campo por campo — **ahí sedimenta, no acá**.
+             `replace` y no `push`: volver con atrás a una sala que ya se dejó
+             no tiene sentido.
+             Sin borrador se sale y ya: *obligar a pasar por el Durante a quien
+             no escribió nada sería cobrarle un trámite por no haber usado una
+             función.* */
+          onSalir={(borrador) => {
+            if (borrador.trim().length === 0) {
+              router.back();
+              return;
+            }
+            router.replace({
+              pathname: '/veterinaria/consulta/[citaId]',
+              params: { citaId, borrador },
+            });
+          }}
         />
       </LiveKitRoom>
     </View>
@@ -208,7 +225,8 @@ function MesaDeTrabajo({
   onMic: () => void;
   onCam: () => void;
   onGirar: () => void;
-  onSalir: () => void;
+  /** Recibe el borrador: **al colgar la nota no se pierde, se entrega.** */
+  onSalir: (borrador: string) => void;
 }) {
   const { t } = useTraduccion();
   const estado = useConnectionState();
@@ -319,7 +337,7 @@ function MesaDeTrabajo({
         sujeto={t('consulta.vcColgarSujeto')}
         etiquetaConfirmar={t('consulta.vcColgarSi')}
         etiquetaCancelar={t('consulta.vcColgarNo')}
-        onConfirmar={onSalir}
+        onConfirmar={() => onSalir(nota)}
       />
     </>
   );

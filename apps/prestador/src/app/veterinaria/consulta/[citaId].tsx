@@ -146,10 +146,23 @@ export default function ConsultaVeterinaria() {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
-  const { citaId = '', mascotaId = '', mascotaNombre = '' } = useLocalSearchParams<{
+  const { citaId = '', mascotaId = '', mascotaNombre = '', borrador = '' } = useLocalSearchParams<{
     citaId?: string;
     mascotaId?: string;
     mascotaNombre?: string;
+    /**
+     * 🔴 EL BORRADOR DE LA TELECONSULTA (firma del founder, 26-ago-2026).
+     *
+     * Durante la videollamada el vet escribe en un modal **mirando al animal**
+     * —ése es todo el punto del modal— pero eso es **borrador vivo, no nota
+     * sedimentada**. Al colgar cae acá, y sedimenta **por este mismo flujo**:
+     * el dictado que ya conoce de las presenciales, con su confirmación campo
+     * por campo.
+     *
+     * *Media sedimentación adentro de una llamada sería peor que no tenerla:
+     * el vet quedaría creyendo que la nota está guardada mientras cuelga.*
+     */
+    borrador?: string;
   }>();
 
   const cargadoRef = useRef(false);
@@ -187,10 +200,13 @@ export default function ConsultaVeterinaria() {
   const [presupuestos, setPresupuestos] = useState<PresupuestoPrestador[]>([]);
 
   // Máquina de fases.
-  const [fase, setFase] = useState<Fase>('antes');
+  /* Con borrador de una teleconsulta se arranca en `dictado` y no en `antes`:
+     el vet YA vio al animal — hacerlo pasar de nuevo por la ficha de 30
+     segundos sería repetirle lo que acaba de mirar en vivo. */
+  const [fase, setFase] = useState<Fase>(borrador.trim().length > 0 ? 'dictado' : 'antes');
 
   // Dictado.
-  const [dictado, setDictado] = useState('');
+  const [dictado, setDictado] = useState(borrador);
   const [estructurando, setEstructurando] = useState(false);
 
   // Nota estructurada (el borrador de la IA — fuente de la confirmación).
