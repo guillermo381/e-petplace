@@ -89,6 +89,30 @@ camino fácil; no es una promesa de confidencialidad.)*
 
 ---
 
+## ⚠️ DOS ENMIENDAS POSTERIORES A LA FIRMA — 26-ago-2026, mismo día
+
+*Se marcan acá arriba, y la letra vieja queda **tachada en su lugar y no
+borrada**. Este documento es un depósito VERBATIM: si se editara en silencio
+dejaría de serlo, y la próxima pista no tendría cómo saber qué se firmó y qué
+se corrigió.*
+
+**① LOS MILISEGUNDOS SUELTOS SE REEMPLAZAN POR LOS TOKENS.** El documento
+firmado decía `200 ms` y `250 ms`. **El founder ratificó los tokens por
+encima de esos números:** el vocabulario del movimiento de la casa es cerrado
+y firmado —`micro: 150` · `estandar: 300` · `grande: 520`— y los 200/250 eran
+**intención de la mesa, no medición**. *Lo advirtió B, y tiene razón en la
+forma: una pista que lee sólo este documento construye contra un número que no
+existe en el sistema, y el resultado compila igual.*
+
+**② EL TILE PROPIO SE SEPARA CON ANILLO, NO CON SOMBRA.** La mesa adoptó el
+argumento de B: **una sombra no separa sobre fondo oscuro**, y un video en
+vivo puede ser exactamente eso. Su anillo mide **4.11 contra negro puro**.
+*La especificación original se escribió mirando un mock; el fondo no
+controlado es justo lo que un mock no tiene.* **Es §1.2 aplicada a sí misma
+—el video es fondo no controlado— dos párrafos después de enunciarla.**
+
+---
+
 ## §1 · LA DIRECCIÓN DE ARTE — el contrato visual de las dos pantallas
 
 **Esto no es sugerencia: es la vara contra la que el founder va a mirar la
@@ -114,7 +138,8 @@ una vez y se reutiliza.
 
 Los controles y el encabezado **se desvanecen a los 4 segundos sin toque**
 y **vuelven con un toque en cualquier parte del video**. Desvanecido:
-opacidad 0 en 200 ms. Aparición: 150 ms. **Nunca se esconden:** el botón de
+~~opacidad 0 en 200 ms~~ **opacidad 0 en `duration.micro` (150)**.
+Aparición: ~~150 ms~~ **`duration.micro` (150)** *(enmienda ①)*. **Nunca se esconden:** el botón de
 colgar (siempre alcanzable) y, en el profesional, el asa del modal.
 *Cuando el vet está mirando una oreja, cada píxel de interfaz es una oreja
 que no se ve.*
@@ -122,10 +147,13 @@ que no se ve.*
 ### 1.4 · El propio, en chico
 
 Rectángulo redondeado en la **esquina superior derecha**, alto ~28 % de la
-pantalla, esquinas del radio del sistema, sombra suave para separarlo del
-fondo no controlado. **Tocarlo intercambia** propio y remoto con una
-transición de 250 ms. **Arrastrable** a cualquiera de las cuatro esquinas,
-con imán: al soltar, viaja a la esquina más cercana en 200 ms.
+pantalla, esquinas del radio del sistema, ~~sombra suave~~ **ANILLO** para separarlo
+del fondo no controlado *(enmienda ②: una sombra no separa sobre fondo
+oscuro, y el video puede serlo — el anillo mide 4.11 contra negro puro)*.
+**Tocarlo intercambia** propio y remoto con una transición de ~~250 ms~~
+**`duration.estandar` (300)**. **Arrastrable** a cualquiera de las cuatro
+esquinas, con imán: al soltar, viaja a la esquina más cercana en ~~200 ms~~
+**`duration.micro` (150)** *(enmienda ①)*.
 
 ### 1.5 · El temporizador: ascendente, y por qué
 
@@ -146,7 +174,8 @@ usuario necesita entender para no colgar creyendo que se rompió.
 ### 1.7 · Las animaciones
 
 Todo movimiento es **resorte suave, jamás rebote de juguete**. El modal
-usa arrastre con inercia real. Entradas y salidas: 200–250 ms. **Nada
+usa arrastre con inercia real. Entradas y salidas: ~~200–250 ms~~
+**`duration.estandar` (300)** *(enmienda ①)*. **Nada
 pulsa, nada late, nada llama la atención** — es una consulta médica, no una
 app de juegos.
 
