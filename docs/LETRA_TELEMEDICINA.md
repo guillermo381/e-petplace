@@ -51,16 +51,34 @@ Antes de que el dueño confirme una teleconsulta, la app le muestra:
 > videoconsulta ]
 
 🔴 **Los signos concretos no son decoración.** Decir «si creés que está en
-riesgo» le pide al dueño un juicio clínico que no tiene; nombrar cinco
-signos le da un criterio. *No se resume, no se acorta, no se convierte en
-una línea de letra chica.*
+riesgo» le pide al dueño un juicio clínico que no tiene; nombrar ~~cinco~~
+**seis** signos le da un criterio. *No se resume, no se acorta, no se
+convierte en una línea de letra chica.*
+
+> ### ✅ ENMIENDA DE CONTEO — firma de la mesa, 26-ago-2026
+>
+> **La enumeración SIEMPRE tuvo seis** —dificultad para respirar · sangrado ·
+> convulsiones · golpe fuerte · dolor intenso · decaimiento repentino— **y la
+> prosa decía «cinco» en dos lugares.** Se corrige **el número, jamás la
+> lista**.
+>
+> 🔴 **Y la razón por la que la salida barata era la peligrosa:** cuadrar el
+> número borrando un signo es **exactamente lo que este párrafo prohíbe**.
+> *Un aviso que existe para que un dueño reconozca una urgencia no se recorta
+> para que una prosa cierre — y el signo que sobraba iba a ser el que menos
+> «suena» grave, que es justamente el que hace falta nombrar porque nadie lo
+> asocia con riesgo.*
+>
+> **Consumidores avisados:** `packages/ui` (pasa la tupla) y **`R67`, que
+> cuenta los signos y hoy cuenta cinco** — su baseline se corrige con esta
+> firma, no antes.
 
 > ### ✅ ENMIENDA — firma founder CP1 S106, 25-ago-2026
 >
 > **① La conjugación pasa a TUTEO NEUTRO, sin tocar el contenido.** La v1.0
 > decía ~~«Si **notás** que tu mascota está en riesgo … **llevala** a una
-> clínica»~~; ahora dice **«notas»** y **«llévala»**. *Los cinco signos y
-> las tres acciones quedan intactos* — la prohibición de §3 es contra
+> clínica»~~; ahora dice **«notas»** y **«llévala»**. *Los ~~cinco~~ **seis**
+> signos y las tres acciones quedan intactos* — la prohibición de §3 es contra
 > resumir y acortar, no contra hablar la voz de la casa (tuteo neutro,
 > decisión founder S51; la familia `R66` vigila el voseo con baseline 0).
 >
