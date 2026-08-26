@@ -73,8 +73,8 @@ export const clienteEs = {
   // S104-C · verificar correo. Aparece solo cuando el proyecto exige
   // confirmar el correo (registrarse devuelve sesion_activa=false).
   verificarCorreo: {
-    titulo: 'Confirmá tu correo',
-    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escribilo para entrar.',
+    titulo: 'Confirma tu correo',
+    intro: 'Te enviamos un código de 8 dígitos a {{email}}. Escríbelo para entrar.',
     codigoLabel: 'Código',
     codigoAyuda: '8 dígitos',
     confirmar: 'Confirmar',
@@ -1437,7 +1437,7 @@ export const clienteEs = {
     familiaInvitar: 'Invitar a alguien de tu familia',
     familiaInvitarPronto: 'Pronto',
     familiaInvitarSoloTitular: 'Solo quien creó la familia puede invitar.',
-    familiaInvitarAyuda: 'Le compartís un enlace para que se una a tu familia.',
+    familiaInvitarAyuda: 'Le compartes un enlace para que se una a tu familia.',
     familiaInvitarEmailLabel: 'Su correo',
     familiaInvitarNombreLabel: 'Su nombre (opcional)',
     familiaInvitarCrear: 'Crear la invitación',
@@ -1446,13 +1446,13 @@ export const clienteEs = {
     familiaInvitarComoFamiliar: 'Se une como familiar autorizado: va a poder ver el expediente de las mascotas de tu familia.',
     // avisoPorCorreo=false: el invitado no tiene cuenta, el correo NO sale —
     // la pantalla lo dice, jamás promete un correo que no va a llegar.
-    familiaInvitarSoloEnlace: 'Compartí este enlace con {{email}} — por WhatsApp, por ejemplo. Es la forma de que se una.',
+    familiaInvitarSoloEnlace: 'Comparte este enlace con {{email}} — por WhatsApp, por ejemplo. Es la forma de que se una.',
     // correoSuprimido=true: esa dirección pidió no recibir más. La invitación
     // vale y el enlace sirve, pero la casa NO le escribe. Callarlo dejaría a
     // quien invita esperando un correo que nunca sale (firma A).
-    familiaInvitarSuprimido: '{{email}} pidió no recibir nuestros correos, así que no le vamos a escribir. La invitación vale igual: compartile vos este enlace.',
+    familiaInvitarSuprimido: '{{email}} pidió no recibir nuestros correos, así que no le vamos a escribir. La invitación vale igual: compártele tú este enlace.',
     // avisoPorCorreo=true: el correo sí sale; el enlace es el respaldo.
-    familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También podés compartirle este enlace:',
+    familiaInvitarCorreoYEnlace: 'Le enviamos un correo a {{email}}. También puedes compartirle este enlace:',
     familiaCopiarEnlace: 'Copiar el enlace',
     familiaEnlaceCopiado: 'Enlace copiado',
     // S104-C · «Enviar por…» (Share API nativa). La casa NO manda nada: entrega
@@ -1462,7 +1462,7 @@ export const clienteEs = {
     familiaMensajeCompartir: 'Te invito a nuestra familia en e-PetPlace para cuidar juntos a nuestras mascotas. Uníte acá: {{enlace}}',
     familiaInvitarOtra: 'Invitar a otra persona',
     familiaInvitarListo: 'Listo',
-    familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Probá más tarde.',
+    familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Prueba más tarde.',
     // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
     // — la promesa se jubila: el motor existe y ya habló una vez) y los
@@ -1847,7 +1847,7 @@ export const clienteEs = {
   // token — distinguir sería un oráculo de tokens válidos (firma A).
   baja: {
     titulo: 'Dejar de recibir correos',
-    cuerpo: '¿Querés dejar de recibir invitaciones y avisos de e-PetPlace en este correo?',
+    cuerpo: '¿Quieres dejar de recibir invitaciones y avisos de e-PetPlace en este correo?',
     confirmar: 'Sí, no quiero más correos',
     listo: 'Listo. No te vamos a escribir más a este correo.',
   },
