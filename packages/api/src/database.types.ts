@@ -13007,6 +13007,7 @@ export type Database = {
           oferta_id: string | null
           pedido_id: string
           precio_unitario: number
+          precio_unitario_prometido: number | null
           producto_id: string
           subtotal: number
           updated_at: string
@@ -13030,6 +13031,7 @@ export type Database = {
           oferta_id?: string | null
           pedido_id: string
           precio_unitario: number
+          precio_unitario_prometido?: number | null
           producto_id: string
           subtotal: number
           updated_at?: string
@@ -13053,6 +13055,7 @@ export type Database = {
           oferta_id?: string | null
           pedido_id?: string
           precio_unitario?: number
+          precio_unitario_prometido?: number | null
           producto_id?: string
           subtotal?: number
           updated_at?: string
@@ -22610,6 +22613,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
       }
+      retomar_compra: { Args: { p_compra_id: string }; Returns: Json }
       retomar_paso_onboarding: {
         Args: { p_cuenta_comercial_id: string; p_paso: string }
         Returns: Json
