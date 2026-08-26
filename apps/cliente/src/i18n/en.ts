@@ -734,8 +734,16 @@ export const clienteEn = {
     avisoTeleTitulo: 'Before you continue',
     avisoTeleParaQue:
       'Video consultations are for guidance, follow-up, and cases the vet can assess by seeing your pet on screen.',
-    avisoTeleNoReemplaza:
-      'They do not replace in-person care and are not for emergencies. If you notice your pet is at risk —difficulty breathing, bleeding, seizures, a hard blow, severe pain, or sudden lethargy— take them to a clinic right now.',
+    avisoTeleNoReemplaza: 'They do not replace in-person care and are not for emergencies.',
+    avisoTeleSignosIntro: 'If you notice your pet is at risk:',
+    avisoTeleSigno1: 'Difficulty breathing',
+    avisoTeleSigno2: 'Bleeding',
+    avisoTeleSigno3: 'Seizures',
+    avisoTeleSigno4: 'A hard blow',
+    avisoTeleSigno5: 'Severe pain',
+    avisoTeleSigno6: 'Sudden lethargy',
+    avisoTeleSignosCierre: 'Take them to a clinic right now.',
+    avisoTeleConsentimiento: 'I understand a video consultation does not replace in-person care.',
     avisoTeleTransito:
       'The video call is not recorded and is transmitted through our video provider’s infrastructure.',
     avisoTeleIrUrgencias: 'Go to urgent care',
