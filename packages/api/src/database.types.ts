@@ -18785,6 +18785,53 @@ export type Database = {
           },
         ]
       }
+      videollamada_hechos: {
+        Row: {
+          cita_id: string | null
+          crudo: Json
+          evento: string
+          id: string
+          livekit_event_id: string | null
+          ocurrido_en: string
+          participante_identidad: string | null
+          participante_user_id: string | null
+          recibido_en: string
+          sala: string
+        }
+        Insert: {
+          cita_id?: string | null
+          crudo: Json
+          evento: string
+          id?: string
+          livekit_event_id?: string | null
+          ocurrido_en: string
+          participante_identidad?: string | null
+          participante_user_id?: string | null
+          recibido_en?: string
+          sala: string
+        }
+        Update: {
+          cita_id?: string | null
+          crudo?: Json
+          evento?: string
+          id?: string
+          livekit_event_id?: string | null
+          ocurrido_en?: string
+          participante_identidad?: string | null
+          participante_user_id?: string | null
+          recibido_en?: string
+          sala?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videollamada_hechos_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: false
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wearable_alerts: {
         Row: {
           alert_type: string
@@ -20513,6 +20560,17 @@ export type Database = {
         }
         Returns: Json
       }
+      adjuntar_cuadro_teleconsulta: {
+        Args: {
+          p_bucket: string
+          p_cita_id: string
+          p_descripcion?: string
+          p_mime_type?: string
+          p_storage_path: string
+          p_tamano_bytes?: number
+        }
+        Returns: Json
+      }
       adjuntar_fotos_producto: {
         Args: { p_imagenes: Json; p_producto_id: string }
         Returns: Json
@@ -21692,6 +21750,7 @@ export type Database = {
           ruta_imagen: string
         }[]
       }
+      obtener_config_video: { Args: never; Returns: Json }
       obtener_consultas_con_receta: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -22422,6 +22481,17 @@ export type Database = {
           p_numero: string
           p_pedido_id: string
           p_total?: number
+        }
+        Returns: Json
+      }
+      registrar_hecho_de_sala: {
+        Args: {
+          p_crudo: Json
+          p_evento: string
+          p_evento_id?: string
+          p_ocurrido_en: string
+          p_participante?: string
+          p_sala: string
         }
         Returns: Json
       }

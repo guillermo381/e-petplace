@@ -829,6 +829,56 @@ cuentan.*
 
 ---
 
+## 6septies. EL CONTROL SOBRE VIDEO — CLASE APARTE (firma del founder, 26-ago-2026, S106)
+
+> **Estatuto: FIRMADA.** **La regla madre del trazo NO se enmienda** —
+> tercera vez que se nombra una clase en vez de ensanchar la Ley 12.
+
+**LA FRONTERA, en una línea: un video en vivo no es superficie de la casa
+— es la cámara de otra persona.**
+
+Las leyes del ícono (§2) gobiernan superficies que la casa pinta, con su
+fondo, su tema y su contraste bajo control. **Un video remoto no cumple
+ninguna de esas condiciones**: el fondo puede ser blanco, negro, moteado o
+en movimiento, y **cambia mientras el usuario mira**.
+
+⇒ **Nace la clase «control sobre video», con su propia física:**
+- **Scrim propio.** Todo control encima del video lleva su tratamiento de
+  contraste — no se apoya en el tema, porque debajo no hay tema.
+- **Se define UNA vez y se reutiliza.** Vive en una pieza de
+  `packages/ui`; las dos pantallas de la videoconsulta la consumen.
+- **Su contraste se VERIFICA contra los extremos** —fondo claro y fondo
+  oscuro—, jamás se asume.
+
+### 🔴 ESTA CLASE NO SE INVENTÓ — LA PREVIÓ §6ter, CON ESTAS PALABRAS
+
+Cuando se firmó la marca de mapa, la mesa descartó ensanchar la Ley 12
+para admitir relleno «sobre fondo no-controlado», y dejó escrito por qué:
+
+> *«esa condición no está acotada: toda foto, todo gradiente y **todo
+> póster de video** son fondo no controlado. **Una regla que no puede decir
+> dónde termina no es una regla.**»*
+>
+> *«La clase se acota sola, y por construcción: la marca de mapa vive en
+> UNA pieza, y las piezas se cuentan.»*
+
+**El caso que §6ter nombró como ejemplo de lo que NO se podía dejar entrar
+llegó de verdad trece meses después** — y llega por la única puerta que ese
+mismo precedente dejó abierta: **una clase nombrada, acotada en una pieza
+contable**. *No es una excepción nueva: es la salida que la mesa ya había
+elegido, ejercida por primera vez sobre el caso que la había motivado.*
+
+### DÓNDE VIVE EL RESTO
+
+**Esta sección firma la CLASE.** El contrato visual de las dos pantallas
+de la videoconsulta —jerarquía, chrome que se esconde, el propio en chico,
+el temporizador ascendente, el estado de conexión, el modal de dos
+alturas— vive en **`docs/DIRECCION_ARTE_VIDEOCONSULTA.md`**, firmado la
+misma fecha. *Se partió a propósito: la ley general vive con las leyes, y
+el contrato de superficie vive donde B y C lo encuentran por su nombre.*
+
+---
+
 ## ⚠️ NOTA DE NUMERACIÓN — DOS NUMERALES DUPLICADOS EN ESTE DOCUMENTO *(A, 25-ago-2026)*
 
 **Lo levantó B al entregar la ley de arriba, y al verificarlo aparecieron DOS, no

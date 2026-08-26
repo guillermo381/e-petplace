@@ -209,7 +209,19 @@ Para operar el servicio recurrimos a los siguientes proveedores, que tratan dato
 | **Resend** | Correo electrónico y nombre del destinatario | Enviar correos |
 | **Google (Firebase)** | Identificador del dispositivo | Enviar notificaciones |
 | **Google (Places y Maps)** | Texto de la dirección y ubicación mostrada | Autocompletar direcciones y dibujar mapas |
+| **LiveKit Inc.** | **Imagen y voz de la videoconsulta, en tiempo real** | Transmitir la teleconsulta veterinaria entre usted y el profesional |
 | **Expo / EAS** | No trata datos personales | Distribuir actualizaciones de la aplicación |
+
+**16.1bis. Sobre LiveKit, y sobre qué significa exactamente que «no se graba».** LiveKit Inc. es el proveedor que transmite la imagen y la voz de la teleconsulta. Actuamos como responsables y LiveKit como encargado, en virtud de un acuerdo de tratamiento de datos.
+
+**La videoconsulta no se graba.** Eso quiere decir dos cosas distintas y las declaramos por separado, porque no son la misma:
+
+- **Nosotros no activamos la grabación** en ninguna configuración del servicio, y no conservamos ni la imagen ni el audio de la consulta en ningún sistema nuestro.
+- **El proveedor elimina el contenido de la transmisión —voz y video— una vez entregado**, salvo que el cliente del servicio active la función de grabación. **No la activamos.** Esa obligación consta en el acuerdo suscrito y la conservamos documentada.
+
+**Lo que sí queda registrado** es información **operacional y no de contenido**: en qué momento cada participante entró y salió de la sala. **Esos metadatos los conserva el proveedor por doce (12) meses**, y nosotros conservamos por nuestra cuenta el registro de entrada y salida asociado a la cita, con el plazo de la §18. Sirven para que, si una consulta no pudo realizarse, podamos resolver una devolución con un dato y no con un relato. **No medimos ni registramos la calidad de la conexión de nadie, y ese registro no atribuye responsabilidad a ninguna de las partes.**
+
+El acuerdo obliga además al proveedor a **notificarnos cualquier brecha de seguridad dentro de las 72 horas**. **La información de la teleconsulta no se utiliza para entrenar modelos de inteligencia artificial**, y la teleconsulta **no es una funcionalidad asistida por inteligencia artificial**: es una transmisión entre dos personas.
 
 **16.1. Sobre Anthropic, con nombre propio.** Lo señalamos de manera destacada porque **es el único proveedor que trata información de salud de las mascotas e imágenes de documentos cargados**. Actuamos como responsables y Anthropic PBC como encargado, en virtud de un acuerdo de tratamiento de datos que le obliga a tratar la información únicamente conforme a nuestras instrucciones documentadas, a no venderla, compartirla ni combinarla con datos de terceros, a notificarnos cualquier brecha de seguridad dentro de las 48 horas y a mantener medidas de seguridad auditadas anualmente por terceros independientes. **La información que le enviamos no se utiliza para entrenar sus modelos.**
 
@@ -228,6 +240,8 @@ Para operar el servicio recurrimos a los siguientes proveedores, que tratan dato
 ### 17.A — Proveedores que trabajan por nuestra cuenta
 
 **17.A.1.** Los proveedores de la tabla de la §16 tratan sus datos **siguiendo nuestras instrucciones**, en virtud de acuerdos de tratamiento que incorporan **cláusulas contractuales tipo** como garantía adecuada, conforme a la LOPDP y a la normativa expedida por la SPDP. En el caso de las funcionalidades de la §14, la transferencia se apoya además en **su consentimiento**, que usted otorga al activarlas y puede retirar en cualquier momento.
+
+**17.A.1bis. La teleconsulta, con nombre propio.** La transmisión de imagen y voz a **LiveKit Inc.** es una transferencia internacional de esta misma clase, y **el hecho de que no se grabe no la excluye**: transmitir en tiempo real imagen, voz y contenido clínico es tratamiento de datos personales. Su acuerdo incorpora cláusulas contractuales tipo europeas y **se rige por ley y foro irlandeses** — las mismas dos brechas que declaramos para los demás proveedores de esta sección. **Se cierran de la misma manera: con los compromisos de la §17.A.2, que le asumimos a usted directamente y también cubren esta transferencia.** La transferencia se apoya además en **su consentimiento específico para la teleconsulta**, que usted otorga **por cada cita** y no de una vez para siempre. **No existe restricción de residencia de datos en Ecuador aplicable a este servicio.**
 
 **17.A.2. Compromisos que asumimos directamente ante usted.** Los acuerdos suscritos con nuestros proveedores se rigen por leyes y tribunales extranjeros. Para que eso no le traslade a usted la carga de reclamar fuera del país, asumimos dos compromisos con carácter vinculante: **nos sometemos a la jurisdicción ecuatoriana y a la competencia de la Superintendencia de Protección de Datos Personales** respecto de cualquier reclamación relacionada con estas transferencias, y **no le opondremos ley ni foro extranjeros**; y **asumimos frente a usted la obligación de reparación integral** por los daños que pudieran derivarse de ellas, **sin que usted deba dirigir su reclamación contra el proveedor ni ante autoridad o tribunal extranjero**.
 
@@ -269,6 +283,8 @@ Para operar el servicio recurrimos a los siguientes proveedores, que tratan dato
 | Documentación de transferencias internacionales | **3 años** | Cada transferencia |
 | Solicitudes de derechos y nuestra respuesta | **3 años** | Fecha de la respuesta |
 | Identificador del dispositivo para avisos | Se elimina a los **90 días** sin uso | Última actividad del dispositivo |
+| **Imagen y voz de la teleconsulta** | **No se conservan.** No se graba, y el proveedor elimina el contenido tras entregarlo | — |
+| **Registro de entrada y salida de la teleconsulta** (metadatos, sin contenido) | **12 meses** en el proveedor; en nuestros sistemas, junto a la cita | Fecha de la consulta |
 | Registros técnicos y de seguridad | **12 meses** | Su generación |
 
 **18.2.** Cumplido el plazo, la información se elimina. Cuando el plazo recaiga sobre información que debemos seguir conservando por las razones de la §19.4, lo que se elimina son los datos que permiten identificarle directamente, en los términos de la §19.5.
