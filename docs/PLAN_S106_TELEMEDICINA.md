@@ -1,6 +1,10 @@
 # PLAN_S106_TELEMEDICINA — el quinto oficio, en cuatro pistas
 
-> **Versión:** v1.0 · 25-ago-2026 · **PROPUESTA a la firma del founder.**
+> **Versión:** **v1.1** · 25-ago-2026 · ✅ **FIRMADO en el Checkpoint 1** —
+> acta: `docs/actas/2026-08-25-s106-CP1-ACTA.md` (diez firmas).
+> 🔴 **Su §5-C quedó FALSO por medición y está tachado ahí mismo** — decía
+> *«el saldo ya existe por `LETRA_SALDO`»* y **el motor de saldo no existe**.
+> *No se borra: se tacha con puntero, para que nadie vuelva a escribirlo.*
 > **Fuentes que obedece:** CLAUDE.md · CONTRATO_TRABAJO (reglas 73–88) ·
 > `docs/LETRA_TELEMEDICINA.md` (incluido su FRENO DE DEPÓSITO) ·
 > `LETRA_PAGO_CITAS` (el motor de citas rige entero) · `LETRA_SALDO` ·
@@ -193,9 +197,20 @@ que el motor lo da, después escribir).
 - **Wrappers** en `packages/api` (puerta única, voz tuteo neutro, R66).
 - Todas las migraciones: **reversa escrita ANTES**, 76(g) declarada,
   verificadas contra el objeto.
-- **Docs**: la enmienda firmada de `LETRA_SALDO` §3 (letra vieja tachada,
-  no borrada) + depositar este plan + toda enmienda que CP1 firme sobre
-  `LETRA_TELEMEDICINA`.
+- **Docs**: ~~la enmienda firmada de `LETRA_SALDO` §3 (letra vieja tachada,
+  no borrada)~~ **SIN OBJETO — ver abajo** + depositar este plan + toda
+  enmienda que CP1 firme sobre `LETRA_TELEMEDICINA`.
+
+> ### 🔴 ENMIENDA v1.1 — `LETRA_SALDO` §3 **NO SE TOCA**. Firma founder CP1
+>
+> Con la firma ③ (la devolución va **al medio de pago**), telemedicina **no
+> agrega ninguna fuente** a la lista cerrada de §3 ⇒ **la enmienda que el
+> freno de depósito pedía queda SIN OBJETO, no pendiente.**
+>
+> *Enmendar una lista ajena por un choque que ya se cerró es trabajo que
+> ensucia:* dejaría en el canon una distinción presencial/teleconsulta sobre
+> fuentes que este oficio dejó de usar. **El freno se disuelve por la
+> adjudicación, no por enmienda** — acta de CP1, firma ⑨.
 
 **B — las piezas y el juez:**
 
@@ -214,7 +229,24 @@ que el motor lo da, después escribir).
   ANTES de confirmar; el consentimiento viaja en el acto de confirmar (el
   wrapper atómico de A); detalle de cita con «entrar a la videoconsulta»
   como placeholder honesto hasta T2; cancelación con la ventana de 30 min
-  dicha en pantalla; el saldo ya existe por `LETRA_SALDO`.
+  dicha en pantalla; ~~el saldo ya existe por `LETRA_SALDO`~~.
+
+> ### 🔴 ENMIENDA v1.1 — *«el saldo ya existe» ERA FALSO.* Firma founder CP1, 25-ago-2026
+>
+> **Medido en el turno ⓪ contra la base: cero tablas, cero funciones de
+> saldo.** `LETRA_SALDO` fija el **contrato**; su **motor** era trabajo de
+> S102 y S102 no lo construyó. *Esta línea confundía contrato con motor —
+> el error más caro del plan, porque de él colgaban las dos ramas donde la
+> plata vuelve.*
+>
+> **Lo que rige:** la devolución va **al medio de pago, gestionada por
+> soporte**, con reverso automático solo dentro de la ventana del riel
+> (Nuvei mismo día · DeUna 24 h). Ver **firma ③** del acta de CP1 y las
+> enmiendas de §4/§5 de `LETRA_TELEMEDICINA` v1.1. El motor de saldo tiene
+> ficha propia: **`D-926`**.
+>
+> ⇒ **La superficie de C promete «a tu medio de pago» con plazo honesto, y
+> jamás «al instante» ni «como saldo».**
 - **Prestador**: habilitación (prender el servicio aceptando §6, con el
   texto de los mínimos visible); la agenda distingue la teleconsulta; el
   Durante de teleconsulta con **marcar no realizable** (y su voz honesta:
