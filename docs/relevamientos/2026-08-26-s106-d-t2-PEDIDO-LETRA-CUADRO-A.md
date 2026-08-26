@@ -70,8 +70,23 @@ columna, con miles de eventos vivos es una migración con backfill**»*.
 `verificado_por_prestador`— o sea que **la casa ya sabe modelar «de dónde
 viene un dato»**; lo que falta es el mismo eje para los archivos.
 
-⚠️ **No propongo la forma: es tu territorio.** Sólo señalo que **el ③ pide un
-eje que hoy no existe**, y que su ventana barata es ahora.
+> ### ✅ LA FORMA YA ESTÁ FIRMADA — 26-ago-2026, después de escribir esto
+> **Columna de procedencia propia. NUNCA dentro de `categoria`.**
+>
+> *(Este párrafo decía «no propongo la forma: es tu territorio». **La mesa la
+> firmó**, así que se enmienda en vez de dejarte leer que está abierta.)*
+>
+> **Y el criterio que la fundó, adoptado por la mesa:**
+> > **Una marca que esconde datos al buscarlos es peor que no tener marca.**
+>
+> *Sin marca, una foto de teleconsulta aparece en «todas las fotos clínicas» y
+> lo único que falta es saber de dónde vino. Con la marca dentro de
+> `categoria`, **desaparece de esa búsqueda** — y nadie va a notar la ausencia
+> de algo que no sabe que existe.*
+
+⚠️ **Lo que sigue siendo tuyo es CUÁNDO se paga.** Yo sólo señalo que el eje
+no existe y que **la ventana barata es ahora** (`D-753`: *hoy es una columna,
+con miles de filas vivas es una migración con backfill*).
 
 ### ⚠️ El ② tiene una consecuencia de producto — que NO es mía ni tuya
 *«que la captura sea visible cuando ocurre»* es **requisito de la pantalla de
