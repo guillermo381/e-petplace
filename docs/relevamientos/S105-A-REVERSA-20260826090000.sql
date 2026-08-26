@@ -1,0 +1,21 @@
+-- ══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260826090000_s105a_lector_de_cita_resuelta.sql
+-- Escrita ANTES de aplicar.
+--
+-- QUÉ DESHACE: retira `obtener_cita_resuelta`.
+--
+-- 🔴 QUÉ NO DESHACE — porque no hay nada que deshacer: la función **sólo lee**.
+-- No escribe una fila, no mueve un estado, no emite un aviso.
+--
+-- CONSECUENCIA DE CORRERLA: las pantallas que preguntan por UNA cita vuelven a
+-- no poder distinguir **«no existe»** de **«existe y está cancelada»** — y la
+-- única voz posible vuelve a ser la conjetura *«puede haberse movido o
+-- cancelado»*. *Una app que conjetura sobre su propio dato es una app que no
+-- fue a mirarlo.*
+--
+-- ⚠️ Ninguna agenda ni lista depende de esto: **la jornada y los cuatro
+-- lectores de «lo que viene» NO se tocaron** — su exclusión de `cancelada` es
+-- correcta y §13 sigue rigiendo intacta.
+-- ══════════════════════════════════════════════════════════════════════════
+
+DROP FUNCTION IF EXISTS public.obtener_cita_resuelta(uuid);
