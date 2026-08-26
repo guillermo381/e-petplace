@@ -1492,3 +1492,4 @@ export {
   type InputCuadroTeleconsulta,
   type CodigoCuadroTeleconsulta,
 } from './wrappers/teleconsulta-adjuntos';
+export { obtenerConfigVideo, type ConfigVideo } from './wrappers/telemedicina';

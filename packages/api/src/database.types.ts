@@ -21750,6 +21750,7 @@ export type Database = {
           ruta_imagen: string
         }[]
       }
+      obtener_config_video: { Args: never; Returns: Json }
       obtener_consultas_con_receta: {
         Args: { p_mascota_id: string }
         Returns: {
