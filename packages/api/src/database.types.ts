@@ -20560,6 +20560,17 @@ export type Database = {
         }
         Returns: Json
       }
+      adjuntar_cuadro_teleconsulta: {
+        Args: {
+          p_bucket: string
+          p_cita_id: string
+          p_descripcion?: string
+          p_mime_type?: string
+          p_storage_path: string
+          p_tamano_bytes?: number
+        }
+        Returns: Json
+      }
       adjuntar_fotos_producto: {
         Args: { p_imagenes: Json; p_producto_id: string }
         Returns: Json
