@@ -1476,3 +1476,20 @@ export {
   type ResultadoCancelacionTeleconsulta,
   type CodigoErrorTelemedicina,
 } from './wrappers/telemedicina';
+
+/* S106-A t2 · la puerta de la videollamada (motor de D, wrapper de A). */
+export {
+  pedirTokenVideollamada,
+  type TokenVideollamada,
+  type ResultadoVideollamada,
+  type CodigoVideollamada,
+} from './wrappers/videollamada';
+
+/* S106-A t2 · el cuadro congelado de la teleconsulta. */
+export {
+  adjuntarCuadroTeleconsulta,
+  type CuadroAdjuntado,
+  type InputCuadroTeleconsulta,
+  type CodigoCuadroTeleconsulta,
+} from './wrappers/teleconsulta-adjuntos';
+export { obtenerConfigVideo, type ConfigVideo } from './wrappers/telemedicina';
