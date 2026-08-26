@@ -275,6 +275,15 @@ export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-
    *Una cita cancelada aparece sólo donde la superficie promete contar lo que
    PASÓ; donde promete lo que VIENE, excluirla es correcto.* Los de arriba
    (`obtenerCitasActivas*`) prometen lo que viene y siguen filtrando bien. */
+/* S105-A · RETOMAR LA COMPRA — nace CON su motor, en la misma tanda. */
+export {
+  retomarCompra,
+  type CompraRetomada,
+  type AjustePrecio,
+  type ItemFaltante,
+  type CodigoRetomarCompra,
+} from './wrappers/retomar-compra';
+
 export {
   leerCitaResuelta,
   type CitaResuelta,
