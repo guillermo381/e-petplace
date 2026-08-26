@@ -131,6 +131,16 @@ export interface AvisoTeleconsultaProps {
     signos: readonly [string, string, string, string, string]
     /** El cierre después de los signos («llévala a una clínica ahora mismo»). */
     signosCierre: string
+    /**
+     * ⚠️ LA LÍNEA DE TRÁNSITO (`LETRA_TELEMEDICINA` v1.1 §3 ②) — dónde viaja
+     * la imagen de la familia. La letra la marca **PROVISIONAL**: rige hasta
+     * que el abogado conteste la pregunta 4 de §10 (LOPDP), que puede exigir
+     * nombrar al proveedor, su país o la base de licitud.
+     *
+     * **Va como prop y no como texto de la pieza justamente por eso:** cuando
+     * la respuesta llegue, cambia una cadena del diccionario y no una pieza.
+     */
+    transito: string
   }
   /**
    * Las tres acciones. **Objeto nombrado y no array**: el orden lo fija la
@@ -184,6 +194,13 @@ export function AvisoTeleconsulta({ visible, onCerrar, texto, acciones }: AvisoT
           </View>
 
           <Texto>{texto.signosCierre}</Texto>
+
+          {/* La línea de tránsito, en registro de APOYO: es una nota sobre a
+              dónde viaja la imagen, no una advertencia clínica. Ponerla al
+              mismo peso que los signos le robaría atención a lo que puede
+              salvar a la mascota (Ley 15: la firma respira porque lo demás se
+              mantiene callado). Va al final, como en la letra. */}
+          <Texto variante="apoyo">{texto.transito}</Texto>
         </View>
 
         {/* LAS TRES, de peso par. Orden fijado acá — el consumidor no lo elige. */}

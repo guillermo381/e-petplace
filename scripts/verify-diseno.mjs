@@ -1993,7 +1993,7 @@ const FIXTURES = {
       "const a = { avisoTeleconsulta: { titulo: 'Antes de continuar', intro: 'x', " +
       "advertencia: 'y', signosIntro: 'z', " +
       "signos: ['dificultad para respirar', 'convulsiones', 'golpe fuerte', 'dolor intenso o decaimiento repentino'], " +
-      "signosCierre: 'w' } }",
+      "signosCierre: 'w', transito: 'v' } }",
   }],
   /* R66 · el fixture usa un path de diccionario para que el ANCLA no sea lo
      que lo ponga rojo (la regla exige ver al menos un `i18n` o se declara no
@@ -5542,14 +5542,25 @@ function r66(archivos) {
  * cuerpo diverge, es redacción o conjugación; si falta un signo, es amputación
  * — que es el defecto que esta regla existe para cazar.*
  *
- * ── ⚠️ EL CHOQUE VIVO AL NACER, declarado acá para que no sorprenda ────────
- * **Al 25-ago-2026 la letra sigue en v1.0 y su §3 está en VOSEO** («notás»,
- * «llevala»), mientras la casa firmó TUTEO NEUTRO (S51, y `R66` lo vigila).
- * ⇒ **el día que C deposite el texto en tuteo, el brazo ② va a salir ROJO, y
- * el rojo va a ser VERDADERO**: el texto renderizado no será el firmado. **La
- * cura no es de esta regla — es la enmienda de conjugación que el plan de A
- * dejó servida (§4 ítem 4) y que todavía no llegó al repo.** *Un guard que se
- * ablanda para no molestar deja de ser un guard.*
+ * ── ✅ EL CHOQUE QUE ESTA REGLA DECLARÓ AL NACER, Y CÓMO SE DISOLVIÓ ───────
+ * Al nacer (25-ago) la letra estaba en **v1.0 con su §3 en VOSEO** («notás»,
+ * «llevala») contra el TUTEO NEUTRO que la casa firmó en S51 ⇒ esta regla
+ * declaró que el brazo ② saldría **ROJO en cuanto C depositara**, y que el
+ * rojo sería VERDADERO. **No se ablandó el juez: se enmendó la letra.**
+ * `LETRA_TELEMEDICINA` **v1.1** (CP1, firma founder) pasó §3 a tuteo *sin
+ * tocar el contenido* — los cinco signos y las tres acciones intactos.
+ *
+ * *Queda registrado porque es el guard haciendo su trabajo en la dirección
+ * correcta: la contradicción se resolvió en la FUENTE, que es donde vivía.*
+ *
+ * ── ⚠️ Y LA v1.1 TRAJO UN PÁRRAFO NUEVO, que ESTA REGLA NO VIO VENIR ──────
+ * La línea de tránsito (*«La videollamada no se graba y se transmite a través
+ * de la infraestructura de nuestro proveedor de video»*) entró **después** del
+ * párrafo de los signos, y el extractor tomaba los signos del ÚLTIMO párrafo.
+ * ⇒ devolvió `null`, la regla salió NO CONCLUYENTE contra su propio fixture y
+ * **la auto-prueba la declaró DECORATIVA en la primera corrida.** Curado
+ * buscando el párrafo **por contenido**. *El guard atrapó al juez: es
+ * exactamente para lo que L-192 existe.*
  *
  * ── LAS ANCLAS: NUNCA VERDE POR NO HABER MIRADO (L-192 · L-425) ────────────
  * · sin la letra, o sin poder extraer §3 → **NO CONCLUYENTE**
@@ -5598,24 +5609,38 @@ function avisoDeLaLetra(md) {
   // La línea de las acciones («[ Ir a urgencias ] · …») es NOTACIÓN de mesa:
   // dice qué acciones existen, no es prosa que el usuario lea. Fuera.
   const prosa = limpio.filter((p) => !/^\[/.test(p));
-  /* TRES párrafos, medido contra la letra viva: título · para-qué-sirve · el
-     que trae la advertencia dura + los cinco signos + el cierre, todo junto.
-     El umbral estaba en 4 y la auto-prueba lo cazó: la regla salía NO
-     CONCLUYENTE por su propio extractor y habría sido decorativa. */
   if (prosa.length < 3) return null;
 
-  // Los cinco signos viven entre guiones largos dentro del último párrafo.
-  const conSignos = prosa[prosa.length - 1];
-  const m = conSignos.match(/—([^—]+)—/);
-  if (!m) return null;
-  const signos = m[1].split(',').map((s) => s.trim()).filter(Boolean);
+  /* 🔴 EL PÁRRAFO DE LOS SIGNOS SE BUSCA POR CONTENIDO, NO POR POSICIÓN — y
+     esta línea la escribió un rojo, no una previsión.
+     La v1.0 tenía TRES párrafos y los signos vivían en el último, así que el
+     extractor tomaba `prosa[prosa.length - 1]`. **La v1.1 agregó la línea de
+     tránsito DESPUÉS** ⇒ el último dejó de ser el de los signos, el extractor
+     devolvió `null` y `R67` salió NO CONCLUYENTE contra su propio fixture.
+     **La auto-prueba lo cazó en la primera corrida y lo declaró DECORATIVA**
+     (L-192) — en vez de que el juez se quedara ciego dando verde.
+     *Un extractor que se ata a la POSICIÓN se rompe cuando la fuente crece; uno
+     atado al CONTENIDO sobrevive a que la mesa agregue un párrafo.* */
+  const conSignos = prosa.find((p) => /—[^—]+—/.test(p));
+  if (!conSignos) return null;
+  const signos = conSignos.match(/—([^—]+)—/)[1].split(',').map((s) => s.trim()).filter(Boolean);
+
+  /* ⚠️ LA LÍNEA DE TRÁNSITO (v1.1 ②) — nace marcada **PROVISIONAL** por la
+     propia letra: rige hasta que el abogado conteste la pregunta 4 de §10
+     (LOPDP), que puede exigir nombrar al proveedor, su país o la base de
+     licitud. **Se vigila igual, y no es contradicción**: hoy es texto firmado,
+     y el día que cambie esta regla lee la letra nueva sola — que es
+     exactamente para lo que la vara se extrae en cada corrida en vez de
+     copiarse a un baseline. */
+  const transito = prosa.find((p) => p !== conSignos && /videollamada/i.test(p) && /graba|transmite|proveedor/i.test(p));
 
   return {
     titulo: prosa[0],
     intro: prosa[1],
-    // El párrafo de la advertencia trae la frase dura + la entrada a los signos.
+    // El párrafo de los signos trae la frase dura + la entrada + el cierre.
     advertenciaYSignos: conSignos,
     signos,
+    transito: transito ?? null,
   };
 }
 
@@ -5638,6 +5663,7 @@ function avisoDelDiccionario(src) {
     advertencia: leer('advertencia'),
     signosIntro: leer('signosIntro'),
     signosCierre: leer('signosCierre'),
+    transito: leer('transito'),
     signos,
   };
 }
@@ -5666,7 +5692,7 @@ function r67(archivos) {
       info:
         'NO CONCLUYENTE — **C todavía no depositó `avisoTeleconsulta`** en `apps/cliente/src/i18n/es.ts`. ' +
         'Esto NO es «el texto divergió»: es que el texto todavía no existe. ' +
-        'El contrato que esta regla espera: `avisoTeleconsulta: { titulo · intro · advertencia · signosIntro · signos[5] · signosCierre }`',
+        'El contrato que esta regla espera: `avisoTeleconsulta: { titulo · intro · advertencia · signosIntro · signos[5] · signosCierre · transito }`',
     };
   }
 
@@ -5706,6 +5732,9 @@ function r67(archivos) {
   par('advertencia', firmado.advertenciaYSignos, puesto.advertencia);
   par('signosIntro', firmado.advertenciaYSignos, puesto.signosIntro);
   par('signosCierre', firmado.advertenciaYSignos, puesto.signosCierre);
+  /* La línea de tránsito: se exige SOLO si la letra la trae — la v1.0 no la
+     tenía y una regla no puede pedir lo que su fuente no firma. */
+  if (firmado.transito) par('transito', firmado.transito, puesto.transito);
 
   return {
     fallos,

@@ -2571,7 +2571,7 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
-        <Seccion titulo="⭐ GATE S106 — EL AVISO PREVIO DE TELECONSULTA (§3) · qué decide: (a) que las TRES salidas se lean de PESO PAR —ninguna preside, es tu firma— y (b) que los cinco signos se lean como CRITERIO y no como letra chica. ⚠️ El texto es el de la letra HOY, todavía en voseo: la enmienda de conjugación no llegó al repo">
+        <Seccion titulo="⭐ GATE S106 — EL AVISO PREVIO DE TELECONSULTA (§3) · qué decide: (a) que las TRES salidas se lean de PESO PAR —ninguna preside, es tu firma— y (b) que los cinco signos se lean como CRITERIO y no como letra chica. Texto: LETRA_TELEMEDICINA v1.1 (tuteo, con la línea de tránsito PROVISIONAL al pie)">
           <Texto variante="apoyo">
             Tres Celda, no tres botones: tres sólidos son ilegales (D-484 y el pie
             de Hoja). El precedente es SelectorAvatar. La pieza no trunca, no
@@ -2593,7 +2593,7 @@ function GaleriaInterna() {
                 'Las consultas por videollamada sirven para orientación, seguimiento y casos que el veterinario pueda evaluar viendo a tu mascota por pantalla.',
               advertencia:
                 'No reemplazan una atención presencial ni sirven para emergencias.',
-              signosIntro: 'Si notás que tu mascota está en riesgo:',
+              signosIntro: 'Si notas que tu mascota está en riesgo:',
               signos: [
                 'dificultad para respirar',
                 'sangrado',
@@ -2601,7 +2601,9 @@ function GaleriaInterna() {
                 'golpe fuerte',
                 'dolor intenso o decaimiento repentino',
               ],
-              signosCierre: 'llevala a una clínica ahora mismo.',
+              signosCierre: 'llévala a una clínica ahora mismo.',
+              transito:
+                'La videollamada no se graba y se transmite a través de la infraestructura de nuestro proveedor de video.',
             }}
             acciones={{
               urgencias: { etiqueta: 'Ir a urgencias', onPress: () => setAvisoTele(false) },
