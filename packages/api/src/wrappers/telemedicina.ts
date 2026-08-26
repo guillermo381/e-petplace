@@ -300,3 +300,35 @@ export async function cancelarTeleconsulta(
     },
   };
 }
+
+/* ── S106-A t2 · LA CONFIGURACIÓN DE VIDEO ─────────────────────────────────
+ *
+ * 🔴 **EL BITRATE NO ES UNA CONSTANTE DE APP.** Un número horneado en el
+ *    bundle sólo se mueve publicando, y el eje que corta primero en el plan de
+ *    video son los GB — o sea que el día que haya que bajarlo, hay que poder
+ *    bajarlo HOY.
+ *
+ * ⚠️ **No confundir con los 1,5 Mbps de `LETRA_TELEMEDICINA` §6**: ésos son
+ *    requisito de la **conexión del profesional**, que el sistema declara y no
+ *    mide. **No son promesa de calidad del stream.** *Son dos números sobre
+ *    dos cosas distintas, y confundirlos haría que bajar el consumo se lea
+ *    como romper la letra.*
+ */
+export interface ConfigVideo {
+  /** kbps. **Nunca llega null**: el default vive en el cuerpo de la función. */
+  bitrateKbps: number;
+}
+
+export async function obtenerConfigVideo(): Promise<
+  ResultadoWrapper<ConfigVideo, 'no_se_pudo_completar'>
+> {
+  const { data, error } = await getClient().rpc('obtener_config_video');
+  if (error) return { ok: false, codigo: 'no_se_pudo_completar', mensaje: error.message };
+
+  const d = (data ?? {}) as Record<string, unknown>;
+  const n = typeof d.bitrate_kbps === 'number' ? d.bitrate_kbps : Number(d.bitrate_kbps);
+  if (!Number.isFinite(n) || n <= 0) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: 'bitrate_invalido' };
+  }
+  return { ok: true, data: { bitrateKbps: n } };
+}
