@@ -161,15 +161,35 @@ vida —así funciona un espejo— y verse "al derecho" se siente mal. Pero lo q
 la cámara trasera capta es el mundo, y espejar el mundo lo vuelve ilegible: un
 collar con nombre saldría al revés.*
 
-⇒ **`mirror` tiene que seguir a `facingMode`**, no ser una constante:
-`mirror={facingActual === 'user'}`.
+> ### ✅ FIRMA DEL FOUNDER — 26-ago-2026. Ya no hay que decidir nada acá.
+>
+> **El espejo se aplica SOLO al preview propio, y JAMÁS al video que recibe
+> el otro.**
+>
+> - **Cámara frontal:** el dueño **se ve espejado a sí mismo** *(uno espera
+>   verse así, y ayuda a acomodarse)*, **pero el vet lo ve sin invertir.**
+> - **Cámara trasera:** el espejo **se apaga en todos lados**.
+>
+> 🔴 **La razón es clínica, no cosmética:** *«mostrame la patita izquierda»
+> sobre una imagen espejada apunta a la pata equivocada.*
 
-⚠️ **Y en una teleconsulta importa más que en una videollamada común:** el vet
-puede pedir *«mostrame la patita izquierda»* — **si la imagen está espejada,
-la izquierda del vet es la derecha del animal.** *Esa es la razón real por la
-que el espejo del remoto y el del propio no se deciden igual.*
-**Es decisión de la mesa, no mía ni tuya** — la nombro para que no se resuelva
-por accidente.
+**Cómo se implementa, en dos lugares distintos:**
+
+```tsx
+// ① EL PREVIEW PROPIO (pre-join y tile propio en llamada)
+<VideoView videoTrack={trackLocal} mirror={facingActual === 'user'} />
+
+// ② EL VIDEO DEL OTRO — mirror SIEMPRE false, sin excepción ni condición
+<VideoTrack trackRef={refDelRemoto} /* sin mirror */ />
+```
+
+⚠️ **`mirror` es sólo de presentación:** invierte lo que se pinta en ESE
+componente. **No viaja en el stream** ⇒ espejar el propio preview **no afecta
+lo que el otro recibe**, que es justamente lo que la firma quiere.
+
+🔴 **Y `mirror` sigue a `facingMode`, no es una constante.** *Si se deja fijo
+en `true`, al girar a la cámara trasera el dueño vería el mundo invertido — un
+collar con nombre saldría al revés.*
 
 ---
 

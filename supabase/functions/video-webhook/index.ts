@@ -78,6 +78,15 @@ Deno.serve(async (req) => {
      real llegando — y cuando llegue, esta línea se puede simplificar. */
   const authHeader = req.headers.get('Authorization') ?? req.headers.get('Authorize') ?? '';
 
+  /* 🔴 CUÁL de los dos vino — la única forma de cerrar la ambigüedad.
+     Se loguea SIEMPRE, tanto si la firma valida como si no: *si sólo se
+     registrara en el fallo, un webhook que anda bien dejaría la pregunta
+     abierta para siempre.* Es un nombre de header, no un secreto.
+     Cuando el primer evento real lo conteste, esta línea puede morir. */
+  console.log('[video-webhook] header de firma:', req.headers.has('Authorization')
+    ? 'Authorization'
+    : (req.headers.has('Authorize') ? 'Authorize' : 'NINGUNO'));
+
   let evento: {
     id?: string;
     event?: string;
@@ -88,11 +97,37 @@ Deno.serve(async (req) => {
   try {
     const receiver = new WebhookReceiver(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
     evento = await receiver.receive(bodyRaw, authHeader) as typeof evento;
-  } catch (_e) {
-    /* Firma inválida o cuerpo alterado. **No se registra nada**: esto no es
-       un evento nuestro, es alguien golpeando la puerta.
+  } catch (e) {
+    /* Firma inválida o cuerpo alterado. **No se registra en la BASE**: esto no
+       es un evento nuestro, es alguien golpeando la puerta, y una tabla que
+       cualquiera puede llenar deja de ser un registro.
        🔴 Y el motivo NO se devuelve en el cuerpo: decirle a quien sondea si
-       falló la firma o el hash le enseña cuál de las dos defensas rompió. */
+       falló la firma o el hash le enseña cuál de las dos defensas rompió.
+
+       ── PERO SÍ SE DEJA TRAZA DIAGNÓSTICA EN EL LOG, y por una razón medida:
+       si el alta en LiveKit se hace con **otra API key**, TODOS los eventos
+       legítimos rebotan acá — y sin esta línea **no queda rastro en ningún
+       lado**: ni fila en la base, ni respuesta que alguien vea. *Entrar a una
+       sala y que no pase nada se ve idéntico a que el webhook no esté dado de
+       alta.* Dos causas muy distintas, un mismo silencio.
+
+       ⚠️ Esto **NO es la lección de S103 al revés**: el veredicto lo sigue
+       dando `receive()`. El log **no autoriza nada** — sólo cuenta qué pasó.
+       Y lo que se loguea es **público**: nombres de header y el `iss` del
+       token, que es el **key ID**, jamás el secreto. */
+    const claveUsada = (() => {
+      try {
+        return JSON.parse(atob(authHeader.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).iss;
+      } catch { return '(token ilegible)'; }
+    })();
+    console.error('[video-webhook] firma_invalida', JSON.stringify({
+      header_presente: req.headers.has('Authorization')
+        ? 'Authorization'
+        : (req.headers.has('Authorize') ? 'Authorize' : 'ninguno'),
+      key_id_del_emisor: claveUsada,          // ← comparar contra la key de nuestros secrets
+      motivo: String(e).slice(0, 200),
+      bytes_cuerpo: bodyRaw.length,
+    }));
     return json({ ok: false, codigo: 'firma_invalida' }, 401);
   }
 
