@@ -2250,7 +2250,18 @@ export const clienteEs = {
       'Todavía no hay medio de pago real: no se cobra nada, no se factura nada. Es una compra de prueba y queda marcada así.',
     pagoSimuladoRecordatorio: 'Este pedido quedó con pago SIMULADO: no se cobró nada.',
     exitoTitulo: 'Listo',
-    exitoCuerpo: 'Tu pedido quedó creado.',
+    /* 🔴 S105-C · EL TÍTULO DEL ÉXITO PASA A SER EL PAGO, y es un cambio de
+       JERARQUÍA, no de palabras. ⏪ Lo más grande de la pantalla decía «Tu
+       pedido quedó creado» y **la confirmación del pago aparecía recién en
+       la tercera línea**. *«Creado» es lo que la persona ya sabía —lo armó
+       ella—; lo que fue a averiguar es si la plata pasó.* Y debajo arrancaba
+       la recurrencia: la pantalla pivotaba a ofrecer algo antes de terminar
+       de contestar. */
+    exitoPagoTitulo: 'Tu pago se confirmó',
+    /* ☠️ `exitoCuerpo` MURIÓ (Ley 37, S105-C). Decía «Tu pedido quedó
+       creado» y era el TÍTULO del éxito; al subir el pago a título quedó
+       sin consumidor —medido: 0—. *Una clave sin lector es una voz que
+       alguien va a volver a montar creyendo que hace falta.* */
     /* 🔴 S101-D · ⑤ LA VOZ VIEJA DEL ÉXITO. Decía «Te avisamos cuando el
        vendedor lo confirme» — la frase del mundo ANTERIOR al motor de pagos,
        cuando no había cobro y lo único que podía pasar después era que la
@@ -2262,7 +2273,9 @@ export const clienteEs = {
        síncrona que §0 de la letra prohíbe tratar como confirmación.
        ⇒ Puede decir «confirmado» sin mentir. Y NO promete un aviso que esta
        pantalla no controla: dice el hecho y ofrece el camino. */
-    exitoDetalle: 'Tu pago quedó confirmado. Puedes seguir el pedido en Tus pedidos.',
+    /* ⏪ Decía «Tu pago quedó confirmado. Puedes seguir…» — su primera frase
+       subió a título, así que acá quedaría dicha dos veces. */
+    exitoDetalle: 'Puedes seguir tu pedido en Tus pedidos.',
     exitoRetiro: 'Cuando esté listo para retirar, vas a ver el código para el mostrador en el detalle del pedido.',
     verTotal: 'Ver el total',
     pagarSimulado: 'Pagar',

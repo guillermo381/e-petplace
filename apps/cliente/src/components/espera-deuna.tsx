@@ -97,17 +97,13 @@
  * discriminador contra el `123456` previo). **Lo que falta no es «si se puede
  * copiar»: es «si copia la pieza».***
  *
- * ── 📐 EL ANCHO DE LA FILA — medido de dos capturas reales, no estimado ───
+ * ── ⏪ 📐 EL ANCHO DE LA FILA — **el bloque murió con la fila** ───────────
  *
- * Con **«Copiar código»** el botón es más ancho y **el código se comprime
- * hacia la izquierda, pero ENTRA**: los seis dígitos se dibujan completos en
- * la misma fila, sin truncar ni envolver. Comparado contra **«Copiar»**, el
- * código gana ~60 px de caja.
- *
- * ⇒ **Entra, y el founder tiene el dato para decidir si el costo le gusta**
- * (`scripts/capturas/s103-c-deuna-copiar-codigo.png` vs `…-copiar-corto.png`).
- * *Se declara en vez de resolverse acá: la letra dijo «si el ancho no entra,
- * declaralo» — entra, y aun así el trade-off es visible y es de mesa.*
+ * Acá vivía la medición del código compartiendo fila con «Copiar código»:
+ * *«entra, pero el código pierde ~60 px de caja»*. **Era cierta y hoy no
+ * aplica: el 26-ago el founder firmó separarlos** (ver el bloque del código,
+ * abajo). *La medición NO se borra —fue la que dio el argumento— pero deja de
+ * describir el presente: ya no hay fila que medir.*
  *
  * ═══ ✅ ENCHUFADA — Y LO QUE FALTA YA NO ES DE ESTA PIEZA (S105-C) ═════════
  *
@@ -123,16 +119,16 @@
  * *Esa es la propiedad que se estaba comprando cuando se separó
  * `deuna-estado` de este archivo, y se cobró entera.*
  *
- * ⚠️ **LO QUE SIGUE FALTANDO, con su dueño, para que nadie lo lea como
- * terminado:**
- * · **`pagos-deuna-solicitud` NO está desplegada** ⇒ el camino real todavía no
- *   corre. El bloqueo medido no es el `pointOfSale` —que ya llegó (4262774)—
- *   sino **el rescate de `s103-d` a `main`**, que conduce A.
- * · **`DEUNA_ELEGIBLE` sigue en `false`** (`fila-medio-de-pago.tsx`) ⇒ nadie
- *   puede elegir este riel todavía. **Se flipea DESPUÉS del despliegue y con
- *   el ojo del founder en el aparato, jamás antes** — *mismo precedente que el
- *   reloj del recurrente, que nació inerte a propósito: un cable que se tiende
- *   bajo presión se tiende mal.*
+ * ✅ **LO QUE FALTABA, YA NO FALTA** (26-ago). ⏪ Acá se listaban dos cosas:
+ * que `pagos-deuna-solicitud` no estaba desplegada y que `DEUNA_ELEGIBLE`
+ * seguía en `false`. **Las dos se cerraron:** el riel corrió completo —pago
+ * por webhook, aplicación automática y reverso ejercido— y el flip está
+ * encendido por firma del founder.
+ *
+ * ⚠️ **Lo que SÍ sigue vivo y no es de esta pieza:** el residuo de `D-913` —
+ * *nadie escribe `'expirado'`*, así que **una compra abandonada a mitad de
+ * pago queda impagable por cualquier riel**. Con el flip encendido y DeUna
+ * como default, el radio es **quien abandone un pago**. Dueño A/D.
  */
 
 import { useEffect, useState } from 'react';
@@ -382,18 +378,39 @@ export function EsperaDeUna({ estado, onGenerarNuevo, onSoporte }: EsperaDeUnaPr
           El `letterSpacing` es lo que lo vuelve legible de un vistazo al
           cambiar de app: seis dígitos pegados se leen como un número, y lo que
           la persona tiene que hacer es transcribirlos de a uno. */}
-      {/* 🔴 EL CÓDIGO Y SU BOTÓN DE COPIAR VIVEN EN LA MISMA FILA
-          (pedido del founder, 22-ago): *«el affordance vive junto al código,
-          no debajo ni en el pie: el pulgar tiene que llegar sin buscar»*. */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+      {/* ⏪ 🔴 EL CÓDIGO Y EL BOTÓN DEJAN DE COMPARTIR FILA — **firma nueva del
+          founder (26-ago), y REVIERTE la suya del 22-ago**, que decía: *«el
+          affordance vive junto al código, no debajo ni en el pie: el pulgar
+          tiene que llegar sin buscar»*.
+
+          **Se declara en vez de pisarse, y las dos firmas se reconcilian con
+          una medición que ya existía:** S103 midió que con el botón en la fila
+          **el código perdía ~60 px de caja**. *La firma vieja optimizaba la
+          distancia del pulgar; la nueva optimiza la legibilidad — y el número
+          dice que la primera se estaba pagando con la segunda.* El founder lo
+          vio en el aparato como *«amontonado»*, que es exactamente esos 60 px.
+
+          ⇒ **El código va SOLO, centrado y grande; «Copiar» centrado debajo.**
+          *Esta es la pantalla que la persona mira mientras teclea en OTRA app:
+          su trabajo es leerse de un vistazo, y el pulgar llega igual porque no
+          hay nada más que tocar.*
+
+          La caja: `4xl` (48) contra los 38 de antes, y el `letterSpacing` sube
+          a 8 — **seis dígitos entran con holgura** (≈222 px de los ~350 útiles
+          de un teléfono) y **se leen de a uno**, que es lo que hay que hacer
+          con ellos: transcribirlos. */}
+      <View style={{ alignItems: 'center', gap: spacing[4], paddingVertical: spacing[3] }}>
         <Text
           /* Sigue seleccionable a mano — **el botón se suma, no reemplaza**:
              copiar con el dedo es el camino que la persona ya conoce. */
           selectable
           style={{
             fontFamily: typography.family.mono.regular,
-            fontSize: typography.size['3xl'],
-            letterSpacing: 4,
+            /* 4xl (48) contra los 38 de antes: el código dejó de compartir
+               fila y esos ~60 px vuelven a ser suyos. */
+            fontSize: typography.size['4xl'],
+            letterSpacing: 8,
+            textAlign: 'center',
             color: theme.text.primary,
             fontVariant: ['tabular-nums'],
           }}
