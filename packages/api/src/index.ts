@@ -1476,3 +1476,11 @@ export {
   type ResultadoCancelacionTeleconsulta,
   type CodigoErrorTelemedicina,
 } from './wrappers/telemedicina';
+
+/* S106-A t2 · la puerta de la videollamada (motor de D, wrapper de A). */
+export {
+  pedirTokenVideollamada,
+  type TokenVideollamada,
+  type ResultadoVideollamada,
+  type CodigoVideollamada,
+} from './wrappers/videollamada';
