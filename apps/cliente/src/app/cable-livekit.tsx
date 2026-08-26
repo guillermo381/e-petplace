@@ -5,12 +5,25 @@
  * **Su condición de muerte vive en `lib/livekit-cable.ts`** — los dos se
  * borran en el mismo commit.
  *
- * 🔴 **`__DEV__` — NO VIAJA A PREVIEW NI A PRODUCCIÓN.** Precedente de la casa
- * para andamios de ensayo (`pagos/deuna-ensayo.tsx`, S103-C).
- * ⚠️ **Y de ahí sale una condición de build que A tiene que saber: esta
- * pantalla SOLO se dibuja con `__DEV__ === true`, o sea con el perfil
- * `development`.** Con `preview` el módulo nativo viaja igual pero la pantalla
- * se niega a montarse, y el gate no se puede correr.
+ * ── 🔓 SIN `__DEV__`, Y ESTÁ AUTORIZADO — no es un descuido ────────────────
+ * **Autorización: el founder, 26-ago-2026**, con el MISMO criterio ya firmado
+ * para la entrada de `/gallery` en Cuenta (D-580 del lado cliente · S83-C15
+ * del lado prestador). Su literal, que vale igual acá: *«**SIN `__DEV__`: en
+ * un APK preview `__DEV__` es false y la entrada desaparecería justo donde
+ * tiene que existir**»*, y es **`L-161` al pie de la letra: una superficie de
+ * gate que no se puede alcanzar no es un gate.**
+ *
+ * *El founder gatea en **preview**, no con Metro.* Con el guard puesto, el
+ * módulo nativo viajaba en el binario y la pantalla se negaba a montarse —
+ * un cable correcto que se ve exactamente igual que un cable roto.
+ *
+ * ☠️ **Esto DEROGA el aviso que esta pista le dio a A el 25-ago** («la build
+ * tiene que ser perfil `development`»). **Ya no rige: preview alcanza**, que
+ * es justo lo que hace falta con la cuota de EAS agotada hasta el 1-sep.
+ *
+ * ⚠️ **Lo que NO cambia:** sigue siendo un andamio con condición de muerte, y
+ * **no tiene entrada desde ninguna pantalla** — se llega por URL. *Que sea
+ * alcanzable en preview no la vuelve una pantalla de producto.*
  *
  * **Lo que esta prueba NO es** (spec §7): no es la pantalla de teleconsulta ·
  * no toca citas reales · no prueba autorización (eso es `video-token` + la RPC
@@ -38,16 +51,6 @@ export default function CableLiveKit() {
   const [url, setUrl] = useState(LIVEKIT_URL_DEFECTO);
   const [token, setToken] = useState('');
   const listo = url.trim().length > 0 && token.trim().length > 0;
-
-  // El gate del andamio, idéntico al de `deuna-ensayo`.
-  if (!__DEV__) {
-    return (
-      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="—" atras onAtras={() => router.back()} />
-        <EstadoVacio registro="pantalla" titulo="—" descripcion="—" />
-      </View>
-    );
-  }
 
   const cabecera = (
     <Encabezado

@@ -886,6 +886,32 @@ export const clienteEs = {
     avisoTeleIrUrgencias: 'Ir a urgencias',
     avisoTelePresencial: 'Reservar cita presencial',
     avisoTeleContinuar: 'Continuar con la videoconsulta',
+
+    /* ══ EL DETALLE DE LA VIDEOCONSULTA · §4 ══
+       🔴 **La ventana NO se escribe acá.** Entra por `{{minutos}}`, leída de
+       `ventanaCancelacionMinutos` — un 30 tecleado envejece el día que el
+       founder mueva el parámetro, y su modo de falla es el peor: la pantalla
+       lo dice con toda confianza y el motor rebota por otro número.
+       🔴 **Y la devolución dice «a tu medio de pago» con plazo honesto**:
+       jamás «al instante», jamás «saldo». La ejecuta una persona. */
+    citaTeleTitulo: 'Tu videoconsulta',
+    citaTeleCuando: 'Cuándo',
+    citaTeleHora: 'Hora',
+    citaTeleCancelar: 'Cancelar la videoconsulta',
+    citaTeleVentana: 'Puedes cancelar sin costo hasta {{minutos}} minutos antes.',
+    citaTeleConfirmarTitulo: '¿Cancelar esta videoconsulta?',
+    citaTeleDevolucion:
+      'El pago vuelve a tu medio de pago. Lo gestiona nuestro equipo, así que puede tardar unos días.',
+    citaTeleConfirmar: 'Sí, cancelar',
+    citaTeleCancelada: 'Cancelamos tu videoconsulta.',
+    citaTeleCanceladaConDevolucion:
+      'Cancelamos tu videoconsulta. La devolución vuelve a tu medio de pago.',
+    citaTeleVencida: 'Ya pasó el plazo para cancelar sin costo.',
+    citaTeleError: 'No pudimos cancelarla. Prueba de nuevo.',
+    /* Estado terminal §5 — lo marcó el profesional. **No dice de quién fue la
+       falla porque el sistema no lo sabe** (`atribucion: 'no_se_investiga'`). */
+    citaTeleNoRealizada: 'Esta videoconsulta no se pudo realizar.',
+    citaTeleNoRealizadaDevolucion: 'El pago vuelve a tu medio de pago.',
   },
   // S63-A Bloque 3 — la reserva de adiestramiento del dueño + el parte
   // (LOTE S63, gate founder pendiente)

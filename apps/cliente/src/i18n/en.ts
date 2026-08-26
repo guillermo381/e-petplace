@@ -741,6 +741,25 @@ export const clienteEn = {
     avisoTeleIrUrgencias: 'Go to urgent care',
     avisoTelePresencial: 'Book an in-person visit',
     avisoTeleContinuar: 'Continue with the video consultation',
+
+    /* ══ VIDEO CONSULTATION DETAIL · §4 ══ ⚠️ traducción provisional. La
+       ventana entra por {{minutos}}, nunca escrita. */
+    citaTeleTitulo: 'Your video consultation',
+    citaTeleCuando: 'When',
+    citaTeleHora: 'Time',
+    citaTeleCancelar: 'Cancel the video consultation',
+    citaTeleVentana: 'You can cancel at no cost up to {{minutos}} minutes before.',
+    citaTeleConfirmarTitulo: 'Cancel this video consultation?',
+    citaTeleDevolucion:
+      'The payment goes back to your payment method. Our team handles it, so it may take a few days.',
+    citaTeleConfirmar: 'Yes, cancel',
+    citaTeleCancelada: 'We cancelled your video consultation.',
+    citaTeleCanceladaConDevolucion:
+      'We cancelled your video consultation. The refund goes back to your payment method.',
+    citaTeleVencida: 'The free cancellation window has passed.',
+    citaTeleError: 'We could not cancel it. Please try again.',
+    citaTeleNoRealizada: 'This video consultation could not take place.',
+    citaTeleNoRealizadaDevolucion: 'The payment goes back to your payment method.',
   },
   // S63-A Bloque 3 — training booking, owner side + the session report
   // (LOTE S63, founder gate pending)
