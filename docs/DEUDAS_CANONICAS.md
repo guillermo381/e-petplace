@@ -22090,3 +22090,275 @@ porque nadie lo había vuelto a medir contra el objeto.***
 **Medido:** `37.4` y sus términos aparecen **solo en `TERMINOS-PET-PROFESSIONAL.md`**. **No está replicada.**
 
 ⚠️ **Pero el alcance de esa afirmación es parcial y hay que decirlo: en `docs/legal/` NO EXISTE un archivo de T&C Pet Parent.** ⇒ **lo verificado es que no está replicada EN EL REPO, no que no lo esté en el documento publicado del cliente.** *Un grep que no encuentra el documento no puede decir que el documento está limpio.*
+
+---
+---
+
+# Deudas S106 (D-926 → D-929) + L-426 — depositadas por A el 25-ago-2026 · números verificados libres POR GREP contra este archivo (tope real `D-925` · `L-425`; `L-714` sigue descartado por su propia ficha)
+
+> **Origen:** las cinco nacen del **Checkpoint 1 de S106** (firma del founder,
+> 25-ago-2026) y de las mediciones del turno ⓪ de la pista A
+> (`docs/relevamientos/2026-08-25-s106-a-mediciones.md`). **Ninguna se
+> construye en S106** salvo donde su propio disparo lo diga.
+
+## 🔴 D-926 — EL MOTOR DE SALDO NO EXISTE, Y DOS LETRAS FIRMADAS LO DABAN POR HECHO
+
+**Medido contra la base** (S106-A, turno ⓪, proyecto `zyltipqscdsdsxnjclhp`):
+
+| barrido | resultado |
+|---|---|
+| tablas `%saldo%`, `%wallet%`, `%monedero%`, `%credito%`, `%haber%`, `%balance%` | **(ninguna)** |
+| funciones `%saldo%` o que lean `saldo_cliente` | **(ninguna)** |
+| columnas `%saldo%` | solo `cuentas_comerciales.saldo_arrastre`, `liquidaciones.saldo_arrastre_aplicado`, `v_eventos_resumen_cuenta.saldo_arrastre` — **arrastre de LIQUIDACIÓN DEL PRESTADOR (T&C §22), otra cosa** |
+
+`LETRA_SALDO` v1.1 **fija el contrato entero** —titularidad, fuentes, FIFO,
+pago mixto, tratamiento contable— y su §8 ítem 5 remite el esquema a *«censo
+de S102»*. `LETRA_PAGO_CITAS` §7 pone *«pago mixto y motor de saldo (S102)»*
+fuera de alcance. **S102 no lo construyó, y nadie lo había vuelto a medir.**
+
+🔴 **Lo que lo vuelve caro no es la ausencia: es que dos letras firmadas
+prometían sobre él.** `LETRA_TELEMEDICINA` v1.0 mandaba la plata de vuelta
+«como saldo» en §4 y §5. *Una letra que promete sobre un motor inexistente
+no falla al escribirse: falla el día que alguien la construye y descubre que
+la mitad de abajo no está.*
+
+**Lo que rige mientras tanto** (firma founder CP1 S106): la devolución va
+**al medio de pago, gestionada por soporte**, con reverso automático solo
+dentro de la ventana del riel (Nuvei mismo día · DeUna 24 h). Ver la
+enmienda de §4/§5 de `LETRA_TELEMEDICINA` v1.1 y la **adjudicación del freno
+de depósito** al pie de esa letra.
+
+**Lo que arrastra su nacimiento, para que nadie lo presupueste de menos:**
+el esquema (que `LETRA_SALDO` deja **explícitamente sin fijar**) · el ledger
+append-only con FIFO · el pago mixto saldo-primero de §5 · la superficie
+«tu saldo» · el retiro por soporte de §6 · el tratamiento contable de §7
+(pasivo, reclasificación a 3 meses) · **y la enmienda a `LETRA_SALDO` §3
+que el freno de depósito de `LETRA_TELEMEDICINA` dejó servida** — con la
+distinción presencial (≥24 h) / teleconsulta (30 min) y la fuente «consulta
+no realizable».
+
+☠️ **Disparo:** cuando **el volumen de devoluciones manuales lo pida**, o
+cuando **otra letra lo exija**. *Lo que no dispara: una teleconsulta suelta
+devuelta a mano.*
+
+## 🔴 D-927 — CATÁLOGO DE SUSTANCIAS FISCALIZADAS + GUARD DE PRESCRIPCIÓN
+
+**Por qué no se construyó en S106, medido:** no hay dónde apoyarlo.
+
+| pregunta | objeto | resultado |
+|---|---|---|
+| catálogo de medicamentos/principios entre los 42 `cat_*` | `information_schema` | **NINGUNO** |
+| CHECKs en `evento_medicacion_prescrita` | `pg_constraint` | **(ninguno)** |
+| filas vivas | la tabla | **4** |
+| filas con `principio_activo` poblado | la tabla | **0 de 4** |
+
+⇒ **Un guard construido hoy sobre `principio_activo` daría VERDE SIEMPRE.**
+*Sería exactamente «un requisito que suena serio y no filtra nada» — la
+frase con la que `LETRA_TELEMEDICINA` §6 rechaza la resolución mínima de
+cámara.*
+
+### Las fuentes oficiales — VERBATIM del documento del abogado
+
+*(`docs/legal/2026-08-25-receta-videoconsulta.md`, sección (b). Se copian
+literales porque el filtro se carga de acá y **una fuente parafraseada es
+una fuente que hay que volver a buscar**.)*
+
+| Fuente | Qué es | Rol en el filtro |
+|---|---|---|
+| **Anexos A, B y C de la Ley de Drogas** + resoluciones CID (Ministerio del Interior) | La lista madre de estupefacientes y psicotrópicos, por sustancia | **Fuente primaria del bloqueo** |
+| **ARCSA-DE-2021-006-AKRG** (reformada 2023) y sus anexos | Medicamentos de uso humano que contienen sustancias catalogadas, sujetos a receta especial | Fuente de contraste — mapea sustancias a productos comerciales |
+| **AGROCALIDAD Res. 0072/2012** (Grupo I) | Productos veterinarios con narcóticos/psicotrópicos, receta retenida | Capa veterinaria del mismo control |
+| **AGROCALIDAD Res. 0003/2019 y 0006/2024** | Colistina prohibida; antimicrobianos de importancia crítica restringidos | Segunda lista de bloqueo, independiente de la anterior |
+
+**Última actualización verificada por el abogado: Resolución CID-001-2025
+(2-abr-2025), 116 sustancias nuevas, vigente desde el 30-jun-2025.**
+**No es ARCSA la fuente madre — es el Ministerio del Interior.**
+
+### Las cuatro reglas del abogado — van a la construcción, no al criterio de quien la haga
+
+1. **Por principio activo, jamás por nombre comercial.** *Los anexos listan
+   sustancias; el mercado vende marcas.* La tabla mapea anexo → principio
+   activo → productos y **bloquea por la capa del medio**.
+2. **Cada entrada con fuente, versión y fecha.** *Si un veterinario disputa
+   un bloqueo, la respuesta es la cita, no el criterio de soporte.*
+3. **Responsable nombrado y revisión TRIMESTRAL con constancia.** *La lista
+   se movió 116 sustancias de una vez en 2025: un filtro cargado una vez y
+   olvidado es un filtro vencido.*
+4. **El bloqueo cita su fuente al vet**, con el literal sugerido: *«sustancia
+   incluida en el Anexo [X] de la Ley Orgánica de Drogas — su prescripción no
+   está habilitada para médicos veterinarios en el Ecuador»*. *Convierte cada
+   bloqueo en evidencia de diligencia.*
+
+⚠️ **Y el bloqueo es DURO, sin override del profesional** — el documento es
+explícito: no hay vía legal para que un veterinario prescriba sustancias
+catalogadas **por ningún medio**, no solo a distancia.
+
+☠️ **Disparo: ANTES de emitir la primera REV** (o sea, junto con `D-928`).
+
+## 🟠 D-928 — FASE REV TELEMÁTICA: la EMISIÓN del documento
+
+`LETRA_TELEMEDICINA` v1.1 §9 partió la receta en dos y firmó que **entra la
+prescripción** (registrable del Durante, venta libre) y **no entra la
+emisión**. Esto es la emisión.
+
+**Lo que arrastra:**
+
+- **Generación del documento REV** en el formato del **Anexo 9 de la
+  Resolución AGROCALIDAD 0227/2024**.
+- **FirmaEC de CADA veterinario** — *no una firma de la plataforma ni un
+  sello automático*: el documento legal es explícito en que la firma de la
+  plataforma haría migrar la responsabilidad.
+- **Diagnóstico OBLIGATORIO en el formato.** Literal del abogado: *«una REV
+  sin diagnóstico es una receta defectuosa»*.
+- **La decisión sobre antibióticos, que el founder firma al abrir la fase:**
+  ¿solo en seguimiento de paciente ya examinado presencialmente
+  (recomendación del abogado), o desde la primera videoconsulta bajo criterio
+  profesional (jurídicamente sostenible **si el sistema registra que la
+  decisión es del profesional**)?
+- **`D-927` es su precondición** — no se emite una REV sin el filtro cargado.
+
+☠️ **Disparo:** decisión de producto; hoy no bloquea a S106 porque la
+prescripción v1 va acotada a venta libre.
+
+## 🟡 D-929 — 57 TABLAS (21 %) QUE NINGUNA MIGRACIÓN NOMBRA
+
+**Medido** (S106-A ⓪): **268 tablas base** en `public`; **57 no aparecen en
+ninguna de las 442 migraciones**. Y los dos ledgers están **perfectos**:
+442 local = 442 remoto, todas emparejadas — *el ledger está impecable y no
+explica el objeto.* **`L-422` en su forma general.**
+
+El caso que la destapó: **`cita_telemedicina_detalle`** — 0 filas, 0
+funciones, 0 FKs entrantes, ninguna migración, **pero viva en
+`database.types.ts` y nombrada por letra canónica** (`BIO_EXPEDIENTE`
+D13.6).
+
+Entre las 57 hay además **residuo de test vivo en producción**:
+`_test_resultado_d242`, `test_data_registry`.
+
+⚠️ **Método y su límite declarado:** se concatenaron las 442 migraciones y se
+buscó cada nombre de tabla con `grep -qi "\bnombre\b"`. **Es cota, no censo
+fino** — una tabla creada con nombre partido o generado se contaría mal.
+
+☠️ **Disparo:** la próxima sesión que necesite reconstruir la base desde
+migraciones, o el primer `db reset` que alguien intente. *Hoy no duele
+porque nadie reconstruye; duele el día que haga falta.*
+
+## 📜 L-426 (CANDIDATA — texto servido para la firma del founder) — LA PLATAFORMA NO SUGIERE TRATAMIENTOS
+
+> **La plataforma JAMÁS sugiere medicamentos, tratamientos ni posologías.**
+> No autocompleta, no recomienda, no ordena por conveniencia. La prescripción
+> es un acto del veterinario; **la plataforma provee el canal**.
+
+**Origen:** el documento del abogado sobre prescripción en videoconsulta
+(25-ago-2026), sección (a), *«La condición que hace sostenible el "bajo su
+criterio profesional"»*. Literal: *«el sistema **no sugiere medicamentos, no
+autocompleta tratamientos ni recomienda posologías** — si algún día una
+función de IA lo hiciera, **la responsabilidad migra hacia la plataforma** y
+se activa además la Resolución SPDP-SPD-2026-0009-R»*.
+
+🔴 **Por qué es ley y no preferencia:** no protege del error clínico —
+protege de **cambiar de sujeto responsable**. *Una sugerencia útil y correcta
+tiene el mismo efecto jurídico que una equivocada: convierte a e-PetPlace en
+parte del acto médico.*
+
+**Es hermana de `P11`** (las recomendaciones clínicas no son sponsoreadas) y
+la completa: `P11` prohíbe que **el dinero** distorsione la recomendación;
+esta prohíbe que **la plataforma recomiende**, con o sin dinero de por medio.
+
+⚠️ **Toda feature futura se contrasta contra esta ley — y la primera de la
+fila ya tiene nombre: el «incentivo con IA para evaluar criticidad» que
+`LETRA_TELEMEDICINA` §9 difiere a v2.** *Se declara acá para que no llegue a
+mesa como idea nueva sin su freno puesto.*
+
+**Lo que la ley NO prohíbe, para que no se lea de más:** estructurar lo que
+el veterinario dictó (T&C §31.3, con su muro §8.3 vigente) · recordar lo que
+él mismo prescribió antes (`prestador_recetas_frecuentes`) · advertir sobre
+alergias declaradas de la mascota (`MODELO_DESPENSA` §6 — *advertir no es
+sugerir*).
+
+### 🔴 LA FRONTERA FINA — medida por la auditoría de C, firmada en CP1
+
+*Es donde la ley se aplica de verdad, porque es donde nadie cree estar
+sugiriendo nada:*
+
+- ✅ **LEGAL — los ejemplos de FORMATO** en placeholders y en prompts de IA:
+  *«Ej. 1 comprimido»*, *«cada 12 h»*, *«7 días»*. **Enseñan a escribir, no
+  qué recetar.**
+- 🔴 **JAMÁS — nombres de fármaco o de principio activo como ejemplo**, en
+  ningún lugar: ni en un `placeholder`, ni en un texto de ayuda, ni en un
+  prompt de IA, ni en un valor por defecto.
+
+> *Un placeholder que dice un fármaco es una sugerencia con letra gris.* Y es
+> peor que una sugerencia explícita, porque **nadie lo revisa como si lo
+> fuera**: entra como microcopy y sale como criterio clínico.
+
+⚠️ **Esta frontera se audita en cada pantalla que capture medicación** — es
+la clase de línea que un `placeholder` bienintencionado cruza en un commit
+de acabado.
+
+**Estado: CANDIDATA.** No rige hasta la firma del founder.
+
+---
+
+## ☠️ D-930 — `cita_telemedicina_detalle`: SE MATA, Y LA RAZÓN NO ES QUE ESTUVIERA VACÍA · **CERRADA en S106-A** (migración `2f`)
+
+> 🔴 **La razón se escribe primero porque es lo que evita que alguien la
+> reviva por prolijidad.** *«Estaba vacía» invita a llenarla. Lo que sigue,
+> no.*
+
+**La tabla guardaba `token_prestador` y `token_cliente` como columnas de
+texto**, y su policy `telemedicina_select` alcanzaba a
+`user_tiene_acceso_a_mascota(mascota_id) OR pet_parent_id = auth.uid()`.
+
+> ### ⇒ **El dueño de la mascota podía leer el token del veterinario.**
+
+**Daño hoy: CERO, y medido** — 0 filas, 0 funciones que la nombren, 0 FKs
+entrantes. *No hubo incidente porque no hubo dato, no porque el modelo
+estuviera bien.* (Hallazgo de D sobre el censo de A.)
+
+**Las otras tres razones, todas medidas:**
+
+1. **Su `CHECK` de `proveedor` (`daily | whereby | zoom`, default `'daily'`)
+   pre-decidía el transporte** — habría **rebotado LiveKit**, que es lo que
+   la mesa evaluaba. *Una tabla muerta que ya había votado.*
+2. **`grabacion_url` y `grabacion_consentida` contradicen la firma ⓪ de §7**
+   (la teleconsulta **no se graba en v1**). *Una columna que existe invita a
+   llenarse* — misma clase que el «código latente» de `AVISO-DE-IA.md`.
+3. **Ninguna migración del monorepo la creaba** (`D-929`): existía en la base
+   y no en el ledger.
+
+⚠️ **El modelo correcto NO es esta tabla: es el mint por cita en la edge
+function** — token de vida corta, emitido contra la pertenencia verificada,
+que **nunca se persiste**. *Un token guardado en una fila legible es un
+token que dura lo que dure la fila.*
+
+**Precondición cumplida antes del DROP** (lección S95-F: *lo que bloquea vive
+afuera*): grep en los **cinco repos vecinos** (`e-petplace-admin`,
+`e-petplace-prestadores`, `e-petplace-B`, `e-petplace-C`,
+`e-petplace-sistema-pruebas`) ⇒ **cero consumidores**; solo aparece en
+`database.types.ts` generados y en docs. **Reversa con el `CREATE` completo.**
+
+## 🟡 D-931 — LOS WEBHOOKS DE LiveKit: REGISTRAR SIN JUZGAR · **ESCRITA Y SIN CONSTRUIR**
+
+**Existen y son medibles** (medición de D): `participant_joined` ·
+`participant_left` · `room_started` · `room_finished`.
+
+**Lo que habilitarían:** saber **qué pasó de verdad** en una teleconsulta —
+si alguien entró, quién, cuándo, cuánto duró — sin depender de que un humano
+lo declare.
+
+🔴 **Y por qué NO se construye todavía:** porque el salto de *registrar* a
+*juzgar* es de una línea y de una sesión distraída. **Si el sistema decide
+por sí mismo quién faltó, decide quién paga** — y eso choca de frente con la
+firma ② de §5 de la letra: *«no se investiga de quién fue la culpa, y es
+deliberado»*, porque **el sistema no mide la conexión de nadie y no puede
+atribuirla**.
+
+**El límite, si algún día se enciende:** los eventos se **guardan crudos y
+se muestran a soporte**; **jamás disparan una transición de estado ni una
+devolución por sí mismos.** *Un evento de infraestructura no sabe si el vet
+no entró o si entró y se le cortó — y la diferencia es exactamente la que
+decide quién cobra.*
+
+☠️ **Disparo: la firma del founder, que está resolviendo.** Hasta entonces,
+**escrita y sin construir.**
