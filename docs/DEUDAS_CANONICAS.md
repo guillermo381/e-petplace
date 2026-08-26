@@ -22514,7 +22514,29 @@ el balanceo elige.*
 **Cura:** dos columnas en la matriz — *clave unificada ✅/❌* y *login
 verificado, con fecha*. **Lo que NO se hace es unificar `+7` de paso**: tocar
 credenciales de cuentas vivas es acto del founder, no de una pista.
-**Dueño:** founder decide; A ejecuta la marca del documento.
 
-**Disparo:** la próxima sesión que necesite una cuenta de prueba que no sea
-`+8`, `+demovet` o la demo.
+## ✅ CURADA EN LA MISMA TANDA (firma del founder, 26-ago-2026) — y el número era MUCHO peor
+
+Se midió **por login real contra las 42 cuentas `guillo381+*` vivas**, no
+contra el documento:
+
+> **17 entran con la clave compartida. 25 NO.**
+
+⇒ La ficha nació diciendo *«tiene excepciones sin marcar»* y **la medición dio
+vuelta la proporción: la excepción es la mayoría.**
+
+🔴 **Y el documento se contradecía a sí mismo:** su cura ① de S97-A declara para
+`vet2` *«clave → la compartida ✅»*, y **hoy `vet2` rebota**. No está sola: **el
+equipo `vet*` ENTERO rebota mientras el `ser*` ENTERO entra.** *Esa asimetría no
+es azar — o la unificación del lado médico nunca corrió, o algo la revirtió.*
+**Queda abierta para el founder**; la afirmación de S97 se marcó con su fecha en
+vez de borrarse, porque no sabemos si era falsa entonces — sabemos que lo es hoy.
+
+**La consecuencia operativa, que es la que muerde:** `+7`, `+9`, `+s87prof`,
+`+s87recep`, `+s88admin` y `+s88rolpuro` están todas del lado que rebota **y
+varias son empleados activos de Clínica Aurora** ⇒ **el balanceo del motor puede
+asignarle una cita a alguien cuya sesión después nadie puede acuñar.** *Ya pasó:
+la primera corrida del borde de §4 falló por eso.*
+
+**Lo que queda vivo y es del founder:** unificar las 25. A anotó el estado, no lo
+cambió.
