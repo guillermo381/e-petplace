@@ -81,9 +81,22 @@ export const CON_TILDE = ['probá','tocá','elegí','escribí','andá','mirá','
   /* ⑨ · los SEIS huecos que encontró el censo de segundo orden (B, S105) —
      ver la nota al pie. Van como IMPERATIVO porque la frontera de la `s` caza
      con ellos el presente voseante gratis: `cancelá` ⇒ `cancelás`. */
-  'cancelá','atendé','decí','subí','trabajá','vendé'];
-export const ENCL = ['contanos','escribila','escribilo','corregilo','corregila','ingresalo','ingresala','probalo','probala','tocalo','tocala','elegilo','elegila','agregalo','agregala','revisalo','revisala','guardalo','guardala','avisanos','contactanos','compartile','compartilo','compartila'];
-export const PRON = ['tenés','podés','querés','sabés','debés','necesitás','hacés','ponés','compartís'];
+  'cancelá','atendé','decí','subí','trabajá','vendé',
+  /* ⑫ · EL HUECO DEL AVISO CLÍNICO (S106, hallazgo de B, curado por A).
+     `notá` ⇒ caza `notás` gratis por la frontera de la `s`; `llevá` ⇒
+     `llevás`. **Los dos estaban ausentes y el §3 de LETRA_TELEMEDICINA los
+     usaba literalmente** — ver la nota ⑫ al pie. */
+  'notá','llevá'];
+export const ENCL = ['contanos','escribila','escribilo','corregilo','corregila','ingresalo','ingresala','probalo','probala','tocalo','tocala','elegilo','elegila','agregalo','agregala','revisalo','revisala','guardalo','guardala','avisanos','contactanos','compartile','compartilo','compartila',
+  /* ⑫ · `llevá` NO caza a `llevala`: la frontera derecha descarta con `l`.
+     Los enclíticos se listan enteros, como los demás. */
+  'llevalo','llevala','llevanos','llevame','llevate'];
+export const PRON = ['tenés','podés','querés','sabés','debés','necesitás','hacés','ponés','compartís',
+  /* ⑫ · `creés` va ENTERO y NO como `creé`: **`creé` es tuteo perfectamente
+     válido** («creé una cuenta», pretérito de *crear*). Agregar la raíz
+     habría fabricado falsos positivos — la misma trampa que `estás` y
+     `podrás`, ya documentada arriba. */
+  'creés'];
 /** ⑪ · `sos` (voseo de «eres»). Va aparte porque, como `vos`, es CORTO y
  *  necesita frontera de vecino: «esos», «presos», «sospecha», «nosotros» lo
  *  contienen y no son voz. Control corrido: 0 falsos positivos en los siete
@@ -158,3 +171,52 @@ export function hitsDeVoseo(src) {
 
 /** Igual, leyendo del disco. */
 export const hitsDeArchivo = (ruta) => hitsDeVoseo(readFileSync(ruta, 'utf8'));
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ⑫ · EL HUECO DEL AVISO CLÍNICO — S106 (lo halló B, lo curó A)
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * **`notás` y `llevala` no estaban en ninguna lista.** Las dos son voseo
+ * real y las dos aparecen literalmente en el texto del aviso previo de
+ * `LETRA_TELEMEDICINA` §3 — o sea que el hueco caía justo sobre la pantalla
+ * que más importa que hable bien: la que se muestra antes de decidir si una
+ * mascota necesita ir a una clínica ahora mismo.
+ *
+ * 🔴 **El cruce que lo volvía urgente:** el juez del aviso (R67, de B)
+ * compara el texto renderizado contra el FIRMADO. Si alguien depositaba el
+ * §3 en voseo para que R67 diera verde, **R66 lo dejaba pasar** — dos guards
+ * de la casa contradiciéndose sin que ninguno se pusiera rojo.
+ *
+ * **Es `L-425` cobrando en otro instrumento:** *un baseline en 0 no dice «no
+ * hay»: dice «no vi, con la lista de hoy».* Acá ni siquiera hacía falta que
+ * el baseline fuera 0 — el término simplemente no existía en la lista, así
+ * que ninguna cantidad de barridas lo habría encontrado.
+ *
+ * ─── Lo agregado, y por qué cada uno ───────────────────────────────────
+ *   · `notá` (CON_TILDE) ⇒ caza `notás` gratis por la frontera de la `s`.
+ *   · `llevá` (CON_TILDE) ⇒ `llevás`.
+ *   · `llevalo/llevala/llevanos/llevame/llevate` (ENCL) — **`llevá` NO los
+ *     caza**: la frontera derecha descarta con `l`.
+ *   · `creés` (PRON) va **ENTERO**, y ahí está la trampa que casi se paga:
+ *     agregar la raíz `creé` habría marcado **«creé una cuenta»**, que es
+ *     tuteo perfectamente válido (pretérito de *crear*). Misma familia que
+ *     `estás` y `podrás`, ya documentada arriba.
+ *
+ * ─── Verificado en las dos direcciones, no leído ───────────────────────
+ *   Aislamiento: HIT en `notás` · `llevala` · `creés`; **cero hits** en
+ *   `notas` · `llévala` · `creé`.
+ *   Punta a punta: con las dos formas inyectadas en el diccionario del
+ *   cliente el gate salió **ROJO, exit 1** (4 sobre baseline 2); restaurado,
+ *   **VERDE, exit 0**, y el conteo real siguió en **50** — la cura no
+ *   fabricó un solo falso positivo sobre las cadenas que ya existían.
+ *
+ * ⚠️ **Y un error propio que vale más que la cura, porque casi entra al
+ * acta como medición:** el primer intento de reproducir el hueco inyectó
+ * contra un ancla equivocada (`export const es = {`, cuando el archivo
+ * declara `export const clienteEs = {`). **La inyección nunca ocurrió, el
+ * gate salió verde, y ese verde estuvo a punto de reportarse como
+ * "agujero confirmado".** *Un instrumento que responde sobre un archivo que
+ * no tocaste no está midiendo tu hipótesis: está midiendo el reposo.* La
+ * única razón por la que no entró al reporte es que el `grep` de control
+ * salió vacío y no se dio por bueno.
+ * ═══════════════════════════════════════════════════════════════════════ */
