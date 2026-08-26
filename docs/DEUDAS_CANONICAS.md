@@ -22276,4 +22276,24 @@ el veterinario dictó (T&C §31.3, con su muro §8.3 vigente) · recordar lo que
 alergias declaradas de la mascota (`MODELO_DESPENSA` §6 — *advertir no es
 sugerir*).
 
+### 🔴 LA FRONTERA FINA — medida por la auditoría de C, firmada en CP1
+
+*Es donde la ley se aplica de verdad, porque es donde nadie cree estar
+sugiriendo nada:*
+
+- ✅ **LEGAL — los ejemplos de FORMATO** en placeholders y en prompts de IA:
+  *«Ej. 1 comprimido»*, *«cada 12 h»*, *«7 días»*. **Enseñan a escribir, no
+  qué recetar.**
+- 🔴 **JAMÁS — nombres de fármaco o de principio activo como ejemplo**, en
+  ningún lugar: ni en un `placeholder`, ni en un texto de ayuda, ni en un
+  prompt de IA, ni en un valor por defecto.
+
+> *Un placeholder que dice un fármaco es una sugerencia con letra gris.* Y es
+> peor que una sugerencia explícita, porque **nadie lo revisa como si lo
+> fuera**: entra como microcopy y sale como criterio clínico.
+
+⚠️ **Esta frontera se audita en cada pantalla que capture medicación** — es
+la clase de línea que un `placeholder` bienintencionado cruza en un commit
+de acabado.
+
 **Estado: CANDIDATA.** No rige hasta la firma del founder.
