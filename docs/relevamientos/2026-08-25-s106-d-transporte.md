@@ -446,6 +446,17 @@ del servidor propio, que se factura muy distinto.
 razón ④.** *La razón que parecía la más abstracta de las cinco es la que
 resuelve el problema más concreto.*
 
+> ## ✅ CERRADO — gate del founder, 26-ago-2026 *(nota de A; el párrafo de D se conserva entero)*
+>
+> **El riesgo de abajo se ejerció y no ocurrió.** Dos dispositivos, red real
+> de Quito, APK autónomos: se ven y se oyen en los dos sentidos. Acta:
+> `docs/actas/2026-08-26-s106-GATE-CABLE-LIVEKIT.md`.
+>
+> **La medición de D no se corrige — se confirma.** Tenía razón en no
+> cerrarlo sola: *ausencia de reportes no es evidencia de compatibilidad*, y
+> la única forma de saberlo era construir. **Se retira la escalera de caída**
+> (plugin genérico → Agora): su único disparo era este párrafo.
+
 ⚠️ **Y el riesgo que la recomendación NO cierra:** el **config plugin de Expo
 de LiveKit no se toca desde el 17-mar-2026 — tres meses antes de que SDK 57
 existiera.** No hay issues reportadas de SDK 57 en ningún repo del set, pero

@@ -22389,3 +22389,21 @@ solo el de la cámara, que **ya existía y ahora cambia de significado**.
 ☠️ **Disparo: la tanda 2**, junto con el módulo nativo — antes de que la
 primera familia vea el diálogo. *Es ficha y no obra a propósito: la cadena
 nueva es decisión de voz y la firma el founder con el lote.*
+
+---
+
+## 🟢 D-933 — LA PANTALLA DEL CABLE NO MUESTRA PREVIEW PROPIO
+
+**Observación del founder en el gate del 26-ago-2026, anotada COMO
+OBSERVACIÓN y no como defecto** — la distinción es suya y es la correcta:
+
+> **No es transporte: es vista local.** La pantalla existía **para probar el
+> cable**, no para ser completa.
+
+Y el verde del gate lo respalda: **el punto ③ pasó viéndose en AMBOS
+sentidos** — *cada aparato vio la cámara del otro*, que es justo lo que un
+preview propio NO prueba. *Un preview local funcionando demuestra que la
+cámara abre, no que haya transporte.*
+
+☠️ **Disparo: la in-call real de la tanda 2**, que sí lo lleva. No hay nada
+que curar en la pantalla del cable — su trabajo terminó.

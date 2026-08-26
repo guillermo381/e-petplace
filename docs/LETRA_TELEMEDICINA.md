@@ -210,7 +210,24 @@ Verificación técnica de red o hardware · consulta asíncrona · ~~receta a
 distancia (hasta que el abogado se pronuncie)~~ **ver la enmienda de abajo:
 la PRESCRIPCIÓN entra; la EMISIÓN del documento REV no** · el incentivo con
 IA para evaluar criticidad (v2) · el transporte de video, que **es módulo
-nativo y no viaja por OTA** — su tren de build lo decide la mesa.
+nativo y no viaja por OTA** — ~~su tren de build lo decide la mesa~~
+**DECIDIDO Y EJERCIDO: LiveKit Cloud, ver abajo.**
+
+> ### ✅ EL TRANSPORTE QUEDA FIRMADO SIN CONDICIÓN — gate del founder, 26-ago-2026
+>
+> **LiveKit Cloud.** Corrido en **dos dispositivos, red real de Quito**, con
+> APK autónomos: se ven y se oyen **en ambos sentidos**. Acta con los cinco
+> puntos y los `sha256`:
+> `docs/actas/2026-08-26-s106-GATE-CABLE-LIVEKIT.md`.
+>
+> ☠️ **Se retira la escalera de caída** (plugin genérico de Expo → Agora):
+> existía para el caso de que el config plugin de LiveKit no funcionara bajo
+> SDK 57, **y ese caso se midió y no ocurrió** ⇒ no queda condición que la
+> dispare. *Una escalera sin disparo no es una red: es un camino que alguien
+> va a tomar por las dudas.*
+>
+> ⚠️ **Lo que este verde NO abre:** el servicio. `reservable` sigue en
+> `false` — **firma el transporte, no el encendido.**
 
 ### ✅ ENMIENDA · LA RECETA — firma founder CP1 S106, 25-ago-2026
 
