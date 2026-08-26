@@ -44,15 +44,12 @@ export interface EncabezadoLlamadaProps {
 }
 
 export function EncabezadoLlamada({ nombre, estado, vozEstado, inicioTs, insetTop = 0 }: EncabezadoLlamadaProps) {
-  const reconectando = estado === 'reconectando'
   return (
     <LinearGradient
       colors={sobreVideo.velo}
       style={{ paddingTop: insetTop + spacing[3], paddingHorizontal: spacing[4], paddingBottom: spacing[6] }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-        {/* El punto va PEGADO al nombre: modifica al nombre, no flota solo. */}
-        {!reconectando && <EstadoConexion estado={estado} voz={vozEstado} />}
         <View style={{ flex: 1 }}>
           <Texto variante="seccion" color="sobreVideo">
             {nombre}
@@ -61,13 +58,13 @@ export function EncabezadoLlamada({ nombre, estado, vozEstado, inicioTs, insetTo
         <TemporizadorLlamada inicioTs={inicioTs} />
       </View>
 
-      {/* Reconectando ocupa su propia línea: es el único que lleva palabras y
-          no puede pelear el ancho con el nombre. */}
-      {reconectando && (
-        <View style={{ marginTop: spacing[2] }}>
-          <EstadoConexion estado={estado} voz={vozEstado} />
-        </View>
-      )}
+      {/* §1.6 de la dirección: **«Bajo el nombre, una línea discreta»**. Va
+          DEBAJO y no al lado — al lado competía con el nombre por el ancho, y
+          con «Reconectando…» lo habría empujado. Los tres estados usan el
+          mismo lugar: el que crece no se muda, crece donde ya estaba. */}
+      <View style={{ marginTop: spacing[1.5] }}>
+        <EstadoConexion estado={estado} voz={vozEstado} />
+      </View>
     </LinearGradient>
   )
 }

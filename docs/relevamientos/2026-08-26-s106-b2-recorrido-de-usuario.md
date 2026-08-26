@@ -8,50 +8,80 @@
 
 ---
 
-# 🔴 FRENO DE ENTRADA — la dirección de arte «adjunta» NO existe en el repo
+# ✅ EL FRENO DE ENTRADA — CORRECTO AL MEDIR, VENCIDO AL MERGEAR
 
-Medido antes de escribir una línea, contra el objeto:
+**Lo que este documento decía al abrirse:** que la dirección de arte «adjunta»
+no existía en el repo, medido con `git log` sobre `DIRECCION_ARTE.md`.
 
-| medición | comando | resultado |
-|---|---|---|
-| ¿hay documento de arte de tanda 2? | `ls docs/` + `grep` por *control sobre video · scrim · in-call · videollamada* | **no existe** |
-| ¿`DIRECCION_ARTE.md` ganó §1-§3 nuevos? | `git log 09def031..HEAD -- docs/DIRECCION_ARTE.md` | **vacío — no se tocó en toda S106** |
+**La medición era verdadera y ya no lo es.** Se midió sobre `main = 6bf81d12`;
+A depositó la dirección **después**, en `71090247`, partida en dos:
+`DIRECCION_ARTE.md` **§6septies** (la clase) y
+**`docs/DIRECCION_ARTE_VIDEOCONSULTA.md`** (el contrato de las dos pantallas).
 
-**Es la tercera vez en esta sesión que el prompt afirma que algo llegó y el
-objeto dice que no** (la letra «ya enmendada» en tanda 1, y ahora esto).
+🔴 **Y se corrige la CONCLUSIÓN, no solo el dato:** este documento lo llamó
+*«la tercera vez que el prompt afirma y el objeto niega»*. **Eso era un patrón
+inventado.** Medir antes de un merge y encontrar que algo no está no es lo
+mismo que una afirmación falsa — *y dejar escrito un patrón que no existe es
+peor que el error puntual, porque el patrón es lo que la próxima sesión va a
+creer sin volver a medirlo.*
 
-**Diferencia con aquella vez, y por eso NO se frena entero:** allá el repo tenía
-una versión distinta que podía contradecir; **acá el repo no tiene nada, y el
-prompt sí trae dirección sustantiva y numérica.** Frenar del todo perdería el
-turno sin proteger ninguna letra.
+## EL CONTRASTE CONTRA EL DOCUMENTO DEPOSITADO
 
-⇒ **Lo que se hace:** se construye con lo que el prompt trae, **cada número
-declarado con su procedencia** (prompt · skill · decisión propia), y **este
-documento pasa a ser el registro de la dirección aplicada** — porque si el
-documento no está, lo que se escriba acá es lo que la próxima sesión va a leer.
+**§6septies coincide con lo construido punto por punto, sin coordinación** —
+incluida la elección de citar §6ter como molde y de **no enmendar la Ley 12**.
+*Dos pistas leyendo la misma letra llegaron a la misma clase: eso dice que la
+letra vieja estaba bien escrita.*
 
-## 🔴 Y UN CHOQUE REAL DE NÚMEROS, que no se resuelve en silencio
+### Lo que DIVERGÍA, y se enmendó
 
-El prompt pide **250 ms** (intercambio) y **200 ms** (imán, ocultar chrome).
-**El vocabulario del movimiento es CERRADO y está firmado por la mesa**
-(13-ago-2026, `motion.ts`):
+| § | la dirección | lo construido | resolución |
+|---|---|---|---|
+| **§2** 🔴 | **CUATRO** controles: mic · cámara · **girar cámara** · colgar, y *«que no se esconda junto al resto del chrome»* | tres | ✅ **nace `girarCamara`** y se exceptúa del ocultado, como colgar |
+| **§2** | «La doctora está escribiendo…», **se desvanece sola a los 3 s** | no existía | ✅ **`senalDeNota`**, fuera del chrome (que el vet escriba no depende de que yo toque la pantalla) |
+| **§1.6** | *«Bajo el nombre, una línea discreta»* | el punto al LADO del nombre | ✅ movido **debajo**; los tres estados usan el mismo lugar — *el que crece no se muda, crece donde ya estaba* |
 
-> *«Un bezier, tres duraciones: **150 micro · 300 estándar · 520 grande**. Qué
-> se anima es lista cerrada. **Nada más se mueve.**»*
+### Lo que diverge Y SE DECLARA, sin cambiarlo
 
-| pedido | ¿existe como token? |
-|---|---|
-| 150 | ✅ `duration.micro` |
-| 200 | ❌ **no existe** |
-| 250 | ⚠️ existe como **`legacy_normal`**, marcado legado — y su propio comentario cuenta que *«una pista casi lo usa en una pieza nueva creyendo que era el estándar; la frenó un comentario, no un gate»* |
+**§1.4 pide «sombra suave» para separar el tile; se usó ANILLO.** No es
+desobediencia: es la misma intención con el medio que sí rinde. **Medido —
+una sombra tiene el problema del disco: no separa sobre fondo oscuro.** El
+anillo da **4.11** contra negro puro, verificado en `verify-contrast.ts`.
+*La dirección pide que el tile se separe del fondo no controlado; el anillo es
+lo que cumple esa frase en los dos extremos.* **Si la mesa prefiere la sombra
+igual, es una línea.**
 
-**Decisión, declarada:** se construye con **`micro` (150)** y **`estandar`
-(300)**. Razón: el prompt ordena *«los tokens mandan y NINGÚN color, radio,
-espaciado o tipografía se inventa»* — **una duración es lo mismo**, y el único
-vocabulario firmado y depositado es el de N10.
+### ✅ Los tiempos: RATIFICADOS, no enmendados
 
-*Si el founder ratifica 200/250, es enmienda del token y una línea: los números
-no viven en las piezas.* **Se declara para que sea una firma y no un descuido.**
+`DIRECCION_ARTE_VIDEOCONSULTA` §1.3/§1.4/§1.7 escribe **200/250 ms**. La mesa
+lo resolvió **a favor de los tokens** (founder, 26-ago): *«eran intención
+—“rápido”, “suave”—, no medición: los escribió la mesa, no una regla, y **abrir
+un vocabulario cerrado y firmado por una preferencia es el peor motivo que
+hay**»*. Rige `micro` (150) y `estandar` (300).
+
+⚠️ **Queda una nota para quien lea la dirección después:** su texto sigue
+diciendo 200/250. **La firma es posterior y manda** — se anota acá para que
+nadie lo construya de vuelta leyendo solo el documento.
+
+**Y un criterio quedó registrado por la mesa:** *volver más rápido de lo que se
+va — irse puede ser gradual, volver tiene que sentirse inmediato.*
+
+### Lo que la dirección pide y NO entra en esta tanda
+
+**El pre-join** (§2) · **el cuadro congelado** y su flash de 120 ms (§3) ·
+**`FLAG_SECURE`** · el arrastre del modal **por el encabezado además del asa**
+(§3) · **«colgar pregunta una vez»** (§2) — *la pieza no la impone: llama a
+`onColgar` y la confirmación es del consumidor, porque preguntar es voz.*
+**No estaban entre las obras 1-7 de esta tanda; se listan para que se vea que
+están identificados y no olvidados.**
+
+### Una lectura declarada, para que la mesa la confirme
+
+**Decisión ① dice «dos pantallas, no una con condicionales… comparten solo las
+piezas de video».** `SuperficieLlamada` comparte **más** que el video: trae el
+chrome y los controles. **Medido: cero condicionales de rol adentro** — el
+prestador le monta su modal por el slot `pie`, y no hay ni un `if (esVet)`.
+*El riesgo que la decisión ① nombra —«cada lado cargando el peso del otro»— no
+ocurre.* **Pero es interpretable y por eso se declara en vez de darse por bueno.**
 
 ---
 

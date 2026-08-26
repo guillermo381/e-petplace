@@ -25,15 +25,13 @@
  * · **El toque intercambia** con `duration.estandar` (300 ms), y ese cambio lo
  *   ejecuta el consumidor: la pieza avisa, no decide quién va grande.
  *
- * ⚠️ **CHOQUE DE NÚMEROS DECLARADO (no resuelto en silencio).** La dirección de
- * tanda 2 pidió **200 ms** (imán) y **250 ms** (intercambio). **El vocabulario
- * del movimiento es CERRADO y está firmado** (`motion.ts`, mesa 13-ago-2026):
- * *«150 micro · 300 estándar · 520 grande. Qué se anima es lista cerrada.
- * Nada más se mueve.»* **200 no existe como token**, y 250 vive como
- * `legacy_normal`, cuyo propio comentario cuenta que una pista casi lo usa en
- * una pieza nueva creyendo que era el estándar.
- * ⇒ **Se construye con el vocabulario firmado.** Si el founder ratifica
- * 200/250, es enmienda del TOKEN y una línea — los números no viven acá.
+ * ✅ **LOS NÚMEROS, RESUELTOS POR LA MESA (26-ago).** `DIRECCION_ARTE_VIDEOCONSULTA`
+ * §1.4 escribe **250 ms** (intercambio) y **200 ms** (imán); **el vocabulario del
+ * movimiento es CERRADO y está firmado** (`motion.ts`, 13-ago): *«150 micro ·
+ * 300 estándar · 520 grande. Nada más se mueve.»*
+ * **El founder RATIFICÓ LOS TOKENS:** *«eran intención, no medición — los
+ * escribió la mesa, no una regla, y abrir un vocabulario cerrado y firmado por
+ * una preferencia es el peor motivo que hay.»* ⇒ rige `micro`.
  *
  * ── ACCESIBILIDAD: el arrastre no puede ser el único camino ────────────────
  * El tile es `button` con su etiqueta, y **el toque (intercambiar) hace el

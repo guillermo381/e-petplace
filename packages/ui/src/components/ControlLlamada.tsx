@@ -19,6 +19,14 @@
  * su segundo caso.* Si algún día se quieren en el registry, es otra tanda con
  * su gate por ícono; meterlos hoy los ataría a una ley que no los gobierna.
  *
+ * ── 🔴 «GIRAR CÁMARA» ES ACCIÓN, NO INTERRUPTOR (§2 de la dirección) ───────
+ * La dirección lo marca en rojo: *«va a ser el botón más usado de esta
+ * pantalla — ambas cámaras arrancan frontales y el momento de mostrar al animal
+ * llega en toda consulta. Que sea obvio, grande y no se esconda junto al resto
+ * del chrome.»* Por eso **no lleva `activo`** (no hay estado que cortar: girar
+ * es un acto) y **`SuperficieLlamada` lo exceptúa del ocultado**, junto a
+ * colgar.
+ *
  * ── EL DESTRUCTIVO ES DISTINTO, Y A PROPÓSITO ──────────────────────────────
  * `colgar` va en **masa plena roja**, no en disco translúcido: es el único
  * control que **jamás se esconde** (OBRA 4) y el único cuyo toque termina algo.
@@ -39,7 +47,7 @@ import { sobreVideo } from '../tokens/sobreVideo'
 import { radius } from '../tokens/radius'
 import { usePresionado } from './usePresionado'
 
-export type ControlLlamadaGlifo = 'microfono' | 'camara' | 'colgar'
+export type ControlLlamadaGlifo = 'microfono' | 'camara' | 'girarCamara' | 'colgar'
 
 export interface ControlLlamadaProps {
   glifo: ControlLlamadaGlifo
@@ -58,7 +66,7 @@ export interface ControlLlamadaProps {
 const LADO = { md: 52, lg: 60 } as const
 
 /** Los tres glifos, en masa/trazo grueso — se leen a 24 px sobre cualquier fondo. */
-function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean }) {
+function Glifo({ nombre, color, cortado, fondoDelGlifo }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean; fondoDelGlifo: string }) {
   const t = 2
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -73,6 +81,21 @@ function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color:
         <>
           <Rect x="2.5" y="6.5" width="13" height="11" rx="2.5" fill={color} />
           <Path d="M16.5 11l5-3v8l-5-3z" fill={color} />
+        </>
+      )}
+      {nombre === 'girarCamara' && (
+        /* Cámara con flecha de vuelta: el gesto de dar vuelta, no un ícono de
+           «configurar cámara». La flecha es lo que se lee a 24 px. */
+        <>
+          <Rect x="3" y="7" width="18" height="12" rx="3" fill={color} opacity={0.9} />
+          <Path
+            d="M8.5 13.2a3.6 3.6 0 0 1 6.2-2.2M15.5 12.8a3.6 3.6 0 0 1-6.2 2.2"
+            stroke={fondoDelGlifo}
+            strokeWidth={1.9}
+            strokeLinecap="round"
+          />
+          <Path d="M14.2 9.4l1.2 1.6-2 .3z" fill={fondoDelGlifo} />
+          <Path d="M9.8 16.6l-1.2-1.6 2-.3z" fill={fondoDelGlifo} />
         </>
       )}
       {nombre === 'colgar' && (
@@ -92,7 +115,10 @@ export function ControlLlamada({ glifo, etiqueta, onPress, activo = true, tamañ
   const { handlers, estiloPresionado } = usePresionado()
   const lado = LADO[tamaño]
   const esColgar = glifo === 'colgar'
-  const cortado = !esColgar && !activo
+  /* `girarCamara` no tiene estado encendido/apagado: es una ACCIÓN, no un
+     interruptor. Nunca se dibuja cortada. */
+  const esAccion = esColgar || glifo === 'girarCamara'
+  const cortado = !esAccion && !activo
 
   // Cortado invierte: el disco se aclara y el glifo se oscurece.
   const fondo = esColgar ? sobreVideo.colgar : cortado ? sobreVideo.contenido : sobreVideo.disco
@@ -104,7 +130,7 @@ export function ControlLlamada({ glifo, etiqueta, onPress, activo = true, tamañ
       {...handlers}
       accessibilityRole="button"
       accessibilityLabel={etiqueta}
-      {...(esColgar ? {} : { accessibilityState: { checked: activo } })}
+      {...(esAccion ? {} : { accessibilityState: { checked: activo } })}
       hitSlop={8}
     >
       {/* `Animated.View` y no `View`: `estiloPresionado` lleva las props de
@@ -127,7 +153,7 @@ export function ControlLlamada({ glifo, etiqueta, onPress, activo = true, tamañ
           estiloPresionado,
         ]}
       >
-        <Glifo nombre={glifo} color={tinta} cortado={cortado} />
+        <Glifo nombre={glifo} color={tinta} cortado={cortado} fondoDelGlifo={fondo} />
       </Animated.View>
     </Pressable>
   )

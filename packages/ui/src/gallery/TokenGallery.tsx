@@ -2692,6 +2692,7 @@ function GaleriaInterna() {
               <View style={{ backgroundColor: fondo, padding: spacing[4], borderRadius: radius.md, flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
                 <ControlLlamada glifo="microfono" etiqueta="Micrófono" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
                 <ControlLlamada glifo="camara" etiqueta="Cámara" activo={camViva} onPress={() => setCamViva((v) => !v)} />
+                <ControlLlamada glifo="girarCamara" etiqueta="Girar cámara" onPress={() => {}} />
                 <ControlLlamada glifo="colgar" tamaño="lg" etiqueta="Colgar" onPress={() => {}} />
                 <TemporizadorLlamada inicioTs={inicioLlamada} />
               </View>
@@ -2751,7 +2752,9 @@ function GaleriaInterna() {
               onMicrofono={() => setMicVivo((v) => !v)}
               onCamara={() => setCamViva((v) => !v)}
               onColgar={() => {}}
-              vozControles={{ microfono: 'Micrófono', camara: 'Cámara', colgar: 'Colgar' }}
+              vozControles={{ microfono: 'Micrófono', camara: 'Cámara', colgar: 'Colgar', girarCamara: 'Girar cámara' }}
+              onGirarCamara={() => {}}
+              senalDeNota="La doctora está escribiendo en la historia de Thor"
               pie={<AsaModal etiqueta="Abrir la ficha" onPress={() => setAltModal('medio')} />}
             />
           </View>
