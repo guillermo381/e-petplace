@@ -1,12 +1,46 @@
 -- ══════════════════════════════════════════════════════════════════════════
--- REVERSA de 20260826170000_s105a_retomar_no_aparta.sql
--- Escrita ANTES de aplicar.
--- QUÉ DESHACE: `retomar_compra` vuelve a re-apartar stock por su cuenta.
--- 🔴 CONSECUENCIA: vuelve la DUPLICACIÓN — retomar aparta y el checkout aparta
--- otra vez segundos después. Y si la persona retoma y no llega al checkout,
--- **el stock queda bloqueado 180 minutos para alguien que sí podía comprar**,
--- por una acción que no puede terminar.
--- ⚠️ Las reservas ya tomadas por el camino viejo NO se liberan acá: vencen solas.
+-- S105-A · RETOMAR NO APARTA — la duplicación que yo mismo introduje
+--
+-- 🔴 DEFECTO PROPIO, medido el mismo día que lo escribí. `retomar_compra`
+-- llamaba a `reservar_stock_pedido`, y **el checkout ya lo hace**:
+--     `crear_intento_pago` → `iniciar_pago_pedido` → `reservar_stock_pedido`
+--
+-- Y el del checkout **es mejor que el mío**: rebota `sin_stock` con el NOMBRE
+-- del producto, y su comentario lleva la ley — *«primero se aparta la
+-- mercadería, después se pide la tarjeta: si rebota, la persona ve la mala
+-- noticia ANTES de pagar — que es una mala noticia, pero no es un cobro que
+-- hay que devolver»*.
+--
+-- ⚠️ NO ERA INOFENSIVO: `retomar_compra` está **alcanzable por
+-- `authenticated`** (medido). Si alguien retomaba y no llegaba al checkout,
+-- la reserva quedaba **180 minutos bloqueándole el stock a alguien que sí
+-- podía comprar**, por una acción que no terminó. *Un botón que no puede
+-- terminar es peor cuando además mueve inventario.* Lo levantó la pista C.
+--
+-- ⚠️ LA FIRMA DEL FOUNDER SE CUMPLE IGUAL. Pidió *«re-apartar el stock es
+-- parte del acto de retomar — si falla, la compra no se retoma y se dice por
+-- qué»*, y su intención era **que no se prometa lo que no se puede cumplir**.
+-- Eso lo garantiza el CENSO DE DISPONIBILIDAD, que sigue completo y antes de
+-- tocar nada: si un ítem no está, no se retoma y se nombra cuál.
+-- *Apartar era la forma, no el fin — y la forma duplicada hacía daño.*
+--
+-- ☠️ MUERE el código `stock_insuficiente` de esta función. **No se pierde el
+-- caso:** lo dice el checkout, con el nombre del producto, que es más de lo
+-- que decía acá.
+--
+-- 76(g) — VEDA: **NO RIGE.** DDL puro.
+-- ⚠️ RENUMERADA DE `…170000` A `…180000` — COLISIÓN CON LA PISTA D, medida.
+-- Las dos pistas eligieron `20260826170000` y **las dos migraciones corrieron
+-- de verdad** (verificado contra el objeto: `retomar_compra` ya no aparta Y
+-- `resolver_alta_tarjeta` devuelve `insertada`). **Lo que se perdió fue el
+-- REGISTRO**: `schema_migrations` sólo pudo nombrar a una, y el `ON CONFLICT
+-- DO NOTHING` hizo que la segunda pasara en silencio.
+-- *Dos archivos con el mismo número no rompen el objeto — rompen la
+-- auditoría: mañana nadie sabría que hubo dos.* Es `L-422` otra vez, y esta
+-- vez el número se verificó contra `schema_migrations` **y contra el
+-- directorio**, porque el ledger no muestra lo que otra pista tiene sin aplicar.
+--
+-- REVERSA escrita ANTES: `docs/relevamientos/S105-A-REVERSA-20260826180000.sql`
 -- ══════════════════════════════════════════════════════════════════════════
 
 CREATE OR REPLACE FUNCTION public.retomar_compra(p_compra_id uuid)
@@ -141,16 +175,23 @@ BEGIN
      Si falla, la excepción sube y **toda la función se deshace**: los precios
      ajustados se revierten con ella. *Una compra con el precio nuevo y sin
      stock apartado sería exactamente el botón que promete lo que no puede.* */
-  FOR v_ped IN SELECT id FROM pedidos WHERE compra_id = p_compra_id
-                AND estado NOT IN ('cancelado_sistema','cancelado_cliente','cancelado_vendedor')
-  LOOP
-    BEGIN
-      PERFORM reservar_stock_pedido(v_ped.id, 180);
-    EXCEPTION WHEN OTHERS THEN
-      RETURN jsonb_build_object('ok', false, 'codigo', 'stock_insuficiente',
-        'retomada', false, 'pedido', v_ped.id, 'causa', SQLERRM);
-    END;
-  END LOOP;
+  /* 🔴 ACÁ SE APARTABA EL STOCK, Y ERA UNA DUPLICACIÓN. Medido:
+     `crear_intento_pago` → `iniciar_pago_pedido` → `reservar_stock_pedido`.
+     **El checkout ya aparta, y mejor que esto**: rebota `sin_stock` CON EL
+     NOMBRE DEL PRODUCTO, y su propio comentario lleva la ley — *«primero se
+     aparta la mercadería, después se pide la tarjeta: si rebota, la persona ve
+     la mala noticia ANTES de pagar»*.
+
+     ⇒ apartar acá **no adelantaba nada y hacía daño**: si la persona retoma y
+     no llega al checkout, la reserva queda 180 minutos **bloqueándole el stock
+     a alguien que sí podía comprar**, por una acción que no terminó.
+     *Un botón que no puede terminar es peor cuando además mueve inventario.*
+
+     ⚠️ LA FIRMA DEL FOUNDER SE CUMPLE IGUAL, y por eso esto no la contradice:
+     lo que pidió es **que no se prometa lo que no se puede cumplir**. El censo
+     de disponibilidad —que sigue arriba, completo y antes de tocar nada— es
+     lo que da esa garantía; apartar era la forma, no el fin. *La reserva la
+     toma quien va a cobrar, en el mismo acto en que cobra.* */
 
   UPDATE compras SET estado = 'esperando_pago', updated_at = v_ahora
    WHERE id = p_compra_id AND estado = 'creada';
@@ -167,3 +208,42 @@ BEGIN
     'bajo_de_precio', (jsonb_array_length(v_ajustes) > 0));
 END $function$
 ;
+
+
+DO $cint$
+DECLARE v_aparta boolean; v_censa boolean; v_checkout boolean;
+BEGIN
+  /* 🔴 SE BUSCA LA LLAMADA, NO LA PALABRA — `L-170`, y me la cobré acá mismo:
+     la v1 de este assert buscaba `%reservar_stock_pedido%` y **la encontraba en
+     el comentario que explica por qué ya no se llama** ⇒ rojo sobre una cura
+     correcta. *Un censo por `prosrc` lee los comentarios como código, y el
+     comentario de una cura habla justamente de lo que la cura sacó.* */
+  SELECT prosrc ILIKE '%PERFORM reservar_stock_pedido%'
+      OR prosrc ~ 'reservar_stock_pedido[[:space:]]*\('
+    INTO v_aparta FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public' AND p.proname='retomar_compra';
+  IF v_aparta THEN
+    RAISE EXCEPTION 'CINTURÓN: retomar SIGUE apartando — la duplicación no se fue';
+  END IF;
+
+  /* 🔴 EL BRAZO QUE PRUEBA QUE LA FIRMA SE CUMPLE IGUAL: el censo de
+     disponibilidad tiene que seguir ahí. *Sin él, esto no sería quitar una
+     duplicación: sería quitar la garantía.* */
+  SELECT prosrc ILIKE '%producto_no_disponible%'
+    INTO v_censa FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public' AND p.proname='retomar_compra';
+  IF NOT v_censa THEN
+    RAISE EXCEPTION 'CINTURÓN: se fue el censo de disponibilidad — la garantía se perdió';
+  END IF;
+
+  -- y el checkout sigue siendo quien aparta
+  SELECT prosrc ILIKE '%iniciar_pago_pedido%'
+    INTO v_checkout FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+   WHERE n.nspname='public' AND p.proname='crear_intento_pago';
+  IF NOT v_checkout THEN
+    RAISE EXCEPTION 'CINTURÓN: el checkout dejó de apartar — ahora NADIE aparta';
+  END IF;
+
+  RAISE NOTICE 'CINTURÓN VERDE · retomar ya no aparta=% · censo intacto=% · el checkout aparta=%',
+    NOT v_aparta, v_censa, v_checkout;
+END $cint$;
