@@ -283,7 +283,10 @@
          estamos viendo» promete una gestión que nadie está haciendo.* Acá el
          alta queda abierta y vence sola; **nadie la mira.** Lo que sí es
          cierto es que el problema es nuestro y que reintentar puede servir. */
-      defectoNuestro: 'No pudimos guardar la tarjeta. El problema es nuestro.',
+      /* ☠️ `defectoNuestro` MURIÓ (Ley 37, 26-ago): su único sitio pasó a
+         `probaOtra` por firma del founder. Admitía culpa y no ofrecía nada —
+         y encima la culpa no estaba medida. *Su hermana `…Reintento` sigue
+         viva: ésa SÍ ofrece salida.* */
       /* ☠️ S101-D — acá vivía la ÚNICA línea en VOSEO de toda esta superficie
          («probá de nuevo»), contra las otras 19 en tuteo. Curada con el resto. */
       /* ⏪ Igual que la de arriba: se le quita la gestion que nadie hace y se
@@ -318,7 +321,6 @@
       guardando: 'Saving…',
       tardando: 'This is taking longer than usual. You can try again, or close and come back from the app.',
       revisaDatos: 'Check the card details.',
-      defectoNuestro: "We couldn't save the card. The problem is on our side.",
       defectoNuestroReintento: "We couldn't save the card. The problem is on our side — try again in a moment.",
       sinTerminar: "We saved your card with the processor, but couldn't finish. Try again.",
       probaOtra: "We couldn't save your card, try another one.",
@@ -815,10 +817,26 @@
         var card = (resp && resp.card) ? resp.card : {};
         if (!card.token) {
           enVuelo = false; refrescarBoton();   /* el vuelo terminó: el estado se DERIVA, no se fuerza */
-          /* 🔴 Una respuesta OK sin token **no es un veredicto del emisor**: es
-             una anomalía nuestra o del proveedor. *Decirle «probá con otra» la
-             manda a probar tarjetas que van a fallar todas igual.* */
-          decir(T.defectoNuestro, 'error');
+          /* 🔴 ⏪ ACÁ DECÍA `defectoNuestro` — «El problema es nuestro» — Y ERA
+             LO QUE EL FOUNDER VIO EN EL APARATO. Se cambia por firma suya
+             (26-ago) y **la razón corrige un error mío, no un gusto**.
+
+             Mi comentario afirmaba: *«decirle "probá con otra" la manda a
+             probar tarjetas que van a fallar todas igual»*. **Eso NUNCA se
+             midió.** Una respuesta OK sin `token` puede ser específica de esa
+             tarjeta —el emisor no rechazó, pero el proveedor tampoco
+             tokenizó— y **no tenemos con qué saberlo desde acá**.
+
+             ⇒ La firma, que vale para toda la familia ①: *«incluso en defecto
+             nuestro, si hay una acción que puede destrabarlo, se dice»*. Y su
+             corolario, que es el que desarma mi afirmación: **si funciona con
+             otra tarjeta, entonces el diagnóstico "es nuestro" era dudoso.**
+
+             *Admitir la culpa sin dar salida deja a la persona mirando una
+             pantalla que le informa DE QUIÉN ES LA CULPA y no QUÉ HACER.*
+             Ahora dice lo que pasó y lo único que puede destrabarlo, **sin
+             atribuir una causa que no medimos.** */
+          decir(T.probaOtra, 'error');
           return;
         }
         /* 🔴 Al servidor viajan el token y los METADATOS DE RECONOCIMIENTO.

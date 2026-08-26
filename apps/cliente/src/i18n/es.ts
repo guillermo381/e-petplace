@@ -1462,6 +1462,18 @@ export const clienteEs = {
     familiaMensajeCompartir: 'Te invito a nuestra familia en e-PetPlace para cuidar juntos a nuestras mascotas. Uníte acá: {{enlace}}',
     familiaInvitarOtra: 'Invitar a otra persona',
     familiaInvitarListo: 'Listo',
+    /* 🔴 S105-C · LA VOZ DE `ya_invitada`. Antes caía en el genérico «No
+       pudimos completar la invitación. Probá de nuevo» — voseado **y falso**:
+       la invitación previa no vence hasta el 22-sep, así que mandaba a
+       repetir algo imposible durante cuatro semanas.
+       ⚠️ **En TUTEO aunque el dictado vino en voseo** (`L-148`: la voz de
+       producto no hereda el acento de la mesa). */
+    familiaYaInvitada: 'Ya invitaste a esta persona el {{fecha}} y su invitación sigue abierta.',
+    /* ⚠️ **Dice lo que el botón ROMPE.** Cancelar invalida el enlace anterior,
+       y quien ya lo compartió necesita saberlo ANTES de tocar. */
+    familiaYaInvitadaCancelar: 'Cancelar la anterior',
+    familiaYaInvitadaAviso: 'Si la cancelas, el enlace que compartiste deja de funcionar.',
+    familiaYaInvitadaCancelada: 'Listo, cancelamos la invitación anterior. Ya puedes volver a invitarla.',
     familiaInvitarSinEnlace: 'El enlace todavía no está disponible. Prueba más tarde.',
     // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»

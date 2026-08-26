@@ -1227,6 +1227,10 @@ export const clienteEn = {
     familiaMensajeCompartir: 'I’m inviting you to our family on e-PetPlace to care for our pets together. Join here: {{enlace}}',
     familiaInvitarOtra: 'Invite someone else',
     familiaInvitarListo: 'Done',
+    familiaYaInvitada: 'You already invited this person on {{fecha}}, and that invitation is still open.',
+    familiaYaInvitadaCancelar: 'Cancel the previous one',
+    familiaYaInvitadaAviso: 'If you cancel it, the link you shared stops working.',
+    familiaYaInvitadaCancelada: 'Done, we cancelled the previous invitation. You can invite them again.',
     familiaInvitarSinEnlace: 'The link isn’t available yet. Try again later.',
     // Lote 4 (S88-D) — see es.ts for the Ley 37 tombstone and sources.
     notifLey: 'Choose how updates reach you. Some always arrive — you choose how.',
