@@ -1656,6 +1656,24 @@ export const prestadorEn = {
     otraDuracion: 'Other duration',
     otraDuracionAyuda: 'In 5-minute steps — from 10 to 240.',
     otraDuracionUsar: 'Use this duration',
+
+    /* ══ §6/§8 · TELEMEDICINE MINIMUMS ══
+       ⚠️ Traducción provisional — la letra se firmó en español y `R66` sólo
+       vigila `es`. Los cuatro puntos van completos igual: la prohibición de
+       §6 es contra prometer que se miden, no contra traducirlos. */
+    minimosTitulo: 'Before offering video consultations',
+    minimosIntro: 'To attend by video call, these four things need to be in place on your side:',
+    minimosConexion: 'Connection: 1.5 Mbps sustained upload.',
+    minimosCamara: 'Camera: your phone’s. We do not require a minimum resolution.',
+    minimosLuz: 'Lighting: a well-lit room. A poorly lit animal cannot be assessed, no matter how many megapixels the camera has.',
+    minimosAudio: 'Audio: headphones recommended, not required.',
+    minimosNoSeMiden: 'The system does not measure any of this: you are declaring it.',
+    minimosAceptar: 'I accept and turn on video consultations',
+    minimosPendiente: 'Pending: accept the minimums so families can see it',
+    minimosPendienteAyuda: 'You left it active, but it is not published yet.',
+    minimosRevisar: 'See the minimums',
+    minimosAceptados: 'Minimums accepted',
+    minimosErrorGuardar: 'We could not record your acceptance. Please try again.',
   },
   veterinaria: {
     titulo: 'Veterinary',
@@ -2128,6 +2146,20 @@ export const prestadorEn = {
     proximoTitulo: 'Suggested next visit',
     proximoDetalle: '{{control}}',
     cerrar: 'Done',
+
+    /* ══ §5 · THE CALL THAT DROPS ══ ⚠️ traducción provisional (la letra se
+       firmó en español). Las dos prohibiciones valen igual acá: no insinuar
+       culpa, y no prometer inmediatez. */
+    noRealizableAccion: 'The consultation could not take place',
+    noRealizableTitulo: 'Mark it as not completed?',
+    noRealizableCuerpo:
+      'This video consultation closes without a clinical note, and the refund is recorded.',
+    noRealizableDevolucion:
+      'The payment goes back to the client’s payment method. Support handles it, so it may take a few days.',
+    noRealizableConfirmar: 'Mark as not completed',
+    noRealizableHecho: 'Marked. Support will handle the refund.',
+    noRealizableHechoSinPago: 'Marked. There was no payment to refund.',
+    noRealizableError: 'We could not mark it. Please try again.',
   },
   equipo: {
     titulo: 'Your business',

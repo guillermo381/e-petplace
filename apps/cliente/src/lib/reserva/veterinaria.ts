@@ -88,6 +88,21 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
         fecha: ctx.fecha,
         hora: ctx.hora,
         ...(persona !== undefined ? { empleado_id: persona.empleadoId } : null),
+        /* ── OBRA 2 · EL CONSENTIMIENTO VIAJA EN EL HOLD ────────────────────
+           No hay una segunda llamada, y **no debe haberla**: la fila de
+           `consentimientos` nace en la MISMA transacción que la cita, así que
+           *una teleconsulta con hold y sin consentimiento es inexpresable* —
+           no prohibida por prosa.
+
+           Llegar acá con `telemedicina` implica haber pasado por el gate del
+           aviso: `tocarNegocio` es la única entrada y no deja seguir sin
+           `avisoAceptado`. Si alguna vez se abriera un segundo camino, el
+           motor **igual** rebota `consentimiento_requerido` — fail-closed.
+
+           🔴 **La VERSIÓN del texto NO se manda desde acá.** La pone el
+           servidor (misma ley que `documentosVigentes`): *la casa tiene UNA
+           respuesta a «qué texto vio», y no la decide la pantalla.* */
+        ...(ctx.tipoServicio === 'telemedicina' ? { acepta_teleconsulta: true } : null),
       });
       setCreandoHold(false);
       if (!r.ok) {

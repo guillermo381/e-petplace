@@ -25,21 +25,19 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Boton, Encabezado, EstadoVacio, Tarjeta, Texto, radius, spacing, useTheme } from '@epetplace/ui';
+import { Boton, Campo, Encabezado, EstadoVacio, Tarjeta, Texto, radius, spacing, useTheme } from '@epetplace/ui';
 
-import {
-  LIVEKIT_URL,
-  SALA_CABLE,
-  TOKEN_PRUEBA,
-  cableConfigurado,
-  livekit,
-  livekitMotivoFallo,
-} from '@/lib/livekit-cable';
+import { LIVEKIT_URL_DEFECTO, SALA_CABLE, livekit, livekitMotivoFallo } from '@/lib/livekit-cable';
 
 export default function CableLiveKit() {
   const router = useRouter();
   const { theme } = useTheme();
   const [conectar, setConectar] = useState(false);
+  /* El token se PEGA acá, uno distinto por aparato (spec §4). No vive en el
+     repo: ver el porqué en `lib/livekit-cable.ts`. */
+  const [url, setUrl] = useState(LIVEKIT_URL_DEFECTO);
+  const [token, setToken] = useState('');
+  const listo = url.trim().length > 0 && token.trim().length > 0;
 
   // El gate del andamio, idéntico al de `deuna-ensayo`.
   if (!__DEV__) {
@@ -85,36 +83,6 @@ export default function CableLiveKit() {
     );
   }
 
-  /* ── ② FALTA EL TOKEN ──────────────────────────────────────────────────
-     **Vacío honesto, jamás un botón que no puede funcionar.** El token lo
-     firma el founder con sus tres variables (spec §4); acá no hay forma de
-     generarlo porque los secrets de Supabase devuelven digest, no valor. */
-  if (!cableConfigurado) {
-    return (
-      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        {cabecera}
-        <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
-          <EstadoVacio
-            registro="pantalla"
-            titulo="Falta el token de prueba"
-            descripcion="El cable está montado pero todavía no tiene con qué conectarse."
-          />
-          <Tarjeta elevacion="reposo">
-            <View style={{ gap: spacing[2] }}>
-              <Texto variante="apoyo">Para generarlo, con las tres variables de LiveKit:</Texto>
-              <Texto variante="dato">cd supabase/functions/video-token</Texto>
-              <Texto variante="dato">node generar-token-prueba.mjs</Texto>
-              <Texto variante="apoyo">
-                Imprime la URL y dos tokens. Van en `src/lib/livekit-cable.ts` — uno por aparato:
-                el mismo token en los dos no prueba nada. Duran una hora.
-              </Texto>
-            </View>
-          </Tarjeta>
-        </ScrollView>
-      </View>
-    );
-  }
-
   const { LiveKitRoom } = livekit;
 
   return (
@@ -132,9 +100,32 @@ export default function CableLiveKit() {
         </Tarjeta>
 
         {!conectar ? (
-          <Boton variante="primario" etiqueta="Conectar" onPress={() => setConectar(true)} />
+          <Tarjeta elevacion="reposo">
+            <View style={{ gap: spacing[3] }}>
+              <Campo label="URL del servidor" value={url} onChangeText={setUrl} autoCapitalize="none" />
+              <Campo
+                label="Token de este aparato"
+                value={token}
+                onChangeText={setToken}
+                autoCapitalize="none"
+                multilinea={3}
+              />
+              {/* 🔴 El aviso que evita el falso verde: dos aparatos con el
+                  MISMO token no prueban los dos sentidos. */}
+              <Texto variante="apoyo">
+                Pegá el token A en un aparato y el B en el otro. El mismo token en los dos no prueba
+                nada. Duran 4 horas.
+              </Texto>
+              <Boton
+                variante="primario"
+                etiqueta="Conectar"
+                onPress={() => setConectar(true)}
+                deshabilitado={!listo}
+              />
+            </View>
+          </Tarjeta>
         ) : (
-          <LiveKitRoom serverUrl={LIVEKIT_URL} token={TOKEN_PRUEBA} connect audio video>
+          <LiveKitRoom serverUrl={url.trim()} token={token.trim()} connect audio video>
             <CuadritosDeCable />
           </LiveKitRoom>
         )}
