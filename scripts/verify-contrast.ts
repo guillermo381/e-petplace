@@ -25,6 +25,7 @@
 
 import { lightTheme, darkTheme, memorialTheme, getTheme, type Theme } from '../packages/ui/src/themes'
 import { palette } from '../packages/ui/src/tokens/palette'
+import { sobreVideo } from '../packages/ui/src/tokens/sobreVideo'
 import { superficieDelSegmentoActivo, superficieDelChip } from '../packages/ui/src/components/superficies'
 import { interiorDeCaja } from '../packages/ui/src/components/caja-de-campo'
 
@@ -581,6 +582,27 @@ const todos: Pair[] = [
     })),
   ),
 ]
+
+/* ═══ S106-B · LA CLASE «CONTROL SOBRE VIDEO» ═══════════════════════════════
+   El fondo lo pone la cámara de otro, así que se mide contra los DOS EXTREMOS
+   (blanco puro y negro puro) y no contra ningún tema. Los pares que se GATEAN
+   son los que tienen que pasar SIEMPRE; los dos canales de separación, que por
+   diseño se turnan, van informativos más abajo con su razón. */
+for (const [extremo, video] of [['video BLANCO', '#FFFFFF'], ['video NEGRO', '#000000']] as const) {
+  todos.push(
+    // El glifo dentro del disco. Es gráfico ⇒ 3:1 (WCAG 1.4.11).
+    { nombre: `GLOBAL · sobre video: contenido / disco (${extremo})`, fg: sobreVideo.contenido, bg: sobreVideo.disco, surface: video, noTextual: true },
+    // La banda lleva PROSA ⇒ 4.5:1, sin excepción.
+    { nombre: `GLOBAL · sobre video: texto / banda (${extremo})`, fg: sobreVideo.contenido, bg: sobreVideo.banda, surface: video },
+    // Colgar es masa plena: no depende del video debajo, pero se mide igual.
+    { nombre: `GLOBAL · sobre video: glifo / colgar (${extremo})`, fg: sobreVideo.colgarContenido, bg: sobreVideo.colgar, noTextual: true },
+  )
+}
+/* El canal que separa en cada extremo — gateado donde le toca trabajar. */
+todos.push(
+  { nombre: 'GLOBAL · sobre video: disco / video BLANCO (el disco separa en claro)', fg: sobreVideo.disco, bg: '#FFFFFF', surface: '#FFFFFF', noTextual: true },
+  { nombre: 'GLOBAL · sobre video: anillo / video NEGRO (el anillo separa en oscuro)', fg: sobreVideo.anillo, bg: '#000000', surface: '#000000', noTextual: true },
+)
 
 // Informativa (no gatea): tab inactivo de BarraTabs — decisión B3.7
 for (const [n, t] of [['LIGHT', lightTheme], ['DARK', darkTheme], ['MEMORIAL', memorialTheme]] as const) {
