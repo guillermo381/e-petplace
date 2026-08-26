@@ -71,6 +71,17 @@ export interface YaInvitada {
   fecha: string;
   /** La invitación que sigue abierta — para poder ofrecer cancelarla. */
   invitacionId: string;
+  /**
+   * 🔴 EL ENLACE. Sin esto sólo se podía ofrecer «cancelá la anterior», y el
+   * founder dictó **las dos salidas**: *«compartile el enlace o cancelá esa
+   * invitación»*.
+   *
+   * ⚠️ **ES UNA CREDENCIAL**: quien la tiene puede aceptar la invitación. El
+   * motor sólo se la devuelve a quien invitó —que ya la tenía cuando la creó—,
+   * así que no revela nada nuevo. **No la loguees ni la muestres suelta:** va
+   * adentro del enlace que se comparte, igual que en el alta.
+   */
+  token: string;
 }
 
 /** El motor habla por `message`; acá se traduce a código de la casa (regla 35). */
@@ -86,8 +97,11 @@ function mapear<T>(
      *Si el formato cambiara, esto degrada a la voz sin dato en vez de romper —
      una pantalla sin fecha es peor que ésta, pero mucho mejor que un crash.* */
   if (codigo === 'ya_invitada') {
-    const m = /ya_invitada\|([0-9]{4}-[0-9]{2}-[0-9]{2})\|([0-9a-f-]{36})/.exec(mensaje);
-    if (m) return { ...base, yaInvitada: { fecha: m[1], invitacionId: m[2] } };
+    const m = /ya_invitada\|([0-9]{4}-[0-9]{2}-[0-9]{2})\|([0-9a-f-]{36})\|([0-9a-f]{32,})/
+      .exec(mensaje);
+    if (m) {
+      return { ...base, yaInvitada: { fecha: m[1], invitacionId: m[2], token: m[3] } };
+    }
   }
   return base;
 }
@@ -111,7 +125,15 @@ export async function invitarAFamilia(input: {
   familiaId: string;
   email: string;
   nombre?: string;
-}): Promise<ResultadoWrapper<InvitacionCreada, CodigoInvitacionFamilia>> {
+}): Promise<
+  /* 🔴 EL TIPO DECLARA LO QUE YA VIAJA EN RUNTIME. `mapear` adjunta
+     `yaInvitada` desde S105-A y el tipo público no lo decía ⇒ la pantalla
+     tenía el dato y **el compilador se lo negaba**. La pista C frenó ahí en vez
+     de castear, y tuvo razón: *un `as` sobre nuestro propio wrapper es peor
+     que sobre un borde ajeno, porque acá el tipo se puede arreglar y castear
+     taparía la única señal de que estaba mal.* */
+  ResultadoWrapper<InvitacionCreada, CodigoInvitacionFamilia> & { yaInvitada?: YaInvitada }
+> {
   const { data, error } = await getClient().rpc('invitar_a_familia', {
     p_familia_id: input.familiaId,
     p_email: normalizarEmail(input.email),
