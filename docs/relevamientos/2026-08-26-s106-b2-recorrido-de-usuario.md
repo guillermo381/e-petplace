@@ -40,15 +40,21 @@ letra vieja estaba bien escrita.*
 | **§2** | «La doctora está escribiendo…», **se desvanece sola a los 3 s** | no existía | ✅ **`senalDeNota`**, fuera del chrome (que el vet escriba no depende de que yo toque la pantalla) |
 | **§1.6** | *«Bajo el nombre, una línea discreta»* | el punto al LADO del nombre | ✅ movido **debajo**; los tres estados usan el mismo lugar — *el que crece no se muda, crece donde ya estaba* |
 
-### Lo que diverge Y SE DECLARA, sin cambiarlo
+### ✅ La divergencia que quedaba — RESUELTA A FAVOR DE LA MEDICIÓN
 
-**§1.4 pide «sombra suave» para separar el tile; se usó ANILLO.** No es
-desobediencia: es la misma intención con el medio que sí rinde. **Medido —
-una sombra tiene el problema del disco: no separa sobre fondo oscuro.** El
-anillo da **4.11** contra negro puro, verificado en `verify-contrast.ts`.
-*La dirección pide que el tile se separe del fondo no controlado; el anillo es
-lo que cumple esa frase en los dos extremos.* **Si la mesa prefiere la sombra
-igual, es una línea.**
+**§1.4 pedía «sombra suave» para separar el tile; se usó ANILLO**, con esta
+razón: **una sombra tiene el mismo problema que el disco — no separa sobre
+fondo oscuro**, y el anillo da **4.11** contra negro puro, verificado.
+
+**La mesa adoptó el argumento POR ENCIMA DE SU PROPIA ESPECIFICACIÓN**
+(26-ago): *«"sombra suave" se escribió mirando un mock, no un fondo no
+controlado — y una sombra no separa sobre fondo oscuro, que es exactamente lo
+que un video en vivo puede ser en cualquier momento»*. **El anillo se queda; la
+enmienda a §1.4 está encargada a A.**
+
+> *Lo que hizo mover la especificación no fue el argumento: fue que el
+> argumento traía un número medido contra el peor caso. Una preferencia contra
+> una medición pierde — incluso cuando la preferencia es la que estaba escrita.*
 
 ### ✅ Los tiempos: RATIFICADOS, no enmendados
 
@@ -71,8 +77,11 @@ va — irse puede ser gradual, volver tiene que sentirse inmediato.*
 **`FLAG_SECURE`** · el arrastre del modal **por el encabezado además del asa**
 (§3) · **«colgar pregunta una vez»** (§2) — *la pieza no la impone: llama a
 `onColgar` y la confirmación es del consumidor, porque preguntar es voz.*
-**No estaban entre las obras 1-7 de esta tanda; se listan para que se vea que
-están identificados y no olvidados.**
+**No estaban entre las obras 1-7 de esta tanda.** ✅ **Y ya tienen dueño: los
+cinco son de C y están en su encargo** (mesa, 26-ago) — incluido «colgar
+pregunta una vez», que la mesa confirmó que es **voz del consumidor**.
+*Se listan igual, porque un faltante con dueño sigue siendo un faltante hasta
+que alguien lo construye.*
 
 ### Una lectura declarada, para que la mesa la confirme
 
@@ -81,7 +90,13 @@ piezas de video».** `SuperficieLlamada` comparte **más** que el video: trae el
 chrome y los controles. **Medido: cero condicionales de rol adentro** — el
 prestador le monta su modal por el slot `pie`, y no hay ni un `if (esVet)`.
 *El riesgo que la decisión ① nombra —«cada lado cargando el peso del otro»— no
-ocurre.* **Pero es interpretable y por eso se declara en vez de darse por bueno.**
+ocurre.*
+
+✅ **LEÍDA CUMPLIDA POR LA MESA (26-ago), y con su condición de reapertura
+escrita:** *«nombraba un riesgo y mediste que no ocurre… **no queda deuda; si
+algún día aparece el primer `if (esVet)` adentro, ahí se parte»**.*
+**Ese `if` es el disparo, y queda anotado acá porque es donde alguien lo va a
+buscar** — no en un acta.
 
 ---
 
