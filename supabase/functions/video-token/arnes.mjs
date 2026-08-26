@@ -26,7 +26,9 @@
  *   JWT_AJENO=...        # sesión de cualquier otra persona
  *   ANON_KEY=...         # la anon key PÚBLICA del proyecto (no es secreto:
  *                        # viaja en el bundle). Prueba el guard de D-714.
- *   CITA_TELE=<uuid>     # teleconsulta pagada, EN ventana
+ *   CITA_TELE=<uuid>     # teleconsulta pagada, EN ventana, del DUEÑO de JWT_DUENO
+ *   CITA_AJENA=<uuid>    # teleconsulta de OTRA familia (ajeno es relación,
+ *                        # no identidad) — idealmente EN ventana
  *   CITA_FUERA=<uuid>    # teleconsulta pagada, FUERA de ventana
  *   CITA_CANCELADA=<uuid>
  *   CITA_TIPO_SIN_MODALIDAD=<uuid>   # tipo_servicio='telemedicina' PERO
@@ -156,8 +158,19 @@ await caso('anon key (JWT válido, sin persona) — D-714', {
   jwt: process.env.ANON_KEY, cita: CITA_TELE,
   espera: 'sin_token', codigo: 'sin_sesion',
 });
-await caso('ajeno a la cita', {
-  jwt: JWT_AJENO, cita: CITA_TELE, espera: 'sin_token', codigo: 'ajeno_a_la_cita',
+/* 🔴 CITA **AJENA**, no la propia — y el error lo destapó correr esto.
+   La versión anterior apuntaba este caso a `CITA_TELE`, la cita del camino
+   feliz, y sólo funcionaba si `JWT_AJENO` era de otra persona.
+   **Ajeno es una RELACIÓN, no una identidad:** la misma sesión es dueña de
+   una cita y ajena a otra. Con la cuenta demo apuntando a su propia cita el
+   caso devolvía `fuera_de_ventana` — *rebotaba, pero por la razón
+   equivocada, que está tan roto como un verde por la razón equivocada.*
+   ⇒ `CITA_AJENA` es una cita **de otra familia** y, si es posible, **EN
+   ventana**: así el rechazo sólo puede venir de la identidad, y de paso
+   prueba el orden de A (identidad ANTES que estado). */
+await caso('ajeno a la cita (cita de OTRA familia)', {
+  jwt: JWT_AJENO, cita: process.env.CITA_AJENA,
+  espera: 'sin_token', codigo: 'ajeno_a_la_cita',
 });
 await caso('fuera de ventana', {
   jwt: JWT_DUENO, cita: CITA_FUERA, espera: 'sin_token', codigo: 'fuera_de_ventana',

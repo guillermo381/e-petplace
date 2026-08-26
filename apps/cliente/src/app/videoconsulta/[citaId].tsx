@@ -55,6 +55,7 @@ import {
 
 import { fechaLargaHumana } from '@epetplace/i18n';
 
+import { EntradaVideollamada } from '@/components/entrada-videollamada';
 import { useTraduccion } from '@/i18n';
 
 type Estado =
@@ -190,6 +191,21 @@ export default function DetalleVideoconsulta() {
               <Texto variante="apoyo">{t('veterinaria.citaTeleNoRealizadaDevolucion')}</Texto>
             </View>
           </Tarjeta>
+        )}
+
+        {/* OBRA 1 · LA ENTRADA. Se dibuja sola o no se dibuja: el veredicto lo
+            da el servidor y la pieza decide. Va ARRIBA de cancelar — entrar es
+            lo que la familia viene a hacer.
+            *Se montó recién ahora: R63 la frenó cuando la ruta no existía, y
+            tenía razón — un botón que el servidor habilita y que lleva a una
+            pantalla que no está es peor que no tener botón.* */}
+        {activa && (
+          <EntradaVideollamada
+            citaId={citaId}
+            alEntrar={() =>
+              router.push({ pathname: '/videollamada/[citaId]', params: { citaId } })
+            }
+          />
         )}
 
         {activa && (

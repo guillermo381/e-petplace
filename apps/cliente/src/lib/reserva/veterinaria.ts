@@ -72,6 +72,12 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
      se extrae es el flujo). Así las dos superficies preguntan igual. */
   const [avisoPendiente, setAvisoPendiente] = useState<VeterinarioDisponible | null>(null);
   const [avisoAceptado, setAvisoAceptado] = useState(false);
+  /* OBRA 6 · la casilla del consentimiento. **Vive en el flujo y no en la
+     pantalla**, por la misma razón que el resto del aviso: las dos
+     superficies tienen que preguntar igual.
+     🔴 Se resetea cada vez que el aviso se abre: *una casilla que queda
+     marcada de una vez anterior consiente por alguien que no volvió a leer.* */
+  const [consentimientoMarcado, setConsentimientoMarcado] = useState(false);
   const tocarNegocioRef = useRef<((v: VeterinarioDisponible) => Promise<void>) | null>(null);
 
   // El hold nace acá: invisible al prestador hasta que el pago confirme.
@@ -169,6 +175,7 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
          escape no puede costarle el horario a un tercero.* */
       if (ctx.tipoServicio === 'telemedicina' && !avisoAceptado) {
         setAvisoPendiente(v);
+        setConsentimientoMarcado(false);
         return;
       }
 
@@ -235,6 +242,8 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
     creandoHold,
     // El aviso §3 — la Hoja la MONTAN las superficies, el flujo la gobierna.
     avisoAbierto: avisoPendiente !== null,
+    consentimientoMarcado,
+    marcarConsentimiento: setConsentimientoMarcado,
     cerrarAviso: () => setAvisoPendiente(null),
     irAUrgencias,
     reservarPresencial,
