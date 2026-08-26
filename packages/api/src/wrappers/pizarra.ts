@@ -107,8 +107,8 @@ export async function obtenerPizarra(
 const MENSAJES_TOMAR = {
   sin_sesion: 'No hay sesión activa.',
   cita_no_existe: 'Esa cita ya no está.',
-  no_sos_del_equipo: 'No sos parte del equipo de este negocio.',
-  no_es_tu_especialidad: 'Esa cita es de un servicio que no atendés.',
+  no_sos_del_equipo: 'No eres parte del equipo de este negocio.',
+  no_es_tu_especialidad: 'Esa cita es de un servicio que no atiendes.',
   /** ⚠️ EL CÓDIGO QUE NO SE PUEDE PERDER (ver ① de la cabecera). */
   ya_tomada: 'Alguien del equipo la tomó primero.',
   error_desconocido: 'No pudimos tomar la cita. Prueba de nuevo.',

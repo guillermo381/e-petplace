@@ -25,7 +25,7 @@ const MENSAJES = {
     'Para emitir un certificado necesitas tu matrícula profesional cargada. Sin ella el papel no dice quién firma.',
   sin_vinculo: 'No encontramos tu vínculo activo con este negocio.',
   negocio_ambiguo:
-    'Trabajás en más de un negocio: emití el certificado desde la cita, así el papel dice desde cuál.',
+    'Trabajas en más de un negocio: emite el certificado desde la cita, así el papel dice desde cuál.',
   negocio_incompleto: 'El negocio no tiene nombre comercial cargado: el papel no tendría emisor.',
   alcance_invalido: 'Ese alcance no existe.',
   alcance_no_aplica: 'Para esta mascota solo se puede emitir una constancia de atención.',
