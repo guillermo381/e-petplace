@@ -120,6 +120,18 @@ export {
   type InsigniaModalidad,
   type InsigniaTamaño,
 } from './components/Insignia'
+// ── S106-B TANDA 2 · LA VIDEOLLAMADA ──────────────────────────────────────
+// La clase «control sobre video»: fondo NO controlado (lo pone la cámara de
+// otro). Ver `tokens/sobreVideo.ts` — NO enmienda la Ley 12, la nombra aparte.
+export { sobreVideo, type SobreVideo } from './tokens/sobreVideo'
+export { ControlLlamada, type ControlLlamadaProps, type ControlLlamadaGlifo } from './components/ControlLlamada'
+export { TemporizadorLlamada, type TemporizadorLlamadaProps } from './components/TemporizadorLlamada'
+export { EstadoConexion, type EstadoConexionProps, type EstadoDeConexion } from './components/EstadoConexion'
+export { EncabezadoLlamada, type EncabezadoLlamadaProps } from './components/EncabezadoLlamada'
+export { TileVideoPropio, type TileVideoPropioProps, type EsquinaTile } from './components/TileVideoPropio'
+export { SuperficieLlamada, type SuperficieLlamadaProps } from './components/SuperficieLlamada'
+export { ModalDosAlturas, AsaModal, type ModalDosAlturasProps, type AlturaModal } from './components/ModalDosAlturas'
+
 // S106-B · el aviso previo de teleconsulta (LETRA_TELEMEDICINA §3)
 export {
   AvisoTeleconsulta,

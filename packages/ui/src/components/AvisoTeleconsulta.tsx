@@ -94,6 +94,7 @@
  */
 
 import { View } from 'react-native'
+import { Casilla } from './Casilla'
 import { Celda } from './Celda'
 import { Hoja, HojaScroll } from './Hoja'
 import { Texto } from './Texto'
@@ -125,10 +126,29 @@ export interface AvisoTeleconsultaProps {
     /** La frase que introduce los signos. */
     signosIntro: string
     /**
-     * 🔴 LOS CINCO. **Tupla: cuatro no compila.** El orden es el de la
-     * letra y lo conserva el consumidor — la pieza no reordena.
+     * 🔴 LOS SEIS. **Tupla: cinco no compila.** El orden es el de la letra y
+     * lo conserva el consumidor — la pieza no reordena.
+     *
+     * ⏪ **NACIÓ COMO TUPLA DE CINCO, Y ESE ERA EL ERROR** (firma de mesa,
+     * 26-ago). La letra enumera **seis** —*dificultad para respirar ·
+     * sangrado · convulsiones · golpe fuerte · dolor intenso · decaimiento
+     * repentino*— pero **su propio comentario decía «cinco»**, y los dos
+     * últimos van unidos por «o» en vez de coma, así que se leían como uno.
+     *
+     * 🔴 **El candado funcionó A PESAR DE ESTAR MAL CALIBRADO, y esa es la
+     * parte que hay que no perder:** la tupla no sabía cuántos eran —
+     * replicaba el número equivocado de la prosa—, pero **obligó a alguien a
+     * CONTAR para llenarla**, y ahí apareció el sexto. *Un candado que exige
+     * una cuenta convierte una discrepancia de prosa en un error de
+     * compilación; sin él salía a producción un aviso con un signo clínico
+     * menos y nadie se enteraba.*
+     *
+     * *Y el matiz honesto: si el consumidor hubiera puesto «dolor intenso o
+     * decaimiento repentino» como un solo elemento, habría compilado igual.
+     * **El candado obliga a contar; no puede obligar a contar bien.** Esa
+     * mitad la cubre `R67`, que compara contra la letra.*
      */
-    signos: readonly [string, string, string, string, string]
+    signos: readonly [string, string, string, string, string, string]
     /** El cierre después de los signos («llévala a una clínica ahora mismo»). */
     signosCierre: string
     /**
@@ -141,6 +161,8 @@ export interface AvisoTeleconsultaProps {
      * la respuesta llegue, cambia una cadena del diccionario y no una pieza.
      */
     transito: string
+    /** S106-B · el texto de la casilla («Entendí…»). Voz de la app. */
+    consentimiento: string
   }
   /**
    * Las tres acciones. **Objeto nombrado y no array**: el orden lo fija la
@@ -152,12 +174,41 @@ export interface AvisoTeleconsultaProps {
     presencial: AccionAviso
     continuar: AccionAviso
   }
+  /**
+   * 🔴 S106-B · EL CONSENTIMIENTO (cambio legal, §10.2).
+   *
+   * Casilla **DESMARCADA por defecto** que habilita **SOLO «Continuar con la
+   * videoconsulta»**.
+   *
+   * ═════════════════════════════════════════════════════════════════════════
+   * **LAS OTRAS DOS QUEDAN SIEMPRE HABILITADAS, y es lo más importante de
+   * esta pieza.**
+   * ═════════════════════════════════════════════════════════════════════════
+   * *Si el animal se está ahogando, la app no puede pedir que se tilde una
+   * casilla para dejar salir a alguien hacia urgencias.* **Una casilla de
+   * consentimiento que retiene a quien tiene una emergencia deja de ser un
+   * resguardo legal y pasa a ser un daño** — y encima uno que la letra §3
+   * existe para evitar.
+   *
+   * *El consentimiento se pide para lo que se consiente; no para huir.*
+   *
+   * Y así **se conserva la firma de las tres celdas de peso par**: la única
+   * que cambia de estado es la tercera, y las tres siguen siendo celdas.
+   *
+   * Omitir estas props = sin casilla (el aviso de la tanda 1, intacto).
+   */
+  consentimiento?: {
+    marcado: boolean
+    onCambio: (marcado: boolean) => void
+  }
 }
 
 /** Diámetro de la viñeta del signo. Misma geometría de punto que `LineaDeVida`. */
 const VINETA = 5
 
-export function AvisoTeleconsulta({ visible, onCerrar, texto, acciones }: AvisoTeleconsultaProps) {
+export function AvisoTeleconsulta({ visible, onCerrar, texto, acciones, consentimiento }: AvisoTeleconsultaProps) {
+  // Sin casilla declarada, «Continuar» va habilitada: es el aviso de tanda 1.
+  const continuarBloqueada = consentimiento != null && !consentimiento.marcado
   const { theme } = useTheme()
 
   return (
@@ -203,6 +254,19 @@ export function AvisoTeleconsulta({ visible, onCerrar, texto, acciones }: AvisoT
           <Texto variante="apoyo">{texto.transito}</Texto>
         </View>
 
+        {/* La casilla va ANTES de las acciones: se lee, después se decide. */}
+        {consentimiento != null && (
+          <View style={{ marginTop: spacing[5] }}>
+            <Casilla
+              marcada={consentimiento.marcado}
+              onCambio={consentimiento.onCambio}
+              etiquetaAccesible={texto.consentimiento}
+            >
+              <Texto>{texto.consentimiento}</Texto>
+            </Casilla>
+          </View>
+        )}
+
         {/* LAS TRES, de peso par. Orden fijado acá — el consumidor no lo elige. */}
         <View style={{ marginTop: spacing[5] }}>
           <Celda
@@ -219,11 +283,13 @@ export function AvisoTeleconsulta({ visible, onCerrar, texto, acciones }: AvisoT
             tituloEntero
             onPress={acciones.presencial.onPress}
           />
+          {/* 🔴 La ÚNICA que la casilla puede apagar. Las dos de arriba jamás. */}
           <Celda
             interactiva
             accessibilityRole="button"
             titulo={acciones.continuar.etiqueta}
             tituloEntero
+            deshabilitada={continuarBloqueada}
             onPress={acciones.continuar.onPress}
           />
         </View>
