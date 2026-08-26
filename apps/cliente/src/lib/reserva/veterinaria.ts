@@ -29,7 +29,7 @@
  * justamente lo que no debe saber.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { useAviso } from '@epetplace/ui';
 import {
@@ -66,6 +66,13 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
   const [hojaPersonas, setHojaPersonas] = useState<HojaPersonasEstado | null>(null);
   const [personaElegida, setPersonaElegida] = useState('cualquiera');
   const [personaRebotada, setPersonaRebotada] = useState(false);
+  /* El aviso §3: qué negocio quedó esperando, y si ya se aceptó en este flujo.
+     `avisoAceptado` vive en el hook y no en la pantalla **porque el aviso es
+     del FLUJO, no de la Hoja** (misma doctrina que la cabecera: la unidad que
+     se extrae es el flujo). Así las dos superficies preguntan igual. */
+  const [avisoPendiente, setAvisoPendiente] = useState<VeterinarioDisponible | null>(null);
+  const [avisoAceptado, setAvisoAceptado] = useState(false);
+  const tocarNegocioRef = useRef<((v: VeterinarioDisponible) => Promise<void>) | null>(null);
 
   // El hold nace acá: invisible al prestador hasta que el pago confirme.
   // S78-A7: si la familia ELIGIÓ persona, viaja al motor — que la FIJA o
@@ -133,6 +140,23 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
   const tocarNegocio = useCallback(
     async (v: VeterinarioDisponible) => {
       if (creandoHold || abriendoSelector !== null) return;
+
+      /* ── EL AVISO §3 VA ACÁ, Y EL LUGAR ES LA MITAD DE LA DECISIÓN ───────
+         `tocarNegocio` es la ÚNICA entrada al hold: los dos caminos (con y
+         sin selector de persona) pasan por acá antes de bifurcarse. Poner el
+         gate en un solo lugar es lo que hace cierto que **no hay forma de
+         llegar al hold de una teleconsulta sin haber visto el aviso**.
+
+         🔴 **Y va ANTES del hold, no en el checkout, que es la firma de CP1
+         («dos actos, no uno»).** La cita NACE con el hold: si el aviso
+         viviera después, el dueño que toca «Ir a urgencias» ya habría
+         apartado 15 minutos de la agenda de un veterinario para irse. *El
+         escape no puede costarle el horario a un tercero.* */
+      if (ctx.tipoServicio === 'telemedicina' && !avisoAceptado) {
+        setAvisoPendiente(v);
+        return;
+      }
+
       if (ctx.vitrina?.[v.prestador_id] !== true) {
         void crearHold(v);
         return;
@@ -151,13 +175,55 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
       setPersonaRebotada(false);
       setHojaPersonas({ negocio: v, personas: ofertables });
     },
-    [creandoHold, abriendoSelector, ctx.vitrina, crearHold],
+    [creandoHold, abriendoSelector, ctx.vitrina, ctx.tipoServicio, avisoAceptado, crearHold],
   );
+
+  /* ── LAS TRES SALIDAS DEL AVISO ────────────────────────────────────────
+     Las dos primeras son ESCAPES: se van del flujo de teleconsulta sin haber
+     tocado la agenda de nadie. Usan `replace` y no `push` porque volver con
+     el botón atrás a un aviso ya contestado no tiene sentido. */
+  const irAUrgencias = useCallback(() => {
+    setAvisoPendiente(null);
+    router.replace({
+      pathname: '/explorar/veterinaria',
+      params: { mascotaId: ctx.mascotaId, tipo: 'urgencia_local' },
+    });
+  }, [ctx.mascotaId]);
+
+  const reservarPresencial = useCallback(() => {
+    setAvisoPendiente(null);
+    router.replace({
+      pathname: '/explorar/veterinaria',
+      params: { mascotaId: ctx.mascotaId, tipo: 'consulta' },
+    });
+  }, [ctx.mascotaId]);
+
+  /* Continuar: se marca aceptado y se RE-ENTRA por la misma puerta, para que
+     el camino de abajo (vitrina, selector de persona, hold) sea exactamente
+     el mismo que el de cualquier otro servicio. *Un segundo camino para el
+     mismo acto es un camino que nadie vigila.* */
+  const continuarTrasAviso = useCallback(() => {
+    const v = avisoPendiente;
+    if (v === null) return;
+    setAvisoPendiente(null);
+    setAvisoAceptado(true);
+    void tocarNegocioRef.current?.(v);
+  }, [avisoPendiente]);
+
+  // El ref rompe el ciclo `tocarNegocio` ⇄ `continuarTrasAviso` sin que
+  // ninguno de los dos tenga que declarar al otro en sus deps.
+  tocarNegocioRef.current = tocarNegocio;
 
   return {
     tocarNegocio,
     crearHold,
     creandoHold,
+    // El aviso §3 — la Hoja la MONTAN las superficies, el flujo la gobierna.
+    avisoAbierto: avisoPendiente !== null,
+    cerrarAviso: () => setAvisoPendiente(null),
+    irAUrgencias,
+    reservarPresencial,
+    continuarTrasAviso,
     abriendoSelector,
     hojaPersonas,
     cerrarHoja: () => setHojaPersonas(null),

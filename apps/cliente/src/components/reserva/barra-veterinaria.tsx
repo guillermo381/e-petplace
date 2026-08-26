@@ -29,6 +29,7 @@ import {
 import { useTraduccion } from '@/i18n';
 import { useReservaVeterinaria } from '@/lib/reserva/veterinaria';
 import { HojaPersonasVet } from '@/components/reserva/hoja-personas-vet';
+import { AvisoTeleconsulta } from '@/components/aviso-teleconsulta';
 
 export function BarraVeterinaria({
   prestadorId,
@@ -74,6 +75,11 @@ export function BarraVeterinaria({
     personaElegida,
     elegirPersona,
     personaRebotada,
+    avisoAbierto,
+    cerrarAviso,
+    irAUrgencias,
+    reservarPresencial,
+    continuarTrasAviso,
   } = useReservaVeterinaria({ fecha, hora, mascotaId, tipoServicio, esDomicilio, vitrina }, resolver);
 
   return (
@@ -97,6 +103,14 @@ export function BarraVeterinaria({
         personaRebotada={personaRebotada}
         creandoHold={creandoHold}
         onConfirmar={(negocio, persona) => void crearHold(negocio, persona)}
+      />
+      {/* EL AVISO §3 — bloqueante, antes del hold (LETRA_TELEMEDICINA v1.1) */}
+      <AvisoTeleconsulta
+        abierta={avisoAbierto}
+        alCerrar={cerrarAviso}
+        alIrAUrgencias={irAUrgencias}
+        alReservarPresencial={reservarPresencial}
+        alContinuar={continuarTrasAviso}
       />
     </View>
   );
