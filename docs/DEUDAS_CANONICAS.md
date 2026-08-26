@@ -22297,3 +22297,68 @@ la clase de línea que un `placeholder` bienintencionado cruza en un commit
 de acabado.
 
 **Estado: CANDIDATA.** No rige hasta la firma del founder.
+
+---
+
+## ☠️ D-930 — `cita_telemedicina_detalle`: SE MATA, Y LA RAZÓN NO ES QUE ESTUVIERA VACÍA · **CERRADA en S106-A** (migración `2f`)
+
+> 🔴 **La razón se escribe primero porque es lo que evita que alguien la
+> reviva por prolijidad.** *«Estaba vacía» invita a llenarla. Lo que sigue,
+> no.*
+
+**La tabla guardaba `token_prestador` y `token_cliente` como columnas de
+texto**, y su policy `telemedicina_select` alcanzaba a
+`user_tiene_acceso_a_mascota(mascota_id) OR pet_parent_id = auth.uid()`.
+
+> ### ⇒ **El dueño de la mascota podía leer el token del veterinario.**
+
+**Daño hoy: CERO, y medido** — 0 filas, 0 funciones que la nombren, 0 FKs
+entrantes. *No hubo incidente porque no hubo dato, no porque el modelo
+estuviera bien.* (Hallazgo de D sobre el censo de A.)
+
+**Las otras tres razones, todas medidas:**
+
+1. **Su `CHECK` de `proveedor` (`daily | whereby | zoom`, default `'daily'`)
+   pre-decidía el transporte** — habría **rebotado LiveKit**, que es lo que
+   la mesa evaluaba. *Una tabla muerta que ya había votado.*
+2. **`grabacion_url` y `grabacion_consentida` contradicen la firma ⓪ de §7**
+   (la teleconsulta **no se graba en v1**). *Una columna que existe invita a
+   llenarse* — misma clase que el «código latente» de `AVISO-DE-IA.md`.
+3. **Ninguna migración del monorepo la creaba** (`D-929`): existía en la base
+   y no en el ledger.
+
+⚠️ **El modelo correcto NO es esta tabla: es el mint por cita en la edge
+function** — token de vida corta, emitido contra la pertenencia verificada,
+que **nunca se persiste**. *Un token guardado en una fila legible es un
+token que dura lo que dure la fila.*
+
+**Precondición cumplida antes del DROP** (lección S95-F: *lo que bloquea vive
+afuera*): grep en los **cinco repos vecinos** (`e-petplace-admin`,
+`e-petplace-prestadores`, `e-petplace-B`, `e-petplace-C`,
+`e-petplace-sistema-pruebas`) ⇒ **cero consumidores**; solo aparece en
+`database.types.ts` generados y en docs. **Reversa con el `CREATE` completo.**
+
+## 🟡 D-931 — LOS WEBHOOKS DE LiveKit: REGISTRAR SIN JUZGAR · **ESCRITA Y SIN CONSTRUIR**
+
+**Existen y son medibles** (medición de D): `participant_joined` ·
+`participant_left` · `room_started` · `room_finished`.
+
+**Lo que habilitarían:** saber **qué pasó de verdad** en una teleconsulta —
+si alguien entró, quién, cuándo, cuánto duró — sin depender de que un humano
+lo declare.
+
+🔴 **Y por qué NO se construye todavía:** porque el salto de *registrar* a
+*juzgar* es de una línea y de una sesión distraída. **Si el sistema decide
+por sí mismo quién faltó, decide quién paga** — y eso choca de frente con la
+firma ② de §5 de la letra: *«no se investiga de quién fue la culpa, y es
+deliberado»*, porque **el sistema no mide la conexión de nadie y no puede
+atribuirla**.
+
+**El límite, si algún día se enciende:** los eventos se **guardan crudos y
+se muestran a soporte**; **jamás disparan una transición de estado ni una
+devolución por sí mismos.** *Un evento de infraestructura no sabe si el vet
+no entró o si entró y se le cortó — y la diferencia es exactamente la que
+decide quién cobra.*
+
+☠️ **Disparo: la firma del founder, que está resolviendo.** Hasta entonces,
+**escrita y sin construir.**

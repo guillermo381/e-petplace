@@ -182,6 +182,16 @@ estructuración de la nota clínica no es diagnóstico.
 > turno ⓪. La frase que esta letra parafrasea es literal de **§31.3**:
 > *«no constituye diagnóstico, prescripción ni criterio clínico»*.
 >
+> **⓪ 🔴 LA TELECONSULTA NO SE GRABA EN v1** — ni por la plataforma ni por el
+> proveedor. `roomRecord` queda en **`false`**, explícito en la edge function
+> del token (D lo dejó escrito, no heredado del default). *Un default que
+> hoy es `false` puede cambiar con una versión del SDK; una línea que dice
+> `false` no.*
+>
+> ⚠️ **Y por eso la estructura heredada `cita_telemedicina_detalle` no se
+> «completa»: se MATA.** Trae `grabacion_url` y `grabacion_consentida`, que
+> contradicen esta firma — *una columna que existe invita a llenarse.*
+>
 > **② CÓMO se resuelve la marca, firmado: por `BIO_EXPEDIENTE` D13.6.** El
 > padre es **la propia cita**, con `modalidad='telemedicina'` —
 > **no nace evento separado y NO hay columna nueva en los eventos**. Los
@@ -313,10 +323,13 @@ todavía no tiene pared.*
 letra ya no reclama ninguna fuente de saldo, así que no contradice la lista
 cerrada de §3.
 
-**Lo que queda vivo, con dueño y disparo:** la enmienda a `LETRA_SALDO` §3
-—con la distinción presencial/teleconsulta y la fuente «no realizable»— **se
-escribe cuando el motor de saldo nazca**, y **la ficha de ese motor cita este
-acto**.
+🔴 **Y la enmienda que este freno pedía queda SIN OBJETO, no pendiente:** al
+no reclamar ninguna fuente de saldo, esta letra **no agrega nada** a la lista
+cerrada de §3. **`LETRA_SALDO` §3 NO SE TOCA en S106.** *Enmendar una lista
+ajena por un choque ya cerrado es trabajo que ensucia* — dejaría en el canon
+una distinción presencial/teleconsulta sobre fuentes que este oficio dejó de
+usar. El día que nazca el motor de saldo (`D-926`), esa letra decidirá sus
+fuentes con los casos que existan entonces.
 
 ⚠️ **Y el freno destapó algo que él mismo no había visto, y conviene que
 quede:** las ventanas firmadas eran **TRES**, no dos — falta **T&C §25.1
