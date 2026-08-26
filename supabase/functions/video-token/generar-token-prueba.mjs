@@ -34,6 +34,7 @@ const URL_LK = process.env.LIVEKIT_URL;
 if (!KEY || !SECRET || !URL_LK) {
   console.error('Faltan variables. Uso:');
   console.error("  LIVEKIT_API_KEY=... LIVEKIT_API_SECRET=... LIVEKIT_URL=wss://... node generar-token-prueba.mjs");
+  console.error("  (opcional: TTL_HORAS=3 para un gate que se corre más tarde)");
   process.exit(1);
 }
 
@@ -43,8 +44,16 @@ if (!KEY || !SECRET || !URL_LK) {
 const SALA = 'cable-quito';
 
 /** Vida corta, pero suficiente para una prueba de campo con dos teléfonos
- *  y alguien caminando entre ellos. */
-const TTL_SEGUNDOS = 60 * 60; // 1 h
+ *  y alguien caminando entre ellos. **Por defecto 1 h.**
+ *
+ *  🔴 Se puede estirar con `TTL_HORAS=3` sin editar el archivo, y existe por
+ *  una razón medida en campo: **un token vencido se ve EXACTAMENTE igual que
+ *  un cable roto** — los dos dan «no conecta», sin error distinguible en la
+ *  pantalla. Si el gate se corre horas después de generarlos, la primera
+ *  hipótesis va a ser «LiveKit no anda», y va a ser falsa.
+ *  Ante la duda, se regeneran: cuestan un comando. */
+const TTL_HORAS = Number(process.env.TTL_HORAS ?? 1);
+const TTL_SEGUNDOS = Math.round(TTL_HORAS * 60 * 60);
 
 const b64url = (buf) =>
   Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -96,7 +105,7 @@ console.log('  PRUEBA DE CABLE — S106');
 console.log('  ─────────────────────────────────────────────');
 console.log('  URL   :', URL_LK);
 console.log('  SALA  :', SALA, '(la MISMA para los dos, a propósito)');
-console.log('  VENCEN:', new Date(Date.now() + TTL_SEGUNDOS * 1000).toISOString());
+console.log('  VENCEN:', new Date(Date.now() + TTL_SEGUNDOS * 1000).toLocaleString('es-EC', { timeZone: 'America/Guayaquil' }), `(hora de Quito · TTL ${TTL_HORAS} h)`);
 console.log('');
 console.log('  ── Dispositivo A ──');
 console.log(a);

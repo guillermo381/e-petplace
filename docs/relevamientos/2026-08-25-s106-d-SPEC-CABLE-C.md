@@ -137,14 +137,28 @@ nuevo.*
 founder** (o en la tuya, si él te las pasa por un canal que no sea texto
 plano):
 
+🔴 **OJO CON LA RUTA — el script NO está en `main`.** Vive en la rama
+`pista/s106-d`. Corrido desde el repo primario el error es *«Cannot find
+module»*, **que no dice «estás en la rama equivocada»**. La ruta que
+funciona hoy:
+
 ```bash
-cd supabase/functions/video-token
+cd /Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s106-d/supabase/functions/video-token
 
 LIVEKIT_API_KEY='...' \
 LIVEKIT_API_SECRET='...' \
 LIVEKIT_URL='wss://...' \
   node generar-token-prueba.mjs
 ```
+
+**Sin dependencias** — corre con el Node que haya, sin `pnpm install`.
+
+**Si el gate se corre más tarde**, generarlos con más vida: agregar
+`TTL_HORAS=3` adelante. **Por defecto duran 1 h.**
+🔴 *Un token vencido se ve EXACTAMENTE igual que un cable roto: los dos dan
+«no conecta», sin error distinguible en pantalla. La primera hipótesis va a
+ser «LiveKit no anda» y va a ser falsa. Ante la duda se regeneran — cuestan
+un comando.*
 
 **Lo que sale de ahí sí puede viajar hacia vos**: la URL y dos tokens de
 **una hora**, para una **sala de juguete**, sin acceso a ninguna cita ni a
