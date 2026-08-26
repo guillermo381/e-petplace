@@ -4,7 +4,7 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-const MENSAJE_ERROR = 'No pudimos cargar el catálogo. Probá de nuevo.';
+const MENSAJE_ERROR = 'No pudimos cargar el catálogo. Prueba de nuevo.';
 
 export interface EspecieCatalogo {
   codigo: string;

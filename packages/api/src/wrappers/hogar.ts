@@ -8,7 +8,7 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-const MENSAJE_ERROR = 'No pudimos leer el estado del hogar. Probá de nuevo.';
+const MENSAJE_ERROR = 'No pudimos leer el estado del hogar. Prueba de nuevo.';
 
 export interface SenalesHogarMascota {
   mascota_id: string;

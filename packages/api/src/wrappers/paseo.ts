@@ -40,7 +40,7 @@ const MENSAJES_ERROR_PASEO: Record<
   CodigoErrorPaseo | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:                   'No tenés acceso a esta cita.',
+  acceso_denegado:                   'No tienes acceso a esta cita.',
   cita_no_encontrada:                'La cita no existe o ya no es accesible.',
   cita_no_es_paseo:                  'Esta cita no es de paseo.',
   cita_estado_invalido_para_iniciar: 'La cita no está confirmada: no se puede iniciar el paseo.',
@@ -52,13 +52,13 @@ const MENSAJES_ERROR_PASEO: Record<
   puntos_invalidos:                  'Los puntos GPS no tienen la forma esperada.',
   track_excede_limite:               'La ruta alcanzó el máximo de puntos GPS.',
   gps_motivo_innecesario:            'Hay ruta registrada: no corresponde motivo de fallo.',
-  gps_motivo_fallo_required:         'Sin ruta GPS, contanos qué pasó antes de terminar.',
+  gps_motivo_fallo_required:         'Sin ruta GPS, cuéntanos qué pasó antes de terminar.',
   falta_novedad_paseo:               'Registrá el parte del perro para poder cerrar.',
   novedad_codigo_invalido:           'La novedad elegida no existe en el catálogo.',
   novedad_codigo_inactivo:           'La novedad elegida ya no está disponible.',
   cita_no_promovible:                'La cita de esta atención quedó en un estado que no permite completarla — avisá al equipo.',
   datos_inconsistentes:              'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:                 'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:                 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorPaseo | 'error_desconocido' {

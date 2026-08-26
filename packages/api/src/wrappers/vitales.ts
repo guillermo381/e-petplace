@@ -6,7 +6,7 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-const MENSAJE_ERROR = 'No pudimos leer sus vitales. Probá de nuevo.';
+const MENSAJE_ERROR = 'No pudimos leer sus vitales. Prueba de nuevo.';
 
 export interface PaseoConTrack {
   fecha: string;

@@ -36,7 +36,7 @@ export type CodigoErrorVetAtencion = (typeof CODIGOS_VET_ATENCION)[number];
 const MENSAJES: Record<CodigoErrorVetAtencion | 'error_desconocido', string> = {
   cita_no_encontrada: 'La cita no existe o ya no es accesible.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido: 'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido: 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorVetAtencion> {

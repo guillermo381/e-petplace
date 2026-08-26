@@ -47,8 +47,8 @@ const MENSAJES_ERROR_PAQUETE: Record<
   CodigoErrorPaquete | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:       'No tenés acceso para hacer esto.',
-  sin_familia:           'Tu hogar todavía no está creado — completá el registro primero.',
+  acceso_denegado:       'No tienes acceso para hacer esto.',
+  sin_familia:           'Tu hogar todavía no está creado — completa el registro primero.',
   mascota_no_elegible:   'El paseo es para perros — esta mascota no puede reservarlo.',
   preset_invalido:       'Los paquetes son de 5, 10 o 15 salidas.',
   prestador_inactivo:    'Este paseador no está disponible.',
@@ -57,18 +57,18 @@ const MENSAJES_ERROR_PAQUETE: Record<
   pago_no_disponible:    'Este paseador todavía no puede recibir pagos por la app.',
   sin_saldo_paquete:     'No te quedan salidas en el paquete para esa fecha.',
   slot_invalido:         'El horario elegido no es válido.',
-  slot_en_pasado:        'Ese horario ya pasó — elegí otro.',
+  slot_en_pasado:        'Ese horario ya pasó — elige otro.',
   fuera_de_horario:      'El paseador no atiende en ese horario.',
-  slot_ocupado:          'Ese horario acaba de ocuparse — elegí otro.',
-  prestador_no_disponible: 'El paseador no está disponible en esa fecha — elegí otra.',
+  slot_ocupado:          'Ese horario acaba de ocuparse — elige otro.',
+  prestador_no_disponible: 'El paseador no está disponible en esa fecha — elige otra.',
   cita_no_encontrada:    'La salida no existe o ya no es accesible.',
   cita_no_es_de_paquete: 'Esa salida no es parte de un paquete.',
   cita_estado_invalido:  'Esa salida ya no se puede cancelar.',
   ventana_vencida:       'Faltan menos de 2 horas — esta salida ya no se puede cancelar.',
   sin_sesion:            'No hay sesión activa.',
-  error_familia:         'No pudimos leer tu hogar — probá de nuevo.',
+  error_familia:         'No pudimos leer tu hogar — prueba de nuevo.',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:     'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:     'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorPaquete | 'error_desconocido' {

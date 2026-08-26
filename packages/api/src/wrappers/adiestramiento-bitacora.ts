@@ -38,14 +38,14 @@ const MENSAJES: Record<
   CodigoErrorBitacora | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:      'No tenés acceso para hacer esto.',
+  acceso_denegado:      'No tienes acceso para hacer esto.',
   sin_contexto_activo:  'La bitácora se abre con un programa o una sesión de adiestramiento activa.',
-  bitacora_vacia:       'Elegí al menos una observación o escribí algo.',
+  bitacora_vacia:       'Elige al menos una observación o escribe algo.',
   chip_invalido:        'Una de las observaciones elegidas ya no está disponible.',
   chip_no_aplica_a_la_mascota:
     'Esa observación no aplica a esta mascota.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+  error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 function normalizarCodigo(raw: string): CodigoErrorBitacora | 'error_desconocido' {
