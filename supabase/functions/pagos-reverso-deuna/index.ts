@@ -107,6 +107,20 @@ Deno.serve(async (req) => {
   }
   const txId = it.proveedor_transaction_id;
 
+  /* ═══ 🔴 LA VENTANA (24 h) SE PREGUNTA ANTES DEL REFUND ════════════════
+     Mismo defecto que su hermana de Nuvei y misma cura: preguntar antes de
+     mover plata, con la MISMA función que usa el registro.
+     *Acá la ventana es de 24 horas — no «mismo día», que es Nuvei— y por eso
+     una copia del cálculo en la edge sería el lugar exacto donde se
+     confundirían.* */
+  const { data: puede, error: ePv } = await db.rpc('puede_reversar_deuna', {
+    p_intento_id: intentoId,
+  });
+  if (ePv) return json({ ok: false, codigo: 'no_se_pudo_verificar_ventana' }, 500);
+  if ((puede as Record<string, unknown>)?.ok !== true) {
+    return json({ ok: false, ...(puede as Record<string, unknown>) }, 409);
+  }
+
   // ── ① EL REFUND ───────────────────────────────────────────────────────────
   let crudoRefund = '';
   let refund: Record<string, unknown> = {};
