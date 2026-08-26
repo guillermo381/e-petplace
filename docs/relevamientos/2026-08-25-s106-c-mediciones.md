@@ -237,7 +237,29 @@ misma pantalla (cabecera `:1-15`). ⇒ **«Entrar» del lado familia no tiene
 pantalla propia**: vive como acción en esa fila, o pide superficie nueva. *Es
 decisión de producto, no la tomo.*
 
-### 🔴 EL HALLAZGO DE ESTA MEDICIÓN — la exclusión de §9 NO se cumple sola
+### ☠️ VENCIDO EL 26-AGO — LEER ESTO ANTES QUE LO DE ABAJO
+
+> **El hallazgo que sigue era correcto cuando se midió y HOY YA NO RIGE.** No se
+> borra —la medición fue verdadera— **se marca**, que es la regla de la casa.
+>
+> **Qué cambió:** el abogado se pronunció
+> (`docs/legal/2026-08-25-receta-videoconsulta.md`): **el veterinario SÍ puede
+> recetar en videoconsulta** — REV telemática (AGROCALIDAD Res. 0227/2024,
+> Anexo 9) + firma electrónica (Ley 67, Arts. 2 y 14). El §9 de la letra
+> condicionaba la exclusión a *«hasta que el abogado se pronuncie»*, **y se
+> pronunció**.
+>
+> ⇒ **Que la receta se herede en el Durante sin mirar el tipo de servicio es la
+> CONDUCTA CORRECTA, no un defecto.** La mesa lo firmó así (S106 tanda 1: *«la
+> receta queda, cero obra»*) y lo registró.
+>
+> **Lo único que sobrevive de abajo es la medición de forma** —los dos montajes
+> y sus gates, que siguen siendo exactos— y **una consecuencia NUEVA que sí es
+> trabajo**: el Límite 1 del abogado exige diagnóstico obligatorio *«del
+> sistema»*, y hay **dos productores de medicación**, no uno. Eso vive en
+> `docs/loop/S106-C.md` y es pedido a **A**.
+
+### ~~🔴 EL HALLAZGO DE ESTA MEDICIÓN — la exclusión de §9 NO se cumple sola~~ *(vencido, ver arriba)*
 
 **§9 deja fuera de v1 la «receta a distancia (hasta que el abogado se
 pronuncie)».** Medido:
