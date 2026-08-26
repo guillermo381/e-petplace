@@ -91,9 +91,9 @@ export const uiEs = {
     titular: 'Cerrar la cuenta la vuelve inalcanzable. No destruye lo que la ley obliga a conservar.',
     enCursoTitulo: 'Tu cuenta se está cerrando',
     // FECHA y no contador: ver el porqué medido en la pieza.
-    enCursoFecha: 'Se cierra el {{fecha}}. Hasta entonces podés volver.',
+    enCursoFecha: 'Se cierra el {{fecha}}. Hasta entonces puedes volver.',
     cancelarCierre: 'Cancelar el cierre',
-    enCursoNota: 'Si cancelás, todo sigue como estaba.',
+    enCursoNota: 'Si cancelas, todo sigue como estaba.',
   },
   esqueleto: {
     cargando: 'Cargando',
