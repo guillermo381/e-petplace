@@ -22515,28 +22515,63 @@ el balanceo elige.*
 verificado, con fecha*. **Lo que NO se hace es unificar `+7` de paso**: tocar
 credenciales de cuentas vivas es acto del founder, no de una pista.
 
-## ✅ CURADA EN LA MISMA TANDA (firma del founder, 26-ago-2026) — y el número era MUCHO peor
+## ☠️ LA PRIMERA VERSIÓN DE ESTA CURA ESTABA MAL — retractada el mismo día
 
-Se midió **por login real contra las 42 cuentas `guillo381+*` vivas**, no
-contra el documento:
+**Lo que llegó a decir y NO es cierto:** *«17 entran, 25 no»* y *«el equipo
+`vet*` ENTERO rebota mientras el `ser*` ENTERO entra; esa asimetría no es
+azar»*.
 
-> **17 entran con la clave compartida. 25 NO.**
+**Era azar.** El censo corrió **42 logins seguidos sin pausa**, Supabase los
+limitó por tasa, y **los `429` se leyeron como clave mala**. *El instrumento
+medía `ok/no-ok` y descartaba el `status`, así que no podía distinguir «no
+tiene la clave» de «no me dejaron preguntar» — y las dos se ven igual.*
 
-⇒ La ficha nació diciendo *«tiene excepciones sin marcar»* y **la medición dio
-vuelta la proporción: la excepción es la mayoría.**
+**El discriminador que lo probó:** dos corridas separadas por minutos dieron
+**conjuntos distintos**. Un estado de claves no se reorganiza solo.
 
-🔴 **Y el documento se contradecía a sí mismo:** su cura ① de S97-A declara para
-`vet2` *«clave → la compartida ✅»*, y **hoy `vet2` rebota**. No está sola: **el
-equipo `vet*` ENTERO rebota mientras el `ser*` ENTERO entra.** *Esa asimetría no
-es azar — o la unificación del lado médico nunca corrió, o algo la revirtió.*
-**Queda abierta para el founder**; la afirmación de S97 se marcó con su fecha en
-vez de borrarse, porque no sabemos si era falsa entonces — sabemos que lo es hoy.
+🔴 **Y se cae con ella la acusación a la cura ① de S97-A:** se marcó como falsa
+su afirmación *«`vet2` → la compartida ✅»*. **`vet2` entra. S97 tenía razón.**
 
-**La consecuencia operativa, que es la que muerde:** `+7`, `+9`, `+s87prof`,
-`+s87recep`, `+s88admin` y `+s88rolpuro` están todas del lado que rebota **y
-varias son empleados activos de Clínica Aurora** ⇒ **el balanceo del motor puede
-asignarle una cita a alguien cuya sesión después nadie puede acuñar.** *Ya pasó:
-la primera corrida del borde de §4 falló por eso.*
+> **Es `L-235` en su forma más cara: el instrumento respondió sobre otra cosa,
+> y su respuesta era plausible.** Y es la segunda vez en la misma tanda —la
+> primera fue preguntarle a la persona equivocada por el borde de §4—, con la
+> diferencia de que **ésta llegó al canon antes de que la cazara**.
 
-**Lo que queda vivo y es del founder:** unificar las 25. A anotó el estado, no lo
-cambió.
+## ✅ CURADA DE VERDAD (26-ago-2026), con el instrumento arreglado
+
+**Medido con 3,5 s de espaciado, guardando el `status` y abortando ante un solo
+`429`:**
+
+> **entran 21 · clave distinta 20 · correo sin confirmar 1**
+
+🔴 **El `status` reveló lo que el booleano escondía:** `+test1` no rebota por la
+clave sino por **`Email not confirmed`**. *Cambiarle la clave lo habría dejado
+«unificado» y sin poder entrar igual, y el reporte habría dicho que se arregló.*
+
+**El patrón real es aburrido, y eso lo vuelve creíble:** las cuentas que S97
+creó o reseteó tienen la clave; las que la preceden y no estaban en su lista,
+no. El lado `vet` está **partido**, no entero. *Eso ya lo decía el cuerpo del
+documento — lo que engañaba era el encabezado.*
+
+⇒ **`D-937` es real y mucho más chica de lo que su primera versión dijo:** un
+encabezado que promete un universal que el cuerpo no sostiene.
+
+**Instrumento en el repo:** `scripts/unificar-claves-prueba.mjs`, con el modo
+medición separado del modo aplicar y la re-medición obligatoria al final.
+
+**Lo que NO se abre como ficha:** la pregunta *«¿por qué el lado vet rebotaba
+entero?»* **no existe** — su premisa era el artefacto. *Abrir ficha para
+investigar un patrón que la medición borró habría mandado a alguien a buscar
+una causa que nunca hubo.*
+
+## ☠️ CERRADA — unificadas y re-medidas (26-ago-2026)
+
+`scripts/unificar-claves-prueba.mjs --aplicar` sobre las 21 que rebotaban, y
+**re-corrido el mismo instrumento después**:
+
+> **DESPUÉS → entran 42/42.**
+
+Las dos columnas quedaron en la matriz con su fecha, y **con el comando para
+rehacerlas** — porque una tabla de estado envejece y lo único que vale es
+volver a medir.
+

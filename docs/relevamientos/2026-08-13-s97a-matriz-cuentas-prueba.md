@@ -11,107 +11,96 @@ vendedoras de prueba + la despensa de `duenotodo`).
 
 ---
 
-# 🔴 ESTADO REAL DE LAS CLAVES — medido el 26-ago-2026 (cura de `D-937`, firma del founder)
+# ☠️ RETRACTADO — la primera versión de esta sección estaba MAL (26-ago-2026)
 
-> **Se anota el estado REAL, no el prometido.** Las dos columnas que esta
-> sección agrega —*clave unificada* y *login verificado, con fecha*— existen
-> porque el encabezado de este documento promete un universal que **el cuerpo
-> no sostiene**, y quien lo lea y falle un login va a diagnosticar un problema
-> de auth que no existe.
+> **Lo que decía y NO es cierto:** que **17 de 42** cuentas entraban con la
+> clave compartida, y que **«el equipo `vet*` ENTERO rebota mientras el `ser*`
+> ENTERO entra»**, con la conclusión de que *«esa asimetría no es azar»*.
+>
+> **Era azar exactamente.**
 
-## ⚠️ EL ENCABEZADO ESTÁ MAL Y ASÍ QUEDA MARCADO
+## Qué pasó, porque el modo de falla vale más que el número
 
-Dice: ~~*«La clave es una sola para todas»*~~.
+El censo corrió **42 logins seguidos, sin pausa**. Supabase los limitó por
+tasa, y **los `429` se leyeron como «esta cuenta no tiene la clave»**. El
+instrumento medía `ok / no-ok` y **tiraba el `status`**, así que no podía
+distinguir *«no tiene la clave»* de *«no me dejaron preguntar»*.
 
-**Medido por LOGIN REAL contra las 42 cuentas `guillo381+*` vivas en
-`auth.users`: 17 entran con la clave compartida y 25 NO.**
+**La prueba de que era eso, y es concluyente:** dos corridas separadas por
+minutos dieron **conjuntos distintos** — `vet2`, `vet4`, `vetadmin` y `vetrece`
+pasaron de ❌ a ✅, y `seradmin`, `serrece`, `test2`, `test3` de ✅ a ❌. *Un
+estado de claves no se reorganiza solo entre dos corridas.* Con **3,5 s de
+espaciado**, el resultado es estable.
 
-*No es que falte una clave: es que la unificación de S97 alcanzó a las cuentas
-que esa sesión tocó, y el encabezado se escribió como si las hubiera alcanzado
-a todas.*
+> 🔴 **Y esto se cae con ella: la acusación a la cura ① de S97-A.** Se escribió
+> que su afirmación *«`vet2` → la compartida ✅»* era falsa hoy. **`vet2` entra.
+> La afirmación de S97 estaba bien y la marqué mal.**
 
-## 🔴 Y UNA AFIRMACIÓN DE ESTE MISMO DOCUMENTO QUE HOY ES FALSA
+**Lo único que sobrevive del hallazgo original**, porque se midió aislado y no
+en tanda: **`guillo381+7@gmail.com` rebota de verdad** — es la cuenta que hizo
+fallar la primera corrida del borde de §4.
 
-La cura ① de S97-A declara para **`vet2`**: *«clave: desconocida (rebotaba el
-login) → **la compartida ✅**»*.
+---
 
-**Hoy `vet2` REBOTA.** Y no está sola: **el equipo `vet*` entero rebota**
-—`vet1`, `vet2`, `vet3`, `vet4`, `vetadmin`, `vetrece`— mientras **el equipo
-`ser*` entero entra**. *Esa asimetría no es azar y merece que alguien la mire:
-o la unificación del lado médico nunca corrió, o algo la revirtió después.*
+# ✅ ESTADO REAL DE LAS CLAVES — medido con espaciado el 26-ago-2026
 
-⚠️ **La afirmación de S97 NO se borra** — era verdadera o falsa el 14-ago y no
-lo sabemos; lo que sabemos es que **hoy no lo es**. Se marca con su fecha, que
-es lo único honesto.
+**Instrumento:** `scripts/unificar-claves-prueba.mjs` (modo medición). Corre el
+login real de cada cuenta **con 3,5 s entre intentos**, **guarda el `status` de
+cada error** y **aborta si aparece un solo `429`** — porque una medición con un
+rate limit adentro no es una medición.
 
-## Las 17 que ENTRAN
+**Antes de unificar: entran 21 · clave distinta 20 · correo sin confirmar 1.**
 
-| sufijo | clave unificada | login verificado |
+🔴 **Y el `status` reveló algo que el booleano escondía:** `+test1` no rebota
+por la clave sino por **`Email not confirmed`**. *Cambiarle la clave lo habría
+dejado «unificado» y sin poder entrar igual, y el reporte habría dicho que se
+arregló.*
+
+## El patrón real, y es aburrido — que es lo que lo vuelve creíble
+
+**Las cuentas que S97 creó o reseteó tienen la clave compartida; las que la
+preceden y no estaban en su lista, no.** El lado `vet` está **partido**
+(`vet2`, `vet4`, `vetadmin`, `vetrece` entran; `vet1`, `vet3` no), igual que
+todo lo demás.
+
+*Eso ya lo decía el CUERPO de este documento, caso por caso. Lo que engañaba
+era su ENCABEZADO, que prometía un universal.* ⇒ **`D-937` sigue siendo real y
+mucho más chica de lo que su primera versión dijo.**
+
+## ✅ UNIFICADAS — 26-ago-2026, firma del founder
+
+Se corrió `scripts/unificar-claves-prueba.mjs --aplicar` sobre **las 21 que
+rebotaban**: `+1 +2 +20 +3 +4 +5 +6 +7 +9 +cuatro +nuevotest2 +p1 +s87prof
++s87recep +s88admin +s88rolpuro +vendedorpuro +vet1 +vet3 +wizard +test1`.
+
+**Y la verificación es la parte que importa: se re-corrió EL MISMO instrumento
+después.**
+
+> ### **DESPUÉS → entran 42/42.**
+
+*No se reporta «se ejecutó sin errores». Un `updateUser` que devuelve 200 prueba
+que la API aceptó la orden, no que la persona pueda entrar* — y el episodio de
+esta misma jornada muestra por qué la diferencia importa.
+
+## LAS DOS COLUMNAS, al 26-ago-2026
+
+| conjunto | clave unificada | login verificado |
 |---|---|---|
-| `100` | ✅ | **26-ago-2026** · login real |
-| `21` | ✅ | **26-ago-2026** · login real |
-| `8` | ✅ | **26-ago-2026** · login real |
-| `demovet` | ✅ | **26-ago-2026** · login real |
-| `desrepartidor` | ✅ | **26-ago-2026** · login real |
-| `duenodes` | ✅ | **26-ago-2026** · login real |
-| `duenoser` | ✅ | **26-ago-2026** · login real |
-| `duenotodo` | ✅ | **26-ago-2026** · login real |
-| `duenovet` | ✅ | **26-ago-2026** · login real |
-| `paseo1` | ✅ | **26-ago-2026** · login real |
-| `repartidor1` | ✅ | **26-ago-2026** · login real |
-| `ser1` | ✅ | **26-ago-2026** · login real |
-| `ser2` | ✅ | **26-ago-2026** · login real |
-| `seradmin` | ✅ | **26-ago-2026** · login real |
-| `serrece` | ✅ | **26-ago-2026** · login real |
-| `test2` | ✅ | **26-ago-2026** · login real |
-| `test3` | ✅ | **26-ago-2026** · login real |
+| **las 42 cuentas `guillo381+*` vivas** | ✅ | **26-ago-2026** · login real con 3,5 s de espaciado |
 
-## Las 25 que NO
+**Cómo se rehace este censo** (no de memoria, no de este documento):
 
-| sufijo | clave unificada | login verificado |
-|---|---|---|
-| `1` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `2` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `20` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `3` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `4` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `5` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `6` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `7` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `9` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `cuatro` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `nuevotest2` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `p1` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `s87prof` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `s87recep` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `s88admin` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `s88rolpuro` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `test1` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `vendedorpuro` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `vet1` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `vet2` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `vet3` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `vet4` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `vetadmin` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `vetrece` | ❌ | **26-ago-2026** · login real, **rebota** |
-| `wizard` | ❌ | **26-ago-2026** · login real, **rebota** |
+```
+node scripts/unificar-claves-prueba.mjs            # mide y reporta, NO toca
+node scripts/unificar-claves-prueba.mjs --aplicar  # mide, unifica, re-mide
+```
 
-## LO QUE ESTA CURA **NO** HACE
+⚠️ **El modo medición aborta si aparece un solo `429`.** *Una medición con un
+rate limit adentro no es una medición, y esa lección costó un hallazgo falso en
+el canon.*
 
-**No se unificó ninguna clave.** *Tocar credenciales de cuentas vivas es acto
-del founder, no de una pista* — acá se anota el estado, y la unificación de las
-que falten la hace él por su lado.
-
-**Y lo que hay que saber al elegir una cuenta de prueba:** `+9`, `+7`,
-`+s87prof`, `+s87recep`, `+s88admin` y `+s88rolpuro` **están todas en el lado
-que rebota**, y varias son empleados activos de Clínica Aurora — o sea que **el
-balanceo del motor puede asignarles una cita cuya sesión después nadie puede
-acuñar.** *Es exactamente lo que pasó el 26-ago: la primera corrida del borde
-de §4 falló porque el motor eligió a `+7`.*
-
-**Instrumento:** el censo se rehace corriendo los 42 logins contra
-`security find-generic-password -a siembra -s epetplace-siembra-s97 -w`.
-**La clave se lee al momento y no se imprime nunca.**
+⚠️ **Esta tabla envejece.** Lo único que vale es correr el instrumento; la fecha
+está para que se vea cuánto hace que nadie lo hizo.
 
 ---
 
