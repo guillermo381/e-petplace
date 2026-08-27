@@ -25,10 +25,17 @@ Detalle en el mensaje del commit. Los dos criterios que la mesa registró:
 
 ---
 
-## ☠️ FICHA `D-943` — EL VOSEO VUELVE, Y YA NO SON DESCUIDOS
+## ☠️ FICHA `D-944` — EL VOSEO VUELVE, Y YA NO SON DESCUIDOS
 
-**Medido:** `D-942` es la última depositada; `D-943` está libre (grep sobre
-`docs/`, `apps/`, `packages/`, `supabase/`).
+**⚠️ Nace como `D-943` y se renumera ANTES de mergear.** Ese número lo tomó A
+para su ficha del giro de cámara mientras yo escribía — *el precedente `D-757`
+exacto: un número vivo en artefactos sin ficha depositada, que la sesión
+siguiente encuentra ocupado.* **Corregido cuando todavía no costaba nada.**
+
+**Re-medido contra `origin/main` fresco y contra TODAS las ramas remotas:**
+`D-943` tomada · **`D-944` libre**. *Medir sólo contra el archivo de deudas no
+habría alcanzado — el número de A ya vivía en su rama antes de estar en la
+ficha, que es exactamente cómo se produce la colisión.*
 
 ### El hecho
 
@@ -87,23 +94,28 @@ que le faltó algo.* Lo que hay hoy que **sólo** viaja horneado:
 | # | Qué | Estado |
 |---|---|---|
 | ① | **El módulo del cuadro congelado** (Android + iOS) | lo que motiva la build |
-| ② | ⚠️ **`softwareKeyboardLayoutMode: "pan"`** — la cura candidata del crash al escribir | **medido: hoy NO está declarado en ninguna de las dos apps** ⇒ default `resize`, que es la hipótesis del crash |
+| ② | ~~`softwareKeyboardLayoutMode: "pan"`~~ | ☠️ **RETIRADO — la hipótesis está descartada** |
 
-**② es una decisión de la mesa, no mía**, y por eso va como pregunta y no como
-hecho: **es nativo, toca TODA la app, y su diagnóstico todavía depende del
-stack que A tiene que capturar.**
+### ☠️ EL `"pan"` SALE, y la corrección es mía
 
-🔴 **Pero el orden importa y por eso lo digo ahora:** *si el stack llega
-después de que la build salga, la cura del crash espera a la build siguiente —
-y el crash es lo único que impide al vet escribir.* **Conviene que A capture el
-stack ANTES de que la build se dispare**, aunque la respuesta sea «no era el
-teclado».
+**El crash al escribir YA ESTÁ CURADO**, y no era el teclado: era **un worklet
+de `ModalDosAlturas` llamando a JS desde el hilo de UI** — lo curó A en
+`3797a779`, publicado en `01a041a2`.
 
-⚠️ **Y lo mismo con `[GIRO_C]`:** la instrumentación **ya viaja por OTA**, así
-que ése no necesita esperar a nadie — pero si el log dijera que la causa es
-nativa, su cura también caería en esta build.
+⇒ **Mi hipótesis quedó falsada, y no tengo otra razón para el `pan`.** Es
+nativo, toca toda la app, y *proponer un cambio de esa clase sin una razón
+viva es pedir riesgo a cambio de nada.* **Sale de la lista.**
 
-⇒ **Los tres —cuadro, crash, giro— quieren la misma ventana.** Decidirlo junto
-es lo que evita la segunda build.
+*Y vale registrar por qué la hipótesis era razonable y aun así falsa: el
+síntoma —crash nativo al escribir, «keeps stopping», fuera de toda
+ErrorBoundary— es idéntico en las dos causas. **Lo que las separa no se podía
+leer: hacía falta el stack**, que es justamente lo que la mesa mandó pedir en
+vez de seguir construyendo sobre la sospecha.*
+
+⇒ **LA BUILD LLEVA UNA SOLA COSA: el módulo del cuadro congelado.**
+
+⚠️ Sigue en pie lo del giro: `[GIRO_C]` **viaja por OTA y no espera a nadie**,
+pero **si su log dijera que la causa es nativa, su cura caería en esta misma
+build** — y ahí sí convendría que el log se lea antes del disparo.
 
 ---
