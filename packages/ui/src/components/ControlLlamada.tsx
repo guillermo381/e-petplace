@@ -110,49 +110,55 @@ function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color:
         </>
       )}
       {nombre === 'girarCamara' && (
-        /* 🔴 RE-DIBUJADO CON LA ANATOMÍA PROBADA (gate del founder, 26-ago).
-           **Su versión anterior salía en un disco VACÍO** — el founder contó
-           cuatro controles y del tercero dijo *«no hace nada literalmente»*.
+        /* 🔴 LA VUELTA SOLA — **cero cámara en el dibujo, y ésa es la cura.**
+           (Firma de la mesa, 27-ago, sobre medición.)
 
-           ── LA MEDICIÓN QUE ORDENÓ ESTE DIBUJO ────────────────────────────
-           Comparado prop por prop contra los TRES glifos que sí se ven, éste
-           era el único con **dos rarezas**: `opacity={0.9}` en su `Rect`, y
-           **tres elementos pintados con el COLOR DEL FONDO** para simular un
-           recorte. Los otros tres usan `fill`/`stroke={color}` y nada más.
+           ═══ POR QUÉ ESTE GLIFO SE RE-DIBUJÓ DOS VECES ═══════════════════
+           El founder reportó **cuatro controles donde hay cinco**, dos veces:
+           primero *«uno en el centro que no hace nada literalmente»*, después
+           nombrando cuatro y no mencionando éste. Se descartaron, con
+           medición, CINCO explicaciones: la voz no resuelta, la prop no
+           pasada, el símbolo ausente del bundle, el ancho que recorta, y el
+           SVG inválido. **Las cinco daban verde y el ojo seguía diciendo
+           cuatro.**
 
-           **No sé cuál de las dos lo rompía, y lo digo en vez de elegir:** se
-           adopta la anatomía que los otros tres tienen probada EN EL APARATO.
-           *Elegir entre dos sospechosos con una corazonada, para conservar un
-           dibujo, sería cambiar una medición por una preferencia.*
+           ── LA MEDICIÓN QUE LO RESOLVIÓ, y no miraba el glifo ─────────────
+           Renderizada la fila entera y recortado cada disco: **los cinco
+           pintan**, y éste era **el MÁS entintado** (689 px claros contra 632
+           de `camara`, 396 del micrófono, 306 del altavoz). No faltaba: se
+           dibujaba de más.
 
-           ⚠️ **Y una medición DEBILITA mi propia explicación favorita:**
-           renderizados los dos glifos como SVG en un navegador —el viejo con su
-           `opacity` y sus recortes, y el nuevo— **los DOS dibujan** (154 y 156
-           px claros sobre el disco). ⇒ **el SVG viejo NO era inválido**, así
-           que la causa no está en el path ni en `opacity` *como SVG*: está en
-           cómo `react-native-svg` lo traduce a nativo. **Se deja escrito para
-           acotar dónde mirar si vuelve a pasar** — y para que nadie lea esta
-           cura como «era el opacity».
+           Lo que faltaba era **distinguirse**. Solape de tinta (IoU) del
+           dibujo anterior contra el glifo de `camara`, que vive **en el disco
+           de al lado**: **0,647** — dos tercios de su tinta eran la misma
+           tinta. Los dos eran un cuerpo de cámara con el triángulo del lente;
+           lo único que los separaba era una flecha de 2 px arriba, *que a
+           21 px es exactamente lo que la Ley 9 llama ruido*.
 
-           **Y el recorte por color de fondo era MALO aunque hubiera andado:**
-           el fondo de esta pieza CAMBIA (el estado cortado lo invierte), así
-           que un glifo que se dibuja con el color del fondo se rompe solo el
-           día que el fondo cambia. *Los otros tres no dependen de su fondo —
-           por eso sobreviven a cualquier estado.*
+           🔴 **LA LEY QUE SALE DE ACÁ, y vale para todo el registry:** *un
+           glifo que colisiona con su vecino no es un glifo feo — es un CONTROL
+           QUE DESAPARECE.* El usuario no cuenta discos: **nombra funciones**, y
+           dos controles que dicen «cámara» son una función, no dos.
 
-           El dibujo: cuerpo de cámara en masa + una flecha de vuelta ARRIBA,
-           por fuera del cuerpo. Todo en `color`, sin recortes y sin opacidad. */
+           ── POR QUÉ **la vuelta sola** y no una cámara mejor dibujada ──────
+           Medidos tres candidatos contra `camara`: la vuelta sola **0,110** ·
+           la cámara-que-gira 0,300 · las dos caras 0,212. Gana la que **no
+           dibuja cámara en absoluto** — y de las tres es la única que sigue
+           legible a 21 px. Es además la convención universal de *flip*.
+           *El objeto de este control no es la cámara: es LA VUELTA.*
+
+           ⚠️ **Lo que la medición NO prueba, declarado:** corrió en
+           react-native-web. Prueba árbol, ancho y silueta; **no prueba el
+           render nativo**. La colisión de silueta sí vale en los dos, porque
+           es del path y no del backend de dibujo. */
         <>
-          <Rect x="2" y="9" width="14" height="10" rx="2.5" fill={color} />
-          <Path d="M17 12l4.5-2.5v7L17 14z" fill={color} />
-          {/* La flecha de vuelta: el gesto de dar vuelta, no «configurar». */}
-          <Path
-            d="M6 6.5h9"
-            stroke={color}
-            strokeWidth={t}
-            strokeLinecap="round"
-          />
-          <Path d="M15.8 6.5l-3.2-2.2v4.4z" fill={color} />
+          {/* Las dos mitades de la vuelta, cada una con su punta. Trazo
+              +0,4 sobre el resto: sin masa que lo sostenga, el arco necesita
+              cuerpo propio para no adelgazarse contra el video. */}
+          <Path d="M4.5 12a7.5 7.5 0 0 1 12.6-5.5" stroke={color} strokeWidth={t + 0.4} strokeLinecap="round" />
+          <Path d="M19.5 12a7.5 7.5 0 0 1-12.6 5.5" stroke={color} strokeWidth={t + 0.4} strokeLinecap="round" />
+          <Path d="M17.6 2.4l1.2 4.6-4.6 1.2z" fill={color} />
+          <Path d="M6.4 21.6l-1.2-4.6 4.6-1.2z" fill={color} />
         </>
       )}
       {nombre === 'altavoz' && (
