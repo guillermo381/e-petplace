@@ -648,6 +648,7 @@ export const clienteEn = {
   checkout: {
     titulo: 'Confirm and pay',
     resumen: 'Your walk',
+    conPrestador: 'with {{prestador}}',
     cupon: 'Coupon',
     cuponPronto: 'Soon',
     total: 'Total',
@@ -695,6 +696,7 @@ export const clienteEn = {
     servicioEtiqueta: 'What do they need?',
     precioDesde: 'For {{nombre}}: from ${{precio}}',
     precioExacto: 'For {{nombre}}: ${{precio}}',
+    elegiQueNecesita: 'Choose what {{nombre}} needs to see times and price.',
     urgenciaSoloHoy: 'Urgent care is booked for today only, within each vet’s hours.',
     urgenciaSinLugarHoy: 'No urgent-care slots left for today in the app. If it’s serious, contact your vet directly.',
     eligeMascota: 'Pick your pet above to see the schedule.',

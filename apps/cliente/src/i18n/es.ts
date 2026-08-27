@@ -776,6 +776,9 @@ export const clienteEs = {
   checkout: {
     titulo: 'Confirmar y pagar',
     resumen: 'Tu paseo',
+    /* El prestador baja a subtítulo cuando el SERVICIO pasa a presidir el
+       resumen de pago: dice quién sin competir por el renglón principal. */
+    conPrestador: 'con {{prestador}}',
     cupon: 'Cupón',
     cuponPronto: 'Pronto',
     total: 'Total',
@@ -842,6 +845,10 @@ export const clienteEs = {
     servicioEtiqueta: '¿Qué necesita?',
     precioDesde: 'Para {{nombre}}: desde ${{precio}}',
     precioExacto: 'Para {{nombre}}: ${{precio}}',
+    /* 🔴 Ocupa el lugar del precio cuando todavía no se eligió servicio: sin
+       esto, retirar el default dejaba un hueco silencioso donde antes había
+       un precio — el usuario vería que algo falta y no QUÉ. */
+    elegiQueNecesita: 'Elige qué necesita {{nombre}} para ver horarios y precio.',
     urgenciaSoloHoy: 'Las urgencias se reservan para hoy, dentro del horario de cada veterinario.',
     urgenciaSinLugarHoy: 'Hoy no queda lugar para urgencias por la app. Si es grave, contacta a tu veterinario directamente.',
     eligeMascota: 'Elige arriba a tu mascota para ver la agenda.',
