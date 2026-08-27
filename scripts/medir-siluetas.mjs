@@ -37,8 +37,13 @@
  *    render nativo** — `react-native-svg` traduce a vistas nativas y ahí un
  *    path puede comportarse distinto. *La silueta sí vale en los dos: es del
  *    path, no del backend de dibujo.*
- * ② **NO va al hook de pre-commit ni a `verify:diseno`**: levanta un Chrome y
- *    bundlea 3,9 MB. Es de paso ⓪ o de cierre — precedente `verify-edge-deno`.
+ * ② **NO va al hook de pre-commit ni a `verify:diseno` — y la razón NO es el
+ *    costo.** *Iba a escribir «tarda como `verify-edge-deno`» y lo medí antes
+ *    de escribirlo: **2,5 s**, que entra de sobra en un hook.* La razón real es
+ *    otra: **depende de un Chrome del sistema** (`channel: 'chrome'`). Un gate
+ *    obligatorio que exige un binario que no está declarado en el repo falla en
+ *    la máquina que no lo tiene y en CI — *y un gate que a veces no puede
+ *    correr enseña a saltearlo.* ⇒ vive en el paso ⓪ o en el cierre, a mano.
  * ③ **No tiene umbral y no lo va a tener.** No existe un IoU «legal»: el juicio
  *    es de la mesa mirando la lámina. *Este instrumento pone el número sobre la
  *    mesa; no firma por ella.*
