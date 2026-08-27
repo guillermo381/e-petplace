@@ -81,7 +81,19 @@ select
    and s.start_ok and s.finish_ok               -- abrió y cerró
    and coalesce(i.cuantos, 0) = 0               -- 🔴 sin intrusos
    and (s.cita_id is null                       -- el cable no tiene cita: ok
-        or (s.personas = 2 and m.modalidad = 'telemedicina'))
+        or (m.modalidad = 'telemedicina'
+            /* 🔴 CORREGIDO 27-ago — este criterio EXIGÍA `personas = 2` y
+               estaba MAL, con una firma en contra:
+               `LETRA_TELEMEDICINA` §4 dice que la consulta se cobra **aunque
+               el dueño no asista** — «si el veterinario entra y determina que
+               el caso necesita atención presencial, eso ES el servicio
+               prestado». ⇒ **una sala con UNA sola persona es un caso
+               LEGÍTIMO y firmado**, no un descuadre.
+               *Mi chequeo marcaba en rojo justo el caso que la letra
+               protege* — y lo habría reportado como defecto del registro.
+               Lo que SÍ es rojo: 0 personas (nadie entró y sin embargo hubo
+               sala) o 3+ (alguien que no es ninguno de los dos). */
+            and s.personas between 1 and 2))
   ) as ok,
   s.ultimo::text as ultimo
 from por_sala s
@@ -98,5 +110,54 @@ select
   true,
   now()::text
 from consumo c
+
+union all
+
+-- ═══ ③ EL CUADRO CONGELADO ════════════════════════════════════════════════
+-- 🔴 Lo que prueba que la marca SIRVE no es que exista: es que apunte a la
+-- cita correcta. **Una marca que apunta a la cita equivocada es peor que
+-- ninguna** — una foto en el expediente del animal que no es.
+select
+  'cuadro',
+  a.id::text,
+  format('origen=%s cita=%s mascota_coincide=%s',
+         a.origen_captura,
+         coalesce(c.id::text, '(sin cita)'),
+         (a.mascota_id = c.mascota_id)),
+  -- ok ⟺ tiene su marca Y cuelga de una teleconsulta Y es la mascota de ESA cita
+  (a.origen_captura = 'videoconsulta'
+   and c.id is not null
+   and c.modalidad = 'telemedicina'
+   and a.mascota_id = c.mascota_id),
+  a.created_at::text
+from evento_archivo_adjunto a
+left join evento_cita_servicio c on c.evento_id = a.evento_id
+where a.origen_captura = 'videoconsulta'
+
+union all
+
+-- ═══ ④ LA ASIGNACIÓN — ¿nacen del TITULAR? ════════════════════════════════
+-- Mismo criterio que se le aplicó a los hechos de sala: **que haya un
+-- asignado no prueba nada; que sea el titular, sí.**
+--
+-- Medido el 27-ago: `rol='dueño'` son 10 filas y **las 10** coinciden con
+-- `prestadores.user_id`; los 21 `empleado`, ninguna. Los dos criterios son
+-- consistentes hoy ⇒ **se exigen LOS DOS**, para que el día que divergan el
+-- chequeo lo cace en vez de elegir uno y no enterarse.
+select
+  'asignacion',
+  c.id::text,
+  format('empleado=%s rol=%s es_titular_por_rol=%s es_titular_por_user_id=%s',
+         coalesce(pe.id::text, '(SIN ASIGNAR)'),
+         coalesce(pe.rol, '—'),
+         (pe.rol = 'dueño'),
+         (pe.user_id = p.user_id)),
+  (pe.id is not null and pe.rol = 'dueño' and pe.user_id = p.user_id),
+  (c.fecha::text || ' ' || c.hora::text)
+from evento_cita_servicio c
+left join prestador_empleados pe on pe.id = c.empleado_id
+left join prestadores p        on p.id  = c.prestador_id
+where c.modalidad = 'telemedicina'
+  and c.created_at >= now() - interval '2 days'   -- sólo las nuevas
 
 order by 1, 5 desc;
