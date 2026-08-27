@@ -2728,6 +2728,18 @@ function GaleriaInterna() {
               inicioTs={inicioLlamada}
             />
           </View>
+          <View style={{ height: spacing[2] }} />
+          <Texto variante="apoyo">
+            El temporizador ya NO vive en el encabezado: se esconde lo que compite
+            con el video, y el reloj no compite. Va suelto, con su propia banda —
+            sin ella quedaría texto papel sobre video crudo.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ backgroundColor: sobreVideo.extremoClaro, padding: spacing[4], borderRadius: radius.md, alignItems: 'flex-end' }}>
+            <View style={{ paddingHorizontal: spacing[2.5], paddingVertical: spacing[1], borderRadius: radius.full, backgroundColor: sobreVideo.banda }}>
+              <TemporizadorLlamada inicioTs={inicioLlamada} />
+            </View>
+          </View>
           <View style={{ height: spacing[4] }} />
           <Texto variante="apoyo">
             La superficie completa: remoto a sangre, el tile propio arriba a la
