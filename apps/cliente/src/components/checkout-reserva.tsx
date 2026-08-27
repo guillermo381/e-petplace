@@ -464,9 +464,35 @@ export function CheckoutReserva({
             {resumenEtiqueta}
           </Text>
           <Tarjeta relleno="ninguno">
+            {/* ── 🔴 CURA ② · QUÉ SE ESTÁ COMPRANDO, Y PRESIDE ────────────────
+                ⏪ El servicio iba de SUBTÍTULO, debajo del nombre de la
+                clínica: **estaba, y no presidía**. *En el momento del pago,
+                lo que preside es lo que se lee* — y por ahí pasó el defecto
+                del servicio preseleccionado sin que nada lo delatara.
+
+                🔴 **Es CINTURÓN, no cura.** Aunque la preselección nunca
+                volviera a fallar, *una pantalla de pago tiene que decir qué
+                se paga*: el cinturón vale por sí mismo, no por el defecto
+                que lo motivó.
+
+                Se invierten los dos: el SERVICIO al título, la clínica al
+                subtítulo con su rótulo —*«con Clínica Aurora» dice quién sin
+                competir por el renglón principal*—. La metadata no se toca. */}
+            {/* ⚠️ **El riesgo que trae invertirlos, cerrado acá.** Los cuatro
+                oficios pasan `servicioNombre` con fallback `''` (medido) —
+                con el prestador en el título eso no importaba; **con el
+                servicio arriba, un vacío dejaría el renglón principal mudo**.
+                *Auditar cuatro caminos para probar que nunca llega vacío es
+                más frágil que hacer que un vacío no pueda dañar:* sin nombre
+                de servicio, el título vuelve a ser la clínica y el subtítulo
+                no se monta. */}
             <Celda
-              titulo={prestadorNombre}
-              subtitulo={servicioNombre}
+              titulo={servicioNombre.trim().length > 0 ? servicioNombre : prestadorNombre}
+              subtitulo={
+                servicioNombre.trim().length > 0
+                  ? t('checkout.conPrestador', { prestador: prestadorNombre })
+                  : undefined
+              }
               metadataMono={`${fecha} · ${hora.slice(0, 5)} · ${duracion} min`}
             />
             <Separador />
