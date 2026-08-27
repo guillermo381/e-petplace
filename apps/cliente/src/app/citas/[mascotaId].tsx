@@ -70,9 +70,29 @@ import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 
-function iconoDe(tipo: string | null): 'paseo' | 'grooming' | 'training' {
+/**
+ * ¿Esta cita ocurre por video?
+ *
+ * ⚠️ **Derivación DECLARADA, no atajo.** `CONTRATOS-PARA-C.md` (A, 25-ago):
+ * *«la modalidad ya NO se manda desde el cliente para teleconsulta: se DERIVA
+ * del tipo de servicio, server-side»* ⇒ hoy los dos valores son el mismo
+ * hecho, y `modalidad` **no está expuesta en `CitaActivaMascota`** (medido).
+ * 🔴 Pedida a A (§E1 del recorrido de la Obra 0). Cuando llegue, esto pasa a
+ * `c.modalidad === 'telemedicina'` y este comentario se borra — *el día que
+ * exista una presencial marcada como teleconsulta, esta línea mentiría y nada
+ * avisaría.*
+ */
+function esTeleconsulta(tipo: string | null): boolean {
+  return tipo === 'telemedicina';
+}
+
+function iconoDe(tipo: string | null): 'paseo' | 'grooming' | 'training' | 'telemedicina' {
   if (tipo?.startsWith('grooming')) return 'grooming';
   if (tipo === 'adiestramiento') return 'training';
+  /* S106-C t3 · el glifo YA existía en el registry: la fila de una
+     teleconsulta se distingue por el lenguaje de la casa (Ley 12, el glifo
+     dice el servicio) y no por un texto agregado. */
+  if (esTeleconsulta(tipo)) return 'telemedicina';
   return 'paseo';
 }
 
@@ -81,10 +101,13 @@ function iconoDe(tipo: string | null): 'paseo' | 'grooming' | 'training' {
  *  'training' (lote 3 S58; ESTRENO acá por pedido founder S67 — este
  *  re-gate en dispositivo es su gate por ícono, DIRECCION_ARTE §6).
  *  Un oficio futuro sin glifo va sin ícono: cero genéricos (Ley 12). */
-function iconoOficio(tipo: string | null): 'paseo' | 'grooming' | 'training' | null {
+function iconoOficio(
+  tipo: string | null,
+): 'paseo' | 'grooming' | 'training' | 'telemedicina' | null {
   if (tipo?.startsWith('grooming')) return 'grooming';
   if (tipo === 'adiestramiento') return 'training';
   if (tipo?.startsWith('paseo')) return 'paseo';
+  if (esTeleconsulta(tipo)) return 'telemedicina';
   return null;
 }
 
@@ -213,17 +236,39 @@ export default function CitasDeMascota() {
             </View>
           ) : null}
           <Texto variante="datoMd">{cuando}</Texto>
-          {c.estado === 'en_vivo' ? (
-            // §7.1 — la voz única "En vivo" la pone el pill de CitaEnVivo;
-            // acá solo la invitación a la pantalla de dos caras.
-            <Texto variante="apoyo">{t('hogar.verEnVivo')}</Texto>
-          ) : (
-            <Insignia
-              estado={c.estado === 'hold' || c.estado === 'por_coordinar' ? 'proximo' : 'alDia'}
-              etiqueta={vozEstado(c)}
-              tamaño="sm"
-            />
-          )}
+          {/* S106-C t3 · estado y MODALIDAD conviven: una dice en qué punto
+              está la cita, la otra POR DÓNDE ocurre. La etiqueta de la
+              modalidad la arma la pieza (B) — no se le escribe texto. */}
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: spacing[2],
+            }}
+          >
+            {c.estado === 'en_vivo' ? (
+              // §7.1 — la voz única "En vivo" la pone el pill de CitaEnVivo;
+              // acá solo la invitación a la pantalla de dos caras.
+              <Texto variante="apoyo">{t('hogar.verEnVivo')}</Texto>
+            ) : (
+              <Insignia
+                estado={c.estado === 'hold' || c.estado === 'por_coordinar' ? 'proximo' : 'alDia'}
+                etiqueta={vozEstado(c)}
+                tamaño="sm"
+              />
+            )}
+            {esTeleconsulta(c.tipo_servicio) ? <Insignia modalidad="teleconsulta" tamaño="sm" /> : null}
+          </View>
+          {/* 🔴 LA TARJETA TAPEABLE TIENE QUE DECIR QUE LO ES. Sin esta línea
+              la teleconsulta sería una tarjeta que navega **en silencio**, que
+              es el defecto que el gate de S72 marcó con el «Ver más» mudo. El
+              brazo `en_vivo` ya trae su señal (el pill de CitaEnVivo); éste
+              no tenía ninguna. Estándar de S71: «Ver … ›», jamás un CTA en
+              caja adentro de una tarjeta de información. */}
+          {esTeleconsulta(c.tipo_servicio) ? (
+            <Texto variante="apoyo">{t('citasMascota.verVideoconsulta')}</Texto>
+          ) : null}
           {/* S71-A — la línea de AGENCIA: quién mueve esto ahora. Sin ella
               el dueño queda con un estado y sin saber qué esperar.
               DOS FORMAS, porque el nombre puede no estar: la cita nacida de
@@ -250,6 +295,28 @@ export default function CitasDeMascota() {
         </View>
       </Tarjeta>
     );
+    /* ── S106-C t3 · LA PUERTA A LA VIDEOCONSULTA (D-938) ──────────────────
+       🔴 **Va ANTES que el brazo de `en_vivo`, y es a propósito.** Una
+       teleconsulta no tiene "en vivo" con mapa: su destino es SIEMPRE su
+       antesala, esté como esté. Si este brazo fuera segundo, una teleconsulta
+       en curso mandaría al dueño a `/paseo/[atencionId]` — la pantalla de dos
+       caras del PASEO.
+
+       Aterriza en `videoconsulta`, no en `videollamada`: la antesala es la que
+       sabe si se puede entrar y **lo dice con el motivo**; entrar directo
+       significaría descubrir que no se puede recién adentro. */
+    if (esTeleconsulta(c.tipo_servicio)) {
+      return (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() =>
+            router.push({ pathname: '/videoconsulta/[citaId]', params: { citaId: c.cita_id } })
+          }
+        >
+          {tarjeta}
+        </Pressable>
+      );
+    }
     if (c.estado === 'en_vivo' && c.atencion_id !== null) {
       const atencionId = c.atencion_id;
       return (
