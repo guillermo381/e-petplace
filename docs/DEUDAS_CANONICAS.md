@@ -22643,6 +22643,81 @@ uniformiza.*
 
 ---
 
+### `L-428` — HAY MODOS DE FALLA QUE VIVEN EN EL RELOJ, Y NINGÚN GATE MIRA RELOJES
+
+**Nace S106-A tanda 3, 26-ago-2026.** Es la lección más cara del día, y la
+pagó A **contra su propio trabajo de la víspera**.
+
+#### La primera mitad — el defecto
+
+Una vigilancia de consumo tenía que pedirle un número a un endpoint y avisar al
+cruzar un umbral. `pg_net` **no despacha la petición hasta que la transacción
+commitea** ⇒ pedir y cobrar en la misma transacción es imposible por
+construcción. Se resolvió con **dos tiempos**: cada corrida cobra lo que pidió
+la anterior y pide para la próxima. **Correcto — y con un supuesto no medido:
+que la respuesta seguiría ahí.**
+
+Medido al día siguiente: **`pg_net.ttl` = 6 horas** y el cron corría **cada
+24**. La respuesta llevaba **18 horas borrada** cuando la corrida siguiente iba
+a cobrarla ⇒ la vigilancia habría dicho *«no pude medir»* **todos los días,
+para siempre, sin medir una sola vez** — y `cron.job_run_details` mostrándola
+puntual y sin errores.
+
+> 🔴 **La versión vieja moría por TRANSACCIÓN; ésta moría por RELOJ — y ningún
+> gate mira relojes.**
+
+Ni el typecheck, ni el cinturón de la migración, ni la auto-prueba del juez, ni
+el ledger de jobs pueden ver una incompatibilidad entre **dos duraciones que
+viven en dos sistemas distintos** (la cadencia en `cron.job`, el TTL en
+`pg_settings`). *No es que los gates fallaran: es que la magnitud que decide no
+estaba en ninguno de los dos lados que miran.*
+
+**Cómo se reconoce en el campo:** cuando una pieza depende de que algo **siga
+existiendo** entre dos momentos —una respuesta cacheada, un token, un archivo
+temporal, una fila con TTL, una sesión— **la pregunta no es «¿funciona?» sino
+«¿cuánto vive eso, y cuánto tarda mi próxima corrida?»**. Y las dos respuestas
+se **leen del objeto vivo**, jamás de una constante transcrita.
+
+#### La segunda mitad — lo que lo salvó, y es la mitad que se copia
+
+**El defecto se descubrió porque el monitor estaba obligado a avisar cuando NO
+PODÍA medir**, no sólo cuando cruzaba el umbral.
+
+> 🔴 *Sin ese brazo, el silencio se habría leído como «estás por debajo del
+> umbral» para siempre.* Un monitor que sólo habla cuando hay problema es
+> indistinguible de uno roto: **los dos callan.**
+
+⇒ **La regla que se lleva: todo instrumento de vigilancia tiene DOS avisos, no
+uno** — «pasó lo que vigilo» y «no pude vigilar». El segundo es el que hace
+auditable al primero.
+
+Y su corolario, que apareció en la misma cura: **los dos avisos no comparten
+clave de dedup.** El del umbral era mensual (para no molestar); el de fallo
+había heredado esa misma clave ⇒ *un fallo del día 2 habría silenciado los del
+3 al 31 — el monitor tapándose a sí mismo.*
+
+#### La cura, y por qué no fue la más corta
+
+Se descartaron dos formas más breves, con su razón:
+
+- *dos jobs, pedir y cobrar a 15 minutos* — correcto, pero **acopla dos
+  schedules**: el día que alguien mueva uno solo, el otro cobra vacío y vuelve
+  el mismo silencio.
+- *guardar el último valor conocido y reusarlo* — tapa el síntoma, y encima
+  **diría un número viejo como si fuera de hoy**.
+
+Lo que entró: cadencia dentro del TTL **y la función auto-diagnosticándose** —
+lee su propia cadencia de `cron.job` y el `pg_net.ttl` **vivos**, y si no caben,
+**lo dice adentro del aviso**. *Un cinturón mira el día que corre la migración;
+esto mira cada corrida.* El día que alguien vuelva a alargar la cadencia, el
+primer aviso nombra la causa en vez de mandar a buscar un endpoint sano.
+
+> **Depositada por A, con la formulación del founder.** Número verificado **por
+> grep** contra este archivo y contra las cuatro ramas de pista vivas — el tope
+> real era `L-427`.
+
+---
+
 ### D-938 🔴 · LAS PANTALLAS DE VIDEOCONSULTA NO TIENEN PUERTA — sólo se llega por deep link
 
 **Nace S106 tanda 2, 26-ago-2026.** Hallazgo al preparar las builds del gate.
@@ -22683,11 +22758,12 @@ recorrido, no quien compila el APK.*
 
 ---
 
-### D-939 🟡 · EL AVISO DE CITA NUEVA LLEGA SÓLO AL TITULAR, NO A QUIEN VA A ATENDER
+### D-939 🔴 · EL AVISO DE CITA NUEVA LLEGA SÓLO AL TITULAR — LOS CINCO OFICIOS, CITAS PAGAS
 
-**Medida en S106-A t3 (26-ago-2026), contestando la pregunta de la mesa
-*«¿cómo se entera el vet de que le reservaron una teleconsulta?»*.** La
-respuesta a esa pregunta fue **sí, se entera** — y medirla destapó esto.
+**🔴 NO ES DE TELEMEDICINA: ES DEL PRODUCTO ENTERO** (alcance fijado por el
+founder, 26-ago-2026). Se midió contestando *«¿cómo se entera el vet de que le
+reservaron una teleconsulta?»* — la respuesta fue **sí, se entera** —, y
+medirla destapó **a quién** le llega.
 
 **Lo que el motor hace, medido:** `confirmar_cita_pagada` emite dos avisos del
 mismo instante. El del negocio es `cita_solicitada`, y su destinatario está
@@ -22699,29 +22775,65 @@ SELECT pr.user_id INTO v_titular FROM prestadores pr WHERE pr.id = v_cita.presta
 p_destinatario_user_id => v_titular
 ```
 
-⇒ **el aviso va al TITULAR del negocio y a nadie más.** En una clínica con
-varios veterinarios, **el profesional que va a atender esa cita no recibe
-nada** si no es el titular.
+⇒ **el aviso va al TITULAR del negocio y a nadie más.** En un negocio con
+equipo, **quien va a atender no se entera de que le reservaron.**
 
-**Por qué no es urgente hoy, y por qué igual tiene ficha:** los negocios vivos
-son de un solo profesional o el titular atiende, así que el titular y quien
-atiende son la misma persona. *El defecto es invisible por el tamaño de los
-negocios, no por diseño* — y esa es exactamente la clase que aparece el día que
-entra la primera clínica con equipo.
+**El código no tiene ninguna rama por tipo de servicio** ⇒ vale igual para
+**paseo, grooming, adiestramiento, veterinaria y telemedicina**, y hoy alcanza
+a **citas ya pagadas de todos ellos**.
 
-🔴 **NO ES DE TELEMEDICINA.** El código no tiene ninguna rama por tipo de
-servicio: vale igual para paseo, grooming, adiestramiento y veterinaria. Se
-anota desde acá porque acá se midió, no porque sea del oficio nuevo.
+---
 
-**Lo que hace falta antes de curarlo, y es decisión de mesa, no de código:** la
-cita **ya sabe quién la va a atender** (`evento_cita_servicio.empleado_id`), así
-que el dato está. Lo que no está decidido es la letra: ¿el titular deja de
-recibirlo, o lo reciben los dos? *Avisar a los dos es lo cómodo y es también
-cómo se enseña a ignorar los avisos —`MODELO_DESPENSA` ya firmó que avisar todo
-entrena a no mirar—, así que es una decisión de producto.*
+#### 🔴 EL COSTO, DICHO SIN SUAVIZAR
 
-**Disparo:** la primera clínica real con más de un profesional dando citas — o
-antes, si la mesa quiere escribir la letra junto con la del §7 del expediente.
+**Un profesional puede perderse una cita PAGA sin enterarse.** No es una
+molestia de coordinación: es una familia que pagó, reservó una hora, y del otro
+lado no hay nadie esperándola — *y el negocio se entera cuando la familia
+reclama, que es el peor momento y el peor mensajero.*
+
+**Y es invisible por el tamaño de los negocios, no por diseño.** Los negocios
+vivos hoy son de una sola persona, o el titular atiende ⇒ titular y quien
+atiende son el mismo. *El defecto está completo y no tiene síntoma; lo destapa
+la primera clínica con equipo, que es exactamente cuando más caro es.*
+
+---
+
+#### 🔴 DISPARO: **SE RESUELVE ANTES DEL ENCENDIDO DE TELEMEDICINA**
+
+Firma del founder, con su razón:
+
+> *Un vet que no se entera de una videoconsulta **la pierde entera**. En
+> presencial, al menos el dueño llega a la puerta y alguien lo ve.*
+
+⇒ la teleconsulta **no tiene ese repechaje**: no hay puerta, no hay sala de
+espera, no hay nadie que note que alguien está parado ahí. **La misma falla que
+en presencial degrada, en telemedicina destruye la cita.**
+
+Por eso esta deuda **precede al encendido de la llave**
+(`tipos_servicio.telemedicina.reservable`), y no al revés.
+
+---
+
+#### LO QUE HACE FALTA ANTES DE CURARLA — es letra, no código
+
+**El dato ya está:** la cita sabe quién la va a atender
+(`evento_cita_servicio.empleado_id`). Lo que no está decidido es a quién se
+avisa:
+
+- ¿el titular **deja** de recibirlo, o lo reciben **los dos**?
+
+*Avisar a los dos es lo cómodo y es también cómo se enseña a ignorar los
+avisos* — `MODELO_DESPENSA` ya firmó que **avisar todo entrena a no mirar**
+(por eso preparado y empacado no se notifican). Con el titular de una clínica
+grande recibiendo cada cita de cada profesional, ese buzón se apaga solo en un
+mes, y con él se apaga el aviso que sí importa.
+
+⚠️ **Y hay una tercera pregunta que la letra tiene que contestar y no es
+obvia:** las citas que nacen **sin `empleado_id`** —a la pizarra, sin persona
+asignada— no tienen a quién avisarle además del titular. *Ahí el titular no es
+un destinatario de más: es el único que existe.* Una cura que simplemente
+cambie el destinatario **dejaría esas citas sin ningún aviso**, que es peor que
+el defecto que viene a arreglar.
 
 **Nota de método:** apareció **contestando otra pregunta**. El encargo era
 verificar si el aviso viajaba; viajaba. *Un censo que sólo hubiera contestado
