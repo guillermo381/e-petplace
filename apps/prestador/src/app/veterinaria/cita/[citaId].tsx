@@ -360,6 +360,9 @@ export default function DetalleCitaVet() {
                     pathname: '/videollamada/[citaId]',
                     params: {
                       citaId: cita.id,
+                      /* El contexto clínico del modal (peso · vacunas ·
+                         última visita · alergias) se lee POR MASCOTA. */
+                      mascotaId: cita.mascota!.id,
                       /* Quién está del otro lado: la PERSONA que reservó, no
                          la mascota. `null` honesto ⇒ no se manda y la pantalla
                          cae a su propia voz genérica. */

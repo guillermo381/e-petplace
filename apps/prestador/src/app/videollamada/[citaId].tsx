@@ -21,7 +21,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Keyboard, View, useWindowDimensions } from 'react-native';
+import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePreventScreenCapture } from 'expo-screen-capture';
@@ -44,6 +44,8 @@ import {
   HojaConfirmacionDestructiva,
   ModalDosAlturas,
   SelectorOpcion,
+  radius,
+  sobreVideo,
   AsaModal,
   SuperficieLlamada,
   Texto,
@@ -62,6 +64,8 @@ import { livekitListo } from '@/lib/livekit';
 import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
+import { obtenerDetalleMascotaPrestador, obtenerMiPrestador, type DetalleMascotaPrestador } from '@epetplace/api';
+import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 
 /** La línea rotulada que cada conclusión deja EN la nota. Mapa cerrado: un
  *  código sin voz no puede escribir una línea vacía en un expediente. */
@@ -71,6 +75,59 @@ const VOZ_CONCLUSION: Record<string, 'consulta.vcConclusionLineaResuelta' | 'con
   urgencias: 'consulta.vcConclusionLineaUrgencias',
 };
 
+/**
+ * Las cuatro tarjetas del contexto clínico, con su regla de honestidad.
+ *
+ * 🔴 **Un dato que no está NO se pinta como «0» ni como «ninguna».** El peso
+ * sin medir y el peso cero no son lo mismo; «sin alergias registradas» y «no
+ * tiene alergias» tampoco — *la segunda es una afirmación clínica que el
+ * expediente no hizo.* Por eso cada tarjeta que no tiene dato **no se monta**,
+ * salvo las alergias, que dicen exactamente lo que el expediente sabe.
+ */
+function tarjetasClinicas(
+  d: DetalleMascotaPrestador,
+  t: (k: never) => string,
+  idioma: string,
+): Array<{ clave: string; etiqueta: string; valor: string }> {
+  const salida: Array<{ clave: string; etiqueta: string; valor: string }> = [];
+  if (d.peso_clinico_kg !== null) {
+    salida.push({
+      clave: 'peso',
+      etiqueta: t('consulta.vcClinicoPeso' as never),
+      valor: `${d.peso_clinico_kg} kg`,
+    });
+  }
+  salida.push({
+    clave: 'vacunas',
+    etiqueta: t('consulta.vcClinicoVacunas' as never),
+    valor: String(d.vacunas_total),
+  });
+  /* La última visita sale de las atenciones de ESTE prestador (visibilidad
+     parcial, por RLS): sin ninguna, la tarjeta no existe — *decir «primera
+     visita» sería afirmar algo sobre el historial de otros negocios que esta
+     app no puede ver.* */
+  const cerradas = d.atenciones
+    .map((a) => a.cerrada_en)
+    .filter((f): f is string => f !== null)
+    .sort();
+  const ultima = cerradas.length > 0 ? cerradas[cerradas.length - 1] : null;
+  if (ultima !== undefined && ultima !== null) {
+    salida.push({
+      clave: 'ultima',
+      etiqueta: t('consulta.vcClinicoUltima' as never),
+      valor: fechaCortaMono(ultima.slice(0, 10), idioma as IdiomaSoportado),
+    });
+  }
+  salida.push({
+    clave: 'alergias',
+    etiqueta: t('consulta.vcClinicoAlergias' as never),
+    valor: d.tiene_alergias
+      ? t('consulta.vcClinicoAlergiasSi' as never)
+      : t('consulta.vcClinicoAlergiasNo' as never),
+  });
+  return salida;
+}
+
 type Fase = 'pidiendo' | 'encall' | 'sin_entrada';
 
 export default function VideollamadaProfesional() {
@@ -79,10 +136,36 @@ export default function VideollamadaProfesional() {
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
-  const { citaId = '', familia = '' } = useLocalSearchParams<{ citaId?: string; familia?: string }>();
+  const { citaId = '', familia = '', mascotaId = '' } = useLocalSearchParams<{
+    citaId?: string;
+    familia?: string;
+    mascotaId?: string;
+  }>();
 
   /* OBRA 5 · se enciende al montar y se apaga al desmontar, solo. */
   usePreventScreenCapture();
+
+  /* ── EL CONTEXTO CLÍNICO DE LA MASCOTA (firma del founder, 26-ago) ────────
+     Peso · vacunas · última visita · alergias, **sólo del lado del
+     PROFESIONAL**: *el dueño ya conoce a su animal, y lo que necesita es ver
+     a la doctora.*
+     Se lee UNA vez al entrar —son datos del expediente, no del momento— y
+     **su fallo no tumba la llamada** (Ley 13): las tarjetas no se dibujan y
+     la consulta sigue igual. */
+  const [clinico, setClinico] = useState<DetalleMascotaPrestador | null>(null);
+  useEffect(() => {
+    if (mascotaId.length === 0) return;
+    let vigente = true;
+    void (async () => {
+      const pr = await obtenerMiPrestador();
+      if (!vigente || !pr.ok) return;
+      const r = await obtenerDetalleMascotaPrestador(mascotaId, pr.data.id);
+      if (vigente && r.ok) setClinico(r.data);
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, [mascotaId]);
 
   const [fase, setFase] = useState<Fase>('pidiendo');
   const [credencial, setCredencial] = useState<TokenVideollamada | null>(null);
@@ -301,6 +384,7 @@ export default function VideollamadaProfesional() {
              Sin borrador se sale y ya: *obligar a pasar por el Durante a quien
              no escribió nada sería cobrarle un trámite por no haber usado una
              función.* */
+          clinico={clinico}
           onSalir={(borrador, conclusion) => {
             /* 🔴 LA CONCLUSIÓN VIAJA DENTRO DE LA NOTA, y es lo que la firma
                pide: *«es parte de la nota clínica»*. Se le pone su rótulo para
@@ -344,6 +428,7 @@ function MesaDeTrabajo({
   onCam,
   onGirar,
   onSalir,
+  clinico,
 }: {
   alto: number;
   insetTop: number;
@@ -358,8 +443,11 @@ function MesaDeTrabajo({
   /** Recibe el borrador: **al colgar la nota no se pierde, se entrega.** */
   /** El borrador de la nota + la conclusión elegida (o `undefined`). */
   onSalir: (borrador: string, conclusion?: string) => void;
+  /** El contexto clínico para las tarjetas sobre el video; `null` = no se
+   *  pudo leer y **no se dibujan** (Ley 13, jamás datos inventados). */
+  clinico: DetalleMascotaPrestador | null;
 }) {
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const estado = useConnectionState();
   const { localParticipant, cameraTrack } = useLocalParticipant();
   const remotos = useRemoteParticipants();
@@ -495,9 +583,50 @@ function MesaDeTrabajo({
           manda y dos manijas para lo mismo confunden más que ninguna. */}
       {altura === 'cerrado' && (
         <View
-          style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + 120 }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + 120, gap: spacing[2] }}
           pointerEvents="box-none"
         >
+          {/* ── LAS TARJETAS DEL CONTEXTO CLÍNICO (firma del founder) ────────
+              **Sobre el video y encima de los controles**, no dentro del
+              modal: son lo que el vet mira MIENTRAS observa al animal, y
+              tenerlas detrás de un panel las vuelve inútiles justo cuando
+              sirven.
+
+              🔴 **Sólo del lado del PROFESIONAL.** El dueño no las ve: *ya
+              conoce a su animal, y lo que necesita es ver a la doctora.*
+
+              Fila horizontal desplazable: con cuatro datos de largo variable
+              —«3 vacunas» y «Sin alergias registradas» no miden lo mismo—
+              apretarlas en el ancho las trunca, y *un dato clínico truncado
+              es peor que uno ausente: se lee como si dijera otra cosa.* */}
+          {clinico !== null && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: spacing[4], gap: spacing[2] }}
+            >
+              {tarjetasClinicas(clinico, t, idioma).map((tj) => (
+                <View
+                  key={tj.clave}
+                  style={{
+                    backgroundColor: sobreVideo.banda,
+                    borderRadius: radius.suave,
+                    paddingHorizontal: spacing[3],
+                    paddingVertical: spacing[2],
+                    minHeight: 44,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Texto variante="dato" color="sobreVideo">
+                    {tj.etiqueta}
+                  </Texto>
+                  <Texto variante="cuerpo" color="sobreVideo">
+                    {tj.valor}
+                  </Texto>
+                </View>
+              ))}
+            </ScrollView>
+          )}
           <AsaModal etiqueta={t('consulta.vcAsaModal')} onPress={() => setAltura('medio')} />
         </View>
       )}
