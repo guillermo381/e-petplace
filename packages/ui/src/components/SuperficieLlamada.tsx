@@ -218,10 +218,19 @@ export function SuperficieLlamada({
           colors={[...sobreVideo.velo].reverse() as [string, string]}
           style={{ paddingTop: spacing[8], paddingBottom: insetBottom + spacing[4] }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[5] }}>
-            {/* Micrófono y cámara SÍ se esconden. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[4] }}>
+            {/* 🔴 EL ORDEN ES EL DE LA DIRECCIÓN §2: **micrófono · cámara ·
+                   girar cámara · colgar**, y estaba mal — corría
+                   `micrófono · girar · colgar · cámara`, con COLGAR EN EL MEDIO.
+                   *Un destructivo entre dos controles reversibles es el peor
+                   lugar donde puede estar: el pulgar lo encuentra buscando otra
+                   cosa.* Y la dirección lo pone último por eso mismo. */}
             <Animated.View style={estiloChrome} pointerEvents={visible ? 'auto' : 'none'}>
               <ControlLlamada glifo="microfono" etiqueta={vozControles.microfono} activo={microfonoActivo} onPress={() => { onMicrofono(); despertar() }} />
+            </Animated.View>
+
+            <Animated.View style={estiloChrome} pointerEvents={visible ? 'auto' : 'none'}>
+              <ControlLlamada glifo="camara" etiqueta={vozControles.camara} activo={camaraActiva} onPress={() => { onCamara(); despertar() }} />
             </Animated.View>
 
             {/* 🔴 GIRAR CÁMARA: fuera de `estiloChrome`, como colgar. La
@@ -230,12 +239,8 @@ export function SuperficieLlamada({
                    momento de mostrar al animal, y ese momento no avisa. */}
             <ControlLlamada glifo="girarCamara" etiqueta={vozControles.girarCamara} onPress={() => { onGirarCamara(); despertar() }} />
 
-            {/* 🔴 COLGAR: fuera de `estiloChrome` A PROPÓSITO. Nunca se esconde. */}
+            {/* 🔴 COLGAR: último y fuera de `estiloChrome` A PROPÓSITO. */}
             <ControlLlamada glifo="colgar" tamaño="lg" etiqueta={vozControles.colgar} onPress={onColgar} />
-
-            <Animated.View style={estiloChrome} pointerEvents={visible ? 'auto' : 'none'}>
-              <ControlLlamada glifo="camara" etiqueta={vozControles.camara} activo={camaraActiva} onPress={() => { onCamara(); despertar() }} />
-            </Animated.View>
           </View>
 
           {/* El asa del modal (si el consumidor la monta) tampoco se esconde. */}
