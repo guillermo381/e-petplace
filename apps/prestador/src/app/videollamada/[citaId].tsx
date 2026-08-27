@@ -21,7 +21,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { View, useWindowDimensions } from 'react-native';
+import { Keyboard, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePreventScreenCapture } from 'expo-screen-capture';
@@ -61,6 +61,7 @@ import { useTraduccion } from '@/i18n';
 import { livekitListo } from '@/lib/livekit';
 import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
+import { DictadoEnVivo } from '@/components/dictado-en-vivo';
 
 /** La línea rotulada que cada conclusión deja EN la nota. Mapa cerrado: un
  *  código sin voz no puede escribir una línea vacía en un expediente. */
@@ -370,6 +371,42 @@ function MesaDeTrabajo({
      **no hay default**: *un valor preseleccionado en un campo clínico es un
      diagnóstico que puso la app y no el veterinario.* */
   const [conclusion, setConclusion] = useState<string | undefined>(undefined);
+  /* 🔴 MIENTRAS EL VET DICTA, EL MICRÓFONO DE LA LLAMADA SE APAGA.
+     Dos consumidores del mic no conviven en Android — y además es lo
+     correcto: *está dictando la nota clínica, no hablándole a la familia.* */
+  const [dictando, setDictando] = useState(false);
+
+  /* 🔴 EL ALTO DEL TECLADO — hallazgos ① y ⑤ del gate.
+     `ModalDosAlturas` acepta `altoTeclado` y **yo no se lo pasaba**, así que
+     el panel no reservaba nada y el teclado se comía el final del contenido
+     (la conclusión clínica, que es lo último). *Una prop que la pieza expone
+     y el consumidor no llena es la mitad de una función.*
+     ⚠️ Y es lo único del crash que puedo tocar sin el stack: la hipótesis
+     medida es que el teclado **redimensiona la ventana** y el SurfaceView de
+     LiveKit se recrea — *el mismo modo de falla que el MapView sin key de
+     `D-575`, que también murió en hilo nativo, fuera de toda ErrorBoundary.*
+     Reservar el alto no cambia el modo de la ventana; **el diagnóstico sigue
+     pedido y esto no lo reemplaza.** */
+  const [altoTeclado, setAltoTeclado] = useState(0);
+  useEffect(() => {
+    const mostrar = Keyboard.addListener('keyboardDidShow', (e) =>
+      setAltoTeclado(e.endCoordinates.height),
+    );
+    const ocultar = Keyboard.addListener('keyboardDidHide', () => setAltoTeclado(0));
+    return () => {
+      mostrar.remove();
+      ocultar.remove();
+    };
+  }, []);
+
+  /* 🔴 EL APAGADO REAL, no sólo el ícono. Si el track siguiera publicado, el
+     dueño escucharía al vet dictando su nota clínica — que es exactamente lo
+     que esta cura evita. Y al terminar vuelve al estado que el vet **tenía
+     elegido**, no a «encendido»: *devolverle el micrófono a alguien que lo
+     había apagado a propósito es peor que dejarlo apagado.* */
+  useEffect(() => {
+    void localParticipant.setMicrophoneEnabled(micActivo && !dictando);
+  }, [dictando, micActivo, localParticipant]);
   const [confirmandoSalir, setConfirmandoSalir] = useState(false);
 
   const estadoConexion =
@@ -405,7 +442,9 @@ function MesaDeTrabajo({
           },
           inicioTs,
         }}
-        microfonoActivo={micActivo}
+        /* Mientras dicta, el control se muestra apagado: es la verdad —
+         el micrófono está en la nota, no en la llamada. */
+      microfonoActivo={micActivo && !dictando}
         camaraActiva={camaraActiva}
         onMicrofono={() => {
           void localParticipant.setMicrophoneEnabled(!micActivo);
@@ -470,7 +509,13 @@ function MesaDeTrabajo({
         altura={altura}
         onAltura={setAltura}
         altoPantalla={alto}
-        insetBottom={insetBottom}
+        /* ⑤ · el contenido termina ARRIBA de los controles de la llamada, que
+           viven en `bottom: 0` y se dibujan encima. El 120 es el mismo número
+           que usa la propia `SuperficieLlamada` para poner algo sobre su
+           barra — copiarlo en vez de estimar es lo que hace que siga
+           calzando el día que la barra cambie. */
+        insetBottom={insetBottom + 120}
+        altoTeclado={altoTeclado}
         etiquetaAsa={t('consulta.vcAsaModal')}
         /* Bajar con texto sin guardar pide confirmación — lo resuelve la pieza
            con este aviso; acá sólo se le dice si hay algo escrito. */
@@ -485,6 +530,23 @@ function MesaDeTrabajo({
               🔴 Su regla viaja intacta — **la plataforma jamás sugiere
               medicamentos, tratamientos ni posologías**. El placeholder nombra
               CAMPOS, no contenido. */}
+          {/* 🔴 EL DICTADO — hallazgo ② del gate: **no se montaba.**
+              `DictadoEnVivo` existe desde S78 (D-456, con su gate pasado) y
+              vivía en UNA sola pantalla, el Durante presencial. *Es el mismo
+              patrón que el asa: pieza construida, probada, y sin montar.*
+
+              **Y era el punto del modal**, no un extra: el vet escribe
+              MIRANDO al animal, no al teclado. Si no está el módulo nativo o
+              el reconocedor del SO, la pieza **no se dibuja** (Ley 23) y queda
+              el campo — nunca un control muerto.
+
+              ⚠️ **Y es además la mitigación del crash (①):** la hipótesis
+              medida es que el teclado redimensiona la ventana y el
+              SurfaceView de LiveKit se recrea. *Dictando no se abre el
+              teclado.* No sustituye al diagnóstico —el stack sigue pedido—
+              pero le da al vet un camino para trabajar hoy. */}
+          <DictadoEnVivo value={nota} onChangeText={setNota} onEscuchandoCambia={setDictando} />
+
           <Campo
             label={t('consulta.vcNotaTitulo')}
             placeholder={t('consulta.vcNotaPlaceholder')}
