@@ -1006,12 +1006,18 @@ export const clienteEs = {
     vcTuVideo: 'Tu video',
     vcVozMic: 'Micrófono',
     vcVozCam: 'Cámara',
+    vcVozAltavoz: 'Altavoz',
     vcVozColgar: 'Colgar',
     vcVozGirar: 'Girar cámara',
     /* §2 · la señal de la nota: **sin contenido**, se desvanece sola a los 3 s.
        Dice «me están atendiendo de verdad», no qué escribió. */
     vcSenalNota: '{{nombre}} está escribiendo en la historia de {{mascota}}',
-    vcColgarConfirma: '¿Terminar la videoconsulta?',
+    /* 🔴 DICE QUE CIERRA PARA LOS DOS (firma del founder, 27-ago).
+       La voz vieja —«¿Terminar la videoconsulta?»— era clara sobre la acción
+       y callaba lo importante: que el otro se queda afuera. *Con el cierre
+       local equivocarse costaba volver a entrar; ahora cuesta la consulta.* */
+    vcColgarConfirma: '¿Terminar la videoconsulta para los dos?',
+    vcColgarDetalle: 'Se cierra también para el veterinario y no se puede volver a entrar.',
     vcColgarSi: 'Terminar',
     vcColgarSujeto: 'la videoconsulta',
     vcColgarNo: 'Seguir en la consulta',

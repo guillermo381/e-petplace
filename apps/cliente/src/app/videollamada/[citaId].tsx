@@ -328,6 +328,21 @@ export default function Videollamada() {
               etiqueta={camaraActiva ? t('veterinaria.vcCamApagar') : t('veterinaria.vcCamEncender')}
               onPress={() => setCamaraActiva((v) => !v)}
             />
+            {/* 🔴 GIRAR CÁMARA **TAMBIÉN EN EL PRE-JOIN** — la medición que
+                faltaba (27-ago). Cuatro pistas midieron el control en la
+                IN-CALL y las cuatro dieron verde; **nadie midió acá**, que es
+                donde la persona mira su propia imagen y decide cómo se ve.
+                *Un control que existe en la llamada y no en la antesala se
+                busca justo cuando todavía no está.*
+                Sólo con la cámara encendida: girar una cámara apagada no
+                significa nada. */}
+            {camaraActiva && (
+              <Boton
+                variante="secundario"
+                etiqueta={t('veterinaria.vcVozGirar')}
+                onPress={alternarCamara}
+              />
+            )}
           </View>
 
           <Boton
@@ -417,6 +432,31 @@ function SalaDelDueno({
   const remotos = useRemoteParticipants();
   const pistasRemotas = useParticipantTracks([Track.Source.Camera], remotos[0]?.identity);
   const [inicioTs] = useState(() => Date.now());
+  /* ── ⑤ EL TOGGLE DE ALTAVOZ (pieza de B, `372012e6`) ──────────────────────
+     🔴 **SE DIBUJA SIEMPRE**, también con auriculares conectados — corrección
+     de firma del founder (27-ago). *La v1 de mi plan lo escondía con
+     `getAudioOutputs()`; no va así: un control que aparece y desaparece según
+     lo que el teléfono tenga enchufado es un control que nadie aprende dónde
+     está.*
+
+     Arranca en **altavoz**, que es lo que la sesión de audio configura: el
+     estado del botón dice la verdad del ruteo desde el primer segundo.
+
+     ⚠️ El toggle es binario y su implementación difiere por plataforma —
+     lo midió B. Acá sólo se declara la intención; el SDK resuelve el cómo. */
+  const [altavoz, setAltavoz] = useState(true);
+  const alternarAltavoz = useCallback(() => {
+    setAltavoz((v) => {
+      const siguiente = !v;
+      void AudioSession.selectAudioOutput(siguiente ? 'speaker' : 'earpiece').catch(() => {
+        /* Si el sistema no acepta el cambio, **el estado vuelve**: un botón
+           que se pinta encendido sobre un ruteo que no cambió miente. */
+        setAltavoz(v);
+      });
+      return siguiente;
+    });
+  }, []);
+
 
   /* §1.6 · tres estados y **ninguno miente**. `reconectando` es el único que
      el usuario NECESITA entender para no colgar creyendo que se rompió. */
@@ -474,11 +514,14 @@ function SalaDelDueno({
         girarCamara(propio);
         onGirar();
       }}
+      onAltavoz={alternarAltavoz}
+      altavozActivo={altavoz}
       onColgar={colgar}
       vozControles={{
         microfono: t('veterinaria.vcVozMic'),
         camara: t('veterinaria.vcVozCam'),
         colgar: t('veterinaria.vcVozColgar'),
+        altavoz: t('veterinaria.vcVozAltavoz'),
         girarCamara: t('veterinaria.vcVozGirar'),
       }}
     />
@@ -490,7 +533,11 @@ function SalaDelDueno({
       etiquetaConfirmar={t('veterinaria.vcColgarSi')}
       etiquetaCancelar={t('veterinaria.vcColgarNo')}
       onConfirmar={onSalir}
-    />
+    >
+      {/* La consecuencia va en el CUERPO, no en el título: el título hace
+          la pregunta y esto dice qué pasa si la respuesta es sí. */}
+      <Texto variante="cuerpo">{t('veterinaria.vcColgarDetalle')}</Texto>
+    </HojaConfirmacionDestructiva>
     </>
   );
 }

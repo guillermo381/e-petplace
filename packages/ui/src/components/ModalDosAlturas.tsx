@@ -42,7 +42,7 @@
  */
 
 import { useCallback, useEffect, type ReactNode } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 
@@ -50,6 +50,8 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { sobreVideo } from '../tokens/sobreVideo'
 import { useTheme } from '../ThemeProvider'
+import { Chevron } from './chevron'
+import { Texto } from './Texto'
 
 export type AlturaModal = 'cerrado' | 'medio' | 'completo'
 
@@ -208,16 +210,96 @@ export function ModalDosAlturas({
   )
 }
 
-/** El asa suelta, para montarla sobre el video cuando el panel está cerrado. */
+/**
+ * EL ASA SUELTA — la que se monta SOBRE EL VIDEO cuando el panel está cerrado.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 LAS DOS ASAS DE ESTE ARCHIVO HACEN TRABAJOS DISTINTOS, Y POR ESO SÓLO
+ *    UNA CAMBIÓ.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * · **La de arriba, dentro del panel**, se apoya en la superficie del panel:
+ *   el borde de la hoja YA SE VE, y ahí la barra pelada es la convención
+ *   correcta. **No se toca.**
+ * · **Ésta flota sobre el video con NADA debajo.** La misma barra, sin hoja
+ *   que la sostenga, no es un asa: es una línea sobre una foto.
+ *
+ * *«Hacer legible el asa» aplicado a las dos habría arruinado la que
+ * funciona.*
+ *
+ * ── EL REPORTE Y LAS DOS CAUSAS ────────────────────────────────────────────
+ * El founder la vio como **«una rayita»** y —lo más caro— **no detectó que
+ * hubiera algo que subir**. Son dos defectos, no uno:
+ *
+ * **① NO TENÍA PISO.** Papel a `opacity 0.7` sobre video crudo: un valor que
+ * **no se puede medir**, porque no hay superficie contra la cual medirlo — es
+ * literalmente lo que le pasó al `anillo` en su primera vuelta, y es mi propia
+ * **L-425** cobrándose otra vez. *El 0,70 no era el error: la falta de
+ * superficie sí.* Ahora el contenido vive sobre **`banda`, que está medida**
+ * (8.27 sobre video blanco · 19.47 sobre negro).
+ *
+ * **② NO DECÍA QUÉ HABÍA ABAJO — y la palabra ya estaba acá.** La pieza
+ * recibía `etiqueta` (*«Notas y historia»*) **y la gastaba entera en el lector
+ * de pantalla**: el que ve recibía 4 px de línea, el que escucha recibía la
+ * frase. *Una barra dice «esto se arrastra»; sólo una palabra dice QUÉ sube.*
+ * ⇒ el rótulo se dibuja. **Cero string nuevo, cero pedido a nadie: el material
+ * ya estaba adentro, mal gastado.**
+ *
+ * ── 🔴 ③ Y LA PASADA DE REMOCIÓN ENCONTRÓ QUE LA BARRA MENTÍA ──────────────
+ * Al montarla sobre su banda apareció lo que la barra sola escondía: **esta
+ * pieza NO SE ARRASTRA.** Su contrato es `onPress` — un toque que cambia de
+ * altura. **El agarre anuncia un gesto que este control no implementa**, y eso
+ * es Ley 23 en su forma exacta: *la puerta no ofrece lo que va a rechazar.*
+ *
+ * ⇒ **la barra sale** (Ley 16). *Un control que se toca no puede vestirse como
+ * uno que se arrastra.* Lo que queda —**la palabra y la flecha**— es lo que de
+ * verdad contesta la queja del founder: no «esto se agarra», sino **QUÉ sube**.
+ *
+ * *(El agarre de arriba, dentro del panel, SÍ arrastra y por eso lo conserva.
+ * Si algún día el estado cerrado gana arrastre, la barra vuelve CON él —
+ * jamás antes.)*
+ *
+ * ── LA FORMA ES LA DE LA CASA, NO UNA INVENCIÓN ────────────────────────────
+ * Banda + rótulo + **chevron `arriba`**, y la dirección no es adorno: **E14
+ * dice que ⌃ despliega EN EL LUGAR**, que es exactamente lo que hace (el panel
+ * sube; no lleva a otra pantalla). El `color` del chevron se pasa explícito
+ * porque su propia ficha lo reserva para eso: *«cuando la flecha vive sobre
+ * una superficie que le cambia el contraste»*.
+ *
+ * **Píldora que abraza su contenido, no franja de ancho completo** — y eso es
+ * de MONTAJE, medido: hoy se monta flotando (`bottom: insetBottom + 120`),
+ * con video debajo. *Un borde de hoja necesita ser el borde de algo; flotando
+ * a media pantalla sería una hoja sin hoja.* Como píldora se lee igual de bien
+ * donde está y no se rompe si mañana baja al pie.
+ *
+ * ── LO QUE NO HACE ─────────────────────────────────────────────────────────
+ * **No se agranda para verse.** *El defecto nunca fue el tamaño — 40×4 es la
+ * convención, y engordar la barra sólo habría dado una línea más gorda.*
+ */
 export function AsaModal({ etiqueta, onPress }: { etiqueta: string; onPress: () => void }) {
   return (
-    <View
-      accessibilityRole="button"
-      accessibilityLabel={etiqueta}
-      onTouchEnd={onPress}
-      style={{ height: ASA_ALTO, alignItems: 'center', justifyContent: 'center' }}
-    >
-      <View style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: sobreVideo.contenido, opacity: 0.7 }} />
+    <View style={{ alignItems: 'center' }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={etiqueta}
+        onPress={onPress}
+        style={{
+          minHeight: 44,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing[1],
+          paddingHorizontal: spacing[4],
+          borderRadius: radius.full,
+          backgroundColor: sobreVideo.banda,
+        }}
+      >
+        {/* El rótulo dice QUÉ sube. La barra sola nunca pudo decirlo — y eso
+            era la mitad cara del reporte: no «no la veo», sino «no sé que hay
+            algo». */}
+        <Texto variante="apoyo" color="sobreVideo">
+          {etiqueta}
+        </Texto>
+        <Chevron direccion="arriba" color={sobreVideo.contenido} lado={16} />
+      </Pressable>
     </View>
   )
 }
