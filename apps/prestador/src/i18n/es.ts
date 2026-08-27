@@ -2748,6 +2748,7 @@ export const prestadorEs = {
     vcTuVideo: 'Tu video',
     vcVozMic: 'Micrófono',
     vcVozCam: 'Cámara',
+    vcVozAltavoz: 'Altavoz',
     vcVozColgar: 'Terminar la consulta',
     vcVozGirar: 'Girar cámara',
     vcAsaModal: 'Notas y historia',
@@ -2766,6 +2767,18 @@ export const prestadorEs = {
        hacia el desenlace más caro. */
     /* ══ EL CONTEXTO CLÍNICO SOBRE EL VIDEO (firma founder 26-ago) ═════
        Sólo del lado del profesional: el dueño ya conoce a su animal. */
+    /* ══ LA HISTORIA CLÍNICA EN EL MODAL (firma founder, in-call) ═════ */
+    vcHistoriaFiltroCaso: 'Filtrar por caso',
+    vcHistoriaTodo: 'Todo',
+    vcHistoriaCargando: 'Buscando su historia…',
+    /* Ley 13: un historial que falla NO se pinta vacío — «no tiene historia»
+       es una afirmación clínica, y sería falsa. */
+    vcHistoriaError: 'No pudimos traer su historia clínica.',
+    vcHistoriaVacia: 'Todavía no hay consultas registradas.',
+    vcHistoriaSinFecha: 'Sin fecha',
+    /* Dice lo que hace: cierra el panel. NO dice «Guardar» — no existe un
+       borrador persistente, y prometerlo sería peor que no ofrecerlo. */
+    vcModalListo: 'Listo',
     vcClinicoPeso: 'Peso',
     vcClinicoVacunas: 'Vacunas',
     vcClinicoUltima: 'Última visita',

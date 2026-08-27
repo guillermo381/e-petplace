@@ -517,3 +517,82 @@ servicio cuando es su resultado más valioso.
   por el mismo argumento que la paridad del aviso §3: si «urgencias» presidiera,
   la app estaría empujando hacia el desenlace más caro.
 - **Viaja con el borrador al colgar**, por el camino que ya existe.
+
+---
+---
+
+# §I · LA MESA DE TRABAJO DEL VET — recorrido antes de construir
+
+## §I0 · Los cinco, medidos con literal ANTES de tocar
+
+| # | Veredicto | Literal |
+|---|---|---|
+| ① tres alturas | **La pieza tiene las TRES; yo monto DOS** | `AlturaModal = 'cerrado'\|'medio'\|'completo'` y `FRACCION` las define. Mi único `setAltura` es `('medio')` (`:630`) ⇒ **a `completo` sólo se llega ARRASTRANDO** |
+| ② historia clínica | **No cableada** — el lector llegó hoy | `obtenerHistorialClinicoMascota` en main |
+| ③ tarjetas | 🔴 **SE MONTAN Y NO SE VEN** | Están dentro de `{altura === 'cerrado' && …}` (`:584`) ⇒ **al abrir el modal desaparecen**. `mascotaId` sí viaja (`:365`) |
+| ④ acciones | **No existen** | El modal tiene dictado + campo + conclusión. Sin cerrar, sin guardar |
+| ⑤ altavoz | 🔴 **NO LO CABLEÉ** | `onAltavoz` está en la pieza (`:120`,`:305`) y **cero ocurrencias en mis dos pantallas**. *No es que detecte auriculares: no está conectado* |
+
+### 🔴 ③ es el cuarto caso del patrón, y es de una clase DISTINTA
+
+Los tres anteriores —asa, temporizador, dictado— eran **piezas sin montar**.
+Éste **está montado** y aun así el founder no lo vio: *lo até a la altura
+`cerrado`, y el momento en que el vet quiere el contexto clínico es
+exactamente cuando abre el panel para escribir.*
+
+**La distinción importa porque la cura es distinta:** «no se monta» se arregla
+montando; «se monta y no se ve» se arregla **preguntando cuándo hace falta**.
+Y la respuesta acá es: *siempre que el vet esté trabajando* — o sea, sobre
+todo con el panel abierto.
+
+---
+
+## §I1 · El recorrido, en voz del vet
+
+> *«La estoy viendo. Le miro la oreja, dicto lo que veo, y necesito saber si
+> ya le dimos algo parecido el año pasado.»*
+
+1. **Entra a la llamada.** Ve al animal, sus controles, y **las cuatro
+   tarjetas del contexto** — peso, vacunas, última visita, alergias.
+2. **Sube el panel a MEDIO.** Sigue viendo al animal arriba; abajo tiene el
+   micrófono y el campo. **Las tarjetas siguen ahí**: son el contexto de lo
+   que está por escribir.
+3. **Dicta.** El micrófono de la llamada se apaga solo mientras habla.
+4. **Necesita el historial** → sube a **COMPLETO** con un toque. Lee, filtra
+   por fecha o por caso, y **vuelve a MEDIO** para seguir dictando.
+5. **Cierra el panel** cuando quiere ver a la mascota entera.
+6. **Cuelga.** La app pregunta una vez, y lo dictado cae al Durante.
+
+## §I2 · Lo que decide cada forma
+
+- **A `completo` se llega POR TOQUE, no sólo arrastrando.** *Un gesto que es
+  el único camino a una función es una función que sólo encuentra quien ya
+  sabe que está.* El arrastre queda; se le suma la puerta visible.
+- **Las tarjetas viven en `cerrado` Y en `medio`.** En `completo` no: ahí la
+  pantalla es la historia, y el contexto está adentro de ella.
+- **La historia se lee en `completo` y sólo ahí se pide.** *Traerla al abrir
+  el panel sería pagar una consulta que en la mayoría de las consultas nadie
+  va a mirar.*
+- **«Cerrar» es un botón, no sólo un gesto** — mismo argumento que subir.
+
+## §I3 · 🔴 «GUARDAR» NO SE PUEDE CONSTRUIR HOY, y se dice en vez de fingirse
+
+El founder pide *«no hay guardar»*. **Medido: no existe un borrador
+persistente.** El Durante presencial sedimenta al final con
+`sedimentar_nota_clinica`; **no hay dónde dejar una nota a medio escribir.**
+
+Lo que hay hoy: la nota vive en el estado de la pantalla y **viaja al Durante
+al colgar**, donde sí se sedimenta.
+
+⇒ **Un botón «Guardar» que sólo baja el panel sería una promesa falsa** — el
+vet creería que su nota está a salvo de un cierre de app, y no lo está (y
+menos con el crash ① vivo). **Pedido a A: un borrador persistente por cita.**
+Mientras tanto el botón dice lo que hace: **«Listo»**, que cierra el panel y
+conserva lo escrito en la sesión.
+
+## §I4 · Lo que este recorrido NO trae, declarado
+
+**El Durante presencial completo** —sus fases, sus campos tipados, el
+estructurador— **no entra al modal en esta tanda.** Es el flujo entero de otra
+pantalla, y traerlo a medias sería peor que la puerta que ya existe: al
+colgar, el vet aterriza en el Durante de verdad, con todo.

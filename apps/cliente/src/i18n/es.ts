@@ -1006,6 +1006,7 @@ export const clienteEs = {
     vcTuVideo: 'Tu video',
     vcVozMic: 'Micrófono',
     vcVozCam: 'Cámara',
+    vcVozAltavoz: 'Altavoz',
     vcVozColgar: 'Colgar',
     vcVozGirar: 'Girar cámara',
     /* §2 · la señal de la nota: **sin contenido**, se desvanece sola a los 3 s.

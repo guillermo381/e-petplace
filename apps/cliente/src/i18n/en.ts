@@ -803,6 +803,7 @@ export const clienteEn = {
     vcTuVideo: 'Your video',
     vcVozMic: 'Microphone',
     vcVozCam: 'Camera',
+    vcVozAltavoz: 'Speaker',
     vcVozColgar: 'Hang up',
     vcVozGirar: 'Flip camera',
     vcSenalNota: '{{nombre}} is writing in {{mascota}}’s record',

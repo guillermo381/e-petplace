@@ -417,6 +417,31 @@ function SalaDelDueno({
   const remotos = useRemoteParticipants();
   const pistasRemotas = useParticipantTracks([Track.Source.Camera], remotos[0]?.identity);
   const [inicioTs] = useState(() => Date.now());
+  /* ── ⑤ EL TOGGLE DE ALTAVOZ (pieza de B, `372012e6`) ──────────────────────
+     🔴 **SE DIBUJA SIEMPRE**, también con auriculares conectados — corrección
+     de firma del founder (27-ago). *La v1 de mi plan lo escondía con
+     `getAudioOutputs()`; no va así: un control que aparece y desaparece según
+     lo que el teléfono tenga enchufado es un control que nadie aprende dónde
+     está.*
+
+     Arranca en **altavoz**, que es lo que la sesión de audio configura: el
+     estado del botón dice la verdad del ruteo desde el primer segundo.
+
+     ⚠️ El toggle es binario y su implementación difiere por plataforma —
+     lo midió B. Acá sólo se declara la intención; el SDK resuelve el cómo. */
+  const [altavoz, setAltavoz] = useState(true);
+  const alternarAltavoz = useCallback(() => {
+    setAltavoz((v) => {
+      const siguiente = !v;
+      void AudioSession.selectAudioOutput(siguiente ? 'speaker' : 'earpiece').catch(() => {
+        /* Si el sistema no acepta el cambio, **el estado vuelve**: un botón
+           que se pinta encendido sobre un ruteo que no cambió miente. */
+        setAltavoz(v);
+      });
+      return siguiente;
+    });
+  }, []);
+
 
   /* §1.6 · tres estados y **ninguno miente**. `reconectando` es el único que
      el usuario NECESITA entender para no colgar creyendo que se rompió. */
@@ -474,11 +499,14 @@ function SalaDelDueno({
         girarCamara(propio);
         onGirar();
       }}
+      onAltavoz={alternarAltavoz}
+      altavozActivo={altavoz}
       onColgar={colgar}
       vozControles={{
         microfono: t('veterinaria.vcVozMic'),
         camara: t('veterinaria.vcVozCam'),
         colgar: t('veterinaria.vcVozColgar'),
+        altavoz: t('veterinaria.vcVozAltavoz'),
         girarCamara: t('veterinaria.vcVozGirar'),
       }}
     />
