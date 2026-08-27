@@ -62,9 +62,26 @@ const CLAVE_POR_MOTIVO: Record<string, string | null> = {
   cita_no_realizable: `${NS}.entrarNoRealizable`,
   cita_finalizada: `${NS}.entrarFinalizada`,
   cita_inexistente: `${NS}.entrarInexistente`,
-  // Los dos silencios. `null` NO es un olvido: es la decisión.
-  no_es_teleconsulta: null,
-  ajeno_a_la_cita: null,
+  /* 🔴 EN EL PRESTADOR **NO HAY SILENCIOS**, y es enmienda del gate del
+     26-ago (la regresión de los cero botones).
+
+     El silencio existe del lado del DUEÑO por una razón concreta: *«no tienes
+     permiso» confirma que la cita existe*, y a un extraño no se le confirma
+     nada. **Acá esa razón no aplica**: el veterinario está mirando el DETALLE
+     DE SU PROPIA CITA — la pantalla ya le mostró la mascota, la hora y el
+     contacto de quien reservó. **Callar no oculta nada; sólo lo deja sin
+     botón y sin explicación**, que fue exactamente lo que pasó.
+
+     *El mismo comportamiento es correcto en una app e incorrecto en la otra —
+     y la diferencia no es la pieza: es qué protege el silencio en cada
+     contexto.* Es la tercera vez en esta sesión que aparece la misma forma.
+
+     ⚠️ `no_es_teleconsulta` acá casi siempre significa **que la cita no tiene
+     `modalidad` escrita**, no que el vet se equivocó de pantalla: la RPC
+     gatea por `modalidad` y esta pantalla decide por `tipo_servicio`. Por eso
+     su voz manda a la vía presencial en vez de negar el hecho. */
+  no_es_teleconsulta: `${NS}.entrarNoEsTele`,
+  ajeno_a_la_cita: `${NS}.entrarAjena`,
 };
 
 /** La voz única de «no pudimos preguntar». */

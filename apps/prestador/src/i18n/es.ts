@@ -2737,6 +2737,10 @@ export const prestadorEs = {
     entrarNoRealizable: 'Ya la marcaste como no realizada.',
     entrarFinalizada: 'Esta videoconsulta ya terminó.',
     entrarInexistente: 'No encontramos esta videoconsulta.',
+    /* Enmienda del gate 26-ago: en el prestador NO hay silencios — está
+       mirando SU propia cita, así que callar no oculta nada. */
+    entrarNoEsTele: 'Esta cita no está marcada como videoconsulta. Se atiende de forma presencial.',
+    entrarAjena: 'Esta consulta está asignada a otra persona del equipo.',
     entrarNoSePudoConsultar: 'No pudimos verificar si la sala está abierta.',
 
     /* ══ LA VIDEOCONSULTA · in-call del profesional (Obras 4 y 5) ══ */

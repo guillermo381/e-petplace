@@ -95,6 +95,12 @@ export default function DetalleCitaVet() {
   // MOTOR (puedoAtenderClinico = el mismo gate de los 4 DEFINER D-490);
   // el flip por chip §6.2 es pedido de motor declarado en el wrapper.
   const [puedeAtender, setPuedeAtender] = useState(false);
+  /* 🔴 EL CINTURÓN DE LOS CERO BOTONES (regresión del gate, 26-ago).
+     `false` hasta que el SERVIDOR confirme que hay entrada. Mientras tanto
+     «Iniciar consulta» **se queda**: *ante la duda, el vet tiene un botón —
+     el error de que sobre uno es infinitamente más barato que el de que no
+     quede ninguno y el profesional no pueda trabajar.* */
+  const [hayEntradaVideo, setHayEntradaVideo] = useState(false);
 
   // Estado de la cita → Insignia (misma voz que el HOY — Ley 17.3).
   const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
@@ -364,6 +370,7 @@ export default function DetalleCitaVet() {
                     },
                   })
                 }
+                onVeredicto={setHayEntradaVideo}
                 envolver={(contenido) => (
                   <Tarjeta elevacion="reposo">
                     <View style={{ gap: spacing[3] }}>
@@ -387,6 +394,20 @@ export default function DetalleCitaVet() {
                 una teleconsulta el acto empieza entrando y el dictado sale del
                 modal DURANTE la llamada.
 
+                🔴 **ENMENDADO EL MISMO DÍA — la v1 de esta condición decía
+                `!esTeleconsulta` y produjo CERO BOTONES.** El choque: esta
+                pantalla decidía por `tipo_servicio` y la RPC de entrada decide
+                por `modalidad`; con la modalidad sin escribir, **una condición
+                apagaba este botón y la otra no encendía el suyo.** *Dos
+                condiciones distintas gobernando la misma decisión dejan un
+                hueco entre las dos, y ahí no queda nada.*
+                ⇒ Hoy el ocultamiento depende de que la entrada EXISTA de
+                verdad (`hayEntradaVideo`, que lo dice el servidor), no de mi
+                derivación. **Y arranca en `false`: ante la duda queda el botón
+                viejo.** *Quitar un botón redundante es una condición nueva
+                sobre algo que YA funcionaba — el costo de equivocarse no es
+                que sobre uno, es que no quede ninguno.*
+
                 ⚠️ **Consecuencia medida y declarada, no frenada:** este era el
                 único camino de vuelta a la nota desde el detalle de la cita.
                 Al colgar, el borrador viaja solo al Durante, así que el camino
@@ -395,7 +416,7 @@ export default function DetalleCitaVet() {
                 el `replace` del colgado ya no está. La receta y el certificado
                 sí conservan la suya. *Se anota acá para que quien lo note
                 después sepa que fue decidido y no olvidado.* */}
-            {cita.mascota && puedeAtender && !esTeleconsulta && (
+            {cita.mascota && puedeAtender && !hayEntradaVideo && (
               <Tarjeta elevacion="reposo" relleno="ninguno">
                 <CeldaNavegacion
                   icono="veterinaria"

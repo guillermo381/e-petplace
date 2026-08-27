@@ -2170,6 +2170,8 @@ export const prestadorEn = {
     entrarNoRealizable: 'You already marked it as not completed.',
     entrarFinalizada: 'This video consultation has ended.',
     entrarInexistente: 'We could not find this video consultation.',
+    entrarNoEsTele: 'This appointment is not marked as a video consultation. It is seen in person.',
+    entrarAjena: 'This consultation is assigned to someone else on the team.',
     entrarNoSePudoConsultar: 'We could not check whether the room is open.',
 
     /* ══ VIDEO CONSULTATION · professional in-call ══ ⚠️ provisional. */
