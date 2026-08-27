@@ -723,3 +723,72 @@ al preguntarlo, y así vale aunque nadie haya mirado.*
 **La voz de la confirmación en las dos apps**, diciendo lo que la firma nueva
 hace: **termina para los dos**. Es lo único de §K que es de superficie, y es
 justo lo que la firma vuelve urgente.
+
+---
+---
+
+# §L · EL CUADRO CONGELADO — medición previa a la prueba
+
+## §L1 · ⚠️ EL AVISO QUE LA MESA PIDIÓ TEMPRANO: **SÍ, EXIGE BUILD NUEVA**
+
+**Y no hay variante que lo evite.** La conversión de un frame de video a una
+imagen **no existe en JS**: el frame vive del lado nativo (`VideoFrame` de
+libwebrtc en Android, `RTCVideoFrame` en iOS) y lo que falta es **código
+nativo que lo convierta**. *Nada de eso viaja por OTA.*
+
+⇒ **Los binarios de anoche no sirven para probar esto.** La prueba barata
+**también** necesita build, porque su parte cara —el sink que convierte— es
+justo la nativa. **Vale saberlo antes de agendar el gate.**
+
+## §L2 · 🔴 EL RIESGO QUE D NO PUDO MEDIR: MEDIDO, Y CAE
+
+D dejó marcado: *«`YuvHelper` / `JavaI420Buffer` NO están referenciadas — D no
+las midió. Si ahí frena, es dato»*.
+
+**Medido contra el artefacto real**, el `.aar` que la app compila
+(`io.github.webrtc-sdk:android:144.7559.05`, del cache de gradle de esta
+máquina):
+
+```
+✅ VideoFrame   ✅ VideoSink        ✅ VideoTrack     ✅ SurfaceViewRenderer
+✅ EglBase      ✅ SurfaceTextureHelper
+✅ YuvHelper    ✅ JavaI420Buffer      ← los dos que faltaban por medir
+```
+
+⇒ **El primer riesgo de compilación desaparece antes de gastar una build.**
+*Que el fork no las REFERENCIE no significa que no estén: están en libwebrtc,
+que es su dependencia `api`, o sea que quedan en el classpath de la app.*
+**La distinción importa: D midió el fork; el que las trae es el artefacto de
+abajo.**
+
+## §L3 · Y LA CONVERSIÓN NO LA PONE LIBWEBRTC — la pone cada plataforma
+
+Medido: en el `.aar` **no hay nada de `bitmap`, `png` ni `jpeg`**. Eso **no es
+un problema, es el reparto**:
+
+- **Android:** `VideoFrame` → `YuvHelper` (I420→NV21/ARGB) → `Bitmap` →
+  `compress(PNG)`. Todo con SDK estándar.
+- **iOS:** `RTCVideoFrame.buffer` → `RTCCVPixelBuffer` → `CIImage` →
+  `UIImage` → `UIImagePNGRepresentation`. **Sin YuvHelper**: el pixel buffer
+  ya es convertible.
+
+**Y el fork trae los dos lados**, medido: Android con `VideoSink`; iOS con
+`SampleBufferVideoCallView` y `VideoFrameProcessor` (los dos usan
+`RTCVideoFrame`). ⇒ **El criterio ② —Android Y iOS— es alcanzable por las dos
+vías, y ninguna pide cambiar de fork.**
+
+⚠️ **`VideoFrameProcessor.h` merece mirarse antes de escribir un sink de
+cero**: si el fork ya expone un punto de extensión de frames en iOS, la mitad
+de ese lado puede ser cablear en vez de escribir. *No lo doy por hecho — lo
+declaro como lo primero a leer cuando la prueba arranque.*
+
+## §L4 · Lo que sigue firme y no se toca
+
+**No se cambia de fork.** **La captura de vistas está descartada por firma** —
+negro en Android, anda en iOS: *no se prueba ni se reintenta.* **El POC de
+2020 es código para copiar y hacerse cargo, no una dependencia.**
+
+Y el criterio de verde, tal como llegó: ① **la imagen tiene que ser LA DEL
+VIDEO** —cámara apuntando a algo escrito a mano, y el PNG lo dice— porque *un
+frame negro también pesa, abre y se ve como una foto* · ② **las dos
+plataformas, o es descarte**.
