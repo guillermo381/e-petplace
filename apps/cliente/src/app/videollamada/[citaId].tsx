@@ -78,7 +78,16 @@ export default function Videollamada() {
 
   const [fase, setFase] = useState<Fase>('pidiendo');
   const [credencial, setCredencial] = useState<TokenVideollamada | null>(null);
-  const [vozSinEntrada, setVozSinEntrada] = useState<string | null>(null);
+  /* 🔴 EL SILENCIO ES SU PROPIO CASO, y antes no lo era.
+     Con `string | null`, `null` significaba DOS cosas —«no hay voz» y «no
+     pintes nada»— y la pantalla las trataba igual: caía al título por defecto
+     y mostraba el genérico.
+     **Y ese genérico también confirma que la cita existe**, así que el
+     silencio que `ajeno_a_la_cita` protege se perdía en el último tramo:
+     la decisión estaba bien en la lógica y no tenía dónde vivir en la
+     superficie. *Un estado que no se puede expresar se convierte en el
+     estado de al lado.* */
+  const [sinEntrada, setSinEntrada] = useState<{ tipo: 'silencio' } | { tipo: 'voz'; texto: string } | null>(null);
   const [bitrateKbps, setBitrateKbps] = useState<number | null>(null);
 
   /* Mic y cámara: **el estado en que van a entrar** (§2). Se eligen en el
@@ -115,12 +124,16 @@ export default function Videollamada() {
       /* El veredicto negativo reusa la MISMA tabla que el botón de entrada
          (Obra 1): una sola tabla de motivos para toda la casa. */
       const q = queDibujar(r, idioma);
-      setVozSinEntrada(
+      setSinEntrada(
         q.boton || q.claveVoz === null
-          ? null
-          : q.hora !== undefined
-            ? t(q.claveVoz as never, { hora: q.hora })
-            : t(q.claveVoz as never),
+          ? { tipo: 'silencio' }
+          : {
+              tipo: 'voz',
+              texto:
+                q.hora !== undefined
+                  ? t(q.claveVoz as never, { hora: q.hora })
+                  : t(q.claveVoz as never),
+            },
       );
       setFase('sin_entrada');
     })();
@@ -128,6 +141,17 @@ export default function Videollamada() {
       vigente = false;
     };
   }, [citaId, idioma, t, intento]);
+
+  /* El silencio no dibuja: SALE. Una pantalla en blanco sería un callejón, y
+     cualquier texto —hasta el genérico— confirmaría que la cita existe.
+     `canGoBack` porque a esta pantalla se puede llegar por deep link, donde
+     `back()` no tiene a dónde volver (el mismo defecto que el gate encontró
+     en «Probar de nuevo»). */
+  useEffect(() => {
+    if (fase !== 'sin_entrada' || sinEntrada?.tipo !== 'silencio') return;
+    if (router.canGoBack()) router.back();
+    else router.replace('/hogar');
+  }, [fase, sinEntrada, router]);
 
   const cabecera = (
     <Encabezado
@@ -141,7 +165,7 @@ export default function Videollamada() {
   // El módulo nativo no está: binario horneado antes de esta build. Se dice.
   if (!livekitListo) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <EstadoVacio
           registro="pantalla"
@@ -154,7 +178,7 @@ export default function Videollamada() {
 
   if (fase === 'pidiendo') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <EsperaDeMarca />
@@ -163,13 +187,16 @@ export default function Videollamada() {
     );
   }
 
+  // Silencio: no se monta nada mientras el efecto de arriba saca de acá.
+  if (fase === 'sin_entrada' && sinEntrada?.tipo === 'silencio') return null;
+
   if (fase === 'sin_entrada') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <EstadoVacio
           registro="pantalla"
-          titulo={vozSinEntrada ?? t('veterinaria.vcSinEntrada')}
+          titulo={sinEntrada?.tipo === 'voz' ? sinEntrada.texto : t('veterinaria.vcSinEntrada')}
           descripcion=""
           accion={
             <Boton
@@ -188,14 +215,25 @@ export default function Videollamada() {
 
   const nombreProfesional = profesional.length > 0 ? profesional : t('veterinaria.vcProfesional');
 
-  /* ── OBRA 2 · EL PRE-JOIN ────────────────────────────────────────────────
+  /* 🔴 HALLAZGO DEL GATE (26-ago): el CTA «Entrar a la consulta» quedaba
+     **debajo de los botones del sistema**. La causa: estas pantallas
+     declaraban `edges={['top']}` y el inset de ABAJO no se aplicaba nunca.
+     *Un CTA que el pulgar no alcanza no es un problema de estilo: es una
+     pantalla sin salida.*
+
+     ⚠️ **La in-call NO lleva `SafeAreaView` y eso es correcto**: el video va a
+     sangre y los insets viajan como props a `SuperficieLlamada`, que los
+     aplica en su barra (`paddingBottom: insetBottom + …`). *Envolverla la
+     recortaría con dos franjas donde tiene que haber imagen.*
+
+     ── OBRA 2 · EL PRE-JOIN ────────────────────────────────────────────────
      El preview propio es lo PRIMERO: *lo primero que hace cualquiera antes de
      una videollamada es mirarse.* Y **el permiso se pide acá** — un diálogo
      del sistema sobre la cara del veterinario es la peor interrupción
      posible. */
   if (fase === 'prejoin') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <View style={{ flex: 1, padding: spacing[4], gap: spacing[4] }}>
           <View
