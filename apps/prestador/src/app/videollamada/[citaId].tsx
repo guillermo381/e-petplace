@@ -67,6 +67,7 @@ import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
 import {
+  estructurarNotaClinica,
   guardarBorradorNota,
   leerBorradorNota,
   obtenerDetalleMascotaPrestador,
@@ -563,6 +564,55 @@ function MesaDeTrabajo({
     }
   }, [citaId, nota, conclusion]);
 
+  /* ── 🔴 EL ESTRUCTURADOR, LA MITAD QUE ENTRA ──────────────────────────────
+     **El problema real que nombró el founder:** *«lo que el vet dicta en
+     veinte minutos llega crudo al final».*
+
+     **Medido, el estructurador entero NO entra acá:** en el Durante, después
+     de estructurar, `setFase('confirmacion')` abre **una pantalla completa de
+     revisión** —campos editables, vitales, medicación—. Traer eso adentro de
+     un panel sobre una llamada en curso es rehacer esa pantalla, y a medias
+     sería peor.
+
+     **Lo que SÍ entra, y resuelve el problema entero:** estructurar acá y
+     **dejar el resultado EN EL BORRADOR**. Cuando el vet cuelga y cae al
+     Durante, su nota **ya llegó estructurada** — sólo revisa. *El costo es
+     una llamada; lo que evita es que veinte minutos de dictado aterricen
+     como un bloque de texto que hay que releer entero.*
+
+     ⚠️ **El muro §8.3 viaja intacto**: la IA asigna las palabras DEL VET a
+     campos y jamás agrega contenido clínico que él no dictó. Acá no se toca
+     ese contrato — se lo llama antes, no distinto.
+
+     Su fallo **no interrumpe**: el texto crudo sigue en el borrador y el
+     Durante estructura como siempre. *Lo que se pierde es un adelanto, no el
+     trabajo.* */
+  const [estructurando, setEstructurando] = useState(false);
+  const estructurar = useCallback(async () => {
+    if (nota.trim().length === 0 || estructurando) return;
+    setEstructurando(true);
+    const r = await estructurarNotaClinica({
+      texto: nota,
+      especie: clinico?.mascota.especie ?? undefined,
+    });
+    setEstructurando(false);
+    if (!r.ok) return;
+    /* Se guarda junto al texto: el borrador es `jsonb` opaco y admite las dos
+       cosas. **El crudo NO se pisa** — *el dictado original es la fuente y la
+       estructura es su lectura; perder la fuente para quedarse con la lectura
+       es exactamente lo que L-139 prohíbe.* */
+    const g = await guardarBorradorNota(citaId, {
+      texto: nota,
+      conclusion: conclusion ?? null,
+      estructurada: r.data as unknown as Record<string, unknown>,
+    });
+    if (g.ok) {
+      ultimoGuardado.current = nota;
+      sucio.current = false;
+      setGuardadoEn(g.data.guardadoEn);
+    }
+  }, [nota, estructurando, clinico, citaId, conclusion]);
+
   /* El reloj del guardado automático. **5 s y no cada tecla**: cada llamada
      es un upsert contra el servidor, y guardar en cada letra convertiría una
      red mala en una pantalla que no responde. */
@@ -801,7 +851,25 @@ function MesaDeTrabajo({
            tirar el dato más importante de la consulta. */
         hayCambiosSinGuardar={nota.trim().length > 0 || conclusion !== undefined}
       >
-        <View style={{ gap: spacing[4] }}>
+        {/* ── ② y ③ · EL CUERPO SCROLLEA, y B despejó la tensión ────────────
+            *El `Pan` de la pieza está atado SÓLO AL ASA a propósito, para que
+            un scroll en el cuerpo no pelee con él* ⇒ acá va un `ScrollView`
+            normal y anda. **`blocksExternalGesture` NO hace falta acá**: esa
+            receta es para cuando el contenedor arrastra desde el cuerpo, que
+            no es lo que hace `ModalDosAlturas`.
+
+            `keyboardShouldPersistTaps` para que tocar otro campo con el
+            teclado abierto **funcione al primer toque** — sin eso el primero
+            sólo cierra el teclado y el vet toca dos veces sin saber por qué.
+
+            Y esto es la mitad de ②: el alto reservado ya estaba; **lo que
+            faltaba era que el contenido se pudiera correr** para que el cursor
+            quede a la vista. */}
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing[4], paddingBottom: spacing[6] }}
+        >
           <Texto variante="seccion">{t('consulta.vcNotaTitulo')}</Texto>
           {/* El mismo registro del Durante: texto libre en `Campo`.
               🔴 Su regla viaja intacta — **la plataforma jamás sugiere
@@ -968,6 +1036,17 @@ function MesaDeTrabajo({
               «guardado» sin hora no distingue lo de recién de lo de hace
               veinte minutos, que es justo lo que el vet necesita saber
               cuando la red estuvo mala.* */}
+          {/* Sólo con algo dictado: *un botón que ordena la nada no ordena
+              nada, y ofrecerlo vacío enseña que a veces no hace efecto.* */}
+          {nota.trim().length > 0 && (
+            <Boton
+              variante="secundario"
+              etiqueta={estructurando ? t('consulta.vcModalEstructurando') : t('consulta.vcModalEstructurar')}
+              onPress={() => void estructurar()}
+              cargando={estructurando}
+            />
+          )}
+
           <Boton
             variante="secundario"
             etiqueta={t('consulta.vcModalGuardar')}
@@ -986,7 +1065,7 @@ function MesaDeTrabajo({
               })}
             </Texto>
           )}
-        </View>
+        </ScrollView>
       </ModalDosAlturas>
 
       <HojaConfirmacionDestructiva

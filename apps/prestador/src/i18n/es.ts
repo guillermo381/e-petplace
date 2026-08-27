@@ -2778,6 +2778,10 @@ export const prestadorEs = {
     vcHistoriaSinFecha: 'Sin fecha',
     /* Dice lo que hace: cierra el panel. NO dice «Guardar» — no existe un
        borrador persistente, y prometerlo sería peor que no ofrecerlo. */
+    /* La IA ORDENA lo dictado en campos; jamás agrega contenido clínico que
+       el vet no dijo (muro §8.3, intacto). Por eso «ordenar» y no «redactar». */
+    vcModalEstructurar: 'Ordenar la nota',
+    vcModalEstructurando: 'Ordenando…',
     vcModalGuardar: 'Guardar',
     /* Con HORA y no «Guardado» a secas: un «guardado» sin hora no distingue
        lo de recién de lo de hace veinte minutos. */
