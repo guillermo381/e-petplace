@@ -22838,3 +22838,143 @@ el defecto que viene a arreglar.
 **Nota de método:** apareció **contestando otra pregunta**. El encargo era
 verificar si el aviso viajaba; viajaba. *Un censo que sólo hubiera contestado
 «sí» y cerrado no habría mirado a quién le llega.*
+
+---
+
+### D-941 🔴 · UN DUEÑO PUEDE PAGAR POR UN SERVICIO QUE NO ELIGIÓ, Y NADA SE LO DICE
+
+**Nace S106-A t3, 26-ago-2026.** Lo encontró **el founder dudando de su propia
+reserva** y pidiendo que se midiera — no lo encontró ningún gate.
+
+🔴 **NO ES DE TELEMEDICINA.** Es la pantalla del QUÉ de veterinaria, y toca a
+todo el que reserve por ahí.
+
+#### El costo, dicho sin suavizar
+
+**Le pasó DOS de cinco veces, conociendo el sistema.** Pagó **$50 por una
+consulta presencial que no quería**, dos veces, y *sólo se enteró porque fue a
+mirar la fila en la base de datos.*
+
+> **Nadie más va a ir a mirar la fila.** Una familia se entera el día de la
+> cita, cuando la clínica la espera en persona y ella creía haber comprado una
+> videoconsulta — o peor, cuando no aparece nadie y el vet marca no-show.
+
+Las dos filas medidas, literales:
+
+```
+713aae37 · tipo_servicio=consulta_general · modalidad=presencial · $50 · 30min · 23:20
+7390a25b · tipo_servicio=consulta_general · modalidad=presencial · $50 · 30min · 23:00
+```
+
+…contra la que sí quería, hecha en el medio de las dos:
+
+```
+c6cdb345 · tipo_servicio=telemedicina · modalidad=telemedicina · $24 · 20min · 23:00
+```
+
+#### La causa, medida — una línea
+
+`apps/cliente/src/app/(tabs)/explorar/veterinaria/index.tsx:192`
+
+```js
+pedido ?? (s !== null && r.data.some((o) => o.tipo_servicio === s) ? s : r.data[0].tipo_servicio)
+```
+
+**El QUÉ nace preseleccionado en `r.data[0]`** — el primero de la oferta, que
+el motor devuelve **ordenado alfabéticamente** (`ORDER BY ps.tipo_servicio` en
+`_vet_ofertas_cobrables`) ⇒ cae en una presencial, y `Teleconsulta` queda más
+abajo.
+
+⚠️ **El propio código declara el principio correcto** — *«preselección para ser
+un ancla. **Preseleccionar no es imponer**»* — y el defecto es su reverso
+exacto: **preseleccionar el primero alfabético hace que quien no toca nada
+compre lo que la lista puso arriba.** *La intención estaba escrita; lo que
+faltaba era que el default fuera «ninguno».*
+
+#### Por qué no hay síntoma, que es lo que lo vuelve grave
+
+**El resto del flujo se comporta idéntico**: día, hora, quién, pago. Nada
+cambia de forma, nada avisa. El checkout **sí muestra el nombre del servicio**
+—`subtitulo={servicioNombre}` en `checkout-reserva.tsx:432`— pero **como
+subtítulo debajo del nombre de la clínica.**
+
+> *Un dato que está pero no preside no informa. En el momento del pago, lo que
+> preside es lo que se lee.*
+
+⇒ **No es una pantalla que miente: es una que no insiste.** Y la distinción
+manda la cura: **el arreglo no es agregar texto, es que el QUÉ no venga elegido
+de fábrica.**
+
+#### Las dos curas (firma del founder, 26-ago) — LAS DOS SON DE C
+
+**① EL QUÉ NO VIENE ELEGIDO DE FÁBRICA.** Si el usuario no eligió servicio,
+**no hay servicio elegido** y la pantalla se lo pide. ⚠️ Y su borde: **si viene
+un servicio desde el catálogo, ÉSE gana** — no se pisa con el primero
+alfabético. *(El `pedido ??` ya lo respeta; lo que se retira es el fallback.)*
+
+**② EL CHECKOUT DICE QUÉ ESTÁS COMPRANDO, Y PRESIDE.** Es **cinturón, no
+cura**: *aunque ① nunca fallara, una pantalla de pago tiene que decir qué se
+paga.* Las dos capas se sostienen solas.
+
+**Adjudicación:** las dos a **C**. Son superficie, y C ya está adentro de ese
+archivo en esta tanda — partirlas pondría dos manos sobre las mismas líneas.
+
+---
+
+### D-942 🔴 · EL TITULAR NO PUEDE VER NI TOMAR LA CITA QUE EL MOTOR ASIGNÓ A SU EQUIPO
+
+**Nace S106-A t3, 26-ago-2026.** Hermana de `D-939` **vista desde el otro
+lado**: allá el aviso llega sólo al titular; acá el titular es el único que no
+puede hacer nada con la cita.
+
+🔴 **NO ES DE TELEMEDICINA:** el motor asigna `empleado_id` en los cinco
+oficios y ninguna superficie deja moverlo.
+
+#### El síntoma, literal del founder
+
+Como titular de Clínica Aurora, la cita le dice *«Esta consulta está asignada a
+otra persona del equipo»* — **sin decir a quién** — y **no tiene forma de
+tomarla ni de reasignarla**.
+
+#### Lo medido
+
+**① A quién se asignó, y por qué:** la cita `c6cdb345` quedó en el empleado
+`afdc7fb9` (`guillo381+7@gmail.com`). El motor elige por el `ORDER BY` de
+`crear_bloqueo_agenda` — **continuidad clínica primero, balanceo después**
+(S78). *La elección es correcta y el problema no es a quién eligió: es que no
+se puede ver ni cambiar.*
+
+**② La pantalla de equipo EXISTE:** `apps/prestador/src/app/negocio/equipo.tsx`.
+**No falta y no se quitó — no se encuentra.** Medido: el único lugar que navega
+a ella es **la tab Mascotas** (`mascotas.tsx:728`); **desde Negocio no hay
+camino.**
+
+> *Que una pantalla llamada «equipo», que vive en la ruta `/negocio/equipo`, no
+> se pueda alcanzar desde Negocio es un defecto por derecho propio* — el
+> founder la buscó donde su nombre dice que está.
+
+**③ Y ninguna de las dos reasigna.** Gestionar el equipo y mover una consulta
+son cosas distintas, y **la segunda no existe en ninguna pantalla.**
+
+#### El costo
+
+En una clínica real, el profesional asignado **puede estar de vacaciones o
+haber renunciado**, y la consulta **PAGA** se pierde sin que nadie pueda hacer
+nada.
+
+⚠️ **Y en teleconsulta no hay repechaje.** En presencial el dueño llega a la
+puerta y alguien lo atiende; **en una videollamada no hay puerta, no hay sala y
+no hay nadie que note que alguien está esperando.** La misma falla que en
+presencial degrada, en teleconsulta **destruye la cita**.
+
+#### 🔴 DISPARO: **antes del encendido de telemedicina** — el mismo que `D-939`
+
+#### La pregunta de mesa que sale de acá, y NO es técnica
+
+> **¿El titular DEBERÍA poder tomar una cita asignada a otro?**
+
+En una clínica es razonable que sí — *el dueño cubre a su equipo*. Pero es una
+decisión de producto, no un default: **de la respuesta depende si esto es un
+hueco de pantalla o una decisión que falta tomar**, y por eso se anota como
+pregunta y no como cura. *(Pendiente de A: medir si el motor lo permite hoy o
+lo prohíbe por diseño.)*
