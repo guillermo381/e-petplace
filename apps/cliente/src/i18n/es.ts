@@ -961,6 +961,16 @@ export const clienteEs = {
         · `ajeno_a_la_cita` — **jamás «no tienes permiso»: eso confirmaría que
           la cita existe.** Se comporta como si no hubiera nada.
           *(Criterio registrado por la mesa, 26-ago.)* */
+    /* ══ §3bis · LOS CONSEJOS DE PREPARACIÓN ══════════════════════════
+       🔴 VERBATIM de `LETRA_TELEMEDICINA` §3bis (firma del founder,
+       26-ago-2026). **No se reescriben ni se acortan**: el founder los
+       firmó con estas palabras. Registro de APOYO, jamás de alarma — no
+       compiten con los seis signos de §3, que son la advertencia clínica. */
+    prepTitulo: 'Prepárate para tu videoconsulta',
+    prepConsejo1: 'Elige un lugar con buena luz — el veterinario necesita ver bien a tu mascota.',
+    prepConsejo2: 'Conéctate a una red wifi si puedes: la llamada será más estable.',
+    prepConsejo3: 'Ten a tu mascota contigo y a la mano antes de entrar.',
+    prepConsejo4: 'Si puedes, que alguien te ayude a sostenerla mientras la muestras.',
     entrarBoton: 'Entrar a la videoconsulta',
     /* EL caso que más va a pasar. Lleva la HORA, del `abre_en` del servidor:
        decirle «no puedes entrar» a alguien que llegó veinte minutos antes lo

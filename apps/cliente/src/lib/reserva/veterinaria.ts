@@ -141,7 +141,24 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
           duracion: String(r.data.duracion_minutos),
           direccion: v.direccion ?? '',
           ciudad: v.ciudad ?? '',
-          modalidad: ctx.esDomicilio ? 'domicilio' : 'local',
+          /* 🔴 S106-C t3 · ACÁ UNA TELECONSULTA VIAJABA COMO `'local'`.
+             El ternario tenía dos salidas y la modalidad tiene TRES desde
+             S106: sin este brazo, la cita por video le decía al checkout que
+             ocurría en el local del veterinario.
+             *No daba síntoma porque el único lector era `esDomicilio`, y ahí
+             `'local'` y `'telemedicina'` se comportan igual — el dato estaba
+             mal y el comportamiento salía bien, que es como un dato inventado
+             sobrevive.* Hoy tiene un segundo lector (los consejos de §3bis) y
+             el error habría sido visible: la teleconsulta sin sus consejos.
+             ⚠️ Esto es SÓLO el parámetro de navegación al checkout. La
+             modalidad de la CITA la pone el servidor y no se manda desde
+             acá (contrato de A) — este valor no la toca. */
+          modalidad:
+            ctx.tipoServicio === 'telemedicina'
+              ? 'telemedicina'
+              : ctx.esDomicilio
+                ? 'domicilio'
+                : 'local',
           // §8 LETRA_TURNOS (la mitad "confirmación"): si eligió, se dice.
           ...(persona !== undefined
             ? { personaNombre: persona.nombre ?? t('veterinaria.integranteEquipo') }

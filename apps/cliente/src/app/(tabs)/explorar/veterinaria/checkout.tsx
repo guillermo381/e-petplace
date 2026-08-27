@@ -28,6 +28,7 @@ import {
 import { obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
 import { CheckoutReserva } from '@/components/checkout-reserva';
 import { DireccionHogarForm } from '@/components/direccion-hogar-form';
+import { ConsejosTeleconsulta } from '@/components/consejos-teleconsulta';
 import { useTraduccion } from '@/i18n';
 
 export default function VeterinariaCheckout() {
@@ -56,6 +57,9 @@ export default function VeterinariaCheckout() {
   const direccionSede = typeof params.direccion === 'string' && params.direccion.length > 0 ? params.direccion : null;
   const ciudad = typeof params.ciudad === 'string' && params.ciudad.length > 0 ? params.ciudad : null;
   const esDomicilio = params.modalidad === 'domicilio';
+  /* OBRA 3 · el PRIMERO de los dos lugares de §3bis: la confirmación de la
+     reserva, *«cuando el dueño acaba de pagar y está atento»*. */
+  const esTeleconsulta = params.modalidad === 'telemedicina';
 
   // D-339 heredado (solo urgencia a domicilio): la puerta de la dirección.
   const [direccionHogar, setDireccionHogar] = useState<DireccionHogar | null>(null);
@@ -94,6 +98,7 @@ export default function VeterinariaCheckout() {
       exitoTitulo={t('veterinaria.exitoTitulo')}
       exitoDetalle={t('veterinaria.exitoDetalle')}
       puedePagar={!esDomicilio || (direccionEstado !== 'cargando' && direccionHogar !== null)}
+      exitoExtra={esTeleconsulta ? <ConsejosTeleconsulta /> : undefined}
       seccionExtra={
         <View style={{ gap: spacing[2] }}>
           {personaNombre !== null ? (
