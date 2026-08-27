@@ -1495,3 +1495,4 @@ export {
 export { obtenerConfigVideo, type ConfigVideo } from './wrappers/telemedicina';
 export { prestadorTieneVerificacionProfesional } from './wrappers/telemedicina';
 export { obtenerHistorialClinicoMascota, type ItemHistorialClinico, type FiltrosHistorialClinico } from './wrappers/veterinaria-nota-clinica';
+export { guardarBorradorNota, leerBorradorNota, type BorradorNota, type CodigoBorradorNota } from './wrappers/veterinaria-nota-clinica';
