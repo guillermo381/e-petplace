@@ -66,7 +66,7 @@ export interface ControlLlamadaProps {
 const LADO = { md: 52, lg: 60 } as const
 
 /** Los tres glifos, en masa/trazo grueso — se leen a 24 px sobre cualquier fondo. */
-function Glifo({ nombre, color, cortado, fondoDelGlifo }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean; fondoDelGlifo: string }) {
+function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean }) {
   const t = 2
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -84,18 +84,49 @@ function Glifo({ nombre, color, cortado, fondoDelGlifo }: { nombre: ControlLlama
         </>
       )}
       {nombre === 'girarCamara' && (
-        /* Cámara con flecha de vuelta: el gesto de dar vuelta, no un ícono de
-           «configurar cámara». La flecha es lo que se lee a 24 px. */
+        /* 🔴 RE-DIBUJADO CON LA ANATOMÍA PROBADA (gate del founder, 26-ago).
+           **Su versión anterior salía en un disco VACÍO** — el founder contó
+           cuatro controles y del tercero dijo *«no hace nada literalmente»*.
+
+           ── LA MEDICIÓN QUE ORDENÓ ESTE DIBUJO ────────────────────────────
+           Comparado prop por prop contra los TRES glifos que sí se ven, éste
+           era el único con **dos rarezas**: `opacity={0.9}` en su `Rect`, y
+           **tres elementos pintados con el COLOR DEL FONDO** para simular un
+           recorte. Los otros tres usan `fill`/`stroke={color}` y nada más.
+
+           **No sé cuál de las dos lo rompía, y lo digo en vez de elegir:** se
+           adopta la anatomía que los otros tres tienen probada EN EL APARATO.
+           *Elegir entre dos sospechosos con una corazonada, para conservar un
+           dibujo, sería cambiar una medición por una preferencia.*
+
+           ⚠️ **Y una medición DEBILITA mi propia explicación favorita:**
+           renderizados los dos glifos como SVG en un navegador —el viejo con su
+           `opacity` y sus recortes, y el nuevo— **los DOS dibujan** (154 y 156
+           px claros sobre el disco). ⇒ **el SVG viejo NO era inválido**, así
+           que la causa no está en el path ni en `opacity` *como SVG*: está en
+           cómo `react-native-svg` lo traduce a nativo. **Se deja escrito para
+           acotar dónde mirar si vuelve a pasar** — y para que nadie lea esta
+           cura como «era el opacity».
+
+           **Y el recorte por color de fondo era MALO aunque hubiera andado:**
+           el fondo de esta pieza CAMBIA (el estado cortado lo invierte), así
+           que un glifo que se dibuja con el color del fondo se rompe solo el
+           día que el fondo cambia. *Los otros tres no dependen de su fondo —
+           por eso sobreviven a cualquier estado.*
+
+           El dibujo: cuerpo de cámara en masa + una flecha de vuelta ARRIBA,
+           por fuera del cuerpo. Todo en `color`, sin recortes y sin opacidad. */
         <>
-          <Rect x="3" y="7" width="18" height="12" rx="3" fill={color} opacity={0.9} />
+          <Rect x="2" y="9" width="14" height="10" rx="2.5" fill={color} />
+          <Path d="M17 12l4.5-2.5v7L17 14z" fill={color} />
+          {/* La flecha de vuelta: el gesto de dar vuelta, no «configurar». */}
           <Path
-            d="M8.5 13.2a3.6 3.6 0 0 1 6.2-2.2M15.5 12.8a3.6 3.6 0 0 1-6.2 2.2"
-            stroke={fondoDelGlifo}
-            strokeWidth={1.9}
+            d="M6 6.5h9"
+            stroke={color}
+            strokeWidth={t}
             strokeLinecap="round"
           />
-          <Path d="M14.2 9.4l1.2 1.6-2 .3z" fill={fondoDelGlifo} />
-          <Path d="M9.8 16.6l-1.2-1.6 2-.3z" fill={fondoDelGlifo} />
+          <Path d="M15.8 6.5l-3.2-2.2v4.4z" fill={color} />
         </>
       )}
       {nombre === 'colgar' && (
@@ -153,7 +184,7 @@ export function ControlLlamada({ glifo, etiqueta, onPress, activo = true, tamañ
           estiloPresionado,
         ]}
       >
-        <Glifo nombre={glifo} color={tinta} cortado={cortado} fondoDelGlifo={fondo} />
+        <Glifo nombre={glifo} color={tinta} cortado={cortado} />
       </Animated.View>
     </Pressable>
   )
