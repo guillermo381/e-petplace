@@ -1293,6 +1293,11 @@ export const prestadorEs = {
     error: 'No pudimos cargar el expediente',
   },
   negocio: {
+    /* 🔴 S106-C · El texto NOMBRA EL LUGAR — eso es lo que lo hace puntero
+       y no copia: una copia se llamaría «Equipo» a secas y con los meses
+       las dos pantallas se editarían por separado. */
+    equipoPuntero: 'Tu equipo se gestiona desde Datos',
+    equipoPunteroDetalle: 'Invitar, roles y bajas. Toca para ir.',
     titulo: 'Tu negocio',
     // S77-B — D-541: la voz del bloque que NO SE PUDO LEER · LOTE S77,
     // GATE PENDIENTE. Va en el DETALLE de la fila/tarjeta, así que "esto"

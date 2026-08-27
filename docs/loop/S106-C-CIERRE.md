@@ -180,6 +180,57 @@ moviéndola: se arregla decidiendo cuál de los dos verbos es.*
 cura el hallazgo sin decidir antes la pregunta de fondo, que es la de los dos
 verbos y es letra.*
 
+### ✅ FIRMA DEL FOUNDER (27-ago): va la ① — construida
+
+**Un puntero, no una segunda puerta.** Y la diferencia queda escrita **al lado
+del código**, no sólo acá:
+
+> *Una copia se llama **igual** que su destino y no dice de dónde es — con los
+> meses las dos se editan por separado y envejecen distinto, que es
+> exactamente lo que la mudanza de S86 vino a evitar. Un puntero **nombra el
+> lugar**: su texto dice «se gestiona desde Datos», así que **no puede
+> convertirse en la pantalla de equipo de este tab** — el día que alguien le
+> agregue función acá, el texto lo delata.*
+
+⚠️ **Y no ensancha nada:** hereda `useGateGestor`, que es **más angosto** que
+el gate de Datos. *El puntero no puede deshacer lo que S85-C32 midió.*
+
+---
+
+## ☠️ FICHA `D-945` — PARTIR LA PANTALLA DE EQUIPO POR VERBO
+
+**Sin disparo, por decisión de la mesa.** Se anota para que la pregunta no se
+pierda, no para hacerla ahora.
+
+**Medido:** `D-944` es la última tomada (grep contra `origin/main` **y todas
+las ramas remotas** — la lección de la colisión de ayer aplicada).
+
+### El hecho
+
+`/negocio/equipo` **hace dos verbos**: **consulta** (ver quién está en el
+equipo) y **configura** (invitar, roles, bajas). La frontera firmada —*DATOS
+consulta · NEGOCIO configura*— **pediría partirla**: la vista en Datos, la
+gestión en Negocio.
+
+### 🔴 Por qué se anota aunque hoy no duela
+
+*El defecto que el founder encontró —buscar el equipo donde el nombre lo lleva
+y no hallarlo— **no fue un descuido de ubicación: fue el síntoma de esta
+pregunta sin responder**.* Y por eso reaparece: **ninguna de las dos
+ubicaciones satisface a una pantalla que hace las dos cosas.**
+
+**El puntero cura el síntoma. Esta ficha nombra la causa.** *Un síntoma curado
+sin su causa anotada vuelve, y la próxima vez nadie sabe que ya se había
+entendido.*
+
+### Disparo
+
+**Ninguno hoy.** *La mesa la mira cuando la frontera vuelva a doler* — y el
+indicio de que dolió será exactamente el mismo: alguien buscando una función
+donde el verbo la promete.
+
+---
+
 ### Lo que sí sigue en pie del Acto 3, sin choque
 
 **A quién está asignada una cita** y **cómo se reasigna** son del detalle del

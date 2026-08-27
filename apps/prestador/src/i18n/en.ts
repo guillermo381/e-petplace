@@ -917,6 +917,8 @@ export const prestadorEn = {
     error: "We couldn't load the record",
   },
   negocio: {
+    equipoPuntero: 'Your team is managed from Data',
+    equipoPunteroDetalle: 'Invites, roles and removals. Tap to go.',
     titulo: 'Your business',
     // S77-B — D-541 (espejo): mismo criterio que el castellano.
     bloqueNoCargo: "We couldn't load this right now.",
