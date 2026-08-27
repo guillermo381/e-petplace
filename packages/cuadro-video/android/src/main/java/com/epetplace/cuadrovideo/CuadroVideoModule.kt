@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
+import com.facebook.react.bridge.ReactApplicationContext
 import com.oney.WebRTCModule.WebRTCModule
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
@@ -66,7 +67,16 @@ class CuadroVideoModule : Module() {
      *                usar.*
      */
     AsyncFunction("capturarCuadro") { trackId: String, pcId: Int, promise: Promise ->
-      val reactContext = appContext.reactContext
+      /* 🔴 EL CAST NO ES UN ATAJO — `appContext.reactContext` está declarado
+         como `Context?` (Android), **no** como `ReactApplicationContext**, y
+         su propio doc dice qué es: *«Provides access to the react application
+         context»*. El tipo declarado es el supertipo por desacople; el objeto
+         en runtime es el de React.
+         ⏪ **ACÁ ESTUVO EL DEFECTO QUE COSTÓ UNA BUILD:** llamé
+         `getNativeModule` sobre el `Context` pelado. *Y los dos errores del
+         compilador eran UNO: sin resolver el primero, `webrtc` quedaba de tipo
+         inválido y `getTrack` tampoco resolvía — dos mensajes, una causa.* */
+      val reactContext = appContext.reactContext as? ReactApplicationContext
       if (reactContext == null) {
         promise.reject("sin_contexto", "No hay contexto de React.", null)
         return@AsyncFunction

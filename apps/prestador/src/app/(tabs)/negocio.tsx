@@ -717,6 +717,44 @@ export default function Negocio() {
 
           {/* ☠️ S86-C · ACÁ VIVÍA LA ENTRADA A EQUIPO, y SE MUDÓ A DATOS
               (firma del founder: *DATOS consulta · NEGOCIO configura*).
+
+              ✅ **S106-C · VUELVE UNA SEÑAL, Y NO ES LA PUERTA QUE SE FUE**
+              (firma del founder, 27-ago). El founder buscó su equipo acá
+              —donde el nombre lo lleva— y **no encontró ni siquiera un
+              puntero**: *que una pantalla no se pueda hallar donde su nombre
+              promete es un defecto propio, aparte de dónde viva.*
+
+              🔴 **LA DIFERENCIA ENTRE PUNTERO Y COPIA, escrita para que
+              nadie la borre con el tiempo:** *una copia se llama IGUAL que su
+              destino y no dice de dónde es — con los meses las dos se
+              editan por separado y envejecen distinto, que es exactamente lo
+              que la mudanza de S86 vino a evitar.* **Un puntero NOMBRA EL
+              LUGAR**: su texto dice «se gestiona desde Datos», así que **no
+              puede convertirse en la pantalla de equipo de este tab** — el
+              día que alguien le agregue función acá, el texto lo delata.
+
+              ⇒ Se conserva: **una sola pantalla, un solo dueño de
+              contenido**, y este tab sólo sabe **dónde está**.
+
+              ⚠️ **Y NO se toca la audiencia:** hereda el gate de este tab
+              (`useGateGestor`), que es MÁS ANGOSTO que el de Datos — el
+              puntero no puede ensanchar lo que S85-C32 midió.
+
+              ⏪ La lápida original sigue abajo: lo que sigue vencido es la
+              PUERTA, no esta señal. */}
+          <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[4] }}>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="equipo"
+                registro="aa"
+                titulo={t('negocio.equipoPuntero')}
+                detalle={t('negocio.equipoPunteroDetalle')}
+                onPress={() => router.push('/negocio/equipo')}
+              />
+            </Tarjeta>
+          </View>
+
+          {/* ☠️ (la lápida de S86-C, conservada)
               Se retira en el MISMO commit que la construye allá — una
               mudanza que deja el origen puesto es una COPIA, y dos puertas
               a la misma pantalla envejecen distinto.

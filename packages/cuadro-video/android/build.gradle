@@ -14,6 +14,15 @@ android {
 
 dependencies {
   implementation project(':expo-modules-core')
+  /* 🔴 SIN ESTO NADA DE `com.facebook.react.bridge` RESUELVE — y sus cinco
+     errores son UNO: sin el paquete, `ReactApplicationContext` no existe,
+     `getNativeModule` tampoco, y de ahí en cascada `getTrack` y `cacheDir`.
+     *El fork lo declara igual (`react-android:+` en su propio build.gradle);
+     yo lo di por heredado y no se hereda: cada módulo Gradle declara su
+     propio classpath.*
+     `compileOnly` porque la app ya lo trae: declararlo `implementation`
+     metería una segunda copia de React en el APK. */
+  compileOnly "com.facebook.react:react-android:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
   // El fork ya trae libwebrtc como `api` — de ahí salen VideoFrame, YuvHelper
   // y JavaI420Buffer (verificados en el .aar antes de escribir una línea).

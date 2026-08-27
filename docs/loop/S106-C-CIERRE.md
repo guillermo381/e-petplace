@@ -118,4 +118,203 @@ vez de seguir construyendo sobre la sospecha.*
 pero **si su log dijera que la causa es nativa, su cura caería en esta misma
 build** — y ahí sí convendría que el log se lea antes del disparo.
 
+*(Cerrado después: `[GIRO_C]` se capturó, la causa **no** es nativa —
+`applyConstraints` mentía éxito— y su cura viajó por OTA. **La build sigue
+llevando una sola cosa.**)*
+
 ---
+
+## 🔴 ACTO 3 · FRENO — la entrada desde NEGOCIO choca con una firma viva
+
+**No lo ejecuto y no lo rodeo. Lo declaro con su literal.**
+
+### Lo medido
+
+La entrada a `/negocio/equipo` **hoy sólo existe en la tab Datos**
+(`(tabs)/mascotas.tsx:728`). Y en `(tabs)/negocio.tsx:718` hay una lápida que
+dice **por qué**:
+
+> `☠️ S86-C · ACÁ VIVÍA LA ENTRADA A EQUIPO, y SE MUDÓ A DATOS`
+> `(firma del founder: *DATOS consulta · NEGOCIO configura*).`
+> `Se retira en el MISMO commit que la construye allá — una mudanza que deja`
+> `el origen puesto es una COPIA, y dos puertas a la misma pantalla envejecen`
+> `distinto.`
+
+**La firma sigue viva y no es sólo de esta pantalla:** son **los cuatro
+verbos** —*HOY hace · NEGOCIO configura · DATOS consulta · CUENTA quién sos*—
+firmados en el gate `019fcabf` (S85), y **han gobernado al menos tres
+mudanzas**: equipo, «El movimiento» y la tienda.
+
+⚠️ **Y hay una razón MEDIDA, no sólo estética:** en Datos la sección gatea por
+`esDueno` **del lector**; el tab NEGOCIO tiene gate de gestor y Datos no ⇒
+*mudarla sin su gate habría ensanchado la audiencia* (medido en S85-C32).
+
+### 🔴 EL APORTE: el founder no se equivocó al buscarla ahí
+
+*Su intuición es **coherente con la propia frontera firmada**: invitar a
+alguien, darle roles y desvincularlo **es configurar**, no consultar.*
+
+⇒ **El choque no es founder-contra-founder por descuido: es que la pantalla
+hace LAS DOS COSAS.** Consulta —ver quién está— y configura —invitar, roles,
+baja—. **Por eso ninguna de las dos ubicaciones la satisface del todo, y por
+eso el defecto reaparece.**
+
+*Un nombre que promete un verbo y una pantalla que hace dos no se arregla
+moviéndola: se arregla decidiendo cuál de los dos verbos es.*
+
+### Las tres salidas, para que la mesa elija — ninguna ejecutada
+
+① **Una señal en NEGOCIO, no una puerta.** Una línea que diga dónde se
+   gestiona el equipo, sin navegar. **Respeta la firma al pie** (no hay dos
+   puertas que envejezcan distinto) y cura el hallazgo: el founder buscó y no
+   encontró **ni siquiera un puntero**. *La más barata y la que no reabre
+   nada.*
+② **Partir la pantalla por verbo:** ver el equipo en Datos · invitar y roles
+   en Negocio. **Es lo que la frontera pediría si se aplicara al contenido y
+   no a la pantalla entera** — y es la más cara.
+③ **Enmendar la firma para este caso** y devolver la entrada a Negocio.
+   ⚠️ Cuesta el gate de audiencia medido en S85-C32: habría que llevar su
+   gate con ella.
+
+**Mi voto: ①**, y por una razón de orden más que de gusto — *es la única que
+cura el hallazgo sin decidir antes la pregunta de fondo, que es la de los dos
+verbos y es letra.*
+
+### ✅ FIRMA DEL FOUNDER (27-ago): va la ① — construida
+
+**Un puntero, no una segunda puerta.** Y la diferencia queda escrita **al lado
+del código**, no sólo acá:
+
+> *Una copia se llama **igual** que su destino y no dice de dónde es — con los
+> meses las dos se editan por separado y envejecen distinto, que es
+> exactamente lo que la mudanza de S86 vino a evitar. Un puntero **nombra el
+> lugar**: su texto dice «se gestiona desde Datos», así que **no puede
+> convertirse en la pantalla de equipo de este tab** — el día que alguien le
+> agregue función acá, el texto lo delata.*
+
+⚠️ **Y no ensancha nada:** hereda `useGateGestor`, que es **más angosto** que
+el gate de Datos. *El puntero no puede deshacer lo que S85-C32 midió.*
+
+---
+
+## ☠️ FICHA `D-945` — PARTIR LA PANTALLA DE EQUIPO POR VERBO
+
+**Sin disparo, por decisión de la mesa.** Se anota para que la pregunta no se
+pierda, no para hacerla ahora.
+
+**Medido:** `D-944` es la última tomada (grep contra `origin/main` **y todas
+las ramas remotas** — la lección de la colisión de ayer aplicada).
+
+### El hecho
+
+`/negocio/equipo` **hace dos verbos**: **consulta** (ver quién está en el
+equipo) y **configura** (invitar, roles, bajas). La frontera firmada —*DATOS
+consulta · NEGOCIO configura*— **pediría partirla**: la vista en Datos, la
+gestión en Negocio.
+
+### 🔴 Por qué se anota aunque hoy no duela
+
+*El defecto que el founder encontró —buscar el equipo donde el nombre lo lleva
+y no hallarlo— **no fue un descuido de ubicación: fue el síntoma de esta
+pregunta sin responder**.* Y por eso reaparece: **ninguna de las dos
+ubicaciones satisface a una pantalla que hace las dos cosas.**
+
+**El puntero cura el síntoma. Esta ficha nombra la causa.** *Un síntoma curado
+sin su causa anotada vuelve, y la próxima vez nadie sabe que ya se había
+entendido.*
+
+### Disparo
+
+**Ninguno hoy.** *La mesa la mira cuando la frontera vuelva a doler* — y el
+indicio de que dolió será exactamente el mismo: alguien buscando una función
+donde el verbo la promete.
+
+---
+
+### Lo que sí sigue en pie del Acto 3, sin choque
+
+**A quién está asignada una cita** y **cómo se reasigna** son del detalle del
+prestador y **no tocan esta frontera**. Ahí no hay freno — y el dato de A ya
+está tomado: la pantalla **no vuelve a decidir el permiso**, consume el
+rechazo tipado, y **mientras `cita_ya_asignada` siga cortando, dice la verdad
+sobre por qué no se puede en vez de ofrecer un botón que rebota.**
+
+---
+
+## 🔴 LA BUILD FALLÓ EN MI MÓDULO — la causa, y el gate que no existía
+
+### Lo que pasó, sin adorno
+
+**Una build de ~20 minutos que terminó sin APK, y el defecto era mío.**
+
+Y la lección que me habían dado hoy aplicaba al revés: **medí la API del fork
+desde JS** (`MediaStreamTrack.d.ts`) **y el módulo la consume desde Kotlin, que
+es otra superficie.** *Verifiqué con rigor la mitad que no iba a usar.*
+
+### Las dos rondas de errores, y las dos eran UN solo defecto cada una
+
+**Ronda 1 (la que costó la build):** `getNativeModule` no resolvía porque
+`appContext.reactContext` está declarado **`Context?`**, no
+`ReactApplicationContext` — su propio doc dice *«provides access to the react
+application context»*, o sea que el tipo es el supertipo por desacople.
+`getTrack` era **cascada**: sin resolver el primero, `webrtc` quedaba de tipo
+inválido.
+
+**Ronda 2 (la que encontró el compilador aislado, gratis):** `com.facebook.react.bridge`
+**no resolvía en absoluto** — **faltaba `react-android` en MI `build.gradle`**.
+*El fork lo declara en el suyo; yo lo di por heredado, y no se hereda: cada
+módulo Gradle declara su propio classpath.* Sus **cinco** errores eran uno.
+
+⚠️ **Y la ronda 2 sólo apareció después de curar la 1**: el compilador reporta
+lo que puede resolver. *Curar el primer error de un archivo nativo no prueba
+que compile — prueba que el siguiente ya se puede ver.*
+
+### ✅ SÍ HAY FORMA DE VIGILARLO, y está probada — no propuesta
+
+```
+cd apps/prestador && npx expo prebuild --platform android --no-install
+cd android && ./gradlew :epetplace-cuadro-video:compileReleaseKotlin
+```
+
+**Compila SÓLO el módulo.** Ya rindió: **encontró la ronda 2 sin gastar una
+build EAS.**
+
+**Su costo, MEDIDO en las dos corridas reales:** la primera **15m 48s** (baja
+el toolchain y las dependencias); **la segunda, 6 SEGUNDOS** con el cache
+caliente. *O sea que el gate es caro UNA vez y gratis siempre después* — y ya
+pagó su primera corrida.
+
+✅ **Y el resultado, verificado POR EL OBJETO y no por el exit code
+(`L-191`, que casi me muerde acá):** `BUILD SUCCESSFUL` **y el
+`CuadroVideoModule.class` existe** en
+`packages/cuadro-video/android/build/tmp/kotlin-classes/release/`.
+*La primera vez leí el exit del `| tail` y decía 0 sobre un `BUILD FAILED` —
+la lección de la casa, cobrada en mi propio instrumento.*
+
+**⚠️ SU TERCER COSTO, y lo encontró el propio gate de la casa:** correr
+`expo prebuild` **se lleva puesto `.expo/types/router.d.ts`**, y `R63·C` me
+frenó el commit con su literal — *«con `typedRoutes: true` y sin ese archivo,
+`Href` degrada a `string` y toda ruta inventada compila en verde»*.
+
+*O sea que el gate del nativo APAGA en silencio al gate de las rutas.* Se
+regenera arrancando Metro una vez. **Queda escrito acá porque el que corra
+este comando la próxima vez no va a saberlo — y el modo de falla es el peor:
+el typecheck sigue diciendo verde mientras mide de menos.**
+
+**Sus otros dos límites, declarados:**
+① **compila, NO ejecuta** — que el Kotlin resuelva no dice que el frame se
+   convierta. El criterio de verde sigue siendo el aparato.
+② **es Android.** El equivalente iOS pide `pod install` + `xcodebuild`, que en
+   esta máquina **no medí**.
+
+### El gate que no existía, y por qué ninguno lo veía
+
+*El typecheck de TS estaba verde porque el módulo nativo vive fuera de su
+alcance, y `verify-manifest-apk` mira un APK que nunca llegó a existir.*
+⇒ **el código nativo no lo cubre ningún gate de la casa** — y no por descuido:
+**hasta hoy no había código nativo propio**, sólo dependencias horneadas.
+
+**Mi propuesta, con su costo a la vista:** que el comando de arriba sea el
+gate del módulo, corrido **a mano antes de pedir una build**, no en el
+pre-commit. *Un gate de 15 minutos en cada commit no lo corre nadie, y un gate
+que nadie corre es peor que ninguno: da la sensación de estar cubierto.*
