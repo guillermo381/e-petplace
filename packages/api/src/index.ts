@@ -1493,3 +1493,4 @@ export {
   type CodigoCuadroTeleconsulta,
 } from './wrappers/teleconsulta-adjuntos';
 export { obtenerConfigVideo, type ConfigVideo } from './wrappers/telemedicina';
+export { prestadorTieneVerificacionProfesional } from './wrappers/telemedicina';

@@ -5836,6 +5836,7 @@ export type Database = {
           mime_type: string | null
           nombre_archivo: string
           orden: number
+          origen_captura: string | null
           prestador_id: string
           storage_path: string
           subido_por_user_id: string
@@ -5856,6 +5857,7 @@ export type Database = {
           mime_type?: string | null
           nombre_archivo: string
           orden?: number
+          origen_captura?: string | null
           prestador_id: string
           storage_path: string
           subido_por_user_id: string
@@ -5876,6 +5878,7 @@ export type Database = {
           mime_type?: string | null
           nombre_archivo?: string
           orden?: number
+          origen_captura?: string | null
           prestador_id?: string
           storage_path?: string
           subido_por_user_id?: string
@@ -18832,6 +18835,24 @@ export type Database = {
           },
         ]
       }
+      vigilancia_consumo_pedido: {
+        Row: {
+          pedido_en: string
+          request_id: number
+          unica: boolean
+        }
+        Insert: {
+          pedido_en?: string
+          request_id: number
+          unica?: boolean
+        }
+        Update: {
+          pedido_en?: string
+          request_id?: number
+          unica?: boolean
+        }
+        Relationships: []
+      }
       wearable_alerts: {
         Row: {
           alert_type: string
@@ -22268,6 +22289,10 @@ export type Database = {
       }
       prestador_activo: { Args: { p_prestador_id: string }; Returns: boolean }
       prestador_que_gestiono: { Args: never; Returns: string }
+      prestador_verificacion_profesional: {
+        Args: { p_prestador_id: string }
+        Returns: boolean
+      }
       promesa_por_vendedor: {
         Args: { p_cuentas: string[]; p_fecha_programada?: string }
         Returns: Json
@@ -22964,6 +22989,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string }
         Returns: Json
       }
+      vigilar_consumo_video: { Args: never; Returns: Json }
       volver_pedido_al_orden: { Args: { p_pedido_id: string }; Returns: Json }
       wizard_crear_cuenta_y_rol: {
         Args: {
