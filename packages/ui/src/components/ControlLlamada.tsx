@@ -75,7 +75,21 @@ export interface ControlLlamadaProps {
   tamaño?: 'md' | 'lg'
 }
 
-const LADO = { md: 52, lg: 60 } as const
+/* 🔴 `md` BAJÓ DE 52 A 48 (S106-B, y es consecuencia medida de que el toggle de
+   altavoz pase a dibujarse SIEMPRE).
+
+   Con cinco controles permanentes: `4×md + lg + 4×gap`. A 52 la fila mide
+   **316 px y deja 2 px por lado en un teléfono de 320** — o sea, sin aire.
+   A 48 mide **300** y deja **10 px por lado en 320 · 30 en 360**.
+
+   ⚠️ **48 es el piso: NO se puede bajar más.** El mínimo de target táctil es
+   **44**, así que quedan 4 px de margen. *Si algún día hace falta más espacio,
+   la salida NO es achicar el disco —se rompe el target— sino decidir qué sale
+   de la barra.*
+
+   **El techo, con el número:** un SEXTO control llevaría la fila a
+   `5×48 + 60 + 5×12 = 360` ⇒ **no entra ni en 360**. */
+const LADO = { md: 48, lg: 60 } as const
 
 /** Los tres glifos, en masa/trazo grueso — se leen a 24 px sobre cualquier fondo. */
 function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean }) {
