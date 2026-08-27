@@ -805,6 +805,7 @@ export const clienteEn = {
     vcTuVideo: 'Your video',
     vcVozMic: 'Microphone',
     vcVozCam: 'Camera',
+    vcAvisoCuadro: 'The vet captured an image from the consultation.',
     vcVozAltavoz: 'Speaker',
     vcVozColgar: 'Hang up',
     vcVozGirar: 'Flip camera',

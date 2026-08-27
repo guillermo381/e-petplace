@@ -26,6 +26,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRoomContext } from '@livekit/components-react';
+import { RoomEvent } from 'livekit-client';
 import {
   AudioSession,
   AndroidAudioTypePresets,
@@ -39,6 +41,7 @@ import { ConnectionState, Track, VideoPresets, type LocalVideoTrack } from 'live
 import {
   Boton,
   ControlLlamada,
+  sobreVideo,
   Encabezado,
   EsperaDeMarca,
   EstadoVacio,
@@ -58,7 +61,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { livekitListo } from '@/lib/livekit';
-import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
+import { queDibujar, AVISO_CUADRO } from '@/lib/telemedicina/veredicto-entrada';
 import {
   PreviewPropio,
   VideoPropioEnLlamada,
@@ -442,6 +445,32 @@ function SalaDelDueno({
   const estado = useConnectionState();
   const [confirmandoColgar, setConfirmandoColgar] = useState(false);
   const { localParticipant, cameraTrack } = useLocalParticipant();
+
+  /* ── 🔴 FIRMA ② · EL DUEÑO LO VE EN EL MOMENTO ────────────────────────────
+     *No se captura en silencio a alguien que está en cámara.* El vet avisa
+     por el canal de datos ANTES de capturar, y acá se pinta unos segundos.
+
+     **Se desvanece solo**, con el mismo criterio que la cinta de «está
+     escribiendo»: *el dueño tiene que estar mirando a su animal, no leyendo
+     la pantalla.* Lo que la firma pide es que **se entere**, no que lo lea
+     durante toda la consulta.
+
+     ⚠️ Su fallo es silencioso a propósito: si el canal no trae el aviso, la
+     captura igual ocurrió. *La firma la cumple el vet avisando; esta pantalla
+     es el otro extremo del aviso, no su garantía.* */
+  const [avisoCuadro, setAvisoCuadro] = useState(false);
+  const sala = useRoomContext();
+  useEffect(() => {
+    const alRecibir = (datos: Uint8Array) => {
+      if (new TextDecoder().decode(datos) !== AVISO_CUADRO) return;
+      setAvisoCuadro(true);
+      setTimeout(() => setAvisoCuadro(false), 4000);
+    };
+    sala.on(RoomEvent.DataReceived, alRecibir);
+    return () => {
+      sala.off(RoomEvent.DataReceived, alRecibir);
+    };
+  }, [sala]);
   const remotos = useRemoteParticipants();
   const pistasRemotas = useParticipantTracks([Track.Source.Camera], remotos[0]?.identity);
   const [inicioTs] = useState(() => Date.now());
@@ -488,6 +517,18 @@ function SalaDelDueno({
 
   return (
     <>
+    {/* El aviso, sobre el video y por encima de los controles — el mismo
+        lugar donde el dueño ya está mirando. */}
+    {avisoCuadro && (
+      <View
+        style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + 180, alignItems: 'center', zIndex: 10 }}
+        pointerEvents="none"
+      >
+        <View style={{ backgroundColor: sobreVideo.banda, borderRadius: radius.full, paddingHorizontal: spacing[4], paddingVertical: spacing[2] }}>
+          <Texto variante="cuerpo" color="sobreVideo">{t('veterinaria.vcAvisoCuadro')}</Texto>
+        </View>
+      </View>
+    )}
     <SuperficieLlamada
       alto={alto}
       insetTop={insetTop}
