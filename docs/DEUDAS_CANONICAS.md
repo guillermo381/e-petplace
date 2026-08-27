@@ -22640,3 +22640,43 @@ uniformiza.*
 > **medido en la rama en vez de en el objeto desplegado** (que sí lo tiene).
 > *Dos capas distintas contestando con la forma de la respuesta que A
 > esperaba.*
+
+---
+
+### D-938 🔴 · LAS PANTALLAS DE VIDEOCONSULTA NO TIENEN PUERTA — sólo se llega por deep link
+
+**Nace S106 tanda 2, 26-ago-2026.** Hallazgo al preparar las builds del gate.
+
+**Medido por grep sobre las dos apps enteras**, no supuesto. Las tres rutas
+nuevas existen y compilan:
+
+- cliente: `app/videoconsulta/[citaId].tsx` · `app/videollamada/[citaId].tsx`
+- prestador: `app/videollamada/[citaId].tsx`
+
+🔴 **Y ninguna pantalla del producto navega hacia ellas.** Las únicas
+referencias en todo `apps/*/src` son los propios archivos, sus `lib/livekit.ts`
+y los diccionarios. **La única navegación que existe es
+`videoconsulta → videollamada`: de una pantalla inalcanzable a la otra.**
+
+⇒ **El founder no puede llegar tocando.** El APK las lleva adentro; el camino
+entra sólo por deep link.
+
+> *Es «motor sin puerta» en la superficie — el patrón que este frente ya cobró
+> tres veces en el motor. Y acá muerde distinto: un APK impecable al que no se
+> puede entrar **no se puede gatear**, y el gate es lo único que separa a la
+> tanda de estar terminada.*
+
+**Lo que NO es:** no es un defecto de las pantallas. C las entregó completas y
+en verde, y las dos obras que declaró fuera por medición fueron **el cuadro
+congelado** y **el lector de historia con filtros** — *la entrada no estaba en
+esa lista*, así que o es un hueco o vive en una obra que no llegó.
+
+**Dueño: C** (`apps/` es su territorio). **Disparo: antes del gate del
+founder.** Mientras tanto el deep link funciona y sirve para probar, con
+cualquiera de las citas semilla del 26-ago.
+
+**Y la pregunta que la cura tiene que contestar, que es de producto y no de
+código:** desde dónde se entra. *El botón «entrar a la videoconsulta» ya está
+gateado por el veredicto del servidor (`puede_entrar_a_videollamada`), así que
+el lugar natural es el detalle de la cita — pero eso lo decide quien conoce el
+recorrido, no quien compila el APK.*
