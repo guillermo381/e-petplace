@@ -103,3 +103,8 @@ export function queDibujar(r: ResultadoVideollamada, idioma: string): QueDibujar
     ? { boton: false, claveVoz: CLAVE_POR_MOTIVO[r.codigo] }
     : { boton: false, claveVoz: VOZ_NO_SE_PUDO };
 }
+
+/** El sobre del aviso de captura — **el mismo literal que publica el vet**.
+ *  *Dos constantes iguales en dos apps es una que va a cambiar sola: vive en
+ *  un solo lado de cada app y su valor está versionado (`v1`).* */
+export const AVISO_CUADRO = 'epp.cuadro.v1';

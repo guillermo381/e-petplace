@@ -116,3 +116,93 @@ export async function adjuntarCuadroTeleconsulta(
     },
   };
 }
+
+/* ── LA PUERTA DE SUBIDA DEL CUADRO ──────────────────────────────────────── */
+
+/**
+ * 🔴 **Existe porque el motor estaba sin su puerta — el SEXTO caso de la
+ * sesión.** `adjuntarCuadroTeleconsulta` ya tomaba `bucket` + `storagePath`,
+ * pero **nadie podía producir ese path**: la captura ocurría, se veía, y **no
+ * llegaba al expediente.**
+ *
+ * ⇒ *El contrato de una pieza de motor incluye su wrapper.* Es `L-318` en su
+ * forma de superficie, y se anota acá para que la próxima pieza nazca con las
+ * dos mitades.
+ *
+ * ── LA FORMA NO ES NUEVA: ES LA DE `subirEvidencia` ────────────────────────
+ * Mismo bucket (`cita-archivos`), **mismo path `{prestadorId}/…`** — que no es
+ * una convención: **la policy del bucket valida
+ * `user_puede_acceder_prestador(primer segmento)`**, así que un path con otra
+ * forma **rebota**. *Copiar el molde no es comodidad: es que el permiso está
+ * escrito sobre esa forma.*
+ *
+ * ── EL HUÉRFANO RECUPERABLE, y por qué importa acá más que en el paseo ─────
+ * Son **dos pasos** —subir y registrar— y el segundo puede fallar solo. Si eso
+ * pasa, se devuelve el `storagePath` **para reintentar sólo el registro**.
+ *
+ * > *En una teleconsulta el cuadro es irrepetible: el animal ya no está frente
+ * > a la cámara. Perderlo por un fallo de red del segundo paso sería tirar la
+ * > única imagen que iba a existir de ese momento.*
+ */
+export type CausaSubidaCuadro = 'lectura' | 'red' | 'servidor';
+
+export interface ResultadoSubidaCuadro {
+  ok: boolean;
+  /** El path ya subido. **Se conserva aunque el registro falle**, para que el
+   *  reintento salte el paso 1 y no vuelva a subir la imagen. */
+  storagePath?: string;
+  /** El id del adjunto en el expediente. Lo devuelve el motor, no se compone. */
+  adjuntoId?: string;
+  mensaje?: string;
+  causa?: CausaSubidaCuadro;
+}
+
+const BUCKET_CUADRO = 'cita-archivos';
+
+function esRedCuadro(m: string): boolean {
+  return /network|failed to fetch|fetch failed|timeout/i.test(m);
+}
+
+/**
+ * Sube el PNG del cuadro y lo adjunta a la teleconsulta.
+ *
+ * @param bytes  el PNG ya decodificado. **Se recibe en bytes, no como uri**:
+ *   el cuadro sale del módulo nativo en memoria y *hacerlo pasar por un archivo
+ *   temporal sólo para volver a leerlo agrega un modo de falla que no existe.*
+ */
+export async function subirCuadroTeleconsulta(input: {
+  citaId: string;
+  prestadorId: string;
+  bytes: ArrayBuffer;
+  /** Reintento post-subida: salta el paso 1. */
+  storagePath?: string;
+}): Promise<ResultadoSubidaCuadro> {
+  let path = input.storagePath;
+
+  if (path === undefined) {
+    /* 🔴 EL PRIMER SEGMENTO ES EL PRESTADOR — lo exige la policy, no el gusto. */
+    path = `${input.prestadorId}/cuadro-teleconsulta-${Date.now()}.png`;
+    const { error } = await getClient()
+      .storage.from(BUCKET_CUADRO)
+      .upload(path, input.bytes, { contentType: 'image/png', upsert: false });
+    if (error) {
+      /* La causa queda en el log con su literal: *«no pudimos subir» sin la
+         causa manda a revisar el wifi cuando el problema es un permiso.* */
+      console.error(`[cuadro-teleconsulta] SUBIDA falló · bucket=${BUCKET_CUADRO} · ${error.message}`);
+      return { ok: false, causa: esRedCuadro(error.message) ? 'red' : 'servidor', mensaje: error.message };
+    }
+  }
+
+  const r = await adjuntarCuadroTeleconsulta({
+    citaId: input.citaId,
+    bucket: BUCKET_CUADRO,
+    storagePath: path,
+  });
+  if (!r.ok) {
+    /* ⚠️ **El path viaja de vuelta aunque esto falle.** Sin él, el reintento
+       subiría la imagen otra vez y dejaría un huérfano en el bucket. */
+    return { ok: false, storagePath: path, causa: 'servidor', mensaje: r.mensaje };
+  }
+
+  return { ok: true, storagePath: path, adjuntoId: r.data.adjuntoId };
+}

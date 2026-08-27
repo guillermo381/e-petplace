@@ -318,3 +318,138 @@ alcance, y `verify-manifest-apk` mira un APK que nunca llegó a existir.*
 gate del módulo, corrido **a mano antes de pedir una build**, no en el
 pre-commit. *Un gate de 15 minutos en cada commit no lo corre nadie, y un gate
 que nadie corre es peor que ninguno: da la sensación de estar cubierto.*
+
+---
+---
+
+# CIERRE DE LA PISTA C · S106
+
+## ⓪ DÓNDE QUEDÓ CADA COSA
+
+| Rama | SHA | Estado |
+|---|---|---|
+| `pista/s106-c` | `3e602fd3` | ✅ mergeada |
+| `pista/s106-c-t2` | `2dde267a` | ✅ mergeada |
+| `pista/s106-c-t3` | `914c0a04` | ✅ mergeada |
+| **`pista/s106-c-cierre`** | **`1f54fbe5`** | 🔴 **SIN MERGEAR — es todo lo de hoy** |
+
+*Verificado por SHA contra `origin` y con `merge-base --is-ancestor`, no por
+memoria.* **Lo de hoy vive sólo en la rama de cierre.**
+
+---
+
+## 🔴 EL CUADRO CONGELADO — SU ESTADO EXACTO, para que nadie lo lea como verde
+
+### ✅ Lo que SÍ está probado
+
+**La prueba contra el TRACK LOCAL dio verde EN EL APARATO**, corrida por el
+founder en `/prueba-cuadro`: **el PNG dice lo que la cámara apuntaba.**
+⇒ *la vía nativa produce la imagen REAL, no un frame vacío* — que era el
+criterio ① y el que separaba «producir una imagen» de «producir LA imagen».
+
+### 🔴 Lo que NO está probado, y por qué NO es verde de plataformas
+
+**① EL TRACK REMOTO — SIN EJERCER.** El botón está construido y pusheado
+(`1f54fbe5`), pero **nadie lo corrió todavía**. *Mi propio límite, escrito
+antes de empezar y que sigue rigiendo: si anda con el local, **no está
+probado** con el remoto.*
+
+**② EL BRAZO REMOTO DE iOS — REBOTA A PROPÓSITO.** `buscarTrack` resuelve
+sólo el local (`localTracks` es público en `WebRTCModule.h`); con un `pcId`
+distinto de `-1` **devuelve `nil` y la promesa rechaza**. *No devuelve el local
+en su lugar: un `pcId` ignorado en silencio daría la imagen equivocada en una
+historia clínica, que es peor que ninguna.*
+
+⇒ **🔴 EL CRITERIO ② DE VERDE NO ESTÁ CUMPLIDO, Y NO SE ABLANDA:** *«Android
+Y iOS. Si anda en una sola, es DESCARTE, no verde parcial.»* **Hoy anda en
+una sola.** Lo de hoy cierra **la vía Android hasta el track local**, y **nada
+más**.
+
+**Su costo para cerrarlo:** medir cómo el fork iOS guarda las peer connections
+y sus tracks remotos · escribirlo en Swift · **y una build de iOS, que esta
+máquina no tiene medida** (`pod install` + `xcodebuild` sin verificar).
+
+### ⚠️ Y la tercera pata que falta, del lado del expediente
+
+`adjuntarCuadroTeleconsulta` existe tomando `bucket` + `storagePath`, **pero
+falta el paso previo: subir el PNG a `cita-archivos`**, y no hay wrapper para
+ese bucket. `packages/api` es de A ⇒ **pedido a A.**
+
+*Hasta que exista, la captura ocurre y se ve, y NO llega al expediente.* **Se
+dice; no se simula.**
+
+---
+
+## 🔴 EL GATE DEL CÓDIGO NATIVO — su regla de uso
+
+**Hasta esta sesión no había código nativo propio**, sólo dependencias
+horneadas ⇒ **ningún gate de la casa lo cubría**: el typecheck de TS no lo
+alcanza y `verify-manifest-apk` mira un APK que puede no llegar a existir.
+
+```
+cd apps/prestador && npx expo prebuild --platform android --no-install
+cd android && ./gradlew :epetplace-cuadro-video:compileReleaseKotlin
+```
+
+**Cuándo:** 🔴 **a mano, ANTES de pedir una build.** *Jamás en el pre-commit:
+un gate de 15 minutos por commit no lo corre nadie, y un gate que nadie corre
+es peor que ninguno — da la sensación de estar cubierto.*
+
+**Su costo, medido en las dos corridas reales:** `15m 48s` la primera (baja el
+toolchain), **`6s` la segunda** con cache. *Caro una vez, gratis después.*
+
+**Cómo se lee su resultado:** **por el objeto** — que exista
+`packages/cuadro-video/android/build/tmp/kotlin-classes/release/CuadroVideoModule.class`.
+*El exit code de un pipe miente: la primera vez leí `0` sobre un `BUILD
+FAILED` (L-191, cobrada en mi propio instrumento).*
+
+### ⚠️ SUS TRES LÍMITES, y el tercero muerde en silencio
+
+① **Compila, NO ejecuta** — el verde sigue siendo del aparato.
+② **Es Android.** El equivalente iOS no está medido.
+③ 🔴 **`expo prebuild` SE LLEVA `.expo/types/router.d.ts`**, y con él
+   `R63·C`: *sin ese archivo `Href` degrada a `string` y toda ruta inventada
+   compila en verde.* **El gate del nativo apaga en silencio al gate de las
+   rutas.** Se regenera arrancando Metro una vez. *Queda escrito porque el
+   próximo que corra el comando no va a saberlo, y el modo de falla es el
+   peor: el typecheck sigue diciendo verde mientras mide de menos.*
+
+---
+
+## ACTO 3 — LO QUE QUEDA A MEDIAS, CON DUEÑO
+
+| Qué | Estado | Dueño |
+|---|---|---|
+| **La señal en NEGOCIO** (firma ①) | ✅ construida | — |
+| **A quién está asignada una cita** | 🔴 **NO construida** | **C** |
+| **La reasignación** | 🔴 **NO construida** | **C** |
+| **Partir la pantalla por verbo** (`D-945`) | ficha sin disparo | mesa |
+
+**Lo que ya está medido para quien la retome, así no arranca de cero:**
+
+- **El permiso NO se construye:** `asignar_cita_a_persona` ya existe y **ya
+  gatea por rol** (recepción · administrador · titular). *La pantalla no
+  vuelve a decidirlo: consume el rechazo tipado.*
+- **Hoy reasignar rebota con `cita_ya_asignada`** — *reasignar exige el aviso
+  a la familia, que A está construyendo.* ⇒ **la pantalla tiene que decir la
+  verdad sobre por qué no se puede, jamás ofrecer un botón que rebota**; y
+  cuando el aviso exista, **el gate se abre solo y la pantalla no cambia.**
+- **No toca la frontera de los cuatro verbos** — vive en el detalle de la cita
+  del prestador. *Ahí no hay freno.*
+
+---
+
+## LO QUE ESTA SESIÓN ME DEJÓ ESCRITO
+
+**El criterio que más me corrigió:** *una pieza **entregada** y una pieza
+**montada** son dos hechos distintos.* Lo pagué **cinco veces** —el asa, el
+temporizador, el dictado, las tarjetas atadas a la altura equivocada, y la
+cinta de «está escribiendo» que sigue sin llenar—. **Ningún typecheck ve una
+prop que nadie llena.**
+
+**Y su versión más cara, la de hoy:** *medí la API del fork desde JS y el
+módulo la consume desde Kotlin — verifiqué con rigor la mitad que no iba a
+usar*, y costó una build de veinte minutos.
+
+**Por eso el cierre no dice «curado» en ninguna línea.** Eso lo dice el dedo
+del founder.

@@ -25,6 +25,7 @@ import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePreventScreenCapture } from 'expo-screen-capture';
+import { useRoomContext } from '@livekit/components-react';
 import {
   AudioSession,
   AndroidAudioTypePresets,
@@ -66,6 +67,8 @@ import { livekitListo } from '@/lib/livekit';
 import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, useCamara } from '@/components/videollamada-piezas';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
+import { AVISO_CUADRO, pcIdDeLaSala } from '@/lib/telemedicina/cuadro';
+import { capturarCuadro } from '@epetplace/cuadro-video';
 import {
   cerrarTeleconsulta,
   estructurarNotaClinica,
@@ -483,6 +486,8 @@ function MesaDeTrabajo({
   const { t, idioma } = useTraduccion();
   const estado = useConnectionState();
   const { localParticipant, cameraTrack } = useLocalParticipant();
+  /* La sala, para leer el `pcId` del track remoto (ver `cuadro.ts`). */
+  const sala = useRoomContext();
   const remotos = useRemoteParticipants();
   const pistasRemotas = useParticipantTracks([Track.Source.Camera], remotos[0]?.identity);
   const [inicioTs] = useState(() => Date.now());
@@ -521,6 +526,46 @@ function MesaDeTrabajo({
      Dos consumidores del mic no conviven en Android — y además es lo
      correcto: *está dictando la nota clínica, no hablándole a la familia.* */
   const [dictando, setDictando] = useState(false);
+
+  /* ── 🔴 EL CUADRO CONGELADO, en la llamada ────────────────────────────────
+     La prueba contra el track LOCAL dio verde (gate del founder): la vía
+     nativa produce **la imagen real**. Acá se ejerce contra el **REMOTO**,
+     que es lo que cierra el verde y **es el caso de uso**: el vet captura lo
+     que la cámara del dueño está mostrando, no su propia cara.
+
+     🔴 **LAS TRES FIRMAS:**
+     ① **No cuenta como grabación** — un cuadro quieto no es la transmisión.
+        `roomRecord:false` **no se toca**.
+     ② **El dueño lo VE en el momento** — se le avisa por el canal de datos
+        de LiveKit ANTES de nada. *No se captura en silencio a alguien que
+        está en cámara.*
+     ③ **Entra al expediente con su marca** — ⚠️ **pendiente**: falta el
+        wrapper de subida a `cita-archivos` (pedido a A). *Hasta que exista,
+        la captura ocurre y se ve, y no llega al expediente — se dice.* */
+  const [cuadro, setCuadro] = useState<string | null>(null);
+  const [capturando, setCapturando] = useState(false);
+
+  const capturar = useCallback(async () => {
+    const pista = pistasRemotas[0]?.publication?.track?.mediaStreamTrack;
+    const pc = pcIdDeLaSala(sala);
+    if (pista === undefined || pc === null) return;
+    setCapturando(true);
+    /* ② PRIMERO el aviso, después la captura. *Avisar después sería avisar
+       de algo ya hecho, y la firma dice que lo VE en el momento.* Su fallo
+       no frena: el vet no puede quedarse sin capturar porque el canal falló,
+       y el dueño igual ve el aviso en pantalla del lado del vet. */
+    try {
+      await localParticipant.publishData(
+        new TextEncoder().encode(AVISO_CUADRO) as Uint8Array<ArrayBuffer>,
+        { reliable: true },
+      );
+    } catch {
+      /* declarado arriba */
+    }
+    const r = await capturarCuadro(pista.id, pc);
+    setCapturando(false);
+    setCuadro(r);
+  }, [pistasRemotas, sala, localParticipant]);
 
   /* ── 🔴 EL BORRADOR — veinte minutos de dictado no dependen de la memoria
      del vet ni de que la app no se cierre ─────────────────────────────────
@@ -839,6 +884,26 @@ function MesaDeTrabajo({
               ))}
             </ScrollView>
           )}
+          {/* 🔴 EL BOTÓN DEL CUADRO — sobre el video, donde el vet está
+              mirando. Sólo con video remoto: *capturar antes de que llegue
+              imagen produciría el frame vacío que el criterio de verde
+              prohíbe.* */}
+          {pistasRemotas.length > 0 && (
+            <View style={{ paddingHorizontal: spacing[4] }}>
+              <Boton
+                variante="secundario"
+                etiqueta={capturando ? t('consulta.vcCuadroCapturando') : t('consulta.vcCuadroCta')}
+                onPress={() => void capturar()}
+                cargando={capturando}
+              />
+              {cuadro !== null && (
+                <Texto variante="apoyo" color="sobreVideo">
+                  {t('consulta.vcCuadroListo')}
+                </Texto>
+              )}
+            </View>
+          )}
+
           <AsaModal
             etiqueta={t('consulta.vcAsaModal')}
             onPress={() => setAltura(altura === 'cerrado' ? 'medio' : 'completo')}

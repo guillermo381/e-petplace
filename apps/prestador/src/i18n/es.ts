@@ -2756,6 +2756,11 @@ export const prestadorEs = {
     vcVozAltavoz: 'Altavoz',
     vcVozColgar: 'Terminar la consulta',
     vcVozGirar: 'Girar cámara',
+    /* ① La voz dice que NO es grabación — un cuadro quieto no es la
+       transmisión. */
+    vcCuadroCta: 'Capturar imagen',
+    vcCuadroCapturando: 'Capturando…',
+    vcCuadroListo: 'Imagen capturada. La familia lo ve en su pantalla.',
     vcAsaModal: 'Notas y historia',
     vcNotaTitulo: 'Nota de la consulta',
     /* El mismo registro del Durante: la plataforma JAMÁS sugiere medicamentos,

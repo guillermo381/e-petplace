@@ -17,6 +17,25 @@
 
 ---
 
+> # ✅ CIERRE DEL PLAN — estado al 27-ago-2026, tarde
+>
+> **Este plan NO sigue entero.** Lo que cerró y lo que no:
+>
+> | frente | estado al cierre |
+> |---|---|
+> | **§1** lo que sólo el founder puede cerrar | 🟢 **cerrado** — ejercido en aparato: terminar · derivar sin diagnóstico · la receta · el preset |
+> | **§2** el cuadro congelado | 🟡 **construido, ejercido SOLO en la prueba LOCAL.** El brazo REMOTO no se ejerció, y el de iOS **rebota a propósito** |
+> | **§3** los huecos del equipo | 🟢 **motor cerrado** (asignación al titular · aviso de reasignación · gate de la vitrina abierto) · 🟡 **su superficie queda a C** |
+> | **§4** el servicio preseleccionado | 🟡 **curado por C, sin ejercer en aparato** |
+>
+> ⚠️ **Y §6 «lo que no incluye» tiene una baja:** **el desenlace clínico YA ES
+> DATO** — la columna nació hoy con su vocabulario cerrado. *Lo que queda de esa
+> línea es que las pantallas lo llenen y que alguien pueda preguntar «cuántas
+> derivaron a urgencias».*
+>
+> 🔴 **Lo único que bloquea el encendido sigue siendo UNO: el consentimiento
+> verificado en fila.** Este plan no lo levanta y no lo levantó nada de hoy.
+
 ## §0 · El estado, sin adornos
 
 | frente | estado |

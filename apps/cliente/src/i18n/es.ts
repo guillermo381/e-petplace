@@ -1013,6 +1013,9 @@ export const clienteEs = {
     vcTuVideo: 'Tu video',
     vcVozMic: 'Micrófono',
     vcVozCam: 'Cámara',
+    /* Firma ②: el dueño se ENTERA en el momento. Dice qué pasó, sin alarma
+       — es una observación clínica, no una advertencia. */
+    vcAvisoCuadro: 'El veterinario capturó una imagen de la consulta.',
     vcVozAltavoz: 'Altavoz',
     vcVozColgar: 'Colgar',
     vcVozGirar: 'Girar cámara',
