@@ -81,11 +81,19 @@ export interface SuperficieLlamadaProps {
   onMicrofono: () => void
   onCamara: () => void
   onColgar: () => void
-  /** 🔴 Girar cámara. Omitirlo lo saca de la barra — pero en la pantalla del
-   *  DUEÑO la dirección lo declara obligatorio (§2: «el botón más usado»). */
-  onGirarCamara?: () => void
+  /** 🔴 GIRAR CÁMARA — **OBLIGATORIA desde el gate del 26-ago.**
+   *
+   *  ⏪ Nació opcional, con la idea de que una pantalla pudiera no tenerlo.
+   *  **Medido: las DOS lo pasan** (cliente y prestador), así que la
+   *  opcionalidad no servía a nadie — y en cambio dejaba viva una rama
+   *  `{onGirarCamara != null && …}` que **hay que descartar a mano cada vez
+   *  que el botón no aparece**.
+   *
+   *  *Una prop opcional que todos pasan no es flexibilidad: es un sospechoso
+   *  permanente.* Obligatoria, el tsc lo exige y la rama desaparece. */
+  onGirarCamara: () => void
   /** Voz de los controles (a11y — SIEMPRE, no son opcionales). */
-  vozControles: { microfono: string; camara: string; colgar: string; girarCamara?: string }
+  vozControles: { microfono: string; camara: string; colgar: string; girarCamara: string }
   /** 🔴 LA SEÑAL DE LA NOTA (§2): «La doctora está escribiendo…». Aparece,
    *  **se desvanece sola a los 3 s** y no vuelve hasta el próximo cambio.
    *  *Es una señal tranquilizadora («me están atendiendo de verdad»), NO un
@@ -220,9 +228,7 @@ export function SuperficieLlamada({
                    dirección §2 lo pide explícito — «que no se esconda junto al
                    resto del chrome». Es el botón que se busca cuando llega el
                    momento de mostrar al animal, y ese momento no avisa. */}
-            {onGirarCamara != null && (
-              <ControlLlamada glifo="girarCamara" etiqueta={vozControles.girarCamara ?? ''} onPress={() => { onGirarCamara(); despertar() }} />
-            )}
+            <ControlLlamada glifo="girarCamara" etiqueta={vozControles.girarCamara} onPress={() => { onGirarCamara(); despertar() }} />
 
             {/* 🔴 COLGAR: fuera de `estiloChrome` A PROPÓSITO. Nunca se esconde. */}
             <ControlLlamada glifo="colgar" tamaño="lg" etiqueta={vozControles.colgar} onPress={onColgar} />
