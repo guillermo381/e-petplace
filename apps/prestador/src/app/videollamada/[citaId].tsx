@@ -26,6 +26,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePreventScreenCapture } from 'expo-screen-capture';
 import {
+  AudioSession,
+  AndroidAudioTypePresets,
   LiveKitRoom,
   useConnectionState,
   useLocalParticipant,
@@ -41,6 +43,7 @@ import {
   EstadoVacio,
   HojaConfirmacionDestructiva,
   ModalDosAlturas,
+  AsaModal,
   SuperficieLlamada,
   Texto,
   spacing,
@@ -127,6 +130,66 @@ export default function VideollamadaProfesional() {
       vigente = false;
     };
   }, [citaId, idioma, t, intento]);
+
+  /* ── 🔴 EL ALTAVOZ — la sesión de audio la configura ESTA pantalla ─────────
+     **Gate del founder (26-ago): la llamada sonaba por el AURICULAR** y sin
+     auriculares no se escuchaba.
+
+     **La causa no es una mala configuración: es que NADIE configuraba** — B
+     midió cero llamadas a `AudioSession` en toda la app, así que decidía el
+     sistema, y en Android el sistema elige el auricular.
+
+     **La llave, leída del JSDoc del SDK y verificada contra el objeto** (no
+     supuesta): en modo `communication` el ruteo **está APAGADO** y la lista de
+     salidas —que ya trae `speaker` antes que `earpiece`— **no se aplica**.
+     ⇒ *Reordenar la lista NO alcanza: `forceHandleAudioRouting` es lo que la
+     enciende.*
+
+     🔴 **`earpiece` queda FUERA de la lista a propósito, no por olvido** — es
+     justo el comportamiento que se vino a corregir. **Bluetooth y auriculares
+     siguen ganando**: *si alguien se puso auriculares, quiere auriculares.*
+
+     ⚠️ **Y no es cosmético:** sin altavoz el dueño necesita el teléfono en la
+     oreja, y con el teléfono en la oreja **no tiene las dos manos para
+     sostener al animal y mostrárselo al veterinario** — que es el acto central
+     del servicio. *Va junto con girar cámara: son el mismo problema visto dos
+     veces.*
+
+     Se descartó un selector de salida con el argumento de B: *un toggle no
+     arregla un default malo, lo delega en el usuario.*
+
+     Vive acá y no en `packages/ui` porque **ui no importa LiveKit** (decisión
+     de arquitectura ratificada): la sesión se configura donde se monta el
+     Room. Se apaga al desmontar — *una sesión de audio que queda abierta se
+     lleva el audio del teléfono a una llamada que ya terminó.* */
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      try {
+        await AudioSession.configureAudio({
+          android: {
+            preferredOutputList: ['bluetooth', 'headset', 'speaker'],
+            audioTypeOptions: {
+              ...AndroidAudioTypePresets.communication,
+              forceHandleAudioRouting: true,
+            },
+          },
+          ios: { defaultOutput: 'speaker' },
+        });
+        if (!vigente) return;
+        await AudioSession.startAudioSession();
+      } catch {
+        /* Si la sesión no se pudo configurar **la llamada sigue**: se escucha
+           peor, pero se escucha. *Tumbar una videoconsulta médica por el ruteo
+           del audio sería cambiar un problema por uno mucho peor.* */
+      }
+    })();
+    return () => {
+      vigente = false;
+      void AudioSession.stopAudioSession();
+    };
+  }, []);
+
 
   /* El silencio no dibuja: SALE. Una pantalla en blanco sería un callejón, y
      cualquier texto —hasta el genérico— confirmaría que la cita existe.
@@ -336,6 +399,41 @@ function MesaDeTrabajo({
           girarCamara: t('consulta.vcVozGirar'),
         }}
       />
+
+      {/* ── 🔴 EL ASA, SOBRE EL VIDEO — hallazgo ④ del gate del founder ──────
+          **«El vet no tiene con qué escribir.»** El panel SÍ se montaba; lo
+          que no se veía era su manija, y la medición dice por qué **sin
+          necesidad de aparato**:
+
+          ① `ModalDosAlturas` cerrado vive en `bottom: 0` con 28 px de alto, y
+             `SuperficieLlamada` pone su barra de controles **también en
+             `bottom: 0`**. El modal se monta después ⇒ **su franja tapa la
+             parte baja de los controles y el asa se pierde ahí.**
+          ② Peor: esos 28 px **no descuentan `insetBottom`**, así que caen
+             dentro de la barra de gestos del sistema. *Es el gemelo exacto
+             del hallazgo ② de B en la tanda 2 —el botón «entrar» pisado por
+             los botones del sistema—: el mismo defecto, otra pantalla.*
+
+          ⇒ Se monta `AsaModal`, que **B exportó para exactamente esto** y lo
+          dejó escrito en su JSDoc: *«el asa suelta, para montarla sobre el
+          video cuando el panel está cerrado»*. **Estaba construida y nadie la
+          montaba** — mi obra, no la suya.
+
+          El `120` no es un número elegido: es **el mismo que la propia
+          `SuperficieLlamada` usa** para poner contenido justo encima de su
+          barra de controles. *Copiar su número en vez de estimar uno es lo
+          que hace que el asa siga en su lugar el día que la barra cambie.*
+
+          Sólo con el panel `cerrado`: abierto, el asa del panel es la que
+          manda y dos manijas para lo mismo confunden más que ninguna. */}
+      {altura === 'cerrado' && (
+        <View
+          style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + 120 }}
+          pointerEvents="box-none"
+        >
+          <AsaModal etiqueta={t('consulta.vcAsaModal')} onPress={() => setAltura('medio')} />
+        </View>
+      )}
 
       {/* §3 · EL MODAL DE DOS ALTURAS. `medio` = dictar viendo al animal, que
           es el caso real; `completo` = leer la historia. **Nunca tapa el video

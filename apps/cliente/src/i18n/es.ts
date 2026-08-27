@@ -795,6 +795,9 @@ export const clienteEs = {
     simuladoAviso: 'Fase de pruebas: el pago es simulado — no se cobra nada real.',
     exitoTitulo: 'Paseo confirmado',
     exitoDetalle: 'Ya está en la agenda del paseador. Lo verás en tu Hogar.',
+    /* S106-C t3 · la salida del riel DeUna antes de pagar (hallazgo ②). */
+    cambiarMedio: 'Cambiar de medio de pago',
+    cambiarMedioNota: 'Tu reserva se mantiene. El código que generamos deja de servir.',
     volverHogar: 'Ir al Hogar',
     // ☠️ S101-C · MURIERON `rechazado`, `rechazadoDetalle`, `reintentar`,
     //    `timeout` y `timeoutDetalle` (Ley 37): eran las pantallas enteras del

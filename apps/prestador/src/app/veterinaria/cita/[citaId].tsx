@@ -380,7 +380,22 @@ export default function DetalleCitaVet() {
             {/* S76-B2 (D-525): la acción de atender EXISTE solo para quien
                 atiende (titular o chip clínico) — gate de ausencia, jamás
                 candado. Para recepción, esta tarjeta no se monta. */}
-            {cita.mascota && puedeAtender && (
+            {/* 🔴 S106-C t3 · EN TELECONSULTA ESTE BOTÓN NO SE MONTA (hallazgo
+                ⑦ del gate, firma de la mesa). Con la entrada arriba, «Iniciar
+                consulta» quedaba como un SEGUNDO botón que hace lo mismo — y
+                peor: *se lee como si hubiera un paso más que hacer*, cuando en
+                una teleconsulta el acto empieza entrando y el dictado sale del
+                modal DURANTE la llamada.
+
+                ⚠️ **Consecuencia medida y declarada, no frenada:** este era el
+                único camino de vuelta a la nota desde el detalle de la cita.
+                Al colgar, el borrador viaja solo al Durante, así que el camino
+                del día de la consulta está cubierto; **lo que queda sin puerta
+                es volver a la nota de una teleconsulta días después**, cuando
+                el `replace` del colgado ya no está. La receta y el certificado
+                sí conservan la suya. *Se anota acá para que quien lo note
+                después sepa que fue decidido y no olvidado.* */}
+            {cita.mascota && puedeAtender && !esTeleconsulta && (
               <Tarjeta elevacion="reposo" relleno="ninguno">
                 <CeldaNavegacion
                   icono="veterinaria"

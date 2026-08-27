@@ -302,6 +302,43 @@ export function CheckoutReserva({
               ⚠️ **La cadencia del barrido NO se afirma acá.** Medida para
               tarjeta (mismo día); **para DeUna no la medí** y su aplicador
               sigue abierto (`D-887`). */}
+          {/* ── 🔴 LA VUELTA AL RESUMEN — hallazgo ② del gate del founder ────
+              **«Tocó por error, quiso cambiar a tarjeta, y no hay camino de
+              vuelta: hay que rehacer TODO el proceso.»**
+
+              🔴 **Y la asimetría es la cura, no un detalle:** con DeUna esta
+              fase se alcanza **SIN haber cobrado nada** —sólo se pidió un
+              código—, así que volver es seguro y el hold sigue vivo. Con
+              tarjeta se llega **después** de que `cobrar()` salió bien: ahí
+              ofrecer «cambiar de medio» sería *invitar a pagar dos veces*.
+              Por eso el botón existe **sólo en el riel DeUna**, y sólo
+              mientras el estado sea `esperando`: en `aprobada` la plata ya
+              entró y en `cargando` todavía no hay código que abandonar.
+
+              ⚠️ **El borde, declarado y no disimulado:** si la persona estaba
+              tecleando en su app de DeUna justo cuando vuelve, el pago puede
+              llegar igual — el barrido lo resuelve, **como ya pasa hoy** con
+              el «Volver al hogar» de abajo. *No se agrega un riesgo nuevo: se
+              agrega una salida al que ya existía.* La política definitiva de
+              ese cruce es del motor de pagos, no de esta pantalla.
+
+              La voz dice lo que pasa con el código — *un botón que devuelve
+              sin avisar que el código deja de servir manda a alguien a pagar
+              con un número muerto.* */}
+          {riel === 'deuna' && deuna.estado.fase === 'esperando' ? (
+            <View style={{ gap: spacing[2], alignItems: 'center' }}>
+              <Boton
+                variante="secundario"
+                etiqueta={t('checkout.cambiarMedio')}
+                onPress={() => {
+                  setFase('resumen');
+                  setRiel(null);
+                }}
+              />
+              <Texto variante="apoyo">{t('checkout.cambiarMedioNota')}</Texto>
+            </View>
+          ) : null}
+
           {espera.fase === 'sigue_abierta' ? (
             <>
               <Texto variante="apoyo">{t('pago.esperaSigueAbiertaCita')}</Texto>
