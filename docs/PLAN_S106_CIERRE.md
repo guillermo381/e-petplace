@@ -231,6 +231,32 @@ cambió y está depositado en
 
 ---
 
+## §6bis · Tres números que hay que usar bien — correcciones de B
+
+*Se depositan acá porque son los datos con los que este plan decide, y **un
+número vencido al lado de uno bueno es el mismo señuelo que la letra derogada**
+— que esta sesión ya pagó tres veces.*
+
+**① El ancho de la barra de la in-call: `300` de `320`, ~~316~~.** B bajó el
+disco a 48 en t3 y está en `main`. **La conclusión sobrevive** —un sexto control
+da 360 y no entra ni en un teléfono de 360— *pero el número viejo hace creer que
+hay 2 px de margen cuando hay 10, y ese margen es justo el que invita a apretar
+el gap en vez de decidir qué sale de la barra.* **La decisión es de mesa mirando
+el número, no de quien construye.**
+
+**② La vara de colisión de glifos: `0,361`, ~~0,306~~.** El par sano más alto de
+esa fila es **cámara·altavoz**, no micrófono·cámara. *Una vara tiene que ser el
+par sano MÁS ALTO: puesta en el segundo marcaría como colisión un par que está
+bien.* El glifo enfermo daba **0,647** ⇒ **la separación es amplia con
+cualquiera de los dos: lo que se rompe es el umbral, no el diagnóstico.**
+
+**③ El encargo de colisiones NO está abierto: B lo contestó** (`92f70183`, en
+`main`). Veredicto **(b) se puede a medias**, con el instrumento
+`scripts/medir-siluetas.mjs` vivo y su guard probado en rojo. **La mitad que no
+se puede:** *«convivir en una fila» no es derivable del JSX — se declara.*
+
+---
+
 ## §7 · Lo que esta sesión enseñó, y por qué el método se queda
 
 **Cinco defectos de producción y tres de proceso los encontró el founder con el
