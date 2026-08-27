@@ -27,6 +27,18 @@
  * es un acto) y **`SuperficieLlamada` lo exceptúa del ocultado**, junto a
  * colgar.
  *
+ * ── ⚠️ `altavoz`: LA ASIMETRÍA DE PLATAFORMA, para quien lo cablee ────────
+ * El control es UNO, pero **abajo no lo es** — leído del SDK
+ * (`AudioSession.d.ts`), y por eso se declara acá:
+ * · **Android** devuelve la lista real: `speaker · earpiece · headset ·
+ *   bluetooth`.
+ * · **iOS** solo da `default` y `force_speaker`, *«due to OS limitations»*;
+ *   para elegir auriculares o bluetooth ofrece su propio `showAudioRoutePicker`.
+ *
+ * ⇒ **El toggle binario altavoz↔auricular funciona en las dos**, con distinta
+ * implementación debajo. *Lo que NO se puede es ofrecer una lista de salidas
+ * igual en ambas — quien lo intente va a encontrar que en iOS no existe.*
+ *
  * ── EL DESTRUCTIVO ES DISTINTO, Y A PROPÓSITO ──────────────────────────────
  * `colgar` va en **masa plena roja**, no en disco translúcido: es el único
  * control que **jamás se esconde** (OBRA 4) y el único cuyo toque termina algo.
@@ -47,7 +59,7 @@ import { sobreVideo } from '../tokens/sobreVideo'
 import { radius } from '../tokens/radius'
 import { usePresionado } from './usePresionado'
 
-export type ControlLlamadaGlifo = 'microfono' | 'camara' | 'girarCamara' | 'colgar'
+export type ControlLlamadaGlifo = 'microfono' | 'camara' | 'girarCamara' | 'altavoz' | 'colgar'
 
 export interface ControlLlamadaProps {
   glifo: ControlLlamadaGlifo
@@ -127,6 +139,16 @@ function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color:
             strokeLinecap="round"
           />
           <Path d="M15.8 6.5l-3.2-2.2v4.4z" fill={color} />
+        </>
+      )}
+      {nombre === 'altavoz' && (
+        /* Cono + dos ondas. **Anatomía probada** (S106-B, gate): todo en
+           `color`, sin `opacity` y sin recortes con el color del fondo — que
+           fue lo único que distinguía al glifo que salió en blanco. */
+        <>
+          <Path d="M4 9.5h3.2L11.5 6v12L7.2 14.5H4z" fill={color} />
+          <Path d="M15 9.8a3.4 3.4 0 0 1 0 4.4" stroke={color} strokeWidth={t} strokeLinecap="round" />
+          <Path d="M17.8 7.6a6.8 6.8 0 0 1 0 8.8" stroke={color} strokeWidth={t} strokeLinecap="round" />
         </>
       )}
       {nombre === 'colgar' && (

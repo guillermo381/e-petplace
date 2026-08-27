@@ -36,6 +36,7 @@ import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
 import { AvisoTeleconsulta } from '../components/AvisoTeleconsulta'
+import { AccionQueLleva } from '../components/AccionQueLleva'
 import { ControlLlamada } from '../components/ControlLlamada'
 import { TemporizadorLlamada } from '../components/TemporizadorLlamada'
 import { EstadoConexion } from '../components/EstadoConexion'
@@ -2600,6 +2601,16 @@ function GaleriaInterna() {
             etiqueta="Ver el aviso"
             onPress={() => setAvisoTele(true)}
           />
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="apoyo">
+            `AccionQueLleva` — la acción suelta que SACA del flujo. Al lado de un
+            secundario se ve la jerarquía: el de arriba es lo que la pantalla
+            espera, el de abajo es la escapatoria.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <Boton variante="secundario" bloque etiqueta="Copiar el código" onPress={() => {}} />
+          <View style={{ height: spacing[2] }} />
+          <AccionQueLleva etiqueta="Cambiar medio de pago" onPress={() => {}} />
           <AvisoTeleconsulta
             visible={avisoTele}
             onCerrar={() => setAvisoTele(false)}
@@ -2693,6 +2704,7 @@ function GaleriaInterna() {
               <View style={{ backgroundColor: fondo, padding: spacing[4], borderRadius: radius.md, flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
                 <ControlLlamada glifo="microfono" etiqueta="Micrófono" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
                 <ControlLlamada glifo="camara" etiqueta="Cámara" activo={camViva} onPress={() => setCamViva((v) => !v)} />
+                <ControlLlamada glifo="altavoz" etiqueta="Altavoz" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
                 <ControlLlamada glifo="girarCamara" etiqueta="Girar cámara" onPress={() => {}} />
                 <ControlLlamada glifo="colgar" tamaño="lg" etiqueta="Colgar" onPress={() => {}} />
                 <TemporizadorLlamada inicioTs={inicioLlamada} />

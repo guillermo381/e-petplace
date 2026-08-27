@@ -132,6 +132,9 @@ export { TileVideoPropio, type TileVideoPropioProps, type EsquinaTile } from './
 export { SuperficieLlamada, type SuperficieLlamadaProps } from './components/SuperficieLlamada'
 export { ModalDosAlturas, AsaModal, type ModalDosAlturasProps, type AlturaModal } from './components/ModalDosAlturas'
 
+// S106-B · la acción SUELTA que saca del flujo (anatomía 19.7 sin portador)
+export { AccionQueLleva, type AccionQueLlevaProps } from './components/AccionQueLleva'
+
 // S106-B · el aviso previo de teleconsulta (LETRA_TELEMEDICINA §3)
 export {
   AvisoTeleconsulta,
