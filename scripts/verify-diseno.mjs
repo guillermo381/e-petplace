@@ -5555,9 +5555,18 @@ function r66(archivos) {
  *
  * **La letra que lo pide, `LETRA_TELEMEDICINA` §3, y es su línea roja:**
  * *«Los signos concretos no son decoración. Decir "si creés que está en riesgo"
- * le pide al dueño un juicio clínico que no tiene; nombrar cinco signos le da
- * un criterio. **No se resume, no se acorta, no se convierte en una línea de
- * letra chica.»***
+ * le pide al dueño un juicio clínico que no tiene; nombrar **seis** signos le
+ * da un criterio. **No se resume, no se acorta, no se convierte en una línea
+ * de letra chica.»***
+ *
+ * ⚠️ **Esta cita decía «cinco» hasta el 26-ago, y la letra ya decía seis.** El
+ * archivo canónico trae la corrección tachada (`~~cinco~~ **seis**`), o sea que
+ * el número estaba derogado **en la fuente** mientras este juez transcribía la
+ * forma anterior. *La ley de la sesión —la letra derogada se saca de la sección
+ * que un juez lee— vale también para la que el juez se copió adentro: acá la
+ * copia sobrevivió a su original.* El brazo ① nunca contó mal (mide por ancla
+ * estructural, no por esta prosa), pero **un lector que llegara a arreglar un
+ * rojo habría empezado creyendo que son cinco.**
  *
  * *Una prohibición que solo vigila un ojo se rompe el día que nadie mira. Y su
  * modo de falla es el peor de todos: **un aviso con cuatro signos compila,
