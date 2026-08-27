@@ -118,4 +118,72 @@ vez de seguir construyendo sobre la sospecha.*
 pero **si su log dijera que la causa es nativa, su cura caería en esta misma
 build** — y ahí sí convendría que el log se lea antes del disparo.
 
+*(Cerrado después: `[GIRO_C]` se capturó, la causa **no** es nativa —
+`applyConstraints` mentía éxito— y su cura viajó por OTA. **La build sigue
+llevando una sola cosa.**)*
+
 ---
+
+## 🔴 ACTO 3 · FRENO — la entrada desde NEGOCIO choca con una firma viva
+
+**No lo ejecuto y no lo rodeo. Lo declaro con su literal.**
+
+### Lo medido
+
+La entrada a `/negocio/equipo` **hoy sólo existe en la tab Datos**
+(`(tabs)/mascotas.tsx:728`). Y en `(tabs)/negocio.tsx:718` hay una lápida que
+dice **por qué**:
+
+> `☠️ S86-C · ACÁ VIVÍA LA ENTRADA A EQUIPO, y SE MUDÓ A DATOS`
+> `(firma del founder: *DATOS consulta · NEGOCIO configura*).`
+> `Se retira en el MISMO commit que la construye allá — una mudanza que deja`
+> `el origen puesto es una COPIA, y dos puertas a la misma pantalla envejecen`
+> `distinto.`
+
+**La firma sigue viva y no es sólo de esta pantalla:** son **los cuatro
+verbos** —*HOY hace · NEGOCIO configura · DATOS consulta · CUENTA quién sos*—
+firmados en el gate `019fcabf` (S85), y **han gobernado al menos tres
+mudanzas**: equipo, «El movimiento» y la tienda.
+
+⚠️ **Y hay una razón MEDIDA, no sólo estética:** en Datos la sección gatea por
+`esDueno` **del lector**; el tab NEGOCIO tiene gate de gestor y Datos no ⇒
+*mudarla sin su gate habría ensanchado la audiencia* (medido en S85-C32).
+
+### 🔴 EL APORTE: el founder no se equivocó al buscarla ahí
+
+*Su intuición es **coherente con la propia frontera firmada**: invitar a
+alguien, darle roles y desvincularlo **es configurar**, no consultar.*
+
+⇒ **El choque no es founder-contra-founder por descuido: es que la pantalla
+hace LAS DOS COSAS.** Consulta —ver quién está— y configura —invitar, roles,
+baja—. **Por eso ninguna de las dos ubicaciones la satisface del todo, y por
+eso el defecto reaparece.**
+
+*Un nombre que promete un verbo y una pantalla que hace dos no se arregla
+moviéndola: se arregla decidiendo cuál de los dos verbos es.*
+
+### Las tres salidas, para que la mesa elija — ninguna ejecutada
+
+① **Una señal en NEGOCIO, no una puerta.** Una línea que diga dónde se
+   gestiona el equipo, sin navegar. **Respeta la firma al pie** (no hay dos
+   puertas que envejezcan distinto) y cura el hallazgo: el founder buscó y no
+   encontró **ni siquiera un puntero**. *La más barata y la que no reabre
+   nada.*
+② **Partir la pantalla por verbo:** ver el equipo en Datos · invitar y roles
+   en Negocio. **Es lo que la frontera pediría si se aplicara al contenido y
+   no a la pantalla entera** — y es la más cara.
+③ **Enmendar la firma para este caso** y devolver la entrada a Negocio.
+   ⚠️ Cuesta el gate de audiencia medido en S85-C32: habría que llevar su
+   gate con ella.
+
+**Mi voto: ①**, y por una razón de orden más que de gusto — *es la única que
+cura el hallazgo sin decidir antes la pregunta de fondo, que es la de los dos
+verbos y es letra.*
+
+### Lo que sí sigue en pie del Acto 3, sin choque
+
+**A quién está asignada una cita** y **cómo se reasigna** son del detalle del
+prestador y **no tocan esta frontera**. Ahí no hay freno — y el dato de A ya
+está tomado: la pantalla **no vuelve a decidir el permiso**, consume el
+rechazo tipado, y **mientras `cita_ya_asignada` siga cortando, dice la verdad
+sobre por qué no se puede en vez de ofrecer un botón que rebota.**
