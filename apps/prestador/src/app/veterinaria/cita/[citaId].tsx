@@ -61,6 +61,7 @@ import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { useTraduccion } from '@/i18n';
 import { CitaNoDisponible } from '@/components/cita-no-disponible';
 import { RecetaDeLaConsulta } from '@/components/receta-de-la-consulta';
+import { EntradaVideollamada } from '@/components/entrada-videollamada';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 
 type Pantalla =
@@ -164,6 +165,17 @@ export default function DetalleCitaVet() {
   const dur = cita?.duracion_minutos;
   const ef = cita ? (cita.atencion?.estado ?? cita.estado) : null;
   const insignia = ef ? INSIGNIA_POR_ESTADO[ef] : undefined;
+  /* S106-C t3 · ¿esta cita ocurre por video?
+     ⚠️ **Se lee de `tipo_servicio` y no de `modalidad`, y es una derivación
+     declarada, no un atajo:** `CONTRATOS-PARA-C.md` §—«la modalidad ya NO se
+     manda desde el cliente para teleconsulta: se DERIVA del tipo de servicio,
+     server-side»— ⇒ hoy los dos valores son el mismo hecho.
+     🔴 El campo canónico es `modalidad`, y está pedido a A (§E1 del recorrido
+     de la Obra 0). *El día que exista una cita presencial marcada como
+     teleconsulta —o al revés— esta línea mentiría y nada avisaría*, así que
+     cuando el campo llegue esto cambia por `cita.modalidad === 'telemedicina'`
+     y se borra este comentario. */
+  const esTeleconsulta = cita?.tipo_servicio === 'telemedicina';
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -230,9 +242,27 @@ export default function DetalleCitaVet() {
                     <Texto variante="titulo">
                       {nombre}
                     </Texto>
-                    {insignia && (
-                      <View style={{ alignSelf: 'flex-start' }}>
-                        <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />
+                    {/* S106-C t3 · La insignia de ESTADO y la de MODALIDAD
+                        conviven en la misma fila y **dicen cosas distintas**:
+                        una es en qué punto está la cita, la otra es POR DÓNDE
+                        ocurre. `flexWrap` porque con un nombre largo la
+                        segunda tiene que bajar, no comprimir a la primera. */}
+                    {(insignia || esTeleconsulta) && (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          flexWrap: 'wrap',
+                          alignItems: 'center',
+                          gap: spacing[2],
+                        }}
+                      >
+                        {insignia && (
+                          <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />
+                        )}
+                        {/* La etiqueta la arma la pieza (B): no se le escribe
+                            texto — así las dos apps dicen lo mismo sin que
+                            nadie tenga que acordarse de copiarlo. */}
+                        {esTeleconsulta && <Insignia modalidad="teleconsulta" tamaño="sm" />}
                       </View>
                     )}
                   </View>
@@ -297,6 +327,53 @@ export default function DetalleCitaVet() {
                 )}
               </View>
             </Tarjeta>
+
+            {/* ── S106-C t3 · LA PUERTA A LA VIDEOCONSULTA (D-938) ──────────
+                🔴 **PRESIDE a «La consulta» a propósito.** En una teleconsulta
+                el acto empieza entrando a la sala: el dictado sale del modal
+                DURANTE la llamada y el borrador cae al Durante al colgar. Si
+                el dictado se ofreciera primero, el vet entraría a escribir una
+                nota de una consulta que todavía no pasó.
+
+                «La consulta» se conserva abajo, sin tocar su gate: al re-abrir
+                la cita días después, ahí es donde vive la nota.
+
+                Hereda el MISMO gate clínico que atender (`puedeAtender`,
+                D-525): entrar a una teleconsulta es acto clínico, no de
+                mostrador. La recepción no ve esta tarjeta — gate de ausencia,
+                jamás candado.
+
+                El envoltorio es de la PIEZA: si el servidor no deja entrar y
+                el motivo es uno de los dos silencios, **la tarjeta no se monta
+                vacía** (ver `entrada-videollamada.tsx`). */}
+            {cita.mascota && puedeAtender && esTeleconsulta && (
+              <EntradaVideollamada
+                citaId={cita.id}
+                alEntrar={() =>
+                  router.push({
+                    pathname: '/videollamada/[citaId]',
+                    params: {
+                      citaId: cita.id,
+                      /* Quién está del otro lado: la PERSONA que reservó, no
+                         la mascota. `null` honesto ⇒ no se manda y la pantalla
+                         cae a su propia voz genérica. */
+                      familia:
+                        contacto !== 'cargando' && contacto !== 'error' && contacto.nombre !== null
+                          ? contacto.nombre
+                          : '',
+                    },
+                  })
+                }
+                envolver={(contenido) => (
+                  <Tarjeta elevacion="reposo">
+                    <View style={{ gap: spacing[3] }}>
+                      <Texto variante="seccion">{t('consulta.vcEntradaTitulo')}</Texto>
+                      {contenido}
+                    </View>
+                  </Tarjeta>
+                )}
+              />
+            )}
 
             {/* S70-B2-v2: LA CONSULTA (el Durante clínico) — la acción central
                 de la cita vet: dictado → nota estructurada → sedimento. */}

@@ -683,6 +683,7 @@ export const clienteEn = {
     vacunacion: 'Vaccination',
     urgenciaLocal: 'Urgent care at the clinic',
     urgenciaDomicilio: 'Urgent care at home',
+    telemedicina: 'Video consultation',
   },
   // S68-A2 — vet booking, owner side (V2: pet→what→day→time→who→pay on
   // the shared chassis). LOTE S68 APPROVED by founder (Jul 18 2026).
@@ -1957,6 +1958,7 @@ export const clienteEn = {
     coordinaranSinNombre: "You'll be contacted to schedule",
     quienAtiende: 'Provider',
     otrasActivas: 'Their other appointments',
+    verVideoconsulta: 'View the video consultation ›',
     vacio: 'No upcoming appointments',
     vacioDetalle: "When you book an appointment, you'll see it here.",
     error: "We couldn't load the appointments.",

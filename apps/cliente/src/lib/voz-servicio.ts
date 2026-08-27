@@ -21,6 +21,11 @@ const KEY_VOZ_SERVICIO = {
   vacunacion: 'servicioVoz.vacunacion',
   urgencia_local: 'servicioVoz.urgenciaLocal',
   urgencia_domicilio: 'servicioVoz.urgenciaDomicilio',
+  /* S106-C t3 · el quinto oficio. **Sin esta línea la teleconsulta se pinta
+     MUDA**: el fallback del dueño omite el nombre a propósito (D-474), así
+     que una cita real quedaría sin decir qué es — y el defecto se ve como
+     "falta un dato", no como "falta una traducción". */
+  telemedicina: 'servicioVoz.telemedicina',
   paseo: 'explorar.paseoTitulo',
   paseo_30min: 'explorar.paseoTitulo',
   paseo_60min: 'explorar.paseoTitulo',

@@ -2727,6 +2727,9 @@ export const prestadorEs = {
        servidor dice que sí**, los motivos NO se colapsan, y DOS no pintan
        nada — `no_es_teleconsulta` (no es error de nadie) y `ajeno_a_la_cita`
        (**jamás «no tienes permiso»: confirmaría que la cita existe**). */
+    /* S106-C t3 · el rótulo de la tarjeta que contiene la entrada. Nombra la
+       cita, no la acción: adentro puede haber un botón O un motivo. */
+    vcEntradaTitulo: 'La videoconsulta',
     entrarBoton: 'Entrar a la videoconsulta',
     entrarFueraDeVentana: 'La sala abre a las {{hora}}.',
     entrarNoPagada: 'La familia todavía no pagó esta videoconsulta.',

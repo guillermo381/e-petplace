@@ -2162,6 +2162,7 @@ export const prestadorEn = {
     noRealizableError: 'We could not mark it. Please try again.',
 
     /* ══ ENTRY VERDICT · the EIGHT motives ══ ⚠️ traducción provisional. */
+    vcEntradaTitulo: 'The video consultation',
     entrarBoton: 'Join the video consultation',
     entrarFueraDeVentana: 'The room opens at {{hora}}.',
     entrarNoPagada: 'The family has not paid for this video consultation yet.',

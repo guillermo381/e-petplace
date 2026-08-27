@@ -825,6 +825,11 @@ export const clienteEs = {
     vacunacion: 'Vacunación',
     urgenciaLocal: 'Urgencia en clínica',
     urgenciaDomicilio: 'Urgencia a domicilio',
+    /* S106-C t3 · el quinto oficio en voz de familia. «Videoconsulta» y no
+       «telemedicina»: el dueño no compra una disciplina, compra una cita
+       por video. Mismo sustantivo que usa la pantalla de la llamada, para
+       que la app no se llame a sí misma de dos formas. */
+    telemedicina: 'Videoconsulta',
   },
   // S68-A2 — la reserva vet del dueño (V2: mascota→qué→día→hora→quién→
   // pagar sobre el chasis compartido). LOTE S68 APROBADO founder (18 Jul 2026).
@@ -2665,6 +2670,10 @@ export const clienteEs = {
     coordinaranSinNombre: 'Te van a contactar para agendar',
     quienAtiende: 'Quien la atiende',
     otrasActivas: 'Sus otras citas',
+    /* S106-C t3 · la señal de que la tarjeta de una teleconsulta NAVEGA.
+       «Ver» y no «Entrar»: la antesala puede decir que todavía no se puede,
+       y prometer entrada desde acá sería prometer lo que no controlamos. */
+    verVideoconsulta: 'Ver la videoconsulta ›',
     vacio: 'Sin citas por venir',
     vacioDetalle: 'Cuando reserves una cita, la vas a ver acá.',
     error: 'No pudimos cargar las citas.',
