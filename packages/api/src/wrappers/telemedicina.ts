@@ -376,3 +376,47 @@ export async function prestadorTieneVerificacionProfesional(
   }
   return { ok: true, data };
 }
+
+/* ── CERRAR LA TELECONSULTA ──────────────────────────────────────────────── */
+
+/**
+ * Termina la teleconsulta. **Cualquiera de los dos actores cierra, y cierra
+ * para ambos.**
+ *
+ * 🔴 **Existe porque colgar era puramente local.** Sin esta llamada, para el
+ * motor la cita seguía `confirmada` y `pagada` — *y una cita así tiene su sala
+ * abierta*: los dos podían volver a entrar a una consulta ya terminada.
+ *
+ * ⚠️ **Nunca marca un «no pasó».** El cierre aterriza en `completada` y jamás
+ * en `no_show` ni `no_realizable`: *eso le consumiría a la familia su derecho a
+ * devolución por una consulta que sí recibió.* El camino del que no ocurre es
+ * `marcarTeleconsultaNoRealizable`, y lo toma un humano.
+ *
+ * ⚠️ **No toca el borrador.** Firma del founder: *lo que se cierra es la sala,
+ * jamás el trabajo.* Si cierra el dueño, la consulta queda completada **aunque
+ * el vet no haya sedimentado** — y el vet puede sedimentar después (medido:
+ * `sedimentar_nota_clinica` no mira el estado de la cita).
+ *
+ * **Idempotente**: los dos pueden apretar «terminar» a la vez. El segundo
+ * recibe `ok` con `yaEstaba: true`. *Un cierre que falla porque el otro llegó
+ * primero le muestra un error a alguien que hizo todo bien.*
+ */
+export async function cerrarTeleconsulta(
+  citaId: string,
+): Promise<ResultadoWrapper<{ yaEstaba: boolean }, CodigoErrorTelemedicina | 'sin_sesion'>> {
+  const { data, error } = await getClient().rpc('cerrar_teleconsulta', { p_cita_id: citaId });
+  if (error) return { ok: false, codigo: 'error_desconocido', mensaje: error.message };
+  if (typeof data !== 'object' || data === null) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: 'respuesta_invalida' };
+  }
+  const d = data as Record<string, unknown>;
+  if (d['ok'] !== true) {
+    const c = typeof d['codigo'] === 'string' ? d['codigo'] : 'error_desconocido';
+    return {
+      ok: false,
+      codigo: c as CodigoErrorTelemedicina,
+      mensaje: MENSAJES[c as CodigoErrorTelemedicina] ?? 'No pudimos terminar la consulta.',
+    };
+  }
+  return { ok: true, data: { yaEstaba: d['ya_estaba'] === true } };
+}
