@@ -114,25 +114,55 @@ export async function girarCamara(
   track: LocalVideoTrack | null | undefined,
   destino: Camara,
 ): Promise<boolean> {
-  if (!track) return false;
+  /* ── 🔴 INSTRUMENTADA ANTES DE VOLVER A CONSTRUIR (L-427) ─────────────────
+     **Dos veces declaré esto curado y el aparato dijo que no.** Y el dato del
+     founder afina el diagnóstico: *no reportó parpadeo*, así que
+     probablemente **ni siquiera cayó al plan B** — o las dos vías fallan, o
+     el llamador no las alcanza.
+
+     `GIRO_C` es una marca que **sólo este código pudo poner**: si no aparece
+     en el log, la función NO CORRIÓ, y el problema está antes —en el
+     llamador— no acá. *Sin esa distinción, un log ausente y un log que dice
+     «falló» se leen igual, y son cosas opuestas.*
+
+     Cada vía dice **si corrió y qué devolvió**, no sólo el resultado final. */
+  const marca = (paso: string, detalle?: unknown) =>
+    console.log(`[GIRO_C] ${paso}`, detalle ?? '');
+
+  marca('entra', { destino, hayTrack: track != null });
+  if (!track) {
+    marca('sale:sin_track');
+    return false;
+  }
 
   // ① sin parpadeo
   try {
     const mst = track.mediaStreamTrack as MediaStreamTrack | undefined;
+    marca('via1:existe', { applyConstraints: mst?.applyConstraints !== undefined });
     if (mst?.applyConstraints !== undefined) {
       await mst.applyConstraints({ facingMode: destino } as MediaTrackConstraints);
-      return true;
+      /* 🔴 Que `applyConstraints` no lance **NO prueba que la cámara cambió**:
+         en varios aparatos resuelve sin error y deja el `facingMode` como
+         estaba. *Ése es exactamente el modo de falla que produjo el síntoma —
+         una vía que "funciona" y no hace nada.* Se verifica contra lo que el
+         track REPORTA, y si no cambió se cae al plan B. */
+      const real = mst.getSettings?.()?.facingMode;
+      marca('via1:corrio', { pedido: destino, real });
+      if (real === destino) return true;
+      marca('via1:no_cambio_cae_a_via2');
     }
-  } catch {
-    /* Cae al plan B. **No se reporta**: que la vía barata no sirva en este
-       aparato no es un error del usuario ni algo que pueda hacer al respecto. */
+  } catch (e) {
+    marca('via1:excepcion', String(e));
   }
 
   // ② parpadea, pero cambia
   try {
     await track.restartTrack({ facingMode: destino });
+    const real = (track.mediaStreamTrack as MediaStreamTrack | undefined)?.getSettings?.()?.facingMode;
+    marca('via2:corrio', { pedido: destino, real });
     return true;
-  } catch {
+  } catch (e) {
+    marca('via2:excepcion', String(e));
     return false;
   }
 }
@@ -188,6 +218,11 @@ export function useCamara(inicial: Camara = 'user') {
       /* Un segundo toque mientras el primero está en vuelo re-crearía el track
          dos veces: *el botón más usado de la pantalla no puede pelear consigo
          mismo.* */
+      /* La marca del LLAMADOR: si `girarCamara` no imprime pero esto sí, el
+         problema es que la función no se alcanza — y si no imprime ninguno de
+         los dos, el toque no llega al handler. *Tres lugares distintos donde
+         puede morir, y el log dice cuál.* */
+      console.log('[GIRO_C] alternar:entra', { camara, hayTrack: track != null, girando: girando.current });
       if (girando.current) return;
       girando.current = true;
       const destino: Camara = camara === 'user' ? 'environment' : 'user';
