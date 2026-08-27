@@ -83,10 +83,19 @@ export default function Videollamada() {
 
   /* Mic y cámara: **el estado en que van a entrar** (§2). Se eligen en el
      pre-join y viajan tal cual — sin sorpresas. */
+  const [intento, setIntento] = useState(0);
   const [micActivo, setMicActivo] = useState(true);
   const [camaraActiva, setCamaraActiva] = useState(true);
   const { camara, alternar: alternarCamara } = useCamara('user');
 
+  /* 🔴 EL REINTENTO REINTENTA. *La v1 de este botón hacía `router.back()`, y
+     abierto por deep link **no hay pila atrás: era un no-op**.* El síntoma es
+     el peor de su clase — la pantalla dice «probá de nuevo», el founder toca,
+     y no pasa NADA: ni error, ni spinner, ni cambio. Se lee como app colgada
+     cuando el servidor estaba contestando bien.
+     Bumpear `intento` vuelve a correr el efecto; `fase='pidiendo'` da la señal
+     de que algo pasó. *Un reintento sin realimentación visible es
+     indistinguible de un botón muerto.* */
   useEffect(() => {
     let vigente = true;
     void (async () => {
@@ -118,7 +127,7 @@ export default function Videollamada() {
     return () => {
       vigente = false;
     };
-  }, [citaId, idioma, t]);
+  }, [citaId, idioma, t, intento]);
 
   const cabecera = (
     <Encabezado
@@ -163,7 +172,14 @@ export default function Videollamada() {
           titulo={vozSinEntrada ?? t('veterinaria.vcSinEntrada')}
           descripcion=""
           accion={
-            <Boton variante="primario" etiqueta={t('hogar.reintentar')} onPress={() => router.back()} />
+            <Boton
+              variante="primario"
+              etiqueta={t('hogar.reintentar')}
+              onPress={() => {
+                setFase('pidiendo');
+                setIntento((n) => n + 1);
+              }}
+            />
           }
         />
       </SafeAreaView>
