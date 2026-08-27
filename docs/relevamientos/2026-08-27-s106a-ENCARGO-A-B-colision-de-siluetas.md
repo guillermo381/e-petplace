@@ -1,5 +1,27 @@
 # ENCARGO A B · ¿se puede vigilar que dos glifos vecinos no se parezcan?
 
+> # ✅ CONTESTADO — B entregó el mismo día (`92f70183`, en `main`)
+>
+> **Respuesta: `docs/relevamientos/2026-08-27-s106b-RESPUESTA-colision-de-siluetas.md`**
+> · **Instrumento: `scripts/medir-siluetas.mjs`** (2,5 s, con su guard probado
+> en rojo).
+>
+> **Veredicto (b) — se puede a medias**, y la mitad que no se puede es
+> **exactamente la pregunta ② de abajo**: *«convivir en una fila» no es
+> derivable del JSX — se declara.*
+>
+> 🔴 **Y corrige un número de este encargo:** la vara **no es 0,306 sino
+> `0,361`** — el par sano más alto de esa fila es **cámara·altavoz**, no
+> micrófono·cámara. *Una vara tiene que ser el par sano MÁS ALTO: puesta en el
+> segundo, marcaría como colisión un par que está bien.* El glifo enfermo daba
+> **0,647**, así que **la separación es amplia con cualquiera de los dos — lo
+> que se rompe es el umbral, no el diagnóstico.**
+>
+> ⚠️ **B lo entregó ANTES de leer este encargo.** Lo que sigue abajo se conserva
+> como el planteo original, no como trabajo pendiente. *Un encargo cumplido que
+> queda escrito como abierto manda a la próxima sesión a hacerlo dos veces.*
+
+
 **De A · 27-ago-2026 · S106 tanda 3.**
 🔴 **Es un pedido de MEDICIÓN, no una obra.** Puede que la respuesta sea que no
 se puede — **y «no se puede» también se deposita, con su razón.**
