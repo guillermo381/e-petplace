@@ -23003,3 +23003,101 @@ decisión de producto, no un default: **de la respuesta depende si esto es un
 hueco de pantalla o una decisión que falta tomar**, y por eso se anota como
 pregunta y no como cura. *(Pendiente de A: medir si el motor lo permite hoy o
 lo prohíbe por diseño.)*
+
+---
+
+### D-943 🟡 · GIRAR CÁMARA CORRE POR EL PLAN B — `applyConstraints` resuelve OK y no gira
+
+**Nace S106-A t3, 27-ago-2026.** Cierra con dato el último hallazgo del
+servicio que quedaba **sin causa conocida**. Instrumentación de C, capturada por
+logcat con el founder tocando el botón.
+
+#### Lo medido, literal
+
+Bundle verificado **por identidad** antes de leer nada: `[update]
+id=01a043fd` — el que lleva `[GIRO_C]`.
+
+```
+[GIRO_C] alternar:entra   { camara:'environment', hayTrack:true, girando:false }
+[GIRO_C] entra            { destino:'user' }
+[GIRO_C] via1:existe      { applyConstraints:true }
+[GIRO_C] via1:corrio      { pedido:'user',  real:'environment' }   ← 🔴
+[GIRO_C] via1:no_cambio_cae_a_via2
+[GIRO_C] via2:corrio      { pedido:'user',  real:'user' }          ← ✅
+```
+
+Y el giro inverso, idéntico. **Dos de dos.**
+
+⇒ **El toque llega, la función se alcanza, y `applyConstraints` resuelve
+exitosamente sin cambiar la cámara.** El plan B (`restartTrack`) sí gira — **por
+eso el founder lo vio funcionar.**
+
+**Aparato:** `R5CY201ZDVL` · SM-S938B · Android 16 (SDK 36). **N = 1.**
+
+#### 🔴 Lo que la mesa firma, y por qué
+
+**① LA VÍA 1 SE CONSERVA.** *Descartarla con N=1 sería el error que esta sesión
+ya pagó tres veces.* En otros modelos puede ser la que evita el parpadeo.
+**Cuesta 3 ms y dos líneas de log.**
+
+**② LA INSTRUMENTACIÓN SE QUEDA.** Es **lo único que distingue «anduvo la
+buena» de «anduvo la de respaldo»**. *Sin ella, el próximo teléfono vuelve a ser
+un misterio de cinco mediciones estáticas contra un ojo* — que es literalmente
+lo que costó esta saga.
+
+**③ EL PARPADEO NO SE FIRMA todavía.** Es **degradación conocida, no
+comportamiento**. Firmarlo exigiría saber en cuántos aparatos falla la vía 1, y
+**hoy hay uno.**
+
+#### Las dos preguntas abiertas
+
+- **¿Se conserva la vía 1 a largo plazo?** Hoy sí, por ①. La respuesta definitiva
+  necesita más aparatos.
+- **Si el plan B se vuelve la vía única**, el parpadeo deja de ser degradación y
+  pasa a ser el comportamiento — y ahí **merece decisión de diseño**, no una
+  nota al pie.
+
+#### Disparo
+
+**Cuando haya datos de más aparatos:** el moto g31 cuando reciba su build (la
+única con el cuadro congelado adentro), o los teléfonos del
+**friends-and-family de octubre**.
+
+---
+
+### `L-429` — UNA API QUE RESUELVE OK SIN HACER SU TRABAJO ES INDISTINGUIBLE DE UNA QUE FUNCIONA
+
+**Nace S106-A t3, 27-ago-2026**, del caso de `D-943`.
+
+`applyConstraints({ facingMode })` **resolvió exitosamente** —sin lanzar, sin
+rechazar, sin advertir— y **la cámara siguió siendo la misma**. Desde el código
+que la llama, eso es idéntico a que hubiera funcionado.
+
+> **Ningún gate lo ve.** El typecheck ve que la firma se respeta. El lint ve que
+> el `await` está. `verify:diseno` ve que el control se monta. **Los tres tienen
+> razón, y ninguno mira si pasó algo.**
+
+#### La regla
+
+> **Sólo lo ve quien instrumenta EL EFECTO, no el retorno** — y la forma
+> concreta es **comparar LO PEDIDO contra LO REAL**, en la misma línea de log.
+
+`{ pedido:'user', real:'environment' }` cierra el caso en un renglón. `«via1
+ok»` no habría dicho nada, y **habría sido cierto**.
+
+#### Dónde aplica, y no es sólo cámaras
+
+Cualquier llamada cuyo éxito se mide por **un cambio de estado ajeno**, no por
+su valor de retorno: permisos que se «conceden» y no cambian nada · un `UPDATE`
+con `WHERE` que no matchea y devuelve éxito · una escritura a un servicio que
+acusa recibo y descarta · un `setState` sobre una referencia obsoleta.
+
+*El patrón de la casa ya lo tenía por otro lado —«un mensaje de éxito prueba que
+algo pasó, no que fuera lo tuyo»— y esta es su forma para APIs: **no alcanza con
+que la llamada haya salido bien; hay que preguntarle al mundo si cambió.***
+
+#### Y su costo, medido
+
+Este defecto sobrevivió a **cinco mediciones estáticas independientes** que
+decían, todas correctamente, que el control estaba montado y viajaba. **Lo cazó
+una línea de log que compara dos valores.**
