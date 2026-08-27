@@ -188,8 +188,26 @@ export default function VeterinariaCuando() {
             ? paramTipo
             : null;
         if (!paramTipoConsumido.current && paramTipo !== null) paramTipoConsumido.current = true;
+        /* ── 🔴 EL QUÉ NO VIENE ELEGIDO DE FÁBRICA ────────────────────────
+           ⏪ ACÁ ESTABA `r.data[0].tipo_servicio`, y con él **se podía pagar
+           por un servicio que nadie eligió**: la lista sale ordenada
+           alfabéticamente, así que el primero cae en una presencial, y
+           **todo el resto del flujo se comporta idéntico** — hora, precio,
+           checkout. *No era una pantalla que mentía: era una que no
+           insistía.* Le pasó al founder DOS de cinco veces, conociendo el
+           sistema.
+
+           🔴 **Lo que se retira es el FALLBACK, no el ANCLA.** Los dos
+           caminos que traen un servicio de afuera —el catálogo y «Ir a
+           urgencias»— siguen ganando por `pedido`, y lo que el usuario ya
+           eligió se conserva mientras siga en la oferta.
+
+           **Sin ninguno de los dos: `null`, y la pantalla lo pide.** *Si el
+           usuario no eligió servicio, no hay servicio elegido* — un default
+           en el campo que decide QUÉ se compra no es una comodidad: es una
+           decisión tomada en nombre de alguien que no la tomó. */
         setTipoServicio((s) =>
-          pedido ?? (s !== null && r.data.some((o) => o.tipo_servicio === s) ? s : r.data[0].tipo_servicio),
+          pedido ?? (s !== null && r.data.some((o) => o.tipo_servicio === s) ? s : null),
         );
       }
     });
@@ -428,7 +446,16 @@ export default function VeterinariaCuando() {
                         ? t('veterinaria.precioDesde', { nombre: mascota.nombre, precio: servicioElegido.desde_precio.toFixed(2) })
                         : t('veterinaria.precioExacto', { nombre: mascota.nombre, precio: servicioElegido.desde_precio.toFixed(2) })}
                     </Text>
-                  ) : null}
+                  ) : (
+                    /* 🔴 SIN SERVICIO ELEGIDO, LA PANTALLA LO PIDE. Retirar el
+                       default sin decir nada dejaría un hueco silencioso donde
+                       antes había un precio: *el usuario vería que algo falta
+                       y no qué.* Ocupa el mismo renglón que el precio — así el
+                       paso no se mueve al elegir. */
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                      {t('veterinaria.elegiQueNecesita', { nombre: mascota.nombre })}
+                    </Text>
+                  )}
                 </View>
 
                 {/* 2 · DÍA — urgencia es para HOY: el día no se elige, se

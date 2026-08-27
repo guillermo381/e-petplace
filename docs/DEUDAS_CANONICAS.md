@@ -22946,6 +22946,37 @@ archivo en esta tanda — partirlas pondría dos manos sobre las mismas líneas.
 
 ---
 
+### ✅ FIRMA DEL FOUNDER · LA ASIGNACIÓN DE CITAS *(27-ago-2026)*
+
+**Vale para los CINCO oficios, no sólo telemedicina. Es letra nueva y
+contradice lo que el motor hace hoy.**
+
+> ① **Toda cita se asigna al TITULAR** de la clínica por defecto. **Nace suya.**
+> ② Sólo el rol de **RECEPCIÓN** puede pasarla a otra persona del equipo.
+> ③ Si nadie la mueve, **el titular es el único que puede tomarla**.
+> ④ Si desde la **pizarra** se asigna a otra persona, **ésa la atiende**.
+
+**Lo que la firma destapa:** el founder reservó una teleconsulta en su **propia
+clínica** y el motor **se la asignó solo a otro empleado**. La pantalla le dijo
+*«asignada a otra persona del equipo»* sin decir a quién, y no pudo tomarla.
+⇒ **con esta regla, ese balanceo automático es el defecto.**
+
+⚠️ **Y cambia la forma de la cura de `D-942`:** deja de ser *«dejar que el
+titular tome una cita ajena»* y pasa a ser **que las citas no nazcan ajenas**.
+
+⚠️ **`D-939` se SIMPLIFICA con la misma firma:** el aviso va al titular **porque
+la cita es del titular**, y viaja al empleado el día que recepción la reasigne.
+*Deja de ser el caso raro: es el caso normal.* Lo que hay que verificar cambia:
+que el aviso **siga al asignado** y no a una columna fija.
+
+🔴 **Advertencia de método, antes de tocar el balanceo:** puede ser deliberado
+de una sesión vieja. *Retirarlo sin saber por qué existe es el error inverso* —
+si aparece su razón escrita, se trae antes de borrarla. Y **las citas ya creadas
+por balanceo NO se tocan en silencio**: si alguna está viva, hay una familia
+detrás.
+
+---
+
 ### D-942 🔴 · EL TITULAR NO PUEDE VER NI TOMAR LA CITA QUE EL MOTOR ASIGNÓ A SU EQUIPO
 
 **Nace S106-A t3, 26-ago-2026.** Hermana de `D-939` **vista desde el otro
