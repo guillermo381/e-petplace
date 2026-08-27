@@ -141,7 +141,7 @@ export default function Videollamada() {
   // El módulo nativo no está: binario horneado antes de esta build. Se dice.
   if (!livekitListo) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <EstadoVacio
           registro="pantalla"
@@ -154,7 +154,7 @@ export default function Videollamada() {
 
   if (fase === 'pidiendo') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <EsperaDeMarca />
@@ -165,7 +165,7 @@ export default function Videollamada() {
 
   if (fase === 'sin_entrada') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <EstadoVacio
           registro="pantalla"
@@ -188,14 +188,25 @@ export default function Videollamada() {
 
   const nombreProfesional = profesional.length > 0 ? profesional : t('veterinaria.vcProfesional');
 
-  /* ── OBRA 2 · EL PRE-JOIN ────────────────────────────────────────────────
+  /* 🔴 HALLAZGO DEL GATE (26-ago): el CTA «Entrar a la consulta» quedaba
+     **debajo de los botones del sistema**. La causa: estas pantallas
+     declaraban `edges={['top']}` y el inset de ABAJO no se aplicaba nunca.
+     *Un CTA que el pulgar no alcanza no es un problema de estilo: es una
+     pantalla sin salida.*
+
+     ⚠️ **La in-call NO lleva `SafeAreaView` y eso es correcto**: el video va a
+     sangre y los insets viajan como props a `SuperficieLlamada`, que los
+     aplica en su barra (`paddingBottom: insetBottom + …`). *Envolverla la
+     recortaría con dos franjas donde tiene que haber imagen.*
+
+     ── OBRA 2 · EL PRE-JOIN ────────────────────────────────────────────────
      El preview propio es lo PRIMERO: *lo primero que hace cualquiera antes de
      una videollamada es mirarse.* Y **el permiso se pide acá** — un diálogo
      del sistema sobre la cara del veterinario es la peor interrupción
      posible. */
   if (fase === 'prejoin') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <View style={{ flex: 1, padding: spacing[4], gap: spacing[4] }}>
           <View

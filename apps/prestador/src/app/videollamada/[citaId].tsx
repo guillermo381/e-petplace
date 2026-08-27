@@ -121,7 +121,7 @@ export default function VideollamadaProfesional() {
 
   if (!livekitListo) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <EstadoVacio
           registro="pantalla"
@@ -134,7 +134,7 @@ export default function VideollamadaProfesional() {
 
   if (fase === 'pidiendo') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <EsperaDeMarca />
@@ -145,7 +145,7 @@ export default function VideollamadaProfesional() {
 
   if (fase === 'sin_entrada' || credencial === null) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <EstadoVacio
           registro="pantalla"
