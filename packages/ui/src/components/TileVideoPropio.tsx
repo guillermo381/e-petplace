@@ -109,7 +109,14 @@ export function TileVideoPropio({
   const iniX = useSharedValue(0)
   const iniY = useSharedValue(0)
 
-  /** La más cercana al punto donde se soltó — distancia al cuadrado, sin raíz. */
+  /** La más cercana al punto donde se soltó — distancia al cuadrado, sin raíz.
+   *
+   * 🔴 **NO SE LLAMA DESDE UN WORKLET, y por eso ahora es privada de `pegar`.**
+   * *La v1 hacía `runOnJS(pegar)(masCercana(x.value, y.value))`: el `runOnJS`
+   * estaba bien escrito, pero **el ARGUMENTO se calculaba en el hilo de UI**
+   * llamando a esta función, que es JS normal.* Android lo mataba con
+   * `[Worklets] Tried to synchronously call a Remote Function` — **cierre
+   * forzado al soltar el tile**, en pleno gate. */
   const masCercana = useCallback(
     (px: number, py: number): EsquinaTile => {
       let mejor: EsquinaTile = 'arribaDer'
@@ -123,15 +130,31 @@ export function TileVideoPropio({
     [esquinas],
   )
 
+  /**
+   * 🔴 **RECIBE COORDENADAS, NO UNA ESQUINA — y esa es la cura.**
+   *
+   * Se eligió esta forma **por encima de marcar `masCercana` como `'worklet'`**,
+   * que era una línea. Razón: con el worklet marcado, el cruce de hilos vuelve
+   * a ser posible en cuanto alguien agregue otra llamada de JS al armar un
+   * argumento — *y esa llamada se va a leer igual de correcta que la que
+   * rompió*. Acá el worklet **sólo puede pasar `x.value` e `y.value`**, que son
+   * números: **no queda nada que pueda cruzar el hilo.**
+   *
+   * Es además **la misma forma que `ModalDosAlturas` ya usaba y que no se
+   * rompió** (`runOnJS(resolver)(h.value, -e.velocityY)`): argumentos que son
+   * VALORES. *Dos piezas hermanas con una sola forma se corrigen juntas; con
+   * dos formas, la próxima persona copia la que tenga más cerca.*
+   */
   const pegar = useCallback(
-    (k: EsquinaTile) => {
+    (px: number, py: number) => {
+      const k = masCercana(px, py)
       const cfg = reduceMotion
         ? { duration: 0 }
         : { duration: motion.duration.micro, easing: Easing.bezier(...motion.easing.easeOut.bezier) }
       x.value = withTiming(esquinas[k].x, cfg)
       y.value = withTiming(esquinas[k].y, cfg)
     },
-    [esquinas, reduceMotion, x, y],
+    [esquinas, masCercana, reduceMotion, x, y],
   )
 
   const arrastre = Gesture.Pan()
@@ -145,7 +168,8 @@ export function TileVideoPropio({
       y.value = iniY.value + e.translationY
     })
     .onEnd(() => {
-      runOnJS(pegar)(masCercana(x.value, y.value))
+      // Sólo VALORES cruzan el hilo. Nada que llamar acá adentro.
+      runOnJS(pegar)(x.value, y.value)
     })
 
   const toque = Gesture.Tap().onEnd(() => {
