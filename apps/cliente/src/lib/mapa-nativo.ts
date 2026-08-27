@@ -15,6 +15,15 @@
  * ErrorBoundary**— y estuvo **latente en el cliente todo este tiempo**: el
  * guard se construyó sólo del lado del prestador.
  *
+ * ⚠️ **RETRACTACIÓN (27-ago):** cuando esto se escribió, se afirmó que **el
+ * prestador estaba sano** porque su `AndroidManifest.xml` tenía la key. **Eso
+ * era falso y la medición estaba mal hecha:** el archivo leído era el del
+ * **prebuild**, no el del APK. Medido con `verify-manifest-apk` sobre los
+ * artefactos, **ninguno de los dos APK tiene la key** ⇒ el prestador tenía el
+ * mismo crash latente en «Cómo te ven», y su flag pasó a `false`. Ver `D-944`.
+ * *Leer el insumo de un artefacto y llamarlo el artefacto es la misma clase de
+ * error que medir una rama en vez del objeto desplegado.*
+ *
  * ── LA CAUSA, MEDIDA Y ESTRUCTURAL ─────────────────────────────────────────
  * El `AndroidManifest.xml` del prebuild de las APK de S106 t2 (26-ago 00:50)
  * **no tiene `com.google.android.geo.API_KEY`**. Y no fue un descuido: medido

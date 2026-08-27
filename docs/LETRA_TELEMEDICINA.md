@@ -333,6 +333,98 @@ estructuración de la nota clínica no es diagnóstico.
 > decidido; acá se declara para que nadie construya la columna que no hace
 > falta.*
 
+## §7bis · EL CIERRE DE LA CONSULTA — firma founder 27-ago-2026
+
+**Cualquiera de los dos cierra, y cierra para ambos.** Mientras nadie cierre,
+los dos vuelven a entrar libremente. **A los 10 minutos del fin, el cierre
+perezoso** — *no un temporizador de pantalla: una regla de tiempo que depende
+de que alguien esté mirando no es una regla, es una coincidencia.* **Vale con
+las dos apps cerradas.**
+
+🔴 **El cierre NUNCA aterriza en un estado de «no pasó».** Ni `no_show` ni
+`no_realizable`: *eso le consumiría a la familia su derecho a devolución por una
+consulta que sí recibió.* El camino del que no ocurre es
+`marcar_teleconsulta_no_realizable`, **y lo toma un humano.**
+
+**Y el borde firmado:** si cierra **el dueño**, la consulta queda `completada`
+**aunque el vet no haya sedimentado**. *Lo que se cierra es la sala, jamás el
+trabajo* — el borrador vive en la cita y el vet sedimenta después. (Medido antes
+de construir: `sedimentar_nota_clinica` no mira el estado de la cita.)
+
+⚠️ **El perezoso sólo cierra lo que OCURRIÓ** — hechos de sala o historia
+sedimentada. Sin evidencia **no toca la cita**: *un cierre automático que decide
+sobre plata no es higiene, es una decisión.*
+
+## §7ter · EL DESENLACE, Y EL GUARD DEL DIAGNÓSTICO ACOTADO A SU LETRA
+
+**Vocabulario CERRADO y mínimo:** `resuelto` · `derivacion`. **`NULL` es
+legítimo** — las consultas anteriores no lo declararon.
+
+🔴 **El guard del diagnóstico era MÁS ANCHO QUE SU LETRA.** Cortaba citando al
+abogado, **pero el abogado dijo «antes de EMITIR»** —una receta— y el guard
+estaba en **cerrar la consulta** ⇒ *el vet que concluye «necesita visita
+presencial» quedaba atrapado: le exigían el diagnóstico que precisamente no
+puede dar.*
+
+**La regla, sin ablandar el límite:**
+① diagnóstico obligatorio **salvo** cuando el desenlace sea `derivacion`
+② 🔴 **sin diagnóstico NO se puede emitir receta** — *el límite se cumple donde
+   fue escrito; ablandar el cierre sin cerrar la emisión habría movido el
+   agujero de lugar en vez de taparlo.*
+
+**Y el modelo lo sabe, no lo recuerda:** `diagnostico_principal IS NOT NULL OR
+desenlace = 'derivacion'` es un `CHECK` ⇒ **una consulta sin diagnóstico que no
+sea derivación es INEXPRESABLE.**
+
+## §7quater · EL CUADRO CONGELADO — sus tres firmas
+
+- **No cuenta como grabación.** Es vía de cliente, no Egress ⇒ la firma ⓪ no lo
+  bloquea y `roomRecord:false` **no se toca**.
+- **El dueño lo VE en el momento** — *no se captura en silencio a alguien que
+  está en cámara.*
+- **Entra al expediente con su marca de origen**, en su eje propio
+  (`origen_captura`), jamás dentro de `categoria`.
+
+🔴 **Y su criterio de verde, escrito antes de correr:** que la imagen sea **la
+del video**. *Producir «una imagen» no es producir «la imagen»: un frame negro
+también pesa, abre y se ve como una foto — y **un rectángulo negro en una
+historia clínica no es un bug de UI: es un dato clínico falso** que alguien lee
+años después para decidir algo.*
+
+## §7quinquies · LA ASIGNACIÓN DE LA CITA — firma founder 27-ago-2026
+
+**Vale para los CINCO oficios, no sólo telemedicina.**
+
+① Si el animal tiene un **caso clínico abierto** con alguien del equipo, la cita
+va a ese profesional — **la continuidad manda y es el primer brazo**.
+② Si no hay caso abierto, **la cita NACE DEL TITULAR**.
+③ Sólo **recepción** puede moverla · ④ si nadie la mueve, el titular es el único
+que puede tomarla · ⑤ desde la **pizarra**, quien la reciba la atiende.
+
+☠️ **El BALANCEO PURO queda DEROGADO** —~~menos citas ese día~~ y ~~antigüedad~~—
+**no así la continuidad**, que es el criterio de arriba y sobrevive entera.
+
+> **La razón:** *el balanceo por carga reparte pacientes de forma **arbitraria**.
+> La continuidad es lo contrario: **es que quien conoce el caso lo siga**. En
+> teleconsulta vale más, porque el vet **no puede palpar** y depende de saber la
+> historia.*
+
+**Y la regla que ordena las tres:** **lo arbitrario se deroga, lo decidido
+manda** — si la familia eligió persona, esa elección gana sobre la continuidad y
+sobre el titular.
+
+## §7sexies · LA VITRINA — se permitió elegir, no se expuso a nadie
+
+Firma founder 27-ago, al construir el aviso de reasignación que abre su gate.
+
+> **Lo que se firmó NO es «exponer al equipo»: es «permitir que un negocio elija
+> exponerlo».**
+
+Sostenido por medición: `expone_personas` es `DEFAULT false` · **11 de 11
+apagados** al firmar · los nuevos nacen apagados · y se exponen **tres campos
+con uno solo identificatorio**. **Encenderlo no movió un pixel en la app de
+ninguna familia.**
+
 ## §8 · LA HABILITACIÓN
 
 El veterinario **prende el servicio** y al hacerlo acepta los mínimos de
