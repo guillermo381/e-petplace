@@ -596,3 +596,68 @@ conserva lo escrito en la sesión.
 estructurador— **no entra al modal en esta tanda.** Es el flujo entero de otra
 pantalla, y traerlo a medias sería peor que la puerta que ya existe: al
 colgar, el vet aterriza en el Durante de verdad, con todo.
+
+---
+---
+
+# §J · LA SALA QUE SE PUEDE REABRIR — medición del motor y recomendación
+
+## §J1 · Lo medido, y da vuelta el diagnóstico
+
+**① Colgar es PURAMENTE LOCAL.** `onSalir` hace `router.replace` / `router.back`
+y **nada más**: cero llamadas al motor desde las dos pantallas de videollamada.
+
+**② Pero el motor YA TIENE EL GATE, y es el correcto.**
+`puede_entrar_a_videollamada:143` — verbatim, con el comentario de A:
+
+> `-- *Una sala abierta después de que el vet cerró la consulta es una puerta`
+> `-- sin dueño.*`
+> `IF v_cita.estado IN ('completada', 'no_show', 'rechazada') THEN`
+> `  RETURN … 'cita_finalizada';`
+
+⇒ 🔴 **NO es que el motor no se entere: es que COLGAR NO TERMINA LA CONSULTA.**
+El acto que la cierra es **sedimentar la nota** —completar el Durante—, y eso
+es coherente con la letra: *el vet cuelga, cae al Durante, escribe, y ahí la
+cita se completa y la sala se cierra sola.*
+
+**Por eso el founder pudo volver a entrar: colgó y no completó el Durante.**
+La cita quedó `confirmada`, y para el motor una cita confirmada y pagada tiene
+su sala abierta — correctamente.
+
+⇒ **No hay pedido a A por esto.** El circuito existe.
+
+## §J2 · 🔴 EL HUECO QUE SÍ ES REAL, y es otro
+
+**Si el vet cuelga y NUNCA completa el Durante, la sala queda abierta
+indefinidamente.** Hoy nada la cierra: ni un reloj, ni la ventana de la cita,
+ni un barrido.
+
+*No es el caso que el founder reportó —él sí podía volver porque la consulta
+seguía viva— pero es el que queda cuando se cure lo demás.* **Su dueño es
+letra + motor**, no esta pantalla.
+
+## §J3 · La asimetría — recomendación, no decisión
+
+**Recomiendo que NADIE quede afuera mientras la consulta no esté cerrada, y
+que al cerrarla se cierre PARA LOS DOS.** El razonamiento:
+
+- **El dueño tiene que poder volver**, y la mesa ya lo dice: se le cayó la
+  llamada, se quedó sin batería, tocó colgar sin querer. *Cerrarle la puerta
+  a los dos minutos de algo que pagó es peor que dejarla abierta.*
+- **El vet también, y ésta es la parte que la asimetría propuesta se pierde:**
+  si el vet no pudiera volver, **un colgado accidental lo deja afuera de una
+  consulta que todavía no cerró — con la familia adentro, esperando.** *El que
+  paga la asimetría no sería el vet: sería el dueño mirando una sala vacía.*
+- **Lo que cierra la sala no debe ser un toque, sino un acto:** sedimentar la
+  nota. Eso ya es así, y tiene dos virtudes: es deliberado (nadie lo hace sin
+  querer) y es **clínico** (la consulta termina cuando queda registrada).
+
+**Y así el cobro queda protegido sin esfuerzo extra:** «terminar» no es un
+botón que alguien pueda tocar para discutir la plata — es escribir la nota de
+una consulta que **ya ocurrió** y que §4 dice que se cobra igual.
+
+**Lo que la mesa tiene que decidir y yo no:**
+① ¿hay un techo de tiempo para volver? (mi voto: el fin de la ventana de la
+cita, no un reloj nuevo) · ② ¿qué ve el que está adentro cuando el otro
+vuelve? (hay pieza: `EstadoConexion` ya distingue reconectando) · ③ el hueco
+de §J2: qué cierra una consulta que nadie completó.
