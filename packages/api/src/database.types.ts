@@ -12034,6 +12034,52 @@ export type Database = {
         }
         Relationships: []
       }
+      nota_clinica_borrador: {
+        Row: {
+          actualizado_en: string
+          cita_id: string
+          empleado_id: string | null
+          mascota_id: string
+          nota: Json
+        }
+        Insert: {
+          actualizado_en?: string
+          cita_id: string
+          empleado_id?: string | null
+          mascota_id: string
+          nota: Json
+        }
+        Update: {
+          actualizado_en?: string
+          cita_id?: string
+          empleado_id?: string | null
+          mascota_id?: string
+          nota?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nota_clinica_borrador_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: true
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nota_clinica_borrador_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nota_clinica_borrador_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notas_admin_usuario: {
         Row: {
           autor_id: string | null
@@ -21452,6 +21498,10 @@ export type Database = {
         }[]
       }
       get_user_features: { Args: { p_user_id: string }; Returns: Json }
+      guardar_borrador_nota: {
+        Args: { p_cita_id: string; p_nota: Json }
+        Returns: Json
+      }
       guardar_direccion_con_alias: {
         Args: {
           p_alias: string
@@ -21540,6 +21590,7 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      leer_borrador_nota: { Args: { p_cita_id: string }; Returns: Json }
       leer_sombra_notificaciones: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: {

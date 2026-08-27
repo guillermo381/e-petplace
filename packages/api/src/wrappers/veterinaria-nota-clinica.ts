@@ -704,3 +704,95 @@ export async function obtenerHistorialClinicoMascota(
     })),
   };
 }
+
+/* ── EL BORRADOR DE LA NOTA CLÍNICA ──────────────────────────────────────── */
+
+/**
+ * 🔴 **Existe para que el vet no pierda veinte minutos de dictado si la app se
+ * cierra.** `sedimentar_nota_clinica` es todo-o-nada: hasta que se sedimenta,
+ * la nota vive **sólo en la memoria de la pantalla**.
+ *
+ * ⚠️ **El borrador NO se valida, y es la decisión de diseño, no un descuido:**
+ * `nota` es un `jsonb` opaco — sin campos obligatorios, sin forma exigida.
+ * *Una nota a medio escribir es inválida por definición; un borrador que exige
+ * estar completo no es un borrador, es el formulario otra vez, y no salva a
+ * nadie del crash.* **El borrador guarda; el expediente juzga.**
+ *
+ * ⚠️ **No hay que borrarlo.** Un trigger lo limpia solo cuando la historia
+ * clínica sedimenta. *Llamar a un borrado desde la pantalla abriría la puerta a
+ * que quede sin llamarse — y un borrador que sobrevive a su consulta le muestra
+ * al vet texto viejo sobre algo ya cerrado.*
+ */
+export type CodigoBorradorNota =
+  | 'sin_sesion'
+  | 'cita_no_existe'
+  /** No sos del negocio de esa cita. **La familia también cae acá**, aunque
+   *  tenga acceso clínico a su propia mascota: *acá el acceso no alcanza.* */
+  | 'no_es_el_prestador_de_la_cita';
+
+export interface BorradorNota {
+  /** `false` la primera vez que se abre la consulta — **no es un error.** */
+  existe: boolean;
+  /** La nota tal como se guardó. `null` si no existe. */
+  nota: Record<string, unknown> | null;
+  actualizadoEn: string | null;
+}
+
+function falloBorrador(d: Record<string, unknown>): { ok: false; codigo: CodigoBorradorNota | 'error_desconocido'; mensaje: string } {
+  const c = typeof d['codigo'] === 'string' ? d['codigo'] : 'error_desconocido';
+  const voz: Record<string, string> = {
+    sin_sesion: 'Tu sesión expiró.',
+    cita_no_existe: 'Esta consulta ya no está disponible.',
+    no_es_el_prestador_de_la_cita: 'Esta consulta no es de tu negocio.',
+  };
+  return {
+    ok: false,
+    codigo: (c as CodigoBorradorNota) ?? 'error_desconocido',
+    mensaje: voz[c] ?? 'No pudimos guardar el borrador.',
+  };
+}
+
+/**
+ * Guarda (o pisa) el borrador de UNA cita. Idempotente: **hay un solo borrador
+ * por cita, por construcción** — `cita_id` es la PK de la tabla.
+ *
+ * Pensado para llamarse seguido (guardado automático mientras se dicta): cada
+ * llamada es un `upsert`, no crece nada.
+ */
+export async function guardarBorradorNota(
+  citaId: string,
+  nota: Record<string, unknown>,
+): Promise<ResultadoWrapper<{ guardadoEn: string }, CodigoBorradorNota>> {
+  const { data, error } = await getClient().rpc('guardar_borrador_nota', {
+    p_cita_id: citaId,
+    p_nota: nota as never,
+  });
+  if (error) return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos guardar el borrador.' };
+  if (!esObj(data)) return { ok: false, codigo: 'datos_inconsistentes', mensaje: 'No pudimos guardar el borrador.' };
+  if (data['ok'] !== true) return falloBorrador(data);
+
+  const g = data['guardado_en'];
+  return { ok: true, data: { guardadoEn: typeof g === 'string' ? g : new Date().toISOString() } };
+}
+
+/** Lee el borrador de una cita. **`existe: false` es la respuesta normal**, no
+ *  un fallo: *tratar lo normal como excepción es donde nace el mensaje de
+ *  error que no significa nada.* */
+export async function leerBorradorNota(
+  citaId: string,
+): Promise<ResultadoWrapper<BorradorNota, CodigoBorradorNota>> {
+  const { data, error } = await getClient().rpc('leer_borrador_nota', { p_cita_id: citaId });
+  if (error) return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos cargar el borrador.' };
+  if (!esObj(data)) return { ok: false, codigo: 'datos_inconsistentes', mensaje: 'No pudimos cargar el borrador.' };
+  if (data['ok'] !== true) return falloBorrador(data);
+
+  const n = data['nota'];
+  return {
+    ok: true,
+    data: {
+      existe: data['existe'] === true,
+      nota: esObj(n) ? n : null,
+      actualizadoEn: str(data['actualizado_en']),
+    },
+  };
+}
