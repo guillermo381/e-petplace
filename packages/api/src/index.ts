@@ -1488,6 +1488,7 @@ export {
 /* S106-A t2 · el cuadro congelado de la teleconsulta. */
 export {
   adjuntarCuadroTeleconsulta,
+  subirCuadroTeleconsulta,
   type CuadroAdjuntado,
   type InputCuadroTeleconsulta,
   type CodigoCuadroTeleconsulta,
