@@ -332,3 +332,47 @@ export async function obtenerConfigVideo(): Promise<
   }
   return { ok: true, data: { bitrateKbps: n } };
 }
+
+/* ── LA VERIFICACIÓN PROFESIONAL ─────────────────────────────────────────── */
+
+/**
+ * ¿Este negocio tiene su verificación profesional aprobada?
+ *
+ * 🔴 **EXISTE PARA QUE LA PANTALLA NO TENGA QUE CHOCAR PARA ENTERARSE.** El
+ * gate ya era ley desde S79 —`trg_ps_verificacion_profesional` rebota
+ * `verificacion_profesional_pendiente` al activar cualquier servicio cuyo tipo
+ * pida validación, telemedicina incluida— pero **no había forma de
+ * preguntar**: la única manera de saberlo era intentar y fallar.
+ *
+ * > *Un toggle que se mueve y rebota promete una acción que el servidor va a
+ * > negar. La Ley 23 pide lo contrario: la puerta no ofrece lo que va a
+ * > rechazar.*
+ *
+ * El servidor devuelve el **espejo exacto** del predicado del trigger, y su
+ * migración lo ejerce con un discriminador de no-divergencia (los dos corren
+ * contra el mismo prestador y tienen que coincidir).
+ *
+ * ⚠️ **Su `false` NO es un permiso denegado: es un requisito pendiente.** La
+ * voz correcta nombra el camino («subí tu título o tu registro»), jamás
+ * «no tienes acceso». *Confundir un trámite con una prohibición manda al vet
+ * a soporte a discutir permisos que nadie le quitó.*
+ *
+ * ⚠️ Y su `true` dice **«tiene el documento aprobado»**, jamás «puede activar
+ * telemedicina»: los mínimos de §6 son una condición aparte, y la mide
+ * `prestadorAceptoMinimos`.
+ */
+export async function prestadorTieneVerificacionProfesional(
+  prestadorId: string,
+): Promise<ResultadoWrapper<boolean, 'no_se_pudo_completar'>> {
+  const { data, error } = await getClient().rpc('prestador_verificacion_profesional', {
+    p_prestador_id: prestadorId,
+  });
+  if (error) return { ok: false, codigo: 'no_se_pudo_completar', mensaje: error.message };
+  /* 🔴 Un `null` NO se degrada a `false`. «No pude averiguarlo» y «no está
+     verificado» son dos cosas distintas, y colapsarlas le diría a un vet
+     verificado que le falta un trámite que ya hizo. */
+  if (typeof data !== 'boolean') {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: 'veredicto_no_booleano' };
+  }
+  return { ok: true, data };
+}
