@@ -1,0 +1,15 @@
+-- ════════════════════════════════════════════════════════════════════════
+-- REVERSA de `20260827050000_s106a_asignacion_al_titular.sql`
+--
+-- QUÉ DESHACE: devuelve el `ORDER BY` de `crear_bloqueo_agenda` al balanceo
+-- por carga del día + antigüedad.
+--
+-- 🔴 REVERTIR REINSTALA EL REPARTO ARBITRARIO que la firma del founder derogó:
+--    las citas vuelven a caer en quien tenga menos ese día, y el titular vuelve
+--    a poder quedarse sin poder tomar una cita de su propia clínica.
+--
+-- ⚠️ NO deshace las citas ya asignadas: quedan con la persona que tengan.
+--
+-- El cuerpo previo se recarga desde la migración que definió la función por
+-- última vez ANTES de ésta. No se transcribe: *una copia diverge en silencio.*
+-- ════════════════════════════════════════════════════════════════════════
