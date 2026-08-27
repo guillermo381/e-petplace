@@ -148,6 +148,36 @@ convierte en una línea de letra chica.*
 > país o la base de licitud. *Se escribe hoy porque decir de menos sobre a
 > dónde viaja la imagen de una familia es peor que decirlo provisional.*
 
+## §3bis · LOS CONSEJOS DE PREPARACIÓN
+
+*(Firma del founder, 26-ago-2026. **Texto verbatim** — se copia tal cual al
+lote de strings; el gate del founder sobre el lote sigue rigiendo.)*
+
+> **Prepárate para tu videoconsulta**
+>
+> - Elige un lugar con buena luz — el veterinario necesita ver bien a tu
+>   mascota.
+> - Conéctate a una red wifi si puedes: la llamada será más estable.
+> - Ten a tu mascota contigo y a la mano antes de entrar.
+> - Si puedes, que alguien te ayude a sostenerla mientras la muestras.
+
+**Dónde aparece, y por qué en esos dos lugares:** en la **confirmación de la
+reserva** —cuando el dueño acaba de pagar y está atento— y en el **detalle de
+la cita, antes de entrar** —cuando ya es accionable—. *Un consejo que llega
+sólo al reservar se olvida; uno que llega sólo al entrar llega tarde para
+conseguir wifi.*
+
+🔴 **NO es un gate y NO lleva casilla.** El consentimiento ya tiene **su acto
+propio** (§3 + su casilla, por firma legal): *agregar una segunda casilla
+diluiría la única que importa jurídicamente* — cuando todo pide confirmación,
+confirmar deja de significar algo. Y **no frena nada**: un dueño sin wifi
+reserva igual.
+
+⚠️ **Registro de apoyo, jamás de alarma.** No compite con los seis signos de
+§3, que son **la advertencia clínica**. *Si esto se pintara con la misma cara
+de urgencia, el dueño no sabría cuál de los dos bloques es el que puede
+salvarle la vida a su animal.*
+
 ## §4 · EL COBRO — se cobra el criterio, no el tiempo
 
 *(Firma ① del founder, 25-ago-2026.)*

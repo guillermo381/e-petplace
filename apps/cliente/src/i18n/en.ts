@@ -659,6 +659,8 @@ export const clienteEn = {
     simuladoAviso: 'Test phase: the payment is simulated — nothing real is charged.',
     exitoTitulo: 'Walk confirmed',
     exitoDetalle: "It's on the walker's schedule. You'll see it in your Home.",
+    cambiarMedio: 'Change payment method',
+    cambiarMedioNota: 'Your booking stays. The code we generated stops working.',
     volverHogar: 'Go to Home',
     // S101-C — the simulator's whole screens died here (see the Spanish note).
     holdVencido: 'This time was released',
@@ -683,6 +685,7 @@ export const clienteEn = {
     vacunacion: 'Vaccination',
     urgenciaLocal: 'Urgent care at the clinic',
     urgenciaDomicilio: 'Urgent care at home',
+    telemedicina: 'Video consultation',
   },
   // S68-A2 — vet booking, owner side (V2: pet→what→day→time→who→pay on
   // the shared chassis). LOTE S68 APPROVED by founder (Jul 18 2026).
@@ -770,6 +773,13 @@ export const clienteEn = {
     citaTeleNoRealizadaDevolucion: 'The payment goes back to your payment method.',
 
     /* ══ ENTRY VERDICT · the EIGHT motives ══ ⚠️ traducción provisional. */
+    /* §3bis · la letra firmada es el ESPAÑOL; el inglés es traducción
+       nuestra y no tiene fuente firmada (mismo alcance que R67). */
+    prepTitulo: 'Get ready for your video consultation',
+    prepConsejo1: 'Pick a spot with good light — the vet needs to see your pet clearly.',
+    prepConsejo2: 'Connect to wifi if you can: the call will be more stable.',
+    prepConsejo3: 'Have your pet with you and within reach before you join.',
+    prepConsejo4: 'If you can, have someone help you hold them while you show them.',
     entrarBoton: 'Join the video consultation',
     entrarFueraDeVentana: 'The room opens at {{hora}}.',
     entrarNoPagada: 'This video consultation is not paid yet.',
@@ -1957,6 +1967,7 @@ export const clienteEn = {
     coordinaranSinNombre: "You'll be contacted to schedule",
     quienAtiende: 'Provider',
     otrasActivas: 'Their other appointments',
+    verVideoconsulta: 'View the video consultation ›',
     vacio: 'No upcoming appointments',
     vacioDetalle: "When you book an appointment, you'll see it here.",
     error: "We couldn't load the appointments.",

@@ -2162,6 +2162,7 @@ export const prestadorEn = {
     noRealizableError: 'We could not mark it. Please try again.',
 
     /* ══ ENTRY VERDICT · the EIGHT motives ══ ⚠️ traducción provisional. */
+    vcEntradaTitulo: 'The video consultation',
     entrarBoton: 'Join the video consultation',
     entrarFueraDeVentana: 'The room opens at {{hora}}.',
     entrarNoPagada: 'The family has not paid for this video consultation yet.',
@@ -2169,6 +2170,8 @@ export const prestadorEn = {
     entrarNoRealizable: 'You already marked it as not completed.',
     entrarFinalizada: 'This video consultation has ended.',
     entrarInexistente: 'We could not find this video consultation.',
+    entrarNoEsTele: 'This appointment is not marked as a video consultation. It is seen in person.',
+    entrarAjena: 'This consultation is assigned to someone else on the team.',
     entrarNoSePudoConsultar: 'We could not check whether the room is open.',
 
     /* ══ VIDEO CONSULTATION · professional in-call ══ ⚠️ provisional. */
@@ -2185,6 +2188,19 @@ export const prestadorEn = {
     vcHistoriaLectura: 'Read-only during the consultation.',
     vcFiltroFecha: 'By date',
     vcFiltroCaso: 'By case type',
+    vcClinicoPeso: 'Weight',
+    vcClinicoVacunas: 'Vaccines',
+    vcClinicoUltima: 'Last visit',
+    vcClinicoAlergias: 'Allergies',
+    vcClinicoAlergiasSi: 'On record',
+    vcClinicoAlergiasNo: 'None on record',
+    vcConclusionTitulo: 'How this consultation ends',
+    vcConclusionResuelta: 'Resolved over video',
+    vcConclusionPresencial: 'Needs in-person care',
+    vcConclusionUrgencias: 'Referred to emergency care',
+    vcConclusionLineaResuelta: 'Conclusion: the case was resolved in the video consultation.',
+    vcConclusionLineaPresencial: 'Conclusion: needs in-person care.',
+    vcConclusionLineaUrgencias: 'Conclusion: referred to emergency care.',
     vcColgarConfirma: 'End the video consultation?',
     vcColgarSujeto: 'the video consultation',
     vcColgarSi: 'End',

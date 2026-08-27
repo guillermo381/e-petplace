@@ -27,6 +27,18 @@
  * es un acto) y **`SuperficieLlamada` lo exceptúa del ocultado**, junto a
  * colgar.
  *
+ * ── ⚠️ `altavoz`: LA ASIMETRÍA DE PLATAFORMA, para quien lo cablee ────────
+ * El control es UNO, pero **abajo no lo es** — leído del SDK
+ * (`AudioSession.d.ts`), y por eso se declara acá:
+ * · **Android** devuelve la lista real: `speaker · earpiece · headset ·
+ *   bluetooth`.
+ * · **iOS** solo da `default` y `force_speaker`, *«due to OS limitations»*;
+ *   para elegir auriculares o bluetooth ofrece su propio `showAudioRoutePicker`.
+ *
+ * ⇒ **El toggle binario altavoz↔auricular funciona en las dos**, con distinta
+ * implementación debajo. *Lo que NO se puede es ofrecer una lista de salidas
+ * igual en ambas — quien lo intente va a encontrar que en iOS no existe.*
+ *
  * ── EL DESTRUCTIVO ES DISTINTO, Y A PROPÓSITO ──────────────────────────────
  * `colgar` va en **masa plena roja**, no en disco translúcido: es el único
  * control que **jamás se esconde** (OBRA 4) y el único cuyo toque termina algo.
@@ -47,7 +59,7 @@ import { sobreVideo } from '../tokens/sobreVideo'
 import { radius } from '../tokens/radius'
 import { usePresionado } from './usePresionado'
 
-export type ControlLlamadaGlifo = 'microfono' | 'camara' | 'girarCamara' | 'colgar'
+export type ControlLlamadaGlifo = 'microfono' | 'camara' | 'girarCamara' | 'altavoz' | 'colgar'
 
 export interface ControlLlamadaProps {
   glifo: ControlLlamadaGlifo
@@ -66,7 +78,7 @@ export interface ControlLlamadaProps {
 const LADO = { md: 52, lg: 60 } as const
 
 /** Los tres glifos, en masa/trazo grueso — se leen a 24 px sobre cualquier fondo. */
-function Glifo({ nombre, color, cortado, fondoDelGlifo }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean; fondoDelGlifo: string }) {
+function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean }) {
   const t = 2
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -84,18 +96,59 @@ function Glifo({ nombre, color, cortado, fondoDelGlifo }: { nombre: ControlLlama
         </>
       )}
       {nombre === 'girarCamara' && (
-        /* Cámara con flecha de vuelta: el gesto de dar vuelta, no un ícono de
-           «configurar cámara». La flecha es lo que se lee a 24 px. */
+        /* 🔴 RE-DIBUJADO CON LA ANATOMÍA PROBADA (gate del founder, 26-ago).
+           **Su versión anterior salía en un disco VACÍO** — el founder contó
+           cuatro controles y del tercero dijo *«no hace nada literalmente»*.
+
+           ── LA MEDICIÓN QUE ORDENÓ ESTE DIBUJO ────────────────────────────
+           Comparado prop por prop contra los TRES glifos que sí se ven, éste
+           era el único con **dos rarezas**: `opacity={0.9}` en su `Rect`, y
+           **tres elementos pintados con el COLOR DEL FONDO** para simular un
+           recorte. Los otros tres usan `fill`/`stroke={color}` y nada más.
+
+           **No sé cuál de las dos lo rompía, y lo digo en vez de elegir:** se
+           adopta la anatomía que los otros tres tienen probada EN EL APARATO.
+           *Elegir entre dos sospechosos con una corazonada, para conservar un
+           dibujo, sería cambiar una medición por una preferencia.*
+
+           ⚠️ **Y una medición DEBILITA mi propia explicación favorita:**
+           renderizados los dos glifos como SVG en un navegador —el viejo con su
+           `opacity` y sus recortes, y el nuevo— **los DOS dibujan** (154 y 156
+           px claros sobre el disco). ⇒ **el SVG viejo NO era inválido**, así
+           que la causa no está en el path ni en `opacity` *como SVG*: está en
+           cómo `react-native-svg` lo traduce a nativo. **Se deja escrito para
+           acotar dónde mirar si vuelve a pasar** — y para que nadie lea esta
+           cura como «era el opacity».
+
+           **Y el recorte por color de fondo era MALO aunque hubiera andado:**
+           el fondo de esta pieza CAMBIA (el estado cortado lo invierte), así
+           que un glifo que se dibuja con el color del fondo se rompe solo el
+           día que el fondo cambia. *Los otros tres no dependen de su fondo —
+           por eso sobreviven a cualquier estado.*
+
+           El dibujo: cuerpo de cámara en masa + una flecha de vuelta ARRIBA,
+           por fuera del cuerpo. Todo en `color`, sin recortes y sin opacidad. */
         <>
-          <Rect x="3" y="7" width="18" height="12" rx="3" fill={color} opacity={0.9} />
+          <Rect x="2" y="9" width="14" height="10" rx="2.5" fill={color} />
+          <Path d="M17 12l4.5-2.5v7L17 14z" fill={color} />
+          {/* La flecha de vuelta: el gesto de dar vuelta, no «configurar». */}
           <Path
-            d="M8.5 13.2a3.6 3.6 0 0 1 6.2-2.2M15.5 12.8a3.6 3.6 0 0 1-6.2 2.2"
-            stroke={fondoDelGlifo}
-            strokeWidth={1.9}
+            d="M6 6.5h9"
+            stroke={color}
+            strokeWidth={t}
             strokeLinecap="round"
           />
-          <Path d="M14.2 9.4l1.2 1.6-2 .3z" fill={fondoDelGlifo} />
-          <Path d="M9.8 16.6l-1.2-1.6 2-.3z" fill={fondoDelGlifo} />
+          <Path d="M15.8 6.5l-3.2-2.2v4.4z" fill={color} />
+        </>
+      )}
+      {nombre === 'altavoz' && (
+        /* Cono + dos ondas. **Anatomía probada** (S106-B, gate): todo en
+           `color`, sin `opacity` y sin recortes con el color del fondo — que
+           fue lo único que distinguía al glifo que salió en blanco. */
+        <>
+          <Path d="M4 9.5h3.2L11.5 6v12L7.2 14.5H4z" fill={color} />
+          <Path d="M15 9.8a3.4 3.4 0 0 1 0 4.4" stroke={color} strokeWidth={t} strokeLinecap="round" />
+          <Path d="M17.8 7.6a6.8 6.8 0 0 1 0 8.8" stroke={color} strokeWidth={t} strokeLinecap="round" />
         </>
       )}
       {nombre === 'colgar' && (
@@ -153,7 +206,7 @@ export function ControlLlamada({ glifo, etiqueta, onPress, activo = true, tamañ
           estiloPresionado,
         ]}
       >
-        <Glifo nombre={glifo} color={tinta} cortado={cortado} fondoDelGlifo={fondo} />
+        <Glifo nombre={glifo} color={tinta} cortado={cortado} />
       </Animated.View>
     </Pressable>
   )

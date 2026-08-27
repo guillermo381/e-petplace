@@ -61,6 +61,7 @@ import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { useTraduccion } from '@/i18n';
 import { CitaNoDisponible } from '@/components/cita-no-disponible';
 import { RecetaDeLaConsulta } from '@/components/receta-de-la-consulta';
+import { EntradaVideollamada } from '@/components/entrada-videollamada';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 
 type Pantalla =
@@ -94,6 +95,12 @@ export default function DetalleCitaVet() {
   // MOTOR (puedoAtenderClinico = el mismo gate de los 4 DEFINER D-490);
   // el flip por chip §6.2 es pedido de motor declarado en el wrapper.
   const [puedeAtender, setPuedeAtender] = useState(false);
+  /* 🔴 EL CINTURÓN DE LOS CERO BOTONES (regresión del gate, 26-ago).
+     `false` hasta que el SERVIDOR confirme que hay entrada. Mientras tanto
+     «Iniciar consulta» **se queda**: *ante la duda, el vet tiene un botón —
+     el error de que sobre uno es infinitamente más barato que el de que no
+     quede ninguno y el profesional no pueda trabajar.* */
+  const [hayEntradaVideo, setHayEntradaVideo] = useState(false);
 
   // Estado de la cita → Insignia (misma voz que el HOY — Ley 17.3).
   const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
@@ -164,6 +171,17 @@ export default function DetalleCitaVet() {
   const dur = cita?.duracion_minutos;
   const ef = cita ? (cita.atencion?.estado ?? cita.estado) : null;
   const insignia = ef ? INSIGNIA_POR_ESTADO[ef] : undefined;
+  /* S106-C t3 · ¿esta cita ocurre por video?
+     ⚠️ **Se lee de `tipo_servicio` y no de `modalidad`, y es una derivación
+     declarada, no un atajo:** `CONTRATOS-PARA-C.md` §—«la modalidad ya NO se
+     manda desde el cliente para teleconsulta: se DERIVA del tipo de servicio,
+     server-side»— ⇒ hoy los dos valores son el mismo hecho.
+     🔴 El campo canónico es `modalidad`, y está pedido a A (§E1 del recorrido
+     de la Obra 0). *El día que exista una cita presencial marcada como
+     teleconsulta —o al revés— esta línea mentiría y nada avisaría*, así que
+     cuando el campo llegue esto cambia por `cita.modalidad === 'telemedicina'`
+     y se borra este comentario. */
+  const esTeleconsulta = cita?.tipo_servicio === 'telemedicina';
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -230,9 +248,27 @@ export default function DetalleCitaVet() {
                     <Texto variante="titulo">
                       {nombre}
                     </Texto>
-                    {insignia && (
-                      <View style={{ alignSelf: 'flex-start' }}>
-                        <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />
+                    {/* S106-C t3 · La insignia de ESTADO y la de MODALIDAD
+                        conviven en la misma fila y **dicen cosas distintas**:
+                        una es en qué punto está la cita, la otra es POR DÓNDE
+                        ocurre. `flexWrap` porque con un nombre largo la
+                        segunda tiene que bajar, no comprimir a la primera. */}
+                    {(insignia || esTeleconsulta) && (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          flexWrap: 'wrap',
+                          alignItems: 'center',
+                          gap: spacing[2],
+                        }}
+                      >
+                        {insignia && (
+                          <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />
+                        )}
+                        {/* La etiqueta la arma la pieza (B): no se le escribe
+                            texto — así las dos apps dicen lo mismo sin que
+                            nadie tenga que acordarse de copiarlo. */}
+                        {esTeleconsulta && <Insignia modalidad="teleconsulta" tamaño="sm" />}
                       </View>
                     )}
                   </View>
@@ -298,12 +334,92 @@ export default function DetalleCitaVet() {
               </View>
             </Tarjeta>
 
+            {/* ── S106-C t3 · LA PUERTA A LA VIDEOCONSULTA (D-938) ──────────
+                🔴 **PRESIDE a «La consulta» a propósito.** En una teleconsulta
+                el acto empieza entrando a la sala: el dictado sale del modal
+                DURANTE la llamada y el borrador cae al Durante al colgar. Si
+                el dictado se ofreciera primero, el vet entraría a escribir una
+                nota de una consulta que todavía no pasó.
+
+                «La consulta» se conserva abajo, sin tocar su gate: al re-abrir
+                la cita días después, ahí es donde vive la nota.
+
+                Hereda el MISMO gate clínico que atender (`puedeAtender`,
+                D-525): entrar a una teleconsulta es acto clínico, no de
+                mostrador. La recepción no ve esta tarjeta — gate de ausencia,
+                jamás candado.
+
+                El envoltorio es de la PIEZA: si el servidor no deja entrar y
+                el motivo es uno de los dos silencios, **la tarjeta no se monta
+                vacía** (ver `entrada-videollamada.tsx`). */}
+            {cita.mascota && puedeAtender && esTeleconsulta && (
+              <EntradaVideollamada
+                citaId={cita.id}
+                alEntrar={() =>
+                  router.push({
+                    pathname: '/videollamada/[citaId]',
+                    params: {
+                      citaId: cita.id,
+                      /* El contexto clínico del modal (peso · vacunas ·
+                         última visita · alergias) se lee POR MASCOTA. */
+                      mascotaId: cita.mascota!.id,
+                      /* Quién está del otro lado: la PERSONA que reservó, no
+                         la mascota. `null` honesto ⇒ no se manda y la pantalla
+                         cae a su propia voz genérica. */
+                      familia:
+                        contacto !== 'cargando' && contacto !== 'error' && contacto.nombre !== null
+                          ? contacto.nombre
+                          : '',
+                    },
+                  })
+                }
+                onVeredicto={setHayEntradaVideo}
+                envolver={(contenido) => (
+                  <Tarjeta elevacion="reposo">
+                    <View style={{ gap: spacing[3] }}>
+                      <Texto variante="seccion">{t('consulta.vcEntradaTitulo')}</Texto>
+                      {contenido}
+                    </View>
+                  </Tarjeta>
+                )}
+              />
+            )}
+
             {/* S70-B2-v2: LA CONSULTA (el Durante clínico) — la acción central
                 de la cita vet: dictado → nota estructurada → sedimento. */}
             {/* S76-B2 (D-525): la acción de atender EXISTE solo para quien
                 atiende (titular o chip clínico) — gate de ausencia, jamás
                 candado. Para recepción, esta tarjeta no se monta. */}
-            {cita.mascota && puedeAtender && (
+            {/* 🔴 S106-C t3 · EN TELECONSULTA ESTE BOTÓN NO SE MONTA (hallazgo
+                ⑦ del gate, firma de la mesa). Con la entrada arriba, «Iniciar
+                consulta» quedaba como un SEGUNDO botón que hace lo mismo — y
+                peor: *se lee como si hubiera un paso más que hacer*, cuando en
+                una teleconsulta el acto empieza entrando y el dictado sale del
+                modal DURANTE la llamada.
+
+                🔴 **ENMENDADO EL MISMO DÍA — la v1 de esta condición decía
+                `!esTeleconsulta` y produjo CERO BOTONES.** El choque: esta
+                pantalla decidía por `tipo_servicio` y la RPC de entrada decide
+                por `modalidad`; con la modalidad sin escribir, **una condición
+                apagaba este botón y la otra no encendía el suyo.** *Dos
+                condiciones distintas gobernando la misma decisión dejan un
+                hueco entre las dos, y ahí no queda nada.*
+                ⇒ Hoy el ocultamiento depende de que la entrada EXISTA de
+                verdad (`hayEntradaVideo`, que lo dice el servidor), no de mi
+                derivación. **Y arranca en `false`: ante la duda queda el botón
+                viejo.** *Quitar un botón redundante es una condición nueva
+                sobre algo que YA funcionaba — el costo de equivocarse no es
+                que sobre uno, es que no quede ninguno.*
+
+                ⚠️ **Consecuencia medida y declarada, no frenada:** este era el
+                único camino de vuelta a la nota desde el detalle de la cita.
+                Al colgar, el borrador viaja solo al Durante, así que el camino
+                del día de la consulta está cubierto; **lo que queda sin puerta
+                es volver a la nota de una teleconsulta días después**, cuando
+                el `replace` del colgado ya no está. La receta y el certificado
+                sí conservan la suya. *Se anota acá para que quien lo note
+                después sepa que fue decidido y no olvidado.* */}
+            {cita.mascota && puedeAtender && !hayEntradaVideo && (
               <Tarjeta elevacion="reposo" relleno="ninguno">
                 <CeldaNavegacion
                   icono="veterinaria"

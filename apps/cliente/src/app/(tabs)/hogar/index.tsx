@@ -483,6 +483,7 @@ function EventoVida({
   color,
   titulo,
   meta,
+  marca,
   navega,
   expandido,
   onPress,
@@ -491,6 +492,19 @@ function EventoVida({
   color: string | null;
   titulo: string;
   meta: string;
+  /**
+   * S106-C t3 · LA MARCA DE §7 — hoy, la insignia de teleconsulta.
+   *
+   * Va **debajo del título y en su propia fila**, no dentro de `meta`: esa
+   * línea es `numberOfLines={1}` y ya lleva fecha y quién — un tercer
+   * segmento la trunca, y *lo que se pierde al truncar es siempre el final,
+   * o sea justo la marca*.
+   *
+   * `LETRA_TELEMEDICINA` §7: *«dentro de tres años alguien va a leer ese
+   * expediente para decidir algo, y "evaluado por pantalla" cambia cómo se
+   * lee»* — por eso la marca es visible SIN desplegar el hecho.
+   */
+  marca?: React.ReactNode;
   /** true = el chevron es › y el tap navega (no hay despliegue). */
   navega?: boolean;
   expandido?: boolean;
@@ -505,6 +519,7 @@ function EventoVida({
         <View style={{ gap: spacing[1], padding: spacing[4], minHeight: 44, justifyContent: 'center' }}>
           <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
           <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
+          {marca}
         </View>
       </CantoCurva>
     );
@@ -528,6 +543,7 @@ function EventoVida({
           <View style={{ flex: 1, minWidth: 0, gap: spacing[1] }}>
             <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
             <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
+            {marca}
           </View>
           <ChevronFila forma={navega ? 'navega' : expandido ? 'pliega' : 'revela'} />
         </Animated.View>
@@ -2118,6 +2134,22 @@ export default function Hogar() {
                               color={color}
                               titulo={vozHecho(it, t, nombrePorMascota.get(it.mascota_id) ?? '')}
                               meta={metaHecho(it, idioma)}
+                              /* §7 · LA MARCA DEL EXPEDIENTE. El wrapper trae
+                                 el CÓDIGO DEL MOTOR (`'telemedicina'`) y la
+                                 pieza habla su propio vocabulario
+                                 (`'teleconsulta'`): la traducción es de la
+                                 pantalla (Ley 3), y por eso el mapeo vive acá
+                                 y no en el lector.
+                                 `null` NO se degrada a «presencial»: una cita
+                                 sin modalidad escrita no dice nada — decirlo
+                                 sería inventar un hecho clínico. */
+                              marca={
+                                it.modalidad === 'telemedicina' ? (
+                                  <View style={{ alignSelf: 'flex-start', marginTop: spacing[1] }}>
+                                    <Insignia modalidad="teleconsulta" tamaño="sm" />
+                                  </View>
+                                ) : undefined
+                              }
                               navega={navega}
                               expandido={expandible ? abierto : undefined}
                               onPress={

@@ -27,6 +27,8 @@ import { View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  AudioSession,
+  AndroidAudioTypePresets,
   LiveKitRoom,
   useConnectionState,
   useLocalParticipant,
@@ -141,6 +143,66 @@ export default function Videollamada() {
       vigente = false;
     };
   }, [citaId, idioma, t, intento]);
+
+  /* ── 🔴 EL ALTAVOZ — la sesión de audio la configura ESTA pantalla ─────────
+     **Gate del founder (26-ago): la llamada sonaba por el AURICULAR** y sin
+     auriculares no se escuchaba.
+
+     **La causa no es una mala configuración: es que NADIE configuraba** — B
+     midió cero llamadas a `AudioSession` en toda la app, así que decidía el
+     sistema, y en Android el sistema elige el auricular.
+
+     **La llave, leída del JSDoc del SDK y verificada contra el objeto** (no
+     supuesta): en modo `communication` el ruteo **está APAGADO** y la lista de
+     salidas —que ya trae `speaker` antes que `earpiece`— **no se aplica**.
+     ⇒ *Reordenar la lista NO alcanza: `forceHandleAudioRouting` es lo que la
+     enciende.*
+
+     🔴 **`earpiece` queda FUERA de la lista a propósito, no por olvido** — es
+     justo el comportamiento que se vino a corregir. **Bluetooth y auriculares
+     siguen ganando**: *si alguien se puso auriculares, quiere auriculares.*
+
+     ⚠️ **Y no es cosmético:** sin altavoz el dueño necesita el teléfono en la
+     oreja, y con el teléfono en la oreja **no tiene las dos manos para
+     sostener al animal y mostrárselo al veterinario** — que es el acto central
+     del servicio. *Va junto con girar cámara: son el mismo problema visto dos
+     veces.*
+
+     Se descartó un selector de salida con el argumento de B: *un toggle no
+     arregla un default malo, lo delega en el usuario.*
+
+     Vive acá y no en `packages/ui` porque **ui no importa LiveKit** (decisión
+     de arquitectura ratificada): la sesión se configura donde se monta el
+     Room. Se apaga al desmontar — *una sesión de audio que queda abierta se
+     lleva el audio del teléfono a una llamada que ya terminó.* */
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      try {
+        await AudioSession.configureAudio({
+          android: {
+            preferredOutputList: ['bluetooth', 'headset', 'speaker'],
+            audioTypeOptions: {
+              ...AndroidAudioTypePresets.communication,
+              forceHandleAudioRouting: true,
+            },
+          },
+          ios: { defaultOutput: 'speaker' },
+        });
+        if (!vigente) return;
+        await AudioSession.startAudioSession();
+      } catch {
+        /* Si la sesión no se pudo configurar **la llamada sigue**: se escucha
+           peor, pero se escucha. *Tumbar una videoconsulta médica por el ruteo
+           del audio sería cambiar un problema por uno mucho peor.* */
+      }
+    })();
+    return () => {
+      vigente = false;
+      void AudioSession.stopAudioSession();
+    };
+  }, []);
+
 
   /* El silencio no dibuja: SALE. Una pantalla en blanco sería un callejón, y
      cualquier texto —hasta el genérico— confirmaría que la cita existe.

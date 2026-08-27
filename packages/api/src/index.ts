@@ -1493,3 +1493,5 @@ export {
   type CodigoCuadroTeleconsulta,
 } from './wrappers/teleconsulta-adjuntos';
 export { obtenerConfigVideo, type ConfigVideo } from './wrappers/telemedicina';
+export { prestadorTieneVerificacionProfesional } from './wrappers/telemedicina';
+export { obtenerHistorialClinicoMascota, type ItemHistorialClinico, type FiltrosHistorialClinico } from './wrappers/veterinaria-nota-clinica';

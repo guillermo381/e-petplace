@@ -18,8 +18,16 @@
  *
  * ESCALERA (§4b, declarada):
  *  · Peldaño 0 — sin vets cobrables con oferta reservable: vacío honesto
- *    (telemedicina/emergencia existen pero reservable=false: el motor
+ *    (~~telemedicina~~/emergencia existen pero reservable=false: el motor
  *    las deja fuera SOLO — la UI no filtra listas).
+ *    ⚠️ **ENMENDADO S106-C t3: la TELEMEDICINA YA ES RESERVABLE** (A la
+ *    publicó en S106). La frase era cierta hasta entonces y se marca en vez
+ *    de borrarse — pero quien la lea hoy y concluya «la teleconsulta no se
+ *    reserva por acá» estaría leyendo el estado de otra sesión.
+ *    *La parte que SIGUE siendo verdad es la que importa: esta pantalla no
+ *    tiene lista escrita — pinta lo que el motor publica.* Por eso el quinto
+ *    oficio aparece sin una línea de superficie nueva; lo único que hubo que
+ *    darle fue su VOZ (`servicioVoz.telemedicina`, sin ella se pintaba muda).
  *  · Peldaño 1 — todo lo pintado es REAL: tipos con su "desde" agregado,
  *    inicios de franjas reales menos ocupación.
  *  · Peldaño 2 — el techo de especies del tipo gobierna la elegibilidad

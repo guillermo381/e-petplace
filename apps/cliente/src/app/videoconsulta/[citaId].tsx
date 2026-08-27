@@ -56,6 +56,7 @@ import {
 import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { EntradaVideollamada } from '@/components/entrada-videollamada';
+import { ConsejosTeleconsulta } from '@/components/consejos-teleconsulta';
 import { useTraduccion } from '@/i18n';
 
 type Estado =
@@ -207,6 +208,17 @@ export default function DetalleVideoconsulta() {
             }
           />
         )}
+
+        {/* OBRA 3 · LOS CONSEJOS DE PREPARACIÓN (§3bis) — el segundo de sus
+            dos lugares: *«cuando ya es accionable»*.
+            Van DEBAJO de la entrada y ARRIBA de cancelar: a la hora de la
+            cita el dueño viene a entrar, no a leer. Y cuando llega temprano
+            —sin botón, con el motivo— **son justo lo que le sirve**, que es
+            el caso que la letra tenía en la cabeza al pedir los dos lugares
+            (*«sólo al entrar llega tarde para conseguir wifi»*).
+            Sólo con la cita ACTIVA: en una cancelada o no realizada,
+            prepararse no significa nada. */}
+        {activa && <ConsejosTeleconsulta />}
 
         {activa && (
           <View style={{ gap: spacing[3] }}>

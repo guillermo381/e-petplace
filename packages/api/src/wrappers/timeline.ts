@@ -62,6 +62,34 @@ export interface ItemTimeline {
    *  día calendario (partes UTC) y JAMÁS una hora — sin esto, UTC-5 lo
    *  corre a "un día antes · 19:00". */
   fecha_sola: boolean;
+  /**
+   * S106-A t3 · **LA MARCA DEL EXPEDIENTE** — `LETRA_TELEMEDICINA` §7:
+   * *«la consulta queda marcada como atendida por videoconsulta»*, y su §7②
+   * firma CÓMO: **el padre es la propia cita**, sin evento separado y sin
+   * columna nueva en los eventos — *los lectores derivan la marca de la cita*.
+   * Este lector es uno de esos lectores.
+   *
+   * 🔴 **SE DERIVA POR EL PADRE, NO POR `evento_atencion` — y esa elección la
+   * decidió una medición, no una lectura.** El join a `evento_atencion` ya
+   * existía tres líneas más abajo y colgarse de él era lo obvio. Medido contra
+   * la base: de los eventos que llegan al timeline,
+   * `atencion_paseo/grooming/adiestramiento` alcanzan su cita por AMBOS
+   * caminos, pero **lo clínico no**: `historia_clinica_registrada` (5),
+   * `medicacion_prescrita` (4), `examen_diagnostico` (1) y `peso_medicion`
+   * tienen `evento_atencion = 0` y llegan **sólo por el padre**.
+   *
+   * > *La ruta cómoda habría devuelto `null` exactamente en los eventos que la
+   * > firma §7 existe para marcar — y sin error, sin log y sin síntoma: una
+   * > teleconsulta se vería idéntica a una presencial en la única pantalla
+   * > donde un vet la va a leer años después.*
+   *
+   * Código del motor sin traducir (`'telemedicina'`), jamás el vocabulario de
+   * la pieza (`'teleconsulta'`): la voz es de la pantalla (Ley 3), igual que
+   * `tipo` y `vacuna_nombre`. `null` = el evento no cuelga de una cita, o la
+   * cita no tiene modalidad escrita — **decir `presencial` ahí sería
+   * inventar.**
+   */
+  modalidad: string | null;
 }
 
 export interface PaginaTimeline {
@@ -91,7 +119,7 @@ async function _timeline(
 
   let q = getClient()
     .from('eventos_mascota')
-    .select('id, mascota_id, tipo, eje_jtbd, fecha_evento, prestador_id, datos')
+    .select('id, mascota_id, tipo, eje_jtbd, fecha_evento, prestador_id, datos, evento_padre_id')
     .in('mascota_id', mascotaIds)
     .eq('soft_delete', false)
     .neq('tipo', 'cita_servicio')
@@ -144,8 +172,16 @@ async function _timeline(
 
   const eventoIds = eventos.map((e) => e.id);
   const prestadorIds = [...new Set(eventos.map((e) => e.prestador_id).filter((p): p is string => p !== null))];
+  /* Los padres de los que cuelgan los eventos clínicos: es por ahí que se
+     alcanza la cita, y con ella la marca de §7 (ver `ItemTimeline.modalidad`). */
+  const padreIds = [...new Set(eventos.map((e) => e.evento_padre_id).filter((p): p is string => p !== null))];
 
-  const [atenciones, adjuntos, prestadores] = await Promise.all([
+  /* 🔴 LA CUARTA CONSULTA ENTRA AL MISMO `Promise.all`, no después.
+     La ley de performance de la casa (L-223) es *«no hay consultas que
+     optimizar, hay VIAJES que eliminar»*: el peaje es ~150 ms por petición sin
+     importar cuánto traiga, y encadenarla costaría una ola más de red en la
+     pantalla que el dueño abre primero. En paralelo cuesta cero. */
+  const [atenciones, adjuntos, prestadores, citasPadre] = await Promise.all([
     getClient()
       .from('evento_atencion')
       .select('id, evento_id, iniciada_en, terminada_en')
@@ -157,8 +193,13 @@ async function _timeline(
     prestadorIds.length > 0
       ? getClient().from('prestadores').select('id, nombre_comercial').in('id', prestadorIds)
       : Promise.resolve({ data: [] as Array<{ id: string; nombre_comercial: string | null }>, error: null }),
+    padreIds.length > 0
+      ? getClient().from('evento_cita_servicio').select('evento_id, modalidad').in('evento_id', padreIds)
+      : Promise.resolve({ data: [] as Array<{ evento_id: string | null; modalidad: string | null }>, error: null }),
   ]);
-  if (atenciones.error || adjuntos.error || prestadores.error) return fallo('error_desconocido');
+  if (atenciones.error || adjuntos.error || prestadores.error || citasPadre.error) {
+    return fallo('error_desconocido');
+  }
 
   const atencionPorEvento = new Map(
     (atenciones.data ?? []).map((a) => [a.evento_id, a]),
@@ -170,6 +211,10 @@ async function _timeline(
     }
   }
   const nombrePrestador = new Map((prestadores.data ?? []).map((p) => [p.id, p.nombre_comercial]));
+  const modalidadPorPadre = new Map<string, string | null>();
+  for (const c of citasPadre.data ?? []) {
+    if (c.evento_id !== null) modalidadPorPadre.set(c.evento_id, c.modalidad);
+  }
 
   const items: ItemTimeline[] = eventos.map((e) => {
     const at = atencionPorEvento.get(e.id);
@@ -197,6 +242,9 @@ async function _timeline(
       fotos_count: fotosPorEvento.get(e.id) ?? 0,
       vacuna_nombre: vacuna,
       hito_clave: hito,
+      modalidad: e.evento_padre_id !== null
+        ? modalidadPorPadre.get(e.evento_padre_id) ?? null
+        : null,
       // La vacuna es fecha-sola POR TIPO (el carnet registra días, no
       // momentos). S82 r4: nació el SEGUNDO tipo fecha-sola
       // (desparasitación) — EL DISPARO DE D-312 SONÓ: llevar la

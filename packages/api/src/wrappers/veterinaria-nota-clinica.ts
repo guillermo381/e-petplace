@@ -396,6 +396,23 @@ export interface ParteConsulta {
   examenes: Array<{ tipoExamen: string; estado: string }>;
   proximoControl: string | null;
   casoCondicion: string | null;
+  /**
+   * S106-A t3 · **LA MARCA DE §7 EN LA LECTURA CLÍNICA.**
+   * `LETRA_TELEMEDICINA` §7 firma que la consulta queda marcada como atendida
+   * por videoconsulta, y §7② firma cómo: **derivada de la cita**, sin evento
+   * separado ni columna nueva.
+   *
+   * 🔴 Acá pesa más que en el timeline. Allá la marca ayuda a ubicarse; **acá
+   * cambia cómo se lee lo que dice**: *un examen físico hecho por video y uno
+   * hecho con el animal sobre la mesa no son la misma evidencia, y el papel
+   * tiene que decir cuál fue.*
+   *
+   * Código del motor (`'telemedicina'`), jamás el de la pieza
+   * (`'teleconsulta'`): la voz es de la pantalla, Ley 3. `null` = parte viejo
+   * sin modalidad escrita — **decir `presencial` por él sería inventar, y en
+   * un papel clínico.**
+   */
+  modalidad: string | null;
 }
 
 function mapExamenParte(e: Record<string, unknown>): { tipoExamen: string; estado: string } {
@@ -450,6 +467,7 @@ export async function obtenerParteConsulta(
       examenes: examenesRaw.filter(esObj).map(mapExamenParte),
       proximoControl: str(data['proximo_control']),
       casoCondicion: str(data['caso_condicion']),
+      modalidad: str(data['modalidad']),
     },
   };
 }
@@ -595,5 +613,94 @@ export async function obtenerHistoriaClinicaDeCita(
         empleadoId: data.empleado_id,
       },
     },
+  };
+}
+
+/* ── EL HISTORIAL CLÍNICO, CON SUS FILTROS ───────────────────────────────── */
+
+/**
+ * Una consulta pasada, **en cabecera**. El cuerpo (anamnesis, examen,
+ * tratamiento) NO viaja acá: para eso está `obtenerParteConsulta`, que tiene su
+ * propio gate. *Un lector de lista que trae el texto entero obliga a la
+ * pantalla a decidir qué esconder — y lo que se esconde igual viajó.*
+ */
+export interface ItemHistorialClinico {
+  eventoId: string;
+  citaId: string | null;
+  /** ISO. `null` si la consulta quedó sin cerrar. */
+  fecha: string | null;
+  motivoConsulta: string | null;
+  diagnostico: string | null;
+  negocioNombre: string | null;
+  casoClinicoId: string | null;
+  casoCondicion: string | null;
+  /** Código del motor (`'telemedicina'`), jamás el de la pieza. Ley 3. */
+  modalidad: string | null;
+}
+
+export interface FiltrosHistorialClinico {
+  /** `YYYY-MM-DD`. Ausente = sin piso. */
+  desde?: string;
+  /** `YYYY-MM-DD`. Ausente = sin techo. */
+  hasta?: string;
+  casoClinicoId?: string;
+  /** Techo del servidor: 1–200, default 50. */
+  limite?: number;
+}
+
+/**
+ * El historial clínico de una mascota, filtrable por **fecha** y por **caso**.
+ *
+ * 🔴 **Su gate es el CLÍNICO, no el de acceso** (`user_acceso_clinico_a_mascota`).
+ * *Quien puede ver que existe una mascota no es necesariamente quien puede leer
+ * su historia* — un paseador con una cita confirmada pasa el gate de acceso y
+ * **no debe pasar éste**. La migración lo ejerce con un ajeno que rebota.
+ *
+ * ⚠️ **Los filtros son opcionales por construcción.** *Un lector que exigiera
+ * rango obligaría a la pantalla a inventar uno, y el rango inventado se lee
+ * después como si alguien lo hubiera elegido.*
+ */
+export async function obtenerHistorialClinicoMascota(
+  mascotaId: string,
+  filtros?: FiltrosHistorialClinico,
+): Promise<ResultadoWrapper<ItemHistorialClinico[], 'sin_acceso_clinico' | 'sin_sesion'>> {
+  const { data, error } = await getClient().rpc('obtener_historial_clinico_mascota', {
+    p_mascota_id: mascotaId,
+    p_desde: filtros?.desde ?? undefined,
+    p_hasta: filtros?.hasta ?? undefined,
+    p_caso_clinico_id: filtros?.casoClinicoId ?? undefined,
+    p_limite: filtros?.limite ?? undefined,
+  });
+
+  if (error) {
+    /* Los dos rechazos del motor tienen su propia cara. `sin_acceso_clinico`
+       NO se colapsa con «no pudimos cargar»: *decirle «error» a quien no tiene
+       permiso lo manda a reintentar para siempre.* */
+    if (error.message.includes('sin_acceso_clinico')) {
+      return { ok: false, codigo: 'sin_acceso_clinico', mensaje: 'No tienes acceso clínico a esta mascota.' };
+    }
+    if (error.message.includes('auth_required')) {
+      return { ok: false, codigo: 'sin_sesion', mensaje: 'Tu sesión expiró.' };
+    }
+    return { ok: false, codigo: 'error_desconocido', mensaje: 'No pudimos cargar el historial.' };
+  }
+
+  if (!Array.isArray(data)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: 'No pudimos cargar el historial.' };
+  }
+
+  return {
+    ok: true,
+    data: data.filter(esObj).map((f) => ({
+      eventoId: String(f['evento_id']),
+      citaId: str(f['cita_id']),
+      fecha: str(f['fecha']),
+      motivoConsulta: str(f['motivo_consulta']),
+      diagnostico: str(f['diagnostico']),
+      negocioNombre: str(f['negocio_nombre']),
+      casoClinicoId: str(f['caso_clinico_id']),
+      casoCondicion: str(f['caso_condicion']),
+      modalidad: str(f['modalidad']),
+    })),
   };
 }
