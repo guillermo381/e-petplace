@@ -2195,6 +2195,8 @@ export const prestadorEn = {
     vcHistoriaError: 'We could not load their clinical history.',
     vcHistoriaVacia: 'No consultations recorded yet.',
     vcHistoriaSinFecha: 'No date',
+    vcModalGuardar: 'Save',
+    vcModalGuardadoA: 'Saved at {{hora}}',
     vcModalListo: 'Done',
     vcClinicoPeso: 'Weight',
     vcClinicoVacunas: 'Vaccines',
