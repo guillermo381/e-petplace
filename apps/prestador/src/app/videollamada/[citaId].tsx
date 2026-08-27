@@ -894,7 +894,11 @@ function MesaDeTrabajo({
         etiquetaConfirmar={t('consulta.vcColgarSi')}
         etiquetaCancelar={t('consulta.vcColgarNo')}
         onConfirmar={() => onSalir(nota, conclusion)}
-      />
+      >
+        {/* La consecuencia va en el CUERPO, no en el título: el título hace
+            la pregunta y esto dice qué pasa si la respuesta es sí. */}
+        <Texto variante="cuerpo">{t('consulta.vcColgarDetalle')}</Texto>
+      </HojaConfirmacionDestructiva>
     </>
   );
 }

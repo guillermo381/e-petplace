@@ -2796,7 +2796,10 @@ export const prestadorEs = {
     vcConclusionLineaResuelta: 'Conclusión: el caso se resolvió en la videoconsulta.',
     vcConclusionLineaPresencial: 'Conclusión: necesita atención presencial.',
     vcConclusionLineaUrgencias: 'Conclusión: derivada a urgencias.',
-    vcColgarConfirma: '¿Terminar la videoconsulta?',
+    /* Igual que en el cliente: la firma hace que CUALQUIERA cierre para
+       los dos, así que la confirmación lo dice. */
+    vcColgarConfirma: '¿Terminar la videoconsulta para los dos?',
+    vcColgarDetalle: 'Se cierra también para la familia y no se puede volver a entrar. Tu nota queda guardada.',
     vcColgarSujeto: 'la videoconsulta',
     vcColgarSi: 'Terminar',
     vcColgarNo: 'Seguir en la consulta',

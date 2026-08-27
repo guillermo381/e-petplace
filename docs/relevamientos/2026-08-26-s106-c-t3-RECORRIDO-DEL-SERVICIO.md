@@ -661,3 +661,65 @@ una consulta que **ya ocurrió** y que §4 dice que se cobra igual.
 cita, no un reloj nuevo) · ② ¿qué ve el que está adentro cuando el otro
 vuelve? (hay pieza: `EstadoConexion` ya distingue reconectando) · ③ el hueco
 de §J2: qué cierra una consulta que nadie completó.
+
+---
+---
+
+# §K · EL CIERRE DEFINITIVO — recorrido sobre la firma del 27-ago
+
+**La firma:** se cierra ① cuando **cualquiera de los dos** toca terminar
+—cierra para ambos— o ② **sola, 10 minutos después** del fin del tiempo de la
+cita. Mientras no pase ninguna, **los dos vuelven libremente**.
+
+## §K1 · Qué ve cada uno
+
+**El que toca terminar** ve la confirmación, y **tiene que decir que cierra
+para los dos** — hoy dice *«¿Terminar la videoconsulta?»*, que es claro sobre
+la acción y **calla lo importante**: que el otro se queda afuera.
+
+*El caso que lo vuelve grave es el que la mesa nombró: un toque accidental del
+dueño termina a los dos minutos una consulta que pagó.* Con la firma vieja
+—colgar era local— equivocarse costaba volver a entrar; ahora cuesta la
+consulta.
+
+**El que se queda del otro lado** ve que la llamada terminó. No hay nada nuevo
+que construir: la desconexión ya llega por el transporte.
+
+**El que vuelve a una sala CERRADA** recibe `cita_finalizada`, que ya tiene su
+voz en las dos apps (*«Esta videoconsulta ya terminó»*). ✅ Cero trabajo.
+
+**El que vuelve a una sala VIVA** entra y sigue. ✅ Es lo que ya pasa.
+
+## §K2 · 🔴 EL BORRADOR SI EL VET CERRÓ SIN SEDIMENTAR — y acá la firma ayuda
+
+Con el borrador de A (uno por cita, PK `cita_id`, limpieza por trigger al
+sedimentar), **cerrar la sala no toca la nota**: el borrador vive en la CITA,
+no en la sala.
+
+⇒ El vet cierra, cae al Durante, y **su dictado lo está esperando**. Si
+abandona ahí, sigue esperándolo la próxima vez que abra esa cita.
+
+*Y esto vuelve al cierre menos peligroso de lo que parece: lo que se pierde al
+cerrar es la sala, jamás el trabajo.*
+
+## §K3 · Lo que la pantalla NO puede hacer, dicho en vez de simulado
+
+🔴 **El cierre por tiempo (②) es del MOTOR y no tiene dónde vivir hoy.**
+Medido: `puede_entrar_a_videollamada` corta por `estado IN (completada,
+no_show, rechazada)` — **no mira el reloj de la cita**. Y ningún cron cierra
+teleconsultas.
+
+*Un temporizador en la app sólo corre mientras alguien mira la pantalla, y la
+regla dice «aunque las dos apps estén cerradas».* **Una regla de tiempo que
+depende de que alguien esté mirando no es una regla: es una coincidencia.**
+
+⇒ **PEDIDO A A**, con su forma: que la RPC devuelva `cita_finalizada` cuando
+`ahora > fin_de_la_cita + 10 min`. **Perezoso, no cron** — es el patrón que la
+casa ya usa para el hold y para el presupuesto vencido: *el estado se calcula
+al preguntarlo, y así vale aunque nadie haya mirado.*
+
+## §K4 · Lo que sí construyo ahora
+
+**La voz de la confirmación en las dos apps**, diciendo lo que la firma nueva
+hace: **termina para los dos**. Es lo único de §K que es de superficie, y es
+justo lo que la firma vuelve urgente.

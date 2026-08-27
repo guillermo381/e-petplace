@@ -533,7 +533,11 @@ function SalaDelDueno({
       etiquetaConfirmar={t('veterinaria.vcColgarSi')}
       etiquetaCancelar={t('veterinaria.vcColgarNo')}
       onConfirmar={onSalir}
-    />
+    >
+      {/* La consecuencia va en el CUERPO, no en el título: el título hace
+          la pregunta y esto dice qué pasa si la respuesta es sí. */}
+      <Texto variante="cuerpo">{t('veterinaria.vcColgarDetalle')}</Texto>
+    </HojaConfirmacionDestructiva>
     </>
   );
 }
