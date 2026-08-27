@@ -53,6 +53,16 @@ export type CausaCancelacion =
    */
   | 'desconocida';
 
+/**
+ * Cómo se atiende la cita. **Es el vocabulario del motor**, no el de la pieza:
+ * la insignia habla `'teleconsulta'` y acá viaja `'telemedicina'`. *La voz es
+ * de la pantalla (Ley 3), igual que con `tipoServicio`.*
+ *
+ * El `CHECK` de `evento_cita_servicio.modalidad` es la fuente de esta lista.
+ */
+export type ModalidadCita =
+  | 'presencial' | 'telemedicina' | 'domicilio' | 'emergencia_movil' | 'local';
+
 export type CitaResuelta = {
   citaId: string;
   estado: string;
@@ -60,6 +70,18 @@ export type CitaResuelta = {
   fecha: string;
   hora: string;
   tipoServicio: string | null;
+  /**
+   * 🔴 **NO se deriva de `tipoServicio`, y el pedido de C explica por qué.**
+   * `modalidad` es una columna **propia** de la cita, con su propio `CHECK`,
+   * independiente del catálogo de servicios. Derivarla del tipo funciona hoy
+   * **por coincidencia**: el día que exista una cita cuyo tipo y cuya
+   * modalidad no coincidan, *la derivación mentiría y nada avisaría — los dos
+   * son texto y compilan igual.*
+   *
+   * `null` es legítimo: hay citas viejas sin modalidad escrita. **Decir
+   * `presencial` por ellas sería inventar.**
+   */
+  modalidad: ModalidadCita | null;
   prestadorId: string | null;
   mascotaId: string | null;
   cancelada: boolean;
@@ -86,6 +108,14 @@ function esObj(v: unknown): v is Record<string, unknown> {
 function esCausa(v: unknown): v is CausaCancelacion {
   return v === 'pago_reversado' || v === 'cierre_de_plan'
       || v === 'otra' || v === 'desconocida';
+}
+
+/** Misma disciplina que `esCausa`: se VALIDA contra el vocabulario, no se
+ *  castea. Un valor nuevo del server cae a `null` —«no sé»— en vez de llegar
+ *  a la pantalla como una modalidad que no sabe pintar. */
+function esModalidad(v: unknown): v is ModalidadCita {
+  return v === 'presencial' || v === 'telemedicina' || v === 'domicilio'
+      || v === 'emergencia_movil' || v === 'local';
 }
 
 function fallo(
@@ -148,6 +178,7 @@ export async function leerCitaResuelta(
       fecha: data.fecha,
       hora: data.hora,
       tipoServicio: typeof data.tipo_servicio === 'string' ? data.tipo_servicio : null,
+      modalidad: esModalidad(data.modalidad) ? data.modalidad : null,
       prestadorId: typeof data.prestador_id === 'string' ? data.prestador_id : null,
       mascotaId: typeof data.mascota_id === 'string' ? data.mascota_id : null,
       cancelada: data.cancelada,
