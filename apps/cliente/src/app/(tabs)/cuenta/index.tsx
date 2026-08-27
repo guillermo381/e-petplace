@@ -12,6 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router';
 import * as Updates from 'expo-updates';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import {
   Boton,
   Celda,
@@ -261,6 +262,18 @@ export default function Cuenta() {
                 ? 'bundle embebido'
                 : 'metro · dev'}
           </Texto>
+
+          {/* 🔴 S106-A · LA MARCA DE LA BUILD DE PRUEBA (`D-944`), colgada de
+              `MAPA_NATIVO_DISPONIBLE` **a propósito**.
+              *Atarla a `isEmbeddedLaunch` la habría hecho desaparecer con el
+              primer OTA* — seguiría al ARRANQUE y no al HECHO. Este flag sigue
+              al hecho: es `false` exactamente cuando el APK salió sin la key, y
+              sobrevive a cualquier update.
+              ☠️ Muere sola: una build de la nube trae las dos cosas, el flag
+              vuelve a `true` y esto deja de dibujarse. */}
+          {!MAPA_NATIVO_DISPONIBLE ? (
+            <Texto variante="dato">BUILD DE PRUEBA · sin mapas · sin push</Texto>
+          ) : null}
 
           {/* ── S82-B r13 · LA ENTRADA A LA GALERÍA DE TOKENS ──
               CRUCE DE TERRITORIO DECLARADO: esta pantalla es del cliente
