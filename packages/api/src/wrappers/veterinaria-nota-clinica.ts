@@ -551,7 +551,18 @@ export interface HistoriaClinicaDeCita {
   casoClinicoId: string | null;
   completadoEn: string;
   motivoConsulta: string;
-  diagnosticoPrincipal: string;
+  /**
+   * 🔴 **Puede ser `null` desde S106 t3, y es legítimo.** La columna dejó de ser
+   * `NOT NULL` cuando el guard del diagnóstico se acotó a su letra: **una
+   * consulta cuyo desenlace es `derivacion` no lleva diagnóstico**, porque es
+   * justo el que el vet no puede dar a distancia.
+   *
+   * *Lo cazó el typecheck al regenerar tipos — que es para lo que existe: la
+   * migración cambió el contrato y la prosa del wrapper todavía decía que
+   * siempre venía.* La pantalla tiene que poder decir «sin diagnóstico ·
+   * derivada», jamás pintar un vacío como si faltara un dato.
+   */
+  diagnosticoPrincipal: string | null;
   /** Quién la firmó: user del vet (el schema guarda user, no empleado). */
   veterinarioUserId: string;
   empleadoId: string | null;
