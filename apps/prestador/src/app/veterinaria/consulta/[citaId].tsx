@@ -146,7 +146,7 @@ export default function ConsultaVeterinaria() {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
-  const { citaId = '', mascotaId = '', mascotaNombre = '', borrador = '' } = useLocalSearchParams<{
+  const { citaId = '', mascotaId = '', mascotaNombre = '', borrador = '', desenlace = '' } = useLocalSearchParams<{
     citaId?: string;
     mascotaId?: string;
     mascotaNombre?: string;
@@ -163,6 +163,9 @@ export default function ConsultaVeterinaria() {
      * el vet quedaría creyendo que la nota está guardada mientras cuelga.*
      */
     borrador?: string;
+    /** `resuelto` | `derivacion`, del modal de la videoconsulta. Ausente en
+     *  las presenciales — y ahí el guard del diagnóstico rige entero. */
+    desenlace?: string;
   }>();
 
   const cargadoRef = useRef(false);
@@ -456,6 +459,18 @@ export default function ConsultaVeterinaria() {
       vitales: Object.keys(vitalesConf).length > 0 ? vitalesConf : undefined,
       formula: formula.length > 0 ? formula : undefined,
       plan_diagnostico: planDiagnostico.map((x) => x.trim()).filter((x) => x.length > 0),
+      /* 🔴 EL DESENLACE — lo que destraba al vet que DERIVA.
+         El guard del diagnóstico se acotó a su letra: es obligatorio **salvo
+         cuando el desenlace es `derivacion`**, porque *el diagnóstico es
+         justo el que no se puede dar a distancia, y derivar ES el resultado
+         de la consulta*.
+         Viene del modal de la videollamada; en una consulta presencial no
+         llega y **la cadena vacía se omite**: *mandar `resuelto` por omisión
+         afirmaría un desenlace que nadie declaró* — y de paso apagaría un
+         guard que ahí sí tiene que regir.
+         ⚠️ Y lo que NO cambia: **sin diagnóstico no hay receta.** El límite
+         del abogado sigue donde fue escrito. */
+      ...(desenlace.length > 0 ? { desenlace } : null),
     };
 
     setSedimentando(true);

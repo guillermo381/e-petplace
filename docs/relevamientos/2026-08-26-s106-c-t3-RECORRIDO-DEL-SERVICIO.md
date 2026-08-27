@@ -723,3 +723,182 @@ al preguntarlo, y así vale aunque nadie haya mirado.*
 **La voz de la confirmación en las dos apps**, diciendo lo que la firma nueva
 hace: **termina para los dos**. Es lo único de §K que es de superficie, y es
 justo lo que la firma vuelve urgente.
+
+---
+---
+
+# §L · EL CUADRO CONGELADO — medición previa a la prueba
+
+## §L1 · ⚠️ EL AVISO QUE LA MESA PIDIÓ TEMPRANO: **SÍ, EXIGE BUILD NUEVA**
+
+**Y no hay variante que lo evite.** La conversión de un frame de video a una
+imagen **no existe en JS**: el frame vive del lado nativo (`VideoFrame` de
+libwebrtc en Android, `RTCVideoFrame` en iOS) y lo que falta es **código
+nativo que lo convierta**. *Nada de eso viaja por OTA.*
+
+⇒ **Los binarios de anoche no sirven para probar esto.** La prueba barata
+**también** necesita build, porque su parte cara —el sink que convierte— es
+justo la nativa. **Vale saberlo antes de agendar el gate.**
+
+## §L2 · 🔴 EL RIESGO QUE D NO PUDO MEDIR: MEDIDO, Y CAE
+
+D dejó marcado: *«`YuvHelper` / `JavaI420Buffer` NO están referenciadas — D no
+las midió. Si ahí frena, es dato»*.
+
+**Medido contra el artefacto real**, el `.aar` que la app compila
+(`io.github.webrtc-sdk:android:144.7559.05`, del cache de gradle de esta
+máquina):
+
+```
+✅ VideoFrame   ✅ VideoSink        ✅ VideoTrack     ✅ SurfaceViewRenderer
+✅ EglBase      ✅ SurfaceTextureHelper
+✅ YuvHelper    ✅ JavaI420Buffer      ← los dos que faltaban por medir
+```
+
+⇒ **El primer riesgo de compilación desaparece antes de gastar una build.**
+*Que el fork no las REFERENCIE no significa que no estén: están en libwebrtc,
+que es su dependencia `api`, o sea que quedan en el classpath de la app.*
+**La distinción importa: D midió el fork; el que las trae es el artefacto de
+abajo.**
+
+## §L3 · Y LA CONVERSIÓN NO LA PONE LIBWEBRTC — la pone cada plataforma
+
+Medido: en el `.aar` **no hay nada de `bitmap`, `png` ni `jpeg`**. Eso **no es
+un problema, es el reparto**:
+
+- **Android:** `VideoFrame` → `YuvHelper` (I420→NV21/ARGB) → `Bitmap` →
+  `compress(PNG)`. Todo con SDK estándar.
+- **iOS:** `RTCVideoFrame.buffer` → `RTCCVPixelBuffer` → `CIImage` →
+  `UIImage` → `UIImagePNGRepresentation`. **Sin YuvHelper**: el pixel buffer
+  ya es convertible.
+
+**Y el fork trae los dos lados**, medido: Android con `VideoSink`; iOS con
+`SampleBufferVideoCallView` y `VideoFrameProcessor` (los dos usan
+`RTCVideoFrame`). ⇒ **El criterio ② —Android Y iOS— es alcanzable por las dos
+vías, y ninguna pide cambiar de fork.**
+
+⚠️ **`VideoFrameProcessor.h` merece mirarse antes de escribir un sink de
+cero**: si el fork ya expone un punto de extensión de frames en iOS, la mitad
+de ese lado puede ser cablear en vez de escribir. *No lo doy por hecho — lo
+declaro como lo primero a leer cuando la prueba arranque.*
+
+## §L4 · Lo que sigue firme y no se toca
+
+**No se cambia de fork.** **La captura de vistas está descartada por firma** —
+negro en Android, anda en iOS: *no se prueba ni se reintenta.* **El POC de
+2020 es código para copiar y hacerse cargo, no una dependencia.**
+
+Y el criterio de verde, tal como llegó: ① **la imagen tiene que ser LA DEL
+VIDEO** —cámara apuntando a algo escrito a mano, y el PNG lo dice— porque *un
+frame negro también pesa, abre y se ve como una foto* · ② **las dos
+plataformas, o es descarte**.
+
+---
+---
+
+# §M · DOS COSAS QUE DECLARÉ CONSTRUIDAS Y EL APARATO NEGÓ
+
+## §M0 · 🔴 EL CRITERIO, TOMADO — y lo escribo para mí
+
+**Las dos las declaré construidas y las dos fallan en el aparato.**
+
+*El criterio de verde de esta casa se ejerce con el dedo del founder, no con
+un typecheck.* Cuatro typechecks en 0 y 59 reglas verdes **dicen que compila y
+que no rompí ninguna ley — no dicen que la cosa haga lo que dice hacer.**
+
+⇒ **De acá en adelante: «construido» hasta que el founder lo vea andar.**
+Nunca «curado».
+
+## §M1 · GIRAR CÁMARA — instrumentado, tercera vez
+
+**El dato que afina el diagnóstico: NO hay parpadeo** ⇒ *probablemente ni
+siquiera cae a `restartTrack`.* O las dos vías fallan silenciosamente, o el
+llamador no las alcanza.
+
+**Instrumentado con `[GIRO_C]`, una marca que sólo este código pudo poner**
+(L-427), en **tres lugares** — porque son tres muertes distintas y el log dice
+cuál:
+
+| Marca | Qué prueba |
+|---|---|
+| `alternar:entra` | el toque llegó al handler |
+| `entra` | `girarCamara` se alcanzó, y si hay track |
+| `via1:existe` / `via1:corrio` | si `applyConstraints` existe, corrió, y **qué facingMode reporta el track después** |
+| `via1:no_cambio_cae_a_via2` | corrió sin lanzar **y no cambió** |
+| `via2:corrio` / `via2:excepcion` | el plan B |
+
+🔴 **Y una cura que salió de instrumentar, no de leer:** `applyConstraints`
+**puede resolver sin error y dejar el `facingMode` como estaba** — *una vía
+que "funciona" y no hace nada, que es exactamente el síntoma*. Ahora se
+verifica contra `getSettings().facingMode` y, si no cambió, **cae al plan B en
+vez de devolver `true`**. *Sin esa verificación, la vía ① reportaba éxito
+siempre y el plan B nunca corría — lo que explica que el founder no viera
+parpadeo.*
+
+**Falta el cable**: el founder reproduce con A y el log dice cuál de los tres
+lugares muere.
+
+## §M2 · TERMINAR NO CIERRA — medido de punta a punta, y es pedido a A
+
+**① Colgar es PURAMENTE LOCAL.** Medido otra vez tras la firma: `onSalir`
+hace `router.replace`/`router.back` y **cero llamadas al motor** en las dos
+apps.
+
+**② No existe ninguna RPC para que un actor termine la consulta.** Medido:
+`terminar_teleconsulta` · `cerrar_teleconsulta` · `finalizar_videollamada` →
+**cero resultados**.
+
+**③ Lo único que existe es `_cerrar_teleconsulta_si_vencio`** — el perezoso de
+A, **revocado de `authenticated`** (sólo lo llama la RPC por dentro). **Y la
+mesa tiene razón: ése es para las que NADIE cerró, no para las que sí.**
+
+⇒ **La pantalla no puede arreglarlo sola.** Confirmar en las dos apps y volver
+a entrar es coherente: *para el motor, esa cita sigue confirmada y pagada, y
+una cita así tiene su sala abierta.*
+
+### El pedido, con su forma
+
+**Una RPC que marque la teleconsulta como terminada**, llamable por **el dueño
+o el profesional de esa cita** (los dos, por la firma: *cualquiera cierra para
+ambos*).
+
+**Lo que la vuelve delicada, y por eso va con su nota:**
+
+- 🔴 **No puede confundirse con `no_show` ni con `no_realizable`.** *Acá la
+  consulta OCURRIÓ, el vet atendió y COBRA.* Un cierre que aterrice en un
+  estado de "no pasó" **le consumiría a la familia su derecho a la devolución
+  por una consulta que sí recibió** — el mismo cuidado que A puso en su freno
+  del perezoso.
+- **Idempotente**: los dos pueden tocar terminar casi a la vez.
+- ⚠️ **Y el borde que hay que decidir con ella:** si el DUEÑO cierra, ¿la cita
+  queda `completada` aunque el vet no haya sedimentado su nota? *Mi voto: sí —
+  la sala se cierra, y el Durante sigue disponible para el vet por su propia
+  puerta, que no depende de la sala.* Pero es letra, no mía.
+
+## §M3 · EL VET ATRAPADO AL DERIVAR — medido, y el guard es MÁS ANCHO QUE SU LETRA
+
+**Dónde vive la exigencia: en el MOTOR.** `sedimentar_nota_clinica` corta con
+`nota_sin_diagnostico` (`22023`), y su migración cita el literal del abogado:
+
+> *«El sistema debe exigir el campo de diagnóstico como obligatorio **antes de
+> emitir** — no por formalismo, sino porque una REV sin diagnóstico es una
+> receta defectuosa.»*
+
+🔴 **Y ahí está el hallazgo: el abogado dijo «antes de EMITIR» —una receta— y
+el guard está en CERRAR LA CONSULTA.** *Son dos actos, y hoy comparten un
+requisito que sólo uno de los dos necesita.* **El guard protege más de lo que
+su propia letra pide, y el costo es un vet que no puede cerrar una consulta
+cuyo resultado fue justamente no poder diagnosticar.**
+
+### El pedido, con la tensión respetada y no rodeada
+
+**Que `sedimentar_nota_clinica` exija diagnóstico SALVO cuando la conclusión
+sea una derivación** — y que **la exigencia para EMITIR RECETA quede intacta**,
+que es lo que el abogado pidió.
+
+**Y el cierre del círculo, que hace que nadie pierda nada:** *una consulta
+derivada sin diagnóstico no debería poder emitir receta*. Con eso el límite
+legal se cumple donde fue escrito, y el vet deja de estar atrapado.
+
+⚠️ **No es «no realizable»**, y la diferencia toca la plata: *acá la consulta
+ocurrió, el vet atendió y cobra. Su resultado fue derivar.*
