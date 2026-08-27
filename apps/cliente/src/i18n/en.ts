@@ -659,6 +659,8 @@ export const clienteEn = {
     simuladoAviso: 'Test phase: the payment is simulated — nothing real is charged.',
     exitoTitulo: 'Walk confirmed',
     exitoDetalle: "It's on the walker's schedule. You'll see it in your Home.",
+    cambiarMedio: 'Change payment method',
+    cambiarMedioNota: 'Your booking stays. The code we generated stops working.',
     volverHogar: 'Go to Home',
     // S101-C — the simulator's whole screens died here (see the Spanish note).
     holdVencido: 'This time was released',
