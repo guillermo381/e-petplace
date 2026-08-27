@@ -19861,54 +19861,6 @@ export type Database = {
           zona_lon: number | null
           zona_radio_m: number | null
         }
-        Insert: {
-          acepta_emergencias?: boolean | null
-          calificacion_promedio?: number | null
-          ciudad?: string | null
-          clip_url?: string | null
-          cohorte?: string | null
-          cohorte_anio?: number | null
-          country_code?: string | null
-          descripcion?: string | null
-          foto_url?: string | null
-          id?: string | null
-          nombre_comercial?: string | null
-          portadas?: never
-          radio_cobertura_km?: number | null
-          sector?: string | null
-          servicios?: never
-          tipo?: string | null
-          total_citas?: number | null
-          total_resenas?: number | null
-          user_id?: string | null
-          zona_lat?: never
-          zona_lon?: never
-          zona_radio_m?: never
-        }
-        Update: {
-          acepta_emergencias?: boolean | null
-          calificacion_promedio?: number | null
-          ciudad?: string | null
-          clip_url?: string | null
-          cohorte?: string | null
-          cohorte_anio?: number | null
-          country_code?: string | null
-          descripcion?: string | null
-          foto_url?: string | null
-          id?: string | null
-          nombre_comercial?: string | null
-          portadas?: never
-          radio_cobertura_km?: number | null
-          sector?: string | null
-          servicios?: never
-          tipo?: string | null
-          total_citas?: number | null
-          total_resenas?: number | null
-          user_id?: string | null
-          zona_lat?: never
-          zona_lon?: never
-          zona_radio_m?: never
-        }
         Relationships: [
           {
             foreignKeyName: "prestadores_user_id_fkey"
@@ -20491,6 +20443,14 @@ export type Database = {
           p_user_id: string
         }
         Returns: Json
+      }
+      _zona_aproximada: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          zona_lat: number
+          zona_lon: number
+          zona_radio_m: number
+        }[]
       }
       abrir_caso_clinico: {
         Args: {
@@ -21872,6 +21832,26 @@ export type Database = {
         }[]
       }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_historial_clinico_mascota: {
+        Args: {
+          p_caso_clinico_id?: string
+          p_desde?: string
+          p_hasta?: string
+          p_limite?: number
+          p_mascota_id: string
+        }
+        Returns: {
+          caso_clinico_id: string
+          caso_condicion: string
+          cita_id: string
+          diagnostico: string
+          evento_id: string
+          fecha: string
+          modalidad: string
+          motivo_consulta: string
+          negocio_nombre: string
+        }[]
+      }
       obtener_inicios_adiestramiento_disponibles: {
         Args: { p_comprable?: string; p_fecha: string; p_mascota_id: string }
         Returns: {
