@@ -99,7 +99,27 @@ export interface SuperficieLlamadaProps {
    *  permanente.* Obligatoria, el tsc lo exige y la rama desaparece. */
   onGirarCamara: () => void
   /** Voz de los controles (a11y — SIEMPRE, no son opcionales). */
-  vozControles: { microfono: string; camara: string; colgar: string; girarCamara: string }
+  vozControles: { microfono: string; camara: string; colgar: string; girarCamara: string; altavoz?: string }
+  /**
+   * 🔴 LA SALIDA DE AUDIO (firma del founder, 26-ago).
+   *
+   * ⏪ **Lo había descartado, y el argumento era correcto ENTONCES:** *«un
+   * toggle no arregla un default malo, lo delega en el usuario»*. **Con el
+   * default en altavoz ya curado y confirmado en llamada real, ese argumento
+   * caduca**: deja de ser una excusa para no arreglar el default y pasa a ser
+   * control sobre algo que ya funciona bien solo. *La razón del founder es de
+   * uso — hay momentos de una consulta en que no se quiere el altavoz.*
+   *
+   * 🔴 **OPCIONAL, y acá la opcionalidad SÍ se gana** (a diferencia de
+   * `onGirarCamara`, que la perdió porque las dos pantallas la pasaban):
+   * **con auriculares o bluetooth conectados este control no debe dibujarse**
+   * — *si alguien se puso auriculares, quiere auriculares, y un botón que
+   * pelea contra eso es peor que no tenerlo.* El consumidor lo decide con
+   * `getAudioOutputs()`, que es quien sabe qué hay enchufado.
+   */
+  onAltavoz?: () => void
+  /** `true` = suena por altavoz. Sin esto el control no se dibuja. */
+  altavozActivo?: boolean
   /** 🔴 LA SEÑAL DE LA NOTA (§2): «La doctora está escribiendo…». Aparece,
    *  **se desvanece sola a los 3 s** y no vuelve hasta el próximo cambio.
    *  *Es una señal tranquilizadora («me están atendiendo de verdad»), NO un
@@ -127,6 +147,8 @@ export function SuperficieLlamada({
   onColgar,
   onGirarCamara,
   vozControles,
+  onAltavoz,
+  altavozActivo = true,
   senalDeNota = null,
   pie,
 }: SuperficieLlamadaProps) {
@@ -250,7 +272,16 @@ export function SuperficieLlamada({
           colors={[...sobreVideo.velo].reverse() as [string, string]}
           style={{ paddingTop: spacing[8], paddingBottom: insetBottom + spacing[4] }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[4] }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[3] }}>
+            {/* ⚠️ EL ANCHO, MEDIDO — con CINCO controles la fila aprieta.
+                   4×52 + 1×60 (colgar) = 268 px de discos; con `gap` en 16 y
+                   4 huecos sumaba **332 px** y NO entra en un teléfono de 320.
+                   Con `spacing[3]` (12) queda en **316** y entra.
+                   🔴 **Es el techo: un sexto control no cabe**, y la salida no
+                   sería achicar más el gap —quedarían pegados— sino decidir qué
+                   sale de la barra. *Se deja el número escrito para que esa
+                   decisión se tome mirándolo y no en el momento.* */}
+
             {/* 🔴 EL ORDEN ES EL DE LA DIRECCIÓN §2: **micrófono · cámara ·
                    girar cámara · colgar**, y estaba mal — corría
                    `micrófono · girar · colgar · cámara`, con COLGAR EN EL MEDIO.
@@ -269,6 +300,14 @@ export function SuperficieLlamada({
                    dirección §2 lo pide explícito — «que no se esconda junto al
                    resto del chrome». Es el botón que se busca cuando llega el
                    momento de mostrar al animal, y ese momento no avisa. */}
+            {/* La salida de audio: se esconde con el chrome — cambiarla es
+                   ajuste, no emergencia. */}
+            {onAltavoz != null && (
+              <Animated.View style={estiloChrome} pointerEvents={visible ? 'auto' : 'none'}>
+                <ControlLlamada glifo="altavoz" etiqueta={vozControles.altavoz ?? ''} activo={altavozActivo} onPress={() => { onAltavoz(); despertar() }} />
+              </Animated.View>
+            )}
+
             <ControlLlamada glifo="girarCamara" etiqueta={vozControles.girarCamara} onPress={() => { onGirarCamara(); despertar() }} />
 
             {/* 🔴 COLGAR: último y fuera de `estiloChrome` A PROPÓSITO. */}

@@ -2704,6 +2704,7 @@ function GaleriaInterna() {
               <View style={{ backgroundColor: fondo, padding: spacing[4], borderRadius: radius.md, flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
                 <ControlLlamada glifo="microfono" etiqueta="Micrófono" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
                 <ControlLlamada glifo="camara" etiqueta="Cámara" activo={camViva} onPress={() => setCamViva((v) => !v)} />
+                <ControlLlamada glifo="altavoz" etiqueta="Altavoz" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
                 <ControlLlamada glifo="girarCamara" etiqueta="Girar cámara" onPress={() => {}} />
                 <ControlLlamada glifo="colgar" tamaño="lg" etiqueta="Colgar" onPress={() => {}} />
                 <TemporizadorLlamada inicioTs={inicioLlamada} />
