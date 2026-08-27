@@ -396,6 +396,23 @@ export interface ParteConsulta {
   examenes: Array<{ tipoExamen: string; estado: string }>;
   proximoControl: string | null;
   casoCondicion: string | null;
+  /**
+   * S106-A t3 · **LA MARCA DE §7 EN LA LECTURA CLÍNICA.**
+   * `LETRA_TELEMEDICINA` §7 firma que la consulta queda marcada como atendida
+   * por videoconsulta, y §7② firma cómo: **derivada de la cita**, sin evento
+   * separado ni columna nueva.
+   *
+   * 🔴 Acá pesa más que en el timeline. Allá la marca ayuda a ubicarse; **acá
+   * cambia cómo se lee lo que dice**: *un examen físico hecho por video y uno
+   * hecho con el animal sobre la mesa no son la misma evidencia, y el papel
+   * tiene que decir cuál fue.*
+   *
+   * Código del motor (`'telemedicina'`), jamás el de la pieza
+   * (`'teleconsulta'`): la voz es de la pantalla, Ley 3. `null` = parte viejo
+   * sin modalidad escrita — **decir `presencial` por él sería inventar, y en
+   * un papel clínico.**
+   */
+  modalidad: string | null;
 }
 
 function mapExamenParte(e: Record<string, unknown>): { tipoExamen: string; estado: string } {
@@ -450,6 +467,7 @@ export async function obtenerParteConsulta(
       examenes: examenesRaw.filter(esObj).map(mapExamenParte),
       proximoControl: str(data['proximo_control']),
       casoCondicion: str(data['caso_condicion']),
+      modalidad: str(data['modalidad']),
     },
   };
 }

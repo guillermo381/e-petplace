@@ -12,7 +12,12 @@
  * devuelve.** Porque lo que la familia vino a mirar es al animal y a la cara
  * del veterinario, no nuestros botones.
  *
- * 🔴 **TRES COSAS NO SE ESCONDEN JAMÁS:**
+ * 🔴 **CUATRO COSAS NO SE ESCONDEN JAMÁS:**
+ * · **EL TEMPORIZADOR** (firma del founder, 26-ago). *Un reloj que arranca en
+ *   `00:00` y desaparece a los 4 s no lo ve nadie: el founder lo tuvo funcionando
+ *   en las dos apps y nunca supo que existía.* **Un dato que solo aparece si
+ *   tocás la pantalla, en la práctica no está** — y §4 cobra la consulta por su
+ *   duración, así que el vet necesita verla sin pedirla.
  * · **COLGAR.** *Si me quiero ir, no puedo tener que adivinar dónde tocar
  *   primero para que aparezca el botón de salida.* Un control de emergencia que
  *   exige un toque de descubrimiento no es un control de emergencia.
@@ -55,6 +60,7 @@ import { sobreVideo } from '../tokens/sobreVideo'
 import { ControlLlamada } from './ControlLlamada'
 import { Texto } from './Texto'
 import { EncabezadoLlamada, type EncabezadoLlamadaProps } from './EncabezadoLlamada'
+import { TemporizadorLlamada } from './TemporizadorLlamada'
 import { TileVideoPropio, type TileVideoPropioProps } from './TileVideoPropio'
 
 /** Lo que la dirección fijó: 4 s de quietud y el chrome se va. */
@@ -197,6 +203,32 @@ export function SuperficieLlamada({
         <EncabezadoLlamada {...encabezado} insetTop={insetTop} />
       </Animated.View>
 
+      {/* 🔴 EL TEMPORIZADOR, HERMANO DEL ENCABEZADO Y FUERA DEL CHROME.
+             **Y lleva su propia `banda`, que es la mitad que la firma no
+             nombraba pero sin la cual la cura queda a medias:** hasta hoy se
+             leía gracias al VELO del encabezado, y al salir de ahí quedaría
+             texto papel sobre video crudo — **ilegible sobre una pared
+             blanca**. Con la banda de la clase el par está medido: **8.27
+             sobre video blanco · 19.47 sobre negro**.
+             *Exceptuar un elemento del ocultado no es moverlo de contenedor:
+             es darle el piso que el contenedor le prestaba.* */}
+      {encabezado.inicioTs != null && (
+        <View
+          style={{
+            position: 'absolute',
+            top: insetTop + spacing[3],
+            right: spacing[4],
+            paddingHorizontal: spacing[2.5],
+            paddingVertical: spacing[1],
+            borderRadius: radius.full,
+            backgroundColor: sobreVideo.banda,
+          }}
+          pointerEvents="none"
+        >
+          <TemporizadorLlamada inicioTs={encabezado.inicioTs} />
+        </View>
+      )}
+
       {/* 🔴 La señal de la nota. Vive FUERA del chrome: aparece aunque los
              controles estén ocultos, porque no es un control — es una noticia. */}
       {senalDeNota != null && senalVisible && (
@@ -218,10 +250,19 @@ export function SuperficieLlamada({
           colors={[...sobreVideo.velo].reverse() as [string, string]}
           style={{ paddingTop: spacing[8], paddingBottom: insetBottom + spacing[4] }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[5] }}>
-            {/* Micrófono y cámara SÍ se esconden. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[4] }}>
+            {/* 🔴 EL ORDEN ES EL DE LA DIRECCIÓN §2: **micrófono · cámara ·
+                   girar cámara · colgar**, y estaba mal — corría
+                   `micrófono · girar · colgar · cámara`, con COLGAR EN EL MEDIO.
+                   *Un destructivo entre dos controles reversibles es el peor
+                   lugar donde puede estar: el pulgar lo encuentra buscando otra
+                   cosa.* Y la dirección lo pone último por eso mismo. */}
             <Animated.View style={estiloChrome} pointerEvents={visible ? 'auto' : 'none'}>
               <ControlLlamada glifo="microfono" etiqueta={vozControles.microfono} activo={microfonoActivo} onPress={() => { onMicrofono(); despertar() }} />
+            </Animated.View>
+
+            <Animated.View style={estiloChrome} pointerEvents={visible ? 'auto' : 'none'}>
+              <ControlLlamada glifo="camara" etiqueta={vozControles.camara} activo={camaraActiva} onPress={() => { onCamara(); despertar() }} />
             </Animated.View>
 
             {/* 🔴 GIRAR CÁMARA: fuera de `estiloChrome`, como colgar. La
@@ -230,12 +271,8 @@ export function SuperficieLlamada({
                    momento de mostrar al animal, y ese momento no avisa. */}
             <ControlLlamada glifo="girarCamara" etiqueta={vozControles.girarCamara} onPress={() => { onGirarCamara(); despertar() }} />
 
-            {/* 🔴 COLGAR: fuera de `estiloChrome` A PROPÓSITO. Nunca se esconde. */}
+            {/* 🔴 COLGAR: último y fuera de `estiloChrome` A PROPÓSITO. */}
             <ControlLlamada glifo="colgar" tamaño="lg" etiqueta={vozControles.colgar} onPress={onColgar} />
-
-            <Animated.View style={estiloChrome} pointerEvents={visible ? 'auto' : 'none'}>
-              <ControlLlamada glifo="camara" etiqueta={vozControles.camara} activo={camaraActiva} onPress={() => { onCamara(); despertar() }} />
-            </Animated.View>
           </View>
 
           {/* El asa del modal (si el consumidor la monta) tampoco se esconde. */}

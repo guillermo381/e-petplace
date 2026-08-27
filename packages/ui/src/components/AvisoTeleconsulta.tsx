@@ -94,8 +94,9 @@
  */
 
 import { View } from 'react-native'
+import { Boton } from './Boton'
 import { Casilla } from './Casilla'
-import { Celda } from './Celda'
+import { CeldaNavegacion } from './CeldaNavegacion'
 import { Hoja, HojaScroll } from './Hoja'
 import { Texto } from './Texto'
 import { useTheme } from '../ThemeProvider'
@@ -267,29 +268,56 @@ export function AvisoTeleconsulta({ visible, onCerrar, texto, acciones, consenti
           </View>
         )}
 
-        {/* LAS TRES, de peso par. Orden fijado acá — el consumidor no lo elige. */}
+        {/* ── LAS TRES ACCIONES ─────────────────────────────────────────────
+            🔴 **EL FOUNDER PRESIONÓ UNA POR ERROR** en la prueba real: eran
+            `Celda` desnudas —sin chevron, sin caja, sin nada que dijera que se
+            tocan—. *En una pantalla cuyo punto es que alguien con un animal en
+            riesgo elija bien, eso es lo más grave que dejó el gate.*
+
+            ── LA TENSIÓN CON LA PARIDAD, DECIDIDA Y DECLARADA ──────────────
+            La paridad se firmó para que **ninguna presida** — para que la app
+            no empuje hacia la videoconsulta cuando el animal puede estar en
+            riesgo. ¿Un fondo en la tercera la hace presidir?
+
+            **No, y el argumento que lo decide es que la paridad se estaba
+            cumpliendo en la FORMA y violando en el EFECTO:** las tres se veían
+            igual… **igual de MUERTAS**. *Lo que la paridad protege es que las
+            tres se vean igual de DISPONIBLES, y ninguna lo parecía.* Un chevron
+            no baja disponibilidad: la sube.
+
+            ── Y LA FORMA NO SE INVENTA: la casa ya tiene su gramática ───────
+            **Ley 19.7:** el chevron discrimina **navegar** de **ejecutar**.
+            Las dos primeras te SACAN de acá (`›`); la tercera AVANZA el flujo.
+            Son dos clases de acción y por eso llevan dos formas.
+
+            **La tercera va `secundario`, JAMÁS `primario`:** en el cliente el
+            CTA primario es ORO (S82), y un oro pleno acá sí empujaría — que es
+            exactamente lo que la firma de la paridad prohíbe. Secundario tiene
+            fondo (se lee como acción) **sin la jerarquía del CTA**. Con esto
+            hay **cero sólidos primarios** en la superficie: 19.7 intacta.
+
+            *Y el precedente que cité al construir esto —`SelectorAvatar`— tiene
+            el mismo hueco: heredé su defecto. **El mismo patrón es aceptable
+            donde equivocarse es gratis e inaceptable donde equivocarse tiene
+            consecuencia clínica** (medición de C).* */}
         <View style={{ marginTop: spacing[5] }}>
-          <Celda
-            interactiva
-            accessibilityRole="button"
+          <CeldaNavegacion
             titulo={acciones.urgencias.etiqueta}
-            tituloEntero
             onPress={acciones.urgencias.onPress}
           />
-          <Celda
-            interactiva
-            accessibilityRole="button"
+          <CeldaNavegacion
             titulo={acciones.presencial.etiqueta}
-            tituloEntero
             onPress={acciones.presencial.onPress}
           />
-          {/* 🔴 La ÚNICA que la casilla puede apagar. Las dos de arriba jamás. */}
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={acciones.continuar.etiqueta}
-            tituloEntero
-            deshabilitada={continuarBloqueada}
+        </View>
+
+        {/* La única que la casilla puede apagar, y la única con fondo. */}
+        <View style={{ marginTop: spacing[4] }}>
+          <Boton
+            variante="secundario"
+            bloque
+            etiqueta={acciones.continuar.etiqueta}
+            deshabilitado={continuarBloqueada}
             onPress={acciones.continuar.onPress}
           />
         </View>

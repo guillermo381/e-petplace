@@ -17,10 +17,17 @@
  * no cortar la imagen con una línea recta — *un borde duro sobre video se lee
  * como un defecto de render.*
  *
- * ── SE ESCONDE CON EL CHROME ───────────────────────────────────────────────
- * Es de los que desaparecen a los 4 s (OBRA 4). **Y el temporizador sigue
- * corriendo por dentro**: no se pausa porque no se vea. *Un reloj que se
- * reinicia al reaparecer mentiría sobre algo que se cobra.*
+ * ── SE ESCONDE CON EL CHROME — **pero el reloj YA NO VIVE ACÁ** ────────────
+ * El nombre y el estado se desvanecen a los 4 s (OBRA 4). **El temporizador
+ * salió de esta pieza** por firma del founder (26-ago): se esconde lo que
+ * compite con el video, y el reloj no compite — *le dice al vet cuánto lleva
+ * una consulta que §4 cobra por su duración*.
+ *
+ * 🔴 **Por qué SALIÓ en vez de quedarse con una excepción adentro:** este
+ * bloque entero es lo que se desvanece. Para exceptuar UNA parte había que
+ * sacarla del bloque, y entonces **la composición pasa a decir la ley**: lo que
+ * se esconde y lo que no son dos piezas distintas, y ninguna futura pasada
+ * puede volver a esconderlo por descuido.
  */
 
 import { View } from 'react-native'
@@ -30,32 +37,36 @@ import { sobreVideo } from '../tokens/sobreVideo'
 import { spacing } from '../tokens/spacing'
 import { Texto } from './Texto'
 import { EstadoConexion, type EstadoConexionProps } from './EstadoConexion'
-import { TemporizadorLlamada } from './TemporizadorLlamada'
 
 export interface EncabezadoLlamadaProps {
   /** Con quién estoy hablando. */
   nombre: string
   estado: EstadoConexionProps['estado']
   vozEstado: EstadoConexionProps['voz']
-  /** Epoch ms del inicio. `null` = todavía no empezó a contar. */
+  /** ⏪ Epoch ms del inicio. **Ya NO lo dibuja esta pieza** (firma founder
+   *  26-ago: el temporizador no se esconde) — se conserva en el contrato
+   *  porque `SuperficieLlamada` lo recibe acá y lo pasa al reloj hermano.
+   *  *No se saca para no romper a los dos consumidores por un dato que igual
+   *  hay que transportar.* */
   inicioTs: number | null
   /** Inset superior del aparato. */
   insetTop?: number
 }
 
-export function EncabezadoLlamada({ nombre, estado, vozEstado, inicioTs, insetTop = 0 }: EncabezadoLlamadaProps) {
+export function EncabezadoLlamada({ nombre, estado, vozEstado, insetTop = 0 }: EncabezadoLlamadaProps) {
   return (
     <LinearGradient
       colors={sobreVideo.velo}
       style={{ paddingTop: insetTop + spacing[3], paddingHorizontal: spacing[4], paddingBottom: spacing[6] }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+        {/* El reloj ocupaba la derecha de esta fila; su hueco queda para que el
+            nombre respire y NO se rellena con nada (Chanel). */}
         <View style={{ flex: 1 }}>
           <Texto variante="seccion" color="sobreVideo">
             {nombre}
           </Texto>
         </View>
-        <TemporizadorLlamada inicioTs={inicioTs} />
       </View>
 
       {/* §1.6 de la dirección: **«Bajo el nombre, una línea discreta»**. Va

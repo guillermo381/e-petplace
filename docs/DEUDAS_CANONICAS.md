@@ -22643,6 +22643,81 @@ uniformiza.*
 
 ---
 
+### `L-428` — HAY MODOS DE FALLA QUE VIVEN EN EL RELOJ, Y NINGÚN GATE MIRA RELOJES
+
+**Nace S106-A tanda 3, 26-ago-2026.** Es la lección más cara del día, y la
+pagó A **contra su propio trabajo de la víspera**.
+
+#### La primera mitad — el defecto
+
+Una vigilancia de consumo tenía que pedirle un número a un endpoint y avisar al
+cruzar un umbral. `pg_net` **no despacha la petición hasta que la transacción
+commitea** ⇒ pedir y cobrar en la misma transacción es imposible por
+construcción. Se resolvió con **dos tiempos**: cada corrida cobra lo que pidió
+la anterior y pide para la próxima. **Correcto — y con un supuesto no medido:
+que la respuesta seguiría ahí.**
+
+Medido al día siguiente: **`pg_net.ttl` = 6 horas** y el cron corría **cada
+24**. La respuesta llevaba **18 horas borrada** cuando la corrida siguiente iba
+a cobrarla ⇒ la vigilancia habría dicho *«no pude medir»* **todos los días,
+para siempre, sin medir una sola vez** — y `cron.job_run_details` mostrándola
+puntual y sin errores.
+
+> 🔴 **La versión vieja moría por TRANSACCIÓN; ésta moría por RELOJ — y ningún
+> gate mira relojes.**
+
+Ni el typecheck, ni el cinturón de la migración, ni la auto-prueba del juez, ni
+el ledger de jobs pueden ver una incompatibilidad entre **dos duraciones que
+viven en dos sistemas distintos** (la cadencia en `cron.job`, el TTL en
+`pg_settings`). *No es que los gates fallaran: es que la magnitud que decide no
+estaba en ninguno de los dos lados que miran.*
+
+**Cómo se reconoce en el campo:** cuando una pieza depende de que algo **siga
+existiendo** entre dos momentos —una respuesta cacheada, un token, un archivo
+temporal, una fila con TTL, una sesión— **la pregunta no es «¿funciona?» sino
+«¿cuánto vive eso, y cuánto tarda mi próxima corrida?»**. Y las dos respuestas
+se **leen del objeto vivo**, jamás de una constante transcrita.
+
+#### La segunda mitad — lo que lo salvó, y es la mitad que se copia
+
+**El defecto se descubrió porque el monitor estaba obligado a avisar cuando NO
+PODÍA medir**, no sólo cuando cruzaba el umbral.
+
+> 🔴 *Sin ese brazo, el silencio se habría leído como «estás por debajo del
+> umbral» para siempre.* Un monitor que sólo habla cuando hay problema es
+> indistinguible de uno roto: **los dos callan.**
+
+⇒ **La regla que se lleva: todo instrumento de vigilancia tiene DOS avisos, no
+uno** — «pasó lo que vigilo» y «no pude vigilar». El segundo es el que hace
+auditable al primero.
+
+Y su corolario, que apareció en la misma cura: **los dos avisos no comparten
+clave de dedup.** El del umbral era mensual (para no molestar); el de fallo
+había heredado esa misma clave ⇒ *un fallo del día 2 habría silenciado los del
+3 al 31 — el monitor tapándose a sí mismo.*
+
+#### La cura, y por qué no fue la más corta
+
+Se descartaron dos formas más breves, con su razón:
+
+- *dos jobs, pedir y cobrar a 15 minutos* — correcto, pero **acopla dos
+  schedules**: el día que alguien mueva uno solo, el otro cobra vacío y vuelve
+  el mismo silencio.
+- *guardar el último valor conocido y reusarlo* — tapa el síntoma, y encima
+  **diría un número viejo como si fuera de hoy**.
+
+Lo que entró: cadencia dentro del TTL **y la función auto-diagnosticándose** —
+lee su propia cadencia de `cron.job` y el `pg_net.ttl` **vivos**, y si no caben,
+**lo dice adentro del aviso**. *Un cinturón mira el día que corre la migración;
+esto mira cada corrida.* El día que alguien vuelva a alargar la cadencia, el
+primer aviso nombra la causa en vez de mandar a buscar un endpoint sano.
+
+> **Depositada por A, con la formulación del founder.** Número verificado **por
+> grep** contra este archivo y contra las cuatro ramas de pista vivas — el tope
+> real era `L-427`.
+
+---
+
 ### D-938 🔴 · LAS PANTALLAS DE VIDEOCONSULTA NO TIENEN PUERTA — sólo se llega por deep link
 
 **Nace S106 tanda 2, 26-ago-2026.** Hallazgo al preparar las builds del gate.
@@ -22680,3 +22755,226 @@ código:** desde dónde se entra. *El botón «entrar a la videoconsulta» ya es
 gateado por el veredicto del servidor (`puede_entrar_a_videollamada`), así que
 el lugar natural es el detalle de la cita — pero eso lo decide quien conoce el
 recorrido, no quien compila el APK.*
+
+---
+
+### D-939 🔴 · EL AVISO DE CITA NUEVA LLEGA SÓLO AL TITULAR — LOS CINCO OFICIOS, CITAS PAGAS
+
+**🔴 NO ES DE TELEMEDICINA: ES DEL PRODUCTO ENTERO** (alcance fijado por el
+founder, 26-ago-2026). Se midió contestando *«¿cómo se entera el vet de que le
+reservaron una teleconsulta?»* — la respuesta fue **sí, se entera** —, y
+medirla destapó **a quién** le llega.
+
+**Lo que el motor hace, medido:** `confirmar_cita_pagada` emite dos avisos del
+mismo instante. El del negocio es `cita_solicitada`, y su destinatario está
+escrito así:
+
+```sql
+SELECT pr.user_id INTO v_titular FROM prestadores pr WHERE pr.id = v_cita.prestador_id;
+...
+p_destinatario_user_id => v_titular
+```
+
+⇒ **el aviso va al TITULAR del negocio y a nadie más.** En un negocio con
+equipo, **quien va a atender no se entera de que le reservaron.**
+
+**El código no tiene ninguna rama por tipo de servicio** ⇒ vale igual para
+**paseo, grooming, adiestramiento, veterinaria y telemedicina**, y hoy alcanza
+a **citas ya pagadas de todos ellos**.
+
+---
+
+#### 🔴 EL COSTO, DICHO SIN SUAVIZAR
+
+**Un profesional puede perderse una cita PAGA sin enterarse.** No es una
+molestia de coordinación: es una familia que pagó, reservó una hora, y del otro
+lado no hay nadie esperándola — *y el negocio se entera cuando la familia
+reclama, que es el peor momento y el peor mensajero.*
+
+**Y es invisible por el tamaño de los negocios, no por diseño.** Los negocios
+vivos hoy son de una sola persona, o el titular atiende ⇒ titular y quien
+atiende son el mismo. *El defecto está completo y no tiene síntoma; lo destapa
+la primera clínica con equipo, que es exactamente cuando más caro es.*
+
+---
+
+#### 🔴 DISPARO: **SE RESUELVE ANTES DEL ENCENDIDO DE TELEMEDICINA**
+
+Firma del founder, con su razón:
+
+> *Un vet que no se entera de una videoconsulta **la pierde entera**. En
+> presencial, al menos el dueño llega a la puerta y alguien lo ve.*
+
+⇒ la teleconsulta **no tiene ese repechaje**: no hay puerta, no hay sala de
+espera, no hay nadie que note que alguien está parado ahí. **La misma falla que
+en presencial degrada, en telemedicina destruye la cita.**
+
+Por eso esta deuda **precede al encendido de la llave**
+(`tipos_servicio.telemedicina.reservable`), y no al revés.
+
+---
+
+#### LO QUE HACE FALTA ANTES DE CURARLA — es letra, no código
+
+**El dato ya está:** la cita sabe quién la va a atender
+(`evento_cita_servicio.empleado_id`). Lo que no está decidido es a quién se
+avisa:
+
+- ¿el titular **deja** de recibirlo, o lo reciben **los dos**?
+
+*Avisar a los dos es lo cómodo y es también cómo se enseña a ignorar los
+avisos* — `MODELO_DESPENSA` ya firmó que **avisar todo entrena a no mirar**
+(por eso preparado y empacado no se notifican). Con el titular de una clínica
+grande recibiendo cada cita de cada profesional, ese buzón se apaga solo en un
+mes, y con él se apaga el aviso que sí importa.
+
+⚠️ **Y hay una tercera pregunta que la letra tiene que contestar y no es
+obvia:** las citas que nacen **sin `empleado_id`** —a la pizarra, sin persona
+asignada— no tienen a quién avisarle además del titular. *Ahí el titular no es
+un destinatario de más: es el único que existe.* Una cura que simplemente
+cambie el destinatario **dejaría esas citas sin ningún aviso**, que es peor que
+el defecto que viene a arreglar.
+
+**Nota de método:** apareció **contestando otra pregunta**. El encargo era
+verificar si el aviso viajaba; viajaba. *Un censo que sólo hubiera contestado
+«sí» y cerrado no habría mirado a quién le llega.*
+
+---
+
+### D-941 🔴 · UN DUEÑO PUEDE PAGAR POR UN SERVICIO QUE NO ELIGIÓ, Y NADA SE LO DICE
+
+**Nace S106-A t3, 26-ago-2026.** Lo encontró **el founder dudando de su propia
+reserva** y pidiendo que se midiera — no lo encontró ningún gate.
+
+🔴 **NO ES DE TELEMEDICINA.** Es la pantalla del QUÉ de veterinaria, y toca a
+todo el que reserve por ahí.
+
+#### El costo, dicho sin suavizar
+
+**Le pasó DOS de cinco veces, conociendo el sistema.** Pagó **$50 por una
+consulta presencial que no quería**, dos veces, y *sólo se enteró porque fue a
+mirar la fila en la base de datos.*
+
+> **Nadie más va a ir a mirar la fila.** Una familia se entera el día de la
+> cita, cuando la clínica la espera en persona y ella creía haber comprado una
+> videoconsulta — o peor, cuando no aparece nadie y el vet marca no-show.
+
+Las dos filas medidas, literales:
+
+```
+713aae37 · tipo_servicio=consulta_general · modalidad=presencial · $50 · 30min · 23:20
+7390a25b · tipo_servicio=consulta_general · modalidad=presencial · $50 · 30min · 23:00
+```
+
+…contra la que sí quería, hecha en el medio de las dos:
+
+```
+c6cdb345 · tipo_servicio=telemedicina · modalidad=telemedicina · $24 · 20min · 23:00
+```
+
+#### La causa, medida — una línea
+
+`apps/cliente/src/app/(tabs)/explorar/veterinaria/index.tsx:192`
+
+```js
+pedido ?? (s !== null && r.data.some((o) => o.tipo_servicio === s) ? s : r.data[0].tipo_servicio)
+```
+
+**El QUÉ nace preseleccionado en `r.data[0]`** — el primero de la oferta, que
+el motor devuelve **ordenado alfabéticamente** (`ORDER BY ps.tipo_servicio` en
+`_vet_ofertas_cobrables`) ⇒ cae en una presencial, y `Teleconsulta` queda más
+abajo.
+
+⚠️ **El propio código declara el principio correcto** — *«preselección para ser
+un ancla. **Preseleccionar no es imponer**»* — y el defecto es su reverso
+exacto: **preseleccionar el primero alfabético hace que quien no toca nada
+compre lo que la lista puso arriba.** *La intención estaba escrita; lo que
+faltaba era que el default fuera «ninguno».*
+
+#### Por qué no hay síntoma, que es lo que lo vuelve grave
+
+**El resto del flujo se comporta idéntico**: día, hora, quién, pago. Nada
+cambia de forma, nada avisa. El checkout **sí muestra el nombre del servicio**
+—`subtitulo={servicioNombre}` en `checkout-reserva.tsx:432`— pero **como
+subtítulo debajo del nombre de la clínica.**
+
+> *Un dato que está pero no preside no informa. En el momento del pago, lo que
+> preside es lo que se lee.*
+
+⇒ **No es una pantalla que miente: es una que no insiste.** Y la distinción
+manda la cura: **el arreglo no es agregar texto, es que el QUÉ no venga elegido
+de fábrica.**
+
+#### Las dos curas (firma del founder, 26-ago) — LAS DOS SON DE C
+
+**① EL QUÉ NO VIENE ELEGIDO DE FÁBRICA.** Si el usuario no eligió servicio,
+**no hay servicio elegido** y la pantalla se lo pide. ⚠️ Y su borde: **si viene
+un servicio desde el catálogo, ÉSE gana** — no se pisa con el primero
+alfabético. *(El `pedido ??` ya lo respeta; lo que se retira es el fallback.)*
+
+**② EL CHECKOUT DICE QUÉ ESTÁS COMPRANDO, Y PRESIDE.** Es **cinturón, no
+cura**: *aunque ① nunca fallara, una pantalla de pago tiene que decir qué se
+paga.* Las dos capas se sostienen solas.
+
+**Adjudicación:** las dos a **C**. Son superficie, y C ya está adentro de ese
+archivo en esta tanda — partirlas pondría dos manos sobre las mismas líneas.
+
+---
+
+### D-942 🔴 · EL TITULAR NO PUEDE VER NI TOMAR LA CITA QUE EL MOTOR ASIGNÓ A SU EQUIPO
+
+**Nace S106-A t3, 26-ago-2026.** Hermana de `D-939` **vista desde el otro
+lado**: allá el aviso llega sólo al titular; acá el titular es el único que no
+puede hacer nada con la cita.
+
+🔴 **NO ES DE TELEMEDICINA:** el motor asigna `empleado_id` en los cinco
+oficios y ninguna superficie deja moverlo.
+
+#### El síntoma, literal del founder
+
+Como titular de Clínica Aurora, la cita le dice *«Esta consulta está asignada a
+otra persona del equipo»* — **sin decir a quién** — y **no tiene forma de
+tomarla ni de reasignarla**.
+
+#### Lo medido
+
+**① A quién se asignó, y por qué:** la cita `c6cdb345` quedó en el empleado
+`afdc7fb9` (`guillo381+7@gmail.com`). El motor elige por el `ORDER BY` de
+`crear_bloqueo_agenda` — **continuidad clínica primero, balanceo después**
+(S78). *La elección es correcta y el problema no es a quién eligió: es que no
+se puede ver ni cambiar.*
+
+**② La pantalla de equipo EXISTE:** `apps/prestador/src/app/negocio/equipo.tsx`.
+**No falta y no se quitó — no se encuentra.** Medido: el único lugar que navega
+a ella es **la tab Mascotas** (`mascotas.tsx:728`); **desde Negocio no hay
+camino.**
+
+> *Que una pantalla llamada «equipo», que vive en la ruta `/negocio/equipo`, no
+> se pueda alcanzar desde Negocio es un defecto por derecho propio* — el
+> founder la buscó donde su nombre dice que está.
+
+**③ Y ninguna de las dos reasigna.** Gestionar el equipo y mover una consulta
+son cosas distintas, y **la segunda no existe en ninguna pantalla.**
+
+#### El costo
+
+En una clínica real, el profesional asignado **puede estar de vacaciones o
+haber renunciado**, y la consulta **PAGA** se pierde sin que nadie pueda hacer
+nada.
+
+⚠️ **Y en teleconsulta no hay repechaje.** En presencial el dueño llega a la
+puerta y alguien lo atiende; **en una videollamada no hay puerta, no hay sala y
+no hay nadie que note que alguien está esperando.** La misma falla que en
+presencial degrada, en teleconsulta **destruye la cita**.
+
+#### 🔴 DISPARO: **antes del encendido de telemedicina** — el mismo que `D-939`
+
+#### La pregunta de mesa que sale de acá, y NO es técnica
+
+> **¿El titular DEBERÍA poder tomar una cita asignada a otro?**
+
+En una clínica es razonable que sí — *el dueño cubre a su equipo*. Pero es una
+decisión de producto, no un default: **de la respuesta depende si esto es un
+hueco de pantalla o una decisión que falta tomar**, y por eso se anota como
+pregunta y no como cura. *(Pendiente de A: medir si el motor lo permite hoy o
+lo prohíbe por diseño.)*
