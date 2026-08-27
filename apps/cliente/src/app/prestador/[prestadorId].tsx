@@ -58,6 +58,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { vozDeOficios } from '@/lib/voz-oficio';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { urlGaleria } from '@/lib/url-galeria';
 import { FlechaVolver } from '@/components/flecha-volver';
 import { BarraAdiestramiento } from '@/components/reserva/barra-adiestramiento';
@@ -162,9 +163,16 @@ export default function PerfilPublicoPrestador() {
             logoUrl={resolverUrlLogoNegocio(perfil.foto_url)}
             portadas={perfil.portadas.map(urlGaleria).filter((u): u is string => u !== null)}
             clipUri={urlGaleria(perfil.clip_url)}
-            zonaLat={perfil.zona_lat}
-            zonaLon={perfil.zona_lon}
-            zonaRadioM={perfil.zona_radio_m}
+            /* 🔴 EL GUARD DEL MAPA NATIVO (S80-B19, gemelo del prestador).
+               Sin la meta-data `geo.API_KEY` en el APK, montar el MapView
+               MATA LA APP EN HILO NATIVO — ninguna ErrorBoundary lo atrapa.
+               `FichaPrestador` ya no monta el mapa cuando estas tres vienen
+               nulas, así que el guard se aplica NO PASÁNDOLAS: cero cambio en
+               la pieza compartida.
+               Un secret faltante cuesta EL MAPA, jamás la app. */
+            zonaLat={MAPA_NATIVO_DISPONIBLE ? perfil.zona_lat : null}
+            zonaLon={MAPA_NATIVO_DISPONIBLE ? perfil.zona_lon : null}
+            zonaRadioM={MAPA_NATIVO_DISPONIBLE ? perfil.zona_radio_m : null}
             ciudad={perfil.ciudad}
             historia={perfil.descripcion}
             servicios={vozDeOficios(perfil.servicios, t)}
