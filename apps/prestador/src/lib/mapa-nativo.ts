@@ -33,4 +33,22 @@
  * El guard NO se retira: si una build futura sale sin el secret, este
  * flag vuelve a false y cuesta el mapa, jamás la app.
  */
-export const MAPA_NATIVO_DISPONIBLE = true;
+/* 🔴 S106-A · VUELVE A `false`, Y ES LA PROPIA LEY DE ESTE ARCHIVO CUMPLIDA:
+ * *«si una build futura sale sin el secret, este flag vuelve a false y cuesta
+ * el mapa, jamás la app.»*
+ *
+ * **Medido sobre el ARTEFACTO, no sobre el prebuild** (`verify-manifest-apk`):
+ * el APK del prestador de S106 t2 **NO tiene `geo.API_KEY`**, y el de este
+ * cierre tampoco. `D-944`: los dos son secrets de EAS y **una build local no
+ * puede tenerlos**.
+ *
+ * ⚠️ **Y corrige una medición mía que estaba mal:** al diagnosticar el crash
+ * del cliente leí `android/app/src/main/AndroidManifest.xml` —el del
+ * **prebuild**— y concluí que el prestador estaba sano. *Ese archivo no es el
+ * manifiesto del APK.* Con el flag en `true` sobre un APK sin key, «Cómo te
+ * ven» montaba un mapa y **moría en hilo nativo**: un crash latente que nadie
+ * había disparado sólo porque nadie abrió esa pantalla.
+ *
+ * *Leer el insumo de un artefacto y llamarlo el artefacto es la misma clase de
+ * error que medir una rama en vez del objeto desplegado.* */
+export const MAPA_NATIVO_DISPONIBLE = false;

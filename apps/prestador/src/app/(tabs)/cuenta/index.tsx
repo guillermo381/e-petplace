@@ -68,6 +68,7 @@ import {
   useMuroOficio,
 } from '@/components/techo-oficio';
 import { contextoVentas } from '@/lib/cuenta-ventas';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { vozOficio } from '@/lib/voz-oficio';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { useTraduccion } from '@/i18n';
@@ -911,6 +912,18 @@ export default function Cuenta() {
                 ? 'bundle embebido'
                 : 'metro · dev'}
           </Texto>
+
+          {/* 🔴 S106-A · LA MARCA DE LA BUILD DE PRUEBA (`D-944`), colgada de
+              `MAPA_NATIVO_DISPONIBLE` **a propósito**.
+              *Atarla a `isEmbeddedLaunch` la habría hecho desaparecer con el
+              primer OTA* — seguiría al ARRANQUE y no al HECHO. Este flag sigue
+              al hecho: es `false` exactamente cuando el APK salió sin la key, y
+              sobrevive a cualquier update.
+              ☠️ Muere sola: una build de la nube trae las dos cosas, el flag
+              vuelve a `true` y esto deja de dibujarse. */}
+          {!MAPA_NATIVO_DISPONIBLE ? (
+            <Texto variante="dato">BUILD DE PRUEBA · sin mapas · sin push</Texto>
+          ) : null}
 
           {/* ⭐ S86-C · D-649 — el botón vive PEGADO al marcador de arriba a
               propósito: el id que se lee ahí es exactamente lo que este
