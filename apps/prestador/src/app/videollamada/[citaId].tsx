@@ -67,6 +67,7 @@ import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, useCamara } from '@/components/videollamada-piezas';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
 import {
+  cerrarTeleconsulta,
   estructurarNotaClinica,
   guardarBorradorNota,
   leerBorradorNota,
@@ -411,6 +412,18 @@ export default function VideollamadaProfesional() {
                («cuántas teleconsultas derivaron a urgencias»).* Preferible a
                perderla: un dato en prosa se puede migrar, uno que no se
                registró no. */
+            /* 🔴 EL DESENLACE VIAJA AL DURANTE, con su mapeo declarado.
+               El motor tiene vocabulario CERRADO de dos —`resuelto` ·
+               `derivacion`— y la pantalla ofrece tres. **No es una
+               discrepancia: es que el motor sólo necesita saber si el
+               diagnóstico era posible.** «Necesita presencial» y «derivada a
+               urgencias» son las DOS derivaciones — en las dos el vet no
+               pudo diagnosticar a distancia, que es exactamente lo que el
+               guard acotado contempla.
+               *Un vocabulario de motor más grueso que el de la pantalla está
+               bien cuando el motor decide MENOS cosas; lo que estaría mal es
+               al revés.* */
+            const desenlace = conclusion === 'resuelta' ? 'resuelto' : conclusion !== undefined ? 'derivacion' : '';
             const linea = conclusion !== undefined ? t(VOZ_CONCLUSION[conclusion]) : null;
             const texto = linea === null ? borrador : `${borrador}\n\n${linea}`.trim();
             if (texto.trim().length === 0) {
@@ -419,7 +432,7 @@ export default function VideollamadaProfesional() {
             }
             router.replace({
               pathname: '/veterinaria/consulta/[citaId]',
-              params: { citaId, borrador: texto },
+              params: { citaId, borrador: texto, desenlace },
             });
           }}
         />
@@ -1079,7 +1092,14 @@ function MesaDeTrabajo({
         sujeto={t('consulta.vcColgarSujeto')}
         etiquetaConfirmar={t('consulta.vcColgarSi')}
         etiquetaCancelar={t('consulta.vcColgarNo')}
-        onConfirmar={() => onSalir(nota, conclusion)}
+        onConfirmar={() => {
+          /* 🔴 CIERRA DE VERDAD — ver el gemelo del cliente. Se sale igual si
+             el cierre falla: *retener al vet en una llamada que quiere
+             terminar es peor que una sala abierta*, y para eso está el cierre
+             perezoso. */
+          void cerrarTeleconsulta(citaId);
+          onSalir(nota, conclusion);
+        }}
       >
         {/* La consecuencia va en el CUERPO, no en el título: el título hace
             la pregunta y esto dice qué pasa si la respuesta es sí. */}

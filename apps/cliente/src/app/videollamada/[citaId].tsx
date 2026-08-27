@@ -50,6 +50,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  cerrarTeleconsulta,
   obtenerConfigVideo,
   pedirTokenVideollamada,
   type TokenVideollamada,
@@ -400,6 +401,7 @@ export default function Videollamada() {
           onCam={() => setCamaraActiva((v) => !v)}
           onGirar={(track) => void alternarCamara(track)}
           onSalir={() => router.back()}
+        citaId={citaId}
         />
       </LiveKitRoom>
     </View>
@@ -419,6 +421,7 @@ function SalaDelDueno({
   onCam,
   onGirar,
   onSalir,
+  citaId,
 }: {
   alto: number;
   insetTop: number;
@@ -432,6 +435,8 @@ function SalaDelDueno({
   /** Recibe el track propio: el giro real ocurre arriba, con él. */
   onGirar: (track: LocalVideoTrack | null | undefined) => void;
   onSalir: () => void;
+  /** Para cerrar la sala en el motor al colgar. */
+  citaId: string;
 }) {
   const { t } = useTraduccion();
   const estado = useConnectionState();
@@ -543,7 +548,22 @@ function SalaDelDueno({
       sujeto={t('veterinaria.vcColgarSujeto')}
       etiquetaConfirmar={t('veterinaria.vcColgarSi')}
       etiquetaCancelar={t('veterinaria.vcColgarNo')}
-      onConfirmar={onSalir}
+      onConfirmar={() => {
+        /* 🔴 COLGAR AHORA CIERRA DE VERDAD. Antes era **puramente local** —
+           medido— así que el motor no se enteraba y la sala seguía abierta:
+           el founder confirmaba en las dos apps y volvía a entrar.
+
+           **La firma:** cualquiera de los dos cierra, y cierra para ambos.
+           **Idempotente**: los dos pueden apretar casi a la vez y ninguno ve
+           un error por haber llegado segundo.
+
+           ⚠️ **Se sale IGUAL si el cierre falla.** *Retener a alguien en una
+           videollamada que quiere terminar porque el servidor no contestó es
+           peor que una sala que queda abierta* — y para esa hay red: el
+           cierre perezoso de los 10 minutos. */
+        void cerrarTeleconsulta(citaId);
+        onSalir();
+      }}
     >
       {/* La consecuencia va en el CUERPO, no en el título: el título hace
           la pregunta y esto dice qué pasa si la respuesta es sí. */}
