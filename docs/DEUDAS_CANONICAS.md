@@ -22718,6 +22718,31 @@ primer aviso nombra la causa en vez de mandar a buscar un endpoint sano.
 
 ---
 
+#### ✅ ENMIENDA A `L-140` — **VALE TAMBIÉN PARA TABLAS** *(A, 27-ago-2026)*
+
+`L-140` decía que **toda función nueva nace con `EXECUTE` para `anon`** por los
+default privileges de Supabase, y que el `REVOKE` es obligatorio. **Se enmienda
+por incompleta, no por equivocada: lo mismo pasa con las TABLAS.**
+
+**Lo destapó un cinturón, en el primer intento de su propia migración:** la
+tabla `nota_clinica_borrador`, recién creada, ya tenía **`SELECT` para
+`authenticated`** sin que ninguna línea lo concediera.
+
+⚠️ **Y su modo de falla es más sutil que el de las funciones**, por eso hay que
+escribirlo: con **RLS encendida y cero policies, la tabla no devuelve ni una
+fila** — se ve perfectamente cerrada. *El privilegio concedido no hace daño
+solo: queda ahí, esperando a que alguien escriba una policy «para arreglar»
+algo, y ese día entra todo de una vez.*
+
+> **Un `GRANT` que nadie decidió es una puerta cerrada con llave puesta.**
+
+⇒ **Toda migración que cree una tabla en `public` cierra con
+`REVOKE ALL ON TABLE … FROM PUBLIC, anon, authenticated`** y concede después lo
+que de verdad necesite — igual que con las funciones. *El default concede, y no
+decidirlo es decidir que sí.*
+
+---
+
 ### D-938 🔴 · LAS PANTALLAS DE VIDEOCONSULTA NO TIENEN PUERTA — sólo se llega por deep link
 
 **Nace S106 tanda 2, 26-ago-2026.** Hallazgo al preparar las builds del gate.
