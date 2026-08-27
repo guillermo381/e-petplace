@@ -175,13 +175,53 @@ probada.)*
 
 ## §7 · LO QUE ESTO ES Y LO QUE NO — en los términos que la mesa firmó
 
+*(Tabla actualizada con las firmas del founder del **27-ago**, para no dejar
+viva una candidata que la mesa ya descartó.)*
+
 | | |
 |---|---|
 | ❌ **NO hay vía en el SDK** | censo completo del bridge + `RTCView`. **Cerrado.** |
 | ❌ **NO hay vía server-side usable** | `ImageOutput` es Egress, y `roomRecord:false` la cierra *(primera pasada)* |
-| 🟡 **SÍ hay CANDIDATA por debajo** | módulo nativo con sink/renderer. **Real, conocida desde 2020, sin mantenedor.** |
-| 🟡 **SÍ hay CANDIDATA por vista** | y **falla asimétrico: negro en Android, anda en iOS** |
-| 🔴 **NINGUNA está probada** | ⇒ **«hay candidata sin probar», no «hay vía»** |
+| ☠️ **La captura de vistas: DESCARTADA POR FIRMA** | ver ⇣ — **no es pendiente: está descartada** |
+| 🟡 **LA VÍA VIVA: el módulo nativo** | sink/renderer. **Real, conocida desde 2020, sin mantenedor** |
+| 🔴 **NO está probada** | ⇒ **«hay candidata sin probar», jamás «hay vía»** |
+
+### ☠️ LA CAPTURA DE VISTAS — descartada por firma del founder, 27-ago-2026
+
+**No se prueba, no se intenta: se descarta.** La razón que la decidió, escrita
+para que nadie la reabra por parecerle barata:
+
+> **Un fallo asimétrico por plataforma es peor que uno total.** *Si fallara en
+> las dos, se descarta en la primera prueba. Fallando sólo en una, **el iPhone
+> del que prueba convence de que la función sirve** — y el negro aparece en
+> los Android, en producción, dentro de expedientes.*
+
+⚠️ **Y por eso «probarla barato» tampoco aplica ya:** la prueba contra
+`expo-video` de §5 **queda para la vía NATIVA**, no para ésta. *No hace falta
+medir algo que se descartó por cómo falla, no por si funciona.*
+
+### 🟢 LO QUE REABRIÓ ESTA PASADA — y es el hallazgo, no un detalle
+
+> **El frame ya está en la app.** El fork lo recibe en cada llamada y **sólo lo
+> cuenta** para saber si el video vive. **No falta el acceso: falta la
+> conversión.** Y es **vía de CLIENTE, no Egress** ⇒ **la firma ⓪ no la
+> bloquea.**
+>
+> *El camino que la primera pasada dio por cerrado —«no se puede sin
+> grabar»— **no estaba cerrado: estábamos mirando el del servidor.***
+
+### ⏰ EL DISPARO — firmado por el founder, 27-ago-2026
+
+> **Cuando el modal del vet esté usable Y los defectos de producción abiertos
+> estén curados. HOY NO.**
+
+**Y cuando dispare, el camino ya está escrito:** módulo nativo sobre el sink
+que **ya existe** (§2), probado primero **contra `expo-video` sin LiveKit, sin
+cita y sin dos aparatos** (§5).
+
+🔴 **Con su costo dicho, para que nadie lo presupueste como una dependencia:**
+> *un POC de 2020 sin mantenedor no es una dependencia — **es código para
+> copiar y hacerse cargo**.*
 
 **Las tres firmas del founder siguen en pie para cuando haya vía:** un cuadro
 **no** es grabación · **el dueño lo ve en el momento** · entra **con su marca
