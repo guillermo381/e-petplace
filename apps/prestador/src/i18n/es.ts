@@ -2778,6 +2778,14 @@ export const prestadorEs = {
     vcHistoriaSinFecha: 'Sin fecha',
     /* Dice lo que hace: cierra el panel. NO dice «Guardar» — no existe un
        borrador persistente, y prometerlo sería peor que no ofrecerlo. */
+    /* La IA ORDENA lo dictado en campos; jamás agrega contenido clínico que
+       el vet no dijo (muro §8.3, intacto). Por eso «ordenar» y no «redactar». */
+    vcModalEstructurar: 'Ordenar la nota',
+    vcModalEstructurando: 'Ordenando…',
+    vcModalGuardar: 'Guardar',
+    /* Con HORA y no «Guardado» a secas: un «guardado» sin hora no distingue
+       lo de recién de lo de hace veinte minutos. */
+    vcModalGuardadoA: 'Guardado a las {{hora}}',
     vcModalListo: 'Listo',
     vcClinicoPeso: 'Peso',
     vcClinicoVacunas: 'Vacunas',
@@ -2796,7 +2804,10 @@ export const prestadorEs = {
     vcConclusionLineaResuelta: 'Conclusión: el caso se resolvió en la videoconsulta.',
     vcConclusionLineaPresencial: 'Conclusión: necesita atención presencial.',
     vcConclusionLineaUrgencias: 'Conclusión: derivada a urgencias.',
-    vcColgarConfirma: '¿Terminar la videoconsulta?',
+    /* Igual que en el cliente: la firma hace que CUALQUIERA cierre para
+       los dos, así que la confirmación lo dice. */
+    vcColgarConfirma: '¿Terminar la videoconsulta para los dos?',
+    vcColgarDetalle: 'Se cierra también para la familia y no se puede volver a entrar. Tu nota queda guardada.',
     vcColgarSujeto: 'la videoconsulta',
     vcColgarSi: 'Terminar',
     vcColgarNo: 'Seguir en la consulta',

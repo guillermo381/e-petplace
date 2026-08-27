@@ -596,3 +596,130 @@ conserva lo escrito en la sesión.
 estructurador— **no entra al modal en esta tanda.** Es el flujo entero de otra
 pantalla, y traerlo a medias sería peor que la puerta que ya existe: al
 colgar, el vet aterriza en el Durante de verdad, con todo.
+
+---
+---
+
+# §J · LA SALA QUE SE PUEDE REABRIR — medición del motor y recomendación
+
+## §J1 · Lo medido, y da vuelta el diagnóstico
+
+**① Colgar es PURAMENTE LOCAL.** `onSalir` hace `router.replace` / `router.back`
+y **nada más**: cero llamadas al motor desde las dos pantallas de videollamada.
+
+**② Pero el motor YA TIENE EL GATE, y es el correcto.**
+`puede_entrar_a_videollamada:143` — verbatim, con el comentario de A:
+
+> `-- *Una sala abierta después de que el vet cerró la consulta es una puerta`
+> `-- sin dueño.*`
+> `IF v_cita.estado IN ('completada', 'no_show', 'rechazada') THEN`
+> `  RETURN … 'cita_finalizada';`
+
+⇒ 🔴 **NO es que el motor no se entere: es que COLGAR NO TERMINA LA CONSULTA.**
+El acto que la cierra es **sedimentar la nota** —completar el Durante—, y eso
+es coherente con la letra: *el vet cuelga, cae al Durante, escribe, y ahí la
+cita se completa y la sala se cierra sola.*
+
+**Por eso el founder pudo volver a entrar: colgó y no completó el Durante.**
+La cita quedó `confirmada`, y para el motor una cita confirmada y pagada tiene
+su sala abierta — correctamente.
+
+⇒ **No hay pedido a A por esto.** El circuito existe.
+
+## §J2 · 🔴 EL HUECO QUE SÍ ES REAL, y es otro
+
+**Si el vet cuelga y NUNCA completa el Durante, la sala queda abierta
+indefinidamente.** Hoy nada la cierra: ni un reloj, ni la ventana de la cita,
+ni un barrido.
+
+*No es el caso que el founder reportó —él sí podía volver porque la consulta
+seguía viva— pero es el que queda cuando se cure lo demás.* **Su dueño es
+letra + motor**, no esta pantalla.
+
+## §J3 · La asimetría — recomendación, no decisión
+
+**Recomiendo que NADIE quede afuera mientras la consulta no esté cerrada, y
+que al cerrarla se cierre PARA LOS DOS.** El razonamiento:
+
+- **El dueño tiene que poder volver**, y la mesa ya lo dice: se le cayó la
+  llamada, se quedó sin batería, tocó colgar sin querer. *Cerrarle la puerta
+  a los dos minutos de algo que pagó es peor que dejarla abierta.*
+- **El vet también, y ésta es la parte que la asimetría propuesta se pierde:**
+  si el vet no pudiera volver, **un colgado accidental lo deja afuera de una
+  consulta que todavía no cerró — con la familia adentro, esperando.** *El que
+  paga la asimetría no sería el vet: sería el dueño mirando una sala vacía.*
+- **Lo que cierra la sala no debe ser un toque, sino un acto:** sedimentar la
+  nota. Eso ya es así, y tiene dos virtudes: es deliberado (nadie lo hace sin
+  querer) y es **clínico** (la consulta termina cuando queda registrada).
+
+**Y así el cobro queda protegido sin esfuerzo extra:** «terminar» no es un
+botón que alguien pueda tocar para discutir la plata — es escribir la nota de
+una consulta que **ya ocurrió** y que §4 dice que se cobra igual.
+
+**Lo que la mesa tiene que decidir y yo no:**
+① ¿hay un techo de tiempo para volver? (mi voto: el fin de la ventana de la
+cita, no un reloj nuevo) · ② ¿qué ve el que está adentro cuando el otro
+vuelve? (hay pieza: `EstadoConexion` ya distingue reconectando) · ③ el hueco
+de §J2: qué cierra una consulta que nadie completó.
+
+---
+---
+
+# §K · EL CIERRE DEFINITIVO — recorrido sobre la firma del 27-ago
+
+**La firma:** se cierra ① cuando **cualquiera de los dos** toca terminar
+—cierra para ambos— o ② **sola, 10 minutos después** del fin del tiempo de la
+cita. Mientras no pase ninguna, **los dos vuelven libremente**.
+
+## §K1 · Qué ve cada uno
+
+**El que toca terminar** ve la confirmación, y **tiene que decir que cierra
+para los dos** — hoy dice *«¿Terminar la videoconsulta?»*, que es claro sobre
+la acción y **calla lo importante**: que el otro se queda afuera.
+
+*El caso que lo vuelve grave es el que la mesa nombró: un toque accidental del
+dueño termina a los dos minutos una consulta que pagó.* Con la firma vieja
+—colgar era local— equivocarse costaba volver a entrar; ahora cuesta la
+consulta.
+
+**El que se queda del otro lado** ve que la llamada terminó. No hay nada nuevo
+que construir: la desconexión ya llega por el transporte.
+
+**El que vuelve a una sala CERRADA** recibe `cita_finalizada`, que ya tiene su
+voz en las dos apps (*«Esta videoconsulta ya terminó»*). ✅ Cero trabajo.
+
+**El que vuelve a una sala VIVA** entra y sigue. ✅ Es lo que ya pasa.
+
+## §K2 · 🔴 EL BORRADOR SI EL VET CERRÓ SIN SEDIMENTAR — y acá la firma ayuda
+
+Con el borrador de A (uno por cita, PK `cita_id`, limpieza por trigger al
+sedimentar), **cerrar la sala no toca la nota**: el borrador vive en la CITA,
+no en la sala.
+
+⇒ El vet cierra, cae al Durante, y **su dictado lo está esperando**. Si
+abandona ahí, sigue esperándolo la próxima vez que abra esa cita.
+
+*Y esto vuelve al cierre menos peligroso de lo que parece: lo que se pierde al
+cerrar es la sala, jamás el trabajo.*
+
+## §K3 · Lo que la pantalla NO puede hacer, dicho en vez de simulado
+
+🔴 **El cierre por tiempo (②) es del MOTOR y no tiene dónde vivir hoy.**
+Medido: `puede_entrar_a_videollamada` corta por `estado IN (completada,
+no_show, rechazada)` — **no mira el reloj de la cita**. Y ningún cron cierra
+teleconsultas.
+
+*Un temporizador en la app sólo corre mientras alguien mira la pantalla, y la
+regla dice «aunque las dos apps estén cerradas».* **Una regla de tiempo que
+depende de que alguien esté mirando no es una regla: es una coincidencia.**
+
+⇒ **PEDIDO A A**, con su forma: que la RPC devuelva `cita_finalizada` cuando
+`ahora > fin_de_la_cita + 10 min`. **Perezoso, no cron** — es el patrón que la
+casa ya usa para el hold y para el presupuesto vencido: *el estado se calcula
+al preguntarlo, y así vale aunque nadie haya mirado.*
+
+## §K4 · Lo que sí construyo ahora
+
+**La voz de la confirmación en las dos apps**, diciendo lo que la firma nueva
+hace: **termina para los dos**. Es lo único de §K que es de superficie, y es
+justo lo que la firma vuelve urgente.

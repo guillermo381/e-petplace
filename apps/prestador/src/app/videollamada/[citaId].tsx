@@ -67,6 +67,9 @@ import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
 import {
+  estructurarNotaClinica,
+  guardarBorradorNota,
+  leerBorradorNota,
   obtenerDetalleMascotaPrestador,
   obtenerHistorialClinicoMascota,
   obtenerMiPrestador,
@@ -394,6 +397,7 @@ export default function VideollamadaProfesional() {
              función.* */
           clinico={clinico}
           mascotaId={mascotaId}
+          citaId={citaId}
           onSalir={(borrador, conclusion) => {
             /* 🔴 LA CONCLUSIÓN VIAJA DENTRO DE LA NOTA, y es lo que la firma
                pide: *«es parte de la nota clínica»*. Se le pone su rótulo para
@@ -439,6 +443,7 @@ function MesaDeTrabajo({
   onSalir,
   clinico,
   mascotaId,
+  citaId,
 }: {
   alto: number;
   insetTop: number;
@@ -458,6 +463,8 @@ function MesaDeTrabajo({
   clinico: DetalleMascotaPrestador | null;
   /** Para pedir el historial cuando el panel llega a `completo`. */
   mascotaId: string;
+  /** La PK del borrador: hay UNO por cita, por construcción. */
+  citaId: string;
 }) {
   const { t, idioma } = useTraduccion();
   const estado = useConnectionState();
@@ -500,6 +507,120 @@ function MesaDeTrabajo({
      Dos consumidores del mic no conviven en Android — y además es lo
      correcto: *está dictando la nota clínica, no hablándole a la familia.* */
   const [dictando, setDictando] = useState(false);
+
+  /* ── 🔴 EL BORRADOR — veinte minutos de dictado no dependen de la memoria
+     del vet ni de que la app no se cierre ─────────────────────────────────
+     **Se lee al montar** (si el vet ya había dictado y volvió, su trabajo
+     está) y **se guarda solo cada 5 s cuando hay cambios**.
+
+     Tres cosas que el wrapper de A deja escritas y esta pantalla respeta:
+     · **`existe: false` es la respuesta NORMAL** la primera vez — no un
+       fallo, y por eso no tiene voz de error.
+     · **No se borra**: lo limpia un trigger al sedimentar. *Llamar a un
+       borrado que el motor ya hace sería competir con él.*
+     · **No se valida**: es `jsonb` opaco a propósito — *una nota a medio
+       escribir es inválida por definición, y validarla sería impedir
+       exactamente lo que el borrador existe para permitir.*
+
+     ⚠️ **Su fallo NO interrumpe la consulta y NO se grita.** Un aviso de
+     «no pudimos guardar» cada cinco segundos, encima del video, mientras el
+     vet examina a un animal, es peor que el riesgo que evita. Lo que sí
+     hace es **dejar de decir «Guardado»**: la pantalla no afirma lo que no
+     puede probar. */
+  const [guardadoEn, setGuardadoEn] = useState<string | null>(null);
+  const sucio = useRef(false);
+  const ultimoGuardado = useRef('');
+
+  useEffect(() => {
+    if (citaId.length === 0) return;
+    let vigente = true;
+    void leerBorradorNota(citaId).then((r) => {
+      if (!vigente || !r.ok || !r.data.existe) return;
+      const texto = r.data.nota?.['texto'];
+      if (typeof texto === 'string' && texto.length > 0) {
+        setNota(texto);
+        ultimoGuardado.current = texto;
+        setGuardadoEn(r.data.actualizadoEn);
+      }
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [citaId]);
+
+  const guardarAhora = useCallback(async () => {
+    if (citaId.length === 0) return;
+    const texto = nota;
+    if (texto === ultimoGuardado.current) return;
+    const r = await guardarBorradorNota(citaId, { texto, conclusion: conclusion ?? null });
+    if (r.ok) {
+      ultimoGuardado.current = texto;
+      sucio.current = false;
+      setGuardadoEn(r.data.guardadoEn);
+    } else {
+      /* Silencio deliberado: ver la cabecera. Lo que se pierde es la marca
+         de guardado, que es justo la señal honesta. */
+      setGuardadoEn(null);
+    }
+  }, [citaId, nota, conclusion]);
+
+  /* ── 🔴 EL ESTRUCTURADOR, LA MITAD QUE ENTRA ──────────────────────────────
+     **El problema real que nombró el founder:** *«lo que el vet dicta en
+     veinte minutos llega crudo al final».*
+
+     **Medido, el estructurador entero NO entra acá:** en el Durante, después
+     de estructurar, `setFase('confirmacion')` abre **una pantalla completa de
+     revisión** —campos editables, vitales, medicación—. Traer eso adentro de
+     un panel sobre una llamada en curso es rehacer esa pantalla, y a medias
+     sería peor.
+
+     **Lo que SÍ entra, y resuelve el problema entero:** estructurar acá y
+     **dejar el resultado EN EL BORRADOR**. Cuando el vet cuelga y cae al
+     Durante, su nota **ya llegó estructurada** — sólo revisa. *El costo es
+     una llamada; lo que evita es que veinte minutos de dictado aterricen
+     como un bloque de texto que hay que releer entero.*
+
+     ⚠️ **El muro §8.3 viaja intacto**: la IA asigna las palabras DEL VET a
+     campos y jamás agrega contenido clínico que él no dictó. Acá no se toca
+     ese contrato — se lo llama antes, no distinto.
+
+     Su fallo **no interrumpe**: el texto crudo sigue en el borrador y el
+     Durante estructura como siempre. *Lo que se pierde es un adelanto, no el
+     trabajo.* */
+  const [estructurando, setEstructurando] = useState(false);
+  const estructurar = useCallback(async () => {
+    if (nota.trim().length === 0 || estructurando) return;
+    setEstructurando(true);
+    const r = await estructurarNotaClinica({
+      texto: nota,
+      especie: clinico?.mascota.especie ?? undefined,
+    });
+    setEstructurando(false);
+    if (!r.ok) return;
+    /* Se guarda junto al texto: el borrador es `jsonb` opaco y admite las dos
+       cosas. **El crudo NO se pisa** — *el dictado original es la fuente y la
+       estructura es su lectura; perder la fuente para quedarse con la lectura
+       es exactamente lo que L-139 prohíbe.* */
+    const g = await guardarBorradorNota(citaId, {
+      texto: nota,
+      conclusion: conclusion ?? null,
+      estructurada: r.data as unknown as Record<string, unknown>,
+    });
+    if (g.ok) {
+      ultimoGuardado.current = nota;
+      sucio.current = false;
+      setGuardadoEn(g.data.guardadoEn);
+    }
+  }, [nota, estructurando, clinico, citaId, conclusion]);
+
+  /* El reloj del guardado automático. **5 s y no cada tecla**: cada llamada
+     es un upsert contra el servidor, y guardar en cada letra convertiría una
+     red mala en una pantalla que no responde. */
+  useEffect(() => {
+    if (!sucio.current) return;
+    const id = setTimeout(() => void guardarAhora(), 5000);
+    return () => clearTimeout(id);
+  }, [nota, conclusion, guardarAhora]);
 
   /* ── EL HISTORIAL: se pide la PRIMERA vez que el panel llega a `completo`.
      *No al montar —la mayoría de las consultas no lo abren— ni en cada
@@ -730,7 +851,25 @@ function MesaDeTrabajo({
            tirar el dato más importante de la consulta. */
         hayCambiosSinGuardar={nota.trim().length > 0 || conclusion !== undefined}
       >
-        <View style={{ gap: spacing[4] }}>
+        {/* ── ② y ③ · EL CUERPO SCROLLEA, y B despejó la tensión ────────────
+            *El `Pan` de la pieza está atado SÓLO AL ASA a propósito, para que
+            un scroll en el cuerpo no pelee con él* ⇒ acá va un `ScrollView`
+            normal y anda. **`blocksExternalGesture` NO hace falta acá**: esa
+            receta es para cuando el contenedor arrastra desde el cuerpo, que
+            no es lo que hace `ModalDosAlturas`.
+
+            `keyboardShouldPersistTaps` para que tocar otro campo con el
+            teclado abierto **funcione al primer toque** — sin eso el primero
+            sólo cierra el teclado y el vet toca dos veces sin saber por qué.
+
+            Y esto es la mitad de ②: el alto reservado ya estaba; **lo que
+            faltaba era que el contenido se pudiera correr** para que el cursor
+            quede a la vista. */}
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing[4], paddingBottom: spacing[6] }}
+        >
           <Texto variante="seccion">{t('consulta.vcNotaTitulo')}</Texto>
           {/* El mismo registro del Durante: texto libre en `Campo`.
               🔴 Su regla viaja intacta — **la plataforma jamás sugiere
@@ -751,13 +890,23 @@ function MesaDeTrabajo({
               SurfaceView de LiveKit se recrea. *Dictando no se abre el
               teclado.* No sustituye al diagnóstico —el stack sigue pedido—
               pero le da al vet un camino para trabajar hoy. */}
-          <DictadoEnVivo value={nota} onChangeText={setNota} onEscuchandoCambia={setDictando} />
+          <DictadoEnVivo
+            value={nota}
+            onChangeText={(x) => {
+              sucio.current = true;
+              setNota(x);
+            }}
+            onEscuchandoCambia={setDictando}
+          />
 
           <Campo
             label={t('consulta.vcNotaTitulo')}
             placeholder={t('consulta.vcNotaPlaceholder')}
             value={nota}
-            onChangeText={setNota}
+            onChangeText={(x) => {
+              sucio.current = true;
+              setNota(x);
+            }}
             multilinea={6}
           />
 
@@ -795,7 +944,10 @@ function MesaDeTrabajo({
               { codigo: 'urgencias', etiqueta: t('consulta.vcConclusionUrgencias') },
             ]}
             seleccionada={conclusion}
-            onSelect={setConclusion}
+            onSelect={(c) => {
+              sucio.current = true;
+              setConclusion(c);
+            }}
           />
 
           {/* ── ② LA HISTORIA CLÍNICA, con sus filtros ──────────────────────
@@ -878,12 +1030,42 @@ function MesaDeTrabajo({
               un cierre de app, y no lo está.*
               Lo escrito viaja al Durante **al colgar**, que es donde sí
               sedimenta. El borrador persistente es pedido a A. */}
+          {/* 🔴 AHORA DICE «GUARDAR» DE VERDAD — el borrador existe (A, 27-ago).
+              Guarda y baja el panel. *Y la marca de abajo es la parte que
+              importa: dice CUÁNDO se guardó, no «guardado» a secas — un
+              «guardado» sin hora no distingue lo de recién de lo de hace
+              veinte minutos, que es justo lo que el vet necesita saber
+              cuando la red estuvo mala.* */}
+          {/* Sólo con algo dictado: *un botón que ordena la nada no ordena
+              nada, y ofrecerlo vacío enseña que a veces no hace efecto.* */}
+          {nota.trim().length > 0 && (
+            <Boton
+              variante="secundario"
+              etiqueta={estructurando ? t('consulta.vcModalEstructurando') : t('consulta.vcModalEstructurar')}
+              onPress={() => void estructurar()}
+              cargando={estructurando}
+            />
+          )}
+
           <Boton
             variante="secundario"
-            etiqueta={t('consulta.vcModalListo')}
-            onPress={() => setAltura('cerrado')}
+            etiqueta={t('consulta.vcModalGuardar')}
+            onPress={() => {
+              void guardarAhora();
+              setAltura('cerrado');
+            }}
           />
-        </View>
+          {guardadoEn !== null && (
+            <Texto variante="apoyo">
+              {t('consulta.vcModalGuardadoA', {
+                hora: new Intl.DateTimeFormat(idioma === 'en' ? 'en-US' : 'es-EC', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }).format(new Date(guardadoEn)),
+              })}
+            </Texto>
+          )}
+        </ScrollView>
       </ModalDosAlturas>
 
       <HojaConfirmacionDestructiva
@@ -894,7 +1076,11 @@ function MesaDeTrabajo({
         etiquetaConfirmar={t('consulta.vcColgarSi')}
         etiquetaCancelar={t('consulta.vcColgarNo')}
         onConfirmar={() => onSalir(nota, conclusion)}
-      />
+      >
+        {/* La consecuencia va en el CUERPO, no en el título: el título hace
+            la pregunta y esto dice qué pasa si la respuesta es sí. */}
+        <Texto variante="cuerpo">{t('consulta.vcColgarDetalle')}</Texto>
+      </HojaConfirmacionDestructiva>
     </>
   );
 }

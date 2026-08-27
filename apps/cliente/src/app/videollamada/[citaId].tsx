@@ -328,6 +328,21 @@ export default function Videollamada() {
               etiqueta={camaraActiva ? t('veterinaria.vcCamApagar') : t('veterinaria.vcCamEncender')}
               onPress={() => setCamaraActiva((v) => !v)}
             />
+            {/* 🔴 GIRAR CÁMARA **TAMBIÉN EN EL PRE-JOIN** — la medición que
+                faltaba (27-ago). Cuatro pistas midieron el control en la
+                IN-CALL y las cuatro dieron verde; **nadie midió acá**, que es
+                donde la persona mira su propia imagen y decide cómo se ve.
+                *Un control que existe en la llamada y no en la antesala se
+                busca justo cuando todavía no está.*
+                Sólo con la cámara encendida: girar una cámara apagada no
+                significa nada. */}
+            {camaraActiva && (
+              <Boton
+                variante="secundario"
+                etiqueta={t('veterinaria.vcVozGirar')}
+                onPress={alternarCamara}
+              />
+            )}
           </View>
 
           <Boton
@@ -518,7 +533,11 @@ function SalaDelDueno({
       etiquetaConfirmar={t('veterinaria.vcColgarSi')}
       etiquetaCancelar={t('veterinaria.vcColgarNo')}
       onConfirmar={onSalir}
-    />
+    >
+      {/* La consecuencia va en el CUERPO, no en el título: el título hace
+          la pregunta y esto dice qué pasa si la respuesta es sí. */}
+      <Texto variante="cuerpo">{t('veterinaria.vcColgarDetalle')}</Texto>
+    </HojaConfirmacionDestructiva>
     </>
   );
 }
