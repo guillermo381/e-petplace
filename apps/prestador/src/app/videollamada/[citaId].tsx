@@ -73,7 +73,16 @@ export default function VideollamadaProfesional() {
 
   const [fase, setFase] = useState<Fase>('pidiendo');
   const [credencial, setCredencial] = useState<TokenVideollamada | null>(null);
-  const [vozSinEntrada, setVozSinEntrada] = useState<string | null>(null);
+  /* 🔴 EL SILENCIO ES SU PROPIO CASO, y antes no lo era.
+     Con `string | null`, `null` significaba DOS cosas —«no hay voz» y «no
+     pintes nada»— y la pantalla las trataba igual: caía al título por defecto
+     y mostraba el genérico.
+     **Y ese genérico también confirma que la cita existe**, así que el
+     silencio que `ajeno_a_la_cita` protege se perdía en el último tramo:
+     la decisión estaba bien en la lógica y no tenía dónde vivir en la
+     superficie. *Un estado que no se puede expresar se convierte en el
+     estado de al lado.* */
+  const [sinEntrada, setSinEntrada] = useState<{ tipo: 'silencio' } | { tipo: 'voz'; texto: string } | null>(null);
   const [bitrateKbps, setBitrateKbps] = useState<number | null>(null);
   const [intento, setIntento] = useState(0);
   const [micActivo, setMicActivo] = useState(true);
@@ -101,12 +110,16 @@ export default function VideollamadaProfesional() {
         return;
       }
       const q = queDibujar(r, idioma);
-      setVozSinEntrada(
+      setSinEntrada(
         q.boton || q.claveVoz === null
-          ? null
-          : q.hora !== undefined
-            ? t(q.claveVoz as never, { hora: q.hora })
-            : t(q.claveVoz as never),
+          ? { tipo: 'silencio' }
+          : {
+              tipo: 'voz',
+              texto:
+                q.hora !== undefined
+                  ? t(q.claveVoz as never, { hora: q.hora })
+                  : t(q.claveVoz as never),
+            },
       );
       setFase('sin_entrada');
     })();
@@ -114,6 +127,17 @@ export default function VideollamadaProfesional() {
       vigente = false;
     };
   }, [citaId, idioma, t, intento]);
+
+  /* El silencio no dibuja: SALE. Una pantalla en blanco sería un callejón, y
+     cualquier texto —hasta el genérico— confirmaría que la cita existe.
+     `canGoBack` porque a esta pantalla se puede llegar por deep link, donde
+     `back()` no tiene a dónde volver (el mismo defecto que el gate encontró
+     en «Probar de nuevo»). */
+  useEffect(() => {
+    if (fase !== 'sin_entrada' || sinEntrada?.tipo !== 'silencio') return;
+    if (router.canGoBack()) router.back();
+    else router.replace('/(tabs)');
+  }, [fase, sinEntrada, router]);
 
   const cabecera = (
     <Encabezado variante="navegacion" titulo={t('consulta.vcTitulo')} atras onAtras={() => router.back()} />
@@ -143,13 +167,16 @@ export default function VideollamadaProfesional() {
     );
   }
 
+  // Silencio: no se monta nada mientras el efecto de arriba saca de acá.
+  if (fase === 'sin_entrada' && sinEntrada?.tipo === 'silencio') return null;
+
   if (fase === 'sin_entrada' || credencial === null) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top', 'bottom']}>
         {cabecera}
         <EstadoVacio
           registro="pantalla"
-          titulo={vozSinEntrada ?? t('consulta.vcSinEntrada')}
+          titulo={sinEntrada?.tipo === 'voz' ? sinEntrada.texto : t('consulta.vcSinEntrada')}
           descripcion=""
           accion={<Boton
               variante="primario"
