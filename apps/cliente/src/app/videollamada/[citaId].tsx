@@ -38,6 +38,7 @@ import {
 import { ConnectionState, Track, VideoPresets, type LocalVideoTrack } from 'livekit-client';
 import {
   Boton,
+  ControlLlamada,
   Encabezado,
   EsperaDeMarca,
   EstadoVacio,
@@ -61,7 +62,6 @@ import {
   PreviewPropio,
   VideoPropioEnLlamada,
   VideoRemoto,
-  girarCamara,
   useCamara,
 } from '@/components/videollamada-piezas';
 
@@ -318,29 +318,36 @@ export default function Videollamada() {
           </Texto>
 
           <View style={{ flexDirection: 'row', gap: spacing[3] }}>
-            <Boton
-              variante="secundario"
-              etiqueta={micActivo ? t('veterinaria.vcMicApagar') : t('veterinaria.vcMicEncender')}
+            {/* ── 🔴 GLIFOS, NO BOTONES DE TEXTO (gate 27-ago) ─────────────
+                Tres botones con texto **no entraban**: el tercero salía
+                cortado («Gi…»). Y el texto decía la ACCIÓN («apagar
+                micrófono»), que obliga a leer para deducir el estado actual.
+
+                `ControlLlamada` sirve tal cual —**no hace falta pieza nueva**:
+                su `activo` **invierte el disco**, así que el estado con el que
+                se va a entrar **se ve**, no se lee. Es la misma gramática que
+                la barra de la llamada, que es lo que el founder pidió: *la
+                antesala y la llamada no pueden hablar dos idiomas.*
+
+                Girar no lleva `activo` **por decisión de la pieza**: es una
+                acción, no un estado que se pueda cortar. */}
+            <ControlLlamada
+              glifo="microfono"
+              etiqueta={t('veterinaria.vcVozMic')}
+              activo={micActivo}
               onPress={() => setMicActivo((v) => !v)}
             />
-            <Boton
-              variante="secundario"
-              etiqueta={camaraActiva ? t('veterinaria.vcCamApagar') : t('veterinaria.vcCamEncender')}
+            <ControlLlamada
+              glifo="camara"
+              etiqueta={t('veterinaria.vcVozCam')}
+              activo={camaraActiva}
               onPress={() => setCamaraActiva((v) => !v)}
             />
-            {/* 🔴 GIRAR CÁMARA **TAMBIÉN EN EL PRE-JOIN** — la medición que
-                faltaba (27-ago). Cuatro pistas midieron el control en la
-                IN-CALL y las cuatro dieron verde; **nadie midió acá**, que es
-                donde la persona mira su propia imagen y decide cómo se ve.
-                *Un control que existe en la llamada y no en la antesala se
-                busca justo cuando todavía no está.*
-                Sólo con la cámara encendida: girar una cámara apagada no
-                significa nada. */}
             {camaraActiva && (
-              <Boton
-                variante="secundario"
+              <ControlLlamada
+                glifo="girarCamara"
                 etiqueta={t('veterinaria.vcVozGirar')}
-                onPress={alternarCamara}
+                onPress={() => void alternarCamara()}
               />
             )}
           </View>
@@ -391,7 +398,7 @@ export default function Videollamada() {
           camara={camara}
           onMic={() => setMicActivo((v) => !v)}
           onCam={() => setCamaraActiva((v) => !v)}
-          onGirar={alternarCamara}
+          onGirar={(track) => void alternarCamara(track)}
           onSalir={() => router.back()}
         />
       </LiveKitRoom>
@@ -422,7 +429,8 @@ function SalaDelDueno({
   camara: 'user' | 'environment';
   onMic: () => void;
   onCam: () => void;
-  onGirar: () => void;
+  /** Recibe el track propio: el giro real ocurre arriba, con él. */
+  onGirar: (track: LocalVideoTrack | null | undefined) => void;
   onSalir: () => void;
 }) {
   const { t } = useTraduccion();
@@ -511,8 +519,11 @@ function SalaDelDueno({
       }}
       /* 🔴 Obligatorio del lado dueño (§2: «el botón más usado»). */
       onGirarCamara={() => {
-        girarCamara(propio);
-        onGirar();
+        /* 🔴 EL TRACK VIAJA HACIA ARRIBA: el estado de `facingMode` vive en
+           el componente de afuera, y el track sólo existe acá adentro (sale
+           de `useLocalParticipant`). *Sin esto el giro se pedía sin track y
+           el espejo se movía sobre una cámara que no cambió.* */
+        onGirar(propio);
       }}
       onAltavoz={alternarAltavoz}
       altavozActivo={altavoz}
