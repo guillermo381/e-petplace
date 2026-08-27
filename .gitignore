@@ -23,3 +23,6 @@ apps/*/build-*.apk
 # Permisos locales de Claude Code — de ESTA máquina, jamás al repo
 **/.claude/settings.local.json
 **/.claude/settings.local.json.bak-*
+
+# S106-C · el build/ del módulo nativo local (lo genera el gate en aislado)
+packages/*/android/build/

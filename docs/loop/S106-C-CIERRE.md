@@ -238,3 +238,83 @@ prestador y **no tocan esta frontera**. Ahí no hay freno — y el dato de A ya
 está tomado: la pantalla **no vuelve a decidir el permiso**, consume el
 rechazo tipado, y **mientras `cita_ya_asignada` siga cortando, dice la verdad
 sobre por qué no se puede en vez de ofrecer un botón que rebota.**
+
+---
+
+## 🔴 LA BUILD FALLÓ EN MI MÓDULO — la causa, y el gate que no existía
+
+### Lo que pasó, sin adorno
+
+**Una build de ~20 minutos que terminó sin APK, y el defecto era mío.**
+
+Y la lección que me habían dado hoy aplicaba al revés: **medí la API del fork
+desde JS** (`MediaStreamTrack.d.ts`) **y el módulo la consume desde Kotlin, que
+es otra superficie.** *Verifiqué con rigor la mitad que no iba a usar.*
+
+### Las dos rondas de errores, y las dos eran UN solo defecto cada una
+
+**Ronda 1 (la que costó la build):** `getNativeModule` no resolvía porque
+`appContext.reactContext` está declarado **`Context?`**, no
+`ReactApplicationContext` — su propio doc dice *«provides access to the react
+application context»*, o sea que el tipo es el supertipo por desacople.
+`getTrack` era **cascada**: sin resolver el primero, `webrtc` quedaba de tipo
+inválido.
+
+**Ronda 2 (la que encontró el compilador aislado, gratis):** `com.facebook.react.bridge`
+**no resolvía en absoluto** — **faltaba `react-android` en MI `build.gradle`**.
+*El fork lo declara en el suyo; yo lo di por heredado, y no se hereda: cada
+módulo Gradle declara su propio classpath.* Sus **cinco** errores eran uno.
+
+⚠️ **Y la ronda 2 sólo apareció después de curar la 1**: el compilador reporta
+lo que puede resolver. *Curar el primer error de un archivo nativo no prueba
+que compile — prueba que el siguiente ya se puede ver.*
+
+### ✅ SÍ HAY FORMA DE VIGILARLO, y está probada — no propuesta
+
+```
+cd apps/prestador && npx expo prebuild --platform android --no-install
+cd android && ./gradlew :epetplace-cuadro-video:compileReleaseKotlin
+```
+
+**Compila SÓLO el módulo.** Ya rindió: **encontró la ronda 2 sin gastar una
+build EAS.**
+
+**Su costo, MEDIDO en las dos corridas reales:** la primera **15m 48s** (baja
+el toolchain y las dependencias); **la segunda, 6 SEGUNDOS** con el cache
+caliente. *O sea que el gate es caro UNA vez y gratis siempre después* — y ya
+pagó su primera corrida.
+
+✅ **Y el resultado, verificado POR EL OBJETO y no por el exit code
+(`L-191`, que casi me muerde acá):** `BUILD SUCCESSFUL` **y el
+`CuadroVideoModule.class` existe** en
+`packages/cuadro-video/android/build/tmp/kotlin-classes/release/`.
+*La primera vez leí el exit del `| tail` y decía 0 sobre un `BUILD FAILED` —
+la lección de la casa, cobrada en mi propio instrumento.*
+
+**⚠️ SU TERCER COSTO, y lo encontró el propio gate de la casa:** correr
+`expo prebuild` **se lleva puesto `.expo/types/router.d.ts`**, y `R63·C` me
+frenó el commit con su literal — *«con `typedRoutes: true` y sin ese archivo,
+`Href` degrada a `string` y toda ruta inventada compila en verde»*.
+
+*O sea que el gate del nativo APAGA en silencio al gate de las rutas.* Se
+regenera arrancando Metro una vez. **Queda escrito acá porque el que corra
+este comando la próxima vez no va a saberlo — y el modo de falla es el peor:
+el typecheck sigue diciendo verde mientras mide de menos.**
+
+**Sus otros dos límites, declarados:**
+① **compila, NO ejecuta** — que el Kotlin resuelva no dice que el frame se
+   convierta. El criterio de verde sigue siendo el aparato.
+② **es Android.** El equivalente iOS pide `pod install` + `xcodebuild`, que en
+   esta máquina **no medí**.
+
+### El gate que no existía, y por qué ninguno lo veía
+
+*El typecheck de TS estaba verde porque el módulo nativo vive fuera de su
+alcance, y `verify-manifest-apk` mira un APK que nunca llegó a existir.*
+⇒ **el código nativo no lo cubre ningún gate de la casa** — y no por descuido:
+**hasta hoy no había código nativo propio**, sólo dependencias horneadas.
+
+**Mi propuesta, con su costo a la vista:** que el comando de arriba sea el
+gate del módulo, corrido **a mano antes de pedir una build**, no en el
+pre-commit. *Un gate de 15 minutos en cada commit no lo corre nadie, y un gate
+que nadie corre es peor que ninguno: da la sensación de estar cubierto.*
