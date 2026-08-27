@@ -319,3 +319,92 @@ una puerta.*
 ---
 
 *Depositado antes de construir, como pide la Obra 0.*
+
+---
+---
+
+# §G · EL RECORRIDO, RE-CAMINADO AL CIERRE DE LA TANDA
+
+*Actualizado sin redondear: lo que quedó caminable, lo que no, y con quién.*
+
+## El dueño
+
+| Paso | Antes | Ahora |
+|---|---|---|
+| A1 · Encuentra la teleconsulta | ⚠️ sin voz | ✅ **camina** — `servicioVoz.telemedicina`; la pantalla no tenía lista escrita, así que el resto fue cero código |
+| A2 · Reserva con aviso y casilla | ✅ | ✅ |
+| A3 · Confirmación con consejos | 🔴 sin texto | ✅ **camina** — §3bis verbatim, en sus dos lugares |
+| A4 · Entra desde SU cita | 🔴 sin puerta | ✅ **camina** — fila → antesala → llamada, sin deep link |
+| A5 · Consulta y cuelga | ✅ | ✅ *(girar cámara y altavoz siguen abiertos, de tandas previas)* |
+| A6 · La marca en el expediente | 🔴 sin dato | 🟡 **camina en el Hogar; falta el parte** — ver §G1 |
+
+## El veterinario
+
+| Paso | Antes | Ahora |
+|---|---|---|
+| B1 · Activa el servicio | ✅ verificado · 🔴 mudo si no lo está | 🔴 **sin cambio: la Obra 5 sigue bloqueada** (§G2) |
+| B2 · Se entera de la cita | ⚠️ sin dueño | ⚠️ **sin dueño** — va a la mesa |
+| B3 · La ve en su jornada | 🔴 | 🟡 **la dice, no la marca** — ver §G3 |
+| B4 · Entra desde el detalle | 🔴 sin puerta | ✅ **camina** — con su insignia de modalidad |
+| B5 · Atiende y el borrador cae al Durante | ✅ | ✅ |
+| B6 · La marca en el expediente | 🔴 | 🟡 igual que A6 |
+
+---
+
+### §G1 · La marca del expediente quedó A MEDIAS, y la mitad que falta tiene dueño
+
+**Lo que se descubrió al cablearla, y no estaba previsto:**
+
+🔴 **`LineaDeVida` —la pieza donde B implementó la marca de §7— NO LA MONTA
+NINGUNA APP.** Medido con control positivo (118 archivos montan `<Tarjeta>`):
+sus únicos montajes en todo el repo están **en la galería**.
+
+El cliente pinta su timeline con **componentes locales**: `EventoVida` en el
+Hogar y una fila inline en el perfil de la mascota. *La prop `modalidad` de
+`LineaDeVida` está en la pieza correcta por diseño y sin uso por historia* —
+y su único consumidor, la galería, es justo lo que `D-940` declara caído.
+
+**Lo hecho:** la marca vive en `EventoVida` (Hogar), sobre el `modalidad` que
+A entregó hoy. El código del motor lo traduce la pantalla (Ley 3) y `null`
+**no se degrada a «presencial»**.
+
+**Lo que falta, con su razón de no haberse forzado:**
+- **El perfil de la mascota** pinta cada hecho en **una sola línea**
+  (`numberOfLines={1}`). Meter una insignia ahí es la aritmética de ancho que
+  S97-D pagó con cuatro vueltas. Su destino natural es el parte.
+- 🔴 **`parte/[eventoId]` (la pantalla MOMENTO) no puede pintarla:
+  `ParteConsulta` no trae `modalidad`** (medido con control). **Pedido a A** —
+  y es el lugar donde la marca más importa: es la pantalla que alguien abre
+  para leer qué pasó en esa consulta.
+
+### §G2 · La Obra 5 sigue bloqueada, re-medido al cierre
+
+`CodigoErrorTelemedicina` sigue sin ningún código de certificación, y no
+llegó un estado de B. **No se rodeó**: inferir «no estás verificado» de un
+`acceso_denegado` genérico es adivinar por qué se cerró una puerta.
+
+### §G3 · La insignia en la jornada NO se montó, y es una decisión
+
+La fila de la jornada (`FilaCitaUi`, pieza de B) tiene su slot `fin`
+**vacío A PROPÓSITO desde S97-D**, con la aritmética escrita en el código:
+~92 + 96 + ~160 px pedidos contra ~340 disponibles ⇒ *con el total fuera de
+rango la pieza sólo podía elegir quién se rompía*.
+
+⇒ **Meter la insignia ahí sería reabrir un defecto medido y firmado.** La fila
+igual **dice** qué es, por el nombre del servicio en su subtítulo, y la
+insignia vive en el detalle. Si la mesa quiere la marca en la fila, es un
+**pedido a B** (una prop en el segundo piso, que es donde S97-D dejó lugar) —
+no una decisión mía reabriendo su medición.
+
+⚠️ **Lo que no pude verificar:** qué dice exactamente
+`tipos_servicio.nombre` para telemedicina — es dato vivo y la DB es de A. Si
+ese nombre no fuera reconocible, este paso vuelve a quedar en rojo.
+
+### §G4 · Pedidos vivos a A, al cierre
+
+1. **`modalidad` en `ParteConsulta`** (§G1) — el lugar donde la marca de §7
+   más importa.
+2. **`modalidad` en `CitaActivaMascota` y `CitaAgendaPaseo`** — hoy las dos
+   puertas derivan de `tipo_servicio` con la derivación declarada en el
+   código; cuando llegue, son dos líneas.
+3. **Un código tipado de «no verificado»** (§G2) — bloquea la Obra 5.
