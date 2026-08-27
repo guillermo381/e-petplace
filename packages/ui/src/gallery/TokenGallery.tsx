@@ -2514,6 +2514,7 @@ function GaleriaInterna() {
   const [conex, setConex] = useState<'buena' | 'inestable' | 'reconectando'>('buena')
   const inicioLlamada = useRef(Date.now()).current
   const [altModal, setAltModal] = useState<'cerrado' | 'medio' | 'completo'>('cerrado')
+  const [altavozOn, setAltavozOn] = useState(true)
   const { theme, mode, setMode } = useTheme()
   const { mostrar } = useAviso()
   const [cargandoDemo, setCargandoDemo] = useState(false)
@@ -2704,7 +2705,7 @@ function GaleriaInterna() {
               <View style={{ backgroundColor: fondo, padding: spacing[4], borderRadius: radius.md, flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
                 <ControlLlamada glifo="microfono" etiqueta="Micrófono" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
                 <ControlLlamada glifo="camara" etiqueta="Cámara" activo={camViva} onPress={() => setCamViva((v) => !v)} />
-                <ControlLlamada glifo="altavoz" etiqueta="Altavoz" activo={micVivo} onPress={() => setMicVivo((v) => !v)} />
+                <ControlLlamada glifo="altavoz" etiqueta="Altavoz" activo={altavozOn} onPress={() => setAltavozOn((v) => !v)} />
                 <ControlLlamada glifo="girarCamara" etiqueta="Girar cámara" onPress={() => {}} />
                 <ControlLlamada glifo="colgar" tamaño="lg" etiqueta="Colgar" onPress={() => {}} />
                 <TemporizadorLlamada inicioTs={inicioLlamada} />
@@ -2777,8 +2778,10 @@ function GaleriaInterna() {
               onMicrofono={() => setMicVivo((v) => !v)}
               onCamara={() => setCamViva((v) => !v)}
               onColgar={() => {}}
-              vozControles={{ microfono: 'Micrófono', camara: 'Cámara', colgar: 'Colgar', girarCamara: 'Girar cámara' }}
+              vozControles={{ microfono: 'Micrófono', camara: 'Cámara', colgar: 'Colgar', girarCamara: 'Girar cámara', altavoz: 'Altavoz' }}
               onGirarCamara={() => {}}
+              onAltavoz={() => setAltavozOn((v) => !v)}
+              altavozActivo={altavozOn}
               senalDeNota="La doctora está escribiendo en la historia de Thor"
               pie={<AsaModal etiqueta="Abrir la ficha" onPress={() => setAltModal('medio')} />}
             />
