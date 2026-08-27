@@ -5836,6 +5836,7 @@ export type Database = {
           mime_type: string | null
           nombre_archivo: string
           orden: number
+          origen_captura: string | null
           prestador_id: string
           storage_path: string
           subido_por_user_id: string
@@ -5856,6 +5857,7 @@ export type Database = {
           mime_type?: string | null
           nombre_archivo: string
           orden?: number
+          origen_captura?: string | null
           prestador_id: string
           storage_path: string
           subido_por_user_id: string
@@ -5876,6 +5878,7 @@ export type Database = {
           mime_type?: string | null
           nombre_archivo?: string
           orden?: number
+          origen_captura?: string | null
           prestador_id?: string
           storage_path?: string
           subido_por_user_id?: string
@@ -18832,6 +18835,24 @@ export type Database = {
           },
         ]
       }
+      vigilancia_consumo_pedido: {
+        Row: {
+          pedido_en: string
+          request_id: number
+          unica: boolean
+        }
+        Insert: {
+          pedido_en?: string
+          request_id: number
+          unica?: boolean
+        }
+        Update: {
+          pedido_en?: string
+          request_id?: number
+          unica?: boolean
+        }
+        Relationships: []
+      }
       wearable_alerts: {
         Row: {
           alert_type: string
@@ -19840,54 +19861,6 @@ export type Database = {
           zona_lon: number | null
           zona_radio_m: number | null
         }
-        Insert: {
-          acepta_emergencias?: boolean | null
-          calificacion_promedio?: number | null
-          ciudad?: string | null
-          clip_url?: string | null
-          cohorte?: string | null
-          cohorte_anio?: number | null
-          country_code?: string | null
-          descripcion?: string | null
-          foto_url?: string | null
-          id?: string | null
-          nombre_comercial?: string | null
-          portadas?: never
-          radio_cobertura_km?: number | null
-          sector?: string | null
-          servicios?: never
-          tipo?: string | null
-          total_citas?: number | null
-          total_resenas?: number | null
-          user_id?: string | null
-          zona_lat?: never
-          zona_lon?: never
-          zona_radio_m?: never
-        }
-        Update: {
-          acepta_emergencias?: boolean | null
-          calificacion_promedio?: number | null
-          ciudad?: string | null
-          clip_url?: string | null
-          cohorte?: string | null
-          cohorte_anio?: number | null
-          country_code?: string | null
-          descripcion?: string | null
-          foto_url?: string | null
-          id?: string | null
-          nombre_comercial?: string | null
-          portadas?: never
-          radio_cobertura_km?: number | null
-          sector?: string | null
-          servicios?: never
-          tipo?: string | null
-          total_citas?: number | null
-          total_resenas?: number | null
-          user_id?: string | null
-          zona_lat?: never
-          zona_lon?: never
-          zona_radio_m?: never
-        }
         Relationships: [
           {
             foreignKeyName: "prestadores_user_id_fkey"
@@ -20470,6 +20443,14 @@ export type Database = {
           p_user_id: string
         }
         Returns: Json
+      }
+      _zona_aproximada: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          zona_lat: number
+          zona_lon: number
+          zona_radio_m: number
+        }[]
       }
       abrir_caso_clinico: {
         Args: {
@@ -21851,6 +21832,26 @@ export type Database = {
         }[]
       }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_historial_clinico_mascota: {
+        Args: {
+          p_caso_clinico_id?: string
+          p_desde?: string
+          p_hasta?: string
+          p_limite?: number
+          p_mascota_id: string
+        }
+        Returns: {
+          caso_clinico_id: string
+          caso_condicion: string
+          cita_id: string
+          diagnostico: string
+          evento_id: string
+          fecha: string
+          modalidad: string
+          motivo_consulta: string
+          negocio_nombre: string
+        }[]
+      }
       obtener_inicios_adiestramiento_disponibles: {
         Args: { p_comprable?: string; p_fecha: string; p_mascota_id: string }
         Returns: {
@@ -22268,6 +22269,10 @@ export type Database = {
       }
       prestador_activo: { Args: { p_prestador_id: string }; Returns: boolean }
       prestador_que_gestiono: { Args: never; Returns: string }
+      prestador_verificacion_profesional: {
+        Args: { p_prestador_id: string }
+        Returns: boolean
+      }
       promesa_por_vendedor: {
         Args: { p_cuentas: string[]; p_fecha_programada?: string }
         Returns: Json
@@ -22964,6 +22969,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string }
         Returns: Json
       }
+      vigilar_consumo_video: { Args: never; Returns: Json }
       volver_pedido_al_orden: { Args: { p_pedido_id: string }; Returns: Json }
       wizard_crear_cuenta_y_rol: {
         Args: {

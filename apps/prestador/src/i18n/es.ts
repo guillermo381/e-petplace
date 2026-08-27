@@ -2727,6 +2727,9 @@ export const prestadorEs = {
        servidor dice que sí**, los motivos NO se colapsan, y DOS no pintan
        nada — `no_es_teleconsulta` (no es error de nadie) y `ajeno_a_la_cita`
        (**jamás «no tienes permiso»: confirmaría que la cita existe**). */
+    /* S106-C t3 · el rótulo de la tarjeta que contiene la entrada. Nombra la
+       cita, no la acción: adentro puede haber un botón O un motivo. */
+    vcEntradaTitulo: 'La videoconsulta',
     entrarBoton: 'Entrar a la videoconsulta',
     entrarFueraDeVentana: 'La sala abre a las {{hora}}.',
     entrarNoPagada: 'La familia todavía no pagó esta videoconsulta.',
@@ -2734,6 +2737,10 @@ export const prestadorEs = {
     entrarNoRealizable: 'Ya la marcaste como no realizada.',
     entrarFinalizada: 'Esta videoconsulta ya terminó.',
     entrarInexistente: 'No encontramos esta videoconsulta.',
+    /* Enmienda del gate 26-ago: en el prestador NO hay silencios — está
+       mirando SU propia cita, así que callar no oculta nada. */
+    entrarNoEsTele: 'Esta cita no está marcada como videoconsulta. Se atiende de forma presencial.',
+    entrarAjena: 'Esta consulta está asignada a otra persona del equipo.',
     entrarNoSePudoConsultar: 'No pudimos verificar si la sala está abierta.',
 
     /* ══ LA VIDEOCONSULTA · in-call del profesional (Obras 4 y 5) ══ */
@@ -2752,6 +2759,30 @@ export const prestadorEs = {
     vcHistoriaLectura: 'Solo lectura durante la consulta.',
     vcFiltroFecha: 'Por fecha',
     vcFiltroCaso: 'Por tipo de caso',
+    /* ══ LA CONCLUSIÓN CLÍNICA (firma founder 26-ago) ═════════════════
+       Los tres desenlaces salen de la LETRA: «necesita atención presencial»
+       es verbatim de §4 y «urgencias» es la salida que §3 ya nombra.
+       Las tres pesan igual: si «urgencias» presidiera, la app empujaría
+       hacia el desenlace más caro. */
+    /* ══ EL CONTEXTO CLÍNICO SOBRE EL VIDEO (firma founder 26-ago) ═════
+       Sólo del lado del profesional: el dueño ya conoce a su animal. */
+    vcClinicoPeso: 'Peso',
+    vcClinicoVacunas: 'Vacunas',
+    vcClinicoUltima: 'Última visita',
+    vcClinicoAlergias: 'Alergias',
+    /* «Sin alergias registradas» y «no tiene alergias» NO son lo mismo: la
+       segunda es una afirmación clínica que el expediente no hizo. */
+    vcClinicoAlergiasSi: 'Tiene registradas',
+    vcClinicoAlergiasNo: 'Ninguna registrada',
+    vcConclusionTitulo: 'Cómo termina esta consulta',
+    vcConclusionResuelta: 'Se resolvió por video',
+    vcConclusionPresencial: 'Necesita atención presencial',
+    vcConclusionUrgencias: 'Derivada a urgencias',
+    /* Las líneas que quedan EN la nota. Llevan rótulo para que quien las lea
+       después sepa que son el desenlace y no una frase más del relato. */
+    vcConclusionLineaResuelta: 'Conclusión: el caso se resolvió en la videoconsulta.',
+    vcConclusionLineaPresencial: 'Conclusión: necesita atención presencial.',
+    vcConclusionLineaUrgencias: 'Conclusión: derivada a urgencias.',
     vcColgarConfirma: '¿Terminar la videoconsulta?',
     vcColgarSujeto: 'la videoconsulta',
     vcColgarSi: 'Terminar',

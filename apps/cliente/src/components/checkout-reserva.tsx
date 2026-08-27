@@ -89,6 +89,7 @@ export function CheckoutReserva({
   puedePagar,
   seccionExtra,
   fueraDeScroll,
+  exitoExtra,
 }: {
   citaId: string;
   expiraEn: string;
@@ -112,6 +113,17 @@ export function CheckoutReserva({
   seccionExtra?: ReactNode;
   /** Hojas del consumidor (viven fuera del ScrollView). */
   fueraDeScroll?: ReactNode;
+  /**
+   * S106-C t3 · Lo que el oficio agrega DEBAJO del éxito. Hoy su único
+   * consumidor son los consejos de preparación de §3bis, que la letra pide
+   * en la confirmación de la reserva —*«cuando el dueño acaba de pagar y
+   * está atento»*—.
+   *
+   * ⚠️ **Su presencia cambia el layout del éxito a scrolleable** (ver el
+   * bloque `fase === 'exito'`): sin él, el render es exactamente el de
+   * antes, y por eso los otros tres oficios no se tocan.
+   */
+  exitoExtra?: ReactNode;
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -290,6 +302,43 @@ export function CheckoutReserva({
               ⚠️ **La cadencia del barrido NO se afirma acá.** Medida para
               tarjeta (mismo día); **para DeUna no la medí** y su aplicador
               sigue abierto (`D-887`). */}
+          {/* ── 🔴 LA VUELTA AL RESUMEN — hallazgo ② del gate del founder ────
+              **«Tocó por error, quiso cambiar a tarjeta, y no hay camino de
+              vuelta: hay que rehacer TODO el proceso.»**
+
+              🔴 **Y la asimetría es la cura, no un detalle:** con DeUna esta
+              fase se alcanza **SIN haber cobrado nada** —sólo se pidió un
+              código—, así que volver es seguro y el hold sigue vivo. Con
+              tarjeta se llega **después** de que `cobrar()` salió bien: ahí
+              ofrecer «cambiar de medio» sería *invitar a pagar dos veces*.
+              Por eso el botón existe **sólo en el riel DeUna**, y sólo
+              mientras el estado sea `esperando`: en `aprobada` la plata ya
+              entró y en `cargando` todavía no hay código que abandonar.
+
+              ⚠️ **El borde, declarado y no disimulado:** si la persona estaba
+              tecleando en su app de DeUna justo cuando vuelve, el pago puede
+              llegar igual — el barrido lo resuelve, **como ya pasa hoy** con
+              el «Volver al hogar» de abajo. *No se agrega un riesgo nuevo: se
+              agrega una salida al que ya existía.* La política definitiva de
+              ese cruce es del motor de pagos, no de esta pantalla.
+
+              La voz dice lo que pasa con el código — *un botón que devuelve
+              sin avisar que el código deja de servir manda a alguien a pagar
+              con un número muerto.* */}
+          {riel === 'deuna' && deuna.estado.fase === 'esperando' ? (
+            <View style={{ gap: spacing[2], alignItems: 'center' }}>
+              <Boton
+                variante="secundario"
+                etiqueta={t('checkout.cambiarMedio')}
+                onPress={() => {
+                  setFase('resumen');
+                  setRiel(null);
+                }}
+              />
+              <Texto variante="apoyo">{t('checkout.cambiarMedioNota')}</Texto>
+            </View>
+          ) : null}
+
           {espera.fase === 'sigue_abierta' ? (
             <>
               <Texto variante="apoyo">{t('pago.esperaSigueAbiertaCita')}</Texto>
@@ -309,30 +358,56 @@ export function CheckoutReserva({
   }
 
   if (fase === 'exito') {
+    const cuerpo = (
+      <>
+        <EstadoVacio
+          icono={<Icono nombre={exitoIcono} tamano={48} />}
+          titulo={exitoTitulo}
+          descripcion={exitoDetalle}
+          accion={
+            <Boton
+              variante="primario"
+              etiqueta={t('checkout.volverHogar')}
+              onPress={() => {
+                // D-329: dismissTo solo busca en el stack ACTUAL
+                // (Explorar) — /hogar vive en otro tab y el CTA no
+                // navegaba. Se vacía el stack de Explorar (si hay
+                // algo que vaciar — deep link entra directo) y recién
+                // ahí se cambia de tab.
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar');
+              }}
+            />
+          }
+        />
+        {exitoExtra}
+      </>
+    );
+    /* S106-C t3 · **DOS LAYOUTS, y la rama existe para no tocar los otros
+       tres oficios.** El éxito siempre fue un `EstadoVacio` centrado en un
+       `View` que no scrollea — con un bloque extra abajo (los consejos de
+       §3bis: título + cuatro líneas) eso deja de entrar en un teléfono
+       chico, y lo que se pierde es el final: el botón de volver.
+       Con `exitoExtra` presente pasa a `ScrollView` con `flexGrow` — sigue
+       centrado cuando cabe, scrollea cuando no. **Sin `exitoExtra` el
+       render es byte por byte el de antes**, así que paseo, grooming y
+       adiestramiento no cambian ni necesitan re-gate. */
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
-          <EstadoVacio
-            icono={<Icono nombre={exitoIcono} tamano={48} />}
-            titulo={exitoTitulo}
-            descripcion={exitoDetalle}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('checkout.volverHogar')}
-                onPress={() => {
-                  // D-329: dismissTo solo busca en el stack ACTUAL
-                  // (Explorar) — /hogar vive en otro tab y el CTA no
-                  // navegaba. Se vacía el stack de Explorar (si hay
-                  // algo que vaciar — deep link entra directo) y recién
-                  // ahí se cambia de tab.
-                  if (router.canDismiss()) router.dismissAll();
-                  router.navigate('/hogar');
-                }}
-              />
-            }
-          />
-        </View>
+        {exitoExtra === undefined ? (
+          <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>{cuerpo}</View>
+        ) : (
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              padding: spacing[4],
+              gap: spacing[5],
+            }}
+          >
+            {cuerpo}
+          </ScrollView>
+        )}
       </SafeAreaView>
     );
   }

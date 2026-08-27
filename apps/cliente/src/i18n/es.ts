@@ -795,6 +795,9 @@ export const clienteEs = {
     simuladoAviso: 'Fase de pruebas: el pago es simulado — no se cobra nada real.',
     exitoTitulo: 'Paseo confirmado',
     exitoDetalle: 'Ya está en la agenda del paseador. Lo verás en tu Hogar.',
+    /* S106-C t3 · la salida del riel DeUna antes de pagar (hallazgo ②). */
+    cambiarMedio: 'Cambiar de medio de pago',
+    cambiarMedioNota: 'Tu reserva se mantiene. El código que generamos deja de servir.',
     volverHogar: 'Ir al Hogar',
     // ☠️ S101-C · MURIERON `rechazado`, `rechazadoDetalle`, `reintentar`,
     //    `timeout` y `timeoutDetalle` (Ley 37): eran las pantallas enteras del
@@ -825,6 +828,11 @@ export const clienteEs = {
     vacunacion: 'Vacunación',
     urgenciaLocal: 'Urgencia en clínica',
     urgenciaDomicilio: 'Urgencia a domicilio',
+    /* S106-C t3 · el quinto oficio en voz de familia. «Videoconsulta» y no
+       «telemedicina»: el dueño no compra una disciplina, compra una cita
+       por video. Mismo sustantivo que usa la pantalla de la llamada, para
+       que la app no se llame a sí misma de dos formas. */
+    telemedicina: 'Videoconsulta',
   },
   // S68-A2 — la reserva vet del dueño (V2: mascota→qué→día→hora→quién→
   // pagar sobre el chasis compartido). LOTE S68 APROBADO founder (18 Jul 2026).
@@ -956,6 +964,16 @@ export const clienteEs = {
         · `ajeno_a_la_cita` — **jamás «no tienes permiso»: eso confirmaría que
           la cita existe.** Se comporta como si no hubiera nada.
           *(Criterio registrado por la mesa, 26-ago.)* */
+    /* ══ §3bis · LOS CONSEJOS DE PREPARACIÓN ══════════════════════════
+       🔴 VERBATIM de `LETRA_TELEMEDICINA` §3bis (firma del founder,
+       26-ago-2026). **No se reescriben ni se acortan**: el founder los
+       firmó con estas palabras. Registro de APOYO, jamás de alarma — no
+       compiten con los seis signos de §3, que son la advertencia clínica. */
+    prepTitulo: 'Prepárate para tu videoconsulta',
+    prepConsejo1: 'Elige un lugar con buena luz — el veterinario necesita ver bien a tu mascota.',
+    prepConsejo2: 'Conéctate a una red wifi si puedes: la llamada será más estable.',
+    prepConsejo3: 'Ten a tu mascota contigo y a la mano antes de entrar.',
+    prepConsejo4: 'Si puedes, que alguien te ayude a sostenerla mientras la muestras.',
     entrarBoton: 'Entrar a la videoconsulta',
     /* EL caso que más va a pasar. Lleva la HORA, del `abre_en` del servidor:
        decirle «no puedes entrar» a alguien que llegó veinte minutos antes lo
@@ -2665,6 +2683,10 @@ export const clienteEs = {
     coordinaranSinNombre: 'Te van a contactar para agendar',
     quienAtiende: 'Quien la atiende',
     otrasActivas: 'Sus otras citas',
+    /* S106-C t3 · la señal de que la tarjeta de una teleconsulta NAVEGA.
+       «Ver» y no «Entrar»: la antesala puede decir que todavía no se puede,
+       y prometer entrada desde acá sería prometer lo que no controlamos. */
+    verVideoconsulta: 'Ver la videoconsulta ›',
     vacio: 'Sin citas por venir',
     vacioDetalle: 'Cuando reserves una cita, la vas a ver acá.',
     error: 'No pudimos cargar las citas.',

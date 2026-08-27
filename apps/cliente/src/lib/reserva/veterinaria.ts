@@ -78,7 +78,7 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
      🔴 Se resetea cada vez que el aviso se abre: *una casilla que queda
      marcada de una vez anterior consiente por alguien que no volvió a leer.* */
   const [consentimientoMarcado, setConsentimientoMarcado] = useState(false);
-  const tocarNegocioRef = useRef<((v: VeterinarioDisponible) => Promise<void>) | null>(null);
+  const tocarNegocioRef = useRef<((v: VeterinarioDisponible, yaAcepto?: boolean) => Promise<void>) | null>(null);
 
   // El hold nace acá: invisible al prestador hasta que el pago confirme.
   // S78-A7: si la familia ELIGIÓ persona, viaja al motor — que la FIJA o
@@ -141,7 +141,24 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
           duracion: String(r.data.duracion_minutos),
           direccion: v.direccion ?? '',
           ciudad: v.ciudad ?? '',
-          modalidad: ctx.esDomicilio ? 'domicilio' : 'local',
+          /* 🔴 S106-C t3 · ACÁ UNA TELECONSULTA VIAJABA COMO `'local'`.
+             El ternario tenía dos salidas y la modalidad tiene TRES desde
+             S106: sin este brazo, la cita por video le decía al checkout que
+             ocurría en el local del veterinario.
+             *No daba síntoma porque el único lector era `esDomicilio`, y ahí
+             `'local'` y `'telemedicina'` se comportan igual — el dato estaba
+             mal y el comportamiento salía bien, que es como un dato inventado
+             sobrevive.* Hoy tiene un segundo lector (los consejos de §3bis) y
+             el error habría sido visible: la teleconsulta sin sus consejos.
+             ⚠️ Esto es SÓLO el parámetro de navegación al checkout. La
+             modalidad de la CITA la pone el servidor y no se manda desde
+             acá (contrato de A) — este valor no la toca. */
+          modalidad:
+            ctx.tipoServicio === 'telemedicina'
+              ? 'telemedicina'
+              : ctx.esDomicilio
+                ? 'domicilio'
+                : 'local',
           // §8 LETRA_TURNOS (la mitad "confirmación"): si eligió, se dice.
           ...(persona !== undefined
             ? { personaNombre: persona.nombre ?? t('veterinaria.integranteEquipo') }
@@ -159,7 +176,29 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
   // del colapso N=1 corre sobre lo filtrado (Ley 23: no se ofrece a
   // alguien sin horarios).
   const tocarNegocio = useCallback(
-    async (v: VeterinarioDisponible) => {
+    /**
+     * 🔴 `yaAcepto` NO es un parámetro de conveniencia: es la cura de un
+     * defecto medido en el gate (hallazgo ③, 26-ago).
+     *
+     * **El síntoma:** el dueño marcaba la casilla, tocaba «Continuar», y el
+     * aviso volvía a abrirse **con la casilla desmarcada**. Había que marcarla
+     * dos veces para el mismo acto.
+     *
+     * **La causa:** `continuarTrasAviso` hace `setAvisoAceptado(true)` y
+     * enseguida re-entra por acá — pero **el `tocarNegocio` que re-entra es el
+     * del render actual, cuyo closure todavía tiene `avisoAceptado === false`**
+     * (React no aplicó el `setState`). ⇒ el gate se cumplía de nuevo y volvía
+     * a abrir el aviso, reseteando la casilla.
+     *
+     * *El `ref` rompía el ciclo de dependencias pero no la vejez del valor: un
+     * ref soluciona a QUIÉN se llama, jamás CON QUÉ.*
+     *
+     * **La cura es la de D-730 y la casa ya la tenía escrita:** el dato entra
+     * como ARGUMENTO, no se lee del estado. *Un argumento no puede estar
+     * viejo.* El reseteo al ABRIR el aviso queda intacto — ése es firma, y es
+     * otra cosa: protege de una casilla marcada en una visita anterior.
+     */
+    async (v: VeterinarioDisponible, yaAcepto = false) => {
       if (creandoHold || abriendoSelector !== null) return;
 
       /* ── EL AVISO §3 VA ACÁ, Y EL LUGAR ES LA MITAD DE LA DECISIÓN ───────
@@ -173,7 +212,7 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
          viviera después, el dueño que toca «Ir a urgencias» ya habría
          apartado 15 minutos de la agenda de un veterinario para irse. *El
          escape no puede costarle el horario a un tercero.* */
-      if (ctx.tipoServicio === 'telemedicina' && !avisoAceptado) {
+      if (ctx.tipoServicio === 'telemedicina' && !avisoAceptado && !yaAcepto) {
         setAvisoPendiente(v);
         setConsentimientoMarcado(false);
         return;
@@ -229,7 +268,9 @@ export function useReservaVeterinaria(ctx: ContextoVeterinaria, alConflicto?: ()
     if (v === null) return;
     setAvisoPendiente(null);
     setAvisoAceptado(true);
-    void tocarNegocioRef.current?.(v);
+    /* `true` explícito: el estado de arriba **todavía no se aplicó** cuando
+       esta llamada corre. Ver el porqué en la cabecera de `tocarNegocio`. */
+    void tocarNegocioRef.current?.(v, true);
   }, [avisoPendiente]);
 
   // El ref rompe el ciclo `tocarNegocio` ⇄ `continuarTrasAviso` sin que

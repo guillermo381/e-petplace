@@ -36,7 +36,7 @@
  * dispositivo, con la build.
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
@@ -65,22 +65,37 @@ function unir(a: string, b: string): string {
 export function DictadoEnVivo({
   value,
   onChangeText,
+  onEscuchandoCambia,
 }: {
   value: string;
   onChangeText: (texto: string) => void;
+  /**
+   * 🔴 S106-C t3 · avisa cuándo está tomando el micrófono.
+   *
+   * Nace para la VIDEOCONSULTA: ahí LiveKit también tiene el micrófono, y
+   * **dos consumidores del mic a la vez no conviven en Android**. La pantalla
+   * usa esto para apagar el de la llamada mientras el vet dicta.
+   *
+   * *Y resulta ser mejor producto que un arreglo técnico: el vet está
+   * dictando la NOTA CLÍNICA, no hablándole a la familia — que el dueño no
+   * escuche «otitis bilateral, pronóstico reservado» es lo correcto.*
+   */
+  onEscuchandoCambia?: (escuchando: boolean) => void;
 }) {
   // Módulo ausente: el control no existe. Constante de por vida del
   // proceso ⇒ el early-return antes de hooks es legal y estable.
   if (speech === null) return null;
-  return <DictadoVivoInterno value={value} onChangeText={onChangeText} />;
+  return <DictadoVivoInterno value={value} onChangeText={onChangeText} onEscuchandoCambia={onEscuchandoCambia} />;
 }
 
 function DictadoVivoInterno({
   value,
   onChangeText,
+  onEscuchandoCambia,
 }: {
   value: string;
   onChangeText: (texto: string) => void;
+  onEscuchandoCambia?: (escuchando: boolean) => void;
 }) {
   const s = speech!;
   const { theme } = useTheme();
@@ -88,6 +103,13 @@ function DictadoVivoInterno({
   const { handlers, estiloPresionado } = usePresionado(0.97);
 
   const [escuchando, setEscuchando] = useState(false);
+  /* El aviso al padre viaja por efecto y no dentro de cada handler: así hay
+     UN solo lugar que lo emite y no puede quedar un camino de apagado que se
+     olvide de avisar — que dejaría el micrófono de la llamada apagado para
+     siempre. */
+  useEffect(() => {
+    onEscuchandoCambia?.(escuchando);
+  }, [escuchando, onEscuchandoCambia]);
   const [voz, setVoz] = useState<string | null>(null);
   // §31.6 · el consentimiento del dictado. `consentidoRef` cachea que ya
   // consintió (no re-consulta en cada toque); `pidiendo` muestra la Hoja.

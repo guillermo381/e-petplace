@@ -111,6 +111,26 @@ export function ModalDosAlturas({
   const h = useSharedValue(altoDe(altura))
   const iniH = useSharedValue(0)
 
+  /* 🔴 EL TOPE Y EL PISO VIVEN EN SHARED VALUES, NO SE CALCULAN EN EL GESTO.
+     **Crash confirmado por logcat** (S106, 27-ago): `onUpdate` llamaba
+     `altoDe(...)` —un `useCallback`, o sea una función del hilo JS— desde el
+     hilo UI, y Worklets mata la app:
+       `[Worklets] Tried to synchronously call a Remote Function.
+        Called "anonymous" on the UI Runtime.` → `ModalDosAlturasTsx2`
+
+     Es el MISMO defecto que `TileVideoPropio` (S106 t2) y por eso la cura tiene
+     la misma forma: **por el hilo sólo cruzan VALORES.** Se eligió esto y no
+     marcar `altoDe` como `'worklet'` porque *una directiva se puede olvidar al
+     editar y su ausencia no rompe el build: rompe la app en la mano del
+     usuario.* Un `useSharedValue` no se olvida — el worklet no tiene otra cosa
+     que leer. */
+  const tope = useSharedValue(altoDe('completo'))
+  const piso = useSharedValue(altoDe('cerrado'))
+  useEffect(() => {
+    tope.value = altoDe('completo')
+    piso.value = altoDe('cerrado')
+  }, [altoDe, tope, piso])
+
   useEffect(() => {
     h.value = asentar(altoDe(altura))
   }, [altura, altoDe, asentar, h])
@@ -143,9 +163,7 @@ export function ModalDosAlturas({
     .onUpdate((e) => {
       // Arrastrar hacia ARRIBA (translationY negativo) hace crecer el panel.
       const siguiente = iniH.value - e.translationY
-      const tope = altoDe('completo')
-      const piso = altoDe('cerrado')
-      h.value = Math.min(tope, Math.max(piso, siguiente))
+      h.value = Math.min(tope.value, Math.max(piso.value, siguiente))
     })
     .onEnd((e) => {
       runOnJS(resolver)(h.value, -e.velocityY)

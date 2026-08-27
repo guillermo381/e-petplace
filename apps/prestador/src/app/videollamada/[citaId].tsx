@@ -21,11 +21,13 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { View, useWindowDimensions } from 'react-native';
+import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePreventScreenCapture } from 'expo-screen-capture';
 import {
+  AudioSession,
+  AndroidAudioTypePresets,
   LiveKitRoom,
   useConnectionState,
   useLocalParticipant,
@@ -41,6 +43,10 @@ import {
   EstadoVacio,
   HojaConfirmacionDestructiva,
   ModalDosAlturas,
+  SelectorOpcion,
+  radius,
+  sobreVideo,
+  AsaModal,
   SuperficieLlamada,
   Texto,
   spacing,
@@ -57,6 +63,70 @@ import { useTraduccion } from '@/i18n';
 import { livekitListo } from '@/lib/livekit';
 import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
+import { DictadoEnVivo } from '@/components/dictado-en-vivo';
+import { obtenerDetalleMascotaPrestador, obtenerMiPrestador, type DetalleMascotaPrestador } from '@epetplace/api';
+import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
+
+/** La línea rotulada que cada conclusión deja EN la nota. Mapa cerrado: un
+ *  código sin voz no puede escribir una línea vacía en un expediente. */
+const VOZ_CONCLUSION: Record<string, 'consulta.vcConclusionLineaResuelta' | 'consulta.vcConclusionLineaPresencial' | 'consulta.vcConclusionLineaUrgencias'> = {
+  resuelta: 'consulta.vcConclusionLineaResuelta',
+  presencial: 'consulta.vcConclusionLineaPresencial',
+  urgencias: 'consulta.vcConclusionLineaUrgencias',
+};
+
+/**
+ * Las cuatro tarjetas del contexto clínico, con su regla de honestidad.
+ *
+ * 🔴 **Un dato que no está NO se pinta como «0» ni como «ninguna».** El peso
+ * sin medir y el peso cero no son lo mismo; «sin alergias registradas» y «no
+ * tiene alergias» tampoco — *la segunda es una afirmación clínica que el
+ * expediente no hizo.* Por eso cada tarjeta que no tiene dato **no se monta**,
+ * salvo las alergias, que dicen exactamente lo que el expediente sabe.
+ */
+function tarjetasClinicas(
+  d: DetalleMascotaPrestador,
+  t: (k: never) => string,
+  idioma: string,
+): Array<{ clave: string; etiqueta: string; valor: string }> {
+  const salida: Array<{ clave: string; etiqueta: string; valor: string }> = [];
+  if (d.peso_clinico_kg !== null) {
+    salida.push({
+      clave: 'peso',
+      etiqueta: t('consulta.vcClinicoPeso' as never),
+      valor: `${d.peso_clinico_kg} kg`,
+    });
+  }
+  salida.push({
+    clave: 'vacunas',
+    etiqueta: t('consulta.vcClinicoVacunas' as never),
+    valor: String(d.vacunas_total),
+  });
+  /* La última visita sale de las atenciones de ESTE prestador (visibilidad
+     parcial, por RLS): sin ninguna, la tarjeta no existe — *decir «primera
+     visita» sería afirmar algo sobre el historial de otros negocios que esta
+     app no puede ver.* */
+  const cerradas = d.atenciones
+    .map((a) => a.cerrada_en)
+    .filter((f): f is string => f !== null)
+    .sort();
+  const ultima = cerradas.length > 0 ? cerradas[cerradas.length - 1] : null;
+  if (ultima !== undefined && ultima !== null) {
+    salida.push({
+      clave: 'ultima',
+      etiqueta: t('consulta.vcClinicoUltima' as never),
+      valor: fechaCortaMono(ultima.slice(0, 10), idioma as IdiomaSoportado),
+    });
+  }
+  salida.push({
+    clave: 'alergias',
+    etiqueta: t('consulta.vcClinicoAlergias' as never),
+    valor: d.tiene_alergias
+      ? t('consulta.vcClinicoAlergiasSi' as never)
+      : t('consulta.vcClinicoAlergiasNo' as never),
+  });
+  return salida;
+}
 
 type Fase = 'pidiendo' | 'encall' | 'sin_entrada';
 
@@ -66,10 +136,36 @@ export default function VideollamadaProfesional() {
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
-  const { citaId = '', familia = '' } = useLocalSearchParams<{ citaId?: string; familia?: string }>();
+  const { citaId = '', familia = '', mascotaId = '' } = useLocalSearchParams<{
+    citaId?: string;
+    familia?: string;
+    mascotaId?: string;
+  }>();
 
   /* OBRA 5 · se enciende al montar y se apaga al desmontar, solo. */
   usePreventScreenCapture();
+
+  /* ── EL CONTEXTO CLÍNICO DE LA MASCOTA (firma del founder, 26-ago) ────────
+     Peso · vacunas · última visita · alergias, **sólo del lado del
+     PROFESIONAL**: *el dueño ya conoce a su animal, y lo que necesita es ver
+     a la doctora.*
+     Se lee UNA vez al entrar —son datos del expediente, no del momento— y
+     **su fallo no tumba la llamada** (Ley 13): las tarjetas no se dibujan y
+     la consulta sigue igual. */
+  const [clinico, setClinico] = useState<DetalleMascotaPrestador | null>(null);
+  useEffect(() => {
+    if (mascotaId.length === 0) return;
+    let vigente = true;
+    void (async () => {
+      const pr = await obtenerMiPrestador();
+      if (!vigente || !pr.ok) return;
+      const r = await obtenerDetalleMascotaPrestador(mascotaId, pr.data.id);
+      if (vigente && r.ok) setClinico(r.data);
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, [mascotaId]);
 
   const [fase, setFase] = useState<Fase>('pidiendo');
   const [credencial, setCredencial] = useState<TokenVideollamada | null>(null);
@@ -127,6 +223,66 @@ export default function VideollamadaProfesional() {
       vigente = false;
     };
   }, [citaId, idioma, t, intento]);
+
+  /* ── 🔴 EL ALTAVOZ — la sesión de audio la configura ESTA pantalla ─────────
+     **Gate del founder (26-ago): la llamada sonaba por el AURICULAR** y sin
+     auriculares no se escuchaba.
+
+     **La causa no es una mala configuración: es que NADIE configuraba** — B
+     midió cero llamadas a `AudioSession` en toda la app, así que decidía el
+     sistema, y en Android el sistema elige el auricular.
+
+     **La llave, leída del JSDoc del SDK y verificada contra el objeto** (no
+     supuesta): en modo `communication` el ruteo **está APAGADO** y la lista de
+     salidas —que ya trae `speaker` antes que `earpiece`— **no se aplica**.
+     ⇒ *Reordenar la lista NO alcanza: `forceHandleAudioRouting` es lo que la
+     enciende.*
+
+     🔴 **`earpiece` queda FUERA de la lista a propósito, no por olvido** — es
+     justo el comportamiento que se vino a corregir. **Bluetooth y auriculares
+     siguen ganando**: *si alguien se puso auriculares, quiere auriculares.*
+
+     ⚠️ **Y no es cosmético:** sin altavoz el dueño necesita el teléfono en la
+     oreja, y con el teléfono en la oreja **no tiene las dos manos para
+     sostener al animal y mostrárselo al veterinario** — que es el acto central
+     del servicio. *Va junto con girar cámara: son el mismo problema visto dos
+     veces.*
+
+     Se descartó un selector de salida con el argumento de B: *un toggle no
+     arregla un default malo, lo delega en el usuario.*
+
+     Vive acá y no en `packages/ui` porque **ui no importa LiveKit** (decisión
+     de arquitectura ratificada): la sesión se configura donde se monta el
+     Room. Se apaga al desmontar — *una sesión de audio que queda abierta se
+     lleva el audio del teléfono a una llamada que ya terminó.* */
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      try {
+        await AudioSession.configureAudio({
+          android: {
+            preferredOutputList: ['bluetooth', 'headset', 'speaker'],
+            audioTypeOptions: {
+              ...AndroidAudioTypePresets.communication,
+              forceHandleAudioRouting: true,
+            },
+          },
+          ios: { defaultOutput: 'speaker' },
+        });
+        if (!vigente) return;
+        await AudioSession.startAudioSession();
+      } catch {
+        /* Si la sesión no se pudo configurar **la llamada sigue**: se escucha
+           peor, pero se escucha. *Tumbar una videoconsulta médica por el ruteo
+           del audio sería cambiar un problema por uno mucho peor.* */
+      }
+    })();
+    return () => {
+      vigente = false;
+      void AudioSession.stopAudioSession();
+    };
+  }, []);
+
 
   /* El silencio no dibuja: SALE. Una pantalla en blanco sería un callejón, y
      cualquier texto —hasta el genérico— confirmaría que la cita existe.
@@ -228,14 +384,29 @@ export default function VideollamadaProfesional() {
              Sin borrador se sale y ya: *obligar a pasar por el Durante a quien
              no escribió nada sería cobrarle un trámite por no haber usado una
              función.* */
-          onSalir={(borrador) => {
-            if (borrador.trim().length === 0) {
+          clinico={clinico}
+          onSalir={(borrador, conclusion) => {
+            /* 🔴 LA CONCLUSIÓN VIAJA DENTRO DE LA NOTA, y es lo que la firma
+               pide: *«es parte de la nota clínica»*. Se le pone su rótulo para
+               que el que la lea después —persona o estructurador— sepa que es
+               el desenlace y no una frase más del relato.
+
+               ⚠️ **Declarado: hoy viaja como TEXTO, no como campo.** La nota
+               clínica no tiene una columna para el desenlace, y esa columna es
+               MOTOR — pedido a A. *Mientras tanto la conclusión se conserva y
+               se lee; lo que no se puede todavía es consultarla como dato
+               («cuántas teleconsultas derivaron a urgencias»).* Preferible a
+               perderla: un dato en prosa se puede migrar, uno que no se
+               registró no. */
+            const linea = conclusion !== undefined ? t(VOZ_CONCLUSION[conclusion]) : null;
+            const texto = linea === null ? borrador : `${borrador}\n\n${linea}`.trim();
+            if (texto.trim().length === 0) {
               router.back();
               return;
             }
             router.replace({
               pathname: '/veterinaria/consulta/[citaId]',
-              params: { citaId, borrador },
+              params: { citaId, borrador: texto },
             });
           }}
         />
@@ -257,6 +428,7 @@ function MesaDeTrabajo({
   onCam,
   onGirar,
   onSalir,
+  clinico,
 }: {
   alto: number;
   insetTop: number;
@@ -269,9 +441,13 @@ function MesaDeTrabajo({
   onCam: () => void;
   onGirar: () => void;
   /** Recibe el borrador: **al colgar la nota no se pierde, se entrega.** */
-  onSalir: (borrador: string) => void;
+  /** El borrador de la nota + la conclusión elegida (o `undefined`). */
+  onSalir: (borrador: string, conclusion?: string) => void;
+  /** El contexto clínico para las tarjetas sobre el video; `null` = no se
+   *  pudo leer y **no se dibujan** (Ley 13, jamás datos inventados). */
+  clinico: DetalleMascotaPrestador | null;
 }) {
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const estado = useConnectionState();
   const { localParticipant, cameraTrack } = useLocalParticipant();
   const remotos = useRemoteParticipants();
@@ -279,6 +455,46 @@ function MesaDeTrabajo({
   const [inicioTs] = useState(() => Date.now());
   const [altura, setAltura] = useState<AlturaModal>('cerrado');
   const [nota, setNota] = useState('');
+  /* 🔴 LA CONCLUSIÓN CLÍNICA — `undefined` = el vet todavía no eligió, y
+     **no hay default**: *un valor preseleccionado en un campo clínico es un
+     diagnóstico que puso la app y no el veterinario.* */
+  const [conclusion, setConclusion] = useState<string | undefined>(undefined);
+  /* 🔴 MIENTRAS EL VET DICTA, EL MICRÓFONO DE LA LLAMADA SE APAGA.
+     Dos consumidores del mic no conviven en Android — y además es lo
+     correcto: *está dictando la nota clínica, no hablándole a la familia.* */
+  const [dictando, setDictando] = useState(false);
+
+  /* 🔴 EL ALTO DEL TECLADO — hallazgos ① y ⑤ del gate.
+     `ModalDosAlturas` acepta `altoTeclado` y **yo no se lo pasaba**, así que
+     el panel no reservaba nada y el teclado se comía el final del contenido
+     (la conclusión clínica, que es lo último). *Una prop que la pieza expone
+     y el consumidor no llena es la mitad de una función.*
+     ⚠️ Y es lo único del crash que puedo tocar sin el stack: la hipótesis
+     medida es que el teclado **redimensiona la ventana** y el SurfaceView de
+     LiveKit se recrea — *el mismo modo de falla que el MapView sin key de
+     `D-575`, que también murió en hilo nativo, fuera de toda ErrorBoundary.*
+     Reservar el alto no cambia el modo de la ventana; **el diagnóstico sigue
+     pedido y esto no lo reemplaza.** */
+  const [altoTeclado, setAltoTeclado] = useState(0);
+  useEffect(() => {
+    const mostrar = Keyboard.addListener('keyboardDidShow', (e) =>
+      setAltoTeclado(e.endCoordinates.height),
+    );
+    const ocultar = Keyboard.addListener('keyboardDidHide', () => setAltoTeclado(0));
+    return () => {
+      mostrar.remove();
+      ocultar.remove();
+    };
+  }, []);
+
+  /* 🔴 EL APAGADO REAL, no sólo el ícono. Si el track siguiera publicado, el
+     dueño escucharía al vet dictando su nota clínica — que es exactamente lo
+     que esta cura evita. Y al terminar vuelve al estado que el vet **tenía
+     elegido**, no a «encendido»: *devolverle el micrófono a alguien que lo
+     había apagado a propósito es peor que dejarlo apagado.* */
+  useEffect(() => {
+    void localParticipant.setMicrophoneEnabled(micActivo && !dictando);
+  }, [dictando, micActivo, localParticipant]);
   const [confirmandoSalir, setConfirmandoSalir] = useState(false);
 
   const estadoConexion =
@@ -314,7 +530,9 @@ function MesaDeTrabajo({
           },
           inicioTs,
         }}
-        microfonoActivo={micActivo}
+        /* Mientras dicta, el control se muestra apagado: es la verdad —
+         el micrófono está en la nota, no en la llamada. */
+      microfonoActivo={micActivo && !dictando}
         camaraActiva={camaraActiva}
         onMicrofono={() => {
           void localParticipant.setMicrophoneEnabled(!micActivo);
@@ -337,6 +555,82 @@ function MesaDeTrabajo({
         }}
       />
 
+      {/* ── 🔴 EL ASA, SOBRE EL VIDEO — hallazgo ④ del gate del founder ──────
+          **«El vet no tiene con qué escribir.»** El panel SÍ se montaba; lo
+          que no se veía era su manija, y la medición dice por qué **sin
+          necesidad de aparato**:
+
+          ① `ModalDosAlturas` cerrado vive en `bottom: 0` con 28 px de alto, y
+             `SuperficieLlamada` pone su barra de controles **también en
+             `bottom: 0`**. El modal se monta después ⇒ **su franja tapa la
+             parte baja de los controles y el asa se pierde ahí.**
+          ② Peor: esos 28 px **no descuentan `insetBottom`**, así que caen
+             dentro de la barra de gestos del sistema. *Es el gemelo exacto
+             del hallazgo ② de B en la tanda 2 —el botón «entrar» pisado por
+             los botones del sistema—: el mismo defecto, otra pantalla.*
+
+          ⇒ Se monta `AsaModal`, que **B exportó para exactamente esto** y lo
+          dejó escrito en su JSDoc: *«el asa suelta, para montarla sobre el
+          video cuando el panel está cerrado»*. **Estaba construida y nadie la
+          montaba** — mi obra, no la suya.
+
+          El `120` no es un número elegido: es **el mismo que la propia
+          `SuperficieLlamada` usa** para poner contenido justo encima de su
+          barra de controles. *Copiar su número en vez de estimar uno es lo
+          que hace que el asa siga en su lugar el día que la barra cambie.*
+
+          Sólo con el panel `cerrado`: abierto, el asa del panel es la que
+          manda y dos manijas para lo mismo confunden más que ninguna. */}
+      {altura === 'cerrado' && (
+        <View
+          style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + 120, gap: spacing[2] }}
+          pointerEvents="box-none"
+        >
+          {/* ── LAS TARJETAS DEL CONTEXTO CLÍNICO (firma del founder) ────────
+              **Sobre el video y encima de los controles**, no dentro del
+              modal: son lo que el vet mira MIENTRAS observa al animal, y
+              tenerlas detrás de un panel las vuelve inútiles justo cuando
+              sirven.
+
+              🔴 **Sólo del lado del PROFESIONAL.** El dueño no las ve: *ya
+              conoce a su animal, y lo que necesita es ver a la doctora.*
+
+              Fila horizontal desplazable: con cuatro datos de largo variable
+              —«3 vacunas» y «Sin alergias registradas» no miden lo mismo—
+              apretarlas en el ancho las trunca, y *un dato clínico truncado
+              es peor que uno ausente: se lee como si dijera otra cosa.* */}
+          {clinico !== null && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: spacing[4], gap: spacing[2] }}
+            >
+              {tarjetasClinicas(clinico, t, idioma).map((tj) => (
+                <View
+                  key={tj.clave}
+                  style={{
+                    backgroundColor: sobreVideo.banda,
+                    borderRadius: radius.suave,
+                    paddingHorizontal: spacing[3],
+                    paddingVertical: spacing[2],
+                    minHeight: 44,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Texto variante="dato" color="sobreVideo">
+                    {tj.etiqueta}
+                  </Texto>
+                  <Texto variante="cuerpo" color="sobreVideo">
+                    {tj.valor}
+                  </Texto>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          <AsaModal etiqueta={t('consulta.vcAsaModal')} onPress={() => setAltura('medio')} />
+        </View>
+      )}
+
       {/* §3 · EL MODAL DE DOS ALTURAS. `medio` = dictar viendo al animal, que
           es el caso real; `completo` = leer la historia. **Nunca tapa el video
           del todo** — eso lo garantiza la pieza. */}
@@ -344,11 +638,20 @@ function MesaDeTrabajo({
         altura={altura}
         onAltura={setAltura}
         altoPantalla={alto}
-        insetBottom={insetBottom}
+        /* ⑤ · el contenido termina ARRIBA de los controles de la llamada, que
+           viven en `bottom: 0` y se dibujan encima. El 120 es el mismo número
+           que usa la propia `SuperficieLlamada` para poner algo sobre su
+           barra — copiarlo en vez de estimar es lo que hace que siga
+           calzando el día que la barra cambie. */
+        insetBottom={insetBottom + 120}
+        altoTeclado={altoTeclado}
         etiquetaAsa={t('consulta.vcAsaModal')}
         /* Bajar con texto sin guardar pide confirmación — lo resuelve la pieza
            con este aviso; acá sólo se le dice si hay algo escrito. */
-        hayCambiosSinGuardar={nota.trim().length > 0}
+        /* La conclusión también cuenta como trabajo sin guardar: bajar el
+           panel después de elegir «urgencias» y perderlo en silencio sería
+           tirar el dato más importante de la consulta. */
+        hayCambiosSinGuardar={nota.trim().length > 0 || conclusion !== undefined}
       >
         <View style={{ gap: spacing[4] }}>
           <Texto variante="seccion">{t('consulta.vcNotaTitulo')}</Texto>
@@ -356,12 +659,66 @@ function MesaDeTrabajo({
               🔴 Su regla viaja intacta — **la plataforma jamás sugiere
               medicamentos, tratamientos ni posologías**. El placeholder nombra
               CAMPOS, no contenido. */}
+          {/* 🔴 EL DICTADO — hallazgo ② del gate: **no se montaba.**
+              `DictadoEnVivo` existe desde S78 (D-456, con su gate pasado) y
+              vivía en UNA sola pantalla, el Durante presencial. *Es el mismo
+              patrón que el asa: pieza construida, probada, y sin montar.*
+
+              **Y era el punto del modal**, no un extra: el vet escribe
+              MIRANDO al animal, no al teclado. Si no está el módulo nativo o
+              el reconocedor del SO, la pieza **no se dibuja** (Ley 23) y queda
+              el campo — nunca un control muerto.
+
+              ⚠️ **Y es además la mitigación del crash (①):** la hipótesis
+              medida es que el teclado redimensiona la ventana y el
+              SurfaceView de LiveKit se recrea. *Dictando no se abre el
+              teclado.* No sustituye al diagnóstico —el stack sigue pedido—
+              pero le da al vet un camino para trabajar hoy. */}
+          <DictadoEnVivo value={nota} onChangeText={setNota} onEscuchandoCambia={setDictando} />
+
           <Campo
             label={t('consulta.vcNotaTitulo')}
             placeholder={t('consulta.vcNotaPlaceholder')}
             value={nota}
             onChangeText={setNota}
             multilinea={6}
+          />
+
+          {/* ── 🔴 CÓMO TERMINA LA CONSULTA (firma del founder, 26-ago) ──────
+              **Es parte de la NOTA CLÍNICA, no un motivo de cierre**, y la
+              diferencia no es de forma: *una consulta que termina en «llevala
+              a urgencias» SÍ OCURRIÓ* — el vet atendió, cobra, y el expediente
+              tiene que decir qué pasó. **No se confunde con «no realizable»**,
+              que es la consulta que NO se pudo hacer y devuelve la plata: son
+              opuestos para el dinero y para el registro.
+
+              *Por eso vive acá adentro y no en un formulario al colgar: un
+              formulario al colgar se lee como «motivo de cierre», y ahí la
+              derivación empieza a parecerse a un fracaso del servicio cuando
+              es su resultado más valioso.*
+
+              🔴 **Las tres salen de la LETRA, no de mi criterio:**
+              «necesita atención presencial» es verbatim de §4 —*«eso ES el
+              servicio prestado»*— y «derivar a urgencias» es la salida que el
+              aviso de §3 ya nombra. *Si el vocabulario clínico crece, es letra
+              y no código.*
+
+              **Ninguna preselecciona y las tres pesan igual**: si «urgencias»
+              presidiera, la app empujaría hacia el desenlace más caro — el
+              mismo argumento que sostiene la paridad del aviso §3.
+
+              **No bloquea nada.** Sin elegir, la conclusión va vacía y la nota
+              sigue siendo válida: *es la nota clínica, no un peaje.* */}
+          <SelectorOpcion
+            etiqueta={t('consulta.vcConclusionTitulo')}
+            disposicion="columnas"
+            opciones={[
+              { codigo: 'resuelta', etiqueta: t('consulta.vcConclusionResuelta') },
+              { codigo: 'presencial', etiqueta: t('consulta.vcConclusionPresencial') },
+              { codigo: 'urgencias', etiqueta: t('consulta.vcConclusionUrgencias') },
+            ]}
+            seleccionada={conclusion}
+            onSelect={setConclusion}
           />
 
           {altura === 'completo' && (
@@ -380,7 +737,7 @@ function MesaDeTrabajo({
         sujeto={t('consulta.vcColgarSujeto')}
         etiquetaConfirmar={t('consulta.vcColgarSi')}
         etiquetaCancelar={t('consulta.vcColgarNo')}
-        onConfirmar={() => onSalir(nota)}
+        onConfirmar={() => onSalir(nota, conclusion)}
       />
     </>
   );
