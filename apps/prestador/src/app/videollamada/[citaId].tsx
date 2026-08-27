@@ -43,6 +43,7 @@ import {
   EstadoVacio,
   HojaConfirmacionDestructiva,
   ModalDosAlturas,
+  SelectorOpcion,
   AsaModal,
   SuperficieLlamada,
   Texto,
@@ -60,6 +61,14 @@ import { useTraduccion } from '@/i18n';
 import { livekitListo } from '@/lib/livekit';
 import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
+
+/** La línea rotulada que cada conclusión deja EN la nota. Mapa cerrado: un
+ *  código sin voz no puede escribir una línea vacía en un expediente. */
+const VOZ_CONCLUSION: Record<string, 'consulta.vcConclusionLineaResuelta' | 'consulta.vcConclusionLineaPresencial' | 'consulta.vcConclusionLineaUrgencias'> = {
+  resuelta: 'consulta.vcConclusionLineaResuelta',
+  presencial: 'consulta.vcConclusionLineaPresencial',
+  urgencias: 'consulta.vcConclusionLineaUrgencias',
+};
 
 type Fase = 'pidiendo' | 'encall' | 'sin_entrada';
 
@@ -291,14 +300,28 @@ export default function VideollamadaProfesional() {
              Sin borrador se sale y ya: *obligar a pasar por el Durante a quien
              no escribió nada sería cobrarle un trámite por no haber usado una
              función.* */
-          onSalir={(borrador) => {
-            if (borrador.trim().length === 0) {
+          onSalir={(borrador, conclusion) => {
+            /* 🔴 LA CONCLUSIÓN VIAJA DENTRO DE LA NOTA, y es lo que la firma
+               pide: *«es parte de la nota clínica»*. Se le pone su rótulo para
+               que el que la lea después —persona o estructurador— sepa que es
+               el desenlace y no una frase más del relato.
+
+               ⚠️ **Declarado: hoy viaja como TEXTO, no como campo.** La nota
+               clínica no tiene una columna para el desenlace, y esa columna es
+               MOTOR — pedido a A. *Mientras tanto la conclusión se conserva y
+               se lee; lo que no se puede todavía es consultarla como dato
+               («cuántas teleconsultas derivaron a urgencias»).* Preferible a
+               perderla: un dato en prosa se puede migrar, uno que no se
+               registró no. */
+            const linea = conclusion !== undefined ? t(VOZ_CONCLUSION[conclusion]) : null;
+            const texto = linea === null ? borrador : `${borrador}\n\n${linea}`.trim();
+            if (texto.trim().length === 0) {
               router.back();
               return;
             }
             router.replace({
               pathname: '/veterinaria/consulta/[citaId]',
-              params: { citaId, borrador },
+              params: { citaId, borrador: texto },
             });
           }}
         />
@@ -332,7 +355,8 @@ function MesaDeTrabajo({
   onCam: () => void;
   onGirar: () => void;
   /** Recibe el borrador: **al colgar la nota no se pierde, se entrega.** */
-  onSalir: (borrador: string) => void;
+  /** El borrador de la nota + la conclusión elegida (o `undefined`). */
+  onSalir: (borrador: string, conclusion?: string) => void;
 }) {
   const { t } = useTraduccion();
   const estado = useConnectionState();
@@ -342,6 +366,10 @@ function MesaDeTrabajo({
   const [inicioTs] = useState(() => Date.now());
   const [altura, setAltura] = useState<AlturaModal>('cerrado');
   const [nota, setNota] = useState('');
+  /* 🔴 LA CONCLUSIÓN CLÍNICA — `undefined` = el vet todavía no eligió, y
+     **no hay default**: *un valor preseleccionado en un campo clínico es un
+     diagnóstico que puso la app y no el veterinario.* */
+  const [conclusion, setConclusion] = useState<string | undefined>(undefined);
   const [confirmandoSalir, setConfirmandoSalir] = useState(false);
 
   const estadoConexion =
@@ -446,7 +474,10 @@ function MesaDeTrabajo({
         etiquetaAsa={t('consulta.vcAsaModal')}
         /* Bajar con texto sin guardar pide confirmación — lo resuelve la pieza
            con este aviso; acá sólo se le dice si hay algo escrito. */
-        hayCambiosSinGuardar={nota.trim().length > 0}
+        /* La conclusión también cuenta como trabajo sin guardar: bajar el
+           panel después de elegir «urgencias» y perderlo en silencio sería
+           tirar el dato más importante de la consulta. */
+        hayCambiosSinGuardar={nota.trim().length > 0 || conclusion !== undefined}
       >
         <View style={{ gap: spacing[4] }}>
           <Texto variante="seccion">{t('consulta.vcNotaTitulo')}</Texto>
@@ -460,6 +491,43 @@ function MesaDeTrabajo({
             value={nota}
             onChangeText={setNota}
             multilinea={6}
+          />
+
+          {/* ── 🔴 CÓMO TERMINA LA CONSULTA (firma del founder, 26-ago) ──────
+              **Es parte de la NOTA CLÍNICA, no un motivo de cierre**, y la
+              diferencia no es de forma: *una consulta que termina en «llevala
+              a urgencias» SÍ OCURRIÓ* — el vet atendió, cobra, y el expediente
+              tiene que decir qué pasó. **No se confunde con «no realizable»**,
+              que es la consulta que NO se pudo hacer y devuelve la plata: son
+              opuestos para el dinero y para el registro.
+
+              *Por eso vive acá adentro y no en un formulario al colgar: un
+              formulario al colgar se lee como «motivo de cierre», y ahí la
+              derivación empieza a parecerse a un fracaso del servicio cuando
+              es su resultado más valioso.*
+
+              🔴 **Las tres salen de la LETRA, no de mi criterio:**
+              «necesita atención presencial» es verbatim de §4 —*«eso ES el
+              servicio prestado»*— y «derivar a urgencias» es la salida que el
+              aviso de §3 ya nombra. *Si el vocabulario clínico crece, es letra
+              y no código.*
+
+              **Ninguna preselecciona y las tres pesan igual**: si «urgencias»
+              presidiera, la app empujaría hacia el desenlace más caro — el
+              mismo argumento que sostiene la paridad del aviso §3.
+
+              **No bloquea nada.** Sin elegir, la conclusión va vacía y la nota
+              sigue siendo válida: *es la nota clínica, no un peaje.* */}
+          <SelectorOpcion
+            etiqueta={t('consulta.vcConclusionTitulo')}
+            disposicion="columnas"
+            opciones={[
+              { codigo: 'resuelta', etiqueta: t('consulta.vcConclusionResuelta') },
+              { codigo: 'presencial', etiqueta: t('consulta.vcConclusionPresencial') },
+              { codigo: 'urgencias', etiqueta: t('consulta.vcConclusionUrgencias') },
+            ]}
+            seleccionada={conclusion}
+            onSelect={setConclusion}
           />
 
           {altura === 'completo' && (
@@ -478,7 +546,7 @@ function MesaDeTrabajo({
         sujeto={t('consulta.vcColgarSujeto')}
         etiquetaConfirmar={t('consulta.vcColgarSi')}
         etiquetaCancelar={t('consulta.vcColgarNo')}
-        onConfirmar={() => onSalir(nota)}
+        onConfirmar={() => onSalir(nota, conclusion)}
       />
     </>
   );

@@ -2737,6 +2737,10 @@ export const prestadorEs = {
     entrarNoRealizable: 'Ya la marcaste como no realizada.',
     entrarFinalizada: 'Esta videoconsulta ya terminó.',
     entrarInexistente: 'No encontramos esta videoconsulta.',
+    /* Enmienda del gate 26-ago: en el prestador NO hay silencios — está
+       mirando SU propia cita, así que callar no oculta nada. */
+    entrarNoEsTele: 'Esta cita no está marcada como videoconsulta. Se atiende de forma presencial.',
+    entrarAjena: 'Esta consulta está asignada a otra persona del equipo.',
     entrarNoSePudoConsultar: 'No pudimos verificar si la sala está abierta.',
 
     /* ══ LA VIDEOCONSULTA · in-call del profesional (Obras 4 y 5) ══ */
@@ -2755,6 +2759,20 @@ export const prestadorEs = {
     vcHistoriaLectura: 'Solo lectura durante la consulta.',
     vcFiltroFecha: 'Por fecha',
     vcFiltroCaso: 'Por tipo de caso',
+    /* ══ LA CONCLUSIÓN CLÍNICA (firma founder 26-ago) ═════════════════
+       Los tres desenlaces salen de la LETRA: «necesita atención presencial»
+       es verbatim de §4 y «urgencias» es la salida que §3 ya nombra.
+       Las tres pesan igual: si «urgencias» presidiera, la app empujaría
+       hacia el desenlace más caro. */
+    vcConclusionTitulo: 'Cómo termina esta consulta',
+    vcConclusionResuelta: 'Se resolvió por video',
+    vcConclusionPresencial: 'Necesita atención presencial',
+    vcConclusionUrgencias: 'Derivada a urgencias',
+    /* Las líneas que quedan EN la nota. Llevan rótulo para que quien las lea
+       después sepa que son el desenlace y no una frase más del relato. */
+    vcConclusionLineaResuelta: 'Conclusión: el caso se resolvió en la videoconsulta.',
+    vcConclusionLineaPresencial: 'Conclusión: necesita atención presencial.',
+    vcConclusionLineaUrgencias: 'Conclusión: derivada a urgencias.',
     vcColgarConfirma: '¿Terminar la videoconsulta?',
     vcColgarSujeto: 'la videoconsulta',
     vcColgarSi: 'Terminar',

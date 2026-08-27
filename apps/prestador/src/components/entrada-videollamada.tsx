@@ -49,9 +49,27 @@ export interface EntradaVideollamadaProps {
    * lado*— resuelto una capa más arriba.
    */
   envolver?: (contenido: ReactElement) => ReactElement;
+  /**
+   * 🔴 EL CINTURÓN DE LOS CERO BOTONES — nace de la regresión del gate
+   * (26-ago): el vet abrió una teleconsulta y **no tenía ningún botón**.
+   *
+   * La causa fue un **choque de ejes**: la pantalla decide por
+   * `tipo_servicio === 'telemedicina'` y esconde «Iniciar consulta»; la RPC
+   * decide por `modalidad`, y con la modalidad sin escribir devolvía
+   * `no_es_teleconsulta` ⇒ **una condición apagaba un botón y la otra no
+   * encendía el suyo.**
+   *
+   * *Dos condiciones distintas gobernando la misma decisión dejan un hueco
+   * entre las dos, y ahí no queda nada.*
+   *
+   * ⇒ La pieza avisa **si va a poder entrar**, y la pantalla esconde el botón
+   * viejo **sólo entonces**. Así «cero botones» deja de ser expresable: no se
+   * vigila, no se puede.
+   */
+  onVeredicto?: (hayEntrada: boolean) => void;
 }
 
-export function EntradaVideollamada({ citaId, alEntrar, envolver }: EntradaVideollamadaProps) {
+export function EntradaVideollamada({ citaId, alEntrar, envolver, onVeredicto }: EntradaVideollamadaProps) {
   const { t, idioma } = useTraduccion();
   const [veredicto, setVeredicto] = useState<ResultadoVideollamada | null>(null);
 
@@ -64,12 +82,16 @@ export function EntradaVideollamada({ citaId, alEntrar, envolver }: EntradaVideo
          todas las citas del producto. */
       setVeredicto(null);
       void pedirTokenVideollamada(citaId).then((r) => {
-        if (vigente) setVeredicto(r);
+        if (!vigente) return;
+        setVeredicto(r);
+        /* Se avisa DENTRO del efecto y no en el render: un callback que
+           dispara mientras se pinta obliga al padre a re-pintar en el medio. */
+        onVeredicto?.(r.ok);
       });
       return () => {
         vigente = false;
       };
-    }, [citaId]),
+    }, [citaId, onVeredicto]),
   );
 
   if (veredicto === null) return null;
