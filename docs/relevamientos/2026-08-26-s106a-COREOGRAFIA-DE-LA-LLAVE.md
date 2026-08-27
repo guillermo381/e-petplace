@@ -1,5 +1,47 @@
 # COREOGRAFÍA DE LA LLAVE — el procedimiento del gate del recorrido completo
 
+> # 🔴 ENMIENDA · EL CRITERIO DE APAGADO CAMBIÓ — LEER ANTES QUE TODO LO DEMÁS
+>
+> **Firma del founder, 26-ago-2026 ~22:30.** Este documento describe una
+> **ventana corta**: encender, correr el gate, apagar. **Esa parte ya NO rige.**
+>
+> **La llave `tipos_servicio.telemedicina.reservable` QUEDA EN `true`**, y con
+> ella la franja nocturna de Aurora. **No se apaga al terminar un gate.**
+>
+> **Por qué, y es un hecho medido, no una preferencia:** todo este
+> procedimiento se apoyaba en que encender **expone el oficio al público**.
+> *La app no tiene usuarios reales hasta el friends-and-family de octubre*, y
+> el único negocio que publica teleconsulta es la clínica demo ⇒ **no hay a
+> quién exponer.** La premisa que justificaba la ventana no existe todavía.
+>
+> ### El criterio nuevo
+>
+> > **La llave se apaga cuando haya usuarios reales** — el friends-and-family
+> > de octubre, o antes si entra cualquier familia que no sea del equipo.
+>
+> ### Qué de este documento SIGUE VIVO
+>
+> - **§1** (lo ya medido) y **§4** (lo que la coreografía no autoriza): rigen
+>   enteros. *Que la llave esté encendida para probar no significa que el
+>   servicio esté abierto* — el estreno sigue pidiendo el consentimiento
+>   verificado en fila y la respuesta del abogado.
+> - **§2③** (la verificación posterior): se corre **el día que se apague**, no
+>   hoy. Y su regla dura no cambia: *si aparece una cita ajena, se reporta y va
+>   a soporte — **jamás se borra**.*
+>
+> ### Qué está DEROGADO
+>
+> ~~§2② «encender, correr, apagar» como ciclo de una sesión~~ · ~~«no se deja
+> encendida hasta mañana»~~ · ~~el apagado al terminar el recorrido~~.
+>
+> ⚠️ **Esta enmienda vive ACÁ ARRIBA y no sólo en un parte, a propósito:** *un
+> procedimiento que dice «apagá al terminar» lo obedece quien lo lee, sin saber
+> que la mesa lo derogó — y apagaría la llave en medio de las pruebas del
+> founder.* La letra derogada se saca de la sección que alguien lee.
+>
+> Acta del encendido vigente:
+> `docs/relevamientos/2026-08-26-s106a-ACTA-ENCENDIDO-DE-GATE.md`.
+
 **Pista A · S106 tanda 3 · 26-ago-2026.**
 Escrito **ANTES** del gate, por encargo: *«dejá el procedimiento escrito
 para que el día que se corra sea leer, no improvisar.»*
