@@ -7845,7 +7845,8 @@ export type Database = {
           completado_en: string
           condicion_corporal: number | null
           country_code: string
-          diagnostico_principal: string
+          desenlace: string | null
+          diagnostico_principal: string | null
           diagnosticos_secundarios: Json
           empleado_id: string | null
           evento_id: string | null
@@ -7873,7 +7874,8 @@ export type Database = {
           completado_en?: string
           condicion_corporal?: number | null
           country_code?: string
-          diagnostico_principal: string
+          desenlace?: string | null
+          diagnostico_principal?: string | null
           diagnosticos_secundarios?: Json
           empleado_id?: string | null
           evento_id?: string | null
@@ -7901,7 +7903,8 @@ export type Database = {
           completado_en?: string
           condicion_corporal?: number | null
           country_code?: string
-          diagnostico_principal?: string
+          desenlace?: string | null
+          diagnostico_principal?: string | null
           diagnosticos_secundarios?: Json
           empleado_id?: string | null
           evento_id?: string | null
@@ -20210,6 +20213,10 @@ export type Database = {
         Args: { p_atencion_id: string }
         Returns: Record<string, unknown>
       }
+      _cerrar_teleconsulta_si_vencio: {
+        Args: { p_cita_id: string }
+        Returns: undefined
+      }
       _cierre_requiere_camino_asistido: {
         Args: { p_user: string }
         Returns: boolean
@@ -20789,6 +20796,7 @@ export type Database = {
         Args: { p_atencion_id: string; p_mensaje_familia?: string }
         Returns: Json
       }
+      cerrar_teleconsulta: { Args: { p_cita_id: string }; Returns: Json }
       cerrar_y_renovar_planes: { Args: never; Returns: Json }
       cleanup_pendientes_vencidos: {
         Args: never
