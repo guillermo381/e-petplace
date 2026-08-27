@@ -20,7 +20,7 @@
  * el founder no podría sacar capturas para revisar diseño.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -42,8 +42,10 @@ import {
   EsperaDeMarca,
   EstadoVacio,
   HojaConfirmacionDestructiva,
+  Insignia,
   ModalDosAlturas,
   SelectorOpcion,
+  Separador,
   radius,
   sobreVideo,
   AsaModal,
@@ -64,7 +66,13 @@ import { livekitListo } from '@/lib/livekit';
 import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
 import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
-import { obtenerDetalleMascotaPrestador, obtenerMiPrestador, type DetalleMascotaPrestador } from '@epetplace/api';
+import {
+  obtenerDetalleMascotaPrestador,
+  obtenerHistorialClinicoMascota,
+  obtenerMiPrestador,
+  type DetalleMascotaPrestador,
+  type ItemHistorialClinico,
+} from '@epetplace/api';
 import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 
 /** La línea rotulada que cada conclusión deja EN la nota. Mapa cerrado: un
@@ -385,6 +393,7 @@ export default function VideollamadaProfesional() {
              no escribió nada sería cobrarle un trámite por no haber usado una
              función.* */
           clinico={clinico}
+          mascotaId={mascotaId}
           onSalir={(borrador, conclusion) => {
             /* 🔴 LA CONCLUSIÓN VIAJA DENTRO DE LA NOTA, y es lo que la firma
                pide: *«es parte de la nota clínica»*. Se le pone su rótulo para
@@ -429,6 +438,7 @@ function MesaDeTrabajo({
   onGirar,
   onSalir,
   clinico,
+  mascotaId,
 }: {
   alto: number;
   insetTop: number;
@@ -446,6 +456,8 @@ function MesaDeTrabajo({
   /** El contexto clínico para las tarjetas sobre el video; `null` = no se
    *  pudo leer y **no se dibujan** (Ley 13, jamás datos inventados). */
   clinico: DetalleMascotaPrestador | null;
+  /** Para pedir el historial cuando el panel llega a `completo`. */
+  mascotaId: string;
 }) {
   const { t, idioma } = useTraduccion();
   const estado = useConnectionState();
@@ -453,6 +465,31 @@ function MesaDeTrabajo({
   const remotos = useRemoteParticipants();
   const pistasRemotas = useParticipantTracks([Track.Source.Camera], remotos[0]?.identity);
   const [inicioTs] = useState(() => Date.now());
+  /* ── ⑤ EL TOGGLE DE ALTAVOZ (pieza de B, `372012e6`) ──────────────────────
+     🔴 **SE DIBUJA SIEMPRE**, también con auriculares conectados — corrección
+     de firma del founder (27-ago). *La v1 de mi plan lo escondía con
+     `getAudioOutputs()`; no va así: un control que aparece y desaparece según
+     lo que el teléfono tenga enchufado es un control que nadie aprende dónde
+     está.*
+
+     Arranca en **altavoz**, que es lo que la sesión de audio configura: el
+     estado del botón dice la verdad del ruteo desde el primer segundo.
+
+     ⚠️ El toggle es binario y su implementación difiere por plataforma —
+     lo midió B. Acá sólo se declara la intención; el SDK resuelve el cómo. */
+  const [altavoz, setAltavoz] = useState(true);
+  const alternarAltavoz = useCallback(() => {
+    setAltavoz((v) => {
+      const siguiente = !v;
+      void AudioSession.selectAudioOutput(siguiente ? 'speaker' : 'earpiece').catch(() => {
+        /* Si el sistema no acepta el cambio, **el estado vuelve**: un botón
+           que se pinta encendido sobre un ruteo que no cambió miente. */
+        setAltavoz(v);
+      });
+      return siguiente;
+    });
+  }, []);
+
   const [altura, setAltura] = useState<AlturaModal>('cerrado');
   const [nota, setNota] = useState('');
   /* 🔴 LA CONCLUSIÓN CLÍNICA — `undefined` = el vet todavía no eligió, y
@@ -463,6 +500,33 @@ function MesaDeTrabajo({
      Dos consumidores del mic no conviven en Android — y además es lo
      correcto: *está dictando la nota clínica, no hablándole a la familia.* */
   const [dictando, setDictando] = useState(false);
+
+  /* ── EL HISTORIAL: se pide la PRIMERA vez que el panel llega a `completo`.
+     *No al montar —la mayoría de las consultas no lo abren— ni en cada
+     subida: es historia, no estado del momento.* */
+  const [historial, setHistorial] = useState<ItemHistorialClinico[] | 'cargando' | 'error'>('cargando');
+  const [filtroCaso, setFiltroCaso] = useState('todo');
+  const pedido = useRef(false);
+  useEffect(() => {
+    if (altura !== 'completo' || pedido.current || mascotaId.length === 0) return;
+    pedido.current = true;
+    void obtenerHistorialClinicoMascota(mascotaId, { limite: 50 }).then((r) => {
+      setHistorial(r.ok ? r.data : 'error');
+    });
+  }, [altura, mascotaId]);
+
+  /* Los casos que la mascota REALMENTE tiene — el filtro sale de los datos,
+     jamás de una lista escrita: *un filtro con opciones que no existen ofrece
+     vacíos.* */
+  const casosPresentes = Array.isArray(historial)
+    ? [
+        ...new Map(
+          historial
+            .filter((h) => h.casoClinicoId !== null && h.casoCondicion !== null)
+            .map((h) => [h.casoClinicoId as string, { codigo: h.casoClinicoId as string, etiqueta: h.casoCondicion as string }]),
+        ).values(),
+      ]
+    : [];
 
   /* 🔴 EL ALTO DEL TECLADO — hallazgos ① y ⑤ del gate.
      `ModalDosAlturas` acepta `altoTeclado` y **yo no se lo pasaba**, así que
@@ -546,11 +610,14 @@ function MesaDeTrabajo({
           girarCamara(propio);
           onGirar();
         }}
-        onColgar={salir}
+        onAltavoz={alternarAltavoz}
+      altavozActivo={altavoz}
+      onColgar={salir}
         vozControles={{
           microfono: t('consulta.vcVozMic'),
           camara: t('consulta.vcVozCam'),
           colgar: t('consulta.vcVozColgar'),
+        altavoz: t('consulta.vcVozAltavoz'),
           girarCamara: t('consulta.vcVozGirar'),
         }}
       />
@@ -581,7 +648,14 @@ function MesaDeTrabajo({
 
           Sólo con el panel `cerrado`: abierto, el asa del panel es la que
           manda y dos manijas para lo mismo confunden más que ninguna. */}
-      {altura === 'cerrado' && (
+      {/* ③ · LAS TARJETAS Y EL ASA VIVEN EN `cerrado` **Y EN `medio`**.
+          🔴 La v1 las ató sólo a `cerrado` y el founder no las vio: *el
+          momento en que el vet quiere el contexto clínico es exactamente
+          cuando abre el panel para escribir.* En `completo` no van — ahí la
+          pantalla ES la historia, y el contexto vive adentro de ella.
+          **Cuarto caso del patrón, y de otra clase: no era «sin montar», era
+          «montado donde no sirve».** */}
+      {altura !== 'completo' && (
         <View
           style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + 120, gap: spacing[2] }}
           pointerEvents="box-none"
@@ -627,7 +701,10 @@ function MesaDeTrabajo({
               ))}
             </ScrollView>
           )}
-          <AsaModal etiqueta={t('consulta.vcAsaModal')} onPress={() => setAltura('medio')} />
+          <AsaModal
+            etiqueta={t('consulta.vcAsaModal')}
+            onPress={() => setAltura(altura === 'cerrado' ? 'medio' : 'completo')}
+          />
         </View>
       )}
 
@@ -721,12 +798,91 @@ function MesaDeTrabajo({
             onSelect={setConclusion}
           />
 
+          {/* ── ② LA HISTORIA CLÍNICA, con sus filtros ──────────────────────
+              **Sólo en `completo`, y sólo ahí se pide.** *Traerla al abrir el
+              panel sería pagar una consulta que en la mayoría de las
+              consultas nadie va a mirar.*
+
+              🔴 Su gate es el **CLÍNICO**, no el de acceso — lo dice el
+              wrapper de A: *«quien puede ver que existe una mascota no es
+              necesariamente quien puede leer su historia»*. Acá no se
+              re-verifica: la puerta es del servidor.
+
+              El filtro por CASO nace de los datos que vuelven, no de una
+              lista escrita: *un filtro con opciones que la mascota no tiene
+              ofrece vacíos.* */}
           {altura === 'completo' && (
-            <View style={{ gap: spacing[2] }}>
+            <View style={{ gap: spacing[3] }}>
               <Texto variante="seccion">{t('consulta.vcHistoriaTitulo')}</Texto>
-              <Texto variante="apoyo">{t('consulta.vcHistoriaLectura')}</Texto>
+
+              {casosPresentes.length > 0 && (
+                <SelectorOpcion
+                  etiqueta={t('consulta.vcHistoriaFiltroCaso')}
+                  disposicion="tira"
+                  opciones={[
+                    { codigo: 'todo', etiqueta: t('consulta.vcHistoriaTodo') },
+                    ...casosPresentes,
+                  ]}
+                  seleccionada={filtroCaso}
+                  onSelect={setFiltroCaso}
+                />
+              )}
+
+              {historial === 'cargando' ? (
+                <Texto variante="apoyo">{t('consulta.vcHistoriaCargando')}</Texto>
+              ) : historial === 'error' ? (
+                /* Ley 13: el fallo se DICE. *Un historial que falla y se pinta
+                   vacío le dice al vet que la mascota no tiene historia, que es
+                   una afirmación clínica falsa.* */
+                <Texto variante="apoyo">{t('consulta.vcHistoriaError')}</Texto>
+              ) : historial.length === 0 ? (
+                <Texto variante="apoyo">{t('consulta.vcHistoriaVacia')}</Texto>
+              ) : (
+                historial
+                  .filter((h) => filtroCaso === 'todo' || h.casoClinicoId === filtroCaso)
+                  .map((h) => (
+                    <View key={h.eventoId} style={{ gap: spacing[1] }}>
+                      <Separador />
+                      <Texto variante="dato">
+                        {h.fecha !== null
+                          ? fechaCortaMono(h.fecha.slice(0, 10), idioma as IdiomaSoportado)
+                          : t('consulta.vcHistoriaSinFecha')}
+                        {h.negocioNombre !== null ? ` · ${h.negocioNombre}` : ''}
+                      </Texto>
+                      {/* Motivo y diagnóstico: los dos con `null` HONESTO. La
+                          lista trae el encabezado, jamás la nota entera — *lo
+                          que se esconde igual viajó.* */}
+                      {h.motivoConsulta !== null && (
+                        <Texto variante="cuerpo">{h.motivoConsulta}</Texto>
+                      )}
+                      {h.diagnostico !== null && (
+                        <Texto variante="apoyo">{h.diagnostico}</Texto>
+                      )}
+                      {h.modalidad === 'telemedicina' && (
+                        <View style={{ alignSelf: 'flex-start' }}>
+                          <Insignia modalidad="teleconsulta" tamaño="sm" />
+                        </View>
+                      )}
+                    </View>
+                  ))
+              )}
             </View>
           )}
+
+          {/* ── ④ CERRAR EL PANEL ───────────────────────────────────────────
+              🔴 **Dice «Listo», no «Guardar», y la diferencia es honestidad.**
+              Medido: **no existe un borrador persistente** — el Durante
+              sedimenta al final con `sedimentar_nota_clinica` y no hay dónde
+              dejar una nota a medio escribir. *Un botón «Guardar» que sólo
+              baja el panel le haría creer al vet que su nota está a salvo de
+              un cierre de app, y no lo está.*
+              Lo escrito viaja al Durante **al colgar**, que es donde sí
+              sedimenta. El borrador persistente es pedido a A. */}
+          <Boton
+            variante="secundario"
+            etiqueta={t('consulta.vcModalListo')}
+            onPress={() => setAltura('cerrado')}
+          />
         </View>
       </ModalDosAlturas>
 
