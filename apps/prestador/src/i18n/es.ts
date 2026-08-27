@@ -2764,6 +2764,16 @@ export const prestadorEs = {
        es verbatim de §4 y «urgencias» es la salida que §3 ya nombra.
        Las tres pesan igual: si «urgencias» presidiera, la app empujaría
        hacia el desenlace más caro. */
+    /* ══ EL CONTEXTO CLÍNICO SOBRE EL VIDEO (firma founder 26-ago) ═════
+       Sólo del lado del profesional: el dueño ya conoce a su animal. */
+    vcClinicoPeso: 'Peso',
+    vcClinicoVacunas: 'Vacunas',
+    vcClinicoUltima: 'Última visita',
+    vcClinicoAlergias: 'Alergias',
+    /* «Sin alergias registradas» y «no tiene alergias» NO son lo mismo: la
+       segunda es una afirmación clínica que el expediente no hizo. */
+    vcClinicoAlergiasSi: 'Tiene registradas',
+    vcClinicoAlergiasNo: 'Ninguna registrada',
     vcConclusionTitulo: 'Cómo termina esta consulta',
     vcConclusionResuelta: 'Se resolvió por video',
     vcConclusionPresencial: 'Necesita atención presencial',
