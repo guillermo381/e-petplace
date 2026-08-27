@@ -22680,3 +22680,49 @@ código:** desde dónde se entra. *El botón «entrar a la videoconsulta» ya es
 gateado por el veredicto del servidor (`puede_entrar_a_videollamada`), así que
 el lugar natural es el detalle de la cita — pero eso lo decide quien conoce el
 recorrido, no quien compila el APK.*
+
+---
+
+### D-939 🟡 · EL AVISO DE CITA NUEVA LLEGA SÓLO AL TITULAR, NO A QUIEN VA A ATENDER
+
+**Medida en S106-A t3 (26-ago-2026), contestando la pregunta de la mesa
+*«¿cómo se entera el vet de que le reservaron una teleconsulta?»*.** La
+respuesta a esa pregunta fue **sí, se entera** — y medirla destapó esto.
+
+**Lo que el motor hace, medido:** `confirmar_cita_pagada` emite dos avisos del
+mismo instante. El del negocio es `cita_solicitada`, y su destinatario está
+escrito así:
+
+```sql
+SELECT pr.user_id INTO v_titular FROM prestadores pr WHERE pr.id = v_cita.prestador_id;
+...
+p_destinatario_user_id => v_titular
+```
+
+⇒ **el aviso va al TITULAR del negocio y a nadie más.** En una clínica con
+varios veterinarios, **el profesional que va a atender esa cita no recibe
+nada** si no es el titular.
+
+**Por qué no es urgente hoy, y por qué igual tiene ficha:** los negocios vivos
+son de un solo profesional o el titular atiende, así que el titular y quien
+atiende son la misma persona. *El defecto es invisible por el tamaño de los
+negocios, no por diseño* — y esa es exactamente la clase que aparece el día que
+entra la primera clínica con equipo.
+
+🔴 **NO ES DE TELEMEDICINA.** El código no tiene ninguna rama por tipo de
+servicio: vale igual para paseo, grooming, adiestramiento y veterinaria. Se
+anota desde acá porque acá se midió, no porque sea del oficio nuevo.
+
+**Lo que hace falta antes de curarlo, y es decisión de mesa, no de código:** la
+cita **ya sabe quién la va a atender** (`evento_cita_servicio.empleado_id`), así
+que el dato está. Lo que no está decidido es la letra: ¿el titular deja de
+recibirlo, o lo reciben los dos? *Avisar a los dos es lo cómodo y es también
+cómo se enseña a ignorar los avisos —`MODELO_DESPENSA` ya firmó que avisar todo
+entrena a no mirar—, así que es una decisión de producto.*
+
+**Disparo:** la primera clínica real con más de un profesional dando citas — o
+antes, si la mesa quiere escribir la letra junto con la del §7 del expediente.
+
+**Nota de método:** apareció **contestando otra pregunta**. El encargo era
+verificar si el aviso viajaba; viajaba. *Un censo que sólo hubiera contestado
+«sí» y cerrado no habría mirado a quién le llega.*
