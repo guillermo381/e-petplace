@@ -152,6 +152,27 @@ export default function ParteConsultaScreen() {
               {estado.consulta.diagnostico !== null || estado.consulta.motivo !== null ? (
                 <Tarjeta elevacion="reposo">
                   <View style={{ gap: spacing[2] }}>
+                    {/* ── 🔴 LA MARCA DE §7, y es FIRMA LEGAL ─────────────────
+                        *«Dentro de tres años alguien va a leer ese expediente
+                        para decidir algo, y "evaluado por pantalla" cambia
+                        cómo se lee.»*
+
+                        Lo que delimita no es un detalle de forma: **es el
+                        estándar contra el que se juzga al veterinario** — lo
+                        que podía ver por video, no lo que habría palpado.
+
+                        Va ARRIBA del diagnóstico a propósito: *una marca que
+                        aparece después de que ya leíste el diagnóstico llega
+                        tarde para modular cómo lo leíste.*
+
+                        ⚠️ El dato LLEGABA y no se pintaba (medido: cero
+                        ocurrencias en esta pantalla) — el lector de A lo trae
+                        desde el 27-ago. */}
+                    {estado.modalidad === 'telemedicina' ? (
+                      <View style={{ alignSelf: 'flex-start' }}>
+                        <Insignia modalidad="teleconsulta" tamaño="sm" />
+                      </View>
+                    ) : null}
                     <Texto variante="apoyo">{t('parte.diagnostico')}</Texto>
                     <Texto variante="titulo">{estado.consulta.diagnostico ?? estado.consulta.motivo}</Texto>
                     {estado.consulta.motivo !== null && estado.consulta.diagnostico !== null ? (

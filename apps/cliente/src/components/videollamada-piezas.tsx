@@ -27,7 +27,7 @@
  * constante: con la cámara trasera uno NO espera verse espejado.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { VideoView, VideoTrack } from '@livekit/react-native';
 import { createLocalVideoTrack, type LocalVideoTrack } from 'livekit-client';
@@ -83,27 +83,58 @@ export function PreviewPropio({ activa, camara }: { activa: boolean; camara: Cam
 }
 
 /**
- * Girar la cámara.
+ * Girar la cámara — **CURA DEL GATE del 27-ago**.
  *
- * 🔴 **`switchCamera` NO EXISTE con ese nombre** — lo midió D. Lo que hay es
- * **`_switchCamera()`** en el `MediaStreamTrack` del fork, y **está
- * `@deprecated` en su propio JSDoc**.
+ * ── 🔴 QUÉ HACÍA MAL LA v1, y el síntoma lo explica entero ────────────────
+ * Llamaba a `_switchCamera()` —el método del fork, `@deprecated` en su propio
+ * JSDoc— y **devolvía `null` sin decir si había funcionado**. El llamador
+ * alternaba su `facingMode` igual. ⇒ **el `mirror` cambiaba y la cámara no**,
+ * que es exactamente lo que el founder vio: *«no cambia de cámara, invierte
+ * la imagen»*.
  *
- * ⚠️ **Declarado, no disimulado:** D midió **firmas, no comportamiento**. Esto
- * compila y existe; **que gire de verdad y sin parpadeo sólo lo cierra un
- * aparato**. Su plan B es `restartTrack`, que **re-crea el track ⇒ parpadea** —
- * y éste es *el botón más usado de la pantalla*, así que el parpadeo no es
- * detalle.
+ * *Un efecto visible es el peor disfraz de una acción que no ocurrió: el botón
+ * parecía andar.*
  *
- * **El criterio de verde, escrito ANTES:** ① la imagen cambia de cámara ·
- * ② **sin parpadeo negro** · ③ el espejo se apaga al pasar a trasera ·
- * ④ el profesional **sigue viendo** durante el giro.
+ * ── LA VÍA, en el orden en que se intenta ─────────────────────────────────
+ * ① **`applyConstraints({ facingMode })`** — la vía recomendada que midió D.
+ *    **No re-crea el track ⇒ sin parpadeo**, y el vet no pierde la imagen.
+ * ② **`restartTrack({ facingMode })`** — la API oficial de LiveKit
+ *    (`LocalVideoTrack.restartTrack(options?: VideoCaptureOptions)`, medida
+ *    contra el objeto). **Re-crea el track ⇒ parpadea**, y durante ese
+ *    instante el otro lado no ve nada. Se acepta como plan B porque
+ *    *«funciona con parpadeo» es infinitamente mejor que «no funciona»*.
+ *
+ * ── 🔴 LO QUE DEVUELVE ES LA MITAD DE LA CURA ─────────────────────────────
+ * `true` **sólo si la cámara cambió de verdad**. El llamador mueve su estado
+ * —y con él el espejo— **únicamente entonces**: así el espejo no puede
+ * desincronizarse de la cámara real, que es el estado que producía el
+ * síntoma. *El estado sigue al hecho, jamás al intento.*
  */
-export function girarCamara(track: LocalVideoTrack | null | undefined): Camara | null {
-  const mst = track?.mediaStreamTrack as unknown as { _switchCamera?: () => void } | undefined;
-  if (mst?._switchCamera === undefined) return null;
-  mst._switchCamera();
-  return null; // el llamador alterna su propio estado de `facingMode`
+export async function girarCamara(
+  track: LocalVideoTrack | null | undefined,
+  destino: Camara,
+): Promise<boolean> {
+  if (!track) return false;
+
+  // ① sin parpadeo
+  try {
+    const mst = track.mediaStreamTrack as MediaStreamTrack | undefined;
+    if (mst?.applyConstraints !== undefined) {
+      await mst.applyConstraints({ facingMode: destino } as MediaTrackConstraints);
+      return true;
+    }
+  } catch {
+    /* Cae al plan B. **No se reporta**: que la vía barata no sirva en este
+       aparato no es un error del usuario ni algo que pueda hacer al respecto. */
+  }
+
+  // ② parpadea, pero cambia
+  try {
+    await track.restartTrack({ facingMode: destino });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** El video del otro. Acá SÍ hay room ⇒ `VideoTrack` con su referencia. */
@@ -131,12 +162,41 @@ export function VideoPropioEnLlamada({
 }
 
 /** Guarda el `facingMode` actual — el espejo lo lee. */
+/**
+ * Guarda el `facingMode` actual — el espejo lo lee.
+ *
+ * 🔴 **`alternar` YA NO mueve el estado por su cuenta.** Recibe el track y
+ * **sólo cambia si el giro ocurrió de verdad** (ver `girarCamara`). *La v1
+ * alternaba siempre, y por eso el espejo se daba vuelta sobre una cámara que
+ * no había cambiado.*
+ */
 export function useCamara(inicial: Camara = 'user') {
   const [camara, setCamara] = useState<Camara>(inicial);
-  const ref = useRef(camara);
-  ref.current = camara;
-  return {
-    camara,
-    alternar: () => setCamara((c) => (c === 'user' ? 'environment' : 'user')),
-  };
+  const girando = useRef(false);
+
+  /**
+   * `track` OPCIONAL, y la diferencia es real:
+   * · **En la llamada** el track existe y hay que pedirle el giro — si no lo
+   *   hace, el estado no se mueve.
+   * · **En el pre-join NO hay track que girar**: `PreviewPropio` **crea el
+   *   suyo a partir de `camara`**, así que cambiar el estado ES el giro.
+   *   *Pedirle a esa vía un track que todavía no le pertenece a nadie sería
+   *   inventar un paso.*
+   */
+  const alternar = useCallback(
+    async (track?: LocalVideoTrack | null) => {
+      /* Un segundo toque mientras el primero está en vuelo re-crearía el track
+         dos veces: *el botón más usado de la pantalla no puede pelear consigo
+         mismo.* */
+      if (girando.current) return;
+      girando.current = true;
+      const destino: Camara = camara === 'user' ? 'environment' : 'user';
+      const ok = track === undefined ? true : await girarCamara(track, destino);
+      if (ok) setCamara(destino);
+      girando.current = false;
+    },
+    [camara],
+  );
+
+  return { camara, alternar };
 }

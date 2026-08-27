@@ -64,7 +64,7 @@ import {
 import { useTraduccion } from '@/i18n';
 import { livekitListo } from '@/lib/livekit';
 import { queDibujar } from '@/lib/telemedicina/veredicto-entrada';
-import { VideoPropioEnLlamada, VideoRemoto, girarCamara, useCamara } from '@/components/videollamada-piezas';
+import { VideoPropioEnLlamada, VideoRemoto, useCamara } from '@/components/videollamada-piezas';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
 import {
   estructurarNotaClinica,
@@ -386,7 +386,7 @@ export default function VideollamadaProfesional() {
           camara={camara}
           onMic={() => setMicActivo((v) => !v)}
           onCam={() => setCamaraActiva((v) => !v)}
-          onGirar={alternarCamara}
+          onGirar={(track) => void alternarCamara(track)}
           /* 🔴 EL BORRADOR NO MUERE AL COLGAR (firma del founder, 26-ago).
              Cae en el Durante que el vet ya conoce de las presenciales, con su
              confirmación campo por campo — **ahí sedimenta, no acá**.
@@ -454,7 +454,8 @@ function MesaDeTrabajo({
   camara: 'user' | 'environment';
   onMic: () => void;
   onCam: () => void;
-  onGirar: () => void;
+  /** Recibe el track propio: el giro real ocurre arriba, con él. */
+  onGirar: (track: LocalVideoTrack | null | undefined) => void;
   /** Recibe el borrador: **al colgar la nota no se pierde, se entrega.** */
   /** El borrador de la nota + la conclusión elegida (o `undefined`). */
   onSalir: (borrador: string, conclusion?: string) => void;
@@ -728,8 +729,11 @@ function MesaDeTrabajo({
           onCam();
         }}
         onGirarCamara={() => {
-          girarCamara(propio);
-          onGirar();
+          /* 🔴 EL TRACK VIAJA HACIA ARRIBA: el estado de `facingMode` vive
+             afuera y el track sólo existe acá adentro (`useLocalParticipant`).
+             *Sin esto el giro se pedía sin track y el espejo se movía sobre
+             una cámara que no había cambiado* — el defecto del gate. */
+          onGirar(propio);
         }}
         onAltavoz={alternarAltavoz}
       altavozActivo={altavoz}
