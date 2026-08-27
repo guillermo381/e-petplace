@@ -2026,6 +2026,15 @@ const FIXTURES = {
      ⚠️ El `path` TIENE que ser el del diccionario `es` del cliente: con
      cualquier otro, el ancla ② corta antes y saldría NO CONCLUYENTE — que no
      es verde, pero tampoco probaría nada. */
+  /* R68 · EL FIXTURE ES EL CASO REAL DE `TileVideoPropio`, no uno inventado:
+     **el `runOnJS` está escrito y correcto, y lo que cruza el hilo es el
+     ARGUMENTO.** Si la regla sólo preguntara «¿hay runOnJS?», este fixture
+     saldría VERDE — y con él los tres crashes que la parieron.
+     *Un fixture que la regla caza por la razón fácil no prueba que sirva.* */
+  R68: [{
+    path: 'packages/ui/src/components/PiezaFixture.tsx',
+    src: 'const g = Gesture.Pan().onEnd(() => {\n  runOnJS(pegar)(masCercana(x.value, y.value))\n})',
+  }],
   R67: [{
     path: 'apps/cliente/src/i18n/es.ts',
     src:
@@ -5982,7 +5991,177 @@ function r67(archivos) {
   };
 }
 
-const REGLAS = { R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/**
+ * ═══ R68 · NADA DEL COMPONENTE SE LLAMA DENTRO DE UN WORKLET DE GESTO (S106-B)
+ *
+ * **Nace de TRES crashes reales, y los tres los encontró el founder USANDO la
+ * app — ninguno, un gate:** `SliderPrecio` (S58) · `TileVideoPropio` (S106-t2)
+ * · `ModalDosAlturas` (S106-t3).
+ *
+ * **Por qué ningún gate los veía, y está escrito desde S58:** typecheck, lint y
+ * el resto de `verify:diseno` corren **en un mundo donde el defecto no existe**
+ * — en web los gestos van por JS y jamás lo delatan. *El defecto sólo aparece
+ * en el hilo de UI de un aparato, que es exactamente donde no hay CI.*
+ *
+ * ── QUÉ VIGILA ────────────────────────────────────────────────────────────
+ * Dentro del cuerpo de un callback de gesto (`.onStart` · `.onUpdate` ·
+ * `.onEnd` · `.onBegin` · `.onFinalize`), **ninguna llamada a una función del
+ * componente**. Ese cuerpo corre en el hilo de UI: sólo puede leer *shared
+ * values* y primitivas.
+ *
+ * ── 🔴 EL MATIZ QUE HOY COSTÓ CARO, y sin el cual esta regla sería inútil ──
+ * **El `runOnJS` puede estar escrito y correcto, y lo que cruza el hilo es el
+ * ARGUMENTO que se calcula para dárselo.** El caso vivo de `TileVideoPropio`:
+ *
+ * ```js
+ * runOnJS(pegar)(masCercana(x.value, y.value))   // ← `masCercana` corre en UI
+ * ```
+ *
+ * ⇒ **la regla quita `runOnJS(fn)` como ENVOLTORIO y sigue mirando adentro de
+ * sus argumentos.** *Un guard que sólo preguntara «¿hay runOnJS?» habría dado
+ * verde en los tres.*
+ *
+ * ── LA CURA PREFERIDA, decidida por A con su razón ─────────────────────────
+ * **Valores por SHARED VALUE, no directivas `'worklet'`.** *Una directiva se
+ * puede olvidar al editar y su ausencia no rompe el build: rompe la app en la
+ * mano del usuario. **Un shared value no se olvida, porque el worklet no tiene
+ * otra cosa que leer.*** (Es lo que A hizo en `ModalDosAlturas`: `altoDe(…)`
+ * pasó a `tope.value` / `piso.value`.)
+ *
+ * ── LO QUE **NO** VIGILA, declarado ───────────────────────────────────────
+ * · **No mira `useAnimatedStyle` ni otros worklets** — sólo gestos, que es donde
+ *   los tres casos ocurrieron. *Ensanchar sin un caso medido es inventar
+ *   cobertura.*
+ * · **No prueba que la app no crashee**: prueba que ESTA forma no está. Su
+ *   verde dice «ningún gesto llama al componente», jamás «los gestos andan».
+ */
+const GESTO_CB = /\.(onStart|onUpdate|onEnd|onBegin|onFinalize|onChange)\s*\(\s*(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>\s*\{/g;
+
+/** Lo que SÍ puede llamarse dentro del hilo de UI. */
+const PERMITIDO_EN_WORKLET = new Set([
+  'runOnJS', 'runOnUI', 'withTiming', 'withSpring', 'withDecay', 'withDelay',
+  'withSequence', 'withRepeat', 'cancelAnimation', 'interpolate', 'interpolateColor',
+  'clamp', 'Math', 'Number', 'String', 'Boolean', 'Array', 'Object', 'JSON',
+  'parseFloat', 'parseInt', 'isNaN', 'console', 'Easing',
+  /* `scheduleOnRN` es el `runOnJS` de Reanimated 4 — mismo trabajo, nombre
+     nuevo. **Lo destapó la primera corrida contra el código real** (`Hoja`), no
+     una lista escrita de memoria. */
+  'scheduleOnRN',
+  /* Palabras clave: `if (…)` NO es una llamada. *El regex no distingue una
+     keyword de una función, y sin esta lista la regla grita en todo archivo con
+     un condicional adentro de un gesto — que es casi todos.* */
+  'if', 'for', 'while', 'switch', 'catch', 'return', 'typeof', 'do', 'else',
+]);
+
+/** Cuerpo balanceado desde la llave de apertura. */
+function cuerpoDesde(src, iAbre) {
+  let n = 0;
+  for (let k = iAbre; k < src.length; k++) {
+    if (src[k] === '{') n++;
+    else if (src[k] === '}') { n--; if (n === 0) return src.slice(iAbre + 1, k); }
+  }
+  return null;
+}
+
+/** Nombres de funciones que declaran `'worklet'` — pueden correr en el hilo de
+ *  UI y por lo tanto llamarse desde un gesto.
+ *
+ *  ⚠️ **Se permiten, pero NO son la cura preferida** (nota de A): *una directiva
+ *  se puede olvidar al editar y **su ausencia no rompe el build: rompe la app en
+ *  la mano del usuario**. Un shared value no se olvida, porque el worklet no
+ *  tiene otra cosa que leer.* **Esta regla las acepta donde ya existen y andan;
+ *  no las recomienda para lo nuevo.** */
+function worklets(archivos) {
+  const set = new Set();
+  for (const { src } of archivos) {
+    for (const m of src.matchAll(/['"]worklet['"]\s*;/g)) {
+      const antes = src.slice(Math.max(0, m.index - 400), m.index);
+      const d = [...antes.matchAll(/(?:function\s+|const\s+)([A-Za-z_$][\w$]*)/g)].pop();
+      if (d) set.add(d[1]);
+    }
+  }
+  return set;
+}
+
+function r68(archivos) {
+  const fallos = [];
+  const esWorklet = worklets(archivos);
+  let conGesto = 0;
+  let cbMirados = 0;
+  let exentos = 0;
+
+  for (const { path, src } of archivos) {
+    if (!/Gesture\./.test(src)) continue;
+    conGesto++;
+    GESTO_CB.lastIndex = 0;
+    let m;
+    while ((m = GESTO_CB.exec(src)) !== null) {
+      const cuerpo = cuerpoDesde(src, src.indexOf('{', m.index + m[0].length - 1));
+      if (cuerpo == null) continue;
+
+      /* 🔴 `.runOnJS(true)` EXIME A TODA LA CADENA — y es la OTRA cura legítima,
+         la que `SliderPrecio` usa desde S58: con esa bandera el callback entero
+         corre en JS y llamar al componente **es legal**.
+         *Lo destapó la primera corrida: sin esta exención la regla acusaba a la
+         única pieza que YA estaba curada.*
+         La ventana es la cadena del gesto — del `Gesture.` previo al siguiente —
+         porque la bandera puede ir antes o después del callback. */
+      const desde = src.lastIndexOf('Gesture.', m.index);
+      const sig = src.indexOf('Gesture.', m.index);
+      const hasta = sig > m.index ? sig : src.length;
+      if (/\.runOnJS\s*\(\s*true\s*\)/.test(src.slice(desde < 0 ? 0 : desde, hasta))) {
+        exentos++;
+        continue;
+      }
+      cbMirados++;
+      /* Se quita `runOnJS(fn)` SÓLO como envoltorio: sus ARGUMENTOS siguen
+         mirándose, que es donde vivía el caso de `TileVideoPropio`. */
+      const limpio = cuerpo
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/.*$/gm, '')
+        .replace(/\brunOnJS\s*\(\s*[A-Za-z_$][\w$]*\s*\)/g, 'runOnJS');
+
+      /* 🔴 LOOKBEHIND, no un grupo que consuma el carácter previo.
+         **Lo cazó la auto-prueba y era el defecto exacto que esta regla viene a
+         vigilar:** con `(^|[^\w$.])` el match de `runOnJS(` **se comía el
+         paréntesis de apertura**, y el siguiente intento arrancaba pegado a
+         `masCercana(` sin carácter previo que ofrecer ⇒ **la regla no veía el
+         argumento, que es justamente el caso que la parió.**
+         *Un guard que falla en su propio caso testigo no es un guard: es una
+         regla que da verde.* */
+      for (const c of limpio.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)\s*\(/g)) {
+        const nombre = c[1];
+        if (PERMITIDO_EN_WORKLET.has(nombre)) continue;
+        /* Declarada `'worklet'` ⇒ corre en el hilo de UI y es legal llamarla. */
+        if (esWorklet.has(nombre)) continue;
+        fallos.push(
+          `R68 **${path}** · \`.${m[1]}\` llama a **\`${nombre}(…)\`** dentro del worklet del gesto. ` +
+          `**Ese cuerpo corre en el hilo de UI y sólo puede leer shared values.** ` +
+          `*Cura preferida (A): pasar el valor por **shared value**, no por una directiva \`'worklet'\` — ` +
+          `una directiva se puede olvidar al editar y su ausencia no rompe el build: rompe la app en la mano del usuario.*`,
+        );
+      }
+    }
+  }
+
+  /* ANCLA: sin gestos en el corpus, el cero significaría «no miré». */
+  if (conGesto === 0) {
+    return { fallos, info: 'NO CONCLUYENTE — ningún archivo del corpus usa `Gesture.`' };
+  }
+
+  return {
+    fallos,
+    info:
+      `${cbMirados} callback(s) de gesto mirados en ${conGesto} pieza(s) con \`Gesture.\`` +
+      (exentos ? ` · ${exentos} exento(s) por \`.runOnJS(true)\` en su cadena (la cura de \`SliderPrecio\`)` : '') +
+      ` · nace de TRES crashes que encontró el founder usando la app y ningún gate` +
+      ` · quita \`runOnJS(fn)\` como ENVOLTORIO y **sigue mirando sus argumentos** (el caso de \`TileVideoPropio\`)` +
+      ` · ⚠️ su verde dice «ningún gesto llama al componente», **jamás «los gestos andan»**`,
+  };
+}
+
+const REGLAS = { R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6369,6 +6548,11 @@ corridas.push(['R64 (una pantalla de cierre no promete un efecto que nadie ejecu
 /* R67 · su corpus es SOLO el diccionario `es` del cliente — la vara la lee de
    la letra con `readFileSync`, no del corpus. `appsCodigo` lo contiene. */
 corridas.push(['R67 (el aviso de teleconsulta no se acorta)', r67(appsCodigo)]);
+/* R68 · corre sobre `ui` Y las apps: un gesto mal escrito rompe igual viva donde
+   viva, y dos de los tres casos fueron piezas del sistema. */
+/* Se le pasa TAMBIÉN el código `.ts`: los helpers `'worklet'` viven ahí
+   (`foto-encuadre.ts`), y sin ellos la regla acusaría a quien los usa bien. */
+corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);
