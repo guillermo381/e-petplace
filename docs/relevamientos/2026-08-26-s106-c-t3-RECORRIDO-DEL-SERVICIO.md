@@ -408,3 +408,112 @@ ese nombre no fuera reconocible, este paso vuelve a quedar en rojo.
    puertas derivan de `tipo_servicio` con la derivación declarada en el
    código; cuando llegue, son dos líneas.
 3. **Un código tipado de «no verificado»** (§G2) — bloquea la Obra 5.
+
+---
+---
+
+# §H · EL CIERRE DE LA CONSULTA — recorrido antes de construir
+
+## §H0 · Lo que YA estaba, medido con literal (dos de las tres cosas pedidas)
+
+**① EL TEMPORIZADOR SE MONTA EN LAS DOS APPS.** La cadena, entera:
+`SuperficieLlamada` → `encabezado={{ …, inicioTs }}` →
+`EncabezadoLlamada:58` → `<TemporizadorLlamada inicioTs={inicioTs} />`.
+Cliente `:460` · prestador `:378`.
+
+🔴 **Por qué el founder no lo vio, y no es que falte:** el temporizador vive
+dentro del **chrome**, y `SuperficieLlamada` **lo esconde a los 4 s de
+quietud** (`QUIETUD_MS = 4000`, `:61`; `setVisible(false)`, `:133`). Cualquier
+toque lo devuelve (`despertar`, `:136`).
+
+*Cuatro segundos alcanzan para que un reloj que arranca en `00:00` desaparezca
+antes de que alguien registre que existía.* **Es decisión de la pieza de B**
+—su comentario lo declara: *«se esconde la vista, no el reloj»*— así que **no
+lo toco: va a B como observación**, con el número medido.
+
+**② GIRAR CÁMARA ESTÁ MONTADO EN LAS DOS.** `onGirarCamara` + su voz:
+cliente `:473`/`:482` · prestador `:390`/`:399`. Ambos llaman a
+`girarCamara(propio)`. ✅ Validado antes de probar, como pidió el founder.
+
+**③a COLGAR YA PREGUNTA, EN LOS DOS LADOS.** Cliente:
+`colgar = () => setConfirmandoColgar(true)` (`:432`) + su
+`HojaConfirmacionDestructiva` (`:485`). Prestador:
+`salir = () => setConfirmandoSalir(true)` (`:292`) + la suya (`:474`).
+⇒ **No hace falta agregarlo del lado del vet: ya estaba.**
+
+---
+
+## §H1 · El recorrido, en voz de cada uno
+
+### El veterinario, al terminar
+
+> *«Ya vi lo que necesitaba. Esto no se arregla por pantalla: que la lleven
+> a urgencias ahora.»*
+
+Abre el panel de la nota **durante** la llamada (el asa, ya curada), escribe
+lo que observó, y **elige cómo termina**. Después cuelga, la app le pregunta
+una vez, y el borrador cae al Durante para sedimentar.
+
+### El dueño, al terminar
+
+> *«¿Y ahora qué hago?»*
+
+Cuelga (con su pregunta) y vuelve. **Lo que el vet concluyó le llega por el
+parte**, que es donde ya vive el resto de la consulta — no por una pantalla
+nueva al colgar.
+
+⚠️ **Lo que este recorrido NO promete:** una alerta inmediata al dueño con la
+derivación. *Eso sería un canal, no una pantalla* — y decidirlo es de la mesa.
+Se declara para que nadie lo dé por hecho.
+
+### Lo que queda escrito
+
+La conclusión **es parte de la nota clínica** y sedimenta con ella, en el mismo
+acto. No hay registro paralelo.
+
+---
+
+## §H2 · 🔴 LA DISTINCIÓN QUE GOBIERNA — y por eso la conclusión no es un motivo de cierre
+
+Firma del founder, y la mesa pidió respetarla al pie:
+
+| | **Conclusión clínica** | **No realizable** |
+|---|---|---|
+| ¿Ocurrió la consulta? | **SÍ** — el vet atendió | **NO** — no se pudo hacer |
+| La plata | **se cobra** | **se devuelve** |
+| El expediente | **dice qué pasó** | no hay acto clínico que registrar |
+| Dónde vive | **dentro de la nota** | estado terminal de la cita (§5) |
+
+*«Una consulta que termina en "llevala a urgencias" SÍ OCURRIÓ.»*
+
+⇒ **Son opuestos para el dinero y para el registro**, y por eso la conclusión
+**no puede ser un formulario al colgar**: un formulario al colgar se lee como
+«motivo de cierre», y ahí la derivación empieza a parecerse a un fracaso del
+servicio cuando es su resultado más valioso.
+
+## §H3 · De dónde salen las opciones — de la LETRA, no de mi criterio
+
+**No invento vocabulario clínico.** Los tres desenlaces salen literales de
+`LETRA_TELEMEDICINA`:
+
+1. **Se resolvió en la videoconsulta** — el caso normal.
+2. **Necesita atención presencial** — §4, verbatim: *«si el veterinario entra
+   y determina que el caso necesita atención presencial, eso **es** el
+   servicio prestado»*.
+3. 🔴 **Derivada a urgencias** — §3, la salida que el aviso previo ya nombra,
+   y la que el founder pidió **visible**.
+
+*Si el vocabulario clínico tiene que crecer, es letra y no código.*
+
+## §H4 · Las decisiones de forma, con su razón
+
+- **Vive en el modal, junto a la nota** — no en una pantalla al colgar, por
+  §H2.
+- **Ninguna opción preselecciona.** *Un default en un campo clínico es un
+  diagnóstico que la app puso y el vet no.* Sin elección, la conclusión va
+  vacía y la nota sigue siendo válida — **la consulta no se bloquea por esto**:
+  es la nota clínica, no un peaje.
+- **La derivación no grita.** Las tres opciones tienen el mismo peso visual,
+  por el mismo argumento que la paridad del aviso §3: si «urgencias» presidiera,
+  la app estaría empujando hacia el desenlace más caro.
+- **Viaja con el borrador al colgar**, por el camino que ya existe.
