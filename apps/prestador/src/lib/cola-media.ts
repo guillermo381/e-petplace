@@ -88,8 +88,16 @@ export interface ItemMedia {
   tipo: 'foto' | 'clip';
   /** Las etiquetas. Mínimo 1 (firma ① del founder: la foto llega a CADA animal). */
   mascotaIds: string[];
-  /** El contexto del día — lo valida el servidor contra el roster. */
-  estadiaId: string;
+  /**
+   * El día de la estadía, local del lugar (`YYYY-MM-DD`).
+   *
+   * 🔴 Es **fecha y no `estadia_id`**, y el cambio se hizo al llegar el
+   * contrato de A: `publicarMedia` ancla por `(mascota, fecha)` y **el
+   * `estadia_id` de cada etiqueta lo resuelve el SERVIDOR**. Mandar un id
+   * desde el teléfono sería más ancho —y un id viajando por un campo que se
+   * lee como fecha es la clase de defecto que compila perfecto.
+   */
+  fecha: string;
   /** Solo clips. */
   duracionS?: number;
   /**
@@ -125,6 +133,19 @@ export interface ItemMedia {
 const BASE_MS = 5_000;
 const FACTOR = 3;
 export const INTENTOS_AUTOMATICOS = 6;
+
+/**
+ * Techo del clip, en la PUERTA de la cola y no en un consumidor.
+ *
+ * El servidor admite **30.9 s** (tolerancia de contenedor declarada en el
+ * CHECK del contrato de A §①). Ese margen existe **para que un archivo honesto
+ * no rebote, no para grabar de más** — así que la puerta corta ahí: un clip
+ * más largo **no entra**, venga de donde venga. *Un techo que vive en la
+ * pantalla lo respeta la pantalla que lo conoce; en la puerta lo respetan
+ * todas.*
+ */
+export const CLIP_TECHO_S = 30;
+export const CLIP_TOLERANCIA_S = 0.9;
 
 function esperaDe(intentos: number): number {
   return BASE_MS * FACTOR ** Math.min(intentos, INTENTOS_AUTOMATICOS - 1);
@@ -190,10 +211,10 @@ export async function leerCola(): Promise<ItemMedia[]> {
 }
 
 /** Lo pendiente de una estadía, en orden de captura. */
-export async function pendientesDe(estadiaId: string): Promise<ItemMedia[]> {
+export async function pendientesDe(fecha: string): Promise<ItemMedia[]> {
   const items = await leerCola();
   return items
-    .filter((i) => i.estadiaId === estadiaId && i.estado !== 'publicada')
+    .filter((i) => i.fecha === fecha && i.estado !== 'publicada')
     .sort((a, b) => a.creadoEn - b.creadoEn);
 }
 
@@ -211,7 +232,7 @@ export interface AltaMedia {
   tipo: 'foto' | 'clip';
   /** 🔴 mínimo 1: publicar sin etiquetas dejaría media sin dueño. */
   mascotaIds: string[];
-  estadiaId: string;
+  fecha: string;
   duracionS?: number;
 }
 
@@ -225,12 +246,17 @@ export async function encolar(alta: AltaMedia): Promise<ItemMedia> {
   if (alta.mascotaIds.length === 0) {
     throw new Error('cola-media: mascotaIds vacío — una media sin etiqueta no tiene a quién llegar');
   }
+  if (alta.tipo === 'clip' && (alta.duracionS ?? 0) > CLIP_TECHO_S + CLIP_TOLERANCIA_S) {
+    throw new Error(
+      `cola-media: clip de ${alta.duracionS}s supera el techo de ${CLIP_TECHO_S}s — el servidor lo rebotaría`,
+    );
+  }
   const item: ItemMedia = {
     id: `${alta.tipo}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     uri: alta.uri,
     tipo: alta.tipo,
     mascotaIds: [...alta.mascotaIds],
-    estadiaId: alta.estadiaId,
+    fecha: alta.fecha,
     duracionS: alta.duracionS,
     creadoEn: Date.now(),
     estado: 'en_cola',
@@ -314,7 +340,7 @@ export interface ResumenCorrida {
  */
 export async function procesarCola(
   motor: MotorDeSubida | null,
-  opciones?: { estadiaId?: string; ahora?: number },
+  opciones?: { fecha?: string; ahora?: number },
 ): Promise<ResumenCorrida> {
   const ahora = opciones?.ahora ?? Date.now();
   const resumen: ResumenCorrida = { intentados: 0, publicados: 0, pendientes: 0, enError: 0 };
@@ -322,7 +348,7 @@ export async function procesarCola(
   const todos = await leerCola();
   const listos = todos
     .filter((i) => i.estado === 'en_cola' || i.estado === 'subida_sin_registrar')
-    .filter((i) => (opciones?.estadiaId ? i.estadiaId === opciones.estadiaId : true))
+    .filter((i) => (opciones?.fecha ? i.fecha === opciones.fecha : true))
     .filter((i) => (i.proximoIntentoEn ?? 0) <= ahora)
     .sort((a, b) => a.creadoEn - b.creadoEn);
 

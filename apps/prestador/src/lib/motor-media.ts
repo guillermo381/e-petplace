@@ -34,34 +34,43 @@ function esErrorDeRed(mensaje: string): boolean {
   return /network|failed to fetch|fetch failed|timeout/i.test(mensaje);
 }
 
-// ══════════════════ EL CONTRATO QUE ESPERA A LA PISTA A ════════════════════
+// ══════════════════ EL CONTRATO DE A, YA PUBLICADO ═════════════════════════
+// `docs/contratos/s107-contrato-media-durante.md` (28-ago). Lo que estaba acá
+// era MI propuesta escrita como tipo; ahora existe la oficial y **manda la de
+// A**. Diferencias que importan y por las que esto se reescribió en vez de
+// convivir: el contrato guarda `archivo_url` (no bucket+path por separado) y
+// ancla por **`fecha`** — el `estadia_id` de cada etiqueta lo resuelve el
+// SERVIDOR por (mascota, fecha), que es más angosto que mandárselo desde acá.
+// *Dos contratos para la misma puerta es peor que uno equivocado: cualquiera
+// cita el que le conviene.*
 
-export interface EntradaRegistroMedia {
-  /** Ya subido. El registro NUNCA sube: son dos pasos por diseño. */
-  storagePath: string;
-  bucket: string;
-  mimeType: string;
-  tamanoBytes: number;
+// El techo del clip vive en `cola-media.ts`, en la PUERTA. Acá no se
+// redeclara: dos constantes con el mismo nombre y distinto dueño es cómo se
+// desincronizan los topes.
+
+export interface EntradaPublicarMedia {
+  /** Ya subido — el registro NUNCA sube: son dos pasos por diseño. */
+  archivoUrl: string;
   tipo: 'foto' | 'clip';
-  duracionSegundos?: number;
-  /** El día. El servidor valida el conjunto contra SU roster — no la app. */
-  estadiaId: string;
-  /** 🔴 LAS N ETIQUETAS. Mínimo 1. Cada una recibe su evento apuntando al
-   *  MISMO objeto de storage: un byte, N lecturas. */
+  duracionS?: number;
+  /** 🔴 LAS N ETIQUETAS. Mínimo 1: sin etiquetas rebota `media_sin_etiquetas`.
+   *  Cada una recibe su evento apuntando al MISMO archivo. */
   mascotaIds: string[];
+  /** El día de la estadía, local del lugar (`YYYY-MM-DD`). */
+  fecha: string;
 }
 
 /**
- * Lo que la app necesita de A. Requisitos duros, en el orden en que importan:
- *  1. **Idempotente por `storagePath`** — el reintento de la cola no puede
- *     duplicar eventos, y la cola reintenta por diseño.
- *  2. **Valida el conjunto contra el roster del día** — una mascota ajena
- *     rebota TIPADA, jamás pasa.
- *  3. Devuelve los ids creados, para que la pantalla pueda confirmar sin
- *     re-preguntar.
+ * `publicarMedia` del contrato §②: crea la media, sus N etiquetas y sus N
+ * eventos **en una sola transacción**.
+ *
+ * ⚠️ Lo que la app NO puede asumir y por eso la cola igual reintenta: el
+ * contrato no declara idempotencia por `archivo_url`. **Se pidió** (era el
+ * requisito ① de mi pedido D→A) y hasta que esté escrita, un reintento tras un
+ * timeout ambiguo podría duplicar eventos. *Está anotado, no supuesto.*
  */
-export type RegistrarMediaEtiquetada = (
-  entrada: EntradaRegistroMedia,
+export type PublicarMedia = (
+  entrada: EntradaPublicarMedia,
 ) => Promise<
   | { ok: true; mediaId: string; eventoIds: string[] }
   | { ok: false; codigo: string; mensaje: string }
@@ -70,16 +79,14 @@ export type RegistrarMediaEtiquetada = (
 /**
  * El aviso, después de publicar.
  *
- * 🔴 **LA AGRUPACIÓN NO PUEDE VIVIR ACÁ, y la razón es estructural, no una
- * preferencia:** dos cuidadores subiendo fotos del mismo animal desde dos
- * teléfonos no pueden coordinar un digest local, y un tercero que abre la app
- * más tarde tampoco. **Agrupa el servidor o no agrupa nadie.** La app solo
- * declara el hecho; el reparto firmado por la mesa (media → `resumen`
- * agrupada; tramo y acta → operativas e inmediatas, sin competir por el techo)
- * lo aplica el motor de A.
+ * 🔴 **LA AGRUPACIÓN NO VIVE ACÁ, y la mesa lo ratificó** (contrato §④bis):
+ * dos teléfonos subiendo media del mismo animal no coordinan un digest entre
+ * ellos — *cada aparato sabe lo que él subió y nada más*, así que agrupar en el
+ * cliente produce «1 foto nueva» tres veces, que es el «una push por foto» que
+ * la firma prohíbe. **Agrupa el servidor.** La app solo declara el hecho.
  */
 export type AvisarMediaPublicada = (aviso: {
-  estadiaId: string;
+  fecha: string;
   mascotaIds: string[];
   tipo: 'foto' | 'clip';
 }) => Promise<void>;
@@ -90,10 +97,12 @@ export interface DepsMotorMedia {
    *  de molde y la forma del path es la misma. */
   bucketFoto: string;
   bucketClip: string;
-  /** null = todavía no existe (pedido D→A ①). La cola guarda y lo dice. */
-  registrar: RegistrarMediaEtiquetada | null;
-  /** null = todavía no existe (pedido D→A ③). El aviso NO frena la
-   *  publicación: la media ya está en el hilo del dueño. */
+  /** null = el wrapper todavía no existe (contrato publicado, migración y
+   *  `publicarMedia` **aún no**: medido el 28-ago — cero migraciones
+   *  `guarderia_media`, cero wrappers). La cola guarda y lo dice. */
+  publicar: PublicarMedia | null;
+  /** null = todavía no existe. El aviso NO frena la publicación: la media ya
+   *  está en el hilo del dueño. */
   avisar?: AvisarMediaPublicada | null;
 }
 
@@ -143,26 +152,22 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
     },
 
     async registrar(item: ItemMedia, storagePath: string) {
-      if (!deps.registrar) {
+      if (!deps.publicar) {
         // INERTE y declarado: la media queda guardada y la pantalla puede
         // decir la verdad sin inventar una falla de red que no ocurrió.
         return {
           ok: false as const,
           causa: 'motor_no_cableado' as CausaFalla,
-          mensaje: 'el registro de media etiquetada todavía no existe (pedido D→A ①)',
+          mensaje: 'publicarMedia todavía no existe (contrato §② publicado, wrapper pendiente)',
         };
       }
 
-      const esClip = item.tipo === 'clip';
-      const r = await deps.registrar({
-        storagePath,
-        bucket: esClip ? deps.bucketClip : deps.bucketFoto,
-        mimeType: esClip ? tipoDeClip(item.uri).mime : 'image/jpeg',
-        tamanoBytes: item.bytes ?? 0,
+      const r = await deps.publicar({
+        archivoUrl: storagePath,
         tipo: item.tipo,
-        duracionSegundos: item.duracionS,
-        estadiaId: item.estadiaId,
+        duracionS: item.duracionS,
         mascotaIds: item.mascotaIds,
+        fecha: item.fecha,
       });
 
       if (!r.ok) {
@@ -178,7 +183,7 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
       // (volvería a registrar, y eso sí duplicaría). Se registra y se sigue.
       if (deps.avisar) {
         try {
-          await deps.avisar({ estadiaId: item.estadiaId, mascotaIds: item.mascotaIds, tipo: item.tipo });
+          await deps.avisar({ fecha: item.fecha, mascotaIds: item.mascotaIds, tipo: item.tipo });
         } catch (e) {
           console.error(`[motor-media] el aviso falló y NO frena la publicación · ${String(e)}`);
         }
