@@ -1521,3 +1521,14 @@ export {
   type GuarderiaDisponible,
   type CodigoErrorGuarderiaOferta,
 } from './wrappers/guarderia-oferta';
+
+/* S107-A · guardería: el gate sanitario y la reserva del día. */
+export {
+  evaluarRequisitosGuarderia,
+  reservarDiaGuarderia,
+  type RequisitosGuarderia,
+  type RequisitoFaltante,
+  type EstadoRequisito,
+  type ReservaGuarderia,
+  type CodigoErrorGuarderiaReserva,
+} from './wrappers/guarderia-reserva';

@@ -22169,6 +22169,22 @@ porque el vencido está actualizado.
 > `L-432` conviviendo: dos leyes con el mismo número son peores que una mal
 > numerada.*
 
+#### L-434 · UN PEDIDO AUTOCONTENIDO FIJA NOMBRES — CAMBIARLOS DESPUÉS ES DESHACERLO
+
+> ### **Cuando la otra pista ya fabricó la cerradura, la llave no se renombra «porque este nombre es mejor».**
+
+**El caso, y es un error propio de A (28-ago-2026):** C mandó un pedido autocontenido pidiendo una bandera de país con la clave **`guarderia`**, y **dejó su mitad construida e INERTE contra ese nombre** (molde S91). A la construyó como **`daycare`** — con un argumento razonable: *el resto de `services_enabled` está en inglés* (`walking`, `grooming`, `hotel`).
+
+**El argumento era cierto y la decisión estaba mal.** El pedido autocontenido **es el contrato entre las dos pistas**; su valor entero está en que el otro pueda construir sin volver a preguntar. *Renombrar la llave después convierte un pedido autocontenido en una conversación — que es exactamente lo que el molde existe para evitar.*
+
+### Lo operativo
+
+1. **Los nombres de un pedido autocontenido se toman VERBATIM**, aunque quien construye tenga un nombre mejor. **Si el nombre importa, se discute ANTES de que el otro construya** — después ya no es una opinión sobre estética, es romper una pieza que existe.
+2. **La coherencia de vocabulario es de la mesa, y vale menos que un contrato ya construido de un lado.** *Se declara el costo y se sigue: `services_enabled` queda con once claves en inglés y una en español, y eso es más barato que una pista recodificando.*
+3. **Y la cura, cuando ya pasó, es la que se aplicó:** corregir en **la migración SIGUIENTE**, jamás editando la aplicada — *una migración aplicada es historia; editarla es reescribir lo que ya le pasó a la base.*
+
+**Su hermana es la excepción legítima del método §6** (*se comparte la FORMA, la voz es de cada casa*): allá el que construye conserva su voz; **acá el nombre no es voz, es interfaz** — y la interfaz la fija quien la pidió.
+
 #### L-433 — UN CENSO QUE DA CERO VERIFICA PRIMERO QUE LA PÁGINA VIVA
 
 > **Texto de la pista B, depositado VERBATIM por A el 28-ago-2026** (`docs/` es

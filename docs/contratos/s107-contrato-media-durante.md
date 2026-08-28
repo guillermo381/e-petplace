@@ -181,6 +181,16 @@ etiquetas» es construcción nueva, y ahora está probado en vez de supuesto.**
 
 **Las tres llegan al aparato con el tren `1.0.7` / `1.0.6`, no antes.**
 
+### 🔴 LAS TRES CADENAS DEL CHECKLIST DEL BINARIO *(D, `cd1df4d1`) — ABIERTAS hasta leerse en el aparato*
+
+| cadena | dónde |
+|---|---|
+| `photosPermission` | **prestador** |
+| `photosPermission` | **cliente** |
+| `locationWhenInUsePermission` | **prestador** — la frase firmada, con **sus dos oficios y sus dos alcances** |
+
+**Ninguna viaja por OTA y ninguna se declara cerrada al commitearla.** Van al checklist del tren **`1.0.7` / `1.0.6`** y **se leen en la pantalla del aparato** antes de darlas por curadas.
+
 ⚠️ **Y la instrucción operativa que va con esto, que es la que se pierde:** al armar ese binario, **las cadenas se verifican EN EL APARATO** — no se dan por curadas porque estén bien escritas en el repo. *Es exactamente la clase de `L-432` que este contrato ya pagó con el micrófono: el repo y el teléfono son dos versiones de la verdad, y un commit mueve sólo una.*
 
 ---
