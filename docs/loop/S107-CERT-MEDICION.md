@@ -205,3 +205,27 @@ conciliador es CIEGO A LAS CITAS por construcción.**
 Y eso importa hoy más que ayer: **S106 convirtió a la cita en el sujeto que más
 cobra — 11 cobros aprobados hoy.** *El único sujeto sin red de seguridad es el
 que más plata mueve.*
+
+---
+
+## ⑦ CONSTRUIDO Y **NO EJERCIDO** — al cierre de S107-CERT
+
+*Misma disciplina que el §② del acta de S105: cada pieza con **cómo se ejerce**,
+no solo con que falta.*
+
+| pieza | qué falta para ejercerla |
+|---|---|
+| 🔴 **Las tres voces nuevas de `pago_reversado`** (`20260827220000`) | **cobrar una cita y reversarla antes de las 17:00 `America/Guayaquil`**. La ventana del 27-ago se pasó. ⚠️ **Con un prestador DISTINTO de `4f572081`**: él ya recibió la versión vieja a las 15:46, y un segundo aviso con otro texto sobre el mismo hecho **le cuenta dos historias**. Es un caso nuevo, no una repetición |
+| 🔴 **El aviso a la FAMILIA** | nace con el mismo acto de arriba. Hoy tiene **0 enviados**: la cura llegó después del único reverso de cita del día |
+| 🟡 **`obtener_cita_resuelta`, brazo `pago_reversado`** | **NO CONCLUYENTE**, no rojo: por SQL rebota en `sin_sesion` antes de llegar al brazo. Se ejerce con el deep link `cliente://videoconsulta/d41c9dea-…` en el aparato, **con sesión real** |
+| 🟡 **El pasillo a la cita cancelada** (`D-951`) | no se puede ejercer: **no existe**. El deep link prueba el lector, no el camino |
+| 🟢 **La verdad vencida curada** (`20260827210000`) | verificada contra el objeto, **pero no vista en una respuesta real**: hace falta un reverso nuevo para leer `sujeto_movido: true` saliendo de la función en vez de del assert |
+| 🔴 **El acto A del uid** (piezas ②③④) | ③ desplegada · ② y ④ **bloqueadas por la build**, que recién ahora existe |
+| 🔴 **El borrado de las 2 tarjetas parcheadas** | suspendido con fecha de vencimiento escrita: **se hace dentro del acto A**, no antes |
+
+### La regla que este bloque cobra por segunda vez en dos sesiones
+
+> **Una cura que llega después del único caso del día no está probada: está
+> escrita.** El reverso de las 15:46 gastó el único sujeto disponible y la cura
+> salió a las 16:30 — *el orden importa tanto como el contenido, y acá el orden
+> lo decidió una ventana de un tercero.*
