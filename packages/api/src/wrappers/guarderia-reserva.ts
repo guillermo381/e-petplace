@@ -129,3 +129,78 @@ export async function reservarDiaGuarderia(params: {
     data: { citaId: r.cita_id, estadiaId: r.estadia_id, precio: r.precio, expiraEn: r.expira_en },
   };
 }
+
+// ── LA JORNADA DEL PRESTADOR ────────────────────────────────────────────────
+
+/** El vocabulario del motor. La VOZ de cada estado es de la casa que lo muestra. */
+export type EstadoEstadia =
+  | 'reservada' | 'recogida_en_curso' | 'en_guarderia'
+  | 'retorno_en_curso' | 'entregada' | 'cancelada' | 'no_recogida';
+
+export interface EstadiaDelDia {
+  estadiaId: string;
+  citaId: string;
+  estado: EstadoEstadia;
+  mascotaId: string;
+  mascotaNombre: string;
+  mascotaEspecie: string;
+  mascotaFotoUrl: string | null;
+  /** En qué sala quedó. null = todavía sin asignar. */
+  espacioNombre: string | null;
+  /** 🔴 Dónde hay que ir a buscarlo. Congelada al reservar (D-339). */
+  direccion: unknown | null;
+  aBordoEn: string | null;
+  llegadaEn: string | null;
+  entregadaEn: string | null;
+}
+
+/**
+ * La lista de hoy del prestador.
+ *
+ * 🔴 **Es una VISTA sobre las estadías, jamás una entidad «jornada»**: un día
+ * con seis animales son seis estadías. La pantalla compone; no hay un objeto
+ * que pedir ni que mutar.
+ *
+ * 🔴 **Y sólo trae verdad firme.** Un hold sin pagar no es una estadía del día:
+ * es alguien mirando. *Una lista que incluyera reservas que pueden evaporarse
+ * en quince minutos haría salir al cuidador a buscar un animal que nadie
+ * compró.*
+ */
+export async function obtenerEstadiasDelDia(
+  prestadorId: string,
+  /** 'YYYY-MM-DD' */
+  fecha: string,
+): Promise<ResultadoWrapper<EstadiaDelDia[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_estadias_del_dia', {
+    p_prestador_id: prestadorId,
+    p_fecha: fecha,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: EstadiaDelDia[] = [];
+  for (const e of data) {
+    if (typeof e !== 'object' || e === null) return fallaCodigo('datos_inconsistentes');
+    const r = e as Record<string, unknown>;
+    if (typeof r.estadia_id !== 'string' || typeof r.cita_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.estado !== 'string' || typeof r.mascota_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    salida.push({
+      estadiaId: r.estadia_id,
+      citaId: r.cita_id,
+      estado: r.estado as EstadoEstadia,
+      mascotaId: r.mascota_id,
+      mascotaNombre: typeof r.mascota_nombre === 'string' ? r.mascota_nombre : '',
+      mascotaEspecie: typeof r.mascota_especie === 'string' ? r.mascota_especie : '',
+      mascotaFotoUrl: typeof r.mascota_foto_url === 'string' ? r.mascota_foto_url : null,
+      espacioNombre: typeof r.espacio_nombre === 'string' ? r.espacio_nombre : null,
+      direccion: r.direccion_snapshot ?? null,
+      aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
+      llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
+      entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+    });
+  }
+  return { ok: true, data: salida };
+}

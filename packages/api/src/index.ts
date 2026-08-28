@@ -1530,5 +1530,8 @@ export {
   type RequisitoFaltante,
   type EstadoRequisito,
   type ReservaGuarderia,
+  obtenerEstadiasDelDia,
+  type EstadiaDelDia,
+  type EstadoEstadia,
   type CodigoErrorGuarderiaReserva,
 } from './wrappers/guarderia-reserva';
