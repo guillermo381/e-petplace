@@ -1474,8 +1474,27 @@ const FUENTES_R17 = {
 // modo de falla de siempre — y con la galería especializada en láminas
 // (enmienda de método 2-ago) importa MÁS, no menos: es el único camino
 // del founder a lo que tiene que firmar.
+/* ✏️ ENMIENDA S107 — FIRMA DE LA MESA (28-ago-2026). **R18 NO SE BORRA: SE
+ *  ANGOSTA A UNA SOLA CASA.**
+ *
+ *  Lo firmado: **se retira la entrada del CLIENTE; la del PRESTADOR se
+ *  conserva hasta el gate de producción.** *La galería salió de sala de
+ *  revisión (firma S106) — pero salió como lugar donde el founder JUZGA, no
+ *  como pieza: `R17` sigue exigiendo que toda pieza exportada esté montada
+ *  ahí, y ése sigue siendo el único mecanismo que hace que el typecheck vea
+ *  una prop sin llenar.*
+ *
+ *  🔴 POR QUÉ SE ANGOSTA EN VEZ DE BORRARSE, que es la parte que se pierde
+ *  si no queda escrita: la polaridad de R18 es lo valioso — vigila que la
+ *  entrada **EXISTA**, porque su modo de falla es que DESAPAREZCA sin firma.
+ *  Borrar la regla entera para retirar UNA de las dos entradas dejaría a la
+ *  otra —la que la firma manda conservar— **sin guard**, y su desaparición
+ *  volvería a ser silenciosa. *Se retira lo que la firma retira, y se sigue
+ *  vigilando lo que la firma conserva.*
+ *
+ *  El día que el founder firme el retiro del prestador, ahí sí la regla se
+ *  borra entera, en el mismo commit de la firma. */
 const CUENTAS_GALERIA = [
-  'apps/cliente/src/app/(tabs)/cuenta/index.tsx',
   'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
 ];
 /* S85-B1 · EL MENSAJE GRITABA UNA CAUSA QUE EL PREDICADO NO MEDÍA — la
@@ -1532,7 +1551,12 @@ function r18(casas) {
   }
   // ANCLA: sin casas que mirar la regla informaría "0 fallos" sin haber
   // abierto un archivo — verde sin verificación (L-192).
-  fallos.push(...ancla('R18', casas.length, 2, 'Cuenta(s) de galería vigiladas'));
+  // ✏️ S107: baja de 2 a 1 porque la FIRMA retiró la casa del cliente. El
+  // ancla no se afloja «para que pase»: se mueve al número que la firma dejó,
+  // y sigue siendo el que impide que la regla mire cero archivos. *Y el que
+  // cazó este cambio fue el ancla misma — dio rojo en cuanto la lista bajó a
+  // uno, que es exactamente para lo que existe.*
+  fallos.push(...ancla('R18', casas.length, 1, 'Cuenta(s) de galería vigiladas'));
   return { fallos, info: fallos.length === 0 ? `${casas.length} entradas vivas y sin __DEV__` : `${fallos.length} fallo(s)` };
 }
 
@@ -6591,7 +6615,7 @@ corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
-corridas.push(['R18 (D-580: la entrada a la galería NO desaparece, en LAS DOS casas)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
+corridas.push(['R18 (D-580: la entrada a la galería NO desaparece — SOLO el prestador, firma S107)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R30 (el glifo no se re-dibuja: apps contra el registry)', r30([...apps, ...ui])]);
