@@ -207,6 +207,25 @@ evaluar_requisitos_guarderia(p_mascota_id uuid) RETURNS jsonb
 
 ---
 
+## ⑥bis · RECONCILIACIÓN CON LAS PIEZAS DE B — *(A, 28-ago; B construyó antes que este contrato)*
+
+**B definió sus props sin contratos a la vista (los suyos son de `pista/s107-b`, ya en `main`). A los leyó y los reconcilia: NO HAY CHOQUE — y donde había riesgo, B ya lo había cerrado mejor.**
+
+| pieza de B | prop que recibe | de qué wrapper sale | quién arma el texto |
+|---|---|---|---|
+| `CalendarioCupo` | `DiaDeCupo{ clave, numero, estado:'elegible'\|'sin_cupo', motivo? }` | `obtenerCupoGuarderia` → `CupoDia{fecha, capacidad, consumido, disponible, sobrevendido}` | **C**: `sin_cupo ⟺ disponible === 0`; `motivo` es voz de la casa |
+| `SemaforoSanitario` | `RequisitoSanitario` (unión: `al_dia` \| `falta` **con `onResolver` + `etiquetaResolver` obligatorios**) | `evaluar_requisitos_guarderia` → `{ estado, faltantes:[{codigo, estado, vence?}] }` | **C**: `codigo → clave`, la `etiqueta` y el `detalle` son **voz**, y la voz es de cada casa (método §6) |
+| `FichaFranja` | `recogida` / `devolucion?` : `{rotulo, desde, hasta}` | `obtenerFranjasGuarderia` (las dos ventanas ya resueltas) | **C** el rótulo; las horas vienen crudas |
+| `SelectorRoster` | el roster del día | `obtenerEstadiasDelDia` | — |
+
+### Las tres cosas que hay que decir, porque son las que se pierden
+
+1. 🟢 **`SemaforoSanitario` hace INEXPRESABLE el faltante sin camino** — su `falta` **no compila** sin `onResolver`. *Este contrato lo pedía en prosa («cada faltante viaja con su camino»); B lo volvió mecanismo.* **Gana el mecanismo, y este contrato lo adopta:** el wrapper devuelve el faltante **con su código**, y **C está obligada por el tipo** a cablearle el camino. *Una promesa de diseño que el código no expresa es peor que no haberla escrito.*
+2. 🟢 **`CalendarioCupo` no tiene prop de cupo restante, y no la va a tener.** Coincide con este contrato: `disponible` viaja **para que la pieza decida**, jamás para pintarse como «quedan 2» (`MODELO_LOYALTY` §7.5). **La pieza no puede mostrarlo porque no puede recibirlo.**
+3. ⚠️ **Ninguna pieza de B trae texto adentro — todo rótulo entra por prop**, y eso es lo que hace que **ninguna pueda afirmar un reparto de responsabilidad que la letra frenada no sostiene.** *Es la mitad del §0 del plan hecha estructura.* **A lo ratifica: el server manda códigos y fechas; la voz es de la casa que la muestra.**
+
+---
+
 ## ⑦ LO QUE ESTE CONTRATO **NO** CUBRE (y a quién le toca)
 
 - **Documentos, aceptaciones y actas** — contrato aparte, A lo publica enseguida.
