@@ -592,3 +592,44 @@ lo lea mañana como cerrado y construya encima.**
 ⚠️ **Y hasta que eso se mida, el botón de capturar no debería estar al alcance
 del vet en una consulta real:** *romperle el video a la familia a mitad de una
 teleconsulta paga es peor que no tener la función.*
+
+---
+
+## ✅ EJECUTADO — el botón, retirado detrás de `__DEV__` (firma del founder)
+
+**La razón, tal como la mesa la escribió y queda en el código:** *hoy tocarlo
+le corta el video a la familia a mitad de una teleconsulta paga, y eso es peor
+que no tener la función.*
+
+⚠️ **No se retira lo que el founder pidió: se retira una VERSIÓN que rompe la
+consulta.** Vuelve —sin `__DEV__`— cuando ① y ② estén medidos.
+
+*Y lo demás queda intacto y probado: la vía nativa produce la imagen real, y
+la captura llegó a escribir el PNG en una cita real.* **Lo que se apaga es la
+puerta, no el trabajo.**
+
+---
+
+# 📋 PARA A — LO QUE HAY QUE PUBLICAR E INCLUIR EN SU PARTE
+
+**Rama:** `pista/s106-c-cierre` · **HEAD** al cerrar: ver el último commit de C.
+**Nada de esto está en `main`.**
+
+| Commit | Qué lleva | Urgencia |
+|---|---|---|
+| `a6f268c1` | **ACTO 1** — el servicio ya no viene preseleccionado + el checkout dice qué se paga | 🔴 **es el defecto que hacía pagar por lo que no se eligió** |
+| `4b790e6b` | la señal en NEGOCIO + ficha `D-945` | — |
+| `c381fe41` | el módulo nativo **compilando** + el gate del código nativo | — |
+| `e8e380a5` | 🔴 **el `box-none` repuesto** — *la cura del bloqueo, escrita y sin mergear* | 🔴 |
+| **el último** | **el botón detrás de `__DEV__`** | 🔴 **lo que impide romperle el video a una familia** |
+
+🔴 **Los dos que no pueden esperar: el `__DEV__` y el ACTO 1.** *El primero
+evita un daño en vivo; el segundo evita que alguien pague por un servicio que
+no eligió — y ése le pasó al founder dos de cinco veces.*
+
+## EL ORDEN DE LA PRÓXIMA SESIÓN, firmado
+
+1. 🔴 **EL PNG** — el discriminador entre las dos lecturas.
+2. **El `release()` sobre `toI420()`** — sospechoso en las dos ramas.
+3. **El bloqueo** — su cura **ya está escrita en `e8e380a5`**: *quien retome
+   sólo tiene que traerla, no re-diagnosticarla.*
