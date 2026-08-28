@@ -1027,6 +1027,11 @@
              la causa fina la resuelve la app con la taxonomía de la letra §7.
              «Fondos insuficientes» jamás se nombra. */
           decir(T.probaOtra, 'error');
+          /* 🔴 S107 · D-961 — el alta se cerraba como `rechazada` **sin motivo**,
+             asi que soporte veia el QUE y nunca el POR QUE. Se anota antes de
+             cerrar: `terminar` cierra, `anotarIncidente` deja el rastro. El
+             orden importa — despues de cerrar, el handle ya no admite nada. */
+          anotarIncidente('emisor_rechazo:' + (tipo || 'sin_tipo'), resp);
           terminar('rechazada');
           return;
         }
@@ -1035,6 +1040,25 @@
            abierta** (vence sola) y la voz no le pide nada a la familia.
            ⚠️ El mapa de `type` está incompleto a propósito: se cierra
            midiendo un rechazo real en sandbox, no enumerando de memoria. */
+        /* 🔴 S107 · D-961 — EL ALTA DEJA DE MORIR SIN RASTRO.
+           ⏪ Acá antes SOLO se hablaba: el alta quedaba `pendiente` sin motivo,
+           **indistinguible de una en curso salvo por el reloj**, y dos segundos
+           despues no habia nada que mostrarle a la persona. Medidos SEIS casos
+           asi en una sola noche (27-ago), incluido el duplicado que el dedup
+           rechazo bien y del que no quedo ni una linea.
+
+           `anotarIncidente` ya existia y tenia UN solo llamador. La puerta es
+           `desenlace:'incidente'` — **anotar SIN cerrar** (`D-925`), que nacio
+           justo para esto: `rechazada` cerraria el alta, y el handle es de un
+           solo uso.
+
+           ⚠️ EL MOTIVO ES LO QUE MANDA EL PROVEEDOR, SIN INFERIRLE UNA CAUSA.
+           Confirmado por Erick (28-ago): su rechazo dice «rechazado» y nada
+           mas — **no distingue «ya tokenizada» de otros motivos**. Se registra
+           lo que hay; el dia que haya con que distinguir, se afina. *Inventar
+           la causa seria acertar la mayoria de las veces, que es la peor clase
+           de acierto.* */
+        anotarIncidente('sdk_defecto_tecnico:' + (tipo || 'sin_tipo'), resp);
         decir(T.defectoNuestroReintento, 'error');
       },
       campo
