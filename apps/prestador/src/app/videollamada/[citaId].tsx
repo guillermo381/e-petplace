@@ -881,18 +881,54 @@ function MesaDeTrabajo({
             Con esto el vet **no puede tocar algo que no va a funcionar**
             (Ley 23), y el defecto pasa de «botón que no hace nada» a
             «botón ausente», que se diagnostica solo. */}
-        {pistasRemotas.length > 0 && pcIdDeLaSala(sala) !== null && (
-          <View style={{ paddingHorizontal: spacing[4] }}>
+        {/* 🔴 `box-none` REPUESTO — la verificación de la mudanza de B lo
+              encontró, y es exactamente el caso del precedente S90.
+              *Su cura fue mecánica y correcta: el contenido no cambió, «sólo
+              dejó de tener envoltorio propio». **Pero el envoltorio llevaba
+              estas dos props**, y un `View` opaco DENTRO del slot vuelve a
+              comerse los toques de su franja — ya no los de colgar, que su
+              `zIndex` protege, pero sí los del video.*
+              ⇒ **El slot da `box-none` al contenedor; los hijos son de quien
+              los pone.** Eso es justo lo que su división implica: ella dejó
+              de darme motivos para pelear con sus hermanos, y a mí me toca no
+              crear una capa opaca dentro de mi propio slot. */}
+        {/* ☠️ 🔴 RETIRADO DEL ALCANCE DEL VET — firma del founder, 27-ago.
+            **Hoy tocarlo le CORTA EL VIDEO a la familia** a mitad de una
+            teleconsulta paga: el founder reportó que después de capturar el
+            dueño deja de ver al veterinario. *Y eso es peor que no tener la
+            función.*
+
+            ⚠️ **No se retira lo que el founder pidió: se retira una VERSIÓN
+            que rompe la consulta.** Vuelve —sin `__DEV__`— cuando estén
+            medidos los dos pendientes:
+            ① **el PNG**, que es el DISCRIMINADOR entre las dos lecturas: si
+               es la cara del vet, la causa es que capturé el track equivocado
+               y el `release()` es su consecuencia; si es el animal, son dos
+               defectos distintos.
+            ② **el `release()` sobre `toI420()`** — `VideoFrame.Buffer` es
+               `RefCounted` y `toI420()` puede devolver `this` retenido, así
+               que mi `finally { i420.release() }` puede estar liberando el
+               buffer del frame original. **Sospechoso en las dos ramas.**
+
+            *Todo lo demás queda intacto y probado: la vía nativa produce la
+            imagen real, y la captura llegó a escribir el PNG en una cita
+            real. Lo que se apaga es la puerta, no el trabajo.* */}
+        {__DEV__ && pistasRemotas.length > 0 && pcIdDeLaSala(sala) !== null && (
+          <View style={{ paddingHorizontal: spacing[4] }} pointerEvents="box-none">
             <Boton
               variante="secundario"
               etiqueta={capturando ? t('consulta.vcCuadroCapturando') : t('consulta.vcCuadroCta')}
               onPress={() => void capturar()}
               cargando={capturando}
             />
+            {/* La confirmación **no se toca y se va sola**: capturar es un acto
+                DENTRO de la consulta, nunca una pantalla de la que salir. */}
             {cuadro !== null && (
-              <Texto variante="apoyo" color="sobreVideo">
-                {t('consulta.vcCuadroListo')}
-              </Texto>
+              <View pointerEvents="none">
+                <Texto variante="apoyo" color="sobreVideo">
+                  {t('consulta.vcCuadroListo')}
+                </Texto>
+              </View>
             )}
           </View>
         )}

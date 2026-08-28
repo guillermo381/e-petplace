@@ -453,3 +453,258 @@ usar*, y costó una build de veinte minutos.
 
 **Por eso el cierre no dice «curado» en ninguna línea.** Eso lo dice el dedo
 del founder.
+
+---
+---
+
+# 🔴 EL CUADRO CONGELADO — DIAGNÓSTICO PARA LA PRÓXIMA SESIÓN
+
+**No se cura hoy, por decisión de la mesa y con la razón compartida:** *dos
+curas encima de una superficie que no se puede ejercer sin una llamada real,
+a esta hora, es cómo se rompe lo que funciona.*
+
+## ① LA ADJUDICACIÓN — verificada, y **mi `box-none` quedó FUERA de `main`**
+
+Medido contra `origin/main`: **cero `pointerEvents` en la pantalla**. Entre mi
+prop y el slot de B ganó el slot, y **la prop se perdió en la adjudicación**.
+
+🔴 **Y las dos NO eran alternativas: eran complementarias.**
+- **El slot** resuelve el **ORDEN** — colgar queda encima por construcción.
+- **El `box-none`** resuelve la **OPACIDAD** — que mi `View` no se coma los
+  toques de su propia franja.
+
+*Sacar uno de los dos deja el otro trabajo sin hacer.* **Y encaja con el
+agravamiento reportado:** antes bloqueaba una franja; sin el `box-none` dentro
+de un slot que ahora ocupa su ancho completo, bloquea más.
+
+⚠️ **La prop está repuesta en `pista/s106-c-cierre` (`e8e380a5`) y NO en
+`main`.** *Quien retome esto: la cura de ① ya está escrita, sólo hay que
+mergearla.*
+
+## ② SI EL BLOQUEO PERSISTE — la otra causa, sin construir
+
+Si con el `box-none` repuesto sigue bloqueando, entonces **lo que come los
+toques es la vista de la imagen, no su envoltorio** — y el sospechoso es la
+miniatura del modal, que monté sin `pointerEvents`.
+
+*No lo curo a ciegas: son curas opuestas y elegir sin el dato es cómo se
+encadenan tres arreglos que no arreglan.*
+
+## 🔴 ③ LA PREGUNTA MÁS GRAVE — QUÉ IMAGEN SALIÓ
+
+**El log dijo `transporte: 'publisher'`** — la conexión por la que el vet
+MANDA su video, no por la que recibe.
+
+**Lo que SÍ se puede afirmar, medido en el fork** (`WebRTCModule.java:461`):
+
+```java
+public MediaStreamTrack getTrack(int pcId, String trackId) {
+    if (pcId == -1) { return getLocalTrack(trackId); }   // ← el ÚNICO brazo local
+    PeerConnectionObserver pco = mPeerConnectionObservers.get(pcId);
+    return pco.remoteTracks.get(trackId);                // ← sólo REMOTOS
+}
+```
+
+⇒ **Con `pcId != -1` el brazo local es INALCANZABLE.** Si hubiera devuelto la
+cámara del vet, el track sería local, `remoteTracks` no lo tendría, habría
+devuelto `null` y el módulo habría rechazado con `track_no_encontrado`.
+**Y capturó** (`puerta:ok` + PNG escrito) ⇒ **el track era REMOTO.**
+
+*Y el nombre `publisher` no contradice esto: significa que
+`pcManager.subscriber` estaba `undefined` —LiveKit puede operar con una sola
+PC bidireccional— y esa misma PC es la que tiene los `remoteTracks`, que es
+justo lo que explica que lo encontrara.*
+
+⚠️ **PERO ESO PRUEBA QUE ES REMOTO, NO CUÁL.** *El razonamiento es fuerte y el
+PNG es prueba* — **y la mesa tiene razón en pedir el PNG**: en una historia
+clínica, «casi seguro que es el animal» no alcanza. **El archivo está en disco
+y A tiene el cable. Es lo primero de la próxima sesión, antes de seguir
+curando el bloqueo.**
+
+## LO QUE SÍ QUEDÓ PROBADO, para que nadie lo re-mida
+
+✅ La vía nativa produce **la imagen real** (prueba local, aparato).
+✅ La captura funciona **sobre el video remoto** en una cita real: `pcId`
+resuelto · aviso al dueño despachado ANTES · puerta `ok` · PNG escrito.
+✅ El `pcId` sale de **recorrer los cuatro transportes** — *no del eje `pc` vs
+`_pc`, que el aparato desmintió.*
+
+## LO QUE NO
+
+🔴 **Que no bloquee.** 🔴 **Qué imagen salió** (③). 🔴 **iOS remoto**, que sigue
+rebotando ⇒ **no hay verde de plataformas.**
+
+---
+
+## 🔴 ENMIENDA AL DIAGNÓSTICO — dato nuevo del founder, y me obliga a corregirme
+
+**«El pet parent ya no puede ver el video del vet después de la captura.»**
+
+### Por qué esto NO es la capa, y cambia todo
+
+Las curas de ① y ② eran sobre **una capa que tapa**. *Una capa tapa TOCA — no
+apaga el video del otro lado, en el otro teléfono.* ⇒ **lo que se rompió es el
+TRACK, y eso sólo puede venir de mi módulo nativo.**
+
+### 🔴 EL PRIMER SOSPECHOSO, y es mi código
+
+```kotlin
+val i420 = frame.buffer.toI420()
+try { … } finally { i420.release() }
+```
+
+**`VideoFrame.Buffer extends RefCounted`** (verificado con `javap` sobre el
+`.aar`). **Y el contrato de `toI420()` es que, si el buffer YA es I420,
+devuelve `this` con un `retain()` — el MISMO objeto.**
+
+⇒ Mi `release()` **puede estar liberando una referencia del buffer del frame
+original**, no de una copia. *Y un buffer liberado de más se destruye mientras
+el renderer todavía lo usa: el pipeline de ese track se rompe.*
+
+### 🔴 Y LO QUE ME OBLIGA A CORREGIR LO QUE DEPOSITÉ
+
+Hace veinte minutos escribí, con un razonamiento que sigo considerando
+sólido: *«el track era REMOTO, porque con `pcId != -1` el brazo local es
+inalcanzable»*.
+
+**El dato nuevo lo pone en duda por el otro extremo:** *el que perdió imagen
+es el DUEÑO, y lo que dejó de ver es el video del VET.* **Si el track que
+rompí es el que el vet publica, entonces el track que capturé era el del vet
+— y el PNG sería su cara, no el animal.**
+
+⚠️ **Las dos lecturas son incompatibles y no puedo resolverlas leyendo:** una
+sale del código del fork, la otra de lo que pasó en dos teléfonos.
+
+⇒ **NO doy por válido mi razonamiento anterior.** *Un argumento que se sostiene
+solo hasta que aparece la primera evidencia del mundo no era una prueba: era
+una hipótesis bien construida.* **Queda anotado como lo que es, para que nadie
+lo lea mañana como cerrado y construya encima.**
+
+### El orden de la próxima sesión, corregido
+
+1. 🔴 **MIRAR EL PNG.** Ahora no es sólo «qué imagen salió»: es **el
+   discriminador entre las dos lecturas**. Si es la cara del vet, la causa es
+   el track equivocado y el `release()` es su consecuencia; si es el animal,
+   son dos defectos y el `release()` es el único.
+2. **El `release()`**, que es sospechoso en las dos ramas.
+3. Recién después, el bloqueo (① ya está escrito y sin mergear).
+
+⚠️ **Y hasta que eso se mida, el botón de capturar no debería estar al alcance
+del vet en una consulta real:** *romperle el video a la familia a mitad de una
+teleconsulta paga es peor que no tener la función.*
+
+---
+
+## ✅ EJECUTADO — el botón, retirado detrás de `__DEV__` (firma del founder)
+
+**La razón, tal como la mesa la escribió y queda en el código:** *hoy tocarlo
+le corta el video a la familia a mitad de una teleconsulta paga, y eso es peor
+que no tener la función.*
+
+⚠️ **No se retira lo que el founder pidió: se retira una VERSIÓN que rompe la
+consulta.** Vuelve —sin `__DEV__`— cuando ① y ② estén medidos.
+
+*Y lo demás queda intacto y probado: la vía nativa produce la imagen real, y
+la captura llegó a escribir el PNG en una cita real.* **Lo que se apaga es la
+puerta, no el trabajo.**
+
+---
+
+# 📋 PARA A — LO QUE HAY QUE PUBLICAR E INCLUIR EN SU PARTE
+
+**Rama:** `pista/s106-c-cierre` · **HEAD** al cerrar: ver el último commit de C.
+**Nada de esto está en `main`.**
+
+| Commit | Qué lleva | Urgencia |
+|---|---|---|
+| `a6f268c1` | **ACTO 1** — el servicio ya no viene preseleccionado + el checkout dice qué se paga | 🔴 **es el defecto que hacía pagar por lo que no se eligió** |
+| `4b790e6b` | la señal en NEGOCIO + ficha `D-945` | — |
+| `c381fe41` | el módulo nativo **compilando** + el gate del código nativo | — |
+| `e8e380a5` | 🔴 **el `box-none` repuesto** — *la cura del bloqueo, escrita y sin mergear* | 🔴 |
+| **el último** | **el botón detrás de `__DEV__`** | 🔴 **lo que impide romperle el video a una familia** |
+
+🔴 **Los dos que no pueden esperar: el `__DEV__` y el ACTO 1.** *El primero
+evita un daño en vivo; el segundo evita que alguien pague por un servicio que
+no eligió — y ése le pasó al founder dos de cinco veces.*
+
+## EL ORDEN DE LA PRÓXIMA SESIÓN, firmado
+
+1. 🔴 **EL PNG** — el discriminador entre las dos lecturas.
+2. **El `release()` sobre `toI420()`** — sospechoso en las dos ramas.
+3. **El bloqueo** — su cura **ya está escrita en `e8e380a5`**: *quien retome
+   sólo tiene que traerla, no re-diagnosticarla.*
+
+---
+---
+
+# LAS DOS ALTERNATIVAS AL CUADRO — medidas, como fichas
+
+*Números medidos contra `origin/main` **y todas las ramas remotas**: `D-953`
+es la última tomada.*
+
+## ☠️ FICHA `D-954` — EL OBTURADOR DEL TELÉFONO: **NO APLICA**, y ahora está medido
+
+**Propuesta del founder:** que funcione como el obturador de la cámara del
+teléfono mientras graba video.
+
+### 🔴 Lo medido, con su literal
+
+`expo-camera` — `Camera.types.d.ts:7`:
+
+```ts
+export type CameraType = 'front' | 'back';
+```
+
+y su doc (`:314`): *«Camera facing… When `front`, use the front-facing camera.
+When `back`, use the back-facing camera.»*
+
+⇒ **`takePictureAsync` tiene exactamente DOS fuentes posibles, y las dos son
+el sensor LOCAL del teléfono.** No admite una fuente arbitraria.
+
+### Por qué eso cierra la pregunta
+
+**El obturador del teléfono mientras graba saca del SENSOR, no del encoder** —
+por eso da mejor calidad que un fotograma del video. **En el teléfono del vet
+no hay ningún sensor apuntando al animal: hay un decodificador.** *La cámara
+del vet apunta al vet.*
+
+⇒ **La lectura de la mesa era correcta, y ahora no depende de que lo fuera:
+está medido.** *Que una intuición acierte no la convierte en medición — y ésta
+costaba dos greps.*
+
+⚠️ **Y no se confunde con la captura de vistas**, que es la otra forma de
+«fotografiar lo que se ve»: **ésa está descartada por firma** (negro en
+Android, anda en iOS). *Son dos caminos distintos y los dos están cerrados.*
+
+## 🟢 FICHA `D-955` — QUE LA FOTO LA SAQUE EL DUEÑO — **opción, no encargo**
+
+**La variante que sí podría funcionar:** el dueño saca la foto **con su propio
+teléfono** —obturador real, contra el animal que tiene delante— y **aparece en
+el modal del vet**.
+
+### Lo que la hace atractiva, medido
+
+- **Obturador real ⇒ mejor calidad que cualquier fotograma de video**, por la
+  misma razón que explica por qué `D-954` no aplica: sale del sensor.
+- 🔴 **No toca el transporte.** *Y eso importa más que la calidad: los dos
+  defectos abiertos del cuadro —el bloqueo y el video que se corta— nacen de
+  meterle un sink a un track vivo. Este camino no le pone la mano encima.*
+- **El camino de fotos del cliente YA EXISTE** (medido: `capturaFoto` /
+  `EvidenciaFoto`, vivos en `carnet.tsx` y `perfil.tsx`).
+
+### Su costo, dicho sin adornar
+
+**Depende de que el dueño lo haga, con un animal en brazos.** *El vet pide y
+espera; si el dueño no puede, no hay imagen.* **Eso lo vuelve una vía
+complementaria, jamás un reemplazo del cuadro** — el cuadro sirve justo cuando
+el dueño tiene las dos manos ocupadas, que es el caso que la teleconsulta
+existe para resolver.
+
+⇒ **Va como opción para que la mesa la sopese, no como plan.**
+
+---
+
+## ✅ CONFIRMADO
+
+**El capturar sale del alcance del vet ahora, y el servicio funciona sin él.**
+*Lo que se apaga es la puerta, no el trabajo.*
