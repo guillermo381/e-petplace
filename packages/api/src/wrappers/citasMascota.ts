@@ -91,7 +91,7 @@ async function _citasActivas(
     // es AMBIGUO y PostgREST rompe el select entero (PGRST201). Se desambigua
     // con el nombre de la FK que va cita→presupuesto.
     .select(
-      'id, mascota_id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))',
+      'id, mascota_id, fecha, hora, duracion_minutos, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))',
     )
     .in('mascota_id', mascotaIds)
     .in('estado', ['pendiente', 'confirmada', 'en_curso'])
@@ -118,6 +118,38 @@ async function _citasActivas(
   // del dispositivo solo decide DISPLAY — la correctitud la gatea el
   // server (expiración perezosa S54).
   const ahora = Date.now();
+  /* ── S107 · D-952 (segunda mitad) · EL ORDEN PONE ADELANTE LA PRÓXIMA ─────
+     Firma del founder, 27-ago-2026, camino **B**.
+
+     🔴 EL DEFECTO: esta lista se llama `_citasActivas`, su tipo es
+     `CitaActivaMascota` y su pantalla se titula **«La cita de {nombre}»** —en
+     singular—, pero ordenaba por `fecha, hora` y **filtraba por DÍA**. ⇒ una
+     cita de hoy que ya terminó quedaba ARRIBA de la próxima. Medido: Thor
+     mostraba la de las 12:00 (terminada hacía 9 h) por encima de la de las 9:30
+     del día siguiente.
+
+     🔑 POR QUÉ **B** (ordenar) Y NO **A** (descartar), firmado: descartarlas
+     dejaría al dueño **sin ningún acceso a la cita recién pasada** — hoy ésta es
+     la única superficie donde sobrevive. *El pedido era que la próxima esté
+     adelante, no que lo de hoy desaparezca.*
+
+     ⚠️ `en_curso` NUNCA se posterga, aunque su hora de fin haya pasado:
+     **el estado manda sobre el reloj cuando el estado dice que está pasando.**
+     (Este lector sí trae `en_curso`; el del Hogar no, por eso allá no hizo
+     falta el matiz.) */
+  const yaTermino = (c: {
+    estado: string | null;
+    fecha: string | null;
+    hora: string | null;
+    duracion_minutos: number | null;
+  }): boolean => {
+    if (c.estado === 'en_curso') return false;
+    if (c.fecha === null) return false;
+    const inicio = Date.parse(`${c.fecha}T${(c.hora ?? '00:00:00').slice(0, 8)}`);
+    if (Number.isNaN(inicio)) return false; // lo ilegible no se posterga
+    return inicio + (c.duracion_minutos ?? 60) * 60000 <= ahora;
+  };
+
   const activas = citas.data.filter(
     (c) =>
       // S71-A: la sin-fecha entra SOLO si viene de presupuesto aprobado —
@@ -131,6 +163,12 @@ async function _citasActivas(
           c.expira_en !== null &&
           Date.parse(c.expira_en) > ahora)),
   );
+
+  /* 🔴 EL REORDENAMIENTO, y es ESTABLE a propósito: `sort` conserva el orden
+     relativo dentro de cada grupo, así que las no-terminadas mantienen su
+     `fecha, hora` de la consulta y las terminadas de hoy quedan al final entre
+     ellas. *No se re-ordena nada: solo se mueve un grupo detrás del otro.* */
+  activas.sort((a, b) => Number(yaTermino(a)) - Number(yaTermino(b)));
 
   // La atención de las en_curso — solo se consulta si hay algo vivo
   // (cero costo en el caso quieto); un fallo deja atencion_id null y la
