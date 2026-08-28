@@ -678,19 +678,60 @@
      La `forma` va enmascarada desde acá **y la base vuelve a enmascarar** —
      decisión de D, y es la correcta: *un enmascarado que depende de que el
      llamador lo haya hecho bien no es un enmascarado, es una promesa.*      */
+  /* 🔴 S107 · EL RASTRO QUE NO PODÍA REPORTAR QUE NO SE DEJÓ.
+     ⏪ Esta función tenía `.catch(function () {})` y un `try{}catch(e){}` mudo:
+     **una pieza que existe para dejar rastro y se tragaba su propio fallo.**
+     Si el POST rebotaba, el resultado era `incidentes = []` sin ninguna señal
+     — indistinguible de «nunca se intentó». *Es `D-961` mordiéndose la cola.*
+
+     Y no es hipotético: la edge rebota `origen_no_permitido` (403) cuando el
+     `Origin` no está en su lista — medido el 28-ago con curl. Un cambio de
+     dominio dejaría este rastro muerto **y nadie se enteraría.**
+
+     ── LO QUE LA CURA **NO** HACE, y es deliberado ────────────────────────
+     No interrumpe a la persona ni rompe el alta: **el trámite no puede fallar
+     porque falle su registro.** Sigue siendo fire-and-forget.
+
+     ── LO QUE SÍ HACE ────────────────────────────────────────────────────
+     ① UN reintento, sólo uno. *Cubre el corte de red de un segundo, que es el
+        fallo más común; más reintentos sobre un endpoint que rebota por diseño
+        (403) es insistir contra una puerta cerrada.*
+     ② Y si el reintento también falla, **lo dice por `reportarSdk`** — que
+        escribe en consola Y sale del WebView por `postMessage`, así que llega
+        al log de la app. *La consola del WebView no la ve nadie; el canal de
+        diagnóstico sí lo lee el aparato del founder.* */
   function anotarIncidente(motivo, resp) {
-    try {
-      fetch(CONFIG.API_ALTA, {
+    var cuerpo = JSON.stringify({
+      alta: alta,
+      desenlace: 'incidente',
+      motivo: motivo,
+      forma: forma(resp)
+    });
+    function enviar(intento) {
+      return fetch(CONFIG.API_ALTA, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          alta: alta,
-          desenlace: 'incidente',
-          motivo: motivo,
-          forma: forma(resp)
-        })
-      }).catch(function () {});
-    } catch (e) {}
+        body: cuerpo
+      }).then(function (r) {
+        /* 🔴 Un 200 no alcanza: la edge contesta 200 con `ok:false` en varios
+           rebotes. *Confiar en el status code sería el mismo verde flojo que
+           esta cura vino a sacar.* */
+        if (r.ok) return r.json().catch(function () { return { ok: true }; });
+        return Promise.reject('http_' + r.status);
+      }).then(function (j) {
+        if (j && j.ok === false) return Promise.reject(j.codigo || 'rebote_sin_codigo');
+        return true;
+      }).catch(function (causa) {
+        if (intento === 0) return enviar(1);
+        reportarSdk('aviso',
+          'el rastro del incidente NO se pudo dejar · motivo=' + motivo + ' · causa=' + causa,
+          null);
+        return false;
+      });
+    }
+    try { enviar(0); } catch (e) {
+      try { reportarSdk('aviso', 'el rastro del incidente lanzó · ' + String(e), null); } catch (e2) {}
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
