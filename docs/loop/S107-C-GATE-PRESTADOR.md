@@ -12,7 +12,13 @@
 | ① | **Mi trabajo NO está en `main`.** Medido: `git merge-base --is-ancestor HEAD origin/main` da **rojo**; tengo **4 commits** fuera. | **A** (mergea y publica) |
 | ② | **Un OTA del prestador** con eso adentro. | **A** |
 
-🟢 **Lo que NO hace falta: build nueva.** Medido — **cero cambios en `package.json` y en `app.json`** de las dos apps entre `main` y mi rama ⇒ **no hay módulo nativo nuevo, el OTA alcanza** (L-134). Entra sobre la **preview del prestador, `version` 1.0.7**, sin tocar runtime.
+### 🔴 CORRECCIÓN — ACÁ ME EQUIVOQUÉ, Y LA VERSIÓN ANTERIOR DE ESTE GUION DECÍA LO CONTRARIO
+
+**Yo escribí: «build nueva NO hace falta».** Lo medí así: cero cambios en `package.json` y `app.json` **entre `main` y mi rama** ⇒ ningún módulo nativo nuevo ⇒ alcanza el OTA (L-134).
+
+**La medición era correcta y la pregunta estaba mal.** La pregunta no era *«¿mi rama agrega algo nativo?»* sino **«¿existe un binario para el runtime que `app.json` declara?»**. Medido por la mesa: **`app.json` dice `1.0.7` y ese binario nunca se cortó — la última build terminada es `1.0.6`, del 24-ago.** ⇒ **un OTA publicado contra 1.0.7 no le llega a nadie**, y el founder habría cerrado y abierto la app dos veces esperando algo que no podía bajar.
+
+> **Rige: se corta binario nuevo y el gate se camina sobre él.** *Comparar mi rama contra `main` responde qué cambié yo; no responde qué puede recibir el teléfono.* **Queda como `L-432`.**
 
 ⚠️ **Y el gate empieza confirmando el binario y el update** (L-138 · L-160/enmienda): **Cuenta → el pie**, que dice `update <8 chars> · <canal>`. Si dice **`bundle embebido`**, el OTA no se aplicó y todo lo que sigue mide otra cosa. *Cerrar y abrir la app DOS veces: la primera descarga, la segunda aplica.*
 
@@ -71,6 +77,23 @@ Es la **quinta** baldosa, junto a paseo · grooming · adiestramiento · veterin
 
 ---
 
+## §3bis · TU DÍA — la segunda pantalla del recorrido
+
+**Negocio → Guardería** ahora abre **la portada del mundo**, con dos puertas: **«Tu día»** y **«Configuración»**. El §3 de arriba es la segunda; ésta es la primera.
+
+**Qué deberías ver, con el negocio recomendado (cero reservas hoy):**
+- **«Hoy no tienes animales»**, con su porqué. *Un día sin animales no es un negocio muerto, y la pantalla no lo trata así.*
+
+**Con reservas pagadas** (sólo posible después de encender el flag y de que una familia pague): una tarjeta por animal con **su cara, su nombre, la sala si el motor se la asignó, su estado en voz** —«Por recoger» · «Yendo a buscarlo» · «Acá» · «Volviendo a casa» · «Entregado»— y **la dirección de recogida**, en la **misma pieza que usa la cita de paseo**.
+
+🔴 **Dos cosas para mirar con atención:**
+1. **La lista sólo trae verdad firme.** Un hold sin pagar **no sale**. *Si saliera, te mandaría a buscar un animal que nadie compró.*
+2. **Si el snapshot de dirección viniera ilegible, la pieza lo declara** en vez de pintar una casa en blanco.
+
+⚠️ **Y una tensión que declaro en vez de esconder:** «Tu día» es de **HOY**, no de Negocio (`DISEÑO_EXPERIENCIA` §15b: *HOY acciona / NEGOCIO gestiona*). Está bajo Negocio porque **HOY tiene 2.854 líneas y su propia lógica de merge de citas**, y una estadía-día no es una cita con hora: es un día entre dos ventanas. **Inyectarla ahí es un cambio a la pantalla que usás todos los días y merece su tanda.** *El destino correcto es una entrada en HOY.*
+
+---
+
 ## §4 · LOS REBOTES — 🔴 y acá va una respuesta incómoda
 
 Pediste ver **publicar sin franjas** y **sin capacidad**. **Medido: por la pantalla no se llega a ninguno de los dos, y es por diseño.**
@@ -94,7 +117,8 @@ La pantalla guarda en este orden — **capacidad → recogida → devolución �
 
 | qué | por qué |
 |---|---|
-| 🔴 **Tu jornada del día** (la lista de animales de hoy) | **`obtenerEstadiasDelDia` no existe.** Es lo único que le falta al recorrido del prestador para cerrarse de punta a punta: hoy **configura y cobra, pero no ve su día.** |
+| ✅ ~~Tu jornada del día~~ | **YA ESTÁ — `obtenerEstadiasDelDia` se publicó y la pantalla está montada.** Ver §3bis. *(Cuando escribí este guion no existía; entró una hora después.)* |
+| 🔴 **Marcar «a bordo» y «entregado»** | Los cuatro wrappers de acción **no existen**, y las transiciones son eventos server que llegan **con el acta (⑤)**. La pantalla del día lo dice en su superficie en vez de dejarte buscando el botón. |
 | 🔴 **El día sobrevendido** | La tarjeta existe y **no se puede provocar con el dedo**: hace falta una reserva pagada y después bajar el cupo. **Con cero reservas vivas, no hay cómo.** |
 | ⚠️ **Que una familia te reserve** | El camino del dueño **está construido y no es alcanzable**: el flag `guarderia` de `country_config` está en **`false`** (medido, EC y CO). **Encenderlo es acto de mesa** y pide al menos una guardería con oferta publicada — o sea, **este gate primero.** |
 

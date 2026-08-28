@@ -509,7 +509,7 @@ export default function Negocio() {
                      Pasarle `conteoDeMundo` diría «sin configurar» a un
                      prestador que ya guardó su cupo y sus ventanas — un
                      número falso es peor que ninguno. Entra con la oferta. */
-                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia/taller', detalle: undefined },
+                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia', detalle: undefined },
                 ] as const
               ).map((mundo, i) => (
                 <View key={mundo.ruta} style={ESTILO_CELDA}>
