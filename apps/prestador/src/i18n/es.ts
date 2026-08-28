@@ -2763,6 +2763,7 @@ export const prestadorEs = {
        defecto donde no hay ninguno. */
     vcCuadroSinImagen: 'No hay imagen para capturar. Pide que enciendan la cámara.',
     vcCuadroFallo: 'No pudimos capturar la imagen. Prueba de nuevo.',
+    vcCuadrosTitulo: 'Imágenes de la consulta',
     vcCuadroCta: 'Capturar imagen',
     vcCuadroCapturando: 'Capturando…',
     vcCuadroListo: 'Imagen capturada. La familia lo ve en su pantalla.',

@@ -45,21 +45,34 @@ export function pcIdDeLaSala(room: unknown): number | null {
 
     /* Los transportes, en el orden en que sirven: el SUSCRIPTOR es el que
        recibe el video del otro lado. El publicador queda de respaldo. */
-    const transportes = [mgr['subscriber'], mgr['publisher'], mgr['_subscriber'], mgr['_publisher']];
+    /* 🔴 **EL EJE QUE DECIDE ES ÉSTE: CUÁL TRANSPORTE**, no cuál forma del
+       `pc`. Medido en aparato (27-ago): resolvió `via: 'pc'` — *la misma
+       forma que la v1 ya usaba* ⇒ **el eje `pc` vs `_pc` NO era la causa**.
+       Lo que curó fue **recorrer los cuatro transportes**: la v1 miraba sólo
+       `subscriber`.
+       *Y la marca de la v1 reportaba el eje que NO discriminaba y callaba el
+       que decide — por eso ahora el nombre del transporte va en el log:
+       **sin él, el próximo que toque esto protege la forma equivocada y borra
+       la que lo sostiene**.* */
+    const transportes: Array<[string, unknown]> = [
+      ['subscriber', mgr['subscriber']],
+      ['publisher', mgr['publisher']],
+      ['_subscriber', mgr['_subscriber']],
+      ['_publisher', mgr['_publisher']],
+    ];
 
-    for (const t of transportes) {
+    for (const [nombre, t] of transportes) {
       if (t === undefined || t === null) continue;
       const tr = t as Record<string, unknown>;
-      /* 🔴 LAS DOS FORMAS, y por eso falló la v1: `PCTransport` declara
-         `private _pc` **y** `private get pc()`. *Un `private` de TypeScript no
-         existe en runtime, pero el nombre del getter sí puede desaparecer en
-         un bundle minificado — y `_pc`, que es el campo real, sobrevive.*
-         Probar las dos cuesta una línea; depender de una sola costó una cita
-         real. */
+      /* Las dos formas del `pc` se conservan por prudencia —`PCTransport`
+         declara `private _pc` y `private get pc()`, y un bundle minificado
+         puede llevarse el getter— **pero medido, hoy gana `pc`**: no fue
+         ésta la causa. Se queda como red, no como cura. */
       const pc = (tr['pc'] ?? tr['_pc']) as { _pcId?: number } | undefined;
       const id = pc?._pcId;
       if (typeof id === 'number') {
-        marca('resuelto', { via: tr['pc'] !== undefined ? 'pc' : '_pc', id });
+        /* **El transporte va PRIMERO**: es el eje que decide. */
+        marca('resuelto', { transporte: nombre, via: tr['pc'] !== undefined ? 'pc' : '_pc', id });
         return id;
       }
     }
