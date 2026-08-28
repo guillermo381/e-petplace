@@ -428,6 +428,45 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 
 ---
 
+### Enmienda Sesión 107 — **EL NÚMERO DE UNA FICHA O UNA LECCIÓN SE RELEE Y SE ESCRIBE EN EL MISMO ACTO** (regla 89)
+
+> ### **`max + 1` leído ANTES de escribir es una lectura VENCIDA en el momento de escribir.**
+
+**El caso que la funda, y es el que la vuelve necesaria porque NINGUNA de las
+dos pistas hizo nada mal:** A y B midieron `L-432` libre con el mismo grep,
+las dos correctamente, **con minutos de diferencia**. A depositó; B siguió
+recomendando el número que ya no existía. *Dos pistas que leen el máximo antes
+de escribir colisionan aunque las dos midan bien.*
+
+**Lo que esta enmienda NO es, y hay que decirlo porque es la reacción obvia y
+no alcanza:** un grep más ancho. **Ampliar el corpus no cura nada acá** — el
+número no se perdió por buscar en pocos lugares, se perdió **por el tiempo
+entre la lectura y la escritura**.
+
+**Lo operativo, en tres líneas:**
+
+1. **Se relee el máximo y se escribe en el MISMO turno.** Si entre medio hubo
+   un merge, un `fetch` o una espera, **se relee de nuevo**.
+2. **El corpus del grep es `docs/` entero, no el archivo canónico** — y esto
+   sí sale de una medición: B censó **DOCE números tomados fuera de
+   `DEUDAS_CANONICAS.md`** (`D-945`…`D-947`, `D-949`…`D-955` en
+   `relevamientos/` y `loop/`, más `L-430`/`L-431`). *El precedente es `D-757`:
+   un número usado en artefactos vivos sin ficha depositada, que la sesión
+   siguiente encuentra tomado y sin dueño.*
+3. **Ante una colisión ya ocurrida, deposita quien tiene el territorio** —
+   `docs/` es de A — **y el otro corre su número, sin discutir el fondo.** *Lo
+   que no se hace es dejar dos fichas con el mismo número conviviendo: dos
+   leyes numeradas igual son peores que una mal numerada.*
+
+⚠️ **Y una corrección de premisa que quedó medida:** la mesa habló de *«dos
+colisiones el mismo día»* (`D-956` y `L-430`/`L-431`). **`D-956` no colisionó
+con nada** — está depositado, no aparece reservado en `relevamientos/`, y queda
+por encima de todo el bloque tomado (máximo reservado: `D-955`). **Tomarlo fue
+seguro.** *Se registra porque una premisa falsa sobre la frecuencia de un
+defecto cambia cuánto se invierte en curarlo.*
+
+---
+
 ### Enmienda Sesión 99 — EL WORKTREE AÍSLA EL ÁRBOL, **NO NECESARIAMENTE LOS PAQUETES** (corolario de la regla 85, MEDIDO)
 
 **Hallazgo de D:** en su worktree, `apps/prestador/node_modules/@epetplace/{api,domain,i18n,ui}` resuelve a los `packages/*` **DEL REPO PRIMARIO**, no a los suyos. **Su lectura del riesgo es correcta y es fea:** *una pista que edite `packages/ui` en su worktree no vería su cambio en su propia app y podría concluir que no funciona* — **el modo de falla es que su pieza «no anda» y la pieza esté bien.**
