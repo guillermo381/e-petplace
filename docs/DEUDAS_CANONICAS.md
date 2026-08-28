@@ -22088,6 +22088,44 @@ porque nadie lo había vuelto a medir contra el objeto.***
 > (`docs/` es su territorio), con el número **verificado por grep**: tope real
 > `L-424`, `L-425` en cero ocurrencias.
 
+#### L-432 · LA VERDAD VENCIDA DERIVA, NO AFIRMA — una fila viva y una fila vigente no son lo mismo
+
+> ### **Un dato con ventana de vigencia sólo puede DERIVAR lo que rige HOY. Leído sin su ventana, no afirma nada — y afirma con toda la seguridad del mundo.**
+
+**Se cobró DOS VECES en dos días, en documentos distintos y sobre datos
+distintos** — por eso sube a ley y no queda como nota de una ficha:
+
+| # | dónde | qué pasó |
+|---|---|---|
+| **①** | pista **CERT**, 27-ago (`D-948`) | se leyó una verdad que ya había vencido y se la citó como vigente |
+| **②** | `D-920`, 28-ago | se leyó la fila de **15 %** de `fee_configs` —**viva, y con razón: 13 citas congeladas la necesitan**— sin mirar que su `vigencia_hasta` era el **25-ago**. La ficha declaró un choque de números que **ya no existía** |
+
+**Por qué el modo de falla es caro y no ruidoso:** la fila **está ahí**, la
+consulta **devuelve**, el número **es real**. *No hay error, no hay NULL, no
+hay nada que se vea raro* — hay un dato correcto contestando una pregunta que
+nadie le hizo. **El que lee obtiene una afirmación donde había, como mucho, una
+derivación.**
+
+### Lo operativo
+
+1. **Toda tabla con `vigencia_desde` / `vigencia_hasta` se consulta CON su
+   ventana**, y la consulta lo dice: *«vigente al ⟨fecha⟩»*, jamás *«la fila
+   dice X»*.
+2. **Una fila vencida NO se borra** —la historia congelada la necesita— **y por
+   eso mismo va a seguir apareciendo en todo `SELECT` ingenuo para siempre.**
+   *El riesgo no se retira: se lee bien.*
+3. **Un choque de números entre fuentes se declara recién después de fechar las
+   dos.** *Dos fuentes que dicen números distintos en fechas distintas no se
+   contradicen: se suceden.*
+
+**Su hermana mayor es `L-166`** (*todo dato vivo se lee al momento de usarlo*):
+aquélla protege del dato **viejo**; ésta, del dato **vencido** — que es peor,
+porque el vencido está actualizado.
+
+> **Depósito:** A, 28-ago-2026, por orden de la mesa. **Número verificado por
+> grep contra el objeto: tope real `L-431` (pista CERT), `L-432` en cero
+> ocurrencias.**
+
 
 > ### **La cura es de forma, y por eso funciona: el merge a `main` va en su PROPIO comando, desde el worktree primario, jamás encadenado a un `cd`.**
 > *Encadenar mezcla dos contextos de directorio en una sola línea, y el segundo hereda el del primero sin decirlo.*
@@ -23224,6 +23262,56 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 **Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
+
+#### D-956 — ✏️ ENMENDADA Y DESTRABADA (28-ago-2026) — EL CRITERIO v1 DEL GATE SANITARIO, FIRMADO POR LA MESA
+
+> ✏️ **LA FICHA SE ENMIENDA, NO SE CIERRA.** Su título decía *«no tiene con qué
+> ejecutarse»* y **la medición era correcta**; lo que faltaba no era dato, era
+> **criterio**. La mesa lo firmó el 28-ago y **el enforcement se enciende**.
+>
+> ### El criterio v1, firmado
+>
+> - **«al día» = carnet cargado** (foto, a un toque) **+ rabia vigente por
+>   especie**, con **la vigencia declarada por el DUEÑO al cargar**.
+> - **La verificación física del carnet es del PRESTADOR**, en el **acta de
+>   recogida** (`CRITERIO_LEGAL_GUARDERIA` §4) — *la app no valida un papel:
+>   lo transporta y lo deja verificable en la puerta, que es donde alguien lo
+>   puede mirar.*
+> - **La lista completa de vacunas por especie: DATO configurable**, pendiente
+>   de mesa + veterinario — **jamás cableada**. *El catálogo `cat_plan_vacunal`
+>   ya ES ese dato: se llena, no se escribe en código.*
+>
+> ### 🔴 Y la lectura que da vuelta el número de esta ficha
+>
+> **El rechazo masivo NO es un bug del gate: es el catálogo vacío.** *Cada
+> familia carga su carnet en su primera reserva — para eso está el camino a un
+> toque.* **Un gate sin datos y un gate mal hecho se ven igual desde afuera, y
+> son cosas opuestas: el primero se llena, el segundo se arregla.**
+>
+> ### Lo medido el 28-ago contra el criterio NUEVO (no contra el viejo)
+>
+> | medición | número |
+> |---|---|
+> | mascotas activas perro/gato | **58** |
+> | con `antirrabica` registrada | **0** |
+> | **con rabia vigente hoy** | **0** |
+> | filas de vacuna con archivo de carnet | **32 de 32** |
+>
+> 🔴 **Y el hallazgo que el criterio tiene que absorber: hay CERO filas con
+> `vacuna_codigo = 'antirrabica'`, pero 10 filas sin código con nombres
+> comerciales** (`Canigen LR` · `Vanguard DA2L` · `Procyon Dog Pv`…) **donde la
+> rabia probablemente viaja adentro.** *Leer sólo el código rechazaría a
+> mascotas realmente vacunadas.* **Por eso la fuente es la declaración del
+> dueño al cargar, y no la fila histórica** — y el mapeo comercial→código
+> (que S48 ya sabe hacer) queda como mejora, no como precondición.
+>
+> **Dueño:** A (enciende la compuerta) · mesa + veterinario (la lista completa
+> por especie, como dato). ☠️ **Condición de muerte:** la compuerta encendida
+> **y** la lista por especie cargada en `cat_plan_vacunal` con firma del
+> veterinario.
+>
+> *(Texto original conservado abajo: su medición era correcta el día que se
+> escribió, y es la que produjo el criterio.)*
 
 #### D-956 — 🔴 EL GATE SANITARIO DURO DE GUARDERÍA NO TIENE CON QUÉ EJECUTARSE
 🔴 **ALTA · BLOQUEA LA FIRMA ③ DE S107, no su construcción.** Hallada el 28-ago-2026 por el censo de S107-A, midiendo la base viva antes de construir.

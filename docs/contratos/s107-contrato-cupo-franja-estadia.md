@@ -6,6 +6,23 @@
 
 ---
 
+## ⓪bis · LOS NOMBRES, RATIFICADOS POR A — *(28-ago-2026, contra la base)*
+
+**Los fijó C (por el prompt pegado por error) y el plan dice que los fija A contra la base. A los midió y los RATIFICA los cuatro, sin renombrar:**
+
+`guarderia_espacios` · `guarderia_espacio_excepciones` · `guarderia_franjas` · `guarderia_estadias` · `guarderia_media` + `guarderia_media_etiquetas`
+
+**Por qué se ratifican y no se renombran:** la casa nombra la **configuración** por su dominio (`recursos_reparto`, `prestador_horarios`, `prestador_servicios`) y el **expediente** con `evento_*`. Estas tablas son configuración y operación del oficio, no eventos de expediente — **los eventos siguen naciendo en `eventos_mascota`**, que no cambia. *Un renombre sin razón cuesta dos recodificaciones y no compra nada.*
+
+> 🔴 **PERO HAY UNA TRAMPA MEDIDA, Y SE CIERRA ACÁ: YA EXISTE UNA TABLA `estadias`.**
+> Censo ⓪: **0 filas · RLS ON con 8 policies · CERO consumidores en el monorepo · `tipo_servicio DEFAULT 'hotel'` · semántica de NOCHES** (`cantidad_noches`, `precio_por_noche`) — *justo lo que `LETRA_GUARDERIA` §5 manda afuera de v1.*
+>
+> **`estadias` y `guarderia_estadias` van a convivir**, y el prefijo alcanza para desambiguar al escribir — **pero no al leer de apuro**. ⇒ **La migración le pone LÁPIDA a la vieja** (`COMMENT ON TABLE`) diciendo qué es, que no se usa y que **guardería NO vive ahí**. *Una tabla vacía con el nombre correcto es la trampa más barata de caer y la más barata de cerrar.*
+
+**Desde acá los nombres están CONGELADOS: cambiarlos es aviso a B, C y D, no un edit.**
+
+---
+
 ## ⓪ LA FORMA DEL OFICIO — fijada, y es lo que ordena todo lo demás
 
 **Una estadía = UN animal, UN día.** La «lista de hoy» del prestador es una **VISTA** sobre las estadías del día — **jamás una entidad «jornada»** (plan §4.5). Un día con seis animales son **seis estadías**, no una jornada con seis.
@@ -114,7 +131,7 @@ Medido (censo §③): el sujeto del pago es **una columna nullable por tipo** en
 |---|---|---|
 | **día suelto** | `cita_id` | 🟢 existe — **cero trabajo de esquema** |
 | **mensualidad** | `suscripcion_servicio_id` + `suscripcion_periodo` | 🟢 existen |
-| **paquete** | `bono_id` | 🔴 **columna nueva** en `pagos_intentos` |
+| **paquete** | `bono_id` | 🔴 **construcción de A** — columna nueva en `pagos_intentos` **+ su entrada al check de sujeto + `bono_desglose`** |
 
 🟢 **La comisión NO se cablea:** `fee_configs` vigente da **10 % base `subtotal`** para `tipo_origen='cita'` **sin discriminar oficio** ⇒ **guardería hereda sin fila propia** (censo §⑥). **Nadie siembra una fila de guardería.**
 
@@ -129,9 +146,25 @@ Congela en **`cita_desglose`** cuando la cita nace con `estado_reserva='pendient
 
 > ⚠️ **CORRECCIÓN DE ESTE CONTRATO (28-ago, antes de que nadie lo consumiera):** una versión anterior declaró acá un hueco —*«el congelado no está donde el plan lo supone»*— **y era falso: se buscó el trigger sobre `pagos_intentos` cuando vive sobre `evento_cita_servicio`, y la tabla es `cita_desglose`, no `pagos_desglose`.** *Se midió el objeto equivocado y se concluyó con seguridad.* Queda escrito porque **un hueco inventado manda a alguien a resolver un problema que no existe**, y en este caso lo habría invitado a reimplementar un congelado que ya funciona.
 
-🔴 **PERO EL DESGLOSE ES POR CITA, O SEA POR DÍA** (censo §⑤, costo 3) — y eso **sí** es hueco real: paquete y mensualidad se cobran como **UNA** compra, así que su desglose **no puede ser la suma de N desgloses de cita**. La mensualidad ya tiene `suscripcion_desglose`; **el paquete no tiene ninguno.** **Ese es el trabajo de cobro del paquete, y es de A.**
+🔴 **PERO EL DESGLOSE ES POR CITA, O SEA POR DÍA** (censo §⑤, costo 3) — y eso **sí** es hueco real: paquete y mensualidad se cobran como **UNA** compra, así que su desglose **no puede ser la suma de N desgloses de cita**. La mensualidad ya tiene `suscripcion_desglose`; **el paquete no tiene ninguno.**
 
-⚠️ **Segundo costo medido, y es decisión de mesa, no de pista:** `evento_cita_servicio.modalidad` es **vocabulario CERRADO** (`presencial|telemedicina|domicilio|emergencia_movil|local`) y **guardería con recogida a domicilio no tiene su valor**. *Un vocabulario cerrado no se amplía de paso.*
+### ✏️ EL PAQUETE, RESUELTO (firma de la mesa, 28-ago) — y es construcción de A
+
+```
+pagos_intentos
+  + bono_id  uuid            -- QUINTO sujeto
+  chk_intento_un_solo_sujeto -> pedido | cita | recurrencia | suscripcion | BONO  (sigue = 1)
+
+bono_desglose                -- hermano de suscripcion_desglose
+  bono_id  uuid pk
+  subtotal · impuesto · total · moneda · fee_config_id · congelado_en
+```
+
+🔴 **EL DESGLOSE DEL PAQUETE ES POR COMPRA — jamás la suma de N desgloses de cita.** *El congelado por cita describe UN día; el paquete se cobra UNA vez.* Sumar N citas produciría un total que nadie cobró y que no coincide con lo que la familia vio.
+
+⚠️ **Y se dice lo que es: ampliar `chk_intento_un_solo_sujeto` es tocar un vocabulario cerrado, o sea una DECISIÓN.** Ésta es **la firma ④ ejerciéndola** (*«las tres modalidades en v1»*) — **no se amplía «de paso»**, y por eso queda escrito acá con su razón antes de existir la migración.
+
+✅ **Segundo costo — RESUELTO POR LA MESA (28-ago), y sin tocar el vocabulario.** `evento_cita_servicio.modalidad` es cerrado (`presencial|telemedicina|domicilio|emergencia_movil|local`) y la pregunta era qué valor lleva guardería. **Firma ⑩ del plan: la estadía nace `presencial`, en el local del prestador — y el transporte puerta a puerta es CONTENIDO del servicio, no una modalidad** (es lo que `LETRA_GUARDERIA` §2 ya decía: *«lo hace la guardería con su propia gente»*). 🔴 **No nace ningún valor nuevo.** *Si al construir el esquema exigiera otra cosa, A para y lo declara — no lo amplía de paso.*
 
 **El orden de cobro no se negocia** (`LETRA_PAGO_CITAS` §3): compuertas → cobro por el motor → **`confirmada` sólo cuando el motor confirma**. **Hold de cupo con vencimiento** en las tres modalidades: si el pago no llega, el hold vence y los espacios se liberan.
 
@@ -157,10 +190,20 @@ evaluar_requisitos_guarderia(p_mascota_id uuid) RETURNS jsonb
 ```
 **Cada faltante viaja con su camino a resolver** (cargar el carnet) — *un pendiente que el dueño no puede resolver es peor que no mostrarlo.*
 
-🔴 **PERO EL GATE NACE ABIERTO, Y ES DECISIÓN MEDIDA, NO DESCUIDO.** Censo §⑤: **5 de 78 animales tienen alguna vacuna** y **`fecha_proxima` está en 1 de 32 filas**. Cerrarlo hoy **rechaza a 73 de 78** — *un gate que corre sobre un criterio sin datos no gatea: rechaza a todos.*
-**La función se construye y devuelve la verdad; el enforcement se enciende cuando la mesa firme qué significa «al día».** Hasta entonces `faltan` **informa y no bloquea**, y la superficie lo dice honesto.
+### ✏️ CORREGIDO (28-ago): **EL GATE NACE CERRADO** — la mesa firmó el criterio (`D-956`)
 
-> **Para C:** montá el semáforo completo. **No escribas el bloqueo de reserva contra él todavía** — la compuerta es del server y hoy está abierta a propósito.
+*Una versión anterior de este contrato lo dejaba **abierto** «hasta que la mesa firme qué significa al día». **La mesa firmó el mismo día**, así que esa línea ya no rige y se corrige acá para que nadie construya contra ella.*
+
+**Criterio v1, firmado:**
+- **«al día» = carnet cargado** (foto, a un toque) **+ rabia vigente por especie**, con **la vigencia declarada por el DUEÑO al cargar**.
+- **La verificación física del carnet es del PRESTADOR, en el acta de recogida** (`CRITERIO_LEGAL_GUARDERIA` §4). *La app no valida un papel: lo transporta y lo deja verificable en la puerta.*
+- **La lista completa por especie es DATO configurable** (`cat_plan_vacunal`), pendiente de mesa + veterinario — **jamás cableada**.
+
+🔴 **El rechazo masivo de hoy no es un bug del gate: es el catálogo vacío.** Medido el 28-ago: **58 mascotas activas perro/gato · 0 con rabia vigente · 0 con `antirrabica` registrada**. *Cada familia carga su carnet en su primera reserva — para eso está el camino a un toque.*
+
+⚠️ **Hallazgo que el criterio absorbe:** hay **cero filas con `vacuna_codigo='antirrabica'`** pero **10 sin código con nombres comerciales** (`Canigen LR`, `Vanguard DA2L`…) donde la rabia probablemente viaja adentro. **Por eso la fuente es la declaración del dueño al cargar, no la fila histórica.**
+
+> **Para C:** montá el semáforo completo **y sí escribí el camino bloqueado** — la compuerta del server rebota, y la pantalla tiene que decir **qué falta y cómo se resuelve a un toque**. 🔴 **El bloqueo no lo decide la pantalla: lo decide el server.** La pantalla lo refleja.
 
 ---
 
