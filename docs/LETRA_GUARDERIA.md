@@ -1,5 +1,24 @@
 # LETRA_GUARDERIA.md — e-PetPlace
 
+> ## ✏️ MARCA DE REGISTRO — EL ABOGADO CONTESTÓ (28-ago-2026, depositada por A)
+>
+> **El fondo de las dos cláusulas frenadas quedó destrabado** por
+> `docs/CRITERIO_LEGAL_GUARDERIA.md` (respuesta del abogado, 28-ago):
+> **§3** se reemplaza por *cada parte responde por lo que controla* (con su
+> cláusula-espina dorsal) y **§6** por la tabla de plazos y las **cinco
+> prohibiciones textuales**.
+>
+> 🔴 **Y LA LETRA SIGUE FRENADA IGUAL, porque el texto nuevo todavía no
+> existe.** *Un fondo resuelto no es una cláusula escrita.* La redacción es de
+> la mesa (founder + arquitecto) sobre el criterio — fichas `D-918` · `D-919`
+> — y A la registra cuando exista. **Ninguna pista redacta texto legal, ni
+> siquiera un placeholder en pantalla** (`PLAN_S107_GUARDERIA` §0).
+>
+> **Se marca acá, donde se lee, y no solo en el plan:** quien abra esta letra
+> hoy vería «FRENADA» sin enterarse de que el abogado ya contestó, y
+> concluiría que nada se movió. *El precedente es de la casa: los documentos
+> vencidos se marcan donde se leen.*
+
 > # 🔴🔴 LETRA FRENADA — NO RIGE, NO SE CONSTRUYE, NO SE PUBLICA
 > **Frenada el 25-ago-2026 por el memo del abogado, horas después de
 > depositarse.** El cuerpo se conserva **entero y sin editar** porque es el
