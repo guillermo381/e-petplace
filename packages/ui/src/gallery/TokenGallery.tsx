@@ -53,6 +53,7 @@ import { CalendarioCupo } from '../components/CalendarioCupo'
 import { ContadorClip } from '../components/ContadorClip'
 import { FichaFranja } from '../components/FichaFranja'
 import { FichaMensualidad } from '../components/FichaMensualidad'
+import { FichaPaquete, type EquivalenciaPaquete } from '../components/FichaPaquete'
 import { HiloDelDia } from '../components/HiloDelDia'
 import { MiniaturaClip } from '../components/MiniaturaClip'
 import { SelectorRoster } from '../components/SelectorRoster'
@@ -6618,6 +6619,18 @@ function PiezasDelOficioS107() {
   ])
   const [aceptadas, setAceptadas] = useState<string[]>([])
   const [inicioClip, setInicioClip] = useState<number | null>(null)
+  const [paquete, setPaquete] = useState<string | null>(null)
+  const [pasoPrecio, setPasoPrecio] = useState(3)
+
+  /* La VOZ del espejo es del riel, no de la pieza (ver su cabecera). Acá es
+     relleno de demostración: arma la frase con los números ya calculados. */
+  const vozEquivalente = (e: EquivalenciaPaquete) => {
+    const porDia = `$${e.porDia.toFixed(2)}`
+    if (e.direccion === 'sin_comparacion') return `${porDia} por día`
+    if (e.direccion === 'igual') return `${porDia} por día — igual que tu día suelto`
+    const pct = `${Math.round(e.deltaPct ?? 0)} %`
+    return `${porDia} por día — ${pct} ${e.direccion === 'menos' ? 'menos' : 'más'} que tu día suelto`
+  }
 
   /* El mes de muestra: 30 días, con tres llenos y uno de ellos con su razón.
      `columnaInicial` la manda el riel — acá se fija a mano porque es una
@@ -6824,6 +6837,77 @@ function PiezasDelOficioS107() {
           vozConformidad="Registrado sin conformidad"
           onConformar={() => {}}
           etiquetaConformar="Estoy conforme"
+        />
+      </View>
+
+      {/* ⑦bis LA FICHA DE PAQUETE */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          FichaPaquete · config del PRESTADOR: seleccionable, con su campo de precio en el slot ·
+          día suelto de referencia = $12,00
+        </Text>
+
+        <FichaPaquete
+          clave="p5"
+          tamano={5}
+          rotuloTamano="5 estadías"
+          precioPaquete={50}
+          precioDiaSuelto={12}
+          vozEquivalente={vozEquivalente}
+          onElegir={setPaquete}
+          elegido={paquete === 'p5'}
+          registro="oficio"
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del paquete"
+              pasos={['$40', '$45', '$50', '$55', '$60']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="control"
+            />
+          }
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          🔴 EL PAR QUE DECIDE — el de arriba sale MÁS BARATO, el de abajo MÁS CARO que el día
+          suelto. **Los dos tienen que verse IGUAL de neutros**: si el caro se pinta de alarma, la app
+          está opinando sobre el precio de un negocio ajeno (firma de mesa: informa, jamás alarma)
+        </Text>
+
+        <FichaPaquete
+          clave="p15"
+          tamano={15}
+          rotuloTamano="15 estadías"
+          precioPaquete={200}
+          precioDiaSuelto={12}
+          vozEquivalente={vozEquivalente}
+          onElegir={setPaquete}
+          elegido={paquete === 'p15'}
+          registro="oficio"
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ perfil del LUGAR (familia): la MISMA pieza sin `onElegir` — no es tocable y se anuncia
+          como texto · y el tercer caso: SIN día suelto, el espejo dice el equivalente y OMITE la
+          comparación en vez de inventar un 0 %
+        </Text>
+
+        <FichaPaquete
+          clave="p10"
+          tamano={10}
+          rotuloTamano="10 estadías"
+          precioPaquete={90}
+          precioDiaSuelto={12}
+          vozEquivalente={vozEquivalente}
+        />
+
+        <FichaPaquete
+          clave="p10sin"
+          tamano={10}
+          rotuloTamano="10 estadías"
+          precioPaquete={90}
+          precioDiaSuelto={null}
+          vozEquivalente={vozEquivalente}
         />
       </View>
 
