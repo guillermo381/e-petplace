@@ -22154,6 +22154,24 @@ export type Database = {
           user_id: string
         }[]
       }
+      obtener_estadias_del_dia: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: {
+          a_bordo_en: string
+          cita_id: string
+          direccion_snapshot: Json
+          entregada_en: string
+          espacio_nombre: string
+          estadia_id: string
+          estado: string
+          estado_reserva: string
+          llegada_en: string
+          mascota_especie: string
+          mascota_foto_url: string
+          mascota_id: string
+          mascota_nombre: string
+        }[]
+      }
       obtener_estado_onboarding_wizard: {
         Args: { p_cuenta_comercial_id: string }
         Returns: {
