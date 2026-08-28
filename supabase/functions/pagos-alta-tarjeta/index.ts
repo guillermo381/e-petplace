@@ -174,17 +174,55 @@ Deno.serve(async (req) => {
   }
 
   // ── El stoken, si vino ────────────────────────────────────────────────────
+  /* 🔴 S107 · PIEZA ④ DE `D-921` — LA FÓRMULA USA EL UID DEL USUARIO.
+     Respuesta de Erick (Nuvei), 27-ago, que es lo que destrabó esto:
+     **el identificador que va en la posición del `stoken` es el del USUARIO,
+     no el de la operación.** Antes acá iba `alta` —el id de la operación— con
+     el comentario «el handle ES el uid: por eso no pueden divergir». *Divergen
+     desde el momento en que el uid se volvió estable por persona.*
+
+     🔑 SE RESUELVE POR SQL desde el alta que ya recibimos, en vez de aceptar un
+     campo más en el body: **menos superficie y un dato menos que puede llegar
+     mal** (criterio del founder). El body lo manda la página, y la página es el
+     lado que no controlamos.
+
+     ⚠️ Y va junto con la pieza ②: si la página tokeniza con el uid y esta
+     fórmula sigue en el id del alta, el stoken deja de validar. *Por eso las
+     tres viajan en un solo acto.* */
+  let uidFormula: string | null = null;
+  {
+    const { data: fila } = await sb
+      .from('altas_tarjeta')
+      .select('user_id, proveedor')
+      .eq('id', alta)
+      .maybeSingle();
+    if (fila?.user_id) {
+      const { data: u } = await sb
+        .from('usuario_proveedor_uid')
+        .select('uid')
+        .eq('user_id', fila.user_id)
+        .eq('proveedor', fila.proveedor ?? 'nuvei')
+        .maybeSingle();
+      uidFormula = u?.uid ?? null;
+    }
+  }
+
   const st = extraerStoken(body);
   let stokenValido: boolean | null = null;
   let stokenDetalle = `stoken_de=${st.de}`;
   if (st.valor) {
-    if (APP_CODE_SERVER && APP_KEY_SERVER) {
-      // Fórmula CANDIDATA — la de transacciones, con el token de la tarjeta en
-      // el lugar del transaction_id y el handle como user_id (que es el `uid`
-      // con el que se tokenizó: por eso no pueden divergir).
-      const esperado = await md5Hex(`${token}_${APP_CODE_SERVER}_${alta}_${APP_KEY_SERVER}`);
+    if (!uidFormula) {
+      /* 🔴 NO SE CAE AL `alta`. *Volver al id de la operación sería revivir en
+         silencio el defecto que esta pieza cierra*, y encima daría un
+         `valido=true` engañoso mientras la página siga mandando el viejo.
+         Se DICE que no se pudo evaluar, que es la verdad. */
+      stokenDetalle += ' formula=no_evaluada:sin_uid_estable';
+    } else if (APP_CODE_SERVER && APP_KEY_SERVER) {
+      const esperado = await md5Hex(
+        `${token}_${APP_CODE_SERVER}_${uidFormula}_${APP_KEY_SERVER}`,
+      );
       stokenValido = esperado === st.valor.toLowerCase();
-      stokenDetalle += ` formula=candidata_transaccion valido=${stokenValido}`;
+      stokenDetalle += ` formula=candidata_transaccion_uid valido=${stokenValido}`;
     } else {
       stokenDetalle += ' formula=no_evaluada:faltan_credenciales_server';
     }

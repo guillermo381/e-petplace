@@ -45,6 +45,16 @@ export async function abrirAltaDeTarjeta(): Promise<AperturaAlta> {
      (`.expo/types/router.d.ts`) y esta pantalla es nueva: el union todavía no
      la conoce. Se regenera al correr metro/build. *Se declara para que nadie
      lo copie creyendo que los `Href` se castean por costumbre.* */
-  router.push(`/pagos/alta-tarjeta?alta=${encodeURIComponent(alta.data.altaId)}` as Href);
+  /* 🔴 S107 · PIEZA ② DE `D-921` — EL UID ESTABLE VIAJA EN LA URL.
+     Antes iba SOLO `alta`, y la pagina tokenizaba con el id del alta ⇒ **Nuvei
+     veia una persona distinta por cada alta** (probado desde SU base el 27-ago:
+     `user.id = f7a7001e...`, que es un id de alta). Y despues de curar el
+     escritor, el cobro rebotaba con `uid does not match`: nosotros guardabamos
+     el uid estable y el proveedor conocia la tarjeta por el del alta.
+     El wrapper ya EXIGE el uid (no lo tolera ausente), asi que aca siempre hay. */
+  router.push(
+    `/pagos/alta-tarjeta?alta=${encodeURIComponent(alta.data.altaId)}` +
+      `&uid=${encodeURIComponent(alta.data.uid)}` as Href,
+  );
   return { ok: true, altaId: alta.data.altaId };
 }
