@@ -21,7 +21,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
+import { Image, Keyboard, ScrollView, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePreventScreenCapture } from 'expo-screen-capture';
@@ -544,7 +544,12 @@ function MesaDeTrabajo({
      ③ **Entra al expediente con su marca** — ⚠️ **pendiente**: falta el
         wrapper de subida a `cita-archivos` (pedido a A). *Hasta que exista,
         la captura ocurre y se ve, y no llega al expediente — se dice.* */
+  /** La confirmación efímera sobre el video (se va sola a los 3 s). */
   const [cuadro, setCuadro] = useState<string | null>(null);
+  /** 🔴 Las capturas de ESTA consulta — **viven en el modal**, junto a la
+   *  nota y la historia: *es evidencia clínica del acto, y ahí es donde el
+   *  vet va a buscarla después.* */
+  const [cuadros, setCuadros] = useState<string[]>([]);
   const [capturando, setCapturando] = useState(false);
 
   const capturar = useCallback(async () => {
@@ -607,6 +612,11 @@ function MesaDeTrabajo({
 
     if (r.ok) {
       setCuadro(r.ruta);
+      /* ① EL VIDEO VUELVE SOLO. *Una herramienta que interrumpe el acto que
+         viene a servir no es una herramienta a medias: es un obstáculo.* */
+      setTimeout(() => setCuadro(null), 3000);
+      /* ② La evidencia va al modal, en su lugar propio. */
+      setCuadros((xs) => [...xs, r.ruta]);
       return;
     }
     /* 🔴 **EL FALLO SE DICE.** La v1 guardaba `null` y no pintaba nada: *el
@@ -952,17 +962,30 @@ function MesaDeTrabajo({
               (Ley 23), y el defecto pasa de «botón que no hace nada» a
               «botón ausente», que se diagnostica solo. */}
           {pistasRemotas.length > 0 && pcIdDeLaSala(sala) !== null && (
-            <View style={{ paddingHorizontal: spacing[4] }}>
+            /* 🔴 `box-none` — Y ACÁ ESTABA EL DEFECTO QUE ENCERRÓ AL VET.
+               Este `View` se monta DESPUÉS de `SuperficieLlamada`, así que
+               queda **por encima** de sus controles; sin `box-none` **ocupa
+               todo el ancho y se come los toques de su franja**. Y al
+               capturar crecía con el texto de confirmación ⇒ cubría más.
+               *Eso explica los DOS síntomas con una sola causa: no se podía
+               volver al video ni colgar — no eran dos defectos.* */
+            <View style={{ paddingHorizontal: spacing[4] }} pointerEvents="box-none">
               <Boton
                 variante="secundario"
                 etiqueta={capturando ? t('consulta.vcCuadroCapturando') : t('consulta.vcCuadroCta')}
                 onPress={() => void capturar()}
                 cargando={capturando}
               />
+              {/* La confirmación **no se toca y se va sola** (3 s): *capturar
+                  es un acto DENTRO de la consulta — nunca una pantalla de la
+                  que haya que salir.* La evidencia queda en el modal, que es
+                  donde el vet la va a buscar después. */}
               {cuadro !== null && (
-                <Texto variante="apoyo" color="sobreVideo">
-                  {t('consulta.vcCuadroListo')}
-                </Texto>
+                <View pointerEvents="none">
+                  <Texto variante="apoyo" color="sobreVideo">
+                    {t('consulta.vcCuadroListo')}
+                  </Texto>
+                </View>
               )}
             </View>
           )}
@@ -986,7 +1009,13 @@ function MesaDeTrabajo({
            que usa la propia `SuperficieLlamada` para poner algo sobre su
            barra — copiarlo en vez de estimar es lo que hace que siga
            calzando el día que la barra cambie. */
-        insetBottom={insetBottom + 120}
+        /* ⏪ ACÁ HABÍA `insetBottom + 120`, y **el blanco enorme del modal era
+           eso**: lo puse para que la conclusión no quedara tapada por los
+           controles, pero **el panel abierto se monta ENCIMA de ellos** ⇒ el
+           +120 no protegía nada y sólo agregaba 120 px de vacío.
+           *Medido: es defecto propio y PREEXISTENTE a la imagen — son dos
+           cosas distintas, como la mesa sospechaba.* */
+        insetBottom={insetBottom}
         altoTeclado={altoTeclado}
         etiquetaAsa={t('consulta.vcAsaModal')}
         /* Bajar con texto sin guardar pide confirmación — lo resuelve la pieza
@@ -1163,6 +1192,27 @@ function MesaDeTrabajo({
                     </View>
                   ))
               )}
+            </View>
+          )}
+
+          {/* ② LAS CAPTURAS DE ESTA CONSULTA — su lugar propio, junto a la
+              nota y la historia. *El vet las va a buscar acá, no sobre el
+              video: sobre el video son una interrupción; acá son evidencia.*
+              Fila desplazable por la misma razón que las tarjetas: con varias
+              capturas, apretarlas en el ancho las vuelve ilegibles. */}
+          {cuadros.length > 0 && (
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">{t('consulta.vcCuadrosTitulo')}</Texto>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing[2] }}>
+                {cuadros.map((ruta) => (
+                  <Image
+                    key={ruta}
+                    source={{ uri: `file://${ruta}` }}
+                    style={{ width: 96, height: 96, borderRadius: radius.suave }}
+                    resizeMode="cover"
+                  />
+                ))}
+              </ScrollView>
             </View>
           )}
 
