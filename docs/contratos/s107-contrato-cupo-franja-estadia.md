@@ -97,6 +97,8 @@ guarderia_franjas
 
 ## ③ LA ESTADÍA — `guarderia_estadias`, compañera 1:1 de la cita
 
+> ⚠️ **Y ACÁ HAY QUE DESARMAR UNA CONTRADICCIÓN APARENTE CON EL BRIEF, ANTES DE QUE ALGUIEN LA «CURE».** El `BRIEF S107` §1 dice, en negrita: *«se comporta como un PASEO, no como una cita»* — y este contrato dice que **la reserva ES una cita**. **No se contradicen, y lo prueba el objeto: el paseo también vive en `evento_cita_servicio`** (medido: sus reservas son citas con `tipo_servicio` de paseo). **Lo que el brief niega es la GRILLA de la cita médica** —turnos de 30 minutos, hora exacta, disponibilidad por profesional—, **no la tabla.** *Heredar el motor del paseo y ser una fila de citas son la misma cosa dicha con dos vocabularios.* 🔴 **Quien lea el brief y quiera sacar la guardería de `evento_cita_servicio` va a perder el motor de pagos entero por una lectura de palabra.**
+
 🔴 **La reserva ES una cita** (`evento_cita_servicio`, `tipo_servicio = 'guarderia_dia'`), con `fecha` = el día y **`hora` NULL** — medido: ambas son nullable (censo §④). **Así hereda el motor de pagos entero por `cita_id`.**
 La máquina de estados del oficio vive **aparte**, para no contaminar la cita compartida:
 
