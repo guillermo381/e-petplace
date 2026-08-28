@@ -1507,8 +1507,13 @@ export {
   obtenerCupoGuarderia,
   type FranjaGuarderia,
   type CupoDiaGuarderia,
+  type EstadoCupoDia,
   type TipoFranjaGuarderia,
   type DiaSemana,
+  definirPaqueteGuarderia,
+  obtenerPaquetesGuarderia,
+  type PaqueteGuarderia,
+  type TamanoPaquete,
   type CodigoErrorGuarderiaConfig,
 } from './wrappers/guarderia-config';
 

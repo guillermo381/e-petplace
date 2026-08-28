@@ -10655,6 +10655,51 @@ export type Database = {
           },
         ]
       }
+      guarderia_paquetes: {
+        Row: {
+          activo: boolean
+          created_at: string
+          id: string
+          precio: number
+          prestador_id: string
+          tamano: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          precio: number
+          prestador_id: string
+          tamano: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          precio?: number
+          prestador_id?: string
+          tamano?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_paquetes_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_paquetes_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historial_pagos_prime: {
         Row: {
           created_at: string
@@ -20582,6 +20627,10 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      _guarderia_dia_operativo: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: boolean
+      }
       _guarderia_ofertas_cobrables: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -21411,6 +21460,7 @@ export type Database = {
           capacidad: number
           consumido: number
           disponible: number
+          estado: string
           fecha: string
           sobrevendido: boolean
         }[]
@@ -21517,8 +21567,16 @@ export type Database = {
           p_activo?: boolean
           p_precio_dia: number
           p_precio_mensual?: number
-          p_precio_paquete?: number
           p_prestador_id: string
+        }
+        Returns: Json
+      }
+      definir_paquete_guarderia: {
+        Args: {
+          p_activo?: boolean
+          p_precio: number
+          p_prestador_id: string
+          p_tamano: number
         }
         Returns: Json
       }
@@ -22463,6 +22521,14 @@ export type Database = {
           varia: boolean
         }[]
       }
+      obtener_paquetes_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          activo: boolean
+          precio: number
+          tamano: number
+        }[]
+      }
       obtener_parte_adiestramiento: {
         Args: { p_cita_id: string }
         Returns: Json
@@ -22696,6 +22762,10 @@ export type Database = {
       prestador_verificacion_profesional: {
         Args: { p_prestador_id: string }
         Returns: boolean
+      }
+      primer_dia_reservable_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: string
       }
       promesa_por_vendedor: {
         Args: { p_cuentas: string[]; p_fecha_programada?: string }

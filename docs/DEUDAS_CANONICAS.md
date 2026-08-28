@@ -23368,6 +23368,44 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
 
+#### D-964 — 🔴 REQUISITO DE LANZAMIENTO: CADA PRESTADOR DEBE DECLARAR QUÉ ESPECIES ATIENDE
+
+🔴 **ALTA · es de LANZAMIENTO, no de S107.** Firma de la mesa (29-ago), tercera capa de la resolución de `D-959`.
+
+**Lo que la cura de `D-959` hizo:** a cada oferta con `especies_compatibles = []` se le escribió **todas las especies del universo de su tipo** — que es exactamente lo que los lectores leían antes del defecto (`IS NULL` = «no acota»). **Eso les devuelve la visibilidad hoy.**
+
+🔴 **Lo que NO hizo, y por eso esta ficha existe: no es la elección de su dueño.** *Un prestador de consulta general que hoy figura atendiendo equinos y hurones no lo decidió — se lo escribió un backfill para sacarlo del cero.* **Antes de salir a producción, cada prestador DEBE declarar qué especies atiende.**
+
+**La pantalla donde lo declara es de C y NO entra en esta sesión.** Se escribe acá para que **nadie lo descubra en el lanzamiento**.
+
+**Dueño:** C (la pantalla) + cada prestador (la declaración). **Disparo:** antes de producción.
+☠️ **Condición de muerte:** cero ofertas activas cuyo `especies_compatibles` provenga del backfill sin que su dueño lo haya confirmado.
+
+#### D-965 — 🟡 «TU DÍA» VIVE BAJO NEGOCIO, Y ES UNA DESVIACIÓN ACEPTADA DE §15b
+
+🟡 **MEDIA. Desviación DECLARADA y aceptada por la mesa para S107** — no un descuido.
+
+**La ley:** `DISEÑO_EXPERIENCIA` §15b — **HOY acciona · NEGOCIO gestiona**. La lista del día es acción pura, así que por la letra iría en **HOY**.
+
+**Por qué se acepta la desviación, con su razón:** **la estadía-día no es una cita con hora.** El HOY del prestador está construido sobre una jornada de citas con hora de inicio, y meter ahí un objeto cuya unidad es **el día entero** —con dos ventanas y sin hora— **es una tanda propia**, no un injerto. *Forzarlo ahora produciría el HOY que hay que rehacer después.*
+
+☠️ **CONDICIÓN DE MUERTE, y es de las que no admiten media tinta:** «Tu día» pasa a ser **alcanzable desde HOY** y **se retira de Negocio EN EL MISMO ACTO**.
+
+> 🔴 **Dejarlo en los dos lados es exactamente la duplicación que `D-645` acaba de costar** — la pieza promovida que nadie retiró de su sitio viejo, y la casa terminó manteniendo dos. *Una migración de superficie que no retira el origen no es una migración: es una copia.*
+
+**Disparo:** después del acta (tanda ⑤). **Jamás en silencio:** el día que se mueva, se declara.
+
+#### D-966 — 🟢 `VozComision` REINTRODUJO EL `toFixed(2)` QUE `PrecioText` VINO A MATAR
+
+🟢 **BAJA. Hallazgo de B (29-ago), declarado y NO curado a propósito.**
+
+`PrecioText` nació para terminar con el `toFixed(2)` a mano repartido en **53 sitios**. **`VozComision` lo tiene otra vez en su cuerpo.**
+
+**Por qué no se cura en esta tanda:** tiene consumidores vivos y tocarla es una pasada propia. **Se ficha para que no se re-descubra** — *un defecto que se encuentra tres veces cuesta tres diagnósticos, y el tercero ya no es un hallazgo: es que nadie lo anotó.*
+
+**Dueño:** B. **Disparo:** la próxima vez que se toque `VozComision`.
+☠️ **Condición de muerte:** `VozComision` consume `PrecioText` y su `toFixed` desaparece.
+
 #### D-963 — ☠️ CERRADA AL DESCUBRIRSE (29-ago-2026) — LA RESERVA DE GUARDERÍA NO GUARDABA DÓNDE IR
 
 **Apareció escribiendo el lector de la jornada, no auditando.** `reservar_dia_guarderia` creaba la cita **sin `direccion_snapshot`** ⇒ la lista del día del prestador decía **a quién** recoger y **no dónde**.
