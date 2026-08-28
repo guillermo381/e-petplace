@@ -69,7 +69,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "La app usa tu ubicación durante el paseo para registrar el recorrido que ve la familia.",
+          "locationWhenInUsePermission": "La app usa tu ubicación mientras dura un paseo o un traslado de guardería: en el paseo registra el recorrido que ve la familia; en el traslado, solo dónde va el vehículo.",
           "locationAlwaysAndWhenInUsePermission": "Con el permiso \"siempre\", el recorrido se registra aunque guardes el teléfono en el bolsillo. Solo se usa mientras dura un paseo.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
