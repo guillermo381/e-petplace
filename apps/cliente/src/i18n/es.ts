@@ -2838,4 +2838,23 @@ export const clienteEs = {
     error: 'No pudimos preparar tu copia ahora. Prueba de nuevo en un momento.',
     pedirDeNuevo: 'Pedirla de nuevo',
   },
+  /* ── S107-C · LA GUARDERÍA vista por la familia ───────────────────────
+     🔴 La sobreventa NO tiene voz acá a propósito (firma de la mesa): para
+     la familia un día sin lugar es un día sin lugar. */
+  lugarGuarderia: {
+    titulo: 'La guardería',
+    franjasTitulo: 'Cuándo pasan y cuándo lo traen',
+    recogida: 'Pasan a buscarlo',
+    devolucion: 'Lo traen de vuelta',
+    elegiDia: 'Elige el día',
+    diaLleno: 'Sin lugares para este día',
+    diaPasado: 'Ya pasó',
+    mesAnterior: 'Mes anterior',
+    mesSiguiente: 'Mes siguiente',
+    noCargoTitulo: 'No pudimos cargar los días',
+    noCargoDetalle: 'No es que no haya lugar: no pudimos preguntar. Prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+    reservaPendiente: 'Todavía no se puede reservar acá.',
+    reservaPendienteApoyo: 'Estamos terminando esa parte. Por ahora puedes ver los días con lugar y los horarios.',
+  },
 } as const;

@@ -118,7 +118,7 @@ export const ORDEN_DISPLAY = [1, 2, 3, 4, 5, 6, 0] as const;
 // /horarios S55-B que este comentario confesaba): 48 medias horas,
 // mismo día, fin > inicio vive en las DOS puertas (h > minimo). CERO
 // motor: C5 midió que 22:30→23:30 ya produce slots y el wrapper guarda.
-const HORAS: string[] = [];
+export const HORAS: string[] = [];
 for (let m = 0; m < 24 * 60; m += 30) {
   HORAS.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
 }

@@ -56,6 +56,23 @@ function TituloBloque({ texto }: { texto: string }) {
   );
 }
 
+/**
+ * ⚠️ **MITAD INERTE (molde S91) — el flag de guardería todavía no existe.**
+ *
+ * Guardería sigue en «próximamente», y **hoy eso es cierto**: sin oferta no
+ * hay guarderías que reservar. Lo que esta constante arregla ES OTRA COSA —
+ * que su visibilidad colgara del flag de `hotel` (ver abajo).
+ *
+ * 🔴 **NO se reemplaza por `servicios.hotel`.** Cuando A publique el flag
+ * propio, esto pasa a `servicios.guarderia` **y se enciende la ficha activa**
+ * — pedido autocontenido en `docs/loop/S107-C-PEDIDO-A-A-FLAG-GUARDERIA.md`.
+ *
+ * ⚠️ Y el flag es **la mitad de la llave**: la otra es `guarderia-oferta`.
+ * Sin oferta, encender la ficha llevaría a una lista vacía — *una puerta que
+ * abre a un cuarto sin nada adentro es peor que la puerta cerrada.*
+ */
+const GUARDERIA_ABIERTA = false;
+
 export default function Explorar() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -102,7 +119,16 @@ export default function Explorar() {
     // entrada (el founder cayó en reserva al tocar Veterinaria).
     if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} />, onPress: () => router.navigate('/hogar/veterinaria') });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <Icono nombre="training" tamano={26} />, onPress: () => router.navigate('/hogar/adiestramiento') });
-    if (!servicios.hotel) proximamente.push({ nombre: t('explorar.proxHotel'), icono: 'hotel' }, { nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
+    if (!servicios.hotel) proximamente.push({ nombre: t('explorar.proxHotel'), icono: 'hotel' });
+    /* ⭐ S107-C · GUARDERÍA DESACOPLADA DEL FLAG DE HOTEL — y no es prolijidad.
+       Hasta hoy las dos colgaban del MISMO `if (!servicios.hotel)`, así que
+       🔴 **el día que hotel abriera, guardería no pasaba a activa: DESAPARECÍA**
+       —no tiene ficha propia—, y nadie se habría enterado hasta buscarla.
+       Además la letra separa los dos servicios explícitamente (`LETRA_GUARDERIA`
+       §5: *«la noche NO es guardería: es hotel, y es otro servicio con su propia
+       letra»*), así que compartir bandera contradice una firma.
+       Ver `GUARDERIA_ABIERTA` y su pedido a A. */
+    if (!GUARDERIA_ABIERTA) proximamente.push({ nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
     if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
     if (!servicios.telemedicine) proximamente.push({ nombre: t('explorar.proxTelemedicina'), icono: 'telemedicina' });
     if (!servicios.prime) proximamente.push({ nombre: t('explorar.proxPrime'), icono: 'prime' });

@@ -501,6 +501,15 @@ export default function Negocio() {
                   { etiqueta: t('negocio.mundoGrooming'), glifo: 'grooming', capa: 'cuidado', ruta: '/grooming', detalle: conteoDeMundo('grooming', nGrooming) },
                   { etiqueta: t('negocio.mundoAdiestramiento'), glifo: 'training', capa: 'cuidado', ruta: '/adiestramiento', detalle: conteoDeMundo('adiestramiento', nAdiestramiento) },
                   { etiqueta: t('negocio.mundoVeterinaria'), glifo: 'veterinaria', capa: 'identidad', ruta: '/veterinaria', detalle: conteoDeMundo('veterinaria', nVeterinaria) },
+                  /* ⭐ S107-C · LA GUARDERÍA. Capa `cuidado` como sus tres
+                     hermanas (Ley 10: el canto dice CATEGORÍA), glifo propio.
+                     🔴 `detalle: undefined` A PROPÓSITO y no por olvido: las
+                     otras cuatro cuentan sus filas de oferta activas, y
+                     guardería TODAVÍA NO TIENE OFERTA (no existe su wrapper).
+                     Pasarle `conteoDeMundo` diría «sin configurar» a un
+                     prestador que ya guardó su cupo y sus ventanas — un
+                     número falso es peor que ninguno. Entra con la oferta. */
+                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia/taller', detalle: undefined },
                 ] as const
               ).map((mundo, i) => (
                 <View key={mundo.ruta} style={ESTILO_CELDA}>
