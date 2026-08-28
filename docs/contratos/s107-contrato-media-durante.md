@@ -5,6 +5,8 @@
 
 ---
 
+> **Nombres RATIFICADOS por A (28-ago) y CONGELADOS:** `guarderia_media` + `guarderia_media_etiquetas`. El porqué —y la lápida de la tabla legacy `estadias`— viven en `s107-contrato-cupo-franja-estadia.md` §⓪bis.
+
 ## ① LA REGLA MADRE — **una media = un archivo; las etiquetas son muchas**
 
 🔴 **El binario JAMÁS se duplica por animal.** Una foto con cuatro perros es **un archivo** y **cuatro etiquetas**.
@@ -68,6 +70,20 @@ De `CRITERIO_LEGAL_GUARDERIA` §5, y es **obligación del prestador por contrato
 **La app guía y da la tijera.** 🔴 **Ningún texto de este bloque se redacta en pantalla como cláusula** — el contrato del prestador lo dice; la pantalla sólo guía el encuadre.
 
 **La casilla de redes** es un **dato del expediente** (opcional · independiente · **apagada por defecto** · revocable) y viaja con la aceptación de documentos — contrato aparte. **La prohibición por defecto es texto del contrato del prestador, no lógica de app.**
+
+---
+
+## ④bis · LOS AVISOS SE AGRUPAN EN EL SERVIDOR — *(medición de D, ratificada por la mesa el 28-ago)*
+
+> ### **La agrupación es del SERVIDOR. Un digest local no existe.**
+>
+> **La razón es de hecho, no de preferencia: dos teléfonos subiendo media del mismo animal no pueden coordinar un digest entre ellos.** *Cada aparato sabe lo que él subió y nada más* — agrupar en el cliente produce «1 foto nueva» tres veces, que es exactamente el *«una push por foto»* que la firma prohíbe.
+
+- **Agrupadas** («3 fotos nuevas de Thor»), **jamás una push por media** — y el que agrupa es el server, sobre lo que ya llegó.
+- 🔴 **Fuera del digest, operativas e inmediatas:** las del **acta** y las de **tramo** («subió», «está en casa»). *Un aviso que dice que el animal ya está en casa no espera a juntarse con otro.*
+- Rigen las reglas de silencio del modelo (memorial · atención en curso).
+
+**D dejó su contrato escrito como TIPO en su módulo; A lo cablea al construir media/avisos** — *el tipo es la mitad de D, inerte y sin puerta, y la puerta es de A* (molde S91).
 
 ---
 

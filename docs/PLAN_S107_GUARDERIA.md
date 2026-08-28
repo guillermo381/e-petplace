@@ -18,6 +18,27 @@
 
 ---
 
+## §0bis · ENMIENDAS REGISTRADAS — *(A, 28-ago-2026; se marcan ACÁ y en su lugar, no solo acá)*
+
+**El plan se registró verbatim el 28-ago. Estas enmiendas llegaron después, de
+la mesa y del censo, y viven donde se leen:**
+
+| # | qué cambia | dónde |
+|---|---|---|
+| **⑩** | **modalidad** — guardería es **presencial en el local**; el transporte puerta a puerta es **contenido del servicio, no una modalidad**. **Ningún valor nuevo en el vocabulario.** *(default del arquitecto, reversible; si el esquema exige otra cosa, A para y declara)* | §1.10 · §4.4 |
+| **D-920** | **cerrada por medición: 10 % vigente para toda cita desde el 25-ago.** **Guardería NO lleva fila propia de comisión** — sembrarla sería una divergencia que nadie pidió | §3 · §4.1 |
+| **D-956** | **enmienda a la firma ③** — el criterio v1 de «al día» quedó firmado, así que **el enforcement se enciende** | §3 ③ · §4.6 |
+| **paquete** | el hueco del sujeto de pago es **construcción de A**: `bono` entra al check de sujeto y **nace su desglose POR COMPRA** | §4.5 |
+| **D-645** | traspaso de B a C: migrar `apps/prestador` a la pieza generalizada y **retirar la vieja** | §6 |
+
+> 🔴 **FRENO DECLARADO — `BRIEF S107` SIGUE SIN LLEGAR.** Los cuatro prompts lo
+> citan como primera lectura y **no está en el repo** (medido por grep: cero
+> ocurrencias en `docs/`). Se pidió adjuntarlo **dos veces** y las dos veces
+> llegó la instrucción sin el texto. **No se reconstruye de memoria** (76b:
+> *un dictado sin literal no se deposita*). **No bloquea** —este plan restata
+> el perímetro y las cinco mediciones—, pero **B, C y D lo van a buscar y no
+> está.**
+
 ## §0 · EL PERÍMETRO — va pegado en las cuatro pistas, literal
 
 - El abogado destrabó **el fondo** de las dos cláusulas frenadas
@@ -89,8 +110,15 @@
    **no mueve plata** · iniciada, sin devolución automática — soporte (y falla
    del prestador devuelve **siempre**). ⚠️ Pide su línea en la letra.
 
+10. **Modalidad — default del arquitecto** (reversible con una palabra): **la
+    guardería es PRESENCIAL, en el local del prestador.** El transporte puerta
+    a puerta es **contenido del servicio, no una modalidad** — es lo que la
+    letra ya dice (§2: *«lo hace la guardería con su propia gente»*). 🔴 **No
+    nace ningún valor nuevo en el vocabulario de `modalidad`.** *Si el esquema
+    exigiera otra cosa, A para y lo declara — no lo amplía de paso.*
+
 ⚠️ **Depósito futuro:** cuando la mesa escriba la letra nueva sobre el
-criterio, incorpora ①–⑨ — hoy viven acá para que ninguna pista las busque
+criterio, incorpora ①–⑩ — hoy viven acá para que ninguna pista las busque
 donde no están.
 
 ---
@@ -127,10 +155,24 @@ final, y en la nube.**
 | # | decisión | firma |
 |---|---|---|
 | ② | dueño ausente a la recogida | **FIRMADA:** el cuidador reintenta dentro de la franja a su criterio; si la franja cierra sin recogida, **el día se cobra y no se repone** (cupo comprometido — coherente con el no-show de P18). Sin protocolo de mora en la app: eso es letra + soporte. |
-| ③ | requisitos sanitarios | **FIRMADO gate duro:** sin papeles al día no se reserva, con el camino para cargarlos a un toque. |
+| ③ | requisitos sanitarios | **FIRMADO gate duro:** sin papeles al día no se reserva, con el camino para cargarlos a un toque. **✏️ ENMENDADA (28-ago, mesa) — el criterio v1 de «al día», que es lo que le faltaba (`D-956`): **carnet cargado** (foto, a un toque) **+ rabia vigente por especie**, con la **vigencia declarada por el dueño al cargar**. La **verificación física** del carnet es del **prestador, en el acta de recogida** (`CRITERIO_LEGAL_GUARDERIA` §4). La lista completa de vacunas por especie es **DATO configurable** —pendiente de mesa + veterinario—, **jamás cableada**. 🔴 **Con ese criterio el enforcement SE ENCIENDE:** el rechazo masivo de hoy **no es un bug del gate, es el catálogo vacío** — cada familia carga su carnet en su primera reserva, y para eso está el camino a un toque. |
 | ④ | paquete y mensualidad | **FIRMADO — las tres modalidades en v1:** día suelto · paquete de N días a consumir (cada día toma cupo al agendarlo) · **mensualidad** («es el uso más común») con cupo garantizado. Semántica: §4.5; defaults: §1.9. |
 | ⑤ | cancelar un día de un paquete | **FIRMADA:** sí, con las ventanas de P18; **el día vuelve al paquete** — no se mueve plata. |
 | ⑥ | sociabilidad | **FIRMADO el reuso de P19:** la misma respuesta ya almacenada («¿se lleva bien con otros?»); NO = no reserva, con la voz honesta y sin re-preguntar. |
+
+> **✏️ D-920 · CERRADA POR MEDICIÓN (28-ago) — y toca a este plan en dos lugares.**
+> **Rige 10 % para toda cita desde el 25-ago**, con base `subtotal`: la fila de
+> 15 % existe pero **venció** (`vigencia_hasta = 2026-08-25`), y **la línea de
+> los T&C publicados ya dice 10 % para servicios** ⇒ **ese hueco muere: no hay
+> nada que decidir.** 🔴 **Y guardería NO lleva fila propia de comisión** — la
+> vigente aplica a `tipo_origen='cita'` **sin discriminar oficio**; *quien
+> siembre una fila de guardería al 10 crea una divergencia que nadie pidió.*
+>
+> ⚠️ **Nota de honestidad del registro:** la ficha de `D-920` dice que levanta
+> un bloqueo *«ninguna pantalla pinta precio»* de **§3 y §6 de este plan**.
+> **Medido: ese bloqueo no existe en el plan registrado** — ninguna de las dos
+> secciones lo contiene. *Se deja escrito para que nadie lo busque: la ficha
+> nombra un texto que este documento nunca tuvo.*
 
 *(La ⑦ — la letra nueva — quedó destrabada por el criterio: la redactan
 founder + arquitecto sobre `CRITERIO_LEGAL_GUARDERIA.md` (fichas D-918 ·
@@ -190,9 +232,12 @@ versionadas cuyo contenido llega de la mesa.
 
 ### Construcción, sobre el censo y en este orden
 
-1. **El tipo de servicio.** `guarderia`, comisión 10 %, con
-   `especies_elegibles = {perro, gato}` como **dato con guard en las tres
-   puertas** — jamás un `if`.
+1. **El tipo de servicio.** `guarderia`, con `especies_elegibles = {perro,
+   gato}` como **dato con guard en las tres puertas** — jamás un `if`.
+   ✏️ **ENMENDADO (D-920):** la comisión **NO se siembra**. El 10 % vigente
+   aplica a `tipo_origen='cita'` **sin discriminar oficio** ⇒ **guardería lo
+   hereda sin fila propia.** *Sembrar «la fila de guardería al 10» sobra, y
+   crea una divergencia que nadie pidió.*
 2. **El cupo por lugar.** N espacios por lugar; ocupación contada **por día**
    (espacios ocupados ese día). 🔴 **Jamás sobre la grilla de agenda** — si se
    construye ahí, pelea todo el tiempo (brief §2 ②). 🔴 **Día = fecha local del
@@ -204,6 +249,11 @@ versionadas cuyo contenido llega de la mesa.
 3. **Las franjas.** Dos ventanas por día por lugar (recoge / devuelve), modelo
    propio — **no son turnos de 30 minutos**. Validación mínima: la franja de
    recogida termina antes de que empiece la de retorno.
+✏️ **ENMIENDA ⑩ (modalidad).** La estadía nace **`presencial`** — el valor ya
+existe en el vocabulario. **El transporte puerta a puerta es contenido del
+servicio, no una modalidad**, así que **no nace ningún valor nuevo**. *Si al
+construir el esquema exigiera otra cosa, se para y se declara.*
+
 4. **Los estados de la estadía-día.** `reservada → recogida_en_curso →
    en_guarderia → retorno_en_curso → entregada`, más `cancelada` y — firma ② —
    `no_recogida`: la franja de recogida venció sin animal a bordo; **el día
@@ -225,7 +275,17 @@ versionadas cuyo contenido llega de la mesa.
      **recién al agendarlo**; cancelar un día con las ventanas de P18 **lo
      devuelve al saldo — la plata no se mueve** (firma ⑤). Vencimiento del
      saldo: la letra no lo dijo — **hueco declarado**, sin vencimiento
-     inventado.
+     inventado *(la medición encontró ancestro: `bonos.fecha_vencimiento`
+     existe. **Tener ancestro no es tener letra.**)*.
+     ✏️ **ENMIENDA — EL HUECO DEL SUJETO DE PAGO, y es construcción de A:**
+     medido, `pagos_intentos.chk_intento_un_solo_sujeto` admite
+     `pedido | cita | recurrencia | suscripcion` — **`bono` no está**, y
+     `comprar_paquete_salidas` **no toca el motor de pagos**. ⇒ **el paquete
+     entra al check como quinto sujeto y nace `bono_desglose`, hermano de
+     `suscripcion_desglose`.** 🔴 **El desglose del paquete es POR COMPRA —
+     jamás la suma de N desgloses de cita**: el congelado por cita describe un
+     día, y el paquete se cobra una vez. *Ampliar ese CHECK es decisión, y
+     ésta es la firma ④ ejerciéndola — no se amplía «de paso».*
    - **Mensualidad:** una **oferta del lugar** que el prestador define —
      patrón de días de la semana + precio del mes; 🔴 **la plataforma no la
      deriva del precio del día.** Al comprar: fecha de inicio; el período
@@ -247,6 +307,25 @@ versionadas cuyo contenido llega de la mesa.
    nombrado**; con faltantes, **la reserva no se abre**. El enforcement vive
    en la **compuerta del server**, no en la pantalla — y cada faltante viaja
    con su camino a resolver (lo pinta B).
+   ✏️ **ENMIENDA `D-956` — EL CRITERIO v1, FIRMADO POR LA MESA (28-ago), que es
+   lo que le faltaba a la firma ③:**
+   - **«al día» = carnet cargado** (foto, a un toque) **+ rabia vigente por
+     especie**, con **la vigencia declarada por el DUEÑO al cargar**.
+   - **La verificación física del carnet es del PRESTADOR**, en el **acta de
+     recogida** (`CRITERIO_LEGAL_GUARDERIA` §4). *La app no valida un papel:
+     lo transporta y lo deja verificable en la puerta.*
+   - **La lista completa de vacunas por especie es DATO configurable**
+     —pendiente de mesa + veterinario— **jamás cableada** (el catálogo
+     `cat_plan_vacunal` ya es ese dato: se llena, no se escribe en código).
+   - 🔴 **Con ese criterio el enforcement SE ENCIENDE.** El rechazo masivo de
+     hoy **no es un bug del gate: es el catálogo vacío.** *Cada familia carga
+     su carnet en su primera reserva, y para eso está el camino a un toque.*
+   - ⚠️ **Y un hallazgo del censo que el criterio tiene que absorber, medido:**
+     **cero filas con `vacuna_codigo='antirrabica'`** en toda la base — pero
+     **10 filas quedaron sin código con nombres comerciales** (`Canigen LR`,
+     `Vanguard DA2L`…) donde la rabia probablemente viaja adentro. *Leer sólo
+     el código rechazaría a mascotas realmente vacunadas.* **Por eso la
+     declaración del dueño al cargar es la fuente, y no la fila histórica.**
 7. **El ancla de P18.** Las ventanas 24 h/2 h necesitan un instante y la franja
    no lo es: **el ancla es el INICIO de la franja de recogida del día
    reservado** — va escrita en el contrato para que ninguna pantalla invente
@@ -458,6 +537,18 @@ dejo anotada mi observación.»*
   respuesta ya almacenada** — no una segunda pregunta que desincroniza.
 - Con una estadía en curso rige el **silencio de interrupciones** del portal
   (`PORTAL_PRESTADOR` §6.3).
+
+### ✏️ TRASPASO DE B — `D-645` (28-ago-2026)
+
+**C migra `apps/prestador` de `aceptacion-terminos.tsx` a la pieza
+generalizada de `packages/ui`, y RETIRA la vieja.**
+
+> 🔴 **La promoción no es migración.** *Que B haya generalizado la pieza no
+> mueve un solo consumidor* — mientras la pantalla siga montando la vieja, la
+> casa tiene dos: la que se mantiene y la que nadie recuerda. **Retirar la
+> vieja es parte del trabajo, no una limpieza para después.**
+
+---
 
 **HECHO significa:** los recorridos de arriba **caminables en el aparato**, con
 sus caminos tristes, y el founder corrigiendo sobre la app.
