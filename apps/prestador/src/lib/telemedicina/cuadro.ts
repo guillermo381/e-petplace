@@ -32,11 +32,43 @@ export const AVISO_CUADRO = 'epp.cuadro.v1';
  * intacta* — el modo de falla es un botón ausente, jamás una pantalla rota.
  */
 export function pcIdDeLaSala(room: unknown): number | null {
+  const marca = (paso: string, d?: unknown) => console.log(`[CUADRO_C] pcId:${paso}`, d ?? '');
   try {
-    const r = room as { engine?: { pcManager?: { subscriber?: { pc?: { _pcId?: number } } } } };
-    const id = r.engine?.pcManager?.subscriber?.pc?._pcId;
-    return typeof id === 'number' ? id : null;
-  } catch {
+    const r = room as {
+      engine?: { pcManager?: Record<string, unknown> };
+    };
+    const mgr = r.engine?.pcManager;
+    if (mgr === undefined) {
+      marca('sin_pcManager');
+      return null;
+    }
+
+    /* Los transportes, en el orden en que sirven: el SUSCRIPTOR es el que
+       recibe el video del otro lado. El publicador queda de respaldo. */
+    const transportes = [mgr['subscriber'], mgr['publisher'], mgr['_subscriber'], mgr['_publisher']];
+
+    for (const t of transportes) {
+      if (t === undefined || t === null) continue;
+      const tr = t as Record<string, unknown>;
+      /* 🔴 LAS DOS FORMAS, y por eso falló la v1: `PCTransport` declara
+         `private _pc` **y** `private get pc()`. *Un `private` de TypeScript no
+         existe en runtime, pero el nombre del getter sí puede desaparecer en
+         un bundle minificado — y `_pc`, que es el campo real, sobrevive.*
+         Probar las dos cuesta una línea; depender de una sola costó una cita
+         real. */
+      const pc = (tr['pc'] ?? tr['_pc']) as { _pcId?: number } | undefined;
+      const id = pc?._pcId;
+      if (typeof id === 'number') {
+        marca('resuelto', { via: tr['pc'] !== undefined ? 'pc' : '_pc', id });
+        return id;
+      }
+    }
+    /* Se dice QUÉ había, no sólo que falló: *sin esto, «no se pudo» obliga a
+       la próxima sesión a re-medir lo mismo desde cero.* */
+    marca('no_resuelto', { claves: Object.keys(mgr) });
+    return null;
+  } catch (e) {
+    marca('excepcion', String(e));
     return null;
   }
 }

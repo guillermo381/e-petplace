@@ -571,9 +571,19 @@ function MesaDeTrabajo({
       muteada: pistasRemotas[0]?.publication?.isMuted,
       enabled: pista?.enabled,
     });
-    if (pista === undefined || pc === null) {
-      marca('sale:sin_pista_o_sin_pc');
+    /* 🔴 SEPARADAS, y la corrección es de A: la guarda única cubría DOS
+       casos y en la cita real sólo fallaba uno. *Tres personas leyendo
+       `sale:sin_pista_o_sin_pc` habrían dicho «no hay pista» — y la pista
+       estaba.* **Un log que agrupa dos causas manda a diagnosticar la
+       equivocada.** */
+    if (pista === undefined) {
+      marca('sale:sin_pista');
       mostrar({ texto: t('consulta.vcCuadroSinImagen'), variante: 'error' });
+      return;
+    }
+    if (pc === null) {
+      marca('sale:sin_pcid');
+      mostrar({ texto: t('consulta.vcCuadroFallo'), variante: 'error' });
       return;
     }
     setCapturando(true);
@@ -932,7 +942,16 @@ function MesaDeTrabajo({
               mirando. Sólo con video remoto: *capturar antes de que llegue
               imagen produciría el frame vacío que el criterio de verde
               prohíbe.* */}
-          {pistasRemotas.length > 0 && (
+          {/* 🔴 LA PROMESA QUE HABÍA INCUMPLIDO, cumplida. Escribí que *«si la
+              API interna cambia, esto devuelve null, el botón no se dibuja y
+              la llamada sigue intacta»* — **y el botón se dibujó igual**,
+              porque la condición sólo miraba la pista. *Una promesa de diseño
+              que el código no contiene es peor que no haberla escrito: se
+              confía en ella al leer.*
+              Con esto el vet **no puede tocar algo que no va a funcionar**
+              (Ley 23), y el defecto pasa de «botón que no hace nada» a
+              «botón ausente», que se diagnostica solo. */}
+          {pistasRemotas.length > 0 && pcIdDeLaSala(sala) !== null && (
             <View style={{ paddingHorizontal: spacing[4] }}>
               <Boton
                 variante="secundario"
