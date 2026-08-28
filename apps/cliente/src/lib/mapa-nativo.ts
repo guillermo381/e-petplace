@@ -1,3 +1,5 @@
+import Constants from 'expo-constants';
+
 /**
  * EL GUARD DEL MAPA NATIVO — **la mitad que el cliente nunca recibió.**
  *
@@ -53,4 +55,29 @@
  *  2. El APK sin key **fuera del dispositivo del founder** — el flip viaja por
  *     OTA y le llegaría también al APK roto, **re-abriendo el crash**.
  */
-export const MAPA_NATIVO_DISPONIBLE = false;
+/* ── S107 · B2 (firma del founder, 27-ago-2026) ────────────────────────────
+   ⏪ ACA HABIA UNA CONSTANTE EN `false`, y arriba la promesa de que «muere
+   sola» cuando llegara una build con la key. **No murio sola: era un `const`.**
+   El 27-ago se compilo un APK local CON la key —verificado por manifiesto,
+   `✓ meta-data geo.API_KEY`— y esta linea lo habria hecho decir «sin mapas»
+   sobre una app que si los tiene.
+
+   🔴 Y de paso cae la premisa que sostenia el `false`, que decia:
+   *«una build LOCAL nunca puede tener esa key»*. **Falso, y falsado con un
+   APK**: la key es inaccesible para el builder de EAS en la nube, no para una
+   build local, que corre en la maquina donde la key vive. Lo que la condicion
+   ① queria de verdad no era «en la nube»: era **verificada por manifiesto**.
+
+   AHORA SE DERIVA: `app.config.ts` calcula el veredicto en build-time desde la
+   presencia real de `GOOGLE_MAPS_API_KEY` y lo expone como booleano en `extra`
+   (nunca la key — medido: Expo la borra del config embebido, asi que leerla
+   desde aca era imposible).
+
+   🔑 Lo computa **la misma build que la hornea**: no hay dos fuentes que puedan
+   divergir, y por eso esto no vuelve a caducar en silencio.
+
+   ⚠️ FAIL-CLOSED: `!== true` — si `extra` no llega, si el campo falta, o si
+   viene con cualquier otra cosa, el flag queda en `false` y **se pierde el
+   mapa, jamas la app**. Es la ley original de este archivo, intacta. */
+export const MAPA_NATIVO_DISPONIBLE =
+  (Constants.expoConfig?.extra as { mapasHorneados?: boolean } | undefined)?.mapasHorneados === true;
