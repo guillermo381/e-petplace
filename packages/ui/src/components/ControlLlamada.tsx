@@ -89,7 +89,7 @@ export interface ControlLlamadaProps {
 
    **El techo, con el número:** un SEXTO control llevaría la fila a
    `5×48 + 60 + 5×12 = 360` ⇒ **no entra ni en 360**. */
-const LADO = { md: 48, lg: 60 } as const
+export const LADO = { md: 48, lg: 60 } as const
 
 /** Los tres glifos, en masa/trazo grueso — se leen a 24 px sobre cualquier fondo. */
 function Glifo({ nombre, color, cortado }: { nombre: ControlLlamadaGlifo; color: string; cortado: boolean }) {
