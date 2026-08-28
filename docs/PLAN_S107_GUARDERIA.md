@@ -31,13 +31,7 @@ la mesa y del censo, y viven donde se leen:**
 | **paquete** | el hueco del sujeto de pago es **construcción de A**: `bono` entra al check de sujeto y **nace su desglose POR COMPRA** | §4.5 |
 | **D-645** | traspaso de B a C: migrar `apps/prestador` a la pieza generalizada y **retirar la vieja** | §6 |
 
-> 🔴 **FRENO DECLARADO — `BRIEF S107` SIGUE SIN LLEGAR.** Los cuatro prompts lo
-> citan como primera lectura y **no está en el repo** (medido por grep: cero
-> ocurrencias en `docs/`). Se pidió adjuntarlo **dos veces** y las dos veces
-> llegó la instrucción sin el texto. **No se reconstruye de memoria** (76b:
-> *un dictado sin literal no se deposita*). **No bloquea** —este plan restata
-> el perímetro y las cinco mediciones—, pero **B, C y D lo van a buscar y no
-> está.**
+> ✅ **`BRIEF S107` REGISTRADO** (28-ago-2026) en **`docs/BRIEF_S107_GUARDERIA.md`**, verbatim. *El freno que ocupaba este lugar se retira porque su condición se cumplió: el documento existe y se puede abrir.* **Los cuatro prompts ya pueden leerlo donde lo citan.**
 
 ## §0 · EL PERÍMETRO — va pegado en las cuatro pistas, literal
 
