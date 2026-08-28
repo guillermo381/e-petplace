@@ -114,8 +114,15 @@ const ESTILO_GRILLA = {
   flexWrap: 'wrap',
   marginHorizontal: -spacing[2],
 } as const;
+/* ⭐ S107-C · TRES COLUMNAS (firma del founder tras caminar el gate).
+   Con cuatro mundos, dos columnas repartían parejo. Con el quinto, la última
+   fila quedaba con UNA baldosa sola del doble de ancho que sus hermanas — y
+   **una baldosa más grande se lee como más importante**, que es justo lo que
+   la grilla no debe decir: los cinco oficios pesan igual.
+   🔴 Tres columnas reparten 5 en 3+2 y **ninguna queda huérfana a lo ancho**:
+   la fila corta se ve corta, no se ve inflada. */
 const ESTILO_CELDA = {
-  width: '50%',
+  width: '33.333%',
   paddingHorizontal: spacing[2],
   paddingBottom: spacing[4],
 } as const;

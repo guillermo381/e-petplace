@@ -2104,6 +2104,8 @@ export const clienteEn = {
     elegiDia: 'Pick the day',
     diaLleno: 'No places left for this day',
     diaPasado: 'Already past',
+    diaHoy: 'Bookings start from tomorrow',
+    diaCerrado: 'They’re closed that day',
     mesAnterior: 'Previous month',
     mesSiguiente: 'Next month',
     noCargoTitulo: 'We couldn’t load the days',
