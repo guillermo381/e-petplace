@@ -761,3 +761,11 @@ export {
   type AceptacionDeDocumentosProps,
   type DocumentoAceptable,
 } from './components/AceptacionDeDocumentos'
+
+export {
+  FichaPaquete,
+  equivalenciaDePaquete,
+  type FichaPaqueteProps,
+  type EquivalenciaPaquete,
+  type DireccionEquivalencia,
+} from './components/FichaPaquete'
