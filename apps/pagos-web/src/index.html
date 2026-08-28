@@ -1067,7 +1067,26 @@
           /* El rechazo del emisor NO se detalla en pantalla y NO se registra:
              la causa fina la resuelve la app con la taxonomía de la letra §7.
              «Fondos insuficientes» jamás se nombra. */
-          decir(T.probaOtra, 'error');
+          /* 🔴 S107 · LA VOZ DE LA ACCIÓN SIN EFECTO, ahora que el proveedor
+             la hace distinguible. **Medido el 28-ago**: ante una tarjeta que
+             Nuvei ya tiene, su SDK devuelve
+                 type = "Card already added: #"
+                 help = "If you want to update the card, first delete it"
+             ⇒ *el rechazo SÍ trae la causa*, contra lo que creíamos.
+
+             🔴 MATCHEO TOLERANTE Y JAMÁS CASTEADO: sin distinguir mayúsculas y
+             sin depender del formato exacto —el `#` del final y los dos puntos
+             son de ellos y pueden moverse—. **Si no matchea, cae en la genérica
+             que ya existe.** *Es texto de un tercero: el día que lo cambien, la
+             voz vuelve al genérico sin romper nada, y el motivo crudo sigue
+             quedando en el rastro igual.* (`L-425`: un string que deja de
+             coincidir compila perfecto.)
+
+             ⚠️ El TONO lo decide la firma del 26-ago y no se toca: *«agregar
+             una tarjeta que ya tenés no es un error de la persona ni un fallo —
+             es una acción sin efecto»*. Por eso va SIN tono de error. */
+          var yaLaTenia = /already\s*added/i.test(String(tipo || ''));
+          decir(yaLaTenia ? T.yaEstaba : T.probaOtra, yaLaTenia ? null : 'error');
           /* 🔴 S107 · D-961 — el alta se cerraba como `rechazada` **sin motivo**,
              asi que soporte veia el QUE y nunca el POR QUE. Se anota antes de
              cerrar: `terminar` cierra, `anotarIncidente` deja el rastro. El
