@@ -106,6 +106,30 @@ De `CRITERIO_LEGAL_GUARDERIA` §5, y es **obligación del prestador por contrato
 
 ---
 
+## ④pre · EL PUNTO VIVO — **UNA FILA POR TRAMO, `UPDATE` JAMÁS `INSERT`** *(pedido de D, adoptado)*
+
+```
+guarderia_tramo_punto
+  tramo_id  uuid PRIMARY KEY     -- 🔴 LA PK ES EL TRAMO: una fila, y sólo una
+  lat       double precision NOT NULL
+  lon       double precision NOT NULL
+  visto_en  timestamptz NOT NULL
+```
+
+> ### 🔴 **CON `INSERT` LA TRAZA VUELVE POR LA PUERTA DE ATRÁS.**
+>
+> **Y no es una traza cualquiera: las paradas de una recogida son las CASAS de las otras familias.** *Un histórico de puntos con timestamps es un mapa de dónde vive cada cliente del prestador, reconstruible por cualquiera que pueda leer la tabla.* Guardar sólo el último punto no es una optimización: **es lo que hace inexpresable el dato que no queremos tener** (L-222).
+
+**El lector devuelve UN punto o `null`** — nunca una lista.
+
+> ### 🔴 **Y EL RECORTE VIVE EN EL SERVIDOR.** *Si el servidor manda la traza y la app pinta un punto, **la traza ya salió**.* Lo que no viaja no se filtra mal.
+
+**Wrapper:** `obtenerPuntoVivo(tramoId) → { lat, lon, vistoEn } | null` · `registrarPuntoVivo({ tramoId, lat, lon, vistoEn })` (upsert por `tramo_id`).
+
+**Cuándo hay punto:** sólo mientras el animal de ese dueño está **pendiente o a bordo** de ese tramo. Fuera de eso, `null` — y la pantalla lo dice, no muestra un punto viejo.
+
+---
+
 ## ④bis · LOS AVISOS SE AGRUPAN EN EL SERVIDOR — *(medición de D, ratificada por la mesa el 28-ago)*
 
 > ### **La agrupación es del SERVIDOR. Un digest local no existe.**
@@ -115,6 +139,22 @@ De `CRITERIO_LEGAL_GUARDERIA` §5, y es **obligación del prestador por contrato
 - **Agrupadas** («3 fotos nuevas de Thor»), **jamás una push por media** — y el que agrupa es el server, sobre lo que ya llegó.
 - 🔴 **Fuera del digest, operativas e inmediatas:** las del **acta** y las de **tramo** («subió», «está en casa»). *Un aviso que dice que el animal ya está en casa no espera a juntarse con otro.*
 - Rigen las reglas de silencio del modelo (memorial · atención en curso).
+
+### ✏️ LA CATEGORÍA, RESUELTA CON SU NÚMERO *(medición de D, adoptada por la mesa)*
+
+**El molde ya existe y le falta el productor:** la categoría **`resumen` está en el catálogo con CERO tipos que la usen.** ⇒ **no se inventa una categoría: se estrena la que estaba esperando.**
+
+🔴 **Y el número que lo vuelve urgente, no estético: `operacion` tiene techo de 20 avisos cada 24 h.** Si la media del durante entrara por ahí, **veinte fotos consumen el techo del día y el aviso del RETORNO se pierde — CALLADO.**
+
+> *El dueño no recibiría «Thor está en camino a casa», y no habría error en ningún lado: el techo hizo exactamente lo que le pidieron.* **Es la clase de defecto que este contrato viene cazando toda la sesión: el que no falla, el que omite.**
+
+**El reparto, entonces:**
+
+| qué | categoría | por qué |
+|---|---|---|
+| **la media del durante** (fotos y clips) | **`resumen`** | se agrupa, y **jamás compite por el techo de las operativas** |
+| **los tramos** («subió», «está en casa») | **`operacion`** | inmediatas — *un aviso que dice que el animal ya está en casa no espera a juntarse con otro* |
+| **las actas** | **`operacion`** | el dueño tiene que poder confirmar en el momento |
 
 **D dejó su contrato escrito como TIPO en su módulo; A lo cablea al construir media/avisos** — *el tipo es la mitad de D, inerte y sin puerta, y la puerta es de A* (molde S91).
 
@@ -130,6 +170,28 @@ su media cuelga de UNA mascota (`evento_archivo_adjunto.mascota_id`,
 
 ⇒ **El contrato se confirma sin enmienda: «una media = un archivo + N
 etiquetas» es construcción nueva, y ahora está probado en vez de supuesto.**
+
+---
+
+## ④quater · LAS CADENAS DE PERMISO NO VIAJAN POR OTA — *(cierre de D, para el tren de builds)*
+
+> ### 🔴 **SE HORNEAN EN EL MANIFEST Y EN EL `Info.plist`. Curarlas en el repo NO las cura en el teléfono.**
+
+**Estado al cierre de D:** dos curas de tuteo **commiteadas** y una enmienda de la cadena de **ubicación en foreground** en camino — firma de la mesa: **nombra el paseo Y los traslados de guardería**. 🔴 **La cadena de «siempre» NO se toca**, porque el punto vivo corre **en foreground**.
+
+**Las tres llegan al aparato con el tren `1.0.7` / `1.0.6`, no antes.**
+
+### 🔴 LAS TRES CADENAS DEL CHECKLIST DEL BINARIO *(D, `cd1df4d1`) — ABIERTAS hasta leerse en el aparato*
+
+| cadena | dónde |
+|---|---|
+| `photosPermission` | **prestador** |
+| `photosPermission` | **cliente** |
+| `locationWhenInUsePermission` | **prestador** — la frase firmada, con **sus dos oficios y sus dos alcances** |
+
+**Ninguna viaja por OTA y ninguna se declara cerrada al commitearla.** Van al checklist del tren **`1.0.7` / `1.0.6`** y **se leen en la pantalla del aparato** antes de darlas por curadas.
+
+⚠️ **Y la instrucción operativa que va con esto, que es la que se pierde:** al armar ese binario, **las cadenas se verifican EN EL APARATO** — no se dan por curadas porque estén bien escritas en el repo. *Es exactamente la clase de `L-432` que este contrato ya pagó con el micrófono: el repo y el teléfono son dos versiones de la verdad, y un commit mueve sólo una.*
 
 ---
 

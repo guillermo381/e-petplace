@@ -69,6 +69,27 @@ const MIN_SIMBOLO_DEUNA = 16;
  * `apps/prestador/src/i18n/es.ts` es **deuda declarada, sin dueño en esta
  * mesa** — nunca se barrió entero (S77 curó 8/8 del prestador, que era otro
  * lote). Verificado contra `origin/main`: **47**.
+ *
+ * ── ✏️ FIRMA DE LA MESA (28-ago-2026, S107) ──────────────────────────────
+ *
+ * > ### **LAS APPS HABLAN TUTEO AL USUARIO — LAS DOS APPS, LAS CUATRO PISTAS.**
+ *
+ * Ratifica la decisión del founder de S51 (regla 27) y **la extiende a la
+ * forma de trabajo**: ninguna pista escribe voz de producto en voseo, ni en
+ * el cliente ni en el prestador. *La voz de la mesa y la voz del producto son
+ * dos registros distintos; el chat vosea, la app no.*
+ *
+ * ⚠️ **Y EL TRINQUETE NO SE MOVIÓ, con su medición al lado.** La mesa ratificó
+ * un ajuste de **47 → 51**. **Medido el 28-ago con el propio instrumento
+ * (`hitsDeArchivo`) sobre `main`: el archivo tiene EXACTAMENTE 47** — y R66
+ * está VERDE. **Subirlo a 51 dejaría lugar para cuatro voseos nuevos sin nada
+ * que los cace**, que es literalmente el defecto que esta regla existe para
+ * cerrar y que su propio encabezado narra dos párrafos más arriba.
+ *
+ * ⇒ **Se deja en 47 y se declara.** Si C curó su voseo, 47 es el número
+ * correcto y no hay nada que hacer; si quedaron cuatro sin curar, **se curan**
+ * — no se les hace lugar. *Un baseline se mueve cuando la realidad se mueve,
+ * y acá la realidad dice 47.*
  */
 const BASELINE_VOSEO = {
   /* ── VOZ DE LAS APPS ──────────────────────────────────────────────────── */
@@ -1465,8 +1486,28 @@ const FUENTES_R17 = {
  *    ② y NO está escondida tras `__DEV__` (el gate corre sobre el APK
  *      preview, donde `__DEV__` es false: esconderla ahí la mata justo
  *      donde se la necesita — L-161, la misma lección del marcador).
- *  El día que el founder firme el retiro, esta regla se BORRA en el
- *  mismo acto (y su borrado queda en el commit de la firma). */
+ *  ⏪ ACÁ DECÍA: *«el día que el founder firme el retiro, esta regla se
+ *  BORRA en el mismo acto»*. **La firma llegó (mesa, S107) y NO la borró:
+ *  LA ENMENDÓ.** Se marca en vez de reescribirse, porque la instrucción
+ *  vieja mandaba borrar un guard que hoy sigue haciendo falta.
+ *
+ *  🔴 **LO FIRMADO: se retira la entrada del CLIENTE; la del PRESTADOR
+ *  queda, y R18 pasa a vigilar SÓLO ésa.**
+ *
+ *  **Por qué enmendar y no borrar, que es lo que cambia el resultado:** la
+ *  polaridad de arriba **sigue siendo el punto**. Si la regla se borrara,
+ *  la entrada del prestador —la única que queda— pasaría a no tener guard,
+ *  y su modo de falla es el de siempre: *desaparece y nadie se entera*.
+ *  **Borrar el guard junto con una de sus dos casas habría dejado
+ *  desprotegida a la que sobrevive** — exactamente el hueco que S84-B8
+ *  cerró cuando R18 miraba sólo al cliente, ahora en espejo.
+ *
+ *  ⚠️ **Y EL ANCLA BAJA DE 2 A 1 EN EL MISMO ACTO.** No es cosmético: el
+ *  ancla exige un mínimo de casas para que el silencio de la regla
+ *  signifique algo, y con `2` sobre una sola casa **R18 saldría ROJA por
+ *  ANCLA ROTA** — un rojo que no habla del defecto que vigila. *Bajar un
+ *  ancla es aflojar un guard y por eso se declara: acá se baja porque el
+ *  corpus se achicó POR FIRMA, no para que pase un rojo.* */
 // S84-B8 ② — LAS DOS CASAS. Hasta hoy R18 miraba SOLO la del cliente y
 // el propio código de la entrada del prestador declaraba el hueco: "R18
 // mira SOLO la Cuenta del cliente… esta entrada queda SIN guard". Una
@@ -1495,6 +1536,9 @@ const FUENTES_R17 = {
  *  El día que el founder firme el retiro del prestador, ahí sí la regla se
  *  borra entera, en el mismo commit de la firma. */
 const CUENTAS_GALERIA = [
+  // ☠️ 'apps/cliente/...' — RETIRADA POR FIRMA DE MESA (S107). La entrada del
+  // cliente se saca de la app; el retiro del ARCHIVO es de C. Esta línea se
+  // deja como lápida para que nadie la re-agregue creyendo que falta.
   'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
 ];
 /* S85-B1 · EL MENSAJE GRITABA UNA CAUSA QUE EL PREDICADO NO MEDÍA — la
@@ -1556,6 +1600,7 @@ function r18(casas) {
   // y sigue siendo el que impide que la regla mire cero archivos. *Y el que
   // cazó este cambio fue el ancla misma — dio rojo en cuanto la lista bajó a
   // uno, que es exactamente para lo que existe.*
+  // (A y B escribieron esta misma enmienda en paralelo; se conserva una sola.)
   fallos.push(...ancla('R18', casas.length, 1, 'Cuenta(s) de galería vigiladas'));
   return { fallos, info: fallos.length === 0 ? `${casas.length} entradas vivas y sin __DEV__` : `${fallos.length} fallo(s)` };
 }
@@ -6615,7 +6660,7 @@ corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
-corridas.push(['R18 (D-580: la entrada a la galería NO desaparece — SOLO el prestador, firma S107)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
+corridas.push(['R18 (D-580 enmendada S107: la entrada a la galería NO desaparece — sólo el PRESTADOR; la del cliente se retiró por firma)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R30 (el glifo no se re-dibuja: apps contra el registry)', r30([...apps, ...ui])]);

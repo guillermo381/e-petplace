@@ -184,7 +184,9 @@ Camino de la plata, P18 tal cual: **≥24 h** reagendar o cancelar con destino a
 
 ---
 
-## ⑥ EL GATE SANITARIO — se construye, y nace ABIERTO
+## ⑥ EL GATE SANITARIO — **NACE CERRADO** (firma ③ + `D-956` v1)
+
+> ⏪ **Este título decía «y nace ABIERTO» y era FALSO desde el mismo día.** Lo escribió C mientras conducía como A, antes de que la mesa firmara el criterio; la corrección entró abajo **y el título quedó contradiciendo a su propio cuerpo**. *Un encabezado que dice lo contrario que su sección es peor que una sección equivocada: nadie lee dos párrafos para desconfiar de un título.* **Lo cazó C leyéndolo.**
 
 ```
 evaluar_requisitos_guarderia(p_mascota_id uuid) RETURNS jsonb

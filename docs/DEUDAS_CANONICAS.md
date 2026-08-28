@@ -22169,6 +22169,22 @@ porque el vencido está actualizado.
 > `L-432` conviviendo: dos leyes con el mismo número son peores que una mal
 > numerada.*
 
+#### L-434 · UN PEDIDO AUTOCONTENIDO FIJA NOMBRES — CAMBIARLOS DESPUÉS ES DESHACERLO
+
+> ### **Cuando la otra pista ya fabricó la cerradura, la llave no se renombra «porque este nombre es mejor».**
+
+**El caso, y es un error propio de A (28-ago-2026):** C mandó un pedido autocontenido pidiendo una bandera de país con la clave **`guarderia`**, y **dejó su mitad construida e INERTE contra ese nombre** (molde S91). A la construyó como **`daycare`** — con un argumento razonable: *el resto de `services_enabled` está en inglés* (`walking`, `grooming`, `hotel`).
+
+**El argumento era cierto y la decisión estaba mal.** El pedido autocontenido **es el contrato entre las dos pistas**; su valor entero está en que el otro pueda construir sin volver a preguntar. *Renombrar la llave después convierte un pedido autocontenido en una conversación — que es exactamente lo que el molde existe para evitar.*
+
+### Lo operativo
+
+1. **Los nombres de un pedido autocontenido se toman VERBATIM**, aunque quien construye tenga un nombre mejor. **Si el nombre importa, se discute ANTES de que el otro construya** — después ya no es una opinión sobre estética, es romper una pieza que existe.
+2. **La coherencia de vocabulario es de la mesa, y vale menos que un contrato ya construido de un lado.** *Se declara el costo y se sigue: `services_enabled` queda con once claves en inglés y una en español, y eso es más barato que una pista recodificando.*
+3. **Y la cura, cuando ya pasó, es la que se aplicó:** corregir en **la migración SIGUIENTE**, jamás editando la aplicada — *una migración aplicada es historia; editarla es reescribir lo que ya le pasó a la base.*
+
+**Su hermana es la excepción legítima del método §6** (*se comparte la FORMA, la voz es de cada casa*): allá el que construye conserva su voz; **acá el nombre no es voz, es interfaz** — y la interfaz la fija quien la pidió.
+
 #### L-433 — UN CENSO QUE DA CERO VERIFICA PRIMERO QUE LA PÁGINA VIVA
 
 > **Texto de la pista B, depositado VERBATIM por A el 28-ago-2026** (`docs/` es
@@ -23341,6 +23357,63 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 **Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
+
+#### D-960 — ☠️ CERRADA EL MISMO DÍA (28-ago-2026) — UN SERVICIO QUE CUELGA DEL FLAG DE OTRO DESAPARECE CUANDO EL OTRO SE ENCIENDE
+
+**Hallada por C midiendo su pantalla, cerrada por A en la migración siguiente. Se registra igual, porque el defecto era LATENTE y la clase vale más que el caso.**
+
+**Lo medido:** `apps/cliente/src/app/(tabs)/explorar/index.tsx:105` decía
+
+```js
+if (!servicios.hotel) proximamente.push({ hotel }, { guarderia });
+```
+
+> ### 🔴 La guardería colgaba del flag de HOTEL. **El día que hotel abriera, la guardería no pasaba a activa: DESAPARECÍA de la pantalla** — no tiene ficha propia — **y nadie se habría enterado hasta ir a buscarla.**
+
+**Por qué es de la familia que esta sesión viene cazando: el modo de falla es la AUSENCIA.** *Encender un servicio no produce un error en otro; produce que el otro deje de estar. No hay excepción, no hay log, no hay pantalla rota — hay una ficha menos en una lista.*
+
+**Y además unía en el código lo que la letra separa:** `LETRA_GUARDERIA` §5 dice *«la noche NO es guardería: es hotel, y es otro servicio con su propia letra»*. **Compartir bandera es unir en el código lo que la letra separó** — y una decisión de producto que sólo vive en una condición de pantalla no la ve nadie.
+
+☠️ **CERRADA:** `country_config.services_enabled` gana la clave **`guarderia`** (migraciones `20260828210000` + `20260828220000`), `paisConfig.ts` la expone, y C desacopló su lado.
+
+⚠️ **Y LA ADVERTENCIA QUE VA CON ELLA, adoptada por la mesa — el flag es LA MITAD DE LA LLAVE:**
+
+| estado | qué pasa |
+|---|---|
+| **flag encendido, sin oferta** | la ficha abre a **una lista vacía** |
+| **oferta publicada, sin flag** | **hay guarderías y ninguna familia llega** |
+
+> ### **SE ENCIENDEN JUNTAS, Y LA OFERTA VA PRIMERO.**
+
+*Por eso la bandera nace en `false` en los dos países y su cinturón lo verifica: encenderla es una firma, y es una línea.*
+
+#### D-959 — 🔴 ONCE OFERTAS VIVAS SON INVISIBLES EN SU PROPIA VITRINA, POR UN DEFAULT
+
+🔴 **ALTA. Hallada el 28-ago-2026 por el cinturón de la oferta de guardería, buscando otra cosa.**
+
+**El mecanismo, en tres líneas y ninguna es un bug de código:**
+
+1. `prestador_servicios.especies_compatibles` es **`NOT NULL` con `DEFAULT '[]'::jsonb`**.
+2. **Todos** los lectores de ofertas cobrables de la casa la leen igual:
+   `(ps.especies_compatibles IS NULL OR ps.especies_compatibles ? m.especie)` —
+   con el comentario *«el prestador ACOTA; **NULL = rige el techo del tipo**»*.
+3. 🔴 **Con `NOT NULL`, la rama `IS NULL` es INALCANZABLE.** ⇒ una oferta que
+   nadie tocó queda en `[]`, y `[]` **no matchea ninguna especie**.
+
+> ### **«No acota» es INEXPRESABLE, y el valor que el default pone significa exactamente lo contrario: «no acepta a nadie».**
+
+### El número, medido el 28-ago
+
+**11 ofertas `activo=true` y `reservable=true` con `especies_compatibles = []`** — y **no son de guardería**: `paseo` (×2) · `grooming` · `adiestramiento` · `consulta_general` (×2) · `vacunacion` · `emergencia`… entre ellas una de **Satori Latam**. **Todas invisibles hoy en el lector de su propio oficio.**
+
+🔴 **Y por qué nadie lo vio: el modo de falla es la AUSENCIA.** *Una oferta que no aparece no produce error, no loguea, no rompe una pantalla — produce una vitrina con menos prestadores, que se lee exactamente igual que una vitrina honesta.* **Es `L-425` otra vez** (*un cero no dice «no hay»: dice «no vi»*), esta vez del lado del dato.
+
+**Lo que NO se hizo, y con su razón:** curar las 11 filas. **Decidir qué especies acepta cada oferta ajena es adivinar por su dueño** — y la cura de fondo es de vocabulario (¿se permite `NULL`? ¿`[]` pasa a significar «no acota»?), o sea **decisión, no parche**. *Cambiar el significado de un valor que ya está escrito en 14 filas no se hace de paso.*
+
+**Lo que SÍ se hizo:** la oferta de guardería **nace con el techo de su tipo, derivado de `tipos_servicio.especies_elegibles` y no tecleado** — así el default nunca la alcanza.
+
+**Dueño:** A (el vocabulario) + mesa (si `[]` cambia de significado). **Disparo:** antes de abrir cualquier oficio a familias reales — *es plata que no entra y nadie sabe que no entró.*
+☠️ **Condición de muerte:** que «no acota» sea expresable **y** las 11 filas resueltas por su dueño, una por una.
 
 #### D-958 — 🟠 EL PASEO ES GRUPAL POR NORMA, Y SU FOTO DE GRUPO LLEGA A UN SOLO DUEÑO
 

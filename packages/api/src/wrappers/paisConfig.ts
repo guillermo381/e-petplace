@@ -15,6 +15,12 @@ export interface ServiciosPais {
   telemedicine: boolean;
   adoption: boolean;
   hotel: boolean;
+  /* S107 · guardería tiene bandera PROPIA. Hasta hoy colgaba de `hotel` en la
+     pantalla de Explorar, y eso tenía un defecto latente: **el día que hotel
+     abriera, la guardería no pasaba a activa — DESAPARECÍA** (lo midió C). Y
+     además unía en el código lo que `LETRA_GUARDERIA` §5 separa con todas las
+     letras. */
+  guarderia: boolean;
   insurance: boolean;
   prime: boolean;
 }
@@ -51,6 +57,7 @@ export async function obtenerServiciosPais(
       telemedicine: leerBandera(o, 'telemedicine'),
       adoption: leerBandera(o, 'adoption'),
       hotel: leerBandera(o, 'hotel'),
+      guarderia: leerBandera(o, 'guarderia'),
       insurance: leerBandera(o, 'insurance'),
       prime: leerBandera(o, 'prime'),
     },

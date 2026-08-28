@@ -6625,11 +6625,19 @@ function PiezasDelOficioS107() {
   const dias = Array.from({ length: 30 }, (_, i) => {
     const n = i + 1
     const lleno = n === 6 || n === 7 || n === 19
+    const sobra = n === 12
     return {
       clave: `d${n}`,
       numero: String(n),
-      estado: (lleno ? 'sin_cupo' : 'elegible') as 'sin_cupo' | 'elegible',
-      motivo: lleno ? 'Ese día ya no tiene lugar' : undefined,
+      estado: (sobra ? 'sobrevendido' : lleno ? 'sin_cupo' : 'elegible') as
+        | 'sobrevendido'
+        | 'sin_cupo'
+        | 'elegible',
+      motivo: sobra
+        ? 'Ese día quedó por encima del cupo'
+        : lleno
+          ? 'Ese día ya no tiene lugar'
+          : undefined,
     }
   })
 
@@ -6646,7 +6654,23 @@ function PiezasDelOficioS107() {
           cabecerasDias={['L', 'M', 'X', 'J', 'V', 'S', 'D']}
           elegido={dia}
           onElegir={setDia}
-          rotulo="Agosto"
+          rotulo="Agosto · vista del DUEÑO (default)"
+        />
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↑ el 12 está SOBREVENDIDO y acá se ve igual que un día lleno — firma de
+          mesa: es problema operativo del lugar · ↓ la MISMA data con
+          `revelaSobreventa` (prestador). **El par es el gate**: si los dos se
+          vieran igual, la prop no hace nada; si el de arriba distinguiera el 12,
+          se le está contando al dueño un problema ajeno
+        </Text>
+        <CalendarioCupo
+          dias={dias}
+          columnaInicial={3}
+          cabecerasDias={['L', 'M', 'X', 'J', 'V', 'S', 'D']}
+          elegido={dia}
+          onElegir={setDia}
+          rotulo="Agosto · vista del PRESTADOR"
+          revelaSobreventa
         />
       </View>
 
@@ -6806,7 +6830,8 @@ function PiezasDelOficioS107() {
       {/* ⑧ LA ACEPTACIÓN DE DOCUMENTOS */}
       <View style={{ gap: spacing[2] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          AceptacionDeDocumentos · la lista es DATO · el opcional va separado y JAMÁS pre-marcado
+          AceptacionDeDocumentos · la lista es DATO · el opcional va separado y JAMÁS pre-marcado · el
+          label del lector es la FRASE ENTERA («Acepto los Términos del servicio»), no la primera mitad
         </Text>
         <AceptacionDeDocumentos
           marcadas={aceptadas}

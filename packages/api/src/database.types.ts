@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -828,6 +828,44 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_daas_eligible_users"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      bono_desglose: {
+        Row: {
+          bono_id: string
+          congelado_en: string
+          fee_config_id: string | null
+          impuesto: number
+          moneda: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          bono_id: string
+          congelado_en?: string
+          fee_config_id?: string | null
+          impuesto?: number
+          moneda: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          bono_id?: string
+          congelado_en?: string
+          fee_config_id?: string | null
+          impuesto?: number
+          moneda?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bono_desglose_bono_id_fkey"
+            columns: ["bono_id"]
+            isOneToOne: true
+            referencedRelation: "bonos"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2235,6 +2273,7 @@ export type Database = {
           created_at: string
           edad_inicio_meses: number | null
           especie_codigo: string
+          exigida_guarderia: boolean
           obligatoria: boolean
           orden: number
           periodicidad_meses: number | null
@@ -2245,6 +2284,7 @@ export type Database = {
           created_at?: string
           edad_inicio_meses?: number | null
           especie_codigo: string
+          exigida_guarderia?: boolean
           obligatoria?: boolean
           orden?: number
           periodicidad_meses?: number | null
@@ -2255,6 +2295,7 @@ export type Database = {
           created_at?: string
           edad_inicio_meses?: number | null
           especie_codigo?: string
+          exigida_guarderia?: boolean
           obligatoria?: boolean
           orden?: number
           periodicidad_meses?: number | null
@@ -12746,6 +12787,7 @@ export type Database = {
           actualizado_en: string
           authorization_code: string | null
           bin: string | null
+          bono_id: string | null
           cerrado_en: string | null
           cita_id: string | null
           clave_idempotencia: string
@@ -12784,6 +12826,7 @@ export type Database = {
           actualizado_en?: string
           authorization_code?: string | null
           bin?: string | null
+          bono_id?: string | null
           cerrado_en?: string | null
           cita_id?: string | null
           clave_idempotencia: string
@@ -12822,6 +12865,7 @@ export type Database = {
           actualizado_en?: string
           authorization_code?: string | null
           bin?: string | null
+          bono_id?: string | null
           cerrado_en?: string | null
           cita_id?: string | null
           clave_idempotencia?: string
@@ -12857,6 +12901,13 @@ export type Database = {
           url_redireccion?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pagos_intentos_bono_id_fkey"
+            columns: ["bono_id"]
+            isOneToOne: false
+            referencedRelation: "bonos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pagos_intentos_cita_id_fkey"
             columns: ["cita_id"]
@@ -20531,6 +20582,24 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      _guarderia_ofertas_cobrables: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          ciudad: string
+          direccion: string
+          jornada_minutos: number
+          precio: number
+          precio_mensual: number
+          precio_paquete: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+        }[]
+      }
+      _guarderia_puede_reservar: {
+        Args: { p_mascota_id: string }
+        Returns: Json
+      }
       _inicios_disponibles_prestador: {
         Args: {
           p_duracion_minutos: number
@@ -21443,6 +21512,16 @@ export type Database = {
         }
         Returns: Json
       }
+      definir_oferta_guarderia: {
+        Args: {
+          p_activo?: boolean
+          p_precio_dia: number
+          p_precio_mensual?: number
+          p_precio_paquete?: number
+          p_prestador_id: string
+        }
+        Returns: Json
+      }
       definir_recurso_reparto: {
         Args: {
           p_activo?: boolean
@@ -21576,6 +21655,10 @@ export type Database = {
       escenario_paseo_iniciado: { Args: never; Returns: Json }
       estado_correo_invitacion: {
         Args: { p_invitacion_id: string }
+        Returns: Json
+      }
+      evaluar_requisitos_guarderia: {
+        Args: { p_mascota_id: string }
         Returns: Json
       }
       existe_invitacion_pendiente: {
@@ -22134,6 +22217,27 @@ export type Database = {
         }[]
       }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_guarderias_disponibles: {
+        Args: {
+          p_fecha: string
+          p_lat?: number
+          p_lon?: number
+          p_mascota_id: string
+        }
+        Returns: {
+          ciudad: string
+          direccion: string
+          disponible: number
+          jornada_minutos: number
+          precio: number
+          precio_mensual: number
+          precio_paquete: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          sobrevendido: boolean
+        }[]
+      }
       obtener_historial_clinico_mascota: {
         Args: {
           p_caso_clinico_id?: string
@@ -22957,6 +23061,10 @@ export type Database = {
       reordenar_fotos_prestador: {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined
+      }
+      reservar_dia_guarderia: {
+        Args: { p_fecha: string; p_mascota_id: string; p_prestador_id: string }
+        Returns: Json
       }
       reservar_salida_paquete: {
         Args: {
