@@ -1,5 +1,12 @@
 # EL CUADRO CAPTURA Y BLOQUEA — la evidencia que ya estaba en el log
 
+> 🔴 **LEER LA ENMIENDA DEL PIE ANTES QUE ESTE CUERPO.** Lo de arriba concluye
+> que la capa *«explica los tres síntomas de una vez»*. **Es falso y está
+> corregido abajo con medición:** el founder midió que **cada uno ve su propia
+> cámara y ninguno la del otro**, y eso no lo produce un `zIndex` — es
+> **transporte**. La capa era un defecto real y su cura queda; **no era la causa
+> de esto.**
+
 **A · 27-ago-2026, 22:58.** Del log de la captura ejercida (`/tmp/c5.log`,
 Samsung `R5CY201ZDVL`, OTA `01a04680`). **Nadie tiene que reproducir nada para
 tener esto**: la ventana de escucha cubrió los 21 segundos posteriores.

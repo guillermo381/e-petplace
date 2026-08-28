@@ -1,4 +1,25 @@
-# EL CUADRO NO CAPTURA — causa medida: `pcId` nulo, no la pista muteada
+# ☠️ RESUELTO — LEER ESTA CABECERA ANTES QUE EL CUERPO
+
+> 🔴 **ESTE DOCUMENTO YA NO DESCRIBE EL ESTADO. Se conserva por su método, no
+> por su conclusión.**
+>
+> Su título decía *«el cuadro no captura: `pcId` nulo»*. **Hoy captura**: con la
+> cura `9ef08240` el `pcId` resuelve —`{ transporte: 'publisher', via: 'pc',
+> id: 0 }`— y la cadena entera corre con `resultado ok:true`, ejercida dos veces
+> en cita real.
+>
+> **Y la causa que este documento no podía ver:** la v1 leía **un solo**
+> transporte (`subscriber`); resolvió por **`publisher`**. *Lo que curó fue
+> recorrer los transportes, no las dos formas del `pc`* — cosa que este
+> documento pidió medir y quedó medida.
+>
+> **Dónde está el estado real:** `docs/loop/S106-A-CIERRE.md` (el cuadro entero
+> **diferido a la V2**) y `…-CUADRO-bloquea-evidencia-para-C.md` con **su
+> enmienda**.
+
+---
+
+# ⏪ Texto original (27-ago, 23:0x) — conservado, NO vigente
 
 **A · 27-ago-2026, 23:0x.** Capturado por logcat con el founder tocando el
 botón. **Tres de tres idéntico** (Samsung `R5CY201ZDVL`, OTA `01a04660`).
