@@ -69,6 +69,27 @@ const MIN_SIMBOLO_DEUNA = 16;
  * `apps/prestador/src/i18n/es.ts` es **deuda declarada, sin dueño en esta
  * mesa** — nunca se barrió entero (S77 curó 8/8 del prestador, que era otro
  * lote). Verificado contra `origin/main`: **47**.
+ *
+ * ── ✏️ FIRMA DE LA MESA (28-ago-2026, S107) ──────────────────────────────
+ *
+ * > ### **LAS APPS HABLAN TUTEO AL USUARIO — LAS DOS APPS, LAS CUATRO PISTAS.**
+ *
+ * Ratifica la decisión del founder de S51 (regla 27) y **la extiende a la
+ * forma de trabajo**: ninguna pista escribe voz de producto en voseo, ni en
+ * el cliente ni en el prestador. *La voz de la mesa y la voz del producto son
+ * dos registros distintos; el chat vosea, la app no.*
+ *
+ * ⚠️ **Y EL TRINQUETE NO SE MOVIÓ, con su medición al lado.** La mesa ratificó
+ * un ajuste de **47 → 51**. **Medido el 28-ago con el propio instrumento
+ * (`hitsDeArchivo`) sobre `main`: el archivo tiene EXACTAMENTE 47** — y R66
+ * está VERDE. **Subirlo a 51 dejaría lugar para cuatro voseos nuevos sin nada
+ * que los cace**, que es literalmente el defecto que esta regla existe para
+ * cerrar y que su propio encabezado narra dos párrafos más arriba.
+ *
+ * ⇒ **Se deja en 47 y se declara.** Si C curó su voseo, 47 es el número
+ * correcto y no hay nada que hacer; si quedaron cuatro sin curar, **se curan**
+ * — no se les hace lugar. *Un baseline se mueve cuando la realidad se mueve,
+ * y acá la realidad dice 47.*
  */
 const BASELINE_VOSEO = {
   /* ── VOZ DE LAS APPS ──────────────────────────────────────────────────── */

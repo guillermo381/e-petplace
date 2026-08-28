@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -20531,6 +20531,20 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      _guarderia_ofertas_cobrables: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          ciudad: string
+          direccion: string
+          jornada_minutos: number
+          precio: number
+          precio_mensual: number
+          precio_paquete: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+        }[]
+      }
       _inicios_disponibles_prestador: {
         Args: {
           p_duracion_minutos: number
@@ -21443,6 +21457,16 @@ export type Database = {
         }
         Returns: Json
       }
+      definir_oferta_guarderia: {
+        Args: {
+          p_activo?: boolean
+          p_precio_dia: number
+          p_precio_mensual?: number
+          p_precio_paquete?: number
+          p_prestador_id: string
+        }
+        Returns: Json
+      }
       definir_recurso_reparto: {
         Args: {
           p_activo?: boolean
@@ -22134,6 +22158,27 @@ export type Database = {
         }[]
       }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_guarderias_disponibles: {
+        Args: {
+          p_fecha: string
+          p_lat?: number
+          p_lon?: number
+          p_mascota_id: string
+        }
+        Returns: {
+          ciudad: string
+          direccion: string
+          disponible: number
+          jornada_minutos: number
+          precio: number
+          precio_mensual: number
+          precio_paquete: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          sobrevendido: boolean
+        }[]
+      }
       obtener_historial_clinico_mascota: {
         Args: {
           p_caso_clinico_id?: string

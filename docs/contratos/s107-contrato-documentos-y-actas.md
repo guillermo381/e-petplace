@@ -140,6 +140,26 @@ guarderia_actas
 
 **Wrappers:** `levantarActaGuarderia({ estadiaId, direccion, carnetVerificado, objetos?, observaciones?, mediaIds[] })` · `confirmarActaGuarderia({ actaId, conformidad, reservaTexto? })` — **el segundo sólo lo puede llamar la familia de esa mascota**, gateado en el server.
 
+### 🔴 `levantarActaGuarderia` ES IDEMPOTENTE — pedido de D, adoptado por la mesa
+
+**`UNIQUE (estadia_id, direccion)` es la idempotencia natural, y NO alcanza.** Un segundo intento choca contra el índice y sale un **`23505` pelado** ⇒ la cola lo lee como fallo y **el acta CORRECTA queda en error para siempre**.
+
+> ### **Un guard que vive en un ÍNDICE sólo sabe negarse** (`L-424`).
+
+**Segundo intento = ÉXITO que devuelve el acta que ya existe** (`ya_existia: true`), con `claveIdempotencia` generada por el cliente antes del primer intento y reusada en cada reintento.
+
+⚠️ **Es el MISMO defecto un contrato más allá que el de `publicarMedia`** — y eso es lo que lo vuelve una regla y no dos parches: **toda puerta que una cola con reintentos vaya a llamar declara su idempotencia en el tipo.** *Si aparece una tercera, ya no es un descubrimiento: es que no aplicamos la regla.*
+
+### 🔴 EL ACTA VIAJA ENTERA, Y LA HORA ES LA DE LA PUERTA — decisión de D, adoptada
+
+**El acta se encola COMPLETA junto a sus fotos y viaja cuando todas están arriba.** No se publica el acta primero y las fotos después: *un acta sin sus fotos es exactamente el registro que no sirve para lo que existe.*
+
+> ### 🔴 **LA HORA QUE VIAJA ES LA DE LA PUERTA, JAMÁS LA DE LA SUBIDA.**
+>
+> **En un registro que existe para responder «cuándo apareció la lesión», esa diferencia es el registro entero.** *Un acta levantada a las 7:55 en la vereda y subida a las 9:40 cuando volvió la señal, fechada 9:40, ubica al animal en el lugar equivocado a la hora equivocada — y lo hace con la autoridad de un sello de tiempo.*
+
+⇒ `cerrada_en` **lo manda el cliente** (el instante de la puerta) y el server **no lo pisa con `now()`**; el instante de llegada al servidor, si hace falta auditarlo, es un campo aparte. *Dos relojes distintos, dos columnas distintas — jamás uno sobrescribiendo al otro.*
+
 ---
 
 ## ⑤ LO QUE ESTE CONTRATO **NO** CUBRE
