@@ -3217,5 +3217,6 @@ export const prestadorEn = {
     arbitrajeAccesible: 'I agree to resolve disputes through arbitration. It is optional.',
     arbitrajeNota:
       'If you don’t check this, the contract still applies and disputes go to the courts of Ecuador.',
+    opcionalRotulo: 'Optional',
   },
 } as const satisfies Espejo<typeof prestadorEs>;
