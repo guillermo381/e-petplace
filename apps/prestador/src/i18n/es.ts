@@ -4085,5 +4085,9 @@ export const prestadorEs = {
     arbitrajeAccesible: 'Acepto resolver las controversias por arbitraje. Es opcional.',
     arbitrajeNota:
       'Si no marcas esto, el contrato igual rige y las controversias van a los jueces del Ecuador.',
+    /* S107-C · rotula la SECCIÓN opcional. La pieza generalizada separa las dos
+       familias con un `Separador` y este rótulo: sin él, un opcional mezclado
+       entre obligatorios se marca por inercia. */
+    opcionalRotulo: 'Opcional',
   },
 } as const;

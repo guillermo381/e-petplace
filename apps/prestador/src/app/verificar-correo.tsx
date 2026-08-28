@@ -39,7 +39,7 @@ import {
 } from '@epetplace/api';
 
 import { marcarRegistroReciente } from '@/lib/registro-reciente';
-import { urlTycProfesional } from '@/components/aceptacion-terminos';
+import { urlTycProfesional } from '@/lib/aceptacion-prestador';
 import { useTraduccion } from '@/i18n';
 
 const LARGO_CODIGO = 8;

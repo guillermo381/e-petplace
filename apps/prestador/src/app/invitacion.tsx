@@ -32,6 +32,7 @@ import { View } from 'react-native';
 import { Redirect, useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AceptacionDeDocumentos,
   Boton,
   EstadoVacio,
   Esqueleto,
@@ -57,10 +58,12 @@ import {
 
 import {
   ACEPTACION_INICIAL,
-  AceptacionTerminos,
   aceptacionCompleta,
+  aplicarCambio,
+  marcadasDe,
   urlTycProfesional,
-} from '@/components/aceptacion-terminos';
+  useDocumentosAceptacion,
+} from '@/lib/aceptacion-prestador';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -84,6 +87,7 @@ export default function Invitacion() {
   // founder (a)): dos checks obligatorios + el arbitraje opcional, ANTES de
   // entrar. Acá hay sesión, así que todo se registra en el mismo acto.
   const [aceptacion, setAceptacion] = useState(ACEPTACION_INICIAL);
+  const docs = useDocumentosAceptacion();
 
   useFocusEffect(
     useCallback(() => {
@@ -226,10 +230,25 @@ export default function Invitacion() {
             el arbitraje opcional. `stretch` para que las casillas se alineen a
             la izquierda dentro de la composición centrada. */}
         <View style={{ alignSelf: 'stretch' }}>
-          <AceptacionTerminos
-            estado={aceptacion}
-            onCambio={(p) => setAceptacion((a) => ({ ...a, ...p }))}
+          {/* ── S107-C · `D-645` MIGRADA: monta la pieza de la casa ──
+              La forma es la misma; lo que cambió es de dónde viene. La lista
+              de documentos entra por prop (voz + URLs los arma la app, que es
+              quien las tiene), y `AceptacionDeDocumentos` sólo reporta qué se
+              marcó: no valida ni registra. El gate del botón sigue acá abajo y
+              el registro lo hace el motor (P23). */}
+          <AceptacionDeDocumentos
+            registro="oficio"
+            documentos={docs.documentos}
+            opcionales={docs.opcionales}
+            rotuloOpcionales={docs.rotuloOpcionales}
+            marcadas={marcadasDe(aceptacion)}
+            onCambiar={(clave, m) => setAceptacion((a) => ({ ...a, ...aplicarCambio(clave, m) }))}
           />
+          {/* La nota del arbitraje: dice qué pasa si NO se marca, y eso es
+              contenido legal. La pieza rotula la SECCIÓN opcional pero no tiene
+              ranura para una nota POR documento — con un solo opcional, acá
+              debajo queda donde estaba. */}
+          <Texto variante="apoyo">{docs.notaArbitraje}</Texto>
         </View>
         <Entrada orden={1}>
         <Boton
