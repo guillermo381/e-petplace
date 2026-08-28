@@ -42,6 +42,21 @@ import { TemporizadorLlamada } from '../components/TemporizadorLlamada'
 import { EstadoConexion } from '../components/EstadoConexion'
 import { EncabezadoLlamada } from '../components/EncabezadoLlamada'
 import { SuperficieLlamada } from '../components/SuperficieLlamada'
+// ── S107-B · LAS PIEZAS DEL OFICIO ──────────────────────────────────────────
+// Entran a la galería por `R17` («la galería no envejece»), y acá esa regla
+// paga doble: **la galería es el único consumidor que llena TODAS las props**,
+// así que es lo que hace que el typecheck las vea. *Una prop que nadie llena
+// no la ve ningún typecheck — se pagó cinco veces.*
+import { ActaDeEntrega } from '../components/ActaDeEntrega'
+import { AceptacionDeDocumentos } from '../components/AceptacionDeDocumentos'
+import { CalendarioCupo } from '../components/CalendarioCupo'
+import { ContadorClip } from '../components/ContadorClip'
+import { FichaFranja } from '../components/FichaFranja'
+import { FichaMensualidad } from '../components/FichaMensualidad'
+import { HiloDelDia } from '../components/HiloDelDia'
+import { MiniaturaClip } from '../components/MiniaturaClip'
+import { SelectorRoster } from '../components/SelectorRoster'
+import { SemaforoSanitario } from '../components/SemaforoSanitario'
 import { TileVideoPropio } from '../components/TileVideoPropio'
 import { ModalDosAlturas, AsaModal } from '../components/ModalDosAlturas'
 import { sobreVideo } from '../tokens/sobreVideo'
@@ -6565,10 +6580,247 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="S107-B · LAS PIEZAS DEL OFICIO · qué decide: (a) que el día LLENO se lea lleno y diga por qué SIN tocar nada, (b) que el roster arranque VACÍO y su casilla se lea como «podés elegir varios» antes del primer toque, y (c) que el faltante sanitario se lea como TAREA y no como error. ⚠️ Los textos son de relleno: el lote de strings lo lee el founder aparte — ninguna pieza trae voz propia (LETRA_GUARDERIA está FRENADA, D-918/D-919)">
+          <PiezasDelOficioS107 />
+        </Seccion>
+
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
           tema activo: {mode} · gradiente ui: {gradients.firmaUILight.angle}deg
         </Text>
       </View>
     </ScrollView>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   S107-B · LAS PIEZAS DEL OFICIO — la muestra.
+
+   🔴 TODAS LAS PROPS SE LLENAN ACÁ, y no es por prolijidad de demo: es lo que
+   hace que el typecheck vea el contrato. *Una prop que nadie llena no la ve
+   ningún typecheck.* Si mañana alguien le cambia la forma a una de estas
+   piezas, este archivo es lo que sale en rojo.
+
+   ⚠️ Los textos son DE RELLENO. Ninguna pieza trae voz propia (perímetro §0:
+   `LETRA_GUARDERIA` está frenada — `D-918`/`D-919`), así que lo que se ve acá
+   son cadenas de demostración, jamás la voz del producto. `R66` las exceptúa
+   por vivir en la galería.
+   ───────────────────────────────────────────────────────────────────────── */
+function PiezasDelOficioS107() {
+  const { theme } = useTheme()
+
+  const [dia, setDia] = useState<string | null>(null)
+  const [roster, setRoster] = useState<string[]>([])
+  const [obs, setObs] = useState('')
+  const [items, setItems] = useState([
+    { clave: 'carnet', etiqueta: 'Carnet a la vista', marcado: true },
+    { clave: 'correa', etiqueta: 'Correa', marcado: false },
+    { clave: 'manta', etiqueta: 'Manta', marcado: false },
+  ])
+  const [aceptadas, setAceptadas] = useState<string[]>([])
+  const [inicioClip, setInicioClip] = useState<number | null>(null)
+
+  /* El mes de muestra: 30 días, con tres llenos y uno de ellos con su razón.
+     `columnaInicial` la manda el riel — acá se fija a mano porque es una
+     muestra, no una pantalla. */
+  const dias = Array.from({ length: 30 }, (_, i) => {
+    const n = i + 1
+    const lleno = n === 6 || n === 7 || n === 19
+    return {
+      clave: `d${n}`,
+      numero: String(n),
+      estado: (lleno ? 'sin_cupo' : 'elegible') as 'sin_cupo' | 'elegible',
+      motivo: lleno ? 'Ese día ya no tiene lugar' : undefined,
+    }
+  })
+
+  return (
+    <View style={{ gap: spacing[6] }}>
+      {/* ① EL CALENDARIO DE CUPO */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          CalendarioCupo · el lleno se dibuja, no se toca, y su razón está abajo SIN tocar nada
+        </Text>
+        <CalendarioCupo
+          dias={dias}
+          columnaInicial={3}
+          cabecerasDias={['L', 'M', 'X', 'J', 'V', 'S', 'D']}
+          elegido={dia}
+          onElegir={setDia}
+          rotulo="Agosto"
+        />
+      </View>
+
+      {/* ② LAS DOS FICHAS HERMANAS */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          FichaFranja + FichaMensualidad · la MISMA pieza en la config del prestador y en el perfil del lugar
+        </Text>
+        <FichaFranja
+          conSuperficie
+          rotulo="La franja"
+          recogida={{ rotulo: 'Recoge', desde: '7:00', hasta: '9:00' }}
+          devolucion={{ rotulo: 'Devuelve', desde: '16:30', hasta: '18:30' }}
+        />
+        <FichaMensualidad conSuperficie rotulo="El mes" dias="Lun–Vie" valor={180} porUnidad="el mes" />
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ el borde: una franja con la devolución SIN declarar — ni rango vacío ni separador huérfano
+        </Text>
+        <FichaFranja conSuperficie recogida={{ rotulo: 'Recoge', desde: '7:00', hasta: '9:00' }} />
+      </View>
+
+      {/* ③ EL SEMÁFORO SANITARIO */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          SemaforoSanitario · el faltante es TAREA (ochre), jamás error — y lleva su camino a un toque
+        </Text>
+        <SemaforoSanitario
+          rotulo="Para entrar"
+          requisitos={[
+            { clave: 'rabia', etiqueta: 'Vacuna antirrábica', estado: 'al_dia', detalle: 'vence 12 mar 2027' },
+            {
+              clave: 'quintuple',
+              etiqueta: 'Quíntuple',
+              estado: 'falta',
+              detalle: 'no la encontramos en el carnet',
+              onResolver: () => {},
+              etiquetaResolver: 'Cargar el carnet',
+            },
+            {
+              clave: 'desparasitacion',
+              etiqueta: 'Desparasitación',
+              estado: 'falta',
+              onResolver: () => {},
+              etiquetaResolver: 'Cargar el carnet',
+            },
+          ]}
+        />
+      </View>
+
+      {/* ④ EL SELECTOR DE ROSTER */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          SelectorRoster · arranca VACÍO (etiquetar de más rompe más que de menos) · seleccionadas: {roster.length}
+        </Text>
+        <SelectorRoster
+          rotulo="¿Quiénes salen en esta foto?"
+          etiquetaTodos="Están todos"
+          miembros={[
+            { clave: 'thor', nombre: 'Thor' },
+            { clave: 'zeus', nombre: 'Zeus' },
+            { clave: 'luna', nombre: 'Luna' },
+            { clave: 'nube', nombre: 'Nube' },
+            { clave: 'kira', nombre: 'Kira' },
+          ]}
+          seleccionadas={roster}
+          onCambiar={setRoster}
+        />
+      </View>
+
+      {/* ⑤ EL MODO CLIP Y LA MINIATURA */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ContadorClip · sube a 0:30 y corta solo · JAMÁS rojo (§1.5) — tocá para arrancar
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          <Boton
+            variante="secundario"
+            etiqueta={inicioClip === null ? 'Grabar' : 'Cortar'}
+            onPress={() => setInicioClip(inicioClip === null ? Date.now() : null)}
+          />
+          {inicioClip === null ? null : (
+            <ContadorClip inicioTs={inicioClip} techoSeg={30} onTecho={() => setInicioClip(null)} />
+          )}
+        </View>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          MiniaturaClip · la marca y la duración van con la clase «control sobre video» (§6septies), no con el tema
+        </Text>
+        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          <MiniaturaClip duracion="0:12" onPress={() => {}} accesibilidadEtiqueta="Clip de la mañana" />
+          <MiniaturaClip onPress={() => {}} accesibilidadEtiqueta="Clip sin póster" />
+        </View>
+      </View>
+
+      {/* ⑥ EL HILO DEL DÍA */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          HiloDelDia · la media entra COMO LLEGA · la hora en columna fija para barrer el día sin leerlo
+        </Text>
+        <HiloDelDia
+          rotulo="Hoy"
+          onAbrirMedia={() => {}}
+          entradas={[
+            { clave: 'e1', hora: '07:12', texto: 'Llegó y saludó a todos.' },
+            {
+              clave: 'e2',
+              hora: '10:40',
+              texto: 'Jugaron en el patio.',
+              media: [
+                { tipo: 'clip', duracion: '0:18', accesibilidadEtiqueta: 'Clip del patio' },
+                { tipo: 'clip', duracion: '0:07', accesibilidadEtiqueta: 'Segundo clip' },
+              ],
+            },
+            { clave: 'e3', hora: '13:05', texto: 'Comió todo.' },
+          ]}
+        />
+      </View>
+
+      {/* ⑦ EL ACTA, EN SUS DOS MODOS */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ActaDeEntrega · modo LEVANTAR (prestador) — no puede firmar conformidad: la prop no existe
+        </Text>
+        <ActaDeEntrega
+          modo="levantar"
+          direccion="recogida"
+          items={items}
+          rotuloItems="Al recibirlo"
+          rotuloObservaciones="Observaciones"
+          etiquetaObservaciones="Qué viste"
+          observaciones={obs}
+          onCambiarObservaciones={setObs}
+          onAlternarItem={(c) =>
+            setItems((prev) => prev.map((i) => (i.clave === c ? { ...i, marcado: !i.marcado } : i)))
+          }
+          conformidad="pendiente"
+          vozConformidad="Todavía sin confirmar"
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ActaDeEntrega · modo LEER (dueño) — el único que puede conformar
+        </Text>
+        <ActaDeEntrega
+          modo="leer"
+          direccion="devolucion"
+          items={items}
+          rotuloItems="Al devolverlo"
+          rotuloObservaciones="Observaciones"
+          observaciones="Volvió tranquilo, sin novedad."
+          conformidad="sin_conformidad"
+          vozConformidad="Registrado sin conformidad"
+          onConformar={() => {}}
+          etiquetaConformar="Estoy conforme"
+        />
+      </View>
+
+      {/* ⑧ LA ACEPTACIÓN DE DOCUMENTOS */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          AceptacionDeDocumentos · la lista es DATO · el opcional va separado y JAMÁS pre-marcado
+        </Text>
+        <AceptacionDeDocumentos
+          marcadas={aceptadas}
+          onCambiar={(clave, m) =>
+            setAceptadas((prev) => (m ? [...prev, clave] : prev.filter((c) => c !== clave)))
+          }
+          documentos={[
+            { clave: 'tyc', texto: 'Acepto los', etiquetaEnlace: 'Términos del servicio', onAbrir: () => {} },
+            { clave: 'priv', texto: 'Acepto la', etiquetaEnlace: 'Política de Privacidad', onAbrir: () => {} },
+          ]}
+          rotuloOpcionales="Opcional"
+          opcionales={[{ clave: 'redes', texto: 'Pueden publicar fotos de mi mascota en redes' }]}
+        />
+      </View>
+    </View>
   )
 }
