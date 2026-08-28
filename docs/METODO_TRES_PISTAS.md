@@ -849,3 +849,63 @@ viaja en los params y **hoy no se manda**), más **un pedido autocontenido en
 disco** con el contrato exacto —`p_token_intento text DEFAULT NULL`, sin token =
 comportamiento de hoy, `ya_existia` como ÉXITO—. *Así el merge no puede romper
 nada y la puerta se abre con una línea el día que exista.*
+
+---
+
+# 🔴 EL MÉTODO DE GATE, ENMENDADO POR FIRMA DEL FOUNDER (S106, 27-ago-2026)
+
+## ⏪ Lo que se retira: **el gate visual en la galería**
+
+Vivía como el paso donde una pieza nueva se miraba aislada en `/gallery` antes
+de montarse. **Su razón de muerte es del founder, literal:**
+
+> *La galería saca la pieza de contexto y duplica esfuerzo.*
+
+## Lo que rige: **RECORRIDO DE USUARIO ESCRITO ANTES DE CONSTRUIR + corrección sobre la app en el dispositivo**
+
+Dos actos, y el orden no es negociable:
+
+1. **Antes de escribir código**, el recorrido se escribe: qué hace la persona,
+   en qué orden, qué ve en cada paso y qué pasa cuando algo falla.
+2. **Después**, el founder lo camina **en el aparato** y corrige ahí.
+
+## Por qué, y esta sesión lo probó con número
+
+**Ocho defectos de S106 los encontró el founder con el teléfono en la mano, y
+ninguno lo podía ver un gate.** Entre ellos: el servicio preseleccionado que
+hacía pagar por lo que nadie eligió · la capa que encerró a un vet en una
+consulta con un animal esperando · el video que se corta en las dos direcciones
+al capturar.
+
+> *Ningún typecheck, lint ni juez ve un recorrido. Ven lo que FALLA; esto
+> FUNCIONA MAL, que es otra cosa.*
+
+**Y la galería no habría visto ninguno**: los ocho nacen de piezas correctas
+puestas en un contexto real — que es exactamente el contexto que la galería
+saca.
+
+---
+
+# EL CRITERIO DE VERDE DE LA CASA (doctrina, misma firma)
+
+> **«CONSTRUIDO» hasta que el founder lo vea andar. JAMÁS «curado».**
+
+Un typecheck verde, un gate verde y una pieza entregada **no son verde**. El
+verde lo da el dedo del founder sobre el aparato, y nada más.
+
+### Sus dos corolarios, los dos medidos en S106
+
+**① Una pieza ENTREGADA y una pieza MONTADA son dos hechos distintos.** *Seis
+veces en una sola sesión se entregó un motor sin su puerta* — el último,
+`subirCuadroTeleconsulta`: existe en `packages/api`, nadie lo llama, y por eso
+ninguna imagen clínica es auditable. **Un motor sin puerta no lo ve ningún
+gate: compila, pasa sus tests y no hace nada.**
+
+**② Una promesa de diseño que el código no expresa es peor que no haberla
+escrito.** *Se confía en ella al leer.* El caso: un comentario prometía que si
+la API interna cambiaba *«el botón no se dibuja y la llamada sigue intacta»* —
+**y el botón se dibujaba igual**, porque la condición sólo miraba la pista.
+
+⇒ **Cuando una ley importa, se expresa donde frena**: en el código, en un
+`CHECK`, en un gate. *Un comentario frena a un lector; sólo un mecanismo frena a
+una mano apurada.*
