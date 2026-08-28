@@ -884,6 +884,18 @@ al capturar.
 puestas en un contexto real — que es exactamente el contexto que la galería
 saca.
 
+### ✏️ PRECISIÓN DE LA FIRMA — *(relayada por la conductora, depositada por A el 28-ago-2026)*
+
+> ⚠️ **Verbatim de SEGUNDA MANO, y se marca como tal (L-142):** B pidió depositarlo y **no tenía el literal**; llegó por relevo de la mesa. **Quien tenga el acta de S106 a mano lo coteja.**
+
+> ### **LA GALERÍA NO DEJA DE EXISTIR NI DE SER OBLIGATORIA. LO QUE MUERE ES QUE EL FOUNDER JUZGUE AHÍ.**
+>
+> `R17` sigue exigiendo que **toda pieza exportada esté montada en la galería**, y ése sigue siendo el mecanismo que hace que el typecheck vea las props — *una prop que nadie llena no la ve ningún typecheck* (se pagó cinco veces).
+>
+> **Consecuencia operativa, y es la que cambia los partes:** una pieza de `packages/ui` **sin pantalla real que la monte NO puede pasar gate visual**. **Su gate espera al consumidor**, y eso **se declara en el parte** en vez de darse por pasado contra la galería.
+
+*Sin esta precisión la firma se lee como «la galería se retira», y la próxima pista deja de montar sus piezas ahí — perdiendo el único lugar donde el compilador ve una prop sin llenar.*
+
 ---
 
 # EL CRITERIO DE VERDE DE LA CASA (doctrina, misma firma)

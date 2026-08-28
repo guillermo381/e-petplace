@@ -21565,8 +21565,21 @@ endpoint** — su peor caso deja sin códigos vivos a todos los demás.
 
 **Dueño:** mesa + abogado. ☠️ **Condición de muerte:** §6 reescrita con una figura que el abogado valide.
 
-#### D-920 — 🔴 LAS FIRMAS DE AYER DICEN 10 % Y LO QUE RIGE DICE 15 %
-🔴 **ALTA — es plata y es firma del founder, no cura de pista.**
+#### D-920 — ☠️ CERRADA (28-ago-2026, S107-A) — LAS FIRMAS DE AYER DICEN 10 % Y LO QUE RIGE DICE 15 %
+> ☠️ **CERRADA POR MEDICIÓN, no por decreto — y su condición de muerte se cumplió literal: las tres fuentes dicen el mismo número con la misma base.**
+>
+> | fuente | medido el 28-ago |
+> |---|---|
+> | **`fee_configs` VIGENTE** (EC · `prestador_servicios` · origen `cita`) | **`{pct: 10, base: "subtotal"}`**, `vigencia_hasta = NULL` |
+> | la fila de 15 % | **`vigencia_hasta = 2026-08-25 16:04` — CERRADA.** Su nota lo dice: *«El lanzamiento va a 10 % con base subtotal. No se borra: 13 citas congeladas apuntan acá»* |
+> | **T&C publicados** (`TERMINOS-PET-PROFESSIONAL.md:220`) | **Servicios 10 %** sobre valor **sin impuestos**; el 15 % **tachado** en la línea 224 |
+> | **firma del founder** (28-ago, guardería) | **10 %, configurable** |
+>
+> 🔴 **POR QUÉ LA FICHA DECÍA OTRA COSA, y es la lección: se leyó una fila VIVA sin mirar su VENTANA DE VIGENCIA.** La fila de 15 % existe y siempre va a existir —13 citas congeladas la necesitan—, pero **dejó de regir el 25-ago**. *Una fila viva y una fila vigente no son lo mismo.* **Es exactamente `D-948` de la pista CERT de esta misma sesión — «la verdad vencida: deriva, no afirma» — cobrada por segunda vez en dos días, en otro documento y sobre otro dato.**
+>
+> ✅ **Consecuencia ejecutada:** se levanta el bloqueo *«ninguna pantalla pinta precio»* del `PLAN_S107_GUARDERIA` §3 y §6. **Y guardería no necesita fila propia de comisión:** la vigente aplica a `tipo_origen='cita'` **sin discriminar oficio** — quien siembre una fila de guardería crea una divergencia que nadie pidió.
+
+🔴 **ALTA — es plata y es firma del founder, no cura de pista.** *(Texto original conservado abajo: la medición que lo motivó era correcta el día que se escribió.)*
 
 **Medido contra las TRES fuentes, y el resultado importa: dos ya concuerdan entre sí.**
 
@@ -22074,6 +22087,91 @@ porque nadie lo había vuelto a medir contra el objeto.***
 > con la orden de que vaya **como ley y no como nota**. Depositado por **A**
 > (`docs/` es su territorio), con el número **verificado por grep**: tope real
 > `L-424`, `L-425` en cero ocurrencias.
+
+#### L-432 · LA VERDAD VENCIDA DERIVA, NO AFIRMA — una fila viva y una fila vigente no son lo mismo
+
+> ### **Un dato con ventana de vigencia sólo puede DERIVAR lo que rige HOY. Leído sin su ventana, no afirma nada — y afirma con toda la seguridad del mundo.**
+
+**Se cobró DOS VECES en dos días, en documentos distintos y sobre datos
+distintos** — por eso sube a ley y no queda como nota de una ficha:
+
+| # | dónde | qué pasó |
+|---|---|---|
+| **①** | pista **CERT**, 27-ago (`D-948`) | se leyó una verdad que ya había vencido y se la citó como vigente |
+| **②** | `D-920`, 28-ago | se leyó la fila de **15 %** de `fee_configs` —**viva, y con razón: 13 citas congeladas la necesitan**— sin mirar que su `vigencia_hasta` era el **25-ago**. La ficha declaró un choque de números que **ya no existía** |
+
+**Por qué el modo de falla es caro y no ruidoso:** la fila **está ahí**, la
+consulta **devuelve**, el número **es real**. *No hay error, no hay NULL, no
+hay nada que se vea raro* — hay un dato correcto contestando una pregunta que
+nadie le hizo. **El que lee obtiene una afirmación donde había, como mucho, una
+derivación.**
+
+### Lo operativo
+
+1. **Toda tabla con `vigencia_desde` / `vigencia_hasta` se consulta CON su
+   ventana**, y la consulta lo dice: *«vigente al ⟨fecha⟩»*, jamás *«la fila
+   dice X»*.
+2. **Una fila vencida NO se borra** —la historia congelada la necesita— **y por
+   eso mismo va a seguir apareciendo en todo `SELECT` ingenuo para siempre.**
+   *El riesgo no se retira: se lee bien.*
+3. **Un choque de números entre fuentes se declara recién después de fechar las
+   dos.** *Dos fuentes que dicen números distintos en fechas distintas no se
+   contradicen: se suceden.*
+
+**Su hermana mayor es `L-166`** (*todo dato vivo se lee al momento de usarlo*):
+aquélla protege del dato **viejo**; ésta, del dato **vencido** — que es peor,
+porque el vencido está actualizado.
+
+> **Depósito:** A, 28-ago-2026, por orden de la mesa. **Número verificado por
+> grep contra el objeto: tope real `L-431` (pista CERT), `L-432` en cero
+> ocurrencias.**
+
+> ⚠️ **COLISIÓN DE NÚMERO, DECLARADA — y es el precedente `D-757` cobrado dos
+> veces en el mismo día.** **B pidió `L-432` para OTRA lección** (*«un censo que
+> da cero verifica primero que la página viva»*), midiendo igual de bien que yo:
+> los dos grepeamos, los dos vimos `L-432` libre, **y los dos teníamos razón en
+> el instante en que medimos.** *El número se ocupó entre una medición y la
+> otra.* **Resuelto sin discutir el fondo: deposita A (`docs/` es su
+> territorio), así que ésta se queda con `L-432` y la de B baja a `L-433` —
+> depositada abajo, con su texto íntegro.** *Lo que no se hace es dejar dos
+> `L-432` conviviendo: dos leyes con el mismo número son peores que una mal
+> numerada.*
+
+#### L-433 — UN CENSO QUE DA CERO VERIFICA PRIMERO QUE LA PÁGINA VIVA
+
+> **Texto de la pista B, depositado VERBATIM por A el 28-ago-2026** (`docs/` es
+> territorio de A; B lo mandó como texto autocontenido, que es como esta casa
+> manda que viaje un pedido entre pistas). **Su número corrió de `L-432` a
+> `L-433` por la colisión declarada arriba** — el contenido no se tocó.
+
+**Un censo sobre una página rota devuelve CERO sin fallar a la vista** — y ese
+cero se lee como *«no está la pieza»* cuando lo cierto es *«no está la
+página»*.
+
+**Medido (S106-B-T3):** se fue a `/gallery` a contar cuatro botones y los
+cuatro dieron 0. El cero no probaba nada: `curl /gallery → HTTP 500`, body
+vacío, **cero errores JS a la vista**. La causa es preexistente y ajena al
+censo — `requireNativeComponent is not a function` desde
+`@livekit/react-native-webrtc`, que entra al bundle web porque el `_layout.tsx`
+del cliente importa `@/lib/livekit` **en el raíz**.
+
+🔴 **Lo que la vuelve cara es que NO HAY SÍNTOMA:** la página responde, el
+navegador no protesta, el censo termina bien y su número es falso. *No falla
+la medición: falla la superficie sobre la que se mide, y el instrumento no
+tiene cómo saberlo.*
+
+**La regla:** todo censo cuyo resultado sea CERO **prueba primero que su
+fuente existe** — control positivo contra un caso de resultado conocido, o el
+estado HTTP de la página, antes de creerle al vacío. **Un cero sin control
+positivo no dice «no hay»: dice «no vi».**
+
+**Familia:** es `L-425` (*un baseline en 0 no dice «no hay»: dice «no vi, con
+la lista de hoy»*) un piso más abajo — allá fallaba la LISTA, acá falla la
+PÁGINA. Y es `L-192` en su forma de siempre: **una verificación cuyo modo de
+falla es el silencio no es una verificación.**
+
+**Re-cobrada el 28-ago (S107-B):** volvió a aparecer al buscar piezas en
+`/gallery`. Segunda vez, misma página, misma causa viva.
 
 
 > ### **La cura es de forma, y por eso funciona: el merge a `main` va en su PROPIO comando, desde el worktree primario, jamás encadenado a un `cd`.**
@@ -23211,3 +23309,77 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 **Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
+
+#### D-956 — ✏️ ENMENDADA Y DESTRABADA (28-ago-2026) — EL CRITERIO v1 DEL GATE SANITARIO, FIRMADO POR LA MESA
+
+> ✏️ **LA FICHA SE ENMIENDA, NO SE CIERRA.** Su título decía *«no tiene con qué
+> ejecutarse»* y **la medición era correcta**; lo que faltaba no era dato, era
+> **criterio**. La mesa lo firmó el 28-ago y **el enforcement se enciende**.
+>
+> ### El criterio v1, firmado
+>
+> - **«al día» = carnet cargado** (foto, a un toque) **+ rabia vigente por
+>   especie**, con **la vigencia declarada por el DUEÑO al cargar**.
+> - **La verificación física del carnet es del PRESTADOR**, en el **acta de
+>   recogida** (`CRITERIO_LEGAL_GUARDERIA` §4) — *la app no valida un papel:
+>   lo transporta y lo deja verificable en la puerta, que es donde alguien lo
+>   puede mirar.*
+> - **La lista completa de vacunas por especie: DATO configurable**, pendiente
+>   de mesa + veterinario — **jamás cableada**. *El catálogo `cat_plan_vacunal`
+>   ya ES ese dato: se llena, no se escribe en código.*
+>
+> ### 🔴 Y la lectura que da vuelta el número de esta ficha
+>
+> **El rechazo masivo NO es un bug del gate: es el catálogo vacío.** *Cada
+> familia carga su carnet en su primera reserva — para eso está el camino a un
+> toque.* **Un gate sin datos y un gate mal hecho se ven igual desde afuera, y
+> son cosas opuestas: el primero se llena, el segundo se arregla.**
+>
+> ### Lo medido el 28-ago contra el criterio NUEVO (no contra el viejo)
+>
+> | medición | número |
+> |---|---|
+> | mascotas activas perro/gato | **58** |
+> | con `antirrabica` registrada | **0** |
+> | **con rabia vigente hoy** | **0** |
+> | filas de vacuna con archivo de carnet | **32 de 32** |
+>
+> 🔴 **Y el hallazgo que el criterio tiene que absorber: hay CERO filas con
+> `vacuna_codigo = 'antirrabica'`, pero 10 filas sin código con nombres
+> comerciales** (`Canigen LR` · `Vanguard DA2L` · `Procyon Dog Pv`…) **donde la
+> rabia probablemente viaja adentro.** *Leer sólo el código rechazaría a
+> mascotas realmente vacunadas.* **Por eso la fuente es la declaración del
+> dueño al cargar, y no la fila histórica** — y el mapeo comercial→código
+> (que S48 ya sabe hacer) queda como mejora, no como precondición.
+>
+> **Dueño:** A (enciende la compuerta) · mesa + veterinario (la lista completa
+> por especie, como dato). ☠️ **Condición de muerte:** la compuerta encendida
+> **y** la lista por especie cargada en `cat_plan_vacunal` con firma del
+> veterinario.
+>
+> *(Texto original conservado abajo: su medición era correcta el día que se
+> escribió, y es la que produjo el criterio.)*
+
+#### D-956 — 🔴 EL GATE SANITARIO DURO DE GUARDERÍA NO TIENE CON QUÉ EJECUTARSE
+🔴 **ALTA · BLOQUEA LA FIRMA ③ DE S107, no su construcción.** Hallada el 28-ago-2026 por el censo de S107-A, midiendo la base viva antes de construir.
+
+**La firma ③ del founder dice: «sin papeles al día no se reserva» — gate DURO.** El censo midió con qué se alimentaría:
+
+| medición | número |
+|---|---|
+| filas en `evento_vacuna_aplicada` | **32** |
+| de ellas, con **`fecha_proxima`** (el dato que define el vencimiento) | 🔴 **1** |
+| con `vacuna_codigo` | 22 |
+| **mascotas con alguna vacuna** | 🔴 **5** |
+| mascotas vivas | **78** |
+
+> ### 🔴 Con los datos de hoy el gate duro **rechaza a 73 de 78 animales** — y de los 5 restantes, **«al día» ni siquiera es computable**, porque el vencimiento vive en `fecha_proxima` y está poblado en **1 de 32** filas.
+
+**Esto no invalida la firma ③: dice que la firma no tiene insumo.** *Un gate que corre sobre un criterio sin datos no gatea: rechaza a todos.* **Misma clase que la cadena de selección entre vendedores de S99** — *«una cadena que ordena por un criterio que no tiene datos **parece** que ordena»* — y misma clase que `D-768` (64 mascotas sin fecha de nacimiento, donde aplicar el filtro por etapa **vaciaba la vitrina**).
+
+**Lo que la construcción hace mientras tanto, y está en el contrato publicado:** `evaluar_requisitos_guarderia` **se construye entera y devuelve la verdad** (`al_dia | faltan[…]`, cada faltante con su camino a resolver), pero **el enforcement nace ABIERTO** — `faltan` informa y no bloquea, y la superficie lo dice honesto. **Encenderlo es una línea el día que la mesa firme.**
+
+**Lo que la mesa tiene que firmar (y no se infiere):** qué vacunas exige guardería · con qué vigencia · y qué pasa con el animal cuyo carnet es de papel y todavía no se cargó. **Toca `CRITERIO_LEGAL_GUARDERIA` §4** (*declaración sanitaria con carnet vigente, obligatoria por Res. 121*): el requisito es legal, así que la respuesta no puede ser «lo apagamos».
+
+**Dueño:** mesa (el criterio) + A (encender la compuerta). **Disparo:** antes de abrir guardería a familias reales.
+☠️ **Condición de muerte:** el criterio de «al día» firmado **y** `fecha_proxima` poblándose por el camino real (el carnet por cámara ya la escribe cuando el modelo la encuentra).
