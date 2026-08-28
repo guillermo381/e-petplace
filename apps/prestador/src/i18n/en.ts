@@ -945,6 +945,7 @@ export const prestadorEn = {
     mundoAdiestramiento: 'Training',
     // S68-B: the Veterinary world · LOTE S68 · APROBADO founder 18-jul
     mundoVeterinaria: 'Veterinary',
+    mundoGuarderia: 'Daycare',
     // S56-B TAREA 2 (D-341) · LOTE S56 · Espejo de es.ts
     vacaciones: 'Time off',
     vacacionesDetalle: "Mark the days you're not walking.",
@@ -3218,5 +3219,25 @@ export const prestadorEn = {
     arbitrajeNota:
       'If you don’t check this, the contract still applies and disputes go to the courts of Ecuador.',
     opcionalRotulo: 'Optional',
+  },
+  tallerGuarderia: {
+    titulo: 'Daycare',
+    capacidadTitulo: 'How many animals do you take per day?',
+    capacidadApoyo: 'This is each day’s capacity. If you close on a given day, you declare that separately.',
+    capacidadEtiqueta: 'Animals per day',
+    sobrevendido: 'Today you have more animals booked than places. No one lost their booking: the new capacity applies from now on.',
+    franjasTitulo: 'Your two windows',
+    franjasApoyo: 'In one you pick up; in the other you drop off. Drop-off starts after pick-up ends.',
+    recogida: 'Pick-up',
+    devolucion: 'Drop-off',
+    recogidaDesde: 'I start picking up',
+    recogidaHasta: 'I finish picking up',
+    devolucionDesde: 'I start dropping off',
+    devolucionHasta: 'I finish dropping off',
+    elegiHora: 'Pick the time',
+    guardar: 'Save',
+    precioPendiente: 'Pricing isn’t set up here yet.',
+    precioPendienteApoyo: 'We’re finishing that part. Until then your daycare won’t show up for booking, even though your capacity and windows are saved.',
+    devolucionNoGuardo: 'Your capacity and pick-up window were saved, but the drop-off one wasn’t: {{motivo}}',
   },
 } as const satisfies Espejo<typeof prestadorEs>;

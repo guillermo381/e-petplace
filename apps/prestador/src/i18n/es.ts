@@ -1356,6 +1356,7 @@ export const prestadorEs = {
     mundoAdiestramiento: 'Adiestramiento',
     // S68-B: el mundo Veterinaria · LOTE S68 · APROBADO founder 18-jul
     mundoVeterinaria: 'Veterinaria',
+    mundoGuarderia: 'Guardería',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
     vacacionesDetalle: 'Marca los días en que no paseas.',
@@ -4089,5 +4090,33 @@ export const prestadorEs = {
        familias con un `Separador` y este rótulo: sin él, un opcional mezclado
        entre obligatorios se marca por inercia. */
     opcionalRotulo: 'Opcional',
+  },
+  /* ── S107-C · LA GUARDERÍA · configuración ────────────────────────────
+     La voz es de la casa: el motor manda códigos y horas, y el rótulo lo
+     pone la app (contrato de B §⑥bis). */
+  tallerGuarderia: {
+    titulo: 'La guardería',
+    capacidadTitulo: '¿Cuántos animales recibes por día?',
+    capacidadApoyo: 'Es el cupo de cada día. Si algún día no abres, lo declaras aparte.',
+    capacidadEtiqueta: 'Animales por día',
+    /* Se dice sin vueltas y sin culpa: el motor NUNCA cancela una reserva por
+       bajar el cupo, así que el prestador tiene que enterarse él. */
+    sobrevendido: 'Hoy tienes más animales reservados que lugares. Nadie perdió su reserva: el cupo nuevo rige de acá en adelante.',
+    franjasTitulo: 'Tus dos ventanas',
+    franjasApoyo: 'En una pasas a buscar; en la otra devuelves. La de devolución empieza después de que termina la de recogida.',
+    recogida: 'Recoge',
+    devolucion: 'Devuelve',
+    recogidaDesde: 'Empiezo a recoger',
+    recogidaHasta: 'Termino de recoger',
+    devolucionDesde: 'Empiezo a devolver',
+    devolucionHasta: 'Termino de devolver',
+    elegiHora: 'Elige la hora',
+    guardar: 'Guardar',
+    /* La mitad que no existe se DICE. Un oficio sin precio no recibe
+       reservas, y callarlo deja al prestador esperando clientes que no
+       pueden llegar. */
+    precioPendiente: 'El precio todavía no se configura acá.',
+    precioPendienteApoyo: 'Estamos terminando esa parte. Hasta entonces tu guardería no aparece para reservar, aunque tu cupo y tus ventanas queden guardados.',
+    devolucionNoGuardo: 'Tu cupo y tu ventana de recogida quedaron guardados, pero la de devolución no: {{motivo}}',
   },
 } as const;
