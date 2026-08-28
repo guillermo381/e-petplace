@@ -1465,8 +1465,28 @@ const FUENTES_R17 = {
  *    ② y NO está escondida tras `__DEV__` (el gate corre sobre el APK
  *      preview, donde `__DEV__` es false: esconderla ahí la mata justo
  *      donde se la necesita — L-161, la misma lección del marcador).
- *  El día que el founder firme el retiro, esta regla se BORRA en el
- *  mismo acto (y su borrado queda en el commit de la firma). */
+ *  ⏪ ACÁ DECÍA: *«el día que el founder firme el retiro, esta regla se
+ *  BORRA en el mismo acto»*. **La firma llegó (mesa, S107) y NO la borró:
+ *  LA ENMENDÓ.** Se marca en vez de reescribirse, porque la instrucción
+ *  vieja mandaba borrar un guard que hoy sigue haciendo falta.
+ *
+ *  🔴 **LO FIRMADO: se retira la entrada del CLIENTE; la del PRESTADOR
+ *  queda, y R18 pasa a vigilar SÓLO ésa.**
+ *
+ *  **Por qué enmendar y no borrar, que es lo que cambia el resultado:** la
+ *  polaridad de arriba **sigue siendo el punto**. Si la regla se borrara,
+ *  la entrada del prestador —la única que queda— pasaría a no tener guard,
+ *  y su modo de falla es el de siempre: *desaparece y nadie se entera*.
+ *  **Borrar el guard junto con una de sus dos casas habría dejado
+ *  desprotegida a la que sobrevive** — exactamente el hueco que S84-B8
+ *  cerró cuando R18 miraba sólo al cliente, ahora en espejo.
+ *
+ *  ⚠️ **Y EL ANCLA BAJA DE 2 A 1 EN EL MISMO ACTO.** No es cosmético: el
+ *  ancla exige un mínimo de casas para que el silencio de la regla
+ *  signifique algo, y con `2` sobre una sola casa **R18 saldría ROJA por
+ *  ANCLA ROTA** — un rojo que no habla del defecto que vigila. *Bajar un
+ *  ancla es aflojar un guard y por eso se declara: acá se baja porque el
+ *  corpus se achicó POR FIRMA, no para que pase un rojo.* */
 // S84-B8 ② — LAS DOS CASAS. Hasta hoy R18 miraba SOLO la del cliente y
 // el propio código de la entrada del prestador declaraba el hueco: "R18
 // mira SOLO la Cuenta del cliente… esta entrada queda SIN guard". Una
@@ -1475,7 +1495,9 @@ const FUENTES_R17 = {
 // (enmienda de método 2-ago) importa MÁS, no menos: es el único camino
 // del founder a lo que tiene que firmar.
 const CUENTAS_GALERIA = [
-  'apps/cliente/src/app/(tabs)/cuenta/index.tsx',
+  // ☠️ 'apps/cliente/...' — RETIRADA POR FIRMA DE MESA (S107). La entrada del
+  // cliente se saca de la app; el retiro del ARCHIVO es de C. Esta línea se
+  // deja como lápida para que nadie la re-agregue creyendo que falta.
   'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
 ];
 /* S85-B1 · EL MENSAJE GRITABA UNA CAUSA QUE EL PREDICADO NO MEDÍA — la
@@ -1532,7 +1554,9 @@ function r18(casas) {
   }
   // ANCLA: sin casas que mirar la regla informaría "0 fallos" sin haber
   // abierto un archivo — verde sin verificación (L-192).
-  fallos.push(...ancla('R18', casas.length, 2, 'Cuenta(s) de galería vigiladas'));
+  // 2 → 1 por la enmienda de mesa S107 (ver cabecera): el corpus se achicó
+  // porque se firmó el retiro de una casa, no para dejar pasar un rojo.
+  fallos.push(...ancla('R18', casas.length, 1, 'Cuenta(s) de galería vigiladas'));
   return { fallos, info: fallos.length === 0 ? `${casas.length} entradas vivas y sin __DEV__` : `${fallos.length} fallo(s)` };
 }
 
@@ -6591,7 +6615,7 @@ corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
-corridas.push(['R18 (D-580: la entrada a la galería NO desaparece, en LAS DOS casas)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
+corridas.push(['R18 (D-580 enmendada S107: la entrada a la galería NO desaparece — sólo el PRESTADOR; la del cliente se retiró por firma)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R30 (el glifo no se re-dibuja: apps contra el registry)', r30([...apps, ...ui])]);

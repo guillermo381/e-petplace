@@ -94,6 +94,30 @@ export type DocumentoAceptable = {
    * Ausente = no hay enlace (aunque venga `etiquetaEnlace`).
    */
   onAbrir?: () => void
+  /**
+   * 🔴 **LA FRASE ENTERA PARA EL LECTOR DE PANTALLA** (S107, pedido de C sobre
+   * una degradación REAL que su migración destapó).
+   *
+   * **El defecto:** `texto` y `etiquetaEnlace` son DOS mitades de una sola
+   * frase — *«Acepto los»* + *«Términos y Condiciones»*—, porque el enlace
+   * tiene que ser un nodo aparte para poder abrirse sin marcar la casilla.
+   * Pasarle a `Casilla` sólo `texto` hacía que el lector anunciara
+   * **«Acepto los»** y se detuviera. *En una casilla de consentimiento legal
+   * eso no es una molestia de a11y: es una aceptación cuyo enunciado el
+   * usuario nunca oyó completo* (P23 — la casilla existe para ser prueba).
+   *
+   * ⚠️ **Y el default se curó ADEMÁS de abrir esta prop**, que es la mitad que
+   * importa: sin `etiquetaAccesible`, la pieza ahora compone
+   * `texto + etiquetaEnlace` — o sea que **el caso roto dejó de ser el
+   * default**. *Una prop opcional que hay que acordarse de llenar deja el
+   * defecto vivo para quien no se acuerde; lo que lo cierra es que el camino
+   * de menor esfuerzo ya sea el correcto.*
+   *
+   * ⇒ Esta prop queda para cuando la composición **no lee bien** (una frase
+   * que no es la concatenación de sus dos mitades), no para arreglar el caso
+   * normal.
+   */
+  etiquetaAccesible?: string
 }
 
 export type AceptacionDeDocumentosProps = {
@@ -139,9 +163,19 @@ function Linea({
     <Casilla
       marcada={marcada}
       onCambio={(m) => onCambiar(doc.clave, m)}
-      /* El label accesible es el TEXTO de la aceptación, jamás el enlace —
-         el literal de `Casilla`: el enlace vive en children con su onPress. */
-      etiquetaAccesible={doc.texto}
+      /* 🔴 LA FRASE ENTERA, no la primera mitad. Explícita si vino; si no,
+         COMPUESTA — ver la nota de `etiquetaAccesible`.
+
+         ⚠️ Esto NO contradice el literal de `Casilla` (*«el TEXTO de la
+         aceptación, jamás el enlace»*): lo que esa regla prohíbe es que el
+         label anuncie el enlace **como control** —el enlace sigue siendo un
+         responder aparte, con su propio `onPress` y su propio rol—. Lo que
+         acá viaja es **la frase que se acepta**, que casualmente termina con
+         las mismas palabras. *Se lee el enunciado completo; no se ofrece un
+         segundo botón.* */
+      etiquetaAccesible={
+        doc.etiquetaAccesible ?? [doc.texto, doc.etiquetaEnlace].filter(Boolean).join(' ')
+      }
       registro={registro}
     >
       <Texto variante="cuerpo">
