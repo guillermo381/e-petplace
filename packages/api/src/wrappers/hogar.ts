@@ -107,7 +107,7 @@ export async function obtenerEstadoHogar(
       .in('estado', ['en_curso', 'cerrada_con_calidad']),
     cliente
       .from('evento_cita_servicio')
-      .select('id, mascota_id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, direccion_snapshot')
+      .select('id, mascota_id, fecha, hora, duracion_minutos, tipo_servicio, estado, estado_reserva, expira_en, direccion_snapshot')
       .in('mascota_id', mascotaIds)
       .in('estado', ['pendiente', 'confirmada'])
       .gte('fecha', hoyLocal())
@@ -211,7 +211,51 @@ export async function obtenerEstadoHogar(
     return typeof d === 'string' && d.length > 0 ? d : null;
   };
 
-  const cita = citas.data.find((c) => c.estado === 'confirmada' || esHoldVigente(c));
+  /* ── S107 · «PRÓXIMA» ES UN INSTANTE, NO UN DÍA ───────────────────────────
+     Firma del founder, 27-ago-2026.
+
+     🔴 EL DEFECTO: el filtro de la consulta es `.gte('fecha', hoyLocal())` —
+     por DÍA— y acá abajo no había ninguna comprobación de hora. ⇒ **una cita de
+     HOY que ya terminó seguía siendo «la próxima» hasta la medianoche**, y como
+     `porMascota` guarda UNA sola por mascota, **tapaba a la siguiente**.
+
+     Medido el 27-ago a las 21:00: Thor tenía la de las 12:00 (telemedicina,
+     20 min, **terminada hacía 9 horas**) ocupando el puesto, y la de las 20:00
+     no aparecía. *No faltaba la de las 20:00: sobraba la de las 12:00.*
+
+     🔑 LA REGLA FIRMADA — el borde es lo importante:
+     **cuenta como próxima si su instante de inicio es futuro O si está EN
+     CURSO. Se descarta lo que ya TERMINÓ, jamás lo que ya empezó.** *Una cita
+     que arrancó es justo cuando más importa que esté ahí.*
+
+     El fin se deriva de `duracion_minutos` (medido: **15 de 15 citas vivas la
+     traen**); los 60' son red para el NULL que hoy no ocurre — no un supuesto.
+
+     ⚠️ RELOJ DEL DISPOSITIVO, no un huso fijo: es la convención de este
+     archivo (`hoyLocal`) y la correcta para «qué me toca AHORA». *La ventana de
+     las 17:00 de Guayaquil es una regla del PROVEEDOR y vive en el servidor;
+     clavarla acá rompería a una familia en otro huso (P21).* */
+  const yaTermino = (c: {
+    fecha: string | null;
+    hora: string | null;
+    duracion_minutos: number | null;
+  }): boolean => {
+    if (c.fecha === null) return false;
+    const inicio = Date.parse(`${c.fecha}T${(c.hora ?? '00:00:00').slice(0, 8)}`);
+    if (Number.isNaN(inicio)) return false; // no se descarta lo que no se pudo leer
+    return inicio + (c.duracion_minutos ?? 60) * 60000 <= ahora;
+  };
+
+  const vigente = (c: {
+    estado: string | null;
+    estado_reserva: string | null;
+    expira_en: string | null;
+    fecha: string | null;
+    hora: string | null;
+    duracion_minutos: number | null;
+  }) => (c.estado === 'confirmada' || esHoldVigente(c)) && !yaTermino(c);
+
+  const cita = citas.data.find(vigente);
   const proximaCita: ProximaCitaHogar | null =
     cita !== undefined && cita.mascota_id !== null && cita.fecha !== null
       ? {
@@ -231,7 +275,7 @@ export async function obtenerEstadoHogar(
   for (const c of citas.data) {
     if (c.mascota_id === null || c.fecha === null) continue;
     if (porMascota[c.mascota_id] !== undefined) continue;
-    if (c.estado === 'confirmada' || esHoldVigente(c)) {
+    if (vigente(c)) {
       porMascota[c.mascota_id] = {
         fecha: c.fecha,
         hora: c.hora !== null ? c.hora.slice(0, 5) : null,

@@ -1,0 +1,44 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA · borrado de las 2 tarjetas parcheadas (ACTO A del uid, pieza ⑤)
+-- ESCRITA ANTES DE EJECUTAR. Firma del founder: 27-ago-2026.
+--
+-- QUÉ SE BORRA: las 2 tarjetas de `dd024680-3d1c-4465-b38b-dedab45da037`
+-- (`54097cb6` y `baa9dc85`, ambas visa …1111) y sus altas.
+--
+-- POR QUÉ AHORA Y NO ANTES: se parchearon a mano el 27-ago (opción C) para
+-- alinear su `proveedor_uid` con el id del alta que las tokenizó, y así poder
+-- cobrar durante la llamada. **Ese parche nació con fecha de vencimiento
+-- escrita: se borra cuando el acto A esté completo.** Este es ese momento.
+--
+-- 🔴 Y SU RAZÓN, que es la que importa: con las piezas ②③④ vivas, la página
+-- tokeniza con el **uid estable**. Las dos parcheadas están tokenizadas ante
+-- Nuvei con el **id de su alta**. ⇒ **después de la cura dejarían de cobrar**,
+-- con el desalineo invertido. *No se pueden migrar: el handle lo emitió el
+-- proveedor y no lo podemos re-emitir.* La única salida es volver a guardarlas.
+--
+-- ── LA REVERSA ─────────────────────────────────────────────────────────────
+-- 🔴 **NO PUEDE REVERTIR**, y por la misma razón que la limpieza de la mañana:
+-- el `token` es un handle de Nuvei que no podemos regenerar. Restaurar las
+-- filas con el mismo texto restaura una cadena que ya no apunta a nada.
+--
+-- ⇒ **La única «reversa» real es volver a guardar la tarjeta desde la app** —
+--    que es exactamente lo que el founder va a hacer, y esta vez el parque
+--    nuevo nace ALINEADO desde la primera.
+--
+-- Lo que SÍ se recupera solo, por FK `ON DELETE SET NULL`:
+--   · `user_preferencias.tarjeta_preferida_id` → NULL (la app vuelve a preguntar)
+--   · `pedidos_recurrencias.tarjeta_id` → medido antes de borrar, debe ser 0
+--
+-- Lo que NO se toca, a propósito:
+--   · `usuario_proveedor_uid` — la identidad ESTABLE por persona. Borrarla haría
+--     nacer un uid nuevo y volvería a partir la identidad, **que es el defecto
+--     que todo este acto cierra**. Las tarjetas nuevas cuelgan de ESTE uid.
+--   · La tarjeta y el alta de `guillo381+7@gmail.com` — fuera de alcance, otra vez.
+--   · `pagos_intentos` — ninguna FK a tarjetas; los cobros históricos quedan
+--     con su `marca`/`bin`/`ultimos4` congelados en la fila.
+--
+-- ⚠️ ORDEN OBLIGATORIO DEL ACTO: el borrado va **DESPUÉS** de que ②③④ estén
+-- vivas. Al revés, el founder queda sin medio de pago y sin forma de crear uno
+-- alineado — que es exactamente por lo que este borrado se suspendió a la
+-- mañana en vez de hacerse junto con la limpieza.
+-- ═══════════════════════════════════════════════════════════════════════════

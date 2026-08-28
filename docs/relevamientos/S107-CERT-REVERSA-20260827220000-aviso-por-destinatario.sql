@@ -1,0 +1,57 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de `20260827220000_s107_aviso_reverso_por_destinatario.sql`
+-- ESCRITA ANTES DE APLICAR. Firma del founder: 27-ago-2026.
+--
+-- QUÉ HACE LA MIGRACIÓN (dos funciones):
+--
+--   ① `_voz_notificacion` — `pago_reversado` deja de bifurcar por SUJETO y pasa
+--      a bifurcar por (SUJETO × DESTINATARIO), vía `p_extra->>'para'`.
+--   ② `mover_sujeto_por_reverso` — el brazo de CITA manda DOS avisos: el que ya
+--      mandaba al prestador (con texto nuevo) y uno nuevo a la FAMILIA, resuelto
+--      por `pagos_intentos.pagador_user_id`.
+--
+-- POR QUÉ: medido el 27-ago sobre el primer `pago_reversado` real de la
+-- historia del producto. El texto de la rama `cita` **estaba escrito para quien
+-- paga** —terminaba en «No se te cobrará nada por esta cita»— **y el motor se lo
+-- mandaba al PRESTADOR**, a quien esa frase le dice que pierde un cobro.
+--
+-- 🔴 Y la contradicción que lo enmarca, que vale más que el caso:
+--    `apps/prestador/src/components/cita-no-disponible.tsx:30` declara que
+--    decirle al prestador que se revirtió el pago **expondría un movimiento
+--    financiero del cliente** — y la notificación se lo decía.
+--    *La pantalla del prestador protegía esa privacidad y su aviso la publicaba.
+--     Dos superficies del mismo producto con criterios opuestos sobre el mismo
+--     dato, y ninguna sabía de la otra.*
+--
+-- ── LA REVERSA ─────────────────────────────────────────────────────────────
+-- Las dos funciones se restauran con `CREATE OR REPLACE` a su cuerpo anterior,
+-- que queda capturado íntegro en:
+--   scratchpad `def_voz_notificacion.txt` y `def_mover.txt` (27-ago, pre-cambio)
+-- y es reconstruible en cualquier momento desde el commit anterior a esta
+-- migración. Los dos puntos exactos a revertir:
+--
+--   ① en `_voz_notificacion`, la rama `WHEN 'pago_reversado'` vuelve a
+--      bifurcar SOLO por `p_extra->>'sujeto'`, con el texto de cita terminando
+--      en «No se te cobrará nada por esta cita.»
+--   ② en `mover_sujeto_por_reverso`, el brazo de cita vuelve a UN solo
+--      `registrar_intencion_notificacion` (al prestador) con
+--      `p_clave_dedup => 'reverso:cita:' || v_id::text`.
+--
+-- ⚠️ LO QUE LA REVERSA **NO** DESHACE, y es lo importante:
+--    · Las intenciones YA registradas **no se borran ni se reescriben**.
+--      `notificacion_intencion` es el registro de lo que se decidió avisar; un
+--      aviso ya entregado no se puede des-entregar. **Revertir esta migración
+--      NO le quita al prestador la información financiera que ya recibió.**
+--    · Revertir **reintroduce la fuga**: el prestador vuelve a enterarse de que
+--      el banco devolvió el pago. *Se revierte solo si el aviso nuevo produjera
+--      un daño mayor que la fuga, que hoy no se ve cómo.*
+--
+-- ── 76(g) — VEDA DE ESCRITURA ──────────────────────────────────────────────
+-- **NO RIGE.** DDL pura, dos `CREATE OR REPLACE FUNCTION`, sin backfill, sin
+-- anclas, cero filas tocadas. Los avisos nuevos nacen del tráfico futuro.
+--
+-- ── CINTURÓN ───────────────────────────────────────────────────────────────
+-- Rojo producido ANTES: se pide la voz del prestador contra la definición VIVA
+-- y tiene que traer todavía la frase de plata. Después de aplicar, la misma
+-- consulta tiene que traerla sin plata, y la de la familia CON su literal.
+-- ═══════════════════════════════════════════════════════════════════════════

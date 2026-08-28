@@ -1,0 +1,44 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA · parche de DATO del `proveedor_uid` de dos tarjetas (opción C)
+-- Escrita ANTES de ejecutar. Firma del founder: 27-ago-2026.
+--
+-- QUÉ HACE EL PARCHE: alinea `tarjetas_guardadas.proveedor_uid` con el id del
+-- alta que efectivamente tokenizó la tarjeta ante Nuvei, para las DOS tarjetas
+-- vivas de `dd024680-3d1c-4465-b38b-dedab45da037`.
+--
+--   baa9dc85-0b7a-4b2e-87d6-3ca8e7e429e6  ←  2cf85f58  (alta que la creó)
+--   54097cb6-…                            ←  d1f34e1f  (alta que la creó)
+--
+-- POR QUÉ: `resolver_alta_tarjeta` ya está curado y escribe el uid ESTABLE
+-- (`d5d42b92-…`), pero la página todavía tokeniza con el id del alta —la pieza
+-- ② del contrato no llegó al aparato—. Nuvei conoce la tarjeta por el id del
+-- alta; nosotros la guardamos con el estable ⇒ `uid does not match`.
+--
+-- 🔴 ESTO **NO** ES REVERTIR `D-921`. El escritor queda curado. Se parchea el
+--    DATO de dos filas, no el código. *Revertir un escritor ya curado para
+--    tapar un desalineo es curar hacia atrás.*
+--
+-- ── LA REVERSA ─────────────────────────────────────────────────────────────
+-- Devuelve las dos filas al uid estable:
+--
+--   UPDATE tarjetas_guardadas
+--      SET proveedor_uid = 'd5d42b92-b049-4211-ad79-143805ee7dab'
+--    WHERE id IN ('baa9dc85-0b7a-4b2e-87d6-3ca8e7e429e6',
+--                 '54097cb6-…')
+--      AND user_id = 'dd024680-3d1c-4465-b38b-dedab45da037';
+--
+-- ⚠️ Y lo que la reversa NO deshace: revertir devuelve el estado que HOY
+--    impide cobrar. *Esta reversa restaura la coherencia con el futuro, no la
+--    capacidad de cobrar.* Sólo se corre si el parche resultara dañino.
+--
+-- ── 🔴 FECHA DE VENCIMIENTO — ESCRITA ACÁ, NO EN UN COMENTARIO DEL CÓDIGO ──
+--
+-- **Estas dos filas se BORRAN cuando salga la build y el acto A (piezas ②③④)
+-- se ejecute completo.** No se re-parchean, no se migran: se borran, y el
+-- founder vuelve a guardar sus tarjetas para que el parque nuevo nazca
+-- alineado desde la primera.
+--
+-- *Un parche sin fecha de vencimiento es una decisión permanente que nadie
+--  tomó.* El disparo es objetivo y verificable: `apps/cliente` mandando `uid`
+--  en la URL, en un binario instalado.
+-- ═══════════════════════════════════════════════════════════════════════════

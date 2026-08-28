@@ -14,6 +14,30 @@ import type { ConfigContext, ExpoConfig } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...(config as ExpoConfig),
+  /* ── S107 · B2: EL FLAG DEL MAPA SE DERIVA, NO SE AFIRMA ──────────────────
+     `MAPA_NATIVO_DISPONIBLE` era una CONSTANTE en `false` (D-944), y su propio
+     comentario prometía que «muere sola: una build de la nube trae las dos
+     cosas y el flag vuelve a true». **No muere sola: es un `const false`.**
+     Nadie lo iba a flipear, y el día que la build SÍ tuviera la key el pie
+     diría «sin mapas» sobre una app que los tiene.
+
+     🔴 POR QUÉ UN BOOLEANO Y NO LA KEY: medido el 27-ago sobre dos APK reales
+     —uno con key y otro sin— **el `app.config` embebido NO lleva `apiKey` en
+     ninguno de los dos**: Expo la borra del config legible por el cliente. Así
+     que `Constants.expoConfig` no puede distinguirlos leyendo la key. Lo que sí
+     viaja es `extra`. ⇒ **se calcula acá el veredicto y se expone SOLO el
+     booleano** — nunca la key.
+
+     🔑 Y lo que lo hace incapaz de desincronizarse: **lo computa la MISMA build
+     que hornea (o no) la key.** No hay dos fuentes que puedan divergir.
+
+     ⚠️ Existe una vía más pura —`SondaManifest.leerMetaData(...)`, el módulo
+     nativo de `D-579` que YA vive en esta app— y queda fichada sin usar: exige
+     portarla al cliente, o sea abrir un frente nativo que hoy no hace falta. */
+  extra: {
+    ...config.extra,
+    mapasHorneados: Boolean(process.env.GOOGLE_MAPS_API_KEY),
+  },
   android: {
     ...config.android,
     // S81 (el tren de notificaciones): google-services.json viaja como

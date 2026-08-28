@@ -1,0 +1,47 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de `20260827210000_s107_verdad_vencida_sujeto_movido.sql`
+-- ESCRITA ANTES DE APLICAR. Firma del founder: 27-ago-2026.
+--
+-- QUÉ HACE LA MIGRACIÓN: en `registrar_reverso_nuvei` y `registrar_reverso_deuna`
+-- reemplaza la constante `'sujeto_movido', false` (con su nota `'el sujeto no se
+-- mueve: D-923'`) por una LECTURA del marcador que deja el trigger.
+--
+-- POR QUÉ: `D-923` está cerrada. El trigger `trg_pagos_intentos_reverso_mueve_sujeto`
+-- mueve el sujeto exactamente cuando estas funciones ponen el estado en
+-- `reversado` — o sea que la constante quedó FALSA el día que el trigger nació,
+-- y no lo avisó. Se vio en vivo dos veces el 27-ago, contradiciéndose dentro del
+-- MISMO JSON: `registro.sujeto_movido: false` junto a `sujeto_movido: true`.
+--
+-- 🔴 EL CRITERIO ES EL MISMO QUE YA USAN LAS DOS EDGES (`pagos-reverso/index.ts:254`
+--    y `pagos-reverso-deuna/index.ts:233`): `sujeto_movido = (no hay marcador
+--    'sujeto_no_movido' en payload_crudo)`. **No se inventa un segundo criterio:
+--    se adopta el que ya rige**, para que el día que uno se corrija no queden dos.
+--
+-- ── LA REVERSA ─────────────────────────────────────────────────────────────
+-- Volver a la constante. Se conserva el texto exacto para que revertir no
+-- invente una tercera redacción:
+--
+--   En `registrar_reverso_nuvei`, el RETURN final vuelve a:
+--       'sujeto_movido', false,
+--       'nota', 'el sujeto no se mueve: D-923');
+--
+--   En `registrar_reverso_deuna`:
+--       'sujeto_movido', false,
+--       'nota', 'el sujeto no se mueve: D-923, de A');
+--
+-- ⚠️ Y LO QUE LA REVERSA NO DESHACE: revertir **restaura una afirmación falsa**.
+--    No hay daño de datos que deshacer —esta migración no toca ninguna fila—,
+--    pero volver atrás vuelve a decirle a soporte que mueva a mano algo que el
+--    trigger ya movió. *Se revierte sólo si la lectura nueva resultara peor que
+--    la mentira, que es difícil pero no imposible: si el marcador se poblara por
+--    otra vía, la lectura mentiría en el otro sentido.*
+--
+-- ── 76(g) — VEDA DE ESCRITURA ──────────────────────────────────────────────
+-- **NO RIGE.** Es DDL pura (`CREATE OR REPLACE FUNCTION` ×2), sin backfill, sin
+-- anclas, sin tocar una sola fila. No hay ventana que declarar.
+--
+-- ── CINTURÓN ───────────────────────────────────────────────────────────────
+-- Su rojo se produce ANTES de aplicar: se corre el assert contra la definición
+-- VIVA y tiene que ABORTAR mientras la constante siga ahí. Recién después se
+-- aplica, y el mismo assert tiene que pasar.
+-- ═══════════════════════════════════════════════════════════════════════════

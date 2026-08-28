@@ -30,7 +30,7 @@ import { useTraduccion } from '@/i18n';
 const BASE = process.env.EXPO_PUBLIC_PAGOS_ALTA_URL ?? '';
 
 export default function AltaTarjeta() {
-  const { alta } = useLocalSearchParams<{ alta: string }>();
+  const { alta, uid } = useLocalSearchParams<{ alta: string; uid?: string }>();
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
@@ -83,8 +83,13 @@ export default function AltaTarjeta() {
      (`D-316` existe porque el idioma se persiste como preferencia propia).
      *Si la página adivinara, contradiría a la app que la abrió, en la pantalla
      donde la familia entrega su tarjeta.* */
+  /* 🔴 S107 · PIEZA ② — el `uid` se REENVIA, no se adivina. La pagina lo usa
+     en `Payment.addCard(uid, ...)` con `uid || alta` como red, asi que si esto
+     faltara volveria al comportamiento viejo **en silencio**: por eso viaja
+     desde quien lo tiene (el wrapper del alta), y no se deriva aca. */
   const url =
     `${BASE}?alta=${encodeURIComponent(String(alta))}` +
+    (typeof uid === 'string' && uid.length > 0 ? `&uid=${encodeURIComponent(uid)}` : '') +
     `&lang=${encodeURIComponent(obtenerIdiomaActual())}`;
 
   return (

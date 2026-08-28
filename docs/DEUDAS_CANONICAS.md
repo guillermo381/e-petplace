@@ -23132,3 +23132,82 @@ que la llamada haya salido bien; hay que preguntarle al mundo si cambió.***
 Este defecto sobrevivió a **cinco mediciones estáticas independientes** que
 decían, todas correctamente, que el control estaba montado y viajaba. **Lo cazó
 una línea de log que compara dos valores.**
+
+---
+
+### D-944 🔴 · NINGUNA BUILD LOCAL PUEDE TENER MAPAS NI PUSH — y nadie lo sabía
+
+**Nace S106-A, 27-ago-2026.** Lo destapó **correr `verify-manifest-apk.mjs`
+antes de entregar** — el guard que existe desde S80 y que en la tanda anterior
+no se corrió, con su costo ya cobrado.
+
+#### Lo medido, literal
+
+```
+ROJO — LA BUILD NO SE DISTRIBUYE (D-574):
+  ✗ FALTA meta-data com.google.android.geo.API_KEY
+  ✗ FALTA resource google_app_id — google-services.json NO se horneó
+```
+
+#### 🔴 El mecanismo, completo — y es estructural, no un descuido
+
+Medido contra EAS:
+
+```
+GOOGLE_MAPS_API_KEY  = ***** (secret env variable that can only be
+GOOGLE_SERVICES_JSON = *****  accessed on EAS builder)
+```
+
+> **Un secret de EAS marcado como tal SÓLO existe en el builder de la nube.**
+> ⇒ **Ninguna build local va a tener mapas ni push mientras el secret sea de ese
+> tipo.** No es «se me olvidó pasar la variable»: **es imposible por
+> construcción.**
+
+Y `app.config.ts` colabora en el silencio: `apiKey: process.env.GOOGLE_MAPS_API_KEY ?? ''`
+convierte *«falta la key»* en *«la key es vacía»* **sin una línea de error**.
+
+⚠️ **Una señal parcial me engañó y la dejo escrita:** el paso
+`[PREPARE_CREDENTIALS] Writing secrets to the project's directory` **sí aparece**
+en la build local — pero escribe el **keystore**, no los env secrets. *Un
+mensaje verdadero sobre otra cosa, que es `L-427` en su forma más barata de
+cometer.*
+
+#### 🔴 EL HALLAZGO QUE NADIE BUSCABA: TAMPOCO HAY FCM
+
+Hasta hoy la conversación era **sólo sobre mapas**. El guard destapó que
+`google-services.json` **tampoco se hornea** ⇒ **el APK no tiene push**.
+
+**Y su consecuencia sobre lo ya instalado:** los dos APK de la tanda 2 que el
+founder tiene en el teléfono **tampoco tienen FCM**, y nadie lo sabía.
+
+> *Cualquier prueba de avisos en ellos habría dado un falso negativo que alguien
+> iba a diagnosticar como defecto del motor de notificaciones* — que está sano y
+> lo probamos hoy mismo con `cita_reasignada`.
+
+**Es exactamente el modo de falla que esta ficha existe para cerrar:** un APK que
+no se distingue de uno bueno, produciendo mediciones creíbles y falsas.
+
+#### La firma del founder (27-ago) — se acepta el APK, con su letra
+
+**Va la opción (c): build de PRUEBA**, y la razón es de alcance: *lo que se va a
+probar es la CAPTURA DE IMAGEN, y ni los mapas ni las push participan de eso.*
+El crash del mapa **ya está cubierto** por `MAPA_NATIVO_DISPONIBLE`, así que no
+se rompe nada — el mapa de zona no se dibuja y listo.
+
+🔴 **Y su condición, que no es formalismo:** este APK **no puede confundirse con
+uno bueno más adelante**. Se declara en el parte **y en el aparato** —el
+marcador del pie— como:
+
+> **BUILD DE PRUEBA · SIN MAPAS · SIN PUSH**
+
+#### DISPARO
+
+**El APK del friends-and-family se hace EN LA NUBE, no localmente.** Es la única
+vía que puede tener las dos cosas. *(La alternativa —que el founder exporte los
+dos valores en su terminal— sirve para una build de prueba puntual y **no** para
+la que va a manos de familias: ahí la trazabilidad de qué credencial se horneó
+tiene que estar en EAS, no en la sesión de alguien.)*
+
+**Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
+fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
+**dos secrets, no uno**— y con su disparo.
