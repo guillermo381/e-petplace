@@ -633,3 +633,78 @@ no eligió — y ése le pasó al founder dos de cinco veces.*
 2. **El `release()` sobre `toI420()`** — sospechoso en las dos ramas.
 3. **El bloqueo** — su cura **ya está escrita en `e8e380a5`**: *quien retome
    sólo tiene que traerla, no re-diagnosticarla.*
+
+---
+---
+
+# LAS DOS ALTERNATIVAS AL CUADRO — medidas, como fichas
+
+*Números medidos contra `origin/main` **y todas las ramas remotas**: `D-953`
+es la última tomada.*
+
+## ☠️ FICHA `D-954` — EL OBTURADOR DEL TELÉFONO: **NO APLICA**, y ahora está medido
+
+**Propuesta del founder:** que funcione como el obturador de la cámara del
+teléfono mientras graba video.
+
+### 🔴 Lo medido, con su literal
+
+`expo-camera` — `Camera.types.d.ts:7`:
+
+```ts
+export type CameraType = 'front' | 'back';
+```
+
+y su doc (`:314`): *«Camera facing… When `front`, use the front-facing camera.
+When `back`, use the back-facing camera.»*
+
+⇒ **`takePictureAsync` tiene exactamente DOS fuentes posibles, y las dos son
+el sensor LOCAL del teléfono.** No admite una fuente arbitraria.
+
+### Por qué eso cierra la pregunta
+
+**El obturador del teléfono mientras graba saca del SENSOR, no del encoder** —
+por eso da mejor calidad que un fotograma del video. **En el teléfono del vet
+no hay ningún sensor apuntando al animal: hay un decodificador.** *La cámara
+del vet apunta al vet.*
+
+⇒ **La lectura de la mesa era correcta, y ahora no depende de que lo fuera:
+está medido.** *Que una intuición acierte no la convierte en medición — y ésta
+costaba dos greps.*
+
+⚠️ **Y no se confunde con la captura de vistas**, que es la otra forma de
+«fotografiar lo que se ve»: **ésa está descartada por firma** (negro en
+Android, anda en iOS). *Son dos caminos distintos y los dos están cerrados.*
+
+## 🟢 FICHA `D-955` — QUE LA FOTO LA SAQUE EL DUEÑO — **opción, no encargo**
+
+**La variante que sí podría funcionar:** el dueño saca la foto **con su propio
+teléfono** —obturador real, contra el animal que tiene delante— y **aparece en
+el modal del vet**.
+
+### Lo que la hace atractiva, medido
+
+- **Obturador real ⇒ mejor calidad que cualquier fotograma de video**, por la
+  misma razón que explica por qué `D-954` no aplica: sale del sensor.
+- 🔴 **No toca el transporte.** *Y eso importa más que la calidad: los dos
+  defectos abiertos del cuadro —el bloqueo y el video que se corta— nacen de
+  meterle un sink a un track vivo. Este camino no le pone la mano encima.*
+- **El camino de fotos del cliente YA EXISTE** (medido: `capturaFoto` /
+  `EvidenciaFoto`, vivos en `carnet.tsx` y `perfil.tsx`).
+
+### Su costo, dicho sin adornar
+
+**Depende de que el dueño lo haga, con un animal en brazos.** *El vet pide y
+espera; si el dueño no puede, no hay imagen.* **Eso lo vuelve una vía
+complementaria, jamás un reemplazo del cuadro** — el cuadro sirve justo cuando
+el dueño tiene las dos manos ocupadas, que es el caso que la teleconsulta
+existe para resolver.
+
+⇒ **Va como opción para que la mesa la sopese, no como plan.**
+
+---
+
+## ✅ CONFIRMADO
+
+**El capturar sale del alcance del vet ahora, y el servicio funciona sin él.**
+*Lo que se apaga es la puerta, no el trabajo.*
