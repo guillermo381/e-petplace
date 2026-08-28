@@ -182,18 +182,41 @@ export default function LugarGuarderia() {
     for (let d = 1; d <= ultimoDelMes.getDate(); d += 1) {
       const fecha = iso(new Date(primeroDelMes.getFullYear(), primeroDelMes.getMonth(), d));
       const c = porFecha.get(fecha);
+      /* 🔴 CUATRO RAZONES DISTINTAS PARA NO PODER, Y CADA UNA CON SU VOZ.
+         La pieza sólo tiene `elegible | sin_cupo`, así que la distinción vive
+         en el MOTIVO — y eso importa: *«ya pasó», «hoy no», «no abre» y «se
+         llenó» le piden a la familia cosas distintas*. Mezclarlas en un
+         «no disponible» la deja sin saber si esperar, volver mañana o
+         buscar otro lugar. */
       if (fecha < isoHoy) {
         salida.push({ clave: fecha, numero: String(d), estado: 'sin_cupo', motivo: t('lugarGuarderia.diaPasado') });
         continue;
       }
+      /* HOY JAMÁS SE RESERVA (compuerta de A). La puerta no ofrece lo que el
+         servidor va a rechazar (Ley 23) — y lo dice con su voz propia, no
+         disfrazado de «se llenó». */
+      if (fecha === isoHoy) {
+        salida.push({ clave: fecha, numero: String(d), estado: 'sin_cupo', motivo: t('lugarGuarderia.diaHoy') });
+        continue;
+      }
       /* 🔴 `sobrevendido` se lee y SE DESCARTA acá: no viaja a la pieza.
          Para la familia, un día sin lugar es un día sin lugar. */
+      const capacidad = c?.capacidad ?? 0;
       const disponible = c?.disponible ?? 0;
-      salida.push(
-        disponible > 0
-          ? { clave: fecha, numero: String(d), estado: 'elegible' }
-          : { clave: fecha, numero: String(d), estado: 'sin_cupo', motivo: t('lugarGuarderia.diaLleno') },
-      );
+      if (disponible > 0) {
+        salida.push({ clave: fecha, numero: String(d), estado: 'elegible' });
+        continue;
+      }
+      /* Capacidad CERO no es «se llenó»: es que el lugar no abre ese día
+         (su patrón no lo incluye, o lo declaró cerrado). *Decirle «se llenó»
+         a alguien un domingo que la guardería nunca abre es mentirle sobre
+         por qué no puede.* */
+      salida.push({
+        clave: fecha,
+        numero: String(d),
+        estado: 'sin_cupo',
+        motivo: capacidad === 0 ? t('lugarGuarderia.diaCerrado') : t('lugarGuarderia.diaLleno'),
+      });
     }
     return salida;
   }, [estado, primeroDelMes, ultimoDelMes, hoy, t]);

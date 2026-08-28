@@ -2851,6 +2851,9 @@ export const clienteEs = {
     elegiDia: 'Elige el día',
     diaLleno: 'Sin lugares para este día',
     diaPasado: 'Ya pasó',
+    /* Compuerta de A: hoy jamás se reserva. Voz propia — no es «se llenó». */
+    diaHoy: 'Las reservas entran desde mañana',
+    diaCerrado: 'Ese día no abren',
     mesAnterior: 'Mes anterior',
     mesSiguiente: 'Mes siguiente',
     noCargoTitulo: 'No pudimos cargar los días',
