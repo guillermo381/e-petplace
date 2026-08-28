@@ -2111,6 +2111,15 @@ export const clienteEn = {
     reintentar: 'Try again',
     reservaPendiente: 'You can’t book here yet.',
     reservaPendienteApoyo: 'We’re finishing that part. For now you can see which days have room and the times.',
+    requisitosTitulo: 'What they require',
+    requisitosAlDia: 'All up to date',
+    estado_nunca_aplicada: 'You haven’t registered it yet',
+    estado_sin_carnet: 'The record card is missing',
+    estado_sin_fecha: 'The expiry date is missing',
+    estado_vencida: 'It’s expired',
+    cargarCarnet: 'Upload record card',
+    reservar: 'Book this day',
+    bloqueadoPorRequisitos: 'To book, first complete what’s missing above.',
   },
   hubGuarderia: {
     titulo: 'Daycare',
@@ -2126,5 +2135,12 @@ export const clienteEn = {
     noCargoDetalle: 'It’s not that you have none: we couldn’t ask. Try again.',
     listaNoCargoTitulo: 'We couldn’t search for daycares',
     listaNoCargoDetalle: 'It’s not that there are none: we couldn’t ask. Try again.',
+  },
+  checkoutGuarderia: {
+    servicio: 'Daycare · one day',
+    sinHora: 'All day',
+    duracion: 'Between the two windows',
+    exitoTitulo: 'Done! Your day is booked.',
+    exitoDetalle: 'We’ll let you know when they head out to pick him up.',
   },
 } as const satisfies Espejo<typeof clienteEs>;

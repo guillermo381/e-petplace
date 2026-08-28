@@ -214,7 +214,19 @@ export default function HubGuarderia() {
                        sobreventa es problema operativo del prestador. */
                     subtitulo={g.ciudad ?? undefined}
                     metadataMono={t('hubGuarderia.porDia', { precio: g.precio.toFixed(2) })}
-                    onPress={() => router.push(`/guarderia/${g.prestadorId}`)}
+                    /* 🔴 La mascota VIAJA: sin ella el lugar no puede evaluar
+                       el gate sanitario, y una pantalla que no puede evaluarlo
+                       no puede ofrecer reservar. */
+                    onPress={() =>
+                      router.push({
+                        pathname: '/guarderia/[prestadorId]',
+                        params: {
+                          prestadorId: g.prestadorId,
+                          mascotaId: mascotaId ?? '',
+                          prestadorNombre: g.prestadorNombre,
+                        },
+                      })
+                    }
                   />
                 ))
               ) : null}

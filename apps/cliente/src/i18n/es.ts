@@ -2858,6 +2858,15 @@ export const clienteEs = {
     reintentar: 'Probar de nuevo',
     reservaPendiente: 'Todavía no se puede reservar acá.',
     reservaPendienteApoyo: 'Estamos terminando esa parte. Por ahora puedes ver los días con lugar y los horarios.',
+    requisitosTitulo: 'Lo que piden para recibirlo',
+    requisitosAlDia: 'Todo al día',
+    estado_nunca_aplicada: 'Todavía no la registraste',
+    estado_sin_carnet: 'Falta el carnet donde consta',
+    estado_sin_fecha: 'Falta la fecha de vencimiento',
+    estado_vencida: 'Está vencida',
+    cargarCarnet: 'Cargar carnet',
+    reservar: 'Reservar este día',
+    bloqueadoPorRequisitos: 'Para reservar, primero completa lo que falta arriba.',
   },
   hubGuarderia: {
     titulo: 'Guardería',
@@ -2873,5 +2882,12 @@ export const clienteEs = {
     noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
     listaNoCargoTitulo: 'No pudimos buscar guarderías',
     listaNoCargoDetalle: 'No es que no haya: no pudimos preguntar. Prueba de nuevo.',
+  },
+  checkoutGuarderia: {
+    servicio: 'Guardería · un día',
+    sinHora: 'Todo el día',
+    duracion: 'Entre tus dos ventanas',
+    exitoTitulo: '¡Listo! Tu día está reservado.',
+    exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
   },
 } as const;
