@@ -49,6 +49,10 @@ function esErrorDeRed(mensaje: string): boolean {
 // desincronizan los topes.
 
 export interface EntradaPublicarMedia {
+  /** 🔴 Obligatoria en la firma, y por eso no la olvida nadie: *una
+   *  idempotencia opcional la olvida el primer consumidor apurado, y el modo
+   *  de falla es silencioso.* La genera la cola antes del primer intento. */
+  claveIdempotencia: string;
   /** Ya subido — el registro NUNCA sube: son dos pasos por diseño. */
   archivoUrl: string;
   tipo: 'foto' | 'clip';
@@ -64,15 +68,16 @@ export interface EntradaPublicarMedia {
  * `publicarMedia` del contrato §②: crea la media, sus N etiquetas y sus N
  * eventos **en una sola transacción**.
  *
- * ⚠️ Lo que la app NO puede asumir y por eso la cola igual reintenta: el
- * contrato no declara idempotencia por `archivo_url`. **Se pidió** (era el
- * requisito ① de mi pedido D→A) y hasta que esté escrita, un reintento tras un
- * timeout ambiguo podría duplicar eventos. *Está anotado, no supuesto.*
+ * ✅ **Idempotente, y adoptado en el contrato** (corrección de D, 28-ago): el
+ * segundo intento **no rebota — devuelve la media que ya existe** con
+ * `ya_existia: true`. Eso es lo que la cola necesitaba: *un reintento que
+ * rebota obliga a distinguir «falló» de «ya estaba», y esa distinción es justo
+ * la que no se puede hacer con un timeout ambiguo.*
  */
 export type PublicarMedia = (
   entrada: EntradaPublicarMedia,
 ) => Promise<
-  | { ok: true; mediaId: string; eventoIds: string[] }
+  | { ok: true; mediaId: string; eventoIds: string[]; ya_existia?: boolean }
   | { ok: false; codigo: string; mensaje: string }
 >;
 
@@ -163,6 +168,7 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
       }
 
       const r = await deps.publicar({
+        claveIdempotencia: item.claveIdempotencia,
         archivoUrl: storagePath,
         tipo: item.tipo,
         duracionS: item.duracionS,
@@ -189,7 +195,13 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
         }
       }
 
-      return { ok: true as const };
+      if (r.ya_existia) {
+        // No es un caso raro: es el camino feliz del reintento tras un timeout
+        // ambiguo. Se registra para que en el log se vea que la idempotencia
+        // trabajó — jamás como advertencia.
+        console.log(`[motor-media] ${item.tipo} ${item.id} ya estaba publicada · media=${r.mediaId}`);
+      }
+      return { ok: true as const, mediaId: r.mediaId };
     },
   };
 }
