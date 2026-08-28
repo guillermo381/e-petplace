@@ -83,7 +83,10 @@ import { Texto } from './Texto'
  * dos piezas hablan del mismo hecho y **un segundo vocabulario para el mismo
  * hecho es cómo empiezan a divergir.**
  */
-export type EstadoCupo = 'elegible' | 'sin_cupo'
+export type EstadoCupo = 'elegible' | 'sin_cupo' | 'sobrevendido'
+
+/** Ninguno de los dos se puede elegir. La diferencia es sólo si se DICE. */
+const NO_SE_ELIGE = (e: EstadoCupo) => e === 'sin_cupo' || e === 'sobrevendido'
 
 export type DiaDeCupo = {
   /** Identidad estable (la fecha ISO sirve). Jamás se muestra. */
@@ -103,6 +106,21 @@ export type DiaDeCupo = {
   motivo?: string
 }
 
+/**
+ * 🔴 EL TERCER ESTADO — `'sobrevendido'` (firma de la mesa, S107).
+ *
+ * Nace porque el motor lo distingue: `cupo_guarderia_del_dia` devuelve
+ * `sobrevendido: boolean` aparte de `disponible`, y su contrato dice que
+ * **bajar la capacidad con reservas tomadas rige hacia adelante y jamás
+ * cancela** ⇒ el día queda sobrevendido **declarado** y *«nunca se resuelve
+ * solo»*. Alguien tiene que verlo.
+ *
+ * **Y la firma acota QUIÉN: sólo el prestador.** Es su problema operativo —él
+ * tiene que ir y resolverlo. **Para el dueño un día sobrevendido se ve LLENO,
+ * exactamente como hoy**: saber que el lugar se pasó de cupo no le sirve para
+ * nada y le cuenta un problema ajeno.
+ */
+
 export type CalendarioCupoProps = {
   /** Los días del mes, EN ORDEN. */
   dias: DiaDeCupo[]
@@ -118,6 +136,20 @@ export type CalendarioCupoProps = {
   onElegir: (clave: string) => void
   /** Rótulo del grupo, en voz de la app (el mes suele vivir acá). */
   rotulo?: string
+  /**
+   * 🔴 **DEFAULT `false`, Y ESO ES LA MITAD DE LA FIRMA.**
+   *
+   * Con `false`, un día `'sobrevendido'` **se dibuja idéntico a uno lleno**.
+   * Con `true` —sólo la superficie del prestador— se distingue y lo dice.
+   *
+   * ⚠️ **Por qué es una prop de la pieza y no un mapeo de la pantalla:** si la
+   * app del dueño tuviera que colapsar `sobrevendido → sin_cupo` antes de
+   * pasar los días, **el día que alguien se olvide, el dueño ve el problema
+   * operativo del lugar** — y no se ve como un bug, se ve como un calendario.
+   * Acá **olvidarse es el caso SEGURO**: para revelar hay que pedirlo. *La
+   * defensa vive en el default, no en la memoria de quien consume* (L-222).
+   */
+  revelaSobreventa?: boolean
 }
 
 const COLUMNAS = 7
@@ -129,13 +161,14 @@ export function CalendarioCupo({
   elegido,
   onElegir,
   rotulo,
+  revelaSobreventa = false,
 }: CalendarioCupoProps) {
   const { theme } = useTheme()
 
   /* EL MOTIVO QUE SE ESTÁ CONTANDO. Arranca en el PRIMER día lleno para que
      el porqué esté a la vista sin tocar nada, y cambia si la persona pregunta
      por otro. Receta calcada de `SelectorVentana` en `tira`. */
-  const primeroLleno = dias.find((d) => d.estado === 'sin_cupo' && d.motivo !== undefined)
+  const primeroLleno = dias.find((d) => NO_SE_ELIGE(d.estado) && d.motivo !== undefined)
   const [claveMotivo, setClaveMotivo] = useState<string | null>(null)
   const motivoALaVista = (dias.find((d) => d.clave === claveMotivo) ?? primeroLleno)?.motivo
 
@@ -183,7 +216,11 @@ export function CalendarioCupo({
         ))}
 
         {dias.map((d) => {
-          const lleno = d.estado === 'sin_cupo'
+          const lleno = NO_SE_ELIGE(d.estado)
+          /* Revelado = sobrevendido Y la superficie pidió verlo. Si no lo
+             pidió, cae en el brazo de `lleno` y no hay forma de distinguirlo:
+             es el colapso que la firma manda para el lado del dueño. */
+          const revelado = d.estado === 'sobrevendido' && revelaSobreventa
           const activo = !lleno && d.clave === elegido
 
           return (
@@ -216,26 +253,37 @@ export function CalendarioCupo({
                      elegible en reposo · el lleno pierde el borde: no compite
                      por atención, pero sigue estando. Receta exacta de
                      `SelectorVentana`. */
+                  /* El sobrevendido REVELADO usa el tinte `warning` de la casa
+                     —`status.warningBg` + `warningBorder`, el par que `Tarjeta
+                     warning` ya monta y `verify-contrast` ya mide—, así que no
+                     entra ningún par nuevo. **Jamás `danger`** (Ley 22): que un
+                     día se haya pasado de cupo pide atención, no alarma — el
+                     mismo criterio que le prohíbe el rojo al faltante de
+                     `SemaforoSanitario` y al temporizador de la videoconsulta. */
                   borderColor: activo
                     ? theme.accent.control
-                    : lleno
-                      ? 'transparent'
-                      : theme.border.default,
+                    : revelado
+                      ? theme.status.warningBorder
+                      : lleno
+                        ? 'transparent'
+                        : theme.border.default,
                   backgroundColor: activo
                     ? 'capaBg' in theme
                       ? theme.capaBg.comunidad
                       : theme.bg.overlay
-                    : lleno
-                      ? theme.bg.overlay
-                      : pressed
+                    : revelado
+                      ? theme.status.warningBg
+                      : lleno
                         ? theme.bg.overlay
-                        : 'transparent',
+                        : pressed
+                          ? theme.bg.overlay
+                          : 'transparent',
                 })}
               >
                 {/* El número del día es dato de máquina (Ley 3). El lleno baja
                     a `tertiary`: apagado sereno, JAMÁS registro de error —
                     un día sin lugar no es una falla de nadie (Ley 22). */}
-                <Texto variante="dato" color={lleno ? 'tertiary' : undefined}>
+                <Texto variante="dato" color={revelado ? 'warning' : lleno ? 'tertiary' : undefined}>
                   {d.numero}
                 </Texto>
               </Pressable>
