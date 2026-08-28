@@ -173,6 +173,18 @@ etiquetas» es construcción nueva, y ahora está probado en vez de supuesto.**
 
 ---
 
+## ④quater · LAS CADENAS DE PERMISO NO VIAJAN POR OTA — *(cierre de D, para el tren de builds)*
+
+> ### 🔴 **SE HORNEAN EN EL MANIFEST Y EN EL `Info.plist`. Curarlas en el repo NO las cura en el teléfono.**
+
+**Estado al cierre de D:** dos curas de tuteo **commiteadas** y una enmienda de la cadena de **ubicación en foreground** en camino — firma de la mesa: **nombra el paseo Y los traslados de guardería**. 🔴 **La cadena de «siempre» NO se toca**, porque el punto vivo corre **en foreground**.
+
+**Las tres llegan al aparato con el tren `1.0.7` / `1.0.6`, no antes.**
+
+⚠️ **Y la instrucción operativa que va con esto, que es la que se pierde:** al armar ese binario, **las cadenas se verifican EN EL APARATO** — no se dan por curadas porque estén bien escritas en el repo. *Es exactamente la clase de `L-432` que este contrato ya pagó con el micrófono: el repo y el teléfono son dos versiones de la verdad, y un commit mueve sólo una.*
+
+---
+
 ## ⑤ LO QUE ESTE CONTRATO NO DECIDE
 
 - **Compresión, cola offline, reintentos, miniaturas generadas** — son de **D**, que elige parámetros **y los declara**. La miniatura es **un dato del esquema, no una promesa**: si D no la genera, la columna queda nula y la pieza lo maneja.
