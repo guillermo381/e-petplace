@@ -1511,3 +1511,13 @@ export {
   type DiaSemana,
   type CodigoErrorGuarderiaConfig,
 } from './wrappers/guarderia-config';
+
+/* S107-A · guardería: la oferta (precio y visibilidad). */
+export {
+  definirOfertaGuarderia,
+  obtenerOfertaGuarderiaPropia,
+  obtenerGuarderiasDisponibles,
+  type OfertaGuarderiaPublicada,
+  type GuarderiaDisponible,
+  type CodigoErrorGuarderiaOferta,
+} from './wrappers/guarderia-oferta';
