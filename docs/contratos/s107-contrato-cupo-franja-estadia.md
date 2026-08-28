@@ -118,7 +118,20 @@ Medido (censo §③): el sujeto del pago es **una columna nullable por tipo** en
 
 🟢 **La comisión NO se cablea:** `fee_configs` vigente da **10 % base `subtotal`** para `tipo_origen='cita'` **sin discriminar oficio** ⇒ **guardería hereda sin fila propia** (censo §⑥). **Nadie siembra una fila de guardería.**
 
-⚠️ **HUECO DECLARADO, y es precondición de la puerta de cobro:** el «desglose congelado por trigger» que el plan da por existente **no está donde el plan lo supone** — no hay tabla `pagos_desglose` y el único trigger sobre `pagos_intentos` es el del reverso. **A localiza dónde vive hoy el congelado ANTES de escribir la puerta; no se reimplementa a ciegas.**
+🟢 **EL CONGELADO EXISTE Y NUESTRA PUERTA LO HEREDA — verificado leyendo el trigger, no asumido** (censo §⑤):
+
+```
+trg_cita_congela_desglose  AFTER INSERT ON evento_cita_servicio
+```
+Congela en **`cita_desglose`** cuando la cita nace con `estado_reserva='pendiente_pago'` y `precio IS NOT NULL`; resuelve moneda de la cuenta comercial y `fee_config`. **Sin moneda no congela, y la compuerta 2 del motor rebota fail-closed.**
+
+⇒ **Toda puerta que INSERTe una estadía con `pendiente_pago` + `precio` hereda el congelado sin tocar el trigger. La «octava puerta» que la letra anticipó es la nuestra.** 🔴 **No se reimplementa nada.**
+
+> ⚠️ **CORRECCIÓN DE ESTE CONTRATO (28-ago, antes de que nadie lo consumiera):** una versión anterior declaró acá un hueco —*«el congelado no está donde el plan lo supone»*— **y era falso: se buscó el trigger sobre `pagos_intentos` cuando vive sobre `evento_cita_servicio`, y la tabla es `cita_desglose`, no `pagos_desglose`.** *Se midió el objeto equivocado y se concluyó con seguridad.* Queda escrito porque **un hueco inventado manda a alguien a resolver un problema que no existe**, y en este caso lo habría invitado a reimplementar un congelado que ya funciona.
+
+🔴 **PERO EL DESGLOSE ES POR CITA, O SEA POR DÍA** (censo §⑤, costo 3) — y eso **sí** es hueco real: paquete y mensualidad se cobran como **UNA** compra, así que su desglose **no puede ser la suma de N desgloses de cita**. La mensualidad ya tiene `suscripcion_desglose`; **el paquete no tiene ninguno.** **Ese es el trabajo de cobro del paquete, y es de A.**
+
+⚠️ **Segundo costo medido, y es decisión de mesa, no de pista:** `evento_cita_servicio.modalidad` es **vocabulario CERRADO** (`presencial|telemedicina|domicilio|emergencia_movil|local`) y **guardería con recogida a domicilio no tiene su valor**. *Un vocabulario cerrado no se amplía de paso.*
 
 **El orden de cobro no se negocia** (`LETRA_PAGO_CITAS` §3): compuertas → cobro por el motor → **`confirmada` sólo cuando el motor confirma**. **Hold de cupo con vencimiento** en las tres modalidades: si el pago no llega, el hold vence y los espacios se liberan.
 
