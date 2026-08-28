@@ -92,6 +92,16 @@ export interface ItemMedia {
   estadiaId: string;
   /** Solo clips. */
   duracionS?: number;
+  /**
+   * 🔴 EL PESO REAL DEL BYTE SUBIDO — no una estimación.
+   * Nace del `ArrayBuffer` que el subidor YA lee para subir: medirlo aparte
+   * sería un segundo número que puede diferir del que viajó. Existe porque el
+   * peso que circulaba en la casa («un clip de 30 s pesa ~9 MB») es **prosa
+   * heredada**: no hay bitrate configurado en ningún punto de captura, así que
+   * lo elige el encoder de cada teléfono. *Un promedio que sale del uso real
+   * no se puede heredar equivocado.*
+   */
+  bytes?: number;
   creadoEn: number;
   estado: EstadoItem;
   /** Subida hecha, registro pendiente. */
@@ -274,7 +284,12 @@ export async function limpiarPublicadas(): Promise<void> {
  */
 export interface MotorDeSubida {
   /** Paso 1 — sube bytes y devuelve el path. Reusa `leerBytes` + el bucket. */
-  subir(item: ItemMedia): Promise<{ ok: true; storagePath: string } | { ok: false; causa: CausaFalla; mensaje: string }>;
+  subir(
+    item: ItemMedia,
+  ): Promise<
+    | { ok: true; storagePath: string; bytes: number }
+    | { ok: false; causa: CausaFalla; mensaje: string }
+  >;
   /** Paso 2 — registra la media con SUS N etiquetas (pedido D→A ①). */
   registrar(
     item: ItemMedia,
@@ -337,7 +352,8 @@ export async function procesarCola(
       path = r.storagePath;
       // Se persiste ANTES de registrar: si la app muere entre los dos pasos,
       // el reintento salta el paso 1 en vez de subir el byte otra vez.
-      await mutar(item.id, { estado: 'subida_sin_registrar', storagePath: path });
+      await mutar(item.id, { estado: 'subida_sin_registrar', storagePath: path, bytes: r.bytes });
+      console.log(`[cola-media] ${item.tipo} subido · ${(r.bytes / 1_048_576).toFixed(2)} MB${item.duracionS ? ` · ${item.duracionS}s` : ''}`);
     }
 
     // Paso 2.
@@ -381,4 +397,32 @@ async function fallo(
 
   if (agotado) resumen.enError += 1;
   else resumen.pendientes += 1;
+}
+
+
+// ══════════════════ EL PESO, PARA DECLARARLO CON NÚMERO ════════════════════
+
+export interface PesoMedido {
+  n: number;
+  promedioMB: number;
+  maxMB: number;
+}
+
+/**
+ * Lo que el brief pide declarar al cierre — **derivado del uso real**, no de
+ * un ensayo aparte ni de la prosa del repo.
+ *
+ * Devuelve `null` cuando todavía no se subió nada de ese tipo: **el promedio
+ * de cero capturas no es cero, es ausencia de dato** — y decir «0 MB» sería
+ * exactamente la clase de número verosímil y falso que L-139 nombra.
+ */
+export async function pesoMedido(tipo: 'foto' | 'clip'): Promise<PesoMedido | null> {
+  const items = (await leerCola()).filter((i) => i.tipo === tipo && typeof i.bytes === 'number');
+  if (items.length === 0) return null;
+  const mb = items.map((i) => (i.bytes as number) / 1_048_576);
+  return {
+    n: mb.length,
+    promedioMB: Number((mb.reduce((a, b) => a + b, 0) / mb.length).toFixed(2)),
+    maxMB: Number(Math.max(...mb).toFixed(2)),
+  };
 }

@@ -30,6 +30,7 @@ import {
   procesarCola,
   reintentar,
   descartar,
+  pesoMedido,
   INTENTOS_AUTOMATICOS,
   type Almacen,
   type ItemMedia,
@@ -61,14 +62,14 @@ const BASE = { tipo: 'foto' as const, mascotaIds: ['thor', 'zeus'], estadiaId: E
 
 /** Motor de mentira con contadores — el discriminador vive acá. */
 function motorFalso(plan: {
-  subir?: () => { ok: true; storagePath: string } | { ok: false; causa: any; mensaje: string };
+  subir?: () => { ok: true; storagePath: string; bytes: number } | { ok: false; causa: any; mensaje: string };
   registrar?: () => { ok: true } | { ok: false; causa: any; mensaje: string };
 }) {
   const cuenta = { subidas: 0, registros: 0 };
   const motor: MotorDeSubida = {
     async subir() {
       cuenta.subidas += 1;
-      return plan.subir ? plan.subir() : { ok: true as const, storagePath: `p/${cuenta.subidas}.jpg` };
+      return plan.subir ? plan.subir() : { ok: true as const, storagePath: `p/${cuenta.subidas}.jpg`, bytes: 2_500_000 };
     },
     async registrar() {
       cuenta.registros += 1;
@@ -187,6 +188,21 @@ async function main() {
       corto = true;
     }
     ok(corto, '7 · publicar sin etiqueta se corta en la puerta');
+  }
+
+  // ── 9 · el peso sale del uso real, y su ausencia NO es cero ────────────
+  {
+    configurarAlmacen(almacenEnMemoria());
+    ok((await pesoMedido('foto')) === null, '9 · sin capturas el peso es AUSENCIA, no 0 MB');
+
+    await encolar({ ...BASE, uri: 'file://h.jpg' });
+    const { motor } = motorFalso({
+      subir: () => ({ ok: true, storagePath: 'p/h.jpg', bytes: 3_145_728 }), // 3 MB
+    });
+    await procesarCola(motor, { estadiaId: ESTADIA });
+    const peso = await pesoMedido('foto');
+    ok(peso?.n === 1 && peso.promedioMB === 3, '9b · mide el byte que REALMENTE se subió', `${peso?.promedioMB} MB`);
+    ok((await pesoMedido('clip')) === null, '9c · no inventa peso para un tipo que nadie capturó');
   }
 
   console.log(`\n${fallos === 0 ? '✅ TODO VERDE' : `❌ ${fallos} FALLO(S)`}\n`);
