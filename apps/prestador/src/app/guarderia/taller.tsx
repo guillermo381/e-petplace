@@ -52,6 +52,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  Campo,
   Celda,
   Encabezado,
   Esqueleto,
@@ -59,10 +60,13 @@ import {
   FichaFranja,
   Hoja,
   HojaScroll,
+  Interruptor,
   SelectorOpcion,
+  SliderPrecio,
   StepperCantidad,
   Tarjeta,
   Texto,
+  VozComision,
   spacing,
   useAviso,
   useTheme,
@@ -70,9 +74,12 @@ import {
 import {
   definirEspacioGuarderia,
   definirFranjaGuarderia,
+  definirOfertaGuarderia,
+  obtenerComisionVigenteCita,
   obtenerCupoGuarderia,
   obtenerFranjasGuarderia,
   obtenerMiPrestador,
+  obtenerOfertaGuarderiaPropia,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -87,6 +94,16 @@ const NOMBRE_ESPACIO = 'Principal';
 const CAP_MIN = 1;
 const CAP_MAX = 60;
 
+/* El riel del precio del día. Arranca en el piso y jamás en vacío — el
+   precedente del grooming (S59-B6). Paquete y mensualidad NO usan slider: son
+   múltiplos de esto (diez días, un mes) y un riel de $5–$60 no los cubre. */
+const PASOS_PRECIO: string[] = [];
+for (let c = 500; c <= 6000; c += 50) PASOS_PRECIO.push((c / 100).toFixed(2));
+const indiceDePrecio = (v: number): number => {
+  const i = PASOS_PRECIO.indexOf(v.toFixed(2));
+  return i >= 0 ? i : 0;
+};
+
 /** 'HH:MM:SS' del motor → 'HH:MM' de la grilla. El motor manda la verdad; la
  *  pantalla sólo la recorta para mostrarla (jamás la reinterpreta). */
 function aHoraCorta(h: string): string {
@@ -96,7 +113,16 @@ function aHoraCorta(h: string): string {
 type Estado =
   | { fase: 'cargando' }
   | { fase: 'roto' }
-  | { fase: 'listo'; prestadorId: string; sobrevendidoHoy: boolean };
+  | {
+      fase: 'listo';
+      prestadorId: string;
+      sobrevendidoHoy: boolean;
+      /** null = todavía no publicó. **No es un error**: es el camino de alta. */
+      publicada: boolean;
+      /** 🔴 DERIVADA de las franjas por el motor — jamás se teclea. */
+      jornadaMinutos: number | null;
+      comisionPct: number | null;
+    };
 
 type QueHora = null | 'recogidaDesde' | 'recogidaHasta' | 'devolucionDesde' | 'devolucionHasta';
 
@@ -119,6 +145,11 @@ export default function TallerGuarderia() {
   const [devolucionDesde, setDevolucionDesde] = useState('16:30');
   const [devolucionHasta, setDevolucionHasta] = useState('18:30');
   const [queHora, setQueHora] = useState<QueHora>(null);
+  const [iPrecio, setIPrecio] = useState(indiceDePrecio(12));
+  const [ofrecePaquete, setOfrecePaquete] = useState(false);
+  const [precioPaquete, setPrecioPaquete] = useState('');
+  const [ofreceMensual, setOfreceMensual] = useState(false);
+  const [precioMensual, setPrecioMensual] = useState('');
 
   useEffect(() => {
     if (gate !== 'permitido') return;
@@ -139,9 +170,11 @@ export default function TallerGuarderia() {
       const ahora = new Date();
       const hoy = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
 
-      const [franjas, cupo] = await Promise.all([
+      const [franjas, cupo, oferta, comision] = await Promise.all([
         obtenerFranjasGuarderia(prestadorId),
         obtenerCupoGuarderia(prestadorId, hoy, hoy),
+        obtenerOfertaGuarderiaPropia(prestadorId),
+        obtenerComisionVigenteCita(),
       ]);
       if (!vigente) return;
 
@@ -149,7 +182,11 @@ export default function TallerGuarderia() {
          (Ley 13 / L-178): si el servidor no contestó, la pantalla lo dice y
          ofrece reintentar — no pinta un formulario vacío que, al guardarse,
          pisaría una configuración que sí existe. */
-      if (!franjas.ok || !cupo.ok) {
+      /* La comisión NO entra al guard: si no se pudo leer, el neto no se
+         muestra (`VozComision` con `pct` null calla) y la pantalla sigue
+         siendo usable. *Un dato de apoyo que rompe la pantalla entera es peor
+         que su ausencia.* */
+      if (!franjas.ok || !cupo.ok || !oferta.ok) {
         setEstado({ fase: 'roto' });
         return;
       }
@@ -167,10 +204,22 @@ export default function TallerGuarderia() {
       const hoyCupo = cupo.data[0];
       if (hoyCupo !== undefined && hoyCupo.capacidad > 0) setCapacidad(hoyCupo.capacidad);
 
+      const o = oferta.data;
+      if (o !== null) {
+        setIPrecio(indiceDePrecio(o.precio));
+        setOfrecePaquete(o.precioPaquete !== null);
+        setPrecioPaquete(o.precioPaquete === null ? '' : o.precioPaquete.toFixed(2));
+        setOfreceMensual(o.precioMensual !== null);
+        setPrecioMensual(o.precioMensual === null ? '' : o.precioMensual.toFixed(2));
+      }
+
       setEstado({
         fase: 'listo',
         prestadorId,
         sobrevendidoHoy: hoyCupo?.sobrevendido ?? false,
+        publicada: o !== null && o.activo,
+        jornadaMinutos: o?.jornadaMinutos ?? null,
+        comisionPct: comision.ok ? comision.data.porcentaje : null,
       });
     })();
     return () => {
@@ -221,10 +270,43 @@ export default function TallerGuarderia() {
       return;
     }
 
+    /* 🔴 LA OFERTA VA ÚLTIMA, Y NO ES ORDEN DE CONVENIENCIA: publicar EXIGE
+       franjas Y capacidad, y el motor lo rebota hablado
+       (`franjas_no_configuradas` / `sin_espacios_configurados`). Guardarla
+       antes rebotaría contra lo que esta misma pantalla está por escribir. */
+    const paquete = ofrecePaquete ? Number(precioPaquete.replace(',', '.')) : null;
+    const mensual = ofreceMensual ? Number(precioMensual.replace(',', '.')) : null;
+    if (ofrecePaquete && (!Number.isFinite(paquete) || (paquete ?? 0) <= 0)) {
+      mostrar({ texto: t('tallerGuarderia.paqueteInvalido'), variante: 'error' });
+      setGuardando(false);
+      return;
+    }
+    if (ofreceMensual && (!Number.isFinite(mensual) || (mensual ?? 0) <= 0)) {
+      mostrar({ texto: t('tallerGuarderia.mensualInvalido'), variante: 'error' });
+      setGuardando(false);
+      return;
+    }
+
+    const oferta = await definirOfertaGuarderia({
+      prestadorId: estado.prestadorId,
+      precioDia: Number(PASOS_PRECIO[iPrecio]),
+      precioPaquete: paquete,
+      precioMensual: mensual,
+    });
+    if (!oferta.ok) {
+      /* Los dos rebotes de la firma llegan con SU voz desde el wrapper: dicen
+         QUÉ falta, así el prestador sabe adónde ir. No se re-escriben acá. */
+      mostrar({ texto: oferta.mensaje, variante: 'error' });
+      setGuardando(false);
+      setIntento((n) => n + 1);
+      return;
+    }
+
     setGuardando(false);
     mostrar({ texto: t('taller.guardado'), variante: 'exito' });
     setIntento((n) => n + 1);
-  }, [estado, guardando, capacidad, recogidaDesde, recogidaHasta, devolucionDesde, devolucionHasta, mostrar, t]);
+  }, [estado, guardando, capacidad, recogidaDesde, recogidaHasta, devolucionDesde, devolucionHasta,
+      iPrecio, ofrecePaquete, precioPaquete, ofreceMensual, precioMensual, mostrar, t]);
 
   if (gate === 'verificando' || estado.fase === 'cargando') {
     return (
@@ -339,13 +421,77 @@ export default function TallerGuarderia() {
           />
         </View>
 
-        {/* 🔴 EL PRECIO NO ESTÁ, Y LA PANTALLA LO DICE. Un oficio configurado
-            sin precio no recibe reservas, y callarlo dejaría al prestador
-            esperando clientes que no pueden llegar. */}
+        {/* ── EL PRECIO ── */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="titulo">{t('tallerGuarderia.precioTitulo')}</Texto>
+          <SliderPrecio
+            etiqueta={t('tallerGuarderia.precioDia')}
+            pasos={PASOS_PRECIO}
+            indice={iPrecio}
+            onCambio={setIPrecio}
+            registro="aa"
+            edicionNumerica
+          />
+          {/* El NETO, vivo (D-412): lo que le queda al prestador después de la
+              comisión. Con `pct` null calla — jamás inventa un número. */}
+          <VozComision pct={estado.comisionPct} precio={Number(PASOS_PRECIO[iPrecio])} />
+
+          {/* Paquete y mensualidad: OPCIONALES, y el «no» es un valor legítimo
+              — por eso nacen apagados y el motor guarda `null`, que **jamás
+              cae al precio del día**. */}
+          <Interruptor
+            etiqueta={t('tallerGuarderia.ofrecePaquete')}
+            encendido={ofrecePaquete}
+            onCambio={setOfrecePaquete}
+            registro="oficio"
+          />
+          {ofrecePaquete ? (
+            <Campo
+              label={t('tallerGuarderia.precioPaquete')}
+              value={precioPaquete}
+              onChangeText={setPrecioPaquete}
+              keyboardType="decimal-pad"
+              placeholder={t('tallerGuarderia.precioPlaceholder')}
+            />
+          ) : null}
+
+          <Interruptor
+            etiqueta={t('tallerGuarderia.ofreceMensual')}
+            encendido={ofreceMensual}
+            onCambio={setOfreceMensual}
+            registro="oficio"
+          />
+          {ofreceMensual ? (
+            <Campo
+              label={t('tallerGuarderia.precioMensual')}
+              value={precioMensual}
+              onChangeText={setPrecioMensual}
+              keyboardType="decimal-pad"
+              placeholder={t('tallerGuarderia.precioPlaceholder')}
+            />
+          ) : null}
+        </View>
+
+        {/* ── ESTÁS VISIBLE, O NO, Y POR QUÉ ──
+            🔴 «Visible» es la palabra más peligrosa de esta pantalla: si la
+            dijera sin que sea cierta, el prestador esperaría clientes que no
+            pueden llegar. Por eso se dice el estado REAL que devolvió el motor
+            —publicada o no— y, cuando lo está, la JORNADA DERIVADA de sus
+            franjas: el dato que prueba que el motor leyó lo que él configuró. */}
         <Tarjeta relleno="normal" elevacion="reposo">
           <View style={{ gap: spacing[2] }}>
-            <Texto variante="cuerpo">{t('tallerGuarderia.precioPendiente')}</Texto>
-            <Texto variante="apoyo">{t('tallerGuarderia.precioPendienteApoyo')}</Texto>
+            <Texto variante="cuerpo">
+              {estado.publicada ? t('tallerGuarderia.visibleSi') : t('tallerGuarderia.visibleNo')}
+            </Texto>
+            {estado.publicada && estado.jornadaMinutos !== null ? (
+              <Texto variante="apoyo">
+                {t('tallerGuarderia.jornadaDerivada', {
+                  horas: (estado.jornadaMinutos / 60).toFixed(1),
+                })}
+              </Texto>
+            ) : (
+              <Texto variante="apoyo">{t('tallerGuarderia.visibleNoApoyo')}</Texto>
+            )}
           </View>
         </Tarjeta>
 
