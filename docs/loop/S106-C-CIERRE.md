@@ -453,3 +453,83 @@ usar*, y costó una build de veinte minutos.
 
 **Por eso el cierre no dice «curado» en ninguna línea.** Eso lo dice el dedo
 del founder.
+
+---
+---
+
+# 🔴 EL CUADRO CONGELADO — DIAGNÓSTICO PARA LA PRÓXIMA SESIÓN
+
+**No se cura hoy, por decisión de la mesa y con la razón compartida:** *dos
+curas encima de una superficie que no se puede ejercer sin una llamada real,
+a esta hora, es cómo se rompe lo que funciona.*
+
+## ① LA ADJUDICACIÓN — verificada, y **mi `box-none` quedó FUERA de `main`**
+
+Medido contra `origin/main`: **cero `pointerEvents` en la pantalla**. Entre mi
+prop y el slot de B ganó el slot, y **la prop se perdió en la adjudicación**.
+
+🔴 **Y las dos NO eran alternativas: eran complementarias.**
+- **El slot** resuelve el **ORDEN** — colgar queda encima por construcción.
+- **El `box-none`** resuelve la **OPACIDAD** — que mi `View` no se coma los
+  toques de su propia franja.
+
+*Sacar uno de los dos deja el otro trabajo sin hacer.* **Y encaja con el
+agravamiento reportado:** antes bloqueaba una franja; sin el `box-none` dentro
+de un slot que ahora ocupa su ancho completo, bloquea más.
+
+⚠️ **La prop está repuesta en `pista/s106-c-cierre` (`e8e380a5`) y NO en
+`main`.** *Quien retome esto: la cura de ① ya está escrita, sólo hay que
+mergearla.*
+
+## ② SI EL BLOQUEO PERSISTE — la otra causa, sin construir
+
+Si con el `box-none` repuesto sigue bloqueando, entonces **lo que come los
+toques es la vista de la imagen, no su envoltorio** — y el sospechoso es la
+miniatura del modal, que monté sin `pointerEvents`.
+
+*No lo curo a ciegas: son curas opuestas y elegir sin el dato es cómo se
+encadenan tres arreglos que no arreglan.*
+
+## 🔴 ③ LA PREGUNTA MÁS GRAVE — QUÉ IMAGEN SALIÓ
+
+**El log dijo `transporte: 'publisher'`** — la conexión por la que el vet
+MANDA su video, no por la que recibe.
+
+**Lo que SÍ se puede afirmar, medido en el fork** (`WebRTCModule.java:461`):
+
+```java
+public MediaStreamTrack getTrack(int pcId, String trackId) {
+    if (pcId == -1) { return getLocalTrack(trackId); }   // ← el ÚNICO brazo local
+    PeerConnectionObserver pco = mPeerConnectionObservers.get(pcId);
+    return pco.remoteTracks.get(trackId);                // ← sólo REMOTOS
+}
+```
+
+⇒ **Con `pcId != -1` el brazo local es INALCANZABLE.** Si hubiera devuelto la
+cámara del vet, el track sería local, `remoteTracks` no lo tendría, habría
+devuelto `null` y el módulo habría rechazado con `track_no_encontrado`.
+**Y capturó** (`puerta:ok` + PNG escrito) ⇒ **el track era REMOTO.**
+
+*Y el nombre `publisher` no contradice esto: significa que
+`pcManager.subscriber` estaba `undefined` —LiveKit puede operar con una sola
+PC bidireccional— y esa misma PC es la que tiene los `remoteTracks`, que es
+justo lo que explica que lo encontrara.*
+
+⚠️ **PERO ESO PRUEBA QUE ES REMOTO, NO CUÁL.** *El razonamiento es fuerte y el
+PNG es prueba* — **y la mesa tiene razón en pedir el PNG**: en una historia
+clínica, «casi seguro que es el animal» no alcanza. **El archivo está en disco
+y A tiene el cable. Es lo primero de la próxima sesión, antes de seguir
+curando el bloqueo.**
+
+## LO QUE SÍ QUEDÓ PROBADO, para que nadie lo re-mida
+
+✅ La vía nativa produce **la imagen real** (prueba local, aparato).
+✅ La captura funciona **sobre el video remoto** en una cita real: `pcId`
+resuelto · aviso al dueño despachado ANTES · puerta `ok` · PNG escrito.
+✅ El `pcId` sale de **recorrer los cuatro transportes** — *no del eje `pc` vs
+`_pc`, que el aparato desmintió.*
+
+## LO QUE NO
+
+🔴 **Que no bloquee.** 🔴 **Qué imagen salió** (③). 🔴 **iOS remoto**, que sigue
+rebotando ⇒ **no hay verde de plataformas.**
