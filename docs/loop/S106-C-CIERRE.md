@@ -533,3 +533,62 @@ resuelto · aviso al dueño despachado ANTES · puerta `ok` · PNG escrito.
 
 🔴 **Que no bloquee.** 🔴 **Qué imagen salió** (③). 🔴 **iOS remoto**, que sigue
 rebotando ⇒ **no hay verde de plataformas.**
+
+---
+
+## 🔴 ENMIENDA AL DIAGNÓSTICO — dato nuevo del founder, y me obliga a corregirme
+
+**«El pet parent ya no puede ver el video del vet después de la captura.»**
+
+### Por qué esto NO es la capa, y cambia todo
+
+Las curas de ① y ② eran sobre **una capa que tapa**. *Una capa tapa TOCA — no
+apaga el video del otro lado, en el otro teléfono.* ⇒ **lo que se rompió es el
+TRACK, y eso sólo puede venir de mi módulo nativo.**
+
+### 🔴 EL PRIMER SOSPECHOSO, y es mi código
+
+```kotlin
+val i420 = frame.buffer.toI420()
+try { … } finally { i420.release() }
+```
+
+**`VideoFrame.Buffer extends RefCounted`** (verificado con `javap` sobre el
+`.aar`). **Y el contrato de `toI420()` es que, si el buffer YA es I420,
+devuelve `this` con un `retain()` — el MISMO objeto.**
+
+⇒ Mi `release()` **puede estar liberando una referencia del buffer del frame
+original**, no de una copia. *Y un buffer liberado de más se destruye mientras
+el renderer todavía lo usa: el pipeline de ese track se rompe.*
+
+### 🔴 Y LO QUE ME OBLIGA A CORREGIR LO QUE DEPOSITÉ
+
+Hace veinte minutos escribí, con un razonamiento que sigo considerando
+sólido: *«el track era REMOTO, porque con `pcId != -1` el brazo local es
+inalcanzable»*.
+
+**El dato nuevo lo pone en duda por el otro extremo:** *el que perdió imagen
+es el DUEÑO, y lo que dejó de ver es el video del VET.* **Si el track que
+rompí es el que el vet publica, entonces el track que capturé era el del vet
+— y el PNG sería su cara, no el animal.**
+
+⚠️ **Las dos lecturas son incompatibles y no puedo resolverlas leyendo:** una
+sale del código del fork, la otra de lo que pasó en dos teléfonos.
+
+⇒ **NO doy por válido mi razonamiento anterior.** *Un argumento que se sostiene
+solo hasta que aparece la primera evidencia del mundo no era una prueba: era
+una hipótesis bien construida.* **Queda anotado como lo que es, para que nadie
+lo lea mañana como cerrado y construya encima.**
+
+### El orden de la próxima sesión, corregido
+
+1. 🔴 **MIRAR EL PNG.** Ahora no es sólo «qué imagen salió»: es **el
+   discriminador entre las dos lecturas**. Si es la cara del vet, la causa es
+   el track equivocado y el `release()` es su consecuencia; si es el animal,
+   son dos defectos y el `release()` es el único.
+2. **El `release()`**, que es sospechoso en las dos ramas.
+3. Recién después, el bloqueo (① ya está escrito y sin mergear).
+
+⚠️ **Y hasta que eso se mida, el botón de capturar no debería estar al alcance
+del vet en una consulta real:** *romperle el video a la familia a mitad de una
+teleconsulta paga es peor que no tener la función.*
