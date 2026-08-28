@@ -21565,8 +21565,21 @@ endpoint** — su peor caso deja sin códigos vivos a todos los demás.
 
 **Dueño:** mesa + abogado. ☠️ **Condición de muerte:** §6 reescrita con una figura que el abogado valide.
 
-#### D-920 — 🔴 LAS FIRMAS DE AYER DICEN 10 % Y LO QUE RIGE DICE 15 %
-🔴 **ALTA — es plata y es firma del founder, no cura de pista.**
+#### D-920 — ☠️ CERRADA (28-ago-2026, S107-A) — LAS FIRMAS DE AYER DICEN 10 % Y LO QUE RIGE DICE 15 %
+> ☠️ **CERRADA POR MEDICIÓN, no por decreto — y su condición de muerte se cumplió literal: las tres fuentes dicen el mismo número con la misma base.**
+>
+> | fuente | medido el 28-ago |
+> |---|---|
+> | **`fee_configs` VIGENTE** (EC · `prestador_servicios` · origen `cita`) | **`{pct: 10, base: "subtotal"}`**, `vigencia_hasta = NULL` |
+> | la fila de 15 % | **`vigencia_hasta = 2026-08-25 16:04` — CERRADA.** Su nota lo dice: *«El lanzamiento va a 10 % con base subtotal. No se borra: 13 citas congeladas apuntan acá»* |
+> | **T&C publicados** (`TERMINOS-PET-PROFESSIONAL.md:220`) | **Servicios 10 %** sobre valor **sin impuestos**; el 15 % **tachado** en la línea 224 |
+> | **firma del founder** (28-ago, guardería) | **10 %, configurable** |
+>
+> 🔴 **POR QUÉ LA FICHA DECÍA OTRA COSA, y es la lección: se leyó una fila VIVA sin mirar su VENTANA DE VIGENCIA.** La fila de 15 % existe y siempre va a existir —13 citas congeladas la necesitan—, pero **dejó de regir el 25-ago**. *Una fila viva y una fila vigente no son lo mismo.* **Es exactamente `D-948` de la pista CERT de esta misma sesión — «la verdad vencida: deriva, no afirma» — cobrada por segunda vez en dos días, en otro documento y sobre otro dato.**
+>
+> ✅ **Consecuencia ejecutada:** se levanta el bloqueo *«ninguna pantalla pinta precio»* del `PLAN_S107_GUARDERIA` §3 y §6. **Y guardería no necesita fila propia de comisión:** la vigente aplica a `tipo_origen='cita'` **sin discriminar oficio** — quien siembre una fila de guardería crea una divergencia que nadie pidió.
+
+🔴 **ALTA — es plata y es firma del founder, no cura de pista.** *(Texto original conservado abajo: la medición que lo motivó era correcta el día que se escribió.)*
 
 **Medido contra las TRES fuentes, y el resultado importa: dos ya concuerdan entre sí.**
 
@@ -23211,3 +23224,27 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 **Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
+
+#### D-956 — 🔴 EL GATE SANITARIO DURO DE GUARDERÍA NO TIENE CON QUÉ EJECUTARSE
+🔴 **ALTA · BLOQUEA LA FIRMA ③ DE S107, no su construcción.** Hallada el 28-ago-2026 por el censo de S107-A, midiendo la base viva antes de construir.
+
+**La firma ③ del founder dice: «sin papeles al día no se reserva» — gate DURO.** El censo midió con qué se alimentaría:
+
+| medición | número |
+|---|---|
+| filas en `evento_vacuna_aplicada` | **32** |
+| de ellas, con **`fecha_proxima`** (el dato que define el vencimiento) | 🔴 **1** |
+| con `vacuna_codigo` | 22 |
+| **mascotas con alguna vacuna** | 🔴 **5** |
+| mascotas vivas | **78** |
+
+> ### 🔴 Con los datos de hoy el gate duro **rechaza a 73 de 78 animales** — y de los 5 restantes, **«al día» ni siquiera es computable**, porque el vencimiento vive en `fecha_proxima` y está poblado en **1 de 32** filas.
+
+**Esto no invalida la firma ③: dice que la firma no tiene insumo.** *Un gate que corre sobre un criterio sin datos no gatea: rechaza a todos.* **Misma clase que la cadena de selección entre vendedores de S99** — *«una cadena que ordena por un criterio que no tiene datos **parece** que ordena»* — y misma clase que `D-768` (64 mascotas sin fecha de nacimiento, donde aplicar el filtro por etapa **vaciaba la vitrina**).
+
+**Lo que la construcción hace mientras tanto, y está en el contrato publicado:** `evaluar_requisitos_guarderia` **se construye entera y devuelve la verdad** (`al_dia | faltan[…]`, cada faltante con su camino a resolver), pero **el enforcement nace ABIERTO** — `faltan` informa y no bloquea, y la superficie lo dice honesto. **Encenderlo es una línea el día que la mesa firme.**
+
+**Lo que la mesa tiene que firmar (y no se infiere):** qué vacunas exige guardería · con qué vigencia · y qué pasa con el animal cuyo carnet es de papel y todavía no se cargó. **Toca `CRITERIO_LEGAL_GUARDERIA` §4** (*declaración sanitaria con carnet vigente, obligatoria por Res. 121*): el requisito es legal, así que la respuesta no puede ser «lo apagamos».
+
+**Dueño:** mesa (el criterio) + A (encender la compuerta). **Disparo:** antes de abrir guardería a familias reales.
+☠️ **Condición de muerte:** el criterio de «al día» firmado **y** `fecha_proxima` poblándose por el camino real (el carnet por cámara ya la escribe cuando el modelo la encuentra).
