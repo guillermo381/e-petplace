@@ -2850,6 +2850,14 @@ export const clienteEs = {
     devolucion: 'Lo traen de vuelta',
     elegiDia: 'Elige el día',
     diaLleno: 'Sin lugares para este día',
+    /* Los cinco casos del motor, cada uno con su voz. La pantalla PINTA el
+       motivo; no lo deduce — «no abren» se mide del patrón del lugar y desde
+       acá era indistinguible de «se llenó». */
+    cupo_pasado: 'Ya pasó',
+    cupo_mismo_dia: 'Las reservas entran desde mañana',
+    cupo_no_opera: 'Ese día no abren',
+    cupo_sin_lugar: 'Sin lugares para este día',
+    cupo_sin_dato: 'No disponible',
     diaPasado: 'Ya pasó',
     /* Compuerta de A: hoy jamás se reserva. Voz propia — no es «se llenó». */
     diaHoy: 'Las reservas entran desde mañana',

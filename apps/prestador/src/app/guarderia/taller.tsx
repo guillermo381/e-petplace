@@ -60,6 +60,7 @@ import {
   FichaFranja,
   Hoja,
   HojaScroll,
+  FichaPaquete,
   Interruptor,
   SelectorOpcion,
   SliderPrecio,
@@ -75,6 +76,9 @@ import {
   definirEspacioGuarderia,
   definirFranjaGuarderia,
   definirOfertaGuarderia,
+  definirPaqueteGuarderia,
+  obtenerPaquetesGuarderia,
+  type TamanoPaquete,
   obtenerComisionVigenteCita,
   obtenerCupoGuarderia,
   obtenerFranjasGuarderia,
@@ -97,6 +101,30 @@ const CAP_MAX = 60;
 /* El riel del precio del día. Arranca en el piso y jamás en vacío — el
    precedente del grooming (S59-B6). Paquete y mensualidad NO usan slider: son
    múltiplos de esto (diez días, un mes) y un riel de $5–$60 no los cubre. */
+/**
+ * Los tamaños que el lugar puede ofrecer. 🔴 **La lista está acá una sola vez
+ * y NO PUEDE DESINCRONIZARSE EN SILENCIO**: `satisfies` prueba que cada valor
+ * es un `TamanoPaquete` válido, y el guard de exhaustividad de abajo **no
+ * compila** si el tipo gana un tamaño que esta lista no tiene.
+ *
+ * *Los tamaños son DATO en el motor (un `CHECK`, no columnas) — un cuarto
+ * tamaño es un `INSERT`. Esta pantalla no puede leer el `CHECK`, así que lo
+ * que hace es imposible quedarse atrás de él sin que el typecheck lo grite.*
+ */
+const TAMANOS = [5, 10, 15] as const satisfies readonly TamanoPaquete[];
+type _FaltaAlgunTamano = Exclude<TamanoPaquete, (typeof TAMANOS)[number]>;
+/* Si el motor suma un tamaño y esta lista no, acá rompe el build. */
+const _GUARD_TAMANOS: _FaltaAlgunTamano extends never ? true : never = true;
+void _GUARD_TAMANOS;
+
+/** El riel del precio de un paquete: quince estadías pesan mucho más que una. */
+const PASOS_PAQUETE: string[] = [];
+for (let c = 2000; c <= 90000; c += 500) PASOS_PAQUETE.push((c / 100).toFixed(2));
+const indiceDePaquete = (v: number): number => {
+  const i = PASOS_PAQUETE.indexOf(v.toFixed(2));
+  return i >= 0 ? i : 0;
+};
+
 const PASOS_PRECIO: string[] = [];
 for (let c = 500; c <= 6000; c += 50) PASOS_PRECIO.push((c / 100).toFixed(2));
 const indiceDePrecio = (v: number): number => {
@@ -146,8 +174,16 @@ export default function TallerGuarderia() {
   const [devolucionHasta, setDevolucionHasta] = useState('18:30');
   const [queHora, setQueHora] = useState<QueHora>(null);
   const [iPrecio, setIPrecio] = useState(indiceDePrecio(12));
-  const [ofrecePaquete, setOfrecePaquete] = useState(false);
-  const [precioPaquete, setPrecioPaquete] = useState('');
+  /**
+   * Los tres tamaños con su estado. 🔴 **`existe` y `activo` son cosas
+   * distintas** (contrato §): *no estar en la respuesta* = **nunca se
+   * encendió**; *estar con `activo:false`* = **apagado con su precio
+   * guardado**. La pantalla los distingue sin preguntarle nada a nadie: el
+   * segundo muestra su precio, el primero no tiene ninguno que mostrar.
+   */
+  const [paquetes, setPaquetes] = useState<
+    Record<number, { existe: boolean; activo: boolean; iPrecio: number }>
+  >({});
   const [ofreceMensual, setOfreceMensual] = useState(false);
   const [precioMensual, setPrecioMensual] = useState('');
 
@@ -170,11 +206,12 @@ export default function TallerGuarderia() {
       const ahora = new Date();
       const hoy = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
 
-      const [franjas, cupo, oferta, comision] = await Promise.all([
+      const [franjas, cupo, oferta, comision, paqs] = await Promise.all([
         obtenerFranjasGuarderia(prestadorId),
         obtenerCupoGuarderia(prestadorId, hoy, hoy),
         obtenerOfertaGuarderiaPropia(prestadorId),
         obtenerComisionVigenteCita(),
+        obtenerPaquetesGuarderia(prestadorId),
       ]);
       if (!vigente) return;
 
@@ -186,7 +223,7 @@ export default function TallerGuarderia() {
          muestra (`VozComision` con `pct` null calla) y la pantalla sigue
          siendo usable. *Un dato de apoyo que rompe la pantalla entera es peor
          que su ausencia.* */
-      if (!franjas.ok || !cupo.ok || !oferta.ok) {
+      if (!franjas.ok || !cupo.ok || !oferta.ok || !paqs.ok) {
         setEstado({ fase: 'roto' });
         return;
       }
@@ -207,11 +244,18 @@ export default function TallerGuarderia() {
       const o = oferta.data;
       if (o !== null) {
         setIPrecio(indiceDePrecio(o.precio));
-        setOfrecePaquete(o.precioPaquete !== null);
-        setPrecioPaquete(o.precioPaquete === null ? '' : o.precioPaquete.toFixed(2));
         setOfreceMensual(o.precioMensual !== null);
         setPrecioMensual(o.precioMensual === null ? '' : o.precioMensual.toFixed(2));
       }
+
+      /* Lo que NO vino en la respuesta queda `existe:false` — nunca se
+         encendió — y por eso arranca sin precio: no hay ninguno que mostrar. */
+      const mapa: Record<number, { existe: boolean; activo: boolean; iPrecio: number }> = {};
+      for (const tam of TAMANOS) mapa[tam] = { existe: false, activo: false, iPrecio: 0 };
+      for (const pq of paqs.data) {
+        mapa[pq.tamano] = { existe: true, activo: pq.activo, iPrecio: indiceDePaquete(pq.precio) };
+      }
+      setPaquetes(mapa);
 
       setEstado({
         fase: 'listo',
@@ -274,13 +318,7 @@ export default function TallerGuarderia() {
        franjas Y capacidad, y el motor lo rebota hablado
        (`franjas_no_configuradas` / `sin_espacios_configurados`). Guardarla
        antes rebotaría contra lo que esta misma pantalla está por escribir. */
-    const paquete = ofrecePaquete ? Number(precioPaquete.replace(',', '.')) : null;
     const mensual = ofreceMensual ? Number(precioMensual.replace(',', '.')) : null;
-    if (ofrecePaquete && (!Number.isFinite(paquete) || (paquete ?? 0) <= 0)) {
-      mostrar({ texto: t('tallerGuarderia.paqueteInvalido'), variante: 'error' });
-      setGuardando(false);
-      return;
-    }
     if (ofreceMensual && (!Number.isFinite(mensual) || (mensual ?? 0) <= 0)) {
       mostrar({ texto: t('tallerGuarderia.mensualInvalido'), variante: 'error' });
       setGuardando(false);
@@ -290,7 +328,6 @@ export default function TallerGuarderia() {
     const oferta = await definirOfertaGuarderia({
       prestadorId: estado.prestadorId,
       precioDia: Number(PASOS_PRECIO[iPrecio]),
-      precioPaquete: paquete,
       precioMensual: mensual,
     });
     if (!oferta.ok) {
@@ -302,11 +339,32 @@ export default function TallerGuarderia() {
       return;
     }
 
+    /* Los paquetes, después de la oferta. Se guarda **sólo lo que el
+       prestador tocó alguna vez** (`existe` o encendido ahora): un tamaño que
+       nunca prendió **no se escribe**, para que su ausencia siga significando
+       «nunca lo ofrecí» y no «lo ofrecí en cero». */
+    for (const tam of TAMANOS) {
+      const pq = paquetes[tam];
+      if (pq === undefined || (!pq.existe && !pq.activo)) continue;
+      const r = await definirPaqueteGuarderia({
+        prestadorId: estado.prestadorId,
+        tamano: tam,
+        precio: Number(PASOS_PAQUETE[pq.iPrecio]),
+        activo: pq.activo,
+      });
+      if (!r.ok) {
+        mostrar({ texto: r.mensaje, variante: 'error' });
+        setGuardando(false);
+        setIntento((n) => n + 1);
+        return;
+      }
+    }
+
     setGuardando(false);
     mostrar({ texto: t('taller.guardado'), variante: 'exito' });
     setIntento((n) => n + 1);
   }, [estado, guardando, capacidad, recogidaDesde, recogidaHasta, devolucionDesde, devolucionHasta,
-      iPrecio, ofrecePaquete, precioPaquete, ofreceMensual, precioMensual, mostrar, t]);
+      iPrecio, paquetes, ofreceMensual, precioMensual, mostrar, t]);
 
   if (gate === 'verificando' || estado.fase === 'cargando') {
     return (
@@ -439,21 +497,69 @@ export default function TallerGuarderia() {
           {/* Paquete y mensualidad: OPCIONALES, y el «no» es un valor legítimo
               — por eso nacen apagados y el motor guarda `null`, que **jamás
               cae al precio del día**. */}
-          <Interruptor
-            etiqueta={t('tallerGuarderia.ofrecePaquete')}
-            encendido={ofrecePaquete}
-            onCambio={setOfrecePaquete}
-            registro="oficio"
-          />
-          {ofrecePaquete ? (
-            <Campo
-              label={t('tallerGuarderia.precioPaquete')}
-              value={precioPaquete}
-              onChangeText={setPrecioPaquete}
-              keyboardType="decimal-pad"
-              placeholder={t('tallerGuarderia.precioPlaceholder')}
-            />
-          ) : null}
+          {/* ── LOS PAQUETES ──
+              Los tres se pintan SIEMPRE, y el prestador enciende los que
+              quiera: ninguno, uno, dos o los tres.
+              🔴 **Dos estados que se ven distinto, y no es un matiz:** el que
+              nunca se encendió **no tiene precio que mostrar**; el que está
+              apagado **muestra el suyo, guardado**. *Si los dos se vieran
+              iguales, volver a encender uno se sentiría como empezar de cero
+              sobre un precio que el prestador ya había pensado.* */}
+          <Texto variante="seccion">{t('tallerGuarderia.paquetesTitulo')}</Texto>
+          <Texto variante="apoyo">{t('tallerGuarderia.paquetesApoyo')}</Texto>
+          {TAMANOS.map((tam) => {
+            const pq = paquetes[tam] ?? { existe: false, activo: false, iPrecio: 0 };
+            return (
+              <FichaPaquete
+                key={tam}
+                clave={String(tam)}
+                tamano={tam}
+                registro="oficio"
+                rotuloTamano={t('tallerGuarderia.estadias', { n: tam })}
+                /* `null` = nunca encendido. El apagado CON precio lo manda
+                   igual, y por eso se distingue del que nunca existió. */
+                precioPaquete={pq.existe || pq.activo ? Number(PASOS_PAQUETE[pq.iPrecio]) : null}
+                precioDiaSuelto={Number(PASOS_PRECIO[iPrecio])}
+                /* La cuenta la hace la pieza; acá sólo se dice. **El número es
+                   uno solo o no sirve**, y por eso no se recalcula. */
+                vozEquivalente={(e) =>
+                  e.deltaPct === null || e.direccion === 'sin_comparacion'
+                    ? t('tallerGuarderia.equivalenteSimple', { porDia: e.porDia.toFixed(2) })
+                    : e.direccion === 'igual'
+                      ? t('tallerGuarderia.equivalenteIgual', { porDia: e.porDia.toFixed(2) })
+                      : t(
+                          e.direccion === 'menos'
+                            ? 'tallerGuarderia.equivalenteMenos'
+                            : 'tallerGuarderia.equivalenteMas',
+                          { porDia: e.porDia.toFixed(2), pct: e.deltaPct.toFixed(0) },
+                        )
+                }
+                elegido={pq.activo}
+                onElegir={() =>
+                  setPaquetes((m) => ({
+                    ...m,
+                    [tam]: { ...(m[tam] ?? { existe: false, iPrecio: 0 }), activo: !(m[tam]?.activo ?? false) },
+                  }))
+                }
+                /* El precio se edita SOLO si está encendido: un riel vivo bajo
+                   un paquete apagado invita a mover algo que no se ofrece. */
+                campoPrecio={
+                  pq.activo ? (
+                    <SliderPrecio
+                      etiqueta={t('tallerGuarderia.precioDelPaquete', { n: tam })}
+                      pasos={PASOS_PAQUETE}
+                      indice={pq.iPrecio}
+                      onCambio={(i) =>
+                        setPaquetes((m) => ({ ...m, [tam]: { ...(m[tam] ?? { existe: false, activo: true }), iPrecio: i } }))
+                      }
+                      registro="aa"
+                      edicionNumerica
+                    />
+                  ) : undefined
+                }
+              />
+            );
+          })}
 
           <Interruptor
             etiqueta={t('tallerGuarderia.ofreceMensual')}
