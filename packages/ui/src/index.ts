@@ -705,3 +705,59 @@ export {
   type OpcionVentana,
   type EstadoVentana,
 } from './components/SelectorVentana'
+
+// ── S107-B · LAS PIEZAS DEL OFICIO ────────────────────────────────────────
+//
+// 🔴 CONTEXTO QUE NO SE PUEDE OMITIR: `LETRA_GUARDERIA` está **FRENADA**
+// (memo del abogado, 25-ago-2026 — su §3, el reparto de responsabilidad, es
+// *nula de pleno derecho*; fichas `D-918` y `D-919`). Estas piezas se
+// construyen bajo el perímetro §0 de la tanda: **ninguna escribe texto que
+// reparta responsabilidad — todo texto entra por prop**, y por eso ninguna
+// puede afirmar algo que la letra todavía no sostiene. Es el mecanismo, no
+// la disciplina: el estado malo es inexpresable (L-222).
+
+export { FichaFranja, type FichaFranjaProps, type VentanaDeFranja } from './components/FichaFranja'
+
+export {
+  FichaMensualidad,
+  type FichaMensualidadProps,
+} from './components/FichaMensualidad'
+
+export {
+  SemaforoSanitario,
+  type SemaforoSanitarioProps,
+  type RequisitoSanitario,
+} from './components/SemaforoSanitario'
+
+export {
+  CalendarioCupo,
+  type CalendarioCupoProps,
+  type DiaDeCupo,
+  type EstadoCupo,
+} from './components/CalendarioCupo'
+
+export {
+  SelectorRoster,
+  type SelectorRosterProps,
+  type MiembroDelRoster,
+} from './components/SelectorRoster'
+
+export { ContadorClip, type ContadorClipProps } from './components/ContadorClip'
+
+export { MiniaturaClip, type MiniaturaClipProps } from './components/MiniaturaClip'
+
+export { HiloDelDia, type HiloDelDiaProps, type EntradaDelHilo, type MediaDelHilo } from './components/HiloDelDia'
+
+export {
+  ActaDeEntrega,
+  type ActaDeEntregaProps,
+  type ItemDeActa,
+  type Conformidad,
+  type DireccionDelActa,
+} from './components/ActaDeEntrega'
+
+export {
+  AceptacionDeDocumentos,
+  type AceptacionDeDocumentosProps,
+  type DocumentoAceptable,
+} from './components/AceptacionDeDocumentos'
