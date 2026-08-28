@@ -1497,3 +1497,17 @@ export { obtenerConfigVideo, type ConfigVideo } from './wrappers/telemedicina';
 export { prestadorTieneVerificacionProfesional, cerrarTeleconsulta } from './wrappers/telemedicina';
 export { obtenerHistorialClinicoMascota, type ItemHistorialClinico, type FiltrosHistorialClinico } from './wrappers/veterinaria-nota-clinica';
 export { guardarBorradorNota, leerBorradorNota, type BorradorNota, type CodigoBorradorNota } from './wrappers/veterinaria-nota-clinica';
+
+/* S107-A · guardería: el cupo del lugar y sus dos franjas. */
+export {
+  definirEspacioGuarderia,
+  declararExcepcionEspacioGuarderia,
+  definirFranjaGuarderia,
+  obtenerFranjasGuarderia,
+  obtenerCupoGuarderia,
+  type FranjaGuarderia,
+  type CupoDiaGuarderia,
+  type TipoFranjaGuarderia,
+  type DiaSemana,
+  type CodigoErrorGuarderiaConfig,
+} from './wrappers/guarderia-config';

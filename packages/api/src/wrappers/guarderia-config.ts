@@ -1,0 +1,219 @@
+// Configuración de guardería — S107-A (el cupo del lugar y sus dos franjas).
+//
+// Contrato: `docs/contratos/s107-contrato-cupo-franja-estadia.md`.
+// Censo que lo funda: `docs/loop/S107-A-CENSO.md`.
+//
+// 🔴 EL CUPO ES DEL LUGAR Y SE CUENTA POR DÍA, jamás sobre la grilla de agenda
+// (`BRIEF_S107` §2 ②). Es traducción del molde vivo de la despensa
+// (`cupo_reparto_del_dia`), no diseño nuevo: la excepción GANA al patrón y un
+// cancelado devuelve su lugar.
+//
+// 🔴 Y LAS FRANJAS NO SON TURNOS: son dos ventanas por día (recogida /
+// devolución). No se rebanan en slots de 30 minutos — el dueño no elige hora
+// exacta, acuerda dentro de la ventana.
+//
+// La escritura va por RPC (patrón S95-G2: sin policy de escritura, la única vía
+// es la función que valida). La lectura de franjas es INVOKER: la gobierna la
+// RLS de la tabla, que ya distingue al público del titular.
+
+import { getClient } from '../client';
+import type { ResultadoWrapper } from '../resultado';
+
+const MENSAJES = {
+  no_gestionas_este_prestador: 'No administras este negocio.',
+  capacidad_invalida:          'La capacidad tiene que ser mayor a cero.',
+  espacio_no_existe:           'No encontramos ese espacio.',
+  tipo_de_franja_invalido:     'La franja tiene que ser de recogida o de devolución.',
+  franja_invertida:            'La hora de fin tiene que ser después de la de inicio.',
+  /* 🔴 La voz dice QUÉ está mal, no «revisá los datos»: el prestador tiene que
+     poder corregirlo sin adivinar cuál de las dos ventanas mover. */
+  franjas_se_cruzan:           'La devolución no puede empezar antes de que termine la recogida.',
+  rango_invertido:             'La fecha de fin es anterior a la de inicio.',
+  rango_demasiado_largo:       'Se pueden consultar hasta 62 días por vez.',
+  sin_sesion:                  'No hay sesión activa.',
+  datos_inconsistentes:        'La respuesta del servidor no tiene la forma esperada.',
+  error_desconocido:           'Ocurrió un error inesperado. Prueba de nuevo.',
+} as const;
+
+export type CodigoErrorGuarderiaConfig = keyof typeof MENSAJES;
+const CODIGOS = Object.keys(MENSAJES) as CodigoErrorGuarderiaConfig[];
+
+/** L-115: el motor levanta `codigo: detalle`, así que se normaliza por prefijo. */
+function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorGuarderiaConfig> {
+  if (raw === 'auth_required') return fallaCodigo('sin_sesion');
+  for (const codigo of CODIGOS) {
+    if (raw.startsWith(codigo)) return fallaCodigo(codigo);
+  }
+  return fallaCodigo('error_desconocido');
+}
+function fallaCodigo<T>(
+  codigo: CodigoErrorGuarderiaConfig,
+): ResultadoWrapper<T, CodigoErrorGuarderiaConfig> {
+  return { ok: false, codigo, mensaje: MENSAJES[codigo] };
+}
+
+/** 0=Domingo … 6=Sábado (regla 32, sin transformaciones). */
+export type DiaSemana = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type TipoFranjaGuarderia = 'recogida' | 'devolucion';
+
+export interface FranjaGuarderia {
+  tipo: TipoFranjaGuarderia;
+  /** 'HH:MM:SS' tal como lo devuelve el motor. */
+  desde: string;
+  hasta: string;
+  diasSemana: DiaSemana[];
+  zonaHoraria: string;
+}
+
+export interface CupoDiaGuarderia {
+  /** 'YYYY-MM-DD' — FECHA LOCAL DEL LUGAR, jamás derivada de un timestamp UTC. */
+  fecha: string;
+  capacidad: number;
+  consumido: number;
+  disponible: number;
+  /**
+   * 🔴 La capacidad bajó por debajo de lo ya prometido. **El motor jamás
+   * cancela una reserva por esto**: lo declara para que el prestador lo vea.
+   * *Un día sobrevendido que se resuelve solo es un día en que alguien se
+   * queda sin lugar sin que nadie lo decida.*
+   */
+  sobrevendido: boolean;
+}
+
+// ── ESCRITURA ───────────────────────────────────────────────────────────────
+
+export async function definirEspacioGuarderia(params: {
+  prestadorId: string;
+  nombre: string;
+  capacidadPorDia: number;
+  diasOperacion?: DiaSemana[];
+  activo?: boolean;
+}): Promise<ResultadoWrapper<{ espacioId: string }, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('definir_espacio_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_nombre: params.nombre,
+    p_capacidad_por_dia: params.capacidadPorDia,
+    p_dias_operacion: params.diasOperacion ?? undefined,
+    p_activo: params.activo ?? true,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const id = (data as Record<string, unknown>).espacio_id;
+  if (typeof id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { espacioId: id } };
+}
+
+export async function declararExcepcionEspacioGuarderia(params: {
+  espacioId: string;
+  /** 'YYYY-MM-DD' */
+  fecha: string;
+  /** true = abre aunque el patrón diga que no; false = cierra aunque diga que sí. */
+  disponible: boolean;
+  motivo?: string;
+}): Promise<ResultadoWrapper<true, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('declarar_excepcion_espacio_guarderia', {
+    p_espacio_id: params.espacioId,
+    p_fecha: params.fecha,
+    p_disponible: params.disponible,
+    p_motivo: params.motivo ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  if ((data as Record<string, unknown>).ok !== true) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: true };
+}
+
+export async function definirFranjaGuarderia(params: {
+  prestadorId: string;
+  tipo: TipoFranjaGuarderia;
+  /** 'HH:MM' o 'HH:MM:SS' */
+  desde: string;
+  hasta: string;
+  diasSemana?: DiaSemana[];
+  zonaHoraria?: string;
+}): Promise<ResultadoWrapper<{ franjaId: string }, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('definir_franja_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_tipo: params.tipo,
+    p_desde: params.desde,
+    p_hasta: params.hasta,
+    p_dias_semana: params.diasSemana ?? undefined,
+    p_zona_horaria: params.zonaHoraria ?? 'America/Guayaquil',
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const id = (data as Record<string, unknown>).franja_id;
+  if (typeof id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { franjaId: id } };
+}
+
+// ── LECTURA ─────────────────────────────────────────────────────────────────
+
+export async function obtenerFranjasGuarderia(
+  prestadorId: string,
+): Promise<ResultadoWrapper<FranjaGuarderia[], CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('obtener_franjas_guarderia', {
+    p_prestador_id: prestadorId,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: FranjaGuarderia[] = [];
+  for (const f of data) {
+    if (typeof f !== 'object' || f === null) return fallaCodigo('datos_inconsistentes');
+    const r = f as Record<string, unknown>;
+    if (r.tipo !== 'recogida' && r.tipo !== 'devolucion') return fallaCodigo('datos_inconsistentes');
+    if (typeof r.desde !== 'string' || typeof r.hasta !== 'string') return fallaCodigo('datos_inconsistentes');
+    if (!Array.isArray(r.dias_semana)) return fallaCodigo('datos_inconsistentes');
+    salida.push({
+      tipo: r.tipo,
+      desde: r.desde,
+      hasta: r.hasta,
+      diasSemana: r.dias_semana as DiaSemana[],
+      zonaHoraria: typeof r.zona_horaria === 'string' ? r.zona_horaria : 'America/Guayaquil',
+    });
+  }
+  return { ok: true, data: salida };
+}
+
+/**
+ * El cupo de un rango **en UN SOLO VIAJE**.
+ *
+ * 🔴 Existe como RPC de rango a propósito: el calendario pinta un mes, y
+ * resolverlo llamando treinta veces al de un día son treinta viajes — el peaje
+ * fijo de ~150 ms por petición que S94-PERF midió (*«no hay consultas que
+ * optimizar, hay viajes que eliminar»*).
+ */
+export async function obtenerCupoGuarderia(
+  prestadorId: string,
+  /** 'YYYY-MM-DD' */
+  desde: string,
+  hasta: string,
+): Promise<ResultadoWrapper<CupoDiaGuarderia[], CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('cupo_guarderia_del_rango', {
+    p_prestador_id: prestadorId,
+    p_desde: desde,
+    p_hasta: hasta,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: CupoDiaGuarderia[] = [];
+  for (const d of data) {
+    if (typeof d !== 'object' || d === null) return fallaCodigo('datos_inconsistentes');
+    const r = d as Record<string, unknown>;
+    if (typeof r.fecha !== 'string') return fallaCodigo('datos_inconsistentes');
+    if (typeof r.capacidad !== 'number' || typeof r.consumido !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.disponible !== 'number' || typeof r.sobrevendido !== 'boolean') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    salida.push({
+      fecha: r.fecha,
+      capacidad: r.capacidad,
+      consumido: r.consumido,
+      disponible: r.disponible,
+      sobrevendido: r.sobrevendido,
+    });
+  }
+  return { ok: true, data: salida };
+}

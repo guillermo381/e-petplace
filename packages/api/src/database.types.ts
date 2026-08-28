@@ -10429,6 +10429,191 @@ export type Database = {
           },
         ]
       }
+      guarderia_espacio_excepciones: {
+        Row: {
+          created_at: string
+          disponible: boolean
+          espacio_id: string
+          fecha: string
+          id: string
+          motivo: string | null
+        }
+        Insert: {
+          created_at?: string
+          disponible: boolean
+          espacio_id: string
+          fecha: string
+          id?: string
+          motivo?: string | null
+        }
+        Update: {
+          created_at?: string
+          disponible?: boolean
+          espacio_id?: string
+          fecha?: string
+          id?: string
+          motivo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_espacio_excepciones_espacio_id_fkey"
+            columns: ["espacio_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_espacios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_espacios: {
+        Row: {
+          activo: boolean
+          capacidad_por_dia: number
+          created_at: string
+          dias_operacion: number[]
+          id: string
+          nombre: string
+          prestador_id: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          capacidad_por_dia: number
+          created_at?: string
+          dias_operacion?: number[]
+          id?: string
+          nombre: string
+          prestador_id: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          capacidad_por_dia?: number
+          created_at?: string
+          dias_operacion?: number[]
+          id?: string
+          nombre?: string
+          prestador_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_espacios_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_espacios_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_estadias: {
+        Row: {
+          a_bordo_en: string | null
+          cita_id: string
+          created_at: string
+          entregada_en: string | null
+          espacio_id: string | null
+          estado: string
+          id: string
+          llegada_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          a_bordo_en?: string | null
+          cita_id: string
+          created_at?: string
+          entregada_en?: string | null
+          espacio_id?: string | null
+          estado?: string
+          id?: string
+          llegada_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          a_bordo_en?: string | null
+          cita_id?: string
+          created_at?: string
+          entregada_en?: string | null
+          espacio_id?: string | null
+          estado?: string
+          id?: string
+          llegada_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_estadias_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: true
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_estadias_espacio_id_fkey"
+            columns: ["espacio_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_espacios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_franjas: {
+        Row: {
+          activo: boolean
+          created_at: string
+          desde: string
+          dias_semana: number[]
+          hasta: string
+          id: string
+          prestador_id: string
+          tipo: string
+          zona_horaria: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          desde: string
+          dias_semana?: number[]
+          hasta: string
+          id?: string
+          prestador_id: string
+          tipo: string
+          zona_horaria?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          desde?: string
+          dias_semana?: number[]
+          hasta?: string
+          id?: string
+          prestador_id?: string
+          tipo?: string
+          zona_horaria?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_franjas_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_franjas_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historial_pagos_prime: {
         Row: {
           created_at: string
@@ -21147,6 +21332,20 @@ export type Database = {
         }
         Returns: string
       }
+      cupo_guarderia_del_dia: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: Json
+      }
+      cupo_guarderia_del_rango: {
+        Args: { p_desde: string; p_hasta: string; p_prestador_id: string }
+        Returns: {
+          capacidad: number
+          consumido: number
+          disponible: number
+          fecha: string
+          sobrevendido: boolean
+        }[]
+      }
       cupo_reparto_del_dia: {
         Args: { p_cuenta_comercial_id: string; p_fecha: string }
         Returns: Json
@@ -21183,6 +21382,15 @@ export type Database = {
         }
         Returns: Json
       }
+      declarar_excepcion_espacio_guarderia: {
+        Args: {
+          p_disponible: boolean
+          p_espacio_id: string
+          p_fecha: string
+          p_motivo?: string
+        }
+        Returns: Json
+      }
       declarar_excepcion_recurso: {
         Args: {
           p_disponible: boolean
@@ -21212,6 +21420,27 @@ export type Database = {
       }
       declarar_talla_pelaje: {
         Args: { p_mascota_id: string; p_pelaje: string; p_talla: string }
+        Returns: Json
+      }
+      definir_espacio_guarderia: {
+        Args: {
+          p_activo?: boolean
+          p_capacidad_por_dia: number
+          p_dias_operacion?: number[]
+          p_nombre: string
+          p_prestador_id: string
+        }
+        Returns: Json
+      }
+      definir_franja_guarderia: {
+        Args: {
+          p_desde: string
+          p_dias_semana?: number[]
+          p_hasta: string
+          p_prestador_id: string
+          p_tipo: string
+          p_zona_horaria?: string
+        }
         Returns: Json
       }
       definir_recurso_reparto: {
@@ -21686,6 +21915,10 @@ export type Database = {
         Args: { p_country_code: string; p_texto: string }
         Returns: string
       }
+      notificar_reasignacion_cita: {
+        Args: { p_cita_id: string; p_empleado_id: string }
+        Returns: undefined
+      }
       notificar_recordatorios_cita: { Args: never; Returns: Json }
       obtener_adiestradores_disponibles: {
         Args: {
@@ -21866,6 +22099,16 @@ export type Database = {
         Returns: Json
       }
       obtener_ficha_repartidor: { Args: { p_envio_id: string }; Returns: Json }
+      obtener_franjas_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          desde: string
+          dias_semana: number[]
+          hasta: string
+          tipo: string
+          zona_horaria: string
+        }[]
+      }
       obtener_groomers_disponibles: {
         Args: {
           p_fecha: string
