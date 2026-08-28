@@ -538,6 +538,14 @@ dejo anotada mi observación.»*
 - Con una estadía en curso rige el **silencio de interrupciones** del portal
   (`PORTAL_PRESTADOR` §6.3).
 
+### ✏️ SEGUNDO PEDIDO DE B A C — **retirar la entrada a `/gallery`** (28-ago-2026)
+
+**Medido por B, y no hace falta re-medirlo:** `apps/cliente/src/app/(tabs)/cuenta/index.tsx:318` → `router.push('/gallery')`.
+
+> 🔴 **La galería salió de sala de revisión por firma del founder (S106) — y mientras esa entrada exista, la sala retirada sigue teniendo puerta.** *No es limpieza: es que el founder puede volver a juzgar donde ya se decidió que no se juzga.* **La galería sigue existiendo y sigue siendo obligatoria** (`R17`): lo que se retira es el camino del founder hacia ella.
+
+---
+
 ### ✏️ TRASPASO DE B — `D-645` (28-ago-2026)
 
 **C migra `apps/prestador` de `aceptacion-terminos.tsx` a la pieza

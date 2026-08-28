@@ -22126,6 +22126,53 @@ porque el vencido está actualizado.
 > grep contra el objeto: tope real `L-431` (pista CERT), `L-432` en cero
 > ocurrencias.**
 
+> ⚠️ **COLISIÓN DE NÚMERO, DECLARADA — y es el precedente `D-757` cobrado dos
+> veces en el mismo día.** **B pidió `L-432` para OTRA lección** (*«un censo que
+> da cero verifica primero que la página viva»*), midiendo igual de bien que yo:
+> los dos grepeamos, los dos vimos `L-432` libre, **y los dos teníamos razón en
+> el instante en que medimos.** *El número se ocupó entre una medición y la
+> otra.* **Resuelto sin discutir el fondo: deposita A (`docs/` es su
+> territorio), así que ésta se queda con `L-432` y la de B baja a `L-433` —
+> depositada abajo, con su texto íntegro.** *Lo que no se hace es dejar dos
+> `L-432` conviviendo: dos leyes con el mismo número son peores que una mal
+> numerada.*
+
+#### L-433 — UN CENSO QUE DA CERO VERIFICA PRIMERO QUE LA PÁGINA VIVA
+
+> **Texto de la pista B, depositado VERBATIM por A el 28-ago-2026** (`docs/` es
+> territorio de A; B lo mandó como texto autocontenido, que es como esta casa
+> manda que viaje un pedido entre pistas). **Su número corrió de `L-432` a
+> `L-433` por la colisión declarada arriba** — el contenido no se tocó.
+
+**Un censo sobre una página rota devuelve CERO sin fallar a la vista** — y ese
+cero se lee como *«no está la pieza»* cuando lo cierto es *«no está la
+página»*.
+
+**Medido (S106-B-T3):** se fue a `/gallery` a contar cuatro botones y los
+cuatro dieron 0. El cero no probaba nada: `curl /gallery → HTTP 500`, body
+vacío, **cero errores JS a la vista**. La causa es preexistente y ajena al
+censo — `requireNativeComponent is not a function` desde
+`@livekit/react-native-webrtc`, que entra al bundle web porque el `_layout.tsx`
+del cliente importa `@/lib/livekit` **en el raíz**.
+
+🔴 **Lo que la vuelve cara es que NO HAY SÍNTOMA:** la página responde, el
+navegador no protesta, el censo termina bien y su número es falso. *No falla
+la medición: falla la superficie sobre la que se mide, y el instrumento no
+tiene cómo saberlo.*
+
+**La regla:** todo censo cuyo resultado sea CERO **prueba primero que su
+fuente existe** — control positivo contra un caso de resultado conocido, o el
+estado HTTP de la página, antes de creerle al vacío. **Un cero sin control
+positivo no dice «no hay»: dice «no vi».**
+
+**Familia:** es `L-425` (*un baseline en 0 no dice «no hay»: dice «no vi, con
+la lista de hoy»*) un piso más abajo — allá fallaba la LISTA, acá falla la
+PÁGINA. Y es `L-192` en su forma de siempre: **una verificación cuyo modo de
+falla es el silencio no es una verificación.**
+
+**Re-cobrada el 28-ago (S107-B):** volvió a aparecer al buscar piezas en
+`/gallery`. Segunda vez, misma página, misma causa viva.
+
 
 > ### **La cura es de forma, y por eso funciona: el merge a `main` va en su PROPIO comando, desde el worktree primario, jamás encadenado a un `cd`.**
 > *Encadenar mezcla dos contextos de directorio en una sola línea, y el segundo hereda el del primero sin decirlo.*
