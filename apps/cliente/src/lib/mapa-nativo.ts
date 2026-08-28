@@ -79,5 +79,28 @@ import Constants from 'expo-constants';
    ⚠️ FAIL-CLOSED: `!== true` — si `extra` no llega, si el campo falta, o si
    viene con cualquier otra cosa, el flag queda en `false` y **se pierde el
    mapa, jamas la app**. Es la ley original de este archivo, intacta. */
-export const MAPA_NATIVO_DISPONIBLE =
-  (Constants.expoConfig?.extra as { mapasHorneados?: boolean } | undefined)?.mapasHorneados === true;
+/* 🔴 S107 · **C PROVISORIO, CON SU MUERTE ESCRITA** (firma del founder, 27-ago).
+   ⏪ Acá estuvo, por unas horas, la derivación de B2:
+   `Constants.expoConfig?.extra?.mapasHorneados === true`. **Se retira porque
+   estaba rota por diseño**, y la razón vale más que el código:
+
+   > **La premisa era «una sola build». Hay DOS actos de compilación de config
+   > —el APK y CADA OTA— y el segundo nunca puede saber.** `GOOGLE_MAPS_API_KEY`
+   > es un secret que **solo el builder de EAS puede leer**, así que todo
+   > `eas update` recomputa `extra` sin la key y publica `false`, **pisando el
+   > `true` que el APK traía bien**. Medido el 27-ago: el APK decía `True`, el
+   > OTA `01a0462c` lo puso en `False`, y el mapa se apagó en una app que lo
+   > tiene horneado.
+
+   ✅ HOY ESTA CONSTANTE ES VERDADERA, y por eso se puede usar: el APK instalado
+   pasó `verify-manifest-apk.mjs` en VERDE con `✓ meta-data geo.API_KEY`, y la
+   condición ② del flip de `D-944` —el APK sin key fuera del dispositivo del
+   founder— **se cumplió cuando lo desinstaló**.
+
+   ☠️ **CONDICIÓN DE MUERTE, y no es «cuando alguien se acuerde»:**
+   **esta línea muere cuando entre B1** — la sonda nativa
+   `SondaManifest.leerMetaData('com.google.android.geo.API_KEY')`, que **ya
+   existe en `apps/prestador/modules/sonda-manifest`** y hay que portar al
+   cliente. *Lee el manifiesto REAL en runtime: inmune a OTA e inmune a env
+   vars, que es lo único que no depende de que alguien recuerde algo.* */
+export const MAPA_NATIVO_DISPONIBLE = true;
