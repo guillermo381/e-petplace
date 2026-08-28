@@ -805,9 +805,109 @@ function MesaDeTrabajo({
   const propio = cameraTrack?.track as LocalVideoTrack | undefined;
   const salir = useCallback(() => setConfirmandoSalir(true), []);
 
+  /* 🔴 LA CAPA SOBRE LA BARRA VIAJA POR `sobreLaBarra`, NO COMO HERMANA.
+
+     ⏪ Vivía como un `<View position:'absolute'>` montado DESPUÉS de
+     `<SuperficieLlamada>`. En React Native el orden de pintado entre hermanos
+     lo decide el orden del JSX ⇒ **una capa así puede quedar encima de los
+     controles**, y eso ya encerró al founder en una consulta real: sin volver
+     al video y **sin poder colgar**, con un animal esperando.
+
+     **La pieza ganó el slot para esto.** Lo que entra por `sobreLaBarra` queda
+     debajo de la barra **por construcción**, no por cuidado de quien lo monta,
+     y su altura sale de `ALTO_BARRA` ⇒ **el 120 deja de copiarse**: se mueve
+     con la barra. *Hoy son los mismos píxeles; la diferencia aparece el día
+     que la barra cambie de alto, que es cuando la copia mentía.*
+
+     ⚠️ **Edición de B en territorio de C, DECLARADA** (precedente S90:
+     adaptaciones declaradas que su dueño firma o revierte). Es mecánica —el
+     contenido no cambió, sólo dejó de tener envoltorio propio— y se hizo acá
+     porque `R69` gatea y dejar `main` en rojo bloquea a las cuatro pistas.
+     **C: verificá o revertí.** */
+  const capaSobreLaBarra =
+    altura !== 'completo' ? (
+      <>
+        {/* ── LAS TARJETAS DEL CONTEXTO CLÍNICO (firma del founder) ────────
+            **Sobre el video y encima de los controles**, no dentro del
+            modal: son lo que el vet mira MIENTRAS observa al animal, y
+            tenerlas detrás de un panel las vuelve inútiles justo cuando
+            sirven.
+
+            🔴 **Sólo del lado del PROFESIONAL.** El dueño no las ve: *ya
+            conoce a su animal, y lo que necesita es ver a la doctora.*
+
+            Fila horizontal desplazable: con cuatro datos de largo variable
+            —«3 vacunas» y «Sin alergias registradas» no miden lo mismo—
+            apretarlas en el ancho las trunca, y *un dato clínico truncado
+            es peor que uno ausente: se lee como si dijera otra cosa.* */}
+        {clinico !== null && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: spacing[4], gap: spacing[2] }}
+          >
+            {tarjetasClinicas(clinico, t, idioma).map((tj) => (
+              <View
+                key={tj.clave}
+                style={{
+                  backgroundColor: sobreVideo.banda,
+                  borderRadius: radius.suave,
+                  paddingHorizontal: spacing[3],
+                  paddingVertical: spacing[2],
+                  minHeight: 44,
+                  justifyContent: 'center',
+                }}
+              >
+                <Texto variante="dato" color="sobreVideo">
+                  {tj.etiqueta}
+                </Texto>
+                <Texto variante="cuerpo" color="sobreVideo">
+                  {tj.valor}
+                </Texto>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+        {/* 🔴 EL BOTÓN DEL CUADRO — sobre el video, donde el vet está
+            mirando. Sólo con video remoto: *capturar antes de que llegue
+            imagen produciría el frame vacío que el criterio de verde
+            prohíbe.* */}
+        {/* 🔴 LA PROMESA QUE HABÍA INCUMPLIDO, cumplida. Escribí que *«si la
+            API interna cambia, esto devuelve null, el botón no se dibuja y
+            la llamada sigue intacta»* — **y el botón se dibujó igual**,
+            porque la condición sólo miraba la pista. *Una promesa de diseño
+            que el código no contiene es peor que no haberla escrito: se
+            confía en ella al leer.*
+            Con esto el vet **no puede tocar algo que no va a funcionar**
+            (Ley 23), y el defecto pasa de «botón que no hace nada» a
+            «botón ausente», que se diagnostica solo. */}
+        {pistasRemotas.length > 0 && pcIdDeLaSala(sala) !== null && (
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <Boton
+              variante="secundario"
+              etiqueta={capturando ? t('consulta.vcCuadroCapturando') : t('consulta.vcCuadroCta')}
+              onPress={() => void capturar()}
+              cargando={capturando}
+            />
+            {cuadro !== null && (
+              <Texto variante="apoyo" color="sobreVideo">
+                {t('consulta.vcCuadroListo')}
+              </Texto>
+            )}
+          </View>
+        )}
+
+        <AsaModal
+          etiqueta={t('consulta.vcAsaModal')}
+          onPress={() => setAltura(altura === 'cerrado' ? 'medio' : 'completo')}
+        />
+      </>
+    ) : null;
+
   return (
     <>
       <SuperficieLlamada
+        sobreLaBarra={capaSobreLaBarra}
         alto={alto}
         insetTop={insetTop}
         insetBottom={insetBottom}
@@ -892,87 +992,6 @@ function MesaDeTrabajo({
           pantalla ES la historia, y el contexto vive adentro de ella.
           **Cuarto caso del patrón, y de otra clase: no era «sin montar», era
           «montado donde no sirve».** */}
-      {altura !== 'completo' && (
-        <View
-          style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + 120, gap: spacing[2] }}
-          pointerEvents="box-none"
-        >
-          {/* ── LAS TARJETAS DEL CONTEXTO CLÍNICO (firma del founder) ────────
-              **Sobre el video y encima de los controles**, no dentro del
-              modal: son lo que el vet mira MIENTRAS observa al animal, y
-              tenerlas detrás de un panel las vuelve inútiles justo cuando
-              sirven.
-
-              🔴 **Sólo del lado del PROFESIONAL.** El dueño no las ve: *ya
-              conoce a su animal, y lo que necesita es ver a la doctora.*
-
-              Fila horizontal desplazable: con cuatro datos de largo variable
-              —«3 vacunas» y «Sin alergias registradas» no miden lo mismo—
-              apretarlas en el ancho las trunca, y *un dato clínico truncado
-              es peor que uno ausente: se lee como si dijera otra cosa.* */}
-          {clinico !== null && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: spacing[4], gap: spacing[2] }}
-            >
-              {tarjetasClinicas(clinico, t, idioma).map((tj) => (
-                <View
-                  key={tj.clave}
-                  style={{
-                    backgroundColor: sobreVideo.banda,
-                    borderRadius: radius.suave,
-                    paddingHorizontal: spacing[3],
-                    paddingVertical: spacing[2],
-                    minHeight: 44,
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Texto variante="dato" color="sobreVideo">
-                    {tj.etiqueta}
-                  </Texto>
-                  <Texto variante="cuerpo" color="sobreVideo">
-                    {tj.valor}
-                  </Texto>
-                </View>
-              ))}
-            </ScrollView>
-          )}
-          {/* 🔴 EL BOTÓN DEL CUADRO — sobre el video, donde el vet está
-              mirando. Sólo con video remoto: *capturar antes de que llegue
-              imagen produciría el frame vacío que el criterio de verde
-              prohíbe.* */}
-          {/* 🔴 LA PROMESA QUE HABÍA INCUMPLIDO, cumplida. Escribí que *«si la
-              API interna cambia, esto devuelve null, el botón no se dibuja y
-              la llamada sigue intacta»* — **y el botón se dibujó igual**,
-              porque la condición sólo miraba la pista. *Una promesa de diseño
-              que el código no contiene es peor que no haberla escrito: se
-              confía en ella al leer.*
-              Con esto el vet **no puede tocar algo que no va a funcionar**
-              (Ley 23), y el defecto pasa de «botón que no hace nada» a
-              «botón ausente», que se diagnostica solo. */}
-          {pistasRemotas.length > 0 && pcIdDeLaSala(sala) !== null && (
-            <View style={{ paddingHorizontal: spacing[4] }}>
-              <Boton
-                variante="secundario"
-                etiqueta={capturando ? t('consulta.vcCuadroCapturando') : t('consulta.vcCuadroCta')}
-                onPress={() => void capturar()}
-                cargando={capturando}
-              />
-              {cuadro !== null && (
-                <Texto variante="apoyo" color="sobreVideo">
-                  {t('consulta.vcCuadroListo')}
-                </Texto>
-              )}
-            </View>
-          )}
-
-          <AsaModal
-            etiqueta={t('consulta.vcAsaModal')}
-            onPress={() => setAltura(altura === 'cerrado' ? 'medio' : 'completo')}
-          />
-        </View>
-      )}
 
       {/* §3 · EL MODAL DE DOS ALTURAS. `medio` = dictar viendo al animal, que
           es el caso real; `completo` = leer la historia. **Nunca tapa el video

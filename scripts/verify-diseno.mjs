@@ -2031,6 +2031,15 @@ const FIXTURES = {
      ARGUMENTO.** Si la regla sólo preguntara «¿hay runOnJS?», este fixture
      saldría VERDE — y con él los tres crashes que la parieron.
      *Un fixture que la regla caza por la razón fácil no prueba que sirva.* */
+  /* R69 · EL FIXTURE ES EL CASO REAL, reducido: la capa que encerró al founder.
+     Un absoluto montado DESPUÉS de la superficie, sin declaración. Si la regla
+     mirara todo el archivo en vez de lo que va después del montaje, los
+     absolutos de la propia superficie la harían saltar siempre y sería ruido;
+     si mirara sólo el montaje, este caso saldría verde. */
+  R69: [{
+    path: 'apps/prestador/src/app/videollamada/[citaId]Fixture.tsx',
+    src: "<><SuperficieLlamada alto={a} />\n  <View style={{ position: 'absolute', bottom: 120 }}>{capa}</View>\n</>",
+  }],
   R68: [{
     path: 'packages/ui/src/components/PiezaFixture.tsx',
     src: 'const g = Gesture.Pan().onEnd(() => {\n  runOnJS(pegar)(masCercana(x.value, y.value))\n})',
@@ -6161,7 +6170,77 @@ function r68(archivos) {
   };
 }
 
-const REGLAS = { R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ═══ R69 · NADA ABSOLUTO SE MONTA DESPUÉS DE `SuperficieLlamada` (S106-B t5)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * 🔴 **SALE DE UN DAÑO REAL, no de una hipótesis.** Una capa de overlay se
+ * montó como HERMANA de `SuperficieLlamada`, después de ella. En React Native
+ * el orden de pintado entre hermanos lo decide el orden del JSX ⇒ **la capa
+ * tapó los controles y el founder quedó ENCERRADO en una consulta real**: sin
+ * poder volver al video y **sin poder colgar**, con un animal esperando.
+ *
+ * **La ley existía y estaba escrita:** `DIRECCION_ARTE` dice que colgar es la
+ * excepción al ocultado, *porque en una consulta paga quien quiere terminar
+ * tiene que poder terminar SIEMPRE*. **Vivía sólo en un documento.**
+ *
+ * > *Una promesa de diseño que el código no expresa es peor que no haberla
+ * > escrito: **se confía en ella al leer**.* Y se confió dos veces — quien
+ * > construyó encima, y quien revisó.
+ *
+ * ── LO QUE MIDE, Y ES UNA SOBRE-APROXIMACIÓN A PROPÓSITO ───────────────────
+ * En un archivo que monta `<SuperficieLlamada`, cuenta los
+ * `position: 'absolute'` que aparecen **después** de ese montaje. **No decide
+ * si son hermanos ni si solapan la barra** — eso exige parsear JSX, y un
+ * analizador de React no es un guard (mismo límite que la ② del encargo de A).
+ *
+ * ⇒ **caza LA FORMA y pide DECLARACIÓN**, como `R53`. *Sobre-aproximar y exigir
+ * una frase es honesto; adivinar la geometría y callarse, no.*
+ *
+ * ── LA SALIDA LEGÍTIMA NO ES DECLARAR: ES `sobreLaBarra` ───────────────────
+ * La pieza ganó el slot que faltaba. **Lo que entra ahí queda debajo de la
+ * barra POR CONSTRUCCIÓN**, así que el consumidor correcto no tiene ningún
+ * absoluto que declarar. *La declaración es para lo que de verdad debe cubrir
+ * —el modal de dos alturas—, no para volver a montar afuera.*
+ *
+ * ⚠️ **SU LÍMITE, ESCRITO:** cuenta declaraciones, **no sabe cuál corresponde a
+ * cuál absoluto** (mismo límite que R53). *Su verde dice «hay tantas razones
+ * escritas como absolutos», jamás «cada razón es la correcta».* */
+function r69(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  let ofensores = 0
+  let declarados = 0
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    const limpio = sinComentarios(src)
+    const monta = limpio.indexOf('<SuperficieLlamada')
+    if (monta === -1) continue
+    /* Se mira DESPUÉS del montaje. Los `absolute` que viven ANTES no pueden
+       tapar a la barra por orden de pintado — el que pinta último gana. */
+    const despues = limpio.slice(monta)
+    const n = [...despues.matchAll(/position:\s*'absolute'/g)].length
+    if (n === 0) continue
+    ofensores += n
+    /* La razón se busca en `src` CRUDO: declarar ES prosa (patrón R45/R53).
+       ≥16 caracteres para que un marcador vacío no cuente — lo que hace
+       honesto a un escape es que cueste una frase que alguien pueda discutir. */
+    const razones = [...src.matchAll(/R69-DECLARADO:\s*\S.{15,}/g)].length
+    declarados += Math.min(razones, n)
+    if (razones >= n) continue
+    fallos.push(
+      `R69 **${path}** · ${n} montaje(s) absolutos después de \`<SuperficieLlamada\` y ${razones} declaración(es). ` +
+      `La barra de controles —y **colgar**— puede quedar debajo. ` +
+      `La salida NO es declarar: es pasarlo por \`sobreLaBarra\`, que lo deja debajo de la barra por construcción. ` +
+      `Si de verdad tiene que cubrir, escribí \`R69-DECLARADO: <por qué>\`.`,
+    )
+  }
+  return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
+}
+
+const REGLAS = { R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6552,6 +6631,7 @@ corridas.push(['R67 (el aviso de teleconsulta no se acorta)', r67(appsCodigo)]);
    viva, y dos de los tres casos fueron piezas del sistema. */
 /* Se le pasa TAMBIÉN el código `.ts`: los helpers `'worklet'` viven ahí
    (`foto-encuadre.ts`), y sin ellos la regla acusaría a quien los usa bien. */
+corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);

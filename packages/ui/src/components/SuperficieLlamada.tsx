@@ -57,7 +57,7 @@ import { motion } from '../tokens/motion'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { sobreVideo } from '../tokens/sobreVideo'
-import { ControlLlamada } from './ControlLlamada'
+import { ControlLlamada, LADO } from './ControlLlamada'
 import { Texto } from './Texto'
 import { EncabezadoLlamada, type EncabezadoLlamadaProps } from './EncabezadoLlamada'
 import { TemporizadorLlamada } from './TemporizadorLlamada'
@@ -65,6 +65,29 @@ import { TileVideoPropio, type TileVideoPropioProps } from './TileVideoPropio'
 
 /** Lo que la dirección fijó: 4 s de quietud y el chrome se va. */
 const QUIETUD_MS = 4000
+
+/** 🔴 EL ALTO DE LA BARRA DE CONTROLES — **una sola fuente, y ése es el punto.**
+ *
+ *  Este número vivía **tecleado en la pantalla del prestador**, con un
+ *  comentario que decía *«copiarlo en vez de estimar es lo que hace que siga
+ *  calzando el día que la barra cambie»*. **Copiar no logra eso: lo logra NO
+ *  copiar.** Un valor copiado calza hasta que alguien cambia el original, y
+ *  entonces las dos copias siguen compilando y una miente (L-284: dos números
+ *  que deben coincidir no salen de dos lugares).
+ *
+ *  🔴 **Y SE DERIVA, no se teclea — porque el 120 tecleado era JUSTAMENTE la
+ *  copia.** La barra mide `spacing[8] + LADO.lg + spacing[4] = 108`; los 12 que
+ *  faltaban para el 120 histórico son el aire entre la barra y lo que flote
+ *  encima, y ahora se dicen (`spacing[3]`) en vez de estar escondidos dentro de
+ *  un número redondo. **Mismos píxeles que hoy, pero se mueven con la barra.**
+ *
+ *  *Si mañana entra un control más alto o cambia el padding, esto sigue
+ *  calzando — que es lo que el comentario que copiaba el 120 decía querer y no
+ *  podía lograr copiando.*
+ *
+ *  Lo consumen la franja `sobreLaBarra` y el `insetBottom` que la pantalla le
+ *  pasa al modal. */
+export const ALTO_BARRA = spacing[8] + LADO.lg + spacing[4] + spacing[3]
 
 export interface SuperficieLlamadaProps {
   /** El video que va grande. Nodo: esta pieza no sabe de transporte. */
@@ -135,8 +158,25 @@ export interface SuperficieLlamadaProps {
    *  `null` = nadie está escribiendo. */
   senalDeNota?: string | null
 
-  /** Lo que el consumidor monte abajo (el asa del modal, por ejemplo). */
+  /** Lo que el consumidor monte DENTRO del velo, debajo de los controles. */
   pie?: ReactNode
+
+  /** 🔴 LO QUE FLOTA SOBRE EL VIDEO, **POR ENCIMA DE LA BARRA Y DEBAJO DE
+   *  ELLA EN ORDEN DE PINTADO** — tarjetas de contexto, el asa del modal, un
+   *  botón de captura.
+   *
+   *  **Existe porque su ausencia encerró al founder en una consulta real.** Sin
+   *  este slot, la pantalla montaba esas capas **como hermanas de la pieza**, y
+   *  el orden del JSX las puso encima de los controles: sin volver al video y
+   *  **sin poder colgar**.
+   *
+   *  ⚠️ **Lo que entre acá NO puede tapar la barra**, y no por cuidado de quien
+   *  lo monta: por construcción. *Ésa es toda la razón de que el slot exista —
+   *  la garantía no puede depender de que el próximo consumidor se acuerde.*
+   *
+   *  La franja se posiciona sola sobre la barra (ver `ALTO_BARRA`): **la altura
+   *  no se copia.** */
+  sobreLaBarra?: ReactNode
 }
 
 export function SuperficieLlamada({
@@ -159,6 +199,7 @@ export function SuperficieLlamada({
   altavozActivo,
   senalDeNota = null,
   pie,
+  sobreLaBarra,
 }: SuperficieLlamadaProps) {
   const [visible, setVisible] = useState(true)
   const opacidad = useSharedValue(1)
@@ -265,7 +306,7 @@ export function SuperficieLlamada({
         <Animated.View
           entering={FadeIn.duration(motion.duration.micro)}
           exiting={FadeOut.duration(motion.duration.estandar)}
-          style={{ position: 'absolute', left: spacing[4], right: spacing[4], bottom: insetBottom + 120 }}
+          style={{ position: 'absolute', left: spacing[4], right: spacing[4], bottom: insetBottom + ALTO_BARRA }}
           pointerEvents="none"
         >
           <View style={{ alignSelf: 'center', paddingHorizontal: spacing[3], paddingVertical: spacing[1.5], borderRadius: radius.full, backgroundColor: sobreVideo.banda }}>
@@ -274,8 +315,57 @@ export function SuperficieLlamada({
         </Animated.View>
       )}
 
-      {/* ── El pie: velo + controles. */}
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+      {/* 🔴 LA FRANJA SOBRE LA BARRA — el slot que faltaba, y su ausencia hizo
+             daño real (S106-B t5).
+
+             ── QUÉ PASÓ ────────────────────────────────────────────────────
+             La pantalla necesitaba flotar cosas sobre el video **por encima de
+             los controles** (tarjetas de contexto, el botón de capturar, el
+             asa). Como esta pieza no tenía dónde, se montaron **como HERMANO
+             de `SuperficieLlamada`, después de ella** — y en React Native el
+             orden de pintado lo decide el orden del JSX.
+
+             **Resultado: la capa tapó los controles y el founder quedó
+             ENCERRADO en una consulta real** — sin poder volver al video y
+             **sin poder colgar**, con un animal del otro lado esperando.
+
+             ── POR QUÉ EL SLOT Y NO SÓLO UN `zIndex` ───────────────────────
+             `zIndex` ordena **entre hermanos**. Un `zIndex` alto acá adentro
+             defiende de lo que se monte ADENTRO — y no puede hacer nada contra
+             un hermano de la pieza. *Una pieza no puede defenderse de sus
+             hermanos: lo único que puede hacer es **dejar de darle motivos al
+             consumidor para tener hermanos**.*
+
+             ⇒ **este slot existe para que «afuera» no haga falta.** Lo que
+             entra acá queda **debajo de la barra por construcción**, no por
+             cuidado de quien lo monta.
+
+             📐 **Y se lleva el 120 adentro.** Era un número que la pantalla
+             copiaba —su propio comentario decía *«copiarlo en vez de estimar
+             es lo que hace que siga calzando el día que la barra cambie»*—.
+             **Un número copiado calza hasta que alguien cambia el original.**
+             Acá el alto de la barra y la altura de esta franja salen del mismo
+             lugar. */}
+      {sobreLaBarra != null && (
+        <View
+          style={{ position: 'absolute', left: 0, right: 0, bottom: insetBottom + ALTO_BARRA, gap: spacing[2] }}
+          pointerEvents="box-none"
+        >
+          {sobreLaBarra}
+        </View>
+      )}
+
+      {/* ── El pie: velo + controles.
+             🔴 `zIndex` EXPLÍCITO, y es la ley de colgar hecha código.
+             `DIRECCION_ARTE` dice que **colgar no se esconde jamás** porque
+             *en una consulta paga, quien quiere terminar tiene que poder
+             terminar SIEMPRE*. **Hasta hoy esa ley vivía sólo en un
+             documento**, y el orden del JSX alcanzaba para violarla.
+             *Una promesa de diseño que el código no expresa es peor que no
+             haberla escrito: se confía en ella al leer.*
+             Cubre lo que se monte adentro; contra un hermano de la pieza el
+             que defiende es el slot de arriba. */}
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 10 }}>
         <LinearGradient
           colors={[...sobreVideo.velo].reverse() as [string, string]}
           style={{ paddingTop: spacing[8], paddingBottom: insetBottom + spacing[4] }}
