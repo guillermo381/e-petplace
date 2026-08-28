@@ -2758,6 +2758,11 @@ export const prestadorEs = {
     vcVozGirar: 'Girar cámara',
     /* ① La voz dice que NO es grabación — un cuadro quieto no es la
        transmisión. */
+    /* 🔴 «Sin imagen» NO es un error: es el criterio funcionando — no había
+       nada que capturar. Confundirlo con una falla mandaría a buscar un
+       defecto donde no hay ninguno. */
+    vcCuadroSinImagen: 'No hay imagen para capturar. Pide que enciendan la cámara.',
+    vcCuadroFallo: 'No pudimos capturar la imagen. Prueba de nuevo.',
     vcCuadroCta: 'Capturar imagen',
     vcCuadroCapturando: 'Capturando…',
     vcCuadroListo: 'Imagen capturada. La familia lo ve en su pantalla.',

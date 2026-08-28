@@ -2184,6 +2184,8 @@ export const prestadorEn = {
     vcVozAltavoz: 'Speaker',
     vcVozColgar: 'End the consultation',
     vcVozGirar: 'Flip camera',
+    vcCuadroSinImagen: 'There is no image to capture. Ask them to turn the camera on.',
+    vcCuadroFallo: 'We could not capture the image. Try again.',
     vcCuadroCta: 'Capture image',
     vcCuadroCapturando: 'Capturing…',
     vcCuadroListo: 'Image captured. The family sees it on their screen.',

@@ -73,8 +73,11 @@ export default function PruebaCuadro() {
        por eso probar con el local ejercita el camino real y no un atajo. */
     const r = await capturarCuadro(pista.id, -1);
     setTrabajando(false);
-    if (r === null) setError('El módulo devolvió null (¿binario sin hornear?).');
-    else setRuta(r);
+    /* El resultado pasó a discriminado: **el código tipado ya no se pierde**
+       — antes `null` mezclaba «binario sin hornear», «track no encontrado» y
+       «falló la conversión», que son tres cosas distintas de arreglar. */
+    if (r.ok) setRuta(r.ruta);
+    else setError(`${r.codigo}: ${r.mensaje}`);
   }, [stream]);
 
   return (

@@ -53,6 +53,7 @@ import {
   SuperficieLlamada,
   Texto,
   spacing,
+  useAviso,
   useTheme,
   type AlturaModal,
 } from '@epetplace/ui';
@@ -488,6 +489,7 @@ function MesaDeTrabajo({
   const { localParticipant, cameraTrack } = useLocalParticipant();
   /* La sala, para leer el `pcId` del track remoto (ver `cuadro.ts`). */
   const sala = useRoomContext();
+  const { mostrar } = useAviso();
   const remotos = useRemoteParticipants();
   const pistasRemotas = useParticipantTracks([Track.Source.Camera], remotos[0]?.identity);
   const [inicioTs] = useState(() => Date.now());
@@ -546,9 +548,34 @@ function MesaDeTrabajo({
   const [capturando, setCapturando] = useState(false);
 
   const capturar = useCallback(async () => {
+    /* ── 🔴 INSTRUMENTADO ANTES DE CONSTRUIR (L-427) ────────────────────────
+       El botón no produjo imagen en la cita real. `[CUADRO_C]` es una marca
+       que **sólo este código pudo poner**, en cada punto donde puede morir —
+       el mismo método que fue lo único que cerró el caso de `[GIRO_C]`.
+
+       ⚠️ **Y el dato del founder no se asume en ninguna dirección:** no pudo
+       observar el aviso al dueño (dura 4 s y estaba mirando la otra
+       pantalla). *Por eso el despacho del aviso se marca acá: si salió, el
+       botón corrió y murió después; si no salió, murió antes.* */
+    const marca = (paso: string, detalle?: unknown) =>
+      console.log(`[CUADRO_C] ${paso}`, detalle ?? '');
+
     const pista = pistasRemotas[0]?.publication?.track?.mediaStreamTrack;
     const pc = pcIdDeLaSala(sala);
-    if (pista === undefined || pc === null) return;
+    marca('toque', {
+      hayPista: pista !== undefined,
+      pcId: pc,
+      /* 🔴 **La pista puede EXISTIR y estar MUTEADA** — con la cámara del
+         otro apagada sigue publicada y no emite. *Ése es el borde que puede
+         explicar el caso entero, y hasta hoy no se medía.* */
+      muteada: pistasRemotas[0]?.publication?.isMuted,
+      enabled: pista?.enabled,
+    });
+    if (pista === undefined || pc === null) {
+      marca('sale:sin_pista_o_sin_pc');
+      mostrar({ texto: t('consulta.vcCuadroSinImagen'), variante: 'error' });
+      return;
+    }
     setCapturando(true);
     /* ② PRIMERO el aviso, después la captura. *Avisar después sería avisar
        de algo ya hecho, y la firma dice que lo VE en el momento.* Su fallo
@@ -559,13 +586,30 @@ function MesaDeTrabajo({
         new TextEncoder().encode(AVISO_CUADRO) as Uint8Array<ArrayBuffer>,
         { reliable: true },
       );
-    } catch {
-      /* declarado arriba */
+      marca('aviso:despachado');
+    } catch (e) {
+      marca('aviso:fallo', String(e));
     }
+
     const r = await capturarCuadro(pista.id, pc);
     setCapturando(false);
-    setCuadro(r);
-  }, [pistasRemotas, sala, localParticipant]);
+    marca('resultado', r);
+
+    if (r.ok) {
+      setCuadro(r.ruta);
+      return;
+    }
+    /* 🔴 **EL FALLO SE DICE.** La v1 guardaba `null` y no pintaba nada: *el
+       founder tocó el botón y no pasó NADA — ni imagen, ni error, ni motivo.*
+       `sin_frame` tiene voz propia porque **no es una falla: es el criterio
+       funcionando** —no había imagen que capturar— y confundirlo con un error
+       mandaría a buscar un defecto donde no hay ninguno. */
+    setCuadro(null);
+    mostrar({
+      texto: r.codigo === 'sin_frame' ? t('consulta.vcCuadroSinImagen') : t('consulta.vcCuadroFallo'),
+      variante: 'error',
+    });
+  }, [pistasRemotas, sala, localParticipant, mostrar, t]);
 
   /* ── 🔴 EL BORRADOR — veinte minutos de dictado no dependen de la memoria
      del vet ni de que la app no se cierre ─────────────────────────────────
