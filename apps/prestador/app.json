@@ -63,7 +63,7 @@
         "expo-image-picker",
         {
           "cameraPermission": "Para las fotos de cada atención, los clips de adiestramiento y tus videoconsultas.",
-          "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen como evidencia de una atención."
+          "photosPermission": "La app accede a tus fotos solo cuando eliges una imagen como evidencia de una atención."
         }
       ],
       [

@@ -61,7 +61,7 @@
         "expo-image-picker",
         {
           "cameraPermission": "Para la foto de tu mascota y para tus videoconsultas con el veterinario.",
-          "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen para tu mascota."
+          "photosPermission": "La app accede a tus fotos solo cuando eliges una imagen para tu mascota."
         }
       ]
     ],
