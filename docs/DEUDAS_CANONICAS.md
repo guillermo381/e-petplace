@@ -2981,6 +2981,38 @@ Origen: S86-A, medición para C.
 🟠 MEDIA. **Medido S81-B2 (`2026-07-29-s81-B2-guard.md`):** `MAPA_NATIVO_DISPONIBLE` es una **constante de módulo JS compilada DENTRO de cada bundle** (embebido u OTA) — describe UNA build pero viaja en TODOS los bundles del runtime, y **no puede ver el manifest del APK donde aterriza**. La prueba viva: TRES estados convivieron para el runtime 1.0.3 (embebido de `build-s80-b19` con guard en `false` → mapa TAPADO con la key presente · OTA vigente pre-guard → mapa incondicional · HEAD con flip `true` sin publicar) — el founder vio el mapa tapado por un flag viejo, no por la key. **La sonda runtime NO existe con la API instalada** (medido: `expo-constants` trae `android.config` VACÍO en el app.config embebido — Expo filtra la key del config público; `expo-application`/`expo-updates`/`react-native-maps` no exponen meta-data; el crash es nativo en `MapView.onCreate`, antes de todo callback JS). **La sonda real = módulo nativo mínimo** (`PackageManager.getApplicationInfo(GET_META_DATA)`) ⇒ tren de build (L-134) — el huevo-gallina que el guard-constante intentaba esquivar. **Decisión estructural DE MESA/FOUNDER:** ¿módulo nativo de sonda en el próximo tren, o D-574 (pipeline: manifest verificado antes de distribuir) como única defensa y el guard-constante se retira? Mientras tanto el mecanismo vigente es el declarado en `mapa-nativo.ts` (flip manual con las dos condiciones). Disparo: el próximo tren de build nativa del prestador, o la mesa del guard — lo que llegue primero. Origen: S81-B2 (medición del artefacto instalado).
 
 #### D-580 — La entrada a `/gallery` vive en la superficie REAL del cliente 🟠
+> ### ✏️ FIRMA DE LA MESA (28-ago-2026, S107) — **SE RETIRA LA DEL CLIENTE; LA DEL PRESTADOR SE CONSERVA**
+>
+> **Lo firmado, en una línea:** la entrada a `/gallery` **sale de la Cuenta del
+> CLIENTE**; la del **PRESTADOR queda hasta el gate de producción**, con la
+> enmienda S82 intacta (su retiro sigue exigiendo firma).
+>
+> 🔴 **Y `R18` NO SE BORRA: SE ANGOSTA.** *La polaridad de esa regla es lo
+> valioso* — vigila que la entrada **EXISTA**, porque su modo de falla es que
+> **desaparezca sin firma**. **Borrarla entera para retirar UNA de las dos
+> entradas dejaría a la otra —la que la firma manda conservar— sin guard, y su
+> desaparición volvería a ser silenciosa.** *Se retira lo que la firma retira,
+> y se sigue vigilando lo que la firma conserva.*
+>
+> ✅ **Ejecutado (A, con la firma de la mesa, en territorio de B declarado):**
+> `CUENTAS_GALERIA` queda con la casa del prestador, el ancla baja de 2 a 1
+> **con su razón escrita al lado**, y el rótulo dice *«SOLO el prestador,
+> firma S107»*. **`verify:diseno` VERDE con 60 reglas.**
+>
+> 🟢 **Nota que vale más que el cambio: el ancla de la propia regla cazó la
+> edición.** Al bajar la lista a una casa, R18 salió **ROJO** —*«esperaba al
+> menos 2 y encontró 1»*— antes de que nadie lo mirara. *Ese rojo es el guard
+> haciendo exactamente lo que existe para hacer: un corpus que se achica sin
+> que nadie lo declare convierte el silencio de una regla de ausencia en «no
+> miré».* **El ancla se movió al número que la firma dejó — jamás se aflojó
+> «para que pase».**
+>
+> ⚠️ **Y el retiro en la app del cliente es de C** (`apps/` es su territorio).
+> Al cierre de esta tanda, la entrada del cliente **sigue viva** en
+> `apps/cliente/src/app/(tabs)/cuenta/index.tsx:318` — **C la retira, y desde
+> ahora puede hacerlo sin que el juez la frene.** *C la había frenado con
+> medición, y frenó bien: sin esta firma, retirarla ponía a `R18` en rojo.*
+
 🟠 MEDIA. **Nace CON su cura pendiente y por decisión explícita del founder (S82-B r13):** la galería de tokens ganó una `CeldaNavegacion` al pie de **Cuenta** del cliente (`(tabs)/cuenta/index.tsx`), **SIN `__DEV__`** — el gate corre en el APK **preview**, donde `__DEV__` es false, y un guard ahí la haría inalcanzable justo donde se la necesita (misma lección que el marcador de identidad renderizado: **L-161**). **Por qué es la ÚNICA vía y no una comodidad, MEDIDO en r13:** el scheme SÍ está horneado (el APK hermano del prestador trae `android:scheme="prestador"` + `"exp+prestador"` en su intent filter, leído con `aapt2 dump xmltree`; el del cliente vive en `app.json` desde el scaffold `98e14c9`) ⇒ el deep link `cliente:///gallery` funciona — **pero exige cable/adb**, y el founder no tiene cable: Chrome no abre schemes custom tipeados y WhatsApp no los linkea (**D-509②**, medido S79). Sin cable no hay forma de disparar el intent. **⚠️ ENMIENDA FOUNDER (S82, orden explícita — CAMBIA la condición y el dueño de esta deuda): LA GALERÍA QUEDA VISIBLE EN CUENTA HASTA QUE SALGAMOS A PRODUCCIÓN. No se retira ni se esconde tras `__DEV__` SIN ORDEN EXPLÍCITA DEL FOUNDER.** El retiro **se DECIDE en el gate de producción, no antes** — o sea: esta deuda **no se paga por iniciativa de ninguna sesión**, ni siquiera con la excusa de "ya está el checklist". La redacción original (abajo, conservada como historia) decía que se retiraba ANTES del soft launch con disparo automático; **esa cláusula queda SUPERSEDED**: el disparo dejó de ser un evento del calendario y pasó a ser UNA FIRMA. *(Texto original, superseded: "se RETIRA o se esconde tras un gesto ANTES del soft launch (1-oct-2026) — una herramienta de sesión en la superficie real también la alcanza un usuario, y su propio detalle 'no es pantalla de producto' lo admite".)* El argumento de riesgo sigue siendo VÁLIDO y por eso la deuda no se cierra: lo que cambió es quién decide y cuándo. **GUARD CON LA POLARIDAD CORRECTA (R18, S82-C):** el lint vigila que la entrada EXISTA — su falla es que la entrada **DESAPAREZCA**, jamás que aparezca; así, si una sesión la retira sin la firma, el rojo lo caza (L-192: el modo de falla es el que importa). Nota de implementación para el que la pague: sus textos van LITERALES a propósito (fuera del riel i18n), así el retiro no deja keys huérfanas en los diccionarios. **Disparo (ENMENDADO): EL GATE DE PRODUCCIÓN, con firma explícita del founder.** El checklist de tiendas y la primera cohorte dejan de ser disparos automáticos — son insumos de esa decisión, no la decisión. Origen: S82-B r13 (cruce de territorio autorizado por el founder, citado en el commit).
 
 #### D-581 — LA SEPARACIÓN DE SUPERFICIE EN OSCURO 🟠
@@ -23309,6 +23341,39 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 **Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
+
+#### D-958 — 🟠 EL PASEO ES GRUPAL POR NORMA, Y SU FOTO DE GRUPO LLEGA A UN SOLO DUEÑO
+
+🟠 MEDIA. **Hallazgo de la pista D (28-ago-2026), midiendo el motor del paseo para el contrato de media de guardería.**
+
+**Los dos hechos, y el problema vive en el cruce:**
+
+| | |
+|---|---|
+| `POLITICAS` **P19** (S59) | **el paseo es GRUPAL por norma** — varios animales salen juntos, y el guard `paseo_social_no` existe justamente porque la norma es el grupo |
+| la media del paseo | **cuelga de UNA mascota**: `evento_archivo_adjunto.mascota_id` y `evento_adiestramiento_clips.mascota_id`, las dos **singulares** |
+
+> ### ⇒ Una foto de tres perros paseando juntos **llega al expediente de uno solo**. Los otros dos dueños no la ven, y nadie recibe un error.
+
+🔴 **POR QUÉ NUNCA FALLÓ, que es lo único interesante de esta ficha: la
+estructura no se ejerció.** No hay defecto de código — hay una capacidad que la
+norma permite y que **nadie fue a mirar**. *Un defecto que necesita que alguien
+mire para existir no aparece en ningún gate: no rompe, no loguea, no deja
+traza. Se descubre el día que un dueño pregunta por una foto que sí existe.*
+
+**Es la hermana exacta de `L-425`** (*un baseline en 0 no dice «no hay»: dice
+«no vi»*) **un piso más abajo**: acá el cero no es de un instrumento, es de la
+observación.
+
+**Dueño:** A. ☠️ **Condición de muerte — y es de las baratas, por eso se
+declara con disparo y no se paga hoy:** cuando exista `guarderia_media` con su
+tabla de etiquetas (**una media = un archivo + N etiquetas**), **el paseo migra
+a esa forma** y deja de tener el problema. *La forma que guardería construye
+por necesidad es la que el paseo necesitaba desde S59 sin saberlo.*
+
+⚠️ **Lo que NO se hace hoy:** tocar la media del paseo. *Migrarla antes de que
+exista la forma nueva sería construir dos veces — y el paseo lleva un año así
+sin que nadie lo note, así que el costo de esperar está medido en cero.*
 
 #### D-956 — ✏️ ENMENDADA Y DESTRABADA (28-ago-2026) — EL CRITERIO v1 DEL GATE SANITARIO, FIRMADO POR LA MESA
 
