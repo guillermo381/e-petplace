@@ -1,0 +1,51 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA · limpieza de tarjetas y altas de la cuenta de pruebas
+-- Escrita ANTES de ejecutar. Firma del founder: 27-ago-2026.
+--
+-- 🔴 ESTA REVERSA **NO PUEDE REVERTIR**, y se declara con todas las letras.
+--
+-- Lo que se borra son filas de `tarjetas_guardadas` y `altas_tarjeta`. La
+-- columna `token` guarda el **handle del proveedor**: un valor que Nuvei emitió
+-- al tokenizar y que **nosotros no podemos volver a generar**. Restaurar la fila
+-- con el mismo texto no restaura la tarjeta: restaura una cadena que ya no
+-- apunta a nada del otro lado.
+--
+-- ⇒ La única «reversa» real es **volver a guardar la tarjeta desde la app**,
+--    que es exactamente lo que el founder va a hacer antes de la llamada.
+--
+-- Lo que SÍ se recupera automáticamente por FK (`ON DELETE SET NULL`):
+--   · `user_preferencias.tarjeta_preferida_id` queda NULL — la app vuelve a
+--     preguntar cuál es la preferida. No es pérdida: es la pregunta de nuevo.
+--   · `pedidos_recurrencias.tarjeta_id` — medido: **0 filas afectadas**.
+--
+-- Lo que NO se toca, a propósito:
+--   · `usuario_proveedor_uid` (1 fila, `nuvei`, uid `d5d42b92-…`) — es la
+--     identidad ESTABLE POR PERSONA que `D-921` creó. Borrarla haría nacer un
+--     uid nuevo y volvería a partir la identidad, que es el defecto que esa
+--     cura existe para cerrar. **Las tarjetas nuevas deben colgar de ESTE uid.**
+--   · La tarjeta y el alta de `guillo381+7@gmail.com` (`929ca296` / `3a3edeec`)
+--     — fuera del alcance firmado.
+--   · `pagos_intentos` — ninguna FK a tarjetas; los cobros históricos quedan
+--     intactos con su `marca`/`bin`/`ultimos4` congelados en la fila.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Si hiciera falta dejar constancia de QUÉ había (no restaura nada, solo
+-- documenta), este era el estado medido antes de borrar:
+--
+--   9 tarjetas de dd024680-3d1c-4465-b38b-dedab45da037:
+--     d2573a70 vi 411111****1111  (preferida)   creada 08-26 01:54
+--     ca6cc285 vi 411111****1111               creada 08-25 15:10
+--     91f9926b di 364170****0808               creada 08-21 05:54
+--     b269c87a di 364170****0808               creada 08-21 05:50
+--     92aa34ab vi 411111****1111               creada 08-20 04:24
+--     cf1bbd3c di 364170****0808               creada 08-20 03:52
+--     247a6465 vi 411111****1111               creada 08-20 03:51
+--     6355ea39 di 364170****0808               creada 08-20 03:49
+--     cf43b2d2 vi 411111****1111               creada 08-20 03:15
+--
+--   16 altas: 9 `guardada` · 6 `pendiente` vencidas · 1 `guardada` sin tarjeta
+--
+-- 🔴 Los `token` NO se transcriben acá a propósito: son credenciales del
+--    proveedor. Copiarlos «para dejar constancia» sería reintroducir el dato
+--    que este borrado saca de la base. (Mismo criterio que la purga de
+--    teléfonos de S92.)

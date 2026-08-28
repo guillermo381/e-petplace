@@ -11,6 +11,17 @@ import type { ConfigContext, ExpoConfig } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...(config as ExpoConfig),
+  /* ── S107 · B2: EL FLAG DEL MAPA SE DERIVA, NO SE AFIRMA ──────────────────
+     Gemelo del prestador; ver allí la razón completa. En corto:
+     `MAPA_NATIVO_DISPONIBLE` era `const false` (D-944) con la promesa de morir
+     sola — **una constante no muere sola**. Y la key NO se puede leer del
+     `app.config` embebido (medido en dos APK: Expo la borra), así que se expone
+     el VEREDICTO como booleano, jamás la key. Lo computa la misma build que la
+     hornea, así que no puede desincronizarse. */
+  extra: {
+    ...config.extra,
+    mapasHorneados: Boolean(process.env.GOOGLE_MAPS_API_KEY),
+  },
   android: {
     ...config.android,
     // S81 (el tren de notificaciones): google-services.json como env
