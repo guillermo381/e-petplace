@@ -22158,6 +22158,16 @@ porque el vencido está actualizado.
 > grep contra el objeto: tope real `L-431` (pista CERT), `L-432` en cero
 > ocurrencias.**
 
+> ### ➕ TERCER COBRO, 29-ago-2026 — **Y ES LA FORMA MÁS PURA DE ESTA LEY: UNA MEDICIÓN BIEN HECHA QUE CONTESTA OTRA PREGUNTA.**
+>
+> **El caso:** para decidir si el recorrido del prestador podía viajar por OTA, C midió *«cero cambios en `package.json` y `app.json` **entre main y mi rama**»* — **y la medición era correcta**. De ahí concluyó, razonablemente, que no había módulo nativo nuevo y que el OTA alcanzaba.
+>
+> 🔴 **La pregunta era otra: qué versión declara `app.json` CONTRA qué binario existe.** Medido después: `app.json` decía **`1.0.7`** —con `runtimeVersion` por policy `appVersion`— y **la última build finished era `1.0.6`, del 24-ago**. ⇒ **todo OTA del prestador salía a un runtime que ningún binario tenía.** *Un OTA perfecto que no le llega a nadie* — el caso literal que parió `verify-ota.mjs` el 4-ago, y **el guard lo frenó otra vez**.
+>
+> **Por qué pertenece a esta ley y no a «se midió mal»:** la premisa *«sin módulo nativo nuevo, el OTA alcanza»* **era verdadera** — hasta que alguien subió la versión en `app.json`. **La verdad venció, y su medición siguió siendo impecable sobre la variable que ya no decidía.**
+>
+> **Lo operativo, que es barato:** antes de afirmar que algo viaja por OTA se comparan **DOS objetos, no un diff**: la `version` declarada y la lista de builds `finished` de ese canal. *Un diff entre ramas nunca va a contestar eso, porque el dato que decide no está en ninguna de las dos.*
+
 > ⚠️ **COLISIÓN DE NÚMERO, DECLARADA — y es el precedente `D-757` cobrado dos
 > veces en el mismo día.** **B pidió `L-432` para OTRA lección** (*«un censo que
 > da cero verifica primero que la página viva»*), midiendo igual de bien que yo:
@@ -23357,6 +23367,18 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 **Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
+
+#### D-963 — ☠️ CERRADA AL DESCUBRIRSE (29-ago-2026) — LA RESERVA DE GUARDERÍA NO GUARDABA DÓNDE IR
+
+**Apareció escribiendo el lector de la jornada, no auditando.** `reservar_dia_guarderia` creaba la cita **sin `direccion_snapshot`** ⇒ la lista del día del prestador decía **a quién** recoger y **no dónde**.
+
+> ### 🔴 En un oficio cuyo primer acto es tocar el timbre de una casa, eso no era un campo faltante: **era la mitad del trabajo.**
+
+**Por qué no lo vio ningún gate, que es lo de siempre en esta sesión:** la reserva **funcionaba** — cobraba, tomaba cupo, congelaba su desglose y devolvía `ok`. *El defecto no era que algo fallara: era que el dato que hace ejecutable el servicio no estaba, y nada lo pedía.* **Se descubrió recién cuando alguien fue a escribir la pantalla que lo consume** — que es exactamente el patrón que `P-CIRCUITO` (S103) existe para forzar: *recorrer el circuito de punta a punta encuentra lo que ningún gate ve.*
+
+☠️ **CERRADA en `20260829000000` reusando `_direccion_hogar_snapshot(user_id)`** — **la MISMA pieza que el paseo usa para su modalidad a domicilio** (`D-339`). **Cero invención:** la dirección se congela igual que el precio y por la misma razón — *es la que la familia tenía cuando reservó, no la que tenga el día de la recogida.*
+
+⚠️ **Lo que queda declarado:** las citas creadas antes de esta migración se quedan sin dirección. **Medido: cero estadías vivas** (las únicas eran de cinturones, deshechas en subtransacción) ⇒ **daño cero**, y por eso no hay backfill.
 
 #### D-960 — ☠️ CERRADA EL MISMO DÍA (28-ago-2026) — UN SERVICIO QUE CUELGA DEL FLAG DE OTRO DESAPARECE CUANDO EL OTRO SE ENCIENDE
 
