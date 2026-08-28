@@ -82,3 +82,35 @@ ejerza una vez para saber que no lo necesita.*
 "sin_sesion"}` **antes** de llegar a su brazo `pago_reversado`. Se ejerce
 abriendo el detalle de esa cita **en la app, con sesión** — gate del founder en
 el aparato, no medible desde acá.
+
+---
+
+### 🔴 EL ALCANCE EXACTO DE ESTA AFIRMACIÓN — para que nadie la lea como excepción
+
+**Esta ficha afirma sobre el MOTOR, y solo sobre el motor.** El mismo día, el
+founder pagó otra cita de telemedicina (`1ef3e69d`, `DF-2106376`) y **no le
+apareció del lado del cliente**. Medido punto por punto, **el motor hizo todo
+bien**: intento `aprobado`, cita `confirmada` + `pagada`, atada a Thor, pasando
+los seis filtros del lector —incluida la RLS, probada por camino real con su
+sesión— y en **posición 3 de 15** dentro de un límite de 50.
+
+**Dónde se cortaba:** su APK es el **1.0.5, compilado de `357ce8e3` el 24-ago**,
+y `git show 357ce8e3:apps/cliente/src/app/citas/[mascotaId].tsx | grep -c
+telemedicina` da **0**. La superficie del cliente aprendió telemedicina en
+`a1fa895b` (S106-C), **después** de ese binario. Y el OTA no la alcanza: `main`
+subió a 1.0.6 y el update vigente está anclado en `bde35600`.
+
+> ### El motor heredó entero. Lo que no heredó es la SUPERFICIE INSTALADA — y eso es una afirmación sobre un binario de hace tres días, no sobre el motor.
+
+**El prestador sí la veía**, y no porque su app fuera nueva: **telemedicina nació
+del lado del prestador primero**, así que su lector ya la conocía en `357ce8e3`.
+*Los dos lados avanzaron en tiempos distintos y el cliente quedó atrás.*
+
+🔴 **Y la regla que este caso deja, que vale más que el caso:**
+
+> **Hasta que el binario esté al día, un «no aparece» del cliente no prueba nada
+> del producto.** Un reporte de campo contra un binario vencido mide el binario,
+> no la pieza — y se lee exactamente igual que un defecto real.
+
+*Por eso `D-950` no tiene excepción: no hay ningún tramo del motor que
+telemedicina no haya heredado. Lo que hubo fue un aparato midiendo otra cosa.*
