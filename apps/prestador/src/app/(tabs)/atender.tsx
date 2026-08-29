@@ -356,6 +356,9 @@ export default function Atender() {
             <View style={ESTILO_GRILLA}>
               <View style={ESTILO_CELDA}>
                 <Baldosa
+                  /* Grilla de DOS (`ESTILO_CELDA` a 50 %). El valor es el mismo que
+                     daba el default: acá no cambia nada — se DECLARA, que es el punto. */
+                  columnas={2}
                   glifo="despensa"
                   titulo={t('atender.ventaTitulo')}
                   capa="consumo"
@@ -513,6 +516,9 @@ export default function Atender() {
                   {capacidad.oficios.map((o, i) => (
                     <View key={o.oficio} style={ESTILO_CELDA}>
                       <Baldosa
+                        /* Grilla de DOS (`ESTILO_CELDA` a 50 %). El valor es el mismo que
+                           daba el default: acá no cambia nada — se DECLARA, que es el punto. */
+                        columnas={2}
                         glifo={GLIFO_OFICIO[o.oficio]}
                         titulo={t(KEY_OFICIO[o.oficio])}
                         detalle={datoDelDia(o.oficio)}
@@ -627,6 +633,9 @@ export default function Atender() {
                 <View style={ESTILO_GRILLA}>
                   <View style={ESTILO_CELDA}>
                     <Baldosa
+                      /* Grilla de DOS (`ESTILO_CELDA` a 50 %). El valor es el mismo que
+                         daba el default: acá no cambia nada — se DECLARA, que es el punto. */
+                      columnas={2}
                       glifo="despensa"
                       titulo={t('atender.ventaTitulo')}
                       capa="consumo"

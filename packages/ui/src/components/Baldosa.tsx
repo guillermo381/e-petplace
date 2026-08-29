@@ -131,8 +131,28 @@ export type BaldosaProps = {
    * 🔴 Sólo modula **el tamaño del glifo** — ver `LADO_GLIFO`. **No decide el
    * ancho**: eso lo pone el contenedor, y una pieza que se auto-anchara
    * pelearía con su grilla.
+   *
+   * ═══════════════════════════════════════════════════════════════════════
+   * ☠️ **OBLIGATORIA — acá había un `?` con default `2`** *(firma de la mesa,
+   * S107; la propuso B contra su propia decisión).*
+   *
+   * El default existía **«para no romper consumidores existentes»**, y fue
+   * exactamente eso lo que volvió el defecto **silencioso para el consumidor
+   * NUEVO**: la grilla de Negocio pasó a `33.333 %` y las baldosas siguieron
+   * pidiendo su glifo de 48 — *sin error, sin warning, con el glifo pisando
+   * el label.* **Medido al ejecutar esta firma: DOS de las tres baldosas de
+   * `negocio.tsx` estaban así HOY**, y ningún gate las veía.
+   *
+   * > **Un default que existe para no romper a nadie es un default que no
+   * > rompe a nadie el día que alguien debería enterarse.** Es la regla 19.9
+   * > en su forma más barata de evitar: *quien renderiza sabe en cuántas
+   * > columnas está; la pieza no puede adivinarlo, y adivinar mal no duele
+   * > hasta que se ve.*
+   *
+   * ⇒ **Sin default. El compilador pregunta, una vez, en cada call site.**
+   * ═══════════════════════════════════════════════════════════════════════
    */
-  columnas?: 2 | 3
+  columnas: 2 | 3
 }
 
 export function Baldosa({

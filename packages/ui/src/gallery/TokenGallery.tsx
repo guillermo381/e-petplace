@@ -4383,7 +4383,7 @@ function GaleriaInterna() {
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o) => (
                   <View key={o.t} style={{ width: 190 }}>
-                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} onPress={() => {}} />
+                    <Baldosa columnas={2} glifo={o.g} titulo={o.t} capa={o.c} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -4398,7 +4398,7 @@ function GaleriaInterna() {
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o, i) => (
                   <View key={o.g} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
-                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} orden={i} onPress={() => {}} />
+                    <Baldosa columnas={2} glifo={o.g} titulo={o.t} capa={o.c} orden={i} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -4420,7 +4420,7 @@ function GaleriaInterna() {
                   { g: 'paseo', t: 'Paseo de una hora con nombre largo', c: 'cuidado', d: '3 activos' },
                 ] as const).map((o) => (
                   <View key={o.t} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
-                    <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} onPress={() => {}} />
+                    <Baldosa columnas={2} glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} onPress={() => {}} />
                   </View>
                 ))}
               </View>
