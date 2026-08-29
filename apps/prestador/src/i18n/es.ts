@@ -4095,6 +4095,10 @@ export const prestadorEs = {
      La voz es de la casa: el motor manda códigos y horas, y el rótulo lo
      pone la app (contrato de B §⑥bis). */
   tallerGuarderia: {
+    especiesTitulo: 'Especies que recibes',
+    especiePerro: 'Perros',
+    especieGato: 'Gatos',
+    especiesMinima: 'Elige al menos una: sin especies, tu guardería no puede recibir a nadie.',
     titulo: 'La guardería',
     capacidadTitulo: '¿Cuántos animales recibes por día?',
     capacidadApoyo: 'Es el cupo de cada día. Si algún día no abres, lo declaras aparte.',
@@ -4133,7 +4137,10 @@ export const prestadorEs = {
     avisoVolver: 'Volver y poner un precio',
     avisoGuardarAsi: 'Guardar así',
     avisoSinDiarioTitulo: 'Vas a guardar sin precio por día',
-    avisoSinDiario: 'Guardamos lo que configuraste ({{modalidades}}), pero hoy publicar necesita el precio por día. Sin él tu guardería no aparece para reservar.',
+    /* ⭐ Ya se publica sin precio del día: el aviso pasó de advertir una
+       imposibilidad a NOMBRAR lo que se publica. Informar sin nombrar deja al
+       prestador adivinando con qué salió a la vitrina. */
+    avisoSinDiario: 'Vas a publicar solo con {{modalidades}}. Quien te busque no va a poder reservar un día suelto.',
     avisoEntendido: 'Entendido, guardar',
     precioDia: 'Tu precio por día',
     ofrecePaquete: 'Paquete de estadías',
