@@ -243,7 +243,10 @@ export default function TallerGuarderia() {
 
       const o = oferta.data;
       if (o !== null) {
-        setIPrecio(indiceDePrecio(o.precio));
+        /* ✏️ S107-A (cruce declarado): `precio` puede ser null — el día dejó de
+           ser obligatorio (firma 29-ago). Sin precio de día el riel arranca
+           donde arrancaba antes; **no se inventa un 0, que sería «gratis»**. */
+        if (o.precio !== null) setIPrecio(indiceDePrecio(o.precio));
         setOfreceMensual(o.precioMensual !== null);
         setPrecioMensual(o.precioMensual === null ? '' : o.precioMensual.toFixed(2));
       }

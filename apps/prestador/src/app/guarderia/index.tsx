@@ -46,6 +46,7 @@ import {
   obtenerMiPrestador,
   obtenerOfertaGuarderiaPropia,
   type FranjaGuarderia,
+  type OfertaGuarderiaPropia,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -65,9 +66,13 @@ type Estado =
   | { fase: 'roto' }
   | {
       fase: 'listo';
-      /** null = todavía no configuró NADA. No es error: es el camino de alta. */
-      oferta: { precio: number; precioPaquete: number | null; precioMensual: number | null;
-                jornadaMinutos: number; activo: boolean } | null;
+      /** null = todavía no configuró NADA. No es error: es el camino de alta.
+       *  ✏️ S107-A (cruce declarado): el tipo local se reemplaza por el del
+       *  wrapper. **`precio` ahora puede ser null** —el día dejó de ser
+       *  obligatorio— y el shape trae `especies`. *Un tipo local que copia al
+       *  del wrapper se separa de él el día que el wrapper cambia, y el
+       *  compilador no puede avisar porque los dos son válidos.* */
+      oferta: OfertaGuarderiaPropia | null;
       franjas: FranjaGuarderia[];
       capacidadHoy: number;
     };
@@ -171,9 +176,15 @@ export default function MundoGuarderia() {
                 </Texto>
                 {estado.oferta !== null ? (
                   <>
-                    <Texto variante="cuerpo">
-                      {t('mundoGuarderia.resumenPrecio', { precio: estado.oferta.precio.toFixed(2) })}
-                    </Texto>
+                    {/* ✏️ S107-A (cruce declarado): el precio del día puede no
+                        existir — el día dejó de ser obligatorio. **Sin él la
+                        línea NO se pinta**: escribir «$0.00» diría GRATIS, que
+                        es lo contrario de «no ofrece esta modalidad». */}
+                    {estado.oferta.precio !== null ? (
+                      <Texto variante="cuerpo">
+                        {t('mundoGuarderia.resumenPrecio', { precio: estado.oferta.precio.toFixed(2) })}
+                      </Texto>
+                    ) : null}
                     <Texto variante="apoyo">
                       {t('mundoGuarderia.resumenJornada', {
                         horas: (estado.oferta.jornadaMinutos / 60).toFixed(1),

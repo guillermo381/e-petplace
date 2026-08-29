@@ -10470,6 +10470,163 @@ export type Database = {
           },
         ]
       }
+      guarderia_aceptaciones: {
+        Row: {
+          aceptado_en: string
+          aceptado_por: string
+          documento_codigo: string
+          documento_version: number
+          familia_id: string
+        }
+        Insert: {
+          aceptado_en?: string
+          aceptado_por: string
+          documento_codigo: string
+          documento_version: number
+          familia_id: string
+        }
+        Update: {
+          aceptado_en?: string
+          aceptado_por?: string
+          documento_codigo?: string
+          documento_version?: number
+          familia_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_aceptaciones_documento_codigo_documento_version_fkey"
+            columns: ["documento_codigo", "documento_version"]
+            isOneToOne: false
+            referencedRelation: "guarderia_documentos"
+            referencedColumns: ["codigo", "version"]
+          },
+          {
+            foreignKeyName: "guarderia_aceptaciones_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_actas: {
+        Row: {
+          carnet_verificado: boolean
+          cerrada_en: string
+          clave_idempotencia: string | null
+          conformidad: string
+          conformidad_en: string | null
+          direccion: string
+          estadia_id: string
+          id: string
+          levantada_por: string
+          objetos: string | null
+          observaciones: string | null
+          recibida_en: string
+          reserva_texto: string | null
+        }
+        Insert: {
+          carnet_verificado: boolean
+          cerrada_en: string
+          clave_idempotencia?: string | null
+          conformidad?: string
+          conformidad_en?: string | null
+          direccion: string
+          estadia_id: string
+          id?: string
+          levantada_por: string
+          objetos?: string | null
+          observaciones?: string | null
+          recibida_en?: string
+          reserva_texto?: string | null
+        }
+        Update: {
+          carnet_verificado?: boolean
+          cerrada_en?: string
+          clave_idempotencia?: string | null
+          conformidad?: string
+          conformidad_en?: string | null
+          direccion?: string
+          estadia_id?: string
+          id?: string
+          levantada_por?: string
+          objetos?: string | null
+          observaciones?: string | null
+          recibida_en?: string
+          reserva_texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_actas_estadia_id_fkey"
+            columns: ["estadia_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_estadias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_autorizaciones_familia: {
+        Row: {
+          actualizado_en: string
+          contacto_alternativo: Json | null
+          contactos: Json
+          familia_id: string
+          redes_autorizadas: boolean
+          urgencia_tope_moneda: string
+          urgencia_tope_monto: number
+        }
+        Insert: {
+          actualizado_en?: string
+          contacto_alternativo?: Json | null
+          contactos: Json
+          familia_id: string
+          redes_autorizadas?: boolean
+          urgencia_tope_moneda: string
+          urgencia_tope_monto: number
+        }
+        Update: {
+          actualizado_en?: string
+          contacto_alternativo?: Json | null
+          contactos?: Json
+          familia_id?: string
+          redes_autorizadas?: boolean
+          urgencia_tope_moneda?: string
+          urgencia_tope_monto?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_autorizaciones_familia_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: true
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_documentos: {
+        Row: {
+          activo: boolean
+          codigo: string
+          contenido: string
+          version: number
+          vigente_desde: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          contenido: string
+          version: number
+          vigente_desde?: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          contenido?: string
+          version?: number
+          vigente_desde?: string
+        }
+        Relationships: []
+      }
       guarderia_espacio_excepciones: {
         Row: {
           created_at: string
@@ -10655,6 +10812,113 @@ export type Database = {
           },
         ]
       }
+      guarderia_media: {
+        Row: {
+          archivo_url: string
+          autor_user_id: string
+          capturada_en: string
+          clave_idempotencia: string
+          created_at: string
+          duracion_s: number | null
+          fecha: string
+          id: string
+          miniatura_url: string | null
+          prestador_id: string
+          tipo: string
+        }
+        Insert: {
+          archivo_url: string
+          autor_user_id: string
+          capturada_en: string
+          clave_idempotencia: string
+          created_at?: string
+          duracion_s?: number | null
+          fecha: string
+          id?: string
+          miniatura_url?: string | null
+          prestador_id: string
+          tipo: string
+        }
+        Update: {
+          archivo_url?: string
+          autor_user_id?: string
+          capturada_en?: string
+          clave_idempotencia?: string
+          created_at?: string
+          duracion_s?: number | null
+          fecha?: string
+          id?: string
+          miniatura_url?: string | null
+          prestador_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_media_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_media_etiquetas: {
+        Row: {
+          estadia_id: string
+          evento_id: string | null
+          mascota_id: string
+          media_id: string
+        }
+        Insert: {
+          estadia_id: string
+          evento_id?: string | null
+          mascota_id: string
+          media_id: string
+        }
+        Update: {
+          estadia_id?: string
+          evento_id?: string | null
+          mascota_id?: string
+          media_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_media_etiquetas_estadia_id_fkey"
+            columns: ["estadia_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_estadias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_etiquetas_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_etiquetas_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_etiquetas_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guarderia_paquetes: {
         Row: {
           activo: boolean
@@ -10699,6 +10963,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      guarderia_tramo_punto: {
+        Row: {
+          lat: number
+          lon: number
+          tramo_id: string
+          visto_en: string
+        }
+        Insert: {
+          lat: number
+          lon: number
+          tramo_id: string
+          visto_en: string
+        }
+        Update: {
+          lat?: number
+          lon?: number
+          tramo_id?: string
+          visto_en?: string
+        }
+        Relationships: []
       }
       historial_pagos_prime: {
         Row: {
@@ -20820,6 +21105,18 @@ export type Database = {
         }
         Returns: string
       }
+      aceptar_documentos_guarderia: {
+        Args: {
+          p_aceptaciones: Json
+          p_contacto_alternativo?: Json
+          p_contactos: Json
+          p_familia_id: string
+          p_redes_autorizadas?: boolean
+          p_urgencia_tope_moneda: string
+          p_urgencia_tope_monto: number
+        }
+        Returns: Json
+      }
       aceptar_invitacion_familia: {
         Args: { p_token: string }
         Returns: {
@@ -21155,6 +21452,14 @@ export type Database = {
       }
       configurar_venta_mostrador: {
         Args: { p_activa: boolean; p_cuenta_comercial_id: string }
+        Returns: Json
+      }
+      confirmar_acta_guarderia: {
+        Args: {
+          p_acta_id: string
+          p_conformidad: string
+          p_reserva_texto?: string
+        }
         Returns: Json
       }
       confirmar_cita_pagada: { Args: { p_cita_id: string }; Returns: Json }
@@ -21716,6 +22021,10 @@ export type Database = {
         Args: { p_invitacion_id: string }
         Returns: Json
       }
+      evaluar_documentos_guarderia: {
+        Args: { p_familia_id: string }
+        Returns: Json
+      }
       evaluar_requisitos_guarderia: {
         Args: { p_mascota_id: string }
         Returns: Json
@@ -21984,6 +22293,18 @@ export type Database = {
           sobre: string
         }[]
       }
+      levantar_acta_guarderia: {
+        Args: {
+          p_carnet_verificado: boolean
+          p_cerrada_en?: string
+          p_clave_idempotencia?: string
+          p_direccion: string
+          p_estadia_id: string
+          p_objetos?: string
+          p_observaciones?: string
+        }
+        Returns: Json
+      }
       log_admin_action: {
         Args: {
           p_accion: string
@@ -22204,6 +22525,14 @@ export type Database = {
           prestadores_totales: number
         }[]
       }
+      obtener_documentos_guarderia: {
+        Args: never
+        Returns: {
+          codigo: string
+          contenido: string
+          version: number
+        }[]
+      }
       obtener_empleados_cuenta: {
         Args: { p_cuenta_comercial_id: string }
         Returns: {
@@ -22388,6 +22717,27 @@ export type Database = {
           mascota_id: string
           mascota_nombre: string
           tipo_servicio: string
+        }[]
+      }
+      obtener_media_de_mi_mascota: {
+        Args: { p_fecha?: string; p_mascota_id: string }
+        Returns: {
+          archivo_url: string
+          capturada_en: string
+          duracion_s: number
+          media_id: string
+          tipo: string
+        }[]
+      }
+      obtener_media_del_dia: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: {
+          archivo_url: string
+          capturada_en: string
+          duracion_s: number
+          mascota_ids: string[]
+          media_id: string
+          tipo: string
         }[]
       }
       obtener_mi_posicion_en_prestador: {
@@ -22617,6 +22967,7 @@ export type Database = {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: Json
       }
+      obtener_punto_vivo: { Args: { p_tramo_id: string }; Returns: Json }
       obtener_resumen_actividad_prestador: {
         Args: {
           p_desde: string
@@ -22795,6 +23146,18 @@ export type Database = {
           p_cuenta_comercial_id: string
           p_filas: Json
           p_origen_carga?: string
+        }
+        Returns: Json
+      }
+      publicar_media_guarderia: {
+        Args: {
+          p_archivo_url: string
+          p_capturada_en?: string
+          p_clave_idempotencia: string
+          p_duracion_s?: number
+          p_mascota_ids?: string[]
+          p_prestador_id: string
+          p_tipo: string
         }
         Returns: Json
       }
@@ -23051,6 +23414,15 @@ export type Database = {
           p_producto_codigo?: string
           p_producto_otro?: string
           p_unidad?: string
+        }
+        Returns: Json
+      }
+      registrar_punto_vivo: {
+        Args: {
+          p_lat: number
+          p_lon: number
+          p_tramo_id: string
+          p_visto_en?: string
         }
         Returns: Json
       }
