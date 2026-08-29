@@ -20993,7 +20993,7 @@ export type Database = {
         Returns: boolean
       }
       _guarderia_ofertas_cobrables: {
-        Args: { p_mascota_id: string; p_modalidad?: string }
+        Args: { p_fecha?: string; p_mascota_id: string; p_modalidad?: string }
         Returns: {
           ciudad: string
           devuelve_desde: string
