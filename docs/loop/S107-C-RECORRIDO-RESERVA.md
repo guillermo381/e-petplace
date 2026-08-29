@@ -64,7 +64,7 @@ se le movió el piso.*
   grooming**. *Sin él, entrar sin mascota deja una pantalla sin sujeto.*
 
 ### ETAPA 2 · `disponibles.tsx` — el día y quién puede
-`SelectorDia` (**sus seis voces, y jamás HOY**) → **«Ver quién puede»** → lista de lugares con
+`SelectorDia` (**los cinco estados del contrato, y jamás HOY**) → **«Ver quién puede»** → lista de lugares con
 **su** precio → tocar uno lleva al lugar.
 
 - **Qué significa el día**, por modalidad *(contrato ①)*: **día** = el día a agendar ·
@@ -83,7 +83,8 @@ se le movió el piso.*
 | camino | qué ve la familia | de dónde sale |
 |---|---|---|
 | **sin cupo ese día** | «Ninguna guardería tiene cupo ese día» — **con el día a la vista y la tira viva para mover el dedo** | ya construido, `hubGuarderia.sinLugaresTitulo` |
-| **el día no es elegible** | **las seis voces del calendario, separadas**: `pasado` · `mismo_dia` · `no_opera` · `sin_lugar` · `elegible`. 🔴 **«No abre» NO es «se llenó»** | el server las separa; la pantalla las pinta |
+| **el día no es elegible** | **los CINCO estados del cupo, separados**: `pasado` · `mismo_dia` · `no_opera` · `sin_lugar` · `elegible`. 🔴 **«No abre» NO es «se llenó»** — y **`sobrevendido` NO es un sexto: es un booleano aparte que puede acompañar a cualquiera de los cinco** | contrato ② |
+| **el día no vino en la respuesta** | voz propia (`cupo_sin_dato`) — **no es un estado del cupo, es una ausencia**, y decirlo así evita contarla como sexto | ya construido |
 | **rebote de cupo al reservar** | el mensaje del motor **y el calendario se recarga** — *el cupo se toma bajo candado y dos familias pueden tocar en el mismo segundo* | `[prestadorId].tsx`, ya construido |
 | **pago rechazado** | lo resuelve **`CheckoutReserva`**, que ya lo tiene: la cita queda `pendiente_pago` con su hold y **la familia puede volver a pagar** | pieza compartida |
 | **paquete sin saldo** | 🔴 **HOY NO PUEDE OCURRIR** — ver ④: no hay compra de paquete, así que no hay saldo que agotar. **Cuando exista, se reusa la Hoja parejo-parejo del paseo** |

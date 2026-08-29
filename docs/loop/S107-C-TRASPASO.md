@@ -71,7 +71,7 @@
 |---|---|
 | **Tuteo** (`R66`) | la voz de producto **jamás vosea**. Es un trinquete **solo-baja**: si tus strings lo suben, el gate se pone rojo |
 | **La víspera** | 🔴 **HOY jamás se reserva** — el primer día elegible es el siguiente en que el lugar opera |
-| **Las voces del calendario** | **seis estados con voz propia**: `pasado` · `mismo_dia` · `no_opera` · `sin_lugar` · `elegible` · sin fila. **«No abre» NO es «se llenó»**, y el server los separa porque desde la pantalla ambos llegan como `disponible = 0` |
+| **Las voces del calendario** | ⏪ **CORREGIDO (29-ago): son CINCO, no seis** — `pasado` · `mismo_dia` · `no_opera` · `sin_lugar` · `elegible` (contrato ②). **`sobrevendido` NO es un estado: es un booleano aparte** que puede venir con cualquiera de los cinco, y *«sin fila» es una ausencia, no un estado*. **«No abre» NO es «se llenó»**, y el server los separa porque desde la pantalla ambos llegan como `disponible = 0` |
 | **El semáforo REFLEJA, no decide** | `bloquea` viaja **dentro** de la evaluación y lo lee también `reservar_dia_guarderia`. **La pantalla nunca abre una puerta para chocar contra otra** |
 | **Sin chips de mascota en el flujo** | la mascota **viaja por parámetro** desde el log; el flujo no la vuelve a preguntar |
 | **Guardería sedimenta CADA estadía** | como sus hermanas. 🔴 **El evento es de A** — nace en el servidor **al entregar**, no en ninguna pantalla mía |
