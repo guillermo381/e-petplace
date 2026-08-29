@@ -473,6 +473,13 @@ export interface EstadiaDeMiMascota {
   /** Si hay id, hay acta: la pantalla del acta no vuelve a preguntar. */
   actaRecogidaId: string | null;
   actaDevolucionId: string | null;
+  /**
+   * 🔴 Los dos VIAJES. Con el tramo de la dirección en curso, el mapa del punto
+   * vivo se enciende solo (`obtenerPuntoVivo`). *No faltaba entidad — faltaba
+   * proyección: los dos campos ya vivían en la tabla.*
+   */
+  tramoRecogidaId: string | null;
+  tramoDevolucionId: string | null;
   /** El server ya decidió de qué lado del hoy cae. La pantalla no compara fechas. */
   esProxima: boolean;
 }
@@ -511,6 +518,8 @@ export async function obtenerMisEstadiasGuarderia(params?: {
       entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
       actaRecogidaId: typeof r.acta_recogida_id === 'string' ? r.acta_recogida_id : null,
       actaDevolucionId: typeof r.acta_devolucion_id === 'string' ? r.acta_devolucion_id : null,
+      tramoRecogidaId: typeof r.tramo_recogida_id === 'string' ? r.tramo_recogida_id : null,
+      tramoDevolucionId: typeof r.tramo_devolucion_id === 'string' ? r.tramo_devolucion_id : null,
       esProxima: r.es_proxima === true,
     });
   }
@@ -522,4 +531,98 @@ function esEstadoEstadia(v: unknown): v is EstadoEstadia {
     v === 'reservada' || v === 'recogida_en_curso' || v === 'en_guarderia' ||
     v === 'retorno_en_curso' || v === 'entregada' || v === 'cancelada' || v === 'no_recogida'
   );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL CONTENIDO DEL ACTA — para que la conformidad no se firme a ciegas
+   ═══════════════════════════════════════════════════════════════════════════
+   🔴 **Existía `confirmarActaGuarderia` y no existía con qué LEERLA.** C no
+   montó el botón de conformar a propósito, y su razón es firma de la mesa:
+   *la conformidad existe porque el dueño VIO lo que firma.* Un «conforme»
+   sobre un acta ilegible **no prueba nada: prueba que alguien tocó un botón.**
+
+   Devuelve **los hechos**, no la voz: `ActaDeEntrega` compone sus `items` con
+   el idioma de la casa. *El motor dice el hecho; la voz es de la superficie.*
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface MediaDelActa {
+  mediaId: string;
+  tipo: 'foto' | 'clip';
+  archivoUrl: string;
+  miniaturaUrl: string | null;
+  capturadaEn: string | null;
+}
+
+export interface ActaGuarderia {
+  actaId: string;
+  estadiaId: string;
+  direccion: 'recogida' | 'devolucion';
+  carnetVerificado: boolean;
+  objetos: string | null;
+  observaciones: string | null;
+  conformidad: 'sin_conformidad' | 'conforme' | 'con_reserva';
+  conformidadEn: string | null;
+  reservaTexto: string | null;
+  /**
+   * 🔴 **La hora de la PUERTA** — la pone el cliente al cerrar el acta en la
+   * casa. `recibidaEn` es cuándo llegó al servidor. *Son dos hechos distintos
+   * y se muestran los dos: la diferencia entre ellos es la cola offline.*
+   */
+  cerradaEn: string | null;
+  recibidaEn: string | null;
+  mascotaNombre: string;
+  prestadorNombre: string;
+  media: MediaDelActa[];
+}
+
+export async function obtenerActaGuarderia(
+  actaId: string,
+): Promise<ResultadoWrapper<ActaGuarderia, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_acta_guarderia', { p_acta_id: actaId });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.actaId !== 'string' || typeof r.estadiaId !== 'string') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  const dir = r.direccion;
+  if (dir !== 'recogida' && dir !== 'devolucion') return fallaCodigo('datos_inconsistentes');
+  const conf = r.conformidad;
+  if (conf !== 'sin_conformidad' && conf !== 'conforme' && conf !== 'con_reserva') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  const media: MediaDelActa[] = [];
+  if (Array.isArray(r.media)) {
+    for (const m of r.media) {
+      if (typeof m !== 'object' || m === null) continue;
+      const x = m as Record<string, unknown>;
+      if (typeof x.mediaId !== 'string' || typeof x.archivoUrl !== 'string') continue;
+      media.push({
+        mediaId: x.mediaId,
+        tipo: x.tipo === 'clip' ? 'clip' : 'foto',
+        archivoUrl: x.archivoUrl,
+        miniaturaUrl: typeof x.miniaturaUrl === 'string' ? x.miniaturaUrl : null,
+        capturadaEn: typeof x.capturadaEn === 'string' ? x.capturadaEn : null,
+      });
+    }
+  }
+  return {
+    ok: true,
+    data: {
+      actaId: r.actaId,
+      estadiaId: r.estadiaId,
+      direccion: dir,
+      carnetVerificado: r.carnetVerificado === true,
+      objetos: typeof r.objetos === 'string' ? r.objetos : null,
+      observaciones: typeof r.observaciones === 'string' ? r.observaciones : null,
+      conformidad: conf,
+      conformidadEn: typeof r.conformidadEn === 'string' ? r.conformidadEn : null,
+      reservaTexto: typeof r.reservaTexto === 'string' ? r.reservaTexto : null,
+      cerradaEn: typeof r.cerradaEn === 'string' ? r.cerradaEn : null,
+      recibidaEn: typeof r.recibidaEn === 'string' ? r.recibidaEn : null,
+      mascotaNombre: typeof r.mascotaNombre === 'string' ? r.mascotaNombre : '',
+      prestadorNombre: typeof r.prestadorNombre === 'string' ? r.prestadorNombre : '',
+      media,
+    },
+  };
 }

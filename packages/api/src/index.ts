@@ -1540,6 +1540,9 @@ export {
 export {
   obtenerMisEstadiasGuarderia,
   type EstadiaDeMiMascota,
+  obtenerActaGuarderia,
+  type ActaGuarderia,
+  type MediaDelActa,
   evaluarRequisitosGuarderia,
   reservarDiaGuarderia,
   type RequisitosGuarderia,
