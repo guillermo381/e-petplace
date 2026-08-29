@@ -179,6 +179,24 @@ export default function Explorar() {
                 {/* QW2 (S53, decisión founder): grilla de 2 columnas,
                     cards cuadradas con el Icono b′ PRESIDIENDO. */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+                  {/* ═══════════════════════════════════════════════════════════
+                      🔴 ESTE BLOQUE TIENE UNA COPIA VIVA, Y SI LO TOCÁS SIN
+                      TOCARLA, UN INSTRUMENTO EMPIEZA A MENTIR.
+
+                      La galería lo reproduce **transcrito a mano** para poder
+                      comparar las tres baldosas de la casa (`D-973`):
+                      `packages/ui/src/gallery/TokenGallery.tsx`, sección
+                      *«D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL»*.
+
+                      **No se importa porque no hay qué importar:** esta baldosa
+                      no es un componente — vive INLINE acá adentro. *Y ése es
+                      exactamente el hecho que `D-973` pone sobre la mesa.*
+
+                      ⚠️ **La advertencia estaba escrita allá y no acá**, que es
+                      el lado que rompe: la copia avisa «quien toque aquella,
+                      mira ésta» **y aquella no se enteraba**. *Una nota que sólo
+                      vive en la copia protege a la copia de nadie.*
+                      ═══════════════════════════════════════════════════════════ */}
                   {fichasActivas.map((f) => {
                     const contenido = (
                       <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
