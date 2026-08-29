@@ -106,6 +106,49 @@ const ANCHO_CANTO = 3
  *  lo declara. */
 const LADO_GLIFO: Record<2 | 3, number> = { 2: 48, 3: 32 }
 
+/* ── S107-B · EL LABEL A TRES COLUMNAS — medido, no ajustado a ojo ────────
+   **Medición de C:** el ancho útil es `(ancho − 16)/3 − 51` = **73,7 pt en
+   390**, y «Adiestramiento» mide **~116 a cuerpo · ~102 a sm · ~80 a xs**.
+   **Es UNA palabra de 14 caracteres**, así que `numberOfLines={2}` sola no
+   alcanza: no hay dónde cortar. «Veterinaria» también se pasa en 360 y 390.
+
+   ── 🔴 LA ELIPSIS QUEDA DESCARTADA POR PRECEDENTE, NO POR GUSTO ──────────
+   **`D-576` ya registra «"Adiestramiento" trunca» como DEFECTO medido por el
+   founder en dispositivo (S80), y sigue abierta.** Elegir elipsis sería
+   reproducir, en otra pantalla, un defecto que él ya rechazó **sobre esta
+   misma palabra**. ⇒ **la palabra se parte y no se corta: nada se pierde.**
+
+   ── EL MODELO, derivado de los tres números de C (se cruzan entre sí) ────
+   `116/(14·16) = 0,518` · `102/(14·14) = 0,520` · `80/(14·11) = 0,519`
+   ⇒ **ancho ≈ 0,519 × caracteres × tamaño** para DM Sans regular.
+
+   ── LAS DOS PALANCAS, las dos DERIVADAS ─────────────────────────────────
+   · **Escala:** `cuerpo` (16) → **`enfasis` (14, bold)**. No es `apoyo`
+     porque el título quedaría del mismo peso que el `detalle`; `enfasis` es
+     literalmente *«el elemento destacado de una lista, que no es un
+     rótulo»*, que es lo que un título de baldosa es.
+   · **Padding:** `spacing[4]` (16) → **`spacing[2.5]` (10)**, por la MISMA
+     derivación que el glifo — la baldosa a tres es ~2/3 de ancho, y 16×2/3 ≈
+     10. *Ni el glifo ni el aire se eligen a ojo: los dos salen de la misma
+     proporción.* Devuelve **12 pt** al ancho útil.
+
+   ── EL RESULTADO CONTRA LOS CINCO LABELS REALES (no contra el más corto) ─
+   Útil = `(ancho−16)/3 − 39` · bold ≈ +5 %
+
+   | label | ancho @14 bold | 360 (75,7) | 390 (85,7) | 430 (99,0) |
+   |---|---|---|---|---|
+   | Paseo (5) | 38 | ✓ | ✓ | ✓ |
+   | Grooming (8) | 61 | ✓ | ✓ | ✓ |
+   | Guardería (9) | 69 | ✓ | ✓ | ✓ |
+   | Veterinaria (11) | 84 | **2 líneas** | ✓ | ✓ |
+   | Adiestramiento (14) | 107 | **2 líneas** | **2 líneas** | ✓ |
+
+   **Ninguno trunca en ningún tamaño.** Los que no entran **se parten**, y
+   con `numberOfLines={2}` el peor caso —14 caracteres— entra holgado en dos
+   renglones. ⚠️ **El modelo es una ESTIMACIÓN de ancho de glifo**: la vara
+   final es el aparato, y por eso el par de la galería monta los cinco. */
+const RELLENO: Record<2 | 3, number> = { 2: spacing[4], 3: spacing[2.5] }
+
 export type BaldosaProps = {
   /** El nombre de lo que se elige. Una línea; dos si el nombre es largo. */
   titulo: string
@@ -249,7 +292,7 @@ export function Baldosa({
             // cuatro solo porque coincida el número.
             borderLeftColor: capa === 'consumo' ? theme.accent.warm : theme.capa[capa],
             overflow: 'hidden',
-            padding: spacing[4],
+            padding: RELLENO[columnas],
             justifyContent: 'flex-end',
             gap: spacing[2],
           },
@@ -293,7 +336,9 @@ export function Baldosa({
             `apoyo` (14 secundario) el contraste sigue siendo claro.
             *Si el gate dice que falta peso, la salida es una variante
             nueva con su gate (Ley 11) — jamás un `style` inline acá.* */}
-        <Texto variante="cuerpo" numberOfLines={2}>
+        {/* A tres columnas baja a `enfasis` (14 bold) y **se parte antes que
+            truncarse** — ver la tabla de arriba y el porqué de `D-576`. */}
+        <Texto variante={columnas === 3 ? 'enfasis' : 'cuerpo'} numberOfLines={2}>
           {titulo}
         </Texto>
         {detalle !== undefined ? (
