@@ -123,3 +123,30 @@ puntos, la garantía de la pantalla se caería sola.
   fecha alcanza. *Un lector por caso de uso es cómo una tabla termina con seis.*
 - **No hace falta que el lector traiga la media**: `obtenerMediaDeMiMascota` ya existe, ya
   funciona y **ya está consumido** — es la única mitad del durante que anda hoy.
+
+---
+
+# ⑥ AMPLIACIÓN 2 — 29-ago · **el rail «Tus servicios» del Hogar también lo espera**
+
+**Medido recorriendo la app:** `ResumenServiciosHogar` (`packages/api/src/wrappers/serviciosHogar.ts`)
+tiene **cuatro servicios** —`paseo` · `estetica` · `adiestramiento` · `veterinaria`— y
+**ninguno es guardería**.
+
+⇒ **Guardería no aparece en el rail del Hogar**, donde viven sus cuatro hermanos. Hoy se alcanza
+**sólo por la baldosa de Explorar**. *Una familia que ya la usó la busca donde están las otras
+cuatro y no la encuentra* — y el rail no se puede completar desde la pantalla, porque su regla
+es **«cero actividad = cero celda»** y la actividad sale de este wrapper.
+
+**La forma, espejo exacto de sus hermanos:**
+
+```ts
+  guarderia: {
+    proxima: ProximaDeServicio | null;
+    /** Última estadía ENTREGADA, o null. */
+    ultima_cerrada: string | null;
+  };
+```
+
+**Es el mismo dato que `obtenerMisEstadias` ya va a traer** — se pide acá para que el rail no
+tenga que componerlo con N llamadas. *Y si A prefiere que C lo componga del lector, también
+sirve: lo que no sirve es que guardería siga sin celda.*
