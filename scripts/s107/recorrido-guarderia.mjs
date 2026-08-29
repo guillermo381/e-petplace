@@ -7,6 +7,12 @@
  * · NO: los datos de Aurora — **este recorrido corre SIN SESIÓN**. Una pantalla
  *   que acá pinta su vacío honesto podría pintar otra cosa con datos.
  *   *Decirlo importa: un verde de este script NO es un gate del founder.*
+ *
+ * 🔴 EXIGE LA API VIVA. Levantá el servidor con `scripts/s107/levantar-cliente-web.sh`
+ * — **sin las env vars de Supabase la app no llama a `initApi()`**, toda pantalla
+ * queda en esqueleto y este recorrido reporta seis rutas «rotas» que son el
+ * arnés. *Pasó el 29-ago.* Ese script trae además el aviso de por qué **no** se
+ * corre `supabase projects api-keys` a secas.
  */
 import { chromium } from 'playwright-core';
 
