@@ -1,0 +1,172 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOS DOCUMENTOS DE GUARDERÍA — la puerta que faltaba
+   ═══════════════════════════════════════════════════════════════════════════
+   Las tres RPC vivían en la base **sin wrapper**, y una pantalla que las llame
+   directo salta la puerta única de la casa: sin unión discriminada, sin códigos
+   tipados, sin normalizar el error. *No es prolijidad — es que el día que el
+   motor cambie un código, la pantalla se entera por un `error_desconocido`.*
+
+   🔴 **ESTE MÓDULO NO REDACTA NI UNA LÍNEA DE TEXTO LEGAL.** El `contenido` de
+   cada documento **sale de la base**, donde lo pone quien tiene la firma
+   (`PLAN_S107_GUARDERIA` §0: *ninguna pista redacta texto legal, ni siquiera un
+   placeholder*). Lo que hay acá son mensajes de **producto** para errores de
+   producto.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+import { getClient } from '../client';
+import type { Json } from '../database.types';
+import type { ResultadoWrapper } from '../resultado';
+
+const MENSAJES = {
+  no_sos_de_esta_familia:    'Esto es de otra familia.',
+  tope_de_urgencia_invalido: 'Ese tope de urgencia no es válido.',
+  familia_no_existe:         'No encontramos esa familia.',
+  sin_sesion:                'Tu sesión expiró. Vuelve a entrar.',
+  datos_inconsistentes:      'No pudimos leer la respuesta. Prueba de nuevo.',
+  error_desconocido:         'No pudimos completar la acción. Prueba de nuevo.',
+} as const;
+
+export type CodigoErrorGuarderiaDocumentos = keyof typeof MENSAJES;
+const CODIGOS = Object.keys(MENSAJES) as CodigoErrorGuarderiaDocumentos[];
+
+function fallaCodigo<T>(c: CodigoErrorGuarderiaDocumentos): ResultadoWrapper<T, CodigoErrorGuarderiaDocumentos> {
+  return { ok: false, codigo: c, mensaje: MENSAJES[c] };
+}
+function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorGuarderiaDocumentos> {
+  if (raw === 'auth_required') return fallaCodigo('sin_sesion');
+  // L-115: el motor levanta `codigo: detalle` — se normaliza por prefijo.
+  for (const codigo of CODIGOS) if (raw.startsWith(codigo)) return fallaCodigo(codigo);
+  return fallaCodigo('error_desconocido');
+}
+
+export interface DocumentoGuarderia {
+  codigo: string;
+  /** La versión VIGENTE. Se acepta una versión concreta, jamás «el documento». */
+  version: number;
+  /** 🔴 El texto, tal cual vive en la base. **Esta capa no lo compone.** */
+  contenido: string;
+}
+
+/**
+ * El estado de los documentos de una familia.
+ *
+ * 🔴 **`documentos_no_disponibles` NO es `al_dia`** — significa que **no hay
+ * documentos cargados**, y por lo tanto no hay nada que aceptar. *Tratarlo como
+ * «al día» dejaría reservar sin que la familia haya aceptado nada: es
+ * fail-OPEN, y acá el default tiene que ser el contrario.* La pantalla lo dice
+ * y no ofrece continuar.
+ */
+export type EstadoDocumentos = 'al_dia' | 'faltan' | 'documentos_no_disponibles';
+
+export interface EvaluacionDocumentos {
+  estado: EstadoDocumentos;
+  /** Qué falta aceptar, con su versión. Vacío cuando `al_dia`. */
+  faltantes: { codigo: string; version: number }[];
+}
+
+export async function obtenerDocumentosGuarderia(): Promise<
+  ResultadoWrapper<DocumentoGuarderia[], CodigoErrorGuarderiaDocumentos>
+> {
+  const { data, error } = await getClient().rpc('obtener_documentos_guarderia');
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: DocumentoGuarderia[] = [];
+  for (const d of data) {
+    if (typeof d !== 'object' || d === null) return fallaCodigo('datos_inconsistentes');
+    const r = d as Record<string, unknown>;
+    if (typeof r.codigo !== 'string' || typeof r.version !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    /* El contenido vacío NO se rellena con nada: si un documento llegó sin
+       texto, la pantalla lo dice — **jamás se muestra un legal a medias.** */
+    salida.push({
+      codigo: r.codigo,
+      version: r.version,
+      contenido: typeof r.contenido === 'string' ? r.contenido : '',
+    });
+  }
+  return { ok: true, data: salida };
+}
+
+export async function evaluarDocumentosGuarderia(
+  familiaId: string,
+): Promise<ResultadoWrapper<EvaluacionDocumentos, CodigoErrorGuarderiaDocumentos>> {
+  const { data, error } = await getClient().rpc('evaluar_documentos_guarderia', {
+    p_familia_id: familiaId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  const e = r.estado;
+  if (e !== 'al_dia' && e !== 'faltan' && e !== 'documentos_no_disponibles') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  const faltantes: { codigo: string; version: number }[] = [];
+  if (Array.isArray(r.faltantes)) {
+    for (const f of r.faltantes) {
+      if (typeof f !== 'object' || f === null) continue;
+      const x = f as Record<string, unknown>;
+      if (typeof x.codigo === 'string' && typeof x.version === 'number') {
+        faltantes.push({ codigo: x.codigo, version: x.version });
+      }
+    }
+  }
+  return { ok: true, data: { estado: e, faltantes } };
+}
+
+/**
+ * Acepta las versiones que la familia leyó, y de paso registra lo que la letra
+ * pide junto: el tope de urgencia, los contactos y la autorización de imagen.
+ *
+ * 🔴 **Se acepta una VERSIÓN, no «el documento».** El día que el texto cambie,
+ * la aceptación vieja **deja de contar** — que es el punto de versionarlos.
+ *
+ * **Idempotente:** aceptar dos veces la misma versión no duplica ni falla
+ * (`ON CONFLICT DO NOTHING` en el motor). *Un reintento de red no puede
+ * convertirse en un error para el que ya aceptó.*
+ */
+export async function aceptarDocumentosGuarderia(params: {
+  familiaId: string;
+  /** Las versiones leídas, tal como vinieron de `obtenerDocumentosGuarderia`. */
+  aceptaciones: { codigo: string; version: number }[];
+  /**
+   * 🔴 **OBLIGATORIOS PORQUE EL MOTOR LOS EXIGE — y eso es LETRA, no descuido.**
+   * `aceptar_documentos_guarderia` declara `p_urgencia_tope_monto`,
+   * `p_urgencia_tope_moneda` y `p_contactos` **sin `DEFAULT`** (medido en la
+   * firma). *No se puede aceptar los documentos sin declarar hasta cuánto se
+   * autoriza gastar en una urgencia y a quién llamar* — el consentimiento y esos
+   * dos datos son **un solo acto**, y separarlos dejaría familias aceptadas y
+   * sin contacto.
+   *
+   * ⚠️ Si algún día el motor los vuelve opcionales, **acá se aflojan después,
+   * no antes**: un wrapper más permisivo que su RPC sólo mueve el rechazo del
+   * compilador al teléfono.
+   */
+  urgenciaTopeMonto: number;
+  urgenciaTopeMoneda: string;
+  contactos: Json;
+  /** Éste SÍ es opcional en el motor (`p_contacto_alternativo?`). */
+  contactoAlternativo?: Json;
+  /** La autorización de imagen. **Ausente = NO autorizada**, jamás al revés. */
+  redesAutorizadas?: boolean;
+}): Promise<ResultadoWrapper<{ aceptadas: number }, CodigoErrorGuarderiaDocumentos>> {
+  const { data, error } = await getClient().rpc('aceptar_documentos_guarderia', {
+    p_familia_id: params.familiaId,
+    /* Tipado, no forzado: `as never` habría silenciado al compilador en el
+       único lugar donde su opinión sirve (regla 34). */
+    p_aceptaciones: params.aceptaciones as Json,
+    p_urgencia_tope_monto: params.urgenciaTopeMonto,
+    p_urgencia_tope_moneda: params.urgenciaTopeMoneda,
+    p_contactos: params.contactos,
+    p_contacto_alternativo: params.contactoAlternativo,
+    /* 🔴 FAIL-CLOSED: sin decisión explícita, la imagen NO se autoriza.
+       *Un default `true` acá autorizaría a publicar la foto de un animal
+       porque alguien no tocó un interruptor.* */
+    p_redes_autorizadas: params.redesAutorizadas === true,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.aceptadas !== 'number') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { aceptadas: r.aceptadas } };
+}
