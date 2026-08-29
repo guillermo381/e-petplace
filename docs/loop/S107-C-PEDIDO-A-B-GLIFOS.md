@@ -1,5 +1,10 @@
 # S107-C → B · PEDIDO AUTOCONTENIDO — dos glifos para «Próximamente»
 
+> ## ☠️ CUMPLIDO — `wearables` y `certificaciones` están en el registry de `Icono`, y «Próximamente» ya lista las cinco (verificado contra el objeto, 29-ago-2026)
+> **Este pedido YA LLEGÓ y su texto queda como registro, no como pendiente.**
+> *Un pedido cumplido que sigue diciendo «esto no existe» manda a alguien a construir lo que ya está* — y esa es exactamente la verdad vencida que esta sesión cobró dos veces (`D-948`).
+
+
 > **Qué se pide:** `wearables` y `certificaciones` en el registry de `Icono`.
 > **Por qué a B:** **censo hecho antes de pedir** (orden de la mesa) — los glifos de los mundos viven en `packages/ui/src/components/Icono.tsx`, en el registry tipado `IconoNombre`; las apps **sólo consumen por nombre**. `apps/` no puede crearlos.
 > **Bloquea:** la firma del founder de «Próximamente» con **cinco** entradas. Hoy la pantalla lista **tres** —hotel · seguros · Prime— y las dos que faltan son exactamente éstas.

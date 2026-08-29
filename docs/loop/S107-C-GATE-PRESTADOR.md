@@ -1,7 +1,14 @@
 # S107-C · GUION DE GATE — el recorrido del prestador en el aparato
 
 > **Para el founder.** Lo que sigue está medido contra la base viva y contra el repo hoy, no escrito de memoria.
-> 🔴 **Leé §0 antes de agendar nada: hoy el recorrido NO es caminable, y falta un acto que no es mío.**
+> ## ⚠️ §0 ESTÁ VENCIDO — enmienda del 29-ago-2026, medida
+> **Cuando escribí este guion, mi trabajo no estaba en `main` y por eso §0 decía «no es caminable». Hoy es falso:** medido, **cero commits fuera de `main`** y la rama en origin al mismo SHA.
+> **§0 se conserva y NO se borra** —su lección sobre el binario (`L-432`) sigue siendo cierta y es la parte que vale— **pero su veredicto de «no caminable» ya no rige.**
+> 🔴 **Lo que sí hay que re-medir antes de agendar, porque cambia solo:** que exista binario para el runtime que `app.json` declara, y el estado del flag `guarderia`.
+>
+> *Se marca en vez de borrarse: un guion que dice «no se puede caminar» sobre algo que ya se puede hace perder una sesión, y uno borrado se vuelve a escribir desde cero.*
+
+> 🔴 **Leé §0 antes de agendar nada: hoy el recorrido NO es caminable, y falta un acto que no es mío.** *(← esta línea es la vencida.)*
 
 ---
 
