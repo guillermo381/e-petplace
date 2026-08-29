@@ -591,6 +591,7 @@ export const clienteEn = {
     // S54-B3.1 — walks are bookable now; the rest stays honest
     agendarLlegaOtros: 'Booking veterinary visits is coming soon.',
     paseoAgendable: 'Tap to open',
+    entrarA: 'Go to {{servicio}}',
     paseadoresTitulo: 'Walkers',
     paseadoresError: "We couldn't load the walkers",
     paseadoresVacio: 'No walkers offering yet',
@@ -2139,12 +2140,14 @@ export const clienteEn = {
   },
   hubGuarderia: {
     titulo: 'Daycare',
-    paraQuien: 'For whom?',
+    cabezalDetalle: 'They pick him up, he spends the day, they bring him back.',
     queDia: 'Which day?',
     lugaresTitulo: 'Places with room that day',
     porDia: '${{precio}} per day',
     sinElegiblesTitulo: 'You can’t use daycare yet',
     sinElegiblesDetalle: 'Daycare is for dogs and cats. Once you register one, it’ll show up here.',
+    diaCerrado: 'Closed',
+    probarDia: 'Try {{dia}}',
     sinLugaresTitulo: 'No daycare has room that day',
     sinLugaresDetalle: 'Try another day: capacity changes daily.',
     noCargoTitulo: 'We couldn’t load your pets',
@@ -2158,5 +2161,13 @@ export const clienteEn = {
     duracion: 'Between the two windows',
     exitoTitulo: 'Done! Your day is booked.',
     exitoDetalle: 'We’ll let you know when they head out to pick him up.',
+  },
+  logGuarderia: {
+    titulo: 'Daycare',
+    reservarDe: 'Book for {{nombre}}',
+    listaPendienteTitulo: 'We can’t show your stays yet',
+    listaPendienteDetalle: 'We’re finishing this part. In the meantime you can book from the button below.',
+    noCargoTitulo: 'We couldn’t load your pets',
+    noCargoDetalle: 'It’s not that you have none: we couldn’t ask. Try again.',
   },
 } as const satisfies Espejo<typeof clienteEs>;

@@ -106,6 +106,78 @@ const ANCHO_CANTO = 3
  *  lo declara. */
 const LADO_GLIFO: Record<2 | 3, number> = { 2: 48, 3: 32 }
 
+/* ── S107-B · EL LABEL A TRES COLUMNAS — medido, no ajustado a ojo ────────
+   **Medición de C:** el ancho útil es `(ancho − 16)/3 − 51` = **73,7 pt en
+   390**, y «Adiestramiento» mide **~116 a cuerpo · ~102 a sm · ~80 a xs**.
+   **Es UNA palabra de 14 caracteres**, así que `numberOfLines={2}` sola no
+   alcanza: no hay dónde cortar. «Veterinaria» también se pasa en 360 y 390.
+
+   ── 🔴 LA ELIPSIS QUEDA DESCARTADA POR PRECEDENTE, NO POR GUSTO ──────────
+   **`D-576` ya registra «"Adiestramiento" trunca» como DEFECTO medido por el
+   founder en dispositivo (S80), y sigue abierta.** Elegir elipsis sería
+   reproducir, en otra pantalla, un defecto que él ya rechazó **sobre esta
+   misma palabra**. ⇒ **la palabra se parte y no se corta: nada se pierde.**
+
+   ── EL MODELO, derivado de los tres números de C (se cruzan entre sí) ────
+   `116/(14·16) = 0,518` · `102/(14·14) = 0,520` · `80/(14·11) = 0,519`
+   ⇒ **ancho ≈ 0,519 × caracteres × tamaño** para DM Sans regular.
+
+   ── LAS DOS PALANCAS, las dos DERIVADAS ─────────────────────────────────
+   · **Escala:** `cuerpo` (16) → **`enfasis` (14, bold)**. No es `apoyo`
+     porque el título quedaría del mismo peso que el `detalle`; `enfasis` es
+     literalmente *«el elemento destacado de una lista, que no es un
+     rótulo»*, que es lo que un título de baldosa es.
+   · **Padding:** `spacing[4]` (16) → **`spacing[2.5]` (10)**, por la MISMA
+     derivación que el glifo — la baldosa a tres es ~2/3 de ancho, y 16×2/3 ≈
+     10. *Ni el glifo ni el aire se eligen a ojo: los dos salen de la misma
+     proporción.* Devuelve **12 pt** al ancho útil.
+
+   ── EL RESULTADO CONTRA LOS CINCO LABELS REALES (no contra el más corto) ─
+   Útil = `(ancho−16)/3 − 39` · bold ≈ +5 %
+
+   | label | ancho @14 bold | 360 (75,7) | 390 (85,7) | 430 (99,0) |
+   |---|---|---|---|---|
+   | Paseo (5) | 38 | ✓ | ✓ | ✓ |
+   | Grooming (8) | 61 | ✓ | ✓ | ✓ |
+   | Guardería (9) | 69 | ✓ | ✓ | ✓ |
+   | Veterinaria (11) | 84 | **2 líneas** | ✓ | ✓ |
+   | Adiestramiento (14) | 107 | **2 líneas** | **2 líneas** | ✓ |
+
+   **Ninguno trunca en ningún tamaño.** Los que no entran **se parten**, y
+   con `numberOfLines={2}` el peor caso —14 caracteres— entra holgado en dos
+   renglones. ⚠️ **El modelo es una ESTIMACIÓN de ancho de glifo**: la vara
+   final es el aparato, y por eso el par de la galería monta los cinco. */
+const RELLENO: Record<2 | 3, number> = { 2: spacing[4], 3: spacing[2.5] }
+const AIRE: Record<2 | 3, number> = { 2: spacing[2], 3: spacing[1.5] }
+
+/* 🔴 ── S107-B · LA PROPORCIÓN, TERCER NÚMERO FIRMADO PARA DOS COLUMNAS ───
+   **El founder vio en el aparato que el glifo se monta ENCIMA del texto** en
+   «Adiestramiento» y «Vender por e-PetPlace». **No era ancho: era ALTO**, y la
+   causa es mía por partida doble:
+
+   ① **El glifo estaba `position: absolute`** — o sea **fuera del flujo, sin
+     reservar altura** — y el texto crece desde abajo (`flex-end`). *Nada
+     impedía que el texto subiera hasta debajo del glifo: no había espacio
+     reservado, había un hueco que casualmente alcanzaba a dos columnas.*
+   ② **`aspectRatio: 1` es el TERCER número de esta pieza firmado PARA DOS
+     COLUMNAS** —después del glifo (48) y del aire (16)—, y es el único que no
+     re-derivé. *Curé los dos que se veían y dejé el que causaba el choque.*
+
+   **La cuenta que lo prueba, en el peor caso (360):** la baldosa mide
+   `(360−16)/3 − 8 = 106,7`. Demanda con dos líneas de título:
+   `20 (aire) + 32 (glifo) + 6 + 40 (2×20) + 6 + 20 (detalle) = 124`.
+   ⇒ **faltan ~17 pt, y en un cuadrado no hay de dónde sacarlos.**
+
+   ⇒ **A tres columnas la baldosa deja de ser cuadrada** (`0.8`): alto ≈ 133 en
+   360 y ≈ 146 en 390, con holgura sobre los 124. **A dos columnas sigue
+   CUADRADA, intacta** — su firma no se toca.
+
+   ⚠️ **Y esta vez la vara es el APARATO, no una cuenta.** La cuenta de arriba
+   es de la geometría de la pieza (números propios, no estimación de ancho de
+   texto), pero *el modelo de ancho ya me dijo una vez que entraba y el founder
+   vio que no*. Por eso el par de la galería monta los cinco labels reales. */
+const PROPORCION: Record<2 | 3, number> = { 2: 1, 3: 0.8 }
+
 export type BaldosaProps = {
   /** El nombre de lo que se elige. Una línea; dos si el nombre es largo. */
   titulo: string
@@ -226,7 +298,7 @@ export function Baldosa({
          *Mi ley decía «la raíz es dueña de su espacio» y yo la había
          cumplido a medias: el espacio son DOS dimensiones.* El hijo deja
          de decidir geometría y solo compone adentro (`flex: 1`). */
-      style={{ width: '100%', aspectRatio: 1 }}>
+      style={{ width: '100%', aspectRatio: PROPORCION[columnas] }}>
       <Animated.View
         style={[
           {
@@ -249,19 +321,26 @@ export function Baldosa({
             // cuatro solo porque coincida el número.
             borderLeftColor: capa === 'consumo' ? theme.accent.warm : theme.capa[capa],
             overflow: 'hidden',
-            padding: spacing[4],
-            justifyContent: 'flex-end',
-            gap: spacing[2],
+            padding: RELLENO[columnas],
+            gap: AIRE[columnas],
           },
           estiloPresionado,
         ]}
       >
-        {/* El glifo arriba, empujado por el `justifyContent: flex-end`
-            del padre: el texto queda anclado abajo y todas las baldosas
-            alinean su título a la misma altura, tengan detalle o no. */}
-        <View style={{ position: 'absolute', top: spacing[4], left: spacing[4] }}>
-          <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO[columnas]} />
-        </View>
+        {/* ⏪ EL GLIFO VUELVE AL FLUJO. Estaba `absolute`, y por eso **no
+            reservaba altura**: el texto crecía desde abajo y se le metía
+            encima (lo vio el founder en el aparato). Ahora ocupa su lugar y
+            **el choque es imposible por construcción**, no por que las
+            cuentas den.
+
+            🔴 **Y la alineación firmada NO se pierde, que era el porqué del
+            `absolute`:** la sostiene el ESPACIADOR de abajo — empuja el texto
+            al pie igual que lo hacía `justifyContent: flex-end`, y todas las
+            baldosas siguen alineando su título a la misma altura, tengan
+            detalle o no. *La diferencia es que ahora, cuando el contenido
+            crece, lo primero que cede es el espaciador — y no el glifo.* */}
+        <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO[columnas]} />
+        <View style={{ flex: 1 }} />
 
         {/* 🔴 EL TÍTULO ES `cuerpo`, NO `seccion` — y la corrección cura
             DOS defectos que resultaron ser el mismo cambio.
@@ -293,7 +372,9 @@ export function Baldosa({
             `apoyo` (14 secundario) el contraste sigue siendo claro.
             *Si el gate dice que falta peso, la salida es una variante
             nueva con su gate (Ley 11) — jamás un `style` inline acá.* */}
-        <Texto variante="cuerpo" numberOfLines={2}>
+        {/* A tres columnas baja a `enfasis` (14 bold) y **se parte antes que
+            truncarse** — ver la tabla de arriba y el porqué de `D-576`. */}
+        <Texto variante={columnas === 3 ? 'enfasis' : 'cuerpo'} numberOfLines={2}>
           {titulo}
         </Texto>
         {detalle !== undefined ? (

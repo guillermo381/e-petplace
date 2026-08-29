@@ -1,6 +1,6 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.11
+> Versión: v1.12
 > Última actualización: 9 Ago 2026 — S92-BIS. **P23 FIRMADA: qué significa «borrado» para un documento de identidad — el archivo queda inalcanzable, no se sobrescribe, y esa diferencia se declara en vez de prometerse de más.**
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
@@ -925,3 +925,89 @@ documentos existentes es del founder, caso por caso — ver **D-732**.
 - **v1.10 (24 Jul 2026 — S76)**: **P22 DECLARADA, sin letra** (reagenda y cancelación de la cita CLÍNICA — nace por `LETRA_RECEPCION_S76` §8, FIRMADA founder). Hermana de P18 (que cubre SOLO el paseo suelto); contraste financiero obligatorio al escribirse; lo que tendrá que resolver y el paseo no tiene: caso abierto, presupuesto atado, instrucciones de preparación. No se construye en S76. **Nota de numeración:** la letra fuente decía "P20"; la mesa resolvió que **custodia CONSERVA P20** (reserva S70, D-405 — materia legal, número citable afuera del repo) y la reagenda toma **P22** — el choque lo atrapó el freno de A contra el literal de POLITICAS (L-166 aplicada contra la mesa).
 - **v1.9 (19 Jul 2026 — S70/T3)**: **P21 FIRMADA (LA LETRA UBER)** — la cuenta es GLOBAL y el país es contexto de OPERACIÓN, jamás de identidad; el teléfono NO implica país (caso canónico: el founder en EC con línea CO); PROHIBIDO derivar el prefijo del `country_code` del perfil (el prefijo lo declara el usuario, con `+` o selector de país de la línea); fiscalidad y liquidación siguen por país de operación. **P20 queda RESERVADA a la custodia (D-405)** — verificado en el cierre. Gemelos: `DEFINICION_SOFTLAUNCH.md` §3.5 y **D-442** (forma canónica del teléfono, reescrita bajo esta letra).
 - **v1.11 (9 Ago 2026 — S92-BIS)**: **P23 FIRMADA** — qué significa «borrado» para un documento de identidad. Origen: orden del founder al cerrar **D-731** (la FK `ON DELETE CASCADE` + la policy de borrado propio + cero funciones que tocaran Storage dejaban cédulas, RUC y títulos en el bucket para siempre). La política dice las tres cosas que un acta técnica no alcanza a fijar: **(a)** el documento vive en dos lugares y borrar la fila no borra el archivo — desde la cura los dos actos están atados, pero siguen siendo dos; **(b)** el borrado deja el archivo **inalcanzable, no lo sobrescribe** ⇒ ante un derecho de supresión la respuesta honesta es *«ya no es accesible por ningún medio del producto»*, jamás *«fue destruido»* — **prometer lo segundo sería una promesa que el sistema no puede cumplir**; **(c)** nunca es aceptable reportar éxito sobre un borrado no confirmado, ni dejar la fila sin archivo (*el dato ya no se puede usar y ninguna retención lo protege, porque para el producto ya no existe*), ni conservar documentos de quien no es prestador vigente sin razón escrita. **Lo que P23 NO resuelve y queda declarado: el plazo de retención tras una baja** — hasta que exista, el borrado de documentos existentes lo decide el founder caso por caso (**D-732**).
+
+---
+
+## P24 — Cancelación y reagenda de la ESTADÍA de guardería (FIRMADA — founder, S107)
+
+> **Qué cubre:** el **día de guardería** — suelto pagado **y** día consumido de
+> un paquete. **Nace porque P18 no la cubría y nadie lo había notado:** P18 se
+> acota **por su propio encabezado** a *«el paseo INDIVIDUAL pagado»*, y
+> guardería no tenía hermana.
+>
+> 🔴 **La firma existía hace tandas; lo que faltaba era el DEPÓSITO.** *Una firma
+> sin depósito no es una decisión tomada: es una decisión que se va a rediscutir
+> en tres meses — y peor, se va a rediscutir creyendo que nunca se decidió.*
+>
+> Gemelos: `LETRA_GUARDERIA.md` · `MODELO_FINANCIERO.md` nota 7.16 (el camino de
+> la plata de lo pagado y no ejecutado) · **P18**, de la que hereda las tres
+> ventanas sin cambiarles un número.
+
+### 🔴 EL ANCLA — y es lo único que NO se hereda de P18
+
+**Las ventanas se miden contra el INICIO de la franja de RECOGIDA del lugar**,
+no contra «la hora de la cita».
+
+*Una estadía de guardería **no tiene hora**: tiene un día y una ventana en la que
+el vehículo pasa.* Anclar a la hora de la cita —que no existe— habría dejado la
+política sin punto de referencia, o peor: habría hecho que cada superficie
+eligiera el suyo.
+
+**De dónde sale, medido:** `min(desde) FILTER (WHERE tipo='recogida')` de
+`guarderia_franjas` del lugar. **Es dato del prestador, no constante del código**
+— cada guardería tiene su ventana y la política se mide contra la suya.
+
+### Las tres ventanas (heredadas de P18, mismos números)
+
+**(a) Con ≥24 h antes del inicio de la franja de recogida — reagendar o cancelar.**
+
+- **Reagendar:** mover la estadía a otro **día** con cupo del mismo lugar. El
+  pago viaja con la estadía; **el lugar del día viejo se libera y vuelve al
+  cupo** (espejo exacto de «la franja vieja se libera y se re-oferta»).
+- **Cancelar definitivamente:** el dueño **ELIGE el destino de su plata** —
+  vuelta al medio de pago (*«depende de tu banco y tarda en promedio 15 días
+  hábiles»*) **o** saldo en e-PetPlace. **Las dos parejas, sin default oscuro**:
+  la rapidez del saldo se INFORMA, jamás se usa para esconder la del banco.
+
+**(b) Entre 24 y 2 h — solo reagendar.** El cupo de ese día ya es difícil de
+revender, pero el servicio puede seguir vivo otro día. **La plata no se mueve.**
+
+**(c) Con <2 h, o no estar cuando el vehículo pasa — la estadía se pierde.**
+La guardería **COBRA** (cierre `no_show`, Decisión T: su cupo se bloqueó de
+verdad y el vehículo hizo el viaje). Sin excepciones automáticas — los casos
+humanos son soporte, no regla.
+
+**(d) Falla del prestador.** Si la guardería no ejecuta, el dueño elige —
+**devolución o saldo, sin discusión**. La plataforma no litiga la falla del lado
+que cobró.
+
+### 🔴 EL DÍA DE PAQUETE VUELVE AL SALDO, NO A LA PLATA (firma ⑤, sigue)
+
+Cancelar un día que salió de un paquete **devuelve la unidad al bono**
+(`unidades_usadas − 1`), **no reembolsa**.
+
+> *Ese día ya se pagó cuando se compró el paquete entero, y su desglose quedó
+> congelado ahí* (la octava puerta, `_trg_bono_congela_desglose`). **Devolver
+> plata por una unidad rompería un precio que se firmó por el conjunto** — el
+> paquete vale lo que vale **porque son N**.
+
+⚠️ **Y en la ventana (c) la unidad NO vuelve:** el `no_show` consume el día
+igual, porque el cupo se bloqueó y el viaje se hizo. *Devolverla ahí sería
+cobrarle al prestador el plantón.*
+
+### El camino de la plata (contraste financiero, regla de piedra)
+
+- Una estadía pagada y **no ejecutada no tiene devengo que reversar** (el evento
+  económico nace al cierre — variante (b) intacta): la cancelación se **DECLARA
+  sobre el pago**, patrón 7.14. **`aplicar_reembolso()` no se toca.**
+- El `no_show` usa **el mismo cierre** que el del paquete (Decisión T, no hay
+  tercera vía): la guardería devenga al precio snapshoteado de la estadía.
+
+### ⚠️ Lo que esta política NO decide, y se dice para que no se infiera
+
+**La mensualidad tiene su propia salida** y NO es ésta: corre hasta el fin del
+período pagado, ahí muere la serie y se libera el cupo futuro, **sin reintegro
+del período en curso** (firma del founder, S107 — rige `LETRA_COBRO_RECURRENTE`).
+*Aplicarle estas tres ventanas a un cobro recurrente sería devolver por día algo
+que se cobró por mes.*
+

@@ -704,17 +704,26 @@ export const clienteEs = {
     servicios: 'Servicios',
     servicioPaseo: 'Paseo',
     servicioPaseoDetalle: 'Paseadores que cuidan y documentan cada salida.',
-    servicioGrooming: 'Estética y baño',
+    /* ⚠️ GUION BLANDO (U+00AD) ADENTRO — misma cura que el prestador. La
+       grilla del cliente **no monta `Baldosa`**: la dibuja a mano, así que la
+       cura de la pieza no la alcanza (medido por B). *Montar la pieza acá es
+       DECISIÓN de mesa, no arreglo* — mientras tanto, la cadena resuelve el
+       corte igual de bien y sin tocar una anatomía firmada.
+       🔴 **Si editás estas cadenas, el guion se pierde sin que nada avise.** */
+    servicioGrooming: 'Esté­tica y baño',
     servicioGroomingDetalle: 'Grooming profesional que queda en su historia.',
-    servicioVet: 'Veterinaria',
+    servicioVet: 'Vete­ri­na­ria',
     servicioVetDetalle: 'Atención clínica para su salud.',
-    servicioAdiestramiento: 'Adiestramiento',
+    servicioAdiestramiento: 'Adiestra­miento',
     servicioAdiestramientoDetalle: 'Educación y conducta con profesionales.',
     agendarLlega: 'Agendar desde la app llega pronto.',
     // S54-B3.1; S60: el grooming abrió — la voz nombra SOLO lo que falta
     agendarLlegaOtros: 'Agendar veterinaria llega pronto.',
     // S58 ruta del mundo — GATE DE STRINGS PENDIENTE (lote S58)
     paseoAgendable: 'Toca para entrar',
+    /* S107-C · la etiqueta accesible de la baldosa: sin texto visible, es lo
+       único que dice a dónde lleva. */
+    entrarA: 'Entrar a {{servicio}}',
     paseadoresTitulo: 'Paseadores',
     paseadoresError: 'No pudimos cargar los paseadores',
     paseadoresVacio: 'Todavía no hay paseadores ofreciendo',
@@ -2894,12 +2903,14 @@ export const clienteEs = {
   },
   hubGuarderia: {
     titulo: 'Guardería',
-    paraQuien: '¿Para quién?',
+    cabezalDetalle: 'Lo buscan, pasa el día y lo traen de vuelta.',
     queDia: '¿Qué día?',
     lugaresTitulo: 'Lugares con cupo ese día',
     porDia: '${{precio}} por día',
     sinElegiblesTitulo: 'Todavía no puedes usar la guardería',
     sinElegiblesDetalle: 'La guardería es para perros y gatos. Cuando registres uno, va a aparecer acá.',
+    diaCerrado: 'No abren',
+    probarDia: 'Probar {{dia}}',
     sinLugaresTitulo: 'Ninguna guardería tiene cupo ese día',
     sinLugaresDetalle: 'Prueba con otro día: el cupo cambia todos los días.',
     noCargoTitulo: 'No pudimos cargar tus mascotas',
@@ -2913,5 +2924,15 @@ export const clienteEs = {
     duracion: 'Entre tus dos ventanas',
     exitoTitulo: '¡Listo! Tu día está reservado.',
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
+  },
+  logGuarderia: {
+    titulo: 'Guardería',
+    reservarDe: 'Reservar para {{nombre}}',
+    /* 🔴 No dice «no tienes estadías»: dice que todavía no podemos mostrarlas.
+       Lo primero sería mentir con cara de dato. */
+    listaPendienteTitulo: 'Todavía no podemos mostrarte tus estadías',
+    listaPendienteDetalle: 'Estamos terminando esta parte. Mientras tanto puedes reservar desde el botón de abajo.',
+    noCargoTitulo: 'No pudimos cargar tus mascotas',
+    noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
   },
 } as const;

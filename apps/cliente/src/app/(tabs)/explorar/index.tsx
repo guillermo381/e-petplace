@@ -195,17 +195,28 @@ export default function Explorar() {
                           >
                             {f.titulo}
                           </Text>
-                          <Text
-                            numberOfLines={2}
-                            style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.45, color: theme.text.secondary }}
-                          >
-                            {f.detalle}
-                          </Text>
-                          {f.onPress ? (
-                            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.xs, color: theme.text.primary, marginTop: 2 }}>
-                              {t('explorar.paseoAgendable')}
-                            </Text>
-                          ) : null}
+                          {/* ☠️ S107-C · LA DESCRIPCIÓN DEL PRODUCTO Y EL
+                              «Toca para entrar» SALIERON (firma del founder).
+                              La causa del desborde acá no era el tamaño del
+                              texto: **era cuánta información cargaba la
+                              baldosa**. Con tres columnas entraban glifo +
+                              nombre + descripción + una llamada a la acción en
+                              ~100 pt de ancho.
+                              🔴 **El chevron reemplaza al texto porque dice lo
+                              mismo ocupando una fila de nada** — y *«toca para
+                              entrar» le explica a alguien que ya sabe tocar
+                              una tarjeta*. */}
+                          {/* ☠️ S107-C · EL CHEVRON SE RETIRÓ (firma del
+                              founder, con su razón medida): **quedaba en un
+                              lugar distinto en cada baldosa** porque el label
+                              ocupa distinta cantidad de líneas — «Adiestramiento»
+                              lo empujaba abajo y «Paseo» lo dejaba arriba.
+                              🔴 **Y no se pierde nada: que la tarjeta es
+                              tocable ya lo dice ser una tarjeta.** *Un
+                              indicador que se mueve solo llama la atención
+                              sobre sí mismo en vez de sobre lo que señala.*
+                              ⚠️ La etiqueta accesible **se queda**: sin texto
+                              ni chevron, es lo único que dice a dónde entra. */}
                         </View>
                       </View>
                     );
@@ -217,8 +228,25 @@ export default function Explorar() {
                        se estire a llenar. */
                     return (
                       <View key={f.clave} style={{ flexBasis: '31%', flexGrow: 0 }}>
+                        {/* 🔴 SIN TEXTO, LA ETIQUETA CARGA EL DESTINO.
+                            Un chevron no se anuncia: quien no ve la pantalla
+                            oiría «botón» y nada más. La etiqueta dice **a
+                            dónde entra**, que es lo que el texto retirado
+                            decía peor. */}
                         {f.onPress ? (
-                          <Tarjeta relleno="amplio" interactiva onPress={f.onPress} accessibilityRole="button" etiqueta={`${f.titulo} — ${t('explorar.paseoAgendable')}`}>
+                          <Tarjeta
+                            relleno="amplio"
+                            interactiva
+                            onPress={f.onPress}
+                            accessibilityRole="button"
+                            /* 🔴 El guion blando SE QUITA de la etiqueta
+                               accesible: sirve para partir un renglón, y acá
+                               no hay renglón que partir. *La mayoría de los
+                               lectores lo ignora, pero «la mayoría» no es una
+                               garantía cuando el costo de asegurarlo es un
+                               `replace`.* */
+                            etiqueta={t('explorar.entrarA', { servicio: f.titulo.replace(/\u00AD/g, '') })}
+                          >
                             {contenido}
                           </Tarjeta>
                         ) : (

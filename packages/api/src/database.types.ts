@@ -10720,6 +10720,8 @@ export type Database = {
           estado: string
           id: string
           llegada_en: string | null
+          tramo_devolucion_id: string | null
+          tramo_recogida_id: string | null
           updated_at: string
         }
         Insert: {
@@ -10731,6 +10733,8 @@ export type Database = {
           estado?: string
           id?: string
           llegada_en?: string | null
+          tramo_devolucion_id?: string | null
+          tramo_recogida_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -10742,6 +10746,8 @@ export type Database = {
           estado?: string
           id?: string
           llegada_en?: string | null
+          tramo_devolucion_id?: string | null
+          tramo_recogida_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -10757,6 +10763,20 @@ export type Database = {
             columns: ["espacio_id"]
             isOneToOne: false
             referencedRelation: "guarderia_espacios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_estadias_tramo_devolucion_id_fkey"
+            columns: ["tramo_devolucion_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_tramos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_estadias_tramo_recogida_id_fkey"
+            columns: ["tramo_recogida_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_tramos"
             referencedColumns: ["id"]
           },
         ]
@@ -10983,7 +11003,63 @@ export type Database = {
           tramo_id?: string
           visto_en?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_tramo_punto_tramo_id_fkey"
+            columns: ["tramo_id"]
+            isOneToOne: true
+            referencedRelation: "guarderia_tramos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_tramos: {
+        Row: {
+          abierto_en: string
+          abierto_por: string | null
+          cerrado_en: string | null
+          direccion: string
+          estado: string
+          fecha: string
+          id: string
+          prestador_id: string
+        }
+        Insert: {
+          abierto_en?: string
+          abierto_por?: string | null
+          cerrado_en?: string | null
+          direccion: string
+          estado?: string
+          fecha: string
+          id?: string
+          prestador_id: string
+        }
+        Update: {
+          abierto_en?: string
+          abierto_por?: string | null
+          cerrado_en?: string | null
+          direccion?: string
+          estado?: string
+          fecha?: string
+          id?: string
+          prestador_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_tramos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_tramos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       historial_pagos_prime: {
         Row: {
@@ -21105,6 +21181,15 @@ export type Database = {
         }
         Returns: string
       }
+      abrir_tramo_guarderia: {
+        Args: {
+          p_direccion: string
+          p_estadias?: string[]
+          p_fecha: string
+          p_prestador_id: string
+        }
+        Returns: Json
+      }
       aceptar_documentos_guarderia: {
         Args: {
           p_aceptaciones: Json
@@ -21397,6 +21482,7 @@ export type Database = {
         Returns: Json
       }
       cerrar_teleconsulta: { Args: { p_cita_id: string }; Returns: Json }
+      cerrar_tramo_guarderia: { Args: { p_tramo_id: string }; Returns: Json }
       cerrar_y_renovar_planes: { Args: never; Returns: Json }
       cleanup_pendientes_vencidos: {
         Args: never
@@ -23047,6 +23133,10 @@ export type Database = {
           solicitud_id: string
           tipo: string
         }[]
+      }
+      obtener_tramo_vivo_de_mi_mascota: {
+        Args: { p_mascota_id: string }
+        Returns: Json
       }
       obtener_uid_proveedor: {
         Args: { p_proveedor: string; p_user_id: string }
