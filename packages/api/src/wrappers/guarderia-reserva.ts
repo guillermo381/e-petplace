@@ -12,6 +12,34 @@ import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+  sin_saldo_paquete:       'No te quedan días en ese paquete.',
+  paquete_vencido:         'Ese paquete ya venció.',
+  paquete_no_disponible:   'Ese paquete no está disponible en este lugar.',
+  mascota_no_determinada:  '¿Para cuál de tus mascotas es este día?',
+  prestador_inactivo:      'Ese lugar ya no está disponible.',
+  sin_familia:             'Necesitas una familia para reservar.',
+  preset_invalido:         'Ese tamaño de paquete no existe.',
+
+  /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
+     función, no grepeando. **Mi censo anterior dijo «0 sin tipar» y estos dos
+     estaban vivos**: `reservar_dia_guarderia` los levanta con
+     `RAISE EXCEPTION USING MESSAGE = CASE …`, una forma que mi regex
+     —`RAISE EXCEPTION 'literal'`— **no veía**.
+
+     🔴 Es `L-425` en carne: *un baseline en 0 no dice «no hay»: dice «no vi,
+     con la lista de hoy»*. El 0 era de **la forma que miraba**, no del motor. */
+
+  /* 🔴 EL CAMINO NORMAL DE TODA FAMILIA NUEVA. Antes caía en
+     `error_desconocido`: le decíamos «ocurrió un error inesperado» a alguien
+     que sólo tenía que aceptar los términos — **y no le decíamos cuáles ni
+     dónde**. La pantalla que lea este código LLEVA a aceptarlos. */
+  documentos_sin_aceptar:    'Antes de reservar hay que aceptar los términos de la guardería.',
+  /* 🔴 PEOR EN CLASE: **es un estado NUESTRO** —la casa no cargó los
+     documentos— y se presentaba como si algo hubiera fallado del lado de la
+     familia. *No hay nada que ella pueda hacer, y la voz no le pide que lo
+     intente de nuevo.* */
+  documentos_no_disponibles: 'Todavía no podemos mostrarte los términos de la guardería. Es de nuestro lado: vuelve a intentarlo más tarde.',
+
 
   /* ✏️ S107-A · CENSADOS CONTRA EL MOTOR, no agregados de a uno.
      C reportó que `fecha_no_ofertable` llegaba como `error_desconocido`; al
@@ -635,6 +663,104 @@ export async function obtenerActaGuarderia(
       mascotaNombre: typeof r.mascotaNombre === 'string' ? r.mascotaNombre : '',
       prestadorNombre: typeof r.prestadorNombre === 'string' ? r.prestadorNombre : '',
       media,
+    },
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL PAQUETE — comprar, y agendar contra saldo
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface CompraDePaquete {
+  bonoId: string;
+  dias: number;
+  total: number;
+  porDia: number;
+  /** 'YYYY-MM-DD'. */
+  venceEl: string;
+  /** Días que venían de un paquete anterior y se extendieron (rollover, P16e). */
+  diasRollover: number;
+  /** Lo comprado + lo que rodó. **Es el número que el hub muestra.** */
+  saldoTotal: number;
+}
+
+/**
+ * 🔴 **COMPRAR NO ES RESERVAR.** El único efecto es el bono: cero citas.
+ * *La primera sesión se agenda al comprar desde la PANTALLA, con una segunda
+ * llamada — no acá.*
+ *
+ * El tamaño se valida contra `guarderia_paquetes` del lugar: **los presets son
+ * dato del prestador**, no un `5|10|15` cableado.
+ */
+export async function comprarPaqueteGuarderia(params: {
+  prestadorId: string;
+  tamano: number;
+}): Promise<ResultadoWrapper<CompraDePaquete, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('comprar_paquete_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_tamano: params.tamano,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.bono_id !== 'string' || typeof r.dias !== 'number') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      bonoId: r.bono_id,
+      dias: r.dias,
+      total: typeof r.total === 'number' ? r.total : 0,
+      porDia: typeof r.por_dia === 'number' ? r.por_dia : 0,
+      venceEl: typeof r.vence_el === 'string' ? r.vence_el : '',
+      diasRollover: typeof r.dias_rollover === 'number' ? r.dias_rollover : 0,
+      saldoTotal: typeof r.saldo_total === 'number' ? r.saldo_total : 0,
+    },
+  };
+}
+
+/**
+ * Agenda un día contra el saldo de un paquete. **Cero cobro:** el desglose se
+ * congeló al comprar.
+ *
+ * 🔴 **NO recibe `prestadorId`, y es firma del founder:** *cuando la familia ya
+ * tiene saldo, **el lugar está determinado por el paquete**.* Pedirlo sería
+ * ofrecerle elegir algo que ya eligió — y abrir la puerta a que elija mal.
+ *
+ * ⚠️ **`mascotaId` es opcional pero NO decorativo:** con una sola mascota
+ * elegible el motor la resuelve; **con dos o más rebota `mascota_no_determinada`
+ * en vez de adivinar.** *El bono es del HOGAR (v1.4): a cuál de los dos perros
+ * se le agenda el martes lo elige la familia, cada vez.*
+ */
+export async function reservarDiaDePaqueteGuarderia(params: {
+  bonoId: string;
+  /** 'YYYY-MM-DD'. **Jamás hoy**: rebota `reserva_mismo_dia`. */
+  fecha: string;
+  mascotaId?: string | null;
+}): Promise<
+  ResultadoWrapper<
+    { citaId: string; estadiaId: string; saldoRestante: number },
+    CodigoErrorGuarderiaReserva
+  >
+> {
+  const { data, error } = await getClient().rpc('reservar_dia_de_paquete_guarderia', {
+    p_bono_id: params.bonoId,
+    p_fecha: params.fecha,
+    p_mascota_id: params.mascotaId ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.cita_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: {
+      citaId: r.cita_id,
+      estadiaId: typeof r.estadia_id === 'string' ? r.estadia_id : '',
+      /* 🔴 El saldo sale del MOTOR. La pantalla no resta: si restara, dos
+         superficies podrían decir números distintos del mismo bono. */
+      saldoRestante: typeof r.saldo_restante === 'number' ? r.saldo_restante : 0,
     },
   };
 }
