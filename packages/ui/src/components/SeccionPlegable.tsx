@@ -51,7 +51,7 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 import { Texto } from './Texto'
-import { CHEVRON } from './chevron'
+import { Chevron } from './chevron'
 
 export type SeccionPlegableProps = {
   /** El título, en voz de la app. Es también el control. */
@@ -108,10 +108,15 @@ export function SeccionPlegable({
           )}
         </View>
 
-        {/* 19.7: ⌄ revela en el lugar · ⌃ pliega. JAMÁS `›` — no se navega. */}
-        <Texto variante="cuerpo" color="tertiary">
-          {abierta ? CHEVRON.arriba : CHEVRON.abajo}
-        </Texto>
+        {/* 19.7: ⌄ revela en el lugar · ⌃ pliega. JAMÁS `›` — no se navega.
+            ⏪ **ACÁ VIVÍA UN DEFECTO MÍO, y es de los caros:** se metía
+            `CHEVRON.arriba` —que es el atributo `d` de un path— dentro de un
+            `<Texto>`, así que **la pantalla mostraba `M9 18l6-6-6-6` como
+            TEXTO** cada vez que se abría un acordeón del taller. *Compilaba,
+            pasaba lint y pasaba `verify:diseno`.* Lo cazó C leyendo el texto
+            renderizado. **Se usa la PIEZA**, que es lo que `chevron.tsx` ya
+            mandaba: *«el path no se exporta; se usa la pieza»*. */}
+        <Chevron direccion={abierta ? 'arriba' : 'abajo'} />
       </Pressable>
 
       {abierta ? children : null}
