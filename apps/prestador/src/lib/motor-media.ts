@@ -49,6 +49,10 @@ function esErrorDeRed(mensaje: string): boolean {
 // desincronizan los topes.
 
 export interface EntradaPublicarMedia {
+  /** 🔴 Obligatoria en la firma, y por eso no la olvida nadie: *una
+   *  idempotencia opcional la olvida el primer consumidor apurado, y el modo
+   *  de falla es silencioso.* La genera la cola antes del primer intento. */
+  claveIdempotencia: string;
   /** Ya subido — el registro NUNCA sube: son dos pasos por diseño. */
   archivoUrl: string;
   tipo: 'foto' | 'clip';
@@ -56,23 +60,32 @@ export interface EntradaPublicarMedia {
   /** 🔴 LAS N ETIQUETAS. Mínimo 1: sin etiquetas rebota `media_sin_etiquetas`.
    *  Cada una recibe su evento apuntando al MISMO archivo. */
   mascotaIds: string[];
-  /** El día de la estadía, local del lugar (`YYYY-MM-DD`). */
-  fecha: string;
+  /**
+   * 🔴 EL INSTANTE de la captura (ISO), no el día.
+   *
+   * Corregido al cablear: el contrato escrito decía `fecha` y **la función viva
+   * pide `p_capturada_en timestamptz`**. La diferencia no es cosmética — **el
+   * día lo deriva el servidor del instante**, y eso lo vuelve dueño del huso
+   * horario, que es donde tiene que vivir. *Lo cazó el compilador en el
+   * cableado, que es exactamente para lo que ese archivo existe.*
+   */
+  capturadaEn: string;
 }
 
 /**
  * `publicarMedia` del contrato §②: crea la media, sus N etiquetas y sus N
  * eventos **en una sola transacción**.
  *
- * ⚠️ Lo que la app NO puede asumir y por eso la cola igual reintenta: el
- * contrato no declara idempotencia por `archivo_url`. **Se pidió** (era el
- * requisito ① de mi pedido D→A) y hasta que esté escrita, un reintento tras un
- * timeout ambiguo podría duplicar eventos. *Está anotado, no supuesto.*
+ * ✅ **Idempotente, y adoptado en el contrato** (corrección de D, 28-ago): el
+ * segundo intento **no rebota — devuelve la media que ya existe** con
+ * `ya_existia: true`. Eso es lo que la cola necesitaba: *un reintento que
+ * rebota obliga a distinguir «falló» de «ya estaba», y esa distinción es justo
+ * la que no se puede hacer con un timeout ambiguo.*
  */
 export type PublicarMedia = (
   entrada: EntradaPublicarMedia,
 ) => Promise<
-  | { ok: true; mediaId: string; eventoIds: string[] }
+  | { ok: true; mediaId: string; eventoIds: string[]; ya_existia?: boolean }
   | { ok: false; codigo: string; mensaje: string }
 >;
 
@@ -86,7 +99,7 @@ export type PublicarMedia = (
  * la firma prohíbe. **Agrupa el servidor.** La app solo declara el hecho.
  */
 export type AvisarMediaPublicada = (aviso: {
-  fecha: string;
+  capturadaEn: string;
   mascotaIds: string[];
   tipo: 'foto' | 'clip';
 }) => Promise<void>;
@@ -163,11 +176,15 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
       }
 
       const r = await deps.publicar({
+        claveIdempotencia: item.claveIdempotencia,
         archivoUrl: storagePath,
         tipo: item.tipo,
         duracionS: item.duracionS,
         mascotaIds: item.mascotaIds,
-        fecha: item.fecha,
+        // El instante REAL de la captura, no el de la subida: entre los dos
+        // puede haber horas sin señal, y el hilo del dueño ordena por cuándo
+        // pasó, no por cuándo llegó.
+        capturadaEn: new Date(item.creadoEn).toISOString(),
       });
 
       if (!r.ok) {
@@ -183,13 +200,23 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
       // (volvería a registrar, y eso sí duplicaría). Se registra y se sigue.
       if (deps.avisar) {
         try {
-          await deps.avisar({ fecha: item.fecha, mascotaIds: item.mascotaIds, tipo: item.tipo });
+          await deps.avisar({
+            capturadaEn: new Date(item.creadoEn).toISOString(),
+            mascotaIds: item.mascotaIds,
+            tipo: item.tipo,
+          });
         } catch (e) {
           console.error(`[motor-media] el aviso falló y NO frena la publicación · ${String(e)}`);
         }
       }
 
-      return { ok: true as const };
+      if (r.ya_existia) {
+        // No es un caso raro: es el camino feliz del reintento tras un timeout
+        // ambiguo. Se registra para que en el log se vea que la idempotencia
+        // trabajó — jamás como advertencia.
+        console.log(`[motor-media] ${item.tipo} ${item.id} ya estaba publicada · media=${r.mediaId}`);
+      }
+      return { ok: true as const, mediaId: r.mediaId };
     },
   };
 }
