@@ -32,7 +32,9 @@
 | pantalla | estado |
 |---|---|
 | **`/hogar/guarderia.tsx`** — el LOG | 🟠 **MITAD INERTE**: monta `FiltroMascotas` y el CTA al pie, **pero la lista no se puede llenar** (no existe el lector). Su vacío **dice la verdad**: *«todavía no podemos mostrarte tus estadías»*, **no** *«no tienes estadías»* |
-| **`/explorar/guarderia/index.tsx`** — el CUÁNDO | ✅ `CabezalOficio` · `FiltroMascotas` · `SelectorDia` · lista de lugares · `DiaSinHorarios` |
+| **`/explorar/guarderia/index.tsx`** — **ETAPA 1, la MODALIDAD** | ✅ `SelectorSegmentado` (Día · Paquete · Mensual). ⚠️ **Hoy no se ve, y está bien**: con una sola modalidad abierta **N=1 colapsa** y redirige sin dibujar |
+| **`/explorar/guarderia/disponibles.tsx`** — **ETAPA 2, el día y quién puede** | ✅ era el `index`. `CabezalOficio` (**con el nombre de la mascota**) · `SelectorDia` · lista de lugares · `DiaSinHorarios`. El rótulo del día **habla por modalidad** |
+| **`/guarderia/[estadiaId].tsx`** — **el DURANTE del dueño** | 🟠 **media VIVA**, estadía con **enchufe nombrado**, punto vivo montado. **Sin entrada cableada a propósito** (ver ④) |
 | **`/explorar/guarderia/[prestadorId].tsx`** — el lugar | ✅ franjas · calendario de cupo · semáforo sanitario · reservar |
 | **`/explorar/guarderia/checkout.tsx`** | ✅ monta `CheckoutReserva`, **la misma pieza que paseo y grooming** |
 
@@ -61,7 +63,10 @@
 1. 🔴 **El lector de estadías del lado de la FAMILIA — bloquea el log.** `obtenerEstadiasDelDia` **no sirve**: es del prestador, por día, y **filtra los holds a propósito**; la familia necesita ver su reserva **sin pagar**, que es la que tiene que ir a pagar. **Contrato exacto:** `docs/loop/S107-C-PEDIDO-A-A-LOG-FAMILIA.md`.
 2. 🟠 **`D-967`, mitad cliente.** `apps/cliente/src/lib/mapa-nativo.ts:106` sigue con **`= true` literal** y la sonda **no está portada** (`apps/cliente/modules/` no existe). 🔴 **NO se porta y se consume en el mismo acto:** en un binario sin el módulo la sonda daría `null` ⇒ fail-closed ⇒ **el mapa del cliente se apagaría hoy, donde funciona**. **Forma:** portar inerte, y flipear **cuando exista un binario de cliente que lo lleve**.
 3. 🟠 **La baldosa a mano del Explorar del cliente.** No monta `Baldosa`: la dibuja a mano, así que las curas de la pieza no la alcanzan. **Decidí aplicar el guion blando y NO montar la pieza**, porque su anatomía ya divergió por firma (perdió descripción y chevron) y montarla reabriría dos decisiones recién tomadas. ⚠️ **La mesa la llamó `D-973`, pero medido: esa ficha NO existe en `DEUDAS_CANONICAS.md`** — quien la deposite **verifica el número libre por grep**.
-4. 🔴 **El acta (⑤)** y **la aceptación de documentos** — sin superficie todavía; sus wrappers no existen (`obtenerDocumentosGuarderia`, `aceptarDocumentosGuarderia`, `evaluarDocumentosGuarderia`). **Dos huecos del contrato pedidos a A** en `S107-C-PEDIDO-A-A-DOCUMENTOS.md`.
+4. 🟠 **El acta (⑤)** — ⏪ **CORREGIDO (29-ago): sus wrappers YA EXISTEN.** `levantarActaGuarderia` y `confirmarActaGuarderia` están publicados, y `ActaDeEntrega` (B) tiene su `modo='leer'` con `onConformar`. **Lo único que falta es de dónde sacar el `actaId`** ⇒ lo trae el mismo lector del hueco 1 (`actaPendienteId`).
+5. 🔴 **La aceptación de documentos** — sin superficie; sus wrappers no existen en `packages/api` (aunque las RPC `obtener_documentos_guarderia` / `aceptar_documentos_guarderia` / `evaluar_documentos_guarderia` **sí están en la base**). Pedido: `S107-C-PEDIDO-A-A-DOCUMENTOS.md`.
+6. 🔴 **Paquete y mensual no se pueden vender.** Construidas enteras, **detrás de una compuerta de una línea** (`lib/guarderia-modalidad.ts`). Medido: **no existe RPC de compra de paquete de guardería** ni hermano de `contratar_plan_paseo`, y **el filtro todavía no acepta `p_modalidad`**. Pedido: `S107-C-PEDIDO-A-A-PAQUETE-Y-MENSUAL.md`. ⚠️ **Leé la trampa antes de encender la compuerta.**
+7. 🔴 **`guarderia_tramos` NO EXISTE** ⇒ el punto vivo es **inalcanzable por los dos lados**. `L-318` un piso más adentro. Detallado en la ampliación ⑤.2 del pedido del lector.
 
 ---
 
@@ -90,6 +95,17 @@
 
 ## ⑦ EL PRÓXIMO PASO EJECUTABLE
 
-**Si A publicó el lector de estadías de familia:** en `apps/cliente/src/app/(tabs)/hogar/guarderia.tsx`, reemplazar el `EstadoVacio` de «listaPendiente» por **`FiltroPills`** (próximos / historial) + filas **`FilaCita`**. **El esqueleto, los chips y el CTA ya están montados** — falta sólo con qué llenar la lista.
+**Todo depende del mismo lector**, y por eso está pedido una sola vez:
 
-**Si no:** el acta (⑤) es lo siguiente en la cola, y su contrato ya está publicado.
+1. **Si A publicó `obtenerMisEstadias`:** ① la lista del LOG
+   (`hogar/guarderia.tsx`: reemplazar el `EstadoVacio` de «listaPendiente» por `FiltroPills` +
+   filas `FilaCita`) · ② **cablear la entrada al durante** desde esa fila · ③ el acta, que con
+   `actaPendienteId` es montar `ActaDeEntrega` en `modo='leer'`.
+2. **Si A publicó el filtro por modalidad y las dos RPC de cobro:** cambiar **una línea** en
+   `lib/guarderia-modalidad.ts`. **Nada más** — las tres pantallas ya están.
+3. **Si no llegó ninguna:** la **aceptación de documentos** es lo único que no depende del
+   lector, y su contrato ya está publicado.
+
+⚠️ **Y lo que NO se hace todavía:** cancelación y reagenda. **No hay política** — `P18` cubre
+por su propio encabezado *«el paseo INDIVIDUAL pagado»* y guardería **no tiene hermana**.
+Depositarla es de A.
