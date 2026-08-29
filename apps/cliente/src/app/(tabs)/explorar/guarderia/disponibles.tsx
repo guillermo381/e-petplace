@@ -167,7 +167,13 @@ export default function DisponiblesGuarderia() {
     let vigente = true;
     setLista({ fase: 'cargando' });
     void (async () => {
-      const r = await obtenerGuarderiasDisponibles({ fecha, mascotaId });
+      /* ✏️ A, S107: **la modalidad VIAJA al server** — el filtro ya la acepta.
+         C escribió esta llamada cuando todavía no, así que la pantalla filtraba
+         de su lado. 🔴 Mandarla no es cosmético: **es lo que hace que la lista
+         sean los lugares que ofrecen ESA modalidad**, y lo que trae
+         `precioModalidad` ya resuelto. *Sin este argumento, el selector elige
+         una modalidad que el servidor nunca se entera.* */
+      const r = await obtenerGuarderiasDisponibles({ fecha, mascotaId, modalidad });
       if (!vigente) return;
       /* Un fallo JAMÁS se disfraza de «no hay lugares» (Ley 13): la familia
          leería «ninguna guardería puede» cuando lo cierto es «no pudimos
@@ -224,9 +230,27 @@ export default function DisponiblesGuarderia() {
    * modalidad —nunca `precio`— para que, si alguien enciende la compuerta antes
    * de tiempo, el peor caso sea una ausencia y no un precio de día disfrazado.*
    */
+  /* ✏️ CRUCE DECLARADO (A, S107) — **el criterio de C era el correcto y la
+     fuente estaba equivocada.** Elegir el campo de SU modalidad en vez de
+     `precio` evitaba el peor caso que C nombró; lo que no podía saber es que
+     una de las tres fuentes ya estaba MINTIENDO.
+
+     🔴 **Medido el 29-ago:** para paquete, `precioPaquete` sale de la COLUMNA
+     `prestador_servicios.precio_paquete`, que es **`NULL`**, mientras el motor
+     resuelve el precio desde la TABLA `guarderia_paquetes`, donde vive **5d/$40**.
+     ⇒ esta pantalla habría mostrado **«sin precio»** para una modalidad que sí
+     se vende, y lo habría hecho sin error de ningún tipo.
+
+     ⇒ **Se usa `precioModalidad`, que el server ya resolvió** (contrato del
+     filtro §①). *La cuenta se hace una vez o no sirve: dos fuentes para el
+     mismo precio es cómo la vitrina y el checkout terminan diciendo distinto.*
+     Los tres campos sueltos quedan como respaldo por si `precioModalidad` no
+     viniera —una llamada sin `modalidad`—, y **nunca cae a `precio`** cuando la
+     modalidad no es día: la ausencia es preferible al precio de otra cosa. */
   const precioDeLaModalidad = useCallback(
     (g: GuarderiaDisponible): number | null =>
-      modalidad === 'dia' ? g.precio : modalidad === 'paquete' ? g.precioPaquete : g.precioMensual,
+      g.precioModalidad ??
+      (modalidad === 'dia' ? g.precio : modalidad === 'paquete' ? null : g.precioMensual),
     [modalidad],
   );
 
