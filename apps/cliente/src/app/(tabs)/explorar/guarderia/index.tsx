@@ -31,12 +31,18 @@
  * `razonDeshabilitado` que exige apretar una puerta cerrada para saber por qué
  * lo está.
  *
- * ⚠️ **UNA DIVERGENCIA DECLARADA:** el founder pidió el mensaje **debajo** del
- * botón. El botón vive en `PieReserva`, que es **fijo al borde inferior**, y
- * **debajo de él no hay lugar donde algo pueda vivir**. Queda **inmediatamente
- * encima**, que cumple lo que la firma persigue —*visible sin tocarlo*— y no
- * la letra. *Si la letra manda, el pie deja de ser fijo en esta pantalla; es
- * un cambio chico y no lo tomo por mi cuenta.*
+ * ✅ **EL MENSAJE VA ENCIMA DEL BOTÓN — FIRMADO ASÍ (founder, 29-ago-2026).**
+ *
+ * El dictado original decía *«debajo del botón»*. El botón vive en
+ * `PieReserva`, que es **fijo al borde inferior**: **debajo de él no hay lugar
+ * donde algo pueda vivir**. Queda **inmediatamente encima**, y la mesa lo firmó
+ * con su razón: *cumple lo que la firma perseguía —**visible sin tocarlo**— y
+ * no vale romper el pie fijo por la letra.*
+ *
+ * 🔴 **Se escribe acá, y no sólo en un parte, para que nadie lo lea como un
+ * desvío pendiente de curar.** *Una divergencia firmada que vive únicamente en
+ * el reporte de quien la propuso vuelve como «defecto» en el próximo gate, y el
+ * que la encuentre no va a tener con qué defenderla.*
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
