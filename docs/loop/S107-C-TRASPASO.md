@@ -61,7 +61,7 @@
 ## ④ LOS HUECOS VIVOS
 
 1. 🔴 **El lector de estadías del lado de la FAMILIA — bloquea el log.** `obtenerEstadiasDelDia` **no sirve**: es del prestador, por día, y **filtra los holds a propósito**; la familia necesita ver su reserva **sin pagar**, que es la que tiene que ir a pagar. **Contrato exacto:** `docs/loop/S107-C-PEDIDO-A-A-LOG-FAMILIA.md`.
-2. 🟠 **`D-967`, mitad cliente.** `apps/cliente/src/lib/mapa-nativo.ts:106` sigue con **`= true` literal** y la sonda **no está portada** (`apps/cliente/modules/` no existe). 🔴 **NO se porta y se consume en el mismo acto:** en un binario sin el módulo la sonda daría `null` ⇒ fail-closed ⇒ **el mapa del cliente se apagaría hoy, donde funciona**. **Forma:** portar inerte, y flipear **cuando exista un binario de cliente que lo lleve**.
+2. 🟠 **`D-967`, mitad cliente — ⏪ MEDIO PAGADA (29-ago).** ✅ **La sonda YA ESTÁ PORTADA**, inerte y byte-idéntica (`apps/cliente/modules/sonda-manifest`; `diff -r` contra el prestador en cero). ❌ **El flip NO se hizo y no debe hacerse todavía:** en el binario instalado la sonda daría `null` ⇒ fail-closed ⇒ **apagaría el mapa donde funciona**. **Disparo del flip: el próximo binario de cliente que lleve el módulo**, verificado con `verify-manifest-apk` **sobre ESE APK**. El flip está escrito, listo para copiar, en la cabecera de `mapa-nativo.ts`. ⚠️ **La trampa, escrita ahí mismo:** *«si la sonda devuelve `null`, caigo al literal»* es **fail-OPEN con mejor nombre**.
 3. 🟠 **La baldosa a mano del Explorar del cliente.** No monta `Baldosa`: la dibuja a mano, así que las curas de la pieza no la alcanzan. **Decidí aplicar el guion blando y NO montar la pieza**, porque su anatomía ya divergió por firma (perdió descripción y chevron) y montarla reabriría dos decisiones recién tomadas. ⚠️ **La mesa la llamó `D-973`, pero medido: esa ficha NO existe en `DEUDAS_CANONICAS.md`** — quien la deposite **verifica el número libre por grep**.
 4. 🟠 **El acta (⑤)** — ⏪ **CORREGIDO (29-ago): sus wrappers YA EXISTEN.** `levantarActaGuarderia` y `confirmarActaGuarderia` están publicados, y `ActaDeEntrega` (B) tiene su `modo='leer'` con `onConformar`. **Lo único que falta es de dónde sacar el `actaId`** ⇒ lo trae el mismo lector del hueco 1 (`actaPendienteId`).
 5. 🔴 **La aceptación de documentos** — sin superficie; sus wrappers no existen en `packages/api` (aunque las RPC `obtener_documentos_guarderia` / `aceptar_documentos_guarderia` / `evaluar_documentos_guarderia` **sí están en la base**). Pedido: `S107-C-PEDIDO-A-A-DOCUMENTOS.md`.
@@ -90,6 +90,17 @@
 **② Por qué los labels llevan un guion invisible.** RN **no hifena español** y la pieza **no sabe silabificar** — dónde parte una palabra es propiedad del idioma. Medido: `Adiestramiento` son 14 caracteres de **una sola palabra** y **ningún tamaño de la escala** la hace entrar en los ~74 pt de una baldosa a tres columnas. ⚠️ **El guion es invisible en el editor: quien edite esas cadenas lo borra sin que nada avise.**
 
 **③ Por qué desconfiar del aparato antes que del repo.** Dos veces en esta sesión el founder vio algo que el código no decía, y **las dos veces el repo estaba bien y el bundle era viejo**. **El discriminador es el commit, no la discusión.** Y la lección propia (**`L-432`**): comparar tu rama contra `main` responde *qué cambiaste vos*, **no qué puede recibir el teléfono** — para eso la pregunta es si **existe binario para el runtime que `app.json` declara**.
+
+---
+
+**④ La clase de defecto que ningún gate ve, y que ya cobró dos veces acá.**
+**La incoherencia entre dos estados que sólo coinciden en pantalla.** Cada mitad es correcta por
+separado; el defecto **nace de mostrarlas juntas**, así que **no hay una línea que esté mal** y
+ningún typecheck, lint o test puede verlo. El peor caso del 29-ago: un vacío que prometía
+*«sus fotos sí las tienes acá abajo»* con *«no pudimos traer sus fotos»* **debajo, en la misma
+vista**. **La regla:** *un estado vacío habla SÓLO de lo suyo* — y el vacío es justo el momento
+en que las otras secciones también están fallando. **Se cazan recorriendo la pantalla y leyendo
+su texto entero** (`scripts/s107/recorrido-guarderia.mjs` lo hace).
 
 ---
 
