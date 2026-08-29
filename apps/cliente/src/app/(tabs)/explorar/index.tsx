@@ -239,7 +239,13 @@ export default function Explorar() {
                             interactiva
                             onPress={f.onPress}
                             accessibilityRole="button"
-                            etiqueta={t('explorar.entrarA', { servicio: f.titulo })}
+                            /* 🔴 El guion blando SE QUITA de la etiqueta
+                               accesible: sirve para partir un renglón, y acá
+                               no hay renglón que partir. *La mayoría de los
+                               lectores lo ignora, pero «la mayoría» no es una
+                               garantía cuando el costo de asegurarlo es un
+                               `replace`.* */
+                            etiqueta={t('explorar.entrarA', { servicio: f.titulo.replace(/\u00AD/g, '') })}
                           >
                             {contenido}
                           </Tarjeta>
