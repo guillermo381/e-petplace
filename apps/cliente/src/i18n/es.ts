@@ -2918,7 +2918,6 @@ export const clienteEs = {
   /* S107-C · EL DURANTE. **Los estados del motor en voz de familia** — el
      motor dice `retorno_en_curso`, la pantalla dice «viene camino a casa». */
   duranteGuarderia: {
-    titulo: 'Su día',
     reservada: 'Todavía no salieron a buscar a {{nombre}}.',
     recogidaEnCurso: 'Van en camino a buscar a {{nombre}}.',
     enGuarderia: '{{nombre}} está en la guardería.',
@@ -2927,7 +2926,7 @@ export const clienteEs = {
     noRecogida: 'No pudieron recoger a {{nombre}}.',
     cancelada: 'Esta estadía se canceló.',
     sinEstadoTitulo: 'Todavía no podemos decirte cómo va',
-    sinEstadoDetalle: 'No es que no esté pasando nada: no pudimos preguntar. Sus fotos sí las tienes acá abajo.',
+    sinEstadoDetalle: 'No es que no esté pasando nada: no pudimos preguntar. Prueba de nuevo en un momento.',
     dondeVa: 'Dónde va',
     sinPunto: 'Todavía no vemos dónde va. Te lo mostramos apenas salgan.',
     vistoA: 'Visto a las {{hora}}',

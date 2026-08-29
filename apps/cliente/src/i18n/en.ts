@@ -2151,7 +2151,6 @@ export const clienteEn = {
     continuar: 'Continue',
   },
   duranteGuarderia: {
-    titulo: 'Their day',
     reservada: 'They haven’t left to pick {{nombre}} up yet.',
     recogidaEnCurso: 'They’re on their way to pick {{nombre}} up.',
     enGuarderia: '{{nombre}} is at daycare.',
@@ -2160,7 +2159,7 @@ export const clienteEn = {
     noRecogida: 'They couldn’t pick {{nombre}} up.',
     cancelada: 'This stay was cancelled.',
     sinEstadoTitulo: 'We can’t tell you how it’s going yet',
-    sinEstadoDetalle: 'It’s not that nothing is happening: we couldn’t ask. Their photos are right below.',
+    sinEstadoDetalle: 'It’s not that nothing is happening: we couldn’t ask. Try again in a moment.',
     dondeVa: 'Where they are',
     sinPunto: 'We can’t see where they are yet. We’ll show you as soon as they leave.',
     vistoA: 'Seen at {{hora}}',

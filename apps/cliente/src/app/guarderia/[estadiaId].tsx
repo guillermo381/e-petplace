@@ -201,7 +201,11 @@ export default function DuranteGuarderia() {
       <Encabezado
         variante="navegacion"
         atras
-        titulo={params.mascotaNombre ?? t('duranteGuarderia.titulo')}
+        /* 🔴 SIN MASCOTA CAE A «Guardería», NO a «Su día» — el recorrido lo
+           destapó: el cabezal y la sección de fotos decían **la misma frase
+           dos veces en la misma pantalla**. *Chanel: si dice lo mismo, sobra
+           uno.* Y el que se queda es el de la sección, porque rotula algo. */
+        titulo={params.mascotaNombre ?? t('hubGuarderia.titulo')}
         onAtras={() => router.back()}
       />
 
