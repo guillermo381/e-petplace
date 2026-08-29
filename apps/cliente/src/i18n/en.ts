@@ -2140,6 +2140,7 @@ export const clienteEn = {
   },
   hubGuarderia: {
     titulo: 'Daycare',
+    cabezalDetalle: 'They pick him up, he spends the day, they bring him back.',
     queDia: 'Which day?',
     lugaresTitulo: 'Places with room that day',
     porDia: '${{precio}} per day',
@@ -2160,5 +2161,13 @@ export const clienteEn = {
     duracion: 'Between the two windows',
     exitoTitulo: 'Done! Your day is booked.',
     exitoDetalle: 'We’ll let you know when they head out to pick him up.',
+  },
+  logGuarderia: {
+    titulo: 'Daycare',
+    reservarDe: 'Book for {{nombre}}',
+    listaPendienteTitulo: 'We can’t show your stays yet',
+    listaPendienteDetalle: 'We’re finishing this part. In the meantime you can book from the button below.',
+    noCargoTitulo: 'We couldn’t load your pets',
+    noCargoDetalle: 'It’s not that you have none: we couldn’t ask. Try again.',
   },
 } as const satisfies Espejo<typeof clienteEs>;

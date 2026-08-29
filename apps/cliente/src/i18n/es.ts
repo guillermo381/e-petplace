@@ -2897,6 +2897,7 @@ export const clienteEs = {
   },
   hubGuarderia: {
     titulo: 'Guardería',
+    cabezalDetalle: 'Lo buscan, pasa el día y lo traen de vuelta.',
     queDia: '¿Qué día?',
     lugaresTitulo: 'Lugares con cupo ese día',
     porDia: '${{precio}} por día',
@@ -2917,5 +2918,15 @@ export const clienteEs = {
     duracion: 'Entre tus dos ventanas',
     exitoTitulo: '¡Listo! Tu día está reservado.',
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
+  },
+  logGuarderia: {
+    titulo: 'Guardería',
+    reservarDe: 'Reservar para {{nombre}}',
+    /* 🔴 No dice «no tienes estadías»: dice que todavía no podemos mostrarlas.
+       Lo primero sería mentir con cara de dato. */
+    listaPendienteTitulo: 'Todavía no podemos mostrarte tus estadías',
+    listaPendienteDetalle: 'Estamos terminando esta parte. Mientras tanto puedes reservar desde el botón de abajo.',
+    noCargoTitulo: 'No pudimos cargar tus mascotas',
+    noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
   },
 } as const;
