@@ -17,7 +17,6 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   Celda,
   Boton,
-  Chevron,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -207,11 +206,17 @@ export default function Explorar() {
                               mismo ocupando una fila de nada** — y *«toca para
                               entrar» le explica a alguien que ya sabe tocar
                               una tarjeta*. */}
-                          {f.onPress ? (
-                            <View style={{ alignItems: 'flex-end', marginTop: 2 }}>
-                              <Chevron direccion="derecha" />
-                            </View>
-                          ) : null}
+                          {/* ☠️ S107-C · EL CHEVRON SE RETIRÓ (firma del
+                              founder, con su razón medida): **quedaba en un
+                              lugar distinto en cada baldosa** porque el label
+                              ocupa distinta cantidad de líneas — «Adiestramiento»
+                              lo empujaba abajo y «Paseo» lo dejaba arriba.
+                              🔴 **Y no se pierde nada: que la tarjeta es
+                              tocable ya lo dice ser una tarjeta.** *Un
+                              indicador que se mueve solo llama la atención
+                              sobre sí mismo en vez de sobre lo que señala.*
+                              ⚠️ La etiqueta accesible **se queda**: sin texto
+                              ni chevron, es lo único que dice a dónde entra. */}
                         </View>
                       </View>
                     );

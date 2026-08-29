@@ -20,7 +20,7 @@
  * defecto que dejó «el paseo es para perros» con dos perros vivos.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,7 +30,8 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  SelectorOpcion,
+  FiltroMascotas,
+  SelectorDia,
   Texto,
   spacing,
   useTheme,
@@ -45,6 +46,8 @@ import { fechaDiaSemanaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+import { DiaSinHorarios } from '@/components/reserva-piezas';
 
 /** Fecha LOCAL. 🔴 Jamás `toISOString()`: en Guayaquil, después de las 19:00,
  *  devuelve el día siguiente. */
@@ -55,7 +58,9 @@ function iso(d: Date): string {
 type Mascotas =
   | { fase: 'cargando' }
   | { fase: 'error' }
-  | { fase: 'listo'; lista: Array<{ id: string; nombre: string }> };
+  /* 🔴 La mascota viaja con su CARA: `FiltroMascotas` la pinta, y era lo que
+     el chip de texto plano no podía mostrar. */
+  | { fase: 'listo'; lista: Array<{ id: string; nombre: string; fotoUrl?: string }> };
 
 type Lista =
   | { fase: 'ocioso' }
@@ -100,7 +105,14 @@ export default function HubGuarderia() {
         return;
       }
       const elegibles = ofrecibles(r.data, especies);
-      setMascotas({ fase: 'listo', lista: elegibles.map((m) => ({ id: m.id, nombre: m.nombre })) });
+      setMascotas({
+        fase: 'listo',
+        lista: elegibles.map((m) => ({
+          id: m.id,
+          nombre: m.nombre,
+          fotoUrl: caraDeMascotaPorRuta({ especie: m.especie, rutaImagen: m.foto_url }),
+        })),
+      });
       if (elegibles.length === 1) setMascotaId(elegibles[0].id);
     })();
     return () => {
@@ -128,11 +140,29 @@ export default function HubGuarderia() {
     };
   }, [mascotaId, fecha, intento]);
 
-  const dias = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1 + i);
-    return { codigo: iso(d), etiqueta: fechaDiaSemanaHumana(iso(d), idioma) };
-  });
+  /* `DiaOpcion = { iso, dia, numero }` — **día abreviado y número, separados**,
+     que es lo que deja al número grande y al día chico arriba. La prosa larga
+     no cabía porque era UNA sola cadena. */
+  const dias = useMemo(() => {
+    const corto = new Intl.DateTimeFormat(idioma, { weekday: 'short' });
+    return Array.from({ length: 14 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1 + i);
+      return {
+        iso: iso(d),
+        dia: corto.format(d).replace('.', '').toLowerCase(),
+        numero: String(d.getDate()),
+      };
+    });
+  }, [idioma]);
+
+  /** El día siguiente al elegido — la salida del vacío. `null` al final de la
+   *  tira: **sin día al que ir, no se ofrece un botón que no lleva a nada.** */
+  const siguienteDia = useMemo(() => {
+    const i = dias.findIndex((d) => d.iso === fecha);
+    const sig = i >= 0 ? dias[i + 1] : undefined;
+    return sig === undefined ? null : { iso: sig.iso, etiqueta: `${sig.dia} ${sig.numero}` };
+  }, [dias, fecha]);
 
   const alAtras = useCallback(() => router.back(), []);
 
@@ -162,24 +192,33 @@ export default function HubGuarderia() {
           />
         ) : (
           <>
+            {/* ⭐ S107-C · `FiltroMascotas`, LA PIEZA DE LA CASA. Antes acá
+                había un `SelectorOpcion` genérico: texto plano, sin cara y sin
+                el estado elegido que los otros cuatro oficios sí muestran.
+                **No era un chip mal configurado: era otro control.** */}
             {mascotas.lista.length > 1 ? (
-              <SelectorOpcion
-                etiqueta={t('hubGuarderia.paraQuien')}
-                acento="control"
-                disposicion="tira"
-                opciones={mascotas.lista.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
-                seleccionada={mascotaId ?? undefined}
-                onSelect={setMascotaId}
-              />
+              <View style={{ marginHorizontal: -spacing[5] }}>
+                <FiltroMascotas
+                  mascotas={mascotas.lista}
+                  elegida={mascotaId}
+                  onElegir={setMascotaId}
+                />
+              </View>
             ) : null}
 
-            <SelectorOpcion
-              etiqueta={t('hubGuarderia.queDia')}
-              acento="control"
-              disposicion="tira"
-              opciones={dias}
-              seleccionada={fecha}
-              onSelect={setFecha}
+            {/* ⭐ S107-C · `SelectorDia`, la misma tira que los cuatro.
+                Antes eran chips con la fecha en prosa larga —«Domingo, 30 de
+                agos»— que **se cortaban**: el texto no entraba y entraban dos.
+                La pieza de la casa resuelve la misma pregunta con **día
+                abreviado arriba y número grande**, y entran tres.
+                *La pregunta era la misma; la respuesta ya estaba escrita.* */}
+            <Texto variante="seccion">{t('hubGuarderia.queDia')}</Texto>
+            <SelectorDia
+              dias={dias}
+              elegido={fecha}
+              cerrados={new Set()}
+              etiquetaCerrado={t('hubGuarderia.diaCerrado')}
+              onElegir={setFecha}
             />
 
             <View style={{ gap: spacing[3] }}>
@@ -197,10 +236,15 @@ export default function HubGuarderia() {
                   descripcion={t('hubGuarderia.listaNoCargoDetalle')}
                 />
               ) : lista.fase === 'listo' && lista.lugares.length === 0 ? (
-                <EstadoVacio
-                  registro="seccion"
+                /* 🔴 EL VACÍO NO QUEDA MUDO: dice qué pasa **y ofrece la
+                    salida**, como el paseo. *Un vacío sin salida deja a la
+                    familia mirando una pantalla que no le propone nada* — y
+                    acá la salida es obvia: el cupo cambia todos los días. */
+                <DiaSinHorarios
                   titulo={t('hubGuarderia.sinLugaresTitulo')}
-                  descripcion={t('hubGuarderia.sinLugaresDetalle')}
+                  porque={t('hubGuarderia.sinLugaresDetalle')}
+                  etiquetaSalida={siguienteDia === null ? null : t('hubGuarderia.probarDia', { dia: siguienteDia.etiqueta })}
+                  onSalida={() => { if (siguienteDia !== null) setFecha(siguienteDia.iso); }}
                 />
               ) : lista.fase === 'listo' ? (
                 lista.lugares.map((g) => (

@@ -78,3 +78,43 @@
 ## ④ LO QUE NO HICE, Y ES LA ORDEN
 
 **No toqué una línea.** *La casa tenía la respuesta escrita y el trabajo era leerla* — y leerla dio un diagnóstico distinto del que yo habría «arreglado» a ojo: **habría cambiado el chip y la pantalla habría seguido sin parecerse, porque el problema no era el chip: era que construí el flujo donde va el log.**
+
+---
+---
+
+# ⑤ CENSO DEL FLUJO — el que el founder caminó, y el número es contundente
+
+**La casa tiene un MÓDULO de piezas de reserva.** Medido: `packages/ui` aporta **`SelectorDia`** y **`PieReserva`**; `apps/cliente/src/components/reserva-piezas.tsx` aporta **`CabezalOficio`**, **`GrillaElegir`** y **`DiaSinHorarios`**.
+
+| oficio | CabezalOficio | FiltroMascotas | SelectorDia | GrillaElegir | DiaSinHorarios | PieReserva |
+|---|---|---|---|---|---|---|
+| paseo | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| grooming | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| veterinaria | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| adiestramiento | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| 🔴 **guardería** | — | — | — | — | — | — |
+
+> ### **Guardería monta CERO de las seis.** *No es que las use distinto: no las usa.* Cada síntoma de la captura tiene su pieza esperando escrita.
+
+| lo que el founder vio | la pieza que ya existe |
+|---|---|
+| chips de texto plano, sin foto ni estado | **`FiltroMascotas`** |
+| fechas en prosa larga que se cortan | **`SelectorDia`** (`{iso, dia, numero}` — día abreviado y número **separados**, por eso el número puede ir grande) |
+| debajo, nada: ni vacío digno ni salida | **`DiaSinHorarios`** (`etiquetaSalida` + `onSalida`) |
+| sin barra inferior | **`PieReserva`** (`total`, `cuando`, `etiqueta`, `razonDeshabilitado`) |
+| título de tamaño desproporcionado | `Texto variante="seccion"`, como sus hermanas |
+
+**Por qué la prosa larga no entraba, medido:** era **UNA sola cadena** (`fechaDiaSemanaHumana` → *«Domingo, 30 de agosto»*). `DiaOpcion` la parte en **dos campos**, y por eso el día va chico arriba y el número grande abajo — **entran tres**.
+
+---
+
+# ⑥ EJECUTADO EN ESTA TANDA
+
+1. **`FiltroMascotas`** reemplaza al `SelectorOpcion` de mascotas, **con la cara** por `caraDeMascotaPorRuta`.
+2. **`SelectorDia`** reemplaza los chips de prosa larga.
+3. **`DiaSinHorarios`** reemplaza el vacío mudo, **con su salida**: *«Probar {día siguiente}»* — y **`null` si no hay día siguiente**, porque *un botón que no lleva a ningún lado es peor que su ausencia*.
+4. ☠️ **El chevron de las baldosas de Explorar, RETIRADO** (firma del founder): quedaba en distinta altura en cada una porque el label ocupa distintas líneas. **La etiqueta accesible se queda** — sin texto ni chevron, es lo único que dice a dónde entra.
+
+**Lo que falta y tiene dueño:** el **log** (pedido a A en `S107-C-PEDIDO-A-A-LOG-FAMILIA.md`) · la **mudanza del flujo** a `/explorar/guarderia/` con `CabezalOficio` y `PieReserva`.
+
+⚠️ **Y el riel de claves tipadas me cazó por segunda vez en dos tandas:** al borrar una clave huérfana, mi regex se llevó **la de veterinaria** en vez de la de guardería —el mismo nombre en dos namespaces— y **el typecheck lo dijo enseguida**. Restaurado y acotado al bloque correcto. *Dos veces el mismo instrumento y la misma clase de error: un nombre repetido entre namespaces.*
