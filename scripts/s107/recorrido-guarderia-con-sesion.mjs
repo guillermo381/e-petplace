@@ -72,6 +72,7 @@ const RUTAS = [
   ['/explorar/guarderia', 'ETAPA 1 · elegir cómo y cuándo'],
   [`/explorar/guarderia/disponibles?modalidad=dia&fecha=${FECHA}&mascotaId=${MASCOTA}`,
    'ETAPA 3 · QUIÉN PUEDE · ¿la vitrina presenta al prestador?'],
+  ['/guarderia/documentos', 'LOS DOCUMENTOS · donde la familia resuelve el rebote'],
 ];
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });

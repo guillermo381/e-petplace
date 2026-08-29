@@ -236,6 +236,19 @@ export default function LugarGuarderia() {
          el cupo cambió mientras miraba, el calendario tiene que decirlo. */
       setRebote(r.mensaje);
       setIntento((n) => n + 1);
+      /* ⭐ S107-C · **EL ÚNICO REBOTE QUE TIENE ADÓNDE IR.**
+         `documentos_sin_aceptar` no es un error: es **el paso anterior**, y
+         toda familia nueva lo recibe. *Nombrarlo fue la mitad de la cura —A lo
+         tipó y dejó de salir como «error inesperado»—; la otra mitad es que
+         lleve a donde se resuelve.*
+         🔴 **Los otros rebotes NO navegan a propósito:** `sin_cupo` y
+         `requisitos_sanitarios` se arreglan en esta misma pantalla o en el
+         carnet, y `documentos_no_disponibles` **no se arregla del lado de la
+         familia** — mandarla a una pantalla que va a decirle lo mismo sería
+         pasearla. */
+      if (r.codigo === 'documentos_sin_aceptar') {
+        router.push('/guarderia/documentos');
+      }
       return;
     }
     router.push({

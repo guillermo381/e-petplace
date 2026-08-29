@@ -218,6 +218,11 @@ export default function ElegirGuarderia() {
     (c: CausaSinGuarderias): string =>
       t(
         c === 'sin_cupo_ese_dia' ? 'elegirGuarderia.causaSinCupo'
+        /* ⭐ A la tipó como causa propia (29-ago). 🔴 **Su voz NO lleva «prueba
+           con otro día» pegado**: el día no es el problema — lo que la familia
+           no sabía es CUÁNDO sí abren. *Mandarla a mover el dedo sería
+           esconderle el dato que le falta.* */
+        : c === 'no_opera_ese_dia' ? 'elegirGuarderia.causaNoOpera'
         : c === 'nadie_vende_esa_modalidad' ? 'elegirGuarderia.causaSinModalidad'
         /* ④ Mapeada, **hoy inalcanzable**: sin `lat`/`lon` esa etapa no
            descarta a nadie y el server no puede devolverla. */
