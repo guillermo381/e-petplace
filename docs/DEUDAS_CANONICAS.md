@@ -23368,6 +23368,38 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
 
+#### D-968 — 🔴 EL GATE SANITARIO NACE APAGADO, Y **SE ENCIENDE ANTES DE LA SALIDA REAL**
+
+🔴 **ALTA · ENTRA AL CHECKLIST DE LANZAMIENTO.** Firma de la mesa, 29-ago-2026.
+
+**Lo que se apagó es el ENFORCEMENT, no la evaluación** — y la distinción es la ficha entera. `evaluar_requisitos_guarderia` **sigue midiendo todo**: carnet cargado, vigencia, y cada faltante con su código, su estado y su fecha. Lo configurable es **si la compuerta frena o informa**: `app_config.guarderia_gate_sanitario_duro`, que **nace en `false`**.
+
+Durante las pruebas el semáforo es **informativo**: una mascota con requisitos incompletos **puede reservar y pagar**, viendo qué le falta.
+
+> ### 🔴 **UN GATE APAGADO QUE NADIE RECUERDA ENCENDER ES PEOR QUE NO TENERLO — porque todos creen que está.**
+
+*Por eso esta ficha existe y por eso está en el checklist: no es una preferencia de configuración, es una promesa de seguridad que hoy no se cumple y que alguien tiene que cumplir en una fecha.*
+
+☠️ **Condición de muerte:** `guarderia_gate_sanitario_duro = true` **antes de la salida real**, y ahí pasa a ser restricción dura — *sin requisitos al día no se paga el servicio.* **Encenderlo es un `UPDATE`**, no una versión de la app.
+
+**Y su hermana, DEUDA ACEPTADA:** hoy la lista corre con **antirrábica**. El founder confirma con su veterinario **las anuales y los desparasitantes**, y se agregan **como dato** (`cat_plan_vacunal.exigida_guarderia`) cuando lleguen — *jamás cableadas.*
+
+**Dueño:** founder (la firma + la lista con su veterinario) + A (el `UPDATE`).
+
+#### D-969 — 🟠 CAMBIAR EL PASO DE UN RIEL PUEDE REESCRIBIR PRECIOS YA GUARDADOS, SIN UN SOLO ERROR
+
+🟠 **MEDIA. Hallazgo de C (29-ago-2026), curado por C en su tanda. Se ficha porque la CLASE vale más que el caso.**
+
+**El mecanismo:** un selector de precio con pasos discretos resolvía el valor guardado con **`indexOf`**. Si el precio guardado **no cae exactamente en la grilla nueva**, `indexOf` devuelve **`-1`**… y el consumo lo lee como **índice 0**: *el piso del rango.*
+
+> ### **Cambiar la PRESENTACIÓN de un riel reescribió el DATO — y sin un solo error.**
+
+**Por qué es de la familia cara:** no hay excepción, no hay log, no hay nada raro en pantalla. **El precio simplemente aparece siendo otro**, y el prestador lo guarda sin saber que cambió. *Un cambio que sólo iba a mover píxeles terminó moviendo plata.*
+
+☠️ **Curado por C** cayendo **al paso más cercano** en vez de al índice 0. **La regla que deja:** *todo control con pasos discretos que reciba un valor ya guardado declara qué hace cuando el valor no cae en la grilla — y «caer al primero» nunca es la respuesta.*
+
+**Dueño:** B (si la clase se repite en otra pieza con pasos). **Disparo:** el próximo riel con grilla que reciba valores persistidos.
+
 #### D-967 — ☠️ CURADA EN EL PRESTADOR · 🟠 DECLARADA EN EL CLIENTE (29-ago-2026) — `MAPA_NATIVO_DISPONIBLE` AFIRMABA SOBRE **UN** APARATO
 
 > ☠️ **CURADA EN `apps/prestador` (firma de la mesa, 29-ago).** El literal murió; ahora lo decide **la sonda nativa**:

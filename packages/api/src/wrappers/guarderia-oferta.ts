@@ -173,16 +173,43 @@ export async function obtenerEstadoGuarderia(
 }
 
 /** La oferta propia del prestador — lectura directa por RLS (`prestador_servicios_own`). */
+/**
+ * 🔴 DOS HUECOS QUE C MIDIÓ Y ESTA FORMA CIERRA — *el escritor avanzó y el
+ * lector no*, que es el modo de falla más caro de una migración de columna:
+ *
+ * ① **`precio` es NULLABLE desde el 29-ago** (el día dejó de ser obligatorio).
+ *    El lector exigía `typeof precio === 'number'` ⇒ **una oferta guardada sin
+ *    precio de día NO SE PODÍA VOLVER A LEER**: el prestador guardaba bien y
+ *    **la próxima vez su taller abría roto**. *Hoy no se veía porque C tapaba
+ *    el caso por accidente — y un defecto tapado por accidente es uno que
+ *    aparece el día que alguien destapa otra cosa.*
+ *
+ * ② **No devolvía `especies`.** Si el selector se montara contra este lector,
+ *    cargaría el default y **un prestador que guardó «solo perros» vería
+ *    perro+gato y al guardar sobrescribiría su elección — en silencio.**
+ *    *Un lector que omite un campo editable no muestra menos: hace que la
+ *    pantalla escriba de más.*
+ */
+export interface OfertaGuarderiaPropia {
+  prestadorServicioId: string;
+  /** `null` = **no ofrece día suelto**. Jamás 0: 0 sería «gratis». */
+  precio: number | null;
+  precioMensual: number | null;
+  jornadaMinutos: number;
+  activo: boolean;
+  /** Las que el prestador eligió, ya recortadas contra `{perro, gato}`. */
+  especies: string[];
+}
+
 export async function obtenerOfertaGuarderiaPropia(
   prestadorId: string,
 ): Promise<ResultadoWrapper<
-  { prestadorServicioId: string; precio: number; precioPaquete: number | null;
-    precioMensual: number | null; jornadaMinutos: number; activo: boolean } | null,
+  OfertaGuarderiaPropia | null,
   CodigoErrorGuarderiaOferta
 >> {
   const { data, error } = await getClient()
     .from('prestador_servicios')
-    .select('id, precio, precio_paquete, precio_mensual_plan, duracion_minutos, activo')
+    .select('id, precio, precio_mensual_plan, duracion_minutos, activo, especies_compatibles')
     .eq('prestador_id', prestadorId)
     .eq('tipo_servicio', 'guarderia_dia')
     .maybeSingle();
@@ -190,18 +217,18 @@ export async function obtenerOfertaGuarderiaPropia(
   /* null NO es un error: es «todavía no publicaste». La pantalla del prestador
      necesita distinguirlo de un fallo para poder ofrecer el camino de alta. */
   if (data === null) return { ok: true, data: null };
-  if (typeof data.precio !== 'number' || typeof data.duracion_minutos !== 'number') {
-    return fallaCodigo('datos_inconsistentes');
-  }
+  if (typeof data.duracion_minutos !== 'number') return fallaCodigo('datos_inconsistentes');
   return {
     ok: true,
     data: {
       prestadorServicioId: data.id,
-      precio: data.precio,
-      precioPaquete: data.precio_paquete,
+      precio: typeof data.precio === 'number' ? data.precio : null,
       precioMensual: data.precio_mensual_plan,
       jornadaMinutos: data.duracion_minutos,
       activo: data.activo,
+      especies: Array.isArray(data.especies_compatibles)
+        ? (data.especies_compatibles as string[])
+        : [],
     },
   };
 }
