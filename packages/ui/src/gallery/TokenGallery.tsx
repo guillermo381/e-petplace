@@ -6606,6 +6606,17 @@ function GaleriaInterna() {
    son cadenas de demostración, jamás la voz del producto. `R66` las exceptúa
    por vivir en la galería.
    ───────────────────────────────────────────────────────────────────────── */
+/* Los CINCO mundos REALES de la grilla de Negocio, con sus labels tal cual los
+   escribe el riel del prestador — **no un ejemplo corto**. Es la vara que la
+   mesa pidió: *«medí el resultado contra los cinco labels reales»*. */
+const MUNDOS_REALES = [
+  { g: 'paseo', t: 'Paseo', d: '3 activos', c: 'cuidado' },
+  { g: 'grooming', t: 'Grooming', d: '2 activos', c: 'cuidado' },
+  { g: 'training', t: 'Adiestramiento', d: '1 activo', c: 'cuidado' },
+  { g: 'veterinaria', t: 'Veterinaria', d: '4 activos', c: 'identidad' },
+  { g: 'guarderia', t: 'Guardería', d: undefined, c: 'cuidado' },
+] as const
+
 function PiezasDelOficioS107() {
   const { theme } = useTheme()
 
@@ -6847,21 +6858,30 @@ function PiezasDelOficioS107() {
       {/* ⑦ante · LA BALDOSA A DOS Y A TRES — el par que prueba la cura */}
       <View style={{ gap: spacing[2] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          Baldosa · `columnas` ahora es OBLIGATORIA sin default (19.9: el tsc obliga a decidirlo) ·
-          arriba la grilla de DOS con el glifo firmado por N7 (48) · abajo la de TRES con 32 —
-          derivado (48 × 2/3), no elegido a ojo. **Qué decide: que a tres el label RESPIRE**
+          Baldosa · `columnas` OBLIGATORIA sin default (19.9) · el glifo baja 48→32 y el aire 16→10,
+          los dos DERIVADOS de la misma proporción (×2/3), no elegidos a ojo · 🔴 **y el label se
+          PARTE, jamás se trunca: `D-576` ya registra «Adiestramiento trunca» como defecto que el
+          founder rechazó en dispositivo**
         </Text>
-        <View style={{ flexDirection: 'row' }}>
-          {(['paseo', 'veterinaria'] as const).map((g) => (
-            <View key={g} style={{ width: '50%', padding: spacing[1] }}>
-              <Baldosa glifo={g} titulo="Dos columnas" capa="cuidado" columnas={2} onPress={() => {}} />
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ LOS CINCO MUNDOS REALES, a DOS columnas (el caso firmado por N7)
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {MUNDOS_REALES.map((m) => (
+            <View key={m.t} style={{ width: '50%', padding: spacing[1] }}>
+              <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={2} onPress={() => {}} />
             </View>
           ))}
         </View>
-        <View style={{ flexDirection: 'row' }}>
-          {(['paseo', 'veterinaria', 'grooming'] as const).map((g) => (
-            <View key={g} style={{ width: '33.333%', padding: spacing[1] }}>
-              <Baldosa glifo={g} titulo="Tres columnas" capa="cuidado" columnas={3} onPress={() => {}} />
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ LOS MISMOS CINCO a TRES columnas — **qué decide: que ninguno trunque y que los dos que se
+          parten («Veterinaria» y «Adiestramiento») sigan diciendo QUÉ MUNDO SON**. El glifo ayuda:
+          es lo que identifica cuando el label se parte
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {MUNDOS_REALES.map((m) => (
+            <View key={m.t} style={{ width: '33.333%', padding: spacing[1] }}>
+              <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={3} onPress={() => {}} />
             </View>
           ))}
         </View>
