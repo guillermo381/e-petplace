@@ -23103,6 +23103,16 @@ export type Database = {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: Json
       }
+      obtener_resumen_guarderias: {
+        Args: {
+          p_fecha: string
+          p_lat?: number
+          p_lon?: number
+          p_mascota_id: string
+          p_modalidad: string
+        }
+        Returns: Json
+      }
       obtener_sedes_de_mis_citas: {
         Args: { p_prestador_ids: string[] }
         Returns: {

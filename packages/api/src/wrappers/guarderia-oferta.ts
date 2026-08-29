@@ -342,3 +342,77 @@ export async function obtenerGuarderiasDisponibles(params: {
   }
   return { ok: true, data: salida };
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL RESUMEN DEL FILTRO — cuántos, desde cuánto, y POR QUÉ no
+   ═══════════════════════════════════════════════════════════════════════════
+   Las tres cosas en UNA llamada: con ellas la pantalla pinta «desde $X»,
+   habilita o no el botón, y **dice por qué no puede**.
+   *Tres llamadas darían tres verdades de tres instantes distintos.*
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Por qué no hay lugares. **Sale de una cascada MEDIDA** (se relaja el filtro
+ * por etapas y se mira dónde cae a cero), no de una adivinanza.
+ *
+ * 🔴 `causa_indeterminada` **es honesta y se devuelve declarada** — antes que
+ * elegir la más plausible. *Un lector que miente sobre el porqué manda a la
+ * familia a cambiar lo que no era el problema.*
+ */
+export type CausaSinGuarderias =
+  | 'sin_cupo_ese_dia'
+  | 'nadie_vende_esa_modalidad'
+  | 'sin_cobertura'
+  | 'especie_sin_oferta'
+  | 'causa_indeterminada';
+
+export interface ResumenGuarderias {
+  /** Lugares que de verdad van a aparecer en la lista. */
+  cuantos: number;
+  /**
+   * El más bajo **entre esos**, para esa modalidad. `null` cuando no hay
+   * ninguno — 🔴 **jamás `0`, que se leería como GRATIS.**
+   *
+   * Se calcula DESPUÉS de filtrar por día, cupo, radio y especie: *un «desde
+   * $8» de un lugar que después no aparece promete de más.*
+   */
+  precioDesde: number | null;
+  /** `null` cuando SÍ hay lugares. Nunca vienen los dos. */
+  causa: CausaSinGuarderias | null;
+}
+
+export async function obtenerResumenGuarderias(params: {
+  modalidad: ModalidadGuarderia;
+  /** 'YYYY-MM-DD'. **Jamás hoy**: el motor rebota `fecha_no_ofertable`. */
+  fecha: string;
+  mascotaId: string;
+  lat?: number | null;
+  lon?: number | null;
+}): Promise<ResultadoWrapper<ResumenGuarderias, CodigoErrorGuarderiaOferta>> {
+  const { data, error } = await getClient().rpc('obtener_resumen_guarderias', {
+    p_modalidad: params.modalidad,
+    p_fecha: params.fecha,
+    p_mascota_id: params.mascotaId,
+    p_lat: params.lat ?? undefined,
+    p_lon: params.lon ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.cuantos !== 'number') return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: {
+      cuantos: r.cuantos,
+      precioDesde: typeof r.precioDesde === 'number' ? r.precioDesde : null,
+      causa: esCausa(r.causa) ? r.causa : null,
+    },
+  };
+}
+
+function esCausa(v: unknown): v is CausaSinGuarderias {
+  return (
+    v === 'sin_cupo_ese_dia' || v === 'nadie_vende_esa_modalidad' ||
+    v === 'sin_cobertura' || v === 'especie_sin_oferta' || v === 'causa_indeterminada'
+  );
+}

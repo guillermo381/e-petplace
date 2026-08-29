@@ -1530,6 +1530,9 @@ export {
   type MotivoNoPublicada,
   type GuarderiaDisponible,
   type ModalidadGuarderia,
+  obtenerResumenGuarderias,
+  type ResumenGuarderias,
+  type CausaSinGuarderias,
   type CodigoErrorGuarderiaOferta,
 } from './wrappers/guarderia-oferta';
 
