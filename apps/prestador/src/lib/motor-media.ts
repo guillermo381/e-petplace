@@ -89,20 +89,27 @@ export type PublicarMedia = (
   | { ok: false; codigo: string; mensaje: string }
 >;
 
-/**
- * El aviso, después de publicar.
- *
- * 🔴 **LA AGRUPACIÓN NO VIVE ACÁ, y la mesa lo ratificó** (contrato §④bis):
- * dos teléfonos subiendo media del mismo animal no coordinan un digest entre
- * ellos — *cada aparato sabe lo que él subió y nada más*, así que agrupar en el
- * cliente produce «1 foto nueva» tres veces, que es el «una push por foto» que
- * la firma prohíbe. **Agrupa el servidor.** La app solo declara el hecho.
- */
-export type AvisarMediaPublicada = (aviso: {
-  capturadaEn: string;
-  mascotaIds: string[];
-  tipo: 'foto' | 'clip';
-}) => Promise<void>;
+/* ☠️ ── AQUÍ VIVIÓ `AvisarMediaPublicada`, Y MURIÓ AL MEDIR SU PUERTA ──────
+   Este módulo tuvo un quinto punto de inyección: un `avisar` que la app
+   llamaba al publicar, para que el dueño se enterara.
+
+   **Medido el 29-ago, contra el objeto:** el productor del digest existe
+   (`encolar_resumen_media_guarderia`), **no recibe argumentos**, lo corre un
+   **cron cada 15 minutos** agrupando por (mascota, día) — y la migración
+   `20260829190000_s107a_digest_acl` **REVOCÓ `authenticated`** de esa función,
+   a propósito.
+
+   ⇒ **La app no tiene puerta, y no debe tenerla.** El disparo desde el cliente
+   no es que esté cerrado por ahora: **sobra**. Y sobra por la razón que este
+   mismo módulo venía escribiendo desde el censo — *dos teléfonos subiendo media
+   del mismo animal no pueden coordinar un digest entre ellos; agrupa el
+   servidor o no agrupa nadie*. **El servidor agrupa.** El cron ve la media de
+   todos los aparatos; esta app solo ve la suya.
+
+   ☠️ Se retira en vez de dejarse en `null`: *un puente que sobrevive a su río
+   manda al próximo a construir otro* (`L-395`). Quien busque acá el aviso, que
+   lo busque en el cron.
+   ── FIN DE LA LÁPIDA ─────────────────────────────────────────────────── */
 
 export interface DepsMotorMedia {
   prestadorId: string;
@@ -114,9 +121,6 @@ export interface DepsMotorMedia {
    *  `publicarMedia` **aún no**: medido el 28-ago — cero migraciones
    *  `guarderia_media`, cero wrappers). La cola guarda y lo dice. */
   publicar: PublicarMedia | null;
-  /** null = todavía no existe. El aviso NO frena la publicación: la media ya
-   *  está en el hilo del dueño. */
-  avisar?: AvisarMediaPublicada | null;
 }
 
 // ══════════════════ EL MOTOR ═══════════════════════════════════════════════
@@ -195,27 +199,6 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
         };
       }
 
-      // El aviso va DESPUÉS y no puede tumbar la publicación: si falla, la
-      // media ya está en el hilo del dueño y el ítem no debe volver a la cola
-      // (volvería a registrar, y eso sí duplicaría). Se registra y se sigue.
-      if (deps.avisar) {
-        try {
-          await deps.avisar({
-            capturadaEn: new Date(item.creadoEn).toISOString(),
-            mascotaIds: item.mascotaIds,
-            tipo: item.tipo,
-          });
-        } catch (e) {
-          console.error(`[motor-media] el aviso falló y NO frena la publicación · ${String(e)}`);
-        }
-      }
-
-      if (r.ya_existia) {
-        // No es un caso raro: es el camino feliz del reintento tras un timeout
-        // ambiguo. Se registra para que en el log se vea que la idempotencia
-        // trabajó — jamás como advertencia.
-        console.log(`[motor-media] ${item.tipo} ${item.id} ya estaba publicada · media=${r.mediaId}`);
-      }
       return { ok: true as const, mediaId: r.mediaId };
     },
   };

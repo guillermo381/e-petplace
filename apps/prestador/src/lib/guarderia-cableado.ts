@@ -21,9 +21,11 @@
  *     perdía.* El pedido entró tal cual.
  *  ✅ `guarderia_actas` con `UNIQUE (estadia_id, direccion)` y
  *     `levantar_acta_guarderia` devolviendo `ya_existia`.
- *  🔴 **El productor del digest NO existe**: `cat_notificacion_tipos` tiene
- *     **0 filas en categoría `resumen`** (medido dos veces, con main mergeado).
- *     ⇒ `avisar` **sigue en `null`, y esa es la decisión correcta**: ver abajo.
+  ✅ **El productor del digest ya vive** — tipo `guarderia_media_resumen`, cron
+ *     cada 15 min, y **4 cuentas sembradas en `in_app`** (la ① firmada, sin la
+ *     cual el aviso no le habría llegado a nadie **en silencio**).
+ *     ⇒ `avisar` **no se cableó: se RETIRÓ** — la app no tiene puerta ni debe
+ *     tenerla. Ver la lápida al pie.
  */
 
 import {
@@ -31,7 +33,7 @@ import {
   levantarActaGuarderia,
   registrarPuntoVivo,
 } from '@epetplace/api';
-import type { PublicarMedia, AvisarMediaPublicada } from './motor-media';
+import type { PublicarMedia } from './motor-media';
 import type { LevantarActa } from './cola-actas';
 import type { EmitirPunto } from './use-punto-vivo';
 
@@ -104,21 +106,25 @@ export function cablearEmitirPunto(): EmitirPunto {
   };
 }
 
-/**
- * ⑤ · El aviso — 🔴 **SIGUE EN `null`, Y NO POR OLVIDO.**
- *
- * Medido: **cero tipos en la categoría `resumen`** del catálogo de
- * notificaciones. El molde existe desde el día uno (nació para el volumen de
- * despensa) y **nunca tuvo productor**.
- *
- * **Por qué no se cablea igual «para que algo salga»:** sin el tipo de digest,
- * el único camino disponible sería mandar la media por `operacion` — que es
- * **una push por foto** (lo que la firma prohíbe) **y** consumir el techo de
- * `20/24 h` que necesitan las de tramo y acta, silenciando en el camino el
- * aviso de que el animal llegó a casa. *La opción «que salga algo» no es más
- * pobre que esperar: es peor que no avisar.*
- *
- * ⇒ Queda `null`. La cola publica igual —el aviso **nunca** frena la
- * publicación— y el dueño ve la media en el hilo cuando abre la app.
- */
-export const AVISAR_MEDIA: AvisarMediaPublicada | null = null;
+/* ☠️ ── EL QUINTO PUNTO NO SE CABLEÓ: SE RETIRÓ ──────────────────────────
+   `avisar` era el único que quedaba en `null`, y la orden era cablearlo.
+   **La medición dijo otra cosa, y se siguió la medición:**
+
+   · `encolar_resumen_media_guarderia()` — **sin argumentos**, DEFINER,
+     disparada por el **cron `resumen-media-guarderia` cada 15 min**;
+   · `20260829190000_s107a_digest_acl` **REVOCÓ `authenticated`** de ella.
+
+   ⇒ **No hay puerta desde la app, y es deliberado.** Cablear algo acá exigiría
+   pedir que se abra lo que A cerró a propósito — y para nada: el cron ya ve la
+   media de TODOS los aparatos, que es justo lo que un teléfono no puede.
+
+   **Las dos reglas que la mesa marcó, respetadas por CONSTRUCCIÓN y no por
+   cuidado:** el aviso no dice el número y diez fotos son un aviso — **porque
+   esta app no compone ninguna voz ni cuenta nada**. Lo hacen el encolado y el
+   dedup por (mascota, día). *La forma más segura de no escribir «3 fotos» es
+   no tener dónde escribirlo.*
+
+   ✅ Y la razón por la que el retiro es seguro: **la publicación nunca dependió
+   del aviso.** El motor publica y termina; el dueño ve la media en el hilo al
+   abrir, y el push llega por su cuenta cuando el cron pasa.
+   ── FIN DE LA LÁPIDA ─────────────────────────────────────────────────── */

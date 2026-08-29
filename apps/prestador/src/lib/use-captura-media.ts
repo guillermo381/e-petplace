@@ -47,7 +47,7 @@ import {
   type ItemMedia,
   type PesoMedido,
 } from './cola-media';
-import { crearMotorMedia, type PublicarMedia, type AvisarMediaPublicada } from './motor-media';
+import { crearMotorMedia, type PublicarMedia } from './motor-media';
 import {
   levantarActaLocal,
   procesarActas,
@@ -79,7 +79,6 @@ export interface OpcionesCapturaMedia {
   prestadorId: string;
   /** El wrapper de A. `null` mientras no exista: la cola guarda y lo dice. */
   publicar: PublicarMedia | null;
-  avisar?: AvisarMediaPublicada | null;
   /** El wrapper de actas de A. `null` mientras no exista: el acta se levanta
    *  igual, en la puerta, y viaja cuando haya con qué. */
   levantarActa?: LevantarActa | null;
@@ -133,7 +132,6 @@ export function useCapturaMedia(opciones: OpcionesCapturaMedia): CapturaMedia {
     bucketFoto: opciones.bucketFoto,
     bucketClip: opciones.bucketClip,
     publicar: opciones.publicar,
-    avisar: opciones.avisar,
   });
 
   const refrescar = useCallback(async () => {
