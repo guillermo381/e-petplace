@@ -115,8 +115,8 @@ export type IconoNombre =
    *  el tiempo.* **Las ondas se descartaron por precedente**, no por gusto:
    *  `contactoOndas` murió en su gate porque **§1 manda dibujar el OBJETO y
    *  «el alcance» es una idea** — y encima chocaba con `ayuda` a 21px. */
-  | 'certificacion' | 'certificacionSello'
-  | 'wearable' | 'wearableActividad'
+  | 'certificaciones' | 'certificacionesSello'
+  | 'wearables' | 'wearablesActividad'
   /** S100d-B — EL FILTRO, pedido por la pista C con su literal del founder
    *  (punto 2 del gate: *«buscador en el MISMO escalón que Filtrar, con
    *  ícono clásico de filtro»*) y con el registry censado antes de pedir:
@@ -665,17 +665,25 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
   // La jeringa protege; la huella verde es la vida cuidada (carnet).
-  /* A · CERTIFICACIÓN — el papel, y la huella como SELLO abajo-derecha.
-     El papel es rectángulo vertical con dos renglones cortos: se lee
-     «documento» sin ser `documento` (aquél lleva retrato) ni `carnet` (que
-     es placa, no hoja). El sello va donde va un sello y **es la huella**.
-     RIESGO DECLARADO: a 21px los dos renglones pueden empastarse con el
-     borde — si pasa, se van los renglones antes que el sello. */
-  certificacion: ({ tinta, huella }) => (
+  /* A · CERTIFICACIONES — la hoja con la esquina doblada, y **la huella como
+     SELLO**. Sin renglones.
+     ⏪ **LOS RENGLONES SE FUERON, y los mató un censo de C que yo no había
+     hecho:** su pedido avisaba *«si el papel que acredita ya tiene una forma
+     acá, el tercero no la reinventa»*, y el registry lo dice más fuerte en la
+     entrada de `fiscal`: **«el idioma "rectángulo con renglones" ya está
+     ocupado CINCO veces en este registry»**. *Mi primer dibujo era el sexto.*
+
+     ⇒ El diferenciador no puede ser el relleno del papel — tiene que ser
+     estructural, como el **dentado** de `fiscal` o el **retrato** de
+     `documento`. Acá es **el sello**, y el sello es la huella.
+     🔴 **Y la cura arregló DOS cosas de una:** los renglones eran también mi
+     propio riesgo declarado a 21px (*«pueden empastarse con el borde»*).
+     *Sacarlos despeja la colisión y el tamaño chico al mismo tiempo.* */
+  certificaciones: ({ tinta, huella }) => (
     <>
       <Path d="M5.4 2.8h9.4l4 4v14.4H5.4Z" {...trazo(tinta)} />
-      <Path d="M14.6 2.9v4.1h4M8.2 9.6h6M8.2 12.6h4.4" {...trazo(tinta)} />
-      <Huella color={huella} x={12.4} y={14.2} escala={0.4} />
+      <Path d="M14.6 2.9v4.1h4" {...trazo(tinta)} />
+      <Huella color={huella} x={11.4} y={13.4} escala={0.46} />
     </>
   ),
   /* B · CERTIFICACIÓN CON SELLO TROQUELADO — el mismo papel, pero el sello
@@ -684,12 +692,12 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
      🔴 RIESGO DECLARADO, y es el que decide el gate: **Ley 9 — a 21px la
      huella SOBREVIVE O ES RUIDO.** Metida dentro de un anillo tiene menos
      aire que en A, y puede empastarse en una mancha. Si eso pasa, gana A. */
-  certificacionSello: ({ tinta, huella }) => (
+  certificacionesSello: ({ tinta, huella }) => (
     <>
       <Path d="M5.4 2.8h9.4l4 4v14.4H5.4Z" {...trazo(tinta)} />
-      <Path d="M14.6 2.9v4.1h4M8.2 9.6h6" {...trazo(tinta)} />
-      <Circle cx={14.6} cy={16} r={3.9} {...trazo(tinta)} />
-      <Huella color={huella} x={12.6} y={14} escala={0.34} />
+      <Path d="M14.6 2.9v4.1h4" {...trazo(tinta)} />
+      <Circle cx={13.6} cy={15.6} r={4.2} {...trazo(tinta)} />
+      <Huella color={huella} x={11.5} y={13.5} escala={0.36} />
     </>
   ),
   /* A · WEARABLE — el dispositivo: cuerpo redondeado + dos tramos de correa,
@@ -698,7 +706,7 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
      RIESGO DECLARADO: la silueta se parece a un reloj, y un reloj puede
      leerse como «hora». Lo desambigua la huella adentro — que es
      exactamente lo que un reloj no tiene. */
-  wearable: ({ tinta, huella }) => (
+  wearables: ({ tinta, huella }) => (
     <>
       <Path d="M9 2.6h6l-.5 3.4M9 21.4h6l-.5-3.4M9.5 6h5" {...trazo(tinta)} />
       <Path d="M6.4 8.6a2 2 0 0 1 2-2h7.2a2 2 0 0 1 2 2v6.8a2 2 0 0 1-2 2H8.4a2 2 0 0 1-2-2Z" {...trazo(tinta)} />
@@ -712,7 +720,7 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
      saca («un corazón dice consulta»). Se dibuja igual porque la traza es
      lo único que dice «mide EN EL TIEMPO» siendo un objeto y no una idea;
      si a 21px se lee médica, gana A. */
-  wearableActividad: ({ tinta, huella }) => (
+  wearablesActividad: ({ tinta, huella }) => (
     <>
       <Path d="M9 2.6h6l-.5 3.4M9 21.4h6l-.5-3.4" {...trazo(tinta)} />
       <Path d="M6.4 8.6a2 2 0 0 1 2-2h7.2a2 2 0 0 1 2 2v6.8a2 2 0 0 1-2 2H8.4a2 2 0 0 1-2-2Z" {...trazo(tinta)} />
@@ -1830,14 +1838,14 @@ export function Icono({
        certificación es de esa familia — un papel que dice QUIÉN ES y para
        qué está habilitada. *No es `cuidado` como `training`: el curso es el
        servicio; el certificado es la condición que queda.* */
-    certificacion: identidad,
-    certificacionSello: identidad,
+    certificaciones: identidad,
+    certificacionesSello: identidad,
     /* WEARABLE → `identidad`, y **no se eligió: la casa ya lo tenía
        declarado**. `themes/light.ts` dice `services.wearable:
        palette.verdeVitalDark  // Capa 1 · monitoreo de vida`. Se lee de ahí
        (L-166) en vez de razonarlo de nuevo y arriesgar contradecirlo. */
-    wearable: identidad,
-    wearableActividad: identidad,
+    wearables: identidad,
+    wearablesActividad: identidad,
     // Las tres secciones de "Datos comerciales" comparten CAPA a
     // propósito: son la identidad del negocio ante el Estado y ante el
     // banco, y tres hermanas de la misma pantalla que divergieran de

@@ -594,6 +594,8 @@ export default function Negocio() {
                   {!sinPrestador && (
                     <View style={ESTILO_CELDA}>
                       <Baldosa
+                        /* Grilla de TRES (ESTILO_CELDA = 33.333%), como su hermana de arriba. */
+                        columnas={3}
                         glifo="despensa"
                         capa="consumo"
                         titulo={t('negocio.tiendaVitrina')}
@@ -618,6 +620,8 @@ export default function Negocio() {
                         glifo de inventario en el registry, y pedir uno se
                         firma (L-175), no se improvisa. */}
                     <Baldosa
+                      /* Grilla de TRES (ESTILO_CELDA = 33.333%), como su hermana de arriba. */
+                      columnas={3}
                       glifo="negocio"
                       capa="consumo"
                       titulo={t('negocio.tiendaLocal')}

@@ -4383,7 +4383,7 @@ function GaleriaInterna() {
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o) => (
                   <View key={o.t} style={{ width: 190 }}>
-                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} onPress={() => {}} />
+                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} columnas={2} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -4398,7 +4398,7 @@ function GaleriaInterna() {
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o, i) => (
                   <View key={o.g} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
-                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} orden={i} onPress={() => {}} />
+                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} columnas={2} orden={i} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -4420,7 +4420,7 @@ function GaleriaInterna() {
                   { g: 'paseo', t: 'Paseo de una hora con nombre largo', c: 'cuidado', d: '3 activos' },
                 ] as const).map((o) => (
                   <View key={o.t} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
-                    <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} onPress={() => {}} />
+                    <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} columnas={2} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -6844,6 +6844,29 @@ function PiezasDelOficioS107() {
         />
       </View>
 
+      {/* ⑦ante · LA BALDOSA A DOS Y A TRES — el par que prueba la cura */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          Baldosa · `columnas` ahora es OBLIGATORIA sin default (19.9: el tsc obliga a decidirlo) ·
+          arriba la grilla de DOS con el glifo firmado por N7 (48) · abajo la de TRES con 32 —
+          derivado (48 × 2/3), no elegido a ojo. **Qué decide: que a tres el label RESPIRE**
+        </Text>
+        <View style={{ flexDirection: 'row' }}>
+          {(['paseo', 'veterinaria'] as const).map((g) => (
+            <View key={g} style={{ width: '50%', padding: spacing[1] }}>
+              <Baldosa glifo={g} titulo="Dos columnas" capa="cuidado" columnas={2} onPress={() => {}} />
+            </View>
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row' }}>
+          {(['paseo', 'veterinaria', 'grooming'] as const).map((g) => (
+            <View key={g} style={{ width: '33.333%', padding: spacing[1] }}>
+              <Baldosa glifo={g} titulo="Tres columnas" capa="cuidado" columnas={3} onPress={() => {}} />
+            </View>
+          ))}
+        </View>
+      </View>
+
       {/* ⑦pre · LA HOJA DE CONTACTO DE LOS DOS GLIFOS NUEVOS (§6b) */}
       <View style={{ gap: spacing[3] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
@@ -6853,22 +6876,23 @@ function PiezasDelOficioS107() {
 
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
           CERTIFICACIÓN · qué decide: que se lea «la acreditada es LA MASCOTA» y no «alguien ganó un
-          premio». A = huella como sello · B = sello troquelado (anillo) con la huella adentro — su
-          riesgo es Ley 9: menos aire, puede empastarse en una mancha
+          premio». A = hoja + huella-sello · B = sello troquelado (anillo) con la huella adentro — su riesgo es
+          Ley 9: menos aire, puede empastarse en una mancha · ⏪ los RENGLONES se fueron: el idioma
+          «rectángulo con renglones» ya está ocupado CINCO veces (lo dice `fiscal`)
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
-          <Icono nombre="certificacion" tamano={44} />
-          <Icono nombre="certificacionSello" tamano={44} />
-          <Icono nombre="certificacion" tamano={21} />
-          <Icono nombre="certificacionSello" tamano={21} />
+          <Icono nombre="certificaciones" tamano={44} />
+          <Icono nombre="certificacionesSello" tamano={44} />
+          <Icono nombre="certificaciones" tamano={21} />
+          <Icono nombre="certificacionesSello" tamano={21} />
         </View>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
           ↓ a 21px CONTRA SUS VECINOS DE PAPEL — es donde se ve si colisiona: documento · carnet ·
           descargar · copiar
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-          <Icono nombre="certificacion" tamano={21} />
-          <Icono nombre="certificacionSello" tamano={21} />
+          <Icono nombre="certificaciones" tamano={21} />
+          <Icono nombre="certificacionesSello" tamano={21} />
           <Icono nombre="documento" tamano={21} />
           <Icono nombre="carnet" tamano={21} />
           <Icono nombre="descargar" tamano={21} />
@@ -6881,18 +6905,18 @@ function PiezasDelOficioS107() {
           veto mismo: una traza puede leerse como ECG, o sea clínica
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
-          <Icono nombre="wearable" tamano={44} />
-          <Icono nombre="wearableActividad" tamano={44} />
-          <Icono nombre="wearable" tamano={21} />
-          <Icono nombre="wearableActividad" tamano={21} />
+          <Icono nombre="wearables" tamano={44} />
+          <Icono nombre="wearablesActividad" tamano={44} />
+          <Icono nombre="wearables" tamano={21} />
+          <Icono nombre="wearablesActividad" tamano={21} />
         </View>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
           ↓ a 21px contra los vecinos que el censo marcó como riesgo: carnet (placa colgante) y paseo
           (el lazo del collar) — por eso el objeto NO es una placa de collar
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-          <Icono nombre="wearable" tamano={21} />
-          <Icono nombre="wearableActividad" tamano={21} />
+          <Icono nombre="wearables" tamano={21} />
+          <Icono nombre="wearablesActividad" tamano={21} />
           <Icono nombre="carnet" tamano={21} />
           <Icono nombre="paseo" tamano={21} />
           <Icono nombre="veterinaria" tamano={21} />

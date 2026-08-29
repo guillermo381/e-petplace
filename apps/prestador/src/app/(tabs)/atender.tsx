@@ -356,6 +356,8 @@ export default function Atender() {
             <View style={ESTILO_GRILLA}>
               <View style={ESTILO_CELDA}>
                 <Baldosa
+                  /* Grilla de DOS (ESTILO_CELDA = 50%): el glifo va a 48, el firmado por N7. */
+                  columnas={2}
                   glifo="despensa"
                   titulo={t('atender.ventaTitulo')}
                   capa="consumo"
@@ -513,6 +515,8 @@ export default function Atender() {
                   {capacidad.oficios.map((o, i) => (
                     <View key={o.oficio} style={ESTILO_CELDA}>
                       <Baldosa
+                        /* Grilla de DOS (ESTILO_CELDA = 50%): el glifo va a 48, el firmado por N7. */
+                        columnas={2}
                         glifo={GLIFO_OFICIO[o.oficio]}
                         titulo={t(KEY_OFICIO[o.oficio])}
                         detalle={datoDelDia(o.oficio)}
@@ -627,6 +631,8 @@ export default function Atender() {
                 <View style={ESTILO_GRILLA}>
                   <View style={ESTILO_CELDA}>
                     <Baldosa
+                      /* Grilla de DOS (ESTILO_CELDA = 50%): el glifo va a 48, el firmado por N7. */
+                      columnas={2}
                       glifo="despensa"
                       titulo={t('atender.ventaTitulo')}
                       capa="consumo"

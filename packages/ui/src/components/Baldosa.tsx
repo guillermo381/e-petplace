@@ -125,14 +125,30 @@ export type BaldosaProps = {
    *  servicios activos"). Default: el título. */
   etiquetaA11y?: string
   /**
-   * Cuántas baldosas entran por fila donde ésta se monta. **Default 2**, que
-   * es el caso firmado (N7) y deja intacto todo consumidor existente.
+   * Cuántas baldosas entran por fila donde ésta se monta.
+   *
+   * 🔴 **OBLIGATORIA, SIN DEFAULT — firma de mesa, S107.** Y la enmienda es
+   * contra el razonamiento de su propio autor: nació como `columnas = 2` «para
+   * dejar intacto a todo consumidor existente», **y eso es exactamente lo que
+   * la volvió silenciosa para el consumidor NUEVO** — la grilla de tres de
+   * Negocio siguió con el glifo de 48 porque nadie le dijo nada, y *un glifo
+   * grande de más no lanza, no rompe el build y no sale en ningún gate: se ve,
+   * y sólo si alguien mira.*
+   *
+   * **La casa ya tenía la regla y no se fue a buscar** (19.9): *«la prop de
+   * identidad va OBLIGATORIA sin default — el tsc obliga a decidirlo»*, con su
+   * precedente `capa=` en `CabezalOficio`, donde **la primera consumidora real
+   * probó que sin declararla el clon salía teal.** Mismo caso, mismo desenlace.
+   *
+   * ⇒ **Que rompa el typecheck ES el punto:** convierte un defecto invisible en
+   * un error de compilación, y obliga a cada grilla a declarar cuántas
+   * columnas tiene.
    *
    * 🔴 Sólo modula **el tamaño del glifo** — ver `LADO_GLIFO`. **No decide el
    * ancho**: eso lo pone el contenedor, y una pieza que se auto-anchara
    * pelearía con su grilla.
    */
-  columnas?: 2 | 3
+  columnas: 2 | 3
 }
 
 export function Baldosa({
@@ -142,7 +158,7 @@ export function Baldosa({
   capa,
   onPress,
   orden,
-  columnas = 2,
+  columnas,
   etiquetaA11y,
 }: BaldosaProps) {
   const { theme } = useTheme()
