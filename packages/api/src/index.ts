@@ -1529,6 +1529,7 @@ export {
   type EstadoGuarderiaCompleto,
   type MotivoNoPublicada,
   type GuarderiaDisponible,
+  type ModalidadGuarderia,
   type CodigoErrorGuarderiaOferta,
 } from './wrappers/guarderia-oferta';
 

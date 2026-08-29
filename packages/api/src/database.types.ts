@@ -20993,13 +20993,15 @@ export type Database = {
         Returns: boolean
       }
       _guarderia_ofertas_cobrables: {
-        Args: { p_mascota_id: string }
+        Args: { p_mascota_id: string; p_modalidad?: string }
         Returns: {
           ciudad: string
           direccion: string
           jornada_minutos: number
+          modalidad: string
           precio: number
           precio_mensual: number
+          precio_modalidad: number
           precio_paquete: number
           prestador_id: string
           prestador_nombre: string
@@ -22720,14 +22722,17 @@ export type Database = {
           p_lat?: number
           p_lon?: number
           p_mascota_id: string
+          p_modalidad?: string
         }
         Returns: {
           ciudad: string
           direccion: string
           disponible: number
           jornada_minutos: number
+          modalidad: string
           precio: number
           precio_mensual: number
+          precio_modalidad: number
           precio_paquete: number
           prestador_id: string
           prestador_nombre: string

@@ -266,7 +266,20 @@ export default function CuandoGuarderia() {
                        que puede recibirla es un lugar que puede recibirla. La
                        sobreventa es problema operativo del prestador. */
                     subtitulo={g.ciudad ?? undefined}
-                    metadataMono={t('hubGuarderia.porDia', { precio: g.precio.toFixed(2) })}
+                    /* ✏️ CRUCE DECLARADO (A, S107): `precio` pasó a NULLABLE —
+                       el día suelto dejó de ser obligatorio, así que hay lugares
+                       que venden sólo paquete o sólo mensualidad. **Sin precio de
+                       día no se escribe un `$0,00`**, que se leería como gratis:
+                       se muestra el precio de la MODALIDAD que el server ya
+                       resolvió, y si tampoco lo hay, no se pinta nada.
+                       *Un hueco honesto es mejor que un número inventado (Ley 13).* */
+                    metadataMono={
+                      typeof g.precioModalidad === 'number'
+                        ? t('hubGuarderia.porDia', { precio: g.precioModalidad.toFixed(2) })
+                        : typeof g.precio === 'number'
+                          ? t('hubGuarderia.porDia', { precio: g.precio.toFixed(2) })
+                          : undefined
+                    }
                     /* 🔴 La mascota VIAJA: sin ella el lugar no puede evaluar
                        el gate sanitario, y una pantalla que no puede evaluarlo
                        no puede ofrecer reservar. */

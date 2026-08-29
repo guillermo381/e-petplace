@@ -84,11 +84,37 @@ export interface OfertaGuarderiaPublicada {
   capacidadDia: number;
 }
 
+/**
+ * Las tres formas de contratar guardería. **Vocabulario cerrado y compartido**
+ * con el motor (`obtener_guarderias_disponibles` rebota `modalidad_invalida`).
+ *
+ * 🔴 **`hotel` NO está y no se agrega de paso:** la noche es otro servicio con
+ * su propia letra (`LETRA_GUARDERIA` §5). *Meterla acá convertiría una custodia
+ * diurna en una pernoctación sin que nadie lo decidiera.*
+ */
+export type ModalidadGuarderia = 'dia' | 'paquete' | 'mensual';
+
+/** Guard de forma: el server manda texto, y un texto no es una unión. */
+function esModalidad(v: unknown): v is ModalidadGuarderia {
+  return v === 'dia' || v === 'paquete' || v === 'mensual';
+}
+
 export interface GuarderiaDisponible {
   prestadorId: string;
   prestadorServicioId: string;
   prestadorNombre: string;
-  precio: number;
+  /**
+   * El precio del DÍA SUELTO.
+   * 🔴 **`null` desde S107: el día dejó de ser obligatorio** (firma de la mesa,
+   * `chk_precio_obligatorio_salvo_guarderia`). Un lugar puede vender **sólo
+   * paquete** o **sólo mensualidad**.
+   *
+   * ⏪ Acá decía `number`, y el lector de abajo rebotaba la lista ENTERA con
+   * `datos_inconsistentes` si un solo lugar no tenía precio de día. *El motor
+   * se curó y el wrapper lo habría rechazado un piso más arriba* — el mismo
+   * defecto, en la otra punta del cable.
+   */
+  precio: number | null;
   /** null = este lugar no ofrece paquete. **Jamás cae al precio del día.** */
   precioPaquete: number | null;
   /** null = este lugar no ofrece mensualidad. */
@@ -100,6 +126,14 @@ export interface GuarderiaDisponible {
   disponible: number;
   /** El lugar bajó su capacidad por debajo de lo prometido — lo declara, no cancela. */
   sobrevendido: boolean;
+  /** La modalidad con la que se preguntó. `null` = se preguntó sin filtrar. */
+  modalidad: ModalidadGuarderia | null;
+  /**
+   * 🔴 **El precio DE ESA MODALIDAD, ya resuelto por el server.**
+   * La pantalla NO elige entre los tres: si eligiera, podría mostrar uno y
+   * cobrar otro. `null` cuando se preguntó sin modalidad.
+   */
+  precioModalidad: number | null;
 }
 
 export async function definirOfertaGuarderia(params: {
@@ -248,12 +282,26 @@ export async function obtenerGuarderiasDisponibles(params: {
   mascotaId: string;
   lat?: number | null;
   lon?: number | null;
+  /**
+   * 🔴 **LA MODALIDAD ES UN FILTRO** (firma del founder, S107): la familia
+   * elige Día · Paquete · Mensual **antes** de ver lugares, y esto devuelve
+   * los que ofrecen ESA modalidad, con su precio ya resuelto.
+   *
+   * **Qué significa `fecha` según la modalidad:** para `dia` y `paquete` es el
+   * PRIMER día a agendar; para `mensual`, el día de INICIO del período.
+   *
+   * Omitirla = *«el lugar ofrece algo»* — el comportamiento anterior, para que
+   * ninguna pantalla se rompa por este cambio. *Un contrato que obliga a mover
+   * dos piezas a la vez es cómo se rompe una pantalla en producción.*
+   */
+  modalidad?: ModalidadGuarderia | null;
 }): Promise<ResultadoWrapper<GuarderiaDisponible[], CodigoErrorGuarderiaOferta>> {
   const { data, error } = await getClient().rpc('obtener_guarderias_disponibles', {
     p_fecha: params.fecha,
     p_mascota_id: params.mascotaId,
     p_lat: params.lat ?? undefined,
     p_lon: params.lon ?? undefined,
+    p_modalidad: params.modalidad ?? undefined,
   });
   if (error) return fallo(error.message);
   if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
@@ -264,7 +312,13 @@ export async function obtenerGuarderiasDisponibles(params: {
     if (typeof r.prestador_id !== 'string' || typeof r.prestador_servicio_id !== 'string') {
       return fallaCodigo('datos_inconsistentes');
     }
-    if (typeof r.precio !== 'number' || typeof r.jornada_minutos !== 'number') {
+    /* 🔴 `precio` YA NO SE EXIGE: puede ser `null` (solo-paquete / solo-mensual).
+       Lo que sí se exige es que, si viene, sea un número — un string acá sería
+       un dato roto, y eso sigue siendo `datos_inconsistentes`. */
+    if (r.precio !== null && typeof r.precio !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.jornada_minutos !== 'number') {
       return fallaCodigo('datos_inconsistentes');
     }
     if (typeof r.disponible !== 'number' || typeof r.sobrevendido !== 'boolean') {
@@ -274,7 +328,7 @@ export async function obtenerGuarderiasDisponibles(params: {
       prestadorId: r.prestador_id,
       prestadorServicioId: r.prestador_servicio_id,
       prestadorNombre: typeof r.prestador_nombre === 'string' ? r.prestador_nombre : '',
-      precio: r.precio,
+      precio: typeof r.precio === 'number' ? r.precio : null,
       precioPaquete: typeof r.precio_paquete === 'number' ? r.precio_paquete : null,
       precioMensual: typeof r.precio_mensual === 'number' ? r.precio_mensual : null,
       jornadaMinutos: r.jornada_minutos,
@@ -282,6 +336,8 @@ export async function obtenerGuarderiasDisponibles(params: {
       ciudad: typeof r.ciudad === 'string' ? r.ciudad : null,
       disponible: r.disponible,
       sobrevendido: r.sobrevendido,
+      modalidad: esModalidad(r.modalidad) ? r.modalidad : null,
+      precioModalidad: typeof r.precio_modalidad === 'number' ? r.precio_modalidad : null,
     });
   }
   return { ok: true, data: salida };
