@@ -72,6 +72,7 @@ import {
 import { obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { PieReserva } from '@/components/reserva-piezas';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
@@ -98,6 +99,7 @@ export default function LugarGuarderia() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ precio?: string }>();
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
     mascotaId?: string;
@@ -215,6 +217,17 @@ export default function LugarGuarderia() {
 
   /** Lunes = columna 0. `getDay()` da domingo=0, así que se corre. */
   const columnaInicial = (primeroDelMes.getDay() + 6) % 7;
+
+  /** El precio viaja desde la lista: la familia ve lo que va a pagar **antes**
+   *  de tocar. `null` = no llegó, y entonces el pie no monta bloque de precio
+   *  — *jamás un número inventado.* */
+  const precioTexto =
+    typeof params.precio === 'string' && params.precio.length > 0 ? params.precio : null;
+  /* 🔴 Se estrecha por FASE antes de mirar `requisitos`: mientras carga no hay
+     nada que decidir, y el pie sólo existe con la pantalla lista. */
+  const req = estado.fase === 'listo' ? estado.requisitos : null;
+  const puedeReservar =
+    elegido !== null && req !== null && !(req.bloquea && !req.alDia);
 
   const alAtras = useCallback(() => router.back(), [router]);
 
@@ -400,42 +413,37 @@ export default function LugarGuarderia() {
           </View>
         ) : null}
 
-        {/* ── RESERVAR ── */}
-        <View style={{ gap: spacing[2] }}>
-          {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-          <Boton
-            etiqueta={t('lugarGuarderia.reservar')}
-            bloque
-            cargando={reservando}
-            /* 🔴 EL GATE REFLEJA AL SERVER, NO LO DECIDE — y ahora la perilla
-               viaja DENTRO de la evaluación (`bloquea`), así que **es la misma
-               pantalla en los dos modos**: no hay rama nueva, hay un dato más
-               en la condición.
-               *Y el mismo `bloquea` lo lee `reservar_dia_guarderia`, así que
-               esta puerta nunca se abre para chocar contra otra.* */
-            deshabilitado={
-              elegido === null ||
-              estado.requisitos === null ||
-              (estado.requisitos.bloquea && !estado.requisitos.alDia)
-            }
-            onPress={() => void reservar()}
-          />
-          {/* 🔴 EL MISMO FALTANTE, DOS TONOS — y la diferencia es de trato, no
-              de información: **con el bloqueo encendido frena** y hay que
-              decirlo; **apagado, se dice sin frenar y sin drama.** *Le falta
-              algo y lo puede resolver: no está haciendo nada malo, y una voz
-              de alarma sobre algo que no impide nada enseña a ignorar las
-              alarmas que sí importan.* El camino a cargarlo sigue a un toque
-              en los dos modos — la pieza no compila un faltante sin camino. */}
-          {estado.requisitos !== null && !estado.requisitos.alDia ? (
-            <Texto variante="apoyo">
-              {estado.requisitos.bloquea
-                ? t('lugarGuarderia.bloqueadoPorRequisitos')
-                : t('lugarGuarderia.faltaSinFrenar')}
-            </Texto>
-          ) : null}
-        </View>
       </ScrollView>
+
+      {/* ── RESERVAR — ⏪ **ESTABA AL FINAL DEL SCROLL Y NO SE VEÍA.**
+             Medido con sesión real el 29-ago: el CTA caía en **y=1007 sobre una
+             pantalla de 932** ⇒ *había que scrollear para descubrir que se
+             podía reservar*, y el founder lo leyó como «el botón no está
+             montado». **Sus cuatro hermanas usan `PieReserva`**, que es fijo al
+             borde inferior; ésta era la única que no.
+             *No era un defecto de estilo: una acción que hay que buscar es una
+             acción que no existe para quien no la busca.* ── */}
+      <View style={{ paddingHorizontal: spacing[5] }}>
+        {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
+      </View>
+      {estado.fase === 'listo' ? (
+      <PieReserva
+        total={precioTexto}
+        etiqueta={t('lugarGuarderia.reservar')}
+        habilitado={puedeReservar}
+        insetBottom={insets.bottom}
+        /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una
+           palabra. *Una pared muda le hace creer a la familia que el producto
+           está roto, cuando lo único que falta es que toque un día.* */
+        razonDeshabilitado={
+          elegido === null
+            ? t('lugarGuarderia.faltaDia')
+            : t('lugarGuarderia.faltaRequisitos')
+        }
+        onPress={() => void reservar()}
+      />
+      ) : null}
+
     </View>
   );
 }

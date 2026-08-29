@@ -2107,6 +2107,8 @@ export const clienteEn = {
     pedirDeNuevo: 'Request it again',
   },
   lugarGuarderia: {
+    faltaDia: 'Pick a day on the calendar.',
+    faltaRequisitos: 'Something the daycare requires is still missing.',
     titulo: 'Daycare',
     franjasTitulo: 'When they pick up and drop off',
     recogida: 'They pick up',

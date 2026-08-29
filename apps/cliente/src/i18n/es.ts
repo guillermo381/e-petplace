@@ -2864,6 +2864,10 @@ export const clienteEs = {
      🔴 La sobreventa NO tiene voz acá a propósito (firma de la mesa): para
      la familia un día sin lugar es un día sin lugar. */
   lugarGuarderia: {
+    /* El CTA apagado DICE qué falta: una pared muda hace creer que el
+       producto está roto cuando sólo falta tocar un día. */
+    faltaDia: 'Elige un día en el calendario.',
+    faltaRequisitos: 'Falta lo que la guardería pide para recibirlo.',
     titulo: 'La guardería',
     franjasTitulo: 'Cuándo pasan y cuándo lo traen',
     recogida: 'Pasan a buscarlo',
