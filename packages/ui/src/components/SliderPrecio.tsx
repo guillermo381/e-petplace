@@ -145,15 +145,60 @@ export function SliderPrecio({
   // gestos en JS y jamás lo delató (Ley 9). runOnJS(true) es el contrato
   // honesto del componente: el thumb se mueve por ESTADO (indice→render),
   // no hay animación de UI-thread que justifique worklets.
-  const pan = Gesture.Pan()
-    .minDistance(0)
+  /* ═══════════════════════════════════════════════════════════════════════
+     🔴 S107-B · POR QUÉ EL PRECIO SE MOVÍA SOLO — y no era «sensibilidad».
+     ═══════════════════════════════════════════════════════════════════════
+     **La causa, leída del código y no supuesta:** `.minDistance(0)` +
+     `onBegin(irA(...))` ⇒ **el valor se fijaba en el TOUCH-DOWN**, antes de
+     que el dedo se moviera un píxel. Y desplazar una pantalla larga EMPIEZA
+     con un touch-down: si cae sobre el riel, el precio ya cambió.
+
+     *No hacía falta arrastrar para romperlo: alcanzaba con apoyar el dedo.*
+     Por eso «bajarle la sensibilidad» no lo habría curado — no había gesto
+     que suavizar; había un compromiso tomado antes de que hubiera gesto.
+
+     ── LA CURA: DOS GESTOS QUE HACEN DOS COSAS ──────────────────────────
+     · **TAP** — poner el valor donde tocaste. Es deliberado, y **se cancela
+       solo si el dedo se mueve** (el slop del tap), que es justo lo que pasa
+       cuando alguien empieza a desplazar.
+     · **PAN** con `activeOffsetX` — **no se activa hasta que hay recorrido
+       HORIZONTAL**, y `failOffsetY` lo hace **RENDIRSE ante el scroll
+       vertical**: si el dedo arranca hacia abajo, el gesto falla y la lista
+       se lleva el movimiento.
+
+     **`failOffsetY` es la mitad que no se puede omitir:** sin él, un arrastre
+     mayormente vertical con algo de deriva lateral **igual activa el pan** —
+     y el precio se mueve mientras alguien creía estar scrolleando.
+
+     ⚠️ `.runOnJS(true)` se conserva en LOS DOS: es el contrato honesto que la
+     cura de S58 dejó escrito (un callback workletizado llamando `indiceDesdeX`
+     crasheaba en nativo y la web no lo delataba), y es lo que exime a esta
+     pieza de `R68`. */
+  const tocar = Gesture.Tap()
     .runOnJS(true)
-    .onBegin((e) => {
+    .onEnd((e) => {
       irA(indiceDesdeX(e.x))
     })
+
+  const arrastrar = Gesture.Pan()
+    /* 12 px de recorrido horizontal antes de tomar el gesto. No es un número
+       de gusto: está por encima del slop de un tap (~8) para que un dedo que
+       apenas tiembla no arrastre, y por debajo de lo que se siente pegajoso. */
+    .activeOffsetX([-12, 12])
+    /* 10 px verticales y el pan se rinde: la lista scrollea y el precio no se
+       entera. Más chico que el umbral horizontal A PROPÓSITO — ante la duda
+       gana el scroll, porque equivocarse hacia «no moví el precio» es gratis
+       y hacia «moví el precio» cuesta plata. */
+    .failOffsetY([-10, 10])
+    .runOnJS(true)
     .onUpdate((e) => {
       irA(indiceDesdeX(e.x))
     })
+
+  /* `Race`: el primero que gane manda. Un tap limpio gana por ser el más
+     corto; un arrastre horizontal gana por umbral; un scroll vertical no gana
+     ninguno de los dos y sale por `failOffsetY`. */
+  const pan = Gesture.Race(tocar, arrastrar)
 
   // S68-B7: los números del riel — memoizados de las etiquetas; NaN en
   // cualquiera apaga la edición (degradación honesta, jamás rota)

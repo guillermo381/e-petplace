@@ -763,9 +763,19 @@ export {
 } from './components/AceptacionDeDocumentos'
 
 export {
-  FichaPaquete,
+  FichaDeOferta,
   equivalenciaDePaquete,
-  type FichaPaqueteProps,
+  type FichaDeOfertaProps,
   type EquivalenciaPaquete,
   type DireccionEquivalencia,
-} from './components/FichaPaquete'
+} from './components/FichaDeOferta'
+/* ⏪ ACÁ VIVÍA UN ALIAS `FichaPaquete → FichaDeOferta`, y se retiró en el mismo
+   commit que lo creó. **El typecheck probó que no servía:** un alias conserva
+   el NOMBRE, no las PROPS — y en el rename cambiaron cinco (`rotuloTamano`,
+   `precioPaquete`, `onElegir`, `elegido`, y `clave` que se fue). El consumidor
+   de C rompía igual, así que el alias sólo agregaba una pieza muerta y la
+   obligación de un trinquete para matarla.
+   ⇒ Se migró el consumidor y el nombre viejo no existe. *Un alias que no evita
+   la migración no es compatibilidad: es deuda con buena intención.* */
+
+export { SeccionPlegable, type SeccionPlegableProps } from './components/SeccionPlegable'

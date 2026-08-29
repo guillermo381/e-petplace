@@ -1,18 +1,37 @@
 /**
- * FichaPaquete — QUÉ SALE CADA DÍA SI COMPRÁS EL PAQUETE (S107-B).
+ * FichaDeOferta — UNA COSA QUE SE OFRECE: se enciende, se expande, se cotiza.
+ * (S107-B · nace como `FichaPaquete` y se GENERALIZA en la tanda 4.)
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * **Un paquete no se entiende por su precio: se entiende por su EQUIVALENTE.**
+ * **UN SOLO GESTO DICE LAS DOS COSAS: el toggle ENCIENDE Y EXPANDE.**
  * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Diario · Mensual · los tres paquetes: **son la misma fila**. Pared blanca,
+ * etiqueta a la izquierda, toggle a la derecha; al encender, la ficha se abre
+ * y muestra su campo de precio. *Antes eran tres anatomías distintas para el
+ * mismo trabajo —una tarjeta seleccionable, un `Interruptor` suelto con un
+ * `Campo` debajo, y un slider suelto—, que es exactamente cómo empiezan a
+ * divergir (19.9).*
+ *
+ * ── POR QUÉ EL TOGGLE HACE LAS DOS COSAS ─────────────────────────────────
+ * Encender una oferta y abrir su precio **no son dos decisiones**: nadie
+ * enciende «Mensual» para dejarlo sin precio. Separarlos pediría dos gestos
+ * para un solo acto — y dejaría existir el estado «encendido sin precio», que
+ * es una oferta que no se puede comprar.
+ *
+ * ── EL ESPEJO (opcional): un paquete se entiende por su EQUIVALENTE ──────
+ * «10 estadías a $90 = $9,00 por día — 25 % menos que tu día suelto». Nadie
+ * compara $90 contra $12 de cabeza mientras decide. **Diario y Mensual no lo
+ * pasan y no se dibuja.**
  *
  * «10 estadías a $90 = $9,00 por día — 25 % menos que tu día suelto». Nadie
  * compara $90 contra $12 de cabeza mientras decide. **El espejo hace esa cuenta
  * a la vista**, y por eso vive pegado al precio y no en una nota al pie.
  *
  * ── 🔴 LA ARITMÉTICA ES DE LA PIEZA. LAS PALABRAS NO. Y ES LA DECISIÓN ────
- * La misma ficha se monta en la **config del prestador** (donde se elige y se
- * pone el precio) y en el **perfil del lugar** (donde la familia lee). **Si la
- * cuenta viviera en cada pantalla, las dos podrían dar números distintos** —
+ * La misma ficha se monta en la **config del prestador** (donde se enciende y
+ * se pone el precio) y en el **perfil del lugar** (donde la familia lee, sin
+ * toggle). **Si la cuenta viviera en cada pantalla, podrían dar distinto** —
  * y el día que difieran, el prestador estaría vendiendo un descuento que la
  * familia no ve. *Es la lección 19.9 en su forma más cara: lo que se copia,
  * diverge.* ⇒ **la división y el porcentaje se calculan ACÁ, una vez.**
@@ -53,6 +72,22 @@
  * de distinta forma.** *La diferencia está en para qué sirve el número — «$9,00
  * por día» ayuda a comparar; «¡últimos 3!» ayuda a no pensar.*
  *
+ * ── 🔴 EL FONDO ENCENDIDO ES VERDE SUAVE, NO MAGENTA (firma de mesa, S107) ─
+ * ⏪ **Defecto corregido, y era mío:** esta pieza pintaba el borde SEGÚN EL
+ * REGISTRO (`accent.cta` en el prestador = tealDark) **y el fondo NO** —
+ * `capaBg.comunidad`, que es `pinkAlpha08`. *Resultado medido: en el taller
+ * del prestador la ficha encendida tenía borde teal con relleno magenta.*
+ *
+ * **El magenta es color de MARCA** (Ley 4: el hex puro vive en destello,
+ * huella de tab y techo) y no tiene nada que hacer marcando una oferta
+ * encendida. Pasa a **`capaBg.cuidado`** (`tealAlpha16`) **en las dos casas**.
+ *
+ * *Por qué `cuidado` y no `identidad`:* `capaBg.identidad` es
+ * `verdeVitalAlpha15`, la capa de **VIDA** (salud). Usarla acá metería la capa
+ * clínica en una pieza de comercio. `cuidado` es la capa del servicio y su
+ * `capa.cuidado` es `tealDark` — **el mismo color que ya pinta el borde**, así
+ * que borde y relleno por fin dicen lo mismo.
+ *
  * ── LEY 11: EL CENSO, Y POR QUÉ NO ES `SelectorOpcion` ───────────────────
  * Relevado antes de crear (protocolo 1c, pregunta 2):
  * · **`SelectorOpcion`** es un GRUPO de chips con una etiqueta por chip. Acá
@@ -88,11 +123,12 @@
  */
 
 import type { ReactNode } from 'react'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
 
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
+import { Interruptor } from './Interruptor'
 import { PrecioText } from './PrecioText'
 import { Texto } from './Texto'
 
@@ -119,39 +155,49 @@ export type EquivalenciaPaquete = {
   direccion: DireccionEquivalencia
 }
 
-export type FichaPaqueteProps = {
-  /** Identidad estable. Jamás se muestra. */
-  clave: string
-  /** 5 · 10 · 15. Lo declara el lugar: es DATO, no un catálogo cableado acá. */
-  tamano: number
+export type FichaDeOfertaProps = {
+  /* ☠️ `clave` SE RETIRÓ en la tanda 4: la pieza ya no la usaba. La identidad
+     de una fila la resuelve el `key` de React, y quién cambió lo sabe el
+     closure de la pantalla. Una prop que nadie lee es ruido en el contrato. */
   /**
-   * El rótulo del tamaño en voz de la app («10 estadías»).
-   * 🔴 Por prop: la pluralización es del riel, no de una pieza.
+   * Sólo lo usa el ESPEJO. `null` = esta oferta no se divide en unidades
+   * (Diario, Mensual) y no hay equivalente que calcular.
    */
-  rotuloTamano: string
+  tamano: number | null
+  /**
+   * La etiqueta de la oferta, a la izquierda: «Diario», «Mensual»,
+   * «10 estadías». 🔴 Por prop: la pluralización es del riel.
+   */
+  rotulo: string
   /** Precio total del paquete. `null` = todavía sin precio (ver Ley 13). */
-  precioPaquete: number | null
+  precio: number | null
   /**
    * El precio del día suelto, para comparar. `null` o `0` = no hay
    * comparación posible y el espejo lo omite — jamás inventa un 0 %.
    */
-  precioDiaSuelto: number | null
+  precioDiaSuelto?: number | null
   /**
    * Compone la frase del espejo con los números ya calculados.
    * Ausente = no se dibuja el espejo (la pantalla decidió no contarlo).
    */
   vozEquivalente?: (e: EquivalenciaPaquete) => string
   /**
-   * Presente = la ficha es SELECCIONABLE (config del prestador).
-   * Ausente = solo lectura (perfil del lugar, la familia) — y entonces **no
-   * es tocable**: una ficha que se hunde sin hacer nada es una promesa rota.
+   * Presente = la ficha tiene TOGGLE (config del prestador): enciende y
+   * expande en el mismo acto.
+   * Ausente = solo lectura (perfil del lugar, la familia) — sin control y
+   * **sin nada tocable**: una ficha que se hunde sin hacer nada es una
+   * promesa rota.
    */
-  onElegir?: (clave: string) => void
-  elegido?: boolean
+  onCambio?: (encendido: boolean) => void
+  /** Encendido ⇒ expandido. **No son dos estados** — ver la cabecera. */
+  encendido?: boolean
   /**
-   * El campo de precio, como SLOT — la pantalla mete `SliderPrecio`.
-   * **La pieza no reimplementa la edición de precio** (misma frontera que
-   * `ActaDeEntrega` con la captura de fotos: la mecánica es de quien la tiene).
+   * Lo que se revela al encender — típicamente el campo de precio. **SLOT**:
+   * la pantalla mete `SliderPrecio` o `Campo`. *La pieza no reimplementa la
+   * edición de precio* (misma frontera que `ActaDeEntrega` con las fotos).
+   *
+   * 🔴 **Sólo se dibuja con `encendido`.** Un riel vivo bajo una oferta
+   * apagada invita a mover algo que no se ofrece.
    */
   campoPrecio?: ReactNode
   /** Ley 22 por registro: 'control' (cliente, default) · 'oficio' (prestador). */
@@ -166,16 +212,26 @@ export type FichaPaqueteProps = {
 export function equivalenciaDePaquete(
   tamano: number,
   precioPaquete: number,
-  precioDiaSuelto: number | null,
+  precioDiaSuelto?: number | null,
 ): EquivalenciaPaquete {
   const porDia = precioPaquete / tamano
-  const hayComparacion = precioDiaSuelto !== null && precioDiaSuelto > 0
+
+  /* 🔴 EL GUARD SE ESCRIBE EXPLÍCITO, y hay una razón medida.
+     Al volverse OPCIONAL este parámetro (tanda 4), apareció una TERCERA forma
+     de estar ausente: `undefined`. El guard viejo miraba sólo `null` y **seguía
+     acertando** — porque `undefined > 0` da `false`—, o sea **acertaba por cómo
+     JS coerciona, no por diseño**. Es `L-424` con otra ropa: *un guard que
+     acierta por coerción es un guard que nadie puede leer y confirmar.*
+     Y este caso **dejó de ser raro**: un lugar que todavía no puso precio de
+     día suelto es lo normal mientras configura. */
+  const hayComparacion =
+    precioDiaSuelto !== null && precioDiaSuelto !== undefined && precioDiaSuelto > 0
 
   if (!hayComparacion) {
     return { tamano, precioPaquete, porDia, deltaPct: null, direccion: 'sin_comparacion' }
   }
 
-  const suelto = precioDiaSuelto as number
+  const suelto = precioDiaSuelto
   const razon = (porDia - suelto) / suelto
   /* Se compara el REDONDEO A CENTAVO y no el flotante crudo: dos precios que
      rinden el mismo centavo por día son iguales para quien paga, y un
@@ -193,49 +249,71 @@ export function equivalenciaDePaquete(
   }
 }
 
-export function FichaPaquete({
-  clave,
+export function FichaDeOferta({
   tamano,
-  rotuloTamano,
-  precioPaquete,
-  precioDiaSuelto,
+  rotulo,
+  precio,
+  precioDiaSuelto = null,
   vozEquivalente,
-  onElegir,
-  elegido = false,
+  onCambio,
+  encendido = false,
   campoPrecio,
   registro = 'control',
-}: FichaPaqueteProps) {
+}: FichaDeOfertaProps) {
   const { theme } = useTheme()
-
-  /* Un tamaño no positivo no se dibuja: dividir por él daría Infinity y el
-     espejo afirmaría cualquier cosa (Ley 13 — antes que un número falso, nada). */
-  if (tamano <= 0) return null
 
   const acento = registro === 'oficio' ? theme.accent.cta : theme.accent.control
 
+  /* El espejo sólo existe si la oferta se divide en unidades Y hay precio.
+     `tamano <= 0` no se calcula: dividir daría Infinity y el espejo afirmaría
+     cualquier cosa (Ley 13 — antes que un número falso, nada). */
   const equivalencia =
-    precioPaquete === null ? null : equivalenciaDePaquete(tamano, precioPaquete, precioDiaSuelto)
+    tamano !== null && tamano > 0 && precio !== null
+      ? equivalenciaDePaquete(tamano, precio, precioDiaSuelto)
+      : null
+
+  /* 🔴 EL FONDO ENCENDIDO — verde suave en LAS DOS CASAS (firma de mesa).
+     Memorial no tiene `capaBg` y degrada a superficie sin tinte (Ley 8),
+     mismo guard que `SelectorVentana` y `CalendarioCupo`. */
+  const fondoEncendido = 'capaBg' in theme ? theme.capaBg.cuidado : theme.bg.overlay
+
+  const cabecera = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: spacing[3],
+      }}
+    >
+      <View style={{ flex: 1, gap: spacing[0.5] }}>
+        <Texto variante="cuerpo">{rotulo}</Texto>
+      </View>
+
+      {/* El precio acompaña a la etiqueta: es el dato que decide y se lee de
+          un vistazo aunque la ficha esté cerrada. `null` lo resuelve él. */}
+      <PrecioText valor={precio} registro="linea" />
+
+      {/* EL TOGGLE — enciende Y expande. Sólo donde se configura. */}
+      {onCambio === undefined ? null : (
+        <Interruptor
+          etiqueta={rotulo}
+          encendido={encendido}
+          onCambio={onCambio}
+          registro={registro === 'oficio' ? 'oficio' : 'control'}
+        />
+      )}
+    </View>
+  )
 
   const cuerpo = (
     <View style={{ gap: spacing[2] }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'baseline',
-          justifyContent: 'space-between',
-          gap: spacing[3],
-        }}
-      >
-        {/* El tamaño lo escribió el riel en voz humana (Ley 3). */}
-        <Texto variante="cuerpo">{rotuloTamano}</Texto>
+      {cabecera}
 
-        {/* El precio es el dato que decide: lo viste `PrecioText`, que existe
-            para no volver a escribirlo a mano. `null` lo resuelve él. */}
-        <PrecioText valor={precioPaquete} registro="ficha" />
-      </View>
-
-      {/* EL CAMPO DE PRECIO — slot; sólo donde se configura. */}
-      {campoPrecio}
+      {/* LO QUE SE REVELA AL ENCENDER. En solo-lectura (sin toggle) el
+          contenido se muestra si vino: la familia no enciende nada, pero sí
+          ve lo que el lugar ofrece. */}
+      {(onCambio === undefined || encendido) && campoPrecio !== undefined ? campoPrecio : null}
 
       {/* EL ESPEJO. 🔴 Mismo color SIEMPRE (`secondary`), caiga para donde
           caiga: informa, jamás alarma — firma de la mesa. */}
@@ -247,48 +325,29 @@ export function FichaPaquete({
     </View>
   )
 
-  if (onElegir === undefined) {
-    /* SOLO LECTURA: no es tocable y se anuncia como texto. */
+  const pared = {
+    padding: spacing[4],
+    borderRadius: radius.suave,
+    borderWidth: theme.border.width,
+    /* PARED BLANCA en reposo (firma de mesa): la superficie de la casa, no
+       transparente — la ficha es un objeto sobre el fondo, no un hueco. */
+    backgroundColor: encendido ? fondoEncendido : theme.bg.card,
+    borderColor: encendido ? acento : theme.border.default,
+  }
+
+  /* SOLO LECTURA: sin toggle no hay nada que tocar, y no se dibuja un
+     Pressable que se hunda sin consecuencia. */
+  if (onCambio === undefined) {
     return (
-      <View
-        accessibilityRole="text"
-        style={{
-          padding: spacing[4],
-          borderRadius: radius.suave,
-          borderWidth: theme.border.width,
-          borderColor: theme.border.default,
-        }}
-      >
+      <View accessibilityRole="text" style={pared}>
         {cuerpo}
       </View>
     )
   }
 
-  return (
-    <Pressable
-      onPress={() => onElegir(clave)}
-      accessibilityRole="radio"
-      accessibilityState={{ checked: elegido }}
-      accessibilityLabel={rotuloTamano}
-      style={({ pressed }) => ({
-        padding: spacing[4],
-        minHeight: 44,
-        borderRadius: radius.suave,
-        borderWidth: theme.border.width,
-        /* TONAL para el elegido (Ley 22), con el MISMO guard de memorial que
-           `SelectorVentana` y `CalendarioCupo`: memorial no tiene `capaBg` y
-           degrada a superficie sin tinte (Ley 8). */
-        borderColor: elegido ? acento : theme.border.default,
-        backgroundColor: elegido
-          ? 'capaBg' in theme
-            ? theme.capaBg.comunidad
-            : theme.bg.overlay
-          : pressed
-            ? theme.bg.overlay
-            : 'transparent',
-      })}
-    >
-      {cuerpo}
-    </Pressable>
-  )
+  /* CON TOGGLE: la ficha NO es tocable entera. El control es el
+     `Interruptor`, que ya tiene su rol y su target — envolver todo en un
+     segundo responder pondría dos blancos táctiles para el mismo acto, que
+     es cómo se falla un tap. */
+  return <View style={pared}>{cuerpo}</View>
 }
