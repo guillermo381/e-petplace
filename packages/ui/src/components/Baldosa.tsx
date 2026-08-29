@@ -176,13 +176,38 @@ const AIRE: Record<2 | 3, number> = { 2: spacing[2], 3: spacing[1.5] }
    es de la geometría de la pieza (números propios, no estimación de ancho de
    texto), pero *el modelo de ancho ya me dijo una vez que entraba y el founder
    vio que no*. Por eso el par de la galería monta los cinco labels reales. */
-const PROPORCION: Record<2 | 3, number> = { 2: 1, 3: 0.8 }
+/* 🔴 ── S107-B · A TRES COLUMNAS LA CAJA DEJA DE SER UNA PROPORCIÓN ───────
+   **El `0.8` que firmé estaba dimensionado para alojar el SUBTÍTULO. Sin él
+   sobra alto** — es el mismo error que ya caché una vez en esta pieza: *un
+   número firmado para un caso que dejó de existir.* **Tercera vez que aparece
+   acá** (glifo 48 · aire 16 · proporción), y esta vez el caso no cambió de
+   tamaño: **desapareció.**
 
-export type BaldosaProps = {
+   ⚠️ **Y no se re-deriva otra proporción, porque la proporción es la
+   herramienta equivocada:** `aspectRatio` hace que el alto CREZCA CON EL
+   ANCHO, y el contenido de esta baldosa es **de alto FIJO** (un glifo y dos
+   renglones). Un ratio afinado en 360 deja ~23 pt de aire muerto en 430.
+   *Se pidió «ni un píxel más»: eso es una ALTURA, no una razón.*
+
+   LA CUENTA, sumando lo que hay y nada más:
+   `10 (arriba) + 32 (glifo) + 6 (aire) + 40 (2 renglones × 20) + 10 (abajo)`
+   ⇒ **98**
+
+   **Es `minHeight` y no `height`:** si el usuario agranda el tipo del sistema,
+   una altura fija CLIPA — y clipar es el defecto que acabamos de curar. Con
+   mínimo, la baldosa crece; y como el contenido es igual en todas, **la
+   grilla queda pareja igual.** */
+const ALTO_TRES =
+  spacing[2.5] * 2 + LADO_GLIFO[3] + AIRE[3] + 2 * 20
+
+/** El apagado del glifo. **No es un gris tímido**: con el subtítulo afuera, el
+ *  color quedó como ÚNICO portador del estado, así que tiene que verse. */
+const GLIFO_APAGADO = 0.45
+
+type Comun = {
   /** El nombre de lo que se elige. Una línea; dos si el nombre es largo. */
   titulo: string
-  /** Segunda línea opcional — el conteo, el precio, el estado. */
-  detalle?: string
+
   /** Glifo del registry (Ley 12: el glifo dice SERVICIO). */
   glifo: IconoNombre
   /** Categoría (Ley 10: el canto dice CATEGORÍA). */
@@ -240,8 +265,37 @@ export type BaldosaProps = {
    * ⇒ **Sin default. El compilador pregunta, una vez, en cada call site.**
    * ═══════════════════════════════════════════════════════════════════════
    */
-  columnas: 2 | 3
 }
+
+/**
+ * 🔴 EL CONTRATO SE PARTE POR `columnas`, y cada rama dice lo que esa grilla
+ * puede tener. **Las tres cosas del gate viven en el TIPO, no en la
+ * disciplina de quien la monta.**
+ *
+ * · **A DOS** — como siempre, con su `detalle` opcional. **Intacta**: es el
+ *   caso firmado por N7, y `atender` le pasa ahí *el dato del día*.
+ * · **A TRES** — **`detalle` NO EXISTE** (firma del gate: *glifo y nombre,
+ *   nada más*), y **`configurado` es OBLIGATORIA sin default** — 19.9, y la
+ *   lección que esta pieza ya pagó con `columnas`: *un default silencia el
+ *   caso nuevo, y el consumidor es el que sabe cuáles están configurados.*
+ *
+ * ⚠️ **POR QUÉ EL `detalle` SE CIERRA A TRES Y NO SE BORRA DE LA PIEZA:**
+ * medido, lo pasan **`negocio` ×7 y `atender` ×2**, y sólo UNO es el conteo de
+ * la grilla de mundos. *Borrarlo entero se llevaría el dato del día de
+ * `atender` —a DOS columnas— y seis baldosas de Negocio que el gate no miró.*
+ * **La firma fue sobre la grilla de tres; el alcance se respeta.**
+ *
+ * 🔴 **Y `sin configurar` EXIGE SU VOZ:** sin `vozSinConfigurar` no compila.
+ * *Al irse el subtítulo, el color quedó como único portador del estado — y un
+ * lector de pantalla no ve el color.* **Un estado que sólo existe en el píxel
+ * es un estado que para alguien no existe.**
+ */
+type PorColumnas =
+  | { columnas: 2; detalle?: string; configurado?: never; vozSinConfigurar?: never }
+  | { columnas: 3; configurado: true; detalle?: never; vozSinConfigurar?: never }
+  | { columnas: 3; configurado: false; vozSinConfigurar: string; detalle?: never }
+
+export type BaldosaProps = Comun & PorColumnas
 
 export function Baldosa({
   titulo,
@@ -251,9 +305,15 @@ export function Baldosa({
   onPress,
   orden,
   columnas,
+  configurado,
+  vozSinConfigurar,
   etiquetaA11y,
 }: BaldosaProps) {
   const { theme } = useTheme()
+
+  /* `configurado` sólo existe a tres columnas; a dos no hay estado que pintar. */
+  const apagado = columnas === 3 && configurado === false
+  const cantoApagado = apagado
   // 0.99 — la escala de las superficies que contienen (el precedente
   // de `TarjetaEstado` y `SelectorOpcion`); 0.97 es de botones sueltos.
   const { handlers, estiloPresionado } = usePresionado(0.99)
@@ -263,7 +323,16 @@ export function Baldosa({
       onPress={onPress}
       {...handlers}
       accessibilityRole="button"
-      accessibilityLabel={etiquetaA11y ?? (detalle ? `${titulo}, ${detalle}` : titulo)}
+      /* 🔴 EL ESTADO VIAJA EN LA ETIQUETA, y no es cortesía: al irse el
+         subtítulo **el color quedó como único portador**, y quien usa lector de
+         pantalla no lo ve. *Un estado que sólo existe en el píxel es un estado
+         que para alguien no existe.* Por eso `vozSinConfigurar` es obligatoria
+         en esa rama del tipo: sin ella no compila. */
+      accessibilityLabel={
+        [etiquetaA11y ?? (detalle ? `${titulo}, ${detalle}` : titulo), vozSinConfigurar]
+          .filter(Boolean)
+          .join('. ')
+      }
       /* 🔴 LA RAÍZ DECLARA SU ANCHO — sin esto la grilla COLAPSA A ALTURA
          CERO y las baldosas se dibujan encima de lo que sigue.
 
@@ -298,7 +367,10 @@ export function Baldosa({
          *Mi ley decía «la raíz es dueña de su espacio» y yo la había
          cumplido a medias: el espacio son DOS dimensiones.* El hijo deja
          de decidir geometría y solo compone adentro (`flex: 1`). */
-      style={{ width: '100%', aspectRatio: PROPORCION[columnas] }}>
+      /* A DOS sigue CUADRADA (firmada). A TRES es ALTURA MÍNIMA MEDIDA, no
+         una razón — ver `ALTO_TRES`: el contenido es de alto fijo y un ratio
+         le regalaría aire muerto en las pantallas anchas. */
+      style={{ width: '100%', ...(columnas === 2 ? { aspectRatio: 1 } : { minHeight: ALTO_TRES }) }}>
       <Animated.View
         style={[
           {
@@ -319,7 +391,21 @@ export function Baldosa({
             // clase de error que pintó de otra capa una pieza entera en
             // S91. Un vocabulario de cuatro no cae 1:1 sobre slots de
             // cuatro solo porque coincida el número.
-            borderLeftColor: capa === 'consumo' ? theme.accent.warm : theme.capa[capa],
+            /* EL CANTO, MÁS SUAVE CUANDO NO ESTÁ CONFIGURADO — mismo HUE,
+               menos intensidad: se usa el tinte de la capa (`capaBg`), que ya
+               es ese color con alfa. **No se apaga a gris**: el canto dice
+               CATEGORÍA (Ley 10) y un gris le borraría de qué mundo es, que es
+               justo lo que el prestador necesita para elegir cuál tocar.
+               Memorial no tiene `capaBg` y se queda con su color (Ley 8). */
+            borderLeftColor: cantoApagado
+              ? capa === 'consumo'
+                ? theme.accent.warmBg
+                : 'capaBg' in theme
+                  ? theme.capaBg[capa]
+                  : theme.capa[capa]
+              : capa === 'consumo'
+                ? theme.accent.warm
+                : theme.capa[capa],
             overflow: 'hidden',
             padding: RELLENO[columnas],
             gap: AIRE[columnas],
@@ -339,7 +425,20 @@ export function Baldosa({
             baldosas siguen alineando su título a la misma altura, tengan
             detalle o no. *La diferencia es que ahora, cuando el contenido
             crece, lo primero que cede es el espaciador — y no el glifo.* */}
-        <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO[columnas]} />
+        {/* 🔴 SE ATENÚA EL GLIFO, JAMÁS EL NOMBRE. El glifo es lo decorativo;
+            el nombre es la información, y **el texto no baja de contraste
+            nunca** (`verify:contrast` rige sobre el resultado, y por eso el
+            `opacity` no lo toca).
+
+            ⚠️ **LA TRAMPA QUE ESTO EVITA, y es la razón de la forma:** un gris
+            de «disabled» sobre toda la baldosa le diría al prestador que **no
+            puede entrar** — y es exactamente al revés: *esa baldosa es la que
+            tiene que tocar, porque es la puerta a configurar el servicio.*
+            Atenuando sólo el glifo se lee **«todavía no lo usás»**, no «no
+            está disponible». */}
+        <View style={apagado ? { opacity: GLIFO_APAGADO } : null}>
+          <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO[columnas]} />
+        </View>
         <View style={{ flex: 1 }} />
 
         {/* 🔴 EL TÍTULO ES `cuerpo`, NO `seccion` — y la corrección cura
