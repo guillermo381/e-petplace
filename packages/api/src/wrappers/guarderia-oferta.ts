@@ -138,6 +138,23 @@ export interface GuarderiaDisponible {
   disponible: number;
   /** El lugar bajó su capacidad por debajo de lo prometido — lo declara, no cancela. */
   sobrevendido: boolean;
+  /**
+   * 🔴 **LAS DOS VENTANAS, EN LA MISMA PROYECCIÓN** (S107-A, pedido de C).
+   * Antes se pedían con `obtenerFranjasGuarderia` **una vez por lugar** — un
+   * N+1 que no dolía con seis lugares y sí con sesenta.
+   *
+   * ⚠️ **Los cuatro pueden ser `null` POR SEPARADO, y es un caso real:** un
+   * lugar puede tener la recogida declarada y la devolución no. *`FichaFranja`
+   * ya lo contempla — sin devolución no dibuja ni el rango ni el separador,
+   * **jamás un «—» que se lea como dato.***
+   *
+   * Son `'HH:MM:SS'`. Si el lugar declaró varias ventanas del mismo tipo, esto
+   * es **de la primera a la última** (`min`/`max`).
+   */
+  recogeDesde: string | null;
+  recogeHasta: string | null;
+  devuelveDesde: string | null;
+  devuelveHasta: string | null;
   /** La modalidad con la que se preguntó. `null` = se preguntó sin filtrar. */
   modalidad: ModalidadGuarderia | null;
   /**
@@ -348,6 +365,10 @@ export async function obtenerGuarderiasDisponibles(params: {
       ciudad: typeof r.ciudad === 'string' ? r.ciudad : null,
       disponible: r.disponible,
       sobrevendido: r.sobrevendido,
+      recogeDesde: typeof r.recoge_desde === 'string' ? r.recoge_desde : null,
+      recogeHasta: typeof r.recoge_hasta === 'string' ? r.recoge_hasta : null,
+      devuelveDesde: typeof r.devuelve_desde === 'string' ? r.devuelve_desde : null,
+      devuelveHasta: typeof r.devuelve_hasta === 'string' ? r.devuelve_hasta : null,
       modalidad: esModalidad(r.modalidad) ? r.modalidad : null,
       precioModalidad: typeof r.precio_modalidad === 'number' ? r.precio_modalidad : null,
     });

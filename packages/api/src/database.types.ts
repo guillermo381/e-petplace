@@ -20996,6 +20996,8 @@ export type Database = {
         Args: { p_mascota_id: string; p_modalidad?: string }
         Returns: {
           ciudad: string
+          devuelve_desde: string
+          devuelve_hasta: string
           direccion: string
           jornada_minutos: number
           modalidad: string
@@ -21006,6 +21008,8 @@ export type Database = {
           prestador_id: string
           prestador_nombre: string
           prestador_servicio_id: string
+          recoge_desde: string
+          recoge_hasta: string
         }[]
       }
       _guarderia_puede_reservar: {
@@ -22727,6 +22731,8 @@ export type Database = {
         }
         Returns: {
           ciudad: string
+          devuelve_desde: string
+          devuelve_hasta: string
           direccion: string
           disponible: number
           jornada_minutos: number
@@ -22738,6 +22744,8 @@ export type Database = {
           prestador_id: string
           prestador_nombre: string
           prestador_servicio_id: string
+          recoge_desde: string
+          recoge_hasta: string
           sobrevendido: boolean
         }[]
       }
