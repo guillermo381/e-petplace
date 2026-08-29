@@ -23753,3 +23753,58 @@ La migración del digest cerró su función nueva con `REVOKE … FROM PUBLIC, a
 
 **Dueño:** B (la pieza) + mesa (la firma sobre píxeles). **Disparo:** sesión de diseño, con **las tres montadas juntas** — *la comparación es el instrumento; ninguna de las tres se juzga sola.*
 ☠️ **Condición de muerte:** la decisión firmada **y** el censo en 0 baldosas a mano, **o** las excepciones declaradas una por una con su razón.
+
+# Deudas S107 (D-974 · D-975) — depositadas por A el 29-ago-2026 · números verificados libres POR GREP (tope real `D-973`)
+
+#### D-974 — 🔴 DOS ENUMS QUE COMPARTEN UNA PALABRA NO COMPARTEN SU SENTIDO
+🔴 **ALTA como CLASE, ya curado el caso.** Hallado por C montando el botón de conformar el acta; **los dos vocabularios se re-midieron contra el objeto al depositar**.
+
+**Lo medido:**
+
+| | vocabulario |
+|---|---|
+| **el MOTOR** (`guarderia_actas_conformidad_check`) | `sin_conformidad` · `conforme` · **`con_reserva`** |
+| **la PIEZA** (`ActaDeEntrega.Conformidad`) | **`pendiente`** · `conforme` · `sin_conformidad` |
+
+> ### 🔴 **`sin_conformidad` existe en LOS DOS, con sentidos OPUESTOS.**
+> · En el **motor** es el estado inicial —`conformidad_en IS NULL`, o sea
+>   **«todavía no la miró»**—: el más normal de todos, el que tiene el 100 % de
+>   las actas recién levantadas.
+> · En la **pieza** es el **warning**: *«aceptó señalando algo»*.
+
+**⇒ Un mapeo directo habría pintado el estado más normal como el más grave** — y
+en la superficie donde el dueño decide si firma. *No es un color feo: es la app
+diciéndole a una familia que su acta tiene una objeción cuando nadie la abrió
+todavía.*
+
+**Y ningún gate lo ve:** los dos enums son válidos, el `as` compila, el
+typecheck pasa. **La única cura es comparar los dos vocabularios; confiar en la
+coincidencia de una palabra es el defecto.**
+
+*El mapeo correcto, que C escribió:* motor `sin_conformidad` → pieza `pendiente`
+· `conforme` → `conforme` · `con_reserva` → `sin_conformidad`. **Ninguno de los
+tres es la identidad.**
+
+**Por qué queda como ficha si el caso ya está curado:** porque **es una clase**.
+Esta casa tiene vocabularios cerrados en el motor (CHECK) y uniones en las
+piezas, y **nada obliga a que se llamen igual ni impide que se llamen igual
+significando distinto**. *El próximo par de enums que compartan una palabra va a
+pasar todos los gates igual que éste.*
+
+**Dueño:** A (el criterio) + B (la regla, si se mecaniza). **Disparo:** la
+próxima pieza que consuma un vocabulario cerrado del motor.
+☠️ **Condición de muerte:** o una regla de `verify:diseno` que compare los pares
+motor↔pieza declarados, **o** la disciplina escrita en el protocolo 1c —
+*«¿este enum comparte palabras con el del motor? ¿significan lo mismo?»*.
+
+#### D-975 — 🟡 EL CANTO DE `FilaCita` DECIDE CUATRO CAPAS CON DOS RAMAS
+🟡 **MEDIA · latente, declarada por B y correctamente NO curada.**
+
+**El hecho:** el canto de `FilaCita` es `veterinaria ? identidad : cuidado` — **un ternario de dos ramas sobre una taxonomía de CUATRO** (`SALUD · CUIDADO · COMUNIDAD · CONSUMO`, Ley 10).
+
+**Hoy es CORRECTO y por eso no se cura:** los cinco oficios vivos —veterinaria, paseo, grooming, adiestramiento y ahora **guardería**— son salud o cuidado. *Curar algo que hoy acierta, sin un caso que lo falsee, es inventar una abstracción contra un futuro imaginado.*
+
+🔴 **Pero el día que entre un oficio de COMUNIDAD o CONSUMO se va a pintar `cuidado` EN SILENCIO** — sin error, sin warning, con un canto plausible. *Es la familia de defecto que no falla: el que omite.* Y el candidato ya tiene nombre: **la despensa es CONSUMO**, y su ficha en una lista de citas es una cuestión de cuándo.
+
+**Dueño:** B. **Disparo:** el primer oficio de `COMUNIDAD` o `CONSUMO` que necesite fila de cita.
+☠️ **Condición de muerte:** el canto se deriva de la **taxonomía** (la capa del servicio como dato), no de un ternario — **o** el ternario gana un `default` que aborta en vez de asumir `cuidado`.

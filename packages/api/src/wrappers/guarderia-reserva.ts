@@ -560,6 +560,18 @@ export interface ActaGuarderia {
   carnetVerificado: boolean;
   objetos: string | null;
   observaciones: string | null;
+  /**
+   * 🔴 **EL VOCABULARIO DEL MOTOR — NO SE PASA DIRECTO A `ActaDeEntrega`.**
+   * `D-974`: los dos enums comparten la palabra `sin_conformidad` **con
+   * sentidos opuestos** — acá es *«todavía no la miró»* (el estado inicial, el
+   * más normal) y en la pieza es el **warning** *«aceptó señalando algo»*.
+   *
+   * *Mapear por identidad pinta el estado más normal como el más grave, y
+   * ningún typecheck lo ve: los dos enums son válidos.*
+   *
+   * El mapeo correcto: `sin_conformidad` → `pendiente` · `conforme` →
+   * `conforme` · `con_reserva` → `sin_conformidad`. **Ninguno es la identidad.**
+   */
   conformidad: 'sin_conformidad' | 'conforme' | 'con_reserva';
   conformidadEn: string | null;
   reservaTexto: string | null;
