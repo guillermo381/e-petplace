@@ -146,17 +146,29 @@ function aHoraCorta(v: string): string {
   return v.slice(0, 5);
 }
 
+/* ✏️ S107 · `prestador_servicios.precio` pasó a NULLABLE para que guardería
+   pueda no ofrecer día suelto. **El paseo sigue obligado por un CHECK**
+   (`chk_precio_obligatorio_salvo_guarderia`), así que acá nunca puede llegar
+   null — pero el TIPO ahora lo admite y **el compilador tiene razón en
+   exigirlo**. *No se castea: un null acá sería un dato imposible, y esta casa
+   los llama `datos_inconsistentes` en vez de fingir que no pasó.*
+
+   ⚠️ La primera versión de esta cura puso `?? 0` — **y `0` no es «sin precio»:
+   es GRATIS.** El comentario decía «no se castea» y el código casteaba: *una
+   promesa que el código no expresa es peor que no haberla escrito.* Devuelve
+   `null` y el llamador rebota. */
 function mapearOferta(fila: {
   id: string;
   duracion_minutos: number | null;
-  precio: number;
+  precio: number | null;
   precio_plan: number | null;
   precio_mensual_plan: number | null;
   precio_paquete: number | null;
   nombre_custom: string | null;
   descripcion: string | null;
   activo: boolean;
-}): OfertaPaseoPropia {
+}): OfertaPaseoPropia | null {
+  if (fila.precio === null) return null;   // dato imposible: lo rebota el llamador
   return {
     id: fila.id,
     duracionMinutos: fila.duracion_minutos ?? 30,
@@ -186,7 +198,13 @@ export async function obtenerOfertasPaseoPropias(
     .order('duracion_minutos', { ascending: true });
 
   if (error || !Array.isArray(data)) return falla('error_desconocido');
-  return { ok: true, data: data.map(mapearOferta) };
+  const ofertas: OfertaPaseoPropia[] = [];
+  for (const fila of data) {
+    const o = mapearOferta(fila);
+    if (o === null) return falla('datos_inconsistentes');
+    ofertas.push(o);
+  }
+  return { ok: true, data: ofertas };
 }
 
 export interface InputCrearOfertaPaseo {
@@ -264,7 +282,9 @@ export async function crearOfertaPaseo(
     .single();
 
   if (error || data === null) return falla('error_desconocido');
-  return { ok: true, data: mapearOferta(data) };
+  const oferta = mapearOferta(data);
+  if (oferta === null) return falla('datos_inconsistentes');
+  return { ok: true, data: oferta };
 }
 
 export interface InputActualizarOfertaPaseo {
@@ -335,7 +355,9 @@ export async function actualizarOfertaPaseo(
   if (error) return falla('error_desconocido');
   // sin fila tocada = no era tuya o no existe — jamás no-op silencioso (cura T4 S54)
   if (data === null) return falla('no_encontrada');
-  return { ok: true, data: mapearOferta(data) };
+  const actualizada = mapearOferta(data);
+  if (actualizada === null) return falla('datos_inconsistentes');
+  return { ok: true, data: actualizada };
 }
 
 const SELECT_FRANJA = 'id, dia_semana, hora_inicio, hora_fin, duracion_slot_minutos, max_citas_por_slot, activo';
