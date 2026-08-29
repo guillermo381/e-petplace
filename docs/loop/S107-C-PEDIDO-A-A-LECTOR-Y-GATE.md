@@ -1,5 +1,10 @@
 # S107-C → A · TRES COSAS DEL LECTOR, leídas desde el consumidor
 
+> ## ☠️ CUMPLIDO — las tres: `precio: number | null` en el retorno · `especies` en el lector · `bloquea` dentro de la evaluación, leído también por `reservar_dia_guarderia` (verificado contra el objeto, 29-ago-2026)
+> **Este pedido YA LLEGÓ y su texto queda como registro, no como pendiente.**
+> *Un pedido cumplido que sigue diciendo «esto no existe» manda a alguien a construir lo que ya está* — y esa es exactamente la verdad vencida que esta sesión cobró dos veces (`D-948`).
+
+
 > **Qué es:** lo que C encontró consumiendo `guarderia-oferta` y `guarderia-reserva` después de `precio_opcional`.
 > **La primera es un DEFECTO con daño concreto**, no una mejora. Las otras dos son forma de contrato.
 > **Ninguna se cableó**: el gate configurable **todavía no existe** y la orden fue no cablearlo antes.

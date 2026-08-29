@@ -59,3 +59,94 @@ El hub pasa a tener **el esqueleto de sus cuatro hermanas**, que ya está censad
 ## ④ UNA PREGUNTA QUE ES DE MESA Y NO DE CÓDIGO
 
 **¿La estadía entra a la Línea de Vida del expediente?** Los otros cuatro oficios sedimentan. **Guardería todavía no**, y no lo decido yo. *Si entra, el evento nace al entregar —como el paseo— y no al reservar.*
+
+---
+---
+
+# ⑤ AMPLIACIÓN — 29-ago-2026 · **el mismo lector destraba también EL DURANTE**
+
+> **Por qué se amplía en vez de abrir otro pedido:** construí el durante del dueño y
+> **choca contra este mismo lector**. Pedir un segundo lector para la misma tabla sería
+> fabricar dos verdades sobre la estadía de una familia.
+
+## ⑤.1 · DOS CAMPOS MÁS EN `EstadiaDeLaFamilia`
+
+```ts
+  /** El acta que espera la conformidad del dueño. `null` = ninguna pendiente. */
+  actaPendienteId: string | null;
+  /** El tramo en curso — ver ⑤.2 antes de implementarlo. */
+  tramoActivoId: string | null;
+```
+
+**`actaPendienteId` es barato y destraba una pieza entera:** `confirmarActaGuarderia(actaId)`
+**ya existe y funciona**, y `ActaDeEntrega` (B) tiene su `modo='leer'` con `onConformar`.
+*Lo único que falta es de dónde sacar el `actaId`.*
+
+---
+
+## ⑤.2 · 🔴 EL HALLAZGO DE MOTOR — el punto vivo no tiene de dónde colgar
+
+`obtenerPuntoVivo(tramoId)` y `registrarPuntoVivo({tramoId,…})` existen, están bien escritos
+y pasan sus pruebas. **Medido contra el esquema el 29-ago:**
+
+| | |
+|---|---|
+| **`guarderia_tramos`** | **NO EXISTE.** No hay tabla de tramos |
+| `guarderia_tramo_punto.tramo_id` | uuid **sin FK** — `Relationships: []` en los tipos generados |
+| `guarderia_estadias` | **no tiene columna de tramo** (sus columnas son `cita_id`, `espacio_id`, `estado`, `a_bordo_en`, `llegada_en`, `entregada_en`) |
+
+> ### ⇒ **Nadie puede producir un `tramoId` y nadie puede obtenerlo.**
+> El punto vivo es inalcanzable **por los dos lados**, y **no por permisos: por falta de la
+> entidad que los une.**
+
+**Es `L-318` («motor sin puerta») un piso más adentro, y por eso se declara con esta forma:**
+*la pieza existe, es alcanzable desde afuera y pasa sus pruebas — **lo que no tiene productor
+es el identificador con el que abre**. Y no falla: devuelve `null`, que la pantalla lee
+correctamente como «todavía no salió».* **Un hueco que se lee como un estado normal no deja
+síntoma.**
+
+**Lo que C ya hizo con esto:** el mapa está montado y **se enciende solo** el día que
+`tramoActivoId` deje de ser `null`. **Cero trabajo de superficie pendiente.**
+
+**Y la regla que va con él, para quien construya el productor:** el lector devuelve **UN PUNTO
+O `null`, jamás una lista** — *las paradas de una ruta son las casas de otras familias.* Del
+lado de la pantalla eso ya está garantizado **por construcción** (se le pasa a `MapaRecorrido`
+un array de exactamente un punto, y una polilínea de un punto no dibuja nada), **pero el
+recorte tiene que seguir viviendo en el servidor**: si el lector algún día devolviera dos
+puntos, la garantía de la pantalla se caería sola.
+
+---
+
+## ⑤.3 · LO QUE **NO** SE PIDE, para que no se construya de más
+
+- **No hace falta un lector de «la estadía de hoy»**: con `obtenerMisEstadias` filtrando por
+  fecha alcanza. *Un lector por caso de uso es cómo una tabla termina con seis.*
+- **No hace falta que el lector traiga la media**: `obtenerMediaDeMiMascota` ya existe, ya
+  funciona y **ya está consumido** — es la única mitad del durante que anda hoy.
+
+---
+
+# ⑥ AMPLIACIÓN 2 — 29-ago · **el rail «Tus servicios» del Hogar también lo espera**
+
+**Medido recorriendo la app:** `ResumenServiciosHogar` (`packages/api/src/wrappers/serviciosHogar.ts`)
+tiene **cuatro servicios** —`paseo` · `estetica` · `adiestramiento` · `veterinaria`— y
+**ninguno es guardería**.
+
+⇒ **Guardería no aparece en el rail del Hogar**, donde viven sus cuatro hermanos. Hoy se alcanza
+**sólo por la baldosa de Explorar**. *Una familia que ya la usó la busca donde están las otras
+cuatro y no la encuentra* — y el rail no se puede completar desde la pantalla, porque su regla
+es **«cero actividad = cero celda»** y la actividad sale de este wrapper.
+
+**La forma, espejo exacto de sus hermanos:**
+
+```ts
+  guarderia: {
+    proxima: ProximaDeServicio | null;
+    /** Última estadía ENTREGADA, o null. */
+    ultima_cerrada: string | null;
+  };
+```
+
+**Es el mismo dato que `obtenerMisEstadias` ya va a traer** — se pide acá para que el rail no
+tenga que componerlo con N llamadas. *Y si A prefiere que C lo componga del lector, también
+sirve: lo que no sirve es que guardería siga sin celda.*
