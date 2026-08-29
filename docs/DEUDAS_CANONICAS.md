@@ -23368,7 +23368,30 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
 
-#### D-967 — 🔴 `MAPA_NATIVO_DISPONIBLE = true` ES UNA AFIRMACIÓN SOBRE **UN** APARATO, ESCRITA EN EL CÓDIGO DE TODOS
+#### D-967 — ☠️ CURADA EN EL PRESTADOR · 🟠 DECLARADA EN EL CLIENTE (29-ago-2026) — `MAPA_NATIVO_DISPONIBLE` AFIRMABA SOBRE **UN** APARATO
+
+> ☠️ **CURADA EN `apps/prestador` (firma de la mesa, 29-ago).** El literal murió; ahora lo decide **la sonda nativa**:
+> ```ts
+> export const MAPA_NATIVO_DISPONIBLE =
+>   Platform.OS === 'web' ? true : manifestTieneKeyDeMapa() === true;
+> ```
+> **`SondaManifest.leerMetaData` lee el manifiesto REAL en runtime** — *inmune al OTA e inmune a las env vars, que es lo único que no depende de que alguien recuerde algo.* La pieza **ya existía** desde S81 (`D-579`), preparada-apagada y **sin un solo consumidor a propósito**; esto es su flip, y su condición de disparo se cumplió.
+>
+> 🔴 **FAIL-CLOSED restituido:** la sonda devuelve `boolean | null`, y **`null` —módulo ausente, APK pre-tren— cuenta como NO**. *No saber es un caso de no tener*, y la ley del archivo (*un secret faltante cuesta EL MAPA, jamás la app*) vuelve a tener efecto.
+>
+> ⚠️ **Web queda afuera, y no es un atajo:** el crash que este guard evita es `IllegalStateException: API key not found` en `com.rnmaps.maps.MapView.onCreate` — **hilo nativo de Android**. En web el mapa es otra pieza y esta key no lo gobierna; apagarlo ahí escondería un mapa que funciona **sin evitar ningún crash**.
+>
+> ### 🟠 LO QUE QUEDA ABIERTO, con su camino exacto: **EL CLIENTE**
+>
+> `apps/cliente/src/lib/mapa-nativo.ts:106` **sigue con `= true` literal**, y **la sonda NO está portada** (medido: `apps/cliente/modules/` no existe).
+>
+> 🔴 **Y NO se porta y consume en el mismo acto, por una razón medida:** en un binario de cliente que todavía no tenga el módulo, la sonda devolvería `null` ⇒ fail-closed ⇒ **el mapa del cliente se apagaría HOY**, en una app donde funciona. *La cura correcta apagaría lo que está bien.*
+>
+> **La forma, que es el molde S91:** ① portar `modules/sonda-manifest` al cliente **inerte, sin consumidor** ② el flip de su constante **cuando exista un binario de cliente que lo lleve**. **Dueño:** C (`apps/` es su territorio) + B (la sonda). **Disparo:** el próximo binario del cliente.
+>
+> *(Diagnóstico original abajo — su medición sigue siendo la que produjo la cura.)*
+
+#### D-967 (original) — 🔴 `MAPA_NATIVO_DISPONIBLE = true` ES UNA AFIRMACIÓN SOBRE **UN** APARATO, ESCRITA EN EL CÓDIGO DE TODOS
 
 🔴 **ALTA. Hallada el 29-ago-2026 midiendo por qué el guard del manifest reprobó una build local.**
 
