@@ -1,4 +1,6 @@
-import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+
+import { manifestTieneKeyDeMapa } from '../../modules/sonda-manifest';
 
 /**
  * S80-B19 — EL GUARD DEL MAPA NATIVO (🔴 crash confirmado por logcat:
@@ -101,4 +103,30 @@ import Constants from 'expo-constants';
    existe en `apps/prestador/modules/sonda-manifest`** y hay que portar al
    cliente. *Lee el manifiesto REAL en runtime: inmune a OTA e inmune a env
    vars, que es lo único que no depende de que alguien recuerde algo.* */
-export const MAPA_NATIVO_DISPONIBLE = true;
+/* ═══════════════════════════════════════════════════════════════════════════
+   ☠️ `D-967` CURADA (29-ago-2026, firma de la mesa) — LA SONDA REEMPLAZA AL
+   LITERAL, Y ES LA ÚNICA FORMA QUE NO CADUCA.
+
+   **Las dos formas anteriores estaban rotas, cada una a su manera:**
+
+   | forma | por qué no servía |
+   |---|---|
+   | `= true` literal | **afirmaba sobre UN aparato** — era cierto porque el APK del founder pasó el guard, escrito en el código de todos. El 29-ago apareció el contraejemplo: una build local **sin** la key, contra la que esta constante habría dicho «hay mapa» y la app **habría muerto en hilo nativo** en vez de degradar |
+   | `extra.mapasHorneados` | **se recomputa en CADA `eas update`** sin la key ⇒ todo OTA publica `false` y pisa el `true` del APK (`L-435`, medido el 27-ago) |
+
+   > ### La sonda lee **el manifiesto REAL en runtime**: inmune al OTA e inmune
+   > a las env vars — *lo único que no depende de que alguien recuerde algo.*
+
+   🔴 **FAIL-CLOSED, y la ley de este archivo vuelve a tener efecto:** la sonda
+   devuelve `boolean | null`, y **`null` (módulo ausente, APK pre-tren) cuenta
+   como NO** — `=== true` y nada más. *Un secret faltante debe costar EL MAPA,
+   jamás la app* (mandato B19-①), y **no saber es un caso de no tener.**
+
+   ⚠️ **WEB QUEDA AFUERA, y no es un atajo:** el crash que este guard existe
+   para evitar es `IllegalStateException: API key not found` en
+   `com.rnmaps.maps.MapView.onCreate` — **hilo NATIVO de Android**. En web el
+   mapa es otra pieza (`MapaRecorrido.web.tsx`) y esta key no la gobierna:
+   apagarlo ahí escondería un mapa que funciona, sin evitar ningún crash.
+   ═══════════════════════════════════════════════════════════════════════════ */
+export const MAPA_NATIVO_DISPONIBLE =
+  Platform.OS === 'web' ? true : manifestTieneKeyDeMapa() === true;
