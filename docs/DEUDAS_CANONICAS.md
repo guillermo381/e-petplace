@@ -23368,6 +23368,30 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
 
+#### D-967 — 🔴 `MAPA_NATIVO_DISPONIBLE = true` ES UNA AFIRMACIÓN SOBRE **UN** APARATO, ESCRITA EN EL CÓDIGO DE TODOS
+
+🔴 **ALTA. Hallada el 29-ago-2026 midiendo por qué el guard del manifest reprobó una build local.**
+
+`apps/prestador/src/lib/mapa-nativo.ts:104` tiene **`export const MAPA_NATIVO_DISPONIBLE = true;`**, y su propio comentario dice por qué:
+
+> *«HOY ESTA CONSTANTE ES VERDADERA … **el APK instalado pasó `verify-manifest-apk.mjs` en VERDE** con `✓ meta-data geo.API_KEY`»*
+
+**El razonamiento era correcto el día que se escribió** — y su fragilidad es de forma, no de cuidado:
+
+> ### **Una constante que dice «el mapa está horneado» porque UN APK medido lo tenía, es una afirmación sobre un aparato viviendo en el código de todos.**
+
+🔴 **Y hoy existe el contraejemplo, medido:** la build local que se cortó el 29-ago **NO lleva la key** — `verify-manifest-apk` la reprobó con exit 1, y la causa está medida: `GOOGLE_MAPS_API_KEY` es un **secret que sólo el builder de EAS puede leer**, así que **ninguna build local puede hornearlo** salvo que alguien la exporte a mano en su shell.
+
+**El modo de falla, que es el peor de todos:** con la constante en `true` sobre un binario sin key, la app **no degrada — monta el `MapView` y muere en hilo NATIVO, fuera de toda ErrorBoundary.** *Es el incidente literal de S80, que estuvo invisible tres sesiones.* La ley `FAIL-CLOSED` que el propio archivo declara en su línea 77 **quedó sin efecto** al reemplazar la derivación por un literal.
+
+⚠️ **Y por qué la derivación anterior tampoco servía** (está medido en el mismo archivo, 27-ago): `extra.mapasHorneados` se **recomputa en CADA `eas update`** sin la key ⇒ **todo OTA publica `false` y pisa el `true` del APK**. *Dos actos compilan el config y el segundo nunca puede saber* (`L-435`). **Ninguna de las dos formas —literal ni derivada de `extra`— puede ser correcta.**
+
+☠️ **CONDICIÓN DE MUERTE, ya escrita en el propio archivo y con su pieza construida:** la sonda nativa **`SondaManifest.leerMetaData('com.google.android.geo.API_KEY')`**, que **YA EXISTE** en `apps/prestador/modules/sonda-manifest` — *lee el manifiesto REAL en runtime: inmune al OTA e inmune a las env vars, que es lo único que no depende de que alguien recuerde algo.* **Falta portarla al cliente y consumirla acá.**
+
+⚠️ **Consecuencia operativa inmediata, y refuerza el veredicto del guard:** **el APK local del 29-ago NO se instala.** No sólo porque le falten las metadatas — sino porque **con esta constante en `true` no degradaría: crashearía.**
+
+**Dueño:** B (la sonda es su territorio) + A (el consumo). **Disparo:** antes de cualquier build local que alguien vaya a instalar.
+
 #### D-964 — 🔴 REQUISITO DE LANZAMIENTO: CADA PRESTADOR DEBE DECLARAR QUÉ ESPECIES ATIENDE
 
 🔴 **ALTA · es de LANZAMIENTO, no de S107.** Firma de la mesa (29-ago), tercera capa de la resolución de `D-959`.
