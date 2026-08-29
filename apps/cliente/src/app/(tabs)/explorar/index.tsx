@@ -88,11 +88,11 @@ export default function Explorar() {
   }> = [];
   const proximamente: Array<{ nombre: string; icono: 'hotel' | 'guarderia' | 'seguros' | 'telemedicina' | 'prime' }> = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
-    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} />, onPress: () => router.navigate('/hogar/paseos') });
+    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={26} />, onPress: () => router.navigate('/hogar/paseos') });
     // S60-A1: el grooming dejó el coming-soon; S60-A4: la card aterriza
     // en SU hub (doble-click, mismo patrón que el paseo) — el Agendar
     // del hub lleva al CUÁNDO.
-    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={34} />, onPress: () => router.navigate('/hogar/grooming') });
+    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={26} />, onPress: () => router.navigate('/hogar/grooming') });
     // S68-A2 (V2): la card vet despierta — va al CUÁNDO directo (el hub
     // del oficio queda declarado como resto de la tanda del Durante; la
     // cita pagada ya tiene superficie: /citas/[mascotaId] D-430 + Hogar).
@@ -100,9 +100,22 @@ export default function Explorar() {
     // SU LOG como los otros tres oficios — era la ÚNICA de las cuatro
     // que caía directo en la reserva, y por eso el log de r9 nacía sin
     // entrada (el founder cayó en reserva al tocar Veterinaria).
-    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} />, onPress: () => router.navigate('/hogar/veterinaria') });
+    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={26} />, onPress: () => router.navigate('/hogar/veterinaria') });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <Icono nombre="training" tamano={26} />, onPress: () => router.navigate('/hogar/adiestramiento') });
+    /* ⭐ S107-C · «PRÓXIMAMENTE» — firma del founder: hotel · seguros ·
+       wearables · certificaciones · Prime.
+       **Salen dos, por razones opuestas:** telemedicina porque **YA está
+       implementada** (vive dentro de veterinaria) — *anunciar como futuro algo
+       que ya se usa hace dudar de toda la lista* — y guardería porque **subió
+       a los implementados**.
+       ⚠️ **Wearables y certificaciones NO están todavía: les falta su glifo**,
+       y los glifos viven en `packages/ui` (censo: `IconoNombre` es el registry
+       tipado; las apps sólo consumen por nombre) ⇒ **es pedido a B**, no
+       territorio de esta pista. Ver `docs/loop/S107-C-PEDIDO-A-B-GLIFOS.md`.
+       *No se listan con un glifo prestado: dos servicios con el ícono de un
+       tercero se leen como ese tercero.* */
     if (!servicios.hotel) proximamente.push({ nombre: t('explorar.proxHotel'), icono: 'hotel' });
+    if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
     /* ⭐ S107-C · GUARDERÍA DESACOPLADA DEL FLAG DE HOTEL — y no es prolijidad.
        Hasta hoy las dos colgaban del MISMO `if (!servicios.hotel)`, así que
        🔴 **el día que hotel abriera, guardería no pasaba a activa: DESAPARECÍA**
@@ -115,11 +128,14 @@ export default function Explorar() {
        murió en el mismo acto (Ley 37): `servicios.guarderia` existe desde
        S107-A, y hoy viene en `false` — la ficha aparece el día que la mesa lo
        encienda, con oferta viva. */
-    if (servicios.guarderia) fichasActivas.push({ clave: 'guarderia', titulo: t('explorar.servicioGuarderia'), detalle: t('explorar.servicioGuarderiaDetalle'), icono: <Icono nombre="guarderia" tamano={34} />, onPress: () => router.navigate('/hogar/guarderia') });
-    else proximamente.push({ nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
-    if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
-    if (!servicios.telemedicine) proximamente.push({ nombre: t('explorar.proxTelemedicina'), icono: 'telemedicina' });
+    if (servicios.guarderia) fichasActivas.push({ clave: 'guarderia', titulo: t('explorar.servicioGuarderia'), detalle: t('explorar.servicioGuarderiaDetalle'), icono: <Icono nombre="guarderia" tamano={26} />, onPress: () => router.navigate('/hogar/guarderia') });
     if (!servicios.prime) proximamente.push({ nombre: t('explorar.proxPrime'), icono: 'prime' });
+    /* 🔴 Guardería NO cae a «Próximamente»: su camino está CONSTRUIDO y
+       espera sólo el flag. Con el flag en `false` no aparece en ningún lado, y
+       eso es correcto — anunciarla en próximamente diría que falta construirla
+       cuando lo que falta es una guardería con oferta publicada. */
+    /* ☠️ Telemedicina salió de «Próximamente»: **ya está implementada** y se
+       agenda desde veterinaria. */
   }
 
   return (
@@ -171,8 +187,14 @@ export default function Explorar() {
                         </View>
                       </View>
                     );
+                    /* ⭐ S107-C · TRES COLUMNAS, igual que la grilla de
+                       Negocio: con cinco servicios activos, dos columnas dejan
+                       la última fila con una ficha del doble de ancho — y una
+                       ficha más grande se lee como más importante.
+                       `flexGrow: 0` para que la fila corta se vea corta y no
+                       se estire a llenar. */
                     return (
-                      <View key={f.clave} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                      <View key={f.clave} style={{ flexBasis: '31%', flexGrow: 0 }}>
                         {f.onPress ? (
                           <Tarjeta relleno="amplio" interactiva onPress={f.onPress} accessibilityRole="button" etiqueta={`${f.titulo} — ${t('explorar.paseoAgendable')}`}>
                             {contenido}
@@ -184,9 +206,10 @@ export default function Explorar() {
                     );
                   })}
                 </View>
-                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
-                  {t('explorar.agendarLlegaOtros')}
-                </Text>
+                {/* ☠️ S107-C · «Agendar veterinaria llega pronto» RETIRADO.
+                    No pertenecía acá: esta sección lista los servicios que YA
+                    se agendan, y una nota que dice lo contrario debajo de
+                    ellos contradice lo que la pantalla está mostrando. */}
               </View>
             )}
           </View>

@@ -638,6 +638,12 @@ export const clienteEn = {
     refugiosVacio: 'No shelters published yet',
     refugiosVacioDetalle: 'When a shelter joins, their pets up for adoption will live here.',
     proximamente: 'Coming soon',
+    /* ⚠️ S107-C · proxHotel · proxSeguros · proxPrime quedaron SIN CONSUMIDOR
+       a propósito: «Próximamente» ahora lista sólo telemedicina (firma del
+       founder). Los tres servicios siguen en la hoja de ruta — lo que se
+       retiró es la lista, no el plan —, así que borrar su voz sería tirar y
+       reescribir. `proxGuarderia` queda por otra razón: guardería ya no es una
+       promesa, es un camino construido esperando su flag. */
     proxHotel: 'Pet hotel',
     proxGuarderia: 'Daycare',
     servicioGuarderia: 'Daycare',
