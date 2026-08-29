@@ -591,6 +591,7 @@ export const clienteEn = {
     // S54-B3.1 — walks are bookable now; the rest stays honest
     agendarLlegaOtros: 'Booking veterinary visits is coming soon.',
     paseoAgendable: 'Tap to open',
+    entrarA: 'Go to {{servicio}}',
     paseadoresTitulo: 'Walkers',
     paseadoresError: "We couldn't load the walkers",
     paseadoresVacio: 'No walkers offering yet',
