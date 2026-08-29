@@ -23840,3 +23840,44 @@ motor↔pieza declarados, **o** la disciplina escrita en el protocolo 1c —
 
 **Dueño:** quien construya. **Disparo:** cada vez que se reuse una fórmula de otra función.
 ☠️ **Condición de muerte:** la pregunta *«¿este criterio responde MI pregunta, o la de donde lo saqué?»* escrita en el protocolo de reuso — **el reuso se justifica por la pregunta, no por el precedente.**
+
+### L-437 — UN CENSO POR REGEX MIDE LA FORMA QUE MIRA, NO EL MOTOR
+
+**Origen: censo propio de A que dio 0 con dos códigos vivos, 29-ago-2026.**
+
+A censó los códigos de error del motor de guardería con
+`RAISE EXCEPTION '([a-z_]+)'`, tipó 17 y **reportó el censo en 0**.
+
+🔴 **Dos códigos seguían sin tipar, y eran los del camino más común:**
+`documentos_sin_aceptar` —**el de toda familia nueva**— y
+`documentos_no_disponibles`. Los levanta `reservar_dia_guarderia` con
+
+```sql
+RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = CASE … END
+```
+
+— **una forma sin literal detrás de `RAISE EXCEPTION`, que el regex no veía.**
+
+> ### El 0 no era del motor: era **de la forma que el instrumento miraba**.
+>
+> Es `L-425` en carne —*un baseline en 0 no dice «no hay»: dice «no vi, con la
+> lista de hoy»*— con el agravante de que **el 0 se reportó como cierre**: «el
+> censo quedó en 0» se leyó, y se escribió, como *«no falta ninguno»*.
+
+**Y el segundo intento tampoco alcanzó:** ampliar el regex a `THEN 'x'` trajo
+**ruido** (capturó estados como `al_dia`, `no_opera`, `pasado` — que no son
+errores) **y siguió incompleto** (el `ELSE 'documentos_sin_aceptar'` tampoco
+matchea). *Un instrumento que se parchea dos veces sobre el mismo caso está
+diciendo que no es el instrumento.*
+
+**La cura no fue un tercer regex: fue LEER la función.** Los dos códigos salieron
+del `CASE` a la vista, en tres líneas de lectura.
+
+**Regla:** un censo por patrón sobre CÓDIGO **acota, no cierra**. Sirve para
+encontrar candidatos; **no sirve para afirmar que no queda ninguno.** Cuando el
+resultado se va a usar como *«ya está completo»* —y no como *«mirá estos»*—, la
+verificación es **leer la fuente de las funciones que importan**.
+
+*Corolario para esta casa: el motor levanta errores de al menos DOS formas
+(`RAISE EXCEPTION 'x'` y `USING MESSAGE = …`), y cualquier instrumento futuro
+que cuente códigos tiene que declarar cuál de las dos mira.*
