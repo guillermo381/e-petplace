@@ -3019,6 +3019,7 @@ export const clienteEs = {
     elegiMascotaTitulo: 'Elige de quién',
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
+    verSuDia: 'Ver su día',
     elegiMascotaDetalle: 'Toca una de tus mascotas para ver sus estadías.',
     vacioDetalle: 'Cuando reserves, tus estadías se verán acá.',
     estadiasNoCargoTitulo: 'No pudimos cargar tus estadías',
