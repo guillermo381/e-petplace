@@ -65,6 +65,7 @@ import {
   obtenerFranjasGuarderia,
   reservarDiaGuarderia,
   type CupoDiaGuarderia,
+  type EstadoCupoDia,
   type FranjaGuarderia,
   type RequisitosGuarderia,
 } from '@epetplace/api';
@@ -174,52 +175,43 @@ export default function LugarGuarderia() {
     [idioma, primeroDelMes],
   );
 
+  /* El vocabulario del motor → la voz de la casa. Los cinco casos tienen su
+     propia frase: mezclarlos en «no disponible» deja a la familia sin saber
+     si esperar, volver mañana o buscar otro lugar. */
+  const vozDelEstado = useCallback(
+    (e: Exclude<EstadoCupoDia, 'elegible'>): string =>
+      t(`lugarGuarderia.cupo_${e}` as 'lugarGuarderia.cupo_pasado'),
+    [t],
+  );
+
   const dias: DiaDeCupo[] = useMemo(() => {
     if (estado.fase !== 'listo') return [];
     const porFecha = new Map(estado.cupo.map((c) => [c.fecha, c]));
-    const isoHoy = iso(hoy);
     const salida: DiaDeCupo[] = [];
     for (let d = 1; d <= ultimoDelMes.getDate(); d += 1) {
       const fecha = iso(new Date(primeroDelMes.getFullYear(), primeroDelMes.getMonth(), d));
       const c = porFecha.get(fecha);
-      /* 🔴 CUATRO RAZONES DISTINTAS PARA NO PODER, Y CADA UNA CON SU VOZ.
-         La pieza sólo tiene `elegible | sin_cupo`, así que la distinción vive
-         en el MOTIVO — y eso importa: *«ya pasó», «hoy no», «no abre» y «se
-         llenó» le piden a la familia cosas distintas*. Mezclarlas en un
-         «no disponible» la deja sin saber si esperar, volver mañana o
-         buscar otro lugar. */
-      if (fecha < isoHoy) {
-        salida.push({ clave: fecha, numero: String(d), estado: 'sin_cupo', motivo: t('lugarGuarderia.diaPasado') });
-        continue;
-      }
-      /* HOY JAMÁS SE RESERVA (compuerta de A). La puerta no ofrece lo que el
-         servidor va a rechazar (Ley 23) — y lo dice con su voz propia, no
-         disfrazado de «se llenó». */
-      if (fecha === isoHoy) {
-        salida.push({ clave: fecha, numero: String(d), estado: 'sin_cupo', motivo: t('lugarGuarderia.diaHoy') });
-        continue;
-      }
-      /* 🔴 `sobrevendido` se lee y SE DESCARTA acá: no viaja a la pieza.
-         Para la familia, un día sin lugar es un día sin lugar. */
-      const capacidad = c?.capacidad ?? 0;
-      const disponible = c?.disponible ?? 0;
-      if (disponible > 0) {
+      /* 🔴 EL MOTIVO LO RESUELVE EL SERVER Y LA PANTALLA LO PINTA — no lo
+         deduce. Es la corrección de la mesa (29-ago) sobre lo que yo había
+         inferido acá: **«no opera» se mide del PATRÓN del lugar, no del cupo**,
+         y desde la pantalla los dos llegaban como `disponible = 0`. *Dos ceros
+         distintos que sólo el motor puede separar.*
+         La pieza sólo tiene `elegible | sin_cupo`, así que los cuatro «no» se
+         distinguen por su MOTIVO — y eso importa: *«ya pasó», «hoy no», «no
+         abren» y «se llenó» le piden a la familia cosas distintas.* */
+      const st = c?.estado;
+      if (st === 'elegible') {
         salida.push({ clave: fecha, numero: String(d), estado: 'elegible' });
         continue;
       }
-      /* Capacidad CERO no es «se llenó»: es que el lugar no abre ese día
-         (su patrón no lo incluye, o lo declaró cerrado). *Decirle «se llenó»
-         a alguien un domingo que la guardería nunca abre es mentirle sobre
-         por qué no puede.* */
-      salida.push({
-        clave: fecha,
-        numero: String(d),
-        estado: 'sin_cupo',
-        motivo: capacidad === 0 ? t('lugarGuarderia.diaCerrado') : t('lugarGuarderia.diaLleno'),
-      });
+      /* Sin fila para ese día, el día no es elegible y se dice sin inventar
+         una causa: sólo el motor sabe por qué. */
+      const motivo =
+        st === undefined ? t('lugarGuarderia.cupo_sin_dato') : vozDelEstado(st);
+      salida.push({ clave: fecha, numero: String(d), estado: 'sin_cupo', motivo });
     }
     return salida;
-  }, [estado, primeroDelMes, ultimoDelMes, hoy, t]);
+  }, [estado, primeroDelMes, ultimoDelMes, vozDelEstado, t]);
 
   /** Lunes = columna 0. `getDay()` da domingo=0, así que se corre. */
   const columnaInicial = (primeroDelMes.getDay() + 6) % 7;
