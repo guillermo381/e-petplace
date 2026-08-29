@@ -12,6 +12,26 @@ import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+  /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
+     función, no grepeando. **Mi censo anterior dijo «0 sin tipar» y estos dos
+     estaban vivos**: `reservar_dia_guarderia` los levanta con
+     `RAISE EXCEPTION USING MESSAGE = CASE …`, una forma que mi regex
+     —`RAISE EXCEPTION 'literal'`— **no veía**.
+
+     🔴 Es `L-425` en carne: *un baseline en 0 no dice «no hay»: dice «no vi,
+     con la lista de hoy»*. El 0 era de **la forma que miraba**, no del motor. */
+
+  /* 🔴 EL CAMINO NORMAL DE TODA FAMILIA NUEVA. Antes caía en
+     `error_desconocido`: le decíamos «ocurrió un error inesperado» a alguien
+     que sólo tenía que aceptar los términos — **y no le decíamos cuáles ni
+     dónde**. La pantalla que lea este código LLEVA a aceptarlos. */
+  documentos_sin_aceptar:    'Antes de reservar hay que aceptar los términos de la guardería.',
+  /* 🔴 PEOR EN CLASE: **es un estado NUESTRO** —la casa no cargó los
+     documentos— y se presentaba como si algo hubiera fallado del lado de la
+     familia. *No hay nada que ella pueda hacer, y la voz no le pide que lo
+     intente de nuevo.* */
+  documentos_no_disponibles: 'Todavía no podemos mostrarte los términos de la guardería. Es de nuestro lado: vuelve a intentarlo más tarde.',
+
 
   /* ✏️ S107-A · CENSADOS CONTRA EL MOTOR, no agregados de a uno.
      C reportó que `fecha_no_ofertable` llegaba como `error_desconocido`; al
