@@ -2,12 +2,32 @@
  * cola-actas.ts — EL ACTA SE LEVANTA EN LA PUERTA, CON O SIN SEÑAL (S107-D).
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * 🔴 **EL CHOQUE QUE ESTA PIEZA RESUELVE, y no es un detalle de red.**
+ * ⚠️ **ENMENDADO AL CABLEAR (29-ago): EL ACTA YA NO ESPERA A SUS FOTOS.**
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * El contrato de actas pide `levantarActaGuarderia({ …, mediaIds[] })` — o sea
- * **fotos YA publicadas** — y al mismo tiempo firma dos cosas que no se pueden
- * romper:
+ * **Medido contra la función viva, no contra el contrato:**
+ * `levantar_acta_guarderia(p_estadia_id, p_direccion, p_carnet_verificado,
+ * p_objetos, p_observaciones, p_cerrada_en, p_clave_idempotencia)` — **no
+ * recibe `mediaIds[]`**, aunque el contrato escrito los pedía.
+ *
+ * ⇒ **El choque que esta pieza nació para resolver dejó de existir**, y la
+ * pieza queda igual de necesaria por la otra mitad: *el acta se levanta en la
+ * puerta, donde puede no haber señal, y no puede perderse.* Lo que cambia es la
+ * dependencia — **el acta viaja apenas puede; sus fotos viajan por su cuenta**,
+ * y ninguna espera a la otra. *Menos acoplamiento del que había diseñado: la
+ * medición achicó la pieza en vez de agrandarla.*
+ *
+ * 🔴 **Lo que la enmienda deja ABIERTO, y va declarado a A (no lo decide D):**
+ * si el acta no referencia sus fotos, **qué las ata al acta es (estadía, día)**
+ * — y ese conjunto incluye también la media del durante. En un registro cuyo
+ * valor es probatorio (*«el estado del animal con fotografías fechadas»*,
+ * criterio §4), *«las fotos de ese día»* no es lo mismo que *«las fotos de esta
+ * acta»*. Puede ser deliberado y suficiente; **no lo asumo ni lo arreglo por mi
+ * cuenta.** Las fotos igual quedan atadas localmente (`fotosLocales`) para que
+ * la pantalla sepa cuáles mostró.
+ *
+ * ── LO QUE SIGUE RIGIENDO IGUAL ──────────────────────────────────────────
+ * El contrato firma dos cosas que no se pueden romper:
  *
  *  · *«las fotos del estado son media etiquetada»* (una sola forma para los dos
  *    lados), y
@@ -18,17 +38,10 @@
  * Y el acta **nace cerrada**: un trigger rechaza todo `UPDATE` salvo la
  * conformidad. ⇒ **no se puede levantar sin fotos y agregarlas después.**
  *
- * Las tres salidas posibles, y por qué queda una:
- *  ① esperar a que la media suba antes de levantar → **frena la recogida**.
- *     Prohibido por el contrato.
- *  ② levantar sin `mediaIds` y completarlos luego → **imposible**: cerrada no
- *     se edita, y esa inmutabilidad es lo que hace que el acta pruebe algo.
- *  ③ **encolar el acta ENTERA junto a sus fotos** y publicarla cuando todas
- *     estén arriba. ⇐ la única que respeta las dos reglas.
- *
- * ⇒ En la puerta, el acta **existe localmente y con su hora**; el viaje al
+ ⇒ En la puerta, el acta **existe localmente y con su hora**; el viaje al
  * servidor ocurre cuando hay señal. *La hora que vale es la de la puerta, no la
- * de la subida* — por eso `levantadaEn` se sella al crearla acá.
+ * de la subida* — por eso `levantadaEn` se sella al crearla acá y **viaja** en
+ * `p_cerrada_en`: el servidor no la inventa del `INSERT`.
  *
  * ── LO QUE ESTA COLA NO HACE ─────────────────────────────────────────────
  * No confirma nada por el dueño (eso es su app, su sesión — firma ⑥) y **no
@@ -38,7 +51,6 @@
  */
 
 import { almacenActual, enFila } from './almacen';
-import { mediaIdsDe } from './cola-media';
 
 const CLAVE = 'epp.cola_actas.v1';
 
@@ -72,17 +84,17 @@ export interface ActaLocal {
 }
 
 /**
- * Lo que la app necesita de A. **`UNIQUE (estadia_id, direccion)` ya es su
- * idempotencia natural** — pero eso solo sirve si el segundo intento **no
- * rebota**.
+ * ✅ **El pedido entró:** medido contra la función viva, `levantar_acta_guarderia`
+ * **devuelve `ya_existia`** en vez de un `23505` pelado, y `guarderia_actas`
+ * lleva su `UNIQUE (estadia_id, direccion)`. *Un reintento que rebota obligaría
+ * a esta cola a distinguir «falló» de «ya estaba», que es justo lo que no puede
+ * saber con un timeout ambiguo.*
  *
- * 🔴 **PEDIDO A LA PISTA A, mismo argumento que el ya adoptado para
- * `publicarMedia`:** un reintento tras un timeout ambiguo tiene que devolver
- * **el acta que ya existe** (`ya_existia: true`), no un error de unicidad. *Un
- * reintento que rebota obliga a esta cola a distinguir «falló» de «ya estaba»,
- * y esa distinción es justo la que no puede hacer con un timeout ambiguo.* Si
- * vuelve `23505` pelado, el acta correcta queda marcada en error para siempre
- * — y un guard que vive en un índice **sólo puede negarse** (`L-424`).
+ * ⚠️ **Un matiz medido y anotado, no bloqueante:** la función resuelve la
+ * idempotencia **sin `ON CONFLICT`** (mira antes de insertar), así que **queda
+ * una ventana de carrera** si dos cuidadores levantaran la misma acta en el
+ * mismo instante. Para esta cola no aplica —un teléfono, secuencial—, y por eso
+ * se declara en vez de pedirse.
  */
 export type LevantarActa = (entrada: {
   estadiaId: string;
@@ -90,9 +102,9 @@ export type LevantarActa = (entrada: {
   carnetVerificado: boolean;
   objetos?: string;
   observaciones?: string;
-  mediaIds: string[];
   /** La hora de la puerta viaja: el servidor no la inventa del INSERT. */
   levantadaEn: string;
+  claveIdempotencia: string;
 }) => Promise<
   | { ok: true; actaId: string; ya_existia?: boolean }
   | { ok: false; codigo: string; mensaje: string }
@@ -198,13 +210,10 @@ export async function procesarActas(
   const pendientes = (await leerActas()).filter((x) => x.estado !== 'levantada' && x.estado !== 'error');
 
   for (const acta of pendientes) {
-    const mediaIds = await mediaIdsDe(acta.fotosLocales);
-    if (!mediaIds) {
-      if (acta.estado !== 'esperando_media') await mutar(acta.id, { estado: 'esperando_media' });
-      resumen.esperandoMedia += 1;
-      continue;
-    }
-
+    // ⚠️ ENMIENDA 29-ago: ya NO se espera a que suban las fotos. La función
+    // viva no recibe `mediaIds`, así que hacerla esperar sería inventar un
+    // acoplamiento que el motor no pide — y dejaría el acta en el teléfono
+    // por una razón que dejó de existir.
     if (!levantar) {
       await mutar(acta.id, { estado: 'lista', detalle: 'levantarActaGuarderia todavía no existe' });
       resumen.esperandoMedia += 1;
@@ -218,8 +227,8 @@ export async function procesarActas(
       carnetVerificado: acta.carnetVerificado,
       objetos: acta.objetos,
       observaciones: acta.observaciones,
-      mediaIds,
       levantadaEn: new Date(acta.levantadaEn).toISOString(),
+      claveIdempotencia: acta.id,
     });
 
     if (!r.ok) {

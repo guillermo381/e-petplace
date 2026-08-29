@@ -60,8 +60,16 @@ export interface EntradaPublicarMedia {
   /** 🔴 LAS N ETIQUETAS. Mínimo 1: sin etiquetas rebota `media_sin_etiquetas`.
    *  Cada una recibe su evento apuntando al MISMO archivo. */
   mascotaIds: string[];
-  /** El día de la estadía, local del lugar (`YYYY-MM-DD`). */
-  fecha: string;
+  /**
+   * 🔴 EL INSTANTE de la captura (ISO), no el día.
+   *
+   * Corregido al cablear: el contrato escrito decía `fecha` y **la función viva
+   * pide `p_capturada_en timestamptz`**. La diferencia no es cosmética — **el
+   * día lo deriva el servidor del instante**, y eso lo vuelve dueño del huso
+   * horario, que es donde tiene que vivir. *Lo cazó el compilador en el
+   * cableado, que es exactamente para lo que ese archivo existe.*
+   */
+  capturadaEn: string;
 }
 
 /**
@@ -91,7 +99,7 @@ export type PublicarMedia = (
  * la firma prohíbe. **Agrupa el servidor.** La app solo declara el hecho.
  */
 export type AvisarMediaPublicada = (aviso: {
-  fecha: string;
+  capturadaEn: string;
   mascotaIds: string[];
   tipo: 'foto' | 'clip';
 }) => Promise<void>;
@@ -173,7 +181,10 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
         tipo: item.tipo,
         duracionS: item.duracionS,
         mascotaIds: item.mascotaIds,
-        fecha: item.fecha,
+        // El instante REAL de la captura, no el de la subida: entre los dos
+        // puede haber horas sin señal, y el hilo del dueño ordena por cuándo
+        // pasó, no por cuándo llegó.
+        capturadaEn: new Date(item.creadoEn).toISOString(),
       });
 
       if (!r.ok) {
@@ -189,7 +200,11 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
       // (volvería a registrar, y eso sí duplicaría). Se registra y se sigue.
       if (deps.avisar) {
         try {
-          await deps.avisar({ fecha: item.fecha, mascotaIds: item.mascotaIds, tipo: item.tipo });
+          await deps.avisar({
+            capturadaEn: new Date(item.creadoEn).toISOString(),
+            mascotaIds: item.mascotaIds,
+            tipo: item.tipo,
+          });
         } catch (e) {
           console.error(`[motor-media] el aviso falló y NO frena la publicación · ${String(e)}`);
         }

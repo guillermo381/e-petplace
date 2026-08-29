@@ -4,9 +4,14 @@
 // exactamente lo que hace que eso no sea una promesa:
 //  1. sin fotos no se levanta (criterio §4: un acta sin foto de entrada no
 //     responde la única pregunta para la que existe)
-//  2. con fotos sin subir NO viaja, y lo dice — pero YA EXISTE localmente
-//  3. cuando las fotos suben, viaja con los mediaIds REALES del servidor
+//  2. el acta EXISTE en la puerta antes de cualquier red
+//  3. 🔴 INVERTIDO AL CABLEAR: el acta viaja AUNQUE sus fotos sigan en cola.
+//     `levantar_acta_guarderia` no recibe `mediaIds` (medido contra la función
+//     viva), así que hacerla esperar sería inventar un acoplamiento que el
+//     motor no pide — y dejar el acta en el teléfono por una razón muerta.
 //  4. 🔴 la hora que viaja es la de la PUERTA, no la de la subida
+//  7. la clave de idempotencia es ESTABLE entre reintentos — si cambiara, la
+//     idempotencia del servidor no serviría de nada
 //  5. un fallo de red NO deja el acta muerta: vuelve a 'lista' y reintenta
 //  6. sin el wrapper cableado no viaja y el acta sigue guardada
 import { configurarAlmacen, type Almacen } from '../apps/prestador/src/lib/almacen';
@@ -73,7 +78,7 @@ async function main() {
     ok(corto, '1 · un acta sin fotos de estado no se levanta');
   }
 
-  // ── 2·3·4 · el acta espera a sus fotos, y viaja con la hora de la puerta ─
+  // ── 2·3·4 · el acta viaja SIN esperar a sus fotos ──────────────────────
   {
     configurarAlmacen(almacenEnMemoria());
     const foto = await encolar({ uri: 'file://a.jpg', tipo: 'foto', mascotaIds: ['thor'], fecha: DIA });
@@ -86,7 +91,6 @@ async function main() {
       fotosLocales: [foto.id],
     });
 
-    // El acta EXISTE en la puerta, aunque nada haya viajado.
     ok((await pendientesDeEstadia(ESTADIA)).length === 1, '2 · el acta existe en la puerta antes de cualquier red');
 
     let recibido: Parameters<LevantarActa>[0] | null = null;
@@ -95,25 +99,47 @@ async function main() {
       return { ok: true as const, actaId: 'acta-srv-1' };
     };
 
-    // Con la foto SIN subir: no viaja.
+    // 🔴 La foto sigue SIN subir — y el acta viaja igual.
     const r1 = await procesarActas(levantar);
-    ok(r1.levantadas === 0 && r1.esperandoMedia === 1, '2b · con la foto sin subir el acta NO viaja', JSON.stringify(r1));
-    ok(recibido === null, '2c · y nadie llamó al servidor');
-
-    // Sube la foto → ahora sí.
-    await procesarCola(motorOk(), { fecha: DIA });
-    const r2 = await procesarActas(levantar);
-    ok(r2.levantadas === 1, '3 · con las fotos arriba, el acta viaja');
-    ok(
-      !!recibido && (recibido as any).mediaIds.length === 1 && (recibido as any).mediaIds[0].startsWith('media-srv-'),
-      '3b · 🔴 viaja con el mediaId REAL del servidor, no con el id local',
-      recibido ? (recibido as any).mediaIds[0] : '—',
-    );
+    ok(r1.levantadas === 1, '3 · 🔴 el acta viaja aunque sus fotos sigan en cola', JSON.stringify(r1));
+    ok(!!recibido, '3b · llegó al servidor');
     ok(
       !!recibido && Math.abs(Date.parse((recibido as any).levantadaEn) - acta.levantadaEn) < 1000,
       '4 · 🔴 la hora que viaja es la de la PUERTA, no la de la subida',
     );
     ok((await leerActas())[0]?.estado === 'levantada', '3c · y queda marcada como levantada');
+  }
+
+  // ── 7 · la clave de idempotencia no cambia entre reintentos ────────────
+  {
+    configurarAlmacen(almacenEnMemoria());
+    const foto = await encolar({ uri: 'file://d.jpg', tipo: 'foto', mascotaIds: ['thor'], fecha: DIA });
+    await levantarActaLocal({
+      estadiaId: ESTADIA,
+      direccion: 'recogida',
+      carnetVerificado: true,
+      fotosLocales: [foto.id],
+    });
+
+    const claves: string[] = [];
+    let falla = true;
+    const inestable: LevantarActa = async (e) => {
+      claves.push(e.claveIdempotencia);
+      return falla
+        ? { ok: false as const, codigo: 'red', mensaje: 'network' }
+        : { ok: true as const, actaId: 'acta-srv-9' };
+    };
+
+    await procesarActas(inestable);
+    falla = false;
+    await procesarActas(inestable);
+
+    ok(claves.length === 2, '7 · hubo dos intentos', String(claves.length));
+    ok(
+      claves[0] === claves[1] && !!claves[0],
+      '7b · 🔴 la clave de idempotencia es LA MISMA en el reintento',
+      claves[0]?.slice(0, 20),
+    );
   }
 
   // ── 5 · un fallo no mata el acta ───────────────────────────────────────
