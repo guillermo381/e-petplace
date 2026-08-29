@@ -21984,6 +21984,7 @@ export type Database = {
         Returns: boolean
       }
       encolar_fotos_entrega_vencidas: { Args: never; Returns: Json }
+      encolar_resumen_media_guarderia: { Args: never; Returns: Json }
       encontrar_prestador_emergencia: {
         Args: {
           p_country?: string

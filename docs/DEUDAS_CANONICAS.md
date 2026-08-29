@@ -23660,3 +23660,52 @@ sin que nadie lo note, así que el costo de esperar está medido en cero.*
 
 **Dueño:** mesa (el criterio) + A (encender la compuerta). **Disparo:** antes de abrir guardería a familias reales.
 ☠️ **Condición de muerte:** el criterio de «al día» firmado **y** `fecha_proxima` poblándose por el camino real (el carnet por cámara ya la escribe cuando el modelo la encuentra).
+
+# Deudas S107 (D-970 · D-971) + L-436 — depositadas por A el 29-ago-2026 · números verificados libres POR GREP contra este archivo (tope real `D-969` · `L-435`; `L-714` sigue descartado por su propia ficha)
+
+#### D-970 — 🟡 EL DEFAULT DE LA CATEGORÍA `resumen` SE ESCRIBIÓ PARA OTRO VOLUMEN
+🟡 **MEDIA · decisión de MESA, no de pista.** Nace el 29-ago-2026 como **acto ② separado a propósito** de la firma que destrabó el digest de guardería.
+
+**Lo medido, contra el objeto:** `cat_notificacion_categorias.resumen` tiene `default_habilitada = **false**`, y `user_notificacion_prefs` tenía **cero filas** de esa categoría. Como `preferencia_efectiva` resuelve `COALESCE(fila del usuario, default de la categoría, false)`, **el digest no le llegaba a nadie** — y no por un defecto: por una decisión escrita.
+
+> ### 🔴 Lo que la vuelve ficha y no cura: ese default se escribió pensando en **el volumen de La Despensa**, no en la media de una guardería.
+> *Un resumen de decenas de eventos comerciales por día y «la guardería compartió fotos de Thor» son la misma categoría en el catálogo y dos cosas distintas para quien las recibe.* Pero **la categoría es una sola**, así que cambiar el default los mueve a los dos.
+
+🔴 **Y LO QUE NO SE HIZO, con todas las letras: el default NO se tocó para que el gate saliera verde.** El acto ① habilitó `resumen` **sólo en las cuentas del gate**, una fila por persona, marcada en `evidencia->>'origen'` para poder revertirla sin pisar la elección de nadie.
+
+> ***Un default de privacidad no se cambia para que un gate salga verde.*** Cambiarlo habría encendido un canal para toda la base a partir de una necesidad de prueba — y nadie lo habría notado, porque el síntoma de encender de más es que todo funciona.
+
+**Lo que la mesa tiene que decidir:** si `resumen` nace habilitada, si se parte en dos categorías (comercio vs cuidado), o si se queda apagada y el digest se ofrece explícitamente al contratar guardería. **Dueño:** mesa. **Disparo:** antes de abrir guardería a familias reales.
+☠️ **Condición de muerte:** la decisión firmada **y** las filas de `evidencia->>'origen' = 's107a-gate'` retiradas o convertidas en elección real.
+
+#### D-971 — 🟡 UNA PROP QUE SE EJERCITA PERFECTO Y NO TIENE QUIÉN LA PRODUZCA
+🟡 **MEDIA · hallazgo de B (S107), depositada por A. Va con número acá porque la enmienda de hoy dice que la numera quien la deposita, releyendo el máximo en ese commit.**
+
+**El contenido, en una línea:** *una prop nace del **dato que alguien produce**, jamás del ejemplo con el que se pidió la pieza.*
+
+🔴 **Y lo que la vuelve CLASE y no anécdota: pasa todos los gates.** La prop se ejercita perfectamente en la galería, tiene su tipo, su doc y sus pares de contraste — *lo único que falta es un productor*, y eso no lo ve el typecheck, ni el lint, ni WCAG, ni una revisión de código, porque **no hay nada mal escrito**. La pieza está bien; simplemente nadie le va a dar nunca ese valor.
+
+> *Es la familia de «motor sin puerta» (`L-318`) mirada desde el otro extremo: allá la pieza existe y nadie la llama; acá la prop existe y nadie la alimenta. Las dos dan verde en todo.*
+
+**El caso hermano del mismo día, que muestra el otro modo de falla:** `Baldosa.columnas` **sí tenía productor** pero con **default**, y el default volvió el defecto invisible **para el consumidor nuevo** — dos baldosas de `negocio.tsx` pidiendo el glifo de dos columnas dentro de una grilla de tres, sin error de ningún tipo. Al hacerla obligatoria (firma de la mesa) **un defecto invisible pasó a ser once errores de compilación.**
+
+**Dueño:** B (el criterio en el protocolo 1c de Ley 11). **Disparo:** la próxima pieza que nazca con una prop cuyo valor no salga de un dato existente.
+☠️ **Condición de muerte:** el protocolo 1c pregunta explícitamente **«¿quién produce este valor, y existe hoy?»** por cada prop, y la pregunta queda escrita en la skill.
+
+---
+
+### L-436 — UN CINTURÓN QUE MIRA UNA SOLA AUDIENCIA CERTIFICA UNA SOLA AUDIENCIA
+
+**Origen: defecto propio de A, encontrado al verificar contra el objeto, 29-ago-2026.**
+
+La migración del digest cerró su función nueva con `REVOKE … FROM PUBLIC, anon` **y dejó `authenticated` con EXECUTE**. Su cinturón preguntaba `proacl ILIKE '%anon=%'` — **y dio VERDE**.
+
+> ### El verde era **parcialmente** cierto, y un verde parcial se lee igual que uno entero.
+
+*Es `L-216` («un `REVOKE … FROM anon` que deja `PUBLIC` intacto no cierra nada») con una vuelta más incómoda: allá el REVOKE no hacía nada y el rojo aparecía al probarlo; acá el REVOKE **sí hizo la mitad de su trabajo**, así que el instrumento tenía razón sobre lo que miraba — y por eso nadie sospecha de él.*
+
+**Cómo se encontró:** no lo encontró el cinturón. Lo encontró **comparar el `proacl` de la función nueva contra el de sus cuatro barredoras hermanas** — `notificar_recordatorios_cita`, `avisar_recurrencias_proximas`, `vigilar_consumo_video`, `encolar_fotos_entrega_vencidas`, todas con `postgres=X · service_role=X` y **ninguna con `authenticated`**. La mía era la única distinta.
+
+**La cura, y es la parte transferible:** el cinturón de la corrección **no compara contra un literal tipeado a mano — compara contra el MOLDE VIVO**, extrayendo el `proacl` de las hermanas en la misma corrida. *Si las hermanas cambian, el gate cambia con ellas; y si mi función se aparta del molde, aborta.* Un valor tipeado a mano habría vuelto a certificar mi propia idea en vez del estado de la casa.
+
+**Regla:** un cinturón de permisos **enumera las audiencias que la casa tiene** (`anon`, `authenticated`, `PUBLIC`, `service_role`) o **se compara contra el molde de sus pares** — jamás pregunta por una sola y concluye «cerrada». *Preguntar por una y afirmar sobre todas es la forma más barata de fabricar un verde flojo.*
