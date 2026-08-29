@@ -1,5 +1,23 @@
 # S107-A · ACTA DE TRASPASO — la conducción, medida al 29-ago-2026
 
+> ## ✏️ MARCA DE ENMIENDA — LA A QUE RETOMÓ YA EJECUTÓ EL PUNTO 2
+> *(depositada por la A siguiente, con el aparato y la base a la vista.)*
+>
+> **`main` = `6a10fb5c`.** **El merge de C está hecho, verificado y publicado**
+> — 4 typechecks en 0 · `verify:diseno` VERDE con 60 reglas · OTA prestador
+> group `df533f43-b297-4b13-bdb7-586ece4f34f3` (runtime 1.0.7) y OTA cliente
+> group `2d999b9e-387b-4de7-9ed7-437ac138f672` (runtime 1.0.6), **los dos con
+> ancla `6a10fb5c`** y `verify-ota` VERDE (los dos con `--binario-local`
+> declarado: **ni 1.0.7 ni 1.0.6 tienen build registrada en EAS**).
+>
+> 🔴 **Y ESTA ACTA SE EQUIVOCABA EN DOS COSAS QUE HABRÍAN ROTO LA PANTALLA.**
+> Se corrigen abajo **en su lugar, con lo viejo tachado y no borrado** — el
+> precedente de la casa: *un documento vencido se marca donde se lee, porque
+> quien lo abra mañana no va a poder medirlo.*
+>
+> **Lo que SIGUE vivo de esta acta:** el punto 3 (la build de nube), toda la
+> §⑤ (las trampas que no se ven en el código) y toda la §⑥.
+
 > **Para quién:** la A que retome. **Se lee ANTES de tocar nada.** Todo lo que
 > dice está medido contra el objeto; lo que es decisión lleva su firma.
 > **`main` al cerrar: `6e1598e8`** · **último OTA de prestador: group
@@ -17,15 +35,53 @@
 > todavía lo daba por empezar). **Este documento envejece igual que aquélla** —
 > es una foto del 29-ago, no un estado vivo. *Un acta dice lo que pasó; sólo el
 > founder dice lo que sigue.*
+>
+> ✏️ **NOTA AL PIE — esta advertencia se cobró en el PRIMER MINUTO de la A que
+> retomó, y de una forma que conviene escribir porque no es obvia:**
+>
+> > **Medir la rama REMOTA no mide el trabajo de la pista.** La A nueva corrió
+> > `git log origin/main..origin/pista/s107-c` y obtuvo **«cero commits fuera»**
+> > — o sea, la medición dijo *«C ya está mergeada»* y contradijo a esta acta.
+> > **Falso:** los cuatro commits de C **vivían sólo en el disco de su
+> > worktree**, sin pushear. `origin/pista/s107-c` estaba viejo.
+> >
+> > *Un remoto no es el estado de una pista: es el último momento en que a
+> > alguien se le ocurrió empujarlo.* ⇒ **el estado de una pista se mide contra
+> > su worktree** (`git -C <worktree> rev-parse HEAD` + `status --porcelain`),
+> > y lo primero que hace quien mergea es **respaldar esa rama en origin**
+> > (L-217: *«todo en origin» y «todo en el canon» son dos afirmaciones
+> > distintas* — acá faltaba la primera).
 
-**2 · EL MERGE DE C ES LO PRIMERO QUE SE CONSTRUYE.** Está abortado y no
-compila: son **cuatro llamadas contra la API vieja** en
-`apps/prestador/src/app/guarderia/taller.tsx` — **573 · 663 · 698 · 702**. El
-mapeo, ya medido: **`precioPaquete` → `precio`** · **`rotuloTamano` → `rotulo`**
-· y **desaparecen `clave`, `registro`, `elegido`, `onElegir`, `campoPrecio`**.
-🔴 **Leé `packages/ui/src/components/FichaDeOferta.tsx` ENTERA antes de tocar:
-es la pantalla que el founder está por caminar**, y una adaptación a ojo rompe
-en silencio lo que ningún typecheck ve. *(El detalle completo, en §②.)*
+**2 · ~~EL MERGE DE C ES LO PRIMERO QUE SE CONSTRUYE.~~** ✅ **HECHO** — está en
+`main` (`6a10fb5c`), con los cuatro sitios adaptados. Se conserva **el mapeo
+CORREGIDO**, porque el que decía esta acta estaba mal en dos de cinco:
+
+| prop vieja de C | qué pasa de verdad |
+|---|---|
+| `precioPaquete` | → **`precio`** |
+| `rotuloTamano` | → **`rotulo`** |
+| `elegido` | → **`encendido`** |
+| `onElegir` | → **`onCambio`** *(firma nueva: recibe el booleano)* |
+| `clave` | ☠️ **muere** — única que muere, con su lápida escrita en la pieza |
+| **`campoPrecio`** | ✅ **VIVE** — `FichaDeOferta.tsx:202` |
+| **`registro`** | ✅ **VIVE** — `FichaDeOferta.tsx:204` |
+
+> 🔴 **ACÁ ESTABA EL ERROR, Y ERA CARO:** esta acta daba por muertas a
+> ~~`registro`~~ y ~~`campoPrecio`~~. **Adaptar al pie de la lista habría
+> borrado el `campoPrecio` de las TRES fichas del taller** —diario, paquetes y
+> mensual— **y con él el `SliderPrecio` de cada una**: el prestador habría
+> encendido una oferta y no habría tenido dónde ponerle precio. *Y no lo caza
+> ningún typecheck: quitar una prop opcional compila perfecto.*
+>
+> ⇒ **Por eso la instrucción de leer la pieza ENTERA no era una formalidad.**
+> La lápida de `clave` está escrita adentro del archivo, en el lugar donde
+> vivía la prop; las otras dos siguen ahí, con su doc. *La lista de una acta es
+> un recuerdo; el archivo es el contrato.*
+
+🔴 **Y SI VOLVÉS A TOCAR ESA PANTALLA, LEÉ
+`packages/ui/src/components/FichaDeOferta.tsx` ENTERA ANTES:** es la que el
+founder camina, y una adaptación a ojo rompe en silencio lo que ningún
+typecheck ve. *(El detalle del merge, en §②.)*
 
 **3 · LA BUILD DE NUBE `1.0.7`, cuando resetee la cuota de EAS el 1-sep.** Es
 **la que va a familias** y **la única que cierra las tres cadenas de permiso**,
@@ -57,7 +113,7 @@ node scripts/verify-ota.mjs --app prestador --update <id> \
 | pista | mergeado en `6e1598e8` | qué queda afuera | qué espera de A |
 |---|---|---|---|
 | **B** | ✅ **todo** (`17a2ee48` → `46e59173`): `SeccionPlegable`, el rename `FichaPaquete` → **`FichaDeOferta`**, `equivalenciaDePaquete`, dos pares de glifos nuevos | — | nada |
-| **C** | hasta `2cb9a955`… **NO**: ver ② | 🔴 **6 commits fuera** (`3fa1c4ae` · `525744ba` · `b9910d41` · `2cb9a955`) | **el merge, que hoy NO COMPILA** — ② |
+| **C** | ✅ **TODO** — `6a10fb5c` (los ~~6~~ **4** commits: `3fa1c4ae` · `525744ba` · `b9910d41` · `2cb9a955`; **eran cuatro, no seis**, y **vivían sólo en su worktree**) | — | nada |
 | **D** | su módulo de media, cola y punto vivo (mergeado tandas atrás) | — | **nada: ⑤ está aplicado** (③). Puede cablear sus cuatro puntos |
 
 **Verificado del rename de B:** `FichaPaquete.tsx` **no existe** y
@@ -65,10 +121,30 @@ node scripts/verify-ota.mjs --app prestador --update <id> \
 
 ---
 
-## ② 🔴 EL MERGE DE C ESTÁ ABORTADO, Y POR QUÉ — es lo primero de la cola
+## ② ~~🔴 EL MERGE DE C ESTÁ ABORTADO~~ → ✅ **HECHO en `6a10fb5c`**
 
-**Intenté mergear `pista/s107-c` y lo ABORTÉ.** No es un conflicto de texto: es
-**una divergencia de API**.
+> **✏️ CÓMO SE RESOLVIÓ, porque los tres conflictos NO eran mecánicos:**
+>
+> · **el import** — el nombre nuevo de B (`FichaDeOferta`) **más
+>   `FichaMensualidad`**, que C necesita en el espejo y HEAD no tenía.
+> · 🔴 **la carga de la oferta — LAS DOS MITADES, y ninguna sola alcanzaba.**
+>   Mi versión seteaba el precio con el guard de nulo (firma del 29-ago); la de
+>   C encendía `ofreceDiario`. **El toggle se enciende DENTRO del guard:** con
+>   `precio === null` no hay oferta de día que encender, y prenderlo igual haría
+>   que el taller mostrara **un día suelto que el lugar no vende**.
+> · 🔴 **el espejo del paquete — GANA EL GUARD DE C.** Yo pasaba
+>   `PASOS_PRECIO[iPrecio]` **siempre** como día suelto ⇒ *comparaba el paquete
+>   contra un precio que el lugar podía no estar ofreciendo.* C lo condiciona a
+>   `ofreceDiario` y omite la comparación cuando no hay contra qué comparar.
+>
+> **En el toggle se conservó la forma FUNCIONAL de C** (`() => set(v => !v)`) en
+> vez de usar el booleano que ahora llega. *Medido: `Interruptor` llama
+> `onCambio(!encendido)` —o sea manda el valor nuevo, y `(v) => set(v)` habría
+> andado— pero depender de eso ataría la pantalla a un detalle interno de la
+> pieza. Alternar sobre el estado previo es correcto mande lo que mande.*
+
+**Lo que sigue (registro de por qué se abortó la primera vez):** no era un
+conflicto de texto, era **una divergencia de API**.
 
 **Lo medido:** B renombró `FichaPaquete` → `FichaDeOferta` **y le cambió las
 props** (`precioPaquete` → `precio`, `rotuloTamano` → `rotulo`, y desaparecen
@@ -117,7 +193,8 @@ ver ⑥).
 
 ## ④ LA COLA, EN ORDEN, CON LO QUE FALTA DE VERDAD
 
-1. 🔴 **Mergear C** — bloqueado por ②. **Es lo único que frena a todos.**
+1. ~~🔴 **Mergear C** — bloqueado por ②.~~ ✅ **HECHO** (`6a10fb5c`), con sus
+   dos OTAs publicados. **C y D destrabadas.**
 2. 🔴 **La build de nube `1.0.7`, cuando resetee la cuota de EAS (martes 1-sep).**
    Medido el 29-ago: *«This account has used its Android builds from the Free
    plan this month, which will reset in 3 days.»* **Es la que va a familias y
