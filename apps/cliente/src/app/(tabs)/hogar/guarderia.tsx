@@ -31,20 +31,42 @@ import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   FiltroMascotas,
+  Icono,
+  FiltroPills,
   Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { getEstadoOnboardingDueno, obtenerMascotasDeFamilia } from '@epetplace/api';
+import {
+  getEstadoOnboardingDueno,
+  obtenerMascotasDeFamilia,
+  obtenerMisEstadiasGuarderia,
+  resolverUrlsFotos,
+  type EstadiaDeMiMascota,
+} from '@epetplace/api';
+import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+
+/* ☠️ ACÁ VIVÍA `LISTA_DISPONIBLE = false`, y murió el 29-ago: **A publicó
+   `obtenerMisEstadiasGuarderia`** y el enchufe se conectó. *La constante existía
+   para que el día del lector fuera una línea — y lo fue.* (Ley 37: el andamio
+   se retira en el mismo acto que su razón.) */
+
+type Estadias =
+  | { fase: 'cargando' }
+  | { fase: 'error' }
+  /** 🔴 Nadie preguntó todavía — **no es lo mismo que «no hay»**. */
+  | { fase: 'sinSujeto' }
+  | { fase: 'listo'; lista: EstadiaDeMiMascota[] };
 
 type Mascotas =
   | { fase: 'cargando' }
@@ -84,12 +106,33 @@ export default function LogGuarderia() {
         return;
       }
       const elegibles = ofrecibles(r.data, especies);
+      /* 🔴 LAS FOTOS SE FIRMAN ANTES DE PINTARLAS. El bucket `mascotas` es
+         PRIVADO desde S92-BIS: `foto_url` es un PATH, no una URL, y sin firmar
+         no carga. `resolverUrlsFotos` las firma POR LOTE (una sola llamada). */
+      const paths = elegibles
+        .map((m) => m.foto_url)
+        .filter((x): x is string => typeof x === 'string' && x.length > 0);
+      const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
+      if (!vigente) return;
       setMascotas({
         fase: 'listo',
         lista: elegibles.map((m) => ({
           id: m.id,
           nombre: m.nombre,
-          fotoUrl: caraDeMascotaPorRuta({ especie: m.especie, rutaImagen: m.foto_url }),
+          fotoUrl: caraDeMascotaPorRuta({
+            especie: m.especie,
+            /* ⏪ ACÁ ESTABA LA MITAD MÁS SILENCIOSA DEL DEFECTO: este parámetro
+               recibía `m.foto_url`. `rutaImagen` es la ILUSTRACIÓN del catálogo
+               (`cat_razas.ruta_imagen`, bucket PÚBLICO `especies`) — pasarle el
+               path de la foto privada lo mandaba a resolver contra un bucket
+               donde ese objeto no existe. *No fallaba: devolvía una URL que
+               no carga, que es un 404 con forma de dato.* */
+            rutaImagen: m.raza_ruta_imagen,
+            /* ⏪ Y ÉSTA ERA LA MITAD VISIBLE: el escalón 0 —la foto real de la
+               familia— **no se pasaba**, así que la escalera nunca podía
+               llegar a ella. Las cuatro hermanas sí lo pasan. */
+            fotoUri: m.foto_url ? urls.get(m.foto_url) : undefined,
+          }),
         })),
       });
       if (elegibles.length === 1) setElegida(elegibles[0].id);
@@ -98,6 +141,33 @@ export default function LogGuarderia() {
       vigente = false;
     };
   }, [especies.fase, intento]);
+
+  const [pestana, setPestana] = useState<'proximas' | 'historial'>('proximas');
+  const [estadias, setEstadias] = useState<Estadias>({ fase: 'cargando' });
+  const idioma = obtenerIdiomaActual();
+
+  /* 🔴 SE PIDE POR MASCOTA. El lector acepta `mascotaId?` y filtra del lado del
+     server — *filtrar acá una lista que el server sabe filtrar es traerse de
+     más para tirar la mitad.* */
+  useEffect(() => {
+    /* ⏪ ACÁ DECÍA `{ fase: 'listo', lista: [] }`, y era **la misma clase de
+       defecto que esta pista anotó ayer**: con ninguna mascota elegida la
+       pantalla pintaba *«Sin estadías agendadas»* — **una afirmación sobre algo
+       que nadie preguntó**. Cazado con sesión real y tres mascotas: el vacío
+       de la firma salía antes de que hubiera sujeto.
+       *Cada mitad era correcta —el vacío dice bien lo suyo, el filtro también—
+       y el defecto nacía de mostrarlas juntas.* */
+    if (elegida === null) { setEstadias({ fase: 'sinSujeto' }); return; }
+    let vigente = true;
+    setEstadias({ fase: 'cargando' });
+    void (async () => {
+      const r = await obtenerMisEstadiasGuarderia({ mascotaId: elegida });
+      if (!vigente) return;
+      /* Un fallo JAMÁS se disfraza de «no tienes estadías» (Ley 13). */
+      setEstadias(r.ok ? { fase: 'listo', lista: r.data } : { fase: 'error' });
+    })();
+    return () => { vigente = false; };
+  }, [elegida, intento]);
 
   const alAtras = useCallback(() => router.back(), []);
   const mascota =
@@ -134,16 +204,143 @@ export default function LogGuarderia() {
               </View>
             ) : null}
 
-            {/* 🔴 EL VACÍO DICE LA VERDAD, Y LA VERDAD HOY ES OTRA:
-                no es «no tienes estadías» — es que **todavía no podemos
-                mostrarlas**. *Decir lo primero sobre un lector que no existe
-                sería mentir con cara de dato*, y el día que el lector llegue
-                nadie sabría que la pantalla estuvo mintiendo. */}
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('logGuarderia.listaPendienteTitulo')}
-              descripcion={t('logGuarderia.listaPendienteDetalle')}
+            {/* ═══ 🔴 DOS BLOQUES CONSTRUIDOS E INERTES — su causa la manda
+                    el SERVER, y por eso no se deducen acá ═══════════════════
+
+                ① **ESPECIE SIN OFERTA** (hoy: gato). Firma del founder:
+                *«Todavía no tenemos guarderías para gatos. Estamos trabajando
+                en eso»* — **y es distinto de «no tienes estadías»: una es una
+                carencia NUESTRA, la otra un estado suyo.**
+                🔴 **No se deduce de una lista vacía.** Hoy no hay forma de
+                distinguirlas: el catálogo dice que el gato es elegible y quien
+                sabe que nadie lo recibe es el filtro de ofertas. *Deducirlo
+                sería inventar un diagnóstico a partir de un silencio.*
+                ⇒ llega con `especie_sin_oferta` del resumen de A.
+
+                ② **PAQUETE CON SALDO** — botón «Reservar estadía de tu
+                paquete» + «7 de 10 disponibles», directo al selector de fecha
+                de ESA guardería (sin elegir lugar ni pagar: las dos ya están
+                hechas). **No existe lector de saldo de paquetes de guardería**
+                — y tampoco existe la compra que lo crearía.
+                ═════════════════════════════════════════════════════════════ */}
+
+            {/* LOS CHIPS DE LA LISTA — la estructura de las cuatro hermanas.
+                Se montan ya: **son navegación, no dato**, y el día que la
+                lista llegue no hay que reacomodar la pantalla. */}
+            {/* Las etiquetas son las MISMAS keys que sus hermanas (`plan.seg*`)
+                — *dos cadenas nuevas que dijeran lo mismo son dos lugares donde
+                la voz puede divergir.* */}
+            <FiltroPills
+              activo={pestana}
+              onCambio={(c) => setPestana(c)}
+              opciones={[
+                { codigo: 'proximas' as const, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
+                { codigo: 'historial' as const, etiqueta: t('plan.segHistorial'), icono: 'guarderia', capa: null },
+              ]}
             />
+
+            {/* 🔴 DOS VACÍOS DISTINTOS, Y LA DIFERENCIA NO ES DE ESTILO.
+
+                · **«Sin estadías agendadas»** (firma del founder) es la verdad
+                  cuando el lector respondió y no había ninguna.
+                · **«Todavía no podemos mostrarte»** es la verdad HOY: el lector
+                  **no existe**, así que no sabemos si hay o no.
+
+                *Decir el primero sobre un lector que no existe sería mentir con
+                cara de dato — y el día que el lector llegue, nadie sabría que la
+                pantalla estuvo mintiendo.* **El de la firma está construido y se
+                enciende solo** cuando `cargarEstadias` devuelva una lista. */}
+            {/* LA LISTA — el vacío de la firma del founder ya es el que se
+                pinta: **el lector existe, así que decir «sin estadías» ES la
+                verdad.** *El vacío honesto de «todavía no podemos mostrarte»
+                murió con su razón.* */}
+            {estadias.fase === 'cargando' ? (
+              <EsqueletoGrupo>
+                <Esqueleto alto={64} />
+                <Esqueleto alto={64} />
+              </EsqueletoGrupo>
+            ) : estadias.fase === 'error' ? (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('logGuarderia.estadiasNoCargoTitulo')}
+                descripcion={t('logGuarderia.estadiasNoCargoDetalle')}
+                accion={
+                  <Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />
+                }
+              />
+            ) : estadias.fase === 'sinSujeto' ? (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('logGuarderia.elegiMascotaTitulo')}
+                descripcion={t('logGuarderia.elegiMascotaDetalle')}
+              />
+            ) : (() => {
+              /* 🔴 `esProxima` LO DECIDE EL SERVER — la pantalla no compara
+                 fechas. *Si se compararan en dos superficies podrían discrepar
+                 sobre qué es «hoy», y una familia vería su estadía del lado
+                 equivocado.* */
+              const visibles = estadias.lista.filter((e) =>
+                pestana === 'proximas' ? e.esProxima : !e.esProxima,
+              );
+              if (visibles.length === 0) {
+                return (
+                  <EstadoVacio
+                    registro="seccion"
+                    icono={<Icono nombre="guarderia" tamano={48} />}
+                    titulo={t('logGuarderia.vacioTitulo')}
+                    descripcion={t('logGuarderia.vacioDetalle')}
+                  />
+                );
+              }
+              return visibles.map((e) => (
+                /* ⚠️ **ESTA FILA NO ES `FilaCita`, Y SE DECLARA.** Medido:
+                   `FilaCitaOficio` es `'paseo' | 'grooming' | 'veterinaria' |
+                   'adiestramiento'` — **la pieza no conoce guardería**, y es de
+                   B. *Montarla con otro oficio pintaría el canto de un servicio
+                   ajeno; forzar el tipo sería mentirle al compilador para que
+                   la pantalla mienta en el color.*
+                   ⇒ **`Celda` mientras tanto**, con el pedido a B escrito
+                   (`S107-C-PEDIDO-A-B-FILACITA-GUARDERIA.md`). **Hasta que
+                   entre, esta fila NO se ve igual que la de sus hermanas** —
+                   se dice acá para que no se lea como un desvío de acabado. */
+                /* 🔴 DOS VARIANTES Y NO UNA CON PROPS OPCIONALES: `Celda`
+                   discrimina por `interactiva`, y **una fila sin destino no
+                   debe parecer tocable**. *Una estadía sin `estadiaId` es una
+                   cita comprada que el prestador todavía no ejecutó: no hay
+                   durante que mirar, y ofrecer el toque prometería una pantalla
+                   vacía.* */
+                e.estadiaId === null ? (
+                  <Celda
+                    key={e.citaId}
+                    titulo={e.prestadorNombre}
+                    subtitulo={e.mascotaNombre}
+                    metadataMono={fechaCortaMono(e.fecha, idioma)}
+                  />
+                ) : (
+                  <Celda
+                    key={e.citaId}
+                    interactiva
+                    accessibilityRole="button"
+                    titulo={e.prestadorNombre}
+                    subtitulo={e.mascotaNombre}
+                    /* ⚠️ SIN HORA: **una estadía no tiene hora** — tiene día y
+                       franja. *Un `00:00` se leería como medianoche.* */
+                    metadataMono={fechaCortaMono(e.fecha, idioma)}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/guarderia/[estadiaId]',
+                        params: {
+                          estadiaId: e.estadiaId ?? '',
+                          mascotaId: e.mascotaId,
+                          mascotaNombre: e.mascotaNombre,
+                          fecha: e.fecha,
+                        },
+                      })
+                    }
+                  />
+                )
+              ));
+            })()}
           </>
         )}
       </ScrollView>
@@ -155,10 +352,21 @@ export default function LogGuarderia() {
           <Boton
             variante="primario"
             bloque
+            /* ⏪ ACÁ EL BOTÓN REPETÍA LA INSTRUCCIÓN DEL CUERPO. Sin mascota
+               elegida decía «Elige de quién primero» **mientras el vacío decía
+               «Elige de quién»** — la misma frase dos veces en una pantalla.
+               *Cada mitad correcta por su cuenta; el defecto nacía de mostrarlas
+               juntas* (la clase que esta pista viene cazando).
+
+               🔴 **Firma de la mesa: el cuerpo instruye, el botón lleva la
+               acción.** Y el rótulo sale de **una key propia de esta pantalla**:
+               `plan.agendarFaltaMascota` es COMPARTIDA y cambiarla movería la
+               voz de superficies ajenas. *No hizo falta tocar `Boton`: su
+               `razonDeshabilitado` ya existía justo para esto.* */
             etiqueta={
               mascota !== null
                 ? t('logGuarderia.reservarDe', { nombre: mascota.nombre })
-                : t('plan.agendarFaltaMascota')
+                : t('logGuarderia.reservar')
             }
             deshabilitado={mascota === null}
             razonDeshabilitado={t('plan.elegiMascota')}

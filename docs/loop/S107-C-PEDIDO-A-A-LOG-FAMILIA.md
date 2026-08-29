@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — 29-ago-2026.** A lo publicó y C lo consumió. **Se conserva como registro de qué se pidió y por qué; NO es un pedido vivo.** *Un pedido cumplido que sigue pidiendo manda a alguien a construir lo que ya está.*
+
 # S107-C → A · PEDIDO AUTOCONTENIDO — el lector de estadías del lado de la FAMILIA
 
 > **Qué destraba:** el **log** del hub de guardería — la mitad que los otros cuatro oficios tienen y guardería no. **Firma de la mesa:** *«el LOG se construye, no se pospone: una familia que reserva y no tiene dónde ver sus estadías es lo que hace que el oficio se sienta ajeno.»*
@@ -84,38 +86,22 @@ El hub pasa a tener **el esqueleto de sus cuatro hermanas**, que ya está censad
 
 ---
 
-## ⑤.2 · 🔴 EL HALLAZGO DE MOTOR — el punto vivo no tiene de dónde colgar
+## ⑤.2 · ⏪ **RETIRADO — EL HALLAZGO ERA MÍO Y ESTABA VENCIDO** *(29-ago)*
 
-`obtenerPuntoVivo(tramoId)` y `registrarPuntoVivo({tramoId,…})` existen, están bien escritos
-y pasan sus pruebas. **Medido contra el esquema el 29-ago:**
+**Acá decía que `guarderia_tramos` no existía y que el punto vivo era inalcanzable por los dos
+lados. Es FALSO: la tabla existe** —A la creó hace varias tandas— **y en el mismo acto se curó
+una fuga que el hueco tapaba**: `obtener_punto_vivo` sólo pedía `auth.uid()`, así que cualquier
+logueado con un `tramo_id` obtenía la ubicación en vivo de un vehículo.
 
-| | |
-|---|---|
-| **`guarderia_tramos`** | **NO EXISTE.** No hay tabla de tramos |
-| `guarderia_tramo_punto.tramo_id` | uuid **sin FK** — `Relationships: []` en los tipos generados |
-| `guarderia_estadias` | **no tiene columna de tramo** (sus columnas son `cita_id`, `espacio_id`, `estado`, `a_bordo_en`, `llegada_en`, `entregada_en`) |
+🔴 **Y la forma corrige lo que yo había supuesto:** el tramo es **del VIAJE, no de la estadía**
+(`prestador_id, fecha, direccion`, **sin `estadia_id`**), y cada estadía apunta a los suyos con
+`tramo_recogida_id` / `tramo_devolucion_id`. *Un tramo por estadía haría que el mismo vehículo
+emitiera N puntos idénticos.*
 
-> ### ⇒ **Nadie puede producir un `tramoId` y nadie puede obtenerlo.**
-> El punto vivo es inalcanzable **por los dos lados**, y **no por permisos: por falta de la
-> entidad que los une.**
-
-**Es `L-318` («motor sin puerta») un piso más adentro, y por eso se declara con esta forma:**
-*la pieza existe, es alcanzable desde afuera y pasa sus pruebas — **lo que no tiene productor
-es el identificador con el que abre**. Y no falla: devuelve `null`, que la pantalla lee
-correctamente como «todavía no salió».* **Un hueco que se lee como un estado normal no deja
-síntoma.**
-
-**Lo que C ya hizo con esto:** el mapa está montado y **se enciende solo** el día que
-`tramoActivoId` deje de ser `null`. **Cero trabajo de superficie pendiente.**
-
-**Y la regla que va con él, para quien construya el productor:** el lector devuelve **UN PUNTO
-O `null`, jamás una lista** — *las paradas de una ruta son las casas de otras familias.* Del
-lado de la pantalla eso ya está garantizado **por construcción** (se le pasa a `MapaRecorrido`
-un array de exactamente un punto, y una polilínea de un punto no dibuja nada), **pero el
-recorte tiene que seguir viviendo en el servidor**: si el lector algún día devolviera dos
-puntos, la garantía de la pantalla se caería sola.
-
----
+**No se borra este apartado: se marca.** *Un pedido que afirmó de más y desaparece deja a quien
+lo leyó antes creyendo lo viejo — y a quien lo lea después sin saber que hubo un error.*
+**Lo que sí queda vivo del pedido es `tramoActivoId` en el lector**, que es de dónde la pantalla
+lo lee.
 
 ## ⑤.3 · LO QUE **NO** SE PIDE, para que no se construya de más
 
