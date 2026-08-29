@@ -52,7 +52,6 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Campo,
   Celda,
   Encabezado,
   Esqueleto,
@@ -60,8 +59,8 @@ import {
   FichaFranja,
   Hoja,
   HojaScroll,
+  FichaMensualidad,
   FichaPaquete,
-  Interruptor,
   SelectorOpcion,
   SliderPrecio,
   StepperCantidad,
@@ -87,6 +86,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { AcordeonSeccion } from '@/components/acordeon-seccion';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
@@ -122,6 +122,14 @@ const PASOS_PAQUETE: string[] = [];
 for (let c = 2000; c <= 90000; c += 500) PASOS_PAQUETE.push((c / 100).toFixed(2));
 const indiceDePaquete = (v: number): number => {
   const i = PASOS_PAQUETE.indexOf(v.toFixed(2));
+  return i >= 0 ? i : 0;
+};
+
+/** El riel de la mensualidad: un mes pesa como veinte y pico de días. */
+const PASOS_MENSUAL: string[] = [];
+for (let c = 5000; c <= 150000; c += 1000) PASOS_MENSUAL.push((c / 100).toFixed(2));
+const indiceDeMensual = (v: number): number => {
+  const i = PASOS_MENSUAL.indexOf(v.toFixed(2));
   return i >= 0 ? i : 0;
 };
 
@@ -185,7 +193,16 @@ export default function TallerGuarderia() {
     Record<number, { existe: boolean; activo: boolean; iPrecio: number }>
   >({});
   const [ofreceMensual, setOfreceMensual] = useState(false);
-  const [precioMensual, setPrecioMensual] = useState('');
+  const [iMensual, setIMensual] = useState(indiceDeMensual(200));
+  /* 🔴 El diario nace PRENDIDO: es la unidad base del oficio, y arrancar
+     apagado le pediría al prestador que encienda lo obvio. */
+  const [ofreceDiario, setOfreceDiario] = useState(true);
+  /* Los horarios ya están guardados y no hacen falta para tocar precios;
+     los precios sí son a lo que se viene. */
+  const [horariosAbierto, setHorariosAbierto] = useState(false);
+  const [preciosAbierto, setPreciosAbierto] = useState(true);
+  /** El modal de guardar: 'informa' (un botón) · 'pregunta' (dos). */
+  const [aviso, setAviso] = useState<null | 'informa' | 'pregunta'>(null);
 
   useEffect(() => {
     if (gate !== 'permitido') return;
@@ -244,8 +261,9 @@ export default function TallerGuarderia() {
       const o = oferta.data;
       if (o !== null) {
         setIPrecio(indiceDePrecio(o.precio));
+        setOfreceDiario(true);
         setOfreceMensual(o.precioMensual !== null);
-        setPrecioMensual(o.precioMensual === null ? '' : o.precioMensual.toFixed(2));
+        if (o.precioMensual !== null) setIMensual(indiceDeMensual(o.precioMensual));
       }
 
       /* Lo que NO vino en la respuesta queda `existe:false` — nunca se
@@ -271,8 +289,47 @@ export default function TallerGuarderia() {
     };
   }, [gate, intento]);
 
+  /** ¿Hay alguna modalidad con precio encendida? */
+  const hayAlgunPrecio =
+    ofreceDiario || ofreceMensual || TAMANOS.some((tam) => paquetes[tam]?.activo === true);
+
+  /**
+   * El botón de guardar **no guarda directo**: primero decide si hay algo que
+   * decir. Dos avisos y sólo dos (firma de la mesa):
+   * · **sin ningún precio** → PREGUNTA, dos botones. *Guardar sin publicar es
+   *   una decisión, no un accidente, y por eso se confirma.*
+   * · **con precio pero sin el diario** → INFORMA, un botón. *No se pregunta
+   *   lo que no tiene alternativa: sólo se dice qué va a pasar.*
+   */
+  /** Lo que queda encendido, nombrado — «no se publica» sin decir QUÉ queda
+   *  deja al prestador adivinando qué configuró. */
+  const modalidadesEncendidas = [
+    ...(TAMANOS.filter((tam) => paquetes[tam]?.activo === true).map((tam) =>
+      t('tallerGuarderia.estadias', { n: tam }),
+    )),
+    ...(ofreceMensual ? [t('tallerGuarderia.mensual')] : []),
+  ].join(' · ');
+
+  /* 🔴 SIN `useCallback` A PROPÓSITO: memorizarlo con deps
+     `[hayAlgunPrecio, ofreceDiario]` capturaría un `guardar` VIEJO —el de un
+     render anterior, con precios anteriores— y guardaría lo que ya no está en
+     pantalla. *Es el closure obsoleto que costó tres diagnósticos en S92
+     (L-221), y acá el síntoma sería peor: no falla, guarda otra cosa.* */
+  const alGuardar = () => {
+    if (!hayAlgunPrecio) {
+      setAviso('pregunta');
+      return;
+    }
+    if (!ofreceDiario) {
+      setAviso('informa');
+      return;
+    }
+    void guardar();
+  };
+
   const guardar = useCallback(async () => {
     if (estado.fase !== 'listo' || guardando) return;
+    setAviso(null);
     setGuardando(true);
 
     const espacio = await definirEspacioGuarderia({
@@ -318,25 +375,24 @@ export default function TallerGuarderia() {
        franjas Y capacidad, y el motor lo rebota hablado
        (`franjas_no_configuradas` / `sin_espacios_configurados`). Guardarla
        antes rebotaría contra lo que esta misma pantalla está por escribir. */
-    const mensual = ofreceMensual ? Number(precioMensual.replace(',', '.')) : null;
-    if (ofreceMensual && (!Number.isFinite(mensual) || (mensual ?? 0) <= 0)) {
-      mostrar({ texto: t('tallerGuarderia.mensualInvalido'), variante: 'error' });
-      setGuardando(false);
-      return;
-    }
-
-    const oferta = await definirOfertaGuarderia({
-      prestadorId: estado.prestadorId,
-      precioDia: Number(PASOS_PRECIO[iPrecio]),
-      precioMensual: mensual,
-    });
-    if (!oferta.ok) {
-      /* Los dos rebotes de la firma llegan con SU voz desde el wrapper: dicen
-         QUÉ falta, así el prestador sabe adónde ir. No se re-escriben acá. */
-      mostrar({ texto: oferta.mensaje, variante: 'error' });
-      setGuardando(false);
-      setIntento((n) => n + 1);
-      return;
+    /* 🔴 LA OFERTA SÓLO SI HAY PRECIO DEL DÍA — y no es una preferencia:
+       `definir_oferta_guarderia` **exige** `precio_dia`. Sin él **no se
+       publica, y no se finge que sí**: lo configurado se guarda igual y el
+       prestador no pierde nada. */
+    if (ofreceDiario) {
+      const oferta = await definirOfertaGuarderia({
+        prestadorId: estado.prestadorId,
+        precioDia: Number(PASOS_PRECIO[iPrecio]),
+        precioMensual: ofreceMensual ? Number(PASOS_MENSUAL[iMensual]) : null,
+      });
+      if (!oferta.ok) {
+        /* Los dos rebotes de la firma llegan con SU voz desde el wrapper:
+           dicen QUÉ falta, así el prestador sabe adónde ir. */
+        mostrar({ texto: oferta.mensaje, variante: 'error' });
+        setGuardando(false);
+        setIntento((n) => n + 1);
+        return;
+      }
     }
 
     /* Los paquetes, después de la oferta. Se guarda **sólo lo que el
@@ -364,7 +420,7 @@ export default function TallerGuarderia() {
     mostrar({ texto: t('taller.guardado'), variante: 'exito' });
     setIntento((n) => n + 1);
   }, [estado, guardando, capacidad, recogidaDesde, recogidaHasta, devolucionDesde, devolucionHasta,
-      iPrecio, paquetes, ofreceMensual, precioMensual, mostrar, t]);
+      iPrecio, paquetes, ofreceDiario, ofreceMensual, iMensual, mostrar, t]);
 
   if (gate === 'verificando' || estado.fase === 'cargando') {
     return (
@@ -436,75 +492,77 @@ export default function TallerGuarderia() {
           ) : null}
         </View>
 
-        {/* ── LAS DOS VENTANAS ── */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="titulo">{t('tallerGuarderia.franjasTitulo')}</Texto>
-          <Texto variante="apoyo">{t('tallerGuarderia.franjasApoyo')}</Texto>
+        {/* ⚠️ ACÁ VA «ESPECIES QUE RECIBES», Y NO ESTÁ POR MEDICIÓN.
+            El motor **no puede guardarlas**: `definir_oferta_guarderia` es
+            `(uuid, numeric, numeric, boolean)` — sin parámetro de especies —, y
+            cada oficio escribe las suyas con SU wrapper (grooming, veterinaria,
+            adiestramiento, paseo); guardería no lo tiene.
+            🔴 **Montar el selector igual sería peor que no montarlo**: el
+            prestador elegiría «solo perros», guardaría, y su elección se
+            perdería sin un solo error. Pedido a A en el parte. */}
 
-          {/* EL ESPEJO VIVO: la misma pieza que el dueño ve en el perfil del
-              lugar, respondiendo al borrador — el estándar §15b. */}
+        {/* ── HORARIOS — cerrado al entrar: ya están guardados y no hace falta
+            verlos para tocar los precios, que es a lo que se viene. ── */}
+        <AcordeonSeccion
+          titulo={t('tallerGuarderia.franjasTitulo')}
+          detalle={t('tallerGuarderia.franjasResumen', {
+            recogeDesde: recogidaDesde, recogeHasta: recogidaHasta,
+            devuelveDesde: devolucionDesde, devuelveHasta: devolucionHasta,
+          })}
+          abierto={horariosAbierto}
+          onAlternar={() => setHorariosAbierto((v) => !v)}
+        >
+          <Texto variante="apoyo">{t('tallerGuarderia.franjasApoyo')}</Texto>
           <FichaFranja
             recogida={{ rotulo: t('tallerGuarderia.recogida'), desde: recogidaDesde, hasta: recogidaHasta }}
             devolucion={{ rotulo: t('tallerGuarderia.devolucion'), desde: devolucionDesde, hasta: devolucionHasta }}
             conSuperficie
           />
+          <Celda interactiva accessibilityRole="button" titulo={t('tallerGuarderia.recogidaDesde')} metadataMono={recogidaDesde} onPress={() => setQueHora('recogidaDesde')} />
+          <Celda interactiva accessibilityRole="button" titulo={t('tallerGuarderia.recogidaHasta')} metadataMono={recogidaHasta} onPress={() => setQueHora('recogidaHasta')} />
+          <Celda interactiva accessibilityRole="button" titulo={t('tallerGuarderia.devolucionDesde')} metadataMono={devolucionDesde} onPress={() => setQueHora('devolucionDesde')} />
+          <Celda interactiva accessibilityRole="button" titulo={t('tallerGuarderia.devolucionHasta')} metadataMono={devolucionHasta} onPress={() => setQueHora('devolucionHasta')} />
+        </AcordeonSeccion>
 
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('tallerGuarderia.recogidaDesde')}
-            metadataMono={recogidaDesde}
-            onPress={() => setQueHora('recogidaDesde')}
+        {/* ── TUS PRECIOS — abierto al entrar: es a lo que se viene. EN PLURAL,
+            porque adentro viven tres modalidades y no una. ── */}
+        <AcordeonSeccion
+          titulo={t('tallerGuarderia.preciosTitulo')}
+          abierto={preciosAbierto}
+          onAlternar={() => setPreciosAbierto((v) => !v)}
+        >
+          {/* ① DIARIO — prendido por defecto: es la unidad base del oficio. */}
+          <FichaPaquete
+            clave="diario"
+            /* `tamano: 1` es honesto —un día— y sólo alimenta el espejo, que
+               esta ficha no dibuja (sin `vozEquivalente`). */
+            tamano={1}
+            registro="oficio"
+            rotuloTamano={t('tallerGuarderia.diario')}
+            precioPaquete={ofreceDiario ? Number(PASOS_PRECIO[iPrecio]) : null}
+            precioDiaSuelto={null}
+            elegido={ofreceDiario}
+            onElegir={() => setOfreceDiario((v) => !v)}
+            campoPrecio={
+              ofreceDiario ? (
+                <View style={{ gap: spacing[2] }}>
+                  <SliderPrecio
+                    etiqueta={t('tallerGuarderia.precioDia')}
+                    pasos={PASOS_PRECIO}
+                    indice={iPrecio}
+                    onCambio={setIPrecio}
+                    registro="aa"
+                    edicionNumerica
+                  />
+                  {/* El NETO, vivo. Con `pct` null calla — jamás inventa. */}
+                  <VozComision pct={estado.comisionPct} precio={Number(PASOS_PRECIO[iPrecio])} />
+                </View>
+              ) : undefined
+            }
           />
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('tallerGuarderia.recogidaHasta')}
-            metadataMono={recogidaHasta}
-            onPress={() => setQueHora('recogidaHasta')}
-          />
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('tallerGuarderia.devolucionDesde')}
-            metadataMono={devolucionDesde}
-            onPress={() => setQueHora('devolucionDesde')}
-          />
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('tallerGuarderia.devolucionHasta')}
-            metadataMono={devolucionHasta}
-            onPress={() => setQueHora('devolucionHasta')}
-          />
-        </View>
 
-        {/* ── EL PRECIO ── */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="titulo">{t('tallerGuarderia.precioTitulo')}</Texto>
-          <SliderPrecio
-            etiqueta={t('tallerGuarderia.precioDia')}
-            pasos={PASOS_PRECIO}
-            indice={iPrecio}
-            onCambio={setIPrecio}
-            registro="aa"
-            edicionNumerica
-          />
-          {/* El NETO, vivo (D-412): lo que le queda al prestador después de la
-              comisión. Con `pct` null calla — jamás inventa un número. */}
-          <VozComision pct={estado.comisionPct} precio={Number(PASOS_PRECIO[iPrecio])} />
-
-          {/* Paquete y mensualidad: OPCIONALES, y el «no» es un valor legítimo
-              — por eso nacen apagados y el motor guarda `null`, que **jamás
-              cae al precio del día**. */}
-          {/* ── LOS PAQUETES ──
-              Los tres se pintan SIEMPRE, y el prestador enciende los que
-              quiera: ninguno, uno, dos o los tres.
-              🔴 **Dos estados que se ven distinto, y no es un matiz:** el que
-              nunca se encendió **no tiene precio que mostrar**; el que está
-              apagado **muestra el suyo, guardado**. *Si los dos se vieran
-              iguales, volver a encender uno se sentiría como empezar de cero
-              sobre un precio que el prestador ya había pensado.* */}
+          {/* ② PAQUETES — los tres se pintan siempre; cada toggle enciende Y
+              expande en el mismo acto. */}
           <Texto variante="seccion">{t('tallerGuarderia.paquetesTitulo')}</Texto>
           <Texto variante="apoyo">{t('tallerGuarderia.paquetesApoyo')}</Texto>
           {TAMANOS.map((tam) => {
@@ -519,9 +577,10 @@ export default function TallerGuarderia() {
                 /* `null` = nunca encendido. El apagado CON precio lo manda
                    igual, y por eso se distingue del que nunca existió. */
                 precioPaquete={pq.existe || pq.activo ? Number(PASOS_PAQUETE[pq.iPrecio]) : null}
-                precioDiaSuelto={Number(PASOS_PRECIO[iPrecio])}
-                /* La cuenta la hace la pieza; acá sólo se dice. **El número es
-                   uno solo o no sirve**, y por eso no se recalcula. */
+                /* El espejo compara contra el día suelto SOLO si hay día
+                   suelto: sin él, la pieza omite la comparación en vez de
+                   inventar un 0 %. */
+                precioDiaSuelto={ofreceDiario ? Number(PASOS_PRECIO[iPrecio]) : null}
                 vozEquivalente={(e) =>
                   e.deltaPct === null || e.direccion === 'sin_comparacion'
                     ? t('tallerGuarderia.equivalenteSimple', { porDia: e.porDia.toFixed(2) })
@@ -541,8 +600,6 @@ export default function TallerGuarderia() {
                     [tam]: { ...(m[tam] ?? { existe: false, iPrecio: 0 }), activo: !(m[tam]?.activo ?? false) },
                   }))
                 }
-                /* El precio se edita SOLO si está encendido: un riel vivo bajo
-                   un paquete apagado invita a mover algo que no se ofrece. */
                 campoPrecio={
                   pq.activo ? (
                     <SliderPrecio
@@ -561,20 +618,67 @@ export default function TallerGuarderia() {
             );
           })}
 
-          <Interruptor
-            etiqueta={t('tallerGuarderia.ofreceMensual')}
-            encendido={ofreceMensual}
-            onCambio={setOfreceMensual}
+          {/* ③ MENSUAL — la misma ficha, con su precio adentro. Antes tenía un
+              `Campo` suelto fuera de toda ficha; ahora vive como sus hermanas. */}
+          <FichaPaquete
+            clave="mensual"
+            tamano={1}
             registro="oficio"
+            rotuloTamano={t('tallerGuarderia.mensual')}
+            precioPaquete={ofreceMensual ? Number(PASOS_MENSUAL[iMensual]) : null}
+            precioDiaSuelto={null}
+            elegido={ofreceMensual}
+            onElegir={() => setOfreceMensual((v) => !v)}
+            campoPrecio={
+              ofreceMensual ? (
+                <SliderPrecio
+                  etiqueta={t('tallerGuarderia.precioMensual')}
+                  pasos={PASOS_MENSUAL}
+                  indice={iMensual}
+                  onCambio={setIMensual}
+                  registro="aa"
+                  edicionNumerica
+                />
+              ) : undefined
+            }
           />
-          {ofreceMensual ? (
-            <Campo
-              label={t('tallerGuarderia.precioMensual')}
-              value={precioMensual}
-              onChangeText={setPrecioMensual}
-              keyboardType="decimal-pad"
-              placeholder={t('tallerGuarderia.precioPlaceholder')}
+        </AcordeonSeccion>
+
+        {/* ── ASÍ LO VE EL DUEÑO — el espejo, patrón de grooming.
+            🔴 **Son LAS MISMAS PIEZAS que monta la familia**, no una maqueta:
+            si fueran otras, el prestador estaría mirando algo que nadie ve. */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="seccion">{t('tallerGuarderia.espejoTitulo')}</Texto>
+          <Texto variante="apoyo">{t('tallerGuarderia.espejoApoyo')}</Texto>
+          <FichaFranja
+            recogida={{ rotulo: t('tallerGuarderia.recogida'), desde: recogidaDesde, hasta: recogidaHasta }}
+            devolucion={{ rotulo: t('tallerGuarderia.devolucion'), desde: devolucionDesde, hasta: devolucionHasta }}
+            conSuperficie
+          />
+          {ofreceDiario ? (
+            <FichaPaquete clave="e-dia" tamano={1} rotuloTamano={t('tallerGuarderia.diario')}
+              precioPaquete={Number(PASOS_PRECIO[iPrecio])} precioDiaSuelto={null} />
+          ) : null}
+          {TAMANOS.filter((tam) => paquetes[tam]?.activo === true).map((tam) => (
+            <FichaPaquete key={`e-${tam}`} clave={`e-${tam}`} tamano={tam}
+              rotuloTamano={t('tallerGuarderia.estadias', { n: tam })}
+              precioPaquete={Number(PASOS_PAQUETE[paquetes[tam]!.iPrecio])}
+              precioDiaSuelto={ofreceDiario ? Number(PASOS_PRECIO[iPrecio]) : null}
+              vozEquivalente={(e) =>
+                e.deltaPct === null || e.direccion === 'sin_comparacion'
+                  ? t('tallerGuarderia.equivalenteSimple', { porDia: e.porDia.toFixed(2) })
+                  : t('tallerGuarderia.equivalenteSimple', { porDia: e.porDia.toFixed(2) })
+              }
             />
+          ))}
+          {ofreceMensual ? (
+            <FichaMensualidad dias={t('tallerGuarderia.mensual')} valor={Number(PASOS_MENSUAL[iMensual])}
+              porUnidad={t('tallerGuarderia.porMes')} conSuperficie />
+          ) : null}
+          {/* Sin ningún precio encendido, la familia no vería nada — y se dice
+              acá, que es donde el prestador está mirando. */}
+          {!ofreceDiario && !ofreceMensual && TAMANOS.every((tam) => paquetes[tam]?.activo !== true) ? (
+            <Texto variante="apoyo">{t('tallerGuarderia.espejoVacio')}</Texto>
           ) : null}
         </View>
 
@@ -605,9 +709,42 @@ export default function TallerGuarderia() {
           etiqueta={t('tallerGuarderia.guardar')}
           bloque
           cargando={guardando}
-          onPress={() => void guardar()}
+          onPress={alGuardar}
         />
       </ScrollView>
+
+      {/* ── LOS DOS AVISOS DE GUARDAR ──
+          Uno pregunta y el otro informa, y la diferencia no es de tono: **se
+          pregunta cuando hay alternativa; se informa cuando no la hay.**
+          *Preguntar lo que no se puede cambiar entrena a tocar «seguir» sin
+          leer, y ese hábito se paga en el aviso que sí importaba.* */}
+      <Hoja
+        visible={aviso !== null}
+        onCerrar={() => setAviso(null)}
+        titulo={aviso === 'pregunta' ? t('tallerGuarderia.avisoSinPrecioTitulo') : t('tallerGuarderia.avisoSinDiarioTitulo')}
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">
+            {aviso === 'pregunta'
+              ? t('tallerGuarderia.avisoSinPrecio')
+              : t('tallerGuarderia.avisoSinDiario', { modalidades: modalidadesEncendidas })}
+          </Texto>
+          {aviso === 'pregunta' ? (
+            <>
+              {/* Dos botones: volver es lo primero, y por eso va primero. */}
+              <Boton etiqueta={t('tallerGuarderia.avisoVolver')} bloque onPress={() => setAviso(null)} />
+              <Boton
+                variante="secundario"
+                etiqueta={t('tallerGuarderia.avisoGuardarAsi')}
+                bloque
+                onPress={() => void guardar()}
+              />
+            </>
+          ) : (
+            <Boton etiqueta={t('tallerGuarderia.avisoEntendido')} bloque onPress={() => void guardar()} />
+          )}
+        </View>
+      </Hoja>
 
       <Hoja visible={queHora !== null} onCerrar={() => setQueHora(null)} titulo={t('tallerGuarderia.elegiHora')}>
         <HojaScroll>
