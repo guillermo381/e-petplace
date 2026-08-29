@@ -239,7 +239,7 @@ export default function LugarGuarderia() {
       return;
     }
     router.push({
-      pathname: '/guarderia/checkout',
+      pathname: '/explorar/guarderia/checkout',
       params: {
         citaId: r.data.citaId,
         expiraEn: r.data.expiraEn,
