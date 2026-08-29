@@ -1550,6 +1550,9 @@ export {
 export {
   obtenerMisEstadiasGuarderia,
   type EstadiaDeMiMascota,
+  comprarPaqueteGuarderia,
+  reservarDiaDePaqueteGuarderia,
+  type CompraDePaquete,
   obtenerActaGuarderia,
   type ActaGuarderia,
   type MediaDelActa,
