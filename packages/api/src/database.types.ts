@@ -21509,6 +21509,10 @@ export type Database = {
         Args: { input_data: Json }
         Returns: string
       }
+      comprar_paquete_guarderia: {
+        Args: { p_prestador_id: string; p_tamano: number }
+        Returns: Json
+      }
       comprar_paquete_salidas: {
         Args: {
           p_prestador_id: string
@@ -23665,6 +23669,10 @@ export type Database = {
       reordenar_fotos_prestador: {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined
+      }
+      reservar_dia_de_paquete_guarderia: {
+        Args: { p_bono_id: string; p_fecha: string; p_mascota_id?: string }
+        Returns: Json
       }
       reservar_dia_guarderia: {
         Args: { p_fecha: string; p_mascota_id: string; p_prestador_id: string }
