@@ -715,6 +715,9 @@ export const clienteEs = {
     agendarLlegaOtros: 'Agendar veterinaria llega pronto.',
     // S58 ruta del mundo — GATE DE STRINGS PENDIENTE (lote S58)
     paseoAgendable: 'Toca para entrar',
+    /* S107-C · la etiqueta accesible de la baldosa: sin texto visible, es lo
+       único que dice a dónde lleva. */
+    entrarA: 'Entrar a {{servicio}}',
     paseadoresTitulo: 'Paseadores',
     paseadoresError: 'No pudimos cargar los paseadores',
     paseadoresVacio: 'Todavía no hay paseadores ofreciendo',

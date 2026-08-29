@@ -17,6 +17,7 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   Celda,
   Boton,
+  Chevron,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -195,16 +196,21 @@ export default function Explorar() {
                           >
                             {f.titulo}
                           </Text>
-                          <Text
-                            numberOfLines={2}
-                            style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.45, color: theme.text.secondary }}
-                          >
-                            {f.detalle}
-                          </Text>
+                          {/* ☠️ S107-C · LA DESCRIPCIÓN DEL PRODUCTO Y EL
+                              «Toca para entrar» SALIERON (firma del founder).
+                              La causa del desborde acá no era el tamaño del
+                              texto: **era cuánta información cargaba la
+                              baldosa**. Con tres columnas entraban glifo +
+                              nombre + descripción + una llamada a la acción en
+                              ~100 pt de ancho.
+                              🔴 **El chevron reemplaza al texto porque dice lo
+                              mismo ocupando una fila de nada** — y *«toca para
+                              entrar» le explica a alguien que ya sabe tocar
+                              una tarjeta*. */}
                           {f.onPress ? (
-                            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.xs, color: theme.text.primary, marginTop: 2 }}>
-                              {t('explorar.paseoAgendable')}
-                            </Text>
+                            <View style={{ alignItems: 'flex-end', marginTop: 2 }}>
+                              <Chevron direccion="derecha" />
+                            </View>
                           ) : null}
                         </View>
                       </View>
@@ -217,8 +223,19 @@ export default function Explorar() {
                        se estire a llenar. */
                     return (
                       <View key={f.clave} style={{ flexBasis: '31%', flexGrow: 0 }}>
+                        {/* 🔴 SIN TEXTO, LA ETIQUETA CARGA EL DESTINO.
+                            Un chevron no se anuncia: quien no ve la pantalla
+                            oiría «botón» y nada más. La etiqueta dice **a
+                            dónde entra**, que es lo que el texto retirado
+                            decía peor. */}
                         {f.onPress ? (
-                          <Tarjeta relleno="amplio" interactiva onPress={f.onPress} accessibilityRole="button" etiqueta={`${f.titulo} — ${t('explorar.paseoAgendable')}`}>
+                          <Tarjeta
+                            relleno="amplio"
+                            interactiva
+                            onPress={f.onPress}
+                            accessibilityRole="button"
+                            etiqueta={t('explorar.entrarA', { servicio: f.titulo })}
+                          >
                             {contenido}
                           </Tarjeta>
                         ) : (
