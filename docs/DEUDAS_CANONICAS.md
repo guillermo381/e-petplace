@@ -22158,6 +22158,16 @@ porque el vencido está actualizado.
 > grep contra el objeto: tope real `L-431` (pista CERT), `L-432` en cero
 > ocurrencias.**
 
+> ### ➕ TERCER COBRO, 29-ago-2026 — **Y ES LA FORMA MÁS PURA DE ESTA LEY: UNA MEDICIÓN BIEN HECHA QUE CONTESTA OTRA PREGUNTA.**
+>
+> **El caso:** para decidir si el recorrido del prestador podía viajar por OTA, C midió *«cero cambios en `package.json` y `app.json` **entre main y mi rama**»* — **y la medición era correcta**. De ahí concluyó, razonablemente, que no había módulo nativo nuevo y que el OTA alcanzaba.
+>
+> 🔴 **La pregunta era otra: qué versión declara `app.json` CONTRA qué binario existe.** Medido después: `app.json` decía **`1.0.7`** —con `runtimeVersion` por policy `appVersion`— y **la última build finished era `1.0.6`, del 24-ago**. ⇒ **todo OTA del prestador salía a un runtime que ningún binario tenía.** *Un OTA perfecto que no le llega a nadie* — el caso literal que parió `verify-ota.mjs` el 4-ago, y **el guard lo frenó otra vez**.
+>
+> **Por qué pertenece a esta ley y no a «se midió mal»:** la premisa *«sin módulo nativo nuevo, el OTA alcanza»* **era verdadera** — hasta que alguien subió la versión en `app.json`. **La verdad venció, y su medición siguió siendo impecable sobre la variable que ya no decidía.**
+>
+> **Lo operativo, que es barato:** antes de afirmar que algo viaja por OTA se comparan **DOS objetos, no un diff**: la `version` declarada y la lista de builds `finished` de ese canal. *Un diff entre ramas nunca va a contestar eso, porque el dato que decide no está en ninguna de las dos.*
+
 > ⚠️ **COLISIÓN DE NÚMERO, DECLARADA — y es el precedente `D-757` cobrado dos
 > veces en el mismo día.** **B pidió `L-432` para OTRA lección** (*«un censo que
 > da cero verifica primero que la página viva»*), midiendo igual de bien que yo:
@@ -23357,6 +23367,135 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 **Y `D-574` queda cerrada por absorción:** decía *«los secrets del build local no
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
+
+#### D-968 — 🔴 EL GATE SANITARIO NACE APAGADO, Y **SE ENCIENDE ANTES DE LA SALIDA REAL**
+
+🔴 **ALTA · ENTRA AL CHECKLIST DE LANZAMIENTO.** Firma de la mesa, 29-ago-2026.
+
+**Lo que se apagó es el ENFORCEMENT, no la evaluación** — y la distinción es la ficha entera. `evaluar_requisitos_guarderia` **sigue midiendo todo**: carnet cargado, vigencia, y cada faltante con su código, su estado y su fecha. Lo configurable es **si la compuerta frena o informa**: `app_config.guarderia_gate_sanitario_duro`, que **nace en `false`**.
+
+Durante las pruebas el semáforo es **informativo**: una mascota con requisitos incompletos **puede reservar y pagar**, viendo qué le falta.
+
+> ### 🔴 **UN GATE APAGADO QUE NADIE RECUERDA ENCENDER ES PEOR QUE NO TENERLO — porque todos creen que está.**
+
+*Por eso esta ficha existe y por eso está en el checklist: no es una preferencia de configuración, es una promesa de seguridad que hoy no se cumple y que alguien tiene que cumplir en una fecha.*
+
+☠️ **Condición de muerte:** `guarderia_gate_sanitario_duro = true` **antes de la salida real**, y ahí pasa a ser restricción dura — *sin requisitos al día no se paga el servicio.* **Encenderlo es un `UPDATE`**, no una versión de la app.
+
+**Y su hermana, DEUDA ACEPTADA:** hoy la lista corre con **antirrábica**. El founder confirma con su veterinario **las anuales y los desparasitantes**, y se agregan **como dato** (`cat_plan_vacunal.exigida_guarderia`) cuando lleguen — *jamás cableadas.*
+
+**Dueño:** founder (la firma + la lista con su veterinario) + A (el `UPDATE`).
+
+#### D-969 — 🟠 CAMBIAR EL PASO DE UN RIEL PUEDE REESCRIBIR PRECIOS YA GUARDADOS, SIN UN SOLO ERROR
+
+🟠 **MEDIA. Hallazgo de C (29-ago-2026), curado por C en su tanda. Se ficha porque la CLASE vale más que el caso.**
+
+**El mecanismo:** un selector de precio con pasos discretos resolvía el valor guardado con **`indexOf`**. Si el precio guardado **no cae exactamente en la grilla nueva**, `indexOf` devuelve **`-1`**… y el consumo lo lee como **índice 0**: *el piso del rango.*
+
+> ### **Cambiar la PRESENTACIÓN de un riel reescribió el DATO — y sin un solo error.**
+
+**Por qué es de la familia cara:** no hay excepción, no hay log, no hay nada raro en pantalla. **El precio simplemente aparece siendo otro**, y el prestador lo guarda sin saber que cambió. *Un cambio que sólo iba a mover píxeles terminó moviendo plata.*
+
+☠️ **Curado por C** cayendo **al paso más cercano** en vez de al índice 0. **La regla que deja:** *todo control con pasos discretos que reciba un valor ya guardado declara qué hace cuando el valor no cae en la grilla — y «caer al primero» nunca es la respuesta.*
+
+**Dueño:** B (si la clase se repite en otra pieza con pasos). **Disparo:** el próximo riel con grilla que reciba valores persistidos.
+
+#### D-967 — ☠️ CURADA EN EL PRESTADOR · 🟠 DECLARADA EN EL CLIENTE (29-ago-2026) — `MAPA_NATIVO_DISPONIBLE` AFIRMABA SOBRE **UN** APARATO
+
+> ☠️ **CURADA EN `apps/prestador` (firma de la mesa, 29-ago).** El literal murió; ahora lo decide **la sonda nativa**:
+> ```ts
+> export const MAPA_NATIVO_DISPONIBLE =
+>   Platform.OS === 'web' ? true : manifestTieneKeyDeMapa() === true;
+> ```
+> **`SondaManifest.leerMetaData` lee el manifiesto REAL en runtime** — *inmune al OTA e inmune a las env vars, que es lo único que no depende de que alguien recuerde algo.* La pieza **ya existía** desde S81 (`D-579`), preparada-apagada y **sin un solo consumidor a propósito**; esto es su flip, y su condición de disparo se cumplió.
+>
+> 🔴 **FAIL-CLOSED restituido:** la sonda devuelve `boolean | null`, y **`null` —módulo ausente, APK pre-tren— cuenta como NO**. *No saber es un caso de no tener*, y la ley del archivo (*un secret faltante cuesta EL MAPA, jamás la app*) vuelve a tener efecto.
+>
+> ⚠️ **Web queda afuera, y no es un atajo:** el crash que este guard evita es `IllegalStateException: API key not found` en `com.rnmaps.maps.MapView.onCreate` — **hilo nativo de Android**. En web el mapa es otra pieza y esta key no lo gobierna; apagarlo ahí escondería un mapa que funciona **sin evitar ningún crash**.
+>
+> ### 🟠 LO QUE QUEDA ABIERTO, con su camino exacto: **EL CLIENTE**
+>
+> `apps/cliente/src/lib/mapa-nativo.ts:106` **sigue con `= true` literal**, y **la sonda NO está portada** (medido: `apps/cliente/modules/` no existe).
+>
+> 🔴 **Y NO se porta y consume en el mismo acto, por una razón medida:** en un binario de cliente que todavía no tenga el módulo, la sonda devolvería `null` ⇒ fail-closed ⇒ **el mapa del cliente se apagaría HOY**, en una app donde funciona. *La cura correcta apagaría lo que está bien.*
+>
+> **La forma, que es el molde S91:** ① portar `modules/sonda-manifest` al cliente **inerte, sin consumidor** ② el flip de su constante **cuando exista un binario de cliente que lo lleve**. **Dueño:** C (`apps/` es su territorio) + B (la sonda). **Disparo:** el próximo binario del cliente.
+>
+> *(Diagnóstico original abajo — su medición sigue siendo la que produjo la cura.)*
+
+#### D-967 (original) — 🔴 `MAPA_NATIVO_DISPONIBLE = true` ES UNA AFIRMACIÓN SOBRE **UN** APARATO, ESCRITA EN EL CÓDIGO DE TODOS
+
+🔴 **ALTA. Hallada el 29-ago-2026 midiendo por qué el guard del manifest reprobó una build local.**
+
+`apps/prestador/src/lib/mapa-nativo.ts:104` tiene **`export const MAPA_NATIVO_DISPONIBLE = true;`**, y su propio comentario dice por qué:
+
+> *«HOY ESTA CONSTANTE ES VERDADERA … **el APK instalado pasó `verify-manifest-apk.mjs` en VERDE** con `✓ meta-data geo.API_KEY`»*
+
+**El razonamiento era correcto el día que se escribió** — y su fragilidad es de forma, no de cuidado:
+
+> ### **Una constante que dice «el mapa está horneado» porque UN APK medido lo tenía, es una afirmación sobre un aparato viviendo en el código de todos.**
+
+🔴 **Y hoy existe el contraejemplo, medido:** la build local que se cortó el 29-ago **NO lleva la key** — `verify-manifest-apk` la reprobó con exit 1, y la causa está medida: `GOOGLE_MAPS_API_KEY` es un **secret que sólo el builder de EAS puede leer**, así que **ninguna build local puede hornearlo** salvo que alguien la exporte a mano en su shell.
+
+**El modo de falla, que es el peor de todos:** con la constante en `true` sobre un binario sin key, la app **no degrada — monta el `MapView` y muere en hilo NATIVO, fuera de toda ErrorBoundary.** *Es el incidente literal de S80, que estuvo invisible tres sesiones.* La ley `FAIL-CLOSED` que el propio archivo declara en su línea 77 **quedó sin efecto** al reemplazar la derivación por un literal.
+
+⚠️ **Y por qué la derivación anterior tampoco servía** (está medido en el mismo archivo, 27-ago): `extra.mapasHorneados` se **recomputa en CADA `eas update`** sin la key ⇒ **todo OTA publica `false` y pisa el `true` del APK**. *Dos actos compilan el config y el segundo nunca puede saber* (`L-435`). **Ninguna de las dos formas —literal ni derivada de `extra`— puede ser correcta.**
+
+☠️ **CONDICIÓN DE MUERTE, ya escrita en el propio archivo y con su pieza construida:** la sonda nativa **`SondaManifest.leerMetaData('com.google.android.geo.API_KEY')`**, que **YA EXISTE** en `apps/prestador/modules/sonda-manifest` — *lee el manifiesto REAL en runtime: inmune al OTA e inmune a las env vars, que es lo único que no depende de que alguien recuerde algo.* **Falta portarla al cliente y consumirla acá.**
+
+⚠️ **Consecuencia operativa inmediata, y refuerza el veredicto del guard:** **el APK local del 29-ago NO se instala.** No sólo porque le falten las metadatas — sino porque **con esta constante en `true` no degradaría: crashearía.**
+
+**Dueño:** B (la sonda es su territorio) + A (el consumo). **Disparo:** antes de cualquier build local que alguien vaya a instalar.
+
+#### D-964 — 🔴 REQUISITO DE LANZAMIENTO: CADA PRESTADOR DEBE DECLARAR QUÉ ESPECIES ATIENDE
+
+🔴 **ALTA · es de LANZAMIENTO, no de S107.** Firma de la mesa (29-ago), tercera capa de la resolución de `D-959`.
+
+**Lo que la cura de `D-959` hizo:** a cada oferta con `especies_compatibles = []` se le escribió **todas las especies del universo de su tipo** — que es exactamente lo que los lectores leían antes del defecto (`IS NULL` = «no acota»). **Eso les devuelve la visibilidad hoy.**
+
+🔴 **Lo que NO hizo, y por eso esta ficha existe: no es la elección de su dueño.** *Un prestador de consulta general que hoy figura atendiendo equinos y hurones no lo decidió — se lo escribió un backfill para sacarlo del cero.* **Antes de salir a producción, cada prestador DEBE declarar qué especies atiende.**
+
+**La pantalla donde lo declara es de C y NO entra en esta sesión.** Se escribe acá para que **nadie lo descubra en el lanzamiento**.
+
+**Dueño:** C (la pantalla) + cada prestador (la declaración). **Disparo:** antes de producción.
+☠️ **Condición de muerte:** cero ofertas activas cuyo `especies_compatibles` provenga del backfill sin que su dueño lo haya confirmado.
+
+#### D-965 — 🟡 «TU DÍA» VIVE BAJO NEGOCIO, Y ES UNA DESVIACIÓN ACEPTADA DE §15b
+
+🟡 **MEDIA. Desviación DECLARADA y aceptada por la mesa para S107** — no un descuido.
+
+**La ley:** `DISEÑO_EXPERIENCIA` §15b — **HOY acciona · NEGOCIO gestiona**. La lista del día es acción pura, así que por la letra iría en **HOY**.
+
+**Por qué se acepta la desviación, con su razón:** **la estadía-día no es una cita con hora.** El HOY del prestador está construido sobre una jornada de citas con hora de inicio, y meter ahí un objeto cuya unidad es **el día entero** —con dos ventanas y sin hora— **es una tanda propia**, no un injerto. *Forzarlo ahora produciría el HOY que hay que rehacer después.*
+
+☠️ **CONDICIÓN DE MUERTE, y es de las que no admiten media tinta:** «Tu día» pasa a ser **alcanzable desde HOY** y **se retira de Negocio EN EL MISMO ACTO**.
+
+> 🔴 **Dejarlo en los dos lados es exactamente la duplicación que `D-645` acaba de costar** — la pieza promovida que nadie retiró de su sitio viejo, y la casa terminó manteniendo dos. *Una migración de superficie que no retira el origen no es una migración: es una copia.*
+
+**Disparo:** después del acta (tanda ⑤). **Jamás en silencio:** el día que se mueva, se declara.
+
+#### D-966 — 🟢 `VozComision` REINTRODUJO EL `toFixed(2)` QUE `PrecioText` VINO A MATAR
+
+🟢 **BAJA. Hallazgo de B (29-ago), declarado y NO curado a propósito.**
+
+`PrecioText` nació para terminar con el `toFixed(2)` a mano repartido en **53 sitios**. **`VozComision` lo tiene otra vez en su cuerpo.**
+
+**Por qué no se cura en esta tanda:** tiene consumidores vivos y tocarla es una pasada propia. **Se ficha para que no se re-descubra** — *un defecto que se encuentra tres veces cuesta tres diagnósticos, y el tercero ya no es un hallazgo: es que nadie lo anotó.*
+
+**Dueño:** B. **Disparo:** la próxima vez que se toque `VozComision`.
+☠️ **Condición de muerte:** `VozComision` consume `PrecioText` y su `toFixed` desaparece.
+
+#### D-963 — ☠️ CERRADA AL DESCUBRIRSE (29-ago-2026) — LA RESERVA DE GUARDERÍA NO GUARDABA DÓNDE IR
+
+**Apareció escribiendo el lector de la jornada, no auditando.** `reservar_dia_guarderia` creaba la cita **sin `direccion_snapshot`** ⇒ la lista del día del prestador decía **a quién** recoger y **no dónde**.
+
+> ### 🔴 En un oficio cuyo primer acto es tocar el timbre de una casa, eso no era un campo faltante: **era la mitad del trabajo.**
+
+**Por qué no lo vio ningún gate, que es lo de siempre en esta sesión:** la reserva **funcionaba** — cobraba, tomaba cupo, congelaba su desglose y devolvía `ok`. *El defecto no era que algo fallara: era que el dato que hace ejecutable el servicio no estaba, y nada lo pedía.* **Se descubrió recién cuando alguien fue a escribir la pantalla que lo consume** — que es exactamente el patrón que `P-CIRCUITO` (S103) existe para forzar: *recorrer el circuito de punta a punta encuentra lo que ningún gate ve.*
+
+☠️ **CERRADA en `20260829000000` reusando `_direccion_hogar_snapshot(user_id)`** — **la MISMA pieza que el paseo usa para su modalidad a domicilio** (`D-339`). **Cero invención:** la dirección se congela igual que el precio y por la misma razón — *es la que la familia tenía cuando reservó, no la que tenga el día de la recogida.*
+
+⚠️ **Lo que queda declarado:** las citas creadas antes de esta migración se quedan sin dirección. **Medido: cero estadías vivas** (las únicas eran de cinturones, deshechas en subtransacción) ⇒ **daño cero**, y por eso no hay backfill.
 
 #### D-960 — ☠️ CERRADA EL MISMO DÍA (28-ago-2026) — UN SERVICIO QUE CUELGA DEL FLAG DE OTRO DESAPARECE CUANDO EL OTRO SE ENCIENDE
 

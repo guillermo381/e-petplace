@@ -161,14 +161,47 @@ if (sinBuilds) {
     process.exit(1)
   }
 
+  /* El escape de la enmienda S107: explícito, con NOTA obligatoria, y ruidoso.
+     No afloja el guard — lo convierte en una declaración firmada de quien sabe
+     algo que EAS no puede saber. */
+  const iLocal = process.argv.indexOf('--binario-local')
+  const notaLocal = iLocal > -1 ? process.argv[iLocal + 1] : null
+  if (iLocal > -1 && !notaLocal) {
+    console.error('✗ --binario-local exige una NOTA: quién lo cortó y cuándo. Sin eso no se declara nada.')
+    process.exit(1)
+  }
+
   const vivas = builds.filter((b) => b.status === 'FINISHED' && b.channel === canal)
   const runtimesVivos = [...new Set(vivas.map((b) => b.runtimeVersion))].sort()
 
-  if (!runtimesVivos.includes(runtime)) {
+  if (!runtimesVivos.includes(runtime) && notaLocal) {
+    console.log(`⚠️ ② SIN build de EAS para ${runtime}, pero se DECLARÓ un binario local:`)
+    console.log(`     «${notaLocal}»`)
+    console.log('     El rojo queda salteado POR DECLARACIÓN, y esta línea es su registro.')
+  } else if (!runtimesVivos.includes(runtime)) {
+    /* ✏️ ENMIENDA S107 — EL GUARD DECÍA MÁS DE LO QUE MEDÍA, y costó una
+     *  decisión equivocada.
+     *
+     *  Decía: «es un OTA perfecto que NO LE LLEGA A NADIE». Eso es una
+     *  afirmación sobre EL MUNDO, y este bloque sólo puede ver **las builds
+     *  registradas en EAS**. 🔴 Un binario cortado en LOCAL e instalado por
+     *  `adb` —cosa que esta casa hace, con precedente en S78— **es invisible
+     *  a esta medición**, y el 29-ago hubo exactamente uno: el founder tenía
+     *  un 1.0.7 corriendo, los OTAs le llegaban, y el guard afirmó que no le
+     *  llegaban a nadie. *Medido: 12 builds en EAS, ninguna 1.0.7. La
+     *  medición era impecable; la conclusión, falsa.*
+     *
+     *  ⇒ **El rojo se conserva** —sigue siendo el caso del 4-ago y sigue
+     *  frenando— **pero ahora dice QUÉ MIDIÓ, no qué concluye.** Es `L-432`
+     *  en su forma más pura: una medición bien hecha contestando otra
+     *  pregunta. *Un guard que declara su alcance se puede saltear con un
+     *  dato; uno que afirma sobre el mundo obliga a discutirle.* */
     rojos.push(
-      `NINGÚN BINARIO TIENE EL RUNTIME ${runtime} en el canal ${canal}.\n` +
-      `     Builds finished vivas: ${runtimesVivos.join(', ') || '(ninguna)'}\n` +
-      `     Es un OTA perfecto que no le llega a nadie.`,
+      `NINGÚN BINARIO **REGISTRADO EN EAS** TIENE EL RUNTIME ${runtime} (canal ${canal}).\n` +
+      `     Builds finished en EAS: ${runtimesVivos.join(', ') || '(ninguna)'}\n` +
+      `     ⚠️ ESTA MEDICIÓN NO VE BINARIOS LOCALES instalados por adb — si hay uno\n` +
+      `        con este runtime, el update SÍ le llega y este rojo es del instrumento,\n` +
+      `        no del update. Se declara con --binario-local <nota> y queda escrito.`,
     )
   } else {
     const ultima = vivas.find((b) => b.runtimeVersion === runtime)

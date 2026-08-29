@@ -114,8 +114,15 @@ const ESTILO_GRILLA = {
   flexWrap: 'wrap',
   marginHorizontal: -spacing[2],
 } as const;
+/* ⭐ S107-C · TRES COLUMNAS (firma del founder tras caminar el gate).
+   Con cuatro mundos, dos columnas repartían parejo. Con el quinto, la última
+   fila quedaba con UNA baldosa sola del doble de ancho que sus hermanas — y
+   **una baldosa más grande se lee como más importante**, que es justo lo que
+   la grilla no debe decir: los cinco oficios pesan igual.
+   🔴 Tres columnas reparten 5 en 3+2 y **ninguna queda huérfana a lo ancho**:
+   la fila corta se ve corta, no se ve inflada. */
 const ESTILO_CELDA = {
-  width: '50%',
+  width: '33.333%',
   paddingHorizontal: spacing[2],
   paddingBottom: spacing[4],
 } as const;
@@ -509,7 +516,7 @@ export default function Negocio() {
                      Pasarle `conteoDeMundo` diría «sin configurar» a un
                      prestador que ya guardó su cupo y sus ventanas — un
                      número falso es peor que ninguno. Entra con la oferta. */
-                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia/taller', detalle: undefined },
+                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia', detalle: undefined },
                 ] as const
               ).map((mundo, i) => (
                 <View key={mundo.ruta} style={ESTILO_CELDA}>

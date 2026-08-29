@@ -53,6 +53,18 @@ export interface RequisitoFaltante {
 export interface RequisitosGuarderia {
   alDia: boolean;
   faltantes: RequisitoFaltante[];
+  /**
+   * 🔴 **Si el gate FRENA o sólo INFORMA — y viaja EN LA MISMA respuesta.**
+   *
+   * *Con dos llamadas habría un instante en que la pantalla sabe QUÉ falta y
+   * no sabe SI frena, y ahí tendría que decidirlo ella.* Con la perilla acá,
+   * **la pantalla es la misma en los dos modos**: pinta el semáforo completo y
+   * deja o no deja avanzar según este booleano.
+   *
+   * Hoy nace en `false` (pruebas del servicio). **Se enciende antes de la
+   * salida real** — `D-968`, y está en el checklist de lanzamiento.
+   */
+  bloquea: boolean;
 }
 
 /**
@@ -87,7 +99,10 @@ export async function evaluarRequisitosGuarderia(
       vence: typeof x.vence === 'string' ? x.vence : null,
     });
   }
-  return { ok: true, data: { alDia: r.estado === 'al_dia', faltantes } };
+  return {
+    ok: true,
+    data: { alDia: r.estado === 'al_dia', faltantes, bloquea: r.bloquea === true },
+  };
 }
 
 export interface ReservaGuarderia {
@@ -128,4 +143,271 @@ export async function reservarDiaGuarderia(params: {
     ok: true,
     data: { citaId: r.cita_id, estadiaId: r.estadia_id, precio: r.precio, expiraEn: r.expira_en },
   };
+}
+
+// ── LA JORNADA DEL PRESTADOR ────────────────────────────────────────────────
+
+/** El vocabulario del motor. La VOZ de cada estado es de la casa que lo muestra. */
+export type EstadoEstadia =
+  | 'reservada' | 'recogida_en_curso' | 'en_guarderia'
+  | 'retorno_en_curso' | 'entregada' | 'cancelada' | 'no_recogida';
+
+export interface EstadiaDelDia {
+  estadiaId: string;
+  citaId: string;
+  estado: EstadoEstadia;
+  mascotaId: string;
+  mascotaNombre: string;
+  mascotaEspecie: string;
+  mascotaFotoUrl: string | null;
+  /** En qué sala quedó. null = todavía sin asignar. */
+  espacioNombre: string | null;
+  /** 🔴 Dónde hay que ir a buscarlo. Congelada al reservar (D-339). */
+  direccion: unknown | null;
+  aBordoEn: string | null;
+  llegadaEn: string | null;
+  entregadaEn: string | null;
+}
+
+/**
+ * La lista de hoy del prestador.
+ *
+ * 🔴 **Es una VISTA sobre las estadías, jamás una entidad «jornada»**: un día
+ * con seis animales son seis estadías. La pantalla compone; no hay un objeto
+ * que pedir ni que mutar.
+ *
+ * 🔴 **Y sólo trae verdad firme.** Un hold sin pagar no es una estadía del día:
+ * es alguien mirando. *Una lista que incluyera reservas que pueden evaporarse
+ * en quince minutos haría salir al cuidador a buscar un animal que nadie
+ * compró.*
+ */
+export async function obtenerEstadiasDelDia(
+  prestadorId: string,
+  /** 'YYYY-MM-DD' */
+  fecha: string,
+): Promise<ResultadoWrapper<EstadiaDelDia[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_estadias_del_dia', {
+    p_prestador_id: prestadorId,
+    p_fecha: fecha,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: EstadiaDelDia[] = [];
+  for (const e of data) {
+    if (typeof e !== 'object' || e === null) return fallaCodigo('datos_inconsistentes');
+    const r = e as Record<string, unknown>;
+    if (typeof r.estadia_id !== 'string' || typeof r.cita_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.estado !== 'string' || typeof r.mascota_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    salida.push({
+      estadiaId: r.estadia_id,
+      citaId: r.cita_id,
+      estado: r.estado as EstadoEstadia,
+      mascotaId: r.mascota_id,
+      mascotaNombre: typeof r.mascota_nombre === 'string' ? r.mascota_nombre : '',
+      mascotaEspecie: typeof r.mascota_especie === 'string' ? r.mascota_especie : '',
+      mascotaFotoUrl: typeof r.mascota_foto_url === 'string' ? r.mascota_foto_url : null,
+      espacioNombre: typeof r.espacio_nombre === 'string' ? r.espacio_nombre : null,
+      direccion: r.direccion_snapshot ?? null,
+      aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
+      llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
+      entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+    });
+  }
+  return { ok: true, data: salida };
+}
+
+// ── ⑤ · LA MEDIA DEL DURANTE, EL PUNTO VIVO Y LAS ACTAS ─────────────────────
+
+export interface MediaGuarderia {
+  mediaId: string;
+  tipo: 'foto' | 'clip';
+  archivoUrl: string;
+  /** null en fotos. En clips, ≤ 30 (con +0,9 s de tolerancia de contenedor). */
+  duracionS: number | null;
+  capturadaEn: string;
+}
+
+/**
+ * Publica UNA media con N etiquetas.
+ *
+ * 🔴 **`claveIdempotencia` es OBLIGATORIA y la genera el cliente ANTES del
+ * primer intento**, reusándola en cada reintento. *La cola reintenta por
+ * diseño: un timeout ambiguo —la subida llegó, la respuesta no— registraría la
+ * misma foto dos veces, y eso no aparece como un fallo sino como **eventos
+ * duplicados en el expediente de un animal**, meses después.*
+ *
+ * **El segundo intento es un ÉXITO** (`yaExistia: true`), no un rebote: *un
+ * rebote obligaría a la cola a distinguir «falló» de «ya estaba», que es justo
+ * lo que no puede saber.*
+ */
+export async function publicarMediaGuarderia(params: {
+  prestadorId: string;
+  claveIdempotencia: string;
+  tipo: 'foto' | 'clip';
+  archivoUrl: string;
+  duracionS?: number | null;
+  /** 🔴 Mínimo una. Una media sin etiquetas es una foto que no llega a nadie. */
+  mascotaIds: string[];
+  capturadaEn: string;
+}): Promise<ResultadoWrapper<{ mediaId: string; yaExistia: boolean }, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('publicar_media_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_clave_idempotencia: params.claveIdempotencia,
+    p_tipo: params.tipo,
+    p_archivo_url: params.archivoUrl,
+    p_duracion_s: params.duracionS ?? undefined,
+    p_mascota_ids: params.mascotaIds,
+    p_capturada_en: params.capturadaEn,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.media_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { mediaId: r.media_id, yaExistia: r.ya_existia === true } };
+}
+
+/** La media del día, para el prestador — con sus etiquetas completas. */
+export async function obtenerMediaDelDia(
+  prestadorId: string,
+  fecha: string,
+): Promise<ResultadoWrapper<(MediaGuarderia & { mascotaIds: string[] })[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_media_del_dia', {
+    p_prestador_id: prestadorId,
+    p_fecha: fecha,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: data.map((m) => {
+      const r = m as Record<string, unknown>;
+      return {
+        mediaId: String(r.media_id),
+        tipo: r.tipo as 'foto' | 'clip',
+        archivoUrl: String(r.archivo_url),
+        duracionS: typeof r.duracion_s === 'number' ? r.duracion_s : null,
+        capturadaEn: String(r.capturada_en),
+        mascotaIds: Array.isArray(r.mascota_ids) ? (r.mascota_ids as string[]) : [],
+      };
+    }),
+  };
+}
+
+/**
+ * La media de MI mascota.
+ *
+ * 🔴 **Los otros animales de la foto NO VIAJAN** — ni el id, ni el nombre, ni
+ * el conteo. Se resuelve en el SELECT del server: *lo que no viaja no se
+ * filtra mal.*
+ */
+export async function obtenerMediaDeMiMascota(
+  mascotaId: string,
+  fecha?: string,
+): Promise<ResultadoWrapper<MediaGuarderia[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_media_de_mi_mascota', {
+    p_mascota_id: mascotaId,
+    p_fecha: fecha ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: data.map((m) => {
+      const r = m as Record<string, unknown>;
+      return {
+        mediaId: String(r.media_id),
+        tipo: r.tipo as 'foto' | 'clip',
+        archivoUrl: String(r.archivo_url),
+        duracionS: typeof r.duracion_s === 'number' ? r.duracion_s : null,
+        capturadaEn: String(r.capturada_en),
+      };
+    }),
+  };
+}
+
+export interface PuntoVivo { lat: number; lon: number; vistoEn: string }
+
+/** Upsert por `tramo_id`. 🔴 **Nunca acumula**: una fila por tramo. */
+export async function registrarPuntoVivo(params: {
+  tramoId: string; lat: number; lon: number; vistoEn?: string;
+}): Promise<ResultadoWrapper<true, CodigoErrorGuarderiaReserva>> {
+  const { error } = await getClient().rpc('registrar_punto_vivo', {
+    p_tramo_id: params.tramoId, p_lat: params.lat, p_lon: params.lon,
+    p_visto_en: params.vistoEn ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  return { ok: true, data: true };
+}
+
+/** Un punto o `null`. 🔴 **Jamás una lista** — el recorte vive en el servidor. */
+export async function obtenerPuntoVivo(
+  tramoId: string,
+): Promise<ResultadoWrapper<PuntoVivo | null, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_punto_vivo', { p_tramo_id: tramoId });
+  if (error) return fallo(error.message);
+  if (data === null || typeof data !== 'object') return { ok: true, data: null };
+  const r = data as Record<string, unknown>;
+  if (typeof r.lat !== 'number' || typeof r.lon !== 'number') return { ok: true, data: null };
+  return { ok: true, data: { lat: r.lat, lon: r.lon, vistoEn: String(r.vistoEn) } };
+}
+
+export type DireccionActa = 'recogida' | 'devolucion';
+export type Conformidad = 'sin_conformidad' | 'conforme' | 'con_reserva';
+
+/**
+ * Levanta el acta. **Idempotente**: el segundo intento devuelve la que ya
+ * existe (`yaExistia: true`) en vez de un `23505` pelado — *un guard que vive
+ * en un índice sólo sabe negarse, y la cola leería ese rebote como fallo
+ * dejando el acta correcta en error para siempre.*
+ *
+ * 🔴 **`cerradaEn` es LA HORA DE LA PUERTA**, no la de la subida. *En un
+ * registro que existe para responder cuándo apareció una lesión, esa
+ * diferencia es el registro entero.*
+ */
+export async function levantarActaGuarderia(params: {
+  estadiaId: string;
+  direccion: DireccionActa;
+  carnetVerificado: boolean;
+  objetos?: string;
+  observaciones?: string;
+  cerradaEn: string;
+  claveIdempotencia?: string;
+}): Promise<ResultadoWrapper<{ actaId: string; yaExistia: boolean }, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('levantar_acta_guarderia', {
+    p_estadia_id: params.estadiaId,
+    p_direccion: params.direccion,
+    p_carnet_verificado: params.carnetVerificado,
+    p_objetos: params.objetos ?? undefined,
+    p_observaciones: params.observaciones ?? undefined,
+    p_cerrada_en: params.cerradaEn,
+    p_clave_idempotencia: params.claveIdempotencia ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.acta_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { actaId: r.acta_id, yaExistia: r.ya_existia === true } };
+}
+
+/**
+ * La conformidad, **desde la sesión del dueño** — firma simple (Ley 67).
+ * 🔴 Nada de dibujar firmas en el teléfono del cuidador: cualquiera garabatea;
+ * una sesión propia, no. Y **no confirmar no frena la recogida**.
+ */
+export async function confirmarActaGuarderia(params: {
+  actaId: string;
+  conformidad: 'conforme' | 'con_reserva';
+  reservaTexto?: string;
+}): Promise<ResultadoWrapper<true, CodigoErrorGuarderiaReserva>> {
+  const { error } = await getClient().rpc('confirmar_acta_guarderia', {
+    p_acta_id: params.actaId,
+    p_conformidad: params.conformidad,
+    p_reserva_texto: params.reservaTexto ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  return { ok: true, data: true };
 }

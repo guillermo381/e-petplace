@@ -53,9 +53,11 @@ import { CalendarioCupo } from '../components/CalendarioCupo'
 import { ContadorClip } from '../components/ContadorClip'
 import { FichaFranja } from '../components/FichaFranja'
 import { FichaMensualidad } from '../components/FichaMensualidad'
+import { FichaDeOferta, type EquivalenciaPaquete } from '../components/FichaDeOferta'
 import { HiloDelDia } from '../components/HiloDelDia'
 import { MiniaturaClip } from '../components/MiniaturaClip'
 import { SelectorRoster } from '../components/SelectorRoster'
+import { SeccionPlegable } from '../components/SeccionPlegable'
 import { SemaforoSanitario } from '../components/SemaforoSanitario'
 import { TileVideoPropio } from '../components/TileVideoPropio'
 import { ModalDosAlturas, AsaModal } from '../components/ModalDosAlturas'
@@ -6618,6 +6620,23 @@ function PiezasDelOficioS107() {
   ])
   const [aceptadas, setAceptadas] = useState<string[]>([])
   const [inicioClip, setInicioClip] = useState<number | null>(null)
+  const [pasoPrecio, setPasoPrecio] = useState(3)
+  const [diario, setDiario] = useState(true)
+  const [mensual, setMensual] = useState(false)
+  const [p5, setP5] = useState(false)
+  const [p15, setP15] = useState(false)
+  const [secHorarios, setSecHorarios] = useState(true)
+  const [secPrecios, setSecPrecios] = useState(false)
+
+  /* La VOZ del espejo es del riel, no de la pieza (ver su cabecera). Acá es
+     relleno de demostración: arma la frase con los números ya calculados. */
+  const vozEquivalente = (e: EquivalenciaPaquete) => {
+    const porDia = `$${e.porDia.toFixed(2)}`
+    if (e.direccion === 'sin_comparacion') return `${porDia} por día`
+    if (e.direccion === 'igual') return `${porDia} por día — igual que tu día suelto`
+    const pct = `${Math.round(e.deltaPct ?? 0)} %`
+    return `${porDia} por día — ${pct} ${e.direccion === 'menos' ? 'menos' : 'más'} que tu día suelto`
+  }
 
   /* El mes de muestra: 30 días, con tres llenos y uno de ellos con su razón.
      `columnaInicial` la manda el riel — acá se fija a mano porque es una
@@ -6825,6 +6844,180 @@ function PiezasDelOficioS107() {
           onConformar={() => {}}
           etiquetaConformar="Estoy conforme"
         />
+      </View>
+
+      {/* ⑦pre · LA HOJA DE CONTACTO DE LOS DOS GLIFOS NUEVOS (§6b) */}
+      <View style={{ gap: spacing[3] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ⭐ GATE POR ÍCONO (§2.9) · DOS CANDIDATOS CADA UNO, el perdedor MUERE con su lápida (molde
+          prime/primeCorona) · **el juicio es a 21px, no a 44**
+        </Text>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          CERTIFICACIÓN · qué decide: que se lea «la acreditada es LA MASCOTA» y no «alguien ganó un
+          premio». A = huella como sello · B = sello troquelado (anillo) con la huella adentro — su
+          riesgo es Ley 9: menos aire, puede empastarse en una mancha
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          <Icono nombre="certificacion" tamano={44} />
+          <Icono nombre="certificacionSello" tamano={44} />
+          <Icono nombre="certificacion" tamano={21} />
+          <Icono nombre="certificacionSello" tamano={21} />
+        </View>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ a 21px CONTRA SUS VECINOS DE PAPEL — es donde se ve si colisiona: documento · carnet ·
+          descargar · copiar
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <Icono nombre="certificacion" tamano={21} />
+          <Icono nombre="certificacionSello" tamano={21} />
+          <Icono nombre="documento" tamano={21} />
+          <Icono nombre="carnet" tamano={21} />
+          <Icono nombre="descargar" tamano={21} />
+          <Icono nombre="copiar" tamano={21} />
+        </View>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          WEARABLE · qué decide: que diga «mide TODO EL TIEMPO» sin corazón. A = huella ADENTRO del
+          aparato (el dispositivo muestra a la mascota) · B = traza de actividad — 🔴 su riesgo es el
+          veto mismo: una traza puede leerse como ECG, o sea clínica
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          <Icono nombre="wearable" tamano={44} />
+          <Icono nombre="wearableActividad" tamano={44} />
+          <Icono nombre="wearable" tamano={21} />
+          <Icono nombre="wearableActividad" tamano={21} />
+        </View>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ a 21px contra los vecinos que el censo marcó como riesgo: carnet (placa colgante) y paseo
+          (el lazo del collar) — por eso el objeto NO es una placa de collar
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <Icono nombre="wearable" tamano={21} />
+          <Icono nombre="wearableActividad" tamano={21} />
+          <Icono nombre="carnet" tamano={21} />
+          <Icono nombre="paseo" tamano={21} />
+          <Icono nombre="veterinaria" tamano={21} />
+          <Icono nombre="training" tamano={21} />
+        </View>
+      </View>
+
+      {/* ⑦ter EL ACORDEÓN DE SECCIÓN */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          SeccionPlegable · el censo dio PIEZA NUEVA: la casa no tenía acordeón en packages/ui y hay
+          6 copias inline en apps · anatomía 19.7 (sin caja, chevron ⌄/⌃, target 44) · el `detalle` es
+          lo que hace que plegar no sea ESCONDER
+        </Text>
+        <SeccionPlegable titulo="Horarios" detalle="3 franjas" abierta={secHorarios} onCambiar={setSecHorarios}>
+          <FichaFranja
+            conSuperficie
+            recogida={{ rotulo: 'Recoge', desde: '7:00', hasta: '9:00' }}
+            devolucion={{ rotulo: 'Devuelve', desde: '16:30', hasta: '18:30' }}
+          />
+        </SeccionPlegable>
+        <SeccionPlegable titulo="Tus precios" detalle="desde $12" abierta={secPrecios} onCambiar={setSecPrecios}>
+          <FichaMensualidad conSuperficie dias="Lun–Vie" valor={180} porUnidad="el mes" />
+        </SeccionPlegable>
+      </View>
+
+      {/* ⑦bis LA FICHA DE OFERTA — Diario, Mensual y los paquetes, UNA pieza */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          FichaDeOferta · **la MISMA pieza para las tres ofertas**: pared blanca, etiqueta izquierda,
+          toggle derecha — y el toggle ENCIENDE Y EXPANDE en un solo gesto · día suelto = $12,00
+        </Text>
+
+        <FichaDeOferta
+          tamano={null}
+          rotulo="Diario"
+          precio={12}
+          registro="oficio"
+          encendido={diario}
+          onCambio={setDiario}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del día"
+              pasos={['$8', '$10', '$12', '$14', '$16']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <FichaDeOferta
+          tamano={null}
+          rotulo="Mensual"
+          precio={180}
+          registro="oficio"
+          encendido={mensual}
+          onCambio={setMensual}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del mes"
+              pasos={['$150', '$165', '$180', '$195', '$210']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ los paquetes: la misma ficha, **más el espejo** (Diario y Mensual no lo pasan y no se
+          dibuja) · 🔴 el fondo encendido es VERDE SUAVE (capaBg.cuidado) en LAS DOS casas — el
+          magenta era color de marca y no marcaba nada acá
+        </Text>
+
+        <FichaDeOferta
+          tamano={5}
+          rotulo="5 estadías"
+          precio={50}
+          precioDiaSuelto={12}
+          vozEquivalente={vozEquivalente}
+          registro="oficio"
+          encendido={p5}
+          onCambio={setP5}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del paquete"
+              pasos={['$40', '$45', '$50', '$55', '$60']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          🔴 EL PAR QUE DECIDE — arriba MÁS BARATO, abajo MÁS CARO que el día suelto. **Los dos
+          tienen que verse IGUAL de neutros**: si el caro se pinta de alarma, la app está opinando
+          sobre el precio de un negocio ajeno (firma: informa, jamás alarma)
+        </Text>
+
+        <FichaDeOferta
+          tamano={15}
+          rotulo="15 estadías"
+          precio={200}
+          precioDiaSuelto={12}
+          vozEquivalente={vozEquivalente}
+          registro="oficio"
+          encendido={p15}
+          onCambio={setP15}
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ perfil del LUGAR (familia): **sin toggle** — no es tocable y se anuncia como texto · y el
+          caso que ahora es COMÚN: sin día suelto, el espejo dice el equivalente y OMITE la
+          comparación en vez de inventar un 0 %
+        </Text>
+
+        <FichaDeOferta tamano={10} rotulo="10 estadías" precio={90} precioDiaSuelto={12} vozEquivalente={vozEquivalente} />
+        <FichaDeOferta tamano={10} rotulo="10 estadías" precio={90} vozEquivalente={vozEquivalente} />
       </View>
 
       {/* ⑧ LA ACEPTACIÓN DE DOCUMENTOS */}

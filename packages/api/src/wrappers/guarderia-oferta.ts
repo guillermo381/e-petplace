@@ -19,6 +19,10 @@ import type { ResultadoWrapper } from '../resultado';
 const MENSAJES = {
   no_gestionas_este_prestador: 'No administras este negocio.',
   precio_invalido:             'El precio por día tiene que ser mayor a cero.',
+  /* 🔴 Firma de la mesa (29-ago): el día dejó de ser obligatorio. Lo
+     obligatorio es AL MENOS UNA modalidad con precio — día, algún paquete, o
+     mensual. Las cuatro se pueden apagar; las cuatro no. */
+  sin_precios_configurados:    'Para publicar, pon al menos un precio: por día, por paquete o mensual.',
   precio_paquete_invalido:     'El precio del paquete tiene que ser mayor a cero. Déjalo vacío si no ofreces paquete.',
   precio_mensual_invalido:     'El precio mensual tiene que ser mayor a cero. Déjalo vacío si no ofreces mensualidad.',
   /* 🔴 Los dos rebotes que hacen honesta la palabra «visible»: dicen QUÉ falta
@@ -47,8 +51,33 @@ function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorGuarderiaOferta> 
   return fallaCodigo('error_desconocido');
 }
 
+/** Por qué NO se publicó. `null` cuando sí se publicó. */
+export type MotivoNoPublicada = 'sin_precio' | 'apagada_por_el_prestador';
+
+/** El estado de la guardería del prestador, en UN viaje. */
+export type EstadoGuarderia =
+  | 'sin_empezar' | 'sin_franjas' | 'sin_capacidad'
+  /** configurada y guardada, pero **no publicada por falta de precio** */
+  | 'sin_precio'
+  | 'apagada' | 'publicada';
+
+export interface EstadoGuarderiaCompleto {
+  estado: EstadoGuarderia;
+  tieneFranjas: boolean;
+  capacidadDia: number;
+  /** `null` = no ofrece esa modalidad. **Jamás 0: 0 sería «gratis».** */
+  precioDia: number | null;
+  precioMensual: number | null;
+  paquetesActivos: number;
+  especies: string[];
+  publicada: boolean;
+}
+
 export interface OfertaGuarderiaPublicada {
   prestadorServicioId: string;
+  /** 🔴 Guardar sin precio **NO es un error**: guarda y no publica. */
+  publicada: boolean;
+  motivoNoPublicada: MotivoNoPublicada | null;
   /** Derivada de las franjas: del inicio de la recogida al fin de la devolución. */
   jornadaMinutos: number;
   /** La suma de los espacios activos del lugar. */
@@ -75,17 +104,19 @@ export interface GuarderiaDisponible {
 
 export async function definirOfertaGuarderia(params: {
   prestadorId: string;
-  precioDia: number;
-  precioPaquete?: number | null;
+  /** `null`/omitido = **no ofrece día suelto**. Ya no es obligatorio. */
+  precioDia?: number | null;
   precioMensual?: number | null;
   activo?: boolean;
+  /** Las que atiende. Se **recortan contra {perro, gato}** en el server. */
+  especies?: string[];
 }): Promise<ResultadoWrapper<OfertaGuarderiaPublicada, CodigoErrorGuarderiaOferta>> {
   const { data, error } = await getClient().rpc('definir_oferta_guarderia', {
     p_prestador_id: params.prestadorId,
-    p_precio_dia: params.precioDia,
-    p_precio_paquete: params.precioPaquete ?? undefined,
+    p_precio_dia: params.precioDia ?? undefined,
     p_precio_mensual: params.precioMensual ?? undefined,
     p_activo: params.activo ?? true,
+    p_especies: params.especies ?? undefined,
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
@@ -100,21 +131,85 @@ export async function definirOfertaGuarderia(params: {
       prestadorServicioId: r.prestador_servicio_id,
       jornadaMinutos: r.jornada_minutos,
       capacidadDia: r.capacidad_dia,
+      publicada: r.publicada === true,
+      motivoNoPublicada:
+        typeof r.motivo_no_publicada === 'string'
+          ? (r.motivo_no_publicada as MotivoNoPublicada)
+          : null,
+    },
+  };
+}
+
+/**
+ * El estado completo, en UN viaje. 🔴 **La pantalla lo PINTA, no lo deduce** —
+ * y no lo arma con cuatro consultas: *«configurado, no publicado, por falta de
+ * precio»* es un estado del motor, no una inferencia de la superficie.
+ */
+export async function obtenerEstadoGuarderia(
+  prestadorId: string,
+): Promise<ResultadoWrapper<EstadoGuarderiaCompleto, CodigoErrorGuarderiaOferta>> {
+  const { data, error } = await getClient().rpc('obtener_estado_guarderia', {
+    p_prestador_id: prestadorId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.estado !== 'string' || typeof r.capacidad_dia !== 'number') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      estado: r.estado as EstadoGuarderia,
+      tieneFranjas: r.tiene_franjas === true,
+      capacidadDia: r.capacidad_dia,
+      precioDia: typeof r.precio_dia === 'number' ? r.precio_dia : null,
+      precioMensual: typeof r.precio_mensual === 'number' ? r.precio_mensual : null,
+      paquetesActivos: typeof r.paquetes_activos === 'number' ? r.paquetes_activos : 0,
+      especies: Array.isArray(r.especies) ? (r.especies as string[]) : [],
+      publicada: r.publicada === true,
     },
   };
 }
 
 /** La oferta propia del prestador — lectura directa por RLS (`prestador_servicios_own`). */
+/**
+ * 🔴 DOS HUECOS QUE C MIDIÓ Y ESTA FORMA CIERRA — *el escritor avanzó y el
+ * lector no*, que es el modo de falla más caro de una migración de columna:
+ *
+ * ① **`precio` es NULLABLE desde el 29-ago** (el día dejó de ser obligatorio).
+ *    El lector exigía `typeof precio === 'number'` ⇒ **una oferta guardada sin
+ *    precio de día NO SE PODÍA VOLVER A LEER**: el prestador guardaba bien y
+ *    **la próxima vez su taller abría roto**. *Hoy no se veía porque C tapaba
+ *    el caso por accidente — y un defecto tapado por accidente es uno que
+ *    aparece el día que alguien destapa otra cosa.*
+ *
+ * ② **No devolvía `especies`.** Si el selector se montara contra este lector,
+ *    cargaría el default y **un prestador que guardó «solo perros» vería
+ *    perro+gato y al guardar sobrescribiría su elección — en silencio.**
+ *    *Un lector que omite un campo editable no muestra menos: hace que la
+ *    pantalla escriba de más.*
+ */
+export interface OfertaGuarderiaPropia {
+  prestadorServicioId: string;
+  /** `null` = **no ofrece día suelto**. Jamás 0: 0 sería «gratis». */
+  precio: number | null;
+  precioMensual: number | null;
+  jornadaMinutos: number;
+  activo: boolean;
+  /** Las que el prestador eligió, ya recortadas contra `{perro, gato}`. */
+  especies: string[];
+}
+
 export async function obtenerOfertaGuarderiaPropia(
   prestadorId: string,
 ): Promise<ResultadoWrapper<
-  { prestadorServicioId: string; precio: number; precioPaquete: number | null;
-    precioMensual: number | null; jornadaMinutos: number; activo: boolean } | null,
+  OfertaGuarderiaPropia | null,
   CodigoErrorGuarderiaOferta
 >> {
   const { data, error } = await getClient()
     .from('prestador_servicios')
-    .select('id, precio, precio_paquete, precio_mensual_plan, duracion_minutos, activo')
+    .select('id, precio, precio_mensual_plan, duracion_minutos, activo, especies_compatibles')
     .eq('prestador_id', prestadorId)
     .eq('tipo_servicio', 'guarderia_dia')
     .maybeSingle();
@@ -122,18 +217,18 @@ export async function obtenerOfertaGuarderiaPropia(
   /* null NO es un error: es «todavía no publicaste». La pantalla del prestador
      necesita distinguirlo de un fallo para poder ofrecer el camino de alta. */
   if (data === null) return { ok: true, data: null };
-  if (typeof data.precio !== 'number' || typeof data.duracion_minutos !== 'number') {
-    return fallaCodigo('datos_inconsistentes');
-  }
+  if (typeof data.duracion_minutos !== 'number') return fallaCodigo('datos_inconsistentes');
   return {
     ok: true,
     data: {
       prestadorServicioId: data.id,
-      precio: data.precio,
-      precioPaquete: data.precio_paquete,
+      precio: typeof data.precio === 'number' ? data.precio : null,
       precioMensual: data.precio_mensual_plan,
       jornadaMinutos: data.duracion_minutos,
       activo: data.activo,
+      especies: Array.isArray(data.especies_compatibles)
+        ? (data.especies_compatibles as string[])
+        : [],
     },
   };
 }

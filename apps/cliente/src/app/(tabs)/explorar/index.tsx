@@ -56,23 +56,6 @@ function TituloBloque({ texto }: { texto: string }) {
   );
 }
 
-/**
- * ⚠️ **MITAD INERTE (molde S91) — el flag de guardería todavía no existe.**
- *
- * Guardería sigue en «próximamente», y **hoy eso es cierto**: sin oferta no
- * hay guarderías que reservar. Lo que esta constante arregla ES OTRA COSA —
- * que su visibilidad colgara del flag de `hotel` (ver abajo).
- *
- * 🔴 **NO se reemplaza por `servicios.hotel`.** Cuando A publique el flag
- * propio, esto pasa a `servicios.guarderia` **y se enciende la ficha activa**
- * — pedido autocontenido en `docs/loop/S107-C-PEDIDO-A-A-FLAG-GUARDERIA.md`.
- *
- * ⚠️ Y el flag es **la mitad de la llave**: la otra es `guarderia-oferta`.
- * Sin oferta, encender la ficha llevaría a una lista vacía — *una puerta que
- * abre a un cuarto sin nada adentro es peor que la puerta cerrada.*
- */
-const GUARDERIA_ABIERTA = false;
-
 export default function Explorar() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -128,7 +111,12 @@ export default function Explorar() {
        §5: *«la noche NO es guardería: es hotel, y es otro servicio con su propia
        letra»*), así que compartir bandera contradice una firma.
        Ver `GUARDERIA_ABIERTA` y su pedido a A. */
-    if (!GUARDERIA_ABIERTA) proximamente.push({ nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
+    /* ⭐ S107-C · GUARDERÍA ENCENDIDA POR SU FLAG PROPIO. La constante inerte
+       murió en el mismo acto (Ley 37): `servicios.guarderia` existe desde
+       S107-A, y hoy viene en `false` — la ficha aparece el día que la mesa lo
+       encienda, con oferta viva. */
+    if (servicios.guarderia) fichasActivas.push({ clave: 'guarderia', titulo: t('explorar.servicioGuarderia'), detalle: t('explorar.servicioGuarderiaDetalle'), icono: <Icono nombre="guarderia" tamano={34} />, onPress: () => router.navigate('/hogar/guarderia') });
+    else proximamente.push({ nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
     if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
     if (!servicios.telemedicine) proximamente.push({ nombre: t('explorar.proxTelemedicina'), icono: 'telemedicina' });
     if (!servicios.prime) proximamente.push({ nombre: t('explorar.proxPrime'), icono: 'prime' });

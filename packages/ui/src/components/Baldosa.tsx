@@ -88,8 +88,23 @@ import type { CapaDeOficio } from './PuertaDeOficio'
 
 /** El canto: mismo ancho que `FilaCita`. La coherencia es el punto. */
 const ANCHO_CANTO = 3
-/** N7 — el glifo con presencia. 48, no 32: es lo primero que se ve. */
-const LADO_GLIFO = 48
+/** N7 — el glifo con presencia. 48, no 32: es lo primero que se ve.
+ *
+ *  🔴 **ENMIENDA S107-B (medición de C): ese 48 se firmó PARA DOS COLUMNAS.**
+ *  En la grilla de Negocio a TRES, la baldosa es ~2/3 de ancho —y por
+ *  `aspectRatio: 1` también ~2/3 de alto—, y el glifo de 48 **le come el aire
+ *  al label**. *No falló la firma: se la aplicó a un ancho para el que no se
+ *  midió.*
+ *
+ *  **El número no se eligió a ojo: se derivó.** 48 servía a una baldosa de
+ *  ~50 % del ancho; a ~33 % la caja es 2/3 ⇒ 48 × 2/3 = **32**. Y el resultado
+ *  aterriza en un lugar elocuente: **32 es exactamente el valor que N7
+ *  rechazó** — o sea que *32 nunca fue «chico», era chico PARA DOS COLUMNAS*.
+ *
+ *  ⚠️ **Se agrega un caso, NO se cambia el firmado:** a dos columnas sigue
+ *  valiendo 48, intacto. Quien renderiza en tres es quien sabe que son tres, y
+ *  lo declara. */
+const LADO_GLIFO: Record<2 | 3, number> = { 2: 48, 3: 32 }
 
 export type BaldosaProps = {
   /** El nombre de lo que se elige. Una línea; dos si el nombre es largo. */
@@ -109,6 +124,15 @@ export type BaldosaProps = {
   /** Voz de a11y cuando el título solo no alcanza ("Veterinaria, 3
    *  servicios activos"). Default: el título. */
   etiquetaA11y?: string
+  /**
+   * Cuántas baldosas entran por fila donde ésta se monta. **Default 2**, que
+   * es el caso firmado (N7) y deja intacto todo consumidor existente.
+   *
+   * 🔴 Sólo modula **el tamaño del glifo** — ver `LADO_GLIFO`. **No decide el
+   * ancho**: eso lo pone el contenedor, y una pieza que se auto-anchara
+   * pelearía con su grilla.
+   */
+  columnas?: 2 | 3
 }
 
 export function Baldosa({
@@ -118,6 +142,7 @@ export function Baldosa({
   capa,
   onPress,
   orden,
+  columnas = 2,
   etiquetaA11y,
 }: BaldosaProps) {
   const { theme } = useTheme()
@@ -199,7 +224,7 @@ export function Baldosa({
             del padre: el texto queda anclado abajo y todas las baldosas
             alinean su título a la misma altura, tengan detalle o no. */}
         <View style={{ position: 'absolute', top: spacing[4], left: spacing[4] }}>
-          <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO} />
+          <Icono nombre={glifo} registro="aa" tamano={LADO_GLIFO[columnas]} />
         </View>
 
         {/* 🔴 EL TÍTULO ES `cuerpo`, NO `seccion` — y la corrección cura
