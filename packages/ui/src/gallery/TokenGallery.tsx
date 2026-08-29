@@ -52,7 +52,6 @@ import { AceptacionDeDocumentos } from '../components/AceptacionDeDocumentos'
 import { CalendarioCupo } from '../components/CalendarioCupo'
 import { ContadorClip } from '../components/ContadorClip'
 import { FichaFranja } from '../components/FichaFranja'
-import { FichaMensualidad } from '../components/FichaMensualidad'
 import { FichaDeOferta, type EquivalenciaPaquete } from '../components/FichaDeOferta'
 import { HiloDelDia } from '../components/HiloDelDia'
 import { MiniaturaClip } from '../components/MiniaturaClip'
@@ -6696,7 +6695,7 @@ function PiezasDelOficioS107() {
       {/* ② LAS DOS FICHAS HERMANAS */}
       <View style={{ gap: spacing[2] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          FichaFranja + FichaMensualidad · la MISMA pieza en la config del prestador y en el perfil del lugar
+          FichaFranja · la MISMA pieza en la config del prestador y en el perfil del lugar — y lo CUMPLIÓ: hoy la montan tres pantallas, incluida la del cliente
         </Text>
         <FichaFranja
           conSuperficie
@@ -6704,7 +6703,6 @@ function PiezasDelOficioS107() {
           recogida={{ rotulo: 'Recoge', desde: '7:00', hasta: '9:00' }}
           devolucion={{ rotulo: 'Devuelve', desde: '16:30', hasta: '18:30' }}
         />
-        <FichaMensualidad conSuperficie rotulo="El mes" dias="Lun–Vie" valor={180} porUnidad="el mes" />
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
           ↓ el borde: una franja con la devolución SIN declarar — ni rango vacío ni separador huérfano
         </Text>
@@ -6917,7 +6915,7 @@ function PiezasDelOficioS107() {
           />
         </SeccionPlegable>
         <SeccionPlegable titulo="Tus precios" detalle="desde $12" abierta={secPrecios} onCambiar={setSecPrecios}>
-          <FichaMensualidad conSuperficie dias="Lun–Vie" valor={180} porUnidad="el mes" />
+          <FichaDeOferta tamano={null} rotulo="Mensual" precio={180} registro="oficio" />
         </SeccionPlegable>
       </View>
 
