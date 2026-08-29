@@ -23808,3 +23808,35 @@ motor↔pieza declarados, **o** la disciplina escrita en el protocolo 1c —
 
 **Dueño:** B. **Disparo:** el primer oficio de `COMUNIDAD` o `CONSUMO` que necesite fila de cita.
 ☠️ **Condición de muerte:** el canto se deriva de la **taxonomía** (la capa del servicio como dato), no de un ternario — **o** el ternario gana un `default` que aborta en vez de asumir `cuidado`.
+
+#### D-976 — 🔴 TRASPLANTAR UN CRITERIO CORRECTO A UNA PREGUNTA QUE NO ES LA SUYA
+🔴 **ALTA como CLASE, curado el caso.** Defecto propio de A, medido y devuelto por C el 29-ago-2026 — **una hora después de escribirlo**.
+
+**El caso:** las dos ventanas de guardería pasaron a viajar en la lista (bien) **calculadas con `min(desde)`/`max(hasta)` sobre TODAS las franjas del lugar** (mal).
+
+> Un lugar con recogida **L-V 07:00–09:00** y **sábados 09:00–11:00** se mostraba
+> como **07:00–11:00**: *un rango que no ofrece ningún día*. A una familia que
+> miraba un martes **le decía que recogen a las 10:30.**
+>
+> **No falla, no avisa, y suena razonable.**
+
+🔴 **Y NO era un borde: el índice lo prueba.** `uq_guarderia_franja (prestador_id, tipo, **dias_semana**)` incluye los días ⇒ **dos ventanas del mismo tipo son EL DISEÑO.** *Hoy no se veía sólo porque el único lugar publicado tiene una de cada tipo — el peor momento para que apareciera era cuando el primer prestador real configurara su sábado.*
+
+### 🔴 LA CLASE, y es peor que inventar un criterio
+
+**El `min`/`max` no se inventó: se tomó de `obtener_estado_guarderia`, donde está BIEN.** Ahí deriva **un lapso** de la configuración propia del prestador, y para un lapso el mínimo y el máximo *son* la respuesta.
+
+**La lista de la familia pregunta otra cosa:** *«¿a qué hora pasan a buscarlo ESE día?»* — y **un agregado sobre todos los días no describe ninguno.**
+
+> ### Trasplantar un criterio correcto a una pregunta que no es la suya es cómo un número bien calculado termina diciendo algo falso.
+>
+> *Y es más peligroso que inventarlo, porque **viene con la autoridad de haber funcionado en otro lado**: quien lo revisa encuentra su precedente, ve que ahí anda, y lo da por bueno.*
+
+**Es pariente de `L-285`** (*«la magnitud equivocada no tiene sesgo»*) con una vuelta: allá la magnitud estaba mal elegida; **acá la magnitud está bien elegida para OTRA pregunta.**
+
+**La cura fue más chica que las dos alternativas que A había ofrecido:** el lector **ya recibía la fecha** — las cuatro columnas salen de la franja **que rige para esa fecha**, con el mismo criterio de día que `_guarderia_dia_operativo` ya usaba (`EXTRACT(dow …) = ANY(dias_semana)`), **sin inventar una segunda convención**. Y si para una misma fecha hay más de una franja, **`min`/`max` vuelve a ser correcto**: ahí sí son ventanas del mismo día.
+
+⚠️ **Lo que se rechazó, y bien:** ofrecer las franjas una por una **obligaría a la pantalla a elegir cuál aplica** — justo lo que el §⓪ del contrato del filtro prohíbe.
+
+**Dueño:** quien construya. **Disparo:** cada vez que se reuse una fórmula de otra función.
+☠️ **Condición de muerte:** la pregunta *«¿este criterio responde MI pregunta, o la de donde lo saqué?»* escrita en el protocolo de reuso — **el reuso se justifica por la pregunta, no por el precedente.**
