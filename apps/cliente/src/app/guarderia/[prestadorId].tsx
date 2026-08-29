@@ -394,18 +394,32 @@ export default function LugarGuarderia() {
             etiqueta={t('lugarGuarderia.reservar')}
             bloque
             cargando={reservando}
-            /* El gate DURO, reflejando al server: sin mascota no hay a quién
-               reservar; sin requisitos al día, no se reserva; sin día elegido
-               tampoco. La puerta no ofrece lo que va a rechazar (Ley 23). */
+            /* 🔴 EL GATE REFLEJA AL SERVER, NO LO DECIDE — y ahora la perilla
+               viaja DENTRO de la evaluación (`bloquea`), así que **es la misma
+               pantalla en los dos modos**: no hay rama nueva, hay un dato más
+               en la condición.
+               *Y el mismo `bloquea` lo lee `reservar_dia_guarderia`, así que
+               esta puerta nunca se abre para chocar contra otra.* */
             deshabilitado={
               elegido === null ||
               estado.requisitos === null ||
-              !estado.requisitos.alDia
+              (estado.requisitos.bloquea && !estado.requisitos.alDia)
             }
             onPress={() => void reservar()}
           />
+          {/* 🔴 EL MISMO FALTANTE, DOS TONOS — y la diferencia es de trato, no
+              de información: **con el bloqueo encendido frena** y hay que
+              decirlo; **apagado, se dice sin frenar y sin drama.** *Le falta
+              algo y lo puede resolver: no está haciendo nada malo, y una voz
+              de alarma sobre algo que no impide nada enseña a ignorar las
+              alarmas que sí importan.* El camino a cargarlo sigue a un toque
+              en los dos modos — la pieza no compila un faltante sin camino. */}
           {estado.requisitos !== null && !estado.requisitos.alDia ? (
-            <Texto variante="apoyo">{t('lugarGuarderia.bloqueadoPorRequisitos')}</Texto>
+            <Texto variante="apoyo">
+              {estado.requisitos.bloquea
+                ? t('lugarGuarderia.bloqueadoPorRequisitos')
+                : t('lugarGuarderia.faltaSinFrenar')}
+            </Texto>
           ) : null}
         </View>
       </ScrollView>

@@ -2884,6 +2884,9 @@ export const clienteEs = {
     cargarCarnet: 'Cargar carnet',
     reservar: 'Reservar este día',
     bloqueadoPorRequisitos: 'Para reservar, primero completa lo que falta arriba.',
+    /* 🔴 Mismo faltante, otro trato: acá NO frena, así que la voz no alarma.
+       Una alarma sobre algo que no impide nada enseña a ignorar las que sí. */
+    faltaSinFrenar: 'Puedes reservar igual. Cuando puedas, carga lo que falta: la guardería lo va a pedir al recibirlo.',
   },
   hubGuarderia: {
     titulo: 'Guardería',

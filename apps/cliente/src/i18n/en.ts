@@ -2133,6 +2133,7 @@ export const clienteEn = {
     cargarCarnet: 'Upload record card',
     reservar: 'Book this day',
     bloqueadoPorRequisitos: 'To book, first complete what’s missing above.',
+    faltaSinFrenar: 'You can book anyway. When you can, upload what’s missing: the daycare will ask for it on arrival.',
   },
   hubGuarderia: {
     titulo: 'Daycare',
