@@ -6630,6 +6630,51 @@ const MUNDOS_CON_GUION = [
   { g: 'guarderia', t: 'Guardería', d: undefined, c: 'cuidado' },
 ] as const
 
+/* ─────────────────────────────────────────────────────────────────────────
+   D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL — no es la pieza.
+
+   🔴 **ES UNA COPIA, y por eso puede envejecer.** Se transcribió el
+   29-ago-2026 de `apps/cliente/src/app/(tabs)/explorar/index.tsx` (el bloque
+   `fichasActivas.map`). *Si esa pantalla cambia y esto no, la comparación
+   pasa a comparar contra una ficción* — que es justo lo que arruinaría el
+   instrumento. **Quien toque aquella, mira ésta.**
+
+   POR QUÉ SE COPIA EN VEZ DE IMPORTARSE: no es un componente — vive **inline**
+   dentro del `.map` de esa pantalla. *No hay nada que importar, y ése es
+   exactamente el hecho que `D-973` pone sobre la mesa.*
+
+   SU ANATOMÍA, tal cual (las diferencias con `Baldosa` son la pregunta):
+   · superficie = `Tarjeta relleno="amplio" interactiva` — **sin canto de capa**
+   · glifo **26**, arriba, con `paddingTop` · proporción **1.05**
+   · título a mano: `sans.medium` + `size.sm`, 2 líneas
+   · **sin detalle y sin chevron** — los dos retirados por firma del founder
+   · celda `flexBasis: '31%'` con `flexGrow: 0`
+   ───────────────────────────────────────────────────────────────────────── */
+function BaldosaDelClienteAMano({ glifo, titulo }: { glifo: IconoNombre; titulo: string }) {
+  const { theme } = useTheme()
+  return (
+    <Tarjeta relleno="amplio" interactiva onPress={() => {}} accessibilityRole="button" etiqueta={titulo}>
+      <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
+        <View style={{ paddingTop: spacing[1] }}>
+          <Icono nombre={glifo} tamano={26} />
+        </View>
+        <View style={{ gap: 2 }}>
+          <Text
+            numberOfLines={2}
+            style={{
+              fontFamily: typography.family.sans.medium,
+              fontSize: typography.size.sm,
+              color: theme.text.primary,
+            }}
+          >
+            {titulo}
+          </Text>
+        </View>
+      </View>
+    </Tarjeta>
+  )
+}
+
 function PiezasDelOficioS107() {
   const { theme } = useTheme()
 
@@ -6895,6 +6940,23 @@ function PiezasDelOficioS107() {
           {MUNDOS_REALES.map((m) => (
             <View key={m.t} style={{ width: '33.333%', padding: spacing[1] }}>
               <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={3} onPress={() => {}} />
+            </View>
+          ))}
+        </View>
+
+        {/* ── D-973 · LA TERCERA FILA: la baldosa a mano del cliente ── */}
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ⭐ D-973 — LA MISMA GRILLA, DIBUJADA A MANO EN EL CLIENTE (reproducción fiel de
+          `explorar/index.tsx`). **Mismos cinco labels: lo único que cambia es la ANATOMÍA.**{'\n'}
+          · sin CANTO de capa · glifo 26 (no 32) · proporción 1.05 (no 0.8) · título a mano en
+          sans.medium/sm · SIN detalle y SIN chevron, los dos retirados por firma{'\n'}
+          🔴 La pregunta que esto contesta: **¿`Baldosa` tiene que admitir esta forma —variantes con
+          y sin detalle, con y sin canto— o esta superficie NO es una baldosa y sólo se parece?**
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+          {MUNDOS_CON_GUION.map((m) => (
+            <View key={`mano-${m.g}`} style={{ flexBasis: '31%', flexGrow: 0 }}>
+              <BaldosaDelClienteAMano glifo={m.g} titulo={m.t} />
             </View>
           ))}
         </View>
