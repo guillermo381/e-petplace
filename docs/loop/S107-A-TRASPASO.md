@@ -174,6 +174,21 @@ ver ⑥).
 
 ## ⑥ LO QUE ESTA CONDUCCIÓN APRENDIÓ, y le va a pasar al que siga
 
+- **Y una de B, que es de MÉTODO y no queda en el repo de otra forma:**
+
+  > ### **El censo del protocolo 1c también es de CRITERIOS, no sólo de piezas.**
+  >
+  > **Se cobró TRES veces en un mismo día:** la huella sobre el documento **ya
+  > estaba escrita** en la entrada de documento · la capa del wearable **ya
+  > estaba declarada** en `themes/light.ts` · y la resolución del día lleno **ya
+  > la había firmado `SelectorVentana`**.
+  >
+  > **En los tres casos el trabajo era LEER, no inventar.** *Un censo que
+  > pregunta «¿existe esta pieza?» y no «¿alguien ya decidió esto?» devuelve
+  > vacío sobre un criterio que está escrito a dos archivos de distancia — y
+  > entonces se re-decide, y las dos decisiones divergen sin que nadie se
+  > entere.*
+
 - **Una migración con DOS transacciones se aplica A MEDIAS.** Me pasó tres
   veces: falla el cinturón, la primera mitad ya commiteó, el ledger no la
   registra, y hay que correr la reversa a mano. **Una sola transacción.**
