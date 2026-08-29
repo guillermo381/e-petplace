@@ -117,28 +117,55 @@ type _FaltaAlgunTamano = Exclude<TamanoPaquete, (typeof TAMANOS)[number]>;
 const _GUARD_TAMANOS: _FaltaAlgunTamano extends never ? true : never = true;
 void _GUARD_TAMANOS;
 
-/** El riel del precio de un paquete: quince estadías pesan mucho más que una. */
-const PASOS_PAQUETE: string[] = [];
-for (let c = 2000; c <= 90000; c += 500) PASOS_PAQUETE.push((c / 100).toFixed(2));
-const indiceDePaquete = (v: number): number => {
-  const i = PASOS_PAQUETE.indexOf(v.toFixed(2));
-  return i >= 0 ? i : 0;
-};
-
-/** El riel de la mensualidad: un mes pesa como veinte y pico de días. */
-const PASOS_MENSUAL: string[] = [];
-for (let c = 5000; c <= 150000; c += 1000) PASOS_MENSUAL.push((c / 100).toFixed(2));
-const indiceDeMensual = (v: number): number => {
-  const i = PASOS_MENSUAL.indexOf(v.toFixed(2));
-  return i >= 0 ? i : 0;
-};
-
+/**
+ * ── LOS RIELES, CALIBRADOS A PROPÓSITO ──────────────────────────────────
+ * 🔴 **El paso es una decisión, no un default.** Con pasos finos el riel tiene
+ * cientos de posiciones repartidas en el ancho de la pantalla: **cada posición
+ * mide dos o tres píxeles y un roce cambia el precio.** *Un control de plata
+ * que se mueve sin que el prestador quiera moverlo es peor que uno tosco.*
+ *
+ * Los tres se calibran para que **un paso sea un salto que alguien quiso dar**,
+ * y el número exacto queda alcanzable igual: las tres fichas montan el riel con
+ * `edicionNumerica`, así que **se puede tipear**. *El riel explora el rango; el
+ * teclado fija el número.*
+ */
+/** Día: $5–$60 de a $1. Un día de guardería no se decide en centavos. */
 const PASOS_PRECIO: string[] = [];
-for (let c = 500; c <= 6000; c += 50) PASOS_PRECIO.push((c / 100).toFixed(2));
-const indiceDePrecio = (v: number): number => {
-  const i = PASOS_PRECIO.indexOf(v.toFixed(2));
-  return i >= 0 ? i : 0;
-};
+for (let c = 500; c <= 6000; c += 100) PASOS_PRECIO.push((c / 100).toFixed(2));
+
+/** Paquete: $20–$600 de a $10 — es un múltiplo de días, se mueve en decenas. */
+const PASOS_PAQUETE: string[] = [];
+for (let c = 2000; c <= 60000; c += 1000) PASOS_PAQUETE.push((c / 100).toFixed(2));
+
+/** Mensual: $50–$900 de a $25 — el salto más grande, porque es el monto más grande. */
+const PASOS_MENSUAL: string[] = [];
+for (let c = 5000; c <= 90000; c += 2500) PASOS_MENSUAL.push((c / 100).toFixed(2));
+
+/**
+ * 🔴 EL ÍNDICE CAE AL PASO MÁS CERCANO, JAMÁS A CERO.
+ *
+ * Con `indexOf` un valor que no está en la grilla —$12,50 guardado cuando el
+ * riel ahora salta de a $1— **caía al índice 0**, o sea al piso del rango: el
+ * prestador abría su taller y **veía $5,00 donde había guardado $12,50**, y al
+ * guardar lo perdía sin un solo error. *Cambiar el paso de un riel puede
+ * reescribir precios ya guardados, y eso no se ve.*
+ */
+function indiceMasCercano(pasos: string[], v: number): number {
+  let mejor = 0;
+  let dist = Infinity;
+  for (let i = 0; i < pasos.length; i += 1) {
+    const d = Math.abs(Number(pasos[i]) - v);
+    if (d < dist) {
+      dist = d;
+      mejor = i;
+    }
+  }
+  return mejor;
+}
+const indiceDePrecio = (v: number): number => indiceMasCercano(PASOS_PRECIO, v);
+const indiceDePaquete = (v: number): number => indiceMasCercano(PASOS_PAQUETE, v);
+const indiceDeMensual = (v: number): number => indiceMasCercano(PASOS_MENSUAL, v);
+
 
 /** 'HH:MM:SS' del motor → 'HH:MM' de la grilla. El motor manda la verdad; la
  *  pantalla sólo la recorta para mostrarla (jamás la reinterpreta). */
