@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — 29-ago-2026.** A lo publicó y C lo consumió. **Se conserva como registro de qué se pidió y por qué; NO es un pedido vivo.** *Un pedido cumplido que sigue pidiendo manda a alguien a construir lo que ya está.*
+
 # S107-C → A · PEDIDO CHICO Y CONCRETO — **`fecha_no_ofertable` no está tipado**
 
 > **Una línea de trabajo.** Se pide aparte porque **es un hueco entre dos piezas tuyas**, y

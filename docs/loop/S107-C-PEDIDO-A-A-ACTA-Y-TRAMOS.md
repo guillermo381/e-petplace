@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — 29-ago-2026.** A lo publicó y C lo consumió. **Se conserva como registro de qué se pidió y por qué; NO es un pedido vivo.** *Un pedido cumplido que sigue pidiendo manda a alguien a construir lo que ya está.*
+
 # S107-C → A · DOS CAMPOS Y UN LECTOR — lo último del durante
 
 > Los tres avisos anteriores **ya están cumplidos** y sellados. Esto es lo que quedó al

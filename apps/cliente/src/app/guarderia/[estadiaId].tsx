@@ -54,10 +54,15 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  ActaDeEntrega,
+  Boton,
+  type Conformidad,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Campo,
+  Hoja,
   MapaRecorrido,
   MarcaDeMapa,
   Tarjeta,
@@ -68,15 +73,24 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  confirmarActaGuarderia,
+  obtenerActaGuarderia,
   obtenerMediaDeMiMascota,
   obtenerMisEstadiasGuarderia,
+  obtenerPuntoVivo,
+  type ActaGuarderia,
   type EstadiaDeMiMascota,
   type MediaGuarderia,
+  type PuntoVivo,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
 const LADO_THUMB = 96;
+
+/** Hora local corta. La fecha completa no aporta: el acta es del día que se mira. */
+const horaCorta = (iso: string) =>
+  new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
 /* ☠️ ACÁ VIVÍA `cargarEstadia`, el enchufe pendiente, y su contrato de
    superficie `lib/guarderia/estadia-en-curso.ts`. **Los dos murieron el
@@ -111,6 +125,11 @@ export default function DuranteGuarderia() {
   const [estadia, setEstadia] = useState<Estadia>({ fase: 'cargando' });
   const [media, setMedia] = useState<Media>({ fase: 'cargando' });
   const [visor, setVisor] = useState<number | null>(null);
+  const [punto, setPunto] = useState<PuntoVivo | null>(null);
+  const [acta, setActa] = useState<ActaGuarderia | null>(null);
+  const [conformando, setConformando] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [reserva, setReserva] = useState('');
 
   useEffect(() => {
     const id = params.estadiaId;
@@ -159,16 +178,67 @@ export default function DuranteGuarderia() {
     };
   }, [params.mascotaId, params.fecha]);
 
-  /* ⏪ EL PUNTO VIVO QUEDA INERTE, y la razón cambió — se dice porque yo mismo
-     escribí antes la razón equivocada:
-     · **ANTES afirmé que `guarderia_tramos` no existía.** Falso: existe, es del
-       VIAJE (`prestador_id, fecha, direccion`) y la estadía apunta con
-       `tramo_recogida_id` / `tramo_devolucion_id`.
-     · **AHORA el hueco es de PROYECCIÓN, no de entidad:** `EstadiaDeMiMascota`
-       **no trae esos dos ids**, así que la familia no tiene con qué llamar a
-       `obtenerPuntoVivo`. **Pedido a A: dos campos en el mismo lector.**
-     *Un tramo por estadía haría que el mismo vehículo emitiera N puntos
-     idénticos — por eso la pantalla NO los crea ni los infiere: los LEE.* */
+  /* ✅ EL PUNTO VIVO, ENCENDIDO — A proyectó los dos `tramo_id` el 29-ago.
+     ⏪ *Y su hueco cambió de clase dos veces antes de llegar acá: primero
+     escribí que faltaba la ENTIDAD (falso), después medí que faltaba la
+     PROYECCIÓN (cierto). La segunda medición es la que lo destrabó.* */
+  useEffect(() => {
+    if (estadia.fase !== 'listo') return;
+    const e = estadia.e;
+    /* El tramo del momento: recogida mientras va a buscarlo, devolución
+       mientras vuelve. **Fuera de esos dos no hay viaje que mirar.** */
+    const tramoId =
+      e.estadoEstadia === 'recogida_en_curso' ? e.tramoRecogidaId
+      : e.estadoEstadia === 'retorno_en_curso' ? e.tramoDevolucionId
+      : null;
+    if (tramoId === null) { setPunto(null); return; }
+    let vigente = true;
+    const leer = async () => {
+      const r = await obtenerPuntoVivo(tramoId);
+      if (vigente && r.ok) setPunto(r.data);
+    };
+    void leer();
+    /* Sondeo con la cadencia de la casa (~30 s), como el EN VIVO del paseo.
+       🔴 Y **jamás se promete «tiempo real»**: la voz dice cuándo se lo vio. */
+    const id = setInterval(() => void leer(), 30_000);
+    return () => { vigente = false; clearInterval(id); };
+  }, [estadia]);
+
+  /* EL ACTA. Se pide la de DEVOLUCIÓN si existe —es la que el dueño conforma al
+     recibirlo— y si no, la de recogida. */
+  useEffect(() => {
+    if (estadia.fase !== 'listo') return;
+    const id = estadia.e.actaDevolucionId ?? estadia.e.actaRecogidaId;
+    if (id === null) { setActa(null); return; }
+    let vigente = true;
+    void (async () => {
+      const r = await obtenerActaGuarderia(id);
+      if (vigente && r.ok) setActa(r.data);
+    })();
+    return () => { vigente = false; };
+  }, [estadia]);
+
+  /** 🔴 RE-LEE EL ACTA DESPUÉS DE CONFIRMAR, no escribe el estado a mano:
+   *  *la conformidad la sella el servidor con su hora, y pintarla de este lado
+   *  mostraría un sello que todavía no existe.* */
+  const enviarConformidad = useCallback(
+    async (c: 'conforme' | 'con_reserva') => {
+      if (acta === null || enviando) return;
+      setEnviando(true);
+      const r = await confirmarActaGuarderia({
+        actaId: acta.actaId,
+        conformidad: c,
+        reservaTexto: c === 'con_reserva' ? reserva.trim() : undefined,
+      });
+      if (r.ok) {
+        const f = await obtenerActaGuarderia(acta.actaId);
+        if (f.ok) setActa(f.data);
+        setConformando(false);
+      }
+      setEnviando(false);
+    },
+    [acta, enviando, reserva],
+  );
 
   const fotos = media.fase === 'listo' ? media.lista.filter((m) => m.tipo === 'foto') : [];
 
@@ -238,44 +308,119 @@ export default function DuranteGuarderia() {
           </Tarjeta>
         )}
 
-        {/* ── ② DÓNDE VA — construido, INERTE hasta que el lector proyecte
-               `tramo_recogida_id` / `tramo_devolucion_id` (ver arriba). Mientras
-               tanto la pantalla **dice que viaja** sin prometer un mapa. ── */}
+        {/* ── ② DÓNDE VA — sólo mientras viaja, y sólo si hay punto ── */}
         {estadia.fase === 'listo' && estaViajando(estadia.e) ? (
           <Tarjeta>
-            <View style={{ gap: spacing[2] }}>
+            <View style={{ gap: spacing[3] }}>
               <Texto variante="seccion">{t('duranteGuarderia.dondeVa')}</Texto>
-              <Texto variante="apoyo">{t('duranteGuarderia.sinPunto')}</Texto>
+              {punto === null ? (
+                /* `null` no es error: es «todavía no lo vemos». **No se muestra
+                   un punto viejo** — un mapa que miente sobre dónde está un
+                   animal es peor que un mapa ausente. */
+                <Texto variante="apoyo">{t('duranteGuarderia.sinPunto')}</Texto>
+              ) : (
+                <>
+                  <MapaRecorrido
+                    modo="vivo"
+                    mirada="espectador"
+                    alto={220}
+                    /* 🔴 **UN SOLO PUNTO — la garantía es estructural.** Una
+                       polilínea de un punto no dibuja nada: no hay forma de que
+                       un descuido futuro pinte la traza sin agregar puntos a
+                       mano. *Las paradas de una ruta son las casas de otras
+                       familias*, y el tramo es del VIAJE: lo comparten todos
+                       los animales a bordo. */
+                    puntos={[{ lat: punto.lat, lng: punto.lon, t: punto.vistoEn }]}
+                    centroInicial={{ lat: punto.lat, lng: punto.lon }}
+                    marcadorVivo={<MarcaDeMapa variante="moto" />}
+                  />
+                  {/* Frescura honesta: jamás «en tiempo real». */}
+                  <Texto variante="apoyo">
+                    {t('duranteGuarderia.vistoA', {
+                      hora: new Date(punto.vistoEn).toLocaleTimeString(undefined, {
+                        hour: '2-digit', minute: '2-digit',
+                      }),
+                    })}
+                  </Texto>
+                </>
+              )}
             </View>
           </Tarjeta>
         ) : null}
 
-        {/* ── ④ EL ACTA — 🔴 SE PUEDE CONFIRMAR Y NO SE PUEDE LEER ──────────
-               `confirmarActaGuarderia(actaId)` existe y `ActaDeEntrega` tiene su
-               `modo='leer'`. **Falta el lector del CONTENIDO** — los ítems, las
-               observaciones, la media y la conformidad actual.
+        {/* ── ④ EL ACTA — ✅ EL BOTÓN DE CONFORMAR NACIÓ CON SU LECTOR
+               (29-ago). *La condición estaba escrita acá: «el botón nace CON el
+               lector del contenido, no antes». Se cumplió y por eso existe.*
 
-               ═══════════════════════════════════════════════════════════
-               🔴 **EL BOTÓN DE CONFORMAR FALTA A PROPÓSITO. FIRMADO POR LA
-               MESA (29-ago-2026). NO SE «COMPLETA».**
+               🔴 **EL MAPEO DE CONFORMIDAD NO ES UN PASO DIRECTO, y esconde un
+               defecto silencioso:** `sin_conformidad` **existe en los dos
+               vocabularios con sentidos OPUESTOS**.
 
-               > ### La conformidad existe porque el dueño VIO lo que firma.
-               > Un botón «conforme» sobre un acta que no se puede leer **no es
-               > una función a medias: es pedirle a alguien que firme a ciegas.**
+               | motor | significa | pieza |
+               |---|---|---|
+               | `sin_conformidad` | **todavía no la miró** | `pendiente` (sereno) |
+               | `conforme` | aceptó | `conforme` (success) |
+               | `con_reserva` | aceptó **señalando algo** | `sin_conformidad` (warning) |
 
-               ⇒ **El botón nace CON el lector del contenido, no antes.** *Si
-               llegaste acá viendo un hueco donde debería haber una acción: el
-               hueco es la decisión.* El lector está pedido en
-               `S107-C-PEDIDO-A-A-ACTA-Y-TRAMOS.md`.
-               ═══════════════════════════════════════════════════════════ */}
-        {estadia.fase === 'listo' &&
-        (estadia.e.actaRecogidaId !== null || estadia.e.actaDevolucionId !== null) ? (
-          <Tarjeta>
-            <View style={{ gap: spacing[2] }}>
-              <Texto variante="seccion">{t('duranteGuarderia.actaTitulo')}</Texto>
-              <Texto variante="apoyo">{t('duranteGuarderia.actaPendienteLector')}</Texto>
-            </View>
-          </Tarjeta>
+               *Pasarlo directo pintaría un WARNING sobre un dueño que
+               simplemente no abrió el acta — y el warning existe para decir
+               que alguien señaló un problema.* ── */}
+        {estadia.fase === 'listo' && acta !== null ? (
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="seccion">{t('duranteGuarderia.actaTitulo')}</Texto>
+            <ActaDeEntrega
+              modo="leer"
+              direccion={acta.direccion}
+              /* 🔴 EL LECTOR DEVUELVE **HECHOS, NO VOZ** — los ítems se componen
+                 acá, con el idioma de la casa. *El motor no sabe cómo se llama
+                 «carnet a la vista» en esta letra, y no debe saberlo.* */
+              items={[
+                {
+                  clave: 'carnet',
+                  etiqueta: t('duranteGuarderia.actaCarnet'),
+                  marcado: acta.carnetVerificado,
+                },
+                ...(acta.objetos !== null && acta.objetos.length > 0
+                  ? [{ clave: 'objetos', etiqueta: acta.objetos, marcado: true }]
+                  : []),
+              ]}
+              rotuloItems={t('duranteGuarderia.actaItems')}
+              observaciones={acta.observaciones ?? undefined}
+              rotuloObservaciones={t('duranteGuarderia.actaObservaciones')}
+              conformidad={
+                (acta.conformidad === 'conforme'
+                  ? 'conforme'
+                  : acta.conformidad === 'con_reserva'
+                    ? 'sin_conformidad'
+                    : 'pendiente') satisfies Conformidad
+              }
+              vozConformidad={t(
+                acta.conformidad === 'conforme'
+                  ? 'duranteGuarderia.actaConforme'
+                  : acta.conformidad === 'con_reserva'
+                    ? 'duranteGuarderia.actaConReserva'
+                    : 'duranteGuarderia.actaPendiente',
+              )}
+              onConformar={
+                acta.conformidad === 'sin_conformidad' ? () => setConformando(true) : undefined
+              }
+              etiquetaConformar={t('duranteGuarderia.actaConformar')}
+            />
+            {/* 🔴 LAS DOS HORAS, SIEMPRE — firma de A. `cerradaEn` es la hora de
+                la PUERTA; `recibidaEn`, cuándo llegó al servidor. *La diferencia
+                entre ellas es la cola offline: esconderla haría que un acta
+                levantada SIN SEÑAL parezca levantada tarde.* */}
+            {acta.cerradaEn !== null ? (
+              <Texto variante="apoyo">
+                {t('duranteGuarderia.actaCerradaEn', { hora: horaCorta(acta.cerradaEn) })}
+              </Texto>
+            ) : null}
+            {acta.recibidaEn !== null ? (
+              <Texto variante="apoyo">
+                {t('duranteGuarderia.actaRecibidaEn', { hora: horaCorta(acta.recibidaEn) })}
+              </Texto>
+            ) : null}
+          </View>
         ) : null}
 
         {/* ── ③ SU DÍA — las fotos y los clips ── */}
@@ -323,6 +468,43 @@ export default function DuranteGuarderia() {
           </View>
         </Tarjeta>
       </ScrollView>
+
+      {/* LA HOJA DE LA CONFORMIDAD — dos caminos parejos, sin default oscuro.
+          🔴 **«Con salvedad» NO es un rechazo**, y por eso no se pinta como
+          peligro: *el dueño acepta y deja constancia de algo. Tratarlo como un
+          «no» empujaría a callar lo que hay que anotar.* */}
+      <Hoja
+        visible={conformando}
+        onCerrar={() => setConformando(false)}
+        titulo={t('duranteGuarderia.actaConformarTitulo')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('duranteGuarderia.actaConforme_si')}
+            cargando={enviando}
+            onPress={() => void enviarConformidad('conforme')}
+          />
+          <Campo
+            label={t('duranteGuarderia.actaReservaEtiqueta')}
+            value={reserva}
+            onChangeText={setReserva}
+            multilinea={3}
+          />
+          <Boton
+            variante="secundario"
+            bloque
+            etiqueta={t('duranteGuarderia.actaReservaEnviar')}
+            /* Sin texto no hay salvedad que dejar: *un «con reserva» vacío es
+               una conformidad con cara de queja.* */
+            deshabilitado={reserva.trim().length === 0}
+            razonDeshabilitado={t('duranteGuarderia.actaReservaEtiqueta')}
+            cargando={enviando}
+            onPress={() => void enviarConformidad('con_reserva')}
+          />
+        </View>
+      </Hoja>
 
       <VisorFoto
         visible={visor !== null}

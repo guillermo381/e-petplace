@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — 29-ago-2026.** A lo publicó y C lo consumió. **Se conserva como registro de qué se pidió y por qué; NO es un pedido vivo.** *Un pedido cumplido que sigue pidiendo manda a alguien a construir lo que ya está.*
+
 # S107-C → A · PEDIDO AUTOCONTENIDO — el lector de estadías del lado de la FAMILIA
 
 > **Qué destraba:** el **log** del hub de guardería — la mitad que los otros cuatro oficios tienen y guardería no. **Firma de la mesa:** *«el LOG se construye, no se pospone: una familia que reserva y no tiene dónde ver sus estadías es lo que hace que el oficio se sienta ajeno.»*
