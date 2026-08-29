@@ -1331,7 +1331,18 @@ export const prestadorEs = {
     /* ⏪ Estos dos detalles nacieron ESCRITOS A OJO y la captura los cazó:
        «La vitrina del cliente» (130,2) y «Llega en la próxima versión»
        (174,4) truncan contra los 121 px del teléfono angosto. La versión
-       larga de la segunda vive en la Hoja, que es donde hay lugar. */
+       larga de la segunda vive en la Hoja, que es donde hay lugar.
+
+       🔴 ⚠️ **HOY NO LAS RENDERIZA NADIE, Y ESO ES A PROPÓSITO — NO SE BORRAN.**
+       Dejaron de dibujarse cuando la grilla pasó a TRES columnas (el subtítulo
+       salió de la baldosa) y **esperan firma del founder** sobre si el detalle
+       vuelve en otra forma o muere.
+
+       > *Una clave huérfana invita a que alguien la limpie por prolijidad — y
+       > esa limpieza sería **borrar una decisión pendiente**, no basura.*
+
+       Quien las mire buscando muertos: **están declaradas vivas acá**. Si el
+       founder firma que no vuelven, mueren con esa firma y con este comentario. */
     tiendaVitrinaDetalle: 'La vitrina',
     tiendaLocal: 'Inventario de tu local',
     tiendaLocalDetalle: 'Muy pronto',
