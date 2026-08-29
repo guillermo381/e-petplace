@@ -255,11 +255,19 @@ export default function DuranteGuarderia() {
                `modo='leer'`. **Falta el lector del CONTENIDO** — los ítems, las
                observaciones, la media y la conformidad actual.
 
-               🔴 **Y por eso NO se ofrece confirmar todavía, que es una decisión
-               de producto y no una limitación técnica:** *la conformidad existe
-               porque el dueño VIO lo que firma. Un botón «conforme» sobre un
-               acta que no se puede leer no es una función a medias — es pedirle
-               a alguien que firme a ciegas.* */}
+               ═══════════════════════════════════════════════════════════
+               🔴 **EL BOTÓN DE CONFORMAR FALTA A PROPÓSITO. FIRMADO POR LA
+               MESA (29-ago-2026). NO SE «COMPLETA».**
+
+               > ### La conformidad existe porque el dueño VIO lo que firma.
+               > Un botón «conforme» sobre un acta que no se puede leer **no es
+               > una función a medias: es pedirle a alguien que firme a ciegas.**
+
+               ⇒ **El botón nace CON el lector del contenido, no antes.** *Si
+               llegaste acá viendo un hueco donde debería haber una acción: el
+               hueco es la decisión.* El lector está pedido en
+               `S107-C-PEDIDO-A-A-ACTA-Y-TRAMOS.md`.
+               ═══════════════════════════════════════════════════════════ */}
         {estadia.fase === 'listo' &&
         (estadia.e.actaRecogidaId !== null || estadia.e.actaDevolucionId !== null) ? (
           <Tarjeta>

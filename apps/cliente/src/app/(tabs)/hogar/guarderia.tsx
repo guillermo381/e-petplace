@@ -352,10 +352,21 @@ export default function LogGuarderia() {
           <Boton
             variante="primario"
             bloque
+            /* ⏪ ACÁ EL BOTÓN REPETÍA LA INSTRUCCIÓN DEL CUERPO. Sin mascota
+               elegida decía «Elige de quién primero» **mientras el vacío decía
+               «Elige de quién»** — la misma frase dos veces en una pantalla.
+               *Cada mitad correcta por su cuenta; el defecto nacía de mostrarlas
+               juntas* (la clase que esta pista viene cazando).
+
+               🔴 **Firma de la mesa: el cuerpo instruye, el botón lleva la
+               acción.** Y el rótulo sale de **una key propia de esta pantalla**:
+               `plan.agendarFaltaMascota` es COMPARTIDA y cambiarla movería la
+               voz de superficies ajenas. *No hizo falta tocar `Boton`: su
+               `razonDeshabilitado` ya existía justo para esto.* */
             etiqueta={
               mascota !== null
                 ? t('logGuarderia.reservarDe', { nombre: mascota.nombre })
-                : t('plan.agendarFaltaMascota')
+                : t('logGuarderia.reservar')
             }
             deshabilitado={mascota === null}
             razonDeshabilitado={t('plan.elegiMascota')}

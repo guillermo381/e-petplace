@@ -2998,6 +2998,8 @@ export const clienteEs = {
     vacioTitulo: 'Sin estadías agendadas',
     /* 🔴 Sin mascota elegida NO se dice «sin estadías»: nadie preguntó. */
     elegiMascotaTitulo: 'Elige de quién',
+    /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
+    reservar: 'Reservar una estadía',
     elegiMascotaDetalle: 'Toca una de tus mascotas para ver sus estadías.',
     vacioDetalle: 'Cuando reserves, tus estadías se verán acá.',
     estadiasNoCargoTitulo: 'No pudimos cargar tus estadías',

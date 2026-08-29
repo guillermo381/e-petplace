@@ -2219,6 +2219,7 @@ export const clienteEn = {
   logGuarderia: {
     vacioTitulo: 'No stays booked',
     elegiMascotaTitulo: 'Choose who',
+    reservar: 'Book a stay',
     elegiMascotaDetalle: 'Tap one of your pets to see their stays.',
     vacioDetalle: 'Once you book, your stays will show up here.',
     estadiasNoCargoTitulo: 'We couldn’t load your stays',
