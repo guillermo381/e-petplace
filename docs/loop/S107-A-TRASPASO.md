@@ -8,6 +8,31 @@
 
 ---
 
+# 🔴 QUÉ HACER APENAS ARRANQUES — tres cosas, en este orden
+
+**1 · PREGUNTALE AL FOUNDER EL ESTADO. No asumas esta cola.**
+> En esta sesión **la cola circulante quedó vencida DOS VECES y se trabajó
+> contra ella**: se pidieron cosas que ya estaban hechas (`obtenerEstadiasDelDia`
+> ya existía cuando volvieron a pedirlo; ⑤ estaba aplicado entero cuando la lista
+> todavía lo daba por empezar). **Este documento envejece igual que aquélla** —
+> es una foto del 29-ago, no un estado vivo. *Un acta dice lo que pasó; sólo el
+> founder dice lo que sigue.*
+
+**2 · EL MERGE DE C ES LO PRIMERO QUE SE CONSTRUYE.** Está abortado y no
+compila: son **cuatro llamadas contra la API vieja** en
+`apps/prestador/src/app/guarderia/taller.tsx` — **573 · 663 · 698 · 702**. El
+mapeo, ya medido: **`precioPaquete` → `precio`** · **`rotuloTamano` → `rotulo`**
+· y **desaparecen `clave`, `registro`, `elegido`, `onElegir`, `campoPrecio`**.
+🔴 **Leé `packages/ui/src/components/FichaDeOferta.tsx` ENTERA antes de tocar:
+es la pantalla que el founder está por caminar**, y una adaptación a ojo rompe
+en silencio lo que ningún typecheck ve. *(El detalle completo, en §②.)*
+
+**3 · LA BUILD DE NUBE `1.0.7`, cuando resetee la cuota de EAS el 1-sep.** Es
+**la que va a familias** y **la única que cierra las tres cadenas de permiso**,
+hoy ABIERTAS. La local **no las cierra** y quedó reprobada por su guard.
+
+---
+
 ## ⓪ LO PRIMERO, PORQUE SI NO SE SABE SE PIERDE UNA HORA
 
 🔴 **El founder tiene un binario `1.0.7` que NO salió de EAS.** Medido: **12
