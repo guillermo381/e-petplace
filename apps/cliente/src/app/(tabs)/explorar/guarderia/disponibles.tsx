@@ -39,7 +39,10 @@ import { esModalidad, type ModalidadGuarderia } from '@/lib/guarderia-modalidad'
 
 type Lista =
   | { fase: 'cargando' }
-  | { fase: 'error' }
+  /** Ley 13: se cayó algo. *No es que no haya: no pudimos preguntar.* */
+  | { fase: 'noPudimos' }
+  /** 🔴 El motor DIAGNOSTICÓ, y su voz ya dice el hecho (A tipó 17 códigos). */
+  | { fase: 'causaDelMotor'; mensaje: string }
   | { fase: 'listo'; lugares: GuarderiaDisponible[] };
 
 export default function QuienPuedeGuarderia() {
@@ -61,7 +64,7 @@ export default function QuienPuedeGuarderia() {
   const [lista, setLista] = useState<Lista>({ fase: 'cargando' });
 
   useEffect(() => {
-    if (mascotaId === null || fecha === null) { setLista({ fase: 'error' }); return; }
+    if (mascotaId === null || fecha === null) { setLista({ fase: 'noPudimos' }); return; }
     let vigente = true;
     setLista({ fase: 'cargando' });
     void (async () => {
@@ -72,7 +75,14 @@ export default function QuienPuedeGuarderia() {
       const r = await obtenerGuarderiasDisponibles({ fecha, mascotaId, modalidad });
       if (!vigente) return;
       /* Un fallo JAMÁS se disfraza de «no hay lugares» (Ley 13). */
-      setLista(r.ok ? { fase: 'listo', lugares: r.data } : { fase: 'error' });
+      if (r.ok) { setLista({ fase: 'listo', lugares: r.data }); return; }
+      /* Un fallo JAMÁS se disfraza de «no hay lugares» (Ley 13) — **y un
+         diagnóstico del motor jamás se disfraza de fallo.** */
+      setLista(
+        r.codigo === 'mascota_no_elegible' || r.codigo === 'no_access_to_mascota'
+          ? { fase: 'causaDelMotor', mensaje: r.mensaje }
+          : { fase: 'noPudimos' },
+      );
     })();
     return () => { vigente = false; };
   }, [mascotaId, fecha]);
@@ -107,7 +117,11 @@ export default function QuienPuedeGuarderia() {
             <Esqueleto alto={64} />
             <Esqueleto alto={64} />
           </EsqueletoGrupo>
-        ) : lista.fase === 'error' ? (
+        ) : lista.fase === 'causaDelMotor' ? (
+          /* Sin título de fallo: **no falló nada.** El motor contestó y su
+             respuesta es el contenido de la pantalla. */
+          <EstadoVacio registro="seccion" titulo={lista.mensaje} />
+        ) : lista.fase === 'noPudimos' ? (
           <EstadoVacio
             registro="seccion"
             titulo={t('hubGuarderia.listaNoCargoTitulo')}

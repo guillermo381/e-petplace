@@ -116,7 +116,19 @@ function iso(d: Date): string {
 type Resumen =
   | { fase: 'ocioso' }
   | { fase: 'cargando' }
-  | { fase: 'error' }
+  /**
+   * 🔴 **DOS ERRORES DISTINTOS, Y CONFUNDIRLOS ESCONDE LA RAZÓN.**
+   *
+   * `noPudimos` es la voz de Ley 13 —*«no es que no haya: no pudimos
+   * preguntar»*—, correcta cuando algo se cayó. **`causa` es un DIAGNÓSTICO
+   * del motor que ahora tiene voz propia** (A tipó 17 códigos el 29-ago).
+   *
+   * *Antes los dos caían en el mismo estado, así que `mascota_no_elegible`
+   * —«la guardería es solo para perros y gatos»— salía como «no pudimos
+   * preguntar»: **una afirmación falsa que además tapaba la verdadera.***
+   */
+  | { fase: 'noPudimos' }
+  | { fase: 'causaDelMotor'; mensaje: string }
   /** ③ — su propio estado, no una causa. */
   | { fase: 'vispera' }
   | { fase: 'listo'; cuantos: number; precioDesde: number | null; causa: CausaSinGuarderias | null };
@@ -171,7 +183,16 @@ export default function ElegirGuarderia() {
            que tampoco estaban—. *Declarar que el código existía y no estaba en
            la unión es lo que lo hizo aparecer; un `catch` genérico lo habría
            escondido para siempre.* */
-        setResumen(r.codigo === 'fecha_no_ofertable' ? { fase: 'vispera' } : { fase: 'error' });
+        /* Los códigos que describen el MUNDO llevan su voz; los que describen
+           una caída, la de Ley 13. *La lista es corta a propósito: sólo entran
+           los que una familia puede provocar y entender.* */
+        setResumen(
+          r.codigo === 'fecha_no_ofertable'
+            ? { fase: 'vispera' }
+            : r.codigo === 'mascota_no_elegible' || r.codigo === 'no_access_to_mascota'
+              ? { fase: 'causaDelMotor', mensaje: r.mensaje }
+              : { fase: 'noPudimos' },
+        );
         return;
       }
       setResumen({
@@ -301,7 +322,11 @@ export default function ElegirGuarderia() {
           /* ③ NO dice «prueba con otro día»: explica LA REGLA, que es lo que
              la familia no sabía. */
           <Texto variante="apoyo">{t('elegirGuarderia.vispera')}</Texto>
-        ) : resumen.fase === 'error' ? (
+        ) : resumen.fase === 'causaDelMotor' ? (
+          /* La voz del motor, tal cual: **ya está en tuteo y ya dice el hecho.**
+             *Envolverla en «no pudimos preguntar» la convertiría en mentira.* */
+          <Texto variante="apoyo">{resumen.mensaje}</Texto>
+        ) : resumen.fase === 'noPudimos' ? (
           <Texto variante="apoyo">{t('hubGuarderia.listaNoCargoDetalle')}</Texto>
         ) : resumen.fase === 'listo' && resumen.causa !== null ? (
           <Texto variante="apoyo">{vozCausa(resumen.causa)}</Texto>

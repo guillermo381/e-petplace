@@ -69,35 +69,32 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerMediaDeMiMascota,
-  obtenerPuntoVivo,
+  obtenerMisEstadiasGuarderia,
+  type EstadiaDeMiMascota,
   type MediaGuarderia,
-  type PuntoVivo,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import type { EstadiaEnCurso } from '@/lib/guarderia/estadia-en-curso';
 
 const LADO_THUMB = 96;
 
-/**
- * 🔴 EL ENCHUFE PENDIENTE — pedido a la pista A
- * (`docs/loop/S107-C-PEDIDO-A-A-LOG-FAMILIA.md`).
- *
- * Devuelve `null` mientras el lector no exista. **No se improvisa una lectura
- * directa a la tabla**: `packages/api` es la puerta única de la casa y es
- * territorio de A. *Escribir un `supabase.from('guarderia_estadias')` acá sería
- * saltarse la puerta para llegar tres días antes, y esa deuda la paga otro.*
- */
-async function cargarEstadia(_estadiaId: string): Promise<EstadiaEnCurso | null> {
-  return null;
-}
+/* ☠️ ACÁ VIVÍA `cargarEstadia`, el enchufe pendiente, y su contrato de
+   superficie `lib/guarderia/estadia-en-curso.ts`. **Los dos murieron el
+   29-ago**: A publicó `obtenerMisEstadiasGuarderia` y la pantalla lee del
+   objeto. *El contrato prometía morir en una línea cuando el lector existiera —
+   y así fue* (Ley 37: el andamio se retira con su razón). */
 
 /** Los dos tramos: mientras viaja, hay a dónde mirar. */
-function estaViajando(e: EstadiaEnCurso): boolean {
-  return e.estado === 'recogida_en_curso' || e.estado === 'retorno_en_curso';
+function estaViajando(e: EstadiaDeMiMascota): boolean {
+  return e.estadoEstadia === 'recogida_en_curso' || e.estadoEstadia === 'retorno_en_curso';
 }
 
-type Estadia = { fase: 'cargando' } | { fase: 'sinLector' } | { fase: 'listo'; e: EstadiaEnCurso };
+type Estadia =
+  | { fase: 'cargando' }
+  | { fase: 'noPudimos' }
+  /** El id no está entre las estadías de esta familia. */
+  | { fase: 'noEsTuya' }
+  | { fase: 'listo'; e: EstadiaDeMiMascota };
 type Media = { fase: 'cargando' } | { fase: 'error' } | { fase: 'listo'; lista: MediaGuarderia[] };
 
 export default function DuranteGuarderia() {
@@ -113,20 +110,32 @@ export default function DuranteGuarderia() {
 
   const [estadia, setEstadia] = useState<Estadia>({ fase: 'cargando' });
   const [media, setMedia] = useState<Media>({ fase: 'cargando' });
-  const [punto, setPunto] = useState<PuntoVivo | null>(null);
   const [visor, setVisor] = useState<number | null>(null);
 
   useEffect(() => {
+    const id = params.estadiaId;
+    if (typeof id !== 'string' || id.length === 0) { setEstadia({ fase: 'noPudimos' }); return; }
     let vigente = true;
     void (async () => {
-      const e = await cargarEstadia(params.estadiaId ?? '');
+      /* 🔴 SE PIDE POR MASCOTA Y SE BUSCA EL ID, no se pide «la estadía»: el
+         lector de A es por familia, y **eso es correcto** — *la RLS ya decide
+         qué es tuyo, y un lector por id abriría una puerta angosta nueva para
+         responder lo mismo.* */
+      const r = await obtenerMisEstadiasGuarderia(
+        typeof params.mascotaId === 'string' && params.mascotaId.length > 0
+          ? { mascotaId: params.mascotaId }
+          : {},
+      );
       if (!vigente) return;
-      setEstadia(e === null ? { fase: 'sinLector' } : { fase: 'listo', e });
+      if (!r.ok) { setEstadia({ fase: 'noPudimos' }); return; }
+      const e = r.data.find((x) => x.estadiaId === id) ?? null;
+      /* No estar en la lista **no es un fallo**: es que no es suya. Decirlo
+         distinto de «no pudimos preguntar» es la diferencia entre un error y
+         un permiso. */
+      setEstadia(e === null ? { fase: 'noEsTuya' } : { fase: 'listo', e });
     })();
-    return () => {
-      vigente = false;
-    };
-  }, [params.estadiaId]);
+    return () => { vigente = false; };
+  }, [params.estadiaId, params.mascotaId]);
 
   /* ✅ LA MITAD VIVA. Sólo necesita mascota y fecha, y las dos viajan por
      parámetro — por eso funciona hoy aunque la estadía no se pueda leer. */
@@ -150,47 +159,38 @@ export default function DuranteGuarderia() {
     };
   }, [params.mascotaId, params.fecha]);
 
-  /* EL PUNTO, sólo mientras viaja. Se apaga solo al cambiar de estado. */
-  useEffect(() => {
-    if (estadia.fase !== 'listo') return;
-    const tramoId = estadia.e.tramoActivoId;
-    if (tramoId === null || !estaViajando(estadia.e)) {
-      setPunto(null);
-      return;
-    }
-    let vigente = true;
-    const leer = async () => {
-      const r = await obtenerPuntoVivo(tramoId);
-      if (vigente && r.ok) setPunto(r.data);
-    };
-    void leer();
-    /* Sondeo con la cadencia de la casa (~30 s), como el EN VIVO del paseo.
-       🔴 Y **jamás se promete «tiempo real»**: la voz dice cuándo se lo vio. */
-    const id = setInterval(() => void leer(), 30_000);
-    return () => {
-      vigente = false;
-      clearInterval(id);
-    };
-  }, [estadia]);
+  /* ⏪ EL PUNTO VIVO QUEDA INERTE, y la razón cambió — se dice porque yo mismo
+     escribí antes la razón equivocada:
+     · **ANTES afirmé que `guarderia_tramos` no existía.** Falso: existe, es del
+       VIAJE (`prestador_id, fecha, direccion`) y la estadía apunta con
+       `tramo_recogida_id` / `tramo_devolucion_id`.
+     · **AHORA el hueco es de PROYECCIÓN, no de entidad:** `EstadiaDeMiMascota`
+       **no trae esos dos ids**, así que la familia no tiene con qué llamar a
+       `obtenerPuntoVivo`. **Pedido a A: dos campos en el mismo lector.**
+     *Un tramo por estadía haría que el mismo vehículo emitiera N puntos
+     idénticos — por eso la pantalla NO los crea ni los infiere: los LEE.* */
 
   const fotos = media.fase === 'listo' ? media.lista.filter((m) => m.tipo === 'foto') : [];
 
   const vozDelEstado = useCallback(
-    (e: EstadiaEnCurso): string =>
+    (e: EstadiaDeMiMascota): string =>
       t(
-        e.estado === 'reservada'
-          ? 'duranteGuarderia.reservada'
-          : e.estado === 'recogida_en_curso'
-            ? 'duranteGuarderia.recogidaEnCurso'
-            : e.estado === 'en_guarderia'
-              ? 'duranteGuarderia.enGuarderia'
-              : e.estado === 'retorno_en_curso'
-                ? 'duranteGuarderia.retornoEnCurso'
-                : e.estado === 'entregada'
-                  ? 'duranteGuarderia.entregada'
-                  : e.estado === 'no_recogida'
-                    ? 'duranteGuarderia.noRecogida'
-                    : 'duranteGuarderia.cancelada',
+        e.estadoEstadia === 'recogida_en_curso'
+          ? 'duranteGuarderia.recogidaEnCurso'
+          : e.estadoEstadia === 'en_guarderia'
+            ? 'duranteGuarderia.enGuarderia'
+            : e.estadoEstadia === 'retorno_en_curso'
+              ? 'duranteGuarderia.retornoEnCurso'
+              : e.estadoEstadia === 'entregada'
+                ? 'duranteGuarderia.entregada'
+                : e.estadoEstadia === 'no_recogida'
+                  ? 'duranteGuarderia.noRecogida'
+                  : e.estadoEstadia === 'cancelada'
+                    ? 'duranteGuarderia.cancelada'
+                    /* 🔴 `estadoEstadia` es `null` mientras el prestador no la
+                       ejecutó: **la cita existe y la estadía todavía no.** No es
+                       un estado desconocido — es el primero de todos. */
+                    : 'duranteGuarderia.reservada',
         { nombre: e.mascotaNombre },
       ),
     [t],
@@ -221,7 +221,9 @@ export default function DuranteGuarderia() {
           <EsqueletoGrupo>
             <Esqueleto alto={72} />
           </EsqueletoGrupo>
-        ) : estadia.fase === 'sinLector' ? (
+        ) : estadia.fase === 'noEsTuya' ? (
+          <EstadoVacio registro="seccion" titulo={t('duranteGuarderia.noEsTuya')} />
+        ) : estadia.fase === 'noPudimos' ? (
           <EstadoVacio
             registro="seccion"
             titulo={t('duranteGuarderia.sinEstadoTitulo')}
@@ -236,33 +238,34 @@ export default function DuranteGuarderia() {
           </Tarjeta>
         )}
 
-        {/* ── ② DÓNDE VA — sólo mientras viaja ── */}
+        {/* ── ② DÓNDE VA — construido, INERTE hasta que el lector proyecte
+               `tramo_recogida_id` / `tramo_devolucion_id` (ver arriba). Mientras
+               tanto la pantalla **dice que viaja** sin prometer un mapa. ── */}
         {estadia.fase === 'listo' && estaViajando(estadia.e) ? (
           <Tarjeta>
-            <View style={{ gap: spacing[3] }}>
+            <View style={{ gap: spacing[2] }}>
               <Texto variante="seccion">{t('duranteGuarderia.dondeVa')}</Texto>
-              {punto === null ? (
-                <Texto variante="apoyo">{t('duranteGuarderia.sinPunto')}</Texto>
-              ) : (
-                <>
-                  <MapaRecorrido
-                    modo="vivo"
-                    mirada="espectador"
-                    alto={220}
-                    puntos={[{ lat: punto.lat, lng: punto.lon, t: punto.vistoEn }]}
-                    centroInicial={{ lat: punto.lat, lng: punto.lon }}
-                    marcadorVivo={<MarcaDeMapa variante="moto" />}
-                  />
-                  <Texto variante="apoyo">
-                    {t('duranteGuarderia.vistoA', {
-                      hora: new Date(punto.vistoEn).toLocaleTimeString(undefined, {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      }),
-                    })}
-                  </Texto>
-                </>
-              )}
+              <Texto variante="apoyo">{t('duranteGuarderia.sinPunto')}</Texto>
+            </View>
+          </Tarjeta>
+        ) : null}
+
+        {/* ── ④ EL ACTA — 🔴 SE PUEDE CONFIRMAR Y NO SE PUEDE LEER ──────────
+               `confirmarActaGuarderia(actaId)` existe y `ActaDeEntrega` tiene su
+               `modo='leer'`. **Falta el lector del CONTENIDO** — los ítems, las
+               observaciones, la media y la conformidad actual.
+
+               🔴 **Y por eso NO se ofrece confirmar todavía, que es una decisión
+               de producto y no una limitación técnica:** *la conformidad existe
+               porque el dueño VIO lo que firma. Un botón «conforme» sobre un
+               acta que no se puede leer no es una función a medias — es pedirle
+               a alguien que firme a ciegas.* */}
+        {estadia.fase === 'listo' &&
+        (estadia.e.actaRecogidaId !== null || estadia.e.actaDevolucionId !== null) ? (
+          <Tarjeta>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">{t('duranteGuarderia.actaTitulo')}</Texto>
+              <Texto variante="apoyo">{t('duranteGuarderia.actaPendienteLector')}</Texto>
             </View>
           </Tarjeta>
         ) : null}
