@@ -411,3 +411,91 @@ export async function confirmarActaGuarderia(params: {
   if (error) return fallo(error.message);
   return { ok: true, data: true };
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL LOG DE LA FAMILIA — próximas e historial de estadías
+   ═══════════════════════════════════════════════════════════════════════════
+   Una sola lectura para TRES superficies de C: el **log** del hub, la entrada
+   al **durante** y el **acta**. *Los tres pedían lo mismo con tres nombres.*
+
+   🔴 **Se ancla en la CITA, no en la estadía.** La cita es lo que la familia
+   COMPRÓ; la estadía es lo que el prestador EJECUTA. *El día que una estadía
+   nazca por otro camino —un día de paquete, una mensualidad— la familia tiene
+   que seguir viendo lo que pagó.* La estadía entra por LEFT JOIN: si no existe,
+   `estadoEstadia` es `null`, que es la verdad y no un hueco.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ✏️ `EstadoEstadia` NO se redeclara: **ya estaba** en este mismo archivo.
+   Lo escribí de nuevo y el compilador lo cazó — es el censo de criterios de la
+   lección de B, cobrado sobre mí: *el trabajo era leer, no inventar.* */
+
+export interface EstadiaDeMiMascota {
+  citaId: string;
+  /** `null` mientras la estadía no exista (ver la cabecera). */
+  estadiaId: string | null;
+  mascotaId: string;
+  mascotaNombre: string;
+  prestadorId: string;
+  prestadorNombre: string;
+  /** 'YYYY-MM-DD'. **Una estadía no tiene hora**: tiene día y franja. */
+  fecha: string;
+  precio: number | null;
+  estadoCita: string;
+  estadoReserva: string;
+  estadoEstadia: EstadoEstadia | null;
+  aBordoEn: string | null;
+  llegadaEn: string | null;
+  entregadaEn: string | null;
+  /** Si hay id, hay acta: la pantalla del acta no vuelve a preguntar. */
+  actaRecogidaId: string | null;
+  actaDevolucionId: string | null;
+  /** El server ya decidió de qué lado del hoy cae. La pantalla no compara fechas. */
+  esProxima: boolean;
+}
+
+export async function obtenerMisEstadiasGuarderia(params?: {
+  mascotaId?: string | null;
+}): Promise<ResultadoWrapper<EstadiaDeMiMascota[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_mis_estadias_guarderia', {
+    p_mascota_id: params?.mascotaId ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: EstadiaDeMiMascota[] = [];
+  for (const e of data) {
+    if (typeof e !== 'object' || e === null) return fallaCodigo('datos_inconsistentes');
+    const r = e as Record<string, unknown>;
+    if (typeof r.cita_id !== 'string' || typeof r.fecha !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    salida.push({
+      citaId: r.cita_id,
+      estadiaId: typeof r.estadia_id === 'string' ? r.estadia_id : null,
+      mascotaId: typeof r.mascota_id === 'string' ? r.mascota_id : '',
+      mascotaNombre: typeof r.mascota_nombre === 'string' ? r.mascota_nombre : '',
+      prestadorId: typeof r.prestador_id === 'string' ? r.prestador_id : '',
+      prestadorNombre: typeof r.prestador_nombre === 'string' ? r.prestador_nombre : '',
+      fecha: r.fecha,
+      /* `precio` nullable: el día suelto dejó de ser obligatorio, y un `0` acá
+         se leería como GRATIS. Null honesto. */
+      precio: typeof r.precio === 'number' ? r.precio : null,
+      estadoCita: typeof r.estado_cita === 'string' ? r.estado_cita : '',
+      estadoReserva: typeof r.estado_reserva === 'string' ? r.estado_reserva : '',
+      estadoEstadia: esEstadoEstadia(r.estado_estadia) ? r.estado_estadia : null,
+      aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
+      llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
+      entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+      actaRecogidaId: typeof r.acta_recogida_id === 'string' ? r.acta_recogida_id : null,
+      actaDevolucionId: typeof r.acta_devolucion_id === 'string' ? r.acta_devolucion_id : null,
+      esProxima: r.es_proxima === true,
+    });
+  }
+  return { ok: true, data: salida };
+}
+
+function esEstadoEstadia(v: unknown): v is EstadoEstadia {
+  return (
+    v === 'reservada' || v === 'recogida_en_curso' || v === 'en_guarderia' ||
+    v === 'retorno_en_curso' || v === 'entregada' || v === 'cancelada' || v === 'no_recogida'
+  );
+}

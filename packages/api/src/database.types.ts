@@ -22889,6 +22889,28 @@ export type Database = {
           titulo: string
         }[]
       }
+      obtener_mis_estadias_guarderia: {
+        Args: { p_mascota_id?: string }
+        Returns: {
+          a_bordo_en: string
+          acta_devolucion_id: string
+          acta_recogida_id: string
+          cita_id: string
+          entregada_en: string
+          es_proxima: boolean
+          estadia_id: string
+          estado_cita: string
+          estado_estadia: string
+          estado_reserva: string
+          fecha: string
+          llegada_en: string
+          mascota_id: string
+          mascota_nombre: string
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+        }[]
+      }
       obtener_modalidades_por_oficio: {
         Args: never
         Returns: {

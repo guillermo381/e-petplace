@@ -13,6 +13,7 @@ import { obtenerMisCitasPaseo } from './citaSuelta';
 import { obtenerMisPaquetesSalidas } from './paquetes';
 import { obtenerMisGroomings } from './grooming-reserva';
 import { obtenerMisAdiestramientos } from './adiestramiento-reserva';
+import { obtenerMisEstadiasGuarderia } from './guarderia-reserva';
 
 const MENSAJE_ERROR = 'No pudimos leer tus servicios. Prueba de nuevo.';
 
@@ -57,6 +58,29 @@ export interface ResumenServiciosHogar {
      *  — el rail la cuenta (la invisibilidad no se repite, S71). */
     por_coordinar: boolean;
   };
+  /**
+   * 🔴 **S107 — LA QUINTA RAMA, y su ausencia era un defecto, no una omisión.**
+   * Este resumidor devolvía CUATRO servicios y guardería no estaba, así que
+   * **una familia que ya la usó la buscaba donde viven sus cuatro hermanos y no
+   * la encontraba.**
+   *
+   * *No lo podía arreglar la pantalla: la regla del rail es «cero actividad =
+   * cero celda», y la actividad se mide acá.* Una superficie que quisiera
+   * pintarla igual tendría que inventarse la actividad — que es exactamente lo
+   * que la regla prohíbe.
+   */
+  guarderia: {
+    proxima: ProximaDeServicio | null;
+    /** Última estadía ENTREGADA, o null. El log del hub lo lee de acá. */
+    ultima_cerrada: string | null;
+    /**
+     * 🔴 **En movimiento AHORA** — su animal va en un vehículo. Es lo único de
+     * este rail que no es una fecha: *un día que ya empezó no se anuncia como
+     * «próximo», y una familia cuyo perro está viajando no quiere leer una
+     * agenda.*
+     */
+    en_curso: boolean;
+  };
 }
 
 function hoyLocal(): string {
@@ -68,18 +92,19 @@ export async function obtenerResumenServiciosHogar(): Promise<
 > {
   const hoy = hoyLocal();
   const cliente = getClient();
-  const [citasPaseo, paquetes, groomings, adiestramientos, tiposVet] = await Promise.all([
+  const [citasPaseo, paquetes, groomings, adiestramientos, estadias, tiposVet] = await Promise.all([
     obtenerMisCitasPaseo(),
     obtenerMisPaquetesSalidas(),
     obtenerMisGroomings(),
     obtenerMisAdiestramientos(),
+    obtenerMisEstadiasGuarderia(),
     // canon regla 59: el mundo clínico se compone por es_medico=true,
     // jamás por categoría (incluye 'procedimiento', S72). Dos pasos como
     // el clon del adiestramiento — cero embed (la clase PGRST201 no se
     // invita de vuelta).
     cliente.from('tipos_servicio').select('codigo').eq('es_medico', true),
   ]);
-  if (!citasPaseo.ok || !paquetes.ok || !groomings.ok || !adiestramientos.ok || tiposVet.error) {
+  if (!citasPaseo.ok || !paquetes.ok || !groomings.ok || !adiestramientos.ok || !estadias.ok || tiposVet.error) {
     return { ok: false, codigo: 'error_servicios_hogar', mensaje: MENSAJE_ERROR };
   }
 
@@ -152,6 +177,26 @@ export async function obtenerResumenServiciosHogar(): Promise<
   const mascotaVetDestino =
     proximaVet?.mascota_id ?? porCoordinar?.mascota_id ?? ultimaVet?.mascota_id ?? null;
 
+  /* guardería: la próxima futura · la última entregada · y si hay una EN
+     MOVIMIENTO ahora. `esProxima` lo decide el SERVER — acá no se comparan
+     fechas otra vez: si se compararan, dos superficies podrían discrepar sobre
+     qué es «hoy» y una familia vería su estadía en el lado equivocado. */
+  const proximaGuard = estadias.data
+    .filter((e) => e.esProxima)
+    .reduce<(typeof estadias.data)[number] | null>(
+      (min, e) => (min === null || e.fecha < min.fecha ? e : min),
+      null,
+    );
+  const ultimaGuard = estadias.data
+    .filter((e) => e.estadoEstadia === 'entregada')
+    .reduce<string | null>((max, e) => (max === null || e.fecha > max ? e.fecha : max), null);
+  const guardEnCurso = estadias.data.some(
+    (e) =>
+      e.estadoEstadia === 'recogida_en_curso' ||
+      e.estadoEstadia === 'en_guarderia' ||
+      e.estadoEstadia === 'retorno_en_curso',
+  );
+
   return {
     ok: true,
     data: {
@@ -190,6 +235,22 @@ export async function obtenerResumenServiciosHogar(): Promise<
               }
             : null,
         ultima_cerrada: ultimaAd,
+      },
+      guarderia: {
+        proxima:
+          proximaGuard !== null
+            ? {
+                fecha: proximaGuard.fecha,
+                /* 🔴 Una estadía NO tiene hora: tiene día y franja de recogida.
+                   El rail pide `hora` por su forma compartida — se manda cadena
+                   vacía, **jamás un '00:00' que se leería como medianoche.** */
+                hora: '',
+                mascota_nombre: proximaGuard.mascotaNombre,
+                tipo_servicio: 'guarderia_dia',
+              }
+            : null,
+        ultima_cerrada: ultimaGuard,
+        en_curso: guardEnCurso,
       },
       veterinaria: {
         proxima:

@@ -1535,6 +1535,8 @@ export {
 
 /* S107-A · guardería: el gate sanitario y la reserva del día. */
 export {
+  obtenerMisEstadiasGuarderia,
+  type EstadiaDeMiMascota,
   evaluarRequisitosGuarderia,
   reservarDiaGuarderia,
   type RequisitosGuarderia,
