@@ -512,10 +512,10 @@ export default function Negocio() {
             <View style={ESTILO_GRILLA}>
               {(
                 [
-                  { etiqueta: t('negocio.paseo'), glifo: 'paseo', capa: 'cuidado', ruta: '/paseo', n: nPaseo },
-                  { etiqueta: t('negocio.mundoGrooming'), glifo: 'grooming', capa: 'cuidado', ruta: '/grooming', n: nGrooming },
-                  { etiqueta: t('negocio.mundoAdiestramiento'), glifo: 'training', capa: 'cuidado', ruta: '/adiestramiento', n: nAdiestramiento },
-                  { etiqueta: t('negocio.mundoVeterinaria'), glifo: 'veterinaria', capa: 'identidad', ruta: '/veterinaria', n: nVeterinaria },
+                  { etiqueta: t('negocio.paseo'), glifo: 'paseo', capa: 'cuidado', ruta: '/paseo', n: nPaseo, bloque: 'paseo' as const },
+                  { etiqueta: t('negocio.mundoGrooming'), glifo: 'grooming', capa: 'cuidado', ruta: '/grooming', n: nGrooming, bloque: 'grooming' as const },
+                  { etiqueta: t('negocio.mundoAdiestramiento'), glifo: 'training', capa: 'cuidado', ruta: '/adiestramiento', n: nAdiestramiento, bloque: 'adiestramiento' as const },
+                  { etiqueta: t('negocio.mundoVeterinaria'), glifo: 'veterinaria', capa: 'identidad', ruta: '/veterinaria', n: nVeterinaria, bloque: 'veterinaria' as const },
                   /* ⭐ S107-C · LA GUARDERÍA. Capa `cuidado` como sus tres
                      hermanas (Ley 10: el canto dice CATEGORÍA), glifo propio.
                      🔴 `detalle: undefined` A PROPÓSITO y no por olvido: las
@@ -524,7 +524,7 @@ export default function Negocio() {
                      Pasarle `conteoDeMundo` diría «sin configurar» a un
                      prestador que ya guardó su cupo y sus ventanas — un
                      número falso es peor que ninguno. Entra con la oferta. */
-                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia', n: null },
+                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia', n: null, bloque: null },
                 ] as const
               ).map((mundo, i) => (
                 <View key={mundo.ruta} style={ESTILO_CELDA}>
@@ -540,12 +540,25 @@ export default function Negocio() {
                        gate). **Se deriva de la MISMA condición que usaba
                        `conteoDeMundo`, no de una nueva:** aquélla sólo decía
                        «Sin configurar» con `cargado && n === 0`.
+
                        🔴 **`true` mientras no se sabe, a propósito:** si «no
                        cargado» se mapeara a `false`, la baldosa afirmaría «sin
                        configurar» MIENTRAS CARGA — un verosímil-falso, y ahora
                        el color es lo único que lo dice. *El apagado se enciende
-                       sólo cuando está MEDIDO en cero.* */
-                    {...(cargado && mundo.n === 0
+                       sólo cuando está MEDIDO en cero.*
+
+                       🔴 **Y `!fallos.has(...)` VA EXPLÍCITO aunque HOY sea
+                       redundante** (firma de la mesa: *una baldosa que falló al
+                       leer queda NEUTRA, como durante la carga*). Medido: en un
+                       fallo el setter **nunca se llama**, así que el estado
+                       queda en su `null` inicial y `n` da `null` ⇒ ya no
+                       entraba. **Pero entraba por cómo cae la cadena, no por
+                       diseño** — un futuro `ofertas ?? []` lo volvería `0` y los
+                       fallos empezarían a pintarse apagados **en silencio**. Es
+                       `L-424`: *un guard que acierta por derivación es un guard
+                       que nadie puede leer y confirmar.* Acá la exclusión se
+                       DICE. */
+                    {...(cargado && !(mundo.bloque !== null && fallos.has(mundo.bloque)) && mundo.n === 0
                       ? { configurado: false as const, vozSinConfigurar: t('negocio.baldosaSinConfigurar') }
                       : { configurado: true as const })}
                     glifo={mundo.glifo}
@@ -628,7 +641,14 @@ export default function Negocio() {
                            servicios», «Sin configurar»— y esto era una
                            DESCRIPCIÓN.** Se declara para que la mesa confirme o
                            lo devuelva; borrar copy en silencio es peor que
-                           dejarlo de más. */
+                           dejarlo de más.
+                           🔴 **`negocio.tiendaVitrinaDetalle` y
+                           `negocio.tiendaLocalDetalle` SIGUEN VIVAS en el riel
+                           (es y en) A PROPÓSITO** — orden de la mesa: *«el
+                           founder decide y te aviso; no las borres mientras
+                           tanto»*. **Quedan sin uso, y eso NO es basura que
+                           limpiar**: es una decisión esperando firma. Quien
+                           barra claves huérfanas, que lea esto primero. */
                         configurado
                         orden={0}
                         onPress={() => router.push('/ventas')}
