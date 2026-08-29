@@ -20,10 +20,8 @@ const BASE = process.env.BASE ?? 'http://localhost:8091';
 const RUTAS = [
   ['/explorar', 'la baldosa de guardería'],
   ['/hogar/guarderia', 'EL LOG'],
-  ['/explorar/guarderia', 'ETAPA 1 · modalidad (debe REDIRIGIR: N=1)'],
-  ['/explorar/guarderia/disponibles', 'ETAPA 2 · día y quién puede'],
-  ['/explorar/guarderia/disponibles?modalidad=paquete', 'ETAPA 2 · rama paquete'],
-  ['/explorar/guarderia/disponibles?modalidad=mensual', 'ETAPA 2 · rama mensual'],
+  ['/explorar/guarderia', 'ETAPA 1 · elegir cómo y cuándo (NO debe listar lugares)'],
+  ['/explorar/guarderia/disponibles?modalidad=dia&fecha=2026-09-05', 'ETAPA 2 · quién puede'],
   ['/guarderia/abc-123', 'EL DURANTE (sin entrada cableada, a propósito)'],
 ];
 
@@ -43,7 +41,19 @@ for (const [ruta, nombre] of RUTAS) {
   const url = new URL(page.url()).pathname + new URL(page.url()).search;
   const texto = (await page.evaluate(() => document.body.innerText)).replace(/\s+/g, ' ').trim();
   const vacio = texto.length === 0;
-  const duros = errores.filter((e) => !/Require cycle|useNativeDriver|deprecated|shadow\*|pointerEvents|props\.pointerEvents/i.test(e));
+  /* 🔴 EL 401 NO ES UN FALLO ACÁ, y decirlo importa: este recorrido corre SIN
+     SESIÓN, así que **la respuesta correcta del servidor a un lector de familia
+     es 401**. Contarlo como rojo hacía que las seis rutas salieran «rotas»
+     estando bien — *un arnés que grita en el caso esperado enseña a ignorarlo.*
+
+     Y el aviso `React does not recognize the \`%s\` prop` tampoco es de acá:
+     **medido el 29-ago — `/hogar` lo tiene y no se tocó en esta sesión;
+     `/bienvenida` está limpio.** Es previo y de las pantallas con tabs (dev-only
+     de RN-web). *Se filtra con su medición escrita, no por conveniencia: un
+     filtro sin medición esconde el próximo defecto real de esa forma.* */
+  const duros = errores.filter(
+    (e) => !/Require cycle|useNativeDriver|deprecated|shadow\*|pointerEvents|props\.pointerEvents|status of 401|does not recognize the/i.test(e),
+  );
 
   const marca = duros.length > 0 || vacio ? '✗' : '✓';
   if (marca === '✗') fallos++;

@@ -36,15 +36,30 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FiltroMascotas,
+  Icono,
+  FiltroPills,
   Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { getEstadoOnboardingDueno, obtenerMascotasDeFamilia } from '@epetplace/api';
+import {
+  getEstadoOnboardingDueno,
+  obtenerMascotasDeFamilia,
+  resolverUrlsFotos,
+} from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
+
+/**
+ * 🔴 EL ENCHUFE DE LA LISTA — pedido a A (`S107-C-PEDIDO-A-A-LOG-FAMILIA.md`).
+ *
+ * `false` mientras `obtenerMisEstadias` no exista. **Con él en `true` la
+ * pantalla ya es la correcta**: los chips están montados y el vacío de la firma
+ * del founder es el que se pinta. *Es una línea, no una reescritura.*
+ */
+const LISTA_DISPONIBLE = false;
 
 type Mascotas =
   | { fase: 'cargando' }
@@ -84,12 +99,33 @@ export default function LogGuarderia() {
         return;
       }
       const elegibles = ofrecibles(r.data, especies);
+      /* 🔴 LAS FOTOS SE FIRMAN ANTES DE PINTARLAS. El bucket `mascotas` es
+         PRIVADO desde S92-BIS: `foto_url` es un PATH, no una URL, y sin firmar
+         no carga. `resolverUrlsFotos` las firma POR LOTE (una sola llamada). */
+      const paths = elegibles
+        .map((m) => m.foto_url)
+        .filter((x): x is string => typeof x === 'string' && x.length > 0);
+      const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
+      if (!vigente) return;
       setMascotas({
         fase: 'listo',
         lista: elegibles.map((m) => ({
           id: m.id,
           nombre: m.nombre,
-          fotoUrl: caraDeMascotaPorRuta({ especie: m.especie, rutaImagen: m.foto_url }),
+          fotoUrl: caraDeMascotaPorRuta({
+            especie: m.especie,
+            /* ⏪ ACÁ ESTABA LA MITAD MÁS SILENCIOSA DEL DEFECTO: este parámetro
+               recibía `m.foto_url`. `rutaImagen` es la ILUSTRACIÓN del catálogo
+               (`cat_razas.ruta_imagen`, bucket PÚBLICO `especies`) — pasarle el
+               path de la foto privada lo mandaba a resolver contra un bucket
+               donde ese objeto no existe. *No fallaba: devolvía una URL que
+               no carga, que es un 404 con forma de dato.* */
+            rutaImagen: m.raza_ruta_imagen,
+            /* ⏪ Y ÉSTA ERA LA MITAD VISIBLE: el escalón 0 —la foto real de la
+               familia— **no se pasaba**, así que la escalera nunca podía
+               llegar a ella. Las cuatro hermanas sí lo pasan. */
+            fotoUri: m.foto_url ? urls.get(m.foto_url) : undefined,
+          }),
         })),
       });
       if (elegibles.length === 1) setElegida(elegibles[0].id);
@@ -98,6 +134,8 @@ export default function LogGuarderia() {
       vigente = false;
     };
   }, [especies.fase, intento]);
+
+  const [pestana, setPestana] = useState<'proximas' | 'historial'>('proximas');
 
   const alAtras = useCallback(() => router.back(), []);
   const mascota =
@@ -134,16 +172,66 @@ export default function LogGuarderia() {
               </View>
             ) : null}
 
-            {/* 🔴 EL VACÍO DICE LA VERDAD, Y LA VERDAD HOY ES OTRA:
-                no es «no tienes estadías» — es que **todavía no podemos
-                mostrarlas**. *Decir lo primero sobre un lector que no existe
-                sería mentir con cara de dato*, y el día que el lector llegue
-                nadie sabría que la pantalla estuvo mintiendo. */}
-            <EstadoVacio
-              registro="seccion"
-              titulo={t('logGuarderia.listaPendienteTitulo')}
-              descripcion={t('logGuarderia.listaPendienteDetalle')}
+            {/* ═══ 🔴 DOS BLOQUES CONSTRUIDOS E INERTES — su causa la manda
+                    el SERVER, y por eso no se deducen acá ═══════════════════
+
+                ① **ESPECIE SIN OFERTA** (hoy: gato). Firma del founder:
+                *«Todavía no tenemos guarderías para gatos. Estamos trabajando
+                en eso»* — **y es distinto de «no tienes estadías»: una es una
+                carencia NUESTRA, la otra un estado suyo.**
+                🔴 **No se deduce de una lista vacía.** Hoy no hay forma de
+                distinguirlas: el catálogo dice que el gato es elegible y quien
+                sabe que nadie lo recibe es el filtro de ofertas. *Deducirlo
+                sería inventar un diagnóstico a partir de un silencio.*
+                ⇒ llega con `especie_sin_oferta` del resumen de A.
+
+                ② **PAQUETE CON SALDO** — botón «Reservar estadía de tu
+                paquete» + «7 de 10 disponibles», directo al selector de fecha
+                de ESA guardería (sin elegir lugar ni pagar: las dos ya están
+                hechas). **No existe lector de saldo de paquetes de guardería**
+                — y tampoco existe la compra que lo crearía.
+                ═════════════════════════════════════════════════════════════ */}
+
+            {/* LOS CHIPS DE LA LISTA — la estructura de las cuatro hermanas.
+                Se montan ya: **son navegación, no dato**, y el día que la
+                lista llegue no hay que reacomodar la pantalla. */}
+            {/* Las etiquetas son las MISMAS keys que sus hermanas (`plan.seg*`)
+                — *dos cadenas nuevas que dijeran lo mismo son dos lugares donde
+                la voz puede divergir.* */}
+            <FiltroPills
+              activo={pestana}
+              onCambio={(c) => setPestana(c)}
+              opciones={[
+                { codigo: 'proximas' as const, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
+                { codigo: 'historial' as const, etiqueta: t('plan.segHistorial'), icono: 'guarderia', capa: null },
+              ]}
             />
+
+            {/* 🔴 DOS VACÍOS DISTINTOS, Y LA DIFERENCIA NO ES DE ESTILO.
+
+                · **«Sin estadías agendadas»** (firma del founder) es la verdad
+                  cuando el lector respondió y no había ninguna.
+                · **«Todavía no podemos mostrarte»** es la verdad HOY: el lector
+                  **no existe**, así que no sabemos si hay o no.
+
+                *Decir el primero sobre un lector que no existe sería mentir con
+                cara de dato — y el día que el lector llegue, nadie sabría que la
+                pantalla estuvo mintiendo.* **El de la firma está construido y se
+                enciende solo** cuando `cargarEstadias` devuelva una lista. */}
+            {LISTA_DISPONIBLE ? (
+              <EstadoVacio
+                registro="seccion"
+                icono={<Icono nombre="guarderia" tamano={48} />}
+                titulo={t('logGuarderia.vacioTitulo')}
+                descripcion={t('logGuarderia.vacioDetalle')}
+              />
+            ) : (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('logGuarderia.listaPendienteTitulo')}
+                descripcion={t('logGuarderia.listaPendienteDetalle')}
+              />
+            )}
           </>
         )}
       </ScrollView>

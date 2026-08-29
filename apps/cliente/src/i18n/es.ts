@@ -2937,6 +2937,27 @@ export const clienteEs = {
     mediaNoCargo: 'No pudimos traer sus fotos. Prueba de nuevo en un momento.',
     verFoto: 'Ver foto {{i}} de {{total}}',
   },
+  /* S107-C · ELEGIR CÓMO Y CUÁNDO.
+     🔴 LAS CUATRO CAUSAS, con la voz convertida a TUTEO: el dictado de la mesa
+     llegó en voseo («Probá», «Podés») y `R66` es un trinquete solo-baja —
+     además de `L-148`: *los dictados viajan en tuteo; la voz de producto no
+     hereda el acento de la mesa.* También «cerca tuyo» → «cerca de ti», que es
+     el tuteo NEUTRO de la casa. */
+  elegirGuarderia: {
+    primeraEstadia: 'Selecciona el día de tu primera estadía',
+    primerDia: 'Selecciona el primer día',
+    verQuienPuede: 'Ver quién puede',
+    requisitosInforman: 'Esto no te frena para reservar. Es lo que la guardería va a pedirte al recibirlo.',
+    causaSinCupo: 'Ninguna guardería tiene cupo para el {{dia}}. Prueba con otro día.',
+    causaSinModalidad: 'Ninguna guardería cerca de ti vende paquetes todavía. Puedes reservar por día.',
+    causaSinCobertura: 'Todavía no hay guarderías cerca de ti.',
+    /* La quinta causa del server. En el HUB es carencia NUESTRA y se dice
+       así; acá, elegido el día, es el mismo hecho con la misma voz. */
+    causaEspecie: 'Todavía no tenemos guarderías para esa especie. Estamos trabajando en eso.',
+    /* ③ NO dice «prueba con otro día»: explica LA REGLA. */
+    vispera: 'Las estadías se reservan con al menos un día de anticipación.',
+    causaIndeterminada: 'Ninguna guardería puede con esa combinación. Prueba con otro día o con otra forma de contratar.',
+  },
   hubGuarderia: {
     titulo: 'Guardería',
     cabezalDetalle: 'Lo buscan, pasa el día y lo traen de vuelta.',
@@ -2968,6 +2989,10 @@ export const clienteEs = {
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
   },
   logGuarderia: {
+    /* El vacío de la FIRMA del founder — se pinta cuando el lector diga
+       que no hay ninguna. Hoy vive detrás de `LISTA_DISPONIBLE`. */
+    vacioTitulo: 'Sin estadías agendadas',
+    vacioDetalle: 'Cuando reserves, tus estadías se verán acá.',
     titulo: 'Guardería',
     reservarDe: 'Reservar para {{nombre}}',
     /* 🔴 No dice «no tienes estadías»: dice que todavía no podemos mostrarlas.

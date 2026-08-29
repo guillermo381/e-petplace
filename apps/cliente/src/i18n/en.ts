@@ -2170,6 +2170,18 @@ export const clienteEn = {
     mediaNoCargo: 'We couldn’t load their photos. Try again in a moment.',
     verFoto: 'View photo {{i}} of {{total}}',
   },
+  elegirGuarderia: {
+    primeraEstadia: 'Pick the day of your first stay',
+    primerDia: 'Pick the first day',
+    verQuienPuede: 'See who can',
+    requisitosInforman: 'This doesn’t stop you from booking. It’s what the daycare will ask for when they take him in.',
+    causaSinCupo: 'No daycare has room for {{dia}}. Try another day.',
+    causaSinModalidad: 'No daycare near you sells packs yet. You can book by the day.',
+    causaSinCobertura: 'There are no daycares near you yet.',
+    causaEspecie: 'We don’t have daycares for that species yet. We’re working on it.',
+    vispera: 'Stays are booked at least one day in advance.',
+    causaIndeterminada: 'No daycare can do that combination. Try another day or another way to book.',
+  },
   hubGuarderia: {
     titulo: 'Daycare',
     cabezalDetalle: 'They pick him up, he spends the day, they bring him back.',
@@ -2201,6 +2213,8 @@ export const clienteEn = {
     exitoDetalle: 'We’ll let you know when they head out to pick him up.',
   },
   logGuarderia: {
+    vacioTitulo: 'No stays booked',
+    vacioDetalle: 'Once you book, your stays will show up here.',
     titulo: 'Daycare',
     reservarDe: 'Book for {{nombre}}',
     listaPendienteTitulo: 'We can’t show your stays yet',
