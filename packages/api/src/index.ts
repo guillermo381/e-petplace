@@ -1522,7 +1522,11 @@ export {
   definirOfertaGuarderia,
   obtenerOfertaGuarderiaPropia,
   obtenerGuarderiasDisponibles,
+  obtenerEstadoGuarderia,
   type OfertaGuarderiaPublicada,
+  type EstadoGuarderia,
+  type EstadoGuarderiaCompleto,
+  type MotivoNoPublicada,
   type GuarderiaDisponible,
   type CodigoErrorGuarderiaOferta,
 } from './wrappers/guarderia-oferta';
