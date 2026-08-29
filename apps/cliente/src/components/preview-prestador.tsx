@@ -48,6 +48,7 @@
  * rehén al principal.
  */
 
+import type { ReactNode } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Celda, LogoNegocio, Texto, radius, spacing, useTheme } from '@epetplace/ui';
@@ -65,6 +66,7 @@ export function PreviewPrestador({
   contexto,
   perfil,
   contextoReserva,
+  pie,
 }: {
   prestadorId: string;
   /** LA OFERTA CONCRETA que esta fila representa. Viaja al detalle para
@@ -102,6 +104,23 @@ export function PreviewPrestador({
    *  esta pieza compartida a conocer los cuatro oficios, que es exactamente
    *  la generalización que quita en vez de sumar.* */
   contextoReserva?: Record<string, string>;
+  /**
+   * ⭐ S107-C · **LO PROPIO DEL OFICIO, al pie de la tarjeta.**
+   *
+   * Nació para guardería, que necesita **el cupo del día y las dos ventanas de
+   * recogida y devolución** — *lo que una familia mira para saber si le sirve,
+   * y que ninguno de los otros cuatro oficios tiene.*
+   *
+   * 🔴 **ES UN SLOT, no props nuevas por oficio.** *Si esta pieza aprendiera
+   * qué es una «ventana de recogida», el próximo oficio le agregaría lo suyo y
+   * en tres oficios sería un formulario con cinco banderas.* La pantalla sabe
+   * de su oficio; la tarjeta sabe de presentar a un prestador.
+   *
+   * Ausente = no se dibuja nada, y los cuatro consumidores de hoy **no se
+   * mueven una línea**. Mismo nombre y mismo criterio que el `pie` de
+   * `FichaPrestador`.
+   */
+  pie?: ReactNode;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
@@ -241,6 +260,11 @@ export function PreviewPrestador({
         </Texto>
       </View>
 
+      {/* EL PIE DEL OFICIO — fuera del tocable de arriba a propósito: *lo que
+          informa no debe competir con lo que navega.* */}
+      {pie === undefined ? null : (
+        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3] }}>{pie}</View>
+      )}
     </View>
   );
 }
