@@ -60,7 +60,6 @@ import {
   Hoja,
   HojaScroll,
   FichaDeOferta,
-  FichaMensualidad,
   SeccionPlegable,
   Interruptor,
   SelectorOpcion,
@@ -68,7 +67,6 @@ import {
   StepperCantidad,
   Tarjeta,
   Texto,
-  VozComision,
   spacing,
   useAviso,
   useTheme,
@@ -80,7 +78,6 @@ import {
   definirPaqueteGuarderia,
   obtenerPaquetesGuarderia,
   type TamanoPaquete,
-  obtenerComisionVigenteCita,
   obtenerCupoGuarderia,
   obtenerFranjasGuarderia,
   obtenerMiPrestador,
@@ -185,7 +182,6 @@ type Estado =
       publicada: boolean;
       /** 🔴 DERIVADA de las franjas por el motor — jamás se teclea. */
       jornadaMinutos: number | null;
-      comisionPct: number | null;
     };
 
 type QueHora = null | 'recogidaDesde' | 'recogidaHasta' | 'devolucionDesde' | 'devolucionHasta';
@@ -253,11 +249,10 @@ export default function TallerGuarderia() {
       const ahora = new Date();
       const hoy = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
 
-      const [franjas, cupo, oferta, comision, paqs] = await Promise.all([
+      const [franjas, cupo, oferta, paqs] = await Promise.all([
         obtenerFranjasGuarderia(prestadorId),
         obtenerCupoGuarderia(prestadorId, hoy, hoy),
         obtenerOfertaGuarderiaPropia(prestadorId),
-        obtenerComisionVigenteCita(),
         obtenerPaquetesGuarderia(prestadorId),
       ]);
       if (!vigente) return;
@@ -266,10 +261,6 @@ export default function TallerGuarderia() {
          (Ley 13 / L-178): si el servidor no contestó, la pantalla lo dice y
          ofrece reintentar — no pinta un formulario vacío que, al guardarse,
          pisaría una configuración que sí existe. */
-      /* La comisión NO entra al guard: si no se pudo leer, el neto no se
-         muestra (`VozComision` con `pct` null calla) y la pantalla sigue
-         siendo usable. *Un dato de apoyo que rompe la pantalla entera es peor
-         que su ausencia.* */
       if (!franjas.ok || !cupo.ok || !oferta.ok || !paqs.ok) {
         setEstado({ fase: 'roto' });
         return;
@@ -322,7 +313,6 @@ export default function TallerGuarderia() {
         sobrevendidoHoy: hoyCupo?.sobrevendido ?? false,
         publicada: o !== null && o.activo,
         jornadaMinutos: o?.jornadaMinutos ?? null,
-        comisionPct: comision.ok ? comision.data.porcentaje : null,
       });
     })();
     return () => {
@@ -461,7 +451,11 @@ export default function TallerGuarderia() {
 
     setGuardando(false);
     mostrar({ texto: t('taller.guardado'), variante: 'exito' });
-    setIntento((n) => n + 1);
+    /* ⭐ Vuelve a la portada del mundo, no se queda en edición. *Quedarse en
+       el formulario después de guardar deja al prestador sin saber si pasó
+       algo* — y la portada es justamente la que muestra el resultado: su
+       resumen se recarga con `useFocusEffect`. */
+    router.replace('/guarderia');
   }, [estado, guardando, capacidad, recogidaDesde, recogidaHasta, devolucionDesde, devolucionHasta,
       iPrecio, paquetes, ofreceDiario, ofreceMensual, iMensual, especies, mostrar, t]);
 
@@ -618,18 +612,21 @@ export default function TallerGuarderia() {
             onCambio={setOfreceDiario}
             campoPrecio={
               ofreceDiario ? (
-                <View style={{ gap: spacing[2] }}>
-                  <SliderPrecio
-                    etiqueta={t('tallerGuarderia.precioDia')}
-                    pasos={PASOS_PRECIO}
-                    indice={iPrecio}
-                    onCambio={setIPrecio}
-                    registro="aa"
-                    edicionNumerica
-                  />
-                  {/* El NETO, vivo. Con `pct` null calla — jamás inventa. */}
-                  <VozComision pct={estado.comisionPct} precio={Number(PASOS_PRECIO[iPrecio])} />
-                </View>
+                /* ☠️ S107-C · EL RESUMEN DE «CUÁNTO VAS A RECIBIR», RETIRADO
+                   (firma del founder). e-PetPlace cobra 10 %, **pero el
+                   prestador asume además la comisión del motor de pagos y la
+                   bancaria**: el número mostraba un neto que no es el que le
+                   llega. *Mejor no decirlo que fijarle una expectativa
+                   errada* — y un número de plata equivocado no se corrige
+                   después: se corrige cuando cobra menos de lo que leyó. */
+                <SliderPrecio
+                  etiqueta={t('tallerGuarderia.precioDia')}
+                  pasos={PASOS_PRECIO}
+                  indice={iPrecio}
+                  onCambio={setIPrecio}
+                  registro="aa"
+                  edicionNumerica
+                />
               ) : undefined
             }
           />
@@ -749,9 +746,19 @@ export default function TallerGuarderia() {
               }
             />
           ))}
+          {/* 🔴 LA MENSUALIDAD USA LA MISMA PIEZA QUE SUS HERMANAS.
+              Con `FichaMensualidad` su precio se veía **más grande** que el del
+              día y el de los paquetes: son dos piezas distintas con dos
+              jerarquías distintas, puestas una al lado de la otra. *Tres
+              precios que se comparan tienen que pesar igual — el que se ve más
+              grande se lee como el importante, y acá ninguno lo es.* */}
           {ofreceMensual ? (
-            <FichaMensualidad dias={t('tallerGuarderia.mensual')} valor={Number(PASOS_MENSUAL[iMensual])}
-              porUnidad={t('tallerGuarderia.porMes')} conSuperficie />
+            <FichaDeOferta
+              tamano={null}
+              rotulo={t('tallerGuarderia.mensual')}
+              precio={Number(PASOS_MENSUAL[iMensual])}
+              precioDiaSuelto={null}
+            />
           ) : null}
           {/* Sin ningún precio encendido, la familia no vería nada — y se dice
               acá, que es donde el prestador está mirando. */}
