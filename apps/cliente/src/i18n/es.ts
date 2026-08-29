@@ -704,11 +704,17 @@ export const clienteEs = {
     servicios: 'Servicios',
     servicioPaseo: 'Paseo',
     servicioPaseoDetalle: 'Paseadores que cuidan y documentan cada salida.',
-    servicioGrooming: 'Estética y baño',
+    /* ⚠️ GUION BLANDO (U+00AD) ADENTRO — misma cura que el prestador. La
+       grilla del cliente **no monta `Baldosa`**: la dibuja a mano, así que la
+       cura de la pieza no la alcanza (medido por B). *Montar la pieza acá es
+       DECISIÓN de mesa, no arreglo* — mientras tanto, la cadena resuelve el
+       corte igual de bien y sin tocar una anatomía firmada.
+       🔴 **Si editás estas cadenas, el guion se pierde sin que nada avise.** */
+    servicioGrooming: 'Esté­tica y baño',
     servicioGroomingDetalle: 'Grooming profesional que queda en su historia.',
-    servicioVet: 'Veterinaria',
+    servicioVet: 'Vete­ri­na­ria',
     servicioVetDetalle: 'Atención clínica para su salud.',
-    servicioAdiestramiento: 'Adiestramiento',
+    servicioAdiestramiento: 'Adiestra­miento',
     servicioAdiestramientoDetalle: 'Educación y conducta con profesionales.',
     agendarLlega: 'Agendar desde la app llega pronto.',
     // S54-B3.1; S60: el grooming abrió — la voz nombra SOLO lo que falta

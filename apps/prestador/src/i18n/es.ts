@@ -1353,9 +1353,14 @@ export const prestadorEs = {
     paseo: 'Paseo',
     mundoGrooming: 'Grooming',
     // S63-B: el mundo Adiestramiento
-    mundoAdiestramiento: 'Adiestramiento',
+    /* ⚠️ GUION BLANDO (U+00AD) ADENTRO — invisible en el editor, a propósito.
+       RN no hifena español y la pieza **no puede** saber dónde parte una
+       palabra: eso es propiedad del IDIOMA, no del layout (pedido de B).
+       Cortes por sílaba: a-dies-tra-mien-to · ve-te-ri-na-ria.
+       🔴 **Si editás estas cadenas, el guion se pierde sin que nada avise.** */
+    mundoAdiestramiento: 'Adiestra­miento',
     // S68-B: el mundo Veterinaria · LOTE S68 · APROBADO founder 18-jul
-    mundoVeterinaria: 'Veterinaria',
+    mundoVeterinaria: 'Vete­ri­na­ria',
     mundoGuarderia: 'Guardería',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
