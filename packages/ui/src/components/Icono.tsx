@@ -77,6 +77,46 @@ export type IconoNombre =
   //    acá: la categoría "glifo de control" es §6bis de DIRECCION_ARTE,
   //    PENDIENTE desde S78 — regla 80 (la ley va DESPUÉS del gate).
   | 'lapiz' | 'compartir'
+  /* ── S107-B · CERTIFICACIONES y WEARABLES — DOS CANDIDATOS CADA UNO
+   *    (molde `prime`/`primeCorona`: el founder elige a 21px y el perdedor
+   *    muere con su lápida). GATE POR ÍCONO PENDIENTE (§2.9).
+   *
+   *  ══ CERTIFICACIÓN ═══════════════════════════════════════════════════
+   *  **La orden del founder trae su propio veto: «el error fácil es dibujar
+   *  una medalla o un diploma — eso acredita a la persona equivocada».**
+   *  Y la casa YA tenía la salida escrita, en la entrada de `documento`:
+   *
+   *  > *«`carnet` es el de vacunas de la MASCOTA — **su huella sobre una
+   *  > cédula diría que el documento es del animal**»*
+   *
+   *  ⇒ **La huella no es el adorno de este glifo: es lo que resuelve el
+   *  veto.** Un papel con la huella RELLENA encima dice *«la acreditada es
+   *  ella»*; una medalla dice *«alguien ganó algo»*. *No se inventó un
+   *  criterio: se ejerció el que la casa ya había escrito para el caso
+   *  inverso.*
+   *
+   *  CENSO DE OBJETOS OCUPADOS (antes de dibujar): `documento` es
+   *  identificación **con retrato** · `carnet` es la **placa** de vacunas ·
+   *  `copiar`/`descargar` son hojas de CONTROL, sin huella. **Ninguno
+   *  acredita**, y prestarlos sería la sustitución genérica que la Ley 12
+   *  prohíbe.
+   *
+   *  ══ WEARABLE ════════════════════════════════════════════════════════
+   *  **El otro veto: «jamás un corazón médico — un corazón dice consulta, y
+   *  esto mide todo el tiempo».**
+   *
+   *  🔴 Y EL CENSO MATÓ AL CANDIDATO OBVIO: la placa del collar. **`carnet`
+   *  YA es una placa colgante y `paseo` YA es el lazo del collar** — a 21px
+   *  serían el mismo dibujo. ⇒ el objeto es **el DISPOSITIVO**: cuerpo
+   *  redondeado con dos tramos de correa, la silueta que nadie confunde.
+   *
+   *  **Y la huella va ADENTRO del cuerpo**, que es lo que dice «continuo»
+   *  sin órgano y sin ondas: *el aparato está mostrando a la mascota, todo
+   *  el tiempo.* **Las ondas se descartaron por precedente**, no por gusto:
+   *  `contactoOndas` murió en su gate porque **§1 manda dibujar el OBJETO y
+   *  «el alcance» es una idea** — y encima chocaba con `ayuda` a 21px. */
+  | 'certificacion' | 'certificacionSello'
+  | 'wearable' | 'wearableActividad'
   /** S100d-B — EL FILTRO, pedido por la pista C con su literal del founder
    *  (punto 2 del gate: *«buscador en el MISMO escalón que Filtrar, con
    *  ícono clásico de filtro»*) y con el registry censado antes de pedir:
@@ -625,6 +665,61 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
   // La jeringa protege; la huella verde es la vida cuidada (carnet).
+  /* A · CERTIFICACIÓN — el papel, y la huella como SELLO abajo-derecha.
+     El papel es rectángulo vertical con dos renglones cortos: se lee
+     «documento» sin ser `documento` (aquél lleva retrato) ni `carnet` (que
+     es placa, no hoja). El sello va donde va un sello y **es la huella**.
+     RIESGO DECLARADO: a 21px los dos renglones pueden empastarse con el
+     borde — si pasa, se van los renglones antes que el sello. */
+  certificacion: ({ tinta, huella }) => (
+    <>
+      <Path d="M5.4 2.8h9.4l4 4v14.4H5.4Z" {...trazo(tinta)} />
+      <Path d="M14.6 2.9v4.1h4M8.2 9.6h6M8.2 12.6h4.4" {...trazo(tinta)} />
+      <Huella color={huella} x={12.4} y={14.2} escala={0.4} />
+    </>
+  ),
+  /* B · CERTIFICACIÓN CON SELLO TROQUELADO — el mismo papel, pero el sello
+     es un ANILLO y la huella vive adentro. Dice «esto lo selló alguien» más
+     fuerte que A.
+     🔴 RIESGO DECLARADO, y es el que decide el gate: **Ley 9 — a 21px la
+     huella SOBREVIVE O ES RUIDO.** Metida dentro de un anillo tiene menos
+     aire que en A, y puede empastarse en una mancha. Si eso pasa, gana A. */
+  certificacionSello: ({ tinta, huella }) => (
+    <>
+      <Path d="M5.4 2.8h9.4l4 4v14.4H5.4Z" {...trazo(tinta)} />
+      <Path d="M14.6 2.9v4.1h4M8.2 9.6h6" {...trazo(tinta)} />
+      <Circle cx={14.6} cy={16} r={3.9} {...trazo(tinta)} />
+      <Huella color={huella} x={12.6} y={14} escala={0.34} />
+    </>
+  ),
+  /* A · WEARABLE — el dispositivo: cuerpo redondeado + dos tramos de correa,
+     y **la huella ADENTRO**. El aparato muestra a la mascota: eso dice
+     «monitorea, y monitorea a ELLA» sin corazón y sin ondas.
+     RIESGO DECLARADO: la silueta se parece a un reloj, y un reloj puede
+     leerse como «hora». Lo desambigua la huella adentro — que es
+     exactamente lo que un reloj no tiene. */
+  wearable: ({ tinta, huella }) => (
+    <>
+      <Path d="M9 2.6h6l-.5 3.4M9 21.4h6l-.5-3.4M9.5 6h5" {...trazo(tinta)} />
+      <Path d="M6.4 8.6a2 2 0 0 1 2-2h7.2a2 2 0 0 1 2 2v6.8a2 2 0 0 1-2 2H8.4a2 2 0 0 1-2-2Z" {...trazo(tinta)} />
+      <Huella color={huella} x={9.6} y={9.4} escala={0.38} />
+    </>
+  ),
+  /* B · WEARABLE CON TRAZA — el mismo cuerpo, con la línea de actividad
+     adentro y la huella afuera, chica.
+     🔴 RIESGO DECLARADO, y es el que el founder ya nombró: **una traza
+     puede leerse como ECG**, o sea CLÍNICA — que es la familia que su veto
+     saca («un corazón dice consulta»). Se dibuja igual porque la traza es
+     lo único que dice «mide EN EL TIEMPO» siendo un objeto y no una idea;
+     si a 21px se lee médica, gana A. */
+  wearableActividad: ({ tinta, huella }) => (
+    <>
+      <Path d="M9 2.6h6l-.5 3.4M9 21.4h6l-.5-3.4" {...trazo(tinta)} />
+      <Path d="M6.4 8.6a2 2 0 0 1 2-2h7.2a2 2 0 0 1 2 2v6.8a2 2 0 0 1-2 2H8.4a2 2 0 0 1-2-2Z" {...trazo(tinta)} />
+      <Path d="M8.6 12.4h1.8l1.2-2.4 1.4 4 1-1.6h1.4" {...trazo(tinta)} />
+      <Huella color={huella} x={16.6} y={16.4} escala={0.3} />
+    </>
+  ),
   carnet: ({ tinta, huella }) => (
     <>
       <Path d="M18.2 2.8l3 3M16.4 7.6l1.7-1.7" {...trazo(tinta)} />
@@ -1730,6 +1825,19 @@ export function Icono({
     // identidades del producto. No va a `ocre`/CONSUMO aunque el trámite
     // sea comercial: el documento no vende, acredita.
     documento: identidad,
+    /* CERTIFICACIÓN → `identidad`, y se ancla en el vecino en vez de
+       elegirse: `documento` (identificación) YA es identidad, y una
+       certificación es de esa familia — un papel que dice QUIÉN ES y para
+       qué está habilitada. *No es `cuidado` como `training`: el curso es el
+       servicio; el certificado es la condición que queda.* */
+    certificacion: identidad,
+    certificacionSello: identidad,
+    /* WEARABLE → `identidad`, y **no se eligió: la casa ya lo tenía
+       declarado**. `themes/light.ts` dice `services.wearable:
+       palette.verdeVitalDark  // Capa 1 · monitoreo de vida`. Se lee de ahí
+       (L-166) en vez de razonarlo de nuevo y arriesgar contradecirlo. */
+    wearable: identidad,
+    wearableActividad: identidad,
     // Las tres secciones de "Datos comerciales" comparten CAPA a
     // propósito: son la identidad del negocio ante el Estado y ante el
     // banco, y tres hermanas de la misma pantalla que divergieran de

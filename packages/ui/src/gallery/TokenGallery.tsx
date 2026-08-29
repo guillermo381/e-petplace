@@ -6846,6 +6846,62 @@ function PiezasDelOficioS107() {
         />
       </View>
 
+      {/* ⑦pre · LA HOJA DE CONTACTO DE LOS DOS GLIFOS NUEVOS (§6b) */}
+      <View style={{ gap: spacing[3] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ⭐ GATE POR ÍCONO (§2.9) · DOS CANDIDATOS CADA UNO, el perdedor MUERE con su lápida (molde
+          prime/primeCorona) · **el juicio es a 21px, no a 44**
+        </Text>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          CERTIFICACIÓN · qué decide: que se lea «la acreditada es LA MASCOTA» y no «alguien ganó un
+          premio». A = huella como sello · B = sello troquelado (anillo) con la huella adentro — su
+          riesgo es Ley 9: menos aire, puede empastarse en una mancha
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          <Icono nombre="certificacion" tamano={44} />
+          <Icono nombre="certificacionSello" tamano={44} />
+          <Icono nombre="certificacion" tamano={21} />
+          <Icono nombre="certificacionSello" tamano={21} />
+        </View>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ a 21px CONTRA SUS VECINOS DE PAPEL — es donde se ve si colisiona: documento · carnet ·
+          descargar · copiar
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <Icono nombre="certificacion" tamano={21} />
+          <Icono nombre="certificacionSello" tamano={21} />
+          <Icono nombre="documento" tamano={21} />
+          <Icono nombre="carnet" tamano={21} />
+          <Icono nombre="descargar" tamano={21} />
+          <Icono nombre="copiar" tamano={21} />
+        </View>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          WEARABLE · qué decide: que diga «mide TODO EL TIEMPO» sin corazón. A = huella ADENTRO del
+          aparato (el dispositivo muestra a la mascota) · B = traza de actividad — 🔴 su riesgo es el
+          veto mismo: una traza puede leerse como ECG, o sea clínica
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          <Icono nombre="wearable" tamano={44} />
+          <Icono nombre="wearableActividad" tamano={44} />
+          <Icono nombre="wearable" tamano={21} />
+          <Icono nombre="wearableActividad" tamano={21} />
+        </View>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ a 21px contra los vecinos que el censo marcó como riesgo: carnet (placa colgante) y paseo
+          (el lazo del collar) — por eso el objeto NO es una placa de collar
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <Icono nombre="wearable" tamano={21} />
+          <Icono nombre="wearableActividad" tamano={21} />
+          <Icono nombre="carnet" tamano={21} />
+          <Icono nombre="paseo" tamano={21} />
+          <Icono nombre="veterinaria" tamano={21} />
+          <Icono nombre="training" tamano={21} />
+        </View>
+      </View>
+
       {/* ⑦ter EL ACORDEÓN DE SECCIÓN */}
       <View style={{ gap: spacing[2] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
