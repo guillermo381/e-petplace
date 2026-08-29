@@ -12,6 +12,25 @@
  * por parámetro**. *Volver a ofrecerlos acá los haría re-editables en una
  * pantalla donde ya están decididos* (Ley 23).
  *
+ * ── ⭐ LA VITRINA: LA MISMA PIEZA QUE SUS CUATRO HERMANAS ────────────────
+ * **`PreviewPrestador`** — censado el 29-ago: *las cuatro montan exactamente
+ * ésta en este paso.* Portada · logo · nombre · **línea de confianza honesta**
+ * (reseñas > citas > nada, jamás estrellas vacías) · cohorte · precio.
+ * 🔴 **No se inventó una vitrina nueva: el paso es el mismo y la respuesta ya
+ * estaba escrita.** *Antes acá había una `Celda` — un renglón de texto donde
+ * las hermanas presentan a alguien.*
+ *
+ * **Y lo propio del oficio va en su `pie`**, un slot que se agregó para esto:
+ * el **cupo de ese día** y **las dos ventanas** de recogida y devolución —
+ * *lo que una familia mira para saber si le sirve, y que ningún otro oficio
+ * tiene*. Las ventanas las pinta **`FichaFranja`**, que existe justo para
+ * informar (no para elegir) y que el perfil del lugar ya monta.
+ *
+ * ⚠️ **LAS FRANJAS CUESTAN UNA LLAMADA POR LUGAR.** `obtenerFranjasGuarderia`
+ * es por prestador y el filtro no las trae. Se piden en paralelo y **la fila no
+ * espera**: si no llegaron, se dibuja sin ellas. *Pedido a A para que viajen en
+ * el mismo lector — con seis lugares es barato, con sesenta no.*
+ *
  * ── EL PRECIO, SIN UNA SOLA CUENTA ───────────────────────────────────────
  * Cada lugar muestra **el número del server para la modalidad pedida**. Si no
  * tiene precio para ella, **se muestra sin número** — *no se lo filtra (filtrar
@@ -27,14 +46,28 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FichaFranja,
   Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerGuarderiasDisponibles, type GuarderiaDisponible } from '@epetplace/api';
+import {
+  obtenerFranjasGuarderia,
+  obtenerGuarderiasDisponibles,
+  obtenerPerfilesPublicos,
+  type FranjaGuarderia,
+  type GuarderiaDisponible,
+  type PerfilPublico,
+} from '@epetplace/api';
+
+import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { CabezalOficio } from '@/components/reserva-piezas';
+import { PreviewPrestador } from '@/components/preview-prestador';
+
+/** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
+const aHoraCorta = (h: string) => h.slice(0, 5);
 import { esModalidad, type ModalidadGuarderia } from '@/lib/guarderia-modalidad';
 
 type Lista =
@@ -49,6 +82,7 @@ export default function QuienPuedeGuarderia() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const idioma = obtenerIdiomaActual();
   const params = useLocalSearchParams<{
     mascotaId?: string;
     mascotaNombre?: string;
@@ -62,6 +96,10 @@ export default function QuienPuedeGuarderia() {
   const fecha = typeof params.fecha === 'string' && params.fecha.length > 0 ? params.fecha : null;
 
   const [lista, setLista] = useState<Lista>({ fase: 'cargando' });
+  /* El enriquecimiento público: portada, logo, reseñas, cohorte. **La fila no
+     lo espera** — llega y la tarjeta se completa (criterio de la pieza). */
+  const [perfiles, setPerfiles] = useState<Record<string, PerfilPublico>>({});
+  const [franjas, setFranjas] = useState<Record<string, FranjaGuarderia[]>>({});
 
   useEffect(() => {
     if (mascotaId === null || fecha === null) { setLista({ fase: 'noPudimos' }); return; }
@@ -96,6 +134,32 @@ export default function QuienPuedeGuarderia() {
      un solo error.** Manda `precioModalidad`, que el server ya resolvió.
      🔴 Y el respaldo **nunca cae a `precio`** cuando la modalidad no es día:
      *la ausencia es preferible al precio de otra cosa.* */
+  useEffect(() => {
+    if (lista.fase !== 'listo' || lista.lugares.length === 0) return;
+    const ids = [...new Set(lista.lugares.map((g) => g.prestadorId))];
+    let vigente = true;
+    void obtenerPerfilesPublicos(ids).then((r) => {
+      if (!vigente || !r.ok) return;
+      setPerfiles(Object.fromEntries(r.data.map((x) => [x.id, x])));
+    });
+    /* 🔴 UNA LLAMADA POR LUGAR, en paralelo y sin bloquear la lista. *El filtro
+       no trae las franjas y `obtenerFranjasGuarderia` es por prestador — con
+       seis lugares es barato; con sesenta hay que pedirle a A que viajen en el
+       mismo lector.* Si alguna falla, esa fila se dibuja sin ventanas: **el
+       hueco no se disfraza de dato** (Ley 13). */
+    void Promise.all(
+      ids.map(async (id) => [id, await obtenerFranjasGuarderia(id)] as const),
+    ).then((pares) => {
+      if (!vigente) return;
+      setFranjas(
+        Object.fromEntries(
+          pares.filter(([, r]) => r.ok).map(([id, r]) => [id, r.ok ? r.data : []]),
+        ),
+      );
+    });
+    return () => { vigente = false; };
+  }, [lista]);
+
   const precioDe = (g: GuarderiaDisponible): number | null =>
     g.precioModalidad ??
     (modalidad === 'dia' ? g.precio : modalidad === 'paquete' ? null : g.precioMensual);
@@ -112,6 +176,18 @@ export default function QuienPuedeGuarderia() {
       />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[3], paddingBottom: insets.bottom + spacing[8] }}>
+        {/* ⏪ ACÁ ABAJO COLGABA LA FECHA EN CRUDO —`2026-09-01`— al pie de la
+            lista. Dos cosas mal: **voz de máquina** donde va la de la casa, y
+            **el contexto al final**, cuando es lo que enmarca todo lo de
+            arriba. Las cuatro hermanas lo resuelven igual: **una `Celda` de
+            contexto POR ENCIMA de la lista** (censo del 29-ago). */}
+        {fecha !== null ? (
+          <Celda
+            titulo={params.mascotaNombre ?? t('hubGuarderia.titulo')}
+            metadataMono={fechaCortaMono(fecha, idioma)}
+          />
+        ) : null}
+
         {lista.fase === 'cargando' ? (
           <EsqueletoGrupo>
             <Esqueleto alto={64} />
@@ -140,35 +216,83 @@ export default function QuienPuedeGuarderia() {
         ) : (
           lista.lugares.map((g) => {
             const precio = precioDe(g);
+            const f = franjas[g.prestadorId] ?? [];
+            const rec = f.find((x) => x.tipo === 'recogida') ?? null;
+            const dev = f.find((x) => x.tipo === 'devolucion') ?? null;
             return (
-              <Celda
+              <PreviewPrestador
                 key={g.prestadorId}
-                interactiva
-                accessibilityRole="button"
-                titulo={g.prestadorNombre}
-                /* 🔴 `sobrevendido` NO se pinta: para la familia, un lugar que
-                   puede recibirla es un lugar que puede recibirla. La
-                   sobreventa es problema operativo del prestador. */
-                subtitulo={g.ciudad ?? undefined}
-                metadataMono={
-                  precio === null ? undefined
-                  : modalidad === 'dia' ? t('hubGuarderia.porDia', { precio: precio.toFixed(2) })
-                  : modalidad === 'mensual' ? t('hubGuarderia.porMes', { precio: precio.toFixed(2) })
-                  : t('hubGuarderia.porPaquete', { precio: precio.toFixed(2) })
+                prestadorId={g.prestadorId}
+                ofertaId={g.prestadorServicioId}
+                nombre={g.prestadorNombre}
+                oficio={t('hogar.railGuarderia')}
+                contexto={
+                  g.direccion !== null
+                    ? [g.direccion, g.ciudad].filter(Boolean).join(' · ')
+                    : null
                 }
-                onPress={() =>
-                  router.push({
-                    pathname: '/explorar/guarderia/[prestadorId]',
-                    params: { ...params, prestadorId: g.prestadorId, prestadorNombre: g.prestadorNombre },
-                  })
+                /* 🔴 SIN NÚMERO cuando el lugar no vende esta modalidad — la
+                   pieza acepta la cadena vacía y no pinta el separador
+                   huérfano. *Un guion o un cero se leerían como «gratis».* */
+                precio={
+                  precio === null
+                    ? ''
+                    : modalidad === 'dia'
+                      ? t('hubGuarderia.porDia', { precio: precio.toFixed(2) })
+                      : modalidad === 'mensual'
+                        ? t('hubGuarderia.porMes', { precio: precio.toFixed(2) })
+                        : t('hubGuarderia.porPaquete', { precio: precio.toFixed(2) })
+                }
+                perfil={perfiles[g.prestadorId]}
+                /* La ventana viaja con el tap para que el lugar pueda reservar,
+                   como en los cuatro oficios (D-730). */
+                contextoReserva={{
+                  mascotaId: mascotaId ?? '',
+                  ...(typeof params.mascotaNombre === 'string' ? { mascotaNombre: params.mascotaNombre } : {}),
+                  modalidad,
+                  fecha: fecha ?? '',
+                  ...(typeof params.tamano === 'string' ? { tamano: params.tamano } : {}),
+                  prestadorNombre: g.prestadorNombre,
+                }}
+                pie={
+                  <View style={{ gap: spacing[2] }}>
+                    {/* EL CUPO DE ESE DÍA. 🔴 `sobrevendido` NO se pinta: para
+                        la familia, un lugar que puede recibirla puede
+                        recibirla. La sobreventa es operativa del prestador. */}
+                    <Texto variante="apoyo">
+                      {g.disponible === 1
+                        ? t('hubGuarderia.cupoUno')
+                        : t('hubGuarderia.cupo', { n: g.disponible })}
+                    </Texto>
+                    {/* LAS DOS VENTANAS. `FichaFranja` informa —no elige— y su
+                        `devolucion` es opcional porque **un lugar puede tener
+                        sólo la recogida declarada**: ahí no se dibuja un rango
+                        vacío que se lea como dato. */}
+                    {rec !== null ? (
+                      <FichaFranja
+                        recogida={{
+                          rotulo: t('lugarGuarderia.recogida'),
+                          desde: aHoraCorta(rec.desde),
+                          hasta: aHoraCorta(rec.hasta),
+                        }}
+                        devolucion={
+                          dev === null
+                            ? undefined
+                            : {
+                                rotulo: t('lugarGuarderia.devolucion'),
+                                desde: aHoraCorta(dev.desde),
+                                hasta: aHoraCorta(dev.hasta),
+                              }
+                        }
+                      />
+                    ) : null}
+                  </View>
                 }
               />
             );
           })
         )}
 
-        {/* El día que se está mirando, a la vista: la lista sola no lo dice. */}
-        {fecha !== null ? <Texto variante="apoyo">{fecha}</Texto> : null}
       </ScrollView>
     </SafeAreaView>
   );

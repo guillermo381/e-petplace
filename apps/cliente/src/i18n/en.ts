@@ -2210,6 +2210,8 @@ export const clienteEn = {
     tamanoEstadias: '{{n}} stays',
     lugaresTitulo: 'Places with room that day',
     porDia: '${{precio}} per day',
+    cupo: '{{n}} spots left that day',
+    cupoUno: '1 spot left that day',
     porMes: '${{precio}} per month',
     porPaquete: '${{precio}} for the pack',
     sinElegiblesTitulo: 'You can’t use daycare yet',

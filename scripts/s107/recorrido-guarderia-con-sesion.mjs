@@ -54,10 +54,24 @@ const { data: sesion, error } = await sb.auth.signInWithPassword({ email: EMAIL,
 if (error || sesion.session === null) { console.error(`🔴 sin sesión para ${EMAIL}: ${error?.message}`); process.exit(1); }
 console.log(`✓ sesión real de ${EMAIL} (el token no se imprime)\n`);
 
+
+/* Una mascota real de la familia — el lector la exige y sin ella la etapa 3 no
+   puede pedir nada. */
+const { data: mm } = await sb.from('mascotas').select('id').eq('nombre', 'Thor').limit(1);
+const MASCOTA = mm?.[0]?.id ?? '';
+
+/* La fecha se calcula: **jamás una constante**, que envejece y un día cae en el
+   pasado — y entonces el recorrido mide el rebote de la víspera creyendo que
+   mide la lista. */
+const d = new Date(); d.setDate(d.getDate() + 3);
+const FECHA = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const RUTAS = [
   ['/hogar', 'EL HOGAR · ¿aparece guardería en el rail?'],
   ['/hogar/guarderia', 'EL LOG · chips, pestañas y lista'],
   ['/explorar/guarderia', 'ETAPA 1 · elegir cómo y cuándo'],
+  [`/explorar/guarderia/disponibles?modalidad=dia&fecha=${FECHA}&mascotaId=${MASCOTA}`,
+   'ETAPA 3 · QUIÉN PUEDE · ¿la vitrina presenta al prestador?'],
 ];
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });

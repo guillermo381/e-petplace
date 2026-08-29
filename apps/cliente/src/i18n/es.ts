@@ -2987,6 +2987,10 @@ export const clienteEs = {
     tamanoEstadias: '{{n}} estadías',
     lugaresTitulo: 'Lugares con cupo ese día',
     porDia: '${{precio}} por día',
+    /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
+       del paquete: la pluralización no es una interpolación). */
+    cupo: 'Quedan {{n}} lugares ese día',
+    cupoUno: 'Queda 1 lugar ese día',
     porMes: '${{precio}} por mes',
     porPaquete: '${{precio}} el paquete',
     sinElegiblesTitulo: 'Todavía no puedes usar la guardería',
