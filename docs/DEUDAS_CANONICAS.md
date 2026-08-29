@@ -23709,3 +23709,47 @@ La migración del digest cerró su función nueva con `REVOKE … FROM PUBLIC, a
 **La cura, y es la parte transferible:** el cinturón de la corrección **no compara contra un literal tipeado a mano — compara contra el MOLDE VIVO**, extrayendo el `proacl` de las hermanas en la misma corrida. *Si las hermanas cambian, el gate cambia con ellas; y si mi función se aparta del molde, aborta.* Un valor tipeado a mano habría vuelto a certificar mi propia idea en vez del estado de la casa.
 
 **Regla:** un cinturón de permisos **enumera las audiencias que la casa tiene** (`anon`, `authenticated`, `PUBLIC`, `service_role`) o **se compara contra el molde de sus pares** — jamás pregunta por una sola y concluye «cerrada». *Preguntar por una y afirmar sobre todas es la forma más barata de fabricar un verde flojo.*
+
+# Deudas S107 (D-972 · D-973) — depositadas por A el 29-ago-2026 · números verificados libres POR GREP (tope real `D-971`)
+
+#### D-972 — 🟠 LA LÍNEA DE VIDA NO DISTINGUE RUTINA DE HECHO DE VIDA
+🟠 **MEDIA-ALTA · DECISIÓN DE MESA, no de pista.** Hallada por C midiendo el catálogo vivo; **los números se re-midieron contra el objeto al depositar** (29-ago-2026).
+
+**Lo medido, y el hallazgo de C se confirma exacto:**
+
+| tipo de evento | filas vivas |
+|---|---|
+| `cita_servicio` | **219** |
+| `atencion_paseo_registrada` | **29** |
+| `atencion_grooming_registrada` | **7** |
+| `atencion_adiestramiento_registrada` | **3** |
+| **rutina, TOTAL** | **🔴 258** |
+
+✏️ **Enmienda al número de C, que dijo 255:** son **258**. Su cuenta tomó tres oficios (219 · 29 · 7) para una frase que decía *«los cuatro oficios vivos»* — **faltaba adiestramiento, con 3**. *No cambia la conclusión; la refuerza: el cuarto oficio también sedimenta su rutina, así que no hay ninguno que sirva de contraejemplo.*
+
+**El catálogo, medido columna por columna** — `cat_tipos_evento` tiene `eje_jtbd`, `puede_ser_raiz`, `puede_ser_subevento`, `tipos_padre_validos` (jerarquía) · `propaga_a_perfil` (propagación) · `visibilidad_default` (audiencia) · `es_clinico`, `es_mvp`, `deprecado`… **y ningún campo de NIVEL.**
+
+🔴 **Y lo que la medición agrega a la pregunta, que no estaba en el pedido:** `hito_narrativo` tiene **57 filas vivas**. ⇒ **la distinción YA EXISTE en el vocabulario de la casa — pero como TIPO, no como propiedad de los demás.** *Hoy «esto es un hecho de vida» se dice siendo otro tipo de evento, no marcando el que ya ocurrió.*
+
+**Eso parte la pregunta en dos, y las dos son de mesa:**
+1. **¿El nivel es un campo nuevo de `cat_tipos_evento`** (y entonces cada tipo declara si es rutina o hecho de vida), **o `hito_narrativo` ya es la respuesta** y lo que falta es que la rutina deje de compartir superficie con él?
+2. **¿Qué se hace con los 258 ya escritos?** Un campo nuevo con default los clasifica a todos de una — y *un default que clasifica 258 filas históricas es una afirmación sobre el pasado, no una migración.* El precedente de la casa es marcar, no reescribir (las 64 sondas de S92, las tarifas de flete de S95).
+
+⚠️ **Lo que NO se hace mientras tanto, y es firma de esta sesión:** **guardería sedimenta como sus hermanas, cada estadía.** *La distinción no se estrena en el oficio nuevo* — hacerlo dejaría cinco oficios sedimentando con dos criterios distintos y la decisión tomada de hecho por quien construyó último.
+
+**Dueño:** mesa. **Disparo:** antes de que la Línea de Vida sea superficie de venta del producto (hoy ya es su diferencial declarado en `EL NORTE`).
+☠️ **Condición de muerte:** el criterio firmado **y** los 258 resueltos por el camino que la mesa elija (marcados o reclasificados), **con el número re-medido ese día** — no con éste.
+
+#### D-973 — 🟡 LA TERCERA BALDOSA A MANO DE LA CASA
+🟡 **MEDIA · TRABAJO DE DISEÑO CON SU PROPIA VARA, no consecuencia de otra cosa.** Declarada por C el 29-ago-2026 y **correctamente NO resuelta por ella**.
+
+**El hecho:** la grilla del cliente **dibuja su baldosa a mano** y ya no comparte anatomía con `Baldosa` — perdió **descripción** y **chevron** por firma del founder. Es la **tercera** superficie de la casa que dibuja una baldosa por su cuenta.
+
+🔴 **Por qué se ficha aparte en vez de «unificarlo de paso»:** apareció mientras se curaba un corte de palabra, y esa vecindad es engañosa. *Arreglar dónde parte un label y decidir si tres superficies comparten anatomía son dos trabajos con varas distintas: el primero se cierra midiendo el peor caso de 14 caracteres; el segundo exige mirar las tres juntas en el aparato y decidir qué es LA baldosa de la casa.* **Resolverlo como efecto colateral es cómo una pieza compartida termina teniendo tres verdades y ninguna firma.**
+
+> *Es 19.9 en su forma más cara — lo que se copia, diverge — pero con una vuelta: acá la divergencia no fue descuido, **la pidió el founder** (sin descripción, sin chevron). Así que la pregunta no es «¿quién se desvió?» sino «¿la pieza tiene que admitir esta forma, o esta superficie no es una baldosa?».*
+
+**Lo que la mesa decide:** si `Baldosa` gana variantes (con/sin descripción, con/sin chevron) · si nace una pieza hermana · o si las tres a mano son tres trabajos distintos que no comparten nada y la pieza sólo sirve a Negocio y Atender.
+
+**Dueño:** B (la pieza) + mesa (la firma sobre píxeles). **Disparo:** sesión de diseño, con **las tres montadas juntas** — *la comparación es el instrumento; ninguna de las tres se juzga sola.*
+☠️ **Condición de muerte:** la decisión firmada **y** el censo en 0 baldosas a mano, **o** las excepciones declaradas una por una con su razón.
