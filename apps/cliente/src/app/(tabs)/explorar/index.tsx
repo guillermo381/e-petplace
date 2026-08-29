@@ -170,11 +170,19 @@ export default function Explorar() {
                       <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
                         <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
                         <View style={{ gap: 2 }}>
-                          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                          {/* ⭐ S107-C · el label baja de `base` a `sm` y se
+                              acota a dos líneas: con la baldosa a 31 % el
+                              texto se salía de su espacio. *El tamaño del
+                              texto vive acá, en el consumidor — se midió antes
+                              de pedírselo a B.* */}
+                          <Text
+                            numberOfLines={2}
+                            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}
+                          >
                             {f.titulo}
                           </Text>
                           <Text
-                            numberOfLines={3}
+                            numberOfLines={2}
                             style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.45, color: theme.text.secondary }}
                           >
                             {f.detalle}

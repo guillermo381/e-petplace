@@ -521,6 +521,13 @@ export default function Negocio() {
               ).map((mundo, i) => (
                 <View key={mundo.ruta} style={ESTILO_CELDA}>
                   <Baldosa
+                    /* 🔴 SIN ESTO EL GLIFO NO SE ENTERA DE QUE LA GRILLA
+                       CAMBIÓ: `Baldosa` dimensiona su glifo con `columnas`
+                       (48 a dos, 32 a tres) y su default es 2. La celda pasó a
+                       33 % y el glifo seguía a 48 — por eso pisaba el label.
+                       *Cambiar el ancho del contenedor no achica lo de
+                       adentro; hay que decírselo a la pieza.* */
+                    columnas={3}
                     glifo={mundo.glifo}
                     capa={mundo.capa}
                     titulo={mundo.etiqueta}
