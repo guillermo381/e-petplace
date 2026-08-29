@@ -2901,12 +2901,32 @@ export const clienteEs = {
        Una alarma sobre algo que no impide nada enseña a ignorar las que sí. */
     faltaSinFrenar: 'Puedes reservar igual. Cuando puedas, carga lo que falta: la guardería lo va a pedir al recibirlo.',
   },
+  /* S107-C · LAS TRES MODALIDADES. **Voz de familia, jamás el slug del
+     motor**: la pantalla dice «Por día», el motor dice `dia`. */
+  modalidadGuarderia: {
+    etiqueta: '¿Cómo quieres reservar?',
+    dia: 'Por día',
+    paquete: 'Paquete',
+    mensual: 'Mensual',
+    diaQue: 'Reservas un día puntual y lo pagas.',
+    paqueteQue: 'Compras varias estadías juntas y las usas cuando quieras.',
+    mensualQue: 'Un cobro cada mes mientras lo quieras.',
+    mensualAviso: 'Es un cobro que se repite: se hace solo, el mismo día de cada mes.',
+    mensualCorte: 'Lo cortas desde la app cuando quieras, y sigue andando hasta el final del mes que pagaste.',
+    continuar: 'Continuar',
+  },
   hubGuarderia: {
     titulo: 'Guardería',
     cabezalDetalle: 'Lo buscan, pasa el día y lo traen de vuelta.',
     queDia: '¿Qué día?',
+    quePrimerDia: '¿Qué día es la primera estadía?',
+    queDiaInicio: '¿Desde qué día?',
+    cuantasEstadias: '¿Cuántas estadías?',
+    tamanoEstadias: '{{n}} estadías',
     lugaresTitulo: 'Lugares con cupo ese día',
     porDia: '${{precio}} por día',
+    porMes: '${{precio}} por mes',
+    porPaquete: '${{precio}} el paquete',
     sinElegiblesTitulo: 'Todavía no puedes usar la guardería',
     sinElegiblesDetalle: 'La guardería es para perros y gatos. Cuando registres uno, va a aparecer acá.',
     diaCerrado: 'No abren',

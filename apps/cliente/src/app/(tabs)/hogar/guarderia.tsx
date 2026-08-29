@@ -164,9 +164,13 @@ export default function LogGuarderia() {
             razonDeshabilitado={t('plan.elegiMascota')}
             onPress={() => {
               if (mascota === null) return;
+              /* 🔴 EL NOMBRE VIAJA CON EL ID. Sin él, el flujo tendría que
+                 volver a pedir la lista de mascotas sólo para escribir una
+                 palabra en el cabezal — un viaje entero para un dato que la
+                 pantalla que navega ya tiene en la mano. */
               router.navigate({
                 pathname: '/explorar/guarderia',
-                params: { mascotaId: mascota.id },
+                params: { mascotaId: mascota.id, mascotaNombre: mascota.nombre },
               });
             }}
           />
