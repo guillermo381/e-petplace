@@ -57,12 +57,15 @@ import {
   Tarjeta,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
   evaluarRequisitosGuarderia,
   obtenerCupoGuarderia,
   obtenerFranjasGuarderia,
+  comprarPaqueteGuarderia,
+  reservarDiaDePaqueteGuarderia,
   reservarDiaGuarderia,
   type CupoDiaGuarderia,
   type EstadoCupoDia,
@@ -99,7 +102,10 @@ export default function LugarGuarderia() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ precio?: string }>();
+  const { mostrar } = useAviso();
+  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string }>();
+  const esPaquete = params.modalidad === 'paquete';
+  const tamano = Number(params.tamano ?? '');
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
     mascotaId?: string;
@@ -241,6 +247,51 @@ export default function LugarGuarderia() {
     if (elegido === null || typeof mascotaId !== 'string' || reservando) return;
     setReservando(true);
     setRebote(null);
+    /* ═══ EL CAMINO DEL PAQUETE — DOS LLAMADAS, UN SOLO ACTO ═══════════════
+       Firma del founder: **el toggle de la primera sesión va prendido y es
+       obligatorio en la primera compra.** Por eso acá no hay interruptor: *un
+       toggle que no se puede apagar es una casilla decorativa.*
+
+       🔴 **COMPRAR NO ES RESERVAR — y por eso son dos llamadas.** El motor lo
+       dice en su contrato: `comprarPaqueteGuarderia` crea SÓLO el bono (cero
+       citas), y la primera sesión se agenda con la segunda. *Meterlas en una
+       sola RPC habría atado el paquete a un día, y el paquete es del HOGAR.*
+
+       ⚠️ **Y no hay checkout, medido:** el bono nace `estado_pago='pagado'` con
+       `pago_simulado: true`. **La pantalla lo DICE** — *un cobro simulado que la
+       superficie presenta como real es la clase de mentira que esta casa
+       persigue.* */
+    if (esPaquete) {
+      const compra = await comprarPaqueteGuarderia({ prestadorId: prestadorId as string, tamano });
+      if (!compra.ok) {
+        setRebote(compra.mensaje);
+        setReservando(false);
+        return;
+      }
+      /* La mascota VIAJA acá aunque sea opcional: en la primera compra ya está
+         decidida y mandarla evita el rebote `mascota_no_determinada` en el
+         único momento del flujo donde la familia no lo entendería. */
+      const primera = await reservarDiaDePaqueteGuarderia({
+        bonoId: compra.data.bonoId,
+        fecha: elegido,
+        mascotaId,
+      });
+      setReservando(false);
+      if (!primera.ok) {
+        /* 🔴 EL BONO YA EXISTE. *Decir sólo «no se pudo» sobre una compra que SÍ
+           ocurrió dejaría a la familia creyendo que perdió la plata.* */
+        setRebote(t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
+        return;
+      }
+      mostrar({
+        texto: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }),
+        variante: 'exito',
+      });
+      if (router.canDismiss()) router.dismissAll();
+      router.navigate('/hogar/guarderia');
+      return;
+    }
+
     const r = await reservarDiaGuarderia({ prestadorId: prestadorId as string, mascotaId, fecha: elegido });
     setReservando(false);
     if (!r.ok) {
@@ -274,7 +325,7 @@ export default function LugarGuarderia() {
         fecha: elegido,
       },
     });
-  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router]);
+  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t]);
 
   if (estado.fase === 'cargando') {
     return (
@@ -429,7 +480,7 @@ export default function LugarGuarderia() {
       {estado.fase === 'listo' ? (
       <PieReserva
         total={precioTexto}
-        etiqueta={t('lugarGuarderia.reservar')}
+        etiqueta={esPaquete ? t('lugarGuarderia.comprarPaquete', { n: tamano }) : t('lugarGuarderia.reservar')}
         habilitado={puedeReservar}
         insetBottom={insets.bottom}
         /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una

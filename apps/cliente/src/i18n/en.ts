@@ -2108,6 +2108,9 @@ export const clienteEn = {
   },
   lugarGuarderia: {
     faltaDia: 'Pick a day on the calendar.',
+    comprarPaquete: 'Buy {{n}} stays and book this day',
+    paqueteListo: 'Pack bought and first day booked — {{n}} left.',
+    paqueteSinPrimera: 'We bought your pack, but couldn’t book that day: {{mensaje}} You can book it from Daycare.',
     faltaRequisitos: 'Something the daycare requires is still missing.',
     titulo: 'Daycare',
     franjasTitulo: 'When they pick up and drop off',

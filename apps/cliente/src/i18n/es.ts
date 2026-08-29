@@ -2867,6 +2867,11 @@ export const clienteEs = {
     /* El CTA apagado DICE qué falta: una pared muda hace creer que el
        producto está roto cuando sólo falta tocar un día. */
     faltaDia: 'Elige un día en el calendario.',
+    comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
+    paqueteListo: 'Paquete comprado y primer día agendado — te quedan {{n}}.',
+    /* 🔴 El bono YA existe: decir solo «no se pudo» dejaría a la familia
+       creyendo que perdió la plata. */
+    paqueteSinPrimera: 'Compramos tu paquete, pero no pudimos agendar ese día: {{mensaje}} Puedes agendarlo desde Guardería.',
     faltaRequisitos: 'Falta lo que la guardería pide para recibirlo.',
     titulo: 'La guardería',
     franjasTitulo: 'Cuándo pasan y cuándo lo traen',
