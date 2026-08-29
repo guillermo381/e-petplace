@@ -12,6 +12,30 @@ import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+
+  /* ✏️ S107-A · CENSADOS CONTRA EL MOTOR, no agregados de a uno.
+     C reportó que `fecha_no_ofertable` llegaba como `error_desconocido`; al
+     medir **el motor de guardería lanza 37 códigos y 17 no estaban tipados en
+     ningún wrapper** — casi la mitad.
+     🔴 **Un código sin tipar no es un mensaje feo: es un HECHO que se vuelve
+     indistinguible de una caída de red.** La víspera —la regla más normal del
+     producto— se veía igual que un error inesperado, y la pantalla no podía
+     ofrecer «elegí otro día» porque no sabía que ése era el problema. */
+  reserva_mismo_dia:           'La guardería se reserva desde mañana en adelante.',
+  dia_no_operativo:            'Ese lugar no abre ese día.',
+  no_ofrece_dia_suelto:        'Este lugar no vende días sueltos. Mira sus paquetes o su mensualidad.',
+  estadia_no_existe:           'No encontramos esa estadía.',
+  acta_no_existe:              'No encontramos esa acta.',
+  acta_cerrada_no_se_edita:    'Esta acta ya se cerró y no se puede cambiar.',
+  conformidad_invalida:        'Esa respuesta no es válida.',
+  direccion_invalida:          'Ese momento de la estadía no existe.',
+  tramo_no_existe:             'No encontramos ese viaje.',
+  mascota_sin_estadia_ese_dia: 'Esa mascota no tiene estadía ese día.',
+  media_sin_etiquetas:         'Una foto tiene que decir de qué animal es.',
+  clave_idempotencia_requerida: 'Falta el identificador del envío.',
+  no_sos_de_esta_familia:      'Esto es de otra familia.',
+  no_gestionas_este_prestador: 'No gestionas este negocio.',
+
   /* 🔴 Este código NO se traduce a «revisá los datos»: la pantalla tiene que
      nombrar QUÉ falta y llevar a resolverlo a un toque. El detalle viaja en
      `faltantes`, y el tipo de la pieza de B hace que un faltante sin camino

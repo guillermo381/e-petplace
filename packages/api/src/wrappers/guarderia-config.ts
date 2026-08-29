@@ -20,6 +20,17 @@ import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+
+  /* ✏️ S107-A · CENSADOS CONTRA EL MOTOR, no agregados de a uno.
+     C reportó que `fecha_no_ofertable` llegaba como `error_desconocido`; al
+     medir **el motor de guardería lanza 37 códigos y 17 no estaban tipados en
+     ningún wrapper** — casi la mitad.
+     🔴 **Un código sin tipar no es un mensaje feo: es un HECHO que se vuelve
+     indistinguible de una caída de red.** La víspera —la regla más normal del
+     producto— se veía igual que un error inesperado, y la pantalla no podía
+     ofrecer «elegí otro día» porque no sabía que ése era el problema. */
+  tope_de_urgencia_invalido:   'Ese tope de urgencia no es válido.',
+
   no_gestionas_este_prestador: 'No administras este negocio.',
   capacidad_invalida:          'La capacidad tiene que ser mayor a cero.',
   espacio_no_existe:           'No encontramos ese espacio.',
