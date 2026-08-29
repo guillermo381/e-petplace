@@ -6932,14 +6932,28 @@ function PiezasDelOficioS107() {
           ))}
         </View>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          ↓ LOS MISMOS CINCO a TRES columnas — **qué decide: que ninguno trunque y que los dos que se
-          parten («Veterinaria» y «Adiestramiento») sigan diciendo QUÉ MUNDO SON**. El glifo ayuda:
-          es lo que identifica cuando el label se parte
+          ↓ LOS MISMOS CINCO a TRES columnas — **SIN SUBTÍTULO** (firma del gate: glifo y nombre,
+          nada más) y con la caja acortada a su ALTO MEDIDO (98 = 10+32+6+40+10), no a una razón ·
+          🔴 **Guardería va SIN CONFIGURAR**: qué decide es si el apagado se lee «todavía no lo
+          usás» o «no podés entrar» — **es la baldosa que MÁS hay que tocar** · se atenúa el GLIFO y
+          el canto, **jamás el nombre**
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {MUNDOS_REALES.map((m) => (
             <View key={m.t} style={{ width: '33.333%', padding: spacing[1] }}>
-              <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={3} onPress={() => {}} />
+              <Baldosa
+                glifo={m.g}
+                titulo={m.t}
+                capa={m.c}
+                columnas={3}
+                /* Guardería va SIN CONFIGURAR — es el par que decide: al lado
+                   de sus cuatro hermanas se ve si el apagado dice «todavía no
+                   lo usás» o si se lee como «no podés entrar». */
+                {...(m.g === 'guarderia'
+                  ? { configurado: false as const, vozSinConfigurar: 'Sin configurar' }
+                  : { configurado: true as const })}
+                onPress={() => {}}
+              />
             </View>
           ))}
         </View>
@@ -6970,7 +6984,16 @@ function PiezasDelOficioS107() {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {MUNDOS_CON_GUION.map((m) => (
             <View key={m.g} style={{ width: '33.333%', padding: spacing[1] }}>
-              <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={3} onPress={() => {}} />
+              <Baldosa
+                glifo={m.g}
+                titulo={m.t}
+                capa={m.c}
+                columnas={3}
+                {...(m.g === 'guarderia'
+                  ? { configurado: false as const, vozSinConfigurar: 'Sin configurar' }
+                  : { configurado: true as const })}
+                onPress={() => {}}
+              />
             </View>
           ))}
         </View>

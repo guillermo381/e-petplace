@@ -22472,6 +22472,7 @@ export type Database = {
         Returns: undefined
       }
       notificar_recordatorios_cita: { Args: never; Returns: Json }
+      obtener_acta_guarderia: { Args: { p_acta_id: string }; Returns: Json }
       obtener_adiestradores_disponibles: {
         Args: {
           p_fecha: string
@@ -22909,6 +22910,8 @@ export type Database = {
           precio: number
           prestador_id: string
           prestador_nombre: string
+          tramo_devolucion_id: string
+          tramo_recogida_id: string
         }[]
       }
       obtener_modalidades_por_oficio: {
