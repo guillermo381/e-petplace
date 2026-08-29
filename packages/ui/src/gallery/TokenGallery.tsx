@@ -6650,11 +6650,19 @@ const MUNDOS_CON_GUION = [
 /* ─────────────────────────────────────────────────────────────────────────
    D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL — no es la pieza.
 
-   🔴 **ES UNA COPIA, y por eso puede envejecer.** Se transcribió el
-   29-ago-2026 de `apps/cliente/src/app/(tabs)/explorar/index.tsx` (el bloque
-   `fichasActivas.map`). *Si esa pantalla cambia y esto no, la comparación
-   pasa a comparar contra una ficción* — que es justo lo que arruinaría el
-   instrumento. **Quien toque aquella, mira ésta.**
+   🔴 **ES UNA COPIA, y por eso puede envejecer.** Se transcribió de
+   `apps/cliente/src/app/(tabs)/explorar/index.tsx`, **bloque
+   `fichasActivas.map`** — *se cita el BLOQUE y no un número de línea: el
+   número ya envejeció una vez (183 → 200) mientras esta copia seguía siendo
+   fiel.* Si esa pantalla cambia y esto no, la comparación pasa a comparar
+   contra una ficción, que es lo único que arruinaría el instrumento.
+   **Quien toque aquélla, mira ésta.**
+
+   ✅ **RE-COTEJADA el 30-ago-2026 y SIGUE FIEL**, campo por campo:
+   `aspectRatio: 1.05` · `paddingTop: spacing[1]` en el glifo · glifo **26** ·
+   título `sans.medium` + `size.sm` + `numberOfLines={2}` · celda
+   `flexBasis: '31%'` con `flexGrow: 0`. *Lo único que cambió allá fue la
+   posición del bloque y que ganó guardería.*
 
    POR QUÉ SE COPIA EN VEZ DE IMPORTARSE: no es un componente — vive **inline**
    dentro del `.map` de esa pantalla. *No hay nada que importar, y ése es
