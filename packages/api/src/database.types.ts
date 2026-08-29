@@ -14786,7 +14786,7 @@ export type Database = {
           especies_compatibles: Json
           id: string
           nombre_custom: string | null
-          precio: number
+          precio: number | null
           precio_emergencia: number | null
           precio_mensual_plan: number | null
           precio_paquete: number | null
@@ -14806,7 +14806,7 @@ export type Database = {
           especies_compatibles?: Json
           id?: string
           nombre_custom?: string | null
-          precio?: number
+          precio?: number | null
           precio_emergencia?: number | null
           precio_mensual_plan?: number | null
           precio_paquete?: number | null
@@ -14826,7 +14826,7 @@ export type Database = {
           especies_compatibles?: Json
           id?: string
           nombre_custom?: string | null
-          precio?: number
+          precio?: number | null
           precio_emergencia?: number | null
           precio_mensual_plan?: number | null
           precio_paquete?: number | null
@@ -21565,7 +21565,8 @@ export type Database = {
       definir_oferta_guarderia: {
         Args: {
           p_activo?: boolean
-          p_precio_dia: number
+          p_especies?: Json
+          p_precio_dia?: number
           p_precio_mensual?: number
           p_prestador_id: string
         }
@@ -22229,6 +22230,10 @@ export type Database = {
           mascota_id: string
           mascota_nombre: string
         }[]
+      }
+      obtener_estado_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: Json
       }
       obtener_estado_onboarding_wizard: {
         Args: { p_cuenta_comercial_id: string }
