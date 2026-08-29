@@ -15,10 +15,18 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 BEGIN;
 
-/* 🔴 LA SALIDA VA A UNA TABLA TEMPORAL, no a `RAISE NOTICE`: **el cliente de
-   `db query` devuelve FILAS y se come los avisos.** *La primera corrida terminó
-   «sin error» y sin una sola línea — un verde mudo, que es la peor forma de
-   verde.* */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ✅ FIRMA DE LA CASA (founder, 29-ago-2026):
+
+   > ### La salida de una corrida va a una tabla que se pueda LEER, jamás a
+   > ### avisos que el cliente pueda descartar. **Un verde mudo es la peor
+   > ### forma de verde.**
+
+   Nació acá: la primera corrida usaba `RAISE NOTICE`, **el cliente de
+   `db query` devuelve FILAS y se come los avisos**, y terminó *«sin error» y
+   sin una sola línea*. *No falló — no dijo nada, que es distinto y peor: un
+   fallo se investiga, un silencio se aprueba.*
+   ═══════════════════════════════════════════════════════════════════════════ */
 CREATE TEMP TABLE _res(n serial, linea text) ON COMMIT DROP;
 
 DO $$
