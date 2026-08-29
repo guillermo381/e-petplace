@@ -594,10 +594,10 @@ export default function Negocio() {
                   {!sinPrestador && (
                     <View style={ESTILO_CELDA}>
                       <Baldosa
-                        /* 🔴 CURA REAL, no formalidad: esta grilla es de TRES (`ESTILO_CELDA`
-                           a 33,333 %) y acá el glifo venía saliendo a 48 —el tamaño de dos
-                           columnas— porque el default lo daba callado. Mismo defecto que C
-                           ya había curado en la baldosa de arriba. */
+                        /* Grilla de TRES (`ESTILO_CELDA` = 33.333 %), como su hermana de
+                           arriba. 🔴 **Y acá no era formalidad: el glifo venía saliendo a 48**
+                           —el tamaño de DOS columnas— porque el default lo daba callado. Es el
+                           defecto que la firma de la prop obligatoria vino a encontrar, vivo. */
                         columnas={3}
                         glifo="despensa"
                         capa="consumo"
@@ -623,10 +623,10 @@ export default function Negocio() {
                         glifo de inventario en el registry, y pedir uno se
                         firma (L-175), no se improvisa. */}
                     <Baldosa
-                      /* 🔴 CURA REAL, no formalidad: esta grilla es de TRES (`ESTILO_CELDA`
-                         a 33,333 %) y acá el glifo venía saliendo a 48 —el tamaño de dos
-                         columnas— porque el default lo daba callado. Mismo defecto que C
-                         ya había curado en la baldosa de arriba. */
+                      /* Grilla de TRES (`ESTILO_CELDA` = 33.333 %), como su hermana de
+                         arriba. 🔴 **Y acá no era formalidad: el glifo venía saliendo a 48**
+                         —el tamaño de DOS columnas— porque el default lo daba callado. Es el
+                         defecto que la firma de la prop obligatoria vino a encontrar, vivo. */
                       columnas={3}
                       glifo="negocio"
                       capa="consumo"
