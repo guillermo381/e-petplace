@@ -191,6 +191,7 @@ export const clienteEn = {
     railEstetica: 'Grooming',
     // S73 item 1: the minimum-4 rail (LOTE S73, founder gate pending)
     railAdiestramiento: 'Training',
+    railGuarderia: 'Daycare',
     railVet: 'Vet care',
     railDescubre: 'Discover',
     railError: "We couldn't load your services.",
@@ -2214,7 +2215,11 @@ export const clienteEn = {
   },
   logGuarderia: {
     vacioTitulo: 'No stays booked',
+    elegiMascotaTitulo: 'Choose who',
+    elegiMascotaDetalle: 'Tap one of your pets to see their stays.',
     vacioDetalle: 'Once you book, your stays will show up here.',
+    estadiasNoCargoTitulo: 'We couldn’t load your stays',
+    estadiasNoCargoDetalle: 'It’s not that you have none: we couldn’t ask. Try again.',
     titulo: 'Daycare',
     reservarDe: 'Book for {{nombre}}',
     listaPendienteTitulo: 'We can’t show your stays yet',

@@ -66,7 +66,7 @@
 4. 🟠 **El acta (⑤)** — ⏪ **CORREGIDO (29-ago): sus wrappers YA EXISTEN.** `levantarActaGuarderia` y `confirmarActaGuarderia` están publicados, y `ActaDeEntrega` (B) tiene su `modo='leer'` con `onConformar`. **Lo único que falta es de dónde sacar el `actaId`** ⇒ lo trae el mismo lector del hueco 1 (`actaPendienteId`).
 5. 🔴 **La aceptación de documentos** — sin superficie; sus wrappers no existen en `packages/api` (aunque las RPC `obtener_documentos_guarderia` / `aceptar_documentos_guarderia` / `evaluar_documentos_guarderia` **sí están en la base**). Pedido: `S107-C-PEDIDO-A-A-DOCUMENTOS.md`.
 6. 🔴 **Paquete y mensual no se pueden vender.** Construidas enteras, **detrás de una compuerta de una línea** (`lib/guarderia-modalidad.ts`). Medido: **no existe RPC de compra de paquete de guardería** ni hermano de `contratar_plan_paseo`, y **el filtro todavía no acepta `p_modalidad`**. Pedido: `S107-C-PEDIDO-A-A-PAQUETE-Y-MENSUAL.md`. ⚠️ **Leé la trampa antes de encender la compuerta.**
-7. 🔴 **`guarderia_tramos` NO EXISTE** ⇒ el punto vivo es **inalcanzable por los dos lados**. `L-318` un piso más adentro. Detallado en la ampliación ⑤.2 del pedido del lector.
+7. ⏪ **RETIRADO — ERA MÍO Y ESTABA VENCIDO (29-ago).** Acá decía que `guarderia_tramos` no existía. **Existe**, y en el acto de crearla se curó una fuga que el hueco tapaba (`obtener_punto_vivo` sólo pedía `auth.uid()`). 🔴 **La forma manda:** el tramo es **del VIAJE, no de la estadía** —sin `estadia_id`—, y cada estadía apunta con `tramo_recogida_id`/`tramo_devolucion_id`. *Un tramo por estadía haría que el mismo vehículo emitiera N puntos idénticos.*
 
 ---
 

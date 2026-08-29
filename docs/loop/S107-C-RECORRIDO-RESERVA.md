@@ -117,23 +117,22 @@ lleva a una pantalla que no puede leer nada es un callejón con nombre bonito».
 
 ---
 
-## ⑤ 🔴 EL HALLAZGO DE MOTOR — el punto vivo no tiene de dónde colgar
+## ⑤ ⏪ **ERROR MÍO, CORREGIDO — `guarderia_tramos` SÍ EXISTE** *(29-ago)*
 
-`obtenerPuntoVivo(tramoId)` y `registrarPuntoVivo({tramoId,…})` **existen y funcionan**.
-Pero medido contra el esquema:
+**Esta sección afirmaba que la tabla no existía y que el punto vivo era inalcanzable por los dos
+lados.** Era falso: **A la creó hace varias tandas**, y **en el mismo acto curó una fuga que el
+hueco tapaba** — `obtener_punto_vivo` sólo pedía `auth.uid()`, así que cualquier logueado con un
+`tramo_id` obtenía **la ubicación en vivo de un vehículo**.
 
-- **`guarderia_tramos` NO EXISTE.** No hay tabla de tramos.
-- `guarderia_tramo_punto.tramo_id` es un **uuid sin FK** (`Relationships: []`).
-- `guarderia_estadias` **no tiene columna de tramo**.
+🔴 **Y la forma corrige lo que yo había supuesto, que es lo caro:** el tramo es **del VIAJE**
+(`prestador_id, fecha, direccion` — **sin `estadia_id`**) y **cada estadía apunta a los suyos**
+con `tramo_recogida_id` / `tramo_devolucion_id`. *Un tramo por estadía haría que el mismo
+vehículo emitiera N puntos idénticos: no fallaría, multiplicaría la misma verdad.*
 
-> ### ⇒ **Nadie puede producir un `tramoId`, y nadie puede obtenerlo.** El punto vivo es
-> inalcanzable **por los dos lados**, y no por permisos: **por falta de la entidad que los une.**
-
-*Es `L-318` («motor sin puerta») un piso más adentro: la pieza existe, es alcanzable desde
-afuera y pasa sus pruebas — **lo que no tiene productor es el identificador con el que abre**.
-Y no da error: devuelve `null`, que la pantalla lee como «todavía no salió».* **Va a A.**
-
----
+**La sección se marca, no se borra.** *Un hallazgo que afirmó de más y desaparece deja a quien
+lo leyó creyendo lo viejo.* ⇒ **`L-166` en su forma más cara: un dato medido no es un dato
+vigente, y una afirmación ESTRUCTURAL vencida es peor que una ausencia — el que la lee
+construye contra ella.**
 
 ## ⑥ UNA POLÍTICA QUE NO EXISTE, declarada porque el encargo la citó
 

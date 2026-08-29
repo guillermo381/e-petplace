@@ -31,6 +31,7 @@ import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -45,21 +46,27 @@ import {
 import {
   getEstadoOnboardingDueno,
   obtenerMascotasDeFamilia,
+  obtenerMisEstadiasGuarderia,
   resolverUrlsFotos,
+  type EstadiaDeMiMascota,
 } from '@epetplace/api';
+import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
-/**
- * 🔴 EL ENCHUFE DE LA LISTA — pedido a A (`S107-C-PEDIDO-A-A-LOG-FAMILIA.md`).
- *
- * `false` mientras `obtenerMisEstadias` no exista. **Con él en `true` la
- * pantalla ya es la correcta**: los chips están montados y el vacío de la firma
- * del founder es el que se pinta. *Es una línea, no una reescritura.*
- */
-const LISTA_DISPONIBLE = false;
+/* ☠️ ACÁ VIVÍA `LISTA_DISPONIBLE = false`, y murió el 29-ago: **A publicó
+   `obtenerMisEstadiasGuarderia`** y el enchufe se conectó. *La constante existía
+   para que el día del lector fuera una línea — y lo fue.* (Ley 37: el andamio
+   se retira en el mismo acto que su razón.) */
+
+type Estadias =
+  | { fase: 'cargando' }
+  | { fase: 'error' }
+  /** 🔴 Nadie preguntó todavía — **no es lo mismo que «no hay»**. */
+  | { fase: 'sinSujeto' }
+  | { fase: 'listo'; lista: EstadiaDeMiMascota[] };
 
 type Mascotas =
   | { fase: 'cargando' }
@@ -136,6 +143,31 @@ export default function LogGuarderia() {
   }, [especies.fase, intento]);
 
   const [pestana, setPestana] = useState<'proximas' | 'historial'>('proximas');
+  const [estadias, setEstadias] = useState<Estadias>({ fase: 'cargando' });
+  const idioma = obtenerIdiomaActual();
+
+  /* 🔴 SE PIDE POR MASCOTA. El lector acepta `mascotaId?` y filtra del lado del
+     server — *filtrar acá una lista que el server sabe filtrar es traerse de
+     más para tirar la mitad.* */
+  useEffect(() => {
+    /* ⏪ ACÁ DECÍA `{ fase: 'listo', lista: [] }`, y era **la misma clase de
+       defecto que esta pista anotó ayer**: con ninguna mascota elegida la
+       pantalla pintaba *«Sin estadías agendadas»* — **una afirmación sobre algo
+       que nadie preguntó**. Cazado con sesión real y tres mascotas: el vacío
+       de la firma salía antes de que hubiera sujeto.
+       *Cada mitad era correcta —el vacío dice bien lo suyo, el filtro también—
+       y el defecto nacía de mostrarlas juntas.* */
+    if (elegida === null) { setEstadias({ fase: 'sinSujeto' }); return; }
+    let vigente = true;
+    setEstadias({ fase: 'cargando' });
+    void (async () => {
+      const r = await obtenerMisEstadiasGuarderia({ mascotaId: elegida });
+      if (!vigente) return;
+      /* Un fallo JAMÁS se disfraza de «no tienes estadías» (Ley 13). */
+      setEstadias(r.ok ? { fase: 'listo', lista: r.data } : { fase: 'error' });
+    })();
+    return () => { vigente = false; };
+  }, [elegida, intento]);
 
   const alAtras = useCallback(() => router.back(), []);
   const mascota =
@@ -218,20 +250,97 @@ export default function LogGuarderia() {
                 cara de dato — y el día que el lector llegue, nadie sabría que la
                 pantalla estuvo mintiendo.* **El de la firma está construido y se
                 enciende solo** cuando `cargarEstadias` devuelva una lista. */}
-            {LISTA_DISPONIBLE ? (
+            {/* LA LISTA — el vacío de la firma del founder ya es el que se
+                pinta: **el lector existe, así que decir «sin estadías» ES la
+                verdad.** *El vacío honesto de «todavía no podemos mostrarte»
+                murió con su razón.* */}
+            {estadias.fase === 'cargando' ? (
+              <EsqueletoGrupo>
+                <Esqueleto alto={64} />
+                <Esqueleto alto={64} />
+              </EsqueletoGrupo>
+            ) : estadias.fase === 'error' ? (
               <EstadoVacio
                 registro="seccion"
-                icono={<Icono nombre="guarderia" tamano={48} />}
-                titulo={t('logGuarderia.vacioTitulo')}
-                descripcion={t('logGuarderia.vacioDetalle')}
+                titulo={t('logGuarderia.estadiasNoCargoTitulo')}
+                descripcion={t('logGuarderia.estadiasNoCargoDetalle')}
+                accion={
+                  <Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />
+                }
               />
-            ) : (
+            ) : estadias.fase === 'sinSujeto' ? (
               <EstadoVacio
                 registro="seccion"
-                titulo={t('logGuarderia.listaPendienteTitulo')}
-                descripcion={t('logGuarderia.listaPendienteDetalle')}
+                titulo={t('logGuarderia.elegiMascotaTitulo')}
+                descripcion={t('logGuarderia.elegiMascotaDetalle')}
               />
-            )}
+            ) : (() => {
+              /* 🔴 `esProxima` LO DECIDE EL SERVER — la pantalla no compara
+                 fechas. *Si se compararan en dos superficies podrían discrepar
+                 sobre qué es «hoy», y una familia vería su estadía del lado
+                 equivocado.* */
+              const visibles = estadias.lista.filter((e) =>
+                pestana === 'proximas' ? e.esProxima : !e.esProxima,
+              );
+              if (visibles.length === 0) {
+                return (
+                  <EstadoVacio
+                    registro="seccion"
+                    icono={<Icono nombre="guarderia" tamano={48} />}
+                    titulo={t('logGuarderia.vacioTitulo')}
+                    descripcion={t('logGuarderia.vacioDetalle')}
+                  />
+                );
+              }
+              return visibles.map((e) => (
+                /* ⚠️ **ESTA FILA NO ES `FilaCita`, Y SE DECLARA.** Medido:
+                   `FilaCitaOficio` es `'paseo' | 'grooming' | 'veterinaria' |
+                   'adiestramiento'` — **la pieza no conoce guardería**, y es de
+                   B. *Montarla con otro oficio pintaría el canto de un servicio
+                   ajeno; forzar el tipo sería mentirle al compilador para que
+                   la pantalla mienta en el color.*
+                   ⇒ **`Celda` mientras tanto**, con el pedido a B escrito
+                   (`S107-C-PEDIDO-A-B-FILACITA-GUARDERIA.md`). **Hasta que
+                   entre, esta fila NO se ve igual que la de sus hermanas** —
+                   se dice acá para que no se lea como un desvío de acabado. */
+                /* 🔴 DOS VARIANTES Y NO UNA CON PROPS OPCIONALES: `Celda`
+                   discrimina por `interactiva`, y **una fila sin destino no
+                   debe parecer tocable**. *Una estadía sin `estadiaId` es una
+                   cita comprada que el prestador todavía no ejecutó: no hay
+                   durante que mirar, y ofrecer el toque prometería una pantalla
+                   vacía.* */
+                e.estadiaId === null ? (
+                  <Celda
+                    key={e.citaId}
+                    titulo={e.prestadorNombre}
+                    subtitulo={e.mascotaNombre}
+                    metadataMono={fechaCortaMono(e.fecha, idioma)}
+                  />
+                ) : (
+                  <Celda
+                    key={e.citaId}
+                    interactiva
+                    accessibilityRole="button"
+                    titulo={e.prestadorNombre}
+                    subtitulo={e.mascotaNombre}
+                    /* ⚠️ SIN HORA: **una estadía no tiene hora** — tiene día y
+                       franja. *Un `00:00` se leería como medianoche.* */
+                    metadataMono={fechaCortaMono(e.fecha, idioma)}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/guarderia/[estadiaId]',
+                        params: {
+                          estadiaId: e.estadiaId ?? '',
+                          mascotaId: e.mascotaId,
+                          mascotaNombre: e.mascotaNombre,
+                          fecha: e.fecha,
+                        },
+                      })
+                    }
+                  />
+                )
+              ));
+            })()}
           </>
         )}
       </ScrollView>

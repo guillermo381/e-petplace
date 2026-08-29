@@ -252,6 +252,7 @@ export const clienteEs = {
     railEstetica: 'Estética',
     // S73 ítem 1: el rail mínimo-4 (LOTE S73, gate founder pendiente)
     railAdiestramiento: 'Adiestramiento',
+    railGuarderia: 'Guardería',
     railVet: 'Veterinaria',
     railDescubre: 'Descubre',
     railError: 'No pudimos leer tus servicios.',
@@ -2992,7 +2993,12 @@ export const clienteEs = {
     /* El vacío de la FIRMA del founder — se pinta cuando el lector diga
        que no hay ninguna. Hoy vive detrás de `LISTA_DISPONIBLE`. */
     vacioTitulo: 'Sin estadías agendadas',
+    /* 🔴 Sin mascota elegida NO se dice «sin estadías»: nadie preguntó. */
+    elegiMascotaTitulo: 'Elige de quién',
+    elegiMascotaDetalle: 'Toca una de tus mascotas para ver sus estadías.',
     vacioDetalle: 'Cuando reserves, tus estadías se verán acá.',
+    estadiasNoCargoTitulo: 'No pudimos cargar tus estadías',
+    estadiasNoCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
     titulo: 'Guardería',
     reservarDe: 'Reservar para {{nombre}}',
     /* 🔴 No dice «no tienes estadías»: dice que todavía no podemos mostrarlas.

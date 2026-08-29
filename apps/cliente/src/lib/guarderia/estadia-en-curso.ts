@@ -20,23 +20,31 @@
  * para que el cuidador no salga a buscar un animal que nadie compró, e
  * inservible para una familia que necesita ver *su* reserva sin pagar.
  *
- * ── 🔴 EL CAMPO QUE HOY ES IMPOSIBLE, Y NO POR PERMISOS ──────────────────
+ * ── ⏪ CORRECCIÓN 29-ago · **`guarderia_tramos` SÍ EXISTE** ───────────────
  *
- * **`tramoActivoId`.** `obtenerPuntoVivo(tramoId)` y `registrarPuntoVivo`
- * existen y funcionan. Pero medido contra el esquema:
+ * **Este archivo afirmaba que la tabla no existía y que el punto vivo era
+ * inalcanzable. Estaba VENCIDO:** A la creó hace varias tandas y **en el mismo
+ * acto curó una fuga que el hueco tapaba** — `obtener_punto_vivo` sólo pedía
+ * `auth.uid()`, así que **cualquier logueado con un `tramo_id` obtenía la
+ * ubicación en vivo de un vehículo.**
  *
- * · **`guarderia_tramos` NO EXISTE** — no hay tabla de tramos.
- * · `guarderia_tramo_punto.tramo_id` es un **uuid sin FK** (`Relationships: []`).
- * · `guarderia_estadias` **no tiene columna de tramo**.
+ * ### 🔴 Y LA FORMA IMPORTA MÁS QUE LA EXISTENCIA, porque de acá sale un error caro
  *
- * > ### **Nadie puede producir un `tramoId` y nadie puede obtenerlo.** El punto
- * > vivo es inalcanzable **por los dos lados**, y no por permisos: **por falta
- * > de la entidad que los une.**
+ * **El tramo es del VIAJE, no de la estadía.** La tabla es
+ * `(id, prestador_id, fecha, direccion, estado, …)` — **sin `estadia_id`** — y
+ * **cada estadía apunta a los suyos** con `tramo_recogida_id` /
+ * `tramo_devolucion_id`.
  *
- * *Es `L-318` («motor sin puerta») un piso más adentro: la pieza existe, es
- * alcanzable desde afuera y pasa sus pruebas — **lo que no tiene productor es
- * el identificador con el que abre**. Y no da error: devuelve `null`, que la
- * pantalla lee como «todavía no salió».*
+ * > **Un tramo por estadía haría que el MISMO vehículo emitiera N puntos
+ * > idénticos**, uno por animal a bordo. *No fallaría: multiplicaría la misma
+ * > verdad y la volvería N verdades que hay que mantener de acuerdo.*
+ *
+ * ⇒ **la superficie NO crea tramos ni los infiere: los LEE de la estadía.**
+ *
+ * *Nota de método: este archivo decía lo contrario con total seguridad porque
+ * su medición fue correcta el día que se hizo. **Un dato medido no es un dato
+ * vigente** (`L-166`) — y una afirmación estructural vencida es peor que una
+ * ausencia, porque el que la lee construye contra ella.*
  */
 
 import type { EstadoEstadia } from '@epetplace/api';
@@ -54,8 +62,10 @@ export type EstadiaEnCurso = {
   recogeDesde: string | null;
   recogeHasta: string | null;
   /**
-   * 🔴 **HOY SIEMPRE `null` — y no porque falte el dato, sino la ENTIDAD.**
-   * Ver la cabecera. Con él, el mapa del tramo se enciende solo.
+   * El tramo EN CURSO, leído de la estadía (`tramo_recogida_id` o
+   * `tramo_devolucion_id` según el estado). 🔴 **La pantalla no lo crea ni lo
+   * deduce** — ver la cabecera: el tramo es del viaje y lo comparten todos los
+   * animales que van a bordo.
    */
   tramoActivoId: string | null;
   /**

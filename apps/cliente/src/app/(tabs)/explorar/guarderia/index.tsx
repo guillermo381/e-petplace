@@ -167,16 +167,11 @@ export default function ElegirGuarderia() {
       if (!vigente) return;
       if (!r.ok) {
         /* ③ LA VÍSPERA SE APARTA ACÁ, antes que cualquier otra cosa.
-           🔴 **`String(...)` NO ES UN ATAJO — es un hecho medido.** El motor
-           LANZA `fecha_no_ofertable` (`20260830020000_s107a_resumen_filtro.sql:86`)
-           y **el wrapper no lo tiene en su `MENSAJES`**, así que el código no
-           está en la unión y hoy llega como `error_desconocido`.
-           *Comparar contra la unión daría rojo por una razón falsa: el código
-           existe, lo que falta es que esté tipado.* **Pedido a A**; el día que
-           entre, esta línea pierde el `String(...)` y nada más cambia. */
-        setResumen(
-          String(r.codigo) === 'fecha_no_ofertable' ? { fase: 'vispera' } : { fase: 'error' },
-        );
+           ☠️ **EL `String(...)` MURIÓ EL 29-AGO:** A tipó el código —y otros 16
+           que tampoco estaban—. *Declarar que el código existía y no estaba en
+           la unión es lo que lo hizo aparecer; un `catch` genérico lo habría
+           escondido para siempre.* */
+        setResumen(r.codigo === 'fecha_no_ofertable' ? { fase: 'vispera' } : { fase: 'error' });
         return;
       }
       setResumen({
