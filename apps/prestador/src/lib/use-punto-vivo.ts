@@ -20,13 +20,30 @@
  * acumulación**. El hook mantiene **un punto: el último**, lo emite, y lo
  * olvida.
  *
- * ── LA PRIVACIDAD SE CURA EN EL ESCRITOR, NO SÓLO EN EL LECTOR ───────────
- * A le pedí un lector que devuelva un punto y nada más (pedido D→A ②), y esa
- * mitad **sigue haciendo falta**. Pero un lector prudente sobre un escritor
+ * ── QUÉ ES UN TRAMO, medido y no supuesto (29-ago) ───────────────────────
+ * 🔴 **El tramo es del VIAJE, no de la estadía.** `guarderia_tramos` es
+ * `(prestador_id, fecha, direccion)` — **no tiene `estadia_id`** —, y cada
+ * estadía apunta a los suyos con `tramo_recogida_id` / `tramo_devolucion_id`.
+ *
+ * ⇒ **Un tramo lleva N animales y tiene UN punto** (`guarderia_tramo_punto`
+ * con `tramo_id` de PK). *Quien lea «tramo» como «el viaje de este animal» va
+ * a crear uno por estadía y a emitir el mismo vehículo N veces* — de ahí que
+ * esto quede escrito acá y no en un parte.
+ *
+ * ── LA PRIVACIDAD SE CURÓ EN LAS DOS PUNTAS ──────────────────────────────
+ * ✅ **El lector existe y está verificado** (`obtener_punto_vivo`, medido
+ * 29-ago): devuelve **un punto o `null`, jamás una lista**; sólo lo ve quien
+ * gestiona el prestador **o** quien tiene acceso a una mascota cuya estadía
+ * está en **ese** tramo **y** en `recogida_en_curso` / `retorno_en_curso`. Y
+ * un tramo inexistente devuelve `null` y no un error — *un error distinto para
+ * «no existe» y «no podés» es un oráculo de ids*.
+ *
+ * **Pero el lector solo no alcanzaba**: un lector prudente sobre un escritor
  * que guarda todo deja la traza escrita, esperando a que alguien la lea con
- * otra consulta. **Si el escritor no acumula, no hay traza que recortar.**
- * *Curar la puerta de entrada y no seguir hasta donde el dato se escribe deja
- * la mitad de una cura mirando a la otra* (la lección de `D-921`).
+ * otra consulta. **Si el escritor no acumula, no hay traza que recortar** — y
+ * el escritor es UPSERT sobre `tramo_id` (verificado). *Curar la puerta de
+ * entrada y no seguir hasta donde el dato se escribe deja la mitad de una cura
+ * mirando a la otra* (la lección de `D-921`).
  *
  * ── FOREGROUND, Y ESO ES UNA DECISIÓN DECLARADA ──────────────────────────
  * Corre mientras la pantalla del tramo está a la vista. El permiso «siempre»
@@ -55,13 +72,13 @@ export type EstadoPuntoVivo =
   | 'emitiendo';
 
 /**
- * El escritor. **Inyectado**: la tabla del tramo todavía no existe (pedido
- * D→A ②), así que sin él el hook capta y no publica — y lo dice con su estado
- * en vez de fingir que emitió.
+ * El escritor. **Inyectado** — hoy lo llena `cablearEmitirPunto()`, y sin él
+ * el hook capta y no publica, diciéndolo con su estado en vez de fingir.
  *
- * 🔴 Su contrato es «**pisá** el último punto», nunca «agregá uno»: si A lo
- * implementa como INSERT en una tabla de puntos, la traza vuelve a existir por
- * la puerta de atrás. **UPDATE de una fila por tramo.**
+ * ✅ Su contrato era «**pisá** el último punto, nunca agregues uno», y
+ * **entró así**: `registrar_punto_vivo` es `ON CONFLICT` sobre una tabla cuya
+ * PK es `tramo_id` (verificado 29-ago). *Con un INSERT la traza volvía a
+ * existir por la puerta de atrás.*
  */
 export type EmitirPunto = (tramoId: string, punto: PuntoVivo) => Promise<void>;
 
