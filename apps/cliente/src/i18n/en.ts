@@ -644,6 +644,8 @@ export const clienteEn = {
        retiró es la lista, no el plan —, así que borrar su voz sería tirar y
        reescribir. `proxGuarderia` queda por otra razón: guardería ya no es una
        promesa, es un camino construido esperando su flag. */
+    proxWearables: 'Wearables',
+    proxCertificaciones: 'Certifications',
     proxHotel: 'Pet hotel',
     proxGuarderia: 'Daycare',
     servicioGuarderia: 'Daycare',

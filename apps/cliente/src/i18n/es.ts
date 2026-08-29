@@ -772,6 +772,10 @@ export const clienteEs = {
        retiró es la lista, no el plan —, así que borrar su voz sería tirar y
        reescribir. `proxGuarderia` queda por otra razón: guardería ya no es una
        promesa, es un camino construido esperando su flag. */
+    /* S107-C · los dos que B dibujó. La voz es de la casa que los muestra;
+       el glifo dice qué son y el nombre dice para qué sirven. */
+    proxWearables: 'Wearables',
+    proxCertificaciones: 'Certificaciones',
     proxHotel: 'Hotel',
     proxGuarderia: 'Guardería',
     servicioGuarderia: 'Guardería',

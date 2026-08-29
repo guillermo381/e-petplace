@@ -86,7 +86,14 @@ export default function Explorar() {
     // informativo (cero CTA muerta — la card gana el tap con su flujo).
     onPress?: () => void;
   }> = [];
-  const proximamente: Array<{ nombre: string; icono: 'hotel' | 'guarderia' | 'seguros' | 'telemedicina' | 'prime' }> = [];
+  /* La unión es CERRADA a propósito: un slot libre dejaría entrar cualquier
+     glifo, y acá el ícono es lo único que distingue una promesa de otra.
+     🔴 `guarderia` y `telemedicina` salieron: la primera subió a implementados
+     y la segunda ya lo estaba. */
+  const proximamente: Array<{
+    nombre: string;
+    icono: 'hotel' | 'seguros' | 'wearables' | 'certificaciones' | 'prime';
+  }> = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
     if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={26} />, onPress: () => router.navigate('/hogar/paseos') });
     // S60-A1: el grooming dejó el coming-soon; S60-A4: la card aterriza
@@ -116,6 +123,13 @@ export default function Explorar() {
        tercero se leen como ese tercero.* */
     if (!servicios.hotel) proximamente.push({ nombre: t('explorar.proxHotel'), icono: 'hotel' });
     if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
+    /* ⭐ S107-C · LOS DOS NUEVOS, con los glifos que B publicó.
+       **No tienen bandera en `country_config`**: no son servicios que un país
+       encienda todavía, son hoja de ruta. *Inventarles un flag apagado sería
+       fingir un interruptor que nadie puede tocar.* Cuando existan, entran por
+       su bandera como sus hermanos. */
+    proximamente.push({ nombre: t('explorar.proxWearables'), icono: 'wearables' });
+    proximamente.push({ nombre: t('explorar.proxCertificaciones'), icono: 'certificaciones' });
     /* ⭐ S107-C · GUARDERÍA DESACOPLADA DEL FLAG DE HOTEL — y no es prolijidad.
        Hasta hoy las dos colgaban del MISMO `if (!servicios.hotel)`, así que
        🔴 **el día que hotel abriera, guardería no pasaba a activa: DESAPARECÍA**
