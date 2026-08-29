@@ -1,3 +1,9 @@
+> ☠️ **CUMPLIDO — A cerró el N+1 (`d627ccfb`).** Las cuatro columnas viajan en la proyección y la
+> pantalla ya no llama a `obtenerFranjasGuarderia`. **Se conserva como registro.**
+>
+> 🔴 **Y destapó algo que el pedido no preveía:** el server colapsa las ventanas con `min`/`max`
+> **sin mirar el día de semana**. Sigue en `S107-C-PEDIDO-A-A-VENTANA-DEL-DIA.md`.
+
 # S107-C → A · PEDIDO CHICO — **las dos ventanas en el mismo lector**
 
 ## LO QUE PASA HOY
