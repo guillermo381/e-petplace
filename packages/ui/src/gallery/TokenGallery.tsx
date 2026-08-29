@@ -6617,6 +6617,19 @@ const MUNDOS_REALES = [
   { g: 'guarderia', t: 'Guardería', d: undefined, c: 'cuidado' },
 ] as const
 
+/* EL MISMO ROSTER, pero con GUION BLANDO (`\u00AD`) en las dos palabras largas.
+   Es invisible salvo que el renglón corte ahí — y entonces se dibuja un guion.
+   **Es la única salida cross-platform**: RN no hifena español (Android tiene
+   `android_hyphenationFrequency`, iOS no expone nada equivalente), así que el
+   punto de corte tiene que venir EN LA CADENA. */
+const MUNDOS_CON_GUION = [
+  { g: 'paseo', t: 'Paseo', d: '3 activos', c: 'cuidado' },
+  { g: 'grooming', t: 'Grooming', d: '2 activos', c: 'cuidado' },
+  { g: 'training', t: 'Adiestra\u00ADmiento', d: '1 activo', c: 'cuidado' },
+  { g: 'veterinaria', t: 'Vete\u00ADri\u00ADna\u00ADria', d: '4 activos', c: 'identidad' },
+  { g: 'guarderia', t: 'Guardería', d: undefined, c: 'cuidado' },
+] as const
+
 function PiezasDelOficioS107() {
   const { theme } = useTheme()
 
@@ -6881,6 +6894,20 @@ function PiezasDelOficioS107() {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {MUNDOS_REALES.map((m) => (
             <View key={m.t} style={{ width: '33.333%', padding: spacing[1] }}>
+              <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={3} onPress={() => {}} />
+            </View>
+          ))}
+        </View>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          🔴 ARRIBA el corte lo elige el motor y cae a mitad de sílaba («Adiestrami / ento») — **un
+          corte así no es mejor que truncar**. ↓ ABAJO, LA MISMA PIEZA con GUION BLANDO en la cadena:
+          el corte cae donde el español corta y aparece el guion. **La pieza no cambia — cambia el
+          texto**, porque dónde parte una palabra es propiedad del IDIOMA, no del layout
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {MUNDOS_CON_GUION.map((m) => (
+            <View key={m.g} style={{ width: '33.333%', padding: spacing[1] }}>
               <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={3} onPress={() => {}} />
             </View>
           ))}
