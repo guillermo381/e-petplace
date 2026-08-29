@@ -60,7 +60,7 @@ import {
   FichaFranja,
   Hoja,
   HojaScroll,
-  FichaPaquete,
+  FichaDeOferta,
   Interruptor,
   SelectorOpcion,
   SliderPrecio,
@@ -510,15 +510,14 @@ export default function TallerGuarderia() {
           {TAMANOS.map((tam) => {
             const pq = paquetes[tam] ?? { existe: false, activo: false, iPrecio: 0 };
             return (
-              <FichaPaquete
+              <FichaDeOferta
                 key={tam}
-                clave={String(tam)}
                 tamano={tam}
                 registro="oficio"
-                rotuloTamano={t('tallerGuarderia.estadias', { n: tam })}
+                rotulo={t('tallerGuarderia.estadias', { n: tam })}
                 /* `null` = nunca encendido. El apagado CON precio lo manda
                    igual, y por eso se distingue del que nunca existió. */
-                precioPaquete={pq.existe || pq.activo ? Number(PASOS_PAQUETE[pq.iPrecio]) : null}
+                precio={pq.existe || pq.activo ? Number(PASOS_PAQUETE[pq.iPrecio]) : null}
                 precioDiaSuelto={Number(PASOS_PRECIO[iPrecio])}
                 /* La cuenta la hace la pieza; acá sólo se dice. **El número es
                    uno solo o no sirve**, y por eso no se recalcula. */
@@ -534,8 +533,8 @@ export default function TallerGuarderia() {
                           { porDia: e.porDia.toFixed(2), pct: e.deltaPct.toFixed(0) },
                         )
                 }
-                elegido={pq.activo}
-                onElegir={() =>
+                encendido={pq.activo}
+                onCambio={() =>
                   setPaquetes((m) => ({
                     ...m,
                     [tam]: { ...(m[tam] ?? { existe: false, iPrecio: 0 }), activo: !(m[tam]?.activo ?? false) },

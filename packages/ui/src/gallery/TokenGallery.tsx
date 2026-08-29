@@ -53,10 +53,11 @@ import { CalendarioCupo } from '../components/CalendarioCupo'
 import { ContadorClip } from '../components/ContadorClip'
 import { FichaFranja } from '../components/FichaFranja'
 import { FichaMensualidad } from '../components/FichaMensualidad'
-import { FichaPaquete, type EquivalenciaPaquete } from '../components/FichaPaquete'
+import { FichaDeOferta, type EquivalenciaPaquete } from '../components/FichaDeOferta'
 import { HiloDelDia } from '../components/HiloDelDia'
 import { MiniaturaClip } from '../components/MiniaturaClip'
 import { SelectorRoster } from '../components/SelectorRoster'
+import { SeccionPlegable } from '../components/SeccionPlegable'
 import { SemaforoSanitario } from '../components/SemaforoSanitario'
 import { TileVideoPropio } from '../components/TileVideoPropio'
 import { ModalDosAlturas, AsaModal } from '../components/ModalDosAlturas'
@@ -6619,8 +6620,13 @@ function PiezasDelOficioS107() {
   ])
   const [aceptadas, setAceptadas] = useState<string[]>([])
   const [inicioClip, setInicioClip] = useState<number | null>(null)
-  const [paquete, setPaquete] = useState<string | null>(null)
   const [pasoPrecio, setPasoPrecio] = useState(3)
+  const [diario, setDiario] = useState(true)
+  const [mensual, setMensual] = useState(false)
+  const [p5, setP5] = useState(false)
+  const [p15, setP15] = useState(false)
+  const [secHorarios, setSecHorarios] = useState(true)
+  const [secPrecios, setSecPrecios] = useState(false)
 
   /* La VOZ del espejo es del riel, no de la pieza (ver su cabecera). Acá es
      relleno de demostración: arma la frase con los números ya calculados. */
@@ -6840,75 +6846,122 @@ function PiezasDelOficioS107() {
         />
       </View>
 
-      {/* ⑦bis LA FICHA DE PAQUETE */}
+      {/* ⑦ter EL ACORDEÓN DE SECCIÓN */}
       <View style={{ gap: spacing[2] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          FichaPaquete · config del PRESTADOR: seleccionable, con su campo de precio en el slot ·
-          día suelto de referencia = $12,00
+          SeccionPlegable · el censo dio PIEZA NUEVA: la casa no tenía acordeón en packages/ui y hay
+          6 copias inline en apps · anatomía 19.7 (sin caja, chevron ⌄/⌃, target 44) · el `detalle` es
+          lo que hace que plegar no sea ESCONDER
+        </Text>
+        <SeccionPlegable titulo="Horarios" detalle="3 franjas" abierta={secHorarios} onCambiar={setSecHorarios}>
+          <FichaFranja
+            conSuperficie
+            recogida={{ rotulo: 'Recoge', desde: '7:00', hasta: '9:00' }}
+            devolucion={{ rotulo: 'Devuelve', desde: '16:30', hasta: '18:30' }}
+          />
+        </SeccionPlegable>
+        <SeccionPlegable titulo="Tus precios" detalle="desde $12" abierta={secPrecios} onCambiar={setSecPrecios}>
+          <FichaMensualidad conSuperficie dias="Lun–Vie" valor={180} porUnidad="el mes" />
+        </SeccionPlegable>
+      </View>
+
+      {/* ⑦bis LA FICHA DE OFERTA — Diario, Mensual y los paquetes, UNA pieza */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          FichaDeOferta · **la MISMA pieza para las tres ofertas**: pared blanca, etiqueta izquierda,
+          toggle derecha — y el toggle ENCIENDE Y EXPANDE en un solo gesto · día suelto = $12,00
         </Text>
 
-        <FichaPaquete
-          clave="p5"
+        <FichaDeOferta
+          tamano={null}
+          rotulo="Diario"
+          precio={12}
+          registro="oficio"
+          encendido={diario}
+          onCambio={setDiario}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del día"
+              pasos={['$8', '$10', '$12', '$14', '$16']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <FichaDeOferta
+          tamano={null}
+          rotulo="Mensual"
+          precio={180}
+          registro="oficio"
+          encendido={mensual}
+          onCambio={setMensual}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del mes"
+              pasos={['$150', '$165', '$180', '$195', '$210']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ los paquetes: la misma ficha, **más el espejo** (Diario y Mensual no lo pasan y no se
+          dibuja) · 🔴 el fondo encendido es VERDE SUAVE (capaBg.cuidado) en LAS DOS casas — el
+          magenta era color de marca y no marcaba nada acá
+        </Text>
+
+        <FichaDeOferta
           tamano={5}
-          rotuloTamano="5 estadías"
-          precioPaquete={50}
+          rotulo="5 estadías"
+          precio={50}
           precioDiaSuelto={12}
           vozEquivalente={vozEquivalente}
-          onElegir={setPaquete}
-          elegido={paquete === 'p5'}
           registro="oficio"
+          encendido={p5}
+          onCambio={setP5}
           campoPrecio={
             <SliderPrecio
               etiqueta="Precio del paquete"
               pasos={['$40', '$45', '$50', '$55', '$60']}
               indice={pasoPrecio}
               onCambio={setPasoPrecio}
-              registro="control"
+              registro="aa"
+              edicionNumerica
             />
           }
         />
 
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          🔴 EL PAR QUE DECIDE — el de arriba sale MÁS BARATO, el de abajo MÁS CARO que el día
-          suelto. **Los dos tienen que verse IGUAL de neutros**: si el caro se pinta de alarma, la app
-          está opinando sobre el precio de un negocio ajeno (firma de mesa: informa, jamás alarma)
+          🔴 EL PAR QUE DECIDE — arriba MÁS BARATO, abajo MÁS CARO que el día suelto. **Los dos
+          tienen que verse IGUAL de neutros**: si el caro se pinta de alarma, la app está opinando
+          sobre el precio de un negocio ajeno (firma: informa, jamás alarma)
         </Text>
 
-        <FichaPaquete
-          clave="p15"
+        <FichaDeOferta
           tamano={15}
-          rotuloTamano="15 estadías"
-          precioPaquete={200}
+          rotulo="15 estadías"
+          precio={200}
           precioDiaSuelto={12}
           vozEquivalente={vozEquivalente}
-          onElegir={setPaquete}
-          elegido={paquete === 'p15'}
           registro="oficio"
+          encendido={p15}
+          onCambio={setP15}
         />
 
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          ↓ perfil del LUGAR (familia): la MISMA pieza sin `onElegir` — no es tocable y se anuncia
-          como texto · y el tercer caso: SIN día suelto, el espejo dice el equivalente y OMITE la
+          ↓ perfil del LUGAR (familia): **sin toggle** — no es tocable y se anuncia como texto · y el
+          caso que ahora es COMÚN: sin día suelto, el espejo dice el equivalente y OMITE la
           comparación en vez de inventar un 0 %
         </Text>
 
-        <FichaPaquete
-          clave="p10"
-          tamano={10}
-          rotuloTamano="10 estadías"
-          precioPaquete={90}
-          precioDiaSuelto={12}
-          vozEquivalente={vozEquivalente}
-        />
-
-        <FichaPaquete
-          clave="p10sin"
-          tamano={10}
-          rotuloTamano="10 estadías"
-          precioPaquete={90}
-          precioDiaSuelto={null}
-          vozEquivalente={vozEquivalente}
-        />
+        <FichaDeOferta tamano={10} rotulo="10 estadías" precio={90} precioDiaSuelto={12} vozEquivalente={vozEquivalente} />
+        <FichaDeOferta tamano={10} rotulo="10 estadías" precio={90} vozEquivalente={vozEquivalente} />
       </View>
 
       {/* ⑧ LA ACEPTACIÓN DE DOCUMENTOS */}
