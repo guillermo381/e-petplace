@@ -4846,6 +4846,23 @@ function GaleriaInterna() {
               mascota={{ nombre: 'Zeus' }}
               onPress={() => {}}
             />
+            {/* ⭐ S107-B · GUARDERÍA — el quinto oficio, contra sus hermanas.
+                Qué decide: que su canto se lea IGUAL que paseo/grooming
+                (los tres son CUIDADO — los separa el glifo, no el canto) y
+                que **el día solo, sin hora, no deje la fila coja**.
+                🔴 Su `metadataMono` es UN DÍA, no una hora: la pieza nunca
+                exigió hora, y por eso guardería NO necesitó una prop. Las
+                DOS VENTANAS no van acá — son contenido del despliegue, no
+                metadata de fila (ver la cabecera de la pieza). */}
+            <FilaCita
+              direccion="abajo"
+              oficio="guarderia"
+              titulo="Luna"
+              subtitulo="Estadía del día"
+              metadataMono="29 ago"
+              mascota={{ nombre: 'Luna' }}
+              onPress={() => {}}
+            />
             <FilaCita
               cara={false}
               direccion="abajo"

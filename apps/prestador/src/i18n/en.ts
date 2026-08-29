@@ -2518,6 +2518,13 @@ export const prestadorEn = {
     oficio_grooming: 'Grooming',
     oficio_paseo: 'Walking',
     oficio_adiestramiento: 'Training',
+    /* ⭐ S107-B · nace porque `FilaCitaOficio` ganó guardería y esta clave se
+       COMPONE del oficio (`historico.oficio_${oficio}`) — sin ella el
+       typecheck de la app cae. **La palabra no se inventó: es la que este
+       mismo riel ya usa para el oficio** (`negocio.mundoGuarderia`), en la
+       forma exacta de sus cuatro hermanas.
+       ⚠️ **Igual es VOZ: va al lote que el founder lee aparte.** */
+    oficio_guarderia: 'Daycare',
     estado: '{{n}} in this period · {{desde}} to {{hasta}}',
     limpiar: 'Clear filters',
     sinCoincidenciasTitulo: 'Nothing with those filters',

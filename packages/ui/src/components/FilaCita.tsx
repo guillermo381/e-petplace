@@ -30,9 +30,38 @@
  * ancho, ni alfa — **EL CANTO DICE CATEGORÍA, EL GLIFO DICE SERVICIO**
  * (DIRECCION_ARTE Ley 10, S80-B16 — la ley del reparto): SALUD =
  * `capa.identidad` (veterinaria) · CUIDADO = `capa.cuidado` (paseo,
- * grooming y adiestramiento COMPARTEN teal A PROPÓSITO — los separa el
- * glifo, no el canto). Cero API que permita romper la ley; si la
- * taxonomía crece, cambia ACÁ y todas las pantallas heredan.
+ * grooming, adiestramiento **y guardería** COMPARTEN teal A PROPÓSITO —
+ * los separa el glifo, no el canto). Cero API que permita romper la ley;
+ * si la taxonomía crece, cambia ACÁ y todas las pantallas heredan.
+ *
+ * ── 🔴 S107-B · GUARDERÍA ENTRA, Y EL CENSO DIJO QUE **NO** HACE FALTA
+ *    UNA PROP ─────────────────────────────────────────────────────────
+ * C midió que su log se estaba dibujando con `Celda` y no se veía como sus
+ * hermanas. **La pregunta era: ¿es un hueco de DATOS (una prop) o el oficio
+ * no cabe en la pieza?** Medido contra el cuerpo, no supuesto:
+ *
+ * · **NO es un hueco de datos.** `metadataMono` es **string libre y
+ *   opcional** — *la pieza nunca exigió una hora*. Una estadía pasa su DÍA
+ *   ahí y ya: no hay campo que agregar.
+ * · **Lo único que faltaba era el oficio en el vocabulario cerrado**, que
+ *   es exactamente lo que esta cabecera manda hacer acá — *«si la taxonomía
+ *   crece, cambia ACÁ»*. Una palabra en la unión.
+ * · **Y el color no se tocó:** el canto resuelve `veterinaria ? identidad :
+ *   cuidado`, y guardería **es cuidado** (Ley 10), así que cae bien sola.
+ *
+ * ⚠️ **LO QUE NO ENTRA, Y NO ES UN DEFECTO DE LA PIEZA:** las DOS VENTANAS
+ * de la estadía («Recoge 7:00–9:00 · Devuelve 16:30–18:30»). `metadataMono`
+ * lo pinta `Celda` **a la derecha, en mono, minúsculas forzadas y `sm`** —
+ * el lugar de *«17:30 · 45 min»*, no de dos rangos. **Las ventanas no son
+ * metadata de fila: son contenido**, y tienen su pieza (`FichaFranja`) y su
+ * lugar (el despliegue, que esta fila ya soporta con `direccion="abajo"`).
+ * *Forzarlas al slot derecho sería meter una frase donde va un dato.*
+ *
+ * ⚠️ **TRAMPA LATENTE, declarada y NO curada acá:** el canto es un ternario
+ * de DOS ramas sobre una taxonomía de CUATRO categorías. Con cinco oficios
+ * sigue siendo correcto —los cinco son salud o cuidado—, pero **el día que
+ * entre uno de COMUNIDAD o CONSUMO se pintará cuidado en silencio**. No se
+ * reestructura en este pedido; se nombra con su disparo.
  *
  * `fin` y `acciones` son slots de DATOS/navegación (la voz es de la
  * pantalla, Ley 3) — jamás de craft.
@@ -49,7 +78,7 @@ import { spacing } from '../tokens/spacing'
 import { Celda } from './Celda'
 import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
 
-export type FilaCitaOficio = 'paseo' | 'grooming' | 'veterinaria' | 'adiestramiento'
+export type FilaCitaOficio = 'paseo' | 'grooming' | 'veterinaria' | 'adiestramiento' | 'guarderia'
 
 const ANCHO_CANTO = 3
 
@@ -131,7 +160,8 @@ export function FilaCita({
 }: FilaCitaProps) {
   const { theme } = useTheme()
   // Ley 10 (DIRECCION_ARTE v1.3): el canto dice CATEGORÍA — SALUD =
-  // identidad (vet) · CUIDADO = cuidado (paseo/grooming/adiestramiento).
+  // identidad (vet) · CUIDADO = cuidado (paseo/grooming/adiestramiento/
+  // guardería). Ver la trampa latente del ternario en la cabecera.
   const color = oficio === 'veterinaria' ? theme.capa.identidad : theme.capa.cuidado
 
   return (
