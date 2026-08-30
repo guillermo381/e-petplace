@@ -198,6 +198,79 @@ pudo medir no dice «está bien», dice que no midió.*
 
 ---
 
+## ⑦bis 🔴 LA COMPUERTA ESTABA EN DOS PUERTAS DE CUATRO — hallazgo de C, curado
+
+`20260831020000_s107a_gate_en_las_cuatro_puertas.sql` · reversa escrita antes ·
+cinturón **6/6**, residuo 0, ACL verificado en las cuatro.
+
+**Lo que C encontró:** `comprar_paquete_guarderia` **no llamaba al gate**.
+Reservar sí; comprar no ⇒ *le cobrábamos el paquete entero a una familia que no
+aceptó las condiciones, y la frenábamos después, con la plata ya tomada.*
+
+**Lo que agrandó el censo: son DOS puertas, no una.**
+`contratar_mensualidad_guarderia` tampoco lo tenía — y es peor, porque no toma
+un pago suelto sino un **mandato recurrente**: hoy no cobra, y el día que las
+tres claves de `app_config` enciendan el reloj, cobra sola todos los meses.
+
+**Daño medido: CERO** — `bonos(guarderia_dia)=0`, `guarderia_suscripciones=0`,
+`guarderia_aceptaciones=0`. Nadie compró todavía.
+
+**Un tercero, que no es de plata pero deja a la familia sin camino:** el gate
+devolvía el motivo en el vocabulario del ESTADO (`faltan`) y **cada puerta lo
+traducía por su cuenta**. La del día suelto traducía bien; la del paquete lo
+pasaba crudo ⇒ emitía `faltan`, un código que **ningún wrapper conoce**. La
+traducción se mudó a la FUENTE. *Dos puertas que traducen no pueden mantenerse
+iguales; una fuente que traduce, sí.*
+
+⚠️ **Y una decisión de forma, porque C pidió «el mismo `_guarderia_puede_reservar`»:**
+en la compra se llama a `evaluar_documentos_guarderia` —**la mitad de
+FAMILIA**— y no al gate entero, que además exige mascota. El paquete es **del
+hogar** y nace sin mascota: forzar una sería evaluar lo sanitario de un animal
+arbitrario, y **le impediría a una familia con dos perros comprar por el que sí
+está al día**. Lo sanitario se queda donde el sujeto existe: en la puerta del
+día.
+
+**Casi reporto un cuarto defecto y era falso:** mi grep de diagnóstico filtró
+por palabras y **se comió la línea que contestaba la pregunta** —
+`reservar_dia_guarderia` **sí** manejaba `requisitos_sanitarios`. Lo cazó leer
+el cuerpo entero. *Es `L-437` otra vez, del lado de quien la escribió.*
+
+---
+
+## ⑦ter 🔴 D-977 · LOS SEIS DOCUMENTOS NO EXISTEN — y es lo único que bloquea comprar
+
+**`guarderia_documentos` = 0 filas.** El perímetro está entero: tabla, `CHECK`
+de seis códigos, lector, evaluador, compuerta, las dos pantallas, y el aceptador
+con **todos** los campos que el criterio del abogado exige — tope de urgencia
+con su moneda, cadena de contactos, contacto alternativo, y el
+**`p_redes_autorizadas`** separado de §5 capa 4.
+
+> **No falta motor ni pantalla. Falta el TEXTO — y el texto es legal.**
+
+🔴 **Ninguna pista lo redacta**, ni como placeholder. Y **no hay borrador**:
+`CRITERIO_LEGAL_GUARDERIA.md` lo dice de sí mismo — *«la redacción es de la
+mesa; este documento dice el fondo, no la letra»*.
+
+**La cadena, en orden — y los tres primeros eslabones no son de A:**
+
+1. **`D-918` / `D-919`** — la mesa reescribe §3 y §6 de `LETRA_GUARDERIA.md`.
+   **Hoy la letra está FRENADA ENTERA**, y no por estar mal escrita: §3 es nula
+   de pleno derecho y §6 tiene riesgo penal.
+2. **Dos firmas del founder adentro de esa reescritura:** los **plazos exactos**
+   del no retiro (el criterio propone 15/60 y dice literal que los firma él) y
+   la **decisión de garantías** —póliza colectiva vs. seguro por prestador—,
+   que cambia lo que dice `contrato_custodia`.
+3. **La redacción de los seis**, cada uno con su `version`.
+4. **Recién ahí A los siembra:** un `INSERT` de seis filas. *Lo caro no es
+   cargarlos: es tenerlos.*
+
+⚠️ **La versión no es decorativa:** las aceptaciones se guardan por
+`(codigo, version)` ⇒ publicar una v2 **vuelve a pedirle la aceptación a toda
+familia que aceptó la v1**. Es lo que se quiere — y por eso el texto se carga
+firmado y no antes.
+
+---
+
 ## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`
