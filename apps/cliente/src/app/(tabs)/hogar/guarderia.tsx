@@ -25,7 +25,7 @@
  * sería la pantalla mintiendo con cara de dato.*
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -150,6 +150,50 @@ export default function LogGuarderia() {
   const [abierta, setAbierta] = useState<string | null>(null);
   const [paquetes, setPaquetes] = useState<PaqueteCompradoGuarderia[]>([]);
 
+  /**
+   * ⏪ **UN BOTÓN POR LUGAR, NO POR BONO.** El founder vio **CUATRO** botones
+   * «Reservar estadía de tu paquete» —tres con 5 de 5 y uno con 4 de 5— porque
+   * esta lista pintaba `paquetes.map(...)`, y el hogar tenía cuatro bonos
+   * vivos de la MISMA guardería. *La familia no compró cuatro cosas: compró
+   * saldo cuatro veces en el mismo lugar.*
+   *
+   * **Letra firmada:** *«se suman o se muestra el que corresponde — pero es UN
+   * botón»*. Se suman.
+   *
+   * 🔴 **El bono que viaja es el que VENCE PRIMERO**, no uno cualquiera: es la
+   * regla FIFO de la casa para bonos. *Consumir el más nuevo dejaría vencer el
+   * viejo con saldo adentro — plata de la familia perdida por un orden de
+   * lista.*
+   *
+   * ⚠️ **Con dos guarderías distintas siguen siendo dos botones, y es
+   * correcto:** son dos lugares, y el camino corto va «a la tira de días DE
+   * ESA guardería». *Un botón que sumara saldos de lugares distintos no sabría
+   * a cuál llevar.*
+   */
+  const paquetesPorLugar = useMemo(() => {
+    const porLugar = new Map<string, { prestadorId: string; bonoId: string; quedan: number; total: number; vence: string | null }>();
+    for (const p of paquetes) {
+      if (p.quedan <= 0) continue;
+      const y = porLugar.get(p.prestadorId);
+      if (y === undefined) {
+        porLugar.set(p.prestadorId, {
+          prestadorId: p.prestadorId, bonoId: p.bonoId,
+          quedan: p.quedan, total: p.total, vence: p.venceEl ?? null,
+        });
+        continue;
+      }
+      y.quedan += p.quedan;
+      y.total += p.total;
+      /* FIFO: gana el que vence antes. Sin fecha, se conserva el que estaba
+         —no se adelanta a uno cuyo vencimiento no conocemos—. */
+      const nuevoVence = p.venceEl ?? null;
+      if (nuevoVence !== null && (y.vence === null || nuevoVence < y.vence)) {
+        y.vence = nuevoVence; y.bonoId = p.bonoId;
+      }
+    }
+    return [...porLugar.values()];
+  }, [paquetes]);
+
   /* ⭐ EL SALDO DEL PAQUETE — A publicó su lector (`768f8d86`) y con él nace el
      botón que el founder pidió hace varias tandas. **Sólo los VIGENTES**: un
      bono agotado o vencido no es un paquete con cero, es uno que ya no está, y
@@ -263,7 +307,7 @@ export default function LogGuarderia() {
                 Los chips ya están arriba; poner el botón encima lo dejaría
                 **sin sujeto**, y tendría que preguntar la mascota de nuevo en
                 una Hoja propia. **Se declaró a la mesa y así quedó.** */}
-            {paquetes.map((pq) => (
+            {paquetesPorLugar.map((pq) => (
               <View key={pq.bonoId} style={{ gap: spacing[1] }}>
                 <Boton
                   variante="primario"

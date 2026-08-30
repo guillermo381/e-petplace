@@ -68,6 +68,7 @@ import {
   Boton,
   Celda,
   Encabezado,
+  PantallaConPie,
   Esqueleto,
   EsqueletoGrupo,
   FichaFranja,
@@ -100,13 +101,16 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { leerEspacioDelTaller, NOMBRE_ESPACIO } from '@/lib/capacidad-guarderia';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
 import { HORAS } from '@/components/seccion-horarios';
 
 /** La clave del upsert del motor. Estable a propósito: re-guardar EDITA. */
-const NOMBRE_ESPACIO = 'Principal';
+/* ⏪ La constante se mudó a `lib/capacidad-guarderia.ts`: **la clave del
+   upsert y la clave de la lectura tienen que ser LA MISMA**, y con dos copias
+   podían divergir sin que nada avisara. */
 
 const CAP_MIN = 1;
 const CAP_MAX = 60;
@@ -226,7 +230,14 @@ export default function TallerGuarderia() {
   const [guardando, setGuardando] = useState(false);
 
   // EL BORRADOR — sobrevive a los reintentos de carga.
-  const [capacidad, setCapacidad] = useState(8);
+  /* 🔴 **`null` = TODAVÍA NO SÉ**, y no 8. El default de 8 era el que hacía
+     que un sábado la pantalla mostrara un número que no había leído — y que
+     guardar se lo escribiera encima al prestador. */
+  const [capacidad, setCapacidad] = useState<number | null>(null);
+  /* 🔴 **UNA SEGUNDA SALA SE VE, no se ignora.** Este taller gestiona UNO
+     (upsert por nombre fijo). Si el negocio tiene más, guardar acá no las
+     toca — *y callarlo dejaría al prestador creyendo que configuró todo.* */
+  const [otrasSalas, setOtrasSalas] = useState(0);
   /* Los días que el lugar abre. Arranca en el default del motor y la carga lo
      pisa con lo guardado — **jamás al revés**: pintar L-V sobre un lugar que
      abre sábados y guardar encima sería borrarle el sábado sin decírselo. */
@@ -256,7 +267,18 @@ export default function TallerGuarderia() {
   const [especies, setEspecies] = useState<string[]>(['perro', 'gato']);
   /* Los horarios ya están guardados y no hacen falta para tocar precios;
      los precios sí son a lo que se viene. */
-  const [horariosAbierto, setHorariosAbierto] = useState(false);
+  /* ⏪ **ARRANCABA CERRADO Y ESE PLIEGUE ESCONDIÓ EL SELECTOR DE DÍAS.**
+     El founder abrió su config y no lo vio; estaba construido, mergeado y
+     publicado — **detrás de un acordeón plegado**.
+
+     🔴 Y la razón del pliegue está escrita dos líneas abajo: *«ya están
+     guardados y no hace falta verlos para tocar los precios»*. Era cierta
+     cuando la sección sólo tenía HORAS ya configuradas. **Dejó de serlo el día
+     que le metí adentro una decisión nueva y sin tomar** — y el pliegue
+     sobrevivió a su razón. *Un default que oculta algo que nunca se decidió no
+     es economía de scroll: es una función que no existe para quien no la
+     busca.* */
+  const [horariosAbierto, setHorariosAbierto] = useState(true);
   const [preciosAbierto, setPreciosAbierto] = useState(true);
   /** El modal de guardar: 'informa' (un botón) · 'pregunta' (dos). */
   const [aviso, setAviso] = useState<null | 'informa' | 'pregunta'>(null);
@@ -313,7 +335,25 @@ export default function TallerGuarderia() {
         setDevolucionHasta(aHoraCorta(d.hasta));
       }
       const hoyCupo = cupo.data[0];
-      if (hoyCupo !== undefined && hoyCupo.capacidad > 0) setCapacidad(hoyCupo.capacidad);
+      /* ⏪ **ACÁ ESTABA EL DEFECTO.** Decía `if (capacidad > 0) setCapacidad(...)`
+         sobre el cupo de HOY, y en un día que el lugar no abre el cupo es 0:
+         el guard no dejaba pasar el 0 y la pantalla se quedaba con su default.
+         Después fue un rodeo de 14 días; **ahora es el DATO CONFIGURADO**, por
+         la misma función que usa la portada — no pueden divergir. */
+      const esp = await leerEspacioDelTaller(prestadorId);
+      if (!vigente) return;
+      if (esp.ok && esp.espacio !== null) {
+        setCapacidad(esp.espacio.capacidadPorDia);
+        /* Los días también salen del espacio, que es donde el motor los guarda.
+           Las franjas siguen siendo el espejo del mismo conjunto (ver la
+           cabecera), pero el declarado manda. */
+        if (esp.espacio.diasOperacion.length > 0) setDias(esp.espacio.diasOperacion);
+        setOtrasSalas(Math.max(esp.cuantos - 1, 0));
+      } else if (esp.ok) {
+        /* Nunca configuró: 0 es la verdad, no un default. */
+        setCapacidad(0);
+      }
+      /* `esp.ok === false` deja `capacidad` en `null` — «no sé» apaga el botón. */
 
       const o = oferta.data;
       if (o !== null) {
@@ -402,7 +442,9 @@ export default function TallerGuarderia() {
     const espacio = await definirEspacioGuarderia({
       prestadorId: estado.prestadorId,
       nombre: NOMBRE_ESPACIO,
-      capacidadPorDia: capacidad,
+      /* 🔴 Nunca `null`: el CTA está apagado mientras no se leyó, así que acá
+         siempre hay un número que el prestador vio. */
+      capacidadPorDia: capacidad ?? 0,
       /* ⭐ **LOS DÍAS QUE EL LUGAR ABRE.** Antes no viajaba y el espacio se
          quedaba con el default del motor: el prestador podía elegir sábado en
          las ventanas y la familia seguía viendo `no_opera`. *Es el mismo
@@ -549,21 +591,76 @@ export default function TallerGuarderia() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('tallerGuarderia.titulo')} atras onAtras={() => router.back()} />
 
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[5], gap: spacing[6], paddingBottom: insets.bottom + spacing[8] }}
+      {/* ── EL PIE FIJO · `PantallaConPie`, la pieza de la casa ──────────────
+             ⏪ **«Guardar» vivía al final del scroll** y había que recorrer
+             toda la pantalla para llegar — *con los acordeones abiertos,
+             mucho más*. **Es el mismo defecto que ya se midió en el detalle
+             del cliente** (el CTA caía en y=1007 sobre una pantalla de 932):
+             *una acción que hay que buscar es una acción que no existe para
+             quien no la busca.*
+
+             🔴 **Se reusa, no se construye.** `PantallaConPie` es la pieza
+             que la casa ya usa para esto (despensa la monta en cuatro
+             pantallas) y **reserva sola el alto del contenido** — que era la
+             causa real del defecto, no el pie. `PieReserva` NO sirve acá: es
+             de reserva, lleva precio y su gramática es la de pagar.
+
+             ⚠️ **El pie va como FRAGMENTO, sin `View` propio** — aviso de B:
+             `PantallaConPie` lleva `pointerEvents="box-none"` para que el
+             gesto de scroll atraviese la banda, y `box-none` cubre UNA capa.
+             Un `View` acá reabriría la zona muerta justo donde va el pulgar. ── */}
+      <PantallaConPie
+        contentContainerStyle={{ padding: spacing[5], gap: spacing[6] }}
+        pie={
+          /* 🔴 `box-none` — **lo leí en el aviso de B y lo hice igual, y R54 lo
+             cazó**: sin esto el `View` captura todo su rectángulo y reabre la
+             zona muerta de gesto en el tercio inferior, justo donde el pulgar
+             sostiene el teléfono. *La regla existe porque la advertencia
+             escrita no alcanzó — ni siquiera conmigo, que la había leído.* */
+          <View
+            pointerEvents="box-none"
+            style={{ paddingHorizontal: spacing[5], paddingBottom: insets.bottom + spacing[3], paddingTop: spacing[3] }}
+          >
+            <Boton
+              etiqueta={t('tallerGuarderia.guardar')}
+              bloque
+              cargando={guardando}
+              /* Ley 23 — la puerta no ofrece lo que el acto va a estropear. Sin
+                 días no hay horario que guardar, y el apagado DICE por qué. */
+              /* Sin días no hay horario; **sin capacidad leída no hay nada que
+             guardar sin pisar** — ver `capacidad-guarderia.ts`. */
+          deshabilitado={dias.length === 0 || capacidad === null}
+              razonDeshabilitado={
+            capacidad === null ? t('tallerGuarderia.capacidadNoLeida') : t('tallerGuarderia.sinDias')
+          }
+              onPress={alGuardar}
+            />
+          </View>
+        }
       >
         {/* ── LA CAPACIDAD ── */}
         <View style={{ gap: spacing[3] }}>
           <Texto variante="titulo">{t('tallerGuarderia.capacidadTitulo')}</Texto>
           <Texto variante="apoyo">{t('tallerGuarderia.capacidadApoyo')}</Texto>
-          <StepperCantidad
-            etiqueta={t('tallerGuarderia.capacidadEtiqueta')}
-            valor={capacidad}
-            min={CAP_MIN}
-            max={CAP_MAX}
-            onCambio={setCapacidad}
-            registro="oficio"
-          />
+          {/* 🔴 **MIENTRAS NO SE LEYÓ, NO SE DIBUJA UN NÚMERO.** Un stepper
+              con un valor inventado invita a guardarlo — y guardar pisaba la
+              capacidad real del prestador. *Un esqueleto dice «todavía no sé»;
+              un 8 dice «tu capacidad es 8».* */}
+          {capacidad === null ? (
+            <Esqueleto alto={56} />
+          ) : (
+            <StepperCantidad
+              etiqueta={t('tallerGuarderia.capacidadEtiqueta')}
+              valor={capacidad}
+              min={CAP_MIN}
+              max={CAP_MAX}
+              onCambio={setCapacidad}
+              registro="oficio"
+            />
+          )}
+          {otrasSalas > 0 ? (
+            <Texto variante="apoyo">{t('tallerGuarderia.otrasSalas', { n: otrasSalas })}</Texto>
+          ) : null}
           {/* 🔴 El día sobrevendido se DECLARA y no se resuelve solo: el motor
               nunca cancela una reserva por bajar la capacidad. Si no se
               mostrara, el prestador bajaría el número y no se enteraría de que
@@ -608,8 +705,8 @@ export default function TallerGuarderia() {
           ) : null}
         </View>
 
-        {/* ── HORARIOS — cerrado al entrar: ya están guardados y no hace falta
-            verlos para tocar los precios, que es a lo que se viene. ── */}
+        {/* ── HORARIOS — **ABIERTO al entrar** desde que adentro vive el
+            selector de días, que es una decisión sin tomar. ── */}
         <SeccionPlegable
           titulo={t('tallerGuarderia.franjasTitulo')}
           /* El resumen dice los días: si no, la sección plegada muestra dos
@@ -872,17 +969,7 @@ export default function TallerGuarderia() {
           </View>
         </Tarjeta>
 
-        <Boton
-          etiqueta={t('tallerGuarderia.guardar')}
-          bloque
-          cargando={guardando}
-          /* Ley 23 — la puerta no ofrece lo que el acto va a estropear. Sin
-             días no hay horario que guardar, y el apagado DICE por qué. */
-          deshabilitado={dias.length === 0}
-          razonDeshabilitado={t('tallerGuarderia.sinDias')}
-          onPress={alGuardar}
-        />
-      </ScrollView>
+      </PantallaConPie>
 
       {/* ── LOS DOS AVISOS DE GUARDAR ──
           Uno pregunta y el otro informa, y la diferencia no es de tono: **se

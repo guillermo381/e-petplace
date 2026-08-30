@@ -63,6 +63,7 @@ import { obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { PieReserva } from '@/components/reserva-piezas';
+import { PreviewPrestador } from '@/components/preview-prestador';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
@@ -255,6 +256,28 @@ export default function LugarGuarderia() {
    * checkout compartido, que espera la verdad del servidor.
    * 🔴 **`confirmada` sólo cuando el motor confirma** (`LETRA_PAGO_CITAS` §3).
    */
+  /**
+   * 🔴 **EL REBOTE QUE TIENE CAMINO, EN TODAS LAS RAMAS.**
+   *
+   * ⏪ Esto vivía **en una sola de las cuatro** —el día suelto—. Las otras tres
+   * (agendar contra saldo, comprar paquete, su primera sesión) hacían
+   * `setRebote` y paraban: *«hay que aceptar los términos» y ni esa pantalla
+   * ni las anteriores tenían cómo hacerlo.* **La familia quedaba trabada sin
+   * camino** — y con la compuerta que A puso en la compra, ésa es justo la
+   * rama por la que se entra a comprar un paquete.
+   *
+   * *Nombrar el rebote fue la mitad de la cura; la otra mitad es que lleve a
+   * donde se resuelve.* Ahora es UNA función y las cuatro la usan: **una rama
+   * nueva que se olvide de rutear tendría que olvidarse de llamar a ésta.**
+   */
+  const rebotar = useCallback(
+    (codigo: string, mensaje: string) => {
+      setRebote(mensaje);
+      if (codigo === 'documentos_sin_aceptar') router.push('/guarderia/documentos');
+    },
+    [router],
+  );
+
   const reservar = useCallback(async () => {
     if (elegido === null || typeof mascotaId !== 'string' || reservando) return;
     setReservando(true);
@@ -267,7 +290,7 @@ export default function LugarGuarderia() {
     if (bonoId !== null) {
       const r = await reservarDiaDePaqueteGuarderia({ bonoId, fecha: elegido, mascotaId });
       setReservando(false);
-      if (!r.ok) { setRebote(r.mensaje); setIntento((n) => n + 1); return; }
+      if (!r.ok) { rebotar(r.codigo, r.mensaje); setIntento((n) => n + 1); return; }
       /* El comprobante de una reserva SIN cobro es el del paseo, censado: **un
          aviso que nombra el saldo restante + Go home**, y el rastro es la fila
          del hub. *No hay pantalla de confirmación, y está bien.* */
@@ -294,7 +317,7 @@ export default function LugarGuarderia() {
     if (esPaquete) {
       const compra = await comprarPaqueteGuarderia({ prestadorId: prestadorId as string, tamano });
       if (!compra.ok) {
-        setRebote(compra.mensaje);
+        rebotar(compra.codigo, compra.mensaje);
         setReservando(false);
         return;
       }
@@ -310,7 +333,7 @@ export default function LugarGuarderia() {
       if (!primera.ok) {
         /* 🔴 EL BONO YA EXISTE. *Decir sólo «no se pudo» sobre una compra que SÍ
            ocurrió dejaría a la familia creyendo que perdió la plata.* */
-        setRebote(t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
+        rebotar(primera.codigo, t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
         return;
       }
       mostrar({
@@ -328,21 +351,17 @@ export default function LugarGuarderia() {
       /* El rebote llega con SU voz desde el wrapper —«ese día ya no tiene
          lugar», «faltan requisitos»— y se muestra tal cual. Y se recarga: si
          el cupo cambió mientras miraba, el calendario tiene que decirlo. */
-      setRebote(r.mensaje);
+      /* El rebote llega con SU voz desde el wrapper y se muestra tal cual; se
+         recarga por si el cupo cambió mientras miraba.
+         ⏪ **Acá vivía el único ruteo de `documentos_sin_aceptar` de las
+         cuatro ramas.** Ahora lo hace `rebotar`, que las cuatro usan.
+         🔴 Y su criterio sigue siendo el mismo: **los otros rebotes NO
+         navegan a propósito** — `sin_cupo` y `requisitos_sanitarios` se
+         arreglan acá o en el carnet, y `documentos_no_disponibles` **no se
+         arregla del lado de la familia**: mandarla a una pantalla que va a
+         decirle lo mismo sería pasearla. */
+      rebotar(r.codigo, r.mensaje);
       setIntento((n) => n + 1);
-      /* ⭐ S107-C · **EL ÚNICO REBOTE QUE TIENE ADÓNDE IR.**
-         `documentos_sin_aceptar` no es un error: es **el paso anterior**, y
-         toda familia nueva lo recibe. *Nombrarlo fue la mitad de la cura —A lo
-         tipó y dejó de salir como «error inesperado»—; la otra mitad es que
-         lleve a donde se resuelve.*
-         🔴 **Los otros rebotes NO navegan a propósito:** `sin_cupo` y
-         `requisitos_sanitarios` se arreglan en esta misma pantalla o en el
-         carnet, y `documentos_no_disponibles` **no se arregla del lado de la
-         familia** — mandarla a una pantalla que va a decirle lo mismo sería
-         pasearla. */
-      if (r.codigo === 'documentos_sin_aceptar') {
-        router.push('/guarderia/documentos');
-      }
       return;
     }
     router.push({
@@ -355,7 +374,7 @@ export default function LugarGuarderia() {
         fecha: elegido,
       },
     });
-  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t, bonoId]);
+  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t, bonoId, rebotar]);
 
   if (estado.fase === 'cargando') {
     return (
@@ -421,6 +440,46 @@ export default function LugarGuarderia() {
               }
               conSuperficie
             />
+          </View>
+        ) : null}
+
+        {/* ── LA VITRINA DEL PRESTADOR ───────────────────────────────────
+               ☠️ **SE HABÍA IDO CON EL CALENDARIO.** Al borrar el bloque del
+               calendario me llevé puesto el de la vitrina y el del mapa, y la
+               pantalla quedó siendo *un esqueleto reciclado*: ventanas, día y
+               semáforo, sin decir de quién es el lugar.
+
+               🔴 **Es `PreviewPrestador`, la misma pieza de la pantalla 3** —
+               portada · logo · nombre · línea de confianza honesta (reseñas >
+               citas > nada, jamás estrellas vacías) · precio. **Sin `onAbrir`:
+               acá ya estás adentro; la vitrina informa, no navega.** ── */}
+        {perfil !== null ? (
+          <PreviewPrestador
+            prestadorId={prestadorId as string}
+            nombre={typeof prestadorNombre === 'string' ? prestadorNombre : t("lugarGuarderia.titulo")}
+            oficio="guarderia"
+            perfil={perfil}
+            /* 🔴 **SIN PRECIO EN LA VITRINA — el precio vive en el PIE.**
+               `precio` es obligatorio en la pieza; la cadena vacía es su
+               «sin número» (jamás un `$0`, que se leería como gratis).
+               *Medido: con el precio acá salía DOS VECES en la misma pantalla.
+               En la pantalla 3 la vitrina lo lleva porque ahí se compara; acá
+               ya se eligió y lo que importa es lo que se va a pagar.* */
+            precio=""
+          />
+        ) : null}
+
+        {/* ── EL MAPA DE LA ZONA ─────────────────────────────────────────
+               **RANGO DEL SECTOR, jamás el punto exacto** — la pieza lo
+               declara y el consumidor no lo re-decide. Se alimenta de
+               `obtenerPerfilesPublicos`, que lee la vista pública y nunca la
+               tabla. ── */}
+        {perfil !== null && perfil.zona_lat !== null && perfil.zona_lon !== null &&
+         perfil.zona_radio_m !== null ? (
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="titulo">{t('lugarGuarderia.zonaTitulo')}</Texto>
+            <MapaZona lat={perfil.zona_lat} lon={perfil.zona_lon} radioM={perfil.zona_radio_m} />
+            <Texto variante="apoyo">{t('lugarGuarderia.zonaDetalle')}</Texto>
           </View>
         ) : null}
 

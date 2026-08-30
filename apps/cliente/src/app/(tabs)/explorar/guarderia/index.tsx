@@ -437,7 +437,14 @@ export default function ElegirGuarderia() {
     setAgendando(true);
     const r = await reservarDiaDePaqueteGuarderia({ bonoId, fecha, mascotaId });
     setAgendando(false);
-    if (!r.ok) { setReboteSaldo(r.mensaje); return; }
+    if (!r.ok) {
+      setReboteSaldo(r.mensaje);
+      /* 🔴 MISMA CURA QUE EN P4: nombrar el rebote es la mitad; la otra es que
+         lleve a donde se resuelve. Sin esto el camino corto quedaba trabado en
+         «hay que aceptar los términos» sin camino. */
+      if (r.codigo === 'documentos_sin_aceptar') router.push('/guarderia/documentos');
+      return;
+    }
     /* El comprobante de una reserva SIN cobro es el del paseo, censado: un
        aviso que nombra el saldo restante + Go home. El rastro es la fila del
        hub, marcada «Con tu paquete». */
