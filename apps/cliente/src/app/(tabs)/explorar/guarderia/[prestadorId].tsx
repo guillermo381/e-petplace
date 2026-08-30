@@ -54,6 +54,7 @@ import {
   obtenerFranjasGuarderia,
   comprarPaqueteGuarderia,
   reservarDiaDePaqueteGuarderia,
+  contratarMensualidadGuarderia,
   reservarDiaGuarderia,
   type FranjaGuarderia,
   type RequisitosGuarderia,
@@ -64,6 +65,7 @@ import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { PieReserva } from '@/components/reserva-piezas';
 import { PreviewPrestador } from '@/components/preview-prestador';
+import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
@@ -134,16 +136,32 @@ export default function LugarGuarderia() {
   const bonoId = typeof params.bonoId === 'string' && params.bonoId.length > 0 ? params.bonoId : null;
   const esPaquete = params.modalidad === 'paquete' && bonoId === null;
   /**
-   * 🔴 **LA MENSUALIDAD LLEGA HASTA ACÁ Y NO MÁS, Y LA PANTALLA LO DICE.**
-   * El motor está entero (`contratar_mensualidad_guarderia` existe y el filtro
-   * acepta `'mensual'`) pero **no hay wrapper de contratación**
-   * (`S107-C-PEDIDO-A-A-WRAPPER-MENSUALIDAD.md`).
+   * ⭐ **LA MENSUALIDAD, VIVA** — A publicó `contratarMensualidadGuarderia`.
+   * ☠️ Muere la rama inerte que decía «todavía no podemos cobrar».
    *
-   * *No se monta un cobro contra un motor que esta app no puede llamar*: el
-   * botón queda apagado **diciendo por qué** (Ley 23), en vez de simular un
-   * acto que no ocurre. **Esta rama muere entera cuando el wrapper llegue.**
+   * 🔴 **Y lo que se firma NO es un cobro: es el MANDATO.** El wrapper
+   * devuelve `cobrada: false` **siempre** — el cobro lo hace el reloj cuando
+   * el founder encienda sus claves. *La pantalla lo DICE: presentar como
+   * cobrado algo que no se cobró es la clase de mentira que esta casa
+   * persigue.*
    */
   const esMensual = params.modalidad === 'mensual' && bonoId === null;
+
+  /**
+   * ⭐ **`useMedioDePago` + `SeccionMedioDePago`, LA PIEZA DE LA CASA.**
+   * *Estaba por construir un selector de tarjetas y el censo lo frenó:* la
+   * casa ya tiene el estado, la sección, la hoja y el desempate de gemelas —
+   * y **`R57` existe para que las superficies de pago monten la MISMA**.
+   * *Dos copias no divergen el día que se escriben: divergen el día que
+   * alguien afina una.*
+   *
+   * ⚠️ Se monta **sólo en la rama mensual**: es la única de las cuatro que
+   * necesita un medio. Día suelto y paquete van por el checkout compartido, y
+   * agendar contra saldo no cobra.
+   */
+  /* `activo` = sólo en mensual: **las otras tres no piden tarjetas y no
+     tienen por qué pagar esa lectura.** El hook ya trae esa puerta. */
+  const medio = useMedioDePago(esMensual);
   const tamano = Number(params.tamano ?? '');
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
@@ -345,6 +363,30 @@ export default function LugarGuarderia() {
       return;
     }
 
+    /* ═══ LA MENSUALIDAD — SE FIRMA UN MANDATO, NO SE COBRA ═══════════════
+       🔴 `cobrada` viene `false` SIEMPRE: esto autoriza el cobro recurrente;
+       el cobro lo hace el reloj. *La voz del éxito lo dice con todas las
+       letras — un «listo, pagaste» sobre algo que no se cobró es una mentira
+       que la familia descubre en el resumen de su tarjeta.* */
+    if (esMensual) {
+      if (medio.idTarjeta === null) {
+        setReservando(false);
+        setRebote(t('lugarGuarderia.faltaTarjeta'));
+        return;
+      }
+      const r = await contratarMensualidadGuarderia({
+        prestadorId: prestadorId as string,
+        tarjetaId: medio.idTarjeta,
+        mascotaId,
+      });
+      setReservando(false);
+      if (!r.ok) { rebotar(r.codigo, r.mensaje); return; }
+      mostrar({ texto: t('lugarGuarderia.mensualFirmada'), variante: 'exito' });
+      if (router.canDismiss()) router.dismissAll();
+      router.navigate('/hogar/guarderia');
+      return;
+    }
+
     const r = await reservarDiaGuarderia({ prestadorId: prestadorId as string, mascotaId, fecha: elegido });
     setReservando(false);
     if (!r.ok) {
@@ -483,6 +525,20 @@ export default function LugarGuarderia() {
           </View>
         ) : null}
 
+        {/* ── CÓMO SE COBRA · **sólo en mensual** ────────────────────────
+               La pieza de la casa (`R57`). Las otras tres modalidades no
+               eligen medio acá: día y paquete van por el checkout compartido,
+               y agendar contra saldo no cobra. ── */}
+        {esMensual ? (
+          <View style={{ gap: spacing[2] }}>
+            <SeccionMedioDePago medio={medio} />
+            {/* 🔴 LO QUE SE FIRMA, DICHO ANTES DE FIRMARLO. *Una recurrencia
+                que no se declara antes de contratar es la clase de cosa que se
+                descubre en el segundo cobro.* */}
+            <Texto variante="apoyo">{t('lugarGuarderia.mensualMandato')}</Texto>
+          </View>
+        ) : null}
+
         {/* ── EL DÍA · SE AFIRMA, NO SE PREGUNTA ─────────────────────────
                ☠️ **ACÁ VIVÍA UN CALENDARIO Y SE BORRÓ ENTERO** — instrucción
                directa del founder (30-ago): *«El calendario de la pantalla del
@@ -610,14 +666,14 @@ export default function LugarGuarderia() {
                   ? t('lugarGuarderia.contratarMensualDesde', { dia: fechaCorta(fechaDeParams) })
                   : t('lugarGuarderia.reservarDia', { dia: fechaCorta(fechaDeParams) })
         }
-        habilitado={puedeReservar && !esMensual}
+        habilitado={puedeReservar}
         insetBottom={insets.bottom}
         /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una
            palabra. *Una pared muda le hace creer a la familia que el producto
            está roto, cuando lo único que falta es que toque un día.* */
         razonDeshabilitado={
-          esMensual
-            ? t('lugarGuarderia.mensualNoCobrable')
+          esMensual && medio.idTarjeta === null
+            ? t('lugarGuarderia.faltaTarjeta')
             : elegido === null
               ? t('lugarGuarderia.faltaDia')
               : t('lugarGuarderia.faltaRequisitos')
