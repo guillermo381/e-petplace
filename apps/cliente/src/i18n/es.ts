@@ -3085,6 +3085,7 @@ export const clienteEs = {
     elegiMascotaTitulo: 'Elige de quién',
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
+    conTuPaquete: 'Con tu paquete',
     verSuDia: 'Ver su día',
     reservarDePaquete: 'Reservar estadía de tu paquete',
     /* El singular tiene key propia: la pluralización no es interpolación. */

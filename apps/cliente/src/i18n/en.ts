@@ -2285,6 +2285,7 @@ export const clienteEn = {
     vacioTitulo: 'No stays booked',
     elegiMascotaTitulo: 'Choose who',
     reservar: 'Book a stay',
+    conTuPaquete: 'With your pack',
     verSuDia: 'See their day',
     reservarDePaquete: 'Book a stay from your pack',
     saldo: '{{n}} of {{total}} available',
