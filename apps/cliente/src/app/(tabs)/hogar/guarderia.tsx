@@ -239,8 +239,13 @@ export default function LogGuarderia() {
                 ② **PAQUETE CON SALDO** — botón «Reservar estadía de tu
                 paquete» + «7 de 10 disponibles», directo al selector de fecha
                 de ESA guardería (sin elegir lugar ni pagar: las dos ya están
-                hechas). **No existe lector de saldo de paquetes de guardería**
-                — y tampoco existe la compra que lo crearía.
+                hechas).
+                ⏪ **ESTABA VENCIDO Y DECÍA LO CONTRARIO DE LO QUE PASA:**
+                *«no existe lector de saldo… y tampoco existe la compra que lo
+                crearía»*. **Los dos existen** —`obtenerMisPaquetesGuarderia`
+                y `comprarPaqueteGuarderia`— y esta pantalla ya los monta,
+                acá abajo. *Un comentario que sobrevive a su propia carencia
+                manda a la próxima pista a construir algo que ya está.*
                 ═════════════════════════════════════════════════════════════ */}
 
             {/* LOS CHIPS DE LA LISTA — la estructura de las cuatro hermanas.
