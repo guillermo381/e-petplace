@@ -1,67 +1,78 @@
 /**
- * LA CAPACIDAD DECLARADA DE LA GUARDERÍA — **una sola lectura para las dos
- * superficies** (S107-C, 30-ago).
+ * EL ESPACIO DE LA GUARDERÍA — **una sola lectura para las dos superficies**
+ * (S107-C, 30-ago).
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * 🔴 EL DEFECTO QUE ESTO CURA, Y ERA EL PEOR DE LOS DOS POSIBLES
+ * 🔴 EL DEFECTO QUE ESTO CURÓ, Y ERA EL PEOR DE LOS DOS POSIBLES
  * ═══════════════════════════════════════════════════════════════════════════
  * La portada decía **«0 animales por día»** y el taller **8**. No era que una
- * leyera otra fuente: **leían LA MISMA y la interpretaban distinto.**
+ * leyera otra fuente: **leían LA MISMA y la interpretaban distinto** —
+ * `obtenerCupoGuarderia(hoy, hoy)`, que devuelve la capacidad **DE ESE DÍA** y
+ * en un día que el lugar no abre vale `0`. Medido un **domingo**, con Aurora
+ * abriendo L-V: la portada mostró ese 0 rotulado como la capacidad del
+ * negocio, y el taller mostró **su default**, un número que no había leído.
  *
- * ```
- * portada: cupo.data[0]?.capacidad ?? 0          → 0
- * taller:  if (capacidad > 0) setCapacidad(...)  → se queda en useState(8)
- * ```
+ * ☠️ **Y adentro había una PÉRDIDA DE DATOS:** un prestador con capacidad 12
+ * que abriera su taller un sábado habría visto 8 y al guardar **se la habría
+ * bajado a 8 sin un solo error.** Dos de cada siete días.
  *
- * `obtenerCupoGuarderia(hoy, hoy)` devuelve la capacidad **DE ESE DÍA**, y
- * medido el 30-ago —**domingo**, con Aurora abriendo L-V— ese día vale `0`.
- * ⇒ la portada mostraba el 0 fiel a hoy **rotulado como si fuera la capacidad
- * del negocio**, y el taller mostraba **su default**, un número que no leyó.
- * *El taller acertaba por casualidad: la capacidad real resulta ser 8.*
+ * ── ⏪ LA CURA DE PANTALLA MURIÓ: AHORA HAY DATO ─────────────────────────
+ * Acá vivió un rodeo —*leer el cupo de 14 días y tomar el máximo*— porque
+ * `capacidad_por_dia` **no tenía lector**. A publicó `obtenerEspaciosGuarderia`
+ * y el rodeo se retira entero (Ley 37).
  *
- * ── ☠️ Y ADENTRO HABÍA UNA PÉRDIDA DE DATOS ──────────────────────────────
- * `guardar()` manda `capacidadPorDia: capacidad`. Un prestador con capacidad
- * **12** que abriera su taller **un sábado** habría visto 8 —el default— y al
- * guardar **se la habría bajado a 8 sin un solo error**. *Dos de cada siete
- * días, en la pantalla donde se configura el negocio.*
+ * **Y hacía falta retirarlo, no sólo mejorarlo:** el máximo sobre 14 días
+ * coincide con la capacidad configurada **sólo si el patrón cubre esos días**
+ * — con una excepción, o con una sala que abre sólo fines de semana, deja de
+ * coincidir. *Era correcto mientras no había dato, y falso apenas lo hay.*
  *
- * ── POR QUÉ ES UNA VENTANA Y NO UN DÍA ───────────────────────────────────
- * La capacidad declarada vive en `guarderia_espacios.capacidad_por_dia` y es
- * **una sola para todos los días**; las excepciones abren o cierran fechas,
- * **no cambian el número**. ⇒ el **máximo** sobre una ventana de dos semanas
- * ES la capacidad declarada, y una ventana de 14 días contiene un día
- * operativo salvo que el lugar no abra nunca.
+ * ── 🔴 LA LECCIÓN QUE DEJÓ, Y ES LA QUE GOBIERNA ESTE ARCHIVO (`L-439`) ───
+ * > **Una limitación declarada en el código protege a quien toca el archivo,
+ * > no a quien usa la pantalla.**
  *
- * ⚠️ **ES UN RODEO, NO EL MODELO.** Lo correcto es un lector de espacios, que
- * **no existe** (`definirEspacioGuarderia` es sólo escritura) ⇒
- * `S107-C-PEDIDO-A-A-LECTOR-DE-ESPACIOS.md`. *Ya declaré este rodeo una vez en
- * la cabecera del taller y lo dejé derivando de HOY; el rodeo estaba
- * declarado y aun así rompió — declarar un atajo no lo hace seguro.*
+ * Yo había declarado el rodeo en la cabecera del taller —*«se declara para que
+ * nadie lea esto como el modelo final»*— **y rompió igual**, porque el
+ * prestador no lee cabeceras. Su corolario, de A: **un atajo que puede
+ * producir un valor equivocado no se declara — se hace inexpresable.**
  *
- * 🔴 **`null` es «no sé», y NO «cero».** Quien lo consuma tiene que tratarlos
- * distinto: *un cero se escribe encima de la configuración; un «no sé» frena.*
+ * ── POR QUÉ DEVUELVE UN ESPACIO Y NO UN NÚMERO ───────────────────────────
+ * **Un negocio no tiene UNA capacidad**: tiene espacios, cada uno con su
+ * número y sus días. Colapsarlos acá me obligaría a elegir cuál —¿la suma? ¿la
+ * del lunes?— *y sería un número bien calculado contestando una pregunta que
+ * no es la suya.*
+ *
+ * ⚠️ **HOY EL TALLER GESTIONA EXACTAMENTE UNO** (upsert por nombre fijo). Por
+ * eso esta función devuelve **ese** espacio y, aparte, **cuántos hay** — para
+ * que una segunda sala **se vea** en vez de ser ignorada en silencio. *Las dos
+ * superficies leen el MISMO objeto: no pueden volver a divergir.*
+ *
+ * 🔴 **`null` es «no sé», y NO «cero».** *Un cero se escribe encima de la
+ * configuración; un «no sé» frena.*
  */
 
-import { obtenerCupoGuarderia } from '@epetplace/api';
+import { obtenerEspaciosGuarderia, type EspacioGuarderia } from '@epetplace/api';
 
-/** Fecha LOCAL. Jamás `toISOString()`: en Guayaquil, tras las 19:00, adelanta. */
-function iso(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+/** El nombre con el que el taller upserta su espacio. Su clave, no su voz. */
+export const NOMBRE_ESPACIO = 'Principal';
 
-export type CapacidadDeclarada =
-  /** Se pudo leer. `0` sólo si el lugar no abre ningún día de la ventana. */
-  | { ok: true; capacidad: number }
+export type LecturaEspacio =
+  | {
+      ok: true;
+      /** El que el taller gestiona. `null` = todavía no configuró ninguno. */
+      espacio: EspacioGuarderia | null;
+      /** Cuántos espacios activos tiene el negocio. >1 ⇒ el taller queda corto. */
+      cuantos: number;
+    }
   /** No se pudo preguntar. **No es cero.** */
   | { ok: false };
 
-export async function leerCapacidadDeclarada(prestadorId: string): Promise<CapacidadDeclarada> {
-  const hoy = new Date();
-  const fin = new Date();
-  fin.setDate(fin.getDate() + 13);
-  const r = await obtenerCupoGuarderia(prestadorId, iso(hoy), iso(fin));
+export async function leerEspacioDelTaller(prestadorId: string): Promise<LecturaEspacio> {
+  const r = await obtenerEspaciosGuarderia(prestadorId);
   if (!r.ok) return { ok: false };
-  /* El máximo, no el primero: los días cerrados valen 0 y arrastrarían el
-     número a cero según qué día de la semana sea hoy. */
-  return { ok: true, capacidad: r.data.reduce((m, d) => Math.max(m, d.capacidad), 0) };
+  const activos = r.data.filter((e) => e.activo);
+  return {
+    ok: true,
+    espacio: activos.find((e) => e.nombre === NOMBRE_ESPACIO) ?? activos[0] ?? null,
+    cuantos: activos.length,
+  };
 }

@@ -101,14 +101,16 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { leerCapacidadDeclarada } from '@/lib/capacidad-guarderia';
+import { leerEspacioDelTaller, NOMBRE_ESPACIO } from '@/lib/capacidad-guarderia';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
 import { HORAS } from '@/components/seccion-horarios';
 
 /** La clave del upsert del motor. Estable a propósito: re-guardar EDITA. */
-const NOMBRE_ESPACIO = 'Principal';
+/* ⏪ La constante se mudó a `lib/capacidad-guarderia.ts`: **la clave del
+   upsert y la clave de la lectura tienen que ser LA MISMA**, y con dos copias
+   podían divergir sin que nada avisara. */
 
 const CAP_MIN = 1;
 const CAP_MAX = 60;
@@ -232,6 +234,10 @@ export default function TallerGuarderia() {
      que un sábado la pantalla mostrara un número que no había leído — y que
      guardar se lo escribiera encima al prestador. */
   const [capacidad, setCapacidad] = useState<number | null>(null);
+  /* 🔴 **UNA SEGUNDA SALA SE VE, no se ignora.** Este taller gestiona UNO
+     (upsert por nombre fijo). Si el negocio tiene más, guardar acá no las
+     toca — *y callarlo dejaría al prestador creyendo que configuró todo.* */
+  const [otrasSalas, setOtrasSalas] = useState(0);
   /* Los días que el lugar abre. Arranca en el default del motor y la carga lo
      pisa con lo guardado — **jamás al revés**: pintar L-V sobre un lugar que
      abre sábados y guardar encima sería borrarle el sábado sin decírselo. */
@@ -330,14 +336,24 @@ export default function TallerGuarderia() {
       }
       const hoyCupo = cupo.data[0];
       /* ⏪ **ACÁ ESTABA EL DEFECTO.** Decía `if (capacidad > 0) setCapacidad(...)`
-         sobre el cupo de HOY: en un día que el lugar no abre el cupo es 0, el
-         guard no dejaba pasar el 0, y la pantalla se quedaba con su default.
-         Ahora lee la CAPACIDAD DECLARADA —máximo sobre dos semanas— por la
-         misma función que usa la portada, así que **no pueden divergir**. */
-      const cap = await leerCapacidadDeclarada(prestadorId);
+         sobre el cupo de HOY, y en un día que el lugar no abre el cupo es 0:
+         el guard no dejaba pasar el 0 y la pantalla se quedaba con su default.
+         Después fue un rodeo de 14 días; **ahora es el DATO CONFIGURADO**, por
+         la misma función que usa la portada — no pueden divergir. */
+      const esp = await leerEspacioDelTaller(prestadorId);
       if (!vigente) return;
-      if (cap.ok && cap.capacidad > 0) setCapacidad(cap.capacidad);
-      else if (cap.ok) setCapacidad(0);
+      if (esp.ok && esp.espacio !== null) {
+        setCapacidad(esp.espacio.capacidadPorDia);
+        /* Los días también salen del espacio, que es donde el motor los guarda.
+           Las franjas siguen siendo el espejo del mismo conjunto (ver la
+           cabecera), pero el declarado manda. */
+        if (esp.espacio.diasOperacion.length > 0) setDias(esp.espacio.diasOperacion);
+        setOtrasSalas(Math.max(esp.cuantos - 1, 0));
+      } else if (esp.ok) {
+        /* Nunca configuró: 0 es la verdad, no un default. */
+        setCapacidad(0);
+      }
+      /* `esp.ok === false` deja `capacidad` en `null` — «no sé» apaga el botón. */
 
       const o = oferta.data;
       if (o !== null) {
@@ -642,6 +658,9 @@ export default function TallerGuarderia() {
               registro="oficio"
             />
           )}
+          {otrasSalas > 0 ? (
+            <Texto variante="apoyo">{t('tallerGuarderia.otrasSalas', { n: otrasSalas })}</Texto>
+          ) : null}
           {/* 🔴 El día sobrevendido se DECLARA y no se resuelve solo: el motor
               nunca cancela una reserva por bajar la capacidad. Si no se
               mostrara, el prestador bajaría el número y no se enteraría de que

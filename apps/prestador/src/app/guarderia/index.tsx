@@ -50,7 +50,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { leerCapacidadDeclarada } from '@/lib/capacidad-guarderia';
+import { leerEspacioDelTaller } from '@/lib/capacidad-guarderia';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
@@ -109,7 +109,7 @@ export default function MundoGuarderia() {
           /* ⏪ Acá iba `obtenerCupoGuarderia(hoy, hoy)` — ver la nota de abajo.
              La lectura del cupo de HOY se retira: esta portada no habla de hoy,
              habla del negocio. */
-          leerCapacidadDeclarada(p.data.id),
+          leerEspacioDelTaller(p.data.id),
         ]);
         if (!vigente) return;
         /* Un fallo NO se disfraza de «todavía no configuraste» (Ley 13): eso
@@ -127,7 +127,12 @@ export default function MundoGuarderia() {
              rotulaba como la capacidad del negocio: *al prestador le decía que
              su guardería no recibe a nadie.* Ahora lee la CAPACIDAD DECLARADA
              por la misma función que el taller — no pueden divergir. */
-          capacidadHoy: cap.ok ? cap.capacidad : 0,
+          /* ⏪ **DECÍA «0 animales por día» los fines de semana**: tomaba el
+             cupo de HOY, que en un día cerrado vale 0, y lo rotulaba como la
+             capacidad del negocio — *al prestador le decía que su guardería no
+             recibe a nadie.* Ahora es el número CONFIGURADO, leído por la
+             misma función que el taller: no pueden divergir. */
+          capacidadHoy: cap.ok && cap.espacio !== null ? cap.espacio.capacidadPorDia : 0,
         });
       })();
       return () => {

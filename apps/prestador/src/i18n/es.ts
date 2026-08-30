@@ -4136,6 +4136,7 @@ export const prestadorEs = {
     sobrevendido: 'Hoy tienes más animales reservados que lugares. Nadie perdió su reserva: el cupo nuevo rige de acá en adelante.',
     franjasTitulo: 'Tus dos ventanas',
     diasEtiqueta: 'Qué días abres',
+    otrasSalas: 'Tienes {{n}} espacio(s) más. Acá configuras el principal.',
     capacidadNoLeida: 'Estamos leyendo tu configuración.',
     sinDias: 'Elige al menos un día: sin días no hay horario que guardar.',
     franjasApoyo: 'En una pasas a buscar; en la otra devuelves. La de devolución empieza después de que termina la de recogida.',
