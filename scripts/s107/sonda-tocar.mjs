@@ -173,3 +173,72 @@ export function claveAnon(ref) {
     'La sonda PARA: correr con otra sería medir permisos que la familia no tiene.',
   );
 }
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * `conResiduoCero()` — LA ESCRITURA DE UNA SONDA NO PUEDE QUEDARSE.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ── LO QUE CURA, medido DOS VECES EN UN DÍA ──────────────────────────────
+ * Una sonda mía creó un bono real en Aurora. Otra apretó «Guardar» en la
+ * config del prestador y **escribió su capacidad y sus franjas**. Las dos
+ * fuera de subtransacción, las dos sin querer.
+ *
+ * 🔴 **Y las dos salieron bien por SUERTE**, que es lo que las vuelve graves:
+ * el bono se borró a mano, y el guardado escribió *el mismo estado sobre sí
+ * mismo* porque la capacidad real coincidía con el default de la pantalla.
+ * *Si hubiera sido 12, la sonda se la habría bajado a 8 sin un solo error.*
+ *
+ * ── POR QUÉ ES UNA FUNCIÓN Y NO UNA NOTA EN EL PARTE ─────────────────────
+ * Las dos veces **la regla estaba escrita y la había leído.** Firma del
+ * founder, y es la misma que parió `tocar()` y `claveAnon()`:
+ *
+ * > *«Hacelo mecanismo, no recordatorio.»*
+ *
+ * **Cuando algo salió mal por lo que uno recordó o dejó de recordar, la cura
+ * no es recordarlo mejor: es que deje de depender de recordarlo.**
+ *
+ * ── CÓMO SE USA ──────────────────────────────────────────────────────────
+ * ```js
+ * await conResiduoCero(
+ *   'comprar un paquete',
+ *   async () => { …lo que escribe… },
+ *   // el censo: lo que TIENE que valer igual antes y después
+ *   async () => (await sb.from('bonos').select('id')).data.length,
+ * )
+ * ```
+ * Corre la acción, vuelve a censar, y **LANZA si el censo cambió**, diciendo
+ * el antes y el después. *No deshace por su cuenta —no puede— pero convierte
+ * un residuo silencioso en un error ruidoso*, que es la diferencia entre
+ * enterarse hoy y enterarse cuando alguien mire.
+ *
+ * ⚠️ **Para escrituras en SQL, esto NO reemplaza al `BEGIN … ROLLBACK`** —
+ * ahí el rollback existe y es la herramienta correcta. Esto es para lo que
+ * **no se puede envolver en una transacción**: una sonda que toca la app real
+ * y escribe por su camino normal.
+ *
+ * 🔴 **Y si tu sonda puede evitar escribir, que no escriba.** Esta función es
+ * la red de lo que sí tiene que escribir, no un permiso para hacerlo.
+ */
+export async function conResiduoCero(queHace, accion, censo) {
+  const antes = await censo();
+  let error = null;
+  try {
+    await accion();
+  } catch (e) {
+    error = e;
+  }
+  const despues = await censo();
+  const igual = JSON.stringify(antes) === JSON.stringify(despues);
+  if (!igual) {
+    throw new Error(
+      `[sonda] RESIDUO en «${queHace}»: el censo cambió y NO se deshizo solo.\n` +
+      `   antes:   ${JSON.stringify(antes)}\n` +
+      `   después: ${JSON.stringify(despues)}\n` +
+      `   🔴 Hay que limpiarlo A MANO, por id, y verificar que el censo vuelva.\n` +
+      `   *Una sonda que deja residuo contamina la medición de la próxima* (L-234).`,
+    );
+  }
+  if (error !== null) throw error;
+  console.log(`   ✓ «${queHace}» · residuo 0 (censo: ${JSON.stringify(antes)})`);
+}

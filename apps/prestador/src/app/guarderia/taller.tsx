@@ -101,6 +101,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { leerCapacidadDeclarada } from '@/lib/capacidad-guarderia';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
@@ -227,7 +228,10 @@ export default function TallerGuarderia() {
   const [guardando, setGuardando] = useState(false);
 
   // EL BORRADOR — sobrevive a los reintentos de carga.
-  const [capacidad, setCapacidad] = useState(8);
+  /* 🔴 **`null` = TODAVÍA NO SÉ**, y no 8. El default de 8 era el que hacía
+     que un sábado la pantalla mostrara un número que no había leído — y que
+     guardar se lo escribiera encima al prestador. */
+  const [capacidad, setCapacidad] = useState<number | null>(null);
   /* Los días que el lugar abre. Arranca en el default del motor y la carga lo
      pisa con lo guardado — **jamás al revés**: pintar L-V sobre un lugar que
      abre sábados y guardar encima sería borrarle el sábado sin decírselo. */
@@ -325,7 +329,15 @@ export default function TallerGuarderia() {
         setDevolucionHasta(aHoraCorta(d.hasta));
       }
       const hoyCupo = cupo.data[0];
-      if (hoyCupo !== undefined && hoyCupo.capacidad > 0) setCapacidad(hoyCupo.capacidad);
+      /* ⏪ **ACÁ ESTABA EL DEFECTO.** Decía `if (capacidad > 0) setCapacidad(...)`
+         sobre el cupo de HOY: en un día que el lugar no abre el cupo es 0, el
+         guard no dejaba pasar el 0, y la pantalla se quedaba con su default.
+         Ahora lee la CAPACIDAD DECLARADA —máximo sobre dos semanas— por la
+         misma función que usa la portada, así que **no pueden divergir**. */
+      const cap = await leerCapacidadDeclarada(prestadorId);
+      if (!vigente) return;
+      if (cap.ok && cap.capacidad > 0) setCapacidad(cap.capacidad);
+      else if (cap.ok) setCapacidad(0);
 
       const o = oferta.data;
       if (o !== null) {
@@ -414,7 +426,9 @@ export default function TallerGuarderia() {
     const espacio = await definirEspacioGuarderia({
       prestadorId: estado.prestadorId,
       nombre: NOMBRE_ESPACIO,
-      capacidadPorDia: capacidad,
+      /* 🔴 Nunca `null`: el CTA está apagado mientras no se leyó, así que acá
+         siempre hay un número que el prestador vio. */
+      capacidadPorDia: capacidad ?? 0,
       /* ⭐ **LOS DÍAS QUE EL LUGAR ABRE.** Antes no viajaba y el espacio se
          quedaba con el default del motor: el prestador podía elegir sábado en
          las ventanas y la familia seguía viendo `no_opera`. *Es el mismo
@@ -597,8 +611,12 @@ export default function TallerGuarderia() {
               cargando={guardando}
               /* Ley 23 — la puerta no ofrece lo que el acto va a estropear. Sin
                  días no hay horario que guardar, y el apagado DICE por qué. */
-              deshabilitado={dias.length === 0}
-              razonDeshabilitado={t('tallerGuarderia.sinDias')}
+              /* Sin días no hay horario; **sin capacidad leída no hay nada que
+             guardar sin pisar** — ver `capacidad-guarderia.ts`. */
+          deshabilitado={dias.length === 0 || capacidad === null}
+              razonDeshabilitado={
+            capacidad === null ? t('tallerGuarderia.capacidadNoLeida') : t('tallerGuarderia.sinDias')
+          }
               onPress={alGuardar}
             />
           </View>
@@ -608,14 +626,22 @@ export default function TallerGuarderia() {
         <View style={{ gap: spacing[3] }}>
           <Texto variante="titulo">{t('tallerGuarderia.capacidadTitulo')}</Texto>
           <Texto variante="apoyo">{t('tallerGuarderia.capacidadApoyo')}</Texto>
-          <StepperCantidad
-            etiqueta={t('tallerGuarderia.capacidadEtiqueta')}
-            valor={capacidad}
-            min={CAP_MIN}
-            max={CAP_MAX}
-            onCambio={setCapacidad}
-            registro="oficio"
-          />
+          {/* 🔴 **MIENTRAS NO SE LEYÓ, NO SE DIBUJA UN NÚMERO.** Un stepper
+              con un valor inventado invita a guardarlo — y guardar pisaba la
+              capacidad real del prestador. *Un esqueleto dice «todavía no sé»;
+              un 8 dice «tu capacidad es 8».* */}
+          {capacidad === null ? (
+            <Esqueleto alto={56} />
+          ) : (
+            <StepperCantidad
+              etiqueta={t('tallerGuarderia.capacidadEtiqueta')}
+              valor={capacidad}
+              min={CAP_MIN}
+              max={CAP_MAX}
+              onCambio={setCapacidad}
+              registro="oficio"
+            />
+          )}
           {/* 🔴 El día sobrevendido se DECLARA y no se resuelve solo: el motor
               nunca cancela una reserva por bajar la capacidad. Si no se
               mostrara, el prestador bajaría el número y no se enteraría de que

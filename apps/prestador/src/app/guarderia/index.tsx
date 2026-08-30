@@ -50,6 +50,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { leerCapacidadDeclarada } from '@/lib/capacidad-guarderia';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
@@ -102,15 +103,18 @@ export default function MundoGuarderia() {
           setEstado({ fase: 'roto' });
           return;
         }
-        const [oferta, franjas, cupo] = await Promise.all([
+        const [oferta, franjas, cap] = await Promise.all([
           obtenerOfertaGuarderiaPropia(p.data.id),
           obtenerFranjasGuarderia(p.data.id),
-          obtenerCupoGuarderia(p.data.id, hoyLocal(), hoyLocal()),
+          /* ⏪ Acá iba `obtenerCupoGuarderia(hoy, hoy)` — ver la nota de abajo.
+             La lectura del cupo de HOY se retira: esta portada no habla de hoy,
+             habla del negocio. */
+          leerCapacidadDeclarada(p.data.id),
         ]);
         if (!vigente) return;
         /* Un fallo NO se disfraza de «todavía no configuraste» (Ley 13): eso
            mandaría al prestador a re-configurar algo que ya está guardado. */
-        if (!oferta.ok || !franjas.ok || !cupo.ok) {
+        if (!oferta.ok || !franjas.ok || !cap.ok) {
           setEstado({ fase: 'roto' });
           return;
         }
@@ -118,7 +122,12 @@ export default function MundoGuarderia() {
           fase: 'listo',
           oferta: oferta.data,
           franjas: franjas.data,
-          capacidadHoy: cupo.data[0]?.capacidad ?? 0,
+          /* ⏪ **DECÍA «0 animales por día» los fines de semana.** Tomaba el
+             cupo de HOY, que en un día que el lugar no abre vale 0, y lo
+             rotulaba como la capacidad del negocio: *al prestador le decía que
+             su guardería no recibe a nadie.* Ahora lee la CAPACIDAD DECLARADA
+             por la misma función que el taller — no pueden divergir. */
+          capacidadHoy: cap.ok ? cap.capacidad : 0,
         });
       })();
       return () => {
