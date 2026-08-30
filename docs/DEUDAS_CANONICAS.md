@@ -23754,6 +23754,30 @@ La migración del digest cerró su función nueva con `REVOKE … FROM PUBLIC, a
 **Dueño:** B (la pieza) + mesa (la firma sobre píxeles). **Disparo:** sesión de diseño, con **las tres montadas juntas** — *la comparación es el instrumento; ninguna de las tres se juzga sola.*
 ☠️ **Condición de muerte:** la decisión firmada **y** el censo en 0 baldosas a mano, **o** las excepciones declaradas una por una con su razón.
 
+---
+
+## ☠️ **D-973 CERRADA SIN CAMBIO — firma del founder, 29-ago-2026**
+
+**La baldosa a mano del cliente SE QUEDA, y `Baldosa` NO gana variantes.**
+
+**Se cumplió la segunda mitad de la condición de muerte**, que estaba escrita
+como alternativa desde el día uno: *«**o** las excepciones declaradas una por una
+con su razón»*. **La excepción es una, está declarada, y su razón es que el
+founder la pidió así** — sin descripción y sin chevron.
+
+> 🔴 **Y el valor de esta ficha no fue el resultado: fue haber separado las dos
+> preguntas.** Cuando apareció, la lectura fácil era *«hay tres baldosas
+> distintas, unifiquemos»*. La ficha obligó a preguntar la otra —**¿la pieza
+> tiene que admitir esta forma, o esta superficie no es una baldosa?**— y la
+> respuesta fue la segunda. *Unificar habría metido dos props opcionales en una
+> pieza congelada para servir a un caso que no es el suyo.*
+
+**Lo que queda vivo y NO muere con ella:** la advertencia de que la galería tiene
+una **copia transcrita a mano** de ese bloque (`TokenGallery.tsx`, sección
+`D-973`) y su marca gemela en `apps/cliente/src/app/(tabs)/explorar/index.tsx`.
+*Si esa pantalla cambia y la copia no, el instrumento de comparación empieza a
+medir una ficción* — **esas dos marcas siguen rigiendo aunque la ficha cierre.**
+
 # Deudas S107 (D-974 · D-975) — depositadas por A el 29-ago-2026 · números verificados libres POR GREP (tope real `D-973`)
 
 #### D-974 — 🔴 DOS ENUMS QUE COMPARTEN UNA PALABRA NO COMPARTEN SU SENTIDO
