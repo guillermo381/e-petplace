@@ -62,8 +62,20 @@ export function porClave(page, clave) {
         `   🔴 No se cae a buscar la cadena literal: eso sería el defecto que este archivo cerró.`,
     );
   }
-  /* Cualquiera de los dos idiomas sirve: el que esté montado va a existir. */
-  return { localizador: page.getByText(cs[0], { exact: false }).or(page.getByText(cs[cs.length - 1], { exact: false })).last(), copias: cs };
+  /* 🔴 **LAS INTERPOLACIONES SE PARTEN**, y lo destapó el camino del dedo: la
+     clave `logGuarderia.reservarDe` es `'Reservar para {{nombre}}'`, y buscar
+     esa cadena literal **no encuentra «Reservar para Thor»**. *Mi sonda dijo
+     «el control NO EXISTE» sobre un botón que estaba ahí — el mismo error de
+     buscar por copy, un nivel más adentro.*
+     ⇒ se busca **el fragmento literal más largo** entre `{{…}}`, que es estable
+     y sigue sin depender del idioma. */
+  const fragmento = (c) =>
+    c.split(/\{\{[^}]*\}\}/).map((x) => x.trim()).sort((a, z) => z.length - a.length)[0];
+  const frags = [...new Set(cs.map(fragmento))].filter((x) => x.length > 0);
+  if (frags.length === 0) throw new Error(`[sonda] la clave «${clave}» es sólo interpolación: no hay texto por el cual buscar.`);
+  let loc = page.getByText(frags[0], { exact: false });
+  for (const f of frags.slice(1)) loc = loc.or(page.getByText(f, { exact: false }));
+  return { localizador: loc.last(), copias: cs };
 }
 
 /**
