@@ -10573,7 +10573,7 @@ export type Database = {
           familia_id: string
           redes_autorizadas: boolean
           urgencia_tope_moneda: string
-          urgencia_tope_monto: number
+          urgencia_tope_monto: number | null
         }
         Insert: {
           actualizado_en?: string
@@ -10582,7 +10582,7 @@ export type Database = {
           familia_id: string
           redes_autorizadas?: boolean
           urgencia_tope_moneda: string
-          urgencia_tope_monto: number
+          urgencia_tope_monto?: number | null
         }
         Update: {
           actualizado_en?: string
@@ -10591,7 +10591,7 @@ export type Database = {
           familia_id?: string
           redes_autorizadas?: boolean
           urgencia_tope_moneda?: string
-          urgencia_tope_monto?: number
+          urgencia_tope_monto?: number | null
         }
         Relationships: [
           {
@@ -21307,11 +21307,11 @@ export type Database = {
         Args: {
           p_aceptaciones: Json
           p_contacto_alternativo?: Json
-          p_contactos: Json
+          p_contactos?: Json
           p_familia_id: string
           p_redes_autorizadas?: boolean
-          p_urgencia_tope_moneda: string
-          p_urgencia_tope_monto: number
+          p_urgencia_tope_moneda?: string
+          p_urgencia_tope_monto?: number
         }
         Returns: Json
       }
@@ -22760,6 +22760,23 @@ export type Database = {
           fecha: string
           motivo: string
           opera: boolean
+          reservable: boolean
+          ya_reservado: boolean
+        }[]
+      }
+      obtener_dias_guarderia_disponibles: {
+        Args: {
+          p_desde: string
+          p_hasta: string
+          p_lat?: number
+          p_lon?: number
+          p_mascota_id: string
+          p_modalidad?: string
+        }
+        Returns: {
+          fecha: string
+          lugares: number
+          motivo: string
           reservable: boolean
           ya_reservado: boolean
         }[]
