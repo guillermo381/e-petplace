@@ -218,6 +218,11 @@ export default function ElegirGuarderia() {
     (c: CausaSinGuarderias): string =>
       t(
         c === 'sin_cupo_ese_dia' ? 'elegirGuarderia.causaSinCupo'
+        /* ⭐ A la tipó como causa propia (29-ago). 🔴 **Su voz NO lleva «prueba
+           con otro día» pegado**: el día no es el problema — lo que la familia
+           no sabía es CUÁNDO sí abren. *Mandarla a mover el dedo sería
+           esconderle el dato que le falta.* */
+        : c === 'no_opera_ese_dia' ? 'elegirGuarderia.causaNoOpera'
         : c === 'nadie_vende_esa_modalidad' ? 'elegirGuarderia.causaSinModalidad'
         /* ④ Mapeada, **hoy inalcanzable**: sin `lat`/`lon` esa etapa no
            descarta a nadie y el server no puede devolverla. */
@@ -291,8 +296,20 @@ export default function ElegirGuarderia() {
           </View>
         ) : null}
 
-        {/* ── ⑤ LOS REQUISITOS — bajo el día, en los tres caminos, INFORMATIVOS ── */}
-        {listoParaDia && requisitos !== null ? (
+        {/* ── ⑤ LOS REQUISITOS — **DESPUÉS de elegir el día**, en los tres
+               caminos, e INFORMATIVOS.
+
+               ⏪ Aparecían apenas se abría la pantalla: con una sola modalidad,
+               `listoParaDia` es verdadero desde el arranque. **Firma de la mesa
+               (29-ago): van después del día, con el ritmo estricto.**
+
+               🔴 **Y la firma gana contra un argumento correcto**, que por eso
+               se deja escrito: los requisitos son de la MASCOTA, no del día, y
+               verlos temprano dejaría arreglar el carnet mientras se elige.
+               *Pero el ritmo es lo que le dice a la familia que la pantalla va
+               paso a paso — y una excepción bien razonada en el medio de una
+               secuencia la vuelve una pantalla que a veces se adelanta.* */}
+        {fecha !== null && requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
             <SemaforoSanitario

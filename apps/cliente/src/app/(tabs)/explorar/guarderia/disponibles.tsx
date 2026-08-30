@@ -26,10 +26,18 @@
  * tiene*. Las ventanas las pinta **`FichaFranja`**, que existe justo para
  * informar (no para elegir) y que el perfil del lugar ya monta.
  *
- * ⚠️ **LAS FRANJAS CUESTAN UNA LLAMADA POR LUGAR.** `obtenerFranjasGuarderia`
- * es por prestador y el filtro no las trae. Se piden en paralelo y **la fila no
- * espera**: si no llegaron, se dibuja sin ellas. *Pedido a A para que viajen en
- * el mismo lector — con seis lugares es barato, con sesenta no.*
+ * ✅ **LAS VENTANAS VIAJAN EN LA PROYECCIÓN** (A, 29-ago): el N+1 se cerró
+ * antes de doler. **Los cuatro campos son independientes** —un lugar puede
+ * tener la recogida y no la devolución— y cada ventana se dibuja sólo si sus
+ * DOS extremos llegaron.
+ *
+ * 🔴 **PERO EL SERVER LAS COLAPSA CON `min`/`max` SIN MIRAR EL DÍA DE SEMANA, y
+ * eso es un verosímil-falso esperando su primer lugar.** El índice es
+ * `UNIQUE (prestador_id, tipo, dias_semana)`: **dos ventanas del mismo tipo no
+ * son un borde, son el diseño** —*L-V de 7 a 9, sábados de 9 a 11*—. Colapsadas
+ * dan **7 a 11**, un rango que ese lugar **no ofrece ningún día**.
+ * *Hoy no se nota porque Aurora tiene una de cada tipo.* **Pedido a A** en
+ * `S107-C-PEDIDO-A-A-VENTANA-DEL-DIA.md`.
  *
  * ── EL PRECIO, SIN UNA SOLA CUENTA ───────────────────────────────────────
  * Cada lugar muestra **el número del server para la modalidad pedida**. Si no
@@ -52,10 +60,8 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
-  obtenerFranjasGuarderia,
   obtenerGuarderiasDisponibles,
   obtenerPerfilesPublicos,
-  type FranjaGuarderia,
   type GuarderiaDisponible,
   type PerfilPublico,
 } from '@epetplace/api';
@@ -99,7 +105,6 @@ export default function QuienPuedeGuarderia() {
   /* El enriquecimiento público: portada, logo, reseñas, cohorte. **La fila no
      lo espera** — llega y la tarjeta se completa (criterio de la pieza). */
   const [perfiles, setPerfiles] = useState<Record<string, PerfilPublico>>({});
-  const [franjas, setFranjas] = useState<Record<string, FranjaGuarderia[]>>({});
 
   useEffect(() => {
     if (mascotaId === null || fecha === null) { setLista({ fase: 'noPudimos' }); return; }
@@ -142,21 +147,10 @@ export default function QuienPuedeGuarderia() {
       if (!vigente || !r.ok) return;
       setPerfiles(Object.fromEntries(r.data.map((x) => [x.id, x])));
     });
-    /* 🔴 UNA LLAMADA POR LUGAR, en paralelo y sin bloquear la lista. *El filtro
-       no trae las franjas y `obtenerFranjasGuarderia` es por prestador — con
-       seis lugares es barato; con sesenta hay que pedirle a A que viajen en el
-       mismo lector.* Si alguna falla, esa fila se dibuja sin ventanas: **el
-       hueco no se disfraza de dato** (Ley 13). */
-    void Promise.all(
-      ids.map(async (id) => [id, await obtenerFranjasGuarderia(id)] as const),
-    ).then((pares) => {
-      if (!vigente) return;
-      setFranjas(
-        Object.fromEntries(
-          pares.filter(([, r]) => r.ok).map(([id, r]) => [id, r.ok ? r.data : []]),
-        ),
-      );
-    });
+    /* ☠️ ACÁ VIVÍA UNA LLAMADA POR LUGAR a `obtenerFranjasGuarderia`. **A
+       cerró el N+1 el 29-ago**: las dos ventanas viajan en la proyección de la
+       lista. *El pedido se hizo antes de que doliera, y por eso se pudo pagar
+       sin apuro.* */
     return () => { vigente = false; };
   }, [lista]);
 
@@ -216,9 +210,17 @@ export default function QuienPuedeGuarderia() {
         ) : (
           lista.lugares.map((g) => {
             const precio = precioDe(g);
-            const f = franjas[g.prestadorId] ?? [];
-            const rec = f.find((x) => x.tipo === 'recogida') ?? null;
-            const dev = f.find((x) => x.tipo === 'devolucion') ?? null;
+            /* 🔴 LOS CUATRO CAMPOS SON INDEPENDIENTES — firma de A, y el caso
+               es real: **un lugar puede tener la recogida declarada y la
+               devolución no.** *Asumir «vienen los cuatro o ninguno» pintaría
+               un rango con la mitad inventada.* Cada ventana existe sólo si sus
+               DOS extremos llegaron. */
+            const rec = g.recogeDesde !== null && g.recogeHasta !== null
+              ? { desde: g.recogeDesde, hasta: g.recogeHasta }
+              : null;
+            const dev = g.devuelveDesde !== null && g.devuelveHasta !== null
+              ? { desde: g.devuelveDesde, hasta: g.devuelveHasta }
+              : null;
             return (
               <PreviewPrestador
                 key={g.prestadorId}

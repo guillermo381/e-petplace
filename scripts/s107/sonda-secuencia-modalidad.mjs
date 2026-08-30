@@ -18,6 +18,7 @@
 import { execFileSync } from 'node:child_process';
 import { chromium } from 'playwright-core';
 import { createClient } from '@supabase/supabase-js';
+import { porDato, tocar } from './sonda-tocar.mjs';
 const REF = 'zyltipqscdsdsxnjclhp';
 const CLAVE = execFileSync('security', ['find-generic-password','-a','siembra','-s','epetplace-siembra-s97','-w'], {encoding:'utf8'}).trim();
 const ANON = execFileSync('npx',['supabase','projects','api-keys','--project-ref',REF],{encoding:'utf8'}).match(/"api_key":"(eyJ[^"]*)"/)?.[1];
@@ -37,11 +38,13 @@ console.log('── ANTES de elegir día ──\n' + (await p.evaluate(()=>docum
    la pantalla o de mi sonda. Se busca el nodo por su texto exacto y se verifica
    que el click ocurrió. */
 /* `SelectorDia` pinta el día y el número en NODOS SEPARADOS — por eso «mon 31»
-   como texto exacto no existe. Se busca el número y se toca su contenedor. */
-const objetivo = p.getByText('31', { exact: true }).first();
-const existe = await objetivo.count().catch(() => 0);
-console.log(`\n[sonda] nodo «31» encontrado: ${existe > 0 ? 'SÍ' : 'NO'}`);
-if (existe > 0) { await objetivo.click({ force: true }); console.log('[sonda] click emitido'); }
-await p.waitForTimeout(4000);
+   como texto exacto no existe. Se busca el número.
+   🔴 El discriminador ya no se escribe acá: vive en `tocar()`, que **no deja
+   tocar sin verificar** y lanza si el nodo no está. */
+/* `porDato` y no `porClave`: **un número de día no es copy** — es dato, y no
+   cambia con el idioma. La separación existe para que nadie lea esto como
+   permiso para volver a buscar textos de UI por su literal. */
+const { cambio } = await tocar(p, porDato(p, '31'), 'el día 31 de la tira');
+console.log(`\n[sonda] toque emitido · ¿la pantalla cambió? ${cambio ? 'SÍ' : 'NO'}`);
 console.log('\n── DESPUÉS de elegir día ──\n' + (await p.evaluate(()=>document.body.innerText)).replace(/\s+/g,' ').trim().slice(0,900));
 await b.close(); await sb.auth.signOut();

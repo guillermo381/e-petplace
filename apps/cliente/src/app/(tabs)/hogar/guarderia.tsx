@@ -31,13 +31,13 @@ import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   FiltroMascotas,
   Icono,
+  FilaCita,
   FiltroPills,
   Texto,
   spacing,
@@ -144,6 +144,7 @@ export default function LogGuarderia() {
 
   const [pestana, setPestana] = useState<'proximas' | 'historial'>('proximas');
   const [estadias, setEstadias] = useState<Estadias>({ fase: 'cargando' });
+  const [abierta, setAbierta] = useState<string | null>(null);
   const idioma = obtenerIdiomaActual();
 
   /* 🔴 SE PIDE POR MASCOTA. El lector acepta `mascotaId?` y filtra del lado del
@@ -293,52 +294,59 @@ export default function LogGuarderia() {
                 );
               }
               return visibles.map((e) => (
-                /* ⚠️ **ESTA FILA NO ES `FilaCita`, Y SE DECLARA.** Medido:
-                   `FilaCitaOficio` es `'paseo' | 'grooming' | 'veterinaria' |
-                   'adiestramiento'` — **la pieza no conoce guardería**, y es de
-                   B. *Montarla con otro oficio pintaría el canto de un servicio
-                   ajeno; forzar el tipo sería mentirle al compilador para que
-                   la pantalla mienta en el color.*
-                   ⇒ **`Celda` mientras tanto**, con el pedido a B escrito
-                   (`S107-C-PEDIDO-A-B-FILACITA-GUARDERIA.md`). **Hasta que
-                   entre, esta fila NO se ve igual que la de sus hermanas** —
-                   se dice acá para que no se lea como un desvío de acabado. */
-                /* 🔴 DOS VARIANTES Y NO UNA CON PROPS OPCIONALES: `Celda`
-                   discrimina por `interactiva`, y **una fila sin destino no
-                   debe parecer tocable**. *Una estadía sin `estadiaId` es una
-                   cita comprada que el prestador todavía no ejecutó: no hay
-                   durante que mirar, y ofrecer el toque prometería una pantalla
-                   vacía.* */
-                e.estadiaId === null ? (
-                  <Celda
-                    key={e.citaId}
-                    titulo={e.prestadorNombre}
-                    subtitulo={e.mascotaNombre}
-                    metadataMono={fechaCortaMono(e.fecha, idioma)}
-                  />
-                ) : (
-                  <Celda
-                    key={e.citaId}
-                    interactiva
-                    accessibilityRole="button"
-                    titulo={e.prestadorNombre}
-                    subtitulo={e.mascotaNombre}
-                    /* ⚠️ SIN HORA: **una estadía no tiene hora** — tiene día y
-                       franja. *Un `00:00` se leería como medianoche.* */
-                    metadataMono={fechaCortaMono(e.fecha, idioma)}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/guarderia/[estadiaId]',
-                        params: {
-                          estadiaId: e.estadiaId ?? '',
-                          mascotaId: e.mascotaId,
-                          mascotaNombre: e.mascotaNombre,
-                          fecha: e.fecha,
-                        },
-                      })
-                    }
-                  />
-                )
+                /* ⭐ `FilaCita`, LA PIEZA DE SUS CUATRO HERMANAS.
+                   ⏪ **Acá vivía una `Celda`** porque medí que `FilaCitaOficio`
+                   no conocía guardería. **B lo resolvió y mi dato quedó
+                   vencido** — y no era hueco de datos: `metadataMono` nunca
+                   exigió una hora, así que **no nació ninguna prop**; sólo
+                   faltaba el oficio en el vocabulario cerrado.
+
+                   🔴 **LA FILA DESPLIEGA, NO NAVEGA.** `onPress` y `direccion`
+                   son obligatorios, y una estadía sin `estadiaId` **no tiene a
+                   dónde llevar**: la cita se compró y el prestador todavía no
+                   la ejecutó. *Un chevron que promete una pantalla vacía es
+                   justo lo que 19.7 vino a matar.* ⇒ despliega, y la acción de
+                   entrar al durante vive adentro, sólo cuando existe.
+
+                   ⚠️ **LAS DOS VENTANAS NO VAN ACÁ — límite declarado por B:**
+                   *no son metadata, son contenido, y su lugar es el despliegue
+                   con `FichaFranja`.* **Y el log no las necesita**: la familia
+                   ya reservó; las ventanas importan al ELEGIR, y ahí están, en
+                   la vitrina de «quién puede». */
+                <FilaCita
+                  key={e.citaId}
+                  oficio="guarderia"
+                  cara={false}
+                  direccion={abierta === e.citaId ? 'arriba' : 'abajo'}
+                  titulo={e.prestadorNombre}
+                  subtitulo={e.mascotaNombre}
+                  /* ⚠️ SIN HORA, y no es un olvido: **una estadía no tiene
+                     hora** — tiene día y franja. *Un `00:00` se leería como
+                     medianoche.* */
+                  metadataMono={fechaCortaMono(e.fecha, idioma)}
+                  mascota={{ nombre: e.mascotaNombre, fotoUrl: undefined }}
+                  onPress={() => setAbierta(abierta === e.citaId ? null : e.citaId)}
+                  acciones={
+                    abierta === e.citaId && e.estadiaId !== null ? (
+                      <Boton
+                        variante="secundario"
+                        bloque
+                        etiqueta={t('logGuarderia.verSuDia')}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/guarderia/[estadiaId]',
+                            params: {
+                              estadiaId: e.estadiaId ?? '',
+                              mascotaId: e.mascotaId,
+                              mascotaNombre: e.mascotaNombre,
+                              fecha: e.fecha,
+                            },
+                          })
+                        }
+                      />
+                    ) : undefined
+                  }
+                />
               ));
             })()}
           </>

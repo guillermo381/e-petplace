@@ -1,3 +1,13 @@
+> ☠️ **CUMPLIDO — B lo resolvió en `69c39376`.** `FilaCitaOficio` ya incluye `'guarderia'` y el
+> log monta la pieza. **Se conserva como registro; NO es un pedido vivo.**
+>
+> ✏️ **Y B corrigió mi encuadre:** *no era hueco de datos.* `metadataMono` **nunca exigió una
+> hora**, así que **no nació ninguna prop** — sólo faltaba el oficio en el vocabulario cerrado.
+> *Yo lo había descrito como si la pieza necesitara aprender algo; sólo necesitaba una palabra.*
+>
+> 🔴 **Y dejó un límite que SÍ sigue vivo:** **las dos ventanas NO entran en la fila** — *no son
+> metadata, son contenido, y su lugar es el despliegue con `FichaFranja`.*
+
 # S107-C → B · PEDIDO CHICO — **`FilaCita` no conoce guardería**
 
 ## LO MEDIDO — 29-ago-2026
