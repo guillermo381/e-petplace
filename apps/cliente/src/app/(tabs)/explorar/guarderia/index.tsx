@@ -372,8 +372,7 @@ export default function ElegirGuarderia() {
             <SelectorDia
               dias={dias}
               elegido={fecha ?? ''}
-              cerrados={new Set()}
-              etiquetaCerrado={t('hubGuarderia.diaCerrado')}
+              cerrados={new Map()}
               onElegir={setFecha}
             />
           </View>

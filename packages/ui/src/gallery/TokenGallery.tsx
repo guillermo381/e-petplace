@@ -3305,8 +3305,17 @@ function GaleriaInterna() {
               { iso: '2026-08-08', dia: 'sáb', numero: '8' },
             ]}
             elegido="2026-08-05"
-            cerrados={new Set(['2026-08-08'])}
-            etiquetaCerrado="cerrado"
+            /* ⭐ S107-B · DOS DÍAS CERRADOS POR CAUSAS DISTINTAS — el par que
+               decide. Antes los dos decían «cerrado» porque la etiqueta era
+               UNA para todos; el día se ve sólo como una opacidad, así que la
+               causa vive en el label y **quien usa lector oía «cerrado» sobre
+               un día que él mismo había reservado.** */
+            cerrados={
+              new Map([
+                ['2026-08-08', 'no abre ese día'],
+                ['2026-08-06', 'ya la reservaste'],
+              ])
+            }
             onElegir={() => {}}
           />
           <View style={{ height: spacing[3] }} />

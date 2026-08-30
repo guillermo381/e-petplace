@@ -81,13 +81,11 @@ function RuedaDias({
   dias,
   elegido,
   cerrados,
-  etiquetaCerrado,
   onElegir,
 }: {
   dias: DiaOpcion[]
   elegido: string
-  cerrados: Set<string>
-  etiquetaCerrado: string
+  cerrados: ReadonlyMap<string, string>
   onElegir: (iso: string) => void
 }) {
   const { theme } = useTheme()
@@ -172,13 +170,12 @@ function RuedaDias({
               dia={d}
               indice={i}
               indiceVivo={indiceVivo}
-              cerrado={cerrados.has(d.iso)}
+              motivoCerrado={cerrados.get(d.iso)}
               onPress={() => elegirPorIndice(i)}
               superficie={theme.bg.card}
               sombra={theme.elevacion.reposo}
               acento={theme.accent.control}
               tinta={theme.text.primary}
-              etiquetaCerrado={etiquetaCerrado}
             />
           ))}
         </Animated.View>
@@ -193,27 +190,27 @@ function ItemRueda({
   dia,
   indice,
   indiceVivo,
-  cerrado,
+  motivoCerrado,
   onPress,
   superficie,
   sombra,
   acento,
   tinta,
-  etiquetaCerrado,
 }: {
   dia: DiaOpcion
   indice: number
   indiceVivo: SharedValue<number>
-  cerrado: boolean
+  /** El POR QUÉ de este día cerrado. `undefined` = el día está abierto.
+   *  **Un solo campo dice las dos cosas** — ver la nota del contrato. */
+  motivoCerrado: string | undefined
   onPress: () => void
   /** Colores YA resueltos (el worklet no puede leer el tema). */
   superficie: string
   sombra: string
   acento: string
   tinta: string
-  /** La voz de "cerrado" para el lector de pantalla: el día apagado se ve,
+  /* (la voz de cerrado viaja en `motivoCerrado`)
    *  pero un lector no ve opacidades — el estado tiene que DECIRSE. */
-  etiquetaCerrado: string
 }) {
   const vivo = useAnimatedStyle(() => {
     const anillo = Math.min(Math.abs(indice - indiceVivo.value), D3.escalas.length - 1)
@@ -224,7 +221,7 @@ function ItemRueda({
     // dedo arrastra, y cae exacto en la calibración al soltar
     const escala = D3.escalas[bajo] + (D3.escalas[alto] - D3.escalas[bajo]) * t
     const opacidad = D3.opacidades[bajo] + (D3.opacidades[alto] - D3.opacidades[bajo]) * t
-    return { transform: [{ scale: escala }], opacity: cerrado ? 0.18 : opacidad }
+    return { transform: [{ scale: escala }], opacity: motivoCerrado !== undefined ? 0.18 : opacidad }
   })
 
   /** EL ACENTO DEL DÍA — la letra literal de D3 («el acento queda en el
@@ -241,7 +238,11 @@ function ItemRueda({
     <Animated.View style={vivo}>
       <Pressable
         accessibilityRole="radio"
-        accessibilityLabel={cerrado ? `${dia.dia} ${dia.numero} · ${etiquetaCerrado}` : `${dia.dia} ${dia.numero}`}
+        accessibilityLabel={
+          motivoCerrado !== undefined
+            ? `${dia.dia} ${dia.numero} · ${motivoCerrado}`
+            : `${dia.dia} ${dia.numero}`
+        }
         onPress={onPress}
         style={{
           width: D3.item,
@@ -292,20 +293,39 @@ export interface SelectorDiaProps {
    *  Ahora el día se toca y la pantalla CONTESTA. Ley 23 sigue en pie: la
    *  puerta no ofrece lo que va a RECHAZAR — acá el toque no se rechaza,
    *  se responde. */
-  cerrados?: Set<string>
-  /** Cómo se dice "cerrado" — el lector de pantalla no ve opacidades. */
-  etiquetaCerrado: string
+  /**
+   * LOS DÍAS CERRADOS, **cada uno con SU porqué** — `iso → motivo`.
+   *
+   * 🔴 **Era un `Set` con UNA etiqueta para todos, y C midió el costo:**
+   * conviven dos causas —*«no abre ese día»* y *«ya la reservaste»*— y con una
+   * sola cadena **sólo se podía decir el neutro**: «Cerrado». *Dos hechos
+   * distintos contados con la misma palabra.*
+   *
+   * ⚠️ **Y el día cerrado es MUDO por diseño:** se ve sólo como una opacidad
+   * de 0.18, así que **el motivo vive en el `accessibilityLabel`** — el único
+   * lugar donde ese día puede explicarse. Con etiqueta única, quien usa lector
+   * de pantalla oía «cerrado» sobre un día que él mismo había reservado.
+   *
+   * **Por qué un `Map` y no `Set` + etiqueta opcional:** con el mapa **«cerrado
+   * sin porqué» es inexpresable** —una entrada siempre trae su valor— y las dos
+   * props se vuelven una. *Un opcional habría dejado el caso viejo vivo para
+   * quien no se acordara.*
+   *
+   * 🔴 **La pieza NO aprende qué es «no abre»:** recibe el texto de quien la
+   * monta, como siempre. Lo que cambió es la granularidad — de uno para todos,
+   * a uno por día.
+   */
+  cerrados?: ReadonlyMap<string, string>
   onElegir: (iso: string) => void
 }
 
 export function SelectorDia(props: SelectorDiaProps) {
-  const cerrados = props.cerrados ?? new Set<string>()
+  const cerrados = props.cerrados ?? new Map<string, string>()
   return (
     <RuedaDias
       dias={props.dias}
       elegido={props.elegido}
       cerrados={cerrados}
-      etiquetaCerrado={props.etiquetaCerrado}
       onElegir={props.onElegir}
     />
   )

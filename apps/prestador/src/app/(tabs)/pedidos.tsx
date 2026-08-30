@@ -338,8 +338,7 @@ export default function PedidosDelDia() {
         <SelectorDia
           dias={dias}
           elegido={dia}
-          cerrados={new Set()}
-          etiquetaCerrado=""
+          cerrados={new Map()}
           onElegir={setDia}
         />
       </View>

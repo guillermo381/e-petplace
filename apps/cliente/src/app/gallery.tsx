@@ -49,7 +49,7 @@ function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'aire' 
   const contenido = (
     <View style={{ gap: spacing[4] }}>
       <Texto variante="dato">el día</Texto>
-      <SelectorDia dias={DIAS} elegido={DIAS[1].iso} etiquetaCerrado="cerrado" onElegir={() => {}} />
+      <SelectorDia dias={DIAS} elegido={DIAS[1].iso} onElegir={() => {}} />
       <Texto variante="dato">la duración</Texto>
       <GrillaElegir opciones={DURACIONES} elegida={DURACIONES[1].codigo} onElegir={() => {}} voz="sans" />
       <Texto variante="dato">el horario</Texto>

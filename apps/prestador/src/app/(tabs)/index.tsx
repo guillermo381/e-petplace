@@ -2473,8 +2473,12 @@ export default function Hoy() {
               // S86-C: el fallback es HOY (el default de la rueda), jamás
               // `desde`, que ahora es tres días atrás.
               elegido={diaVista ?? hoy ?? ''}
-              cerrados={isoCerrados}
-              etiquetaCerrado={t('agenda.diaCerrado')}
+              /* ⭐ S107-B · `cerrados` pasó de `Set` + UNA etiqueta a `Map` de
+                   iso→motivo. Acá se migra **preservando la voz de hoy**: la
+                   misma cadena para todos. **El seam queda abierto** — el día
+                   que esta pantalla distinga «no abre» de «ya la reservaste»,
+                   sólo cambia el valor de esa entrada. */
+                cerrados={new Map([...isoCerrados].map((iso): [string, string] => [iso, t('agenda.diaCerrado')]))}
               onElegir={setDiaElegido}
             />
             {/* ☠️ S98-C · §3.1 — ACÁ VIVÍA «Registrar atención», Y SE MUDÓ

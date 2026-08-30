@@ -472,8 +472,12 @@ export default function VeterinariaCuando() {
                     <SelectorDia
                       dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
                       elegido={dia}
-                      cerrados={cerradosISO}
-                      etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                      /* ⭐ S107-B · `cerrados` pasó de `Set` + UNA etiqueta a `Map` de
+                   iso→motivo. Acá se migra **preservando la voz de hoy**: la
+                   misma cadena para todos. **El seam queda abierto** — el día
+                   que esta pantalla distinga «no abre» de «ya la reservaste»,
+                   sólo cambia el valor de esa entrada. */
+                cerrados={new Map([...cerradosISO].map((iso): [string, string] => [iso, t('explorar.cuandoDiaCerrado')]))}
                       onElegir={setDia}
                     />
                   </View>
