@@ -37,12 +37,10 @@
  * · **El tope de gasto SE RETIRÓ** — firma: *«para eso está el contacto de
  *   emergencia y el seguro del prestador»*.
  *
- * 🔴 **Y EL TOPE ES LA ÚNICA PIEZA QUE ESPERA A A**, con su medición:
- * `aceptar_documentos_guarderia` rebota `tope_de_urgencia_invalido` **tanto
- * con `NULL` como con `0`** ⇒ *no hay puente honesto: cualquier número que
- * mandara esta pantalla sería una autorización que la familia no dio*, y eso
- * es exactamente lo que P23 prohíbe. Ver
- * `S107-C-PEDIDO-A-A-UNA-SOLA-ACEPTACION.md`.
+ * ✅ **EL TOPE SALIÓ DEL FLUJO ENTERO** (A, 30-ago): dejó de ser un dato que
+ * la familia teclea y pasó a ser **un TÉRMINO del documento — USD 150** que se
+ * edita después desde la cuenta. *La pantalla no lo pide, no lo manda y no lo
+ * sabe.* Con él murió el `null as unknown as number` que ayer era puente.
  *
  * ── POR QUÉ NO ES **SÓLO** UNA LISTA DE CASILLAS ─────────────────────────
  * ⏪ **Esto decía que el motor exige el tope Y los contactos.** Medido el
@@ -146,44 +144,34 @@ export default function DocumentosGuarderia() {
     if (carga.fase !== 'listo' || enviando) return;
     setEnviando(true);
     const r = await aceptarDocumentosGuarderia({
-      familiaId: carga.familiaId,
-      /* 🔴 SE ACEPTA LA VERSIÓN QUE SE LEYÓ, no «el documento»: si el texto
-         cambió mientras la pantalla estaba abierta, el motor lo va a saber.
+      /* ⭐ **UN SOLO ARGUMENTO.** A cerró el acto el 30-ago: la familia y nada
+         más. Las seis versiones vigentes **las resuelve el motor** — *y es
+         mejor así: la pantalla mandaba las que había leído, y entre leerlas y
+         aceptar podía haber pasado una versión nueva.*
 
-         ⏪ **Y SÓLO LO QUE LA FAMILIA MARCÓ.** Antes acá iba `carga.docs`
-         entero — las seis viajaban hiciera lo que hiciera. *El botón ya no se
-         enciende sin las seis, así que el filtro no cambia lo que llega al
-         motor; cambia que lo que llega sea consecuencia de un acto.* */
-      /* 🔴 LAS SEIS VERSIONES EN UN SOLO ACTO. La casilla es una; lo que se
-         acepta son los seis textos que esa casilla nombra, cada uno con LA
-         VERSIÓN QUE SE MOSTRÓ. *Colapsar la ceremonia no puede colapsar la
-         prueba: si el texto cambió, la aceptación vieja deja de contar.* */
-      aceptaciones: carga.docs.map((d) => ({ codigo: d.codigo, version: d.version })),
-      /* 🔴 EL TOPE SE RETIRÓ DE LA PANTALLA (firma founder) y el motor
-         TODAVÍA LO EXIGE — medido: rebota `tope_de_urgencia_invalido` con
-         `NULL` y con `0`. *No se manda un número inventado: sería registrar
-         una autorización que la familia no dio.* Esta llamada queda escrita
-         como va a quedar, y **rebota hasta que A afloje el motor**
-         (`S107-C-PEDIDO-A-A-UNA-SOLA-ACEPTACION.md`). */
-      urgenciaTopeMonto: null as unknown as number,
-      /* ⚠️ USD viene del país del prestador, y esta pantalla todavía no lo
-         tiene. **Se declara**: hoy el único país operativo es EC/USD. El día
-         que haya dos, este literal es una mentira y hay que traer la moneda
-         del lugar — no del teléfono. */
-      urgenciaTopeMoneda: 'USD',
-      /* La forma de `contactos` la decide esta pantalla: **el motor la recibe
-         como `jsonb` sin validar** (medido). Se declara acá para que el día que
-         alguien la cambie sepa que no hay nada que lo frene. */
-      /* OPCIONAL: si no lo llenó, no viaja nada. Medido: `p_contactos`
-         acepta `NULL` y la aceptación queda `al_dia`. */
-      contactos:
-        contactoNombre.trim().length > 0 || contactoTel.trim().length > 0
-          ? [{ nombre: contactoNombre.trim(), telefono: contactoTel.trim() }]
-          : null,
+         ☠️ Con esto mueren de esta llamada: `aceptaciones` (las resuelve el
+         server), `urgenciaTopeMonto`/`urgenciaTopeMoneda` —**el tope salió del
+         flujo: es un TÉRMINO del documento (USD 150) y se edita después desde
+         la cuenta**— y el `null as unknown as number` que quedó ayer como
+         puente declarado. *El puente murió con su río* (`L-395`). */
+      familiaId: carga.familiaId,
+      /* Lo único que sigue viajando, porque sigue siendo una decisión de la
+         familia en ESTA pantalla: el contacto (opcional) y la imagen. */
+      ...(contactoNombre.trim().length > 0 || contactoTel.trim().length > 0
+        ? { contactos: [{ nombre: contactoNombre.trim(), telefono: contactoTel.trim() }] }
+        : {}),
       redesAutorizadas: redes,
     });
     setEnviando(false);
     if (!r.ok) { mostrar({ texto: r.mensaje, variante: 'error' }); return; }
+    /* 🔴 **SE LEE `alDia`, NO EL CONTADOR** — orden de A y tiene razón:
+       `aceptadas` cuenta lo que se escribió AHORA, y una familia que ya tenía
+       cinco de seis vuelve con `aceptadas: 1` estando perfectamente al día.
+       *Un contador se lee como progreso y no lo es: el veredicto es `alDia`.* */
+    if (!r.data.alDia) {
+      mostrar({ texto: t('documentosGuarderia.noQuedoAlDia'), variante: 'error' });
+      return;
+    }
     mostrar({ texto: t('documentosGuarderia.aceptado'), variante: 'exito' });
     router.back();
   }, [carga, enviando, contactoNombre, contactoTel, redes, mostrar, t]);

@@ -2871,6 +2871,10 @@ export const clienteEs = {
        producto está roto cuando sólo falta tocar un día. */
     contratarMensual: 'Contratar el mes',
     mensualNoCobrable: 'Todavía no podemos cobrar la mensualidad. Estamos terminando esa parte.',
+    reservarDia: 'Reservar el {{dia}}',
+    agendarDia: 'Agendar el {{dia}}',
+    comprarPaqueteDia: 'Comprar {{n}} estadías y agendar el {{dia}}',
+    contratarMensualDesde: 'Contratar plan mensual desde el {{dia}}',
     faltaDia: 'Elige un día en el calendario.',
     /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
     comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
@@ -2964,6 +2968,7 @@ export const clienteEs = {
     redesEtiqueta: 'Pueden publicar fotos suyas',
     redesDetalle: 'Si lo dejas apagado, sus fotos solo las ves tú.',
     aceptar: 'Acepto y continúo',
+    noQuedoAlDia: 'Algo quedó sin aceptar. Vuelve a intentarlo.',
     aceptado: 'Listo. Ya puedes reservar.',
     noCargoTitulo: 'No pudimos cargar los documentos',
     noCargoDetalle: 'No es que no existan: no pudimos preguntar. Prueba de nuevo.',
@@ -3021,6 +3026,10 @@ export const clienteEs = {
     primerDia: 'Selecciona el primer día',
     verQuienPuede: 'Ver quién puede',
     requisitosInforman: 'Esto no te frena para reservar. Es lo que la guardería va a pedirte al recibirlo.',
+    mensualLetra: 'El plan corre de lunes a viernes. Se cobra ese mismo día cada mes hasta que lo canceles.',
+    diaNadieAbre: 'Ese día no abre ninguna guardería.',
+    diaSinCupo: 'Ese día ya está lleno.',
+    diaYaReservado: 'Ya tienes ese día reservado.',
     causaSinCupo: 'Ninguna guardería tiene cupo para el {{dia}}. Prueba con otro día.',
     /* 🔴 SIN «prueba con otro día»: el día no es el problema. */
     causaNoOpera: 'Ninguna guardería cerca de ti abre ese día.',

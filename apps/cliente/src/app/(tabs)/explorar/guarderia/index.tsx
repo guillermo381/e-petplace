@@ -65,6 +65,8 @@ import {
 } from '@epetplace/ui';
 import {
   evaluarRequisitosGuarderia,
+  obtenerDiasGuarderiaDisponibles,
+  type DiaGuarderiaAgregado,
   obtenerGuarderiasDisponibles,
   obtenerPaquetesGuarderia,
   obtenerResumenGuarderias,
@@ -157,6 +159,22 @@ export default function ElegirGuarderia() {
    * modalidad (ya la decidió el bono), sin tamaño (ya está comprado) y sin
    * «ver quién puede» (el lugar lo determina el bono).
    */
+  /**
+   * ⭐ **LA TIRA DICE SU ESTADO SIN QUE LA TOQUEN** (`obtenerDiasGuarderiaDisponibles`).
+   *
+   * ⏪ Antes los 14 días se veían **iguales** y `cerrados` recibía un
+   * `new Set()`: la familia tocaba un sábado, el botón quedaba apagado y
+   * **recién ahí** aparecía la causa. *Medido tocándolos uno por uno: dos de
+   * los siete primeros no llevaban a ningún lado y no se distinguían de los
+   * cinco que sí.* **Es el candidato serio a por qué el founder nunca pudo
+   * reservar.**
+   *
+   * 🔴 **Un fallo de lectura NO se disfraza de «todos abiertos»** (Ley 13): si
+   * el server no contestó, la tira queda tocable y el rebote del botón sigue
+   * siendo la red — *lo que no se hace es pintar catorce días verdes sobre una
+   * pregunta que nadie respondió.* Se declara en `diasLeidos`.
+   */
+  const [diasEstado, setDiasEstado] = useState<DiaGuarderiaAgregado[] | null>(null);
   const [agendando, setAgendando] = useState(false);
   const [reboteSaldo, setReboteSaldo] = useState<string | null>(null);
   const bonoId = typeof params.bonoId === 'string' && params.bonoId.length > 0 ? params.bonoId : null;
@@ -308,6 +326,55 @@ export default function ElegirGuarderia() {
     });
   }, [idioma]);
 
+  /* La ventana que la tira ofrece: mañana + 13. Se deriva de `dias` para que
+     el rango leído y el rango pintado no puedan divergir. */
+  useEffect(() => {
+    if (mascotaId === null || dias.length === 0) return;
+    let vigente = true;
+    void (async () => {
+      const r = await obtenerDiasGuarderiaDisponibles({
+        mascotaId,
+        desde: dias[0].iso,
+        hasta: dias[dias.length - 1].iso,
+        modalidad: modalidad ?? 'dia',
+      });
+      if (!vigente) return;
+      /* 🔴 `null` = **no sé**, y NO «todos abiertos». La tira queda tocable y
+         el rebote del botón sigue siendo la red. */
+      setDiasEstado(r.ok ? r.data : null);
+    })();
+    return () => { vigente = false; };
+  }, [mascotaId, dias, modalidad]);
+
+  /** Los días que NO llevan a ningún lado. Vacío mientras no se leyó. */
+  const cerrados = useMemo(
+    () => new Set((diasEstado ?? []).filter((d) => !d.reservable).map((d) => d.fecha)),
+    [diasEstado],
+  );
+
+  /**
+   * 🔴 **LA VOZ DEL DÍA CERRADO — y acá hay una brecha DECLARADA.**
+   * `SelectorDia` toma **una sola** `etiquetaCerrado` para todos los días, y
+   * sólo la usa en el `accessibilityLabel`. *«Ningún lugar abre» y «están todos
+   * llenos» son dos verdades distintas —ante la primera se elige otro día,
+   * ante la segunda se puede esperar— y con una sola cadena no se pueden
+   * decir las dos.*
+   *
+   * Lo que se hace mientras tanto, sin inventar: **si todos los días cerrados
+   * comparten motivo, se dice ESE motivo, que es exacto**; si conviven los
+   * dos, se dice el neutro. ⇒ `S107-C-PEDIDO-A-B-VOZ-POR-DIA.md`.
+   */
+  const etiquetaCerrado = useMemo(() => {
+    const motivos = new Set((diasEstado ?? []).filter((d) => !d.reservable).map((d) => d.motivo));
+    if (motivos.size === 1) {
+      const m = [...motivos][0];
+      if (m === 'ningun_lugar_abre') return t('elegirGuarderia.diaNadieAbre');
+      if (m === 'sin_cupo') return t('elegirGuarderia.diaSinCupo');
+      if (m === 'mascota_ya_reservada_ese_dia') return t('elegirGuarderia.diaYaReservado');
+    }
+    return t('hubGuarderia.diaCerrado');
+  }, [diasEstado, t]);
+
   const vozCausa = useCallback(
     (c: CausaSinGuarderias): string =>
       t(
@@ -418,11 +485,22 @@ export default function ElegirGuarderia() {
             <SelectorDia
               dias={dias}
               elegido={fecha ?? ''}
-              cerrados={new Set()}
-              etiquetaCerrado={t('hubGuarderia.diaCerrado')}
+              cerrados={cerrados}
+              etiquetaCerrado={etiquetaCerrado}
               onElegir={setFecha}
             />
           </View>
+        ) : null}
+
+        {/* ── ③bis LA LETRA DE LA MENSUALIDAD ────────────────────────────
+               🔴 **Es lo que la familia está firmando, y no se decía.** Va
+               pegada al día porque el día ELEGIDO es el que fija la
+               recurrencia: *«se cobra ese mismo día cada mes»*.
+
+               *Una recurrencia que no se declara antes de contratar es la
+               clase de cosa que se descubre en el segundo cobro.* ── */}
+        {modalidad === 'mensual' && fecha !== null ? (
+          <Texto variante="apoyo">{t('elegirGuarderia.mensualLetra')}</Texto>
         ) : null}
 
         {/* ── ③ EL TAMAÑO, **DESPUÉS del día** — ver la enmienda arriba.

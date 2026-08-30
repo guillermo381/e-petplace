@@ -72,6 +72,14 @@ const aHoraCorta = (h: string) => h.slice(0, 5);
  * 🔴 Se parte a mano y se arma con `Date(a, m-1, d)`: `new Date('2026-08-31')`
  * lo interpreta como **UTC** y en Guayaquil muestra el día anterior.
  */
+/** «8 de septiembre» — sin año ni día de la semana: va dentro de un botón. */
+function fechaCorta(iso: string): string {
+  const [a, m, d] = iso.split('-').map(Number);
+  return new Date(a, m - 1, d).toLocaleDateString(obtenerIdiomaActual(), {
+    day: 'numeric', month: 'long',
+  });
+}
+
 function fechaLarga(iso: string): string {
   const [a, m, d] = iso.split('-').map(Number);
   return new Date(a, m - 1, d).toLocaleDateString(obtenerIdiomaActual(), {
@@ -517,14 +525,25 @@ export default function LugarGuarderia() {
       {estado.fase === 'listo' ? (
       <PieReserva
         total={precioTexto}
+        /* ⭐ **EL BOTÓN LLEVA LA FECHA ADENTRO** — firma del founder (30-ago):
+           *«Reservar el 8 de septiembre» · «Comprar 5 estadías y agendar el 8
+           de septiembre» · «Contratar plan mensual desde el 8 de
+           septiembre»*.
+
+           *El día se eligió dos pantallas antes; nombrarlo en el botón es lo
+           que deja confirmar sin volver a mirar.* Y en la mensualidad la
+           preposición cambia —**desde**— porque ahí el día no es lo que se
+           compra: es donde empieza a correr. */
         etiqueta={
-          bonoId !== null
-            ? t('lugarGuarderia.agendarDePaquete')
-            : esPaquete
-              ? t('lugarGuarderia.comprarPaquete', { n: tamano })
-              : esMensual
-                ? t('lugarGuarderia.contratarMensual')
-                : t('lugarGuarderia.reservar')
+          fechaDeParams === null
+            ? t('lugarGuarderia.faltaDia')
+            : bonoId !== null
+              ? t('lugarGuarderia.agendarDia', { dia: fechaCorta(fechaDeParams) })
+              : esPaquete
+                ? t('lugarGuarderia.comprarPaqueteDia', { n: tamano, dia: fechaCorta(fechaDeParams) })
+                : esMensual
+                  ? t('lugarGuarderia.contratarMensualDesde', { dia: fechaCorta(fechaDeParams) })
+                  : t('lugarGuarderia.reservarDia', { dia: fechaCorta(fechaDeParams) })
         }
         habilitado={puedeReservar && !esMensual}
         insetBottom={insets.bottom}

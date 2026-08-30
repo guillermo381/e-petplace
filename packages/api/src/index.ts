@@ -1561,6 +1561,16 @@ export {
   type ActaGuarderia,
   type MediaDelActa,
   evaluarRequisitosGuarderia,
+  /* ⚠️ **AGREGADO POR S107-C, EN TERRITORIO DE A, Y DECLARADO.** Los tres
+     wrappers estaban construidos y **no re-exportados**, así que las apps no
+     podían llamarlos: `TS2724 · has no exported member`. *Un wrapper que no se
+     exporta es igual que un pedido que vive en una rama sin mergear — existe y
+     nadie puede usarlo.* Se pidió por mensaje y se agregó igual porque era lo
+     único que frenaba el ítem 1 del founder (la tira que dice su estado sin
+     que la toquen). Edición ADITIVA, cero comportamiento. */
+  obtenerDiasGuarderiaDisponibles,
+  type DiaGuarderiaAgregado,
+  type MotivoDiaAgregado,
   reservarDiaGuarderia,
   type RequisitosGuarderia,
   type RequisitoFaltante,
