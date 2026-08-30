@@ -194,8 +194,19 @@ export default function ElegirGuarderia() {
     return () => { vigente = false; };
   }, [mascotaId]);
 
-  /** Paquete exige tamaño antes de preguntar por el día. */
-  const listoParaDia = modalidad !== null && (modalidad !== 'paquete' || tamano !== null);
+  /* ⏪ **EL ORDEN SE INVIRTIÓ — enmienda firmada del founder (29-ago), sobre
+     una medición mía.** Antes el tamaño iba ANTES de la fecha, y eso dejaba
+     **el primer toque a ciegas**: los precios por tamaño salen de los lugares
+     que operan ESE día, así que sin fecha no hay precio que mostrar.
+
+     > *La firma original ponía los chips antes porque se asumía que el precio
+     > no dependía del día. Depende — de los lugares que abren.*
+
+     ⇒ **la fecha va primero y los chips de tamaño después**, ya con su precio.
+     El día siempre se puede preguntar; **lo que espera ahora es el tamaño.** */
+  const listoParaDia = modalidad !== null;
+  /** El botón sí exige tamaño en paquete: **se compra un tamaño, no «un paquete».** */
+  const listoParaSeguir = modalidad !== null && (modalidad !== 'paquete' || tamano !== null);
 
   useEffect(() => {
     if (!listoParaDia || fecha === null || mascotaId === null) {
@@ -299,7 +310,7 @@ export default function ElegirGuarderia() {
   );
 
   /* ① Se pregunta por la causa y basta: `cuantos > 0 ⟺ causa === null`. */
-  const puedeSeguir = resumen.fase === 'listo' && resumen.causa === null;
+  const puedeSeguir = listoParaSeguir && resumen.fase === 'listo' && resumen.causa === null;
   /* ② `null` ⇒ nada. Jamás un `0` que se lea como gratis.
      ═══════════════════════════════════════════════════════════════════════
      🔴 **EN PAQUETE NO SE PINTA PRECIO, Y ES LA CURA DE UN DEFECTO CARO.**
@@ -350,8 +361,27 @@ export default function ElegirGuarderia() {
           />
         ) : null}
 
-        {/* ── ② LO QUE ESA MODALIDAD NECESITA ── */}
-        {modalidad === 'paquete' ? (
+        {/* ── ③ EL DÍA, con el rótulo de SU modalidad ── */}
+        {listoParaDia ? (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">
+              {modalidad === 'paquete' ? t('elegirGuarderia.primeraEstadia')
+                : modalidad === 'mensual' ? t('elegirGuarderia.primerDia')
+                : t('hubGuarderia.queDia')}
+            </Texto>
+            <SelectorDia
+              dias={dias}
+              elegido={fecha ?? ''}
+              cerrados={new Set()}
+              etiquetaCerrado={t('hubGuarderia.diaCerrado')}
+              onElegir={setFecha}
+            />
+          </View>
+        ) : null}
+
+        {/* ── ③ EL TAMAÑO, **DESPUÉS del día** — ver la enmienda arriba.
+               Con la fecha puesta, cada chip ya puede decir su precio. ── */}
+        {modalidad === 'paquete' && fecha !== null ? (
           <SelectorOpcion
             acento="control"
             disposicion="tira"
@@ -369,24 +399,6 @@ export default function ElegirGuarderia() {
             seleccionada={tamano === null ? '' : String(tamano)}
             onSelect={(c) => { setTamano(Number(c) as TamanoPaqueteGuarderia); setFecha(null); }}
           />
-        ) : null}
-
-        {/* ── ③ EL DÍA, con el rótulo de SU modalidad ── */}
-        {listoParaDia ? (
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">
-              {modalidad === 'paquete' ? t('elegirGuarderia.primeraEstadia')
-                : modalidad === 'mensual' ? t('elegirGuarderia.primerDia')
-                : t('hubGuarderia.queDia')}
-            </Texto>
-            <SelectorDia
-              dias={dias}
-              elegido={fecha ?? ''}
-              cerrados={new Set()}
-              etiquetaCerrado={t('hubGuarderia.diaCerrado')}
-              onElegir={setFecha}
-            />
-          </View>
         ) : null}
 
         {/* ── ⑤ LOS REQUISITOS — **DESPUÉS de elegir el día**, en los tres

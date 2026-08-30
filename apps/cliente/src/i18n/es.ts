@@ -2868,6 +2868,8 @@ export const clienteEs = {
        producto está roto cuando sólo falta tocar un día. */
     faltaDia: 'Elige un día en el calendario.',
     comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
+    agendarDePaquete: 'Agendar este día con tu paquete',
+    agendadaDePaquete: 'Estadía agendada — te quedan {{n}}.',
     paqueteListo: 'Paquete comprado y primer día agendado — te quedan {{n}}.',
     /* 🔴 El bono YA existe: decir solo «no se pudo» dejaría a la familia
        creyendo que perdió la plata. */
@@ -3066,6 +3068,10 @@ export const clienteEs = {
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
     verSuDia: 'Ver su día',
+    reservarDePaquete: 'Reservar estadía de tu paquete',
+    /* El singular tiene key propia: la pluralización no es interpolación. */
+    saldo: '{{n}} de {{total}} disponibles',
+    saldoUna: '1 de {{total}} disponible',
     elegiMascotaDetalle: 'Toca una de tus mascotas para ver sus estadías.',
     vacioDetalle: 'Cuando reserves, tus estadías se verán acá.',
     estadiasNoCargoTitulo: 'No pudimos cargar tus estadías',

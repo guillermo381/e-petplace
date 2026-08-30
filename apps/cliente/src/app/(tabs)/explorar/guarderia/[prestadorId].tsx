@@ -103,8 +103,11 @@ export default function LugarGuarderia() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string }>();
-  const esPaquete = params.modalidad === 'paquete';
+  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string; bonoId?: string }>();
+  /** 🔴 CON BONO NO SE COMPRA: se agenda contra el saldo. **Cero cobro** — el
+   *  desglose se congeló al comprar. */
+  const bonoId = typeof params.bonoId === 'string' && params.bonoId.length > 0 ? params.bonoId : null;
+  const esPaquete = params.modalidad === 'paquete' && bonoId === null;
   const tamano = Number(params.tamano ?? '');
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
@@ -228,7 +231,13 @@ export default function LugarGuarderia() {
    *  de tocar. `null` = no llegó, y entonces el pie no monta bloque de precio
    *  — *jamás un número inventado.* */
   const precioTexto =
-    typeof params.precio === 'string' && params.precio.length > 0 ? params.precio : null;
+    bonoId !== null
+      ? /* 🔴 SIN PRECIO: **no hay cobro en este paso.** *Pintar un número acá
+           sugeriría que se paga otra vez lo que ya se pagó al comprar.* */
+        null
+      : typeof params.precio === 'string' && params.precio.length > 0
+        ? params.precio
+        : null;
   /* 🔴 Se estrecha por FASE antes de mirar `requisitos`: mientras carga no hay
      nada que decidir, y el pie sólo existe con la pantalla lista. */
   const req = estado.fase === 'listo' ? estado.requisitos : null;
@@ -247,6 +256,24 @@ export default function LugarGuarderia() {
     if (elegido === null || typeof mascotaId !== 'string' || reservando) return;
     setReservando(true);
     setRebote(null);
+    /* ═══ AGENDAR CONTRA SALDO — ni compra ni cobro ═══════════════════════
+       🔴 **La mascota VIAJA siempre**: con más de una elegible el motor rebota
+       `mascota_no_determinada` **en vez de adivinar**, y acá ya está decidida
+       desde el hub. *El bono es del hogar; a cuál animal se le agenda el martes
+       lo elige la familia cada vez.* */
+    if (bonoId !== null) {
+      const r = await reservarDiaDePaqueteGuarderia({ bonoId, fecha: elegido, mascotaId });
+      setReservando(false);
+      if (!r.ok) { setRebote(r.mensaje); setIntento((n) => n + 1); return; }
+      /* El comprobante de una reserva SIN cobro es el del paseo, censado: **un
+         aviso que nombra el saldo restante + Go home**, y el rastro es la fila
+         del hub. *No hay pantalla de confirmación, y está bien.* */
+      mostrar({ texto: t('lugarGuarderia.agendadaDePaquete', { n: r.data.saldoRestante }), variante: 'exito' });
+      if (router.canDismiss()) router.dismissAll();
+      router.navigate('/hogar/guarderia');
+      return;
+    }
+
     /* ═══ EL CAMINO DEL PAQUETE — DOS LLAMADAS, UN SOLO ACTO ═══════════════
        Firma del founder: **el toggle de la primera sesión va prendido y es
        obligatorio en la primera compra.** Por eso acá no hay interruptor: *un
@@ -325,7 +352,7 @@ export default function LugarGuarderia() {
         fecha: elegido,
       },
     });
-  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t]);
+  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t, bonoId]);
 
   if (estado.fase === 'cargando') {
     return (
@@ -490,7 +517,13 @@ export default function LugarGuarderia() {
       {estado.fase === 'listo' ? (
       <PieReserva
         total={precioTexto}
-        etiqueta={esPaquete ? t('lugarGuarderia.comprarPaquete', { n: tamano }) : t('lugarGuarderia.reservar')}
+        etiqueta={
+          bonoId !== null
+            ? t('lugarGuarderia.agendarDePaquete')
+            : esPaquete
+              ? t('lugarGuarderia.comprarPaquete', { n: tamano })
+              : t('lugarGuarderia.reservar')
+        }
         habilitado={puedeReservar}
         insetBottom={insets.bottom}
         /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una

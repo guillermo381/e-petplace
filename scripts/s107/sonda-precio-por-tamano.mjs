@@ -35,12 +35,12 @@ await pg.evaluate(([k,v]) => localStorage.setItem(k,v), [`sb-${REF}-auth-token`,
 await pg.goto(`http://localhost:8091/explorar/guarderia?mascotaId=${m[0].id}&mascotaNombre=Thor`, { waitUntil:'networkidle', timeout:60000 });
 await pg.waitForTimeout(2500);
 
-/* 🔴 EL ORDEN IMPORTA Y LO DESTAPÓ LA SONDA: el selector de día **no existe**
-   hasta que haya un tamaño elegido, y los precios **no existen** hasta que haya
-   fecha. ⇒ el primer toque de tamaño es a ciegas; **desde el segundo, cada chip
-   muestra su precio.** *Se recorre en ese orden porque es el de la familia.* */
+/* ⏪ **EL ORDEN SE INVIRTIÓ** (enmienda firmada, 29-ago): antes había que tocar
+   un tamaño ANTES de la fecha, y ese primer toque era **a ciegas** porque los
+   precios sólo existen con fecha. *Ahora: modalidad → fecha → tamaños, ya con
+   su precio.* **Esta sonda es el control de que el ciego desapareció: si los
+   chips no tuvieran precio acá, el orden no se habría invertido de verdad.** */
 await tocar(pg, porDato(pg, 'Pack'), 'el segmento Paquete');
-await tocar(pg, porDato(pg, /^5\b/), 'el chip de 5 (primer toque, a ciegas)');
 await tocar(pg, porDato(pg, '31'), 'el día 31');
 await pg.waitForTimeout(3000);
 

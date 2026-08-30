@@ -47,6 +47,9 @@ import {
   getEstadoOnboardingDueno,
   obtenerMascotasDeFamilia,
   obtenerMisEstadiasGuarderia,
+  obtenerMisPaquetesGuarderia,
+  reservarDiaDePaqueteGuarderia,
+  type PaqueteCompradoGuarderia,
   resolverUrlsFotos,
   type EstadiaDeMiMascota,
 } from '@epetplace/api';
@@ -145,6 +148,21 @@ export default function LogGuarderia() {
   const [pestana, setPestana] = useState<'proximas' | 'historial'>('proximas');
   const [estadias, setEstadias] = useState<Estadias>({ fase: 'cargando' });
   const [abierta, setAbierta] = useState<string | null>(null);
+  const [paquetes, setPaquetes] = useState<PaqueteCompradoGuarderia[]>([]);
+
+  /* ⭐ EL SALDO DEL PAQUETE — A publicó su lector (`768f8d86`) y con él nace el
+     botón que el founder pidió hace varias tandas. **Sólo los VIGENTES**: un
+     bono agotado o vencido no es un paquete con cero, es uno que ya no está, y
+     mostrarlo en cero invita a tocarlo. */
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      const r = await obtenerMisPaquetesGuarderia();
+      if (!vigente) return;
+      setPaquetes(r.ok ? r.data.filter((p) => p.estado === 'activo' && p.quedan > 0) : []);
+    })();
+    return () => { vigente = false; };
+  }, [intento]);
   const idioma = obtenerIdiomaActual();
 
   /* 🔴 SE PIDE POR MASCOTA. El lector acepta `mascotaId?` y filtra del lado del
@@ -228,6 +246,53 @@ export default function LogGuarderia() {
             {/* LOS CHIPS DE LA LISTA — la estructura de las cuatro hermanas.
                 Se montan ya: **son navegación, no dato**, y el día que la
                 lista llegue no hay que reacomodar la pantalla. */}
+            {/* ⭐ **EL PAQUETE CON SALDO — arriba de las pestañas** (firma del
+                founder). *Es una acción, y las pestañas son un filtro: una
+                acción debajo de un filtro parece filtrada por él.*
+
+                🔴 **Y va DEBAJO de los chips de mascota, no encima, por una
+                razón de motor:** con más de una mascota elegible
+                `reservar_dia_de_paquete_guarderia` **rebota
+                `mascota_no_determinada`** — *el bono es del hogar y a cuál
+                animal se le agenda el martes lo decide la familia cada vez.*
+                Los chips ya están arriba; poner el botón encima lo dejaría
+                **sin sujeto**, y tendría que preguntar la mascota de nuevo en
+                una Hoja propia. **Se declaró a la mesa y así quedó.** */}
+            {paquetes.map((pq) => (
+              <View key={pq.bonoId} style={{ gap: spacing[1] }}>
+                <Boton
+                  variante="primario"
+                  bloque
+                  etiqueta={t('logGuarderia.reservarDePaquete')}
+                  deshabilitado={elegida === null}
+                  razonDeshabilitado={t('plan.elegiMascota')}
+                  onPress={() =>
+                    /* 🔴 VA DIRECTO AL DÍA DE **ESA** GUARDERÍA — firma del
+                       founder: *«sin elegir lugar y sin pagar: las dos cosas ya
+                       las hizo»*. **El lugar está determinado por el bono**, así
+                       que la lista de «quién puede» no tiene nada que preguntar.
+                       *Pasar por ella sería ofrecerle cambiar algo que ya
+                       eligió — y abrir la puerta a que elija mal.* */
+                    router.push({
+                      pathname: '/explorar/guarderia/[prestadorId]',
+                      params: {
+                        prestadorId: pq.prestadorId,
+                        mascotaId: elegida ?? '',
+                        ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
+                        modalidad: 'paquete',
+                        bonoId: pq.bonoId,
+                      },
+                    })
+                  }
+                />
+                <Texto variante="apoyo">
+                  {pq.quedan === 1
+                    ? t('logGuarderia.saldoUna', { total: pq.total })
+                    : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })}
+                </Texto>
+              </View>
+            ))}
+
             {/* Las etiquetas son las MISMAS keys que sus hermanas (`plan.seg*`)
                 — *dos cadenas nuevas que dijeran lo mismo son dos lugares donde
                 la voz puede divergir.* */}
