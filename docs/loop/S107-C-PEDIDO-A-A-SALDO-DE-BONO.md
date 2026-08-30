@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · **EL HUB NO PUEDE SABER QUE LA FAMILIA TIENE UN PAQUETE**
 
 > Lo bloquea la mitad del recorrido que el founder pidió caminar: *«y después agendar una segunda

@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · **EL PRESTADOR NO PUEDE ELEGIR SUS DÍAS, y el bloqueante no es la pantalla**
 
 > Medido antes de proponer nada, por pedido del founder.

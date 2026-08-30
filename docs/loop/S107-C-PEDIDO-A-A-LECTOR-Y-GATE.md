@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · TRES COSAS DEL LECTOR, leídas desde el consumidor
 
 > ## ☠️ CUMPLIDO — las tres: `precio: number | null` en el retorno · `especies` en el lector · `bloquea` dentro de la evaluación, leído también por `reservar_dia_guarderia` (verificado contra el objeto, 29-ago-2026)

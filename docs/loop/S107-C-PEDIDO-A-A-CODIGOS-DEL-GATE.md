@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · **DOS DE LOS TRES MOTIVOS DEL GATE DE RESERVA NO ESTÁN TIPADOS**
 
 > Hallado corriendo los caminos tristes contra el motor real, en subtransacción.
