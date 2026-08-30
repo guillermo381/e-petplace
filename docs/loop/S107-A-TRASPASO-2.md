@@ -413,6 +413,39 @@ conflicto en un no-evento.*
 
 ---
 
+## ⑦octies 🟢 LA OTA QUE CIERRA EL FLUJO — ancla `cd94ae6e`
+
+| app | group | runtime |
+|---|---|---|
+| cliente | `7167d05d-d365-4163-ac3e-f3a9823a430c` | 1.0.6 |
+| prestador | `7693522b-cceb-4ec8-a64e-6d50bacc29cb` | 1.0.7 |
+
+Árbol en cero antes de bundlear (regla 82) · 4 typechecks en 0 ·
+`verify:diseno` VERDE con **62 reglas** · **`verify-ota` VERDE en las dos**.
+
+**Lleva:** las tres modalidades vivas · la mensualidad con su letra y su medio
+de pago · la capacidad curada del lado del prestador · la tira que dice su
+estado sin que la toquen · el acto único de aceptación · «Con tu paquete» · el
+semáforo a ~60 px.
+
+**Las notas de `--binario-local` siguen diciendo cosas distintas a propósito:**
+prestador = **MEDICIÓN** (USB, 29-ago) · cliente = **DECLARACIÓN del founder**
+(el instrumento salió NO CONCLUYENTE, sin aparato).
+
+### 🔴 LO QUE VIAJA CON LÍMITE DECLARADO — que nadie lo lea como defecto
+
+1. **`SelectorDia` tiene UNA `etiquetaCerrado`** ⇒ con `ningun_lugar_abre` y
+   `sin_cupo` conviviendo sólo puede decir el neutro. **El motor los distingue;
+   la pieza todavía no.** Pedido de C a B, abierto.
+2. **Sobre un rechazo del banco la pantalla dice UNA sola cosa** — **`D-867`**,
+   bloqueada por la tabla de códigos de Erick. *La causa llega del proveedor y
+   se pierde aplanada a prosa en `motivo_rechazo`.* **Límite, no omisión.**
+3. **La mensualidad NO COBRA todavía** (`cobrada: false`): firma el mandato. El
+   reloj espera **las tres claves de `app_config` del founder**, que van
+   últimas.
+
+---
+
 ## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`
