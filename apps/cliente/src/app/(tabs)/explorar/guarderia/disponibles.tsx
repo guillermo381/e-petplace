@@ -236,8 +236,14 @@ export default function QuienPuedeGuarderia() {
                 /* 🔴 SIN NÚMERO cuando el lugar no vende esta modalidad — la
                    pieza acepta la cadena vacía y no pinta el separador
                    huérfano. *Un guion o un cero se leerían como «gratis».* */
+                /* 🔴 MISMO DEFECTO, SEGUNDA SUPERFICIE: para paquete,
+                   `precioModalidad` sale de `min(gp.precio)` — **el paquete más
+                   barato del lugar, no el tamaño elegido**. *Un «$40» bajo una
+                   selección de 15 es un precio equivocado en la pantalla donde
+                   se elige a quién pagarle.* No se pinta hasta que el server
+                   reciba el tamaño. */
                 precio={
-                  precio === null
+                  modalidad === 'paquete' || precio === null
                     ? ''
                     : modalidad === 'dia'
                       ? t('hubGuarderia.porDia', { precio: precio.toFixed(2) })

@@ -441,26 +441,36 @@ export default function LugarGuarderia() {
         {estado.requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
-            <SemaforoSanitario
-              requisitos={estado.requisitos.faltantes.length === 0
-                ? [{
-                    clave: 'todo',
-                    etiqueta: t('lugarGuarderia.requisitosAlDia'),
-                    estado: 'al_dia',
-                  }]
-                : estado.requisitos.faltantes.map((f): RequisitoSanitario => ({
-                    clave: f.codigo,
-                    etiqueta: f.nombre,
-                    estado: 'falta',
-                    /* El estado del motor se traduce a VOZ acá — el server
-                       manda códigos, la voz es de la casa (contrato §⑥bis). */
-                    detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
-                    /* 🔴 El tipo de la pieza hace INEXPRESABLE un faltante sin
-                       camino: `falta` no compila sin `onResolver`. */
-                    onResolver: () => router.push('/carnet'),
-                    etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
-                  }))}
-            />
+            {/* ⭐ LA SUPERFICIE BLANCA LA PONE EL CONSUMIDOR — firma del
+                founder: *«fondo blanco y un chevron a la derecha, o sea la
+                anatomía de una FILA»*. **El chevron ya lo dibuja la pieza** (el
+                defecto era que su path salía como texto, curado por B); lo que
+                faltaba era el fondo, y `SemaforoSanitario` **no expone
+                superficie** — como `FichaFranja`, la decide quien la monta.
+                *Sin ella las filas flotan sobre el papel y se leen como texto
+                suelto, que es exactamente lo que el founder reportó.* */}
+            <Tarjeta>
+              <SemaforoSanitario
+                requisitos={estado.requisitos.faltantes.length === 0
+                  ? [{
+                      clave: 'todo',
+                      etiqueta: t('lugarGuarderia.requisitosAlDia'),
+                      estado: 'al_dia',
+                    }]
+                  : estado.requisitos.faltantes.map((f): RequisitoSanitario => ({
+                      clave: f.codigo,
+                      etiqueta: f.nombre,
+                      estado: 'falta',
+                      /* El estado del motor se traduce a VOZ acá — el server
+                         manda códigos, la voz es de la casa (contrato §⑥bis). */
+                      detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
+                      /* 🔴 El tipo de la pieza hace INEXPRESABLE un faltante sin
+                         camino: `falta` no compila sin `onResolver`. */
+                      onResolver: () => router.push('/carnet'),
+                      etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
+                    }))}
+              />
+            </Tarjeta>
           </View>
         ) : null}
 
