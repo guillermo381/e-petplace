@@ -928,10 +928,15 @@ export const prestadorEn = {
     baldosaN: '{{n}} services',
     baldosaNoCargo: "Couldn't load",
     // S98-C · Espejo de es.ts — las dos vistas de «Tu tienda».
+    /* ☠️ `tiendaVitrinaDetalle` y `tiendaLocalDetalle` MURIERON (S107-B, firma
+       del founder 30-ago): «La vitrina» y «Muy pronto» salieron de la baldosa
+       cuando la de tres columnas se quedó con glifo y nombre, y la mesa firmó
+       que **no vuelven**. Se borran acá porque **ésa era la condición de
+       muerte que este mismo parte había escrito**: quedaban vivas *«esperando
+       firma»*, y la firma llegó. *Una clave que sobrevive a su decisión deja
+       de ser reserva y pasa a ser basura con coartada.* */
     tiendaVitrina: 'Sell on e-PetPlace',
-    tiendaVitrinaDetalle: 'Storefront',
     tiendaLocal: 'Your shop inventory',
-    tiendaLocalDetalle: 'Coming soon',
     tiendaV2Titulo: 'Not yet, but coming',
     tiendaV2Voz:
       "Your shop inventory —what's on your shelves, without going to the storefront— is coming in the next version. For now you can sell on e-PetPlace.",

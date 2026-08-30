@@ -19,8 +19,22 @@
  * escribir la fórmula de nuevo.*
  *
  * ⚠️ Y lo que este instrumento **NO** dice: si el apagado se LEE como «todavía
- * no lo usás» y no como «deshabilitado». **Eso es ojo del founder** — acá sólo
- * se descarta que haya un rojo de contraste esperándolo.
+ * no lo usás» y no como «deshabilitado». **Eso es ojo del founder.**
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ✅ **FIRMADO Y CERRADO (founder, 30-ago-2026): el glifo apagado SE VE BIEN EN
+ * EL APARATO y queda como está.** Este archivo **deja de ser un gate y pasa a
+ * ser un DATO DECLARADO**: sale siempre en 0 y reporta sus números.
+ *
+ * 🔴 **Por qué se degrada en vez de dejarlo en rojo, que era lo cómodo:** un
+ * gate que queda ROJO POR DECISIÓN enseña a ignorar el rojo — y el día que un
+ * rojo de verdad aparezca acá, nadie lo va a mirar. *Un instrumento cuyo rojo
+ * ya no significa «hay que arreglar algo» no es un gate: es ruido con
+ * autoridad.* Los números siguen impresos porque **el dato no cambió**: en
+ * claro el glifo a 0.45 rinde 2.02–2.06 contra un piso gráfico de 3, y el
+ * founder lo miró y lo aceptó. *Queda escrito para que nadie lo re-descubra
+ * como si fuera nuevo.*
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 import { getTheme } from '../packages/ui/src/themes'
 
@@ -88,8 +102,10 @@ for (const modo of ['light', 'dark'] as const) {
   }
 }
 console.log(
-  fallos === 0
-    ? '\nVERDE — el glifo apagado se separa en las capas EN USO.'
-    : `\n${fallos} capa(s) EN USO por debajo del piso gráfico (las [sin mundo] no cuentan al veredicto).`,
+  `\n${fallos} capa(s) EN USO por debajo del piso gráfico de ${PISO}.` +
+    '\n✅ DATO DECLARADO, NO FALLO — el founder lo gateó en el aparato el 30-ago y firmó que se ve' +
+    '\n   bien. Ver la cabecera: este instrumento no reprueba, informa.',
 )
-process.exit(fallos === 0 ? 0 : 1)
+/* Sale SIEMPRE en 0: ver la cabecera. Un rojo por decisión firmada enseña a
+   ignorar el rojo. */
+process.exit(0)

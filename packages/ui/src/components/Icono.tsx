@@ -115,8 +115,24 @@ export type IconoNombre =
    *  el tiempo.* **Las ondas se descartaron por precedente**, no por gusto:
    *  `contactoOndas` murió en su gate porque **§1 manda dibujar el OBJETO y
    *  «el alcance» es una idea** — y encima chocaba con `ayuda` a 21px. */
-  | 'certificaciones' | 'certificacionesSello'
-  | 'wearables' | 'wearablesActividad'
+  /* ☠️ `certificacionesSello` y `wearablesActividad` MURIERON EN SU GATE
+     (firma del founder, 30-ago-2026) — molde `prime`/`primeCorona`: **el
+     perdedor de cada par muere con su lápida**, no se guarda «por si acaso».
+     *Un candidato que sobrevive a su gate es un dibujo que el próximo va a
+     encontrar sin saber que ya perdió.*
+
+     **Los ganadores son los que quedan** — `certificaciones` (papel + huella
+     como SELLO) y `wearables` (el dispositivo con la huella ADENTRO)—, y **no
+     se dedujo cuáles: se midió.** El consumidor ya los monta por nombre en
+     `explorar/index.tsx` (`icono: 'wearables' | 'certificaciones'`), así que
+     *«los que están puestos»* tenía una única lectura contra el objeto.
+
+     Lo que perdió cada uno, para que no se re-dibuje igual: **el sello
+     troquelado** (anillo con la huella adentro — su riesgo declarado era Ley 9,
+     poca aire a 21 px) y **la traza de actividad** (leía a ECG, o sea clínica,
+     que es justo lo que el veto del founder sacaba). */
+  | 'certificaciones'
+  | 'wearables'
   /** S100d-B — EL FILTRO, pedido por la pista C con su literal del founder
    *  (punto 2 del gate: *«buscador en el MISMO escalón que Filtrar, con
    *  ícono clásico de filtro»*) y con el registry censado antes de pedir:
@@ -686,20 +702,6 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={11.4} y={13.4} escala={0.46} />
     </>
   ),
-  /* B · CERTIFICACIÓN CON SELLO TROQUELADO — el mismo papel, pero el sello
-     es un ANILLO y la huella vive adentro. Dice «esto lo selló alguien» más
-     fuerte que A.
-     🔴 RIESGO DECLARADO, y es el que decide el gate: **Ley 9 — a 21px la
-     huella SOBREVIVE O ES RUIDO.** Metida dentro de un anillo tiene menos
-     aire que en A, y puede empastarse en una mancha. Si eso pasa, gana A. */
-  certificacionesSello: ({ tinta, huella }) => (
-    <>
-      <Path d="M5.4 2.8h9.4l4 4v14.4H5.4Z" {...trazo(tinta)} />
-      <Path d="M14.6 2.9v4.1h4" {...trazo(tinta)} />
-      <Circle cx={13.6} cy={15.6} r={4.2} {...trazo(tinta)} />
-      <Huella color={huella} x={11.5} y={13.5} escala={0.36} />
-    </>
-  ),
   /* A · WEARABLE — el dispositivo: cuerpo redondeado + dos tramos de correa,
      y **la huella ADENTRO**. El aparato muestra a la mascota: eso dice
      «monitorea, y monitorea a ELLA» sin corazón y sin ondas.
@@ -711,21 +713,6 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Path d="M9 2.6h6l-.5 3.4M9 21.4h6l-.5-3.4M9.5 6h5" {...trazo(tinta)} />
       <Path d="M6.4 8.6a2 2 0 0 1 2-2h7.2a2 2 0 0 1 2 2v6.8a2 2 0 0 1-2 2H8.4a2 2 0 0 1-2-2Z" {...trazo(tinta)} />
       <Huella color={huella} x={9.6} y={9.4} escala={0.38} />
-    </>
-  ),
-  /* B · WEARABLE CON TRAZA — el mismo cuerpo, con la línea de actividad
-     adentro y la huella afuera, chica.
-     🔴 RIESGO DECLARADO, y es el que el founder ya nombró: **una traza
-     puede leerse como ECG**, o sea CLÍNICA — que es la familia que su veto
-     saca («un corazón dice consulta»). Se dibuja igual porque la traza es
-     lo único que dice «mide EN EL TIEMPO» siendo un objeto y no una idea;
-     si a 21px se lee médica, gana A. */
-  wearablesActividad: ({ tinta, huella }) => (
-    <>
-      <Path d="M9 2.6h6l-.5 3.4M9 21.4h6l-.5-3.4" {...trazo(tinta)} />
-      <Path d="M6.4 8.6a2 2 0 0 1 2-2h7.2a2 2 0 0 1 2 2v6.8a2 2 0 0 1-2 2H8.4a2 2 0 0 1-2-2Z" {...trazo(tinta)} />
-      <Path d="M8.6 12.4h1.8l1.2-2.4 1.4 4 1-1.6h1.4" {...trazo(tinta)} />
-      <Huella color={huella} x={16.6} y={16.4} escala={0.3} />
     </>
   ),
   carnet: ({ tinta, huella }) => (
@@ -1839,13 +1826,11 @@ export function Icono({
        qué está habilitada. *No es `cuidado` como `training`: el curso es el
        servicio; el certificado es la condición que queda.* */
     certificaciones: identidad,
-    certificacionesSello: identidad,
     /* WEARABLE → `identidad`, y **no se eligió: la casa ya lo tenía
        declarado**. `themes/light.ts` dice `services.wearable:
        palette.verdeVitalDark  // Capa 1 · monitoreo de vida`. Se lee de ahí
        (L-166) en vez de razonarlo de nuevo y arriesgar contradecirlo. */
     wearables: identidad,
-    wearablesActividad: identidad,
     // Las tres secciones de "Datos comerciales" comparten CAPA a
     // propósito: son la identidad del negocio ante el Estado y ante el
     // banco, y tres hermanas de la misma pantalla que divergieran de
