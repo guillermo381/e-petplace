@@ -29,6 +29,7 @@ const MENSAJES = {
   mascota_ya_reservada_ese_dia: 'Ya tienes ese día reservado para esa mascota.',
   rango_invalido:               'Ese rango de fechas no es válido.',
   rango_demasiado_largo:        'Ese rango de fechas es demasiado largo.',
+  modalidad_invalida:           'Esa modalidad no existe.',
 
   /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
      función, no grepeando. **Mi censo anterior dijo «0 sin tipar» y estos dos
@@ -292,6 +293,81 @@ export async function obtenerDiasGuarderia(params: {
       yaReservado: r.ya_reservado,
       reservable: r.reservable,
       motivo: typeof r.motivo === 'string' ? (r.motivo as MotivoDiaNoReservable) : null,
+    });
+  }
+  return { ok: true, data: dias };
+}
+
+export interface DiaGuarderiaAgregado {
+  /** 'YYYY-MM-DD' */
+  fecha: string;
+  /** Cuántos lugares pueden ese día. `0` no dice por qué — eso es `motivo`. */
+  lugares: number;
+  yaReservado: boolean;
+  reservable: boolean;
+  motivo: MotivoDiaAgregado | null;
+}
+
+export type MotivoDiaAgregado =
+  | 'fecha_pasada'
+  /** Ningún lugar ABRE ese día — el caso del fin de semana en un L-V. */
+  | 'ningun_lugar_abre'
+  | 'mascota_ya_reservada_ese_dia'
+  /** Abren, pero están todos llenos. **No es lo mismo que el anterior.** */
+  | 'sin_cupo';
+
+/**
+ * La tira **sin lugar elegido** — un día es reservable si **algún** lugar puede.
+ *
+ * ── POR QUÉ EXISTE ────────────────────────────────────────────────────────
+ * `obtenerDiasGuarderia` es **por prestador**, y en el paso donde la familia
+ * elige la fecha **todavía no hay lugar elegido**. Sin esto, los 14 días se ven
+ * iguales y **la familia descubre tocando** cuáles sirven — y si toca un fin de
+ * semana, encuentra un botón apagado sin explicación.
+ *
+ * 🔴 `ningun_lugar_abre` y `sin_cupo` **no son lo mismo**, y por eso son códigos
+ * distintos: ante el primero la familia elige otro día; ante el segundo puede
+ * esperar. *Deducir cualquiera de los dos de `lugares === 0` los confunde.*
+ *
+ * Corre sobre **la misma cadena que la lista de lugares** — ofertas cobrables,
+ * cupo, día operativo, geo — para que la tira y la lista no puedan discrepar.
+ */
+export async function obtenerDiasGuarderiaDisponibles(params: {
+  mascotaId: string;
+  /** 'YYYY-MM-DD' */
+  desde: string;
+  /** 'YYYY-MM-DD' */
+  hasta: string;
+  modalidad?: 'dia' | 'paquete' | 'mensual';
+  lat?: number;
+  lon?: number;
+}): Promise<ResultadoWrapper<DiaGuarderiaAgregado[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_dias_guarderia_disponibles', {
+    p_mascota_id: params.mascotaId,
+    p_desde: params.desde,
+    p_hasta: params.hasta,
+    p_modalidad: params.modalidad ?? undefined,
+    p_lat: params.lat ?? undefined,
+    p_lon: params.lon ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const dias: DiaGuarderiaAgregado[] = [];
+  for (const fila of data) {
+    if (typeof fila !== 'object' || fila === null) return fallaCodigo('datos_inconsistentes');
+    const r = fila as Record<string, unknown>;
+    if (typeof r.fecha !== 'string' || typeof r.lugares !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.ya_reservado !== 'boolean' || typeof r.reservable !== 'boolean') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    dias.push({
+      fecha: r.fecha,
+      lugares: r.lugares,
+      yaReservado: r.ya_reservado,
+      reservable: r.reservable,
+      motivo: typeof r.motivo === 'string' ? (r.motivo as MotivoDiaAgregado) : null,
     });
   }
   return { ok: true, data: dias };

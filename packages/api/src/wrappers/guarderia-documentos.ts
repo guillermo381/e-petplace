@@ -125,39 +125,54 @@ export async function evaluarDocumentosGuarderia(
  * (`ON CONFLICT DO NOTHING` en el motor). *Un reintento de red no puede
  * convertirse en un error para el que ya aceptó.*
  */
+export interface AceptacionResultado {
+  aceptadas: number;
+  /** **Lo único que la pantalla debe mirar** para decidir si sigue. */
+  alDia: boolean;
+  faltantes: { codigo: string; version: number }[];
+}
+
 export async function aceptarDocumentosGuarderia(params: {
   familiaId: string;
-  /** Las versiones leídas, tal como vinieron de `obtenerDocumentosGuarderia`. */
-  aceptaciones: { codigo: string; version: number }[];
   /**
-   * 🔴 **OBLIGATORIOS PORQUE EL MOTOR LOS EXIGE — y eso es LETRA, no descuido.**
-   * `aceptar_documentos_guarderia` declara `p_urgencia_tope_monto`,
-   * `p_urgencia_tope_moneda` y `p_contactos` **sin `DEFAULT`** (medido en la
-   * firma). *No se puede aceptar los documentos sin declarar hasta cuánto se
-   * autoriza gastar en una urgencia y a quién llamar* — el consentimiento y esos
-   * dos datos son **un solo acto**, y separarlos dejaría familias aceptadas y
-   * sin contacto.
+   * Las versiones leídas. **Omitirlo (o `null`) es EL ACTO ÚNICO**: el servidor
+   * resuelve los vigentes al momento del acto.
    *
-   * ⚠️ Si algún día el motor los vuelve opcionales, **acá se aflojan después,
-   * no antes**: un wrapper más permisivo que su RPC sólo mueve el rechazo del
-   * compilador al teléfono.
+   * 🔴 Preferí omitirlo. Con seis casillas, mandar cinco era una elección de la
+   * familia; **con un solo acto, mandar cinco es un bug** — y su síntoma es una
+   * familia a la que le dijiste que sí y queda en `faltan` sin entender por qué.
    */
-  urgenciaTopeMonto: number;
-  urgenciaTopeMoneda: string;
-  contactos: Json;
+  aceptaciones?: { codigo: string; version: number }[] | null;
+  /**
+   * ✏️ **AFLOJADOS EL 31-AGO — y en el orden que este mismo comentario pedía.**
+   * Decía: *«si algún día el motor los vuelve opcionales, acá se aflojan
+   * después, no antes»*. Ese día llegó: firma del founder — **el tope salió de
+   * la pantalla y vive como término del texto** (el documento dice USD 150,
+   * editable después desde la cuenta).
+   *
+   * 🔴 **Omitir el tope NO es «sin tope»: es «el del documento vigente».** Y es
+   * lo correcto, porque *cualquier número que mandara la pantalla sería una
+   * autorización que la familia no dio.*
+   *
+   * ⚠️ Mandar un número explícito es **la familia editándolo**, y entonces se
+   * guarda. Volver a aceptar sin número **no se lo borra**.
+   */
+  urgenciaTopeMonto?: number;
+  urgenciaTopeMoneda?: string;
+  contactos?: Json;
   /** Éste SÍ es opcional en el motor (`p_contacto_alternativo?`). */
   contactoAlternativo?: Json;
   /** La autorización de imagen. **Ausente = NO autorizada**, jamás al revés. */
   redesAutorizadas?: boolean;
-}): Promise<ResultadoWrapper<{ aceptadas: number }, CodigoErrorGuarderiaDocumentos>> {
+}): Promise<ResultadoWrapper<AceptacionResultado, CodigoErrorGuarderiaDocumentos>> {
   const { data, error } = await getClient().rpc('aceptar_documentos_guarderia', {
     p_familia_id: params.familiaId,
     /* Tipado, no forzado: `as never` habría silenciado al compilador en el
        único lugar donde su opinión sirve (regla 34). */
-    p_aceptaciones: params.aceptaciones as Json,
-    p_urgencia_tope_monto: params.urgenciaTopeMonto,
-    p_urgencia_tope_moneda: params.urgenciaTopeMoneda,
-    p_contactos: params.contactos,
+    p_aceptaciones: (params.aceptaciones ?? null) as Json,
+    p_urgencia_tope_monto: params.urgenciaTopeMonto ?? undefined,
+    p_urgencia_tope_moneda: params.urgenciaTopeMoneda ?? undefined,
+    p_contactos: params.contactos ?? undefined,
     p_contacto_alternativo: params.contactoAlternativo,
     /* 🔴 FAIL-CLOSED: sin decisión explícita, la imagen NO se autoriza.
        *Un default `true` acá autorizaría a publicar la foto de un animal
@@ -167,6 +182,18 @@ export async function aceptarDocumentosGuarderia(params: {
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
   const r = data as Record<string, unknown>;
-  if (typeof r.aceptadas !== 'number') return fallaCodigo('datos_inconsistentes');
-  return { ok: true, data: { aceptadas: r.aceptadas } };
+  if (typeof r.aceptadas !== 'number' || typeof r.al_dia !== 'boolean') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  /* 🔴 LA PANTALLA LEE `alDia`, NO `aceptadas`. *Un contador no es un
+     veredicto*: `aceptadas: 5` se lee como éxito mientras la familia queda
+     trabada. */
+  return {
+    ok: true,
+    data: {
+      aceptadas: r.aceptadas,
+      alDia: r.al_dia,
+      faltantes: Array.isArray(r.faltantes) ? (r.faltantes as { codigo: string; version: number }[]) : [],
+    },
+  };
 }
