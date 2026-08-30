@@ -311,6 +311,34 @@ un séptimo documento que no existe** · **quién ejecuta las notificaciones**.
 
 ---
 
+## ⑦quinquies 🟢 LA OTA DEL CAMINO ENTERO — publicada y verificada
+
+**Ancla `4db32619`** — B (1 commit) y C (17) mergeados, árbol en cero antes de
+bundlear (regla 82), 4 typechecks en 0, `verify:diseno` VERDE con 61 reglas.
+
+| app | group | runtime |
+|---|---|---|
+| cliente | `879f25fd-8f74-4707-8011-2e185eaaf920` | 1.0.6 |
+| prestador | `0726b831-563e-414c-b821-05dc554c329b` | 1.0.7 |
+
+**`verify-ota` VERDE en las dos** — *sin él no está cerrado: el `EXIT=0` de un
+publish sólo dice que EAS lo aceptó.*
+
+⚠️ **Y las dos notas de `--binario-local` NO dicen lo mismo, a propósito:**
+
+- **prestador — MEDICIÓN.** Medido por USB el 29-ago sobre el APK instalado.
+- **cliente — DECLARACIÓN DEL FOUNDER, no medición mía.** Corrí
+  `medir-apk-instalado.mjs cliente` y salió **NO CONCLUYENTE: no había aparato
+  por USB**. *El instrumento hizo lo correcto — no dijo «está bien», dijo que
+  no midió.* Se convierte en medición conectando el teléfono y repitiendo.
+
+**Lo que va en esta OTA:** los seis documentos y el camino de compra abierto ·
+la compuerta en las cuatro puertas · un día por mascota · la tira con su estado
+· el acto de aceptación de C (seis casillas, sólo viaja lo marcado) · el
+semáforo a ~60px · el selector de días.
+
+---
+
 ## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`
