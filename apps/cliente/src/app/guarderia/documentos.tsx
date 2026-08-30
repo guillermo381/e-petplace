@@ -20,28 +20,33 @@
  * pedirle a la familia que acepte algo que no le mostramos.*
  * 🔴 **Se declara para que la mesa decida** — no lo resuelvo por mi cuenta.
  *
- * ── 🔴 POR QUÉ ESTA PANTALLA SE REHIZO SOBRE `AceptacionDeDocumentos` ────
- * La primera versión **volcaba el texto legal entero de los seis documentos**
- * en tarjetas y mandaba `aceptaciones: docs.map(...)` al tocar el botón — o
- * sea **las seis, hiciera lo que hiciera la familia**. *No había casilla, no
- * había acto, y sin acto no hay prueba* (P23). **Era peor que una casilla
- * pre-marcada**, que es justo el patrón que la cabecera de la pieza prohíbe.
+ * ── 🔴 UNA CASILLA, NO OCHO — firma del founder (30-ago) ─────────────────
+ * > *«Ningún servicio pide ocho aceptaciones para agendar.»*
  *
- * Ahora la pieza de la casa pone las seis casillas, **cada documento se abre
- * sin marcarse** (el enlace es el responder más interno) y el botón sólo se
- * enciende **con las seis marcadas**. *El texto completo vive en una `Hoja`,
- * como el original clínico de `parte/[eventoId]`: un muro de seis textos
- * legales arriba del botón no es leerlos, es enterrarlos.*
+ * La pantalla pedía **seis casillas + el tope + el contacto** antes de dejar
+ * agendar un día de guardería. **Hoy pide UNA**, con el enlace a leer los seis
+ * textos completos.
  *
- * ⚠️ **La autorización de imagen bajó a `opcionales`** — el lugar que la pieza
- * tiene hecho para ella, separada y **jamás pre-marcada**. Antes era un
- * `Interruptor` suelto entre obligatorios.
+ * **Lo que NO cambió, y es lo que importa:** *el acto de aceptación sigue
+ * siendo real* — una casilla que la familia marca, **jamás pre-marcada**, con
+ * su texto accesible completo, y **las seis versiones viajan al motor** en ese
+ * único acto. *Lo que se colapsó es la ceremonia, no la prueba* (P23).
+ *
+ * · **El contacto de emergencia es OPCIONAL** — medido: `p_contactos` acepta
+ *   `NULL` y la aceptación queda `al_dia`.
+ * · **El tope de gasto SE RETIRÓ** — firma: *«para eso está el contacto de
+ *   emergencia y el seguro del prestador»*.
+ *
+ * ✅ **EL TOPE SALIÓ DEL FLUJO ENTERO** (A, 30-ago): dejó de ser un dato que
+ * la familia teclea y pasó a ser **un TÉRMINO del documento — USD 150** que se
+ * edita después desde la cuenta. *La pantalla no lo pide, no lo manda y no lo
+ * sabe.* Con él murió el `null as unknown as number` que ayer era puente.
  *
  * ── POR QUÉ NO ES **SÓLO** UNA LISTA DE CASILLAS ─────────────────────────
- * El motor exige **el tope de urgencia y los contactos SIN default**: *no se
- * puede aceptar los documentos sin declarar hasta cuánto se autoriza gastar en
- * una urgencia y a quién llamar.* **El consentimiento y esos dos datos son un
- * solo acto** — separarlos dejaría familias aceptadas y sin contacto.
+ * ⏪ **Esto decía que el motor exige el tope Y los contactos.** Medido el
+ * 30-ago: **los contactos aceptan `NULL`** y la aceptación queda `al_dia`.
+ * *La mitad de la premisa era falsa, y por esa mitad el contacto era
+ * obligatorio.* Lo que sí exige —y espera cura— es el tope.
  *
  * ── LO QUE FALLA CERRADO ─────────────────────────────────────────────────
  * · **La autorización de imagen nace APAGADA.** *Un default encendido
@@ -84,10 +89,13 @@ import { useTraduccion } from '@/i18n';
 
 /**
  * La clave de la casilla OPCIONAL. Vive aparte de los códigos del server a
- * propósito: es la única que **no** es un documento, y mezclarla en `marcadas`
- * la volvería contable para el gate.
+ * propósito: es la única que **no** es un documento — mezclarla con la
+ * aceptación la volvería contable para el gate.
  */
 const CLAVE_REDES = 'redes_autorizadas';
+
+/** La única casilla obligatoria: los términos del servicio, todos juntos. */
+const CLAVE_TERMINOS = 'terminos_del_servicio';
 
 type Carga =
   | { fase: 'cargando' }
@@ -103,12 +111,11 @@ export default function DocumentosGuarderia() {
   const [carga, setCarga] = useState<Carga>({ fase: 'cargando' });
   /* 🔴 EL ACTO. Vacío al arrancar — «el arranque de una aceptación es vacío»
      (literal de la pieza). Sin esto se volvía a mandar las seis por default. */
-  const [marcadas, setMarcadas] = useState<string[]>([]);
-  /** El documento cuyo texto completo está abierto en la Hoja. */
-  const [abierto, setAbierto] = useState<DocumentoGuarderia | null>(null);
+  const [acepto, setAcepto] = useState(false);
+  /** La Hoja con los seis textos completos. */
+  const [leyendo, setLeyendo] = useState(false);
   const [contactoNombre, setContactoNombre] = useState('');
   const [contactoTel, setContactoTel] = useState('');
-  const [tope, setTope] = useState('');
   const [redes, setRedes] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [intento, setIntento] = useState(0);
@@ -137,46 +144,44 @@ export default function DocumentosGuarderia() {
     if (carga.fase !== 'listo' || enviando) return;
     setEnviando(true);
     const r = await aceptarDocumentosGuarderia({
-      familiaId: carga.familiaId,
-      /* 🔴 SE ACEPTA LA VERSIÓN QUE SE LEYÓ, no «el documento»: si el texto
-         cambió mientras la pantalla estaba abierta, el motor lo va a saber.
+      /* ⭐ **UN SOLO ARGUMENTO.** A cerró el acto el 30-ago: la familia y nada
+         más. Las seis versiones vigentes **las resuelve el motor** — *y es
+         mejor así: la pantalla mandaba las que había leído, y entre leerlas y
+         aceptar podía haber pasado una versión nueva.*
 
-         ⏪ **Y SÓLO LO QUE LA FAMILIA MARCÓ.** Antes acá iba `carga.docs`
-         entero — las seis viajaban hiciera lo que hiciera. *El botón ya no se
-         enciende sin las seis, así que el filtro no cambia lo que llega al
-         motor; cambia que lo que llega sea consecuencia de un acto.* */
-      aceptaciones: carga.docs
-        .filter((d) => marcadas.includes(d.codigo))
-        .map((d) => ({ codigo: d.codigo, version: d.version })),
-      urgenciaTopeMonto: Number(tope),
-      /* ⚠️ USD viene del país del prestador, y esta pantalla todavía no lo
-         tiene. **Se declara**: hoy el único país operativo es EC/USD. El día
-         que haya dos, este literal es una mentira y hay que traer la moneda
-         del lugar — no del teléfono. */
-      urgenciaTopeMoneda: 'USD',
-      /* La forma de `contactos` la decide esta pantalla: **el motor la recibe
-         como `jsonb` sin validar** (medido). Se declara acá para que el día que
-         alguien la cambie sepa que no hay nada que lo frene. */
-      contactos: [{ nombre: contactoNombre.trim(), telefono: contactoTel.trim() }],
+         ☠️ Con esto mueren de esta llamada: `aceptaciones` (las resuelve el
+         server), `urgenciaTopeMonto`/`urgenciaTopeMoneda` —**el tope salió del
+         flujo: es un TÉRMINO del documento (USD 150) y se edita después desde
+         la cuenta**— y el `null as unknown as number` que quedó ayer como
+         puente declarado. *El puente murió con su río* (`L-395`). */
+      familiaId: carga.familiaId,
+      /* Lo único que sigue viajando, porque sigue siendo una decisión de la
+         familia en ESTA pantalla: el contacto (opcional) y la imagen. */
+      ...(contactoNombre.trim().length > 0 || contactoTel.trim().length > 0
+        ? { contactos: [{ nombre: contactoNombre.trim(), telefono: contactoTel.trim() }] }
+        : {}),
       redesAutorizadas: redes,
     });
     setEnviando(false);
     if (!r.ok) { mostrar({ texto: r.mensaje, variante: 'error' }); return; }
+    /* 🔴 **SE LEE `alDia`, NO EL CONTADOR** — orden de A y tiene razón:
+       `aceptadas` cuenta lo que se escribió AHORA, y una familia que ya tenía
+       cinco de seis vuelve con `aceptadas: 1` estando perfectamente al día.
+       *Un contador se lee como progreso y no lo es: el veredicto es `alDia`.* */
+    if (!r.data.alDia) {
+      mostrar({ texto: t('documentosGuarderia.noQuedoAlDia'), variante: 'error' });
+      return;
+    }
     mostrar({ texto: t('documentosGuarderia.aceptado'), variante: 'exito' });
     router.back();
-  }, [carga, enviando, tope, contactoNombre, contactoTel, redes, marcadas, mostrar, t]);
+  }, [carga, enviando, contactoNombre, contactoTel, redes, mostrar, t]);
 
-  const montoValido = Number(tope) > 0;
-  const contactoValido = contactoNombre.trim().length > 0 && contactoTel.trim().length > 0;
-  /* 🔴 LAS SEIS, SIN EXCEPCIÓN. La pieza reporta el estado de cada casilla y
-     **no valida** (literal de su cabecera) — el gate es de la pantalla. Y el
-     motor lo confirma del otro lado: `evaluar_documentos_guarderia` devuelve
-     `faltan` con que falte una. */
-  const todosMarcados =
-    carga.fase === 'listo' && carga.docs.every((d) => marcadas.includes(d.codigo));
+  /* 🔴 UNA SOLA CONDICIÓN: que la familia haya marcado. El contacto es
+     opcional y el tope ya no se pide — *un CTA que espera datos que la
+     pantalla dejó de pedir es una pared muda.* */
   const puedeAceptar =
     carga.fase === 'listo' && carga.estado !== 'documentos_no_disponibles' &&
-    carga.docs.length > 0 && todosMarcados && montoValido && contactoValido;
+    carga.docs.length > 0 && acepto;
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -202,39 +207,28 @@ export default function DocumentosGuarderia() {
           />
         ) : (
           <>
-            {/* ── LOS DOCUMENTOS · **LA PIEZA DE LA CASA** ──────────────────
-                `AceptacionDeDocumentos` (S107-B). El texto de cada uno vive
-                detrás de su enlace, en una `Hoja` — canon de `parte`.
+            {/* ── LA ACEPTACIÓN · UNA CASILLA ────────────────────────────
+                `AceptacionDeDocumentos` con **un solo obligatorio**. El enlace
+                abre los seis textos completos **sin marcar la casilla** — es
+                el responder más interno. *Si abrirlos marcara, la prueba diría
+                que alguien aceptó cuando lo único que hizo fue leer.*
 
-                🔴 **El enlace abre SIN marcar**: es un responder aparte
-                adentro del label, así que ir a leer no firma nada. *Si abrirlo
-                marcara, la prueba diría que alguien aceptó cuando lo único que
-                hizo fue leer.*
-
-                ⚠️ **El nombre del documento sale del riel; su CONTENIDO sale
-                del server.** El perímetro sigue entero: acá no vive una
-                palabra de texto legal. */}
+                ⚠️ El texto de la casilla es de la app; **el contenido legal
+                sale del server**. El perímetro sigue entero. */}
             <Tarjeta>
               <View style={{ gap: spacing[3] }}>
-                <Texto variante="seccion">{t('documentosGuarderia.aceptacionTitulo')}</Texto>
                 <AceptacionDeDocumentos
-                  marcadas={redes ? [...marcadas, CLAVE_REDES] : marcadas}
-                  onCambiar={(clave, m) => {
-                    /* La opcional NO entra a `marcadas`: ese arreglo es el que
-                       gatea el botón, y una autorización de imagen jamás puede
-                       contar como uno de los documentos obligatorios. */
-                    if (clave === CLAVE_REDES) { setRedes(m); return; }
-                    setMarcadas((p) => (m ? [...p, clave] : p.filter((c) => c !== clave)));
-                  }}
-                  documentos={carga.docs.map((d) => ({
-                    clave: d.codigo,
+                  marcadas={acepto ? [CLAVE_TERMINOS] : []}
+                  onCambiar={(_, m) => setAcepto(m)}
+                  documentos={[{
+                    clave: CLAVE_TERMINOS,
                     texto: t('documentosGuarderia.leiYAcepto'),
-                    etiquetaEnlace: t(`documentosGuarderia.doc_${d.codigo}` as 'documentosGuarderia.doc_contrato_custodia'),
-                    onAbrir: () => setAbierto(d),
-                  }))}
-                  /* 🔴 NACE APAGADA, y el lugar es de la pieza: separada abajo
-                     y rotulada. *Un default encendido publicaría la foto de un
-                     animal porque alguien no tocó un interruptor.* */
+                    etiquetaEnlace: t('documentosGuarderia.terminosDelServicio'),
+                    onAbrir: () => setLeyendo(true),
+                  }]}
+                  /* 🔴 NACE APAGADA, y separada. *Un default encendido
+                     publicaría la foto de un animal porque alguien no tocó un
+                     interruptor.* */
                   opcionales={[{ clave: CLAVE_REDES, texto: t('documentosGuarderia.redesEtiqueta') }]}
                   rotuloOpcionales={t('documentosGuarderia.opcional')}
                 />
@@ -242,21 +236,16 @@ export default function DocumentosGuarderia() {
               </View>
             </Tarjeta>
 
-            {/* EL TOPE Y LOS CONTACTOS — **parte del mismo acto**, no un paso
-                aparte: el motor los exige sin default y la razón es de fondo. */}
+            {/* ── EL CONTACTO DE EMERGENCIA · **OPCIONAL** ──────────────
+                ⏪ Antes era obligatorio **y venía con el tope de gasto**, que
+                se retiró por firma. *La pantalla lo pide sin frenar por él:
+                un dato útil que no se tiene no puede impedir agendar un día.*
+                Medido: `p_contactos` acepta `NULL` y la aceptación queda
+                `al_dia`. */}
             <Tarjeta>
               <View style={{ gap: spacing[3] }}>
-                <Texto variante="seccion">{t('documentosGuarderia.urgenciaTitulo')}</Texto>
-                <Texto variante="apoyo">{t('documentosGuarderia.urgenciaDetalle')}</Texto>
-                <Campo
-                  label={t('documentosGuarderia.topeEtiqueta')}
-                  value={tope}
-                  onChangeText={setTope}
-                  keyboardType="numeric"
-                />
-                <Separador />
                 <Texto variante="seccion">{t('documentosGuarderia.contactoTitulo')}</Texto>
-                <Texto variante="apoyo">{t('documentosGuarderia.contactoDetalle')}</Texto>
+                <Texto variante="apoyo">{t('documentosGuarderia.contactoOpcional')}</Texto>
                 <Campo label={t('documentosGuarderia.contactoNombre')} value={contactoNombre} onChangeText={setContactoNombre} />
                 <Campo
                   label={t('documentosGuarderia.contactoTelefono')}
@@ -278,47 +267,40 @@ export default function DocumentosGuarderia() {
             etiqueta={t('documentosGuarderia.aceptar')}
             deshabilitado={!puedeAceptar}
             /* El CTA apagado DICE qué falta, en vez de ser una pared muda. */
-            razonDeshabilitado={
-              !todosMarcados
-                ? t('documentosGuarderia.faltaAceptar')
-                : !montoValido
-                  ? t('documentosGuarderia.faltaTope')
-                  : t('documentosGuarderia.faltaContacto')
-            }
+            razonDeshabilitado={t('documentosGuarderia.faltaAceptar')}
             cargando={enviando}
             onPress={() => void aceptar()}
           />
         </View>
       ) : null}
 
-      {/* ── EL TEXTO COMPLETO, EN SU HOJA ──────────────────────────────────
-             Canon `parte/[eventoId]`: el registro largo se abre entero, no se
-             apila arriba del botón. `altura="completa"` porque un documento
-             legal no se lee en media pantalla.
+      {/* ── LOS SEIS TEXTOS, EN UNA SOLA HOJA ─────────────────────────────
+             *«Con el enlace a leerlos completos»* — firma del founder. Van
+             los seis, cada uno con su título y su versión: **lo que se acepta
+             con una casilla tiene que poder leerse entero de una**.
 
-             🔴 **El contenido es el del server, tal cual.** La versión se
-             muestra al pie: lo que se acepta es UNA VERSIÓN, y la familia
-             tiene que poder verla. ── */}
+             `altura="completa"` porque un documento legal no se lee en media
+             pantalla — canon `parte/[eventoId]`. ── */}
       <Hoja
-        visible={abierto !== null}
-        onCerrar={() => setAbierto(null)}
-        titulo={
-          abierto === null
-            ? ''
-            : t(`documentosGuarderia.doc_${abierto.codigo}` as 'documentosGuarderia.doc_contrato_custodia')
-        }
+        visible={leyendo}
+        onCerrar={() => setLeyendo(false)}
+        titulo={t('documentosGuarderia.terminosDelServicio')}
         altura="completa"
         conCerrar
       >
-        <HojaScroll contentContainerStyle={{ padding: spacing[5], gap: spacing[3] }}>
-          {abierto === null ? null : (
-            <>
-              <Texto variante="cuerpo">{abierto.contenido}</Texto>
-              <Texto variante="dato" color="secondary">
-                {t('documentosGuarderia.version', { n: abierto.version })}
+        <HojaScroll contentContainerStyle={{ padding: spacing[5], gap: spacing[5] }}>
+          {carga.fase !== 'listo' ? null : carga.docs.map((d) => (
+            <View key={`${d.codigo}-${d.version}`} style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">
+                {t(`documentosGuarderia.doc_${d.codigo}` as 'documentosGuarderia.doc_contrato_custodia')}
               </Texto>
-            </>
-          )}
+              <Texto variante="cuerpo">{d.contenido}</Texto>
+              <Texto variante="dato" color="secondary">
+                {t('documentosGuarderia.version', { n: d.version })}
+              </Texto>
+              <Separador />
+            </View>
+          ))}
         </HojaScroll>
       </Hoja>
     </SafeAreaView>

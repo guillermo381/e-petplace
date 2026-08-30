@@ -278,8 +278,16 @@ export default function LogGuarderia() {
                        que la lista de «quién puede» no tiene nada que preguntar.
                        *Pasar por ella sería ofrecerle cambiar algo que ya
                        eligió — y abrir la puerta a que elija mal.* */
+                    /* ⏪ **IBA A LA PANTALLA DEL PRESTADOR, Y AHÍ YA NO HAY
+                       CALENDARIO** (se borró por instrucción del founder). El
+                       camino corto **no elige lugar** —lo determina el bono—
+                       pero **sí tiene que elegir día**, así que va a la TIRA DE
+                       DÍAS de esa guardería: pantalla 2 con su bono adentro.
+
+                       *Letra firmada: «va directo a la tira de días DE ESA
+                       GUARDERÍA: sin elegir lugar y sin pagar».* */
                     router.push({
-                      pathname: '/explorar/guarderia/[prestadorId]',
+                      pathname: '/explorar/guarderia',
                       params: {
                         prestadorId: pq.prestadorId,
                         mascotaId: elegida ?? '',
@@ -389,10 +397,30 @@ export default function LogGuarderia() {
                   cara={false}
                   direccion={abierta === e.citaId ? 'arriba' : 'abajo'}
                   titulo={e.prestadorNombre}
-                  subtitulo={e.mascotaNombre}
+                  /* ⭐ **«Con tu paquete» — letra firmada.** Va pegada al
+                     subtítulo y no en un slot nuevo: `FilaCita` no tiene uno
+                     para marcas, y **pedirle una prop a B por una cadena sería
+                     agrandar una pieza compartida por un caso de un oficio.**
+
+                     🔴 El dato es un CAMPO PROPIO del lector (`dePaquete`), no
+                     una deducción de `precio === null`: *deducir el origen de
+                     un silencio es cómo una marca empieza a mentir sin que
+                     nadie lo note* — y el día que el día suelto también venga
+                     sin precio, la marca se vuelve falsa sola. */
+                  subtitulo={
+                    e.dePaquete
+                      ? `${e.mascotaNombre} · ${t('logGuarderia.conTuPaquete')}`
+                      : e.mascotaNombre
+                  }
                   /* ⚠️ SIN HORA, y no es un olvido: **una estadía no tiene
                      hora** — tiene día y franja. *Un `00:00` se leería como
                      medianoche.* */
+                  /* ⭐ **«Con tu paquete» — letra firmada.** El dato es un
+                     campo propio del lector (`dePaquete`), **no una deducción
+                     de `precio === null`**: *deducir el origen de un silencio
+                     es cómo una marca empieza a mentir sin que nadie lo note*,
+                     y el día que el día suelto también venga sin precio la
+                     marca se vuelve falsa sola. */
                   metadataMono={fechaCortaMono(e.fecha, idioma)}
                   mascota={{ nombre: e.mascotaNombre, fotoUrl: undefined }}
                   onPress={() => setAbierta(abierta === e.citaId ? null : e.citaId)}

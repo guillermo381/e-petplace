@@ -60,13 +60,17 @@ import {
   Tarjeta,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
   evaluarRequisitosGuarderia,
+  obtenerDiasGuarderiaDisponibles,
+  type DiaGuarderiaAgregado,
   obtenerGuarderiasDisponibles,
   obtenerPaquetesGuarderia,
   obtenerResumenGuarderias,
+  reservarDiaDePaqueteGuarderia,
   type CausaSinGuarderias,
   type RequisitosGuarderia,
 } from '@epetplace/api';
@@ -140,8 +144,40 @@ export default function ElegirGuarderia() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const { mostrar } = useAviso();
   const idioma = obtenerIdiomaActual();
-  const params = useLocalSearchParams<{ mascotaId?: string; mascotaNombre?: string }>();
+  const params = useLocalSearchParams<{ mascotaId?: string; mascotaNombre?: string; bonoId?: string; prestadorId?: string }>();
+
+  /**
+   * ⭐ **EL CAMINO CORTO — agendar contra saldo.** Entra desde el hub con su
+   * bono y su guardería ya determinados: *«va directo a la tira de días DE ESA
+   * GUARDERÍA: sin elegir lugar y sin pagar»* (letra firmada).
+   *
+   * ⏪ Antes entraba a la pantalla del prestador y elegía el día en su
+   * calendario. **Ese calendario se borró**, así que el día se elige acá —
+   * donde la casa elige días— y esta pantalla **se recorta a la tira**: sin
+   * modalidad (ya la decidió el bono), sin tamaño (ya está comprado) y sin
+   * «ver quién puede» (el lugar lo determina el bono).
+   */
+  /**
+   * ⭐ **LA TIRA DICE SU ESTADO SIN QUE LA TOQUEN** (`obtenerDiasGuarderiaDisponibles`).
+   *
+   * ⏪ Antes los 14 días se veían **iguales** y `cerrados` recibía un
+   * `new Set()`: la familia tocaba un sábado, el botón quedaba apagado y
+   * **recién ahí** aparecía la causa. *Medido tocándolos uno por uno: dos de
+   * los siete primeros no llevaban a ningún lado y no se distinguían de los
+   * cinco que sí.* **Es el candidato serio a por qué el founder nunca pudo
+   * reservar.**
+   *
+   * 🔴 **Un fallo de lectura NO se disfraza de «todos abiertos»** (Ley 13): si
+   * el server no contestó, la tira queda tocable y el rebote del botón sigue
+   * siendo la red — *lo que no se hace es pintar catorce días verdes sobre una
+   * pregunta que nadie respondió.* Se declara en `diasLeidos`.
+   */
+  const [diasEstado, setDiasEstado] = useState<DiaGuarderiaAgregado[] | null>(null);
+  const [agendando, setAgendando] = useState(false);
+  const [reboteSaldo, setReboteSaldo] = useState<string | null>(null);
+  const bonoId = typeof params.bonoId === 'string' && params.bonoId.length > 0 ? params.bonoId : null;
 
   const mascotaId = typeof params.mascotaId === 'string' && params.mascotaId.length > 0
     ? params.mascotaId
@@ -290,6 +326,55 @@ export default function ElegirGuarderia() {
     });
   }, [idioma]);
 
+  /* La ventana que la tira ofrece: mañana + 13. Se deriva de `dias` para que
+     el rango leído y el rango pintado no puedan divergir. */
+  useEffect(() => {
+    if (mascotaId === null || dias.length === 0) return;
+    let vigente = true;
+    void (async () => {
+      const r = await obtenerDiasGuarderiaDisponibles({
+        mascotaId,
+        desde: dias[0].iso,
+        hasta: dias[dias.length - 1].iso,
+        modalidad: modalidad ?? 'dia',
+      });
+      if (!vigente) return;
+      /* 🔴 `null` = **no sé**, y NO «todos abiertos». La tira queda tocable y
+         el rebote del botón sigue siendo la red. */
+      setDiasEstado(r.ok ? r.data : null);
+    })();
+    return () => { vigente = false; };
+  }, [mascotaId, dias, modalidad]);
+
+  /** Los días que NO llevan a ningún lado. Vacío mientras no se leyó. */
+  const cerrados = useMemo(
+    () => new Set((diasEstado ?? []).filter((d) => !d.reservable).map((d) => d.fecha)),
+    [diasEstado],
+  );
+
+  /**
+   * 🔴 **LA VOZ DEL DÍA CERRADO — y acá hay una brecha DECLARADA.**
+   * `SelectorDia` toma **una sola** `etiquetaCerrado` para todos los días, y
+   * sólo la usa en el `accessibilityLabel`. *«Ningún lugar abre» y «están todos
+   * llenos» son dos verdades distintas —ante la primera se elige otro día,
+   * ante la segunda se puede esperar— y con una sola cadena no se pueden
+   * decir las dos.*
+   *
+   * Lo que se hace mientras tanto, sin inventar: **si todos los días cerrados
+   * comparten motivo, se dice ESE motivo, que es exacto**; si conviven los
+   * dos, se dice el neutro. ⇒ `S107-C-PEDIDO-A-B-VOZ-POR-DIA.md`.
+   */
+  const etiquetaCerrado = useMemo(() => {
+    const motivos = new Set((diasEstado ?? []).filter((d) => !d.reservable).map((d) => d.motivo));
+    if (motivos.size === 1) {
+      const m = [...motivos][0];
+      if (m === 'ningun_lugar_abre') return t('elegirGuarderia.diaNadieAbre');
+      if (m === 'sin_cupo') return t('elegirGuarderia.diaSinCupo');
+      if (m === 'mascota_ya_reservada_ese_dia') return t('elegirGuarderia.diaYaReservado');
+    }
+    return t('hubGuarderia.diaCerrado');
+  }, [diasEstado, t]);
+
   const vozCausa = useCallback(
     (c: CausaSinGuarderias): string =>
       t(
@@ -313,27 +398,53 @@ export default function ElegirGuarderia() {
   const puedeSeguir = listoParaSeguir && resumen.fase === 'listo' && resumen.causa === null;
   /* ② `null` ⇒ nada. Jamás un `0` que se lea como gratis.
      ═══════════════════════════════════════════════════════════════════════
-     🔴 **EN PAQUETE NO SE PINTA PRECIO, Y ES LA CURA DE UN DEFECTO CARO.**
+     ⭐ **EL PRECIO DEL PAQUETE VIVE ACÁ ABAJO, JUNTO AL BOTÓN — firma
+     original del founder, re-firmada el 30-ago:** *«El chip dice el tamaño;
+     el precio vive donde vive el de Día.»*
 
-     Reportado por el founder: *«con 5 muestra su precio; al elegir 10 o 15
-     sigue mostrando el de 5»*. **Medido, y no era mi estado:**
-     `obtener_resumen_guarderias` **no recibe el tamaño**, y el precio de
-     paquete sale de `min(gp.precio)` — **el paquete MÁS BARATO del lugar**.
+     ⏪ **Se había implementado distinto** —el precio metido dentro del chip—
+     y eso lo sacaba del único lugar donde la casa pone el valor de lo que se
+     va a pagar. *Dos superficies distintas para el mismo dato según la
+     modalidad hacen que la familia tenga que aprender la pantalla dos veces.*
+
+     🔴 **Y sigue vigente la cura del defecto caro que lo originó:** el founder
+     reportó *«con 5 muestra su precio; al elegir 10 sigue mostrando el de 5»*.
+     Medido: `obtener_resumen_guarderias` **no recibe el tamaño** y devuelve
+     `min(gp.precio)` — el paquete MÁS BARATO del lugar.
 
      > ### La familia veía $40 y pagaba $75. En la superficie donde se decide pagar.
 
-     *Cualquier número que pinte acá es el de OTRO tamaño que el elegido.* ⇒
-     **no se pinta ninguno hasta que el server sepa el tamaño**
-     (`S107-C-PEDIDO-A-A-PRECIO-POR-TAMANO.md`). **La ausencia es honesta; el
-     número no lo era.** El precio real se ve por lugar en «quién puede» y en el
-     botón de compra, que sí nombra el tamaño.
+     ⇒ **el número NO sale del resumen: sale de `precioPorTamano`**, que se
+     resuelve por lugar CON el tamaño elegido. Sin tamaño elegido no hay
+     número, y la ausencia es honesta.
      ═══════════════════════════════════════════════════════════════════════ */
   const total =
     modalidad === 'paquete'
-      ? null
+      ? tamano !== null && precioPorTamano[tamano] !== undefined
+        ? `$ ${precioPorTamano[tamano].toFixed(2)}`
+        : null
       : resumen.fase === 'listo' && resumen.precioDesde !== null
         ? `$ ${resumen.precioDesde.toFixed(2)}`
         : null;
+
+  /**
+   * EL CAMINO CORTO, EJECUTADO. Sin cobro: el bono ya se pagó.
+   * 🔴 **La mascota VIAJA siempre** — con más de una elegible el motor rebota
+   * `mascota_no_determinada` en vez de adivinar, y acá ya viene del hub.
+   */
+  const agendarContraSaldo = useCallback(async () => {
+    if (bonoId === null || fecha === null || mascotaId === null || agendando) return;
+    setAgendando(true);
+    const r = await reservarDiaDePaqueteGuarderia({ bonoId, fecha, mascotaId });
+    setAgendando(false);
+    if (!r.ok) { setReboteSaldo(r.mensaje); return; }
+    /* El comprobante de una reserva SIN cobro es el del paseo, censado: un
+       aviso que nombra el saldo restante + Go home. El rastro es la fila del
+       hub, marcada «Con tu paquete». */
+    mostrar({ texto: t('lugarGuarderia.agendadaDePaquete', { n: r.data.saldoRestante }), variante: 'exito' });
+    if (router.canDismiss()) router.dismissAll();
+    router.navigate('/hogar/guarderia');
+  }, [bonoId, fecha, mascotaId, agendando, mostrar, router, t]);
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -347,8 +458,10 @@ export default function ElegirGuarderia() {
       />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
-        {/* ── ① LA MODALIDAD. Con una sola abierta no se dibuja (N=1 colapsa). ── */}
-        {MODALIDADES_ABIERTAS.length > 1 ? (
+        {/* ── ① LA MODALIDAD. Con una sola abierta no se dibuja (N=1 colapsa).
+               🔴 Y con un BONO tampoco: la modalidad ya la decidió la compra.
+               *Ofrecerle cambiarla sería ofrecerle gastar plata que ya gastó.* ── */}
+        {MODALIDADES_ABIERTAS.length > 1 && bonoId === null ? (
           <SelectorSegmentado
             proposito="eleccion"
             etiqueta={t('modalidadGuarderia.etiqueta')}
@@ -372,16 +485,28 @@ export default function ElegirGuarderia() {
             <SelectorDia
               dias={dias}
               elegido={fecha ?? ''}
-              cerrados={new Set()}
-              etiquetaCerrado={t('hubGuarderia.diaCerrado')}
+              cerrados={cerrados}
+              etiquetaCerrado={etiquetaCerrado}
               onElegir={setFecha}
             />
           </View>
         ) : null}
 
+        {/* ── ③bis LA LETRA DE LA MENSUALIDAD ────────────────────────────
+               🔴 **Es lo que la familia está firmando, y no se decía.** Va
+               pegada al día porque el día ELEGIDO es el que fija la
+               recurrencia: *«se cobra ese mismo día cada mes»*.
+
+               *Una recurrencia que no se declara antes de contratar es la
+               clase de cosa que se descubre en el segundo cobro.* ── */}
+        {modalidad === 'mensual' && fecha !== null ? (
+          <Texto variante="apoyo">{t('elegirGuarderia.mensualLetra')}</Texto>
+        ) : null}
+
         {/* ── ③ EL TAMAÑO, **DESPUÉS del día** — ver la enmienda arriba.
                Con la fecha puesta, cada chip ya puede decir su precio. ── */}
-        {modalidad === 'paquete' && fecha !== null ? (
+        {/* Con bono NO hay tamaño que elegir: ya está comprado. */}
+        {modalidad === 'paquete' && fecha !== null && bonoId === null ? (
           <SelectorOpcion
             acento="control"
             disposicion="tira"
@@ -406,10 +531,11 @@ export default function ElegirGuarderia() {
               .filter((n) => Object.keys(precioPorTamano).length === 0 || precioPorTamano[n] !== undefined)
               .map((n) => ({
                 codigo: String(n),
-                etiqueta:
-                  precioPorTamano[n] === undefined
-                    ? t('hubGuarderia.tamanoEstadias', { n })
-                    : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
+                /* 🔴 SÓLO EL TAMAÑO. El precio vive al pie, junto al botón —
+                   firma del founder. `precioPorTamano` sigue usándose acá
+                   arriba **para filtrar** (un tamaño sin precio es un tamaño
+                   que el lugar no vende), pero no se pinta. */
+                etiqueta: t('hubGuarderia.tamanoEstadias', { n }),
               }))}
             seleccionada={tamano === null ? '' : String(tamano)}
             /* 🔴 **ACÁ VIVÍA `setFecha(null)`, Y HACÍA IMPOSIBLE COMPRAR UN
@@ -523,6 +649,10 @@ export default function ElegirGuarderia() {
         ) : resumen.fase === 'listo' && resumen.causa !== null ? (
           <Texto variante="apoyo">{vozCausa(resumen.causa)}</Texto>
         ) : null}
+
+        {/* El rebote del camino corto vive ENCIMA del pie: el pie es fijo y
+            debajo no hay dónde vivir. */}
+        {reboteSaldo !== null ? <Texto variante="cuerpo">{reboteSaldo}</Texto> : null}
       </ScrollView>
 
       {/* ── ④+⑤ EL VALOR Y EL BOTÓN. «Ver quién puede» es UN BOTÓN, no una lista. ── */}
@@ -533,10 +663,15 @@ export default function ElegirGuarderia() {
              aparecer—, así que siempre es un «desde». *A lo calcula después de
              filtrar: un «desde $8» de un lugar que no aparece promete de más.* */
           totalDesde={resumen.fase === 'listo' && resumen.cuantos > 1}
-          etiqueta={t('elegirGuarderia.verQuienPuede')}
-          habilitado={puedeSeguir}
+          /* 🔴 CON BONO EL PIE NO NAVEGA: AGENDA. No hay lugar que elegir
+             —lo determina el bono— ni cobro que hacer —el desglose se congeló
+             al comprar—. *Pasarlo por «quién puede» sería ofrecerle cambiar
+             algo que ya eligió, y abrir la puerta a que elija mal.* */
+          etiqueta={bonoId !== null ? t('lugarGuarderia.agendarDePaquete') : t('elegirGuarderia.verQuienPuede')}
+          habilitado={bonoId !== null ? fecha !== null && !agendando : puedeSeguir}
           insetBottom={insets.bottom}
-          onPress={() =>
+          onPress={() => {
+            if (bonoId !== null) { void agendarContraSaldo(); return; }
             router.push({
               pathname: '/explorar/guarderia/disponibles',
               params: {
@@ -545,8 +680,8 @@ export default function ElegirGuarderia() {
                 fecha,
                 ...(modalidad === 'paquete' && tamano !== null ? { tamano: String(tamano) } : {}),
               },
-            })
-          }
+            });
+          }}
         />
       ) : null}
     </SafeAreaView>
