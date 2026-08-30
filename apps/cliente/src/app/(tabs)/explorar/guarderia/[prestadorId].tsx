@@ -52,6 +52,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FichaFranja,
+  MapaZona,
   SemaforoSanitario,
   type RequisitoSanitario,
   Tarjeta,
@@ -63,6 +64,8 @@ import {
 import {
   evaluarRequisitosGuarderia,
   obtenerCupoGuarderia,
+  obtenerPerfilesPublicos,
+  type PerfilPublico,
   obtenerFranjasGuarderia,
   comprarPaqueteGuarderia,
   reservarDiaDePaqueteGuarderia,
@@ -75,6 +78,7 @@ import {
 import { obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { PieReserva } from '@/components/reserva-piezas';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
@@ -103,8 +107,11 @@ export default function LugarGuarderia() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string }>();
-  const esPaquete = params.modalidad === 'paquete';
+  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string; bonoId?: string }>();
+  /** 🔴 CON BONO NO SE COMPRA: se agenda contra el saldo. **Cero cobro** — el
+   *  desglose se congeló al comprar. */
+  const bonoId = typeof params.bonoId === 'string' && params.bonoId.length > 0 ? params.bonoId : null;
+  const esPaquete = params.modalidad === 'paquete' && bonoId === null;
   const tamano = Number(params.tamano ?? '');
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
@@ -119,6 +126,27 @@ export default function LugarGuarderia() {
   const [elegido, setElegido] = useState<string | null>(null);
   const [reservando, setReservando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
+  const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
+
+  /* ⭐ **EL MAPA DE LA ZONA — la misma pieza de todas las vitrinas de la casa.**
+     Censado, no construido: `MapaZona`, alimentada por `obtenerPerfilesPublicos`,
+     que **lee la vista pública y jamás la tabla**.
+
+     🔴 **Es RANGO DE SECTOR, jamás el punto exacto.** La propia pieza lo
+     declara: *«si alguien le pasa `lat`/`lon` de la sede, es defecto, no
+     configuración»*. *Aunque el servicio recoja y lleve, toda familia quiere
+     saber dónde está su animal* — firma del founder, que corrigió mi voto.
+
+     ⚠️ Hace falta una llamada aparte porque **`GuarderiaDisponible` NO trae
+     `zona_*`**: su lector es la RPC del filtro, no la vista pública. */
+  useEffect(() => {
+    if (typeof prestadorId !== 'string') return;
+    let vigente = true;
+    void obtenerPerfilesPublicos([prestadorId]).then((r) => {
+      if (vigente && r.ok) setPerfil(r.data[0] ?? null);
+    });
+    return () => { vigente = false; };
+  }, [prestadorId]);
 
   const hoy = useMemo(() => new Date(), []);
   const primeroDelMes = useMemo(
@@ -228,7 +256,13 @@ export default function LugarGuarderia() {
    *  de tocar. `null` = no llegó, y entonces el pie no monta bloque de precio
    *  — *jamás un número inventado.* */
   const precioTexto =
-    typeof params.precio === 'string' && params.precio.length > 0 ? params.precio : null;
+    bonoId !== null
+      ? /* 🔴 SIN PRECIO: **no hay cobro en este paso.** *Pintar un número acá
+           sugeriría que se paga otra vez lo que ya se pagó al comprar.* */
+        null
+      : typeof params.precio === 'string' && params.precio.length > 0
+        ? params.precio
+        : null;
   /* 🔴 Se estrecha por FASE antes de mirar `requisitos`: mientras carga no hay
      nada que decidir, y el pie sólo existe con la pantalla lista. */
   const req = estado.fase === 'listo' ? estado.requisitos : null;
@@ -247,6 +281,24 @@ export default function LugarGuarderia() {
     if (elegido === null || typeof mascotaId !== 'string' || reservando) return;
     setReservando(true);
     setRebote(null);
+    /* ═══ AGENDAR CONTRA SALDO — ni compra ni cobro ═══════════════════════
+       🔴 **La mascota VIAJA siempre**: con más de una elegible el motor rebota
+       `mascota_no_determinada` **en vez de adivinar**, y acá ya está decidida
+       desde el hub. *El bono es del hogar; a cuál animal se le agenda el martes
+       lo elige la familia cada vez.* */
+    if (bonoId !== null) {
+      const r = await reservarDiaDePaqueteGuarderia({ bonoId, fecha: elegido, mascotaId });
+      setReservando(false);
+      if (!r.ok) { setRebote(r.mensaje); setIntento((n) => n + 1); return; }
+      /* El comprobante de una reserva SIN cobro es el del paseo, censado: **un
+         aviso que nombra el saldo restante + Go home**, y el rastro es la fila
+         del hub. *No hay pantalla de confirmación, y está bien.* */
+      mostrar({ texto: t('lugarGuarderia.agendadaDePaquete', { n: r.data.saldoRestante }), variante: 'exito' });
+      if (router.canDismiss()) router.dismissAll();
+      router.navigate('/hogar/guarderia');
+      return;
+    }
+
     /* ═══ EL CAMINO DEL PAQUETE — DOS LLAMADAS, UN SOLO ACTO ═══════════════
        Firma del founder: **el toggle de la primera sesión va prendido y es
        obligatorio en la primera compra.** Por eso acá no hay interruptor: *un
@@ -325,7 +377,7 @@ export default function LugarGuarderia() {
         fecha: elegido,
       },
     });
-  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t]);
+  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t, bonoId]);
 
   if (estado.fase === 'cargando') {
     return (
@@ -438,6 +490,22 @@ export default function LugarGuarderia() {
             reserva. **Y los pocos animales con carnet hoy no son razón para
             abrirlo: son el catálogo vacío, y cada familia lo llena en su
             primera reserva.** */}
+        {/* LA ZONA. 🔴 **El guard del mapa nativo se aplica NO PASANDO las
+            tres** —igual que el perfil del cliente—: la pieza no monta nada si
+            falta cualquiera, así que **cero cambio en el componente
+            compartido**. *Un secret faltante cuesta EL MAPA, jamás la app.* */}
+        {MAPA_NATIVO_DISPONIBLE &&
+        perfil !== null &&
+        perfil.zona_lat !== null &&
+        perfil.zona_lon !== null &&
+        perfil.zona_radio_m !== null ? (
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="titulo">{t('lugarGuarderia.zonaTitulo')}</Texto>
+            <MapaZona lat={perfil.zona_lat} lon={perfil.zona_lon} radioM={perfil.zona_radio_m} />
+            <Texto variante="apoyo">{t('lugarGuarderia.zonaDetalle')}</Texto>
+          </View>
+        ) : null}
+
         {estado.requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
@@ -490,7 +558,13 @@ export default function LugarGuarderia() {
       {estado.fase === 'listo' ? (
       <PieReserva
         total={precioTexto}
-        etiqueta={esPaquete ? t('lugarGuarderia.comprarPaquete', { n: tamano }) : t('lugarGuarderia.reservar')}
+        etiqueta={
+          bonoId !== null
+            ? t('lugarGuarderia.agendarDePaquete')
+            : esPaquete
+              ? t('lugarGuarderia.comprarPaquete', { n: tamano })
+              : t('lugarGuarderia.reservar')
+        }
         habilitado={puedeReservar}
         insetBottom={insets.bottom}
         /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una
