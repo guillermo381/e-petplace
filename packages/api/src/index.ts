@@ -1515,6 +1515,8 @@ export {
   type PaqueteGuarderia,
   type TamanoPaquete,
   type CodigoErrorGuarderiaConfig,
+  retirarFranjaGuarderia,
+  reemplazarFranjasGuarderia,
 } from './wrappers/guarderia-config';
 
 /* S107-A · guardería: la oferta (precio y visibilidad). */

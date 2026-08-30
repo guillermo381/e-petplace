@@ -23482,6 +23482,10 @@ export type Database = {
         Returns: Json
       }
       recurrencias_vencidas_pendientes: { Args: never; Returns: Json }
+      reemplazar_franjas_guarderia: {
+        Args: { p_franjas: Json; p_prestador_id: string; p_tipo: string }
+        Returns: Json
+      }
       registrar_aprobacion_presencial: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -23853,6 +23857,7 @@ export type Database = {
         Args: { p_accion: string; p_solicitud_id: string }
         Returns: Json
       }
+      retirar_franja_guarderia: { Args: { p_franja_id: string }; Returns: Json }
       retirar_naturaleza_solicitada: {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json

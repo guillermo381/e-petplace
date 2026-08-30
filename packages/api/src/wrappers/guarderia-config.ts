@@ -20,6 +20,9 @@ import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+  franja_no_existe:  'No encontramos esa franja.',
+  franjas_invalidas: 'Esas franjas no son válidas.',
+
 
   /* ✏️ S107-A · CENSADOS CONTRA EL MOTOR, no agregados de a uno.
      C reportó que `fecha_no_ofertable` llegaba como `error_desconocido`; al
@@ -308,4 +311,74 @@ export async function obtenerPaquetesGuarderia(
     salida.push({ tamano: r.tamano, precio: r.precio, activo: r.activo !== false });
   }
   return { ok: true, data: salida };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RETIRAR Y REEMPLAZAR FRANJAS — cambiar de horario es UN acto
+   ═══════════════════════════════════════════════════════════════════════════
+   🔴 **Antes no había camino para retirar una franja** (`activo` existía y el
+   wrapper no lo exponía), así que cambiar de horario dejaba **dos ventanas
+   contradictorias vivas** y la lista de la familia leía las dos. *El prestador
+   creía haber cambiado su horario y en realidad había agregado uno.*
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Retira UNA franja. **Soft: `activo = false`, jamás DELETE** — *una franja
+ * borrada se lleva la historia de por qué un día pasado tenía esa ventana.*
+ *
+ * ⚠️ **No frena dejar el tipo sin ventanas, pero lo DICE** en
+ * `sinVentanasDeEseTipo`. *Frenarlo trabaría al prestador a mitad de un cambio;
+ * callarlo lo dejaría publicado sin horario sin enterarse.* Qué hacer con ese
+ * dato es de la pantalla.
+ */
+export async function retirarFranjaGuarderia(
+  franjaId: string,
+): Promise<ResultadoWrapper<{ tipo: string; sinVentanasDeEseTipo: boolean }, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('retirar_franja_guarderia', {
+    p_franja_id: franjaId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      tipo: typeof r.tipo === 'string' ? r.tipo : '',
+      sinVentanasDeEseTipo: r.sin_ventanas_de_ese_tipo === true,
+    },
+  };
+}
+
+/**
+ * 🔴 **CAMBIAR DE PATRÓN EN UN SOLO ACTO.** Retira todas las franjas de ese
+ * tipo y define las nuevas **en la misma transacción**.
+ *
+ * *Hacerlo con dos llamadas deja una ventana —de milisegundos, o de minutos si
+ * la segunda falla— **en la que el lugar no tiene horario o tiene dos**. Y en el
+ * medio puede entrar una reserva.* **Un cambio de patrón es una sola decisión
+ * del prestador; que sea un solo acto no es comodidad, es correctitud.**
+ *
+ * **Un array vacío es un retiro total DECLARADO**, no un error: el prestador
+ * puede dejar de ofrecer ese tramo.
+ */
+export async function reemplazarFranjasGuarderia(params: {
+  prestadorId: string;
+  tipo: 'recogida' | 'devolucion';
+  franjas: { desde: string; hasta: string; dias_semana: number[]; zona_horaria?: string }[];
+}): Promise<ResultadoWrapper<{ definidas: number; sinVentanasDeEseTipo: boolean }, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('reemplazar_franjas_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_tipo: params.tipo,
+    p_franjas: params.franjas,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      definidas: typeof r.definidas === 'number' ? r.definidas : 0,
+      sinVentanasDeEseTipo: r.sin_ventanas_de_ese_tipo === true,
+    },
+  };
 }
