@@ -68,6 +68,7 @@ import {
   Boton,
   Celda,
   Encabezado,
+  PantallaConPie,
   Esqueleto,
   EsqueletoGrupo,
   FichaFranja,
@@ -256,7 +257,18 @@ export default function TallerGuarderia() {
   const [especies, setEspecies] = useState<string[]>(['perro', 'gato']);
   /* Los horarios ya están guardados y no hacen falta para tocar precios;
      los precios sí son a lo que se viene. */
-  const [horariosAbierto, setHorariosAbierto] = useState(false);
+  /* ⏪ **ARRANCABA CERRADO Y ESE PLIEGUE ESCONDIÓ EL SELECTOR DE DÍAS.**
+     El founder abrió su config y no lo vio; estaba construido, mergeado y
+     publicado — **detrás de un acordeón plegado**.
+
+     🔴 Y la razón del pliegue está escrita dos líneas abajo: *«ya están
+     guardados y no hace falta verlos para tocar los precios»*. Era cierta
+     cuando la sección sólo tenía HORAS ya configuradas. **Dejó de serlo el día
+     que le metí adentro una decisión nueva y sin tomar** — y el pliegue
+     sobrevivió a su razón. *Un default que oculta algo que nunca se decidió no
+     es economía de scroll: es una función que no existe para quien no la
+     busca.* */
+  const [horariosAbierto, setHorariosAbierto] = useState(true);
   const [preciosAbierto, setPreciosAbierto] = useState(true);
   /** El modal de guardar: 'informa' (un botón) · 'pregunta' (dos). */
   const [aviso, setAviso] = useState<null | 'informa' | 'pregunta'>(null);
@@ -549,8 +561,48 @@ export default function TallerGuarderia() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('tallerGuarderia.titulo')} atras onAtras={() => router.back()} />
 
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[5], gap: spacing[6], paddingBottom: insets.bottom + spacing[8] }}
+      {/* ── EL PIE FIJO · `PantallaConPie`, la pieza de la casa ──────────────
+             ⏪ **«Guardar» vivía al final del scroll** y había que recorrer
+             toda la pantalla para llegar — *con los acordeones abiertos,
+             mucho más*. **Es el mismo defecto que ya se midió en el detalle
+             del cliente** (el CTA caía en y=1007 sobre una pantalla de 932):
+             *una acción que hay que buscar es una acción que no existe para
+             quien no la busca.*
+
+             🔴 **Se reusa, no se construye.** `PantallaConPie` es la pieza
+             que la casa ya usa para esto (despensa la monta en cuatro
+             pantallas) y **reserva sola el alto del contenido** — que era la
+             causa real del defecto, no el pie. `PieReserva` NO sirve acá: es
+             de reserva, lleva precio y su gramática es la de pagar.
+
+             ⚠️ **El pie va como FRAGMENTO, sin `View` propio** — aviso de B:
+             `PantallaConPie` lleva `pointerEvents="box-none"` para que el
+             gesto de scroll atraviese la banda, y `box-none` cubre UNA capa.
+             Un `View` acá reabriría la zona muerta justo donde va el pulgar. ── */}
+      <PantallaConPie
+        contentContainerStyle={{ padding: spacing[5], gap: spacing[6] }}
+        pie={
+          /* 🔴 `box-none` — **lo leí en el aviso de B y lo hice igual, y R54 lo
+             cazó**: sin esto el `View` captura todo su rectángulo y reabre la
+             zona muerta de gesto en el tercio inferior, justo donde el pulgar
+             sostiene el teléfono. *La regla existe porque la advertencia
+             escrita no alcanzó — ni siquiera conmigo, que la había leído.* */
+          <View
+            pointerEvents="box-none"
+            style={{ paddingHorizontal: spacing[5], paddingBottom: insets.bottom + spacing[3], paddingTop: spacing[3] }}
+          >
+            <Boton
+              etiqueta={t('tallerGuarderia.guardar')}
+              bloque
+              cargando={guardando}
+              /* Ley 23 — la puerta no ofrece lo que el acto va a estropear. Sin
+                 días no hay horario que guardar, y el apagado DICE por qué. */
+              deshabilitado={dias.length === 0}
+              razonDeshabilitado={t('tallerGuarderia.sinDias')}
+              onPress={alGuardar}
+            />
+          </View>
+        }
       >
         {/* ── LA CAPACIDAD ── */}
         <View style={{ gap: spacing[3] }}>
@@ -608,8 +660,8 @@ export default function TallerGuarderia() {
           ) : null}
         </View>
 
-        {/* ── HORARIOS — cerrado al entrar: ya están guardados y no hace falta
-            verlos para tocar los precios, que es a lo que se viene. ── */}
+        {/* ── HORARIOS — **ABIERTO al entrar** desde que adentro vive el
+            selector de días, que es una decisión sin tomar. ── */}
         <SeccionPlegable
           titulo={t('tallerGuarderia.franjasTitulo')}
           /* El resumen dice los días: si no, la sección plegada muestra dos
@@ -872,17 +924,7 @@ export default function TallerGuarderia() {
           </View>
         </Tarjeta>
 
-        <Boton
-          etiqueta={t('tallerGuarderia.guardar')}
-          bloque
-          cargando={guardando}
-          /* Ley 23 — la puerta no ofrece lo que el acto va a estropear. Sin
-             días no hay horario que guardar, y el apagado DICE por qué. */
-          deshabilitado={dias.length === 0}
-          razonDeshabilitado={t('tallerGuarderia.sinDias')}
-          onPress={alGuardar}
-        />
-      </ScrollView>
+      </PantallaConPie>
 
       {/* ── LOS DOS AVISOS DE GUARDAR ──
           Uno pregunta y el otro informa, y la diferencia no es de tono: **se
