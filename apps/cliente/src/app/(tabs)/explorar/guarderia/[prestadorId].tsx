@@ -53,7 +53,6 @@ import {
   resolverUrlLogoNegocio,
   type PerfilPublico,
   obtenerFranjasGuarderia,
-  comprarPaqueteGuarderia,
   reservarDiaDePaqueteGuarderia,
   contratarMensualidadGuarderia,
   reservarDiaGuarderia,
@@ -309,50 +308,14 @@ export default function LugarGuarderia() {
       return;
     }
 
-    /* ═══ EL CAMINO DEL PAQUETE — DOS LLAMADAS, UN SOLO ACTO ═══════════════
-       Firma del founder: **el toggle de la primera sesión va prendido y es
-       obligatorio en la primera compra.** Por eso acá no hay interruptor: *un
-       toggle que no se puede apagar es una casilla decorativa.*
-
-       🔴 **COMPRAR NO ES RESERVAR — y por eso son dos llamadas.** El motor lo
-       dice en su contrato: `comprarPaqueteGuarderia` crea SÓLO el bono (cero
-       citas), y la primera sesión se agenda con la segunda. *Meterlas en una
-       sola RPC habría atado el paquete a un día, y el paquete es del HOGAR.*
-
-       ⚠️ **Y no hay checkout, medido:** el bono nace `estado_pago='pagado'` con
-       `pago_simulado: true`. **La pantalla lo DICE** — *un cobro simulado que la
-       superficie presenta como real es la clase de mentira que esta casa
-       persigue.* */
-    if (esPaquete) {
-      const compra = await comprarPaqueteGuarderia({ prestadorId: prestadorId as string, tamano });
-      if (!compra.ok) {
-        rebotar(compra.codigo, compra.mensaje);
-        setReservando(false);
-        return;
-      }
-      /* La mascota VIAJA acá aunque sea opcional: en la primera compra ya está
-         decidida y mandarla evita el rebote `mascota_no_determinada` en el
-         único momento del flujo donde la familia no lo entendería. */
-      const primera = await reservarDiaDePaqueteGuarderia({
-        bonoId: compra.data.bonoId,
-        fecha: elegido,
-        mascotaId,
-      });
-      setReservando(false);
-      if (!primera.ok) {
-        /* 🔴 EL BONO YA EXISTE. *Decir sólo «no se pudo» sobre una compra que SÍ
-           ocurrió dejaría a la familia creyendo que perdió la plata.* */
-        rebotar(primera.codigo, t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
-        return;
-      }
-      mostrar({
-        texto: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }),
-        variante: 'exito',
-      });
-      if (router.canDismiss()) router.dismissAll();
-      router.navigate('/hogar/guarderia');
-      return;
-    }
+    /* ☠️ **ACÁ VIVÍA LA COMPRA DEL PAQUETE Y SOBREVIVIÓ A SU RÍO.** Cuando
+       el pago se mudó al checkout agregué la rama que navega **y dejé ésta
+       viva encima**: como corre primero, la nueva era inalcanzable y el CTA
+       seguía comprando desde P4.
+       *No lo vio ningún typecheck —las dos ramas son válidas— ni el lint: lo
+       vio la red, mostrando `comprar_paquete_guarderia` disparando desde una
+       pantalla que ya no debía cobrar.* **Ley 37: lo viejo muere en el mismo
+       acto, y esta vez no murió.** */
 
     /* ═══ MENSUAL Y PAQUETE · **NAVEGAN, NO COBRAN** ═════════════════════
        Firma del founder: *«la pantalla 4 termina en un CTA … y ese botón
