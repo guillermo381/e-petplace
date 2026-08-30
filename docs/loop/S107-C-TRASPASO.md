@@ -1,122 +1,136 @@
 # S107-C · ACTA DE TRASPASO — las superficies de guardería
 
-> **Para quien retome la pista C sin saber nada de esta sesión.** Se lee ANTES de tocar nada.
-> **Regla que gobierna todo lo de abajo:** los números y estados de acá **eran ciertos el 29-ago-2026**. **Todo dato vivo se re-lee del objeto al usarlo** (L-166), y **el próximo `D-NNN` libre se verifica por grep contra `DEUDAS_CANONICAS.md`, jamás desde este documento.**
+> **Para quien retome la pista C sin saber nada.** Se lee ANTES de tocar nada.
+> **Regla que gobierna todo:** los estados de acá **eran ciertos el 29-ago-2026**. **Todo dato
+> vivo se re-lee del objeto al usarlo**, y el próximo `D-NNN` libre se verifica **por grep**,
+> jamás desde este documento.
 
 ---
 
-## ⓪ QUÉ ES ESTA PISTA, EN UNA LÍNEA
+## ⓪ LO PRIMERO, PORQUE ES LO QUE MÁS DUELE
 
-**C construye las SUPERFICIES de las dos apps.** En S107 el oficio nuevo es **guardería**: el prestador la configura y ve su día; la familia la descubre, reserva y paga.
-**No son míos:** `packages/ui` (B) · `packages/api`, `supabase/`, `docs/contratos/` y `DEUDAS_CANONICAS.md` (A).
+> ### 🔴 **EL FOUNDER NO PUEDE COMPRAR NI RESERVAR TODAVÍA, Y LA CAUSA NO ES DE PANTALLA.**
+> **`guarderia_documentos` = 0.** La casa **nunca cargó los seis textos legales**, así que
+> `_guarderia_puede_reservar` devuelve `documentos_no_disponibles` **para toda familia**.
+>
+> **Es la regla de perímetro del founder funcionando** — *«sin documento cargado la reserva no se
+> abre»*. **No se cura con código: se cura cargando los textos.** *(Dueño: A / mesa.)*
+
+🔴 **Y con una asimetría grave, medida:** `comprar_paquete_guarderia` **NO pasa por ese gate** ⇒
+se le puede cobrar un paquete a alguien que no aceptó nada, y frenarlo después.
+⇒ `S107-C-PEDIDO-A-A-GATE-DEL-PAQUETE.md`.
 
 ---
 
-## ① ESTADO EXACTO
+## ① ESTADO
 
 | | |
 |---|---|
 | worktree · rama | `../e-petplace-s107-c` · `pista/s107-c` |
-| último commit | **`1117f126`** |
-| árbol | limpio |
-| **en `main`** | **todo lo funcional** — A mergeó cada tanda |
-| **NO en `main`** | sólo los commits de documentación posteriores al último merge de A (este acta incluido) |
-| gates al cerrar | typechecks **prestador y cliente limpios** · `verify:diseno` **VERDE, 60 reglas** |
+| árbol | limpio · todo pusheado |
+| **fuera de main** | **3 commits** — correlos con `bash scripts/s107/estado-de-mis-curas.sh` |
+| gates | typecheck cliente y prestador limpios · `verify:diseno` **VERDE, 61 reglas** |
+| compuerta | **`MODALIDADES_ABIERTAS = ['dia','paquete']`** — mensual **cerrada**, sin wrapper de contratación. **NO se abre sin aviso literal de A** |
 
 ---
 
-## ② LO CONSTRUIDO — CLIENTE
+## ② EL FLUJO DEL CLIENTE, COMO QUEDÓ
 
-**La arquitectura, que es lo que más importa entender:** en esta casa **cada oficio vive en DOS sitios** — `/hogar/<oficio>` es **el LOG** (el historial de la familia) y `/explorar/<oficio>/` es **el FLUJO** (elegir y pagar). *El defecto raíz de esta sesión fue haber construido el flujo en el lugar del log; se corrigió mudándolo.*
+```
+/hogar/guarderia            LOG: chips de mascota · pestañas · lista · saldo de paquete · CTA
+  └→ /explorar/guarderia    ETAPA 1: modalidad → día → tamaño (con su precio) → «Ver quién puede»
+      └→ …/disponibles      ETAPA 2: la vitrina (PreviewPrestador + cupo + las dos ventanas)
+          └→ …/[prestadorId]  EL LUGAR: franjas · calendario · semáforo · MapaZona · PAGAR
+              └→ …/checkout   CheckoutReserva, la pieza compartida
+/guarderia/[estadiaId]      EL DURANTE: estado · mapa del tramo · media · acta
+/guarderia/documentos       LA ACEPTACIÓN
+```
 
-| pantalla | estado |
+🔴 **EL TAP DE LA VITRINA VA A `…/[prestadorId]`, NO AL PERFIL GENÉRICO** (prop `onAbrir` de
+`PreviewPrestador`). *El perfil monta barra de los cuatro oficios y **ninguna de guardería**.*
+**Esta línea se perdió UNA VEZ en un merge y cortó el pago cinco tandas** — el typecheck no lo
+ve, porque **una prop opcional que nadie pasa no rompe nada.** **Si el pago vuelve a cortarse,
+mirá esto primero.**
+
+---
+
+## ③ MI COLA — tres cosas, todas mías
+
+1. 🔴 **El ancho del botón de antirrábica** — el founder lo ve «muy ancho». Sin empezar.
+2. 🔴 **El selector de días del prestador** — **desbloqueado**: `reemplazarFranjasGuarderia` hace
+   el reemplazo atómico con `dias_semana`. *Sin él, cualquier selector fabrica franjas huérfanas
+   — por eso estuvo cerrado.*
+3. 🔴 **Mi pantalla de documentos → `AceptacionDeDocumentos`** — *la hice a mano sin saber que la
+   pieza existía*; la usan el registro del prestador y la invitación.
+
+## ④ ESPERANDO A A
+
+- 🟡 **La mensualidad** — hay motor en migraciones, **no hay wrapper de contratación**.
+- 🔴 **El gate del paquete** (⓪) · 🔴 **los seis textos legales** (⓪).
+- 🟢 **`p_tamano` en el resumen** — **no bloquea**: el precio por chip lo resuelvo con
+  `obtenerPaquetesGuarderia`, que cuesta **una llamada por lugar**. Cuando llegue, colapsa a una.
+
+## ⑤ DECISIÓN DE MESA ABIERTA
+
+**`protocolo_no_retiro` está entre los seis documentos** que la pantalla lista. **No lo trato
+distinto ni lo escondo:** *un caso especial sería la pantalla de mora que el perímetro prohíbe;
+sacarlo sería pedir que acepten algo que no mostramos.*
+
+---
+
+## ⑥ LAS FIRMAS QUE RIGEN
+
+| firma | al construir |
 |---|---|
-| **`/hogar/guarderia.tsx`** — el LOG | 🟠 **MITAD INERTE**: monta `FiltroMascotas` y el CTA al pie, **pero la lista no se puede llenar** (no existe el lector). Su vacío **dice la verdad**: *«todavía no podemos mostrarte tus estadías»*, **no** *«no tienes estadías»* |
-| **`/explorar/guarderia/index.tsx`** — **ETAPA 1, la MODALIDAD** | ✅ `SelectorSegmentado` (Día · Paquete · Mensual). ⚠️ **Hoy no se ve, y está bien**: con una sola modalidad abierta **N=1 colapsa** y redirige sin dibujar |
-| **`/explorar/guarderia/disponibles.tsx`** — **ETAPA 2, el día y quién puede** | ✅ era el `index`. `CabezalOficio` (**con el nombre de la mascota**) · `SelectorDia` · lista de lugares · `DiaSinHorarios`. El rótulo del día **habla por modalidad** |
-| **`/guarderia/[estadiaId].tsx`** — **el DURANTE del dueño** | 🟠 **media VIVA**, estadía con **enchufe nombrado**, punto vivo montado. **Sin entrada cableada a propósito** (ver ④) |
-| **`/explorar/guarderia/[prestadorId].tsx`** — el lugar | ✅ franjas · calendario de cupo · semáforo sanitario · reservar |
-| **`/explorar/guarderia/checkout.tsx`** | ✅ monta `CheckoutReserva`, **la misma pieza que paseo y grooming** |
-
-**✅ La cara de la mascota LLEGA — verificado, no supuesto:** `obtenerMascotasDeFamilia` selecciona `especie, foto_url`, y las dos pantallas la resuelven con `caraDeMascotaPorRuta`. **No quedó pendiente.**
-
-**Otros dos cambios del cliente:** ☠️ **el chevron de las baldosas de Explorar, retirado** (quedaba a distinta altura en cada una según cuántas líneas ocupara el label) — **la etiqueta accesible se quedó, y es lo único que dice a dónde entra**; y **guion blando (U+00AD)** en `Esté­tica y baño` · `Adiestra­miento` · `Vete­ri­na­ria`.
+| **Tuteo** (`R66`) | trinquete solo-baja. **Los dictados de mesa vienen en voseo y se convierten** |
+| **La víspera** | **HOY jamás se reserva** — el motor rebota `fecha_no_ofertable` |
+| **La modalidad arranca en «día»** | *no es default oscuro: es el camino que la familia iba a tomar igual*. Nada más viene elegido |
+| **El orden: fecha → tamaño** | los precios por tamaño salen de los lugares que abren ESE día |
+| **Sin chips de mascota en el flujo** | viaja por parámetro; el guard sobrevive para el deep-link |
+| **El mensaje de causa va ENCIMA del botón** | `PieReserva` es fijo y debajo no hay dónde vivir |
+| **El botón de conformar el acta** | nace **con** el lector del contenido, no antes |
+| **Comprar paquete = comprar + agendar el primer día** | **sin toggle**: *uno que no se puede apagar es una casilla decorativa* |
+| **Con saldo, el lugar lo determina el bono** | va directo al día de ESA guardería |
+| **Toda cura viaja con su estado real** | «en mi rama, esperando merge» — nunca «curado» a secas |
 
 ---
 
-## ③ LO CONSTRUIDO — PRESTADOR
+## ⑦ LOS INSTRUMENTOS — se corren, no se re-inventan
 
-| pantalla | estado |
+| script | para qué |
 |---|---|
-| **`/guarderia/index.tsx`** — la portada | ✅ resumen primero (visibilidad, precio, jornada, cupo, ventanas) y **recién debajo editar**, con `useFocusEffect` |
-| **`/guarderia/taller.tsx`** — la config | ✅ **completa** — ver abajo |
-| **`/guarderia/dia.tsx`** — su día | ✅ lista de estadías con cara, estado, sala y **la dirección de recogida** (misma pieza que el paseo). 🔴 **No marca nada**: los wrappers de acción no existen y llegan con el acta |
-
-**La config, en su orden firmado:** ① **especies** (perro/gato, `SelectorOpcion` del patrón de grooming) → ② **capacidad** por día → ③ acordeón **«Horarios»** *(cerrado)* → ④ acordeón **«Tus precios»** *(abierto)*: diario · tres paquetes (5·10·15) · mensual, **cada uno con su toggle y su precio adentro** → ⑤ **«Así lo ve el dueño»**, con **las mismas piezas que ve la familia**.
-
-**El modal de guardar, con su regla:** sin ningún precio → **pregunta** (dos botones) y guarda sin publicar; con precio pero sin el diario → **informa** (un botón) nombrando con qué se publica. *Se pregunta cuando hay alternativa; se informa cuando no la hay.*
-
----
-
-## ④ LOS HUECOS VIVOS
-
-1. 🔴 **El lector de estadías del lado de la FAMILIA — bloquea el log.** `obtenerEstadiasDelDia` **no sirve**: es del prestador, por día, y **filtra los holds a propósito**; la familia necesita ver su reserva **sin pagar**, que es la que tiene que ir a pagar. **Contrato exacto:** `docs/loop/S107-C-PEDIDO-A-A-LOG-FAMILIA.md`.
-2. 🟠 **`D-967`, mitad cliente — ⏪ MEDIO PAGADA (29-ago).** ✅ **La sonda YA ESTÁ PORTADA**, inerte y byte-idéntica (`apps/cliente/modules/sonda-manifest`; `diff -r` contra el prestador en cero). ❌ **El flip NO se hizo y no debe hacerse todavía:** en el binario instalado la sonda daría `null` ⇒ fail-closed ⇒ **apagaría el mapa donde funciona**. **Disparo del flip: el próximo binario de cliente que lleve el módulo**, verificado con `verify-manifest-apk` **sobre ESE APK**. El flip está escrito, listo para copiar, en la cabecera de `mapa-nativo.ts`. ⚠️ **La trampa, escrita ahí mismo:** *«si la sonda devuelve `null`, caigo al literal»* es **fail-OPEN con mejor nombre**.
-3. 🟠 **La baldosa a mano del Explorar del cliente.** No monta `Baldosa`: la dibuja a mano, así que las curas de la pieza no la alcanzan. **Decidí aplicar el guion blando y NO montar la pieza**, porque su anatomía ya divergió por firma (perdió descripción y chevron) y montarla reabriría dos decisiones recién tomadas. ⚠️ **La mesa la llamó `D-973`, pero medido: esa ficha NO existe en `DEUDAS_CANONICAS.md`** — quien la deposite **verifica el número libre por grep**.
-4. 🟠 **El acta (⑤)** — ⏪ **CORREGIDO (29-ago): sus wrappers YA EXISTEN.** `levantarActaGuarderia` y `confirmarActaGuarderia` están publicados, y `ActaDeEntrega` (B) tiene su `modo='leer'` con `onConformar`. **Lo único que falta es de dónde sacar el `actaId`** ⇒ lo trae el mismo lector del hueco 1 (`actaPendienteId`).
-5. 🔴 **La aceptación de documentos** — sin superficie; sus wrappers no existen en `packages/api` (aunque las RPC `obtener_documentos_guarderia` / `aceptar_documentos_guarderia` / `evaluar_documentos_guarderia` **sí están en la base**). Pedido: `S107-C-PEDIDO-A-A-DOCUMENTOS.md`.
-6. 🔴 **Paquete y mensual no se pueden vender.** Construidas enteras, **detrás de una compuerta de una línea** (`lib/guarderia-modalidad.ts`). Medido: **no existe RPC de compra de paquete de guardería** ni hermano de `contratar_plan_paseo`, y **el filtro todavía no acepta `p_modalidad`**. Pedido: `S107-C-PEDIDO-A-A-PAQUETE-Y-MENSUAL.md`. ⚠️ **Leé la trampa antes de encender la compuerta.**
-7. ⏪ **RETIRADO — ERA MÍO Y ESTABA VENCIDO (29-ago).** Acá decía que `guarderia_tramos` no existía. **Existe**, y en el acto de crearla se curó una fuga que el hueco tapaba (`obtener_punto_vivo` sólo pedía `auth.uid()`). 🔴 **La forma manda:** el tramo es **del VIAJE, no de la estadía** —sin `estadia_id`—, y cada estadía apunta con `tramo_recogida_id`/`tramo_devolucion_id`. *Un tramo por estadía haría que el mismo vehículo emitiera N puntos idénticos.*
+| `estado-de-mis-curas.sh` | **antes de reportar nada**: en qué estado está lo que vas a llamar «curado» |
+| `sonda-camino-del-dedo.mjs` | 🔴 **el camino completo de la familia**. *El único que caza un tap roto* |
+| `sonda-precio-por-tamano.mjs` | que cada chip muestre SU precio, **contra el render** |
+| `sonda-caminos-tristes.mjs` | los rebotes del motor, sin escribir |
+| `corrida-*-subtx.sql` | lo que exige escribir, **entre `BEGIN` y `ROLLBACK` con residuo medido** |
+| `sonda-tocar.mjs` | `tocar()` no deja tocar sin verificar · `porClave()` nombra la clave, no la copia |
+| `levantar-cliente-web.sh` | levanta la web con la API viva. **Lleva el aviso de la `service_role`** |
 
 ---
 
-## ⑤ LAS FIRMAS QUE RIGEN ESTE TERRITORIO
+## ⑧ LAS CINCO CLASES QUE DEJA ESTA PISTA — todas producen salida creíble y ninguna deja síntoma
 
-| firma | qué significa al construir |
-|---|---|
-| **Tuteo** (`R66`) | la voz de producto **jamás vosea**. Es un trinquete **solo-baja**: si tus strings lo suben, el gate se pone rojo |
-| **La víspera** | 🔴 **HOY jamás se reserva** — el primer día elegible es el siguiente en que el lugar opera |
-| **Las voces del calendario** | ⏪ **CORREGIDO (29-ago): son CINCO, no seis** — `pasado` · `mismo_dia` · `no_opera` · `sin_lugar` · `elegible` (contrato ②). **`sobrevendido` NO es un estado: es un booleano aparte** que puede venir con cualquiera de los cinco, y *«sin fila» es una ausencia, no un estado*. **«No abre» NO es «se llenó»**, y el server los separa porque desde la pantalla ambos llegan como `disponible = 0` |
-| **El semáforo REFLEJA, no decide** | `bloquea` viaja **dentro** de la evaluación y lo lee también `reservar_dia_guarderia`. **La pantalla nunca abre una puerta para chocar contra otra** |
-| **Sin chips de mascota en el flujo** | la mascota **viaja por parámetro** desde el log; el flujo no la vuelve a preguntar |
-| **Guardería sedimenta CADA estadía** | como sus hermanas. 🔴 **El evento es de A** — nace en el servidor **al entregar**, no en ninguna pantalla mía |
+1. **La incoherencia entre dos estados que sólo coinciden en pantalla.** *Cada mitad correcta;
+   ninguna línea está mal.*
+2. **El instrumento que no distingue «no pasó nada» de «no hice nada».** → `tocar()`.
+3. **El dato que fue cierto y dejó de serlo.** *Cobrada dos veces, las dos sobre trabajo ajeno.*
+4. **Nombrar de memoria** — campos, tablas, roles, copys. *Seis veces en un día.* → `porClave()`.
+5. 🔴 **Medir bien la pantalla equivocada.** *Tres sondas midieron pantallas que el dedo nunca
+   alcanzaba: «¿esta pantalla anda?» no es «¿se puede comprar?».*
 
----
-
-## ⑥ TRES COSAS QUE SÓLO SE ENTIENDEN CON EL CONTEXTO, Y POR ESO VAN ESCRITAS
-
-**① Por qué el flujo de guardería NO se parte en `index` + `disponibles` como sus hermanas.** Porque **acá el día ES lo que filtra a los lugares**: partirlo inventaría un paso donde la familia elige el día, toca «siguiente» y ve **la misma lista que ya podía ver**. Sus hermanas lo parten porque ahí el QUIÉN depende de **una hora que todavía no está elegida**. **Adoptado por firma, no es pereza.**
-
-**② Por qué los labels llevan un guion invisible.** RN **no hifena español** y la pieza **no sabe silabificar** — dónde parte una palabra es propiedad del idioma. Medido: `Adiestramiento` son 14 caracteres de **una sola palabra** y **ningún tamaño de la escala** la hace entrar en los ~74 pt de una baldosa a tres columnas. ⚠️ **El guion es invisible en el editor: quien edite esas cadenas lo borra sin que nada avise.**
-
-**③ Por qué desconfiar del aparato antes que del repo.** Dos veces en esta sesión el founder vio algo que el código no decía, y **las dos veces el repo estaba bien y el bundle era viejo**. **El discriminador es el commit, no la discusión.** Y la lección propia (**`L-432`**): comparar tu rama contra `main` responde *qué cambiaste vos*, **no qué puede recibir el teléfono** — para eso la pregunta es si **existe binario para el runtime que `app.json` declara**.
+> **Y el patrón que las une: cuando algo salió mal por lo que uno recordó o dejó de recordar, la
+> cura no es recordarlo mejor — es que deje de depender de recordarlo.** *Cinco de las curas de
+> esta pista son mecanismos, no notas.*
 
 ---
 
-**④ La clase de defecto que ningún gate ve, y que ya cobró dos veces acá.**
-**La incoherencia entre dos estados que sólo coinciden en pantalla.** Cada mitad es correcta por
-separado; el defecto **nace de mostrarlas juntas**, así que **no hay una línea que esté mal** y
-ningún typecheck, lint o test puede verlo. El peor caso del 29-ago: un vacío que prometía
-*«sus fotos sí las tienes acá abajo»* con *«no pudimos traer sus fotos»* **debajo, en la misma
-vista**. **La regla:** *un estado vacío habla SÓLO de lo suyo* — y el vacío es justo el momento
-en que las otras secciones también están fallando. **Se cazan recorriendo la pantalla y leyendo
-su texto entero** (`scripts/s107/recorrido-guarderia.mjs` lo hace).
+## ⑨ EL PRÓXIMO PASO EJECUTABLE
 
----
+**Correr `bash scripts/s107/estado-de-mis-curas.sh`** y, si hay commits fuera, decirlo al
+reportar. Después, en orden: **el ancho del botón** (chico y visible) → **la pieza de
+documentos** → **el selector de días**.
 
-## ⑦ EL PRÓXIMO PASO EJECUTABLE
-
-**Todo depende del mismo lector**, y por eso está pedido una sola vez:
-
-1. **Si A publicó `obtenerMisEstadias`:** ① la lista del LOG
-   (`hogar/guarderia.tsx`: reemplazar el `EstadoVacio` de «listaPendiente» por `FiltroPills` +
-   filas `FilaCita` — ✅ la pieza ya conoce guardería desde `69c39376`) · ② **cablear la entrada al durante** desde esa fila · ③ el acta, que con
-   `actaPendienteId` es montar `ActaDeEntrega` en `modo='leer'`.
-2. **Si A publicó el filtro por modalidad y las dos RPC de cobro:** cambiar **una línea** en
-   `lib/guarderia-modalidad.ts`. **Nada más** — las tres pantallas ya están.
-3. **Si no llegó ninguna:** la **aceptación de documentos** es lo único que no depende del
-   lector, y su contrato ya está publicado.
-
-⚠️ **Y lo que NO se hace todavía:** cancelación y reagenda. **No hay política** — `P18` cubre
-por su propio encabezado *«el paseo INDIVIDUAL pagado»* y guardería **no tiene hermana**.
-Depositarla es de A.
+⚠️ **Y antes de decir que algo del pago funciona: `node scripts/s107/sonda-camino-del-dedo.mjs`
+con Metro arriba.** *Es el único instrumento que recorre el tap, y es el que encontró lo que
+cinco tandas de medición no vieron.*
