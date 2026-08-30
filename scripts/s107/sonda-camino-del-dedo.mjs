@@ -102,13 +102,46 @@ const ok1 = await PASO('elegir la mascota (chip)', toca(pg.getByText('Thor', { e
 if (ok1) {
   const ok2 = await PASO('tocar «Reservar una estadía»', toca(porClave(pg,'logGuarderia.reservarDe').localizador, 'CTA del hub (con mascota elegida)'));
   if (ok2) {
-    const ok3 = await PASO('elegir un día', toca(porDato(pg, /^31$/), 'día 31'));
+    /* ⏪ **ANTES ERA `porDato(/^31$/)` — el día 31, tecleado.** Frágil por dos
+       lados: un mes de 30 no lo tiene, y **el 31 caía en lunes por
+       casualidad**. Al cambiarlo por «el primero de la tira» la sonda se cortó
+       ANTES —domingo, y el lugar abre L-V—, o sea que *el instrumento acertaba
+       por el mismo azar que el resto de la pista vino cazando*.
+       Ahora **el dedo hace lo que hace un dedo: prueba hasta que el botón se
+       enciende**, y si ninguno lo enciende lo dice con los días que probó. */
+    const ok3 = await PASO('elegir un día que habilite el botón', async () => {
+      const dias = await visible(pg.getByRole('radio', { name: /^\w+ \d+$/ })).all();
+      if (dias.length === 0) throw new Error('la tira de días NO EXISTE en pantalla');
+      const probados = [];
+      for (const d of dias) {
+        const etq = await d.getAttribute('aria-label');
+        await d.click({ force: true });
+        await pg.waitForTimeout(2000);
+        const apagado = await visible(porClave(pg, 'elegirGuarderia.verQuienPuede').localizador)
+          .first().evaluate((el) => (el.closest('[role="button"]') ?? el).getAttribute('aria-disabled'));
+        if (apagado !== 'true') { console.log(`     (probó ${probados.length + 1}: ${etq} — habilita)`); return; }
+        probados.push(etq);
+      }
+      throw new Error(`NINGUNO de los ${probados.length} días habilita el botón: ${probados.join(', ')}`);
+    });
     if (ok3) {
       const ok4 = await PASO('«Ver quién puede»', toca(porClave(pg,'elegirGuarderia.verQuienPuede').localizador, 'botón ver quién puede'));
       if (ok4) {
         const ok5 = await PASO('tocar Clínica Aurora', toca(pg.getByText('Aurora', { exact:false }), 'la fila del lugar'));
         if (ok5) {
-          const ok6 = await PASO('elegir el día en el calendario del lugar', toca(porDato(pg, /^31$/), 'día 31 del calendario'));
+          /* Mismo criterio que el paso 3: el día se elige por lo que ADMITE,
+             no por su número. El calendario del lugar marca sus días con
+             `aria-disabled`, así que acá el dedo sí puede ver cuál sirve. */
+          const ok6 = await PASO('elegir un día en el calendario del lugar', async () => {
+            const dias = visible(pg.getByRole('radio')).filter({ hasNotText: /^$/ });
+            const libres = await visible(pg.locator('[role="radio"]:not([aria-disabled="true"])'))
+              .filter({ hasText: /\d/ }).all();
+            if (libres.length === 0) {
+              const total = await dias.count();
+              throw new Error(`el calendario tiene ${total} días y NINGUNO es elegible`);
+            }
+            await libres[libres.length - 1].click({ force: true });
+          });
           if (ok6) await PASO('PAGAR / reservar', toca(porClave(pg,'lugarGuarderia.reservar').localizador, 'CTA de reservar'));
         }
       }
