@@ -2947,6 +2947,13 @@ export const clienteEs = {
     doc_autorizacion_transporte: 'Autorización de transporte',
     doc_protocolo_no_retiro: 'Protocolo de no retiro',
     version: 'Versión {{n}}',
+    aceptacionTitulo: 'Lo que hay que aceptar',
+    /* La frase entera se lee «Leí y acepto: Contrato de custodia» — el nombre
+       del documento es el enlace. Una sola clave para los seis: con «Acepto
+       el/la» harían falta seis variantes por el artículo. */
+    leiYAcepto: 'Leí y acepto:',
+    opcional: 'Opcional',
+    faltaAceptar: 'Marca los seis documentos para continuar.',
     urgenciaTitulo: 'Si hay una urgencia',
     urgenciaDetalle: 'Hasta cuánto autorizas a gastar sin poder consultarte primero.',
     topeEtiqueta: 'Tope en dólares',

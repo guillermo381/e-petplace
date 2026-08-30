@@ -20,7 +20,24 @@
  * pedirle a la familia que acepte algo que no le mostramos.*
  * 🔴 **Se declara para que la mesa decida** — no lo resuelvo por mi cuenta.
  *
- * ── POR QUÉ NO ES UNA LISTA DE CASILLAS ──────────────────────────────────
+ * ── 🔴 POR QUÉ ESTA PANTALLA SE REHIZO SOBRE `AceptacionDeDocumentos` ────
+ * La primera versión **volcaba el texto legal entero de los seis documentos**
+ * en tarjetas y mandaba `aceptaciones: docs.map(...)` al tocar el botón — o
+ * sea **las seis, hiciera lo que hiciera la familia**. *No había casilla, no
+ * había acto, y sin acto no hay prueba* (P23). **Era peor que una casilla
+ * pre-marcada**, que es justo el patrón que la cabecera de la pieza prohíbe.
+ *
+ * Ahora la pieza de la casa pone las seis casillas, **cada documento se abre
+ * sin marcarse** (el enlace es el responder más interno) y el botón sólo se
+ * enciende **con las seis marcadas**. *El texto completo vive en una `Hoja`,
+ * como el original clínico de `parte/[eventoId]`: un muro de seis textos
+ * legales arriba del botón no es leerlos, es enterrarlos.*
+ *
+ * ⚠️ **La autorización de imagen bajó a `opcionales`** — el lugar que la pieza
+ * tiene hecho para ella, separada y **jamás pre-marcada**. Antes era un
+ * `Interruptor` suelto entre obligatorios.
+ *
+ * ── POR QUÉ NO ES **SÓLO** UNA LISTA DE CASILLAS ─────────────────────────
  * El motor exige **el tope de urgencia y los contactos SIN default**: *no se
  * puede aceptar los documentos sin declarar hasta cuánto se autoriza gastar en
  * una urgencia y a quién llamar.* **El consentimiento y esos dos datos son un
@@ -38,13 +55,15 @@ import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AceptacionDeDocumentos,
   Boton,
   Campo,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Interruptor,
+  Hoja,
+  HojaScroll,
   Separador,
   Tarjeta,
   Texto,
@@ -63,6 +82,13 @@ import {
 
 import { useTraduccion } from '@/i18n';
 
+/**
+ * La clave de la casilla OPCIONAL. Vive aparte de los códigos del server a
+ * propósito: es la única que **no** es un documento, y mezclarla en `marcadas`
+ * la volvería contable para el gate.
+ */
+const CLAVE_REDES = 'redes_autorizadas';
+
 type Carga =
   | { fase: 'cargando' }
   | { fase: 'noPudimos' }
@@ -75,6 +101,11 @@ export default function DocumentosGuarderia() {
   const { mostrar } = useAviso();
 
   const [carga, setCarga] = useState<Carga>({ fase: 'cargando' });
+  /* 🔴 EL ACTO. Vacío al arrancar — «el arranque de una aceptación es vacío»
+     (literal de la pieza). Sin esto se volvía a mandar las seis por default. */
+  const [marcadas, setMarcadas] = useState<string[]>([]);
+  /** El documento cuyo texto completo está abierto en la Hoja. */
+  const [abierto, setAbierto] = useState<DocumentoGuarderia | null>(null);
   const [contactoNombre, setContactoNombre] = useState('');
   const [contactoTel, setContactoTel] = useState('');
   const [tope, setTope] = useState('');
@@ -108,8 +139,15 @@ export default function DocumentosGuarderia() {
     const r = await aceptarDocumentosGuarderia({
       familiaId: carga.familiaId,
       /* 🔴 SE ACEPTA LA VERSIÓN QUE SE LEYÓ, no «el documento»: si el texto
-         cambió mientras la pantalla estaba abierta, el motor lo va a saber. */
-      aceptaciones: carga.docs.map((d) => ({ codigo: d.codigo, version: d.version })),
+         cambió mientras la pantalla estaba abierta, el motor lo va a saber.
+
+         ⏪ **Y SÓLO LO QUE LA FAMILIA MARCÓ.** Antes acá iba `carga.docs`
+         entero — las seis viajaban hiciera lo que hiciera. *El botón ya no se
+         enciende sin las seis, así que el filtro no cambia lo que llega al
+         motor; cambia que lo que llega sea consecuencia de un acto.* */
+      aceptaciones: carga.docs
+        .filter((d) => marcadas.includes(d.codigo))
+        .map((d) => ({ codigo: d.codigo, version: d.version })),
       urgenciaTopeMonto: Number(tope),
       /* ⚠️ USD viene del país del prestador, y esta pantalla todavía no lo
          tiene. **Se declara**: hoy el único país operativo es EC/USD. El día
@@ -126,13 +164,19 @@ export default function DocumentosGuarderia() {
     if (!r.ok) { mostrar({ texto: r.mensaje, variante: 'error' }); return; }
     mostrar({ texto: t('documentosGuarderia.aceptado'), variante: 'exito' });
     router.back();
-  }, [carga, enviando, tope, contactoNombre, contactoTel, redes, mostrar, t]);
+  }, [carga, enviando, tope, contactoNombre, contactoTel, redes, marcadas, mostrar, t]);
 
   const montoValido = Number(tope) > 0;
   const contactoValido = contactoNombre.trim().length > 0 && contactoTel.trim().length > 0;
+  /* 🔴 LAS SEIS, SIN EXCEPCIÓN. La pieza reporta el estado de cada casilla y
+     **no valida** (literal de su cabecera) — el gate es de la pantalla. Y el
+     motor lo confirma del otro lado: `evaluar_documentos_guarderia` devuelve
+     `faltan` con que falte una. */
+  const todosMarcados =
+    carga.fase === 'listo' && carga.docs.every((d) => marcadas.includes(d.codigo));
   const puedeAceptar =
     carga.fase === 'listo' && carga.estado !== 'documentos_no_disponibles' &&
-    carga.docs.length > 0 && montoValido && contactoValido;
+    carga.docs.length > 0 && todosMarcados && montoValido && contactoValido;
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -158,18 +202,45 @@ export default function DocumentosGuarderia() {
           />
         ) : (
           <>
-            {/* LOS DOCUMENTOS — su texto sale del server, versionado. */}
-            {carga.docs.map((d) => (
-              <Tarjeta key={`${d.codigo}-${d.version}`}>
-                <View style={{ gap: spacing[2] }}>
-                  <Texto variante="seccion">{t(`documentosGuarderia.doc_${d.codigo}` as 'documentosGuarderia.doc_contrato_custodia')}</Texto>
-                  <Texto variante="cuerpo">{d.contenido}</Texto>
-                  <Texto variante="dato" color="secondary">
-                    {t('documentosGuarderia.version', { n: d.version })}
-                  </Texto>
-                </View>
-              </Tarjeta>
-            ))}
+            {/* ── LOS DOCUMENTOS · **LA PIEZA DE LA CASA** ──────────────────
+                `AceptacionDeDocumentos` (S107-B). El texto de cada uno vive
+                detrás de su enlace, en una `Hoja` — canon de `parte`.
+
+                🔴 **El enlace abre SIN marcar**: es un responder aparte
+                adentro del label, así que ir a leer no firma nada. *Si abrirlo
+                marcara, la prueba diría que alguien aceptó cuando lo único que
+                hizo fue leer.*
+
+                ⚠️ **El nombre del documento sale del riel; su CONTENIDO sale
+                del server.** El perímetro sigue entero: acá no vive una
+                palabra de texto legal. */}
+            <Tarjeta>
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="seccion">{t('documentosGuarderia.aceptacionTitulo')}</Texto>
+                <AceptacionDeDocumentos
+                  marcadas={redes ? [...marcadas, CLAVE_REDES] : marcadas}
+                  onCambiar={(clave, m) => {
+                    /* La opcional NO entra a `marcadas`: ese arreglo es el que
+                       gatea el botón, y una autorización de imagen jamás puede
+                       contar como uno de los documentos obligatorios. */
+                    if (clave === CLAVE_REDES) { setRedes(m); return; }
+                    setMarcadas((p) => (m ? [...p, clave] : p.filter((c) => c !== clave)));
+                  }}
+                  documentos={carga.docs.map((d) => ({
+                    clave: d.codigo,
+                    texto: t('documentosGuarderia.leiYAcepto'),
+                    etiquetaEnlace: t(`documentosGuarderia.doc_${d.codigo}` as 'documentosGuarderia.doc_contrato_custodia'),
+                    onAbrir: () => setAbierto(d),
+                  }))}
+                  /* 🔴 NACE APAGADA, y el lugar es de la pieza: separada abajo
+                     y rotulada. *Un default encendido publicaría la foto de un
+                     animal porque alguien no tocó un interruptor.* */
+                  opcionales={[{ clave: CLAVE_REDES, texto: t('documentosGuarderia.redesEtiqueta') }]}
+                  rotuloOpcionales={t('documentosGuarderia.opcional')}
+                />
+                <Texto variante="apoyo">{t('documentosGuarderia.redesDetalle')}</Texto>
+              </View>
+            </Tarjeta>
 
             {/* EL TOPE Y LOS CONTACTOS — **parte del mismo acto**, no un paso
                 aparte: el motor los exige sin default y la razón es de fondo. */}
@@ -195,19 +266,6 @@ export default function DocumentosGuarderia() {
                 />
               </View>
             </Tarjeta>
-
-            {/* 🔴 NACE APAGADA. *Un default encendido publicaría la foto de un
-                animal porque alguien no tocó un interruptor.* */}
-            <Tarjeta>
-              <View style={{ gap: spacing[2] }}>
-                <Interruptor
-                  etiqueta={t('documentosGuarderia.redesEtiqueta')}
-                  encendido={redes}
-                  onCambio={setRedes}
-                />
-                <Texto variante="apoyo">{t('documentosGuarderia.redesDetalle')}</Texto>
-              </View>
-            </Tarjeta>
           </>
         )}
       </ScrollView>
@@ -221,13 +279,48 @@ export default function DocumentosGuarderia() {
             deshabilitado={!puedeAceptar}
             /* El CTA apagado DICE qué falta, en vez de ser una pared muda. */
             razonDeshabilitado={
-              !montoValido ? t('documentosGuarderia.faltaTope') : t('documentosGuarderia.faltaContacto')
+              !todosMarcados
+                ? t('documentosGuarderia.faltaAceptar')
+                : !montoValido
+                  ? t('documentosGuarderia.faltaTope')
+                  : t('documentosGuarderia.faltaContacto')
             }
             cargando={enviando}
             onPress={() => void aceptar()}
           />
         </View>
       ) : null}
+
+      {/* ── EL TEXTO COMPLETO, EN SU HOJA ──────────────────────────────────
+             Canon `parte/[eventoId]`: el registro largo se abre entero, no se
+             apila arriba del botón. `altura="completa"` porque un documento
+             legal no se lee en media pantalla.
+
+             🔴 **El contenido es el del server, tal cual.** La versión se
+             muestra al pie: lo que se acepta es UNA VERSIÓN, y la familia
+             tiene que poder verla. ── */}
+      <Hoja
+        visible={abierto !== null}
+        onCerrar={() => setAbierto(null)}
+        titulo={
+          abierto === null
+            ? ''
+            : t(`documentosGuarderia.doc_${abierto.codigo}` as 'documentosGuarderia.doc_contrato_custodia')
+        }
+        altura="completa"
+        conCerrar
+      >
+        <HojaScroll contentContainerStyle={{ padding: spacing[5], gap: spacing[3] }}>
+          {abierto === null ? null : (
+            <>
+              <Texto variante="cuerpo">{abierto.contenido}</Texto>
+              <Texto variante="dato" color="secondary">
+                {t('documentosGuarderia.version', { n: abierto.version })}
+              </Texto>
+            </>
+          )}
+        </HojaScroll>
+      </Hoja>
     </SafeAreaView>
   );
 }
