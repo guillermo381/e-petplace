@@ -1,4 +1,24 @@
 /* ═══════════════════════════════════════════════════════════════════════════
+   ⚠️ LEER ANTES DE CONFIAR EN SU VERDE — enmienda 29-ago-2026 (L-438)
+   ───────────────────────────────────────────────────────────────────────────
+   **Este arnés fue verde todas las veces sobre un comprador que NO tenía
+   compuerta de documentos.** Para poder correr, siembra un documento y lo
+   acepta ANTES de comprar ⇒ deja a la familia **al día** antes de tocar la
+   puerta de la compra, y por eso **no existe ninguna corrida en la que el
+   comprador tenga que rebotar**. La ausencia del gate no podía manifestarse.
+
+   Lo encontró C leyendo el motor, no este instrumento.
+
+   *Lo que sembrás para que el arnés pase es exactamente lo que tu arnés ya no
+   puede medir.*
+
+   👉 La medición de la compuerta vive en el cinturón de
+      `20260831020000_s107a_gate_en_las_cuatro_puertas.sql`, que recorre los
+      TRES estados de los documentos y exige TRES respuestas distintas en las
+      dos puertas. **Este arnés sigue siendo válido para lo que sí mide: el
+      camino feliz del paquete.**
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
    ARNÉS · EL CAMINO DEL PAQUETE, DE PUNTA A PUNTA — y se deshace
    ═══════════════════════════════════════════════════════════════════════════
    `20260830120000` se aplicó **sin cinturón**, y toca PLATA (el CHECK de bonos,
