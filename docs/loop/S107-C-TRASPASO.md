@@ -23,6 +23,26 @@ textos — no que falte código.*
 `comprar_paquete_guarderia` frena con `documentos_sin_aceptar`. Antes cobraba
 y frenaba a la familia recién en la reserva, *con la plata ya tomada*.
 
+### 🔴 EL BLOQUEO DEL PAQUETE, ENCONTRADO Y CURADO (30-ago)
+
+**Elegir el tamaño borraba la fecha** (`setTamano(...); setFecha(null)`), y los
+chips **y el pie** están montados bajo `fecha !== null` ⇒ al tocar un tamaño
+**desaparecían los propios chips y el botón**, y la pantalla volvía a «elegí un
+día» vacía. **No había forma de llegar a pagar un paquete.**
+
+Resto de cuando el tamaño iba ANTES de la fecha —ahí limpiar el día era
+correcto—; el founder firmó invertir el orden el 29-ago y **la línea sobrevivió
+a su razón**. *Ningún typecheck ni lint lo ve: los dos estados son válidos por
+separado y la pantalla no falla — se VACÍA.*
+
+⚠️ **Segunda mitad:** se ofrecían **tres** tamaños (5·10·15) y el lugar vende
+**dos**. El 15 rebota `paquete_no_disponible` **seis pasos después**. Hoy sólo
+se ofrecen los tamaños con precio.
+
+Verificado contra el render: `5 · from $40.00, opción 1 de 2` ·
+`10 · from $70.00, opción 2 de 2`; tras elegir el tamaño **los chips
+sobreviven y el CTA enciende** (`dis=null`).
+
 ### El camino del dedo, recorrido entero
 
 ```
