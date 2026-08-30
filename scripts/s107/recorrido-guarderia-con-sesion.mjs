@@ -43,9 +43,10 @@ const CLAVE = execFileSync(
   ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'],
   { encoding: 'utf8' },
 ).trim();
-const ANON = execFileSync('npx', ['supabase', 'projects', 'api-keys', '--project-ref', REF], {
-  encoding: 'utf8',
-}).match(/"api_key":"(eyJ[^"]*)"/)?.[1];
+/* 🔒 Por el CLAIM `role="anon"`, no por el orden de la salida del CLI — ver
+   `claveAnon` en `sonda-tocar.mjs`. El regex que había acá acertaba porque la
+   `anon` sale primera HOY, y su modo de falla no era un error: era un verde. */
+const ANON = claveAnon(REF);
 
 if (!CLAVE || !ANON) { console.error('🔴 falta un secreto — se aborta sin tocar nada'); process.exit(1); }
 

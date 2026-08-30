@@ -17,8 +17,13 @@
 #   `service_role` EN CLARO**, junto a la `anon`, en la salida de tu terminal.
 #
 #   Para levantar la app **alcanza la `anon`** —que viaja pública en cada
-#   bundle— y este script la extrae **sin que la otra pase por pantalla**
-#   (`grep` de la primera `api_key`, que es la `anon`).
+#   bundle— y este script la extrae **sin que la otra pase por pantalla**.
+#
+#   ⏪ **Y la elige por lo que ES, no por dónde sale.** Antes tomaba *«la
+#   primera `api_key`, que es la `anon`»* — medido el 29-ago: es cierto HOY,
+#   por el orden en que el CLI las devuelve. *Si ese orden cambiara, este
+#   script levantaría la app con la `service_role` y no fallaría: andaría
+#   mejor.* Ahora exige el claim `role="anon"` del propio JWT.
 #
 #   *Los artefactos de una verificación son un vector nuevo (`D-712`): esa
 #   salida no puede terminar en un log de CI, en un pegado a un chat ni en un
@@ -31,11 +36,20 @@ PUERTO="${PUERTO:-8091}"
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 cd "$RAIZ"
+# El payload del JWT decide, no la posición. Nada se imprime.
 ANON="$(npx supabase projects api-keys --project-ref "$PROYECTO" 2>/dev/null \
-  | grep -o '"api_key":"eyJ[^"]*"' | head -1 | sed 's/"api_key":"//;s/"$//')"
+  | grep -o 'eyJ[A-Za-z0-9._-]*' \
+  | while read -r j; do
+      p="$(printf '%s' "$j" | cut -d. -f2)"
+      p="$p$(printf '%*s' $(( (4 - ${#p} % 4) % 4 )) '' | tr ' ' '=')"
+      if printf '%s' "$p" | base64 -d 2>/dev/null | grep -q '"role":"anon"'; then
+        printf '%s' "$j"; break
+      fi
+    done)"
 
 if [ "${#ANON}" -lt 100 ]; then
-  echo "✗ no se pudo obtener la anon (¿sesión de supabase CLI vencida?)" >&2
+  echo "✗ no hay ninguna clave con el claim role=\"anon\" (¿sesión de supabase CLI vencida?)" >&2
+  echo "  El script PARA: levantar con otra sería probar permisos que nadie tiene." >&2
   exit 1
 fi
 echo "✓ anon obtenida (largo ${#ANON}) — no se imprime"

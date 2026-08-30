@@ -14,11 +14,14 @@
  * 🔴 **CERO ESCRITURAS.** Sólo lectores.
  */
 import { execFileSync } from 'node:child_process';
+import { claveAnon } from './sonda-tocar.mjs';
 import { createClient } from '@supabase/supabase-js';
 
 const REF = 'zyltipqscdsdsxnjclhp';
 const CLAVE = execFileSync('security', ['find-generic-password','-a','siembra','-s','epetplace-siembra-s97','-w'], {encoding:'utf8'}).trim();
-const ANON = execFileSync('npx',['supabase','projects','api-keys','--project-ref',REF],{encoding:'utf8'}).match(/"api_key":"(eyJ[^"]*)"/)?.[1];
+/* 🔒 Por el CLAIM, no por el orden — ver `claveAnon` en `sonda-tocar.mjs`.
+   El regex que había acá acertaba porque `anon` sale primera HOY. */
+const ANON = claveAnon(REF);
 const sb = createClient(`https://${REF}.supabase.co`, ANON);
 const { error } = await sb.auth.signInWithPassword({ email:'guillo381+8@gmail.com', password: CLAVE });
 if (error) { console.error('🔴 sin sesión'); process.exit(1); }
