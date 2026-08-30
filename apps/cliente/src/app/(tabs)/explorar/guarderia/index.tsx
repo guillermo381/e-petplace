@@ -60,6 +60,7 @@ import {
   Tarjeta,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
@@ -67,6 +68,7 @@ import {
   obtenerGuarderiasDisponibles,
   obtenerPaquetesGuarderia,
   obtenerResumenGuarderias,
+  reservarDiaDePaqueteGuarderia,
   type CausaSinGuarderias,
   type RequisitosGuarderia,
 } from '@epetplace/api';
@@ -140,8 +142,24 @@ export default function ElegirGuarderia() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const { mostrar } = useAviso();
   const idioma = obtenerIdiomaActual();
-  const params = useLocalSearchParams<{ mascotaId?: string; mascotaNombre?: string }>();
+  const params = useLocalSearchParams<{ mascotaId?: string; mascotaNombre?: string; bonoId?: string; prestadorId?: string }>();
+
+  /**
+   * ⭐ **EL CAMINO CORTO — agendar contra saldo.** Entra desde el hub con su
+   * bono y su guardería ya determinados: *«va directo a la tira de días DE ESA
+   * GUARDERÍA: sin elegir lugar y sin pagar»* (letra firmada).
+   *
+   * ⏪ Antes entraba a la pantalla del prestador y elegía el día en su
+   * calendario. **Ese calendario se borró**, así que el día se elige acá —
+   * donde la casa elige días— y esta pantalla **se recorta a la tira**: sin
+   * modalidad (ya la decidió el bono), sin tamaño (ya está comprado) y sin
+   * «ver quién puede» (el lugar lo determina el bono).
+   */
+  const [agendando, setAgendando] = useState(false);
+  const [reboteSaldo, setReboteSaldo] = useState<string | null>(null);
+  const bonoId = typeof params.bonoId === 'string' && params.bonoId.length > 0 ? params.bonoId : null;
 
   const mascotaId = typeof params.mascotaId === 'string' && params.mascotaId.length > 0
     ? params.mascotaId
@@ -342,6 +360,25 @@ export default function ElegirGuarderia() {
         ? `$ ${resumen.precioDesde.toFixed(2)}`
         : null;
 
+  /**
+   * EL CAMINO CORTO, EJECUTADO. Sin cobro: el bono ya se pagó.
+   * 🔴 **La mascota VIAJA siempre** — con más de una elegible el motor rebota
+   * `mascota_no_determinada` en vez de adivinar, y acá ya viene del hub.
+   */
+  const agendarContraSaldo = useCallback(async () => {
+    if (bonoId === null || fecha === null || mascotaId === null || agendando) return;
+    setAgendando(true);
+    const r = await reservarDiaDePaqueteGuarderia({ bonoId, fecha, mascotaId });
+    setAgendando(false);
+    if (!r.ok) { setReboteSaldo(r.mensaje); return; }
+    /* El comprobante de una reserva SIN cobro es el del paseo, censado: un
+       aviso que nombra el saldo restante + Go home. El rastro es la fila del
+       hub, marcada «Con tu paquete». */
+    mostrar({ texto: t('lugarGuarderia.agendadaDePaquete', { n: r.data.saldoRestante }), variante: 'exito' });
+    if (router.canDismiss()) router.dismissAll();
+    router.navigate('/hogar/guarderia');
+  }, [bonoId, fecha, mascotaId, agendando, mostrar, router, t]);
+
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <CabezalOficio
@@ -354,8 +391,10 @@ export default function ElegirGuarderia() {
       />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
-        {/* ── ① LA MODALIDAD. Con una sola abierta no se dibuja (N=1 colapsa). ── */}
-        {MODALIDADES_ABIERTAS.length > 1 ? (
+        {/* ── ① LA MODALIDAD. Con una sola abierta no se dibuja (N=1 colapsa).
+               🔴 Y con un BONO tampoco: la modalidad ya la decidió la compra.
+               *Ofrecerle cambiarla sería ofrecerle gastar plata que ya gastó.* ── */}
+        {MODALIDADES_ABIERTAS.length > 1 && bonoId === null ? (
           <SelectorSegmentado
             proposito="eleccion"
             etiqueta={t('modalidadGuarderia.etiqueta')}
@@ -388,7 +427,8 @@ export default function ElegirGuarderia() {
 
         {/* ── ③ EL TAMAÑO, **DESPUÉS del día** — ver la enmienda arriba.
                Con la fecha puesta, cada chip ya puede decir su precio. ── */}
-        {modalidad === 'paquete' && fecha !== null ? (
+        {/* Con bono NO hay tamaño que elegir: ya está comprado. */}
+        {modalidad === 'paquete' && fecha !== null && bonoId === null ? (
           <SelectorOpcion
             acento="control"
             disposicion="tira"
@@ -525,6 +565,10 @@ export default function ElegirGuarderia() {
         ) : resumen.fase === 'listo' && resumen.causa !== null ? (
           <Texto variante="apoyo">{vozCausa(resumen.causa)}</Texto>
         ) : null}
+
+        {/* El rebote del camino corto vive ENCIMA del pie: el pie es fijo y
+            debajo no hay dónde vivir. */}
+        {reboteSaldo !== null ? <Texto variante="cuerpo">{reboteSaldo}</Texto> : null}
       </ScrollView>
 
       {/* ── ④+⑤ EL VALOR Y EL BOTÓN. «Ver quién puede» es UN BOTÓN, no una lista. ── */}
@@ -535,10 +579,15 @@ export default function ElegirGuarderia() {
              aparecer—, así que siempre es un «desde». *A lo calcula después de
              filtrar: un «desde $8» de un lugar que no aparece promete de más.* */
           totalDesde={resumen.fase === 'listo' && resumen.cuantos > 1}
-          etiqueta={t('elegirGuarderia.verQuienPuede')}
-          habilitado={puedeSeguir}
+          /* 🔴 CON BONO EL PIE NO NAVEGA: AGENDA. No hay lugar que elegir
+             —lo determina el bono— ni cobro que hacer —el desglose se congeló
+             al comprar—. *Pasarlo por «quién puede» sería ofrecerle cambiar
+             algo que ya eligió, y abrir la puerta a que elija mal.* */
+          etiqueta={bonoId !== null ? t('lugarGuarderia.agendarDePaquete') : t('elegirGuarderia.verQuienPuede')}
+          habilitado={bonoId !== null ? fecha !== null && !agendando : puedeSeguir}
           insetBottom={insets.bottom}
-          onPress={() =>
+          onPress={() => {
+            if (bonoId !== null) { void agendarContraSaldo(); return; }
             router.push({
               pathname: '/explorar/guarderia/disponibles',
               params: {
@@ -547,8 +596,8 @@ export default function ElegirGuarderia() {
                 fecha,
                 ...(modalidad === 'paquete' && tamano !== null ? { tamano: String(tamano) } : {}),
               },
-            })
-          }
+            });
+          }}
         />
       ) : null}
     </SafeAreaView>
