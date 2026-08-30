@@ -678,6 +678,18 @@ export interface EstadiaDeMiMascota {
   actaRecogidaId: string | null;
   actaDevolucionId: string | null;
   /**
+   * 🔴 **DE DÓNDE SALIÓ LA RESERVA.** `null` = día suelto; con id = salió de ese
+   * paquete, y la fila se marca «Con tu paquete».
+   *
+   * ⚠️ **No lo deduzcas de `precio === null`.** *Deducir el origen de un
+   * silencio es cómo una marca empieza a mentir sin que nadie lo note*: el día
+   * que un día suelto también venga sin precio, la marca se pone sola donde no
+   * va. Es dato propio, proyectado del `bono_id` de la cita.
+   */
+  bonoId: string | null;
+  /** Derivado de `bonoId` **en un solo lugar** para que ninguna pantalla lo derive. */
+  dePaquete: boolean;
+  /**
    * 🔴 Los dos VIAJES. Con el tramo de la dirección en curso, el mapa del punto
    * vivo se enciende solo (`obtenerPuntoVivo`). *No faltaba entidad — faltaba
    * proyección: los dos campos ya vivían en la tabla.*
@@ -722,6 +734,8 @@ export async function obtenerMisEstadiasGuarderia(params?: {
       entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
       actaRecogidaId: typeof r.acta_recogida_id === 'string' ? r.acta_recogida_id : null,
       actaDevolucionId: typeof r.acta_devolucion_id === 'string' ? r.acta_devolucion_id : null,
+      bonoId: typeof r.bono_id === 'string' ? r.bono_id : null,
+      dePaquete: typeof r.bono_id === 'string',
       tramoRecogidaId: typeof r.tramo_recogida_id === 'string' ? r.tramo_recogida_id : null,
       tramoDevolucionId: typeof r.tramo_devolucion_id === 'string' ? r.tramo_devolucion_id : null,
       esProxima: r.es_proxima === true,
