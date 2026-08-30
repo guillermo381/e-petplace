@@ -23959,6 +23959,61 @@ y ofertas que hoy son **fixture vivo que el founder necesita**, no basura del
 arnés. *Se declaran acá en vez de dejarlos rojos sin explicación: un rojo sin
 causa escrita se convierte en un rojo que nadie mira.*
 
+#### D-979 — 🔴 LA REVISIÓN LEGAL DE LOS SEIS DOCUMENTOS ES CONDICIÓN DE SOFT LAUNCH
+
+**Origen: decisión del founder, 29-ago-2026** — *«no te detengas por su
+revisión; todo el texto lo va a revisar un abogado ecuatoriano antes del soft
+launch, así que escribí lo mejor que puedas y seguí»*.
+
+**Estado:** los seis textos **están redactados y sembrados** (`v1`,
+`20260831040000`), y el camino de compra corre de punta a punta — medido:
+*acepta los 6 → al día → compra 5 días por $40 → reserva → saldo 4*, con
+residuo 0.
+
+🔴 **LO QUE FALTA NO ES CÓDIGO: es la firma de un abogado ecuatoriano sobre un
+texto que redactó una pista que no es abogada.** El fondo es del abogado
+(`CRITERIO_LEGAL_GUARDERIA.md`); **la redacción es interpretación**, y cada
+documento lleva su **mapa** marcando qué transcribe y qué interpreta.
+
+**Las tres líneas que el abogado tiene que mirar primero** —las marcadas 🔴 en
+sus mapas—:
+
+1. **«el animal NUNCA se dispone»** (`protocolo_no_retiro` y `LETRA_GUARDERIA`
+   §6). Es la consecuencia que A leyó de que el founder firmara 15 días y
+   descartara el segundo tramo. **El criterio no dice esto**: dice que la
+   disposición *«puede abrirse»* al día 60. *Es la línea que más se aparta de
+   la fuente.*
+2. **«omitir a sabiendas un antecedente de agresión es incumplimiento mío»**
+   (`declaracion_comportamiento` punto 5). **Mueve responsabilidad entre las
+   partes ante una mordida** — la cláusula más cargada de las seis.
+3. **Qué se puede autorizar POR ENCIMA del tope de gasto**
+   (`autorizacion_urgencia_veterinaria` punto 3). El criterio fija que haya
+   tope, no qué pasa arriba. *Sin esa cláusula, un límite de dinero obligaría a
+   dejar sufrir a un animal.*
+
+⚠️ **LA CONSECUENCIA DE CORREGIR, escrita para que nadie la descubra el día del
+launch:** las aceptaciones se guardan por **`(codigo, version)`** ⇒ **toda
+corrección publica una v2, y la v2 le vuelve a pedir aceptación a cada familia
+que aceptó la v1.**
+
+> **Eso está bien y es el diseño** —una familia no queda atada a un texto que ya
+> no rige, y el consentimiento que se conserva es el del texto que efectivamente
+> leyó (P23)—. **Lo que no puede pasar es que sea una sorpresa:** cuanto más
+> tarde llegue la revisión, a más familias les vuelve a aparecer la pantalla de
+> aceptación. *Es trabajo de aviso, no un bug.*
+
+**Dueño:** el founder (contrata la revisión) · A (siembra la v2 con su diff).
+**Disparo:** antes de abrir el soft launch. **Bloquea abrir, NO construir.**
+☠️ **Condición de muerte:** el abogado firma el texto, y lo que corrija entra
+como `v2` con su aviso a las familias que ya aceptaron.
+
+**Y no se cierra sin esto: `LETRA_GUARDERIA` §6.4 deja TRES decisiones abiertas
+que no son jurídicas** —quién le adelanta el dinero al refugio desde el día 15
+(el texto le promete al dueño una custodia **sin fecha límite** que hoy nadie
+financia) · qué refugio y el **acta de traslado, un séptimo documento que no
+existe** · quién ejecuta las notificaciones—. *La primera es la más urgente: es
+la única que promete algo que nadie puede cumplir.*
+
 ### L-438 — UN ARNÉS QUE PREPARA LA PRECONDICIÓN DE UNA COMPUERTA NO PUEDE DESCUBRIR QUE LA COMPUERTA NO EXISTE
 
 **Origen: el arnés propio de A del paquete de guardería, verde todas las veces
