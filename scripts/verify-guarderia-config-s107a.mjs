@@ -11,9 +11,8 @@
 // 🔴 La clave se lee del keychain EN EL MOMENTO — jamás viaja al repo.
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { dbQuery } from './lib-db.mjs';
+import { dbQuery, claveAnonDeEnv } from './lib-db.mjs';
 import {
   initApi,
   iniciarSesion,
@@ -30,13 +29,14 @@ import {
   obtenerEstadiasDelDia,
 } from '../packages/api/src/index.ts';
 
-const env = Object.fromEntries(
-  readFileSync('apps/cliente/.env.local', 'utf8')
-    .split('\n')
-    .filter((l) => l.includes('='))
-    .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
-);
-initApi(env.EXPO_PUBLIC_SUPABASE_URL, env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+/* 🔒 LA CLAVE SE ELIGE POR SU CLAIM, NO POR EL NOMBRE DE LA VARIABLE.
+   Hallazgo de C (29-ago): elegirla por rótulo es correcto **por el contenido
+   de un archivo, no por diseño** — y su modo de falla es un VERDE: con una
+   `service_role` ahí, todo gate de RLS pasa y el arnés dice «la familia
+   puede» midiendo a alguien que puede todo. `claveAnonDeEnv` LANZA si el
+   claim no es `anon`. */
+const { url, anon } = claveAnonDeEnv();
+initApi(url, anon);
 
 const clave = execFileSync('security',
   ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'],

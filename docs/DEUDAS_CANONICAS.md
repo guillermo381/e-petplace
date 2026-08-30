@@ -23917,6 +23917,48 @@ frente entero**, no una pantalla.
 ☠️ **Condición de muerte:** `SELECT count(*) FROM guarderia_documentos WHERE
 activo` devuelve 6, y una familia real acepta y compra.
 
+#### D-978 — 🟡 42 ARNESES ELIGEN SU CLAVE POR EL NOMBRE DE LA VARIABLE, Y SU MODO DE FALLA ES UN VERDE
+
+**Origen: hallazgo de C, 29-ago-2026**, sobre seis sondas suyas que tomaban *«la
+primera `api_key`»* de la salida del CLI — **correctas por ORDEN, no por
+diseño**. Ella lo curó con `claveAnon()` (por el claim `role` del propio JWT).
+
+**El censo del lado de A encontró la misma clase con otra fuente:** **42
+scripts** crean su cliente con `EXPO_PUBLIC_SUPABASE_ANON_KEY` — o sea
+**elegida por el rótulo de la variable**. Medido hoy: ese valor tiene
+`role: "anon"`. Pero eso es *cierto por el contenido de un archivo*, no por
+diseño.
+
+🔴 **Y el modo de falla es idéntico y es un VERDE:** el día que alguien pegue
+una `service_role` en esa variable para destrabar algo, **todo gate de RLS
+pasa** — ninguna excepción, ninguna línea roja, sólo una medición creíble
+diciendo *«la familia puede reservar»* sobre alguien que puede todo.
+
+> ### Un arnés que corre con más permisos de los que dice medir no mide lo que dice: mide otra cosa, y con confianza.
+
+**Curado en la fuente, no en los 42:** nace `claveAnonDeEnv()` en
+`scripts/lib-db.mjs` — **decodifica el claim y LANZA si no es `anon`**, jamás
+degrada a «la que haya». Es hermana de `claveAnon()` de C, **no una segunda
+implementación rival**: el mismo criterio aplicado a otra fuente, y cada una lo
+dice en su cabecera para que nadie las tome por duplicadas.
+
+**Adoptado hoy:** `verify-guarderia-config-s107a.mjs` (el de A en S107).
+**Faltan 41.**
+
+**Dueño:** cada pista al tocar su arnés. **Disparo:** POR ARCHIVO — se cambia
+al editarlo, jamás en una pasada masiva que nadie pueda revisar.
+☠️ **Condición de muerte:** `grep -rl EXPO_PUBLIC_SUPABASE_ANON_KEY scripts/`
+devuelve sólo `lib-db.mjs`.
+
+⚠️ **Nota honesta del arnés curado:** `verify-guarderia-config-s107a.mjs` corre
+y **da 2 rojos que NO son de esta cura ni de la compuerta**: (a) un assert
+espera `requisitos_sanitarios` y hoy rebota `documentos_no_disponibles`, porque
+el gate sanitario duro está APAGADO y los documentos frenan antes — el assert
+quedó viejo respecto del estado real; (b) el chequeo de residuo cuenta franjas
+y ofertas que hoy son **fixture vivo que el founder necesita**, no basura del
+arnés. *Se declaran acá en vez de dejarlos rojos sin explicación: un rojo sin
+causa escrita se convierte en un rojo que nadie mira.*
+
 ### L-438 — UN ARNÉS QUE PREPARA LA PRECONDICIÓN DE UNA COMPUERTA NO PUEDE DESCUBRIR QUE LA COMPUERTA NO EXISTE
 
 **Origen: el arnés propio de A del paquete de guardería, verde todas las veces
