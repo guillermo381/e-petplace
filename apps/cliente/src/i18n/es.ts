@@ -2875,6 +2875,9 @@ export const clienteEs = {
     agendarDia: 'Agendar el {{dia}}',
     comprarPaqueteDia: 'Comprar {{n}} estadías y agendar el {{dia}}',
     contratarMensualDesde: 'Contratar plan mensual desde el {{dia}}',
+    faltaTarjeta: 'Elige con qué tarjeta se cobra cada mes.',
+    mensualMandato: 'Autorizas el cobro mensual. Hoy no se cobra nada: el primer cobro sale el día que empieza el plan.',
+    mensualFirmada: 'Listo. Tu plan mensual queda autorizado.',
     faltaDia: 'Elige un día en el calendario.',
     /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
     comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
