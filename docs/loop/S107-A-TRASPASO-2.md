@@ -164,7 +164,41 @@ llevaba tres.*
 
 ---
 
-## ⑦ DÓNDE ESTÁ TODO
+## ⑦ 🔑 EL BINARIO DEL FOUNDER YA ESTÁ MEDIDO — no vuelvas a declararlo
+
+**`verify-ota` va a dar ROJO en su chequeo ②** («ningún binario registrado en EAS
+tiene este runtime») porque **el founder tiene binarios cortados fuera de EAS**.
+Ese rojo es **del instrumento, no del update**.
+
+⚠️ **Y hasta el 29-ago ese escape se saltaba POR DECLARACIÓN.** Ya no: **se
+midió por USB**. La nota que va en `--binario-local` es ésta, y dice *medición*,
+no *declaración*:
+
+```
+--binario-local "1.0.7 — MEDIDO POR USB el 29-ago sobre el APK instalado
+  (com.epetplace.prestador): geo.API_KEY, google_app_id, los seis permisos
+  y la sonda SondaManifest presentes. Ya no es declaración: es medición."
+```
+
+🔑 **Y el método quedó como instrumento, no como recuerdo:**
+
+```
+node scripts/medir-apk-instalado.mjs prestador
+node scripts/medir-apk-instalado.mjs cliente
+```
+
+> **Nació porque el procedimiento vivía sólo en la cabeza de quien lo corrió — y
+> por eso un supuesto falso sobrevivió tres repeticiones sin que nadie lo
+> comprobara.** *Un método que no está escrito no se vuelve a correr.*
+
+Imprime la línea del `--binario-local` lista para copiar, **avisa que las cadenas
+de permiso no se hornean en Android** (para que nadie lo lea como defecto), y
+**sale NO CONCLUYENTE —jamás verde— si no hay aparato**: *un instrumento que no
+pudo medir no dice «está bien», dice que no midió.*
+
+---
+
+## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`
 **Avisos a C (los del final llevan el estado en el teléfono):** `docs/loop/S107-A-AVISO-A-C-*.md`
