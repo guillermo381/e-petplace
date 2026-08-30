@@ -313,24 +313,31 @@ export default function ElegirGuarderia() {
   const puedeSeguir = listoParaSeguir && resumen.fase === 'listo' && resumen.causa === null;
   /* ② `null` ⇒ nada. Jamás un `0` que se lea como gratis.
      ═══════════════════════════════════════════════════════════════════════
-     🔴 **EN PAQUETE NO SE PINTA PRECIO, Y ES LA CURA DE UN DEFECTO CARO.**
+     ⭐ **EL PRECIO DEL PAQUETE VIVE ACÁ ABAJO, JUNTO AL BOTÓN — firma
+     original del founder, re-firmada el 30-ago:** *«El chip dice el tamaño;
+     el precio vive donde vive el de Día.»*
 
-     Reportado por el founder: *«con 5 muestra su precio; al elegir 10 o 15
-     sigue mostrando el de 5»*. **Medido, y no era mi estado:**
-     `obtener_resumen_guarderias` **no recibe el tamaño**, y el precio de
-     paquete sale de `min(gp.precio)` — **el paquete MÁS BARATO del lugar**.
+     ⏪ **Se había implementado distinto** —el precio metido dentro del chip—
+     y eso lo sacaba del único lugar donde la casa pone el valor de lo que se
+     va a pagar. *Dos superficies distintas para el mismo dato según la
+     modalidad hacen que la familia tenga que aprender la pantalla dos veces.*
+
+     🔴 **Y sigue vigente la cura del defecto caro que lo originó:** el founder
+     reportó *«con 5 muestra su precio; al elegir 10 sigue mostrando el de 5»*.
+     Medido: `obtener_resumen_guarderias` **no recibe el tamaño** y devuelve
+     `min(gp.precio)` — el paquete MÁS BARATO del lugar.
 
      > ### La familia veía $40 y pagaba $75. En la superficie donde se decide pagar.
 
-     *Cualquier número que pinte acá es el de OTRO tamaño que el elegido.* ⇒
-     **no se pinta ninguno hasta que el server sepa el tamaño**
-     (`S107-C-PEDIDO-A-A-PRECIO-POR-TAMANO.md`). **La ausencia es honesta; el
-     número no lo era.** El precio real se ve por lugar en «quién puede» y en el
-     botón de compra, que sí nombra el tamaño.
+     ⇒ **el número NO sale del resumen: sale de `precioPorTamano`**, que se
+     resuelve por lugar CON el tamaño elegido. Sin tamaño elegido no hay
+     número, y la ausencia es honesta.
      ═══════════════════════════════════════════════════════════════════════ */
   const total =
     modalidad === 'paquete'
-      ? null
+      ? tamano !== null && precioPorTamano[tamano] !== undefined
+        ? `$ ${precioPorTamano[tamano].toFixed(2)}`
+        : null
       : resumen.fase === 'listo' && resumen.precioDesde !== null
         ? `$ ${resumen.precioDesde.toFixed(2)}`
         : null;
@@ -406,10 +413,11 @@ export default function ElegirGuarderia() {
               .filter((n) => Object.keys(precioPorTamano).length === 0 || precioPorTamano[n] !== undefined)
               .map((n) => ({
                 codigo: String(n),
-                etiqueta:
-                  precioPorTamano[n] === undefined
-                    ? t('hubGuarderia.tamanoEstadias', { n })
-                    : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
+                /* 🔴 SÓLO EL TAMAÑO. El precio vive al pie, junto al botón —
+                   firma del founder. `precioPorTamano` sigue usándose acá
+                   arriba **para filtrar** (un tamaño sin precio es un tamaño
+                   que el lugar no vende), pero no se pinta. */
+                etiqueta: t('hubGuarderia.tamanoEstadias', { n }),
               }))}
             seleccionada={tamano === null ? '' : String(tamano)}
             /* 🔴 **ACÁ VIVÍA `setFecha(null)`, Y HACÍA IMPOSIBLE COMPRAR UN

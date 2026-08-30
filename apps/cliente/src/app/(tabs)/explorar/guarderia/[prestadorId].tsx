@@ -84,6 +84,18 @@ import { PieReserva } from '@/components/reserva-piezas';
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
 
+/**
+ * 'YYYY-MM-DD' → la fecha en voz humana, en el idioma vivo.
+ * 🔴 Se parte a mano y se arma con `Date(a, m-1, d)`: `new Date('2026-08-31')`
+ * lo interpreta como **UTC** y en Guayaquil muestra el día anterior.
+ */
+function fechaLarga(iso: string): string {
+  const [a, m, d] = iso.split('-').map(Number);
+  return new Date(a, m - 1, d).toLocaleDateString(obtenerIdiomaActual(), {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
+}
+
 /** Fecha LOCAL 'YYYY-MM-DD'. 🔴 Jamás `toISOString()`: eso da UTC y en
  *  Guayaquil, después de las 19:00, devuelve el día siguiente. */
 function iso(d: Date): string {
@@ -107,11 +119,40 @@ export default function LugarGuarderia() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string; bonoId?: string }>();
+  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string; bonoId?: string; fecha?: string }>();
+  /**
+   * ⭐ **EL DÍA YA SE ELIGIÓ DOS PANTALLAS ANTES, Y VIAJABA SIN QUE NADIE LO
+   * LEYERA.** Etapa 1 lo manda (`fecha`), la vitrina lo reenvía con su
+   * `...params`, y acá la pantalla montaba **otro calendario y lo volvía a
+   * pedir** — el mismo dato, dos veces, y la segunda con la libertad de
+   * contradecir a la primera.
+   *
+   * 🔴 **Firma del founder (30-ago):** *«Esa pantalla tiene que mostrar al
+   * prestador y dejar pagar — nada más.»*
+   *
+   * ⚠️ **Con UNA excepción, y no es un olvido:** el camino de **agendar contra
+   * saldo** entra desde el hub, donde **no hay día elegido** —el bono es del
+   * hogar y el día se decide cada vez—. Ahí el calendario **sí** hace falta.
+   * *La regla no es «nunca hay calendario»: es que el día se pregunta UNA vez,
+   * y donde todavía no se preguntó.*
+   */
+  const fechaDeParams =
+    typeof params.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(params.fecha) ? params.fecha : null;
   /** 🔴 CON BONO NO SE COMPRA: se agenda contra el saldo. **Cero cobro** — el
    *  desglose se congeló al comprar. */
   const bonoId = typeof params.bonoId === 'string' && params.bonoId.length > 0 ? params.bonoId : null;
   const esPaquete = params.modalidad === 'paquete' && bonoId === null;
+  /**
+   * 🔴 **LA MENSUALIDAD LLEGA HASTA ACÁ Y NO MÁS, Y LA PANTALLA LO DICE.**
+   * El motor está entero (`contratar_mensualidad_guarderia` existe y el filtro
+   * acepta `'mensual'`) pero **no hay wrapper de contratación**
+   * (`S107-C-PEDIDO-A-A-WRAPPER-MENSUALIDAD.md`).
+   *
+   * *No se monta un cobro contra un motor que esta app no puede llamar*: el
+   * botón queda apagado **diciendo por qué** (Ley 23), en vez de simular un
+   * acto que no ocurre. **Esta rama muere entera cuando el wrapper llegue.**
+   */
+  const esMensual = params.modalidad === 'mensual' && bonoId === null;
   const tamano = Number(params.tamano ?? '');
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
@@ -123,7 +164,9 @@ export default function LugarGuarderia() {
   const [intento, setIntento] = useState(0);
   /** 0 = este mes. Nunca baja de 0: el pasado no se reserva. */
   const [mesOffset, setMesOffset] = useState(0);
-  const [elegido, setElegido] = useState<string | null>(null);
+  /* Nace con el día que ya trajo el recorrido; sólo el camino contra saldo
+     lo deja en null, y ése es el único que dibuja calendario. */
+  const [elegido, setElegido] = useState<string | null>(fechaDeParams);
   const [reservando, setReservando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
@@ -446,65 +489,52 @@ export default function LugarGuarderia() {
           </View>
         ) : null}
 
-        {/* EL CALENDARIO */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="titulo">{t('lugarGuarderia.elegiDia')}</Texto>
-          <CalendarioCupo
-            dias={dias}
-            columnaInicial={columnaInicial}
-            cabecerasDias={cabecerasDias}
-            elegido={elegido}
-            onElegir={setElegido}
-            rotulo={rotuloMes}
-          />
-          <View style={{ flexDirection: 'row', gap: spacing[3] }}>
-            {/* El mes anterior sólo si no es pasado: la puerta no ofrece lo
-                que va a rechazar. */}
-            {mesOffset > 0 ? (
+        {/* ── EL DÍA ──────────────────────────────────────────────────────
+               🔴 **SÓLO SE PREGUNTA SI NO SE PREGUNTÓ ANTES.** Con el día ya
+               elegido, esta pantalla lo AFIRMA y sigue: montar un calendario
+               acá lo volvía el primer paso de una reserva que ya iba por el
+               tercero. *Un control que pide algo ya decidido no es una
+               comodidad: es una invitación a contradecirse.* ── */}
+        {fechaDeParams !== null ? (
+          <View style={{ gap: spacing[1] }}>
+            <Texto variante="seccion">{t('lugarGuarderia.elDia')}</Texto>
+            <Texto variante="cuerpo">{fechaLarga(fechaDeParams)}</Texto>
+          </View>
+        ) : (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="titulo">{t('lugarGuarderia.elegiDia')}</Texto>
+            <CalendarioCupo
+              dias={dias}
+              columnaInicial={columnaInicial}
+              cabecerasDias={cabecerasDias}
+              elegido={elegido}
+              onElegir={setElegido}
+              rotulo={rotuloMes}
+            />
+            <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+              {/* El mes anterior sólo si no es pasado: la puerta no ofrece lo
+                  que va a rechazar. */}
+              {mesOffset > 0 ? (
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('lugarGuarderia.mesAnterior')}
+                  onPress={() => {
+                    setElegido(null);
+                    setMesOffset((m) => m - 1);
+                  }}
+                />
+              ) : null}
               <Boton
                 variante="secundario"
-                etiqueta={t('lugarGuarderia.mesAnterior')}
+                etiqueta={t('lugarGuarderia.mesSiguiente')}
                 onPress={() => {
                   setElegido(null);
-                  setMesOffset((m) => m - 1);
+                  setMesOffset((m) => m + 1);
                 }}
               />
-            ) : null}
-            <Boton
-              variante="secundario"
-              etiqueta={t('lugarGuarderia.mesSiguiente')}
-              onPress={() => {
-                setElegido(null);
-                setMesOffset((m) => m + 1);
-              }}
-            />
+            </View>
           </View>
-        </View>
-
-        {/* ── EL SEMÁFORO SANITARIO ──
-            🔴 NACE CERRADO. La compuerta vive en el SERVER
-            (`_guarderia_puede_reservar`) y esta pantalla la REFLEJA — no la
-            reimplementa y no la ablanda. *Un gate que la pantalla decide es
-            decorativo: se salta cambiando de cliente.*
-            La firma ③ es dura: sin carnet cargado y rabia vigente no se
-            reserva. **Y los pocos animales con carnet hoy no son razón para
-            abrirlo: son el catálogo vacío, y cada familia lo llena en su
-            primera reserva.** */}
-        {/* LA ZONA. 🔴 **El guard del mapa nativo se aplica NO PASANDO las
-            tres** —igual que el perfil del cliente—: la pieza no monta nada si
-            falta cualquiera, así que **cero cambio en el componente
-            compartido**. *Un secret faltante cuesta EL MAPA, jamás la app.* */}
-        {MAPA_NATIVO_DISPONIBLE &&
-        perfil !== null &&
-        perfil.zona_lat !== null &&
-        perfil.zona_lon !== null &&
-        perfil.zona_radio_m !== null ? (
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="titulo">{t('lugarGuarderia.zonaTitulo')}</Texto>
-            <MapaZona lat={perfil.zona_lat} lon={perfil.zona_lon} radioM={perfil.zona_radio_m} />
-            <Texto variante="apoyo">{t('lugarGuarderia.zonaDetalle')}</Texto>
-          </View>
-        ) : null}
+        )}
 
         {estado.requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
@@ -588,17 +618,21 @@ export default function LugarGuarderia() {
             ? t('lugarGuarderia.agendarDePaquete')
             : esPaquete
               ? t('lugarGuarderia.comprarPaquete', { n: tamano })
-              : t('lugarGuarderia.reservar')
+              : esMensual
+                ? t('lugarGuarderia.contratarMensual')
+                : t('lugarGuarderia.reservar')
         }
-        habilitado={puedeReservar}
+        habilitado={puedeReservar && !esMensual}
         insetBottom={insets.bottom}
         /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una
            palabra. *Una pared muda le hace creer a la familia que el producto
            está roto, cuando lo único que falta es que toque un día.* */
         razonDeshabilitado={
-          elegido === null
-            ? t('lugarGuarderia.faltaDia')
-            : t('lugarGuarderia.faltaRequisitos')
+          esMensual
+            ? t('lugarGuarderia.mensualNoCobrable')
+            : elegido === null
+              ? t('lugarGuarderia.faltaDia')
+              : t('lugarGuarderia.faltaRequisitos')
         }
         onPress={() => void reservar()}
       />

@@ -51,7 +51,27 @@ export type ModalidadGuarderia = (typeof MODALIDADES)[number];
  * A publique el filtro por modalidad y las dos RPC de cobro. Leé la trampa de
  * arriba antes de tocarla.
  */
-export const MODALIDADES_ABIERTAS: readonly ModalidadGuarderia[] = ['dia', 'paquete'];
+/**
+ * ⭐ **LAS TRES, ABIERTAS — firma del founder (30-ago).**
+ *
+ * ⏪ `mensual` estuvo cerrada seis o siete tandas, y **el bloqueo no era el
+ * motor: era un aviso que nunca se mandó.** Medido antes de abrir:
+ *
+ * ```
+ * contratar_mensualidad_guarderia(prestador, tarjeta, mascota, monto)  ✅ existe
+ * obtener_guarderias_disponibles(..., 'mensual')            → ✅ 1 lugar
+ * guarderia_suscripciones                                   → existe
+ * ```
+ *
+ * 🔴 **Lo único que falta es el WRAPPER de contratación**, pedido a A
+ * (`S107-C-PEDIDO-A-A-WRAPPER-MENSUALIDAD.md`). Hasta que llegue, el camino
+ * mensual recorre etapa 1 y la vitrina —el filtro las acepta— y **el botón de
+ * contratar lo dice**, en vez de simular un cobro que no ocurre.
+ *
+ * *Se abre igual porque la alternativa es peor: una modalidad que el producto
+ * tiene, el motor cobra y la familia no ve.*
+ */
+export const MODALIDADES_ABIERTAS: readonly ModalidadGuarderia[] = ['dia', 'paquete', 'mensual'];
 
 export function esModalidad(v: unknown): v is ModalidadGuarderia {
   return typeof v === 'string' && (MODALIDADES as readonly string[]).includes(v);

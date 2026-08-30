@@ -2869,6 +2869,8 @@ export const clienteEs = {
     zonaDetalle: 'La zona aproximada. La dirección exacta te llega cuando reserves.',
     /* El CTA apagado DICE qué falta: una pared muda hace creer que el
        producto está roto cuando sólo falta tocar un día. */
+    contratarMensual: 'Contratar el mes',
+    mensualNoCobrable: 'Todavía no podemos cobrar la mensualidad. Estamos terminando esa parte.',
     faltaDia: 'Elige un día en el calendario.',
     /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
     comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
@@ -2883,6 +2885,7 @@ export const clienteEs = {
     franjasTitulo: 'Cuándo pasan y cuándo lo traen',
     recogida: 'Pasan a buscarlo',
     devolucion: 'Lo traen de vuelta',
+    elDia: 'El día',
     elegiDia: 'Elige el día',
     diaLleno: 'Sin lugares para este día',
     /* Los cinco casos del motor, cada uno con su voz. La pantalla PINTA el
@@ -2947,26 +2950,21 @@ export const clienteEs = {
     doc_autorizacion_transporte: 'Autorización de transporte',
     doc_protocolo_no_retiro: 'Protocolo de no retiro',
     version: 'Versión {{n}}',
-    aceptacionTitulo: 'Lo que hay que aceptar',
     /* La frase entera se lee «Leí y acepto: Contrato de custodia» — el nombre
        del documento es el enlace. Una sola clave para los seis: con «Acepto
        el/la» harían falta seis variantes por el artículo. */
-    leiYAcepto: 'Leí y acepto:',
+    leiYAcepto: 'Leí y acepto',
+    terminosDelServicio: 'los términos del servicio',
+    contactoOpcional: 'Opcional. Si no podemos ubicarte a ti.',
     opcional: 'Opcional',
     faltaAceptar: 'Marca los seis documentos para continuar.',
-    urgenciaTitulo: 'Si hay una urgencia',
-    urgenciaDetalle: 'Hasta cuánto autorizas a gastar sin poder consultarte primero.',
-    topeEtiqueta: 'Tope en dólares',
     contactoTitulo: 'A quién llamamos',
-    contactoDetalle: 'Si no podemos ubicarte a ti.',
     contactoNombre: 'Nombre',
     contactoTelefono: 'Teléfono',
     redesEtiqueta: 'Pueden publicar fotos suyas',
     redesDetalle: 'Si lo dejas apagado, sus fotos solo las ves tú.',
     aceptar: 'Acepto y continúo',
     aceptado: 'Listo. Ya puedes reservar.',
-    faltaTope: 'Pon un tope para las urgencias.',
-    faltaContacto: 'Falta el nombre y el teléfono de tu contacto.',
     noCargoTitulo: 'No pudimos cargar los documentos',
     noCargoDetalle: 'No es que no existan: no pudimos preguntar. Prueba de nuevo.',
     /* 🔴 SIN «prueba de nuevo»: el problema es NUESTRO y no hay nada que la
