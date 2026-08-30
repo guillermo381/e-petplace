@@ -145,10 +145,22 @@ export default function ElegirGuarderia() {
     ? params.mascotaId
     : null;
 
-  /* 🔴 NACEN SIN ELEGIR — no hay default oscuro. Con una sola modalidad abierta
-     el selector no se dibuja (N=1 colapsa) y se preselecciona la única. */
-  const unica = MODALIDADES_ABIERTAS.length === 1 ? MODALIDADES_ABIERTAS[0] : null;
-  const [modalidad, setModalidad] = useState<ModalidadGuarderia | null>(unica);
+  /* ⏪ **LA MODALIDAD ARRANCA EN «DÍA» — enmienda firmada del founder (29-ago).**
+     La versión anterior nacía SIN elegir *«para que nada aparezca antes de que
+     la familia decida»*. **El efecto real, visto en el aparato: con dos
+     modalidades la pantalla aterrizaba VACÍA** — un cabezal, dos chips y nada
+     más.
+
+     > *La revelación progresiva servía cuando el primer paso era el día. Con la
+     > modalidad adelante, esperar a que elijan lo más común convierte el paso
+     > cero en una pantalla en blanco.*
+
+     🔴 **Y la firma NO se aflojó, se acotó:** «día» es **la más común y la única
+     que hoy se cobra sola** — *no es un default oscuro: es el camino que la
+     familia iba a tomar igual.* **Nada más viene elegido**: el día, el precio y
+     el botón **siguen apareciendo a medida que avanza**, que es lo que la
+     revelación progresiva protegía de verdad. */
+  const [modalidad, setModalidad] = useState<ModalidadGuarderia | null>('dia');
   const [tamano, setTamano] = useState<TamanoPaqueteGuarderia | null>(null);
   const [fecha, setFecha] = useState<string | null>(null);
   const [requisitos, setRequisitos] = useState<RequisitosGuarderia | null>(null);
