@@ -49,7 +49,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Celda, LogoNegocio, Texto, radius, spacing, useTheme } from '@epetplace/ui';
 import { resolverUrlLogoNegocio, type PerfilPublico } from '@epetplace/api';
@@ -274,8 +274,24 @@ export function PreviewPrestador({
           solo si existe — con `.filter(Boolean)` el separador nunca queda
           huérfano, que es el defecto clásico de una línea compuesta. */}
       <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
+        {/* ⏪ **EL PRECIO IBA EN LA MISMA LÍNEA GRIS, CON EL MISMO PESO** que
+            «Fundador desde 2026» — *y es el dato con el que la familia
+            compara*. Firma del founder (30-ago): va destacado, legible de un
+            vistazo.
+
+            🔴 **Sigue siendo UNA línea**, no un bloque aparte: la anatomía de
+            la casa es meta-en-una-línea y romperla habría desalineado a las
+            cinco hermanas. Lo que cambia es **el peso del número**, no su
+            lugar. *El resto de la meta conserva su gris: si todo se destaca,
+            nada destaca.* */}
         <Texto variante="dato" color="secondary">
-          {[confianza, cohorte, precio].filter(Boolean).join(' · ')}
+          {[confianza, cohorte].filter(Boolean).join(' · ')}
+          {precio ? (
+            <>
+              {confianza || cohorte ? ' · ' : ''}
+              <Text style={{ color: theme.text.primary, fontWeight: '700' }}>{precio}</Text>
+            </>
+          ) : null}
         </Texto>
       </View>
 

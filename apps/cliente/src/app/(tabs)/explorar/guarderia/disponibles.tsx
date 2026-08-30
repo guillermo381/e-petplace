@@ -51,10 +51,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Celda,
+  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   FichaFranja,
+  Separador,
+  Tarjeta,
   Texto,
   spacing,
   useTheme,
@@ -160,13 +163,16 @@ export default function QuienPuedeGuarderia() {
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <CabezalOficio
-        oficio="guarderia"
-        capa="cuidado"
+      {/* ⏪ **ERA `CabezalOficio` Y REPETÍA LA MASCOTA.** El nombre salía bajo
+          el título **y otra vez** en la línea de contexto — *un dato dicho dos
+          veces en la misma pantalla le enseña a la familia a no leer.*
+          Censado contra «Groomers disponibles», su hermana: `Encabezado` de
+          navegación + **una sola línea de contexto**. */}
+      <Encabezado
+        variante="navegacion"
         titulo={t('hubGuarderia.lugaresTitulo')}
-        detalle={params.mascotaNombre ?? null}
+        atras
         onAtras={() => router.back()}
-        insetTop={insets.top}
       />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[3], paddingBottom: insets.bottom + spacing[8] }}>
@@ -175,11 +181,21 @@ export default function QuienPuedeGuarderia() {
             **el contexto al final**, cuando es lo que enmarca todo lo de
             arriba. Las cuatro hermanas lo resuelven igual: **una `Celda` de
             contexto POR ENCIMA de la lista** (censo del 29-ago). */}
+        {/* ⏪ La fecha colgaba SUELTA A LA DERECHA de la mascota. La hermana
+            las junta en UNA línea —«Grooming para Thor · 2026-08-30 · 18:00»—
+            porque **es un solo contexto, no dos datos**. */}
         {fecha !== null ? (
-          <Celda
-            titulo={params.mascotaNombre ?? t('hubGuarderia.titulo')}
-            metadataMono={fechaCortaMono(fecha, idioma)}
-          />
+          <>
+            <Celda
+              titulo={
+                params.mascotaNombre === undefined
+                  ? t('hubGuarderia.titulo')
+                  : t('hubGuarderia.contextoPara', { nombre: params.mascotaNombre })
+              }
+              metadataMono={fechaCortaMono(fecha, idioma)}
+            />
+            <Separador />
+          </>
         ) : null}
 
         {lista.fase === 'cargando' ? (
@@ -208,7 +224,13 @@ export default function QuienPuedeGuarderia() {
             descripcion={t('hubGuarderia.sinLugaresDetalle')}
           />
         ) : (
-          lista.lugares.map((g) => {
+          /* ⏪ **LOS PREVIEWS FLOTABAN SOBRE EL FONDO.** La hermana de
+             grooming los mete en UNA sola tarjeta contenedora, y por eso su
+             lista se lee como una lista y no como fichas sueltas — *y por eso
+             el cupo y las ventanas de guardería quedaban «colgando abajo»:
+             no había caja de la que colgar.* Censado el 30-ago. */
+          <Tarjeta relleno="ninguno">
+          {          lista.lugares.map((g) => {
             const precio = precioDe(g);
             /* 🔴 LOS CUATRO CAMPOS SON INDEPENDIENTES — firma de A, y el caso
                es real: **un lugar puede tener la recogida declarada y la
@@ -320,7 +342,8 @@ export default function QuienPuedeGuarderia() {
                 }
               />
             );
-          })
+          })}
+          </Tarjeta>
         )}
 
       </ScrollView>
