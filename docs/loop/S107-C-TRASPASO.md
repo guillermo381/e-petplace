@@ -7,26 +7,38 @@
 
 ---
 
-## ⓪ LO PRIMERO — Y NO ES UN DEFECTO
+## ⓪ LO PRIMERO — EL ESTADO DEL FRENTE CAMBIÓ EL 29-AGO
 
-> ### **`documentos_no_disponibles` ES EL ESTADO NORMAL DEL FRENTE.**
-> `guarderia_documentos` = 0 filas, así que las tres puertas rebotan.
-> **No falta motor ni pantalla: falta el TEXTO**, y es legal — *lo redacta la
-> mesa, ninguna pista, ni como placeholder.* Ficha **`D-977`**.
->
-> ⇒ **Hasta que los seis textos existan, nadie puede reservar, y eso es el
-> perímetro funcionando.** *No lo reportes como bug.*
+**Los seis textos legales ya están sembrados** (`guarderia_documentos` = 6:
+`autorizacion_transporte` · `autorizacion_urgencia_veterinaria` ·
+`contrato_custodia` · `declaracion_comportamiento` · `declaracion_sanitaria` ·
+`protocolo_no_retiro`).
 
-✅ **Y las dos puertas que faltaban ya están cerradas** (A, migración
-`20260831020000`): `comprar_paquete_guarderia` y `contratar_mensualidad_guarderia`
-**pasan por el gate**. Antes cobraban y frenaban a la familia en la reserva,
-*con la plata ya tomada*. Contrato: `docs/contratos/s107-contrato-compuerta-en-la-compra.md`.
+⇒ El frente pasó de **`documentos_no_disponibles`** (carencia nuestra, sin
+camino) a **`faltan`** (la familia todavía no aceptó, **y tiene el camino**).
+*Si volvés a ver `documentos_no_disponibles`, es que se desactivaron los
+textos — no que falte código.*
 
-⚠️ **Consecuencia que la pantalla ya muestra, declarada por A:** con el gate
-sanitario duro, una familia **puede comprar un paquete y ese día no poder
-usarlo** por el carnet — lo sanitario se evalúa donde el sujeto existe (la
-puerta del DÍA), porque el paquete es del hogar y nace sin mascota. *No es un
-defecto de la compra: es el semáforo diciendo la verdad antes.*
+✅ **Y la compuerta de A está verde, medida:** sin aceptar,
+`comprar_paquete_guarderia` frena con `documentos_sin_aceptar`. Antes cobraba
+y frenaba a la familia recién en la reserva, *con la plata ya tomada*.
+
+### El camino del dedo, recorrido entero
+
+```
+0 el hub → 1 mascota → 2 «Reservar una estadía» → 3 día → 4 «Ver quién puede»
+→ 5 el lugar → 6 día del calendario → 7 PAGAR → /guarderia/documentos
+```
+
+**Los siete pasos pasan.** El paso 7 aterriza en la aceptación, que es el
+destino correcto: la pantalla detecta el gate y manda al paso anterior.
+
+🔴 **Y el corte que la sonda reportaba en el paso 6 era DEL INSTRUMENTO, de la
+peor clase:** `porDato(/^31$/)` acertaba porque **el 31 caía en lunes por
+casualidad**. Al cambiarlo por «el primero de la tira» se cortó antes
+—domingo, y el lugar abre L-V—. *El instrumento venía acertando por el mismo
+azar que esta pista pasó la sesión cazando.* Hoy el dedo prueba días hasta que
+el botón se enciende, y si ninguno lo hace **dice cuáles probó**.
 
 ---
 
@@ -79,18 +91,16 @@ ninguno**. *El prestador no podía elegir sus días por ninguna vía.* Hoy un
 selector escribe los tres lugares. ⚠️ **Se LEE de las franjas porque no hay
 lector de espacios: con dos salas eso no alcanza.**
 
-## ④ ESPERANDO A A
+## ④ ESPERANDO A A — dos son de plata
 
-- 🟡 **La mensualidad** — hay motor en migraciones, **no hay wrapper de contratación**.
-- 🟡 **El lector de espacios** — hoy los días de operación se **escriben y no se
-  leen**; el selector se apoya en las franjas como espejo. Con dos salas hace
-  falta el lector de verdad.
-- ✅ ~~El gate del paquete~~ — **cerrado por A** (`20260831020000`).
-- ⚪ **Los seis textos legales** — de la mesa, no de A. Ver ⓪.
-- 🟢 **`p_tamano` en el resumen** — **no bloquea**: el precio por chip lo resuelvo con
-  `obtenerPaquetesGuarderia`, que cuesta **una llamada por lugar**. Cuando llegue, colapsa a una.
+| | qué | por qué es suyo |
+|---|---|---|
+| 🔴 | **el mismo día dos veces consume dos estadías** | `reservar_dia_de_paquete_guarderia` acepta la misma `(bono, fecha, mascota)` N veces. **No lanza, devuelve `ok:true`, y lo que se pierde es un día que la familia pagó.** Guard por `(mascota, fecha)` — **jamás por `(bono, fecha)`**: el bono es del hogar y dos perros el mismo día es legítimo ⇒ `PEDIDO-A-A-DIA-REPETIDO-DEL-PAQUETE` |
+| 🟡 | **qué días de la semana hay lugar** | la tira ofrece 14 días y **4 son callejón**; se ven igual que los 10 que sirven. Una llamada semanal los apaga todos ⇒ `PEDIDO-A-A-DIAS-CON-LUGAR` |
+| 🟡 | **la mensualidad** | hay motor, **no hay wrapper de contratación** |
+| 🟡 | **el lector de espacios** | los días de operación se **escriben y no se leen**; el selector se apoya en las franjas como espejo. Con dos salas no alcanza |
 
-## ⑤ DECISIÓN DE MESA ABIERTA
+## ⑤ DECISIÓN DE MESA ABIERTA## ⑤ DECISIÓN DE MESA ABIERTA
 
 **`protocolo_no_retiro` está entre los seis documentos** que la pantalla lista. **No lo trato
 distinto ni lo escondo:** *un caso especial sería la pantalla de mora que el perímetro prohíbe;
