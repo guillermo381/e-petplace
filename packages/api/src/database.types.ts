@@ -21136,6 +21136,13 @@ export type Database = {
         Args: { p_mascota_id: string; p_tipo_servicio: string }
         Returns: boolean
       }
+      _mensualidad_dias_habiles: {
+        Args: { p_desde: string; p_prestador_id: string }
+        Returns: {
+          fecha: string
+          opera: boolean
+        }[]
+      }
       _mover_estado_pedido: {
         Args: {
           p_actor: string
@@ -21545,6 +21552,10 @@ export type Database = {
           monto_clawback_total: number
         }[]
       }
+      cancelar_mensualidad_guarderia: {
+        Args: { p_suscripcion_id: string }
+        Returns: Json
+      }
       cancelar_pedido_despensa: {
         Args: { p_actor: string; p_motivo?: string; p_pedido_id: string }
         Returns: Json
@@ -21596,6 +21607,10 @@ export type Database = {
           accion: string
           pendiente_id: string
         }[]
+      }
+      cobrar_periodo_mensualidad_guarderia: {
+        Args: { p_periodo_desde?: string; p_suscripcion_id: string }
+        Returns: Json
       }
       completar_cita_servicio: {
         Args: {
