@@ -97,5 +97,13 @@ export async function tocar(page, localizador, comoSeLlama) {
  * como permiso para volver a buscar textos de UI.
  */
 export function porDato(page, literal) {
-  return page.getByText(literal, { exact: true }).first();
+  /* 🔴 ACEPTA RegExp, y la razón la destapó una corrida: el chip de tamaño dice
+     **«5 stays»** o **«5 · from $40»** según si el precio ya llegó ⇒ el literal
+     exacto no lo encuentra nunca.
+     *La tentación era volver a buscar por la copy («5 stays»). No: **el número
+     es el dato y el resto es rendering**, así que se ancla al número con un
+     patrón —`/^5\b/`— y se sigue sin depender del idioma.* */
+  return typeof literal === 'string'
+    ? page.getByText(literal, { exact: true }).first()
+    : page.getByText(literal).first();
 }

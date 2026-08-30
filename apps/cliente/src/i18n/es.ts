@@ -3030,6 +3030,7 @@ export const clienteEs = {
     queDiaInicio: '¿Desde qué día?',
     cuantasEstadias: '¿Cuántas estadías?',
     tamanoEstadias: '{{n}} estadías',
+    tamanoEstadiasDesde: '{{n}} · desde ${{precio}}',
     lugaresTitulo: 'Lugares con cupo ese día',
     porDia: '${{precio}} por día',
     /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
