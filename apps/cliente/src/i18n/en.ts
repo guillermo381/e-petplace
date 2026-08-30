@@ -2241,6 +2241,7 @@ export const clienteEn = {
     queDiaInicio: 'Starting which day?',
     cuantasEstadias: 'How many stays?',
     tamanoEstadias: '{{n}} stays',
+    tamanoEstadiasDesde: '{{n}} · from ${{precio}}',
     lugaresTitulo: 'Places with room that day',
     porDia: '${{precio}} per day',
     cupo: '{{n}} spots left that day',

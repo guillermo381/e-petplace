@@ -64,6 +64,8 @@ import {
 } from '@epetplace/ui';
 import {
   evaluarRequisitosGuarderia,
+  obtenerGuarderiasDisponibles,
+  obtenerPaquetesGuarderia,
   obtenerResumenGuarderias,
   type CausaSinGuarderias,
   type RequisitosGuarderia,
@@ -165,6 +167,21 @@ export default function ElegirGuarderia() {
   const [fecha, setFecha] = useState<string | null>(null);
   const [requisitos, setRequisitos] = useState<RequisitosGuarderia | null>(null);
   const [resumen, setResumen] = useState<Resumen>({ fase: 'ocioso' });
+  /**
+   * ⭐ **EL PRECIO DE CADA TAMAÑO — el mínimo entre los lugares que ofrecen ESE
+   * paquete.** `{}` = todavía no se sabe.
+   *
+   * ⏪ **Acá estuvo mi peor cura de la sesión.** El resumen devuelve
+   * `min(gp.precio)` **sobre todos los tamaños**, así que los tres chips
+   * mostraban el precio del de 5. **Mi arreglo fue dejar de pintar ninguno** —
+   * *cambié el síntoma y empeoré la pantalla*, y **no lo verifiqué contra el
+   * render**, que es exactamente por lo que no me di cuenta.
+   *
+   * 🔴 **El dato SÍ existía y no lo busqué:** `obtenerPaquetesGuarderia`
+   * devuelve `(tamano, precio)` por lugar. *No hacía falta esperar a A para
+   * decir la verdad: hacía falta buscar dónde vivía.*
+   */
+  const [precioPorTamano, setPrecioPorTamano] = useState<Record<number, number>>({});
 
   /* Los requisitos son de la MASCOTA, no del día: se piden una vez. */
   useEffect(() => {
@@ -220,6 +237,38 @@ export default function ElegirGuarderia() {
        *Era la mitad del defecto — la otra mitad es que el server no sabe el
        tamaño (ver abajo), así que ni preguntando de nuevo cambiaría.* */
   }, [listoParaDia, fecha, mascotaId, modalidad, tamano]);
+
+  /* Los precios por tamaño: una llamada por lugar, en paralelo, y **la
+     pantalla no espera** — los chips se completan cuando llegan.
+     ⚠️ Es un N+1 declarado: con los lugares de hoy es barato. *El día que sean
+     muchos, el pedido a A (`p_tamano` en el resumen) lo cierra de una.* */
+  useEffect(() => {
+    if (modalidad !== 'paquete' || fecha === null || mascotaId === null) {
+      setPrecioPorTamano({});
+      return;
+    }
+    let vigente = true;
+    void (async () => {
+      const lug = await obtenerGuarderiasDisponibles({ fecha, mascotaId, modalidad: 'paquete' });
+      if (!vigente || !lug.ok) return;
+      const packs = await Promise.all(
+        [...new Set(lug.data.map((g) => g.prestadorId))].map((id) => obtenerPaquetesGuarderia(id)),
+      );
+      if (!vigente) return;
+      const min: Record<number, number> = {};
+      for (const r of packs) {
+        if (!r.ok) continue;
+        for (const pq of r.data) {
+          if (!pq.activo) continue;
+          /* 🔴 El MÍNIMO entre lugares, que es un «desde» honesto — **jamás el
+             de otro tamaño**, que era el defecto. */
+          if (min[pq.tamano] === undefined || pq.precio < min[pq.tamano]) min[pq.tamano] = pq.precio;
+        }
+      }
+      setPrecioPorTamano(min);
+    })();
+    return () => { vigente = false; };
+  }, [modalidad, fecha, mascotaId]);
 
   const dias = useMemo(() => {
     const corto = new Intl.DateTimeFormat(idioma, { weekday: 'short' });
@@ -307,7 +356,16 @@ export default function ElegirGuarderia() {
             acento="control"
             disposicion="tira"
             etiqueta={t('hubGuarderia.cuantasEstadias')}
-            opciones={TAMANOS_PAQUETE.map((n) => ({ codigo: String(n), etiqueta: t('hubGuarderia.tamanoEstadias', { n }) }))}
+            /* Cada chip con SU precio. Sin precio todavía, sólo el tamaño:
+               **la etiqueta no espera al número**, y un chip sin precio es
+               honesto mientras un chip con el precio de otro no lo era. */
+            opciones={TAMANOS_PAQUETE.map((n) => ({
+              codigo: String(n),
+              etiqueta:
+                precioPorTamano[n] === undefined
+                  ? t('hubGuarderia.tamanoEstadias', { n })
+                  : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
+            }))}
             seleccionada={tamano === null ? '' : String(tamano)}
             onSelect={(c) => { setTamano(Number(c) as TamanoPaqueteGuarderia); setFecha(null); }}
           />
