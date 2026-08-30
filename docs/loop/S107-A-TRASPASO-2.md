@@ -376,6 +376,43 @@ pantalla de aceptación **dos veces** a quien ya aceptó la v1.
 
 ---
 
+## ⑦septies 🟢 LA OTA DEL FLUJO ENTERO — ancla `70d10100`
+
+C (11 commits) y B (1) mergeados; árbol en cero antes de bundlear (regla 82),
+4 typechecks en 0, `verify:diseno` VERDE con **62 reglas**.
+
+| app | group | runtime |
+|---|---|---|
+| cliente | `ca670979-5567-424a-afef-72b4ad6dab63` | 1.0.6 |
+| prestador | `daf559ce-f426-45d2-b228-ee20cd6bcc7c` | 1.0.7 |
+
+**`verify-ota` VERDE en las dos.** Las notas de `--binario-local` siguen
+diciendo cosas distintas a propósito: **prestador = MEDICIÓN** (USB, 29-ago) ·
+**cliente = DECLARACIÓN del founder** (el instrumento salió NO CONCLUYENTE: no
+había aparato).
+
+**Lo que lleva:** la tira que dice su estado sin que la toquen · el acto único
+de aceptación · «Con tu paquete» · el botón con fecha · el texto de la
+mensualidad · la geometría del semáforo (~60 px) con los dos andamios retirados.
+
+**El merge de `index.ts` NO chocó:** C retiró su hunk tras el aviso, y main
+tenía el superconjunto de siete. *Avisar antes y después es lo que convirtió un
+conflicto en un no-evento.*
+
+### 🔴 DOS BRECHAS DECLARADAS QUE VIAJAN EN ESTA OTA
+
+1. **`SelectorDia` toma UNA sola `etiquetaCerrado` para todos los días** ⇒ con
+   dos causas conviviendo (`ningun_lugar_abre` y `sin_cupo`) sólo puede decir el
+   neutro. **Está declarada, no tapada** — pedido de C a B (`VOZ-POR-DIA`).
+   *El motor ya distingue las dos: lo que falta es que la pieza pueda decirlas.*
+2. **No existe `contratarMensualidadGuarderia` en `packages/api`.** El motor
+   está entero desde S107 y **nunca tuvo wrapper** — otro motor sin puerta, y
+   **`R71` no lo caza** porque la regla mide funciones que existen en
+   `wrappers/`, no las que faltan. *Un gate que vigila lo que hay no puede ver
+   lo que nunca se escribió.*
+
+---
+
 ## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`
