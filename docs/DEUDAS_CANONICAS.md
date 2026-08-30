@@ -19321,6 +19321,33 @@ Ni `apps/cliente` ni `apps/prestador` fijaban `cli.requireCommit` ⇒ **EAS arch
 ---
 
 ### D-867 🔴 · EL ACTUADOR COLAPSA SIETE CAUSAS EN `desconocido`, Y ESA VOZ ES LA DE «SOPORTE»
+
+> ✏️ **ENMIENDA S107-A (31-ago-2026) — SE MIDIÓ QUÉ HAY DEL OTRO LADO, por
+> firma de mesa** (*«no inventes distinciones que el proveedor no te da; antes
+> de ampliar vocabulario, medí»*). El censo separó tres cosas que venían juntas:
+>
+> · 🟢 **VENCIDA era HUECO NUESTRO y se cerró** — `expira_mes`/`expira_anio`
+>   son columnas de `tarjetas_guardadas`, están pobladas, y **no hace falta
+>   preguntarle nada al proveedor**. Nace `tarjeta_vencida`.
+> · 🟢 **Y apareció uno que nadie había pedido:** `contratar_mensualidad_guarderia`
+>   **no miraba el `estado` de la tarjeta** ⇒ se podía firmar un **mandato de
+>   cobro recurrente sobre una tarjeta `rechazada`**. Nace `tarjeta_no_guardada`.
+> · ☠️ **«NO VERIFICADA» NO EXISTE** — el estado es `guardada|rechazada|
+>   abandonada` y una `guardada` ya pasó el alta 3DS. **Se declara inexistente
+>   en vez de inventarse.**
+>
+> 🔒 **Lo que sigue bloqueado es exactamente esta ficha, y ahora con su
+> mecanismo medido:** la causa del rechazo **sí llega** del proveedor —
+> `err.type`, `err.description`, `tx.message`, `tx.status_detail` — y
+> `pagos-cobro` **la aplana a PROSA** en `motivo_rechazo`, 400 caracteres de
+> texto libre. *Sirve para diagnosticar y es inservible para decidir una voz.*
+> **La distinción existe y se pierde en el aplanado** — pero tiparla sigue
+> necesitando la tabla de códigos de Erick, y **mapear `31` por parecido sería
+> el defecto que este censo vino a medir.**
+>
+> ⇒ **Mientras esto siga abierto, la pantalla dice UNA sola cosa honesta sobre
+> un rechazo del banco. Eso es un LÍMITE declarado, no una omisión.**
+
 > S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHAS-del-censo-de-respuestas.md`**
 
 La letra define **siete** causas de rechazo con voz propia; **el actuador tiene DOS salidas**. Los tres rechazos reales que la base vio —`0/31`, `2/32`, `5/14`— **caen los tres en `desconocido`**.

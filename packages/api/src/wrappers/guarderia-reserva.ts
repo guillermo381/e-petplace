@@ -30,6 +30,12 @@ const MENSAJES = {
   rango_invalido:               'Ese rango de fechas no es válido.',
   rango_demasiado_largo:        'Ese rango de fechas es demasiado largo.',
   modalidad_invalida:           'Esa modalidad no existe.',
+  /* Las dos que NO necesitan al proveedor — medidas de nuestra propia tabla. */
+  tarjeta_vencida:              'Esa tarjeta ya venció. Agrega otra para continuar.',
+  tarjeta_no_guardada:          'Esa tarjeta no está disponible. Agrega otra para continuar.',
+  tarjeta_no_existe:            'No encontramos esa tarjeta.',
+  tarjeta_de_otra_persona:      'Esa tarjeta no es tuya.',
+  no_ofrece_mensualidad:        'Este lugar no ofrece plan mensual.',
 
   /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
      función, no grepeando. **Mi censo anterior dijo «0 sin tipar» y estos dos
@@ -205,6 +211,66 @@ export async function reservarDiaGuarderia(params: {
   return {
     ok: true,
     data: { citaId: r.cita_id, estadiaId: r.estadia_id, precio: r.precio, expiraEn: r.expira_en },
+  };
+}
+
+// ── LA MENSUALIDAD ──────────────────────────────────────────────────────────
+
+export interface MandatoMensualidad {
+  suscripcionId: string;
+  precioMensual: number;
+  montoEsperado: number;
+  /** **Hoy siempre `false`.** El mandato se registra; el cobro lo hace el reloj. */
+  cobrada: boolean;
+}
+
+/**
+ * Firma el **mandato** de cobro mensual. **No cobra.**
+ *
+ * ⚠️ **CERO COBRO Y CERO CUPO:** esto registra la autorización. El cobro lo hace
+ * el reloj cuando el founder encienda sus tres claves de `app_config`.
+ *
+ * ── LOS REBOTES DE LA TARJETA, y lo que se puede y no se puede distinguir ──
+ * `tarjeta_no_existe` · `tarjeta_de_otra_persona` · **`tarjeta_vencida`** ·
+ * **`tarjeta_no_guardada`** (la tarjeta está `rechazada` o `abandonada`).
+ *
+ * 🔴 **«No verificada» NO EXISTE y no se inventa.** Una tarjeta `guardada` ya
+ * pasó el alta 3DS: no hay tal estado, ni en nuestra tabla ni en el proveedor.
+ *
+ * 🔒 **Y POR QUÉ el banco rechazó un COBRO no se puede decir todavía.** La causa
+ * viaja en el crudo del proveedor y se aplana a prosa en `motivo_rechazo`; para
+ * convertirla en una voz hace falta la tabla de códigos del proveedor
+ * (**`D-867`**), y *mapear por parecido sería el defecto que ese censo vino a
+ * medir*. **Es un límite declarado, no una omisión** — la pantalla dice una
+ * sola cosa honesta sobre un rechazo del banco.
+ */
+export async function contratarMensualidadGuarderia(params: {
+  prestadorId: string;
+  tarjetaId: string;
+  mascotaId?: string;
+  /** El techo del mandato. Sin él, el precio de hoy. */
+  montoEsperado?: number;
+}): Promise<ResultadoWrapper<MandatoMensualidad, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('contratar_mensualidad_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_tarjeta_id: params.tarjetaId,
+    p_mascota_id: params.mascotaId ?? undefined,
+    p_monto_esperado: params.montoEsperado ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.suscripcion_id !== 'string' || typeof r.precio_mensual !== 'number') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      suscripcionId: r.suscripcion_id,
+      precioMensual: r.precio_mensual,
+      montoEsperado: typeof r.monto_esperado === 'number' ? r.monto_esperado : r.precio_mensual,
+      cobrada: r.cobrada === true,
+    },
   };
 }
 

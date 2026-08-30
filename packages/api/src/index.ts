@@ -1595,6 +1595,8 @@ export {
      `obtenerDiasGuarderiaDisponibles` — **sin lugar elegido**, agregada sobre
      todos los lugares (la que P2 necesita: un día sirve si algún lugar puede).
      `obtenerDiasGuarderia` — **por prestador**, la de después de elegir lugar. */
+  contratarMensualidadGuarderia,
+  type MandatoMensualidad,
   obtenerDiasGuarderia,
   type DiaGuarderia,
   type MotivoDiaNoReservable,
