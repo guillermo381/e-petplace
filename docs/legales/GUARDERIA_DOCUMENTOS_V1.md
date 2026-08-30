@@ -328,3 +328,125 @@ la deuda por los gastos es una deuda común, que se cobra como cualquier otra.
    límite**, y **nadie la financia todavía**.
 2. **Qué refugio, y el acta de traslado** — el séptimo documento, que no existe.
 3. **Quién ejecuta las notificaciones** y quién declara que llegó el día 15.
+
+---
+---
+
+# LA v2 — 30-ago-2026
+
+> **Firma del founder:** el tope de urgencia pasa a ser **término del texto, no
+> campo del flujo** · el acto único dice **«Declaro y acepto»** con los seis
+> enumerados · **sin contacto alternativo, el animal se entrega sólo al dueño**.
+
+## 🔴 SÓLO CUATRO SUBEN A v2, Y LOS OTROS DOS SE QUEDAN EN v1
+
+| documento | versión | por qué |
+|---|---|---|
+| `autorizacion_urgencia_veterinaria` | **v2** | el tope con su número |
+| `contrato_custodia` | **v2** | entrega sin contacto alternativo |
+| `autorizacion_transporte` | **v2** | ídem |
+| `protocolo_no_retiro` | **v2** | ídem (su prohibición 5) |
+| `declaracion_sanitaria` | **v1** | su texto **no cambia** |
+| `declaracion_comportamiento` | **v1** | su texto **no cambia** — el «Declaro» vive en el acto |
+
+**Por qué no se suben los seis:** subir un documento cuyo texto no cambió le
+vuelve a pedir a la familia que acepte **el mismo texto**, y **vacía de
+significado el número de versión** — que existe justamente para decir *«esto
+cambió, míralo de nuevo»*. La familia nunca ve el número: ve seis documentos.
+*Versionar de más no la informa: la cansa.*
+
+⚠️ **La v1 NO se borra — ni del archivo ni de la base.** Una familia real la
+aceptó el 30-ago 16:34, y **la prueba de esa aceptación tiene que poder mostrar
+el texto que se aceptó** (P23). Se retira de la oferta con `activo=false`; su
+fila queda.
+
+---
+
+## EL ACTO — texto de pantalla, no es uno de los seis
+
+> **Declaro y acepto** el **contrato de custodia**, la **declaración
+> sanitaria**, la **declaración de comportamiento**, la **autorización de
+> urgencia veterinaria**, la **autorización de transporte** y el **protocolo de
+> no retiro**, cuyos textos puedo leer aquí antes de aceptar.
+
+🔴 **«Declaro y acepto», y no «acepto» a secas.** Dos de los seis **no son
+consentimientos: son declaraciones de hecho** —que mi animal está vacunado, que
+nunca mordió—. Un «acepto» sobre un paquete es evidencia **más débil de una
+declaración** que de una aceptación de términos, y eso pega justo en la cláusula
+que decide **quién responde en una mordida**. Las dos palabras preservan las dos
+naturalezas **sin agregar una casilla**.
+
+⚠️ **La autorización de redes NO entra en este acto.** Es casilla **separada,
+específica y revocable** (`CRITERIO_LEGAL` §5 capa 4). *Meterla adentro del
+paquete es exactamente lo que el criterio prohíbe.*
+
+---
+
+# ① `contrato_custodia` · v2
+
+*(Idéntico a la v1 salvo el punto 7.)*
+
+**7. Entregas.** El animal se entrega **únicamente a usted o al contacto
+alternativo que usted haya registrado**. A nadie más, por ningún motivo.
+**Si usted no registra un contacto alternativo, el animal se entrega
+únicamente a usted.**
+
+### 🗺️ Mapa — ①v2
+
+| cláusula | origen |
+|---|---|
+| 7 · la frase nueva | ⚠️ **INTERPRETACIÓN de A** — el criterio §3 prohibición 5 no contempla la lista vacía. *Sin esta frase, una lista vacía se lee como «a nadie», y no es eso: es «sólo al dueño».* |
+
+---
+
+# ④ `autorizacion_urgencia_veterinaria` · v2
+
+*(Idéntico a la v1 salvo el punto 3, que ahora lleva el número.)*
+
+**3. Tope de gasto.** Autorizo gastos de urgencia hasta **USD «MONTO_PENDIENTE_DE_FIRMA»**.
+**Puede cambiar este monto cuando quiera desde su cuenta**, y el que rija al
+momento de la urgencia es el que vale. Por encima de ese monto, la guardería
+sólo puede autorizar **lo indispensable para evitar sufrimiento o
+estabilizarlo** mientras sigue intentando contactarme.
+
+### 🗺️ Mapa — ④v2
+
+| cláusula | origen |
+|---|---|
+| que exista un tope | ✅ **transcripción** — `CRITERIO_LEGAL` §4 lo nombra explícitamente |
+| **el número** | 🟢 **firma del founder** (30-ago) |
+| «el que rija al momento de la urgencia es el que vale» | ⚠️ **INTERPRETACIÓN de A** — un tope editable necesita decir **cuál de las versiones manda**, o dos personas leen la misma cláusula distinto el peor día |
+
+---
+
+# ⑤ `autorizacion_transporte` · v2
+
+*(Idéntico a la v1 salvo el punto 5.)*
+
+**5. Entrega.** El animal se recoge y se devuelve **únicamente a mí o al
+contacto alternativo que registré**. A nadie más. **Si no registro un contacto
+alternativo, sólo a mí.**
+
+---
+
+# ⑥ `protocolo_no_retiro` · v2
+
+*(Idéntico a la v1 salvo el último punto del 7.)*
+
+**7.** …
+
+- **no se lo entrega** a ninguna persona que no sea yo o mi contacto
+  alternativo registrado — **y si no registré ninguno, sólo a mí**.
+
+---
+
+## 🔴 EL HUECO QUE FRENA LA SIEMBRA
+
+**`«MONTO_PENDIENTE_DE_FIRMA»` no es un placeholder de redacción: es el número
+que la familia autoriza a gastar de su bolsillo.** Falta.
+
+**La migración de siembra ABORTA si el token sigue puesto** — no por prolijidad:
+*sembrar dos veces la v2 (una sin número y otra con) le muestra la pantalla de
+aceptación **dos veces** a la familia que ya aceptó la v1.* **Adivinar el número
+cuesta una re-aceptación de más, y es exactamente el «default silencioso» que la
+firma prohíbe.**
