@@ -2864,9 +2864,13 @@ export const clienteEs = {
      🔴 La sobreventa NO tiene voz acá a propósito (firma de la mesa): para
      la familia un día sin lugar es un día sin lugar. */
   lugarGuarderia: {
+    zonaTitulo: 'Dónde queda',
+    /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
+    zonaDetalle: 'La zona aproximada. La dirección exacta te llega cuando reserves.',
     /* El CTA apagado DICE qué falta: una pared muda hace creer que el
        producto está roto cuando sólo falta tocar un día. */
     faltaDia: 'Elige un día en el calendario.',
+    /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
     comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
     agendarDePaquete: 'Agendar este día con tu paquete',
     agendadaDePaquete: 'Estadía agendada — te quedan {{n}}.',

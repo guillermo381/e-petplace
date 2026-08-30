@@ -52,6 +52,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FichaFranja,
+  MapaZona,
   SemaforoSanitario,
   type RequisitoSanitario,
   Tarjeta,
@@ -63,6 +64,8 @@ import {
 import {
   evaluarRequisitosGuarderia,
   obtenerCupoGuarderia,
+  obtenerPerfilesPublicos,
+  type PerfilPublico,
   obtenerFranjasGuarderia,
   comprarPaqueteGuarderia,
   reservarDiaDePaqueteGuarderia,
@@ -75,6 +78,7 @@ import {
 import { obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { PieReserva } from '@/components/reserva-piezas';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
@@ -122,6 +126,27 @@ export default function LugarGuarderia() {
   const [elegido, setElegido] = useState<string | null>(null);
   const [reservando, setReservando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
+  const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
+
+  /* ⭐ **EL MAPA DE LA ZONA — la misma pieza de todas las vitrinas de la casa.**
+     Censado, no construido: `MapaZona`, alimentada por `obtenerPerfilesPublicos`,
+     que **lee la vista pública y jamás la tabla**.
+
+     🔴 **Es RANGO DE SECTOR, jamás el punto exacto.** La propia pieza lo
+     declara: *«si alguien le pasa `lat`/`lon` de la sede, es defecto, no
+     configuración»*. *Aunque el servicio recoja y lleve, toda familia quiere
+     saber dónde está su animal* — firma del founder, que corrigió mi voto.
+
+     ⚠️ Hace falta una llamada aparte porque **`GuarderiaDisponible` NO trae
+     `zona_*`**: su lector es la RPC del filtro, no la vista pública. */
+  useEffect(() => {
+    if (typeof prestadorId !== 'string') return;
+    let vigente = true;
+    void obtenerPerfilesPublicos([prestadorId]).then((r) => {
+      if (vigente && r.ok) setPerfil(r.data[0] ?? null);
+    });
+    return () => { vigente = false; };
+  }, [prestadorId]);
 
   const hoy = useMemo(() => new Date(), []);
   const primeroDelMes = useMemo(
@@ -465,6 +490,22 @@ export default function LugarGuarderia() {
             reserva. **Y los pocos animales con carnet hoy no son razón para
             abrirlo: son el catálogo vacío, y cada familia lo llena en su
             primera reserva.** */}
+        {/* LA ZONA. 🔴 **El guard del mapa nativo se aplica NO PASANDO las
+            tres** —igual que el perfil del cliente—: la pieza no monta nada si
+            falta cualquiera, así que **cero cambio en el componente
+            compartido**. *Un secret faltante cuesta EL MAPA, jamás la app.* */}
+        {MAPA_NATIVO_DISPONIBLE &&
+        perfil !== null &&
+        perfil.zona_lat !== null &&
+        perfil.zona_lon !== null &&
+        perfil.zona_radio_m !== null ? (
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="titulo">{t('lugarGuarderia.zonaTitulo')}</Texto>
+            <MapaZona lat={perfil.zona_lat} lon={perfil.zona_lon} radioM={perfil.zona_radio_m} />
+            <Texto variante="apoyo">{t('lugarGuarderia.zonaDetalle')}</Texto>
+          </View>
+        ) : null}
+
         {estado.requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>

@@ -2107,6 +2107,8 @@ export const clienteEn = {
     pedirDeNuevo: 'Request it again',
   },
   lugarGuarderia: {
+    zonaTitulo: 'Where they are',
+    zonaDetalle: 'The approximate area. You get the exact address once you book.',
     faltaDia: 'Pick a day on the calendar.',
     comprarPaquete: 'Buy {{n}} stays and book this day',
     agendarDePaquete: 'Book this day with your pack',
