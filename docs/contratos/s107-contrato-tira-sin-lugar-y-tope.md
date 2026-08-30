@@ -87,3 +87,28 @@ prometiendo en nombre del prestador lo que ese prestador no declaró.*
 **Se cae del flujo y queda declarado.** Si el founder lo quiere, es letra nueva:
 qué ítems, quién los declara, y si son catálogo o texto libre — **no es un campo
 que falte, es una decisión que no se tomó.**
+
+---
+
+## ④ ✏️ AÑADIDO 31-ago · EL ORIGEN DE LA ESTADÍA
+
+`EstadiaDeMiMascota` gana dos campos:
+
+```ts
+bonoId: string | null;   // null = día suelto · con id = salió de ESE paquete
+dePaquete: boolean;      // derivado de bonoId, en UN solo lugar
+```
+
+🔴 **No se deduce de `precio === null`, y el argumento es de C:** *deducir el
+origen de un silencio es cómo una marca empieza a mentir sin que nadie lo note*
+— el día que un día suelto también venga sin precio, «Con tu paquete» se pone
+sola donde no va.
+
+⚠️ **No faltaba dato: faltaba proyección.** `evento_cita_servicio.bono_id` ya
+existía y ya se llenaba. **Es la tercera vez en S107** que lo que falta no es
+una entidad sino una columna que nadie proyectó (los dos tramos y las franjas
+fueron las otras dos).
+
+**Medido, dos brazos en la misma corrida:** de paquete → `bono_id` = el bono
+comprado · día suelto → `NULL`. *Sin el segundo brazo, una proyección que
+devolviera el mismo id para todo daría verde.*

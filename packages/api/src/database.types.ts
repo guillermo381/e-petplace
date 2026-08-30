@@ -23066,6 +23066,7 @@ export type Database = {
           a_bordo_en: string
           acta_devolucion_id: string
           acta_recogida_id: string
+          bono_id: string
           cita_id: string
           entregada_en: string
           es_proxima: boolean
