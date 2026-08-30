@@ -2146,6 +2146,14 @@ const FIXTURES = {
      es verde, pero tampoco probaría que la regla sabe decir que no.
      ⚠️ Y trae las CUATRO constantes: si falta una, la regla corta antes por
      «constantes ilegibles» y el rojo sería por la razón equivocada. */
+  /* R71 · el fixture trae LOS DOS LADOS, porque la regla mide una RELACIÓN:
+     un wrapper que exporta una función y un index que no la nombra. Con uno
+     solo la regla saldría por «corpus incompleto», que no es verde pero
+     tampoco prueba que sepa decir que no. */
+  R71: [
+    { path: 'packages/api/src/index.ts', src: "export { otraCosa } from './wrappers/otra';" },
+    { path: 'packages/api/src/wrappers/fixture-r71.ts', src: 'export async function puertaQueNadieAbre() { return 1 }' },
+  ],
   R65: [{
     path: 'apps/cliente/src/components/logo-franquicia.tsx',
     src: 'export const ANCHO_LOGO = 56;\nconst ALTO_LOGO = 28;\nconst CONTENIDO_ANCHO = 44;\nconst CONTENIDO_ALTO = 22;',
@@ -6323,6 +6331,68 @@ function r68(archivos) {
  *  de hoy nació justamente de una constante que la lista no habría tenido.*
  *
  *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. */
+/**
+ * ═══ R71 · UN WRAPPER QUE NO SE EXPORTA ES UN MOTOR SIN PUERTA (S107-A) ══════
+ *
+ * Toda `export async function` de `packages/api/src/wrappers/*.ts` tiene que
+ * aparecer en `packages/api/src/index.ts`. Si no, **las apps no pueden
+ * llamarla**.
+ *
+ * 🔴 **NINGÚN GATE VEÍA ESTO, y por eso existe la regla.** `packages/api`
+ * compila perfecto con un export que falta —**nada adentro del paquete lo
+ * necesita**— y los cuatro typechecks dan 0. El síntoma aparece recién en la
+ * app que lo monta, un `TS2724` con un *«did you mean…»* que sugiere otra
+ * función.
+ *
+ * **El caso que la parió:** S107-A construyó `obtenerDiasGuarderia` y
+ * `obtenerDiasGuarderiaDisponibles`, las midió con cinturón verde, publicó sus
+ * contratos… y **ninguna estaba exportada**. Lo encontró C al montarlas.
+ * El censo que siguió halló **SIETE símbolos** sin exportar, no dos.
+ *
+ * > Es `L-318` —motor sin puerta— **con la puerta a un `export` de distancia**.
+ * > *Existe, pasa sus tests, tiene su contrato escrito, y no lo alcanza nadie.*
+ *
+ * ⚠️ **Baseline 1 y DURA en 1:** `puertaDelDueno` (`paquetes.ts`) es un helper
+ * **interno** que otros wrappers importan entre sí; no es una puerta de app y
+ * no debe exportarse. **El número es el techo: si sube, hay una puerta nueva
+ * que nadie puede abrir.** *Su verde dice «todo wrapper es alcanzable», jamás
+ * «todo wrapper anda».*
+ */
+function r71(archivos) {
+  const fallos = []
+  let sinPuerta = 0
+  const INTERNOS = new Set(['puertaDelDueno'])
+  const idxFile = archivos.find((a) => /api\/src\/index\.ts$/.test(a.path))
+  const wrappers = archivos.filter((a) => /api\/src\/wrappers\/[^/]+\.ts$/.test(a.path))
+  /* 🔴 SIN LOS DOS LADOS NO SE MIDE NADA: un cero acá diría «no miré», no
+     «está bien» — y ése es el verde flojo que la casa pasó una sesión entera
+     cazando. */
+  if (!idxFile || wrappers.length === 0) {
+    return {
+      fallos: ['R71: falta el `index.ts` o los wrappers en el corpus — un cero acá diría «no miré», no «está bien».'],
+      info: 'corpus incompleto',
+    }
+  }
+  const idx = idxFile.src ?? ''
+  for (const { path, src } of wrappers) {
+    for (const m of (src ?? '').matchAll(/^export async function (\w+)/gm)) {
+      const n = m[1]
+      if (new RegExp(`\\b${n}\\b`).test(idx)) continue
+      sinPuerta++
+      if (INTERNOS.has(n)) continue
+      fallos.push(
+        `R71 **${path} · ${n}()** no está en \`packages/api/src/index.ts\`. ` +
+        `**Las apps no pueden llamarla** — y ningún typecheck lo ve, porque el paquete compila igual. ` +
+        `*Un wrapper que no se exporta es un motor sin puerta: existe, pasa sus tests, y no lo alcanza nadie.*`,
+      )
+    }
+  }
+  return {
+    fallos,
+    info: `${sinPuerta} función(es) de wrapper fuera del index · baseline 1 (\`puertaDelDueno\`, helper interno que otros wrappers importan) · DURA EN 1 · su verde dice «todo wrapper es alcanzable», jamás «todo wrapper anda»`,
+  }
+}
+
 function r70(archivos) {
   const fallos = []
   const vistos = new Set()
@@ -6416,7 +6486,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6812,6 +6882,10 @@ corridas.push(['R67 (el aviso de teleconsulta no se acorta)', r67(appsCodigo)]);
    DERIVADO no vería esa constante y un uso suyo en posición de texto pasaría
    **en verde** — el punto ciego que este mismo censo destapó. */
 corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAICES_UI.flatMap(archivosCodigo)), ...apps, ...appsCodigo])])
+/* 🔴 R71 NO recibe corpus: lee `packages/api` del disco. Su pregunta no es
+   sobre el contenido de un archivo sino sobre la RELACIÓN entre dos —los
+   wrappers y su index—, y esa relación no se ve mirando uno solo. */
+corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
