@@ -7,18 +7,26 @@
 
 ---
 
-## ⓪ LO PRIMERO, PORQUE ES LO QUE MÁS DUELE
+## ⓪ LO PRIMERO — Y NO ES UN DEFECTO
 
-> ### 🔴 **EL FOUNDER NO PUEDE COMPRAR NI RESERVAR TODAVÍA, Y LA CAUSA NO ES DE PANTALLA.**
-> **`guarderia_documentos` = 0.** La casa **nunca cargó los seis textos legales**, así que
-> `_guarderia_puede_reservar` devuelve `documentos_no_disponibles` **para toda familia**.
+> ### **`documentos_no_disponibles` ES EL ESTADO NORMAL DEL FRENTE.**
+> `guarderia_documentos` = 0 filas, así que las tres puertas rebotan.
+> **No falta motor ni pantalla: falta el TEXTO**, y es legal — *lo redacta la
+> mesa, ninguna pista, ni como placeholder.* Ficha **`D-977`**.
 >
-> **Es la regla de perímetro del founder funcionando** — *«sin documento cargado la reserva no se
-> abre»*. **No se cura con código: se cura cargando los textos.** *(Dueño: A / mesa.)*
+> ⇒ **Hasta que los seis textos existan, nadie puede reservar, y eso es el
+> perímetro funcionando.** *No lo reportes como bug.*
 
-🔴 **Y con una asimetría grave, medida:** `comprar_paquete_guarderia` **NO pasa por ese gate** ⇒
-se le puede cobrar un paquete a alguien que no aceptó nada, y frenarlo después.
-⇒ `S107-C-PEDIDO-A-A-GATE-DEL-PAQUETE.md`.
+✅ **Y las dos puertas que faltaban ya están cerradas** (A, migración
+`20260831020000`): `comprar_paquete_guarderia` y `contratar_mensualidad_guarderia`
+**pasan por el gate**. Antes cobraban y frenaban a la familia en la reserva,
+*con la plata ya tomada*. Contrato: `docs/contratos/s107-contrato-compuerta-en-la-compra.md`.
+
+⚠️ **Consecuencia que la pantalla ya muestra, declarada por A:** con el gate
+sanitario duro, una familia **puede comprar un paquete y ese día no poder
+usarlo** por el carnet — lo sanitario se evalúa donde el sujeto existe (la
+puerta del DÍA), porque el paquete es del hogar y nace sin mascota. *No es un
+defecto de la compra: es el semáforo diciendo la verdad antes.*
 
 ---
 
@@ -54,19 +62,31 @@ mirá esto primero.**
 
 ---
 
-## ③ MI COLA — tres cosas, todas mías
+## ③ MI COLA — VACÍA
 
-1. 🔴 **El ancho del botón de antirrábica** — el founder lo ve «muy ancho». Sin empezar.
-2. 🔴 **El selector de días del prestador** — **desbloqueado**: `reemplazarFranjasGuarderia` hace
-   el reemplazo atómico con `dias_semana`. *Sin él, cualquier selector fabrica franjas huérfanas
-   — por eso estuvo cerrado.*
-3. 🔴 **Mi pantalla de documentos → `AceptacionDeDocumentos`** — *la hice a mano sin saber que la
-   pieza existía*; la usan el registro del prestador y la invitación.
+Los tres ítems cerraron el 29-ago, en este orden:
+
+| | qué era | cómo cerró |
+|---|---|---|
+| ✅ **el ancho del semáforo** | «muy ancho, la caja mal dimensionada» | **medido**: ~92 px contra los ~60 de la fila canónica (`parte/[eventoId]`). La causa era mía —el relleno de la `Tarjeta`— y la casa ya tenía el criterio escrito. **Queda un `paddingHorizontal` DECLARADO COMO ANDAMIO**, con su retiro escrito ⇒ `PEDIDO-A-B-GEOMETRIA-DEL-SEMAFORO` |
+| ✅ **la pantalla de documentos** | migrarla a `AceptacionDeDocumentos` | resultó **más grande que un cambio de pieza**: no había acto de aceptación — mandaba las seis hiciera lo que hiciera la familia. Hoy seis casillas, el enlace abre sin marcar, el botón exige las seis y sólo viaja lo marcado |
+| ✅ **el selector de días** | estaba cerrado por motor | abierto con `reemplazarFranjasGuarderia`, **probado en subtransacción con residuo 0** (`corrida-reemplazo-dias-subtx.sql`) |
+
+🔴 **Lo que el selector de días destapó, y es lo que hay que saber:** los días
+viven en **dos lugares** —`espacios.dias_operacion` (lo que le pinta
+`no_opera` a la familia) y `franjas.dias_semana`— y **el taller no escribía
+ninguno**. *El prestador no podía elegir sus días por ninguna vía.* Hoy un
+selector escribe los tres lugares. ⚠️ **Se LEE de las franjas porque no hay
+lector de espacios: con dos salas eso no alcanza.**
 
 ## ④ ESPERANDO A A
 
 - 🟡 **La mensualidad** — hay motor en migraciones, **no hay wrapper de contratación**.
-- 🔴 **El gate del paquete** (⓪) · 🔴 **los seis textos legales** (⓪).
+- 🟡 **El lector de espacios** — hoy los días de operación se **escriben y no se
+  leen**; el selector se apoya en las franjas como espejo. Con dos salas hace
+  falta el lector de verdad.
+- ✅ ~~El gate del paquete~~ — **cerrado por A** (`20260831020000`).
+- ⚪ **Los seis textos legales** — de la mesa, no de A. Ver ⓪.
 - 🟢 **`p_tamano` en el resumen** — **no bloquea**: el precio por chip lo resuelvo con
   `obtenerPaquetesGuarderia`, que cuesta **una llamada por lugar**. Cuando llegue, colapsa a una.
 
@@ -92,6 +112,8 @@ sacarlo sería pedir que acepten algo que no mostramos.*
 | **Comprar paquete = comprar + agendar el primer día** | **sin toggle**: *uno que no se puede apagar es una casilla decorativa* |
 | **Con saldo, el lugar lo determina el bono** | va directo al día de ESA guardería |
 | **Toda cura viaja con su estado real** | «en mi rama, esperando merge» — nunca «curado» a secas |
+| 🔴 **Toda sonda entra por donde entra el dedo** | *medir una pantalla por su ruta directa contesta «¿esta pantalla anda?», no «¿se puede comprar?»*. **Firma del founder sobre un error mío**: tres sondas midieron bien pantallas que el dedo nunca alcanzaba |
+| **La clave se elige por su claim, no por su posición** | `claveAnon()`. Un script que agarra «la primera» anda hasta que el orden cambia, y ese día **anda mejor**: corre como `service_role` y todo gate pasa |
 
 ---
 
@@ -127,10 +149,14 @@ sacarlo sería pedir que acepten algo que no mostramos.*
 
 ## ⑨ EL PRÓXIMO PASO EJECUTABLE
 
-**Correr `bash scripts/s107/estado-de-mis-curas.sh`** y, si hay commits fuera, decirlo al
-reportar. Después, en orden: **el ancho del botón** (chico y visible) → **la pieza de
-documentos** → **el selector de días**.
+**La cola de C está vacía.** Antes de tomar nada nuevo:
 
-⚠️ **Y antes de decir que algo del pago funciona: `node scripts/s107/sonda-camino-del-dedo.mjs`
-con Metro arriba.** *Es el único instrumento que recorre el tap, y es el que encontró lo que
-cinco tandas de medición no vieron.*
+1. `bash scripts/s107/estado-de-mis-curas.sh` — y si hay commits fuera de main,
+   decirlo al reportar. **Nunca «curado» a secas.**
+2. Si el trabajo toca pago o reserva:
+   `node scripts/s107/sonda-camino-del-dedo.mjs` con Metro arriba. *Es el único
+   instrumento que recorre el tap*, y es el que encontró lo que cinco tandas de
+   medición no vieron.
+
+**Lo que espera fuera de C:** los seis textos legales (mesa) · la geometría de
+`SemaforoSanitario` (B) · el wrapper de mensualidad y el lector de espacios (A).

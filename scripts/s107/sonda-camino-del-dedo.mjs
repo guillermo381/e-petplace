@@ -19,8 +19,22 @@
  *
  * **Los pasos 6 y 7 SÍ están medidos, por otra vía** (llamada directa a los RPC
  * con la sesión de la familia, 29-ago):
- *   · `reservar_dia_guarderia`    → 🔴 `documentos_no_disponibles`
- *   · `comprar_paquete_guarderia` → ✓ compró **(saltea el gate — ver el pedido)**
+ *   · `reservar_dia_guarderia`    → `documentos_no_disponibles`
+ *   · `comprar_paquete_guarderia` → ✓ compró **salteando el gate**
+ *
+ * ✅ **Las dos líneas ya están atendidas y su lectura CAMBIÓ:**
+ *   · el salteo lo cerró A (`20260831020000`): las tres puertas gatean igual.
+ *   · 🔴 **`documentos_no_disponibles` NO es un defecto: es el estado NORMAL**
+ *     del frente hasta que existan los seis textos legales (`D-977`). *Si esta
+ *     sonda te lo devuelve, no encontraste un bug.*
+ *
+ * ── LA REGLA QUE ESTA SONDA ES (firma del founder, sobre un error mío) ───
+ * > *«Medir una pantalla por su ruta directa contesta **¿esta pantalla anda?**,
+ * > no **¿se puede comprar?**. Toda sonda tuya de acá en más entra por donde
+ * > entra el dedo.»*
+ *
+ * Tres sondas midieron **bien** pantallas que el dedo nunca alcanzaba. Ninguna
+ * mintió; todas contestaron una pregunta que nadie había hecho.
  *
  * *Se declara acá y no en un parte porque el que corre una sonda no lee partes:
  * lee su salida.* **Un instrumento que se corta y no dice de quién es la culpa
