@@ -6308,10 +6308,19 @@ function r68(archivos) {
  *  dice: *«el path no se exporta; se usa la pieza»*. La regla mecaniza esa
  *  frase, que hasta hoy era prosa.
  *
- *  ⚠️ ALCANCE DECLARADO: vigila `CHEVRON`, que es **el único mapa de paths con
- *  nombre** de la casa. La CLASE es más ancha —cualquier constante de path
- *  impresa como texto—, y ensancharla pide un censo de constantes de path que
- *  hoy no existe. *Se cierra lo medido, no lo imaginable.*
+ *  ── ⏪ ENMENDADA EL MISMO DÍA: **HABÍA FAMILIA, y mi primer censo la perdió**
+ *  Nació vigilando sólo `CHEVRON` porque parecía el único mapa de paths. **El
+ *  censo por NAMESPACES no la encontró** —391 `.tsx`, 88 ocurrencias, 3
+ *  sospechosos y los tres de la galería, donde imprimir el token ES el
+ *  contenido— **y estaba mal planteado: éstas no son namespaces, son
+ *  constantes sueltas.** Buscando `= 'M…'` aparecieron **`ISOTIPO_PATH`** y
+ *  **`GOTA_D`/`GOTA_OJO`**. *Un censo que busca la forma equivocada devuelve
+ *  cero y ese cero se lee como «no hay».*
+ *
+ *  ⇒ **La regla DERIVA SU CORPUS en vez de llevar una lista**: cualquier
+ *  constante cuyo valor empiece con un comando de path SVG entra sola. *Una
+ *  lista escrita a mano no sabe del path que se declare mañana — y el defecto
+ *  de hoy nació justamente de una constante que la lista no habría tenido.*
  *
  *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. */
 function r70(archivos) {
@@ -6319,6 +6328,17 @@ function r70(archivos) {
   const vistos = new Set()
   let usos = 0
   let archivosConChevron = 0
+
+  /* PASO 1 — EL CORPUS SE DERIVA. Toda constante cuyo valor arranca con un
+     comando de path SVG (`M`/`m` + número) es un path, se llame como se llame.
+     Incluye los mapas (`Record<…, string>` con valores `'M…'`). */
+  const PATHS = new Set(['CHEVRON'])
+  for (const { src } of archivos) {
+    const t = src ?? ''
+    for (const m of t.matchAll(/\bconst\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?::[^=]+)?=\s*['"][Mm]\s?[-\d]/g)) PATHS.add(m[1])
+    for (const m of t.matchAll(/\bconst\s+([A-Z][A-Z0-9_]*)\s*(?::\s*Record<[^>]*>)?\s*=\s*\{[^}]*['"][Mm]\s?[-\d]/gs)) PATHS.add(m[1])
+  }
+  const RE_USO = new RegExp(`\\b(${[...PATHS].join('|')})\\b`)
   for (const { path, src } of archivos) {
     if (vistos.has(path)) continue
     vistos.add(path)
@@ -6333,18 +6353,20 @@ function r70(archivos) {
     const limpio = (src ?? '')
       .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
       .replace(/(^|[^:/'"`])\/\/(?!\/)[^\n]*/g, '$1')
-    if (!/\bCHEVRON\b/.test(limpio)) continue
+    if (!RE_USO.test(limpio)) continue
     archivosConChevron++
     const lineas = limpio.split('\n')
     for (let i = 0; i < lineas.length; i++) {
       const l = lineas[i]
-      if (!/\bCHEVRON\b/.test(l)) continue
+      if (!RE_USO.test(l)) continue
       if (/^\s*import\b/.test(l)) continue // el import no dibuja nada
       usos++
       // legítimo: alimenta un `d` — directo o por variable intermedia
-      if (/\bd=\{/.test(l) || /=\s*CHEVRON\b/.test(l)) continue
+      if (/\bd=\{/.test(l) || new RegExp(`=\\s*(${[...PATHS].join('|')})\\b`).test(l)) continue
+      // la DECLARACIÓN del propio path no es un uso
+      if (/\bconst\s+[A-Za-z_]/.test(l)) continue
       fallos.push(
-        `R70: ${path}:${i + 1} — CHEVRON en posición de TEXTO. Es el atributo \`d\` de un path: ` +
+        `R70: ${path}:${i + 1} — un PATH SVG en posición de TEXTO. Es el atributo \`d\` de un path: ` +
           `puesto en un \`<Texto>\`/\`<Text>\` la pantalla IMPRIME "M9 18l6-6-6-6" al usuario. ` +
           `Compila y pasa todos los gates porque un path es un string y ahí va un string — ` +
           `lo que está mal es el significado. **Usá la pieza \`<Chevron direccion=... />\`**, ` +
@@ -6357,7 +6379,7 @@ function r70(archivos) {
   fallos.push(...ancla('R70', archivosConChevron, 5, 'archivo(s) que usan CHEVRON'))
   return {
     fallos,
-    info: `${usos} uso(s) de CHEVRON en ${archivosConChevron} archivo(s) · ${fallos.length} en posición de texto · ⚠️ vigila SOLO \`CHEVRON\`: la clase (cualquier constante de path impresa) es más ancha y pide su censo`,
+    info: `corpus DERIVADO: ${PATHS.size} constante(s) de path (${[...PATHS].join(', ')}) · ${usos} uso(s) en ${archivosConChevron} archivo(s) · ${fallos.length} en posición de texto · ⚠️ su verde dice «ningún path se imprime», jamás «los dibujos están bien»`,
   }
 }
 
@@ -6785,7 +6807,11 @@ corridas.push(['R67 (el aviso de teleconsulta no se acorta)', r67(appsCodigo)]);
    viva, y dos de los tres casos fueron piezas del sistema. */
 /* Se le pasa TAMBIÉN el código `.ts`: los helpers `'worklet'` viven ahí
    (`foto-encuadre.ts`), y sin ellos la regla acusaría a quien los usa bien. */
-corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...ui, ...apps])])
+/* 🔴 SE LE PASA `uiCodigo` Y NO `ui`: los paths también viven en `.ts`
+   (`gota.ts` declara `GOTA_D`), y `ui` sólo lista `.tsx`. Sin esto el corpus
+   DERIVADO no vería esa constante y un uso suyo en posición de texto pasaría
+   **en verde** — el punto ciego que este mismo censo destapó. */
+corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAICES_UI.flatMap(archivosCodigo)), ...apps, ...appsCodigo])])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
