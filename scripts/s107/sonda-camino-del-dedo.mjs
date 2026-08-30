@@ -6,6 +6,25 @@
  * con un camino cortado es exactamente un verde que no sirve.*
  *
  * Reporta **el paso donde deja de funcionar**, no «funciona».
+ *
+ * ═══ ⚠️ HASTA DÓNDE LLEGA HOY, Y POR QUÉ — leelo ANTES de leer su salida ═══
+ *
+ * **Recorre hasta el PASO 5 (tocar el lugar) y ahí se detiene**, con
+ * *«el control «día 31 del calendario» NO EXISTE»*.
+ *
+ * 🔴 **ESO ES UN LÍMITE DEL INSTRUMENTO, NO UN DEFECTO DEL PRODUCTO.** El
+ * calendario del lugar renderiza sus días de una forma que este localizador no
+ * alcanza, y RN-web deja montadas las pantallas anteriores del stack, así que
+ * el mismo número existe varias veces.
+ *
+ * **Los pasos 6 y 7 SÍ están medidos, por otra vía** (llamada directa a los RPC
+ * con la sesión de la familia, 29-ago):
+ *   · `reservar_dia_guarderia`    → 🔴 `documentos_no_disponibles`
+ *   · `comprar_paquete_guarderia` → ✓ compró **(saltea el gate — ver el pedido)**
+ *
+ * *Se declara acá y no en un parte porque el que corre una sonda no lee partes:
+ * lee su salida.* **Un instrumento que se corta y no dice de quién es la culpa
+ * es la clase de defecto que esta pista pasó el día cazando.**
  */
 import { execFileSync } from 'node:child_process';
 import { chromium } from 'playwright-core';

@@ -27,12 +27,14 @@ está en el teléfono **si y sólo si A publicó después de ese merge** — y e
 | 6 | pantalla 2 mostraba lugares antes de elegir | ✅ **MAIN** | secuencia partida en dos |
 | 7 | falta la vitrina del prestador | ✅ **MAIN** | `PreviewPrestador`, la pieza de sus cuatro hermanas |
 | 8 | el carnet no se entiende como tocable | ✅ **MAIN** (`52fcef05`) | el chevron era de B (curado) + el fondo blanco, mío |
-| 9 | **no se puede pagar en el detalle** | ✅ **MAIN** (`52fcef05`) | **lo rompí yo**: `PreviewPrestador` navegaba al perfil genérico, que no tiene barra de guardería |
+| 9 | **no se puede pagar en el detalle** | 🟡 **EN MI RAMA** ⏪ *decía MAIN y estaba vencido* | **lo rompí yo, y la cura se PERDIÓ EN UN MERGE**: la prop `onAbrir` sobrevivió en la pieza y su paso en el consumidor no. **Re-hecha el 29-ago** y verificada con el camino del dedo |
 | 10 | día viene seleccionado por defecto / pantalla vacía | ✅ **MAIN** (`237120f1`) | la modalidad arranca en «día» |
 | 11 | **el precio del paquete no cambia por chip** | 🟡 **EN MI RAMA** (`4ec42da1`) | **verificado contra el render**: `5 · from $40.00` · `10 · from $70.00` |
 | 12 | el botón de antirrábica muy ancho | 🔴 **ABIERTO** | sin empezar |
-| 13 | el mapa en el detalle | 🔴 **ABIERTO** | firma nueva de hoy |
-| 14 | los seis documentos, patrón de telemedicina | 🔴 **ABIERTO** | firma nueva de hoy |
+| 16 | 🔴 **NADIE PUEDE COMPRAR NI RESERVAR** | 🔴 **BLOQUEADO, y no es de pantalla** | **`guarderia_documentos` = 0**: la casa nunca cargó los seis textos ⇒ el gate rebota para toda familia. **Se cura cargando los textos**, no con código |
+| 17 | 🔴 **el paquete saltea el gate de documentos** | 🔴 **PEDIDO A A** | se le puede cobrar a quien no aceptó nada |
+| 13 | el mapa en el detalle | 🟡 **EN MI RAMA** | `MapaZona`, la pieza de todas las vitrinas: **rango de sector, jamás el punto exacto** |
+| 14 | los seis documentos | 🔴 **ABIERTO** | ✏️ **el censo corrigió el encuadre**: telemedicina usa UNA casilla, pero existe **`AceptacionDeDocumentos`** —la pieza de la casa para N documentos versionados— y **mi pantalla la hice a mano sin saberlo**. Eso es lo que hay que montar |
 | 15 | «Mensual» ausente del selector | ✅ **CORRECTO** | dos segmentos exactos, **sin chip apagado ni «próximamente»** |
 
 ---
