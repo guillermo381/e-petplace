@@ -21,6 +21,15 @@ const MENSAJES = {
   sin_familia:             'Necesitas una familia para reservar.',
   preset_invalido:         'Ese tamaño de paquete no existe.',
 
+  /* 🔴 S107-A · MEDIDO ANTES DE CURAR: el mismo perro se podía reservar dos
+     veces el mismo día — por paquete (consumía dos estadías) y por día suelto
+     (**cobraba dos veces**). *La pantalla cubre el doble-toque; no cubre
+     volver atrás y tocar el mismo día otra vez.* El piso es un índice único;
+     este código existe para que el rebote HABLE. */
+  mascota_ya_reservada_ese_dia: 'Ya tienes ese día reservado para esa mascota.',
+  rango_invalido:               'Ese rango de fechas no es válido.',
+  rango_demasiado_largo:        'Ese rango de fechas es demasiado largo.',
+
   /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
      función, no grepeando. **Mi censo anterior dijo «0 sin tipar» y estos dos
      estaban vivos**: `reservar_dia_guarderia` los levanta con
@@ -196,6 +205,96 @@ export async function reservarDiaGuarderia(params: {
     ok: true,
     data: { citaId: r.cita_id, estadiaId: r.estadia_id, precio: r.precio, expiraEn: r.expira_en },
   };
+}
+
+// ── LA TIRA DE DÍAS ─────────────────────────────────────────────────────────
+
+/**
+ * Por qué un día NO se puede reservar. **Lo resuelve el SERVIDOR** — la
+ * pantalla lo pinta, no lo deduce.
+ *
+ * 🔴 `no_opera_ese_dia` y `sin_cupo` son **dos verdades distintas** y la
+ * familia hace cosas distintas con cada una: ante la primera elige otro día,
+ * ante la segunda puede esperar. *Deducirlas de `capacidad === 0` las
+ * confunde, y confundirlas fue exactamente el defecto que S107 ya curó una vez
+ * en el resumen.*
+ */
+export type MotivoDiaNoReservable =
+  | 'fecha_pasada'
+  | 'no_opera_ese_dia'
+  | 'mascota_ya_reservada_ese_dia'
+  | 'sin_cupo';
+
+export interface DiaGuarderia {
+  /** 'YYYY-MM-DD' */
+  fecha: string;
+  /** El lugar abre ese día (patrón semanal + excepciones). */
+  opera: boolean;
+  capacidad: number;
+  disponible: number;
+  /** Sólo si se pasó `mascotaId`: esa mascota ya tiene ese día tomado. */
+  yaReservado: boolean;
+  /** La única que la tira necesita para habilitar o apagar el día. */
+  reservable: boolean;
+  /** `null` cuando `reservable` es true. */
+  motivo: MotivoDiaNoReservable | null;
+}
+
+/**
+ * El rango entero en UNA llamada.
+ *
+ * ── POR QUÉ EXISTE ────────────────────────────────────────────────────────
+ * La tira ofrecía **14 días y 4 eran callejón**: en un lugar que abre L-V, los
+ * fines de semana se veían igual que los días que sirven y **había que tocar
+ * para enterarse**. Catorce llamadas a `cupo_guarderia_del_dia` para pintar
+ * una tira, y aun así la tira no sabía cuáles servían.
+ *
+ * ⚠️ **`mascotaId` es opcional y cambia lo que se puede pintar:** con ella,
+ * cada día dice además si **esa** mascota ya lo tiene tomado — *el día ocupado
+ * se ve ocupado en vez de rebotar al tocarlo.*
+ *
+ * El rango máximo es de 60 días; más largo rebota `rango_demasiado_largo`.
+ */
+export async function obtenerDiasGuarderia(params: {
+  prestadorId: string;
+  /** 'YYYY-MM-DD' */
+  desde: string;
+  /** 'YYYY-MM-DD' */
+  hasta: string;
+  mascotaId?: string;
+}): Promise<ResultadoWrapper<DiaGuarderia[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_dias_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_desde: params.desde,
+    p_hasta: params.hasta,
+    p_mascota_id: params.mascotaId ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const dias: DiaGuarderia[] = [];
+  for (const fila of data) {
+    if (typeof fila !== 'object' || fila === null) return fallaCodigo('datos_inconsistentes');
+    const r = fila as Record<string, unknown>;
+    if (typeof r.fecha !== 'string' || typeof r.opera !== 'boolean') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.capacidad !== 'number' || typeof r.disponible !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.ya_reservado !== 'boolean' || typeof r.reservable !== 'boolean') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    dias.push({
+      fecha: r.fecha,
+      opera: r.opera,
+      capacidad: r.capacidad,
+      disponible: r.disponible,
+      yaReservado: r.ya_reservado,
+      reservable: r.reservable,
+      motivo: typeof r.motivo === 'string' ? (r.motivo as MotivoDiaNoReservable) : null,
+    });
+  }
+  return { ok: true, data: dias };
 }
 
 // ── LA JORNADA DEL PRESTADOR ────────────────────────────────────────────────

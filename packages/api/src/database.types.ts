@@ -22747,6 +22747,23 @@ export type Database = {
           prestadores_totales: number
         }[]
       }
+      obtener_dias_guarderia: {
+        Args: {
+          p_desde: string
+          p_hasta: string
+          p_mascota_id?: string
+          p_prestador_id: string
+        }
+        Returns: {
+          capacidad: number
+          disponible: number
+          fecha: string
+          motivo: string
+          opera: boolean
+          reservable: boolean
+          ya_reservado: boolean
+        }[]
+      }
       obtener_documentos_guarderia: {
         Args: never
         Returns: {
