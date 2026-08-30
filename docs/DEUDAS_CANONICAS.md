@@ -23865,6 +23865,94 @@ motor↔pieza declarados, **o** la disciplina escrita en el protocolo 1c —
 **Dueño:** quien construya. **Disparo:** cada vez que se reuse una fórmula de otra función.
 ☠️ **Condición de muerte:** la pregunta *«¿este criterio responde MI pregunta, o la de donde lo saqué?»* escrita en el protocolo de reuso — **el reuso se justifica por la pregunta, no por el precedente.**
 
+#### D-977 — 🔴 LOS SEIS DOCUMENTOS DE GUARDERÍA NO EXISTEN: EL PERÍMETRO ESTÁ ENTERO Y EL CONTENIDO EN CERO
+
+**Origen: hallazgo de C, 29-ago-2026** — la reserva rebotaba con
+`documentos_no_disponibles`, *que es un estado NUESTRO y la familia no puede
+resolver.* Medido: **`guarderia_documentos` = 0 filas.**
+
+**Lo que SÍ está, y conviene saberlo antes de presupuestar:** la tabla con su
+`CHECK` de seis códigos, el lector, el aceptador con **todos** los campos que
+`CRITERIO_LEGAL_GUARDERIA` §4 y §5 exigen —`p_urgencia_tope_monto` ·
+`p_urgencia_tope_moneda` · `p_contactos` · `p_contacto_alternativo` ·
+**`p_redes_autorizadas`** (el consentimiento separado de §5 capa 4)—, el
+evaluador, la compuerta y las dos pantallas.
+
+> ### No falta motor ni pantalla. Falta el TEXTO — y el texto es legal.
+
+**Los seis códigos, fijados por el `CHECK` vivo:** `contrato_custodia` ·
+`declaracion_sanitaria` · `declaracion_comportamiento` ·
+`autorizacion_urgencia_veterinaria` · `autorizacion_transporte` ·
+`protocolo_no_retiro`.
+
+🔴 **NINGUNA PISTA LO REDACTA** — ni contrato, ni cláusula, ni un placeholder en
+pantalla (regla del founder, vigente). Y **no hay borrador en el repo**:
+`CRITERIO_LEGAL_GUARDERIA.md` lo dice de sí mismo — *«Qué no es: texto de
+contrato ni de pantalla. La redacción es de la mesa; este documento dice el
+fondo, no la letra.»*
+
+**La cadena que lo destraba, en orden, y ninguno de los tres primeros es de A:**
+
+1. **`D-918` y `D-919`** — la mesa reescribe §3 y §6 de `LETRA_GUARDERIA.md`
+   contra el criterio del abogado. **Hoy la letra está FRENADA ENTERA**, y no
+   por estar mal escrita: §3 es *nula de pleno derecho* y §6 tiene *riesgo
+   penal*. Mientras siga frenada, no hay letra de la cual sacar el texto.
+2. **Dos firmas del founder que viven adentro de esa reescritura:** los
+   **plazos exactos** del protocolo de no retiro —el criterio propone 15/60 y
+   dice literal que *«los plazos exactos los firma el founder»*—, y la
+   **decisión de garantías** de §2 (póliza colectiva de la plataforma vs.
+   seguro exigido al prestador), que cambia lo que dice `contrato_custodia`.
+3. **La redacción de los seis**, cada uno con su `version` — mesa y abogado.
+4. **Recién ahí A los siembra** en una migración: es un `INSERT` de seis filas,
+   trabajo de minutos. *Lo caro no es cargarlos: es tenerlos.*
+
+⚠️ **La versión no es decorativa:** `guarderia_aceptaciones` guarda
+`(codigo, version)`, así que **publicar la v2 de un documento vuelve a pedir la
+aceptación de toda familia que aceptó la v1** — que es exactamente lo que se
+quiere, y por eso el texto se carga cuando está firmado y no antes.
+
+**Dueño:** ① y ③ la mesa · ② el founder · ④ A.
+**Disparo:** ninguna compra de guardería es posible sin esto — **bloquea el
+frente entero**, no una pantalla.
+☠️ **Condición de muerte:** `SELECT count(*) FROM guarderia_documentos WHERE
+activo` devuelve 6, y una familia real acepta y compra.
+
+### L-438 — UN ARNÉS QUE PREPARA LA PRECONDICIÓN DE UNA COMPUERTA NO PUEDE DESCUBRIR QUE LA COMPUERTA NO EXISTE
+
+**Origen: el arnés propio de A del paquete de guardería, verde todas las veces
+sobre un comprador que no tenía gate — hallazgo de C, 29-ago-2026.**
+
+`S107-A-ARNES-paquete-guarderia.sql` recorría el camino entero —comprar,
+reservar, cerrar— y daba verde. Para poder correr, **sembraba un documento y lo
+aceptaba ANTES de comprar**, con un comentario que hasta explicaba por qué:
+*«la compuerta de documentos es real y rebota».*
+
+🔴 **Y por eso mismo era ciego:** el arnés dejaba a la familia **al día** antes
+de tocar la puerta de la compra ⇒ **no existía ninguna corrida en la que el
+comprador tuviera que rebotar**. La ausencia del gate no podía manifestarse.
+`comprar_paquete_guarderia` no llamaba a la compuerta, y el instrumento que
+existía para vigilar ese camino **lo certificaba verde**.
+
+> ### Un arnés que cumple la precondición de una compuerta prueba el camino feliz y es ciego a la puerta que falta.
+>
+> *No mide la compuerta: la esquiva — y su verde dice «el camino funciona»,
+> que es verdad, en vez de «la puerta está», que era la pregunta.*
+
+**Es hermana de `L-406`** (*un arnés que para probar el circuito lo ejecuta de
+verdad hace lo que vino a vigilar*) y de **`L-437`**: las tres son la misma
+familia — **el instrumento contestó sobre otra cosa, y su respuesta era cierta.**
+
+**La cura, y es lo que la vuelve exigible:** un arnés de compuerta **recorre los
+estados de su precondición y exige respuestas DISTINTAS en cada uno.** El de
+esta cura hace tres —sin documentos → `documentos_no_disponibles` · cargados y
+sin aceptar → `documentos_sin_aceptar` · aceptados → PASA— **en las dos
+puertas**, porque *«rebota» no es una medición: una compuerta que siempre dice
+que no también rebota.*
+
+☠️ **Condición de muerte:** ninguna — es método. Se cobra cada vez que se
+escriba un arnés que tenga que sembrar algo para poder correr: **lo que sembrás
+para pasar es exactamente lo que tu arnés ya no puede medir.**
+
 ### L-437 — UN CENSO POR REGEX MIDE LA FORMA QUE MIRA, NO EL MOTOR
 
 **Origen: censo propio de A que dio 0 con dos códigos vivos, 29-ago-2026.**

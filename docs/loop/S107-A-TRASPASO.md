@@ -1,5 +1,11 @@
 # S107-A · ACTA DE TRASPASO — la conducción, medida al 29-ago-2026
 
+> # ⏭️ ESTE DOCUMENTO ES LA FOTO DE LA MAÑANA. **EL ESTADO VIVO ESTÁ EN
+> # `docs/loop/S107-A-TRASPASO-2.md`.**
+> Se conserva por su §⑤ y §⑥ (las trampas y las lecciones, que siguen
+> rigiendo) y por sus enmiendas — **no por su cola, que está vencida.**
+
+
 > ## ✏️ MARCA DE ENMIENDA — LA A QUE RETOMÓ YA EJECUTÓ EL PUNTO 2
 > *(depositada por la A siguiente, con el aparato y la base a la vista.)*
 >
