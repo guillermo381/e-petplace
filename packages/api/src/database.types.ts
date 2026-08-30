@@ -22798,6 +22798,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      obtener_espacios_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          activo: boolean
+          capacidad_por_dia: number
+          dias_operacion: number[]
+          espacio_id: string
+          nombre: string
+        }[]
+      }
       obtener_estadias_del_dia: {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: {

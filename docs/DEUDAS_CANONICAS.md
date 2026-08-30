@@ -24014,6 +24014,62 @@ financia) · qué refugio y el **acta de traslado, un séptimo documento que no
 existe** · quién ejecuta las notificaciones—. *La primera es la más urgente: es
 la única que promete algo que nadie puede cumplir.*
 
+#### D-980 — 🟢 EL ESCRITOR SIN LECTOR: `capacidad_por_dia` SE ESCRIBÍA Y NO SE PODÍA LEER (CERRADA)
+
+**Origen: hallazgo de C, 31-ago-2026.** Medido: **seis funciones tocan
+`capacidad_por_dia` y las seis la usan para calcular el cupo de un día;
+ninguna la exponía como lo que es.** Había escritor (`definir_espacio_guarderia`)
+y **cero lector**.
+
+☠️ **La asimetría no era incómoda: perdía datos** — el detalle en `L-439`.
+
+**Curado** (`20260831160000`): nace `obtener_espacios_guarderia`, con el **mismo
+predicado del escritor copiado del objeto** (*leer lo que uno puede escribir no
+puede pedir menos ni más*), y su wrapper `obtenerEspaciosGuarderia`.
+
+🔑 **El brazo del cinturón que lo prueba:** un espacio de **12 abierto sólo
+L-V**, preguntado **un sábado** → el lector dice **12** y `cupo_guarderia_del_dia`
+dice **0**. *Sin ese brazo, un lector que derivara del día también daría verde.*
+
+**Devuelve los ESPACIOS, no un número.** Un negocio no tiene una capacidad:
+tiene espacios con su capacidad y sus días. Un solo número obligaría a elegir
+cuál y sería **`D-976`** otra vez.
+
+⚠️ **La clase queda abierta aunque la ficha cierre:** *escritor sin lector* no
+se censó fuera de guardería. **Disparo:** al tocar cualquier configurador.
+☠️ **Condición de muerte:** cerrada — el lector existe, está exportado y medido.
+
+### L-439 — DECLARAR UN ATAJO NO LO HACE SEGURO
+
+**Origen: hallazgo de C, 31-ago-2026 — `capacidad_por_dia` sin lector.**
+
+`definir_espacio_guarderia` **escribía** la capacidad y **ninguna función la
+devolvía**. El taller la derivó del **cupo de HOY**, y quien lo hizo **dejó una
+nota diciendo que no era el modelo final**.
+
+🔴 **Rompió igual, y perdía datos:** un negocio con capacidad **12 que abriera
+su taller un sábado veía 8** —el cupo de ese día— y **al guardar se la bajaba a
+8, sin error y sin aviso**. *Dos de cada siete días.* Y la portada mostraba el
+cupo del día rotulado como capacidad del negocio: **0 en domingo**.
+
+> ### Una limitación declarada en el código protege a quien toca el archivo, no a quien usa la pantalla.
+>
+> *La nota le habla al próximo que abra ese archivo. El defecto le pasa al
+> prestador que abre su taller un sábado, que no lee código.*
+
+**Es pariente de `L-395`** (*un puente que sobrevive a su río manda al próximo a
+construir otro*) con la diferencia que la vuelve más cara: **ahí el residuo
+confundía; acá el atajo BORRA UN DATO.**
+
+**La forma correcta del atajo, y la única que sirve:** un atajo que puede
+producir un valor equivocado **no se declara — se hace inexpresable**. Si el
+lector no existe, la pantalla **no ofrece editar**: *un campo que muestra un
+número derivado y lo guarda como configurado es una pérdida de datos con
+apariencia de formulario.*
+
+☠️ **Condición de muerte:** ninguna — es método. Se cobra cada vez que alguien
+escriba «esto no es el modelo final» arriba de un valor que después se guarda.
+
 ### L-438 — UN ARNÉS QUE PREPARA LA PRECONDICIÓN DE UNA COMPUERTA NO PUEDE DESCUBRIR QUE LA COMPUERTA NO EXISTE
 
 **Origen: el arnés propio de A del paquete de guardería, verde todas las veces

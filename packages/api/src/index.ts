@@ -1500,6 +1500,8 @@ export { guardarBorradorNota, leerBorradorNota, type BorradorNota, type CodigoBo
 
 /* S107-A · guardería: el cupo del lugar y sus dos franjas. */
 export {
+  obtenerEspaciosGuarderia,
+  type EspacioGuarderia,
   definirEspacioGuarderia,
   declararExcepcionEspacioGuarderia,
   definirFranjaGuarderia,

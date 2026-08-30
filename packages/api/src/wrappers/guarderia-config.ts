@@ -111,6 +111,62 @@ export interface CupoDiaGuarderia {
 
 // ── ESCRITURA ───────────────────────────────────────────────────────────────
 
+export interface EspacioGuarderia {
+  espacioId: string;
+  nombre: string;
+  /** **La capacidad CONFIGURADA del espacio.** Jamás el cupo de un día. */
+  capacidadPorDia: number;
+  diasOperacion: DiaSemana[];
+  activo: boolean;
+}
+
+/**
+ * Los espacios **como están configurados**.
+ *
+ * ── POR QUÉ EXISTE, y tiene pérdida de datos detrás ───────────────────────
+ * ☠️ **`definir_espacio_guarderia` ESCRIBÍA y no había NINGÚN lector.** Sin él,
+ * el taller derivaba la capacidad del **cupo de HOY** ⇒ un negocio con
+ * capacidad **12 que abriera su taller un sábado veía 8**, y **al guardar se la
+ * bajaba a 8, sin error y sin aviso**. *Dos de cada siete días.*
+ *
+ * 🔴 **NO devuelve «la capacidad del negocio», porque no existe tal número.**
+ * Hay espacios, cada uno con su capacidad y sus días. Devolver uno solo
+ * obligaría a elegir cuál —¿la suma? ¿la del lunes?— y sería `D-976` otra vez:
+ * *un número bien calculado contestando una pregunta que no es la suya.*
+ *
+ * Pide el mismo permiso que el escritor: *leer lo que uno puede escribir no
+ * puede pedir menos ni más.*
+ */
+export async function obtenerEspaciosGuarderia(
+  prestadorId: string,
+): Promise<ResultadoWrapper<EspacioGuarderia[], CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('obtener_espacios_guarderia', {
+    p_prestador_id: prestadorId,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const espacios: EspacioGuarderia[] = [];
+  for (const fila of data) {
+    if (typeof fila !== 'object' || fila === null) return fallaCodigo('datos_inconsistentes');
+    const r = fila as Record<string, unknown>;
+    if (typeof r.espacio_id !== 'string' || typeof r.nombre !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.capacidad_por_dia !== 'number' || typeof r.activo !== 'boolean') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (!Array.isArray(r.dias_operacion)) return fallaCodigo('datos_inconsistentes');
+    espacios.push({
+      espacioId: r.espacio_id,
+      nombre: r.nombre,
+      capacidadPorDia: r.capacidad_por_dia,
+      diasOperacion: r.dias_operacion as DiaSemana[],
+      activo: r.activo,
+    });
+  }
+  return { ok: true, data: espacios };
+}
+
 export async function definirEspacioGuarderia(params: {
   prestadorId: string;
   nombre: string;
