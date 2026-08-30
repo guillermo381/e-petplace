@@ -403,7 +403,7 @@ alternativo que usted haya registrado**. A nadie más, por ningún motivo.
 
 *(Idéntico a la v1 salvo el punto 3, que ahora lleva el número.)*
 
-**3. Tope de gasto.** Autorizo gastos de urgencia hasta **USD «MONTO_PENDIENTE_DE_FIRMA»**.
+**3. Tope de gasto.** Autorizo gastos de urgencia hasta **USD 150**.
 **Puede cambiar este monto cuando quiera desde su cuenta**, y el que rija al
 momento de la urgencia es el que vale. Por encima de ese monto, la guardería
 sólo puede autorizar **lo indispensable para evitar sufrimiento o
@@ -440,13 +440,19 @@ alternativo, sólo a mí.**
 
 ---
 
-## 🔴 EL HUECO QUE FRENA LA SIEMBRA
+## ✅ EL HUECO QUE FRENABA LA SIEMBRA — cerrado el 30-ago-2026
 
-**`«MONTO_PENDIENTE_DE_FIRMA»` no es un placeholder de redacción: es el número
-que la familia autoriza a gastar de su bolsillo.** Falta.
+El monto **llegó en blanco** en el mensaje que traía la firma (*«Firma del
+founder sobre el tope: USD ___»*) y **no se completó por cuenta de la pista**.
 
-**La migración de siembra ABORTA si el token sigue puesto** — no por prolijidad:
-*sembrar dos veces la v2 (una sin número y otra con) le muestra la pantalla de
-aceptación **dos veces** a la familia que ya aceptó la v1.* **Adivinar el número
-cuesta una re-aceptación de más, y es exactamente el «default silencioso» que la
-firma prohíbe.**
+> **Ese número no es un placeholder de redacción: es lo que la familia autoriza
+> a gastar de su bolsillo.** Ponerlo la pista habría sido exactamente el
+> *default silencioso* que la propia firma prohíbe, disfrazado de
+> transcripción.
+
+**Y tenía un costo medible, que es lo que decidió:** sembrar dos veces la v2
+—una sin número y otra con— **le muestra la pantalla de aceptación DOS VECES** a
+la familia que ya aceptó la v1. *Adivinar cuesta una re-aceptación de más.*
+
+**Firmado: USD 150** (founder, 30-ago-2026). El cinturón de la migración aborta
+si el token vuelve a aparecer.
