@@ -243,7 +243,13 @@ export async function cancelarReservaPaquete(
  * clonar el predicado en dos sitios, que es exactamente cómo nacen las
  * divergencias que esta sesión viene curando).
  */
-async function puertaDelDueno(): Promise<
+/**
+ * ✏️ EXPORTADA en S107-A. La usa también el lector de paquetes de guardería.
+ * 🔴 **No se re-implementa allá:** este filtro decide QUIÉN ve el saldo de un
+ * hogar, y dos copias del mismo criterio de acceso divergen — la que se olvide
+ * de la pata `familia_id` deja a media familia sin ver su propio paquete.
+ */
+export async function puertaDelDueno(): Promise<
   { ok: true; filtro: string } | { ok: false; codigo: 'sin_sesion' | 'error_familia' }
 > {
   const uid = await uidActual();

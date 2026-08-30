@@ -9,6 +9,7 @@
 // pagos por `cita_id`, que ya sabe hacerlo — acá no se reimplementa nada.**
 
 import { getClient } from '../client';
+import { puertaDelDueno } from './paquetes';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
@@ -763,4 +764,88 @@ export async function reservarDiaDePaqueteGuarderia(params: {
       saldoRestante: typeof r.saldo_restante === 'number' ? r.saldo_restante : 0,
     },
   };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL SALDO DE PAQUETES DE GUARDERÍA — *«te quedan X días»*
+   ═══════════════════════════════════════════════════════════════════════════
+   🔴 **Sin esto el hub no puede saber que la familia tiene un paquete.** El
+   lector del paseo está clavado en `.eq('tipo_servicio','paseo')` —y **filtra
+   bien**: alimenta el hub de paseos— así que guardería necesitaba el suyo.
+   *La lógica ya estaba probada en el motor; lo que faltaba era que el hub la
+   supiera.*
+
+   **Reusa `puertaDelDueno`** del wrapper de paquetes en vez de re-implementar
+   el filtro: *dos copias del mismo criterio de acceso divergen, y la que se
+   olvide de la pata `familia_id` deja a media familia sin ver su propio
+   paquete.*
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * 🔴 **`PaqueteCOMPRADO`, no `PaqueteGuarderia` — y el nombre importa.**
+ * `PaqueteGuarderia` ya existe en `guarderia-config`: es **el que el prestador
+ * OFRECE** (tamaño y precio). Éste es **el que la familia COMPRÓ** (saldo y
+ * vencimiento). *Dos cosas distintas con el mismo nombre es `D-974` otra vez —
+ * acá lo cazó el compilador porque viven en el mismo paquete; entre motor y
+ * pieza no lo habría cazado nadie.*
+ */
+export interface PaqueteCompradoGuarderia {
+  bonoId: string;
+  prestadorId: string;
+  /** Días comprados y cuántos se usaron. **El hub muestra `quedan`.** */
+  total: number;
+  usados: number;
+  quedan: number;
+  /** Lo que se pagó por día al comprar. Congelado: el día vale esto aunque el lugar suba. */
+  porDia: number | null;
+  /** 'YYYY-MM-DD'. `null` = sin vencimiento declarado. */
+  venceEl: string | null;
+  /** `activo` · `agotado` · `vencido` · `cancelado`. */
+  estado: string;
+}
+
+/**
+ * Los paquetes de guardería del hogar.
+ *
+ * ⚠️ **Devuelve TODOS los estados, no sólo los usables.** *Un paquete agotado o
+ * vencido es información que la familia tiene derecho a ver —pagó por él— y
+ * esconderlo haría que su plata desapareciera de la pantalla.* Quién se muestra
+ * en el rail y quién en el historial **lo decide la superficie**, no este lector.
+ */
+export async function obtenerMisPaquetesGuarderia(): Promise<
+  ResultadoWrapper<PaqueteCompradoGuarderia[], CodigoErrorGuarderiaReserva>
+> {
+  const puerta = await puertaDelDueno();
+  if (!puerta.ok) {
+    return fallaCodigo(puerta.codigo === 'sin_sesion' ? 'sin_sesion' : 'datos_inconsistentes');
+  }
+  const { data, error } = await getClient()
+    .from('bonos')
+    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento')
+    .eq('tipo_servicio', 'guarderia_dia')
+    .eq('estado_pago', 'pagado')
+    .or(puerta.filtro)
+    .order('fecha_compra', { ascending: false });
+  if (error) return fallo(error.message);
+
+  const salida: PaqueteCompradoGuarderia[] = [];
+  for (const b of data ?? []) {
+    if (typeof b.id !== 'string' || typeof b.unidades_total !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    const usados = typeof b.unidades_usadas === 'number' ? b.unidades_usadas : 0;
+    salida.push({
+      bonoId: b.id,
+      prestadorId: typeof b.prestador_id === 'string' ? b.prestador_id : '',
+      total: b.unidades_total,
+      usados,
+      /* La resta se hace UNA vez, acá. *Si cada pantalla restara, dos podrían
+         decir números distintos del mismo bono.* */
+      quedan: Math.max(b.unidades_total - usados, 0),
+      porDia: typeof b.precio_por_unidad === 'number' ? b.precio_por_unidad : null,
+      venceEl: typeof b.fecha_vencimiento === 'string' ? b.fecha_vencimiento : null,
+      estado: typeof b.estado === 'string' ? b.estado : '',
+    });
+  }
+  return { ok: true, data: salida };
 }
