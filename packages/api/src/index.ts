@@ -1545,6 +1545,8 @@ export {
   type DocumentoGuarderia,
   type EvaluacionDocumentos,
   type EstadoDocumentos,
+  /* El veredicto del ACTO ÚNICO. La pantalla lee `alDia`, jamás `aceptadas`. */
+  type AceptacionResultado,
   type CodigoErrorGuarderiaDocumentos,
 } from './wrappers/guarderia-documentos';
 
@@ -1590,5 +1592,22 @@ export {
   type Conformidad,
   type EstadiaDelDia,
   type EstadoEstadia,
+  /* ── LAS DOS TIRAS DE DÍAS ────────────────────────────────────────────────
+     🔴 **Las dos existían, compilaban y NINGUNA se podía llamar** — el
+     `index.ts` no las re-exportaba. *Un wrapper que no se exporta es un motor
+     sin puerta* (`L-318`): existe, pasa sus tests, y no lo alcanza nadie.
+     Lo encontró C al montarlas, no un typecheck: `packages/api` compila
+     perfecto con un export que falta, porque **nada adentro del paquete lo
+     necesita**. El censo que siguió halló SIETE símbolos sin exportar, no dos.
+
+     `obtenerDiasGuarderiaDisponibles` — **sin lugar elegido**, agregada sobre
+     todos los lugares (la que P2 necesita: un día sirve si algún lugar puede).
+     `obtenerDiasGuarderia` — **por prestador**, la de después de elegir lugar. */
+  obtenerDiasGuarderia,
+  type DiaGuarderia,
+  type MotivoDiaNoReservable,
+  obtenerDiasGuarderiaDisponibles,
+  type DiaGuarderiaAgregado,
+  type MotivoDiaAgregado,
   type CodigoErrorGuarderiaReserva,
 } from './wrappers/guarderia-reserva';
