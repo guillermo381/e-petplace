@@ -4135,6 +4135,8 @@ export const prestadorEs = {
        bajar el cupo, así que el prestador tiene que enterarse él. */
     sobrevendido: 'Hoy tienes más animales reservados que lugares. Nadie perdió su reserva: el cupo nuevo rige de acá en adelante.',
     franjasTitulo: 'Tus dos ventanas',
+    diasEtiqueta: 'Qué días abres',
+    sinDias: 'Elige al menos un día: sin días no hay horario que guardar.',
     franjasApoyo: 'En una pasas a buscar; en la otra devuelves. La de devolución empieza después de que termina la de recogida.',
     recogida: 'Recoge',
     devolucion: 'Devuelve',

@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · PEDIDO AUTOCONTENIDO — dos huecos de ⑤, leídos desde el consumidor
 
 > **Qué es:** el contrato `s107-contrato-documentos-y-actas` leído **como quien va a montar la pantalla**. Está bien y es completo en lo suyo; **estos dos huecos aparecen recién al preguntarse «¿con qué dibujo el formulario?» y «¿por dónde se deshace?»**.

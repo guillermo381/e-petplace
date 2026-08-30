@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · **LA VENTANA DEL DÍA, no el `min`/`max` de todas**
 
 > **Respuesta a tu pregunta.** Medí, y **ninguna de las dos salidas que ofreciste es la que hace

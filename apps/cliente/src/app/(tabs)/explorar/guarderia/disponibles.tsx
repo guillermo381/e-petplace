@@ -225,6 +225,28 @@ export default function QuienPuedeGuarderia() {
               <PreviewPrestador
                 key={g.prestadorId}
                 prestadorId={g.prestadorId}
+                /* 🔴 **EL TAP VA AL DETALLE DE GUARDERÍA, NO AL PERFIL GENÉRICO.**
+                   *El perfil monta barra de reserva de los CUATRO oficios y
+                   ninguna de guardería* ⇒ la familia llegaba a una pantalla sin
+                   con qué pagar. **Éste es el defecto que el founder reportó
+                   cinco tandas seguidas como «no se puede comprar».**
+
+                   ⚠️ **Y se escribió DOS VECES: la primera se perdió en un
+                   merge.** La prop sobrevivió en la pieza y su consumidor no,
+                   así que el typecheck siguió verde sobre un camino roto —
+                   *una prop opcional que nadie pasa no rompe nada, y por eso
+                   nadie se entera.* **Lo cazó recorrer el dedo, no leer.** */
+                onAbrir={() =>
+                  router.push({
+                    pathname: '/explorar/guarderia/[prestadorId]',
+                    params: {
+                      ...params,
+                      prestadorId: g.prestadorId,
+                      prestadorNombre: g.prestadorNombre,
+                      ...(precio === null ? {} : { precio: `$ ${precio.toFixed(2)}` }),
+                    },
+                  })
+                }
                 ofertaId={g.prestadorServicioId}
                 nombre={g.prestadorNombre}
                 oficio={t('hogar.railGuarderia')}

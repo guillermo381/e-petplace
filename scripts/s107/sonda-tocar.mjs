@@ -29,6 +29,7 @@
  * *Un localizador que se degrada en silencio reintroduce el defecto con más
  * pasos.*
  */
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -62,8 +63,20 @@ export function porClave(page, clave) {
         `   🔴 No se cae a buscar la cadena literal: eso sería el defecto que este archivo cerró.`,
     );
   }
-  /* Cualquiera de los dos idiomas sirve: el que esté montado va a existir. */
-  return { localizador: page.getByText(cs[0], { exact: false }).or(page.getByText(cs[cs.length - 1], { exact: false })).last(), copias: cs };
+  /* 🔴 **LAS INTERPOLACIONES SE PARTEN**, y lo destapó el camino del dedo: la
+     clave `logGuarderia.reservarDe` es `'Reservar para {{nombre}}'`, y buscar
+     esa cadena literal **no encuentra «Reservar para Thor»**. *Mi sonda dijo
+     «el control NO EXISTE» sobre un botón que estaba ahí — el mismo error de
+     buscar por copy, un nivel más adentro.*
+     ⇒ se busca **el fragmento literal más largo** entre `{{…}}`, que es estable
+     y sigue sin depender del idioma. */
+  const fragmento = (c) =>
+    c.split(/\{\{[^}]*\}\}/).map((x) => x.trim()).sort((a, z) => z.length - a.length)[0];
+  const frags = [...new Set(cs.map(fragmento))].filter((x) => x.length > 0);
+  if (frags.length === 0) throw new Error(`[sonda] la clave «${clave}» es sólo interpolación: no hay texto por el cual buscar.`);
+  let loc = page.getByText(frags[0], { exact: false });
+  for (const f of frags.slice(1)) loc = loc.or(page.getByText(f, { exact: false }));
+  return { localizador: loc.last(), copias: cs };
 }
 
 /**
@@ -106,4 +119,57 @@ export function porDato(page, literal) {
   return typeof literal === 'string'
     ? page.getByText(literal, { exact: true }).first()
     : page.getByText(literal).first();
+}
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * `claveAnon()` — LA CLAVE PÚBLICA, ELEGIDA POR LO QUE ES Y NO POR DÓNDE SALE.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ── EL DEFECTO QUE CURA, medido el 29-ago ────────────────────────────────
+ * Seis scripts de esta pista tomaban la clave con
+ * `.match(/"api_key":"(eyJ[^"]*)"/)` — **la PRIMERA del texto**. Y uno de
+ * ellos lo dejaba escrito como si fuera una garantía: *«la primera `api_key`,
+ * que es la `anon`»*.
+ *
+ * **Medido: hoy el comando devuelve `anon` primero, después `service_role`.**
+ * O sea que los seis estaban **correctos por ORDEN, no por diseño**.
+ *
+ * 🔴 **Y su modo de falla no es un error: es un verde.** Si ese orden cambiara,
+ * la sonda correría con la `service_role` y **todo gate de RLS pasaría** — una
+ * sonda que dice *«la familia puede reservar»* midiendo a alguien que puede
+ * todo. *No hay excepción que salte, no hay línea roja: hay una medición
+ * creíble y falsa, que es la clase que esta pista pasó la sesión cazando.*
+ *
+ * ── POR QUÉ SE ELIGE POR EL CLAIM Y NO POR EL NOMBRE ─────────────────────
+ * Se decodifica el payload del JWT y **se exige `role === 'anon'`**. Elegir
+ * por `"name":"anon"` seguiría dependiendo de cómo el CLI rotule sus campos;
+ * el claim es lo que el servidor de verdad va a leer. *Es el mismo criterio
+ * con el que S92 buscó `service_role` en el árbol: **por FORMA, decodificando
+ * el claim, jamás por nombre**.*
+ *
+ * ⚠️ **Y si no la encuentra, LANZA.** Nunca devuelve «alguna»: una sonda sin
+ * clave pública tiene que parar, no degradar a la que sí tenga permisos.
+ *
+ * 🔒 El valor **no se imprime nunca** — ni acá, ni en un error, ni en un log.
+ */
+export function claveAnon(ref) {
+  const salida = execFileSync(
+    'npx', ['supabase', 'projects', 'api-keys', '--project-ref', ref],
+    { encoding: 'utf8' },
+  );
+  for (const m of salida.matchAll(/"(eyJ[A-Za-z0-9._-]+)"/g)) {
+    const jwt = m[1];
+    const partes = jwt.split('.');
+    if (partes.length !== 3) continue;
+    try {
+      const payload = JSON.parse(Buffer.from(partes[1], 'base64url').toString('utf8'));
+      if (payload.role === 'anon') return jwt;
+    } catch { /* no era un JWT legible: seguimos */ }
+  }
+  /* El mensaje no lleva ningún fragmento de ninguna clave. */
+  throw new Error(
+    'No hay ninguna clave con el claim role="anon" en la salida del CLI. ' +
+    'La sonda PARA: correr con otra sería medir permisos que la familia no tiene.',
+  );
 }

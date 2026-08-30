@@ -1,3 +1,5 @@
+> 🟡 **PARCIAL — 29-ago.** ☠️ El PAQUETE está cumplido y consumido. 🔴 **La MENSUALIDAD sigue viva**: hay motor en migraciones pero **no hay wrapper de contratación**, así que la compuerta queda en `[dia, paquete]`.
+
 # S107-C → A · PEDIDO AUTOCONTENIDO — **lo que falta para vender paquete y mensualidad**
 
 > **Estado de C:** las tres modalidades están **construidas enteras**. Dos **no se pueden

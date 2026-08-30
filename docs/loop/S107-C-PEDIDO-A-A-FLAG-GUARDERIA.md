@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · PEDIDO AUTOCONTENIDO — el flag propio de guardería en `country_config`
 
 > ## ☠️ CUMPLIDO — `paisConfig` lee `guarderia`, la clave existe en `country_config` para EC y CO, y la ficha se enciende sola con el flag (verificado contra el objeto, 29-ago-2026)

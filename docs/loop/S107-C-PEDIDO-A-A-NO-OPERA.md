@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · **«NO ABRE» NO ES «SE LLENÓ»** — falta una causa
 
 > Medido contra Aurora el 29-ago con sesión real, **sin escribir nada**.

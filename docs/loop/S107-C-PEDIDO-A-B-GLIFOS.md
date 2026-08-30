@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO** — el sello estaba en la segunda línea y mi propio censo no lo vio. Ver abajo.
+
 # S107-C → B · PEDIDO AUTOCONTENIDO — dos glifos para «Próximamente»
 
 > ## ☠️ CUMPLIDO — `wearables` y `certificaciones` están en el registry de `Icono`, y «Próximamente» ya lista las cinco (verificado contra el objeto, 29-ago-2026)

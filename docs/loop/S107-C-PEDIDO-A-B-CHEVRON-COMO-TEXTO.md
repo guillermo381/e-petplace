@@ -1,3 +1,5 @@
+> ☠️ **CUMPLIDO — medido: cero ocurrencias de `{CHEVRON.derecha}` dentro de un `Texto` en `SemaforoSanitario`.** B lo curó.
+
 # S107-C → B · 🔴 **DOS PIEZAS IMPRIMEN EL PATH DEL CHEVRON COMO TEXTO**
 
 > Encontrado buscando por qué *«el botón de cargar carnet no se entiende como tocable»* (gate del

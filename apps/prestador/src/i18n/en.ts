@@ -3243,6 +3243,8 @@ export const prestadorEn = {
     capacidadEtiqueta: 'Animals per day',
     sobrevendido: 'Today you have more animals booked than places. No one lost their booking: the new capacity applies from now on.',
     franjasTitulo: 'Your two windows',
+    diasEtiqueta: 'Which days you open',
+    sinDias: 'Pick at least one day: with no days there is no schedule to save.',
     franjasApoyo: 'In one you pick up; in the other you drop off. Drop-off starts after pick-up ends.',
     recogida: 'Pick-up',
     devolucion: 'Drop-off',

@@ -18,10 +18,12 @@
 import { execFileSync } from 'node:child_process';
 import { chromium } from 'playwright-core';
 import { createClient } from '@supabase/supabase-js';
-import { porDato, tocar } from './sonda-tocar.mjs';
+import { porDato, tocar, claveAnon } from './sonda-tocar.mjs';
 const REF = 'zyltipqscdsdsxnjclhp';
 const CLAVE = execFileSync('security', ['find-generic-password','-a','siembra','-s','epetplace-siembra-s97','-w'], {encoding:'utf8'}).trim();
-const ANON = execFileSync('npx',['supabase','projects','api-keys','--project-ref',REF],{encoding:'utf8'}).match(/"api_key":"(eyJ[^"]*)"/)?.[1];
+/* 🔒 Por el CLAIM, no por el orden — ver `claveAnon` en `sonda-tocar.mjs`.
+   El regex que había acá acertaba porque `anon` sale primera HOY. */
+const ANON = claveAnon(REF);
 const sb = createClient(`https://${REF}.supabase.co`, ANON);
 const { data } = await sb.auth.signInWithPassword({ email:'guillo381+8@gmail.com', password: CLAVE });
 const b = await chromium.launch({ channel:'chrome', headless:true });

@@ -389,15 +389,44 @@ export default function ElegirGuarderia() {
             /* Cada chip con SU precio. Sin precio todavía, sólo el tamaño:
                **la etiqueta no espera al número**, y un chip sin precio es
                honesto mientras un chip con el precio de otro no lo era. */
-            opciones={TAMANOS_PAQUETE.map((n) => ({
-              codigo: String(n),
-              etiqueta:
-                precioPorTamano[n] === undefined
-                  ? t('hubGuarderia.tamanoEstadias', { n })
-                  : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
-            }))}
+            /* ⏪ **SÓLO LOS TAMAÑOS QUE ALGUIEN VENDE.** `TAMANOS_PAQUETE` es
+               el vocabulario del producto (5·10·15), **no la oferta**: medido
+               contra la base, el lugar vende 5 y 10 — y el chip de 15 se
+               ofrecía igual. *La familia lo elegía, recorría los seis pasos
+               que siguen, y el motor la rebotaba `paquete_no_disponible` al
+               final.* **Ley 23: la puerta no ofrece lo que va a rechazar**, y
+               menos seis pasos antes del rechazo.
+
+               ⚠️ El filtro corre **sólo con precios ya resueltos**: mientras
+               no llegaron, `precioPorTamano` está vacío y filtrar dejaría la
+               lista en cero — *que se leería como «no hay paquetes», y es
+               «todavía no sé»*. Sin precios se muestran todos, sin número,
+               que es lo que la etiqueta ya hacía. */
+            opciones={TAMANOS_PAQUETE
+              .filter((n) => Object.keys(precioPorTamano).length === 0 || precioPorTamano[n] !== undefined)
+              .map((n) => ({
+                codigo: String(n),
+                etiqueta:
+                  precioPorTamano[n] === undefined
+                    ? t('hubGuarderia.tamanoEstadias', { n })
+                    : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
+              }))}
             seleccionada={tamano === null ? '' : String(tamano)}
-            onSelect={(c) => { setTamano(Number(c) as TamanoPaqueteGuarderia); setFecha(null); }}
+            /* 🔴 **ACÁ VIVÍA `setFecha(null)`, Y HACÍA IMPOSIBLE COMPRAR UN
+               PAQUETE.** Los chips y el pie están montados bajo
+               `fecha !== null`, así que elegir un tamaño **borraba el día y
+               con él los propios chips y el botón**: la pantalla volvía a
+               «elegí un día» vacía, y no había forma de llegar a pagar.
+
+               Es un resto de cuando el tamaño iba ANTES de la fecha — ahí
+               limpiar el día al cambiar de tamaño era correcto, porque el
+               precio dependía del tamaño elegido. **El founder firmó invertir
+               el orden el 29-ago y esta línea sobrevivió a su razón.**
+
+               *No lo vio ningún typecheck ni ningún lint: los dos estados son
+               válidos por separado, y la pantalla no falla — se vacía.* Lo
+               encontró recorrer el camino por donde entra el dedo. */
+            onSelect={(c) => setTamano(Number(c) as TamanoPaqueteGuarderia)}
           />
         ) : null}
 
@@ -424,8 +453,32 @@ export default function ElegirGuarderia() {
                 faltaba era el fondo, y `SemaforoSanitario` **no expone
                 superficie** — como `FichaFranja`, la decide quien la monta.
                 *Sin ella las filas flotan sobre el papel y se leen como texto
-                suelto, que es exactamente lo que el founder reportó.* */}
-            <Tarjeta>
+                suelto, que es exactamente lo que el founder reportó.*
+
+                ⏪ **`relleno="ninguno"` Y NO EL DEFAULT — el founder lo vio
+                «muy ancho, la caja mal dimensionada», y estaba MEDIDO:**
+
+                  | | acá con `<Tarjeta>` | la fila equivalente de la casa |
+                  |---|---|---|
+                  | relleno de la carta | 12 | **0** (`ninguno`) |
+                  | alto con detalle | 12+68+12 = **~92** | **~60** |
+
+                *53 % más alta que `CeldaNavegacion` dentro de su carta, para
+                la misma información.* **El criterio ya estaba escrito en la
+                casa** (`pedidos/pedido/[pedidoId]`): *«`relleno="ninguno"`
+                porque adentro van `Celda` a sangre con sus `Separador`»* — y
+                acá adentro van filas, que es el mismo caso. El canon es
+                `parte/[eventoId]`: carta sin relleno con UNA fila adentro.
+
+                🔴 **EL `paddingHorizontal` DE ACÁ ES ANDAMIO, NO DISEÑO.** La
+                `Fila` de `SemaforoSanitario` nace con `paddingVertical` y
+                **sin horizontal**, así que a sangre el texto tocaría el borde.
+                Se lo pongo yo para no dejar la cura a medias — pero el número
+                es de la PIEZA (`CeldaNavegacion` lo lleva adentro), y va en
+                pedido a B. **Cuando B lo mueva, este `View` se retira** (Ley
+                37): un andamio que sobrevive a su obra es el próximo defecto. */}
+            <Tarjeta relleno="ninguno">
+            <View style={{ paddingHorizontal: spacing[3] }}>
               <SemaforoSanitario
                 requisitos={requisitos.faltantes.length === 0
                   ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
@@ -438,6 +491,7 @@ export default function ElegirGuarderia() {
                       etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
                     }))}
               />
+            </View>
             </Tarjeta>
             {/* 🔴 LO DICE, para que nadie lea el semáforo como una puerta: hoy
                 informa y no frena (`bloquea === false`). */}

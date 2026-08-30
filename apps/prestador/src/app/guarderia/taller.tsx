@@ -20,14 +20,28 @@
  * y con ella entra el *«quedo visible para reservas»* del recorrido, que **es
  * la oferta, no la capacidad**.
  *
- * ── LOS DÍAS DE LA FRANJA NO SE EDITAN EN v1, Y LA RAZÓN ES DE MOTOR ─────
- * `definir_franja_guarderia` upserta por `(prestador, tipo, dias_semana)` y
- * **no hay camino para retirar una franja** (la tabla tiene `activo`, el
- * wrapper no lo expone). ⇒ si la pantalla dejara mover el patrón de días,
- * cambiar de L-V a L-S **crearía una segunda franja y dejaría viva la
- * primera**, sin forma de matarla. *Se usa el default del motor (L-V) para
- * que la clave del upsert sea estable.* **Hueco declarado, no inventado:
- * cuando exista el retiro, el patrón se abre.**
+ * ── ✅ LOS DÍAS YA SE EDITAN — el hueco declarado se cerró ───────────────
+ * **Estaba cerrado por MOTOR, no por diseño:** `definir_franja_guarderia`
+ * upserta por `(prestador, tipo, dias_semana)` y **no había camino para
+ * retirar una franja**, así que pasar de L-V a L-S *creaba una segunda y
+ * dejaba viva la primera*, sin forma de matarla. **A publicó
+ * `reemplazarFranjasGuarderia`**, que retira y define **en una transacción**,
+ * y con eso el patrón se abre.
+ *
+ * ── 🔴 UN SOLO SELECTOR, Y NO ES SIMPLIFICACIÓN: ES EL ÚNICO ESTADO SANO ──
+ * En el modelo los días viven en **dos lugares** —`espacios.dias_operacion`
+ * (si el lugar ABRE ese día: es lo que le pinta `no_opera` a la familia) y
+ * `franjas.dias_semana` (si esa VENTANA rige ese día)—.
+ *
+ * *Si divergen, el resultado es un día reservable sin ventana de recogida:
+ * la familia compra y no hay a qué hora entregar al animal.* Con un espacio y
+ * un par de ventanas, **los dos conjuntos son la misma decisión** ⇒ un
+ * selector que escribe los tres lugares (espacio + las dos franjas).
+ *
+ * ⚠️ **Se LEE de las franjas porque no hay lector de espacios** (ver abajo).
+ * Las franjas son el espejo legible de la misma decisión, y guardar los
+ * realinea. **El día que haya dos salas esto no alcanza** — ahí hacen falta
+ * el lector y un selector por sala.
  *
  * ── EL ORDEN DE GUARDADO NO ES ARBITRARIO ───────────────────────────────
  * Recogida primero, devolución después. El motor valida que **la recogida
@@ -73,7 +87,8 @@ import {
 } from '@epetplace/ui';
 import {
   definirEspacioGuarderia,
-  definirFranjaGuarderia,
+  reemplazarFranjasGuarderia,
+  type DiaSemana,
   definirOfertaGuarderia,
   definirPaqueteGuarderia,
   obtenerPaquetesGuarderia,
@@ -184,6 +199,18 @@ type Estado =
       jornadaMinutos: number | null;
     };
 
+/**
+ * Display lunes-primero; **el índice que viaja a la DB sigue siendo
+ * 0=Domingo** (regla 32: sin transformaciones). Mismo criterio y mismo array
+ * que `seccion-horarios.tsx` — se repite el literal y no se importa porque
+ * ese módulo arrastra el motor de franjas del paseo, que no tiene nada que
+ * ver acá; lo que se reusa es el CRITERIO, que es lo que importaba.
+ */
+const ORDEN_DISPLAY: readonly DiaSemana[] = [1, 2, 3, 4, 5, 6, 0];
+
+/** El default del motor, para cuando el lugar todavía no tiene franjas. */
+const DIAS_POR_DEFECTO: DiaSemana[] = [1, 2, 3, 4, 5];
+
 type QueHora = null | 'recogidaDesde' | 'recogidaHasta' | 'devolucionDesde' | 'devolucionHasta';
 
 export default function TallerGuarderia() {
@@ -200,6 +227,10 @@ export default function TallerGuarderia() {
 
   // EL BORRADOR — sobrevive a los reintentos de carga.
   const [capacidad, setCapacidad] = useState(8);
+  /* Los días que el lugar abre. Arranca en el default del motor y la carga lo
+     pisa con lo guardado — **jamás al revés**: pintar L-V sobre un lugar que
+     abre sábados y guardar encima sería borrarle el sábado sin decírselo. */
+  const [dias, setDias] = useState<DiaSemana[]>(DIAS_POR_DEFECTO);
   const [recogidaDesde, setRecogidaDesde] = useState('07:00');
   const [recogidaHasta, setRecogidaHasta] = useState('09:00');
   const [devolucionDesde, setDevolucionDesde] = useState('16:30');
@@ -271,6 +302,11 @@ export default function TallerGuarderia() {
       if (r !== undefined) {
         setRecogidaDesde(aHoraCorta(r.desde));
         setRecogidaHasta(aHoraCorta(r.hasta));
+        /* 🔴 EL PATRÓN SALE DE LA RECOGIDA, que es la ventana que existe
+           siempre que el lugar opere. Sólo si trae días: una franja sin
+           patrón no es «cero días», es una lectura que no lo dice, y
+           tomarla como vacío apagaría el lugar entero. */
+        if (r.diasSemana.length > 0) setDias(r.diasSemana);
       }
       if (d !== undefined) {
         setDevolucionDesde(aHoraCorta(d.desde));
@@ -367,6 +403,11 @@ export default function TallerGuarderia() {
       prestadorId: estado.prestadorId,
       nombre: NOMBRE_ESPACIO,
       capacidadPorDia: capacidad,
+      /* ⭐ **LOS DÍAS QUE EL LUGAR ABRE.** Antes no viajaba y el espacio se
+         quedaba con el default del motor: el prestador podía elegir sábado en
+         las ventanas y la familia seguía viendo `no_opera`. *Es el mismo
+         conjunto que las franjas — ver la cabecera.* */
+      diasOperacion: dias,
     });
     if (!espacio.ok) {
       mostrar({ texto: espacio.mensaje, variante: 'error' });
@@ -374,12 +415,18 @@ export default function TallerGuarderia() {
       return;
     }
 
-    /* Recogida ANTES que devolución: ver el encabezado. */
-    const rec = await definirFranjaGuarderia({
+    /* Recogida ANTES que devolución: ver el encabezado.
+
+       ⭐ **`reemplazar` Y NO `definir`.** `definir` upserta por
+       `(prestador, tipo, dias_semana)`: al mover el patrón dejaba la franja
+       vieja viva y el lugar terminaba con **dos ventanas contradictorias**,
+       que la lista de la familia leía las dos. `reemplazar` retira y define
+       en UNA transacción — *entre las dos puede entrar una reserva, y ese
+       hueco no se cierra con cuidado del que llama: se cierra en el motor.* */
+    const rec = await reemplazarFranjasGuarderia({
       prestadorId: estado.prestadorId,
       tipo: 'recogida',
-      desde: recogidaDesde,
-      hasta: recogidaHasta,
+      franjas: [{ desde: recogidaDesde, hasta: recogidaHasta, dias_semana: dias }],
     });
     if (!rec.ok) {
       mostrar({ texto: rec.mensaje, variante: 'error' });
@@ -387,11 +434,10 @@ export default function TallerGuarderia() {
       return;
     }
 
-    const dev = await definirFranjaGuarderia({
+    const dev = await reemplazarFranjasGuarderia({
       prestadorId: estado.prestadorId,
       tipo: 'devolucion',
-      desde: devolucionDesde,
-      hasta: devolucionHasta,
+      franjas: [{ desde: devolucionDesde, hasta: devolucionHasta, dias_semana: dias }],
     });
     if (!dev.ok) {
       /* 🔴 La capacidad y la recogida YA se guardaron. La voz lo dice en vez
@@ -456,7 +502,7 @@ export default function TallerGuarderia() {
        algo* — y la portada es justamente la que muestra el resultado: su
        resumen se recarga con `useFocusEffect`. */
     router.replace('/guarderia');
-  }, [estado, guardando, capacidad, recogidaDesde, recogidaHasta, devolucionDesde, devolucionHasta,
+  }, [estado, guardando, capacidad, dias, recogidaDesde, recogidaHasta, devolucionDesde, devolucionHasta,
       iPrecio, paquetes, ofreceDiario, ofreceMensual, iMensual, especies, mostrar, t]);
 
   if (gate === 'verificando' || estado.fase === 'cargando') {
@@ -566,14 +612,50 @@ export default function TallerGuarderia() {
             verlos para tocar los precios, que es a lo que se viene. ── */}
         <SeccionPlegable
           titulo={t('tallerGuarderia.franjasTitulo')}
-          detalle={t('tallerGuarderia.franjasResumen', {
+          /* El resumen dice los días: si no, la sección plegada muestra dos
+             horarios sin decir cuándo rigen. */
+          detalle={`${ORDEN_DISPLAY.filter((d) => dias.includes(d))
+            .map((d) => t(`horarios.dia${d}` as 'horarios.dia0'))
+            .join(' · ')} — ${t('tallerGuarderia.franjasResumen', {
             recogeDesde: recogidaDesde, recogeHasta: recogidaHasta,
             devuelveDesde: devolucionDesde, devuelveHasta: devolucionHasta,
-          })}
+          })}`}
           abierta={horariosAbierto}
           onCambiar={setHorariosAbierto}
         >
           <Texto variante="apoyo">{t('tallerGuarderia.franjasApoyo')}</Texto>
+
+          {/* ── LOS DÍAS QUE ABRE — **antes que las horas**, porque una
+                 ventana sin días no rige ningún día. Chips en tira,
+                 multi-selección: el mismo control con el que la familia
+                 arma los días de su plan (`plan-hoja`), con el acento del
+                 oficio en vez del de control. ── */}
+          <SelectorOpcion
+            acento="oficio"
+            multiple
+            disposicion="tira"
+            etiqueta={t('tallerGuarderia.diasEtiqueta')}
+            opciones={ORDEN_DISPLAY.map((d) => ({
+              codigo: String(d),
+              etiqueta: t(`horarios.dia${d}` as 'horarios.dia0'),
+            }))}
+            seleccionadas={dias.map(String)}
+            onSelect={(codigo) => {
+              const d = Number(codigo) as DiaSemana;
+              setDias((prev) =>
+                prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort(),
+              );
+            }}
+          />
+          {/* 🔴 CERO DÍAS NO SE GUARDA EN SILENCIO. El motor lo acepta —un
+              array vacío es un retiro declarado— pero desde acá sería el
+              lugar quedándose sin horario por un toque de más. *Para cerrar
+              hay excepciones por fecha y el `activo` del espacio; vaciar los
+              días es otra cosa y no es lo que este control quiere decir.* */}
+          {dias.length === 0 ? (
+            <Texto variante="apoyo">{t('tallerGuarderia.sinDias')}</Texto>
+          ) : null}
+
           <FichaFranja
             recogida={{ rotulo: t('tallerGuarderia.recogida'), desde: recogidaDesde, hasta: recogidaHasta }}
             devolucion={{ rotulo: t('tallerGuarderia.devolucion'), desde: devolucionDesde, hasta: devolucionHasta }}
@@ -794,6 +876,10 @@ export default function TallerGuarderia() {
           etiqueta={t('tallerGuarderia.guardar')}
           bloque
           cargando={guardando}
+          /* Ley 23 — la puerta no ofrece lo que el acto va a estropear. Sin
+             días no hay horario que guardar, y el apagado DICE por qué. */
+          deshabilitado={dias.length === 0}
+          razonDeshabilitado={t('tallerGuarderia.sinDias')}
           onPress={alGuardar}
         />
       </ScrollView>
