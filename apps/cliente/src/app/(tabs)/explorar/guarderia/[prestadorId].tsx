@@ -7,22 +7,10 @@
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * ── 🔴 LA SOBREVENTA NO LLEGA ACÁ, Y ES POR CONSTRUCCIÓN ────────────────
- * `obtenerCupoGuarderia` devuelve `sobrevendido`, y **esta pantalla no lo
- * pasa a ninguna parte**. Firma de la mesa: *el dueño ve lleno; la sobreventa
- * es problema operativo del prestador, no información suya.*
- *
- * ⚠️ Y el mecanismo es más fuerte que la disciplina: `EstadoCupo` de
- * `CalendarioCupo` es `'elegible' | 'sin_cupo'` — **la pieza no tiene canal
- * para expresar una sobreventa aunque alguien quisiera pasarla.** *Una
- * promesa de diseño que el código vuelve inexpresable no se puede olvidar en
- * la próxima pasada.*
- *
- * ── EL DÍA PASADO SE VE LLENO, Y ES LEY DE PUERTA ───────────────────────
- * El motor responde el cupo de cualquier fecha, incluidas las de ayer — no
- * sabe de «pasado», y hace bien: es un contador, no una agenda. La pantalla
- * **no ofrece lo que el servidor va a rechazar** (Ley 23, el principio de la
- * puerta): los días anteriores a hoy salen `sin_cupo` **con su propio
- * motivo**, jamás mezclados con «se llenó».
+ * ☠️ **ACÁ VIVÍA EL CALENDARIO Y SE BORRÓ ENTERO** (30-ago, instrucción del
+ * founder). Con él se fueron `CalendarioCupo`, la lectura mensual de cupo, la
+ * navegación de meses y la voz de sus cinco estados. *El día llega elegido
+ * desde la pantalla 2; esta pantalla muestra al prestador y deja pagar.*
  *
  * ── LO QUE ESTA PANTALLA TODAVÍA NO HACE ────────────────────────────────
  * 🔴 **No muestra precio ni reserva, porque no existe la oferta.** Medido:
@@ -45,8 +33,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  CalendarioCupo,
-  type DiaDeCupo,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -63,15 +49,12 @@ import {
 } from '@epetplace/ui';
 import {
   evaluarRequisitosGuarderia,
-  obtenerCupoGuarderia,
   obtenerPerfilesPublicos,
   type PerfilPublico,
   obtenerFranjasGuarderia,
   comprarPaqueteGuarderia,
   reservarDiaDePaqueteGuarderia,
   reservarDiaGuarderia,
-  type CupoDiaGuarderia,
-  type EstadoCupoDia,
   type FranjaGuarderia,
   type RequisitosGuarderia,
 } from '@epetplace/api';
@@ -108,7 +91,6 @@ type Estado =
   | {
       fase: 'listo';
       franjas: FranjaGuarderia[];
-      cupo: CupoDiaGuarderia[];
       /** null = no vino mascota por la URL ⇒ no hay a quién evaluar. */
       requisitos: RequisitosGuarderia | null;
     };
@@ -130,11 +112,11 @@ export default function LugarGuarderia() {
    * 🔴 **Firma del founder (30-ago):** *«Esa pantalla tiene que mostrar al
    * prestador y dejar pagar — nada más.»*
    *
-   * ⚠️ **Con UNA excepción, y no es un olvido:** el camino de **agendar contra
-   * saldo** entra desde el hub, donde **no hay día elegido** —el bono es del
-   * hogar y el día se decide cada vez—. Ahí el calendario **sí** hace falta.
-   * *La regla no es «nunca hay calendario»: es que el día se pregunta UNA vez,
-   * y donde todavía no se preguntó.*
+   * ⚠️ **Y el camino corto —agendar contra saldo— entraba acá SIN día.** Con
+   * el calendario borrado ya no tiene dónde elegirlo, así que **su destino
+   * cambia**: va a la tira de días de esa guardería (pantalla 2 con su bono),
+   * que es lo que la letra firmada pide. *La consecuencia se declara acá
+   * porque quien borre una pieza tiene que decir a quién dejó sin ella.*
    */
   const fechaDeParams =
     typeof params.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(params.fecha) ? params.fecha : null;
@@ -162,11 +144,10 @@ export default function LugarGuarderia() {
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [intento, setIntento] = useState(0);
-  /** 0 = este mes. Nunca baja de 0: el pasado no se reserva. */
-  const [mesOffset, setMesOffset] = useState(0);
-  /* Nace con el día que ya trajo el recorrido; sólo el camino contra saldo
-     lo deja en null, y ése es el único que dibuja calendario. */
-  const [elegido, setElegido] = useState<string | null>(fechaDeParams);
+  /* 🔴 YA NO ES ESTADO: es el día que trajo el recorrido, y nada acá lo
+     cambia. *Un `useState` que nadie escribe es una puerta que sugiere que
+     alguna vez se va a poder abrir.* */
+  const elegido = fechaDeParams;
   const [reservando, setReservando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
@@ -192,14 +173,7 @@ export default function LugarGuarderia() {
   }, [prestadorId]);
 
   const hoy = useMemo(() => new Date(), []);
-  const primeroDelMes = useMemo(
-    () => new Date(hoy.getFullYear(), hoy.getMonth() + mesOffset, 1),
-    [hoy, mesOffset],
-  );
-  const ultimoDelMes = useMemo(
-    () => new Date(primeroDelMes.getFullYear(), primeroDelMes.getMonth() + 1, 0),
-    [primeroDelMes],
-  );
+
 
   useEffect(() => {
     if (typeof prestadorId !== 'string' || prestadorId.length === 0) {
@@ -209,9 +183,8 @@ export default function LugarGuarderia() {
     let vigente = true;
     setEstado({ fase: 'cargando' });
     void (async () => {
-      const [franjas, cupo, req] = await Promise.all([
+      const [franjas, req] = await Promise.all([
         obtenerFranjasGuarderia(prestadorId),
-        obtenerCupoGuarderia(prestadorId, iso(primeroDelMes), iso(ultimoDelMes)),
         typeof mascotaId === 'string' && mascotaId.length > 0
           ? evaluarRequisitosGuarderia(mascotaId)
           : Promise.resolve(null),
@@ -223,77 +196,31 @@ export default function LugarGuarderia() {
       /* 🔴 El semáforo entra al guard: si no se pudo evaluar, la pantalla NO
          sigue. *Un gate sanitario que falla en silencio deja pasar por
          omisión* — y acá el animal viaja y convive con otros. */
-      if (!franjas.ok || !cupo.ok || (req !== null && !req.ok)) {
+      if (!franjas.ok || (req !== null && !req.ok)) {
         setEstado({ fase: 'roto' });
         return;
       }
       setEstado({
         fase: 'listo',
         franjas: franjas.data,
-        cupo: cupo.data,
         requisitos: req === null ? null : req.data,
       });
     })();
     return () => {
       vigente = false;
     };
-  }, [prestadorId, mascotaId, primeroDelMes, ultimoDelMes, intento]);
+  }, [prestadorId, mascotaId, intento]);
 
   const idioma = obtenerIdiomaActual();
 
   /* Cabeceras y nombre del mes por `Intl`, por idioma — el precedente de la
      Línea de Vida (S52): los meses no se cablean en un array en español. */
-  const cabecerasDias = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat(idioma, { weekday: 'narrow' });
-    // Lunes primero: 2026-01-05 fue lunes.
-    return [0, 1, 2, 3, 4, 5, 6].map((i) => fmt.format(new Date(2026, 0, 5 + i)).toUpperCase());
-  }, [idioma]);
 
-  const rotuloMes = useMemo(
-    () => new Intl.DateTimeFormat(idioma, { month: 'long', year: 'numeric' }).format(primeroDelMes),
-    [idioma, primeroDelMes],
-  );
 
   /* El vocabulario del motor → la voz de la casa. Los cinco casos tienen su
      propia frase: mezclarlos en «no disponible» deja a la familia sin saber
      si esperar, volver mañana o buscar otro lugar. */
-  const vozDelEstado = useCallback(
-    (e: Exclude<EstadoCupoDia, 'elegible'>): string =>
-      t(`lugarGuarderia.cupo_${e}` as 'lugarGuarderia.cupo_pasado'),
-    [t],
-  );
 
-  const dias: DiaDeCupo[] = useMemo(() => {
-    if (estado.fase !== 'listo') return [];
-    const porFecha = new Map(estado.cupo.map((c) => [c.fecha, c]));
-    const salida: DiaDeCupo[] = [];
-    for (let d = 1; d <= ultimoDelMes.getDate(); d += 1) {
-      const fecha = iso(new Date(primeroDelMes.getFullYear(), primeroDelMes.getMonth(), d));
-      const c = porFecha.get(fecha);
-      /* 🔴 EL MOTIVO LO RESUELVE EL SERVER Y LA PANTALLA LO PINTA — no lo
-         deduce. Es la corrección de la mesa (29-ago) sobre lo que yo había
-         inferido acá: **«no opera» se mide del PATRÓN del lugar, no del cupo**,
-         y desde la pantalla los dos llegaban como `disponible = 0`. *Dos ceros
-         distintos que sólo el motor puede separar.*
-         La pieza sólo tiene `elegible | sin_cupo`, así que los cuatro «no» se
-         distinguen por su MOTIVO — y eso importa: *«ya pasó», «hoy no», «no
-         abren» y «se llenó» le piden a la familia cosas distintas.* */
-      const st = c?.estado;
-      if (st === 'elegible') {
-        salida.push({ clave: fecha, numero: String(d), estado: 'elegible' });
-        continue;
-      }
-      /* Sin fila para ese día, el día no es elegible y se dice sin inventar
-         una causa: sólo el motor sabe por qué. */
-      const motivo =
-        st === undefined ? t('lugarGuarderia.cupo_sin_dato') : vozDelEstado(st);
-      salida.push({ clave: fecha, numero: String(d), estado: 'sin_cupo', motivo });
-    }
-    return salida;
-  }, [estado, primeroDelMes, ultimoDelMes, vozDelEstado, t]);
-
-  /** Lunes = columna 0. `getDay()` da domingo=0, así que se corre. */
-  const columnaInicial = (primeroDelMes.getDay() + 6) % 7;
 
   /** El precio viaja desde la lista: la familia ve lo que va a pagar **antes**
    *  de tocar. `null` = no llegó, y entonces el pie no monta bloque de precio
@@ -489,52 +416,29 @@ export default function LugarGuarderia() {
           </View>
         ) : null}
 
-        {/* ── EL DÍA ──────────────────────────────────────────────────────
-               🔴 **SÓLO SE PREGUNTA SI NO SE PREGUNTÓ ANTES.** Con el día ya
-               elegido, esta pantalla lo AFIRMA y sigue: montar un calendario
-               acá lo volvía el primer paso de una reserva que ya iba por el
-               tercero. *Un control que pide algo ya decidido no es una
-               comodidad: es una invitación a contradecirse.* ── */}
-        {fechaDeParams !== null ? (
-          <View style={{ gap: spacing[1] }}>
-            <Texto variante="seccion">{t('lugarGuarderia.elDia')}</Texto>
-            <Texto variante="cuerpo">{fechaLarga(fechaDeParams)}</Texto>
-          </View>
-        ) : (
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="titulo">{t('lugarGuarderia.elegiDia')}</Texto>
-            <CalendarioCupo
-              dias={dias}
-              columnaInicial={columnaInicial}
-              cabecerasDias={cabecerasDias}
-              elegido={elegido}
-              onElegir={setElegido}
-              rotulo={rotuloMes}
-            />
-            <View style={{ flexDirection: 'row', gap: spacing[3] }}>
-              {/* El mes anterior sólo si no es pasado: la puerta no ofrece lo
-                  que va a rechazar. */}
-              {mesOffset > 0 ? (
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('lugarGuarderia.mesAnterior')}
-                  onPress={() => {
-                    setElegido(null);
-                    setMesOffset((m) => m - 1);
-                  }}
-                />
-              ) : null}
-              <Boton
-                variante="secundario"
-                etiqueta={t('lugarGuarderia.mesSiguiente')}
-                onPress={() => {
-                  setElegido(null);
-                  setMesOffset((m) => m + 1);
-                }}
-              />
-            </View>
-          </View>
-        )}
+        {/* ── EL DÍA · SE AFIRMA, NO SE PREGUNTA ─────────────────────────
+               ☠️ **ACÁ VIVÍA UN CALENDARIO Y SE BORRÓ ENTERO** — instrucción
+               directa del founder (30-ago): *«El calendario de la pantalla del
+               prestador se elimina. No se adapta ni se reusa: se borra.»*
+
+               El día se elige en la pantalla 2 y viaja hasta acá. Montar un
+               calendario en el paso 4 lo volvía el primer paso de una reserva
+               que ya iba por el cuarto — *y le daba a la familia la libertad de
+               contradecir lo que ya había elegido.*
+
+               Con él se fueron `CalendarioCupo`, la lectura de cupo del mes,
+               la navegación de meses y los tipos que arrastraba (Ley 37: lo
+               viejo muere en el mismo acto).
+
+               ⚠️ **Y esto le quita su selector al CAMINO CORTO** —agendar
+               contra saldo entraba acá sin día—. Su destino cambia a la tira
+               de días de esa guardería, que es lo que la letra firmada pide. ── */}
+        <View style={{ gap: spacing[1] }}>
+          <Texto variante="seccion">{t('lugarGuarderia.elDia')}</Texto>
+          <Texto variante="cuerpo">
+            {fechaDeParams === null ? t('lugarGuarderia.faltaDia') : fechaLarga(fechaDeParams)}
+          </Texto>
+        </View>
 
         {estado.requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>

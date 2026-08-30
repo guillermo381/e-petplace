@@ -278,8 +278,16 @@ export default function LogGuarderia() {
                        que la lista de «quién puede» no tiene nada que preguntar.
                        *Pasar por ella sería ofrecerle cambiar algo que ya
                        eligió — y abrir la puerta a que elija mal.* */
+                    /* ⏪ **IBA A LA PANTALLA DEL PRESTADOR, Y AHÍ YA NO HAY
+                       CALENDARIO** (se borró por instrucción del founder). El
+                       camino corto **no elige lugar** —lo determina el bono—
+                       pero **sí tiene que elegir día**, así que va a la TIRA DE
+                       DÍAS de esa guardería: pantalla 2 con su bono adentro.
+
+                       *Letra firmada: «va directo a la tira de días DE ESA
+                       GUARDERÍA: sin elegir lugar y sin pagar».* */
                     router.push({
-                      pathname: '/explorar/guarderia/[prestadorId]',
+                      pathname: '/explorar/guarderia',
                       params: {
                         prestadorId: pq.prestadorId,
                         mascotaId: elegida ?? '',
