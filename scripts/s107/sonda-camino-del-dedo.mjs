@@ -55,6 +55,9 @@ const { data: s } = await sb.auth.signInWithPassword({ email:'guillo381+8@gmail.
 
 const b = await chromium.launch({ channel:'chrome', headless:true });
 const pg = await b.newPage({ viewport:{ width:430, height:932 } });
+/* Techo corto a propósito: una sonda que espera 30 s por control no reporta
+   «no está», reporta nada — y quien la corre no sabe si colgó o si falló. */
+pg.setDefaultTimeout(8000);
 await pg.goto('http://localhost:8091/bienvenida', { waitUntil:'domcontentloaded' });
 await pg.evaluate(([k,v]) => localStorage.setItem(k,v), [`sb-${REF}-auth-token`, JSON.stringify(s.session)]);
 
@@ -148,4 +151,70 @@ if (ok1) {
     }
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL SEGUNDO BRAZO · **EL CAMINO DEL PAQUETE**, que es el que el founder
+   nunca vio entero: comprar → primera sesión → volver al hub → «te quedan N»
+   → agendar la segunda contra saldo.
+   ═══════════════════════════════════════════════════════════════════════════ */
+console.log('\n───────────── EL CAMINO DEL PAQUETE ─────────────');
+paso = 0;
+/* ⏪ `domcontentloaded` y no `networkidle`: con la app ya andando quedan
+   sondeos abiertos y `networkidle` NO VUELVE NUNCA — la sonda se colgaba
+   entera después del primer brazo, sin decir por qué. */
+await pg.goto('http://localhost:8091/hogar/guarderia', { waitUntil:'domcontentloaded', timeout:60000 });
+await pg.waitForTimeout(4000);
+
+const okP1 = await PASO('elegir la mascota', toca(pg.getByText('Thor', { exact:true }), 'chip Thor'));
+if (okP1) {
+  const okP2 = await PASO('«Reservar una estadía»', toca(porClave(pg,'logGuarderia.reservarDe').localizador, 'CTA del hub'));
+  if (okP2) {
+    const okP3 = await PASO('cambiar la modalidad a «Paquete»', toca(porClave(pg,'modalidadGuarderia.paquete').localizador, 'segmento Paquete'));
+    if (okP3) {
+      /* 🔴 EN PAQUETE EL BOTÓN EXIGE DOS COSAS, NO UNA: el día **y** el
+         tamaño. La primera versión de este brazo chequeaba el botón después
+         de cada día **sin haber elegido tamaño**, y reportó *«ninguno de los
+         14 días habilita»* — cierto, y por el motivo equivocado.
+         *Un instrumento que mide un gate sin cumplir todas sus condiciones
+         no reporta el gate: reporta su propio orden.*
+         Ahora hace lo que hace un dedo: elige el día, elige el tamaño, y
+         recién ahí mira el botón. */
+      const okP4 = await PASO('elegir día + tamaño hasta que el botón encienda', async () => {
+        const dias = await visible(pg.getByRole('radio', { name: /^\w+ \d+$/ })).all();
+        if (dias.length === 0) throw new Error('la tira de días NO EXISTE');
+        const probados = [];
+        for (const d of dias) {
+          const etq = await d.getAttribute('aria-label');
+          await d.click({ force:true }); await pg.waitForTimeout(1800);
+          const chips = await visible(pg.getByRole('radio', { name: /opción|option/i })).all();
+          if (chips.length === 0) { probados.push(`${etq}(sin tamaños)`); continue; }
+          /* La VOZ de los chips se reporta siempre: es donde se ve si el
+             precio por tamaño llegó o si quedaron mudos. */
+          const voces = await Promise.all(chips.map((c)=>c.getAttribute('aria-label')));
+          await chips[0].click({ force:true }); await pg.waitForTimeout(1800);
+          const apagado = await visible(porClave(pg,'elegirGuarderia.verQuienPuede').localizador)
+            .first().evaluate((el)=>(el.closest('[role="button"]')??el).getAttribute('aria-disabled'));
+          if (apagado !== 'true') { console.log(`     (día ${etq} · tamaños: ${voces.join(' | ')})`); return; }
+          probados.push(`${etq}[${voces.join('|')}]`);
+        }
+        throw new Error(`ningún día+tamaño habilita: ${probados.join(' · ')}`);
+      });
+      if (okP4) {
+          const okP6 = await PASO('«Ver quién puede»', toca(porClave(pg,'elegirGuarderia.verQuienPuede').localizador, 'ver quién puede'));
+          if (okP6) {
+            const okP7 = await PASO('tocar Clínica Aurora', toca(pg.getByText('Aurora',{exact:false}), 'la fila del lugar'));
+            if (okP7) {
+              const okP8 = await PASO('elegir un día en el calendario del lugar', async () => {
+                const libres = await visible(pg.locator('[role="radio"]:not([aria-disabled="true"])')).filter({ hasText:/\d/ }).all();
+                if (libres.length === 0) throw new Error('el calendario no tiene ningún día elegible');
+                await libres[libres.length-1].click({ force:true });
+              });
+              if (okP8) await PASO('COMPRAR el paquete', toca(porClave(pg,'lugarGuarderia.reservar').localizador, 'CTA de comprar'));
+            }
+          }
+      }
+    }
+  }
+}
+
 await b.close(); await sb.auth.signOut();

@@ -389,15 +389,44 @@ export default function ElegirGuarderia() {
             /* Cada chip con SU precio. Sin precio todavía, sólo el tamaño:
                **la etiqueta no espera al número**, y un chip sin precio es
                honesto mientras un chip con el precio de otro no lo era. */
-            opciones={TAMANOS_PAQUETE.map((n) => ({
-              codigo: String(n),
-              etiqueta:
-                precioPorTamano[n] === undefined
-                  ? t('hubGuarderia.tamanoEstadias', { n })
-                  : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
-            }))}
+            /* ⏪ **SÓLO LOS TAMAÑOS QUE ALGUIEN VENDE.** `TAMANOS_PAQUETE` es
+               el vocabulario del producto (5·10·15), **no la oferta**: medido
+               contra la base, el lugar vende 5 y 10 — y el chip de 15 se
+               ofrecía igual. *La familia lo elegía, recorría los seis pasos
+               que siguen, y el motor la rebotaba `paquete_no_disponible` al
+               final.* **Ley 23: la puerta no ofrece lo que va a rechazar**, y
+               menos seis pasos antes del rechazo.
+
+               ⚠️ El filtro corre **sólo con precios ya resueltos**: mientras
+               no llegaron, `precioPorTamano` está vacío y filtrar dejaría la
+               lista en cero — *que se leería como «no hay paquetes», y es
+               «todavía no sé»*. Sin precios se muestran todos, sin número,
+               que es lo que la etiqueta ya hacía. */
+            opciones={TAMANOS_PAQUETE
+              .filter((n) => Object.keys(precioPorTamano).length === 0 || precioPorTamano[n] !== undefined)
+              .map((n) => ({
+                codigo: String(n),
+                etiqueta:
+                  precioPorTamano[n] === undefined
+                    ? t('hubGuarderia.tamanoEstadias', { n })
+                    : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
+              }))}
             seleccionada={tamano === null ? '' : String(tamano)}
-            onSelect={(c) => { setTamano(Number(c) as TamanoPaqueteGuarderia); setFecha(null); }}
+            /* 🔴 **ACÁ VIVÍA `setFecha(null)`, Y HACÍA IMPOSIBLE COMPRAR UN
+               PAQUETE.** Los chips y el pie están montados bajo
+               `fecha !== null`, así que elegir un tamaño **borraba el día y
+               con él los propios chips y el botón**: la pantalla volvía a
+               «elegí un día» vacía, y no había forma de llegar a pagar.
+
+               Es un resto de cuando el tamaño iba ANTES de la fecha — ahí
+               limpiar el día al cambiar de tamaño era correcto, porque el
+               precio dependía del tamaño elegido. **El founder firmó invertir
+               el orden el 29-ago y esta línea sobrevivió a su razón.**
+
+               *No lo vio ningún typecheck ni ningún lint: los dos estados son
+               válidos por separado, y la pantalla no falla — se vacía.* Lo
+               encontró recorrer el camino por donde entra el dedo. */
+            onSelect={(c) => setTamano(Number(c) as TamanoPaqueteGuarderia)}
           />
         ) : null}
 
