@@ -7027,21 +7027,21 @@ function PiezasDelOficioS107() {
       {/* ⑦pre · LA HOJA DE CONTACTO DE LOS DOS GLIFOS NUEVOS (§6b) */}
       <View style={{ gap: spacing[3] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          ⭐ GATE POR ÍCONO (§2.9) · DOS CANDIDATOS CADA UNO, el perdedor MUERE con su lápida (molde
-          prime/primeCorona) · **el juicio es a 21px, no a 44**
+          ✅ GATE POR ÍCONO CERRADO (§2.9, firma del founder 30-ago) · **ganaron los dos que
+          quedan**; `certificacionesSello` y `wearablesActividad` murieron con su lápida en el
+          registry (molde prime/primeCorona) · se conservan a 21 y 44 px **contra sus vecinos**,
+          que es donde se juzgó
         </Text>
 
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          CERTIFICACIÓN · qué decide: que se lea «la acreditada es LA MASCOTA» y no «alguien ganó un
-          premio». A = hoja + huella-sello · B = sello troquelado (anillo) con la huella adentro — su riesgo es
-          Ley 9: menos aire, puede empastarse en una mancha · ⏪ los RENGLONES se fueron: el idioma
-          «rectángulo con renglones» ya está ocupado CINCO veces (lo dice `fiscal`)
+          CERTIFICACIÓN — **la que ganó**: hoja + huella como SELLO. Lo que resolvió el veto («una
+          medalla acredita a la persona equivocada») fue una regla que la casa ya tenía escrita: *«su
+          huella sobre una cédula diría que el documento es del animal»* · ⏪ los RENGLONES se fueron
+          antes del gate: el idioma «rectángulo con renglones» ya está ocupado CINCO veces (`fiscal`)
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
           <Icono nombre="certificaciones" tamano={44} />
-          <Icono nombre="certificacionesSello" tamano={44} />
           <Icono nombre="certificaciones" tamano={21} />
-          <Icono nombre="certificacionesSello" tamano={21} />
         </View>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
           ↓ a 21px CONTRA SUS VECINOS DE PAPEL — es donde se ve si colisiona: documento · carnet ·
@@ -7049,7 +7049,6 @@ function PiezasDelOficioS107() {
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
           <Icono nombre="certificaciones" tamano={21} />
-          <Icono nombre="certificacionesSello" tamano={21} />
           <Icono nombre="documento" tamano={21} />
           <Icono nombre="carnet" tamano={21} />
           <Icono nombre="descargar" tamano={21} />
@@ -7057,15 +7056,13 @@ function PiezasDelOficioS107() {
         </View>
 
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          WEARABLE · qué decide: que diga «mide TODO EL TIEMPO» sin corazón. A = huella ADENTRO del
-          aparato (el dispositivo muestra a la mascota) · B = traza de actividad — 🔴 su riesgo es el
-          veto mismo: una traza puede leerse como ECG, o sea clínica
+          WEARABLE — **el que ganó**: el DISPOSITIVO con la huella ADENTRO (el aparato muestra a la
+          mascota: dice «mide todo el tiempo» sin corazón y sin ondas) · la traza de actividad murió
+          en el gate, con el riesgo que ya traía declarado: leía a ECG, o sea clínica
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
           <Icono nombre="wearables" tamano={44} />
-          <Icono nombre="wearablesActividad" tamano={44} />
           <Icono nombre="wearables" tamano={21} />
-          <Icono nombre="wearablesActividad" tamano={21} />
         </View>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
           ↓ a 21px contra los vecinos que el censo marcó como riesgo: carnet (placa colgante) y paseo
@@ -7073,7 +7070,6 @@ function PiezasDelOficioS107() {
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
           <Icono nombre="wearables" tamano={21} />
-          <Icono nombre="wearablesActividad" tamano={21} />
           <Icono nombre="carnet" tamano={21} />
           <Icono nombre="paseo" tamano={21} />
           <Icono nombre="veterinaria" tamano={21} />
