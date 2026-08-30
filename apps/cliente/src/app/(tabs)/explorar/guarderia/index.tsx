@@ -57,6 +57,7 @@ import {
   SelectorSegmentado,
   SemaforoSanitario,
   type RequisitoSanitario,
+  Tarjeta,
   Texto,
   spacing,
   useTheme,
@@ -144,10 +145,22 @@ export default function ElegirGuarderia() {
     ? params.mascotaId
     : null;
 
-  /* 🔴 NACEN SIN ELEGIR — no hay default oscuro. Con una sola modalidad abierta
-     el selector no se dibuja (N=1 colapsa) y se preselecciona la única. */
-  const unica = MODALIDADES_ABIERTAS.length === 1 ? MODALIDADES_ABIERTAS[0] : null;
-  const [modalidad, setModalidad] = useState<ModalidadGuarderia | null>(unica);
+  /* ⏪ **LA MODALIDAD ARRANCA EN «DÍA» — enmienda firmada del founder (29-ago).**
+     La versión anterior nacía SIN elegir *«para que nada aparezca antes de que
+     la familia decida»*. **El efecto real, visto en el aparato: con dos
+     modalidades la pantalla aterrizaba VACÍA** — un cabezal, dos chips y nada
+     más.
+
+     > *La revelación progresiva servía cuando el primer paso era el día. Con la
+     > modalidad adelante, esperar a que elijan lo más común convierte el paso
+     > cero en una pantalla en blanco.*
+
+     🔴 **Y la firma NO se aflojó, se acotó:** «día» es **la más común y la única
+     que hoy se cobra sola** — *no es un default oscuro: es el camino que la
+     familia iba a tomar igual.* **Nada más viene elegido**: el día, el precio y
+     el botón **siguen apareciendo a medida que avanza**, que es lo que la
+     revelación progresiva protegía de verdad. */
+  const [modalidad, setModalidad] = useState<ModalidadGuarderia | null>('dia');
   const [tamano, setTamano] = useState<TamanoPaqueteGuarderia | null>(null);
   const [fecha, setFecha] = useState<string | null>(null);
   const [requisitos, setRequisitos] = useState<RequisitosGuarderia | null>(null);
@@ -203,7 +216,10 @@ export default function ElegirGuarderia() {
       });
     })();
     return () => { vigente = false; };
-  }, [listoParaDia, fecha, mascotaId, modalidad]);
+    /* ⏪ `tamano` FALTABA EN LAS DEPS: cambiar de chip no volvía a preguntar.
+       *Era la mitad del defecto — la otra mitad es que el server no sabe el
+       tamaño (ver abajo), así que ni preguntando de nuevo cambiaría.* */
+  }, [listoParaDia, fecha, mascotaId, modalidad, tamano]);
 
   const dias = useMemo(() => {
     const corto = new Intl.DateTimeFormat(idioma, { weekday: 'short' });
@@ -235,10 +251,29 @@ export default function ElegirGuarderia() {
 
   /* ① Se pregunta por la causa y basta: `cuantos > 0 ⟺ causa === null`. */
   const puedeSeguir = resumen.fase === 'listo' && resumen.causa === null;
-  /* ② `null` ⇒ nada. Jamás un `0` que se lea como gratis. */
-  const total = resumen.fase === 'listo' && resumen.precioDesde !== null
-    ? `$ ${resumen.precioDesde.toFixed(2)}`
-    : null;
+  /* ② `null` ⇒ nada. Jamás un `0` que se lea como gratis.
+     ═══════════════════════════════════════════════════════════════════════
+     🔴 **EN PAQUETE NO SE PINTA PRECIO, Y ES LA CURA DE UN DEFECTO CARO.**
+
+     Reportado por el founder: *«con 5 muestra su precio; al elegir 10 o 15
+     sigue mostrando el de 5»*. **Medido, y no era mi estado:**
+     `obtener_resumen_guarderias` **no recibe el tamaño**, y el precio de
+     paquete sale de `min(gp.precio)` — **el paquete MÁS BARATO del lugar**.
+
+     > ### La familia veía $40 y pagaba $75. En la superficie donde se decide pagar.
+
+     *Cualquier número que pinte acá es el de OTRO tamaño que el elegido.* ⇒
+     **no se pinta ninguno hasta que el server sepa el tamaño**
+     (`S107-C-PEDIDO-A-A-PRECIO-POR-TAMANO.md`). **La ausencia es honesta; el
+     número no lo era.** El precio real se ve por lugar en «quién puede» y en el
+     botón de compra, que sí nombra el tamaño.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const total =
+    modalidad === 'paquete'
+      ? null
+      : resumen.fase === 'listo' && resumen.precioDesde !== null
+        ? `$ ${resumen.precioDesde.toFixed(2)}`
+        : null;
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -312,18 +347,28 @@ export default function ElegirGuarderia() {
         {fecha !== null && requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
-            <SemaforoSanitario
-              requisitos={requisitos.faltantes.length === 0
-                ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
-                : requisitos.faltantes.map((f): RequisitoSanitario => ({
-                    clave: f.codigo,
-                    etiqueta: f.nombre,
-                    estado: 'falta',
-                    detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
-                    onResolver: () => router.push('/carnet'),
-                    etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
-                  }))}
-            />
+            {/* ⭐ LA SUPERFICIE BLANCA LA PONE EL CONSUMIDOR — firma del
+                founder: *«fondo blanco y un chevron a la derecha, o sea la
+                anatomía de una FILA»*. **El chevron ya lo dibuja la pieza** (el
+                defecto era que su path salía como texto, curado por B); lo que
+                faltaba era el fondo, y `SemaforoSanitario` **no expone
+                superficie** — como `FichaFranja`, la decide quien la monta.
+                *Sin ella las filas flotan sobre el papel y se leen como texto
+                suelto, que es exactamente lo que el founder reportó.* */}
+            <Tarjeta>
+              <SemaforoSanitario
+                requisitos={requisitos.faltantes.length === 0
+                  ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
+                  : requisitos.faltantes.map((f): RequisitoSanitario => ({
+                      clave: f.codigo,
+                      etiqueta: f.nombre,
+                      estado: 'falta',
+                      detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
+                      onResolver: () => router.push('/carnet'),
+                      etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
+                    }))}
+              />
+            </Tarjeta>
             {/* 🔴 LO DICE, para que nadie lea el semáforo como una puerta: hoy
                 informa y no frena (`bloquea === false`). */}
             {!requisitos.bloquea ? (
