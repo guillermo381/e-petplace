@@ -603,15 +603,22 @@ export default function ElegirGuarderia() {
                 acá adentro van filas, que es el mismo caso. El canon es
                 `parte/[eventoId]`: carta sin relleno con UNA fila adentro.
 
-                🔴 **EL `paddingHorizontal` DE ACÁ ES ANDAMIO, NO DISEÑO.** La
+                ⏪ **ANDAMIO YA RETIRADO — ver la lápida de abajo.** Decía: la
                 `Fila` de `SemaforoSanitario` nace con `paddingVertical` y
                 **sin horizontal**, así que a sangre el texto tocaría el borde.
                 Se lo pongo yo para no dejar la cura a medias — pero el número
                 es de la PIEZA (`CeldaNavegacion` lo lleva adentro), y va en
-                pedido a B. **Cuando B lo mueva, este `View` se retira** (Ley
-                37): un andamio que sobrevive a su obra es el próximo defecto. */}
+                pedido a B. **B lo movió y el `View` se retiró.** */}
             <Tarjeta relleno="ninguno">
-            <View style={{ paddingHorizontal: spacing[3] }}>
+            {/* ☠️ ACÁ VIVÍA UN `View` con `paddingHorizontal: spacing[3]` — el
+                ANDAMIO que C declaró mientras la `Fila` de `SemaforoSanitario`
+                nacía sin padding horizontal. **B movió el número a la pieza
+                (S107-B), así que el andamio se retira en la misma tanda**
+                (Ley 37, y era la condición que este comentario tenía escrita).
+                🔴 **Y se retira ACÁ y no después a propósito:** con el padding
+                puesto en los dos lados la fila quedaría con 24 — *un andamio
+                que sobrevive un rato a su obra no es neutro: dobla el número
+                que vino a arreglar.* */}
               <SemaforoSanitario
                 requisitos={requisitos.faltantes.length === 0
                   ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
@@ -624,7 +631,6 @@ export default function ElegirGuarderia() {
                       etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
                     }))}
               />
-            </View>
             </Tarjeta>
             {/* 🔴 LO DICE, para que nadie lea el semáforo como una puerta: hoy
                 informa y no frena (`bloquea === false`). */}
