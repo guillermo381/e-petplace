@@ -2105,6 +2105,10 @@ const FIXTURES = {
      mirara todo el archivo en vez de lo que va después del montaje, los
      absolutos de la propia superficie la harían saltar siempre y sería ruido;
      si mirara sólo el montaje, este caso saldría verde. */
+  R70: [{
+    path: 'packages/ui/src/components/PiezaFixture.tsx',
+    src: "import { CHEVRON } from './chevron'\n<Texto variante=\"cuerpo\">{CHEVRON.derecha}</Texto>",
+  }],
   R69: [{
     path: 'apps/prestador/src/app/videollamada/[citaId]Fixture.tsx',
     src: "<><SuperficieLlamada alto={a} />\n  <View style={{ position: 'absolute', bottom: 120 }}>{capa}</View>\n</>",
@@ -6276,6 +6280,87 @@ function r68(archivos) {
  * ⚠️ **SU LÍMITE, ESCRITO:** cuenta declaraciones, **no sabe cuál corresponde a
  * cuál absoluto** (mismo límite que R53). *Su verde dice «hay tantas razones
  * escritas como absolutos», jamás «cada razón es la correcta».* */
+/** R70 · UN PATH SVG NO VA EN POSICIÓN DE TEXTO (S107-B).
+ *
+ *  🔴 NACE DE UN DEFECTO VIVO QUE NINGÚN GATE VEÍA, y lo encontró una pista
+ *  LEYENDO EL TEXTO RENDERIZADO:
+ *
+ *      antirrábica · You haven't registered it yet · M9 18l6-6-6-6
+ *
+ *  `M9 18l6-6-6-6` es el atributo `d` de `CHEVRON.derecha` metido dentro de un
+ *  `<Texto>`: **la pantalla imprimía el path como texto.** Pasaba en DOS
+ *  piezas —una de ellas `SeccionPlegable`, o sea **en cada acordeón del taller
+ *  del prestador**— mientras SIETE lo hacían bien.
+ *
+ *  ⚠️ **Y el punto es por qué hacía falta una regla:** un path en posición de
+ *  texto **es un `string` puesto donde va un `string`**. Compila, pasa lint,
+ *  pasa `verify:diseno` y pasa cualquier typecheck **por construcción** — el
+ *  tipo es correcto; lo que está mal es el SIGNIFICADO. *Es la familia de
+ *  L-192: el modo de falla no es un error, es una salida creíble.*
+ *
+ *  LA REGLA, y es barata porque el corpus ya distingue solo: `CHEVRON` es el
+ *  mapa de paths, y **su único uso legítimo es alimentar el `d` de un
+ *  `<Path>`**. Se acepta la forma directa (`d={CHEVRON.x}`) y la indirecta
+ *  (`const d = CHEVRON[dir]` y después `d={d}`). Cualquier otra aparición
+ *  —típicamente `{CHEVRON.x}` como hijo de JSX— es el defecto.
+ *
+ *  **La pieza `Chevron` existe justamente para esto** y su propio archivo lo
+ *  dice: *«el path no se exporta; se usa la pieza»*. La regla mecaniza esa
+ *  frase, que hasta hoy era prosa.
+ *
+ *  ⚠️ ALCANCE DECLARADO: vigila `CHEVRON`, que es **el único mapa de paths con
+ *  nombre** de la casa. La CLASE es más ancha —cualquier constante de path
+ *  impresa como texto—, y ensancharla pide un censo de constantes de path que
+ *  hoy no existe. *Se cierra lo medido, no lo imaginable.*
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. */
+function r70(archivos) {
+  const fallos = []
+  const vistos = new Set()
+  let usos = 0
+  let archivosConChevron = 0
+  for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue
+    vistos.add(path)
+    // EL ARCHIVO QUE LO DEFINE está exento: ahí `CHEVRON` se declara y la
+    // pieza `Chevron` lo consume. Sin esta línea la regla se acusa a sí misma
+    // — su primer rojo fue justamente ése, y era falso.
+    if (/components\/chevron\.tsx$/.test(path)) continue
+    /* Se despoja SIN COLAPSAR LÍNEAS: el `sinComentarios` compartido borra los
+       bloques enteros y **corre la numeración**, así que el mensaje apuntaría a
+       una línea equivocada. Un guard que señala mal el lugar manda a buscar
+       donde no está. */
+    const limpio = (src ?? '')
+      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+      .replace(/(^|[^:/'"`])\/\/(?!\/)[^\n]*/g, '$1')
+    if (!/\bCHEVRON\b/.test(limpio)) continue
+    archivosConChevron++
+    const lineas = limpio.split('\n')
+    for (let i = 0; i < lineas.length; i++) {
+      const l = lineas[i]
+      if (!/\bCHEVRON\b/.test(l)) continue
+      if (/^\s*import\b/.test(l)) continue // el import no dibuja nada
+      usos++
+      // legítimo: alimenta un `d` — directo o por variable intermedia
+      if (/\bd=\{/.test(l) || /=\s*CHEVRON\b/.test(l)) continue
+      fallos.push(
+        `R70: ${path}:${i + 1} — CHEVRON en posición de TEXTO. Es el atributo \`d\` de un path: ` +
+          `puesto en un \`<Texto>\`/\`<Text>\` la pantalla IMPRIME "M9 18l6-6-6-6" al usuario. ` +
+          `Compila y pasa todos los gates porque un path es un string y ahí va un string — ` +
+          `lo que está mal es el significado. **Usá la pieza \`<Chevron direccion=... />\`**, ` +
+          `que es lo que \`chevron.tsx\` ya manda: «el path no se exporta; se usa la pieza».`,
+      )
+    }
+  }
+  // ANCLA: sin archivos que usen CHEVRON, el silencio de esta regla no
+  // significa "no hay paths sueltos" — significa "no miré" (L-192).
+  fallos.push(...ancla('R70', archivosConChevron, 5, 'archivo(s) que usan CHEVRON'))
+  return {
+    fallos,
+    info: `${usos} uso(s) de CHEVRON en ${archivosConChevron} archivo(s) · ${fallos.length} en posición de texto · ⚠️ vigila SOLO \`CHEVRON\`: la clase (cualquier constante de path impresa) es más ancha y pide su censo`,
+  }
+}
+
 function r69(archivos) {
   const fallos = []
   const vistos = new Set()
@@ -6309,7 +6394,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6700,6 +6785,7 @@ corridas.push(['R67 (el aviso de teleconsulta no se acorta)', r67(appsCodigo)]);
    viva, y dos de los tres casos fueron piezas del sistema. */
 /* Se le pasa TAMBIÉN el código `.ts`: los helpers `'worklet'` viven ahí
    (`foto-encuadre.ts`), y sin ellos la regla acusaría a quien los usa bien. */
+corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...ui, ...apps])])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);

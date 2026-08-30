@@ -2864,6 +2864,15 @@ export const clienteEs = {
      🔴 La sobreventa NO tiene voz acá a propósito (firma de la mesa): para
      la familia un día sin lugar es un día sin lugar. */
   lugarGuarderia: {
+    /* El CTA apagado DICE qué falta: una pared muda hace creer que el
+       producto está roto cuando sólo falta tocar un día. */
+    faltaDia: 'Elige un día en el calendario.',
+    comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
+    paqueteListo: 'Paquete comprado y primer día agendado — te quedan {{n}}.',
+    /* 🔴 El bono YA existe: decir solo «no se pudo» dejaría a la familia
+       creyendo que perdió la plata. */
+    paqueteSinPrimera: 'Compramos tu paquete, pero no pudimos agendar ese día: {{mensaje}} Puedes agendarlo desde Guardería.',
+    faltaRequisitos: 'Falta lo que la guardería pide para recibirlo.',
     titulo: 'La guardería',
     franjasTitulo: 'Cuándo pasan y cuándo lo traen',
     recogida: 'Pasan a buscarlo',
@@ -2918,6 +2927,40 @@ export const clienteEs = {
   },
   /* S107-C · EL DURANTE. **Los estados del motor en voz de familia** — el
      motor dice `retorno_en_curso`, la pantalla dice «viene camino a casa». */
+  /* S107-C · ACEPTAR LOS DOCUMENTOS.
+     🔴 **Acá NO vive una sola palabra de texto legal.** Estos son RÓTULOS —
+     cómo se llama cada documento en la lista—; su CONTENIDO sale del server,
+     versionado. *Un texto legal escrito en un diccionario es un texto que nadie
+     versiona, nadie fecha y nadie puede probar que la familia aceptó.* */
+  documentosGuarderia: {
+    titulo: 'Antes de reservar',
+    doc_contrato_custodia: 'Contrato de custodia',
+    doc_declaracion_sanitaria: 'Declaración sanitaria',
+    doc_declaracion_comportamiento: 'Declaración de comportamiento',
+    doc_autorizacion_urgencia_veterinaria: 'Autorización de urgencia veterinaria',
+    doc_autorizacion_transporte: 'Autorización de transporte',
+    doc_protocolo_no_retiro: 'Protocolo de no retiro',
+    version: 'Versión {{n}}',
+    urgenciaTitulo: 'Si hay una urgencia',
+    urgenciaDetalle: 'Hasta cuánto autorizas a gastar sin poder consultarte primero.',
+    topeEtiqueta: 'Tope en dólares',
+    contactoTitulo: 'A quién llamamos',
+    contactoDetalle: 'Si no podemos ubicarte a ti.',
+    contactoNombre: 'Nombre',
+    contactoTelefono: 'Teléfono',
+    redesEtiqueta: 'Pueden publicar fotos suyas',
+    redesDetalle: 'Si lo dejas apagado, sus fotos solo las ves tú.',
+    aceptar: 'Acepto y continúo',
+    aceptado: 'Listo. Ya puedes reservar.',
+    faltaTope: 'Pon un tope para las urgencias.',
+    faltaContacto: 'Falta el nombre y el teléfono de tu contacto.',
+    noCargoTitulo: 'No pudimos cargar los documentos',
+    noCargoDetalle: 'No es que no existan: no pudimos preguntar. Prueba de nuevo.',
+    /* 🔴 SIN «prueba de nuevo»: el problema es NUESTRO y no hay nada que la
+       familia pueda reintentar. */
+    sinDocsTitulo: 'Todavía no podemos abrir reservas de guardería',
+    sinDocsDetalle: 'Estamos terminando de preparar los documentos. Te avisamos apenas esté listo.',
+  },
   duranteGuarderia: {
     reservada: 'Todavía no salieron a buscar a {{nombre}}.',
     recogidaEnCurso: 'Van en camino a buscar a {{nombre}}.',
@@ -2968,6 +3011,8 @@ export const clienteEs = {
     verQuienPuede: 'Ver quién puede',
     requisitosInforman: 'Esto no te frena para reservar. Es lo que la guardería va a pedirte al recibirlo.',
     causaSinCupo: 'Ninguna guardería tiene cupo para el {{dia}}. Prueba con otro día.',
+    /* 🔴 SIN «prueba con otro día»: el día no es el problema. */
+    causaNoOpera: 'Ninguna guardería cerca de ti abre ese día.',
     causaSinModalidad: 'Ninguna guardería cerca de ti vende paquetes todavía. Puedes reservar por día.',
     causaSinCobertura: 'Todavía no hay guarderías cerca de ti.',
     /* La quinta causa del server. En el HUB es carencia NUESTRA y se dice
@@ -2985,6 +3030,7 @@ export const clienteEs = {
     queDiaInicio: '¿Desde qué día?',
     cuantasEstadias: '¿Cuántas estadías?',
     tamanoEstadias: '{{n}} estadías',
+    tamanoEstadiasDesde: '{{n}} · desde ${{precio}}',
     lugaresTitulo: 'Lugares con cupo ese día',
     porDia: '${{precio}} por día',
     /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
@@ -3019,6 +3065,7 @@ export const clienteEs = {
     elegiMascotaTitulo: 'Elige de quién',
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
+    verSuDia: 'Ver su día',
     elegiMascotaDetalle: 'Toca una de tus mascotas para ver sus estadías.',
     vacioDetalle: 'Cuando reserves, tus estadías se verán acá.',
     estadiasNoCargoTitulo: 'No pudimos cargar tus estadías',

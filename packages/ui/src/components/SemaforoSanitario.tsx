@@ -78,7 +78,7 @@ import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { Separador } from './Separador'
 import { Texto } from './Texto'
-import { CHEVRON } from './chevron'
+import { Chevron } from './chevron'
 
 /**
  * 🔴 UNIÓN DISCRIMINADA — ver el encabezado. `falta` SIN camino no compila.
@@ -172,11 +172,9 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
 
       {/* El chevron SOLO donde hay camino (Ley 18: la estructura informa). En
           una fila al día sería una promesa de navegación que nadie cumple. */}
-      {falta ? (
-        <Texto variante="cuerpo" color="tertiary">
-          {CHEVRON.derecha}
-        </Texto>
-      ) : null}
+      {/* ⏪ MISMO DEFECTO QUE `SeccionPlegable`, y del mismo autor: el `d` del
+          path salía impreso como texto. **Se usa la pieza.** */}
+      {falta ? <Chevron direccion="derecha" /> : null}
     </View>
   )
 

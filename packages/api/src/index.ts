@@ -1515,6 +1515,8 @@ export {
   type PaqueteGuarderia,
   type TamanoPaquete,
   type CodigoErrorGuarderiaConfig,
+  retirarFranjaGuarderia,
+  reemplazarFranjasGuarderia,
 } from './wrappers/guarderia-config';
 
 /* S107-A · guardería: la oferta (precio y visibilidad). */
@@ -1536,10 +1538,25 @@ export {
   type CodigoErrorGuarderiaOferta,
 } from './wrappers/guarderia-oferta';
 
+export {
+  obtenerDocumentosGuarderia,
+  evaluarDocumentosGuarderia,
+  aceptarDocumentosGuarderia,
+  type DocumentoGuarderia,
+  type EvaluacionDocumentos,
+  type EstadoDocumentos,
+  type CodigoErrorGuarderiaDocumentos,
+} from './wrappers/guarderia-documentos';
+
 /* S107-A · guardería: el gate sanitario y la reserva del día. */
 export {
   obtenerMisEstadiasGuarderia,
   type EstadiaDeMiMascota,
+  obtenerMisPaquetesGuarderia,
+  type PaqueteCompradoGuarderia,
+  comprarPaqueteGuarderia,
+  reservarDiaDePaqueteGuarderia,
+  type CompraDePaquete,
   obtenerActaGuarderia,
   type ActaGuarderia,
   type MediaDelActa,

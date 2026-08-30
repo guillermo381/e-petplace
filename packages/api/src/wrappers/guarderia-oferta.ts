@@ -392,10 +392,24 @@ export async function obtenerGuarderiasDisponibles(params: {
  * elegir la más plausible. *Un lector que miente sobre el porqué manda a la
  * familia a cambiar lo que no era el problema.*
  */
+/**
+ * 🔴 **`no_opera_ese_dia` NO es `sin_cupo_ese_dia`, y la diferencia es de
+ * PRODUCTO** (medido por C el 29-ago): Aurora opera L-V, y el domingo decía
+ * *«se llenó»* — mandando a la familia a probar otro día **en un lugar que
+ * nunca abre los domingos**.
+ *
+ * *La casa ya había firmado esa distinción un piso arriba: el calendario de
+ * cupo tiene `no_opera` como estado propio, porque desde la pantalla los dos
+ * llegan como `disponible = 0`.*
+ *
+ * ⚠️ **Su voz NO lleva «prueba con otro día» pegado**: en un lugar cerrado los
+ * domingos, otro domingo tampoco sirve.
+ */
 export type CausaSinGuarderias =
   | 'sin_cupo_ese_dia'
   | 'nadie_vende_esa_modalidad'
   | 'sin_cobertura'
+  | 'no_opera_ese_dia'
   | 'especie_sin_oferta'
   | 'causa_indeterminada';
 
@@ -446,6 +460,7 @@ export async function obtenerResumenGuarderias(params: {
 function esCausa(v: unknown): v is CausaSinGuarderias {
   return (
     v === 'sin_cupo_ese_dia' || v === 'nadie_vende_esa_modalidad' ||
-    v === 'sin_cobertura' || v === 'especie_sin_oferta' || v === 'causa_indeterminada'
+    v === 'sin_cobertura' || v === 'no_opera_ese_dia' ||
+    v === 'especie_sin_oferta' || v === 'causa_indeterminada'
   );
 }

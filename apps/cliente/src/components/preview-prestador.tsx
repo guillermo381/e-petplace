@@ -67,6 +67,7 @@ export function PreviewPrestador({
   perfil,
   contextoReserva,
   pie,
+  onAbrir,
 }: {
   prestadorId: string;
   /** LA OFERTA CONCRETA que esta fila representa. Viaja al detalle para
@@ -121,12 +122,30 @@ export function PreviewPrestador({
    * `FichaPrestador`.
    */
   pie?: ReactNode;
+  /**
+   * Redirige el tap. **Sólo para el oficio cuyo «detalle que reserva» NO es el
+   * perfil genérico** — hoy, guardería. *Ver la razón medida arriba.*
+   */
+  onAbrir?: () => void;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
   const { theme } = useTheme();
+  /* ⭐ S107-C · **EL DESTINO SE PUEDE REDIRIGIR, y hay una razón medida.**
+     🔴 El perfil genérico monta barra de reserva de CUATRO oficios
+     (`BarraPaseo` · `BarraGrooming` · `BarraVeterinaria` ·
+     `BarraAdiestramiento`) **y ninguna de guardería** ⇒ una familia que llega
+     ahí por guardería **ve el perfil y no tiene con qué pagar**.
+
+     *Guardería tiene su propia pantalla de «mirar y reservar»
+     (`explorar/guarderia/[prestadorId]`), que cumple exactamente el mismo ROL
+     que el perfil cumple para los otros cuatro: se mira y se reserva.* **La
+     regla de la casa —«un destino por superficie: la lista lleva a mirar, el
+     detalle reserva»— se respeta; lo que cambia es CUÁL es ese detalle.**
+
+     Ausente = el perfil de siempre, y **los cuatro consumidores no se mueven**. */
   const abrirPerfil = () =>
-    router.push({
+    onAbrir !== undefined ? onAbrir() : router.push({
       pathname: '/prestador/[prestadorId]',
       params: {
         prestadorId,

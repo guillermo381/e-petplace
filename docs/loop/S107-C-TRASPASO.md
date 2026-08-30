@@ -110,7 +110,7 @@ su texto entero** (`scripts/s107/recorrido-guarderia.mjs` lo hace).
 
 1. **Si A publicó `obtenerMisEstadias`:** ① la lista del LOG
    (`hogar/guarderia.tsx`: reemplazar el `EstadoVacio` de «listaPendiente» por `FiltroPills` +
-   filas `FilaCita`) · ② **cablear la entrada al durante** desde esa fila · ③ el acta, que con
+   filas `FilaCita` — ✅ la pieza ya conoce guardería desde `69c39376`) · ② **cablear la entrada al durante** desde esa fila · ③ el acta, que con
    `actaPendienteId` es montar `ActaDeEntrega` en `modo='leer'`.
 2. **Si A publicó el filtro por modalidad y las dos RPC de cobro:** cambiar **una línea** en
    `lib/guarderia-modalidad.ts`. **Nada más** — las tres pantallas ya están.

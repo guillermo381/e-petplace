@@ -9,9 +9,38 @@
 // pagos por `cita_id`, que ya sabe hacerlo — acá no se reimplementa nada.**
 
 import { getClient } from '../client';
+import { puertaDelDueno } from './paquetes';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+  sin_saldo_paquete:       'No te quedan días en ese paquete.',
+  paquete_vencido:         'Ese paquete ya venció.',
+  paquete_no_disponible:   'Ese paquete no está disponible en este lugar.',
+  mascota_no_determinada:  '¿Para cuál de tus mascotas es este día?',
+  prestador_inactivo:      'Ese lugar ya no está disponible.',
+  sin_familia:             'Necesitas una familia para reservar.',
+  preset_invalido:         'Ese tamaño de paquete no existe.',
+
+  /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
+     función, no grepeando. **Mi censo anterior dijo «0 sin tipar» y estos dos
+     estaban vivos**: `reservar_dia_guarderia` los levanta con
+     `RAISE EXCEPTION USING MESSAGE = CASE …`, una forma que mi regex
+     —`RAISE EXCEPTION 'literal'`— **no veía**.
+
+     🔴 Es `L-425` en carne: *un baseline en 0 no dice «no hay»: dice «no vi,
+     con la lista de hoy»*. El 0 era de **la forma que miraba**, no del motor. */
+
+  /* 🔴 EL CAMINO NORMAL DE TODA FAMILIA NUEVA. Antes caía en
+     `error_desconocido`: le decíamos «ocurrió un error inesperado» a alguien
+     que sólo tenía que aceptar los términos — **y no le decíamos cuáles ni
+     dónde**. La pantalla que lea este código LLEVA a aceptarlos. */
+  documentos_sin_aceptar:    'Antes de reservar hay que aceptar los términos de la guardería.',
+  /* 🔴 PEOR EN CLASE: **es un estado NUESTRO** —la casa no cargó los
+     documentos— y se presentaba como si algo hubiera fallado del lado de la
+     familia. *No hay nada que ella pueda hacer, y la voz no le pide que lo
+     intente de nuevo.* */
+  documentos_no_disponibles: 'Todavía no podemos mostrarte los términos de la guardería. Es de nuestro lado: vuelve a intentarlo más tarde.',
+
 
   /* ✏️ S107-A · CENSADOS CONTRA EL MOTOR, no agregados de a uno.
      C reportó que `fecha_no_ofertable` llegaba como `error_desconocido`; al
@@ -637,4 +666,186 @@ export async function obtenerActaGuarderia(
       media,
     },
   };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL PAQUETE — comprar, y agendar contra saldo
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface CompraDePaquete {
+  bonoId: string;
+  dias: number;
+  total: number;
+  porDia: number;
+  /** 'YYYY-MM-DD'. */
+  venceEl: string;
+  /** Días que venían de un paquete anterior y se extendieron (rollover, P16e). */
+  diasRollover: number;
+  /** Lo comprado + lo que rodó. **Es el número que el hub muestra.** */
+  saldoTotal: number;
+}
+
+/**
+ * 🔴 **COMPRAR NO ES RESERVAR.** El único efecto es el bono: cero citas.
+ * *La primera sesión se agenda al comprar desde la PANTALLA, con una segunda
+ * llamada — no acá.*
+ *
+ * El tamaño se valida contra `guarderia_paquetes` del lugar: **los presets son
+ * dato del prestador**, no un `5|10|15` cableado.
+ */
+export async function comprarPaqueteGuarderia(params: {
+  prestadorId: string;
+  tamano: number;
+}): Promise<ResultadoWrapper<CompraDePaquete, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('comprar_paquete_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_tamano: params.tamano,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.bono_id !== 'string' || typeof r.dias !== 'number') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      bonoId: r.bono_id,
+      dias: r.dias,
+      total: typeof r.total === 'number' ? r.total : 0,
+      porDia: typeof r.por_dia === 'number' ? r.por_dia : 0,
+      venceEl: typeof r.vence_el === 'string' ? r.vence_el : '',
+      diasRollover: typeof r.dias_rollover === 'number' ? r.dias_rollover : 0,
+      saldoTotal: typeof r.saldo_total === 'number' ? r.saldo_total : 0,
+    },
+  };
+}
+
+/**
+ * Agenda un día contra el saldo de un paquete. **Cero cobro:** el desglose se
+ * congeló al comprar.
+ *
+ * 🔴 **NO recibe `prestadorId`, y es firma del founder:** *cuando la familia ya
+ * tiene saldo, **el lugar está determinado por el paquete**.* Pedirlo sería
+ * ofrecerle elegir algo que ya eligió — y abrir la puerta a que elija mal.
+ *
+ * ⚠️ **`mascotaId` es opcional pero NO decorativo:** con una sola mascota
+ * elegible el motor la resuelve; **con dos o más rebota `mascota_no_determinada`
+ * en vez de adivinar.** *El bono es del HOGAR (v1.4): a cuál de los dos perros
+ * se le agenda el martes lo elige la familia, cada vez.*
+ */
+export async function reservarDiaDePaqueteGuarderia(params: {
+  bonoId: string;
+  /** 'YYYY-MM-DD'. **Jamás hoy**: rebota `reserva_mismo_dia`. */
+  fecha: string;
+  mascotaId?: string | null;
+}): Promise<
+  ResultadoWrapper<
+    { citaId: string; estadiaId: string; saldoRestante: number },
+    CodigoErrorGuarderiaReserva
+  >
+> {
+  const { data, error } = await getClient().rpc('reservar_dia_de_paquete_guarderia', {
+    p_bono_id: params.bonoId,
+    p_fecha: params.fecha,
+    p_mascota_id: params.mascotaId ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.cita_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: {
+      citaId: r.cita_id,
+      estadiaId: typeof r.estadia_id === 'string' ? r.estadia_id : '',
+      /* 🔴 El saldo sale del MOTOR. La pantalla no resta: si restara, dos
+         superficies podrían decir números distintos del mismo bono. */
+      saldoRestante: typeof r.saldo_restante === 'number' ? r.saldo_restante : 0,
+    },
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL SALDO DE PAQUETES DE GUARDERÍA — *«te quedan X días»*
+   ═══════════════════════════════════════════════════════════════════════════
+   🔴 **Sin esto el hub no puede saber que la familia tiene un paquete.** El
+   lector del paseo está clavado en `.eq('tipo_servicio','paseo')` —y **filtra
+   bien**: alimenta el hub de paseos— así que guardería necesitaba el suyo.
+   *La lógica ya estaba probada en el motor; lo que faltaba era que el hub la
+   supiera.*
+
+   **Reusa `puertaDelDueno`** del wrapper de paquetes en vez de re-implementar
+   el filtro: *dos copias del mismo criterio de acceso divergen, y la que se
+   olvide de la pata `familia_id` deja a media familia sin ver su propio
+   paquete.*
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * 🔴 **`PaqueteCOMPRADO`, no `PaqueteGuarderia` — y el nombre importa.**
+ * `PaqueteGuarderia` ya existe en `guarderia-config`: es **el que el prestador
+ * OFRECE** (tamaño y precio). Éste es **el que la familia COMPRÓ** (saldo y
+ * vencimiento). *Dos cosas distintas con el mismo nombre es `D-974` otra vez —
+ * acá lo cazó el compilador porque viven en el mismo paquete; entre motor y
+ * pieza no lo habría cazado nadie.*
+ */
+export interface PaqueteCompradoGuarderia {
+  bonoId: string;
+  prestadorId: string;
+  /** Días comprados y cuántos se usaron. **El hub muestra `quedan`.** */
+  total: number;
+  usados: number;
+  quedan: number;
+  /** Lo que se pagó por día al comprar. Congelado: el día vale esto aunque el lugar suba. */
+  porDia: number | null;
+  /** 'YYYY-MM-DD'. `null` = sin vencimiento declarado. */
+  venceEl: string | null;
+  /** `activo` · `agotado` · `vencido` · `cancelado`. */
+  estado: string;
+}
+
+/**
+ * Los paquetes de guardería del hogar.
+ *
+ * ⚠️ **Devuelve TODOS los estados, no sólo los usables.** *Un paquete agotado o
+ * vencido es información que la familia tiene derecho a ver —pagó por él— y
+ * esconderlo haría que su plata desapareciera de la pantalla.* Quién se muestra
+ * en el rail y quién en el historial **lo decide la superficie**, no este lector.
+ */
+export async function obtenerMisPaquetesGuarderia(): Promise<
+  ResultadoWrapper<PaqueteCompradoGuarderia[], CodigoErrorGuarderiaReserva>
+> {
+  const puerta = await puertaDelDueno();
+  if (!puerta.ok) {
+    return fallaCodigo(puerta.codigo === 'sin_sesion' ? 'sin_sesion' : 'datos_inconsistentes');
+  }
+  const { data, error } = await getClient()
+    .from('bonos')
+    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento')
+    .eq('tipo_servicio', 'guarderia_dia')
+    .eq('estado_pago', 'pagado')
+    .or(puerta.filtro)
+    .order('fecha_compra', { ascending: false });
+  if (error) return fallo(error.message);
+
+  const salida: PaqueteCompradoGuarderia[] = [];
+  for (const b of data ?? []) {
+    if (typeof b.id !== 'string' || typeof b.unidades_total !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    const usados = typeof b.unidades_usadas === 'number' ? b.unidades_usadas : 0;
+    salida.push({
+      bonoId: b.id,
+      prestadorId: typeof b.prestador_id === 'string' ? b.prestador_id : '',
+      total: b.unidades_total,
+      usados,
+      /* La resta se hace UNA vez, acá. *Si cada pantalla restara, dos podrían
+         decir números distintos del mismo bono.* */
+      quedan: Math.max(b.unidades_total - usados, 0),
+      porDia: typeof b.precio_por_unidad === 'number' ? b.precio_por_unidad : null,
+      venceEl: typeof b.fecha_vencimiento === 'string' ? b.fecha_vencimiento : null,
+      estado: typeof b.estado === 'string' ? b.estado : '',
+    });
+  }
+  return { ok: true, data: salida };
 }

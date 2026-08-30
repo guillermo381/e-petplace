@@ -23754,6 +23754,30 @@ La migración del digest cerró su función nueva con `REVOKE … FROM PUBLIC, a
 **Dueño:** B (la pieza) + mesa (la firma sobre píxeles). **Disparo:** sesión de diseño, con **las tres montadas juntas** — *la comparación es el instrumento; ninguna de las tres se juzga sola.*
 ☠️ **Condición de muerte:** la decisión firmada **y** el censo en 0 baldosas a mano, **o** las excepciones declaradas una por una con su razón.
 
+---
+
+## ☠️ **D-973 CERRADA SIN CAMBIO — firma del founder, 29-ago-2026**
+
+**La baldosa a mano del cliente SE QUEDA, y `Baldosa` NO gana variantes.**
+
+**Se cumplió la segunda mitad de la condición de muerte**, que estaba escrita
+como alternativa desde el día uno: *«**o** las excepciones declaradas una por una
+con su razón»*. **La excepción es una, está declarada, y su razón es que el
+founder la pidió así** — sin descripción y sin chevron.
+
+> 🔴 **Y el valor de esta ficha no fue el resultado: fue haber separado las dos
+> preguntas.** Cuando apareció, la lectura fácil era *«hay tres baldosas
+> distintas, unifiquemos»*. La ficha obligó a preguntar la otra —**¿la pieza
+> tiene que admitir esta forma, o esta superficie no es una baldosa?**— y la
+> respuesta fue la segunda. *Unificar habría metido dos props opcionales en una
+> pieza congelada para servir a un caso que no es el suyo.*
+
+**Lo que queda vivo y NO muere con ella:** la advertencia de que la galería tiene
+una **copia transcrita a mano** de ese bloque (`TokenGallery.tsx`, sección
+`D-973`) y su marca gemela en `apps/cliente/src/app/(tabs)/explorar/index.tsx`.
+*Si esa pantalla cambia y la copia no, el instrumento de comparación empieza a
+medir una ficción* — **esas dos marcas siguen rigiendo aunque la ficha cierre.**
+
 # Deudas S107 (D-974 · D-975) — depositadas por A el 29-ago-2026 · números verificados libres POR GREP (tope real `D-973`)
 
 #### D-974 — 🔴 DOS ENUMS QUE COMPARTEN UNA PALABRA NO COMPARTEN SU SENTIDO
@@ -23840,3 +23864,44 @@ motor↔pieza declarados, **o** la disciplina escrita en el protocolo 1c —
 
 **Dueño:** quien construya. **Disparo:** cada vez que se reuse una fórmula de otra función.
 ☠️ **Condición de muerte:** la pregunta *«¿este criterio responde MI pregunta, o la de donde lo saqué?»* escrita en el protocolo de reuso — **el reuso se justifica por la pregunta, no por el precedente.**
+
+### L-437 — UN CENSO POR REGEX MIDE LA FORMA QUE MIRA, NO EL MOTOR
+
+**Origen: censo propio de A que dio 0 con dos códigos vivos, 29-ago-2026.**
+
+A censó los códigos de error del motor de guardería con
+`RAISE EXCEPTION '([a-z_]+)'`, tipó 17 y **reportó el censo en 0**.
+
+🔴 **Dos códigos seguían sin tipar, y eran los del camino más común:**
+`documentos_sin_aceptar` —**el de toda familia nueva**— y
+`documentos_no_disponibles`. Los levanta `reservar_dia_guarderia` con
+
+```sql
+RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = CASE … END
+```
+
+— **una forma sin literal detrás de `RAISE EXCEPTION`, que el regex no veía.**
+
+> ### El 0 no era del motor: era **de la forma que el instrumento miraba**.
+>
+> Es `L-425` en carne —*un baseline en 0 no dice «no hay»: dice «no vi, con la
+> lista de hoy»*— con el agravante de que **el 0 se reportó como cierre**: «el
+> censo quedó en 0» se leyó, y se escribió, como *«no falta ninguno»*.
+
+**Y el segundo intento tampoco alcanzó:** ampliar el regex a `THEN 'x'` trajo
+**ruido** (capturó estados como `al_dia`, `no_opera`, `pasado` — que no son
+errores) **y siguió incompleto** (el `ELSE 'documentos_sin_aceptar'` tampoco
+matchea). *Un instrumento que se parchea dos veces sobre el mismo caso está
+diciendo que no es el instrumento.*
+
+**La cura no fue un tercer regex: fue LEER la función.** Los dos códigos salieron
+del `CASE` a la vista, en tres líneas de lectura.
+
+**Regla:** un censo por patrón sobre CÓDIGO **acota, no cierra**. Sirve para
+encontrar candidatos; **no sirve para afirmar que no queda ninguno.** Cuando el
+resultado se va a usar como *«ya está completo»* —y no como *«mirá estos»*—, la
+verificación es **leer la fuente de las funciones que importan**.
+
+*Corolario para esta casa: el motor levanta errores de al menos DOS formas
+(`RAISE EXCEPTION 'x'` y `USING MESSAGE = …`), y cualquier instrumento futuro
+que cuente códigos tiene que declarar cuál de las dos mira.*

@@ -57,12 +57,15 @@ import {
   Tarjeta,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
   evaluarRequisitosGuarderia,
   obtenerCupoGuarderia,
   obtenerFranjasGuarderia,
+  comprarPaqueteGuarderia,
+  reservarDiaDePaqueteGuarderia,
   reservarDiaGuarderia,
   type CupoDiaGuarderia,
   type EstadoCupoDia,
@@ -72,6 +75,7 @@ import {
 import { obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { PieReserva } from '@/components/reserva-piezas';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
@@ -98,6 +102,10 @@ export default function LugarGuarderia() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const { mostrar } = useAviso();
+  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string }>();
+  const esPaquete = params.modalidad === 'paquete';
+  const tamano = Number(params.tamano ?? '');
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
     mascotaId?: string;
@@ -216,6 +224,17 @@ export default function LugarGuarderia() {
   /** Lunes = columna 0. `getDay()` da domingo=0, así que se corre. */
   const columnaInicial = (primeroDelMes.getDay() + 6) % 7;
 
+  /** El precio viaja desde la lista: la familia ve lo que va a pagar **antes**
+   *  de tocar. `null` = no llegó, y entonces el pie no monta bloque de precio
+   *  — *jamás un número inventado.* */
+  const precioTexto =
+    typeof params.precio === 'string' && params.precio.length > 0 ? params.precio : null;
+  /* 🔴 Se estrecha por FASE antes de mirar `requisitos`: mientras carga no hay
+     nada que decidir, y el pie sólo existe con la pantalla lista. */
+  const req = estado.fase === 'listo' ? estado.requisitos : null;
+  const puedeReservar =
+    elegido !== null && req !== null && !(req.bloquea && !req.alDia);
+
   const alAtras = useCallback(() => router.back(), [router]);
 
   /**
@@ -228,6 +247,51 @@ export default function LugarGuarderia() {
     if (elegido === null || typeof mascotaId !== 'string' || reservando) return;
     setReservando(true);
     setRebote(null);
+    /* ═══ EL CAMINO DEL PAQUETE — DOS LLAMADAS, UN SOLO ACTO ═══════════════
+       Firma del founder: **el toggle de la primera sesión va prendido y es
+       obligatorio en la primera compra.** Por eso acá no hay interruptor: *un
+       toggle que no se puede apagar es una casilla decorativa.*
+
+       🔴 **COMPRAR NO ES RESERVAR — y por eso son dos llamadas.** El motor lo
+       dice en su contrato: `comprarPaqueteGuarderia` crea SÓLO el bono (cero
+       citas), y la primera sesión se agenda con la segunda. *Meterlas en una
+       sola RPC habría atado el paquete a un día, y el paquete es del HOGAR.*
+
+       ⚠️ **Y no hay checkout, medido:** el bono nace `estado_pago='pagado'` con
+       `pago_simulado: true`. **La pantalla lo DICE** — *un cobro simulado que la
+       superficie presenta como real es la clase de mentira que esta casa
+       persigue.* */
+    if (esPaquete) {
+      const compra = await comprarPaqueteGuarderia({ prestadorId: prestadorId as string, tamano });
+      if (!compra.ok) {
+        setRebote(compra.mensaje);
+        setReservando(false);
+        return;
+      }
+      /* La mascota VIAJA acá aunque sea opcional: en la primera compra ya está
+         decidida y mandarla evita el rebote `mascota_no_determinada` en el
+         único momento del flujo donde la familia no lo entendería. */
+      const primera = await reservarDiaDePaqueteGuarderia({
+        bonoId: compra.data.bonoId,
+        fecha: elegido,
+        mascotaId,
+      });
+      setReservando(false);
+      if (!primera.ok) {
+        /* 🔴 EL BONO YA EXISTE. *Decir sólo «no se pudo» sobre una compra que SÍ
+           ocurrió dejaría a la familia creyendo que perdió la plata.* */
+        setRebote(t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
+        return;
+      }
+      mostrar({
+        texto: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }),
+        variante: 'exito',
+      });
+      if (router.canDismiss()) router.dismissAll();
+      router.navigate('/hogar/guarderia');
+      return;
+    }
+
     const r = await reservarDiaGuarderia({ prestadorId: prestadorId as string, mascotaId, fecha: elegido });
     setReservando(false);
     if (!r.ok) {
@@ -236,6 +300,19 @@ export default function LugarGuarderia() {
          el cupo cambió mientras miraba, el calendario tiene que decirlo. */
       setRebote(r.mensaje);
       setIntento((n) => n + 1);
+      /* ⭐ S107-C · **EL ÚNICO REBOTE QUE TIENE ADÓNDE IR.**
+         `documentos_sin_aceptar` no es un error: es **el paso anterior**, y
+         toda familia nueva lo recibe. *Nombrarlo fue la mitad de la cura —A lo
+         tipó y dejó de salir como «error inesperado»—; la otra mitad es que
+         lleve a donde se resuelve.*
+         🔴 **Los otros rebotes NO navegan a propósito:** `sin_cupo` y
+         `requisitos_sanitarios` se arreglan en esta misma pantalla o en el
+         carnet, y `documentos_no_disponibles` **no se arregla del lado de la
+         familia** — mandarla a una pantalla que va a decirle lo mismo sería
+         pasearla. */
+      if (r.codigo === 'documentos_sin_aceptar') {
+        router.push('/guarderia/documentos');
+      }
       return;
     }
     router.push({
@@ -248,7 +325,7 @@ export default function LugarGuarderia() {
         fecha: elegido,
       },
     });
-  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router]);
+  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t]);
 
   if (estado.fase === 'cargando') {
     return (
@@ -364,65 +441,70 @@ export default function LugarGuarderia() {
         {estado.requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
-            <SemaforoSanitario
-              requisitos={estado.requisitos.faltantes.length === 0
-                ? [{
-                    clave: 'todo',
-                    etiqueta: t('lugarGuarderia.requisitosAlDia'),
-                    estado: 'al_dia',
-                  }]
-                : estado.requisitos.faltantes.map((f): RequisitoSanitario => ({
-                    clave: f.codigo,
-                    etiqueta: f.nombre,
-                    estado: 'falta',
-                    /* El estado del motor se traduce a VOZ acá — el server
-                       manda códigos, la voz es de la casa (contrato §⑥bis). */
-                    detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
-                    /* 🔴 El tipo de la pieza hace INEXPRESABLE un faltante sin
-                       camino: `falta` no compila sin `onResolver`. */
-                    onResolver: () => router.push('/carnet'),
-                    etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
-                  }))}
-            />
+            {/* ⭐ LA SUPERFICIE BLANCA LA PONE EL CONSUMIDOR — firma del
+                founder: *«fondo blanco y un chevron a la derecha, o sea la
+                anatomía de una FILA»*. **El chevron ya lo dibuja la pieza** (el
+                defecto era que su path salía como texto, curado por B); lo que
+                faltaba era el fondo, y `SemaforoSanitario` **no expone
+                superficie** — como `FichaFranja`, la decide quien la monta.
+                *Sin ella las filas flotan sobre el papel y se leen como texto
+                suelto, que es exactamente lo que el founder reportó.* */}
+            <Tarjeta>
+              <SemaforoSanitario
+                requisitos={estado.requisitos.faltantes.length === 0
+                  ? [{
+                      clave: 'todo',
+                      etiqueta: t('lugarGuarderia.requisitosAlDia'),
+                      estado: 'al_dia',
+                    }]
+                  : estado.requisitos.faltantes.map((f): RequisitoSanitario => ({
+                      clave: f.codigo,
+                      etiqueta: f.nombre,
+                      estado: 'falta',
+                      /* El estado del motor se traduce a VOZ acá — el server
+                         manda códigos, la voz es de la casa (contrato §⑥bis). */
+                      detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
+                      /* 🔴 El tipo de la pieza hace INEXPRESABLE un faltante sin
+                         camino: `falta` no compila sin `onResolver`. */
+                      onResolver: () => router.push('/carnet'),
+                      etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
+                    }))}
+              />
+            </Tarjeta>
           </View>
         ) : null}
 
-        {/* ── RESERVAR ── */}
-        <View style={{ gap: spacing[2] }}>
-          {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
-          <Boton
-            etiqueta={t('lugarGuarderia.reservar')}
-            bloque
-            cargando={reservando}
-            /* 🔴 EL GATE REFLEJA AL SERVER, NO LO DECIDE — y ahora la perilla
-               viaja DENTRO de la evaluación (`bloquea`), así que **es la misma
-               pantalla en los dos modos**: no hay rama nueva, hay un dato más
-               en la condición.
-               *Y el mismo `bloquea` lo lee `reservar_dia_guarderia`, así que
-               esta puerta nunca se abre para chocar contra otra.* */
-            deshabilitado={
-              elegido === null ||
-              estado.requisitos === null ||
-              (estado.requisitos.bloquea && !estado.requisitos.alDia)
-            }
-            onPress={() => void reservar()}
-          />
-          {/* 🔴 EL MISMO FALTANTE, DOS TONOS — y la diferencia es de trato, no
-              de información: **con el bloqueo encendido frena** y hay que
-              decirlo; **apagado, se dice sin frenar y sin drama.** *Le falta
-              algo y lo puede resolver: no está haciendo nada malo, y una voz
-              de alarma sobre algo que no impide nada enseña a ignorar las
-              alarmas que sí importan.* El camino a cargarlo sigue a un toque
-              en los dos modos — la pieza no compila un faltante sin camino. */}
-          {estado.requisitos !== null && !estado.requisitos.alDia ? (
-            <Texto variante="apoyo">
-              {estado.requisitos.bloquea
-                ? t('lugarGuarderia.bloqueadoPorRequisitos')
-                : t('lugarGuarderia.faltaSinFrenar')}
-            </Texto>
-          ) : null}
-        </View>
       </ScrollView>
+
+      {/* ── RESERVAR — ⏪ **ESTABA AL FINAL DEL SCROLL Y NO SE VEÍA.**
+             Medido con sesión real el 29-ago: el CTA caía en **y=1007 sobre una
+             pantalla de 932** ⇒ *había que scrollear para descubrir que se
+             podía reservar*, y el founder lo leyó como «el botón no está
+             montado». **Sus cuatro hermanas usan `PieReserva`**, que es fijo al
+             borde inferior; ésta era la única que no.
+             *No era un defecto de estilo: una acción que hay que buscar es una
+             acción que no existe para quien no la busca.* ── */}
+      <View style={{ paddingHorizontal: spacing[5] }}>
+        {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
+      </View>
+      {estado.fase === 'listo' ? (
+      <PieReserva
+        total={precioTexto}
+        etiqueta={esPaquete ? t('lugarGuarderia.comprarPaquete', { n: tamano }) : t('lugarGuarderia.reservar')}
+        habilitado={puedeReservar}
+        insetBottom={insets.bottom}
+        /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una
+           palabra. *Una pared muda le hace creer a la familia que el producto
+           está roto, cuando lo único que falta es que toque un día.* */
+        razonDeshabilitado={
+          elegido === null
+            ? t('lugarGuarderia.faltaDia')
+            : t('lugarGuarderia.faltaRequisitos')
+        }
+        onPress={() => void reservar()}
+      />
+      ) : null}
+
     </View>
   );
 }

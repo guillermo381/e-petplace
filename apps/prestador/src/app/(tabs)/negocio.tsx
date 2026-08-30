@@ -642,13 +642,14 @@ export default function Negocio() {
                            DESCRIPCIÓN.** Se declara para que la mesa confirme o
                            lo devuelva; borrar copy en silencio es peor que
                            dejarlo de más.
-                           🔴 **`negocio.tiendaVitrinaDetalle` y
-                           `negocio.tiendaLocalDetalle` SIGUEN VIVAS en el riel
-                           (es y en) A PROPÓSITO** — orden de la mesa: *«el
-                           founder decide y te aviso; no las borres mientras
-                           tanto»*. **Quedan sin uso, y eso NO es basura que
-                           limpiar**: es una decisión esperando firma. Quien
-                           barra claves huérfanas, que lea esto primero. */
+                           ⏪ **ACÁ DECÍA que las dos claves seguían vivas
+                           «esperando firma». LA FIRMA LLEGÓ** (founder,
+                           30-ago): *los textos SE VAN*. `tiendaVitrinaDetalle`
+                           y `tiendaLocalDetalle` **están borradas del riel**,
+                           con su lápida en `i18n/es.ts`. *Se marca en vez de
+                           reescribirse: el párrafo pedía no borrarlas, y
+                           dejarlo tal cual mandaría a la próxima pista a
+                           protegerlas de un borrado que ya se firmó.* */
                         configurado
                         orden={0}
                         onPress={() => router.push('/ventas')}

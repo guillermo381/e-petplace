@@ -57,12 +57,15 @@ import {
   SelectorSegmentado,
   SemaforoSanitario,
   type RequisitoSanitario,
+  Tarjeta,
   Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
 import {
   evaluarRequisitosGuarderia,
+  obtenerGuarderiasDisponibles,
+  obtenerPaquetesGuarderia,
   obtenerResumenGuarderias,
   type CausaSinGuarderias,
   type RequisitosGuarderia,
@@ -144,14 +147,41 @@ export default function ElegirGuarderia() {
     ? params.mascotaId
     : null;
 
-  /* 🔴 NACEN SIN ELEGIR — no hay default oscuro. Con una sola modalidad abierta
-     el selector no se dibuja (N=1 colapsa) y se preselecciona la única. */
-  const unica = MODALIDADES_ABIERTAS.length === 1 ? MODALIDADES_ABIERTAS[0] : null;
-  const [modalidad, setModalidad] = useState<ModalidadGuarderia | null>(unica);
+  /* ⏪ **LA MODALIDAD ARRANCA EN «DÍA» — enmienda firmada del founder (29-ago).**
+     La versión anterior nacía SIN elegir *«para que nada aparezca antes de que
+     la familia decida»*. **El efecto real, visto en el aparato: con dos
+     modalidades la pantalla aterrizaba VACÍA** — un cabezal, dos chips y nada
+     más.
+
+     > *La revelación progresiva servía cuando el primer paso era el día. Con la
+     > modalidad adelante, esperar a que elijan lo más común convierte el paso
+     > cero en una pantalla en blanco.*
+
+     🔴 **Y la firma NO se aflojó, se acotó:** «día» es **la más común y la única
+     que hoy se cobra sola** — *no es un default oscuro: es el camino que la
+     familia iba a tomar igual.* **Nada más viene elegido**: el día, el precio y
+     el botón **siguen apareciendo a medida que avanza**, que es lo que la
+     revelación progresiva protegía de verdad. */
+  const [modalidad, setModalidad] = useState<ModalidadGuarderia | null>('dia');
   const [tamano, setTamano] = useState<TamanoPaqueteGuarderia | null>(null);
   const [fecha, setFecha] = useState<string | null>(null);
   const [requisitos, setRequisitos] = useState<RequisitosGuarderia | null>(null);
   const [resumen, setResumen] = useState<Resumen>({ fase: 'ocioso' });
+  /**
+   * ⭐ **EL PRECIO DE CADA TAMAÑO — el mínimo entre los lugares que ofrecen ESE
+   * paquete.** `{}` = todavía no se sabe.
+   *
+   * ⏪ **Acá estuvo mi peor cura de la sesión.** El resumen devuelve
+   * `min(gp.precio)` **sobre todos los tamaños**, así que los tres chips
+   * mostraban el precio del de 5. **Mi arreglo fue dejar de pintar ninguno** —
+   * *cambié el síntoma y empeoré la pantalla*, y **no lo verifiqué contra el
+   * render**, que es exactamente por lo que no me di cuenta.
+   *
+   * 🔴 **El dato SÍ existía y no lo busqué:** `obtenerPaquetesGuarderia`
+   * devuelve `(tamano, precio)` por lugar. *No hacía falta esperar a A para
+   * decir la verdad: hacía falta buscar dónde vivía.*
+   */
+  const [precioPorTamano, setPrecioPorTamano] = useState<Record<number, number>>({});
 
   /* Los requisitos son de la MASCOTA, no del día: se piden una vez. */
   useEffect(() => {
@@ -203,7 +233,42 @@ export default function ElegirGuarderia() {
       });
     })();
     return () => { vigente = false; };
-  }, [listoParaDia, fecha, mascotaId, modalidad]);
+    /* ⏪ `tamano` FALTABA EN LAS DEPS: cambiar de chip no volvía a preguntar.
+       *Era la mitad del defecto — la otra mitad es que el server no sabe el
+       tamaño (ver abajo), así que ni preguntando de nuevo cambiaría.* */
+  }, [listoParaDia, fecha, mascotaId, modalidad, tamano]);
+
+  /* Los precios por tamaño: una llamada por lugar, en paralelo, y **la
+     pantalla no espera** — los chips se completan cuando llegan.
+     ⚠️ Es un N+1 declarado: con los lugares de hoy es barato. *El día que sean
+     muchos, el pedido a A (`p_tamano` en el resumen) lo cierra de una.* */
+  useEffect(() => {
+    if (modalidad !== 'paquete' || fecha === null || mascotaId === null) {
+      setPrecioPorTamano({});
+      return;
+    }
+    let vigente = true;
+    void (async () => {
+      const lug = await obtenerGuarderiasDisponibles({ fecha, mascotaId, modalidad: 'paquete' });
+      if (!vigente || !lug.ok) return;
+      const packs = await Promise.all(
+        [...new Set(lug.data.map((g) => g.prestadorId))].map((id) => obtenerPaquetesGuarderia(id)),
+      );
+      if (!vigente) return;
+      const min: Record<number, number> = {};
+      for (const r of packs) {
+        if (!r.ok) continue;
+        for (const pq of r.data) {
+          if (!pq.activo) continue;
+          /* 🔴 El MÍNIMO entre lugares, que es un «desde» honesto — **jamás el
+             de otro tamaño**, que era el defecto. */
+          if (min[pq.tamano] === undefined || pq.precio < min[pq.tamano]) min[pq.tamano] = pq.precio;
+        }
+      }
+      setPrecioPorTamano(min);
+    })();
+    return () => { vigente = false; };
+  }, [modalidad, fecha, mascotaId]);
 
   const dias = useMemo(() => {
     const corto = new Intl.DateTimeFormat(idioma, { weekday: 'short' });
@@ -218,6 +283,11 @@ export default function ElegirGuarderia() {
     (c: CausaSinGuarderias): string =>
       t(
         c === 'sin_cupo_ese_dia' ? 'elegirGuarderia.causaSinCupo'
+        /* ⭐ A la tipó como causa propia (29-ago). 🔴 **Su voz NO lleva «prueba
+           con otro día» pegado**: el día no es el problema — lo que la familia
+           no sabía es CUÁNDO sí abren. *Mandarla a mover el dedo sería
+           esconderle el dato que le falta.* */
+        : c === 'no_opera_ese_dia' ? 'elegirGuarderia.causaNoOpera'
         : c === 'nadie_vende_esa_modalidad' ? 'elegirGuarderia.causaSinModalidad'
         /* ④ Mapeada, **hoy inalcanzable**: sin `lat`/`lon` esa etapa no
            descarta a nadie y el server no puede devolverla. */
@@ -230,10 +300,29 @@ export default function ElegirGuarderia() {
 
   /* ① Se pregunta por la causa y basta: `cuantos > 0 ⟺ causa === null`. */
   const puedeSeguir = resumen.fase === 'listo' && resumen.causa === null;
-  /* ② `null` ⇒ nada. Jamás un `0` que se lea como gratis. */
-  const total = resumen.fase === 'listo' && resumen.precioDesde !== null
-    ? `$ ${resumen.precioDesde.toFixed(2)}`
-    : null;
+  /* ② `null` ⇒ nada. Jamás un `0` que se lea como gratis.
+     ═══════════════════════════════════════════════════════════════════════
+     🔴 **EN PAQUETE NO SE PINTA PRECIO, Y ES LA CURA DE UN DEFECTO CARO.**
+
+     Reportado por el founder: *«con 5 muestra su precio; al elegir 10 o 15
+     sigue mostrando el de 5»*. **Medido, y no era mi estado:**
+     `obtener_resumen_guarderias` **no recibe el tamaño**, y el precio de
+     paquete sale de `min(gp.precio)` — **el paquete MÁS BARATO del lugar**.
+
+     > ### La familia veía $40 y pagaba $75. En la superficie donde se decide pagar.
+
+     *Cualquier número que pinte acá es el de OTRO tamaño que el elegido.* ⇒
+     **no se pinta ninguno hasta que el server sepa el tamaño**
+     (`S107-C-PEDIDO-A-A-PRECIO-POR-TAMANO.md`). **La ausencia es honesta; el
+     número no lo era.** El precio real se ve por lugar en «quién puede» y en el
+     botón de compra, que sí nombra el tamaño.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const total =
+    modalidad === 'paquete'
+      ? null
+      : resumen.fase === 'listo' && resumen.precioDesde !== null
+        ? `$ ${resumen.precioDesde.toFixed(2)}`
+        : null;
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -267,7 +356,16 @@ export default function ElegirGuarderia() {
             acento="control"
             disposicion="tira"
             etiqueta={t('hubGuarderia.cuantasEstadias')}
-            opciones={TAMANOS_PAQUETE.map((n) => ({ codigo: String(n), etiqueta: t('hubGuarderia.tamanoEstadias', { n }) }))}
+            /* Cada chip con SU precio. Sin precio todavía, sólo el tamaño:
+               **la etiqueta no espera al número**, y un chip sin precio es
+               honesto mientras un chip con el precio de otro no lo era. */
+            opciones={TAMANOS_PAQUETE.map((n) => ({
+              codigo: String(n),
+              etiqueta:
+                precioPorTamano[n] === undefined
+                  ? t('hubGuarderia.tamanoEstadias', { n })
+                  : t('hubGuarderia.tamanoEstadiasDesde', { n, precio: precioPorTamano[n].toFixed(2) }),
+            }))}
             seleccionada={tamano === null ? '' : String(tamano)}
             onSelect={(c) => { setTamano(Number(c) as TamanoPaqueteGuarderia); setFecha(null); }}
           />
@@ -291,22 +389,44 @@ export default function ElegirGuarderia() {
           </View>
         ) : null}
 
-        {/* ── ⑤ LOS REQUISITOS — bajo el día, en los tres caminos, INFORMATIVOS ── */}
-        {listoParaDia && requisitos !== null ? (
+        {/* ── ⑤ LOS REQUISITOS — **DESPUÉS de elegir el día**, en los tres
+               caminos, e INFORMATIVOS.
+
+               ⏪ Aparecían apenas se abría la pantalla: con una sola modalidad,
+               `listoParaDia` es verdadero desde el arranque. **Firma de la mesa
+               (29-ago): van después del día, con el ritmo estricto.**
+
+               🔴 **Y la firma gana contra un argumento correcto**, que por eso
+               se deja escrito: los requisitos son de la MASCOTA, no del día, y
+               verlos temprano dejaría arreglar el carnet mientras se elige.
+               *Pero el ritmo es lo que le dice a la familia que la pantalla va
+               paso a paso — y una excepción bien razonada en el medio de una
+               secuencia la vuelve una pantalla que a veces se adelanta.* */}
+        {fecha !== null && requisitos !== null ? (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
-            <SemaforoSanitario
-              requisitos={requisitos.faltantes.length === 0
-                ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
-                : requisitos.faltantes.map((f): RequisitoSanitario => ({
-                    clave: f.codigo,
-                    etiqueta: f.nombre,
-                    estado: 'falta',
-                    detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
-                    onResolver: () => router.push('/carnet'),
-                    etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
-                  }))}
-            />
+            {/* ⭐ LA SUPERFICIE BLANCA LA PONE EL CONSUMIDOR — firma del
+                founder: *«fondo blanco y un chevron a la derecha, o sea la
+                anatomía de una FILA»*. **El chevron ya lo dibuja la pieza** (el
+                defecto era que su path salía como texto, curado por B); lo que
+                faltaba era el fondo, y `SemaforoSanitario` **no expone
+                superficie** — como `FichaFranja`, la decide quien la monta.
+                *Sin ella las filas flotan sobre el papel y se leen como texto
+                suelto, que es exactamente lo que el founder reportó.* */}
+            <Tarjeta>
+              <SemaforoSanitario
+                requisitos={requisitos.faltantes.length === 0
+                  ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
+                  : requisitos.faltantes.map((f): RequisitoSanitario => ({
+                      clave: f.codigo,
+                      etiqueta: f.nombre,
+                      estado: 'falta',
+                      detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
+                      onResolver: () => router.push('/carnet'),
+                      etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
+                    }))}
+              />
+            </Tarjeta>
             {/* 🔴 LO DICE, para que nadie lea el semáforo como una puerta: hoy
                 informa y no frena (`bloquea === false`). */}
             {!requisitos.bloquea ? (

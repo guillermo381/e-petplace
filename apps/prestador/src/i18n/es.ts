@@ -1327,6 +1327,13 @@ export const prestadorEs = {
        local (suyo, no sale a ningún lado) y la otra es la vitrina que ve
        el cliente. *Si los dos se llamaran «productos», la pantalla no
        diría cuál es cuál — y ésa era justo la firma.* */
+    /* ☠️ `tiendaVitrinaDetalle` y `tiendaLocalDetalle` MURIERON (S107-B, firma
+       del founder 30-ago): «La vitrina» y «Muy pronto» salieron de la baldosa
+       cuando la de tres columnas se quedó con glifo y nombre, y la mesa firmó
+       que **no vuelven**. Se borran acá porque **ésa era la condición de
+       muerte que este mismo parte había escrito**: quedaban vivas *«esperando
+       firma»*, y la firma llegó. *Una clave que sobrevive a su decisión deja
+       de ser reserva y pasa a ser basura con coartada.* */
     tiendaVitrina: 'Vender por e-PetPlace',
     /* ⏪ Estos dos detalles nacieron ESCRITOS A OJO y la captura los cazó:
        «La vitrina del cliente» (130,2) y «Llega en la próxima versión»
@@ -1343,9 +1350,7 @@ export const prestadorEs = {
 
        Quien las mire buscando muertos: **están declaradas vivas acá**. Si el
        founder firma que no vuelven, mueren con esa firma y con este comentario. */
-    tiendaVitrinaDetalle: 'La vitrina',
     tiendaLocal: 'Inventario de tu local',
-    tiendaLocalDetalle: 'Muy pronto',
     tiendaV2Titulo: 'Todavía no, pero viene',
     tiendaV2Voz:
       'El inventario de tu local —lo que tenés en tus estantes, sin salir a la vitrina— llega en la próxima versión. Por ahora podés vender por e-PetPlace.',

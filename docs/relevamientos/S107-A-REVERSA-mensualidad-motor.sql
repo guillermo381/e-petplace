@@ -1,0 +1,1 @@
+/* REVERSA de 20260831000000: DROP de las tres funciones. 🔴 NO deshace las citas y estadias ya generadas por un período cobrado — eso es servicio vendido y pagado; borrarlo sería quitarle a una familia días que compró. Si hay que revertir con períodos vivos, se decide en mesa qué pasa con esas estadías. */

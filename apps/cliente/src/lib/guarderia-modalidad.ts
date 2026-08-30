@@ -12,11 +12,11 @@
  * **Las tres modalidades están construidas enteras. Dos no se pueden vender**,
  * y no es una opinión — está medido contra el objeto el 29-ago-2026:
  *
- * · **PAQUETE** — no existe RPC de compra de paquete de guardería.
- *   `comprar_paquete_salidas` es del **paseo** y cobra contra
- *   `prestador_servicios.precio_paquete`, **la columna que el contrato de
- *   paquetes ⑤ descartó explícitamente para guardería**. Usarla no daría
- *   error: cobraría un número que nadie configuró.
+ * · ☠️ **PAQUETE — ABIERTO el 29-ago** con el aviso literal de A: existe
+ *   `comprarPaqueteGuarderia` y `reservarDiaDePaqueteGuarderia`, y **los
+ *   presets salen de `guarderia_paquetes` del lugar**, no de un `5|10|15`
+ *   cableado. *Su razón para estar cerrado —que la RPC del paseo cobraría
+ *   contra una columna descartada— dejó de existir cuando nació la propia.*
  * · **MENSUAL** — `precio_mensual_plan` se configura y **nadie lo cobra**: no
  *   hay hermano de `contratar_plan_paseo`.
  *
@@ -51,7 +51,7 @@ export type ModalidadGuarderia = (typeof MODALIDADES)[number];
  * A publique el filtro por modalidad y las dos RPC de cobro. Leé la trampa de
  * arriba antes de tocarla.
  */
-export const MODALIDADES_ABIERTAS: readonly ModalidadGuarderia[] = ['dia'];
+export const MODALIDADES_ABIERTAS: readonly ModalidadGuarderia[] = ['dia', 'paquete'];
 
 export function esModalidad(v: unknown): v is ModalidadGuarderia {
   return typeof v === 'string' && (MODALIDADES as readonly string[]).includes(v);
