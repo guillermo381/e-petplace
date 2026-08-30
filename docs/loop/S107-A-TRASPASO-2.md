@@ -271,6 +271,46 @@ firmado y no antes.
 
 ---
 
+## ⑦quater 🟢 D-977 CERRADA — EL CAMINO DE COMPRA ESTÁ ABIERTO
+
+Las dos firmas del founder del 29-ago destrabaron todo:
+
+| decisión | firma | qué descarta |
+|---|---|---|
+| plazo del no retiro | **15 días, tramo único** | ☠️ el día 60 **y con él la disposición definitiva: el animal NUNCA se dispone** |
+| garantía | **seguro propio del prestador** | ☠️ la póliza colectiva — queda como **intención declarada**, jamás promesa a una familia |
+
+**Hecho:** `LETRA_GUARDERIA` §3 y §6 reescritas (la letra **se descongeló**; el
+banner de freno queda tachado como historia) · los **seis textos v1** en
+`docs/legales/GUARDERIA_DOCUMENTOS_V1.md` · sembrados por
+`20260831040000`, cuyo texto **se EXTRAE de ese archivo** para que el que se
+revisa y el que se publica sean el mismo objeto.
+
+**Medido de punta a punta, y deshecho:**
+`acepta los 6 → al_dia → compra 5 días por $40 → reserva el 31-ago → saldo 4`,
+residuo 0.
+
+🔴 **LO QUE HAY QUE SABER ANTES DE CONFIAR EN ESE TEXTO:** lo redactó A, **que
+no es abogada**. Cada documento y cada § nuevo lleva su **mapa de
+interpretación** marcando qué transcribe del criterio y qué interpreta. **Las
+tres líneas más cargadas están nombradas en `D-979`** — «el animal nunca se
+dispone» · «omitir un antecedente de agresión es incumplimiento mío» · qué se
+autoriza por encima del tope de urgencia.
+
+⚠️ **`D-979` es condición de SOFT LAUNCH, no de construcción.** Y su
+consecuencia está escrita para que nadie la descubra el día del launch: **toda
+corrección publica una v2, y la v2 le vuelve a pedir aceptación a cada familia
+que aceptó la v1.** *Está bien y es el diseño; cuanto más tarde llegue la
+revisión, a más familias les reaparece la pantalla.*
+
+🔴 **Y `LETRA_GUARDERIA` §6.4 deja TRES decisiones abiertas que NO son
+jurídicas** — se nombraron en vez de resolverse: **quién le adelanta el dinero
+al refugio desde el día 15** (el texto promete custodia *sin fecha límite* y
+nadie la financia — **la más urgente**) · **qué refugio y el acta de traslado,
+un séptimo documento que no existe** · **quién ejecuta las notificaciones**.
+
+---
+
 ## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`
