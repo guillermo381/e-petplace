@@ -339,6 +339,43 @@ semáforo a ~60px · el selector de días.
 
 ---
 
+## ⑦sexies 🟢 LA v2 SEMBRADA — y `D-979` cobrándose por primera vez
+
+**`20260831100000`**, cinturón **4/4**. Tres firmas del founder adentro: el acto
+único que dice **«Declaro y acepto»** · el tope en **USD 150** como **término del
+texto, no campo del flujo** · **sin contacto alternativo, sólo al dueño**.
+
+| | |
+|---|---|
+| vigentes | **6** = 4 en v2 + **2 en v1** |
+| filas v1 | **6, conservadas** — `activo=false`, no borradas |
+| la familia que aceptó la v1 | vuelve a **`faltan` con EXACTAMENTE 4** |
+
+🔑 **Ese 4 es el brazo que mide el versionado selectivo:** con las seis subidas
+serían 6 faltantes; sin subir ninguna sería `al_dia`. **Las dos declaraciones le
+siguen contando aceptadas** porque su texto no cambió ni una coma.
+
+**No hace falta OTA.** `obtener_documentos_guarderia()` devuelve `contenido`: los
+textos viven en el servidor y la app los lee. *La familia ve la v2 al abrir.*
+
+⚠️ **La v1 no se borra nunca.** Esa familia la aceptó el 30-ago 16:34 y **la
+prueba tiene que poder mostrar el texto que aceptó** (P23). Y por lo mismo, la
+reversa declara que **si alguien ya aceptó la v2, la salida no es revertir: es
+publicar una v3.**
+
+📄 **El texto se DERIVÓ del objeto, no se retipeó:** cada v2 sale del `contenido`
+vivo de su v1 con **una sola** sustitución de ancla verificada. *Retipear un
+documento legal entero para cambiar una frase es cómo se cuela una diferencia
+que nadie pidió.*
+
+🔑 **Y el número llegó en blanco.** El mensaje con la firma decía *«USD ___»*. Se
+frenó y se pidió: ese número es lo que la familia autoriza a gastar de su
+bolsillo, y ponerlo por cuenta propia era el *default silencioso* que la misma
+firma prohíbe. **Con costo medible:** sembrar dos veces la v2 le muestra la
+pantalla de aceptación **dos veces** a quien ya aceptó la v1.
+
+---
+
 ## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`
