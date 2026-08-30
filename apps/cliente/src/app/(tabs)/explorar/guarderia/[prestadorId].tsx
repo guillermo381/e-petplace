@@ -516,8 +516,32 @@ export default function LugarGuarderia() {
                 faltaba era el fondo, y `SemaforoSanitario` **no expone
                 superficie** — como `FichaFranja`, la decide quien la monta.
                 *Sin ella las filas flotan sobre el papel y se leen como texto
-                suelto, que es exactamente lo que el founder reportó.* */}
-            <Tarjeta>
+                suelto, que es exactamente lo que el founder reportó.*
+
+                ⏪ **`relleno="ninguno"` Y NO EL DEFAULT — el founder lo vio
+                «muy ancho, la caja mal dimensionada», y estaba MEDIDO:**
+
+                  | | acá con `<Tarjeta>` | la fila equivalente de la casa |
+                  |---|---|---|
+                  | relleno de la carta | 12 | **0** (`ninguno`) |
+                  | alto con detalle | 12+68+12 = **~92** | **~60** |
+
+                *53 % más alta que `CeldaNavegacion` dentro de su carta, para
+                la misma información.* **El criterio ya estaba escrito en la
+                casa** (`pedidos/pedido/[pedidoId]`): *«`relleno="ninguno"`
+                porque adentro van `Celda` a sangre con sus `Separador`»* — y
+                acá adentro van filas, que es el mismo caso. El canon es
+                `parte/[eventoId]`: carta sin relleno con UNA fila adentro.
+
+                🔴 **EL `paddingHorizontal` DE ACÁ ES ANDAMIO, NO DISEÑO.** La
+                `Fila` de `SemaforoSanitario` nace con `paddingVertical` y
+                **sin horizontal**, así que a sangre el texto tocaría el borde.
+                Se lo pongo yo para no dejar la cura a medias — pero el número
+                es de la PIEZA (`CeldaNavegacion` lo lleva adentro), y va en
+                pedido a B. **Cuando B lo mueva, este `View` se retira** (Ley
+                37): un andamio que sobrevive a su obra es el próximo defecto. */}
+            <Tarjeta relleno="ninguno">
+            <View style={{ paddingHorizontal: spacing[3] }}>
               <SemaforoSanitario
                 requisitos={estado.requisitos.faltantes.length === 0
                   ? [{
@@ -538,6 +562,7 @@ export default function LugarGuarderia() {
                       etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
                     }))}
               />
+            </View>
             </Tarjeta>
           </View>
         ) : null}
