@@ -24444,6 +24444,19 @@ sobre algo que ya no otorga se corrige poniendo `0` —que es la verdad— y no
 borrando la clave. **Y todo cambio de motor que toque un retorno obliga a censar
 los validadores de sus wrappers**, que es donde el daño aparece.
 
+**Y LA MITAD QUE FALTABA — la asimetría, dictada por el founder al cerrar S109:**
+*el que quita el campo sabe que lo quitó; el que lo exige no se entera nunca.*
+El que remueve tiene toda la información y ningún síntoma; el que valida tiene el
+síntoma y ninguna información. ⇒ **quitar un campo de un retorno se DICE al
+publicar**, en el mismo acto — no se deja que lo descubra el consumidor con un
+`datos_inconsistentes` en la cara de una familia.
+
+⚠️ **Y no bastó censar una vez:** al aplicar esta lección sobre las 20 migraciones
+del arco apareció **un segundo caso, propio**: `comprar_paquete_salidas` seguía
+prometiendo `saldo_total` y `pagado_en` sobre un bono que ahora nace `pendiente`.
+Se curó **cambiando el valor, no la clave** — que es exactamente lo que esta
+lección manda.
+
 ## 🔴 `L-443` — EL CASO SE FABRICA, NO SE BUSCA
 
 Un fixture que **busca** su rojo en el estado de la base **deja de discriminar el
@@ -24476,3 +24489,29 @@ eso la condición de muerte de un gate rojo **va al motor**, no a la memoria de
 nadie: `guarderia_recurrente_vivo()` devuelve `false` aunque la llave esté
 encendida si queda un selector sin consumidor. **El rojo de un gate protege
 mientras alguien lo mira; el motor se niega solo.**
+
+## 🔴 `L-445` — UN `COALESCE` SOBRE UNA COLUMNA QUE PUEDE SER NULL **POR HISTORIA** CONVIERTE «NO DECLARADO» EN UNA AFIRMACIÓN
+
+**Medida en S109-A, y la encontró el CINTURÓN al abortar — no la lectura del código.**
+
+`suscripciones_servicio.riel` nació en S109 con dos valores (`tarjeta`, `deuna`) y
+**NULL legal**, porque los planes anteriores no lo tienen. La primera versión de la
+cura ramificaba con `COALESCE(riel,'tarjeta')`. Compila, se lee razonable, y **el
+CHECK lo tumbó**: el único plan vivo tiene `riel` NULL **y `tarjeta_id` NULL** ⇒ el
+`COALESCE` lo mandaba a cobrarse por token contra un token que no existe.
+
+> **La forma general:** una columna nullable tiene dos NULL distintos —*«todavía no»*
+> y *«nunca hubo»*— y un `COALESCE` los aplasta a los dos contra un valor elegido por
+> comodidad de sintaxis. **Cuando esa columna decide por dónde se mueve plata, el
+> default no es azúcar: es una decisión de producto que nadie firmó.**
+
+⇒ **Sobre una columna que existe porque el modelo CAMBIÓ, el estado histórico es un
+TERCER caso con nombre propio y frenada propia** (acá `riel_no_declarado`), jamás un
+argumento de `COALESCE`. *Fail-closed es el único lado seguro con plata: dejar de
+cobrar se nota; cobrar por un riel inventado, no.*
+
+**Y la nota de método, que es la mitad que más vale:** este defecto **no lo vio
+ninguna lectura del código** — lo produjo un cinturón que ejercía el acto real sobre
+la fila real. *Un `COALESCE` equivocado no falla: acierta plausiblemente hasta que se
+topa con la primera fila que la historia dejó distinta.* Hermana de `L-439` — **un
+atajo que puede producir un valor equivocado no se declara: se hace inexpresable.**
