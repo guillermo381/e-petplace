@@ -15,6 +15,38 @@
 
 ---
 
+## 0 · LO PRIMERO AL ABRIR UN WORKTREE — el typecheck ciego *(S109, medido entre las tres pistas)*
+
+```bash
+ls apps/cliente/.expo/types/router.d.ts \
+  || cp ../e-petplace/apps/cliente/.expo/types/router.d.ts apps/cliente/.expo/types/
+# ídem apps/prestador. O correr `npx expo start` una vez en cada app.
+```
+
+🔴 **`router.d.ts` lo GENERA Metro y está en `.gitignore`: NO viaja con el merge.**
+En un worktree donde Metro nunca corrió **no existe**, y sin él `tsc` **deja de
+medir las rutas de expo-router**: `router.replace(unString)` compila y el
+typecheck sale **VERDE**.
+
+> **El verde no dice «las rutas están bien»: dice «no hay rutas que mirar».**
+> Y un verde por ausencia del insumo es indistinguible de uno por corrección —
+> peor que un rojo, porque nadie lo va a ir a buscar.
+
+⚠️ **Lo caro no es el defecto: es la conversación que produce.** El síntoma no es
+un error, es ***«a mí me da verde»*** — dos pistas discutiendo sobre un estado que
+ninguna está midiendo igual. **Pasó el 07-09 entre las TRES: una tenía el
+generado y vio dos errores reales; las otras dos no lo tenían y sus verdes sobre
+`cliente` decían menos de lo que creían.**
+
+⚠️ **Y `R63` ya lo declaraba** («brazo C NO MEDIDO en cliente/prestador») **y nos
+mordió igual**: *una advertencia dentro de la salida de un gate protege a quien
+lee el gate, no a quien lee su verde.* Por eso la cura vive **acá, en el paso que
+toda pista corre al abrir**, y no en la letra de la regla.
+
+**Detalle completo y su control negativo: `L-450`.**
+
+---
+
 ## 1 · LOS TERRITORIOS, y por qué son ésos
 
 | pista | territorio |
