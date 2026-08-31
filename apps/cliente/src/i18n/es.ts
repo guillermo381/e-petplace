@@ -1107,7 +1107,14 @@ export const clienteEs = {
        lee en el momento de apretarlo,* y ahí las tres puertas tienen que decir
        lo mismo. ☠️ Muere junto con las otras dos, en la tanda en que las tres
        cobren — ni antes ni después. */
-    comprarPrograma: 'Comprar programa (simulado)',
+    /* ⭐ S109-C · **EL «(simulado)» SE FUE, Y ES UNA CORRECCIÓN MÍA.** Se lo
+       agregué cuando era cierto —las tres puertas simulaban y su CTA era el
+       único que no lo decía— y **no lo saqué en el commit en que cablée el
+       cobro real del programa**, dos después. *Mi propia regla incumplida por
+       mí: un texto honesto se retira cuando cambia lo que describe, y el acto
+       que la cambia es el mismo que tiene que retirarla.* Sus dos hermanas de
+       paseo siguen simulando y conservan su marca. */
+    comprarPrograma: 'Comprar programa',
     procesandoPrograma: 'Confirmando tu programa…',
     /* ☠️ S109-C · Acá vivían `programaExitoTitulo` («Programa agendado») y su
        detalle, que decía **«Las {{n}} sesiones quedaron en la agenda»**. Eran
@@ -1400,7 +1407,9 @@ export const clienteEs = {
     rolloverVoz: 'Tienes {{n}} salidas sin usar — se suman a este paquete al comprarlo.',
     precioPorSalida: 'Precio por salida',
     total: 'Total',
-    comprar: 'Comprar paquete (simulado)',
+    /* ☠️ S109-C · Acá vivía `comprar` — «Comprar paquete (simulado)». **Su
+       sujeto dejó de existir**: la Hoja ya no compra (lleva al checkout) y el
+       paquete cobra de verdad. Medida SIN consumidor antes de retirarla. */
     exito: 'Paquete comprado — tienes {{n}} salidas para reservar.',
     eleccionTitulo: 'Tienes un paquete con este paseador',
     eleccionVoz: 'Te quedan {{n}} salidas — puedes usar una o pagar este paseo aparte.',
@@ -1951,6 +1960,10 @@ export const clienteEs = {
     cobroQueMascota: '¿Para cuál de tus mascotas es?',
     cobroSinCupoEnElPeriodo: 'No pudimos reservar todos los días de ese período. Prueba con otras fechas — no se te cobró nada.',
     cobroSinPeriodo: 'No hay un período por cobrar ahora.',
+    /* La compuerta midió ANTES de cobrar: no se movió plata, y la salida es
+       accionable — empezar antes. */
+    cobroSesionesNoEntran: 'Las sesiones no entran en la vigencia del programa. Prueba con una fecha de inicio más temprana — no se te cobró nada.',
+    cobroProgramaNoCobrable: 'Ese programa ya no se puede pagar. Vuelve a contratarlo.',
     promesaTarjeta: 'Se cobra solo cada mes.',
     promesaDeuna: 'Cada mes te mandamos un link y lo pagas a mano. Si no lo pagas, el plan no se renueva.',
     deunaFila: 'Deuna',
