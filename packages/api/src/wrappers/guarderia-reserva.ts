@@ -245,8 +245,23 @@ export interface PlanGuarderia {
   estado: 'activa' | 'pausada' | 'cancelada' | 'vencida';
   /** 'YYYY-MM-DD' */
   periodoDesde: string | null;
+  /**
+   * 🔴 **`periodoHasta` ES EL FIN DEL PERÍODO PAGADO, NO EL DÍA DEL COBRO.** No
+   * se deduce de acá la fecha del próximo cobro: en fin de mes los dos difieren,
+   * y *un día de diferencia en una fecha de cobro no se lee como un error — se
+   * lee como que te cobraron antes de lo que dijiste.* Para eso está
+   * `proximoCobro`. (Hallazgo de S108-C sobre su propia pantalla, 31-ago.)
+   */
   periodoHasta: string | null;
   direccionId: string | null;
+  /**
+   * S108-A-3 · la fecha del próximo cobro, **resuelta por el servidor** con la
+   * regla que RECUPERA el día original (31-ene → 28-feb → 31-mar).
+   * `null` cuando el plan todavía no se cobró o está cancelado — *inventar una
+   * fecha para un plan que no va a cobrar es la misma mentira, del otro lado.*
+   * La superficie la MUESTRA; jamás la recalcula.
+   */
+  proximoCobro: string | null;
 }
 
 /**
@@ -290,6 +305,7 @@ export async function obtenerMisPlanesGuarderia(): Promise<
       periodoDesde: typeof r.periodo_desde === 'string' ? r.periodo_desde : null,
       periodoHasta: typeof r.periodo_hasta === 'string' ? r.periodo_hasta : null,
       direccionId: typeof r.direccion_id === 'string' ? r.direccion_id : null,
+      proximoCobro: typeof r.proximo_cobro === 'string' ? r.proximo_cobro : null,
     });
   }
   return { ok: true, data: planes };
