@@ -37,8 +37,10 @@ import {
   EstadoVacio,
   FiltroMascotas,
   Icono,
+  CeldaNavegacion,
   FilaCita,
   FiltroPills,
+  Tarjeta,
   Texto,
   spacing,
   useTheme,
@@ -308,46 +310,39 @@ export default function LogGuarderia() {
                 **sin sujeto**, y tendría que preguntar la mascota de nuevo en
                 una Hoja propia. **Se declaró a la mesa y así quedó.** */}
             {paquetesPorLugar.map((pq) => (
-              <View key={pq.bonoId} style={{ gap: spacing[1] }}>
-                <Boton
-                  variante="primario"
-                  bloque
-                  etiqueta={t('logGuarderia.reservarDePaquete')}
-                  deshabilitado={elegida === null}
-                  razonDeshabilitado={t('plan.elegiMascota')}
-                  onPress={() =>
-                    /* 🔴 VA DIRECTO AL DÍA DE **ESA** GUARDERÍA — firma del
-                       founder: *«sin elegir lugar y sin pagar: las dos cosas ya
-                       las hizo»*. **El lugar está determinado por el bono**, así
-                       que la lista de «quién puede» no tiene nada que preguntar.
-                       *Pasar por ella sería ofrecerle cambiar algo que ya
-                       eligió — y abrir la puerta a que elija mal.* */
-                    /* ⏪ **IBA A LA PANTALLA DEL PRESTADOR, Y AHÍ YA NO HAY
-                       CALENDARIO** (se borró por instrucción del founder). El
-                       camino corto **no elige lugar** —lo determina el bono—
-                       pero **sí tiene que elegir día**, así que va a la TIRA DE
-                       DÍAS de esa guardería: pantalla 2 con su bono adentro.
+              /* ⏪ **ERA UN `Boton` PRIMARIO Y COMPETÍA CON EL PIE.** Dos
+                 amarillos peleando en la misma pantalla: *cuando todo grita,
+                 nada dirige.* Firma del founder: **fondo blanco con chevron**
+                 — la anatomía de FILA, que dice «hay un camino acá» sin
+                 robarle el CTA al pie.
 
-                       *Letra firmada: «va directo a la tira de días DE ESA
-                       GUARDERÍA: sin elegir lugar y sin pagar».* */
+                 🔴 Es `CeldaNavegacion`, la fila canónica de la casa (Ley
+                 19.7: el contorno transparente muere como acción de fila; por
+                 superficie UN sólido, y el sólido es el del pie). El saldo va
+                 en `detalle`, que es su lugar — no una línea suelta debajo. */
+              <Tarjeta key={pq.bonoId} relleno="ninguno">
+                <CeldaNavegacion
+                  titulo={t('logGuarderia.reservarDePaquete')}
+                  detalle={
+                    pq.quedan === 1
+                      ? t('logGuarderia.saldoUna', { total: pq.total })
+                      : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })
+                  }
+                  onPress={() => {
+                    if (elegida === null) return;
                     router.push({
                       pathname: '/explorar/guarderia',
                       params: {
                         prestadorId: pq.prestadorId,
-                        mascotaId: elegida ?? '',
+                        mascotaId: elegida,
                         ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
                         modalidad: 'paquete',
                         bonoId: pq.bonoId,
                       },
-                    })
-                  }
+                    });
+                  }}
                 />
-                <Texto variante="apoyo">
-                  {pq.quedan === 1
-                    ? t('logGuarderia.saldoUna', { total: pq.total })
-                    : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })}
-                </Texto>
-              </View>
+              </Tarjeta>
             ))}
 
             {/* Las etiquetas son las MISMAS keys que sus hermanas (`plan.seg*`)

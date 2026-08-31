@@ -38,7 +38,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FichaFranja,
-  MapaZona,
+  FichaPrestador,
   SemaforoSanitario,
   type RequisitoSanitario,
   Tarjeta,
@@ -50,9 +50,9 @@ import {
 import {
   evaluarRequisitosGuarderia,
   obtenerPerfilesPublicos,
+  resolverUrlLogoNegocio,
   type PerfilPublico,
   obtenerFranjasGuarderia,
-  comprarPaqueteGuarderia,
   reservarDiaDePaqueteGuarderia,
   contratarMensualidadGuarderia,
   reservarDiaGuarderia,
@@ -64,8 +64,8 @@ import { obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { PieReserva } from '@/components/reserva-piezas';
-import { PreviewPrestador } from '@/components/preview-prestador';
-import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
+import { FlechaVolver } from '@/components/flecha-volver';
+import { urlGaleria } from '@/lib/url-galeria';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
@@ -147,21 +147,11 @@ export default function LugarGuarderia() {
    */
   const esMensual = params.modalidad === 'mensual' && bonoId === null;
 
-  /**
-   * ⭐ **`useMedioDePago` + `SeccionMedioDePago`, LA PIEZA DE LA CASA.**
-   * *Estaba por construir un selector de tarjetas y el censo lo frenó:* la
-   * casa ya tiene el estado, la sección, la hoja y el desempate de gemelas —
-   * y **`R57` existe para que las superficies de pago monten la MISMA**.
-   * *Dos copias no divergen el día que se escriben: divergen el día que
-   * alguien afina una.*
-   *
-   * ⚠️ Se monta **sólo en la rama mensual**: es la única de las cuatro que
-   * necesita un medio. Día suelto y paquete van por el checkout compartido, y
-   * agendar contra saldo no cobra.
-   */
-  /* `activo` = sólo en mensual: **las otras tres no piden tarjetas y no
-     tienen por qué pagar esa lectura.** El hook ya trae esa puerta. */
-  const medio = useMedioDePago(esMensual);
+  /* ☠️ **EL PAGO SE FUE DE ACÁ — firma del founder.** Esta pantalla montaba
+     «Cómo quieres pagar» con la tarjeta y el botón **y no dejaba pagar**.
+     *El medio de pago, los términos y el botón «Pagar» viven en el CHECKOUT,
+     exactamente como en grooming («Confirmar y pagar»).* Acá el CTA sólo
+     NAVEGA. Con él se fueron `useMedioDePago` y `SeccionMedioDePago`. */
   const tamano = Number(params.tamano ?? '');
   const { prestadorId, mascotaId, prestadorNombre } = useLocalSearchParams<{
     prestadorId: string;
@@ -318,105 +308,46 @@ export default function LugarGuarderia() {
       return;
     }
 
-    /* ═══ EL CAMINO DEL PAQUETE — DOS LLAMADAS, UN SOLO ACTO ═══════════════
-       Firma del founder: **el toggle de la primera sesión va prendido y es
-       obligatorio en la primera compra.** Por eso acá no hay interruptor: *un
-       toggle que no se puede apagar es una casilla decorativa.*
+    /* ☠️ **ACÁ VIVÍA LA COMPRA DEL PAQUETE Y SOBREVIVIÓ A SU RÍO.** Cuando
+       el pago se mudó al checkout agregué la rama que navega **y dejé ésta
+       viva encima**: como corre primero, la nueva era inalcanzable y el CTA
+       seguía comprando desde P4.
+       *No lo vio ningún typecheck —las dos ramas son válidas— ni el lint: lo
+       vio la red, mostrando `comprar_paquete_guarderia` disparando desde una
+       pantalla que ya no debía cobrar.* **Ley 37: lo viejo muere en el mismo
+       acto, y esta vez no murió.** */
 
-       🔴 **COMPRAR NO ES RESERVAR — y por eso son dos llamadas.** El motor lo
-       dice en su contrato: `comprarPaqueteGuarderia` crea SÓLO el bono (cero
-       citas), y la primera sesión se agenda con la segunda. *Meterlas en una
-       sola RPC habría atado el paquete a un día, y el paquete es del HOGAR.*
+    /* ═══ LOS TRES NAVEGAN · **P4 NO COBRA NI RESERVA** ══════════════════
+       Firma del founder: *«la pantalla 4 termina en un CTA … y ese botón
+       NAVEGA al checkout»*.
 
-       ⚠️ **Y no hay checkout, medido:** el bono nace `estado_pago='pagado'` con
-       `pago_simulado: true`. **La pantalla lo DICE** — *un cobro simulado que la
-       superficie presenta como real es la clase de mentira que esta casa
-       persigue.* */
-    if (esPaquete) {
-      const compra = await comprarPaqueteGuarderia({ prestadorId: prestadorId as string, tamano });
-      if (!compra.ok) {
-        rebotar(compra.codigo, compra.mensaje);
-        setReservando(false);
-        return;
-      }
-      /* La mascota VIAJA acá aunque sea opcional: en la primera compra ya está
-         decidida y mandarla evita el rebote `mascota_no_determinada` en el
-         único momento del flujo donde la familia no lo entendería. */
-      const primera = await reservarDiaDePaqueteGuarderia({
-        bonoId: compra.data.bonoId,
-        fecha: elegido,
-        mascotaId,
-      });
-      setReservando(false);
-      if (!primera.ok) {
-        /* 🔴 EL BONO YA EXISTE. *Decir sólo «no se pudo» sobre una compra que SÍ
-           ocurrió dejaría a la familia creyendo que perdió la plata.* */
-        rebotar(primera.codigo, t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
-        return;
-      }
-      mostrar({
-        texto: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }),
-        variante: 'exito',
-      });
-      if (router.canDismiss()) router.dismissAll();
-      router.navigate('/hogar/guarderia');
-      return;
-    }
-
-    /* ═══ LA MENSUALIDAD — SE FIRMA UN MANDATO, NO SE COBRA ═══════════════
-       🔴 `cobrada` viene `false` SIEMPRE: esto autoriza el cobro recurrente;
-       el cobro lo hace el reloj. *La voz del éxito lo dice con todas las
-       letras — un «listo, pagaste» sobre algo que no se cobró es una mentira
-       que la familia descubre en el resumen de su tarjeta.* */
-    if (esMensual) {
-      if (medio.idTarjeta === null) {
-        setReservando(false);
-        setRebote(t('lugarGuarderia.faltaTarjeta'));
-        return;
-      }
-      const r = await contratarMensualidadGuarderia({
-        prestadorId: prestadorId as string,
-        tarjetaId: medio.idTarjeta,
-        mascotaId,
-      });
-      setReservando(false);
-      if (!r.ok) { rebotar(r.codigo, r.mensaje); return; }
-      mostrar({ texto: t('lugarGuarderia.mensualFirmada'), variante: 'exito' });
-      if (router.canDismiss()) router.dismissAll();
-      router.navigate('/hogar/guarderia');
-      return;
-    }
-
-    const r = await reservarDiaGuarderia({ prestadorId: prestadorId as string, mascotaId, fecha: elegido });
+       ⏪ **El día SÍ creaba su hold acá**, y eso lo dejaba fuera de la firma
+       nueva de la dirección: `reservar_dia_guarderia` **congela la dirección
+       al crear la cita**, así que elegirla después no habría cambiado nada.
+       *Un selector que el servidor ya no puede escuchar es un control que no
+       decide.* ⇒ **el hold se mudó al checkout**, que es donde la familia
+       elige a dónde pasan a buscarlo. Con eso los tres caminos eligen
+       dirección en el mismo lugar y P4 queda siendo lo que la firma pide:
+       vitrina y un CTA. */
     setReservando(false);
-    if (!r.ok) {
-      /* El rebote llega con SU voz desde el wrapper —«ese día ya no tiene
-         lugar», «faltan requisitos»— y se muestra tal cual. Y se recarga: si
-         el cupo cambió mientras miraba, el calendario tiene que decirlo. */
-      /* El rebote llega con SU voz desde el wrapper y se muestra tal cual; se
-         recarga por si el cupo cambió mientras miraba.
-         ⏪ **Acá vivía el único ruteo de `documentos_sin_aceptar` de las
-         cuatro ramas.** Ahora lo hace `rebotar`, que las cuatro usan.
-         🔴 Y su criterio sigue siendo el mismo: **los otros rebotes NO
-         navegan a propósito** — `sin_cupo` y `requisitos_sanitarios` se
-         arreglan acá o en el carnet, y `documentos_no_disponibles` **no se
-         arregla del lado de la familia**: mandarla a una pantalla que va a
-         decirle lo mismo sería pasearla. */
-      rebotar(r.codigo, r.mensaje);
-      setIntento((n) => n + 1);
-      return;
-    }
     router.push({
       pathname: '/explorar/guarderia/checkout',
       params: {
-        citaId: r.data.citaId,
-        expiraEn: r.data.expiraEn,
-        precio: String(r.data.precio),
+        modalidad: esMensual ? 'mensual' : esPaquete ? 'paquete' : 'dia',
+        prestadorId: prestadorId as string,
         prestadorNombre: typeof prestadorNombre === 'string' ? prestadorNombre : '',
+        mascotaId,
         fecha: elegido,
+        ...(esPaquete ? { tamano: String(tamano) } : {}),
+        ...(typeof params.precio === 'string' ? { precio: params.precio } : {}),
       },
     });
-  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t, bonoId, rebotar]);
+    return;
+  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, esMensual, tamano, params.precio]);
+
+  /* ☠️ Con la mudanza del hold murieron acá `reservarDiaGuarderia`, el
+     `rebotar` con su ruteo a documentos y el `setIntento` de recarga: **todo
+     eso vive ahora en el checkout**, que es quien reserva. */
 
   if (estado.fase === 'cargando') {
     return (
@@ -458,179 +389,96 @@ export default function LugarGuarderia() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('lugarGuarderia.titulo')} atras onAtras={alAtras} />
 
-      <ScrollView
-        contentContainerStyle={{ padding: spacing[5], gap: spacing[6], paddingBottom: insets.bottom + spacing[8] }}
-      >
-        {/* LAS DOS VENTANAS — la misma pieza que el prestador configura. */}
-        {recogida !== undefined ? (
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="titulo">{t('lugarGuarderia.franjasTitulo')}</Texto>
-            <FichaFranja
-              recogida={{
-                rotulo: t('lugarGuarderia.recogida'),
-                desde: aHoraCorta(recogida.desde),
-                hasta: aHoraCorta(recogida.hasta),
-              }}
-              devolucion={
-                devolucion === undefined
-                  ? undefined
-                  : {
-                      rotulo: t('lugarGuarderia.devolucion'),
-                      desde: aHoraCorta(devolucion.desde),
-                      hasta: aHoraCorta(devolucion.hasta),
-                    }
-              }
-              conSuperficie
-            />
+      {/* ══════════════════════════════════════════════════════════════════
+          LA VITRINA · **`FichaPrestador`, la MISMA que grooming**
+          ══════════════════════════════════════════════════════════════════
+          ⏪ **ESTO ERAN BLOQUES APILADOS, NO UNA VITRINA.** Arrancaba con
+          «Cuándo pasan y cuándo lo traen» sobre fondo blanco, metía una foto
+          suelta en el medio y el bloque de pago quedaba a mitad de pantalla.
+
+          🔴 **Censado antes de tocar** (orden del founder, y esta sesión ya
+          pagó tres veces por no ir a leer): grooming **no tiene pantalla
+          propia** — usa `prestador/[prestadorId]`, que monta `FichaPrestador`.
+          Su anatomía, de arriba a abajo: **galería a sangre desde el techo con
+          sus puntos · el logo montado sobre el borde · el nombre con su
+          distintivo · la ubicación · el mapa · y al final el CTA.**
+
+          ⚠️ **Guardería conserva ruta propia** —y no se manda al perfil
+          genérico— porque **necesita sus parámetros** (fecha, modalidad,
+          tamaño, bono): el perfil genérico no los tiene y su barra por oficio
+          no existe para guardería. *Lo que se copia es la ANATOMÍA, que era el
+          pedido; la ruta es de esta reserva.*
+
+          Lo propio del oficio —las dos ventanas, el día y los requisitos— va
+          en el **`pie` de la ficha**: DESPUÉS del nombre y la ubicación, que
+          es donde el founder lo puso. ── */}
+      <FichaPrestador
+        aSangre
+        vozNombre="bloque"
+        sobrePortada={<FlechaVolver onPress={alAtras} etiqueta={t('perfilPrestador.volver')} />}
+        nombre={perfil?.nombre_comercial ?? null}
+        cohorte={perfil?.cohorte ?? null}
+        cohorteAnio={perfil?.cohorte_anio ?? null}
+        logoUrl={resolverUrlLogoNegocio(perfil?.foto_url ?? null)}
+        portadas={(perfil?.portadas ?? []).map(urlGaleria).filter((u): u is string => u !== null)}
+        clipUri={urlGaleria(perfil?.clip_url ?? null)}
+        /* 🔴 EL GUARD DEL MAPA NATIVO, copiado del perfil genérico: sin la
+           meta-data `geo.API_KEY` en el APK, montar el MapView **mata la app
+           en hilo nativo** y ninguna ErrorBoundary lo atrapa. El guard se
+           aplica NO PASANDO las tres — cero cambio en la pieza compartida.
+           *Un secret faltante cuesta EL MAPA, jamás la app.* */
+        zonaLat={MAPA_NATIVO_DISPONIBLE ? (perfil?.zona_lat ?? null) : null}
+        zonaLon={MAPA_NATIVO_DISPONIBLE ? (perfil?.zona_lon ?? null) : null}
+        zonaRadioM={MAPA_NATIVO_DISPONIBLE ? (perfil?.zona_radio_m ?? null) : null}
+        ciudad={perfil?.ciudad ?? null}
+        historia={perfil?.descripcion ?? null}
+        pie={
+          <View style={{ gap: spacing[5], paddingBottom: spacing[8] }}>
+            {/* LAS DOS VENTANAS DE ESE DÍA */}
+            {recogida !== undefined && devolucion !== undefined ? (
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="titulo">{t('lugarGuarderia.franjasTitulo')}</Texto>
+                <FichaFranja
+                  recogida={{ rotulo: t('lugarGuarderia.recogida'), desde: aHoraCorta(recogida.desde), hasta: aHoraCorta(recogida.hasta) }}
+                  devolucion={{ rotulo: t('lugarGuarderia.devolucion'), desde: aHoraCorta(devolucion.desde), hasta: aHoraCorta(devolucion.hasta) }}
+                  conSuperficie
+                />
+              </View>
+            ) : null}
+
+            {/* EL DÍA — se afirma, no se pregunta: se eligió dos pantallas antes. */}
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="seccion">{t('lugarGuarderia.elDia')}</Texto>
+              <Texto variante="cuerpo">
+                {fechaDeParams === null ? t('lugarGuarderia.faltaDia') : fechaLarga(fechaDeParams)}
+              </Texto>
+            </View>
+
+            {/* LOS REQUISITOS */}
+            {req !== null ? (
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
+                <Tarjeta relleno="ninguno">
+                  <View style={{ paddingHorizontal: spacing[3] }}>
+                    <SemaforoSanitario
+                      requisitos={req.faltantes.length === 0
+                        ? [{ clave: 'todo', etiqueta: t('lugarGuarderia.requisitosAlDia'), estado: 'al_dia' }]
+                        : req.faltantes.map((fa): RequisitoSanitario => ({
+                            clave: fa.codigo,
+                            etiqueta: fa.nombre,
+                            estado: 'falta',
+                            detalle: t(`lugarGuarderia.estado_${fa.estado}` as 'lugarGuarderia.estado_sin_carnet'),
+                            onResolver: () => router.push('/carnet'),
+                            etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
+                          }))}
+                    />
+                  </View>
+                </Tarjeta>
+              </View>
+            ) : null}
           </View>
-        ) : null}
-
-        {/* ── LA VITRINA DEL PRESTADOR ───────────────────────────────────
-               ☠️ **SE HABÍA IDO CON EL CALENDARIO.** Al borrar el bloque del
-               calendario me llevé puesto el de la vitrina y el del mapa, y la
-               pantalla quedó siendo *un esqueleto reciclado*: ventanas, día y
-               semáforo, sin decir de quién es el lugar.
-
-               🔴 **Es `PreviewPrestador`, la misma pieza de la pantalla 3** —
-               portada · logo · nombre · línea de confianza honesta (reseñas >
-               citas > nada, jamás estrellas vacías) · precio. **Sin `onAbrir`:
-               acá ya estás adentro; la vitrina informa, no navega.** ── */}
-        {perfil !== null ? (
-          <PreviewPrestador
-            prestadorId={prestadorId as string}
-            nombre={typeof prestadorNombre === 'string' ? prestadorNombre : t("lugarGuarderia.titulo")}
-            oficio="guarderia"
-            perfil={perfil}
-            /* 🔴 **SIN PRECIO EN LA VITRINA — el precio vive en el PIE.**
-               `precio` es obligatorio en la pieza; la cadena vacía es su
-               «sin número» (jamás un `$0`, que se leería como gratis).
-               *Medido: con el precio acá salía DOS VECES en la misma pantalla.
-               En la pantalla 3 la vitrina lo lleva porque ahí se compara; acá
-               ya se eligió y lo que importa es lo que se va a pagar.* */
-            precio=""
-          />
-        ) : null}
-
-        {/* ── EL MAPA DE LA ZONA ─────────────────────────────────────────
-               **RANGO DEL SECTOR, jamás el punto exacto** — la pieza lo
-               declara y el consumidor no lo re-decide. Se alimenta de
-               `obtenerPerfilesPublicos`, que lee la vista pública y nunca la
-               tabla. ── */}
-        {perfil !== null && perfil.zona_lat !== null && perfil.zona_lon !== null &&
-         perfil.zona_radio_m !== null ? (
-          <View style={{ gap: spacing[2] }}>
-            <Texto variante="titulo">{t('lugarGuarderia.zonaTitulo')}</Texto>
-            <MapaZona lat={perfil.zona_lat} lon={perfil.zona_lon} radioM={perfil.zona_radio_m} />
-            <Texto variante="apoyo">{t('lugarGuarderia.zonaDetalle')}</Texto>
-          </View>
-        ) : null}
-
-        {/* ── CÓMO SE COBRA · **sólo en mensual** ────────────────────────
-               La pieza de la casa (`R57`). Las otras tres modalidades no
-               eligen medio acá: día y paquete van por el checkout compartido,
-               y agendar contra saldo no cobra. ── */}
-        {esMensual ? (
-          <View style={{ gap: spacing[2] }}>
-            <SeccionMedioDePago medio={medio} />
-            {/* 🔴 LO QUE SE FIRMA, DICHO ANTES DE FIRMARLO. *Una recurrencia
-                que no se declara antes de contratar es la clase de cosa que se
-                descubre en el segundo cobro.* */}
-            <Texto variante="apoyo">{t('lugarGuarderia.mensualMandato')}</Texto>
-          </View>
-        ) : null}
-
-        {/* ── EL DÍA · SE AFIRMA, NO SE PREGUNTA ─────────────────────────
-               ☠️ **ACÁ VIVÍA UN CALENDARIO Y SE BORRÓ ENTERO** — instrucción
-               directa del founder (30-ago): *«El calendario de la pantalla del
-               prestador se elimina. No se adapta ni se reusa: se borra.»*
-
-               El día se elige en la pantalla 2 y viaja hasta acá. Montar un
-               calendario en el paso 4 lo volvía el primer paso de una reserva
-               que ya iba por el cuarto — *y le daba a la familia la libertad de
-               contradecir lo que ya había elegido.*
-
-               Con él se fueron `CalendarioCupo`, la lectura de cupo del mes,
-               la navegación de meses y los tipos que arrastraba (Ley 37: lo
-               viejo muere en el mismo acto).
-
-               ⚠️ **Y esto le quita su selector al CAMINO CORTO** —agendar
-               contra saldo entraba acá sin día—. Su destino cambia a la tira
-               de días de esa guardería, que es lo que la letra firmada pide. ── */}
-        <View style={{ gap: spacing[1] }}>
-          <Texto variante="seccion">{t('lugarGuarderia.elDia')}</Texto>
-          <Texto variante="cuerpo">
-            {fechaDeParams === null ? t('lugarGuarderia.faltaDia') : fechaLarga(fechaDeParams)}
-          </Texto>
-        </View>
-
-        {estado.requisitos !== null ? (
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="titulo">{t('lugarGuarderia.requisitosTitulo')}</Texto>
-            {/* ⭐ LA SUPERFICIE BLANCA LA PONE EL CONSUMIDOR — firma del
-                founder: *«fondo blanco y un chevron a la derecha, o sea la
-                anatomía de una FILA»*. **El chevron ya lo dibuja la pieza** (el
-                defecto era que su path salía como texto, curado por B); lo que
-                faltaba era el fondo, y `SemaforoSanitario` **no expone
-                superficie** — como `FichaFranja`, la decide quien la monta.
-                *Sin ella las filas flotan sobre el papel y se leen como texto
-                suelto, que es exactamente lo que el founder reportó.*
-
-                ⏪ **`relleno="ninguno"` Y NO EL DEFAULT — el founder lo vio
-                «muy ancho, la caja mal dimensionada», y estaba MEDIDO:**
-
-                  | | acá con `<Tarjeta>` | la fila equivalente de la casa |
-                  |---|---|---|
-                  | relleno de la carta | 12 | **0** (`ninguno`) |
-                  | alto con detalle | 12+68+12 = **~92** | **~60** |
-
-                *53 % más alta que `CeldaNavegacion` dentro de su carta, para
-                la misma información.* **El criterio ya estaba escrito en la
-                casa** (`pedidos/pedido/[pedidoId]`): *«`relleno="ninguno"`
-                porque adentro van `Celda` a sangre con sus `Separador`»* — y
-                acá adentro van filas, que es el mismo caso. El canon es
-                `parte/[eventoId]`: carta sin relleno con UNA fila adentro.
-
-                ⏪ **ANDAMIO YA RETIRADO — ver la lápida de abajo.** Decía: la
-                `Fila` de `SemaforoSanitario` nace con `paddingVertical` y
-                **sin horizontal**, así que a sangre el texto tocaría el borde.
-                Se lo pongo yo para no dejar la cura a medias — pero el número
-                es de la PIEZA (`CeldaNavegacion` lo lleva adentro), y va en
-                pedido a B. **B lo movió y el `View` se retiró.** */}
-            <Tarjeta relleno="ninguno">
-            {/* ☠️ ACÁ VIVÍA UN `View` con `paddingHorizontal: spacing[3]` — el
-                ANDAMIO que C declaró mientras la `Fila` de `SemaforoSanitario`
-                nacía sin padding horizontal. **B movió el número a la pieza
-                (S107-B), así que el andamio se retira en la misma tanda**
-                (Ley 37, y era la condición que este comentario tenía escrita).
-                🔴 **Y se retira ACÁ y no después a propósito:** con el padding
-                puesto en los dos lados la fila quedaría con 24 — *un andamio
-                que sobrevive un rato a su obra no es neutro: dobla el número
-                que vino a arreglar.* */}
-              <SemaforoSanitario
-                requisitos={estado.requisitos.faltantes.length === 0
-                  ? [{
-                      clave: 'todo',
-                      etiqueta: t('lugarGuarderia.requisitosAlDia'),
-                      estado: 'al_dia',
-                    }]
-                  : estado.requisitos.faltantes.map((f): RequisitoSanitario => ({
-                      clave: f.codigo,
-                      etiqueta: f.nombre,
-                      estado: 'falta',
-                      /* El estado del motor se traduce a VOZ acá — el server
-                         manda códigos, la voz es de la casa (contrato §⑥bis). */
-                      detalle: t(`lugarGuarderia.estado_${f.estado}` as 'lugarGuarderia.estado_sin_carnet'),
-                      /* 🔴 El tipo de la pieza hace INEXPRESABLE un faltante sin
-                         camino: `falta` no compila sin `onResolver`. */
-                      onResolver: () => router.push('/carnet'),
-                      etiquetaResolver: t('lugarGuarderia.cargarCarnet'),
-                    }))}
-              />
-            </Tarjeta>
-          </View>
-        ) : null}
-
-      </ScrollView>
+        }
+      />
 
       {/* ── RESERVAR — ⏪ **ESTABA AL FINAL DEL SCROLL Y NO SE VEÍA.**
              Medido con sesión real el 29-ago: el CTA caía en **y=1007 sobre una
@@ -661,10 +509,10 @@ export default function LugarGuarderia() {
             : bonoId !== null
               ? t('lugarGuarderia.agendarDia', { dia: fechaCorta(fechaDeParams) })
               : esPaquete
-                ? t('lugarGuarderia.comprarPaqueteDia', { n: tamano, dia: fechaCorta(fechaDeParams) })
+                ? t('lugarGuarderia.comprarPaqueteAqui', { n: tamano })
                 : esMensual
-                  ? t('lugarGuarderia.contratarMensualDesde', { dia: fechaCorta(fechaDeParams) })
-                  : t('lugarGuarderia.reservarDia', { dia: fechaCorta(fechaDeParams) })
+                  ? t('lugarGuarderia.contratarMensualAqui')
+                  : t('lugarGuarderia.comprarDiaAqui')
         }
         habilitado={puedeReservar}
         insetBottom={insets.bottom}
@@ -672,9 +520,7 @@ export default function LugarGuarderia() {
            palabra. *Una pared muda le hace creer a la familia que el producto
            está roto, cuando lo único que falta es que toque un día.* */
         razonDeshabilitado={
-          esMensual && medio.idTarjeta === null
-            ? t('lugarGuarderia.faltaTarjeta')
-            : elegido === null
+          elegido === null
               ? t('lugarGuarderia.faltaDia')
               : t('lugarGuarderia.faltaRequisitos')
         }

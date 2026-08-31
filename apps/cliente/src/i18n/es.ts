@@ -2871,6 +2871,9 @@ export const clienteEs = {
        producto está roto cuando sólo falta tocar un día. */
     contratarMensual: 'Contratar el mes',
     mensualNoCobrable: 'Todavía no podemos cobrar la mensualidad. Estamos terminando esa parte.',
+    comprarDiaAqui: 'Comprar día en esta guardería',
+    comprarPaqueteAqui: 'Comprar paquete de {{n}} estadías',
+    contratarMensualAqui: 'Contratar mensualidad',
     reservarDia: 'Reservar el {{dia}}',
     agendarDia: 'Agendar el {{dia}}',
     comprarPaqueteDia: 'Comprar {{n}} estadías y agendar el {{dia}}',
@@ -3059,6 +3062,7 @@ export const clienteEs = {
     /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
        del paquete: la pluralización no es una interpolación). */
     cupo: 'Quedan {{n}} lugares ese día',
+    contextoPara: 'Guardería para {{nombre}}',
     cupoUno: 'Queda 1 lugar ese día',
     porMes: '${{precio}} por mes',
     porPaquete: '${{precio}} el paquete',
@@ -3076,6 +3080,12 @@ export const clienteEs = {
   checkoutGuarderia: {
     servicio: 'Guardería · un día',
     sinHora: 'Todo el día',
+    continuar: 'Continuar',
+    dondeRecogen: 'De dónde lo pasan a buscar',
+    dondeRecogenMensual: 'Acá van a pasar a buscarlo todos los meses. Puedes cambiarla después.',
+    mensualServicio: 'Plan mensual de guardería',
+    paqueteServicio: 'Paquete de {{n}} estadías',
+    paqueteSimulado: 'El cobro de este paquete todavía es simulado. Te lo decimos porque es la verdad.',
     duracion: 'Entre tus dos ventanas',
     exitoTitulo: '¡Listo! Tu día está reservado.',
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
