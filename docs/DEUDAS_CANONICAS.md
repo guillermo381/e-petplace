@@ -24066,6 +24066,41 @@ cuál y sería **`D-976`** otra vez.
 se censó fuera de guardería. **Disparo:** al tocar cualquier configurador.
 ☠️ **Condición de muerte:** cerrada — el lector existe, está exportado y medido.
 
+#### D-981 — 🟡 LAS DIRECCIONES SON DE LA PERSONA Y NO DEL HOGAR — frenado con firma, no por olvido
+
+**Origen: S107-A, 31-ago-2026.** Al hacer elegible la dirección de recogida, la
+firma del founder decía *«validarla contra las del hogar»* — y **el hogar no
+existe en el modelo de direcciones**: `direcciones_guardadas` es por `user_id`
+y su RLS también (`dir_own`: `user_id = auth.uid()`).
+
+**Lo que se hizo:** la validación **copió el criterio de la RLS viva en vez de
+inventar uno**. Las tres puertas de guardería validan la dirección contra las de
+**quien reserva**.
+
+🟢 **FIRMA DEL FOUNDER (31-ago): NO se ensancha en esta tanda**, y su razón va
+entera porque es la que hay que releer el día que se reabra:
+
+> **El bono es del hogar y las mascotas también, así que hay precedente para
+> compartir** — pero **ensanchar quién ve la dirección de casa de otra persona
+> es una decisión de privacidad con su propio peso, y no sale de paso en una
+> tanda de guardería.**
+
+⚠️ **LA CONSECUENCIA, escrita para que nadie la descubra en una pantalla:**
+**si la mamá guardó la dirección y el papá reserva, él no la ve — agrega la
+suya.** *No es un defecto: es el alcance elegido.* Duplica una dirección de la
+misma casa, y esa duplicación es el costo aceptado.
+
+**Es la contracara de `D-976` y de la misma familia que `L-439`:** acá **había
+un precedente que invitaba a extender** (el bono del hogar) y **se frenó**,
+porque *un precedente correcto en otro dominio no autoriza el trasplante* —
+compartir un saldo y compartir dónde vive alguien no son la misma pregunta.
+
+**Dueño:** el founder. **Disparo:** una mesa de privacidad propia, o el primer
+reporte real de una familia duplicando la dirección de su casa.
+☠️ **Condición de muerte:** o se firma el ensanche con su letra (qué ve quién,
+y si el que la agregó puede retirarla del hogar), o se declara permanente y la
+pantalla lo dice.
+
 ### L-439 — DECLARAR UN ATAJO NO LO HACE SEGURO
 
 **Origen: hallazgo de C, 31-ago-2026 — `capacidad_por_dia` sin lector.**
