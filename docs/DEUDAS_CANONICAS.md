@@ -24151,6 +24151,70 @@ afina una de las dos**, que es el momento en que empiezan a divergir.
 muere (Ley 37) · **candidata a ensanchar `R57`** para que la dirección también
 tenga quien la mida.
 
+#### D-983 — 🟡 LA AUTORIZACIÓN DE IMAGEN SE QUEDA SIN SUPERFICIE, Y SU ESTADO SERÁ *NADIE PUEDE PERMITIRLA*
+
+> **Redactada por C** (`S107-C-FICHA-D-983-AUTORIZACION-DE-IMAGEN.md`), depositada
+> por A con **una enmienda de estado — ver el recuadro del final.**
+> **Firma del founder, 30-ago-2026:** su casa es Cuenta → Preferencias, y **no
+> se construye en esta sesión.**
+
+**Qué pasó.** La pantalla de términos de guardería tenía **dos casillas**: la
+aceptación de los seis documentos y, separada y rotulada «Opcional», la
+autorización para **publicar fotos de la mascota**. Firma del founder: *«la
+pantalla de términos pide dos checks y debe ser uno solo»* ⇒ se retira la
+segunda. **La aceptación queda en una; la autorización se queda sin ningún
+control en toda la app.**
+
+**El estado que deja:**
+- `aceptar_documentos_guarderia` tiene `p_redes_autorizadas boolean DEFAULT false`.
+- La pantalla deja de mandarlo, así que toda familia queda en `false`.
+- ⇒ **fail-closed: nadie publica nada, y no hay dónde permitirlo.**
+
+*No hay riesgo de que se publique una foto por accidente. Lo que no existe es
+el sí.*
+
+### 🔴 LA DISTINCIÓN QUE SE VA A PERDER, Y ES LA RAZÓN DE ESTA FICHA
+
+> **Las fotos y clips del DURANTE que sube la guardería son PRIVADAS y van al
+> hilo de la familia. Eso NO necesita esta autorización y NO está bloqueado.**
+>
+> **Lo que esta autorización gobierna es publicarlas FUERA.**
+
+⚠️ *Quien retome esto sin la distinción va a leer «la autorización de imagen
+está en false para todas las familias» y va a concluir que la media del durante
+está trabada.* **No lo está**: el durante funciona, la familia ve las fotos de
+su mascota, y el único acto que no tiene camino es el de sacarlas del hilo.
+
+*Es exactamente la clase de dato que se lee bien y se entiende al revés — por
+eso la distinción va en la ficha y no en un comentario.*
+
+**Dueño:** producto · **Disparo:** cuando Cuenta → Preferencias abra su pasada.
+**Dónde va:** con las demás preferencias de la familia, **no** en un flujo de
+reserva — *no es un término que se acepta para poder reservar: es una
+preferencia que se cambia cuando uno quiere.*
+
+**Lo que NO hay que hacer:** devolverla a la pantalla de términos. Ahí volvería
+a ser una segunda casilla, que es de lo que salió.
+
+> ### ✏️ ENMIENDA DE ESTADO AL DEPOSITAR (A, 31-ago-2026) — el tiempo verbal, medido
+>
+> La ficha original decía **«la pantalla YA NO lo manda»**. Medido contra
+> `main` al depositarla: **`documentos.tsx` TODAVÍA declara `CLAVE_REDES` y
+> todavía manda `redesAutorizadas: redes`.** El retiro vive en `pista/s107-c`,
+> **sin mergear**.
+>
+> ⇒ **Todo lo demás de esta ficha rige tal cual; lo único que se enmienda es el
+> tiempo verbal.** Hoy la casilla existe y la familia puede permitirlo; **la
+> ficha empieza a describir la realidad cuando esa tanda se mergee.**
+>
+> 🔴 **Y la clase vale más que el caso:** *medir la propia rama y llamarlo «el
+> estado» es cómo una afirmación verdadera del autor entra al canon como falsa
+> para todos los demás.* **Es la misma trampa que A pisó al abrir S107** —midió
+> a C contra `origin/pista/s107-c` y le dio cero porque el trabajo vivía sin
+> pushear— y la misma que `R66` cobró con un baseline sacado de un worktree sin
+> mergear. **El canon se mide contra `main`, jamás contra el árbol de quien
+> escribe.**
+
 ### L-439 — DECLARAR UN ATAJO NO LO HACE SEGURO
 
 **Origen: hallazgo de C, 31-ago-2026 — `capacidad_por_dia` sin lector.**
