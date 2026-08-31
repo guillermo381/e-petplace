@@ -45,6 +45,18 @@
 --    tablas, cero backfill, cero filas tocadas.
 --
 -- REVERSA: docs/relevamientos/2026-09-04-s108b2-REVERSA-M5.sql (escrita ANTES).
+--
+-- ⚠️ RENUMERADA de `20260904100000` a `20260904120000` — SEGUNDA colisión de
+--    número del día, con `s108a_rollover_por_tipo`. **Y ésta mordió peor que la
+--    primera:** al estar el número ya registrado, el `db push` de la otra pista
+--    dijo **«up to date» sin aplicar una sola línea de lo suyo**. Se cazó
+--    verificando contra el OBJETO —la función que la migración debía crear no
+--    existía, con la migración registrada—, jamás por el ledger.
+--    🔴 *Un ledger que dice que algo corrió es exactamente tan confiable como
+--    la unicidad del número que lo nombra.*
+--    Nada de esta migración se perdió en la base (accesor, guard, selector y
+--    cron verificados vivos); lo que faltaba era su fila.
+-- ═══════════════════════════════════════════════════════════════════════════
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- ── ① EL ACCESOR — el único lugar donde se lee la llave ────────────────────

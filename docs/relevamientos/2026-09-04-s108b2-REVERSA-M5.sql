@@ -1,4 +1,4 @@
--- REVERSA de 20260904100000_s108b2_renovacion_guarderia_apagada.sql
+-- REVERSA de 20260904120000_s108b2_renovacion_guarderia_apagada.sql
 -- ESCRITA ANTES DE APLICAR.
 --
 -- ⚠️ QUÉ NO DESHACE, y es lo que hay que leer antes de correrla:
