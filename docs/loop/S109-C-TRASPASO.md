@@ -21,7 +21,50 @@
 | **mensualidad de guardería** | ídem, rama `esMensual` | ✅ |
 | **paquete de paseo** | `explorar/paseo/checkout-paquete.tsx` | ✅ (motor listo; edge sin desplegar) |
 | **programa de adiestramiento** | `explorar/adiestramiento/confirmar-programa.tsx` | ✅ |
-| **plan mensual de paseo** | `explorar/paseo/checkout-plan.tsx` | 🔴 **NO — el único que simula** |
+| **plan mensual de paseo** | `explorar/paseo/checkout-plan.tsx` | 🟡 **cableado, apagado por interruptor** |
+
+> ### ⚠️ ENMIENDA DEL 31-AGO — RE-MEDIDO CONTRA `main` = `30bf1eeb`
+>
+> **La tabla de arriba se escribió contra `b495db5b` y tres de sus bloqueos ya no
+> existen.** Se deja el texto viejo tachado abajo, no borrado: *quien retome tiene
+> que poder ver qué cambió y contra qué se midió cada cosa.*
+>
+> **☠️ MURIERON TRES BLOQUEOS:**
+> - ~~«`p_tarjeta_id` sin DEFAULT ⇒ el mandato por DeUna es inexpresable»~~ →
+>   **A lo puso** (`20260907260000`). ⇒ **murió el «muy pronto»** de DeUna en
+>   recurrente, nació `MedioDelMandato` (unión discriminada) y el checkout de
+>   guardería lleva el riel congelado al toque, con sus dos cuerpos de espera.
+> - ~~«falta `leerEstadoPlan`»~~ → **existe.** La máquina de espera tiene su
+>   **sexto sujeto** (`plan`), con vocabulario propio: *la mensualidad es un
+>   MANDATO sin `estado_pago`, el plan sí lo tiene.*
+> - ~~«falta un lector de mes pendiente»~~ → `obtener_mes_pendiente_guarderia`
+>   **existía sin wrapper** (L-318, tercera vez en este frente). Nace
+>   `obtenerMesPendienteGuarderia` + su tarjeta en Cuenta.
+>
+> **✅ Y EL ÍNDICE DE IDEMPOTENCIA YA ES PARCIAL** (`20260907240000`,
+> `ON CONFLICT … WHERE estado IN ('iniciado','pendiente')`) ⇒ el muerto deja
+> pasar, así que **frenar en la puerta ya no condena a nadie sin reintento** y el
+> botón `regenerar` del link **se queda**.
+>
+> **🔴 LO ÚNICO QUE SIGUE ESPERANDO: el deploy de B.**
+> `simula('plan_paseo')` sigue en `true` **por firma** — la banda se retira
+> *después* de que B despliegue y ejerza el plan. **El código ya está entero
+> detrás de ese interruptor** (cobro + espera + sección de medio): el día del
+> deploy se cambia **una palabra** en `apps/cliente/src/lib/pagos/simulado.ts` y
+> las cuatro superficies se mueven solas.
+> ⚠️ *No se enciende el cobro antes de apagar la banda: sería la misma mentira al
+> revés, y peor, porque nadie la busca.*
+>
+> **🔴 Y UNA DEUDA QUE NO ES MÍA Y HAY QUE MIRAR:** `contratarPlanPaseo`
+> (`packages/api/src/wrappers/planes.ts`) **no manda `p_riel` ni `p_tarjeta_id`**
+> ⇒ rebota `plan_de_tarjeta_sin_tarjeta` **siempre**. Medido y reportado; **la
+> tomó A** (territorio suyo) con la misma unión. Cuando publique, `medio` pasa a
+> ser requerido en `ContratarPlanInput` y **el compilador trae solo** a la línea
+> de `checkout-plan.tsx` que la espera — por eso no queda ficha.
+> ⇒ **La lección, con nombre:** *un parámetro con `DEFAULT` vuelve invisible al
+> compilador que su ausencia rompe el cuerpo.* En la mensualidad el MISMO defecto
+> sí lo cazó el tipo, porque ahí el parámetro era obligatorio. **La forma que
+> protege es la unión, no el campo suelto.**
 
 **Los tres hogares tienen los MISMOS tres grupos**: pagado con saldo · falta
 completar el pago · no se pagó a tiempo. Guardería (`hogar/guarderia.tsx`),
@@ -32,6 +75,31 @@ superficie** y su reloj, salvo donde el motor no publica ventana.
 ---
 
 ## ② LO QUE ESTÁ BLOQUEADO, con su medición y su dueño
+
+> ### 🔴 ENMIENDA DEL 31-AGO — TRES DE LOS CINCO BLOQUEOS DE ESTA SECCIÓN MURIERON
+>
+> **NO se lee (a), (c) ni (d) como pendientes.** Se conservan enteros abajo
+> porque cada uno guarda la MEDICIÓN que lo justificaba, y esa medición es lo que
+> permite entender por qué la cura tomó la forma que tomó. *Un bloqueo borrado se
+> vuelve a descubrir; uno tachado enseña.*
+>
+> | | estado hoy | qué lo destrabó |
+> |---|---|---|
+> | **(a)** el «muy pronto» de DeUna | ☠️ **MUERTO** | `p_tarjeta_id uuid DEFAULT NULL` (A, `20260907260000`) |
+> | **(b)** la banda de simulación | 🔴 **SIGUE** — es lo ÚNICO vivo | espera el **deploy de B**, no código |
+> | **(c)** el reintento del código | ☠️ **RESUELTO, el botón se queda** | el guard de intento-en-vuelo para los seis (B) **+ el índice PARCIAL** (A, `20260907240000`) |
+> | **(d)** la tarjeta de mes pendiente | ✅ **HECHA** | `obtener_mes_pendiente_guarderia` (A) + su wrapper (C) |
+>
+> **Y por qué (c) necesitaba las DOS piezas, que es la parte que no se puede
+> perder:** con el índice **TOTAL**, frenar en la puerta habría dejado **sin
+> reintento para siempre** a quien tuvo un rechazo — *justo la persona que está
+> mirando el botón de regenerar.* **Las dos viajan juntas o ninguna sirve.**
+>
+> ⭐ **La firma que rige en (c) revocó «devolver el código vivo»**, con mejor
+> razón que la mía: *devolverlo obliga a la PANTALLA a saber si ese código
+> todavía sirve, y ese reloj es de DeUna, no nuestro.* Por eso frena con voz, y
+> la voz **no afirma que el de pantalla sirva**.
+
 
 ### 🔴 (a) EL «MUY PRONTO» DE DEUNA EN LO RECURRENTE — bloqueado por UNA palabra
 `seccion-medio-de-pago.tsx`: con `recurrente`, la fila de DeUna **muestra su
