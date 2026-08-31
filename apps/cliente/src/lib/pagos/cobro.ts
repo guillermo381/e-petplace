@@ -46,7 +46,18 @@ export type VozDeCobro =
   | 'pago.cobroDefectoNuestro'
   | 'pago.cobroElegiMedio'
   | 'pago.cobroRechazado'
-  | 'pago.cobroConfirmando';
+  | 'pago.cobroConfirmando'
+  /* ⭐ S109-C · Las voces que faltaban, y las destapó el cinturón de abajo.
+     Eran QUINCE códigos —los de guardería, paquete, mensualidad y programa—
+     cayendo todos en «no pudimos completar, escribinos». */
+  | 'pago.cobroYaPagado'
+  | 'pago.cobroNoExiste'
+  | 'pago.cobroVentanaVencida'
+  | 'pago.cobroPlanNoActivo'
+  | 'pago.cobroDiaTomado'
+  | 'pago.cobroQueMascota'
+  | 'pago.cobroSinCupoEnElPeriodo'
+  | 'pago.cobroSinPeriodo';
 
 export type ResultadoCobro = { ok: true } | { ok: false; voz: VozDeCobro };
 
@@ -83,6 +94,38 @@ export async function cobrar(
       case 'compra_no_existe':   return { ok: false, voz: 'pago.cobroCompraNoExiste' };
       case 'cita_no_existe':     return { ok: false, voz: 'pago.cobroCitaNoExiste' };
 
+      /* ── ⭐ S109-C · LOS SUJETOS NUEVOS, cada uno con SU frase ────────────
+         🔴 **«Ya está pagado» NO es un error y no puede hablar como uno.** *Un
+         segundo toque sobre algo que ya se cobró es lo más común del mundo, y
+         mandarlo a soporte le enseña a la familia a desconfiar de una compra
+         que salió bien.* */
+      case 'bono_ya_pagado':
+      case 'programa_ya_pagado':
+      case 'periodo_ya_cobrado':
+        return { ok: false, voz: 'pago.cobroYaPagado' };
+
+      /* La ventana de pago se venció: **no se cobró nada**, y eso se dice. */
+      case 'bono_vencido':
+      case 'programa_vencido':
+        return { ok: false, voz: 'pago.cobroVentanaVencida' };
+
+      case 'bono_no_existe':
+      case 'programa_no_existe':
+      case 'mensualidad_no_existe':
+        return { ok: false, voz: 'pago.cobroNoExiste' };
+
+      case 'mensualidad_no_activa':   return { ok: false, voz: 'pago.cobroPlanNoActivo' };
+      case 'dia_ya_reservado':        return { ok: false, voz: 'pago.cobroDiaTomado' };
+      case 'mascota_no_determinada':  return { ok: false, voz: 'pago.cobroQueMascota' };
+      /* 🔴 La compuerta habló ANTES de mover plata: no se pudo comprometer el
+         período. *Es la razón por la que el cobro no salió, y la familia puede
+         hacer algo con ella — elegir otras fechas.* */
+      case 'mes_no_comprometible':
+      case 'sin_cupo_en_el_periodo':
+        return { ok: false, voz: 'pago.cobroSinCupoEnElPeriodo' };
+      case 'sin_periodo_por_cobrar':  return { ok: false, voz: 'pago.cobroSinPeriodo' };
+      case 'sin_medio_autorizado':    return { ok: false, voz: 'pago.cobroElegiMedio' };
+
       /* 🔴 EL VEREDICTO DEL EMISOR, y **solo** el veredicto del emisor. No se
          dibuja como error de datos: *pedirle a la familia que revise algo que
          puede estar perfecto es la clase de error que la hace pagar dos veces
@@ -105,7 +148,14 @@ export async function cobrar(
       case 'servidor_sin_configurar':
       case 'sesion_no_verificable':
       case 'sin_sesion':
+      /* Una respuesta que no pudimos leer es nuestra, no de la familia. */
+      case 'datos_inconsistentes':
         return { ok: false, voz: 'pago.cobroDefectoNuestro' };
+
+      /* El motor dice explícitamente que no sabe: se habla genérico y va a
+         soporte — **jamás se disfraza de rechazo del banco.** */
+      case 'error_desconocido':
+        return { ok: false, voz: 'pago.cobroDesconocido' };
 
       /* 🔴 `sin_respuesta` **NO es un desenlace**: el débito puede haber salido.
          La voz honesta es la de espera — *decir «no pasó» acá es lo que hace
@@ -120,6 +170,25 @@ export async function cobrar(
       case 'no_se_pudo_completar':
         return { ok: false, voz: 'pago.cobroDesconocido' };
     }
+    /* ═══ 🔴 S109-C · EL CINTURÓN QUE ESTE ARCHIVO YA PROMETÍA Y NO TENÍA ═════
+       El encabezado de `VozDeCobro` dice, desde S101: *«si mañana el motor
+       devolviera un código nuevo, **el typecheck obliga a darle su frase acá**
+       — no a caer en el cajón de "desconocido" sin que nadie se entere»*.
+
+       **Medido: no obligaba nada.** El `switch` no tenía `default` ni chequeo de
+       exhaustividad, así que un código nuevo caía por este `return` **en
+       silencio** — compilando en verde. *Una garantía declarada en prosa y no
+       mecanizada es peor que no tenerla: se confía en ella.* (L-192: una
+       verificación cuyo modo de falla es el silencio no es una verificación.)
+
+       Y estaba a punto de cobrarse: S109-B agrega `sesiones_no_agendables` y
+       `programa_no_cobrable` — **los dos con su causa adentro** — y habrían
+       aterrizado como «no pudimos completar, escribinos», *tirando justo la
+       causa que la otra pista se tomó el trabajo de propagar.*
+
+       Con esta línea, el código nuevo **rompe el build** y obliga a la frase. */
+    const _codigoSinVoz: never = r.codigo;
+    void _codigoSinVoz;
     /* Un código que el motor inventó y este archivo no conoce. Habla genérico
        y va a soporte — jamás se disfraza de rechazo del banco. */
     return { ok: false, voz: 'pago.cobroDesconocido' };

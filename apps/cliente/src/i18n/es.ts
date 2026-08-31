@@ -1120,6 +1120,10 @@ export const clienteEs = {
     programaTitulo: 'Tu programa con {{nombre}}',
     sesionesQuedan: '{{n}} de {{total}} sesiones por usar',
     sesionesQuedaUna: '1 de {{total}} sesiones por usar',
+    /* Los dos finales del cobro del programa, cada uno con su frase. */
+    programaNoPagadoATiempoVoz: 'Se venció el tiempo para completar el pago y el programa se dio de baja. No se te cobró nada.',
+    programaNoEntro: 'El pago no entró, así que el programa no quedó agendado. No se te cobró nada.',
+    esperaCuerpo: 'Estamos confirmando el pago de tu programa con el banco.',
     programaFaltaPagar: 'Falta completar el pago de tu programa',
     programaFaltaPagarDetalle: '{{n}} sesiones · todavía no se cobró',
     programaNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
@@ -1935,6 +1939,18 @@ export const clienteEs = {
        ir a pagarla— y *la segunda no es una limitación que se pueda contar
        después de cobrar: es un compromiso distinto que la familia toma con el
        dedo.* */
+    /* ⭐ S109-C · Las voces de los sujetos nuevos. **«Ya está pagado» NO habla
+       como error**: un segundo toque sobre algo que ya se cobró es lo más común
+       del mundo, y mandarlo a soporte enseña a desconfiar de una compra que
+       salió bien. */
+    cobroYaPagado: 'Esto ya está pagado. No te volvimos a cobrar.',
+    cobroNoExiste: 'No encontramos esa compra. Vuelve a empezar desde el inicio.',
+    cobroVentanaVencida: 'Se venció el tiempo para completar el pago. No se te cobró nada.',
+    cobroPlanNoActivo: 'Ese plan ya no está activo.',
+    cobroDiaTomado: 'Ese día ya lo tienes reservado.',
+    cobroQueMascota: '¿Para cuál de tus mascotas es?',
+    cobroSinCupoEnElPeriodo: 'No pudimos reservar todos los días de ese período. Prueba con otras fechas — no se te cobró nada.',
+    cobroSinPeriodo: 'No hay un período por cobrar ahora.',
     promesaTarjeta: 'Se cobra solo cada mes.',
     promesaDeuna: 'Cada mes te mandamos un link y lo pagas a mano. Si no lo pagas, el plan no se renueva.',
     deunaFila: 'Deuna',

@@ -32,9 +32,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import {
-  leerEstadoCompra, leerEstadoCita, leerEstadoBono, leerEstadoMensualidad,
+  leerEstadoCompra, leerEstadoCita, leerEstadoBono, leerEstadoMensualidad, leerEstadoPrograma,
   type EstadoCompra, type EstadoCita,
-  type EsperaBonoEstado, type EstadoMensualidad,
+  type EsperaBonoEstado, type EstadoMensualidad, type EsperaProgramaEstado,
 } from '@epetplace/api';
 
 /** Arranca a 2 s y se abre hasta 15 s. */
@@ -83,14 +83,20 @@ export type SujetoEnEspera =
      `SujetoDeCobro` (S108-B) y el que usa el discriminador del motor. *Dos
      palabras para el mismo sujeto es el lugar exacto donde una pieza empieza a
      esperar algo que otra no cobró.* */
-  | { tipo: 'mensualidad'; id: string };
+  | { tipo: 'mensualidad'; id: string }
+  /** S109 · El programa de adiestramiento: sujeto propio porque sus sesiones
+   *  están numeradas y siguen un currículum — un bono es fungible. */
+  | { tipo: 'programa'; id: string };
 
 export type Espera =
   | { fase: 'mirando' }
   /** 🔴 El estado viaja **en el vocabulario de su sujeto**, sin traducirse.
    *  *«pagada» es la única palabra que los dos comparten, y es la única que
    *  esta pantalla necesita comparar.* */
-  | { fase: 'resuelta'; estado: EstadoCompra | EstadoCita | EsperaBonoEstado | EstadoMensualidad | null }
+  | {
+      fase: 'resuelta';
+      estado: EstadoCompra | EstadoCita | EsperaBonoEstado | EstadoMensualidad | EsperaProgramaEstado | null;
+    }
   | { fase: 'sigue_abierta' };
 
 /**
@@ -201,6 +207,7 @@ export function useEsperaDeConfirmacion(
         : tipo === 'cita' ? await leerEstadoCita(id)
         : tipo === 'bono' ? await leerEstadoBono(id)
         : tipo === 'mensualidad' ? await leerEstadoMensualidad(id)
+        : tipo === 'programa' ? await leerEstadoPrograma(id)
         : ((): never => { throw new Error(`sujeto no contemplado: ${String(tipo)}`); })();
       if (!vivo.current) return;
 

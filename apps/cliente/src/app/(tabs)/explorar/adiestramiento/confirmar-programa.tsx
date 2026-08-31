@@ -12,7 +12,7 @@
  * (la pantalla existe para eso; el precio no preside — el compromiso sí).
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -20,16 +20,21 @@ import {
   Boton,
   Celda,
   Encabezado,
+  EsperaDeTrabajo,
   EstadoVacio,
   Icono,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
 import { contratarPrograma, type ProgramaContratado } from '@epetplace/api';
+import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
+import { cobrar } from '@/lib/pagos/cobro';
+import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
 import { useTraduccion } from '@/i18n';
 
 /** 'YYYY-MM-DD' → Date LOCAL (jamás new Date(iso): ancla UTC y corre el
@@ -67,7 +72,36 @@ export default function ConfirmarPrograma() {
   const vigenciaDias = Number(params.vigenciaDias ?? 0);
   const precio = Number(params.precio ?? 0);
 
-  const [fase, setFase] = useState<'resumen' | 'procesando' | 'exito'>('resumen');
+  const [fase, setFase] = useState<'resumen' | 'procesando' | 'confirmando' | 'exito'>('resumen');
+  /** Compra SUELTA ⇒ DeUna se ofrece: la regla de lo recurrente no aplica. */
+  const medio = useMedioDePago(true);
+  /** 🔴 El programa ya registrado: **se contrata UNA vez aunque el cobro se
+   *  reintente.** Sin esto, tres tarjetas probadas dejarían tres programas
+   *  pendientes contra la agenda del mismo profesional. */
+  const [enVuelo, setEnVuelo] = useState<string | null>(null);
+  const [rebote, setRebote] = useState<string | null>(null);
+  const espera = useEsperaDeConfirmacion(
+    fase === 'confirmando' && enVuelo !== null ? { tipo: 'programa', id: enVuelo } : null,
+  );
+
+  /**
+   * 🔴 **EL ÉXITO SE DICE DESPUÉS DE QUE EL SERVIDOR CONFIRME, JAMÁS ANTES.**
+   * Y con el arco nuevo la frase original **vuelve a ser cierta**: las N
+   * sesiones nacen en `confirmar_pago_programa`, así que cuando esta espera
+   * resuelve `pagado` **la agenda ya tiene las N citas**. *El texto no era malo:
+   * estaba en el momento equivocado.*
+   */
+  useEffect(() => {
+    if (espera.fase !== 'resuelta') return;
+    const e = espera.estado;
+    if (e === 'pagado') { setFase('exito'); return; }
+    setFase('resumen');
+    setEnVuelo(null);
+    setRebote(
+      e === 'no_pagado_a_tiempo' ? t('adiestramiento.programaNoPagadoATiempoVoz')
+      : t('adiestramiento.programaNoEntro'),
+    );
+  }, [espera, t]);
   const [compra, setCompra] = useState<ProgramaContratado | null>(null);
 
   const fmtHumana = useMemo(
@@ -91,23 +125,67 @@ export default function ConfirmarPrograma() {
 
   const comprar = async () => {
     if (fase !== 'resumen') return;
+    if (medio.elegido === null) { setRebote(t('pago.cobroElegiMedio')); return; }
     setFase('procesando');
-    const r = await contratarPrograma({
-      prestadorId: typeof params.prestadorId === 'string' ? params.prestadorId : '',
-      servicioId: typeof params.servicioId === 'string' ? params.servicioId : '',
-      programaId: typeof params.programaId === 'string' ? params.programaId : '',
-      mascotaId: typeof params.mascotaId === 'string' ? params.mascotaId : '',
-      fechaInicio: fecha,
-      hora,
-    });
-    if (!r.ok) {
+    setRebote(null);
+    let id = enVuelo;
+    if (id === null) {
+      const r = await contratarPrograma({
+        prestadorId: typeof params.prestadorId === 'string' ? params.prestadorId : '',
+        servicioId: typeof params.servicioId === 'string' ? params.servicioId : '',
+        programaId: typeof params.programaId === 'string' ? params.programaId : '',
+        mascotaId: typeof params.mascotaId === 'string' ? params.mascotaId : '',
+        fechaInicio: fecha,
+        hora,
+      });
+      if (!r.ok) {
+        setFase('resumen');
+        mostrar({ texto: r.mensaje, variante: 'error' });
+        return;
+      }
+      setCompra(r.data);
+      id = r.data.programa_contratado_id;
+      setEnVuelo(id);
+    }
+    /* ⑤ El débito por el motor de la casa. Su `ok` es **señal optimista**: se
+       pasa a esperar, jamás a éxito. */
+    const cobro = await cobrar({ tipo: 'programa', id }, medio.idTarjeta);
+    if (!cobro.ok) {
       setFase('resumen');
-      mostrar({ texto: r.mensaje, variante: 'error' });
+      mostrar({ texto: t(cobro.voz), variante: 'error' });
       return;
     }
-    setCompra(r.data);
-    setFase('exito');
+    setFase('confirmando');
   };
+
+  if (fase === 'confirmando') {
+    return (
+      <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[4], padding: spacing[6] }}>
+          <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
+          <Texto variante="cuerpo">{t('adiestramiento.esperaCuerpo')}</Texto>
+          <EsperaDeTrabajo />
+          {/* 🔴 El tope habla y NO declara desenlace. Y acá su voz es la que
+              antes vivía en el éxito: **el programa quedó registrado y el pago
+              se sigue confirmando** — que es exactamente lo que pasa. */}
+          {espera.fase === 'sigue_abierta' ? (
+            <>
+              <Texto variante="apoyo">{t('adiestramiento.programaRegistradoTitulo')}</Texto>
+              <Texto variante="apoyo">{t('pago.esperaSigueAbiertaCita')}</Texto>
+              <Boton
+                variante="secundario"
+                etiqueta={t('adiestramiento.irAlHogar')}
+                onPress={() => {
+                  if (router.canDismiss()) router.dismissAll();
+                  router.navigate('/hogar');
+                }}
+              />
+            </>
+          ) : null}
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (fase === 'exito' && compra !== null) {
     const fmt = fmtHumana;
@@ -133,11 +211,14 @@ export default function ConfirmarPrograma() {
                *Un texto honesto se mueve en el mismo acto que cambia lo que
                describe; éste llegó tarde por una sesión y por eso se movió
                apenas la firma lo permitió.* */
-            titulo={t('adiestramiento.programaRegistradoTitulo')}
-            descripcion={t('adiestramiento.programaRegistradoDetalle', {
+            /* ⭐ La frase original VUELVE, y ahora es cierta: se dice después de
+               que el servidor confirmó, y las N sesiones nacen en ese acto. */
+            titulo={t('adiestramiento.programaExitoTitulo')}
+            descripcion={t('adiestramiento.programaExitoDetalle', {
               n: String(compra.n_sesiones),
               primera: fmt.format(fechaLocal(compra.primera_sesion)),
               ultima: fmt.format(fechaLocal(compra.ultima_sesion)),
+              vigencia: fmt.format(fechaLocal(compra.vigencia_hasta)),
             })}
             accion={
               <Boton
@@ -235,8 +316,16 @@ export default function ConfirmarPrograma() {
             color: theme.text.tertiary,
           }}
         >
-          {t('checkout.simuladoAviso')}
+          {t('adiestramiento.resumenVigencia', { dias: String(vigenciaDias) })}
         </Text>
+
+        {/* ☠️ Acá vivía `checkout.simuladoAviso`. **Murió con el cobro real de
+            este sujeto** — el programa ya pasa por el motor. La clave sigue
+            viva para plan y paquete de paseo, que todavía simulan; *cae entera
+            el día que las tres puertas cobren.* */}
+        {/* Compra SUELTA ⇒ sin `recurrente`: DeUna se puede elegir. */}
+        <SeccionMedioDePago medio={medio} />
+        {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
       </ScrollView>
 
       <View
