@@ -602,9 +602,36 @@ export default function MisPaseos() {
                         puro (estado, renovación, pausa; D-343 intacto). */}
                     <Celda
                       titulo={`${t('explorar.paseoTitulo')} · ${p.duracion_minutos} min`}
-                      subtitulo={t(p.auto_renovar && p.estado === 'activa' ? 'plan.renuevaEl' : 'plan.terminaEl', {
-                        fecha: fechaCortaMono(p.periodo_fin, idioma),
-                      })}
+                      /* ═══ 🔴 S108-C · LA PANTALLA NO DEDUCE, EL MOTOR DICE ═══
+                         ⏪ Acá decía **«Se renueva el {fecha}» sobre `periodo_fin`**
+                         — y `periodo_fin` es el ÚLTIMO DÍA CUBIERTO, no el día de
+                         la renovación. Medido en el motor
+                         (`20260712130000:106`): `periodo_fin = (periodo_inicio +
+                         1 mes) - 1 día`, así que el período siguiente arranca en
+                         `periodo_fin + 1` y **la pantalla anunciaba la renovación
+                         un día antes de que ocurriera.**
+
+                         *Un día de diferencia en una fecha de cobro no se lee
+                         como un error: se lee como que te cobraron antes de lo
+                         que dijiste.* Y no lo veía nadie porque **el dato es
+                         verosímil**: una fecha bien formada, del mes correcto.
+
+                         ⚠️ Es el MISMO defecto que me cacé en guardería, en el
+                         otro oficio. Ahí lo destapó el cruce con otra pista;
+                         acá lo destapó ir a buscarlo. **`terminaEl` NO se toca:
+                         para un plan que no renueva, `periodo_fin` sí es el día
+                         en que termina.**
+
+                         ⇒ Mientras el motor no publique el próximo cobro del
+                         paseo, se dice **lo que el dato sí significa**. Cuando A
+                         lo publique, entra igual que entró `proximoCobro` en
+                         guardería: una línea. */
+                      subtitulo={t(
+                        p.auto_renovar && p.estado === 'activa'
+                          ? 'plan.cubiertoHastaRenueva'
+                          : 'plan.terminaEl',
+                        { fecha: fechaCortaMono(p.periodo_fin, idioma) },
+                      )}
                       fin={<Insignia estado={estado.estado} etiqueta={estado.etiqueta} />}
                     />
                     {p.estado === 'activa' ? (

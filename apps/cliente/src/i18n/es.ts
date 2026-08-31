@@ -1287,7 +1287,13 @@ export const clienteEs = {
     estadoActiva: 'Activo',
     estadoPausada: 'Renovación pausada',
     estadoVencida: 'Terminado',
-    renuevaEl: 'Se renueva el {{fecha}}',
+    /* ☠️ S108-C · Acá vivía `renuevaEl` — «Se renueva el {{fecha}}» — pintada
+       con `periodo_fin`, que es el último día cubierto y NO el día en que
+       renueva: el período siguiente arranca al día siguiente. *Una fecha de
+       cobro corrida un día no se lee como un error, se lee como que cobraron
+       antes de lo dicho.* La reemplaza una frase que dice lo que el dato SÍ
+       significa; la fecha del cobro la dirá el motor cuando la publique. */
+    cubiertoHastaRenueva: 'Cubierto hasta el {{fecha}} · se renueva solo',
     terminaEl: 'Termina el {{fecha}}',
     pausar: 'Pausar renovación',
     reanudar: 'Reanudar renovación',
@@ -3281,6 +3287,7 @@ export const clienteEs = {
     proximoCobro: 'Próximo cobro: {{fecha}}',
     cubiertoHasta: 'Cubierto hasta el {{fecha}} · se renueva solo',
     proximoCobroSinFecha: 'Todavía no hay un período cobrado.',
+    pagoPendiente: 'Falta completar el pago de este plan.',
     /* 🔴 Lo que se lee DESPUÉS de apagar, y es la línea que evita el daño: el
        interruptor detiene la RENOVACIÓN, jamás el servicio ya pagado. */
     apagadoHasta: 'No se vuelve a cobrar. Sigue cubierto hasta el {{fecha}}.',

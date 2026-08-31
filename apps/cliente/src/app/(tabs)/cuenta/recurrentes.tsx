@@ -114,6 +114,15 @@ interface Item {
    * te cobraron antes de lo que dijiste.*
    */
   proximoCobro: string | null;
+  /**
+   * 🔴 **S108-C-3 · DEFECTO PROPIO, cazado por el censo de paseo.**
+   * Este bucle filtraba `s.estado !== 'activa'` **y no miraba el pago**, cuando
+   * `PlanPaseo.estado_pago` viaja desde el lector y nadie lo consumía. *Un plan
+   * con el cobro pendiente se listaba en la pantalla de la plata como si
+   * estuviera al día* — y ésta es justo la pantalla donde alguien viene a
+   * enterarse de qué le cobran.
+   */
+  pagoPendiente: boolean;
 }
 
 type Estado =
@@ -165,6 +174,9 @@ export default function Recurrentes() {
           precio: s.precioMensual,
           cubiertoHasta: s.periodoHasta,
           proximoCobro: s.proximoCobro,
+          /* La guardería no expone `estado_pago` en su lector de planes: su
+             veredicto de pago vive en el ciclo (`estado`). No se inventa. */
+          pagoPendiente: false,
           encendido: s.estado === 'activa',
           /* Dentro del período pagado se puede volver; fuera no es volver, es
              contratar de nuevo — y eso lo dice el motor con su propio código. */
@@ -187,6 +199,10 @@ export default function Recurrentes() {
              oficio. Dice hasta cuándo está cubierto, que es lo que su motor sí
              sabe. */
           proximoCobro: null,
+          /* ⭐ El dato SIEMPRE estuvo: `planes.ts:250` lo mapea y hasta hoy no
+             lo consumía nadie. *Un campo que llega y nadie lee es un dato que
+             la pantalla decidió no saber.* */
+          pagoPendiente: s.estado_pago !== 'pagado',
           encendido: s.auto_renovar,
           reversible: true,
         });
@@ -323,7 +339,13 @@ export default function Recurrentes() {
                     }
                   />
                   <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3], gap: 2 }}>
-                    {it.encendido ? (
+                    {/* 🔴 Antes que nada: si el cobro no entró, **eso** es lo
+                        que hay que leer. *Decir «se renueva solo» sobre algo que
+                        no se pudo cobrar es prometer un servicio que puede
+                        cortarse.* */}
+                    {it.pagoPendiente ? (
+                      <Texto variante="apoyo">{t('recurrentes.pagoPendiente')}</Texto>
+                    ) : it.encendido ? (
                       <Texto variante="apoyo">
                         {/* ⭐ La fecha del cobro cuando el motor la da; si no,
                             hasta cuándo está cubierto. **Nunca una deducida.** */}
