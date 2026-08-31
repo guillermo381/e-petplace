@@ -881,6 +881,7 @@ export const clienteEn = {
     esperaCuerpo: 'We’re confirming your program payment with the bank.',
     programaFaltaPagar: 'Your program’s payment isn’t finished',
     programaFaltaPagarDetalle: '{{n}} sessions · not charged yet',
+    programaFaltaPagarConReloj: '{{n}} sessions · {{tiempo}} left to complete it',
     programaNoPagadoATiempo: 'The time to complete the payment ran out',
     programaNoPagadoATiempoDetalle: 'You weren’t charged. You can sign up again.',
     programaRegistradoTitulo: 'Your program is registered',

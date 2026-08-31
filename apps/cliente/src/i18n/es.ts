@@ -1133,6 +1133,7 @@ export const clienteEs = {
     esperaCuerpo: 'Estamos confirmando el pago de tu programa con el banco.',
     programaFaltaPagar: 'Falta completar el pago de tu programa',
     programaFaltaPagarDetalle: '{{n}} sesiones · todavía no se cobró',
+    programaFaltaPagarConReloj: '{{n}} sesiones · te quedan {{tiempo}} para completarlo',
     programaNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
     programaNoPagadoATiempoDetalle: 'No se te cobró nada. Puedes volver a contratarlo.',
     programaRegistradoTitulo: 'Tu programa quedó registrado',
