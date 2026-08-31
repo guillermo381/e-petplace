@@ -75,21 +75,14 @@ Deno.serve(async (req) => {
     intento_id: string; sujeto_tipo: string; sujeto_id: string;
     compra_id: string | null; transaction_id: string;
   }>) {
-    /* ═══ 🔴 LO QUE EL LECTOR VE Y EL APLICADOR NO CUBRE, SE ESCALA POR NOMBRE
-       `resolver_consulta_activa` está tecleada por COMPRA (`p_compra_id`), así
-       que sólo puede aplicar ese sujeto. Ahora el lector trae los seis.
-       **Encontrar un huérfano que después no se puede aplicar es peor que no
-       encontrarlo** —deja una fila que dice «acá hay algo» y ningún camino—,
-       así que NO se descarta en silencio: se nombra el sujeto y se escala.
-       *Un barrido que filtra lo que no sabe aplicar devuelve el mismo número
-       que antes y parece sano.* Es la deuda del APLICADOR, y queda dicha en la
-       respuesta del barrido en vez de vivir en la cabeza de alguien. */
-    if (p.sujeto_tipo !== 'pedido' || !p.compra_id) {
-      resumen[`aplicador_no_cubre_${p.sujeto_tipo}`] =
-        (resumen[`aplicador_no_cubre_${p.sujeto_tipo}`] ?? 0) + 1;
-      escalados.push(`${p.sujeto_tipo} ${p.sujeto_id} (intento ${p.intento_id}: el aplicador de Nuvei es compra-only)`);
-      continue;
-    }
+    /* ☠️ MURIÓ EL ESCALADO POR «SUJETO NO CUBIERTO».
+       S108-B2 tuvo que escalar por nombre lo que el lector veía y el aplicador
+       no podía aplicar —`resolver_consulta_activa` está tecleada por compra—,
+       porque *encontrar un huérfano que después no se puede aplicar es peor que
+       no encontrarlo: deja una fila que dice «acá hay algo» y ningún camino.*
+       **S109-B le dio el camino:** `aplicar_consulta_activa_nuvei` recibe el
+       INTENTO, resuelve el sujeto por catálogo y, cuando es una compra, delega
+       en la función de siempre. ⇒ Una sola llamada para los siete. */
     let crudo: unknown = null;
     try {
       const r = await fetch(`${BASE}/v2/transaction/${encodeURIComponent(p.transaction_id)}`, {
@@ -102,8 +95,8 @@ Deno.serve(async (req) => {
       crudo = { error_de_red: String(e).slice(0, 300) };
     }
 
-    const { data: res, error: e2 } = await db.rpc('resolver_consulta_activa', {
-      p_compra_id: p.compra_id,
+    const { data: res, error: e2 } = await db.rpc('aplicar_consulta_activa_nuvei', {
+      p_intento_id: p.intento_id,
       p_crudo: crudo,
       p_origen: 'barrido',
     });
@@ -112,9 +105,9 @@ Deno.serve(async (req) => {
        — *«no hice nada y no digo por qué»*, que es la forma más cara de un
        verde. Medido en la primera corrida real. */
     if (e2) {
-      console.error('[conciliar] resolver falló', p.compra_id, e2);
+      console.error('[conciliar] aplicador falló', p.sujeto_tipo, p.sujeto_id, e2);
       resumen['error_al_resolver'] = (resumen['error_al_resolver'] ?? 0) + 1;
-      escalados.push(`${p.compra_id} (error: ${e2.message})`);
+      escalados.push(`${p.sujeto_tipo} ${p.sujeto_id} (error: ${e2.message})`);
       continue;
     }
 
@@ -122,7 +115,13 @@ Deno.serve(async (req) => {
     resumen[resol] = (resumen[resol] ?? 0) + 1;
     // Todo lo que empieza con `huerfano` necesita una persona, no solo el que
     // el proveedor no reconoció.
-    if (resol.startsWith('huerfano')) escalados.push(`${p.compra_id} (${resol})`);
+    /* 🔴 Y ahora el escalado NOMBRA EL SUJETO. Decía `compra_id` para todo
+       porque el lector sólo traía compras; con siete, un escalado que nombra
+       el sujeto equivocado manda a mirar el objeto equivocado. */
+    if (resol.startsWith('huerfano') || resol === 'sin_desglose'
+        || resol === 'monto_no_coincide' || resol === 'sujeto_indeterminado') {
+      escalados.push(`${p.sujeto_tipo} ${p.sujeto_id} (${resol})`);
+    }
   }
 
   /* 🔴 Los escalados se NOMBRAN en la respuesta y en el log. *Un barrido que
