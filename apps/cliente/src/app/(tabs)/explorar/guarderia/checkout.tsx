@@ -212,7 +212,18 @@ export default function CheckoutGuarderia() {
      **CREA un intento contra el proveedor**, así que sin este freno abrir el
      resumen fabricaría una transacción que nadie pidió. */
   const enDeuna = fase === 'confirmando' && riel === 'deuna' && sujeto !== null;
-  const deuna = useEstadoDeUna(enDeuna ? sujeto : null);
+  /* 🔴 **EL ESTRECHAMIENTO ES UNA AFIRMACIÓN, no un apaño para compilar.**
+     `SujetoEnEspera` y `SujetoDeuna` son conjuntos DISTINTOS a propósito: el
+     primero es lo que la máquina sabe esperar (seis sujetos), el segundo lo que
+     DeUna sabe cobrar. *Cuando el sexto sujeto (`plan`) entró a la máquina, el
+     compilador cazó que acá se estaban tratando como el mismo conjunto* — y la
+     cura NO era ensanchar `SujetoDeuna`, porque eso habría declarado que DeUna
+     cobra planes de paseo, que es falso.
+     En ESTA pantalla el sujeto sólo puede ser uno de los dos por construcción;
+     el guard hace explícito lo que ya era cierto. */
+  const sujetoDeuna =
+    sujeto !== null && (sujeto.tipo === 'bono' || sujeto.tipo === 'mensualidad') ? sujeto : null;
+  const deuna = useEstadoDeUna(enDeuna ? sujetoDeuna : null);
   /* La MISMA espera para los dos rieles: lee **el SUJETO**, no al proveedor.
      Lo único que cambia es cuánto se mira — con DeUna la plata todavía no se
      movió, así que el tope es margen y no plazo. */

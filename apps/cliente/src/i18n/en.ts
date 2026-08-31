@@ -2377,6 +2377,11 @@ export const clienteEn = {
     exitoDetalle: 'We’ll let you know when they head out to pick him up.',
   },
   checkoutPlan: {
+    /* ⭐ S109-C · Ver la nota del espejo en `es.ts`: «still on its way» NO es
+       «didn't go through» — decirlo como rechazo invita a pagar dos veces. */
+    canceladoVoz: 'That plan was cancelled. You weren’t charged.',
+    noEntroVoz: 'The payment didn’t go through. You can try another card — your plan is waiting.',
+    sigueEnCaminoVoz: 'The payment is still on its way. We’ll let you know as soon as it clears; don’t pay it again.',
     servicio: 'Monthly walks plan',
     antesDePagar: 'Before you confirm',
     cuandoSeCobra: 'This plan is charged once a month, for as long as it stays active.',

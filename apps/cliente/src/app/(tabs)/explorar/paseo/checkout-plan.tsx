@@ -38,7 +38,7 @@
  * cosas son la misma, y la familia descubre cuál tiene el día que quiere irse.*
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -54,6 +54,9 @@ import { contratarPlanPaseo } from '@epetplace/api';
 type Frecuencia = 'semanal' | 'quincenal' | 'mensual';
 
 import { simula } from '@/lib/pagos/simulado';
+import { cobrar } from '@/lib/pagos/cobro';
+import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
+import { useMedioDePago, SeccionMedioDePago } from '@/components/seccion-medio-de-pago';
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutPlanPaseo() {
@@ -73,30 +76,98 @@ export default function CheckoutPlanPaseo() {
      cobro, dice que estamos confirmando con el banco. */
   const [fase, setFase] = useState<'resumen' | 'procesando' | 'exito'>('resumen');
   const [rebote, setRebote] = useState<string | null>(null);
+  /** El plan en vuelo: nace ANTES del cobro y lo espera la máquina. */
+  const [planEnVuelo, setPlanEnVuelo] = useState<string | null>(null);
+  /* ⭐ Activo **sólo cuando hay algo que cobrar y sólo en el resumen**:
+     mientras simula no hay débito, y pedir tarjetas al servidor para una
+     pantalla que no va a cobrar es un viaje que nadie necesita. */
+  const medio = useMedioDePago(!simula('plan_paseo') && fase === 'resumen');
+
+  /* ⭐ **S109-C · UN SOLO INTERRUPTOR GOBIERNA LA BANDA Y EL COBRO.**
+     *Si el cobro se enciende antes que la banda se apague, la pantalla cobra de
+     verdad diciendo que simula — que es la misma mentira al revés y peor,
+     porque nadie la busca.* Por eso `simula('plan_paseo')` no decora: DECIDE.
+     El día del deploy de B se cambia UNA palabra en `simulado.ts` y las dos
+     superficies se mueven juntas, por construcción. */
+  const simulado = simula('plan_paseo');
+  const espera = useEsperaDeConfirmacion(
+    fase === 'procesando' && !simulado && planEnVuelo !== null
+      ? { tipo: 'plan', id: planEnVuelo }
+      : null,
+  );
+
+  useEffect(() => {
+    if (espera.fase !== 'resuelta') return;
+    const e = espera.estado;
+    if (e === 'activa') { setFase('exito'); return; }
+    setFase('resumen');
+    setPlanEnVuelo(null);
+    /* Cada final con su frase. `esperando_pago` NO es rechazo: el cobro puede
+       seguir en camino, y decir «no entró» mandaría a pagar dos veces. */
+    setRebote(
+      e === 'cancelada' ? t('checkoutPlan.canceladoVoz')
+      : e === 'fallida' ? t('checkoutPlan.noEntroVoz')
+      : t('checkoutPlan.sigueEnCaminoVoz'),
+    );
+  }, [espera, t]);
 
   const contratar = useCallback(async () => {
     if (fase !== 'resumen') return;
+    /* 🔴 Con cobro real hace falta medio; simulado no cobra y no lo pide.
+       *Pedir una tarjeta para algo que no se va a cobrar es fricción inventada;
+       no pedirla cuando SÍ se cobra es un botón que rebota.* */
+    if (!simulado && medio.idTarjeta === null) { setRebote(t('pago.cobroElegiMedio')); return; }
     setFase('procesando');
     setRebote(null);
-    const r = await contratarPlanPaseo({
-      prestador_id: texto('prestadorId'),
-      prestador_servicio_id: texto('prestadorServicioId'),
-      mascota_id: texto('mascotaId'),
-      dias,
-      hora: texto('hora'),
-      frecuencia: texto('frecuencia') as Frecuencia,
-      auto_renovar: texto('renueva') === '1',
-    });
-    if (!r.ok) {
-      /* 🔴 Se queda en el resumen con TODO lo elegido — *lo que la familia
-         quiere después de un rebote es corregir, no rehacer.* Y la razón se lee
-         en palabras: el wrapper ya trae su mensaje tipado, nunca un código. */
+
+    /* El plan nace **una sola vez**, aunque el cobro se reintente: sin esto,
+       cada reintento tras un rechazo dejaría otro plan pendiente. */
+    let planId = planEnVuelo;
+    if (planId === null) {
+      const r = await contratarPlanPaseo({
+        prestador_id: texto('prestadorId'),
+        prestador_servicio_id: texto('prestadorServicioId'),
+        mascota_id: texto('mascotaId'),
+        dias,
+        hora: texto('hora'),
+        frecuencia: texto('frecuencia') as Frecuencia,
+        auto_renovar: texto('renueva') === '1',
+        /* ⏸️ **EL RIEL FALTA ACÁ Y ES A PROPÓSITO — lo está poniendo la pista A.**
+           Medí que `contratarPlanPaseo` no manda `p_riel` ni `p_tarjeta_id`, y
+           que la puerta los exige desde `20260906180000:173` ⇒ **rebota
+           siempre**. Lo tomé creyendo que el llamador vivía en el cliente; A
+           midió que **vive en `packages/api`, su territorio**, y lo tomó con la
+           misma unión que la mensualidad. *Mi diagnóstico era exacto y la ruta
+           no — y descartar mi versión cuesta menos que dos pistas curando el
+           mismo archivo.*
+           ⭐ Cuando A publique, `medio` va a ser REQUERIDO en el input y **el
+           compilador va a traer a esta línea solo**: por eso no queda ficha. */
+      });
+      if (!r.ok) {
+        /* 🔴 Se queda en el resumen con TODO lo elegido — *lo que la familia
+           quiere después de un rebote es corregir, no rehacer.* Y la razón se
+           lee en palabras: el wrapper ya trae su mensaje tipado. */
+        setFase('resumen');
+        setRebote(r.mensaje);
+        return;
+      }
+      planId = r.data.suscripcion_id;
+      setPlanEnVuelo(planId);
+    }
+
+    /* ☠️ **MIENTRAS SIMULA, EL ÉXITO SE DECLARA ACÁ — y eso es exactamente lo
+       que la banda anuncia.** No hay cobro que esperar. */
+    if (simulado) { setFase('exito'); return; }
+
+    const cobro = await cobrar({ tipo: 'plan', id: planId }, medio.idTarjeta as string);
+    if (!cobro.ok) {
       setFase('resumen');
-      setRebote(r.mensaje);
+      mostrar({ texto: t(cobro.voz), variante: 'error' });
       return;
     }
-    setFase('exito');
-  }, [fase, dias, t]);
+    /* La fase NO cambia: ya está en `procesando`, y ahora la máquina mira.
+       *Un `ok` del wrapper significa «el proveedor contestó», jamás «pagado».* */
+  }, [fase, dias, simulado, medio.idTarjeta, planEnVuelo, mostrar, t]);
 
   if (fase === 'procesando') {
     return (
@@ -179,7 +250,17 @@ export default function CheckoutPlanPaseo() {
         {/* ⭐ **YA NO SE ESCRIBE A MANO: SE DERIVA.** El día que el plan cobre,
             `simula('plan_paseo')` pasa a `false` y **esta banda desaparece sola**
             — junto con el sufijo del botón, desde la misma línea. */}
-        {simula('plan_paseo') ? <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto> : null}
+        {/* ⭐ **LA SECCIÓN DE MEDIO APARECE SOLA EL DÍA DEL DEPLOY** — sale del
+            MISMO interruptor que la banda y el sufijo. *Un checkout que pide
+            tarjeta y dice «simulado» al lado sería la pantalla contándose dos
+            cosas distintas a sí misma.*
+            🔴 `recurrente`: los dos medios prometen cosas distintas y las dos
+            promesas van ANTES de elegir. */}
+        {simula('plan_paseo') ? (
+          <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto>
+        ) : (
+          <SeccionMedioDePago medio={medio} recurrente />
+        )}
 
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
       </PantallaConPie>

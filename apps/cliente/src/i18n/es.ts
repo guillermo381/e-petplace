@@ -3338,6 +3338,15 @@ export const clienteEs = {
      «gestionar» ambiguo que la disimule hace creer que pausar y cancelar son lo
      mismo, y la familia descubre cuál tiene el día que quiere irse.* */
   checkoutPlan: {
+    /* ═══ ⭐ S109-C · LOS TRES DESENLACES DEL COBRO DEL PLAN ════════════════
+       🔴 **`sigueEnCaminoVoz` NO dice «no entró», y esa es la línea que impide
+       que la familia pague dos veces.** `esperando_pago` significa que el cobro
+       puede seguir viajando: *un tope dibujado como rechazo es una invitación a
+       reintentar sobre plata que quizá ya salió.* La distinción la sostiene el
+       motor —A lee el intento— y acá sólo se cuenta. */
+    canceladoVoz: 'Ese plan quedó cancelado. No se te cobró nada.',
+    noEntroVoz: 'El pago no entró. Puedes probar con otra tarjeta — el plan te espera.',
+    sigueEnCaminoVoz: 'El pago sigue en camino. Te avisamos apenas se confirme; no vuelvas a pagarlo.',
     servicio: 'Plan mensual de paseos',
     antesDePagar: 'Antes de confirmar',
     /* 🔴 NO se promete un día del mes: el ancla tiene bordes (un plan que
