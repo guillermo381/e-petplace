@@ -77,6 +77,26 @@ export type SujetoDeuna =
   | { tipo: 'bono'; id: string }
   | { tipo: 'mensualidad'; id: string }
   | { tipo: 'programa'; id: string };
+/* ═══ 🔴 FALTA `plan` — Y NO SE ESCRIBE TODAVÍA, POR FIRMA ═══════════════════
+   El plan de paseo **no puede cobrarse por DeUna**: este tipo no lo nombra y
+   `pagos-deuna-solicitud` tiene **0 ocurrencias** de `suscripcion_servicio_id`
+   (medido) ⇒ **no falta un nombre, falta la rama entera** —pertenencia,
+   compuerta, monto, y el período, que en `pagos-cobro` costó un 500 porque
+   `chk_suscripcion_viaja_con_su_periodo` lo hace inexpresable—.
+
+   **DISPARO (firma del founder, 31-ago-2026): cuando DeUna haya cobrado de
+   verdad al menos UNA vez.** Hoy `por_deuna = 0`: el riel no corrió nunca.
+   *Escribir una rama entera para un sujeto que no se puede ejercer, en un riel
+   que no se puede ejercer, es garantizar que llegue a producción sin haber
+   corrido.*
+
+   ⚠️ **Y entra CON la pantalla del link (pista C), no antes:**
+   `apps/cliente/src/app/pagos/mensualidad.tsx` hoy resuelve sólo guardería, así
+   que un link de plan llegaría a una pantalla que no sabe leerlo. **Las dos
+   piezas juntas o se emite un sujeto sin destino.**
+   El destino ya existe: `cobro_link_mensual.suscripcion_servicio_id` está en su
+   XOR y `emitir_link_mensual` conoce `'suscripcion_servicio'`. Falta la puerta.
+   Dueño compartido B+C. */
 
 /**
  * Lo que la puerta devuelve en el camino feliz.
