@@ -57,7 +57,13 @@ export type VozDeCobro =
   | 'pago.cobroDiaTomado'
   | 'pago.cobroQueMascota'
   | 'pago.cobroSinCupoEnElPeriodo'
-  | 'pago.cobroSinPeriodo';
+  | 'pago.cobroSinPeriodo'
+  /* ⭐ S109-C · Las dos que el guard exigió en su PRIMERA integración real.
+     Sin él habrían caído en «no pudimos completar, escribinos» —compilando en
+     verde— llevándose puesta la causa que la compuerta se toma el trabajo de
+     medir ANTES de mover plata. */
+  | 'pago.cobroSesionesNoEntran'
+  | 'pago.cobroProgramaNoCobrable';
 
 export type ResultadoCobro = { ok: true } | { ok: false; voz: VozDeCobro };
 
@@ -124,6 +130,20 @@ export async function cobrar(
       case 'sin_cupo_en_el_periodo':
         return { ok: false, voz: 'pago.cobroSinCupoEnElPeriodo' };
       case 'sin_periodo_por_cobrar':  return { ok: false, voz: 'pago.cobroSinPeriodo' };
+
+      /* 🔴 **LA COMPUERTA HABLÓ ANTES DE MOVER PLATA, y eso cambia la frase.**
+         El motor ensayó el acto real —generar las N sesiones— en una
+         subtransacción que se deshizo, y midió que **no entran en la vigencia
+         del programa**. *No se cobró nada, y la familia puede hacer algo con
+         esto: empezar antes.* Decirle «no pudimos completar, escribinos» sería
+         tirar la única parte accionable de un rebote que el motor calculó bien.
+         ⚠️ **Sin nombrar CUÁL sesión**: la `causa` viaja en el 409 y hoy el
+         wrapper la aplana (medido por S109-B). *Prometer un detalle que no
+         tengo sería inventarlo* — cuando `detalle` viaje, es una línea. */
+      case 'sesiones_no_agendables':
+        return { ok: false, voz: 'pago.cobroSesionesNoEntran' };
+      case 'programa_no_cobrable':
+        return { ok: false, voz: 'pago.cobroProgramaNoCobrable' };
       case 'sin_medio_autorizado':    return { ok: false, voz: 'pago.cobroElegiMedio' };
 
       /* 🔴 EL VEREDICTO DEL EMISOR, y **solo** el veredicto del emisor. No se
