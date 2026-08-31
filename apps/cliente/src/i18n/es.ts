@@ -3154,7 +3154,18 @@ export const clienteEs = {
        no honra es exactamente el defecto que esta tanda vino a cerrar.*
        Mientras el motor no devuelva el período, se dice la REGLA, que sí es
        cierta, y no una fecha inventada. */
-    mensualExitoDetalle: 'Tu plan está activo desde hoy. El próximo cobro sale el {{fecha}}. Puedes cancelarlo desde Cuenta cuando quieras.',
+    /* 🔴 **S108-C · CORRECCIÓN DE UN DEFECTO MÍO, cazado por el cruce con A.**
+       Estas dos líneas decían «El próximo cobro sale el {{fecha}}» sobre
+       `periodo_hasta` — **y `periodo_hasta` es el FIN DEL PERÍODO PAGADO, no
+       el día del cobro.** A midió que la renovación es `periodo_hasta + 1`,
+       o sea que la pantalla estaba diciendo la fecha del cobro **corrida un
+       día**. *Un día de diferencia en una fecha de cobro no se lee como un
+       error: se lee como que te cobraron antes de lo que dijiste.*
+       ⇒ Se dice lo que el dato SÍ significa —hasta cuándo está cubierta— y
+       la renovación se enuncia sin fecha. **La fecha exacta la puede dar
+       `guarderia_proximo_cobro` cuando tenga lector; hasta entonces no se
+       deduce.** */
+    mensualExitoDetalle: 'Tu plan está activo desde hoy y queda cubierto hasta el {{fecha}}. Se renueva solo, y puedes cancelarlo desde Cuenta cuando quieras.',
     mensualExitoDetalleSinFecha: 'Tu plan está activo desde hoy. El próximo cobro sale dentro de un mes. Puedes cancelarlo desde Cuenta cuando quieras.',
     continuar: 'Continuar',
     dondeRecogen: 'De dónde lo pasan a buscar',
@@ -3215,6 +3226,8 @@ export const clienteEs = {
     /* ⭐ S108-C · Los dos paquetes que no están listos, cada uno con su voz.
        *«Falta pagarlo» y «se venció el tiempo para pagarlo» son dos estados
        distintos y ninguno puede quedar sin decirse.* */
+    paqueteListoPrimerDia: 'Tu paquete está listo',
+    paqueteListoPrimerDiaDetalle: 'Elige tu primer día · {{n}} estadías por usar',
     paqueteFaltaPagar: 'Falta completar el pago de tu paquete',
     paqueteFaltaPagarDetalle: '{{n}} estadías · toca para completar el pago',
     paqueteNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
@@ -3261,8 +3274,9 @@ export const clienteEs = {
     guarderiaPlan: 'Plan mensual de guardería',
     paseoPlan: 'Plan mensual de paseos',
     alMes: '${{precio}} al mes',
-    proximoCobro: 'Próximo cobro: {{fecha}}',
-    proximoCobroSinFecha: 'Todavía no hay una fecha de próximo cobro.',
+    /* Lo mismo acá: es hasta cuándo está cubierto, no el día del cobro. */
+    proximoCobro: 'Cubierto hasta el {{fecha}} · se renueva solo',
+    proximoCobroSinFecha: 'Todavía no hay un período cobrado.',
     /* 🔴 Lo que se lee DESPUÉS de apagar, y es la línea que evita el daño: el
        interruptor detiene la RENOVACIÓN, jamás el servicio ya pagado. */
     apagadoHasta: 'No se vuelve a cobrar. Sigue cubierto hasta el {{fecha}}.',

@@ -399,11 +399,33 @@ export default function LogGuarderia() {
                  en `detalle`, que es su lugar — no una línea suelta debajo. */
               <Tarjeta key={pq.bonoId} relleno="ninguno">
                 <CeldaNavegacion
-                  titulo={t('logGuarderia.reservarDePaquete')}
+                  /* ⭐ **S108-C · LA REANUDACIÓN, y es la misma fila con otra
+                     voz.** Firma del founder: *si cierro la app entre el cobro y
+                     el agendamiento, al volver me recibe ahí.*
+
+                     Un paquete pagado **sin una sola estadía usada** es
+                     exactamente ese caso: la compra salió, el primer día no se
+                     llegó a elegir. *Con la voz genérica de saldo, la familia
+                     volvía a una lista que no le decía que le faltaba algo —
+                     un paquete pagado sin primer día no puede quedar mudo.*
+
+                     🔴 Y **no hace falta una pantalla nueva ni un estado
+                     guardado**: el hecho vive en el dato (`quedan === total`),
+                     así que la reanudación es cierta aunque la app se haya
+                     matado, aunque se cambie de teléfono, y sin nada que
+                     limpiar después. *Un flujo que se retoma leyendo el mundo
+                     no se puede desincronizar del mundo.* */
+                  titulo={
+                    pq.quedan === pq.total
+                      ? t('logGuarderia.paqueteListoPrimerDia')
+                      : t('logGuarderia.reservarDePaquete')
+                  }
                   detalle={
-                    pq.quedan === 1
-                      ? t('logGuarderia.saldoUna', { total: pq.total })
-                      : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })
+                    pq.quedan === pq.total
+                      ? t('logGuarderia.paqueteListoPrimerDiaDetalle', { n: pq.total })
+                      : pq.quedan === 1
+                        ? t('logGuarderia.saldoUna', { total: pq.total })
+                        : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })
                   }
                   onPress={() => {
                     if (elegida === null) return;
