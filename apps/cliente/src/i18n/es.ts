@@ -1100,7 +1100,14 @@ export const clienteEs = {
     resumenUltima: 'La última sesión queda el {{fecha}}.',
     resumenVigencia: 'Tienes {{dias}} días desde hoy para completarlas.',
     resumenMover: 'Puedes mover una sesión con 24 horas de aviso.',
-    comprarPrograma: 'Comprar programa',
+    /* ⭐ S108-C · **La asimetría que el censo encontró y que hoy SÍ se puede
+       curar.** Sus dos hermanas dicen «(simulado)» en el CTA —`plan.contratar`,
+       `paquete.comprar`— y ésta no, aunque las tres pintan el mismo
+       `checkout.simuladoAviso` arriba. *La banda se lee al llegar; el botón se
+       lee en el momento de apretarlo,* y ahí las tres puertas tienen que decir
+       lo mismo. ☠️ Muere junto con las otras dos, en la tanda en que las tres
+       cobren — ni antes ni después. */
+    comprarPrograma: 'Comprar programa (simulado)',
     procesandoPrograma: 'Confirmando tu programa…',
     programaExitoTitulo: 'Programa agendado',
     programaExitoDetalle:

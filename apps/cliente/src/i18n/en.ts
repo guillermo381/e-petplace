@@ -871,7 +871,7 @@ export const clienteEn = {
     resumenUltima: 'The last session lands on {{fecha}}.',
     resumenVigencia: 'You have {{dias}} days from today to complete them.',
     resumenMover: 'You can move a session with 24 hours notice.',
-    comprarPrograma: 'Buy program',
+    comprarPrograma: 'Buy program (simulated)',
     procesandoPrograma: 'Confirming your program…',
     programaExitoTitulo: 'Program scheduled',
     programaExitoDetalle:
