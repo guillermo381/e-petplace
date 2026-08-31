@@ -253,6 +253,19 @@ Deno.serve(async (req) => {
      casa.* Es el mismo predicado que usan sus policies. */
   let bono: { id: string; estado_pago: string; estado: string; pago_expira_en: string | null } | null = null;
   let menPeriodo: string | null = null;
+  /* 🔴 EL PERÍODO DEL PLAN NO ES OPCIONAL, Y LA BASE YA LO DECÍA.
+     `chk_suscripcion_viaja_con_su_periodo` es un XOR:
+     `suscripcion_servicio_id IS NULL` ⟺ `suscripcion_periodo IS NULL`. **Un
+     intento de suscripción sin su mes es inexpresable** — buen diseño, y me
+     atrapó: la primera versión de esta rama no lo seteaba y el INSERT rebotaba
+     con `23514`, que la edge devolvía como un `no_se_pudo_completar` genérico
+     con HTTP 500.
+     *Es la tercera vez en el día de la misma forma —`iva`, `base`, y ahora
+     esto—: **un campo que el camino común necesita y que la rama nueva no tenía
+     nada que le recordara.*** Con la diferencia que la vuelve peor de justificar:
+     **acá la base SÍ lo exigía por constraint. Lo que faltó no fue la regla:
+     fue leerla antes de escribir la rama.* */
+  let planPeriodo: string | null = null;
   let menMonto = 0;
 
   if (hayBono) {
@@ -341,7 +354,7 @@ Deno.serve(async (req) => {
      plan de otro, y eso es decisión de producto, no una equivalencia. */
   if (hayPlan) {
     const { data: pl } = await db.from('suscripciones_servicio')
-      .select('id, user_id, estado, estado_pago, precio_mensual, pago_expira_en, prestador_id')
+      .select('id, user_id, estado, estado_pago, precio_mensual, pago_expira_en, prestador_id, periodo_inicio')
       .eq('id', planId).maybeSingle();
     if (!pl || pl.user_id !== userId) {
       return json({ ok: false, codigo: 'plan_no_existe' }, 409);
@@ -362,6 +375,14 @@ Deno.serve(async (req) => {
     }
     if (!(Number(pl.precio_mensual) > 0)) {
       return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    }
+    /* El mes que se cobra. Sale de `periodo_inicio`, que la contratación ya
+       ancló — *no se recalcula acá: dos lugares que responden qué mes es dan
+       dos respuestas el día que uno cambie.* */
+    planPeriodo = pl.periodo_inicio ? String(pl.periodo_inicio).slice(0, 10) : null;
+    if (planPeriodo === null) {
+      return json({ ok: false, codigo: 'plan_no_cobrable',
+                    detalle: 'el plan no tiene período anclado' }, 409);
     }
   }
 
@@ -591,6 +612,7 @@ Deno.serve(async (req) => {
     guarderia_suscripcion_periodo: hayMen ? menPeriodo : null,
     programa_contratado_id: hayProg ? progId : null,
     suscripcion_servicio_id: hayPlan ? planId : null,
+    suscripcion_periodo: hayPlan ? planPeriodo : null,
   });
 
   /* 🔑 LA FORMA DEL `order` CON IVA 0 — respuesta de Erick, 20-ago (letra §6bis):
