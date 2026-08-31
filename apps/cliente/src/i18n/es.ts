@@ -3332,6 +3332,17 @@ export const clienteEs = {
     exitoTitulo: 'Tu plan quedó activo',
     exitoDetalle: 'Pagas ${{precio}} al mes y tus salidas quedan agendadas. Lo administras desde Cuenta › Pagos recurrentes y suscripciones.',
   },
+  /* ⭐ S109-C · El destino del LINK MENSUAL. Voz de familia porque quien llega
+     viene de un correo: *un código de seis dígitos sin decir qué se está
+     pagando le pide a alguien que mueva plata a ciegas.* */
+  linkMensual: {
+    concepto: 'Mensualidad de guardería',
+    periodo: 'Período que estás pagando',
+    exitoTitulo: 'Listo, tu mes quedó pagado',
+    exitoDetalle: 'Tu plan sigue activo. Te avisamos antes del próximo cobro.',
+    noPudimosTitulo: 'No pudimos abrir tu mensualidad',
+    noPudimosDetalle: 'Puede que el enlace ya no sirva. Búscala en Cuenta › Pagos recurrentes y suscripciones.',
+  },
   logGuarderia: {
     /* El vacío de la FIRMA del founder — se pinta cuando el lector diga
        que no hay ninguna. Hoy vive detrás de `LISTA_DISPONIBLE`. */

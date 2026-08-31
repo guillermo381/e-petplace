@@ -2380,6 +2380,14 @@ export const clienteEn = {
     exitoTitulo: 'Your plan is active',
     exitoDetalle: 'You pay ${{precio}} a month and your walks are booked. You manage it from Account › Recurring payments and subscriptions.',
   },
+  linkMensual: {
+    concepto: 'Daycare monthly plan',
+    periodo: 'Period you’re paying',
+    exitoTitulo: 'Done — your month is paid',
+    exitoDetalle: 'Your plan stays active. We’ll let you know before the next charge.',
+    noPudimosTitulo: 'We couldn’t open your monthly payment',
+    noPudimosDetalle: 'The link may no longer work. Find it in Account › Recurring payments and subscriptions.',
+  },
   logGuarderia: {
     vacioTitulo: 'No stays booked',
     elegiMascotaTitulo: 'Choose who',
