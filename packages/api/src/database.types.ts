@@ -22004,7 +22004,7 @@ export type Database = {
           p_monto_esperado?: number
           p_prestador_id: string
           p_riel?: string
-          p_tarjeta_id: string
+          p_tarjeta_id?: string
         }
         Returns: Json
       }
@@ -23328,6 +23328,7 @@ export type Database = {
           tipo: string
         }[]
       }
+      obtener_mes_pendiente_guarderia: { Args: never; Returns: Json }
       obtener_mi_posicion_en_prestador: {
         Args: { p_prestador_id: string }
         Returns: Json

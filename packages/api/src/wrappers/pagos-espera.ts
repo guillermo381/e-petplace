@@ -275,3 +275,59 @@ export async function leerEstadoPrograma(
 
   return { ok: true, data: { estado, estadoPago, resuelta: estado !== 'pendiente_pago' } };
 }
+
+/**
+ * ═══ EL PLAN DE PASEO — S109-A ════════════════════════════════════════════
+ *
+ * El sexto sujeto, y **el último que faltaba en esta pieza**: `pagos-espera`
+ * tenía cinco lectores y ninguno leía `suscripciones_servicio`.
+ *
+ * 🔴 **Su vocabulario NO se copia del de la mensualidad aunque las dos sean
+ * mensuales.** La mensualidad de guardería es un MANDATO: no tiene
+ * `estado_pago` y su prueba de vida es `periodo_desde`. El plan de paseo **sí
+ * tiene `estado_pago`**, porque desde S109 nace `pendiente` como los otros
+ * comprables. *Dos sujetos que se cobran igual no se leen igual, y elegir el
+ * campo por la forma del cobro en vez de por la fila es cómo se lee la columna
+ * de otro.*
+ *
+ * 🔴 **Y el `null` se sostiene igual que en sus hermanos:** sin intento visible
+ * NO se declara fallido. *Un «falló» inventado sobre la ausencia de un dato
+ * manda a la familia a reintentar un cobro que quizá ya salió.*
+ */
+export type EstadoPlan = 'activa' | 'esperando_pago' | 'fallida' | 'cancelada';
+export type EsperaPlan = { estado: EstadoPlan; resuelta: boolean };
+
+export async function leerEstadoPlan(
+  suscripcionId: string,
+): Promise<ResultadoWrapper<EsperaPlan, 'plan_no_visible'>> {
+  const cli = getClient();
+  const { data, error } = await cli
+    .from('suscripciones_servicio')
+    .select('estado, estado_pago').eq('id', suscripcionId).maybeSingle();
+
+  if (error) return { ok: false, codigo: 'plan_no_visible', mensaje: error.message };
+  if (!data) return { ok: false, codigo: 'plan_no_visible', mensaje: 'plan_no_visible' };
+
+  if (data.estado === 'cancelada') {
+    return { ok: true, data: { estado: 'cancelada', resuelta: true } };
+  }
+  if (data.estado_pago === 'pagado') {
+    return { ok: true, data: { estado: 'activa', resuelta: true } };
+  }
+
+  /* Todavía sin pagar ⇒ ¿el cobro está viajando, o murió? */
+  const { data: intento } = await cli
+    .from('pagos_intentos')
+    .select('estado')
+    .eq('suscripcion_servicio_id', suscripcionId)
+    .order('creado_en', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const muerto = intento
+    && ['rechazado', 'expirado', 'reversado', 'reverso_fallido'].includes(String(intento.estado));
+
+  return muerto
+    ? { ok: true, data: { estado: 'fallida', resuelta: true } }
+    : { ok: true, data: { estado: 'esperando_pago', resuelta: false } };
+}

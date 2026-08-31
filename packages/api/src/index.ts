@@ -1424,7 +1424,10 @@ export {
   bonoNoPagadoATiempo,
   /* S108-A · el cuarto sujeto de la espera. */
   leerEstadoPrograma,
+  /* S109-A · el sexto y ultimo sujeto de la espera. */
+  leerEstadoPlan,
   type EsperaPrograma, type EsperaProgramaEstado, type EstadoPagoPrograma,
+  type EsperaPlan, type EstadoPlan,
 } from './wrappers/pagos-espera';
 
 // S104-A · tanda 2 — la invitación de familia (puerta única, cero INSERT desde apps).
