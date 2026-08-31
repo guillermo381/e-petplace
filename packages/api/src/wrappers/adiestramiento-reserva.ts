@@ -284,12 +284,30 @@ export interface ProgramaContratado {
   vigencia_hasta: string;
   precio_total: number;
   precio_unitario_efectivo: number;
-  pagado_en: string;
+  /**
+   * 🔴 **S109-C · ACÁ VIVÍA `pagado_en`, Y SU AUSENCIA ROMPÍA LA COMPRA.**
+   * El arco nuevo (`20260905120000`) hace que el programa **nazca `pendiente`**
+   * y que **las sesiones nazcan al confirmar el pago**, así que la RPC dejó de
+   * devolver `pagado_en` — pero el validador de abajo **seguía exigiéndolo**, y
+   * una respuesta buena caía en `datos_inconsistentes`. *La familia veía un
+   * error sobre un programa que el motor sí había creado.*
+   *
+   * Su modo de falla es el peor de los dos posibles: **no es que no se cree —
+   * es que se crea y la pantalla dice que no.**
+   */
+  cobro_pendiente: boolean;
+  /** Cuándo se le acaba el tiempo para pagarlo. */
+  pago_expira_en: string;
 }
 
-/** UN pago simulado DECLARADO por el programa entero; las N sesiones
- *  nacen firmes y EN ORDEN (consumo secuencial, Decisión U). Atómico:
- *  si una fecha no cabe, NADA nace — el error tipado dice cuál falló. */
+/**
+ * Registra el programa. **NO cobra y NO agenda** (S109, arco nuevo): nace
+ * `pendiente` con ventana de 15 minutos, y **las N sesiones nacen cuando el pago
+ * se confirma**. Las fechas que devuelve son **las previstas**, no citas vivas.
+ *
+ * ⚠️ *Por eso la pantalla no puede decir «las N sesiones quedaron en la agenda»
+ * al volver de acá: todavía no hay ninguna.*
+ */
 export async function contratarPrograma(params: {
   prestadorId: string;
   servicioId: string;
@@ -320,7 +338,7 @@ export async function contratarPrograma(params: {
     typeof data.vigencia_hasta !== 'string' ||
     typeof data.precio_total !== 'number' ||
     typeof data.precio_unitario_efectivo !== 'number' ||
-    typeof data.pagado_en !== 'string'
+    typeof data.pago_expira_en !== 'string'
   ) {
     return fallo('datos_inconsistentes');
   }
@@ -334,7 +352,8 @@ export async function contratarPrograma(params: {
       vigencia_hasta: data.vigencia_hasta,
       precio_total: data.precio_total,
       precio_unitario_efectivo: data.precio_unitario_efectivo,
-      pagado_en: data.pagado_en,
+      cobro_pendiente: data.cobro_pendiente === true,
+      pago_expira_en: data.pago_expira_en,
     },
   };
 }

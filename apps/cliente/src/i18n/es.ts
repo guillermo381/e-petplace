@@ -1109,6 +1109,15 @@ export const clienteEs = {
        cobren — ni antes ni después. */
     comprarPrograma: 'Comprar programa (simulado)',
     procesandoPrograma: 'Confirmando tu programa…',
+    /* ☠️ S109-C · Acá vivían `programaExitoTitulo` («Programa agendado») y su
+       detalle, que decía **«Las {{n}} sesiones quedaron en la agenda»**. Eran
+       ciertos mientras `contratar_programa` creaba las citas al comprar; el
+       arco nuevo las mueve a `confirmar_pago_programa` y la frase pasó a
+       afirmar algo falso **sobre la agenda de un profesional**. Se mueven con el
+       motor, en el mismo acto. */
+    programaRegistradoTitulo: 'Tu programa quedó registrado',
+    programaRegistradoDetalle:
+      'Falta completar el pago. Cuando se confirme, agendamos las {{n}} sesiones: la primera el {{primera}} y la última el {{ultima}}.',
     programaExitoTitulo: 'Programa agendado',
     programaExitoDetalle:
       'Las {{n}} sesiones quedaron en la agenda: la primera el {{primera}} y la última el {{ultima}}. Vigencia hasta el {{vigencia}}.',
