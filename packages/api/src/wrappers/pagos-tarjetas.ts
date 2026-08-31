@@ -62,7 +62,14 @@ export type EstadoProveedor =
  * compilador si el tipo se ensancha «para que entren los dos».
  */
 export type TarjetaVerificada = {
-  id: string;
+  /**
+   * 🔴 **PUEDE SER `null`** desde S107 (`D-922`): con `card/list` como fuente,
+   * una tarjeta que vive en el proveedor y no en nuestra tabla **no tiene fila
+   * nuestra**. *Quien la use para identificar rompe con la única tarjeta que la
+   * cura vino a rescatar* — se identifica por `token`.
+   */
+  id: string | null;
+  /** La identidad real: existe en los dos lados. */
   token: string;
   marca: string | null;
   bin: string | null;
@@ -142,13 +149,18 @@ export async function listarTarjetasVerificadas(): Promise<
 
   const tarjetas: TarjetaVerificada[] = [];
   for (const t of data.tarjetas as unknown[]) {
-    if (!esObj(t) || typeof t.id !== 'string' || typeof t.token !== 'string') continue;
+    /* 🔴 S107 · D-922 — EL `id` DEJA DE SER OBLIGATORIO Y EL `token` PASA A
+       SERLO. Antes se exigían los dos y **una tarjeta sin fila local se caía
+       en silencio en este `continue`** — justo la que la inversión de la fuente
+       existe para mostrar. *El token es lo único que existe en los dos lados.* */
+    if (!esObj(t) || typeof t.token !== 'string' || !t.token) continue;
     /* 🔴 El estado se valida contra el vocabulario: cualquier cosa que no sea
        `valid` cae en `null`, que es «no sabemos». *Castearlo dejaría entrar un
        estado nuevo del proveedor como si fuera bueno.* */
     const est = t.estado_proveedor;
     tarjetas.push({
-      id: t.id,
+      /* `null` cuando sólo vive en el proveedor. **Se dice, no se inventa.** */
+      id: typeof t.id === 'string' ? t.id : null,
       token: t.token,
       marca: typeof t.marca === 'string' ? t.marca : null,
       bin: typeof t.bin === 'string' ? t.bin : null,

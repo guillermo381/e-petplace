@@ -114,9 +114,14 @@ Deno.serve(async (req) => {
   if (eT) return json({ ok: false, codigo: 'no_se_pudo_leer' }, 500);
 
   const tarjetas = locales ?? [];
-  if (tarjetas.length === 0) {
-    return json({ ok: true, verificado: true, tarjetas: [], uid_consultados: 0 });
-  }
+  /* 🔴 S107 · D-922 — ACÁ HABÍA UN CORTE TEMPRANO Y ERA EL DEFECTO DE FONDO.
+     ⏪ `if (tarjetas.length === 0) return { tarjetas: [] }` — **con la tabla
+     vacía ni siquiera se preguntaba**. Y como la lista base era la nuestra, una
+     tarjeta que el proveedor tiene y nosotros no **era inexpresable**.
+     Medido el 28-ago: la Visa …1111 vivía en Nuvei bajo el uid del founder,
+     nuestra tabla en cero, y no había forma de verla ni de borrarla.
+     ⇒ Se sigue de largo: el uid estable existe aunque la tabla esté vacía, y
+     es justamente el que trae las huérfanas. */
 
   /* Los uid a preguntar: los de las tarjetas + el ESTABLE si ya existe.
      El estable va aunque no tenga tarjetas todavía: es el que va a traerlas
@@ -137,6 +142,7 @@ Deno.serve(async (req) => {
   // ── LA CONSULTA AL PROVEEDOR ─────────────────────────────────────────────
   /** token → status, según el proveedor. */
   const estadoPorToken = new Map<string, string>();
+  const delProveedor = new Map<string, Record<string, unknown>>();
   let huboRespuesta = false;
   let fallos = 0;
 
@@ -151,8 +157,13 @@ Deno.serve(async (req) => {
       const cards = Array.isArray(js?.cards) ? js.cards : [];
       huboRespuesta = true;
       for (const c of cards) {
-        const tk = String((c as Record<string, unknown>).token ?? '');
-        if (tk) estadoPorToken.set(tk, String((c as Record<string, unknown>).status ?? ''));
+        const o = c as Record<string, unknown>;
+        const tk = String(o.token ?? '');
+        /* 🔴 Se guarda la CARTA ENTERA, no sólo el status: con `card/list` como
+           fuente, sus campos son los que se muestran. *Antes sólo hacía falta
+           clasificar tokens que ya teníamos; ahora hay que poder describir una
+           tarjeta que nunca vimos.* */
+        if (tk) { estadoPorToken.set(tk, String(o.status ?? '')); delProveedor.set(tk, o); }
       }
     } catch (e) {
       fallos++;
@@ -185,25 +196,67 @@ Deno.serve(async (req) => {
 
   /* ④ FILTRO BINARIO: sólo `valid`. Lo que no lo esté **no se lista** — y no
      se reactiva: se agrega de nuevo. */
-  const validas = tarjetas.filter((t) => estadoPorToken.get(String(t.token)) === 'valid');
-  const ocultas = tarjetas.length - validas.length;
+  /* ══ S107 · D-922 · LA FUENTE SE INVIERTE ═══════════════════════════════
+     ⏪ Antes: `tarjetas.filter(t => estadoPorToken.get(t.token) === 'valid')`
+     — **nuestra tabla ∩ su status**. La letra decía «card/list como fuente» y
+     el código hacía lo contrario: usaba `card/list` para CLASIFICAR tokens que
+     ya teníamos, no para DESCUBRIR.
+
+     🔑 Ahora la lista base es la del PROVEEDOR y nuestra tabla ENRIQUECE.
+     Recomendación de Erick (28-ago) y firma del founder: *así ellos no tienen
+     que borrar nada y no puede haber desincronía* — el lado que manda es uno
+     solo.
+
+     🔴 SE INDEXA POR TOKEN, no por nuestro `id`: **el token es lo único que
+     existe en los dos lados.** Con `id` local, una tarjeta que sólo vive en
+     Nuvei es inexpresable — y ésa es justo la que hay que poder mostrar y
+     borrar.
+
+     🔴 EL ALIAS SOBREVIVE AUNQUE LA TARJETA NO ESTÉ: la fila local pasa de
+     FUENTE a REGISTRO. Si la persona vuelve a agregar la misma tarjeta, el
+     proveedor devuelve **el mismo token** —medido el 28-ago, incluso a través
+     de un borrado— y el alias se reencuentra solo. *Borrarlo perdería algo que
+     la persona escribió, para ahorrar una fila.*
+
+     ⚠️ FILTRO BINARIO, sin excepciones (firma del founder tras la respuesta de
+     Erick): **sólo `valid` se lista.** Y no hace falta refresco ni webhook: sus
+     tarjetas **no cambian de estado automáticamente**, así que consultar al
+     abrir alcanza. */
+  const localPorToken = new Map(tarjetas.map((t) => [String(t.token), t]));
+  const validos = [...delProveedor.entries()].filter(([, c]) => String(c.status ?? '') === 'valid');
+  /* Lo oculto se cuenta sobre lo que EL PROVEEDOR tiene, que es la lista real.
+     *Contar sobre la nuestra diría cuántas de las nuestras escondimos, que ya
+     no es la pregunta.* */
+  const ocultas = delProveedor.size - validos.length;
 
   return json({
     ok: true,
     verificado: true,
-    /* Cuántos uid hizo falta preguntar: **con `D-921` curado esto vale 1**, y
-       verlo bajar es la señal de que el parque viejo se extinguió. */
     uid_consultados: uidsAPreguntar.length,
     ...(recortados > 0 ? { uid_no_consultados: recortados } : {}),
     ...(fallos > 0 ? { uid_sin_respuesta: fallos } : {}),
-    /* Cuántas se ocultaron y por qué: *un listado que encoge sin explicación
-       se lee como que perdimos una tarjeta.* */
     ocultas_por_estado: ocultas,
-    tarjetas: validas.map((t) => ({
-      id: t.id, token: t.token, marca: t.marca, bin: t.bin,
-      ultimos4: t.ultimos4, alias: t.alias,
-      /* ③ EN VUELO: viaja en la respuesta y **no se persiste**. */
-      estado_proveedor: 'valid',
-    })),
+    /* 🔴 `solo_del_proveedor` NO es decorativo: es el contador que prueba que
+       la inversión sirve. Con la fuente vieja era CERO por construcción. */
+    solo_del_proveedor: validos.filter(([tk]) => !localPorToken.has(tk)).length,
+    tarjetas: validos.map(([tk, c]) => {
+      const l = localPorToken.get(tk);
+      return {
+        /* `id` puede faltar y **se dice `null`, no se inventa**: una tarjeta que
+           sólo vive en Nuvei no tiene fila nuestra. La superficie usa `token`. */
+        id: l?.id ?? null,
+        token: tk,
+        /* Del PROVEEDOR, con la nuestra de respaldo: su `type` se muestra tal
+           cual y **no se deriva del BIN** (firma del founder; el ejemplo de la
+           doc con `bin 422023` y `type mc` era un error de la doc, confirmado
+           por Erick — y en nuestros 23 cobros el `type` siempre coincidió). */
+        marca: (typeof c.type === 'string' ? c.type : null) ?? l?.marca ?? null,
+        bin: (typeof c.bin === 'string' ? c.bin : null) ?? l?.bin ?? null,
+        ultimos4: (typeof c.number === 'string' ? c.number : null) ?? l?.ultimos4 ?? null,
+        /* 🔴 EL ALIAS ES NUESTRO Y SÓLO NUESTRO: `card/list` no lo trae. */
+        alias: l?.alias ?? null,
+        estado_proveedor: 'valid',
+      };
+    }),
   });
 });

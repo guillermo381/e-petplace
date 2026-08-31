@@ -63,26 +63,107 @@ Deno.serve(async (req) => {
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json({ ok: false, codigo: 'datos_invalidos' }, 400); }
   const tarjetaId = typeof body.tarjeta_id === 'string' ? body.tarjeta_id : null;
-  if (!tarjetaId) return json({ ok: false, codigo: 'datos_invalidos' }, 400);
+  /* 🔴 S107 · D-922 — SE ACEPTA `token` ADEMÁS DE `tarjeta_id`, y hay que decir
+     por qué no rompe la decisión de al lado.
+
+     ⚠️ EL CHOQUE, declarado: el comentario de abajo dice *«el token jamás viaja
+     desde el teléfono»*, y es una decisión de seguridad, no un detalle. Sigue
+     rigiendo para el camino normal — con `tarjeta_id`, el token se resuelve del
+     servidor y nada cambia.
+
+     Pero con `card/list` como fuente hay tarjetas **sin fila local**, y ésas no
+     tienen `tarjeta_id` que mandar. *Exigirlo las volvería imborrables — que es
+     justo el defecto que `D-922` viene a cerrar.*
+
+     🔑 LA PROPIEDAD SE CONSERVA PORQUE **NO SE LE CREE AL CLIENTE**: si viene
+     `token`, no se borra por confianza — se le pregunta a `card/list` por los
+     uid de ESTA persona y sólo se sigue si el token aparece ahí. *Un token que
+     el teléfono nombra no es un token que el teléfono demuestra tener.* */
+  const tokenPedido = typeof body.token === 'string' && body.token.trim()
+    ? body.token.trim() : null;
+  if (!tarjetaId && !tokenPedido) return json({ ok: false, codigo: 'datos_invalidos' }, 400);
 
   /* 🔴 PERTENENCIA. Solo ids del cliente, y el servidor resuelve el resto: el
      token **jamás viaja desde el teléfono**. */
-  const { data: tj, error: e1 } = await admin
-    .from('tarjetas_guardadas')
+  const q = admin.from('tarjetas_guardadas')
     .select('id, token, proveedor_uid, user_id')
-    .eq('id', tarjetaId)
-    .eq('user_id', uid)
-    .maybeSingle();
+    .eq('user_id', uid);
+  const { data: tj, error: e1 } = await (tarjetaId
+    ? q.eq('id', tarjetaId)
+    : q.eq('token', tokenPedido as string)).maybeSingle();
   if (e1) return json({ ok: false, codigo: 'no_pudimos_leer' }, 503);
-  if (!tj) return json({ ok: false, codigo: 'no_es_tu_tarjeta' }, 404);
+  /* 🔴 SIN FILA LOCAL NO ES «NO ES TUYA»: puede ser una que sólo vive en el
+     proveedor — el caso que `D-922` existe para reparar. Se sigue **sólo** si
+     vino por token, y su pertenencia se prueba abajo contra `card/list`. */
+  if (!tj && !tokenPedido) return json({ ok: false, codigo: 'no_es_tu_tarjeta' }, 404);
+
+  /* ── A′ · EL FRENO DE LA GUARDERÍA (firma del founder, 28-ago) ────────────
+     🔴 La FK `guarderia_suscripciones.tarjeta_id` es **`NO ACTION`** —la única
+     de las cuatro que no es `SET NULL`—, así que el DELETE local rebotaría con
+     un error de FK y la app diría un genérico.
+
+     Pero el daño real no es el rebote feo: **con `card/delete` la tarjeta se
+     borraría del proveedor igual**, y quedaría un plan de guardería cobrando
+     contra un token muerto. *Nadie se enteraría hasta el día del cobro.*
+
+     ⇒ Se frena ANTES de tocar al proveedor, y el rebote **dice la causa**
+     (`D-961` del otro lado del cable: un rebote genérico manda a reintentar
+     para siempre). La voz vive en la app y manda a soporte —que existe,
+     `/cuenta/ayuda` con WhatsApp— y **no promete cambiar el medio**, porque ese
+     flujo todavía no existe. *Prometer una acción que no existe es peor que
+     frenar sin salida.* */
+  if (tj) {
+    const { data: susc } = await admin.from('guarderia_suscripciones')
+      .select('id').eq('tarjeta_id', tj.id).neq('estado', 'cancelada').limit(1);
+    if (susc && susc.length > 0) {
+      return json({ ok: false, codigo: 'tarjeta_con_plan_activo' }, 409);
+    }
+  }
 
   // ── ① EL PROVEEDOR PRIMERO ────────────────────────────────────────────────
-  if (tj.proveedor_uid) {
+  /* ── QUÉ SE LE PIDE AL PROVEEDOR ─────────────────────────────────────────
+     Con fila local: lo de siempre, resuelto del servidor.
+     Sin fila local (sólo vive en Nuvei): **el uid sale del estable de esta
+     persona, jamás del cuerpo del request** — el teléfono nombra el token, no
+     elige de quién es. */
+  let uidBorrar: string | null = tj?.proveedor_uid ?? null;
+  let tokenBorrar: string | null = tj?.token ?? null;
+
+  if (!tj && tokenPedido) {
+    const { data: uidEstable } = await admin.rpc('obtener_uid_proveedor', {
+      p_user_id: uid, p_proveedor: 'nuvei',
+    }).then((r) => r, () => ({ data: null }));
+    if (typeof uidEstable !== 'string' || !uidEstable) {
+      return json({ ok: false, codigo: 'sin_uid_estable' }, 409);
+    }
+    /* 🔴 LA PERTENENCIA SE PRUEBA, NO SE ACEPTA. Se le pregunta al proveedor
+       por las tarjetas de ESTE uid y sólo se sigue si el token está ahí.
+       *Sin esto, cualquiera con una sesión podría pedir el borrado de un token
+       ajeno con sólo nombrarlo.* Y si no se pudo preguntar **no se borra**:
+       ante la duda sobre de quién es algo, la respuesta es no. */
+    let pertenece = false;
+    try {
+      const r = await fetch(`${BASE}/v2/card/list?uid=${encodeURIComponent(uidEstable)}`, {
+        headers: { 'Content-Type': 'application/json', 'Auth-Token': authToken() },
+      });
+      if (!r.ok) return json({ ok: false, codigo: 'no_pudimos_verificar' }, 503);
+      const js = await r.json().catch(() => ({}));
+      const cards = Array.isArray(js?.cards) ? js.cards : [];
+      pertenece = cards.some((c: Record<string, unknown>) => String(c.token ?? '') === tokenPedido);
+    } catch {
+      return json({ ok: false, codigo: 'no_pudimos_verificar' }, 503);
+    }
+    if (!pertenece) return json({ ok: false, codigo: 'no_es_tu_tarjeta' }, 404);
+    uidBorrar = uidEstable;
+    tokenBorrar = tokenPedido;
+  }
+
+  if (uidBorrar && tokenBorrar) {
     try {
       const r = await fetch(`${BASE}/v2/card/delete/`, {
         method: 'POST',
         headers: { 'Auth-Token': authToken(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ card: { token: tj.token }, user: { id: tj.proveedor_uid } }),
+        body: JSON.stringify({ card: { token: tokenBorrar }, user: { id: uidBorrar } }),
       });
       if (!r.ok) {
         const crudo = await r.text().catch(() => '');
@@ -103,7 +184,12 @@ Deno.serve(async (req) => {
   else console.warn('[borrar-tarjeta] tarjeta sin proveedor_uid: solo se borra local', tarjetaId);
 
   // ── ② NOSOTROS DESPUÉS ────────────────────────────────────────────────────
-  const { error: e2 } = await admin.from('tarjetas_guardadas').delete().eq('id', tarjetaId).eq('user_id', uid);
+  /* 🔴 SIN FILA LOCAL NO HAY NADA QUE BORRAR ACÁ, y **eso es un éxito**: la
+     tarjeta era del proveedor y del proveedor se fue. *Tratar la ausencia como
+     fallo diría «borrado a medias» sobre un borrado completo.* */
+  const { error: e2 } = tj
+    ? await admin.from('tarjetas_guardadas').delete().eq('id', tj.id).eq('user_id', uid)
+    : { error: null };
   if (e2) {
     console.error('[borrar-tarjeta] el proveedor borró y nosotros no', e2);
     return json({ ok: false, codigo: 'borrado_a_medias' }, 500);
