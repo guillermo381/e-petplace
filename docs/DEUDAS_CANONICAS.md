@@ -24546,3 +24546,55 @@ en UNA de las cinco ramas** —sólo la mensualidad—. *El guard se escribió c
 el sujeto era uno, y abrir los otros cuatro no censó quién lo tenía.* Es
 `L-318`/`D-980` otra vez: **abrir un sujeto obliga a censar los frenos, no sólo
 las puertas.**
+
+## 🔴 `L-447` — UN PARÁMETRO CON `DEFAULT` VUELVE INVISIBLE AL COMPILADOR QUE SU AUSENCIA ROMPE EL CUERPO
+
+**Medida por S109-C, sobre `contratar_plan_paseo`.**
+
+El wrapper no mandaba `p_riel` ni `p_tarjeta_id`. Los dos tienen `DEFAULT`, así
+que **el tipo generado los marca opcionales y el build sale verde** — mientras el
+cuerpo, con `p_riel` cayendo a `'tarjeta'` y la tarjeta en NULL, **rebotaba
+SIEMPRE**. *Contratar un plan de paseo estaba roto en todo ambiente que tuviera
+la migración aplicada, y ningún gate lo veía.*
+
+> **El discriminador que lo prueba, y está a un metro:** el MISMO defecto en
+> `contratar_mensualidad_guarderia` **sí lo cazó el compilador**, porque ahí
+> `p_tarjeta_id` **no tenía default** y salía requerido. **La única diferencia
+> entre el defecto invisible y el defecto visible era una palabra en la firma.**
+
+⇒ **Un `DEFAULT` no es una comodidad de llamada: es una promesa de que el cuerpo
+funciona sin ese valor.** Si el cuerpo lo exige, el default está mintiendo — y
+miente en el único lugar donde el compilador dejó de mirar.
+
+**Cura de forma, cuando el default no se puede quitar** (un parámetro sin default
+no puede seguir a uno con default, así que sacarlo obliga a reordenar y rompe a
+los posicionales): **`DEFAULT NULL` y el silencio se NOMBRA** con su propio
+código. *Rebotar «te falta una tarjeta» a alguien que nunca dijo que iba a pagar
+con tarjeta lo manda a buscar el problema donde no está.*
+
+⚠️ **Y su cruce con `L-445`, que es lo que la vuelve grave:** un `DEFAULT` con
+valor **aplasta el tercer estado**. `p_riel DEFAULT 'tarjeta'` hace que *«no
+declaró»* y *«dijo tarjeta»* sean indistinguibles — **lo escribió la misma pista
+que ese mismo día había depositado que `riel` tiene tres estados y que el tercero
+no se adivina.**
+
+## 🔴 `L-448` — UNA PROMESA FALSA SE MUDA DE PANTALLA COPIANDO LA FORMA DE LA FRASE, NO SU CONTENIDO
+
+**Medida por S109-C sobre su propio copy, y la declaró ella misma.**
+
+El texto de reactivación decía *«el cobro pasa a ser ese día de cada mes»* — **la
+misma promesa falsa que ya se había cazado y curado en otra pantalla** (un plan
+anclado un 31 no se cobra el 31 de febrero). Su literal al reportarlo:
+
+> *«La escribí igual porque copié la forma de la frase vieja, que es exactamente
+> cómo una promesa falsa se muda de pantalla en pantalla.»*
+
+⇒ **El vector de contagio no es el contenido: es la FORMA.** Por eso una promesa
+falsa **sobrevive a la cura de su original** — el que escribe la pantalla nueva
+no copia la frase vieja, copia su molde, y el molde trae la mentira adentro sin
+que nadie la vuelva a leer.
+
+**Corolario exigible:** cuando se cura un copy por decir algo que no es cierto,
+**la cura no termina en esa pantalla — se censa la FORMA en las demás.** Es la
+hermana de *«curar el síntoma reportado y no censar la clase es media cura»*,
+aplicada a la voz en vez de al motor.
