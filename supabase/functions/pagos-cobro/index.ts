@@ -517,6 +517,18 @@ Deno.serve(async (req) => {
     if (!m) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
     monto = Number((pl as { precio_mensual?: number } | null)?.precio_mensual ?? 0);
     moneda = m;
+    /* 🔴 `iva` Y `base` NO SON OPCIONALES, y olvidarlos costó un 500.
+       Medido ejerciendo: sin estas dos líneas `base` queda en 0 con `monto` en
+       138 y la verificación de IVA revienta **antes del insert** — cero
+       intentos, y el rebote llega como `no_se_pudo_completar` genérico, que no
+       dice nada.
+       *El sujeto nuevo entró por la puerta y no llenó todo lo que el camino
+       común necesita.* Es la misma clase del día una vez más: no un `else` que
+       captura de más, sino un campo que nadie exige y por eso nadie recuerda.
+       IVA 0 **DERIVADO, jamás tecleado**: los servicios no llevan IVA en el
+       catálogo — mismo criterio y mismo lugar donde cambiarlo que sus hermanas. */
+    iva = 0;
+    base = monto;
   }
   if (hayMen) {
     /* El número YA se resolvió arriba, contra el mandato — ver «pagar es
