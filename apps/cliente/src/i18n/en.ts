@@ -1288,6 +1288,7 @@ export const clienteEn = {
     enPreparacion: 'In preparation',
     perfil: 'Your profile',
     contrasena: 'Password',
+    imagenTitulo: 'Your pets’ photos',
     notificaciones: 'Notifications',
     eliminarCuenta: 'Delete account',
     sesion: 'Session and account',
@@ -2172,6 +2173,13 @@ export const clienteEn = {
     mensualAviso: 'This charge repeats: it happens on its own, the same day each month.',
     mensualCorte: 'You can cancel it from the app anytime, and it keeps running until the end of the month you paid for.',
     continuar: 'Continue',
+  },
+  imagenes: {
+    titulo: 'May we share their photos?',
+    cuerpo: 'We might show photos of {{nombre}} on our social media so other families get to know the service. It’s optional.',
+    revocar: 'You can revoke this any time: write to privacidad@epetplace.com and it will be revoked in under 48 hours.',
+    guardando: 'Saving…',
+    enPreferencias: 'Share their photos on our social media',
   },
   documentosGuarderia: {
     titulo: 'Before you book',

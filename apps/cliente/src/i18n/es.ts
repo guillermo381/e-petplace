@@ -1591,6 +1591,7 @@ export const clienteEs = {
     enPreparacion: 'En preparación',
     perfil: 'Tu perfil',
     contrasena: 'Contraseña',
+    imagenTitulo: 'Fotos de tus mascotas',
     notificaciones: 'Notificaciones',
     eliminarCuenta: 'Eliminar cuenta',
     sesion: 'Sesión y cuenta',
@@ -2951,6 +2952,13 @@ export const clienteEs = {
      cómo se llama cada documento en la lista—; su CONTENIDO sale del server,
      versionado. *Un texto legal escrito en un diccionario es un texto que nadie
      versiona, nadie fecha y nadie puede probar que la familia aceptó.* */
+  imagenes: {
+    titulo: '¿Nos dejas compartir sus fotos?',
+    cuerpo: 'Podríamos mostrar fotos de {{nombre}} en nuestras redes para que otras familias conozcan el servicio. Es opcional.',
+    revocar: 'Puedes revocar esta autorización cuando quieras: escríbenos a privacidad@epetplace.com y en menos de 48 horas quedará revocada.',
+    guardando: 'Guardando…',
+    enPreferencias: 'Compartir sus fotos en nuestras redes',
+  },
   documentosGuarderia: {
     titulo: 'Antes de reservar',
     doc_contrato_custodia: 'Contrato de custodia',

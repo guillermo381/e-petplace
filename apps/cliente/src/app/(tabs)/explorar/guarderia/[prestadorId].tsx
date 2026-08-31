@@ -112,7 +112,7 @@ export default function LugarGuarderia() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string; bonoId?: string; fecha?: string }>();
+  const params = useLocalSearchParams<{ precio?: string; modalidad?: string; tamano?: string; bonoId?: string; fecha?: string; mascotaNombre?: string }>();
   /**
    * ⭐ **EL DÍA YA SE ELIGIÓ DOS PANTALLAS ANTES, Y VIAJABA SIN QUE NADIE LO
    * LEYERA.** Etapa 1 lo manda (`fecha`), la vitrina lo reenvía con su
@@ -337,6 +337,11 @@ export default function LugarGuarderia() {
         prestadorId: prestadorId as string,
         prestadorNombre: typeof prestadorNombre === 'string' ? prestadorNombre : '',
         mascotaId,
+        /* 🔴 El NOMBRE viaja: el consentimiento de imagen de la confirmación
+           **nombra a la mascota**, porque la imagen es suya. Sin él ese check
+           no se monta — *un consentimiento que no puede nombrar a quién
+           protege es un consentimiento sobre nadie.* */
+        ...(typeof params.mascotaNombre === 'string' ? { mascotaNombre: params.mascotaNombre } : {}),
         fecha: elegido,
         ...(esPaquete ? { tamano: String(tamano) } : {}),
         ...(typeof params.precio === 'string' ? { precio: params.precio } : {}),

@@ -34,13 +34,14 @@
  * significa nada — *un dato vacío con forma de dato es peor que su ausencia.*
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, Celda, Encabezado, EstadoVacio, Icono, Tarjeta, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import {
   comprarPaqueteGuarderia,
+  getEstadoOnboardingDueno,
   reservarDiaGuarderia,
   contratarMensualidadGuarderia,
   reservarDiaDePaqueteGuarderia,
@@ -49,6 +50,7 @@ import {
 import { CheckoutReserva } from '@/components/checkout-reserva';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 import { SeccionDireccion, useDireccionEntrega } from '@/components/seccion-direccion';
+import { CheckImagenes } from '@/components/check-imagenes';
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutGuarderia() {
@@ -91,6 +93,22 @@ export default function CheckoutGuarderia() {
    * del oficio y el «volver al hogar» que usan las cuatro hermanas.
    */
   const [exito, setExito] = useState<{ titulo: string; detalle: string } | null>(null);
+  /* La familia, para el check de imagen: se resuelve una vez y sirve a las
+     tres confirmaciones. */
+  const [familiaId, setFamiliaId] = useState<string | null>(null);
+  useEffect(() => {
+    void getEstadoOnboardingDueno().then((r) => { if (r.ok) setFamiliaId(r.data.familia_id); });
+  }, []);
+
+  /**
+   * ⭐ El check de imagen, en la confirmación de las TRES modalidades.
+   * *Se monta sólo con familia y nombre resueltos: un consentimiento que no
+   * puede nombrar a la mascota es un consentimiento sobre nadie.*
+   */
+  const checkImagenes =
+    familiaId !== null && texto('mascotaNombre') !== ''
+      ? <CheckImagenes familiaId={familiaId} mascotaNombre={texto('mascotaNombre')} />
+      : null;
 
   const rebotar = useCallback(
     (codigo: string, mensaje: string) => {
@@ -194,6 +212,7 @@ export default function CheckoutGuarderia() {
               />
             }
           />
+          {checkImagenes}
         </View>
       </SafeAreaView>
     );
@@ -278,6 +297,9 @@ export default function CheckoutGuarderia() {
       resumenEtiqueta={t('checkout.resumen')}
       exitoTitulo={t('checkoutGuarderia.exitoTitulo')}
       exitoDetalle={t('checkoutGuarderia.exitoDetalle')}
+      /* El slot que la pieza ya tenía para esto — y que además hace que su
+         éxito pase a `ScrollView`, así el check no empuja el botón fuera. */
+      exitoExtra={checkImagenes}
       /* No hay dirección que elegir: pasan a buscarlo por su casa. */
       puedePagar
     />
