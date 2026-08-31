@@ -33,8 +33,10 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import {
   leerEstadoCompra, leerEstadoCita, leerEstadoBono, leerEstadoMensualidad, leerEstadoPrograma,
+  leerEstadoPlan,
   type EstadoCompra, type EstadoCita,
   type EsperaBonoEstado, type EstadoMensualidad, type EsperaProgramaEstado,
+  type EstadoPlan,
 } from '@epetplace/api';
 
 /** Arranca a 2 s y se abre hasta 15 s. */
@@ -86,7 +88,17 @@ export type SujetoEnEspera =
   | { tipo: 'mensualidad'; id: string }
   /** S109 · El programa de adiestramiento: sujeto propio porque sus sesiones
    *  están numeradas y siguen un currículum — un bono es fungible. */
-  | { tipo: 'programa'; id: string };
+  | { tipo: 'programa'; id: string }
+  /**
+   * ⭐ **S109 · EL PLAN DE PASEOS — sujeto propio, y NO es «la mensualidad del
+   * otro oficio».** Las dos se cobran una vez por mes y **se leen distinto**:
+   * la mensualidad de guardería es un **MANDATO** —no tiene `estado_pago`, su
+   * prueba de vida es `periodo_desde`— y el plan **sí lo tiene**, porque desde
+   * S109 nace `pendiente` como los demás comprables.
+   * *Dos sujetos que se cobran igual no se leen igual, y meterlos en el mismo
+   * brazo haría que esta pieza consultara la columna del otro.* (Medido por A.)
+   */
+  | { tipo: 'plan'; id: string };
 
 export type Espera =
   | { fase: 'mirando' }
@@ -95,7 +107,7 @@ export type Espera =
    *  esta pantalla necesita comparar.* */
   | {
       fase: 'resuelta';
-      estado: EstadoCompra | EstadoCita | EsperaBonoEstado | EstadoMensualidad | EsperaProgramaEstado | null;
+      estado: EstadoCompra | EstadoCita | EsperaBonoEstado | EstadoMensualidad | EsperaProgramaEstado | EstadoPlan | null;
     }
   | { fase: 'sigue_abierta' };
 
@@ -208,6 +220,7 @@ export function useEsperaDeConfirmacion(
         : tipo === 'bono' ? await leerEstadoBono(id)
         : tipo === 'mensualidad' ? await leerEstadoMensualidad(id)
         : tipo === 'programa' ? await leerEstadoPrograma(id)
+        : tipo === 'plan' ? await leerEstadoPlan(id)
         : ((): never => { throw new Error(`sujeto no contemplado: ${String(tipo)}`); })();
       if (!vivo.current) return;
 

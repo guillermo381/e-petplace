@@ -24598,3 +24598,41 @@ que nadie la vuelva a leer.
 **la cura no termina en esa pantalla — se censa la FORMA en las demás.** Es la
 hermana de *«curar el síntoma reportado y no censar la clase es media cura»*,
 aplicada a la voz en vez de al motor.
+
+## 🔴 `L-449` — UN DISCRIMINADOR QUE NO PUEDE DAR «NO» NO DISCRIMINA: CONFIRMA
+
+**Medida por S109-B sobre su propio error, y el diagnóstico es suyo.**
+
+Reportó un gate en rojo sobre `main` **midiendo su working tree**. Antes de
+reportar corrió lo que creía un discriminador:
+
+```
+git merge-base --is-ancestor 759d2ff4 origin/main   → sí
+```
+
+**Y no podía dar otra cosa: había leído ese SHA DE `origin/main`.** La pregunta
+que decidía era la otra —*¿está ese commit en el árbol que estoy grepeando?*— y
+ésa no se hizo. Medida después: **su HEAD NO contenía `origin/main`.**
+
+> **La forma general: un test cuya respuesta está IMPLICADA por cómo obtuviste
+> la entrada no separa nada.** Se ve como una medición, se corre como una
+> medición, y devuelve el «sí» que ya traía adentro.
+
+⇒ **Todo discriminador se prueba preguntándose ANTES qué tendría que pasar para
+que diera «no».** Si no hay respuesta a eso, no es un discriminador: es una
+confirmación con forma de prueba. Hermana de `L-437` —*«rebotó» no es una
+medición*— y de la regla de la casa de **probar el instrumento contra un caso de
+resultado conocido antes de confiar en su silencio**.
+
+⚠️ **Y su contexto es lo que la vuelve una ley de método y no una anécdota: el
+mismo día, la misma clase se cobró TRES veces, sobre las tres pistas** —A reportó
+un rojo de su árbol como estado de `main`, C midió y lo corrigió; después B hizo
+lo mismo y A lo corrigió—. **Ninguna de las tres se resolvió discutiendo: las
+tres las resolvió el objeto.**
+
+> *No hace falta desconfiar del otro para medir: alcanza con que dos lecturas no
+> coincidan y preguntarle al objeto cuál es cuál.*
+
+**Y el corolario incómodo, que es el que conviene recordar:** las tres veces
+quien cayó **acababa de citarle esa misma lección a otro**. *Una lección no
+protege a quien la enuncia — sólo a quien la ejecuta sobre su propio trabajo.*

@@ -63,6 +63,29 @@ export default function PagarMensualidad() {
     let vigente = true;
     void obtenerMisPlanesGuarderia().then((r) => {
       if (!vigente) return;
+      /* ⭐ **S109-C · SIN SESIÓN SE VA AL LOGIN LLEVANDO EL DESTINO.**
+         Firma del founder: *la ruta exige sesión* —el correo se reenvía, y sin
+         sesión cualquiera vería qué contrató la familia y cuánto paga— **y el
+         login vuelve ACÁ, sin perder el sujeto.** *Caer en el inicio de la app
+         después de escribir la contraseña obligaría a buscar de nuevo qué se
+         venía a pagar, que es justo lo que un link existe para evitar.*
+         ⚠️ Va con `replace`: el login no debe quedar en la pila detrás de esta
+         pantalla. */
+      if (!r.ok && r.codigo === 'sin_sesion') {
+        router.replace({
+          pathname: '/login',
+          /* ⭐ **EL PATHNAME Y SU SUJETO VIAJAN SEPARADOS.**
+             ⏪ Iba como una cadena con query armada a mano
+             (`'/pagos/mensualidad?suscripcionId=…'`). *Expo-router tipa sus
+             rutas y una cadena no es una ruta suya* — el typecheck lo rebotaba
+             del otro lado, en el `router.replace` del login.
+             ⚠️ Y **la cura no fue un cast**: separarlos es lo que le permite al
+             login validar el destino contra su lista blanca. Con el query
+             pegado, «es una de las nuestras» ya no se podía preguntar. */
+          params: { volverA: '/pagos/mensualidad', suscripcionId },
+        });
+        return;
+      }
       if (!r.ok) { setPlan('noPudimos'); return; }
       const mio = r.data.find((x) => x.suscripcionId === suscripcionId);
       /* 🔴 Un plan que no aparece NO se disfraza de fallo de red, y tampoco se
@@ -70,7 +93,7 @@ export default function PagarMensualidad() {
       setPlan(mio ?? 'noPudimos');
     });
     return () => { vigente = false; };
-  }, [suscripcionId]);
+  }, [suscripcionId, router]);
 
   /* El código se pide **apenas hay sujeto**: quien llegó, llegó a pagar. */
   const listo = plan !== 'cargando' && plan !== 'noPudimos';
@@ -142,7 +165,26 @@ export default function PagarMensualidad() {
             <EsperaDeUna
               estado={deuna.estado}
               /* «Se me venció» se resuelve ACÁ MISMO, sin volver al correo — y
-                 sin que parezca que hizo algo mal. */
+                 sin que parezca que hizo algo mal.
+
+                 ═══ 🔴 S109-C · POR QUÉ ESTE BOTÓN SE QUEDA ═══════════════════
+                 Lo reporté como riesgo de **meses duplicados** y el founder lo
+                 resolvió **sin sacarlo**, con dos piezas que ya están en `main`:
+                 ① **B subió el guard de intento-en-vuelo a la puerta para los
+                    SEIS sujetos** —lo tenía uno de seis— ⇒ un segundo pedido
+                    **frena** con `pago_en_proceso` en vez de fabricar otro mes.
+                 ② **A hizo PARCIAL el índice de idempotencia**
+                    (`20260907240000`): con el índice TOTAL, frenar en la puerta
+                    habría dejado **sin reintento para siempre** a quien tuvo un
+                    rechazo — *justo la persona que está mirando este botón.*
+                    Las dos piezas viajan juntas o ninguna sirve.
+
+                 ⭐ **Y la firma revocó «devolver el código vivo»**, con mejor
+                 razón que la mía: *devolverlo obliga a ESTA pantalla a saber si
+                 ese código todavía sirve, y ese reloj es de DeUna, no nuestro.*
+                 Por eso frena con voz — y la voz (`deunaCausaPagoEnProceso`)
+                 **no afirma que el de pantalla sirva**: dice «si dejó de
+                 servirte, espera un momento». */
               onGenerarNuevo={deuna.regenerar}
               onSoporte={() => void Linking.openURL(urlWhatsApp(t('cuenta.soporteDesdeCobro')))}
             />

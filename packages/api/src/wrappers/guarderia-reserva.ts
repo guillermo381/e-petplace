@@ -37,6 +37,17 @@ const MENSAJES = {
   tarjeta_no_guardada:          'Esa tarjeta no está disponible. Agrega otra para continuar.',
   tarjeta_no_existe:            'No encontramos esa tarjeta.',
   tarjeta_de_otra_persona:      'Esa tarjeta no es tuya.',
+  /* ── S109-C · LOS DOS DEL RIEL ────────────────────────────────────────────
+     🔴 **Hoy son INALCANZABLES desde este wrapper, y a propósito**: el
+     parámetro es una unión discriminada (`MedioDelMandato`) ⇒ mandar DeUna con
+     tarjeta, o tarjeta sin tarjeta, **no compila**. *Un estado que el tipo no
+     deja escribir no necesita rebote.*
+     ⚠️ **Se catalogan igual y eso NO es letra muerta:** sin ellos el fallback
+     genérico diría «Prueba de nuevo» sobre algo que **no se arregla probando de
+     nuevo**, y encima nos ocultaría que el vocabulario del motor cambió. *La
+     red existe para el día que alguien agregue un riel y se olvide de acá.* */
+  riel_no_valido:               'Esa forma de pago no está disponible para planes mensuales.',
+  deuna_no_lleva_tarjeta:       'Los planes por Deuna no llevan tarjeta guardada.',
   no_ofrece_mensualidad:        'Este lugar no ofrece plan mensual.',
   /* 🔴 EL ID DEL PLAN QUE YA EXISTE VIAJA EN EL MENSAJE (`ya_tienes_plan_activo: <uuid>`).
      La pantalla **LLEVA ahí** en vez de mostrar un error: *un rebote que sólo
@@ -318,6 +329,19 @@ export interface MandatoMensualidad {
   montoEsperado: number;
   /** **Hoy siempre `false`.** El mandato se registra; el cobro lo hace el reloj. */
   cobrada: boolean;
+  /**
+   * ⭐ **S109-C · CON QUÉ QUEDÓ FIRMADO, según el SERVIDOR.**
+   *
+   * 🔴 **Se lee de la respuesta, jamás se asume del que se mandó.** Si algún día
+   * el motor degrada un riel, la pantalla tiene que prometer lo que quedó
+   * firmado y no lo que la familia pidió — *que la promesa la dicte el pedido y
+   * no la respuesta es cómo una pantalla termina prometiendo un cobro
+   * automático sobre un mandato que no lo tiene.*
+   *
+   * `null` sólo si el motor dejara de mandarlo: entonces la superficie **no
+   * promete ninguna de las dos cosas**, que es lo honesto.
+   */
+  riel: 'tarjeta' | 'deuna' | null;
 }
 
 /**
@@ -340,9 +364,33 @@ export interface MandatoMensualidad {
  * medir*. **Es un límite declarado, no una omisión** — la pantalla dice una
  * sola cosa honesta sobre un rechazo del banco.
  */
+/**
+ * ⭐ **S109-C · CON QUÉ SE PAGA EL MANDATO — Y POR QUÉ ES UNA UNIÓN.**
+ *
+ * Los dos rieles no se distinguen por un campo opcional al lado de otro, porque
+ * eso deja escribibles **dos estados que el motor rechaza**: DeUna con tarjeta
+ * (`deuna_no_lleva_tarjeta`) y tarjeta sin tarjeta (`tarjeta_requerida`).
+ *
+ * 🔴 **La diferencia es de MOMENTO, no de forma de tipear:** con tarjeta el
+ * mandato se cobra **solo** cada mes; con DeUna cada mes llega un link y **hay
+ * que ir a pagarlo a mano**. *Son dos compromisos distintos que la familia toma
+ * con el dedo, y por eso el tipo los separa en vez de emparentarlos.*
+ *
+ * ⚠️ **Y por qué no se tapó con un `as`:** la firma vieja exigía `p_tarjeta_id`
+ * y un cast habría puesto el build en verde en treinta segundos **dejando
+ * intacto el agujero de forma**. *Un `as` que silencia un tipo silencia también
+ * la razón por la que ese tipo estaba mal.* La palabra la puso A
+ * (`p_tarjeta_id uuid DEFAULT NULL`, `20260907260000`) y recién entonces esto
+ * se pudo escribir.
+ */
+export type MedioDelMandato =
+  | { riel: 'tarjeta'; tarjetaId: string }
+  | { riel: 'deuna' };
+
 export async function contratarMensualidadGuarderia(params: {
   prestadorId: string;
-  tarjetaId: string;
+  /** ⭐ Con qué se paga. Ver `MedioDelMandato`. */
+  medio: MedioDelMandato;
   mascotaId?: string;
   /** El techo del mandato. Sin él, el precio de hoy. */
   montoEsperado?: number;
@@ -358,7 +406,14 @@ export async function contratarMensualidadGuarderia(params: {
 }): Promise<ResultadoWrapper<MandatoMensualidad, CodigoErrorGuarderiaReserva>> {
   const { data, error } = await getClient().rpc('contratar_mensualidad_guarderia', {
     p_prestador_id: params.prestadorId,
-    p_tarjeta_id: params.tarjetaId,
+    /* 🔴 El riel VIAJA SIEMPRE, explícito. *Dejarlo al default del motor haría
+       que el día que ese default cambie, esta llamada cambie de significado sin
+       que nadie toque esta línea.* */
+    p_riel: params.medio.riel,
+    /* En DeUna se OMITE — no se manda `null`: la puerta distingue «no vino» de
+       «vino vacío», y mandar vacío es justo lo que `deuna_no_lleva_tarjeta`
+       rechaza. */
+    p_tarjeta_id: params.medio.riel === 'tarjeta' ? params.medio.tarjetaId : undefined,
     p_mascota_id: params.mascotaId ?? undefined,
     p_monto_esperado: params.montoEsperado ?? undefined,
     p_direccion_id: params.direccionId ?? undefined,
@@ -376,6 +431,7 @@ export async function contratarMensualidadGuarderia(params: {
       precioMensual: r.precio_mensual,
       montoEsperado: typeof r.monto_esperado === 'number' ? r.monto_esperado : r.precio_mensual,
       cobrada: r.cobrada === true,
+      riel: r.riel === 'tarjeta' || r.riel === 'deuna' ? r.riel : null,
     },
   };
 }

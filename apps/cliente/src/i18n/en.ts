@@ -1506,7 +1506,10 @@ export const clienteEn = {
     deunaPidiendoCodigo: 'Getting your code…',
     deunaFalloTitulo: "We couldn't generate your code",
     deunaCompuertaTitulo: 'Something changed before we charged you',
-    deunaCausaPagoEnProceso: "There's already a payment in progress for this order. Wait a moment and try again.",
+    /* ⭐ S109-C · Ver la nota del espejo en `es.ts`: el defecto era de ACCIÓN
+       —proponía repetir el toque que rebotó— y la cura no afirma que el código
+       en pantalla siga sirviendo. */
+    deunaCausaPagoEnProceso: 'You already requested a code for this payment and it’s still in progress. If it stopped working, wait a moment before requesting another.',
     deunaCausaReservaVencida: 'The hold expired and we released the items. Build your order again.',
     deunaCausaVendedorNoActivo: "This seller isn't taking orders right now.",
     deunaCausaMontoDivergente: 'The total changed since you started. Go back to see it updated.',
@@ -2374,6 +2377,11 @@ export const clienteEn = {
     exitoDetalle: 'We’ll let you know when they head out to pick him up.',
   },
   checkoutPlan: {
+    /* ⭐ S109-C · Ver la nota del espejo en `es.ts`: «still on its way» NO es
+       «didn't go through» — decirlo como rechazo invita a pagar dos veces. */
+    canceladoVoz: 'That plan was cancelled. You weren’t charged.',
+    noEntroVoz: 'The payment didn’t go through. You can try another card — your plan is waiting.',
+    sigueEnCaminoVoz: 'The payment is still on its way. We’ll let you know as soon as it clears; don’t pay it again.',
     servicio: 'Monthly walks plan',
     antesDePagar: 'Before you confirm',
     cuandoSeCobra: 'This plan is charged once a month, for as long as it stays active.',
@@ -2435,13 +2443,22 @@ export const clienteEn = {
     cubiertoHasta: 'Covered until {{fecha}} · renews on its own',
     proximoCobroSinFecha: 'There’s no charged period yet.',
     pagoPendiente: 'This plan’s payment isn’t finished.',
+    /* ⭐ S109-C · El mes por pagar del mandato por Deuna. Ver las notas del
+       espejo en `es.ts`: dice «mes» y no «cobro» porque en este riel nadie
+       cobra solo, y la fecha es el ÚLTIMO día cubierto, no el día que se cae. */
+    mesPorPagar: 'You have a month to pay',
+    mesVenceEl: 'You have until {{fecha}} to pay it and keep the plan running.',
+    mesVencido: 'The date to pay this month has passed. The plan wasn’t renewed.',
+    mesSinFecha: 'It’s pending payment.',
     apagadoHasta: 'You won’t be charged again. You’re covered until {{fecha}}.',
     apagadoSinFecha: 'You won’t be charged again.',
     apagadoConserva: 'You keep {{n}} days already booked.',
     confirmarTitulo: 'Turn off {{que}}?',
     confirmarCuerpo: 'We stop charging it. What you already paid stays in place until the period ends.',
-    confirmarReversible: 'You can turn it back on while the period is still running. You won’t be charged again.',
-    confirmarSinVuelta: 'Its period already ended: to get it back you’ll have to sign up again.',
+    confirmarReversible: 'You can turn it back on while the period is still running: you won’t be charged again and the charge day doesn’t move.',
+    /* ⚠️ Ver la nota del espejo en `es.ts`: no promete «ese día de cada mes»
+       — un plan anclado un 31 no se cobra el 31 de febrero. */
+    confirmarSinVuelta: 'Its period already ended. The plan isn’t lost: you can sign up again whenever you want, and the charge anchors to the day you come back.',
     confirmar: 'Yes, turn it off',
     volver: 'Leave it as is',
     noPudimosApagar: 'We couldn’t turn it off. Try again.',

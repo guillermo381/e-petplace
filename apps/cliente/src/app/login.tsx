@@ -28,9 +28,9 @@
  * completa la llegada.
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import {
@@ -52,6 +52,43 @@ import { iniciarSesion, iniciarSesionConGoogle } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
+/**
+ * ⭐ **S109-C · A DÓNDE VOLVER DESPUÉS DE ENTRAR.**
+ *
+ * Firma del founder: quien llega desde el correo del link mensual y no tiene
+ * sesión **vuelve A ESA MISMA PANTALLA** — *no debe caer en el inicio y tener
+ * que buscar de nuevo qué venía a pagar.*
+ *
+ * 🔴 **LISTA BLANCA, y esto es una ENMIENDA a mi propia primera versión.**
+ *
+ * ⏪ Validaba la FORMA: «empieza con `/` y no con `//`». Cerraba el redirector
+ * abierto —*un correo reenviado con destino ajeno mandaría a la familia fuera de
+ * la app justo después de escribir su contraseña*— **y aceptaba cualquier ruta
+ * interna inventada**, incluidas las que no existen.
+ *
+ * ⭐ Ahora se compara contra los destinos que el producto ACEPTA. *Una lista
+ * blanca no es «lo mismo pero más estricto»: es la diferencia entre preguntar si
+ * algo parece una ruta y preguntar si es una de las nuestras.*
+ *
+ * ⚠️ **Y por qué el pathname viaja SEPARADO de sus parámetros:** el destino
+ * llegaba como `'/pagos/mensualidad?suscripcionId=…'`, una cadena armada a mano.
+ * Expo-router **tipa sus rutas**, y una cadena no es una ruta suya ⇒ el
+ * typecheck lo rebotaba. *La cura no es un cast — un `as Href` habría compilado
+ * dejando intacto justo el agujero que esta función existe para cerrar.* Se
+ * manda `{ pathname, params }`, que es la forma que el router entiende **y** la
+ * que hace inexpresable un destino que no esté en la lista.
+ */
+const DESTINOS_PERMITIDOS = ['/pagos/mensualidad'] as const;
+type DestinoPermitido = (typeof DESTINOS_PERMITIDOS)[number];
+
+/** `null` = no vino, o vino algo que no está en la lista ⇒ el Hogar. */
+function destinoSeguro(crudo: unknown): DestinoPermitido | null {
+  if (typeof crudo !== 'string') return null;
+  /* `.some` en vez de `.includes` **para no necesitar un cast**: comparar cada
+     literal contra la cadena es lo mismo y deja el estrechamiento al predicado. */
+  return DESTINOS_PERMITIDOS.some((d) => d === crudo) ? (crudo as DestinoPermitido) : null;
+}
+
 // Cierra la ventana de auth al volver (necesario en web y managed; inocuo en
 // nativo). Va a nivel módulo, una sola vez.
 WebBrowser.maybeCompleteAuthSession();
@@ -69,6 +106,22 @@ export default function Login() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  /* El destino sobrevive al login: **la intención se declaró antes de la
+     contraseña**, y perderla obligaría a rehacer el camino desde el correo. */
+  const paramsUrl = useLocalSearchParams();
+  const destino = destinoSeguro(paramsUrl.volverA);
+  /* El sujeto del destino, **aparte del pathname**: así no hay cadena de query
+     armada a mano y el router recibe la forma que sabe tipar. */
+  const volverASujeto = typeof paramsUrl.suscripcionId === 'string' ? paramsUrl.suscripcionId : null;
+  /**
+   * A dónde se va después de entrar. **Se calcula una vez y sirve a los dos
+   * caminos** (clave y Google): *que cada uno lo derive por su cuenta es cómo
+   * uno de los dos se queda sin la cura.*
+   */
+  const irADestino = useCallback(() => {
+    if (destino === null || volverASujeto === null) { router.replace('/'); return; }
+    router.replace({ pathname: destino, params: { suscripcionId: volverASujeto } });
+  }, [destino, volverASujeto, router]);
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
 
@@ -101,7 +154,7 @@ export default function Login() {
     // §5: la huella de llegada, y recién después el Hogar. El guard del raíz
     // re-decide con la sesión nueva (7.5: estado real).
     setLlegando(true);
-    setTimeout(() => router.replace('/'), 460);
+    setTimeout(irADestino, 460);
   }
 
   async function entrarConGoogle() {
@@ -132,7 +185,7 @@ export default function Login() {
     // Mismo umbral que el login con clave: la huella y recién ahí el Hogar. El
     // guard del raíz decide onboarding (alta nueva) u Hogar (ya existía).
     setLlegando(true);
-    setTimeout(() => router.replace('/'), 460);
+    setTimeout(irADestino, 460);
   }
 
   return (
