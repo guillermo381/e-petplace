@@ -40,10 +40,11 @@ import { useTraduccion } from '@/i18n';
 
 export function PaqueteHoja({
   paseador,
-  onComprado,
+  onIrAPagar,
 }: {
   paseador: PaseadorConPaquete;
-  onComprado: (paquete: PaqueteComprado) => void;
+  /** ⭐ S109-C · La Hoja elige el tamaño; el checkout cobra. */
+  onIrAPagar: (preset: PresetPaquete) => void;
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -51,7 +52,6 @@ export function PaqueteHoja({
 
   const [saldoPrevio, setSaldoPrevio] = useState<number>(0);
   const [preset, setPreset] = useState<PresetPaquete>(5);
-  const [comprando, setComprando] = useState(false);
 
   useEffect(() => {
     let vigente = true;
@@ -66,22 +66,13 @@ export function PaqueteHoja({
     };
   }, [paseador.prestador_id, paseador.prestador_servicio_id]);
 
-  async function comprar() {
-    if (comprando) return;
-    setComprando(true);
-    const r = await comprarPaqueteSalidas({
-      prestador_id: paseador.prestador_id,
-      prestador_servicio_id: paseador.prestador_servicio_id,
-      unidades: preset,
-    });
-    setComprando(false);
-    if (!r.ok) {
-      mostrar({ texto: r.mensaje, variante: 'error' });
-      return;
-    }
-    onComprado(r.data);
-  }
-
+  /**
+   * ⭐ **S109-C · ACÁ YA NO SE COMPRA: SE NAVEGA.**
+   * ☠️ Vivía `comprar()`, que llamaba a `comprarPaqueteSalidas` y devolvía el
+   * bono ya pagado. **Murió en el mismo acto** en que nació
+   * `/explorar/paseo/checkout-paquete` — *una Hoja se arrastra hacia abajo, y
+   * desde que el cobro es real esto es una espera que cambia sola.*
+   */
   const total = paseador.precio_paquete * preset;
 
   return (
@@ -136,14 +127,15 @@ export function PaqueteHoja({
 
         {/* la superficie DICE que el pago es simulado (patrón checkout) */}
         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
-          {t('checkout.simuladoAviso')}
+          {t('paquete.vigenciaVoz')}
         </Text>
 
+        {/* ☠️ La banda de simulación se fue CON el acto: la dice el checkout,
+            que es donde ahora se paga. */}
         <Boton
-          etiqueta={t('paquete.comprar')}
+          etiqueta={t('plan.continuar')}
           bloque
-          cargando={comprando}
-          onPress={() => void comprar()}
+          onPress={() => onIrAPagar(preset)}
         />
       </View>
     </HojaScroll>

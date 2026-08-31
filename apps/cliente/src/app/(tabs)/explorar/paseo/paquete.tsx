@@ -127,8 +127,25 @@ export default function PaqueteComprar() {
         {elegido !== null && comprado === null ? (
           <PaqueteHoja
             paseador={elegido}
-            onComprado={(c) => {
-              setComprado(c);
+            /* ⭐ S109-C · La Hoja cierra y el pago vive en su propia pantalla.
+               ☠️ Con esto muere la segunda Hoja de abajo —la invitación a la
+               primera salida—: su disparo era `comprado`, que ya no existe.
+               *Su contenido no se perdió: vive en el éxito del checkout, que es
+               el único lugar donde ahora se sabe que la compra terminó.* */
+            onIrAPagar={(preset) => {
+              const p = elegido;
+              setElegido(null);
+              router.push({
+                pathname: '/explorar/paseo/checkout-paquete',
+                params: {
+                  prestadorId: p.prestador_id,
+                  prestadorServicioId: p.prestador_servicio_id,
+                  prestadorNombre: p.prestador_nombre,
+                  preset: String(preset),
+                  precioPaquete: String(p.precio_paquete),
+                  duracion: String(p.duracion_minutos),
+                },
+              });
             }}
           />
         ) : null}

@@ -1399,6 +1399,12 @@ export const clienteEs = {
        voz que guardería ya tiene — misma promesa, mismo oficio de decirla.
        ⚠️ `noPagadoATiempo` HOY NO PUEDE OCURRIR (nada de paseo cobra): la
        superficie queda lista para cuando el motor llegue. */
+    checkoutServicio: 'Paquete de {{n}} salidas',
+    presetInvalido: 'Ese tamaño de paquete no existe. Elige otro.',
+    esperaCuerpo: 'Estamos confirmando el pago de tu paquete con el banco.',
+    noPagadoATiempoVoz: 'Se venció el tiempo para completar el pago. No se te cobró nada.',
+    vencidoVoz: 'Ese paquete ya venció.',
+    noEntroVoz: 'El pago no entró y el paquete no quedó comprado. No se te cobró nada.',
     faltaPagar: 'Falta completar el pago de este paquete',
     faltaPagarDetalle: '{{n}} salidas · todavía no se cobró',
     noPagadoATiempo: 'Se venció el tiempo para completar el pago',
