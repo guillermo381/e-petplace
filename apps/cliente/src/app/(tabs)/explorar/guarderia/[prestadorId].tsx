@@ -317,63 +317,37 @@ export default function LugarGuarderia() {
        pantalla que ya no debía cobrar.* **Ley 37: lo viejo muere en el mismo
        acto, y esta vez no murió.** */
 
-    /* ═══ MENSUAL Y PAQUETE · **NAVEGAN, NO COBRAN** ═════════════════════
+    /* ═══ LOS TRES NAVEGAN · **P4 NO COBRA NI RESERVA** ══════════════════
        Firma del founder: *«la pantalla 4 termina en un CTA … y ese botón
-       NAVEGA al checkout. El medio de pago, los términos y el botón Pagar
-       viven en el checkout»*. Es lo que hace grooming: su barra crea el hold
-       y empuja a «Confirmar y pagar».
+       NAVEGA al checkout»*.
 
-       ⚠️ **Ni el paquete ni la mensualidad tienen HOLD** —el motor no da uno
-       para ellos— así que el checkout los recibe por parámetro y hace el acto
-       cuando la familia toca Pagar. *No se inventa un hold que el server no
-       emitió: se declara que estas dos no expiran.* */
-    if (esMensual || esPaquete) {
-      setReservando(false);
-      router.push({
-        pathname: '/explorar/guarderia/checkout',
-        params: {
-          modalidad: esMensual ? 'mensual' : 'paquete',
-          prestadorId: prestadorId as string,
-          prestadorNombre: typeof prestadorNombre === 'string' ? prestadorNombre : '',
-          mascotaId,
-          fecha: elegido,
-          ...(esPaquete ? { tamano: String(tamano) } : {}),
-          ...(typeof params.precio === 'string' ? { precio: params.precio } : {}),
-        },
-      });
-      return;
-    }
-
-    const r = await reservarDiaGuarderia({ prestadorId: prestadorId as string, mascotaId, fecha: elegido });
+       ⏪ **El día SÍ creaba su hold acá**, y eso lo dejaba fuera de la firma
+       nueva de la dirección: `reservar_dia_guarderia` **congela la dirección
+       al crear la cita**, así que elegirla después no habría cambiado nada.
+       *Un selector que el servidor ya no puede escuchar es un control que no
+       decide.* ⇒ **el hold se mudó al checkout**, que es donde la familia
+       elige a dónde pasan a buscarlo. Con eso los tres caminos eligen
+       dirección en el mismo lugar y P4 queda siendo lo que la firma pide:
+       vitrina y un CTA. */
     setReservando(false);
-    if (!r.ok) {
-      /* El rebote llega con SU voz desde el wrapper —«ese día ya no tiene
-         lugar», «faltan requisitos»— y se muestra tal cual. Y se recarga: si
-         el cupo cambió mientras miraba, el calendario tiene que decirlo. */
-      /* El rebote llega con SU voz desde el wrapper y se muestra tal cual; se
-         recarga por si el cupo cambió mientras miraba.
-         ⏪ **Acá vivía el único ruteo de `documentos_sin_aceptar` de las
-         cuatro ramas.** Ahora lo hace `rebotar`, que las cuatro usan.
-         🔴 Y su criterio sigue siendo el mismo: **los otros rebotes NO
-         navegan a propósito** — `sin_cupo` y `requisitos_sanitarios` se
-         arreglan acá o en el carnet, y `documentos_no_disponibles` **no se
-         arregla del lado de la familia**: mandarla a una pantalla que va a
-         decirle lo mismo sería pasearla. */
-      rebotar(r.codigo, r.mensaje);
-      setIntento((n) => n + 1);
-      return;
-    }
     router.push({
       pathname: '/explorar/guarderia/checkout',
       params: {
-        citaId: r.data.citaId,
-        expiraEn: r.data.expiraEn,
-        precio: String(r.data.precio),
+        modalidad: esMensual ? 'mensual' : esPaquete ? 'paquete' : 'dia',
+        prestadorId: prestadorId as string,
         prestadorNombre: typeof prestadorNombre === 'string' ? prestadorNombre : '',
+        mascotaId,
         fecha: elegido,
+        ...(esPaquete ? { tamano: String(tamano) } : {}),
+        ...(typeof params.precio === 'string' ? { precio: params.precio } : {}),
       },
     });
-  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, tamano, mostrar, t, bonoId, rebotar]);
+    return;
+  }, [elegido, mascotaId, prestadorId, prestadorNombre, reservando, router, esPaquete, esMensual, tamano, params.precio]);
+
+  /* ☠️ Con la mudanza del hold murieron acá `reservarDiaGuarderia`, el
+     `rebotar` con su ruteo a documentos y el `setIntento` de recarga: **todo
+     eso vive ahora en el checkout**, que es quien reserva. */
 
   if (estado.fase === 'cargando') {
     return (

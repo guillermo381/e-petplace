@@ -2284,6 +2284,9 @@ export const clienteEn = {
   checkoutGuarderia: {
     servicio: 'Daycare · one day',
     sinHora: 'All day',
+    continuar: 'Continue',
+    dondeRecogen: 'Where they pick them up',
+    dondeRecogenMensual: 'This is where they’ll pick them up every month. You can change it later.',
     mensualServicio: 'Monthly daycare plan',
     paqueteServicio: 'Pack of {{n}} stays',
     paqueteSimulado: 'The charge for this pack is still simulated. We tell you because it’s the truth.',
