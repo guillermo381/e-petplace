@@ -50,10 +50,12 @@ import {
   obtenerMascotasDeFamilia,
   obtenerMisEstadiasGuarderia,
   obtenerMisPaquetesGuarderia,
+  obtenerMisPlanesGuarderia,
   reservarDiaDePaqueteGuarderia,
-  type PaqueteCompradoGuarderia,
   resolverUrlsFotos,
   type EstadiaDeMiMascota,
+  type PaqueteCompradoGuarderia,
+  type PlanGuarderia,
 } from '@epetplace/api';
 import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 
@@ -151,6 +153,13 @@ export default function LogGuarderia() {
   const [estadias, setEstadias] = useState<Estadias>({ fase: 'cargando' });
   const [abierta, setAbierta] = useState<string | null>(null);
   const [paquetes, setPaquetes] = useState<PaqueteCompradoGuarderia[]>([]);
+  /**
+   * ⭐ **EL PLAN CONTRATADO VIVE ACÁ**, como el saldo del paquete.
+   * Sin esto, la familia firmaba una mensualidad y **no la veía en ningún
+   * lado** — *un compromiso que se cobra todos los meses y no aparece en
+   * ninguna pantalla es un cobro que la familia va a descubrir en su tarjeta.*
+   */
+  const [planes, setPlanes] = useState<PlanGuarderia[]>([]);
 
   /**
    * ⏪ **UN BOTÓN POR LUGAR, NO POR BONO.** El founder vio **CUATRO** botones
@@ -203,9 +212,11 @@ export default function LogGuarderia() {
   useEffect(() => {
     let vigente = true;
     void (async () => {
-      const r = await obtenerMisPaquetesGuarderia();
+      /* Misma ola: el peaje es de la PETICIÓN, no del volumen (L-223). */
+      const [r, pl] = await Promise.all([obtenerMisPaquetesGuarderia(), obtenerMisPlanesGuarderia()]);
       if (!vigente) return;
       setPaquetes(r.ok ? r.data.filter((p) => p.estado === 'activo' && p.quedan > 0) : []);
+      setPlanes(pl.ok ? pl.data.filter((p) => p.estado === 'activa') : []);
     })();
     return () => { vigente = false; };
   }, [intento]);
@@ -309,6 +320,25 @@ export default function LogGuarderia() {
                 Los chips ya están arriba; poner el botón encima lo dejaría
                 **sin sujeto**, y tendría que preguntar la mascota de nuevo en
                 una Hoja propia. **Se declaró a la mesa y así quedó.** */}
+            {/* ── EL PLAN MENSUAL CONTRATADO ─────────────────────────────
+                🔴 **Informa, NO navega**: no hay pantalla de plan y un chevron
+                prometería una que no existe (Ley 19.7). *Una fila que se hunde
+                sin llevar a ningún lado es una promesa rota.*
+                Va ARRIBA del paquete porque es el compromiso que se cobra solo
+                todos los meses: lo que se renueva sin que nadie lo toque tiene
+                que verse antes que lo que se gasta a pulso. ── */}
+            {planes.map((pl) => (
+              <Tarjeta key={pl.suscripcionId}>
+                <View style={{ gap: spacing[1] }}>
+                  <Texto variante="seccion">{t('logGuarderia.planTitulo')}</Texto>
+                  <Texto variante="cuerpo">{pl.prestadorNombre}</Texto>
+                  <Texto variante="apoyo">
+                    {t('logGuarderia.planDetalle', { precio: pl.precioMensual.toFixed(2) })}
+                  </Texto>
+                </View>
+              </Tarjeta>
+            ))}
+
             {paquetesPorLugar.map((pq) => (
               /* ⏪ **ERA UN `Boton` PRIMARIO Y COMPETÍA CON EL PIE.** Dos
                  amarillos peleando en la misma pantalla: *cuando todo grita,

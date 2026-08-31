@@ -2309,6 +2309,8 @@ export const clienteEn = {
     vacioTitulo: 'No stays booked',
     elegiMascotaTitulo: 'Choose who',
     reservar: 'Book a stay',
+    planTitulo: 'Your monthly plan',
+    planDetalle: '${{precio}} a month. It renews on its own until you cancel.',
     conTuPaquete: 'With your pack',
     verSuDia: 'See their day',
     reservarDePaquete: 'Book a stay from your pack',

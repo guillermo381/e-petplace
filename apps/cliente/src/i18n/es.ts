@@ -3109,6 +3109,8 @@ export const clienteEs = {
     elegiMascotaTitulo: 'Elige de quién',
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
+    planTitulo: 'Tu plan mensual',
+    planDetalle: '${{precio}} al mes. Se cobra solo hasta que lo canceles.',
     conTuPaquete: 'Con tu paquete',
     verSuDia: 'Ver su día',
     reservarDePaquete: 'Reservar estadía de tu paquete',

@@ -116,8 +116,30 @@ export default function CheckoutGuarderia() {
       /* Nombrar el rebote es la mitad; la otra es que lleve a donde se
          resuelve — la misma cura que las cuatro ramas de la pantalla 4. */
       if (codigo === 'documentos_sin_aceptar') router.push('/guarderia/documentos');
+      /* ⭐ **«YA TENÉS UN PLAN» NO ES UN ERROR: ES UN DESTINO.**
+         Esto es lo que el founder vivió como *«no me deja pagar»*: su primer
+         toque **sí firmó el mandato** y el segundo rebotaba con el mensaje
+         crudo de un índice. *No era «no se pudo»: era «ya lo tenés y no supe
+         explicártelo».*
+         🔴 Y llevar al hub sólo sirve **desde que el plan se ve ahí** — lo
+         monté en la misma tanda. *Llevar a una pantalla que no muestra lo que
+         se fue a buscar es la mitad de la cura otra vez.* */
+      if (codigo === 'ya_tienes_plan_activo') {
+        /* 🔴 **EL MENSAJE VIAJA EN UN TOAST, NO EN LA PANTALLA.** Medido: con
+           `setRebote` solo, la explicación se pintaba y **se iba con la
+           navegación** — la familia aparecía en el hub sin saber por qué la
+           movieron. *Llevarla al lugar correcto sin decirle qué pasó es
+           cambiar un error mudo por una mudanza muda.* Un toast sobrevive al
+           cambio de pantalla; el texto de la pantalla no. */
+        /* `neutro`, no `error`: **no se equivocó en nada** — ya tiene el
+           plan. *Pintar de error un estado correcto le enseña a la familia a
+           desconfiar de lo que hizo bien.* */
+        mostrar({ texto: mensaje, variante: 'neutro' });
+        if (router.canDismiss()) router.dismissAll();
+        router.navigate('/hogar/guarderia');
+      }
     },
-    [router],
+    [router, mostrar],
   );
 
   /**
