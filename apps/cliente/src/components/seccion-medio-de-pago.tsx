@@ -399,28 +399,28 @@ export function SeccionMedioDePago({
           {/* ⭐ S109-C · En lo recurrente la fila **no se dibuja**, y en su lugar
               va la razón. *Sacarla en silencio dejaría a quien la usa siempre
               buscándola en una lista donde ya no está.* */}
-          {/* 🔴 **EN LO RECURRENTE, HOY, LA FILA NO SE PUEDE TOCAR — y no es una
-              decisión de producto, es lo que el motor admite.** Medido:
-              `guarderia_suscripciones.tarjeta_id` es **NOT NULL**
-              (`20260830200000:61`) y `contratar_mensualidad_guarderia` **exige
-              una tarjeta**, así que un mandato por DeUna es **inexpresable**.
+          {/* ☠️ **S109-C · ACÁ VIVIÓ EL «MUY PRONTO» DE LO RECURRENTE, Y MURIÓ
+              PORQUE CAMBIÓ SU MEDICIÓN — no porque cambiáramos de opinión.**
 
-              *Dejarla tocable sería el peor de los dos males: la familia elige
-              DeUna y se topa con el botón apagado diciéndole «elegí con qué
-              tarjeta se cobra cada mes» — un callejón que la manda a corregir
-              algo que hizo bien.* Sin `onPress` la fila vuelve sola a su estado
-              de «muy pronto», que es el mecanismo que este archivo ya tenía.
+              ⏪ La condición era `DEUNA_ELEGIBLE && !recurrente`, y su razón
+              estaba medida y escrita: `guarderia_suscripciones.tarjeta_id` era
+              **NOT NULL** y `contratar_mensualidad_guarderia` **exigía** una
+              tarjeta ⇒ un mandato por DeUna era **inexpresable**.
 
-              ⚠️ **La promesa se dice igual**, y es a propósito: la firma del
-              founder ya declaró qué va a significar pagar un plan con DeUna, y
-              *que la familia sepa hacia dónde va el producto no depende de que
-              hoy pueda tocarlo.* El día que el motor lo admita, esto es sacar
-              una condición. */}
-          <FilaDeUna
-            onPress={
-              DEUNA_ELEGIBLE && !recurrente ? () => medio.elegir({ tipo: 'deuna' }) : undefined
-            }
-          />
+              ✅ Re-medido contra `main` (`20260907260000`, pista A): la columna
+              admite `null`, la puerta lleva `p_riel` y `p_tarjeta_id` **con
+              DEFAULT**, y el wrapper toma una **unión discriminada**
+              (`MedioDelMandato`) que hace inexpresable el estado malo del otro
+              lado. *La condición se retira en el mismo acto en que deja de ser
+              cierta: un freno que sobrevive a su medición ya no protege a
+              nadie, sólo esconde una función que existe.*
+
+              ⚠️ **Y lo que NO cambió: las dos promesas siguen abajo.** Que
+              DeUna se pueda tocar es justo lo que vuelve obligatorio decir
+              ANTES qué significa elegirlo — *se cobra solo* contra *hay que ir
+              a pagarlo*. Son dos compromisos distintos, no dos formas del
+              mismo. */}
+          <FilaDeUna onPress={DEUNA_ELEGIBLE ? () => medio.elegir({ tipo: 'deuna' }) : undefined} />
           {/* ⭐ LA PROMESA DE DEUNA, pegada a su fila y ANTES de elegirla. */}
           {recurrente ? <Texto variante="apoyo">{t('pago.promesaDeuna')}</Texto> : null}
           {/* ⭐ LA PROMESA DE LA TARJETA, encabezando su grupo. Va una vez y no

@@ -2042,7 +2042,20 @@ export const clienteEs = {
     // ② LA COMPUERTA — nuestro motor. El proveedor NUNCA se enteró, así que
     // el título no puede decir «falló el pago»: el pago no se intentó.
     deunaCompuertaTitulo: 'Antes de cobrarte, algo cambió',
-    deunaCausaPagoEnProceso: 'Ya hay un pago en curso para esta compra. Espera un momento y vuelve a intentarlo.',
+    /* ⭐ **S109-C · REESCRITA, y el defecto era de ACCIÓN, no de tono.**
+       ⏪ Decía *«Ya hay un pago en curso para esta compra. Espera un momento y
+       vuelve a intentarlo.»* — y lo que frena es **haber pedido otro código**,
+       así que *«vuelve a intentarlo»* manda a repetir exactamente el toque que
+       acaba de rebotar. **Un rebote que propone la acción que lo produjo es un
+       loop con voz amable.**
+       ⭐ Lo que rige (firma del founder, revocando «devolver el vivo»): **se
+       frena en la puerta y se dice en palabras que hay un pedido en curso.**
+       🔴 Y **no afirma que el código de pantalla todavía sirve** — *ese reloj es
+       de DeUna, no nuestro*: por eso dice «si dejó de servirte» y no «usa el que
+       tienes». La condicional es la parte honesta.
+       ⚠️ Dice «este pago» y ya no «esta compra»: la misma voz cubre un mes de un
+       plan, y un mes no es una compra. */
+    deunaCausaPagoEnProceso: 'Ya pediste un código para este pago y sigue en curso. Si dejó de servirte, espera un momento antes de pedir otro.',
     deunaCausaReservaVencida: 'La reserva venció y soltamos los productos. Vuelve a armar tu pedido.',
     deunaCausaVendedorNoActivo: 'Este vendedor no está recibiendo pedidos ahora mismo.',
     deunaCausaMontoDivergente: 'El total cambió desde que empezaste. Vuelve atrás para verlo actualizado.',
@@ -3423,6 +3436,25 @@ export const clienteEs = {
     cubiertoHasta: 'Cubierto hasta el {{fecha}} · se renueva solo',
     proximoCobroSinFecha: 'Todavía no hay un período cobrado.',
     pagoPendiente: 'Falta completar el pago de este plan.',
+    /* ═══ ⭐ S109-C · EL MES POR PAGAR (mandato por DeUna) ══════════════════
+       🔴 **Dice «mes», no «cobro».** Con DeUna nadie cobra: cada mes se emite
+       un link y **la familia va a pagarlo**. *Llamarlo cobro sugeriría que
+       alguien lo va a intentar solo, que es exactamente la promesa que este
+       riel no hace.* */
+    mesPorPagar: 'Tienes un mes por pagar',
+    /* 🔴 Dice hasta cuándo está cubierta, **no cuándo se cae**: la fecha es el
+       fin del período YA PAGADO, así que hasta ese día el servicio corre. *Un
+       «vence el N» a secas se lee como que ese día se queda sin guardería, y es
+       al revés: ese día es el último que tiene.* */
+    mesVenceEl: 'Tienes hasta el {{fecha}} para pagarlo y que el plan siga.',
+    /* 🔴 **Pasado, y sin dramatismo.** No dice «perdiste el plan»: dice qué
+       pasó y deja el camino abierto — *el link puede seguir sirviendo, y si no,
+       contratar de nuevo existe.* Afirmar la pérdida sería adelantarnos a un
+       veredicto que no leímos. */
+    mesVencido: 'Se pasó la fecha para pagar este mes. El plan no se renovó.',
+    /* Sin fecha del motor **no se inventa una**: se dice que está pendiente y
+       nada más. */
+    mesSinFecha: 'Está pendiente de pago.',
     /* 🔴 Lo que se lee DESPUÉS de apagar, y es la línea que evita el daño: el
        interruptor detiene la RENOVACIÓN, jamás el servicio ya pagado. */
     apagadoHasta: 'No se vuelve a cobrar. Sigue cubierto hasta el {{fecha}}.',
@@ -3447,7 +3479,13 @@ export const clienteEs = {
        quiera— y recién después dice lo que cambia. **La asimetría se dice, no
        se disimula**: callar que el día de cobro se mueve sería dejar que lo
        descubra en el resumen de su tarjeta. */
-    confirmarSinVuelta: 'Su período ya terminó. El plan no se pierde: puedes volver a contratarlo cuando quieras, y desde ese día el cobro pasa a ser ese día de cada mes.',
+    /* ⚠️ **DICE «SE ANCLA AL DÍA QUE VUELVAS», NO «ESE DÍA DE CADA MES».**
+       Es la MISMA trampa que la pista A ya cazó una vez en esta casa: *un plan
+       anclado un 31 no se cobra el 31 de febrero.* La promesa del día fijo es
+       una que el motor no puede cumplir doce veces al año, y **la escribí igual
+       acá por copiar la forma de la frase vieja** — que es exactamente cómo una
+       promesa falsa se muda de pantalla en pantalla. */
+    confirmarSinVuelta: 'Su período ya terminó. El plan no se pierde: puedes volver a contratarlo cuando quieras, y el cobro se ancla al día que vuelvas.',
     confirmar: 'Sí, apagar',
     volver: 'Dejarlo como está',
     noPudimosApagar: 'No pudimos apagarlo. Prueba de nuevo.',

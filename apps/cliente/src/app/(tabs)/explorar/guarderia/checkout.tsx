@@ -35,7 +35,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Linking, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -58,6 +58,9 @@ import { CheckoutReserva } from '@/components/checkout-reserva';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion, type SujetoEnEspera } from '@/lib/pagos/espera-confirmacion';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
+import { EsperaDeUna } from '@/components/espera-deuna';
+import { urlWhatsApp } from '@/lib/contacto';
+import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
 import { SeccionDireccion, useDireccionEntrega } from '@/components/seccion-direccion';
 import { CheckImagenes } from '@/components/check-imagenes';
 import { fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
@@ -197,7 +200,26 @@ export default function CheckoutGuarderia() {
   const [sujeto, setSujeto] = useState<SujetoEnEspera | null>(null);
   /** El bono en vuelo: lo necesita el agendamiento que sigue al cobro. */
   const [bonoEnVuelo, setBonoEnVuelo] = useState<string | null>(null);
-  const espera = useEsperaDeConfirmacion(fase === 'confirmando' ? sujeto : null);
+  /* ═══ 🔴 S109-C · EL RIEL EN CURSO — se congela AL TOCAR ══════════════════
+     `medio.elegido` es estado vivo del resumen; **la fase `confirmando` tiene
+     que saber por dónde entró la plata, y eso se decidió en el toque.** *Leerlo
+     del selector durante la espera dejaría expresable que el cuerpo cambie de
+     riel a mitad de una confirmación — la persona mirando un código de DeUna y
+     la pantalla saltando a la rampa de tarjeta.* Mismo mecanismo que el
+     checkout de la cita y el del paquete de paseo. */
+  const [riel, setRiel] = useState<'tarjeta' | 'deuna' | null>(null);
+  /* Activo **sólo en `confirmando` y sólo con riel DeUna**: pedir un código
+     **CREA un intento contra el proveedor**, así que sin este freno abrir el
+     resumen fabricaría una transacción que nadie pidió. */
+  const enDeuna = fase === 'confirmando' && riel === 'deuna' && sujeto !== null;
+  const deuna = useEstadoDeUna(enDeuna ? sujeto : null);
+  /* La MISMA espera para los dos rieles: lee **el SUJETO**, no al proveedor.
+     Lo único que cambia es cuánto se mira — con DeUna la plata todavía no se
+     movió, así que el tope es margen y no plazo. */
+  const espera = useEsperaDeConfirmacion(
+    fase === 'confirmando' ? sujeto : null,
+    topeDeEspera(deuna.estado),
+  );
   /**
    * ⭐ **LA CONFIRMACIÓN ES LA MISMA QUE LA DE TODOS LOS SERVICIOS.**
    * Firma del founder: *«después de pagar va a la pantalla de confirmación
@@ -361,8 +383,14 @@ export default function CheckoutGuarderia() {
 
   const pagar = useCallback(async () => {
     if (enviando) return;
-    /* Ni el paquete ni la mensualidad se tocan sin medio: los dos cobran. */
-    if (medio.idTarjeta === null) { setRebote(t('lugarGuarderia.faltaTarjeta')); return; }
+    /* Ni el paquete ni la mensualidad se tocan sin medio: los dos cobran.
+       ⭐ S109-C · **DeUna es medio**: antes este guard sólo miraba la tarjeta y
+       habría frenado un pago legítimo con el mensaje de que falta una tarjeta
+       —*rebotar mintiendo*—. */
+    if (medio.idTarjeta === null && medio.elegido?.tipo !== 'deuna') {
+      setRebote(t('lugarGuarderia.faltaTarjeta'));
+      return;
+    }
     setEnviando(true);
     setRebote(null);
     const prestadorId = texto('prestadorId');
@@ -372,10 +400,37 @@ export default function CheckoutGuarderia() {
       /* 🔴 EN LA MENSUALIDAD LA DIRECCIÓN VA EN EL MANDATO, igual que el
          medio de pago: **las citas del plan las crea el reloj, sin nadie
          presente.** Se resuelve AL FIRMAR y jamás al cobrar. */
+      /* ⭐ **EL MANDATO NACE CON SU RIEL** — y el tipo no deja mandar los dos
+         ni ninguno (`MedioDelMandato`). *La forma vieja tomaba `tarjetaId` a
+         secas: para firmar por DeUna había que mandarle una tarjeta o mentirle
+         al compilador con un `as`.* */
+      const porDeuna = medio.elegido?.tipo === 'deuna';
       const r = await contratarMensualidadGuarderia({
-        prestadorId, tarjetaId: medio.idTarjeta, mascotaId, direccionId: dir.direccionId ?? undefined,
+        prestadorId,
+        medio: porDeuna || medio.idTarjeta === null
+          ? { riel: 'deuna' }
+          : { riel: 'tarjeta', tarjetaId: medio.idTarjeta },
+        mascotaId,
+        direccionId: dir.direccionId ?? undefined,
       });
       if (!r.ok) { setEnviando(false); rebotar(r.codigo, r.mensaje); return; }
+
+      /* ── 🔴 DEUNA NO PASA POR `cobrar()`, y no es un atajo ────────────────
+         `cobrar()` **debita una tarjeta**. En DeUna no hay nada que debitar
+         desde acá: *lo que hacemos es pedir seis dígitos para que la persona
+         pague en OTRA app.* El toque **sólo cambia de fase**; el código lo pide
+         `useEstadoDeUna` al activarse.
+         ⚠️ Y **no se prende `enviando`**: no hay viaje que esperar en este
+         hilo. *Un botón que gira mientras la pantalla ya cambió promete un
+         trabajo que no existe.* */
+      if (porDeuna) {
+        setEnviando(false);
+        setSujeto({ tipo: 'mensualidad', id: r.data.suscripcionId });
+        setRiel('deuna');
+        setFase('confirmando');
+        return;
+      }
+      setRiel('tarjeta');
       /* ⭐ **CONTRATAR NO COBRA — el motor devuelve el sujeto y el cobro va por
          la misma puerta que los otros tres** (confirmado con S108-A: la RPC no
          cobra por dentro, a propósito, para que la espera siga siendo UNA
@@ -405,12 +460,27 @@ export default function CheckoutGuarderia() {
       bonoId = compra.data.bonoId;
       setBonoEnVuelo(bonoId);
     }
+    /* ⭐ S109-C · **EL PAQUETE TAMBIÉN ACEPTA DEUNA — porque su fila ya se
+       dibuja tocable.** Es una compra SUELTA (la regla de las dos promesas es
+       de lo recurrente), igual que el paquete de paseo, que ya llevaba este
+       riel. *Dejar la fila encendida y no honrarla sería ofrecer algo que la
+       pantalla va a rechazar — `Ley 23` al revés.*
+       El bono ya nació arriba: **los dos rieles necesitan el sujeto** — la
+       tarjeta para debitarlo, DeUna para pedir un código a su nombre. */
+    if (medio.elegido?.tipo === 'deuna' || medio.idTarjeta === null) {
+      setEnviando(false);
+      setSujeto({ tipo: 'bono', id: bonoId });
+      setRiel('deuna');
+      setFase('confirmando');
+      return;
+    }
+    setRiel('tarjeta');
     const cobro = await cobrar({ tipo: 'bono', id: bonoId }, medio.idTarjeta);
     setEnviando(false);
     if (!cobro.ok) { mostrar({ texto: t(cobro.voz), variante: 'error' }); return; }
     setSujeto({ tipo: 'bono', id: bonoId });
     setFase('confirmando');
-  }, [enviando, esMensual, medio.idTarjeta, params.tamano, bonoEnVuelo, dir.direccionId, mostrar, rebotar, t]);
+  }, [enviando, esMensual, medio.idTarjeta, medio.elegido, params.tamano, bonoEnVuelo, dir.direccionId, mostrar, rebotar, t]);
 
   /**
    * 🔴 **EL HOOK SE ESCUCHA.** *La lección de la despensa: la pieza estaba bien
@@ -425,6 +495,7 @@ export default function CheckoutGuarderia() {
     if (sujeto.tipo === 'mensualidad') {
       if (e === 'activa') { void cerrarMensual(sujeto.id); return; }
       setFase('resumen');
+      setRiel(null);
       /* `fallida` es un veredicto REAL (S108-A lee el intento de la familia),
          no un timeout: por eso se puede decir que no entró. */
       setRebote(e === 'fallida' ? t('checkoutGuarderia.mensualNoEntro') : t('checkoutGuarderia.mensualCancelada'));
@@ -433,6 +504,7 @@ export default function CheckoutGuarderia() {
 
     if (e === 'pagado') { void agendarPrimerDia(sujeto.id); return; }
     setFase('resumen');
+    setRiel(null);
     setBonoEnVuelo(null);
     /* 🔴 CADA FINAL CON SU FRASE. «No llegaste a pagarlo» y «te devolvimos la
        plata» son dos cosas distintas, y S108-A les dio valores distintos justo
@@ -455,17 +527,47 @@ export default function CheckoutGuarderia() {
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[4], padding: spacing[6] }}>
-          <Texto variante="titulo">
-            {fase === 'agendando' ? t('checkoutGuarderia.agendandoTitulo') : t('pago.esperaTitulo')}
-          </Texto>
-          <Texto variante="cuerpo">
-            {fase === 'agendando'
-              ? t('checkoutGuarderia.agendandoCuerpo')
-              : esMensual
-                ? t('checkoutGuarderia.esperaMensual')
-                : t('checkoutGuarderia.esperaPaquete')}
-          </Texto>
-          <EsperaDeTrabajo />
+          {/* ══ ⭐ S109-C · LA MISMA FASE, DOS CUERPOS ═══════════════════════
+              *El cliente jamás aprende un circuito distinto por cambiar de
+              medio.* Y la asimetría que SÍ existe se respeta: **en tarjeta la
+              familia ESPERA; en DeUna la familia TRABAJA** — por eso
+              `EsperaDeTrabajo` no se monta ahí: *una rampa que dice «estamos
+              trabajando» mientras la persona teclea afirma algo falso.*
+              ⚠️ `agendando` es del paquete y **siempre es espera nuestra**: ahí
+              la plata ya entró y el que trabaja es el servidor. */}
+          {riel === 'deuna' && fase === 'confirmando' ? (
+            <EsperaDeUna
+              estado={deuna.estado}
+              onGenerarNuevo={deuna.regenerar}
+              onSoporte={() => void Linking.openURL(urlWhatsApp(t('cuenta.soporteDesdeCobro')))}
+            />
+          ) : (
+            <>
+              <Texto variante="titulo">
+                {fase === 'agendando' ? t('checkoutGuarderia.agendandoTitulo') : t('pago.esperaTitulo')}
+              </Texto>
+              <Texto variante="cuerpo">
+                {fase === 'agendando'
+                  ? t('checkoutGuarderia.agendandoCuerpo')
+                  : esMensual
+                    ? t('checkoutGuarderia.esperaMensual')
+                    : t('checkoutGuarderia.esperaPaquete')}
+              </Texto>
+              <EsperaDeTrabajo />
+            </>
+          )}
+          {/* 🔴 La vuelta al resumen existe **sólo en DeUna y sólo mientras
+              espera**: ahí se llegó SIN cobrar nada —sólo se pidió un código—,
+              así que volver es seguro. Con tarjeta se llega DESPUÉS de que el
+              débito salió, y ofrecer «cambiar de medio» sería invitar a pagar
+              dos veces. */}
+          {riel === 'deuna' && deuna.estado.fase === 'esperando' ? (
+            <Boton
+              variante="secundario"
+              etiqueta={t('checkout.cambiarMedio')}
+              onPress={() => { setFase('resumen'); setRiel(null); }}
+            />
+          ) : null}
           {espera.fase === 'sigue_abierta' ? (
             <>
               <Texto variante="apoyo">{t('pago.esperaSigueAbiertaCita')}</Texto>

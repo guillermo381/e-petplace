@@ -72,6 +72,8 @@ import {
   reactivarMensualidadGuarderia,
   configurarRenovacionPlan,
   obtenerMisPlanesGuarderia,
+  obtenerMesPendienteGuarderia,
+  type MesPendienteGuarderia,
   obtenerMisPlanesPaseo,
   obtenerPerfilesPublicos,
 } from '@epetplace/api';
@@ -128,7 +130,13 @@ interface Item {
 type Estado =
   | { fase: 'cargando' }
   | { fase: 'noPudimos' }
-  | { fase: 'listo'; items: Item[] };
+  /**
+   * ⭐ **S109-C · `pendientes` VIAJA CON LOS ITEMS, no aparte.**
+   * *Dos estados separados dejarían expresable «lista lista, pendientes
+   * cargando» — y ese medio segundo dibuja una pantalla que dice que no hay
+   * nada que pagar sobre un mes que vence.*
+   */
+  | { fase: 'listo'; items: Item[]; pendientes: MesPendienteGuarderia[] };
 
 export default function Recurrentes() {
   const { t } = useTraduccion();
@@ -148,12 +156,21 @@ export default function Recurrentes() {
     setEstado({ fase: 'cargando' });
     void (async () => {
       /* Misma ola: el peaje es de la PETICIÓN, no del volumen (L-223). */
-      const [g, p] = await Promise.all([obtenerMisPlanesGuarderia(), obtenerMisPlanesPaseo()]);
+      const [g, p, mp] = await Promise.all([
+        obtenerMisPlanesGuarderia(),
+        obtenerMisPlanesPaseo(),
+        /* ⭐ S109-C · el mes emitido y sin pagar del mandato por DeUna. */
+        obtenerMesPendienteGuarderia(),
+      ]);
       if (!vigente) return;
       /* 🔴 Un fallo JAMÁS se disfraza de «no tenés nada» (Ley 13). En una
          pantalla de plata esa confusión es peor que en cualquier otra: se lee
-         como «ya no te cobran». */
-      if (!g.ok || !p.ok) { setEstado({ fase: 'noPudimos' }); return; }
+         como «ya no te cobran».
+         ⭐ **Y el tercero entra en la MISMA condición, a propósito**: un mes
+         pendiente que no se pudo leer se ve idéntico a «no tienes nada que
+         pagar», *y ése es el peor error posible de esta pantalla — la familia
+         pierde el plan por no haberse enterado.* */
+      if (!g.ok || !p.ok || !mp.ok) { setEstado({ fase: 'noPudimos' }); return; }
 
       const hoy = hoyLocal();
       const items: Item[] = [];
@@ -210,7 +227,7 @@ export default function Recurrentes() {
 
       /* El nombre del lugar del paseo hay que ir a buscarlo — su lector no lo
          trae. **La pantalla no lo espera**: se pinta y el nombre completa. */
-      setEstado({ fase: 'listo', items });
+      setEstado({ fase: 'listo', items, pendientes: mp.data });
       const ids = [...new Set(p.data.filter((x) => x.estado === 'activa').map((x) => x.prestador_id))];
       if (ids.length === 0) return;
       const perfiles = await obtenerPerfilesPublicos(ids);
@@ -221,6 +238,10 @@ export default function Recurrentes() {
           ? e
           : {
               fase: 'listo',
+              /* ⭐ Se conservan: este updater sólo completa NOMBRES. *Reconstruir
+                 el estado sin ellos borraría los meses por pagar cuando llega
+                 una respuesta que no tiene nada que ver.* */
+              pendientes: e.pendientes,
               items: e.items.map((it) =>
                 it.tipo === 'paseo' && it.donde === null
                   ? { ...it, donde: nombre.get(p.data.find((x) => x.id === it.id)?.prestador_id ?? '') ?? null }
@@ -307,7 +328,7 @@ export default function Recurrentes() {
             titulo={t('recurrentes.noCargoTitulo')}
             descripcion={t('recurrentes.noCargoDetalle')}
           />
-        ) : estado.items.length === 0 ? (
+        ) : estado.items.length === 0 && estado.pendientes.length === 0 ? (
           /* El vacío con calma — no queda mudo. */
           <EstadoVacio
             registro="seccion"
@@ -316,7 +337,54 @@ export default function Recurrentes() {
           />
         ) : (
           <>
-            <Texto variante="apoyo">{t('recurrentes.intro')}</Texto>
+            {/* ═══ ⭐ S109-C · LOS MESES POR PAGAR — ARRIBA DE TODO ══════════
+                🔴 **Es lo único accionable de esta pantalla, y tiene fecha de
+                vencimiento.** El resto informa; esto pide un acto. *Un mes que
+                no se paga no falla ruidosamente: el plan simplemente no se
+                renueva, y la familia se entera por el silencio.*
+                ⚠️ Sólo existe en el mandato por DeUna — con tarjeta se cobra
+                solo y esta lista viene vacía. */}
+            {estado.pendientes.map((m) => {
+              /* 🔴 **LOS DOS RELOJES NO SE MEZCLAN.** `mesVenceEn` es el fin del
+                 período pagado (días); `codigoExpiraEn` es de DeUna (minutos).
+                 *Juntarlos en un contador diría que se acabó algo que no se
+                 acabó* — por eso el código ni siquiera se muestra acá: la
+                 tarjeta LLEVA a la pantalla del link, que es la que lo maneja.
+                 ⭐ Y el veredicto lo da ESTA pantalla, no el servidor: A manda
+                 instantes justamente para que el «ya venció» se pueda volver a
+                 mirar un minuto después. */
+              const vencido = m.mesVenceEn !== null && new Date(m.mesVenceEn).getTime() <= Date.now();
+              return (
+                <Tarjeta key={m.linkId} relleno="ninguno">
+                  <Celda
+                    titulo={t('recurrentes.mesPorPagar')}
+                    subtitulo={m.prestadorNombre.length > 0 ? m.prestadorNombre : undefined}
+                    metadataMono={t('recurrentes.alMes', { precio: m.monto.toFixed(2) })}
+                    interactiva
+                    accessibilityRole="button"
+                    onPress={() => router.push(`/pagos/mensualidad?suscripcionId=${m.suscripcionId}`)}
+                  />
+                  <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3] }}>
+                    <Texto variante="apoyo">
+                      {/* ⭐ Vencido y por vencer son **dos verdades distintas** y
+                          la familia hace cosas distintas con cada una: ante la
+                          primera el plan ya no se renovó, ante la segunda
+                          todavía llega. *Contarlas con la misma frase le
+                          quitaría a la segunda su urgencia y a la primera su
+                          honestidad.* */}
+                      {vencido
+                        ? t('recurrentes.mesVencido')
+                        : m.mesVenceEn === null
+                          ? t('recurrentes.mesSinFecha')
+                          : t('recurrentes.mesVenceEl', {
+                              fecha: fechaLargaHumana(m.mesVenceEn.slice(0, 10), idioma),
+                            })}
+                    </Texto>
+                  </View>
+                </Tarjeta>
+              );
+            })}
+            {estado.items.length > 0 ? <Texto variante="apoyo">{t('recurrentes.intro')}</Texto> : null}
             <Tarjeta relleno="ninguno">
               {estado.items.map((it, i) => (
                 <View key={it.clave}>

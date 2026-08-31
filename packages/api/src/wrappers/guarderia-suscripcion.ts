@@ -155,3 +155,89 @@ export async function cancelarMensualidadGuarderia(
     },
   };
 }
+
+// ═══ ⭐ S109-C · EL MES PENDIENTE — LA PUERTA QUE FALTABA ══════════════════
+//
+// `obtener_mes_pendiente_guarderia` está creada y grantada, y **no tenía
+// wrapper**: `L-318` por tercera vez en este frente. *Un lector sin puerta no
+// falla — no existe, y su ausencia se lee igual que «todavía no se construyó».*
+//
+// 🔴 **POR QUÉ ESTO NO ES «UNA COMPRA MÁS»:** el mandato por DeUna no se cobra
+// solo. Cada mes se emite un link, y **si nadie lo paga, el plan no se
+// renueva.** Esta tarjeta es el único lugar del producto donde ese mes aparece
+// antes de vencerse. *Sin ella, la familia se entera de que perdió el plan por
+// el silencio.*
+
+/** Un mes emitido y todavía sin pagar. */
+export interface MesPendienteGuarderia {
+  linkId: string;
+  suscripcionId: string;
+  prestadorNombre: string;
+  /** 'YYYY-MM-DD' — el primer día del período que se está pagando. */
+  periodo: string;
+  monto: number;
+  moneda: string;
+  /**
+   * 🔴 **EL RELOJ DEL MES** — instante ISO. Es el fin del período **ya pagado**:
+   * hasta ese día la familia puede pagar el siguiente.
+   *
+   * ⚠️ **NO es el reloj del código.** Van separados y con nombres distintos a
+   * propósito: *si una tarjeta los junta en un contador, va a decir que se
+   * acabó algo que no se acabó* — uno dura días y el otro minutos.
+   */
+  mesVenceEn: string | null;
+  /** El intento vivo, si lo hay. */
+  intentoId: string | null;
+  /** Los seis dígitos, si el intento sigue en pie. */
+  codigo: string | null;
+  /**
+   * 🔴 **EL RELOJ DEL CÓDIGO** — instante ISO, de DeUna, en minutos.
+   * `null` con `codigo` presente significa que el proveedor no lo declaró: la
+   * superficie **no inventa un plazo**.
+   */
+  codigoExpiraEn: string | null;
+}
+
+/**
+ * Los meses emitidos y sin pagar de esta persona.
+ *
+ * 🔴 **El servidor manda INSTANTES, no veredictos** — no compara contra `now()`
+ * y esta puerta tampoco. *El «ya se venció» lo dice la pantalla, que es la que
+ * tiene el reloj del dispositivo delante y la que puede volver a mirarlo un
+ * minuto después.* Un booleano calculado en el servidor nace viejo.
+ *
+ * Lista vacía = **no hay nada que pagar**, y eso NO es un error: es el estado
+ * normal de un plan por tarjeta y de uno por DeUna al día.
+ */
+export async function obtenerMesPendienteGuarderia(): Promise<
+  ResultadoWrapper<MesPendienteGuarderia[], CodigoErrorGuarderiaSuscripcion>
+> {
+  const { data, error } = await getClient().rpc('obtener_mes_pendiente_guarderia');
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (!Array.isArray(r.meses)) return fallaCodigo('datos_inconsistentes');
+
+  const meses: MesPendienteGuarderia[] = [];
+  for (const cru of r.meses) {
+    if (typeof cru !== 'object' || cru === null) continue;
+    const m = cru as Record<string, unknown>;
+    /* Sin `link_id` no hay a qué llevar: **se descarta la fila, no la lista.**
+       *Devolver una tarjeta que no puede navegar a ningún lado es peor que no
+       devolverla.* */
+    if (typeof m.link_id !== 'string' || typeof m.suscripcion_id !== 'string') continue;
+    meses.push({
+      linkId: m.link_id,
+      suscripcionId: m.suscripcion_id,
+      prestadorNombre: typeof m.prestador_nombre === 'string' ? m.prestador_nombre : '',
+      periodo: typeof m.periodo === 'string' ? m.periodo : '',
+      monto: typeof m.monto === 'number' ? m.monto : 0,
+      moneda: typeof m.moneda === 'string' ? m.moneda : 'USD',
+      mesVenceEn: typeof m.mes_vence_en === 'string' ? m.mes_vence_en : null,
+      intentoId: typeof m.intento_id === 'string' ? m.intento_id : null,
+      codigo: typeof m.codigo === 'string' ? m.codigo : null,
+      codigoExpiraEn: typeof m.codigo_expira_en === 'string' ? m.codigo_expira_en : null,
+    });
+  }
+  return { ok: true, data: meses };
+}

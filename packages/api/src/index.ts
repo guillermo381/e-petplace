@@ -1619,6 +1619,8 @@ export {
   obtenerMisPlanesGuarderia,
   type PlanGuarderia,
   type MandatoMensualidad,
+  /* S109-C · la unión que hace inexpresable el mandato mal formado. */
+  type MedioDelMandato,
   obtenerDiasGuarderia,
   type DiaGuarderia,
   type MotivoDiaNoReservable,
@@ -1633,6 +1635,9 @@ export {
 export {
   cancelarMensualidadGuarderia,
   reactivarMensualidadGuarderia,
+  /* S109-C · el mes emitido y sin pagar del mandato por DeUna. */
+  obtenerMesPendienteGuarderia,
+  type MesPendienteGuarderia,
   type ReactivacionMensualidad,
   type CancelacionMensualidad,
   type CodigoErrorGuarderiaSuscripcion,
