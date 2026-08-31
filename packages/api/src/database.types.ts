@@ -2520,18 +2520,27 @@ export type Database = {
       }
       cat_sujetos_de_pago: {
         Row: {
+          cobrable_por_checkout: boolean
           codigo: string
           columna_intento: string
+          compuerta: string | null
+          compuerta_ausente_porque: string | null
           descripcion: string
         }
         Insert: {
+          cobrable_por_checkout?: boolean
           codigo: string
           columna_intento: string
+          compuerta?: string | null
+          compuerta_ausente_porque?: string | null
           descripcion: string
         }
         Update: {
+          cobrable_por_checkout?: boolean
           codigo?: string
           columna_intento?: string
+          compuerta?: string | null
+          compuerta_ausente_porque?: string | null
           descripcion?: string
         }
         Relationships: []
@@ -3340,6 +3349,76 @@ export type Database = {
             columns: ["familia_id_placeholder"]
             isOneToOne: true
             referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cobro_link_mensual: {
+        Row: {
+          emitido_en: string
+          estado: string
+          guarderia_suscripcion_id: string | null
+          id: string
+          intento_id: string
+          moneda: string
+          monto: number
+          pagado_en: string | null
+          periodo: string
+          referencia_proveedor: string | null
+          suscripcion_servicio_id: string | null
+          url_proveedor: string | null
+          vence_en: string
+        }
+        Insert: {
+          emitido_en?: string
+          estado?: string
+          guarderia_suscripcion_id?: string | null
+          id?: string
+          intento_id: string
+          moneda: string
+          monto: number
+          pagado_en?: string | null
+          periodo: string
+          referencia_proveedor?: string | null
+          suscripcion_servicio_id?: string | null
+          url_proveedor?: string | null
+          vence_en: string
+        }
+        Update: {
+          emitido_en?: string
+          estado?: string
+          guarderia_suscripcion_id?: string | null
+          id?: string
+          intento_id?: string
+          moneda?: string
+          monto?: number
+          pagado_en?: string | null
+          periodo?: string
+          referencia_proveedor?: string | null
+          suscripcion_servicio_id?: string | null
+          url_proveedor?: string | null
+          vence_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobro_link_mensual_guarderia_suscripcion_id_fkey"
+            columns: ["guarderia_suscripcion_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_suscripciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobro_link_mensual_intento_id_fkey"
+            columns: ["intento_id"]
+            isOneToOne: false
+            referencedRelation: "pagos_intentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobro_link_mensual_suscripcion_servicio_id_fkey"
+            columns: ["suscripcion_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "suscripciones_servicio"
             referencedColumns: ["id"]
           },
         ]
@@ -11064,7 +11143,8 @@ export type Database = {
           precio_mensual: number
           prestador_id: string
           prestador_servicio_id: string
-          tarjeta_id: string
+          riel: string | null
+          tarjeta_id: string | null
           updated_at: string
         }
         Insert: {
@@ -11084,7 +11164,8 @@ export type Database = {
           precio_mensual: number
           prestador_id: string
           prestador_servicio_id: string
-          tarjeta_id: string
+          riel?: string | null
+          tarjeta_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -11104,7 +11185,8 @@ export type Database = {
           precio_mensual?: number
           prestador_id?: string
           prestador_servicio_id?: string
-          tarjeta_id?: string
+          riel?: string | null
+          tarjeta_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -18550,6 +18632,7 @@ export type Database = {
           cancelado_en: string | null
           country_code: string
           created_at: string
+          dia_de_cobro: number | null
           dias_semana: number[] | null
           duracion_minutos: number | null
           empleado_id: string | null
@@ -18563,6 +18646,7 @@ export type Database = {
           motivo_cancelacion: string | null
           notas_prestador: string | null
           observaciones_cliente: string | null
+          pago_expira_en: string | null
           pago_metadata: Json
           periodo_fin: string
           periodo_inicio: string
@@ -18572,6 +18656,8 @@ export type Database = {
           prestador_id: string
           prestador_servicio_id: string | null
           proximo_cobro_en: string | null
+          riel: string | null
+          tarjeta_id: string | null
           tipo_servicio: string
           ultima_actividad_en: string | null
           unidades_consumidas: number
@@ -18583,6 +18669,7 @@ export type Database = {
           cancelado_en?: string | null
           country_code?: string
           created_at?: string
+          dia_de_cobro?: number | null
           dias_semana?: number[] | null
           duracion_minutos?: number | null
           empleado_id?: string | null
@@ -18596,6 +18683,7 @@ export type Database = {
           motivo_cancelacion?: string | null
           notas_prestador?: string | null
           observaciones_cliente?: string | null
+          pago_expira_en?: string | null
           pago_metadata?: Json
           periodo_fin: string
           periodo_inicio: string
@@ -18605,6 +18693,8 @@ export type Database = {
           prestador_id: string
           prestador_servicio_id?: string | null
           proximo_cobro_en?: string | null
+          riel?: string | null
+          tarjeta_id?: string | null
           tipo_servicio: string
           ultima_actividad_en?: string | null
           unidades_consumidas?: number
@@ -18616,6 +18706,7 @@ export type Database = {
           cancelado_en?: string | null
           country_code?: string
           created_at?: string
+          dia_de_cobro?: number | null
           dias_semana?: number[] | null
           duracion_minutos?: number | null
           empleado_id?: string | null
@@ -18629,6 +18720,7 @@ export type Database = {
           motivo_cancelacion?: string | null
           notas_prestador?: string | null
           observaciones_cliente?: string | null
+          pago_expira_en?: string | null
           pago_metadata?: Json
           periodo_fin?: string
           periodo_inicio?: string
@@ -18638,6 +18730,8 @@ export type Database = {
           prestador_id?: string
           prestador_servicio_id?: string | null
           proximo_cobro_en?: string | null
+          riel?: string | null
+          tarjeta_id?: string | null
           tipo_servicio?: string
           ultima_actividad_en?: string | null
           unidades_consumidas?: number
@@ -18677,6 +18771,13 @@ export type Database = {
             columns: ["prestador_servicio_id"]
             isOneToOne: false
             referencedRelation: "prestador_servicios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suscripciones_servicio_tarjeta_id_fkey"
+            columns: ["tarjeta_id"]
+            isOneToOne: false
+            referencedRelation: "tarjetas_guardadas"
             referencedColumns: ["id"]
           },
         ]
@@ -21167,6 +21268,16 @@ export type Database = {
         Args: { p_item_id: string; p_mascota_id: string; p_uid: string }
         Returns: string
       }
+      _desglose_congelado_del_intento: {
+        Args: { p_intento: string }
+        Returns: {
+          envio: number
+          impuesto: number
+          moneda: string
+          subtotal: number
+          total: number
+        }[]
+      }
       _deuna_base36: { Args: { p_n: number }; Returns: string }
       _dias_sin_repetidos: { Args: { p_dias: number[] }; Returns: boolean }
       _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
@@ -21341,6 +21452,10 @@ export type Database = {
         }[]
       }
       _tipo_documento_legible: { Args: { p_tipo: string }; Returns: string }
+      _total_congelado_del_intento: {
+        Args: { p_intento: string }
+        Returns: number
+      }
       _user_clinica_consultor_del_caso: {
         Args: { p_caso_id: string; p_user_id: string }
         Returns: boolean
@@ -21634,6 +21749,15 @@ export type Database = {
         }
         Returns: Json
       }
+      aplicar_consulta_activa_nuvei: {
+        Args: {
+          p_ambiente?: string
+          p_crudo: Json
+          p_intento_id: string
+          p_origen?: string
+        }
+        Returns: Json
+      }
       aplicar_evento_de_pago: { Args: { p_evento_id: string }; Returns: Json }
       aplicar_reembolso: {
         Args: {
@@ -21856,6 +21980,10 @@ export type Database = {
         }
         Returns: Json
       }
+      confirmar_pago_plan_paseo: {
+        Args: { p_suscripcion_id: string }
+        Returns: Json
+      }
       confirmar_pago_programa: {
         Args: { p_programa_contratado_id: string }
         Returns: Json
@@ -21875,6 +22003,7 @@ export type Database = {
           p_mascota_id?: string
           p_monto_esperado?: number
           p_prestador_id: string
+          p_riel?: string
           p_tarjeta_id: string
         }
         Returns: Json
@@ -21888,7 +22017,9 @@ export type Database = {
           p_hora: string
           p_mascota_id: string
           p_prestador_id: string
+          p_riel?: string
           p_servicio_id: string
+          p_tarjeta_id?: string
         }
         Returns: Json
       }
@@ -22338,6 +22469,10 @@ export type Database = {
         }
         Returns: Json
       }
+      emitir_link_mensual: {
+        Args: { p_periodo: string; p_sujeto: string; p_sujeto_id: string }
+        Returns: Json
+      }
       emitir_token_documento: {
         Args: { p_mascota_id: string; p_ref?: string; p_tipo?: string }
         Returns: Json
@@ -22613,10 +22748,6 @@ export type Database = {
         Args: { p_medio?: string; p_tarjeta_id?: string }
         Returns: Json
       }
-      guarderia_proximo_cobro: {
-        Args: { p_dia_cobro: number; p_periodo_desde: string }
-        Returns: string
-      }
       guarderia_recurrente_vivo: { Args: never; Returns: boolean }
       hay_avisos_sin_leer: { Args: never; Returns: boolean }
       hay_novedades: { Args: { p_app: string }; Returns: boolean }
@@ -22732,26 +22863,14 @@ export type Database = {
         Args: { p_invitacion_id: string }
         Returns: boolean
       }
+      marcar_link_mensual_pagado: { Args: { p_link_id: string }; Returns: Json }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
       marcar_teleconsulta_no_realizable: {
         Args: { p_cita_id: string; p_detalle?: string }
         Returns: Json
       }
       maximo_comprable_de_ofertas: { Args: { p_items: Json }; Returns: Json }
-      mensualidades_vencidas_pendientes: {
-        Args: never
-        Returns: {
-          dia_de_cobro: number
-          familia_id: string
-          monto_esperado: number
-          pagador_user_id: string
-          precio_mensual: number
-          prestador_id: string
-          proximo_periodo: string
-          suscripcion_id: string
-          tarjeta_id: string
-        }[]
-      }
+      mensualidades_vencidas_pendientes: { Args: never; Returns: Json }
       mi_email: { Args: never; Returns: string }
       mi_firma_clinica: {
         Args: { p_prestador_id: string }
@@ -23306,6 +23425,24 @@ export type Database = {
           suscripcion_id: string
         }[]
       }
+      obtener_mis_planes_paseo: {
+        Args: never
+        Returns: {
+          auto_renovar: boolean
+          estado: string
+          estado_pago: string
+          link_estado: string
+          link_vence_en: string
+          mascota_id: string
+          periodo_fin: string
+          periodo_inicio: string
+          precio_mensual: number
+          prestador_id: string
+          proximo_cobro: string
+          riel: string
+          suscripcion_id: string
+        }[]
+      }
       obtener_mis_programas: {
         Args: never
         Returns: {
@@ -23313,6 +23450,7 @@ export type Database = {
           estado_pago: string
           mascota_id: string
           no_pagado_a_tiempo: boolean
+          pago_expira_en: string
           precio_por_sesion: number
           precio_total: number
           prestador_id: string
@@ -23632,6 +23770,8 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      pagos_aprobados_sin_sujeto_movido: { Args: never; Returns: Json }
+      pagos_conciliacion_cobertura: { Args: never; Returns: Json }
       pagos_huerfanos_por_sujeto: {
         Args: { p_minutos_de_gracia?: number; p_proveedor?: string }
         Returns: {
@@ -23704,6 +23844,10 @@ export type Database = {
           p_origen_carga?: string
         }
         Returns: Json
+      }
+      proximo_cobro_mensual: {
+        Args: { p_dia_cobro: number; p_periodo_desde: string }
+        Returns: string
       }
       publicar_media_guarderia: {
         Args: {
@@ -24218,6 +24362,13 @@ export type Database = {
         }
         Returns: Json
       }
+      selectores_recurrentes_vivos: {
+        Args: never
+        Returns: {
+          selector: string
+          sujeto: string
+        }[]
+      }
       service_active_in: {
         Args: { p_country_code?: string; p_service: string }
         Returns: boolean
@@ -24376,8 +24527,20 @@ export type Database = {
         Args: { p_email?: string; p_invite_code?: string }
         Returns: Json
       }
+      vencer_links_mensuales: { Args: never; Returns: Json }
       vencer_paquetes_salidas: { Args: never; Returns: Json }
       vencer_programas_adiestramiento: { Args: never; Returns: Json }
+      verificar_censo_de_compuertas: {
+        Args: never
+        Returns: {
+          codigo: string
+          compuerta: string
+          debe_llamarla: boolean
+          existe: boolean
+          nota: string
+        }[]
+      }
+      verificar_cobertura_desgloses: { Args: never; Returns: Json }
       verificar_cobertura_sujetos_de_pago: { Args: never; Returns: Json }
       verificar_coherencia_inventario: { Args: never; Returns: Json }
       verificar_coherencia_tablas_tipadas: {
@@ -24388,8 +24551,16 @@ export type Database = {
           tabla_tipada: string
         }[]
       }
+      verificar_compuerta_plan: {
+        Args: { p_suscripcion_id: string }
+        Returns: Json
+      }
       verificar_compuerta_programa: {
         Args: { p_programa_contratado_id: string }
+        Returns: Json
+      }
+      verificar_compuertas_del_intento: {
+        Args: { p_intento: string }
         Returns: Json
       }
       verificar_compuertas_mensualidad_guarderia: {

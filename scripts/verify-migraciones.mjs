@@ -98,9 +98,21 @@ if (SIN_MOTOR) {
     const soloRemoto = [...remoto.keys()].filter((v) => !porVersion.has(v));
     if (!choques) di(`✅ ② el ledger coincide con el archivo en las ${porVersion.size} versiones locales`);
     if (soloRemoto.length) {
-      /* NO es rojo: es trabajo de otra pista aplicado y todavía sin mergear. */
-      di(`ℹ️  ${soloRemoto.length} versión(es) en el remoto sin archivo local — trabajo`);
-      di(`   de otra pista en vuelo, no un error: ${soloRemoto.join(', ')}`);
+      /* 🔴 NO es rojo —es trabajo de otra pista aplicado y sin mergear, y
+         marcarlo rojo bloquearía toda sesión paralela— **pero decir sólo «hay
+         versiones en el remoto» es media medición.** La consecuencia es dura y
+         es la que cuesta un ciclo si no se dice:
+         **`db push` NO CORRE mientras exista una versión remota sin archivo
+         local.** Rebota con «Remote migration versions not found» y no aplica
+         NADA, ni siquiera lo tuyo que no tiene nada que ver.
+         *Un aviso que nombra el hecho y no su consecuencia deja al que lo lee
+         creyendo que puede seguir.* (S109-A, medido en carne.) */
+      di(`ℹ️  ${soloRemoto.length} versión(es) en el remoto SIN archivo local: ${soloRemoto.join(', ')}`);
+      di('   Es trabajo de otra pista en vuelo, no un error de tu lado —');
+      di('   ⚠️  PERO `db push` NO VA A CORRER hasta que esos archivos lleguen.');
+      di('   Pedile a esa pista que pushee; no renumeres ni repares nada.');
+      di('   (Y si el número que vos ibas a usar está en esa lista, ya está');
+      di('    tomado: corré el tuyo a un hueco libre.)');
     }
   }
 }

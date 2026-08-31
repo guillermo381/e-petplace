@@ -35,6 +35,17 @@ export interface ProgramaConSaldo {
   noPagadoATiempo: boolean;
   vigenciaHasta: string | null;
   primeraSesion: string | null;
+  /**
+   * 🔴 LA VENTANA DE PAGO, TAL CUAL ESTÁ EN LA FILA — sin comparar contra
+   * `now()`. *Quien pinta el reloj decide si ya venció; un veredicto calculado
+   * en el servidor envejece entre la respuesta y el render.*
+   *
+   * `null` cuando el programa ya está pagado (la ventana se suelta al pagar) o
+   * cuando nunca la tuvo. **Sin este campo la pantalla no puede decir cuánto
+   * falta, y lo único peor que no decirlo es inventar un reloj** — pedido de
+   * S109-C, que prefirió no montar la cuenta antes que suponerla.
+   */
+  ventanaDePago: string | null;
 }
 
 export type CodigoErrorPrograma = 'sin_sesion' | 'datos_inconsistentes' | 'fallo';
@@ -75,6 +86,7 @@ export async function obtenerMisProgramas(): Promise<
       noPagadoATiempo: r.no_pagado_a_tiempo === true,
       vigenciaHasta: typeof r.vigencia_hasta === 'string' ? r.vigencia_hasta : null,
       primeraSesion: typeof r.primera_sesion === 'string' ? r.primera_sesion : null,
+      ventanaDePago: typeof r.pago_expira_en === 'string' ? r.pago_expira_en : null,
     });
   }
   return { ok: true, data: salida };
