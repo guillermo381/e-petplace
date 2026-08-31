@@ -27,6 +27,10 @@ import { comprarPaqueteSalidas, PRESETS_PAQUETE, type PresetPaquete } from '@epe
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 import { cobrar } from '@/lib/pagos/cobro';
 import { useEsperaDeConfirmacion } from '@/lib/pagos/espera-confirmacion';
+import { EsperaDeUna } from '@/components/espera-deuna';
+import { topeDeEspera, useEstadoDeUna } from '@/lib/pagos/deuna-estado';
+import { urlWhatsApp } from '@/lib/contacto';
+import { Linking } from 'react-native';
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutPaquetePaseo() {
@@ -54,8 +58,27 @@ export default function CheckoutPaquetePaseo() {
    *  Sin esto, tres tarjetas probadas dejarían tres paquetes fantasma. */
   const [bonoEnVuelo, setBonoEnVuelo] = useState<string | null>(null);
 
+  /* ═══ 🔴 EL RIEL EN CURSO — se congela AL TOCAR, no se lee del selector ═══
+     `medio.elegido` es estado vivo del resumen; **la fase `confirmando` tiene
+     que saber por dónde entró la plata, y eso se decidió en el toque.** *Leer el
+     selector durante la espera dejaría expresable que el cuerpo cambie de riel a
+     mitad de una confirmación — la persona mirando un código de DeUna y la
+     pantalla saltando a la rampa de tarjeta.* Copiado del checkout de la cita,
+     que ya pagó por aprenderlo. */
+  const [riel, setRiel] = useState<'tarjeta' | 'deuna' | null>(null);
+
+  /* 🔴 Activo **sólo en `confirmando` y sólo con riel DeUna**: pedir un código
+     **CREA un intento contra el proveedor**, así que sin este freno abrir el
+     resumen fabricaría una transacción que nadie pidió. */
+  const enDeuna = fase === 'confirmando' && riel === 'deuna' && bonoEnVuelo !== null;
+  const deuna = useEstadoDeUna(enDeuna ? { tipo: 'bono', id: bonoEnVuelo } : null);
+
+  /* La MISMA espera para los dos rieles: lee **el SUJETO**, no al proveedor.
+     Lo único que cambia es cuánto se mira — con DeUna la plata todavía no se
+     movió, así que el tope es margen y no plazo. */
   const espera = useEsperaDeConfirmacion(
     fase === 'confirmando' && bonoEnVuelo !== null ? { tipo: 'bono', id: bonoEnVuelo } : null,
+    topeDeEspera(deuna.estado),
   );
 
   useEffect(() => {
@@ -63,6 +86,7 @@ export default function CheckoutPaquetePaseo() {
     const e = espera.estado;
     if (e === 'pagado') { setExito(preset ?? 0); return; }
     setFase('resumen');
+    setRiel(null);
     setBonoEnVuelo(null);
     /* Cada final con su frase: «no llegaste a pagarlo» y «te devolvimos la
        plata» son dos cosas distintas, y el motor las distingue. */
@@ -82,6 +106,9 @@ export default function CheckoutPaquetePaseo() {
     setEnviando(true);
     setRebote(null);
     if (preset === null) { setEnviando(false); setRebote(t('paquete.presetInvalido')); return; }
+
+    /* El bono nace ANTES de elegir riel: **los dos necesitan el sujeto** — la
+       tarjeta para debitarlo y DeUna para pedirle un código a su nombre. */
     let bonoId = bonoEnVuelo;
     if (bonoId === null) {
       const compra = await comprarPaqueteSalidas({
@@ -93,6 +120,24 @@ export default function CheckoutPaquetePaseo() {
       bonoId = compra.data.bono_id;
       setBonoEnVuelo(bonoId);
     }
+
+    /* ── 🔴 DEUNA NO PASA POR `cobrar()`, y no es un atajo ──────────────────
+       `cobrar()` **debita una tarjeta**: es el riel de Nuvei entero. En DeUna no
+       hay nada que debitar desde acá — *lo que hacemos es pedir seis dígitos
+       para que la persona pague en OTRA app*, y la plata se mueve allá o no se
+       mueve. El toque **sólo cambia de fase**; el código lo pide
+       `useEstadoDeUna` al activarse.
+       ⚠️ Y **no se prende `enviando`**: no hay viaje que esperar en este hilo.
+       *Un botón que gira mientras la pantalla ya cambió promete un trabajo que
+       no existe.* */
+    if (medio.elegido?.tipo === 'deuna') {
+      setEnviando(false);
+      setRiel('deuna');
+      setFase('confirmando');
+      return;
+    }
+
+    setRiel('tarjeta');
     const cobro = await cobrar({ tipo: 'bono', id: bonoId }, medio.idTarjeta);
     setEnviando(false);
     if (!cobro.ok) { mostrar({ texto: t(cobro.voz), variante: 'error' }); return; }
@@ -103,9 +148,40 @@ export default function CheckoutPaquetePaseo() {
     return (
       <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[4], padding: spacing[6] }}>
-          <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
-          <Texto variante="cuerpo">{t('paquete.esperaCuerpo')}</Texto>
-          <EsperaDeTrabajo />
+          {/* ══ LA MISMA FASE, DOS CUERPOS ═══════════════════════════════════
+              *El cliente jamás aprende un circuito distinto por cambiar de
+              medio.* Y la asimetría que SÍ existe se respeta: **en tarjeta la
+              familia ESPERA; en DeUna la familia TRABAJA** — por eso
+              `EsperaDeTrabajo` no se monta ahí: *una rampa que dice «estamos
+              trabajando» mientras la persona teclea afirma algo falso.* */}
+          {riel === 'deuna' ? (
+            <EsperaDeUna
+              estado={deuna.estado}
+              onGenerarNuevo={deuna.regenerar}
+              onSoporte={() => void Linking.openURL(urlWhatsApp(t('cuenta.soporteDesdeCobro')))}
+            />
+          ) : (
+            <>
+              <Texto variante="titulo">{t('pago.esperaTitulo')}</Texto>
+              <Texto variante="cuerpo">{t('paquete.esperaCuerpo')}</Texto>
+              <EsperaDeTrabajo />
+            </>
+          )}
+          {/* 🔴 La vuelta al resumen existe **sólo en DeUna y sólo mientras
+              espera**: ahí se llegó SIN cobrar nada —sólo se pidió un código—,
+              así que volver es seguro. Con tarjeta se llega DESPUÉS de que el
+              débito salió, y ofrecer «cambiar de medio» sería invitar a pagar
+              dos veces. */}
+          {riel === 'deuna' && deuna.estado.fase === 'esperando' ? (
+            <View style={{ gap: spacing[2], alignItems: 'center' }}>
+              <Boton
+                variante="secundario"
+                etiqueta={t('checkout.cambiarMedio')}
+                onPress={() => { setFase('resumen'); setRiel(null); }}
+              />
+              <Texto variante="apoyo">{t('checkout.cambiarMedioNota')}</Texto>
+            </View>
+          ) : null}
           {/* 🔴 El tope habla y **NO declara desenlace**: la compra sigue viva y
               el barrido la resuelve. */}
           {espera.fase === 'sigue_abierta' ? (

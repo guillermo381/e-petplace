@@ -53,6 +53,7 @@ import { contratarPlanPaseo } from '@epetplace/api';
    dejaría pasar una frecuencia que el server rebota.* */
 type Frecuencia = 'semanal' | 'quincenal' | 'mensual';
 
+import { simula } from '@/lib/pagos/simulado';
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutPlanPaseo() {
@@ -147,7 +148,10 @@ export default function CheckoutPlanPaseo() {
           <Boton
             variante="primario"
             bloque
-            etiqueta={t('plan.contratar')}
+            /* El sufijo «(simulado)» **sale del mismo mapa que la banda**: no
+               puede quedar uno sin el otro, que es exactamente lo que me pasó
+               con el programa. */
+            etiqueta={`${t('plan.contratar')}${simula('plan_paseo') ? t('pago.sufijoSimulado') : ''}`}
             onPress={() => void contratar()}
           />
         }
@@ -172,9 +176,10 @@ export default function CheckoutPlanPaseo() {
           <Texto variante="cuerpo">{t('checkoutPlan.sePausaNoSeCancela')}</Texto>
         </View>
 
-        {/* ☠️ Esta banda muere cuando las TRES puertas cobren, no antes: hoy es
-            la verdad de esta pantalla. */}
-        <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto>
+        {/* ⭐ **YA NO SE ESCRIBE A MANO: SE DERIVA.** El día que el plan cobre,
+            `simula('plan_paseo')` pasa a `false` y **esta banda desaparece sola**
+            — junto con el sufijo del botón, desde la misma línea. */}
+        {simula('plan_paseo') ? <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto> : null}
 
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
       </PantallaConPie>

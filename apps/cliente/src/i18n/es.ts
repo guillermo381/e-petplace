@@ -1312,7 +1312,11 @@ export const clienteEs = {
     salidasEstimadas: 'Salidas este mes',
     mesNota: 'Pagas el mes completo. Las salidas que no uses no se descuentan.',
     noOfrecido: 'Este paseador no ofrece plan mensual. Puedes reservar suelto o con paquete.',
-    contratar: 'Contratar plan (simulado)',
+    /* ⭐ S109-C · **La etiqueta queda LIMPIA.** El «(simulado)» ya no vive
+       adentro del texto: lo agrega la pantalla desde `simula()`, la misma
+       fuente que enciende la banda. *Un sufijo escrito a mano dentro de la
+       cadena es el que sobrevive al día en que deja de ser cierto.* */
+    contratar: 'Contratar plan',
     /* ⭐ S109-C · La Hoja ya no contrata: LLEVA al checkout. */
     continuar: 'Continuar',
     exito: 'Plan contratado — {{n}} salidas quedaron agendadas.',
@@ -1964,6 +1968,7 @@ export const clienteEs = {
        accionable — empezar antes. */
     cobroSesionesNoEntran: 'Las sesiones no entran en la vigencia del programa. Prueba con una fecha de inicio más temprana — no se te cobró nada.',
     cobroProgramaNoCobrable: 'Ese programa ya no se puede pagar. Vuelve a contratarlo.',
+    sufijoSimulado: ' (simulado)',
     promesaTarjeta: 'Se cobra solo cada mes.',
     promesaDeuna: 'Cada mes te mandamos un link y lo pagas a mano. Si no lo pagas, el plan no se renueva.',
     deunaFila: 'Deuna',
