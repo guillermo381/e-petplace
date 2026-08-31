@@ -1411,6 +1411,12 @@ export {
 export {
   leerEstadoCompra, leerEstadoCita,
   type EstadoCompra, type EsperaCompra, type EstadoCita, type EsperaCita,
+  /* S108-A · los dos sujetos de guardería, con la MISMA forma {estado, resuelta}
+     que sus dos hermanos: la espera es UNA pieza para los cuatro, no cuatro
+     caminos. */
+  leerEstadoBono, leerEstadoMensualidad,
+  type EsperaBono, type EsperaBonoEstado, type EstadoPagoBono,
+  type EsperaMensualidad, type EstadoMensualidad,
 } from './wrappers/pagos-espera';
 
 // S104-A · tanda 2 — la invitación de familia (puerta única, cero INSERT desde apps).

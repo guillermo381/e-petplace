@@ -1152,6 +1152,13 @@ export interface PaqueteCompradoGuarderia {
   venceEl: string | null;
   /** `activo` · `agotado` · `vencido` · `cancelado`. */
   estado: string;
+  /**
+   * 🔴 S108-A · el crudo de la base: `pendiente` · `pagado` · `reembolsado`.
+   * **NO dice `pendiente_pago`** — ese valor no existe en
+   * `bonos_estado_pago_valido`. La superficie decide qué contar y qué decir;
+   * este lector no esconde.
+   */
+  estadoPago: string;
 }
 
 /**
@@ -1171,9 +1178,17 @@ export async function obtenerMisPaquetesGuarderia(): Promise<
   }
   const { data, error } = await getClient()
     .from('bonos')
-    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento')
+    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento, estado_pago')
     .eq('tipo_servicio', 'guarderia_dia')
-    .eq('estado_pago', 'pagado')
+    /* ☠️ S108-A · CAE EL FILTRO `estado_pago='pagado'`.
+       Desde que el bono nace `pendiente`, este filtro volvía **invisible** todo
+       paquete que la familia intentó comprar y todavía no se cobró. *Un bono
+       que ella cree haber pagado y que no aparece en ninguna pantalla es plata
+       que no podemos ni nombrar* — y su ausencia NO da error: la lista se pinta
+       igual, sólo que sin una fila que debería estar.
+       ⚠️ Y el propio encabezado de esta función ya lo prohibía —«esconderlo
+       haría que su plata desapareciera de la pantalla»—: la letra estaba bien y
+       el filtro la contradecía por una columna que entonces no se movía. */
     .or(puerta.filtro)
     .order('fecha_compra', { ascending: false });
   if (error) return fallo(error.message);
@@ -1195,6 +1210,7 @@ export async function obtenerMisPaquetesGuarderia(): Promise<
       porDia: typeof b.precio_por_unidad === 'number' ? b.precio_por_unidad : null,
       venceEl: typeof b.fecha_vencimiento === 'string' ? b.fecha_vencimiento : null,
       estado: typeof b.estado === 'string' ? b.estado : '',
+      estadoPago: typeof b.estado_pago === 'string' ? b.estado_pago : '',
     });
   }
   return { ok: true, data: salida };
