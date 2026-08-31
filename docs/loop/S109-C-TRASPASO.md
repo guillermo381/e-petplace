@@ -21,7 +21,58 @@
 | **mensualidad de guardería** | ídem, rama `esMensual` | ✅ |
 | **paquete de paseo** | `explorar/paseo/checkout-paquete.tsx` | ✅ (motor listo; edge sin desplegar) |
 | **programa de adiestramiento** | `explorar/adiestramiento/confirmar-programa.tsx` | ✅ |
-| **plan mensual de paseo** | `explorar/paseo/checkout-plan.tsx` | 🟡 **cableado, apagado por interruptor** |
+| **plan mensual de paseo** | `explorar/paseo/checkout-plan.tsx` | ✅ **desde el 31-ago** |
+
+> ## 🟢 EL ARCO CERRÓ: **LOS SIETE SUJETOS EN `false`. NINGÚN COBRO SIMULA.**
+>
+> `apps/cliente/src/lib/pagos/simulado.ts` — el mapa entero apagado. El último
+> fue `plan_paseo`, el 31-ago, **después** de que B desplegara (`pagos-cobro`
+> v33 ACTIVE) y lo ejerciera de punta a punta (`DF-2108362` · $138 · intento
+> `aprobado` · `acto2=true` · el plan quedó `activa · pagado`), y **avisara en el
+> acto** — la secuencia que el founder firmó.
+>
+> ⭐ **Cambió UNA palabra y se movieron cuatro superficies** (banda del checkout,
+> sufijo del CTA, y las dos del hogar). *Ésa es la razón entera por la que el
+> mapa existe en vez de un booleano por pantalla: la alternativa era una
+> cacería, y una cacería siempre deja uno vivo* — a mí ya me había pasado con el
+> CTA del programa, que decía «simulado» dos commits después de cobrar de verdad.
+>
+> **⚠️ EL MAPA NO SE RETIRA AUNQUE ESTÉ TODO EN `false`.** No es letra muerta:
+> es **dónde se declara** que un sujeto nuevo todavía no cobra, y el próximo va a
+> nacer así. *Retirarlo obligaría a reconstruirlo, y el que lo reconstruya va a
+> volver a escribir el booleano en la pantalla.*
+>
+> **⚠️ Dato de B para quien pinte el detalle del plan:** en el PRIMER cobro el
+> comprobante viaja con `subtotal` e `impuesto` en **`NULL`, no en cero** —
+> `suscripcion_desglose` lo escribe el lazo de renovación, así que en el estreno
+> no hay desglose que leer. *Un cero fabricado en un comprobante es una
+> afirmación fiscal que nadie firmó.* **Si la pantalla lo muestra sin impuesto,
+> es esto y no un defecto.** Está en la cola del contador.
+
+> ## 🔴 LO ÚNICO QUE QUEDA ABIERTO EN ESTE FRENTE: DEUNA NO COBRA PLANES
+>
+> **Medido:** `SujetoDeuna` (`packages/api/src/wrappers/pagos-deuna.ts:66-79`)
+> tiene compra · cita · bono · mensualidad · programa — **y no `plan`**.
+>
+> Al morir la condición `!recurrente` del `onPress` de `FilaDeUna`, su fila quedó
+> **tocable en una pantalla que no puede honrarla** (Ley 23 al revés) — *lo
+> destapó mi propia cura, no un gate.* Apagada con **`deunaCobraEsteSujeto`**
+> (default `true`, **para que apagarla cueste una frase**).
+>
+> 🔴 **Y la razón se declara por SUJETO, jamás por categoría:** la mensualidad de
+> guardería también es recurrente y **sí** se paga por DeUna. *«Recurrente»
+> sonaba a explicación y no lo era — ése fue exactamente el defecto de la
+> condición que acabo de enterrar, y por eso la prop nueva no lo repite.*
+>
+> ✅ **El destino del link ya existe:** `cobro_link_mensual` tiene
+> `suscripcion_servicio_id` **y** `guarderia_suscripcion_id` con XOR
+> (`20260906200000:42-56`) — *lo medí antes de suponer que faltaba, y no
+> faltaba.* ⇒ **Cuando `plan` entre a `SujetoDeuna`, acá es borrar una prop.**
+> Reportado a B.
+> ⚠️ **Pero antes de encenderla hay que medir una cosa más:**
+> `apps/cliente/src/app/pagos/mensualidad.tsx` hoy resuelve **sólo guardería**
+> (`obtenerMesPendienteGuarderia`). *Un link de plan de paseo llegaría a una
+> pantalla que no sabe leerlo* — es la misma clase de brecha, un paso más allá.
 
 > ### ⚠️ ENMIENDA DEL 31-AGO — RE-MEDIDO CONTRA `main` = `30bf1eeb`
 >
