@@ -1,3 +1,9 @@
+> # ✅ EJECUTADO — S107 cerrada el 31-ago-2026
+> **Este plan se cumplió.** El estado real, medido contra el objeto, vive en
+> **`docs/loop/S107-A-TRASPASO.md`**; lo que quedó afuera y por qué, también.
+> *Se marca acá, donde se lee: un plan sin marca de ejecución se relee como
+> pendiente.*
+
 # PLAN S107 · GUARDERÍA E2E — cuatro pistas
 
 > **Nace:** 28-ago-2026 (mesa founder + arquitecto, sobre `BRIEF S107`).
