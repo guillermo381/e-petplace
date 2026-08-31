@@ -1544,6 +1544,7 @@ export const clienteEs = {
     // 🔴 «Medio de pago», no «tarjeta»: DeUna entra como otro medio sobre el
     //    mismo contrato, y el nombre de la pantalla es la decisión de
     //    arquitectura.
+    recurrentes: 'Pagos recurrentes y suscripciones',
     medios: 'Medios de pago',
     mediosSub: 'Con qué pagas en e-PetPlace',
     mediosVacioTitulo: 'Todavía no guardas ninguno',
@@ -3210,5 +3211,51 @@ export const clienteEs = {
     listaPendienteDetalle: 'Estamos terminando esta parte. Mientras tanto puedes reservar desde el botón de abajo.',
     noCargoTitulo: 'No pudimos cargar tus mascotas',
     noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
+  },
+  /* ═══ ⭐ S108-C · T5 · PAGOS RECURRENTES Y SUSCRIPCIONES ═══════════════════
+     **La casa de todo lo que se cobra solo.** Nace porque `cancelar_mensualidad_
+     guarderia` existía desde S107 grantada a `authenticated`, sin wrapper ni
+     pantalla, mientras el diccionario ya prometía «…hasta que lo canceles desde
+     Cuenta». *La app mandaba a la familia a un lugar donde no estaba lo que
+     prometía.*
+
+     🔴 **Y la sección tiene que decir lo que NO puede listar.** El censo halló
+     TRES sujetos recurrentes vivos y sólo dos tienen lector: las compras que se
+     repiten de la despensa **no tienen ningún lector en `packages/api`**. *Una
+     sección que promete «todo lo que te cobra solo» y muestra dos de tres
+     miente por omisión, y su modo de falla es el peor: se lee como completa.* */
+  recurrentes: {
+    titulo: 'Pagos recurrentes y suscripciones',
+    intro: 'Todo lo que se te cobra solo, en un lugar.',
+    /* El vacío HABLA con calma: no es un error ni una carencia. */
+    vacioTitulo: 'No tienes nada que se cobre solo',
+    vacioDetalle: 'Cuando contrates un plan o una compra que se repita, va a aparecer acá.',
+    noCargoTitulo: 'No pudimos cargar tus pagos recurrentes',
+    noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
+    guarderiaPlan: 'Plan mensual de guardería',
+    paseoPlan: 'Plan mensual de paseos',
+    alMes: '${{precio}} al mes',
+    proximoCobro: 'Próximo cobro: {{fecha}}',
+    proximoCobroSinFecha: 'Todavía no hay una fecha de próximo cobro.',
+    /* 🔴 Lo que se lee DESPUÉS de apagar, y es la línea que evita el daño: el
+       interruptor detiene la RENOVACIÓN, jamás el servicio ya pagado. */
+    apagadoHasta: 'No se vuelve a cobrar. Sigue cubierto hasta el {{fecha}}.',
+    apagadoSinFecha: 'No se vuelve a cobrar.',
+    apagadoConserva: 'Conservas {{n}} días ya agendados.',
+    /* El modal confirma para que no se apague sin querer. **Sin culpa, sin
+       oferta de retención, sin letra chica** — firma del founder. */
+    confirmarTitulo: '¿Apagar {{que}}?',
+    confirmarCuerpo: 'Dejamos de cobrarlo. Lo que ya pagaste sigue en pie hasta que termine el período.',
+    confirmarReversible: 'Puedes volver a encenderlo cuando quieras.',
+    /* 🔴 Y cuando NO se puede volver, se dice ANTES. Medido: no existe ninguna
+       función que devuelva una mensualidad de guardería a `activa`. */
+    confirmarSinVuelta: 'Para volver a tenerlo vas a tener que contratarlo de nuevo.',
+    confirmar: 'Sí, apagar',
+    volver: 'Dejarlo como está',
+    noPudimosApagar: 'No pudimos apagarlo. Prueba de nuevo.',
+    noPudimosEncender: 'No pudimos encenderlo. Prueba de nuevo.',
+    /* La ausencia declarada del tercer sujeto. */
+    despensaTitulo: 'Tus compras que se repiten',
+    despensaDetalle: 'Todavía no podemos mostrarlas acá. Por ahora las manejas desde la despensa, en la compra donde las activaste.',
   },
 } as const;

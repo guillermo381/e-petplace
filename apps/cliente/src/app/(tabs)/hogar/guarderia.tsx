@@ -321,21 +321,33 @@ export default function LogGuarderia() {
                 **sin sujeto**, y tendría que preguntar la mascota de nuevo en
                 una Hoja propia. **Se declaró a la mesa y así quedó.** */}
             {/* ── EL PLAN MENSUAL CONTRATADO ─────────────────────────────
-                🔴 **Informa, NO navega**: no hay pantalla de plan y un chevron
-                prometería una que no existe (Ley 19.7). *Una fila que se hunde
-                sin llevar a ningún lado es una promesa rota.*
+                ⏪ **Decía: «Informa, NO navega: no hay pantalla de plan y un
+                chevron prometería una que no existe (Ley 19.7)».** La condición
+                que ese comentario ponía **se cumplió**: S108-C construyó
+                `/cuenta/recurrentes`, y con ella el chevron deja de prometer
+                nada. *Una fila que se hunde sin llevar a ningún lado es una
+                promesa rota — pero una que no se hunde teniendo a dónde ir es
+                una puerta escondida*, y ésta es la puerta por la que la familia
+                corta un cobro que se repite.
+
+                🔴 Y la cancelación vive en UN SOLO LUGAR, no acá: *un
+                interruptor de plata repartido por las pantallas donde cada cosa
+                se contrató es un interruptor que no se encuentra el día que se
+                necesita.* Esta fila LLEVA; no decide.
+
                 Va ARRIBA del paquete porque es el compromiso que se cobra solo
                 todos los meses: lo que se renueva sin que nadie lo toque tiene
                 que verse antes que lo que se gasta a pulso. ── */}
             {planes.map((pl) => (
-              <Tarjeta key={pl.suscripcionId}>
-                <View style={{ gap: spacing[1] }}>
-                  <Texto variante="seccion">{t('logGuarderia.planTitulo')}</Texto>
-                  <Texto variante="cuerpo">{pl.prestadorNombre}</Texto>
-                  <Texto variante="apoyo">
-                    {t('logGuarderia.planDetalle', { precio: pl.precioMensual.toFixed(2) })}
-                  </Texto>
-                </View>
+              <Tarjeta key={pl.suscripcionId} relleno="ninguno">
+                <CeldaNavegacion
+                  icono="mes"
+                  titulo={t('logGuarderia.planTitulo')}
+                  /* `CeldaNavegacion` no tiene subtítulo: el lugar y el precio
+                     van juntos en el detalle, que es voz de la pantalla. */
+                  detalle={`${pl.prestadorNombre} · ${t('logGuarderia.planDetalle', { precio: pl.precioMensual.toFixed(2) })}`}
+                  onPress={() => router.push('/cuenta/recurrentes')}
+                />
               </Tarjeta>
             ))}
 
