@@ -337,8 +337,52 @@ if (AUTOPRUEBA) {
   process.exit(0)
 }
 
+/**
+ * 🔴 S107 · EL PARSEO VA ANTES QUE CUALQUIER CLASIFICACION.
+ * Firma del founder (30-ago), con su razon:
+ *
+ *   > **Un archivo que no parsea no tiene errores de clase: no tiene nada.**
+ *   > El parseo no es una clase mas, es la PRECONDICION de poder clasificar.
+ *
+ * ⏪ MEDIDO EL 30-ago: `pagos-tarjetas/index.ts` quedo con un cierre duplicado
+ * -- no parseaba-- y **este gate dijo `OK`**. Lo cazo el deploy, y el deploy no
+ * siempre esta.
+ *
+ * La causa era del instrumento: `errores()` matchea `TS####`, y un error de
+ * parseo de deno **no trae codigo TS**, asi que la lista salia vacia y el gate
+ * leia «cero defectos de clase» como verde.
+ *
+ * ⇒ Hermana de `L-431`: **un gate que filtra por clase da verde sobre todo lo
+ * que esta fuera de su clase -- incluido lo que impide que el archivo exista.**
+ */
+function parseoRoto(salida) {
+  const limpio = salida.replace(/\[[0-9;]*m/g, '')
+  const marcas = [
+    /The module's source code could not be parsed/,
+    /Expression expected/,
+    /Unexpected (?:token|eof)/i,
+    /^error: Parsing error/m,
+  ]
+  if (!marcas.some((m) => m.test(limpio))) return []
+  const out = []
+  const re = /functions\/([^/]+)\/[^:]*:(\d+):(\d+)/g
+  for (const m of limpio.matchAll(re)) out.push({ fn: m[1], linea: m[2] })
+  return out.length ? out : [{ fn: '(sin ubicar)', linea: '?' }]
+}
+
 // ── EL GATE ─────────────────────────────────────────────────────────────
 const r = chequear(null)
+
+/* 🔴 PRIMERO EL PARSEO, y su rojo NO se puede ablandar por clase. */
+const rotos = parseoRoto(r.salida)
+if (rotos.length) {
+  console.error('\nROJO · HAY ARCHIVO(S) QUE NO PARSEAN — el gate no puede clasificar lo que no existe:')
+  for (const x of rotos) console.error(`    - ${x.fn}:${x.linea}`)
+  console.error('\n  Un archivo que no parsea no tiene errores de clase: no tiene nada.')
+  console.error('  Se arregla la sintaxis y se vuelve a correr.\n')
+  process.exit(1)
+}
+
 const todos = errores(r.salida)
 const deLaClase = todos.filter((e) => CLASE.has(e.codigo))
 const fuera = todos.filter((e) => !CLASE.has(e.codigo))

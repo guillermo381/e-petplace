@@ -370,7 +370,16 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
           {/* El desempate se calcula UNA vez para toda la lista: la fila no
               puede saber que tiene una gemela. */}
           {(() => {
-            const desempates = desempatarMedios(medios);
+            /* 🔴 S107 · LA CLAVE AHORA SE DECLARA, y acá es `id` A PROPÓSITO:
+               **esta pantalla sigue leyendo NUESTRA tabla**, donde el `id`
+               existe siempre y es con lo que se elige el medio (`medio.elegir`
+               abajo). *La lista de Cuenta usa `token` porque su fuente es
+               `card/list`; que las dos digan cuál usan es lo que hace visible
+               que son fuentes distintas.*
+               ⚠️ Cambiar ESTA pantalla a la fuente verificada es un paso
+               propio y con decisión de mesa pendiente: usa `m.tipo`, que
+               `TarjetaVerificada` no tiene. */
+            const desempates = desempatarMedios(medios, (m) => m.id);
             return medios.map((m) => (
               <FilaMedioDePago
                 key={m.id}

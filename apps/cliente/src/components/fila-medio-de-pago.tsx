@@ -25,7 +25,6 @@
 
 import { View } from 'react-native';
 import { Celda, Chevron, Texto, spacing } from '@epetplace/ui';
-import type { TarjetaGuardada } from '@epetplace/api';
 import { LogoFranquicia } from '@/components/logo-franquicia';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
@@ -45,19 +44,42 @@ export function nombreDeMarca(marca: string | null): string {
 }
 
 /**
+ * 🔴 S107 · **LA FILA DEJÓ DE PEDIR UN TIPO Y PASA A PEDIR UNA FORMA.**
+ *
+ * ⏪ Antes exigía `TarjetaGuardada` — **la fila local**. Con `D-922` la lista de
+ * Cuenta pasó a leer `TarjetaVerificada` (`card/list` como fuente), y ésa
+ * **no es la misma fila**: su `id` puede ser `null` y trae `token`.
+ *
+ * 🔑 **Se pide lo que la fila DIBUJA, y nada más.** *Las dos formas satisfacen
+ * esto sin castear y sin ensanchar ninguno de los dos tipos* — que era la otra
+ * salida, y la mala: un tipo unión con campos opcionales dejaría a cada pantalla
+ * creyendo que tiene datos que su fuente nunca le dio.
+ *
+ * ⚠️ **`expira*` es `number | null` en las dos, y `null` significa «no lo
+ * sabemos», no «no vence».** Lo consume `vencida()`, que respeta la diferencia.
+ */
+export type MedioDibujable = {
+  marca: string | null;
+  ultimos4: string | null;
+  alias: string | null;
+  expiraMes: number | null;
+  expiraAnio: number | null;
+};
+
+/**
  * ¿Ya venció? **Solo se puede responder si tenemos el dato.**
  * `null` significa *no lo sabemos*, y quien lo consume tiene que distinguirlo
  * de `false`. *Tratar «no sé» como «está bien» es cómo una tarjeta vencida se
  * cobra sin avisar.*
  */
-export function vencida(t: TarjetaGuardada, ahora = new Date()): boolean | null {
+export function vencida(t: MedioDibujable, ahora = new Date()): boolean | null {
   if (t.expiraMes === null || t.expiraAnio === null) return null;
   const finDeMes = new Date(t.expiraAnio, t.expiraMes, 1); // día 1 del mes siguiente
   return finDeMes.getTime() <= ahora.getTime();
 }
 
 export type FilaMedioDePagoProps = {
-  tarjeta: TarjetaGuardada;
+  tarjeta: MedioDibujable;
   /**
    * 🔴 S101-C · LA ZONA DERECHA DICE QUÉ HACE LA FILA, y por eso es una unión
    *    y no un boolean:
@@ -108,18 +130,46 @@ export type FilaMedioDePagoProps = {
  * las filas para cubrir un borde ensucia el caso normal —que es el 99 %— con
  * un dato que a nadie le importa cuando no hay ambigüedad.* **La regla de oro
  * de N1–N10 rige: quitá antes que agregar.**
+ *
+ * ⚠️ `creadaEn` es **`string | null`**: la tarjeta que sólo vive en el proveedor
+ * no tiene fecha nuestra. *Sin fecha no hay desempate, y es lo correcto — no
+ * inventamos cuándo la agregó acá alguien que nunca la agregó acá.*
  */
-export function desempatarMedios(medios: TarjetaGuardada[]): Map<string, string | null> {
+type MedioDesempatable = {
+  marca: string | null;
+  ultimos4: string | null;
+  alias: string | null;
+  creadaEn: string | null;
+};
+
+export function desempatarMedios<T extends MedioDesempatable>(
+  medios: T[],
+  /**
+   * 🔴 S107 · **LA CLAVE LA PONE QUIEN LLAMA, y no es ceremonia.**
+   *
+   * Las dos pantallas identifican por cosas distintas: **el checkout por `id`**
+   * (su fuente es nuestra tabla y siempre lo tiene) y **la lista de Cuenta por
+   * `token`** (su fuente es `card/list`, donde el `id` puede ser `null`).
+   *
+   * ⚠️ *Con `id` fijo acá, dos tarjetas huérfanas colisionarían en la clave
+   * `null` y el desempate le daría a una la fecha de la otra* — **justo en la
+   * pantalla donde se borra, que es donde equivocarse cuesta.**
+   *
+   * Y por eso **no tiene default**: un default habría dejado el error posible y
+   * silencioso. Así, el compilador obliga a decidirlo en cada llamada.
+   */
+  clave: (m: T) => string,
+): Map<string, string | null> {
   /* La huella es lo que la fila DIBUJA — no la tarjeta real. *Dos tarjetas
      distintas que se dibujan igual también colisionan, y son el mismo problema
      para quien mira.* */
-  const huella = (t: TarjetaGuardada) => `${t.alias ?? ''}|${t.marca ?? ''}|${t.ultimos4 ?? ''}`;
+  const huella = (t: T) => `${t.alias ?? ''}|${t.marca ?? ''}|${t.ultimos4 ?? ''}`;
   const cuenta = new Map<string, number>();
   for (const t of medios) cuenta.set(huella(t), (cuenta.get(huella(t)) ?? 0) + 1);
 
   const salida = new Map<string, string | null>();
   for (const t of medios) {
-    salida.set(t.id, (cuenta.get(huella(t)) ?? 0) > 1 ? t.creadaEn : null);
+    salida.set(clave(t), (cuenta.get(huella(t)) ?? 0) > 1 ? t.creadaEn : null);
   }
   return salida;
 }

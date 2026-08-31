@@ -62,12 +62,36 @@ export type EstadoProveedor =
  * compilador si el tipo se ensancha «para que entren los dos».
  */
 export type TarjetaVerificada = {
-  id: string;
+  /**
+   * 🔴 **PUEDE SER `null`** desde S107 (`D-922`): con `card/list` como fuente,
+   * una tarjeta que vive en el proveedor y no en nuestra tabla **no tiene fila
+   * nuestra**. *Quien la use para identificar rompe con la única tarjeta que la
+   * cura vino a rescatar* — se identifica por `token`.
+   */
+  id: string | null;
+  /** La identidad real: existe en los dos lados. */
   token: string;
   marca: string | null;
   bin: string | null;
   ultimos4: string | null;
   alias: string | null;
+  /**
+   * 🔴 S107 · **VIENE DEL PROVEEDOR, no de nuestra fila** — `card/list` los
+   * manda (medido: `CONTRATO_CARD_LIST_NUVEI` §1), y por eso una tarjeta que
+   * sólo vive en Nuvei **también los tiene**.
+   *
+   * ⚠️ Nacieron acá para que cambiar la fuente **no perdiera** la voz de
+   * vencimiento que la lista ya mostraba. *Un cambio de fuente que apaga en
+   * silencio una línea que la familia venía leyendo es una regresión sin
+   * síntoma: nadie extraña lo que dejó de aparecer.*
+   */
+  expiraMes: number | null;
+  expiraAnio: number | null;
+  /**
+   * Cuándo la agregó **acá**. 🔴 **`null` en la que sólo vive en el proveedor**,
+   * y es la verdad: nunca la vimos nacer. Sólo lo usa el desempate de la lista.
+   */
+  creadaEn: string | null;
   estadoProveedor: EstadoProveedor;
 };
 
@@ -142,18 +166,31 @@ export async function listarTarjetasVerificadas(): Promise<
 
   const tarjetas: TarjetaVerificada[] = [];
   for (const t of data.tarjetas as unknown[]) {
-    if (!esObj(t) || typeof t.id !== 'string' || typeof t.token !== 'string') continue;
+    /* 🔴 S107 · D-922 — EL `id` DEJA DE SER OBLIGATORIO Y EL `token` PASA A
+       SERLO. Antes se exigían los dos y **una tarjeta sin fila local se caía
+       en silencio en este `continue`** — justo la que la inversión de la fuente
+       existe para mostrar. *El token es lo único que existe en los dos lados.* */
+    if (!esObj(t) || typeof t.token !== 'string' || !t.token) continue;
     /* 🔴 El estado se valida contra el vocabulario: cualquier cosa que no sea
        `valid` cae en `null`, que es «no sabemos». *Castearlo dejaría entrar un
        estado nuevo del proveedor como si fuera bueno.* */
     const est = t.estado_proveedor;
     tarjetas.push({
-      id: t.id,
+      /* `null` cuando sólo vive en el proveedor. **Se dice, no se inventa.** */
+      id: typeof t.id === 'string' ? t.id : null,
       token: t.token,
       marca: typeof t.marca === 'string' ? t.marca : null,
       bin: typeof t.bin === 'string' ? t.bin : null,
       ultimos4: typeof t.ultimos4 === 'string' ? t.ultimos4 : null,
       alias: typeof t.alias === 'string' ? t.alias : null,
+      /* 🔴 SE EXIGE ENTERO, y no se convierte lo que no lo sea. La edge ya
+         normaliza (el proveedor manda texto), pero **este es el borde del
+         teléfono**: si algún día llegara `"3"`, aceptarlo acá dejaría un string
+         en un campo `number` y el fallo aparecería lejos, en la aritmética de
+         fechas. *No se saca `NaN` a la superficie: se saca `null`.* */
+      expiraMes: Number.isInteger(t.expira_mes) ? (t.expira_mes as number) : null,
+      expiraAnio: Number.isInteger(t.expira_anio) ? (t.expira_anio as number) : null,
+      creadaEn: typeof t.creada_en === 'string' ? t.creada_en : null,
       estadoProveedor: est === 'valid' ? 'valid' : null,
     });
   }
