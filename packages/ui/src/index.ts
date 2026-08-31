@@ -718,10 +718,29 @@ export {
 
 export { FichaFranja, type FichaFranjaProps, type VentanaDeFranja } from './components/FichaFranja'
 
-export {
-  FichaMensualidad,
-  type FichaMensualidadProps,
-} from './components/FichaMensualidad'
+/* ☠️ `FichaMensualidad` MURIÓ (S107-B, tanda 5) — nació y murió en la misma
+   sesión, y se deja lápida porque **una pieza viva que nada señala es la trampa
+   `D-645`**, ya pagada dos veces acá.
+
+   **La mató una MEDICIÓN de C, y su razón es mejor que la que yo le había
+   escrito:** puesta al lado del día y de los paquetes, su precio **se veía más
+   grande** (usaba `PrecioText registro="ficha"`; sus hermanas, `"linea"`). Eran
+   *dos piezas con dos jerarquías, comparándose en la misma pantalla* — y **tres
+   precios que se comparan tienen que pesar igual: el que se ve más grande se
+   lee como el importante, y acá ninguno lo es.**
+
+   ⚠️ **Y hay un segundo hallazgo, que es sobre mí:** su prop `dias` («Lun–Vie»)
+   **NUNCA TUVO PRODUCTOR.** Medido: `dias_semana` existe sólo para las FRANJAS
+   (recogida/devolución) y el taller captura del mensual **sólo un precio**. La
+   inventé del ejemplo de la orden y el motor nunca la modeló. *Una prop que
+   ningún dato podía llenar.*
+
+   ⇒ La reemplaza `FichaDeOferta`, que sirve a las tres ofertas con una sola
+   jerarquía. **NO se le agregó un `detalle` para el patrón de días**: hoy nadie
+   lo produce ni lo consume, y construirlo sería repetir el error de `dias`.
+   **Disparo, si algún día hace falta:** el perfil del lugar mostrando la oferta
+   mensual con su cobertura — ahí nace `detalle?` en `FichaDeOferta` **y su
+   campo en el motor**, en ese orden. */
 
 export {
   SemaforoSanitario,
@@ -761,3 +780,21 @@ export {
   type AceptacionDeDocumentosProps,
   type DocumentoAceptable,
 } from './components/AceptacionDeDocumentos'
+
+export {
+  FichaDeOferta,
+  equivalenciaDePaquete,
+  type FichaDeOfertaProps,
+  type EquivalenciaPaquete,
+  type DireccionEquivalencia,
+} from './components/FichaDeOferta'
+/* ⏪ ACÁ VIVÍA UN ALIAS `FichaPaquete → FichaDeOferta`, y se retiró en el mismo
+   commit que lo creó. **El typecheck probó que no servía:** un alias conserva
+   el NOMBRE, no las PROPS — y en el rename cambiaron cinco (`rotuloTamano`,
+   `precioPaquete`, `onElegir`, `elegido`, y `clave` que se fue). El consumidor
+   de C rompía igual, así que el alias sólo agregaba una pieza muerta y la
+   obligación de un trinquete para matarla.
+   ⇒ Se migró el consumidor y el nombre viejo no existe. *Un alias que no evita
+   la migración no es compatibilidad: es deuda con buena intención.* */
+
+export { SeccionPlegable, type SeccionPlegableProps } from './components/SeccionPlegable'

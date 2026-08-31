@@ -1840,6 +1840,7 @@ export default function Hogar() {
         const re = resumenServicios.estetica;
         const ra = resumenServicios.adiestramiento;
         const rv = resumenServicios.veterinaria;
+        const rg = resumenServicios.guarderia;
 
         const datoPaseo =
           rp.proxima !== null
@@ -1852,7 +1853,7 @@ export default function Hogar() {
 
         type Cuadrado = {
           key: string;
-          icono: 'paseo' | 'grooming' | 'training' | 'veterinaria';
+          icono: 'paseo' | 'grooming' | 'training' | 'veterinaria' | 'guarderia';
           nombre: string;
           dato: string | null;
           actividad: boolean;
@@ -1928,6 +1929,31 @@ export default function Hogar() {
             // alcanzaban por ficha. Ahora va al LOG, que las trae todas
             // y filtra por mascota.
             onPress: () => router.push('/hogar/veterinaria'),
+          },
+          {
+            /* ⭐ S107-C · LA QUINTA — **A publicó su rama del resumen y no
+               tenía consumidor.** Medido con sesión real el 29-ago: el rail
+               pintaba CUATRO y guardería no estaba, así que una familia que ya
+               la usó **la buscaba donde viven sus hermanas y no la
+               encontraba**. *Es «motor sin puerta» del lado de la superficie:
+               el dato llegaba y nadie lo leía.* */
+            key: 'guarderia',
+            icono: 'guarderia',
+            nombre: t('hogar.railGuarderia'),
+            /* 🔴 `en_curso` NO tiene forma de fecha, y por eso no va en `dato`:
+               *un día que ya empezó no se anuncia como «próximo»*. Su lugar es
+               la ACTIVIDAD, que es lo que enciende la celda. */
+            dato:
+              rg.proxima !== null
+                ? fechaCortaMono(rg.proxima.fecha, idioma)
+                : esReciente(rg.ultima_cerrada) && rg.ultima_cerrada !== null
+                  ? fechaCortaMono(rg.ultima_cerrada, idioma)
+                  : null,
+            actividad: rg.proxima !== null || rg.en_curso || esReciente(rg.ultima_cerrada),
+            fechaProxima: rg.proxima?.fecha ?? null,
+            /* En movimiento AHORA cuenta como hoy: es lo más vivo del rail. */
+            recencia: rg.en_curso ? hoyIso : rg.ultima_cerrada,
+            onPress: () => router.push('/hogar/guarderia'),
           },
         ];
 

@@ -56,23 +56,6 @@ function TituloBloque({ texto }: { texto: string }) {
   );
 }
 
-/**
- * ⚠️ **MITAD INERTE (molde S91) — el flag de guardería todavía no existe.**
- *
- * Guardería sigue en «próximamente», y **hoy eso es cierto**: sin oferta no
- * hay guarderías que reservar. Lo que esta constante arregla ES OTRA COSA —
- * que su visibilidad colgara del flag de `hotel` (ver abajo).
- *
- * 🔴 **NO se reemplaza por `servicios.hotel`.** Cuando A publique el flag
- * propio, esto pasa a `servicios.guarderia` **y se enciende la ficha activa**
- * — pedido autocontenido en `docs/loop/S107-C-PEDIDO-A-A-FLAG-GUARDERIA.md`.
- *
- * ⚠️ Y el flag es **la mitad de la llave**: la otra es `guarderia-oferta`.
- * Sin oferta, encender la ficha llevaría a una lista vacía — *una puerta que
- * abre a un cuarto sin nada adentro es peor que la puerta cerrada.*
- */
-const GUARDERIA_ABIERTA = false;
-
 export default function Explorar() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -103,13 +86,20 @@ export default function Explorar() {
     // informativo (cero CTA muerta — la card gana el tap con su flujo).
     onPress?: () => void;
   }> = [];
-  const proximamente: Array<{ nombre: string; icono: 'hotel' | 'guarderia' | 'seguros' | 'telemedicina' | 'prime' }> = [];
+  /* La unión es CERRADA a propósito: un slot libre dejaría entrar cualquier
+     glifo, y acá el ícono es lo único que distingue una promesa de otra.
+     🔴 `guarderia` y `telemedicina` salieron: la primera subió a implementados
+     y la segunda ya lo estaba. */
+  const proximamente: Array<{
+    nombre: string;
+    icono: 'hotel' | 'seguros' | 'wearables' | 'certificaciones' | 'prime';
+  }> = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
-    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} />, onPress: () => router.navigate('/hogar/paseos') });
+    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={26} />, onPress: () => router.navigate('/hogar/paseos') });
     // S60-A1: el grooming dejó el coming-soon; S60-A4: la card aterriza
     // en SU hub (doble-click, mismo patrón que el paseo) — el Agendar
     // del hub lleva al CUÁNDO.
-    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={34} />, onPress: () => router.navigate('/hogar/grooming') });
+    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={26} />, onPress: () => router.navigate('/hogar/grooming') });
     // S68-A2 (V2): la card vet despierta — va al CUÁNDO directo (el hub
     // del oficio queda declarado como resto de la tanda del Durante; la
     // cita pagada ya tiene superficie: /citas/[mascotaId] D-430 + Hogar).
@@ -117,9 +107,29 @@ export default function Explorar() {
     // SU LOG como los otros tres oficios — era la ÚNICA de las cuatro
     // que caía directo en la reserva, y por eso el log de r9 nacía sin
     // entrada (el founder cayó en reserva al tocar Veterinaria).
-    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} />, onPress: () => router.navigate('/hogar/veterinaria') });
+    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={26} />, onPress: () => router.navigate('/hogar/veterinaria') });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <Icono nombre="training" tamano={26} />, onPress: () => router.navigate('/hogar/adiestramiento') });
+    /* ⭐ S107-C · «PRÓXIMAMENTE» — firma del founder: hotel · seguros ·
+       wearables · certificaciones · Prime.
+       **Salen dos, por razones opuestas:** telemedicina porque **YA está
+       implementada** (vive dentro de veterinaria) — *anunciar como futuro algo
+       que ya se usa hace dudar de toda la lista* — y guardería porque **subió
+       a los implementados**.
+       ⚠️ **Wearables y certificaciones NO están todavía: les falta su glifo**,
+       y los glifos viven en `packages/ui` (censo: `IconoNombre` es el registry
+       tipado; las apps sólo consumen por nombre) ⇒ **es pedido a B**, no
+       territorio de esta pista. Ver `docs/loop/S107-C-PEDIDO-A-B-GLIFOS.md`.
+       *No se listan con un glifo prestado: dos servicios con el ícono de un
+       tercero se leen como ese tercero.* */
     if (!servicios.hotel) proximamente.push({ nombre: t('explorar.proxHotel'), icono: 'hotel' });
+    if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
+    /* ⭐ S107-C · LOS DOS NUEVOS, con los glifos que B publicó.
+       **No tienen bandera en `country_config`**: no son servicios que un país
+       encienda todavía, son hoja de ruta. *Inventarles un flag apagado sería
+       fingir un interruptor que nadie puede tocar.* Cuando existan, entran por
+       su bandera como sus hermanos. */
+    proximamente.push({ nombre: t('explorar.proxWearables'), icono: 'wearables' });
+    proximamente.push({ nombre: t('explorar.proxCertificaciones'), icono: 'certificaciones' });
     /* ⭐ S107-C · GUARDERÍA DESACOPLADA DEL FLAG DE HOTEL — y no es prolijidad.
        Hasta hoy las dos colgaban del MISMO `if (!servicios.hotel)`, así que
        🔴 **el día que hotel abriera, guardería no pasaba a activa: DESAPARECÍA**
@@ -128,10 +138,18 @@ export default function Explorar() {
        §5: *«la noche NO es guardería: es hotel, y es otro servicio con su propia
        letra»*), así que compartir bandera contradice una firma.
        Ver `GUARDERIA_ABIERTA` y su pedido a A. */
-    if (!GUARDERIA_ABIERTA) proximamente.push({ nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
-    if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
-    if (!servicios.telemedicine) proximamente.push({ nombre: t('explorar.proxTelemedicina'), icono: 'telemedicina' });
+    /* ⭐ S107-C · GUARDERÍA ENCENDIDA POR SU FLAG PROPIO. La constante inerte
+       murió en el mismo acto (Ley 37): `servicios.guarderia` existe desde
+       S107-A, y hoy viene en `false` — la ficha aparece el día que la mesa lo
+       encienda, con oferta viva. */
+    if (servicios.guarderia) fichasActivas.push({ clave: 'guarderia', titulo: t('explorar.servicioGuarderia'), detalle: t('explorar.servicioGuarderiaDetalle'), icono: <Icono nombre="guarderia" tamano={26} />, onPress: () => router.navigate('/hogar/guarderia') });
     if (!servicios.prime) proximamente.push({ nombre: t('explorar.proxPrime'), icono: 'prime' });
+    /* 🔴 Guardería NO cae a «Próximamente»: su camino está CONSTRUIDO y
+       espera sólo el flag. Con el flag en `false` no aparece en ningún lado, y
+       eso es correcto — anunciarla en próximamente diría que falta construirla
+       cuando lo que falta es una guardería con oferta publicada. */
+    /* ☠️ Telemedicina salió de «Próximamente»: **ya está implementada** y se
+       agenda desde veterinaria. */
   }
 
   return (
@@ -161,32 +179,92 @@ export default function Explorar() {
                 {/* QW2 (S53, decisión founder): grilla de 2 columnas,
                     cards cuadradas con el Icono b′ PRESIDIENDO. */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+                  {/* ═══════════════════════════════════════════════════════════
+                      🔴 ESTE BLOQUE TIENE UNA COPIA VIVA, Y SI LO TOCÁS SIN
+                      TOCARLA, UN INSTRUMENTO EMPIEZA A MENTIR.
+
+                      La galería lo reproduce **transcrito a mano** para poder
+                      comparar las tres baldosas de la casa (`D-973`):
+                      `packages/ui/src/gallery/TokenGallery.tsx`, sección
+                      *«D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL»*.
+
+                      **No se importa porque no hay qué importar:** esta baldosa
+                      no es un componente — vive INLINE acá adentro. *Y ése es
+                      exactamente el hecho que `D-973` pone sobre la mesa.*
+
+                      ⚠️ **La advertencia estaba escrita allá y no acá**, que es
+                      el lado que rompe: la copia avisa «quien toque aquella,
+                      mira ésta» **y aquella no se enteraba**. *Una nota que sólo
+                      vive en la copia protege a la copia de nadie.*
+                      ═══════════════════════════════════════════════════════════ */}
                   {fichasActivas.map((f) => {
                     const contenido = (
                       <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
                         <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
                         <View style={{ gap: 2 }}>
-                          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                          {/* ⭐ S107-C · el label baja de `base` a `sm` y se
+                              acota a dos líneas: con la baldosa a 31 % el
+                              texto se salía de su espacio. *El tamaño del
+                              texto vive acá, en el consumidor — se midió antes
+                              de pedírselo a B.* */}
+                          <Text
+                            numberOfLines={2}
+                            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}
+                          >
                             {f.titulo}
                           </Text>
-                          <Text
-                            numberOfLines={3}
-                            style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.45, color: theme.text.secondary }}
-                          >
-                            {f.detalle}
-                          </Text>
-                          {f.onPress ? (
-                            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.xs, color: theme.text.primary, marginTop: 2 }}>
-                              {t('explorar.paseoAgendable')}
-                            </Text>
-                          ) : null}
+                          {/* ☠️ S107-C · LA DESCRIPCIÓN DEL PRODUCTO Y EL
+                              «Toca para entrar» SALIERON (firma del founder).
+                              La causa del desborde acá no era el tamaño del
+                              texto: **era cuánta información cargaba la
+                              baldosa**. Con tres columnas entraban glifo +
+                              nombre + descripción + una llamada a la acción en
+                              ~100 pt de ancho.
+                              🔴 **El chevron reemplaza al texto porque dice lo
+                              mismo ocupando una fila de nada** — y *«toca para
+                              entrar» le explica a alguien que ya sabe tocar
+                              una tarjeta*. */}
+                          {/* ☠️ S107-C · EL CHEVRON SE RETIRÓ (firma del
+                              founder, con su razón medida): **quedaba en un
+                              lugar distinto en cada baldosa** porque el label
+                              ocupa distinta cantidad de líneas — «Adiestramiento»
+                              lo empujaba abajo y «Paseo» lo dejaba arriba.
+                              🔴 **Y no se pierde nada: que la tarjeta es
+                              tocable ya lo dice ser una tarjeta.** *Un
+                              indicador que se mueve solo llama la atención
+                              sobre sí mismo en vez de sobre lo que señala.*
+                              ⚠️ La etiqueta accesible **se queda**: sin texto
+                              ni chevron, es lo único que dice a dónde entra. */}
                         </View>
                       </View>
                     );
+                    /* ⭐ S107-C · TRES COLUMNAS, igual que la grilla de
+                       Negocio: con cinco servicios activos, dos columnas dejan
+                       la última fila con una ficha del doble de ancho — y una
+                       ficha más grande se lee como más importante.
+                       `flexGrow: 0` para que la fila corta se vea corta y no
+                       se estire a llenar. */
                     return (
-                      <View key={f.clave} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                      <View key={f.clave} style={{ flexBasis: '31%', flexGrow: 0 }}>
+                        {/* 🔴 SIN TEXTO, LA ETIQUETA CARGA EL DESTINO.
+                            Un chevron no se anuncia: quien no ve la pantalla
+                            oiría «botón» y nada más. La etiqueta dice **a
+                            dónde entra**, que es lo que el texto retirado
+                            decía peor. */}
                         {f.onPress ? (
-                          <Tarjeta relleno="amplio" interactiva onPress={f.onPress} accessibilityRole="button" etiqueta={`${f.titulo} — ${t('explorar.paseoAgendable')}`}>
+                          <Tarjeta
+                            relleno="amplio"
+                            interactiva
+                            onPress={f.onPress}
+                            accessibilityRole="button"
+                            /* 🔴 El guion blando SE QUITA de la etiqueta
+                               accesible: sirve para partir un renglón, y acá
+                               no hay renglón que partir. *La mayoría de los
+                               lectores lo ignora, pero «la mayoría» no es una
+                               garantía cuando el costo de asegurarlo es un
+                               `replace`.* */
+                            etiqueta={t('explorar.entrarA', { servicio: f.titulo.replace(/\u00AD/g, '') })}
+                          >
                             {contenido}
                           </Tarjeta>
                         ) : (
@@ -196,9 +274,10 @@ export default function Explorar() {
                     );
                   })}
                 </View>
-                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
-                  {t('explorar.agendarLlegaOtros')}
-                </Text>
+                {/* ☠️ S107-C · «Agendar veterinaria llega pronto» RETIRADO.
+                    No pertenecía acá: esta sección lista los servicios que YA
+                    se agendan, y una nota que dice lo contrario debajo de
+                    ellos contradice lo que la pantalla está mostrando. */}
               </View>
             )}
           </View>

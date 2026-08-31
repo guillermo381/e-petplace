@@ -153,6 +153,17 @@ fecha. El destino incluye:
 - **Compuerta de salida:** cumplimiento de tiendas + beta gate
   (`beta_users`) para un launch controlado.
 
+> **PRECONDICIÓN SUMADA AL CIERRE S107 (firma del founder, 31-ago-2026) —
+> ⑦ EL GATE SANITARIO DE GUARDERÍA SE ENCIENDE ANTES DE LA SALIDA REAL.**
+> `app_config.guarderia_gate_sanitario_duro` está **HOY EN FALSE, y eso es
+> deliberado**: el semáforo INFORMA los requisitos que faltan y **no frena**.
+> **Encenderlo es una línea, y va antes de que entre una familia real.**
+>
+> 🔴 **Se escribe acá y no sólo en su ficha porque una precondición que vive
+> en una ficha suelta no la lee nadie el día del lanzamiento.** *La lista la
+> carga, no la memoria* — misma razón por la que se sumaron las seis de S80.
+> Ficha: **`D-968`**.
+
 **Test de la operación (gemelo del test de toda feature):** *"¿puede
 un dueño real pagar, quejarse, cancelar, cambiar de idioma y borrar su
 cuenta sin que ninguna de esas acciones pase por el WhatsApp del

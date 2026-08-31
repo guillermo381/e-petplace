@@ -10470,6 +10470,163 @@ export type Database = {
           },
         ]
       }
+      guarderia_aceptaciones: {
+        Row: {
+          aceptado_en: string
+          aceptado_por: string
+          documento_codigo: string
+          documento_version: number
+          familia_id: string
+        }
+        Insert: {
+          aceptado_en?: string
+          aceptado_por: string
+          documento_codigo: string
+          documento_version: number
+          familia_id: string
+        }
+        Update: {
+          aceptado_en?: string
+          aceptado_por?: string
+          documento_codigo?: string
+          documento_version?: number
+          familia_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_aceptaciones_documento_codigo_documento_version_fkey"
+            columns: ["documento_codigo", "documento_version"]
+            isOneToOne: false
+            referencedRelation: "guarderia_documentos"
+            referencedColumns: ["codigo", "version"]
+          },
+          {
+            foreignKeyName: "guarderia_aceptaciones_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_actas: {
+        Row: {
+          carnet_verificado: boolean
+          cerrada_en: string
+          clave_idempotencia: string | null
+          conformidad: string
+          conformidad_en: string | null
+          direccion: string
+          estadia_id: string
+          id: string
+          levantada_por: string
+          objetos: string | null
+          observaciones: string | null
+          recibida_en: string
+          reserva_texto: string | null
+        }
+        Insert: {
+          carnet_verificado: boolean
+          cerrada_en: string
+          clave_idempotencia?: string | null
+          conformidad?: string
+          conformidad_en?: string | null
+          direccion: string
+          estadia_id: string
+          id?: string
+          levantada_por: string
+          objetos?: string | null
+          observaciones?: string | null
+          recibida_en?: string
+          reserva_texto?: string | null
+        }
+        Update: {
+          carnet_verificado?: boolean
+          cerrada_en?: string
+          clave_idempotencia?: string | null
+          conformidad?: string
+          conformidad_en?: string | null
+          direccion?: string
+          estadia_id?: string
+          id?: string
+          levantada_por?: string
+          objetos?: string | null
+          observaciones?: string | null
+          recibida_en?: string
+          reserva_texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_actas_estadia_id_fkey"
+            columns: ["estadia_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_estadias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_autorizaciones_familia: {
+        Row: {
+          actualizado_en: string
+          contacto_alternativo: Json | null
+          contactos: Json
+          familia_id: string
+          redes_autorizadas: boolean
+          urgencia_tope_moneda: string
+          urgencia_tope_monto: number | null
+        }
+        Insert: {
+          actualizado_en?: string
+          contacto_alternativo?: Json | null
+          contactos: Json
+          familia_id: string
+          redes_autorizadas?: boolean
+          urgencia_tope_moneda: string
+          urgencia_tope_monto?: number | null
+        }
+        Update: {
+          actualizado_en?: string
+          contacto_alternativo?: Json | null
+          contactos?: Json
+          familia_id?: string
+          redes_autorizadas?: boolean
+          urgencia_tope_moneda?: string
+          urgencia_tope_monto?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_autorizaciones_familia_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: true
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_documentos: {
+        Row: {
+          activo: boolean
+          codigo: string
+          contenido: string
+          version: number
+          vigente_desde: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          contenido: string
+          version: number
+          vigente_desde?: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          contenido?: string
+          version?: number
+          vigente_desde?: string
+        }
+        Relationships: []
+      }
       guarderia_espacio_excepciones: {
         Row: {
           created_at: string
@@ -10563,6 +10720,8 @@ export type Database = {
           estado: string
           id: string
           llegada_en: string | null
+          tramo_devolucion_id: string | null
+          tramo_recogida_id: string | null
           updated_at: string
         }
         Insert: {
@@ -10574,6 +10733,8 @@ export type Database = {
           estado?: string
           id?: string
           llegada_en?: string | null
+          tramo_devolucion_id?: string | null
+          tramo_recogida_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -10585,6 +10746,8 @@ export type Database = {
           estado?: string
           id?: string
           llegada_en?: string | null
+          tramo_devolucion_id?: string | null
+          tramo_recogida_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -10600,6 +10763,20 @@ export type Database = {
             columns: ["espacio_id"]
             isOneToOne: false
             referencedRelation: "guarderia_espacios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_estadias_tramo_devolucion_id_fkey"
+            columns: ["tramo_devolucion_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_tramos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_estadias_tramo_recogida_id_fkey"
+            columns: ["tramo_recogida_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_tramos"
             referencedColumns: ["id"]
           },
         ]
@@ -10648,6 +10825,345 @@ export type Database = {
           },
           {
             foreignKeyName: "guarderia_franjas_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_media: {
+        Row: {
+          archivo_url: string
+          autor_user_id: string
+          capturada_en: string
+          clave_idempotencia: string
+          created_at: string
+          duracion_s: number | null
+          fecha: string
+          id: string
+          miniatura_url: string | null
+          prestador_id: string
+          tipo: string
+        }
+        Insert: {
+          archivo_url: string
+          autor_user_id: string
+          capturada_en: string
+          clave_idempotencia: string
+          created_at?: string
+          duracion_s?: number | null
+          fecha: string
+          id?: string
+          miniatura_url?: string | null
+          prestador_id: string
+          tipo: string
+        }
+        Update: {
+          archivo_url?: string
+          autor_user_id?: string
+          capturada_en?: string
+          clave_idempotencia?: string
+          created_at?: string
+          duracion_s?: number | null
+          fecha?: string
+          id?: string
+          miniatura_url?: string | null
+          prestador_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_media_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_media_etiquetas: {
+        Row: {
+          estadia_id: string
+          evento_id: string | null
+          mascota_id: string
+          media_id: string
+        }
+        Insert: {
+          estadia_id: string
+          evento_id?: string | null
+          mascota_id: string
+          media_id: string
+        }
+        Update: {
+          estadia_id?: string
+          evento_id?: string | null
+          mascota_id?: string
+          media_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_media_etiquetas_estadia_id_fkey"
+            columns: ["estadia_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_estadias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_etiquetas_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_etiquetas_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_media_etiquetas_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_paquetes: {
+        Row: {
+          activo: boolean
+          created_at: string
+          id: string
+          precio: number
+          prestador_id: string
+          tamano: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          precio: number
+          prestador_id: string
+          tamano: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          precio?: number
+          prestador_id?: string
+          tamano?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_paquetes_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_paquetes_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_suscripciones: {
+        Row: {
+          autorizada_en: string
+          autorizada_por: string
+          cancelada_en: string | null
+          created_at: string
+          direccion_id: string | null
+          estado: string
+          familia_id: string
+          id: string
+          mascota_id: string | null
+          monto_esperado: number
+          periodo_desde: string | null
+          periodo_hasta: string | null
+          precio_mensual: number
+          prestador_id: string
+          prestador_servicio_id: string
+          tarjeta_id: string
+          updated_at: string
+        }
+        Insert: {
+          autorizada_en?: string
+          autorizada_por: string
+          cancelada_en?: string | null
+          created_at?: string
+          direccion_id?: string | null
+          estado?: string
+          familia_id: string
+          id?: string
+          mascota_id?: string | null
+          monto_esperado: number
+          periodo_desde?: string | null
+          periodo_hasta?: string | null
+          precio_mensual: number
+          prestador_id: string
+          prestador_servicio_id: string
+          tarjeta_id: string
+          updated_at?: string
+        }
+        Update: {
+          autorizada_en?: string
+          autorizada_por?: string
+          cancelada_en?: string | null
+          created_at?: string
+          direccion_id?: string | null
+          estado?: string
+          familia_id?: string
+          id?: string
+          mascota_id?: string | null
+          monto_esperado?: number
+          periodo_desde?: string | null
+          periodo_hasta?: string | null
+          precio_mensual?: number
+          prestador_id?: string
+          prestador_servicio_id?: string
+          tarjeta_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_suscripciones_direccion_id_fkey"
+            columns: ["direccion_id"]
+            isOneToOne: false
+            referencedRelation: "direcciones_guardadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_servicios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_suscripciones_tarjeta_id_fkey"
+            columns: ["tarjeta_id"]
+            isOneToOne: false
+            referencedRelation: "tarjetas_guardadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_tramo_punto: {
+        Row: {
+          lat: number
+          lon: number
+          tramo_id: string
+          visto_en: string
+        }
+        Insert: {
+          lat: number
+          lon: number
+          tramo_id: string
+          visto_en: string
+        }
+        Update: {
+          lat?: number
+          lon?: number
+          tramo_id?: string
+          visto_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_tramo_punto_tramo_id_fkey"
+            columns: ["tramo_id"]
+            isOneToOne: true
+            referencedRelation: "guarderia_tramos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guarderia_tramos: {
+        Row: {
+          abierto_en: string
+          abierto_por: string | null
+          cerrado_en: string | null
+          direccion: string
+          estado: string
+          fecha: string
+          id: string
+          prestador_id: string
+        }
+        Insert: {
+          abierto_en?: string
+          abierto_por?: string | null
+          cerrado_en?: string | null
+          direccion: string
+          estado?: string
+          fecha: string
+          id?: string
+          prestador_id: string
+        }
+        Update: {
+          abierto_en?: string
+          abierto_por?: string | null
+          cerrado_en?: string | null
+          direccion?: string
+          estado?: string
+          fecha?: string
+          id?: string
+          prestador_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_tramos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guarderia_tramos_prestador_id_fkey"
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
@@ -14741,7 +15257,7 @@ export type Database = {
           especies_compatibles: Json
           id: string
           nombre_custom: string | null
-          precio: number
+          precio: number | null
           precio_emergencia: number | null
           precio_mensual_plan: number | null
           precio_paquete: number | null
@@ -14761,7 +15277,7 @@ export type Database = {
           especies_compatibles?: Json
           id?: string
           nombre_custom?: string | null
-          precio?: number
+          precio?: number | null
           precio_emergencia?: number | null
           precio_mensual_plan?: number | null
           precio_paquete?: number | null
@@ -14781,7 +15297,7 @@ export type Database = {
           especies_compatibles?: Json
           id?: string
           nombre_custom?: string | null
-          precio?: number
+          precio?: number | null
           precio_emergencia?: number | null
           precio_mensual_plan?: number | null
           precio_paquete?: number | null
@@ -20582,18 +21098,28 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      _guarderia_dia_operativo: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: boolean
+      }
       _guarderia_ofertas_cobrables: {
-        Args: { p_mascota_id: string }
+        Args: { p_fecha?: string; p_mascota_id: string; p_modalidad?: string }
         Returns: {
           ciudad: string
+          devuelve_desde: string
+          devuelve_hasta: string
           direccion: string
           jornada_minutos: number
+          modalidad: string
           precio: number
           precio_mensual: number
+          precio_modalidad: number
           precio_paquete: number
           prestador_id: string
           prestador_nombre: string
           prestador_servicio_id: string
+          recoge_desde: string
+          recoge_hasta: string
         }[]
       }
       _guarderia_puede_reservar: {
@@ -20619,6 +21145,13 @@ export type Database = {
       _mascota_elegible_servicio: {
         Args: { p_mascota_id: string; p_tipo_servicio: string }
         Returns: boolean
+      }
+      _mensualidad_dias_habiles: {
+        Args: { p_desde: string; p_prestador_id: string }
+        Returns: {
+          fecha: string
+          opera: boolean
+        }[]
       }
       _mover_estado_pedido: {
         Args: {
@@ -20770,6 +21303,27 @@ export type Database = {
           p_mascota_id: string
         }
         Returns: string
+      }
+      abrir_tramo_guarderia: {
+        Args: {
+          p_direccion: string
+          p_estadias?: string[]
+          p_fecha: string
+          p_prestador_id: string
+        }
+        Returns: Json
+      }
+      aceptar_documentos_guarderia: {
+        Args: {
+          p_aceptaciones: Json
+          p_contacto_alternativo?: Json
+          p_contactos?: Json
+          p_familia_id: string
+          p_redes_autorizadas?: boolean
+          p_urgencia_tope_moneda?: string
+          p_urgencia_tope_monto?: number
+        }
+        Returns: Json
       }
       aceptar_invitacion_familia: {
         Args: { p_token: string }
@@ -21008,6 +21562,10 @@ export type Database = {
           monto_clawback_total: number
         }[]
       }
+      cancelar_mensualidad_guarderia: {
+        Args: { p_suscripcion_id: string }
+        Returns: Json
+      }
       cancelar_pedido_despensa: {
         Args: { p_actor: string; p_motivo?: string; p_pedido_id: string }
         Returns: Json
@@ -21051,6 +21609,7 @@ export type Database = {
         Returns: Json
       }
       cerrar_teleconsulta: { Args: { p_cita_id: string }; Returns: Json }
+      cerrar_tramo_guarderia: { Args: { p_tramo_id: string }; Returns: Json }
       cerrar_y_renovar_planes: { Args: never; Returns: Json }
       cleanup_pendientes_vencidos: {
         Args: never
@@ -21058,6 +21617,10 @@ export type Database = {
           accion: string
           pendiente_id: string
         }[]
+      }
+      cobrar_periodo_mensualidad_guarderia: {
+        Args: { p_periodo_desde?: string; p_suscripcion_id: string }
+        Returns: Json
       }
       completar_cita_servicio: {
         Args: {
@@ -21070,6 +21633,10 @@ export type Database = {
       completar_historia_clinica: {
         Args: { input_data: Json }
         Returns: string
+      }
+      comprar_paquete_guarderia: {
+        Args: { p_prestador_id: string; p_tamano: number }
+        Returns: Json
       }
       comprar_paquete_salidas: {
         Args: {
@@ -21106,6 +21673,14 @@ export type Database = {
       }
       configurar_venta_mostrador: {
         Args: { p_activa: boolean; p_cuenta_comercial_id: string }
+        Returns: Json
+      }
+      confirmar_acta_guarderia: {
+        Args: {
+          p_acta_id: string
+          p_conformidad: string
+          p_reserva_texto?: string
+        }
         Returns: Json
       }
       confirmar_cita_pagada: { Args: { p_cita_id: string }; Returns: Json }
@@ -21145,6 +21720,16 @@ export type Database = {
         Returns: number
       }
       conteos_vitrina_por_eje: { Args: never; Returns: Json }
+      contratar_mensualidad_guarderia: {
+        Args: {
+          p_direccion_id?: string
+          p_mascota_id?: string
+          p_monto_esperado?: number
+          p_prestador_id: string
+          p_tarjeta_id: string
+        }
+        Returns: Json
+      }
       contratar_plan_paseo: {
         Args: {
           p_auto_renovar?: boolean
@@ -21411,6 +21996,7 @@ export type Database = {
           capacidad: number
           consumido: number
           disponible: number
+          estado: string
           fecha: string
           sobrevendido: boolean
         }[]
@@ -21515,10 +22101,19 @@ export type Database = {
       definir_oferta_guarderia: {
         Args: {
           p_activo?: boolean
-          p_precio_dia: number
+          p_especies?: Json
+          p_precio_dia?: number
           p_precio_mensual?: number
-          p_precio_paquete?: number
           p_prestador_id: string
+        }
+        Returns: Json
+      }
+      definir_paquete_guarderia: {
+        Args: {
+          p_activo?: boolean
+          p_precio: number
+          p_prestador_id: string
+          p_tamano: number
         }
         Returns: Json
       }
@@ -21620,6 +22215,7 @@ export type Database = {
         Returns: boolean
       }
       encolar_fotos_entrega_vencidas: { Args: never; Returns: Json }
+      encolar_resumen_media_guarderia: { Args: never; Returns: Json }
       encontrar_prestador_emergencia: {
         Args: {
           p_country?: string
@@ -21657,6 +22253,10 @@ export type Database = {
         Args: { p_invitacion_id: string }
         Returns: Json
       }
+      evaluar_documentos_guarderia: {
+        Args: { p_familia_id: string }
+        Returns: Json
+      }
       evaluar_requisitos_guarderia: {
         Args: { p_mascota_id: string }
         Returns: Json
@@ -21686,6 +22286,10 @@ export type Database = {
           p_fecha: string
           p_hora: string
         }
+        Returns: Json
+      }
+      fijar_redes_autorizadas: {
+        Args: { p_autorizadas: boolean; p_familia_id: string }
         Returns: Json
       }
       generar_eventos_diferidos: {
@@ -21925,6 +22529,18 @@ export type Database = {
           sobre: string
         }[]
       }
+      levantar_acta_guarderia: {
+        Args: {
+          p_carnet_verificado: boolean
+          p_cerrada_en?: string
+          p_clave_idempotencia?: string
+          p_direccion: string
+          p_estadia_id: string
+          p_objetos?: string
+          p_observaciones?: string
+        }
+        Returns: Json
+      }
       log_admin_action: {
         Args: {
           p_accion: string
@@ -22003,6 +22619,7 @@ export type Database = {
         Returns: undefined
       }
       notificar_recordatorios_cita: { Args: never; Returns: Json }
+      obtener_acta_guarderia: { Args: { p_acta_id: string }; Returns: Json }
       obtener_adiestradores_disponibles: {
         Args: {
           p_fecha: string
@@ -22044,6 +22661,17 @@ export type Database = {
           mascota_nombre: string
           precio: number
           tipo_servicio: string
+        }[]
+      }
+      obtener_autorizacion_guarderia: {
+        Args: { p_familia_id: string }
+        Returns: {
+          actualizado_en: string
+          contacto_alternativo: Json
+          contactos: Json
+          redes_autorizadas: boolean
+          urgencia_tope_moneda: string
+          urgencia_tope_monto: number
         }[]
       }
       obtener_casos_activos_mascota: {
@@ -22145,6 +22773,48 @@ export type Database = {
           prestadores_totales: number
         }[]
       }
+      obtener_dias_guarderia: {
+        Args: {
+          p_desde: string
+          p_hasta: string
+          p_mascota_id?: string
+          p_prestador_id: string
+        }
+        Returns: {
+          capacidad: number
+          disponible: number
+          fecha: string
+          motivo: string
+          opera: boolean
+          reservable: boolean
+          ya_reservado: boolean
+        }[]
+      }
+      obtener_dias_guarderia_disponibles: {
+        Args: {
+          p_desde: string
+          p_hasta: string
+          p_lat?: number
+          p_lon?: number
+          p_mascota_id: string
+          p_modalidad?: string
+        }
+        Returns: {
+          fecha: string
+          lugares: number
+          motivo: string
+          reservable: boolean
+          ya_reservado: boolean
+        }[]
+      }
+      obtener_documentos_guarderia: {
+        Args: never
+        Returns: {
+          codigo: string
+          contenido: string
+          version: number
+        }[]
+      }
       obtener_empleados_cuenta: {
         Args: { p_cuenta_comercial_id: string }
         Returns: {
@@ -22153,6 +22823,38 @@ export type Database = {
           nombre: string
           user_id: string
         }[]
+      }
+      obtener_espacios_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          activo: boolean
+          capacidad_por_dia: number
+          dias_operacion: number[]
+          espacio_id: string
+          nombre: string
+        }[]
+      }
+      obtener_estadias_del_dia: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: {
+          a_bordo_en: string
+          cita_id: string
+          direccion_snapshot: Json
+          entregada_en: string
+          espacio_nombre: string
+          estadia_id: string
+          estado: string
+          estado_reserva: string
+          llegada_en: string
+          mascota_especie: string
+          mascota_foto_url: string
+          mascota_id: string
+          mascota_nombre: string
+        }[]
+      }
+      obtener_estado_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: Json
       }
       obtener_estado_onboarding_wizard: {
         Args: { p_cuenta_comercial_id: string }
@@ -22223,18 +22925,25 @@ export type Database = {
           p_lat?: number
           p_lon?: number
           p_mascota_id: string
+          p_modalidad?: string
         }
         Returns: {
           ciudad: string
+          devuelve_desde: string
+          devuelve_hasta: string
           direccion: string
           disponible: number
           jornada_minutos: number
+          modalidad: string
           precio: number
           precio_mensual: number
+          precio_modalidad: number
           precio_paquete: number
           prestador_id: string
           prestador_nombre: string
           prestador_servicio_id: string
+          recoge_desde: string
+          recoge_hasta: string
           sobrevendido: boolean
         }[]
       }
@@ -22309,6 +23018,27 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      obtener_media_de_mi_mascota: {
+        Args: { p_fecha?: string; p_mascota_id: string }
+        Returns: {
+          archivo_url: string
+          capturada_en: string
+          duracion_s: number
+          media_id: string
+          tipo: string
+        }[]
+      }
+      obtener_media_del_dia: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: {
+          archivo_url: string
+          capturada_en: string
+          duracion_s: number
+          mascota_ids: string[]
+          media_id: string
+          tipo: string
+        }[]
+      }
       obtener_mi_posicion_en_prestador: {
         Args: { p_prestador_id: string }
         Returns: Json
@@ -22364,6 +23094,45 @@ export type Database = {
           tiene_destino: boolean
           tipo: string
           titulo: string
+        }[]
+      }
+      obtener_mis_estadias_guarderia: {
+        Args: { p_mascota_id?: string }
+        Returns: {
+          a_bordo_en: string
+          acta_devolucion_id: string
+          acta_recogida_id: string
+          bono_id: string
+          cita_id: string
+          entregada_en: string
+          es_proxima: boolean
+          estadia_id: string
+          estado_cita: string
+          estado_estadia: string
+          estado_reserva: string
+          fecha: string
+          llegada_en: string
+          mascota_id: string
+          mascota_nombre: string
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          tramo_devolucion_id: string
+          tramo_recogida_id: string
+        }[]
+      }
+      obtener_mis_planes_guarderia: {
+        Args: never
+        Returns: {
+          direccion_id: string
+          estado: string
+          mascota_id: string
+          periodo_desde: string
+          periodo_hasta: string
+          precio_mensual: number
+          prestador_id: string
+          prestador_nombre: string
+          suscripcion_id: string
         }[]
       }
       obtener_modalidades_por_oficio: {
@@ -22443,6 +23212,14 @@ export type Database = {
           servicio_nombre: string
           tipo_servicio: string
           varia: boolean
+        }[]
+      }
+      obtener_paquetes_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          activo: boolean
+          precio: number
+          tamano: number
         }[]
       }
       obtener_parte_adiestramiento: {
@@ -22528,6 +23305,7 @@ export type Database = {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: Json
       }
+      obtener_punto_vivo: { Args: { p_tramo_id: string }; Returns: Json }
       obtener_resumen_actividad_prestador: {
         Args: {
           p_desde: string
@@ -22547,6 +23325,16 @@ export type Database = {
       }
       obtener_resumen_dia_grooming: {
         Args: { p_fecha: string; p_prestador_id: string }
+        Returns: Json
+      }
+      obtener_resumen_guarderias: {
+        Args: {
+          p_fecha: string
+          p_lat?: number
+          p_lon?: number
+          p_mascota_id: string
+          p_modalidad: string
+        }
         Returns: Json
       }
       obtener_sedes_de_mis_citas: {
@@ -22606,6 +23394,10 @@ export type Database = {
           solicitud_id: string
           tipo: string
         }[]
+      }
+      obtener_tramo_vivo_de_mi_mascota: {
+        Args: { p_mascota_id: string }
+        Returns: Json
       }
       obtener_uid_proveedor: {
         Args: { p_proveedor: string; p_user_id: string }
@@ -22679,6 +23471,10 @@ export type Database = {
         Args: { p_prestador_id: string }
         Returns: boolean
       }
+      primer_dia_reservable_guarderia: {
+        Args: { p_prestador_id: string }
+        Returns: string
+      }
       promesa_por_vendedor: {
         Args: { p_cuentas: string[]; p_fecha_programada?: string }
         Returns: Json
@@ -22702,6 +23498,18 @@ export type Database = {
           p_cuenta_comercial_id: string
           p_filas: Json
           p_origen_carga?: string
+        }
+        Returns: Json
+      }
+      publicar_media_guarderia: {
+        Args: {
+          p_archivo_url: string
+          p_capturada_en?: string
+          p_clave_idempotencia: string
+          p_duracion_s?: number
+          p_mascota_ids?: string[]
+          p_prestador_id: string
+          p_tipo: string
         }
         Returns: Json
       }
@@ -22774,6 +23582,10 @@ export type Database = {
         Returns: Json
       }
       recurrencias_vencidas_pendientes: { Args: never; Returns: Json }
+      reemplazar_franjas_guarderia: {
+        Args: { p_franjas: Json; p_prestador_id: string; p_tipo: string }
+        Returns: Json
+      }
       registrar_aprobacion_presencial: {
         Args: { p_presupuesto_id: string }
         Returns: Json
@@ -22961,6 +23773,15 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_punto_vivo: {
+        Args: {
+          p_lat: number
+          p_lon: number
+          p_tramo_id: string
+          p_visto_en?: string
+        }
+        Returns: Json
+      }
       registrar_push_token: {
         Args: { p_plataforma: string; p_token: string }
         Returns: Json
@@ -23062,8 +23883,22 @@ export type Database = {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined
       }
+      reservar_dia_de_paquete_guarderia: {
+        Args: {
+          p_bono_id: string
+          p_direccion_id?: string
+          p_fecha: string
+          p_mascota_id?: string
+        }
+        Returns: Json
+      }
       reservar_dia_guarderia: {
-        Args: { p_fecha: string; p_mascota_id: string; p_prestador_id: string }
+        Args: {
+          p_direccion_id?: string
+          p_fecha: string
+          p_mascota_id: string
+          p_prestador_id: string
+        }
         Returns: Json
       }
       reservar_salida_paquete: {
@@ -23132,6 +23967,7 @@ export type Database = {
         Args: { p_accion: string; p_solicitud_id: string }
         Returns: Json
       }
+      retirar_franja_guarderia: { Args: { p_franja_id: string }; Returns: Json }
       retirar_naturaleza_solicitada: {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json

@@ -1,4 +1,11 @@
+> ☠️ **CUMPLIDO — verificado contra el objeto el 29-ago.** A lo publicó y C lo consume. **Se conserva como registro; NO es un pedido vivo.**
+
 # S107-C → A · PEDIDO AUTOCONTENIDO — el flag propio de guardería en `country_config`
+
+> ## ☠️ CUMPLIDO — `paisConfig` lee `guarderia`, la clave existe en `country_config` para EC y CO, y la ficha se enciende sola con el flag (verificado contra el objeto, 29-ago-2026)
+> **Este pedido YA LLEGÓ y su texto queda como registro, no como pendiente.**
+> *Un pedido cumplido que sigue diciendo «esto no existe» manda a alguien a construir lo que ya está* — y esa es exactamente la verdad vencida que esta sesión cobró dos veces (`D-948`).
+
 
 > **Molde S91:** la mitad de C está construida e **INERTE** (`GUARDERIA_ABIERTA` en `apps/cliente/src/app/(tabs)/explorar/index.tsx`). Falta la mitad de A: `packages/api` y la base.
 > **Prioridad:** después de `guarderia-oferta`. **Las dos son la misma llave** y ninguna sirve sola — ver §4.

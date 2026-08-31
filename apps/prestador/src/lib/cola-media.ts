@@ -38,31 +38,10 @@
  * (`motor_no_cableado`) — jamás falla en silencio.
  */
 
-/**
- * ── EL ALMACÉN SE INYECTA (y por eso esta cola se puede PROBAR) ───────────
- * `require` en try/catch, patrón de `bloqueo-biometrico.ts` (S104): si el
- * nativo no está en el build, queda `null` y la cola lo DICE en vez de
- * crashear al montar. El mismo hueco permite correr el arnés en node con un
- * almacén en memoria — *una cola cuyo modo de falla es perder trabajo tiene
- * que poder fallar en un banco antes que en la calle* (L-192).
- */
-export interface Almacen {
-  getItem(clave: string): Promise<string | null>;
-  setItem(clave: string, valor: string): Promise<void>;
-}
-
-let almacen: Almacen | null = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  almacen = require('@react-native-async-storage/async-storage').default as Almacen;
-} catch {
-  almacen = null;
-}
-
-/** Solo para el arnés. En la app el default (AsyncStorage) ya está puesto. */
-export function configurarAlmacen(a: Almacen): void {
-  almacen = a;
-}
+// El almacén y el cerrojo viven en `almacen.ts` — los comparte la cola de
+// actas, y su hueco de inyección es lo que vuelve probables a las dos.
+import { almacenActual, enFila, type Almacen } from './almacen';
+export { configurarAlmacen, type Almacen } from './almacen';
 
 const CLAVE = 'epp.cola_media.v1';
 
@@ -84,6 +63,16 @@ export type EstadoItem =
 export interface ItemMedia {
   /** id local — la llave de idempotencia de la cola. */
   id: string;
+  /**
+   * 🔴 LA CLAVE DE IDEMPOTENCIA DEL SERVIDOR — nace ANTES del primer intento y
+   * se reusa en cada reintento. Es lo que hace que un timeout ambiguo (la
+   * subida llegó, la respuesta no) **no registre la foto dos veces**: el
+   * segundo intento devuelve `ya_existia: true`, que es un éxito.
+   *
+   * *Un expediente append-only que viaja con la mascota no perdona un
+   * duplicado: no hay a quién preguntarle cuál de los dos pasó.*
+   */
+  claveIdempotencia: string;
   uri: string;
   tipo: 'foto' | 'clip';
   /** Las etiquetas. Mínimo 1 (firma ① del founder: la foto llega a CADA animal). */
@@ -114,6 +103,9 @@ export interface ItemMedia {
   estado: EstadoItem;
   /** Subida hecha, registro pendiente. */
   storagePath?: string;
+  /** Devuelto por `publicarMedia`. **El acta lo referencia**: sin él, un acta
+   *  no puede nombrar sus fotos (contrato de actas §③ pide `mediaIds[]`). */
+  mediaId?: string;
   intentos: number;
   /** epoch ms; el backoff no se recalcula al reabrir — se respeta. */
   proximoIntentoEn?: number;
@@ -155,22 +147,32 @@ function esErrorDeRed(mensaje: string): boolean {
   return /network|failed to fetch|fetch failed|timeout/i.test(mensaje);
 }
 
+/**
+ * La receta de `nuevaClaveIdempotencia` de `@epetplace/api` (despensa, S96),
+ * **copiada a propósito y no importada**: esta cola es infraestructura de
+ * dispositivo y se prueba en banco; importar el paquete de wrappers la volvería
+ * inejecutable fuera del teléfono — *y una cola cuyo modo de falla es perder
+ * trabajo tiene que poder fallar en un banco antes que en la calle*.
+ * Si la receta de la casa cambia, esto no la sigue: son 6 líneas y su fuente
+ * está nombrada acá.
+ */
+function nuevaClave(): string {
+  const c = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
+  if (typeof c?.randomUUID === 'function') return c.randomUUID();
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
+}
+
 // ══════════════════ PERSISTENCIA ═══════════════════════════════════════════
 // Una sola escritura por mutación, y serializada: dos capturas seguidas no
 // pueden pisarse (leer-mutar-escribir sin cerrojo pierde la primera).
 
-let cerrojo: Promise<unknown> = Promise.resolve();
-
-function enFila<T>(tarea: () => Promise<T>): Promise<T> {
-  const proximo = cerrojo.then(tarea, tarea);
-  cerrojo = proximo.catch(() => undefined);
-  return proximo;
-}
-
 async function leerCrudo(): Promise<ItemMedia[]> {
   try {
-    if (!almacen) return [];
-    const txt = await almacen.getItem(CLAVE);
+    const a = almacenActual();
+    if (!a) return [];
+    const txt = await a.getItem(CLAVE);
     if (!txt) return [];
     const dato: unknown = JSON.parse(txt);
     if (!Array.isArray(dato)) return [];
@@ -193,8 +195,9 @@ async function leerCrudo(): Promise<ItemMedia[]> {
 
 async function escribir(items: ItemMedia[]): Promise<void> {
   try {
-    if (!almacen) throw new Error('cola-media: sin almacén — la media no quedó guardada');
-    await almacen.setItem(CLAVE, JSON.stringify(items));
+    const a = almacenActual();
+    if (!a) throw new Error('cola-media: sin almacén — la media no quedó guardada');
+    await a.setItem(CLAVE, JSON.stringify(items));
   } catch (e) {
     // Falla de disco: NO se traga. La captura debe poder decir que no quedó
     // guardada — es el único momento en que el cuidador puede repetirla.
@@ -253,6 +256,7 @@ export async function encolar(alta: AltaMedia): Promise<ItemMedia> {
   }
   const item: ItemMedia = {
     id: `${alta.tipo}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    claveIdempotencia: nuevaClave(),
     uri: alta.uri,
     tipo: alta.tipo,
     mascotaIds: [...alta.mascotaIds],
@@ -294,6 +298,25 @@ export async function reintentar(id: string): Promise<void> {
   await mutar(id, { estado: 'en_cola', intentos: 0, proximoIntentoEn: undefined, causa: undefined });
 }
 
+/**
+ * Los ids de servidor de un conjunto de ítems locales — lo que el acta
+ * necesita para nombrar sus fotos.
+ *
+ * Devuelve `null` si **alguno** todavía no se publicó: *un acta con la mitad de
+ * sus fotos no es un acta a medias, es un acta que dice algo distinto del que
+ * se levantó en la puerta.* El acta espera a que estén todas.
+ */
+export async function mediaIdsDe(idsLocales: string[]): Promise<string[] | null> {
+  const items = await leerCola();
+  const ids: string[] = [];
+  for (const local of idsLocales) {
+    const it = items.find((i) => i.id === local);
+    if (!it || it.estado !== 'publicada' || !it.mediaId) return null;
+    ids.push(it.mediaId);
+  }
+  return ids;
+}
+
 /** Higiene: saca las publicadas. Nunca toca lo pendiente. */
 export async function limpiarPublicadas(): Promise<void> {
   return enFila(async () => {
@@ -316,11 +339,12 @@ export interface MotorDeSubida {
     | { ok: true; storagePath: string; bytes: number }
     | { ok: false; causa: CausaFalla; mensaje: string }
   >;
-  /** Paso 2 — registra la media con SUS N etiquetas (pedido D→A ①). */
+  /** Paso 2 — publica la media con SUS N etiquetas. Devuelve el id, que el
+   *  acta necesita para nombrar sus fotos. */
   registrar(
     item: ItemMedia,
     storagePath: string,
-  ): Promise<{ ok: true } | { ok: false; causa: CausaFalla; mensaje: string }>;
+  ): Promise<{ ok: true; mediaId: string } | { ok: false; causa: CausaFalla; mensaje: string }>;
 }
 
 export interface ResumenCorrida {
@@ -389,7 +413,7 @@ export async function procesarCola(
       continue;
     }
 
-    await mutar(item.id, { estado: 'publicada', causa: undefined, detalle: undefined });
+    await mutar(item.id, { estado: 'publicada', mediaId: reg.mediaId, causa: undefined, detalle: undefined });
     resumen.publicados += 1;
   }
 

@@ -252,6 +252,7 @@ export const clienteEs = {
     railEstetica: 'Estética',
     // S73 ítem 1: el rail mínimo-4 (LOTE S73, gate founder pendiente)
     railAdiestramiento: 'Adiestramiento',
+    railGuarderia: 'Guardería',
     railVet: 'Veterinaria',
     railDescubre: 'Descubre',
     railError: 'No pudimos leer tus servicios.',
@@ -704,17 +705,26 @@ export const clienteEs = {
     servicios: 'Servicios',
     servicioPaseo: 'Paseo',
     servicioPaseoDetalle: 'Paseadores que cuidan y documentan cada salida.',
-    servicioGrooming: 'Estética y baño',
+    /* ⚠️ GUION BLANDO (U+00AD) ADENTRO — misma cura que el prestador. La
+       grilla del cliente **no monta `Baldosa`**: la dibuja a mano, así que la
+       cura de la pieza no la alcanza (medido por B). *Montar la pieza acá es
+       DECISIÓN de mesa, no arreglo* — mientras tanto, la cadena resuelve el
+       corte igual de bien y sin tocar una anatomía firmada.
+       🔴 **Si editás estas cadenas, el guion se pierde sin que nada avise.** */
+    servicioGrooming: 'Esté­tica y baño',
     servicioGroomingDetalle: 'Grooming profesional que queda en su historia.',
-    servicioVet: 'Veterinaria',
+    servicioVet: 'Vete­ri­na­ria',
     servicioVetDetalle: 'Atención clínica para su salud.',
-    servicioAdiestramiento: 'Adiestramiento',
+    servicioAdiestramiento: 'Adiestra­miento',
     servicioAdiestramientoDetalle: 'Educación y conducta con profesionales.',
     agendarLlega: 'Agendar desde la app llega pronto.',
     // S54-B3.1; S60: el grooming abrió — la voz nombra SOLO lo que falta
     agendarLlegaOtros: 'Agendar veterinaria llega pronto.',
     // S58 ruta del mundo — GATE DE STRINGS PENDIENTE (lote S58)
     paseoAgendable: 'Toca para entrar',
+    /* S107-C · la etiqueta accesible de la baldosa: sin texto visible, es lo
+       único que dice a dónde lleva. */
+    entrarA: 'Entrar a {{servicio}}',
     paseadoresTitulo: 'Paseadores',
     paseadoresError: 'No pudimos cargar los paseadores',
     paseadoresVacio: 'Todavía no hay paseadores ofreciendo',
@@ -766,8 +776,20 @@ export const clienteEs = {
     refugiosVacioDetalle: 'Cuando un refugio se sume, sus mascotas en adopción van a vivir acá.',
     // próximamente honesto (§8 — sin fechas prometidas)
     proximamente: 'Próximamente',
+    /* ⚠️ S107-C · proxHotel · proxSeguros · proxPrime quedaron SIN CONSUMIDOR
+       a propósito: «Próximamente» ahora lista sólo telemedicina (firma del
+       founder). Los tres servicios siguen en la hoja de ruta — lo que se
+       retiró es la lista, no el plan —, así que borrar su voz sería tirar y
+       reescribir. `proxGuarderia` queda por otra razón: guardería ya no es una
+       promesa, es un camino construido esperando su flag. */
+    /* S107-C · los dos que B dibujó. La voz es de la casa que los muestra;
+       el glifo dice qué son y el nombre dice para qué sirven. */
+    proxWearables: 'Wearables',
+    proxCertificaciones: 'Certificaciones',
     proxHotel: 'Hotel',
     proxGuarderia: 'Guardería',
+    servicioGuarderia: 'Guardería',
+    servicioGuarderiaDetalle: 'Lo buscan, pasa el día y lo traen de vuelta.',
     proxSeguros: 'Seguros',
     proxTelemedicina: 'Telemedicina',
     proxPrime: 'e-PetPlace Prime',
@@ -1569,6 +1591,7 @@ export const clienteEs = {
     enPreparacion: 'En preparación',
     perfil: 'Tu perfil',
     contrasena: 'Contraseña',
+    imagenTitulo: 'Fotos de tus mascotas',
     notificaciones: 'Notificaciones',
     eliminarCuenta: 'Eliminar cuenta',
     sesion: 'Sesión y cuenta',
@@ -2842,13 +2865,52 @@ export const clienteEs = {
      🔴 La sobreventa NO tiene voz acá a propósito (firma de la mesa): para
      la familia un día sin lugar es un día sin lugar. */
   lugarGuarderia: {
+    zonaTitulo: 'Dónde queda',
+    /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
+    zonaDetalle: 'La zona aproximada. La dirección exacta te llega cuando reserves.',
+    /* El CTA apagado DICE qué falta: una pared muda hace creer que el
+       producto está roto cuando sólo falta tocar un día. */
+    contratarMensual: 'Contratar el mes',
+    mensualNoCobrable: 'Todavía no podemos cobrar la mensualidad. Estamos terminando esa parte.',
+    comprarDiaAqui: 'Comprar día en esta guardería',
+    comprarPaqueteAqui: 'Comprar paquete de {{n}} estadías',
+    contratarMensualAqui: 'Contratar mensualidad',
+    reservarDia: 'Reservar el {{dia}}',
+    agendarDia: 'Agendar el {{dia}}',
+    comprarPaqueteDia: 'Comprar {{n}} estadías y agendar el {{dia}}',
+    contratarMensualDesde: 'Contratar plan mensual desde el {{dia}}',
+    faltaTarjeta: 'Elige con qué tarjeta se cobra cada mes.',
+    mensualMandato: 'Autorizas el cobro mensual. Hoy no se cobra nada: el primer cobro sale el día que empieza el plan.',
+    mensualFirmada: 'Listo. Tu plan mensual queda autorizado.',
+    faltaDia: 'Elige un día en el calendario.',
+    /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
+    comprarPaquete: 'Comprar {{n}} estadías y agendar este día',
+    agendarDePaquete: 'Agendar este día con tu paquete',
+    agendadaDePaquete: 'Estadía agendada — te quedan {{n}}.',
+    paqueteListo: 'Paquete comprado y primer día agendado — te quedan {{n}}.',
+    /* 🔴 El bono YA existe: decir solo «no se pudo» dejaría a la familia
+       creyendo que perdió la plata. */
+    paqueteSinPrimera: 'Compramos tu paquete, pero no pudimos agendar ese día: {{mensaje}} Puedes agendarlo desde Guardería.',
+    faltaRequisitos: 'Falta lo que la guardería pide para recibirlo.',
     titulo: 'La guardería',
     franjasTitulo: 'Cuándo pasan y cuándo lo traen',
     recogida: 'Pasan a buscarlo',
     devolucion: 'Lo traen de vuelta',
+    elDia: 'El día',
     elegiDia: 'Elige el día',
     diaLleno: 'Sin lugares para este día',
+    /* Los cinco casos del motor, cada uno con su voz. La pantalla PINTA el
+       motivo; no lo deduce — «no abren» se mide del patrón del lugar y desde
+       acá era indistinguible de «se llenó». */
+    cupo_pasado: 'Ya pasó',
+    cupo_mismo_dia: 'Las reservas entran desde mañana',
+    cupo_no_opera: 'Ese día no abren',
+    cupo_sin_lugar: 'Sin lugares para este día',
+    cupo_sin_dato: 'No disponible',
     diaPasado: 'Ya pasó',
+    /* Compuerta de A: hoy jamás se reserva. Voz propia — no es «se llenó». */
+    diaHoy: 'Las reservas entran desde mañana',
+    diaCerrado: 'Ese día no abren',
     mesAnterior: 'Mes anterior',
     mesSiguiente: 'Mes siguiente',
     noCargoTitulo: 'No pudimos cargar los días',
@@ -2856,5 +2918,216 @@ export const clienteEs = {
     reintentar: 'Probar de nuevo',
     reservaPendiente: 'Todavía no se puede reservar acá.',
     reservaPendienteApoyo: 'Estamos terminando esa parte. Por ahora puedes ver los días con lugar y los horarios.',
+    requisitosTitulo: 'Lo que piden para recibirlo',
+    requisitosAlDia: 'Todo al día',
+    estado_nunca_aplicada: 'Todavía no la registraste',
+    estado_sin_carnet: 'Falta el carnet donde consta',
+    estado_sin_fecha: 'Falta la fecha de vencimiento',
+    estado_vencida: 'Está vencida',
+    cargarCarnet: 'Cargar carnet',
+    reservar: 'Reservar este día',
+    bloqueadoPorRequisitos: 'Para reservar, primero completa lo que falta arriba.',
+    /* 🔴 Mismo faltante, otro trato: acá NO frena, así que la voz no alarma.
+       Una alarma sobre algo que no impide nada enseña a ignorar las que sí. */
+    faltaSinFrenar: 'Puedes reservar igual. Cuando puedas, carga lo que falta: la guardería lo va a pedir al recibirlo.',
+  },
+  /* S107-C · LAS TRES MODALIDADES. **Voz de familia, jamás el slug del
+     motor**: la pantalla dice «Por día», el motor dice `dia`. */
+  modalidadGuarderia: {
+    etiqueta: '¿Cómo quieres reservar?',
+    dia: 'Por día',
+    paquete: 'Paquete',
+    mensual: 'Mensual',
+    diaQue: 'Reservas un día puntual y lo pagas.',
+    paqueteQue: 'Compras varias estadías juntas y las usas cuando quieras.',
+    mensualQue: 'Un cobro cada mes mientras lo quieras.',
+    mensualAviso: 'Es un cobro que se repite: se hace solo, el mismo día de cada mes.',
+    mensualCorte: 'Lo cortas desde la app cuando quieras, y sigue andando hasta el final del mes que pagaste.',
+    continuar: 'Continuar',
+  },
+  /* S107-C · EL DURANTE. **Los estados del motor en voz de familia** — el
+     motor dice `retorno_en_curso`, la pantalla dice «viene camino a casa». */
+  /* S107-C · ACEPTAR LOS DOCUMENTOS.
+     🔴 **Acá NO vive una sola palabra de texto legal.** Estos son RÓTULOS —
+     cómo se llama cada documento en la lista—; su CONTENIDO sale del server,
+     versionado. *Un texto legal escrito en un diccionario es un texto que nadie
+     versiona, nadie fecha y nadie puede probar que la familia aceptó.* */
+  imagenes: {
+    titulo: '¿Nos dejas compartir sus fotos?',
+    cuerpo: 'Podríamos mostrar fotos de {{nombre}} en nuestras redes para que otras familias conozcan el servicio. Es opcional.',
+    revocar: 'Puedes revocar esta autorización cuando quieras: escríbenos a privacidad@epetplace.com y en menos de 48 horas quedará revocada.',
+    guardando: 'Guardando…',
+    enPreferencias: 'Compartir sus fotos en nuestras redes',
+  },
+  documentosGuarderia: {
+    titulo: 'Antes de reservar',
+    doc_contrato_custodia: 'Contrato de custodia',
+    doc_declaracion_sanitaria: 'Declaración sanitaria',
+    doc_declaracion_comportamiento: 'Declaración de comportamiento',
+    doc_autorizacion_urgencia_veterinaria: 'Autorización de urgencia veterinaria',
+    doc_autorizacion_transporte: 'Autorización de transporte',
+    doc_protocolo_no_retiro: 'Protocolo de no retiro',
+    version: 'Versión {{n}}',
+    /* La frase entera se lee «Leí y acepto: Contrato de custodia» — el nombre
+       del documento es el enlace. Una sola clave para los seis: con «Acepto
+       el/la» harían falta seis variantes por el artículo. */
+    leiYAcepto: 'Leí y acepto',
+    terminosDelServicio: 'los términos del servicio',
+    contactoOpcional: 'Opcional. Si no podemos ubicarte a ti.',
+    opcional: 'Opcional',
+    faltaAceptar: 'Marca los seis documentos para continuar.',
+    contactoTitulo: 'A quién llamamos',
+    contactoNombre: 'Nombre',
+    contactoTelefono: 'Teléfono',
+    redesEtiqueta: 'Pueden publicar fotos suyas',
+    redesDetalle: 'Si lo dejas apagado, sus fotos solo las ves tú.',
+    aceptar: 'Acepto y continúo',
+    noQuedoAlDia: 'Algo quedó sin aceptar. Vuelve a intentarlo.',
+    aceptado: 'Listo. Ya puedes reservar.',
+    noCargoTitulo: 'No pudimos cargar los documentos',
+    noCargoDetalle: 'No es que no existan: no pudimos preguntar. Prueba de nuevo.',
+    /* 🔴 SIN «prueba de nuevo»: el problema es NUESTRO y no hay nada que la
+       familia pueda reintentar. */
+    sinDocsTitulo: 'Todavía no podemos abrir reservas de guardería',
+    sinDocsDetalle: 'Estamos terminando de preparar los documentos. Te avisamos apenas esté listo.',
+  },
+  duranteGuarderia: {
+    reservada: 'Todavía no salieron a buscar a {{nombre}}.',
+    recogidaEnCurso: 'Van en camino a buscar a {{nombre}}.',
+    enGuarderia: '{{nombre}} está en la guardería.',
+    retornoEnCurso: '{{nombre}} viene camino a casa.',
+    entregada: '{{nombre}} ya está en casa.',
+    noRecogida: 'No pudieron recoger a {{nombre}}.',
+    cancelada: 'Esta estadía se canceló.',
+    noEsTuya: 'No encontramos esa estadía entre las de tu familia.',
+    actaTitulo: 'El acta',
+    actaItems: 'Lo que revisaron',
+    actaCarnet: 'Carnet a la vista',
+    actaObservaciones: 'Lo que anotaron',
+    actaPendiente: 'Falta tu conformidad',
+    actaConforme: 'Diste tu conformidad',
+    actaConReserva: 'Diste tu conformidad con una salvedad',
+    actaConformar: 'Dar mi conformidad',
+    /* 🔴 LAS DOS HORAS: la diferencia entre ellas es la cola offline. */
+    actaCerradaEn: 'Cerrada en la puerta a las {{hora}}',
+    actaRecibidaEn: 'Nos llegó a las {{hora}}',
+    actaConformarTitulo: '¿Todo en orden?',
+    actaConforme_si: 'Sí, todo bien',
+    actaConReserva_si: 'Quiero dejar una salvedad',
+    actaReservaEtiqueta: '¿Qué quieres que quede anotado?',
+    actaReservaEnviar: 'Dejar la salvedad',
+    actaPendienteLector: 'La guardería dejó constancia de la entrega. Todavía no podemos mostrarte su contenido acá.',
+    sinEstadoTitulo: 'Todavía no podemos decirte cómo va',
+    sinEstadoDetalle: 'No es que no esté pasando nada: no pudimos preguntar. Prueba de nuevo en un momento.',
+    dondeVa: 'Dónde va',
+    sinPunto: 'Todavía no vemos dónde va. Te lo mostramos apenas salgan.',
+    vistoA: 'Visto a las {{hora}}',
+    suDia: 'Su día',
+    cuenta: '{{n}} momentos de hoy',
+    cuentaUna: '1 momento de hoy',
+    sinMediaTodavia: 'Todavía no hay fotos de hoy. Van a ir apareciendo acá.',
+    mediaNoCargo: 'No pudimos traer sus fotos. Prueba de nuevo en un momento.',
+    verFoto: 'Ver foto {{i}} de {{total}}',
+  },
+  /* S107-C · ELEGIR CÓMO Y CUÁNDO.
+     🔴 LAS CUATRO CAUSAS, con la voz convertida a TUTEO: el dictado de la mesa
+     llegó en voseo («Probá», «Podés») y `R66` es un trinquete solo-baja —
+     además de `L-148`: *los dictados viajan en tuteo; la voz de producto no
+     hereda el acento de la mesa.* También «cerca tuyo» → «cerca de ti», que es
+     el tuteo NEUTRO de la casa. */
+  elegirGuarderia: {
+    primeraEstadia: 'Selecciona el día de tu primera estadía',
+    primerDia: 'Selecciona el primer día',
+    verQuienPuede: 'Ver quién puede',
+    requisitosInforman: 'Esto no te frena para reservar. Es lo que la guardería va a pedirte al recibirlo.',
+    mensualLetra: 'El plan corre de lunes a viernes. Se cobra ese mismo día cada mes hasta que lo canceles.',
+    diaNadieAbre: 'Ese día no abre ninguna guardería.',
+    diaSinCupo: 'Ese día ya está lleno.',
+    diaYaReservado: 'Ya tienes ese día reservado.',
+    causaSinCupo: 'Ninguna guardería tiene cupo para el {{dia}}. Prueba con otro día.',
+    /* 🔴 SIN «prueba con otro día»: el día no es el problema. */
+    causaNoOpera: 'Ninguna guardería cerca de ti abre ese día.',
+    causaSinModalidad: 'Ninguna guardería cerca de ti vende paquetes todavía. Puedes reservar por día.',
+    causaSinCobertura: 'Todavía no hay guarderías cerca de ti.',
+    /* La quinta causa del server. En el HUB es carencia NUESTRA y se dice
+       así; acá, elegido el día, es el mismo hecho con la misma voz. */
+    causaEspecie: 'Todavía no tenemos guarderías para esa especie. Estamos trabajando en eso.',
+    /* ③ NO dice «prueba con otro día»: explica LA REGLA. */
+    vispera: 'Las estadías se reservan con al menos un día de anticipación.',
+    causaIndeterminada: 'Ninguna guardería puede con esa combinación. Prueba con otro día o con otra forma de contratar.',
+  },
+  hubGuarderia: {
+    titulo: 'Guardería',
+    cabezalDetalle: 'Lo buscan, pasa el día y lo traen de vuelta.',
+    queDia: '¿Qué día?',
+    quePrimerDia: '¿Qué día es la primera estadía?',
+    queDiaInicio: '¿Desde qué día?',
+    cuantasEstadias: '¿Cuántas estadías?',
+    tamanoEstadias: '{{n}} estadías',
+    tamanoEstadiasDesde: '{{n}} · desde ${{precio}}',
+    lugaresTitulo: 'Lugares con cupo ese día',
+    porDia: '${{precio}} por día',
+    /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
+       del paquete: la pluralización no es una interpolación). */
+    cupo: 'Quedan {{n}} lugares ese día',
+    contextoPara: 'Guardería para {{nombre}}',
+    cupoUno: 'Queda 1 lugar ese día',
+    porMes: '${{precio}} por mes',
+    porPaquete: '${{precio}} el paquete',
+    sinElegiblesTitulo: 'Todavía no puedes usar la guardería',
+    sinElegiblesDetalle: 'La guardería es para perros y gatos. Cuando registres uno, va a aparecer acá.',
+    diaCerrado: 'No abren',
+    probarDia: 'Probar {{dia}}',
+    sinLugaresTitulo: 'Ninguna guardería tiene cupo ese día',
+    sinLugaresDetalle: 'Prueba con otro día: el cupo cambia todos los días.',
+    noCargoTitulo: 'No pudimos cargar tus mascotas',
+    noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
+    listaNoCargoTitulo: 'No pudimos buscar guarderías',
+    listaNoCargoDetalle: 'No es que no haya: no pudimos preguntar. Prueba de nuevo.',
+  },
+  checkoutGuarderia: {
+    servicio: 'Guardería · un día',
+    sinHora: 'Todo el día',
+    paqueteExito: 'Tu paquete quedó comprado',
+    mensualExito: 'Tu plan mensual quedó autorizado',
+    mensualExitoDetalle: 'El primer cobro sale el día que empieza el plan. Puedes cancelarlo cuando quieras.',
+    continuar: 'Continuar',
+    dondeRecogen: 'De dónde lo pasan a buscar',
+    dondeRecogenMensual: 'Acá van a pasar a buscarlo todos los meses. Puedes cambiarla después.',
+    mensualServicio: 'Plan mensual de guardería',
+    paqueteServicio: 'Paquete de {{n}} estadías',
+    paqueteSimulado: 'El cobro de este paquete todavía es simulado. Te lo decimos porque es la verdad.',
+    duracion: 'Entre tus dos ventanas',
+    exitoTitulo: '¡Listo! Tu día está reservado.',
+    exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
+  },
+  logGuarderia: {
+    /* El vacío de la FIRMA del founder — se pinta cuando el lector diga
+       que no hay ninguna. Hoy vive detrás de `LISTA_DISPONIBLE`. */
+    vacioTitulo: 'Sin estadías agendadas',
+    /* 🔴 Sin mascota elegida NO se dice «sin estadías»: nadie preguntó. */
+    elegiMascotaTitulo: 'Elige de quién',
+    /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
+    reservar: 'Reservar una estadía',
+    planTitulo: 'Tu plan mensual',
+    planDetalle: '${{precio}} al mes. Se cobra solo hasta que lo canceles.',
+    conTuPaquete: 'Con tu paquete',
+    verSuDia: 'Ver su día',
+    reservarDePaquete: 'Reservar estadía de tu paquete',
+    /* El singular tiene key propia: la pluralización no es interpolación. */
+    saldo: '{{n}} de {{total}} disponibles',
+    saldoUna: '1 de {{total}} disponible',
+    elegiMascotaDetalle: 'Toca una de tus mascotas para ver sus estadías.',
+    vacioDetalle: 'Cuando reserves, tus estadías se verán acá.',
+    estadiasNoCargoTitulo: 'No pudimos cargar tus estadías',
+    estadiasNoCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
+    titulo: 'Guardería',
+    reservarDe: 'Reservar para {{nombre}}',
+    /* 🔴 No dice «no tienes estadías»: dice que todavía no podemos mostrarlas.
+       Lo primero sería mentir con cara de dato. */
+    listaPendienteTitulo: 'Todavía no podemos mostrarte tus estadías',
+    listaPendienteDetalle: 'Estamos terminando esta parte. Mientras tanto puedes reservar desde el botón de abajo.',
+    noCargoTitulo: 'No pudimos cargar tus mascotas',
+    noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
   },
 } as const;

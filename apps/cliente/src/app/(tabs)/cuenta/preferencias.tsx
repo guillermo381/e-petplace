@@ -41,6 +41,7 @@ import {
   Interruptor,
   SelectorOpcion,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -48,8 +49,11 @@ import {
 } from '@epetplace/ui';
 import { cambiarIdioma, type IdiomaSoportado } from '@epetplace/i18n';
 import {
+  fijarRedesAutorizadas,
+  getEstadoOnboardingDueno,
   guardarIdiomaPreferido,
   guardarPreferenciaCanal,
+  obtenerAutorizacionGuarderia,
   obtenerCatalogoNotificaciones,
   obtenerPreferencias,
   type CanalNotificacion,
@@ -61,6 +65,27 @@ import { filaEncendida, preferenciaEfectiva } from '@/lib/preferencias-estado';
 import { permisoPushDelSistema, type PermisoPush } from '@/lib/permiso-push';
 
 export default function PreferenciasCuenta() {
+  /* `null` = todavía no se leyó O nunca eligió. Las dos se pintan apagadas y
+     ninguna afirma que la familia dijo que no. */
+  const [redes, setRedes] = useState<boolean | null>(null);
+  const [familiaId, setFamiliaId] = useState<string | null>(null);
+
+  /* La familia y su autorización, en la misma ola: el peaje es de la
+     PETICIÓN, no del volumen (L-223). */
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      const e = await getEstadoOnboardingDueno();
+      if (!vigente || !e.ok || e.data.familia_id === null) return;
+      setFamiliaId(e.data.familia_id);
+      const a = await obtenerAutorizacionGuarderia(e.data.familia_id);
+      if (!vigente) return;
+      /* 🔴 `null` del lector = **nunca eligió**, y se queda en `null`: no se
+         traduce a `false`. Las dos se ven apagadas, pero sólo una afirma. */
+      if (a.ok) setRedes(a.data === null ? null : a.data.redesAutorizadas);
+    })();
+    return () => { vigente = false; };
+  }, []);
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -259,6 +284,55 @@ export default function PreferenciasCuenta() {
             onSelect={(codigo) => void alElegirIdioma(codigo)}
           />
         </Tarjeta>
+
+        {/* ── COMPARTIR SUS FOTOS · la SEGUNDA vía de la autorización ─────
+             ⭐ El consentimiento se da en la confirmación de la reserva —ya
+             pagó, así que aceptar no puede parecer un requisito—; **acá vive
+             el interruptor para cambiarlo después**.
+
+             🔴 **El correo de `privacidad@` NO se retira porque exista esta
+             pantalla** (firma del founder): la frase del check ofrece **las
+             dos vías**. *Un canal de contacto no se cierra porque aparezca un
+             control — quien no encuentra la pantalla sigue teniendo cómo.*
+
+             ⚠️ **`null` NO es `false`.** El lector devuelve `null` cuando la
+             familia **nunca eligió**, y eso se pinta apagado **sin decir que
+             dijo que no** — *mostrar «no autorizaste» a quien nunca fue
+             preguntado es inventarle una respuesta.*
+
+             🔴 Escribe por `fijarRedesAutorizadas`, la puerta PROPIA: usar el
+             aceptador de documentos como interruptor **le firmaba a la familia
+             un contrato que no leyó** (medido por A: aceptaciones 10 → 11 al
+             prender el switch). ── */}
+        {familiaId !== null ? (
+          <View style={{ gap: spacing[3] }}>
+            <Text
+              accessibilityRole="header"
+              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
+            >
+              {t('cuenta.imagenTitulo')}
+            </Text>
+            <Tarjeta>
+              <View style={{ gap: spacing[2] }}>
+                <Interruptor
+                  etiqueta={t('imagenes.enPreferencias')}
+                  encendido={redes === true}
+                  onCambio={(v) => {
+                    const antes = redes;
+                    setRedes(v);
+                    void fijarRedesAutorizadas({ familiaId, autorizadas: v }).then((r) => {
+                      /* Si el server rebota, la perilla VUELVE: dejarla puesta
+                         sobre un guardado que falló muestra un permiso que
+                         nadie tiene. */
+                      if (!r.ok) setRedes(antes);
+                    });
+                  }}
+                />
+                <Texto variante="apoyo">{t('imagenes.revocar')}</Texto>
+              </View>
+            </Tarjeta>
+          </View>
+        ) : null}
 
         <View style={{ gap: spacing[3] }}>
           <Text

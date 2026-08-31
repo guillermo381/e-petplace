@@ -99,8 +99,46 @@ import Constants from 'expo-constants';
 
    ☠️ **CONDICIÓN DE MUERTE, y no es «cuando alguien se acuerde»:**
    **esta línea muere cuando entre B1** — la sonda nativa
-   `SondaManifest.leerMetaData('com.google.android.geo.API_KEY')`, que **ya
-   existe en `apps/prestador/modules/sonda-manifest`** y hay que portar al
-   cliente. *Lee el manifiesto REAL en runtime: inmune a OTA e inmune a env
-   vars, que es lo único que no depende de que alguien recuerde algo.* */
+   `SondaManifest.leerMetaData('com.google.android.geo.API_KEY')`, que **lee el
+   manifiesto REAL en runtime: inmune a OTA e inmune a env vars, que es lo único
+   que no depende de que alguien recuerde algo.* */
+/* ═══════════════════════════════════════════════════════════════════════════
+   `D-967` · LA SONDA YA ESTÁ PORTADA — **Y EL FLIP TODAVÍA NO SE HACE**
+   (firma de la mesa, 29-ago-2026)
+
+   `apps/cliente/modules/sonda-manifest` **existe desde hoy**, portado
+   **byte-idéntico** del prestador (`diff -r` en cero — así la divergencia entre
+   las dos copias se caza con un `diff`, y por eso **no se le agregó ni una nota
+   adentro**: un comentario de más volvería ruidosa la única señal que tenemos).
+
+   ── 🔴 POR QUÉ PORT Y FLIP SON DOS ACTOS, Y NO SE HACEN JUNTOS ────────────
+
+   | acto | ¿seguro HOY? | medido |
+   |---|---|---|
+   | **portar** | ✅ **sí** | la sonda usa `requireOptionalNativeModule`, que devuelve `null` si el módulo no está ⇒ **importarla en un APK que no la lleva no rompe nada** |
+   | **flipear** | ❌ **no** | en el binario de cliente instalado la sonda daría `null`, y `null` cuenta como NO (fail-closed) ⇒ **apagaría el mapa en una app donde funciona** |
+
+   > ### El próximo binario del cliente es el disparo del **FLIP**, no del PORT.
+   > *Si el port hubiera esperado al binario, se volvía un paso que alguien tiene
+   > que recordar en el peor momento — y esta deuda existe justamente porque su
+   > cura no puede depender de que alguien recuerde algo.*
+
+   ⚠️ **LA SALIDA TENTADORA ES LA TRAMPA, y por eso se escribe:** *«si la sonda
+   devuelve `null`, caigo al literal»* es **fail-OPEN con mejor nombre** —
+   deshace exactamente el fail-closed que la ficha restituyó, y su modo de falla
+   es el peor: la app **no degrada, muere en hilo NATIVO** fuera de toda
+   ErrorBoundary.
+
+   ── EL FLIP, ESCRITO PARA QUE SEA UNA LÍNEA ───────────────────────────────
+
+   Cuando exista un binario de cliente que lleve el módulo —verificado con
+   `verify-manifest-apk.mjs` sobre ESE APK, no sobre el recuerdo de otro—:
+
+     import { manifestTieneKeyDeMapa } from '../../modules/sonda-manifest';
+     export const MAPA_NATIVO_DISPONIBLE =
+       Platform.OS === 'web' ? true : manifestTieneKeyDeMapa() === true;
+
+   *(Web queda afuera a propósito: el crash que este guard evita es de Android
+   nativo; apagarlo en web escondería un mapa que funciona sin evitar nada.)*
+   ═══════════════════════════════════════════════════════════════════════════ */
 export const MAPA_NATIVO_DISPONIBLE = true;

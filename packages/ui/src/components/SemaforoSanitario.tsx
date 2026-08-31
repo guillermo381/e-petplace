@@ -78,7 +78,7 @@ import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { Separador } from './Separador'
 import { Texto } from './Texto'
-import { CHEVRON } from './chevron'
+import { Chevron } from './chevron'
 
 /**
  * 🔴 UNIÓN DISCRIMINADA — ver el encabezado. `falta` SIN camino no compila.
@@ -121,6 +121,38 @@ export type SemaforoSanitarioProps = {
   /** Rótulo del grupo, en voz de la app. */
   rotulo?: string
 }
+
+/* 🔴 LA GEOMETRÍA DE FILA, EN UN SOLO LUGAR (S107-B, pedido de C con su
+ *  medición — gate del founder: *«quedó MUY ANCHO… la caja no está bien
+ *  dimensionada»*).
+ *
+ *  **Los tres números son los de `CeldaNavegacion`**, que es la fila canónica
+ *  de la casa (`12 / 8 / 56`, leídos de su fuente, no elegidos acá). C midió
+ *  su montaje contra la equivalente exacta —una carta blanca con una fila
+ *  adentro— y dio **~92 contra ~60: 53 % más alta para la misma
+ *  información.**
+ *
+ *  ⚠️ **POR QUÉ EL PADDING ES DE LA PIEZA Y NO DEL CONSUMIDOR**, que era la
+ *  pregunta: *esta pieza no expone SUPERFICIE a propósito —igual que
+ *  `FichaFranja`— y eso sigue bien.* **Pero el padding de la fila no es
+ *  superficie: es la fila.** Sin él, la pieza **sólo se puede montar dentro de
+ *  un contenedor que la padee** — y el contenedor que la casa usa para listas
+ *  de filas es justamente `Tarjeta relleno="ninguno"`, que **no padea**. *Una
+ *  pieza que sólo funciona con el contenedor que su propio caso no usa le está
+ *  pasando su geometría al consumidor, y cada consumidor la va a resolver
+ *  distinto.* Hoy son dos montajes; iban a ser más.
+ *
+ *  ⚠️ **Y VA EN UNA CONSTANTE COMPARTIDA, no repetida en los dos brazos:** el
+ *  defecto que C encontró incluía que **el brazo «al día» no tenía `minHeight`
+ *  y el tocable sí** ⇒ *las dos filas de la misma lista medían distinto*.
+ *  Repetir tres propiedades en dos lugares es cómo se separaron; con una
+ *  constante **no pueden volver a divergir**. */
+const GEOMETRIA_FILA = {
+  paddingHorizontal: spacing[3],
+  paddingVertical: spacing[2],
+  minHeight: 56,
+  justifyContent: 'center',
+} as const
 
 function Fila({ requisito }: { requisito: RequisitoSanitario }) {
   const { theme } = useTheme()
@@ -172,11 +204,9 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
 
       {/* El chevron SOLO donde hay camino (Ley 18: la estructura informa). En
           una fila al día sería una promesa de navegación que nadie cumple. */}
-      {falta ? (
-        <Texto variante="cuerpo" color="tertiary">
-          {CHEVRON.derecha}
-        </Texto>
-      ) : null}
+      {/* ⏪ MISMO DEFECTO QUE `SeccionPlegable`, y del mismo autor: el `d` del
+          path salía impreso como texto. **Se usa la pieza.** */}
+      {falta ? <Chevron direccion="derecha" /> : null}
     </View>
   )
 
@@ -187,7 +217,7 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
       <View
         accessibilityRole="text"
         accessibilityLabel={[requisito.etiqueta, requisito.detalle].filter(Boolean).join('. ')}
-        style={{ paddingVertical: spacing[3] }}
+        style={GEOMETRIA_FILA}
       >
         {cuerpo}
       </View>
@@ -205,12 +235,12 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
         .filter(Boolean)
         .join('. ')}
       style={({ pressed }) => ({
-        /* Target 44 (19.7): 12 + 12 de padding sobre una fila de ~20 llega al
-           mínimo sin inflar el ritmo de la lista. */
-        paddingVertical: spacing[3],
-        minHeight: 44,
-        justifyContent: 'center',
+        ...GEOMETRIA_FILA,
         borderRadius: radius.suave,
+        /* Con el padding ADENTRO, el resalte de presión corre A SANGRE como en
+           toda lista de celdas de la casa. Con el andamio del consumidor
+           quedaba inset — *y ese inset era justo lo que lo delataba como
+           andamio.* */
         backgroundColor: pressed ? theme.bg.overlay : 'transparent',
       })}
     >

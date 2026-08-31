@@ -2472,6 +2472,44 @@ C, contestada por el founder al ver el primer papel de verdad.)*
 >
 > **Origen de la enmienda:** S86 — C lo nombró al construir la Pizarra, A lo midió. *El wrapper nuevo de esa misma sesión (`pizarra.ts`) nace con el mismo defecto **a propósito y declarado**: cambiar la voz de UN wrapper mientras los otros ~40 siguen en voseo produciría dos acentos adentro de `packages/api`, que es peor que uno consistente y equivocado.*
 
+> **➕ ENMIENDA S107 — LA FICHA NO SUBESTIMA EL ALCANCE; SUBESTIMA EL TAMAÑO. Re-medido.**
+>
+> El founder preguntó, al ver un rebote de guardería salir **en español con la
+> app en inglés**, si la ficha estaba fichada con su alcance real. **Lo está** —
+> ya dice *«el paquete no importa i18n en ningún punto»* y *«todos sus mensajes
+> son español literal»*, y ya declara que **los 193 usos de `.mensaje` en las
+> apps los RENDERIZAN**, así que el universo entero siempre fue alcanzable.
+> **No hay nada que ensanchar en el diagnóstico.**
+>
+> **Lo que SÍ cambió es el número, y bastante:**
+>
+> | | S77 | S107 (31-ago-2026) |
+> |---|---|---|
+> | mapas de mensajes | ~51 declaraciones | **24 mapas** |
+> | **entradas de voz en español fijo** | *no se fijó* | **814** |
+> | de ellas, de guardería | — | **79 (10 %)** en cuatro wrappers |
+>
+> ⚠️ **El «~51» de S77 y el «24» de hoy NO se contradicen: cuentan cosas
+> distintas** —aquél contó declaraciones con un grep ancho, éste cuenta mapas
+> `MENSAJES*`/`REBOTES*` al inicio de línea—. *Se dice en vez de elegir el que
+> conviene: **el número que importa es el de ABAJO, las 814 entradas**, que es
+> el que nadie había fijado y el que mide el trabajo.*
+>
+> 🔴 **Y el dato que ordena la prioridad: guardería sola aporta 79 — el 10 % del
+> total — y NACIÓ ENTERA EN S107.** *La deuda no está quieta: crece con cada
+> oficio nuevo, y cada wrapper que se escribe «como los demás» la agranda a
+> propósito y con razón* (cambiar la voz de uno solo produciría dos acentos
+> adentro del paquete).
+>
+> ⇒ **Eso mueve la ficha de «cuando alguien abra la app en inglés» a «antes del
+> próximo oficio»:** el costo de la cura sube con cada tanda, y **ya se sabe que
+> el siguiente oficio va a sumar otras ~80.**
+>
+> **Medido contra el objeto al cerrar S107:** `packages/api` **sigue sin un solo
+> import de `@epetplace/i18n` ni de `i18next`** — el diagnóstico de S77 rige
+> tal cual, cuatro sesiones después.
+
+
 > **➕ ENMIENDA S99 (adjudicación de mesa, 15-ago-2026) — EVIDENCIA NUEVA DE C, Y LA FRONTERA CON R44 DECLARADA.**
 >
 > C midió cinco voces de error de `packages/api` hard-codeadas en español y
@@ -19321,6 +19359,33 @@ Ni `apps/cliente` ni `apps/prestador` fijaban `cli.requireCommit` ⇒ **EAS arch
 ---
 
 ### D-867 🔴 · EL ACTUADOR COLAPSA SIETE CAUSAS EN `desconocido`, Y ESA VOZ ES LA DE «SOPORTE»
+
+> ✏️ **ENMIENDA S107-A (31-ago-2026) — SE MIDIÓ QUÉ HAY DEL OTRO LADO, por
+> firma de mesa** (*«no inventes distinciones que el proveedor no te da; antes
+> de ampliar vocabulario, medí»*). El censo separó tres cosas que venían juntas:
+>
+> · 🟢 **VENCIDA era HUECO NUESTRO y se cerró** — `expira_mes`/`expira_anio`
+>   son columnas de `tarjetas_guardadas`, están pobladas, y **no hace falta
+>   preguntarle nada al proveedor**. Nace `tarjeta_vencida`.
+> · 🟢 **Y apareció uno que nadie había pedido:** `contratar_mensualidad_guarderia`
+>   **no miraba el `estado` de la tarjeta** ⇒ se podía firmar un **mandato de
+>   cobro recurrente sobre una tarjeta `rechazada`**. Nace `tarjeta_no_guardada`.
+> · ☠️ **«NO VERIFICADA» NO EXISTE** — el estado es `guardada|rechazada|
+>   abandonada` y una `guardada` ya pasó el alta 3DS. **Se declara inexistente
+>   en vez de inventarse.**
+>
+> 🔒 **Lo que sigue bloqueado es exactamente esta ficha, y ahora con su
+> mecanismo medido:** la causa del rechazo **sí llega** del proveedor —
+> `err.type`, `err.description`, `tx.message`, `tx.status_detail` — y
+> `pagos-cobro` **la aplana a PROSA** en `motivo_rechazo`, 400 caracteres de
+> texto libre. *Sirve para diagnosticar y es inservible para decidir una voz.*
+> **La distinción existe y se pierde en el aplanado** — pero tiparla sigue
+> necesitando la tabla de códigos de Erick, y **mapear `31` por parecido sería
+> el defecto que este censo vino a medir.**
+>
+> ⇒ **Mientras esto siga abierto, la pantalla dice UNA sola cosa honesta sobre
+> un rechazo del banco. Eso es un LÍMITE declarado, no una omisión.**
+
 > S102-B · 21-ago-2026 · **ficha completa: `docs/relevamientos/2026-08-21-s102b-FICHAS-del-censo-de-respuestas.md`**
 
 La letra define **siete** causas de rechazo con voz propia; **el actuador tiene DOS salidas**. Los tres rechazos reales que la base vio —`0/31`, `2/32`, `5/14`— **caen los tres en `desconocido`**.
@@ -22158,6 +22223,16 @@ porque el vencido está actualizado.
 > grep contra el objeto: tope real `L-431` (pista CERT), `L-432` en cero
 > ocurrencias.**
 
+> ### ➕ TERCER COBRO, 29-ago-2026 — **Y ES LA FORMA MÁS PURA DE ESTA LEY: UNA MEDICIÓN BIEN HECHA QUE CONTESTA OTRA PREGUNTA.**
+>
+> **El caso:** para decidir si el recorrido del prestador podía viajar por OTA, C midió *«cero cambios en `package.json` y `app.json` **entre main y mi rama**»* — **y la medición era correcta**. De ahí concluyó, razonablemente, que no había módulo nativo nuevo y que el OTA alcanzaba.
+>
+> 🔴 **La pregunta era otra: qué versión declara `app.json` CONTRA qué binario existe.** Medido después: `app.json` decía **`1.0.7`** —con `runtimeVersion` por policy `appVersion`— y **la última build finished era `1.0.6`, del 24-ago**. ⇒ **todo OTA del prestador salía a un runtime que ningún binario tenía.** *Un OTA perfecto que no le llega a nadie* — el caso literal que parió `verify-ota.mjs` el 4-ago, y **el guard lo frenó otra vez**.
+>
+> **Por qué pertenece a esta ley y no a «se midió mal»:** la premisa *«sin módulo nativo nuevo, el OTA alcanza»* **era verdadera** — hasta que alguien subió la versión en `app.json`. **La verdad venció, y su medición siguió siendo impecable sobre la variable que ya no decidía.**
+>
+> **Lo operativo, que es barato:** antes de afirmar que algo viaja por OTA se comparan **DOS objetos, no un diff**: la `version` declarada y la lista de builds `finished` de ese canal. *Un diff entre ramas nunca va a contestar eso, porque el dato que decide no está en ninguna de las dos.*
+
 > ⚠️ **COLISIÓN DE NÚMERO, DECLARADA — y es el precedente `D-757` cobrado dos
 > veces en el mismo día.** **B pidió `L-432` para OTRA lección** (*«un censo que
 > da cero verifica primero que la página viva»*), midiendo igual de bien que yo:
@@ -23358,6 +23433,145 @@ tiene que estar en EAS, no en la sesión de alguien.)*
 fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real —
 **dos secrets, no uno**— y con su disparo.
 
+#### D-968 — 🔴 EL GATE SANITARIO NACE APAGADO, Y **SE ENCIENDE ANTES DE LA SALIDA REAL**
+
+> ✏️ **CONFIRMADO POR FIRMA DEL FOUNDER (31-ago-2026) y SUBIDO AL CHECKLIST.**
+> Con estas palabras: **el gate sanitario se ENCIENDE ANTES DE LA SALIDA REAL.
+> Hoy queda apagado, informativo.**
+>
+> 🔑 **Y dejó de vivir sólo acá:** es la **precondición ⑦ de
+> `DEFINICION_SOFTLAUNCH` §3.5**, al lado de las seis de S80. *Una precondición
+> que vive en una ficha suelta no la lee nadie el día del lanzamiento — la
+> lista la carga, no la memoria.*
+
+
+🔴 **ALTA · ENTRA AL CHECKLIST DE LANZAMIENTO.** Firma de la mesa, 29-ago-2026.
+
+**Lo que se apagó es el ENFORCEMENT, no la evaluación** — y la distinción es la ficha entera. `evaluar_requisitos_guarderia` **sigue midiendo todo**: carnet cargado, vigencia, y cada faltante con su código, su estado y su fecha. Lo configurable es **si la compuerta frena o informa**: `app_config.guarderia_gate_sanitario_duro`, que **nace en `false`**.
+
+Durante las pruebas el semáforo es **informativo**: una mascota con requisitos incompletos **puede reservar y pagar**, viendo qué le falta.
+
+> ### 🔴 **UN GATE APAGADO QUE NADIE RECUERDA ENCENDER ES PEOR QUE NO TENERLO — porque todos creen que está.**
+
+*Por eso esta ficha existe y por eso está en el checklist: no es una preferencia de configuración, es una promesa de seguridad que hoy no se cumple y que alguien tiene que cumplir en una fecha.*
+
+☠️ **Condición de muerte:** `guarderia_gate_sanitario_duro = true` **antes de la salida real**, y ahí pasa a ser restricción dura — *sin requisitos al día no se paga el servicio.* **Encenderlo es un `UPDATE`**, no una versión de la app.
+
+**Y su hermana, DEUDA ACEPTADA:** hoy la lista corre con **antirrábica**. El founder confirma con su veterinario **las anuales y los desparasitantes**, y se agregan **como dato** (`cat_plan_vacunal.exigida_guarderia`) cuando lleguen — *jamás cableadas.*
+
+**Dueño:** founder (la firma + la lista con su veterinario) + A (el `UPDATE`).
+
+#### D-969 — 🟠 CAMBIAR EL PASO DE UN RIEL PUEDE REESCRIBIR PRECIOS YA GUARDADOS, SIN UN SOLO ERROR
+
+🟠 **MEDIA. Hallazgo de C (29-ago-2026), curado por C en su tanda. Se ficha porque la CLASE vale más que el caso.**
+
+**El mecanismo:** un selector de precio con pasos discretos resolvía el valor guardado con **`indexOf`**. Si el precio guardado **no cae exactamente en la grilla nueva**, `indexOf` devuelve **`-1`**… y el consumo lo lee como **índice 0**: *el piso del rango.*
+
+> ### **Cambiar la PRESENTACIÓN de un riel reescribió el DATO — y sin un solo error.**
+
+**Por qué es de la familia cara:** no hay excepción, no hay log, no hay nada raro en pantalla. **El precio simplemente aparece siendo otro**, y el prestador lo guarda sin saber que cambió. *Un cambio que sólo iba a mover píxeles terminó moviendo plata.*
+
+☠️ **Curado por C** cayendo **al paso más cercano** en vez de al índice 0. **La regla que deja:** *todo control con pasos discretos que reciba un valor ya guardado declara qué hace cuando el valor no cae en la grilla — y «caer al primero» nunca es la respuesta.*
+
+**Dueño:** B (si la clase se repite en otra pieza con pasos). **Disparo:** el próximo riel con grilla que reciba valores persistidos.
+
+#### D-967 — ☠️ CURADA EN EL PRESTADOR · 🟠 DECLARADA EN EL CLIENTE (29-ago-2026) — `MAPA_NATIVO_DISPONIBLE` AFIRMABA SOBRE **UN** APARATO
+
+> ☠️ **CURADA EN `apps/prestador` (firma de la mesa, 29-ago).** El literal murió; ahora lo decide **la sonda nativa**:
+> ```ts
+> export const MAPA_NATIVO_DISPONIBLE =
+>   Platform.OS === 'web' ? true : manifestTieneKeyDeMapa() === true;
+> ```
+> **`SondaManifest.leerMetaData` lee el manifiesto REAL en runtime** — *inmune al OTA e inmune a las env vars, que es lo único que no depende de que alguien recuerde algo.* La pieza **ya existía** desde S81 (`D-579`), preparada-apagada y **sin un solo consumidor a propósito**; esto es su flip, y su condición de disparo se cumplió.
+>
+> 🔴 **FAIL-CLOSED restituido:** la sonda devuelve `boolean | null`, y **`null` —módulo ausente, APK pre-tren— cuenta como NO**. *No saber es un caso de no tener*, y la ley del archivo (*un secret faltante cuesta EL MAPA, jamás la app*) vuelve a tener efecto.
+>
+> ⚠️ **Web queda afuera, y no es un atajo:** el crash que este guard evita es `IllegalStateException: API key not found` en `com.rnmaps.maps.MapView.onCreate` — **hilo nativo de Android**. En web el mapa es otra pieza y esta key no lo gobierna; apagarlo ahí escondería un mapa que funciona **sin evitar ningún crash**.
+>
+> ### 🟠 LO QUE QUEDA ABIERTO, con su camino exacto: **EL CLIENTE**
+>
+> `apps/cliente/src/lib/mapa-nativo.ts:106` **sigue con `= true` literal**, y **la sonda NO está portada** (medido: `apps/cliente/modules/` no existe).
+>
+> 🔴 **Y NO se porta y consume en el mismo acto, por una razón medida:** en un binario de cliente que todavía no tenga el módulo, la sonda devolvería `null` ⇒ fail-closed ⇒ **el mapa del cliente se apagaría HOY**, en una app donde funciona. *La cura correcta apagaría lo que está bien.*
+>
+> **La forma, que es el molde S91:** ① portar `modules/sonda-manifest` al cliente **inerte, sin consumidor** ② el flip de su constante **cuando exista un binario de cliente que lo lleve**. **Dueño:** C (`apps/` es su territorio) + B (la sonda). **Disparo:** el próximo binario del cliente.
+>
+> *(Diagnóstico original abajo — su medición sigue siendo la que produjo la cura.)*
+
+#### D-967 (original) — 🔴 `MAPA_NATIVO_DISPONIBLE = true` ES UNA AFIRMACIÓN SOBRE **UN** APARATO, ESCRITA EN EL CÓDIGO DE TODOS
+
+🔴 **ALTA. Hallada el 29-ago-2026 midiendo por qué el guard del manifest reprobó una build local.**
+
+`apps/prestador/src/lib/mapa-nativo.ts:104` tiene **`export const MAPA_NATIVO_DISPONIBLE = true;`**, y su propio comentario dice por qué:
+
+> *«HOY ESTA CONSTANTE ES VERDADERA … **el APK instalado pasó `verify-manifest-apk.mjs` en VERDE** con `✓ meta-data geo.API_KEY`»*
+
+**El razonamiento era correcto el día que se escribió** — y su fragilidad es de forma, no de cuidado:
+
+> ### **Una constante que dice «el mapa está horneado» porque UN APK medido lo tenía, es una afirmación sobre un aparato viviendo en el código de todos.**
+
+🔴 **Y hoy existe el contraejemplo, medido:** la build local que se cortó el 29-ago **NO lleva la key** — `verify-manifest-apk` la reprobó con exit 1, y la causa está medida: `GOOGLE_MAPS_API_KEY` es un **secret que sólo el builder de EAS puede leer**, así que **ninguna build local puede hornearlo** salvo que alguien la exporte a mano en su shell.
+
+**El modo de falla, que es el peor de todos:** con la constante en `true` sobre un binario sin key, la app **no degrada — monta el `MapView` y muere en hilo NATIVO, fuera de toda ErrorBoundary.** *Es el incidente literal de S80, que estuvo invisible tres sesiones.* La ley `FAIL-CLOSED` que el propio archivo declara en su línea 77 **quedó sin efecto** al reemplazar la derivación por un literal.
+
+⚠️ **Y por qué la derivación anterior tampoco servía** (está medido en el mismo archivo, 27-ago): `extra.mapasHorneados` se **recomputa en CADA `eas update`** sin la key ⇒ **todo OTA publica `false` y pisa el `true` del APK**. *Dos actos compilan el config y el segundo nunca puede saber* (`L-435`). **Ninguna de las dos formas —literal ni derivada de `extra`— puede ser correcta.**
+
+☠️ **CONDICIÓN DE MUERTE, ya escrita en el propio archivo y con su pieza construida:** la sonda nativa **`SondaManifest.leerMetaData('com.google.android.geo.API_KEY')`**, que **YA EXISTE** en `apps/prestador/modules/sonda-manifest` — *lee el manifiesto REAL en runtime: inmune al OTA e inmune a las env vars, que es lo único que no depende de que alguien recuerde algo.* **Falta portarla al cliente y consumirla acá.**
+
+⚠️ **Consecuencia operativa inmediata, y refuerza el veredicto del guard:** **el APK local del 29-ago NO se instala.** No sólo porque le falten las metadatas — sino porque **con esta constante en `true` no degradaría: crashearía.**
+
+**Dueño:** B (la sonda es su territorio) + A (el consumo). **Disparo:** antes de cualquier build local que alguien vaya a instalar.
+
+#### D-964 — 🔴 REQUISITO DE LANZAMIENTO: CADA PRESTADOR DEBE DECLARAR QUÉ ESPECIES ATIENDE
+
+🔴 **ALTA · es de LANZAMIENTO, no de S107.** Firma de la mesa (29-ago), tercera capa de la resolución de `D-959`.
+
+**Lo que la cura de `D-959` hizo:** a cada oferta con `especies_compatibles = []` se le escribió **todas las especies del universo de su tipo** — que es exactamente lo que los lectores leían antes del defecto (`IS NULL` = «no acota»). **Eso les devuelve la visibilidad hoy.**
+
+🔴 **Lo que NO hizo, y por eso esta ficha existe: no es la elección de su dueño.** *Un prestador de consulta general que hoy figura atendiendo equinos y hurones no lo decidió — se lo escribió un backfill para sacarlo del cero.* **Antes de salir a producción, cada prestador DEBE declarar qué especies atiende.**
+
+**La pantalla donde lo declara es de C y NO entra en esta sesión.** Se escribe acá para que **nadie lo descubra en el lanzamiento**.
+
+**Dueño:** C (la pantalla) + cada prestador (la declaración). **Disparo:** antes de producción.
+☠️ **Condición de muerte:** cero ofertas activas cuyo `especies_compatibles` provenga del backfill sin que su dueño lo haya confirmado.
+
+#### D-965 — 🟡 «TU DÍA» VIVE BAJO NEGOCIO, Y ES UNA DESVIACIÓN ACEPTADA DE §15b
+
+🟡 **MEDIA. Desviación DECLARADA y aceptada por la mesa para S107** — no un descuido.
+
+**La ley:** `DISEÑO_EXPERIENCIA` §15b — **HOY acciona · NEGOCIO gestiona**. La lista del día es acción pura, así que por la letra iría en **HOY**.
+
+**Por qué se acepta la desviación, con su razón:** **la estadía-día no es una cita con hora.** El HOY del prestador está construido sobre una jornada de citas con hora de inicio, y meter ahí un objeto cuya unidad es **el día entero** —con dos ventanas y sin hora— **es una tanda propia**, no un injerto. *Forzarlo ahora produciría el HOY que hay que rehacer después.*
+
+☠️ **CONDICIÓN DE MUERTE, y es de las que no admiten media tinta:** «Tu día» pasa a ser **alcanzable desde HOY** y **se retira de Negocio EN EL MISMO ACTO**.
+
+> 🔴 **Dejarlo en los dos lados es exactamente la duplicación que `D-645` acaba de costar** — la pieza promovida que nadie retiró de su sitio viejo, y la casa terminó manteniendo dos. *Una migración de superficie que no retira el origen no es una migración: es una copia.*
+
+**Disparo:** después del acta (tanda ⑤). **Jamás en silencio:** el día que se mueva, se declara.
+
+#### D-966 — 🟢 `VozComision` REINTRODUJO EL `toFixed(2)` QUE `PrecioText` VINO A MATAR
+
+🟢 **BAJA. Hallazgo de B (29-ago), declarado y NO curado a propósito.**
+
+`PrecioText` nació para terminar con el `toFixed(2)` a mano repartido en **53 sitios**. **`VozComision` lo tiene otra vez en su cuerpo.**
+
+**Por qué no se cura en esta tanda:** tiene consumidores vivos y tocarla es una pasada propia. **Se ficha para que no se re-descubra** — *un defecto que se encuentra tres veces cuesta tres diagnósticos, y el tercero ya no es un hallazgo: es que nadie lo anotó.*
+
+**Dueño:** B. **Disparo:** la próxima vez que se toque `VozComision`.
+☠️ **Condición de muerte:** `VozComision` consume `PrecioText` y su `toFixed` desaparece.
+
+#### D-963 — ☠️ CERRADA AL DESCUBRIRSE (29-ago-2026) — LA RESERVA DE GUARDERÍA NO GUARDABA DÓNDE IR
+
+**Apareció escribiendo el lector de la jornada, no auditando.** `reservar_dia_guarderia` creaba la cita **sin `direccion_snapshot`** ⇒ la lista del día del prestador decía **a quién** recoger y **no dónde**.
+
+> ### 🔴 En un oficio cuyo primer acto es tocar el timbre de una casa, eso no era un campo faltante: **era la mitad del trabajo.**
+
+**Por qué no lo vio ningún gate, que es lo de siempre en esta sesión:** la reserva **funcionaba** — cobraba, tomaba cupo, congelaba su desglose y devolvía `ok`. *El defecto no era que algo fallara: era que el dato que hace ejecutable el servicio no estaba, y nada lo pedía.* **Se descubrió recién cuando alguien fue a escribir la pantalla que lo consume** — que es exactamente el patrón que `P-CIRCUITO` (S103) existe para forzar: *recorrer el circuito de punta a punta encuentra lo que ningún gate ve.*
+
+☠️ **CERRADA en `20260829000000` reusando `_direccion_hogar_snapshot(user_id)`** — **la MISMA pieza que el paseo usa para su modalidad a domicilio** (`D-339`). **Cero invención:** la dirección se congela igual que el precio y por la misma razón — *es la que la familia tenía cuando reservó, no la que tenga el día de la recogida.*
+
+⚠️ **Lo que queda declarado:** las citas creadas antes de esta migración se quedan sin dirección. **Medido: cero estadías vivas** (las únicas eran de cinturones, deshechas en subtransacción) ⇒ **daño cero**, y por eso no hay backfill.
+
 #### D-960 — ☠️ CERRADA EL MISMO DÍA (28-ago-2026) — UN SERVICIO QUE CUELGA DEL FLAG DE OTRO DESAPARECE CUANDO EL OTRO SE ENCIENDE
 
 **Hallada por C midiendo su pantalla, cerrada por A en la migración siguiente. Se registra igual, porque el defecto era LATENTE y la clase vale más que el caso.**
@@ -23521,3 +23735,620 @@ sin que nadie lo note, así que el costo de esperar está medido en cero.*
 
 **Dueño:** mesa (el criterio) + A (encender la compuerta). **Disparo:** antes de abrir guardería a familias reales.
 ☠️ **Condición de muerte:** el criterio de «al día» firmado **y** `fecha_proxima` poblándose por el camino real (el carnet por cámara ya la escribe cuando el modelo la encuentra).
+
+# Deudas S107 (D-970 · D-971) + L-436 — depositadas por A el 29-ago-2026 · números verificados libres POR GREP contra este archivo (tope real `D-969` · `L-435`; `L-714` sigue descartado por su propia ficha)
+
+#### D-970 — 🟡 EL DEFAULT DE LA CATEGORÍA `resumen` SE ESCRIBIÓ PARA OTRO VOLUMEN
+🟡 **MEDIA · decisión de MESA, no de pista.** Nace el 29-ago-2026 como **acto ② separado a propósito** de la firma que destrabó el digest de guardería.
+
+**Lo medido, contra el objeto:** `cat_notificacion_categorias.resumen` tiene `default_habilitada = **false**`, y `user_notificacion_prefs` tenía **cero filas** de esa categoría. Como `preferencia_efectiva` resuelve `COALESCE(fila del usuario, default de la categoría, false)`, **el digest no le llegaba a nadie** — y no por un defecto: por una decisión escrita.
+
+> ### 🔴 Lo que la vuelve ficha y no cura: ese default se escribió pensando en **el volumen de La Despensa**, no en la media de una guardería.
+> *Un resumen de decenas de eventos comerciales por día y «la guardería compartió fotos de Thor» son la misma categoría en el catálogo y dos cosas distintas para quien las recibe.* Pero **la categoría es una sola**, así que cambiar el default los mueve a los dos.
+
+🔴 **Y LO QUE NO SE HIZO, con todas las letras: el default NO se tocó para que el gate saliera verde.** El acto ① habilitó `resumen` **sólo en las cuentas del gate**, una fila por persona, marcada en `evidencia->>'origen'` para poder revertirla sin pisar la elección de nadie.
+
+> ***Un default de privacidad no se cambia para que un gate salga verde.*** Cambiarlo habría encendido un canal para toda la base a partir de una necesidad de prueba — y nadie lo habría notado, porque el síntoma de encender de más es que todo funciona.
+
+**Lo que la mesa tiene que decidir:** si `resumen` nace habilitada, si se parte en dos categorías (comercio vs cuidado), o si se queda apagada y el digest se ofrece explícitamente al contratar guardería. **Dueño:** mesa. **Disparo:** antes de abrir guardería a familias reales.
+☠️ **Condición de muerte:** la decisión firmada **y** las filas de `evidencia->>'origen' = 's107a-gate'` retiradas o convertidas en elección real.
+
+#### D-971 — 🟡 UNA PROP QUE SE EJERCITA PERFECTO Y NO TIENE QUIÉN LA PRODUZCA
+🟡 **MEDIA · hallazgo de B (S107), depositada por A. Va con número acá porque la enmienda de hoy dice que la numera quien la deposita, releyendo el máximo en ese commit.**
+
+**El contenido, en una línea:** *una prop nace del **dato que alguien produce**, jamás del ejemplo con el que se pidió la pieza.*
+
+🔴 **Y lo que la vuelve CLASE y no anécdota: pasa todos los gates.** La prop se ejercita perfectamente en la galería, tiene su tipo, su doc y sus pares de contraste — *lo único que falta es un productor*, y eso no lo ve el typecheck, ni el lint, ni WCAG, ni una revisión de código, porque **no hay nada mal escrito**. La pieza está bien; simplemente nadie le va a dar nunca ese valor.
+
+> *Es la familia de «motor sin puerta» (`L-318`) mirada desde el otro extremo: allá la pieza existe y nadie la llama; acá la prop existe y nadie la alimenta. Las dos dan verde en todo.*
+
+**El caso hermano del mismo día, que muestra el otro modo de falla:** `Baldosa.columnas` **sí tenía productor** pero con **default**, y el default volvió el defecto invisible **para el consumidor nuevo** — dos baldosas de `negocio.tsx` pidiendo el glifo de dos columnas dentro de una grilla de tres, sin error de ningún tipo. Al hacerla obligatoria (firma de la mesa) **un defecto invisible pasó a ser once errores de compilación.**
+
+**Dueño:** B (el criterio en el protocolo 1c de Ley 11). **Disparo:** la próxima pieza que nazca con una prop cuyo valor no salga de un dato existente.
+☠️ **Condición de muerte:** el protocolo 1c pregunta explícitamente **«¿quién produce este valor, y existe hoy?»** por cada prop, y la pregunta queda escrita en la skill.
+
+---
+
+### L-436 — UN CINTURÓN QUE MIRA UNA SOLA AUDIENCIA CERTIFICA UNA SOLA AUDIENCIA
+
+**Origen: defecto propio de A, encontrado al verificar contra el objeto, 29-ago-2026.**
+
+La migración del digest cerró su función nueva con `REVOKE … FROM PUBLIC, anon` **y dejó `authenticated` con EXECUTE**. Su cinturón preguntaba `proacl ILIKE '%anon=%'` — **y dio VERDE**.
+
+> ### El verde era **parcialmente** cierto, y un verde parcial se lee igual que uno entero.
+
+*Es `L-216` («un `REVOKE … FROM anon` que deja `PUBLIC` intacto no cierra nada») con una vuelta más incómoda: allá el REVOKE no hacía nada y el rojo aparecía al probarlo; acá el REVOKE **sí hizo la mitad de su trabajo**, así que el instrumento tenía razón sobre lo que miraba — y por eso nadie sospecha de él.*
+
+**Cómo se encontró:** no lo encontró el cinturón. Lo encontró **comparar el `proacl` de la función nueva contra el de sus cuatro barredoras hermanas** — `notificar_recordatorios_cita`, `avisar_recurrencias_proximas`, `vigilar_consumo_video`, `encolar_fotos_entrega_vencidas`, todas con `postgres=X · service_role=X` y **ninguna con `authenticated`**. La mía era la única distinta.
+
+**La cura, y es la parte transferible:** el cinturón de la corrección **no compara contra un literal tipeado a mano — compara contra el MOLDE VIVO**, extrayendo el `proacl` de las hermanas en la misma corrida. *Si las hermanas cambian, el gate cambia con ellas; y si mi función se aparta del molde, aborta.* Un valor tipeado a mano habría vuelto a certificar mi propia idea en vez del estado de la casa.
+
+**Regla:** un cinturón de permisos **enumera las audiencias que la casa tiene** (`anon`, `authenticated`, `PUBLIC`, `service_role`) o **se compara contra el molde de sus pares** — jamás pregunta por una sola y concluye «cerrada». *Preguntar por una y afirmar sobre todas es la forma más barata de fabricar un verde flojo.*
+
+# Deudas S107 (D-972 · D-973) — depositadas por A el 29-ago-2026 · números verificados libres POR GREP (tope real `D-971`)
+
+#### D-972 — 🟠 LA LÍNEA DE VIDA NO DISTINGUE RUTINA DE HECHO DE VIDA
+🟠 **MEDIA-ALTA · DECISIÓN DE MESA, no de pista.** Hallada por C midiendo el catálogo vivo; **los números se re-midieron contra el objeto al depositar** (29-ago-2026).
+
+**Lo medido, y el hallazgo de C se confirma exacto:**
+
+| tipo de evento | filas vivas |
+|---|---|
+| `cita_servicio` | **219** |
+| `atencion_paseo_registrada` | **29** |
+| `atencion_grooming_registrada` | **7** |
+| `atencion_adiestramiento_registrada` | **3** |
+| **rutina, TOTAL** | **🔴 258** |
+
+✏️ **Enmienda al número de C, que dijo 255:** son **258**. Su cuenta tomó tres oficios (219 · 29 · 7) para una frase que decía *«los cuatro oficios vivos»* — **faltaba adiestramiento, con 3**. *No cambia la conclusión; la refuerza: el cuarto oficio también sedimenta su rutina, así que no hay ninguno que sirva de contraejemplo.*
+
+**El catálogo, medido columna por columna** — `cat_tipos_evento` tiene `eje_jtbd`, `puede_ser_raiz`, `puede_ser_subevento`, `tipos_padre_validos` (jerarquía) · `propaga_a_perfil` (propagación) · `visibilidad_default` (audiencia) · `es_clinico`, `es_mvp`, `deprecado`… **y ningún campo de NIVEL.**
+
+🔴 **Y lo que la medición agrega a la pregunta, que no estaba en el pedido:** `hito_narrativo` tiene **57 filas vivas**. ⇒ **la distinción YA EXISTE en el vocabulario de la casa — pero como TIPO, no como propiedad de los demás.** *Hoy «esto es un hecho de vida» se dice siendo otro tipo de evento, no marcando el que ya ocurrió.*
+
+**Eso parte la pregunta en dos, y las dos son de mesa:**
+1. **¿El nivel es un campo nuevo de `cat_tipos_evento`** (y entonces cada tipo declara si es rutina o hecho de vida), **o `hito_narrativo` ya es la respuesta** y lo que falta es que la rutina deje de compartir superficie con él?
+2. **¿Qué se hace con los 258 ya escritos?** Un campo nuevo con default los clasifica a todos de una — y *un default que clasifica 258 filas históricas es una afirmación sobre el pasado, no una migración.* El precedente de la casa es marcar, no reescribir (las 64 sondas de S92, las tarifas de flete de S95).
+
+⚠️ **Lo que NO se hace mientras tanto, y es firma de esta sesión:** **guardería sedimenta como sus hermanas, cada estadía.** *La distinción no se estrena en el oficio nuevo* — hacerlo dejaría cinco oficios sedimentando con dos criterios distintos y la decisión tomada de hecho por quien construyó último.
+
+**Dueño:** mesa. **Disparo:** antes de que la Línea de Vida sea superficie de venta del producto (hoy ya es su diferencial declarado en `EL NORTE`).
+☠️ **Condición de muerte:** el criterio firmado **y** los 258 resueltos por el camino que la mesa elija (marcados o reclasificados), **con el número re-medido ese día** — no con éste.
+
+#### D-973 — 🟡 LA TERCERA BALDOSA A MANO DE LA CASA
+🟡 **MEDIA · TRABAJO DE DISEÑO CON SU PROPIA VARA, no consecuencia de otra cosa.** Declarada por C el 29-ago-2026 y **correctamente NO resuelta por ella**.
+
+**El hecho:** la grilla del cliente **dibuja su baldosa a mano** y ya no comparte anatomía con `Baldosa` — perdió **descripción** y **chevron** por firma del founder. Es la **tercera** superficie de la casa que dibuja una baldosa por su cuenta.
+
+🔴 **Por qué se ficha aparte en vez de «unificarlo de paso»:** apareció mientras se curaba un corte de palabra, y esa vecindad es engañosa. *Arreglar dónde parte un label y decidir si tres superficies comparten anatomía son dos trabajos con varas distintas: el primero se cierra midiendo el peor caso de 14 caracteres; el segundo exige mirar las tres juntas en el aparato y decidir qué es LA baldosa de la casa.* **Resolverlo como efecto colateral es cómo una pieza compartida termina teniendo tres verdades y ninguna firma.**
+
+> *Es 19.9 en su forma más cara — lo que se copia, diverge — pero con una vuelta: acá la divergencia no fue descuido, **la pidió el founder** (sin descripción, sin chevron). Así que la pregunta no es «¿quién se desvió?» sino «¿la pieza tiene que admitir esta forma, o esta superficie no es una baldosa?».*
+
+**Lo que la mesa decide:** si `Baldosa` gana variantes (con/sin descripción, con/sin chevron) · si nace una pieza hermana · o si las tres a mano son tres trabajos distintos que no comparten nada y la pieza sólo sirve a Negocio y Atender.
+
+**Dueño:** B (la pieza) + mesa (la firma sobre píxeles). **Disparo:** sesión de diseño, con **las tres montadas juntas** — *la comparación es el instrumento; ninguna de las tres se juzga sola.*
+☠️ **Condición de muerte:** la decisión firmada **y** el censo en 0 baldosas a mano, **o** las excepciones declaradas una por una con su razón.
+
+---
+
+## ☠️ **D-973 CERRADA SIN CAMBIO — firma del founder, 29-ago-2026**
+
+**La baldosa a mano del cliente SE QUEDA, y `Baldosa` NO gana variantes.**
+
+**Se cumplió la segunda mitad de la condición de muerte**, que estaba escrita
+como alternativa desde el día uno: *«**o** las excepciones declaradas una por una
+con su razón»*. **La excepción es una, está declarada, y su razón es que el
+founder la pidió así** — sin descripción y sin chevron.
+
+> 🔴 **Y el valor de esta ficha no fue el resultado: fue haber separado las dos
+> preguntas.** Cuando apareció, la lectura fácil era *«hay tres baldosas
+> distintas, unifiquemos»*. La ficha obligó a preguntar la otra —**¿la pieza
+> tiene que admitir esta forma, o esta superficie no es una baldosa?**— y la
+> respuesta fue la segunda. *Unificar habría metido dos props opcionales en una
+> pieza congelada para servir a un caso que no es el suyo.*
+
+**Lo que queda vivo y NO muere con ella:** la advertencia de que la galería tiene
+una **copia transcrita a mano** de ese bloque (`TokenGallery.tsx`, sección
+`D-973`) y su marca gemela en `apps/cliente/src/app/(tabs)/explorar/index.tsx`.
+*Si esa pantalla cambia y la copia no, el instrumento de comparación empieza a
+medir una ficción* — **esas dos marcas siguen rigiendo aunque la ficha cierre.**
+
+# Deudas S107 (D-974 · D-975) — depositadas por A el 29-ago-2026 · números verificados libres POR GREP (tope real `D-973`)
+
+#### D-974 — 🔴 DOS ENUMS QUE COMPARTEN UNA PALABRA NO COMPARTEN SU SENTIDO
+🔴 **ALTA como CLASE, ya curado el caso.** Hallado por C montando el botón de conformar el acta; **los dos vocabularios se re-midieron contra el objeto al depositar**.
+
+**Lo medido:**
+
+| | vocabulario |
+|---|---|
+| **el MOTOR** (`guarderia_actas_conformidad_check`) | `sin_conformidad` · `conforme` · **`con_reserva`** |
+| **la PIEZA** (`ActaDeEntrega.Conformidad`) | **`pendiente`** · `conforme` · `sin_conformidad` |
+
+> ### 🔴 **`sin_conformidad` existe en LOS DOS, con sentidos OPUESTOS.**
+> · En el **motor** es el estado inicial —`conformidad_en IS NULL`, o sea
+>   **«todavía no la miró»**—: el más normal de todos, el que tiene el 100 % de
+>   las actas recién levantadas.
+> · En la **pieza** es el **warning**: *«aceptó señalando algo»*.
+
+**⇒ Un mapeo directo habría pintado el estado más normal como el más grave** — y
+en la superficie donde el dueño decide si firma. *No es un color feo: es la app
+diciéndole a una familia que su acta tiene una objeción cuando nadie la abrió
+todavía.*
+
+**Y ningún gate lo ve:** los dos enums son válidos, el `as` compila, el
+typecheck pasa. **La única cura es comparar los dos vocabularios; confiar en la
+coincidencia de una palabra es el defecto.**
+
+*El mapeo correcto, que C escribió:* motor `sin_conformidad` → pieza `pendiente`
+· `conforme` → `conforme` · `con_reserva` → `sin_conformidad`. **Ninguno de los
+tres es la identidad.**
+
+**Por qué queda como ficha si el caso ya está curado:** porque **es una clase**.
+Esta casa tiene vocabularios cerrados en el motor (CHECK) y uniones en las
+piezas, y **nada obliga a que se llamen igual ni impide que se llamen igual
+significando distinto**. *El próximo par de enums que compartan una palabra va a
+pasar todos los gates igual que éste.*
+
+**Dueño:** A (el criterio) + B (la regla, si se mecaniza). **Disparo:** la
+próxima pieza que consuma un vocabulario cerrado del motor.
+☠️ **Condición de muerte:** o una regla de `verify:diseno` que compare los pares
+motor↔pieza declarados, **o** la disciplina escrita en el protocolo 1c —
+*«¿este enum comparte palabras con el del motor? ¿significan lo mismo?»*.
+
+#### D-975 — 🟡 EL CANTO DE `FilaCita` DECIDE CUATRO CAPAS CON DOS RAMAS
+🟡 **MEDIA · latente, declarada por B y correctamente NO curada.**
+
+**El hecho:** el canto de `FilaCita` es `veterinaria ? identidad : cuidado` — **un ternario de dos ramas sobre una taxonomía de CUATRO** (`SALUD · CUIDADO · COMUNIDAD · CONSUMO`, Ley 10).
+
+**Hoy es CORRECTO y por eso no se cura:** los cinco oficios vivos —veterinaria, paseo, grooming, adiestramiento y ahora **guardería**— son salud o cuidado. *Curar algo que hoy acierta, sin un caso que lo falsee, es inventar una abstracción contra un futuro imaginado.*
+
+🔴 **Pero el día que entre un oficio de COMUNIDAD o CONSUMO se va a pintar `cuidado` EN SILENCIO** — sin error, sin warning, con un canto plausible. *Es la familia de defecto que no falla: el que omite.* Y el candidato ya tiene nombre: **la despensa es CONSUMO**, y su ficha en una lista de citas es una cuestión de cuándo.
+
+**Dueño:** B. **Disparo:** el primer oficio de `COMUNIDAD` o `CONSUMO` que necesite fila de cita.
+☠️ **Condición de muerte:** el canto se deriva de la **taxonomía** (la capa del servicio como dato), no de un ternario — **o** el ternario gana un `default` que aborta en vez de asumir `cuidado`.
+
+#### D-976 — 🔴 TRASPLANTAR UN CRITERIO CORRECTO A UNA PREGUNTA QUE NO ES LA SUYA
+🔴 **ALTA como CLASE, curado el caso.** Defecto propio de A, medido y devuelto por C el 29-ago-2026 — **una hora después de escribirlo**.
+
+**El caso:** las dos ventanas de guardería pasaron a viajar en la lista (bien) **calculadas con `min(desde)`/`max(hasta)` sobre TODAS las franjas del lugar** (mal).
+
+> Un lugar con recogida **L-V 07:00–09:00** y **sábados 09:00–11:00** se mostraba
+> como **07:00–11:00**: *un rango que no ofrece ningún día*. A una familia que
+> miraba un martes **le decía que recogen a las 10:30.**
+>
+> **No falla, no avisa, y suena razonable.**
+
+🔴 **Y NO era un borde: el índice lo prueba.** `uq_guarderia_franja (prestador_id, tipo, **dias_semana**)` incluye los días ⇒ **dos ventanas del mismo tipo son EL DISEÑO.** *Hoy no se veía sólo porque el único lugar publicado tiene una de cada tipo — el peor momento para que apareciera era cuando el primer prestador real configurara su sábado.*
+
+### 🔴 LA CLASE, y es peor que inventar un criterio
+
+**El `min`/`max` no se inventó: se tomó de `obtener_estado_guarderia`, donde está BIEN.** Ahí deriva **un lapso** de la configuración propia del prestador, y para un lapso el mínimo y el máximo *son* la respuesta.
+
+**La lista de la familia pregunta otra cosa:** *«¿a qué hora pasan a buscarlo ESE día?»* — y **un agregado sobre todos los días no describe ninguno.**
+
+> ### Trasplantar un criterio correcto a una pregunta que no es la suya es cómo un número bien calculado termina diciendo algo falso.
+>
+> *Y es más peligroso que inventarlo, porque **viene con la autoridad de haber funcionado en otro lado**: quien lo revisa encuentra su precedente, ve que ahí anda, y lo da por bueno.*
+
+**Es pariente de `L-285`** (*«la magnitud equivocada no tiene sesgo»*) con una vuelta: allá la magnitud estaba mal elegida; **acá la magnitud está bien elegida para OTRA pregunta.**
+
+**La cura fue más chica que las dos alternativas que A había ofrecido:** el lector **ya recibía la fecha** — las cuatro columnas salen de la franja **que rige para esa fecha**, con el mismo criterio de día que `_guarderia_dia_operativo` ya usaba (`EXTRACT(dow …) = ANY(dias_semana)`), **sin inventar una segunda convención**. Y si para una misma fecha hay más de una franja, **`min`/`max` vuelve a ser correcto**: ahí sí son ventanas del mismo día.
+
+⚠️ **Lo que se rechazó, y bien:** ofrecer las franjas una por una **obligaría a la pantalla a elegir cuál aplica** — justo lo que el §⓪ del contrato del filtro prohíbe.
+
+**Dueño:** quien construya. **Disparo:** cada vez que se reuse una fórmula de otra función.
+☠️ **Condición de muerte:** la pregunta *«¿este criterio responde MI pregunta, o la de donde lo saqué?»* escrita en el protocolo de reuso — **el reuso se justifica por la pregunta, no por el precedente.**
+
+#### D-977 — 🔴 LOS SEIS DOCUMENTOS DE GUARDERÍA NO EXISTEN: EL PERÍMETRO ESTÁ ENTERO Y EL CONTENIDO EN CERO
+
+**Origen: hallazgo de C, 29-ago-2026** — la reserva rebotaba con
+`documentos_no_disponibles`, *que es un estado NUESTRO y la familia no puede
+resolver.* Medido: **`guarderia_documentos` = 0 filas.**
+
+**Lo que SÍ está, y conviene saberlo antes de presupuestar:** la tabla con su
+`CHECK` de seis códigos, el lector, el aceptador con **todos** los campos que
+`CRITERIO_LEGAL_GUARDERIA` §4 y §5 exigen —`p_urgencia_tope_monto` ·
+`p_urgencia_tope_moneda` · `p_contactos` · `p_contacto_alternativo` ·
+**`p_redes_autorizadas`** (el consentimiento separado de §5 capa 4)—, el
+evaluador, la compuerta y las dos pantallas.
+
+> ### No falta motor ni pantalla. Falta el TEXTO — y el texto es legal.
+
+**Los seis códigos, fijados por el `CHECK` vivo:** `contrato_custodia` ·
+`declaracion_sanitaria` · `declaracion_comportamiento` ·
+`autorizacion_urgencia_veterinaria` · `autorizacion_transporte` ·
+`protocolo_no_retiro`.
+
+🔴 **NINGUNA PISTA LO REDACTA** — ni contrato, ni cláusula, ni un placeholder en
+pantalla (regla del founder, vigente). Y **no hay borrador en el repo**:
+`CRITERIO_LEGAL_GUARDERIA.md` lo dice de sí mismo — *«Qué no es: texto de
+contrato ni de pantalla. La redacción es de la mesa; este documento dice el
+fondo, no la letra.»*
+
+**La cadena que lo destraba, en orden, y ninguno de los tres primeros es de A:**
+
+1. **`D-918` y `D-919`** — la mesa reescribe §3 y §6 de `LETRA_GUARDERIA.md`
+   contra el criterio del abogado. **Hoy la letra está FRENADA ENTERA**, y no
+   por estar mal escrita: §3 es *nula de pleno derecho* y §6 tiene *riesgo
+   penal*. Mientras siga frenada, no hay letra de la cual sacar el texto.
+2. **Dos firmas del founder que viven adentro de esa reescritura:** los
+   **plazos exactos** del protocolo de no retiro —el criterio propone 15/60 y
+   dice literal que *«los plazos exactos los firma el founder»*—, y la
+   **decisión de garantías** de §2 (póliza colectiva de la plataforma vs.
+   seguro exigido al prestador), que cambia lo que dice `contrato_custodia`.
+3. **La redacción de los seis**, cada uno con su `version` — mesa y abogado.
+4. **Recién ahí A los siembra** en una migración: es un `INSERT` de seis filas,
+   trabajo de minutos. *Lo caro no es cargarlos: es tenerlos.*
+
+⚠️ **La versión no es decorativa:** `guarderia_aceptaciones` guarda
+`(codigo, version)`, así que **publicar la v2 de un documento vuelve a pedir la
+aceptación de toda familia que aceptó la v1** — que es exactamente lo que se
+quiere, y por eso el texto se carga cuando está firmado y no antes.
+
+**Dueño:** ① y ③ la mesa · ② el founder · ④ A.
+**Disparo:** ninguna compra de guardería es posible sin esto — **bloquea el
+frente entero**, no una pantalla.
+☠️ **Condición de muerte:** `SELECT count(*) FROM guarderia_documentos WHERE
+activo` devuelve 6, y una familia real acepta y compra.
+
+#### D-978 — 🟡 42 ARNESES ELIGEN SU CLAVE POR EL NOMBRE DE LA VARIABLE, Y SU MODO DE FALLA ES UN VERDE
+
+**Origen: hallazgo de C, 29-ago-2026**, sobre seis sondas suyas que tomaban *«la
+primera `api_key`»* de la salida del CLI — **correctas por ORDEN, no por
+diseño**. Ella lo curó con `claveAnon()` (por el claim `role` del propio JWT).
+
+**El censo del lado de A encontró la misma clase con otra fuente:** **42
+scripts** crean su cliente con `EXPO_PUBLIC_SUPABASE_ANON_KEY` — o sea
+**elegida por el rótulo de la variable**. Medido hoy: ese valor tiene
+`role: "anon"`. Pero eso es *cierto por el contenido de un archivo*, no por
+diseño.
+
+🔴 **Y el modo de falla es idéntico y es un VERDE:** el día que alguien pegue
+una `service_role` en esa variable para destrabar algo, **todo gate de RLS
+pasa** — ninguna excepción, ninguna línea roja, sólo una medición creíble
+diciendo *«la familia puede reservar»* sobre alguien que puede todo.
+
+> ### Un arnés que corre con más permisos de los que dice medir no mide lo que dice: mide otra cosa, y con confianza.
+
+**Curado en la fuente, no en los 42:** nace `claveAnonDeEnv()` en
+`scripts/lib-db.mjs` — **decodifica el claim y LANZA si no es `anon`**, jamás
+degrada a «la que haya». Es hermana de `claveAnon()` de C, **no una segunda
+implementación rival**: el mismo criterio aplicado a otra fuente, y cada una lo
+dice en su cabecera para que nadie las tome por duplicadas.
+
+**Adoptado hoy:** `verify-guarderia-config-s107a.mjs` (el de A en S107).
+**Faltan 41.**
+
+**Dueño:** cada pista al tocar su arnés. **Disparo:** POR ARCHIVO — se cambia
+al editarlo, jamás en una pasada masiva que nadie pueda revisar.
+☠️ **Condición de muerte:** `grep -rl EXPO_PUBLIC_SUPABASE_ANON_KEY scripts/`
+devuelve sólo `lib-db.mjs`.
+
+⚠️ **Nota honesta del arnés curado:** `verify-guarderia-config-s107a.mjs` corre
+y **da 2 rojos que NO son de esta cura ni de la compuerta**: (a) un assert
+espera `requisitos_sanitarios` y hoy rebota `documentos_no_disponibles`, porque
+el gate sanitario duro está APAGADO y los documentos frenan antes — el assert
+quedó viejo respecto del estado real; (b) el chequeo de residuo cuenta franjas
+y ofertas que hoy son **fixture vivo que el founder necesita**, no basura del
+arnés. *Se declaran acá en vez de dejarlos rojos sin explicación: un rojo sin
+causa escrita se convierte en un rojo que nadie mira.*
+
+#### D-979 — 🔴 LA REVISIÓN LEGAL DE LOS SEIS DOCUMENTOS ES CONDICIÓN DE SOFT LAUNCH
+
+**Origen: decisión del founder, 29-ago-2026** — *«no te detengas por su
+revisión; todo el texto lo va a revisar un abogado ecuatoriano antes del soft
+launch, así que escribí lo mejor que puedas y seguí»*.
+
+**Estado:** los seis textos **están redactados y sembrados** (`v1`,
+`20260831040000`), y el camino de compra corre de punta a punta — medido:
+*acepta los 6 → al día → compra 5 días por $40 → reserva → saldo 4*, con
+residuo 0.
+
+🔴 **LO QUE FALTA NO ES CÓDIGO: es la firma de un abogado ecuatoriano sobre un
+texto que redactó una pista que no es abogada.** El fondo es del abogado
+(`CRITERIO_LEGAL_GUARDERIA.md`); **la redacción es interpretación**, y cada
+documento lleva su **mapa** marcando qué transcribe y qué interpreta.
+
+**Las tres líneas que el abogado tiene que mirar primero** —las marcadas 🔴 en
+sus mapas—:
+
+1. **«el animal NUNCA se dispone»** (`protocolo_no_retiro` y `LETRA_GUARDERIA`
+   §6). Es la consecuencia que A leyó de que el founder firmara 15 días y
+   descartara el segundo tramo. **El criterio no dice esto**: dice que la
+   disposición *«puede abrirse»* al día 60. *Es la línea que más se aparta de
+   la fuente.*
+2. **«omitir a sabiendas un antecedente de agresión es incumplimiento mío»**
+   (`declaracion_comportamiento` punto 5). **Mueve responsabilidad entre las
+   partes ante una mordida** — la cláusula más cargada de las seis.
+3. **Qué se puede autorizar POR ENCIMA del tope de gasto**
+   (`autorizacion_urgencia_veterinaria` punto 3). El criterio fija que haya
+   tope, no qué pasa arriba. *Sin esa cláusula, un límite de dinero obligaría a
+   dejar sufrir a un animal.*
+
+⚠️ **LA CONSECUENCIA DE CORREGIR, escrita para que nadie la descubra el día del
+launch:** las aceptaciones se guardan por **`(codigo, version)`** ⇒ **toda
+corrección publica una v2, y la v2 le vuelve a pedir aceptación a cada familia
+que aceptó la v1.**
+
+> **Eso está bien y es el diseño** —una familia no queda atada a un texto que ya
+> no rige, y el consentimiento que se conserva es el del texto que efectivamente
+> leyó (P23)—. **Lo que no puede pasar es que sea una sorpresa:** cuanto más
+> tarde llegue la revisión, a más familias les vuelve a aparecer la pantalla de
+> aceptación. *Es trabajo de aviso, no un bug.*
+
+**Dueño:** el founder (contrata la revisión) · A (siembra la v2 con su diff).
+**Disparo:** antes de abrir el soft launch. **Bloquea abrir, NO construir.**
+
+> ✏️ **ENMENDADA POR FIRMA (31-ago-2026): SE MANTIENE FICHADA, SIN APURO.**
+> La razón del founder: **no hay familias reales en la app y todo lo legal va a
+> estar listo antes de salir** ⇒ *el costo de re-aceptación que esta ficha
+> describe es hoy CERO, y crece recién cuando entre la primera familia real.*
+> **La ficha NO se cierra** —la revisión sigue debiéndose— **pero deja de ser
+> urgente.** *Lo que cambió es el reloj, no la obligación.*
+☠️ **Condición de muerte:** el abogado firma el texto, y lo que corrija entra
+como `v2` con su aviso a las familias que ya aceptaron.
+
+**Y no se cierra sin esto: `LETRA_GUARDERIA` §6.4 deja TRES decisiones abiertas
+que no son jurídicas** —quién le adelanta el dinero al refugio desde el día 15
+(el texto le promete al dueño una custodia **sin fecha límite** que hoy nadie
+financia) · qué refugio y el **acta de traslado, un séptimo documento que no
+existe** · quién ejecuta las notificaciones—. *La primera es la más urgente: es
+la única que promete algo que nadie puede cumplir.*
+
+#### D-980 — 🟢 EL ESCRITOR SIN LECTOR: `capacidad_por_dia` SE ESCRIBÍA Y NO SE PODÍA LEER (CERRADA)
+
+**Origen: hallazgo de C, 31-ago-2026.** Medido: **seis funciones tocan
+`capacidad_por_dia` y las seis la usan para calcular el cupo de un día;
+ninguna la exponía como lo que es.** Había escritor (`definir_espacio_guarderia`)
+y **cero lector**.
+
+☠️ **La asimetría no era incómoda: perdía datos** — el detalle en `L-439`.
+
+**Curado** (`20260831160000`): nace `obtener_espacios_guarderia`, con el **mismo
+predicado del escritor copiado del objeto** (*leer lo que uno puede escribir no
+puede pedir menos ni más*), y su wrapper `obtenerEspaciosGuarderia`.
+
+🔑 **El brazo del cinturón que lo prueba:** un espacio de **12 abierto sólo
+L-V**, preguntado **un sábado** → el lector dice **12** y `cupo_guarderia_del_dia`
+dice **0**. *Sin ese brazo, un lector que derivara del día también daría verde.*
+
+**Devuelve los ESPACIOS, no un número.** Un negocio no tiene una capacidad:
+tiene espacios con su capacidad y sus días. Un solo número obligaría a elegir
+cuál y sería **`D-976`** otra vez.
+
+⚠️ **La clase queda abierta aunque la ficha cierre:** *escritor sin lector* no
+se censó fuera de guardería. **Disparo:** al tocar cualquier configurador.
+☠️ **Condición de muerte:** cerrada — el lector existe, está exportado y medido.
+
+#### D-981 — 🟡 LAS DIRECCIONES SON DE LA PERSONA Y NO DEL HOGAR — frenado con firma, no por olvido
+
+**Origen: S107-A, 31-ago-2026.** Al hacer elegible la dirección de recogida, la
+firma del founder decía *«validarla contra las del hogar»* — y **el hogar no
+existe en el modelo de direcciones**: `direcciones_guardadas` es por `user_id`
+y su RLS también (`dir_own`: `user_id = auth.uid()`).
+
+**Lo que se hizo:** la validación **copió el criterio de la RLS viva en vez de
+inventar uno**. Las tres puertas de guardería validan la dirección contra las de
+**quien reserva**.
+
+🟢 **FIRMA DEL FOUNDER (31-ago): NO se ensancha en esta tanda**, y su razón va
+entera porque es la que hay que releer el día que se reabra:
+
+> **El bono es del hogar y las mascotas también, así que hay precedente para
+> compartir** — pero **ensanchar quién ve la dirección de casa de otra persona
+> es una decisión de privacidad con su propio peso, y no sale de paso en una
+> tanda de guardería.**
+
+⚠️ **LA CONSECUENCIA, escrita para que nadie la descubra en una pantalla:**
+**si la mamá guardó la dirección y el papá reserva, él no la ve — agrega la
+suya.** *No es un defecto: es el alcance elegido.* Duplica una dirección de la
+misma casa, y esa duplicación es el costo aceptado.
+
+**Es la contracara de `D-976` y de la misma familia que `L-439`:** acá **había
+un precedente que invitaba a extender** (el bono del hogar) y **se frenó**,
+porque *un precedente correcto en otro dominio no autoriza el trasplante* —
+compartir un saldo y compartir dónde vive alguien no son la misma pregunta.
+
+**Dueño:** el founder. **Disparo:** una mesa de privacidad propia, o el primer
+reporte real de una familia duplicando la dirección de su casa.
+☠️ **Condición de muerte:** o se firma el ensanche con su letra (qué ve quién,
+y si el que la agregó puede retirarla del hogar), o se declara permanente y la
+pantalla lo dice.
+
+#### D-982 — 🟡 DOS ORQUESTACIONES DE DIRECCIÓN VIVAS: despensa no migró a la pieza que salió de su propio diseño
+
+**Origen: declarada por C al cerrar su tanda, 31-ago-2026** — *no la encontró
+un gate: la declaró quien la produjo.*
+
+Al montar el selector de dirección de guardería, el censo halló que **los
+componentes de despensa ya eran compartidos; lo duplicable era la
+ORQUESTACIÓN**. C la extrajo con el molde de `SeccionMedioDePago` (hook +
+sección, la voz por prop) ⇒ **no es construcción nueva: es la de despensa con
+su voz parametrizada.**
+
+⚠️ **Y despensa NO migró a ella.** Sigue con su bloque inline ⇒ **hay dos
+orquestaciones vivas de la misma cosa** — *exactamente la segunda copia que
+esta casa persigue.*
+
+> ### Dos copias no divergen el día que se escriben: divergen el día que alguien afina una.
+
+**Es la misma clase que `R57` vigila para las superficies de pago** —que dos
+pantallas monten LA MISMA pieza— con la diferencia de que acá **no hay regla que
+lo mida**: `R57` mira el medio de pago, no la dirección.
+
+**Por qué no se migró en la tanda, y es razón buena:** toca **una pantalla viva
+y muy pulida que nadie pidió tocar**, y la migración es mecánica sólo porque la
+pieza salió de su diseño. *Cambiar una pantalla firmada de paso, sin gate, es
+cómo se rompe algo que funcionaba.*
+
+**Dueño:** C (se ofreció) o quien toque el checkout de despensa.
+**Disparo:** la próxima tanda que abra esa pantalla — **o antes, si alguien
+afina una de las dos**, que es el momento en que empiezan a divergir.
+☠️ **Condición de muerte:** despensa monta la pieza extraída y su bloque inline
+muere (Ley 37) · **candidata a ensanchar `R57`** para que la dirección también
+tenga quien la mida.
+
+#### D-983 — 🟢 LA AUTORIZACIÓN DE IMAGEN: DÓNDE VIVE, POR QUÉ NO VUELVE, Y LA DISTINCIÓN QUE NO SE PUEDE PERDER
+
+> ✏️ **ENMENDADA 31-ago-2026 por firma del founder: DEJA DE SER DEUDA DE
+> PRODUCTO.** Ya no dice «falta construirla» — dice **dónde vive y por qué no
+> vuelve al lugar del que salió**. El motor está construido
+> (`20260901040000`); lo que queda es la superficie, y tiene casa firmada.
+
+**🟢 DÓNDE VIVE, FIRMADO:** en la **pantalla de confirmación**, después de
+pagar. Un check **apagado por defecto, jamás pre-marcado**, rotulado opcional y
+**sin bloquear nada**.
+*El lugar es deliberado: **ya pagó**, así que aceptar o no aceptar no cambia
+nada de lo que contrató — un consentimiento que se pide ANTES de cobrar se
+parece demasiado a un requisito.*
+
+**🔴 POR QUÉ NO VUELVE A LA PANTALLA DE TÉRMINOS:** ahí sería otra vez **la
+segunda casilla de la que salió**.
+
+### 🔴 LA DISTINCIÓN QUE SE VA A PERDER, Y ES LA RAZÓN DE ESTA FICHA
+
+> **Las fotos y clips del DURANTE que sube la guardería son PRIVADAS y van al
+> hilo de la familia. Eso NO necesita esta autorización y NO está bloqueado.**
+>
+> **Lo que esta autorización gobierna es publicarlas FUERA.**
+
+⚠️ *Quien retome esto sin la distinción va a leer «la autorización de imagen
+está en false para todas las familias» y va a concluir que la media del durante
+está trabada.* **No lo está.**
+*Es la clase de dato que se lee bien y se entiende al revés — por eso va en la
+ficha y no en un comentario.*
+
+### ☠️ Y LA PUERTA SE DECIDIÓ POR MEDICIÓN, no por el nombre
+
+C preguntó si el interruptor podía ser `aceptar_documentos_guarderia`
+re-llamado. Su argumento —*«usar la puerta de aceptar términos para cambiar una
+preferencia es un nombre que miente»*— era correcto. **Y medirlo dio algo peor:**
+
+> **Con un documento nuevo publicado, la familia estaba en `faltan` y PRENDER
+> EL INTERRUPTOR DE LA FOTO SE LO ACEPTÓ SOLO** — `aceptaciones 10 → 11`,
+> medido en subtransacción.
+
+**Cambiar una preferencia de imagen habría FIRMADO un contrato legal que la
+familia no leyó.** *No era un riesgo futuro: era el comportamiento de hoy, y
+sólo no se veía porque la familia de prueba ya tenía todo aceptado.*
+⇒ Nace `fijar_redes_autorizadas`, que **toca sólo el booleano**.
+
+**Y su lector, `obtener_autorizacion_guarderia`, devuelve CERO FILAS cuando no
+hay autorización — `null`, jamás `false`:** *«no hay fila» y «dijo que no» son
+dos verdades distintas*, y un interruptor que las confunde **muestra «no» sobre
+alguien que nunca eligió**.
+
+**Dueño:** C (la superficie). **Disparo:** su próxima tanda.
+☠️ **Condición de muerte:** el check vive en la confirmación y la familia puede
+prenderlo y apagarlo. **El motor ya está** — falta la pantalla.
+
+**Lo que NO hay que hacer:** devolverla a la pantalla de términos.
+
+### L-439 — DECLARAR UN ATAJO NO LO HACE SEGURO
+
+**Origen: hallazgo de C, 31-ago-2026 — `capacidad_por_dia` sin lector.**
+
+`definir_espacio_guarderia` **escribía** la capacidad y **ninguna función la
+devolvía**. El taller la derivó del **cupo de HOY**, y quien lo hizo **dejó una
+nota diciendo que no era el modelo final**.
+
+🔴 **Rompió igual, y perdía datos:** un negocio con capacidad **12 que abriera
+su taller un sábado veía 8** —el cupo de ese día— y **al guardar se la bajaba a
+8, sin error y sin aviso**. *Dos de cada siete días.* Y la portada mostraba el
+cupo del día rotulado como capacidad del negocio: **0 en domingo**.
+
+> ### Una limitación declarada en el código protege a quien toca el archivo, no a quien usa la pantalla.
+>
+> *La nota le habla al próximo que abra ese archivo. El defecto le pasa al
+> prestador que abre su taller un sábado, que no lee código.*
+
+**Es pariente de `L-395`** (*un puente que sobrevive a su río manda al próximo a
+construir otro*) con la diferencia que la vuelve más cara: **ahí el residuo
+confundía; acá el atajo BORRA UN DATO.**
+
+**La forma correcta del atajo, y la única que sirve:** un atajo que puede
+producir un valor equivocado **no se declara — se hace inexpresable**. Si el
+lector no existe, la pantalla **no ofrece editar**: *un campo que muestra un
+número derivado y lo guarda como configurado es una pérdida de datos con
+apariencia de formulario.*
+
+☠️ **Condición de muerte:** ninguna — es método. Se cobra cada vez que alguien
+escriba «esto no es el modelo final» arriba de un valor que después se guarda.
+
+### L-438 — UN ARNÉS QUE PREPARA LA PRECONDICIÓN DE UNA COMPUERTA NO PUEDE DESCUBRIR QUE LA COMPUERTA NO EXISTE
+
+**Origen: el arnés propio de A del paquete de guardería, verde todas las veces
+sobre un comprador que no tenía gate — hallazgo de C, 29-ago-2026.**
+
+`S107-A-ARNES-paquete-guarderia.sql` recorría el camino entero —comprar,
+reservar, cerrar— y daba verde. Para poder correr, **sembraba un documento y lo
+aceptaba ANTES de comprar**, con un comentario que hasta explicaba por qué:
+*«la compuerta de documentos es real y rebota».*
+
+🔴 **Y por eso mismo era ciego:** el arnés dejaba a la familia **al día** antes
+de tocar la puerta de la compra ⇒ **no existía ninguna corrida en la que el
+comprador tuviera que rebotar**. La ausencia del gate no podía manifestarse.
+`comprar_paquete_guarderia` no llamaba a la compuerta, y el instrumento que
+existía para vigilar ese camino **lo certificaba verde**.
+
+> ### Un arnés que cumple la precondición de una compuerta prueba el camino feliz y es ciego a la puerta que falta.
+>
+> *No mide la compuerta: la esquiva — y su verde dice «el camino funciona»,
+> que es verdad, en vez de «la puerta está», que era la pregunta.*
+
+**Es hermana de `L-406`** (*un arnés que para probar el circuito lo ejecuta de
+verdad hace lo que vino a vigilar*) y de **`L-437`**: las tres son la misma
+familia — **el instrumento contestó sobre otra cosa, y su respuesta era cierta.**
+
+**La cura, y es lo que la vuelve exigible:** un arnés de compuerta **recorre los
+estados de su precondición y exige respuestas DISTINTAS en cada uno.** El de
+esta cura hace tres —sin documentos → `documentos_no_disponibles` · cargados y
+sin aceptar → `documentos_sin_aceptar` · aceptados → PASA— **en las dos
+puertas**, porque *«rebota» no es una medición: una compuerta que siempre dice
+que no también rebota.*
+
+☠️ **Condición de muerte:** ninguna — es método. Se cobra cada vez que se
+escriba un arnés que tenga que sembrar algo para poder correr: **lo que sembrás
+para pasar es exactamente lo que tu arnés ya no puede medir.**
+
+### L-437 — UN CENSO POR REGEX MIDE LA FORMA QUE MIRA, NO EL MOTOR
+
+**Origen: censo propio de A que dio 0 con dos códigos vivos, 29-ago-2026.**
+
+A censó los códigos de error del motor de guardería con
+`RAISE EXCEPTION '([a-z_]+)'`, tipó 17 y **reportó el censo en 0**.
+
+🔴 **Dos códigos seguían sin tipar, y eran los del camino más común:**
+`documentos_sin_aceptar` —**el de toda familia nueva**— y
+`documentos_no_disponibles`. Los levanta `reservar_dia_guarderia` con
+
+```sql
+RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = CASE … END
+```
+
+— **una forma sin literal detrás de `RAISE EXCEPTION`, que el regex no veía.**
+
+> ### El 0 no era del motor: era **de la forma que el instrumento miraba**.
+>
+> Es `L-425` en carne —*un baseline en 0 no dice «no hay»: dice «no vi, con la
+> lista de hoy»*— con el agravante de que **el 0 se reportó como cierre**: «el
+> censo quedó en 0» se leyó, y se escribió, como *«no falta ninguno»*.
+
+**Y el segundo intento tampoco alcanzó:** ampliar el regex a `THEN 'x'` trajo
+**ruido** (capturó estados como `al_dia`, `no_opera`, `pasado` — que no son
+errores) **y siguió incompleto** (el `ELSE 'documentos_sin_aceptar'` tampoco
+matchea). *Un instrumento que se parchea dos veces sobre el mismo caso está
+diciendo que no es el instrumento.*
+
+**La cura no fue un tercer regex: fue LEER la función.** Los dos códigos salieron
+del `CASE` a la vista, en tres líneas de lectura.
+
+**Regla:** un censo por patrón sobre CÓDIGO **acota, no cierra**. Sirve para
+encontrar candidatos; **no sirve para afirmar que no queda ninguno.** Cuando el
+resultado se va a usar como *«ya está completo»* —y no como *«mirá estos»*—, la
+verificación es **leer la fuente de las funciones que importan**.
+
+*Corolario para esta casa: el motor levanta errores de al menos DOS formas
+(`RAISE EXCEPTION 'x'` y `USING MESSAGE = …`), y cualquier instrumento futuro
+que cuente códigos tiene que declarar cuál de las dos mira.*

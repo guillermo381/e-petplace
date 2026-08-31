@@ -47,7 +47,15 @@ import {
   type ItemMedia,
   type PesoMedido,
 } from './cola-media';
-import { crearMotorMedia, type PublicarMedia, type AvisarMediaPublicada } from './motor-media';
+import { crearMotorMedia, type PublicarMedia } from './motor-media';
+import {
+  levantarActaLocal,
+  procesarActas,
+  pendientesDeEstadia,
+  type ActaLocal,
+  type AltaActa,
+  type LevantarActa,
+} from './cola-actas';
 
 export { CLIP_TECHO_S } from './cola-media';
 
@@ -71,7 +79,11 @@ export interface OpcionesCapturaMedia {
   prestadorId: string;
   /** El wrapper de A. `null` mientras no exista: la cola guarda y lo dice. */
   publicar: PublicarMedia | null;
-  avisar?: AvisarMediaPublicada | null;
+  /** El wrapper de actas de A. `null` mientras no exista: el acta se levanta
+   *  igual, en la puerta, y viaja cuando haya con qué. */
+  levantarActa?: LevantarActa | null;
+  /** La estadía en curso — el acta cuelga de ella. */
+  estadiaId?: string;
   bucketFoto: string;
   bucketClip: string;
   /** Cada cuánto reintenta lo pendiente mientras la pantalla está a la vista.
@@ -99,10 +111,19 @@ export interface CapturaMedia {
   empujar: () => Promise<void>;
   /** El dato que se declara al cierre — del uso real, `null` si no hay. */
   peso: (tipo: 'foto' | 'clip') => Promise<PesoMedido | null>;
+  /** Actas de esta estadía que todavía no llegaron al servidor. */
+  actasPendientes: ActaLocal[];
+  /**
+   * Levanta el acta EN LA PUERTA. Devuelve al instante: **no espera red, no
+   * espera que suban las fotos, no espera al dueño** — la recogida no se frena
+   * (contrato de actas §④). El viaje ocurre solo, cuando sus fotos estén arriba.
+   */
+  levantarActaEnLaPuerta: (alta: Omit<AltaActa, 'estadiaId'>) => Promise<void>;
 }
 
 export function useCapturaMedia(opciones: OpcionesCapturaMedia): CapturaMedia {
   const [pendientes, setPendientes] = useState<ItemMedia[]>([]);
+  const [actasPendientes, setActasPendientes] = useState<ActaLocal[]>([]);
   const vivo = useRef(true);
   // El motor se rehace cuando cambian sus deps, pero la cola es de disco: no
   // hay estado que perder al recrearlo.
@@ -111,19 +132,27 @@ export function useCapturaMedia(opciones: OpcionesCapturaMedia): CapturaMedia {
     bucketFoto: opciones.bucketFoto,
     bucketClip: opciones.bucketClip,
     publicar: opciones.publicar,
-    avisar: opciones.avisar,
   });
 
   const refrescar = useCallback(async () => {
     const items = await pendientesDe(opciones.fecha);
     if (vivo.current) setPendientes(items);
-  }, [opciones.fecha]);
+    if (opciones.estadiaId) {
+      const actas = await pendientesDeEstadia(opciones.estadiaId);
+      if (vivo.current) setActasPendientes(actas);
+    }
+  }, [opciones.fecha, opciones.estadiaId]);
 
   const empujar = useCallback(async () => {
+    // 🔴 EL ORDEN NO ES CASUAL: primero la media, después las actas. Un acta
+    // viaja con los `mediaIds` REALES de sus fotos, así que si las actas
+    // corrieran primero no encontrarían ninguno y esperarían un ciclo entero
+    // de más — con el cuidador todavía en la puerta.
     await procesarCola(motor, { fecha: opciones.fecha });
+    await procesarActas(opciones.levantarActa ?? null);
     await refrescar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opciones.fecha, refrescar, opciones.publicar]);
+  }, [opciones.fecha, refrescar, opciones.publicar, opciones.levantarActa]);
 
   useEffect(() => {
     vivo.current = true;
@@ -186,8 +215,19 @@ export function useCapturaMedia(opciones: OpcionesCapturaMedia): CapturaMedia {
     [empujar],
   );
 
+  const levantarActaEnLaPuerta = useCallback(
+    async (alta: Omit<AltaActa, 'estadiaId'>) => {
+      if (!opciones.estadiaId) throw new Error('use-captura-media: falta estadiaId para levantar un acta');
+      await levantarActaLocal({ ...alta, estadiaId: opciones.estadiaId });
+      await empujar();
+    },
+    [opciones.estadiaId, empujar],
+  );
+
   return {
     pendientes,
+    actasPendientes,
+    levantarActaEnLaPuerta,
     capturarFoto,
     publicarCaptura,
     corregirEtiquetas,

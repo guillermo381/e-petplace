@@ -11,9 +11,8 @@
 // 🔴 La clave se lee del keychain EN EL MOMENTO — jamás viaja al repo.
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { dbQuery } from './lib-db.mjs';
+import { dbQuery, claveAnonDeEnv } from './lib-db.mjs';
 import {
   initApi,
   iniciarSesion,
@@ -25,15 +24,19 @@ import {
   definirOfertaGuarderia,
   obtenerOfertaGuarderiaPropia,
   obtenerGuarderiasDisponibles,
+  evaluarRequisitosGuarderia,
+  reservarDiaGuarderia,
+  obtenerEstadiasDelDia,
 } from '../packages/api/src/index.ts';
 
-const env = Object.fromEntries(
-  readFileSync('apps/cliente/.env.local', 'utf8')
-    .split('\n')
-    .filter((l) => l.includes('='))
-    .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
-);
-initApi(env.EXPO_PUBLIC_SUPABASE_URL, env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+/* 🔒 LA CLAVE SE ELIGE POR SU CLAIM, NO POR EL NOMBRE DE LA VARIABLE.
+   Hallazgo de C (29-ago): elegirla por rótulo es correcto **por el contenido
+   de un archivo, no por diseño** — y su modo de falla es un VERDE: con una
+   `service_role` ahí, todo gate de RLS pasa y el arnés dice «la familia
+   puede» midiendo a alguien que puede todo. `claveAnonDeEnv` LANZA si el
+   claim no es `anon`. */
+const { url, anon } = claveAnonDeEnv();
+initApi(url, anon);
 
 const clave = execFileSync('security',
   ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'],
@@ -178,6 +181,40 @@ if (fam) {
 } else {
   console.log('⚠️ sin familia de prueba con perro: la vitrina no se ejerció (declarado, no asumido)');
 }
+
+// ── ⑧ EL GATE SANITARIO Y LA RESERVA, POR EL CAMINO REAL ────────────────────
+if (fam) {
+  await iniciarSesion({ email: fam.email, password: clave });
+  const req = await evaluarRequisitosGuarderia(fam.perro);
+  check(req.ok === true, 'evaluarRequisitosGuarderia responde', req.ok ? (req.data.alDia ? 'al día' : `faltan ${req.data.faltantes.length}`) : req.codigo);
+  // 🔴 El faltante NOMBRA lo que falta: sin eso la pantalla no puede llevar a
+  // resolverlo, y un pendiente que el dueño no puede resolver es peor que no
+  // mostrarlo.
+  check(req.ok === true && (req.data.alDia || req.data.faltantes.every((f) => f.codigo && f.estado)),
+    'cada faltante viaja con su código y su estado');
+
+  const diaLibre = dbQuery(`
+    SELECT d::text AS d FROM generate_series(hoy_local()+11, hoy_local()+21, interval '1 day') d
+     WHERE EXTRACT(dow FROM d) BETWEEN 1 AND 5 LIMIT 1`)[0].d;
+  const res = await reservarDiaGuarderia({ prestadorId: ctx.prestador, mascotaId: fam.perro, fecha: diaLibre });
+  if (req.ok && !req.data.alDia) {
+    // El gate está CERRADO: la reserva tiene que rebotar POR ESO y no por otra cosa.
+    check(res.ok === false && res.codigo === 'requisitos_sanitarios',
+      '🔴 sin requisitos, la reserva REBOTA por el motivo correcto', res.ok ? 'PASÓ' : res.codigo);
+  } else {
+    check(res.ok === true, 'con requisitos al día, la reserva entra', res.ok ? res.data.citaId : res.codigo);
+    if (res.ok) dbQuery(`DELETE FROM evento_cita_servicio WHERE id = '${res.data.citaId}'`);
+  }
+  await iniciarSesion({ email: ctx.email, password: clave });
+}
+
+// ── ⑨ LA JORNADA DEL PRESTADOR — el wrapper que faltaba ─────────────────────
+const hoyD = dbQuery(`SELECT hoy_local()::text d`)[0].d;
+const jor = await obtenerEstadiasDelDia(ctx.prestador, hoyD);
+check(jor.ok === true, 'obtenerEstadiasDelDia responde', jor.ok ? `${jor.data.length} estadías` : jor.codigo);
+// 🔴 Sólo verdad firme: un hold sin pagar NO sale en la lista del día.
+check(jor.ok === true && jor.data.length === 0,
+  'la jornada no trae holds sin pagar (verdad firme)', jor.ok ? `${jor.data.length}` : '');
 
 // ── DESMONTAJE POR ID, y residuo medido ─────────────────────────────────────
 dbQuery(`DELETE FROM prestador_servicios WHERE prestador_id = '${ctx.prestador}' AND tipo_servicio = 'guarderia_dia'`);

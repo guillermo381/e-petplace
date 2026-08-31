@@ -1500,6 +1500,8 @@ export { guardarBorradorNota, leerBorradorNota, type BorradorNota, type CodigoBo
 
 /* S107-A · guardería: el cupo del lugar y sus dos franjas. */
 export {
+  obtenerEspaciosGuarderia,
+  type EspacioGuarderia,
   definirEspacioGuarderia,
   declararExcepcionEspacioGuarderia,
   definirFranjaGuarderia,
@@ -1507,9 +1509,16 @@ export {
   obtenerCupoGuarderia,
   type FranjaGuarderia,
   type CupoDiaGuarderia,
+  type EstadoCupoDia,
   type TipoFranjaGuarderia,
   type DiaSemana,
+  definirPaqueteGuarderia,
+  obtenerPaquetesGuarderia,
+  type PaqueteGuarderia,
+  type TamanoPaquete,
   type CodigoErrorGuarderiaConfig,
+  retirarFranjaGuarderia,
+  reemplazarFranjasGuarderia,
 } from './wrappers/guarderia-config';
 
 /* S107-A · guardería: la oferta (precio y visibilidad). */
@@ -1517,18 +1526,87 @@ export {
   definirOfertaGuarderia,
   obtenerOfertaGuarderiaPropia,
   obtenerGuarderiasDisponibles,
+  obtenerEstadoGuarderia,
   type OfertaGuarderiaPublicada,
+  type OfertaGuarderiaPropia,
+  type EstadoGuarderia,
+  type EstadoGuarderiaCompleto,
+  type MotivoNoPublicada,
   type GuarderiaDisponible,
+  type ModalidadGuarderia,
+  obtenerResumenGuarderias,
+  type ResumenGuarderias,
+  type CausaSinGuarderias,
   type CodigoErrorGuarderiaOferta,
 } from './wrappers/guarderia-oferta';
 
+export {
+  obtenerDocumentosGuarderia,
+  evaluarDocumentosGuarderia,
+  aceptarDocumentosGuarderia,
+  obtenerAutorizacionGuarderia,
+  fijarRedesAutorizadas,
+  type AutorizacionGuarderia,
+  type DocumentoGuarderia,
+  type EvaluacionDocumentos,
+  type EstadoDocumentos,
+  /* El veredicto del ACTO ÚNICO. La pantalla lee `alDia`, jamás `aceptadas`. */
+  type AceptacionResultado,
+  type CodigoErrorGuarderiaDocumentos,
+} from './wrappers/guarderia-documentos';
+
 /* S107-A · guardería: el gate sanitario y la reserva del día. */
 export {
+  obtenerMisEstadiasGuarderia,
+  type EstadiaDeMiMascota,
+  obtenerMisPaquetesGuarderia,
+  type PaqueteCompradoGuarderia,
+  comprarPaqueteGuarderia,
+  reservarDiaDePaqueteGuarderia,
+  type CompraDePaquete,
+  obtenerActaGuarderia,
+  type ActaGuarderia,
+  type MediaDelActa,
   evaluarRequisitosGuarderia,
   reservarDiaGuarderia,
   type RequisitosGuarderia,
   type RequisitoFaltante,
   type EstadoRequisito,
   type ReservaGuarderia,
+  obtenerEstadiasDelDia,
+  publicarMediaGuarderia,
+  obtenerMediaDelDia,
+  obtenerMediaDeMiMascota,
+  registrarPuntoVivo,
+  obtenerPuntoVivo,
+  levantarActaGuarderia,
+  confirmarActaGuarderia,
+  type MediaGuarderia,
+  type PuntoVivo,
+  type DireccionActa,
+  type Conformidad,
+  type EstadiaDelDia,
+  type EstadoEstadia,
+  /* ── LAS DOS TIRAS DE DÍAS ────────────────────────────────────────────────
+     🔴 **Las dos existían, compilaban y NINGUNA se podía llamar** — el
+     `index.ts` no las re-exportaba. *Un wrapper que no se exporta es un motor
+     sin puerta* (`L-318`): existe, pasa sus tests, y no lo alcanza nadie.
+     Lo encontró C al montarlas, no un typecheck: `packages/api` compila
+     perfecto con un export que falta, porque **nada adentro del paquete lo
+     necesita**. El censo que siguió halló SIETE símbolos sin exportar, no dos.
+
+     `obtenerDiasGuarderiaDisponibles` — **sin lugar elegido**, agregada sobre
+     todos los lugares (la que P2 necesita: un día sirve si algún lugar puede).
+     `obtenerDiasGuarderia` — **por prestador**, la de después de elegir lugar. */
+  contratarMensualidadGuarderia,
+  obtenerMisPlanesGuarderia,
+  type PlanGuarderia,
+  type MandatoMensualidad,
+  obtenerDiasGuarderia,
+  type DiaGuarderia,
+  type MotivoDiaNoReservable,
+  obtenerDiasGuarderiaDisponibles,
+  type DiaGuarderiaAgregado,
+  type MotivoDiaAgregado,
   type CodigoErrorGuarderiaReserva,
 } from './wrappers/guarderia-reserva';

@@ -20,6 +20,20 @@ import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+  franja_no_existe:  'No encontramos esa franja.',
+  franjas_invalidas: 'Esas franjas no son válidas.',
+
+
+  /* ✏️ S107-A · CENSADOS CONTRA EL MOTOR, no agregados de a uno.
+     C reportó que `fecha_no_ofertable` llegaba como `error_desconocido`; al
+     medir **el motor de guardería lanza 37 códigos y 17 no estaban tipados en
+     ningún wrapper** — casi la mitad.
+     🔴 **Un código sin tipar no es un mensaje feo: es un HECHO que se vuelve
+     indistinguible de una caída de red.** La víspera —la regla más normal del
+     producto— se veía igual que un error inesperado, y la pantalla no podía
+     ofrecer «elegí otro día» porque no sabía que ése era el problema. */
+  tope_de_urgencia_invalido:   'Ese tope de urgencia no es válido.',
+
   no_gestionas_este_prestador: 'No administras este negocio.',
   capacidad_invalida:          'La capacidad tiene que ser mayor a cero.',
   espacio_no_existe:           'No encontramos ese espacio.',
@@ -30,6 +44,7 @@ const MENSAJES = {
   franjas_se_cruzan:           'La devolución no puede empezar antes de que termine la recogida.',
   rango_invertido:             'La fecha de fin es anterior a la de inicio.',
   rango_demasiado_largo:       'Se pueden consultar hasta 62 días por vez.',
+  tamano_de_paquete_invalido:  'Los paquetes son de 5, 10 o 15 estadías.',
   sin_sesion:                  'No hay sesión activa.',
   datos_inconsistentes:        'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:           'Ocurrió un error inesperado. Prueba de nuevo.',
@@ -65,6 +80,18 @@ export interface FranjaGuarderia {
   zonaHoraria: string;
 }
 
+/**
+ * 🔴 CUATRO CASOS, NO DOS — firma de la mesa (29-ago): **capacidad 0 NO es
+ * «lleno»**. Si el motor no los distinguiera, la pantalla no lo podría inferir
+ * sin mentir: los dos llegan como `disponible = 0`.
+ */
+export type EstadoCupoDia =
+  /** ese día ya pasó */               'pasado'
+  /** las reservas entran desde mañana */ | 'mismo_dia'
+  /** ese día NO abren */              | 'no_opera'
+  /** abren, pero se llenó */          | 'sin_lugar'
+  /** hay lugar */                     | 'elegible';
+
 export interface CupoDiaGuarderia {
   /** 'YYYY-MM-DD' — FECHA LOCAL DEL LUGAR, jamás derivada de un timestamp UTC. */
   fecha: string;
@@ -78,9 +105,67 @@ export interface CupoDiaGuarderia {
    * queda sin lugar sin que nadie lo decida.*
    */
   sobrevendido: boolean;
+  /** El motivo, ya resuelto por el server. La pantalla lo PINTA, no lo deduce. */
+  estado: EstadoCupoDia;
 }
 
 // ── ESCRITURA ───────────────────────────────────────────────────────────────
+
+export interface EspacioGuarderia {
+  espacioId: string;
+  nombre: string;
+  /** **La capacidad CONFIGURADA del espacio.** Jamás el cupo de un día. */
+  capacidadPorDia: number;
+  diasOperacion: DiaSemana[];
+  activo: boolean;
+}
+
+/**
+ * Los espacios **como están configurados**.
+ *
+ * ── POR QUÉ EXISTE, y tiene pérdida de datos detrás ───────────────────────
+ * ☠️ **`definir_espacio_guarderia` ESCRIBÍA y no había NINGÚN lector.** Sin él,
+ * el taller derivaba la capacidad del **cupo de HOY** ⇒ un negocio con
+ * capacidad **12 que abriera su taller un sábado veía 8**, y **al guardar se la
+ * bajaba a 8, sin error y sin aviso**. *Dos de cada siete días.*
+ *
+ * 🔴 **NO devuelve «la capacidad del negocio», porque no existe tal número.**
+ * Hay espacios, cada uno con su capacidad y sus días. Devolver uno solo
+ * obligaría a elegir cuál —¿la suma? ¿la del lunes?— y sería `D-976` otra vez:
+ * *un número bien calculado contestando una pregunta que no es la suya.*
+ *
+ * Pide el mismo permiso que el escritor: *leer lo que uno puede escribir no
+ * puede pedir menos ni más.*
+ */
+export async function obtenerEspaciosGuarderia(
+  prestadorId: string,
+): Promise<ResultadoWrapper<EspacioGuarderia[], CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('obtener_espacios_guarderia', {
+    p_prestador_id: prestadorId,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const espacios: EspacioGuarderia[] = [];
+  for (const fila of data) {
+    if (typeof fila !== 'object' || fila === null) return fallaCodigo('datos_inconsistentes');
+    const r = fila as Record<string, unknown>;
+    if (typeof r.espacio_id !== 'string' || typeof r.nombre !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.capacidad_por_dia !== 'number' || typeof r.activo !== 'boolean') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (!Array.isArray(r.dias_operacion)) return fallaCodigo('datos_inconsistentes');
+    espacios.push({
+      espacioId: r.espacio_id,
+      nombre: r.nombre,
+      capacidadPorDia: r.capacidad_por_dia,
+      diasOperacion: r.dias_operacion as DiaSemana[],
+      activo: r.activo,
+    });
+  }
+  return { ok: true, data: espacios };
+}
 
 export async function definirEspacioGuarderia(params: {
   prestadorId: string;
@@ -207,13 +292,149 @@ export async function obtenerCupoGuarderia(
     if (typeof r.disponible !== 'number' || typeof r.sobrevendido !== 'boolean') {
       return fallaCodigo('datos_inconsistentes');
     }
+    if (typeof r.estado !== 'string') return fallaCodigo('datos_inconsistentes');
     salida.push({
       fecha: r.fecha,
       capacidad: r.capacidad,
       consumido: r.consumido,
       disponible: r.disponible,
       sobrevendido: r.sobrevendido,
+      estado: r.estado as EstadoCupoDia,
     });
   }
   return { ok: true, data: salida };
+}
+
+// ── LOS PAQUETES 5·10·15 ────────────────────────────────────────────────────
+//
+// 🔴 Tres tamaños FIJOS, cada uno con su precio y su interruptor. El prestador
+// enciende los que quiera — ninguno, uno, dos o los tres.
+//
+// 🔴 LA ARITMÉTICA NO VIVE ACÁ: `equivalenciaDePaquete()` de `packages/ui` es
+// la única cuenta. *Si se duplicara, las dos superficies podrían dar números
+// distintos y el prestador vendería un descuento que la familia no ve.*
+
+export type TamanoPaquete = 5 | 10 | 15;
+
+export interface PaqueteGuarderia {
+  tamano: TamanoPaquete;
+  precio: number;
+  /**
+   * `false` = apagado **con su precio guardado**. No estar en la respuesta es
+   * otra cosa: nunca se encendió. **Son dos estados distintos y la pantalla
+   * los puede distinguir sin preguntar.**
+   */
+  activo: boolean;
+}
+
+export async function definirPaqueteGuarderia(params: {
+  prestadorId: string;
+  tamano: TamanoPaquete;
+  precio: number;
+  activo?: boolean;
+}): Promise<ResultadoWrapper<{ paqueteId: string }, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('definir_paquete_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_tamano: params.tamano,
+    p_precio: params.precio,
+    p_activo: params.activo ?? true,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const id = (data as Record<string, unknown>).paquete_id;
+  if (typeof id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { paqueteId: id } };
+}
+
+export async function obtenerPaquetesGuarderia(
+  prestadorId: string,
+): Promise<ResultadoWrapper<PaqueteGuarderia[], CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('obtener_paquetes_guarderia', {
+    p_prestador_id: prestadorId,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: PaqueteGuarderia[] = [];
+  for (const p of data) {
+    if (typeof p !== 'object' || p === null) return fallaCodigo('datos_inconsistentes');
+    const r = p as Record<string, unknown>;
+    if (typeof r.tamano !== 'number' || typeof r.precio !== 'number') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (r.tamano !== 5 && r.tamano !== 10 && r.tamano !== 15) {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    salida.push({ tamano: r.tamano, precio: r.precio, activo: r.activo !== false });
+  }
+  return { ok: true, data: salida };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RETIRAR Y REEMPLAZAR FRANJAS — cambiar de horario es UN acto
+   ═══════════════════════════════════════════════════════════════════════════
+   🔴 **Antes no había camino para retirar una franja** (`activo` existía y el
+   wrapper no lo exponía), así que cambiar de horario dejaba **dos ventanas
+   contradictorias vivas** y la lista de la familia leía las dos. *El prestador
+   creía haber cambiado su horario y en realidad había agregado uno.*
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Retira UNA franja. **Soft: `activo = false`, jamás DELETE** — *una franja
+ * borrada se lleva la historia de por qué un día pasado tenía esa ventana.*
+ *
+ * ⚠️ **No frena dejar el tipo sin ventanas, pero lo DICE** en
+ * `sinVentanasDeEseTipo`. *Frenarlo trabaría al prestador a mitad de un cambio;
+ * callarlo lo dejaría publicado sin horario sin enterarse.* Qué hacer con ese
+ * dato es de la pantalla.
+ */
+export async function retirarFranjaGuarderia(
+  franjaId: string,
+): Promise<ResultadoWrapper<{ tipo: string; sinVentanasDeEseTipo: boolean }, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('retirar_franja_guarderia', {
+    p_franja_id: franjaId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      tipo: typeof r.tipo === 'string' ? r.tipo : '',
+      sinVentanasDeEseTipo: r.sin_ventanas_de_ese_tipo === true,
+    },
+  };
+}
+
+/**
+ * 🔴 **CAMBIAR DE PATRÓN EN UN SOLO ACTO.** Retira todas las franjas de ese
+ * tipo y define las nuevas **en la misma transacción**.
+ *
+ * *Hacerlo con dos llamadas deja una ventana —de milisegundos, o de minutos si
+ * la segunda falla— **en la que el lugar no tiene horario o tiene dos**. Y en el
+ * medio puede entrar una reserva.* **Un cambio de patrón es una sola decisión
+ * del prestador; que sea un solo acto no es comodidad, es correctitud.**
+ *
+ * **Un array vacío es un retiro total DECLARADO**, no un error: el prestador
+ * puede dejar de ofrecer ese tramo.
+ */
+export async function reemplazarFranjasGuarderia(params: {
+  prestadorId: string;
+  tipo: 'recogida' | 'devolucion';
+  franjas: { desde: string; hasta: string; dias_semana: number[]; zona_horaria?: string }[];
+}): Promise<ResultadoWrapper<{ definidas: number; sinVentanasDeEseTipo: boolean }, CodigoErrorGuarderiaConfig>> {
+  const { data, error } = await getClient().rpc('reemplazar_franjas_guarderia', {
+    p_prestador_id: params.prestadorId,
+    p_tipo: params.tipo,
+    p_franjas: params.franjas,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      definidas: typeof r.definidas === 'number' ? r.definidas : 0,
+      sinVentanasDeEseTipo: r.sin_ventanas_de_ese_tipo === true,
+    },
+  };
 }

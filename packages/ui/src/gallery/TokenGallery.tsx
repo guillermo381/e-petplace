@@ -52,10 +52,11 @@ import { AceptacionDeDocumentos } from '../components/AceptacionDeDocumentos'
 import { CalendarioCupo } from '../components/CalendarioCupo'
 import { ContadorClip } from '../components/ContadorClip'
 import { FichaFranja } from '../components/FichaFranja'
-import { FichaMensualidad } from '../components/FichaMensualidad'
+import { FichaDeOferta, type EquivalenciaPaquete } from '../components/FichaDeOferta'
 import { HiloDelDia } from '../components/HiloDelDia'
 import { MiniaturaClip } from '../components/MiniaturaClip'
 import { SelectorRoster } from '../components/SelectorRoster'
+import { SeccionPlegable } from '../components/SeccionPlegable'
 import { SemaforoSanitario } from '../components/SemaforoSanitario'
 import { TileVideoPropio } from '../components/TileVideoPropio'
 import { ModalDosAlturas, AsaModal } from '../components/ModalDosAlturas'
@@ -4382,7 +4383,7 @@ function GaleriaInterna() {
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o) => (
                   <View key={o.t} style={{ width: 190 }}>
-                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} onPress={() => {}} />
+                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} columnas={2} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -4397,7 +4398,7 @@ function GaleriaInterna() {
                   { g: 'despensa', t: 'Venta de productos', c: 'consumo' },
                 ] as const).map((o, i) => (
                   <View key={o.g} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
-                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} orden={i} onPress={() => {}} />
+                    <Baldosa glifo={o.g} titulo={o.t} capa={o.c} columnas={2} orden={i} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -4419,7 +4420,7 @@ function GaleriaInterna() {
                   { g: 'paseo', t: 'Paseo de una hora con nombre largo', c: 'cuidado', d: '3 activos' },
                 ] as const).map((o) => (
                   <View key={o.t} style={{ width: '50%', paddingHorizontal: spacing[2], paddingBottom: spacing[4] }}>
-                    <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} onPress={() => {}} />
+                    <Baldosa glifo={o.g} titulo={o.t} detalle={o.d} capa={o.c} columnas={2} onPress={() => {}} />
                   </View>
                 ))}
               </View>
@@ -4843,6 +4844,23 @@ function GaleriaInterna() {
               subtitulo="Consulta general"
               metadataMono="10:30 · 30 min"
               mascota={{ nombre: 'Zeus' }}
+              onPress={() => {}}
+            />
+            {/* ⭐ S107-B · GUARDERÍA — el quinto oficio, contra sus hermanas.
+                Qué decide: que su canto se lea IGUAL que paseo/grooming
+                (los tres son CUIDADO — los separa el glifo, no el canto) y
+                que **el día solo, sin hora, no deje la fila coja**.
+                🔴 Su `metadataMono` es UN DÍA, no una hora: la pieza nunca
+                exigió hora, y por eso guardería NO necesitó una prop. Las
+                DOS VENTANAS no van acá — son contenido del despliegue, no
+                metadata de fila (ver la cabecera de la pieza). */}
+            <FilaCita
+              direccion="abajo"
+              oficio="guarderia"
+              titulo="Luna"
+              subtitulo="Estadía del día"
+              metadataMono="29 ago"
+              mascota={{ nombre: 'Luna' }}
               onPress={() => {}}
             />
             <FilaCita
@@ -6605,6 +6623,83 @@ function GaleriaInterna() {
    son cadenas de demostración, jamás la voz del producto. `R66` las exceptúa
    por vivir en la galería.
    ───────────────────────────────────────────────────────────────────────── */
+/* Los CINCO mundos REALES de la grilla de Negocio, con sus labels tal cual los
+   escribe el riel del prestador — **no un ejemplo corto**. Es la vara que la
+   mesa pidió: *«medí el resultado contra los cinco labels reales»*. */
+const MUNDOS_REALES = [
+  { g: 'paseo', t: 'Paseo', d: '3 activos', c: 'cuidado' },
+  { g: 'grooming', t: 'Grooming', d: '2 activos', c: 'cuidado' },
+  { g: 'training', t: 'Adiestramiento', d: '1 activo', c: 'cuidado' },
+  { g: 'veterinaria', t: 'Veterinaria', d: '4 activos', c: 'identidad' },
+  { g: 'guarderia', t: 'Guardería', d: undefined, c: 'cuidado' },
+] as const
+
+/* EL MISMO ROSTER, pero con GUION BLANDO (`\u00AD`) en las dos palabras largas.
+   Es invisible salvo que el renglón corte ahí — y entonces se dibuja un guion.
+   **Es la única salida cross-platform**: RN no hifena español (Android tiene
+   `android_hyphenationFrequency`, iOS no expone nada equivalente), así que el
+   punto de corte tiene que venir EN LA CADENA. */
+const MUNDOS_CON_GUION = [
+  { g: 'paseo', t: 'Paseo', d: '3 activos', c: 'cuidado' },
+  { g: 'grooming', t: 'Grooming', d: '2 activos', c: 'cuidado' },
+  { g: 'training', t: 'Adiestra\u00ADmiento', d: '1 activo', c: 'cuidado' },
+  { g: 'veterinaria', t: 'Vete\u00ADri\u00ADna\u00ADria', d: '4 activos', c: 'identidad' },
+  { g: 'guarderia', t: 'Guardería', d: undefined, c: 'cuidado' },
+] as const
+
+/* ─────────────────────────────────────────────────────────────────────────
+   D-973 · LA BALDOSA DEL CLIENTE, REPRODUCIDA FIEL — no es la pieza.
+
+   🔴 **ES UNA COPIA, y por eso puede envejecer.** Se transcribió de
+   `apps/cliente/src/app/(tabs)/explorar/index.tsx`, **bloque
+   `fichasActivas.map`** — *se cita el BLOQUE y no un número de línea: el
+   número ya envejeció una vez (183 → 200) mientras esta copia seguía siendo
+   fiel.* Si esa pantalla cambia y esto no, la comparación pasa a comparar
+   contra una ficción, que es lo único que arruinaría el instrumento.
+   **Quien toque aquélla, mira ésta.**
+
+   ✅ **RE-COTEJADA el 30-ago-2026 y SIGUE FIEL**, campo por campo:
+   `aspectRatio: 1.05` · `paddingTop: spacing[1]` en el glifo · glifo **26** ·
+   título `sans.medium` + `size.sm` + `numberOfLines={2}` · celda
+   `flexBasis: '31%'` con `flexGrow: 0`. *Lo único que cambió allá fue la
+   posición del bloque y que ganó guardería.*
+
+   POR QUÉ SE COPIA EN VEZ DE IMPORTARSE: no es un componente — vive **inline**
+   dentro del `.map` de esa pantalla. *No hay nada que importar, y ése es
+   exactamente el hecho que `D-973` pone sobre la mesa.*
+
+   SU ANATOMÍA, tal cual (las diferencias con `Baldosa` son la pregunta):
+   · superficie = `Tarjeta relleno="amplio" interactiva` — **sin canto de capa**
+   · glifo **26**, arriba, con `paddingTop` · proporción **1.05**
+   · título a mano: `sans.medium` + `size.sm`, 2 líneas
+   · **sin detalle y sin chevron** — los dos retirados por firma del founder
+   · celda `flexBasis: '31%'` con `flexGrow: 0`
+   ───────────────────────────────────────────────────────────────────────── */
+function BaldosaDelClienteAMano({ glifo, titulo }: { glifo: IconoNombre; titulo: string }) {
+  const { theme } = useTheme()
+  return (
+    <Tarjeta relleno="amplio" interactiva onPress={() => {}} accessibilityRole="button" etiqueta={titulo}>
+      <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
+        <View style={{ paddingTop: spacing[1] }}>
+          <Icono nombre={glifo} tamano={26} />
+        </View>
+        <View style={{ gap: 2 }}>
+          <Text
+            numberOfLines={2}
+            style={{
+              fontFamily: typography.family.sans.medium,
+              fontSize: typography.size.sm,
+              color: theme.text.primary,
+            }}
+          >
+            {titulo}
+          </Text>
+        </View>
+      </View>
+    </Tarjeta>
+  )
+}
+
 function PiezasDelOficioS107() {
   const { theme } = useTheme()
 
@@ -6618,6 +6713,23 @@ function PiezasDelOficioS107() {
   ])
   const [aceptadas, setAceptadas] = useState<string[]>([])
   const [inicioClip, setInicioClip] = useState<number | null>(null)
+  const [pasoPrecio, setPasoPrecio] = useState(3)
+  const [diario, setDiario] = useState(true)
+  const [mensual, setMensual] = useState(false)
+  const [p5, setP5] = useState(false)
+  const [p15, setP15] = useState(false)
+  const [secHorarios, setSecHorarios] = useState(true)
+  const [secPrecios, setSecPrecios] = useState(false)
+
+  /* La VOZ del espejo es del riel, no de la pieza (ver su cabecera). Acá es
+     relleno de demostración: arma la frase con los números ya calculados. */
+  const vozEquivalente = (e: EquivalenciaPaquete) => {
+    const porDia = `$${e.porDia.toFixed(2)}`
+    if (e.direccion === 'sin_comparacion') return `${porDia} por día`
+    if (e.direccion === 'igual') return `${porDia} por día — igual que tu día suelto`
+    const pct = `${Math.round(e.deltaPct ?? 0)} %`
+    return `${porDia} por día — ${pct} ${e.direccion === 'menos' ? 'menos' : 'más'} que tu día suelto`
+  }
 
   /* El mes de muestra: 30 días, con tres llenos y uno de ellos con su razón.
      `columnaInicial` la manda el riel — acá se fija a mano porque es una
@@ -6677,7 +6789,7 @@ function PiezasDelOficioS107() {
       {/* ② LAS DOS FICHAS HERMANAS */}
       <View style={{ gap: spacing[2] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-          FichaFranja + FichaMensualidad · la MISMA pieza en la config del prestador y en el perfil del lugar
+          FichaFranja · la MISMA pieza en la config del prestador y en el perfil del lugar — y lo CUMPLIÓ: hoy la montan tres pantallas, incluida la del cliente
         </Text>
         <FichaFranja
           conSuperficie
@@ -6685,7 +6797,6 @@ function PiezasDelOficioS107() {
           recogida={{ rotulo: 'Recoge', desde: '7:00', hasta: '9:00' }}
           devolucion={{ rotulo: 'Devuelve', desde: '16:30', hasta: '18:30' }}
         />
-        <FichaMensualidad conSuperficie rotulo="El mes" dias="Lun–Vie" valor={180} porUnidad="el mes" />
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
           ↓ el borde: una franja con la devolución SIN declarar — ni rango vacío ni separador huérfano
         </Text>
@@ -6825,6 +6936,263 @@ function PiezasDelOficioS107() {
           onConformar={() => {}}
           etiquetaConformar="Estoy conforme"
         />
+      </View>
+
+      {/* ⑦ante · LA BALDOSA A DOS Y A TRES — el par que prueba la cura */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          Baldosa · `columnas` OBLIGATORIA sin default (19.9) · el glifo baja 48→32 y el aire 16→10,
+          los dos DERIVADOS de la misma proporción (×2/3), no elegidos a ojo · 🔴 **y el label se
+          PARTE, jamás se trunca: `D-576` ya registra «Adiestramiento trunca» como defecto que el
+          founder rechazó en dispositivo**
+        </Text>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ LOS CINCO MUNDOS REALES, a DOS columnas (el caso firmado por N7)
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {MUNDOS_REALES.map((m) => (
+            <View key={m.t} style={{ width: '50%', padding: spacing[1] }}>
+              <Baldosa glifo={m.g} titulo={m.t} detalle={m.d} capa={m.c} columnas={2} onPress={() => {}} />
+            </View>
+          ))}
+        </View>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ LOS MISMOS CINCO a TRES columnas — **SIN SUBTÍTULO** (firma del gate: glifo y nombre,
+          nada más) y con la caja acortada a su ALTO MEDIDO (98 = 10+32+6+40+10), no a una razón ·
+          🔴 **Guardería va SIN CONFIGURAR**: qué decide es si el apagado se lee «todavía no lo
+          usás» o «no podés entrar» — **es la baldosa que MÁS hay que tocar** · se atenúa el GLIFO y
+          el canto, **jamás el nombre**
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {MUNDOS_REALES.map((m) => (
+            <View key={m.t} style={{ width: '33.333%', padding: spacing[1] }}>
+              <Baldosa
+                glifo={m.g}
+                titulo={m.t}
+                capa={m.c}
+                columnas={3}
+                /* Guardería va SIN CONFIGURAR — es el par que decide: al lado
+                   de sus cuatro hermanas se ve si el apagado dice «todavía no
+                   lo usás» o si se lee como «no podés entrar». */
+                {...(m.g === 'guarderia'
+                  ? { configurado: false as const, vozSinConfigurar: 'Sin configurar' }
+                  : { configurado: true as const })}
+                onPress={() => {}}
+              />
+            </View>
+          ))}
+        </View>
+
+        {/* ── D-973 · LA TERCERA FILA: la baldosa a mano del cliente ── */}
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ⭐ D-973 — LA MISMA GRILLA, DIBUJADA A MANO EN EL CLIENTE (reproducción fiel de
+          `explorar/index.tsx`). **Mismos cinco labels: lo único que cambia es la ANATOMÍA.**{'\n'}
+          · sin CANTO de capa · glifo 26 (no 32) · proporción 1.05 (no 0.8) · título a mano en
+          sans.medium/sm · SIN detalle y SIN chevron, los dos retirados por firma{'\n'}
+          🔴 La pregunta que esto contesta: **¿`Baldosa` tiene que admitir esta forma —variantes con
+          y sin detalle, con y sin canto— o esta superficie NO es una baldosa y sólo se parece?**
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+          {MUNDOS_CON_GUION.map((m) => (
+            <View key={`mano-${m.g}`} style={{ flexBasis: '31%', flexGrow: 0 }}>
+              <BaldosaDelClienteAMano glifo={m.g} titulo={m.t} />
+            </View>
+          ))}
+        </View>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          🔴 ARRIBA el corte lo elige el motor y cae a mitad de sílaba («Adiestrami / ento») — **un
+          corte así no es mejor que truncar**. ↓ ABAJO, LA MISMA PIEZA con GUION BLANDO en la cadena:
+          el corte cae donde el español corta y aparece el guion. **La pieza no cambia — cambia el
+          texto**, porque dónde parte una palabra es propiedad del IDIOMA, no del layout
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {MUNDOS_CON_GUION.map((m) => (
+            <View key={m.g} style={{ width: '33.333%', padding: spacing[1] }}>
+              <Baldosa
+                glifo={m.g}
+                titulo={m.t}
+                capa={m.c}
+                columnas={3}
+                {...(m.g === 'guarderia'
+                  ? { configurado: false as const, vozSinConfigurar: 'Sin configurar' }
+                  : { configurado: true as const })}
+                onPress={() => {}}
+              />
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* ⑦pre · LA HOJA DE CONTACTO DE LOS DOS GLIFOS NUEVOS (§6b) */}
+      <View style={{ gap: spacing[3] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ✅ GATE POR ÍCONO CERRADO (§2.9, firma del founder 30-ago) · **ganaron los dos que
+          quedan**; `certificacionesSello` y `wearablesActividad` murieron con su lápida en el
+          registry (molde prime/primeCorona) · se conservan a 21 y 44 px **contra sus vecinos**,
+          que es donde se juzgó
+        </Text>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          CERTIFICACIÓN — **la que ganó**: hoja + huella como SELLO. Lo que resolvió el veto («una
+          medalla acredita a la persona equivocada») fue una regla que la casa ya tenía escrita: *«su
+          huella sobre una cédula diría que el documento es del animal»* · ⏪ los RENGLONES se fueron
+          antes del gate: el idioma «rectángulo con renglones» ya está ocupado CINCO veces (`fiscal`)
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          <Icono nombre="certificaciones" tamano={44} />
+          <Icono nombre="certificaciones" tamano={21} />
+        </View>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ a 21px CONTRA SUS VECINOS DE PAPEL — es donde se ve si colisiona: documento · carnet ·
+          descargar · copiar
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <Icono nombre="certificaciones" tamano={21} />
+          <Icono nombre="documento" tamano={21} />
+          <Icono nombre="carnet" tamano={21} />
+          <Icono nombre="descargar" tamano={21} />
+          <Icono nombre="copiar" tamano={21} />
+        </View>
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          WEARABLE — **el que ganó**: el DISPOSITIVO con la huella ADENTRO (el aparato muestra a la
+          mascota: dice «mide todo el tiempo» sin corazón y sin ondas) · la traza de actividad murió
+          en el gate, con el riesgo que ya traía declarado: leía a ECG, o sea clínica
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          <Icono nombre="wearables" tamano={44} />
+          <Icono nombre="wearables" tamano={21} />
+        </View>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ a 21px contra los vecinos que el censo marcó como riesgo: carnet (placa colgante) y paseo
+          (el lazo del collar) — por eso el objeto NO es una placa de collar
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <Icono nombre="wearables" tamano={21} />
+          <Icono nombre="carnet" tamano={21} />
+          <Icono nombre="paseo" tamano={21} />
+          <Icono nombre="veterinaria" tamano={21} />
+          <Icono nombre="training" tamano={21} />
+        </View>
+      </View>
+
+      {/* ⑦ter EL ACORDEÓN DE SECCIÓN */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          SeccionPlegable · el censo dio PIEZA NUEVA: la casa no tenía acordeón en packages/ui y hay
+          6 copias inline en apps · anatomía 19.7 (sin caja, chevron ⌄/⌃, target 44) · el `detalle` es
+          lo que hace que plegar no sea ESCONDER
+        </Text>
+        <SeccionPlegable titulo="Horarios" detalle="3 franjas" abierta={secHorarios} onCambiar={setSecHorarios}>
+          <FichaFranja
+            conSuperficie
+            recogida={{ rotulo: 'Recoge', desde: '7:00', hasta: '9:00' }}
+            devolucion={{ rotulo: 'Devuelve', desde: '16:30', hasta: '18:30' }}
+          />
+        </SeccionPlegable>
+        <SeccionPlegable titulo="Tus precios" detalle="desde $12" abierta={secPrecios} onCambiar={setSecPrecios}>
+          <FichaDeOferta tamano={null} rotulo="Mensual" precio={180} registro="oficio" />
+        </SeccionPlegable>
+      </View>
+
+      {/* ⑦bis LA FICHA DE OFERTA — Diario, Mensual y los paquetes, UNA pieza */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          FichaDeOferta · **la MISMA pieza para las tres ofertas**: pared blanca, etiqueta izquierda,
+          toggle derecha — y el toggle ENCIENDE Y EXPANDE en un solo gesto · día suelto = $12,00
+        </Text>
+
+        <FichaDeOferta
+          tamano={null}
+          rotulo="Diario"
+          precio={12}
+          registro="oficio"
+          encendido={diario}
+          onCambio={setDiario}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del día"
+              pasos={['$8', '$10', '$12', '$14', '$16']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <FichaDeOferta
+          tamano={null}
+          rotulo="Mensual"
+          precio={180}
+          registro="oficio"
+          encendido={mensual}
+          onCambio={setMensual}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del mes"
+              pasos={['$150', '$165', '$180', '$195', '$210']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ los paquetes: la misma ficha, **más el espejo** (Diario y Mensual no lo pasan y no se
+          dibuja) · 🔴 el fondo encendido es VERDE SUAVE (capaBg.cuidado) en LAS DOS casas — el
+          magenta era color de marca y no marcaba nada acá
+        </Text>
+
+        <FichaDeOferta
+          tamano={5}
+          rotulo="5 estadías"
+          precio={50}
+          precioDiaSuelto={12}
+          vozEquivalente={vozEquivalente}
+          registro="oficio"
+          encendido={p5}
+          onCambio={setP5}
+          campoPrecio={
+            <SliderPrecio
+              etiqueta="Precio del paquete"
+              pasos={['$40', '$45', '$50', '$55', '$60']}
+              indice={pasoPrecio}
+              onCambio={setPasoPrecio}
+              registro="aa"
+              edicionNumerica
+            />
+          }
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          🔴 EL PAR QUE DECIDE — arriba MÁS BARATO, abajo MÁS CARO que el día suelto. **Los dos
+          tienen que verse IGUAL de neutros**: si el caro se pinta de alarma, la app está opinando
+          sobre el precio de un negocio ajeno (firma: informa, jamás alarma)
+        </Text>
+
+        <FichaDeOferta
+          tamano={15}
+          rotulo="15 estadías"
+          precio={200}
+          precioDiaSuelto={12}
+          vozEquivalente={vozEquivalente}
+          registro="oficio"
+          encendido={p15}
+          onCambio={setP15}
+        />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ↓ perfil del LUGAR (familia): **sin toggle** — no es tocable y se anuncia como texto · y el
+          caso que ahora es COMÚN: sin día suelto, el espejo dice el equivalente y OMITE la
+          comparación en vez de inventar un 0 %
+        </Text>
+
+        <FichaDeOferta tamano={10} rotulo="10 estadías" precio={90} precioDiaSuelto={12} vozEquivalente={vozEquivalente} />
+        <FichaDeOferta tamano={10} rotulo="10 estadías" precio={90} vozEquivalente={vozEquivalente} />
       </View>
 
       {/* ⑧ LA ACEPTACIÓN DE DOCUMENTOS */}

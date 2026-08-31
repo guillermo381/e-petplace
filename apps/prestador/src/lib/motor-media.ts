@@ -49,6 +49,10 @@ function esErrorDeRed(mensaje: string): boolean {
 // desincronizan los topes.
 
 export interface EntradaPublicarMedia {
+  /** 🔴 Obligatoria en la firma, y por eso no la olvida nadie: *una
+   *  idempotencia opcional la olvida el primer consumidor apurado, y el modo
+   *  de falla es silencioso.* La genera la cola antes del primer intento. */
+  claveIdempotencia: string;
   /** Ya subido — el registro NUNCA sube: son dos pasos por diseño. */
   archivoUrl: string;
   tipo: 'foto' | 'clip';
@@ -56,40 +60,56 @@ export interface EntradaPublicarMedia {
   /** 🔴 LAS N ETIQUETAS. Mínimo 1: sin etiquetas rebota `media_sin_etiquetas`.
    *  Cada una recibe su evento apuntando al MISMO archivo. */
   mascotaIds: string[];
-  /** El día de la estadía, local del lugar (`YYYY-MM-DD`). */
-  fecha: string;
+  /**
+   * 🔴 EL INSTANTE de la captura (ISO), no el día.
+   *
+   * Corregido al cablear: el contrato escrito decía `fecha` y **la función viva
+   * pide `p_capturada_en timestamptz`**. La diferencia no es cosmética — **el
+   * día lo deriva el servidor del instante**, y eso lo vuelve dueño del huso
+   * horario, que es donde tiene que vivir. *Lo cazó el compilador en el
+   * cableado, que es exactamente para lo que ese archivo existe.*
+   */
+  capturadaEn: string;
 }
 
 /**
  * `publicarMedia` del contrato §②: crea la media, sus N etiquetas y sus N
  * eventos **en una sola transacción**.
  *
- * ⚠️ Lo que la app NO puede asumir y por eso la cola igual reintenta: el
- * contrato no declara idempotencia por `archivo_url`. **Se pidió** (era el
- * requisito ① de mi pedido D→A) y hasta que esté escrita, un reintento tras un
- * timeout ambiguo podría duplicar eventos. *Está anotado, no supuesto.*
+ * ✅ **Idempotente, y adoptado en el contrato** (corrección de D, 28-ago): el
+ * segundo intento **no rebota — devuelve la media que ya existe** con
+ * `ya_existia: true`. Eso es lo que la cola necesitaba: *un reintento que
+ * rebota obliga a distinguir «falló» de «ya estaba», y esa distinción es justo
+ * la que no se puede hacer con un timeout ambiguo.*
  */
 export type PublicarMedia = (
   entrada: EntradaPublicarMedia,
 ) => Promise<
-  | { ok: true; mediaId: string; eventoIds: string[] }
+  | { ok: true; mediaId: string; eventoIds: string[]; ya_existia?: boolean }
   | { ok: false; codigo: string; mensaje: string }
 >;
 
-/**
- * El aviso, después de publicar.
- *
- * 🔴 **LA AGRUPACIÓN NO VIVE ACÁ, y la mesa lo ratificó** (contrato §④bis):
- * dos teléfonos subiendo media del mismo animal no coordinan un digest entre
- * ellos — *cada aparato sabe lo que él subió y nada más*, así que agrupar en el
- * cliente produce «1 foto nueva» tres veces, que es el «una push por foto» que
- * la firma prohíbe. **Agrupa el servidor.** La app solo declara el hecho.
- */
-export type AvisarMediaPublicada = (aviso: {
-  fecha: string;
-  mascotaIds: string[];
-  tipo: 'foto' | 'clip';
-}) => Promise<void>;
+/* ☠️ ── AQUÍ VIVIÓ `AvisarMediaPublicada`, Y MURIÓ AL MEDIR SU PUERTA ──────
+   Este módulo tuvo un quinto punto de inyección: un `avisar` que la app
+   llamaba al publicar, para que el dueño se enterara.
+
+   **Medido el 29-ago, contra el objeto:** el productor del digest existe
+   (`encolar_resumen_media_guarderia`), **no recibe argumentos**, lo corre un
+   **cron cada 15 minutos** agrupando por (mascota, día) — y la migración
+   `20260829190000_s107a_digest_acl` **REVOCÓ `authenticated`** de esa función,
+   a propósito.
+
+   ⇒ **La app no tiene puerta, y no debe tenerla.** El disparo desde el cliente
+   no es que esté cerrado por ahora: **sobra**. Y sobra por la razón que este
+   mismo módulo venía escribiendo desde el censo — *dos teléfonos subiendo media
+   del mismo animal no pueden coordinar un digest entre ellos; agrupa el
+   servidor o no agrupa nadie*. **El servidor agrupa.** El cron ve la media de
+   todos los aparatos; esta app solo ve la suya.
+
+   ☠️ Se retira en vez de dejarse en `null`: *un puente que sobrevive a su río
+   manda al próximo a construir otro* (`L-395`). Quien busque acá el aviso, que
+   lo busque en el cron.
+   ── FIN DE LA LÁPIDA ─────────────────────────────────────────────────── */
 
 export interface DepsMotorMedia {
   prestadorId: string;
@@ -101,9 +121,6 @@ export interface DepsMotorMedia {
    *  `publicarMedia` **aún no**: medido el 28-ago — cero migraciones
    *  `guarderia_media`, cero wrappers). La cola guarda y lo dice. */
   publicar: PublicarMedia | null;
-  /** null = todavía no existe. El aviso NO frena la publicación: la media ya
-   *  está en el hilo del dueño. */
-  avisar?: AvisarMediaPublicada | null;
 }
 
 // ══════════════════ EL MOTOR ═══════════════════════════════════════════════
@@ -163,11 +180,15 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
       }
 
       const r = await deps.publicar({
+        claveIdempotencia: item.claveIdempotencia,
         archivoUrl: storagePath,
         tipo: item.tipo,
         duracionS: item.duracionS,
         mascotaIds: item.mascotaIds,
-        fecha: item.fecha,
+        // El instante REAL de la captura, no el de la subida: entre los dos
+        // puede haber horas sin señal, y el hilo del dueño ordena por cuándo
+        // pasó, no por cuándo llegó.
+        capturadaEn: new Date(item.creadoEn).toISOString(),
       });
 
       if (!r.ok) {
@@ -178,18 +199,7 @@ export function crearMotorMedia(deps: DepsMotorMedia): MotorDeSubida {
         };
       }
 
-      // El aviso va DESPUÉS y no puede tumbar la publicación: si falla, la
-      // media ya está en el hilo del dueño y el ítem no debe volver a la cola
-      // (volvería a registrar, y eso sí duplicaría). Se registra y se sigue.
-      if (deps.avisar) {
-        try {
-          await deps.avisar({ fecha: item.fecha, mascotaIds: item.mascotaIds, tipo: item.tipo });
-        } catch (e) {
-          console.error(`[motor-media] el aviso falló y NO frena la publicación · ${String(e)}`);
-        }
-      }
-
-      return { ok: true as const };
+      return { ok: true as const, mediaId: r.mediaId };
     },
   };
 }

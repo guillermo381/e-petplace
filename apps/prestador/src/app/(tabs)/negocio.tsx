@@ -114,8 +114,15 @@ const ESTILO_GRILLA = {
   flexWrap: 'wrap',
   marginHorizontal: -spacing[2],
 } as const;
+/* ⭐ S107-C · TRES COLUMNAS (firma del founder tras caminar el gate).
+   Con cuatro mundos, dos columnas repartían parejo. Con el quinto, la última
+   fila quedaba con UNA baldosa sola del doble de ancho que sus hermanas — y
+   **una baldosa más grande se lee como más importante**, que es justo lo que
+   la grilla no debe decir: los cinco oficios pesan igual.
+   🔴 Tres columnas reparten 5 en 3+2 y **ninguna queda huérfana a lo ancho**:
+   la fila corta se ve corta, no se ve inflada. */
 const ESTILO_CELDA = {
-  width: '50%',
+  width: '33.333%',
   paddingHorizontal: spacing[2],
   paddingBottom: spacing[4],
 } as const;
@@ -362,18 +369,26 @@ export default function Negocio() {
      de diseño del reporte para que el founder lo mire con el ojo.
      ───────────────────────────────────────────────────────────────────── */
 
-  /** El conteo de servicios ACTIVOS de cada mundo. `null` = todavía no se
-   *  leyó — que **no es cero**: durante la carga la baldosa no dice nada
-   *  en vez de afirmar «Sin configurar» sobre datos que no llegaron. */
-  const conteoDeMundo = (b: BloqueNegocio, n: number | null): string | undefined => {
-    if (fallos.has(b) && cargado) return t('negocio.baldosaNoCargo');
-    if (!cargado || n === null) return undefined;
-    return n === 0
-      ? t('negocio.baldosaSinConfigurar')
-      : n === 1
-        ? t('negocio.baldosaUno')
-        : t('negocio.baldosaN', { n });
-  };
+  /* ☠️ `conteoDeMundo` MURIÓ (S107-B) — la baldosa a tres columnas dejó de
+     tener subtítulo (firma del gate) y ésta era su única productora. **Se
+     borra en el mismo acto que la deja sin consumidor** (Ley 37): una función
+     viva que nadie llama es la trampa `D-645`, y esta sesión ya la pagó.
+
+     ✅ **SU CRITERIO NO SE PERDIÓ, SE ABSORBIÓ.** Decía: *«`null` = todavía no
+     se leyó — que NO ES CERO: durante la carga la baldosa no dice nada en vez
+     de afirmar "Sin configurar" sobre datos que no llegaron»*. Por eso el
+     estado nuevo se deriva de `cargado && n === 0` y **no** de `n !== 0`.
+
+     🔴 ⚠️ **LO QUE SÍ SE PERDIÓ, Y SE DECLARA EN VEZ DE ABSORBERLO EN
+     SILENCIO: el estado de FALLO DE CARGA.** Esta función tenía una rama
+     `fallos.has(b) && cargado → «No cargó»`, y **con el subtítulo afuera ese
+     aviso no tiene dónde vivir**: la baldosa hoy no distingue «no pude leer tu
+     conteo» de «todo bien». *Es Ley 13 en su forma incómoda — un error que
+     deja de decirse.* **No se inventa un lugar acá**: la firma fue «glifo y
+     nombre, nada más», y meterle un tercer estado de color al apagado sería
+     decidir por la mesa. Queda para su gate.
+     `negocio.baldosaNoCargo` / `baldosaUno` / `baldosaN` quedan **sin uso** —
+     no se borran del riel: eso es otra tanda con su censo. */
 
   // B1a paseo · S59-B5 grooming · S63-B adiestramiento · S68-B veterinaria.
   // Cada oficio cuenta SUS filas activas de oferta — la unidad es la misma
@@ -497,10 +512,10 @@ export default function Negocio() {
             <View style={ESTILO_GRILLA}>
               {(
                 [
-                  { etiqueta: t('negocio.paseo'), glifo: 'paseo', capa: 'cuidado', ruta: '/paseo', detalle: conteoDeMundo('paseo', nPaseo) },
-                  { etiqueta: t('negocio.mundoGrooming'), glifo: 'grooming', capa: 'cuidado', ruta: '/grooming', detalle: conteoDeMundo('grooming', nGrooming) },
-                  { etiqueta: t('negocio.mundoAdiestramiento'), glifo: 'training', capa: 'cuidado', ruta: '/adiestramiento', detalle: conteoDeMundo('adiestramiento', nAdiestramiento) },
-                  { etiqueta: t('negocio.mundoVeterinaria'), glifo: 'veterinaria', capa: 'identidad', ruta: '/veterinaria', detalle: conteoDeMundo('veterinaria', nVeterinaria) },
+                  { etiqueta: t('negocio.paseo'), glifo: 'paseo', capa: 'cuidado', ruta: '/paseo', n: nPaseo, bloque: 'paseo' as const },
+                  { etiqueta: t('negocio.mundoGrooming'), glifo: 'grooming', capa: 'cuidado', ruta: '/grooming', n: nGrooming, bloque: 'grooming' as const },
+                  { etiqueta: t('negocio.mundoAdiestramiento'), glifo: 'training', capa: 'cuidado', ruta: '/adiestramiento', n: nAdiestramiento, bloque: 'adiestramiento' as const },
+                  { etiqueta: t('negocio.mundoVeterinaria'), glifo: 'veterinaria', capa: 'identidad', ruta: '/veterinaria', n: nVeterinaria, bloque: 'veterinaria' as const },
                   /* ⭐ S107-C · LA GUARDERÍA. Capa `cuidado` como sus tres
                      hermanas (Ley 10: el canto dice CATEGORÍA), glifo propio.
                      🔴 `detalle: undefined` A PROPÓSITO y no por olvido: las
@@ -509,15 +524,46 @@ export default function Negocio() {
                      Pasarle `conteoDeMundo` diría «sin configurar» a un
                      prestador que ya guardó su cupo y sus ventanas — un
                      número falso es peor que ninguno. Entra con la oferta. */
-                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia/taller', detalle: undefined },
+                  { etiqueta: t('negocio.mundoGuarderia'), glifo: 'guarderia', capa: 'cuidado', ruta: '/guarderia', n: null, bloque: null },
                 ] as const
               ).map((mundo, i) => (
                 <View key={mundo.ruta} style={ESTILO_CELDA}>
                   <Baldosa
+                    /* 🔴 SIN ESTO EL GLIFO NO SE ENTERA DE QUE LA GRILLA
+                       CAMBIÓ: `Baldosa` dimensiona su glifo con `columnas`
+                       (48 a dos, 32 a tres) y su default es 2. La celda pasó a
+                       33 % y el glifo seguía a 48 — por eso pisaba el label.
+                       *Cambiar el ancho del contenedor no achica lo de
+                       adentro; hay que decírselo a la pieza.* */
+                    columnas={3}
+                    /* ⭐ S107-B · EL ESTADO REEMPLAZA AL SUBTÍTULO (firma del
+                       gate). **Se deriva de la MISMA condición que usaba
+                       `conteoDeMundo`, no de una nueva:** aquélla sólo decía
+                       «Sin configurar» con `cargado && n === 0`.
+
+                       🔴 **`true` mientras no se sabe, a propósito:** si «no
+                       cargado» se mapeara a `false`, la baldosa afirmaría «sin
+                       configurar» MIENTRAS CARGA — un verosímil-falso, y ahora
+                       el color es lo único que lo dice. *El apagado se enciende
+                       sólo cuando está MEDIDO en cero.*
+
+                       🔴 **Y `!fallos.has(...)` VA EXPLÍCITO aunque HOY sea
+                       redundante** (firma de la mesa: *una baldosa que falló al
+                       leer queda NEUTRA, como durante la carga*). Medido: en un
+                       fallo el setter **nunca se llama**, así que el estado
+                       queda en su `null` inicial y `n` da `null` ⇒ ya no
+                       entraba. **Pero entraba por cómo cae la cadena, no por
+                       diseño** — un futuro `ofertas ?? []` lo volvería `0` y los
+                       fallos empezarían a pintarse apagados **en silencio**. Es
+                       `L-424`: *un guard que acierta por derivación es un guard
+                       que nadie puede leer y confirmar.* Acá la exclusión se
+                       DICE. */
+                    {...(cargado && !(mundo.bloque !== null && fallos.has(mundo.bloque)) && mundo.n === 0
+                      ? { configurado: false as const, vozSinConfigurar: t('negocio.baldosaSinConfigurar') }
+                      : { configurado: true as const })}
                     glifo={mundo.glifo}
                     capa={mundo.capa}
                     titulo={mundo.etiqueta}
-                    detalle={mundo.detalle}
                     orden={i}
                     onPress={() => router.push(mundo.ruta)}
                   />
@@ -580,10 +626,31 @@ export default function Negocio() {
                   {!sinPrestador && (
                     <View style={ESTILO_CELDA}>
                       <Baldosa
+                        /* Grilla de TRES (`ESTILO_CELDA` = 33.333 %), como su hermana de
+                           arriba. 🔴 **Y acá no era formalidad: el glifo venía saliendo a 48**
+                           —el tamaño de DOS columnas— porque el default lo daba callado. Es el
+                           defecto que la firma de la prop obligatoria vino a encontrar, vivo. */
+                        columnas={3}
                         glifo="despensa"
                         capa="consumo"
                         titulo={t('negocio.tiendaVitrina')}
-                        detalle={t('negocio.tiendaVitrinaDetalle')}
+                        /* ⚠️ S107-B · SU DESCRIPCIÓN SALIÓ COMO CONSECUENCIA,
+                           no por firma: a tres columnas `detalle` ya no existe
+                           (glifo y nombre, nada más). **La firma del gate era
+                           sobre los CONTEOS de la grilla de mundos —«6
+                           servicios», «Sin configurar»— y esto era una
+                           DESCRIPCIÓN.** Se declara para que la mesa confirme o
+                           lo devuelva; borrar copy en silencio es peor que
+                           dejarlo de más.
+                           ⏪ **ACÁ DECÍA que las dos claves seguían vivas
+                           «esperando firma». LA FIRMA LLEGÓ** (founder,
+                           30-ago): *los textos SE VAN*. `tiendaVitrinaDetalle`
+                           y `tiendaLocalDetalle` **están borradas del riel**,
+                           con su lápida en `i18n/es.ts`. *Se marca en vez de
+                           reescribirse: el párrafo pedía no borrarlas, y
+                           dejarlo tal cual mandaría a la próxima pista a
+                           protegerlas de un borrado que ya se firmó.* */
+                        configurado
                         orden={0}
                         onPress={() => router.push('/ventas')}
                       />
@@ -604,10 +671,17 @@ export default function Negocio() {
                         glifo de inventario en el registry, y pedir uno se
                         firma (L-175), no se improvisa. */}
                     <Baldosa
+                      /* Grilla de TRES (`ESTILO_CELDA` = 33.333 %), como su hermana de
+                         arriba. 🔴 **Y acá no era formalidad: el glifo venía saliendo a 48**
+                         —el tamaño de DOS columnas— porque el default lo daba callado. Es el
+                         defecto que la firma de la prop obligatoria vino a encontrar, vivo. */
+                      columnas={3}
                       glifo="negocio"
                       capa="consumo"
                       titulo={t('negocio.tiendaLocal')}
-                      detalle={t('negocio.tiendaLocalDetalle')}
+                      /* ⚠️ Ver la hermana de arriba: descripción retirada como
+                         consecuencia de la regla de tres columnas, no por firma. */
+                      configurado
                       orden={1}
                       onPress={() => setHojaV2(true)}
                     />

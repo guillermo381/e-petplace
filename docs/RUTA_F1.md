@@ -1,5 +1,10 @@
 # RUTA_F1 — El camino al soft launch (v2: dos arcos)
 
+> ✏️ **ENMENDADA S107 (31-ago-2026): entra `A4bis` — LA GUARDERÍA, code-complete
+> y NO trazada acá antes de construirse.** *Se anota después porque una ruta a
+> la que le falta un oficio entero que ya está en producción no es un camino
+> incompleto: es un camino que MIENTE sobre el terreno.*
+
 > **Trazada en S49 (9 Jul 2026), founder + arquitecto.** El destino es
 > `DEFINICION_SOFTLAUNCH.md` (con la enmienda de operación de esta misma
 > sesión). **Contrastes obligatorios:** `MODELO_PRODUCTO.md` para el
@@ -195,6 +200,35 @@ honesta:** relevamiento de qué falta portar del portal web congelado
 > consecuencia; talla del perfil con pregunta si NULL; checkout del
 > chasis) — Bloque 1 del arranque S60. Curas B6 del gate del founder
 > en cola de la B.
+
+## A4bis — LA GUARDERÍA ✅ CODE-COMPLETE (S107, 29-31 Ago 2026)
+
+> ⚠️ **NO ESTABA EN ESTA RUTA.** Se traza acá **después de construirse**, porque
+> un oficio entero que llegó a producción y no figura en el camino **deja el
+> camino diciendo menos de lo que hay** — y la próxima sesión que lea esta ruta
+> para presupuestar concluiría que el catálogo tiene cuatro oficios.
+> **Su letra: `LETRA_GUARDERIA.md` · su acta: `docs/loop/S107-A-TRASPASO.md`.**
+
+**Lo que quedó vivo:** las **tres modalidades** —día suelto, paquete y
+mensualidad— con su filtro, la tira de días que **dice su estado sin que la
+toquen**, la dirección de recogida elegible, las actas de recogida y devolución,
+la media del durante, y **los seis documentos legales versionados con su acto
+único de aceptación**.
+
+🔴 **LO QUE LA SEPARA DE «CERRADA», y son dos, con dueño:**
+
+1. **EL COBRO ES SIMULADO en paquete y mensualidad** (el día suelto va por el
+   riel real). **Firmado que va a ser real** — es **el arco entero de un sujeto
+   DOS VECES** y tiene sesión y plan propios:
+   **`docs/PLAN_S108_COBRO_REAL_GUARDERIA.md`**, con tres decisiones ya
+   firmadas adentro. *Frenado por ALCANCE, no por dudas.*
+2. **El gate sanitario nace APAGADO** y **se enciende antes de la salida real**
+   — es la **precondición ⑦** de `DEFINICION_SOFTLAUNCH` §3.5 (`D-968`).
+
+**Y lo que espera al founder, no a una pista:** las tres claves de `app_config`
+· la revisión legal de los seis textos (`D-979`, **sin apuro firmado**: no hay
+familias reales) · **el candidato a primera guardería real** · el compromiso
+operativo de las **48 horas de revocación**.
 
 ## A5 — Producto-que-sabe, después el coach
 

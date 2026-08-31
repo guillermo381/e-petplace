@@ -1327,14 +1327,30 @@ export const prestadorEs = {
        local (suyo, no sale a ningún lado) y la otra es la vitrina que ve
        el cliente. *Si los dos se llamaran «productos», la pantalla no
        diría cuál es cuál — y ésa era justo la firma.* */
+    /* ☠️ `tiendaVitrinaDetalle` y `tiendaLocalDetalle` MURIERON (S107-B, firma
+       del founder 30-ago): «La vitrina» y «Muy pronto» salieron de la baldosa
+       cuando la de tres columnas se quedó con glifo y nombre, y la mesa firmó
+       que **no vuelven**. Se borran acá porque **ésa era la condición de
+       muerte que este mismo parte había escrito**: quedaban vivas *«esperando
+       firma»*, y la firma llegó. *Una clave que sobrevive a su decisión deja
+       de ser reserva y pasa a ser basura con coartada.* */
     tiendaVitrina: 'Vender por e-PetPlace',
     /* ⏪ Estos dos detalles nacieron ESCRITOS A OJO y la captura los cazó:
        «La vitrina del cliente» (130,2) y «Llega en la próxima versión»
        (174,4) truncan contra los 121 px del teléfono angosto. La versión
-       larga de la segunda vive en la Hoja, que es donde hay lugar. */
-    tiendaVitrinaDetalle: 'La vitrina',
+       larga de la segunda vive en la Hoja, que es donde hay lugar.
+
+       🔴 ⚠️ **HOY NO LAS RENDERIZA NADIE, Y ESO ES A PROPÓSITO — NO SE BORRAN.**
+       Dejaron de dibujarse cuando la grilla pasó a TRES columnas (el subtítulo
+       salió de la baldosa) y **esperan firma del founder** sobre si el detalle
+       vuelve en otra forma o muere.
+
+       > *Una clave huérfana invita a que alguien la limpie por prolijidad — y
+       > esa limpieza sería **borrar una decisión pendiente**, no basura.*
+
+       Quien las mire buscando muertos: **están declaradas vivas acá**. Si el
+       founder firma que no vuelven, mueren con esa firma y con este comentario. */
     tiendaLocal: 'Inventario de tu local',
-    tiendaLocalDetalle: 'Muy pronto',
     tiendaV2Titulo: 'Todavía no, pero viene',
     tiendaV2Voz:
       'El inventario de tu local —lo que tenés en tus estantes, sin salir a la vitrina— llega en la próxima versión. Por ahora podés vender por e-PetPlace.',
@@ -1353,9 +1369,14 @@ export const prestadorEs = {
     paseo: 'Paseo',
     mundoGrooming: 'Grooming',
     // S63-B: el mundo Adiestramiento
-    mundoAdiestramiento: 'Adiestramiento',
+    /* ⚠️ GUION BLANDO (U+00AD) ADENTRO — invisible en el editor, a propósito.
+       RN no hifena español y la pieza **no puede** saber dónde parte una
+       palabra: eso es propiedad del IDIOMA, no del layout (pedido de B).
+       Cortes por sílaba: a-dies-tra-mien-to · ve-te-ri-na-ria.
+       🔴 **Si editás estas cadenas, el guion se pierde sin que nada avise.** */
+    mundoAdiestramiento: 'Adiestra­miento',
     // S68-B: el mundo Veterinaria · LOTE S68 · APROBADO founder 18-jul
-    mundoVeterinaria: 'Veterinaria',
+    mundoVeterinaria: 'Vete­ri­na­ria',
     mundoGuarderia: 'Guardería',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
@@ -3206,6 +3227,13 @@ export const prestadorEs = {
     oficio_grooming: 'Estética',
     oficio_paseo: 'Paseo',
     oficio_adiestramiento: 'Adiestramiento',
+    /* ⭐ S107-B · nace porque `FilaCitaOficio` ganó guardería y esta clave se
+       COMPONE del oficio (`historico.oficio_${oficio}`) — sin ella el
+       typecheck de la app cae. **La palabra no se inventó: es la que este
+       mismo riel ya usa para el oficio** (`negocio.mundoGuarderia`), en la
+       forma exacta de sus cuatro hermanas.
+       ⚠️ **Igual es VOZ: va al lote que el founder lee aparte.** */
+    oficio_guarderia: 'Guardería',
     estado: '{{n}} en el período · {{desde}} a {{hasta}}',
     limpiar: 'Quitar los filtros',
     sinCoincidenciasTitulo: 'Nada con esos filtros',
@@ -4095,6 +4123,10 @@ export const prestadorEs = {
      La voz es de la casa: el motor manda códigos y horas, y el rótulo lo
      pone la app (contrato de B §⑥bis). */
   tallerGuarderia: {
+    especiesTitulo: 'Especies que recibes',
+    especiePerro: 'Perros',
+    especieGato: 'Gatos',
+    especiesMinima: 'Elige al menos una: sin especies, tu guardería no puede recibir a nadie.',
     titulo: 'La guardería',
     capacidadTitulo: '¿Cuántos animales recibes por día?',
     capacidadApoyo: 'Es el cupo de cada día. Si algún día no abres, lo declaras aparte.',
@@ -4103,6 +4135,10 @@ export const prestadorEs = {
        bajar el cupo, así que el prestador tiene que enterarse él. */
     sobrevendido: 'Hoy tienes más animales reservados que lugares. Nadie perdió su reserva: el cupo nuevo rige de acá en adelante.',
     franjasTitulo: 'Tus dos ventanas',
+    diasEtiqueta: 'Qué días abres',
+    otrasSalas: 'Tienes {{n}} espacio(s) más. Acá configuras el principal.',
+    capacidadNoLeida: 'Estamos leyendo tu configuración.',
+    sinDias: 'Elige al menos un día: sin días no hay horario que guardar.',
     franjasApoyo: 'En una pasas a buscar; en la otra devuelves. La de devolución empieza después de que termina la de recogida.',
     recogida: 'Recoge',
     devolucion: 'Devuelve',
@@ -4118,5 +4154,74 @@ export const prestadorEs = {
     precioPendiente: 'El precio todavía no se configura acá.',
     precioPendienteApoyo: 'Estamos terminando esa parte. Hasta entonces tu guardería no aparece para reservar, aunque tu cupo y tus ventanas queden guardados.',
     devolucionNoGuardo: 'Tu cupo y tu ventana de recogida quedaron guardados, pero la de devolución no: {{motivo}}',
+    precioTitulo: 'Tu precio',
+    preciosTitulo: 'Tus precios',
+    diario: 'Diario',
+    mensual: 'Mensualidad',
+    porMes: 'al mes',
+    franjasResumen: 'Recoge {{recogeDesde}}–{{recogeHasta}} · Devuelve {{devuelveDesde}}–{{devuelveHasta}}',
+    espejoTitulo: 'Así lo ve el dueño',
+    espejoApoyo: 'Lo mismo que ve una familia cuando abre tu guardería.',
+    espejoVacio: 'Sin ningún precio encendido, una familia no ve nada acá.',
+    /* 🔴 Se pregunta cuando hay alternativa; se informa cuando no la hay. */
+    avisoSinPrecioTitulo: 'Vas a guardar sin precios',
+    avisoSinPrecio: 'Se guarda todo lo que configuraste, pero sin precios no se publican tus servicios. No pierdes nada de lo que cargaste.',
+    avisoVolver: 'Volver y poner un precio',
+    avisoGuardarAsi: 'Guardar así',
+    avisoSinDiarioTitulo: 'Vas a guardar sin precio por día',
+    /* ⭐ Ya se publica sin precio del día: el aviso pasó de advertir una
+       imposibilidad a NOMBRAR lo que se publica. Informar sin nombrar deja al
+       prestador adivinando con qué salió a la vitrina. */
+    avisoSinDiario: 'Vas a publicar solo con {{modalidades}}. Quien te busque no va a poder reservar un día suelto.',
+    avisoEntendido: 'Entendido, guardar',
+    precioDia: 'Tu precio por día',
+    ofrecePaquete: 'Paquete de estadías',
+    paquetesTitulo: 'Paquetes de estadías',
+    paquetesApoyo: 'Enciende los que quieras ofrecer. Cada uno lleva su propio precio.',
+    estadias: '{{n}} estadías',
+    precioDelPaquete: 'Precio de las {{n}} estadías',
+    equivalenteSimple: 'Sale ${{porDia}} por día',
+    equivalenteIgual: 'Sale ${{porDia}} por día — igual que suelto',
+    equivalenteMenos: 'Sale ${{porDia}} por día — {{pct}}% menos que suelto',
+    equivalenteMas: 'Sale ${{porDia}} por día — {{pct}}% más que suelto',
+    ofreceMensual: 'Mensualidad',
+    precioMensual: 'Precio del mes',
+    /* 🔴 «Visible» sólo se dice cuando el motor lo confirma. */
+    visibleSi: 'Tu guardería está visible para reservas.',
+    visibleNo: 'Tu guardería todavía no está visible para reservas.',
+    visibleNoApoyo: 'Guarda tu cupo, tus dos ventanas y tu precio por día. Con eso entra a la vitrina.',
+    jornadaDerivada: 'La jornada sale de tus ventanas: {{horas}} horas, de que empiezas a recoger a que terminas de devolver.',
+  },
+  mundoGuarderia: {
+    titulo: 'Guardería',
+    tuDia: 'Tu día',
+    tuDiaDetalle: 'Los animales que recibes hoy',
+    configuracion: 'Configuración',
+    configuracionDetalle: 'Cupo, ventanas y precio',
+    sinConfigurarTitulo: 'Todavía no configuraste tu guardería',
+    sinConfigurarDetalle: 'Define cuántos animales recibes por día, tus dos ventanas y tu precio. Con eso entras a la vitrina.',
+    configurar: 'Configurar',
+    editar: 'Editar tu guardería',
+    visibleTitulo: 'Visible para reservas',
+    noVisibleTitulo: 'Todavía no visible',
+    faltaPublicar: 'Te falta guardar tu precio por día para entrar a la vitrina.',
+    resumenPrecio: '${{precio}} por día',
+    resumenJornada: 'Jornada de {{horas}} horas',
+    resumenCupo: '{{n}} animales por día',
+  },
+  diaGuarderia: {
+    titulo: 'Tu día',
+    cuantos: '{{n}} animales hoy',
+    estado_reservada: 'Por recoger',
+    estado_recogida_en_curso: 'Yendo a buscarlo',
+    estado_en_guarderia: 'Acá',
+    estado_retorno_en_curso: 'Volviendo a casa',
+    estado_entregada: 'Entregado',
+    estado_cancelada: 'Cancelada',
+    estado_no_recogida: 'No se pudo recoger',
+    vacioTitulo: 'Hoy no tienes animales',
+    vacioDetalle: 'Cuando una familia reserve un día, va a aparecer acá con su dirección.',
+    marcarPendiente: 'Todavía no puedes marcar la recogida ni la entrega desde acá.',
+    marcarPendienteApoyo: 'Eso llega con el acta, que es donde se registra el estado del animal y lo que viaja con él.',
   },
 } as const;

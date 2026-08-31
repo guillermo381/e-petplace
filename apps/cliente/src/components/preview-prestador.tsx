@@ -48,7 +48,8 @@
  * rehén al principal.
  */
 
-import { Image, Pressable, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { Image, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Celda, LogoNegocio, Texto, radius, spacing, useTheme } from '@epetplace/ui';
 import { resolverUrlLogoNegocio, type PerfilPublico } from '@epetplace/api';
@@ -65,6 +66,8 @@ export function PreviewPrestador({
   contexto,
   perfil,
   contextoReserva,
+  pie,
+  onAbrir,
 }: {
   prestadorId: string;
   /** LA OFERTA CONCRETA que esta fila representa. Viaja al detalle para
@@ -102,12 +105,47 @@ export function PreviewPrestador({
    *  esta pieza compartida a conocer los cuatro oficios, que es exactamente
    *  la generalización que quita en vez de sumar.* */
   contextoReserva?: Record<string, string>;
+  /**
+   * ⭐ S107-C · **LO PROPIO DEL OFICIO, al pie de la tarjeta.**
+   *
+   * Nació para guardería, que necesita **el cupo del día y las dos ventanas de
+   * recogida y devolución** — *lo que una familia mira para saber si le sirve,
+   * y que ninguno de los otros cuatro oficios tiene.*
+   *
+   * 🔴 **ES UN SLOT, no props nuevas por oficio.** *Si esta pieza aprendiera
+   * qué es una «ventana de recogida», el próximo oficio le agregaría lo suyo y
+   * en tres oficios sería un formulario con cinco banderas.* La pantalla sabe
+   * de su oficio; la tarjeta sabe de presentar a un prestador.
+   *
+   * Ausente = no se dibuja nada, y los cuatro consumidores de hoy **no se
+   * mueven una línea**. Mismo nombre y mismo criterio que el `pie` de
+   * `FichaPrestador`.
+   */
+  pie?: ReactNode;
+  /**
+   * Redirige el tap. **Sólo para el oficio cuyo «detalle que reserva» NO es el
+   * perfil genérico** — hoy, guardería. *Ver la razón medida arriba.*
+   */
+  onAbrir?: () => void;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
   const { theme } = useTheme();
+  /* ⭐ S107-C · **EL DESTINO SE PUEDE REDIRIGIR, y hay una razón medida.**
+     🔴 El perfil genérico monta barra de reserva de CUATRO oficios
+     (`BarraPaseo` · `BarraGrooming` · `BarraVeterinaria` ·
+     `BarraAdiestramiento`) **y ninguna de guardería** ⇒ una familia que llega
+     ahí por guardería **ve el perfil y no tiene con qué pagar**.
+
+     *Guardería tiene su propia pantalla de «mirar y reservar»
+     (`explorar/guarderia/[prestadorId]`), que cumple exactamente el mismo ROL
+     que el perfil cumple para los otros cuatro: se mira y se reserva.* **La
+     regla de la casa —«un destino por superficie: la lista lleva a mirar, el
+     detalle reserva»— se respeta; lo que cambia es CUÁL es ese detalle.**
+
+     Ausente = el perfil de siempre, y **los cuatro consumidores no se mueven**. */
   const abrirPerfil = () =>
-    router.push({
+    onAbrir !== undefined ? onAbrir() : router.push({
       pathname: '/prestador/[prestadorId]',
       params: {
         prestadorId,
@@ -236,11 +274,32 @@ export function PreviewPrestador({
           solo si existe — con `.filter(Boolean)` el separador nunca queda
           huérfano, que es el defecto clásico de una línea compuesta. */}
       <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
+        {/* ⏪ **EL PRECIO IBA EN LA MISMA LÍNEA GRIS, CON EL MISMO PESO** que
+            «Fundador desde 2026» — *y es el dato con el que la familia
+            compara*. Firma del founder (30-ago): va destacado, legible de un
+            vistazo.
+
+            🔴 **Sigue siendo UNA línea**, no un bloque aparte: la anatomía de
+            la casa es meta-en-una-línea y romperla habría desalineado a las
+            cinco hermanas. Lo que cambia es **el peso del número**, no su
+            lugar. *El resto de la meta conserva su gris: si todo se destaca,
+            nada destaca.* */}
         <Texto variante="dato" color="secondary">
-          {[confianza, cohorte, precio].filter(Boolean).join(' · ')}
+          {[confianza, cohorte].filter(Boolean).join(' · ')}
+          {precio ? (
+            <>
+              {confianza || cohorte ? ' · ' : ''}
+              <Text style={{ color: theme.text.primary, fontWeight: '700' }}>{precio}</Text>
+            </>
+          ) : null}
         </Texto>
       </View>
 
+      {/* EL PIE DEL OFICIO — fuera del tocable de arriba a propósito: *lo que
+          informa no debe competir con lo que navega.* */}
+      {pie === undefined ? null : (
+        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3] }}>{pie}</View>
+      )}
     </View>
   );
 }

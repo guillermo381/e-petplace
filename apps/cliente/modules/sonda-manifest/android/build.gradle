@@ -1,0 +1,45 @@
+apply plugin: 'com.android.library'
+
+group = 'expo.modules.sondamanifest'
+version = '0.1.0'
+
+def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
+apply from: expoModulesCorePlugin
+applyKotlinExpoModulesCorePlugin()
+useCoreDependencies()
+useExpoPublishing()
+
+// ⭐ S85-C14 — EL compileSdk QUE FALTABA, y sale del PROYECTO, no de un
+// número escrito acá.
+//
+// `useDefaultAndroidSdkVersions()` es la función que el propio
+// `ExpoModulesCorePlugin` trae para esto: resuelve compileSdk, minSdk y
+// targetSdk con `safeExtGet(...)`, o sea leyendo `rootProject.ext` —
+// exactamente el mismo lugar del que lee la app
+// (`android/app/build.gradle:88` → `rootProject.ext.compileSdkVersion`).
+// **El día que el proyecto suba de SDK, este módulo sube solo.**
+//
+// ⚠️ POR QUÉ FALTABA, medido: los módulos de expo modernos usan el plugin
+// `id 'expo-module-gradle-plugin'`, que hace esto por dentro. Este módulo
+// nació con la forma vieja (`apply from: ExpoModulesCorePlugin.gradle` +
+// los helpers a mano) y **llamaba tres de los cuatro helpers** — quedó
+// afuera justo el que fija las versiones de SDK. No era un valor mal
+// puesto: era una llamada que nunca se hizo.
+//
+// ☠️ Y NO SE ESCRIBE EL NÚMERO A MANO, aunque sea una línea más corta: un
+// compileSdk hardcodeado acá envejece en silencio el día que el proyecto
+// suba — es la misma clase del `max={4}` del taller, que quedó viejo sin
+// que nada fallara. El único número aceptable es el que ya declara el
+// proyecto.
+useDefaultAndroidSdkVersions()
+
+android {
+  namespace "expo.modules.sondamanifest"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
