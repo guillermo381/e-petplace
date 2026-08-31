@@ -61,6 +61,8 @@ import {
   obtenerMascotasDeFamilia,
   resolverUrlsFotos,
   obtenerMisAdiestramientos,
+  obtenerMisProgramas,
+  type ProgramaConSaldo,
   obtenerVocabularioBitacora,
   registrarBitacoraFamilia,
   type AdiestramientoDelHogar,
@@ -134,6 +136,39 @@ export default function HubAdiestramiento() {
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
   const [fotosMascota, setFotosMascota] = useState<Map<string, string>>(new Map());
   const [abierta, setAbierta] = useState<string | null>(null);
+  /**
+   * ⭐ **S109-C · EL PROGRAMA DEJA DE SER UN DESCONOCIDO EN SU PROPIO HOGAR.**
+   *
+   * ⏪ Esta pantalla era un hub de **citas**: el programa contratado sólo
+   * asomaba como `programa_estado` dentro de cada sesión, y **su saldo no
+   * existía en ninguna superficie** (medido: cero lectores de sesiones en todo
+   * el repo hasta que A publicó `obtenerMisProgramas`).
+   *
+   * 🔴 Y con el programa naciendo `pendiente`, eso dejaba de ser una carencia y
+   * pasaba a ser un agujero: **un programa que la familia compró y no pagó no
+   * aparecía en ningún lado.** Los mismos tres grupos que guardería y paseo —
+   * *la tercera vez que se escribe la misma superficie es cuando conviene que
+   * digan exactamente lo mismo.*
+   */
+  const [programas, setProgramas] = useState<ProgramaConSaldo[]>([]);
+  useEffect(() => {
+    let vigente = true;
+    void obtenerMisProgramas().then((r) => {
+      if (vigente && r.ok) setProgramas(r.data);
+    });
+    return () => { vigente = false; };
+  }, []);
+
+  /* Pagado y con sesiones por usar · falta completar el pago · no se pagó a
+     tiempo. **Sin filtro de pago en el lector**: filtra la superficie, que es
+     quien sabe qué contar (A lo dejó así a propósito). */
+  const programasConSaldo = programas.filter(
+    (x) => x.estadoPago === 'pagado' && x.estado === 'activo' && x.sesionesQuedan > 0,
+  );
+  const programasPendientes = programas.filter(
+    (x) => x.estadoPago === 'pendiente' && !x.noPagadoATiempo,
+  );
+  const programasNoPagados = programas.filter((x) => x.noPagadoATiempo);
   const scrollRef = useRef<ScrollView>(null);
 
   const cargar = useCallback(() => {
@@ -237,6 +272,42 @@ export default function HubAdiestramiento() {
             sobre la página) y con SU PROPIO glifo: B lo dibujó en r34 —
             hasta ayer pedía prestado el de VACUNA, que es la sustitución
             genérica que la Ley 12 prohíbe. */}
+        {/* ═══ ⭐ EL PROGRAMA CONTRATADO, con sus tres estados ══════════════
+            Va ARRIBA de la bitácora y de las citas: *es el compromiso que ya
+            se pagó (o que falta pagar), y lo que falta pagar no puede quedar
+            debajo de una lista de sesiones.* ═════════════════════════════ */}
+        {programasConSaldo.map((pg) => (
+          <Tarjeta key={pg.programaContratadoId} relleno="ninguno">
+            <Celda
+              titulo={t('adiestramiento.programaTitulo', { nombre: pg.prestadorNombre })}
+              subtitulo={
+                pg.sesionesQuedan === 1
+                  ? t('adiestramiento.sesionesQuedaUna', { total: pg.sesionesTotal })
+                  : t('adiestramiento.sesionesQuedan', { n: pg.sesionesQuedan, total: pg.sesionesTotal })
+              }
+            />
+          </Tarjeta>
+        ))}
+        {programasPendientes.map((pg) => (
+          <Tarjeta key={pg.programaContratadoId} relleno="ninguno">
+            {/* ⚠️ **Sin cuenta regresiva, y no por olvido**: el lector no
+                devuelve `pago_expira_en` (la RPC no lo proyecta). *Sin ventana
+                declarada no se inventa un reloj* — pedido a A. */}
+            <Celda
+              titulo={t('adiestramiento.programaFaltaPagar')}
+              subtitulo={t('adiestramiento.programaFaltaPagarDetalle', { n: pg.sesionesTotal })}
+            />
+          </Tarjeta>
+        ))}
+        {programasNoPagados.map((pg) => (
+          <Tarjeta key={pg.programaContratadoId} relleno="ninguno">
+            <Celda
+              titulo={t('adiestramiento.programaNoPagadoATiempo')}
+              subtitulo={t('adiestramiento.programaNoPagadoATiempoDetalle')}
+            />
+          </Tarjeta>
+        ))}
+
         <Tarjeta relleno="ninguno">
           <CeldaNavegacion
             icono="bitacora"

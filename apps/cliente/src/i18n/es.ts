@@ -1115,6 +1115,15 @@ export const clienteEs = {
        arco nuevo las mueve a `confirmar_pago_programa` y la frase pasó a
        afirmar algo falso **sobre la agenda de un profesional**. Se mueven con el
        motor, en el mismo acto. */
+    /* ⭐ S109-C · El programa en el hogar, con sus tres estados. Vocabulario de
+       SESIONES, que es el suyo — un programa no tiene días ni unidades. */
+    programaTitulo: 'Tu programa con {{nombre}}',
+    sesionesQuedan: '{{n}} de {{total}} sesiones por usar',
+    sesionesQuedaUna: '1 de {{total}} sesiones por usar',
+    programaFaltaPagar: 'Falta completar el pago de tu programa',
+    programaFaltaPagarDetalle: '{{n}} sesiones · todavía no se cobró',
+    programaNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
+    programaNoPagadoATiempoDetalle: 'No se te cobró nada. Puedes volver a contratarlo.',
     programaRegistradoTitulo: 'Tu programa quedó registrado',
     programaRegistradoDetalle:
       'Falta completar el pago. Cuando se confirme, agendamos las {{n}} sesiones: la primera el {{primera}} y la última el {{ultima}}.',

@@ -873,6 +873,13 @@ export const clienteEn = {
     resumenMover: 'You can move a session with 24 hours notice.',
     comprarPrograma: 'Buy program (simulated)',
     procesandoPrograma: 'Confirming your program…',
+    programaTitulo: 'Your program with {{nombre}}',
+    sesionesQuedan: '{{n}} of {{total}} sessions left',
+    sesionesQuedaUna: '1 of {{total}} sessions left',
+    programaFaltaPagar: 'Your program’s payment isn’t finished',
+    programaFaltaPagarDetalle: '{{n}} sessions · not charged yet',
+    programaNoPagadoATiempo: 'The time to complete the payment ran out',
+    programaNoPagadoATiempoDetalle: 'You weren’t charged. You can sign up again.',
     programaRegistradoTitulo: 'Your program is registered',
     programaRegistradoDetalle:
       'The payment isn’t finished. Once it’s confirmed we book all {{n}} sessions: the first on {{primera}} and the last on {{ultima}}.',
