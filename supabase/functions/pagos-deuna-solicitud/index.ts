@@ -88,13 +88,26 @@ Deno.serve(async (req) => {
   if (!u?.user) return json({ ok: false, codigo: 'sin_sesion' }, 401);
   const userId = u.user.id;
 
-  // ── El sujeto: compra O cita, EXACTAMENTE UNO ─────────────────────────────
+  // ── El sujeto: compra, cita, paquete o plan — EXACTAMENTE UNO ─────────────
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
   const compraId = typeof body.compra_id === 'string' ? body.compra_id : '';
   const citaId = typeof body.cita_id === 'string' ? body.cita_id : '';
+  /* S108-B · los dos sujetos de guardería, por el MISMO riel y con el mismo
+     contrato: la sesión autoriza, el monto sale del desglose congelado. */
+  const bonoId = typeof body.bono_id === 'string' ? body.bono_id : '';
+  const menId = typeof body.guarderia_suscripcion_id === 'string'
+    ? body.guarderia_suscripcion_id : '';
   const hayCompra = UUID_RE.test(compraId);
   const hayCita = UUID_RE.test(citaId);
-  if (hayCompra === hayCita) return json({ ok: false, codigo: 'datos_invalidos' }, 400);
+  const hayBono = UUID_RE.test(bonoId);
+  const hayMen = UUID_RE.test(menId);
+  /* 🔴 Con dos sujetos `hayCompra === hayCita` era un XOR correcto. **Con
+     cuatro deja de decir lo que decía** —dos verdaderos lo satisfacen igual—,
+     así que se CUENTA. *Una condición exacta para dos y laxa para cuatro no
+     rompe ningún test: sigue compilando y deja pasar.* */
+  if ([hayCompra, hayCita, hayBono, hayMen].filter(Boolean).length !== 1) {
+    return json({ ok: false, codigo: 'datos_invalidos' }, 400);
+  }
 
   // 🔴 Si llega un monto, se RECHAZA en vez de ignorarse: ignorarlo dejaría
   //    vivo un cliente que se cree con esa facultad.
@@ -103,6 +116,16 @@ Deno.serve(async (req) => {
   }
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
+
+  /* S108-B · los dos sujetos de guardería son DEL HOGAR. Mismo predicado que
+     sus policies, con el user EXPLÍCITO porque acá `auth.uid()` es NULL. */
+  const esDeLaFamilia = async (familiaId: string | null, uid: string) => {
+    if (!familiaId) return false;
+    const { data } = await db.from('familia_miembro')
+      .select('user_id').eq('familia_id', familiaId).eq('user_id', uid)
+      .is('hasta', null).maybeSingle();
+    return data != null;
+  };
 
   // ── ③ PERTENENCIA ─────────────────────────────────────────────────────────
   let moneda = 'USD';
@@ -123,6 +146,93 @@ Deno.serve(async (req) => {
     if (puede !== true) return json({ ok: false, codigo: 'cita_no_existe' }, 409);
   }
 
+  /* ═══ 🔴 S108-B · PERTENENCIA Y ESTADO DE LOS DOS DE GUARDERÍA ═════════════
+     Espejo EXACTO de `pagos-cobro`. *Dos rieles que verifican la pertenencia
+     con criterios distintos son dos respuestas a de quién es el paquete — y la
+     lección de S105 es que el segundo riel es justo el que se olvida.* */
+  let menPeriodo: string | null = null;
+  let menMonto = 0;
+  if (hayBono) {
+    const { data: b } = await db.from('bonos')
+      .select('id, familia_id, estado_pago, estado, pago_expira_en')
+      .eq('id', bonoId).maybeSingle();
+    if (!b || !(await esDeLaFamilia(b.familia_id, userId))) {
+      return json({ ok: false, codigo: 'bono_no_existe' }, 409);
+    }
+    if (b.estado_pago === 'pagado') return json({ ok: false, codigo: 'bono_ya_pagado' }, 409);
+    if (b.estado_pago !== 'pendiente') return json({ ok: false, codigo: 'bono_no_existe' }, 409);
+    if (b.pago_expira_en !== null && new Date(b.pago_expira_en).getTime() <= Date.now()) {
+      return json({ ok: false, codigo: 'bono_vencido' }, 409);
+    }
+    if (b.estado !== 'activo') return json({ ok: false, codigo: 'bono_vencido' }, 409);
+  }
+  if (hayMen) {
+    const { data: susc } = await db.from('guarderia_suscripciones')
+      .select('id, familia_id, estado, precio_mensual, monto_esperado, periodo_hasta')
+      .eq('id', menId).maybeSingle();
+    if (!susc || !(await esDeLaFamilia(susc.familia_id, userId))) {
+      return json({ ok: false, codigo: 'mensualidad_no_existe' }, 409);
+    }
+    if (susc.estado !== 'activa') {
+      return json({ ok: false, codigo: 'mensualidad_no_activa' }, 409);
+    }
+    /* ═══ 🔴 «PAGAR ES ARRANCAR» — firma del founder, 31-ago ════════════════
+       El período **no existe hasta que la plata entra**: lo ancla el actuador
+       en la fecha del intento aprobado. ⇒ En el PRIMER cobro no hay desglose
+       congelado que leer, y eso **no es una excepción cómoda a la regla**: el
+       número lo congela el MANDATO al firmar (`precio_mensual`), y su techo
+       —`monto_esperado`— es literalmente lo que la familia autorizó. *Un techo
+       firmado al firmar es tan fuerte como un desglose: los dos son un número
+       que la familia vio antes de que nadie cobrara.*
+
+       ⚠️ Por eso acá NO se exige `guarderia_suscripcion_desglose`: esa tabla la
+       congela `cobrar_periodo_mensualidad_guarderia` DENTRO del acto, o sea
+       siempre después de este cobro. Exigirla haría el primer cobro imposible
+       — y sería el guard que bloquea el único camino que tiene que abrir. */
+    if (!(Number(susc.precio_mensual) > 0)) {
+      return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    }
+    /* 🔴 EL TECHO SE VERIFICA ACÁ TAMBIÉN, no sólo en el actuador. *Descubrir
+       que se excedió la autorización cuando la plata ya se movió obliga a
+       reversar; descubrirlo antes es no cobrar de más.* */
+    if (Number(susc.precio_mensual) > Number(susc.monto_esperado)) {
+      return json({ ok: false, codigo: 'monto_divergente' }, 409);
+    }
+
+    /* El período que se va a anclar. Se calcula con la MISMA regla que
+       `cobrar_periodo_mensualidad_guarderia` —hoy, o `periodo_hasta + 1`— para
+       que la columna del intento y el plan no cuenten dos historias.
+       `hoy_local()` se le pregunta a la base: *derivar la zona acá sería una
+       segunda respuesta a qué día es hoy en Guayaquil.* */
+    const { data: hoy } = await db.rpc('hoy_local');
+    const hoyStr = String(hoy ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(hoyStr)) {
+      return json({ ok: false, codigo: 'no_se_pudo_completar' }, 500);
+    }
+    if (susc.periodo_hasta !== null && String(susc.periodo_hasta) >= hoyStr) {
+      /* El plan ya tiene mes vigente: no se cobra el siguiente por adelantado.
+         *Cobrar dos meses seguidos porque alguien tocó dos veces es la clase de
+         cosa que la familia descubre en el resumen de su tarjeta.* */
+      return json({ ok: false, codigo: 'periodo_ya_cobrado' }, 409);
+    }
+    const proximo = susc.periodo_hasta === null
+      ? hoyStr
+      : new Date(new Date(String(susc.periodo_hasta) + 'T00:00:00Z').getTime() + 86400000)
+          .toISOString().slice(0, 10);
+
+    /* 🔴 COMPUERTA 0 DE ESTE SUJETO: un intento en vuelo frena. *Sin esto, dos
+       toques seguidos disparan dos débitos y el segundo llega antes de que el
+       primero confirme.* */
+    const { data: intentos } = await db.from('pagos_intentos')
+      .select('estado').eq('guarderia_suscripcion_id', menId)
+      .in('estado', ['iniciado', 'pendiente']);
+    if ((intentos ?? []).length > 0) {
+      return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
+    }
+    menPeriodo = proximo;
+    menMonto = Number(susc.precio_mensual);
+  }
+
   // ── ② EL MONTO SALE DEL DESGLOSE CONGELADO ────────────────────────────────
   let monto = 0, pedidoDelIntento: string | null = null;
   if (hayCompra) {
@@ -140,7 +250,29 @@ Deno.serve(async (req) => {
     monto = Number(d.total ?? 0);
     moneda = d.moneda ?? 'USD';
   }
-  const sujeto = hayCompra ? compraId : citaId;
+  if (hayBono) {
+    const { data: d } = await db.from('bono_desglose')
+      .select('total, moneda').eq('bono_id', bonoId).maybeSingle();
+    if (!d) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    monto = Number(d.total ?? 0);
+    moneda = d.moneda ?? 'USD';
+  }
+  if (hayMen) {
+    /* Espejo de `pagos-cobro`: el número sale del mandato («pagar es arrancar»)
+       y la moneda de la cuenta comercial. Sin moneda no se cobra. */
+    const { data: cta } = await db.from('guarderia_suscripciones')
+      .select('prestadores(cuentas_comerciales(moneda))').eq('id', menId).maybeSingle();
+    const m = (cta as { prestadores?: { cuentas_comerciales?: { moneda?: string } } } | null)
+      ?.prestadores?.cuentas_comerciales?.moneda;
+    if (!m) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    moneda = m;
+    monto = menMonto;
+  }
+  /* 🔴 Se enumera: con cuatro sujetos el ternario encadenado deja al último
+     haciendo de `else`, y el `else` es cómo un sujeto viaja con la referencia
+     del otro. */
+  const sujeto = hayCompra ? compraId : hayCita ? citaId : hayBono ? bonoId : menId;
+  if (!UUID_RE.test(sujeto)) return json({ ok: false, codigo: 'datos_invalidos' }, 400);
   if (!(monto > 0)) return json({ ok: false, codigo: 'monto_invalido' }, 409);
 
   // ── ④ COMPUERTAS SERVER-SIDE ──────────────────────────────────────────────
@@ -190,8 +322,12 @@ Deno.serve(async (req) => {
      prueba que se pidió. Sin ella el caso ④ (no llega ninguno) es indetectable:
      no habría contra qué barrer. */
   const { data: intento, error: eI } = await db.from('pagos_intentos').insert({
-    pedido_id: pedidoDelIntento, cita_id: hayCita ? citaId : null,
+    pedido_id: pedidoDelIntento,
+    cita_id: hayCita ? citaId : null,
     compra_id: hayCompra ? compraId : null,
+    bono_id: hayBono ? bonoId : null,
+    guarderia_suscripcion_id: hayMen ? menId : null,
+    guarderia_suscripcion_periodo: hayMen ? menPeriodo : null,
     proveedor: 'deuna', forma: 'codigo_push', estado: 'iniciado',
     proveedor_referencia: sujeto, referencia_corta: ref,
     monto, moneda,

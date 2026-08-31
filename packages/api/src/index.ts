@@ -1397,6 +1397,9 @@ export {
 
 export {
   cobrarCompra, cobrarCita, cobrarSujeto,
+  // S108-B · las dos puertas de guardería. R71: un wrapper que no se exporta
+  // es un motor sin puerta.
+  cobrarPaqueteGuarderia, cobrarMensualidadGuarderia,
   type CodigoCobro, type SenalDeCobro, type SujetoDeCobro,
 } from './wrappers/pagos-cobro';
 
