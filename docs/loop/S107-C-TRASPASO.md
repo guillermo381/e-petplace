@@ -1,192 +1,229 @@
-# S107-C · ACTA DE TRASPASO — las superficies de guardería
+# S107-C · EL FLUJO DE GUARDERÍA, COMO QUEDÓ
 
-> **Para quien retome la pista C sin saber nada.** Se lee ANTES de tocar nada.
-> **Regla que gobierna todo:** los estados de acá **eran ciertos el 29-ago-2026**. **Todo dato
-> vivo se re-lee del objeto al usarlo**, y el próximo `D-NNN` libre se verifica **por grep**,
-> jamás desde este documento.
-
----
-
-## ⓪ LO PRIMERO — EL ESTADO DEL FRENTE CAMBIÓ EL 29-AGO
-
-**Los seis textos legales ya están sembrados** (`guarderia_documentos` = 6:
-`autorizacion_transporte` · `autorizacion_urgencia_veterinaria` ·
-`contrato_custodia` · `declaracion_comportamiento` · `declaracion_sanitaria` ·
-`protocolo_no_retiro`).
-
-⇒ El frente pasó de **`documentos_no_disponibles`** (carencia nuestra, sin
-camino) a **`faltan`** (la familia todavía no aceptó, **y tiene el camino**).
-*Si volvés a ver `documentos_no_disponibles`, es que se desactivaron los
-textos — no que falte código.*
-
-✅ **Y la compuerta de A está verde, medida:** sin aceptar,
-`comprar_paquete_guarderia` frena con `documentos_sin_aceptar`. Antes cobraba
-y frenaba a la familia recién en la reserva, *con la plata ya tomada*.
-
-### 🔴 EL BLOQUEO DEL PAQUETE, ENCONTRADO Y CURADO (30-ago)
-
-**Elegir el tamaño borraba la fecha** (`setTamano(...); setFecha(null)`), y los
-chips **y el pie** están montados bajo `fecha !== null` ⇒ al tocar un tamaño
-**desaparecían los propios chips y el botón**, y la pantalla volvía a «elegí un
-día» vacía. **No había forma de llegar a pagar un paquete.**
-
-Resto de cuando el tamaño iba ANTES de la fecha —ahí limpiar el día era
-correcto—; el founder firmó invertir el orden el 29-ago y **la línea sobrevivió
-a su razón**. *Ningún typecheck ni lint lo ve: los dos estados son válidos por
-separado y la pantalla no falla — se VACÍA.*
-
-⚠️ **Segunda mitad:** se ofrecían **tres** tamaños (5·10·15) y el lugar vende
-**dos**. El 15 rebota `paquete_no_disponible` **seis pasos después**. Hoy sólo
-se ofrecen los tamaños con precio.
-
-Verificado contra el render: `5 · from $40.00, opción 1 de 2` ·
-`10 · from $70.00, opción 2 de 2`; tras elegir el tamaño **los chips
-sobreviven y el CTA enciende** (`dis=null`).
-
-### El camino del dedo, recorrido entero
-
-```
-0 el hub → 1 mascota → 2 «Reservar una estadía» → 3 día → 4 «Ver quién puede»
-→ 5 el lugar → 6 día del calendario → 7 PAGAR → /guarderia/documentos
-```
-
-**Los siete pasos pasan.** El paso 7 aterriza en la aceptación, que es el
-destino correcto: la pantalla detecta el gate y manda al paso anterior.
-
-🔴 **Y el corte que la sonda reportaba en el paso 6 era DEL INSTRUMENTO, de la
-peor clase:** `porDato(/^31$/)` acertaba porque **el 31 caía en lunes por
-casualidad**. Al cambiarlo por «el primero de la tira» se cortó antes
-—domingo, y el lugar abre L-V—. *El instrumento venía acertando por el mismo
-azar que esta pista pasó la sesión cazando.* Hoy el dedo prueba días hasta que
-el botón se enciende, y si ninguno lo hace **dice cuáles probó**.
+> **Esto es LA VARA.** El founder caminó el flujo entero y funciona. Si mañana
+> se rompe, **se compara contra este documento**, pantalla por pantalla.
+>
+> **Regla que gobierna todo lo de abajo:** los estados eran ciertos al cerrar
+> S107. **Todo dato vivo se re-lee del objeto al usarlo**, y el próximo `D-NNN`
+> se verifica **por grep**, jamás desde acá.
+>
+> ⚠️ **Y una que aprendí a los golpes en esta misma sesión:** *el canon se mide
+> contra `main`, jamás contra el árbol de quien escribe.* Medí mi propia rama,
+> lo llamé «el estado», y una afirmación verdadera para mí entró al canon como
+> falsa para todos los demás.
 
 ---
 
-## ① ESTADO
+## EL RECORRIDO
 
-| | |
+```
+/hogar/guarderia            ① EL HUB
+  └→ /explorar/guarderia    ② MODALIDAD Y DÍA
+      └→ …/disponibles      ③ QUIÉN PUEDE
+          └→ …/[prestadorId]  ④ LA VITRINA DEL PRESTADOR
+              └→ /guarderia/documentos   ⑤ LOS TÉRMINOS (sólo la 1ª vez)
+              └→ …/checkout              ⑥ CHECKOUT → ⑦ CONFIRMACIÓN
+/hogar/guarderia → ② con su bono          ⓪ EL CAMINO CORTO
+```
+
+---
+
+## ① EL HUB · `/hogar/guarderia`
+
+Chips de mascota con foto · **el plan mensual** · **el saldo del paquete** ·
+pestañas Próximas/Historial · la lista o su vacío · el CTA al pie.
+
+| firma | por qué |
 |---|---|
-| worktree · rama | `../e-petplace-s107-c` · `pista/s107-c` |
-| árbol | limpio · todo pusheado |
-| **fuera de main** | **3 commits** — correlos con `bash scripts/s107/estado-de-mis-curas.sh` |
-| gates | typecheck cliente y prestador limpios · `verify:diseno` **VERDE, 61 reglas** |
-| compuerta | **`MODALIDADES_ABIERTAS = ['dia','paquete']`** — mensual **cerrada**, sin wrapper de contratación. **NO se abre sin aviso literal de A** |
+| **UN botón de paquete por LUGAR, no por bono** | el founder vio **cuatro**: el hogar tenía cuatro bonos de la misma guardería. *No compró cuatro cosas: compró saldo cuatro veces en el mismo lugar.* Se **suman** |
+| **el bono que viaja es el que VENCE PRIMERO** | FIFO de la casa. *Consumir el más nuevo dejaría vencer el viejo con saldo adentro* |
+| **fila blanca con chevron, no botón amarillo** | competía con el CTA del pie. *Cuando todo grita, nada dirige* |
+| **bajo los chips de mascota** | con >1 mascota, arriba **no tendría sujeto** — el motor rebota `mascota_no_determinada` |
+| **el plan INFORMA, no navega** | no hay pantalla de plan: *un chevron prometería una que no existe* (Ley 19.7) |
+| **el plan va ARRIBA del paquete** | *lo que se renueva solo va antes que lo que se gasta a pulso* |
+
+🔴 **Por qué el plan está acá:** no se veía **en ningún lado**. *Una mensualidad
+firmada que no aparece en ninguna pantalla es un cobro que la familia descubre
+en su tarjeta.*
 
 ---
 
-## ② EL FLUJO DEL CLIENTE, COMO QUEDÓ
+## ② MODALIDAD Y DÍA · `/explorar/guarderia`
 
-```
-/hogar/guarderia            LOG: chips de mascota · pestañas · lista · saldo de paquete · CTA
-  └→ /explorar/guarderia    ETAPA 1: modalidad → día → tamaño (con su precio) → «Ver quién puede»
-      └→ …/disponibles      ETAPA 2: la vitrina (PreviewPrestador + cupo + las dos ventanas)
-          └→ …/[prestadorId]  EL LUGAR: franjas · calendario · semáforo · MapaZona · PAGAR
-              └→ …/checkout   CheckoutReserva, la pieza compartida
-/guarderia/[estadiaId]      EL DURANTE: estado · mapa del tramo · media · acta
-/guarderia/documentos       LA ACEPTACIÓN
-```
+Sin chips de mascota (viene del hub, su nombre bajo el título) · **Día ·
+Paquete · Mensual**, con Día preseleccionado · la tira de días · el tamaño ·
+los requisitos · al pie, precio y «Ver quién puede».
 
-🔴 **EL TAP DE LA VITRINA VA A `…/[prestadorId]`, NO AL PERFIL GENÉRICO** (prop `onAbrir` de
-`PreviewPrestador`). *El perfil monta barra de los cuatro oficios y **ninguna de guardería**.*
-**Esta línea se perdió UNA VEZ en un merge y cortó el pago cinco tandas** — el typecheck no lo
-ve, porque **una prop opcional que nadie pasa no rompe nada.** **Si el pago vuelve a cortarse,
-mirá esto primero.**
-
----
-
-## ③ MI COLA — VACÍA
-
-Los tres ítems cerraron el 29-ago, en este orden:
-
-| | qué era | cómo cerró |
-|---|---|---|
-| ✅ **el ancho del semáforo** | «muy ancho, la caja mal dimensionada» | **medido**: ~92 px contra los ~60 de la fila canónica (`parte/[eventoId]`). La causa era mía —el relleno de la `Tarjeta`— y la casa ya tenía el criterio escrito. **Queda un `paddingHorizontal` DECLARADO COMO ANDAMIO**, con su retiro escrito ⇒ `PEDIDO-A-B-GEOMETRIA-DEL-SEMAFORO` |
-| ✅ **la pantalla de documentos** | migrarla a `AceptacionDeDocumentos` | resultó **más grande que un cambio de pieza**: no había acto de aceptación — mandaba las seis hiciera lo que hiciera la familia. Hoy seis casillas, el enlace abre sin marcar, el botón exige las seis y sólo viaja lo marcado |
-| ✅ **el selector de días** | estaba cerrado por motor | abierto con `reemplazarFranjasGuarderia`, **probado en subtransacción con residuo 0** (`corrida-reemplazo-dias-subtx.sql`) |
-
-🔴 **Lo que el selector de días destapó, y es lo que hay que saber:** los días
-viven en **dos lugares** —`espacios.dias_operacion` (lo que le pinta
-`no_opera` a la familia) y `franjas.dias_semana`— y **el taller no escribía
-ninguno**. *El prestador no podía elegir sus días por ninguna vía.* Hoy un
-selector escribe los tres lugares. ⚠️ **Se LEE de las franjas porque no hay
-lector de espacios: con dos salas eso no alcanza.**
-
-## ④ ESPERANDO A A — dos son de plata
-
-| | qué | por qué es suyo |
-|---|---|---|
-| 🔴 | **el mismo día dos veces consume dos estadías** | `reservar_dia_de_paquete_guarderia` acepta la misma `(bono, fecha, mascota)` N veces. **No lanza, devuelve `ok:true`, y lo que se pierde es un día que la familia pagó.** Guard por `(mascota, fecha)` — **jamás por `(bono, fecha)`**: el bono es del hogar y dos perros el mismo día es legítimo ⇒ `PEDIDO-A-A-DIA-REPETIDO-DEL-PAQUETE` |
-| 🟡 | **qué días de la semana hay lugar** | la tira ofrece 14 días y **4 son callejón**; se ven igual que los 10 que sirven. Una llamada semanal los apaga todos ⇒ `PEDIDO-A-A-DIAS-CON-LUGAR` |
-| 🟡 | **la mensualidad** | hay motor, **no hay wrapper de contratación** |
-| 🟡 | **el lector de espacios** | los días de operación se **escriben y no se leen**; el selector se apoya en las franjas como espejo. Con dos salas no alcanza |
-
-## ⑤ DECISIÓN DE MESA ABIERTA## ⑤ DECISIÓN DE MESA ABIERTA
-
-**`protocolo_no_retiro` está entre los seis documentos** que la pantalla lista. **No lo trato
-distinto ni lo escondo:** *un caso especial sería la pantalla de mora que el perímetro prohíbe;
-sacarlo sería pedir que acepten algo que no mostramos.*
-
----
-
-## ⑥ LAS FIRMAS QUE RIGEN
-
-| firma | al construir |
+| firma | por qué |
 |---|---|
-| **Tuteo** (`R66`) | trinquete solo-baja. **Los dictados de mesa vienen en voseo y se convierten** |
-| **La víspera** | **HOY jamás se reserva** — el motor rebota `fecha_no_ofertable` |
-| **La modalidad arranca en «día»** | *no es default oscuro: es el camino que la familia iba a tomar igual*. Nada más viene elegido |
-| **El orden: fecha → tamaño** | los precios por tamaño salen de los lugares que abren ESE día |
-| **Sin chips de mascota en el flujo** | viaja por parámetro; el guard sobrevive para el deep-link |
-| **El mensaje de causa va ENCIMA del botón** | `PieReserva` es fijo y debajo no hay dónde vivir |
-| **El botón de conformar el acta** | nace **con** el lector del contenido, no antes |
-| **Comprar paquete = comprar + agendar el primer día** | **sin toggle**: *uno que no se puede apagar es una casilla decorativa* |
-| **Con saldo, el lugar lo determina el bono** | va directo al día de ESA guardería |
-| **Toda cura viaja con su estado real** | «en mi rama, esperando merge» — nunca «curado» a secas |
-| 🔴 **Toda sonda entra por donde entra el dedo** | *medir una pantalla por su ruta directa contesta «¿esta pantalla anda?», no «¿se puede comprar?»*. **Firma del founder sobre un error mío**: tres sondas midieron bien pantallas que el dedo nunca alcanzaba |
-| **La clave se elige por su claim, no por su posición** | `claveAnon()`. Un script que agarra «la primera» anda hasta que el orden cambia, y ese día **anda mejor**: corre como `service_role` y todo gate pasa |
+| **cada día dice su estado SIN tocarlo** | `obtenerDiasGuarderiaDisponibles`. Antes los 14 se veían iguales y **4 eran callejón**: se tocaba un sábado y el botón quedaba apagado. **Es el candidato serio a por qué el founder nunca pudo reservar** |
+| **`ningun_lugar_abre` ≠ `sin_cupo`** | *ante el primero se elige otro día; ante el segundo se puede esperar* |
+| **HOY jamás se reserva** | la víspera; el motor rebota `fecha_no_ofertable` |
+| **la modalidad arranca en «día»** | *no es un default oscuro: es el camino que la familia iba a tomar igual* |
+| **fecha ANTES que tamaño** | los precios por tamaño salen de los lugares que abren **ese** día |
+| **el chip dice el tamaño; el precio vive al pie** | donde vive el de Día. *Dos superficies para el mismo dato obligan a aprender la pantalla dos veces* |
+| **la mensualidad dice su letra** | L-V y cobro mensual hasta cancelar. *Una recurrencia que no se declara antes de contratar se descubre en el segundo cobro* |
+| **la causa, visible sin tocar el botón** | Ley 23 |
+
+⚠️ **Límite declarado:** `SelectorDia` toma **una sola** `etiquetaCerrado` y
+sólo la usa en el lector de pantalla. Con dos motivos conviviendo se dice el
+neutro. ⇒ `S107-C-PEDIDO-A-B-VOZ-POR-DIA.md`, abierto.
 
 ---
 
-## ⑦ LOS INSTRUMENTOS — se corren, no se re-inventan
+## ③ QUIÉN PUEDE · `…/disponibles`
+
+**Una `Tarjeta` contenedora** con todos los prestadores · cada uno con portada,
+logo, nombre, línea de confianza, **su precio de ESA modalidad**, el cupo del
+día y sus dos ventanas.
+
+| firma | por qué |
+|---|---|
+| **la anatomía es la de grooming** | censada. Acá la mascota se decía **dos veces**, la fecha colgaba suelta y los previews **flotaban sin caja** — de ahí que el cupo y las ventanas «colgaran abajo»: *no había caja de la que colgar* |
+| **el precio de CADA prestador, no un «desde» repetido** | `precioModalidad`, resuelto por el server |
+| **el precio DESTACADO dentro de su línea** | *es el dato con el que la familia compara*. Cambia el peso, no el lugar: **si todo se destaca, nada destaca** |
+
+---
+
+## ④ LA VITRINA DEL PRESTADOR · `…/[prestadorId]`
+
+Galería a sangre desde el techo con sus puntos · logo sobre el borde · nombre
+con su distintivo · ubicación · mapa de zona · y en el `pie` de la ficha: las
+dos ventanas, el día y los requisitos. Al pie fijo, el CTA.
+
+| firma | por qué |
+|---|---|
+| ☠️ **SIN CALENDARIO** | el día se eligió dos pantallas antes. *Un control que pide algo ya decidido es una invitación a contradecirse* |
+| **es `FichaPrestador`, la de grooming** | antes eran **bloques apilados**: arrancaba con las ventanas, una foto suelta en el medio, el pago a mitad de pantalla |
+| **el mapa es RANGO del sector, jamás el punto** | y sin `geo.API_KEY` **no se monta**: montarlo mata la app en hilo nativo |
+| **el precio va SÓLO al pie** | salía dos veces. En ③ la vitrina lo lleva porque ahí se compara; acá ya se eligió |
+| **el CTA NAVEGA, no cobra** | el medio de pago, los términos y «Pagar» viven en el checkout |
+| **el CTA lleva la fecha adentro** | «Comprar día…» · «Comprar paquete de N…» · «Contratar mensualidad» |
+| 🔴 **el `ScrollView` es parte de la pantalla** | al poner la vitrina **me llevé el contenedor de scroll** y la mitad de la pantalla dejó de existir. Su `paddingBottom` **no es estilo**: sin él la barra fija tapa el último bloque |
+
+---
+
+## ⑤ LOS TÉRMINOS · `/guarderia/documentos` (sólo la primera vez)
+
+**UNA casilla** que nombra los seis documentos, con el enlace a leerlos
+completos en una `Hoja` · **el contacto de emergencia en acordeón, opcional** ·
+el CTA sólo con la casilla marcada.
+
+| firma | por qué |
+|---|---|
+| **una casilla, no ocho** | *ningún servicio pide ocho aceptaciones para agendar* |
+| **el acto sigue siendo real** | jamás pre-marcada, con su texto accesible completo, y **las seis versiones viajan en ese acto**. *Se colapsó la ceremonia, no la prueba* (P23) |
+| **el enlace abre SIN marcar** | *si abrirlo marcara, la prueba diría que alguien aceptó cuando sólo fue a leer* |
+| **el texto completo en una `Hoja`** | *un muro de seis textos legales arriba del botón no es leerlos: es enterrarlos* |
+| **el contacto NO gobierna el botón** | opcional de verdad |
+| **el tope de gasto salió del flujo** | es un término del documento |
+| **ni una palabra de texto legal en la pantalla** | el nombre sale del riel, **el contenido del server**, versionado |
+
+⚠️ **El acordeón se muestra SIEMPRE, cerrado**: la firma decía «visible cuando
+no hay ninguno cargado» y **eso no se puede saber** — no hay lector de
+contactos. *No invento un «no tiene» que no puedo medir.*
+
+---
+
+## ⑥ CHECKOUT · `…/checkout`
+
+**Las tres modalidades pagan acá.** Resumen · **la dirección de recogida** ·
+el medio de pago (mensual) · el botón.
+
+| firma | por qué |
+|---|---|
+| **el HOLD DEL DÍA SE CREA ACÁ** | `reservar_dia_guarderia` **congela la dirección al crear la cita**: con el hold naciendo en ④, elegirla después no cambiaba nada. *Un selector que el servidor ya no puede escuchar es un control que no decide* |
+| 🔴 **asimetría del hold, declarada** | **día** llega con hold y **su reloj es real**; **paquete y mensual NO tienen hold** —el motor no emite uno— y el acto ocurre al tocar Pagar. *No se inventa un temporizador que ningún servidor honra* |
+| **viaja el ID de dirección, jamás un snapshot** | *dejar que el cliente escriba a dónde va el animal sería la peor forma de confiar en el cliente* |
+| **`null` es válido: la principal** | no se inventa un default |
+| **la mensualidad guarda la dirección en el MANDATO** | sus citas las crea el reloj, sin nadie presente |
+| **el paquete dice que su cobro es simulado** | *un cobro simulado presentado como real es la clase de mentira que esta casa persigue*. El día **no** lo dice: el suyo es real |
+| **`documentos_sin_aceptar` LLEVA a ⑤** | en **las cuatro** ramas. Vivía en una sola, y las otras tres frenaban sin camino |
+| **`ya_tienes_plan_activo` LLEVA al hub** | con su aviso en **toast** —sobrevive a la navegación— y en tono **neutro**: *no se equivocó en nada, ya tiene el plan* |
+
+---
+
+## ⑦ LA CONFIRMACIÓN
+
+La misma de todos los servicios: `EstadoVacio` + glifo del oficio + «Volver al
+hogar». **Y el check de imagen.**
+
+| firma | por qué |
+|---|---|
+| **el consentimiento de imagen va DESPUÉS de pagar** | *ya pagó, así que aceptar no cambia nada de lo que contrató. Uno que se pide antes de cobrar se parece demasiado a un requisito* |
+| **apagado por defecto, jamás pre-marcado** | *es el más fácil de invalidar si viene de fábrica* |
+| **nombra a la mascota — y sin nombre NO se monta** | *un consentimiento que no puede nombrar a quién protege es sobre nadie* |
+| **dice la VÍA de retiro, no «cuando quieras» a secas** | *una promesa de revocación sin camino es la clase de frase que un consentimiento no soporta* |
+| **escribe por `fijarRedesAutorizadas`** | usar el aceptador **le firmaba a la familia un documento que no leyó** — medido, era el comportamiento de HOY |
+| **paquete y mensual también aterrizan acá** | mostraban un toast. *Un toast se va solo: el acto más caro del recorrido no puede confirmarse con algo que desaparece* |
+
+🔴 **LA DISTINCIÓN QUE SE PIERDE SI NADIE LA ESCRIBE:** las fotos del **durante**
+son **privadas y van al hilo de la familia** — **no necesitan esta autorización
+y no están bloqueadas**. Ésta gobierna **publicarlas FUERA**.
+
+---
+
+## ⓪ EL CAMINO CORTO · agendar contra saldo
+
+Desde ① → ② **con su bono**: sin modalidad (la decidió la compra), sin tamaño
+(ya está comprado), sin «ver quién puede» (**el lugar lo determina el bono**).
+El pie **agenda**, no navega. Confirmación por toast con el saldo y la fila
+marcada **«Con tu paquete»**.
+
+⚠️ **Su destino cambió al borrar el calendario de ④** — entraba ahí sin día.
+*Quien borra una pieza tiene que decir a quién dejó sin ella.*
+
+---
+
+## LO QUE QUEDA VIVO, CON DUEÑO
+
+| | qué | dueño |
+|---|---|---|
+| `D-982` | **dos orquestaciones de dirección vivas** — despensa no migró a la pieza que salió de su propio diseño | C |
+| `D-983` | 🟢 el consentimiento de imagen: **dónde vive y por qué no vuelve** a ⑤ | C, cerrada al montarse |
+| **48 horas** | *«escribinos a privacidad@ y en menos de 48 h quedará revocada»* — **alguien tiene que atenderlo**. De cuatro cosas, la única resuelta es el motor. **Modo de falla silencioso** | **operación** |
+| `PEDIDO-A-B-VOZ-POR-DIA` | la voz del día cerrado, por día | B |
+| `PEDIDO-A-B-GEOMETRIA-DEL-SEMAFORO` | y **mi andamio `paddingHorizontal` muere con él** | B |
+| — | **lector de contactos de emergencia** (para que el acordeón sepa si ya hay uno) | A |
+| — | **direcciones por USUARIO, no por hogar** — *si la mamá guardó una, el papá no la ve*. **Alcance elegido, no defecto** | firmado |
+
+---
+
+## LAS CUATRO CLASES — de la casa, no de guardería
+
+**Todas producen salida creíble y ninguna deja síntoma.**
+
+1. **La incoherencia entre dos estados que sólo coinciden en pantalla.** *Cada
+   mitad correcta; ninguna línea está mal.*
+2. **El instrumento que no distingue «no pasó nada» de «no hice nada».**
+   → `tocar()`.
+3. **El dato que fue cierto y dejó de serlo.** *Cobrada tres veces, dos sobre
+   trabajo ajeno y una sobre el canon.*
+4. 🆕 **Una decisión que se ve como una ausencia tiene que estar escrita en el
+   lugar donde se ve la ausencia.** *Declaré rodeos en cabeceras que el
+   prestador no lee, y rompieron igual* — `L-439`, y su corolario, que es el
+   que sirve: **un atajo que puede producir un valor equivocado no se declara:
+   se hace inexpresable.**
+
+> **Y el patrón que las une: cuando algo salió mal por lo que uno recordó o
+> dejó de recordar, la cura no es recordarlo mejor — es que deje de depender de
+> recordarlo.** *Seis de las curas de esta pista son mecanismos, no notas:*
+> `tocar()` · `porClave()` · `claveAnon()` · `conResiduoCero()` ·
+> `verificar-corridas-subtx.sh` · `estado-de-mis-curas.sh`.
+
+---
+
+## LOS INSTRUMENTOS — se corren, no se re-inventan
 
 | script | para qué |
 |---|---|
 | `estado-de-mis-curas.sh` | **antes de reportar nada**: en qué estado está lo que vas a llamar «curado» |
-| `sonda-camino-del-dedo.mjs` | 🔴 **el camino completo de la familia**. *El único que caza un tap roto* |
-| `sonda-precio-por-tamano.mjs` | que cada chip muestre SU precio, **contra el render** |
-| `sonda-caminos-tristes.mjs` | los rebotes del motor, sin escribir |
-| `corrida-*-subtx.sql` | lo que exige escribir, **entre `BEGIN` y `ROLLBACK` con residuo medido** |
-| `sonda-tocar.mjs` | `tocar()` no deja tocar sin verificar · `porClave()` nombra la clave, no la copia |
-| `levantar-cliente-web.sh` | levanta la web con la API viva. **Lleva el aviso de la `service_role`** |
+| `sonda-camino-del-dedo.mjs` | 🔴 **el camino completo**. *El único que caza un tap roto* |
+| `sonda-tocar.mjs` | `tocar()` no deja tocar sin verificar · `porClave()` nombra la clave, no la copia · `claveAnon()` elige por el claim · `conResiduoCero()` lanza si quedó residuo |
+| `verificar-corridas-subtx.sh` | rechaza toda `corrida-*.sql` que escriba sin `BEGIN … ROLLBACK`. **Rojo producido con control negativo** |
+| `corrida-*-subtx.sql` | lo que exige escribir, entre `BEGIN` y `ROLLBACK`, **con residuo medido después** |
+| `levantar-cliente-web.sh` | la web con la API viva. Lleva el aviso de la `service_role` |
 
----
-
-## ⑧ LAS CINCO CLASES QUE DEJA ESTA PISTA — todas producen salida creíble y ninguna deja síntoma
-
-1. **La incoherencia entre dos estados que sólo coinciden en pantalla.** *Cada mitad correcta;
-   ninguna línea está mal.*
-2. **El instrumento que no distingue «no pasó nada» de «no hice nada».** → `tocar()`.
-3. **El dato que fue cierto y dejó de serlo.** *Cobrada dos veces, las dos sobre trabajo ajeno.*
-4. **Nombrar de memoria** — campos, tablas, roles, copys. *Seis veces en un día.* → `porClave()`.
-5. 🔴 **Medir bien la pantalla equivocada.** *Tres sondas midieron pantallas que el dedo nunca
-   alcanzaba: «¿esta pantalla anda?» no es «¿se puede comprar?».*
-
-> **Y el patrón que las une: cuando algo salió mal por lo que uno recordó o dejó de recordar, la
-> cura no es recordarlo mejor — es que deje de depender de recordarlo.** *Cinco de las curas de
-> esta pista son mecanismos, no notas.*
-
----
-
-## ⑨ EL PRÓXIMO PASO EJECUTABLE
-
-**La cola de C está vacía.** Antes de tomar nada nuevo:
-
-1. `bash scripts/s107/estado-de-mis-curas.sh` — y si hay commits fuera de main,
-   decirlo al reportar. **Nunca «curado» a secas.**
-2. Si el trabajo toca pago o reserva:
-   `node scripts/s107/sonda-camino-del-dedo.mjs` con Metro arriba. *Es el único
-   instrumento que recorre el tap*, y es el que encontró lo que cinco tandas de
-   medición no vieron.
-
-**Lo que espera fuera de C:** los seis textos legales (mesa) · la geometría de
-`SemaforoSanitario` (B) · el wrapper de mensualidad y el lector de espacios (A).
+> 🔴 **Y la regla que las gobierna a todas, firma del founder:** *medir una
+> pantalla por su ruta directa responde «¿esta pantalla anda?», no «¿se puede
+> comprar?».* **Toda sonda entra por donde entra el dedo.**
