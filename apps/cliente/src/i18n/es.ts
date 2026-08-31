@@ -1120,6 +1120,10 @@ export const clienteEs = {
     programaTitulo: 'Tu programa con {{nombre}}',
     sesionesQuedan: '{{n}} de {{total}} sesiones por usar',
     sesionesQuedaUna: '1 de {{total}} sesiones por usar',
+    /* Los dos finales del cobro del programa, cada uno con su frase. */
+    programaNoPagadoATiempoVoz: 'Se venció el tiempo para completar el pago y el programa se dio de baja. No se te cobró nada.',
+    programaNoEntro: 'El pago no entró, así que el programa no quedó agendado. No se te cobró nada.',
+    esperaCuerpo: 'Estamos confirmando el pago de tu programa con el banco.',
     programaFaltaPagar: 'Falta completar el pago de tu programa',
     programaFaltaPagarDetalle: '{{n}} sesiones · todavía no se cobró',
     programaNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
