@@ -93,6 +93,12 @@ const palabrasDe = (s: string) =>
 const vozDelChip = (v: ChipVocabularioAgrupado, idioma: string) =>
   normalizarVoz(idioma === 'en' ? v.nombre_familia_en : v.nombre_familia);
 
+/** 'mm:ss' de lo que falta, en voz de máquina. Nunca negativo. */
+function restanteMmSs(iso: string): string {
+  const s = Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+}
+
 export default function HubAdiestramiento() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -165,10 +171,37 @@ export default function HubAdiestramiento() {
   const programasConSaldo = programas.filter(
     (x) => x.estadoPago === 'pagado' && x.estado === 'activo' && x.sesionesQuedan > 0,
   );
-  const programasPendientes = programas.filter(
-    (x) => x.estadoPago === 'pendiente' && !x.noPagadoATiempo,
+  /**
+   * ⭐ **S109-C · EL RELOJ DEL PROGRAMA, que faltaba y ahora existe.**
+   * A proyectó `pago_expira_en` como `ventanaDePago` **crudo, sin comparar
+   * contra `now()`** — y esa decisión es la que hace posible esto: *quien pinta
+   * el reloj decide si ya venció; un veredicto calculado en el servidor
+   * envejece entre la respuesta y el render.*
+   *
+   * Con la fecha en la mano se aplica **expiración perezosa en la superficie**,
+   * igual que en guardería: el que pasó su hora se cuenta vencido **sin esperar
+   * al cron**, así no se ofrece un camino que el motor va a rebotar.
+   */
+  const [tickPrograma, setTickPrograma] = useState(0);
+  const hayProgramaConReloj = programas.some(
+    (x) => x.estadoPago === 'pendiente' && !x.noPagadoATiempo && x.ventanaDePago !== null,
   );
-  const programasNoPagados = programas.filter((x) => x.noPagadoATiempo);
+  useEffect(() => {
+    if (!hayProgramaConReloj) return;
+    const id = setInterval(() => setTickPrograma((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [hayProgramaConReloj]);
+  void tickPrograma; /* dependencia del render: mueve la fila de un grupo al otro */
+
+  const ventanaVencida = (x: ProgramaConSaldo) =>
+    x.ventanaDePago !== null && new Date(x.ventanaDePago).getTime() <= Date.now();
+
+  const programasPendientes = programas.filter(
+    (x) => x.estadoPago === 'pendiente' && !x.noPagadoATiempo && !ventanaVencida(x),
+  );
+  const programasNoPagados = programas.filter(
+    (x) => x.noPagadoATiempo || (x.estadoPago === 'pendiente' && ventanaVencida(x)),
+  );
   const scrollRef = useRef<ScrollView>(null);
 
   const cargar = useCallback(() => {
@@ -290,12 +323,19 @@ export default function HubAdiestramiento() {
         ))}
         {programasPendientes.map((pg) => (
           <Tarjeta key={pg.programaContratadoId} relleno="ninguno">
-            {/* ⚠️ **Sin cuenta regresiva, y no por olvido**: el lector no
-                devuelve `pago_expira_en` (la RPC no lo proyecta). *Sin ventana
-                declarada no se inventa un reloj* — pedido a A. */}
+            {/* ⭐ Ya con su reloj. **Sin ventana declarada sigue sin inventarse
+                una cuenta regresiva**: los que no la tienen —o los ya pagados,
+                donde se suelta— se muestran sin ella. */}
             <Celda
               titulo={t('adiestramiento.programaFaltaPagar')}
-              subtitulo={t('adiestramiento.programaFaltaPagarDetalle', { n: pg.sesionesTotal })}
+              subtitulo={
+                pg.ventanaDePago === null
+                  ? t('adiestramiento.programaFaltaPagarDetalle', { n: pg.sesionesTotal })
+                  : t('adiestramiento.programaFaltaPagarConReloj', {
+                      n: pg.sesionesTotal,
+                      tiempo: restanteMmSs(pg.ventanaDePago),
+                    })
+              }
             />
           </Tarjeta>
         ))}

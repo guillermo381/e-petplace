@@ -1133,6 +1133,7 @@ export const clienteEs = {
     esperaCuerpo: 'Estamos confirmando el pago de tu programa con el banco.',
     programaFaltaPagar: 'Falta completar el pago de tu programa',
     programaFaltaPagarDetalle: '{{n}} sesiones · todavía no se cobró',
+    programaFaltaPagarConReloj: '{{n}} sesiones · te quedan {{tiempo}} para completarlo',
     programaNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
     programaNoPagadoATiempoDetalle: 'No se te cobró nada. Puedes volver a contratarlo.',
     programaRegistradoTitulo: 'Tu programa quedó registrado',
@@ -1312,7 +1313,11 @@ export const clienteEs = {
     salidasEstimadas: 'Salidas este mes',
     mesNota: 'Pagas el mes completo. Las salidas que no uses no se descuentan.',
     noOfrecido: 'Este paseador no ofrece plan mensual. Puedes reservar suelto o con paquete.',
-    contratar: 'Contratar plan (simulado)',
+    /* ⭐ S109-C · **La etiqueta queda LIMPIA.** El «(simulado)» ya no vive
+       adentro del texto: lo agrega la pantalla desde `simula()`, la misma
+       fuente que enciende la banda. *Un sufijo escrito a mano dentro de la
+       cadena es el que sobrevive al día en que deja de ser cierto.* */
+    contratar: 'Contratar plan',
     /* ⭐ S109-C · La Hoja ya no contrata: LLEVA al checkout. */
     continuar: 'Continuar',
     exito: 'Plan contratado — {{n}} salidas quedaron agendadas.',
@@ -1964,6 +1969,14 @@ export const clienteEs = {
        accionable — empezar antes. */
     cobroSesionesNoEntran: 'Las sesiones no entran en la vigencia del programa. Prueba con una fecha de inicio más temprana — no se te cobró nada.',
     cobroProgramaNoCobrable: 'Ese programa ya no se puede pagar. Vuelve a contratarlo.',
+    /* 🔴 Cubre DOS casos —no está, o no es tuyo— y por eso no dice «no existe»:
+       el plan lo administra quien lo contrató, y un familiar que lo ve sin
+       haberlo contratado cae acá. *Negarle el plan a alguien que lo está
+       mirando es hacerle dudar de lo que ve.* */
+    cobroPlanNoEsTuyo: 'No encontramos ese plan en tu cuenta. Los planes los administra quien los contrató.',
+    cobroPlanNoVigente: 'Ese plan ya no está vigente.',
+    cobroPlanNoCobrable: 'Ese plan no se puede pagar ahora.',
+    sufijoSimulado: ' (simulado)',
     promesaTarjeta: 'Se cobra solo cada mes.',
     promesaDeuna: 'Cada mes te mandamos un link y lo pagas a mano. Si no lo pagas, el plan no se renueva.',
     deunaFila: 'Deuna',
@@ -3326,6 +3339,17 @@ export const clienteEs = {
     esperaCuerpo: 'Dejamos tus salidas agendadas para todo el período.',
     exitoTitulo: 'Tu plan quedó activo',
     exitoDetalle: 'Pagas ${{precio}} al mes y tus salidas quedan agendadas. Lo administras desde Cuenta › Pagos recurrentes y suscripciones.',
+  },
+  /* ⭐ S109-C · El destino del LINK MENSUAL. Voz de familia porque quien llega
+     viene de un correo: *un código de seis dígitos sin decir qué se está
+     pagando le pide a alguien que mueva plata a ciegas.* */
+  linkMensual: {
+    concepto: 'Mensualidad de guardería',
+    periodo: 'Período que estás pagando',
+    exitoTitulo: 'Listo, tu mes quedó pagado',
+    exitoDetalle: 'Tu plan sigue activo. Te avisamos antes del próximo cobro.',
+    noPudimosTitulo: 'No pudimos abrir tu mensualidad',
+    noPudimosDetalle: 'Puede que el enlace ya no sirva. Búscala en Cuenta › Pagos recurrentes y suscripciones.',
   },
   logGuarderia: {
     /* El vacío de la FIRMA del founder — se pinta cuando el lector diga
