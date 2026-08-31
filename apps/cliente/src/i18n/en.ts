@@ -2284,6 +2284,9 @@ export const clienteEn = {
   checkoutGuarderia: {
     servicio: 'Daycare · one day',
     sinHora: 'All day',
+    paqueteExito: 'Your pack is bought',
+    mensualExito: 'Your monthly plan is authorised',
+    mensualExitoDetalle: 'The first charge goes out when the plan starts. You can cancel any time.',
     continuar: 'Continue',
     dondeRecogen: 'Where they pick them up',
     dondeRecogenMensual: 'This is where they’ll pick them up every month. You can change it later.',

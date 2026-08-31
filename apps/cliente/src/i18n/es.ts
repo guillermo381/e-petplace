@@ -3080,6 +3080,9 @@ export const clienteEs = {
   checkoutGuarderia: {
     servicio: 'Guardería · un día',
     sinHora: 'Todo el día',
+    paqueteExito: 'Tu paquete quedó comprado',
+    mensualExito: 'Tu plan mensual quedó autorizado',
+    mensualExitoDetalle: 'El primer cobro sale el día que empieza el plan. Puedes cancelarlo cuando quieras.',
     continuar: 'Continuar',
     dondeRecogen: 'De dónde lo pasan a buscar',
     dondeRecogenMensual: 'Acá van a pasar a buscarlo todos los meses. Puedes cambiarla después.',

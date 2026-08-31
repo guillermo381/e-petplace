@@ -38,7 +38,7 @@ import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Celda, Encabezado, Tarjeta, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Celda, Encabezado, EstadoVacio, Icono, Tarjeta, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import {
   comprarPaqueteGuarderia,
   reservarDiaGuarderia,
@@ -80,6 +80,17 @@ export default function CheckoutGuarderia() {
 
   const [enviando, setEnviando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
+  /**
+   * ⭐ **LA CONFIRMACIÓN ES LA MISMA QUE LA DE TODOS LOS SERVICIOS.**
+   * Firma del founder: *«después de pagar va a la pantalla de confirmación
+   * que ya usan todos los servicios — reusala, no la construyas»*.
+   *
+   * ⏪ Paquete y mensual mostraban **un toast y volvían al hogar**. *Un toast
+   * se va solo: el acto más caro del recorrido no puede confirmarse con algo
+   * que desaparece.* Ahora aterrizan en el mismo `EstadoVacio` con el glifo
+   * del oficio y el «volver al hogar» que usan las cuatro hermanas.
+   */
+  const [exito, setExito] = useState<{ titulo: string; detalle: string } | null>(null);
 
   const rebotar = useCallback(
     (codigo: string, mensaje: string) => {
@@ -138,9 +149,7 @@ export default function CheckoutGuarderia() {
       });
       setEnviando(false);
       if (!r.ok) { rebotar(r.codigo, r.mensaje); return; }
-      mostrar({ texto: t('lugarGuarderia.mensualFirmada'), variante: 'exito' });
-      if (router.canDismiss()) router.dismissAll();
-      router.navigate('/hogar/guarderia');
+      setExito({ titulo: t('checkoutGuarderia.mensualExito'), detalle: t('checkoutGuarderia.mensualExitoDetalle') });
       return;
     }
 
@@ -159,10 +168,36 @@ export default function CheckoutGuarderia() {
       rebotar(primera.codigo, t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
       return;
     }
-    mostrar({ texto: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }), variante: 'exito' });
-    if (router.canDismiss()) router.dismissAll();
-    router.navigate('/hogar/guarderia');
+    setExito({
+      titulo: t('checkoutGuarderia.paqueteExito'),
+      detalle: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }),
+    });
   }, [enviando, esMensual, medio.idTarjeta, params.tamano, mostrar, rebotar, router, t]);
+
+  if (exito !== null) {
+    return (
+      <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
+          <EstadoVacio
+            icono={<Icono nombre="guarderia" tamano={48} />}
+            titulo={exito.titulo}
+            descripcion={exito.detalle}
+            accion={
+              <Boton
+                variante="primario"
+                etiqueta={t('checkout.volverHogar')}
+                onPress={() => {
+                  /* D-329: `dismissTo` sólo busca en el stack ACTUAL. */
+                  if (router.canDismiss()) router.dismissAll();
+                  router.navigate('/hogar/guarderia');
+                }}
+              />
+            }
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (esPaquete || esMensual || holdDia === null) {
     return (

@@ -69,6 +69,7 @@ import {
   EstadoVacio,
   Hoja,
   HojaScroll,
+  SeccionPlegable,
   Separador,
   Tarjeta,
   Texto,
@@ -92,8 +93,6 @@ import { useTraduccion } from '@/i18n';
  * propósito: es la única que **no** es un documento — mezclarla con la
  * aceptación la volvería contable para el gate.
  */
-const CLAVE_REDES = 'redes_autorizadas';
-
 /** La única casilla obligatoria: los términos del servicio, todos juntos. */
 const CLAVE_TERMINOS = 'terminos_del_servicio';
 
@@ -114,9 +113,9 @@ export default function DocumentosGuarderia() {
   const [acepto, setAcepto] = useState(false);
   /** La Hoja con los seis textos completos. */
   const [leyendo, setLeyendo] = useState(false);
+  const [contactoAbierto, setContactoAbierto] = useState(false);
   const [contactoNombre, setContactoNombre] = useState('');
   const [contactoTel, setContactoTel] = useState('');
-  const [redes, setRedes] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [intento, setIntento] = useState(0);
 
@@ -160,7 +159,9 @@ export default function DocumentosGuarderia() {
       ...(contactoNombre.trim().length > 0 || contactoTel.trim().length > 0
         ? { contactos: [{ nombre: contactoNombre.trim(), telefono: contactoTel.trim() }] }
         : {}),
-      redesAutorizadas: redes,
+      /* Sin superficie que lo encienda, **no se manda**: el motor es
+         fail-closed y su default es no autorizar. *Mandar `false` explícito
+         sería lo mismo; no mandarlo dice mejor que la pantalla no pregunta.* */
     });
     setEnviando(false);
     if (!r.ok) { mostrar({ texto: r.mensaje, variante: 'error' }); return; }
@@ -174,7 +175,7 @@ export default function DocumentosGuarderia() {
     }
     mostrar({ texto: t('documentosGuarderia.aceptado'), variante: 'exito' });
     router.back();
-  }, [carga, enviando, contactoNombre, contactoTel, redes, mostrar, t]);
+  }, [carga, enviando, contactoNombre, contactoTel, mostrar, t]);
 
   /* 🔴 UNA SOLA CONDICIÓN: que la familia haya marcado. El contacto es
      opcional y el tope ya no se pide — *un CTA que espera datos que la
@@ -226,35 +227,57 @@ export default function DocumentosGuarderia() {
                     etiquetaEnlace: t('documentosGuarderia.terminosDelServicio'),
                     onAbrir: () => setLeyendo(true),
                   }]}
-                  /* 🔴 NACE APAGADA, y separada. *Un default encendido
-                     publicaría la foto de un animal porque alguien no tocó un
-                     interruptor.* */
-                  opcionales={[{ clave: CLAVE_REDES, texto: t('documentosGuarderia.redesEtiqueta') }]}
-                  rotuloOpcionales={t('documentosGuarderia.opcional')}
+                  /* ☠️ **ACÁ VIVÍA UNA SEGUNDA CASILLA —la de publicar
+                     fotos— Y SE RETIRA POR FIRMA:** *«la pantalla de términos
+                     pide dos checks y debe ser uno solo»*.
+
+                     Medido antes de tocar: **la segunda no era una segunda
+                     aceptación** —era la autorización OPCIONAL de imagen, que
+                     la pieza aloja aparte y rotula «Opcional»—. Aun así son
+                     dos casillas en pantalla, y la firma cuenta casillas.
+
+                     🔴 **Y su consecuencia se declara en vez de esconderse:
+                     la autorización de imagen se queda SIN NINGUNA
+                     SUPERFICIE.** `p_redes_autorizadas` es fail-closed, así
+                     que nadie va a publicar una foto por accidente —pero
+                     tampoco hay dónde permitirlo—. *No es uno de los seis
+                     documentos: es una preferencia, y su casa natural es
+                     Cuenta → Preferencias.* **No la construyo sin firma.** */
                 />
-                <Texto variante="apoyo">{t('documentosGuarderia.redesDetalle')}</Texto>
               </View>
             </Tarjeta>
 
-            {/* ── EL CONTACTO DE EMERGENCIA · **OPCIONAL** ──────────────
-                ⏪ Antes era obligatorio **y venía con el tope de gasto**, que
-                se retiró por firma. *La pantalla lo pide sin frenar por él:
-                un dato útil que no se tiene no puede impedir agendar un día.*
-                Medido: `p_contactos` acepta `NULL` y la aceptación queda
-                `al_dia`. */}
-            <Tarjeta>
-              <View style={{ gap: spacing[3] }}>
-                <Texto variante="seccion">{t('documentosGuarderia.contactoTitulo')}</Texto>
-                <Texto variante="apoyo">{t('documentosGuarderia.contactoOpcional')}</Texto>
-                <Campo label={t('documentosGuarderia.contactoNombre')} value={contactoNombre} onChangeText={setContactoNombre} />
-                <Campo
-                  label={t('documentosGuarderia.contactoTelefono')}
-                  value={contactoTel}
-                  onChangeText={setContactoTel}
-                  keyboardType="phone-pad"
-                />
-              </View>
-            </Tarjeta>
+            {/* ── EL CONTACTO DE EMERGENCIA · **OPCIONAL, EN ACORDEÓN** ──
+                Firma del founder: un acordeón «Agregar contacto de
+                emergencia» antes de pagar. **Sigue sin gobernar el botón** —
+                se puede aceptar y seguir sin llenarlo.
+
+                🔴 `SeccionPlegable`, la pieza de la casa. *Iba a montar un
+                plegable propio y el censo lo frenó: existe y la usa el taller
+                del prestador.*
+
+                ⚠️ **La firma dice «visible cuando NO hay ninguno cargado» y
+                eso HOY NO SE PUEDE SABER:** los contactos viven en
+                `guarderia_autorizaciones_familia.contactos` y **no hay
+                lector** (el único que se llama «contacto» es
+                `obtener_contacto_reserva_cita`, que es del prestador).
+                ⇒ se muestra SIEMPRE, cerrado. *Un acordeón cerrado no estorba
+                a quien ya tiene uno, y no invento un «no tiene» que no puedo
+                medir.* Pedido a A. */}
+            <SeccionPlegable
+              titulo={t('documentosGuarderia.contactoTitulo')}
+              abierta={contactoAbierto}
+              onCambiar={setContactoAbierto}
+            >
+              <Texto variante="apoyo">{t('documentosGuarderia.contactoOpcional')}</Texto>
+              <Campo label={t('documentosGuarderia.contactoNombre')} value={contactoNombre} onChangeText={setContactoNombre} />
+              <Campo
+                label={t('documentosGuarderia.contactoTelefono')}
+                value={contactoTel}
+                onChangeText={setContactoTel}
+                keyboardType="phone-pad"
+              />
+            </SeccionPlegable>
           </>
         )}
       </ScrollView>

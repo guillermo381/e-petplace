@@ -412,6 +412,22 @@ export default function LugarGuarderia() {
           Lo propio del oficio —las dos ventanas, el día y los requisitos— va
           en el **`pie` de la ficha**: DESPUÉS del nombre y la ubicación, que
           es donde el founder lo puso. ── */}
+      {/* ☠️ **ACÁ FALTABA EL `ScrollView` Y LA PANTALLA NO SCROLLEABA.**
+          Al reemplazar los bloques apilados por la vitrina me llevé puesto el
+          contenedor de scroll: `FichaPrestador` quedó montada directo.
+
+          🔴 **Y la sospecha razonable era otra** —el pie capturando el gesto,
+          la trampa de `R54` que ya me cazó una vez—. *No era: no había nada
+          que scrollear.* Medido antes de asumir: cero `ScrollView` alrededor
+          de la ficha.
+
+          ⚠️ **El `paddingBottom` no es estilo: es la cura del defecto clásico
+          de toda barra fija** — sin él la barra TAPA el último bloque. El
+          número sale del perfil genérico, que ya lo resolvió. */}
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
+        showsVerticalScrollIndicator={false}
+      >
       <FichaPrestador
         aSangre
         vozNombre="bloque"
@@ -479,6 +495,8 @@ export default function LugarGuarderia() {
           </View>
         }
       />
+
+      </ScrollView>
 
       {/* ── RESERVAR — ⏪ **ESTABA AL FINAL DEL SCROLL Y NO SE VEÍA.**
              Medido con sesión real el 29-ago: el CTA caía en **y=1007 sobre una
