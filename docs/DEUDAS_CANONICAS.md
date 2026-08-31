@@ -24352,3 +24352,127 @@ verificación es **leer la fuente de las funciones que importan**.
 *Corolario para esta casa: el motor levanta errores de al menos DOS formas
 (`RAISE EXCEPTION 'x'` y `USING MESSAGE = …`), y cualquier instrumento futuro
 que cuente códigos tiene que declarar cuál de las dos mira.*
+
+---
+
+# Deudas y lecciones S108-S109 (D-984 · L-440 → L-444) — depositadas por A el 31-ago-2026
+
+> **Números verificados libres POR GREP contra este archivo** antes de numerar:
+> tope real `D-983` · `L-439`. (`L-714` sigue descartado por su propia ficha: es
+> un typo de `D-714`, no una lección.)
+>
+> ⚠️ **`L-440` y `L-441` ya viven en `LETRA_MOTOR_PAGOS_S101` §actuador**, por
+> orden del founder —*«depositá las dos lecciones donde se lee el actuador»*—.
+> Acá entran **sus fichas de registro**, para que un censo por número las
+> encuentre. *Una lección que sólo vive donde es útil no la halla quien busca por
+> el registro; una que sólo vive en el registro no la lee quien toca el código.*
+
+## 🟡 `D-984` — `pagos-cobro-recurrente` ENUMERA SUJETOS POR SU NOMBRE
+
+**Medida por S108-B, depositada por A. 🔴 El founder la subió de deuda a BLOQUEO
+DE LANZAMIENTO el 31-ago.**
+
+La edge llama a **dos selectores por nombre** (`recurrencias_vencidas_pendientes`,
+`planes_vencidos_pendientes`), y los tres que existen **van por su propia tabla y
+devuelven formas distintas**: dos dan un OBJETO `{para_cobrar, frenadas}` y
+`mensualidades_vencidas_pendientes` da FILAS. Por eso el tercero **no se puede
+enchufar sin unificar la forma**.
+
+*Un enumerado que vive en el consumidor necesita que alguien se acuerde de él cada
+vez que nace un sujeto — y el olvido no da síntoma: da un conjunto más chico, que
+se lee igual que «no hay nada que cobrar».*
+
+⚠️ **Se disparó con el TERCER recurrente, el mismo día que se escribió** — su
+disparo decía *«antes de que nazca un sexto»*.
+
+**Estado:** el timbre **se niega con nombre** (`selector_sin_consumidor`) en vez
+de postear, y `guarderia_recurrente_vivo()` **devuelve `false` aunque la llave
+esté encendida** mientras haya un selector huérfano. El gate que lo mide es
+`scripts/verify-selectores-recurrentes.mjs` — **ve los DOS lados, SQL y TS,
+porque el defecto cruza la frontera y ningún guard de un solo lado puede verlo**.
+**Hoy sale ROJO nombrando al selector, y tiene que pasar a verde POR LA CURA,
+jamás por ajuste del gate.** Dueño: **S108-B**.
+
+## 🔴 `L-440` — UN `ok:false` CORRECTO TIRADO A LA BASURA ES INDISTINGUIBLE DE UN `ok:true` MENTIROSO
+
+`_trg_reverso_mueve_sujeto` llamaba con **`PERFORM`**, que evalúa y **descarta el
+retorno**. La función devuelve `ok:false` con código en cuatro casos y **ninguno
+levanta excepción** ⇒ el manejador no corría y **no quedaba una línea diciendo que
+el sujeto no se movió**. La plata volvía y el sujeto seguía en pie.
+
+**Corolario que ENSANCHA la regla del sujeto:** quien agrega un sujeto censa a los
+**LLAMADORES** además de a los consumidores. **Un retorno que nadie lee no es un
+guard.**
+
+🔑 **Y el filtro que lo vuelve censable, de S108-B:** el patrón `PERFORM` da
+decenas de candidatos; **lo que discrimina es «¿el llamado avisa DEVOLVIENDO o
+LANZANDO?»**. Con ese filtro, 26 candidatos quedaron en uno.
+
+## 🔴 `L-441` — UN CENSO CORRECTO ENVEJECE EN CUARENTA MINUTOS CON OTRA PISTA EN VUELO
+
+**Lo que lo hace visible NO es leer con cuidado: es el CONTROL POSITIVO del
+cinturón.** Sin él, un `ADD COLUMN IF NOT EXISTS` pasa **en silencio** sobre la
+columna de otro, y un `DROP/ADD` de un CHECK compartido **rompe trabajo ajeno con
+una migración verde**.
+
+*Un censo no es una foto del sistema: es una foto del sistema en un instante en
+que otras manos lo estaban moviendo.*
+
+⚠️ **Su forma más cara, medida cuatro veces en un día:** dos migraciones con el
+mismo número ⇒ `schema_migrations` sólo puede nombrar una y el
+`ON CONFLICT DO NOTHING` deja pasar la otra **en silencio**; en un ambiente nuevo
+`db push` **saltea LAS DOS creyéndolas aplicadas**. **Y una vez dijo literalmente
+`up to date` sin aplicar una línea.** ⇒ el guard es
+`scripts/verify-migraciones.mjs`, y **mide DOS cosas: duplicados en el directorio
+Y que cada versión registrada lo esté con el nombre de su archivo** — detectar el
+duplicado no alcanza.
+
+## 🔴 `L-442` — QUITAR UN CAMPO DE UN RETORNO NO ROMPE EL SQL: ROMPE AL VALIDADOR DEL CONSUMIDOR
+
+**Medida por S108-C sobre `contratar_programa`.** Al hacer que el programa naciera
+`pendiente`, el retorno dejó de traer `pagado_en`. **El validador del wrapper
+seguía exigiéndolo** ⇒ **una respuesta buena caía en `datos_inconsistentes`**.
+
+*Su modo de falla es el peor de los dos posibles: no es que no se cree — es que se
+crea y la pantalla dice que no.* La familia veía un error sobre un programa que
+existía, pendiente y con su reloj corriendo.
+
+🔴 **Ningún typecheck lo ve**: el campo era `unknown` de un `jsonb`.
+
+⇒ **Se cambia el VALOR, no se quita la clave.** Un retorno que decía `saldo_total`
+sobre algo que ya no otorga se corrige poniendo `0` —que es la verdad— y no
+borrando la clave. **Y todo cambio de motor que toque un retorno obliga a censar
+los validadores de sus wrappers**, que es donde el daño aparece.
+
+## 🔴 `L-443` — EL CASO SE FABRICA, NO SE BUSCA
+
+Un fixture que **busca** su rojo en el estado de la base **deja de discriminar el
+día que alguien cura ese estado — y no avisa: acusa.** Le pasó a S108-B: su brazo
+buscaba un mes que la compuerta rechazara, y la cura del índice de A liberó
+justamente esos días ⇒ el arnés reventó **como si el motor estuviera mal**.
+
+**Su segunda mitad, encontrada al reproducirlo:** un **`LIMIT 1` sin `ORDER BY`**
+devuelve una fila arbitraria que **puede cambiar sin que nadie toque nada**, con
+sólo insertar otra.
+
+⇒ El brazo **fabrica** su caso —ocupa él mismo el slot que va a chocar— y los dos
+brazos miran **el mismo terreno**, para que el positivo y el negativo no hablen de
+meses distintos.
+
+## 🔴 `L-444` — UN DEFAULT NO ES UNA DECISIÓN
+
+La llave del recurrente **no existía como fila** y el cron asumía apagado **por
+ausencia**. *Una fila ausente y una en `false` se comportan igual hoy y significan
+cosas distintas:* la primera no distingue **«está apagado»** de **«nadie lo
+configuró todavía»**, y el día que alguien cambie el default el sistema cambia de
+comportamiento **sin que ninguna migración lo diga**.
+
+⇒ Toda llave que gobierne plata **nace explícita** y su cinturón **falla si no
+está** y **falla si está encendida**.
+
+**Y su corolario, firmado el mismo día:** *un interruptor que se puede poner en
+«sí» mientras el circuito está cortado no es un interruptor: es una etiqueta.* Por
+eso la condición de muerte de un gate rojo **va al motor**, no a la memoria de
+nadie: `guarderia_recurrente_vivo()` devuelve `false` aunque la llave esté
+encendida si queda un selector sin consumidor. **El rojo de un gate protege
+mientras alguien lo mira; el motor se niega solo.**
