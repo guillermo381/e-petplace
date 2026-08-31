@@ -24637,6 +24637,36 @@ tres las resolvió el objeto.**
 quien cayó **acababa de citarle esa misma lección a otro**. *Una lección no
 protege a quien la enuncia — sólo a quien la ejecuta sobre su propio trabajo.*
 
+## 🟠 `L-453` — EL SHA-1 NO ES DEL PRODUCTO: ES DEL PAR `package + keystore`, Y CADA APP TIENE EL SUYO EN EAS
+
+**Medida en S109-D sobre los dos APK de nube.**
+
+Al preparar la autorización de la key de Google Maps, el supuesto natural era
+*«autorizo la app y listo»*. **Medido, son DOS entradas y con huellas distintas:**
+
+```
+com.epetplace.cliente     3331ac303cdcf82517ae1279e0900ceedce95b61
+com.epetplace.prestador   498da5e3e26d59df3f900e0b170012df38bce956
+```
+
+**EAS mantiene un keystore POR APP**, no uno por cuenta ni por proyecto. ⇒ una
+credencial restringida por firma necesita **una entrada por cada par**, y
+autorizar una **no habilita la otra**.
+
+> ### Y el modo de falla es asimétrico, que es lo que lo vuelve caro.
+> Si se autoriza sólo la del cliente, **la app del prestador sale con el mapa
+> mudo** — y como es la app con menos gates, puede tardar semanas en notarse.
+> *No falla la que estás mirando: falla la otra.*
+
+**La regla:** ante cualquier credencial restringida por firma (Maps, Firebase,
+lo que venga), el censo se hace **por par `package + keystore`**, y se cuentan
+**tantas entradas como binarios distintos existan** — incluidos los locales, que
+tienen su propia firma y no la heredan de nadie.
+
+*Corolario operativo: el SHA-1 que decide se saca **del APK instalado**
+(`adb pull` + `apksigner --print-certs`), nunca del keystore que uno cree que
+usó — `L-452` explica por qué esa confusión se siente como evidencia.*
+
 ## 🔴 `L-452` — UN OTA QUE LLEGA NO PRUEBA QUE EL BINARIO SEA EL DE NUBE: EL UPDATE SE RESUELVE POR RUNTIME, LA KEY DE MAPS POR FIRMA
 
 **Medida en S109 sobre el teléfono del founder.**
