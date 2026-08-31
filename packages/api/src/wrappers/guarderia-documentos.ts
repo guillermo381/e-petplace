@@ -125,6 +125,81 @@ export async function evaluarDocumentosGuarderia(
  * (`ON CONFLICT DO NOTHING` en el motor). *Un reintento de red no puede
  * convertirse en un error para el que ya aceptó.*
  */
+export interface AutorizacionGuarderia {
+  redesAutorizadas: boolean;
+  /** `null` = **el tope del documento vigente**, no «sin tope». */
+  urgenciaTopeMonto: number | null;
+  urgenciaTopeMoneda: string;
+  contactos: Json;
+  contactoAlternativo: Json | null;
+  actualizadoEn: string;
+}
+
+/**
+ * Lo que la familia autorizó. **`null` cuando NUNCA autorizó nada.**
+ *
+ * 🔴 **`null` NO es `false`, y la diferencia es la razón de este lector:**
+ * *«no hay fila» y «dijo que no» son dos verdades distintas.* Un interruptor
+ * que las confunde **muestra «no» sobre alguien que nunca eligió** — y encima
+ * lo invita a re-autorizar algo que quizá ya autorizó.
+ *
+ * Antes de esto **se podía escribir y no se podía leer**: cero lectores de
+ * `guarderia_autorizaciones_familia`. *Un interruptor sin lector arranca
+ * siempre en «no».*
+ */
+export async function obtenerAutorizacionGuarderia(
+  familiaId: string,
+): Promise<ResultadoWrapper<AutorizacionGuarderia | null, CodigoErrorGuarderiaDocumentos>> {
+  const { data, error } = await getClient().rpc('obtener_autorizacion_guarderia', {
+    p_familia_id: familiaId,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  if (data.length === 0) return { ok: true, data: null };
+  const r = data[0] as Record<string, unknown>;
+  if (typeof r.redes_autorizadas !== 'boolean' || typeof r.actualizado_en !== 'string') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      redesAutorizadas: r.redes_autorizadas,
+      urgenciaTopeMonto: typeof r.urgencia_tope_monto === 'number' ? r.urgencia_tope_monto : null,
+      urgenciaTopeMoneda: typeof r.urgencia_tope_moneda === 'string' ? r.urgencia_tope_moneda : 'USD',
+      contactos: (r.contactos ?? []) as Json,
+      contactoAlternativo: (r.contacto_alternativo ?? null) as Json | null,
+      actualizadoEn: r.actualizado_en,
+    },
+  };
+}
+
+/**
+ * Prende o apaga la autorización de publicar imágenes. **Puerta propia.**
+ *
+ * 🔴 **NO se usa `aceptarDocumentosGuarderia` para esto, y la razón está
+ * MEDIDA, no argumentada:** con un documento nuevo vigente, re-llamar al
+ * aceptador para mover este booleano **aceptaba el documento solo**
+ * (`aceptaciones 10 → 11`, medido en subtransacción). *Cambiar una preferencia
+ * de imagen habría firmado un contrato legal que la familia no leyó.*
+ *
+ * Esta puerta toca **sólo el booleano** — ni aceptaciones, ni tope, ni
+ * contactos — y crea la fila si no existe.
+ */
+export async function fijarRedesAutorizadas(params: {
+  familiaId: string;
+  autorizadas: boolean;
+}): Promise<ResultadoWrapper<{ redesAutorizadas: boolean }, CodigoErrorGuarderiaDocumentos>> {
+  const { data, error } = await getClient().rpc('fijar_redes_autorizadas', {
+    p_familia_id: params.familiaId,
+    p_autorizadas: params.autorizadas,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.redes_autorizadas !== 'boolean') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { redesAutorizadas: r.redes_autorizadas } };
+}
+
 export interface AceptacionResultado {
   aceptadas: number;
   /** **Lo único que la pantalla debe mirar** para decidir si sigue. */
