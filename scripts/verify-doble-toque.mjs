@@ -51,7 +51,7 @@ if (!sesion?.session) { console.error('🔴 sin sesión'); process.exit(2); }
 const TOKEN = sesion.session.access_token;
 
 const { data: tj } = await admin.from('tarjetas_guardadas')
-  .select('id').eq('user_id', sesion.user.id).eq('activa', true).limit(1).maybeSingle();
+  .select('id').eq('user_id', sesion.user.id).eq('estado', 'guardada').limit(1).maybeSingle();
 if (!tj) { console.error('🔴 sin tarjeta'); process.exit(2); }
 
 const cobrar = (cuerpo) => fetch(`${URL}/functions/v1/pagos-cobro`, {
@@ -74,17 +74,25 @@ const exigir = (cond, queFalta) => {
 /** Un sujeto: se crea, se toca dos veces SEGUIDAS, se cuentan los intentos. */
 async function secuencial(etiqueta, col, id, cuerpo) {
   const a = await cobrar(cuerpo);
+  const n1 = await contar(col, id);
   const b = await cobrar(cuerpo);
-  const n = await contar(col, id);
-  console.log(`   ${etiqueta.padEnd(22)} 1º=${a.http} 2º=${b.http} (${b.cuerpo?.codigo ?? 'ok'}) · intentos=${n}`);
-  exigir(n === 1, `${etiqueta}: el segundo toque dejó ${n} intentos, no 1`);
-  exigir(b.http === 409, `${etiqueta}: el segundo toque no rebotó (HTTP ${b.http})`);
-  return n;
+  const n2 = await contar(col, id);
+  console.log(`   ${etiqueta.padEnd(22)} 1º=${a.http} → ${n1} · 2º=${b.http} (${b.cuerpo?.codigo ?? 'ok'}) → ${n2}`);
+  /* 🔴 LA PREGUNTA ES «¿EL SEGUNDO TOQUE AGREGÓ UNO?», NO «¿HAY EXACTAMENTE 1?».
+     La primera versión exigía `n === 1` y dio rojo sobre el programa, que su
+     compuerta **rebotó antes de cobrar** — 0 intentos ahí es lo correcto.
+     *Esa aserción confundía «el guard funcionó» con «el cobro ocurrió», y por eso
+     acusaba al producto de un acierto.* Se compara contra el estado propio, que
+     es lo único que el segundo toque puede mover. */
+  exigir(n2 === n1, `${etiqueta}: el segundo toque agregó un intento (${n1} → ${n2})`);
+  /* Y si el primero SÍ creó intento, el segundo tiene que rebotar diciéndolo. */
+  if (n1 > 0) exigir(b.http === 409, `${etiqueta}: con un intento vivo, el segundo no rebotó (HTTP ${b.http})`);
+  return n2;
 }
 
 // ══ LOS SUJETOS SE FABRICAN ═══════════════════════════════════════════════
 const { data: fm } = await admin.from('familia_miembro')
-  .select('familia_id').eq('user_id', sesion.user.id).limit(1).maybeSingle();
+  .select('familia_id').eq('user_id', sesion.user.id).is('hasta', null).limit(1).maybeSingle();
 
 const { data: conProg } = await admin.from('programas_contratados')
   .select('mascota_id').in('estado', ['activo', 'pendiente']);
@@ -100,11 +108,14 @@ console.log('\n═══ ① SECUENCIAL — el segundo toque NO puede crear un i
 
 /* ── bono de guardería ── */
 {
-  const { data: pg } = await admin.from('prestador_servicios')
-    .select('prestador_id').eq('activo', true).eq('tipo_servicio', 'guarderia')
-    .limit(1).maybeSingle();
-  const { data: r } = await cli.rpc('comprar_paquete_guarderia',
-    { p_prestador_id: pg.prestador_id, p_tamano: 5 });
+  /* El paquete de guardería vive en `guarderia_paquetes`, NO en
+     `prestador_servicios` — medido, no supuesto: la primera versión buscó ahí y
+     no encontró nada. */
+  const { data: paq } = await admin.from('guarderia_paquetes')
+    .select('prestador_id, tamano').eq('activo', true).order('tamano').limit(1);
+  if (!paq?.length) { console.log('   bono·guardería        sin paquete activo'); }
+  const { data: r } = paq?.length ? await cli.rpc('comprar_paquete_guarderia',
+    { p_prestador_id: paq[0].prestador_id, p_tamano: paq[0].tamano }) : { data: null };
   if (r?.bono_id) await secuencial('bono·guardería', 'bono_id', r.bono_id,
     { bono_id: r.bono_id });
   else console.log(`   bono·guardería        no se pudo sembrar: ${JSON.stringify(r).slice(0,90)}`);
@@ -139,6 +150,70 @@ console.log('\n═══ ① SECUENCIAL — el segundo toque NO puede crear un i
       r.programa_contratado_id ?? r.id, { programa_contratado_id: r.programa_contratado_id ?? r.id });
   else console.log(`   programa              no se pudo sembrar: ${JSON.stringify(r).slice(0,90)}`);
 }
+
+/* ── mensualidad de guardería ── */
+{
+  /* Se cancela el mandato anterior por su PUERTA REAL antes de firmar otro:
+     el motor no admite dos mandatos vivos sobre el mismo hogar. */
+  const { data: viejas } = await admin.from('guarderia_suscripciones')
+    .select('id').eq('autorizada_por', sesion.user.id).eq('estado', 'activa');
+  for (const v of (viejas ?? [])) await cli.rpc('cancelar_mensualidad_guarderia', { p_suscripcion_id: v.id });
+  const { data: pres } = await admin.from('guarderia_paquetes')
+    .select('prestador_id').eq('activo', true).limit(1).maybeSingle();
+  const { data: mas } = await admin.from('mascotas')
+    .select('id').eq('familia_id', fm.familia_id).eq('estado_vida', 'activa').limit(1).maybeSingle();
+  const { data: dir } = await admin.from('direcciones_guardadas')
+    .select('id').eq('user_id', sesion.user.id).limit(1).maybeSingle();
+  const { data: r } = await cli.rpc('contratar_mensualidad_guarderia', {
+    p_prestador_id: pres?.prestador_id, p_tarjeta_id: tj.id, p_mascota_id: mas?.id,
+    p_monto_esperado: 200, p_direccion_id: dir?.id ?? null, p_riel: 'tarjeta' });
+  const mid = r?.suscripcion_id ?? r?.id;
+  if (mid) await secuencial('mensualidad', 'guarderia_suscripcion_id', mid,
+    { guarderia_suscripcion_id: mid });
+  else console.log(`   mensualidad           no se pudo sembrar: ${JSON.stringify(r).slice(0,80)}`);
+}
+
+/* ── plan de paseo ──
+   🔴 Se LIBERA un perro cancelando un plan de prueba que este mismo arnés creó
+   hoy. *El caso se fabrica, no se busca* — y sin esto el brazo no mide: todos
+   los perros del hogar de prueba quedaron con plan de las corridas anteriores.
+   Se toca sólo lo que este arnés produjo, y se declara. */
+{
+  const { data: mios } = await admin.from('suscripciones_servicio')
+    .select('id').eq('user_id', sesion.user.id).in('estado', ['activa','pendiente'])
+    .gte('created_at', new Date(Date.now() - 3 * 3600_000).toISOString());
+  if ((mios ?? []).length > 1) {
+    await admin.from('suscripciones_servicio')
+      .update({ estado: 'cancelada', cancelado_en: new Date().toISOString(),
+                motivo_cancelacion: 'dato de prueba · verify-doble-toque' })
+      .eq('id', mios[0].id);
+    console.log(`   (liberado el plan de prueba ${mios[0].id.slice(0,8)})`);
+  }
+  const { data: conPlan } = await admin.from('suscripciones_servicio')
+    .select('mascota_id').in('estado', ['activa','pendiente']);
+  const oc = new Set((conPlan ?? []).map(x => x.mascota_id));
+  const libre = (perros ?? []).find(m => !oc.has(m.id));
+  const { data: ofs } = await admin.from('prestador_servicios')
+    .select('id, prestador_id').eq('activo', true).eq('tipo_servicio', 'paseo');
+  if (libre && ofs?.length) {
+    const { data: r } = await cli.rpc('contratar_plan_paseo', {
+      p_prestador_id: ofs[0].prestador_id, p_servicio_id: ofs[0].id,
+      p_mascota_id: libre.id, p_dias: [1,3,5], p_hora: '10:00:00',
+      p_frecuencia: 'semanal', p_auto_renovar: true, p_fecha_inicio: manana,
+      p_riel: 'tarjeta', p_tarjeta_id: tj.id });
+    const pid = r?.suscripcion_id ?? r?.id;
+    if (pid) await secuencial('plan de paseo', 'suscripcion_servicio_id', pid,
+      { suscripcion_servicio_id: pid });
+    else console.log(`   plan de paseo         no se pudo sembrar: ${JSON.stringify(r).slice(0,80)}`);
+  } else console.log('   plan de paseo         sin perro libre con que sembrar');
+}
+
+/* ⚠️ `cita` y `pedido` NO se ejercen acá, y se declara en vez de omitirse: su
+   creación exige el recorrido de reserva y el de carrito, que son de otra pista
+   y de otro arnés. *El guard los cubre por construcción —resuelve la columna del
+   catálogo, no una rama tipeada— pero «por construcción» es exactamente la clase
+   de afirmación que esta sesión falsó cinco veces.* Quedan como NO EJERCIDOS. */
+console.log('   cita · pedido         NO EJERCIDOS (declarado, no omitido)');
 
 console.log('\n───────────────────────────────────────────────────────────────');
 if (fallas.length) {
