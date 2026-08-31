@@ -1,0 +1,18 @@
+-- ═══ REVERSA de 20260907180000_s109b_el_comprobante_del_programa.sql ═══
+-- Escrita ANTES de aplicar. Devuelve `aplicar_evento_de_pago` a resolver el
+-- destinatario del comprobante SÓLO por bono y guardería (con su `ELSE`).
+--
+-- ⚠️ QUÉ **NO** DESHACE, y es lo que importa:
+--   · Los comprobantes que la cura ya emitió QUEDAN. Son avisos con su clave de
+--     dedup: revertir el código no los borra ni los reemite.
+--   · Los pagos de programa que YA se aplicaron siguen aplicados. Revertir esto
+--     no devuelve plata ni desactiva un programa: sólo hace que los programas
+--     que se paguen DESPUÉS vuelvan a quedar sin comprobante.
+--   · Revertir REABRE el defecto medido con `DF-2108273`: la familia paga $160,
+--     el programa se activa, y **no recibe respaldo de su pago**.
+--
+-- Cómo revertir: restaurar el cuerpo previo desde el objeto. La forma segura es
+-- volver a aplicar la migración anterior que definió la función, o quitar a mano
+-- las cuatro ramas `programas_contratados` que la cura agregó y restaurar el
+-- `ELSE` de la guardería. NO hay DROP: la función es de otra sesión y tiene
+-- otros ocho sujetos vivos colgando.
