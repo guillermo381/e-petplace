@@ -36,6 +36,13 @@ const MENSAJES = {
   tarjeta_no_existe:            'No encontramos esa tarjeta.',
   tarjeta_de_otra_persona:      'Esa tarjeta no es tuya.',
   no_ofrece_mensualidad:        'Este lugar no ofrece plan mensual.',
+  /* 🔴 EL ID DEL PLAN QUE YA EXISTE VIAJA EN EL MENSAJE (`ya_tienes_plan_activo: <uuid>`).
+     La pantalla **LLEVA ahí** en vez de mostrar un error: *un rebote que sólo
+     dice que no obliga a la familia a adivinar dónde está lo que ya tiene.*
+     Su historia: hasta hoy esto lo frenaba sólo un índice, y al founder le
+     llegó el `duplicate key` crudo de Postgres — sobre un plan que su primer
+     toque SÍ había firmado. */
+  ya_tienes_plan_activo:        'Ya tienes un plan mensual con este lugar.',
   direccion_no_valida:          'Esa dirección no está entre las tuyas.',
 
   /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
@@ -226,6 +233,66 @@ export async function reservarDiaGuarderia(params: {
 }
 
 // ── LA MENSUALIDAD ──────────────────────────────────────────────────────────
+
+export interface PlanGuarderia {
+  suscripcionId: string;
+  prestadorId: string;
+  prestadorNombre: string;
+  mascotaId: string | null;
+  precioMensual: number;
+  estado: 'activa' | 'pausada' | 'cancelada' | 'vencida';
+  /** 'YYYY-MM-DD' */
+  periodoDesde: string | null;
+  periodoHasta: string | null;
+  direccionId: string | null;
+}
+
+/**
+ * Los planes de la familia. **El activo primero.**
+ *
+ * ── POR QUÉ EXISTE ────────────────────────────────────────────────────────
+ * `ya_tienes_plan_activo` sabe decir **que sí lo tiene** y no puede decir
+ * **dónde**: la falla de un wrapper es `{ok, codigo, mensaje}` y **no carga
+ * datos**, y sacar el id parseando el mensaje está prohibido (regla 35).
+ *
+ * ⇒ Ante ese rebote, **la pantalla llama a este lector y LLEVA al plan** en vez
+ * de mostrar un error. *Un rebote que sólo dice que no obliga a la familia a
+ * adivinar dónde está lo que ya tiene.*
+ *
+ * No recibe `familiaId`: **sale de la sesión.** *Un lector que la recibe por
+ * parámetro es una puerta para mirar la de otro.*
+ */
+export async function obtenerMisPlanesGuarderia(): Promise<
+  ResultadoWrapper<PlanGuarderia[], CodigoErrorGuarderiaReserva>
+> {
+  const { data, error } = await getClient().rpc('obtener_mis_planes_guarderia');
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const planes: PlanGuarderia[] = [];
+  for (const fila of data) {
+    if (typeof fila !== 'object' || fila === null) return fallaCodigo('datos_inconsistentes');
+    const r = fila as Record<string, unknown>;
+    if (typeof r.suscripcion_id !== 'string' || typeof r.prestador_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.precio_mensual !== 'number' || typeof r.estado !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    planes.push({
+      suscripcionId: r.suscripcion_id,
+      prestadorId: r.prestador_id,
+      prestadorNombre: typeof r.prestador_nombre === 'string' ? r.prestador_nombre : '',
+      mascotaId: typeof r.mascota_id === 'string' ? r.mascota_id : null,
+      precioMensual: r.precio_mensual,
+      estado: r.estado as PlanGuarderia['estado'],
+      periodoDesde: typeof r.periodo_desde === 'string' ? r.periodo_desde : null,
+      periodoHasta: typeof r.periodo_hasta === 'string' ? r.periodo_hasta : null,
+      direccionId: typeof r.direccion_id === 'string' ? r.direccion_id : null,
+    });
+  }
+  return { ok: true, data: planes };
+}
+
 
 export interface MandatoMensualidad {
   suscripcionId: string;
