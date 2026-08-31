@@ -51,8 +51,47 @@ cliente · pertenencia verificada) → señal optimista → **la espera con voz*
 spinner mudo, jamás rechazo por timeout) → webhook / consulta activa → **el actuador
 transiciona la cita** (solo eventos SERVER autenticados) → **el comprobante por
 correo con id de transacción + código de autorización** (requisito de certificación,
-literal de Erick) → el **barrido** cubre también a los huérfanos de citas. La
-pantalla que cambia sola rige igual: `checkout-reserva` deja de declarar y pasa a
+literal de Erick) → ~~el **barrido** cubre también a los huérfanos de citas~~.
+
+> 🔴 **ENMENDADO (31-ago-2026, censo de S108-B, verificado por S108-A contra el
+> objeto):** el barrido **NUNCA cubrió a las citas**.
+> `pagos_pendientes_de_conciliar(p_minutos_de_gracia integer, p_proveedor text)`
+> —su único lector, y es **función**, no vista— hace `FROM compras`, y su cuerpo
+> **no nombra `cita` ni una vez**. Por eso la rama `'cita'` del barrido de DeUna
+> es **inalcanzable desde su propio lector**. Tampoco va a cubrir al bono ni a la
+> mensualidad de guardería. **La cobertura por sujeto la construye S108-B-2.**
+>
+> **EL NÚMERO, medido por S108-B y re-medido por S108-A por su cuenta** —
+> intentos disparados (con id del proveedor o referencia corta), no terminales,
+> de más de 10 minutos:
+>
+> | sujeto | existen | los ve el lector | INVISIBLES |
+> |---|---|---|---|
+> | cita | 6 | **0** | **6** |
+> | pedido | 6 | 6 | 0 |
+> | **total** | **12** | 6 | **6** |
+>
+> **El lector ve exactamente la mitad, y la mitad que no ve es la que esta letra
+> declaraba cubierta.**
+>
+> ⚠️ **ENCUADRE, y va porque el número invita a leerlo mal:** hasta el 30-sep
+> esto es **ambiente de pruebas** y esos 12 **NO son plata**. El número mide si
+> el mecanismo anda, **no cuánto se perdió**.
+>
+> Y los otros cuatro sujetos —bono, mensualidad de guardería, recurrencia,
+> suscripción— dan **CERO**, pero es un cero de **NO EJERCIDO, no de sano**:
+> nunca pasaron por el riel, así que todavía no pueden tener huérfanos. *Un cero
+> que viene de que nadie caminó el camino se lee igual que uno que viene de que
+> el camino funciona.*
+>
+> *Una letra viva que afirma una cobertura inexistente manda a la próxima sesión
+> a confiar en una red que no está* — y la red se busca justo el día en que algo
+> se cayó.
+>
+> ⚠️ La letra vieja queda **tachada y no borrada**: describe lo que se quiso, y
+> borrarla haría que el próximo censo redescubriera el hueco desde cero.
+
+La pantalla que cambia sola rige igual: `checkout-reserva` deja de declarar y pasa a
 esperar la verdad del servidor.
 
 ## §5 · CANCELACIÓN Y REVERSO — el camino de la plata, no las ventanas

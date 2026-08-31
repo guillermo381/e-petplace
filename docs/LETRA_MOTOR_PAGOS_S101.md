@@ -602,6 +602,48 @@ NO FALLA — LO IGNORA.** El webhook llegó, validó su stoken, quedó autentica
 y la cita no se movió. **No hubo error, ni log, ni síntoma: hubo silencio con
 cara de normalidad.**
 
+### 🔴 `L-440` — UN `ok:false` CORRECTO TIRADO A LA BASURA ES INDISTINGUIBLE DE UN `ok:true` MENTIROSO
+
+**Depositada el 31-ago-2026 (S108). La encontró S108-B; S108-A la verificó
+contra el objeto antes de curarla, y de tirar de ella salió su segunda cabeza.**
+
+`_trg_reverso_mueve_sujeto` llamaba a `mover_sujeto_por_reverso` con **`PERFORM`**,
+que **evalúa y descarta el retorno**. Esa función devuelve `ok:false` con código
+en cuatro casos y **ninguno levanta excepción** ⇒ el manejador de excepciones no
+corría y **no quedaba una sola línea diciendo que el sujeto no se movió.** La
+plata volvía del proveedor, el intento quedaba `reversado`, y el sujeto seguía
+en pie.
+
+*No es el defecto de S101 —aquél era un `ok:true` mentiroso—: éste es un
+`ok:false` PERFECTAMENTE CORRECTO tirado por su llamador.* **El síntoma es
+idéntico: silencio.**
+
+**Y su segunda cabeza, que salió buscando la primera:** el actuador calculaba
+`sujeto_movido` leyendo el **estado del INTENTO** —lo que él mismo acababa de
+escribir— en vez de si el sujeto se movió. **Afirmaba `true` sobre otra cosa.**
+
+⇒ **Corolario que ENSANCHA la regla de abajo:** quien agrega un sujeto censa a
+los **LLAMADORES** además de a los consumidores. **Un retorno que nadie lee no
+es un guard**, y un campo que responde una pregunta distinta de la que su nombre
+hace miente sin equivocarse.
+
+### 🔴 `L-441` — UN CENSO CORRECTO ENVEJECE EN CUARENTA MINUTOS CON OTRA PISTA EN VUELO
+
+**Depositada el 31-ago-2026 (S108), y las dos pistas la pagaron el mismo día.**
+
+S108-B escribió una migración del riel contra un censo de 40 minutos antes; para
+cuando iba a aplicarla, S108-A ya había aterrizado las columnas. Y a la inversa:
+`db push` de A **rebotó** porque el remoto tenía una migración de B que el
+directorio local no.
+
+🔴 **Lo que lo hace visible NO es leer con cuidado: es el CONTROL POSITIVO del
+cinturón.** Sin él, un `ADD COLUMN IF NOT EXISTS` pasa **en silencio** sobre la
+columna que otro acaba de crear, y un `DROP/ADD` de un CHECK compartido —el XOR
+de `pagos_intentos`— **rompe el trabajo ajeno con una migración verde**.
+
+*Un censo no es una foto del sistema: es una foto del sistema en un instante en
+que otras manos lo estaban moviendo.*
+
 ⇒ **Regla depositada:** *agregar un SUJETO al motor obliga a censar TODOS los
 consumidores del evento, no solo la puerta de entrada.* La puerta fue lo fácil
 —una condición y un `if`—; lo que faltaba estaba **tres piezas más adelante**,

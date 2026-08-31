@@ -10,6 +10,8 @@
 
 import { getClient } from '../client';
 import { puertaDelDueno } from './paquetes';
+/* 🔴 UNA sola derivación de la marca, compartida. No se re-implementa acá. */
+import { bonoNoPagadoATiempo } from './pagos-espera';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
@@ -1153,6 +1155,14 @@ export interface PaqueteCompradoGuarderia {
   /** `activo` · `agotado` · `vencido` · `cancelado`. */
   estado: string;
   /**
+   * 🔴 S108-A · `true` cuando el paquete murió porque **se venció su ventana de
+   * pago de 15 minutos**, no por un reverso ni por saldo vencido. La pantalla
+   * necesita distinguirlo: *«no llegaste a pagarlo» y «te devolvimos la plata»
+   * son dos cosas distintas, y un paquete que sólo desaparece de la lista no
+   * dice ninguna de las dos.*
+   */
+  noPagadoATiempo: boolean;
+  /**
    * 🔴 S108-A · el crudo de la base: `pendiente` · `pagado` · `reembolsado`.
    * **NO dice `pendiente_pago`** — ese valor no existe en
    * `bonos_estado_pago_valido`. La superficie decide qué contar y qué decir;
@@ -1178,7 +1188,7 @@ export async function obtenerMisPaquetesGuarderia(): Promise<
   }
   const { data, error } = await getClient()
     .from('bonos')
-    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento, estado_pago')
+    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento, estado_pago, pago_metadata')
     .eq('tipo_servicio', 'guarderia_dia')
     /* ☠️ S108-A · CAE EL FILTRO `estado_pago='pagado'`.
        Desde que el bono nace `pendiente`, este filtro volvía **invisible** todo
@@ -1211,6 +1221,11 @@ export async function obtenerMisPaquetesGuarderia(): Promise<
       venceEl: typeof b.fecha_vencimiento === 'string' ? b.fecha_vencimiento : null,
       estado: typeof b.estado === 'string' ? b.estado : '',
       estadoPago: typeof b.estado_pago === 'string' ? b.estado_pago : '',
+      /* La marca la deja `expirar_bonos_sin_pago()`; la derivación vive en
+         `pagos-espera` para que los dos lectores digan lo MISMO. *Dos derivadas
+         de la misma marca en dos archivos podrían discrepar, y discreparían
+         justo sobre por qué murió el paquete de alguien.* */
+      noPagadoATiempo: bonoNoPagadoATiempo(b.pago_metadata),
     });
   }
   return { ok: true, data: salida };

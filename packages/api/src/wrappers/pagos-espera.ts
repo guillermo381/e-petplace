@@ -97,7 +97,35 @@ export async function leerEstadoCita(
  * Lee por RLS (`bonos_pet_parent_own`): la familia mira su propio paquete.
  */
 export type EstadoPagoBono = 'pendiente' | 'pagado' | 'reembolsado';
-export type EsperaBonoEstado = 'pendiente_pago' | 'pagado' | 'vencido' | 'cancelado';
+export type EsperaBonoEstado =
+  | 'pendiente_pago'
+  /**
+   * 🔴 LA VENTANA DE PAGO SE VENCIÓ — y tiene voz PROPIA a propósito.
+   * Antes caía en `'cancelado'`, el mismo valor que un bono REVERSADO. *Son dos
+   * finales que la familia vive distinto: «te devolvimos la plata» y «nunca
+   * llegaste a pagar» no se cuentan con la misma frase.* Y sin distinguirlos, un
+   * paquete que expiró **sólo desaparecía de una lista** — exactamente lo que la
+   * dirección del founder prohíbe.
+   */
+  | 'no_pagado_a_tiempo'
+  | 'pagado'
+  /** El SALDO venció (otro reloj: `fecha_vencimiento`, el que mueve el rollover). */
+  | 'vencido'
+  /** Reversado: la plata volvió. */
+  | 'cancelado';
+
+/**
+ * La marca que `expirar_bonos_sin_pago()` deja al cancelar por ventana vencida.
+ * **Se lee de `pago_metadata` y no de `estado`** porque el vocabulario de
+ * `bonos.estado` es cerrado (`activo|agotado|vencido|cancelado`) y **no se
+ * ensancha para esto**: `vencido` ya significa que venció el SALDO, y usarlo acá
+ * juntaría dos relojes en un valor.
+ */
+export function bonoNoPagadoATiempo(pagoMetadata: unknown): boolean {
+  return !!pagoMetadata
+    && typeof pagoMetadata === 'object'
+    && 'cancelado_por_hold_en' in (pagoMetadata as Record<string, unknown>);
+}
 
 export type EsperaBono = {
   estado: EsperaBonoEstado;
@@ -110,7 +138,7 @@ export async function leerEstadoBono(
   bonoId: string,
 ): Promise<ResultadoWrapper<EsperaBono, 'bono_no_visible'>> {
   const { data, error } = await getClient()
-    .from('bonos').select('estado, estado_pago').eq('id', bonoId).maybeSingle();
+    .from('bonos').select('estado, estado_pago, pago_metadata').eq('id', bonoId).maybeSingle();
 
   if (error) return { ok: false, codigo: 'bono_no_visible', mensaje: error.message };
   if (!data) return { ok: false, codigo: 'bono_no_visible', mensaje: 'bono_no_visible' };
@@ -125,6 +153,10 @@ export async function leerEstadoBono(
   const estado: EsperaBonoEstado =
     estadoPago === 'pagado' ? 'pagado'
     : estadoPago === 'reembolsado' ? 'cancelado'
+    /* 🔴 ANTES QUE `cancelado` A PROPÓSITO: un bono al que se le venció la
+       ventana queda `cancelado` igual que uno reversado, y sólo la marca los
+       distingue. Preguntar primero por la marca es lo que le da voz propia. */
+    : ciclo === 'cancelado' && bonoNoPagadoATiempo(data.pago_metadata) ? 'no_pagado_a_tiempo'
     : ciclo === 'cancelado' ? 'cancelado'
     : ciclo === 'vencido' ? 'vencido'
     : 'pendiente_pago';

@@ -1420,6 +1420,7 @@ export {
   leerEstadoBono, leerEstadoMensualidad,
   type EsperaBono, type EsperaBonoEstado, type EstadoPagoBono,
   type EsperaMensualidad, type EstadoMensualidad,
+  bonoNoPagadoATiempo,
 } from './wrappers/pagos-espera';
 
 // S104-A · tanda 2 — la invitación de familia (puerta única, cero INSERT desde apps).
