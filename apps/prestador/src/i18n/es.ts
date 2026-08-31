@@ -99,6 +99,15 @@ export const prestadorEs = {
     datoAdiestramientoCero: 'Sin sesiones hoy',
     datoAdiestramientoUno: '1 sesión hoy',
     datoAdiestramientoN: '{{n}} sesiones hoy',
+    /* ⭐ S109-D · EL QUINTO OFICIO, y su sustantivo NO es el de sus cuatro
+       hermanas por una razón del oficio, no de estilo: las otras cuentan
+       ACTOS (paseos, baños, consultas, sesiones) y la guardería cuenta
+       PRESENCIAS. *Un animal en guardería no es algo que se hace: es alguien
+       que está* — y por eso el día se lee «3 animales hoy» y jamás «3
+       guarderías». La forma de la frase sí es la misma que las cuatro. */
+    datoGuarderiaCero: 'Sin animales hoy',
+    datoGuarderiaUno: '1 animal hoy',
+    datoGuarderiaN: '{{n}} animales hoy',
     bandaPrestados: 'Prestados hoy',
     bandaAgendado: 'Agendado hoy',
     bandaCobrado: 'Cobrado hoy',
@@ -108,6 +117,7 @@ export const prestadorEs = {
     oficioGrooming: 'Estética',
     oficioPaseo: 'Paseo',
     oficioAdiestramiento: 'Adiestramiento',
+    oficioGuarderia: 'Guardería',
     ventaTitulo: 'Venta de productos',
     // N9 — el vacío habla: qué pasa y qué hacer.
     vacioTitulo: 'Todavía no hay por dónde entrar',
@@ -3897,6 +3907,7 @@ export const prestadorEs = {
     oficioGrooming: 'Estética',
     oficioPaseo: 'Paseo',
     oficioAdiestramiento: 'Adiestramiento',
+    oficioGuarderia: 'Guardería',
 
     paso1: {
       titulo: 'Tu negocio',

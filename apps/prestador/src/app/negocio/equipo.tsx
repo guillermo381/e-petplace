@@ -126,6 +126,8 @@ const RUTA_TALLER = {
   grooming: '/grooming/taller',
   paseo: '/paseo/taller',
   adiestramiento: '/adiestramiento/taller',
+  // S109-D · el quinto oficio, con su taller ya construido.
+  guarderia: '/guarderia/taller',
 } as const satisfies Record<OficioChip, string>;
 
 /** El oficio del destino: el PRIMER oficio con chip en el orden fijo de la

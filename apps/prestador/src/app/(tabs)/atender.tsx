@@ -46,6 +46,8 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerCitasAdiestramientoDelDia,
+  obtenerEstadiasDelDia,
+  type InputCitasPaseoDelDia,
   obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
@@ -77,6 +79,7 @@ const GLIFO_OFICIO = {
   grooming: 'grooming',
   paseo: 'paseo',
   adiestramiento: 'training',
+  guarderia: 'guarderia',
 } as const;
 
 /** La voz de cada oficio, POR TABLA y jamás por key armada a mano: una
@@ -89,6 +92,7 @@ const KEY_OFICIO = {
   grooming: 'atender.oficioGrooming',
   paseo: 'atender.oficioPaseo',
   adiestramiento: 'atender.oficioAdiestramiento',
+  guarderia: 'atender.oficioGuarderia',
 } as const;
 
 /**
@@ -145,6 +149,16 @@ const KEY_CITAS_DEL_DIA = {
   grooming: obtenerCitasGroomingDelDia,
   paseo: obtenerCitasPaseoDelDia,
   adiestramiento: obtenerCitasAdiestramientoDelDia,
+  /* ⭐ S109-D · EL QUINTO OFICIO. El lector de guardería YA EXISTÍA y ya
+     tenía su consumidor (`/guarderia/dia`): lo único que faltaba era que
+     este mapa lo llamara — *la guardería no era invisible, estaba fuera del
+     HOY*.
+
+     Se ADAPTA la firma acá y no se cambia la del wrapper: `obtenerEstadiasDelDia`
+     es posicional y este mapa llama por objeto. **Tocar el wrapper para que
+     encaje habría movido a su otro consumidor por una razón que no es suya.** */
+  guarderia: (input: InputCitasPaseoDelDia) =>
+    obtenerEstadiasDelDia(input.prestador_id, input.fecha),
 } as const;
 
 /** El orden es el de la tabla y no importa: se usa para recorrer, no para
@@ -178,6 +192,14 @@ const KEY_DATO = {
     cero: 'atender.datoAdiestramientoCero',
     uno: 'atender.datoAdiestramientoUno',
     n: 'atender.datoAdiestramientoN',
+  },
+  /* Los tres casos del quinto, que este archivo exige contestar antes de
+     entrar. Su sustantivo es «animales» y no un acto: la guardería cuenta
+     PRESENCIAS — el porqué está en el diccionario, al lado de la voz. */
+  guarderia: {
+    cero: 'atender.datoGuarderiaCero',
+    uno: 'atender.datoGuarderiaUno',
+    n: 'atender.datoGuarderiaN',
   },
 } as const;
 
@@ -523,7 +545,20 @@ export default function Atender() {
                         capa={o.oficio === 'veterinaria' ? 'identidad' : 'cuidado'}
                         orden={i}
                         onPress={() =>
-                          router.push({ pathname: '/mostrador', params: { oficio: o.oficio } })
+                          /* 🔴 S109-D · GUARDERÍA VA A SU DÍA, NO AL MOSTRADOR — y la
+                             razón vive ACÁ, donde rompe la uniformidad, porque *una
+                             excepción sin su razón al lado es la que alguien
+                             «unifica» en seis meses*.
+
+                             Las otras cuatro se atienden **por mostrador**: alguien
+                             llega, se lo recibe, se lo atiende. **La guardería tiene
+                             DÍA propio** —los animales ya están, todo el día— y esa
+                             pantalla existe y se llega a ella desde Negocio. El
+                             founder lo firmó así: *«toco una estadía y llego a donde
+                             ya llegaba antes; no se construye una pantalla nueva»*. */
+                          o.oficio === 'guarderia'
+                            ? router.push('/guarderia/dia')
+                            : router.push({ pathname: '/mostrador', params: { oficio: o.oficio } })
                         }
                       />
                     </View>
