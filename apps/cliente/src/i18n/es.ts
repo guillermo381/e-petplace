@@ -1591,6 +1591,7 @@ export const clienteEs = {
     enPreparacion: 'En preparación',
     perfil: 'Tu perfil',
     contrasena: 'Contraseña',
+    imagenTitulo: 'Fotos de tus mascotas',
     notificaciones: 'Notificaciones',
     eliminarCuenta: 'Eliminar cuenta',
     sesion: 'Sesión y cuenta',
@@ -2951,6 +2952,13 @@ export const clienteEs = {
      cómo se llama cada documento en la lista—; su CONTENIDO sale del server,
      versionado. *Un texto legal escrito en un diccionario es un texto que nadie
      versiona, nadie fecha y nadie puede probar que la familia aceptó.* */
+  imagenes: {
+    titulo: '¿Nos dejas compartir sus fotos?',
+    cuerpo: 'Podríamos mostrar fotos de {{nombre}} en nuestras redes para que otras familias conozcan el servicio. Es opcional.',
+    revocar: 'Puedes revocar esta autorización cuando quieras: escríbenos a privacidad@epetplace.com y en menos de 48 horas quedará revocada.',
+    guardando: 'Guardando…',
+    enPreferencias: 'Compartir sus fotos en nuestras redes',
+  },
   documentosGuarderia: {
     titulo: 'Antes de reservar',
     doc_contrato_custodia: 'Contrato de custodia',
@@ -3080,6 +3088,9 @@ export const clienteEs = {
   checkoutGuarderia: {
     servicio: 'Guardería · un día',
     sinHora: 'Todo el día',
+    paqueteExito: 'Tu paquete quedó comprado',
+    mensualExito: 'Tu plan mensual quedó autorizado',
+    mensualExitoDetalle: 'El primer cobro sale el día que empieza el plan. Puedes cancelarlo cuando quieras.',
     continuar: 'Continuar',
     dondeRecogen: 'De dónde lo pasan a buscar',
     dondeRecogenMensual: 'Acá van a pasar a buscarlo todos los meses. Puedes cambiarla después.',
@@ -3098,6 +3109,8 @@ export const clienteEs = {
     elegiMascotaTitulo: 'Elige de quién',
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
+    planTitulo: 'Tu plan mensual',
+    planDetalle: '${{precio}} al mes. Se cobra solo hasta que lo canceles.',
     conTuPaquete: 'Con tu paquete',
     verSuDia: 'Ver su día',
     reservarDePaquete: 'Reservar estadía de tu paquete',

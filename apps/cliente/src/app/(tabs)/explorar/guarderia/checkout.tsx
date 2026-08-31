@@ -34,13 +34,14 @@
  * significa nada — *un dato vacío con forma de dato es peor que su ausencia.*
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Celda, Encabezado, Tarjeta, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Celda, Encabezado, EstadoVacio, Icono, Tarjeta, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import {
   comprarPaqueteGuarderia,
+  getEstadoOnboardingDueno,
   reservarDiaGuarderia,
   contratarMensualidadGuarderia,
   reservarDiaDePaqueteGuarderia,
@@ -49,6 +50,7 @@ import {
 import { CheckoutReserva } from '@/components/checkout-reserva';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 import { SeccionDireccion, useDireccionEntrega } from '@/components/seccion-direccion';
+import { CheckImagenes } from '@/components/check-imagenes';
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutGuarderia() {
@@ -80,6 +82,33 @@ export default function CheckoutGuarderia() {
 
   const [enviando, setEnviando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
+  /**
+   * ⭐ **LA CONFIRMACIÓN ES LA MISMA QUE LA DE TODOS LOS SERVICIOS.**
+   * Firma del founder: *«después de pagar va a la pantalla de confirmación
+   * que ya usan todos los servicios — reusala, no la construyas»*.
+   *
+   * ⏪ Paquete y mensual mostraban **un toast y volvían al hogar**. *Un toast
+   * se va solo: el acto más caro del recorrido no puede confirmarse con algo
+   * que desaparece.* Ahora aterrizan en el mismo `EstadoVacio` con el glifo
+   * del oficio y el «volver al hogar» que usan las cuatro hermanas.
+   */
+  const [exito, setExito] = useState<{ titulo: string; detalle: string } | null>(null);
+  /* La familia, para el check de imagen: se resuelve una vez y sirve a las
+     tres confirmaciones. */
+  const [familiaId, setFamiliaId] = useState<string | null>(null);
+  useEffect(() => {
+    void getEstadoOnboardingDueno().then((r) => { if (r.ok) setFamiliaId(r.data.familia_id); });
+  }, []);
+
+  /**
+   * ⭐ El check de imagen, en la confirmación de las TRES modalidades.
+   * *Se monta sólo con familia y nombre resueltos: un consentimiento que no
+   * puede nombrar a la mascota es un consentimiento sobre nadie.*
+   */
+  const checkImagenes =
+    familiaId !== null && texto('mascotaNombre') !== ''
+      ? <CheckImagenes familiaId={familiaId} mascotaNombre={texto('mascotaNombre')} />
+      : null;
 
   const rebotar = useCallback(
     (codigo: string, mensaje: string) => {
@@ -87,8 +116,30 @@ export default function CheckoutGuarderia() {
       /* Nombrar el rebote es la mitad; la otra es que lleve a donde se
          resuelve — la misma cura que las cuatro ramas de la pantalla 4. */
       if (codigo === 'documentos_sin_aceptar') router.push('/guarderia/documentos');
+      /* ⭐ **«YA TENÉS UN PLAN» NO ES UN ERROR: ES UN DESTINO.**
+         Esto es lo que el founder vivió como *«no me deja pagar»*: su primer
+         toque **sí firmó el mandato** y el segundo rebotaba con el mensaje
+         crudo de un índice. *No era «no se pudo»: era «ya lo tenés y no supe
+         explicártelo».*
+         🔴 Y llevar al hub sólo sirve **desde que el plan se ve ahí** — lo
+         monté en la misma tanda. *Llevar a una pantalla que no muestra lo que
+         se fue a buscar es la mitad de la cura otra vez.* */
+      if (codigo === 'ya_tienes_plan_activo') {
+        /* 🔴 **EL MENSAJE VIAJA EN UN TOAST, NO EN LA PANTALLA.** Medido: con
+           `setRebote` solo, la explicación se pintaba y **se iba con la
+           navegación** — la familia aparecía en el hub sin saber por qué la
+           movieron. *Llevarla al lugar correcto sin decirle qué pasó es
+           cambiar un error mudo por una mudanza muda.* Un toast sobrevive al
+           cambio de pantalla; el texto de la pantalla no. */
+        /* `neutro`, no `error`: **no se equivocó en nada** — ya tiene el
+           plan. *Pintar de error un estado correcto le enseña a la familia a
+           desconfiar de lo que hizo bien.* */
+        mostrar({ texto: mensaje, variante: 'neutro' });
+        if (router.canDismiss()) router.dismissAll();
+        router.navigate('/hogar/guarderia');
+      }
     },
-    [router],
+    [router, mostrar],
   );
 
   /**
@@ -138,9 +189,7 @@ export default function CheckoutGuarderia() {
       });
       setEnviando(false);
       if (!r.ok) { rebotar(r.codigo, r.mensaje); return; }
-      mostrar({ texto: t('lugarGuarderia.mensualFirmada'), variante: 'exito' });
-      if (router.canDismiss()) router.dismissAll();
-      router.navigate('/hogar/guarderia');
+      setExito({ titulo: t('checkoutGuarderia.mensualExito'), detalle: t('checkoutGuarderia.mensualExitoDetalle') });
       return;
     }
 
@@ -159,10 +208,37 @@ export default function CheckoutGuarderia() {
       rebotar(primera.codigo, t('lugarGuarderia.paqueteSinPrimera', { mensaje: primera.mensaje }));
       return;
     }
-    mostrar({ texto: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }), variante: 'exito' });
-    if (router.canDismiss()) router.dismissAll();
-    router.navigate('/hogar/guarderia');
+    setExito({
+      titulo: t('checkoutGuarderia.paqueteExito'),
+      detalle: t('lugarGuarderia.paqueteListo', { n: primera.data.saldoRestante }),
+    });
   }, [enviando, esMensual, medio.idTarjeta, params.tamano, mostrar, rebotar, router, t]);
+
+  if (exito !== null) {
+    return (
+      <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
+          <EstadoVacio
+            icono={<Icono nombre="guarderia" tamano={48} />}
+            titulo={exito.titulo}
+            descripcion={exito.detalle}
+            accion={
+              <Boton
+                variante="primario"
+                etiqueta={t('checkout.volverHogar')}
+                onPress={() => {
+                  /* D-329: `dismissTo` sólo busca en el stack ACTUAL. */
+                  if (router.canDismiss()) router.dismissAll();
+                  router.navigate('/hogar/guarderia');
+                }}
+              />
+            }
+          />
+          {checkImagenes}
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (esPaquete || esMensual || holdDia === null) {
     return (
@@ -243,6 +319,9 @@ export default function CheckoutGuarderia() {
       resumenEtiqueta={t('checkout.resumen')}
       exitoTitulo={t('checkoutGuarderia.exitoTitulo')}
       exitoDetalle={t('checkoutGuarderia.exitoDetalle')}
+      /* El slot que la pieza ya tenía para esto — y que además hace que su
+         éxito pase a `ScrollView`, así el check no empuja el botón fuera. */
+      exitoExtra={checkImagenes}
       /* No hay dirección que elegir: pasan a buscarlo por su casa. */
       puedePagar
     />
