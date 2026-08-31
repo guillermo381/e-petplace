@@ -3165,7 +3165,7 @@ export const clienteEs = {
        la renovación se enuncia sin fecha. **La fecha exacta la puede dar
        `guarderia_proximo_cobro` cuando tenga lector; hasta entonces no se
        deduce.** */
-    mensualExitoDetalle: 'Tu plan está activo desde hoy y queda cubierto hasta el {{fecha}}. Se renueva solo, y puedes cancelarlo desde Cuenta cuando quieras.',
+    mensualExitoDetalle: 'Tu plan está activo desde hoy. El próximo cobro sale el {{fecha}}. Puedes cancelarlo desde Cuenta cuando quieras.',
     mensualExitoDetalleSinFecha: 'Tu plan está activo desde hoy. El próximo cobro sale dentro de un mes. Puedes cancelarlo desde Cuenta cuando quieras.',
     continuar: 'Continuar',
     dondeRecogen: 'De dónde lo pasan a buscar',
@@ -3274,8 +3274,12 @@ export const clienteEs = {
     guarderiaPlan: 'Plan mensual de guardería',
     paseoPlan: 'Plan mensual de paseos',
     alMes: '${{precio}} al mes',
-    /* Lo mismo acá: es hasta cuándo está cubierto, no el día del cobro. */
-    proximoCobro: 'Cubierto hasta el {{fecha}} · se renueva solo',
+    /* ⭐ S108-C · **La fecha del cobro vuelve, con el dato correcto.** A la
+       publicó resuelta por el servidor (`proximoCobro`), con la regla que
+       recupera el día original — 31-ene → 28-feb → **31-mar**. Ya no sale de
+       `periodo_hasta`, que es el fin del período pagado y cae un día antes. */
+    proximoCobro: 'Próximo cobro: {{fecha}}',
+    cubiertoHasta: 'Cubierto hasta el {{fecha}} · se renueva solo',
     proximoCobroSinFecha: 'Todavía no hay un período cobrado.',
     /* 🔴 Lo que se lee DESPUÉS de apagar, y es la línea que evita el daño: el
        interruptor detiene la RENOVACIÓN, jamás el servicio ya pagado. */
@@ -3286,10 +3290,12 @@ export const clienteEs = {
        oferta de retención, sin letra chica** — firma del founder. */
     confirmarTitulo: '¿Apagar {{que}}?',
     confirmarCuerpo: 'Dejamos de cobrarlo. Lo que ya pagaste sigue en pie hasta que termine el período.',
-    confirmarReversible: 'Puedes volver a encenderlo cuando quieras.',
+    confirmarReversible: 'Puedes volver a encenderlo mientras siga corriendo el período. No se te cobra de nuevo.',
     /* 🔴 Y cuando NO se puede volver, se dice ANTES. Medido: no existe ninguna
        función que devuelva una mensualidad de guardería a `activa`. */
-    confirmarSinVuelta: 'Para volver a tenerlo vas a tener que contratarlo de nuevo.',
+    /* Sólo para lo que de verdad no vuelve: fuera del período pagado, volver a
+       tenerlo es contratar de nuevo, con cobro y ancla nuevos. */
+    confirmarSinVuelta: 'Su período ya terminó: para volver a tenerlo hay que contratarlo de nuevo.',
     confirmar: 'Sí, apagar',
     volver: 'Dejarlo como está',
     noPudimosApagar: 'No pudimos apagarlo. Prueba de nuevo.',

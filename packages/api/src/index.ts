@@ -1625,6 +1625,8 @@ export {
    S108-A está tocando `guarderia-reserva.ts` en la misma tanda (76f). */
 export {
   cancelarMensualidadGuarderia,
+  reactivarMensualidadGuarderia,
+  type ReactivacionMensualidad,
   type CancelacionMensualidad,
   type CodigoErrorGuarderiaSuscripcion,
 } from './wrappers/guarderia-suscripcion';

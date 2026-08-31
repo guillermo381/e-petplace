@@ -69,6 +69,7 @@ import {
 } from '@epetplace/ui';
 import {
   cancelarMensualidadGuarderia,
+  reactivarMensualidadGuarderia,
   configurarRenovacionPlan,
   obtenerMisPlanesGuarderia,
   obtenerMisPlanesPaseo,
@@ -95,8 +96,24 @@ interface Item {
   /** Fin del período pagado. `null` legal: todavía no hubo cobro. */
   cubiertoHasta: string | null;
   encendido: boolean;
-  /** ¿Se puede volver a encender? Sale del motor, no de la preferencia. */
+  /**
+   * ¿Se puede volver a encender? **Sale del motor, no de la preferencia** — y
+   * en la guardería depende del PERÍODO: dentro del pagado, reactivar es
+   * cancelar la cancelación; fuera, ya no es reactivación sino contratar de
+   * nuevo. *El caso intermedio no se puede expresar: lo impide un trigger.*
+   */
   reversible: boolean;
+  /**
+   * ⭐ **LA FECHA DEL PRÓXIMO COBRO, RESUELTA POR EL SERVIDOR.**
+   * `null` cuando el plan todavía no se cobró o está cancelado — *inventar una
+   * fecha para un plan que no va a cobrar es la misma mentira, del otro lado.*
+   *
+   * 🔴 **NO se deduce de `cubiertoHasta`.** Ese es el fin del período pagado y
+   * el cobro cae al día siguiente: en un mes normal coinciden y por eso el
+   * error no se ve. *Un día de diferencia en una fecha de cobro se lee como que
+   * te cobraron antes de lo que dijiste.*
+   */
+  proximoCobro: string | null;
 }
 
 type Estado =
@@ -147,8 +164,11 @@ export default function Recurrentes() {
           donde: s.prestadorNombre.length > 0 ? s.prestadorNombre : null,
           precio: s.precioMensual,
           cubiertoHasta: s.periodoHasta,
+          proximoCobro: s.proximoCobro,
           encendido: s.estado === 'activa',
-          reversible: false,
+          /* Dentro del período pagado se puede volver; fuera no es volver, es
+             contratar de nuevo — y eso lo dice el motor con su propio código. */
+          reversible: s.periodoHasta !== null && s.periodoHasta >= hoy,
         });
       }
 
@@ -162,6 +182,11 @@ export default function Recurrentes() {
           donde: null,
           precio: s.precio_mensual,
           cubiertoHasta: s.periodo_fin,
+          /* 🔴 El plan de paseos **no publica su próximo cobro**, y no se
+             deduce del fin del período: sería el mismo defecto en el otro
+             oficio. Dice hasta cuándo está cubierto, que es lo que su motor sí
+             sabe. */
+          proximoCobro: null,
           encendido: s.auto_renovar,
           reversible: true,
         });
@@ -207,14 +232,42 @@ export default function Recurrentes() {
     setIntento((n) => n + 1);
   }, [trabajando, mostrar, t]);
 
+  /**
+   * ⭐ **VOLVER A ENCENDER — cada sujeto por su puerta, y los rebotes LLEVAN.**
+   *
+   * 🔴 `periodo_vencido_contratar_de_nuevo` **no es un error: es otro camino.**
+   * *Decirle «no se pudo» a alguien que quiere volver a tener su plan, cuando
+   * volver a tenerlo SÍ se puede —se llama contratar—, es un rebote que esconde
+   * la salida.* Lleva a contratar.
+   *
+   * 🔴 Y `ya_tienes_plan_activo` tampoco: **ya lo tiene.** Se recarga, y el plan
+   * vivo aparece en esta misma lista. *El id viaja en el mensaje del motor, pero
+   * no se parsea (regla 35): esta pantalla no lo necesita porque ya lista los
+   * planes — la relectura es el «llevar ahí».*
+   */
   const encender = useCallback(async (it: Item) => {
     if (trabajando || !it.reversible) return;
     setTrabajando(true);
-    const r = await configurarRenovacionPlan({ suscripcion_id: it.id, auto_renovar: true });
+    const r =
+      it.tipo === 'guarderia'
+        ? await reactivarMensualidadGuarderia(it.id)
+        : await configurarRenovacionPlan({ suscripcion_id: it.id, auto_renovar: true });
     setTrabajando(false);
-    if (!r.ok) { mostrar({ texto: t('recurrentes.noPudimosEncender'), variante: 'error' }); return; }
-    setIntento((n) => n + 1);
-  }, [trabajando, mostrar, t]);
+    if (r.ok) { setIntento((n) => n + 1); return; }
+
+    if (r.codigo === 'periodo_vencido_contratar_de_nuevo') {
+      mostrar({ texto: r.mensaje, variante: 'neutro' });
+      router.push('/explorar/guarderia');
+      return;
+    }
+    if (r.codigo === 'ya_tienes_plan_activo') {
+      /* `neutro`, no `error`: **no se equivocó en nada** — ya lo tiene. */
+      mostrar({ texto: r.mensaje, variante: 'neutro' });
+      setIntento((n) => n + 1);
+      return;
+    }
+    mostrar({ texto: t('recurrentes.noPudimosEncender'), variante: 'error' });
+  }, [trabajando, mostrar, router, t]);
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -272,11 +325,13 @@ export default function Recurrentes() {
                   <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3], gap: 2 }}>
                     {it.encendido ? (
                       <Texto variante="apoyo">
-                        {it.cubiertoHasta === null
-                          ? t('recurrentes.proximoCobroSinFecha')
-                          : t('recurrentes.proximoCobro', {
-                              fecha: fechaLargaHumana(it.cubiertoHasta, idioma),
-                            })}
+                        {/* ⭐ La fecha del cobro cuando el motor la da; si no,
+                            hasta cuándo está cubierto. **Nunca una deducida.** */}
+                        {it.proximoCobro !== null
+                          ? t('recurrentes.proximoCobro', { fecha: fechaLargaHumana(it.proximoCobro, idioma) })
+                          : it.cubiertoHasta === null
+                            ? t('recurrentes.proximoCobroSinFecha')
+                            : t('recurrentes.cubiertoHasta', { fecha: fechaLargaHumana(it.cubiertoHasta, idioma) })}
                       </Texto>
                     ) : (
                       /* 🔴 APAGADO: hasta qué día sigue cubierto. Esta línea es

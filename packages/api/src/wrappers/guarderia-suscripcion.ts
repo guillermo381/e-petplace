@@ -22,6 +22,15 @@ import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
   suscripcion_no_existe: 'No encontramos ese plan.',
+  plan_no_existe: 'No encontramos ese plan.',
+  /* 🔴 **NO ES UN ERROR: ES OTRO CAMINO.** Fuera del período pagado no hay
+     reactivación que hacer — *lo que la familia quiere existe, pero se llama
+     contratar de nuevo, con cobro y ancla nuevos.* La superficie lleva ahí. */
+  periodo_vencido_contratar_de_nuevo: 'Ese plan ya terminó su período. Para volver a tenerlo hay que contratarlo de nuevo.',
+  /* 🔴 Trae el id del plan vivo en el mensaje, y por eso la superficie puede
+     LLEVAR en vez de decir que no (`L-424`). */
+  ya_tienes_plan_activo: 'Ya tienes un plan activo en esa guardería.',
+  plan_no_cancelado: 'Ese plan no está cancelado.',
   no_sos_de_esta_familia: 'Ese plan no es de tu familia.',
   sin_sesion: 'Necesitas iniciar sesión.',
   datos_inconsistentes: 'No pudimos leer la respuesta. Prueba de nuevo.',
@@ -80,6 +89,52 @@ export interface CancelacionMensualidad {
  * volver a encender sin motor que lo encienda es una promesa que la pantalla no
  * puede cumplir* — la superficie lo dice en vez de simularlo.
  */
+/**
+ * ⭐ **REACTIVAR — dentro del período pagado, es CANCELAR LA CANCELACIÓN.**
+ *
+ * Firma del founder (31-ago, confirmada directo): *no cobra de nuevo, no
+ * re-ancla, la renovación vuelve.* **Fuera del período no es reactivación: es
+ * contratar de nuevo**, con cobro y ancla nuevos — y eso tiene su propio código
+ * para que la pantalla pueda llevar ahí en vez de rebotar.
+ *
+ * 🔴 **El caso intermedio es inexpresable en el MOTOR, no acá.** Un trigger
+ * acotado a la transición `cancelada → activa` impide escribir `activa` sobre un
+ * período vencido **ni por SQL directo**; esta RPC es la capa que además
+ * explica. *Un guard que sólo sabe negarse te deja sin frase; uno que sólo
+ * explica se puede saltear.*
+ */
+export interface ReactivacionMensualidad {
+  /** Idempotente: dos toques del mismo botón no son un error. */
+  yaEstaba: boolean;
+  /** El `periodo_hasta` **sin tocar** — no re-ancla. */
+  correHasta: string | null;
+  /**
+   * El motor lo devuelve explícito para que la pantalla pueda **afirmar** que no
+   * se cobra de nuevo en vez de deducirlo de que no falló.
+   */
+  cobradaDeNuevo: boolean;
+}
+
+export async function reactivarMensualidadGuarderia(
+  suscripcionId: string,
+): Promise<ResultadoWrapper<ReactivacionMensualidad, CodigoErrorGuarderiaSuscripcion>> {
+  const { data, error } = await getClient().rpc('reactivar_mensualidad_guarderia', {
+    p_suscripcion_id: suscripcionId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (r.ok !== true) return fallaCodigo('error_desconocido');
+  return {
+    ok: true,
+    data: {
+      yaEstaba: r.ya_estaba === true,
+      correHasta: typeof r.corre_hasta === 'string' ? r.corre_hasta : null,
+      cobradaDeNuevo: r.cobrada_de_nuevo === true,
+    },
+  };
+}
+
 export async function cancelarMensualidadGuarderia(
   suscripcionId: string,
 ): Promise<ResultadoWrapper<CancelacionMensualidad, CodigoErrorGuarderiaSuscripcion>> {

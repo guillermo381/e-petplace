@@ -297,7 +297,11 @@ export default function CheckoutGuarderia() {
   const cerrarMensual = useCallback(async (suscripcionId: string) => {
     const plan = await obtenerMisPlanesGuarderia();
     const mio = plan.ok ? plan.data.find((x) => x.suscripcionId === suscripcionId) : undefined;
-    const proximo = mio?.periodoHasta ?? null;
+    /* ⭐ **DEL SERVIDOR, RESUELTA.** ⏪ Acá decía `mio?.periodoHasta`, que es el
+       fin del período pagado y **cae un día antes del cobro**: la pantalla daba
+       la fecha corrida. A publicó `proximoCobro` ya resuelto, con la regla que
+       recupera el día original. */
+    const proximo = mio?.proximoCobro ?? null;
     setFase('resumen');
     setExito({
       titulo: t('checkoutGuarderia.mensualExito'),
