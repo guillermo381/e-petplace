@@ -1,0 +1,18 @@
+-- REVERSA de 20260903220000_s108b2_concepto_de_los_cuatro_sujetos.sql
+-- ESCRITA ANTES DE APLICAR.
+--
+-- ⚠️ QUÉ NO DESHACE: los comprobantes YA EMITIDOS conservan el concepto con el
+--    que salieron — `notificacion_intencion.datos` es un snapshot, no una vista.
+--    Revertir cambia lo que dirán los PRÓXIMOS, jamás los que ya se mandaron.
+--    (Y eso está bien: un respaldo de pago que cambia de texto después de
+--    emitido no es un respaldo.)
+--
+-- 🔴 Y lo que revertir reintroduce: el comprobante de un paquete y el de un
+--    plan vuelven a decir «Pago en e-PetPlace», que es el defecto que §10.1
+--    existe para no repetir — un respaldo que no dice qué se pagó obliga a
+--    deducirlo del comercio, y el que lo lee puede deducir mal.
+--
+--    El cuerpo anterior vive en la migración que lo creó; revertir es
+--    re-aplicar ESE cuerpo, no escribir uno nuevo de memoria.
+
+-- Sin cuerpo automático a propósito: se re-aplica el `_concepto_de_pago` previo.
