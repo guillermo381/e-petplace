@@ -139,11 +139,35 @@ console.log(`   «${pg.nombre}» ${pg.n_sesiones} sesiones · mascota ${perro.no
    Arranca MAÑANA: con `hoy` la hora 10:00 ya pasó y la puerta rebota
    `slot_en_pasado` — correctamente, porque *la puerta no ofrece lo que va a
    rechazar* (Ley 23). El programa se elige arriba midiendo que quepa. */
-const inicio = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-const { data: ct, error: eC } = await cli.rpc('contratar_programa', {
-  p_prestador_id: sv.prestador_id, p_servicio_id: sv.id, p_programa_id: pg.id,
-  p_mascota_id: perro.id, p_fecha_inicio: inicio, p_hora: '10:00:00',
-});
+/* 🔴 LA FECHA SE BUSCA HASTA QUE LA COMPUERTA LA ACEPTE, no se elige.
+   Medido: con `mañana` la compuerta rebota `fecha_sin_cupo: 2026-09-01` — el
+   prestador no tiene cupo ese día. *Eso NO es un defecto: es la compuerta
+   diciendo la verdad antes de mover plata, que es exactamente para lo que se
+   cableó.* Un arnés que se rinde ahí reporta como falla el acierto del guard.
+   Se prueban días sucesivos y **cada intento fallido se cancela**, para no dejar
+   al perro ocupado ni residuo. */
+let inicio = null, ct = null, eC = null;
+for (let d = 1; d <= 8 && inicio === null; d++) {
+  const cand = new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+  const r = await cli.rpc('contratar_programa', {
+    p_prestador_id: sv.prestador_id, p_servicio_id: sv.id, p_programa_id: pg.id,
+    p_mascota_id: perro.id, p_fecha_inicio: cand, p_hora: '10:00:00' });
+  if (r.error) { console.log(`   ${cand} → la puerta rebotó: ${r.error.message.slice(0,60)}`); eC = r.error; continue; }
+  const pid = r.data?.programa_contratado_id ?? r.data?.id;
+  const { data: g } = await admin.rpc('verificar_compuerta_programa', { p_programa_contratado_id: pid });
+  if (g?.ok === true) { inicio = cand; ct = r.data; break; }
+  /* 🔴 Sólo `estado`. `motivo_vencimiento` tiene VOCABULARIO CERRADO y un texto
+     libre lo rebota con `23514` — y como este `update` no leía su error, la
+     cancelación fallaba en silencio, el perro quedaba ocupado y el siguiente
+     candidato moría con `programa_duplicado`. *Un `update` cuyo error nadie lee
+     es un guard que no aprieta.* */
+  const { error: eCan } = await admin.from('programas_contratados')
+    .update({ estado: 'cancelado' }).eq('id', pid);
+  if (eCan) { console.error(`   🔴 no se pudo liberar ${pid.slice(0,8)}: ${eCan.message}`); process.exit(2); }
+  console.log(`   ${cand} → ${g?.codigo ?? '?'} (${g?.causa ?? ''}) · descartada`);
+}
+if (inicio === null) { console.error('🔴 ninguna fecha de los próximos 8 días pasa la compuerta'); process.exit(2); }
+console.log(`   fecha que entra: ${inicio}`);
 if (eC) { exigir(false, `programa: la puerta rebotó — ${eC.message}`); }
 else {
   const pid = ct.programa_contratado_id ?? ct.id;
