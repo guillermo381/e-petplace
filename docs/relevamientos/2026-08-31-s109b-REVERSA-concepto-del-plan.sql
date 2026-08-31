@@ -1,0 +1,8 @@
+-- ═══ REVERSA de 20260907280000_s109b_el_concepto_del_plan.sql ═══
+-- Escrita ANTES de aplicar. Quita la rama ⑥ de `_concepto_de_pago`, con lo que
+-- el plan de paseo vuelve a caer en el fail-closed 'Pago en e-PetPlace'.
+--
+-- ⚠️ QUÉ **NO** DESHACE: los comprobantes ya emitidos con «Plan mensual de
+-- paseos» quedan — son avisos con su clave de dedup, y revertir el código no los
+-- reescribe. Revertir sólo hace que los PRÓXIMOS no digan qué se compró.
+-- No toca plata, ni planes, ni intentos.
