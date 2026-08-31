@@ -1377,6 +1377,15 @@ export const clienteEs = {
     pagarSuelto: 'Pagar este paseo suelto',
     reservada: 'Salida reservada — te quedan {{n}} en el paquete.',
     tarjetaTitulo: 'Paquete de salidas · {{min}} min',
+    /* ⭐ S108-C-4 · Los dos paquetes de paseo que no están listos. Espejo de la
+       voz que guardería ya tiene — misma promesa, mismo oficio de decirla.
+       ⚠️ `noPagadoATiempo` HOY NO PUEDE OCURRIR (nada de paseo cobra): la
+       superficie queda lista para cuando el motor llegue. */
+    faltaPagar: 'Falta completar el pago de este paquete',
+    faltaPagarDetalle: '{{n}} salidas · todavía no se cobró',
+    noPagadoATiempo: 'Se venció el tiempo para completar el pago',
+    noPagadoATiempoDetalle: 'No se te cobró nada. Toca para volver a comprarlo.',
+    noPagadoATiempoSinCamino: 'No se te cobró nada.',
     venceEl: 'Vence el {{fecha}}',
     citaDePaquete: 'Con tu paquete',
     ventanasVoz: 'Puedes cancelar hasta 2 horas antes y la salida vuelve a tu paquete. Con menos de 2 horas, la salida se usa.',

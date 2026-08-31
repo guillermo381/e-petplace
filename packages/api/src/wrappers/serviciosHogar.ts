@@ -129,9 +129,22 @@ export async function obtenerResumenServiciosHogar(): Promise<
   // paseo: la próxima confirmada futura (la lista ya viene ordenada asc)
   const proximaPaseo = citasPaseo.data.find((c) => c.estado === 'confirmada' && c.fecha >= hoy) ?? null;
 
-  // saldo vigente del hogar (la MISMA regla del hub, D-343/P16)
+  /* saldo vigente del hogar (la MISMA regla del hub, D-343/P16)
+     ⭐ **S108-C-4 · Y AHORA TAMBIÉN LA MISMA REGLA DE PAGO.** El comentario ya
+     decía «la MISMA regla del hub», y por eso el defecto vino en pareja: el hub
+     no miraba el pago y esta copia tampoco. *Una regla duplicada por copia se
+     cura dos veces o no se cura* — y ésta es la que alimenta el resumen del
+     Hogar, o sea la primera pantalla que la familia ve.
+     🔴 Un paquete NO PAGADO sumando saldo acá le diría al Hogar que tiene
+     salidas disponibles que todavía no compró. */
   const salidasSaldo = paquetes.data
-    .filter((p) => p.estado === 'activo' && p.saldo > 0 && (p.fecha_vencimiento === null || p.fecha_vencimiento >= hoy))
+    .filter(
+      (p) =>
+        p.estadoPago === 'pagado' &&
+        p.estado === 'activo' &&
+        p.saldo > 0 &&
+        (p.fecha_vencimiento === null || p.fecha_vencimiento >= hoy),
+    )
     .reduce((acc, p) => acc + p.saldo, 0);
 
   // estética: próxima confirmada + última cerrada (el hub ya trae ambas)
