@@ -134,7 +134,13 @@ Deno.serve(async (req) => {
       .select('id, user_id, moneda').eq('id', compraId).maybeSingle();
     if (!c || c.user_id !== userId) return json({ ok: false, codigo: 'compra_no_existe' }, 409);
     moneda = c.moneda ?? 'USD';
-  } else {
+  }
+  /* 🔴 MISMO `else`, MISMO DEFECTO — curado en pareja. Su gemelo en
+     `pagos-cobro` se midió contra la edge desplegada: un bono volvía
+     `cita_no_existe`. Acá no se esperó a reproducirlo: *el segundo riel es
+     justo el que se olvida* (`L` de S105), y dejar uno curado y el otro no es
+     cómo los dos rieles terminan diciendo cosas distintas. */
+  if (hayCita) {
     const { data: cita } = await db.from('evento_cita_servicio')
       .select('id, mascota_id').eq('id', citaId).maybeSingle();
     if (!cita) return json({ ok: false, codigo: 'cita_no_existe' }, 409);
@@ -241,7 +247,10 @@ Deno.serve(async (req) => {
     if (!d || d.length === 0) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
     monto = d.reduce((a, r) => a + Number(r.total ?? 0), 0);
     pedidoDelIntento = d[0].pedido_id;
-  } else {
+  }
+  /* 🔴 El segundo `else` de la misma clase, curado en pareja con su gemelo de
+     `pagos-cobro`. Ver el comentario largo allá. */
+  if (hayCita) {
     const { data: d } = await db.from('cita_desglose')
       .select('total, moneda').eq('cita_id', citaId).maybeSingle();
     // Fail-closed: sin desglose congelado no hay cobro. El desglose es lo que
