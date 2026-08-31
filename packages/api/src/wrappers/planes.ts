@@ -82,11 +82,11 @@ const MENSAJES_ERROR_PLAN: Record<
   /* S109-A · el riel del plan. La voz del tercer estado NO habla de tarjetas:
      quien no declaró medio no tiene por qué leer sobre una tarjeta que
      nunca mencionó. */
-  riel_no_declarado: 'Elegí cómo querés pagar el plan.',
+  riel_no_declarado: 'Elige cómo quieres pagar el plan.',
   riel_no_valido: 'Ese medio de pago no está disponible para planes.',
-  plan_de_tarjeta_sin_tarjeta: 'Elegí la tarjeta con la que se va a cobrar el plan.',
+  plan_de_tarjeta_sin_tarjeta: 'Elige la tarjeta con la que se va a cobrar el plan.',
   deuna_no_lleva_tarjeta: 'Con DeUna no se guarda una tarjeta: cada mes te llega un aviso para pagar.',
-  tarjeta_no_valida: 'Esa tarjeta ya no está disponible. Elegí otra.',
+  tarjeta_no_valida: 'Esa tarjeta ya no está disponible. Elige otra.',
   error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
