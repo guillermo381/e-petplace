@@ -40,6 +40,14 @@ const CODIGOS_ERROR_PLAN = [
   // la RLS" — se dice que no hay sesión (L-178: un dato faltante jamás
   // se disfraza de otra cosa).
   'sin_sesion',
+  /* S109-A · el riel del plan. `riel_no_declarado` es el TERCER estado que el
+     default anterior aplastaba: quien no declara medio ya no recibe un rebote
+     sobre tarjetas que nunca mencionó. */
+  'riel_no_declarado',
+  'riel_no_valido',
+  'plan_de_tarjeta_sin_tarjeta',
+  'deuna_no_lleva_tarjeta',
+  'tarjeta_no_valida',
 ] as const;
 
 export type CodigoErrorPlan = (typeof CODIGOS_ERROR_PLAN)[number];
@@ -71,6 +79,14 @@ const MENSAJES_ERROR_PLAN: Record<
   fuera_del_periodo:    'La nueva fecha tiene que caer dentro del período de tu plan.',
   sin_sesion:           'No hay sesión activa.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
+  /* S109-A · el riel del plan. La voz del tercer estado NO habla de tarjetas:
+     quien no declaró medio no tiene por qué leer sobre una tarjeta que
+     nunca mencionó. */
+  riel_no_declarado: 'Elegí cómo querés pagar el plan.',
+  riel_no_valido: 'Ese medio de pago no está disponible para planes.',
+  plan_de_tarjeta_sin_tarjeta: 'Elegí la tarjeta con la que se va a cobrar el plan.',
+  deuna_no_lleva_tarjeta: 'Con DeUna no se guarda una tarjeta: cada mes te llega un aviso para pagar.',
+  tarjeta_no_valida: 'Esa tarjeta ya no está disponible. Elegí otra.',
   error_desconocido:    'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
@@ -116,6 +132,22 @@ export interface ContratarPlanInput {
   hora: string;
   frecuencia: 'semanal' | 'quincenal' | 'mensual';
   auto_renovar: boolean;
+  /**
+   * 🔴 EL MEDIO, COMO UNIÓN DISCRIMINADA — para que el estado malo sea
+   * INEXPRESABLE y no rebotable.
+   *
+   * **El defecto que cierra (S109-C lo midió):** este wrapper **no mandaba
+   * riel ni tarjeta**, `p_riel` caía al DEFAULT `'tarjeta'` del motor y
+   * contratar un plan **rebotaba SIEMPRE** con `plan_de_tarjeta_sin_tarjeta`.
+   * Compilaba perfecto: *un parámetro con DEFAULT vuelve invisible al
+   * compilador que su ausencia rompe el cuerpo.*
+   *
+   * Es la misma forma que `MedioDelMandato` de la mensualidad, a propósito:
+   * *no queda una puerta con unión y la otra con campos sueltos.*
+   * «DeUna con tarjeta» no se puede escribir — el motor igual lo rebota
+   * (`deuna_no_lleva_tarjeta`), pero acá no se llega a intentar.
+   */
+  medio: { riel: 'tarjeta'; tarjetaId: string } | { riel: 'deuna' };
 }
 
 export interface PlanContratado {
@@ -146,6 +178,10 @@ export async function contratarPlanPaseo(
     p_hora: input.hora,
     p_frecuencia: input.frecuencia,
     p_auto_renovar: input.auto_renovar,
+    /* Los dos viajan SIEMPRE. El motor ya no asume: sin `p_riel` rebota
+       `riel_no_declarado`, que es honesto — y por eso no se puede omitir. */
+    p_riel: input.medio.riel,
+    p_tarjeta_id: input.medio.riel === 'tarjeta' ? input.medio.tarjetaId : undefined,
   });
   if (error) return mapeoErrorAResultado(error.message);
 

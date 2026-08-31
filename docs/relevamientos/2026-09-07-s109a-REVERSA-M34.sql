@@ -1,0 +1,10 @@
+-- REVERSA de 20260907320000_s109a_el_riel_del_plan_no_se_asume.sql
+--
+-- ⚠️ REVERTIR REPONE EL DEFAULT QUE APLASTA EL TERCER ESTADO: con
+--    `p_riel DEFAULT 'tarjeta'`, un llamador que no declara riel queda
+--    indistinguible de uno que dijo «tarjeta», y rebota
+--    `plan_de_tarjeta_sin_tarjeta` — un rebote que manda a buscar el problema
+--    donde no está.
+--
+-- `contratar_plan_paseo` vuelve a su cuerpo previo: vive en 20260906180000 y
+-- `pg_get_functiondef` lo da del objeto. No se transcribe.
