@@ -90,46 +90,107 @@ COMMENT ON FUNCTION public.verificar_compuertas_mensualidad_guarderia(uuid, date
   'las razones del acto: las hereda, porque es el acto.';
 
 -- ═══ CINTURÓN ══════════════════════════════════════════════════════════════
+/* 🔴 EL ROJO SE FABRICA, NO SE BUSCA — y esta versión existe porque la primera
+   lo buscaba. El brazo (a) pedía un mes que la compuerta RECHAZARA y lo tomaba
+   del estado de la base: `LIMIT 1` sobre los mandatos activos, confiando en que
+   ese mandato tuviera un día ocupado.
+
+   Se cayó por DOS razones a la vez, y ninguna era del motor:
+   ① otra pista curó el índice para que las reservas expiradas dejaran de
+      bloquear ⇒ los días que producían el rojo quedaron libres;
+   ② el `LIMIT 1` pasó a devolver OTRO mandato —uno limpio— porque nacieron
+      mandatos nuevos.
+   ⇒ **El cinturón reventó como si el motor estuviera mal, y el motor estaba
+   bien.** *Un fixture que busca su rojo en el ESTADO de la base deja de
+   discriminar el día que alguien cura ese estado — y no avisa: acusa.*
+
+   Ahora ocupa el día ÉL MISMO, dentro de una subtransacción que lo deshace.
+   Así el rojo no depende de que la base tenga la forma que a este arnés le
+   conviene. */
 DO $cinturon$
-DECLARE v_s uuid; v_r jsonb; v_antes int; v_despues int; v_libre date;
+DECLARE
+  v_s record; v_masc uuid; v_dia date; v_evt uuid; v_r jsonb;
+  v_antes int; v_despues int; v_libre date;
 BEGIN
-  SELECT id INTO v_s FROM guarderia_suscripciones WHERE estado='activa' LIMIT 1;
-  IF v_s IS NULL THEN
+  SELECT * INTO v_s FROM guarderia_suscripciones WHERE estado='activa' LIMIT 1;
+  IF v_s.id IS NULL THEN
     RAISE EXCEPTION 'CINTURON: sin suscripción activa con que DISCRIMINAR';
+  END IF;
+
+  /* La mascota del mandato, resuelta como la resuelve el acto. */
+  v_masc := v_s.mascota_id;
+  IF v_masc IS NULL THEN
+    SELECT m.id INTO v_masc FROM mascotas m
+     WHERE m.familia_id = v_s.familia_id AND m.estado_vida='activa'
+       AND public._mascota_elegible_servicio(m.id,'guarderia_dia') LIMIT 1;
+  END IF;
+  IF v_masc IS NULL THEN
+    RAISE EXCEPTION 'CINTURON: el mandato no resuelve mascota — sin ella no hay caso';
+  END IF;
+
+  /* Un mes lejano y LIBRE: es el terreno donde se van a correr los dos brazos,
+     así el positivo y el negativo miran exactamente el mismo mes. */
+  v_libre := (public.hoy_local() + 400);
+  SELECT d.fecha INTO v_dia
+    FROM public._mensualidad_dias_habiles(v_s.prestador_id, v_libre) d
+   WHERE d.opera LIMIT 1;
+  IF v_dia IS NULL THEN
+    RAISE EXCEPTION 'CINTURON: el prestador no opera ningún día del mes de prueba';
   END IF;
 
   SELECT count(*) INTO v_antes FROM evento_cita_servicio;
 
-  -- (a) 🔴 EL ROJO REAL, reproducido: hoy el mes choca con un día ya reservado.
-  v_r := verificar_compuertas_mensualidad_guarderia(v_s, public.hoy_local());
-  IF (v_r->>'ok')::boolean IS NOT FALSE THEN
-    RAISE EXCEPTION 'CINTURON: aprobó un mes que el acto NO puede comprometer · %', v_r;
-  END IF;
-  IF v_r->>'causa' IS NULL THEN
-    RAISE EXCEPTION 'CINTURON: rebotó SIN causa — es el defecto que vino a curar';
-  END IF;
-
-  -- (b) 🔴 CONTROL POSITIVO: un mes lejano, que sí se puede comprometer.
-  --     Sin esto, una compuerta que rechaza TODO también pasaría (a).
-  v_libre := (public.hoy_local() + 400);
-  v_r := verificar_compuertas_mensualidad_guarderia(v_s, v_libre);
+  -- ── (a) CONTROL POSITIVO: el mes libre se puede comprometer ──────────────
+  /* Va PRIMERO: si esto no pasa, el rojo de (b) no probaría nada — una
+     compuerta que rechaza todo también rechaza un mes ocupado. */
+  v_r := verificar_compuertas_mensualidad_guarderia(v_s.id, v_libre);
   IF (v_r->>'ok')::boolean IS NOT TRUE THEN
-    RAISE EXCEPTION 'CINTURON: rechazó un mes libre (%) · % — una compuerta que '
-      'siempre dice que no también rebota', v_libre, v_r;
+    RAISE EXCEPTION 'CINTURON: rechazó un mes LIBRE (%) · %', v_libre, v_r;
   END IF;
 
-  -- (c) 🔴 EL ENSAYO NO DEJA NADA HECHO. Es la mitad que lo vuelve un ensayo.
+  -- ── (b) ROJO FABRICADO: se ocupa UN día de ese mismo mes ─────────────────
+  BEGIN
+    INSERT INTO eventos_mascota (mascota_id, tipo, eje_jtbd, fecha_evento,
+                                 prestador_id, creado_por_user_id, datos,
+                                 visibilidad, country_code)
+    SELECT v_masc, 'cita_servicio', cte.eje_jtbd, v_dia::timestamptz,
+           v_s.prestador_id, v_s.autorizada_por,
+           jsonb_build_object('origen','cinturon_s108b2'),
+           cte.visibilidad_default, 'EC'
+      FROM cat_tipos_evento cte WHERE cte.codigo='cita_servicio'
+    RETURNING id INTO v_evt;
+
+    INSERT INTO evento_cita_servicio (evento_id, user_id, mascota_id, prestador_id,
+      tipo_servicio, fecha, precio, estado, estado_reserva, country_code, metadata)
+    VALUES (v_evt, v_s.autorizada_por, v_masc, v_s.prestador_id,
+            'guarderia_dia', v_dia, 0, 'confirmada', 'pagada', 'EC',
+            jsonb_build_object('origen','cinturon_s108b2'));
+
+    v_r := verificar_compuertas_mensualidad_guarderia(v_s.id, v_libre);
+    IF (v_r->>'ok')::boolean IS NOT FALSE THEN
+      RAISE EXCEPTION 'CINTURON: aprobó un mes con el día % YA OCUPADO · %', v_dia, v_r;
+    END IF;
+    IF v_r->>'causa' IS NULL THEN
+      RAISE EXCEPTION 'CINTURON: rebotó SIN causa — es el defecto que vino a curar';
+    END IF;
+    RAISE EXCEPTION '__DESHACER_B__';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'CINTURON:%' THEN RAISE; END IF;
+    IF SQLERRM <> '__DESHACER_B__' THEN RAISE; END IF;
+  END;
+
+  -- ── (c) EL ENSAYO NO DEJA NADA HECHO — ni el suyo ni el del día fabricado ─
   SELECT count(*) INTO v_despues FROM evento_cita_servicio;
   IF v_despues <> v_antes THEN
-    RAISE EXCEPTION 'CINTURON: el ensayo COMPROMETIÓ % citas — no se deshizo',
+    RAISE EXCEPTION 'CINTURON: quedaron % citas — el ensayo no se deshizo',
       v_despues - v_antes;
   END IF;
 
-  -- (d) permisos
+  -- ── (d) permisos ────────────────────────────────────────────────────────
   IF has_function_privilege('authenticated',
         'public.verificar_compuertas_mensualidad_guarderia(uuid,date)','EXECUTE') THEN
     RAISE EXCEPTION 'CINTURON: la compuerta es ejecutable desde el bundle';
   END IF;
 
-  RAISE NOTICE 'CINTURON S108B2-M3 OK · rojo real con causa · positivo sobre mes libre · ensayo sin residuo · permisos';
+  RAISE NOTICE 'CINTURON S108B2-M3 OK · positivo sobre mes libre · rojo FABRICADO con su causa · ensayo sin residuo · permisos';
 END $cinturon$;
