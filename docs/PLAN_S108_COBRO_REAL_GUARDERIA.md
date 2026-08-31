@@ -1,5 +1,10 @@
 # PLAN · EL COBRO REAL DE GUARDERÍA — censo y plan, ANTES de tocar
 
+> **Estado: ESPERANDO SU SESIÓN.** 🔴 **El founder FRENÓ el arranque el
+> 31-ago-2026** — no por dudas sobre el objetivo, que sigue firmado, sino de
+> ALCANCE: *es el arco entero de un sujeto dos veces, y S107 es la sesión del
+> FLUJO de guardería.* **Se hace en su propia sesión, con este plan.**
+>
 > **Nace:** 31-ago-2026, por orden del founder: *«adelante, como TANDA PROPIA
 > … antes de construir: censo y plan, y me lo pasás antes de tocar»*.
 > **Firma que lo ordena:** nada de `pago_simulado` — el paquete y la
@@ -85,15 +90,40 @@ corresponda.
 
 ---
 
-## ④ LO QUE HAY QUE DECIDIR ANTES, y no es de código
+## ④ LAS DECISIONES DE LETRA — 🟢 TRES FIRMADAS, UNA ABIERTA
 
-1. 🔴 **¿El bono `pendiente_pago` da saldo?** (paso 0)
-2. 🔴 **¿El bono sin pagar vence?** Si sí, con qué ventana — la cita usa 15 min.
-3. **¿La mensualidad cobra el primer período AL FIRMAR o el día que arranca?**
-   Hoy la pantalla dice *«hoy no se cobra nada, el primer cobro sale el día que
-   empieza el plan»* — **eso ya es una promesa hecha a la familia**, y el motor
-   tiene que cumplirla.
-4. **El comprobante:** ¿el paquete emite uno? (La cita sí.)
+**Firmadas por el founder el 31-ago-2026. La sesión que retome esto NO las
+vuelve a decidir — las ejecuta.**
+
+**① 🟢 UN BONO `pendiente_pago` NO DA SALDO.**
+*Reservar contra saldo no cobrado es exactamente la palanca que S54 cerró en
+citas.* `comprar_paquete_guarderia` deja de nacer `pagado`.
+
+**② 🟢 EL BONO SIN PAGAR VENCE, con la misma ventana de 15 minutos** que la
+cita. ⚠️ El bono **no toma cupo** —es saldo, no un día—, así que lo que el
+vencimiento evita es otra cosa: **un `pendiente_pago` que nadie va a pagar y que
+sólo se limpia a mano.** *Y la limpieza manual es la clase de cosa que nadie
+corre.* Se usa la misma ventana por coherencia con lo que la familia ya conoce
+del checkout.
+
+**③ 🟢 LA MENSUALIDAD COBRA EL DÍA QUE ARRANCA EL PLAN, no al firmar.**
+🔴 **Y esto NO era una decisión libre: ya está PROMETIDO.** La pantalla dice
+*«hoy no se cobra nada, el primer cobro sale el día que empieza el plan»* y se
+publicó así. **El motor cumple lo que la pantalla prometió** — *cobrar el día
+que se firma después de haber dicho que no se cobra hoy es exactamente la
+mentira que esa frase existe para evitar.*
+
+**④ 🟡 EL COMPROBANTE DEL PAQUETE: ABIERTO — pregunta para el contador.**
+La cita emite uno; el paquete es una compra de **saldo**, no de un servicio
+prestado. El comprobante lleva **el concepto y los dos códigos de
+certificación**, y **no está medido si un paquete de días tributa igual que un
+día de guardería**. *Proponer un criterio fiscal sin medirlo sería inventar* ⇒
+va con las que ya esperan al contador (IVA de servicios, redondeo por línea).
+
+## ④bis LO QUE QUEDA ABIERTO Y NO ES DE CÓDIGO
+
+**Sólo el comprobante (④), y espera al contador.** Las otras tres están
+firmadas arriba.
 
 ---
 
