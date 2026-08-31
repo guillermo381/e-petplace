@@ -36,6 +36,7 @@ const MENSAJES = {
   tarjeta_no_existe:            'No encontramos esa tarjeta.',
   tarjeta_de_otra_persona:      'Esa tarjeta no es tuya.',
   no_ofrece_mensualidad:        'Este lugar no ofrece plan mensual.',
+  direccion_no_valida:          'Esa dirección no está entre las tuyas.',
 
   /* ✏️ S107-A · LOS DOS MOTIVOS DEL GATE DE DOCUMENTOS — medidos LEYENDO la
      función, no grepeando. **Mi censo anterior dijo «0 sin tipar» y estos dos
@@ -193,11 +194,21 @@ export async function reservarDiaGuarderia(params: {
   mascotaId: string;
   /** 'YYYY-MM-DD' */
   fecha: string;
+  /**
+   * 🔴 **A dónde pasan a buscar.** Omitirlo = la dirección principal.
+   *
+   * El server **valida el id contra las direcciones de quien reserva** y arma
+   * el snapshot él mismo: *aceptar un snapshot armado por la pantalla sería
+   * dejar que el cliente escriba a dónde va el animal.* Un id ajeno rebota
+   * `direccion_no_valida`.
+   */
+  direccionId?: string;
 }): Promise<ResultadoWrapper<ReservaGuarderia, CodigoErrorGuarderiaReserva>> {
   const { data, error } = await getClient().rpc('reservar_dia_guarderia', {
     p_prestador_id: params.prestadorId,
     p_mascota_id: params.mascotaId,
     p_fecha: params.fecha,
+    p_direccion_id: params.direccionId ?? undefined,
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
@@ -250,12 +261,22 @@ export async function contratarMensualidadGuarderia(params: {
   mascotaId?: string;
   /** El techo del mandato. Sin él, el precio de hoy. */
   montoEsperado?: number;
+  /**
+   * 🔴 **A dónde pasan a buscar — y acá es un dato DEL MANDATO.**
+   * Las citas del plan las crea el reloj **sin nadie presente**: no puede
+   * preguntar. Se resuelve **al firmar**, jamás al cobrar. Omitirlo guarda la
+   * principal **de este momento**.
+   *
+   * ⚠️ Cambiarla después afecta **las citas futuras del plan, no las creadas**.
+   */
+  direccionId?: string;
 }): Promise<ResultadoWrapper<MandatoMensualidad, CodigoErrorGuarderiaReserva>> {
   const { data, error } = await getClient().rpc('contratar_mensualidad_guarderia', {
     p_prestador_id: params.prestadorId,
     p_tarjeta_id: params.tarjetaId,
     p_mascota_id: params.mascotaId ?? undefined,
     p_monto_esperado: params.montoEsperado ?? undefined,
+    p_direccion_id: params.direccionId ?? undefined,
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
@@ -994,6 +1015,12 @@ export async function reservarDiaDePaqueteGuarderia(params: {
   /** 'YYYY-MM-DD'. **Jamás hoy**: rebota `reserva_mismo_dia`. */
   fecha: string;
   mascotaId?: string | null;
+  /**
+   * 🔴 **A dónde pasan a buscar.** Omitirlo = la principal. El server valida el
+   * id contra las direcciones de quien reserva; un id ajeno rebota
+   * `direccion_no_valida`.
+   */
+  direccionId?: string;
 }): Promise<
   ResultadoWrapper<
     { citaId: string; estadiaId: string; saldoRestante: number },
@@ -1004,6 +1031,7 @@ export async function reservarDiaDePaqueteGuarderia(params: {
     p_bono_id: params.bonoId,
     p_fecha: params.fecha,
     p_mascota_id: params.mascotaId ?? undefined,
+    p_direccion_id: params.direccionId ?? undefined,
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');

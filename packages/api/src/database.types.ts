@@ -10990,6 +10990,7 @@ export type Database = {
           autorizada_por: string
           cancelada_en: string | null
           created_at: string
+          direccion_id: string | null
           estado: string
           familia_id: string
           id: string
@@ -11008,6 +11009,7 @@ export type Database = {
           autorizada_por: string
           cancelada_en?: string | null
           created_at?: string
+          direccion_id?: string | null
           estado?: string
           familia_id: string
           id?: string
@@ -11026,6 +11028,7 @@ export type Database = {
           autorizada_por?: string
           cancelada_en?: string | null
           created_at?: string
+          direccion_id?: string | null
           estado?: string
           familia_id?: string
           id?: string
@@ -11040,6 +11043,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "guarderia_suscripciones_direccion_id_fkey"
+            columns: ["direccion_id"]
+            isOneToOne: false
+            referencedRelation: "direcciones_guardadas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "guarderia_suscripciones_familia_id_fkey"
             columns: ["familia_id"]
@@ -21712,6 +21722,7 @@ export type Database = {
       conteos_vitrina_por_eje: { Args: never; Returns: Json }
       contratar_mensualidad_guarderia: {
         Args: {
+          p_direccion_id?: string
           p_mascota_id?: string
           p_monto_esperado?: number
           p_prestador_id: string
@@ -23844,11 +23855,21 @@ export type Database = {
         Returns: undefined
       }
       reservar_dia_de_paquete_guarderia: {
-        Args: { p_bono_id: string; p_fecha: string; p_mascota_id?: string }
+        Args: {
+          p_bono_id: string
+          p_direccion_id?: string
+          p_fecha: string
+          p_mascota_id?: string
+        }
         Returns: Json
       }
       reservar_dia_guarderia: {
-        Args: { p_fecha: string; p_mascota_id: string; p_prestador_id: string }
+        Args: {
+          p_direccion_id?: string
+          p_fecha: string
+          p_mascota_id: string
+          p_prestador_id: string
+        }
         Returns: Json
       }
       reservar_salida_paquete: {
