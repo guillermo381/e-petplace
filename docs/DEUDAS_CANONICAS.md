@@ -24151,27 +24151,22 @@ afina una de las dos**, que es el momento en que empiezan a divergir.
 muere (Ley 37) · **candidata a ensanchar `R57`** para que la dirección también
 tenga quien la mida.
 
-#### D-983 — 🟡 LA AUTORIZACIÓN DE IMAGEN SE QUEDA SIN SUPERFICIE, Y SU ESTADO SERÁ *NADIE PUEDE PERMITIRLA*
+#### D-983 — 🟢 LA AUTORIZACIÓN DE IMAGEN: DÓNDE VIVE, POR QUÉ NO VUELVE, Y LA DISTINCIÓN QUE NO SE PUEDE PERDER
 
-> **Redactada por C** (`S107-C-FICHA-D-983-AUTORIZACION-DE-IMAGEN.md`), depositada
-> por A con **una enmienda de estado — ver el recuadro del final.**
-> **Firma del founder, 30-ago-2026:** su casa es Cuenta → Preferencias, y **no
-> se construye en esta sesión.**
+> ✏️ **ENMENDADA 31-ago-2026 por firma del founder: DEJA DE SER DEUDA DE
+> PRODUCTO.** Ya no dice «falta construirla» — dice **dónde vive y por qué no
+> vuelve al lugar del que salió**. El motor está construido
+> (`20260901040000`); lo que queda es la superficie, y tiene casa firmada.
 
-**Qué pasó.** La pantalla de términos de guardería tenía **dos casillas**: la
-aceptación de los seis documentos y, separada y rotulada «Opcional», la
-autorización para **publicar fotos de la mascota**. Firma del founder: *«la
-pantalla de términos pide dos checks y debe ser uno solo»* ⇒ se retira la
-segunda. **La aceptación queda en una; la autorización se queda sin ningún
-control en toda la app.**
+**🟢 DÓNDE VIVE, FIRMADO:** en la **pantalla de confirmación**, después de
+pagar. Un check **apagado por defecto, jamás pre-marcado**, rotulado opcional y
+**sin bloquear nada**.
+*El lugar es deliberado: **ya pagó**, así que aceptar o no aceptar no cambia
+nada de lo que contrató — un consentimiento que se pide ANTES de cobrar se
+parece demasiado a un requisito.*
 
-**El estado que deja:**
-- `aceptar_documentos_guarderia` tiene `p_redes_autorizadas boolean DEFAULT false`.
-- La pantalla deja de mandarlo, así que toda familia queda en `false`.
-- ⇒ **fail-closed: nadie publica nada, y no hay dónde permitirlo.**
-
-*No hay riesgo de que se publique una foto por accidente. Lo que no existe es
-el sí.*
+**🔴 POR QUÉ NO VUELVE A LA PANTALLA DE TÉRMINOS:** ahí sería otra vez **la
+segunda casilla de la que salió**.
 
 ### 🔴 LA DISTINCIÓN QUE SE VA A PERDER, Y ES LA RAZÓN DE ESTA FICHA
 
@@ -24182,38 +24177,35 @@ el sí.*
 
 ⚠️ *Quien retome esto sin la distinción va a leer «la autorización de imagen
 está en false para todas las familias» y va a concluir que la media del durante
-está trabada.* **No lo está**: el durante funciona, la familia ve las fotos de
-su mascota, y el único acto que no tiene camino es el de sacarlas del hilo.
+está trabada.* **No lo está.**
+*Es la clase de dato que se lee bien y se entiende al revés — por eso va en la
+ficha y no en un comentario.*
 
-*Es exactamente la clase de dato que se lee bien y se entiende al revés — por
-eso la distinción va en la ficha y no en un comentario.*
+### ☠️ Y LA PUERTA SE DECIDIÓ POR MEDICIÓN, no por el nombre
 
-**Dueño:** producto · **Disparo:** cuando Cuenta → Preferencias abra su pasada.
-**Dónde va:** con las demás preferencias de la familia, **no** en un flujo de
-reserva — *no es un término que se acepta para poder reservar: es una
-preferencia que se cambia cuando uno quiere.*
+C preguntó si el interruptor podía ser `aceptar_documentos_guarderia`
+re-llamado. Su argumento —*«usar la puerta de aceptar términos para cambiar una
+preferencia es un nombre que miente»*— era correcto. **Y medirlo dio algo peor:**
 
-**Lo que NO hay que hacer:** devolverla a la pantalla de términos. Ahí volvería
-a ser una segunda casilla, que es de lo que salió.
+> **Con un documento nuevo publicado, la familia estaba en `faltan` y PRENDER
+> EL INTERRUPTOR DE LA FOTO SE LO ACEPTÓ SOLO** — `aceptaciones 10 → 11`,
+> medido en subtransacción.
 
-> ### ✏️ ENMIENDA DE ESTADO AL DEPOSITAR (A, 31-ago-2026) — el tiempo verbal, medido
->
-> La ficha original decía **«la pantalla YA NO lo manda»**. Medido contra
-> `main` al depositarla: **`documentos.tsx` TODAVÍA declara `CLAVE_REDES` y
-> todavía manda `redesAutorizadas: redes`.** El retiro vive en `pista/s107-c`,
-> **sin mergear**.
->
-> ⇒ **Todo lo demás de esta ficha rige tal cual; lo único que se enmienda es el
-> tiempo verbal.** Hoy la casilla existe y la familia puede permitirlo; **la
-> ficha empieza a describir la realidad cuando esa tanda se mergee.**
->
-> 🔴 **Y la clase vale más que el caso:** *medir la propia rama y llamarlo «el
-> estado» es cómo una afirmación verdadera del autor entra al canon como falsa
-> para todos los demás.* **Es la misma trampa que A pisó al abrir S107** —midió
-> a C contra `origin/pista/s107-c` y le dio cero porque el trabajo vivía sin
-> pushear— y la misma que `R66` cobró con un baseline sacado de un worktree sin
-> mergear. **El canon se mide contra `main`, jamás contra el árbol de quien
-> escribe.**
+**Cambiar una preferencia de imagen habría FIRMADO un contrato legal que la
+familia no leyó.** *No era un riesgo futuro: era el comportamiento de hoy, y
+sólo no se veía porque la familia de prueba ya tenía todo aceptado.*
+⇒ Nace `fijar_redes_autorizadas`, que **toca sólo el booleano**.
+
+**Y su lector, `obtener_autorizacion_guarderia`, devuelve CERO FILAS cuando no
+hay autorización — `null`, jamás `false`:** *«no hay fila» y «dijo que no» son
+dos verdades distintas*, y un interruptor que las confunde **muestra «no» sobre
+alguien que nunca eligió**.
+
+**Dueño:** C (la superficie). **Disparo:** su próxima tanda.
+☠️ **Condición de muerte:** el check vive en la confirmación y la familia puede
+prenderlo y apagarlo. **El motor ya está** — falta la pantalla.
+
+**Lo que NO hay que hacer:** devolverla a la pantalla de términos.
 
 ### L-439 — DECLARAR UN ATAJO NO LO HACE SEGURO
 

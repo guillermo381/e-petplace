@@ -22288,6 +22288,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fijar_redes_autorizadas: {
+        Args: { p_autorizadas: boolean; p_familia_id: string }
+        Returns: Json
+      }
       generar_eventos_diferidos: {
         Args: { p_fecha_corte?: string }
         Returns: {
@@ -22657,6 +22661,17 @@ export type Database = {
           mascota_nombre: string
           precio: number
           tipo_servicio: string
+        }[]
+      }
+      obtener_autorizacion_guarderia: {
+        Args: { p_familia_id: string }
+        Returns: {
+          actualizado_en: string
+          contacto_alternativo: Json
+          contactos: Json
+          redes_autorizadas: boolean
+          urgencia_tope_moneda: string
+          urgencia_tope_monto: number
         }[]
       }
       obtener_casos_activos_mascota: {
