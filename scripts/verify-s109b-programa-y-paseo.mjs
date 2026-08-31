@@ -104,8 +104,16 @@ const rastro = async (col, id, etiqueta) => {
 
 // ══ ① EL PROGRAMA DE ADIESTRAMIENTO ══════════════════════════════════════
 console.log('① PROGRAMA DE ADIESTRAMIENTO');
-const { data: pg } = await admin.from('prestador_programas')
-  .select('id, nombre, n_sesiones, prestador_servicio_id').eq('activo', true).limit(1).maybeSingle();
+/* 🔴 EL PROGRAMA SE ELIGE MIDIENDO SU VIGENCIA, no con un `limit(1)`.
+   Tercera vez en este arnés que «el primero que haya» elige el caso: pasó con
+   el perro (`programa_duplicado`), con la oferta de paseo
+   (`paquete_no_disponible`) y acá con la vigencia. **Un programa cuya última
+   sesión cae fuera de `vigencia_dias` es contratable y NO cobrable** — la
+   compuerta lo rebota, y con razón. */
+const { data: programas } = await admin.from('prestador_programas')
+  .select('id, nombre, n_sesiones, vigencia_dias, prestador_servicio_id').eq('activo', true);
+const pg = (programas ?? []).find((x) => (x.n_sesiones - 1) * 7 + 1 <= x.vigencia_dias);
+if (!pg) { console.error('🔴 ningún programa activo cabe en su propia vigencia'); process.exit(2); }
 const { data: sv } = await admin.from('prestador_servicios')
   .select('id, prestador_id').eq('id', pg.prestador_servicio_id).maybeSingle();
 /* 🔴 UN PERRO SIN PROGRAMA VIVO. La primera versión tomaba el primero que
@@ -121,7 +129,17 @@ const { data: perros } = await admin.from('mascotas')
 const perro = (perros ?? []).find((m) => !ocupados.has(m.id));
 if (!perro) { console.error('🔴 sin perro libre con que ejercer el programa'); process.exit(2); }
 console.log(`   «${pg.nombre}» ${pg.n_sesiones} sesiones · mascota ${perro.nombre}`);
-const inicio = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+/* 🔴 LA FECHA SE MIDE, NO SE ELIGE. La primera versión arrancaba en `hoy+7` y
+   el programa de 6 sesiones semanales terminaba PASADA su `vigencia_dias` (35)
+   ⇒ la puerta lo aceptaba, el cobro salía, **y el acto 2 se caía con la plata
+   ya movida** (`DF-2108181`, $90). Medido: arrancando HOY la última sesión cae
+   justo en el borde y entra.
+   *Un arnés que elige una fecha cómoda en vez de una medida prueba el camino
+   que le tocó, no el que vino a probar.*
+   Arranca MAÑANA: con `hoy` la hora 10:00 ya pasó y la puerta rebota
+   `slot_en_pasado` — correctamente, porque *la puerta no ofrece lo que va a
+   rechazar* (Ley 23). El programa se elige arriba midiendo que quepa. */
+const inicio = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 const { data: ct, error: eC } = await cli.rpc('contratar_programa', {
   p_prestador_id: sv.prestador_id, p_servicio_id: sv.id, p_programa_id: pg.id,
   p_mascota_id: perro.id, p_fecha_inicio: inicio, p_hora: '10:00:00',
