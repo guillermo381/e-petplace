@@ -53,7 +53,21 @@ const SIMULA: Record<SujetoSimulable, boolean> = {
      (`suscripciones_servicio`), así que su checkout **contrata sin cobrar** y lo
      dice. **El día que A publique el sujeto, esta línea pasa a `false` y con
      ella desaparecen la banda y el sufijo, sin tocar ninguna pantalla.** */
-  plan_paseo: true,
+  /* ☠️ **31-AGO · SE APAGÓ, Y ESTA LÍNEA ES LA PRUEBA DE QUE EL MAPA SIRVE.**
+   * ⏪ Fue `true` mientras `pagos-cobro` no supo cobrar un plan. **B desplegó
+   * (v33 ACTIVE) y lo ejerció de punta a punta** —`DF-2108362`, $138, intento
+   * `aprobado`, `acto2=true`, el plan quedó `activa · pagado`— y avisó en el
+   * acto, que es la secuencia que el founder firmó: *la banda se retira DESPUÉS
+   * del deploy, jamás antes.*
+   *
+   * ⭐ **Cambió UNA palabra y se movieron cuatro superficies**: la banda del
+   * checkout, el sufijo «(simulado)» del CTA, y las dos del hogar. *Esa es la
+   * razón entera por la que este mapa existe en vez de un booleano escrito en
+   * cada pantalla — la alternativa era una cacería, y una cacería siempre deja
+   * uno vivo.* (Ya me había pasado: el CTA del programa quedó diciendo
+   * «simulado» dos commits después de que cobrara de verdad.)
+   */
+  plan_paseo: false,
 };
 
 /** ¿Este sujeto todavía simula el cobro? */

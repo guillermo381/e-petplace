@@ -78,10 +78,18 @@ export default function CheckoutPlanPaseo() {
   const [rebote, setRebote] = useState<string | null>(null);
   /** El plan en vuelo: nace ANTES del cobro y lo espera la máquina. */
   const [planEnVuelo, setPlanEnVuelo] = useState<string | null>(null);
-  /* ⭐ Activo **sólo cuando hay algo que cobrar y sólo en el resumen**:
-     mientras simula no hay débito, y pedir tarjetas al servidor para una
-     pantalla que no va a cobrar es un viaje que nadie necesita. */
-  const medio = useMedioDePago(!simula('plan_paseo') && fase === 'resumen');
+  /* ⭐ **ACTIVO SIEMPRE EN EL RESUMEN, TAMBIÉN MIENTRAS SIMULA — y esto lo
+     cambió una medición de A, no una preferencia.**
+
+     ⏪ Lo tenía condicionado a `!simula(...)` con el argumento de que «pedir
+     tarjetas para una pantalla que no va a cobrar es un viaje que nadie
+     necesita». **Falso, y el motor lo dice:** `contratar_plan_paseo` exige
+     declarar el riel *para firmar el mandato*, no para cobrarlo — sin medio
+     rebota `riel_no_declarado` **también en simulado**.
+
+     🔴 *El mandato existe desde que se firma; lo que todavía no existe es el
+     débito.* Son dos cosas distintas y la banda dice exactamente la segunda. */
+  const medio = useMedioDePago(fase === 'resumen');
 
   /* ⭐ **S109-C · UN SOLO INTERRUPTOR GOBIERNA LA BANDA Y EL COBRO.**
      *Si el cobro se enciende antes que la banda se apague, la pantalla cobra de
@@ -113,10 +121,13 @@ export default function CheckoutPlanPaseo() {
 
   const contratar = useCallback(async () => {
     if (fase !== 'resumen') return;
-    /* 🔴 Con cobro real hace falta medio; simulado no cobra y no lo pide.
-       *Pedir una tarjeta para algo que no se va a cobrar es fricción inventada;
-       no pedirla cuando SÍ se cobra es un botón que rebota.* */
-    if (!simulado && medio.idTarjeta === null) { setRebote(t('pago.cobroElegiMedio')); return; }
+    /* 🔴 **ACÁ EL MEDIO ES SIEMPRE TARJETA, y el guard lo dice sin excepción.**
+       DeUna no se puede elegir en esta pantalla (`deunaCobraEsteSujeto={false}`,
+       medido abajo), así que **no hay rama de DeUna y no debe haberla**: *una
+       rama inalcanzable que firmara el mandato por DeUna y después cobrara por
+       tarjeta con `null` es peor que no tenerla* — el día que alguien encienda
+       la prop, el compilador tiene que traerlo acá, no dejarlo pasar. */
+    if (medio.idTarjeta === null) { setRebote(t('pago.cobroElegiMedio')); return; }
     setFase('procesando');
     setRebote(null);
 
@@ -132,16 +143,18 @@ export default function CheckoutPlanPaseo() {
         hora: texto('hora'),
         frecuencia: texto('frecuencia') as Frecuencia,
         auto_renovar: texto('renueva') === '1',
-        /* ⏸️ **EL RIEL FALTA ACÁ Y ES A PROPÓSITO — lo está poniendo la pista A.**
-           Medí que `contratarPlanPaseo` no manda `p_riel` ni `p_tarjeta_id`, y
-           que la puerta los exige desde `20260906180000:173` ⇒ **rebota
-           siempre**. Lo tomé creyendo que el llamador vivía en el cliente; A
-           midió que **vive en `packages/api`, su territorio**, y lo tomó con la
-           misma unión que la mensualidad. *Mi diagnóstico era exacto y la ruta
-           no — y descartar mi versión cuesta menos que dos pistas curando el
-           mismo archivo.*
-           ⭐ Cuando A publique, `medio` va a ser REQUERIDO en el input y **el
-           compilador va a traer a esta línea solo**: por eso no queda ficha. */
+        /* ⭐ **EL RIEL, Y NO SE INVENTA NUNCA.** El guard de arriba garantiza que
+           una de las dos ramas es cierta: o hay tarjeta elegida, o la familia
+           eligió DeUna con el dedo. *Caer a DeUna «porque no hay tarjeta» sería
+           elegir por ella el compromiso más caro de los dos —el que hay que ir a
+           pagar a mano cada mes— por un descarte.*
+
+           ⚠️ **Esta línea llegó por el compilador, y así tenía que ser.** A
+           cambió `p_riel` a `DEFAULT NULL` (el silencio gana su nombre:
+           `riel_no_declarado`) y el wrapper a esta unión ⇒ *lo que sólo existía
+           en runtime pasó a existir en build.* La pantalla estaba rota desde
+           antes: contratar rebotaba siempre y nadie lo veía. */
+        medio: { riel: 'tarjeta', tarjetaId: medio.idTarjeta },
       });
       if (!r.ok) {
         /* 🔴 Se queda en el resumen con TODO lo elegido — *lo que la familia
@@ -159,7 +172,7 @@ export default function CheckoutPlanPaseo() {
        que la banda anuncia.** No hay cobro que esperar. */
     if (simulado) { setFase('exito'); return; }
 
-    const cobro = await cobrar({ tipo: 'plan', id: planId }, medio.idTarjeta as string);
+    const cobro = await cobrar({ tipo: 'plan', id: planId }, medio.idTarjeta);
     if (!cobro.ok) {
       setFase('resumen');
       mostrar({ texto: t(cobro.voz), variante: 'error' });
@@ -250,17 +263,31 @@ export default function CheckoutPlanPaseo() {
         {/* ⭐ **YA NO SE ESCRIBE A MANO: SE DERIVA.** El día que el plan cobre,
             `simula('plan_paseo')` pasa a `false` y **esta banda desaparece sola**
             — junto con el sufijo del botón, desde la misma línea. */}
-        {/* ⭐ **LA SECCIÓN DE MEDIO APARECE SOLA EL DÍA DEL DEPLOY** — sale del
-            MISMO interruptor que la banda y el sufijo. *Un checkout que pide
-            tarjeta y dice «simulado» al lado sería la pantalla contándose dos
-            cosas distintas a sí misma.*
-            🔴 `recurrente`: los dos medios prometen cosas distintas y las dos
-            promesas van ANTES de elegir. */}
-        {simula('plan_paseo') ? (
-          <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto>
-        ) : (
-          <SeccionMedioDePago medio={medio} recurrente />
-        )}
+        {/* ⭐ **EL MEDIO SE MONTA SIEMPRE**, también mientras simula: el motor
+            exige declarar el riel para FIRMAR, no para cobrar.
+            🔴 `recurrente`: los dos medios prometen cosas distintas —uno se
+            cobra solo, al otro hay que ir a pagarlo— y las dos promesas van
+            ANTES de elegir. */}
+        {/* 🔴 `deunaCobraEsteSujeto={false}` — **MEDIDO, no supuesto**:
+            `SujetoDeuna` (`pagos-deuna.ts:66-79`) tiene compra · cita · bono ·
+            mensualidad · programa, **y no `plan`**. El riel no sabe nombrar
+            este sujeto ⇒ *dejar la fila tocable sería ofrecer un medio que la
+            pantalla siguiente no puede honrar* (Ley 23).
+            ⚠️ **Y NO es «porque es recurrente»**: la mensualidad de guardería
+            también lo es y SÍ se paga por DeUna, con link mensual. La razón es
+            del SUJETO, y por eso se declara acá y no en la pieza.
+            ⭐ El día que `plan` entre a `SujetoDeuna`, esto es borrar una prop
+            — y `cobro_link_mensual` ya tiene `suscripcion_servicio_id` en su
+            XOR, así que el destino del link existe. Reportado a B. */}
+        <SeccionMedioDePago medio={medio} recurrente deunaCobraEsteSujeto={false} />
+        {/* ☠️ **LA BANDA SE SUMA, NO REEMPLAZA — y no se contradice con la
+            sección de arriba**: el mandato se firma hoy, el débito todavía no
+            sale. *Decir «simulado» al lado de un selector de tarjeta sólo sería
+            confuso si las dos frases hablaran de lo mismo, y no lo hacen.*
+            El día del deploy de B, `plan_paseo` pasa a `false` en
+            `simulado.ts` y **esta banda y el sufijo del CTA desaparecen a la
+            vez**, sin tocar esta pantalla. */}
+        {simula('plan_paseo') ? <Texto variante="apoyo">{t('checkout.simuladoAviso')}</Texto> : null}
 
         {rebote !== null ? <Texto variante="cuerpo">{rebote}</Texto> : null}
       </PantallaConPie>

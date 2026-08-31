@@ -261,6 +261,7 @@ export function useMedioDePago(activo: boolean): MedioDePago {
 export function SeccionMedioDePago({
   medio,
   recurrente = false,
+  deunaCobraEsteSujeto = true,
 }: {
   medio: MedioDePago;
   /**
@@ -269,6 +270,23 @@ export function SeccionMedioDePago({
    * después de pagar.*
    */
   recurrente?: boolean;
+  /**
+   * ⭐ **S109-C · SI EL RIEL DE DEUNA ALCANZA A ESTE SUJETO.**
+   *
+   * 🔴 **No es «recurrente» con otro nombre, y la diferencia importa.**
+   * `recurrente` describe QUÉ SE COMPRA (algo que se repite) y por eso gobierna
+   * las dos promesas. Esto describe **hasta dónde llega un riel**, que es otra
+   * cosa y cambia por su cuenta.
+   *
+   * ⏪ *Acá mismo vivió `!recurrente` apagando DeUna, y su defecto era ése:
+   * apagaba por CATEGORÍA algo que fallaba por SUJETO.* El día que el motor
+   * admitió el mandato por DeUna, la condición quedó mintiendo — y hubo que
+   * medir para descubrirlo, porque «recurrente» sonaba a explicación.
+   *
+   * ⚠️ **Quien lo pase en `false` declara CONTRA QUÉ MIDIÓ**, en el uso: este
+   * default es `true` justamente para que apagarlo cueste una frase.
+   */
+  deunaCobraEsteSujeto?: boolean;
 }) {
   const { t } = useTraduccion();
   const { medios, elegido } = medio;
@@ -420,7 +438,13 @@ export function SeccionMedioDePago({
               ANTES qué significa elegirlo — *se cobra solo* contra *hay que ir
               a pagarlo*. Son dos compromisos distintos, no dos formas del
               mismo. */}
-          <FilaDeUna onPress={DEUNA_ELEGIBLE ? () => medio.elegir({ tipo: 'deuna' }) : undefined} />
+          <FilaDeUna
+            onPress={
+              DEUNA_ELEGIBLE && deunaCobraEsteSujeto
+                ? () => medio.elegir({ tipo: 'deuna' })
+                : undefined
+            }
+          />
           {/* ⭐ LA PROMESA DE DEUNA, pegada a su fila y ANTES de elegirla. */}
           {recurrente ? <Texto variante="apoyo">{t('pago.promesaDeuna')}</Texto> : null}
           {/* ⭐ LA PROMESA DE LA TARJETA, encabezando su grupo. Va una vez y no
