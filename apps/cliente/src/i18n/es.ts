@@ -3088,6 +3088,12 @@ export const clienteEs = {
     tamanoEstadias: '{{n}} estadías',
     tamanoEstadiasDesde: '{{n}} · desde ${{precio}}',
     lugaresTitulo: 'Lugares con cupo ese día',
+    /* ⭐ S108-C · QUÉ mide el número del pie. Va como segunda línea del
+       precio, y es lo que hace que el «desde» se pinte: la pieza lo cuelga
+       de esta línea, así que sin ella el «desde» no existía. */
+    unidadDia: 'Un día',
+    unidadPaquete: 'Paquete de {{n}} estadías',
+    unidadMes: 'Al mes',
     porDia: '${{precio}} por día',
     /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
        del paquete: la pluralización no es una interpolación). */
@@ -3100,6 +3106,11 @@ export const clienteEs = {
     sinElegiblesDetalle: 'La guardería es para perros y gatos. Cuando registres uno, va a aparecer acá.',
     diaCerrado: 'No abren',
     probarDia: 'Probar {{dia}}',
+    /* ⭐ S108-C · La segunda causa del vacío, con voz PROPIA: hay lugares
+       con cupo y ninguno vende ESE tamaño. *Decir «ninguna tiene cupo»
+       mandaría a probar otro día para siempre, y el día no es el problema.* */
+    sinLugaresTamanoTitulo: 'Ninguna guardería vende el paquete de {{n}} estadías',
+    sinLugaresTamanoDetalle: 'Prueba con otro tamaño de paquete: no todas ofrecen los tres.',
     sinLugaresTitulo: 'Ninguna guardería tiene cupo ese día',
     sinLugaresDetalle: 'Prueba con otro día: el cupo cambia todos los días.',
     noCargoTitulo: 'No pudimos cargar tus mascotas',
@@ -3119,6 +3130,12 @@ export const clienteEs = {
     mensualServicio: 'Plan mensual de guardería',
     paqueteServicio: 'Paquete de {{n}} estadías',
     paqueteSimulado: 'El cobro de este paquete todavía es simulado. Te lo decimos porque es la verdad.',
+    /* ⭐ S108-C · Las tres voces del total que todavía no se pudo leer.
+       *No se paga un total que la pantalla no conoce, y el CTA apagado
+       dice cuál de las tres cosas pasó.* */
+    precioCargando: 'Estamos leyendo el precio de tu paquete.',
+    precioNoLeido: 'No pudimos leer el precio de este paquete. Prueba de nuevo.',
+    paqueteYaNoSeVende: 'Esta guardería ya no vende ese paquete. Elige otro tamaño.',
     duracion: 'Entre tus dos ventanas',
     exitoTitulo: '¡Listo! Tu día está reservado.',
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',

@@ -42,10 +42,12 @@ import { Boton, Celda, Encabezado, EstadoVacio, Icono, Tarjeta, Texto, spacing, 
 import {
   comprarPaqueteGuarderia,
   getEstadoOnboardingDueno,
+  obtenerPaquetesGuarderia,
   reservarDiaGuarderia,
   contratarMensualidadGuarderia,
   reservarDiaDePaqueteGuarderia,
 } from '@epetplace/api';
+import { TAMANOS_PAQUETE, type TamanoPaqueteGuarderia } from '@/lib/guarderia-modalidad';
 
 import { CheckoutReserva } from '@/components/checkout-reserva';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
@@ -79,6 +81,60 @@ export default function CheckoutGuarderia() {
   /* Los TRES eligen dirección — el día también, desde que su hold se crea acá. */
   const dir = useDireccionEntrega(true);
 
+
+  /**
+   * ⭐ **EL TOTAL DEL PAQUETE SE LEE ACÁ, NO SE HEREDA (S108-C · T1).**
+   *
+   * ⏪ **Lo que estaba mal, y es la cuarta puerta de un defecto ya conocido.**
+   * El total salía de `texto('precio')` — **una cadena preformateada que viaja
+   * por la URL** desde la lista, y que para paquete era `min(gp.precio)`: *el
+   * paquete más barato del lugar, no el que la familia eligió.* El literal del
+   * hub lo dice con todas las letras desde S107: **«La familia veía $40 y
+   * pagaba $75. En la superficie donde se decide pagar.»** Se había curado en
+   * los chips y en la tarjeta de la lista, **y sobrevivió justo en la
+   * superficie que esa frase nombra.**
+   *
+   * 🔴 **Por eso no alcanza con arreglar el parámetro aguas arriba.** Un número
+   * que llega por la URL es un número que nadie puede volver a verificar: entra
+   * igual por un deep link, sobrevive a un back y no envejece. *La pantalla
+   * donde se decide pagar resuelve su propio precio* — el mismo principio por
+   * el que el motor lee el monto del desglose congelado y no del cliente.
+   *
+   * ⚠️ **Y mientras no lo sepa, no deja pagar.** No se pinta un total viejo ni
+   * un «—»: *pagar a ciegas es peor que esperar dos segundos.*
+   */
+  type PrecioPaquete =
+    | { fase: 'noAplica' }
+    | { fase: 'cargando' }
+    | { fase: 'noPudimos' }
+    /** El lugar ya no vende ESE tamaño — la compra rebotaría igual. */
+    | { fase: 'noVende' }
+    | { fase: 'listo'; precio: number };
+  const [precioPaquete, setPrecioPaquete] = useState<PrecioPaquete>({ fase: 'noAplica' });
+
+  /* El tamaño se valida contra el catálogo, jamás se confía del `Number()`. */
+  const tamanoElegido: TamanoPaqueteGuarderia | null = (() => {
+    if (!esPaquete) return null;
+    const n = Number(params.tamano);
+    return TAMANOS_PAQUETE.find((x) => x === n) ?? null;
+  })();
+
+  useEffect(() => {
+    if (!esPaquete) { setPrecioPaquete({ fase: 'noAplica' }); return; }
+    const prestadorId = texto('prestadorId');
+    if (tamanoElegido === null || prestadorId === '') { setPrecioPaquete({ fase: 'noPudimos' }); return; }
+    let vigente = true;
+    setPrecioPaquete({ fase: 'cargando' });
+    void (async () => {
+      const r = await obtenerPaquetesGuarderia(prestadorId);
+      if (!vigente) return;
+      /* Ley 13: un fallo de lectura no se disfraza de «no lo vende». */
+      if (!r.ok) { setPrecioPaquete({ fase: 'noPudimos' }); return; }
+      const pq = r.data.find((x) => x.tamano === tamanoElegido && x.activo);
+      setPrecioPaquete(pq === undefined ? { fase: 'noVende' } : { fase: 'listo', precio: pq.precio });
+    })();
+    return () => { vigente = false; };
+  }, [esPaquete, tamanoElegido]);
 
   const [enviando, setEnviando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
@@ -258,7 +314,23 @@ export default function CheckoutGuarderia() {
               subtitulo={texto('prestadorNombre')}
               metadataMono={texto('fecha')}
             />
-            <Celda titulo={t('checkout.total')} metadataMono={texto('precio')} />
+            {/* ⭐ **EL TOTAL DEL PAQUETE SALE DEL PAQUETE, no de la URL.**
+                Las otras dos siguen con su parámetro **y eso es correcto,
+                medido**: para día `precioModalidad` es `ps.precio` y para
+                mensual `ps.precio_mensual_plan` — los dos exactos y del lugar.
+                *El único que era un mínimo era el paquete.*
+                🔴 Mientras no se resuelve **no se pinta ningún número**: un
+                total viejo o un «—» en la pantalla de pago se leen como dato. */}
+            <Celda
+              titulo={t('checkout.total')}
+              metadataMono={
+                esPaquete
+                  ? precioPaquete.fase === 'listo'
+                    ? `$ ${precioPaquete.precio.toFixed(2)}`
+                    : undefined
+                  : texto('precio')
+              }
+            />
           </Tarjeta>
 
           {/* A DÓNDE PASAN A BUSCARLO — antes del medio de pago: primero
@@ -295,8 +367,22 @@ export default function CheckoutGuarderia() {
                hold recién creado. Los otros dos pagan acá mismo. */
             etiqueta={esPaquete || esMensual ? t('checkout.pagar') : t('checkoutGuarderia.continuar')}
             cargando={enviando}
-            deshabilitado={esMensual && medio.idTarjeta === null}
-            razonDeshabilitado={t('lugarGuarderia.faltaTarjeta')}
+            /* ⭐ **NO SE PAGA UN TOTAL QUE LA PANTALLA NO PUDO LEER.** Y el
+                apagado DICE qué falta, cada causa con su frase — *una pared
+                muda hace creer que el producto está roto.* */
+            deshabilitado={
+              (esMensual && medio.idTarjeta === null) ||
+              (esPaquete && precioPaquete.fase !== 'listo')
+            }
+            razonDeshabilitado={
+              esMensual
+                ? t('lugarGuarderia.faltaTarjeta')
+                : precioPaquete.fase === 'noVende'
+                  ? t('checkoutGuarderia.paqueteYaNoSeVende')
+                  : precioPaquete.fase === 'noPudimos'
+                    ? t('checkoutGuarderia.precioNoLeido')
+                    : t('checkoutGuarderia.precioCargando')
+            }
             onPress={() => void (esPaquete || esMensual ? pagar() : reservarElDia())}
           />
         </View>
