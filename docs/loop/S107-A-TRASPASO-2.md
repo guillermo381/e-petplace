@@ -1,3 +1,8 @@
+> # ☠️ VENCIDA — reemplazada por `S107-A-TRASPASO.md` (31-ago-2026)
+> **No se lee para saber el estado.** Se conserva como historia de las tandas.
+> *Un acta vieja sin esta marca se lee con la confianza de un documento y el
+> contenido de un recuerdo.*
+
 # S107-A · TRASPASO 2 — la conducción al 29-ago-2026, tarde
 
 > **Reemplaza a `S107-A-TRASPASO.md`**, que es la foto de la mañana y quedó

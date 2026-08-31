@@ -53,6 +53,28 @@ detalle, y devuelve **`ok: false`**.
 
 ---
 
+## ②bis 🎁 LO QUE ESTA TANDA HEREDA YA CURADO — y no es poco
+
+**Dos cosas se curaron en S107 ANTES del freno, y las dos son de este arco:**
+
+1. ✅ **El actuador SUENA.** Un sujeto que no sabe mover **se nombra**
+   (`bono`, `mensualidad_guarderia`), **marca el evento** con
+   `resultado='desconocido'` y su detalle, y devuelve **`ok: false`**.
+   *Antes: `ok: true` y una línea de consola.*
+2. ✅ **Los dos `ok:true` que ocultaban intervención humana, volteados** —
+   `reverso_sin_intento` (*plata devuelta que no encontró su intento*) y
+   `monto_no_coincide` (*plata que llegó por otro monto*). **Las SEIS del camino
+   normal quedan como están, por decisión y con su lista escrita.**
+
+> ### Eso cambia la naturaleza del riesgo de esta tanda: **si el cableado queda a medias, SUENA.** Antes, quedar a medias era indistinguible de funcionar.
+
+⚠️ **Y una parte NO ejercida, declarada:** la rama **DeUna** del actuador exige
+una **consulta verificada**, así que el cinturón la midió por Nuvei y **lo dice
+en vez de contarla como verde**. *Fabricar esa consulta en un arnés sería
+simular el veredicto que la consulta existe para dar.*
+
+---
+
 ## ③ EL PLAN, en el orden en que se puede medir cada paso
 
 **Cada paso deja el sistema en un estado honesto** — ninguno depende del
