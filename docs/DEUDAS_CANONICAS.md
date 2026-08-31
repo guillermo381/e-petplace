@@ -24515,3 +24515,34 @@ ninguna lectura del código** — lo produjo un cinturón que ejercía el acto r
 la fila real. *Un `COALESCE` equivocado no falla: acierta plausiblemente hasta que se
 topa con la primera fila que la historia dejó distinta.* Hermana de `L-439` — **un
 atajo que puede producir un valor equivocado no se declara: se hace inexpresable.**
+
+## 🔴 `L-446` — UNA CLAVE DE IDEMPOTENCIA QUE NO PUEDE REPETIRSE NO ES UNA CLAVE DE IDEMPOTENCIA
+
+**Medida en S109, entre A y B, sobre `pagos-deuna-solicitud`.**
+
+La edge escribía `clave_idempotencia = 'deuna:<sujeto>:<ref>'` con la `ref`
+**generada por pedido**. La columna tiene su UNIQUE, el `ON CONFLICT` está
+escrito, el código se lee correcto — **y no protege de nada**, porque dos
+pedidos nunca pueden producir la misma clave.
+
+> **La forma general: una clave de idempotencia se arma con lo que IDENTIFICA
+> al acto, jamás con algo que nace en la llamada.** Si un componente de la clave
+> es nuevo cada vez, la constraint existe y el mecanismo no.
+
+🔴 **Y lo que la volvió cara acá es el sujeto: con DeUna un intento es un CÓDIGO
+PAGABLE.** *Con tarjeta un duplicado te cobra dos veces y se ve en el estado de
+cuenta; con un código, se lo entregás a la familia y confiás en que use uno
+solo.* Evidencia viva al medirlo: **un sujeto con 2 intentos DeUna y 2 claves
+distintas** — no era hipotético, ya había pasado en sandbox.
+
+**Su corolario, que es de forma y hermana de `L-424`:** con la clave arreglada,
+el mecanismo es **`ON CONFLICT DO UPDATE`, jamás `DO NOTHING`**. *Un `DO NOTHING`
+devuelve «ok» sin el dato que el llamador venía a buscar, y la pantalla muestra
+una espera que nunca llega.* El mismo `DO NOTHING` dejó pasar en silencio, ese
+mismo día y en otro lugar, la quinta colisión de número del arco.
+
+**Y la tercera mitad, que es de método:** el freno de intento-en-vuelo **existía
+en UNA de las cinco ramas** —sólo la mensualidad—. *El guard se escribió cuando
+el sujeto era uno, y abrir los otros cuatro no censó quién lo tenía.* Es
+`L-318`/`D-980` otra vez: **abrir un sujeto obliga a censar los frenos, no sólo
+las puertas.**
