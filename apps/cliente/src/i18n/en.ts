@@ -2347,6 +2347,7 @@ export const clienteEn = {
     paqueteListoPrimerDiaDetalle: 'Pick your first day · {{n}} stays to use',
     paqueteFaltaPagar: 'Your pack payment isn’t finished',
     paqueteFaltaPagarDetalle: '{{n}} stays · tap to complete the payment',
+    paqueteFaltaPagarConReloj: '{{n}} stays · {{tiempo}} left to complete it',
     paqueteNoPagadoATiempo: 'The time to complete the payment ran out',
     paqueteNoPagadoATiempoDetalle: 'You weren’t charged. Tap to buy it again.',
     conTuPaquete: 'With your pack',

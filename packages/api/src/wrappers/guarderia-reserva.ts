@@ -1185,6 +1185,22 @@ export interface PaqueteCompradoGuarderia {
    * este lector no esconde.
    */
   estadoPago: string;
+  /**
+   * ⭐ **S109-C · CUÁNDO SE LE ACABA EL TIEMPO PARA PAGAR.** `null` si el bono
+   * no tiene ventana (los viejos, y los que ya se pagaron).
+   *
+   * 🔴 **Sin esto la tarjeta de «falta completar el pago» es MUDA sobre lo único
+   * que apura**: la familia lee que falta pagar y no sabe que tiene quince
+   * minutos. *Un pendiente sin su reloj es un pendiente que se vence mientras
+   * alguien lo mira.*
+   *
+   * ⚠️ Y habilita la **expiración perezosa en la superficie**, que es el patrón
+   * de la casa para los holds: `expirar_bonos_sin_pago` corre cada minuto, así
+   * que hay una ventana de hasta 60 s en la que el bono **ya venció** y todavía
+   * dice `pendiente`. *Con la fecha en la mano la pantalla dice la verdad sin
+   * esperar al reloj* — y no ofrece un camino que el motor va a rebotar.
+   */
+  pagoExpiraEn: string | null;
 }
 
 /**
@@ -1204,7 +1220,7 @@ export async function obtenerMisPaquetesGuarderia(): Promise<
   }
   const { data, error } = await getClient()
     .from('bonos')
-    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento, estado_pago, pago_metadata')
+    .select('id, prestador_id, estado, unidades_total, unidades_usadas, precio_por_unidad, fecha_vencimiento, estado_pago, pago_metadata, pago_expira_en')
     .eq('tipo_servicio', 'guarderia_dia')
     /* ☠️ S108-A · CAE EL FILTRO `estado_pago='pagado'`.
        Desde que el bono nace `pendiente`, este filtro volvía **invisible** todo
@@ -1237,6 +1253,7 @@ export async function obtenerMisPaquetesGuarderia(): Promise<
       venceEl: typeof b.fecha_vencimiento === 'string' ? b.fecha_vencimiento : null,
       estado: typeof b.estado === 'string' ? b.estado : '',
       estadoPago: typeof b.estado_pago === 'string' ? b.estado_pago : '',
+      pagoExpiraEn: typeof b.pago_expira_en === 'string' ? b.pago_expira_en : null,
       /* La marca la deja `expirar_bonos_sin_pago()`; la derivación vive en
          `pagos-espera` para que los dos lectores digan lo MISMO. *Dos derivadas
          de la misma marca en dos archivos podrían discrepar, y discreparían

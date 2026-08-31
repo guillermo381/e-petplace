@@ -80,6 +80,12 @@ type Mascotas =
   | { fase: 'error' }
   | { fase: 'listo'; lista: Array<{ id: string; nombre: string; fotoUrl?: string }> };
 
+/** 'mm:ss' de lo que falta, en voz de máquina. Nunca negativo. */
+function restanteMmSs(iso: string): string {
+  const s = Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 1000));
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+}
+
 export default function LogGuarderia() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -227,13 +233,49 @@ export default function LogGuarderia() {
    * les dio valores separados justo para que acá no se cuenten con la misma
    * frase.
    */
+  /**
+   * ⭐ **S109-C · EXPIRACIÓN PEREZOSA EN LA SUPERFICIE.** `expirar_bonos_sin_pago`
+   * corre **cada minuto**, así que hay una ventana de hasta 60 s en la que el
+   * bono **ya venció** y su fila todavía diría «toca para completar el pago» —
+   * *un camino que el motor va a rebotar, ofrecido por una pantalla que tenía la
+   * fecha en la mano.* Con `pagoExpiraEn` no se espera al reloj: **el que ya
+   * pasó su hora se cuenta como vencido**, exactamente como los holds de cita.
+   *
+   * `tick` sólo existe para que esto se re-evalúe mientras la pantalla está
+   * abierta: sin él, alguien mirando la lista cuando vence no ve nada cambiar.
+   */
+  const [tick, setTick] = useState(0);
+  const hayPendienteConReloj = paquetes.some(
+    (p) => p.estadoPago === 'pendiente' && !p.noPagadoATiempo && p.pagoExpiraEn !== null,
+  );
+  useEffect(() => {
+    if (!hayPendienteConReloj) return;
+    const t = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, [hayPendienteConReloj]);
+
   const paquetesPendientes = useMemo(
-    () => paquetes.filter((p) => p.estadoPago === 'pendiente' && !p.noPagadoATiempo),
-    [paquetes],
+    () =>
+      paquetes.filter(
+        (p) =>
+          p.estadoPago === 'pendiente' &&
+          !p.noPagadoATiempo &&
+          !(p.pagoExpiraEn !== null && new Date(p.pagoExpiraEn).getTime() <= Date.now()),
+      ),
+    /* `tick` es dependencia REAL: es lo que mueve una fila de un grupo al otro
+       cuando el reloj pasa mientras la familia mira. */
+    [paquetes, tick],
   );
   const paquetesNoPagados = useMemo(
-    () => paquetes.filter((p) => p.noPagadoATiempo),
-    [paquetes],
+    () =>
+      paquetes.filter(
+        (p) =>
+          p.noPagadoATiempo ||
+          (p.estadoPago === 'pendiente' &&
+            p.pagoExpiraEn !== null &&
+            new Date(p.pagoExpiraEn).getTime() <= Date.now()),
+      ),
+    [paquetes, tick],
   );
 
   /* ⭐ EL SALDO DEL PAQUETE — A publicó su lector (`768f8d86`) y con él nace el
@@ -453,9 +495,19 @@ export default function LogGuarderia() {
                 <CeldaNavegacion
                   icono="pagos"
                   titulo={t('logGuarderia.paqueteFaltaPagar')}
-                  /* El saldo se nombra igual: **la familia compró esos días**,
-                     lo que falta es el cobro. */
-                  detalle={t('logGuarderia.paqueteFaltaPagarDetalle', { n: pq.total })}
+                  /* El saldo se nombra igual —**la familia compró esos días**, lo
+                     que falta es el cobro— y ahora **con el tiempo que le
+                     queda**: *un pendiente sin su reloj es un pendiente que se
+                     vence mientras alguien lo mira.* Sin ventana declarada no se
+                     inventa una cuenta regresiva. */
+                  detalle={
+                    pq.pagoExpiraEn === null
+                      ? t('logGuarderia.paqueteFaltaPagarDetalle', { n: pq.total })
+                      : t('logGuarderia.paqueteFaltaPagarConReloj', {
+                          n: pq.total,
+                          tiempo: restanteMmSs(pq.pagoExpiraEn),
+                        })
+                  }
                   onPress={() =>
                     router.push({
                       pathname: '/explorar/guarderia/checkout',

@@ -3260,6 +3260,7 @@ export const clienteEs = {
     paqueteListoPrimerDiaDetalle: 'Elige tu primer día · {{n}} estadías por usar',
     paqueteFaltaPagar: 'Falta completar el pago de tu paquete',
     paqueteFaltaPagarDetalle: '{{n}} estadías · toca para completar el pago',
+    paqueteFaltaPagarConReloj: '{{n}} estadías · te quedan {{tiempo}} para completarlo',
     paqueteNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
     paqueteNoPagadoATiempoDetalle: 'No se te cobró nada. Toca para volver a comprarlo.',
     conTuPaquete: 'Con tu paquete',
