@@ -2988,8 +2988,16 @@ export const clienteEs = {
     mensual: 'Mensual',
     diaQue: 'Reservas un día puntual y lo pagas.',
     paqueteQue: 'Compras varias estadías juntas y las usas cuando quieras.',
-    mensualQue: 'Un cobro cada mes mientras lo quieras.',
-    mensualAviso: 'Es un cobro que se repite: se hace solo, el mismo día de cada mes.',
+    /* ☠️ **S108-C-3 · Acá vivían `mensualQue` y `mensualAviso`**, la segunda con
+       la promesa que esta sesión derogó en otros tres lugares: «se hace solo,
+       **el mismo día de cada mes**». El motor NO lo garantiza en los bordes.
+       **Medidas SIN consumidor**, así que nunca se pintaron — pero un string
+       muerto que carga una promesa derogada es justo lo que la próxima sesión
+       resucita creyendo que faltaba (Ley 37).
+       🔴 **Y cómo sobrevivió es la lección**: cuando maté esa frase busqué por
+       las CLAVES que yo había escrito, y ésta vivía en un namespace ajeno. *Un
+       censo de textos se hace por la FRASE, jamás por la lista de claves que
+       uno recuerda.* Depositado en `docs/loop/S108-C-3-CENSO-Y-CONTRATO.md`. */
     mensualCorte: 'Lo cortas desde la app cuando quieras, y sigue andando hasta el final del mes que pagaste.',
     continuar: 'Continuar',
   },

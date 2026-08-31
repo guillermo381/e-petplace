@@ -2174,8 +2174,6 @@ export const clienteEn = {
     mensual: 'Monthly',
     diaQue: 'You book one day and pay for it.',
     paqueteQue: 'You buy several stays together and use them whenever you want.',
-    mensualQue: 'One charge every month, for as long as you want it.',
-    mensualAviso: 'This charge repeats: it happens on its own, the same day each month.',
     mensualCorte: 'You can cancel it from the app anytime, and it keeps running until the end of the month you paid for.',
     continuar: 'Continue',
   },
