@@ -13392,6 +13392,7 @@ export type Database = {
           pagador_user_id: string | null
           payload_crudo: Json
           pedido_id: string | null
+          programa_contratado_id: string | null
           proveedor: string
           proveedor_referencia: string | null
           proveedor_reverso_id: string | null
@@ -13433,6 +13434,7 @@ export type Database = {
           pagador_user_id?: string | null
           payload_crudo?: Json
           pedido_id?: string | null
+          programa_contratado_id?: string | null
           proveedor: string
           proveedor_referencia?: string | null
           proveedor_reverso_id?: string | null
@@ -13474,6 +13476,7 @@ export type Database = {
           pagador_user_id?: string | null
           payload_crudo?: Json
           pedido_id?: string | null
+          programa_contratado_id?: string | null
           proveedor?: string
           proveedor_referencia?: string | null
           proveedor_reverso_id?: string | null
@@ -13536,6 +13539,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_pedidos_narrativa"
             referencedColumns: ["pedido_id"]
+          },
+          {
+            foreignKeyName: "pagos_intentos_programa_contratado_id_fkey"
+            columns: ["programa_contratado_id"]
+            isOneToOne: false
+            referencedRelation: "programas_contratados"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "pagos_intentos_recurrencia_id_fkey"
@@ -16340,6 +16350,44 @@ export type Database = {
           },
         ]
       }
+      programa_desglose: {
+        Row: {
+          congelado_en: string
+          fee_config_id: string | null
+          impuesto: number
+          moneda: string
+          programa_contratado_id: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          congelado_en?: string
+          fee_config_id?: string | null
+          impuesto: number
+          moneda: string
+          programa_contratado_id: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          congelado_en?: string
+          fee_config_id?: string | null
+          impuesto?: number
+          moneda?: string
+          programa_contratado_id?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programa_desglose_programa_contratado_id_fkey"
+            columns: ["programa_contratado_id"]
+            isOneToOne: true
+            referencedRelation: "programas_contratados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programas_contratados: {
         Row: {
           country_code: string
@@ -16347,10 +16395,13 @@ export type Database = {
           duracion_minutos: number
           estado: string
           estado_pago: string
+          fecha_inicio: string | null
+          hora: string | null
           id: string
           mascota_id: string
           motivo_vencimiento: string | null
           n_sesiones: number
+          pago_expira_en: string | null
           pago_metadata: Json
           precio_total: number
           precio_unitario_efectivo: number
@@ -16367,10 +16418,13 @@ export type Database = {
           duracion_minutos: number
           estado?: string
           estado_pago?: string
+          fecha_inicio?: string | null
+          hora?: string | null
           id?: string
           mascota_id: string
           motivo_vencimiento?: string | null
           n_sesiones: number
+          pago_expira_en?: string | null
           pago_metadata?: Json
           precio_total: number
           precio_unitario_efectivo: number
@@ -16387,10 +16441,13 @@ export type Database = {
           duracion_minutos?: number
           estado?: string
           estado_pago?: string
+          fecha_inicio?: string | null
+          hora?: string | null
           id?: string
           mascota_id?: string
           motivo_vencimiento?: string | null
           n_sesiones?: number
+          pago_expira_en?: string | null
           pago_metadata?: Json
           precio_total?: number
           precio_unitario_efectivo?: number
@@ -21771,6 +21828,7 @@ export type Database = {
         Args: { p_cita_id: string; p_empleado_id_actual?: string }
         Returns: Json
       }
+      confirmar_pago_bono: { Args: { p_bono_id: string }; Returns: Json }
       confirmar_pago_compra: {
         Args: {
           p_authorization_code?: string
@@ -21788,10 +21846,6 @@ export type Database = {
         }
         Returns: Json
       }
-      confirmar_pago_paquete_guarderia: {
-        Args: { p_bono_id: string }
-        Returns: Json
-      }
       confirmar_pago_pedido: {
         Args: {
           p_clave_idempotencia: string
@@ -21800,6 +21854,10 @@ export type Database = {
           p_proveedor: string
           p_referencia: string
         }
+        Returns: Json
+      }
+      confirmar_pago_programa: {
+        Args: { p_programa_contratado_id: string }
         Returns: Json
       }
       congelar_desglose_mensualidad_guarderia: {
@@ -22260,6 +22318,7 @@ export type Database = {
       }
       ejecutar_cierres_vencidos: { Args: never; Returns: Json }
       ejecutar_recurrencias_vencidas: { Args: never; Returns: Json }
+      ejecutar_renovaciones_guarderia: { Args: never; Returns: Json }
       elegir_modo_horarios: { Args: { p_modo: string }; Returns: string }
       eliminar_vehiculo_repartidor: {
         Args: { p_vehiculo_id: string }
@@ -22558,6 +22617,7 @@ export type Database = {
         Args: { p_dia_cobro: number; p_periodo_desde: string }
         Returns: string
       }
+      guarderia_recurrente_vivo: { Args: never; Returns: boolean }
       hay_avisos_sin_leer: { Args: never; Returns: boolean }
       hay_novedades: { Args: { p_app: string }; Returns: boolean }
       hoy_local: { Args: never; Returns: string }
@@ -22678,6 +22738,20 @@ export type Database = {
         Returns: Json
       }
       maximo_comprable_de_ofertas: { Args: { p_items: Json }; Returns: Json }
+      mensualidades_vencidas_pendientes: {
+        Args: never
+        Returns: {
+          dia_de_cobro: number
+          familia_id: string
+          monto_esperado: number
+          pagador_user_id: string
+          precio_mensual: number
+          prestador_id: string
+          proximo_periodo: string
+          suscripcion_id: string
+          tarjeta_id: string
+        }[]
+      }
       mi_email: { Args: never; Returns: string }
       mi_firma_clinica: {
         Args: { p_prestador_id: string }
@@ -23230,6 +23304,25 @@ export type Database = {
           prestador_nombre: string
           proximo_cobro: string
           suscripcion_id: string
+        }[]
+      }
+      obtener_mis_programas: {
+        Args: never
+        Returns: {
+          estado: string
+          estado_pago: string
+          mascota_id: string
+          no_pagado_a_tiempo: boolean
+          precio_por_sesion: number
+          precio_total: number
+          prestador_id: string
+          prestador_nombre: string
+          primera_sesion: string
+          programa_contratado_id: string
+          sesiones_quedan: number
+          sesiones_total: number
+          sesiones_usadas: number
+          vigencia_hasta: string
         }[]
       }
       obtener_modalidades_por_oficio: {
@@ -24295,6 +24388,14 @@ export type Database = {
           tabla_tipada: string
         }[]
       }
+      verificar_compuerta_programa: {
+        Args: { p_programa_contratado_id: string }
+        Returns: Json
+      }
+      verificar_compuertas_mensualidad_guarderia: {
+        Args: { p_periodo_desde: string; p_suscripcion_id: string }
+        Returns: Json
+      }
       verificar_compuertas_pre_cobro: {
         Args: { p_compra_id: string; p_exige_token?: boolean; p_token?: string }
         Returns: Json
@@ -24310,6 +24411,7 @@ export type Database = {
           mensaje: string
         }[]
       }
+      verificar_llave_unica_guarderia: { Args: never; Returns: Json }
       verificar_reloj_para_dia: {
         Args: never
         Returns: {

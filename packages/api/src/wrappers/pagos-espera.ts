@@ -225,3 +225,53 @@ export async function leerEstadoMensualidad(
     ? { ok: true, data: { estado: 'fallida', resuelta: true } }
     : { ok: true, data: { estado: 'esperando_pago', resuelta: false } };
 }
+
+/**
+ * ═══ EL PROGRAMA DE ADIESTRAMIENTO — S108-A ════════════════════════════════
+ *
+ * Misma forma que sus tres hermanos: la espera es **UNA** pieza para los cuatro
+ * sujetos, no cuatro caminos.
+ *
+ * 🔴 El vocabulario derivado es el del bono **y no por parecido**: el programa
+ * tiene los mismos tres finales de pago —se pagó · se venció la ventana · se
+ * reversó— porque comparte el arco, aunque su SALDO no sea fungible. *Lo que lo
+ * hace sujeto propio es cómo se consume, no cómo se paga.*
+ */
+export type EstadoPagoPrograma = 'pendiente' | 'pagado' | 'reembolsado';
+export type EsperaProgramaEstado =
+  | 'pendiente_pago' | 'no_pagado_a_tiempo' | 'pagado' | 'vencido' | 'cancelado';
+
+export type EsperaPrograma = {
+  estado: EsperaProgramaEstado;
+  /** El valor CRUDO de la base, sin traducir. */
+  estadoPago: EstadoPagoPrograma;
+  resuelta: boolean;
+};
+
+export async function leerEstadoPrograma(
+  programaContratadoId: string,
+): Promise<ResultadoWrapper<EsperaPrograma, 'programa_no_visible'>> {
+  const { data, error } = await getClient()
+    .from('programas_contratados')
+    .select('estado, estado_pago, pago_metadata')
+    .eq('id', programaContratadoId).maybeSingle();
+
+  if (error) return { ok: false, codigo: 'programa_no_visible', mensaje: error.message };
+  if (!data) return { ok: false, codigo: 'programa_no_visible', mensaje: 'programa_no_visible' };
+
+  const estadoPago = data.estado_pago as EstadoPagoPrograma;
+  const ciclo = data.estado as 'activo' | 'completado' | 'vencido' | 'cancelado';
+
+  /* Mismo orden que el bono, y por la misma razón: un programa `reembolsado`
+     está ADEMÁS `cancelado`. Preguntar primero por el pago es lo que impide
+     leer un reverso como «se te venció la ventana». */
+  const estado: EsperaProgramaEstado =
+    estadoPago === 'pagado' ? 'pagado'
+    : estadoPago === 'reembolsado' ? 'cancelado'
+    : ciclo === 'cancelado' && bonoNoPagadoATiempo(data.pago_metadata) ? 'no_pagado_a_tiempo'
+    : ciclo === 'cancelado' ? 'cancelado'
+    : ciclo === 'vencido' ? 'vencido'
+    : 'pendiente_pago';
+
+  return { ok: true, data: { estado, estadoPago, resuelta: estado !== 'pendiente_pago' } };
+}

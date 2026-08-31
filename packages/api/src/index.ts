@@ -1421,6 +1421,9 @@ export {
   type EsperaBono, type EsperaBonoEstado, type EstadoPagoBono,
   type EsperaMensualidad, type EstadoMensualidad,
   bonoNoPagadoATiempo,
+  /* S108-A · el cuarto sujeto de la espera. */
+  leerEstadoPrograma,
+  type EsperaPrograma, type EsperaProgramaEstado, type EstadoPagoPrograma,
 } from './wrappers/pagos-espera';
 
 // S104-A · tanda 2 — la invitación de familia (puerta única, cero INSERT desde apps).
@@ -1630,3 +1633,7 @@ export {
   type CancelacionMensualidad,
   type CodigoErrorGuarderiaSuscripcion,
 } from './wrappers/guarderia-suscripcion';
+
+/* S108-A · los programas de adiestramiento, en vocabulario de SESIONES. */
+export { obtenerMisProgramas } from './wrappers/adiestramiento-programa';
+export type { ProgramaConSaldo, CodigoErrorPrograma } from './wrappers/adiestramiento-programa';
