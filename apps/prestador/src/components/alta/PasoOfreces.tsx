@@ -80,6 +80,7 @@ const CLAVE_OFICIO = {
   grooming: 'alta.oficioGrooming',
   paseo: 'alta.oficioPaseo',
   adiestramiento: 'alta.oficioAdiestramiento',
+  guarderia: 'alta.oficioGuarderia',
 } as const satisfies Record<OficioChip, string>;
 
 type Pantalla =

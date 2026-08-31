@@ -35,14 +35,16 @@ type Pincel = {
   tamano?: number;
 };
 
-/** Los cuatro oficios y su glifo del set b′. El adiestramiento se dice
- *  `training` en el registry — el mapa vive acá, en la frontera, y no
- *  se resuelve con un cast. */
+/** Los CINCO oficios y su glifo del set b′. Dos no se llaman igual que su
+ *  oficio —el adiestramiento se dice `training` en el registry— y por eso el
+ *  mapa vive acá, en la frontera, y no se resuelve con un cast. */
 const GLIFO_DE_OFICIO: Record<OficioChip, IconoNombre> = {
   veterinaria: 'veterinaria',
   grooming: 'grooming',
   paseo: 'paseo',
   adiestramiento: 'training',
+  // S109-D · el glifo ya existía y ya se monta en NEGOCIO (mundo Guardería).
+  guarderia: 'guarderia',
 };
 
 /** El glifo del oficio, PELADO (sin contenedor) — 27px por la composición firmada. */
