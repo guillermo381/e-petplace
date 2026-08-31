@@ -1599,6 +1599,8 @@ export {
      todos los lugares (la que P2 necesita: un día sirve si algún lugar puede).
      `obtenerDiasGuarderia` — **por prestador**, la de después de elegir lugar. */
   contratarMensualidadGuarderia,
+  obtenerMisPlanesGuarderia,
+  type PlanGuarderia,
   type MandatoMensualidad,
   obtenerDiasGuarderia,
   type DiaGuarderia,

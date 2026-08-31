@@ -23121,6 +23121,20 @@ export type Database = {
           tramo_recogida_id: string
         }[]
       }
+      obtener_mis_planes_guarderia: {
+        Args: never
+        Returns: {
+          direccion_id: string
+          estado: string
+          mascota_id: string
+          periodo_desde: string
+          periodo_hasta: string
+          precio_mensual: number
+          prestador_id: string
+          prestador_nombre: string
+          suscripcion_id: string
+        }[]
+      }
       obtener_modalidades_por_oficio: {
         Args: never
         Returns: {
