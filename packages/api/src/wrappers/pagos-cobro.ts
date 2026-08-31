@@ -28,7 +28,12 @@ export type CodigoCobro =
      log— a mirar una cita que nunca hubo.* */
   | 'bono_no_existe' | 'bono_ya_pagado' | 'bono_vencido'
   | 'mensualidad_no_existe' | 'mensualidad_no_activa'
-  | 'sin_periodo_por_cobrar' | 'periodo_ya_cobrado';
+  | 'sin_periodo_por_cobrar' | 'periodo_ya_cobrado'
+  /* La compuerta pre-cobro del mes: el mandato existe y el MES no se puede
+     comprometer. Cada causa con su nombre — *«no se pudo» sobre un plan mensual
+     manda a la familia a reintentar algo que va a fallar igual.* */
+  | 'dia_ya_reservado' | 'sin_cupo_en_el_periodo' | 'mascota_no_determinada'
+  | 'sin_medio_autorizado' | 'mes_no_comprometible';
 
 /** 🔴 Lo que vuelve es **señal optimista**, jamás «pagado». */
 export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };

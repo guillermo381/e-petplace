@@ -302,6 +302,24 @@ Deno.serve(async (req) => {
     if ((intentos ?? []).length > 0) {
       return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
     }
+    /* ═══ 🔴 LA COMPUERTA PRE-COBRO DEL MES ════════════════════════════════
+       Medido con un cobro REAL (`DF-2107864`, $100): el débito salió y el acto 2
+       se cayó por `duplicate key` de `(mascota, fecha)` ⇒ **plata tomada, plan
+       sin arrancar, cero días.** El freno existía —«cobrar un mes y no poder dar
+       todos sus días es vender lo que no se tiene»— **del lado equivocado del
+       cobro**. *Un freno que sólo puede actuar cuando la plata ya se movió no
+       evita vender lo que no se tiene: obliga a devolverlo.*
+       La compuerta ENSAYA el acto real en una subtransacción que se deshace, así
+       que no puede divergir de él. */
+    const { data: gm } = await db.rpc('verificar_compuertas_mensualidad_guarderia', {
+      p_suscripcion_id: menId, p_periodo_desde: proximo,
+    });
+    const gate = (gm ?? {}) as Record<string, unknown>;
+    if (gate.ok !== true) {
+      return json({ ok: false, codigo: gate.codigo ?? 'mes_no_comprometible',
+                    detalle: gate.causa ?? null }, 409);
+    }
+
     menPeriodo = proximo;
     menMonto = Number(susc.precio_mensual);
   }
