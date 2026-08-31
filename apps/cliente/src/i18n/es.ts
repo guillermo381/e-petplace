@@ -1100,8 +1100,24 @@ export const clienteEs = {
     resumenUltima: 'La última sesión queda el {{fecha}}.',
     resumenVigencia: 'Tienes {{dias}} días desde hoy para completarlas.',
     resumenMover: 'Puedes mover una sesión con 24 horas de aviso.',
-    comprarPrograma: 'Comprar programa',
+    /* ⭐ S108-C · **La asimetría que el censo encontró y que hoy SÍ se puede
+       curar.** Sus dos hermanas dicen «(simulado)» en el CTA —`plan.contratar`,
+       `paquete.comprar`— y ésta no, aunque las tres pintan el mismo
+       `checkout.simuladoAviso` arriba. *La banda se lee al llegar; el botón se
+       lee en el momento de apretarlo,* y ahí las tres puertas tienen que decir
+       lo mismo. ☠️ Muere junto con las otras dos, en la tanda en que las tres
+       cobren — ni antes ni después. */
+    comprarPrograma: 'Comprar programa (simulado)',
     procesandoPrograma: 'Confirmando tu programa…',
+    /* ☠️ S109-C · Acá vivían `programaExitoTitulo` («Programa agendado») y su
+       detalle, que decía **«Las {{n}} sesiones quedaron en la agenda»**. Eran
+       ciertos mientras `contratar_programa` creaba las citas al comprar; el
+       arco nuevo las mueve a `confirmar_pago_programa` y la frase pasó a
+       afirmar algo falso **sobre la agenda de un profesional**. Se mueven con el
+       motor, en el mismo acto. */
+    programaRegistradoTitulo: 'Tu programa quedó registrado',
+    programaRegistradoDetalle:
+      'Falta completar el pago. Cuando se confirme, agendamos las {{n}} sesiones: la primera el {{primera}} y la última el {{ultima}}.',
     programaExitoTitulo: 'Programa agendado',
     programaExitoDetalle:
       'Las {{n}} sesiones quedaron en la agenda: la primera el {{primera}} y la última el {{ultima}}. Vigencia hasta el {{vigencia}}.',
@@ -1277,6 +1293,8 @@ export const clienteEs = {
     mesNota: 'Pagas el mes completo. Las salidas que no uses no se descuentan.',
     noOfrecido: 'Este paseador no ofrece plan mensual. Puedes reservar suelto o con paquete.',
     contratar: 'Contratar plan (simulado)',
+    /* ⭐ S109-C · La Hoja ya no contrata: LLEVA al checkout. */
+    continuar: 'Continuar',
     exito: 'Plan contratado — {{n}} salidas quedaron agendadas.',
     hubTitulo: 'Mis paseos',
     segProximos: 'Próximos',
@@ -1381,6 +1399,12 @@ export const clienteEs = {
        voz que guardería ya tiene — misma promesa, mismo oficio de decirla.
        ⚠️ `noPagadoATiempo` HOY NO PUEDE OCURRIR (nada de paseo cobra): la
        superficie queda lista para cuando el motor llegue. */
+    checkoutServicio: 'Paquete de {{n}} salidas',
+    presetInvalido: 'Ese tamaño de paquete no existe. Elige otro.',
+    esperaCuerpo: 'Estamos confirmando el pago de tu paquete con el banco.',
+    noPagadoATiempoVoz: 'Se venció el tiempo para completar el pago. No se te cobró nada.',
+    vencidoVoz: 'Ese paquete ya venció.',
+    noEntroVoz: 'El pago no entró y el paquete no quedó comprado. No se te cobró nada.',
     faltaPagar: 'Falta completar el pago de este paquete',
     faltaPagarDetalle: '{{n}} salidas · todavía no se cobró',
     noPagadoATiempo: 'Se venció el tiempo para completar el pago',
@@ -1894,6 +1918,16 @@ export const clienteEs = {
        El nombre es propio y **no se traduce**. La voz de «todavía no» es
        honesta y temporal: el riel está bloqueado por un dato del comercio
        (el `pointOfSale`), medido por la pista D. */
+    /* ☠️ S109-C · Acá vivió `recurrenteSoloTarjeta` («Los planes mensuales se
+       cobran con tarjeta») durante una firma. **Derogada**: el recurrente por
+       DeUna existe, con link mensual.
+       ⭐ Lo que rige: **las dos promesas, cada una al lado de SU opción y ANTES
+       de elegir.** Son distintas de verdad —una se cobra sola, la otra hay que
+       ir a pagarla— y *la segunda no es una limitación que se pueda contar
+       después de cobrar: es un compromiso distinto que la familia toma con el
+       dedo.* */
+    promesaTarjeta: 'Se cobra solo cada mes.',
+    promesaDeuna: 'Cada mes te mandamos un link y lo pagas a mano. Si no lo pagas, el plan no se renueva.',
     deunaFila: 'Deuna',
     /* Por qué el default no pudo ser DeUna. **La firma exige decirlo**: el
        default cae a tarjeta y jamás cambia en silencio. */
@@ -3234,6 +3268,27 @@ export const clienteEs = {
     exitoTitulo: '¡Listo! Tu día está reservado.',
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
   },
+  /* ═══ ⭐ S109-C · EL CHECKOUT DEL PLAN MENSUAL DE PASEO ═══════════════════
+     Los tres avisos van ANTES de pagar y en la misma pantalla — firma del
+     founder. Y el tercero dice **la asimetría con todas las letras**: *un
+     «gestionar» ambiguo que la disimule hace creer que pausar y cancelar son lo
+     mismo, y la familia descubre cuál tiene el día que quiere irse.* */
+  checkoutPlan: {
+    servicio: 'Plan mensual de paseos',
+    antesDePagar: 'Antes de confirmar',
+    /* 🔴 NO se promete un día del mes: el ancla tiene bordes (un plan que
+       arranca un 31 no cae un 31 todos los meses) y **el motor del paseo
+       todavía no publica su próximo cobro**. Se dice la cadencia, que sí es
+       cierta siempre. */
+    cuandoSeCobra: 'Este plan se cobra una vez al mes, mientras siga activo.',
+    avisoPrevio: 'Te avisamos por correo 3 días antes de cada cobro.',
+    /* La asimetría con guardería, dicha y no disimulada. */
+    sePausaNoSeCancela: 'Este plan se PAUSA, no se cancela: cuando lo pauses deja de renovarse, y el mes que ya pagaste sigue en pie. Puedes volver a activarlo cuando quieras.',
+    esperaTitulo: 'Estamos armando tu plan',
+    esperaCuerpo: 'Dejamos tus salidas agendadas para todo el período.',
+    exitoTitulo: 'Tu plan quedó activo',
+    exitoDetalle: 'Pagas ${{precio}} al mes y tus salidas quedan agendadas. Lo administras desde Cuenta › Pagos recurrentes y suscripciones.',
+  },
   logGuarderia: {
     /* El vacío de la FIRMA del founder — se pinta cuando el lector diga
        que no hay ninguna. Hoy vive detrás de `LISTA_DISPONIBLE`. */
@@ -3253,6 +3308,7 @@ export const clienteEs = {
     paqueteListoPrimerDiaDetalle: 'Elige tu primer día · {{n}} estadías por usar',
     paqueteFaltaPagar: 'Falta completar el pago de tu paquete',
     paqueteFaltaPagarDetalle: '{{n}} estadías · toca para completar el pago',
+    paqueteFaltaPagarConReloj: '{{n}} estadías · te quedan {{tiempo}} para completarlo',
     paqueteNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
     paqueteNoPagadoATiempoDetalle: 'No se te cobró nada. Toca para volver a comprarlo.',
     conTuPaquete: 'Con tu paquete',

@@ -585,7 +585,10 @@ export default function CheckoutGuarderia() {
 
           {esMensual ? (
             <>
-              <SeccionMedioDePago medio={medio} />
+              {/* 🔴 `recurrente`: los dos medios prometen cosas distintas y las
+                  dos se dicen ANTES de elegir. El PAQUETE es compra suelta y no
+                  lleva la marca. */}
+              <SeccionMedioDePago medio={medio} recurrente />
               <Texto variante="apoyo">{t('lugarGuarderia.mensualMandato')}</Texto>
             </>
           ) : esPaquete ? (

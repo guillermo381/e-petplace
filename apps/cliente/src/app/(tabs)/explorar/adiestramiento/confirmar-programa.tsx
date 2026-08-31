@@ -116,12 +116,28 @@ export default function ConfirmarPrograma() {
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
           <EstadoVacio
             icono={<Icono nombre="training" tamano={48} />}
-            titulo={t('adiestramiento.programaExitoTitulo')}
-            descripcion={t('adiestramiento.programaExitoDetalle', {
+            /* ═══ 🔴 S109-C · EL TEXTO SE MUEVE CON EL MOTOR ═════════════════
+               ⏪ Decía **«Las {{n}} sesiones quedaron en la agenda»** — y era
+               cierto: `contratar_programa` las creaba al comprar. **Dejó de
+               serlo el día que A publicó el arco nuevo** (`20260905120000`): el
+               programa nace `pendiente` y *las sesiones nacen cuando el pago se
+               confirma*.
+
+               🔴 **Y no es una imprecisión: es una afirmación falsa sobre la
+               agenda de un profesional.** La familia salía creyendo que N
+               horarios estaban tomados y no había ninguno.
+
+               Lo que se dice ahora es lo que hay: **el programa quedó
+               registrado, falta el pago, y las sesiones se agendan cuando se
+               confirme** — con las fechas PREVISTAS nombradas como previstas.
+               *Un texto honesto se mueve en el mismo acto que cambia lo que
+               describe; éste llegó tarde por una sesión y por eso se movió
+               apenas la firma lo permitió.* */
+            titulo={t('adiestramiento.programaRegistradoTitulo')}
+            descripcion={t('adiestramiento.programaRegistradoDetalle', {
               n: String(compra.n_sesiones),
               primera: fmt.format(fechaLocal(compra.primera_sesion)),
               ultima: fmt.format(fechaLocal(compra.ultima_sesion)),
-              vigencia: fmt.format(fechaLocal(compra.vigencia_hasta)),
             })}
             accion={
               <Boton
