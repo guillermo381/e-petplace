@@ -85,6 +85,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 
 const LADO_THUMB = 96;
 
@@ -313,7 +314,13 @@ export default function DuranteGuarderia() {
           <Tarjeta>
             <View style={{ gap: spacing[3] }}>
               <Texto variante="seccion">{t('duranteGuarderia.dondeVa')}</Texto>
-              {punto === null ? (
+              {/* 🔴 S109-D · EL MAPA PUEDE NO ESTAR, Y SE DICE EN PALABRAS.
+                       El flag lo decide `lib/mapa-nativo`. *Un rectángulo gris sin
+                       explicación y una app caída son la misma falta de respeto:
+                       la pantalla tiene que seguir siendo útil sin el mapa.* */}
+              {!MAPA_NATIVO_DISPONIBLE ? (
+                <Texto variante="apoyo">{t('duranteGuarderia.mapaNoDisponible')}</Texto>
+              ) : punto === null ? (
                 /* `null` no es error: es «todavía no lo vemos». **No se muestra
                    un punto viejo** — un mapa que miente sobre dónde está un
                    animal es peor que un mapa ausente. */

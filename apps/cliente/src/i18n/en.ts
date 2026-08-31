@@ -541,6 +541,7 @@ export const clienteEn = {
   },
   // S55-A A3 (D-315): walk detail on the rail.
   paseo: {
+    mapaNoDisponible: 'The map isn’t available in this version of the app.',
     titulo: 'Walk',
     tituloConFecha: 'Walk · {{fecha}}',
     cargando: 'Loading the walk',
@@ -658,6 +659,7 @@ export const clienteEn = {
   },
   // S54-B3.3 — single-item checkout with cart shape
   checkout: {
+    mapaNoDisponible: 'The map isn’t available in this version of the app.',
     titulo: 'Confirm and pay',
     resumen: 'Your walk',
     conPrestador: 'with {{prestador}}',
@@ -1180,6 +1182,7 @@ export const clienteEn = {
   },
   // S56-A D-339 — the home address. GATE PENDIENTE founder (lote S56).
   direccion: {
+    mapaNoDisponible: 'The map isn’t available in this version of the app.',
     titulo: 'Your address',
     voz: "Your home's door — where the walker picks up and brings back your pet.",
     direccionLabel: 'Address',
@@ -1444,6 +1447,7 @@ export const clienteEn = {
   // S101-C — the voice of PAYING, in its own house: "the bank didn't authorise"
   // was never a pantry sentence. Shared by the pantry and by services.
   serie: {
+    mapaNoDisponible: 'The map isn’t available in this version of the app.',
     titulo: 'Automatic delivery',
     queLlega: 'What you get',
     cada: 'Every {{dias}} days',
@@ -2256,6 +2260,7 @@ export const clienteEn = {
     sinDocsDetalle: 'We’re still preparing the documents. We’ll let you know as soon as it’s ready.',
   },
   duranteGuarderia: {
+    mapaNoDisponible: 'The map isn’t available in this version of the app.',
     reservada: 'They haven’t left to pick {{nombre}} up yet.',
     recogidaEnCurso: 'They’re on their way to pick {{nombre}} up.',
     enGuarderia: '{{nombre}} is at daycare.',
