@@ -1567,6 +1567,28 @@ export const clienteEs = {
     /* ⏪ Decía «…Ya lo estamos viendo.» — retirado por criterio del founder
        (25-ago): un borrado fallido no crea NADA que nadie mire. */
     medioBorrarFallo: 'No pudimos borrarla. Prueba de nuevo en un momento.',
+    /* 🔴 S107 · A′ — EL FRENO DE LA GUARDERÍA. **Literal firmado por el founder
+       (30-ago), y su segunda mitad es la corrección de su propia voz:** la
+       primera versión mandaba a *«cambiar el medio de pago del plan»*, y esa
+       pantalla **no existe**. *Prometer una acción que no existe es peor que
+       frenar sin salida.* Manda a escribirnos, que sí es un camino real. */
+    medioConPlanActivo: 'Esta tarjeta paga tu plan de guardería, por eso no se puede borrar. Escríbenos si quieres cambiar el medio de pago de tu plan.',
+    /* 🔴 S107 · FAIL-OPEN CON VOZ. No decimos «error»: la lista sirve. Decimos
+       que no la pudimos contrastar, que es lo único que sabemos. */
+    mediosSinVerificar: 'No pudimos confirmar tus tarjetas con el banco en este momento. Las mostramos como las tenemos guardadas.',
+    /* 🔴 Y LA SALIDA VA EN EL MISMO TEXTO: sin ella, la persona se queda
+       sabiendo que falta una y sin saber qué hacer. No se reactivan — se
+       vuelven a agregar.
+       ⚠️ **SIN EL NÚMERO, y es decisión, no olvido.** El riel **no tiene
+       plurales**: sus keys son literales y `mediosOcultas_one/_other` daría dos
+       claves distintas que `t('cuenta.mediosOcultas')` no encuentra —rompería
+       el typecheck, que es justo lo que las keys tipadas existen para hacer—.
+       *Y la salida barata era peor: una frase con concordancia forzada
+       («No mostramos 1 tarjetas») en el caso MÁS probable, que es exactamente
+       uno.* El contrato pide que el hecho se diga y que la salida esté; las dos
+       están. **Inventar un mecanismo de plurales para un contador es una
+       decisión del riel, no de esta pantalla.** */
+    mediosOcultas: 'No mostramos las tarjetas que tu banco ya no tiene activas. Puedes volver a agregarlas cuando quieras.',
     titulo: 'Tu cuenta',
     // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
     laminaFusion: 'Lámina S74 · la fusión del avatar',

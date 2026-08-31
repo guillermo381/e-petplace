@@ -75,6 +75,23 @@ export type TarjetaVerificada = {
   bin: string | null;
   ultimos4: string | null;
   alias: string | null;
+  /**
+   * 🔴 S107 · **VIENE DEL PROVEEDOR, no de nuestra fila** — `card/list` los
+   * manda (medido: `CONTRATO_CARD_LIST_NUVEI` §1), y por eso una tarjeta que
+   * sólo vive en Nuvei **también los tiene**.
+   *
+   * ⚠️ Nacieron acá para que cambiar la fuente **no perdiera** la voz de
+   * vencimiento que la lista ya mostraba. *Un cambio de fuente que apaga en
+   * silencio una línea que la familia venía leyendo es una regresión sin
+   * síntoma: nadie extraña lo que dejó de aparecer.*
+   */
+  expiraMes: number | null;
+  expiraAnio: number | null;
+  /**
+   * Cuándo la agregó **acá**. 🔴 **`null` en la que sólo vive en el proveedor**,
+   * y es la verdad: nunca la vimos nacer. Sólo lo usa el desempate de la lista.
+   */
+  creadaEn: string | null;
   estadoProveedor: EstadoProveedor;
 };
 
@@ -166,6 +183,14 @@ export async function listarTarjetasVerificadas(): Promise<
       bin: typeof t.bin === 'string' ? t.bin : null,
       ultimos4: typeof t.ultimos4 === 'string' ? t.ultimos4 : null,
       alias: typeof t.alias === 'string' ? t.alias : null,
+      /* 🔴 SE EXIGE ENTERO, y no se convierte lo que no lo sea. La edge ya
+         normaliza (el proveedor manda texto), pero **este es el borde del
+         teléfono**: si algún día llegara `"3"`, aceptarlo acá dejaría un string
+         en un campo `number` y el fallo aparecería lejos, en la aritmética de
+         fechas. *No se saca `NaN` a la superficie: se saca `null`.* */
+      expiraMes: Number.isInteger(t.expira_mes) ? (t.expira_mes as number) : null,
+      expiraAnio: Number.isInteger(t.expira_anio) ? (t.expira_anio as number) : null,
+      creadaEn: typeof t.creada_en === 'string' ? t.creada_en : null,
       estadoProveedor: est === 'valid' ? 'valid' : null,
     });
   }

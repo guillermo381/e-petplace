@@ -58,6 +58,28 @@ export async function listarTarjetasGuardadas(): Promise<
 }
 
 /**
+ * 🔴 S107 · **CÓMO SE NOMBRA LA TARJETA A BORRAR — y es una unión a propósito.**
+ *
+ * · `tarjetaId` — **el camino normal, y el preferido.** El token se resuelve
+ *   server-side y **jamás viaja desde el teléfono**: esa decisión de seguridad
+ *   sigue rigiendo entera.
+ * · `token` — **sólo para la que no tiene fila nuestra.** Con `card/list` como
+ *   fuente (`D-922`) hay tarjetas que viven en el proveedor y no acá; sin este
+ *   camino serían **imborrables**, que es el defecto que `D-922` cierra.
+ *
+ * 🔑 **Nombrar un token no es demostrar que es tuyo, y el servidor no le cree
+ * al teléfono:** por este camino la edge pregunta a `card/list` por los uid de
+ * ESTA persona y sólo sigue si el token aparece ahí. **Si no pudo preguntar, no
+ * borra** (`no_pudimos_verificar`) — fail-**closed**, porque el riesgo acá es
+ * borrar algo ajeno.
+ *
+ * ⚠️ **La unión hace inexpresable mandar los dos.** *Si fueran dos parámetros
+ * opcionales, un llamador podría mandar un id y un token de tarjetas distintas
+ * y la edge elegiría uno en silencio.*
+ */
+export type RefBorrado = { tarjetaId: string } | { token: string };
+
+/**
  * Borra un medio de pago. **Acto server-side** (letra §7): el endpoint del
  * proveedor **y** la fila local, en ese orden.
  *
@@ -67,10 +89,10 @@ export async function listarTarjetasGuardadas(): Promise<
  *    está escondida.*
  */
 export async function borrarTarjetaGuardada(
-  tarjetaId: string,
+  ref: RefBorrado,
 ): Promise<ResultadoWrapper<{ borrada: true }, CodigoBorrado>> {
   const { data, error } = await getClient().functions.invoke('pagos-borrar-tarjeta', {
-    body: { tarjeta_id: tarjetaId },
+    body: 'tarjetaId' in ref ? { tarjeta_id: ref.tarjetaId } : { token: ref.token },
   });
 
   if (error) {
@@ -92,8 +114,34 @@ export async function borrarTarjetaGuardada(
   return { ok: true, data: { borrada: true } };
 }
 
+/**
+ * 🔴 S107 · **ESTA LISTA ESTABA VIEJA, Y SU MODO DE FALLA NO ERA UN ERROR: ERA
+ * UN MENSAJE EQUIVOCADO.**
+ *
+ * Medido el 30-ago contra la edge: devolvía **cinco códigos que esta lista no
+ * tenía** — entre ellos `tarjeta_con_plan_activo`, el freno A′ recién nacido.
+ * El `includes` de abajo los rechazaba y **caían al genérico `error_borrado`**,
+ * cuya voz es *«No pudimos borrarla. Prueba de nuevo en un momento»*.
+ *
+ * ⇒ Un freno que funcionó perfecto se habría leído como **una falla
+ * transitoria**, e invitaba a reintentar algo que va a rebotar siempre. *Peor
+ * que no tener voz: tener la voz de otro.*
+ *
+ * 🔑 Y la lección operativa: **un vocabulario de errores que vive en dos
+ * archivos diverge en cuanto uno de los dos crece.** El que agrega un código en
+ * la edge no ve esta lista, y **ningún typecheck cruza el borde de la red.**
+ * ⚠️ Se re-mide contra la edge (`grep "codigo:"`) cada vez que se le agrega un
+ * rebote — no se recuerda.
+ */
 const CODIGOS_BORRADO = [
-  'sin_sesion', 'sesion_no_verificable', 'datos_invalidos', 'no_es_tu_tarjeta',
-  'proveedor_rechazo', 'proveedor_sin_respuesta', 'borrado_a_medias', 'error_borrado',
+  'metodo', 'sin_sesion', 'sesion_no_verificable', 'datos_invalidos',
+  'no_pudimos_leer', 'no_es_tu_tarjeta',
+  /** A′ · el freno de la guardería: la tarjeta paga un plan activo. **No es un
+   *  fallo y no se reintenta** — la superficie tiene que decirlo con su voz. */
+  'tarjeta_con_plan_activo',
+  'sin_uid_estable', 'no_pudimos_verificar',
+  'proveedor_rechazo', 'proveedor_sin_respuesta', 'borrado_a_medias',
+  /** El único que NO viene de la edge: es el fallback de este wrapper. */
+  'error_borrado',
 ] as const;
 export type CodigoBorrado = (typeof CODIGOS_BORRADO)[number];

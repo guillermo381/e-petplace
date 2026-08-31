@@ -21,7 +21,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Boton, Encabezado, EstadoVacio, EsqueletoGrupo, Hoja, Separador, Texto, spacing, useTheme,
 } from '@epetplace/ui';
-import { listarTarjetasGuardadas, borrarTarjetaGuardada, type TarjetaGuardada } from '@epetplace/api';
+import { listarTarjetasVerificadas, borrarTarjetaGuardada, type TarjetaVerificada } from '@epetplace/api';
 import { FilaMedioDePago, VozVencida, desempatarMedios, nombreDeMarca, vencida } from '@/components/fila-medio-de-pago';
 import { abrirAltaDeTarjeta } from '@/lib/pagos/alta-tarjeta';
 import { useTraduccion } from '@/i18n';
@@ -38,15 +38,43 @@ export default function MediosDePago() {
      lo pone el scroll. */
   const insets = useSafeAreaInsets();
   const [estado, setEstado] = useState<Estado>('cargando');
-  const [medios, setMedios] = useState<TarjetaGuardada[]>([]);
-  const [aBorrar, setABorrar] = useState<TarjetaGuardada | null>(null);
+  const [medios, setMedios] = useState<TarjetaVerificada[]>([]);
+  const [aBorrar, setABorrar] = useState<TarjetaVerificada | null>(null);
   const [borrando, setBorrando] = useState(false);
   const [voz, setVoz] = useState<string | null>(null);
+  /**
+   * 🔴 LOS DOS AVISOS QUE TRAE LA FUENTE NUEVA, y ninguno se puede callar.
+   *
+   * · `verificado:false` — **fail-open**: el proveedor no respondió y la lista
+   *   sale sin contrastar. *Mostrarla igual es la decisión firmada; mostrarla
+   *   **como si estuviera verificada** no lo es.*
+   * · `ocultas > 0` — el filtro binario dejó afuera tarjetas que no están
+   *   `valid`. *Una lista que encoge sin explicación se lee como que perdimos
+   *   una tarjeta*, y la salida real —volver a agregarla— sólo se le ocurre a
+   *   quien sabe qué pasó.
+   */
+  const [sinVerificar, setSinVerificar] = useState(false);
+  const [ocultas, setOcultas] = useState(0);
 
+  /**
+   * 🔴 S107 · `D-922` — **LA FUENTE ES EL PROVEEDOR, NO NUESTRA TABLA.**
+   *
+   * ⏪ Leía `listarTarjetasGuardadas()`, o sea **sólo lo que nosotros
+   * anotamos**. Medido el 28-ago: la Visa …1111 vivía en Nuvei bajo el uid del
+   * founder y **no en nuestra tabla** ⇒ *no se podía ver, y por lo tanto no se
+   * podía borrar.* **Una tarjeta invisible en la pantalla que existe para
+   * administrarlas es la peor clase de desincronía: la que sólo descubre quien
+   * intenta volver a agregarla.*
+   *
+   * ⚠️ **Y esto es lo que hace la pantalla del gate:** acá es donde la huérfana
+   * aparece por primera vez y donde se la puede sacar.
+   */
   const leer = useCallback(async () => {
-    const r = await listarTarjetasGuardadas();
+    const r = await listarTarjetasVerificadas();
     if (!r.ok) { setEstado('error'); return; }
-    setMedios(r.data);
+    setMedios(r.data.tarjetas);
+    setSinVerificar(!r.data.verificado);
+    setOcultas(r.data.ocultasPorEstado);
     setEstado('listo');
   }, []);
 
@@ -67,17 +95,34 @@ export default function MediosDePago() {
   const confirmarBorrado = useCallback(async () => {
     if (!aBorrar) return;
     setBorrando(true);
-    const r = await borrarTarjetaGuardada(aBorrar.id);
+    /* 🔴 `tarjeta_id` CUANDO LO HAY, `token` SÓLO CUANDO NO.
+       *La decisión firmada «el token jamás viaja desde el teléfono» sigue
+       rigiendo para el camino normal.* El token es la salida de la huérfana —
+       la que no tiene fila nuestra— y su pertenencia **la prueba el servidor
+       contra `card/list`**, no este botón. */
+    const r = await borrarTarjetaGuardada(
+      aBorrar.id ? { tarjetaId: aBorrar.id } : { token: aBorrar.token },
+    );
     setBorrando(false);
     setABorrar(null);
-    /* 🔴 La voz dice lo que pasó, y el fallo **habla hacia soporte**: borrar una
-       tarjeta es del servidor, y si falló no hay nada que la familia pueda
-       corregir. */
-    setVoz(r.ok ? t('cuenta.medioBorrado') : t('cuenta.medioBorrarFallo'));
+    /* 🔴 EL FRENO A′ NO ES UN FALLO Y NO SE DICE COMO TAL.
+       *«No pudimos borrarla, probá de nuevo» invitaría a reintentar algo que va
+       a rebotar siempre.* Acá el servidor **sí pudo** y **decidió que no**, por
+       una razón que la familia puede entender y resolver. Todo lo demás sigue
+       hablando hacia soporte: borrar es del servidor, y si falló de verdad no
+       hay nada que ella pueda corregir. */
+    setVoz(
+      r.ok ? t('cuenta.medioBorrado')
+        : r.codigo === 'tarjeta_con_plan_activo' ? t('cuenta.medioConPlanActivo')
+        : t('cuenta.medioBorrarFallo'),
+    );
     await leer();
   }, [aBorrar, leer, t]);
 
   const hayVencida = medios.some((m) => vencida(m) === true);
+  /* Se calcula UNA vez por render, no una vez por fila: `desempatarMedios`
+     recorre la lista entera y llamarlo dentro del `map` lo hacía N². */
+  const desempates = desempatarMedios(medios, (m) => m.token);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -113,13 +158,18 @@ export default function MediosDePago() {
             <View>
               {medios.map((m) => (
                 <FilaMedioDePago
-                  key={m.id}
+                  /* 🔴 LA CLAVE ES EL TOKEN, y con la fuente invertida no es un
+                     detalle: `id` puede ser `null`, y **dos huérfanas
+                     compartirían la misma clave `null`** — React reusaría una
+                     fila para otra tarjeta. *En la pantalla donde se borra, eso
+                     es una fila que dice una cosa y borra otra.* */
+                  key={m.token}
                   tarjeta={m}
                   /* Mismo desempate que en la hoja del checkout: la lista es
                      donde la persona BORRA, así que distinguir dos filas
                      idénticas acá no es comodidad — es lo que evita que borre
                      la que no era. */
-                  desempate={desempatarMedios(medios).get(m.id) ?? null}
+                  desempate={desempates.get(m.token) ?? null}
                   fin={
                     <Boton
                       variante="secundario"
@@ -134,6 +184,21 @@ export default function MediosDePago() {
             <VozVencida visible={hayVencida} />
           </>
         )}
+
+        {/* 🔴 Los dos avisos van DESPUÉS de la lista y en voz de apoyo: explican
+            lo que la persona está viendo, no compiten con ello. Y se dibujan
+            también con la lista vacía — *«no tenés ninguna» y «no pudimos
+            preguntar» son dos cosas muy distintas.* */}
+        {estado === 'listo' && sinVerificar ? (
+          <View style={{ paddingHorizontal: spacing[5] }}>
+            <Texto variante="apoyo">{t('cuenta.mediosSinVerificar')}</Texto>
+          </View>
+        ) : null}
+        {estado === 'listo' && ocultas > 0 ? (
+          <View style={{ paddingHorizontal: spacing[5] }}>
+            <Texto variante="apoyo">{t('cuenta.mediosOcultas')}</Texto>
+          </View>
+        ) : null}
 
         {voz ? (
           <View style={{ paddingHorizontal: spacing[5] }}>

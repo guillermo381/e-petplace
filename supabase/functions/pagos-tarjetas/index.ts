@@ -78,6 +78,30 @@ function json(cuerpo: unknown, status = 200) {
   });
 }
 
+/**
+ * 🔴 EL VENCIMIENTO LLEGA COMO **TEXTO** Y TIENE QUE SALIR COMO NÚMERO-O-NADA.
+ *
+ * Medido en `CONTRATO_CARD_LIST_NUVEI` §1: el proveedor manda `"expiry_month":
+ * "3"` y `"expiry_year": "2030"` — **strings**, no enteros. Nuestra fila local
+ * los guarda `int`.
+ *
+ * ⚠️ **Por qué no alcanza un `Number()` pelado, y es la razón de que esto sea
+ * una función y no una expresión:** `Number("abc")` da `NaN`, y `NaN` viaja por
+ * el JSON como `null`… pero `Number(" ")` da **0**, y un mes 0 es un mes que no
+ * existe. Peor: aguas abajo, `vencida()` construye `new Date(anio, mes, 1)` y
+ * con un `NaN` produce una fecha inválida cuya comparación da **`false`** ⇒
+ * *«no está vencida»*. **Ahí «no sé» se leería como «está bien», que es
+ * exactamente lo que el contrato de `vencida()` existe para impedir.**
+ *
+ * ⇒ Sólo pasa un entero dentro de rango. Todo lo demás es `null`, que la
+ * superficie ya sabe callar.
+ */
+function entero(v: unknown, min: number, max: number): number | null {
+  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v.trim()) : NaN;
+  if (!Number.isInteger(n) || n < min || n > max) return null;
+  return n;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ ok: false, codigo: 'metodo_no_permitido' }, 405);
   if (!SUPABASE_URL || !SERVICE_ROLE || !APP_CODE || !APP_KEY) {
@@ -108,7 +132,7 @@ Deno.serve(async (req) => {
        antes de escribirlo.*
        Y se filtra por PROVEEDOR: esta edge habla con Nuvei, y una tarjeta de
        otro riel no tiene `card/list` que consultar. */
-    .select('id, token, proveedor_uid, marca, bin, ultimos4, alias, creada_en, estado')
+    .select('id, token, proveedor_uid, marca, bin, ultimos4, alias, expira_mes, expira_anio, creada_en, estado')
     .eq('user_id', userId)
     .eq('proveedor', 'nuvei');
   if (eT) return json({ ok: false, codigo: 'no_se_pudo_leer' }, 500);
@@ -187,6 +211,11 @@ Deno.serve(async (req) => {
       tarjetas: tarjetas.map((t) => ({
         id: t.id, token: t.token, marca: t.marca, bin: t.bin,
         ultimos4: t.ultimos4, alias: t.alias,
+        /* En el degradado el vencimiento sale de NUESTRA fila, que es lo único
+           que hay cuando el proveedor no contesta. */
+        expira_mes: entero(t.expira_mes, 1, 12),
+        expira_anio: entero(t.expira_anio, 2000, 2100),
+        creada_en: t.creada_en ?? null,
         /* Sin veredicto del proveedor NO se inventa uno: `null` significa
            «no preguntamos», que es distinto de `valid`. */
         estado_proveedor: null,
@@ -255,6 +284,19 @@ Deno.serve(async (req) => {
         ultimos4: (typeof c.number === 'string' ? c.number : null) ?? l?.ultimos4 ?? null,
         /* 🔴 EL ALIAS ES NUESTRO Y SÓLO NUESTRO: `card/list` no lo trae. */
         alias: l?.alias ?? null,
+        /* 🔴 EL VENCIMIENTO SÍ LO TRAE, y por eso viene del proveedor primero.
+           *Con la fuente invertida, una tarjeta que sólo vive en Nuvei no tiene
+           fila nuestra de donde sacarlo* — y es justo la que hay que describir
+           bien. Nuestra fila queda de respaldo para el caso inverso (la tuvimos,
+           él no lo mandó). Ver `entero()`: llega como texto. */
+        expira_mes: entero(c.expiry_month, 1, 12) ?? entero(l?.expira_mes, 1, 12),
+        expira_anio: entero(c.expiry_year, 2000, 2100) ?? entero(l?.expira_anio, 2000, 2100),
+        /* 🔴 `creada_en` ES NUESTRO Y NO TIENE RESPALDO: es cuándo la agregó
+           acá. **`null` para la huérfana, y eso es la verdad** — nunca la vimos
+           nacer. *Poner la fecha del proveedor sería contestar otra pregunta.*
+           Lo consume el desempate de la lista, que sólo se dibuja cuando dos
+           filas serían idénticas. */
+        creada_en: l?.creada_en ?? null,
         estado_proveedor: 'valid',
       };
     }),

@@ -1266,6 +1266,12 @@ export const clienteEn = {
     medioBorrarCancelar: 'No, keep it',
     medioBorrado: 'Done, we deleted it.',
     medioBorrarFallo: "We couldn't delete it. Try again in a moment.",
+    /* 🔴 S107 · A′. El español lo firmó el founder verbatim; **este inglés es
+       PROPUESTA y va al próximo lote** — es voz emocional (le está diciendo a
+       alguien que no puede hacer algo), y ésas exigen lote aprobado. */
+    medioConPlanActivo: "This card pays for your daycare plan, so it can't be deleted. Write to us if you'd like to change your plan's payment method.",
+    mediosSinVerificar: "We couldn't confirm your cards with your bank right now. We're showing them as we have them saved.",
+    mediosOcultas: "We're not showing the cards your bank no longer has active. You can add them again anytime.",
     titulo: 'Your account',
     // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
     laminaFusion: 'S74 plate · avatar fusion',
