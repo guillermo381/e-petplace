@@ -114,3 +114,45 @@ no se encontró: es lo que nunca entró en la búsqueda.*
 sobre **los dos diccionarios enteros**, y recién después mirar quién la consume.
 Y el corolario que vale para cualquier barrido: *un censo cuyo alcance sale de
 la memoria del que censa tiene el tamaño de su memoria, no el del problema.*
+
+---
+
+## ⑤ LA SEGUNDA LECCIÓN DEPOSITADA (S108-C-4)
+
+> ### Una regla duplicada por copia se cura dos veces o no se cura. Y el comentario que dice «la MISMA regla» es la señal de que hay dos.
+
+**El caso.** El hogar de paseos filtraba el saldo de los paquetes sin mirar el
+pago. Al curarlo, la gemela apareció en `serviciosHogar.ts` — **y su propio
+comentario la delataba**: *«saldo vigente del hogar (la MISMA regla del hub,
+D-343/P16)»*. La copia estaba **declarada**, con su razón y su ficha, por alguien
+que hizo lo correcto al escribirla. Lo que no existía era **un mecanismo que
+obligue a curar las dos**.
+
+**Por qué la segunda es peor que la primera, medido:** `serviciosHogar.ts`
+alimenta el **resumen del Hogar**, o sea la primera pantalla que la familia ve.
+*La copia estaba más cerca del ojo que el original.*
+
+**Lo que la vuelve una lección y no una anécdota:** el comentario que honestamente
+declara una duplicación es, al mismo tiempo, **el mejor localizador de su
+gemela** — y nadie lo estaba usando para eso. ⇒ **Al curar una regla, se busca la
+frase que la nombra**, no sólo el sitio que falló. `grep "MISMA regla"` es más
+barato que el defecto.
+
+**Y encaja con la ley de la sesión** (`S107`, cobrada seis veces): *el censo casi
+siempre encuentra una segunda puerta al mismo defecto.* Acá la puerta venía con
+un cartel puesto.
+
+---
+
+## ⑥ LA REGLA DE TERRITORIO QUE ESTA TANDA FIJÓ (firma del founder)
+
+> **Una pista puede ensanchar un lector ajeno DEL LADO CONSUMIDOR si: ① mide que
+> el dueño no lo tiene, ② avisa en el momento, y ③ deja el commit descartable.**
+
+No es «esperá al dueño». *Esperar habría costado la tanda entera:* sin
+`estadoPago` en `PaqueteSalidas` no había con qué agrupar, y el ensanche eran
+tres líneas aditivas del lado del consumidor — el motor no se tocaba.
+
+⚠️ **Las tres condiciones son conjuntas.** Sin la medición es pisar trabajo en
+vuelo; sin el aviso es un conflicto diferido; sin la descartabilidad es obligar
+al dueño a integrar lo que quizá ya tenía mejor resuelto.
