@@ -23397,6 +23397,16 @@ fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real 
 
 #### D-968 — 🔴 EL GATE SANITARIO NACE APAGADO, Y **SE ENCIENDE ANTES DE LA SALIDA REAL**
 
+> ✏️ **CONFIRMADO POR FIRMA DEL FOUNDER (31-ago-2026) y SUBIDO AL CHECKLIST.**
+> Con estas palabras: **el gate sanitario se ENCIENDE ANTES DE LA SALIDA REAL.
+> Hoy queda apagado, informativo.**
+>
+> 🔑 **Y dejó de vivir sólo acá:** es la **precondición ⑦ de
+> `DEFINICION_SOFTLAUNCH` §3.5**, al lado de las seis de S80. *Una precondición
+> que vive en una ficha suelta no la lee nadie el día del lanzamiento — la
+> lista la carga, no la memoria.*
+
+
 🔴 **ALTA · ENTRA AL CHECKLIST DE LANZAMIENTO.** Firma de la mesa, 29-ago-2026.
 
 **Lo que se apagó es el ENFORCEMENT, no la evaluación** — y la distinción es la ficha entera. `evaluar_requisitos_guarderia` **sigue midiendo todo**: carnet cargado, vigencia, y cada faltante con su código, su estado y su fecha. Lo configurable es **si la compuerta frena o informa**: `app_config.guarderia_gate_sanitario_duro`, que **nace en `false`**.
@@ -24031,6 +24041,13 @@ que aceptó la v1.**
 
 **Dueño:** el founder (contrata la revisión) · A (siembra la v2 con su diff).
 **Disparo:** antes de abrir el soft launch. **Bloquea abrir, NO construir.**
+
+> ✏️ **ENMENDADA POR FIRMA (31-ago-2026): SE MANTIENE FICHADA, SIN APURO.**
+> La razón del founder: **no hay familias reales en la app y todo lo legal va a
+> estar listo antes de salir** ⇒ *el costo de re-aceptación que esta ficha
+> describe es hoy CERO, y crece recién cuando entre la primera familia real.*
+> **La ficha NO se cierra** —la revisión sigue debiéndose— **pero deja de ser
+> urgente.** *Lo que cambió es el reloj, no la obligación.*
 ☠️ **Condición de muerte:** el abogado firma el texto, y lo que corrija entra
 como `v2` con su aviso a las familias que ya aceptaron.
 
