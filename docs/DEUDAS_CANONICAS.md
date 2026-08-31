@@ -2472,6 +2472,44 @@ C, contestada por el founder al ver el primer papel de verdad.)*
 >
 > **Origen de la enmienda:** S86 — C lo nombró al construir la Pizarra, A lo midió. *El wrapper nuevo de esa misma sesión (`pizarra.ts`) nace con el mismo defecto **a propósito y declarado**: cambiar la voz de UN wrapper mientras los otros ~40 siguen en voseo produciría dos acentos adentro de `packages/api`, que es peor que uno consistente y equivocado.*
 
+> **➕ ENMIENDA S107 — LA FICHA NO SUBESTIMA EL ALCANCE; SUBESTIMA EL TAMAÑO. Re-medido.**
+>
+> El founder preguntó, al ver un rebote de guardería salir **en español con la
+> app en inglés**, si la ficha estaba fichada con su alcance real. **Lo está** —
+> ya dice *«el paquete no importa i18n en ningún punto»* y *«todos sus mensajes
+> son español literal»*, y ya declara que **los 193 usos de `.mensaje` en las
+> apps los RENDERIZAN**, así que el universo entero siempre fue alcanzable.
+> **No hay nada que ensanchar en el diagnóstico.**
+>
+> **Lo que SÍ cambió es el número, y bastante:**
+>
+> | | S77 | S107 (31-ago-2026) |
+> |---|---|---|
+> | mapas de mensajes | ~51 declaraciones | **24 mapas** |
+> | **entradas de voz en español fijo** | *no se fijó* | **814** |
+> | de ellas, de guardería | — | **79 (10 %)** en cuatro wrappers |
+>
+> ⚠️ **El «~51» de S77 y el «24» de hoy NO se contradicen: cuentan cosas
+> distintas** —aquél contó declaraciones con un grep ancho, éste cuenta mapas
+> `MENSAJES*`/`REBOTES*` al inicio de línea—. *Se dice en vez de elegir el que
+> conviene: **el número que importa es el de ABAJO, las 814 entradas**, que es
+> el que nadie había fijado y el que mide el trabajo.*
+>
+> 🔴 **Y el dato que ordena la prioridad: guardería sola aporta 79 — el 10 % del
+> total — y NACIÓ ENTERA EN S107.** *La deuda no está quieta: crece con cada
+> oficio nuevo, y cada wrapper que se escribe «como los demás» la agranda a
+> propósito y con razón* (cambiar la voz de uno solo produciría dos acentos
+> adentro del paquete).
+>
+> ⇒ **Eso mueve la ficha de «cuando alguien abra la app en inglés» a «antes del
+> próximo oficio»:** el costo de la cura sube con cada tanda, y **ya se sabe que
+> el siguiente oficio va a sumar otras ~80.**
+>
+> **Medido contra el objeto al cerrar S107:** `packages/api` **sigue sin un solo
+> import de `@epetplace/i18n` ni de `i18next`** — el diagnóstico de S77 rige
+> tal cual, cuatro sesiones después.
+
+
 > **➕ ENMIENDA S99 (adjudicación de mesa, 15-ago-2026) — EVIDENCIA NUEVA DE C, Y LA FRONTERA CON R44 DECLARADA.**
 >
 > C midió cinco voces de error de `packages/api` hard-codeadas en español y
