@@ -71,6 +71,7 @@ import { resolverUrlFotoGaleria } from '@/lib/subir-galeria';
 
 import { useTraduccion } from '@/i18n';
 import { FlechaVolver } from '@/components/flecha-volver';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 
 export default function ComoTeVen() {
   const router = useRouter();
@@ -253,9 +254,19 @@ export default function ComoTeVen() {
              derivación que la familia, así que las dos no pueden
              divergir. Las tres viajan juntas; si falta una, la pieza no
              monta el bloque. */
-          zonaLat={prestador.zona_lat}
-          zonaLon={prestador.zona_lon}
-          zonaRadioM={prestador.zona_radio_m}
+          /* 🔴 S109-D · EL GUARD QUE FALTABA, Y FALTABA JUSTO ACÁ. Medido:
+             de las tres superficies que pasan zona a `FichaPrestador`, las dos
+             del cliente ya lo tenían y **ésta no** — y es la app donde el flag
+             SÍ mide (sonda nativa). ⇒ en un binario sin `geo.API_KEY` el flag
+             daba `false`, esta pantalla no lo consultaba, montaba el `MapView`
+             igual y **mataba la app en hilo nativo**, fuera de toda
+             ErrorBoundary. *El guard faltaba donde más servía.*
+
+             Se aplica NO PASANDO las tres, que es la forma que ya usan sus dos
+             hermanas: cero cambio en la pieza compartida. */
+          zonaLat={MAPA_NATIVO_DISPONIBLE ? prestador.zona_lat : null}
+          zonaLon={MAPA_NATIVO_DISPONIBLE ? prestador.zona_lon : null}
+          zonaRadioM={MAPA_NATIVO_DISPONIBLE ? prestador.zona_radio_m : null}
           /* ① S84-C24 — SIN ZONA, LA PIEZA NO MONTA EL MAPA, y está
              BIEN: la familia tampoco lo vería. La explicación NO va acá
              —sería una prop nueva en la pieza de B, inventada por mí—
