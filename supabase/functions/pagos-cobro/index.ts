@@ -170,7 +170,20 @@ Deno.serve(async (req) => {
       return json({ ok: false, codigo: 'compra_no_existe' }, 409);
     }
     moneda = compra.moneda ?? 'USD';
-  } else {
+  }
+  /* 🔴 ERA UN `else`, Y EL `else` SE COMIÓ AL BONO — medido contra la edge
+     DESPLEGADA, no contra un arnés: un cobro real de paquete volvió
+     `cita_no_existe`. Con dos sujetos `if (hayCompra) … else …` era un XOR
+     correcto; con cuatro, **el `else` deja de significar «la cita» y pasa a
+     significar «todo lo que no es compra»** ⇒ el bono entraba a resolverse
+     como cita, con `citaId = ''`.
+     *Es exactamente la clase que este archivo ya nombra dos bloques más abajo
+     al enumerar el sujeto — y la dejé viva acá arriba. Un `else` no es una
+     rama: es el sujeto por defecto, y el sujeto por defecto siempre es el
+     último que alguien recuerda.*
+     Ningún typecheck lo ve: compila igual y devuelve un código tipado que
+     además suena plausible. **Lo encontró pedir un cobro de verdad.** */
+  if (hayCita) {
     /* La cita no tiene `user_id`: pertenece a una MASCOTA, y el acceso lo dice
        la familia. Se pregunta por el camino de la casa —`user_tiene_acceso_a_mascota`
        vía la vista de la cita— en vez de inventar una regla nueva. */
@@ -317,7 +330,17 @@ Deno.serve(async (req) => {
     iva = desglose.reduce((a, d) => a + Number(d.impuesto ?? 0), 0);
     base = desglose.reduce((a, d) => a + Number(d.subtotal ?? 0) + Number(d.envio ?? 0), 0);
     pedidoDelIntento = desglose[0].pedido_id;
-  } else {
+  }
+  /* 🔴 EL SEGUNDO `else` DE LA MISMA CLASE, en el mismo archivo — y apareció
+     al medir otra vez DESPUÉS de curar el primero. Curado el `else` de la
+     pertenencia, el cobro del bono dejó de decir `cita_no_existe` y pasó a
+     decir `desglose_incompleto`: caía acá, leyendo `cita_desglose` con
+     `citaId = ''`.
+     *Curar el síntoma reportado y no censar la CLASE es media cura* — la otra
+     mitad estaba tres bloques abajo, con un código distinto y también
+     plausible. El censo de `} else {` en los dos rieles se corrió recién
+     entonces: eran exactamente dos, uno por archivo. */
+  if (hayCita) {
     const { data: d } = await db.from('cita_desglose')
       .select('subtotal, impuesto, total, moneda').eq('cita_id', citaId).maybeSingle();
     /* 🔴 FAIL-CLOSED, igual que la compra: **sin desglose congelado no hay

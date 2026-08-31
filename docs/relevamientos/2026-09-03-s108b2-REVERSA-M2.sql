@@ -1,0 +1,18 @@
+-- REVERSA de 20260903140000_s108b2_ancla_dia_de_contratacion.sql
+-- ESCRITA ANTES DE APLICAR.
+--
+-- ⚠️ QUÉ NO DESHACE: los `dia_de_cobro` ya escritos en
+--    `guarderia_suscripciones` QUEDAN. Esta reversa devuelve la función a
+--    `periodo_hasta + 1` pero NO borra la columna (es de la migración de A) ni
+--    los valores. Un plan que ya fijó su día lo conserva escrito y la función
+--    vieja lo ignora ⇒ el dato queda huérfano, no corrupto.
+--
+-- 🔴 Y LO QUE REVERTIR REINTRODUCE: el encadenado que BAJA el día del cobro y
+--    no lo recupera. Una vez que un febrero arrastra el cobro al 28, se queda
+--    en 28 para siempre — y ésa es la fecha en que le sale plata a una familia
+--    todos los meses. No es una regresión de forma: es la fecha del débito.
+--
+--    El cuerpo anterior vive en la migración de A `20260901160000`; revertir es
+--    re-aplicar ESE cuerpo, no escribir uno nuevo de memoria.
+
+-- Sin cuerpo automático a propósito: se re-aplica 20260901160000 tal cual.
