@@ -33,7 +33,8 @@ export type CodigoCobro =
      comprometer. Cada causa con su nombre — *«no se pudo» sobre un plan mensual
      manda a la familia a reintentar algo que va a fallar igual.* */
   | 'dia_ya_reservado' | 'sin_cupo_en_el_periodo' | 'mascota_no_determinada'
-  | 'sin_medio_autorizado' | 'mes_no_comprometible';
+  | 'sin_medio_autorizado' | 'mes_no_comprometible'
+  | 'programa_no_existe' | 'programa_ya_pagado' | 'programa_vencido';
 
 /** 🔴 Lo que vuelve es **señal optimista**, jamás «pagado». */
 export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };
@@ -63,7 +64,13 @@ export type SujetoDeCobro =
      qué mes paga —y cuál se saltea—, que es la misma facultad que el monto:
      no se la damos por una columna distinta.* */
   | { tipo: 'bono'; id: string }
-  | { tipo: 'mensualidad'; id: string };
+  | { tipo: 'mensualidad'; id: string }
+  /* 🔴 EL PROGRAMA DE ADIESTRAMIENTO — S109-B, y entra por un hallazgo del
+     CENSO DEL LADO CREADOR: su arco estaba entero —congelador, compuerta,
+     confirmación, actuador, reverso— **y no había con qué crear su intento.**
+     *Un sujeto que se aplica bien y no se puede crear es un sujeto que nunca va
+     a cobrar, y hoy se lee como completo.* */
+  | { tipo: 'programa'; id: string };
 
 export async function cobrarCompra(
   compraId: string,
@@ -97,6 +104,8 @@ function cuerpoDelSujeto(
     case 'bono': return { bono_id: sujeto.id, tarjeta_id: tarjetaId };
     case 'mensualidad':
       return { guarderia_suscripcion_id: sujeto.id, tarjeta_id: tarjetaId };
+    case 'programa':
+      return { programa_contratado_id: sujeto.id, tarjeta_id: tarjetaId };
     default: {
       const _exhaustivo: never = sujeto;
       return _exhaustivo;
@@ -128,6 +137,16 @@ export async function cobrarMensualidadGuarderia(
   tarjetaId: string,
 ): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
   return cobrarSujeto({ tipo: 'mensualidad', id: suscripcionId }, tarjetaId);
+}
+
+/**
+ * S109-B · EL PROGRAMA DE ADIESTRAMIENTO — su puerta de entrada.
+ */
+export async function cobrarProgramaAdiestramiento(
+  programaContratadoId: string,
+  tarjetaId: string,
+): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
+  return cobrarSujeto({ tipo: 'programa', id: programaContratadoId }, tarjetaId);
 }
 
 export async function cobrarSujeto(

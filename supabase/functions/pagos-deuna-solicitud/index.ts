@@ -97,15 +97,18 @@ Deno.serve(async (req) => {
   const bonoId = typeof body.bono_id === 'string' ? body.bono_id : '';
   const menId = typeof body.guarderia_suscripcion_id === 'string'
     ? body.guarderia_suscripcion_id : '';
+  const progId = typeof body.programa_contratado_id === 'string'
+    ? body.programa_contratado_id : '';
   const hayCompra = UUID_RE.test(compraId);
   const hayCita = UUID_RE.test(citaId);
   const hayBono = UUID_RE.test(bonoId);
   const hayMen = UUID_RE.test(menId);
+  const hayProg = UUID_RE.test(progId);
   /* 🔴 Con dos sujetos `hayCompra === hayCita` era un XOR correcto. **Con
      cuatro deja de decir lo que decía** —dos verdaderos lo satisfacen igual—,
      así que se CUENTA. *Una condición exacta para dos y laxa para cuatro no
      rompe ningún test: sigue compilando y deja pasar.* */
-  if ([hayCompra, hayCita, hayBono, hayMen].filter(Boolean).length !== 1) {
+  if ([hayCompra, hayCita, hayBono, hayMen, hayProg].filter(Boolean).length !== 1) {
     return json({ ok: false, codigo: 'datos_invalidos' }, 400);
   }
 
@@ -172,6 +175,25 @@ Deno.serve(async (req) => {
     }
     if (b.estado !== 'activo') return json({ ok: false, codigo: 'bono_vencido' }, 409);
   }
+
+  /* ═══ 🔴 S109-B · EL PROGRAMA DE ADIESTRAMIENTO ════════════════════════════
+     Su arco estaba entero y **le faltaba la puerta de entrada**: nada creaba su
+     intento. Pertenencia por `user_id` —el programa se contrata para una
+     mascota pero lo compra una persona—, y el mismo hold que el paquete. */
+  if (hayProg) {
+    const { data: pr } = await db.from('programas_contratados')
+      .select('id, user_id, estado, estado_pago, pago_expira_en')
+      .eq('id', progId).maybeSingle();
+    if (!pr || pr.user_id !== userId) {
+      return json({ ok: false, codigo: 'programa_no_existe' }, 409);
+    }
+    if (pr.estado_pago === 'pagado') return json({ ok: false, codigo: 'programa_ya_pagado' }, 409);
+    if (pr.estado_pago !== 'pendiente') return json({ ok: false, codigo: 'programa_no_existe' }, 409);
+    if (pr.pago_expira_en !== null && new Date(pr.pago_expira_en).getTime() <= Date.now()) {
+      return json({ ok: false, codigo: 'programa_vencido' }, 409);
+    }
+  }
+
   if (hayMen) {
     const { data: susc } = await db.from('guarderia_suscripciones')
       .select('id, familia_id, estado, precio_mensual, monto_esperado, periodo_hasta')
@@ -295,10 +317,18 @@ Deno.serve(async (req) => {
     moneda = m;
     monto = menMonto;
   }
+
+  if (hayProg) {
+    const { data: d } = await db.from('programa_desglose')
+      .select('total, moneda').eq('programa_contratado_id', progId).maybeSingle();
+    if (!d) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    monto = Number(d.total ?? 0);
+    moneda = d.moneda ?? 'USD';
+  }
   /* 🔴 Se enumera: con cuatro sujetos el ternario encadenado deja al último
      haciendo de `else`, y el `else` es cómo un sujeto viaja con la referencia
      del otro. */
-  const sujeto = hayCompra ? compraId : hayCita ? citaId : hayBono ? bonoId : menId;
+  const sujeto = hayCompra ? compraId : hayCita ? citaId : hayBono ? bonoId : hayMen ? menId : progId;
   if (!UUID_RE.test(sujeto)) return json({ ok: false, codigo: 'datos_invalidos' }, 400);
   if (!(monto > 0)) return json({ ok: false, codigo: 'monto_invalido' }, 409);
 
@@ -355,6 +385,7 @@ Deno.serve(async (req) => {
     bono_id: hayBono ? bonoId : null,
     guarderia_suscripcion_id: hayMen ? menId : null,
     guarderia_suscripcion_periodo: hayMen ? menPeriodo : null,
+    programa_contratado_id: hayProg ? progId : null,
     proveedor: 'deuna', forma: 'codigo_push', estado: 'iniciado',
     proveedor_referencia: sujeto, referencia_corta: ref,
     monto, moneda,

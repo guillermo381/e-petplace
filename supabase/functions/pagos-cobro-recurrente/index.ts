@@ -101,10 +101,19 @@ function json(cuerpo: unknown, status = 200) {
   });
 }
 
+/* 🔴 EL ÍTEM DEJA DE SER DE DESPENSA. Tenía `recurrencia_id` como llave y el
+   lazo entero lo usaba para rotular, para la compuerta y para el
+   `dev_reference` ⇒ **ningún otro sujeto podía entrar sin disfrazarse.**
+   Ahora la llave es `sujeto` + `sujeto_id`, que los TRES selectores emiten.
+   `recurrencia_id` y `pedido_id` sobreviven como EXTRAS de despensa —los
+   necesita su guard de IVA por ítems— y nadie más los mira. */
 type Item = {
-  recurrencia_id: string; periodo: string; intento_id: string;
+  sujeto: string; sujeto_id: string;
+  periodo: string; intento_id: string;
   user_id: string; tarjeta_id: string | null; monto: number; moneda: string;
   autorizada_en: string | null; reintentos: number;
+  /* extras de despensa, opcionales */
+  recurrencia_id?: string; pedido_id?: string | null;
 };
 
 Deno.serve(async (req) => {
@@ -126,32 +135,47 @@ Deno.serve(async (req) => {
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
 
   // ── LA BASE ELIGE Y CONGELA ─────────────────────────────────────────────
-  const { data: selDespensa, error: eD } = await db.rpc('recurrencias_vencidas_pendientes');
-  if (eD) return json({ ok: false, codigo: 'selector_despensa_fallo', detalle: eD.message }, 500);
+  /* ═══ 🔴 `D-984` · LOS SELECTORES SE ITERAN, NO SE NOMBRAN ════════════════
+     Esto nombraba DOS selectores uno por uno. `mensualidades_vencidas_pendientes`
+     nació en S108-B2 y **nunca fue llamado**: el cron sonaba, corrían los dos de
+     siempre, la mensualidad no se cobraba **y el timbre devolvía `ok:true`**.
+     *El olvido no daba síntoma — daba un conjunto más chico, que se lee igual
+     que «no había nada que cobrar».*
+     ⇒ La BASE dice qué selectores existen y **acá se llaman todos**. Un sujeto
+     recurrente nuevo entra sin tocar este archivo. */
+  const { data: catalogo, error: eC } = await db.rpc('selectores_recurrentes_vivos');
+  if (eC) return json({ ok: false, codigo: 'catalogo_de_selectores_fallo', detalle: eC.message }, 500);
 
-  const { data: selPlanes, error: eP } = await db.rpc('planes_vencidos_pendientes');
-  if (eP) return json({ ok: false, codigo: 'selector_planes_fallo', detalle: eP.message }, 500);
+  const listas: Item[] = [];
+  const frenadasDeSelectores: unknown[] = [];
+  for (const s of (catalogo ?? []) as Array<{ selector: string; sujeto: string }>) {
+    const { data, error } = await db.rpc(s.selector);
+    if (error) {
+      /* 🔴 UN SELECTOR QUE FALLA CORTA LA CORRIDA, y se dice CUÁL. *Seguir con
+         los demás devolvería un resumen que parece completo sobre un sujeto que
+         nadie miró — que es exactamente el defecto que esto viene a cerrar.* */
+      return json({ ok: false, codigo: 'selector_fallo',
+                    selector: s.selector, detalle: error.message }, 500);
+    }
+    const r = (data ?? {}) as Record<string, unknown>;
+    if (!Array.isArray(r.para_cobrar) || !Array.isArray(r.frenadas)) {
+      /* Forma inesperada ⇒ se NOMBRA. Un selector nuevo que devuelva otra cosa
+         no puede pasar como «cero para cobrar». */
+      return json({ ok: false, codigo: 'selector_con_forma_desconocida',
+                    selector: s.selector }, 500);
+    }
+    listas.push(...(r.para_cobrar as Item[]));
+    frenadasDeSelectores.push(...(r.frenadas as unknown[]));
+  }
 
-  const sel = (selDespensa ?? {}) as Record<string, unknown>;
-  const planes = (selPlanes ?? {}) as Record<string, unknown>;
-  const listas = (sel.para_cobrar ?? []) as Item[];
-
-  /* 🔴 LOS PLANES SE FRENAN ENTEROS. Ver la cabecera: su serie no registra
-     medio autorizado, así que la compuerta 5 es inevaluable. **Se declara uno
-     por uno, no como un total** — un número agregado esconde a quién le pasó. */
-  const planesFrenados = ((planes.para_cobrar ?? []) as Array<Record<string, unknown>>)
-    .map((p) => ({
-      suscripcion_id: p.suscripcion_id, periodo: p.periodo,
-      motivo: 'sin_medio_autorizado',
-      porque: 'la suscripcion no registra tarjeta ni autorizada_en; la compuerta 5 de §4bis es inevaluable y no se adivina',
-    }));
-
+  /* ☠️ MURIÓ LA LISTA FIJA DE «PLANES FRENADOS». Frenaba a TODOS los planes acá,
+     en el consumidor, con un motivo escrito a mano. **Ahora cada selector
+     declara sus propias frenadas** —incluido el de planes, que sigue frenando
+     los suyos— y este archivo dejó de decidir por un sujeto que no conoce.
+     *Un freno que vive en el consumidor es un freno que el dueño del sujeto no
+     puede levantar cuando lo cure.* */
   const cobrados: unknown[] = [];
-  const frenados: unknown[] = [
-    ...((sel.frenadas ?? []) as unknown[]),
-    ...((planes.frenadas ?? []) as unknown[]),
-    ...planesFrenados,
-  ];
+  const frenados: unknown[] = [...frenadasDeSelectores];
   let pospuestos = 0;
 
   for (const it of listas) {
@@ -164,7 +188,7 @@ Deno.serve(async (req) => {
        función no puede quedarse cobrando por inercia.* */
     if (!it.tarjeta_id || !it.user_id || !it.autorizada_en) {
       frenados.push({
-        recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+        sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
         motivo: 'raiz_de_autorizacion_incompleta',
         falta: [!it.user_id && 'quien', !it.autorizada_en && 'cuando',
                 !it.tarjeta_id && 'sobre_que_medio'].filter(Boolean),
@@ -176,14 +200,14 @@ Deno.serve(async (req) => {
     const { data: tarjeta } = await db.from('tarjetas_guardadas')
       .select('id, user_id, token, estado, proveedor_uid').eq('id', it.tarjeta_id).maybeSingle();
     if (!tarjeta || tarjeta.user_id !== it.user_id || tarjeta.estado !== 'guardada') {
-      frenados.push({ recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+      frenados.push({ sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
                       motivo: 'medio_no_disponible' });
       continue;
     }
     /* Sin `proveedor_uid` no se puede cobrar esa tarjeta: **no se adivina**. */
     const uidProveedor = (tarjeta as { proveedor_uid?: string | null }).proveedor_uid ?? '';
     if (!uidProveedor) {
-      frenados.push({ recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+      frenados.push({ sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
                       motivo: 'tarjeta_sin_uid' });
       continue;
     }
@@ -194,13 +218,16 @@ Deno.serve(async (req) => {
        —intento en vuelo— es la única defensa cuando no hay nadie mirando.**
        Un cron que corre dos veces no cobra dos veces, y esto es lo que lo
        sostiene. */
-    const { data: g } = await db.rpc('verificar_compuertas_recurrencia', {
-      p_recurrencia_id: it.recurrencia_id, p_periodo: it.periodo,
+    /* 🔴 POR EL INTENTO, no por la serie de despensa. El despachador enruta al
+       verificador de cada sujeto y es **fail-closed con nombre**: un sujeto sin
+       compuerta propia NO pasa «porque no había nada que verificar». */
+    const { data: g } = await db.rpc('verificar_compuertas_del_intento', {
+      p_intento: it.intento_id,
     });
     const gate = (g ?? {}) as Record<string, unknown>;
     if (gate.ok !== true) {
       frenados.push({
-        recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+        sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
         motivo: gate.codigo ?? 'compuerta_sin_codigo',
         no_evaluables: gate.no_evaluables ?? [],
       });
@@ -212,11 +239,17 @@ Deno.serve(async (req) => {
        correcto hoy, pero pasa por una capa más; el desglose es la fuente.*
        Es la misma disciplina de `pagos-cobro`: **el monto se lee, nunca se
        recibe** — ni siquiera de nosotros mismos. */
-    const { data: d } = await db.from('recurrencia_desglose')
-      .select('subtotal, impuesto, envio, total, moneda')
-      .eq('recurrencia_id', it.recurrencia_id).eq('periodo', it.periodo).maybeSingle();
+    /* 🔴 DEL LECTOR UNIFORME, no de `recurrencia_desglose` por nombre: **una
+       tabla nombrada acá era justo lo que ataba el lazo a despensa.**
+       `_desglose_congelado_del_intento` sabe de qué tabla sale el número de cada
+       uno de los siete, y **no devuelve fila** cuando no sabe — que es negativa,
+       no cero. */
+    const { data: dd } = await db.rpc('_desglose_congelado_del_intento', {
+      p_intento: it.intento_id,
+    });
+    const d = Array.isArray(dd) ? dd[0] : dd;
     if (!d) {
-      frenados.push({ recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+      frenados.push({ sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
                       motivo: 'desglose_incompleto' });
       continue;
     }
@@ -251,7 +284,7 @@ Deno.serve(async (req) => {
         motivo_rechazo: `${vIva.codigo}: ${vIva.detalle}`,
         cerrado_en: new Date().toISOString(),
       }).eq('id', it.intento_id);
-      frenados.push({ recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+      frenados.push({ sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
                       motivo: vIva.codigo });
       continue;
     }
@@ -270,10 +303,14 @@ Deno.serve(async (req) => {
           user: { id: uidProveedor, email: 'sin-correo@epetplace.com' },
           order: {
             amount: Number(monto.toFixed(2)),
-            description: `e-PetPlace recurrente ${it.recurrencia_id.slice(0, 8)}`,
+            description: `e-PetPlace ${it.sujeto} ${it.sujeto_id.slice(0, 8)}`,
             /* 🔴 EL SUJETO es la SERIE, y por eso el actuador la reconoce: su
                rama nueva resuelve el intento desde `recurrencia_id`. */
-            dev_reference: it.recurrencia_id,
+            /* 🔴 EL SUJETO, y por eso el actuador lo reconoce: resuelve el
+               intento desde la referencia. Decía `recurrencia_id` fijo — con un
+               sujeto que no fuera despensa habría salido `undefined` y **el
+               callback se quedaba sin a quién apuntar.** */
+            dev_reference: it.sujeto_id,
             /* Los tres del veredicto; `tax_percentage` es el NOMINAL. */
             vat: vIva.vat,
             taxable_amount: vIva.taxable_amount,
@@ -293,7 +330,7 @@ Deno.serve(async (req) => {
         motivo_rechazo: `red: ${String(e).slice(0, 200)}`,
         payload_crudo: { error: String(e) },
       }).eq('id', it.intento_id);
-      frenados.push({ recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+      frenados.push({ sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
                       motivo: 'sin_respuesta', en_vuelo: true });
       continue;
     }
@@ -327,7 +364,7 @@ Deno.serve(async (req) => {
         ultimo_fallo_en: new Date().toISOString(),
         ultimo_fallo_causa: motivo,
       }).eq('id', it.recurrencia_id);
-      frenados.push({ recurrencia_id: it.recurrencia_id, periodo: it.periodo,
+      frenados.push({ sujeto: it.sujeto, sujeto_id: it.sujeto_id, periodo: it.periodo,
                       motivo: 'rechazado', causa: motivo });
       continue;
     }
@@ -342,7 +379,10 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     ambiente: AMBIENTE,
-    fecha: sel.fecha ?? null,
+    /* La fecha la ponía el selector de despensa; ahora la corrida no depende de
+       ninguno en particular. */
+    fecha: new Date().toISOString().slice(0, 10),
+    selectores: ((catalogo ?? []) as Array<{ selector: string }>).map((x) => x.selector),
     disparados: cobrados.length,
     frenados: frenados.length,
     pospuestos_por_techo: pospuestos,

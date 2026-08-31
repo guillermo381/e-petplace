@@ -24,14 +24,23 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 
-const RAIZ = '/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace';
+/* 🔴 DOS RAÍCES, Y NO ES UN DETALLE: la primera versión leía el ARCHIVO desde
+ *    el worktree principal con una ruta fija. Corriendo desde una rama, el gate
+ *    evaluaba el árbol de OTRO — y dio dos verdes sobre un `main` que sí nombra
+ *    los selectores, mientras la rama bajo cambio no nombraba ninguno.
+ *    *Medir un árbol y llamarlo el estado del que estás cambiando es la misma
+ *    familia que medir la propia rama y llamarla `main`.*
+ *    ⇒ El CÓDIGO se lee del repo donde vive este script; los SECRETOS siguen
+ *    saliendo del worktree principal, que es el único que los tiene. */
+const AQUI = new URL('..', import.meta.url).pathname;   // el repo de este script
+const SECRETOS = '/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace';
 const EDGE = 'supabase/functions/pagos-cobro-recurrente/index.ts';
 
 const env = Object.fromEntries(
-  readFileSync(`${RAIZ}/apps/cliente/.env.local`, 'utf8')
+  readFileSync(`${SECRETOS}/apps/cliente/.env.local`, 'utf8')
     .split('\n').filter((l) => l.includes('='))
     .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]));
-const SERVICE = readFileSync(`${RAIZ}/supabase/dev/.env.local`, 'utf8')
+const SERVICE = readFileSync(`${SECRETOS}/supabase/dev/.env.local`, 'utf8')
   .match(/^SUPABASE_SERVICE_ROLE_KEY=(.+)$/m)?.[1]?.trim();
 if (!env.EXPO_PUBLIC_SUPABASE_URL || !SERVICE) {
   console.error('🔴 falta un secreto — el gate NO concluye (y eso no es verde)');
@@ -44,19 +53,36 @@ const db = createClient(env.EXPO_PUBLIC_SUPABASE_URL, SERVICE, { auth: { persist
 const { data: sel, error } = await db.rpc('selectores_recurrentes_vivos');
 if (error) { console.error('🔴 no pude leer los selectores:', error.message); process.exit(2); }
 
-const fuente = readFileSync(`${RAIZ}/${EDGE}`, 'utf8');
-const huerfanos = (sel ?? []).filter((s) => !fuente.includes(`'${s.selector}'`));
+const fuente = readFileSync(`${AQUI}${EDGE}`, 'utf8');
+
+/* 🔴 LA PREGUNTA CAMBIÓ PORQUE LA ARQUITECTURA CAMBIÓ, y se declara para que
+ *    nadie lo lea como un gate ablandado para pasar.
+ *    ANTES la edge nombraba cada selector, así que la pregunta correcta era
+ *    «¿lo nombra?». AHORA los ITERA desde el catálogo, y bajo esa forma
+ *    **«selector huérfano» es inexpresable**: todos se llaman, siempre.
+ *    ⇒ La pregunta pasa a ser la que hoy puede fallar: **¿de verdad itera, y
+ *    no quedó ninguno cableado a mano?** Un `db.rpc('<selector>')` suelto es la
+ *    regresión exacta, y este gate la caza.
+ *    *Un gate cuya pregunta ya no puede fallar no es estricto: es decorativo.* */
+const itera = /rpc\(\s*['"`]selectores_recurrentes_vivos['"`]/.test(fuente);
+const aMano = (sel ?? []).filter((s) =>
+  new RegExp(`rpc\\(\\s*['"\`]${s.selector}['"\`]`).test(fuente));
 
 console.log(`selectores recurrentes en la base: ${(sel ?? []).length}`);
-for (const s of sel ?? []) {
-  const ok = fuente.includes(`'${s.selector}'`);
-  console.log(`  ${ok ? '✓' : '🔴'} ${s.selector.padEnd(36)} ${ok ? 'consumido por la edge' : 'NADIE LO LLAMA'}`);
-}
+for (const s of sel ?? []) console.log(`  · ${s.selector}  (sujeto: ${s.sujeto})`);
+console.log(`\nitera el catálogo: ${itera ? '✓ sí' : '🔴 NO'}`);
+console.log(`cableados a mano:  ${aMano.length === 0 ? '✓ ninguno' : '🔴 ' + aMano.map((x) => x.selector).join(', ')}`);
 
-if (huerfanos.length) {
-  console.error(`\n🔴 ${huerfanos.length} selector(es) que la base tiene y la edge NO consume.`);
-  console.error('   El cron va a devolver ok:true sin cobrar ese sujeto — y eso se lee');
-  console.error('   igual que «no había nada que cobrar». Cablealos en', EDGE);
+if (!itera) {
+  console.error('\n🔴 La edge NO itera `selectores_recurrentes_vivos`.');
+  console.error('   Con la enumeración a mano, un selector nuevo no se llama y el cron');
+  console.error('   devuelve ok:true sin cobrar ese sujeto — que se lee igual que');
+  console.error('   «no había nada que cobrar». Es `D-984`.');
   process.exit(1);
 }
-console.log('\n✓ todos los selectores recurrentes tienen quien los llame');
+if (aMano.length) {
+  console.error(`\n🔴 ${aMano.length} selector(es) cableados a mano además del catálogo.`);
+  console.error('   Se van a llamar DOS veces, y el que se agregue mañana ninguna.');
+  process.exit(1);
+}
+console.log('\n✓ el lazo itera el catálogo y ninguno quedó cableado a mano');
