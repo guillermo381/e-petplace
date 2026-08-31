@@ -78,7 +78,15 @@ Deno.serve(async (req) => {
      medido.* Se acepta por el cuerpo para poder ejercerlo en el momento. */
   const gracia = typeof cuerpo.minutos_de_gracia === 'number'
     ? cuerpo.minutos_de_gracia : 10;
-  const { data: pendientes, error } = await db.rpc('pagos_pendientes_de_conciliar', {
+  /* ═══ 🔴 S108-B2 · EL LECTOR PASA A RESOLVER POR SUJETO ═══════════════════
+     Era `pagos_pendientes_de_conciliar`, cuyo `FROM` es `compras` ⇒ **este
+     barrido sólo podía ver compras**, y su propia rama `sujeto === 'cita'`
+     (más abajo) era inalcanzable desde su lector. Medido antes de cambiar:
+     existían 12 huérfanos con forma de huérfano y el lector veía 6; los 6
+     invisibles eran citas — justo lo que `LETRA_PAGO_CITAS` §4 declara
+     cubierto. *Una rama que su propio lector no puede alimentar se lee como
+     cobertura y no lo es.* */
+  const { data: pendientes, error } = await db.rpc('pagos_huerfanos_por_sujeto', {
     p_minutos_de_gracia: gracia, p_proveedor: 'deuna',
   });
   if (error) {
@@ -88,7 +96,7 @@ Deno.serve(async (req) => {
     console.error('[deuna-barrido] no pude leer candidatos', error.message);
     return Response.json({ ok: false, error: 'sin_candidatos',
       detalle: error.message.includes('p_proveedor')
-        ? 'falta la migracion N3 (pagos_pendientes_de_conciliar con proveedor)'
+        ? 'falta la migracion 20260903100000 (pagos_huerfanos_por_sujeto)'
         : error.message }, { status: 500 });
   }
 
@@ -109,8 +117,12 @@ Deno.serve(async (req) => {
     .map((f) => ({
       intento_id: String(f.intento_id ?? ''),
       proveedor: String(f.proveedor ?? 'deuna'),
-      sujeto: 'compra',
-      sujeto_id: String(f.compra_id ?? ''),
+      /* 🔴 EL SUJETO LO DICE EL LECTOR, ya no se teclea. Estaba fijo en
+         `'compra'` porque era lo único que su lector podía traer; ahora vienen
+         los seis y el rótulo es el del catálogo. *Un sujeto tecleado en el
+         consumidor es el lugar donde el séptimo se vuelve a olvidar.* */
+      sujeto: String(f.sujeto_tipo ?? 'sin_resolver'),
+      sujeto_id: String(f.sujeto_id ?? ''),
       transaction_id: (f.transaction_id as string) ?? null,
       referencia_corta: (f.referencia_corta as string) ?? null,
       creado_en: String(f.creado_en),
@@ -121,7 +133,7 @@ Deno.serve(async (req) => {
        fallaría buscando una fila que no existe, que es un error mudo. */
     .filter((c) => {
       if (c.intento_id) return true;
-      escalados.push(`compra ${c.sujeto_id} (el lector no trajo intento_id)`);
+      escalados.push(`${c.sujeto} ${c.sujeto_id} (el lector no trajo intento_id)`);
       return false;
     });
 

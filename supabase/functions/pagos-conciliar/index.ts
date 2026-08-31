@@ -56,8 +56,12 @@ Deno.serve(async (req) => {
     return new Response('no', { status: 401 });
   }
 
-  const { data: pendientes, error } = await db.rpc('pagos_pendientes_de_conciliar', {
-    p_minutos_de_gracia: 10,
+  /* ═══ 🔴 S108-B2 · EL LECTOR RESUELVE POR SUJETO ══════════════════════════
+     Era `pagos_pendientes_de_conciliar` (`FROM compras`) ⇒ este barrido sólo
+     veía compras. Medido: 12 huérfanos existían, veía 6, y los 6 invisibles
+     eran citas. */
+  const { data: pendientes, error } = await db.rpc('pagos_huerfanos_por_sujeto', {
+    p_minutos_de_gracia: 10, p_proveedor: 'nuvei',
   });
   if (error) {
     console.error('[conciliar] no pude leer candidatos', error);
@@ -67,7 +71,25 @@ Deno.serve(async (req) => {
   const resumen: Record<string, number> = {};
   const escalados: string[] = [];
 
-  for (const p of (pendientes ?? []) as Array<{ compra_id: string; transaction_id: string }>) {
+  for (const p of (pendientes ?? []) as Array<{
+    intento_id: string; sujeto_tipo: string; sujeto_id: string;
+    compra_id: string | null; transaction_id: string;
+  }>) {
+    /* ═══ 🔴 LO QUE EL LECTOR VE Y EL APLICADOR NO CUBRE, SE ESCALA POR NOMBRE
+       `resolver_consulta_activa` está tecleada por COMPRA (`p_compra_id`), así
+       que sólo puede aplicar ese sujeto. Ahora el lector trae los seis.
+       **Encontrar un huérfano que después no se puede aplicar es peor que no
+       encontrarlo** —deja una fila que dice «acá hay algo» y ningún camino—,
+       así que NO se descarta en silencio: se nombra el sujeto y se escala.
+       *Un barrido que filtra lo que no sabe aplicar devuelve el mismo número
+       que antes y parece sano.* Es la deuda del APLICADOR, y queda dicha en la
+       respuesta del barrido en vez de vivir en la cabeza de alguien. */
+    if (p.sujeto_tipo !== 'pedido' || !p.compra_id) {
+      resumen[`aplicador_no_cubre_${p.sujeto_tipo}`] =
+        (resumen[`aplicador_no_cubre_${p.sujeto_tipo}`] ?? 0) + 1;
+      escalados.push(`${p.sujeto_tipo} ${p.sujeto_id} (intento ${p.intento_id}: el aplicador de Nuvei es compra-only)`);
+      continue;
+    }
     let crudo: unknown = null;
     try {
       const r = await fetch(`${BASE}/v2/transaction/${encodeURIComponent(p.transaction_id)}`, {
