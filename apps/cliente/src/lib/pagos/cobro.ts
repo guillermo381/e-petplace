@@ -63,7 +63,13 @@ export type VozDeCobro =
      verde— llevándose puesta la causa que la compuerta se toma el trabajo de
      medir ANTES de mover plata. */
   | 'pago.cobroSesionesNoEntran'
-  | 'pago.cobroProgramaNoCobrable';
+  | 'pago.cobroProgramaNoCobrable'
+  /* ⭐ S109-C · El plan de paseo. **Segunda vez que el guard dispara** — y esta
+     vez la clase ya la conocíamos: la puerta nueva trae sus códigos y el
+     compilador los reclama antes de que salgan sin frase. */
+  | 'pago.cobroPlanNoEsTuyo'
+  | 'pago.cobroPlanNoVigente'
+  | 'pago.cobroPlanNoCobrable';
 
 export type ResultadoCobro = { ok: true } | { ok: false; voz: VozDeCobro };
 
@@ -144,6 +150,29 @@ export async function cobrar(
         return { ok: false, voz: 'pago.cobroSesionesNoEntran' };
       case 'programa_no_cobrable':
         return { ok: false, voz: 'pago.cobroProgramaNoCobrable' };
+
+      /* ── ⭐ EL PLAN DE PASEO ──────────────────────────────────────────────
+         🔴 **`plan_no_existe` NO habla como «no existe», y el dato es de B:**
+         la pertenencia del plan es del **CONTRATANTE**, no de la familia —
+         `suscripciones_servicio` no tiene `familia_id`—, así que **acá cae
+         también un familiar que sí ve el plan y no lo contrató.** *Decirle «ese
+         plan no existe» a alguien que lo está mirando es hacerle dudar de lo
+         que ve.* La frase cubre los dos casos sin negar el plan.
+         ⇒ La regla que deja: **un código que cubre «no está» y «no es tuyo» no
+         puede hablar como si sólo cubriera el primero.** */
+      case 'plan_no_existe':
+        return { ok: false, voz: 'pago.cobroPlanNoEsTuyo' };
+      /* «Ya pagado» no es un error: es «no hace falta». Comparte voz con sus
+         hermanos porque la familia vive lo mismo en los tres. */
+      case 'plan_ya_pagado':
+        return { ok: false, voz: 'pago.cobroYaPagado' };
+      /* ⚠️ **NO comparte voz con `bono_vencido` / `programa_vencido`**: en el
+         plan lo que terminó es su VIGENCIA, no una ventana de pago de quince
+         minutos. *Dos relojes distintos no se cuentan con la misma frase.* */
+      case 'plan_vencido':
+        return { ok: false, voz: 'pago.cobroPlanNoVigente' };
+      case 'plan_no_cobrable':
+        return { ok: false, voz: 'pago.cobroPlanNoCobrable' };
       case 'sin_medio_autorizado':    return { ok: false, voz: 'pago.cobroElegiMedio' };
 
       /* 🔴 EL VEREDICTO DEL EMISOR, y **solo** el veredicto del emisor. No se

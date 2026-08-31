@@ -1969,6 +1969,13 @@ export const clienteEs = {
        accionable — empezar antes. */
     cobroSesionesNoEntran: 'Las sesiones no entran en la vigencia del programa. Prueba con una fecha de inicio más temprana — no se te cobró nada.',
     cobroProgramaNoCobrable: 'Ese programa ya no se puede pagar. Vuelve a contratarlo.',
+    /* 🔴 Cubre DOS casos —no está, o no es tuyo— y por eso no dice «no existe»:
+       el plan lo administra quien lo contrató, y un familiar que lo ve sin
+       haberlo contratado cae acá. *Negarle el plan a alguien que lo está
+       mirando es hacerle dudar de lo que ve.* */
+    cobroPlanNoEsTuyo: 'No encontramos ese plan en tu cuenta. Los planes los administra quien los contrató.',
+    cobroPlanNoVigente: 'Ese plan ya no está vigente.',
+    cobroPlanNoCobrable: 'Ese plan no se puede pagar ahora.',
     sufijoSimulado: ' (simulado)',
     promesaTarjeta: 'Se cobra solo cada mes.',
     promesaDeuna: 'Cada mes te mandamos un link y lo pagas a mano. Si no lo pagas, el plan no se renueva.',
