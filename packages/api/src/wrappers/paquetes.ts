@@ -345,6 +345,13 @@ export interface SaldoPaquete {
   /** El vencimiento más próximo entre los bonos que aportan saldo. */
   vence_el: string | null;
   duracion_minutos: number | null;
+  /**
+   * 🔴 S108-A · hay un paquete comprado **esperando el pago**. `saldo` puede ser
+   * 0 y esto `true` a la vez, y esa combinación es exactamente el caso que la
+   * pantalla tiene que poder decir: *«no tenés saldo» y «falta que se cobre» son
+   * dos frases distintas, y la segunda tiene camino.*
+   */
+  hay_pendiente_de_pago: boolean;
 }
 
 /**
@@ -369,12 +376,18 @@ export async function obtenerSaldoPaquete(input: {
   const hoy = new Intl.DateTimeFormat('en-CA').format(new Date());
   const { data, error } = await supabase
     .from('bonos')
-    .select('unidades_total, unidades_usadas, fecha_vencimiento, duracion_minutos')
+    .select('unidades_total, unidades_usadas, fecha_vencimiento, duracion_minutos, estado_pago')
     .eq('tipo_servicio', 'paseo')
     .eq('prestador_id', input.prestador_id)
     .eq('prestador_servicio_id', input.prestador_servicio_id)
     .eq('estado', 'activo')
-    .eq('estado_pago', 'pagado')
+    /* ☠️ S108-A · CAE `.eq('estado_pago','pagado')` DE LA CONSULTA — pero **NO
+       del cálculo**. Desde que el bono nace `pendiente`, este filtro devolvía
+       `null` y el paquete **desaparecía del flujo de compra y de reserva sin
+       decir nada**: el mismo guard mudo que ya cayó en guardería.
+       🔴 Lo que NO cambia es el invariante: **el saldo sigue contando SÓLO lo
+       pagado.** *Mostrar no es otorgar* — se separa en el bucle de abajo, que es
+       donde se puede distinguir «no tenés saldo» de «falta el pago». */
     .gte('fecha_vencimiento', hoy)
     .or(puerta.filtro);
   if (error) return mapeoError(error.message);
@@ -382,14 +395,26 @@ export async function obtenerSaldoPaquete(input: {
   let saldo = 0;
   let vence: string | null = null;
   let duracion: number | null = null;
+  let hayPendiente = false;
   for (const fila of data ?? []) {
+    /* 🔴 EL INVARIANTE VIVE ACÁ: un paquete sin cobrar **no suma un solo día**.
+       Lo único que gana es voz. */
+    if (fila.estado_pago !== 'pagado') {
+      if (fila.estado_pago === 'pendiente') hayPendiente = true;
+      continue;
+    }
     saldo += Number(fila.unidades_total) - Number(fila.unidades_usadas);
     const v = fila.fecha_vencimiento === null ? null : String(fila.fecha_vencimiento);
     if (v !== null && (vence === null || v < vence)) vence = v;
     if (duracion === null && fila.duracion_minutos !== null) duracion = Number(fila.duracion_minutos);
   }
-  if (saldo <= 0) return { ok: true, data: null };
-  return { ok: true, data: { saldo, vence_el: vence, duracion_minutos: duracion } };
+  /* `null` sigue significando **no hay nada que decir**. Con un paquete
+     esperando el pago sí lo hay, aunque el saldo sea cero. */
+  if (saldo <= 0 && !hayPendiente) return { ok: true, data: null };
+  return {
+    ok: true,
+    data: { saldo, vence_el: vence, duracion_minutos: duracion, hay_pendiente_de_pago: hayPendiente },
+  };
 }
 
 export interface PaseadorConPaquete {
