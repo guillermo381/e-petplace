@@ -885,6 +885,7 @@ export type Database = {
           id: string
           mascota_id: string | null
           observaciones_cliente: string | null
+          pago_expira_en: string | null
           pago_metadata: Json
           precio_por_unidad: number | null
           precio_total: number
@@ -910,6 +911,7 @@ export type Database = {
           id?: string
           mascota_id?: string | null
           observaciones_cliente?: string | null
+          pago_expira_en?: string | null
           pago_metadata?: Json
           precio_por_unidad?: number | null
           precio_total: number
@@ -935,6 +937,7 @@ export type Database = {
           id?: string
           mascota_id?: string | null
           observaciones_cliente?: string | null
+          pago_expira_en?: string | null
           pago_metadata?: Json
           precio_por_unidad?: number | null
           precio_total?: number
@@ -10984,6 +10987,47 @@ export type Database = {
           },
         ]
       }
+      guarderia_suscripcion_desglose: {
+        Row: {
+          congelado_en: string
+          fee_config_id: string | null
+          guarderia_suscripcion_id: string
+          impuesto: number
+          moneda: string
+          periodo: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          congelado_en?: string
+          fee_config_id?: string | null
+          guarderia_suscripcion_id: string
+          impuesto: number
+          moneda: string
+          periodo: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          congelado_en?: string
+          fee_config_id?: string | null
+          guarderia_suscripcion_id?: string
+          impuesto?: number
+          moneda?: string
+          periodo?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_suscripcion_desglose_guarderia_suscripcion_id_fkey"
+            columns: ["guarderia_suscripcion_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_suscripciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guarderia_suscripciones: {
         Row: {
           autorizada_en: string
@@ -13314,6 +13358,8 @@ export type Database = {
           creado_en: string
           estado: string
           forma: string
+          guarderia_suscripcion_id: string | null
+          guarderia_suscripcion_periodo: string | null
           hallazgo: string | null
           hallazgo_en: string | null
           id: string
@@ -13353,6 +13399,8 @@ export type Database = {
           creado_en?: string
           estado?: string
           forma: string
+          guarderia_suscripcion_id?: string | null
+          guarderia_suscripcion_periodo?: string | null
           hallazgo?: string | null
           hallazgo_en?: string | null
           id?: string
@@ -13392,6 +13440,8 @@ export type Database = {
           creado_en?: string
           estado?: string
           forma?: string
+          guarderia_suscripcion_id?: string | null
+          guarderia_suscripcion_periodo?: string | null
           hallazgo?: string | null
           hallazgo_en?: string | null
           id?: string
@@ -13436,6 +13486,13 @@ export type Database = {
             columns: ["compra_id"]
             isOneToOne: false
             referencedRelation: "compras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagos_intentos_guarderia_suscripcion_id_fkey"
+            columns: ["guarderia_suscripcion_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_suscripciones"
             referencedColumns: ["id"]
           },
           {
@@ -21619,7 +21676,11 @@ export type Database = {
         }[]
       }
       cobrar_periodo_mensualidad_guarderia: {
-        Args: { p_periodo_desde?: string; p_suscripcion_id: string }
+        Args: {
+          p_intento_id?: string
+          p_periodo_desde?: string
+          p_suscripcion_id: string
+        }
         Returns: Json
       }
       completar_cita_servicio: {
@@ -21705,6 +21766,10 @@ export type Database = {
         }
         Returns: Json
       }
+      confirmar_pago_paquete_guarderia: {
+        Args: { p_bono_id: string }
+        Returns: Json
+      }
       confirmar_pago_pedido: {
         Args: {
           p_clave_idempotencia: string
@@ -21713,6 +21778,10 @@ export type Database = {
           p_proveedor: string
           p_referencia: string
         }
+        Returns: Json
+      }
+      congelar_desglose_mensualidad_guarderia: {
+        Args: { p_periodo: string; p_suscripcion_id: string }
         Returns: Json
       }
       contar_citas_despegables: {
@@ -22275,6 +22344,7 @@ export type Database = {
           origen_nombre: string
         }[]
       }
+      expirar_bonos_sin_pago: { Args: never; Returns: number }
       expirar_citas_pendientes: { Args: never; Returns: undefined }
       expirar_pedidos_sin_pago: { Args: never; Returns: Json }
       expirar_reservas_vencidas: { Args: never; Returns: Json }
