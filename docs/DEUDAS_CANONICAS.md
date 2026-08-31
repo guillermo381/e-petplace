@@ -23397,6 +23397,16 @@ fallan, SE OMITEN»* y le faltaba el mecanismo. Acá está, con su alcance real 
 
 #### D-968 — 🔴 EL GATE SANITARIO NACE APAGADO, Y **SE ENCIENDE ANTES DE LA SALIDA REAL**
 
+> ✏️ **CONFIRMADO POR FIRMA DEL FOUNDER (31-ago-2026) y SUBIDO AL CHECKLIST.**
+> Con estas palabras: **el gate sanitario se ENCIENDE ANTES DE LA SALIDA REAL.
+> Hoy queda apagado, informativo.**
+>
+> 🔑 **Y dejó de vivir sólo acá:** es la **precondición ⑦ de
+> `DEFINICION_SOFTLAUNCH` §3.5**, al lado de las seis de S80. *Una precondición
+> que vive en una ficha suelta no la lee nadie el día del lanzamiento — la
+> lista la carga, no la memoria.*
+
+
 🔴 **ALTA · ENTRA AL CHECKLIST DE LANZAMIENTO.** Firma de la mesa, 29-ago-2026.
 
 **Lo que se apagó es el ENFORCEMENT, no la evaluación** — y la distinción es la ficha entera. `evaluar_requisitos_guarderia` **sigue midiendo todo**: carnet cargado, vigencia, y cada faltante con su código, su estado y su fecha. Lo configurable es **si la compuerta frena o informa**: `app_config.guarderia_gate_sanitario_duro`, que **nace en `false`**.
@@ -24031,6 +24041,13 @@ que aceptó la v1.**
 
 **Dueño:** el founder (contrata la revisión) · A (siembra la v2 con su diff).
 **Disparo:** antes de abrir el soft launch. **Bloquea abrir, NO construir.**
+
+> ✏️ **ENMENDADA POR FIRMA (31-ago-2026): SE MANTIENE FICHADA, SIN APURO.**
+> La razón del founder: **no hay familias reales en la app y todo lo legal va a
+> estar listo antes de salir** ⇒ *el costo de re-aceptación que esta ficha
+> describe es hoy CERO, y crece recién cuando entre la primera familia real.*
+> **La ficha NO se cierra** —la revisión sigue debiéndose— **pero deja de ser
+> urgente.** *Lo que cambió es el reloj, no la obligación.*
 ☠️ **Condición de muerte:** el abogado firma el texto, y lo que corrija entra
 como `v2` con su aviso a las familias que ya aceptaron.
 
@@ -24065,6 +24082,74 @@ cuál y sería **`D-976`** otra vez.
 ⚠️ **La clase queda abierta aunque la ficha cierre:** *escritor sin lector* no
 se censó fuera de guardería. **Disparo:** al tocar cualquier configurador.
 ☠️ **Condición de muerte:** cerrada — el lector existe, está exportado y medido.
+
+#### D-981 — 🟡 LAS DIRECCIONES SON DE LA PERSONA Y NO DEL HOGAR — frenado con firma, no por olvido
+
+**Origen: S107-A, 31-ago-2026.** Al hacer elegible la dirección de recogida, la
+firma del founder decía *«validarla contra las del hogar»* — y **el hogar no
+existe en el modelo de direcciones**: `direcciones_guardadas` es por `user_id`
+y su RLS también (`dir_own`: `user_id = auth.uid()`).
+
+**Lo que se hizo:** la validación **copió el criterio de la RLS viva en vez de
+inventar uno**. Las tres puertas de guardería validan la dirección contra las de
+**quien reserva**.
+
+🟢 **FIRMA DEL FOUNDER (31-ago): NO se ensancha en esta tanda**, y su razón va
+entera porque es la que hay que releer el día que se reabra:
+
+> **El bono es del hogar y las mascotas también, así que hay precedente para
+> compartir** — pero **ensanchar quién ve la dirección de casa de otra persona
+> es una decisión de privacidad con su propio peso, y no sale de paso en una
+> tanda de guardería.**
+
+⚠️ **LA CONSECUENCIA, escrita para que nadie la descubra en una pantalla:**
+**si la mamá guardó la dirección y el papá reserva, él no la ve — agrega la
+suya.** *No es un defecto: es el alcance elegido.* Duplica una dirección de la
+misma casa, y esa duplicación es el costo aceptado.
+
+**Es la contracara de `D-976` y de la misma familia que `L-439`:** acá **había
+un precedente que invitaba a extender** (el bono del hogar) y **se frenó**,
+porque *un precedente correcto en otro dominio no autoriza el trasplante* —
+compartir un saldo y compartir dónde vive alguien no son la misma pregunta.
+
+**Dueño:** el founder. **Disparo:** una mesa de privacidad propia, o el primer
+reporte real de una familia duplicando la dirección de su casa.
+☠️ **Condición de muerte:** o se firma el ensanche con su letra (qué ve quién,
+y si el que la agregó puede retirarla del hogar), o se declara permanente y la
+pantalla lo dice.
+
+#### D-982 — 🟡 DOS ORQUESTACIONES DE DIRECCIÓN VIVAS: despensa no migró a la pieza que salió de su propio diseño
+
+**Origen: declarada por C al cerrar su tanda, 31-ago-2026** — *no la encontró
+un gate: la declaró quien la produjo.*
+
+Al montar el selector de dirección de guardería, el censo halló que **los
+componentes de despensa ya eran compartidos; lo duplicable era la
+ORQUESTACIÓN**. C la extrajo con el molde de `SeccionMedioDePago` (hook +
+sección, la voz por prop) ⇒ **no es construcción nueva: es la de despensa con
+su voz parametrizada.**
+
+⚠️ **Y despensa NO migró a ella.** Sigue con su bloque inline ⇒ **hay dos
+orquestaciones vivas de la misma cosa** — *exactamente la segunda copia que
+esta casa persigue.*
+
+> ### Dos copias no divergen el día que se escriben: divergen el día que alguien afina una.
+
+**Es la misma clase que `R57` vigila para las superficies de pago** —que dos
+pantallas monten LA MISMA pieza— con la diferencia de que acá **no hay regla que
+lo mida**: `R57` mira el medio de pago, no la dirección.
+
+**Por qué no se migró en la tanda, y es razón buena:** toca **una pantalla viva
+y muy pulida que nadie pidió tocar**, y la migración es mecánica sólo porque la
+pieza salió de su diseño. *Cambiar una pantalla firmada de paso, sin gate, es
+cómo se rompe algo que funcionaba.*
+
+**Dueño:** C (se ofreció) o quien toque el checkout de despensa.
+**Disparo:** la próxima tanda que abra esa pantalla — **o antes, si alguien
+afina una de las dos**, que es el momento en que empiezan a divergir.
+☠️ **Condición de muerte:** despensa monta la pieza extraída y su bloque inline
+muere (Ley 37) · **candidata a ensanchar `R57`** para que la dirección también
+tenga quien la mida.
 
 ### L-439 — DECLARAR UN ATAJO NO LO HACE SEGURO
 

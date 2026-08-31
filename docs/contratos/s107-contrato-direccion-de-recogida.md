@@ -64,6 +64,14 @@ por `user_id` y su RLS también (`dir_own`: `user_id = auth.uid()`).
 inventado.** Consecuencia concreta: *si la mamá guardó la dirección y el papá
 reserva, él no la ve.*
 
-Validar contra las de todos los miembros **ensancharía la audiencia** —le
-mostraría a uno la dirección que guardó otro— y **eso es decisión del founder,
-no de motor.** Se declara acá en vez de resolverse.
+🟢 **FIRMADO POR EL FOUNDER (31-ago): NO se ensancha en esta tanda** — ficha
+**`D-981`**, con su razón:
+
+> **El bono es del hogar y las mascotas también, así que hay precedente para
+> compartir** — pero **ensanchar quién ve la dirección de casa de otra persona
+> es una decisión de privacidad con su propio peso, y no sale de paso en una
+> tanda de guardería.**
+
+⚠️ **Para la pantalla:** *si la mamá guardó la dirección y el papá reserva, él
+agrega la suya.* **No es un defecto: es el alcance elegido**, y la duplicación
+de una dirección de la misma casa es el costo aceptado.

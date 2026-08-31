@@ -288,30 +288,41 @@ la segunda sola suena a que no pasa nada.* **Y este aviso es visible ANTES de
 contratar**: es el documento `protocolo_no_retiro`, que se firma al contratar y
 **no en el momento crítico**.
 
-### §6.4 · 🔴 LO QUE §6 TODAVÍA NECESITA — y son decisiones del founder, no mías
+### §6.4 · 🟢 CERRADA — las tres decisiones, firmadas el 31-ago-2026
 
-Las nombro en vez de resolverlas, porque **ninguna es jurídica: las tres son
-operativas o comerciales**, y una letra que las improvise promete algo que
-nadie va a poder cumplir.
+**① QUIÉN FINANCIA LA ESPERA, y qué pasa cuando se agota.**
 
-1. **¿Quién le paga al refugio a partir del día 15, y hasta cuándo?**
-   Las expensas las **debe** el dueño — eso está resuelto. Lo que no está es
-   quién las **adelanta** mientras el dueño no aparece. 🔴 *Sin esto, el
-   contrato le promete a un refugio una custodia sin plazo que nadie financia,
-   y al descartar el día 60 esa custodia es **indefinida**.* **Es la más
-   urgente de las tres.**
-2. **¿Qué refugio, y qué firma?** Hoy **no existe la red de refugios
-   verificados** que la tabla nombra. Y **el acta de traslado es un SÉPTIMO
-   documento** —entre el prestador (o e-PetPlace) y el refugio— que **no está
-   entre los seis** y no existe. Decisión: ¿el contrato nombra un refugio, un
-   criterio, o «un refugio verificado por e-PetPlace»?
-3. **¿Quién ejecuta las notificaciones y quién declara que llegó el día 15?**
-   El prestador tiene al animal; e-PetPlace tiene el canal. **Si no se nombra a
-   nadie, no lo hace nadie** — y el registro de intentos es justamente la
-   evidencia de diligencia que sostiene todo el protocolo.
+**e-PetPlace ADELANTA las expensas del refugio desde el día 15, hasta un tope
+de USD 300, y el dueño las debe.**
 
-**Lo que sí está resuelto y no hace falta volver a mirar:** los plazos, las
-prohibiciones, y que **no hay disposición**.
+🔴 **Y el tope obliga a decir qué pasa al agotarse, o el texto se contradice:**
+no se puede prometer custodia sin fecha de cierre *y* tener un tope.
+> ### Lo que cambia al agotarse el tope NO es el destino del animal: es quién financia la espera.
+
+**El dueño no pierde el derecho a recuperarlo — pierde el derecho a recuperarlo
+sin pagar.** Al agotarse:
+
+- **el animal se queda donde está**, en custodia del refugio;
+- **e-PetPlace deja de adelantar**;
+- **la recuperación sigue abierta, sin fecha límite, contra el pago de TODAS
+  las expensas documentadas**;
+- **nadie dispone del animal** — las cinco prohibiciones de §6.2 siguen enteras.
+
+⚠️ **EL COSTO, DECLARADO Y NO ESCONDIDO:** desde que el tope se agota, **el
+refugio sostiene al animal sin cobrar**. *Esta letra no elimina ese hecho: lo
+hace explícito y lo saca del contrato con el dueño, donde no correspondía.*
+🔴 **Y por eso es parte de lo que un refugio tiene que ACEPTAR POR ESCRITO el
+día que exista uno verificado** — no un supuesto sobre su buena voluntad.
+
+**② NO SE NOMBRA REFUGIO hasta que exista uno verificado.** La tabla de §6.1
+dice *«un refugio verificado»* y **no nombra a ninguno**, porque hoy no existe
+la red. *Nombrar uno que no aceptó por escrito sería prometer en nombre de un
+tercero.*
+
+**③ E-PETPLACE DECLARA EL DÍA 15 Y EJECUTA LOS AVISOS.** Tiene el canal, y **ese
+registro de intentos es la evidencia de diligencia** que sostiene el protocolo
+entero. *Si no se nombra a nadie, no lo hace nadie* — y el registro que nadie
+llevó es el que falta el día del litigio.
 
 ### 🗺️ MAPA DE INTERPRETACIÓN de §6
 
@@ -323,7 +334,10 @@ prohibiciones, y que **no hay disposición**.
 | **15 días como plazo único** | 🟢 **firma del founder** — el criterio proponía 15/60 y decía literal que *«los plazos exactos los firma el founder»* |
 | **«el animal NUNCA se dispone»** | ⚠️ **INTERPRETACIÓN de A** — es la consecuencia que leo de descartar el segundo tramo. El criterio **no dice esto**: dice que la disposición *«puede abrirse»* al día 60. **Es la línea que el abogado tiene que mirar primero.** |
 | la prohibición 4 vuelta absoluta | ⚠️ **INTERPRETACIÓN de A** — deriva de la anterior |
-| «desde el día 15, sin fecha de cierre» | ⚠️ **INTERPRETACIÓN de A** — el criterio no contempla una custodia sin plazo, y por eso nace la decisión ① de §6.4 |
+| «desde el día 15, sin fecha de cierre» | ⚠️ **INTERPRETACIÓN de A**, y **§6.4 la cerró**: sigue sin fecha de cierre para el DUEÑO, y con tope para lo que e-PetPlace adelanta |
+| **el tope de USD 300 y el adelanto** | 🟢 **firma del founder** (31-ago) |
+| **qué pasa al agotarse el tope** | 🟢 **firma del founder** sobre la opción (c) — *pierde el derecho a recuperarlo SIN PAGAR, no el derecho a recuperarlo* |
+| «el refugio sostiene al animal sin cobrar» | ⚠️ **INTERPRETACIÓN de A** — es la consecuencia aritmética de ① y va **declarada**, no resuelta: *un tope que sólo mueve el problema es peor que ninguno, porque parece resuelto* |
 
 <details><summary>~~§6 v1.0 — texto muerto, conservado como historia~~</summary>
 
