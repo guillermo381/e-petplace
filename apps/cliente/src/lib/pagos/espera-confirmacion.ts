@@ -32,8 +32,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import {
-  leerEstadoCompra, leerEstadoCita,
+  leerEstadoCompra, leerEstadoCita, leerEstadoBono, leerEstadoMensualidad,
   type EstadoCompra, type EstadoCita,
+  type EsperaBonoEstado, type EstadoMensualidad,
 } from '@epetplace/api';
 
 /** Arranca a 2 s y se abre hasta 15 s. */
@@ -64,14 +65,32 @@ export const TOPE_MS = 90_000;
  *    afina, el de la otra no, y un día el paseo tarda más que la despensa sin
  *    que nadie sepa por qué.*
  */
-export type SujetoEnEspera = { tipo: 'compra'; id: string } | { tipo: 'cita'; id: string };
+/**
+ * ⭐ **S108-C · LOS CUATRO SUJETOS.** El paquete y la mensualidad de guardería
+ * entran por la MISMA pieza que la compra de despensa y la cita de servicio.
+ *
+ * *Un cuarto hook para el cuarto sujeto habría sido el lugar exacto donde las
+ * puertas empiezan a comportarse distinto: el backoff de una se afina, el de la
+ * otra no, y un día el paquete tarda más que el paseo sin que nadie sepa por
+ * qué.* La razón que ya estaba escrita para el segundo vale igual para el
+ * cuarto — y por eso acá sólo crece la unión y el `switch` de abajo.
+ */
+export type SujetoEnEspera =
+  | { tipo: 'compra'; id: string }
+  | { tipo: 'cita'; id: string }
+  | { tipo: 'bono'; id: string }
+  /* 🔴 **`mensualidad`, no `suscripcion`** — es el nombre que le puso
+     `SujetoDeCobro` (S108-B) y el que usa el discriminador del motor. *Dos
+     palabras para el mismo sujeto es el lugar exacto donde una pieza empieza a
+     esperar algo que otra no cobró.* */
+  | { tipo: 'mensualidad'; id: string };
 
 export type Espera =
   | { fase: 'mirando' }
   /** 🔴 El estado viaja **en el vocabulario de su sujeto**, sin traducirse.
    *  *«pagada» es la única palabra que los dos comparten, y es la única que
    *  esta pantalla necesita comparar.* */
-  | { fase: 'resuelta'; estado: EstadoCompra | EstadoCita | null }
+  | { fase: 'resuelta'; estado: EstadoCompra | EstadoCita | EsperaBonoEstado | EstadoMensualidad | null }
   | { fase: 'sigue_abierta' };
 
 /**
@@ -171,7 +190,18 @@ export function useEsperaDeConfirmacion(
         return;
       }
 
-      const r = tipo === 'compra' ? await leerEstadoCompra(id) : await leerEstadoCita(id);
+      /* 🔴 **`switch` EXHAUSTIVO, no una cadena de ternarios.** Con dos sujetos
+         un ternario alcanzaba; con cuatro, *un sujeto nuevo que nadie agregue
+         acá caería en el brazo de otro y esta pieza sondearía la tabla
+         equivocada sin fallar* — devolvería el estado de un objeto ajeno y la
+         pantalla lo leería como veredicto. El `never` obliga a que el
+         compilador lo cace. */
+      const r =
+        tipo === 'compra' ? await leerEstadoCompra(id)
+        : tipo === 'cita' ? await leerEstadoCita(id)
+        : tipo === 'bono' ? await leerEstadoBono(id)
+        : tipo === 'mensualidad' ? await leerEstadoMensualidad(id)
+        : ((): never => { throw new Error(`sujeto no contemplado: ${String(tipo)}`); })();
       if (!vivo.current) return;
 
       if (r.ok && r.data.resuelta) {

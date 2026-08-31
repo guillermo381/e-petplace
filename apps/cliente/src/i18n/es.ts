@@ -3170,7 +3170,25 @@ export const clienteEs = {
     mensualCuandoRepite: 'Después, una vez por mes.',
     mensualCuandoCancela: 'Lo cancelas desde Cuenta, cuando quieras.',
     paqueteServicio: 'Paquete de {{n}} estadías',
-    paqueteSimulado: 'El cobro de este paquete todavía es simulado. Te lo decimos porque es la verdad.',
+    /* ☠️ S108-C · Acá vivía `paqueteSimulado` — «El cobro de este paquete
+       todavía es simulado. Te lo decimos porque es la verdad.» **Era cierta, y
+       por eso estaba escrita.** Muere en la misma tanda en que el cobro real se
+       enchufa: *un texto honesto se retira cuando cambia lo que describe.* */
+    /* ⭐ LA ESPERA — con voz. Cada sujeto dice qué está pasando. */
+    esperaPaquete: 'Estamos confirmando el pago de tu paquete con el banco.',
+    esperaMensual: 'Estamos confirmando el primer cobro de tu plan con el banco.',
+    agendandoTitulo: 'Ya está pagado',
+    agendandoCuerpo: 'Estamos agendando tu primer día.',
+    /* Cuando el paquete se pagó y todavía no hay día elegido. */
+    paqueteElegiDia: 'Tu paquete está listo. Elige tu primer día cuando quieras.',
+    /* 🔴 El paquete SÍ se compró: se nombra antes que el problema del día. */
+    paqueteDiaSeOcupo: 'Tu paquete quedó pagado, pero ese día se ocupó mientras cobrábamos: {{mensaje}} Tu saldo está intacto — elige otro día desde Guardería.',
+    /* Los tres finales del cobro del paquete, cada uno con su frase. */
+    paqueteNoPagadoATiempo: 'Se venció el tiempo para completar el pago y el paquete se dio de baja. No se te cobró nada.',
+    paqueteVencido: 'Ese paquete ya venció.',
+    paqueteNoEntro: 'El pago no entró y el paquete no quedó comprado. No se te cobró nada.',
+    mensualNoEntro: 'El pago no entró, así que el plan no quedó activo. No se te cobró nada. Prueba con otra tarjeta.',
+    mensualCancelada: 'El plan no quedó activo.',
     /* ⭐ S108-C · Las tres voces del total que todavía no se pudo leer.
        *No se paga un total que la pantalla no conoce, y el CTA apagado
        dice cuál de las tres cosas pasó.* */
