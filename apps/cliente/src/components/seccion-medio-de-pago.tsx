@@ -126,21 +126,27 @@ export type MedioDePago = {
  *        pregunta.*
  */
 /**
- * ⭐ **S109-C · `soloTarjeta` — LO RECURRENTE SE COBRA CON TARJETA.**
+ * ⭐ **S109-C · `recurrente` — LAS DOS PROMESAS, EN EL MOMENTO DE ELEGIR.**
  *
- * Firma del founder: **DeUna no hace recurrencia.** Un plan mensual se cobra
- * solo, sin nadie presente; DeUna necesita que una persona teclee seis dígitos
- * en otra app. *No es una limitación que se pueda esconder detrás de una opción
- * que después no va a poder cobrar.*
+ * ⏪ **Acá vivió `soloTarjeta` durante una firma**: DeUna quedaba fuera de lo
+ * recurrente. **Derogado**: el recurrente por DeUna existe, con **link mensual**.
+ * *Lo viejo muere en el mismo acto* (Ley 37) — el modo no se queda «por si
+ * acaso», porque un modo que ya no rige es un interruptor que alguien va a
+ * encender creyendo que hace lo que su nombre dice.
  *
- * 🔴 **Y no se saca en silencio.** La sección lo DICE en una línea corta y sin
- * culpar a nadie — misma regla que la asimetría de pausar-vs-cancelar: *una
- * opción que desaparece sin explicación se lee como que la app se rompió, y la
- * familia busca el error en su teléfono.*
+ * Lo que rige ahora: en un cobro que se repite **los dos medios prometen cosas
+ * distintas**, y las dos se leen **al lado de su opción, ANTES de elegir** — no
+ * en una nota al pie ni detrás de un «?».
+ * · **Tarjeta:** se cobra solo cada mes.
+ * · **DeUna:** cada mes llega un link y se paga a mano; si no se paga, el plan
+ *   no se renueva.
  *
- * Las compras sueltas —bono, paquete, programa— **no cambian**: ahí DeUna sigue.
+ * 🔴 *La segunda no es una limitación que se pueda contar después de cobrar: es
+ * un compromiso distinto que la familia toma con el dedo.* Que las dos frases
+ * vivan pegadas a su opción es lo que hace que sea una elección y no una
+ * sorpresa.
  */
-export function useMedioDePago(activo: boolean, soloTarjeta = false): MedioDePago {
+export function useMedioDePago(activo: boolean): MedioDePago {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const [medios, setMedios] = useState<TarjetaGuardada[]>([]);
@@ -174,11 +180,6 @@ export function useMedioDePago(activo: boolean, soloTarjeta = false): MedioDePag
          Firma del founder: *«por defecto a menos que el usuario lo cambie»*.
          **El default es para quien no eligió nunca, no un reset por compra.** */
       if (pref.medio === 'deuna') {
-        /* 🔴 Eligió DeUna alguna vez y esto es un cobro que se repite: **no se
-           hereda la preferencia**, y se dice por qué. *Arrastrar acá una
-           elección tomada para una compra suelta la dejaría con un medio que
-           el día del cobro automático no puede responder.* */
-        if (soloTarjeta) { setVozDefault(t('pago.recurrenteSoloTarjeta')); return null; }
         if (DEUNA_ELEGIBLE) return { tipo: 'deuna' };
         /* Eligió DeUna y hoy no se puede: **se dice, no se cambia en
            silencio** (borde 1 de la firma). Y NO se cae a una tarjeta
@@ -195,12 +196,6 @@ export function useMedioDePago(activo: boolean, soloTarjeta = false): MedioDePag
       }
 
       /* ── ② NUNCA ELIGIÓ (`null`) ⇒ RIGE EL DEFAULT ───────────────────────── */
-      /* En lo recurrente el default JAMÁS es DeUna. Con una sola tarjeta se
-         preselecciona, como abajo; con dos o más no se elige por la familia. */
-      if (soloTarjeta) {
-        setVozDefault(t('pago.recurrenteSoloTarjeta'));
-        return rTarjetas.data.length === 1 ? { tipo: 'tarjeta', id: rTarjetas.data[0].id } : null;
-      }
       if (DEUNA_ELEGIBLE) return { tipo: 'deuna' };
 
       /* Borde 1 vigente: DeUna todavía no se puede elegir ⇒ **el default cae a
@@ -212,7 +207,7 @@ export function useMedioDePago(activo: boolean, soloTarjeta = false): MedioDePag
         ? { tipo: 'tarjeta', id: rTarjetas.data[0].id }
         : null;
     });
-  }, [t, soloTarjeta]);
+  }, [t]);
 
   useEffect(() => {
     if (activo) void releer();
@@ -265,11 +260,15 @@ export function useMedioDePago(activo: boolean, soloTarjeta = false): MedioDePag
 /** ② La sección, dentro de su tarjeta. Va en el scroll de la pantalla. */
 export function SeccionMedioDePago({
   medio,
-  soloTarjeta = false,
+  recurrente = false,
 }: {
   medio: MedioDePago;
-  /** Cobro que se repite ⇒ DeUna no se ofrece, **y la sección dice por qué**. */
-  soloTarjeta?: boolean;
+  /**
+   * Cobro que SE REPITE ⇒ cada opción muestra **su promesa** antes de elegirse.
+   * *Las dos son distintas y las dos se dicen en el momento de elegir, no
+   * después de pagar.*
+   */
+  recurrente?: boolean;
 }) {
   const { t } = useTraduccion();
   const { medios, elegido } = medio;
@@ -400,13 +399,37 @@ export function SeccionMedioDePago({
           {/* ⭐ S109-C · En lo recurrente la fila **no se dibuja**, y en su lugar
               va la razón. *Sacarla en silencio dejaría a quien la usa siempre
               buscándola en una lista donde ya no está.* */}
-          {soloTarjeta ? (
-            <Texto variante="apoyo">{t('pago.recurrenteSoloTarjeta')}</Texto>
-          ) : (
-            <FilaDeUna
-              onPress={DEUNA_ELEGIBLE ? () => medio.elegir({ tipo: 'deuna' }) : undefined}
-            />
-          )}
+          {/* 🔴 **EN LO RECURRENTE, HOY, LA FILA NO SE PUEDE TOCAR — y no es una
+              decisión de producto, es lo que el motor admite.** Medido:
+              `guarderia_suscripciones.tarjeta_id` es **NOT NULL**
+              (`20260830200000:61`) y `contratar_mensualidad_guarderia` **exige
+              una tarjeta**, así que un mandato por DeUna es **inexpresable**.
+
+              *Dejarla tocable sería el peor de los dos males: la familia elige
+              DeUna y se topa con el botón apagado diciéndole «elegí con qué
+              tarjeta se cobra cada mes» — un callejón que la manda a corregir
+              algo que hizo bien.* Sin `onPress` la fila vuelve sola a su estado
+              de «muy pronto», que es el mecanismo que este archivo ya tenía.
+
+              ⚠️ **La promesa se dice igual**, y es a propósito: la firma del
+              founder ya declaró qué va a significar pagar un plan con DeUna, y
+              *que la familia sepa hacia dónde va el producto no depende de que
+              hoy pueda tocarlo.* El día que el motor lo admita, esto es sacar
+              una condición. */}
+          <FilaDeUna
+            onPress={
+              DEUNA_ELEGIBLE && !recurrente ? () => medio.elegir({ tipo: 'deuna' }) : undefined
+            }
+          />
+          {/* ⭐ LA PROMESA DE DEUNA, pegada a su fila y ANTES de elegirla. */}
+          {recurrente ? <Texto variante="apoyo">{t('pago.promesaDeuna')}</Texto> : null}
+          {/* ⭐ LA PROMESA DE LA TARJETA, encabezando su grupo. Va una vez y no
+              por fila: *la promesa es del MEDIO, no de cada plástico* — y
+              repetirla en cinco filas la volvería ruido y dejaría de leerse,
+              que es justo lo contrario de lo que se busca. */}
+          {recurrente && medios.length > 0 ? (
+            <Texto variante="apoyo">{t('pago.promesaTarjeta')}</Texto>
+          ) : null}
           {/* El desempate se calcula UNA vez para toda la lista: la fila no
               puede saber que tiene una gemela. */}
           {(() => {

@@ -81,9 +81,7 @@ export default function CheckoutGuarderia() {
      `useMedioDePago(esMensual)` porque el paquete no cobraba: nacía `pagado`
      con `pago_simulado`. Desde que el cobro es real, **una compra sin medio no
      es una compra**. */
-  /* 🔴 **La MENSUALIDAD va con `soloTarjeta`** (firma del founder, S109): DeUna
-     no hace recurrencia. El PAQUETE es compra suelta y no cambia. */
-  const medio = useMedioDePago(esMensual || esPaquete, esMensual);
+  const medio = useMedioDePago(esMensual || esPaquete);
   /**
    * ⭐ **DE DÓNDE LO PASAN A BUSCAR.** La pieza extraída de despensa — la
    * pregunta es la misma (a qué dirección va alguien) y sólo cambia la voz.
@@ -587,7 +585,10 @@ export default function CheckoutGuarderia() {
 
           {esMensual ? (
             <>
-              <SeccionMedioDePago medio={medio} soloTarjeta />
+              {/* 🔴 `recurrente`: los dos medios prometen cosas distintas y las
+                  dos se dicen ANTES de elegir. El PAQUETE es compra suelta y no
+                  lleva la marca. */}
+              <SeccionMedioDePago medio={medio} recurrente />
               <Texto variante="apoyo">{t('lugarGuarderia.mensualMandato')}</Texto>
             </>
           ) : esPaquete ? (

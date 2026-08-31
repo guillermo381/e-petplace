@@ -1455,7 +1455,8 @@ export const clienteEn = {
     pagar: 'Pay',
     sinMedios: "You haven't saved a card yet.",
     elegiMedio: 'Choose which one to pay with.',
-    recurrenteSoloTarjeta: 'Monthly plans are charged to a card.',
+    promesaTarjeta: 'Charged automatically every month.',
+    promesaDeuna: 'Each month we send you a link and you pay it yourself. If you don’t pay it, the plan won’t renew.',
     deunaFila: 'Deuna',
     deunaNoDisponibleAhora: "Deuna isn't available yet — for now you pay by card.",
     /* ⏪ Fue `deunaPronto`: "Soon you'll be able to pay from your Deuna app."

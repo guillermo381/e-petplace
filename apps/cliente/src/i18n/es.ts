@@ -1903,8 +1903,16 @@ export const clienteEs = {
        El nombre es propio y **no se traduce**. La voz de «todavía no» es
        honesta y temporal: el riel está bloqueado por un dato del comercio
        (el `pointOfSale`), medido por la pista D. */
-    /* ⭐ S109-C · Por qué DeUna no está acá. Corta, y sin culpar a nadie. */
-    recurrenteSoloTarjeta: 'Los planes mensuales se cobran con tarjeta.',
+    /* ☠️ S109-C · Acá vivió `recurrenteSoloTarjeta` («Los planes mensuales se
+       cobran con tarjeta») durante una firma. **Derogada**: el recurrente por
+       DeUna existe, con link mensual.
+       ⭐ Lo que rige: **las dos promesas, cada una al lado de SU opción y ANTES
+       de elegir.** Son distintas de verdad —una se cobra sola, la otra hay que
+       ir a pagarla— y *la segunda no es una limitación que se pueda contar
+       después de cobrar: es un compromiso distinto que la familia toma con el
+       dedo.* */
+    promesaTarjeta: 'Se cobra solo cada mes.',
+    promesaDeuna: 'Cada mes te mandamos un link y lo pagas a mano. Si no lo pagas, el plan no se renueva.',
     deunaFila: 'Deuna',
     /* Por qué el default no pudo ser DeUna. **La firma exige decirlo**: el
        default cae a tarjeta y jamás cambia en silencio. */
