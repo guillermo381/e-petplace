@@ -74,7 +74,15 @@ export default function PagarMensualidad() {
       if (!r.ok && r.codigo === 'sin_sesion') {
         router.replace({
           pathname: '/login',
-          params: { volverA: `/pagos/mensualidad?suscripcionId=${suscripcionId}` },
+          /* ⭐ **EL PATHNAME Y SU SUJETO VIAJAN SEPARADOS.**
+             ⏪ Iba como una cadena con query armada a mano
+             (`'/pagos/mensualidad?suscripcionId=…'`). *Expo-router tipa sus
+             rutas y una cadena no es una ruta suya* — el typecheck lo rebotaba
+             del otro lado, en el `router.replace` del login.
+             ⚠️ Y **la cura no fue un cast**: separarlos es lo que le permite al
+             login validar el destino contra su lista blanca. Con el query
+             pegado, «es una de las nuestras» ya no se podía preguntar. */
+          params: { volverA: '/pagos/mensualidad', suscripcionId },
         });
         return;
       }
