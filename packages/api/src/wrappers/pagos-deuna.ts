@@ -65,7 +65,18 @@ export type CodigoDeuna =
  */
 export type SujetoDeuna =
   | { tipo: 'compra'; id: string }
-  | { tipo: 'cita'; id: string };
+  | { tipo: 'cita'; id: string }
+  /* ═══ 🔴 S109-B · LOS TRES QUE FALTABAN, y el hueco era del LADO CREADOR ═══
+     La edge `pagos-deuna-solicitud` acepta `bono_id`, `guarderia_suscripcion_id`
+     y `programa_contratado_id` **desde S108**, y este tipo no los podía pedir.
+     *Un sujeto que el motor sabe cobrar y el wrapper no sabe nombrar es un
+     sujeto que nunca va a cobrar por ese riel* — la misma clase que el censo
+     del lado creador encontró en `programa`.
+     ⚠️ Y esto es lo que destraba el ejercicio de DeUna: por firma del founder,
+     el riel se estrena con el **PAQUETE DE PASEO**, que es compra suelta. */
+  | { tipo: 'bono'; id: string }
+  | { tipo: 'mensualidad'; id: string }
+  | { tipo: 'programa'; id: string };
 
 /**
  * Lo que la puerta devuelve en el camino feliz.
@@ -96,11 +107,36 @@ export interface SolicitudDeuna {
  * quedarse esperando y **preguntarle al servidor**; el reloj del código no
  * decide nada sobre si entró la plata.
  */
+function cuerpoDeuna(sujeto: SujetoDeuna): Record<string, string> {
+  switch (sujeto.tipo) {
+    case 'compra': return { compra_id: sujeto.id };
+    case 'cita': return { cita_id: sujeto.id };
+    case 'bono': return { bono_id: sujeto.id };
+    case 'mensualidad': return { guarderia_suscripcion_id: sujeto.id };
+    case 'programa': return { programa_contratado_id: sujeto.id };
+    default: {
+      const _exhaustivo: never = sujeto;
+      return _exhaustivo;
+    }
+  }
+}
+
+/**
+ * S109-B · el paquete —de paseo o de guardería— por el riel DeUna.
+ * **Es el sujeto con el que el founder firmó estrenar el riel.**
+ */
+export const pedirCodigoDeunaPaquete = (bonoId: string) =>
+  pedirCodigoDeuna({ tipo: 'bono', id: bonoId });
+
 export async function pedirCodigoDeuna(
   sujeto: SujetoDeuna,
 ): Promise<ResultadoWrapper<SolicitudDeuna, CodigoDeuna>> {
   const { data, error } = await getClient().functions.invoke('pagos-deuna-solicitud', {
-    body: sujeto.tipo === 'compra' ? { compra_id: sujeto.id } : { cita_id: sujeto.id },
+    /* 🔴 MAPA EXHAUSTIVO con guard `never`, igual que `cobrarSujeto`: con cinco
+       sujetos un ternario deja al último haciendo de `else`, y **el `else` es
+       cómo un sujeto viaja con la referencia del otro**. Si mañana entra un
+       sexto y nadie escribe su rama, no compila. */
+    body: cuerpoDeuna(sujeto),
   });
 
   if (error) {

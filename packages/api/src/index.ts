@@ -1407,7 +1407,7 @@ export {
 // propósito: `una casa, un motor, dos puertas`. Lo que devuelve es una
 // INVITACIÓN A PAGAR (un código para tipear en otra app), jamás un pago.
 export {
-  pedirCodigoDeuna, pedirCodigoDeunaCompra, pedirCodigoDeunaCita,
+  pedirCodigoDeuna, pedirCodigoDeunaPaquete, pedirCodigoDeunaCompra, pedirCodigoDeunaCita,
   type CodigoDeuna, type SujetoDeuna, type SolicitudDeuna,
 } from './wrappers/pagos-deuna';
 
