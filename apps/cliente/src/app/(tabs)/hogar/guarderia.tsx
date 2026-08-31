@@ -184,6 +184,14 @@ export default function LogGuarderia() {
   const paquetesPorLugar = useMemo(() => {
     const porLugar = new Map<string, { prestadorId: string; bonoId: string; quedan: number; total: number; vence: string | null }>();
     for (const p of paquetes) {
+      /* 🔴 **S108-C · EL SALDO QUE SE PUEDE GASTAR ES EL PAGADO, y esto era una
+         rotura viva.** Desde que el bono nace `pendiente` y cayó el filtro del
+         lector, un paquete **no pagado** entraba acá con su saldo y su botón
+         «Reservar estadía de tu paquete». *Ofrecerle a la familia gastar días
+         que todavía no compró es peor que esconderlos: la manda a un rebote con
+         la plata ya en la cabeza.* Y la cadena empeoraba sola — una compra
+         cuyo cobro no entró dejaba saldo invitando a gastarse. */
+      if (p.estadoPago !== 'pagado' || p.estado !== 'activo') continue;
       if (p.quedan <= 0) continue;
       const y = porLugar.get(p.prestadorId);
       if (y === undefined) {
@@ -205,6 +213,29 @@ export default function LogGuarderia() {
     return [...porLugar.values()];
   }, [paquetes]);
 
+  /**
+   * ⭐ **LOS PAQUETES QUE NO ESTÁN LISTOS — y que HABLAN (S108-C · T4).**
+   *
+   * 🔴 *Un paquete que sólo desaparece de una lista es el guard mudo que la
+   * casa prohíbe, y acá tiene dos caras:* el que **falta pagar** —que se puede
+   * completar— y el que **no se pagó a tiempo** —que ya no existe y hay que
+   * volver a comprar—. **Los dos son plata que la familia intentó gastar**, y
+   * ninguno de los dos puede quedar sin decirse.
+   *
+   * `noPagadoATiempo` lo distingue de un reverso: *«nunca llegaste a pagar» y
+   * «te devolvimos la plata» son dos finales que se viven distinto*, y S108-A
+   * les dio valores separados justo para que acá no se cuenten con la misma
+   * frase.
+   */
+  const paquetesPendientes = useMemo(
+    () => paquetes.filter((p) => p.estadoPago === 'pendiente' && !p.noPagadoATiempo),
+    [paquetes],
+  );
+  const paquetesNoPagados = useMemo(
+    () => paquetes.filter((p) => p.noPagadoATiempo),
+    [paquetes],
+  );
+
   /* ⭐ EL SALDO DEL PAQUETE — A publicó su lector (`768f8d86`) y con él nace el
      botón que el founder pidió hace varias tandas. **Sólo los VIGENTES**: un
      bono agotado o vencido no es un paquete con cero, es uno que ya no está, y
@@ -215,7 +246,11 @@ export default function LogGuarderia() {
       /* Misma ola: el peaje es de la PETICIÓN, no del volumen (L-223). */
       const [r, pl] = await Promise.all([obtenerMisPaquetesGuarderia(), obtenerMisPlanesGuarderia()]);
       if (!vigente) return;
-      setPaquetes(r.ok ? r.data.filter((p) => p.estado === 'activo' && p.quedan > 0) : []);
+      /* ⭐ **S108-C · YA NO SE FILTRA ACÁ.** El lector devuelve todos los
+         estados a propósito (S108-A), y **quién se muestra y cómo lo decide la
+         superficie, abajo**. *Filtrar en el fetch fue lo que volvió invisible
+         al paquete pendiente de pago el día que el bono dejó de nacer pagado.* */
+      setPaquetes(r.ok ? r.data : []);
       setPlanes(pl.ok ? pl.data.filter((p) => p.estado === 'activa') : []);
     })();
     return () => { vigente = false; };
@@ -321,21 +356,33 @@ export default function LogGuarderia() {
                 **sin sujeto**, y tendría que preguntar la mascota de nuevo en
                 una Hoja propia. **Se declaró a la mesa y así quedó.** */}
             {/* ── EL PLAN MENSUAL CONTRATADO ─────────────────────────────
-                🔴 **Informa, NO navega**: no hay pantalla de plan y un chevron
-                prometería una que no existe (Ley 19.7). *Una fila que se hunde
-                sin llevar a ningún lado es una promesa rota.*
+                ⏪ **Decía: «Informa, NO navega: no hay pantalla de plan y un
+                chevron prometería una que no existe (Ley 19.7)».** La condición
+                que ese comentario ponía **se cumplió**: S108-C construyó
+                `/cuenta/recurrentes`, y con ella el chevron deja de prometer
+                nada. *Una fila que se hunde sin llevar a ningún lado es una
+                promesa rota — pero una que no se hunde teniendo a dónde ir es
+                una puerta escondida*, y ésta es la puerta por la que la familia
+                corta un cobro que se repite.
+
+                🔴 Y la cancelación vive en UN SOLO LUGAR, no acá: *un
+                interruptor de plata repartido por las pantallas donde cada cosa
+                se contrató es un interruptor que no se encuentra el día que se
+                necesita.* Esta fila LLEVA; no decide.
+
                 Va ARRIBA del paquete porque es el compromiso que se cobra solo
                 todos los meses: lo que se renueva sin que nadie lo toque tiene
                 que verse antes que lo que se gasta a pulso. ── */}
             {planes.map((pl) => (
-              <Tarjeta key={pl.suscripcionId}>
-                <View style={{ gap: spacing[1] }}>
-                  <Texto variante="seccion">{t('logGuarderia.planTitulo')}</Texto>
-                  <Texto variante="cuerpo">{pl.prestadorNombre}</Texto>
-                  <Texto variante="apoyo">
-                    {t('logGuarderia.planDetalle', { precio: pl.precioMensual.toFixed(2) })}
-                  </Texto>
-                </View>
+              <Tarjeta key={pl.suscripcionId} relleno="ninguno">
+                <CeldaNavegacion
+                  icono="mes"
+                  titulo={t('logGuarderia.planTitulo')}
+                  /* `CeldaNavegacion` no tiene subtítulo: el lugar y el precio
+                     van juntos en el detalle, que es voz de la pantalla. */
+                  detalle={`${pl.prestadorNombre} · ${t('logGuarderia.planDetalle', { precio: pl.precioMensual.toFixed(2) })}`}
+                  onPress={() => router.push('/cuenta/recurrentes')}
+                />
               </Tarjeta>
             ))}
 
@@ -352,11 +399,33 @@ export default function LogGuarderia() {
                  en `detalle`, que es su lugar — no una línea suelta debajo. */
               <Tarjeta key={pq.bonoId} relleno="ninguno">
                 <CeldaNavegacion
-                  titulo={t('logGuarderia.reservarDePaquete')}
+                  /* ⭐ **S108-C · LA REANUDACIÓN, y es la misma fila con otra
+                     voz.** Firma del founder: *si cierro la app entre el cobro y
+                     el agendamiento, al volver me recibe ahí.*
+
+                     Un paquete pagado **sin una sola estadía usada** es
+                     exactamente ese caso: la compra salió, el primer día no se
+                     llegó a elegir. *Con la voz genérica de saldo, la familia
+                     volvía a una lista que no le decía que le faltaba algo —
+                     un paquete pagado sin primer día no puede quedar mudo.*
+
+                     🔴 Y **no hace falta una pantalla nueva ni un estado
+                     guardado**: el hecho vive en el dato (`quedan === total`),
+                     así que la reanudación es cierta aunque la app se haya
+                     matado, aunque se cambie de teléfono, y sin nada que
+                     limpiar después. *Un flujo que se retoma leyendo el mundo
+                     no se puede desincronizar del mundo.* */
+                  titulo={
+                    pq.quedan === pq.total
+                      ? t('logGuarderia.paqueteListoPrimerDia')
+                      : t('logGuarderia.reservarDePaquete')
+                  }
                   detalle={
-                    pq.quedan === 1
-                      ? t('logGuarderia.saldoUna', { total: pq.total })
-                      : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })
+                    pq.quedan === pq.total
+                      ? t('logGuarderia.paqueteListoPrimerDiaDetalle', { n: pq.total })
+                      : pq.quedan === 1
+                        ? t('logGuarderia.saldoUna', { total: pq.total })
+                        : t('logGuarderia.saldo', { n: pq.quedan, total: pq.total })
                   }
                   onPress={() => {
                     if (elegida === null) return;
@@ -371,6 +440,58 @@ export default function LogGuarderia() {
                       },
                     });
                   }}
+                />
+              </Tarjeta>
+            ))}
+
+            {/* ═══ ⭐ LOS QUE NO ESTÁN LISTOS, Y LO DICEN (S108-C · paso 1 + T4)
+                🔴 **Van DESPUÉS del saldo usable y ANTES del historial**: son
+                acciones pendientes, no archivo. *Un pendiente al fondo de una
+                lista es un pendiente que nadie ve.* ══════════════════════ */}
+            {paquetesPendientes.map((pq) => (
+              <Tarjeta key={pq.bonoId} relleno="ninguno">
+                <CeldaNavegacion
+                  icono="pagos"
+                  titulo={t('logGuarderia.paqueteFaltaPagar')}
+                  /* El saldo se nombra igual: **la familia compró esos días**,
+                     lo que falta es el cobro. */
+                  detalle={t('logGuarderia.paqueteFaltaPagarDetalle', { n: pq.total })}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/explorar/guarderia/checkout',
+                      params: {
+                        modalidad: 'paquete',
+                        bonoId: pq.bonoId,
+                        prestadorId: pq.prestadorId,
+                        ...(elegida !== null ? { mascotaId: elegida } : {}),
+                        ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
+                      },
+                    })
+                  }
+                />
+              </Tarjeta>
+            ))}
+
+            {/* ⭐ **T4 · EL VENCIDO HABLA Y OFRECE VOLVER A COMPRARLO.**
+                *Un vencimiento que sólo desaparece de una lista deja a la
+                familia sin saber qué pasó con algo que ella tocó.* */}
+            {paquetesNoPagados.map((pq) => (
+              <Tarjeta key={pq.bonoId} relleno="ninguno">
+                <CeldaNavegacion
+                  icono="guarderia"
+                  titulo={t('logGuarderia.paqueteNoPagadoATiempo')}
+                  detalle={t('logGuarderia.paqueteNoPagadoATiempoDetalle')}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/explorar/guarderia',
+                      params: {
+                        prestadorId: pq.prestadorId,
+                        ...(elegida !== null ? { mascotaId: elegida } : {}),
+                        ...(mascota !== null ? { mascotaNombre: mascota.nombre } : {}),
+                        modalidad: 'paquete',
+                      },
+                    })
+                  }
                 />
               </Tarjeta>
             ))}

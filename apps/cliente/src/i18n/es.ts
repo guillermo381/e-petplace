@@ -1287,7 +1287,13 @@ export const clienteEs = {
     estadoActiva: 'Activo',
     estadoPausada: 'Renovación pausada',
     estadoVencida: 'Terminado',
-    renuevaEl: 'Se renueva el {{fecha}}',
+    /* ☠️ S108-C · Acá vivía `renuevaEl` — «Se renueva el {{fecha}}» — pintada
+       con `periodo_fin`, que es el último día cubierto y NO el día en que
+       renueva: el período siguiente arranca al día siguiente. *Una fecha de
+       cobro corrida un día no se lee como un error, se lee como que cobraron
+       antes de lo dicho.* La reemplaza una frase que dice lo que el dato SÍ
+       significa; la fecha del cobro la dirá el motor cuando la publique. */
+    cubiertoHastaRenueva: 'Cubierto hasta el {{fecha}} · se renueva solo',
     terminaEl: 'Termina el {{fecha}}',
     pausar: 'Pausar renovación',
     reanudar: 'Reanudar renovación',
@@ -1371,6 +1377,15 @@ export const clienteEs = {
     pagarSuelto: 'Pagar este paseo suelto',
     reservada: 'Salida reservada — te quedan {{n}} en el paquete.',
     tarjetaTitulo: 'Paquete de salidas · {{min}} min',
+    /* ⭐ S108-C-4 · Los dos paquetes de paseo que no están listos. Espejo de la
+       voz que guardería ya tiene — misma promesa, mismo oficio de decirla.
+       ⚠️ `noPagadoATiempo` HOY NO PUEDE OCURRIR (nada de paseo cobra): la
+       superficie queda lista para cuando el motor llegue. */
+    faltaPagar: 'Falta completar el pago de este paquete',
+    faltaPagarDetalle: '{{n}} salidas · todavía no se cobró',
+    noPagadoATiempo: 'Se venció el tiempo para completar el pago',
+    noPagadoATiempoDetalle: 'No se te cobró nada. Toca para volver a comprarlo.',
+    noPagadoATiempoSinCamino: 'No se te cobró nada.',
     venceEl: 'Vence el {{fecha}}',
     citaDePaquete: 'Con tu paquete',
     ventanasVoz: 'Puedes cancelar hasta 2 horas antes y la salida vuelve a tu paquete. Con menos de 2 horas, la salida se usa.',
@@ -1544,6 +1559,7 @@ export const clienteEs = {
     // 🔴 «Medio de pago», no «tarjeta»: DeUna entra como otro medio sobre el
     //    mismo contrato, y el nombre de la pantalla es la decisión de
     //    arquitectura.
+    recurrentes: 'Pagos recurrentes y suscripciones',
     medios: 'Medios de pago',
     mediosSub: 'Con qué pagas en e-PetPlace',
     mediosVacioTitulo: 'Todavía no guardas ninguno',
@@ -2893,16 +2909,35 @@ export const clienteEs = {
     /* El CTA apagado DICE qué falta: una pared muda hace creer que el
        producto está roto cuando sólo falta tocar un día. */
     contratarMensual: 'Contratar el mes',
-    mensualNoCobrable: 'Todavía no podemos cobrar la mensualidad. Estamos terminando esa parte.',
     comprarDiaAqui: 'Comprar día en esta guardería',
     comprarPaqueteAqui: 'Comprar paquete de {{n}} estadías',
     contratarMensualAqui: 'Contratar mensualidad',
     reservarDia: 'Reservar el {{dia}}',
     agendarDia: 'Agendar el {{dia}}',
     comprarPaqueteDia: 'Comprar {{n}} estadías y agendar el {{dia}}',
-    contratarMensualDesde: 'Contratar plan mensual desde el {{dia}}',
+    /* ☠️ S108-C · Acá vivían `contratarMensualDesde` («…desde el {{dia}}») y
+       `mensualNoCobrable`. **Medidas SIN consumidor** —el CTA que se pinta es
+       `contratarMensualAqui`, que no lleva fecha— y su sujeto quedó derogado
+       con el día de inicio. *Un string muerto que describe una promesa
+       derogada es justo lo que la próxima sesión resucita creyendo que
+       faltaba* (Ley 37: lo viejo muere en el mismo acto). */
     faltaTarjeta: 'Elige con qué tarjeta se cobra cada mes.',
-    mensualMandato: 'Autorizas el cobro mensual. Hoy no se cobra nada: el primer cobro sale el día que empieza el plan.',
+    /* ⭐ **S108-C · PAGAR ES ARRANCAR** (firma del founder, 31-ago).
+       ⏪ Decía: «Hoy no se cobra nada: el primer cobro sale el día que empieza
+       el plan.» **Se deroga el día de inicio elegible**, así que esa frase
+       pasó de promesa cumplida a mentira el minuto que el cobro se enciende.
+       *Y su modo de falla era el peor: no rompe nada — cobra y la pantalla
+       sigue diciendo que no.* */
+    /* 🔴 **S108-C · «EL MISMO DÍA DE CADA MES» SE CAYÓ ANTES DE PUBLICARSE.**
+       Lo escribí así y **S108-A lo frenó con la medición**: la renovación es
+       `periodo_hasta + 1`, y con `+ interval '1 month' - 1 día` de Postgres un
+       plan que arranca el 31-ene corre al 27-feb y el siguiente **arranca el
+       28-feb**. *O sea que el día del mes NO se conserva en los bordes.*
+       ⇒ se dice **«una vez por mes»**, que es cierto siempre, y la fecha exacta
+       la dice el servidor cuando la tiene. *Prometer un día que el motor no
+       garantiza es exactamente el defecto que esta tanda vino a cerrar — y esta
+       vez lo cazó el cruce entre pistas, no el typecheck.* */
+    mensualMandato: 'Autorizas el cobro mensual. Te cobramos hoy y después una vez por mes, hasta que lo canceles.',
     mensualFirmada: 'Listo. Tu plan mensual queda autorizado.',
     faltaDia: 'Elige un día en el calendario.',
     /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
@@ -2962,8 +2997,16 @@ export const clienteEs = {
     mensual: 'Mensual',
     diaQue: 'Reservas un día puntual y lo pagas.',
     paqueteQue: 'Compras varias estadías juntas y las usas cuando quieras.',
-    mensualQue: 'Un cobro cada mes mientras lo quieras.',
-    mensualAviso: 'Es un cobro que se repite: se hace solo, el mismo día de cada mes.',
+    /* ☠️ **S108-C-3 · Acá vivían `mensualQue` y `mensualAviso`**, la segunda con
+       la promesa que esta sesión derogó en otros tres lugares: «se hace solo,
+       **el mismo día de cada mes**». El motor NO lo garantiza en los bordes.
+       **Medidas SIN consumidor**, así que nunca se pintaron — pero un string
+       muerto que carga una promesa derogada es justo lo que la próxima sesión
+       resucita creyendo que faltaba (Ley 37).
+       🔴 **Y cómo sobrevivió es la lección**: cuando maté esa frase busqué por
+       las CLAVES que yo había escrito, y ésta vivía en un namespace ajeno. *Un
+       censo de textos se hace por la FRASE, jamás por la lista de claves que
+       uno recuerda.* Depositado en `docs/loop/S108-C-3-CENSO-Y-CONTRATO.md`. */
     mensualCorte: 'Lo cortas desde la app cuando quieras, y sigue andando hasta el final del mes que pagaste.',
     continuar: 'Continuar',
   },
@@ -3062,7 +3105,10 @@ export const clienteEs = {
     primerDia: 'Selecciona el primer día',
     verQuienPuede: 'Ver quién puede',
     requisitosInforman: 'Esto no te frena para reservar. Es lo que la guardería va a pedirte al recibirlo.',
-    mensualLetra: 'El plan corre de lunes a viernes. Se cobra ese mismo día cada mes hasta que lo canceles.',
+    /* ⭐ S108-C · **«ese mismo día» era el día ELEGIDO**, y el día elegido se
+       derogó. El ancla de la recurrencia pasa a ser la fecha en que se
+       contrata. */
+    mensualLetra: 'El plan corre de lunes a viernes. Empieza hoy: se cobra al contratarlo y después una vez por mes, hasta que lo canceles.',
     diaNadieAbre: 'Ese día no abre ninguna guardería.',
     diaSinCupo: 'Ese día ya está lleno.',
     diaYaReservado: 'Ya tienes ese día reservado.',
@@ -3088,6 +3134,12 @@ export const clienteEs = {
     tamanoEstadias: '{{n}} estadías',
     tamanoEstadiasDesde: '{{n}} · desde ${{precio}}',
     lugaresTitulo: 'Lugares con cupo ese día',
+    /* ⭐ S108-C · QUÉ mide el número del pie. Va como segunda línea del
+       precio, y es lo que hace que el «desde» se pinte: la pieza lo cuelga
+       de esta línea, así que sin ella el «desde» no existía. */
+    unidadDia: 'Un día',
+    unidadPaquete: 'Paquete de {{n}} estadías',
+    unidadMes: 'Al mes',
     porDia: '${{precio}} por día',
     /* El cupo de ESE día. El singular tiene key propia (patrón del saldo
        del paquete: la pluralización no es una interpolación). */
@@ -3100,6 +3152,11 @@ export const clienteEs = {
     sinElegiblesDetalle: 'La guardería es para perros y gatos. Cuando registres uno, va a aparecer acá.',
     diaCerrado: 'No abren',
     probarDia: 'Probar {{dia}}',
+    /* ⭐ S108-C · La segunda causa del vacío, con voz PROPIA: hay lugares
+       con cupo y ninguno vende ESE tamaño. *Decir «ninguna tiene cupo»
+       mandaría a probar otro día para siempre, y el día no es el problema.* */
+    sinLugaresTamanoTitulo: 'Ninguna guardería vende el paquete de {{n}} estadías',
+    sinLugaresTamanoDetalle: 'Prueba con otro tamaño de paquete: no todas ofrecen los tres.',
     sinLugaresTitulo: 'Ninguna guardería tiene cupo ese día',
     sinLugaresDetalle: 'Prueba con otro día: el cupo cambia todos los días.',
     noCargoTitulo: 'No pudimos cargar tus mascotas',
@@ -3111,14 +3168,68 @@ export const clienteEs = {
     servicio: 'Guardería · un día',
     sinHora: 'Todo el día',
     paqueteExito: 'Tu paquete quedó comprado',
-    mensualExito: 'Tu plan mensual quedó autorizado',
-    mensualExitoDetalle: 'El primer cobro sale el día que empieza el plan. Puedes cancelarlo cuando quieras.',
+    /* ⭐ S108-C · **«autorizado» ya no alcanza: queda ACTIVO y cobrado.** */
+    mensualExito: 'Tu plan mensual quedó activo',
+    /* 🔴 **DOS VARIANTES, Y LA SEGUNDA NO ES UN RESPALDO PEREZOSO.** La fecha
+       exacta del próximo cobro la tiene que decir el SERVIDOR: calcularla acá
+       obliga a replicar la regla de anclaje del motor —incluido qué pasa con
+       un 31 en un mes de 30— y *una fecha que la pantalla calcula y el motor
+       no honra es exactamente el defecto que esta tanda vino a cerrar.*
+       Mientras el motor no devuelva el período, se dice la REGLA, que sí es
+       cierta, y no una fecha inventada. */
+    /* 🔴 **S108-C · CORRECCIÓN DE UN DEFECTO MÍO, cazado por el cruce con A.**
+       Estas dos líneas decían «El próximo cobro sale el {{fecha}}» sobre
+       `periodo_hasta` — **y `periodo_hasta` es el FIN DEL PERÍODO PAGADO, no
+       el día del cobro.** A midió que la renovación es `periodo_hasta + 1`,
+       o sea que la pantalla estaba diciendo la fecha del cobro **corrida un
+       día**. *Un día de diferencia en una fecha de cobro no se lee como un
+       error: se lee como que te cobraron antes de lo que dijiste.*
+       ⇒ Se dice lo que el dato SÍ significa —hasta cuándo está cubierta— y
+       la renovación se enuncia sin fecha. **La fecha exacta la puede dar
+       `guarderia_proximo_cobro` cuando tenga lector; hasta entonces no se
+       deduce.** */
+    mensualExitoDetalle: 'Tu plan está activo desde hoy. El próximo cobro sale el {{fecha}}. Puedes cancelarlo desde Cuenta cuando quieras.',
+    mensualExitoDetalleSinFecha: 'Tu plan está activo desde hoy. El próximo cobro sale dentro de un mes. Puedes cancelarlo desde Cuenta cuando quieras.',
     continuar: 'Continuar',
     dondeRecogen: 'De dónde lo pasan a buscar',
     dondeRecogenMensual: 'Acá van a pasar a buscarlo todos los meses. Puedes cambiarla después.',
     mensualServicio: 'Plan mensual de guardería',
+    /* ⭐ **S108-C · LA AUSENCIA SE ESCRIBE DONDE SE VE LA AUSENCIA.**
+       Acá estaba la fecha de inicio. Se derogó, y el hueco no se deja mudo:
+       *una decisión que se ve como una ausencia, sin explicación, se lee como
+       un dato que falta.* Las tres cosas que la familia necesita saber antes
+       de autorizar un cobro que se repite. */
+    mensualCuando: 'Cuándo se cobra',
+    mensualCuandoPrimera: 'La primera vez, hoy, al contratarlo.',
+    mensualCuandoRepite: 'Después, una vez por mes.',
+    mensualCuandoCancela: 'Lo cancelas desde Cuenta, cuando quieras.',
     paqueteServicio: 'Paquete de {{n}} estadías',
-    paqueteSimulado: 'El cobro de este paquete todavía es simulado. Te lo decimos porque es la verdad.',
+    /* ☠️ S108-C · Acá vivía `paqueteSimulado` — «El cobro de este paquete
+       todavía es simulado. Te lo decimos porque es la verdad.» **Era cierta, y
+       por eso estaba escrita.** Muere en la misma tanda en que el cobro real se
+       enchufa: *un texto honesto se retira cuando cambia lo que describe.* */
+    /* ⭐ LA ESPERA — con voz. Cada sujeto dice qué está pasando. */
+    paqueteCompletarPago: 'Completar el pago de tu paquete',
+    esperaPaquete: 'Estamos confirmando el pago de tu paquete con el banco.',
+    esperaMensual: 'Estamos confirmando el primer cobro de tu plan con el banco.',
+    agendandoTitulo: 'Ya está pagado',
+    agendandoCuerpo: 'Estamos agendando tu primer día.',
+    /* Cuando el paquete se pagó y todavía no hay día elegido. */
+    paqueteElegiDia: 'Tu paquete está listo. Elige tu primer día cuando quieras.',
+    /* 🔴 El paquete SÍ se compró: se nombra antes que el problema del día. */
+    paqueteDiaSeOcupo: 'Tu paquete quedó pagado, pero ese día se ocupó mientras cobrábamos: {{mensaje}} Tu saldo está intacto — elige otro día desde Guardería.',
+    /* Los tres finales del cobro del paquete, cada uno con su frase. */
+    paqueteNoPagadoATiempo: 'Se venció el tiempo para completar el pago y el paquete se dio de baja. No se te cobró nada.',
+    paqueteVencido: 'Ese paquete ya venció.',
+    paqueteNoEntro: 'El pago no entró y el paquete no quedó comprado. No se te cobró nada.',
+    mensualNoEntro: 'El pago no entró, así que el plan no quedó activo. No se te cobró nada. Prueba con otra tarjeta.',
+    mensualCancelada: 'El plan no quedó activo.',
+    /* ⭐ S108-C · Las tres voces del total que todavía no se pudo leer.
+       *No se paga un total que la pantalla no conoce, y el CTA apagado
+       dice cuál de las tres cosas pasó.* */
+    precioCargando: 'Estamos leyendo el precio de tu paquete.',
+    precioNoLeido: 'No pudimos leer el precio de este paquete. Prueba de nuevo.',
+    paqueteYaNoSeVende: 'Esta guardería ya no vende ese paquete. Elige otro tamaño.',
     duracion: 'Entre tus dos ventanas',
     exitoTitulo: '¡Listo! Tu día está reservado.',
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
@@ -3132,7 +3243,18 @@ export const clienteEs = {
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
     planTitulo: 'Tu plan mensual',
-    planDetalle: '${{precio}} al mes. Se cobra solo hasta que lo canceles.',
+    /* ⭐ S108-C · Prometía cancelar y **no había puerta** (la RPC existía sin
+       wrapper ni pantalla). Hoy la hay, y la frase dice DÓNDE. */
+    planDetalle: '${{precio}} al mes. Se renueva solo hasta que lo canceles desde Cuenta.',
+    /* ⭐ S108-C · Los dos paquetes que no están listos, cada uno con su voz.
+       *«Falta pagarlo» y «se venció el tiempo para pagarlo» son dos estados
+       distintos y ninguno puede quedar sin decirse.* */
+    paqueteListoPrimerDia: 'Tu paquete está listo',
+    paqueteListoPrimerDiaDetalle: 'Elige tu primer día · {{n}} estadías por usar',
+    paqueteFaltaPagar: 'Falta completar el pago de tu paquete',
+    paqueteFaltaPagarDetalle: '{{n}} estadías · toca para completar el pago',
+    paqueteNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
+    paqueteNoPagadoATiempoDetalle: 'No se te cobró nada. Toca para volver a comprarlo.',
     conTuPaquete: 'Con tu paquete',
     verSuDia: 'Ver su día',
     reservarDePaquete: 'Reservar estadía de tu paquete',
@@ -3151,5 +3273,59 @@ export const clienteEs = {
     listaPendienteDetalle: 'Estamos terminando esta parte. Mientras tanto puedes reservar desde el botón de abajo.',
     noCargoTitulo: 'No pudimos cargar tus mascotas',
     noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
+  },
+  /* ═══ ⭐ S108-C · T5 · PAGOS RECURRENTES Y SUSCRIPCIONES ═══════════════════
+     **La casa de todo lo que se cobra solo.** Nace porque `cancelar_mensualidad_
+     guarderia` existía desde S107 grantada a `authenticated`, sin wrapper ni
+     pantalla, mientras el diccionario ya prometía «…hasta que lo canceles desde
+     Cuenta». *La app mandaba a la familia a un lugar donde no estaba lo que
+     prometía.*
+
+     🔴 **Y la sección tiene que decir lo que NO puede listar.** El censo halló
+     TRES sujetos recurrentes vivos y sólo dos tienen lector: las compras que se
+     repiten de la despensa **no tienen ningún lector en `packages/api`**. *Una
+     sección que promete «todo lo que te cobra solo» y muestra dos de tres
+     miente por omisión, y su modo de falla es el peor: se lee como completa.* */
+  recurrentes: {
+    titulo: 'Pagos recurrentes y suscripciones',
+    intro: 'Todo lo que se te cobra solo, en un lugar.',
+    /* El vacío HABLA con calma: no es un error ni una carencia. */
+    vacioTitulo: 'No tienes nada que se cobre solo',
+    vacioDetalle: 'Cuando contrates un plan o una compra que se repita, va a aparecer acá.',
+    noCargoTitulo: 'No pudimos cargar tus pagos recurrentes',
+    noCargoDetalle: 'No es que no tengas: no pudimos preguntar. Prueba de nuevo.',
+    guarderiaPlan: 'Plan mensual de guardería',
+    paseoPlan: 'Plan mensual de paseos',
+    alMes: '${{precio}} al mes',
+    /* ⭐ S108-C · **La fecha del cobro vuelve, con el dato correcto.** A la
+       publicó resuelta por el servidor (`proximoCobro`), con la regla que
+       recupera el día original — 31-ene → 28-feb → **31-mar**. Ya no sale de
+       `periodo_hasta`, que es el fin del período pagado y cae un día antes. */
+    proximoCobro: 'Próximo cobro: {{fecha}}',
+    cubiertoHasta: 'Cubierto hasta el {{fecha}} · se renueva solo',
+    proximoCobroSinFecha: 'Todavía no hay un período cobrado.',
+    pagoPendiente: 'Falta completar el pago de este plan.',
+    /* 🔴 Lo que se lee DESPUÉS de apagar, y es la línea que evita el daño: el
+       interruptor detiene la RENOVACIÓN, jamás el servicio ya pagado. */
+    apagadoHasta: 'No se vuelve a cobrar. Sigue cubierto hasta el {{fecha}}.',
+    apagadoSinFecha: 'No se vuelve a cobrar.',
+    apagadoConserva: 'Conservas {{n}} días ya agendados.',
+    /* El modal confirma para que no se apague sin querer. **Sin culpa, sin
+       oferta de retención, sin letra chica** — firma del founder. */
+    confirmarTitulo: '¿Apagar {{que}}?',
+    confirmarCuerpo: 'Dejamos de cobrarlo. Lo que ya pagaste sigue en pie hasta que termine el período.',
+    confirmarReversible: 'Puedes volver a encenderlo mientras siga corriendo el período. No se te cobra de nuevo.',
+    /* 🔴 Y cuando NO se puede volver, se dice ANTES. Medido: no existe ninguna
+       función que devuelva una mensualidad de guardería a `activa`. */
+    /* Sólo para lo que de verdad no vuelve: fuera del período pagado, volver a
+       tenerlo es contratar de nuevo, con cobro y ancla nuevos. */
+    confirmarSinVuelta: 'Su período ya terminó: para volver a tenerlo hay que contratarlo de nuevo.',
+    confirmar: 'Sí, apagar',
+    volver: 'Dejarlo como está',
+    noPudimosApagar: 'No pudimos apagarlo. Prueba de nuevo.',
+    noPudimosEncender: 'No pudimos encenderlo. Prueba de nuevo.',
+    /* La ausencia declarada del tercer sujeto. */
+    despensaTitulo: 'Tus compras que se repiten',
+    despensaDetalle: 'Todavía no podemos mostrarlas acá. Por ahora las manejas desde la despensa, en la compra donde las activaste.',
   },
 } as const;

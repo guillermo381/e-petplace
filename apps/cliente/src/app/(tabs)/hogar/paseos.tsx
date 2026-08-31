@@ -365,10 +365,33 @@ export default function MisPaseos() {
 
   const hoy = hoyLocal();
   const listaPlanes = Array.isArray(planes) ? planes : [];
-  // D-343: los paquetes con saldo vigente (el vencido/agotado va al historial implícito)
+  /* ═══ ⭐ S108-C-4 · LOS TRES GRUPOS, espejo del hogar de guardería ═════════
+     D-343 pedía «los paquetes con saldo vigente», y este filtro lo cumplía —
+     **pero no miraba el pago**, porque el lector no lo traía. Con el bono a
+     punto de nacer `pendiente`, eso deja **un paquete NO PAGADO ofreciendo su
+     saldo**: exactamente la rotura que ya se curó del lado de guardería, y que
+     acá viene en pareja (su gemela vive en `serviciosHogar.ts`).
+
+     🔴 **Y no se cura escondiéndolo.** Un no-pagado que desaparece es el mismo
+     guard mudo en la otra dirección: la familia tocó algo, puso su plata en la
+     cabeza, y la pantalla no dice nada. Se muestra, y dice qué es.
+
+     ⚠️ **HOY NADA DE PASEO COBRA**, así que `noPagadoATiempo` **no puede
+     ocurrir todavía** y ese grupo nace vacío. *Se construye igual: es la
+     pantalla lista para cuando el motor llegue, no una promesa activa* — y la
+     alternativa es que el día del enchufe la rotura entre sin superficie que la
+     cuente. ═══════════════════════════════════════════════════════════════ */
+  const vigenteEnFecha = (p: PaqueteSalidas) =>
+    p.fecha_vencimiento === null || p.fecha_vencimiento >= hoy;
   const paquetesVigentes = paquetes.filter(
-    (p) => p.estado === 'activo' && p.saldo > 0 && (p.fecha_vencimiento === null || p.fecha_vencimiento >= hoy),
+    (p) => p.estadoPago === 'pagado' && p.estado === 'activo' && p.saldo > 0 && vigenteEnFecha(p),
   );
+  /** Falta completar el pago — todavía se puede. */
+  const paquetesPendientes = paquetes.filter(
+    (p) => p.estadoPago === 'pendiente' && !p.noPagadoATiempo && vigenteEnFecha(p),
+  );
+  /** Se venció la ventana de pago. Hoy imposible; la superficie ya lo espera. */
+  const paquetesNoPagados = paquetes.filter((p) => p.noPagadoATiempo);
   // r12: el filtro de MASCOTA muerde toda la pantalla; el de FECHA
   // solo el historial (en próximos no parte los datos).
   const porMascota = (c: CitaPaseoDueno) => filtroMascota === null || c.mascota_id === filtroMascota;
@@ -593,6 +616,42 @@ export default function MisPaseos() {
                   ) : null}
                 </Tarjeta>
               ))}
+              {/* ⭐ LOS QUE NO ESTÁN LISTOS, con su voz. Van DESPUÉS del saldo
+                  usable: son pendientes, no archivo — *un pendiente al fondo de
+                  una lista es un pendiente que nadie ve.* */}
+              {paquetesPendientes.map((pq) => (
+                <Tarjeta key={pq.id} relleno="ninguno" elevacion="reposo">
+                  <Celda
+                    titulo={t('paquete.faltaPagar')}
+                    subtitulo={t('paquete.faltaPagarDetalle', { n: pq.unidades_total })}
+                  />
+                </Tarjeta>
+              ))}
+              {paquetesNoPagados.map((pq) => (
+                <Tarjeta key={pq.id} relleno="ninguno" elevacion="reposo">
+                  {pq.prestador_servicio_id !== null ? (
+                    <CeldaNavegacion
+                      icono="paseo"
+                      titulo={t('paquete.noPagadoATiempo')}
+                      detalle={t('paquete.noPagadoATiempoDetalle')}
+                      onPress={() =>
+                        router.navigate({
+                          pathname: '/explorar/paseo/paquete',
+                          params: { servicio: pq.prestador_servicio_id },
+                        })
+                      }
+                    />
+                  ) : (
+                    /* Sin oferta viva no hay a dónde llevar: se dice igual, sin
+                       chevron. *Una fila que se hunde sin destino es una promesa
+                       rota* (Ley 19.7). */
+                    <Celda
+                      titulo={t('paquete.noPagadoATiempo')}
+                      subtitulo={t('paquete.noPagadoATiempoSinCamino')}
+                    />
+                  )}
+                </Tarjeta>
+              ))}
               {listaPlanes.map((p) => {
                 const estado = vozEstado(p);
                 return (
@@ -602,9 +661,36 @@ export default function MisPaseos() {
                         puro (estado, renovación, pausa; D-343 intacto). */}
                     <Celda
                       titulo={`${t('explorar.paseoTitulo')} · ${p.duracion_minutos} min`}
-                      subtitulo={t(p.auto_renovar && p.estado === 'activa' ? 'plan.renuevaEl' : 'plan.terminaEl', {
-                        fecha: fechaCortaMono(p.periodo_fin, idioma),
-                      })}
+                      /* ═══ 🔴 S108-C · LA PANTALLA NO DEDUCE, EL MOTOR DICE ═══
+                         ⏪ Acá decía **«Se renueva el {fecha}» sobre `periodo_fin`**
+                         — y `periodo_fin` es el ÚLTIMO DÍA CUBIERTO, no el día de
+                         la renovación. Medido en el motor
+                         (`20260712130000:106`): `periodo_fin = (periodo_inicio +
+                         1 mes) - 1 día`, así que el período siguiente arranca en
+                         `periodo_fin + 1` y **la pantalla anunciaba la renovación
+                         un día antes de que ocurriera.**
+
+                         *Un día de diferencia en una fecha de cobro no se lee
+                         como un error: se lee como que te cobraron antes de lo
+                         que dijiste.* Y no lo veía nadie porque **el dato es
+                         verosímil**: una fecha bien formada, del mes correcto.
+
+                         ⚠️ Es el MISMO defecto que me cacé en guardería, en el
+                         otro oficio. Ahí lo destapó el cruce con otra pista;
+                         acá lo destapó ir a buscarlo. **`terminaEl` NO se toca:
+                         para un plan que no renueva, `periodo_fin` sí es el día
+                         en que termina.**
+
+                         ⇒ Mientras el motor no publique el próximo cobro del
+                         paseo, se dice **lo que el dato sí significa**. Cuando A
+                         lo publique, entra igual que entró `proximoCobro` en
+                         guardería: una línea. */
+                      subtitulo={t(
+                        p.auto_renovar && p.estado === 'activa'
+                          ? 'plan.cubiertoHastaRenueva'
+                          : 'plan.terminaEl',
+                        { fecha: fechaCortaMono(p.periodo_fin, idioma) },
+                      )}
                       fin={<Insignia estado={estado.estado} etiqueta={estado.etiqueta} />}
                     />
                     {p.estado === 'activa' ? (

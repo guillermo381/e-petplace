@@ -500,13 +500,16 @@ export default function ElegirGuarderia() {
         ) : null}
 
         {/* ── ③bis LA LETRA DE LA MENSUALIDAD ────────────────────────────
-               🔴 **Es lo que la familia está firmando, y no se decía.** Va
-               pegada al día porque el día ELEGIDO es el que fija la
-               recurrencia: *«se cobra ese mismo día cada mes»*.
-
+               🔴 **Es lo que la familia está firmando, y no se decía.**
                *Una recurrencia que no se declara antes de contratar es la
-               clase de cosa que se descubre en el segundo cobro.* ── */}
-        {modalidad === 'mensual' && fecha !== null ? (
+               clase de cosa que se descubre en el segundo cobro.*
+
+               ⏪ **Colgaba de `fecha !== null`**, porque el día elegido era el
+               que fijaba la recurrencia. Con el día derogado (S108-C · T2) el
+               ancla es la fecha en que se contrata, así que **la letra ya no
+               espera a que se toque un día**: se lee desde que se elige la
+               modalidad, que es cuando la decisión se está tomando. ── */}
+        {modalidad === 'mensual' ? (
           <Texto variante="apoyo">{t('elegirGuarderia.mensualLetra')}</Texto>
         ) : null}
 
@@ -670,6 +673,36 @@ export default function ElegirGuarderia() {
              aparecer—, así que siempre es un «desde». *A lo calcula después de
              filtrar: un «desde $8» de un lugar que no aparece promete de más.* */
           totalDesde={resumen.fase === 'listo' && resumen.cuantos > 1}
+          /* ═══ 🔴 LA CUARTA PUERTA DEL MISMO DEFECTO (S108-C · T1) ═══════════
+             **`totalDesde` estaba bien calculado y NO SE PINTABA NUNCA.**
+             `PieReserva` cuelga el «desde» de ESTA línea —
+             `{cuando !== null ? (totalDesde ? \`desde · ${cuando}\` : cuando) : null}`—
+             y guardería **es el único oficio que no pasaba `cuando`**, porque es
+             el único sin hora: la estadía ocupa el día entre dos ventanas.
+             ⇒ El pie mostraba **un mínimo pelado con cara de total**, que es
+             exactamente lo que la escalera del precio honesto prohíbe: *un
+             precio sin «desde» es una promesa de ese precio.*
+
+             *No lo vio ningún typecheck —la prop es opcional y el valor es un
+             booleano válido— ni ningún lint: el flag existe, se calcula, y su
+             render depende de OTRA prop que nadie pasa.* Es la hermana exacta
+             de lo que `disponibles` ya tenía escrito: **una prop opcional que
+             nadie pasa no rompe nada, y por eso nadie se entera.**
+
+             La línea además dice **QUÉ mide el número**, que es lo que faltaba
+             para poder leerlo: «desde · Paquete de 15 estadías».
+
+             ⚠️ Se pasa `null` sin total: la pieza no monta el bloque, y una
+             unidad sin número no dice nada. */
+          cuando={
+            total === null
+              ? null
+              : modalidad === 'paquete'
+                ? tamano === null ? null : t('hubGuarderia.unidadPaquete', { n: tamano })
+                : modalidad === 'mensual'
+                  ? t('hubGuarderia.unidadMes')
+                  : t('hubGuarderia.unidadDia')
+          }
           /* 🔴 CON BONO EL PIE NO NAVEGA: AGENDA. No hay lugar que elegir
              —lo determina el bono— ni cobro que hacer —el desglose se congeló
              al comprar—. *Pasarlo por «quién puede» sería ofrecerle cambiar

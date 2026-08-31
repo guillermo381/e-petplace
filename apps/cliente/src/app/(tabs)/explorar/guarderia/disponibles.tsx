@@ -64,6 +64,7 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerGuarderiasDisponibles,
+  obtenerPaquetesGuarderia,
   obtenerPerfilesPublicos,
   type GuarderiaDisponible,
   type PerfilPublico,
@@ -77,7 +78,12 @@ import { PreviewPrestador } from '@/components/preview-prestador';
 
 /** 'HH:MM:SS' → 'HH:MM'. El motor manda la verdad; la pantalla la recorta. */
 const aHoraCorta = (h: string) => h.slice(0, 5);
-import { esModalidad, type ModalidadGuarderia } from '@/lib/guarderia-modalidad';
+import {
+  esModalidad,
+  TAMANOS_PAQUETE,
+  type ModalidadGuarderia,
+  type TamanoPaqueteGuarderia,
+} from '@/lib/guarderia-modalidad';
 
 type Lista =
   | { fase: 'cargando' }
@@ -86,6 +92,37 @@ type Lista =
   /** 🔴 El motor DIAGNOSTICÓ, y su voz ya dice el hecho (A tipó 17 códigos). */
   | { fase: 'causaDelMotor'; mensaje: string }
   | { fase: 'listo'; lugares: GuarderiaDisponible[] };
+
+/**
+ * 🔴 **EL PRECIO DEL PAQUETE ELEGIDO, POR LUGAR (S108-C · T1).**
+ *
+ * ── QUÉ ESTABA MAL, medido en el SQL ────────────────────────────────────
+ * `precioModalidad` para paquete es `(SELECT min(gp.precio) …)` — **el paquete
+ * más barato del lugar, sobre TODOS los tamaños**
+ * (`20260830060000_s107a_franjas_en_el_filtro.sql`). El tamaño **ya está
+ * elegido** cuando se llega acá —el hub no habilita el botón sin él— así que
+ * ese mínimo es *el precio de un producto que la familia no eligió*.
+ *
+ * ⚠️ **Y era la tercera puerta del mismo defecto**, cuyo literal ya vive en el
+ * hub: *«La familia veía $40 y pagaba $75. En la superficie donde se decide
+ * pagar.»* Se había curado en los chips y **acá se resolvió no pintando nada**,
+ * que tapó el síntoma y dejó la lista sin precio.
+ *
+ * ── LA CURA: se pregunta por lugar, con el tamaño en la mano ─────────────
+ * `obtenerPaquetesGuarderia` ya existe y **el hub ya lo llama así** — es el N+1
+ * que esa pantalla declara barato con los lugares de hoy. Con la respuesta hay
+ * **el precio exacto**, y además se sabe **quién NO vende ese tamaño**.
+ *
+ * 🔴 Un fallo de lectura NO se degrada a «sin precio» (Ley 13): sin precio, el
+ * lugar se cae de la lista por Ley 23, y **un bache de red escondería una
+ * guardería que sí vende.** Por eso el fallo es su propia fase.
+ */
+type PreciosPaquete =
+  | { fase: 'noAplica' }
+  | { fase: 'cargando' }
+  | { fase: 'noPudimos' }
+  /** Sólo los lugares que venden ESE tamaño. Ausente = no lo vende. */
+  | { fase: 'listo'; porLugar: Record<string, number> };
 
 export default function QuienPuedeGuarderia() {
   const { theme } = useTheme();
@@ -103,11 +140,25 @@ export default function QuienPuedeGuarderia() {
   const modalidad: ModalidadGuarderia = esModalidad(params.modalidad) ? params.modalidad : 'dia';
   const mascotaId = typeof params.mascotaId === 'string' && params.mascotaId.length > 0 ? params.mascotaId : null;
   const fecha = typeof params.fecha === 'string' && params.fecha.length > 0 ? params.fecha : null;
+  /**
+   * ⭐ **EL TAMAÑO ELEGIDO, Y ACÁ EMPIEZA LA CURA (S108-C · T1).**
+   *
+   * Se valida contra `TAMANOS_PAQUETE` en vez de confiar en el `Number()`:
+   * *un `tamano=7` que entrara por un deep link no existe como paquete, y
+   * dejarlo pasar produciría una lista sin ningún precio y un rebote recién en
+   * la compra.*
+   */
+  const tamano: TamanoPaqueteGuarderia | null = (() => {
+    if (modalidad !== 'paquete') return null;
+    const n = Number(params.tamano);
+    return TAMANOS_PAQUETE.find((x) => x === n) ?? null;
+  })();
 
   const [lista, setLista] = useState<Lista>({ fase: 'cargando' });
   /* El enriquecimiento público: portada, logo, reseñas, cohorte. **La fila no
      lo espera** — llega y la tarjeta se completa (criterio de la pieza). */
   const [perfiles, setPerfiles] = useState<Record<string, PerfilPublico>>({});
+  const [precios, setPrecios] = useState<PreciosPaquete>({ fase: 'noAplica' });
 
   useEffect(() => {
     if (mascotaId === null || fecha === null) { setLista({ fase: 'noPudimos' }); return; }
@@ -157,9 +208,62 @@ export default function QuienPuedeGuarderia() {
     return () => { vigente = false; };
   }, [lista]);
 
+  /* ⭐ EL PRECIO DEL TAMAÑO ELEGIDO — una llamada por lugar, en paralelo.
+     Mismo patrón y mismo N+1 declarado que el hub. */
+  useEffect(() => {
+    if (modalidad !== 'paquete' || tamano === null) { setPrecios({ fase: 'noAplica' }); return; }
+    if (lista.fase !== 'listo') { setPrecios({ fase: 'cargando' }); return; }
+    const ids = [...new Set(lista.lugares.map((g) => g.prestadorId))];
+    if (ids.length === 0) { setPrecios({ fase: 'listo', porLugar: {} }); return; }
+    let vigente = true;
+    setPrecios({ fase: 'cargando' });
+    void (async () => {
+      const rs = await Promise.all(ids.map(async (id) => [id, await obtenerPaquetesGuarderia(id)] as const));
+      if (!vigente) return;
+      /* 🔴 UN SOLO FALLO TIÑE LA PASADA. *Con un lugar sin leer no se puede
+         distinguir «no vende ese tamaño» de «no pude preguntar», y la
+         diferencia decide si la guardería aparece o desaparece.* */
+      if (rs.some(([, r]) => !r.ok)) { setPrecios({ fase: 'noPudimos' }); return; }
+      const porLugar: Record<string, number> = {};
+      for (const [id, r] of rs) {
+        if (!r.ok) continue;
+        const pq = r.data.find((p) => p.tamano === tamano && p.activo);
+        if (pq !== undefined) porLugar[id] = pq.precio;
+      }
+      setPrecios({ fase: 'listo', porLugar });
+    })();
+    return () => { vigente = false; };
+  }, [modalidad, tamano, lista]);
+
+  /**
+   * 🔴 **PARA PAQUETE YA NO SALE DEL RESUMEN.** `precioModalidad` es el mínimo
+   * sobre todos los tamaños; acá manda el precio del tamaño elegido, leído del
+   * lugar. Las otras dos modalidades no se tocan: `precioModalidad` es exacto
+   * para día (`ps.precio`) y para mensual (`ps.precio_mensual_plan`).
+   */
   const precioDe = (g: GuarderiaDisponible): number | null =>
-    g.precioModalidad ??
-    (modalidad === 'dia' ? g.precio : modalidad === 'paquete' ? null : g.precioMensual);
+    modalidad === 'paquete'
+      ? (precios.fase === 'listo' ? precios.porLugar[g.prestadorId] ?? null : null)
+      : g.precioModalidad ?? (modalidad === 'dia' ? g.precio : g.precioMensual);
+
+  /**
+   * ⭐ **LEY 23 — LA PUERTA NO OFRECE LO QUE VA A RECHAZAR.**
+   * `obtener_guarderias_disponibles` filtra por *«el lugar vende ALGÚN
+   * paquete»*: **nunca recibe el tamaño**. Y `comprar_paquete_guarderia`
+   * rebota `paquete_no_disponible` si ese lugar no vende ESE tamaño. *Entre las
+   * dos, la lista podía ofrecer una guardería que iba a rechazar la compra —
+   * seis pasos después, con la tarjeta ya elegida.*
+   *
+   * ⚠️ Se filtra **sólo con los precios resueltos**: mientras cargan no se
+   * esconde a nadie, porque una lista vacía se leería como «no hay» y es
+   * «todavía no sé» — la misma trampa que el hub declara en sus chips.
+   */
+  const lugaresVisibles =
+    lista.fase !== 'listo'
+      ? []
+      : modalidad !== 'paquete' || precios.fase !== 'listo'
+        ? lista.lugares
+        : lista.lugares.filter((g) => precios.porLugar[g.prestadorId] !== undefined);
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -207,22 +311,44 @@ export default function QuienPuedeGuarderia() {
           /* Sin título de fallo: **no falló nada.** El motor contestó y su
              respuesta es el contenido de la pantalla. */
           <EstadoVacio registro="seccion" titulo={lista.mensaje} />
-        ) : lista.fase === 'noPudimos' ? (
+        ) : lista.fase === 'noPudimos' || precios.fase === 'noPudimos' ? (
+          /* 🔴 El fallo de los precios entra POR ACÁ y no por «no hay lugares»:
+             *no es que ninguna guardería venda ese paquete — es que no pudimos
+             preguntar.* (Ley 13.) */
           <EstadoVacio
             registro="seccion"
             titulo={t('hubGuarderia.listaNoCargoTitulo')}
             descripcion={t('hubGuarderia.listaNoCargoDetalle')}
           />
-        ) : lista.lugares.length === 0 ? (
-          /* 🔴 NO DEBERÍA VERSE NUNCA: la pantalla anterior no habilita el
-             botón sin lugares (Ley 23 — la puerta no ofrece lo que va a
-             rechazar). Existe porque **el cupo puede cambiar entre las dos
-             pantallas**, y ahí la verdad es de acá. */
-          <EstadoVacio
-            registro="seccion"
-            titulo={t('hubGuarderia.sinLugaresTitulo')}
-            descripcion={t('hubGuarderia.sinLugaresDetalle')}
-          />
+        ) : precios.fase === 'cargando' ? (
+          /* La lista llegó y los precios del tamaño todavía no. **No se pinta
+             la lista sin ellos**: aparecería y se acortaría sola cuando el
+             filtro de Ley 23 corriera. */
+          <EsqueletoGrupo>
+            <Esqueleto alto={64} />
+            <Esqueleto alto={64} />
+          </EsqueletoGrupo>
+        ) : lugaresVisibles.length === 0 ? (
+          /* 🔴 NO DEBERÍA VERSE NUNCA por cupo: la pantalla anterior no habilita
+             el botón sin lugares (Ley 23). Existe porque **el cupo puede cambiar
+             entre las dos pantallas**, y ahí la verdad es de acá.
+             ⭐ **Y desde S108-C tiene una segunda causa, que se dice aparte:**
+             hay lugares con cupo, pero **ninguno vende ese tamaño de paquete**.
+             *Decir «ninguna tiene cupo» mandaría a la familia a probar otro día
+             para siempre, y el día no es el problema.* */
+          modalidad === 'paquete' && tamano !== null && lista.lugares.length > 0 ? (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('hubGuarderia.sinLugaresTamanoTitulo', { n: tamano })}
+              descripcion={t('hubGuarderia.sinLugaresTamanoDetalle')}
+            />
+          ) : (
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('hubGuarderia.sinLugaresTitulo')}
+              descripcion={t('hubGuarderia.sinLugaresDetalle')}
+            />
+          )
         ) : (
           /* ⏪ **LOS PREVIEWS FLOTABAN SOBRE EL FONDO.** La hermana de
              grooming los mete en UNA sola tarjeta contenedora, y por eso su
@@ -230,7 +356,7 @@ export default function QuienPuedeGuarderia() {
              el cupo y las ventanas de guardería quedaban «colgando abajo»:
              no había caja de la que colgar.* Censado el 30-ago. */
           <Tarjeta relleno="ninguno">
-          {          lista.lugares.map((g) => {
+          {          lugaresVisibles.map((g) => {
             const precio = precioDe(g);
             /* 🔴 LOS CUATRO CAMPOS SON INDEPENDIENTES — firma de A, y el caso
                es real: **un lugar puede tener la recogida declarada y la
@@ -280,14 +406,17 @@ export default function QuienPuedeGuarderia() {
                 /* 🔴 SIN NÚMERO cuando el lugar no vende esta modalidad — la
                    pieza acepta la cadena vacía y no pinta el separador
                    huérfano. *Un guion o un cero se leerían como «gratis».* */
-                /* 🔴 MISMO DEFECTO, SEGUNDA SUPERFICIE: para paquete,
-                   `precioModalidad` sale de `min(gp.precio)` — **el paquete más
-                   barato del lugar, no el tamaño elegido**. *Un «$40» bajo una
-                   selección de 15 es un precio equivocado en la pantalla donde
-                   se elige a quién pagarle.* No se pinta hasta que el server
-                   reciba el tamaño. */
+                /* ⭐ **EL PAQUETE VUELVE A TENER PRECIO, y ahora es el suyo.**
+                   ⏪ Acá decía `modalidad === 'paquete' ? ''` — la cura vieja
+                   del mínimo, que tapó el número equivocado dejando la lista
+                   **sin ningún número** en la pantalla donde se elige a quién
+                   pagarle. *Curar un dato equivocado borrándolo deja a la
+                   familia eligiendo a ciegas: es el mismo defecto con menos
+                   información.* Hoy `precioDe` devuelve el precio del tamaño
+                   elegido en ESE lugar, así que el número se puede pintar y
+                   **es el que va a pagar.** */
                 precio={
-                  modalidad === 'paquete' || precio === null
+                  precio === null
                     ? ''
                     : modalidad === 'dia'
                       ? t('hubGuarderia.porDia', { precio: precio.toFixed(2) })

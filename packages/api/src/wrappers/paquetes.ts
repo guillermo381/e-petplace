@@ -10,6 +10,9 @@
 
 import { getClient, misFamiliasVigentes, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
+/* La marca de «se venció la ventana de pago» se DERIVA con la función de la
+   casa, jamás con una copia — S108-A la exporta para eso. */
+import { bonoNoPagadoATiempo } from './pagos-espera';
 
 // ── Códigos de error (verificados contra los RAISE de cada body) ────────────
 
@@ -278,6 +281,27 @@ export interface PaqueteSalidas {
   fecha_compra: string;
   /** La vigencia declarada al comprar (§6bis.2). */
   fecha_vencimiento: string | null;
+  /**
+   * ⭐ **S108-C-4 · EL PAGO, que este lector no traía.** El crudo de la base:
+   * `pendiente` · `pagado` · `reembolsado`.
+   *
+   * 🔴 Sin él, **la superficie no podía decidir por pago aunque el docstring de
+   * abajo diga que decide ella**: el dato no llegaba. Y con el bono a punto de
+   * nacer `pendiente`, eso deja un paquete NO PAGADO pintándose como saldo
+   * gastable — *la misma rotura que S108-A ya curó del lado de guardería.*
+   * Espejo exacto de `PaqueteCompradoGuarderia.estadoPago`.
+   */
+  estadoPago: string;
+  /**
+   * `true` cuando el paquete murió porque **se venció su ventana de pago**, no
+   * por un reverso ni por saldo vencido. *«No llegaste a pagarlo» y «te
+   * devolvimos la plata» son dos finales que la familia vive distinto.*
+   *
+   * Se deriva con `bonoNoPagadoATiempo`, **la misma función que usa guardería**
+   * — no se reimplementa la marca: *dos derivaciones de la misma verdad son dos
+   * lugares donde una puede quedarse vieja.*
+   */
+  noPagadoATiempo: boolean;
 }
 
 /**
@@ -311,7 +335,7 @@ export async function obtenerMisPaquetesSalidas(): Promise<
   if (!puerta.ok) return { ok: false, codigo: puerta.codigo, mensaje: MENSAJES_ERROR_PAQUETE[puerta.codigo] };
   const { data, error } = await supabase
     .from('bonos')
-    .select('id, prestador_id, prestador_servicio_id, mascota_id, estado, unidades_total, unidades_usadas, duracion_minutos, precio_por_unidad, fecha_compra, fecha_vencimiento')
+    .select('id, prestador_id, prestador_servicio_id, mascota_id, estado, unidades_total, unidades_usadas, duracion_minutos, precio_por_unidad, fecha_compra, fecha_vencimiento, estado_pago, pago_metadata')
     .eq('tipo_servicio', 'paseo')
     .or(puerta.filtro)
     .order('fecha_compra', { ascending: false });
@@ -335,6 +359,8 @@ export async function obtenerMisPaquetesSalidas(): Promise<
       precio_por_unidad: fila.precio_por_unidad === null ? null : Number(fila.precio_por_unidad),
       fecha_compra: String(fila.fecha_compra),
       fecha_vencimiento: fila.fecha_vencimiento === null ? null : String(fila.fecha_vencimiento),
+      estadoPago: typeof fila.estado_pago === 'string' ? fila.estado_pago : '',
+      noPagadoATiempo: bonoNoPagadoATiempo(fila.pago_metadata),
     });
   }
   return { ok: true, data: paquetes };

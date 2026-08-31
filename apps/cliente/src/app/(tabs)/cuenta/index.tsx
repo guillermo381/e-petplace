@@ -126,6 +126,15 @@ export default function Cuenta() {
        tres: `pagos` = el historial · `bancario` = el instrumento ·
        `preferencias` = cómo querés que se comporte la app. */
     { etiqueta: t('cuenta.medios'), ruta: '/cuenta/medios' as const, icono: 'bancario' as const },
+    /* ⭐ **S108-C · LA TERCERA CATEGORÍA QUE FALTABA.** El comentario de arriba
+       ya trazaba la taxonomía —`pagos` = el historial · `bancario` = el
+       instrumento · `preferencias` = cómo se comporta la app— y **le faltaba
+       QUÉ TE COBRA SOLO**, que no es ninguna de las tres.
+       🔴 Y no es una idea nueva: **el diccionario ya la prometía publicada**
+       («…hasta que lo canceles desde Cuenta») sobre una pantalla que no
+       existía. Glifo propio por `D-877`: `pagos`, `bancario` y `preferencias`
+       ya están tomados en esta misma lista. */
+    { etiqueta: t('cuenta.recurrentes'), ruta: '/cuenta/recurrentes' as const, icono: 'mes' as const },
     /* 🔴 S103-C · LA PUERTA QUE FALTABA. El motor de contraseña vive en
        `packages/api` desde S84 y **su único consumidor era el prestador**:
        una familia no tenía NINGÚN camino para cambiar su clave. *No faltaba
