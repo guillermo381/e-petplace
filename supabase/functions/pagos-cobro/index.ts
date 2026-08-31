@@ -116,6 +116,9 @@ Deno.serve(async (req) => {
   const hayCita = UUID_RE.test(citaId);
   const hayBono = UUID_RE.test(bonoId);
   const hayMen = UUID_RE.test(menId);
+  const planId = typeof body.suscripcion_servicio_id === 'string'
+    ? body.suscripcion_servicio_id : '';
+  const hayPlan = UUID_RE.test(planId);
   const hayProg = UUID_RE.test(progId);
   /* 🔴 «Exactamente uno» también en la puerta, no solo en el CHECK: *un
      llamador que manda los dos no está pidiendo dos cosas — está pidiendo algo
@@ -127,7 +130,8 @@ Deno.serve(async (req) => {
      decía** —dos verdaderos la satisfacen igual—, así que se CUENTA. *Una
      condición que era exacta para dos y silenciosamente laxa para cuatro es la
      clase de cosa que no rompe ningún test: sigue compilando y deja pasar.* */
-  const cuantosSujetos = [hayCompra, hayCita, hayBono, hayMen, hayProg].filter(Boolean).length;
+  const cuantosSujetos = [hayCompra, hayCita, hayBono, hayMen, hayProg, hayPlan]
+    .filter(Boolean).length;
   if (cuantosSujetos !== 1 || !UUID_RE.test(tarjetaId)) {
     return json({ ok: false, codigo: 'datos_invalidos' }, 400);
   }
@@ -280,6 +284,51 @@ Deno.serve(async (req) => {
     }
   }
 
+  /* ═══ EL PLAN DE PASEO — el sujeto que PODÍA RENOVAR Y NO PODÍA EMPEZAR ═══
+     Medido por A y confirmado por mi censo de compuertas: el motor estaba
+     entero —`verificar_compuerta_plan`, `confirmar_pago_plan_paseo`, y el
+     actuador llamándola— **y esta edge no aceptaba el sujeto.** El lazo
+     recurrente lo cobraba; el primer cobro, el del checkout, no tenía puerta.
+     *Un sujeto que renueva y no arranca sólo puede cobrarle a alguien que ya le
+     estaba pagando.*
+
+     🔴 EL MONTO SALE DE `precio_mensual` Y **NO SE EXIGE DESGLOSE EN EL PRIMER
+     COBRO** — es el mismo precedente que la mensualidad de guardería:
+     `suscripcion_desglose` lo escribe el lazo de RENOVACIÓN, así que exigirlo
+     acá frenaría el estreno de todo plan. *Un número firmado al contratar es
+     tan fuerte como un desglose: los dos son un número que la familia vio antes
+     de que nadie cobrara.*
+
+     ⚠️ LA PERTENENCIA VA FAIL-CLOSED, y se declara: `suscripciones_servicio` NO
+     tiene `familia_id` —medido— así que se exige **el contratante**, no la
+     familia. Derivar la familia por la mascota ENSANCHARÍA quién puede pagar el
+     plan de otro, y eso es decisión de producto, no una equivalencia. */
+  if (hayPlan) {
+    const { data: pl } = await db.from('suscripciones_servicio')
+      .select('id, user_id, estado, estado_pago, precio_mensual, pago_expira_en, prestador_id')
+      .eq('id', planId).maybeSingle();
+    if (!pl || pl.user_id !== userId) {
+      return json({ ok: false, codigo: 'plan_no_existe' }, 409);
+    }
+    if (pl.estado_pago === 'pagado') {
+      return json({ ok: false, codigo: 'plan_ya_pagado' }, 409);
+    }
+    if (pl.pago_expira_en !== null && new Date(pl.pago_expira_en).getTime() <= Date.now()) {
+      return json({ ok: false, codigo: 'plan_vencido' }, 409);
+    }
+    /* La compuerta ANTES de mover plata — la lección que costó `DF-2108181`. */
+    const { data: gpl } = await db.rpc('verificar_compuerta_plan',
+      { p_suscripcion_id: planId });
+    const gatePl = (gpl ?? {}) as Record<string, unknown>;
+    if (gatePl.ok !== true) {
+      return json({ ok: false, codigo: gatePl.codigo ?? 'plan_no_cobrable',
+                    detalle: gatePl.causa ?? null }, 409);
+    }
+    if (!(Number(pl.precio_mensual) > 0)) {
+      return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    }
+  }
+
   if (hayMen) {
     const { data: susc } = await db.from('guarderia_suscripciones')
       .select('id, familia_id, estado, precio_mensual, monto_esperado, periodo_hasta')
@@ -425,6 +474,19 @@ Deno.serve(async (req) => {
     base = Number(d.subtotal ?? 0);
     moneda = d.moneda ?? 'USD';
   }
+  if (hayPlan) {
+    const { data: pl } = await db.from('suscripciones_servicio')
+      .select('precio_mensual, prestadores(cuentas_comerciales(moneda))')
+      .eq('id', planId).maybeSingle();
+    const m = (pl as { prestadores?: { cuentas_comerciales?: { moneda?: string } } } | null)
+      ?.prestadores?.cuentas_comerciales?.moneda;
+    /* Sin moneda no se cobra: no se cae a 'USD'. Mismo criterio que la
+       mensualidad — *un cobro con una moneda supuesta cobra en una moneda que
+       nadie eligió*. */
+    if (!m) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    monto = Number((pl as { precio_mensual?: number } | null)?.precio_mensual ?? 0);
+    moneda = m;
+  }
   if (hayMen) {
     /* El número YA se resolvió arriba, contra el mandato — ver «pagar es
        arrancar». Acá sólo falta la moneda, que vive en la cuenta comercial del
@@ -459,7 +521,8 @@ Deno.serve(async (req) => {
   /* 🔴 EL SUJETO — lo que viaja como `dev_reference` y lo que el actuador va a
      resolver del otro lado. Con cuatro sujetos el ternario encadenado deja al
      último de la cadena haciendo de `else`; se enumera. */
-  const sujeto = hayCompra ? compraId : hayCita ? citaId : hayBono ? bonoId : hayMen ? menId : progId;
+  const sujeto = hayCompra ? compraId : hayCita ? citaId : hayBono ? bonoId
+    : hayMen ? menId : hayPlan ? planId : progId;
   if (!UUID_RE.test(sujeto)) {
     /* No puede pasar —la puerta ya contó exactamente uno—, pero un
        `dev_reference` vacío es justo el defecto que la cita ya produjo una vez:
@@ -468,7 +531,7 @@ Deno.serve(async (req) => {
   }
   if (!(monto > 0)) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
   const nombreDelSujeto = hayCompra ? 'compra' : hayCita ? 'cita'
-    : hayBono ? 'paquete' : hayMen ? 'plan' : 'programa';
+    : hayBono ? 'paquete' : hayMen ? 'plan' : hayPlan ? 'plan' : 'programa';
 
   /* 🔴 LAS COLUMNAS DEL SUJETO, EN UN SOLO LUGAR. Estaban repetidas en los DOS
      INSERT de `pagos_intentos` (el del rechazo por IVA y el del cobro), y con
@@ -484,6 +547,7 @@ Deno.serve(async (req) => {
     guarderia_suscripcion_id: hayMen ? menId : null,
     guarderia_suscripcion_periodo: hayMen ? menPeriodo : null,
     programa_contratado_id: hayProg ? progId : null,
+    suscripcion_servicio_id: hayPlan ? planId : null,
   });
 
   /* 🔑 LA FORMA DEL `order` CON IVA 0 — respuesta de Erick, 20-ago (letra §6bis):

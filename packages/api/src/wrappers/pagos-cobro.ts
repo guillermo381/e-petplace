@@ -38,7 +38,8 @@ export type CodigoCobro =
   /* La compuerta del programa: existe y su mes de sesiones NO cabe. Con su
      nombre — *«no se pudo» sobre un programa manda a reintentar algo que va a
      fallar igual.* */
-  | 'sesiones_no_agendables' | 'programa_no_cobrable';
+  | 'sesiones_no_agendables' | 'programa_no_cobrable'
+  | 'plan_no_existe' | 'plan_ya_pagado' | 'plan_vencido' | 'plan_no_cobrable';
 
 /** 🔴 Lo que vuelve es **señal optimista**, jamás «pagado». */
 export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };
@@ -74,7 +75,10 @@ export type SujetoDeCobro =
      confirmación, actuador, reverso— **y no había con qué crear su intento.**
      *Un sujeto que se aplica bien y no se puede crear es un sujeto que nunca va
      a cobrar, y hoy se lee como completo.* */
-  | { tipo: 'programa'; id: string };
+  | { tipo: 'programa'; id: string }
+  /* El plan de paseo. **Podía renovar y no podía empezar**: el lazo recurrente
+     lo cobraba y el checkout no tenía puerta. */
+  | { tipo: 'plan'; id: string };
 
 export async function cobrarCompra(
   compraId: string,
@@ -110,6 +114,8 @@ function cuerpoDelSujeto(
       return { guarderia_suscripcion_id: sujeto.id, tarjeta_id: tarjetaId };
     case 'programa':
       return { programa_contratado_id: sujeto.id, tarjeta_id: tarjetaId };
+    case 'plan':
+      return { suscripcion_servicio_id: sujeto.id, tarjeta_id: tarjetaId };
     default: {
       const _exhaustivo: never = sujeto;
       return _exhaustivo;
@@ -151,6 +157,24 @@ export async function cobrarProgramaAdiestramiento(
   tarjetaId: string,
 ): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
   return cobrarSujeto({ tipo: 'programa', id: programaContratadoId }, tarjetaId);
+}
+
+/**
+ * S109-B · EL PLAN DE PASEO — el PRIMER cobro, el del checkout.
+ *
+ * 🔴 Hasta hoy este sujeto **podía renovar y no podía empezar**: el lazo
+ * recurrente lo cobraba y el checkout no tenía puerta. *Un sujeto que renueva y
+ * no arranca sólo puede cobrarle a alguien que ya le estaba pagando.*
+ *
+ * ⚠️ Quien lo llame tiene que haber dejado `riel='tarjeta'` **en el mismo acto**
+ * en que guardó la tarjeta: el CHECK `chk_susc_riel_valido` exige que si el riel
+ * es tarjeta haya tarjeta, y un plan con `riel` NULL es *nadie lo declaró*.
+ */
+export async function cobrarPlanDePaseo(
+  suscripcionId: string,
+  tarjetaId: string,
+): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
+  return cobrarSujeto({ tipo: 'plan', id: suscripcionId }, tarjetaId);
 }
 
 export async function cobrarSujeto(

@@ -123,25 +123,36 @@ Deno.serve(async (req) => {
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
 
-  /* ═══ 🔴 UN INTENTO EN VUELO FRENA — PARA LOS CINCO, NO PARA UNO ══════════
-     Medido: este guard existía **en una sola de las cinco ramas** (la
-     mensualidad). En compra, cita, bono y programa, pedir el código dos veces
-     creaba **dos intentos** — y con DeUna un intento es un CÓDIGO PAGABLE, así
-     que eran dos códigos vivos para la misma compra. *Con tarjeta un duplicado
-     te cobra dos veces; con un código, se lo das a la familia y esperás que use
-     sólo uno.*
+  /* ═══ 🔴 EL CÓDIGO ES UN ATRIBUTO DEL INTENTO, NO UN INTENTO ═════════════
+     Historia de dos curas, y la segunda corrige a la primera:
 
-     **Es la clase del día por cuarta vez:** el freno se escribió cuando el
-     sujeto era uno y no se censó al abrir los otros cuatro. Por eso ahora se
-     resuelve **por el catálogo** —`cat_sujetos_de_pago.columna_intento`— y no
-     por una rama tipeada: un sexto sujeto queda cubierto sin que nadie se
-     acuerde de él.
+     **①** Medido: el guard de intento-en-vuelo existía en UNA de las cinco
+     ramas (la mensualidad). En compra, cita, bono y programa **pedir el código
+     dos veces creaba dos intentos** — y con DeUna un intento es un CÓDIGO
+     PAGABLE. Evidencia viva que trajo A: un sujeto con 2 intentos DeUna y 2
+     claves distintas. *No es hipotético: ya pasó.*
 
-     ⚠️ Frena, NO devuelve el código vivo. Si el producto necesita que la
-     familia pueda pedir otro código del mismo mes, la respuesta correcta es
-     devolver el que ya existe — **y eso es decisión de producto, no de esta
-     edge**: hoy `pago_en_proceso` es la verdad («ya hay uno andando»), y
-     mentirla sería peor que negarla. */
+     **②** La primera cura frenó con `pago_en_proceso` para los cinco — y eso
+     **contradice la firma**: *«la familia puede volver al link y generar otro
+     código si el primero venció, todas las veces que haga falta, mientras el
+     período no termine»*. **Frenar cuando el código venció es cerrarle la puerta
+     a alguien que viene a pagar.**
+
+     LA FORMA QUE RIGE — `pagos_intentos` YA tiene `codigo_numerico` y
+     `codigo_expira_en`: *el diseño siempre dijo que el código es renovable sobre
+     el intento; lo que estaba mal era la clave.*
+
+       · intento no terminal + código VIVO    → devuelve EL MISMO código
+       · intento no terminal + código VENCIDO → acuña uno nuevo SOBRE ÉL
+       · sin intento no terminal              → nace uno
+       · el anterior es TERMINAL              → nace uno, y no es duplicado:
+                                                es un segundo intento después de
+                                                un desenlace real
+
+     ⚠️ Y `pago_en_proceso` ya no se devuelve nunca desde acá. Se conserva en el
+     tipo del wrapper porque el riel de tarjeta sí lo usa. */
+  let reusarIntento: string | null = null;
+  let refExistente: string | null = null;
   {
     const col = hayCompra ? 'compra_id' : hayCita ? 'cita_id'
       : hayBono ? 'bono_id' : hayMen ? 'guarderia_suscripcion_id'
@@ -149,11 +160,26 @@ Deno.serve(async (req) => {
     const idSujeto = hayCompra ? compraId : hayCita ? citaId
       : hayBono ? bonoId : hayMen ? menId : progId;
     const { data: enVuelo } = await db.from('pagos_intentos')
-      .select('id').eq(col, idSujeto).in('estado', ['iniciado', 'pendiente']);
-    if ((enVuelo ?? []).length > 0) {
-      return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
+      .select('id, codigo_numerico, codigo_expira_en, referencia_corta, monto, moneda')
+      .eq(col, idSujeto).in('estado', ['iniciado', 'pendiente'])
+      .order('creado_en', { ascending: false }).limit(1).maybeSingle();
+    if (enVuelo) {
+      const vive = enVuelo.codigo_numerico
+        && enVuelo.codigo_expira_en
+        && Date.parse(String(enVuelo.codigo_expira_en)) > Date.now();
+      if (vive) {
+        /* Mismo código, misma cuenta regresiva. Cero intentos nuevos, cero
+           llamadas al proveedor. *Un mes pendiente es UNO, aunque se pidan
+           cinco códigos.* */
+        return json({ ok: true, intento_id: enVuelo.id,
+          codigo: enVuelo.codigo_numerico, expira_en: enVuelo.codigo_expira_en,
+          monto: Number(enVuelo.monto), moneda: enVuelo.moneda, reusado: true });
+      }
+      reusarIntento = enVuelo.id;
+      refExistente = enVuelo.referencia_corta;
     }
   }
+
 
 
   /* S108-B · los dos sujetos de guardería son DEL HOGAR. Mismo predicado que
@@ -402,13 +428,33 @@ Deno.serve(async (req) => {
   /* 🔴 <= 20 chars: el UUID de 36 NO CABE (LETRA_DEUNA §4). La genera la base
      por secuencia ofuscada — única por construcción, y **se resuelve a intento
      POR TABLA, jamás parseando el string**. */
-  const { data: ref, error: eR } = await db.rpc('deuna_nueva_referencia');
-  if (eR || typeof ref !== 'string') return json({ ok: false, codigo: 'no_se_pudo_completar' }, 500);
+  /* La referencia del intento reusado se CONSERVA: es la que el proveedor
+     devuelve y por la que el webhook lo encuentra. Acuñar una nueva sobre el
+     mismo intento lo volvería inhallable para el evento anterior. */
+  let ref: string | null = refExistente;
+  if (ref === null) {
+    const { data: r, error: eR } = await db.rpc('deuna_nueva_referencia');
+    if (eR || typeof r !== 'string') return json({ ok: false, codigo: 'no_se_pudo_completar' }, 500);
+    ref = r;
+  }
 
   // ── EL INTENTO, ANTES DE DISPARAR ─────────────────────────────────────────
   /* Si pedimos el código y perdemos la respuesta, esta fila es lo único que
      prueba que se pidió. Sin ella el caso ④ (no llega ninguno) es indetectable:
      no habría contra qué barrer. */
+  /* 🔴 LA CLAVE DE IDEMPOTENCIA ERA LA RAÍZ, NO UN SÍNTOMA.
+     Era `deuna:<sujeto>:<ref>` con la `ref` generada POR PEDIDO ⇒ **nunca podía
+     colisionar**. *Una clave de idempotencia que no puede repetirse no es una
+     clave de idempotencia.* Va por SUJETO, más el período en los recurrentes,
+     que es la forma que ya usa el link mensual. */
+  const claveIdem = `deuna:${hayCompra ? 'compra' : hayCita ? 'cita'
+    : hayBono ? 'bono' : hayMen ? 'mensualidad' : 'programa'}:${sujeto}`
+    + (hayMen && menPeriodo ? `:${menPeriodo}` : '');
+
+  let intentoId: string;
+  if (reusarIntento !== null) {
+    intentoId = reusarIntento;
+  } else {
   const { data: intento, error: eI } = await db.from('pagos_intentos').insert({
     pedido_id: pedidoDelIntento,
     cita_id: hayCita ? citaId : null,
@@ -420,12 +466,14 @@ Deno.serve(async (req) => {
     proveedor: 'deuna', forma: 'codigo_push', estado: 'iniciado',
     proveedor_referencia: sujeto, referencia_corta: ref,
     monto, moneda,
-    clave_idempotencia: `deuna:${sujeto}:${ref}`,
+    clave_idempotencia: claveIdem,
     // La sesión ES el pagador (LETRA_SALDO §2). Explícito y jamás por DEFAULT
     // auth.uid(): acá corremos con service_role y ahí es NULL.
     pagador_user_id: userId, pagador_origen: 'sesion',
   }).select('id').single();
   if (eI) return json({ ok: false, codigo: 'no_se_pudo_completar' }, 500);
+    intentoId = intento.id;
+  }
 
   // ── ⑤ LA SOLICITUD A DEUNA ────────────────────────────────────────────────
   /* 🔑 LA FORMA DEL CUERPO, MEDIDA CONTRA QA CAMPO POR CAMPO (S103-D §2bis):
@@ -477,7 +525,7 @@ Deno.serve(async (req) => {
        — no se cierra como rechazado por no haber podido preguntar. */
     await db.from('pagos_intentos').update({
       motivo_rechazo: `red: ${String(e).slice(0, 200)}`,
-    }).eq('id', intento.id);
+    }).eq('id', intentoId);
     return json({ ok: false, codigo: 'sin_respuesta' }, 504);
   }
 
@@ -496,7 +544,7 @@ Deno.serve(async (req) => {
     await db.from('pagos_intentos').update({
       estado: 'rechazado', motivo_rechazo: motivo,
       cerrado_en: new Date().toISOString(), payload_crudo: resp,
-    }).eq('id', intento.id);
+    }).eq('id', intentoId);
     return json({ ok: false, codigo: 'no_se_pudo_completar', motivo }, 409);
   }
 
@@ -516,13 +564,13 @@ Deno.serve(async (req) => {
     codigo_numerico: codigo,
     codigo_expira_en: expira.toISOString(),
     payload_crudo: resp,   // QR y deeplink viven acá: reserva sin pantalla
-  }).eq('id', intento.id);
+  }).eq('id', intentoId);
 
   /* 🔴 ⑥ SEÑAL, JAMÁS «PAGADO». Que exista el código no significa que alguien
      haya pagado: eso lo dice el webhook verificado, o el barrido. */
   return json({
     ok: true,
-    intento_id: intento.id,
+    intento_id: intentoId,
     codigo,                                  // los 6 dígitos, para la pantalla
     expira_en: expira.toISOString(),         // el reloj DEL CÓDIGO
     monto, moneda,
