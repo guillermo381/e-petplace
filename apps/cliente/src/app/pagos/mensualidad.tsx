@@ -63,6 +63,21 @@ export default function PagarMensualidad() {
     let vigente = true;
     void obtenerMisPlanesGuarderia().then((r) => {
       if (!vigente) return;
+      /* ⭐ **S109-C · SIN SESIÓN SE VA AL LOGIN LLEVANDO EL DESTINO.**
+         Firma del founder: *la ruta exige sesión* —el correo se reenvía, y sin
+         sesión cualquiera vería qué contrató la familia y cuánto paga— **y el
+         login vuelve ACÁ, sin perder el sujeto.** *Caer en el inicio de la app
+         después de escribir la contraseña obligaría a buscar de nuevo qué se
+         venía a pagar, que es justo lo que un link existe para evitar.*
+         ⚠️ Va con `replace`: el login no debe quedar en la pila detrás de esta
+         pantalla. */
+      if (!r.ok && r.codigo === 'sin_sesion') {
+        router.replace({
+          pathname: '/login',
+          params: { volverA: `/pagos/mensualidad?suscripcionId=${suscripcionId}` },
+        });
+        return;
+      }
       if (!r.ok) { setPlan('noPudimos'); return; }
       const mio = r.data.find((x) => x.suscripcionId === suscripcionId);
       /* 🔴 Un plan que no aparece NO se disfraza de fallo de red, y tampoco se
@@ -70,7 +85,7 @@ export default function PagarMensualidad() {
       setPlan(mio ?? 'noPudimos');
     });
     return () => { vigente = false; };
-  }, [suscripcionId]);
+  }, [suscripcionId, router]);
 
   /* El código se pide **apenas hay sujeto**: quien llegó, llegó a pagar. */
   const listo = plan !== 'cargando' && plan !== 'noPudimos';

@@ -3432,12 +3432,22 @@ export const clienteEs = {
        oferta de retención, sin letra chica** — firma del founder. */
     confirmarTitulo: '¿Apagar {{que}}?',
     confirmarCuerpo: 'Dejamos de cobrarlo. Lo que ya pagaste sigue en pie hasta que termine el período.',
-    confirmarReversible: 'Puedes volver a encenderlo mientras siga corriendo el período. No se te cobra de nuevo.',
+    /* La otra mitad de la asimetría, y es la que hace legible a la primera:
+       **dentro del período no re-ancla y no cobra** — es cancelar la
+       cancelación. *Que las dos frases existan es lo que convierte «se mueve el
+       día» en una consecuencia de haber esperado, y no en un castigo.* */
+    confirmarReversible: 'Puedes volver a encenderlo mientras siga corriendo el período: no se te cobra de nuevo y el día de cobro no cambia.',
     /* 🔴 Y cuando NO se puede volver, se dice ANTES. Medido: no existe ninguna
        función que devuelva una mensualidad de guardería a `activa`. */
-    /* Sólo para lo que de verdad no vuelve: fuera del período pagado, volver a
-       tenerlo es contratar de nuevo, con cobro y ancla nuevos. */
-    confirmarSinVuelta: 'Su período ya terminó: para volver a tenerlo hay que contratarlo de nuevo.',
+    /* ⭐ **S109-C · LA FIRMA DE REACTIVACIÓN, y se dice como un HECHO.**
+       Fuera del período pagado, volver es **contratar de nuevo**: ancla nueva,
+       el día que la familia vuelve.
+       🔴 *Nadie perdió nada, y la frase no puede sonar a castigo.* Por eso
+       arranca por lo que se conserva —el plan no se perdió y vuelve cuando
+       quiera— y recién después dice lo que cambia. **La asimetría se dice, no
+       se disimula**: callar que el día de cobro se mueve sería dejar que lo
+       descubra en el resumen de su tarjeta. */
+    confirmarSinVuelta: 'Su período ya terminó. El plan no se pierde: puedes volver a contratarlo cuando quieras, y desde ese día el cobro pasa a ser ese día de cada mes.',
     confirmar: 'Sí, apagar',
     volver: 'Dejarlo como está',
     noPudimosApagar: 'No pudimos apagarlo. Prueba de nuevo.',
