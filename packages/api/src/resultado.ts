@@ -4,7 +4,31 @@
 
 export type ResultadoWrapper<T, C extends string = string> =
   | { ok: true; data: T }
-  | { ok: false; codigo: C | 'error_desconocido' | 'datos_inconsistentes'; mensaje: string };
+  | {
+      ok: false;
+      codigo: C | 'error_desconocido' | 'datos_inconsistentes';
+      mensaje: string;
+      /**
+       * 🔴 EL DETALLE ES PARA MOSTRAR, JAMÁS PARA RAMIFICAR — y esa mitad de la
+       * regla es la que hace que este campo sea seguro de tener.
+       *
+       * **Por qué nace (S109, pedido de S109-B a pedido de S109-C):** el motor
+       * ya calculaba la *causa* de varios rechazos —cuál sesión no entra en la
+       * vigencia, cuál mes no se puede comprometer— y **el wrapper la tiraba**:
+       * construía `{ codigo, mensaje: codigo }` y descartaba el resto. *La
+       * pantalla decía un genérico sobre un rechazo del que sabíamos el porqué.*
+       *
+       * ⚠️ **La regla 35 sigue viva y este campo NO la afloja:** las decisiones
+       * se toman SIEMPRE sobre `codigo`. Hacer `if (detalle.includes(...))` es
+       * exactamente el string matching que la casa prohíbe, y acá sería peor
+       * que en `mensaje` porque este texto viene del motor y puede cambiar sin
+       * que ningún typecheck lo vea.
+       *
+       * **Opcional a propósito:** ningún wrapper existente lo emite y ninguno
+       * se rompe. El que quiera decir el porqué lo agrega; el que no, no cambia.
+       */
+      detalle?: string | null;
+    };
 
 /**
  * 🔴 EL CÓDIGO REAL DE UN FALLO, EXTRAÍDO DEL TIPO — no mantenido al lado.
