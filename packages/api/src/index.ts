@@ -1620,3 +1620,11 @@ export {
   type MotivoDiaAgregado,
   type CodigoErrorGuarderiaReserva,
 } from './wrappers/guarderia-reserva';
+
+/* S108-C · La cancelación de la mensualidad. **Archivo aparte a propósito**:
+   S108-A está tocando `guarderia-reserva.ts` en la misma tanda (76f). */
+export {
+  cancelarMensualidadGuarderia,
+  type CancelacionMensualidad,
+  type CodigoErrorGuarderiaSuscripcion,
+} from './wrappers/guarderia-suscripcion';
