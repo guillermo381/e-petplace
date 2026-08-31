@@ -42,6 +42,7 @@ import { Boton, Celda, Encabezado, EstadoVacio, Icono, Tarjeta, Texto, spacing, 
 import {
   comprarPaqueteGuarderia,
   getEstadoOnboardingDueno,
+  obtenerMisPlanesGuarderia,
   obtenerPaquetesGuarderia,
   reservarDiaGuarderia,
   contratarMensualidadGuarderia,
@@ -53,6 +54,8 @@ import { CheckoutReserva } from '@/components/checkout-reserva';
 import { SeccionMedioDePago, useMedioDePago } from '@/components/seccion-medio-de-pago';
 import { SeccionDireccion, useDireccionEntrega } from '@/components/seccion-direccion';
 import { CheckImagenes } from '@/components/check-imagenes';
+import { fechaLargaHumana, obtenerIdiomaActual } from '@epetplace/i18n';
+
 import { useTraduccion } from '@/i18n';
 
 export default function CheckoutGuarderia() {
@@ -245,7 +248,27 @@ export default function CheckoutGuarderia() {
       });
       setEnviando(false);
       if (!r.ok) { rebotar(r.codigo, r.mensaje); return; }
-      setExito({ titulo: t('checkoutGuarderia.mensualExito'), detalle: t('checkoutGuarderia.mensualExitoDetalle') });
+      /* ⭐ **LA FECHA DEL PRÓXIMO COBRO SE PREGUNTA, NO SE CALCULA.**
+         Con «pagar es arrancar» la familia tiene que salir de acá sabiendo
+         cuándo vuelve a salir plata. **Pero calcularlo en la pantalla obliga a
+         replicar la regla de anclaje del motor** —incluido qué pasa con un 31
+         en un mes de 30—, y *una fecha que la pantalla calcula y el motor no
+         honra es exactamente el defecto que esta tanda vino a cerrar.*
+
+         ⇒ Se lee el período del plan recién firmado. Mientras el motor no lo
+         llene (`periodo_desde`/`periodo_hasta` son NULL hasta que haya cobro,
+         por su propia letra), se dice **la regla**, que sí es cierta, en vez de
+         una fecha inventada. **El día que el motor lo llene, esta pantalla
+         empieza a decir la fecha sola** — sin tocar una línea. */
+      const plan = await obtenerMisPlanesGuarderia();
+      const mio = plan.ok ? plan.data.find((x) => x.suscripcionId === r.data.suscripcionId) : undefined;
+      const proximo = mio?.periodoHasta ?? null;
+      setExito({
+        titulo: t('checkoutGuarderia.mensualExito'),
+        detalle: proximo === null
+          ? t('checkoutGuarderia.mensualExitoDetalleSinFecha')
+          : t('checkoutGuarderia.mensualExitoDetalle', { fecha: fechaLargaHumana(proximo, obtenerIdiomaActual()) }),
+      });
       return;
     }
 
@@ -312,7 +335,13 @@ export default function CheckoutGuarderia() {
                     : t('checkoutGuarderia.servicio')
               }
               subtitulo={texto('prestadorNombre')}
-              metadataMono={texto('fecha')}
+              /* ☠️ **LA FECHA DE INICIO, DEROGADA (S108-C · T2).** Para la
+                 mensualidad esta línea pintaba el día que la familia había
+                 elegido *como si fuera el arranque del plan* — y con «pagar es
+                 arrancar» el arranque es hoy. *Dejar un día ahí sería seguir
+                 prometiendo el modelo viejo en la superficie donde se firma.*
+                 Las otras dos conservan su fecha: para ellas ES la estadía. */
+              metadataMono={esMensual ? undefined : texto('fecha')}
             />
             {/* ⭐ **EL TOTAL DEL PAQUETE SALE DEL PAQUETE, no de la URL.**
                 Las otras dos siguen con su parámetro **y eso es correcto,
@@ -332,6 +361,26 @@ export default function CheckoutGuarderia() {
               }
             />
           </Tarjeta>
+
+          {/* ═══ ⭐ LA AUSENCIA ESCRITA (S108-C · T2) ═══════════════════════
+              🔴 **Acá se elegía el día en que empezaba el plan.** El founder lo
+              derogó el 31-ago: *pagar es arrancar.* **Y una decisión que se ve
+              como una ausencia se escribe en el lugar donde se ve la ausencia**
+              — si no, el hueco se lee como un dato que falta, y la familia
+              autoriza un cobro que se repite sin saber cuándo cae.
+
+              Las tres cosas, y ninguna es decorativa: **cuándo se cobra la
+              primera vez** (hoy — lo que cambió), **cuándo se repite** (el
+              ancla de la recurrencia) y **cómo se sale** (sin eso, un cobro
+              mensual es una puerta de entrada sin salida). */}
+          {esMensual ? (
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="seccion">{t('checkoutGuarderia.mensualCuando')}</Texto>
+              <Texto variante="cuerpo">{t('checkoutGuarderia.mensualCuandoPrimera')}</Texto>
+              <Texto variante="cuerpo">{t('checkoutGuarderia.mensualCuandoRepite')}</Texto>
+              <Texto variante="cuerpo">{t('checkoutGuarderia.mensualCuandoCancela')}</Texto>
+            </View>
+          ) : null}
 
           {/* A DÓNDE PASAN A BUSCARLO — antes del medio de pago: primero
               dónde, después con qué. */}

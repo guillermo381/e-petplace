@@ -500,13 +500,16 @@ export default function ElegirGuarderia() {
         ) : null}
 
         {/* ── ③bis LA LETRA DE LA MENSUALIDAD ────────────────────────────
-               🔴 **Es lo que la familia está firmando, y no se decía.** Va
-               pegada al día porque el día ELEGIDO es el que fija la
-               recurrencia: *«se cobra ese mismo día cada mes»*.
-
+               🔴 **Es lo que la familia está firmando, y no se decía.**
                *Una recurrencia que no se declara antes de contratar es la
-               clase de cosa que se descubre en el segundo cobro.* ── */}
-        {modalidad === 'mensual' && fecha !== null ? (
+               clase de cosa que se descubre en el segundo cobro.*
+
+               ⏪ **Colgaba de `fecha !== null`**, porque el día elegido era el
+               que fijaba la recurrencia. Con el día derogado (S108-C · T2) el
+               ancla es la fecha en que se contrata, así que **la letra ya no
+               espera a que se toque un día**: se lee desde que se elige la
+               modalidad, que es cuando la decisión se está tomando. ── */}
+        {modalidad === 'mensual' ? (
           <Texto variante="apoyo">{t('elegirGuarderia.mensualLetra')}</Texto>
         ) : null}
 

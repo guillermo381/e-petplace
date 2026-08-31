@@ -2893,16 +2893,26 @@ export const clienteEs = {
     /* El CTA apagado DICE qué falta: una pared muda hace creer que el
        producto está roto cuando sólo falta tocar un día. */
     contratarMensual: 'Contratar el mes',
-    mensualNoCobrable: 'Todavía no podemos cobrar la mensualidad. Estamos terminando esa parte.',
     comprarDiaAqui: 'Comprar día en esta guardería',
     comprarPaqueteAqui: 'Comprar paquete de {{n}} estadías',
     contratarMensualAqui: 'Contratar mensualidad',
     reservarDia: 'Reservar el {{dia}}',
     agendarDia: 'Agendar el {{dia}}',
     comprarPaqueteDia: 'Comprar {{n}} estadías y agendar el {{dia}}',
-    contratarMensualDesde: 'Contratar plan mensual desde el {{dia}}',
+    /* ☠️ S108-C · Acá vivían `contratarMensualDesde` («…desde el {{dia}}») y
+       `mensualNoCobrable`. **Medidas SIN consumidor** —el CTA que se pinta es
+       `contratarMensualAqui`, que no lleva fecha— y su sujeto quedó derogado
+       con el día de inicio. *Un string muerto que describe una promesa
+       derogada es justo lo que la próxima sesión resucita creyendo que
+       faltaba* (Ley 37: lo viejo muere en el mismo acto). */
     faltaTarjeta: 'Elige con qué tarjeta se cobra cada mes.',
-    mensualMandato: 'Autorizas el cobro mensual. Hoy no se cobra nada: el primer cobro sale el día que empieza el plan.',
+    /* ⭐ **S108-C · PAGAR ES ARRANCAR** (firma del founder, 31-ago).
+       ⏪ Decía: «Hoy no se cobra nada: el primer cobro sale el día que empieza
+       el plan.» **Se deroga el día de inicio elegible**, así que esa frase
+       pasó de promesa cumplida a mentira el minuto que el cobro se enciende.
+       *Y su modo de falla era el peor: no rompe nada — cobra y la pantalla
+       sigue diciendo que no.* */
+    mensualMandato: 'Autorizas el cobro mensual. Te cobramos hoy y después el mismo día de cada mes, hasta que lo canceles.',
     mensualFirmada: 'Listo. Tu plan mensual queda autorizado.',
     faltaDia: 'Elige un día en el calendario.',
     /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
@@ -3062,7 +3072,10 @@ export const clienteEs = {
     primerDia: 'Selecciona el primer día',
     verQuienPuede: 'Ver quién puede',
     requisitosInforman: 'Esto no te frena para reservar. Es lo que la guardería va a pedirte al recibirlo.',
-    mensualLetra: 'El plan corre de lunes a viernes. Se cobra ese mismo día cada mes hasta que lo canceles.',
+    /* ⭐ S108-C · **«ese mismo día» era el día ELEGIDO**, y el día elegido se
+       derogó. El ancla de la recurrencia pasa a ser la fecha en que se
+       contrata. */
+    mensualLetra: 'El plan corre de lunes a viernes. Empieza hoy: se cobra al contratarlo y después el mismo día de cada mes, hasta que lo canceles.',
     diaNadieAbre: 'Ese día no abre ninguna guardería.',
     diaSinCupo: 'Ese día ya está lleno.',
     diaYaReservado: 'Ya tienes ese día reservado.',
@@ -3122,12 +3135,30 @@ export const clienteEs = {
     servicio: 'Guardería · un día',
     sinHora: 'Todo el día',
     paqueteExito: 'Tu paquete quedó comprado',
-    mensualExito: 'Tu plan mensual quedó autorizado',
-    mensualExitoDetalle: 'El primer cobro sale el día que empieza el plan. Puedes cancelarlo cuando quieras.',
+    /* ⭐ S108-C · **«autorizado» ya no alcanza: queda ACTIVO y cobrado.** */
+    mensualExito: 'Tu plan mensual quedó activo',
+    /* 🔴 **DOS VARIANTES, Y LA SEGUNDA NO ES UN RESPALDO PEREZOSO.** La fecha
+       exacta del próximo cobro la tiene que decir el SERVIDOR: calcularla acá
+       obliga a replicar la regla de anclaje del motor —incluido qué pasa con
+       un 31 en un mes de 30— y *una fecha que la pantalla calcula y el motor
+       no honra es exactamente el defecto que esta tanda vino a cerrar.*
+       Mientras el motor no devuelva el período, se dice la REGLA, que sí es
+       cierta, y no una fecha inventada. */
+    mensualExitoDetalle: 'Tu plan está activo desde hoy. El próximo cobro sale el {{fecha}}. Puedes cancelarlo desde Cuenta cuando quieras.',
+    mensualExitoDetalleSinFecha: 'Tu plan está activo desde hoy. El próximo cobro sale dentro de un mes, el mismo día. Puedes cancelarlo desde Cuenta cuando quieras.',
     continuar: 'Continuar',
     dondeRecogen: 'De dónde lo pasan a buscar',
     dondeRecogenMensual: 'Acá van a pasar a buscarlo todos los meses. Puedes cambiarla después.',
     mensualServicio: 'Plan mensual de guardería',
+    /* ⭐ **S108-C · LA AUSENCIA SE ESCRIBE DONDE SE VE LA AUSENCIA.**
+       Acá estaba la fecha de inicio. Se derogó, y el hueco no se deja mudo:
+       *una decisión que se ve como una ausencia, sin explicación, se lee como
+       un dato que falta.* Las tres cosas que la familia necesita saber antes
+       de autorizar un cobro que se repite. */
+    mensualCuando: 'Cuándo se cobra',
+    mensualCuandoPrimera: 'La primera vez, hoy, al contratarlo.',
+    mensualCuandoRepite: 'Después, el mismo día de cada mes.',
+    mensualCuandoCancela: 'Lo cancelas desde Cuenta, cuando quieras.',
     paqueteServicio: 'Paquete de {{n}} estadías',
     paqueteSimulado: 'El cobro de este paquete todavía es simulado. Te lo decimos porque es la verdad.',
     /* ⭐ S108-C · Las tres voces del total que todavía no se pudo leer.
@@ -3149,7 +3180,9 @@ export const clienteEs = {
     /* El rótulo NEUTRO del botón: la instrucción vive en el cuerpo. */
     reservar: 'Reservar una estadía',
     planTitulo: 'Tu plan mensual',
-    planDetalle: '${{precio}} al mes. Se cobra solo hasta que lo canceles.',
+    /* ⭐ S108-C · Prometía cancelar y **no había puerta** (la RPC existía sin
+       wrapper ni pantalla). Hoy la hay, y la frase dice DÓNDE. */
+    planDetalle: '${{precio}} al mes. Se renueva solo hasta que lo canceles desde Cuenta.',
     conTuPaquete: 'Con tu paquete',
     verSuDia: 'Ver su día',
     reservarDePaquete: 'Reservar estadía de tu paquete',
