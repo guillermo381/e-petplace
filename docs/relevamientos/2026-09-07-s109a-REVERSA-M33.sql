@@ -1,0 +1,12 @@
+-- REVERSA de 20260907300000_s109a_el_comprobante_del_plan.sql
+--
+-- ⚠️ QUÉ NO DESHACE: los comprobantes ya encolados por
+--    `registrar_intencion_notificacion` quedan en su cola. No se retiran acá.
+--
+-- ⚠️ Y REVERTIR DEJA AL SEXTO SUJETO COBRANDO SIN COMPROBANTE — que es el
+--    estado del que esta migración lo saca.
+--
+-- `aplicar_evento_de_pago` vuelve a su cuerpo previo: vive completo en
+-- 20260906140000 y sus sucesoras, y `pg_get_functiondef` lo da del objeto.
+-- No se transcribe: copiar un cuerpo largo a mano es cómo una reversa termina
+-- restaurando algo que no era.
