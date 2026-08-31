@@ -67,8 +67,29 @@
 > ✅ **El destino del link ya existe:** `cobro_link_mensual` tiene
 > `suscripcion_servicio_id` **y** `guarderia_suscripcion_id` con XOR
 > (`20260906200000:42-56`) — *lo medí antes de suponer que faltaba, y no
-> faltaba.* ⇒ **Cuando `plan` entre a `SujetoDeuna`, acá es borrar una prop.**
-> Reportado a B.
+> faltaba.*
+>
+> ⚠️ **PERO NO ES «BORRAR UNA PROP», Y ESO LO CORRIGIÓ B MIDIENDO** — mi lectura
+> desde el wrapper subestimaba el trabajo:
+>
+> | pieza | estado (medido por B) |
+> |---|---|
+> | `SujetoDeuna` nombra `plan` | **no** (y tiene `never` ⇒ agregarlo obliga la rama) |
+> | `pagos-deuna-solicitud` acepta `suscripcion_servicio_id` | **0 ocurrencias — la edge no lo conoce** |
+> | destino en `cobro_link_mensual` | ✅ existe |
+>
+> ⇒ **Es la rama entera**: pertenencia fail-closed por `user_id`, la compuerta
+> `verificar_compuerta_plan` **antes** de emitir, monto de `precio_mensual` sin
+> exigir desglose en el primer cobro, **y el período** —
+> `chk_suscripcion_viaja_con_su_periodo` hace inexpresable un intento de
+> suscripción sin su mes.
+>
+> **B lo dejó declarado y NO lo empieza sin firma**, por tres razones que se
+> sostienen juntas: ① el riel DeUna **nunca corrió** (`por_deuna = 0`) ⇒ nada
+> roto en producción · ② el apagado por sujeto ya cerró la exposición viva ·
+> ③ **las dos piezas tienen que viajar juntas** — su rama y esta pantalla del
+> link. *Arrancar sola dejaría un sujeto emitible sin destino, que es justo lo
+> que el apagado frenó.*
 > ⚠️ **Pero antes de encenderla hay que medir una cosa más:**
 > `apps/cliente/src/app/pagos/mensualidad.tsx` hoy resuelve **sólo guardería**
 > (`obtenerMesPendienteGuarderia`). *Un link de plan de paseo llegaría a una
