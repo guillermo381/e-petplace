@@ -110,6 +110,9 @@ Deno.serve(async (req) => {
      rompe ningún test: sigue compilando y deja pasar.* */
   if ([hayCompra, hayCita, hayBono, hayMen, hayProg].filter(Boolean).length !== 1) {
     return json({ ok: false, codigo: 'datos_invalidos' }, 400);
+
+
+
   }
 
   // 🔴 Si llega un monto, se RECHAZA en vez de ignorarse: ignorarlo dejaría
@@ -119,6 +122,39 @@ Deno.serve(async (req) => {
   }
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
+
+  /* ═══ 🔴 UN INTENTO EN VUELO FRENA — PARA LOS CINCO, NO PARA UNO ══════════
+     Medido: este guard existía **en una sola de las cinco ramas** (la
+     mensualidad). En compra, cita, bono y programa, pedir el código dos veces
+     creaba **dos intentos** — y con DeUna un intento es un CÓDIGO PAGABLE, así
+     que eran dos códigos vivos para la misma compra. *Con tarjeta un duplicado
+     te cobra dos veces; con un código, se lo das a la familia y esperás que use
+     sólo uno.*
+
+     **Es la clase del día por cuarta vez:** el freno se escribió cuando el
+     sujeto era uno y no se censó al abrir los otros cuatro. Por eso ahora se
+     resuelve **por el catálogo** —`cat_sujetos_de_pago.columna_intento`— y no
+     por una rama tipeada: un sexto sujeto queda cubierto sin que nadie se
+     acuerde de él.
+
+     ⚠️ Frena, NO devuelve el código vivo. Si el producto necesita que la
+     familia pueda pedir otro código del mismo mes, la respuesta correcta es
+     devolver el que ya existe — **y eso es decisión de producto, no de esta
+     edge**: hoy `pago_en_proceso` es la verdad («ya hay uno andando»), y
+     mentirla sería peor que negarla. */
+  {
+    const col = hayCompra ? 'compra_id' : hayCita ? 'cita_id'
+      : hayBono ? 'bono_id' : hayMen ? 'guarderia_suscripcion_id'
+      : 'programa_contratado_id';
+    const idSujeto = hayCompra ? compraId : hayCita ? citaId
+      : hayBono ? bonoId : hayMen ? menId : progId;
+    const { data: enVuelo } = await db.from('pagos_intentos')
+      .select('id').eq(col, idSujeto).in('estado', ['iniciado', 'pendiente']);
+    if ((enVuelo ?? []).length > 0) {
+      return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
+    }
+  }
+
 
   /* S108-B · los dos sujetos de guardería son DEL HOGAR. Mismo predicado que
      sus policies, con el user EXPLÍCITO porque acá `auth.uid()` es NULL. */
@@ -248,15 +284,10 @@ Deno.serve(async (req) => {
       : new Date(new Date(String(susc.periodo_hasta) + 'T00:00:00Z').getTime() + 86400000)
           .toISOString().slice(0, 10);
 
-    /* 🔴 COMPUERTA 0 DE ESTE SUJETO: un intento en vuelo frena. *Sin esto, dos
-       toques seguidos disparan dos débitos y el segundo llega antes de que el
-       primero confirme.* */
-    const { data: intentos } = await db.from('pagos_intentos')
-      .select('estado').eq('guarderia_suscripcion_id', menId)
-      .in('estado', ['iniciado', 'pendiente']);
-    if ((intentos ?? []).length > 0) {
-      return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
-    }
+    /* ☠️ El guard de intento-en-vuelo que vivía acá SUBIÓ a la puerta, para los
+       cinco sujetos. Se retira en el mismo acto en vez de dejarlo duplicado:
+       *dos guards que hacen lo mismo divergen, y el de abajo gana sin que nadie
+       lo note.* */
     /* ═══ 🔴 LA COMPUERTA PRE-COBRO DEL MES ════════════════════════════════
        Medido con un cobro REAL (`DF-2107864`, $100): el débito salió y el acto 2
        se cayó por `duplicate key` de `(mascota, fecha)` ⇒ **plata tomada, plan
