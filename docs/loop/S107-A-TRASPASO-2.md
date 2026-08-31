@@ -446,6 +446,29 @@ prestador = **MEDICIÓN** (USB, 29-ago) · cliente = **DECLARACIÓN del founder*
 
 ---
 
+## ⑦nonies 🟢 LA DIRECCIÓN ELEGIDA, PUBLICADA — ancla `8ae284bd`
+
+| app | group | runtime |
+|---|---|---|
+| cliente | `13d989fe-703d-45a3-bd17-2af407ced438` | 1.0.6 |
+| prestador | `210affef-82da-4e3c-b4e4-ade20e792e2b` | 1.0.7 |
+
+`verify-ota` VERDE en las dos · 4 typechecks en 0 · 62 reglas · árbol en cero.
+
+🔴 **Y el contrato del motor OBLIGÓ A MOVER UNA PIEZA, que es el hallazgo:**
+`reservar_dia_guarderia` **congela la dirección al crear la cita**, y el hold
+del día nacía en la pantalla 4 ⇒ **elegir la dirección en el checkout no habría
+cambiado nada.** *Un selector que el servidor ya no puede escuchar es un control
+que no decide.* C mudó el hold al checkout; los tres caminos eligen en el mismo
+lugar.
+
+**Firmas del founder ejecutadas en esta tanda:** `D-981` (las direcciones quedan
+por usuario, **por firma y no por olvido**) · `D-968` sube a **precondición ⑦ de
+`DEFINICION_SOFTLAUNCH` §3.5** · `D-979` pierde el apuro sin perder la
+obligación · **`D-867` sale de la cola de A** (lo ve el founder con Nuvei).
+
+---
+
 ## ⑧ DÓNDE ESTÁ TODO
 
 **Contratos:** `docs/contratos/s107-contrato-{filtro-por-modalidad · resumen-del-filtro · paquete-contra-saldo · cupo-franja-estadia · paquetes-guarderia · media-durante · documentos-y-actas}.md`

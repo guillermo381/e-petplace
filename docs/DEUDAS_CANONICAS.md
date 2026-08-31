@@ -24118,6 +24118,39 @@ reporte real de una familia duplicando la dirección de su casa.
 y si el que la agregó puede retirarla del hogar), o se declara permanente y la
 pantalla lo dice.
 
+#### D-982 — 🟡 DOS ORQUESTACIONES DE DIRECCIÓN VIVAS: despensa no migró a la pieza que salió de su propio diseño
+
+**Origen: declarada por C al cerrar su tanda, 31-ago-2026** — *no la encontró
+un gate: la declaró quien la produjo.*
+
+Al montar el selector de dirección de guardería, el censo halló que **los
+componentes de despensa ya eran compartidos; lo duplicable era la
+ORQUESTACIÓN**. C la extrajo con el molde de `SeccionMedioDePago` (hook +
+sección, la voz por prop) ⇒ **no es construcción nueva: es la de despensa con
+su voz parametrizada.**
+
+⚠️ **Y despensa NO migró a ella.** Sigue con su bloque inline ⇒ **hay dos
+orquestaciones vivas de la misma cosa** — *exactamente la segunda copia que
+esta casa persigue.*
+
+> ### Dos copias no divergen el día que se escriben: divergen el día que alguien afina una.
+
+**Es la misma clase que `R57` vigila para las superficies de pago** —que dos
+pantallas monten LA MISMA pieza— con la diferencia de que acá **no hay regla que
+lo mida**: `R57` mira el medio de pago, no la dirección.
+
+**Por qué no se migró en la tanda, y es razón buena:** toca **una pantalla viva
+y muy pulida que nadie pidió tocar**, y la migración es mecánica sólo porque la
+pieza salió de su diseño. *Cambiar una pantalla firmada de paso, sin gate, es
+cómo se rompe algo que funcionaba.*
+
+**Dueño:** C (se ofreció) o quien toque el checkout de despensa.
+**Disparo:** la próxima tanda que abra esa pantalla — **o antes, si alguien
+afina una de las dos**, que es el momento en que empiezan a divergir.
+☠️ **Condición de muerte:** despensa monta la pieza extraída y su bloque inline
+muere (Ley 37) · **candidata a ensanchar `R57`** para que la dirección también
+tenga quien la mida.
+
 ### L-439 — DECLARAR UN ATAJO NO LO HACE SEGURO
 
 **Origen: hallazgo de C, 31-ago-2026 — `capacidad_por_dia` sin lector.**
