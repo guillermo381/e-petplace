@@ -202,16 +202,25 @@ export async function cobrarSujeto(
        la hay.*
        El cuerpo viaja en `error.context`, que es la Response. */
     let codigo = 'no_se_pudo_completar';
+    /* 🔴 LA CAUSA VIAJA. La edge la manda en `detalle` desde S109-B —«qué sesión
+       no entra», «qué mes no cabe»— y este wrapper la tiraba: se quedaba con el
+       `codigo` y la pantalla sólo podía decir un genérico. *Un motor que sabe
+       cuál es el problema y una superficie que dice «no se pudo» es la misma
+       clase de pérdida que la de arriba, un piso más adentro.*
+       Lo destrabó la enmienda de A a `ResultadoWrapper` (`detalle?: string`). */
+    let detalle: string | null = null;
     const ctx = (error as { context?: unknown }).context;
     if (ctx && typeof (ctx as Response).text === 'function') {
       try {
         const cuerpo = await (ctx as Response).clone().text();
         const j = JSON.parse(cuerpo) as Record<string, unknown>;
         if (typeof j.codigo === 'string') codigo = j.codigo;
+        if (typeof j.detalle === 'string') detalle = j.detalle;
       } catch { /* si no se puede leer, queda la voz genérica */ }
     }
     const d = (data ?? {}) as Record<string, unknown>;
     if (codigo === 'no_se_pudo_completar' && typeof d.codigo === 'string') codigo = d.codigo;
+    if (detalle === null && typeof d.detalle === 'string') detalle = d.detalle;
     /* 🔴 INSTRUMENTO — patrón `stoken_de` de S101-A: que el PRÓXIMO intento
        PRODUZCA el dato en vez de dejarnos hipotetizando. Sin logs de Edge
        Function por CLI, esta línea es la única forma de saber en qué punto
@@ -219,12 +228,16 @@ export async function cobrarSujeto(
        tarjeta.** Se retira cuando la causa esté identificada. */
     const st = (ctx as Response | undefined)?.status ?? '-';
     console.log(`[cobro] codigo=${codigo} http=${st} msg=${(error as Error).message ?? '-'}`);
-    return { ok: false, codigo: codigo as CodigoCobro, mensaje: codigo };
+    return { ok: false, codigo: codigo as CodigoCobro, mensaje: codigo, detalle };
   }
   const d = (data ?? {}) as Record<string, unknown>;
   if (d.ok !== true) {
     const codigo = typeof d.codigo === 'string' ? d.codigo : 'no_se_pudo_completar';
-    return { ok: false, codigo: codigo as CodigoCobro, mensaje: codigo };
+    /* La segunda rama: un 200 con `ok:false`. Lleva el mismo `detalle` — *dos
+       returns del mismo wrapper que hablan distinto divergen, y el que menos
+       dice gana el día que alguien cambie sólo uno.* */
+    return { ok: false, codigo: codigo as CodigoCobro, mensaje: codigo,
+             detalle: typeof d.detalle === 'string' ? d.detalle : null };
   }
   return { ok: true, data: { senal: 'optimista', estado: 'confirmando' } };
 }
