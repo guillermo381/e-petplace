@@ -30,7 +30,7 @@
 
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import {
@@ -52,6 +52,25 @@ import { iniciarSesion, iniciarSesionConGoogle } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
+/**
+ * ⭐ **S109-C · A DÓNDE VOLVER DESPUÉS DE ENTRAR.**
+ *
+ * Firma del founder: quien llega desde el correo del link mensual y no tiene
+ * sesión **vuelve A ESA MISMA PANTALLA** — *no debe caer en el inicio y tener
+ * que buscar de nuevo qué venía a pagar.*
+ *
+ * 🔴 **Sólo rutas INTERNAS.** Un `volverA` que aceptara cualquier cadena sería
+ * un redirector abierto: *un correo reenviado con un destino ajeno mandaría a la
+ * familia fuera de la app justo después de escribir su contraseña.* Se exige que
+ * empiece con `/` y que no sea `//` —que el navegador lee como otro host—; ante
+ * cualquier otra cosa, el Hogar.
+ */
+function destinoSeguro(crudo: unknown): string {
+  if (typeof crudo !== 'string') return '/';
+  if (!crudo.startsWith('/') || crudo.startsWith('//')) return '/';
+  return crudo;
+}
+
 // Cierra la ventana de auth al volver (necesario en web y managed; inocuo en
 // nativo). Va a nivel módulo, una sola vez.
 WebBrowser.maybeCompleteAuthSession();
@@ -69,6 +88,9 @@ export default function Login() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  /* El destino sobrevive al login: **la intención se declaró antes de la
+     contraseña**, y perderla obligaría a rehacer el camino desde el correo. */
+  const destino = destinoSeguro(useLocalSearchParams().volverA);
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
 
@@ -101,7 +123,7 @@ export default function Login() {
     // §5: la huella de llegada, y recién después el Hogar. El guard del raíz
     // re-decide con la sesión nueva (7.5: estado real).
     setLlegando(true);
-    setTimeout(() => router.replace('/'), 460);
+    setTimeout(() => router.replace(destino), 460);
   }
 
   async function entrarConGoogle() {
@@ -132,7 +154,7 @@ export default function Login() {
     // Mismo umbral que el login con clave: la huella y recién ahí el Hogar. El
     // guard del raíz decide onboarding (alta nueva) u Hogar (ya existía).
     setLlegando(true);
-    setTimeout(() => router.replace('/'), 460);
+    setTimeout(() => router.replace(destino), 460);
   }
 
   return (
