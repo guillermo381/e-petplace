@@ -34,7 +34,11 @@ export type CodigoCobro =
      manda a la familia a reintentar algo que va a fallar igual.* */
   | 'dia_ya_reservado' | 'sin_cupo_en_el_periodo' | 'mascota_no_determinada'
   | 'sin_medio_autorizado' | 'mes_no_comprometible'
-  | 'programa_no_existe' | 'programa_ya_pagado' | 'programa_vencido';
+  | 'programa_no_existe' | 'programa_ya_pagado' | 'programa_vencido'
+  /* La compuerta del programa: existe y su mes de sesiones NO cabe. Con su
+     nombre — *«no se pudo» sobre un programa manda a reintentar algo que va a
+     fallar igual.* */
+  | 'sesiones_no_agendables' | 'programa_no_cobrable';
 
 /** 🔴 Lo que vuelve es **señal optimista**, jamás «pagado». */
 export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };
