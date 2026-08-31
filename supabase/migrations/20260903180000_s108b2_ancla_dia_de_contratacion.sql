@@ -12,6 +12,20 @@
 --    `dia_de_cobro` sólo en cobros futuros. Cero backfill.
 --
 -- REVERSA: docs/relevamientos/2026-09-03-s108b2-REVERSA-M2.sql (escrita ANTES).
+--
+-- ⚠️ RENUMERADA de `20260903140000` a `20260903180000` — COLISIÓN DE NÚMERO
+--    con `s108a_aviso_renovacion_guarderia`, de la pista A. **Las dos corrieron
+--    y nada se perdió en la base**, pero `schema_migrations` sólo pudo nombrar
+--    una: el `INSERT` de ésta cayó en `ON CONFLICT DO NOTHING` **y pasó en
+--    silencio**.
+--    🔴 La consecuencia no es de hoy: en un ambiente nuevo, replay desde cero,
+--    `db push` ve `20260903140000` ya registrada y **saltea las dos** — una de
+--    las dos migraciones no se aplicaría nunca, y **sin error**, porque el
+--    ledger dice que sí. *Y no se puede saber cuál se pierde: depende de qué
+--    archivo esté en el directorio.*
+--    Es el precedente literal de S105 (A y D). Verificado antes de renumerar:
+--    el ledger tiene UNA fila `20260903140000` y se llama `s108a_aviso_...`,
+--    y `20260903180000` estaba libre.
 -- ═══════════════════════════════════════════════════════════════════════════
 
 CREATE OR REPLACE FUNCTION public.cobrar_periodo_mensualidad_guarderia(p_suscripcion_id uuid, p_periodo_desde date DEFAULT NULL::date, p_intento_id uuid DEFAULT NULL::uuid)

@@ -1,4 +1,4 @@
--- REVERSA de 20260903140000_s108b2_ancla_dia_de_contratacion.sql
+-- REVERSA de 20260903180000_s108b2_ancla_dia_de_contratacion.sql
 -- ESCRITA ANTES DE APLICAR.
 --
 -- ⚠️ QUÉ NO DESHACE: los `dia_de_cobro` ya escritos en
