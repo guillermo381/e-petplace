@@ -24637,6 +24637,33 @@ tres las resolvió el objeto.**
 quien cayó **acababa de citarle esa misma lección a otro**. *Una lección no
 protege a quien la enuncia — sólo a quien la ejecuta sobre su propio trabajo.*
 
+## 🟠 `L-451` — SEIS CONSUMIDORES DE UNA PIEZA NO SON SEIS PANTALLAS CON ESA PIEZA VIVA: LA DIFERENCIA LA DICE EL PROP, NO EL IMPORT
+
+**Medida por S109-D, sobre su propio censo.**
+
+Buscando por qué un mapa no dibujaba, el censo por **import** dio *«`MapaZona`
+se monta en `FichaPrestador`, y `FichaPrestador` tiene **seis** consumidores»* —
+y de ahí salió la conclusión de que **seis pantallas** estaban afectadas.
+
+**Medido por PROP, eran TRES.** Las otras tres montan la ficha **sin pasarle la
+zona**, así que la pieza del mapa **nunca se monta ahí**: importan al padre, no
+al hijo.
+
+> ### El costo no es contar de más: es *dónde* se mira.
+> El censo ancho manda a revisar tres pantallas que no tenían nada — y **el
+> defecto real estaba entre las que sí pasaban el prop**: la única de las tres
+> que no consultaba el guard, en la app donde el guard sí mide, montando un
+> `MapView` que mataba el proceso en hilo nativo. *Un censo que sobrestima no
+> falla por exceso de trabajo: falla porque diluye la atención justo donde
+> hacía falta.*
+
+**La regla:** cuando una pieza se monta **condicionada por sus props**, el censo
+se hace por **el prop que la enciende**, no por el import de quien la contiene.
+El import prueba que la pieza *puede* estar; **el prop prueba que está**.
+
+*Hermana de `L-433` (medir el consumidor y no la definición) y de la ley madre
+de esta casa: se mide del cuerpo, no del nombre.*
+
 ## 🔴 `L-450` — UN TYPECHECK EN UN WORKTREE DONDE METRO NUNCA CORRIÓ ESTÁ CIEGO A LAS RUTAS, Y DA VERDE POR AUSENCIA
 
 **Medida por S109-C sobre su propio verde flojo.**
