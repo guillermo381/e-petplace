@@ -143,11 +143,19 @@ export default function CheckoutPlanPaseo() {
         hora: texto('hora'),
         frecuencia: texto('frecuencia') as Frecuencia,
         auto_renovar: texto('renueva') === '1',
-        /* ⭐ **EL RIEL, Y NO SE INVENTA NUNCA.** El guard de arriba garantiza que
-           una de las dos ramas es cierta: o hay tarjeta elegida, o la familia
-           eligió DeUna con el dedo. *Caer a DeUna «porque no hay tarjeta» sería
-           elegir por ella el compromiso más caro de los dos —el que hay que ir a
-           pagar a mano cada mes— por un descarte.*
+        /* ⭐ **EL RIEL VIAJA EN EL MISMO ACTO QUE LA TARJETA, y eso no es
+           prolijidad: es lo que el motor exige.** `chk_susc_riel_valido` pide
+           que si el riel es `tarjeta` haya tarjeta, y un `riel` NULL significa
+           *nadie lo declaró* (hay uno vivo así en la base, medido por B).
+           *Contratar primero y guardar el riel después dejaría una ventana con
+           el plan existiendo sin poder cobrarse* — por eso van juntos en una
+           sola llamada y no en dos.
+
+           🔴 **Acá es SIEMPRE tarjeta, y el guard de arriba lo garantiza sin
+           excepción:** DeUna no puede cobrar este sujeto
+           (`deunaCobraEsteSujeto={false}`, medido abajo). *Caer a DeUna «porque
+           no hay tarjeta» sería elegir por la familia el compromiso más caro de
+           los dos —el que hay que ir a pagar a mano cada mes— por un descarte.*
 
            ⚠️ **Esta línea llegó por el compilador, y así tenía que ser.** A
            cambió `p_riel` a `DEFAULT NULL` (el silencio gana su nombre:
