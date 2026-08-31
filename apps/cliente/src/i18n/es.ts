@@ -2912,7 +2912,16 @@ export const clienteEs = {
        pasó de promesa cumplida a mentira el minuto que el cobro se enciende.
        *Y su modo de falla era el peor: no rompe nada — cobra y la pantalla
        sigue diciendo que no.* */
-    mensualMandato: 'Autorizas el cobro mensual. Te cobramos hoy y después el mismo día de cada mes, hasta que lo canceles.',
+    /* 🔴 **S108-C · «EL MISMO DÍA DE CADA MES» SE CAYÓ ANTES DE PUBLICARSE.**
+       Lo escribí así y **S108-A lo frenó con la medición**: la renovación es
+       `periodo_hasta + 1`, y con `+ interval '1 month' - 1 día` de Postgres un
+       plan que arranca el 31-ene corre al 27-feb y el siguiente **arranca el
+       28-feb**. *O sea que el día del mes NO se conserva en los bordes.*
+       ⇒ se dice **«una vez por mes»**, que es cierto siempre, y la fecha exacta
+       la dice el servidor cuando la tiene. *Prometer un día que el motor no
+       garantiza es exactamente el defecto que esta tanda vino a cerrar — y esta
+       vez lo cazó el cruce entre pistas, no el typecheck.* */
+    mensualMandato: 'Autorizas el cobro mensual. Te cobramos hoy y después una vez por mes, hasta que lo canceles.',
     mensualFirmada: 'Listo. Tu plan mensual queda autorizado.',
     faltaDia: 'Elige un día en el calendario.',
     /* 🔴 Se dice que es aproximada: la exacta llega después de reservar. */
@@ -3075,7 +3084,7 @@ export const clienteEs = {
     /* ⭐ S108-C · **«ese mismo día» era el día ELEGIDO**, y el día elegido se
        derogó. El ancla de la recurrencia pasa a ser la fecha en que se
        contrata. */
-    mensualLetra: 'El plan corre de lunes a viernes. Empieza hoy: se cobra al contratarlo y después el mismo día de cada mes, hasta que lo canceles.',
+    mensualLetra: 'El plan corre de lunes a viernes. Empieza hoy: se cobra al contratarlo y después una vez por mes, hasta que lo canceles.',
     diaNadieAbre: 'Ese día no abre ninguna guardería.',
     diaSinCupo: 'Ese día ya está lleno.',
     diaYaReservado: 'Ya tienes ese día reservado.',
@@ -3145,7 +3154,7 @@ export const clienteEs = {
        Mientras el motor no devuelva el período, se dice la REGLA, que sí es
        cierta, y no una fecha inventada. */
     mensualExitoDetalle: 'Tu plan está activo desde hoy. El próximo cobro sale el {{fecha}}. Puedes cancelarlo desde Cuenta cuando quieras.',
-    mensualExitoDetalleSinFecha: 'Tu plan está activo desde hoy. El próximo cobro sale dentro de un mes, el mismo día. Puedes cancelarlo desde Cuenta cuando quieras.',
+    mensualExitoDetalleSinFecha: 'Tu plan está activo desde hoy. El próximo cobro sale dentro de un mes. Puedes cancelarlo desde Cuenta cuando quieras.',
     continuar: 'Continuar',
     dondeRecogen: 'De dónde lo pasan a buscar',
     dondeRecogenMensual: 'Acá van a pasar a buscarlo todos los meses. Puedes cambiarla después.',
@@ -3157,7 +3166,7 @@ export const clienteEs = {
        de autorizar un cobro que se repite. */
     mensualCuando: 'Cuándo se cobra',
     mensualCuandoPrimera: 'La primera vez, hoy, al contratarlo.',
-    mensualCuandoRepite: 'Después, el mismo día de cada mes.',
+    mensualCuandoRepite: 'Después, una vez por mes.',
     mensualCuandoCancela: 'Lo cancelas desde Cuenta, cuando quieras.',
     paqueteServicio: 'Paquete de {{n}} estadías',
     paqueteSimulado: 'El cobro de este paquete todavía es simulado. Te lo decimos porque es la verdad.',
