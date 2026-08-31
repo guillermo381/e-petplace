@@ -21,7 +21,14 @@ export type CodigoCobro =
   | 'no_se_pudo_completar' | 'servidor_sin_configurar'
   /* Los de COMPUERTA: viajan tal cual desde el 409 del servidor. */
   | 'pago_en_proceso' | 'reserva_vencida' | 'vendedor_no_activo'
-  | 'monto_divergente' | 'compra_sin_pedidos';
+  | 'monto_divergente' | 'compra_sin_pedidos'
+  /* ═══ S108-B · LOS DOS SUJETOS DE GUARDERÍA ════════════════════════════
+     🔴 Cada uno con SU voz, y jamás reusando la del vecino: *un paquete que
+     rebota diciendo `cita_no_existe` manda a la familia —y a quien lea el
+     log— a mirar una cita que nunca hubo.* */
+  | 'bono_no_existe' | 'bono_ya_pagado' | 'bono_vencido'
+  | 'mensualidad_no_existe' | 'mensualidad_no_activa'
+  | 'sin_periodo_por_cobrar' | 'periodo_ya_cobrado';
 
 /** 🔴 Lo que vuelve es **señal optimista**, jamás «pagado». */
 export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };
@@ -38,7 +45,20 @@ export type SenalDeCobro = { senal: 'optimista'; estado: 'confirmando' };
  * divergencia — y lo que el founder gatea es justamente que el paseo se
  * sienta igual que la despensa.*
  */
-export type SujetoDeCobro = { tipo: 'compra'; id: string } | { tipo: 'cita'; id: string };
+export type SujetoDeCobro =
+  | { tipo: 'compra'; id: string }
+  | { tipo: 'cita'; id: string }
+  /* ═══ S108-B · GUARDERÍA — el paquete y la mensualidad ══════════════════
+     Entran por la MISMA puerta que los otros dos, con el mismo contrato: la
+     sesión es la autorización, el monto se lee del desglose congelado
+     server-side, la pertenencia se verifica allá.
+
+     🔴 **La mensualidad NO manda su período.** El servidor resuelve cuál está
+     por cobrar. *Un período elegido por el cliente es un cliente eligiendo
+     qué mes paga —y cuál se saltea—, que es la misma facultad que el monto:
+     no se la damos por una columna distinta.* */
+  | { tipo: 'bono'; id: string }
+  | { tipo: 'mensualidad'; id: string };
 
 export async function cobrarCompra(
   compraId: string,
@@ -55,14 +75,68 @@ export async function cobrarCita(
   return cobrarSujeto({ tipo: 'cita', id: citaId }, tarjetaId);
 }
 
+/**
+ * El cuerpo que viaja, por sujeto. **Sólo ids y el medio de pago.**
+ *
+ * 🔴 El `never` del `default` es el guard: si mañana la unión gana un sujeto y
+ *    nadie agrega su rama, **no compila**. *La alternativa —un `else` -- es
+ *    justo lo que hace que un sujeto nuevo viaje con el nombre del anterior.*
+ */
+function cuerpoDelSujeto(
+  sujeto: SujetoDeCobro,
+  tarjetaId: string,
+): Record<string, string> {
+  switch (sujeto.tipo) {
+    case 'compra': return { compra_id: sujeto.id, tarjeta_id: tarjetaId };
+    case 'cita': return { cita_id: sujeto.id, tarjeta_id: tarjetaId };
+    case 'bono': return { bono_id: sujeto.id, tarjeta_id: tarjetaId };
+    case 'mensualidad':
+      return { guarderia_suscripcion_id: sujeto.id, tarjeta_id: tarjetaId };
+    default: {
+      const _exhaustivo: never = sujeto;
+      return _exhaustivo;
+    }
+  }
+}
+
+/**
+ * S108-B · EL PAQUETE DE DÍAS DE GUARDERÍA.
+ *
+ * 🔴 El bono nace `pendiente` y **no da un solo día de saldo** hasta que la
+ *    plata entra (firma ① del plan). Esto es lo que la hace entrar.
+ */
+export async function cobrarPaqueteGuarderia(
+  bonoId: string,
+  tarjetaId: string,
+): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
+  return cobrarSujeto({ tipo: 'bono', id: bonoId }, tarjetaId);
+}
+
+/**
+ * S108-B · LA MENSUALIDAD DE GUARDERÍA — el período que esté por cobrar.
+ *
+ * 🔴 **No recibe período.** Lo resuelve el servidor contra el mandato. Ver la
+ *    nota de `SujetoDeCobro`.
+ */
+export async function cobrarMensualidadGuarderia(
+  suscripcionId: string,
+  tarjetaId: string,
+): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
+  return cobrarSujeto({ tipo: 'mensualidad', id: suscripcionId }, tarjetaId);
+}
+
 export async function cobrarSujeto(
   sujeto: SujetoDeCobro,
   tarjetaId: string,
 ): Promise<ResultadoWrapper<SenalDeCobro, CodigoCobro>> {
   const { data, error } = await getClient().functions.invoke('pagos-cobro', {
-    body: sujeto.tipo === 'compra'
-      ? { compra_id: sujeto.id, tarjeta_id: tarjetaId }
-      : { cita_id: sujeto.id, tarjeta_id: tarjetaId },
+    /* 🔴 UN MAPA EXHAUSTIVO, jamás un ternario encadenado. Con dos sujetos
+       `a ? x : y` era legible; con cuatro, **el `else` se vuelve el sujeto por
+       defecto** y el día que entre el quinto se cobra disfrazado del último de
+       la cadena. *Es la misma dicotomía que el actuador tuvo que desarmar
+       cuando pasó de dos sujetos a cuatro.* Acá el `switch` sobre la unión
+       hace que TypeScript exija la rama nueva. */
+    body: cuerpoDelSujeto(sujeto, tarjetaId),
   });
 
   if (error) {

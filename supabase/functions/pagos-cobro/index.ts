@@ -55,6 +55,7 @@ const BASE = AMBIENTE === 'produccion'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+
 /** Ventana de 15 s ⇒ **se genera en el momento**, jamás se cachea. */
 async function authToken(): Promise<string> {
   const ts = Math.floor(Date.now() / 1000);
@@ -100,14 +101,31 @@ Deno.serve(async (req) => {
      único que cambia es qué objeto se resuelve. */
   const compraId = typeof body.compra_id === 'string' ? body.compra_id : '';
   const citaId = typeof body.cita_id === 'string' ? body.cita_id : '';
+  /* ═══ 🔴 S108-B · LOS DOS SUJETOS DE GUARDERÍA ═════════════════════════════
+     El paquete (`bonos`) y la mensualidad (`guarderia_suscripciones`) entran
+     por esta misma puerta. **Nada del contrato de seguridad cambia**: la sesión
+     autoriza, el monto sale del desglose congelado, la pertenencia se verifica
+     acá. Lo único que cambia es qué objeto se resuelve. */
+  const bonoId = typeof body.bono_id === 'string' ? body.bono_id : '';
+  const menId = typeof body.guarderia_suscripcion_id === 'string'
+    ? body.guarderia_suscripcion_id : '';
   const tarjetaId = typeof body.tarjeta_id === 'string' ? body.tarjeta_id : '';
   const hayCompra = UUID_RE.test(compraId);
   const hayCita = UUID_RE.test(citaId);
+  const hayBono = UUID_RE.test(bonoId);
+  const hayMen = UUID_RE.test(menId);
   /* 🔴 «Exactamente uno» también en la puerta, no solo en el CHECK: *un
      llamador que manda los dos no está pidiendo dos cosas — está pidiendo algo
      que no existe, y adivinar cuál quiso es cómo se cobra el objeto
-     equivocado.* */
-  if (hayCompra === hayCita || !UUID_RE.test(tarjetaId)) {
+     equivocado.*
+
+     ⚠️ Con dos sujetos esto era `hayCompra === hayCita`, que es un XOR
+     disfrazado de igualdad. **Con cuatro esa forma deja de significar lo que
+     decía** —dos verdaderos la satisfacen igual—, así que se CUENTA. *Una
+     condición que era exacta para dos y silenciosamente laxa para cuatro es la
+     clase de cosa que no rompe ningún test: sigue compilando y deja pasar.* */
+  const cuantosSujetos = [hayCompra, hayCita, hayBono, hayMen].filter(Boolean).length;
+  if (cuantosSujetos !== 1 || !UUID_RE.test(tarjetaId)) {
     return json({ ok: false, codigo: 'datos_invalidos' }, 400);
   }
   /* 🔴 Si alguna vez llega un `monto`, es señal de que un llamador cree que
@@ -119,6 +137,26 @@ Deno.serve(async (req) => {
   }
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
+
+  /* ═══ 🔴 S108-B · ¿ES DE ESTA FAMILIA? ═════════════════════════════════════
+     Los dos sujetos de guardería pertenecen al HOGAR: el paquete se compra sin
+     mascota y la mensualidad la firma un adulto para la familia. Se pregunta
+     con el MISMO predicado que sus policies —`familia_miembro` con
+     `hasta IS NULL`—, **copiado y medido**: `user_es_de_familia` no existe en
+     esta base. *Atar la pertenencia a `user_id` dejaría a la pareja sin poder
+     pagar el paquete de su propia casa.*
+
+     ⚠️ Vive acá adentro, cerrado sobre `db`, y no a nivel de módulo: `db` corre
+     con `service_role` y `auth.uid()` es NULL — el user tiene que viajar
+     EXPLÍCITO. *Es la misma trampa del `uid` del proveedor: una función
+     correcta que, llamada desde otro lado, contesta otra cosa.* */
+  const esDeLaFamilia = async (familiaId: string | null, uid: string) => {
+    if (!familiaId) return false;
+    const { data } = await db.from('familia_miembro')
+      .select('user_id').eq('familia_id', familiaId).eq('user_id', uid)
+      .is('hasta', null).maybeSingle();
+    return data != null;
+  };
 
   // ── ③ PERTENENCIA ─────────────────────────────────────────────────────────
   /* 🔴 La respuesta es la MISMA para «no existe» y «es de otro» — en los dos
@@ -149,6 +187,81 @@ Deno.serve(async (req) => {
       p_user_id: userId, p_mascota_id: cita.mascota_id,
     });
     if (puede !== true) return json({ ok: false, codigo: 'cita_no_existe' }, 409);
+  }
+
+  /* ═══ 🔴 S108-B · PERTENENCIA Y ESTADO DE LOS DOS SUJETOS DE GUARDERÍA ═════
+     Los dos son **DEL HOGAR**, no de una persona: el paquete se compra sin
+     mascota y la mensualidad la firma un adulto para la familia. Por eso la
+     pertenencia se pregunta por `familia_miembro` y no por `user_id` — *atarlo
+     a quien tecleó dejaría a la pareja sin poder pagar el paquete de su propia
+     casa.* Es el mismo predicado que usan sus policies. */
+  let bono: { id: string; estado_pago: string; estado: string; pago_expira_en: string | null } | null = null;
+  let menPeriodo: string | null = null;
+
+  if (hayBono) {
+    const { data: b } = await db.from('bonos')
+      .select('id, familia_id, estado_pago, estado, pago_expira_en')
+      .eq('id', bonoId).maybeSingle();
+    /* La MISMA respuesta para «no existe» y «es de otra familia» — igual que
+       los otros dos sujetos. *Distinguirlas convertiría esto en un oráculo de
+       paquetes ajenos.* */
+    if (!b || !(await esDeLaFamilia(b.familia_id, userId))) {
+      return json({ ok: false, codigo: 'bono_no_existe' }, 409);
+    }
+    /* 🔴 IDEMPOTENCIA ANTES QUE NADA: un paquete ya pagado no se vuelve a
+       cobrar. *El doble toque de una familia impaciente no puede costarle dos
+       paquetes.* */
+    if (b.estado_pago === 'pagado') return json({ ok: false, codigo: 'bono_ya_pagado' }, 409);
+    if (b.estado_pago !== 'pendiente') return json({ ok: false, codigo: 'bono_no_existe' }, 409);
+    /* 🔴 LA VENTANA DE 15 MINUTOS, LEÍDA — no supuesta. `expirar_bonos_sin_pago`
+       corre por reloj, así que entre el vencimiento y su barrida hay una
+       ventana en la que el bono todavía dice `pendiente`. **Cobrar ahí sería
+       cobrar algo que el motor ya considera muerto**, y el actuador lo rebota
+       después con `pago_tardio_bono_cancelado` — con la plata ya tomada. */
+    if (b.pago_expira_en !== null && new Date(b.pago_expira_en).getTime() <= Date.now()) {
+      return json({ ok: false, codigo: 'bono_vencido' }, 409);
+    }
+    if (b.estado !== 'activo') return json({ ok: false, codigo: 'bono_vencido' }, 409);
+    bono = b;
+  }
+
+  if (hayMen) {
+    const { data: susc } = await db.from('guarderia_suscripciones')
+      .select('id, familia_id, estado').eq('id', menId).maybeSingle();
+    if (!susc || !(await esDeLaFamilia(susc.familia_id, userId))) {
+      return json({ ok: false, codigo: 'mensualidad_no_existe' }, 409);
+    }
+    if (susc.estado !== 'activa') {
+      return json({ ok: false, codigo: 'mensualidad_no_activa' }, 409);
+    }
+    /* ═══ 🔴 EL PERÍODO LO ELIGE EL SERVIDOR ═══════════════════════════════
+       *Un período que llega del cliente es un cliente eligiendo qué mes paga —
+       y cuál se saltea. Es la misma facultad que el monto, entrando por otra
+       columna.*
+       Se toma **el más viejo con desglose congelado y sin cobro aprobado**. */
+    const { data: desgloses } = await db.from('guarderia_suscripcion_desglose')
+      .select('periodo').eq('guarderia_suscripcion_id', menId).order('periodo');
+    if (!desgloses || desgloses.length === 0) {
+      /* Fail-closed: sin desglose no hay período que cobrar, y NO se congela
+         uno acá. *Congelar al cobrar es recalcular al cobrar con otro nombre.* */
+      return json({ ok: false, codigo: 'sin_periodo_por_cobrar' }, 409);
+    }
+    const { data: intentos } = await db.from('pagos_intentos')
+      .select('guarderia_suscripcion_periodo, estado, creado_en')
+      .eq('guarderia_suscripcion_id', menId);
+    const cobrado = new Set((intentos ?? [])
+      .filter((i) => i.estado === 'aprobado')
+      .map((i) => String(i.guarderia_suscripcion_periodo)));
+    const pendiente = desgloses.map((d) => String(d.periodo)).find((per) => !cobrado.has(per));
+    if (!pendiente) return json({ ok: false, codigo: 'periodo_ya_cobrado' }, 409);
+    /* 🔴 COMPUERTA 0 PARA ESTE SUJETO: un intento en vuelo sobre el MISMO
+       período frena. *Sin esto, dos toques seguidos disparan dos débitos por
+       el mismo mes y el segundo llega antes de que el primero confirme.* */
+    const enVuelo = (intentos ?? []).some((i) =>
+      String(i.guarderia_suscripcion_periodo) === pendiente &&
+      (i.estado === 'iniciado' || i.estado === 'pendiente'));
+    if (enVuelo) return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
+    menPeriodo = pendiente;
   }
 
   const { data: tarjeta } = await db.from('tarjetas_guardadas')
@@ -187,7 +300,59 @@ Deno.serve(async (req) => {
     base = Number(d.subtotal ?? 0);
     moneda = d.moneda ?? 'USD';
   }
-  const sujeto = hayCompra ? compraId : citaId;
+
+  /* ═══ 🔴 S108-B · EL DESGLOSE DE LOS DOS DE GUARDERÍA — MISMO FAIL-CLOSED ══
+     `bono_desglose` y `guarderia_suscripcion_desglose` tienen la forma exacta
+     de `cita_desglose`. **Sin fila no hay cobro**, y no se congela una acá:
+     el desglose es lo que se le prometió a la familia al comprar o al firmar. */
+  if (hayBono) {
+    const { data: d } = await db.from('bono_desglose')
+      .select('subtotal, impuesto, total, moneda').eq('bono_id', bonoId).maybeSingle();
+    if (!d) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    monto = Number(d.total ?? 0);
+    iva = Number(d.impuesto ?? 0);
+    base = Number(d.subtotal ?? 0);
+    moneda = d.moneda ?? 'USD';
+  }
+  if (hayMen) {
+    const { data: d } = await db.from('guarderia_suscripcion_desglose')
+      .select('subtotal, impuesto, total, moneda')
+      .eq('guarderia_suscripcion_id', menId).eq('periodo', menPeriodo).maybeSingle();
+    if (!d) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    monto = Number(d.total ?? 0);
+    iva = Number(d.impuesto ?? 0);
+    base = Number(d.subtotal ?? 0);
+    moneda = d.moneda ?? 'USD';
+  }
+
+  /* 🔴 EL SUJETO — lo que viaja como `dev_reference` y lo que el actuador va a
+     resolver del otro lado. Con cuatro sujetos el ternario encadenado deja al
+     último de la cadena haciendo de `else`; se enumera. */
+  const sujeto = hayCompra ? compraId : hayCita ? citaId : hayBono ? bonoId : menId;
+  if (!UUID_RE.test(sujeto)) {
+    /* No puede pasar —la puerta ya contó exactamente uno—, pero un
+       `dev_reference` vacío es justo el defecto que la cita ya produjo una vez:
+       *un cobro que sale sin referencia mueve la plata y no la traza.* */
+    return json({ ok: false, codigo: 'datos_invalidos' }, 400);
+  }
+  if (!(monto > 0)) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+  const nombreDelSujeto = hayCompra ? 'compra' : hayCita ? 'cita'
+    : hayBono ? 'paquete' : 'plan';
+
+  /* 🔴 LAS COLUMNAS DEL SUJETO, EN UN SOLO LUGAR. Estaban repetidas en los DOS
+     INSERT de `pagos_intentos` (el del rechazo por IVA y el del cobro), y con
+     dos sujetos la repetición era barata. **Con cuatro, mantener dos listas en
+     sincronía a mano es cómo un sujeto entra a una y no a la otra** — y el
+     intento del rechazo quedaría sin sujeto, violando el XOR, justo en el
+     camino que nadie ejercita. */
+  const columnasDelSujeto = () => ({
+    pedido_id: pedidoDelIntento,
+    cita_id: hayCita ? citaId : null,
+    compra_id: hayCompra ? compraId : null,
+    bono_id: hayBono ? bonoId : null,
+    guarderia_suscripcion_id: hayMen ? menId : null,
+    guarderia_suscripcion_periodo: hayMen ? menPeriodo : null,
+  });
 
   /* 🔑 LA FORMA DEL `order` CON IVA 0 — respuesta de Erick, 20-ago (letra §6bis):
      `vat: 0` es válido **siempre que vayan también `tax_percentage: 0` y
@@ -226,8 +391,8 @@ Deno.serve(async (req) => {
   const vIva = verificarIva(lineasIva);
   if (!vIva.ok) {
     await db.from('pagos_intentos').insert({
-      pedido_id: pedidoDelIntento, cita_id: hayCita ? citaId : null,
-      compra_id: hayCompra ? compraId : null, proveedor: 'nuvei',
+      ...columnasDelSujeto(),
+      proveedor: 'nuvei',
       proveedor_referencia: sujeto, monto, moneda,
       forma: 'tokenizacion', estado: 'rechazado',
       motivo_rechazo: `${vIva.codigo}: ${vIva.detalle}`,
@@ -245,9 +410,28 @@ Deno.serve(async (req) => {
      y corren en su propia reserva, ANTES de este cobro (letra §3, orden 1).
      *No se reconstruyen acá: duplicar una compuerta es garantizar que algún
      día las dos digan cosas distintas.* */
+  /* 🔴 CADA SUJETO DECLARA QUÉ NO SE EVALUÓ, CON SU NOMBRE. Antes el `else`
+     devolvía siempre *«las compuertas de la cita corren en su reserva»* — que
+     con dos sujetos era cierto y **con cuatro se vuelve una afirmación falsa
+     sobre un paquete**. *Un `no_evaluables` que nombra al sujeto equivocado es
+     peor que uno vacío: hace creer que algo se verificó donde no.* */
   const { data: g } = hayCompra
     ? await db.rpc('verificar_compuertas_pre_cobro', { p_compra_id: compraId, p_token: tarjeta.token })
-    : { data: { ok: true, no_evaluables: ['compuertas_de_la_cita_corren_en_su_reserva'] } };
+    : {
+        data: {
+          ok: true,
+          no_evaluables: hayCita
+            ? ['compuertas_de_la_cita_corren_en_su_reserva']
+            : hayBono
+              /* El paquete trae las suyas de `comprar_paquete_guarderia`:
+                 documentos del hogar, prestador activo, cuenta cobrable, fee.
+                 Y su hold vivo se verificó arriba, contra `pago_expira_en`. */
+              ? ['compuertas_del_paquete_corren_en_su_compra']
+              /* El mandato trae las suyas de `contratar_mensualidad_guarderia`:
+                 tarjeta guardada y no vencida, dirección, plan único por lugar. */
+              : ['compuertas_del_mandato_corren_en_su_firma'],
+        },
+      };
   const gate = (g ?? {}) as Record<string, unknown>;
   if (gate.ok !== true) {
     return json({ ok: false, codigo: gate.codigo ?? 'no_se_pudo_completar',
@@ -259,8 +443,8 @@ Deno.serve(async (req) => {
      que se disparó. Sin ella el caso ④ (no llega ninguno) es indetectable: no
      habría contra qué barrer. Y deja la compuerta 0 armada. */
   const { data: intento, error: eI } = await db.from('pagos_intentos').insert({
-    pedido_id: pedidoDelIntento, cita_id: hayCita ? citaId : null,
-    compra_id: hayCompra ? compraId : null, proveedor: 'nuvei',
+    ...columnasDelSujeto(),
+    proveedor: 'nuvei',
     proveedor_referencia: sujeto, monto, moneda,
     forma: 'tokenizacion', estado: 'iniciado',
     clave_idempotencia: `cobro:${sujeto}:${Date.now()}`,
@@ -304,7 +488,13 @@ Deno.serve(async (req) => {
         user: { id: uidProveedor, email: u.user.email ?? 'sin-correo@epetplace.com' },
         order: {
           amount: Number(monto.toFixed(2)),
-          description: `e-PetPlace compra ${compraId.slice(0, 8)}`,
+          /* 🔴 DECÍA «compra» PARA TODO SUJETO y usaba `compraId`, que para una
+             cita es `''` ⇒ salía *«e-PetPlace compra »*, con el nombre del
+             sujeto equivocado y sin id. Es la MISMA clase que el
+             `dev_reference` vacío que ya se curó tres líneas más abajo —
+             *el dato del camino viejo colándose en el nuevo* — y agregar dos
+             sujetos más la volvía a cobrar. */
+          description: `e-PetPlace ${nombreDelSujeto} ${sujeto.slice(0, 8)}`,
         /* 🔴 EL SUJETO, jamás un pedido — y jamás el otro sujeto.
            **Medido: con `compraId` fijo, el cobro de una cita mandaba
            `dev_reference: ""`** y el callback quedaba sin a quién apuntar. *Un
