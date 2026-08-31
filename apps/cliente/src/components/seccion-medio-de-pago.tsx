@@ -125,7 +125,22 @@ export type MedioDePago = {
  *        un total que pagar**: *antes de eso, «con qué pagás» no es una
  *        pregunta.*
  */
-export function useMedioDePago(activo: boolean): MedioDePago {
+/**
+ * ⭐ **S109-C · `soloTarjeta` — LO RECURRENTE SE COBRA CON TARJETA.**
+ *
+ * Firma del founder: **DeUna no hace recurrencia.** Un plan mensual se cobra
+ * solo, sin nadie presente; DeUna necesita que una persona teclee seis dígitos
+ * en otra app. *No es una limitación que se pueda esconder detrás de una opción
+ * que después no va a poder cobrar.*
+ *
+ * 🔴 **Y no se saca en silencio.** La sección lo DICE en una línea corta y sin
+ * culpar a nadie — misma regla que la asimetría de pausar-vs-cancelar: *una
+ * opción que desaparece sin explicación se lee como que la app se rompió, y la
+ * familia busca el error en su teléfono.*
+ *
+ * Las compras sueltas —bono, paquete, programa— **no cambian**: ahí DeUna sigue.
+ */
+export function useMedioDePago(activo: boolean, soloTarjeta = false): MedioDePago {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const [medios, setMedios] = useState<TarjetaGuardada[]>([]);
@@ -159,6 +174,11 @@ export function useMedioDePago(activo: boolean): MedioDePago {
          Firma del founder: *«por defecto a menos que el usuario lo cambie»*.
          **El default es para quien no eligió nunca, no un reset por compra.** */
       if (pref.medio === 'deuna') {
+        /* 🔴 Eligió DeUna alguna vez y esto es un cobro que se repite: **no se
+           hereda la preferencia**, y se dice por qué. *Arrastrar acá una
+           elección tomada para una compra suelta la dejaría con un medio que
+           el día del cobro automático no puede responder.* */
+        if (soloTarjeta) { setVozDefault(t('pago.recurrenteSoloTarjeta')); return null; }
         if (DEUNA_ELEGIBLE) return { tipo: 'deuna' };
         /* Eligió DeUna y hoy no se puede: **se dice, no se cambia en
            silencio** (borde 1 de la firma). Y NO se cae a una tarjeta
@@ -175,6 +195,12 @@ export function useMedioDePago(activo: boolean): MedioDePago {
       }
 
       /* ── ② NUNCA ELIGIÓ (`null`) ⇒ RIGE EL DEFAULT ───────────────────────── */
+      /* En lo recurrente el default JAMÁS es DeUna. Con una sola tarjeta se
+         preselecciona, como abajo; con dos o más no se elige por la familia. */
+      if (soloTarjeta) {
+        setVozDefault(t('pago.recurrenteSoloTarjeta'));
+        return rTarjetas.data.length === 1 ? { tipo: 'tarjeta', id: rTarjetas.data[0].id } : null;
+      }
       if (DEUNA_ELEGIBLE) return { tipo: 'deuna' };
 
       /* Borde 1 vigente: DeUna todavía no se puede elegir ⇒ **el default cae a
@@ -186,7 +212,7 @@ export function useMedioDePago(activo: boolean): MedioDePago {
         ? { tipo: 'tarjeta', id: rTarjetas.data[0].id }
         : null;
     });
-  }, [t]);
+  }, [t, soloTarjeta]);
 
   useEffect(() => {
     if (activo) void releer();
@@ -237,7 +263,14 @@ export function useMedioDePago(activo: boolean): MedioDePago {
 }
 
 /** ② La sección, dentro de su tarjeta. Va en el scroll de la pantalla. */
-export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
+export function SeccionMedioDePago({
+  medio,
+  soloTarjeta = false,
+}: {
+  medio: MedioDePago;
+  /** Cobro que se repite ⇒ DeUna no se ofrece, **y la sección dice por qué**. */
+  soloTarjeta?: boolean;
+}) {
   const { t } = useTraduccion();
   const { medios, elegido } = medio;
 
@@ -364,9 +397,16 @@ export function SeccionMedioDePago({ medio }: { medio: MedioDePago }) {
           {/* ✅ ENCENDIDA (25-ago). Sin `onPress` la fila vuelve sola a su
               estado de «muy pronto» — el interruptor es uno solo y está en
               `DEUNA_ELEGIBLE`, no repartido en dos lados. */}
-          <FilaDeUna
-            onPress={DEUNA_ELEGIBLE ? () => medio.elegir({ tipo: 'deuna' }) : undefined}
-          />
+          {/* ⭐ S109-C · En lo recurrente la fila **no se dibuja**, y en su lugar
+              va la razón. *Sacarla en silencio dejaría a quien la usa siempre
+              buscándola en una lista donde ya no está.* */}
+          {soloTarjeta ? (
+            <Texto variante="apoyo">{t('pago.recurrenteSoloTarjeta')}</Texto>
+          ) : (
+            <FilaDeUna
+              onPress={DEUNA_ELEGIBLE ? () => medio.elegir({ tipo: 'deuna' }) : undefined}
+            />
+          )}
           {/* El desempate se calcula UNA vez para toda la lista: la fila no
               puede saber que tiene una gemela. */}
           {(() => {

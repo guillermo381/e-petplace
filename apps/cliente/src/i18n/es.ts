@@ -1284,6 +1284,8 @@ export const clienteEs = {
     mesNota: 'Pagas el mes completo. Las salidas que no uses no se descuentan.',
     noOfrecido: 'Este paseador no ofrece plan mensual. Puedes reservar suelto o con paquete.',
     contratar: 'Contratar plan (simulado)',
+    /* ⭐ S109-C · La Hoja ya no contrata: LLEVA al checkout. */
+    continuar: 'Continuar',
     exito: 'Plan contratado — {{n}} salidas quedaron agendadas.',
     hubTitulo: 'Mis paseos',
     segProximos: 'Próximos',
@@ -1901,6 +1903,8 @@ export const clienteEs = {
        El nombre es propio y **no se traduce**. La voz de «todavía no» es
        honesta y temporal: el riel está bloqueado por un dato del comercio
        (el `pointOfSale`), medido por la pista D. */
+    /* ⭐ S109-C · Por qué DeUna no está acá. Corta, y sin culpar a nadie. */
+    recurrenteSoloTarjeta: 'Los planes mensuales se cobran con tarjeta.',
     deunaFila: 'Deuna',
     /* Por qué el default no pudo ser DeUna. **La firma exige decirlo**: el
        default cae a tarjeta y jamás cambia en silencio. */
@@ -3240,6 +3244,27 @@ export const clienteEs = {
     duracion: 'Entre tus dos ventanas',
     exitoTitulo: '¡Listo! Tu día está reservado.',
     exitoDetalle: 'Te avisamos cuando salgan a buscarlo.',
+  },
+  /* ═══ ⭐ S109-C · EL CHECKOUT DEL PLAN MENSUAL DE PASEO ═══════════════════
+     Los tres avisos van ANTES de pagar y en la misma pantalla — firma del
+     founder. Y el tercero dice **la asimetría con todas las letras**: *un
+     «gestionar» ambiguo que la disimule hace creer que pausar y cancelar son lo
+     mismo, y la familia descubre cuál tiene el día que quiere irse.* */
+  checkoutPlan: {
+    servicio: 'Plan mensual de paseos',
+    antesDePagar: 'Antes de confirmar',
+    /* 🔴 NO se promete un día del mes: el ancla tiene bordes (un plan que
+       arranca un 31 no cae un 31 todos los meses) y **el motor del paseo
+       todavía no publica su próximo cobro**. Se dice la cadencia, que sí es
+       cierta siempre. */
+    cuandoSeCobra: 'Este plan se cobra una vez al mes, mientras siga activo.',
+    avisoPrevio: 'Te avisamos por correo 3 días antes de cada cobro.',
+    /* La asimetría con guardería, dicha y no disimulada. */
+    sePausaNoSeCancela: 'Este plan se PAUSA, no se cancela: cuando lo pauses deja de renovarse, y el mes que ya pagaste sigue en pie. Puedes volver a activarlo cuando quieras.',
+    esperaTitulo: 'Estamos armando tu plan',
+    esperaCuerpo: 'Dejamos tus salidas agendadas para todo el período.',
+    exitoTitulo: 'Tu plan quedó activo',
+    exitoDetalle: 'Pagas ${{precio}} al mes y tus salidas quedan agendadas. Lo administras desde Cuenta › Pagos recurrentes y suscripciones.',
   },
   logGuarderia: {
     /* El vacío de la FIRMA del founder — se pinta cuando el lector diga

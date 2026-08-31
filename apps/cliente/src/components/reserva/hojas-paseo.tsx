@@ -46,7 +46,6 @@ export function HojasPaseo({
   fecha,
   hora,
   duracion,
-  onContratadoPlan,
 }: {
   flujo: FlujoPaseo;
   fecha: string;
@@ -55,7 +54,6 @@ export function HojasPaseo({
   /** Qué hacer cuando el plan se contrató. Lo decide cada superficie porque
    *  el destino puede no ser el mismo — hoy las dos van al hub, pero eso es
    *  una coincidencia de producto, no una regla de esta pieza. */
-  onContratadoPlan: (citasGeneradas: number) => void;
 }) {
   const { t } = useTraduccion();
   const { theme } = useTheme();
@@ -108,9 +106,27 @@ export function HojasPaseo({
             mascotaId={flujo.plan.mascotaId}
             fecha={fecha}
             hora={hora}
-            onContratado={(contratado) => {
+            /* ⭐ S109-C · La Hoja cierra y **el pago vive en su propia
+               pantalla**: una Hoja se arrastra hacia abajo, y esto es una
+               espera que cambia sola. */
+            onIrAPagar={(config) => {
+              const p = flujo.plan;
+              if (p === null) return;
               flujo.cerrarPlan();
-              onContratadoPlan(contratado.citas_generadas);
+              router.push({
+                pathname: '/explorar/paseo/checkout-plan',
+                params: {
+                  prestadorId: p.paseador.prestador_id,
+                  prestadorServicioId: p.paseador.prestador_servicio_id,
+                  prestadorNombre: p.paseador.prestador_nombre,
+                  mascotaId: p.mascotaId,
+                  dias: config.dias.join(','),
+                  hora,
+                  frecuencia: config.frecuencia,
+                  renueva: config.renueva ? '1' : '0',
+                  precioMensual: String(p.paseador.precio_mensual_plan ?? 0),
+                },
+              });
             }}
           />
         ) : null}

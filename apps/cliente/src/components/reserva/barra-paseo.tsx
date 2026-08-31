@@ -75,17 +75,15 @@ export function BarraPaseo({
         }}
       />
       <HojasPaseo
+        /* ☠️ S109-C · Acá se pasaba `onContratadoPlan`: el toast de éxito y el
+           Go home del plan. **Murió con el acto** — hoy el plan se contrata en
+           `/explorar/paseo/checkout-plan`, que tiene su propio éxito y su propio
+           camino de vuelta. *Un callback de éxito que sobrevive al acto que lo
+           disparaba queda esperando un evento que ya no ocurre.* */
         flujo={flujo}
         fecha={fecha}
         hora={hora}
         duracion={duracion}
-        onContratadoPlan={(n) => {
-          mostrar({ texto: t('plan.exito', { n }), variante: 'exito' });
-          // D-329: el hub vive en el stack del Hogar (otro tab) — se vacía el
-          // stack de Explorar y recién ahí se navega.
-          if (router.canDismiss()) router.dismissAll();
-          router.navigate('/hogar/paseos');
-        }}
       />
     </View>
   );

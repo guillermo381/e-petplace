@@ -1048,6 +1048,7 @@ export const clienteEn = {
     mesNota: "You pay the full month. Unused walks aren't discounted.",
     noOfrecido: "This walker doesn't offer a monthly plan. You can book single walks or a pack.",
     contratar: 'Start plan (simulated)',
+    continuar: 'Continue',
     exito: 'Plan started — {{n}} walks are booked.',
     hubTitulo: 'My walks',
     segProximos: 'Upcoming',
@@ -1454,6 +1455,7 @@ export const clienteEn = {
     pagar: 'Pay',
     sinMedios: "You haven't saved a card yet.",
     elegiMedio: 'Choose which one to pay with.',
+    recurrenteSoloTarjeta: 'Monthly plans are charged to a card.',
     deunaFila: 'Deuna',
     deunaNoDisponibleAhora: "Deuna isn't available yet — for now you pay by card.",
     /* ⏪ Fue `deunaPronto`: "Soon you'll be able to pay from your Deuna app."
@@ -2336,6 +2338,17 @@ export const clienteEn = {
     duracion: 'Between the two windows',
     exitoTitulo: 'Done! Your day is booked.',
     exitoDetalle: 'We’ll let you know when they head out to pick him up.',
+  },
+  checkoutPlan: {
+    servicio: 'Monthly walks plan',
+    antesDePagar: 'Before you confirm',
+    cuandoSeCobra: 'This plan is charged once a month, for as long as it stays active.',
+    avisoPrevio: 'We email you 3 days before each charge.',
+    sePausaNoSeCancela: 'This plan is PAUSED, not cancelled: pausing stops it from renewing, and the month you already paid stays in place. You can turn it back on whenever you want.',
+    esperaTitulo: 'We’re setting up your plan',
+    esperaCuerpo: 'We’re booking your walks for the whole period.',
+    exitoTitulo: 'Your plan is active',
+    exitoDetalle: 'You pay ${{precio}} a month and your walks are booked. You manage it from Account › Recurring payments and subscriptions.',
   },
   logGuarderia: {
     vacioTitulo: 'No stays booked',

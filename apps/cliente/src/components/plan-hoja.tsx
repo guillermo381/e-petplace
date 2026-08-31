@@ -86,14 +86,15 @@ export function PlanHoja({
   mascotaId,
   fecha,
   hora,
-  onContratado,
+  onIrAPagar,
 }: {
   paseador: PaseadorDisponible;
   mascotaId: string;
   /** El día elegido en el CUÁNDO — su día de semana llega preseleccionado. */
   fecha: string;
   hora: string;
-  onContratado: (plan: PlanContratado) => void;
+  /** ⭐ S109-C · La Hoja CONFIGURA; el checkout cobra. */
+  onIrAPagar: (config: { dias: number[]; frecuencia: Frecuencia; renueva: boolean }) => void;
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -108,7 +109,7 @@ export function PlanHoja({
   const [frecuencia, setFrecuencia] = useState<Frecuencia>('semanal');
   const [renueva, setRenueva] = useState(true);
   const [cubiertos, setCubiertos] = useState<number[] | 'cargando'>('cargando');
-  const [contratando, setContratando] = useState(false);
+
 
   // La cobertura REAL por día: para cada día de la semana, ¿la agenda
   // del paseador oferta esta hora (franja + cupo) en su próxima fecha?
@@ -157,24 +158,21 @@ export function PlanHoja({
   const precioMensual = paseador.precio_mensual_plan;
   const estimado = estimarSalidas(dias, frecuencia);
 
-  async function contratar() {
-    if (contratando || dias.length === 0) return;
-    setContratando(true);
-    const r = await contratarPlanPaseo({
-      prestador_id: paseador.prestador_id,
-      prestador_servicio_id: paseador.prestador_servicio_id,
-      mascota_id: mascotaId,
-      dias,
-      hora,
-      frecuencia,
-      auto_renovar: renueva,
-    });
-    setContratando(false);
-    if (!r.ok) {
-      mostrar({ texto: r.mensaje, variante: 'error' });
-      return;
-    }
-    onContratado(r.data);
+  /**
+   * ⭐ **S109-C · ACÁ YA NO SE CONTRATA: SE NAVEGA.**
+   * ☠️ Vivía `contratar()`, que llamaba a `contratarPlanPaseo` y cerraba la
+   * Hoja con el plan hecho. **Murió en el mismo acto** (Ley 37) en que nació
+   * `/explorar/paseo/checkout-plan`.
+   *
+   * 🔴 La razón es del founder y es de forma: **una Hoja se arrastra hacia
+   * abajo.** Mientras la plata se mueve, la familia puede cerrarla con el dedo y
+   * no hay a dónde volver — *y contratar un plan es una espera que cambia
+   * sola.* La Hoja **configura**; la pantalla **cobra**. Mismo corte que
+   * guardería.
+   */
+  function irAPagar() {
+    if (dias.length === 0) return;
+    onIrAPagar({ dias, frecuencia, renueva });
   }
 
   return (
@@ -270,16 +268,14 @@ export function PlanHoja({
         </View>
 
         {/* la superficie DICE que el pago es simulado (patrón checkout) */}
-        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
-          {t('checkout.simuladoAviso')}
-        </Text>
-
+        {/* ☠️ La banda de simulación se fue CON el acto: **la dice el checkout,
+            que es donde ahora se paga.** *Dejarla acá la habría dejado avisando
+            de un cobro que esta Hoja ya no hace.* */}
         <Boton
-          etiqueta={t('plan.contratar')}
+          etiqueta={t('plan.continuar')}
           bloque
-          cargando={contratando}
           deshabilitado={dias.length === 0 || cubiertos === 'cargando' || estimado === 0 || precioMensual === null}
-          onPress={() => void contratar()}
+          onPress={irAPagar}
         />
       </View>
     </HojaScroll>
