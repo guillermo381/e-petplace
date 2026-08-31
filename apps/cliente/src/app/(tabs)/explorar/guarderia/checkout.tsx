@@ -45,6 +45,7 @@ import {
 import {
   comprarPaqueteGuarderia,
   getEstadoOnboardingDueno,
+  obtenerMisPaquetesGuarderia,
   obtenerMisPlanesGuarderia,
   obtenerPaquetesGuarderia,
   reservarDiaGuarderia,
@@ -123,6 +124,14 @@ export default function CheckoutGuarderia() {
     | { fase: 'listo'; precio: number };
   const [precioPaquete, setPrecioPaquete] = useState<PrecioPaquete>({ fase: 'noAplica' });
 
+  /**
+   * ⭐ **MODO REANUDACIÓN** — se entra con un bono que YA existe y cuyo pago
+   * quedó a medias. *Un paquete pendiente de pago que sólo se puede completar
+   * volviendo a comprarlo dejaría a la familia con dos bonos y una sola
+   * intención.*
+   */
+  const esReanudacion = esPaquete && texto('bonoId') !== '';
+
   /* El tamaño se valida contra el catálogo, jamás se confía del `Number()`. */
   const tamanoElegido: TamanoPaqueteGuarderia | null = (() => {
     if (!esPaquete) return null;
@@ -132,10 +141,32 @@ export default function CheckoutGuarderia() {
 
   useEffect(() => {
     if (!esPaquete) { setPrecioPaquete({ fase: 'noAplica' }); return; }
-    const prestadorId = texto('prestadorId');
-    if (tamanoElegido === null || prestadorId === '') { setPrecioPaquete({ fase: 'noPudimos' }); return; }
     let vigente = true;
     setPrecioPaquete({ fase: 'cargando' });
+
+    /* ⭐ **REANUDACIÓN: el precio sale del BONO, no del catálogo.**
+       Cuando se vuelve a completar el pago de un paquete que ya existe, el
+       precio **ya está congelado en él** — *volver a preguntarle al lugar
+       podría mostrar el precio de hoy sobre una compra de ayer, que es un
+       total distinto del que se va a cobrar.* Y el catálogo ni siquiera
+       serviría: la reanudación llega sin tamaño elegido. */
+    if (esReanudacion) {
+      void (async () => {
+        const r = await obtenerMisPaquetesGuarderia();
+        if (!vigente) return;
+        if (!r.ok) { setPrecioPaquete({ fase: 'noPudimos' }); return; }
+        const b = r.data.find((x) => x.bonoId === texto('bonoId'));
+        setPrecioPaquete(
+          b === undefined || b.porDia === null
+            ? { fase: 'noPudimos' }
+            : { fase: 'listo', precio: b.porDia * b.total },
+        );
+      })();
+      return () => { vigente = false; };
+    }
+
+    const prestadorId = texto('prestadorId');
+    if (tamanoElegido === null || prestadorId === '') { setPrecioPaquete({ fase: 'noPudimos' }); return; }
     void (async () => {
       const r = await obtenerPaquetesGuarderia(prestadorId);
       if (!vigente) return;
@@ -145,7 +176,7 @@ export default function CheckoutGuarderia() {
       setPrecioPaquete(pq === undefined ? { fase: 'noVende' } : { fase: 'listo', precio: pq.precio });
     })();
     return () => { vigente = false; };
-  }, [esPaquete, tamanoElegido]);
+  }, [esPaquete, esReanudacion, tamanoElegido]);
 
   const [enviando, setEnviando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
@@ -486,9 +517,11 @@ export default function CheckoutGuarderia() {
               titulo={
                 esMensual
                   ? t('checkoutGuarderia.mensualServicio')
-                  : esPaquete
-                    ? t('checkoutGuarderia.paqueteServicio', { n: texto('tamano') })
-                    : t('checkoutGuarderia.servicio')
+                  : esReanudacion
+                    ? t('checkoutGuarderia.paqueteCompletarPago')
+                    : esPaquete
+                      ? t('checkoutGuarderia.paqueteServicio', { n: texto('tamano') })
+                      : t('checkoutGuarderia.servicio')
               }
               subtitulo={texto('prestadorNombre')}
               /* ☠️ **LA FECHA DE INICIO, DEROGADA (S108-C · T2).** Para la

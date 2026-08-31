@@ -3175,6 +3175,7 @@ export const clienteEs = {
        por eso estaba escrita.** Muere en la misma tanda en que el cobro real se
        enchufa: *un texto honesto se retira cuando cambia lo que describe.* */
     /* ⭐ LA ESPERA — con voz. Cada sujeto dice qué está pasando. */
+    paqueteCompletarPago: 'Completar el pago de tu paquete',
     esperaPaquete: 'Estamos confirmando el pago de tu paquete con el banco.',
     esperaMensual: 'Estamos confirmando el primer cobro de tu plan con el banco.',
     agendandoTitulo: 'Ya está pagado',
@@ -3211,6 +3212,13 @@ export const clienteEs = {
     /* ⭐ S108-C · Prometía cancelar y **no había puerta** (la RPC existía sin
        wrapper ni pantalla). Hoy la hay, y la frase dice DÓNDE. */
     planDetalle: '${{precio}} al mes. Se renueva solo hasta que lo canceles desde Cuenta.',
+    /* ⭐ S108-C · Los dos paquetes que no están listos, cada uno con su voz.
+       *«Falta pagarlo» y «se venció el tiempo para pagarlo» son dos estados
+       distintos y ninguno puede quedar sin decirse.* */
+    paqueteFaltaPagar: 'Falta completar el pago de tu paquete',
+    paqueteFaltaPagarDetalle: '{{n}} estadías · toca para completar el pago',
+    paqueteNoPagadoATiempo: 'Se venció el tiempo para completar el pago',
+    paqueteNoPagadoATiempoDetalle: 'No se te cobró nada. Toca para volver a comprarlo.',
     conTuPaquete: 'Con tu paquete',
     verSuDia: 'Ver su día',
     reservarDePaquete: 'Reservar estadía de tu paquete',
