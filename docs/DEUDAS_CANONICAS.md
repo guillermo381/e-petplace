@@ -24636,3 +24636,37 @@ tres las resolvió el objeto.**
 **Y el corolario incómodo, que es el que conviene recordar:** las tres veces
 quien cayó **acababa de citarle esa misma lección a otro**. *Una lección no
 protege a quien la enuncia — sólo a quien la ejecuta sobre su propio trabajo.*
+
+## 🔴 `L-450` — UN TYPECHECK EN UN WORKTREE DONDE METRO NUNCA CORRIÓ ESTÁ CIEGO A LAS RUTAS, Y DA VERDE POR AUSENCIA
+
+**Medida por S109-C sobre su propio verde flojo.**
+
+Dos pistas midieron el mismo commit y **una vio dos errores de tipo y la otra
+ninguno**. La causa no era el código: **en el worktree de C no existía
+`apps/cliente/.expo/types/router.d.ts`.** Ese archivo lo GENERA Metro; sin él,
+`tsc` no tiene contra qué comparar una ruta y **`router.push`/`router.replace`
+pasan sin control**.
+
+> **El verde no decía «las rutas están bien»: decía «no hay rutas que mirar».**
+> Un verde por ausencia del insumo es indistinguible de un verde por corrección,
+> y es peor que un rojo porque nadie va a buscarlo.
+
+⚠️ **Y su forma social es la parte cara:** *el que tiene el generado ve un rojo
+que el otro no puede reproducir, y la conversación se va a «a mí me da verde»* —
+donde ninguna de las dos lecturas es mentira y las dos están midiendo objetos
+distintos (hermana de `L-449`).
+
+**Cómo se cierra, y es barato:** correr `npx expo start` una vez en `apps/cliente`
+(y en `apps/prestador`) para que el generado exista, **o copiarlo del worktree que
+ya lo tiene**. El archivo es generado y está en `.gitignore`, así que **no viaja
+con el merge**: cada worktree se lo tiene que ganar.
+
+🟢 **Y la mitad que hace que esto sea una lección y no una anécdota: C probó el
+instrumento antes de confiar en su silencio.** Trajo el generado, **reintrodujo el
+defecto viejo como control negativo → 2 errores**, y con la cura → 0.
+*Un verde que no puede producir su rojo no es una medición.*
+
+⚠️ El gate lo declara desde antes —`R63` dice «brazo C NO MEDIDO en
+cliente/prestador»— **y estaba escrito en el lugar donde nadie lo lee cuando
+corre `tsc`.** *Una limitación declarada protege a quien lee la declaración, no a
+quien corre el comando* (`L-439`).
