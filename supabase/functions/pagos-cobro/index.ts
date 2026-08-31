@@ -197,6 +197,7 @@ Deno.serve(async (req) => {
      casa.* Es el mismo predicado que usan sus policies. */
   let bono: { id: string; estado_pago: string; estado: string; pago_expira_en: string | null } | null = null;
   let menPeriodo: string | null = null;
+  let menMonto = 0;
 
   if (hayBono) {
     const { data: b } = await db.from('bonos')
@@ -227,41 +228,69 @@ Deno.serve(async (req) => {
 
   if (hayMen) {
     const { data: susc } = await db.from('guarderia_suscripciones')
-      .select('id, familia_id, estado').eq('id', menId).maybeSingle();
+      .select('id, familia_id, estado, precio_mensual, monto_esperado, periodo_hasta')
+      .eq('id', menId).maybeSingle();
     if (!susc || !(await esDeLaFamilia(susc.familia_id, userId))) {
       return json({ ok: false, codigo: 'mensualidad_no_existe' }, 409);
     }
     if (susc.estado !== 'activa') {
       return json({ ok: false, codigo: 'mensualidad_no_activa' }, 409);
     }
-    /* ═══ 🔴 EL PERÍODO LO ELIGE EL SERVIDOR ═══════════════════════════════
-       *Un período que llega del cliente es un cliente eligiendo qué mes paga —
-       y cuál se saltea. Es la misma facultad que el monto, entrando por otra
-       columna.*
-       Se toma **el más viejo con desglose congelado y sin cobro aprobado**. */
-    const { data: desgloses } = await db.from('guarderia_suscripcion_desglose')
-      .select('periodo').eq('guarderia_suscripcion_id', menId).order('periodo');
-    if (!desgloses || desgloses.length === 0) {
-      /* Fail-closed: sin desglose no hay período que cobrar, y NO se congela
-         uno acá. *Congelar al cobrar es recalcular al cobrar con otro nombre.* */
-      return json({ ok: false, codigo: 'sin_periodo_por_cobrar' }, 409);
+    /* ═══ 🔴 «PAGAR ES ARRANCAR» — firma del founder, 31-ago ════════════════
+       El período **no existe hasta que la plata entra**: lo ancla el actuador
+       en la fecha del intento aprobado. ⇒ En el PRIMER cobro no hay desglose
+       congelado que leer, y eso **no es una excepción cómoda a la regla**: el
+       número lo congela el MANDATO al firmar (`precio_mensual`), y su techo
+       —`monto_esperado`— es literalmente lo que la familia autorizó. *Un techo
+       firmado al firmar es tan fuerte como un desglose: los dos son un número
+       que la familia vio antes de que nadie cobrara.*
+
+       ⚠️ Por eso acá NO se exige `guarderia_suscripcion_desglose`: esa tabla la
+       congela `cobrar_periodo_mensualidad_guarderia` DENTRO del acto, o sea
+       siempre después de este cobro. Exigirla haría el primer cobro imposible
+       — y sería el guard que bloquea el único camino que tiene que abrir. */
+    if (!(Number(susc.precio_mensual) > 0)) {
+      return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
     }
+    /* 🔴 EL TECHO SE VERIFICA ACÁ TAMBIÉN, no sólo en el actuador. *Descubrir
+       que se excedió la autorización cuando la plata ya se movió obliga a
+       reversar; descubrirlo antes es no cobrar de más.* */
+    if (Number(susc.precio_mensual) > Number(susc.monto_esperado)) {
+      return json({ ok: false, codigo: 'monto_divergente' }, 409);
+    }
+
+    /* El período que se va a anclar. Se calcula con la MISMA regla que
+       `cobrar_periodo_mensualidad_guarderia` —hoy, o `periodo_hasta + 1`— para
+       que la columna del intento y el plan no cuenten dos historias.
+       `hoy_local()` se le pregunta a la base: *derivar la zona acá sería una
+       segunda respuesta a qué día es hoy en Guayaquil.* */
+    const { data: hoy } = await db.rpc('hoy_local');
+    const hoyStr = String(hoy ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(hoyStr)) {
+      return json({ ok: false, codigo: 'no_se_pudo_completar' }, 500);
+    }
+    if (susc.periodo_hasta !== null && String(susc.periodo_hasta) >= hoyStr) {
+      /* El plan ya tiene mes vigente: no se cobra el siguiente por adelantado.
+         *Cobrar dos meses seguidos porque alguien tocó dos veces es la clase de
+         cosa que la familia descubre en el resumen de su tarjeta.* */
+      return json({ ok: false, codigo: 'periodo_ya_cobrado' }, 409);
+    }
+    const proximo = susc.periodo_hasta === null
+      ? hoyStr
+      : new Date(new Date(String(susc.periodo_hasta) + 'T00:00:00Z').getTime() + 86400000)
+          .toISOString().slice(0, 10);
+
+    /* 🔴 COMPUERTA 0 DE ESTE SUJETO: un intento en vuelo frena. *Sin esto, dos
+       toques seguidos disparan dos débitos y el segundo llega antes de que el
+       primero confirme.* */
     const { data: intentos } = await db.from('pagos_intentos')
-      .select('guarderia_suscripcion_periodo, estado, creado_en')
-      .eq('guarderia_suscripcion_id', menId);
-    const cobrado = new Set((intentos ?? [])
-      .filter((i) => i.estado === 'aprobado')
-      .map((i) => String(i.guarderia_suscripcion_periodo)));
-    const pendiente = desgloses.map((d) => String(d.periodo)).find((per) => !cobrado.has(per));
-    if (!pendiente) return json({ ok: false, codigo: 'periodo_ya_cobrado' }, 409);
-    /* 🔴 COMPUERTA 0 PARA ESTE SUJETO: un intento en vuelo sobre el MISMO
-       período frena. *Sin esto, dos toques seguidos disparan dos débitos por
-       el mismo mes y el segundo llega antes de que el primero confirme.* */
-    const enVuelo = (intentos ?? []).some((i) =>
-      String(i.guarderia_suscripcion_periodo) === pendiente &&
-      (i.estado === 'iniciado' || i.estado === 'pendiente'));
-    if (enVuelo) return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
-    menPeriodo = pendiente;
+      .select('estado').eq('guarderia_suscripcion_id', menId)
+      .in('estado', ['iniciado', 'pendiente']);
+    if ((intentos ?? []).length > 0) {
+      return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
+    }
+    menPeriodo = proximo;
+    menMonto = Number(susc.precio_mensual);
   }
 
   const { data: tarjeta } = await db.from('tarjetas_guardadas')
@@ -315,14 +344,24 @@ Deno.serve(async (req) => {
     moneda = d.moneda ?? 'USD';
   }
   if (hayMen) {
-    const { data: d } = await db.from('guarderia_suscripcion_desglose')
-      .select('subtotal, impuesto, total, moneda')
-      .eq('guarderia_suscripcion_id', menId).eq('periodo', menPeriodo).maybeSingle();
-    if (!d) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
-    monto = Number(d.total ?? 0);
-    iva = Number(d.impuesto ?? 0);
-    base = Number(d.subtotal ?? 0);
-    moneda = d.moneda ?? 'USD';
+    /* El número YA se resolvió arriba, contra el mandato — ver «pagar es
+       arrancar». Acá sólo falta la moneda, que vive en la cuenta comercial del
+       prestador (la suscripción no tiene columna de moneda, medido) y se
+       resuelve por el MISMO camino que las tres congeladoras de la casa. */
+    const { data: cta } = await db.from('guarderia_suscripciones')
+      .select('prestadores(cuentas_comerciales(moneda))').eq('id', menId).maybeSingle();
+    const m = (cta as { prestadores?: { cuentas_comerciales?: { moneda?: string } } } | null)
+      ?.prestadores?.cuentas_comerciales?.moneda;
+    /* 🔴 SIN MONEDA NO SE COBRA — no se cae a 'USD'. *Un cobro con una moneda
+       supuesta cobra en una moneda que nadie eligió*, y es exactamente lo que
+       `_trg_cita_congela_desglose` se niega a hacer tres capas más abajo. */
+    if (!m) return json({ ok: false, codigo: 'desglose_incompleto' }, 409);
+    moneda = m;
+    monto = menMonto;
+    /* IVA 0 DERIVADO, jamás tecleado: los servicios no llevan IVA en el
+       catálogo. Mismo criterio y mismo lugar donde cambiarlo que sus hermanas. */
+    iva = 0;
+    base = menMonto;
   }
 
   /* 🔴 EL SUJETO — lo que viaja como `dev_reference` y lo que el actuador va a
