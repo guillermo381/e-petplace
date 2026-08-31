@@ -145,6 +145,42 @@ Deno.serve(async (req) => {
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession: false } });
 
+  /* ═══ 🔴 UN INTENTO EN VUELO FRENA — PARA LOS SEIS, NO PARA UNO ═══════════
+     **El hallazgo más grave de la jornada, y es del riel que cobra de verdad.**
+     Medido: este guard existía en UNA de las seis ramas (la mensualidad).
+     Compra, cita, bono, programa y plan **no tenían ninguno**.
+
+     Y lo que lo vuelve grave es lo que NO lo tapa: `clave_idempotencia` acá es
+     `cobro:<sujeto>:${Date.now()}` — **nunca puede colisionar**, así que el
+     índice único tampoco frena nada. *Una clave de idempotencia que no puede
+     repetirse no es una clave de idempotencia*, y sin ella **dos toques
+     simultáneos en «Pagar» producen dos intentos y DOS DÉBITOS REALES.**
+
+     Es la misma clase que se curó en `pagos-deuna-solicitud` unas horas antes —
+     **y se curó allá sin censar la clase acá.** *Curar la ocurrencia y no censar
+     la clase deja la puerta abierta en el archivo de al lado*: quinta vez en el
+     día, y ésta con plata de verdad de por medio.
+
+     ⚠️ ESTO ES LA MITAD QUE SE PUEDE HACER SOLA. La otra —la clave real y su
+     índice PARCIAL— es de la base y va con A: hoy el índice de
+     `clave_idempotencia` es TOTAL, así que una clave por sujeto dejaría a un
+     intento terminal quedándose con ella **para siempre** y una familia
+     rechazada no podría reintentar nunca. *Arreglar la clave sin el índice
+     parcial cambia un cobro doble por un bloqueo permanente.* */
+  {
+    const col = hayCompra ? 'compra_id' : hayCita ? 'cita_id'
+      : hayBono ? 'bono_id' : hayMen ? 'guarderia_suscripcion_id'
+      : hayPlan ? 'suscripcion_servicio_id' : 'programa_contratado_id';
+    const idSujeto = hayCompra ? compraId : hayCita ? citaId
+      : hayBono ? bonoId : hayMen ? menId : hayPlan ? planId : progId;
+    const { data: enVuelo } = await db.from('pagos_intentos')
+      .select('id').eq(col, idSujeto).in('estado', ['iniciado', 'pendiente']);
+    if ((enVuelo ?? []).length > 0) {
+      return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
+    }
+  }
+
+
   /* ═══ 🔴 S108-B · ¿ES DE ESTA FAMILIA? ═════════════════════════════════════
      Los dos sujetos de guardería pertenecen al HOGAR: el paquete se compra sin
      mascota y la mensualidad la firma un adulto para la familia. Se pregunta
@@ -383,15 +419,10 @@ Deno.serve(async (req) => {
       : new Date(new Date(String(susc.periodo_hasta) + 'T00:00:00Z').getTime() + 86400000)
           .toISOString().slice(0, 10);
 
-    /* 🔴 COMPUERTA 0 DE ESTE SUJETO: un intento en vuelo frena. *Sin esto, dos
-       toques seguidos disparan dos débitos y el segundo llega antes de que el
-       primero confirme.* */
-    const { data: intentos } = await db.from('pagos_intentos')
-      .select('estado').eq('guarderia_suscripcion_id', menId)
-      .in('estado', ['iniciado', 'pendiente']);
-    if ((intentos ?? []).length > 0) {
-      return json({ ok: false, codigo: 'pago_en_proceso' }, 409);
-    }
+    /* ☠️ El guard de intento-en-vuelo que vivía acá SUBIÓ a la puerta, para los
+       SEIS sujetos. Se retira en el mismo acto para no dejar dos guards que
+       hacen lo mismo — *divergen, y el de abajo gana sin que nadie lo note*
+       (`L-395`). */
     /* ═══ 🔴 LA COMPUERTA PRE-COBRO DEL MES ════════════════════════════════
        Medido con un cobro REAL (`DF-2107864`, $100): el débito salió y el acto 2
        se cayó por `duplicate key` de `(mascota, fecha)` ⇒ **plata tomada, plan
