@@ -43,8 +43,46 @@ const cobrar = async (body) => {
 };
 const esperar = (ms) => new Promise((s) => setTimeout(s, ms));
 
+/* ── ESPERAR AL WEBHOOK SONDEANDO, JAMÁS DURMIENDO UN NÚMERO ────────────────
+   Medido dos veces en esta sesión: con una espera fija de 6 s y de 9 s el arnés
+   leyó la cadena EN VUELO —intento `pendiente`, sujeto sin mover, comprobante
+   ausente— y estuvo a un paso de reportar como defecto lo que era su propia
+   impaciencia. Re-medir mostró las tres cadenas cerradas.
+   *Una espera fija no puede acertar: o lee antes de tiempo, o gasta tiempo de
+   más.* Se sondea el ESTADO —que es el hecho— con un techo que sí puede fallar
+   por lentitud real. `L-166` en su segunda forma: el dato no sólo se lee del
+   objeto, se lee cuando el objeto TERMINÓ de escribirlo. */
+async function esperarWebhook(tx, techoMs = 60_000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < techoMs) {
+    const { data } = await admin.from('webhook_events')
+      .select('resultado, detalle').eq('transaction_id', tx).maybeSingle();
+    if (data?.resultado && data.resultado !== 'pendiente') return data;
+    await esperar(2000);
+  }
+  return null;
+}
+
+/* 🔴 EL ARNÉS TIENE QUE PODER FALLAR. La primera versión imprimía los rojos y
+ * salía 0 — lo cazó la pista A corriéndolo sobre `main`. *Un arnés que imprime
+ * el rojo y sale 0 no vigila nada: su silencio no dice nada, y su ruido tampoco,
+ * porque nadie lo lee cuando el exit dice que está bien.*
+ * Es `L-437` en su forma más cara: «rebotó» no es una medición.
+ */
+const fallas = [];
+const exigir = (cond, queFalta) => { if (!cond) { fallas.push(queFalta); console.log(`   🔴 ${queFalta}`); } };
+
 const rastro = async (col, id, etiqueta) => {
-  await esperar(9000);
+  await esperar(2500);
+  const { data: i0 } = await admin.from('pagos_intentos')
+    .select('proveedor_transaction_id').eq(col, id)
+    .order('creado_en', { ascending: false }).limit(1).maybeSingle();
+  const w = i0?.proveedor_transaction_id
+    ? await esperarWebhook(i0.proveedor_transaction_id) : null;
+  exigir(!!w, `${etiqueta}: el webhook no llegó en 60 s`);
+  if (w) console.log(`   webhook: ${w.resultado} · ${String(w.detalle ?? '').slice(-46)}`);
+  exigir(w?.resultado === 'aplicado',
+    `${etiqueta}: el acto 2 no aplicó — quedó «${w?.resultado}»`);
   const { data: i } = await admin.from('pagos_intentos')
     .select('id, estado, monto, proveedor_transaction_id, authorization_code, motivo_rechazo')
     .eq(col, id).order('creado_en', { ascending: false }).limit(1).maybeSingle();
@@ -52,7 +90,15 @@ const rastro = async (col, id, etiqueta) => {
   if (i?.motivo_rechazo) console.log(`   motivo: ${i.motivo_rechazo.slice(0, 160)}`);
   const { data: c } = await admin.from('notificacion_intencion')
     .select('datos').eq('clave_dedup', `comprobante:${id}`).maybeSingle();
-  console.log(`   COMPROBANTE: ${c ? `«${c.datos.concepto}» · $${c.datos.monto} ${c.datos.moneda} · tx=${c.datos.transaction_id}` : '🔴 ninguno'}`);
+  console.log(`   COMPROBANTE: ${c ? `«${c.datos.concepto}» · $${c.datos.monto} ${c.datos.moneda} · tx=${c.datos.transaction_id}` : 'ninguno'}`);
+  /* El objetivo pide el ID, no la posibilidad: se exige transacción, código de
+     autorización y un comprobante que diga QUÉ se compró. */
+  exigir(i?.estado === 'aprobado' || i?.estado === 'pendiente', `${etiqueta}: el intento quedó «${i?.estado}»`);
+  exigir(!!i?.proveedor_transaction_id, `${etiqueta}: sin id de transacción`);
+  exigir(!!i?.authorization_code, `${etiqueta}: sin código de autorización`);
+  exigir(!!c, `${etiqueta}: sin comprobante`);
+  exigir(!!c && c.datos.concepto !== 'Pago en e-PetPlace',
+         `${etiqueta}: el comprobante no dice qué se compró («${c?.datos?.concepto}»)`);
   return { intento: i, comprobante: c };
 };
 
@@ -62,21 +108,31 @@ const { data: pg } = await admin.from('prestador_programas')
   .select('id, nombre, n_sesiones, prestador_servicio_id').eq('activo', true).limit(1).maybeSingle();
 const { data: sv } = await admin.from('prestador_servicios')
   .select('id, prestador_id').eq('id', pg.prestador_servicio_id).maybeSingle();
-const { data: perro } = await admin.from('mascotas')
+/* 🔴 UN PERRO SIN PROGRAMA VIVO. La primera versión tomaba el primero que
+   apareciera y rebotó `programa_duplicado` — el mismo perro ya tenía uno de una
+   corrida anterior. *Un arnés que toma «el primero» mide el estado que dejó la
+   corrida de al lado, no el camino que vino a probar.* */
+const { data: conPrograma } = await admin.from('programas_contratados')
+  .select('mascota_id').in('estado', ['activo', 'pendiente']);
+const ocupados = new Set((conPrograma ?? []).map((x) => x.mascota_id));
+const { data: perros } = await admin.from('mascotas')
   .select('id, nombre').eq('familia_id', fm.familia_id).eq('especie', 'perro')
-  .eq('estado_vida', 'activa').limit(1).maybeSingle();
+  .eq('estado_vida', 'activa');
+const perro = (perros ?? []).find((m) => !ocupados.has(m.id));
+if (!perro) { console.error('🔴 sin perro libre con que ejercer el programa'); process.exit(2); }
 console.log(`   «${pg.nombre}» ${pg.n_sesiones} sesiones · mascota ${perro.nombre}`);
 const inicio = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
 const { data: ct, error: eC } = await cli.rpc('contratar_programa', {
   p_prestador_id: sv.prestador_id, p_servicio_id: sv.id, p_programa_id: pg.id,
   p_mascota_id: perro.id, p_fecha_inicio: inicio, p_hora: '10:00:00',
 });
-if (eC) { console.log(`   🔴 la puerta del programa rebotó: ${eC.message}`); }
+if (eC) { exigir(false, `programa: la puerta rebotó — ${eC.message}`); }
 else {
   const pid = ct.programa_contratado_id ?? ct.id;
   console.log(`   contratado ${String(pid).slice(0,8)} · ${JSON.stringify(ct).slice(0,150)}`);
   const r = await cobrar({ programa_contratado_id: pid });
   console.log(`   pagos-cobro → HTTP ${r.status} · ${r.cuerpo.slice(0, 180)}`);
+  exigir(r.status === 200, `programa: pagos-cobro devolvió HTTP ${r.status}`);
   await rastro('programa_contratado_id', pid, 'programa');
   const { data: fin } = await admin.from('programas_contratados')
     .select('estado, estado_pago').eq('id', pid).maybeSingle();
@@ -86,20 +142,38 @@ else {
 
 // ══ ② EL PAQUETE DE PASEO ════════════════════════════════════════════════
 console.log('\n② PAQUETE DE PASEO');
+/* 🔴 UNO QUE DE VERDAD OFREZCA PAQUETE. La primera versión tomaba el primer
+   servicio de paseo activo y rebotó `paquete_no_disponible` — ese servicio tiene
+   `precio_paquete` en NULL. **No era un hueco de datos: era el arnés eligiendo
+   mal**, la misma clase que el perro de arriba.
+   *«El primero que aparezca» no es una selección: es lo que la base tenga
+   ordenado hoy.* */
 const { data: sp } = await admin.from('prestador_servicios')
-  .select('id, prestador_id').eq('tipo_servicio', 'paseo').eq('activo', true).limit(1).maybeSingle();
+  .select('id, prestador_id, precio_paquete').eq('tipo_servicio', 'paseo')
+  .eq('activo', true).not('precio_paquete', 'is', null).limit(1).maybeSingle();
+if (!sp) { console.error('🔴 ningún servicio de paseo ofrece paquete'); process.exit(2); }
+console.log(`   servicio ${sp.id.slice(0,8)} · $${sp.precio_paquete} por salida`);
 const { data: cp, error: eP } = await cli.rpc('comprar_paquete_salidas', {
   p_prestador_id: sp.prestador_id, p_servicio_id: sp.id, p_unidades: 5,
 });
-if (eP) { console.log(`   🔴 la puerta del paquete rebotó: ${eP.message}`); }
+if (eP) { exigir(false, `paquete de paseo: la puerta rebotó — ${eP.message}`); }
 else {
   const bid = cp.bono_id ?? cp.id;
   console.log(`   bono ${String(bid).slice(0,8)} · ${JSON.stringify(cp).slice(0,150)}`);
   const r = await cobrar({ bono_id: bid });
   console.log(`   pagos-cobro → HTTP ${r.status} · ${r.cuerpo.slice(0, 180)}`);
+  exigir(r.status === 200, `paquete de paseo: pagos-cobro devolvió HTTP ${r.status}`);
   await rastro('bono_id', bid, 'paquete de paseo');
   const { data: fin } = await admin.from('bonos')
     .select('estado, estado_pago').eq('id', bid).maybeSingle();
   console.log(`   el bono quedó: estado=${fin?.estado} estado_pago=${fin?.estado_pago}`);
   console.log(`   ID: ${bid}`);
 }
+
+// ══ EL VEREDICTO ═════════════════════════════════════════════════════════
+if (fallas.length) {
+  console.error(`\n🔴 ${fallas.length} falla(s):`);
+  for (const f of fallas) console.error(`   · ${f}`);
+  process.exit(1);
+}
+console.log('\n✓ los dos sujetos cobraron, con id de transacción y comprobante que dice qué se compró');

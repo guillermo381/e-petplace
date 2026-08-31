@@ -259,6 +259,25 @@ Deno.serve(async (req) => {
     if (pr.pago_expira_en !== null && new Date(pr.pago_expira_en).getTime() <= Date.now()) {
       return json({ ok: false, codigo: 'programa_vencido' }, 409);
     }
+    /* ═══ 🔴 LA COMPUERTA DEL PROGRAMA, ANTES DE MOVER PLATA ═══════════════
+       Medido con un cobro REAL (`DF-2108181`, $90): el débito salió, el webhook
+       llegó, y el acto 2 se cayó con `programa_excede_vigencia`. **El freno YA
+       EXISTÍA** —`verificar_compuerta_programa`, de la pista A, devuelve
+       `sesiones_no_agendables` sobre ese mismo programa— **y esta edge no lo
+       llamaba.**
+       *Un freno que sólo puede actuar cuando la plata ya se movió no evita
+       vender lo que no se tiene: obliga a devolverlo.* Es la misma clase que se
+       curó para la mensualidad en S108-B2, repetida en el sujeto recién
+       abierto: **abrir una puerta nueva obliga a cablear su compuerta, no sólo
+       su desglose.** */
+    const { data: gp } = await db.rpc('verificar_compuerta_programa', {
+      p_programa_contratado_id: progId,
+    });
+    const gateProg = (gp ?? {}) as Record<string, unknown>;
+    if (gateProg.ok !== true) {
+      return json({ ok: false, codigo: gateProg.codigo ?? 'programa_no_cobrable',
+                    detalle: gateProg.causa ?? null }, 409);
+    }
   }
 
   if (hayMen) {
