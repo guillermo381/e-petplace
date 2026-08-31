@@ -121,6 +121,7 @@ import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { useTraduccion } from '@/i18n';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -485,6 +486,15 @@ export default function DespensaEnCamino() {
             // alto 0 y después saltar a pantalla completa es un parpadeo.
             if (altoLienzo === 0) return null;
             return (
+              /* 🔴 S109-D · SI EL MAPA NO ESTÁ, SE DICE — y el resto de la
+                 pantalla sigue sirviendo: los hitos, la ficha del repartidor y
+                 el estado del envío no dependen del dibujo. *Un rectángulo gris
+                 sin explicación y una app caída son la misma falta de respeto.*
+                 ⚠️ Hoy el flag del cliente es `true`: esto queda INERTE hasta que
+                 el flip pueda aplicarse (ver `lib/mapa-nativo`). */
+              !MAPA_NATIVO_DISPONIBLE ? (
+                <Texto variante="apoyo">{t('serie.mapaNoDisponible')}</Texto>
+              ) : (
               <MapaRecorrido
                 modo="vivo"
                 /* ✅ S100d · PUNTO 24① — *«el mapa NO es navegable»*.
@@ -568,6 +578,7 @@ export default function DespensaEnCamino() {
                   t: new Date(p.t).toISOString(),
                 }))}
               />
+              )
             );
           })()}
 

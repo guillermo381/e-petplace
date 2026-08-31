@@ -54,6 +54,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 
 /** El arranque del pin a mano cuando no hay NINGUNA coordenada: el centro
  *  de Quito (la cobertura v1 — S95). No es un dato inventado que se
@@ -584,7 +585,14 @@ export function DireccionHogarForm({
           Founder: *«el mapa, sin que yo le dé clic a ajustar punto, debería
           estar fijado, bloqueado»*. Se ve porque hace falta —es lo que deja
           leer dónde quedó el punto— y no se mueve porque nadie lo pidió. */}
-      {punto !== null ? (
+      {punto !== null && !MAPA_NATIVO_DISPONIBLE ? (
+        /* 🔴 S109-D · SIN MAPA, LA DIRECCIÓN SIGUE SIRVIENDO. Lo que se
+           pierde es la CORRECCIÓN del punto, no el punto: Places ya devolvió
+           la coordenada y es la que se guarda. *La pantalla dice qué falta y
+           no bloquea lo que sí puede hacer.*
+           ⚠️ Hoy el flag del cliente es `true`: INERTE hasta el flip. */
+        <Texto variante="apoyo">{t('direccion.mapaNoDisponible')}</Texto>
+      ) : punto !== null ? (
         <View style={{ gap: spacing[1] }}>
           <View>
             <PinMovible

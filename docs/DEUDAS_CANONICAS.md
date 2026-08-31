@@ -24637,6 +24637,67 @@ tres las resolvió el objeto.**
 quien cayó **acababa de citarle esa misma lección a otro**. *Una lección no
 protege a quien la enuncia — sólo a quien la ejecuta sobre su propio trabajo.*
 
+## 🔴 `L-452` — UN OTA QUE LLEGA NO PRUEBA QUE EL BINARIO SEA EL DE NUBE: EL UPDATE SE RESUELVE POR RUNTIME, LA KEY DE MAPS POR FIRMA
+
+**Medida en S109 sobre el teléfono del founder.**
+
+Dos hechos que parecían contradecirse: **el aparato recibe los OTA con
+normalidad** —tiene el de anoche— **y su mapa no dibuja**. La lectura natural es
+que si los updates llegan, el binario «es el bueno», y entonces el defecto tiene
+que estar en el código.
+
+**Es falso, y la razón es que son dos mecanismos que miran cosas distintas:**
+
+| mecanismo | contra qué resuelve |
+|---|---|
+| el update de Expo | **el `runtimeVersion`** que el binario *declara* |
+| la key de Google Maps | **la FIRMA (SHA-1) + package** del APK instalado |
+
+⇒ Un binario **local**, firmado con otro keystore, **declara el mismo runtime**
+(`1.0.6`) y por eso **recibe todos los OTA** — mientras Google le niega los
+tiles, porque su firma no está autorizada. **Medido: `1.0.6` no existe en EAS**,
+así que ese aparato corre un binario que nunca pasó por el pipeline de nube.
+
+> ### El OTA que llega **se siente como evidencia** de que el binario está bien, y no lo es.
+> *Es la clase de falso positivo más cara: no es un dato ausente que uno sabe que
+> le falta — es un dato presente, verdadero, y sobre otra pregunta.*
+
+**La regla:** antes de concluir «el binario está bien» a partir de que los OTA
+llegan, **preguntá contra QUÉ resuelve cada cosa**. Y si lo que falla es de
+Google Maps, Firebase o cualquier servicio con credencial restringida, **el dato
+que decide es la FIRMA del APK instalado** — que se saca del aparato
+(`adb pull` + `apksigner --print-certs`), jamás del keystore que uno cree que usó.
+
+*Hermana de `L-138` (el gate de una APK empieza confirmando el binario) y de
+`L-166`: lo que se mide tiene que ser lo que decide.*
+
+## 🟠 `L-451` — SEIS CONSUMIDORES DE UNA PIEZA NO SON SEIS PANTALLAS CON ESA PIEZA VIVA: LA DIFERENCIA LA DICE EL PROP, NO EL IMPORT
+
+**Medida por S109-D, sobre su propio censo.**
+
+Buscando por qué un mapa no dibujaba, el censo por **import** dio *«`MapaZona`
+se monta en `FichaPrestador`, y `FichaPrestador` tiene **seis** consumidores»* —
+y de ahí salió la conclusión de que **seis pantallas** estaban afectadas.
+
+**Medido por PROP, eran TRES.** Las otras tres montan la ficha **sin pasarle la
+zona**, así que la pieza del mapa **nunca se monta ahí**: importan al padre, no
+al hijo.
+
+> ### El costo no es contar de más: es *dónde* se mira.
+> El censo ancho manda a revisar tres pantallas que no tenían nada — y **el
+> defecto real estaba entre las que sí pasaban el prop**: la única de las tres
+> que no consultaba el guard, en la app donde el guard sí mide, montando un
+> `MapView` que mataba el proceso en hilo nativo. *Un censo que sobrestima no
+> falla por exceso de trabajo: falla porque diluye la atención justo donde
+> hacía falta.*
+
+**La regla:** cuando una pieza se monta **condicionada por sus props**, el censo
+se hace por **el prop que la enciende**, no por el import de quien la contiene.
+El import prueba que la pieza *puede* estar; **el prop prueba que está**.
+
+*Hermana de `L-433` (medir el consumidor y no la definición) y de la ley madre
+de esta casa: se mide del cuerpo, no del nombre.*
+
 ## 🔴 `L-450` — UN TYPECHECK EN UN WORKTREE DONDE METRO NUNCA CORRIÓ ESTÁ CIEGO A LAS RUTAS, Y DA VERDE POR AUSENCIA
 
 **Medida por S109-C sobre su propio verde flojo.**
