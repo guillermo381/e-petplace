@@ -456,3 +456,49 @@ la familia que ya aceptó la v1. *Adivinar cuesta una re-aceptación de más.*
 
 **Firmado: USD 150** (founder, 30-ago-2026). El cinturón de la migración aborta
 si el token vuelve a aparecer.
+
+
+---
+---
+
+# LA v3 — 31-ago-2026 · SOLO `protocolo_no_retiro`
+
+> 🟢 **Firma del founder:** e-PetPlace **adelanta** las expensas del refugio
+> desde el día 15 **hasta USD 300**, y el dueño las debe. **Y el tope obliga a
+> decir qué pasa al agotarse** — un texto no puede prometer custodia sin fecha
+> de cierre *y* tener un tope.
+
+**Sube SOLA.** Los otros cinco no cambian ni una coma (cuatro en v2, dos en v1).
+**Costo de re-aceptación: CERO** — nadie había aceptado la v2 de éste.
+
+## El párrafo nuevo — `protocolo_no_retiro` v3, punto 6 bis
+
+> **6 bis. Quién paga mientras yo no aparezco.** Desde el día quince,
+> e-PetPlace **adelanta** al refugio los gastos de la custodia **hasta
+> USD 300**, y **esos gastos son míos**: se suman a lo que debo pagar para
+> recuperarlo.
+>
+> **Cuando ese monto se agota**, e-PetPlace deja de adelantar. **Mi animal se
+> queda donde está y sigue siendo mío**: puedo recuperarlo en cualquier momento
+> pagando todo lo que se haya gastado. **Lo que cambia no es qué pasa con mi
+> animal — es que a partir de ahí nadie está pagando su cuidado por mí.**
+
+### 🗺️ Mapa — ⑥v3
+
+| parte | origen |
+|---|---|
+| el adelanto y el tope de **USD 300** | 🟢 **firma del founder** (31-ago) |
+| *«pierde el derecho a recuperarlo sin pagar, no el derecho a recuperarlo»* | 🟢 **firma del founder** sobre la opción (c) |
+| la redacción del punto en voz de familia | ⚠️ **INTERPRETACIÓN de A** |
+| que las cinco prohibiciones sigan enteras después del tope | ✅ **transcripción** — el criterio §3 no las condiciona a ningún plazo |
+
+## ⚠️ EL COSTO QUE ESTE TEXTO **NO** ESCONDE
+
+Desde que el tope se agota, **el refugio sostiene al animal sin cobrar.** El
+texto de la familia no lo dice —no es asunto suyo y decírselo sería cargarle una
+culpa que no le toca— pero **`LETRA_GUARDERIA` §6.4 sí lo dice**, y con su
+consecuencia: **es parte de lo que un refugio tiene que ACEPTAR POR ESCRITO el
+día que exista uno verificado.**
+
+*Un tope que sólo mueve el problema es peor que ninguno, porque parece
+resuelto.*
