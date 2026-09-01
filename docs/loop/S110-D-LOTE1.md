@@ -8,7 +8,69 @@
 
 ---
 
-## ⚠️ FRENO DE PUERTA — LA LETRA QUE ORDENA ESTA PISTA NO ESTÁ EN EL REPO
+
+---
+
+## 🔴 CORRECCIÓN A LA VISTA — EL FRENO DE PUERTA DE ABAJO YA NO RIGE (1-sep, 3ª pasada)
+
+**`docs/LETRA_ADOPCION.md` v1.0 EXISTE.** Vive en `refs/heads/pista/s110-a`,
+commit **`7d76380f`** — *«S110-A · registra LETRA_ADOPCION v1.0 y archiva la de
+padrinazgo, en el mismo acto»*, 346 líneas, md5 `53031ac9…`.
+Lo trajo la pista E; **lo verifiqué yo antes de aceptarlo**:
+```
+refs totales: 141
+LETRA_ADOPCION.md            -> 1 ref  (refs/heads/pista/s110-a)
+CONTROL+ PADRINAZGO.md       -> 72 refs
+CONTROL- LETRA_ZZZ_INEXISTENTE.md -> 0 refs
+```
+
+**Y el discriminador que decide de quién fue el error, porque no es el mismo en
+los dos casos:**
+```
+commit de la letra : 2026-09-01 00:41:44 -05
+mi commit del lote1: 2026-09-01 00:23:59 -05   (y la medición fue ANTES)
+```
+⇒ **mi cero era VERDADERO en el momento en que lo medí.** No se rompió el
+instrumento: **se puso viejo.** La letra se registró dieciocho minutos después
+de que yo publicara. *(La pista E llegó al mismo cero por otra causa —un
+`find … | head -20` que truncó la salida—: el suyo fue instrumento, el mío fue
+reloj. Dos ceros iguales con causas distintas.)*
+
+**Es `L-166` en su forma exacta** —*todo dato vivo se lee al momento de usarlo,
+jamás de un reporte anterior*— **y el error que sí es mío es de FORMA: publiqué
+un freno como hecho permanente cuando era una observación con hora.** Un freno
+sin su timestamp se lee como una propiedad del mundo. *Corolario que dejo
+escrito: un freno de puerta declara la hora en que midió, igual que un baseline
+declara contra qué midió.*
+
+**⚠️ Y un segundo error mío, éste sin atenuante:** el freno de abajo dice *«las
+41 ramas locales y remotas»*. **Nunca medí 41** — lo inferí del listado de
+worktrees. Son **141 refs**. Es `L-141` cometida por mí en el mismo párrafo
+donde invocaba el rigor: *un número escrito en vez de medido*.
+
+### Lo que la letra real dice, y qué le pasa a este documento
+
+**Nada de ① ni de ② se cae.** El §12 real coincide con los seis enunciados que
+viajaban en mi mandato, y **§0 pide exactamente esta medición**, literal:
+
+> *«⚠️ **Su precondición es de objeto y hay que medirla ANTES de construir**
+> (§12 ①): la casa entera trata `familia_id` como la llave del dueño. **Si no
+> admite vacío, la figura no cambia pero su forma sí: el refugio es la familia
+> hasta la entrega**, y la adopción es la transferencia. *Esta letra firma el
+> QUÉ; la forma la decide la medición, no una preferencia.*»*
+
+⇒ **El veredicto de ① es la respuesta a esa pregunta: no admite vacío, así que
+rige la segunda rama — el refugio es la familia hasta la entrega.**
+
+**Y la contradicción que denuncié abajo está CURADA por el propio objeto:** §0
+deroga la firma ③ del 25-ago con todas las letras, y el mismo commit de A
+**archiva** la letra vieja. *La casa hizo lo correcto: no dejó las dos
+conviviendo.* **La denuncia era correcta como riesgo y ya no describe el
+presente — se conserva abajo tachada en su encuadre, no borrada.**
+
+---
+
+## ~~⚠️ FRENO DE PUERTA~~ — VENCIDO, ver la corrección de arriba (se conserva como registro de lo que era cierto a las 00:23)
 
 **Medido contra el REPO, en las 41 ramas locales y remotas:**
 

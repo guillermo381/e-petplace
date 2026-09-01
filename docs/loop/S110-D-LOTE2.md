@@ -54,7 +54,24 @@ chk_destino_excluyente:  CHECK ((NOT (es_donacion AND (mascota_id IS NOT NULL)))
 + guard gemelo en el body: RAISE EXCEPTION 'destino_contradictorio: un ítem no
   puede ser donación Y de una mascota'
 ```
-**El padrinazgo es exactamente donación CON destino** —la mascota apadrinada, y
+✅ **CORREGIDA LA FIGURA (3ª pasada, contra la fuente): el CHECK bloquea la
+DONACIÓN de §7, no el padrinazgo — E se corrigió a sí misma y lo verifiqué.**
+§6 dice *«La canasta es del **REFUGIO**, no de cada mascota… el saco llega al
+refugio donde vive Luna, y **las fotos** que recibís son de Luna»* ⇒ en el
+padrinazgo el vínculo con la mascota es **para las fotos, no para el destino del
+producto**. La que choca es la **donación de §7**, cuyo campo de destino tiene
+tres valores y **el primero es *«una mascota en adopción»***. **El hallazgo se
+sostiene entero; la figura estaba mal asignada.**
+
+Y §7 cierra con la advertencia que le pone nombre a lo que medimos:
+> *«Quien implemente el padrinazgo o la donación con destino **reusando la
+> donación de la despensa tal cual** va a heredar «sin destino elegible», que es
+> precisamente lo que estas figuras no pueden ser.»*
+
+**`chk_destino_excluyente` ES el artefacto de esa advertencia.** *El founder la
+escribió antes de que midiéramos; la medición le puso el nombre del constraint.*
+
+~~El padrinazgo es exactamente donación CON destino~~ —la mascota apadrinada, y
 por eso recibe sus fotos—. ⇒ **no es agregar una columna: es enmendar un CHECK
 que hoy declara esa combinación una contradicción**, más su guard. **Mi §④ se
 queda corto y se corrige acá.** *El veredicto de ④ no cambia —el motor de
@@ -109,14 +126,33 @@ recurrente de PRODUCTOS en v1**, y que su §11 excluye el padrinazgo **en
 dinero**, no la recurrencia. ⇒ **`suscripciones_servicio_tipo_valido` habría que
 abrirlo PARA v1, no después.**
 
-⚠️ **Y esto se anota como RELEVO DE E, jamás como medición:** el documento del
-31-ago **no existe en ninguna rama** —medido en las 41 al abrir esta pista, con
-`git log --all` vacío—, así que **ni E ni yo pudimos leer ese §11**. Los dos
-estamos citando literales que viajan en nuestros mandatos y no en el repo.
-*Quien vote esto no puede verificar ninguna de las dos lecturas contra un
-documento: es exactamente el freno de puerta de mi lote 1, cobrándose por
-segunda vez y ahora sobre una decisión de alcance.* **La medición aguanta sola;
-el encuadre no, y por eso va con su fuente puesta.**
+✅ **ACTUALIZADO (3ª pasada, 1-sep): esto YA NO ES RELEVO — es MEDIDO contra la
+fuente.** `LETRA_ADOPCION.md` v1.0 apareció en `pista/s110-a` (`7d76380f`) y la
+leí. **E tenía razón, y su relevo era exacto:**
+
+> **§1** — *«**Padrinazgo** | **Compra RECURRENTE de productos**, entregada al
+> refugio»*
+> **§11 · LO QUE NO ENTRA EN v1** — *«**Padrinazgo en dinero** · cualquier
+> beneficio comercial al padrino · …»* — **la recurrencia NO figura en la lista.**
+
+⇒ **abrir `suscripciones_servicio_tipo_valido` es COSTO DE v1, no deuda
+diferida.** *Mi separación entre medición y relevo era la correcta —el encuadre
+no se podía verificar cuando lo escribí— y al poder verificarse, el relevo
+resultó exacto. Se sube a medición y se cita la fuente:
+`pista/s110-a:docs/LETRA_ADOPCION.md` §1 y §11.*
+
+**Y §6 confirma, sin que nadie lo pidiera, la otra mitad de mi ⑤:**
+> *«Su puerta de cancelación es la de la casa: **Pagos recurrentes y
+> suscripciones**, en Cuenta. El padrinazgo **no construye la suya**.»*
+> *«🔴 **El padrinazgo sabe morir.** Si el ahijado es adoptado, fallece o el
+> refugio se va, **el cobro recurrente se detiene solo — jamás sigue por
+> inercia.**»*
+
+⇒ **la letra apunta a `/cuenta/recurrentes`, que medí que existe, y pide
+exactamente el mecanismo del memorial, que medí que corre.** *Y ahí la frase
+que salió de la objeción de E pasa de detalle a requisito: cuatro de los seis
+escritores apagan sin dejar motivo, y §6 exige tres motivos distintos —adoptado,
+fallecido, refugio que se va— cada uno con su aviso propio.*
 
 **④ ⑥ — E REFUERZA, sin contradecir.** El eje **no es «tipo de cuenta»: es rol +
 capacidad** (`esGestor`, `montaAtender`); `ClaveTabPrestador` es un tipo cerrado
@@ -261,6 +297,52 @@ apps/cliente/src/app/(tabs)/despensa/checkout.tsx:459   nombre_receptor: recepto
 apps/cliente/src/app/(tabs)/despensa/checkout.tsx:1663  label={t('despensa.receptorLabel')}
 ```
 **El receptor es un campo editable con validación propia y su propia voz.**
+
+### 🔴 CORRECCIÓN DE MI PROPIA ④ (3ª pasada, contra la fuente y contra el dato)
+
+Escribí que ④ *«corrige la letra»* y que era *«la pieza MÁS construida, no la
+única nueva»*. **Leída la fuente, me pasé — y el dato me modera a mí, no a la
+letra.** §8 dice, literal:
+
+> *«La compra se entrega **al refugio**, no a quien pagó. **La coordina el
+> refugio.** 🔴 **Es la única pieza genuinamente nueva del bloque:** el motor de
+> entrega de la despensa **nunca despachó a un tercero**.»*
+
+**«Nunca DESPACHÓ» es una afirmación histórica, y yo medí CAPACIDAD. Las dos
+pueden ser ciertas — y lo son.** Medido contra el objeto:
+```
+pedidos totales                                    87
+con entrega_nombre_receptor no nulo                87
+CONTROL+ receptor = nombre del comprador           61
+MEDICIÓN  receptor DISTINTO del comprador          26
+comprador sin nombre (no comparable)                0
+de los 26: created_by_sistema = true               11   (= los 11 del total: control ✅)
+de los 26: created_by_sistema = false              15
+de los 26: PAGADOS (pagado_en no nulo)              0   🔴
+de los 26: direcciones distintas entre sí            7
+rango                                     12→21 ago 2026
+```
+
+⇒ **el campo del tercero existe, está cableado hasta la pantalla y se ejerció 15
+veces por caminos no-sistema… y NINGUNO de esos pedidos se pagó.** Como no hubo
+pago, no hubo despacho. **La letra es literalmente correcta: el motor nunca
+despachó a un tercero.**
+
+**Lo que mi ④ sostiene, acotado a lo que la evidencia aguanta:** el **modelo de
+datos y la superficie** ya admiten destinatario distinto —no hay FK al comprador,
+`p_entrega` es libre, el checkout pide receptor—, así que **lo nuevo no es el
+mecanismo del destinatario**. **Lo que sí es nuevo, y §8 lo nombra y yo no lo
+había medido, es *«la coordina el refugio»***: un rol de coordinación de la
+entrega por parte de un tercero que no compró — **eso no existe en ninguna
+tabla que haya medido.**
+
+*El veredicto de ④ se mantiene en su dirección y se le baja el volumen: no
+«corrige» la letra, la **acota**. La pieza nueva es la FIGURA y su coordinación,
+no el campo.* **Y la lección es mía: «el motor lo admite» y «el motor lo hizo»
+son dos afirmaciones distintas, y yo usé la primera para discutirle a una letra
+que hablaba de la segunda.**
+
+---
 
 ### Lo que SÍ falta, para que la corrección no se lea como «está todo hecho»
 
