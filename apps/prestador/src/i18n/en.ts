@@ -3331,6 +3331,6 @@ export const prestadorEn = {
     vacioTitulo: 'No animals today',
     vacioDetalle: 'When a family books a day, it’ll show up here with their address.',
     marcarPendiente: 'You can’t mark pick-up or delivery from here yet.',
-    marcarPendienteApoyo: 'That comes with the handover record, where the animal’s condition and what travels with it are logged.',
+    marcarPendienteApoyo: 'For now this list is for knowing who to pick up, and where.',
   },
 } as const satisfies Espejo<typeof prestadorEs>;

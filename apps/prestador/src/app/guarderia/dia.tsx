@@ -249,12 +249,17 @@ export default function DiaGuarderia() {
                 *Un vocabulario de estados completo en un CHECK se lee como una
                 máquina que funciona; acá son seis palabras que nadie escribe.*
 
-                ⚠️ Y EL APOYO ENVEJECE ANTES QUE EL TÍTULO: dice «eso llega con
-                el acta», y **el acta ya llegó al motor** (las dos RPC vivas, con
-                wrapper, y con superficie del lado de la FAMILIA). Lo que falta
-                es su puerta del lado del prestador. El día que se cablee, el
-                apoyo hay que reescribirlo AUNQUE el título siga siendo cierto —
-                *son dos frases con dos fechas de vencimiento distintas.* */}
+                ⚠️ EL APOYO YA NO EXPLICA LA MECÁNICA, Y ES FIRMA DEL FOUNDER:
+                decía «eso llega con el acta» — *una frase sobre nuestro plan de
+                obra, no sobre su trabajo* — **y encima envejecía antes que el
+                título**: el acta YA llegó al motor (las dos RPC vivas, con
+                wrapper y con superficie del lado de la FAMILIA); lo único que
+                falta es su puerta del lado del prestador. ⇒ *dos frases con dos
+                fechas de vencimiento distintas, y el apoyo era el que se pudría
+                primero.* Ahora dice **qué SÍ se puede** —«saber a quién pasar a
+                buscar y dónde»—, que es lo que la pantalla de arriba realmente
+                hace: *un mensaje que sólo dice qué no se puede se lee como un
+                final, con una lista útil justo encima.* */}
             <Tarjeta relleno="normal" elevacion="reposo">
               <View style={{ gap: spacing[2] }}>
                 <Texto variante="cuerpo">{t('diaGuarderia.marcarPendiente')}</Texto>
