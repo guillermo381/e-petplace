@@ -69,8 +69,8 @@ import {
   obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
-  obtenerEstadiasDelDia,
-  type EstadiaDelDia,
+  obtenerEstadiasPorRango,
+  type EstadiaEnRango,
   obtenerCitasPorCoordinar,
   obtenerEquipoNegocio,
   obtenerFranjasHorario,
@@ -962,30 +962,20 @@ export default function Hoy() {
      mismo dato, y sólo una lo veía* — el header suma por FECHA y es agnóstico
      al oficio; la lista preguntaba por cuatro oficios.
 
-     ⚠️ VIENE EN SU PROPIO VIAJE, Y ESO ES UNA DEUDA DECLARADA, no un descuido:
-     los otros cuatro traen **diez días en un fetch** (S86-C) y elegir un día
-     es un filtro sobre memoria. `obtenerEstadiasDelDia` toma **UNA fecha**, así
-     que acá se re-consulta al cambiar de día. **Se pidió a A el lector por
-     rango**; el día que exista, esto se pliega al `Promise.all` de arriba y
-     este efecto muere. *Inventar el rango llamando diez veces habría pagado
-     dos veces la deuda que D-738 existe para no repetir.* */
-  const [estadias, setEstadias] = useState<EstadiaDelDia[]>([]);
-  useEffect(() => {
-    let vigente = true;
-    const dia = diaElegido ?? hoyLocal();
-    void (async () => {
-      const p = await obtenerMiPrestador();
-      if (!p.ok || p.data === null) return;
-      const r = await obtenerEstadiasDelDia(p.data.id, dia);
-      /* Ley 13: un fallo de lectura NO se disfraza de «no hay animales».
-         Se deja la lista como estaba y el bloque simplemente no habla — la
-         jornada de citas sigue siendo verdadera por su cuenta. */
-      if (vigente && r.ok) setEstadias(r.data);
-    })();
-    return () => {
-      vigente = false;
-    };
-  }, [diaElegido]);
+     ☠️ ACÁ VIVÍA SU VIAJE PROPIO, y muere con la deuda que lo justificaba:
+     nació con un efecto aparte porque `obtenerEstadiasDelDia` tomaba UNA
+     fecha mientras sus cuatro hermanas traen diez días en un fetch (S86-C).
+     A publicó `obtenerEstadiasPorRango` y **la quinta se plegó al
+     `Promise.all`**: se fue un `obtenerMiPrestador()` encadenado y una
+     re-consulta por cada giro de la rueda. *La deuda declarada al construir
+     no era retórica: tenía una condición de muerte y sonó.*
+
+     ⚠️ Y AL PLEGARSE ADOPTA LA LEY DE SUS HERMANAS (Ley 13): su fallo ya no
+     deja el bloque callado — **rebota la pantalla entera**. Callar era
+     correcto mientras el bloque era un añadido opcional; ahora el vacío dice
+     «no tienes citas» mirando ESTAS dos listas, así que un fallo silencioso
+     sería la pantalla afirmando que no hay nadie. */
+  const [estadias, setEstadias] = useState<EstadiaEnRango[]>([]);
   /** Los días que el negocio declaró cerrados — la rueda los apaga y la
    *  pantalla los CONTESTA (el día cerrado se toca, no se deshabilita:
    *  decisión firmada dentro de la pieza). */
@@ -1170,7 +1160,7 @@ export default function Hoy() {
        midió (622 ms en cuatro viajes encadenados solo para resolver quién
        soy), y agregarle una espera serial habría sido pagar dos veces la
        deuda que esa ficha existe para no repetir. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rAbiertas, rAlta] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rAbiertas, rAlta, rEst] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -1255,6 +1245,10 @@ export default function Hoy() {
       prestador.data.cuenta_comercial_id === null
         ? Promise.resolve({ ok: true as const, data: { contador: null } })
         : obtenerEstadoOnboardingWizard(prestador.data.cuenta_comercial_id),
+      /* S109-D · LA QUINTA PATA — y va AL FINAL por la misma razón que las
+         dos advertencias de arriba: insertarla en el medio desalinea el
+         destructuring y el error que salta no nombra la causa. */
+      obtenerEstadiasPorRango(prestador.data.id, desde, hasta),
     ]);
     /* S85-C7 · los cerrados se guardan APARTE del estado de pantalla, y
        ANTES del rebote de las citas: su fallo no cambia la jornada — solo
@@ -1282,6 +1276,14 @@ export default function Hoy() {
       setPantalla({ estado: 'error', mensaje: rv.mensaje });
       return;
     }
+    // La guardería es la MISMA jornada — y su error importa MÁS que el de
+    // las otras cuatro: el vacío mira citas Y estadías, así que un fallo
+    // silencioso acá haría que la pantalla afirme que no hay nadie a bordo.
+    if (!rEst.ok) {
+      setPantalla({ estado: 'error', mensaje: rEst.mensaje });
+      return;
+    }
+    setEstadias(rEst.data);
     // La marca de bloqueo es PROMESA de la vista semana (jamás se cae en
     // silencio — Ley 13: un error no se disfraza de "sin vacaciones").
     if (!bloqueos.ok) {
@@ -1538,6 +1540,14 @@ export default function Hoy() {
      tres días atrás, caer en `desde` abriría la portada parada en el pasado. */
   const diaVista = diaElegido ?? hoy;
   const citasHoy = diaVista === null ? [] : citasVisibles.filter((c) => c.fecha === diaVista);
+  /* ⚠️ S109-D · EL FILTRO QUE EL PLIEGUE HIZO OBLIGATORIO. Con el viaje
+     propio, el efecto re-consultaba el día elegido y el estado tenía UN día;
+     ahora trae **diez** como sus cuatro hermanas, así que sin esta línea el
+     bloque de presencia mostraría a todos los animales de la ventana como si
+     estuvieran hoy. *Cambiar de dónde viene un dato cambia qué hay que
+     filtrar: el pliegue no fue mover una llamada, fue mover una verdad.*
+     Por eso `EstadiaEnRango` trae `fecha` en cada fila (letra de A). */
+  const estadiasHoy = diaVista === null ? [] : estadias.filter((e) => e.fecha === diaVista);
   // S61-B12: el día SIN filtrar — la Zona 1 es INMUNE al filtro por
   // GUARD ESTRUCTURAL (se computa de acá, jamás de la lista filtrada)
   const citasHoySin = diaVista === null ? [] : citas.filter((c) => c.fecha === diaVista);
@@ -2566,15 +2576,15 @@ export default function Hoy() {
             Y el vocabulario es el de sus cuatro hermanas y el de la baldosa de
             ATENDER: la guardería cuenta **presencias, no actos** — «3 animales
             hoy», jamás «3 guarderías». */}
-        {pantalla.estado === 'listo' && estadias.length > 0 && (
+        {pantalla.estado === 'listo' && estadiasHoy.length > 0 && (
           <View style={{ gap: spacing[2] }}>
             <Texto variante="seccion">{t('agenda.presenciaTitulo')}</Texto>
             <Texto variante="apoyo">
-              {estadias.length === 1
+              {estadiasHoy.length === 1
                 ? t('agenda.presenciaUno')
-                : t('agenda.presenciaN', { n: estadias.length })}
+                : t('agenda.presenciaN', { n: estadiasHoy.length })}
             </Texto>
-            {estadias.map((e) => (
+            {estadiasHoy.map((e) => (
               <CeldaNavegacion
                 key={e.estadiaId}
                 icono="guarderia"
@@ -2590,7 +2600,7 @@ export default function Hoy() {
 
         {/* 🔴 El vacío cuenta lo que REALMENTE no hay: con animales a bordo,
             «hoy no tienes citas» es falso. Firma del founder. */}
-        {pantalla.estado === 'listo' && citasHoy.length === 0 && estadias.length === 0 && (
+        {pantalla.estado === 'listo' && citasHoy.length === 0 && estadiasHoy.length === 0 && (
           // S52-P7b: registro sereno — el día vacío se dice en el
           // flujo, sin display que grite (dosis baja). S61-B5: el vacío
           // POR FILTRO dice su verdad (hay jornada, no de este servicio).
