@@ -26393,3 +26393,43 @@ escribir el próximo número, no después de que dos pistas se pisen otra vez.*
 ⚠️ **Mientras tanto, el número libre es `D-1003` y el máximo real es `D-1001`** —
 escrito acá **a propósito**, contra la propia ley de no escribir números, porque
 **hoy el comando no lo puede decir**.
+
+---
+
+## 🔴 `L-474` — UN VEREDICTO NO VENCE: **LO VENCEN LOS DEMÁS**
+
+**De E, y sale de su propio cierre.**
+
+E depositó cuatro veredictos medidos contra `9443da56`. **Al cerrar, dos de los
+cuatro ya estaban PAGADOS** — y no los venció un error suyo: **los venció el
+trabajo**. Entre su medición y el cierre entraron **157 commits**.
+
+> ### Un documento de medición **sin su ancla** —contra qué y cuándo— **no envejece: se vuelve falso en silencio**, y se sigue leyendo con la confianza del día que se escribió.
+
+**Y esta sesión lo cobró CUATRO veces en un día**, cada una distinta:
+
+- **E**: dos de sus cuatro fichas, pagadas por otras pistas.
+- **C**: dos buzones —*«cero motor de adopción»*, *«el wrapper del tramo vivo no
+  existe»*— falsos el mismo día.
+- **A** (yo): tres tablas de group id vencidas, y **un ítem del estacionamiento
+  que decía *«el motor no existe todavía»* sobre un motor que yo construí
+  después de escribirlo**.
+- **A otra vez**: la notación `por_deuna = 0`, verdadera para quien la escribió y
+  **leída después como si hablara del riel entero**.
+
+🔴 **Lo que las hace peligrosas es que TODAS ERAN VERDADERAS AL ESCRIBIRSE.** No
+hay a quién corregir. *No es un problema de rigor: es que un documento no sabe
+qué día es.*
+
+### LAS DOS CURAS, y ninguna es «revisar antes de cerrar»
+
+**① TODO documento de medición declara su ANCLA** —el sha y la hora— **en su
+encabezado, no al pie.** Sin ancla, quien lo lee no puede saber si envejeció.
+
+**② El que cierra CORRIGE SUS PROPIOS DOCUMENTOS A LA VISTA**, con el texto
+viejo conservado y su porqué. *Marcar arriba y no al pie: un buzón que se mergea
+con datos vencidos se lee con la misma confianza que uno vigente.*
+
+**DISPARO: todo cierre de pista, y toda relectura de un documento de medición
+ajeno.** Es `L-166` —*el dato vivo se relee del objeto al usarlo*— aplicada al
+documento en vez de al dato.
