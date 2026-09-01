@@ -10,7 +10,8 @@ import { useColorScheme } from 'react-native';
 // pantalla de video. Import por efecto: no exporta nada que se use acá.
 import '@/lib/livekit';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import { escuchaDeToque } from '@/lib/toque-de-push';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
@@ -77,6 +78,43 @@ export default function RootLayout() {
       void SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontsError]);
+
+
+  /**
+   * ① · EL TOQUE DE LA PUSH — a dónde lleva (S111-C).
+   *
+   * 🔴 **Los tres estados, y el tercero no lo cubre un listener:** abierta y en
+   * fondo las atiende `alTocar`; **con la app CERRADA el toque ocurrió antes de
+   * que existiera el proceso**, así que además se pregunta por el toque que la
+   * ARRANCÓ (`destinoInicial`). *Un listener solo anda en dos de los tres casos
+   * y se ve como si anduviera — el que falta es justo el de la push que
+   * despierta al teléfono.*
+   *
+   * ⚠️ **Se navega DESPUÉS de que hay a dónde.** Este efecto corre en el layout
+   * raíz con el `Stack` ya montado. *Navegar antes de que el router exista se
+   * pierde en silencio, y es la clase de defecto que sólo aparece en aparato*
+   * (la advertencia es de A).
+   *
+   * **Sin nativo (Expo Go, web) `escuchaDeToque()` es `null` y esto no corre.**
+   */
+  useEffect(() => {
+    const escucha = escuchaDeToque();
+    if (escucha === null) return;
+    let vivo = true;
+    void (async () => {
+      const inicial = await escucha.destinoInicial();
+      /* El guard de vida importa acá y no sólo en el listener: entre pedir el
+         destino inicial y recibirlo, el layout puede haberse desmontado. */
+      if (vivo && inicial !== null) router.push(inicial as never);
+    })();
+    const retirar = escucha.alTocar((ruta) => {
+      if (vivo) router.push(ruta as never);
+    });
+    return () => {
+      vivo = false;
+      retirar();
+    };
+  }, []);
 
   if (!fontsLoaded && !fontsError) return null;
 
