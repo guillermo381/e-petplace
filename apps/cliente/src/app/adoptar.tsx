@@ -53,6 +53,8 @@ import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AvatarMascota,
+  Boton,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -62,11 +64,14 @@ import {
   Tarjeta,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
   caraDeMascota,
+  crearSolicitudAdopcion,
   obtenerAdoptables,
+  obtenerSesion,
   resolverUrlsFotos,
   type Adoptable,
 } from '@epetplace/api';
@@ -90,12 +95,22 @@ export default function Adoptar() {
 
   const [especie, setEspecie] = useState<string | null>(null);
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
+  /** `null` mientras no se sabe. **No se asume que no hay sesión**: con `false`
+   *  por default, el primer render ofrecería registrarse a alguien que ya
+   *  entró. */
+  const [conSesion, setConSesion] = useState<boolean | null>(null);
+  const [postulando, setPostulando] = useState<string | null>(null);
+  const { mostrar } = useAviso();
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       setEstado({ fase: 'cargando' });
       void (async () => {
+        /* Se pregunta por la sesión SIEMPRE, no sólo al postular: el botón tiene
+           que decir la verdad desde el primer render. */
+        const ses = await obtenerSesion();
+        if (vigente) setConSesion(ses.ok && ses.data !== null);
         const r = await obtenerAdoptables({ especie: especie ?? undefined });
         if (!vigente) return;
         /* Ley 13: un fallo JAMÁS se disfraza de «no hay nadie en adopción».
@@ -117,6 +132,42 @@ export default function Adoptar() {
       };
     }, [especie]),
   );
+
+  /**
+   * POSTULAR. §4: *«Al postular, se pide crear cuenta.»*
+   *
+   * 🔴 **Sin sesión NO se intenta y se rebota:** se lleva al registro. *Llamar
+   * al motor para que conteste «sin sesión» y recién ahí mandar al alta es
+   * hacerle pagar al usuario un viaje para decirle algo que ya sabíamos.*
+   *
+   * ⚠️ **Y no se pierde a quién estaba mirando:** la vidriera queda atrás en la
+   * pila, así que al volver del registro sigue acá. *Devolverlo al principio
+   * de la lista después de decidirse sería castigarlo por haberse decidido* —
+   * el camino triste que el recorrido nombra.
+   */
+  const postular = async (a: Adoptable) => {
+    if (postulando !== null) return;
+    if (conSesion !== true) {
+      router.push('/registro');
+      return;
+    }
+    setPostulando(a.publicacionId);
+    try {
+      const r = await crearSolicitudAdopcion({ publicacionId: a.publicacionId });
+      if (!r.ok) {
+        /* `solicitud_ya_viva` trae el id de la que existe: se lleva ahí en vez
+           de decir que no (`L-424` — un guard que sólo sabe negarse). */
+        mostrar({ variante: 'error', texto: r.mensaje });
+        return;
+      }
+      router.push({
+        pathname: '/adoptar/solicitud/[solicitudId]',
+        params: { solicitudId: r.data.solicitudId },
+      });
+    } finally {
+      setPostulando(null);
+    }
+  };
 
   const especieDe = (x: string): 'perro' | 'gato' | undefined =>
     x === 'perro' || x === 'gato' ? x : undefined;
@@ -150,6 +201,21 @@ export default function Adoptar() {
           paddingBottom: insets.bottom + spacing[8],
         }}
       >
+        {/* LA VUELTA A LAS CONVERSACIONES. Sólo con sesión: sin cuenta no hay
+            ninguna, y ofrecerla sería llevar a un vacío garantizado (Ley 23).
+
+            🔴 **Sin contador, y sin pedirlas para saber si hay.** Contar exigiría
+            un viaje más en CADA carga de la vidriera, y S94-PERF midió que el
+            techo de esta casa son los viajes, no las consultas. *Un número que
+            cuesta una espera en la pantalla más visitada no vale lo que informa*
+            — y el vacío del otro lado tiene su camino de vuelta. */}
+        {conSesion === true ? (
+          <CeldaNavegacion
+            titulo={t('misSolicitudes.entrada')}
+            onPress={() => router.push('/adoptar/solicitudes')}
+          />
+        ) : null}
+
         {/* EL ÚNICO FILTRO QUE EL MOTOR ACEPTA. `null` = todas, y es la opción
             que preside: la vidriera se abre mostrando a todos. */}
         <SelectorOpcion
@@ -216,6 +282,23 @@ export default function Adoptar() {
                       </Texto>
                     ) : null}
                   </View>
+                </View>
+
+                {/* POSTULAR — la única acción de la vidriera. §10.8: sin swipe,
+                    sin descartes, sin score. *No hay nada que deshabilitar
+                    porque no se construyó.* */}
+                <View style={{ marginTop: spacing[3] }}>
+                  <Boton
+                    variante="primario"
+                    bloque
+                    etiqueta={
+                      conSesion === false
+                        ? t('adoptar.postularSinCuenta')
+                        : t('adoptar.postular', { nombre: a.nombre })
+                    }
+                    cargando={postulando === a.publicacionId}
+                    onPress={() => void postular(a)}
+                  />
                 </View>
               </Tarjeta>
             );
