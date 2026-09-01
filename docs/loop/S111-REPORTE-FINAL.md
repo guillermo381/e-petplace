@@ -22,13 +22,32 @@ porque la foto no carga** ⇒ **la pasada no llegó al final.**
 por procedimiento: *no hay «autorizo» porque no hubo recorrido completo que
 autorizar.*
 
-**Lo que sigue, en orden:** C cierra los nueve → **A corta los dos APK de nube
-de nuevo** → **una sola pasada más, completa** → recién ahí la autorización.
+**Lo que sigue, en orden:** ~~C cierra los nueve~~ ✅ → ~~A corta los dos APK de
+nube de nuevo~~ ☠️ **NO HIZO FALTA — el lote entró por OTA** → **una sola pasada
+más, completa** → recién ahí la autorización.
 
-⚠️ **Los links de abajo son de la PRIMERA tanda y quedan como registro.** Los
-del gate final se cortan cuando C cierre.
+> ### 🟢 NO TENÉS QUE DESCARGAR NADA. Abrí los APK que YA tenés instalados.
+>
+> El discriminador de runtime dio **los tres en NO** (sin dependencia nativa,
+> sin cambio de config ni permisos, mismo runtime y canal; **fingerprint de EAS
+> idéntico** al del binario que tenés). ⇒ **los builds se cancelaron y el lote
+> salió por OTA** — ver **`L-467`**, que es la corrección de método que lo
+> ordena.
+>
+> | app | OTA group | qué hacer |
+> |---|---|---|
+> | **cliente** | `cab8058f-7ffb-423e-87f3-4d86b40cddd6` | abrir el APK instalado **dos veces** |
+> | **prestador** | `6f0ac534-c3f7-49d3-8581-a02b6a9f13b1` | abrir el APK instalado **dos veces** |
+>
+> Runtime **1.0.7**, canal `preview`, ancla `f3c99216` con árbol limpio,
+> `verify-ota` verde en las dos con su rojo producido primero. *La primera
+> apertura descarga, la segunda aplica.* **El pie de Cuenta muestra el id: si
+> dice `cab8058f` / `6f0ac534`, estás en el lote nuevo.**
+>
+> 🔴 **Esto NO es publicar.** Es entrega para tu gate; el «autorizo» sigue
+> siendo tuyo.
 
-### Los APK de la primera tanda (registro)
+### Los APK instalados (los de la primera tanda — SIGUEN SIENDO LOS BUENOS)
 
 | app | estado | dónde |
 |---|---|---|
@@ -199,5 +218,5 @@ merge, incluidas las que no pidieron nada.
 | `verify:diseno` | **VERDE, 62 reglas** |
 | `verify:mensajeria` | **53/53** |
 | `verify:sin-byte-nul` | **VERDE**, 3515 archivos |
-| fichas / lecciones | `D-986` → `D-995` · `L-461` → `L-464` |
-| publish / OTA | **CERO** — veda sostenida |
+| fichas / lecciones | `D-986` → `D-996` · `L-461` → **`L-467`** |
+| publish / OTA | **OTA de gate en los dos canales** (`cab8058f` · `6f0ac534`), `verify-ota` verde. **Publish a producción: CERO — veda sostenida.** |
