@@ -109,7 +109,41 @@ aparato — **no se publicó OTA ni se lanzó build**, por firma del founder.*
 
 ---
 
-## ⑤ OPERATIVO
+## ⑤ 🔴 LAS BUILDS 1.0.7 EXISTEN Y **NO LLEVAN NADA DE ESTA SESIÓN** — medido
+
+**Las dos apps tienen 1.0.7 `FINISHED` en EAS** (`build:list`, corrido desde
+`apps/<app>/`):
+
+| app | build | ancla | hora |
+|---|---|---|---|
+| prestador | `6e361277` | **`28daa703`** | 01-sep 02:34 |
+| cliente | `b6e7d77e` | **`28daa703`** | 01-sep 02:34 |
+
+⚠️ **Hay un par ANTERIOR, también `1.0.7 FINISHED`, ancla `8b5def5c` (~01:20): son
+las que salieron con la key MUERTA** —autorizadas con información vieja, antes de
+actualizar el secret—. *Dos builds con el mismo número de versión y distinto
+comportamiento de mapas: quien instale «la 1.0.7» sin mirar el ancla puede estar
+instalando la que no tiene mapas.* **Las buenas son las de `28daa703`.**
+
+🔴 **Y LO QUE NADIE MIDIÓ HASTA ACÁ: el ancla `28daa703` es de las 21:06 y NINGUNO
+de los ocho commits de S109-D está adentro.** Verificado uno por uno con
+`merge-base --is-ancestor`: la quinta pata, el pliegue, el censo, la vitrina, la
+condición de muerte, la voz del apoyo, la cara por escalera y `MapaPunto` — **los
+ocho quedaron afuera**.
+
+> **Esas APK llevan la cura de la KEY, no las curas del DÍA.** Un gate sobre
+> ellas mediría el binario correcto y el código de ayer — *la forma exacta de
+> `L-138`, y esta vez con dos builds del mismo número para elegir mal.*
+
+**El camino para que lleguen, y es una sola cosa:** un **OTA contra runtime
+1.0.7**. Con `runtimeVersion: appVersion` las 1.0.7 lo reciben; el runtime ya no
+es un obstáculo —lo era cuando el teléfono estaba en 1.0.6—. **No se publicó por
+firma del founder** (*«sin OTA hasta que las builds estén instaladas y
+verificadas»*), y esa firma sigue en pie: **es de él, no de la pista.**
+
+---
+
+## ⑥ OPERATIVO
 
 `main` `c203c8f3` · rama `pista/s109-d` **ancestro de main, verificado por
 `merge-base`** · typechecks **ui · api · prestador · cliente** verdes ·
