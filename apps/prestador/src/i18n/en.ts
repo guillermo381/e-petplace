@@ -3398,7 +3398,7 @@ export const prestadorEn = {
     grabar: 'Record',
     detener: 'Stop',
     publicarClip: 'Send the clip',
-    sinPermisoMic: 'We need microphone permission: a clip without sound cannot be fixed later.',
+    sinPermisoMic: 'We need microphone permission before recording.',
     descartar: 'Discard',
     enviar: 'Send to {{n}}',
     faltaElegir: 'Pick at least one animal.',

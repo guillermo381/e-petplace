@@ -4303,7 +4303,7 @@ export const prestadorEs = {
     grabar: 'Grabar',
     detener: 'Detener',
     publicarClip: 'Enviar el clip',
-    sinPermisoMic: 'Necesitamos permiso para el micrófono: un clip sin sonido no se puede arreglar después.',
+    sinPermisoMic: 'Necesitamos permiso para el micrófono antes de grabar.',
     descartar: 'Descartar',
     enviar: 'Enviar a {{n}}',
     faltaElegir: 'Elige al menos un animal.',
