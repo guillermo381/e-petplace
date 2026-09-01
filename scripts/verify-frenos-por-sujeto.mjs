@@ -82,7 +82,11 @@ if (!enVuelo) {
     di('   El guard vive UNA vez en la puerta; lo que falta es que RESUELVA su columna.');
   } else {
     const n = sujetos.filter((s) => s.cobrable_por_checkout).length;
+    const fuera = sujetos.length - n;
     di(`✅ ① el guard de intento-en-vuelo alcanza los ${n} sujetos cobrables del catálogo`);
+    /* 🔴 LO QUE NO MIDIÓ, DICHO — `L-459`: un guard que sólo suma verdes
+       esconde cuánto no midió, y ese silencio es indistinguible de la salud. */
+    if (fuera) di(`   ⚠️  ${fuera} sujeto(s) del catálogo NO cobrables por checkout quedaron FUERA de esta medición`);
   }
 }
 
@@ -112,8 +116,18 @@ if (!pares.length) {
     di('   La base ya lo exigía. Lo que faltó no fue la regla: fue leerla.');
   } else {
     di(`✅ ② las ${pares.length} parejas de CHECK viajan completas en la edge`);
+    /* 🔴 EL ALCANCE DEL BRAZO ②, DICHO EN VEZ DE SUPUESTO. Detecta SÓLO la
+       forma `(a IS NULL) = (b IS NULL)`. Los demás CHECK de la tabla —rangos,
+       vocabularios, XOR de sujeto— **no los mira**, y su verde no dice nada de
+       ellos. *Un gate que no declara su recorte se lee como si cubriera todo.* */
+    const otros = checks.length - pares.length;
+    if (otros) di(`   ⚠️  ${otros} CHECK más en la tabla NO se miden acá: sólo se evalúa la forma de PAREJA`);
   }
 }
 
+if (!rojo) {
+  di('');
+  di('   Su verde dice «lo que mide, está» — jamás «no hay nada más que mirar».');
+}
 di(rojo ? '\n🔴 verify:frenos-por-sujeto — ROJO' : '\n✅ verify:frenos-por-sujeto — VERDE');
 process.exit(rojo ? 1 : 0);
