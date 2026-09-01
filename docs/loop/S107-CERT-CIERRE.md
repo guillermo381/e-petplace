@@ -116,7 +116,8 @@ tiene stack trace y nadie lo extraña.**
 
 | | qué | disparo |
 |---|---|---|
-| 🔴 **`D-946`/`D-947`** | **el conciliador no alcanza las citas** — **BLOQUEANTE DE PRODUCCIÓN** | antes de cobrar de verdad |
+| ☠️ ~~`D-946`/`D-947`~~ | ~~el conciliador no alcanza las citas — BLOQUEANTE DE PRODUCCIÓN~~ **FALSO. Corregido 1-sep** | — |
+| | 🔴 **Y los dos números NUNCA SE DEPOSITARON**: medido, cero fichas en el canon. *Cité dos deudas que no existían para respaldar un bloqueante que tampoco.* | |
 | 🟠 **`D-984`** | el censo de mapas de códigos (pregunta del founder) | antes de agregar un rebote a cualquier edge de plata |
 | 🟡 **`D-985`** | el `onError` del WebView — **necesita abrir una puerta cerrada a propósito**, decisión de mesa | la decisión sobre cuál puerta |
 | 🟡 **`D-962`** | la Visa huérfana **del lado de Nuvei** — camino A firmado: se deja | Erick |
@@ -166,5 +167,21 @@ peor que frenar sin salida.*
 adentro**. **Va en su propia sesión, como el propio plan dice** — es el arco
 entero de un sujeto **dos veces** (bono y mensualidad).
 
-⚠️ **Y `D-946`/`D-947` van ANTES**: el conciliador ciego a las citas es
-bloqueante de producción, y S108 mueve plata de verdad.
+⚠️ ☠️ **ESTO ERA FALSO — corregido el 1-sep-2026, y se deja a la vista.**
+
+⏪ Decía: *«`D-946`/`D-947` van ANTES: el conciliador ciego a las citas es
+bloqueante de producción»*.
+
+**No había tal bloqueante.** Lo fabricaba un instrumento:
+`pagos_aprobados_sin_sujeto_movido()` decide por `pedidos.pagado_en IS NULL`, y
+**esa columna no la escribe nadie** ⇒ contaba como plata detenida hasta **tres
+pedidos ENTREGADOS**. Lo real: **14 casos, de proveedor real CERO**, todos
+artefactos de seed de agosto (`D-997` ANEXO B, S111-A).
+
+🔴 **Y el agravante es de método, no de número: `D-946` y `D-947` nunca se
+depositaron.** Cero fichas en el canon. *Cité dos números para darle peso a un
+bloqueante, y ni el bloqueante ni las fichas existían — un número de ficha se
+lee como evidencia aunque no haya nada detrás de él.*
+
+**Lo que sí queda vivo, con otra forma:** el instrumento sobre-reporta. Ficha en
+el buzón de cierre de S111, **sin número asignado por mí** — lo pone A.
