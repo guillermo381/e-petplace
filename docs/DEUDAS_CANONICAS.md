@@ -25307,3 +25307,38 @@ buscar** (lo dice, y decide según el caso: si lo que falló es su auto-prueba,
 frena; si lo que falta es el instrumento mismo porque el árbol es anterior a él,
 NO frena, porque frenar sería el rojo falso). *Un gate que no distingue «no
 encontré nada» de «no pude buscar» tiene el defecto del `grep` que lo motivó.*
+
+---
+
+## 🟡 `D-990` — LA FAMILIA NO SE ENTERA DE QUE NO SE PUDO RECOGER A SU ANIMAL
+
+**Elevado por S110-C en vez de dejarlo pasar**, y por eso queda con número.
+
+La corrección ③ de la mesa pedía **TRES** piezas para `no_recogida`, textual:
+*«el escritor · el lector del prestador —el día lo muestra cerrado, con su
+motivo y su hora— y el lector de la familia, que dice lo que la firma ② dice y
+NADA más: no se pudo recoger, el día se cobró y no se repone»*.
+
+**Se construyeron DOS.** El escritor (`marcar_no_recogida_guarderia`, S110-A) y
+el lector del prestador (S110-C). **El tercero no lo construyó nadie**, y no por
+olvido: el perímetro de C dice explícitamente que no construye el lado familia,
+y A no es su consumidor.
+
+> ### Hoy el día se cobra y la familia no se entera de que su animal no salió.
+
+⚠️ **Y tiene el MISMO argumento que usamos para no construir la mitad del
+prestador sola:** un estado que se escribe y ninguna superficie lee es `D-980`.
+Acá la asimetría es más angosta —el prestador sí lo ve— pero la mitad que falta
+es la del actor **cuyo animal es**.
+
+**Lo que NO se hizo, y es la parte correcta:** C **no pidió el ensanche** de
+`obtener_mis_estadias_guarderia`. *Pedir un dato para un lector que no vas a
+montar es la mitad de `D-980` al revés* — el motor quedaría proyectando un campo
+que nadie lee, y el hueco seguiría igual con una capa más de apariencia.
+
+**Dueño:** la mesa, o quien tome el lado familia. **Cuando alguien lo tome, pide
+el ensanche del lector con su recorte** — y el recorte ya está firmado
+(firma ②): **no se pudo recoger · el día se cobró y no se repone. Ni una palabra
+de mora, aviso ni protocolo** (§6 de `LETRA_GUARDERIA` sigue frenado).
+
+**Disparo:** antes de que una familia real contrate guardería.
