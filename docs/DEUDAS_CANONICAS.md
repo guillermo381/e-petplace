@@ -25762,3 +25762,53 @@ el instrumento: era acordarse de preguntar antes de cortar.*
 ⚠️ **Publicar este OTA NO levanta ninguna veda.** Es **entrega al founder para
 su gate**; el «autorizo» de publicar a producción sigue siendo suyo y no se
 deduce de un verde técnico.
+
+---
+
+## ☠️ `L-468` — UN CINTURÓN QUE MIDE QUE EL AVISO **NACE** NO MIDE QUE **DIGA ALGO**
+
+**La cometí yo, en S111, y es peor que un defecto: es un cierre falso.** Declaré
+el hallazgo ⑩ del gate —«el durante no emite avisos»— **cerrado**. Su cinturón
+estaba verde. Y la firma del founder que pidió el quinto acto obligó a volver, y
+al volver se midió lo que el cinturón nunca había mirado.
+
+**Lo medido, con control positivo:** `_voz_notificacion` **no tiene rama para
+ninguno de los cuatro tipos del durante** — los cuatro caen en su `ELSE` y
+devuelven `{}`. El control positivo (`guarderia_media_resumen`) devuelve título
+y mensaje, así que **el vacío es del sujeto, no del instrumento**.
+
+> ### ⇒ Y NO SALÍAN MUDOS. El despachador tiene fallback: `'Tienes una novedad en e-PetPlace'`.
+
+**Los cinco actos del día habrían dicho EXACTAMENTE LO MISMO** — y el aviso que
+trae mala noticia y cobra el día habría dicho lo mismo que «va en camino».
+
+🔴 **Un fallback convierte «no hay texto» en «hay un texto plausible», y ahí
+muere la posibilidad de notarlo.** *No es que el defecto sea silencioso: es que
+tiene una voz creíble.* Familia de `L-466` —el síntoma no apunta a la causa— y
+de la ley de S85: **salida creíble, resultado falso**.
+
+### LO QUE EL CINTURÓN MEDÍA Y LO QUE LE FALTABA
+
+Medía que la **intención NACIERA** con su tipo y su clave de dedupe — y eso era
+cierto. **Nunca preguntó si esa intención tenía texto.** Son dos hechos
+distintos y sólo el primero estaba probado.
+
+**⇒ La regla, como CATEGORÍA:** cuando una pieza produce algo que **otra pieza
+va a renderizar**, el cinturón no termina en «se produjo»: **termina en el
+CONTENIDO que el humano va a leer**. Y si hay un fallback en el camino, el
+cinturón tiene que poder distinguir *el contenido real* del *fallback* —
+si no puede, su verde sólo prueba que el fallback funciona.
+
+**Su corolario operativo, ya aplicado:** el cinturón nuevo produce su rojo con
+un **control negativo explícito** (un tipo sin voz firmada tiene que devolver
+`{}`), y recién entonces cuenta como verde que los cinco tengan título y
+mensaje. *Un instrumento que no distingue voz de no-voz no puede certificar
+ninguna de las dos.*
+
+### Y UN SEGUNDO ERROR PROPIO EN EL MISMO CINTURÓN, DECLARADO
+
+Su brazo de `L-140` usó **`LIKE` sobre `proacl`** y disparó un WARNING falso.
+**Es el error ② de S92, escrito en el canon, cometido de nuevo.** Medido con el
+instrumento correcto —`has_function_privilege`— las tres funciones dan
+`anon = false`. *Una regla escrita en el canon no frena a nadie que no la
+relea: lo que frena es el instrumento.*
