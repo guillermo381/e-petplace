@@ -102,6 +102,7 @@ import { Convivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
+import { EvidenciaClip } from '../components/EvidenciaClip'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
 import { PrecioText } from '../components/PrecioText'
@@ -4859,6 +4860,154 @@ function GaleriaInterna() {
                 />
               </View>
             ))}
+          </View>
+        </Seccion>
+
+        <Seccion titulo="EvidenciaClip (S111) — la guía no desaparece al grabar">
+          {/* EL GATE ES UNA COMPARACIÓN, y por eso las dos primeras van juntas:
+              la guía tiene que seguir A LA VISTA en «grabando». Si al apretar
+              el obturador la instrucción se va, la pieza falla su única ley
+              (CRITERIO_LEGAL §5 es ley de captura, no ayuda contextual).
+              La tercera muestra el momento del envío: N animales, UN envío. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">① encuadre · todavía no graba</Texto>
+              <EvidenciaClip
+                vista={
+                  <View
+                    style={{
+                      height: 140,
+                      borderRadius: radius.suave,
+                      backgroundColor: theme.bg.overlay,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Texto variante="apoyo" color="tertiary">
+                      (slot de la cámara — la pieza NO la monta)
+                    </Texto>
+                  </View>
+                }
+                reglas={[
+                  { clave: 'animal_en_cuadro', voz: 'El animal, en primer plano' },
+                  { clave: 'personas_no', voz: 'Sin personas en el cuadro' },
+                  { clave: 'menores_descarte', voz: 'Si aparece un menor, se descarta' },
+                ]}
+                techoSeg={30}
+                momento={{ fase: 'encuadre' }}
+                onObturador={() => {}}
+                onTecho={() => {}}
+                candidatos={[
+                  { id: 'a', nombre: 'Luna' },
+                  { id: 'b', nombre: 'Thor' },
+                  { id: 'c', nombre: 'Simón' },
+                ]}
+                elegidos={[]}
+                onAlternar={() => {}}
+                onPublicar={() => {}}
+                voces={{
+                  guia: 'Antes de grabar',
+                  grabar: 'Grabar',
+                  detener: 'Detener',
+                  destinatarios: '¿De quién es este clip?',
+                  publicar: 'Enviar',
+                }}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                ② GRABANDO · 🔴 la guía SIGUE a la vista — es el caso que decide
+              </Texto>
+              <EvidenciaClip
+                vista={
+                  <View
+                    style={{
+                      height: 140,
+                      borderRadius: radius.suave,
+                      backgroundColor: theme.bg.overlay,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Texto variante="apoyo" color="tertiary">
+                      (slot de la cámara — la pieza NO la monta)
+                    </Texto>
+                  </View>
+                }
+                reglas={[
+                  { clave: 'animal_en_cuadro', voz: 'El animal, en primer plano' },
+                  { clave: 'personas_no', voz: 'Sin personas en el cuadro' },
+                  { clave: 'menores_descarte', voz: 'Si aparece un menor, se descarta' },
+                ]}
+                techoSeg={30}
+                momento={{ fase: 'grabando', inicioTs: Date.now() - 7000 }}
+                onObturador={() => {}}
+                onTecho={() => {}}
+                candidatos={[
+                  { id: 'a', nombre: 'Luna' },
+                  { id: 'b', nombre: 'Thor' },
+                  { id: 'c', nombre: 'Simón' },
+                ]}
+                elegidos={[]}
+                onAlternar={() => {}}
+                onPublicar={() => {}}
+                voces={{
+                  guia: 'Antes de grabar',
+                  grabar: 'Grabar',
+                  detener: 'Detener',
+                  destinatarios: '¿De quién es este clip?',
+                  publicar: 'Enviar',
+                }}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                ③ tomado · N destinatarios, UN envío · con cero elegidos el envío no se ofrece
+              </Texto>
+              <EvidenciaClip
+                vista={
+                  <View
+                    style={{
+                      height: 140,
+                      borderRadius: radius.suave,
+                      backgroundColor: theme.bg.overlay,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Texto variante="apoyo" color="tertiary">
+                      (slot de la cámara — la pieza NO la monta)
+                    </Texto>
+                  </View>
+                }
+                reglas={[
+                  { clave: 'animal_en_cuadro', voz: 'El animal, en primer plano' },
+                  { clave: 'personas_no', voz: 'Sin personas en el cuadro' },
+                  { clave: 'menores_descarte', voz: 'Si aparece un menor, se descarta' },
+                ]}
+                techoSeg={30}
+                momento={{ fase: 'tomado' }}
+                onObturador={() => {}}
+                onTecho={() => {}}
+                candidatos={[
+                  { id: 'a', nombre: 'Luna' },
+                  { id: 'b', nombre: 'Thor' },
+                  { id: 'c', nombre: 'Simón' },
+                ]}
+                elegidos={['a', 'c']}
+                onAlternar={() => {}}
+                onPublicar={() => {}}
+                voces={{
+                  guia: 'Antes de grabar',
+                  grabar: 'Grabar',
+                  detener: 'Detener',
+                  destinatarios: '¿De quién es este clip?',
+                  publicar: 'Enviar',
+                }}
+              />
+            </View>
           </View>
         </Seccion>
 
