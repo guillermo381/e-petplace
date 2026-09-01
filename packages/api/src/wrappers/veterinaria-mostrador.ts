@@ -69,6 +69,15 @@ export interface MascotaDeClienteRegistrado {
   mascotaId: string;
   nombre: string;
   fotoUrl: string | null;
+  /**
+   * 🔴 SIN `especie` NO SE ALCANZA NI EL GENÉRICO. Este lector entregaba
+   * `{mascotaId, nombre, fotoUrl}` y la superficie caía directo a la huella,
+   * saltándose los dos peldaños de la escalera. (S109-D lo midió y **no
+   * adivinó un slug**: sin especie, cualquier ruta inventada sería peor.)
+   */
+  especie: string | null;
+  /** Peldaño ②. `null` = la raza no matchea el catálogo ⇒ baja al genérico. */
+  razaRutaImagen: string | null;
 }
 
 export type ResultadoBusquedaCliente =
@@ -120,7 +129,15 @@ function parseBusquedaCliente(
       if (!esObj(m)) continue;
       const id = str(m['mascota_id']);
       if (id === null) continue;
-      mascotas.push({ mascotaId: id, nombre: str(m['nombre']) ?? '', fotoUrl: str(m['foto_url']) });
+      mascotas.push({
+        mascotaId: id,
+        nombre: str(m['nombre']) ?? '',
+        fotoUrl: str(m['foto_url']),
+        /* Los dos peldaños que faltaban: sin `especie` esta superficie caía
+           directo a la huella, saltándose el genérico. */
+        especie: str(m['especie']),
+        razaRutaImagen: str(m['raza_ruta_imagen']),
+      });
     }
     const userId = str(raw['user_id']);
     if (userId === null) return inconsistente;

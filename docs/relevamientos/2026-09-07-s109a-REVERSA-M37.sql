@@ -1,0 +1,8 @@
+-- REVERSA de 20260907400000_s109a_el_peldano_de_la_raza.sql
+--
+-- ⚠️ Revertir devuelve las cuatro proyecciones a su forma anterior y **las 111
+--    imágenes sembradas vuelven a ser inalcanzables desde esas superficies**.
+--    No rompe nada: los campos son ADITIVOS y quien no los lee sigue igual.
+--
+-- Los cuerpos previos viven en sus migraciones; `pg_get_functiondef` los da
+-- del objeto. No se transcriben.

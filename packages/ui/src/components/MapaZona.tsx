@@ -33,8 +33,8 @@ import { useTheme } from '../ThemeProvider'
 
 export interface MapaZonaProps {
   /** Centro DESPLAZADO de la zona (jamás la sede). */
-  lat: number
-  lon: number
+  zonaLat: number
+  zonaLon: number
   /** Radio en metros (hoy 500, lo decide el motor). */
   radioM: number
   /** Alto del bloque. Default 160. */
@@ -55,7 +55,7 @@ function conAlfa(hex: string, alfa: number): string {
   return `rgba(${r},${g},${b},${alfa})`
 }
 
-export function MapaZona({ lat, lon, radioM, alto = 160 }: MapaZonaProps) {
+export function MapaZona({ zonaLat, zonaLon, radioM, alto = 160 }: MapaZonaProps) {
   const { theme } = useTheme()
   const acento = theme.accent.control
   const delta = radioM * GRADO_POR_METRO * AIRE
@@ -70,7 +70,7 @@ export function MapaZona({ lat, lon, radioM, alto = 160 }: MapaZonaProps) {
     >
       <MapView
         style={{ flex: 1 }}
-        initialRegion={{ latitude: lat, longitude: lon, latitudeDelta: delta, longitudeDelta: delta }}
+        initialRegion={{ latitude: zonaLat, longitude: zonaLon, latitudeDelta: delta, longitudeDelta: delta }}
         scrollEnabled={false}
         zoomEnabled={false}
         rotateEnabled={false}
@@ -81,7 +81,7 @@ export function MapaZona({ lat, lon, radioM, alto = 160 }: MapaZonaProps) {
         zoomControlEnabled={false}
       >
         <Circle
-          center={{ latitude: lat, longitude: lon }}
+          center={{ latitude: zonaLat, longitude: zonaLon }}
           radius={radioM}
           strokeColor={acento}
           strokeWidth={1.5}
