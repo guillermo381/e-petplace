@@ -98,6 +98,7 @@ import { GotaUbicacion } from '../components/GotaUbicacion'
 import { Mutacion } from '../components/Mutacion'
 import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
+import { Convivencia } from '../components/Convivencia'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
 import { PrecioText } from '../components/PrecioText'
@@ -4742,6 +4743,59 @@ function GaleriaInterna() {
               onLlamar={() => {}}
             />
             <FilaEntrega direccion="Calle Cuero y Caicedo 458" onLlamar={() => {}} />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="Convivencia (S111) — el tercer estado tiene voz propia">
+          {/* LOS TRES ESTADOS JUNTOS, porque la comparación ES el gate:
+              lo que hay que poder ver de un vistazo es que «todavía no se
+              sabe» NO se lee como un hueco ni como un «no» pálido — ocupa
+              su lugar con su voz. Si en el teléfono el tercero se lee como
+              ausencia, la pieza falla su única ley (LETRA_ADOPCION §3).
+
+              Y el segundo bloque es el CONTROL: un caso todo-desconocido,
+              que es el estado REAL de un rescate de seis días. Si esa
+              tarjeta se ve rota o vacía, el defecto es de la pieza — ése
+              es el caso que la letra dice que cuesta un hogar. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">los tres estados · sí · no · todavía no se sabe</Texto>
+              <Convivencia
+                rotulo="Convive con"
+                voces={{ si: 'Sí', no: 'No' }}
+                filas={[
+                  { con: 'Perros', estado: 'si' },
+                  { con: 'Gatos', estado: 'no' },
+                  { con: 'Niños', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                control · rescate de seis días: nada medido todavía
+              </Texto>
+              <Convivencia
+                rotulo="Convive con"
+                voces={{ si: 'Sí', no: 'No' }}
+                filas={[
+                  { con: 'Perros', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
+                  { con: 'Gatos', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
+                  { con: 'Niños', estado: 'no_se_sabe', voz: 'Aún no lo vimos con chicos' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">sin rótulo · embebido en una ficha</Texto>
+              <Convivencia
+                voces={{ si: 'Sí', no: 'No' }}
+                filas={[
+                  { con: 'Perros', estado: 'si' },
+                  { con: 'Gatos', estado: 'si' },
+                ]}
+              />
+            </View>
           </View>
         </Seccion>
 
