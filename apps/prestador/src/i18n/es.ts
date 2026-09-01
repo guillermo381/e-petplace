@@ -4238,6 +4238,8 @@ export const prestadorEs = {
     vacioDetalle: 'Cuando una familia reserve un día, va a aparecer acá con su dirección.',
     salgoABuscar: 'Salgo a buscar',
     sacarFoto: 'Sacar una foto',
+    subir: 'Subir',
+    bajar: 'Bajar',
     salgoADevolver: 'Salgo a devolver',
     viajeRecogida: '{{aBordo}} a bordo · faltan {{faltan}}',
     viajeDevolucion: 'Llevando {{llevando}}',

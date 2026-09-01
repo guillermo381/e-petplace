@@ -254,8 +254,15 @@ con su motor; pedido a A.**
 7:00 antes que el de las 8:30. Ése es el orden natural del día.
 
 Pero yo sé que hoy conviene pasar primero por Luna porque me queda de camino.
-**Muevo su tarjeta arriba con el dedo** y listo. **Ese orden es mi viaje**: la
-barra y la lista lo respetan.
+**Subo su tarjeta** y listo. **Ese orden es mi viaje**: la lista lo respeta.
+
+> ⏪ **ENMIENDA A LA VISTA — esto decía «con el dedo» y construí subir/bajar.**
+> El arrastre pide gesto + reanimated sobre una lista cuyas tarjetas **ya tienen
+> acciones adentro**, y *dos gestos en la misma superficie pelean*: el que
+> arrastra y el que toca un botón. **Preferí un control que se entiende sin
+> explicación a un gesto que a veces mueve y a veces dispara otra cosa.** Si el
+> founder quiere arrastre es su firma y otra tanda — *pero el recorrido no puede
+> prometer un gesto que la app no hace.*
 
 Si cierro y abro la app, **mi orden sigue ahí**. No vuelvo a acomodar seis
 tarjetas cada vez que atiendo el teléfono.»

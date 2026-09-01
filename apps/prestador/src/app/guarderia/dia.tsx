@@ -76,8 +76,11 @@ import { HojaMediaGuarderia } from '@/components/hoja-media-guarderia';
 import { horaCorta } from '@/lib/ventas-formato';
 import type { DireccionActa } from '@/lib/cola-actas';
 import {
+  aplicarOrden,
   borrarViaje,
+  guardarOrden,
   guardarViaje,
+  leerOrden,
   leerViaje,
   type ViajeAbierto,
 } from '@/lib/viaje-guarderia';
@@ -200,12 +203,15 @@ export default function DiaGuarderia() {
          pantalla sigue mostrando el roster y sólo pierde los actos — un
          catálogo caído no puede dejar al cuidador sin saber a quién buscar. */
       const maq = await obtenerMaquinaEstadia();
+      /* ⑨ · El orden que el cuidador dejó hoy. Lo guardado manda; lo nuevo
+         cae al final por su orden natural. */
+      const orden = await leerOrden(hoyLocal());
       if (!vigente) return;
       setViaje(v);
       setEstado({
         fase: 'listo',
         prestadorId: p.data.id,
-        estadias: r.data,
+        estadias: aplicarOrden(r.data, orden),
         caras,
         maquina: maq.ok ? maq.data : null,
       });
@@ -315,6 +321,31 @@ export default function DiaGuarderia() {
   };
 
   const relanzar = () => setIntento((n) => n + 1);
+
+  /**
+   * ⑨ · MOVER UNA TARJETA. **Ese orden es el viaje.**
+   *
+   * ⚠️ **Es subir/bajar y no arrastrar, y lo declaro porque mi recorrido decía
+   * «con el dedo»:** el arrastre pide gesto + reanimated sobre una lista que ya
+   * lleva tarjetas con acciones adentro, y **dos gestos en la misma superficie
+   * pelean** —el que arrastra y el que toca un botón—. *Prefiero un control que
+   * se entiende sin explicación a un gesto que a veces mueve y a veces dispara
+   * otra cosa.* Si el founder quiere arrastre, es su firma y otra tanda.
+   *
+   * 🔴 **El orden se guarda ENTERO, no la posición del que se movió**: guardar
+   * «Luna está tercera» se rompe con la primera cancelación. La lista completa
+   * de ids sobrevive a que entren y salgan animales.
+   */
+  const mover = (estadiaId: string, delta: -1 | 1) => {
+    if (listo === null) return;
+    const lista = [...listo.estadias];
+    const i = lista.findIndex((e) => e.estadiaId === estadiaId);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= lista.length) return;
+    [lista[i], lista[j]] = [lista[j], lista[i]];
+    setEstado({ ...listo, estadias: lista });
+    void guardarOrden(hoyLocal(), lista.map((e) => e.estadiaId));
+  };
 
   /** La hora del TOQUE — la de la puerta. La del servidor existe para auditar
    *  y no se muestra: con cola offline sería la hora de la señal. */
@@ -656,6 +687,27 @@ export default function DiaGuarderia() {
                         exactamente lo que el trinquete existe para evitar.* El
                         choque entre 22c y R47 está declarado en el propio lint;
                         acá se resuelve a favor del que mide. */}
+                    {/* ⑨ · Mover, sólo ANTES de salir: con el viaje abierto el
+                        orden ya está en la calle y reordenarlo no cambia nada
+                        de lo que pasó. *Un control que no tiene efecto es peor
+                        que no tenerlo.* */}
+                    {viaje === null && estado.estadias.length > 1 ? (
+                      <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                        <Boton
+                          variante="ghost"
+                          tamaño="sm"
+                          etiqueta={t('diaGuarderia.subir')}
+                          onPress={() => mover(e.estadiaId, -1)}
+                        />
+                        <Boton
+                          variante="ghost"
+                          tamaño="sm"
+                          etiqueta={t('diaGuarderia.bajar')}
+                          onPress={() => mover(e.estadiaId, 1)}
+                        />
+                      </View>
+                    ) : null}
+
                     {corresponde === null ? null : (
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}

@@ -3333,6 +3333,8 @@ export const prestadorEn = {
     vacioDetalle: 'When a family books a day, it’ll show up here with their address.',
     salgoABuscar: 'Heading out to pick up',
     sacarFoto: 'Take a photo',
+    subir: 'Up',
+    bajar: 'Down',
     salgoADevolver: 'Heading out to drop off',
     viajeRecogida: '{{aBordo}} on board · {{faltan}} to go',
     viajeDevolucion: 'Carrying {{llevando}}',
