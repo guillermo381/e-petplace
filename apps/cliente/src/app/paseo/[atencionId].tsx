@@ -50,6 +50,7 @@ import {
   spacing,
   typography,
   useTheme,
+  Texto,
 } from '@epetplace/ui';
 import {
   leerDetalleAtencion,
@@ -61,6 +62,7 @@ import {
 import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 
 function horaMono(iso: string | null): string {
   if (iso === null) return '--:--';
@@ -597,12 +599,18 @@ export default function DetallePaseo() {
             el veredicto del founder (M1 §9 — se ensancha, no se
             duplica). */}
         <View style={{ position: 'absolute', top: -radius.md, left: -radius.md, right: -radius.md, bottom: -radius.md }}>
+          {!MAPA_NATIVO_DISPONIBLE ? (
+            /* Pantalla completa del recorrido: sin mapa, la pantalla lo dice
+               y el resto (volver, el pie) sigue en pie. */
+            <Texto variante="apoyo">{t('paseo.mapaNoDisponible')}</Texto>
+          ) : (
           <MapaRecorrido
             modo={enVivo ? 'vivo' : 'recorrido'}
             puntos={detalle.track_gps}
             capa="cuidado"
             alto={altoPantalla + radius.md * 2}
           />
+          )}
         </View>
 
         {/* volver — flotante sobre el mapa (glifo canónico de Encabezado) */}
@@ -703,7 +711,11 @@ export default function DetallePaseo() {
                     </View>
                   ) : detalle.track_gps.length > 0 ? (
                     <View style={{ borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, overflow: 'hidden' }}>
-                      <MapaRecorrido modo="vivo" puntos={detalle.track_gps} capa="cuidado" alto={200} />
+                      {!MAPA_NATIVO_DISPONIBLE ? (
+                        <Texto variante="apoyo">{t('paseo.mapaNoDisponible')}</Texto>
+                      ) : (
+                        <MapaRecorrido modo="vivo" puntos={detalle.track_gps} capa="cuidado" alto={200} />
+                      )}
                     </View>
                   ) : (
                     <Text
@@ -767,7 +779,13 @@ export default function DetallePaseo() {
                 'registrado' con 1 punto (el verosímil-falso pre-cura). */}
             {detalle.track_gps.length >= 2 ? (
               <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
-                <MapaRecorrido modo="recorrido" puntos={detalle.track_gps} capa="cuidado" alto={200} />
+                {!MAPA_NATIVO_DISPONIBLE ? (
+                  /* El recorrido QUEDÓ grabado: lo que falta es el dibujo.
+                     Mismo criterio que el cierre del prestador (S80-B19). */
+                  <Texto variante="apoyo">{t('paseo.mapaNoDisponible')}</Texto>
+                ) : (
+                  <MapaRecorrido modo="recorrido" puntos={detalle.track_gps} capa="cuidado" alto={200} />
+                )}
               </View>
             ) : (
               <View style={{ gap: spacing[1] }}>

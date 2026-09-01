@@ -402,7 +402,7 @@ export async function invitarEmpleado(
 // se ofrece hasta que su motor exista — §5, Ley 23).
 
 /** Los cuatro oficios del chip (§6: grano de OFICIO en pantalla). */
-export type OficioChip = 'veterinaria' | 'grooming' | 'paseo' | 'adiestramiento';
+export type OficioChip = 'veterinaria' | 'grooming' | 'paseo' | 'adiestramiento' | 'guarderia';
 
 /** UN servicio del negocio con su MODALIDAD (S97-A, pedido de C para el paso
  *  ② del wizard: «atiendo este servicio en mi local»).
@@ -469,11 +469,25 @@ export async function obtenerOficiosNegocio(prestadorId: string): R<OficioNegoci
     else if (t.categoria === 'paseo' || t.categoria === 'grooming' || t.categoria === 'adiestramiento') {
       oficioDe.set(t.codigo, t.categoria);
     }
+    /* ⭐ S109-D · GUARDERÍA ES EL QUINTO OFICIO (firma del founder, 31-ago).
+       La categoría del catálogo es `hospedaje` y el oficio se llama
+       `guarderia`: **son dos vocabularios distintos y por eso el mapeo es
+       explícito** — no se puede hacer `oficioDe.set(t.codigo, t.categoria)`
+       como con los tres de arriba, porque ahí el nombre coincide y acá no. */
+    else if (t.categoria === 'hospedaje') oficioDe.set(t.codigo, 'guarderia');
   }
   const porOficio = new Map<OficioChip, ServicioDeOficio[]>();
   for (const f of filas) {
     const oficio = oficioDe.get(f.tipo_servicio);
-    if (oficio === undefined) continue; // hospedaje/otro: fuera del v1
+    /* ☠️ S109-D · ACÁ DECÍA `continue; // hospedaje/otro: fuera del v1`, y
+       ése era EL defecto: la guardería del founder existía, cobraba y tenía
+       estadías pagadas para HOY, y su baldosa **nunca se pintaba en el
+       ATENDER** — no vacía: ausente.
+
+       *Una exclusión escrita cuando el oficio no existía, que sobrevivió al
+       mundo que la justificaba.* El `continue` sigue vivo para `otro` y para
+       lo que venga sin oficio, que es su trabajo real. */
+    if (oficio === undefined) continue;
     porOficio.set(oficio, [
       ...(porOficio.get(oficio) ?? []),
       {

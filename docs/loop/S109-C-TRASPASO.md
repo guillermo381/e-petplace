@@ -11,6 +11,42 @@
 
 ---
 
+## ⓪ 🔴 ANTES DE MEDIR NADA EN ESTE WORKTREE: EL TYPECHECK PUEDE ESTAR CIEGO
+
+**`apps/cliente/.expo/types/router.d.ts` es un GENERADO y no está en git.** Si
+Metro nunca corrió en tu worktree, **no existe — y sin él `tsc` no mide las rutas
+de expo-router**: `router.replace(unString)` compila, y el typecheck sale
+**VERDE**.
+
+```bash
+# antes de creerle a un verde de `cliente` o `prestador`:
+ls apps/cliente/.expo/types/router.d.ts \
+  || cp ../e-petplace/apps/cliente/.expo/types/router.d.ts apps/cliente/.expo/types/
+```
+
+**Pasó de verdad, el 31-ago, y costó una discusión de tres mensajes:** A veía un
+rojo en `login.tsx` que yo no podía reproducir. *El rojo era el real y mi verde
+no probaba nada.* Está declarado desde antes en **`R63`** —«brazo C NO MEDIDO en
+cliente/prestador (Metro nunca corrió en este worktree)»— y aun así nos mordió a
+las dos pistas que no lo teníamos.
+
+> 🔴 **Un verde que no puede producir su rojo no es una medición** — y **la
+> ausencia de un archivo generado es la forma más silenciosa de eso: no falla, no
+> avisa, y sale verde.**
+>
+> ⇒ **Toda cura de tipos se cierra con su control negativo**: reintroducir el
+> defecto y ver el rojo. *Probar el instrumento antes de confiar en su silencio.*
+> (Acá: defecto viejo → 2 errores · cura → 0.)
+
+**Y su hermana, que se cobró TRES veces el mismo día entre las tres pistas:**
+*medir la propia rama y llamarlo «el estado».* A me midió a mí contra su árbol,
+B me avisó de un rojo que era suyo, yo tuve un verde que era ciego. **Las tres
+veces lo resolvió el objeto, no el argumento** — `git merge-base --is-ancestor`,
+`git show origin/main:<ruta>`, `git range-diff`. El canon ya la registra con tres
+cobros previos; ésta fue la cuarta, quinta y sexta.
+
+---
+
 ## ① EL ESTADO, en una línea por sujeto
 
 | sujeto | superficie | ¿cobra de verdad? |

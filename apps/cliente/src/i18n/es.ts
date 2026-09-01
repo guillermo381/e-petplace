@@ -660,6 +660,7 @@ export const clienteEs = {
   },
   // S55-A A3 (D-315): detalle del paseo al riel (voseo→tuteo).
   paseo: {
+    mapaNoDisponible: 'El mapa no está disponible en esta versión de la app.',
     titulo: 'Paseo',
     tituloConFecha: 'Paseo · {{fecha}}',
     cargando: 'Cargando el paseo',
@@ -796,6 +797,7 @@ export const clienteEs = {
   },
   // S54-B3.3 — checkout mono-ítem con forma de carrito
   checkout: {
+    mapaNoDisponible: 'El mapa no está disponible en esta versión de la app.',
     titulo: 'Confirmar y pagar',
     resumen: 'Tu paseo',
     /* El prestador baja a subtítulo cuando el SERVICIO pasa a presidir el
@@ -1482,6 +1484,7 @@ export const clienteEs = {
   },
   // S56-A D-339 — la dirección del hogar. GATE PENDIENTE founder (lote S56).
   direccion: {
+    mapaNoDisponible: 'El mapa no está disponible en esta versión de la app.',
     titulo: 'Tu dirección',
     voz: 'La puerta de tu hogar — donde el paseador busca y devuelve a tu mascota.',
     direccionLabel: 'Dirección',
@@ -1889,6 +1892,7 @@ export const clienteEs = {
         tiene ni medio de pago ni monto esperado (censo de A, divergencias #3 y
         #4): para esos dos hay voz de AUSENCIA, no un valor de relleno. */
   serie: {
+    mapaNoDisponible: 'El mapa no está disponible en esta versión de la app.',
     titulo: 'Que llegue solo',
     queLlega: 'Qué te llega',
     cada: 'Cada {{dias}} días',
@@ -3155,6 +3159,7 @@ export const clienteEs = {
     sinDocsDetalle: 'Estamos terminando de preparar los documentos. Te avisamos apenas esté listo.',
   },
   duranteGuarderia: {
+    mapaNoDisponible: 'El mapa no está disponible en esta versión de la app.',
     reservada: 'Todavía no salieron a buscar a {{nombre}}.',
     recogidaEnCurso: 'Van en camino a buscar a {{nombre}}.',
     enGuarderia: '{{nombre}} está en la guardería.',

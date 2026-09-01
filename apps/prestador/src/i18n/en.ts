@@ -38,6 +38,10 @@ export const prestadorEn = {
     datoVeterinariaCero: 'No consults today',
     datoVeterinariaUno: '1 consult today',
     datoVeterinariaN: '{{n}} consults today',
+    /* S109-D · the fifth trade counts PRESENCES, not acts — see es.ts. */
+    datoGuarderiaCero: 'No pets today',
+    datoGuarderiaUno: '1 pet today',
+    datoGuarderiaN: '{{n}} pets today',
     datoAdiestramientoCero: 'No sessions today',
     datoAdiestramientoUno: '1 session today',
     datoAdiestramientoN: '{{n}} sessions today',
@@ -50,6 +54,7 @@ export const prestadorEn = {
     oficioGrooming: 'Grooming',
     oficioPaseo: 'Walking',
     oficioAdiestramiento: 'Training',
+    oficioGuarderia: 'Daycare',
     ventaTitulo: 'Product sales',
     vacioTitulo: 'No door is open yet',
     vacioDetalle:
@@ -3038,6 +3043,7 @@ export const prestadorEn = {
     oficioGrooming: 'Grooming',
     oficioPaseo: 'Walking',
     oficioAdiestramiento: 'Training',
+    oficioGuarderia: 'Daycare',
 
     paso1: {
       titulo: 'Your business',

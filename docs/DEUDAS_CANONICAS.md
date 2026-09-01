@@ -24636,3 +24636,174 @@ tres las resolvió el objeto.**
 **Y el corolario incómodo, que es el que conviene recordar:** las tres veces
 quien cayó **acababa de citarle esa misma lección a otro**. *Una lección no
 protege a quien la enuncia — sólo a quien la ejecuta sobre su propio trabajo.*
+
+## 🔴 `L-454` — UNA ROTACIÓN DE CREDENCIALES INVALIDA LOS BINARIOS YA CONSTRUIDOS, NO SÓLO EL PRÓXIMO DEPLOY
+
+**Medida en S109 sobre la key de Google Maps.**
+
+La key de Maps **se hornea en el APK** (`meta-data com.google.android.geo.API_KEY`
+del manifiesto): **no se resuelve en runtime y no se puede actualizar por OTA.**
+⇒ el día que alguien la rota en la consola, **todos los binarios que ya existen
+quedan muertos a la vez** — los instalados, los de nube y los locales. *No es un
+problema del próximo deploy: es un problema de todo lo que ya está en manos de
+alguien.*
+
+> ### 🔴 Y su síntoma se disfraza de otro defecto, que es lo que la vuelve cara.
+> «El mapa monta y no dibuja» se ve **idéntico** a un problema de **firma**
+> (SHA-1 no autorizado) — y la firma es lo que se mira primero, **porque es lo
+> único que el código puede medir**. En S109 esa confusión costó una tanda
+> entera de diagnóstico, dos APK construidos con la key muerta adentro, y estuvo
+> a punto de costar la instalación de esos dos binarios.
+>
+> **El discriminador es de alcance, y es barato:** una **firma** mal autorizada
+> rompe **una app** (el par `package + keystore`); una **key rotada** rompe
+> **todas las apps y todos los servicios que la usan, a la vez**. *Si no dibuja
+> en ningún lado, no mires la firma.*
+
+**Y lo peor de todo: la rotación NO DEJA RASTRO EN EL REPO.** No hay commit, no
+hay diff, ningún gate la ve. El repo sigue verde mientras el producto está roto.
+
+> ### 🔴 Y por eso se mira la firma primero: **la señal fuerte que uno tiene a mano tapa la que no tiene.**
+> La firma es medible desde el código —`apksigner` la imprime, un script la
+> compara— así que es la que se investiga, se documenta y se cura. **La rotación
+> no es medible desde el repo en absoluto**, y lo que no se puede medir no se
+> propone como hipótesis. *No es que se elija mal entre dos candidatas: es que
+> una de las dos nunca entra a la lista.*
+>
+> **El correctivo es la pregunta de alcance, y hay que hacerla ANTES de mirar lo
+> que se puede medir:** ¿falla **una** app o **todas**? Si fallan todas, ninguna
+> explicación por-binario alcanza — y la firma es por-binario.
+
+**La regla:** una rotación se cura en **TODOS** los lugares donde la credencial
+vive, y ese censo **se hace, no se recuerda** — secrets del builder (uno por
+app), `.env` locales (**uno por worktree, y no están en git**), config de la app,
+otros repos y funciones. *El lugar que quede con la vieja no falla hoy: falla
+semanas después, en manos de otro, y parece un defecto nuevo.*
+
+*Corolario: los worktrees viejos son el peor escondite — nadie los mira, y el día
+que alguien buildee desde uno se lleva la credencial muerta sin que nada avise.*
+
+## 🟠 `L-453` — EL SHA-1 NO ES DEL PRODUCTO: ES DEL PAR `package + keystore`, Y CADA APP TIENE EL SUYO EN EAS
+
+**Medida en S109-D sobre los dos APK de nube.**
+
+Al preparar la autorización de la key de Google Maps, el supuesto natural era
+*«autorizo la app y listo»*. **Medido, son DOS entradas y con huellas distintas:**
+
+```
+com.epetplace.cliente     3331ac303cdcf82517ae1279e0900ceedce95b61
+com.epetplace.prestador   498da5e3e26d59df3f900e0b170012df38bce956
+```
+
+**EAS mantiene un keystore POR APP**, no uno por cuenta ni por proyecto. ⇒ una
+credencial restringida por firma necesita **una entrada por cada par**, y
+autorizar una **no habilita la otra**.
+
+> ### Y el modo de falla es asimétrico, que es lo que lo vuelve caro.
+> Si se autoriza sólo la del cliente, **la app del prestador sale con el mapa
+> mudo** — y como es la app con menos gates, puede tardar semanas en notarse.
+> *No falla la que estás mirando: falla la otra.*
+
+**La regla:** ante cualquier credencial restringida por firma (Maps, Firebase,
+lo que venga), el censo se hace **por par `package + keystore`**, y se cuentan
+**tantas entradas como binarios distintos existan** — incluidos los locales, que
+tienen su propia firma y no la heredan de nadie.
+
+*Corolario operativo: el SHA-1 que decide se saca **del APK instalado**
+(`adb pull` + `apksigner --print-certs`), nunca del keystore que uno cree que
+usó — `L-452` explica por qué esa confusión se siente como evidencia.*
+
+## 🔴 `L-452` — UN OTA QUE LLEGA NO PRUEBA QUE EL BINARIO SEA EL DE NUBE: EL UPDATE SE RESUELVE POR RUNTIME, LA KEY DE MAPS POR FIRMA
+
+**Medida en S109 sobre el teléfono del founder.**
+
+Dos hechos que parecían contradecirse: **el aparato recibe los OTA con
+normalidad** —tiene el de anoche— **y su mapa no dibuja**. La lectura natural es
+que si los updates llegan, el binario «es el bueno», y entonces el defecto tiene
+que estar en el código.
+
+**Es falso, y la razón es que son dos mecanismos que miran cosas distintas:**
+
+| mecanismo | contra qué resuelve |
+|---|---|
+| el update de Expo | **el `runtimeVersion`** que el binario *declara* |
+| la key de Google Maps | **la FIRMA (SHA-1) + package** del APK instalado |
+
+⇒ Un binario **local**, firmado con otro keystore, **declara el mismo runtime**
+(`1.0.6`) y por eso **recibe todos los OTA** — mientras Google le niega los
+tiles, porque su firma no está autorizada. **Medido: `1.0.6` no existe en EAS**,
+así que ese aparato corre un binario que nunca pasó por el pipeline de nube.
+
+> ### El OTA que llega **se siente como evidencia** de que el binario está bien, y no lo es.
+> *Es la clase de falso positivo más cara: no es un dato ausente que uno sabe que
+> le falta — es un dato presente, verdadero, y sobre otra pregunta.*
+
+**La regla:** antes de concluir «el binario está bien» a partir de que los OTA
+llegan, **preguntá contra QUÉ resuelve cada cosa**. Y si lo que falla es de
+Google Maps, Firebase o cualquier servicio con credencial restringida, **el dato
+que decide es la FIRMA del APK instalado** — que se saca del aparato
+(`adb pull` + `apksigner --print-certs`), jamás del keystore que uno cree que usó.
+
+*Hermana de `L-138` (el gate de una APK empieza confirmando el binario) y de
+`L-166`: lo que se mide tiene que ser lo que decide.*
+
+## 🟠 `L-451` — SEIS CONSUMIDORES DE UNA PIEZA NO SON SEIS PANTALLAS CON ESA PIEZA VIVA: LA DIFERENCIA LA DICE EL PROP, NO EL IMPORT
+
+**Medida por S109-D, sobre su propio censo.**
+
+Buscando por qué un mapa no dibujaba, el censo por **import** dio *«`MapaZona`
+se monta en `FichaPrestador`, y `FichaPrestador` tiene **seis** consumidores»* —
+y de ahí salió la conclusión de que **seis pantallas** estaban afectadas.
+
+**Medido por PROP, eran TRES.** Las otras tres montan la ficha **sin pasarle la
+zona**, así que la pieza del mapa **nunca se monta ahí**: importan al padre, no
+al hijo.
+
+> ### El costo no es contar de más: es *dónde* se mira.
+> El censo ancho manda a revisar tres pantallas que no tenían nada — y **el
+> defecto real estaba entre las que sí pasaban el prop**: la única de las tres
+> que no consultaba el guard, en la app donde el guard sí mide, montando un
+> `MapView` que mataba el proceso en hilo nativo. *Un censo que sobrestima no
+> falla por exceso de trabajo: falla porque diluye la atención justo donde
+> hacía falta.*
+
+**La regla:** cuando una pieza se monta **condicionada por sus props**, el censo
+se hace por **el prop que la enciende**, no por el import de quien la contiene.
+El import prueba que la pieza *puede* estar; **el prop prueba que está**.
+
+*Hermana de `L-433` (medir el consumidor y no la definición) y de la ley madre
+de esta casa: se mide del cuerpo, no del nombre.*
+
+## 🔴 `L-450` — UN TYPECHECK EN UN WORKTREE DONDE METRO NUNCA CORRIÓ ESTÁ CIEGO A LAS RUTAS, Y DA VERDE POR AUSENCIA
+
+**Medida por S109-C sobre su propio verde flojo.**
+
+Dos pistas midieron el mismo commit y **una vio dos errores de tipo y la otra
+ninguno**. La causa no era el código: **en el worktree de C no existía
+`apps/cliente/.expo/types/router.d.ts`.** Ese archivo lo GENERA Metro; sin él,
+`tsc` no tiene contra qué comparar una ruta y **`router.push`/`router.replace`
+pasan sin control**.
+
+> **El verde no decía «las rutas están bien»: decía «no hay rutas que mirar».**
+> Un verde por ausencia del insumo es indistinguible de un verde por corrección,
+> y es peor que un rojo porque nadie va a buscarlo.
+
+⚠️ **Y su forma social es la parte cara:** *el que tiene el generado ve un rojo
+que el otro no puede reproducir, y la conversación se va a «a mí me da verde»* —
+donde ninguna de las dos lecturas es mentira y las dos están midiendo objetos
+distintos (hermana de `L-449`).
+
+**Cómo se cierra, y es barato:** correr `npx expo start` una vez en `apps/cliente`
+(y en `apps/prestador`) para que el generado exista, **o copiarlo del worktree que
+ya lo tiene**. El archivo es generado y está en `.gitignore`, así que **no viaja
+con el merge**: cada worktree se lo tiene que ganar.
+
+🟢 **Y la mitad que hace que esto sea una lección y no una anécdota: C probó el
+instrumento antes de confiar en su silencio.** Trajo el generado, **reintrodujo el
+defecto viejo como control negativo → 2 errores**, y con la cura → 0.
+*Un verde que no puede producir su rojo no es una medición.*
+
+⚠️ El gate lo declara desde antes —`R63` dice «brazo C NO MEDIDO en
+cliente/prestador»— **y estaba escrito en el lugar donde nadie lo lee cuando
+corre `tsc`.** *Una limitación declarada protege a quien lee la declaración, no a
+quien corre el comando* (`L-439`).

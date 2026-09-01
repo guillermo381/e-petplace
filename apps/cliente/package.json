@@ -64,7 +64,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "node ../../scripts/guard-rutas-tipadas.mjs && tsc --noEmit"
   },
   "private": true
 }
