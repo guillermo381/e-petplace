@@ -56,6 +56,7 @@ import { obtenerAdiestradoresDisponibles, type OfertaAdiestrador } from '@epetpl
 
 import { useTraduccion } from '@/i18n';
 import { useReservaAdiestramiento } from '@/lib/reserva/adiestramiento';
+import { hoyLocal } from '@/lib/corte-agenda';
 import { vozOfertaAdiestramiento } from '@/lib/adiestramiento-voz';
 
 export function BarraAdiestramiento({
@@ -89,7 +90,20 @@ export function BarraAdiestramiento({
         r.data.filter(
           (o) =>
             o.prestador_servicio_id === ofertaId &&
-            (comprable === undefined || o.comprable === comprable),
+            (comprable === undefined || o.comprable === comprable) &&
+            /* 🔴 **UN PROGRAMA NO PUEDE EMPEZAR HOY — y la puerta no ofrece lo
+               que el motor va a rechazar** (Ley 23). Medido en
+               `contratar_programa` (`20260715180000:466`):
+               `IF p_fecha_inicio <= v_hoy_local THEN RAISE 'slot_en_pasado'`,
+               con su razón escrita al lado — *§12.2 exige aire entre la compra
+               y la sesión 1*.
+               ⚠️ **La sesión suelta SÍ puede hoy**, y por eso el filtro es por
+               oferta y no por día: recortar el día entero le quitaría a la
+               sesión un día que sí tiene.
+               *No es una regla que invento acá: la derivo del guard. Por eso no
+               toca el motor y por eso el día que ese guard cambie, esta línea
+               queda mintiendo — va con su cita para que se encuentre.* */
+            (o.comprable !== 'programa' || fecha > hoyLocal()),
         ),
       );
     });

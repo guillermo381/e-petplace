@@ -32,10 +32,8 @@ import {
   EstadoVacio,
   Icono,
   SelectorOpcion,
-  SelectorSegmentado,
   Texto,
   spacing,
-  typography,
   useTheme,
 } from '@epetplace/ui';
 import {
@@ -46,7 +44,6 @@ import {
   obtenerIniciosAdiestramiento,
   obtenerMascotasDeFamilia,
   resolverUrlFoto,
-  type ComprableAdiestramiento,
   type MascotaResumen,
   type OfertaAdiestramientoPublica,
   mascotasElegibles,
@@ -81,7 +78,8 @@ export default function AdiestramientoCuando() {
   const [elegidaLocal, setElegidaLocal] = useState<string | null>(null);
   const mascotaId = paramMascota ?? elegidaLocal;
   const setMascotaId = setElegidaLocal;
-  const [comprable, setComprable] = useState<ComprableAdiestramiento>('sesion');
+  /* ☠️ **`comprable` MURIÓ** con el paso del QUÉ (ver la lápida en el render).
+     La elección pasó a la vitrina, que es donde la familia ya sabe con quién. */
   // ✅ r34 · LOS DÍAS CERRADOS, CABLEADOS con el lector POR SERVICIO de A
   // (el hueco que declaré en r32: los inicios llegan agregados y no
   // nombran prestadores). La intersección vive en el MOTOR: cerrado ⟺ lo
@@ -169,7 +167,15 @@ export default function AdiestramientoCuando() {
       weekday: 'short',
       day: 'numeric',
     });
-    const desde = comprable === 'programa' ? 1 : 0;
+    /* ⭐ **ARRANCA HOY, y eso es lo PERMISIVO, no lo descuidado.**
+       ⏪ Con el QUÉ vivo, elegir «programa» hacía `desde = 1` porque el motor
+       rebota un programa que empieza hoy (`slot_en_pasado`, §12.2). Sin el QUÉ
+       no se sabe todavía qué se va a contratar — *y recortar el día de hoy para
+       todos, por una restricción que sólo aplica a una de las dos cosas, le
+       quitaría a la sesión suelta un día que sí puede tener.*
+       🔴 **El borde del programa se cubre donde se elige, no acá:** la barra de
+       la vitrina no ofrece programas cuando la fecha es hoy. */
+    const desde = 0;
     const partes = new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' });
     const lista: Array<{ iso: string; etiqueta: string; corta: string; dow: number; diaCorto: string }> = [];
     for (let i = desde; i < 14; i++) {
@@ -189,7 +195,7 @@ export default function AdiestramientoCuando() {
       });
     }
     return lista;
-  }, [idioma, t, comprable]);
+  }, [idioma, t]);
 
   const cerradosISO = useMemo(
     () => new Set(dias.filter((d) => diasCerrados.has(d.dow)).map((d) => d.iso)),
@@ -214,7 +220,10 @@ export default function AdiestramientoCuando() {
     if (mascota === null) return;
     let vigente = true;
     setInicios('cargando');
-    void obtenerIniciosAdiestramiento(dia, mascota.id, comprable).then((r) => {
+    /* Sin comprable = **los dos**. El motor ya lo admitía (`p_comprable DEFAULT
+       NULL`); era el wrapper el que lo pedía obligatorio y volvía inexpresable
+       la pregunta. */
+    void obtenerIniciosAdiestramiento(dia, mascota.id).then((r) => {
       if (!vigente) return;
       setInicios(r.ok ? r.data : 'error');
       if (r.ok) setHora((h) => (h !== null && r.data.includes(h) ? h : null));
@@ -222,7 +231,15 @@ export default function AdiestramientoCuando() {
     return () => {
       vigente = false;
     };
-  }, [dia, mascota, comprable, reintento]);
+  }, [dia, mascota, reintento]);
+
+  /** El piso real de las dos formas. `null` si el catálogo todavía no llegó. */
+  const precioDesde = useMemo(() => {
+    const precios = ofertaPublica
+      .map((o) => o.desde_precio)
+      .filter((x): x is number => typeof x === 'number');
+    return precios.length === 0 ? null : Math.min(...precios);
+  }, [ofertaPublica]);
 
   const listo = mascota !== null && hora !== null;
 
@@ -318,39 +335,23 @@ export default function AdiestramientoCuando() {
             </View>
             ) : null}
 
-            {/* 1 · EL QUÉ — sesión-o-programa (§8). La FIRMA de la
-                pantalla: si es programa, la voz honesta dice ACÁ que
-                las sesiones se agendan solas, antes de todo precio. */}
-            <View style={{ gap: spacing[2] }}>
-              <SelectorSegmentado
-                      // r38-bis · `proposito="eleccion"`: B terminó la
-                      // pieza (r37) y acá se consume en su modo correcto.
-                      // Sin esto el control queda en 'vista', que es el
-                      // default para los consumidores viejos — y este eje
-                      // NO cambia de vista: ELIGE PRODUCTO. El modo trae
-                      // la pata y el magenta; el rol deja de mentir.
-                      proposito="eleccion"
-                etiqueta={t('adiestramiento.comprableEtiqueta')}
-                segmentos={[
-                  { codigo: 'sesion', etiqueta: t('adiestramiento.comprableSesion') },
-                  { codigo: 'programa', etiqueta: t('adiestramiento.comprablePrograma') },
-                ]}
-                activo={comprable}
-                onCambio={(c) => setComprable(c === 'programa' ? 'programa' : 'sesion')}
-              />
-              {comprable === 'programa' ? (
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    lineHeight: Math.round(typography.size.sm * 1.4),
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('adiestramiento.comprableProgramaVoz')}
-                </Text>
-              ) : null}
-            </View>
+            {/* ☠️ **S109-C · ACÁ VIVÍA EL QUÉ — sesión-o-programa. MUERTO POR
+                FIRMA DEL FOUNDER.**
+
+                🔴 *Preguntar sesión-o-programa ANTES de ver quién puede es un
+                filtro que ya no filtra nada, y contradice la regla que ordena el
+                oficio: primero el quién.* Desde que la lista agrupa por
+                adiestrador, **un adiestrador con las dos cosas es un prestador
+                con tres ofertas** — y esta pregunta le pedía a la familia
+                decidir algo que todavía no puede saber.
+
+                ⭐ Lo que reemplaza al selector no es otro control: **es la
+                vitrina**, que muestra lo que ese adiestrador ofrece y deja
+                elegir ahí. *Un paso que se quita porque el siguiente lo hace
+                mejor no deja hueco.*
+
+                ☠️ Con él murieron `comprable`, su estado, su voz de programa y
+                el `SelectorSegmentado` de esta pantalla. */}
 
             {/* 2 · DÍA — la rueda (programa: desde mañana, §12.2).
                 🔴 Y ACÁ VIVE EL DEFECTO MÁS CARO POSIBLE DE ESTA PANTALLA,
@@ -367,7 +368,11 @@ export default function AdiestramientoCuando() {
             <View style={{ gap: spacing[2] }}>
               <View style={{ paddingHorizontal: spacing[5] }}>
                 <Texto variante="apoyo">
-                  {t(comprable === 'programa' ? 'adiestramiento.cuandoEmpieza' : 'explorar.cuandoDia')}
+                  {/* La voz genérica: sin el QUÉ no se sabe si es la fecha de
+                      una sesión o el arranque de un programa. *Decir «cuándo
+                      empieza» sobre algo que puede ser una sesión suelta sería
+                      afirmar un compromiso que la familia no tomó.* */}
+                  {t('explorar.cuandoDia')}
                 </Texto>
               </View>
               {/* 🔴 DÍAS CERRADOS: NO VIAJAN — mismo bloqueo que grooming,
@@ -416,7 +421,7 @@ export default function AdiestramientoCuando() {
               <View style={{ gap: spacing[2] }}>
                 <View style={{ paddingHorizontal: spacing[5] }}>
                   <Texto variante="apoyo">
-                    {t(comprable === 'programa' ? 'adiestramiento.horaPrimera' : 'explorar.cuandoHora')}
+                    {t('explorar.cuandoHora')}
                   </Texto>
                 </View>
                 <GrillaElegir
@@ -449,12 +454,16 @@ export default function AdiestramientoCuando() {
           programa (dice "desde"). */}
       {Array.isArray(mascotas) && elegibles.length > 0 ? (
         <PieReserva
-          total={
-            ofertaPublica.find((o) => o.comprable === comprable)?.desde_precio !== undefined
-              ? `$ ${ofertaPublica.find((o) => o.comprable === comprable)!.desde_precio.toFixed(2)}`
-              : null
-          }
-          totalDesde={ofertaPublica.find((o) => o.comprable === comprable)?.varia ?? false}
+          /* ⭐ **EL «DESDE» ES EL MÍNIMO DE LAS DOS FORMAS**, no el de la que
+             el QUÉ hubiera elegido. *Con sesión y programas juntos, el número
+             que hace verdadero un «desde» es el más chico que la familia puede
+             llegar a pagar* — mostrar el del programa sobre una lista que
+             incluye la sesión suelta diría un piso que no es el piso.
+             🔴 Y `varia` es `true` en cuanto hay MÁS DE UNA forma: con dos
+             precios distintos el número deja de ser el precio y pasa a ser un
+             punto de partida. */
+          total={precioDesde !== null ? `$ ${precioDesde.toFixed(2)}` : null}
+          totalDesde={ofertaPublica.length > 1 || ofertaPublica.some((o) => o.varia)}
           cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
           etiqueta={t('explorar.verQuienPuede')}
           habilitado={listo}
@@ -462,7 +471,9 @@ export default function AdiestramientoCuando() {
             if (!listo || mascota === null || hora === null) return;
             router.push({
               pathname: '/explorar/adiestramiento/disponibles',
-              params: { fecha: dia, hora, comprable, mascotaId: mascota.id, mascotaNombre: mascota.nombre },
+              /* ☠️ `comprable` ya no viaja: la lista muestra a cada adiestrador
+                 con todo lo que ofrece, y la elección vive en su vitrina. */
+              params: { fecha: dia, hora, mascotaId: mascota.id, mascotaNombre: mascota.nombre },
             });
           }}
           insetBottom={insets.bottom}

@@ -113,17 +113,37 @@ function esObj(v: unknown): v is Obj {
 // ── A · Los inicios del DÍA/HORA (la grilla, verdad del server) ─────────────
 
 /** Inicios REALES para la fecha, agregados entre adiestradores cobrables
- *  (7.13) con la duración PROPIA del comprable elegido en el QUÉ; para
- *  el programa la grilla es la de su PRIMERA sesión (§12.2 — las N−1
- *  las valida contratar, atómico). Devuelve 'HH:MM'. */
+ *  (7.13) con la duración PROPIA del comprable; para el programa la grilla es
+ *  la de su PRIMERA sesión (§12.2 — las N−1 las valida contratar, atómico).
+ *  Devuelve 'HH:MM'.
+ *
+ *  ⭐ **S109-C · `comprable` PASA A OPCIONAL — ausente = LOS DOS.**
+ *
+ *  🔴 **El motor SIEMPRE tuvo tres estados y este wrapper aplastaba uno:**
+ *  `p_comprable text DEFAULT NULL` con `WHERE (p_comprable IS NULL OR
+ *  o.comprable = p_comprable)` (`20260715230000`). *Pedirlo obligatorio no
+ *  «simplificaba»: hacía inexpresable la pregunta «¿qué horarios hay, sin
+ *  importar qué se compre?»* — que es exactamente la que la pantalla necesita
+ *  desde que el QUÉ dejó de preguntar sesión-o-programa.
+ *
+ *  ⚠️ Es la misma clase que `p_riel` y `p_tarjeta_id` en el motor de pagos, por
+ *  el otro extremo: allá un `DEFAULT` que afirma borraba el «no declaró»; acá un
+ *  parámetro obligatorio borraba el «no filtres». **Un tipo que no puede
+ *  expresar un estado del motor lo vuelve inalcanzable, sea cual sea el
+ *  mecanismo.** */
 export async function obtenerIniciosAdiestramiento(
   fecha: string,
   mascotaId: string,
-  comprable: ComprableAdiestramiento,
+  comprable?: ComprableAdiestramiento,
 ): Promise<ResultadoWrapper<string[], CodigoErrorAdiestramientoReserva>> {
   const { data, error } = await getClient().rpc(
     'obtener_inicios_adiestramiento_disponibles',
-    { p_fecha: fecha, p_mascota_id: mascotaId, p_comprable: comprable },
+    /* Ausente se OMITE, no se manda `null`: el motor ya tiene su `DEFAULT NULL`
+       y omitir deja que ese default rija — mandar `null` explícito diría lo
+       mismo hoy y dejaría de decirlo el día que el default cambie. */
+    comprable === undefined
+      ? { p_fecha: fecha, p_mascota_id: mascotaId }
+      : { p_fecha: fecha, p_mascota_id: mascotaId, p_comprable: comprable },
   );
 
   if (error) return fallo(error.message);

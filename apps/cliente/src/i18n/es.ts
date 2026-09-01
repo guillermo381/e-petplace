@@ -1072,14 +1072,10 @@ export const clienteEs = {
     errorTitulo: 'No pudimos cargar el adiestramiento.',
     sinElegiblesTitulo: 'El adiestramiento es para perros',
     sinElegiblesDetalle: 'Tu hogar todavía no tiene un perro registrado.',
-    comprableEtiqueta: 'Qué quieres reservar',
-    comprableSesion: 'Sesión suelta',
     comprablePrograma: 'Programa completo',
     // r32 · EL SIGNIFICADO DEL DÍA CAMBIA CON EL COMPRABLE, y se dice
     // DONDE se decide: con programa el día no es cuándo ES, es cuándo
     // EMPIEZA. La voz honesta del QUÉ explica; estos rótulos avisan.
-    cuandoEmpieza: 'Cuándo empieza',
-    horaPrimera: 'Hora de la primera',
     comprableProgramaVoz:
       'Un programa son varias sesiones ordenadas, una por semana, con el mismo adiestrador. Eliges la fecha y hora de la primera y las demás se agendan solas.',
     vacioTitulo: 'Todavía no hay adiestradores disponibles',
@@ -1097,6 +1093,13 @@ export const clienteEs = {
        al lado de ellos.** Antes era una fila aparte y no necesitaba nombre: era
        la fila. *Con el prestador presidiendo, «Andrés» ofrece tres cosas y las
        tres tienen que poder decirse en la misma línea.* */
+    /* ☠️ **S109-C · LAS CUATRO VOCES DEL PASO DEL QUÉ, MUERTAS CON ÉL.**
+       `comprableEtiqueta` · `comprableSesion` · `cuandoEmpieza` · `horaPrimera`
+       — medidas en **0 consumidores** antes de borrarlas.
+       *Vivían para un selector que preguntaba sesión-o-programa antes de ver
+       quién puede; con el quién presidiendo, esa pregunta no tiene lugar donde
+       hacerse.* `comprablePrograma` y `comprableProgramaVoz` **se conservan**:
+       la lista las sigue usando para la nota del programa. */
     sesionSuelta: 'Sesión suelta',
     /* El resumen bajo el nombre: «Sesión suelta $25 · 6 sesiones básicas $90».
        Se arma con la MISMA función que la Hoja de la vitrina (`lib/
