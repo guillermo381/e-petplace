@@ -11,7 +11,24 @@
 
 ---
 
-## ⓪ LO PRIMERO — LOS DOS APK ESTÁN LISTOS Y ESPERANDO TU DEDO
+## ⓪ LO PRIMERO — LA PRIMERA PASADA SE CORRIÓ Y **NO SE COMPLETÓ**
+
+> ### ⚠️ ESTA SECCIÓN SE ENMENDÓ A LA VISTA. Decía *«los dos APK están listos y esperando tu dedo»* — y para cuando se escribió, **el founder ya había corrido su pasada**.
+
+**Nueve hallazgos, todos con C.** Y el que corta: **el acta no pudo levantarse
+porque la foto no carga** ⇒ **la pasada no llegó al final.**
+
+🔴 **La veda de publish sigue ENTERA**, y ahora por una razón medida y no sólo
+por procedimiento: *no hay «autorizo» porque no hubo recorrido completo que
+autorizar.*
+
+**Lo que sigue, en orden:** C cierra los nueve → **A corta los dos APK de nube
+de nuevo** → **una sola pasada más, completa** → recién ahí la autorización.
+
+⚠️ **Los links de abajo son de la PRIMERA tanda y quedan como registro.** Los
+del gate final se cortan cuando C cierre.
+
+### Los APK de la primera tanda (registro)
 
 | app | estado | dónde |
 |---|---|---|
@@ -21,10 +38,8 @@
 **Son de NUBE**, no locales: llevan mapas y push. *Los binarios de prueba no los
 tienen, y una prueba de avisos en ellos da falso negativo.*
 
-🔴 **CERO PUBLISH. La veda se sostuvo entera.** Ningún OTA, ninguna llave de
-`app_config` encendida, ni una palabra de texto legal en pantalla.
-**Lo que falta es tu recorrido en el aparato** — el de guardería, con dos
-animales de dueños distintos y los dos lados — y **recién ahí se publica.**
+🔴 **CERO PUBLISH.** Ningún OTA, ninguna llave de `app_config` encendida, ni una
+palabra de texto legal en pantalla.
 
 ---
 
@@ -64,13 +79,14 @@ rastro.
 
 | # | qué esperamos de vos | evidencia |
 |---|---|---|
-| **1** | 🔴 **El recorrido de guardería en el aparato** — y con él, la autorización de publicar. | los dos APK de arriba |
+| **1** | 🔴 **Una segunda pasada de guardería, COMPLETA** — y con ella, la autorización de publicar. La primera se detuvo en el acta. | los nueve hallazgos, con C |
 | **2** | **El paquete del abogado**: el acta de adopción y los contratos. **Sin ese texto el traspaso NO ocurre** — la puerta está construida y cerrada, y **se abre sola el día que el texto se cargue**. | `adopcion_documentos`, tabla vacía a propósito |
 | **3** | **El contador**: el 5 % a la fundación. **No se construyó nada** — modelarlo antes de saber su figura fiscal es fabricar un motor que después hay que desarmar. | §4 del estacionamiento |
 | **4** | **Las plantillas de solicitud de adopción** (el contenido que el refugio responde). | §5 de la letra |
 | **5** | **¿Quién opera el día de guardería?** Hoy sólo el titular; el cuidador empleado no pasa. **Default (a): queda así.** | `D-986` |
 | **6** | **¿Se borran las cinco tablas legado de adopción?** **No las borres todavía**: algo las recorre desde afuera del monorepo. | `D-991` |
-| **7** | **Ocho decisiones más**, todas con opciones, voto y **construidas fail-closed** para que nada quede trabado esperándote. | `docs/loop/S111-ESTACIONAMIENTO.md` |
+| **7** | **La ruta del viaje**: firmada como producto propio, **v1 va sin ruta** (`D-996`). Nada la bloquea. | `D-996` |
+| **8** | **Ocho decisiones más**, todas con opciones, voto y **construidas fail-closed** para que nada quede trabado esperándote. | `docs/loop/S111-ESTACIONAMIENTO.md` |
 
 ---
 
@@ -127,7 +143,13 @@ lista se lee como trabajo que faltó.*
 
 > *Lo no construido se sabe; lo construido y no ejercido **se lee como hecho**.*
 
-- **Nada de esta sesión se vio en un aparato.**
+- **La pasada del founder llegó hasta el acta y se detuvo ahí** (la foto no
+  carga). ⇒ **de todo lo de guardería, lo que está EJERCIDO en aparato termina
+  antes del acta**; lo demás sigue sin verse.
+- 🔴 **Y el hallazgo tiene la forma que esta casa ya conoce:** la pieza que
+  falló **no es el acta** —su motor está probado y su cinturón verde— **es la
+  foto**, que es su precondición. *Un acto único cae entero cuando cae
+  cualquiera de sus mitades, y la que cayó no era la que se estaba probando.*
 - **El traspaso de adopción nunca corrió de verdad** — no puede, hasta que
   exista el acta. Su camino feliz está probado **sólo** dentro de un arnés que
   cargó un acta de prueba y la deshizo.
