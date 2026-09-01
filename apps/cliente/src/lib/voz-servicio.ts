@@ -18,6 +18,9 @@ const KEY_VOZ_SERVICIO = {
   adiestramiento: 'servicioVoz.adiestramiento',
   // S68-A2: los comprables del mundo vet (V2 + urgencia same-day).
   consulta_general: 'servicioVoz.consultaGeneral',
+  /* S109-D · faltaba, y NO era hipotética: hay una cita real de una familia
+     con este tipo, listada MUDA hoy. La encontró el gate de voz-por-tipo. */
+  consulta_especializada: 'servicioVoz.consultaEspecializada',
   vacunacion: 'servicioVoz.vacunacion',
   urgencia_local: 'servicioVoz.urgenciaLocal',
   urgencia_domicilio: 'servicioVoz.urgenciaDomicilio',
@@ -26,6 +29,17 @@ const KEY_VOZ_SERVICIO = {
      que una cita real quedaría sin decir qué es — y el defecto se ve como
      "falta un dato", no como "falta una traducción". */
   telemedicina: 'servicioVoz.telemedicina',
+  /* ⭐ S109-D · GUARDERÍA, y su voz es de PRESENCIA y no de acto — coherente
+     con el HOY del prestador, donde el día se lee «3 animales hoy» y jamás «3
+     guarderías». *El dueño no compró una sesión: compró que su animal PASE EL
+     DÍA en algún lado.*
+
+     🔴 Y entra acá porque su ausencia ya se estaba cobrando: sin clave,
+     `vozServicio` cae a `nombreDb`, y el lector de citas por mascota no lo
+     pasa ⇒ devolvía `null` y **la estadía aparecía en la lista sin decir qué
+     era**. Es el segundo caso idéntico de este archivo — el primero fue
+     `telemedicina`, y su nota sigue tres líneas más abajo. */
+  guarderia_dia: 'servicioVoz.guarderiaDia',
   paseo: 'explorar.paseoTitulo',
   paseo_30min: 'explorar.paseoTitulo',
   paseo_60min: 'explorar.paseoTitulo',

@@ -286,6 +286,9 @@ export const prestadorEs = {
     despachoTitulo: 'Pedido {{orden}}',
   },
   agenda: {
+    presenciaTitulo: 'Quiénes están hoy',
+    presenciaUno: '1 animal en guardería',
+    presenciaN: '{{n}} animales en guardería',
     // S60-C2.2: la jornada ya no es solo paseos (grooming vivo) — la
     // voz genérica de la jornada, propuesta al gate · LOTE S60
     // S71-B1 — EL TECHO DE LA JORNADA. `saludo` ('Tu jornada de hoy')
