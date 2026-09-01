@@ -4243,6 +4243,8 @@ export const prestadorEs = {
     llegamos: 'Llegamos',
     subio: 'Subió',
     entregado: 'Entregado',
+    noEstaba: 'No estaba',
+    noRecogidaDetalle: '{{motivo}} · {{hora}}',
     diaCerrado: 'Entregaste al último. El día está cerrado.',
   },
   actaGuarderia: {
@@ -4266,5 +4268,18 @@ export const prestadorEs = {
     fotoNoGuardada: 'No se pudo guardar la foto. Prueba de nuevo.',
     noSePudo: 'No se pudo guardar el acta. Prueba de nuevo.',
     actaGuardada: 'El acta quedó guardada con su hora. Las fotos se envían cuando haya conexión.',
+  },
+  noEstaba: {
+    titulo: '¿Qué pasó con {{nombre}}?',
+    apoyo: 'Queda anotado con su hora, para que la familia sepa qué pasó.',
+    etiquetaGrupo: 'Elige el motivo',
+    motivo_nadie_en_domicilio: 'No había nadie',
+    motivo_animal_no_entregado: 'No nos lo entregaron',
+    motivo_familia_cancelo_en_puerta: 'La familia canceló en la puerta',
+    motivo_otro: 'Otra cosa',
+    detalleEtiqueta: 'Cuenta qué pasó',
+    faltaMotivo: 'Elige un motivo para poder anotarlo.',
+    faltaDetalle: 'Con «otra cosa», cuenta qué pasó.',
+    confirmar: 'Dejarlo anotado',
   },
 } as const;

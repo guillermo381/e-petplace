@@ -62,6 +62,7 @@ import {
   type EstadiaDelDia,
   type EstadoEstadia,
   type MaquinaEstadia,
+  type MotivoNoRecogida,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -70,6 +71,8 @@ import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
 import { SeccionDireccion } from '@/components/seccion-direccion';
 import { HojaActaGuarderia } from '@/components/hoja-acta-guarderia';
+import { HojaNoEstaba } from '@/components/hoja-no-estaba';
+import { horaCorta } from '@/lib/ventas-formato';
 import type { DireccionActa } from '@/lib/cola-actas';
 import {
   borrarViaje,
@@ -139,6 +142,8 @@ export default function DiaGuarderia() {
   /** El viaje que este teléfono sigue. Se lee del disco al montar: **sobrevive
    *  a cerrar la app**, que es lo que el recorrido pide. */
   const [viaje, setViaje] = useState<ViajeAbierto | null>(null);
+  /** La estadía cuyo «no estaba» se está anotando. `null` = no se monta. */
+  const [noEstaba, setNoEstaba] = useState<EstadiaDelDia | null>(null);
   const [enVuelo, setEnVuelo] = useState(false);
 
   useEffect(() => {
@@ -516,6 +521,27 @@ export default function DiaGuarderia() {
                         {e.espacioNombre !== null ? (
                           <Texto variante="apoyo">{e.espacioNombre}</Texto>
                         ) : null}
+                        {/* 🔴 EL LECTOR DE «NO SE PUDO RECOGER» — la mitad sin
+                            la cual el escritor no se construye (`D-980` del
+                            lado espejo). El día lo muestra CERRADO, con su
+                            motivo y su hora.
+
+                            El motivo llega como CÓDIGO del catálogo y la voz la
+                            pone este diccionario: si el motor mandara la frase,
+                            su vocabulario saldría a pantalla.
+
+                            ⚠️ Y acá TERMINA: ni una palabra de mora, aviso ni
+                            protocolo — `LETRA_GUARDERIA` §6 sigue frenada. */}
+                        {e.estado === 'no_recogida' && e.noRecogidaMotivo !== null ? (
+                          <Texto variante="apoyo">
+                            {t('diaGuarderia.noRecogidaDetalle', {
+                              motivo: t(
+                                `noEstaba.motivo_${e.noRecogidaMotivo as MotivoNoRecogida}` as 'noEstaba.motivo_nadie_en_domicilio',
+                              ),
+                              hora: e.noRecogidaEn === null ? '' : horaCorta(e.noRecogidaEn),
+                            })}
+                          </Texto>
+                        ) : null}
                       </View>
                       <Insignia estado={familiaDe(e.estado)} etiqueta={vozEstado(e.estado)} />
                     </View>
@@ -550,12 +576,30 @@ export default function DiaGuarderia() {
                         choque entre 22c y R47 está declarado en el propio lint;
                         acá se resuelve a favor del que mide. */}
                     {corresponde === null ? null : (
-                      <View style={{ alignSelf: 'flex-start' }}>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}
+                      >
                         <Boton
                           variante="apoyada"
-                          etiqueta={t('actaGuarderia.guardarActa')}
+                          etiqueta={t(
+                            corresponde === 'recogida'
+                              ? 'diaGuarderia.subio'
+                              : 'diaGuarderia.entregado',
+                          )}
                           onPress={() => setActa({ estadia: e, direccion: corresponde })}
                         />
+                        {/* «No estaba» sólo en la RECOGIDA —`no_recogida` sale
+                            de `reservada` y de ningún otro estado— y en `ghost`
+                            porque es la EXCEPCIÓN: el camino normal pesa más
+                            sin que nadie tenga que leer cuál es cuál. */}
+                        {corresponde === 'recogida' ? (
+                          <Boton
+                            variante="ghost"
+                            tamaño="sm"
+                            etiqueta={t('diaGuarderia.noEstaba')}
+                            onPress={() => setNoEstaba(e)}
+                          />
+                        ) : null}
                       </View>
                     )}
                   </View>
@@ -594,6 +638,21 @@ export default function DiaGuarderia() {
           que levanta el acta y mueve el estado en una transacción— se inyecta
           acá, **en esta línea y en ninguna otra**, y la etiqueta de abajo pasa
           a prometer lo que el acto entonces sí hace. */}
+      {/* «No estaba» — se monta con el catálogo del motor. Sin catálogo no se
+          ofrece: un selector de motivos inventado acá sería el vocabulario del
+          motor escrito a mano, y el CHECK lo rebotaría. */}
+      {estado.fase === 'listo' && noEstaba !== null ? (
+        <HojaNoEstaba
+          estadia={noEstaba}
+          motivos={estado.maquina?.motivosNoRecogida ?? []}
+          onCerrar={() => setNoEstaba(null)}
+          onMarcada={() => {
+            setNoEstaba(null);
+            relanzar();
+          }}
+        />
+      ) : null}
+
       {estado.fase === 'listo' && acta !== null ? (
         <HojaActaGuarderia
           estadia={acta.estadia}

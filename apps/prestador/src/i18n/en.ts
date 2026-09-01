@@ -3338,6 +3338,8 @@ export const prestadorEn = {
     llegamos: 'We are here',
     subio: 'On board',
     entregado: 'Dropped off',
+    noEstaba: 'Nobody there',
+    noRecogidaDetalle: '{{motivo}} · {{hora}}',
     diaCerrado: 'You dropped off the last one. The day is closed.',
   },
   actaGuarderia: {
@@ -3361,5 +3363,18 @@ export const prestadorEn = {
     fotoNoGuardada: 'The photo could not be saved. Try again.',
     noSePudo: 'The record could not be saved. Try again.',
     actaGuardada: 'The record is saved with its time. Photos are sent when there is a connection.',
+  },
+  noEstaba: {
+    titulo: 'What happened with {{nombre}}?',
+    apoyo: 'It is recorded with its time, so the family knows what happened.',
+    etiquetaGrupo: 'Pick the reason',
+    motivo_nadie_en_domicilio: 'Nobody was there',
+    motivo_animal_no_entregado: 'They did not hand them over',
+    motivo_familia_cancelo_en_puerta: 'The family cancelled at the door',
+    motivo_otro: 'Something else',
+    detalleEtiqueta: 'Tell us what happened',
+    faltaMotivo: 'Pick a reason to record it.',
+    faltaDetalle: 'With «something else», tell us what happened.',
+    confirmar: 'Record it',
   },
 } as const satisfies Espejo<typeof prestadorEs>;
