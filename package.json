@@ -25,7 +25,9 @@
     "_comentario_jornada": "S109-D: la guarderia existia —motor, wrapper, pantalla, cinco estadias vivas— y no aparecia en TRES superficies del prestador por tres mecanismos distintos con la misma forma (un continue por categoria, un mapa cerrado de cuatro claves, y cuatro lectores escritos a mano). Ninguno falla: los tres OMITEN, y una omision no tiene sintoma — el prestador leyo 'hoy no tienes citas' con dos animales a bordo. El gate exige que toda superficie que enumere la jornada la enumere ENTERA, con el universo derivado de los lectores de packages/api (una lista adentro lo volveria el sexto mapa cerrado). NO necesita red y es apto para el hook, pero el hook es territorio de A: se deja aca y se pide alli. Declara adentro las cuatro cosas que NO ve.",
     "verify:jornada-completa": "node scripts/verify-jornada-completa.mjs",
     "_comentario_nul": "S110-A (L-461): un byte NUL vuelve BINARIO al archivo para grep -I, ugrep -I, git grep y el buscador del editor, que lo saltean y devuelven CERO SIN DECIR NADA. Un censo que toca ese archivo sale verde y esta ciego; ya cobro un cero falso medido (una funcion declarada sin llamadores tenia tres). NO prohibe el CARACTER sino el BYTE: los tres casos vivos eran separadores deliberados de join y de plantilla, y borrarlos habria cambiado una clave unica por una concatenacion sin separador, en silencio. Se escriben como escape de dos caracteres y el runtime no cambia. NO necesita red y es un read por archivo, por eso SI va en el hook.",
-    "verify:sin-byte-nul": "node scripts/verify-sin-byte-nul.mjs"
+    "verify:sin-byte-nul": "node scripts/verify-sin-byte-nul.mjs",
+    "_comentario_mensajeria": "S111-D: la ley del canal interno (packages/mensajeria) es dominio PURO, y por eso se ejerce sin levantar app ni sesion. El arnes corre su AUTO-PRUEBA antes de contar un verde: siembra un rojo conocido y si NO lo detecta sale con codigo 2, porque «no pude medir» no es «no encontre nada» (L-459). No toca red ni DB.",
+    "verify:mensajeria": "tsx scripts/verify-mensajeria.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",
