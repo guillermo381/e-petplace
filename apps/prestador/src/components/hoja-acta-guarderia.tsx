@@ -67,6 +67,7 @@ import {
   type EvidenciaFotoEstado,
   Hoja,
   HojaScroll,
+  SelectorOpcion,
   Texto,
   AvatarMascota,
   spacing,
@@ -153,10 +154,41 @@ export function HojaActaGuarderia({
   const { mostrar } = useAviso();
 
   const [carnet, setCarnet] = useState(false);
+  /**
+   * ③ · QUÉ VIAJA CON ÉL — **obligatorio CONTESTAR, no que haya objetos.**
+   *
+   * `null` = todavía no contestó · `'nada'` = respondió que no viaja nada ·
+   * `'algo'` = viaja algo y lo escribe abajo.
+   *
+   * 🔴 **La distinción no es formal: es lo que hace útil el acta en un
+   * reclamo.** Un campo de texto obligatorio obliga a inventar contenido
+   * cuando no viaja nada, y *se llena con basura* —«-», «n/a», «nada»— con lo
+   * cual deja de poder distinguirse «no traía nada» de «nadie preguntó». **Con
+   * la respuesta explícita, el silencio y el «nada» dejan de parecerse.**
+   */
+  const [viajaAlgo, setViajaAlgo] = useState<'nada' | 'algo' | null>(null);
   const [objetos, setObjetos] = useState('');
   const [observaciones, setObservaciones] = useState('');
-  /** ids locales de ESTA acta — devueltos por la cola al encolar. */
-  const [fotos, setFotos] = useState<string[]>([]);
+  /**
+   * Las fotos de ESTA acta: **id y uri, guardados acá**.
+   *
+   * ═══════════════════════════════════════════════════════════════════════
+   * 🔴 **ANTES SE LEÍAN DE `pendientes` Y DESAPARECÍAN AL SUBIR.** Medido con
+   * dos colores sobre el filtro real: `pendientesDe` excluye
+   * `estado === 'publicada'` (`cola-media.ts:220`) y el subidor marca
+   * `'publicada'` cuando la subida sale bien (`:416`).
+   *
+   * ⇒ **La foto se subía CORRECTAMENTE y se borraba de la pantalla** — y el
+   * comportamiento quedaba invertido: *la que fallaba se quedaba a la vista y
+   * la que funcionaba se iba.* El cuidador veía «la foto no queda».
+   *
+   * **El error era de lectura, no de la cola:** `pendientes` es la cola de
+   * TRABAJO —lo que falta hacer— y yo la usé como si fuera *las fotos de esta
+   * acta*, que es otra pregunta. Una foto publicada dejó de ser trabajo
+   * pendiente y siguió siendo, exactamente igual, una foto del acta.
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  const [fotos, setFotos] = useState<{ id: string; uri: string }[]>([]);
   const [levantando, setLevantando] = useState(false);
 
   /* El cableado se memoiza: sin esto, `cablearPublicarMedia` devuelve una
@@ -183,15 +215,22 @@ export function HojaActaGuarderia({
 
   if (estadia === null) return null;
 
-  /* Sólo las fotos de ESTA acta, y por id — jamás por «las de esta mascota
-     hoy», que mezclaría el acta de recogida con la de devolución. */
-  const mias = captura.pendientes.filter((p) => fotos.includes(p.id));
-
-  /** La cola habla cinco estados; la miniatura, tres. Se mapea por los DOS
-   *  extremos y todo lo del medio es «subiendo» — así un estado nuevo de la
-   *  cola no cae en un `else` que lo pinte como éxito. */
-  const estadoMiniatura = (e: string): EvidenciaFotoEstado =>
-    e === 'publicada' ? 'subida' : e === 'error' ? 'error' : 'subiendo';
+  /**
+   * El estado de UNA foto del acta, derivado de la cola.
+   *
+   * 🔴 **Ausente de `pendientes` = PUBLICADA**, y por eso la miniatura no
+   * desaparece: la cola sólo lleva lo que falta hacer, así que salir de ella es
+   * el ÉXITO. *La foto vive en el acta; su estado vive en la cola.*
+   *
+   * La cola habla cinco estados y la miniatura tres: se mapea por los DOS
+   * extremos y todo lo del medio es «subiendo» — así un estado nuevo de la cola
+   * no cae en un `else` que lo pinte como éxito.
+   */
+  const estadoDe = (id: string): EvidenciaFotoEstado => {
+    const enCola = captura.pendientes.find((p) => p.id === id);
+    if (enCola === undefined) return 'subida';
+    return enCola.estado === 'error' ? 'error' : 'subiendo';
+  };
 
   const vozRegla = (r: ReglaEncuadre): string =>
     t(`actaGuarderia.encuadre_${r}` as 'actaGuarderia.encuadre_animal_en_cuadro');
@@ -214,7 +253,7 @@ export function HojaActaGuarderia({
         tipo: 'foto',
         mascotaIds: [estadia.mascotaId],
       });
-      setFotos((f) => [...f, id]);
+      setFotos((f) => [...f, { id, uri: r.uri }]);
     } catch {
       /* La cola guarda en disco antes de subir: si esto falla, no es la red —
          es que no se pudo ni encolar, y el cuidador tiene que saberlo AHORA
@@ -223,16 +262,29 @@ export function HojaActaGuarderia({
     }
   };
 
+  /** Lo que falta para poder levantar el acta. `null` = nada falta. */
+  const queFalta = (): string | null => {
+    if (fotos.length === 0) return t('actaGuarderia.faltanFotos');
+    if (viajaAlgo === null) return t('actaGuarderia.faltaObjetos');
+    if (viajaAlgo === 'algo' && objetos.trim().length === 0) {
+      return t('actaGuarderia.faltaObjetosDetalle');
+    }
+    return null;
+  };
+
   const levantar = async () => {
-    if (levantando || fotos.length === 0) return;
+    if (levantando || queFalta() !== null) return;
     setLevantando(true);
     try {
       const datos: DatosDelActa = {
         direccion,
         carnetVerificado: carnet,
-        objetos: objetos.trim().length > 0 ? objetos.trim() : undefined,
+        /* 🔴 «nada» VIAJA como texto, no como `undefined`. *Mandar `undefined`
+           lo volvería indistinguible de «no se preguntó», que es justo la
+           ambigüedad que la respuesta explícita vino a cerrar.* */
+        objetos: viajaAlgo === 'nada' ? t('actaGuarderia.viajaNada') : objetos.trim(),
         observaciones: observaciones.trim().length > 0 ? observaciones.trim() : undefined,
-        fotosLocales: fotos,
+        fotosLocales: fotos.map((f) => f.id),
       };
       if (alLevantar !== undefined) {
         await alLevantar(datos);
@@ -324,18 +376,21 @@ export function HojaActaGuarderia({
               </View>
 
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                {mias.map((m) => (
+                {fotos.map((f) => (
                   <EvidenciaFoto.Thumbnail
-                    key={m.id}
-                    uri={m.uri}
-                    estado={estadoMiniatura(m.estado)}
-                    onReintentar={() => void captura.reintentarPendiente(m.id)}
+                    key={f.id}
+                    uri={f.uri}
+                    estado={estadoDe(f.id)}
+                    onReintentar={() => void captura.reintentarPendiente(f.id)}
                   />
                 ))}
                 <EvidenciaFoto.Capturar onFoto={() => void sacarFoto()} deshabilitado={levantando} />
               </View>
             </View>
           }
+          /* ② · La palabra «opcional» va EN EL RÓTULO, arriba del campo, no en
+             un pie: quien escanea la pantalla decide si escribir ANTES de
+             empezar a leer, no después. */
           rotuloObservaciones={t('actaGuarderia.rotuloObservaciones')}
           observaciones={observaciones}
           onCambiarObservaciones={setObservaciones}
@@ -346,32 +401,54 @@ export function HojaActaGuarderia({
           vozConformidad={t('actaGuarderia.conformidadPendiente')}
         />
 
-        {/* QUÉ VIAJA CON ÉL — fuera de la pieza; ver el encabezado. */}
-        <Campo
-          label={t(
-            direccion === 'recogida'
-              ? 'actaGuarderia.objetosRecogida'
-              : 'actaGuarderia.objetosDevolucion',
-          )}
-          value={objetos}
-          onChangeText={setObjetos}
-          multilinea={2}
-        />
+        {/* ③④ · QUÉ VIAJA CON ÉL — fuera de la pieza; ver el encabezado.
+            **Obligatorio contestar**, y «nada» es una respuesta válida. */}
+        <View style={{ gap: spacing[2] }}>
+          <SelectorOpcion
+            acento="oficio"
+            disposicion="fila"
+            etiqueta={t(
+              direccion === 'recogida'
+                ? 'actaGuarderia.objetosRecogida'
+                : 'actaGuarderia.objetosDevolucion',
+            )}
+            opciones={[
+              { codigo: 'algo', etiqueta: t('actaGuarderia.viajaAlgo') },
+              { codigo: 'nada', etiqueta: t('actaGuarderia.viajaNada') },
+            ]}
+            seleccionada={viajaAlgo ?? undefined}
+            onSelect={(c) => {
+              setViajaAlgo(c as 'nada' | 'algo');
+              /* Al pasar a «nada» se limpia lo escrito: dejarlo guardaría un
+                 detalle de objetos junto a la afirmación de que no viaja
+                 ninguno — dos datos que se contradicen en el mismo acta. */
+              if (c === 'nada') setObjetos('');
+            }}
+          />
+          {viajaAlgo === 'algo' ? (
+            <Campo
+              label={t('actaGuarderia.objetosDetalle')}
+              value={objetos}
+              onChangeText={setObjetos}
+              multilinea={2}
+            />
+          ) : null}
+        </View>
       </HojaScroll>
 
       {/* EL PIE, FUERA DEL SCROLL — un botón apagado tiene que decir QUÉ FALTA
           a la vista, no debajo del pliegue (medido en aparato, S99-C). */}
       <View style={{ gap: spacing[2], paddingTop: spacing[3] }}>
-        {fotos.length === 0 ? (
+        {queFalta() !== null ? (
           <Texto variante="apoyo" color="tertiary">
-            {t('actaGuarderia.faltanFotos')}
+            {queFalta()}
           </Texto>
         ) : null}
         <Boton
           variante="primario"
           etiqueta={etiquetaActo}
           onPress={() => void levantar()}
-          deshabilitado={fotos.length === 0}
+          deshabilitado={queFalta() !== null}
           cargando={levantando}
         />
       </View>
