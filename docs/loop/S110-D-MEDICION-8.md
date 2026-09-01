@@ -160,10 +160,38 @@ CONTROL- funcionQueNoExisteControlNegativo -> 0
 
 ⇒ **cero escritores, cero lectores, en motor y en las dos apps.**
 
-🔴 **PERO `refugios` tiene 322 `idx_scan` y 218 `seq_scan`.** *Algo la lee, y no
-es el monorepo ni una función.* **Son las webs del legado que comparten esta
-base** (portal admin, `e-petplace-v2`; S95-F ya midió que el portal lee tablas
-que el monorepo no conoce). **No lo medí: no tengo esos repos acá.**
+🔴 **PERO LAS CINCO TIENEN RECORRIDOS, y son más de los que reporté primero.**
+*(Ensanchado por S110-A y cotejado contra mi propia lectura de 40 minutos antes:
+**los cinco tríos coinciden dígito por dígito** — dos lecturas independientes
+del mismo objeto.)*
+```
+tabla                    filas  idx_scan  seq_scan
+refugios                     0       322       218
+solicitudes_adopcion         0         3       996   <- el más recorrido
+donaciones                   0         1       292
+adopcion_seguimiento         0         5       226
+mascotas_adopcion            0        11       135
+```
+
+⚠️ **Y ACÁ CORRIJO UNA FRASE MÍA QUE ERA INFERENCIA VESTIDA DE MEDICIÓN.**
+Escribí *«**son** las webs del legado que comparten esta base»* y dos líneas
+después *«no lo medí»*. **Las dos no pueden ser ciertas, y la que vale es la
+segunda.** Es exactamente el defecto que me corregí con `virtual_refugio` —*sé
+dónde no está; por dónde entró, no*— **cometido de nuevo, en este mismo
+documento, sobre otra pieza.** Lo señaló A al ensanchar el hallazgo.
+
+**Lo que el número SOSTIENE:** algo recorre las cinco tablas. **Lo que NO
+sostiene:** que sea una app consultándolas. `pg_stat_user_tables` es acumulativo
+y **no dice QUIÉN**; un `seq_scan` sobre una tabla vacía es barato y puede venir
+del panel, de una introspección de esquema o de un backup. **La hipótesis de las
+webs del legado sigue siendo la más plausible —S95-F midió que el portal admin
+lee tablas que el monorepo no conoce— pero es HIPÓTESIS.**
+
+⇒ **`D-991` 🔴**, con su exigible de conducción: **antes de un `DROP` sobre
+cualquiera de las cinco, alguien con los repos del legado corre el mismo censo
+ahí.** 🔑 **Y las dos decisiones van separadas a propósito: NO CONSTRUIR sobre
+ellas y NO BORRARLAS no son la misma.** La primera ya está decidida por el dato
+de las FK de este documento; **la segunda no, y este documento no la decide.**
 
 ---
 
