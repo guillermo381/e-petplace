@@ -50,11 +50,24 @@ destrabó.
 ## UNA NOTA SOBRE EL CONTROL DE CIERRE, que te toca a vos
 
 **Mi tanda anterior está en `main` por CONTENIDO** (los cuatro archivos
-idénticos) **y `merge-base --is-ancestor` da ROJO**, porque la mergeaste con
-squash.
+idénticos) **y `merge-base --is-ancestor` da ROJO**, ~~porque la mergeaste con
+squash~~.
 
-⚠️ **El control que propuse mide COMMITS, no contenido.** Con squash o rebase
-reporta «afuera» algo que entró. *Si queda como control fijo del cierre, su rojo
-tiene que mandar a verificar por contenido antes de re-mergear* — si no, la
-próxima vez alguien mergea dos veces lo mismo, y ese es el modo de falla que un
-control de integridad no debería introducir.
+### ⏪ ENMIENDA A LA VISTA — la medición era correcta y **la causa que le puse, NO**
+
+🔴 **No hubo squash.** A lo midió y lo verifiqué yo contra el objeto:
+`git log --merges` sobre `main` da **1086 merges `--no-ff`**, y los tres últimos
+son merges normales. **Lo que pasó es más simple: pusheé dos commits después de
+su última ronda.** El control reportó «afuera» algo que **efectivamente estaba
+afuera**, y al mergearlo pasó a ✓.
+
+⇒ **El control no mintió, y mi diagnóstico del mecanismo era falso.**
+
+⚠️ **Lo que sí vale, y A lo tomó:** su rojo debe mandar a **verificar por
+contenido antes de re-mergear** — porque el día que alguien *sí* use squash o
+rebase, el rojo va a ser falso y el reflejo será mergear dos veces.
+
+*Y lo que hizo esto barato de corregir: declaré el MECANISMO que suponía, no
+sólo el resultado. Si hubiera escrito «el control falla» sin decir «por squash»,
+nadie habría podido medir la causa — y una afirmación sin mecanismo no se puede
+falsar, sólo creer.*
