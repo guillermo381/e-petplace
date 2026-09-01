@@ -1554,9 +1554,17 @@ export const clienteEs = {
   // S73 C3 — la puerta de la adopción (refugios, peldaño 0 honesto)
   adoptar: {
     titulo: 'Adopción',
-    proximamenteTitulo: 'Los refugios llegan pronto',
-    proximamenteDetalle:
-      'Estamos sumando refugios a e-PetPlace. Cuando estén acá, vas a conocer a sus mascotas en adopción y podrás darles familia.',
+    filtroEspecie: 'Qué estás buscando',
+    todas: 'Todas',
+    especie_perro: 'Perros',
+    especie_gato: 'Gatos',
+    sexo_macho: 'Macho',
+    sexo_hembra: 'Hembra',
+    publicadoPor: 'De {{refugio}}',
+    vacioTitulo: 'Todavía no hay animales publicados',
+    vacioDetalle: 'Cuando un refugio publique a sus animales, los vas a conocer acá.',
+    errorTitulo: 'No pudimos cargar la lista',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
   },
   // S55-A B3 — Cuenta v1 (ciclo §3.5 adelantado). Voz completa
   // APROBADA por founder (lote S55, es y en).
