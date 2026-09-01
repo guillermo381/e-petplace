@@ -25229,6 +25229,19 @@ hacer, porque el motivo de un apagón pasado no se reconstruye.*
 
 **NO se corrige en S110** — se declara con su dueño y su disparo.
 
+### ⊕ ENMIENDA S111 — **una TERCERA medición independiente, y un requisito nuevo**
+**S110-E lo midió por su cuenta y llegó a los mismos cuatro escritores.** Con D
+y A son **tres lecturas independientes del mismo hecho** — *la forma que esta
+casa usa para resolver sin discutir.*
+
+**Y trae lo que a la ficha le faltaba: el REQUISITO.** `LETRA_ADOPCION` §6 exige
+**TRES motivos distintos** —adoptado · fallece · el refugio se va—. ⇒ esto deja
+de ser higiene y pasa a ser **precondición del padrinazgo**: sin motivo, las tres
+causas producen la misma fila, y **la que hay que tratar con voz de duelo queda
+indistinguible de la que se celebra**.
+🔴 **Regla que se suma al disparo:** *todo escritor NUEVO del estado escribe
+SIEMPRE su motivo* — va junto con `D-994`.
+
 ---
 
 ## 🔴 `D-989` — LA POLICY DE UPDATE DE `mascotas` NO VALIDA EL DESTINO
@@ -25301,6 +25314,26 @@ difunde a todas las pistas por el founder EN ESE MOMENTO**. *Una pista no puede
 saber que su árbol quedó viejo mirando su propio árbol* — es información que
 sólo existe afuera.
 
+### ⊕ ENMIENDA S111 — **el caso que junta LAS DOS CAUSAS sobre el MISMO hecho**
+S110-E y S110-D declararon, cada uno por su lado, que `LETRA_ADOPCION.md` **no
+existía**. **Existía**: `pista/s110-a`, commit `7d76380f`, 00:41:44.
+
+- **E falló por INSTRUMENTO:** un `find` truncado con `| head -20`.
+- **D falló por RELOJ:** midió a las **00:23:59**, dieciocho minutos antes de que
+  el archivo existiera. **Su cero era VERDADERO cuando lo tomó.**
+
+> ### 🔴 Y el modo de falla que importa: LOS DOS CEROS COINCIDIERON, y dos ceros que coinciden se leen como CONFIRMACIÓN.
+
+*La redundancia —dos mediciones independientes— es la herramienta que esta casa
+usa para no equivocarse, y acá **produjo más confianza en una conclusión falsa**.
+Coincidir no es verificar cuando las dos lecturas pueden fallar por causas
+distintas y dar el mismo número.*
+
+**La cura de conducción, de una línea y de A:** cuando una letra o un canon se
+registra **en una rama de pista**, **su sha va al canal en ese momento**, no sólo
+al repo. *Una pista no puede saber que su árbol quedó viejo mirando su propio
+árbol* — es información que sólo existe afuera.
+
 **Y la forma de la cura, que vale para todo gate:** un gate tiene **TRES**
 desenlaces, no dos — **encontró** (frena) · **no encontró** (pasa) · **no pudo
 buscar** (lo dice, y decide según el caso: si lo que falló es su auto-prueba,
@@ -25310,7 +25343,35 @@ encontré nada» de «no pude buscar» tiene el defecto del `grep` que lo motiv�
 
 ---
 
-## 🟡 `D-990` — LA FAMILIA NO SE ENTERA DE QUE NO SE PUDO RECOGER A SU ANIMAL
+## 🟢 `D-990` — LA FAMILIA NO SE ENTERA DE QUE NO SE PUDO RECOGER A SU ANIMAL
+### ⚠️ ENMENDADA A LA VISTA (S111-A) — **la escribí yo y decía más de lo que pasaba**
+
+> **Lo que esta ficha afirmaba y era FALSO:** *«el tercero no lo construyó
+> nadie»* y *«el motor no proyecta el dato»*. **Las dos las midió C contra el
+> objeto y las dos caen:**
+> - `obtener_mis_estadias_guarderia` **ya proyectaba `estado_estadia`** desde
+>   `20260831140000`, y `EstadiaDeMiMascota.estadoEstadia` lo tipa con los siete
+>   valores ⇒ **`no_recogida` llegaba a la familia el día que lo escribí.**
+>   *El ensanche que pedí habría sido un campo nuevo al lado de uno que ya traía
+>   el dato — la otra mitad de `D-980`, justo la que la ficha decía evitar.*
+> - **Media pieza existía desde S107-C**: `guarderia/[estadiaId].tsx` ya
+>   ramificaba por `no_recogida` con su voz.
+>
+> **El hueco REAL era de ALCANCE, y es más fino que el que yo describí:** la voz
+> vivía **sólo dentro del durante**, y la familia **no tenía razón para entrar**
+> si no sabía que había pasado algo — *una voz correcta en una pantalla a la que
+> nadie va es la mitad que no se ve*. Más la segunda mitad del recorte firmado
+> («el día se cobró y no se repone»), con **0 ocurrencias** medidas.
+>
+> **CERRADA por S111-C** (`40328405`), que la construyó en el hub.
+>
+> 🔴 **La lección de esta enmienda, y es sobre cómo escribo yo las fichas:**
+> declaré un hueco **desde mi lado del contrato** —«mi motor escribe y nadie
+> lee»— **sin medir la superficie ajena**. La ficha era plausible, estaba bien
+> argumentada, y su premisa era falsa. *Un hueco entre dos territorios se
+> declara midiendo LOS DOS, no deduciendo el otro desde el propio.*
+
+**Texto original, conservado como historia:**
 
 **Elevado por S110-C en vez de dejarlo pasar**, y por eso queda con número.
 
@@ -25432,3 +25493,123 @@ más fácil de no ver.
 **Corolario:** la mecánica es la que cierra el hueco; la de forma es la que evita
 que se abra. **Depender sólo de la segunda es depender de que todos escriban
 bien todo el tiempo.**
+
+
+---
+
+## 🟠 `D-992` — `chk_destino_excluyente` VUELVE INEXPRESABLE LA DONACIÓN CON DESTINO
+
+**Medida por S110-E** (`docs/loop/S110-E-MEDICIONES-3-A-6.md`).
+
+`CHECK ((NOT (es_donacion AND (mascota_id IS NOT NULL))))` en
+`pedido_item_destinos`, **más su guard gemelo** `destino_contradictorio` en el
+body de `crear_pedido_despensa`.
+
+**§7 de `LETRA_ADOPCION` define el destino con TRES valores, y el primero es
+*«una mascota en adopción»***. ⇒ hoy el motor declara imposible justo lo que la
+letra pide.
+
+🔴 **No es agregar una columna: es enmendar un constraint MÁS su guard** — *una
+regla duplicada por copia se cura dos veces o no se cura* (`L-462` y su familia).
+
+⚠️ **NO aplica al padrinazgo** (§6: la canasta es del refugio; el vínculo con la
+mascota existe para las fotos, no para el destino). *Confundirlos haría exactamente
+el trasplante de criterio de `D-976`.*
+
+*Es el artefacto concreto de la advertencia que §7 ya había escrito en prosa —
+«quien reuse la donación de la despensa hereda "sin destino elegible"».*
+
+**Disparo:** la primera línea de la donación con destino.
+
+---
+
+## 🔴 `D-993` — EL REFUGIO NO EXISTE COMO ACTOR QUE PUEDA MOVER UN PEDIDO
+
+**Medida por S110-E.** `cat_transiciones_pedido.actor` =
+`admin | cliente | repartidor | sistema | vendedor`. **El refugio no está.** Y
+`pedidos` no tiene ninguna columna de coordinación, refugio o tercero.
+
+**§8 dice *«la coordina el refugio»*, y ese actor no está declarado en ningún
+lado.**
+
+> ### Es una variante PREVIA del callejón de S105: allá el catálogo declaraba un actor que la puerta no aceptaba; acá **ni siquiera está declarado**.
+
+🔴 **Éste es el costo real de §8 — no el campo del receptor, que ya existe y
+funciona.** *Presupuestar §8 por el campo visible y no por el actor ausente es
+cómo un frente se estima en una línea y cuesta una tanda.*
+
+**Disparo:** la primera construcción de §8.
+
+---
+
+## 🔴 `D-994` — `suscripciones_servicio_tipo_valido` ESTÁ CERRADO A DOS VALORES
+
+**Medida por S110-E.**
+`CHECK (tipo_servicio = ANY (ARRAY['guarderia_mensual','paseo_mensual']))`.
+**Un padrinazgo recurrente no entra sin enmendarlo.**
+
+**Y es costo de v1, medido contra la letra, no supuesto:** §1 define el
+padrinazgo como *«Compra RECURRENTE de productos»* y **§11 excluye el padrinazgo
+EN DINERO, no la recurrencia**. *La exclusión que existe no es la que taparía
+este costo.*
+
+⚠️ **Y lo que lo vuelve una ficha y no una nota:** `recurrentes.tsx` dice que el
+padrinazgo aterriza *«agregando un lector y un caso»*. **Con esto son TRES
+cosas** — y la pantalla no podía preverlo cuando se escribió.
+
+**Disparo:** la primera línea del padrinazgo recurrente.
+**Va junto con `D-988`:** todo escritor nuevo del estado escribe SIEMPRE su motivo.
+
+---
+
+## 🟡 `D-995` — `SemaforoSanitario` NO PUEDE SERVIR AL ADOPTABLE, Y LO FRENA EL TIPO
+
+**Medida y construida alrededor por S111-B.**
+
+`SemaforoSanitario` (S107-B, guardería) declara `RequisitoSanitario` como unión
+discriminada donde la variante `falta` lleva `onResolver` y `etiquetaResolver`
+**OBLIGATORIOS**. Su encabezado dice por qué: *«un pendiente que el dueño no
+puede resolver es peor que no mostrarlo»*.
+
+**Por qué no transfiere:** en guardería **el lector ES quien resuelve** —la
+familia carga la vacuna y el animal entra—. En adopción el lector es el
+**adoptante**, que no puede resolver nada: la vacuna pendiente es del refugio.
+Reusarla obligaría a inventar un `onResolver` que no lleva a ningún lado — *el
+pendiente-sin-camino que la pieza existe para prohibir*.
+
+Es el caso limpio de **`D-976`** —*trasplantar un criterio correcto a otra
+pregunta es más peligroso que inventarlo, porque viene con la autoridad de haber
+funcionado en otro lado*—. 🟢 **Y la mitad buena: acá el trasplante no lo frena
+la disciplina, lo frena EL TIPO.** Quien intente reusarla **no compila**.
+
+**Lo que B declara NO haber medido, y por eso no se toca:** si la pieza tiene
+otros consumidores fuera de guardería. **La de S107 no se toca**; adopción
+necesita una hermana.
+
+---
+
+## 🔴 `L-464` — UN COMPARADOR CONTRA UN LADO NULO NO MIDE: AFIRMA
+
+**Medida por S110-E, contra sí misma.**
+
+Al comparar receptor contra comprador, el join devolvía `NULL`, y
+**`IS DISTINCT FROM NULL` es `true` siempre**. El instrumento dio
+`es_tercero = true` en **las 16 filas**.
+
+> ### No dio error. No dio cero. **Dio la respuesta que quien lo escribió esperaba** — y habría sostenido un veredicto equivocado *contra la letra*.
+
+*Es la peor forma del verde flojo: no hay nada que se vea raro, porque el
+resultado confirma la hipótesis.* Un cero sospechoso invita a revisar; un `true`
+esperado, no.
+
+**EL CONTROL, y es barato y general — vale para todo censo, no sólo para joins:**
+
+> **Una columna que sale CONSTANTE en el 100 % de las filas es la señal.**
+
+Acá el comprador salía `(sin nombre)` en las dieciséis: *el dato que delataba el
+join roto estaba en la misma tabla de resultados, en la columna de al lado.*
+
+**Corolario operativo:** todo censo que compara dos lados imprime **ambos**, y
+quien lo lee mira primero si alguno es constante. `L-461` dijo que un buscador
+puede devolver cero en silencio; ésta dice que **un comparador puede devolver
+`true` en silencio**, y el segundo es más difícil de ver.

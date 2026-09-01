@@ -96,19 +96,28 @@ producción**, y el síntoma aparece lejos del acto.
 
 ---
 
-## §3 · EL CENSO DE E — no es una decisión: es un TEXTO QUE NO LLEGÓ
+## §3 · ~~EL CENSO DE E~~ — ☠️ **RESUELTO, y no por donde se esperaba**
 
-**① QUÉ FALTA.** La mesa ordenó registrar el lote de E verbatim y atribuido en
-`docs/loop/S110-E-LOTE2.md`. **El texto se anunció dos veces y nunca llegó.**
+> **Esta entrada nació y murió en la misma jornada.** Se conserva tachada, no
+> borrada, porque **la forma en que se resolvió corrige el supuesto con el que
+> se escribió.**
 
-**② NO HAY OPCIONES QUE VOTAR.** O llega el literal, o no se registra.
+**Lo que decía:** que el lote de E se había anunciado dos veces y nunca llegado,
+y que **no se reconstruye de un resumen**.
 
-**③ EL VOTO DE A: no se reconstruye de un resumen.** Ya se cobró dos veces en
-esta casa: dos pistas midieron citando literales que viajaban en sus mandatos y
-no en el repo, y una calibró mal un alcance por leer una letra archivada.
+**Lo que pasó:** el texto no llegó del founder — **lo depositó E misma**, en
+`docs/loop/S110-E-MEDICIONES-3-A-6.md` (366 líneas, commit `47bbb6dd`),
+**re-verificando sus cuatro veredictos contra `9443da56` antes de depositarlos**
+porque en el medio se habían movido tres migraciones y `packages/api`.
 
-**④ CONSTRUIDO ALREDEDOR.** Nada depende de ese texto para avanzar; lo que se
-pierde es **la atribución y el registro**, no una construcción.
+🔴 **Y el supuesto que corrige es mío:** yo lo estacioné como *«un texto que
+tiene que traer el founder»*. **La autora del censo estaba viva y podía
+depositarlo ella.** *Estacionar algo esperando a una persona cuando otra ya lo
+tiene es dejar quieto un trabajo que no estaba bloqueado.*
+
+**De ese depósito salieron cuatro fichas y una lección** (`D-992` · `D-993` ·
+`D-994` · `L-464`), más una tercera medición independiente de `D-988`. **Nada de
+eso existiría si el ítem se hubiera quedado esperando.**
 
 ---
 
@@ -123,7 +132,130 @@ después hay que desarmar.
 
 ## §5 · ENTRADAS DE LAS DEMÁS PISTAS
 
-*A transcribe acá lo que llega por buzón, con su atribución. Vacío no significa
-que no haya: significa que todavía no llegó nada.*
+*A transcribe acá lo que llega por buzón, con su atribución.*
 
-_(sin entradas)_
+---
+
+### §5.1 · ¿QUÉ ACTIVA EL CANAL DE CONVERSACIÓN CUANDO NO HAY SERVICIO? — *de E*
+
+**① QUÉ FALTA.** §5 pide una conversación entre publicador y solicitante, con
+estados. Pero **§6.4.7 —decisión cerrada en S20— dice literal *«Sin servicio
+activo, no hay canal»***, y refugio y adoptante **no comparten cita**. Medido por
+E: no existe mensajería entre dos cuentas (única tabla `ticket_mensajes`,
+usuario↔admin, 0 filas, 0 wrappers de 110, 0 rutas de 174).
+
+> ### ⇒ La regla vigente, aplicada al pie, deja la conversación de §5 sin poder existir. **No es que falte construirla: está excluida por diseño.**
+
+**② LAS OPCIONES.**
+- **(a)** la solicitud de adopción es un **activador de pleno derecho**, igual
+  que una cita: el canal se abre al postular y se cierra con el desenlace.
+- **(b)** **canal propio de adopción**, superficie separada, con su propia regla
+  de vida.
+
+**③ EL VOTO DE E: (a) — y su argumento es textual.** §6.4.7 **no dice «cita»**:
+dice *«cita / servicio / **contrato** activo»*, y una solicitud de adopción es
+exactamente eso: un vínculo acotado entre dos cuentas, con principio y con fin.
+**(a) ensancha el activador sin tocar el principio**; (b) crea un segundo canal
+cuya divergencia hay que sostener para siempre.
+**A coincide con (a)**, y agrega una razón de conducción: *un segundo canal
+duplica las reglas de privacidad, y una regla duplicada por copia se cura dos
+veces o no se cura.*
+
+**④ CONSTRUIDO ALREDEDOR — fail-closed.** D construyó **el módulo de mensajería
+con la ley del hilo en TS** (`packages/mensajeria`, `verify:mensajeria` 26/26) y
+publicó su contrato de DB. **Nada está cableado a una superficie**, y el motor no
+existe todavía. *Si la mesa elige (b), lo que se mueve es dónde vive el canal, no
+la ley del hilo.*
+
+**⑤ SI SE ELIGE MAL.** Con (a) mal elegida: se ensancha un activador que la
+privacidad de S20 acotó a propósito. Con (b) mal elegida: dos canales que
+divergen, y el día que una regla de privacidad cambie, se cura uno solo.
+
+---
+
+### §5.2 · ¿EL ADOPTANTE VE LO QUE LE FALTA DE SALUD AL ANIMAL? — *de B*
+
+**① QUÉ FALTA.** §3 dice *«salud con honestidad de semáforo»* y **no define sus
+estados ni su audiencia**. ¿El adoptante ve los pendientes sanitarios —vacuna que
+falta, castración pendiente— o sólo lo que ya está hecho?
+
+**No es una pregunta de estilo:** en guardería la respuesta está firmada y el
+pendiente es **accionable** para quien lo lee. Acá **el lector no puede resolver
+nada** —la vacuna la pone el refugio—, así que mostrar el faltante o es
+**información para decidir** o es **una marca en contra del animal**. *De eso
+depende si la pieza existe.*
+
+**② LAS OPCIONES.** **(a)** se muestra, como información **sin acción** ·
+**(b)** sólo se muestra lo que ya está hecho.
+
+**③ EL VOTO DE A, sobre el análisis de B: (a).** §3 pide honestidad y §10
+prohíbe esconder — *«necesidades especiales» existe sólo para incluir*. Y el
+argumento decisivo es el de B: **un adoptante que se entera después de la
+castración pendiente tiene una sorpresa, no una decisión.** El riesgo que (b)
+evita —que la lista se lea como defecto— es un problema de **cómo se dice**, y
+ése sí lo puede resolver el diseño; el de (a) mal elegida no.
+
+**④ CONSTRUIDO ALREDEDOR.** B **no construyó la pieza**, y midió por qué no
+podía reusar la de guardería: `SemaforoSanitario` obliga por TIPO a un
+`onResolver` que en adopción no lleva a ningún lado ⇒ **el trasplante no
+compila** (`D-995`). *La puerta no existe, en vez de existir abierta.*
+
+**⑤ SI SE ELIGE MAL.** Con (b): la sorpresa llega después de la adopción, que es
+donde §3 midió que un dato mal contado **le cuesta el hogar** al animal.
+
+---
+
+### §5.3 · EL AVISO AL PADRINO CUANDO EL AHIJADO FALLECE — *de D*
+
+**① QUÉ FALTA.** §6 firma que si el ahijado *«es adoptado, fallece o el refugio
+se va»* el padrino recibe aviso — **y da el texto sólo para «adoptado»**. Para
+*fallece* **choca con una firma anterior**: S88 firmó que la liberación por
+memorial **CALLA**, y está en el body de `_trg_mascotas_memorial_planes`: *«el
+memorial calla, también acá… lo que muere es el AVISO»*.
+
+**② LAS OPCIONES.** **(a)** el padrino recibe aviso también en fallecimiento ·
+**(b)** no lo recibe; sólo ve que su recurrencia se detuvo, sin causa.
+
+**③ EL VOTO DE D: (a)**, con voz de duelo y **sin** invitación a apadrinar otro
+en el mismo mensaje. Su razón, que es la que decide: **el silencio de S88 protege
+a LA FAMILIA; el padrino es un TERCERO que está pagando**, y *un cobro que se
+detiene sin explicación es peor que la noticia.*
+**A coincide**, y agrega que (b) produce un caso de soporte sin respuesta —
+exactamente lo que `D-988` existe para evitar.
+
+**④ CONSTRUIDO ALREDEDOR — fail-closed y verificado.** Las tres causas existen en
+`padrinazgo.ts`; **`fallecido` nace con `avisa: false` y su `motivoSinAviso`
+escrito**, y `verify:mensajeria` lo ejerce (*«🅿️ fallecido NO avisa (estacionado,
+fail-closed)»*). **D no pidió el tipo de notificación correspondiente**, así que
+la puerta no existe. 🔴 **El cobro se detiene igual: eso no está en duda y no
+depende del aviso.**
+
+**⑤ SI SE ELIGE MAL.** Con (b): alguien paga por un animal que murió y su cobro
+se apaga sin decir nada. Con (a) mal dicha: se automatiza un duelo, que es lo que
+la letra prohíbe — por eso el voto lleva «voz de duelo y sin invitación».
+
+---
+
+### §5.4 · ¿EL PUBLICADOR CONSERVA LA VISTA DEL HILO TRAS `declinada`? — *de D*
+
+**①** §5 no lo dice. **②** (a) sí, en lectura, por trazabilidad de disputa ·
+(b) no. **③ Voto de D: (a). A coincide** — *un hilo que desaparece al declinar
+deja sin material justo el caso en que alguien reclama.*
+**④ CONSTRUIDO ALREDEDOR:** el módulo lo expone como **parámetro explícito, sin
+default**, así que **nadie hereda una respuesta que nadie dio.**
+**⑤** Con (b): la disputa se resuelve sin registro.
+
+---
+
+### §5.5 · ADJUNTOS EN EL HILO — *de D*
+
+**①** §5 no los nombra; el vertical sí promete fotos del animal (§5, §6).
+**②** libre · sólo imagen · ninguno.
+**③ Voto de D: imagen, y SÓLO del lado del publicador.** *Del publicador porque
+las fotos que el vertical promete son **del animal**, y quien lo tiene es quien
+lo tiene; sólo imagen porque un adjunto libre abre subida de documentos entre dos
+personas que no se conocen, y eso arrastra retención y contenido que ninguna letra
+decidió* (`D-405` sigue abierta). **A coincide.**
+**④ CONSTRUIDO ALREDEDOR:** **D no pidió bucket en el contrato de DB.** *Sin
+bucket la puerta no existe, en vez de existir abierta.*
+**⑤** Con «libre»: se abre un canal de archivos sin política de retención.
