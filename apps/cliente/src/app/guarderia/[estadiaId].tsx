@@ -112,11 +112,18 @@ const horaCorta = (iso: string) =>
  * punto llegaba y nadie lo pedía.
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * ⚠️ **ESTO ES UN ESPEJO DECLARADO DE LA REGLA DEL MOTOR, y se retira.** El
- * lector que la contesta entero —`obtener_tramo_vivo_de_mi_mascota`, que además
- * verifica que el tramo esté `abierto`— **no tiene wrapper**; está pedido a A.
- * *Mientras tanto esta función repite su criterio, y un espejo puede divergir:
- * por eso lleva su fecha de retiro escrita y no se le agrega nada.*
+ * ⚠️ **ESTO ES UN ESPEJO DECLARADO DE LA REGLA DEL MOTOR, y SU CONDICIÓN DE
+ * RETIRO YA SE CUMPLIÓ** (medido 1-sep 17:27): `obtenerTramoVivoDeMiMascota`
+ * **ya existe** (`guarderia-reserva.ts:938`) y contesta la pregunta entera —
+ * incluido lo que este espejo **no puede saber**: si el tramo sigue abierto.
+ *
+ * 🔴 **No se retira acá porque S111 cerró**, y cambiar el lector del durante en
+ * el cierre es tocar el camino que el founder está por caminar. **Va con ficha
+ * y disparo**: se retira en la primera tanda que toque esta pantalla, y es un
+ * reemplazo de una llamada, no un rediseño.
+ *
+ * *Se declara con su fecha porque un espejo sin fecha de retiro se vuelve
+ * permanente por accidente — y éste ya tiene con qué morir.*
  *
  * **Lo que el espejo NO puede saber:** si el tramo sigue abierto. Con uno
  * cerrado, `obtenerPuntoVivo` devuelve `null` —el punto se borra al cerrar— y
