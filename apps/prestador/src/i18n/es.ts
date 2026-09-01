@@ -4259,6 +4259,6 @@ export const prestadorEs = {
     sinPermisoCamara: 'Necesitamos permiso para usar la cámara.',
     fotoNoGuardada: 'No se pudo guardar la foto. Prueba de nuevo.',
     noSePudo: 'No se pudo guardar el acta. Prueba de nuevo.',
-    sinConexion: 'Sin conexión: el acta queda guardada con su hora y viaja sola.',
+    actaGuardada: 'El acta quedó guardada con su hora. Las fotos se envían cuando haya conexión.',
   },
 } as const;

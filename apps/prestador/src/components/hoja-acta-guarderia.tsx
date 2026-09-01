@@ -242,6 +242,18 @@ export function HojaActaGuarderia({
           fotosLocales: datos.fotosLocales,
         });
       }
+      /* 🔴 EL ACTO CONFIRMA, y dice la verdad ENTERA de lo que pasó.
+         Sin esto, el cuidador toca, la hoja baja y **no cambia nada visible**:
+         el acta no mueve el estado del día, así que la pantalla de atrás se ve
+         idéntica. *Un acto sin acuse se lee como un acto que no ocurrió, y el
+         segundo toque lo levanta de nuevo.*
+
+         ⚠️ Y dice «se envían cuando haya conexión» SIEMPRE, no sólo sin señal:
+         la publicación es asíncrona por diseño —la cola devuelve al instante—
+         así que en el momento del toque **todavía no viajó ninguna**, haya red
+         o no. *Detectar la red para elegir el mensaje sería prometer una
+         medición que no hago.* */
+      mostrar({ variante: 'exito', texto: t('actaGuarderia.actaGuardada') });
       onLevantada();
     } catch {
       /* No se cierra la hoja: lo escrito sigue ahí y se puede reintentar. */

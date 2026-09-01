@@ -3354,6 +3354,6 @@ export const prestadorEn = {
     sinPermisoCamara: 'We need permission to use the camera.',
     fotoNoGuardada: 'The photo could not be saved. Try again.',
     noSePudo: 'The record could not be saved. Try again.',
-    sinConexion: 'No connection: the record is saved with its time and travels on its own.',
+    actaGuardada: 'The record is saved with its time. Photos are sent when there is a connection.',
   },
 } as const satisfies Espejo<typeof prestadorEs>;
