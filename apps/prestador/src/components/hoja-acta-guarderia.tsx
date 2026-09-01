@@ -76,7 +76,7 @@ import {
 import { caraDeMascota, type EstadiaDelDia } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { cablearLevantarActa, cablearPublicarMedia } from '@/lib/guarderia-cableado';
+import { cablearActoUnico, cablearPublicarMedia } from '@/lib/guarderia-cableado';
 import {
   reglasSegunLugar,
   useCapturaMedia,
@@ -162,7 +162,12 @@ export function HojaActaGuarderia({
   /* El cableado se memoiza: sin esto, `cablearPublicarMedia` devuelve una
      función nueva en cada render y el hook rehace su motor cada vez. */
   const publicar = useMemo(() => cablearPublicarMedia(prestadorId), [prestadorId]);
-  const levantarActa = useMemo(() => cablearLevantarActa(), []);
+  /* 🔴 EL ACTO ÚNICO POR LA COLA, y no `cablearLevantarActa`: la cola
+     reproduce el ACTO ENTERO —acta + estado— con la hora de la puerta, así que
+     el acta se levanta sin señal y viaja sola. Cablear `marcarABordo` directo
+     desde acá levantaba el acta **sólo con red**, que es el camino que el
+     recorrido pide explícitamente que exista. */
+  const levantarActa = useMemo(() => cablearActoUnico(), []);
 
   const captura = useCapturaMedia({
     fecha,
