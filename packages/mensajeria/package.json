@@ -1,0 +1,14 @@
+{
+  "name": "@epetplace/mensajeria",
+  "version": "0.0.1",
+  "private": true,
+  "description": "La ley del canal interno: quien puede hablar con quien, cuando se abre, que ve cada lado. Dominio PURO — sin Supabase, sin UI.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.0"
+  }
+}
