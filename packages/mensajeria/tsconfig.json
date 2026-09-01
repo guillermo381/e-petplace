@@ -1,4 +1,6 @@
 {
+  "_comentario_types": "S111-A: `types: []` corta la auto-inclusion de los @types AMBIENTE del raiz (dom-mediacapture-record, emscripten), que metian 10 errores TS2304/TS2694 sin que una sola linea de src participara. Es la cura QUIRURGICA: `skipLibCheck: true` -- lo que usan ui e i18n -- tambien los apaga, pero apaga ademas los errores de las libs que este paquete SI importa, y eso convierte un gate en un silencio. Aca no hace falta: el paquete es logica pura y no usa APIs del navegador.",
+
   "compilerOptions": {
     "strict": true,
     "noUnusedLocals": true,
@@ -6,8 +8,13 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022"],
-    "noEmit": true
+    "lib": [
+      "ES2022"
+    ],
+    "noEmit": true,
+    "types": []
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }
