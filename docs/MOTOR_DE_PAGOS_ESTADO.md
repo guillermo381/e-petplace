@@ -12,7 +12,11 @@
 
 ## ① EL ESTADO EN UNA LÍNEA
 
-> ## 🟢 Nuvei CERTIFICÓ. El motor habla bien con el proveedor, en los dos rieles, con reverso ejercido.
+> ## 🟢 LOS DOS RIELES CERTIFICADOS — Nuvei **y** DeUna, el 1-sep-2026.
+
+⚠️ **Corregido el mismo día:** este documento nació diciendo *«Nuvei
+certificó»*. **Son los dos** (`D-997`). *Leí «nos certificaron» y lo angosté al
+riel que tenía en la mano — el sesgo del que viene de mirar una sola cosa.*
 
 **Y lo que la certificación NO dice, dicho acá antes que nada:** certifica **la
 conversación con el proveedor**. **No dice nada del acto 2** —mover el sujeto
@@ -162,45 +166,71 @@ rate limit compartido con clientes pagando en vivo.*
 
 ---
 
-## ⑦ 🔴 LO QUE EL MOTOR **NO** CUBRE — y es lo único que bloquea producción
+## ⑦ 🔴 EL INSTRUMENTO QUE MIDE LA COBERTURA **SOBRE-REPORTA POR CONSTRUCCIÓN**
+
+> ⚠️ **Esta sección se reescribió entera el 1-sep.** Su primera versión declaraba
+> *«25 cobros reales por \$796,42 con el sujeto sin mover»* y **era falso**.
+> `D-997` ANEXO B (S111-A, el mismo día) decía **14 casos, de proveedor real
+> CERO** — y tenía razón. *Se conserva la corrección a la vista porque el error
+> es el hallazgo.*
+
+### El discriminador que resolvió la contradicción
+
+Tomé tres casos que la función llamaba «sujeto sin mover» **y le pregunté al
+sujeto**:
+
+| intento | riel | pedido | estado real |
+|---|---|---|---|
+| `56bb068c` | nuvei | `P-20260821-182415` | `pago_capturado` |
+| `8d4659f2` | nuvei | `P-20260821-eb8f06` | `pago_capturado` |
+| `18816cbc` | deuna | `P-20260825-9eeb53` | **`cancelado_cliente`** |
+
+**El tercero se había movido y la función igual lo contaba.** Ahí se rompió la
+hipótesis.
+
+### 🔑 LA CAUSA — el criterio mide una columna que nadie llena
 
 ```sql
-select * from pagos_conciliacion_cobertura();
+-- dentro de pagos_aprobados_sin_sujeto_movido()
+i.pedido_id IS NOT NULL AND EXISTS (
+  SELECT 1 FROM pedidos d WHERE d.id = i.pedido_id AND d.pagado_en IS NULL)
 ```
 
-La función **lo declara ella misma**, que es como tiene que ser:
+**`pedidos.pagado_en` NO LO ESCRIBE NADIE en el camino del pedido.** Medido: sus
+únicos dos escritores son `despachar_notificaciones` y
+`marcar_link_mensual_pagado` — **ninguno del cobro.**
+
+### El control que lo cierra sin discusión
+
+| estado del pedido | pedidos | con `pagado_en` |
+|---|---|---|
+| `pago_capturado` | 22 | **0** |
+| **`entregado`** | **3** | **0** |
+
+> ### **Tres pedidos ENTREGADOS —ciclo completo, la familia recibió su producto— cuentan como «plata cobrada sobre algo que no recibió».**
+
+*Un pedido entregado es el caso más terminado que existe. Si el instrumento lo
+llama «detenido», no está midiendo lo que dice medir.*
+
+### Qué es cierto entonces
 
 | | |
 |---|---|
-| ✅ **cubre** | **8** intentos no terminales con `transaction_id` — **automático** |
-| 🔴 **NO cubre** | **39** intentos **APROBADOS cuyo sujeto no se movió** — *«son terminales; el barrido sólo mira no terminales»* · **necesita una persona** |
+| lo que dice la función | 39 casos · \$1.686,39 |
+| **lo que hay de verdad** (`D-997` B) | **14 casos · \$889,97 · de proveedor real CERO** |
+| **qué son** | `seed_gate` 9 · `simulado` 4 · `siembra` 1 — **artefactos de agosto** |
+| lo que el barrido sí vigila | **16 pendientes vivos** · deuna 13 (\$468,45) · nuvei 3 (\$87,65) · **cero se escapan por falta de id** |
 
-### ⚠️ Y el contador de $1.686,39 ESTÁ INFLADO — 56 %
+> ### ⇒ **NO hay un bloqueante de plata detenida.** Lo que hay es **un instrumento roto que fabricaba uno.**
 
-**Clasificado por riel**, que es la pregunta que el contador no hace:
+⚠️ **Y el instrumento importa más que el número que arruinó:** es el que se
+consulta para decidir si se puede cobrar en producción. **Mientras sobre-reporte,
+va a haber siempre una lista de «casos» que nadie puede vaciar** — y una alarma
+que nunca se apaga es una alarma que se aprende a ignorar.
 
-| clase | casos | monto | período |
-|---|---|---|---|
-| **PLATA REAL — nuvei** | 22 | **$524,56** | 20-ago → 31-ago |
-| **PLATA REAL — deuna** | 3 | **$271,86** | 25-ago → **1-sep** |
-| siembra / gates | 14 | $890,00 | 12-ago → 18-ago |
-
-> ### **Lo real son 25 casos y $796,42. El resto es siembra de gates viejos contándose como plata.**
-
-*Un contador que mezcla datos de prueba con cobros reales no exagera un poco:
-exagera justo en la dirección que hace que nadie lo mire, porque el número
-grande parece un problema de otro.*
-
-🔴 **Y la parte que sí es urgente son TRES casos, no veinticinco:** los de
-**DeUna llegan hasta HOY**. Los 22 de Nuvei son del 20 al 31 de agosto —
-**escombro de cuando el actuador estaba roto**, anterior a las curas. *Los de
-DeUna son de un motor que ya está curado, y eso los vuelve otra cosa.*
-
-**Qué significa cada uno, sin suavizar:** **plata cobrada a una familia sobre
-algo que no recibió** — el pedido no avanzó, el bono no dio saldo, la cita no
-quedó firme.
-
-⇒ **`D-946` / `D-947`. BLOQUEANTE DE PRODUCCIÓN**, y va **antes** de S108.
+⇒ **`D-998`.** *Y la cura NO es tocar la función primero: es decidir si
+`pagado_en` debe llenarse (y quién) o si el criterio debe leer el ESTADO. Son
+dos curas distintas y sólo una es la correcta.*
 
 ---
 
@@ -211,7 +241,8 @@ quedó firme.
 | ✅ **certificación Nuvei** | Erick | **APROBADA 1-sep-2026** |
 | 🔴 credenciales de **producción** | Erick | pendiente |
 | 🔴 **host productivo** | founder / Erick | pendiente |
-| 🔴 **`D-946`/`D-947`** — el acto 2 que no llegó | equipo | **bloqueante** |
+| ⚪ ~~`D-946`/`D-947`~~ — «el acto 2 que no llegó» | — | **se disolvió al medir**: era el instrumento (§⑦) |
+| 🟠 **`D-998`** — el instrumento sobre-reporta | equipo | decidir la cura antes de tocarlo |
 | 🟡 el guard del IVA | contador + Erick | corta **todo IVA > 0**: nadie lo probó contra esta cuenta |
 | 🟡 3 claves de `app_config` | **founder** | el recurrente nace inerte a propósito |
 

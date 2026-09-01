@@ -25986,3 +25986,71 @@ exactamente igual que *«no tiene recorte»*.
 reportar**. *Un `LEFT JOIN` sobre una clave adivinada no da error: da ausencia —
 y la ausencia es la respuesta más creíble que existe.* Es regla 40 en su forma
 más barata de cometer y más cara de creer.
+
+---
+
+## 🟠 `D-998` — EL INSTRUMENTO QUE VIGILA LA PLATA DETENIDA **SOBRE-REPORTA POR CONSTRUCCIÓN**
+
+**Estado:** ABIERTA · **Dueño:** el próximo frente de pagos · **Disparo:** antes
+de usar su número para decidir nada.
+*(Número verificado libre POR GREP: tope real `D-997` · `L-468`.)*
+
+### EL DEFECTO
+
+`pagos_aprobados_sin_sujeto_movido()` decide si un **pedido** movió su sujeto
+así:
+
+```sql
+i.pedido_id IS NOT NULL AND EXISTS (
+  SELECT 1 FROM pedidos d WHERE d.id = i.pedido_id AND d.pagado_en IS NULL)
+```
+
+🔴 **`pedidos.pagado_en` NO LO ESCRIBE NADIE en el camino del pedido.** Medido:
+sus dos únicos escritores son `despachar_notificaciones` y
+`marcar_link_mensual_pagado` — **ninguno del cobro.**
+
+⇒ **Todo pedido pagado cae en la lista, para siempre.**
+
+### EL CONTROL QUE LO CIERRA
+
+| estado del pedido | pedidos | con `pagado_en` |
+|---|---|---|
+| `pago_capturado` | 22 | **0** |
+| **`entregado`** | **3** | **0** |
+
+> ### **Tres pedidos ENTREGADOS cuentan como «plata cobrada sobre algo que la familia no recibió».** Un pedido entregado es el caso más terminado que existe.
+
+### LO QUE COSTÓ, Y ES LA RAZÓN DE LA FICHA
+
+**Fabricó un bloqueante de producción que no existía.** Su número —39 casos,
+\$1.686,39— entró a un documento de estado como *«25 cobros reales por
+\$796,42»*, y **`D-997` ANEXO B, corrido el mismo día por otra pista, decía 14
+casos y de proveedor real CERO.** *Dos mediciones del mismo hecho, el mismo día,
+con conclusiones opuestas.* Lo resolvió **preguntarle al sujeto**, no discutir
+los números: de tres casos, uno estaba `cancelado_cliente` — **se había movido y
+la función igual lo contaba.**
+
+### 🔴 LA CURA NO ES OBVIA, Y POR ESO NO SE APLICA ACÁ
+
+Son **dos curas distintas y sólo una es la correcta**:
+
+- **(a)** que alguien **llene `pagado_en`** en el camino del cobro — si la
+  columna existe para eso, hoy es **`D-980` invertida: hay LECTOR y no hay
+  ESCRITOR**;
+- **(b)** que el criterio **lea el ESTADO** del pedido, y `pagado_en` se declare
+  muerta.
+
+⚠️ **Elegir (b) sin mirar quién más lee `pagado_en` puede dejar otra cosa rota;
+elegir (a) sin saber si la columna todavía significa algo es llenar un campo por
+inercia.** *Se decide midiendo sus lectores, no eligiendo la más rápida.*
+
+### ⚠️ Y LO QUE HAY QUE MIRAR ADEMÁS, porque la clase puede ser más ancha
+
+El criterio de `pedido` es **uno de seis**. Los otros cinco leen `estado` o
+`estado_pago` de su tabla —que sí parecen vivos—, **pero ninguno se verificó
+contra un caso conocido.** *Un censo por patrón acota, no cierra* (`L-437`):
+**cada brazo necesita su par discriminador**, uno que deba salir y uno que no.
+
+### LA LECCIÓN, en una línea
+
+> ### Una alarma que no se puede vaciar deja de ser una alarma: se vuelve ruido que se aprende a ignorar. Y un instrumento que decide un bloqueante de producción tiene que probarse contra un caso con resultado conocido **antes** de que su número entre a un documento.

@@ -109,20 +109,25 @@ fecha. El destino incluye:
 > **sandbox de punta a punta**. Producción exige credenciales nuevas de Nuvei,
 > host productivo y el visto de certificación — ver el acta de cierre S101-B/C.
 >
-> ✅ **ENMIENDA 1-sep-2026 — LA CERTIFICACIÓN DE NUVEI ESTÁ APROBADA.** De las
-> tres condiciones de arriba, **la tercera cayó**: el visto llegó. **Las otras
-> dos siguen abiertas y son de terceros** (credenciales productivas y host).
+> ✅ **ENMIENDA 1-sep-2026 — LOS DOS RIELES ESTÁN CERTIFICADOS** (Nuvei **y**
+> DeUna, `D-997`). De las tres condiciones de arriba, **la tercera cayó**: el
+> visto llegó. **Las otras dos siguen abiertas y son de terceros** (credenciales
+> productivas y host productivo).
 > ⚠️ **La letra vieja NO se borra:** describía la verdad de su día, y quien lea
 > un parte de agosto tiene que poder ver contra qué medía.
 >
-> 🔴 **Y lo que la certificación NO cierra, dicho acá para que nadie lo lea de
-> más:** certifica que **el motor habla bien con el proveedor**. No dice nada
-> de que **el acto 2 llegue** —mover el sujeto después de cobrar—, y ahí hay
-> **25 cobros reales por $796,42 cuyo sujeto nunca se movió** y que **el
-> conciliador automático no alcanza** (son terminales; su barrido sólo mira no
-> terminales). *Un pago aprobado cuyo sujeto no se movió es plata cobrada sobre
-> algo que la familia no recibió.* **Estado del motor y su lista:
-> `docs/MOTOR_DE_PAGOS_ESTADO.md`.**
+> 🔴 **Y lo que la certificación NO cierra:** certifica que **el motor habla bien
+> con el proveedor**. No dice nada de que **el acto 2 llegue** — mover el sujeto
+> después de cobrar.
+>
+> ⚠️ **Corrección del mismo día, y se deja a la vista porque el error es el
+> hallazgo:** esta enmienda nació citando *«25 cobros reales por \$796,42 con el
+> sujeto sin mover»*. **Era falso, y lo produjo un instrumento roto**
+> (`pagos_aprobados_sin_sujeto_movido()` mide `pedidos.pagado_en`, **una columna
+> que nadie llena** ⇒ cuenta hasta pedidos **entregados**). **Lo real: 14 casos,
+> de proveedor real CERO — todos artefactos de seed de agosto.** *No había
+> plata detenida: había un instrumento que la fabricaba* — `D-998`.
+> **Estado del motor: `docs/MOTOR_DE_PAGOS_ESTADO.md` §⑦.**
 
 > **NOTA DE OPERACIÓN — LA LETRA UBER (founder S70, 19 Jul 2026;
 > letra completa en `POLITICAS_EPETPLACE.md` P21).** Todo lo que sigue
