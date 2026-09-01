@@ -40,6 +40,8 @@ const CODIGOS_ERROR_ADIESTRAMIENTO_RESERVA = [
   'programa_duplicado',
   'slot_invalido',
   'slot_en_pasado',
+  /* ⭐ S109-C · el tercer estado que el motor ganó hoy — ver su voz abajo. */
+  'programa_no_empieza_hoy',
   'fuera_de_horario',
   'fecha_sin_cupo',
   'prestador_no_disponible',
@@ -64,7 +66,27 @@ const MENSAJES: Record<
   programa_no_disponible:   'Este programa ya no está disponible.',
   programa_duplicado:       'Tu mascota ya tiene este programa en curso.',
   slot_invalido:            'El horario elegido no es válido.',
-  slot_en_pasado:           'Esa fecha ya pasó — elige una desde mañana.',
+  /* ⭐ **S109-C · LA VOZ SE PARTE EN DOS PORQUE EL MOTOR PARTIÓ EL CASO — y la
+     vieja llevaba la mentira adentro.**
+
+     ⏪ Decía *«Esa fecha ya pasó — elige una desde mañana»*. **Las dos mitades
+     no hablaban del mismo caso**: la primera es del pasado real, la segunda era
+     **una muleta** para cubrir que HOY tampoco sirve — porque el motor rebotaba
+     los dos con `slot_en_pasado` y *hoy no es pasado*. *La frase compensaba una
+     mentira del código diciendo de más, que es cómo una voz honesta termina
+     siendo la que oculta el defecto.*
+
+     ⇒ Con `programa_no_empieza_hoy` (A, en el motor), cada caso dice lo suyo y
+     **el pasado recupera su frase**: sin la muleta, «ya pasó» vuelve a ser
+     exacto. */
+  slot_en_pasado:           'Esa fecha ya pasó — elige otra.',
+  /* 🔴 **DICE LO QUE LA FAMILIA PUEDE HACER, no lo que el motor rechaza.**
+     La regla es del negocio y no un capricho: un programa necesita aire entre la
+     compra y la primera sesión (§12.2). *«No puede empezar hoy» deja a la
+     familia buscando qué hizo mal; «arranca desde mañana» le da el siguiente
+     toque.* Y **no se disculpa**: no hizo nada mal — eligió un día que sirve
+     para una sesión suelta y no para un programa. */
+  programa_no_empieza_hoy:  'Un programa arranca desde mañana. Elige otro día para la primera sesión.',
   fuera_de_horario:         'El adiestrador no atiende en ese horario.',
   fecha_sin_cupo:           'Una de las fechas del programa ya no tiene lugar.',
   prestador_no_disponible:  'El adiestrador no está disponible en esas fechas.',
