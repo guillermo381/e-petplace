@@ -25342,3 +25342,93 @@ el ensanche del lector con su recorte** — y el recorte ya está firmado
 de mora, aviso ni protocolo** (§6 de `LETRA_GUARDERIA` sigue frenado).
 
 **Disparo:** antes de que una familia real contrate guardería.
+
+---
+
+## 🔴 `D-991` — «MUERTA EN EL MONOREPO» NO ES «MUERTA EN EL PROYECTO»: ALGO LEE LAS TABLAS DE ADOPCIÓN Y VIVE AFUERA
+
+**Hallazgo de S110-D, verificado por A contra el objeto por su cuenta** — dos
+lecturas independientes, no una citada.
+
+Las cuatro tablas del subsistema de adopción están en **0 filas** y con **0
+consumidores en el monorepo** (D midió: cero funciones las mencionan, control
+positivo `familia_miembro` = 38; cero consumidores en las dos apps, control
+positivo del vecino = 40 líneas). **Y sin embargo alguien las recorre:**
+
+| tabla | filas | `idx_scan` | `seq_scan` |
+|---|---:|---:|---:|
+| `refugios` | 0 | **322** | 218 |
+| `solicitudes_adopcion` | 0 | 3 | **996** |
+| `donaciones` | 0 | 1 | 292 |
+| `adopcion_seguimiento` | 0 | 5 | 226 |
+| `mascotas_adopcion` | 0 | 11 | 135 |
+
+> ### El veredicto «muerta» era del MONOREPO. El proyecto es más grande que el monorepo.
+
+El portal admin y `e-petplace-v2` **comparten esta base** (medido en S94-PERF: el
+60 % del tiempo de la base es realtime de webs del legado que el monorepo no
+conoce). **S95-F ya cobró esta clase**: buscando otra cosa encontró **dos vistas
+que bloqueaban un borrado sin que nadie las leyera** desde el monorepo.
+
+⚠️ **EL LÍMITE DE ESTA MEDICIÓN, declarado y no escondido:** `pg_stat_user_tables`
+es **acumulativo desde el último reset y NO dice QUIÉN**. Un `seq_scan` sobre una
+tabla vacía es barato y puede venir del panel de Supabase, de una introspección
+de esquema o de un backup. **Lo que el número sostiene es «algo la recorre»; lo
+que NO sostiene es «una app la consulta».** *Confundir las dos sería exactamente
+la inferencia sobre la causa que D se corrigió a sí mismo con `virtual_refugio`.*
+
+🔴 **LO EXIGIBLE, y es de conducción:** **antes de derogar o borrar cualquiera de
+las cuatro, alguien con los repos del legado corre el mismo censo ahí.** Sin eso,
+«muerta» es una afirmación sobre el único repo que miramos.
+
+**Dueño:** conducción (A o quien tenga el legado a mano). **Disparo:** la primera
+migración del vertical de adopción que toque estas tablas — **antes** de un
+`DROP`, no después.
+
+**Lo que esto NO cambia:** el veredicto de que el vertical **no se construye
+sobre ellas** sigue en pie, y por otra razón —`adopcion_seguimiento.mascota_id`
+apunta a `mascotas_adopcion`, ninguna FK cruza a `mascotas`, y `eventos_mascota`
+tiene FK a `mascotas`— o sea que construir ahí daría **un adoptable sin
+expediente**, justo lo que el §0 de `LETRA_ADOPCION` v1.0 deroga.
+*No construir sobre ellas y no borrarlas son dos decisiones distintas.*
+
+---
+
+## 🔴 `L-463` — UN SHA ANUNCIADO DENTRO DE UN MENSAJE SOBRE OTRA COSA ES UNA POSDATA, Y UNA POSDATA NO ENTRA EN NINGUNA COLA
+
+> ### El pedido de merge viaja SOLO, con su asunto propio.
+
+**El caso, de S110, y lo valioso es que las dos mitades estaban bien
+intencionadas.** Ocho commits de una pista —dos lotes, un anexo, dos mediciones,
+correcciones— **estuvieron pusheados y anunciados, y no entraron al canon
+durante horas.**
+
+- **La mitad de quien conduce:** mergeó lo que le pidieron mergear. *No fue un
+  error de verificación: verificó bien lo que le pidieron verificar.*
+- **La mitad de quien produce** (la nombró ella misma, y es la que no se ve):
+  anunció el sha **las tres veces dentro de mensajes cuyo asunto era otro** —
+  uno para coordinar un número de migración, otro para reportar un rojo falso.
+  **Nunca pidió el merge.**
+
+*Las dos juntas producen el hueco, y ninguna sola lo produce.*
+
+**Y lo que lo vuelve caro es que NADA SE VE ROTO:** `main` compila, los gates
+pasan, el árbol está limpio. **El trabajo simplemente no está**, y el único
+síntoma es que alguien vaya a buscarlo. Es `L-217` —*«todo en origin» y «todo en
+el canon» son dos afirmaciones distintas»*— en su forma más barata de evitar y
+más fácil de no ver.
+
+**LAS DOS CURAS, y hacen falta las dos porque cubren mitades distintas:**
+
+1. **La mecánica, que no depende de que nadie avise** (la propuso C, y encontró
+   nueve commits en su primera corrida): al cerrar y después de **cada** merge,
+   `git merge-base --is-ancestor origin/pista/<rama> origin/main` sobre **TODAS**
+   las ramas de la sesión — **incluidas las que no pidieron nada.** *Un control
+   que sólo mira lo que le señalaron tiene el mismo punto ciego que la persona.*
+2. **La de forma:** el pedido de merge es **su propio mensaje**, con su asunto.
+   Un sha dentro de un párrafo sobre otro tema se lee, se entiende, y **no
+   genera una acción** — porque la acción que el mensaje pedía era otra.
+
+**Corolario:** la mecánica es la que cierra el hueco; la de forma es la que evita
+que se abra. **Depender sólo de la segunda es depender de que todos escriban
+bien todo el tiempo.**
