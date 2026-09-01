@@ -19,6 +19,18 @@
  * pregunta a la BASE qué selectores existen y al ARCHIVO cuáles consume.
  *
  *   node scripts/verify-selectores-recurrentes.mjs
+ *
+ * ═══ ⚠️ LO QUE SU VERDE **NO** DICE — medido ═══════════════════════════════
+ * · **No prueba que los selectores FUNCIONEN.** Verifica que la edge itere el
+ *   catálogo y que ninguno esté hardcodeado; jamás corre uno. *Un selector que
+ *   devuelve basura pasa este gate.*
+ * · **No prueba que el cron llame a la edge.** Si el reloj está apagado o su
+ *   comando quedó viejo, este gate sigue verde — y el lazo no cobra a nadie.
+ * · **Mide los 3 selectores VIVOS de hoy.** Si alguien agrega un recurrente y no
+ *   lo registra en `selectores_recurrentes_vivos()`, el gate no lo extraña: mide
+ *   contra el catálogo, y el catálogo es lo que se olvidó de actualizar.
+ * · **Lee el ARCHIVO, no la edge desplegada** — un `main` curado con una versión
+ *   vieja arriba sale verde acá.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';

@@ -50,6 +50,25 @@ const fuente = ruta.startsWith('git:')
   : readFileSync(ruta, 'utf8');
 
 console.log(`\n═══ CENSO DE COMPUERTAS · edge leída de: ${ruta}\n`);
+/* ═══ ⚠️ LO QUE SU VERDE **NO** DICE — medido, no supuesto ══════════════════
+   Un gate que no declara su frontera se lee como si midiera todo, y **su
+   silencio se cobra en cada corrida**. Lo que este censo NO mira:
+
+   · **La compuerta puede estar MAL.** Sólo verifica que exista y que la edge la
+     llame — jamás si su veredicto es correcto. *Una compuerta que siempre dice
+     que sí pasa este gate en verde.*
+   · **Mide UNA edge: `pagos-cobro`.** `pagos-deuna-solicitud` cobra los mismos
+     sujetos por el otro riel y **no está en este censo** — y ese riel nunca
+     corrió (`por_deuna = 0`), así que su hueco no tiene síntoma.
+   · **Mide 6 de 7 sujetos.** `recurrencia` queda fuera por `cobrable_por_checkout
+     = false`: la cobra el lazo recurrente, no un checkout. Su compuerta existe y
+     **este gate no verifica que el lazo la llame.**
+   · **Dos sujetos declaran no tener compuerta** —`cita` y `bono`— y el gate
+     ACEPTA esa declaración sin cuestionarla: *si mañana la cita necesita una, el
+     gate seguiría verde.*
+   · **Lee el ARCHIVO, no la edge desplegada.** Un `main` correcto con una edge
+     vieja arriba sale verde acá. Lo que prueba el despliegue es leer la versión
+     del objeto, y eso este gate no lo hace. */
 
 const { data: censo, error } = await admin.rpc('verificar_censo_de_compuertas');
 if (error) { console.error('🔴 el censo no respondió:', error.message); process.exit(2); }

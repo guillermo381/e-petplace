@@ -5352,7 +5352,7 @@ function GaleriaInterna() {
               del motor (D-624) — un pin diría "acá está", que es lo único que la zona no afirma. En web
               se ve el placeholder; el círculo se ve en el teléfono.
             </Texto>
-            <MapaZona lat={-0.1807} lon={-78.4678} radioM={500} />
+            <MapaZona zonaLat={-0.1807} zonaLon={-78.4678} radioM={500} />
             <Texto variante="apoyo">
               EL PUNTO (S109-D): la hermana de la zona para el OTRO actor. La zona es lo que la FAMILIA
               ve de un prestador —centro desplazado, sin pin—; el punto es lo que el PRESTADOR necesita
