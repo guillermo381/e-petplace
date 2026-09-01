@@ -98,6 +98,9 @@ import { GotaUbicacion } from '../components/GotaUbicacion'
 import { Mutacion } from '../components/Mutacion'
 import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
+import { Convivencia } from '../components/Convivencia'
+import { SenalesAdoptable } from '../components/SenalesAdoptable'
+import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
 import { PrecioText } from '../components/PrecioText'
@@ -4742,6 +4745,140 @@ function GaleriaInterna() {
               onLlamar={() => {}}
             />
             <FilaEntrega direccion="Calle Cuero y Caicedo 458" onLlamar={() => {}} />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="SenalesAdoptable (S111) — lo que hay que saber antes de enamorarse">
+          {/* Las cuatro juntas, porque lo que hay que poder juzgar de un
+              vistazo es que NINGUNA se lee como un defecto del animal:
+              «urgente» pide acción a su favor y «2 años en rescate» es un
+              hecho neutro. Si en el teléfono el tiempo largo se lee como
+              alarma, la pieza falla (§4: el que más lo necesita gana el
+              mejor lugar). */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">las cuatro señales</Texto>
+              <SenalesAdoptable
+                rotulo="Antes de decidir"
+                senales={[
+                  { tipo: 'urgente', voz: 'Urgente' },
+                  { tipo: 'pareja_vinculada', voz: 'Se adopta con su hermana' },
+                  { tipo: 'tiempo_en_rescate', voz: '2 años en rescate' },
+                  { tipo: 'zona', voz: 'Cumbayá' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                control · el caso largo: dos años NO puede leerse como alarma
+              </Texto>
+              <SenalesAdoptable
+                senales={[{ tipo: 'tiempo_en_rescate', voz: '4 años en rescate' }]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">una sola señal · sin rótulo</Texto>
+              <SenalesAdoptable senales={[{ tipo: 'zona', voz: 'Valle de los Chillos' }]} />
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="SelectorDestinoDonacion (S111) — «abierta» es una elección, no un hueco">
+          {/* El gate de esta pieza es UNA pregunta: ¿el chip de la derecha se
+              lee como una opción elegida a propósito, o como «no elegí»? Si
+              se lee como hueco, la pieza falla su única ley (§7). Por eso
+              va en la MISMA hilera y con su voz, no en un renglón aparte. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">nadie elegido todavía · destino = null</Texto>
+              <SelectorDestinoDonacion
+                rotulo="¿A quién le llega?"
+                mascotas={[{ id: 'm1', nombre: 'Luna' }, { id: 'm2', nombre: 'Simón' }]}
+                refugios={[{ id: 'r1', nombre: 'Refugio Esperanza' }]}
+                abierta={{ voz: 'Donde más se necesite' }}
+                destino={null}
+                onCambiar={() => {}}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                control · «abierta» ELEGIDA — el mismo chip que arriba, ahora es una decisión
+              </Texto>
+              <SelectorDestinoDonacion
+                mascotas={[{ id: 'm1', nombre: 'Luna' }, { id: 'm2', nombre: 'Simón' }]}
+                refugios={[{ id: 'r1', nombre: 'Refugio Esperanza' }]}
+                abierta={{ voz: 'Donde más se necesite' }}
+                destino={{ tipo: 'abierta' }}
+                onCambiar={() => {}}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">una mascota elegida</Texto>
+              <SelectorDestinoDonacion
+                mascotas={[{ id: 'm1', nombre: 'Luna' }, { id: 'm2', nombre: 'Simón' }]}
+                refugios={[{ id: 'r1', nombre: 'Refugio Esperanza' }]}
+                abierta={{ voz: 'Donde más se necesite' }}
+                destino={{ tipo: 'mascota', mascotaId: 'm1' }}
+                onCambiar={() => {}}
+              />
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="Convivencia (S111) — el tercer estado tiene voz propia">
+          {/* LOS TRES ESTADOS JUNTOS, porque la comparación ES el gate:
+              lo que hay que poder ver de un vistazo es que «todavía no se
+              sabe» NO se lee como un hueco ni como un «no» pálido — ocupa
+              su lugar con su voz. Si en el teléfono el tercero se lee como
+              ausencia, la pieza falla su única ley (LETRA_ADOPCION §3).
+
+              Y el segundo bloque es el CONTROL: un caso todo-desconocido,
+              que es el estado REAL de un rescate de seis días. Si esa
+              tarjeta se ve rota o vacía, el defecto es de la pieza — ése
+              es el caso que la letra dice que cuesta un hogar. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">los tres estados · sí · no · todavía no se sabe</Texto>
+              <Convivencia
+                rotulo="Convive con"
+                voces={{ si: 'Sí', no: 'No' }}
+                filas={[
+                  { con: 'Perros', estado: 'si' },
+                  { con: 'Gatos', estado: 'no' },
+                  { con: 'Niños', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                control · rescate de seis días: nada medido todavía
+              </Texto>
+              <Convivencia
+                rotulo="Convive con"
+                voces={{ si: 'Sí', no: 'No' }}
+                filas={[
+                  { con: 'Perros', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
+                  { con: 'Gatos', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
+                  { con: 'Niños', estado: 'no_se_sabe', voz: 'Aún no lo vimos con chicos' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">sin rótulo · embebido en una ficha</Texto>
+              <Convivencia
+                voces={{ si: 'Sí', no: 'No' }}
+                filas={[
+                  { con: 'Perros', estado: 'si' },
+                  { con: 'Gatos', estado: 'si' },
+                ]}
+              />
+            </View>
           </View>
         </Seccion>
 

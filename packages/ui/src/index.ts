@@ -455,6 +455,59 @@ export {
   type DesvioEscalera,
 } from './components/EscaleraEstados'
 
+// Convivencia — S111-B: CON QUIÉN PUEDE VIVIR, Y CON QUIÉN TODAVÍA NO SE SABE.
+// `LETRA_ADOPCION` §3: TRES estados, jamás dos — sí · no · todavía no se
+// sabe. El tercero NO es la ausencia de los otros dos: es un estado con su
+// propia voz, que ocupa su lugar en la fila.
+//
+// Dos decisiones que quien la consuma NO puede deshacer desde la pantalla:
+//   ① `no_se_sabe` LLEVA SU `voz` OBLIGATORIA — "todavía no se sabe, mudo"
+//     no compila (L-222). La letra mide el costo de romperlo: un «no»
+//     inventado le cuesta el hogar al animal.
+//   ② NO USA LA PALETA DE ESTADO — un «no» es un hecho del animal, no un
+//     defecto suyo; pintarlo de rojo es editorializar en su contra. La
+//     distinción es estructural (punto relleno / contorneado / ausente).
+export {
+  Convivencia,
+  type ConvivenciaProps,
+  type ConvivenciaCon,
+} from './components/Convivencia'
+
+// SenalesAdoptable — S111-B: LO QUE HAY QUE SABER ANTES DE ENAMORARSE.
+// `LETRA_ADOPCION` §3: urgente · pareja vinculada · tiempo en rescate ·
+// ubicación aproximada — JAMÁS la dirección exacta.
+//
+//   ① NO ACEPTA COORDENADAS. La señal de lugar es una sola cadena ya
+//     compuesta: un `lat`/`lon` acá no compila. ⚠️ Límite honesto en su
+//     encabezado: cierra la puerta ANCHA, no puede inspeccionar el string.
+//     La ofuscación real es del motor (precedente medido S84).
+//   ② `tiempo_en_rescate` JAMÁS se pinta de alarma. Dos años esperando no
+//     es una falla del animal — es el dato con el que §4 arma «Llevan más
+//     tiempo esperando».
+export {
+  SenalesAdoptable,
+  type SenalesAdoptableProps,
+  type SenalAdoptable,
+} from './components/SenalesAdoptable'
+
+// SelectorDestinoDonacion — S111-B: A QUIÉN LLEGA ESTO (`LETRA_ADOPCION` §7).
+// Tres destinos: una mascota en adopción · un refugio · abierta.
+//
+//   🔴 `abierta` ES UNA ELECCIÓN, NO LA AUSENCIA DE UNA — su `voz` es
+//     OBLIGATORIA, y `destino: null` («todavía no eligió») es un valor
+//     DISTINTO. La despensa los colapsaba porque allá no hacía diferencia.
+//   ⚠️ NO reusa `SelectorDestinoItem` y la razón es medible: su variante
+//     `{ tipo: 'donacion' }` no tiene campo de destino — ES el «sin destino
+//     elegible» que §7 prohíbe heredar. Además su unión la consume el
+//     carrito vivo del cliente: ensancharla no sería aditivo. Nace hermana;
+//     la de la despensa NO se toca.
+export {
+  SelectorDestinoDonacion,
+  type SelectorDestinoDonacionProps,
+  type DestinoDonacion,
+  type OpcionDestino,
+} from './components/SelectorDestinoDonacion'
+
 // TarjetaPedido — S96-B: UN pedido en una lista, de los DOS lados. La fila
 // de la lista Hoy del vendedor (LETRA_PANEL_VENDEDOR_S96 §2.1) y la de
 // "Mis pedidos" de la familia (LETRA_RECORRIDO_DESPENSA_S96 §8.1).

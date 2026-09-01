@@ -1681,3 +1681,16 @@ export type {
   ResultadoNoRecogida,
   CodigoErrorGuarderiaDurante,
 } from './wrappers/guarderia-durante';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   S111-A · EL MOTOR DE ADOPCIÓN — la vidriera, la publicación y el traspaso.
+   Hunk aditivo (76c). 🔴 Antes de esto había CERO funciones y CERO wrappers de
+   adopción, y tres bloques de tres pistas estaban parados por eso.
+   ═══════════════════════════════════════════════════════════════════════════ */
+export {
+  obtenerAdoptables,
+  publicarAdoptable,
+  despublicarAdoptable,
+  traspasarMascotaAFamilia,
+} from './wrappers/adopcion';
+export type { Adoptable, ResultadoTraspaso, CodigoErrorAdopcion } from './wrappers/adopcion';
