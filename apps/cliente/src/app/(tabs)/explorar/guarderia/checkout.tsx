@@ -34,7 +34,7 @@
  * significa nada — *un dato vacío con forma de dato es peor que su ausencia.*
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -195,6 +195,9 @@ export default function CheckoutGuarderia() {
      sólo cuando el servidor lo dice. **No es una máquina nueva: es la de la
      casa, que ya sabía esperar dos sujetos y ahora espera cuatro.** */
   const [fase, setFase] = useState<'resumen' | 'confirmando' | 'agendando'>('resumen');
+  /** Para llevar al medio de pago cuando el botón apagado dice qué falta —
+   *  ver `onRazon` abajo. */
+  const scrollRef = useRef<ScrollView>(null);
   /** Qué se está esperando. `null` fuera de `confirmando` — *pasarle `null` es
    *  lo que impide que esta pantalla sondee por existir.* */
   const [sujeto, setSujeto] = useState<SujetoEnEspera | null>(null);
@@ -627,7 +630,10 @@ export default function CheckoutGuarderia() {
     return (
       <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
         <Encabezado variante="navegacion" atras titulo={t('checkout.titulo')} onAtras={() => router.back()} />
-        <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}
+        >
           <Texto variante="seccion">{t('checkout.resumen')}</Texto>
           <Tarjeta relleno="ninguno">
             <Celda
@@ -778,6 +784,30 @@ export default function CheckoutGuarderia() {
                     ? t('checkoutGuarderia.precioNoLeido')
                     : t('checkoutGuarderia.precioCargando')
             }
+            /* ═══════════════════════════════════════════════════════════
+               🔴 **SIN `onRazon`, LA RAZÓN NO SE DIBUJA — y era un defecto
+               aparte del botón.**
+
+               `Boton` sólo muestra la razón si vienen **las dos** props:
+               `conRazon = deshabilitado && !cargando && razonDeshabilitado !==
+               undefined && onRazon !== undefined` (`Boton.tsx:256`). Yo pasaba
+               la razón **y no `onRazon`** ⇒ el botón quedaba **apagado y
+               MUDO**: la frase existía, se armaba, y no la veía nadie.
+
+               *Es `L-460` en su forma exacta: una prop aceptada e ignorada se
+               lee como cableada* — y el contrato de B es deliberado, no un
+               olvido: sin `onRazon` el toque no lleva a ningún lado, así que
+               un botón «que explica» sin destino sería el mismo botón muerto
+               con más código.
+
+               ⚠️ **Censado: son 8 pantallas con la misma brecha** (13 pasan
+               razón, 5 pasan `onRazon`). Curo la mía; las otras siete van con
+               su ficha — *curar la reportada y no censar la clase es media
+               cura, y la otra mitad se descubre con un founder mirando.*
+
+               Y lleva **al lugar donde se arregla**, no a un aviso: el medio de
+               pago vive arriba en este mismo scroll. */
+            onRazon={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
             onPress={() => void (esPaquete || esMensual ? pagar() : reservarElDia())}
           />
         </View>
