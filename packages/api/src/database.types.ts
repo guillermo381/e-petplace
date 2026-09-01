@@ -340,6 +340,85 @@ export type Database = {
           },
         ]
       }
+      adopcion_documentos: {
+        Row: {
+          codigo: string
+          contenido: string
+          version: number
+          vigente_desde: string
+        }
+        Insert: {
+          codigo: string
+          contenido: string
+          version: number
+          vigente_desde?: string
+        }
+        Update: {
+          codigo?: string
+          contenido?: string
+          version?: number
+          vigente_desde?: string
+        }
+        Relationships: []
+      }
+      adopcion_publicacion: {
+        Row: {
+          country_code: string
+          creada_en: string
+          cuenta_comercial_id: string
+          estado: string
+          id: string
+          mascota_id: string
+          motivo_retiro: string | null
+          publicada_por: string | null
+          retirada_en: string | null
+        }
+        Insert: {
+          country_code: string
+          creada_en?: string
+          cuenta_comercial_id: string
+          estado?: string
+          id?: string
+          mascota_id: string
+          motivo_retiro?: string | null
+          publicada_por?: string | null
+          retirada_en?: string | null
+        }
+        Update: {
+          country_code?: string
+          creada_en?: string
+          cuenta_comercial_id?: string
+          estado?: string
+          id?: string
+          mascota_id?: string
+          motivo_retiro?: string | null
+          publicada_por?: string | null
+          retirada_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_publicacion_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adopcion_seguimiento: {
         Row: {
           adoptante_id: string
@@ -1729,6 +1808,30 @@ export type Database = {
             referencedColumns: ["codigo"]
           },
         ]
+      }
+      cat_estados_adopcion: {
+        Row: {
+          descripcion: string
+          es_terminal: boolean
+          estado: string
+          orden: number
+          visible_en_vidriera: boolean
+        }
+        Insert: {
+          descripcion: string
+          es_terminal: boolean
+          estado: string
+          orden: number
+          visible_en_vidriera: boolean
+        }
+        Update: {
+          descripcion?: string
+          es_terminal?: boolean
+          estado?: string
+          orden?: number
+          visible_en_vidriera?: boolean
+        }
+        Relationships: []
       }
       cat_estados_pedido: {
         Row: {
@@ -12690,6 +12793,7 @@ export type Database = {
           created_at: string
           criadero_id: string | null
           especie: string
+          estado_adopcion: string
           estado_vida: string
           estado_vida_desde: string
           familia_id: string
@@ -12722,6 +12826,7 @@ export type Database = {
           created_at?: string
           criadero_id?: string | null
           especie?: string
+          estado_adopcion?: string
           estado_vida?: string
           estado_vida_desde?: string
           familia_id: string
@@ -12754,6 +12859,7 @@ export type Database = {
           created_at?: string
           criadero_id?: string | null
           especie?: string
+          estado_adopcion?: string
           estado_vida?: string
           estado_vida_desde?: string
           familia_id?: string
@@ -12802,6 +12908,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cat_especies"
             referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "mascotas_estado_adopcion_fkey"
+            columns: ["estado_adopcion"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_adopcion"
+            referencedColumns: ["estado"]
           },
           {
             foreignKeyName: "mascotas_familia_id_fkey"
@@ -21621,8 +21734,16 @@ export type Database = {
         Args: { p_familia_id: string; p_user_id: string }
         Returns: boolean
       }
+      _user_gestiona_cuenta_refugio: {
+        Args: { p_cuenta_id: string }
+        Returns: boolean
+      }
       _user_opera_cuenta_comercial: {
         Args: { p_cuenta_id: string; p_uid: string }
+        Returns: boolean
+      }
+      _user_publico_esta_publicacion: {
+        Args: { p_publicacion_id: string; p_user_id: string }
         Returns: boolean
       }
       _valida_identidad_repartidor: {
@@ -22579,6 +22700,10 @@ export type Database = {
         Args: { p_pedido_id: string; p_repartidor_id: string }
         Returns: Json
       }
+      despublicar_adoptable: {
+        Args: { p_motivo?: string; p_publicacion_id: string }
+        Returns: Json
+      }
       deuna_nueva_referencia: { Args: never; Returns: string }
       eje_de_tipo_servicio: {
         Args: { p_tipo_servicio: string }
@@ -23111,6 +23236,21 @@ export type Database = {
           programa_id: string
           tipo_servicio: string
           vigencia_dias: number
+        }[]
+      }
+      obtener_adoptables: {
+        Args: { p_country_code?: string; p_especie?: string; p_limite?: number }
+        Returns: {
+          creada_en: string
+          especie: string
+          fecha_nacimiento: string
+          foto_url: string
+          mascota_id: string
+          nombre: string
+          publicacion_id: string
+          publicador_nombre: string
+          raza: string
+          sexo: string
         }[]
       }
       obtener_alertas_activas_mascota_para_familia_servicio: {
@@ -24057,6 +24197,10 @@ export type Database = {
         Args: { p_dia_cobro: number; p_periodo_desde: string }
         Returns: string
       }
+      publicar_adoptable: {
+        Args: { p_cuenta_comercial_id: string; p_mascota_id: string }
+        Returns: Json
+      }
       publicar_media_guarderia: {
         Args: {
           p_archivo_url: string
@@ -24679,6 +24823,15 @@ export type Database = {
       }
       test_sb1_transversales_genericas: { Args: never; Returns: Json }
       tomar_cita: { Args: { p_cita_id: string }; Returns: Json }
+      traspasar_mascota_a_familia: {
+        Args: {
+          p_acta_codigo?: string
+          p_acta_version: number
+          p_familia_destino_id: string
+          p_mascota_id: string
+        }
+        Returns: Json
+      }
       unaccent_simple: { Args: { p: string }; Returns: string }
       use_beta_invite: {
         Args: { p_beta_id: string; p_user_id: string }
