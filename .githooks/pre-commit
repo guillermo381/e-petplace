@@ -267,14 +267,49 @@ node scripts/verify-jornada-completa.mjs >/dev/null 2>&1 || {
 #    Y **declara lo que no mide**: sólo extensiones de código y texto
 #    (.ts/.tsx/.js/.jsx/.mjs/.cjs/.sql/.json/.md). Un NUL en un binario
 #    legítimo —una imagen, una fuente— no es defecto y no se gatea.
-node scripts/verify-sin-byte-nul.mjs >/dev/null 2>&1 || {
+#
+# 🔴 EL HOOK ES COMPARTIDO Y EL SCRIPT NO. Hallazgo de S110-D, el mismo día:
+#    el hook vive UNA sola vez en `$(git rev-parse --git-common-dir)/hooks` y lo
+#    corren TODOS los worktrees, pero `scripts/verify-sin-byte-nul.mjs` vive en
+#    el árbol de trabajo. **Una pista cuyo worktree salga de un `main` anterior
+#    a este gate no tiene el archivo** — y la primera versión de este bloque
+#    imprimía «HAY UN BYTE NUL» sobre un `Cannot find module`.
+#    > ### Es la misma clase que el gate vino a cazar, del lado incómodo: no un verde flojo, un ROJO QUE MIENTE SOBRE SU CAUSA.
+#    Y el mensaje era **creíble justo en la sesión donde el NUL era el tema**.
+#    *Un gate que no distingue «no encontré nada» de «no pude buscar» tiene
+#    exactamente el defecto del `grep` que lo motivó.*
+#
+#    ⇒ TRES desenlaces, no dos:
+#    · script AUSENTE  → **NO CONCLUYENTE, y NO frena.** El árbol es anterior al
+#      gate; frenarlo sería un rojo falso. Se dice fuerte y se deja pasar.
+#    · exit 2 (la auto-prueba del instrumento falló) → **FRENA**: si el
+#      detector no puede ver un NUL sembrado, su cero no vale nada.
+#    · exit 1 (encontró) → **FRENA**, que es su trabajo.
+if [ ! -f scripts/verify-sin-byte-nul.mjs ]; then
   echo ""
-  echo "✗ HAY UN BYTE NUL EN UN ARCHIVO TRACKEADO — el commit NO ocurre."
-  node scripts/verify-sin-byte-nul.mjs 2>&1 | grep -vE "^$" | head -12
+  echo "⚠️  verify:sin-byte-nul NO CONCLUYENTE — el script no existe en este árbol."
+  echo "   (worktree anterior al gate; NO es un byte NUL. El commit SIGUE.)"
   echo ""
-  echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
-  exit 1
-}
+else
+  node scripts/verify-sin-byte-nul.mjs >/dev/null 2>&1
+  ESTADO_NUL=$?
+  if [ "$ESTADO_NUL" = "2" ]; then
+    echo ""
+    echo "✗ EL DETECTOR DE BYTE NUL NO PUEDE MEDIR — el commit NO ocurre."
+    node scripts/verify-sin-byte-nul.mjs 2>&1 | head -4
+    echo ""
+    echo "  No es que no haya un NUL: es que su cero no significaría nada."
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  elif [ "$ESTADO_NUL" != "0" ]; then
+    echo ""
+    echo "✗ HAY UN BYTE NUL EN UN ARCHIVO TRACKEADO — el commit NO ocurre."
+    node scripts/verify-sin-byte-nul.mjs 2>&1 | grep -vE "^$" | head -12
+    echo ""
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+fi
 
 # ─────────────────────────────────────────────────────────────────────
 # ③ EL TSC MIRA A LOS CONSUMIDORES, NO SOLO A LO QUE TOCASTE

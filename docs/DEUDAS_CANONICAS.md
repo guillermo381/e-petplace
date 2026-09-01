@@ -25228,3 +25228,82 @@ agregarlo después es una línea por escritor **más** el backfill que no se pue
 hacer, porque el motivo de un apagón pasado no se reconstruye.*
 
 **NO se corrige en S110** — se declara con su dueño y su disparo.
+
+---
+
+## 🔴 `D-989` — LA POLICY DE UPDATE DE `mascotas` NO VALIDA EL DESTINO
+
+**Sonda de S110-A, EJECUTADA contra el objeto** (transacción revertida; la
+mascota volvió a su familia y se verificó).
+
+`mascotas_update_familia` tiene `USING` y `WITH CHECK` = **la misma expresión**,
+`user_es_familiar_adulto_de_mascota(id)`.
+
+> ### Toma el `id` de la mascota, no su `familia_id`. **No puede ver a dónde va la fila.**
+
+Y no es una omisión de la expresión: la función **re-lee `mascotas` por `id`**,
+así que bajo el snapshot de la sentencia ve **la fila VIEJA** — el destino nuevo
+nunca entra en la evaluación.
+
+| caso | resultado medido |
+|---|---|
+| **(a)** mover `familia_id` hacia una familia a la que el actor **NO** pertenece | 🔴 **PASA** — `filas=1`, y el `familia_id` quedó escrito |
+| **(b)** hacia una a la que **SÍ** pertenece | **PASA** |
+
+*El par es lo que lo hace concluyente: no es que el UPDATE no llegue — es que el
+`WITH CHECK` no mira el destino.*
+
+⚠️ **LÍMITE DECLARADO DE LA SONDA:** el actor elegido era **además el `user_id`
+de la mascota**, así que **no aísla cuál de las dos ramas** de la función
+(familiar adulto · dueño directo) dejó pasar. *No cambia el veredicto —las dos
+leen la tabla por `id` y ven la fila vieja—, pero **quien diseñe el guard corre
+la sonda de nuevo con un familiar que NO sea el `user_id`.***
+
+**Por qué cerrarla es barato:** medido por D en S110, **cero escritores
+legítimos de `familia_id`** en el monorepo ⇒ **cerrar la puerta del cliente no
+rompe nada**. El motor mueve por DEFINER cuando exista el traspaso.
+
+**Prioridad 🔴.** **Disparo:** la primera migración del vertical de adopción, **o**
+antes de encender cobros reales del 30-sep — lo que llegue primero.
+**La cura es paso ⓪ del plan del loop; NO se construye en S110.**
+
+---
+
+## 🔴 `L-462` — UN FRENO DE PUERTA DECLARA CONTRA QUÉ MIDIÓ **Y A QUÉ HORA**
+
+> ### La ley de S84 pedía la primera mitad. La jornada cobró la segunda: un cero verdadero CADUCA.
+
+**Dos causas distintas, las dos medidas en S110, y la lección es que producen el
+mismo síntoma:**
+
+**① FALLA POR INSTRUMENTO.** Un freno que se apoya en una salida truncada
+—`head`, un corte de buffer, un panel que muestra las primeras filas— declara un
+cero que es **del recorte, no del mundo**. *El instrumento presenta su ceguera
+como resultado* (`L-461` es su caso extremo: el buscador ni siquiera avisa).
+
+**② FALLA POR RELOJ.** El caso que la funda es el mejor, porque **nadie midió
+mal**: el gate del byte NUL dio ROJO en el worktree de otra pista diciendo «hay
+un byte NUL» cuando lo que pasaba era **`Cannot find module`** — su árbol salía
+de un `main` **anterior** al commit que agregó el script. **La medición fue
+correcta el momento en que se tomó y falsa siete commits después.**
+
+> ***Un cero verdadero tiene fecha de vencimiento, y quien lo cita días después
+> no tiene forma de saber que venció.***
+
+**Lo que obliga, en una línea:** todo freno escribe **contra qué midió Y contra
+qué SHA / a qué hora**. Un freno con su medición y su fecha adentro se puede
+reabrir; uno sin ellas es permanente por accidente — que es exactamente lo que
+S99 ya había cobrado por el lado de la geometría.
+
+**Y el corolario operativo de coordinación, que salió del mismo caso:** cuando
+un canon se registra **en una rama de pista** y no en `main`, **su sha se
+difunde a todas las pistas por el founder EN ESE MOMENTO**. *Una pista no puede
+saber que su árbol quedó viejo mirando su propio árbol* — es información que
+sólo existe afuera.
+
+**Y la forma de la cura, que vale para todo gate:** un gate tiene **TRES**
+desenlaces, no dos — **encontró** (frena) · **no encontró** (pasa) · **no pudo
+buscar** (lo dice, y decide según el caso: si lo que falló es su auto-prueba,
+frena; si lo que falta es el instrumento mismo porque el árbol es anterior a él,
+NO frena, porque frenar sería el rojo falso). *Un gate que no distingue «no
+encontré nada» de «no pude buscar» tiene el defecto del `grep` que lo motivó.*
