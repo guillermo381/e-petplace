@@ -6457,6 +6457,7 @@ export type Database = {
           aportado_por_menor: boolean
           country_code: string
           created_at: string
+          estadia_id: string | null
           evento_id: string
           id: string
           mascota_id: string
@@ -6468,6 +6469,7 @@ export type Database = {
           aportado_por_menor?: boolean
           country_code?: string
           created_at?: string
+          estadia_id?: string | null
           evento_id: string
           id?: string
           mascota_id: string
@@ -6479,6 +6481,7 @@ export type Database = {
           aportado_por_menor?: boolean
           country_code?: string
           created_at?: string
+          estadia_id?: string | null
           evento_id?: string
           id?: string
           mascota_id?: string
@@ -6487,6 +6490,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "evento_bitacora_familia_estadia_id_fkey"
+            columns: ["estadia_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_estadias"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "evento_bitacora_familia_evento_id_fkey"
             columns: ["evento_id"]
@@ -24478,6 +24488,10 @@ export type Database = {
       }
       registrar_bitacora_familia: {
         Args: { p_chips?: Json; p_mascota_id: string; p_texto?: string }
+        Returns: Json
+      }
+      registrar_bitacora_guarderia: {
+        Args: { p_chips?: Json; p_estadia_id: string; p_texto?: string }
         Returns: Json
       }
       registrar_busqueda_sin_resultado: {

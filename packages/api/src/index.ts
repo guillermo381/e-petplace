@@ -1594,11 +1594,13 @@ export {
   publicarMediaGuarderia,
   obtenerMediaDelDia,
   obtenerMediaDeMiMascota,
+  obtenerTramoVivoDeMiMascota,
   registrarPuntoVivo,
   obtenerPuntoVivo,
   levantarActaGuarderia,
   confirmarActaGuarderia,
   type MediaGuarderia,
+  type TramoVivo,
   type PuntoVivo,
   type DireccionActa,
   type Conformidad,
@@ -1667,6 +1669,8 @@ export {
   marcarNoRecogida,
   abrirTramoGuarderia,
   cerrarTramoGuarderia,
+  registrarBitacoraGuarderia,
+  type ResultadoBitacoraGuarderia,
 } from './wrappers/guarderia-durante';
 export type {
   MaquinaEstadia,
