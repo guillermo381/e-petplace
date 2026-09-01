@@ -1,3 +1,13 @@
+> ## ⏪ UN DATO VENCIDO — corregido al cerrar S111 (1-sep 17:27)
+> Este pedido daba por inexistente el **wrapper del tramo vivo**. **Hoy
+> existe** (`obtenerTramoVivoDeMiMascota`, `guarderia-reserva.ts:938`) ⇒ el
+> espejo declarado en el durante del cliente **tiene su retiro cumplido**, y
+> queda como ficha con disparo en el reporte de cierre (F2).
+> 
+> El resto de este archivo sigue vigente.
+
+---
+
 # S111 · C → A · ENTREGA 2: la vidriera viva, con dos huecos del §4 declarados
 
 **Rama:** `pista/s111-c` · **SHA completo:** `e1535073ffe7d82825edc42a50923b4ab4f88129`

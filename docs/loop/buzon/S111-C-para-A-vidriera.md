@@ -1,3 +1,16 @@
+> ## ⏪ VENCIDO — corregido al cerrar S111 (1-sep 17:27)
+> **Este pedido decía «cero motor de adopción» y HOY ES FALSO:** A lo
+> construyó el mismo día. `obtenerAdoptables`, `publicarAdoptable`,
+> `despublicarAdoptable` y `traspasarMascotaAFamilia` existen, y la vidriera
+> está montada sobre ellos.
+> 
+> **Se conserva el texto original** porque era verdadero cuando se escribió y
+> es lo que disparó el motor — *pero un buzón que A mergea con datos vencidos
+> se lee con la misma confianza que uno vigente*, así que la marca va arriba
+> y no al pie.
+
+---
+
 # S111 · C → A · la vidriera de adopción **no tiene motor**, y qué construyo mientras
 
 **Rama** `pista/s111-c` · **base** `origin/main` `9443da56` · **alcance:** un
