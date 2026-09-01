@@ -25088,3 +25088,143 @@ la absolvió el ojo del founder mirando la pantalla.
 **Corolario para todo censo de superficies:** censar *qué se pasa* no basta —
 hay que censar *qué se hace con lo que se pasa*. `L-451` dijo que un import no
 es un uso; ésta dice que **una prop tampoco lo es**.
+
+---
+
+## 🔴 `L-461` — UN BUSCADOR QUE DEVUELVE CERO EN SILENCIO INVALIDA TODO CENSO QUE LO TOQUE
+
+> ### El control NEGATIVO es tan obligatorio como el positivo: sin él, «no hay» y «no vi» tienen exactamente la misma cara.
+
+**Medida en S110, sobre el repo entero.** `grep` en este entorno **no es el
+binario**: una función del snapshot de shell lo shadowea con `ugrep … -I`
+(saltear binarios). Y **un byte NUL vuelve BINARIO al archivo** para casi todo
+buscador — `grep -I`, `ugrep -I`, `git grep` y los buscadores de los editores.
+
+**Lo que hacen sobre ese archivo: devuelven CERO.** No dicen «binary file
+matches». No fallan. No avisan. **Contestan cero**, que es una respuesta
+perfectamente normal.
+
+**El cobro medido, y es de la clase cara:** una pista afirmó que
+`crearFamiliaConPrimeraMascota` **no tenía llamadores**. Tenía **tres**, todos
+en el archivo con el byte NUL. *La conclusión era falsa, la medición estaba
+bien hecha, y el instrumento presentó su ceguera como resultado.*
+
+**🔴 Y LA CURA OBVIA ERA UN DEFECTO.** La reacción natural —«limpiá el byte»—
+habría roto dos piezas en silencio: los tres NUL vivos eran **separadores
+deliberados** (`join` con NUL, y una clave de plantilla). Borrarlos convierte
+una clave única en una concatenación sin separador, **y no falla**: produce
+colisiones donde antes no había.
+
+> ***Un byte invisible que además es load-bearing es la peor combinación
+> posible: no se ve al leer, y quitarlo no se ve al correr.***
+
+**La cura que sí sirve, y es la que quedó:** el byte NUL crudo se escribe como
+su **ESCAPE de dos caracteres**. Mismo valor en runtime, cero bytes NUL en el
+archivo, y el buscador vuelve a ver el contenido. **El gate no prohíbe el
+CARÁCTER: prohíbe el BYTE** — la distinción es lo que lo hace aplicable sin
+romper nada.
+
+**MECANISMO, no lápida** (`L-396`: el modo de falla decide la herramienta —
+acá el que tiene que frenar es un compilador, no un lector):
+`scripts/verify-sin-byte-nul.mjs`, **enganchado al pre-commit**. No necesita
+red, es un `read` por archivo trackeado, **declara qué extensiones NO mide**
+(un NUL en una imagen o una fuente no es defecto), y **corre su propio control
+positivo y negativo antes de medir nada** — *un gate de baseline 0 que no
+puede producir su rojo es indistinguible de uno que no miró.* Su rojo se probó
+sembrando el byte en un archivo trackeado real, no en un fixture.
+
+**El corolario operativo, que vale para todo barrido de repo y no sólo para
+esto:** todo censo corre con **un patrón cuyo hit ya se conoce** y **uno cuyo
+cero ya se conoce**. Si el instrumento no puede producir su rojo, su verde no
+es un dato.
+
+---
+
+## 🟡 `D-986` — EL CUIDADOR EMPLEADO NO PUEDE OPERAR EL DURANTE DE GUARDERÍA
+
+**Medido en S110-A contra el objeto.** `user_gestiona_prestador` =
+**titular OR administrador OR `is_admin()`**. No incluye al empleado de a pie.
+
+Ese predicado gatea **las cinco RPC del durante**, `levantar_acta_guarderia`,
+`abrir_tramo_guarderia` y `registrar_punto_vivo`. ⇒ **el cuidador que maneja la
+camioneta no puede marcar «subió», ni levantar el acta, ni emitir su posición.**
+
+⚠️ **NO es un techo que S110 introdujo: es el que el acta y el tramo tienen
+desde S107.** Lo que S110 hizo fue **usar el mismo predicado a propósito**, y la
+razón no es prolijidad: los actos únicos levantan el acta y mueven el estado en
+la misma transacción, y **dos gates distintos en un acto único producen una
+transacción que puede autorizar la mitad.**
+
+**Por qué no se ensancha de prepo:** un gate que se abre para que una pantalla
+ande es cómo se entrega la lapicera sin que nadie lo firme. Y ensanchar acá no
+es una línea: `empleado_tiene_rol` exige decidir **qué rol** (¿el chip del
+oficio? ¿un rol «transporte» que no existe?), y eso es decisión de producto.
+
+**Consecuencia mientras tanto, escrita para que no se descubra en el aparato:**
+el día de guardería lo opera **el TITULAR**. La pantalla de S110-C lo dice; no
+se trata como bug.
+
+**Dueño:** la mesa. **Disparo:** antes de la primera guardería real con personal
+de transporte propio — o antes, si el founder quiere probar el durante con una
+cuenta que no sea la del titular.
+
+---
+
+## 🟢 `D-987` — LOS DOS LECTORES DEL DÍA NO PROYECTAN LA AUDITORÍA DE LAS DOS HORAS
+
+**Nace y se acota en el mismo acto (S110-A).** `guarderia_estadia_actos` guarda
+`ocurrido_en` (la puerta) y `registrado_en` (el servidor) por cada acto, y **su
+divergencia es el dato**: con cola offline puede ser de cuarenta minutos.
+
+Los lectores del día ya proyectan `ocurrido_en` a través de las columnas de la
+estadía (`a_bordo_en`, `llegada_en`, `retorno_en`, `entregada_en`,
+`no_recogida_en`), que es **lo que la superficie tiene que mostrar**. Lo que
+**no** tiene lector es `registrado_en` — y eso es correcto hoy: *la hora del
+servidor existe para auditar y no se muestra; mostrarla al lado de la de la
+puerta invita a preguntar cuál es la buena.*
+
+**Por qué es 🟢 y no una deuda de trabajo:** el dato **está escrito y es
+consultable** (`guarderia_estadia_actos`, con RLS para el negocio y la familia).
+Lo que falta es **quién lo mira y cuándo**, que es una superficie de auditoría y
+no del día.
+
+**Disparo:** el primer reclamo donde la hora esté en discusión — o el día que
+exista el panel de soporte. **Hasta entonces la consulta es SQL**, y eso alcanza
+para un ambiente sin volumen.
+
+---
+
+## 🟡 `D-988` — CUATRO DE SEIS ESCRITORES APAGAN UNA RECURRENCIA SIN DEJAR MOTIVO
+
+**Medido en S110 por D y por E, por caminos distintos** — *dos lecturas
+independientes que coinciden, que es la única forma de que un censo valga.*
+
+`suscripciones_servicio` tiene **seis** escritores de su estado. **Cuatro apagan
+la recurrencia sin escribir `motivo_cancelacion`:**
+
+- `cerrar_y_renovar_planes`
+- `confirmar_pago_plan_paseo`
+- `expirar_planes_sin_pago`
+- `vencer_links_mensuales`
+
+**Sólo dos lo dejan:** el camino de memorial y el del reverso de pago.
+
+> ### Un plan que se apagó y no dice por qué es un caso de soporte sin respuesta.
+
+Y el modo de falla es el que esta casa ya nombró: **no falla, no deja traza, y
+el estado resultante se lee como normal.** Una familia que pregunta «¿por qué se
+me cortó el plan?» recibe una fila `cancelada` idéntica a la de quien lo canceló
+a propósito. *La diferencia entre «venciste» y «no pagaste» y «lo cancelaste» no
+está escrita en ningún lado, y las tres se ven igual.*
+
+**Prioridad 🟡 ALTA.**
+
+🔴 **Criterio de disparo, y es una precondición, no una preferencia:** **ANTES
+de encender la llave compartida de `app_config` del cron de renovación.** Hoy
+esos caminos corren sobre datos de prueba; con la llave encendida corren sobre
+**plata real**, y cada apagón silencioso pasa a ser un reclamo sin material para
+contestarlo. *El costo de agregar el motivo hoy es una línea por escritor; el de
+agregarlo después es una línea por escritor **más** el backfill que no se puede
+hacer, porque el motivo de un apagón pasado no se reconstruye.*
+
+**NO se corrige en S110** — se declara con su dueño y su disparo.
