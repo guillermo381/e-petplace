@@ -692,6 +692,7 @@ export const clienteEn = {
   // S61-A1 (FALLA-J1) — the sellable's voice lives in the rail, by code
   // (LOTE S61, GATE PENDIENTE founder). Walk reuses explorar.paseoTitulo.
   servicioVoz: {
+    guarderiaDia: 'A day at daycare',
     grooming: 'Bath',
     groomingCompleto: 'Bath & cut',
     adiestramiento: 'Training',

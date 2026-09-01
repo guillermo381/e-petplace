@@ -103,10 +103,15 @@ function iconoDe(tipo: string | null): 'paseo' | 'grooming' | 'training' | 'tele
  *  Un oficio futuro sin glifo va sin ícono: cero genéricos (Ley 12). */
 function iconoOficio(
   tipo: string | null,
-): 'paseo' | 'grooming' | 'training' | 'telemedicina' | null {
+): 'paseo' | 'grooming' | 'training' | 'telemedicina' | 'guarderia' | null {
   if (tipo?.startsWith('grooming')) return 'grooming';
   if (tipo === 'adiestramiento') return 'training';
   if (tipo?.startsWith('paseo')) return 'paseo';
+  /* ⭐ S109-D · el quinto oficio. El glifo YA EXISTÍA en el registry y ya se
+     monta en el HOY del prestador y en NEGOCIO: lo único que faltaba era que
+     esta función lo nombrara. *Sin él la estadía se pintaba sin glifo — el
+     mismo mapa cerrado que le quitaba el nombre, un renglón más abajo.* */
+  if (tipo?.startsWith('guarderia')) return 'guarderia';
   if (esTeleconsulta(tipo)) return 'telemedicina';
   return null;
 }

@@ -847,6 +847,7 @@ export const clienteEs = {
   // S61-A1 (FALLA-J1) — la voz del comprable en el riel, por código
   // (LOTE S61, GATE PENDIENTE founder). El paseo reusa explorar.paseoTitulo.
   servicioVoz: {
+    guarderiaDia: 'El día en la guardería',
     grooming: 'Baño',
     groomingCompleto: 'Baño y corte',
     adiestramiento: 'Adiestramiento',
