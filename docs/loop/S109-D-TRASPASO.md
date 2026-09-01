@@ -53,7 +53,7 @@ no está tomado porque alguien lo mencione: está tomado si tiene encabezado.*
 | qué | dueño | disparo |
 |---|---|---|
 | **El peldaño de la raza** — `raza_ruta_imagen` en los tres lectores + `especie` en el del mostrador. 111 imágenes sembradas hoy inalcanzables; `mostrador/autorizar` **no llega ni al genérico** | **A** (tomado) | al publicarse, las tres superficies suben del ② al ① sin tocar pantalla |
-| **La proyección de guardería con forma de cita** — lo único que destraba `historico.tsx`, la última deuda del gate | **A** (tomado) | cuando exista: el histórico es UNA línea y la deuda sale sola |
+| ✅ **La proyección de guardería con forma de cita** — **HECHA por A** (`e1f9f3c0`), y `historico.tsx` sumó la quinta pata **en una línea**: `DEUDA_CONOCIDA` del gate queda **VACÍA**. *La deuda duró exactamente lo que tardó en existir su bloqueante* | **A** ✅ | — |
 | ✅ **`MapaZona` afirmaba una salvaguarda que su código no tenía** — **CERRADO por B** (`pista/s109-b` `5ca3882f`): eligió **el nombre**, `zonaLat`/`zonaLon`. 🔑 Y midió lo que lo volvió barato: **`FichaPrestador` ya hablaba ese idioma desde S84 y lo traducía al llamar** ⇒ el rename no impuso vocabulario, *le devolvió a la pieza el que su consumidor ya usaba*. Dos sitios, no un barrido | **B** ✅ | — |
 | 🟡 **EL RIESGO ESPEJO, declarado y NO cerrado** — el rename cierra pasarle la coordenada exacta a la zona (hoy es error de tipo). **La dirección inversa sigue abierta: nada impide pasarle a `MapaPunto` un centro DESPLAZADO** ⇒ *un punto de aspecto exacto sobre una coordenada deliberadamente imprecisa* — la promesa que `MapaZona` existe para no hacer, hecha por la pieza de al lado. **No se cierra hoy a propósito**: `MapaPunto` tiene UN consumidor y su dato es inequívoco, así que un guard sería una defensa sin caso — *y un guard sin caso no es gratis: es una defensa que nadie puede probar y que la próxima sesión ablanda porque estorba* (B). ✅ **Y NO vive sólo acá: B lo escribió en el header de `MapaPunto`, sobre la prop `lat`** (`pista/s109-b` `47a4f002`) — verificado contra el objeto: **27 líneas de comentario, cero de código**. *Una condición escrita lejos del código que la cumple es una condición que nadie va a leer el día que se cumpla* | **B** (la pieza es de `packages/ui`) | **su SEGUNDO consumidor** — el candidato con nombre es *la vitrina de la familia queriendo mostrar «más o menos por acá» con un punto*; **quien llegue va a estar mirando ese bloque** |
 | **El DURANTE de guardería** — objetivo de **S110**, no se empezó | **S110** | ver §④ |
@@ -95,9 +95,13 @@ aparato — **no se publicó OTA ni se lanzó build**, por firma del founder.*
 - **La cara por escalera** — las dos superficies curadas **no se vieron**. Y
   `mostrador/autorizar` **sigue mostrando la huella**, correctamente, hasta que su
   lector traiga `especie`.
-- **La rama ROJA de `verify:jornada-completa`** — probada **sintéticamente**
-  (desarmando la deuda conocida dio exit 1) y **jamás disparada por una regresión
-  real**. Su rama de **deuda curada que sigue listada** tampoco corrió nunca.
+- **La rama ROJA de `verify:jornada-completa`** — probada **sintéticamente** y
+  jamás disparada por una regresión real. ⚠️ **Sí se ejerció de otra forma** (§④bis):
+  un lector nuevo la puso en rojo **falso** y eso destapó un defecto del propio
+  instrumento. *Su primer contacto con el mundo no encontró un defecto del código:
+  encontró uno suyo.* Su rama de **deuda curada que sigue listada** tampoco corrió
+  nunca — y ahora que `DEUDA_CONOCIDA` está vacía, no puede correr hasta que
+  alguien vuelva a declarar una.
 - **`verify:voz-por-tipo`** — baseline **0** desde su cura; **no cazó todavía
   ningún caso nuevo**. *Un baseline en 0 no dice «no hay»: dice «no vi, con la
   lista de hoy»* (`L-425`).
@@ -109,6 +113,36 @@ aparato — **no se publicó OTA ni se lanzó build**, por firma del founder.*
   galería en esta sesión**.
 
 ---
+
+## ④bis 🔴 EL GATE DIO UN ROJO FALSO AL DÍA SIGUIENTE, Y ERA LA MISMA LECCIÓN EN OTRA PARTE DEL NOMBRE
+
+Al publicar A `obtenerCitasGuarderiaDelDia`, `verify:jornada-completa` acusó a
+**dos superficies que YA muestran guardería**. **La conclusión de A era correcta
+y la causa estaba media pulgada corrida**, y la diferencia decidía la cura: no
+medía «por lector en vez de por oficio» —agrupaba por oficio— sino que
+**derivaba el oficio del NOMBRE**, y un mismo oficio tiene **dos raíces**
+(`Estadias` y `Guarderia`) ⇒ dos grupos para un oficio.
+
+> **Es la enmienda ① otra vez, corrida de lugar:** primero el **sufijo**
+> (`…DelDia` vs `…PorRango`), ahora la **raíz**. *Un gate atado a cómo se escribe
+> un nombre mide la convención, no el hecho — y la convención se rompe en cada
+> pieza del nombre, una por vez.* Mientras hubo **un lector por oficio**,
+> derivación y verdad coincidían: **la coincidencia era del DATO, no del
+> diseño**, y se cayó el día que un oficio tuvo dos puertas.
+
+**Cura: el oficio se DECLARA por lector.** Y no choca con «el universo sale del
+objeto»: la tabla **no es una lista de oficios** —ésa sí sería el sexto mapa
+cerrado— sino **la clasificación de lo que el objeto ya contiene**. Nada puede
+faltar por olvido: un lector **sin clasificar** detiene el gate (salida 2,
+**probada**), y una entrada **cuyo lector ya no existe** también — *si ése era la
+última puerta de su oficio, el oficio desaparecería del universo y nadie volvería
+a exigirlo.* El control mutante ahora borra **las tres** puertas: *uno que
+borrara una sola daría verde con las otras dos vivas.*
+
+⚠️ **Y esto entra en «lo que nunca corrió» al revés:** es la **primera vez que
+este gate se ejerció de verdad** — no lo disparó una regresión, lo disparó un
+lector nuevo, y **encontró un defecto del instrumento, no del código**. *Un gate
+que nunca fue puesto a prueba por el mundo no es un gate probado.*
 
 ## ⑤ 🔴 LAS BUILDS 1.0.7 EXISTEN Y **NO LLEVAN NADA DE ESTA SESIÓN** — medido
 
