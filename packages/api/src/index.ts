@@ -1646,3 +1646,8 @@ export {
 /* S108-A · los programas de adiestramiento, en vocabulario de SESIONES. */
 export { obtenerMisProgramas } from './wrappers/adiestramiento-programa';
 export type { ProgramaConSaldo, CodigoErrorPrograma } from './wrappers/adiestramiento-programa';
+
+/* S109-A · LA QUINTA PROYECCIÓN — la guardería con forma de cita, para que
+   «el trabajo que ya hiciste» enumere los CINCO oficios y no cuatro. */
+export { obtenerCitasGuarderiaDelDia } from './wrappers/guarderia-agenda';
+export type { CodigoErrorGuarderiaAgenda } from './wrappers/guarderia-agenda';
