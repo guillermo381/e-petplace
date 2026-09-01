@@ -24637,6 +24637,41 @@ tres las resolvió el objeto.**
 quien cayó **acababa de citarle esa misma lección a otro**. *Una lección no
 protege a quien la enuncia — sólo a quien la ejecuta sobre su propio trabajo.*
 
+## 🔴 `L-454` — UNA ROTACIÓN DE CREDENCIALES INVALIDA LOS BINARIOS YA CONSTRUIDOS, NO SÓLO EL PRÓXIMO DEPLOY
+
+**Medida en S109 sobre la key de Google Maps.**
+
+La key de Maps **se hornea en el APK** (`meta-data com.google.android.geo.API_KEY`
+del manifiesto): **no se resuelve en runtime y no se puede actualizar por OTA.**
+⇒ el día que alguien la rota en la consola, **todos los binarios que ya existen
+quedan muertos a la vez** — los instalados, los de nube y los locales. *No es un
+problema del próximo deploy: es un problema de todo lo que ya está en manos de
+alguien.*
+
+> ### 🔴 Y su síntoma se disfraza de otro defecto, que es lo que la vuelve cara.
+> «El mapa monta y no dibuja» se ve **idéntico** a un problema de **firma**
+> (SHA-1 no autorizado) — y la firma es lo que se mira primero, **porque es lo
+> único que el código puede medir**. En S109 esa confusión costó una tanda
+> entera de diagnóstico, dos APK construidos con la key muerta adentro, y estuvo
+> a punto de costar la instalación de esos dos binarios.
+>
+> **El discriminador es de alcance, y es barato:** una **firma** mal autorizada
+> rompe **una app** (el par `package + keystore`); una **key rotada** rompe
+> **todas las apps y todos los servicios que la usan, a la vez**. *Si no dibuja
+> en ningún lado, no mires la firma.*
+
+**Y lo peor de todo: la rotación NO DEJA RASTRO EN EL REPO.** No hay commit, no
+hay diff, ningún gate la ve. El repo sigue verde mientras el producto está roto.
+
+**La regla:** una rotación se cura en **TODOS** los lugares donde la credencial
+vive, y ese censo **se hace, no se recuerda** — secrets del builder (uno por
+app), `.env` locales (**uno por worktree, y no están en git**), config de la app,
+otros repos y funciones. *El lugar que quede con la vieja no falla hoy: falla
+semanas después, en manos de otro, y parece un defecto nuevo.*
+
+*Corolario: los worktrees viejos son el peor escondite — nadie los mira, y el día
+que alguien buildee desde uno se lleva la credencial muerta sin que nada avise.*
+
 ## 🟠 `L-453` — EL SHA-1 NO ES DEL PRODUCTO: ES DEL PAR `package + keystore`, Y CADA APP TIENE EL SUYO EN EAS
 
 **Medida en S109-D sobre los dos APK de nube.**
