@@ -31,6 +31,8 @@
 import {
   publicarMediaGuarderia,
   levantarActaGuarderia,
+  marcarABordo,
+  marcarEntregada,
   registrarPuntoVivo,
 } from '@epetplace/api';
 import type { PublicarMedia } from './motor-media';
@@ -68,6 +70,18 @@ export function cablearPublicarMedia(prestadorId: string): PublicarMedia {
  * regla**: nace con el acta, antes del primer intento, y se reusa en cada
  * reintento.
  */
+/* ⚠️ **SIN CONSUMIDOR DESDE S110-C — medido, no supuesto** (0 importadores
+   reales; el censo por texto daba 1 porque contaba una mención en un
+   comentario: `L-170` en vivo).
+
+   **No se borra, y la razón no es cortesía:** levanta el acta **sin mover el
+   estado**, y ése es el camino correcto el día que haya que registrar un acta
+   que NO es un acto del día — una corrección, o un acta de un tramo que ya
+   cerró. Su reemplazo (`cablearActoUnico`) hace las dos cosas juntas a
+   propósito, y para eso no sirve.
+
+   ☠️ **Disparo de muerte:** si al cerrar el frente de guardería sigue sin
+   consumidor y la mesa no abrió el caso del acta-sin-acto, se retira. */
 export function cablearLevantarActa(): LevantarActa {
   return async (entrada) => {
     const r = await levantarActaGuarderia({
@@ -81,6 +95,64 @@ export function cablearLevantarActa(): LevantarActa {
     });
     if (!r.ok) return { ok: false, codigo: r.codigo, mensaje: r.mensaje };
     return { ok: true, actaId: r.data.actaId, ya_existia: r.data.yaExistia };
+  };
+}
+
+/**
+ * ⑤ · **EL ACTO ÚNICO POR LA COLA** — el que hace que el sin-señal exista (S110-C).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **POR QUÉ NACE, y es un defecto que casi entrego:** al llegar el motor de
+ * S110-A cableé `marcarABordo` **directo desde la pantalla**, y con eso perdí
+ * el camino que la cola existía para dar. *Con el teléfono sin señal en la
+ * puerta de una casa, la llamada falla y el acta no se levanta* — y el
+ * recorrido del founder dice, literal: **«Si no hay señal, la hoja baja igual y
+ * me lo dice»**.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * La cura no fue volver atrás al acta sola: **es que la cola reproduzca EL
+ * ACTO**, no el acta. Y se pudo porque las dos piezas encajan sin forzar nada:
+ *
+ * · `LevantarActa` ya lleva **`levantadaEn`** —la hora de la puerta, sellada al
+ *   crear el acta local— y **`claveIdempotencia`**;
+ * · `marcarABordo`/`marcarEntregada` reciben **`ocurridoEn`** y
+ *   **`claveIdempotencia`**, y **la idempotencia es por (estadía, ACTO)**, así
+ *   que *un reintento tarde devuelve el original con su hora en vez de
+ *   rebotar* — incluso si la estadía ya avanzó.
+ *
+ * ⇒ **El acta se levanta en la puerta con su hora, y el ACTO ENTERO —acta más
+ * estado— viaja solo cuando hay señal, sin duplicar y sin mentir el reloj.**
+ * *Las dos mitades que parecían excluyentes eran la misma pieza vista de dos
+ * lados.*
+ *
+ * ⚠️ **Consecuencia declarada, y no es menor:** el estado del día **no se mueve
+ * hasta que el acto viaja**. Con señal es inmediato; sin señal, el animal
+ * figura en su casa hasta que haya. *Es la verdad y no un retraso disimulado:
+ * el motor no puede saber lo que todavía no le contaron.* La alternativa
+ * —mover el estado local y sincronizar después— es la que produce dos verdades
+ * sobre dónde está un animal, y ésa no se toma sin firma.
+ */
+export function cablearActoUnico(): LevantarActa {
+  return async (entrada) => {
+    const payload = {
+      carnetVerificado: entrada.carnetVerificado,
+      objetos: entrada.objetos,
+      observaciones: entrada.observaciones,
+      /* `levantadaEn` ES la hora de la puerta: nace en el aparato al crear el
+         acta local, no al viajar. El servidor no la pisa y guarda la suya
+         aparte para auditar. */
+      ocurridoEn: entrada.levantadaEn,
+      claveIdempotencia: entrada.claveIdempotencia,
+    };
+    const r =
+      entrada.direccion === 'recogida'
+        ? await marcarABordo(entrada.estadiaId, payload)
+        : await marcarEntregada(entrada.estadiaId, payload);
+    if (!r.ok) return { ok: false, codigo: r.codigo, mensaje: r.mensaje };
+    /* `actaYaExistia` y no `yaEstaba`: la cola pregunta por SU acta —si ya
+       viajó, deja de reintentarla—, no por el estado de la estadía. Son dos
+       hechos distintos y el motor los devuelve separados a propósito. */
+    return { ok: true, actaId: r.data.actaId, ya_existia: r.data.actaYaExistia };
   };
 }
 

@@ -31,12 +31,13 @@
  * pantalla mintiendo sobre lo que puede hacer.*
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AvatarMascota,
+  Boton,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -45,15 +46,23 @@ import {
   Tarjeta,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
+  abrirTramoGuarderia,
   caraDeMascota,
+  cerrarTramoGuarderia,
+  marcarLlegada,
+  marcarRetorno,
   obtenerEstadiasDelDia,
+  obtenerMaquinaEstadia,
   obtenerMiPrestador,
   resolverUrlsFotos,
   type EstadiaDelDia,
   type EstadoEstadia,
+  type MaquinaEstadia,
+  type MotivoNoRecogida,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -61,6 +70,18 @@ import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
 import { SeccionDireccion } from '@/components/seccion-direccion';
+import { HojaActaGuarderia } from '@/components/hoja-acta-guarderia';
+import { HojaNoEstaba } from '@/components/hoja-no-estaba';
+import { horaCorta } from '@/lib/ventas-formato';
+import type { DireccionActa } from '@/lib/cola-actas';
+import {
+  borrarViaje,
+  guardarViaje,
+  leerViaje,
+  type ViajeAbierto,
+} from '@/lib/viaje-guarderia';
+import { cablearEmitirPunto } from '@/lib/guarderia-cableado';
+import { usePuntoVivo } from '@/lib/use-punto-vivo';
 
 /** Fecha LOCAL. 🔴 `toISOString()` da UTC y en Guayaquil, pasadas las 19:00,
  *  devuelve el día siguiente — la jornada saldría vacía a la tarde. */
@@ -97,17 +118,55 @@ function comoDireccion(d: unknown): {
 type Estado =
   | { fase: 'cargando' }
   | { fase: 'roto' }
-  | { fase: 'listo'; estadias: EstadiaDelDia[]; caras: Map<string, string> };
+  | {
+      fase: 'listo';
+      prestadorId: string;
+      estadias: EstadiaDelDia[];
+      caras: Map<string, string>;
+      /** 🔴 La máquina, LEÍDA del motor — ver `actaQueCorresponde`. */
+      maquina: MaquinaEstadia | null;
+    };
 
 export default function DiaGuarderia() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const { gate, reintentarGate } = useGateGestor();
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [intento, setIntento] = useState(0);
+  /** La estadía cuya acta está abierta. `null` = la hoja no se monta. */
+  const [acta, setActa] = useState<{ estadia: EstadiaDelDia; direccion: DireccionActa } | null>(
+    null,
+  );
+  /** El viaje que este teléfono sigue. Se lee del disco al montar: **sobrevive
+   *  a cerrar la app**, que es lo que el recorrido pide. */
+  const [viaje, setViaje] = useState<ViajeAbierto | null>(null);
+  /** La estadía cuyo «no estaba» se está anotando. `null` = no se monta. */
+  const [noEstaba, setNoEstaba] = useState<EstadiaDelDia | null>(null);
+  const [enVuelo, setEnVuelo] = useState(false);
+
+  /**
+   * EL PUNTO VIVO — lo que la familia ve mientras el vehículo va en camino.
+   *
+   * 🔴 **`activo` es el freno, y no es opcional:** `cerrarTramo` **borra** el
+   * punto a propósito —*lo que ya no se mueve no se sigue mostrando*— y desde
+   * S110-A el escritor **rebota `tramo_cerrado`**. Sin este freno, un emisor
+   * rezagado resucitaría el punto y la familia vería moverse un vehículo que ya
+   * llegó.
+   *
+   * ⚠️ **UN PUNTO O NADA, JAMÁS LA TRAZA**, y no se sostiene con disciplina:
+   * el escritor es un UPSERT sobre `tramo_id`, así que cada punto pisa al
+   * anterior. *Las paradas de una ruta son las casas de otras familias.*
+   */
+  const emitirPunto = useMemo(() => cablearEmitirPunto(), []);
+  const punto = usePuntoVivo({
+    tramoId: viaje?.tramoId ?? '',
+    activo: viaje !== null,
+    emitir: emitirPunto,
+  });
 
   useEffect(() => {
     if (gate !== 'permitido') return;
@@ -131,7 +190,23 @@ export default function DiaGuarderia() {
       const paths = r.data.map((e) => e.mascotaFotoUrl).filter((x): x is string => typeof x === 'string' && x.length > 0);
       const caras = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
       if (!vigente) return;
-      setEstado({ fase: 'listo', estadias: r.data, caras });
+      /* El viaje se lee del disco con la MISMA fecha que el roster: dos formas
+         de saber qué día es se contradicen justo a la tarde, que es cuando se
+         devuelven los animales. */
+      const v = await leerViaje(hoyLocal());
+      /* La máquina es un CATÁLOGO: se pide una vez, con el día. Si falla, la
+         pantalla sigue mostrando el roster y sólo pierde los actos — un
+         catálogo caído no puede dejar al cuidador sin saber a quién buscar. */
+      const maq = await obtenerMaquinaEstadia();
+      if (!vigente) return;
+      setViaje(v);
+      setEstado({
+        fase: 'listo',
+        prestadorId: p.data.id,
+        estadias: r.data,
+        caras,
+        maquina: maq.ok ? maq.data : null,
+      });
     })();
     return () => {
       vigente = false;
@@ -160,6 +235,172 @@ export default function DiaGuarderia() {
   const especieDe = (x: string): 'perro' | 'gato' | undefined =>
     x === 'perro' || x === 'gato' ? x : undefined;
 
+  const listo = estado.fase === 'listo' ? estado : null;
+
+  /**
+   * QUÉ ACTA CORRESPONDE — **derivada de la máquina que devuelve el motor**,
+   * jamás repetida acá.
+   *
+   * ═══════════════════════════════════════════════════════════════════════
+   * 🔴 **La primera versión la escribí de memoria y tenía DOS errores que
+   * ningún typecheck ve**, los dos encontrados al leer la tabla del motor:
+   *   · daba el acta de devolución colgando de `en_guarderia`, y **cuelga de
+   *     `retorno_en_curso`** — el botón aparecía antes de salir a devolver, y
+   *     el motor lo habría rebotado por transición ilegal;
+   *   · **ignoraba que `a_bordo` exige tramo de recogida abierto**, así que
+   *     ofrecía el acta sin viaje: rebote `sin_tramo_abierto`.
+   * *Dos veces la pantalla ofreciendo lo que el motor iba a rechazar — Ley 23
+   * rota en los dos sentidos, compilando perfecto.*
+   * ═══════════════════════════════════════════════════════════════════════
+   *
+   * Por eso ahora **se lee**: la máquina trae `desde`, `exigeTramo`, `esLote` y
+   * `levantaActa` como DATO. *El día que cambie, esta pantalla la sigue sin que
+   * nadie se acuerde de tocarla.*
+   *
+   * Sin máquina (catálogo caído) **no se ofrece ninguna acta**: es preferible
+   * que el cuidador no vea el botón a que lo vea y rebote.
+   */
+  const actaQueCorresponde = (e: EstadoEstadia): DireccionActa | null => {
+    if (listo?.maquina == null) return null;
+    const acto = listo.maquina.actos.find(
+      (a) => a.desde === e && a.levantaActa !== null && !a.esLote,
+    );
+    if (acto?.levantaActa == null) return null;
+    /* Si el acto exige tramo, exige EL SUYO: con el viaje de vuelta abierto no
+       se levanta un acta de recogida. */
+    if (acto.exigeTramo !== null && viaje?.direccion !== acto.exigeTramo) return null;
+    return acto.levantaActa;
+  };
+
+  /* ── EL VIAJE ────────────────────────────────────────────────────────────
+     Los conteos se DERIVAN del roster; nunca se guardan. El servidor ya tiene
+     la verdad de cuántos subieron, y una copia local sería una segunda verdad
+     que diverge el día que una subida falla. */
+  const porRecoger = listo?.estadias.filter((e) => e.estado === 'reservada') ?? [];
+  const aBordo = listo?.estadias.filter((e) => e.estado === 'recogida_en_curso') ?? [];
+  const adentro = listo?.estadias.filter((e) => e.estado === 'en_guarderia') ?? [];
+  const volviendo = listo?.estadias.filter((e) => e.estado === 'retorno_en_curso') ?? [];
+
+  const relanzar = () => setIntento((n) => n + 1);
+
+  /** La hora del TOQUE — la de la puerta. La del servidor existe para auditar
+   *  y no se muestra: con cola offline sería la hora de la señal. */
+  const ahora = () => new Date().toISOString();
+
+  const avisarFallo = (mensaje: string) => mostrar({ variante: 'error', texto: mensaje });
+
+  const salirABuscar = async () => {
+    if (listo === null || enVuelo) return;
+    setEnVuelo(true);
+    try {
+      const r = await abrirTramoGuarderia({
+        prestadorId: listo.prestadorId,
+        fecha: hoyLocal(),
+        direccion: 'recogida',
+        estadias: porRecoger.map((e) => e.estadiaId),
+      });
+      if (!r.ok) return avisarFallo(r.mensaje);
+      const v: ViajeAbierto = {
+        tramoId: r.data.tramoId,
+        direccion: 'recogida',
+        fecha: hoyLocal(),
+        prestadorId: listo.prestadorId,
+        abiertoEn: Date.now(),
+      };
+      await guardarViaje(v);
+      setViaje(v);
+      relanzar();
+    } finally {
+      setEnVuelo(false);
+    }
+  };
+
+  const salirADevolver = async () => {
+    if (listo === null || enVuelo) return;
+    setEnVuelo(true);
+    try {
+      const ids = adentro.map((e) => e.estadiaId);
+      const r = await abrirTramoGuarderia({
+        prestadorId: listo.prestadorId,
+        fecha: hoyLocal(),
+        direccion: 'devolucion',
+        estadias: ids,
+      });
+      if (!r.ok) return avisarFallo(r.mensaje);
+      /* 🔴 LA ASIMETRÍA ES DECISIÓN, NO CONSECUENCIA (confirmada por A): en la
+         recogida cada animal sube en SU puerta y se marca de a uno; en la
+         devolución **salen todos juntos del local**, así que el retorno es un
+         acto de LOTE en una transacción. *Seis animales que salen en la misma
+         camioneta salen juntos o no salió ninguno.* */
+      const m = await marcarRetorno(ids, ahora());
+      if (!m.ok) return avisarFallo(m.mensaje);
+      const v: ViajeAbierto = {
+        tramoId: r.data.tramoId,
+        direccion: 'devolucion',
+        fecha: hoyLocal(),
+        prestadorId: listo.prestadorId,
+        abiertoEn: Date.now(),
+      };
+      await guardarViaje(v);
+      setViaje(v);
+      relanzar();
+    } finally {
+      setEnVuelo(false);
+    }
+  };
+
+  const llegamos = async () => {
+    if (viaje === null || enVuelo) return;
+    setEnVuelo(true);
+    try {
+      const m = await marcarLlegada(aBordo.map((e) => e.estadiaId), ahora());
+      if (!m.ok) return avisarFallo(m.mensaje);
+      /* El tramo se cierra DESPUÉS de que llegaron, y cerrarlo borra el punto
+         vivo: lo que ya no se mueve no se sigue mostrando. */
+      await cerrarTramoGuarderia(viaje.tramoId);
+      await borrarViaje();
+      setViaje(null);
+      relanzar();
+    } finally {
+      setEnVuelo(false);
+    }
+  };
+
+  /**
+   * EL CIERRE DEL DÍA. Del recorrido: *«Cuando entrego el último, el día se
+   * cierra y me lo dice sin fanfarria.»*
+   *
+   * 🔴 Es automático y no un botón porque **no hay nada que decidir**: si no
+   * queda nadie adentro ni volviendo, el viaje de devolución terminó. *Pedir un
+   * toque para confirmar un hecho que ya ocurrió es preguntar algo cuya
+   * respuesta ya sabemos* (Ley 23, corolario).
+   *
+   * El `ref` es el guard contra el re-disparo: `relanzar()` vuelve a correr el
+   * efecto y sin él cerraría el tramo en cada vuelta.
+   *
+   * ⚠️ **Este bloque ya se perdió una vez** — una limpieza por RANGO DE ÍNDICES
+   * se llevó al vecino de al lado, y **ningún gate lo vio**: nada lo
+   * referenciaba, así que el typecheck quedó verde sobre una función que había
+   * desaparecido. *Lo cazó un censo de piezas conocidas, no una relectura.*
+   */
+  const cerrando = useRef(false);
+  useEffect(() => {
+    if (viaje === null || viaje.direccion !== 'devolucion') return;
+    if (volviendo.length > 0 || adentro.length > 0) return;
+    if (cerrando.current) return;
+    cerrando.current = true;
+    void (async () => {
+      try {
+        await cerrarTramoGuarderia(viaje.tramoId);
+        await borrarViaje();
+        setViaje(null);
+        mostrar({ variante: 'exito', texto: t('diaGuarderia.diaCerrado') });
+      } finally {
+        cerrando.current = false;
+      }
+    })();
+  }, [viaje, volviendo.length, adentro.length, mostrar, t]);
+
   const alAtras = useCallback(() => router.back(), [router]);
 
   if (gate === 'verificando' || estado.fase === 'cargando') {
@@ -183,6 +424,58 @@ export default function DiaGuarderia() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('diaGuarderia.titulo')} atras onAtras={alAtras} />
 
+      {/* ═══ EL VIAJE ═══════════════════════════════════════════════════════
+          Del recorrido: *«arriba queda una barra fina, viva, que dice cuántos
+          llevo a bordo y cuántos me faltan. Esa barra no se mueve de ahí hasta
+          que cierro el viaje.»*
+
+          🔴 Vive FUERA del ScrollView a propósito: adentro se iría con el
+          scroll, y el cuidador mira el teléfono con una mano mientras maneja o
+          toca timbres. *Una barra que hay que ir a buscar no es una barra.* */}
+      {viaje !== null ? (
+        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3] }}>
+          <Tarjeta relleno="normal" elevacion="reposo">
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}
+            >
+              <View style={{ flex: 1 }}>
+                <Texto variante="cuerpo">
+                  {viaje.direccion === 'recogida'
+                    ? t('diaGuarderia.viajeRecogida', {
+                        aBordo: aBordo.length,
+                        faltan: porRecoger.length,
+                      })
+                    : t('diaGuarderia.viajeDevolucion', { llevando: volviendo.length })}
+                </Texto>
+              </View>
+              {/* «Llegamos» sólo en la recogida y sólo con alguien a bordo: en
+                  la devolución el viaje se cierra cuando se entrega el último,
+                  no con un botón. Ley 23 — la puerta no ofrece lo que va a
+                  rechazar. */}
+              {/* 🔴 EL PERMISO DENEGADO SE DICE. Sin ubicación, la familia no
+                  ve a dónde va su animal — y el único que puede arreglarlo es
+                  quien tiene el teléfono en la mano. *Callarlo deja a las dos
+                  puntas sin entender: la familia mirando un mapa vacío y el
+                  cuidador creyendo que emite.* (Ley 13.) */}
+              {punto.estado === 'permiso_denegado' ? (
+                <Texto variante="apoyo" color="warning">
+                  {t('diaGuarderia.puntoSinPermiso')}
+                </Texto>
+              ) : null}
+              {viaje.direccion === 'recogida' && aBordo.length > 0 ? (
+                <Boton
+                  variante="primario"
+                  tamaño="sm"
+                  etiqueta={t('diaGuarderia.llegamos')}
+                  onPress={() => void llegamos()}
+                  cargando={enVuelo}
+                />
+              ) : null}
+            </View>
+          </Tarjeta>
+        </View>
+      ) : null}
+
       <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
         {estado.estadias.length === 0 ? (
           /* Vacío DIGNO: un día sin animales no es un negocio muerto. */
@@ -196,6 +489,26 @@ export default function DiaGuarderia() {
             <Texto variante="titulo">
               {t('diaGuarderia.cuantos', { n: estado.estadias.length })}
             </Texto>
+
+            {/* EL ARRANQUE. Un solo botón por vez y sólo si hay a quién ir a
+                buscar o a quién devolver — con el día vacío de ese lado, el
+                botón no existe en vez de rebotar. */}
+            {viaje === null && porRecoger.length > 0 ? (
+              <Boton
+                variante="primario"
+                etiqueta={t('diaGuarderia.salgoABuscar')}
+                onPress={() => void salirABuscar()}
+                cargando={enVuelo}
+              />
+            ) : null}
+            {viaje === null && porRecoger.length === 0 && adentro.length > 0 ? (
+              <Boton
+                variante="primario"
+                etiqueta={t('diaGuarderia.salgoADevolver')}
+                onPress={() => void salirADevolver()}
+                cargando={enVuelo}
+              />
+            ) : null}
 
             {estado.estadias.map((e) => {
               const dir = comoDireccion(e.direccion);
@@ -222,6 +535,7 @@ export default function DiaGuarderia() {
                 razaSlug: null,
                 fotoUri: foto,
               });
+              const corresponde = actaQueCorresponde(e.estado);
               return (
                 <Tarjeta key={e.estadiaId} relleno="normal" elevacion="reposo">
                   <View style={{ gap: spacing[3] }}>
@@ -239,6 +553,27 @@ export default function DiaGuarderia() {
                         {e.espacioNombre !== null ? (
                           <Texto variante="apoyo">{e.espacioNombre}</Texto>
                         ) : null}
+                        {/* 🔴 EL LECTOR DE «NO SE PUDO RECOGER» — la mitad sin
+                            la cual el escritor no se construye (`D-980` del
+                            lado espejo). El día lo muestra CERRADO, con su
+                            motivo y su hora.
+
+                            El motivo llega como CÓDIGO del catálogo y la voz la
+                            pone este diccionario: si el motor mandara la frase,
+                            su vocabulario saldría a pantalla.
+
+                            ⚠️ Y acá TERMINA: ni una palabra de mora, aviso ni
+                            protocolo — `LETRA_GUARDERIA` §6 sigue frenada. */}
+                        {e.estado === 'no_recogida' && e.noRecogidaMotivo !== null ? (
+                          <Texto variante="apoyo">
+                            {t('diaGuarderia.noRecogidaDetalle', {
+                              motivo: t(
+                                `noEstaba.motivo_${e.noRecogidaMotivo as MotivoNoRecogida}` as 'noEstaba.motivo_nadie_en_domicilio',
+                              ),
+                              hora: e.noRecogidaEn === null ? '' : horaCorta(e.noRecogidaEn),
+                            })}
+                          </Texto>
+                        ) : null}
                       </View>
                       <Insignia estado={familiaDe(e.estado)} etiqueta={vozEstado(e.estado)} />
                     </View>
@@ -247,51 +582,144 @@ export default function DiaGuarderia() {
                         Con snapshot ausente o ilegible, `null` y la pieza lo
                         declara: nadie sale a buscar a una casa en blanco. */}
                     <SeccionDireccion direccion={dir} />
+
+                    {/* LA PUERTA DEL ACTA.
+
+                        🔴 **Por qué es un botón y no la tarjeta entera tocable**,
+                        que es lo que el recorrido pide («toco su tarjeta»):
+                        `SeccionDireccion` YA tiene un tocable adentro —el «cómo
+                        llegar» que abre el mapa—, y un tocable dentro de otro
+                        es la clase `D-311`: dos blancos superpuestos donde el
+                        dedo decide por vos. *La tarjeta entera se vuelve tocable
+                        el día que su contenido no tenga acciones propias, no
+                        antes.*
+
+                        Y es `apoyada` y no `primario` por la Ley 5: con seis
+                        animales en pantalla, seis CTAs de acento serían seis
+                        elementos peleando. El «cómo llegar» queda en `ghost`
+                        debajo — la jerarquía entre las dos acciones se lee sin
+                        leerlas.
+
+                        ⚠️ **`compacto` NO**, aunque 22c lo avale como letra
+                        viva: `R47` lo tiene jubilado POR POLÍTICA con trinquete
+                        solo-baja hacia 0. Mi uso pasaba el baseline por uno —
+                        *y hacer crecer un trinquete que todavía no rebota es
+                        exactamente lo que el trinquete existe para evitar.* El
+                        choque entre 22c y R47 está declarado en el propio lint;
+                        acá se resuelve a favor del que mide. */}
+                    {corresponde === null ? null : (
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}
+                      >
+                        <Boton
+                          variante="apoyada"
+                          etiqueta={t(
+                            corresponde === 'recogida'
+                              ? 'diaGuarderia.subio'
+                              : 'diaGuarderia.entregado',
+                          )}
+                          onPress={() => setActa({ estadia: e, direccion: corresponde })}
+                        />
+                        {/* «No estaba» sólo en la RECOGIDA —`no_recogida` sale
+                            de `reservada` y de ningún otro estado— y en `ghost`
+                            porque es la EXCEPCIÓN: el camino normal pesa más
+                            sin que nadie tenga que leer cuál es cuál. */}
+                        {corresponde === 'recogida' ? (
+                          <Boton
+                            variante="ghost"
+                            tamaño="sm"
+                            etiqueta={t('diaGuarderia.noEstaba')}
+                            onPress={() => setNoEstaba(e)}
+                          />
+                        ) : null}
+                      </View>
+                    )}
                   </View>
                 </Tarjeta>
               );
             })}
 
-            {/* 🔴 LO QUE FALTA SE DICE ACÁ, no se descubre buscando el botón.
+            {/* ☠️ ACÁ VIVÍA LA TARJETA QUE DECÍA «todavía no puedes marcar
+                la recogida ni la entrega». **Murió porque su condición de
+                muerte se cumplió**, y estaba escrita en ella misma: *«MUERE
+                cuando exista un escritor de `guarderia_estadias.estado` con
+                puerta y esta pantalla lo llame»*. Los cinco actos existen
+                (S110-A) y esta pantalla los llama.
 
-                ⚠️ S109-D · SU CONDICIÓN DE MUERTE, y va escrita porque un texto
-                honesto sin fecha de vencimiento es cómo nace una lápida vencida
-                (`L-395`): esta tarjeta MUERE cuando exista **un escritor de
-                `guarderia_estadias.estado` con puerta** y esta pantalla lo
-                llame. Hoy no existe, y no es una impresión: medido contra la
-                base desplegada (31-ago-2026) —
-                  · las 95 estadías vivas están **todas en `reservada`**, con
-                    `a_bordo_en`, `llegada_en` y `entregada_en` en CERO;
-                  · el CHECK declara **siete** estados y **seis son
-                    inalcanzables**: ninguna función escribe la transición. Los
-                    únicos escritores de la tabla son `abrir_tramo_guarderia`
-                    —que sólo ata `tramo_recogida_id`/`tramo_devolucion_id`— y
-                    `mover_sujeto_por_reverso`, que cancela por plata devuelta.
-                  · `levantar_acta_guarderia` y `confirmar_acta_guarderia`
-                    existen y **sólo LEEN** la estadía.
-                *Un vocabulario de estados completo en un CHECK se lee como una
-                máquina que funciona; acá son seis palabras que nadie escribe.*
-
-                ⚠️ EL APOYO YA NO EXPLICA LA MECÁNICA, Y ES FIRMA DEL FOUNDER:
-                decía «eso llega con el acta» — *una frase sobre nuestro plan de
-                obra, no sobre su trabajo* — **y encima envejecía antes que el
-                título**: el acta YA llegó al motor (las dos RPC vivas, con
-                wrapper y con superficie del lado de la FAMILIA); lo único que
-                falta es su puerta del lado del prestador. ⇒ *dos frases con dos
-                fechas de vencimiento distintas, y el apoyo era el que se pudría
-                primero.* Ahora dice **qué SÍ se puede** —«saber a quién pasar a
-                buscar y dónde»—, que es lo que la pantalla de arriba realmente
-                hace: *un mensaje que sólo dice qué no se puede se lee como un
-                final, con una lista útil justo encima.* */}
-            <Tarjeta relleno="normal" elevacion="reposo">
-              <View style={{ gap: spacing[2] }}>
-                <Texto variante="cuerpo">{t('diaGuarderia.marcarPendiente')}</Texto>
-                <Texto variante="apoyo">{t('diaGuarderia.marcarPendienteApoyo')}</Texto>
-              </View>
-            </Tarjeta>
+                *Se retira en el MISMO acto que la vuelve falsa* — `L-395`: un
+                texto honesto que sobrevive a su razón manda al próximo lector a
+                construir un puente sobre un río que ya no está. Sus dos claves
+                salieron del diccionario en el mismo commit. */}
           </>
         )}
       </ScrollView>
+
+      {/* LA PUERTA DEL ACTA. Se monta con la estadía elegida y se desmonta al
+          cerrar: su estado interno (fotos, carnet, observaciones) muere con
+          ella a propósito — **un acta a medias de OTRO animal es el peor
+          arrastre posible en el instrumento que existe para un litigio.**
+
+          ⚠️ `lugar="domicilio"` en las DOS direcciones, y no es un descuido:
+          las actas se levantan en la puerta de la casa —tanto la de recogida
+          como la de devolución—, así que rige el primer plano del criterio
+          §5.3. *Las fotos de la ESTADÍA se toman en las instalaciones; ésas
+          son otras fotos y otra pantalla.*
+
+          ⚠️ Sin `alLevantar`: hoy el acta se levanta en la COLA LOCAL con la
+          hora de la puerta. Cuando exista el acto único de A —`marcarABordo`,
+          que levanta el acta y mueve el estado en una transacción— se inyecta
+          acá, **en esta línea y en ninguna otra**, y la etiqueta de abajo pasa
+          a prometer lo que el acto entonces sí hace. */}
+      {/* «No estaba» — se monta con el catálogo del motor. Sin catálogo no se
+          ofrece: un selector de motivos inventado acá sería el vocabulario del
+          motor escrito a mano, y el CHECK lo rebotaría. */}
+      {estado.fase === 'listo' && noEstaba !== null ? (
+        <HojaNoEstaba
+          estadia={noEstaba}
+          motivos={estado.maquina?.motivosNoRecogida ?? []}
+          onCerrar={() => setNoEstaba(null)}
+          onMarcada={() => {
+            setNoEstaba(null);
+            relanzar();
+          }}
+        />
+      ) : null}
+
+      {estado.fase === 'listo' && acta !== null ? (
+        <HojaActaGuarderia
+          estadia={acta.estadia}
+          direccion={acta.direccion}
+          prestadorId={estado.prestadorId}
+          fecha={hoyLocal()}
+          cara={
+            acta.estadia.mascotaFotoUrl === null
+              ? null
+              : (estado.caras.get(acta.estadia.mascotaFotoUrl) ?? null)
+          }
+          lugar="domicilio"
+          /* 🔴 SIN `alLevantar` A PROPÓSITO, y es lo contrario de lo que parece:
+             el acto único NO se llama desde acá, se inyecta **a la cola** (ver
+             `cablearActoUnico`). Así el acta se levanta en la puerta sin señal
+             y el acto entero —acta + estado— viaja solo, con la hora del toque.
+             *Llamarlo directo desde la pantalla lo ataba a tener red justo en
+             la puerta de una casa, que es donde menos hay.*
+
+             Y la etiqueta ya puede prometer lo que el acto hace: antes decía
+             «Guardar el acta» porque eso era lo único que ocurría. */
+          etiquetaActo={t(
+            acta.direccion === 'recogida'
+              ? 'diaGuarderia.subio'
+              : 'diaGuarderia.entregado',
+          )}
+          onCerrar={() => setActa(null)}
+          onLevantada={() => {
+            setActa(null);
+            /* Se re-lee el día: el acta puede haber cambiado lo que el motor
+               devuelve, y la pantalla LEE el estado — nunca lo declara. */
+            setIntento((n) => n + 1);
+          }}
+        />
+      ) : null}
     </View>
   );
 }

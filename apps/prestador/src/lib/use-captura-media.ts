@@ -96,13 +96,28 @@ export interface CapturaMedia {
   /** Abre la cámara para una foto, ya comprimida. NO publica: la selección de
    *  animales viene después, y sin etiquetas no hay publicación. */
   capturarFoto: () => Promise<ResultadoCapturaMedia>;
-  /** Publica lo capturado con sus etiquetas. `mascotaIds` mínimo 1. */
+  /**
+   * Publica lo capturado con sus etiquetas. `mascotaIds` mínimo 1.
+   *
+   * ⚠️ **ENSANCHE S110-C — devuelve el ID LOCAL del ítem encolado.** Antes
+   * devolvía `void` y `encolar` ya venía devolviendo su `ItemMedia`: el hook lo
+   * descartaba. **Sin ese id la puerta del acta no se puede montar** —
+   * `levantarActaLocal` exige `fotosLocales` no vacío (criterio §4: *un acta
+   * sin fotos de entrada no prueba nada*), y la alternativa era adivinar cuáles
+   * de los pendientes del día son de ESTA acta filtrando por mascota y hora.
+   * *Adivinar qué foto pertenece a qué acta es exactamente el dato que no se
+   * puede inventar en el instrumento que existe para un litigio.*
+   *
+   * **Medido antes de tocar: CERO consumidores** (`useCapturaMedia` no lo
+   * llamaba nadie), así que el ensanche no puede romper a nadie. Es aditivo:
+   * quien ignore el retorno sigue compilando igual.
+   */
   publicarCaptura: (input: {
     uri: string;
     tipo: 'foto' | 'clip';
     mascotaIds: string[];
     duracionS?: number;
-  }) => Promise<void>;
+  }) => Promise<string>;
   /** Corrección del mismo día, antes de que salga (firma del founder). */
   corregirEtiquetas: (id: string, mascotaIds: string[]) => Promise<void>;
   descartarPendiente: (id: string) => Promise<void>;
@@ -179,7 +194,7 @@ export function useCapturaMedia(opciones: OpcionesCapturaMedia): CapturaMedia {
     async (input: { uri: string; tipo: 'foto' | 'clip'; mascotaIds: string[]; duracionS?: number }) => {
       // El techo lo corta la PUERTA de la cola (`encolar`), no este consumidor:
       // así lo respetan todos los caminos, no solo el que lo conoce.
-      await encolar({
+      const item = await encolar({
         uri: input.uri,
         tipo: input.tipo,
         mascotaIds: input.mascotaIds,
@@ -187,6 +202,10 @@ export function useCapturaMedia(opciones: OpcionesCapturaMedia): CapturaMedia {
         duracionS: input.duracionS,
       });
       await empujar();
+      /* El id local viaja al llamador: es lo que el acta referencia. Se
+         devuelve DESPUÉS de empujar para que el orden observable no cambie —
+         el ensanche agrega un dato, no mueve un efecto. */
+      return item.id;
     },
     [opciones.fecha, empujar],
   );
