@@ -99,6 +99,7 @@ import { Mutacion } from '../components/Mutacion'
 import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
+import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
 import { PrecioText } from '../components/PrecioText'
@@ -4743,6 +4744,43 @@ function GaleriaInterna() {
               onLlamar={() => {}}
             />
             <FilaEntrega direccion="Calle Cuero y Caicedo 458" onLlamar={() => {}} />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="SenalesAdoptable (S111) — lo que hay que saber antes de enamorarse">
+          {/* Las cuatro juntas, porque lo que hay que poder juzgar de un
+              vistazo es que NINGUNA se lee como un defecto del animal:
+              «urgente» pide acción a su favor y «2 años en rescate» es un
+              hecho neutro. Si en el teléfono el tiempo largo se lee como
+              alarma, la pieza falla (§4: el que más lo necesita gana el
+              mejor lugar). */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">las cuatro señales</Texto>
+              <SenalesAdoptable
+                rotulo="Antes de decidir"
+                senales={[
+                  { tipo: 'urgente', voz: 'Urgente' },
+                  { tipo: 'pareja_vinculada', voz: 'Se adopta con su hermana' },
+                  { tipo: 'tiempo_en_rescate', voz: '2 años en rescate' },
+                  { tipo: 'zona', voz: 'Cumbayá' },
+                ]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                control · el caso largo: dos años NO puede leerse como alarma
+              </Texto>
+              <SenalesAdoptable
+                senales={[{ tipo: 'tiempo_en_rescate', voz: '4 años en rescate' }]}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">una sola señal · sin rótulo</Texto>
+              <SenalesAdoptable senales={[{ tipo: 'zona', voz: 'Valle de los Chillos' }]} />
+            </View>
           </View>
         </Seccion>
 
