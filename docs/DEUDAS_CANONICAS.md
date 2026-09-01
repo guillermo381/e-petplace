@@ -25917,3 +25917,72 @@ son los únicos dos a los que se puede preguntar.
 **Lo que el barrido SÍ alcanza hoy: 16 pendientes vivos — deuna 13 ($468,45) ·
 nuvei 3 ($87,65) — y CERO se le escapan por falta de id.** *Ése es el número que
 importa el 30-sep, y está cubierto.*
+
+---
+
+## ☠️ `D-997` · ANEXO C — LA CAUSA APARECIÓ, Y ERA DE PANTALLA: el botón se apagaba a sí mismo
+
+**Aislada por C en `apps/cliente/src/app/pagos/checkout.tsx:731`:**
+
+```
+deshabilitado = ((esMensual || esPaquete) && medio.idTarjeta === null) || …
+```
+
+🔴 **`medio.idTarjeta` es `null` cuando el usuario elige DeUna — por diseño.**
+El guard exige tarjeta para paquete y mensualidad ⇒ **con DeUna nunca podía
+habilitarse.** Reproducido con dos colores: paquete+tarjeta ✅ · **paquete+DeUna
+🔴** · **mensual+DeUna 🔴** · día suelto+DeUna ✅.
+
+> ### ⇒ Mi cero de intentos y su causa son **el mismo hecho desde los dos extremos**: no había intentos **porque la app nunca llamó a la edge**.
+
+**Y por qué nunca se vio:** el **día suelto no exige tarjeta** en su condición.
+*El defecto vivía sólo en las dos compras que jamás se habían cobrado por esta
+vía* — el caso que nunca corrió es el que tenía el guard equivocado, y por eso
+ninguno de los 4 cobros DeUna de hoy lo tocó.
+
+**El agravante, de C:** `razonDeshabilitado` pregunta **primero** por la
+tarjeta, así que la voz que habría salido era *«falta la tarjeta»* — **un guard
+incorrecto con una voz que además manda a mirar el lugar equivocado.** El
+founder no la vio porque el botón estaba mudo; de haberla visto lo habría
+mandado a agregar una tarjeta que no necesitaba.
+
+**Y el dato que lo vuelve nítido:** el mismo archivo **ya sabía de DeUna en
+cuatro lugares**. *La pantalla estaba lista para pagar por DeUna y se apagaba a
+sí misma antes de dejar intentarlo.*
+
+**Cura: de C, en dos partes** — el guard pasa a preguntar *«¿hay medio
+elegido?»*, y la voz. **Cero motor.**
+
+### 🟢 EL RIESGO ③ QUE YO HABÍA DEJADO VIVO: DESCARTADO
+
+La mensualidad **no usa desglose** —su monto sale de `precio_mensual` y su
+moneda de `prestadores → cuentas_comerciales.moneda`—, así que una moneda NULL
+la haría rebotar `desglose_incompleto` **sin desglose de por medio**, y ese
+rebote estaba escondido detrás del botón apagado.
+
+**Medido: las 6 suscripciones tienen `moneda = USD`. CERO NULL.** ⇒ curar el
+botón no destapa este segundo rebote.
+
+### ⚠️ PERO AL MEDIRLO APARECIÓ OTRA COSA, y es la que queda viva
+
+**La ÚNICA suscripción de guardería activa es `20d025ca` — de Pepe, que es un
+AVE.** Las otras cinco están canceladas.
+
+Y el recorte **SÍ existe**: `guarderia_mensual.especies_elegibles =
+["perro","gato"]` ⇒ **la puerta de la mensualidad no lo consulta.** Es la deuda
+que el canon de S110 ya declaró, ahora con su consecuencia operativa:
+
+> ### 🔴 El único sujeto vivo para ejercer la mensualidad por DeUna **es un dato que no debería existir**. Se puede cobrar igual —el cobro no mira especie— pero **la prueba correría sobre un ave en una guardería de perros y gatos**.
+
+### 🔴 Y UN FALSO POSITIVO MÍO, DECLARADO
+
+Mi primera lectura dijo *«guardería no tiene recorte de especies»*. **Era
+falso y era mío**: consulté `tipos_servicio.codigo = 'guarderia'`, que **no
+existe** — los códigos reales son **`guarderia_dia` y `guarderia_mensual`**. El
+`LEFT JOIN` contra un código inventado devuelve NULL, y ese NULL se lee
+exactamente igual que *«no tiene recorte»*.
+
+**Lo cazó el control positivo** (`paseo → ["perro"]`), que se corrió **antes de
+reportar**. *Un `LEFT JOIN` sobre una clave adivinada no da error: da ausencia —
+y la ausencia es la respuesta más creíble que existe.* Es regla 40 en su forma
+más barata de cometer y más cara de creer.
