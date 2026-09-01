@@ -73,6 +73,7 @@ import { SeccionDireccion } from '@/components/seccion-direccion';
 import { HojaActaGuarderia } from '@/components/hoja-acta-guarderia';
 import { HojaNoEstaba } from '@/components/hoja-no-estaba';
 import { HojaMediaGuarderia } from '@/components/hoja-media-guarderia';
+import { HojaChipsGuarderia } from '@/components/hoja-chips-guarderia';
 import { horaCorta } from '@/lib/ventas-formato';
 import type { DireccionActa } from '@/lib/cola-actas';
 import {
@@ -151,6 +152,8 @@ export default function DiaGuarderia() {
   /** La estadía cuyo «no estaba» se está anotando. `null` = no se monta. */
   const [noEstaba, setNoEstaba] = useState<EstadiaDelDia | null>(null);
   const [mediaAbierta, setMediaAbierta] = useState(false);
+  /** La estadía cuyos chips se están marcando. `null` = la hoja no se monta. */
+  const [chips, setChips] = useState<EstadiaDelDia | null>(null);
   const [enVuelo, setEnVuelo] = useState(false);
 
   /**
@@ -687,6 +690,29 @@ export default function DiaGuarderia() {
                         exactamente lo que el trinquete existe para evitar.* El
                         choque entre 22c y R47 está declarado en el propio lint;
                         acá se resuelve a favor del que mide. */}
+                    {/* ③ · CÓMO SE PORTÓ — sólo con el animal ADENTRO.
+
+                        🔴 **No se ofrece sobre una estadía terminal**, y es el
+                        borde que A dejó nombrado: su guard rechaza `entregada`,
+                        `no_recogida` y `cancelada`. *Ofrecerlo y rebotar sería
+                        enseñarle al cuidador que el botón a veces no anda* —
+                        Ley 23: la puerta no ofrece lo que va a rechazar.
+
+                        ⚠️ Y `entregada` es el discutible —el animal SÍ estuvo, y
+                        las manos del cuidador quedan libres justo después de
+                        entregar—. Si el founder abre esa ventana, acá es
+                        agregar un estado a esta condición y allá un valor a una
+                        lista: **nada más**. */}
+                    {e.estado === 'en_guarderia' ? (
+                      <View style={{ alignSelf: 'flex-start' }}>
+                        <Boton
+                          variante="apoyada"
+                          etiqueta={t('diaGuarderia.comoSePorto')}
+                          onPress={() => setChips(e)}
+                        />
+                      </View>
+                    ) : null}
+
                     {/* ⑨ · Mover, sólo ANTES de salir: con el viaje abierto el
                         orden ya está en la calle y reordenarlo no cambia nada
                         de lo que pasó. *Un control que no tiene efecto es peor
@@ -781,6 +807,15 @@ export default function DiaGuarderia() {
           onCerrar={() => setMediaAbierta(false)}
         />
       ) : null}
+
+      <HojaChipsGuarderia
+        estadia={chips}
+        onCerrar={() => setChips(null)}
+        onRegistrada={() => {
+          setChips(null);
+          relanzar();
+        }}
+      />
 
       {/* «No estaba» — se monta con el catálogo del motor. Sin catálogo no se
           ofrece: un selector de motivos inventado acá sería el vocabulario del
