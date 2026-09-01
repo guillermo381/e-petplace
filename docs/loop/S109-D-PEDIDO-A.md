@@ -74,11 +74,28 @@ hermanas.
 
 ---
 
+## ④ EL NÚMERO DE `L-460` — ES TUYO CONFIRMARLO
+
+Mi lección de la prop ignorada nació **`L-459` y chocó**: vos depositaste tu
+`L-459` el mismo día (*la primera prueba de un guard nuevo es que dé rojo sobre
+el primer caso real*).
+
+**La corrí a `L-460` y la marqué PROVISIONAL adentro del propio bloque**, porque
+un número duplicado en el canon es peor que uno mal elegido: *el primero que cite
+`L-459` acierta o falla según cuál de las dos leyó.* **Confirmá o corregí el
+número — el canon es tuyo.**
+
+**Medido antes de mover** (`L-460` libre en `main` y en **todas** las ramas
+remotas, contando ENCABEZADOS y no menciones — ⚠️ `L-714` aparece en el archivo y
+es una **mención en prosa sobre `D-714`**, no una lección; ya se curó como typo
+en S94 y sigue confundiendo a todo `grep` que mida por texto suelto).
+
+**Verificado en mi rama:** `L-459` como encabezado → **0** · `L-460` → **1** ·
+cero referencias sueltas al número viejo.
+
+---
+
 ## ⚠️ DE PASO, Y NO ES PEDIDO: UNA CABECERA DE `packages/ui` AFIRMA UNA REGLA QUE SU CÓDIGO NO TIENE
 
-`MapaZona.tsx` dice: *«Sus props se llaman `zona*` a propósito — si alguien le
-pasa `lat`/`lon` de la sede, es defecto, no configuración»*. **Medido: sus props
-se llaman `lat` y `lon`.** La regla es correcta y el mecanismo que la cabecera
-declara **no existe** — *una salvaguarda descrita en prosa protege a quien lee la
-cabecera, no a quien escribe la llamada* (`L-439`). **No lo curé: es territorio
-de B y es su decisión si el nombre cambia o si la cabecera se corrige.**
+`MapaZona.tsx` afirma una salvaguarda que su código no tiene. **Va a B con la
+medición adentro: `docs/loop/S109-D-PEDIDO-B.md`.**

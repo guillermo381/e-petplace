@@ -25005,7 +25005,16 @@ los tres era **el único que dejaba rastro en el árbol**. *Cuando dos pantallas
 deberían verse igual y no lo hacen, la pregunta no es «qué le falta a la rota»
 sino «qué tiene de más».*
 
-## 🔴 `L-459` — UNA PROP QUE SE ACEPTA Y SE IGNORA SE LEE COMO CABLEADO
+## 🔴 `L-460` — UNA PROP QUE SE ACEPTA Y SE IGNORA SE LEE COMO CABLEADO
+
+> ⚠️ **EL NÚMERO ES PROVISIONAL Y LO CONFIRMA A, que es de quien es el canon.**
+> Nació como `L-459` y **chocó**: A depositó su `L-459` el mismo día (*la primera
+> prueba de un guard nuevo es que dé rojo sobre el primer caso real*). Medido
+> antes de mover: `L-460` está libre **en `main` y en todas las ramas remotas**,
+> contando encabezados y no menciones — *`L-714` aparece en el archivo y es una
+> mención en prosa sobre `D-714`, no una lección*. Se corre acá y no se deja
+> duplicado porque **un `L-459` que significa dos cosas es peor que un número
+> mal elegido**: el primero que lo cite acierta o falla según cuál leyó.
 
 **Medida en S109-D sobre `AvatarMascota.especie`.**
 
