@@ -1,3 +1,26 @@
+# ⚠️ ESTE DOCUMENTO ES INSUMO PARA LA PISTA E, NO UN VEREDICTO DE D
+
+> **Acotación de mesa recibida el 1-sep-2026, DESPUÉS de que estas cuatro
+> mediciones ya estuvieran corridas y publicadas:** el censo de D queda en el
+> **primer lote (① y ②)**; **las mediciones ③–⑥ son de la pista E**, que corre
+> en paralelo.
+>
+> **No se retira, y se declara por qué:** las cuatro están medidas contra el
+> objeto con sus controles, y borrarlas tiraría trabajo que a E le sirve. **Pero
+> el dueño de esos cuatro veredictos es E, no D.**
+>
+> 🔴 **Cómo se lee esto, entonces:** como **insumo verificable**, jamás como
+> medición firmada de la sesión. **Si una lectura de E no coincide con una de
+> acá, gana E** — y la diferencia se resuelve preguntándole al objeto, no
+> discutiendo: *no hace falta desconfiar del otro para medir; alcanza con que
+> dos lecturas no coincidan y preguntarle al objeto cuál es cuál.* Cada
+> afirmación de abajo lleva su consulta y su control para que E la pueda
+> re-correr en vez de heredarla.
+>
+> **El censo de D, el que la mesa pidió, es `docs/loop/S110-D-LOTE1.md`.**
+
+---
+
 # S110-D · LOTE 2 — LAS OTRAS CUATRO MEDICIONES DEL §12
 
 > **Pista D de S110 · SOLO LECTURA.** Cero DDL, cero backfill, cero seeds, cero
