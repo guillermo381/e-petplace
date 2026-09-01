@@ -259,3 +259,82 @@ decidió* (`D-405` sigue abierta). **A coincide.**
 **④ CONSTRUIDO ALREDEDOR:** **D no pidió bucket en el contrato de DB.** *Sin
 bucket la puerta no existe, en vez de existir abierta.*
 **⑤** Con «libre»: se abre un canal de archivos sin política de retención.
+
+---
+
+### §5.6 · ¿«QUIERO ADOPTAR» CREA LA FAMILIA VACÍA? — *de C*
+
+**① QUÉ FALTA.** §4 tiene una puerta *«quiero adoptar»* y no dice si esa persona
+queda con familia creada o sin nada.
+
+**② LAS OPCIONES.** **(a)** la crea vacía · **(b)** no crea nada hasta que
+adopte.
+
+**③ EL VOTO DE C: (a), con NÚMERO.** Con (b), **24 superficies de
+`apps/cliente` que cuelgan de `familia_id` tendrían que aprender a tolerar
+`null`, y ninguna lo tolera hoy.** *No es una preferencia de arquitectura: es
+el costo medido de la otra opción.*
+
+**④ CONSTRUIDO ALREDEDOR.** C **no cableó esa rama** — *sin saber qué crea, la
+salida del alta sería un botón que no sabe dónde deja al usuario.* Y midió que
+el guard de entrada **no cambia** con (a): `tiene_familia ? '/hogar' :
+'/onboarding'` sigue siendo correcto, porque quien eligió adoptar tiene familia.
+Lo único que cambia es **poder salir del onboarding sin mascota**.
+🔴 **A NO construyó el RPC**, a pedido de C: hoy sólo existe
+`crear_familia_con_primera_mascota`, que exige mascota. *Un RPC construido sobre
+una decisión no firmada es motor que puede nacer para nada.*
+
+**⑤ SI SE ELIGE MAL.** Con (b) sin preparar las 24 pantallas: la app entra en
+estados que ninguna tolera, y el síntoma aparece lejos del alta.
+
+---
+
+### §5.7 · EL BLOQUE «LLEVAN MÁS TIEMPO ESPERANDO» — *de C*
+
+**① QUÉ FALTA.** §4 pide ese bloque encabezando la vidriera **y dice explícito
+que NO es orden por antigüedad**: *«los que más esperan suelen ser los más
+difíciles, y una primera pantalla de casos duros hace rebotar al que entró a
+mirar»*. **El criterio real no está escrito.**
+
+**② LAS OPCIONES.** **(a)** el criterio se define y vive en el servidor ·
+**(b)** el bloque no existe en v1.
+
+**③ EL VOTO DE A: (a), pero es tuyo el criterio.** *Lo único que no se puede es
+que lo invente una pantalla.*
+
+**④ CONSTRUIDO ALREDEDOR.** C **no construyó el bloque**: la vidriera sale
+ordenada como venga del motor. Y lo dijo bien — **tenía `creadaEn` a mano, que
+es exactamente lo que la letra prohíbe usar.** *Tener el dato para hacerlo mal y
+no hacerlo es la parte difícil.*
+
+**⑤ SI SE ELIGE MAL.** Con antigüedad pura: la primera pantalla es de casos
+duros y **hace rebotar a quien entró a mirar** — el daño que §4 nombra.
+
+---
+
+### §5.8 · EL MODELO DE CONVIVENCIA — *de A, con la pieza de B esperando*
+
+**① QUÉ FALTA.** §3 pide *«convive con perros / gatos / niños»* con **tres
+estados** (sí · no · **no se sabe**), y §4 pide filtrar sin borrar al que no se
+midió. **No hay dónde leer eso.** Lo único parecido es
+`mascotas.paseo_social_ok` (booleano, de la socialización de paseo), que **no es
+lo mismo y no tiene el tercer estado**.
+
+**② LAS OPCIONES.** **(a)** tres dimensiones con tres estados cada una ·
+**(b)** una sola señal de convivencia · **(c)** texto libre del refugio.
+
+**③ EL VOTO DE A: (a).** §4 pide **filtrar** por convivencia, y un filtro
+necesita valores, no prosa. *Y el tercer estado no es un detalle: la letra dice
+que con el filtro activo van arriba los confirmados y abajo, con su título, los
+que todavía no se saben — sin «no se sabe» esa regla no se puede escribir.*
+
+**④ CONSTRUIDO ALREDEDOR — y acá hay una pieza esperando.** B construyó
+**`Convivencia`**, con los tres estados y **el tercero con voz propia**, y está
+**entregada y NO montada**: no tiene de qué hablar. A **no inventó el modelo de
+datos** y `Adoptable` **no trae convivencia** — *modelarlo es decidir cuántas
+dimensiones hay y qué significa «no se sabe», que es producto y no esquema.*
+
+**⑤ SI SE ELIGE MAL.** Con (b) o (c): el filtro de §4 no se puede construir, y
+la pieza de B queda sin uso. *Con (c) además, la información que decide si una
+familia con chicos adopta a ese animal queda en un párrafo que nadie puede
+filtrar.*

@@ -1,0 +1,170 @@
+# S111 · REPORTE FINAL — lo que te espera cuando vuelvas
+
+> **Para el founder.** Lo compila A con los reportes de las cuatro pistas.
+> **Una línea por ítem que te espera, con su evidencia.**
+> Cinco pistas corrieron sin vos: **A** (motor + conducción) · **B**
+> (`packages/ui`) · **C** (`apps/*`) · **D** (`packages/mensajeria`) · **E**
+> (mediciones).
+>
+> **`main` cerró en `cd81beb6`**, con las cinco ramas adentro, árbol limpio y
+> todos los gates en verde.
+
+---
+
+## ⓪ LO PRIMERO — LOS DOS APK ESTÁN LISTOS Y ESPERANDO TU DEDO
+
+| app | estado | dónde |
+|---|---|---|
+| **cliente** | ✅ FINISHED | `https://expo.dev/artifacts/eas/wQmllDBDwXCT4ng7dCPk1KuPm3C76eTNJgQmER5cXxA.apk` |
+| **prestador** | ✅ FINISHED | `https://expo.dev/artifacts/eas/IReW43nme5mOp1gaq65iQpzjM6AdZEqfMhh9bdzinRA.apk` |
+
+**Son de NUBE**, no locales: llevan mapas y push. *Los binarios de prueba no los
+tienen, y una prueba de avisos en ellos da falso negativo.*
+
+🔴 **CERO PUBLISH. La veda se sostuvo entera.** Ningún OTA, ninguna llave de
+`app_config` encendida, ni una palabra de texto legal en pantalla.
+**Lo que falta es tu recorrido en el aparato** — el de guardería, con dos
+animales de dueños distintos y los dos lados — y **recién ahí se publica.**
+
+---
+
+## ① LO QUE SE CONSTRUYÓ, en una línea cada uno
+
+**EL DURANTE DE GUARDERÍA QUEDÓ ENTERO** (venía de S110): los cinco actos del
+día, las dos actas, el viaje con su punto vivo, y la familia enterándose de que
+no se pudo recoger. **Nada de eso se vio en un aparato todavía** — es lo que tu
+recorrido va a decidir.
+
+**NACIÓ EL MOTOR DE ADOPCIÓN, y es lo que destrabó la sesión.** Antes había
+**cero funciones y cero wrappers** de adopción: tres bloques de tres pistas
+distintas estaban parados por la misma pieza ausente. Hoy existe el adoptable,
+su publicación, la vidriera, y **el traspaso que deja rastro** — un acto que
+mueve la familia, cierra el acceso viejo, escribe el evento y deja al refugio
+como procedencia permanente del animal.
+
+**LA VIDRIERA SE VE SIN CUENTA**, como §4 firmó — incluidas las caras. *Quien
+llega de una foto en Instagram puede mirar antes de registrarse.*
+
+**LA CONVERSACIÓN ENTRE REFUGIO Y ADOPTANTE TIENE MOTOR**: solicitud, hilo,
+estados y el reloj de los 5 días. El diseño lo hizo D; A lo implementó.
+
+**SE ABRIERON TRES PUERTAS QUE LA LETRA PEDÍA Y EL MOTOR DECLARABA
+IMPOSIBLES**: la donación con destino (§7), el padrinazgo recurrente (§1) y el
+refugio como actor de un pedido (§8).
+
+**SE CERRÓ UN AGUJERO DE SEGURIDAD**: cualquier familiar adulto podía mover una
+mascota a **otra familia** desde la app. Hoy el traspaso va por el motor y deja
+rastro.
+
+---
+
+## ② LO QUE TE ESPERA A VOS — una línea, con su evidencia
+
+| # | qué esperamos de vos | evidencia |
+|---|---|---|
+| **1** | 🔴 **El recorrido de guardería en el aparato** — y con él, la autorización de publicar. | los dos APK de arriba |
+| **2** | **El paquete del abogado**: el acta de adopción y los contratos. **Sin ese texto el traspaso NO ocurre** — la puerta está construida y cerrada, y **se abre sola el día que el texto se cargue**. | `adopcion_documentos`, tabla vacía a propósito |
+| **3** | **El contador**: el 5 % a la fundación. **No se construyó nada** — modelarlo antes de saber su figura fiscal es fabricar un motor que después hay que desarmar. | §4 del estacionamiento |
+| **4** | **Las plantillas de solicitud de adopción** (el contenido que el refugio responde). | §5 de la letra |
+| **5** | **¿Quién opera el día de guardería?** Hoy sólo el titular; el cuidador empleado no pasa. **Default (a): queda así.** | `D-986` |
+| **6** | **¿Se borran las cinco tablas legado de adopción?** **No las borres todavía**: algo las recorre desde afuera del monorepo. | `D-991` |
+| **7** | **Ocho decisiones más**, todas con opciones, voto y **construidas fail-closed** para que nada quede trabado esperándote. | `docs/loop/S111-ESTACIONAMIENTO.md` |
+
+---
+
+## ③ LAS OCHO DECISIONES ESTACIONADAS — el titular y el voto
+
+*El detalle completo, con sus cinco partes cada una, está en el
+estacionamiento. Acá va lo que necesitás para decidir en un minuto.*
+
+1. **¿El cuidador empleado opera el día de guardería?** → voto **(a) queda como
+   está**, el titular opera. *Ensancharlo no es una línea: hay que mover el gate
+   del acta y el del estado a la vez, o la transacción autoriza la mitad.*
+2. **¿Se borran las cinco tablas legado?** → voto **(c): que alguien con los
+   repos viejos mida primero.** *Ya nos pasó: S95-F encontró dos vistas que
+   bloqueaban un borrado sin que nadie las leyera.*
+3. **¿Qué activa la conversación cuando no hay servicio contratado?** → voto
+   **(a): la solicitud de adopción es un activador**, como una cita. *La regla
+   vigente dice «cita / servicio / contrato», y una solicitud es un contrato
+   acotado.*
+4. **¿El adoptante ve lo que le FALTA de salud al animal?** → voto **(a): sí,
+   como información sin acción.** *Un adoptante que se entera después de la
+   castración pendiente tiene una sorpresa, no una decisión.*
+5. **¿Se avisa al padrino cuando su ahijado fallece?** → voto **(a): sí**, con
+   voz de duelo y sin invitación a apadrinar otro. *El silencio del memorial
+   protege a la familia; el padrino es un tercero que está pagando, y un cobro
+   que se detiene sin explicación es peor que la noticia.*
+6. **¿El publicador conserva el hilo después de declinar?** → voto **(a): sí**,
+   en lectura. *Un hilo que desaparece deja sin material justo el caso en que
+   alguien reclama.*
+7. **¿Adjuntos en el hilo?** → voto **imagen, sólo del publicador.** *Un adjunto
+   libre abre subida de documentos entre dos personas que no se conocen.*
+8. **¿«Quiero adoptar» crea la familia vacía?** → voto **(a) sí.** *Con (b), 24
+   pantallas que hoy cuelgan de la familia tendrían que aprender a tolerar que
+   no exista, y ninguna lo tolera.*
+
+---
+
+## ④ LOS CUATRO FRENOS QUE SE RESPETARON — y que valen más que lo construido
+
+*Se listan porque cada uno es trabajo que NO se hizo a propósito, y sin esta
+lista se lee como trabajo que faltó.*
+
+- **Nadie escribió una palabra de texto legal.** Las puertas se construyeron
+  contra documentos versionados que **no existen todavía**, así que están
+  cerradas. **Se abren solas el día que el texto se cargue.**
+- **El protocolo del animal no retirado no se construyó**: ni conteo, ni aviso,
+  ni camino a refugio. Sigue frenado por riesgo penal.
+- **Las cinco tablas legado no se tocaron**, ni para construir ni para borrar.
+- **Al refugio se le dio existencia como actor de un pedido, pero NO se le
+  inventaron movimientos.** *Cuáles puede hacer es una decisión tuya.*
+
+---
+
+## ⑤ LO CONSTRUIDO Y NO EJERCIDO — se dice aparte, a propósito
+
+> *Lo no construido se sabe; lo construido y no ejercido **se lee como hecho**.*
+
+- **Nada de esta sesión se vio en un aparato.**
+- **El traspaso de adopción nunca corrió de verdad** — no puede, hasta que
+  exista el acta. Su camino feliz está probado **sólo** dentro de un arnés que
+  cargó un acta de prueba y la deshizo.
+- **La mensajería tiene motor y ninguna pantalla la consume**: el módulo de
+  lógica y el motor existen, y el hilo no está montado.
+- **La pieza de convivencia de B está entregada y no montada**, y va a seguir
+  así hasta que se firme el modelo de datos (decisión 4).
+- **La vidriera anónima nunca se abrió en un navegador sin sesión.**
+
+---
+
+## ⑥ CÓMO SE TRABAJÓ SIN VOS — dos cosas que conviene que sepas
+
+**① Las pistas se corrigieron entre ellas, y casi siempre midiendo.** C midió
+que la vidriera anónima no podía mostrar fotos **antes** de cablear la pantalla
+— y no la cableó: *entregar la puerta a medias habría sido peor que no
+entregarla.* D se corrigió a sí mismo dos veces. E depositó un censo que llevaba
+dos sesiones esperándote.
+
+**② Y el error de conducción que sí hubo, dicho sin maquillar:** ocho
+documentos de una pista estuvieron pusheados, anunciados y **fuera del canon
+durante horas**, porque yo mergeé sólo lo que me pidieron mergear. **Nada se veía
+roto**: main compilaba, los gates pasaban, y el trabajo simplemente no estaba.
+Se curó con un control que ahora corre sobre **todas** las ramas después de cada
+merge, incluidas las que no pidieron nada.
+
+---
+
+## ⑦ EL ESTADO OPERATIVO
+
+| qué | valor |
+|---|---|
+| `main` | `cd81beb6`, pusheado y verificado por contenido |
+| ramas | las **cinco** contenidas en `origin/main` |
+| migraciones | **584** · 6 nuevas de A, **todas con reversa escrita ANTES** |
+| cinturones | **6 verdes**, todos con su rojo producido primero |
+| typechecks | **5 en 0** (`api` · `ui` · `mensajeria` · `cliente` · `prestador`) |
+| `verify:diseno` | **VERDE, 62 reglas** |
+| `verify:mensajeria` | **53/53** |
+| `verify:sin-byte-nul` | **VERDE**, 3515 archivos |
+| fichas / lecciones | `D-986` → `D-995` · `L-461` → `L-464` |
+| publish / OTA | **CERO** — veda sostenida |
