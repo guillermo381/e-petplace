@@ -361,6 +361,41 @@ export type Database = {
         }
         Relationships: []
       }
+      adopcion_mensaje: {
+        Row: {
+          automatica: boolean
+          autor_user_id: string
+          creado_en: string
+          cuerpo: string
+          id: string
+          solicitud_id: string
+        }
+        Insert: {
+          automatica?: boolean
+          autor_user_id: string
+          creado_en?: string
+          cuerpo: string
+          id?: string
+          solicitud_id: string
+        }
+        Update: {
+          automatica?: boolean
+          autor_user_id?: string
+          creado_en?: string
+          cuerpo?: string
+          id?: string
+          solicitud_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_mensaje_solicitud_id_fkey"
+            columns: ["solicitud_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_solicitud"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adopcion_publicacion: {
         Row: {
           country_code: string
@@ -495,6 +530,47 @@ export type Database = {
             columns: ["solicitud_id"]
             isOneToOne: false
             referencedRelation: "solicitudes_adopcion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      adopcion_solicitud: {
+        Row: {
+          aviso_silencio_emitido_en: string | null
+          cerrada_en: string | null
+          country_code: string
+          creada_en: string
+          estado: string
+          id: string
+          publicacion_id: string
+          solicitante_user_id: string
+        }
+        Insert: {
+          aviso_silencio_emitido_en?: string | null
+          cerrada_en?: string | null
+          country_code: string
+          creada_en?: string
+          estado?: string
+          id?: string
+          publicacion_id: string
+          solicitante_user_id: string
+        }
+        Update: {
+          aviso_silencio_emitido_en?: string | null
+          cerrada_en?: string | null
+          country_code?: string
+          creada_en?: string
+          estado?: string
+          id?: string
+          publicacion_id?: string
+          solicitante_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_solicitud_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_publicacion"
             referencedColumns: ["id"]
           },
         ]
@@ -14066,6 +14142,7 @@ export type Database = {
           es_donacion: boolean
           mascota_id: string | null
           pedido_item_id: string
+          refugio_cuenta_comercial_id: string | null
         }
         Insert: {
           atado_en?: string | null
@@ -14074,6 +14151,7 @@ export type Database = {
           es_donacion?: boolean
           mascota_id?: string | null
           pedido_item_id: string
+          refugio_cuenta_comercial_id?: string | null
         }
         Update: {
           atado_en?: string | null
@@ -14082,6 +14160,7 @@ export type Database = {
           es_donacion?: boolean
           mascota_id?: string | null
           pedido_item_id?: string
+          refugio_cuenta_comercial_id?: string | null
         }
         Relationships: [
           {
@@ -14097,6 +14176,20 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "pedido_items"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_item_destinos_refugio_cuenta_comercial_id_fkey"
+            columns: ["refugio_cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_item_destinos_refugio_cuenta_comercial_id_fkey"
+            columns: ["refugio_cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
           },
         ]
       }
@@ -21622,6 +21715,7 @@ export type Database = {
         Args: { p_mascota_id: string }
         Returns: Json
       }
+      _hilo_mensajes: { Args: { p_solicitud_id: string }; Returns: Json }
       _inicios_disponibles_prestador: {
         Args: {
           p_duracion_minutos: number
@@ -22126,6 +22220,10 @@ export type Database = {
         Args: { p_atencion_id: string; p_mensaje_familia?: string }
         Returns: Json
       }
+      cerrar_solicitud_adopcion: {
+        Args: { p_estado_final: string; p_solicitud_id: string }
+        Returns: Json
+      }
       cerrar_teleconsulta: { Args: { p_cita_id: string }; Returns: Json }
       cerrar_tramo_guarderia: { Args: { p_tramo_id: string }; Returns: Json }
       cerrar_y_renovar_planes: { Args: never; Returns: Json }
@@ -22254,6 +22352,7 @@ export type Database = {
         Args: { p_empleado_id: string }
         Returns: number
       }
+      contar_solicitudes_por_revisar: { Args: never; Returns: number }
       conteos_vitrina_por_eje: { Args: never; Returns: Json }
       contratar_mensualidad_guarderia: {
         Args: {
@@ -22512,6 +22611,10 @@ export type Database = {
           p_mascota_id: string
         }
         Returns: string
+      }
+      crear_solicitud_adopcion: {
+        Args: { p_mensaje_inicial?: string; p_publicacion_id: string }
+        Returns: Json
       }
       crear_solicitud_autorizacion: {
         Args: {
@@ -23811,6 +23914,22 @@ export type Database = {
           vigencia_hasta: string
         }[]
       }
+      obtener_mis_solicitudes_adopcion: {
+        Args: never
+        Returns: {
+          cerrada_en: string
+          creada_en: string
+          estado: string
+          mascota_especie: string
+          mascota_foto_url: string
+          mascota_id: string
+          mascota_nombre: string
+          mensajes: Json
+          publicacion_id: string
+          publicador_nombre: string
+          solicitud_id: string
+        }[]
+      }
       obtener_modalidades_por_oficio: {
         Args: never
         Returns: {
@@ -24044,6 +24163,32 @@ export type Database = {
           duracion_minutos: number
           fecha: string
           hora: string
+        }[]
+      }
+      obtener_solicitudes_de_mis_publicaciones: {
+        Args: { p_solo_por_revisar?: boolean }
+        Returns: {
+          cerrada_en: string
+          creada_en: string
+          estado: string
+          mascota_foto_url: string
+          mascota_id: string
+          mascota_nombre: string
+          mensajes: Json
+          publicacion_id: string
+          solicitante_nombre: string
+          solicitante_user_id: string
+          solicitud_id: string
+        }[]
+      }
+      obtener_solicitudes_en_silencio: {
+        Args: never
+        Returns: {
+          creada_en: string
+          dias_de_silencio: number
+          publicacion_id: string
+          solicitante_user_id: string
+          solicitud_id: string
         }[]
       }
       obtener_solicitudes_mostrador: {
@@ -24665,6 +24810,10 @@ export type Database = {
       }
       responder_socializacion_paseo: {
         Args: { p_mascota_id: string; p_ok: boolean }
+        Returns: Json
+      }
+      responder_solicitud_adopcion: {
+        Args: { p_cuerpo: string; p_solicitud_id: string }
         Returns: Json
       }
       responder_solicitud_autorizacion: {

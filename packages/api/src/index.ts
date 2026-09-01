@@ -1694,3 +1694,14 @@ export {
   traspasarMascotaAFamilia,
 } from './wrappers/adopcion';
 export type { Adoptable, ResultadoTraspaso, CodigoErrorAdopcion } from './wrappers/adopcion';
+
+/* S111-A · la mensajería de adopción — hunk aditivo. La puerta que le faltaba
+   al motor: las cuatro RPC existían y no se podían llamar desde `apps/`. */
+export {
+  crearSolicitudAdopcion, responderSolicitudAdopcion, cerrarSolicitudAdopcion,
+  obtenerMisSolicitudesAdopcion, obtenerSolicitudesDeMisPublicaciones,
+  contarSolicitudesPorRevisar,
+} from './wrappers/adopcion';
+export type {
+  EstadoSolicitudAdopcion, MensajeDelHilo, MiSolicitud, SolicitudRecibida,
+} from './wrappers/adopcion';
