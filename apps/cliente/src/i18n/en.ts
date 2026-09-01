@@ -863,6 +863,11 @@ export const clienteEn = {
     nivelExperto: 'Expert program',
     nivelEspecialidad: 'Specialty',
     sesionesN: '{{n}} sessions',
+    /* ⭐ S109-C · Ver las notas del espejo en `es.ts`: con el prestador
+       presidiendo, la sesión suelta necesita nombre porque ya no ES la fila. */
+    sesionSuelta: 'Single session',
+    duracionMin: '{{n}} min per session',
+    elegiQue: 'What would you like to book?',
     checkoutResumen: 'Your training session',
     exitoTitulo: 'Session booked',
     exitoDetalle: 'The trainer already has your session on their schedule.',

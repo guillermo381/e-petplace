@@ -219,7 +219,19 @@ export default function PerfilPublicoPrestador() {
               hora={texto(params.hora)}
               mascotaId={texto(params.mascotaId)}
               mascotaNombre={texto(params.mascotaNombre)}
-              comprable={texto(params.comprable) === 'programa' ? 'programa' : 'sesion'}
+              /* 🔴 **S109-C · AUSENTE = OFRECÉ TODO, y el `undefined` es la
+                 diferencia entera.** ⏪ Decía
+                 `=== 'programa' ? 'programa' : 'sesion'`: sin el param **caía a
+                 `'sesion'`** y la barra ofrecía sólo la sesión suelta — *un
+                 default que decide en vez de preguntar.*
+                 Desde que la lista lleva al PRESTADOR y no al programa, no
+                 manda `comprable`, y acá eso significa **la familia todavía no
+                 eligió qué**: la barra le muestra las tres cosas. */
+              comprable={
+                texto(params.comprable) === 'programa' ? 'programa'
+                : texto(params.comprable) === 'sesion' ? 'sesion'
+                : undefined
+              }
             />
           ) : texto(params.oficio) === 'grooming' ? (
             <BarraGrooming
