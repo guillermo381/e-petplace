@@ -231,8 +231,21 @@ una familia de UNA mascota; un refugio es lo contrario de eso.*
 quedarse, y su costo es **acotado y nombrable**:
 1. **no existe** — cero funciones escriben `mascotas.familia_id` (lote 1,
    medido con control positivo en dos columnas hermanas);
-2. **el `WITH CHECK` de `mascotas_update_familia` no está medido** — lo declaré
-   en el lote 1 y **sigue sin medir**: exige ejecutar un UPDATE;
+2. ✅ **MEDIDO POR S110-A (1-sep, posterior a este documento): el `WITH CHECK`
+   de `mascotas_update_familia` es PUERTA ABIERTA** — `D-989` 🔴. Evalúa
+   `user_es_familiar_adulto_de_mascota(id)`, que **toma el `id` de la mascota y
+   no ve a dónde va la fila**: pasa hacia la familia propia **y hacia una
+   ajena**. ⇒ *lo que yo había dejado como sospecha razonada —«un WITH CHECK que
+   revalida la fila vieja no valida nada»— está confirmado ejerciéndolo, que es
+   lo que yo no podía hacer sin escribir.*
+   ⚠️ **Con el límite que A declara de su propia sonda:** su actor era además el
+   `user_id` de la mascota, así que **no aísla cuál de los dos brazos pasó** —el
+   de `familia_miembro` o el legacy `m.user_id = auth.uid()`—. *La puerta está
+   abierta; cuál de las dos hojas, no se midió.*
+   🔑 **Y esto no agranda el costo de «mover»: lo vuelve exigible.** Mover no
+   sólo hay que construirlo — hay que **cerrar la puerta en el mismo acto**, y
+   mi *«cero funciones escriben `mascotas.familia_id`»* es justo lo que hace que
+   cerrarla no rompa nada: **no hay escritor legítimo que quede afuera**;
 3. **hay que cerrar los permisos a mano**: `mascota_codueño.hasta` y
    `mascota_familiar_autorizado.hasta`, porque el gate no mira familia;
 4. **hay que decidir qué pasa con `mascotas.user_id`**, por el segundo brazo de
@@ -247,8 +260,9 @@ quedarse, y su costo es **acotado y nombrable**:
 
 ## LO QUE NO SE MIDIÓ (declarado)
 
-1. **El `WITH CHECK` de `mascotas_update_familia`** — exige un UPDATE.
-   **Bloqueante de la forma «mover».**
+1. ~~El `WITH CHECK` de `mascotas_update_familia`~~ — **YA NO: medido por
+   S110-A, es puerta abierta (`D-989`).** Ver el punto 2 del veredicto. *Queda
+   sin aislar cuál de los dos brazos la abre.*
 2. **Si `familia` con `tipo='virtual_refugio'` puede convivir con mascotas de
    varios adoptantes futuros** — no hay dato: cero filas de ese tipo.
 3. **Nada en bundle corriendo.**
