@@ -890,6 +890,43 @@ export async function obtenerMediaDeMiMascota(
   };
 }
 
+export interface TramoVivo { tramoId: string; direccion: DireccionActa }
+
+/**
+ * El viaje vivo de MI mascota, o `null`.
+ *
+ * 🔴 **LA PUERTA QUE FALTABA.** Las cinco RPC del tramo existían y ésta era la
+ * única sin wrapper — *el contrato de una pieza de motor incluye su wrapper*,
+ * cobrado por séptima vez. Su ausencia obligó a la pantalla de la familia a
+ * mantener un ESPEJO de la lógica del servidor, y un espejo diverge en
+ * silencio: el día que el motor cambie su regla, la pantalla sigue con la
+ * vieja y **nada da rojo**.
+ *
+ * 🔴 **Lo enciende el TRAMO ABIERTO, no el acto** (enmienda de mesa S110-⑥):
+ * la familia ve el vehículo desde que sale a buscarla, no desde que su animal
+ * sube. El estado sólo APAGA — después de `entregada`, `no_recogida` o
+ * `cancelada` no hay viaje que mirar.
+ *
+ * `direccion` dice de qué mitad del día es el viaje, para que la pantalla no
+ * tenga que deducirlo del estado de la estadía.
+ *
+ * ⚠️ **`null` es una respuesta legítima y frecuente**, no un fallo: significa
+ * «hoy no hay viaje en curso». Un consumidor que lo trate como error va a
+ * mostrar una falla donde no la hay.
+ */
+export async function obtenerTramoVivoDeMiMascota(
+  mascotaId: string,
+): Promise<ResultadoWrapper<TramoVivo | null, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_tramo_vivo_de_mi_mascota', {
+    p_mascota_id: mascotaId,
+  });
+  if (error) return fallo(error.message);
+  if (data === null || typeof data !== 'object') return { ok: true, data: null };
+  const r = data as Record<string, unknown>;
+  if (typeof r.tramoId !== 'string' || typeof r.direccion !== 'string') return { ok: true, data: null };
+  return { ok: true, data: { tramoId: r.tramoId, direccion: r.direccion as DireccionActa } };
+}
+
 export interface PuntoVivo { lat: number; lon: number; vistoEn: string }
 
 /** Upsert por `tramo_id`. 🔴 **Nunca acumula**: una fila por tramo. */
