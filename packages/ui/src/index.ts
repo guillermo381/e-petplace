@@ -455,6 +455,24 @@ export {
   type DesvioEscalera,
 } from './components/EscaleraEstados'
 
+// Convivencia — S111-B: CON QUIÉN PUEDE VIVIR, Y CON QUIÉN TODAVÍA NO SE SABE.
+// `LETRA_ADOPCION` §3: TRES estados, jamás dos — sí · no · todavía no se
+// sabe. El tercero NO es la ausencia de los otros dos: es un estado con su
+// propia voz, que ocupa su lugar en la fila.
+//
+// Dos decisiones que quien la consuma NO puede deshacer desde la pantalla:
+//   ① `no_se_sabe` LLEVA SU `voz` OBLIGATORIA — "todavía no se sabe, mudo"
+//     no compila (L-222). La letra mide el costo de romperlo: un «no»
+//     inventado le cuesta el hogar al animal.
+//   ② NO USA LA PALETA DE ESTADO — un «no» es un hecho del animal, no un
+//     defecto suyo; pintarlo de rojo es editorializar en su contra. La
+//     distinción es estructural (punto relleno / contorneado / ausente).
+export {
+  Convivencia,
+  type ConvivenciaProps,
+  type ConvivenciaCon,
+} from './components/Convivencia'
+
 // TarjetaPedido — S96-B: UN pedido en una lista, de los DOS lados. La fila
 // de la lista Hoy del vendedor (LETRA_PANEL_VENDEDOR_S96 §2.1) y la de
 // "Mis pedidos" de la familia (LETRA_RECORRIDO_DESPENSA_S96 §8.1).
