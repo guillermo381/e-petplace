@@ -623,6 +623,13 @@ export interface EstadiaDelDia {
   aBordoEn: string | null;
   llegadaEn: string | null;
   entregadaEn: string | null;
+  /**
+   * 🔴 EL PELDAÑO ② DE LA ESCALERA — cara de su raza → genérico de su especie
+   * → la huella. `null` cuando `mascotas.raza` (texto libre) no matchea el
+   * catálogo: la superficie baja al siguiente peldaño.
+   * *Fabricar la ruta desde el texto libre daría un 404 con cara de foto.*
+   */
+  razaRutaImagen: string | null;
 }
 
 /**
@@ -671,6 +678,7 @@ export async function obtenerEstadiasDelDia(
       aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
       llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
       entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+      razaRutaImagen: typeof r.raza_ruta_imagen === 'string' ? r.raza_ruta_imagen : null,
     });
   }
   return { ok: true, data: salida };
@@ -749,6 +757,7 @@ export async function obtenerEstadiasPorRango(
       aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
       llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
       entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+      razaRutaImagen: typeof r.raza_ruta_imagen === 'string' ? r.raza_ruta_imagen : null,
     });
   }
   return { ok: true, data: salida };
