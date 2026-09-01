@@ -48,6 +48,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   obtenerEstadiasDelDia,
   obtenerMiPrestador,
   resolverUrlsFotos,
@@ -199,6 +200,28 @@ export default function DiaGuarderia() {
             {estado.estadias.map((e) => {
               const dir = comoDireccion(e.direccion);
               const foto = e.mascotaFotoUrl === null ? null : (estado.caras.get(e.mascotaFotoUrl) ?? null);
+              /* ⭐ S109-D · LA CARA SALE DE LA ESCALERA DE LA CASA, no de la
+                 pieza. Acá se pasaba `fotoUrl` crudo y sin foto salía LA
+                 HUELLA — con 111 caras sembradas a dos carpetas de distancia.
+
+                 🔴 Y leyendo el JSX parecía correcto: la llamada pasaba
+                 `especie`, así que se veía cableado. **`AvatarMascota` declara
+                 en su contrato que `especie` «hoy no cambia el render»** (está
+                 reservada al set ilustrado de `D-288`). *Una prop que se acepta
+                 y se ignora se lee como cableado, y el único que sabe que no
+                 hace nada es el archivo del componente.*
+
+                 ⚠️ `razaSlug: null` A PROPÓSITO: `EstadiaDelDia` no proyecta la
+                 raza, y `resolverUrlRaza` exige el slug de `cat_razas` — jamás
+                 uno derivado del texto tipeado, porque *una URL que acierta a
+                 veces muestra una cara equivocada, que es peor que ninguna*.
+                 Con esto se llega al peldaño ② (el genérico de su especie). El
+                 ① llega cuando el lector traiga `raza_ruta_imagen`. */
+              const cara = caraDeMascota({
+                especie: e.mascotaEspecie,
+                razaSlug: null,
+                fotoUri: foto,
+              });
               return (
                 <Tarjeta key={e.estadiaId} relleno="normal" elevacion="reposo">
                   <View style={{ gap: spacing[3] }}>
@@ -206,7 +229,7 @@ export default function DiaGuarderia() {
                       <AvatarMascota
                         nombre={e.mascotaNombre}
                         especie={especieDe(e.mascotaEspecie)}
-                        fotoUrl={foto ?? undefined}
+                        fotoUrl={cara ?? undefined}
                         tamano="md"
                       />
                       <View style={{ flex: 1, gap: spacing[1] }}>
