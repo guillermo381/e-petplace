@@ -1892,6 +1892,75 @@ export type Database = {
           },
         ]
       }
+      cat_guarderia_estados: {
+        Row: {
+          es_terminal: boolean
+          escritor: string
+          estado: string
+          orden: number
+        }
+        Insert: {
+          es_terminal: boolean
+          escritor: string
+          estado: string
+          orden: number
+        }
+        Update: {
+          es_terminal?: boolean
+          escritor?: string
+          estado?: string
+          orden?: number
+        }
+        Relationships: []
+      }
+      cat_guarderia_transiciones: {
+        Row: {
+          acto: string
+          columna_ts: string
+          desde: string
+          es_lote: boolean
+          exige_tramo: string | null
+          hasta: string
+          levanta_acta: string | null
+          orden: number
+        }
+        Insert: {
+          acto: string
+          columna_ts: string
+          desde: string
+          es_lote: boolean
+          exige_tramo?: string | null
+          hasta: string
+          levanta_acta?: string | null
+          orden: number
+        }
+        Update: {
+          acto?: string
+          columna_ts?: string
+          desde?: string
+          es_lote?: boolean
+          exige_tramo?: string | null
+          hasta?: string
+          levanta_acta?: string | null
+          orden?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_guarderia_transiciones_desde_fkey"
+            columns: ["desde"]
+            isOneToOne: false
+            referencedRelation: "cat_guarderia_estados"
+            referencedColumns: ["estado"]
+          },
+          {
+            foreignKeyName: "cat_guarderia_transiciones_hasta_fkey"
+            columns: ["hasta"]
+            isOneToOne: false
+            referencedRelation: "cat_guarderia_estados"
+            referencedColumns: ["estado"]
+          },
+        ]
+      }
       cat_hitos_narrativos: {
         Row: {
           activo: boolean
@@ -10810,6 +10879,48 @@ export type Database = {
           },
         ]
       }
+      guarderia_estadia_actos: {
+        Row: {
+          acto: string
+          actor_user_id: string | null
+          estadia_id: string
+          id: string
+          ocurrido_en: string
+          registrado_en: string
+        }
+        Insert: {
+          acto: string
+          actor_user_id?: string | null
+          estadia_id: string
+          id?: string
+          ocurrido_en: string
+          registrado_en?: string
+        }
+        Update: {
+          acto?: string
+          actor_user_id?: string | null
+          estadia_id?: string
+          id?: string
+          ocurrido_en?: string
+          registrado_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarderia_estadia_actos_acto_fkey"
+            columns: ["acto"]
+            isOneToOne: false
+            referencedRelation: "cat_guarderia_transiciones"
+            referencedColumns: ["acto"]
+          },
+          {
+            foreignKeyName: "guarderia_estadia_actos_estadia_id_fkey"
+            columns: ["estadia_id"]
+            isOneToOne: false
+            referencedRelation: "guarderia_estadias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guarderia_estadias: {
         Row: {
           a_bordo_en: string | null
@@ -10820,6 +10931,10 @@ export type Database = {
           estado: string
           id: string
           llegada_en: string | null
+          no_recogida_detalle: string | null
+          no_recogida_en: string | null
+          no_recogida_motivo: string | null
+          retorno_en: string | null
           tramo_devolucion_id: string | null
           tramo_recogida_id: string | null
           updated_at: string
@@ -10833,6 +10948,10 @@ export type Database = {
           estado?: string
           id?: string
           llegada_en?: string | null
+          no_recogida_detalle?: string | null
+          no_recogida_en?: string | null
+          no_recogida_motivo?: string | null
+          retorno_en?: string | null
           tramo_devolucion_id?: string | null
           tramo_recogida_id?: string | null
           updated_at?: string
@@ -10846,6 +10965,10 @@ export type Database = {
           estado?: string
           id?: string
           llegada_en?: string | null
+          no_recogida_detalle?: string | null
+          no_recogida_en?: string | null
+          no_recogida_motivo?: string | null
+          retorno_en?: string | null
           tramo_devolucion_id?: string | null
           tramo_recogida_id?: string | null
           updated_at?: string
@@ -21344,9 +21467,23 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      _guarderia_aplicar_acto: {
+        Args: {
+          p_acto: string
+          p_detalle?: string
+          p_estadia_id: string
+          p_motivo?: string
+          p_ocurrido_en: string
+        }
+        Returns: Json
+      }
       _guarderia_dia_operativo: {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: boolean
+      }
+      _guarderia_estadia_gestionable: {
+        Args: { p_estadia_id: string }
+        Returns: string
       }
       _guarderia_ofertas_cobrables: {
         Args: { p_fecha?: string; p_mascota_id: string; p_modalidad?: string }
@@ -22853,6 +22990,17 @@ export type Database = {
         }
         Returns: string
       }
+      marcar_a_bordo_guarderia: {
+        Args: {
+          p_carnet_verificado: boolean
+          p_clave_idempotencia?: string
+          p_estadia_id: string
+          p_objetos?: string
+          p_observaciones?: string
+          p_ocurrido_en: string
+        }
+        Returns: Json
+      }
       marcar_aviso_leido: { Args: { p_aviso_id: string }; Returns: Json }
       marcar_en_camino_a_destino: {
         Args: { p_envio_id: string }
@@ -22862,12 +23010,40 @@ export type Database = {
         Args: { p_envio_id: string; p_motivo: string }
         Returns: Json
       }
+      marcar_entregada_guarderia: {
+        Args: {
+          p_carnet_verificado: boolean
+          p_clave_idempotencia?: string
+          p_estadia_id: string
+          p_objetos?: string
+          p_observaciones?: string
+          p_ocurrido_en: string
+        }
+        Returns: Json
+      }
       marcar_invitacion_aceptada: {
         Args: { p_invitacion_id: string }
         Returns: boolean
       }
       marcar_link_mensual_pagado: { Args: { p_link_id: string }; Returns: Json }
+      marcar_llegada_guarderia: {
+        Args: { p_estadias: string[]; p_ocurrido_en: string }
+        Returns: Json
+      }
+      marcar_no_recogida_guarderia: {
+        Args: {
+          p_detalle?: string
+          p_estadia_id: string
+          p_motivo: string
+          p_ocurrido_en: string
+        }
+        Returns: Json
+      }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
+      marcar_retorno_guarderia: {
+        Args: { p_estadias: string[]; p_ocurrido_en: string }
+        Returns: Json
+      }
       marcar_teleconsulta_no_realizable: {
         Args: { p_cita_id: string; p_detalle?: string }
         Returns: Json
@@ -23142,7 +23318,10 @@ export type Database = {
           mascota_foto_url: string
           mascota_id: string
           mascota_nombre: string
+          no_recogida_en: string
+          no_recogida_motivo: string
           raza_ruta_imagen: string
+          retorno_en: string
         }[]
       }
       obtener_estadias_por_rango: {
@@ -23162,7 +23341,10 @@ export type Database = {
           mascota_foto_url: string
           mascota_id: string
           mascota_nombre: string
+          no_recogida_en: string
+          no_recogida_motivo: string
           raza_ruta_imagen: string
+          retorno_en: string
         }[]
       }
       obtener_estado_guarderia: {
@@ -23331,6 +23513,7 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      obtener_maquina_estadia_guarderia: { Args: never; Returns: Json }
       obtener_media_de_mi_mascota: {
         Args: { p_fecha?: string; p_mascota_id: string }
         Returns: {
@@ -24567,6 +24750,7 @@ export type Database = {
       }
       verificar_cobertura_desgloses: { Args: never; Returns: Json }
       verificar_cobertura_sujetos_de_pago: { Args: never; Returns: Json }
+      verificar_coherencia_estados_guarderia: { Args: never; Returns: Json }
       verificar_coherencia_inventario: { Args: never; Returns: Json }
       verificar_coherencia_tablas_tipadas: {
         Args: never

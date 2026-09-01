@@ -1651,3 +1651,33 @@ export type { ProgramaConSaldo, CodigoErrorPrograma } from './wrappers/adiestram
    «el trabajo que ya hiciste» enumere los CINCO oficios y no cuatro. */
 export { obtenerCitasGuarderiaDelDia } from './wrappers/guarderia-agenda';
 export type { CodigoErrorGuarderiaAgenda } from './wrappers/guarderia-agenda';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   S110-A · EL DURANTE DE GUARDERÍA — los cinco actos del día y el viaje.
+   Hunk aditivo (76c): bloque propio, sin reordenar nada ajeno.
+   🔴 Antes de esto, CINCO de los siete estados del CHECK no tenían escritor y
+   las dos RPC de tramo no tenían un solo consumidor en TypeScript.
+   ═══════════════════════════════════════════════════════════════════════════ */
+export {
+  obtenerMaquinaEstadia,
+  marcarABordo,
+  marcarLlegada,
+  marcarRetorno,
+  marcarEntregada,
+  marcarNoRecogida,
+  abrirTramoGuarderia,
+  cerrarTramoGuarderia,
+} from './wrappers/guarderia-durante';
+export type {
+  MaquinaEstadia,
+  /* `EstadoEstadia` NO va acá: ya lo exporta `guarderia-reserva`, que es su
+     único dueño. Un segundo export del mismo nombre no compila — y el que
+     compila igual es el que después diverge. */
+  ActoDelDurante,
+  MotivoNoRecogida,
+  PayloadActa,
+  ResultadoActoUnico,
+  ResultadoLote,
+  ResultadoNoRecogida,
+  CodigoErrorGuarderiaDurante,
+} from './wrappers/guarderia-durante';
