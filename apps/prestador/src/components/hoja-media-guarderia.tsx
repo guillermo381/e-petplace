@@ -171,8 +171,26 @@ export function HojaMediaGuarderia({
     setCapturada(r.uri);
   };
 
-  /** Abre el encuadre pidiendo los DOS permisos: un clip sin micrófono sale
-   *  mudo y no se puede arreglar después. */
+  /**
+   * Abre el encuadre pidiendo **los DOS permisos**, cámara y micrófono.
+   *
+   * ⚠️ **QUÉ SÉ Y QUÉ NO, declarado porque lo escribí como hecho y no lo era:**
+   * *no medí* si sin permiso de micrófono `recordAsync` graba mudo o falla
+   * directo — el contrato de `expo-camera` documenta `mute` como opción, pero
+   * **no dice qué hace cuando el permiso falta**.
+   *
+   * 🔴 **La decisión no depende de eso, y por eso se sostiene igual:** en los
+   * dos casos el clip no sirve, y el cuidador se entera **después de grabar**.
+   * *Pedir dos permisos molesta una vez; un clip perdido se pierde entero.*
+   *
+   * **Y va acá y no en la pieza** (voto de B, y coincido): `EvidenciaClip` no
+   * tiene `expo-camera` ni puede tenerlo —rompería el bundle del cliente—, así
+   * que una prop de permisos sería **API para un estado que la pieza no puede
+   * alcanzar ni arreglar**: sólo podría dibujar «falta el micrófono» y quedarse
+   * mirando. *Eso no es una puerta, es un cartel.* Pidiéndolos acá, **la pieza
+   * nunca ve el estado sin permiso** (Ley 23) y no hay dos gates para lo mismo
+   * — que es cómo uno de los dos envejece sin que nadie se entere.
+   */
   const abrirClip = async () => {
     const c = permisoCamara?.granted === true ? permisoCamara : await pedirCamara();
     if (!c.granted) {
