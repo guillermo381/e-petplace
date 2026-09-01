@@ -59,7 +59,33 @@ import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 
 export interface MapaPuntoProps {
-  /** La coordenada EXACTA del destino. */
+  /** La coordenada EXACTA del destino.
+   *
+   *  🔴 **EL RIESGO ESPEJO, DECLARADO Y NO CERRADO (S109-D → S109-B).**
+   *  Desde S109-B pasarle a `MapaZona` una coordenada exacta **es un error de
+   *  tipo** —sus props se llaman `zonaLat`/`zonaLon`—. *La dirección inversa
+   *  sigue abierta: nada impide pasarle a ESTA pieza un centro DESPLAZADO*, y
+   *  el resultado sería **un punto de aspecto exacto sobre una coordenada
+   *  deliberadamente imprecisa** — la promesa de precisión que `MapaZona` existe
+   *  para no hacer, hecha por la pieza de al lado.
+   *
+   *  ⚠️ **NO se cierra hoy, y con su razón:** esta pieza tiene **UN solo
+   *  consumidor** (`SeccionDireccion`) y su dato es inequívoco —`direccion.lat`
+   *  del snapshot `D-339`—, así que un guard sería *una defensa sin caso*.
+   *
+   *  🔑 **DISPARO: su SEGUNDO consumidor.** El día que la vitrina de la familia
+   *  quiera decir «más o menos por acá» con un punto, entra por acá **y nada va
+   *  a frenarlo** — que es exactamente la forma que esta sesión pagó siete
+   *  veces. *Una condición escrita lejos del código que la cumple es una
+   *  condición que nadie va a leer el día que se cumpla*, y por eso vive acá y
+   *  no sólo en el traspaso.
+   *
+   *  Y por qué NO lleva prefijo, que es la otra mitad de la decisión:
+   *  `lat`/`lon` significa en esta pieza exactamente lo que significa en el
+   *  resto de la casa. La zona necesitaba prefijo porque su coordenada **no es**
+   *  eso — el prefijo marca la EXCEPCIÓN. *Renombrar lo normal para que se
+   *  parezca a la excepción invierte cuál de las dos lleva la carga de
+   *  explicarse.* */
   lat: number
   lon: number
   /** Alto del bloque. Default 160 — el mismo que `MapaZona`. */
