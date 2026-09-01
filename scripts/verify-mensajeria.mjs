@@ -8,11 +8,15 @@ import {
   estadoDeSilencio, DIAS_SILENCIO_PUBLICADOR,
   camposVisibles, puedeVer,
   avisaAlPadrino, REGLAS_FIN_PADRINAZGO,
+  reducirCola, proximoAEnviar, puedeReintentar, hayFallidos, MAX_INTENTOS,
+  avisosDe,
 } from '../packages/mensajeria/src/index.ts';
 
 const d = (s) => new Date(s);
 let fallos = 0;
+let corridos = 0;   // se MIDE, no se escribe: un total a mano miente el dia que agrego un caso
 const check = (nombre, real, esperado) => {
+  corridos++;
   const ok = JSON.stringify(real) === JSON.stringify(esperado);
   console.log(`${ok ? '✓' : '✗ FALLO'} ${nombre}${ok ? '' : ` → ${JSON.stringify(real)} ≠ ${JSON.stringify(esperado)}`}`);
   if (!ok) fallos++;
@@ -84,6 +88,101 @@ check('las TRES causas detienen el cobro, sin excepción',
 check('la causa sin aviso DECLARA su motivo',
   typeof REGLAS_FIN_PADRINAZGO.find((r) => r.causa === 'fallecido').motivoSinAviso === 'string', true);
 
-const total = 26;
-console.log(fallos === 0 ? `\nMENSAJERÍA: ${total}/${total}` : `\nFALLOS: ${fallos}`);
+
+// ── ⑤ LA COLA DE ENVÍO — las tres garantías, ejercidas ──────────────────────
+{
+  const enc = (c, k, cuerpo) => reducirCola(c, { tipo: 'encolar', claveIdempotencia: k, cuerpo });
+  let c = enc([], 'k1', 'hola');
+  check('encolar deja el mensaje pendiente', c.map((m) => m.estado), ['pendiente']);
+
+  // ① EL DOBLE TOQUE NO DUPLICA
+  c = enc(c, 'k1', 'hola');
+  check('🔴 doble toque con la misma clave NO duplica', c.length, 1);
+  c = enc(c, 'k2', 'otro');
+  check('clave distinta SÍ encola', c.length, 2);
+
+  check('el próximo a enviar es el primero pendiente', proximoAEnviar(c).claveIdempotencia, 'k1');
+
+  c = reducirCola(c, { tipo: 'marcar_enviando', claveIdempotencia: 'k1' });
+  check('enviando cuenta el intento', c[0].intentos, 1);
+  check('lo que está en vuelo ya no es el próximo', proximoAEnviar(c).claveIdempotencia, 'k2');
+
+  // ② EL FALLO SE DICE
+  c = reducirCola(c, { tipo: 'fallar', claveIdempotencia: 'k1', causa: 'sin_red' });
+  check('🔴 el fallo NO desaparece: queda fallido con su causa',
+    [c[0].estado, c[0].causaFallo], ['fallido', 'sin_red']);
+  check('hayFallidos lo ve', hayFallidos(c), true);
+  check('un fallido se puede reintentar', puedeReintentar(c[0]), true);
+
+  // ③ EL REINTENTO NO CREA UN MENSAJE NUEVO
+  const antes = c.length;
+  c = reducirCola(c, { tipo: 'reintentar', claveIdempotencia: 'k1' });
+  check('🔴 reintentar NO agrega un mensaje', c.length, antes);
+  check('reintentar vuelve a pendiente y limpia la causa',
+    [c[0].estado, c[0].causaFallo], ['pendiente', undefined]);
+
+  // el techo
+  let t = enc([], 'kx', 'x');
+  for (let i = 0; i < MAX_INTENTOS; i++) {
+    t = reducirCola(t, { tipo: 'marcar_enviando', claveIdempotencia: 'kx' });
+    t = reducirCola(t, { tipo: 'fallar', claveIdempotencia: 'kx', causa: 'sin_red' });
+  }
+  check('agotado el techo, NO se ofrece reintentar', puedeReintentar(t[0]), false);
+
+  // confirmar y purgar
+  c = reducirCola(c, { tipo: 'confirmar', claveIdempotencia: 'k1', idServidor: 'srv-1' });
+  check('confirmar deja el id del servidor', [c[0].estado, c[0].idServidor], ['enviado', 'srv-1']);
+  check('un fallo tardío NO pisa lo ya enviado',
+    reducirCola(c, { tipo: 'fallar', claveIdempotencia: 'k1', causa: 'timeout' })[0].estado, 'enviado');
+  check('purgar saca los enviados y deja el resto',
+    reducirCola(c, { tipo: 'purgar_enviados' }).map((m) => m.claveIdempotencia), ['k2']);
+
+  // no-op sobre clave ausente: una respuesta tardía no es un error
+  check('acción sobre clave ausente es no-op, no excepción',
+    reducirCola(c, { tipo: 'confirmar', claveIdempotencia: 'no_existe', idServidor: 'z' }).length, c.length);
+}
+
+
+// ── ⑥ AVISOS — categorías del modelo, y los DOS silencios ───────────────────
+{
+  const vivo = { mascotaEnMemorial: false };
+  const memorial = { mascotaEnMemorial: true };
+
+  const a1 = avisosDe({ clase: 'solicitud_creada', solicitudId: 's1', publicadorUserId: 'u-pub' }, vivo);
+  check('solicitud nueva → relacional, al publicador',
+    [a1.length, a1[0].tipo, a1[0].categoria, a1[0].audiencia, a1[0].destinatarioUserId],
+    [1, 'adopcion_solicitud_nueva', 'relacional', 'prestador', 'u-pub']);
+
+  const a2 = avisosDe({ clase: 'silencio_detectado', solicitudId: 's1', solicitanteUserId: 'u-fam' }, vivo);
+  check('🔑 «no respondieron» es OPERACION, no relacional (criterio S87)',
+    [a2[0].tipo, a2[0].categoria], ['adopcion_sin_respuesta', 'operacion']);
+  check('y su clave de dedupe es por solicitud: suena UNA vez',
+    a2[0].claveDedup, 'adopcion_sin_respuesta:s1');
+
+  const a3 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'adoptado' }, vivo);
+  check('padrinazgo: adoptado SÍ avisa', [a3.length, a3[0].tipo], [1, 'padrinazgo_ahijado_adoptado']);
+  const a4 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'refugio_inactivo' }, vivo);
+  check('padrinazgo: refugio inactivo es OPERACION', [a4[0].tipo, a4[0].categoria], ['padrinazgo_refugio_inactivo', 'operacion']);
+
+  // 🅿️ SILENCIO ①: lo estacionado
+  const a5 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'fallecido' }, vivo);
+  check('🅿️ ROJO: fallecido NO emite aviso (estacionado, fail-closed)', a5, []);
+
+  // 🔴 SILENCIO ②: el memorial apaga el vertical entero
+  check('🔴 ROJO: memorial apaga solicitud nueva',
+    avisosDe({ clase: 'solicitud_creada', solicitudId: 's1', publicadorUserId: 'u-pub' }, memorial), []);
+  check('🔴 ROJO: memorial apaga el aviso de silencio',
+    avisosDe({ clase: 'silencio_detectado', solicitudId: 's1', solicitanteUserId: 'u-fam' }, memorial), []);
+  check('🔴 ROJO: memorial apaga hasta el padrinazgo adoptado',
+    avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'adoptado' }, memorial), []);
+
+  const a6 = avisosDe({ clase: 'mensaje_nuevo', solicitudId: 's1', mensajeId: 'm9', destinatarioUserId: 'u-x' }, vivo);
+  check('mensaje nuevo dedupea por MENSAJE, no por solicitud', a6[0].claveDedup, 'adopcion_mensaje_nuevo:m9');
+}
+
+console.log(
+  fallos === 0
+    ? `\nMENSAJERÍA: ${corridos - 1}/${corridos - 1}  (sin contar la auto-prueba)`
+    : `\nFALLOS: ${fallos} de ${corridos - 1}`,
+);
 process.exit(fallos === 0 ? 0 : 1);

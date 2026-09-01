@@ -39,3 +39,25 @@ export {
   type CausaFinPadrinazgo,
   type ReglaFinPadrinazgo,
 } from './padrinazgo';
+
+export {
+  hayFallidos,
+  MAX_INTENTOS,
+  proximoAEnviar,
+  puedeReintentar,
+  reducirCola,
+  type AccionCola,
+  type Cola,
+  type EstadoEnvio,
+  type MensajeEnCola,
+} from './cola';
+
+export {
+  avisosDe,
+  type AudienciaAviso,
+  type CategoriaAviso,
+  type ContextoAviso,
+  type HechoDelVertical,
+  type IntencionAviso,
+  type TipoAviso,
+} from './avisos';
