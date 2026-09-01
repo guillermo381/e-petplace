@@ -26433,3 +26433,33 @@ con datos vencidos se lee con la misma confianza que uno vigente.*
 **DISPARO: todo cierre de pista, y toda relectura de un documento de medición
 ajeno.** Es `L-166` —*el dato vivo se relee del objeto al usarlo*— aplicada al
 documento en vez de al dato.
+
+### ⚠️ ENMIENDA DEL MISMO DÍA — LA TERCERA FORMA, y es la que más se va a repetir
+
+**Aportada por C al verificar este cierre.** Fue a comprobar que los ocho números
+estuvieran depositados y midió **cuatro ausentes**; estuvo a punto de avisar que
+faltaban.
+
+🔴 **Estaba leyendo el canon de SU PROPIO ÁRBOL**, que había quedado en
+`0527196c` mientras `main` ya iba en `0c7e8cf1`. Contra
+`origin/main:docs/DEUDAS_CANONICAS.md` **las cuatro estaban.**
+
+> ### ⇒ *Un archivo de trabajo es una foto del momento en que se hizo `fetch`.*
+
+**Y con esto la clase queda completa: el mismo error tuvo TRES formas en un solo
+día**, y las tres se leen distinto hasta que se las pone juntas:
+
+| forma | qué envejeció |
+|---|---|
+| **el documento** | un veredicto medido contra un sha viejo |
+| **el sha citado** | el HEAD de la otra rama siguió caminando (`L-469`) |
+| **el archivo local** | la copia del canon en el worktree propio |
+
+**Las tres se curan igual: la pregunta se le hace al OBJETO VIGENTE, no a la
+copia que uno tiene a mano.** Para un archivo del canon eso es literal —
+`git show origin/main:<ruta>` después de `fetch`, jamás el archivo del worktree.
+
+🔴 **Y el modo de falla es simétrico y por eso engaña:** el árbol viejo hace ver
+**ausencias que no existen** (C casi reporta números faltantes) y también
+**presencias que ya no están** (un dato borrado que la copia conserva). *Ninguna
+de las dos da error: las dos dan una respuesta.*
