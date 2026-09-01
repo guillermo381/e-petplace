@@ -99,9 +99,45 @@ const horaCorta = (iso: string) =>
    objeto. *El contrato prometía morir en una línea cuando el lector existiera —
    y así fue* (Ley 37: el andamio se retira con su razón). */
 
-/** Los dos tramos: mientras viaja, hay a dónde mirar. */
+/**
+ * ¿Hay viaje que mirar?
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **ANTES DECÍA «`recogida_en_curso` o `retorno_en_curso`» Y LA FAMILIA
+ * NUNCA VEÍA EL EN VIVO CON SU ANIMAL PENDIENTE** — que es *«7:40, en camino a
+ * buscar a Thor»*, el momento en que más quiere mirar.
+ *
+ * El motor ya lo resolvió (S110-A): manda **el TRAMO ABIERTO** y el estado sólo
+ * APAGA. **La pantalla se quedó atrás enumerando dos estados**, así que el
+ * punto llegaba y nadie lo pedía.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ **ESTO ES UN ESPEJO DECLARADO DE LA REGLA DEL MOTOR, y se retira.** El
+ * lector que la contesta entero —`obtener_tramo_vivo_de_mi_mascota`, que además
+ * verifica que el tramo esté `abierto`— **no tiene wrapper**; está pedido a A.
+ * *Mientras tanto esta función repite su criterio, y un espejo puede divergir:
+ * por eso lleva su fecha de retiro escrita y no se le agrega nada.*
+ *
+ * **Lo que el espejo NO puede saber:** si el tramo sigue abierto. Con uno
+ * cerrado, `obtenerPuntoVivo` devuelve `null` —el punto se borra al cerrar— y
+ * la pantalla dice que todavía no hay dónde mirar. *Impreciso, no falso.*
+ */
 function estaViajando(e: EstadiaDeMiMascota): boolean {
-  return e.estadoEstadia === 'recogida_en_curso' || e.estadoEstadia === 'retorno_en_curso';
+  if (e.estadoEstadia === 'entregada' || e.estadoEstadia === 'no_recogida') return false;
+  if (e.estadoEstadia === 'cancelada') return false;
+  return tramoDelMomento(e) !== null;
+}
+
+/** El tramo que corresponde al momento — ida mientras va a buscarlo, vuelta
+ *  mientras lo trae. Espejo de la misma regla del motor; ver arriba. */
+function tramoDelMomento(e: EstadiaDeMiMascota): string | null {
+  if (e.estadoEstadia === 'reservada' || e.estadoEstadia === 'recogida_en_curso') {
+    return e.tramoRecogidaId;
+  }
+  if (e.estadoEstadia === 'en_guarderia' || e.estadoEstadia === 'retorno_en_curso') {
+    return e.tramoDevolucionId;
+  }
+  return null;
 }
 
 type Estadia =
@@ -188,10 +224,9 @@ export default function DuranteGuarderia() {
     const e = estadia.e;
     /* El tramo del momento: recogida mientras va a buscarlo, devolución
        mientras vuelve. **Fuera de esos dos no hay viaje que mirar.** */
-    const tramoId =
-      e.estadoEstadia === 'recogida_en_curso' ? e.tramoRecogidaId
-      : e.estadoEstadia === 'retorno_en_curso' ? e.tramoDevolucionId
-      : null;
+    /* Una sola fuente para «qué tramo miro»: la de arriba. *Dos copias de esta
+       regla en el mismo archivo es cómo una queda vieja.* */
+    const tramoId = estaViajando(e) ? tramoDelMomento(e) : null;
     if (tramoId === null) { setPunto(null); return; }
     let vigente = true;
     const leer = async () => {
