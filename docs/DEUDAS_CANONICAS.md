@@ -25812,3 +25812,108 @@ Su brazo de `L-140` usó **`LIKE` sobre `proacl`** y disparó un WARNING falso.
 instrumento correcto —`has_function_privilege`— las tres funciones dan
 `anon = false`. *Una regla escrita en el canon no frena a nadie que no la
 relea: lo que frena es el instrumento.*
+
+---
+
+## 🔴 `D-997` — DeUna y Nuvei CERTIFICADOS (1-sep-2026), y el primer paquete mensual no llegó a habilitar el botón
+
+**Estado:** ABIERTA · **Dueño:** diagnóstico en curso por C; lo de motor o
+configuración vuelve a A por pedido autocontenido.
+
+### EL HECHO
+
+**Los dos rieles quedaron certificados el 1-sep-2026.**
+
+### ⚠️ Y LA PREMISA CON LA QUE LLEGÓ SE MIDIÓ, Y ESTÁ MATIZADA
+
+Se dictó *«hasta hoy `por_deuna = 0`»*. **Medido: `por_deuna` NO es una columna
+ni una métrica — es una NOTACIÓN que las pistas de S109 usaron** para decir
+«intentos por el riel DeUna», y **el propio traspaso de S109 ya la había
+re-verificado como FALSA**.
+
+**Lo cierto, contra el objeto, hoy:**
+
+| | |
+|---|---|
+| DeUna aprobados | **4 · $279,86 · TODOS de hoy, con `proveedor_transaction_id`** |
+| ↳ desglose | 3 `compra` ($271,86) · 1 `cita` ($8,00) |
+| DeUna pendientes | 13 · $468,45 |
+| DeUna rechazado / reversado | 1 · $75,86 (25-ago) / 1 · $94,50 (25-ago) |
+
+> ### ⇒ El cero **no era del riel: era de estos tres sujetos.** `bono` (paquete), `mensualidad` y `programa` tienen **CERO intentos por DeUna** — y ése es el cero que sigue siendo verdad.
+
+*La notación era correcta para lo que sus autoras estaban mirando y se leyó
+después como si hablara del riel entero. Es `L-166` en su forma más barata de
+evitar: el número se relee del objeto al usarlo, no del texto que lo citó.*
+
+### EL SÍNTOMA ABIERTO
+
+Un **paquete mensual de guardería por DeUna** no habilita el botón de pago: el
+mensaje del link es correcto, el botón queda apagado, **sin razón a la vista**.
+
+🔴 **Y el dato que acota el diagnóstico: NO EXISTE NINGÚN INTENTO DE
+`mensualidad` POR DeUna.** Cero filas. ⇒ **la edge no llegó a insertar**, así
+que la causa está **antes** de `pagos-deuna-solicitud` o en su rebote temprano
+— no en el cobro.
+
+### LO QUE SE DESCARTÓ MIDIENDO (no hace falta volver a mirarlo)
+
+- **La vía admite cobros que no son una unidad.** `bono_id`,
+  `guarderia_suscripcion_id` y `programa_contratado_id` tienen **rama real** en
+  la edge (4, 4 y 5 ocurrencias; control positivo 5 / negativo 0).
+- **Los desgloses existen**: `bono` 18 · `cita` 56 · `compra` 59 ·
+  `programa` 13 ⇒ el rebote `desglose_incompleto` no se explica por tabla vacía.
+- **Las 6 suscripciones de guardería tienen `precio_mensual` y
+  `monto_esperado`, y NINGUNA tiene `precio_mensual > monto_esperado`** ⇒ el
+  guard `monto_divergente` **no** es la causa.
+
+### LO QUE NO SE TOCÓ
+
+**Nada.** Esta ficha es sólo lectura. El pedido, si cae en motor o
+configuración, llega autocontenido.
+
+---
+
+## 🟢 `D-997` · ANEXO A — el disparo del plan de paseo por DeUna: **CUMPLIDO**
+
+El disparo escrito era *«cuando DeUna haya cobrado de verdad al menos UNA vez»*.
+
+**Cumplido y medido:** 4 intentos DeUna en `aprobado`, **los cuatro con
+`proveedor_transaction_id`**, del 1-sep. *Un intento que no llegó a botón no es
+un cobro — y estos cuatro sí llegaron.*
+
+⚠️ **Se DECLARA, no se construye.** Y la condición gemela sigue viva y no la
+cumple este disparo: la rama entera falta —`suscripcion_servicio_id` tiene
+**0 ocurrencias** en `pagos-deuna-solicitud`, medido— y **entra con la pantalla
+del link (C), no antes**: hoy `pagos/mensualidad.tsx` resuelve sólo guardería,
+así que un link de plan llegaría a una pantalla que no sabe leerlo. **Dueño
+compartido B+C.**
+
+---
+
+## 🟢 `D-997` · ANEXO B — los 37 intentos fuera del barrido: **YA NO SON 37, Y LOS QUE QUEDAN NO SON PLATA**
+
+Se pedía revisar *«los 37 intentos aprobados con el sujeto sin mover, fuera del
+barrido ($1.490,39)»*.
+
+**Medido hoy sobre los 96 aprobados ($4.167,89), verificando los SEIS sujetos**
+—la primera pasada sólo miró `compra` y `cita`, y **27 aprobados habrían quedado
+sin verificar**; el censo completo se corrió antes de concluir—:
+
+| | |
+|---|---|
+| aprobados con sujeto **sin mover** | **14 · $889,97** |
+| de proveedor **real** (nuvei/deuna) | **CERO** |
+| lo que son | `seed_gate` 9 · `simulado` 4 · `siembra` 1 — **artefactos de arnés y seed, de agosto** |
+| `bono`·`mensualidad`·`plan`·`programa` (27) | **0 inexistentes, 0 sin mover** |
+
+**Y están fuera del barrido por DOS razones independientes, cada una
+suficiente:** ① el barrido busca `estado IN ('iniciado','pendiente')` y éstos
+están **`aprobado` y cerrados**; ② su proveedor no es `nuvei` ni `deuna`, que
+son los únicos dos a los que se puede preguntar.
+
+> ### ⇒ **Eso es correcto por diseño, no un hueco.** El barrido existe para *«se disparó y no llegó a terminal»*; un aprobado ya es terminal, y **a un proveedor inventado no se le puede consultar nada**.
+
+**Lo que el barrido SÍ alcanza hoy: 16 pendientes vivos — deuna 13 ($468,45) ·
+nuvei 3 ($87,65) — y CERO se le escapan por falta de id.** *Ése es el número que
+importa el 30-sep, y está cubierto.*
