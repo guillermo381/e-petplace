@@ -24876,3 +24876,64 @@ defecto viejo como control negativo → 2 errores**, y con la cura → 0.
 cliente/prestador»— **y estaba escrito en el lugar donde nadie lo lee cuando
 corre `tsc`.** *Una limitación declarada protege a quien lee la declaración, no a
 quien corre el comando* (`L-439`).
+
+## 🔴 `L-456` — UN MAPA CERRADO NO FALLA: OMITE. Y UNA OMISIÓN NO TIENE SÍNTOMA
+
+**Medida en S109-D sobre la guardería, TRES VECES EL MISMO DÍA, y las tres por
+mecanismos distintos.** El oficio existía entero —motor, wrapper, pantalla propia
+y **cinco estadías vivas en la base**— y aun así no aparecía:
+
+| # | dónde | mecanismo | qué se veía |
+|---|---|---|---|
+| ① | `obtenerOficiosNegocio` | un `continue` explícito sobre `categoria='hospedaje'` | la baldosa de ATENDER nunca se dibujaba |
+| ② | `KEY_CITAS_DEL_DIA` (`atender.tsx`) | un mapa cerrado de **cuatro** claves | la baldosa no tenía lector |
+| ③ | el HOY (`(tabs)/index.tsx`) | **cuatro lectores escritos a mano** | *«hoy no tienes citas»* con dos animales a bordo |
+
+> **Ninguno de los tres FALLA.** No hay excepción, ni log, ni `null`, ni fila
+> vacía: cada uno recorre su lista y devuelve un resultado perfectamente
+> consistente **sobre un universo más chico del real**. *Un error se descubre
+> porque algo se rompe; una omisión se descubre porque alguien echa de menos algo
+> que no sabe que debería estar.*
+
+Y el detalle que lo vuelve caro: **`index.tsx` cantaba su propio defecto**. Sus
+comentarios decían *«tercera pata de la MISMA jornada»* y *«CUARTA pata»* — la
+enumeración a mano estaba **documentada y numerada**, y ninguna de las dos veces
+que se ensanchó alguien preguntó cuántas patas tenía que haber. *Contar hasta
+cuatro en un comentario no es lo mismo que preguntar cuántas son.*
+
+**EL DISCRIMINADOR QUE LO CERRÓ ES DEL FOUNDER Y VALE MÁS QUE LA CURA:** el
+header del mismo día mostraba **$12** mientras la lista decía *«no tienes
+citas»*. El header sale de `obtenerPlataDelDia`, que suma **por FECHA** y es
+agnóstico al oficio; la lista preguntaba **por cuatro oficios**. ⇒ ***dos
+lecturas del mismo día que no cierran localizan un mapa cerrado con una precisión
+que ningún log alcanza*** — y la localizan **sin acceso al código**: la
+contradicción es visible desde la pantalla.
+
+**LA CURA ES UN GATE, Y SU DISEÑO ES LA MITAD DE LA LECCIÓN**
+(`scripts/verify-jornada-completa.mjs`, `verify:jornada-completa`):
+
+- 🔴 **el universo sale del OBJETO** —los `export async function obtener…DelDia`
+  de `packages/api`— **jamás de una lista adentro del gate**: *un gate con su
+  propia lista de cinco oficios es el sexto mapa cerrado, y deja afuera al sexto
+  oficio igual que los otros cinco.* Un lector nuevo sin clasificar **detiene el
+  gate** (salida 2): clasificarlo es decisión de mesa, no de un regex.
+- **cuenta REFERENCIAS, no llamadas** — `index.tsx` los llama con paréntesis;
+  `atender.tsx` los pone como valor de un mapa, pelados. Un gate que buscara
+  `nombre(` habría visto **una sola** referencia en `atender` y la superficie
+  caería bajo el umbral: **ciego justo donde nació el defecto ②**.
+- **su control positivo es un MUTANTE, no un commit**: fabrica el estado
+  pre-cura borrando el lector de guardería del archivo vivo y exige rojo sobre
+  él, verde sobre el real. *Un control leído del historial se rompe con un
+  rebase; uno que se fabrica no puede rotar.*
+- **declara adentro las cuatro cosas que NO ve** — el `continue` por categoría
+  (el defecto ① vive un piso más abajo), los mapas que no son llamadas, que el
+  resultado se PINTE, y un oficio sin lector de día. *Un censo por referencia
+  mira la puerta, no el pasillo* (`L-425` en su forma concreta).
+
+**Y ENCONTRÓ UNA CUARTA, que nadie había reportado:** `historico.tsx` —«Tu
+histórico», *el trabajo que ya hiciste*— enumera los mismos cuatro. Queda como
+**deuda con nombre dentro del gate, no como exención**: sus cuatro lectores toman
+RANGO y `obtenerEstadiasDelDia` toma UNA fecha, así que curarla hoy sería
+llamarla una vez por día (`D-738`). **El gate se pone rojo también si una deuda
+listada aparece curada** — *un baseline que sólo baja tiene que poder notar que
+bajó* (`D-889`, que declaraba que ese mecanismo no existía en ninguna parte).

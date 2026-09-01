@@ -19,7 +19,11 @@
     "verify:huellas": "node scripts/verify-huellas-credenciales.mjs",
     "verify:frenos": "node scripts/verify-frenos-por-sujeto.mjs",
     "verify:migraciones": "node scripts/verify-migraciones.mjs",
-    "verify:edge-deno": "node scripts/verify-edge-deno.mjs"
+    "verify:edge-deno": "node scripts/verify-edge-deno.mjs",
+    "_comentario_voz_por_tipo": "S109-D: `telemedicina` y `guarderia_dia` entraron al producto sin su clave en KEY_VOZ_SERVICIO y su cita se listo MUDA en la app de la familia — dos veces el mismo defecto, y la lapida de la primera ya estaba escrita en el archivo. El universo sale del DATO (que tipos ve YA una familia en sus citas), no de una lista: un universo por lista hay que acordarse de mantenerlo, que es justo lo que fallo. EXIGE la DB: sin ella sale NO CONCLUYENTE, jamas verde. Su lugar es el paso 0 y el cierre, al lado de verify:censo.",
+    "verify:voz-por-tipo": "node scripts/verify-voz-por-tipo.mjs",
+    "_comentario_jornada": "S109-D: la guarderia existia —motor, wrapper, pantalla, cinco estadias vivas— y no aparecia en TRES superficies del prestador por tres mecanismos distintos con la misma forma (un continue por categoria, un mapa cerrado de cuatro claves, y cuatro lectores escritos a mano). Ninguno falla: los tres OMITEN, y una omision no tiene sintoma — el prestador leyo 'hoy no tienes citas' con dos animales a bordo. El gate exige que toda superficie que enumere la jornada la enumere ENTERA, con el universo derivado de los lectores de packages/api (una lista adentro lo volveria el sexto mapa cerrado). NO necesita red y es apto para el hook, pero el hook es territorio de A: se deja aca y se pide alli. Declara adentro las cuatro cosas que NO ve.",
+    "verify:jornada-completa": "node scripts/verify-jornada-completa.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",
