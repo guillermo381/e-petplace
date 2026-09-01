@@ -31,6 +31,7 @@ import { Campo, PieDeCampo } from '../components/Campo'
 import { Badge, useEtiquetaBadge } from '../components/Badge'
 import { CampoCodigo } from '../components/CampoCodigo'
 import { FichaPrestador } from '../components/FichaPrestador'
+import { MapaPunto } from '../components/MapaPunto'
 import { MapaZona } from '../components/MapaZona'
 import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
@@ -5352,6 +5353,14 @@ function GaleriaInterna() {
               se ve el placeholder; el círculo se ve en el teléfono.
             </Texto>
             <MapaZona lat={-0.1807} lon={-78.4678} radioM={500} />
+            <Texto variante="apoyo">
+              EL PUNTO (S109-D): la hermana de la zona para el OTRO actor. La zona es lo que la FAMILIA
+              ve de un prestador —centro desplazado, sin pin—; el punto es lo que el PRESTADOR necesita
+              para llegar a una casa, sobre el snapshot que la cita ya le entrega (D-339). Mismo
+              marcador que el vivo del recorrido: 16 px y anillo blanco, jamás un pin-gota. Quien la
+              monta la GATEA — sin geo.API_KEY el MapView mata la app en hilo nativo.
+            </Texto>
+            <MapaPunto lat={-0.1807} lon={-78.4678} etiqueta="Mapa del destino" />
             <Texto variante="apoyo">
               SIN FOTOS · con handler = EL ESPEJO: una invitación con su CTA, jamás cuatro tarjetas de
               ausencia.

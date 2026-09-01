@@ -1038,7 +1038,8 @@ export const prestadorEs = {
     direccionTitulo: 'A dónde ir',
     // marca "parte del plan" (D-338, S56-B T7) · LOTE S56, GATE PENDIENTE
     parteDelPlan: 'Parte del plan de {{nombre}}',
-    direccionAbrirMapa: 'Abrir en el mapa',
+    direccionComoLlegar: 'Cómo llegar',
+    direccionMapaEtiqueta: 'Mapa del destino',
     direccionSinDato: 'Esta cita no tiene una dirección registrada.',
     direccionMapaError: 'No pudimos abrir el mapa.',
     // durante

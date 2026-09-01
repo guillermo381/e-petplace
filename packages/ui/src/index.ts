@@ -98,6 +98,11 @@ export { Baldosa, type BaldosaProps } from './components/Baldosa'
 // S84-B7 — la vitrina del negocio, UNA sola vez (cliente + espejo).
 // S84-B16 — la ZONA (círculo sin pin, no interactivo). Variante .web.
 export { MapaZona, type MapaZonaProps } from './components/MapaZona'
+/* S109-D · el punto EXACTO, la hermana de MapaZona para el otro actor: la
+   zona es lo que la FAMILIA ve de un prestador; el punto es lo que el
+   PRESTADOR necesita para llegar a una casa. Se exporta en el mismo acto en
+   que nace: un componente sin puerta es un motor sin puerta (R70/R71). */
+export { MapaPunto, type MapaPuntoProps } from './components/MapaPunto'
 export { FichaPrestador, type FichaPrestadorProps, RADIO_PORTADA_EN_TARJETA } from './components/FichaPrestador'
 // FilaCita — S80-B12 Parte 3 (dominio: la fila de cita con su canto ADENTRO;
 // cero API de color/posición/alfa — el molde de "cero genéricos")
