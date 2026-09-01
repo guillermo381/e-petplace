@@ -51,3 +51,25 @@ simplemente no existe, y ninguna superficie la promete.**
 - **Si no se elige ninguna:** §5 no se puede construir. **La conversación es la
   mitad del vertical de adopción**, así que esta firma bloquea el bloque entero,
   no un detalle.
+
+---
+
+## ⚠️ ACTUALIZACIÓN AL CIERRE DE S111 — la parte ④ cambió de contexto
+
+**Medido contra `origin/main` `67fec425315e202c338f91df834f0dd228a64a8b`, 1-sep
+al cierre.** Mi ④ decía *«no se construyó nada alrededor»* y **para esta pista
+sigue siendo cierto** (E no tocó código). **Lo que cambió es el mundo alrededor:
+el motor de la conversación YA EXISTE, y con la forma (a).**
+
+```
+tabla    : adopcion_mensaje (solicitud_id | autor_user_id | cuerpo | automatica | creado_en) · 0 filas
+funciones: obtener_solicitudes_en_silencio | crear_solicitud_adopcion | responder_solicitud_adopcion | _hilo_mensajes
+policy   : el hilo cuelga de adopcion_solicitud — solicitante O dueño de la publicación O admin
+superficie: NINGUNA (cero wrappers en packages/api, cero pantallas)
+```
+
+🔴 **Consecuencia para la firma, y es lo único que cambia: ya no se vota sobre
+papel.** Sigue siendo reversible sin perder datos —cero filas, cero pantallas—
+**pero el §4 del ítem en `S111-ESTACIONAMIENTO.md`, que dice «el motor no existe
+todavía», está vencido y conviene actualizarlo antes del reporte final.** *No es
+reproche: era verdadero cuando se escribió y el motor nació después (`L-166`).*

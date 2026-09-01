@@ -7,6 +7,23 @@
 > **Evidencia completa:** `docs/loop/S110-E-MEDICIONES-3-A-6.md`, commit
 > `47bbb6ddb18a5105f21abe02bdd12e50c3aff5c0`.
 
+> ## ⚠️ ACTUALIZACIÓN AL CIERRE DE S111 — dos de estas fichas YA SE PAGARON
+>
+> **Medido contra `origin/main` `67fec425315e202c338f91df834f0dd228a64a8b`, 1-sep
+> al cierre.** Las fichas ① y ③ **ya no corresponden**: entraron 157 commits
+> entre la medición y el cierre.
+>
+> - **① `chk_destino_excluyente` — PAGADA.** El constraint **ya no existe**; lo
+>   reemplaza `chk_destino_donacion`, y nació `refugio_cuenta_comercial_id`. *La
+>   cura salió mejor que lo pedido: no se ablandó la regla, se la reescribió para
+>   que exprese los tres destinos de §7.*
+> - **③ `suscripciones_servicio_tipo_valido` — PAGADA.** Hoy el CHECK incluye
+>   `padrinazgo_mensual`.
+>
+> **② y ④ siguen VIVAS y sin cambio** (`cat_transiciones_pedido.actor` sigue sin
+> refugio; los escritores siguen en `6 estado · 2 motivo`). **⑤ y ⑥ son lecciones
+> y no vencen.** *No se borra nada acá: se marca, para que se vea qué se cobró.*
+
 ---
 
 **① DEUDA · `chk_destino_excluyente` vuelve INEXPRESABLE la donación con destino.**
