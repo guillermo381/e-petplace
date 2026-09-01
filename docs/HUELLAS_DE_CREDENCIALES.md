@@ -57,13 +57,47 @@ nota que hay que acordarse de respetar.*
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | `60e8ed85` | `apps/cliente/.env.local` | — |
 | `EXPO_PUBLIC_DEMO_EMAIL` | `844f760f` | `apps/cliente/.env.local` | — |
 | `EXPO_PUBLIC_PAGOS_ALTA_URL` | `f8e1e975` | `apps/cliente/.env.local` | — |
-| `GOOGLE_MAPS_API_KEY` | `e68088b4` | `apps/prestador/.env.local` | — |
+| `GOOGLE_MAPS_API_KEY` | `353a0fbf` | `apps/prestador/.env.local` | **31-ago-2026** |
 
 **`EXPO_PUBLIC_DEMO_PASSWORD`: excluida a propósito — ver §②.**
 
 > La columna **rotada** se llena con la fecha el día que se cambie el valor, en
 > el mismo commit que actualiza la huella. *Una fila sin fecha significa «nunca
 > se rotó desde que existe esta tabla», jamás «no sé».*
+
+---
+
+## ③bis 🔴 SU PRIMERA PRUEBA REAL LA FALLÓ — y por eso la fila de arriba tiene fecha
+
+**La key de Maps rotó el mismo día en que este mecanismo nació, y el mecanismo
+NO la registró: salió VERDE.**
+
+| | |
+|---|---|
+| huella declarada | `e68088b4` |
+| valor en disco | `353a0fbf` — **había rotado** |
+| veredicto del guard | ✅ **VERDE** |
+
+**La causa:** el guard tenía la ruta `apps/cliente/.env.local` **hardcodeada**, y
+esta key vive en `apps/prestador/.env.local`. Dijo *«no está en este `.env.local`
+— no se compara»* y contó los otros cuatro como verdes.
+
+> 🔴 **Un verde POR AUSENCIA (`L-450`) dentro del guard escrito para detectar
+> rotaciones.** Y la ironía es exacta: **esta tabla ya declaraba la ruta correcta
+> en su columna «dónde vive», y el guard no leía esa columna.**
+
+**Curado en el mismo acto, y la cura tiene tres partes porque el defecto tenía
+tres caras:**
+1. **la ruta sale de la TABLA**, por credencial — no de una constante;
+2. **«la tabla dice que vive acá y no está» pasa a ser ROJO**, no un `ℹ️`.
+   *Contarlo como «no aplica» fue el bug de nacimiento;*
+3. **lo NO medido se CUENTA y se dice al final.** *Un guard que sólo suma verdes
+   esconde cuánto no midió* — que es precisamente cómo éste se veía sano.
+
+⚠️ **Y la lección que deja para cualquier guard nuevo:** *su primera prueba no es
+que dé verde — es que dé ROJO sobre el primer caso real que aparezca.* Éste tuvo
+uno el día que nació y lo dejó pasar. **La fecha de la fila de arriba existe
+porque el guard, curado, lo cazó.**
 
 ---
 

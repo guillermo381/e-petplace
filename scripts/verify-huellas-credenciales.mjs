@@ -48,7 +48,13 @@ import { createHash } from 'node:crypto';
 import { readFileSync, existsSync } from 'node:fs';
 
 const DECL = 'docs/HUELLAS_DE_CREDENCIALES.md';
-const ENV = 'apps/cliente/.env.local';
+/* 🔴 LA RUTA SALE DE LA TABLA, NO DE ACÁ — y esta constante existió y falló.
+   Nació apuntando fija a `apps/cliente/.env.local`, y la PRIMERA rotación real
+   posterior a su nacimiento fue la de `GOOGLE_MAPS_API_KEY`… que vive en
+   `apps/prestador/.env.local`. El guard dijo «no está en este .env.local» y
+   **salió VERDE**: un verde POR AUSENCIA (`L-450`) dentro del guard escrito
+   para detectar rotaciones. *El archivo ya declaraba la ruta correcta en su
+   columna «dónde vive», y el guard no la leía.* */
 const di = (s) => process.stdout.write(s + '\n');
 const huella = (v) => createHash('sha256').update(v, 'utf8').digest('hex').slice(0, 8);
 
@@ -56,28 +62,33 @@ const huella = (v) => createHash('sha256').update(v, 'utf8').digest('hex').slice
 const PROHIBIDAS = [/PASSWORD/i, /SECRET/i, /_PWD/i];
 
 if (!existsSync(DECL)) { di(`🔴 falta ${DECL}`); process.exit(1); }
-if (!existsSync(ENV)) {
-  di(`ℹ️  este worktree no tiene ${ENV} — nada que comparar.`);
-  di('   (medido por S109-D: 29 de 36 worktrees están así, y es normal)');
-  process.exit(0);
-}
-
 const declaradas = new Map();
 for (const l of readFileSync(DECL, 'utf8').split('\n')) {
-  const m = l.match(/^\|\s*`([A-Z0-9_]+)`\s*\|\s*`([0-9a-f]{8})`/);
-  if (m) declaradas.set(m[1], m[2]);
+  const m = l.match(/^\|\s*`([A-Z0-9_]+)`\s*\|\s*`([0-9a-f]{8})`\s*\|\s*`([^`]+)`/);
+  if (m) declaradas.set(m[1], { huella: m[2], ruta: m[3] });
 }
 if (!declaradas.size) { di(`🔴 ${DECL} no declara ninguna huella — el guard no mide nada.`); process.exit(1); }
 
-const txt = readFileSync(ENV, 'utf8').split('\n');
-const bancos = new Map();
-let rojo = false, ok = 0;
-txt.forEach((l, i) => {
-  const b = l.match(/^#\s*banco:\s*(.+)$/);
-  if (b) { const sig = txt[i + 1]?.match(/^([A-Z0-9_]+)=/); if (sig) bancos.set(sig[1], b[1].trim()); }
-});
+const cache = new Map();
+const leer = (ruta) => {
+  if (!cache.has(ruta)) cache.set(ruta, existsSync(ruta) ? readFileSync(ruta, 'utf8').split('\n') : null);
+  return cache.get(ruta);
+};
+let rojo = false, ok = 0, ausentes = 0;
 
-for (const [nombre, esperada] of declaradas) {
+for (const [nombre, { huella: esperada, ruta }] of declaradas) {
+  const txt = leer(ruta);
+  if (txt === null) {
+    /* Legítimo: 29 de 36 worktrees no tienen `.env.local` (S109-D). Pero se
+       CUENTA y se dice al final — un guard que sólo suma verdes esconde
+       cuánto NO midió, que es la forma en que éste falló al nacer. */
+    ausentes++; continue;
+  }
+  const bancos = new Map();
+  txt.forEach((l, i) => {
+    const b = l.match(/^#\s*banco:\s*(.+)$/);
+    if (b) { const sig = txt[i + 1]?.match(/^([A-Z0-9_]+)=/); if (sig) bancos.set(sig[1], b[1].trim()); }
+  });
   if (PROHIBIDAS.some((r) => r.test(nombre))) {
     rojo = true;
     di(`🔴 ${nombre} NO puede llevar huella: su clase es adivinable y una huella`);
@@ -85,7 +96,15 @@ for (const [nombre, esperada] of declaradas) {
     continue;
   }
   const linea = txt.find((l) => l.startsWith(`${nombre}=`));
-  if (!linea) { di(`ℹ️  ${nombre} no está en este .env.local — no se compara.`); continue; }
+  if (!linea) {
+    /* 🔴 ESTO SÍ ES ROJO: la tabla dice que vive acá y no está. O la tabla
+       miente sobre dónde vive, o alguien la sacó. *Contarlo como «no aplica»
+       fue exactamente el bug de nacimiento de este guard.* */
+    rojo = true;
+    di(`🔴 ${nombre}: la tabla dice que vive en ${ruta} y NO está ahí.`);
+    di('   O la tabla miente sobre dónde vive, o alguien la sacó del archivo.');
+    continue;
+  }
   const actual = huella(linea.slice(nombre.length + 1).trim());
   if (actual === esperada) { ok++; continue; }
   if (bancos.has(nombre)) {
@@ -100,6 +119,9 @@ for (const [nombre, esperada] of declaradas) {
   di(`   línea "# banco: <razón>" arriba de la variable.`);
 }
 
-if (!rojo) di(`✅ verify:huellas — VERDE · ${ok} credencial(es) coinciden con lo declarado`);
+if (!rojo) {
+  di(`✅ verify:huellas — VERDE · ${ok} credencial(es) coinciden con lo declarado`);
+  if (ausentes) di(`   (${ausentes} no medida(s): su archivo no existe en este worktree — normal, y se dice)`);
+}
 else di('\n🔴 verify:huellas — ROJO');
 process.exit(rojo ? 1 : 0);

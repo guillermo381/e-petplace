@@ -24752,6 +24752,42 @@ resuelve al montar la barra y no se vuelve a evaluar** ⇒ la **carrera de la
 medianoche** —elegís mañana, pasa la medianoche, tocás pagar— **sólo la cubre el
 motor**. No eran dos curas del mismo problema: eran **dos mitades**.
 
+## 🔴 `L-459` — LA PRIMERA PRUEBA DE UN GUARD NUEVO NO ES QUE DÉ VERDE: ES QUE DÉ ROJO SOBRE EL PRIMER CASO REAL
+
+**Medida en S109 sobre un guard escrito ESE MISMO DÍA, y por eso duele.**
+
+`verify:huellas` nació para que **una rotación de credencial deje rastro en el
+repo**. Horas después, la key de Maps **rotó de verdad** — la primera rotación
+real posterior a su nacimiento— y el guard **salió VERDE**.
+
+| | |
+|---|---|
+| declarada | `e68088b4` |
+| en disco | `353a0fbf` — **había rotado** |
+| veredicto | ✅ **VERDE** |
+
+**La causa:** tenía la ruta del `.env.local` **hardcodeada** a una app, y esa
+credencial vivía en la otra. Dijo *«no está en este archivo — no se compara»* y
+**contó las demás como verdes**.
+
+> 🔴 **Un verde POR AUSENCIA (`L-450`) adentro del guard escrito para detectar
+> exactamente ese tipo de cambio.** Y lo más filoso: **la tabla que el guard lee
+> YA declaraba la ruta correcta en una columna — y el guard no leía esa
+> columna.** *El dato para no fallar estaba en la misma línea que consultaba.*
+
+⇒ **Un guard se prueba contra el primer caso REAL que aparece, no contra el
+fixture con el que nació.** Su fixture lo escribió el mismo que lo escribió a él,
+y comparte sus supuestos — *un control negativo prueba que el mecanismo puede
+gritar; sólo un caso real prueba que grita cuando le toca.*
+
+**Corolario de forma, y son tres porque el defecto tenía tres caras:**
+1. **lo que dice DÓNDE mirar se lee del dato, no de una constante** — si el
+   guard tiene una ruta escrita a mano, mide un caso y cree que midió la clase;
+2. **«está declarado y no lo encuentro» es ROJO, no `ℹ️`** — contarlo como «no
+   aplica» es el modo exacto en que este guard se veía sano;
+3. **lo NO medido se CUENTA y se dice** — *un guard que sólo suma verdes esconde
+   cuánto no midió*, y ese silencio es indistinguible de la salud.
+
 ## 🟠 `L-453` — EL SHA-1 NO ES DEL PRODUCTO: ES DEL PAR `package + keystore`, Y CADA APP TIENE EL SUYO EN EAS
 
 **Medida en S109-D sobre los dos APK de nube.**
