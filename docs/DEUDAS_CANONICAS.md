@@ -25040,3 +25040,51 @@ contenedor no (los dos `ScrollView` son idénticos), header propio **sí** — y
 los tres era **el único que dejaba rastro en el árbol**. *Cuando dos pantallas
 deberían verse igual y no lo hacen, la pregunta no es «qué le falta a la rota»
 sino «qué tiene de más».*
+
+## 🔴 `L-460` — UNA PROP QUE SE ACEPTA Y SE IGNORA SE LEE COMO CABLEADO
+
+> ⚠️ **EL NÚMERO ES PROVISIONAL Y LO CONFIRMA A, que es de quien es el canon.**
+> Nació como `L-459` y **chocó**: A depositó su `L-459` el mismo día (*la primera
+> prueba de un guard nuevo es que dé rojo sobre el primer caso real*). Medido
+> antes de mover: `L-460` está libre **en `main` y en todas las ramas remotas**,
+> contando encabezados y no menciones — *`L-714` aparece en el archivo y es una
+> mención en prosa sobre `D-714`, no una lección*. Se corre acá y no se deja
+> duplicado porque **un `L-459` que significa dos cosas es peor que un número
+> mal elegido**: el primero que lo cite acierta o falla según cuál leyó.
+
+**Medida en S109-D sobre `AvatarMascota.especie`.**
+
+El founder reportó que una mascota sin foto mostraba **la huella pintada** en vez
+de la cara de su especie. Al abrir el JSX, la llamada **parecía correcta**:
+
+```tsx
+<AvatarMascota nombre={…} especie={especieDe(e.mascotaEspecie)} fotoUrl={foto} />
+```
+
+Pasa `especie`. Se lee como cableado. **Y el contrato del componente dice, con
+todas las letras, que `especie` «hoy no cambia el render»** — está reservada al
+set ilustrado de `D-288`, que todavía no existe.
+
+> ***El único archivo del repo que sabe que esa prop no hace nada es el archivo
+> del componente.*** Todos los demás leen una llamada que pasa el dato correcto y
+> concluyen que el dato se usa. *Una prop ignorada no es código muerto —el código
+> muerto no se lee como vivo—: es una afirmación falsa escrita en el lugar donde
+> uno va a verificar.*
+
+**Y su forma agravante, que es la que costó:** la prop reservada estaba en la
+superficie **que no usaba la escalera**, así que la única señal de que faltaba
+algo era invisible desde la llamada. El censo por texto la habría absuelto; sólo
+la absolvió el ojo del founder mirando la pantalla.
+
+**Las dos curas, y son distintas:**
+- **de este caso** — la superficie llama a la escalera de la casa
+  (`caraDeMascota`, `D-806`) en vez de pasar la URL cruda.
+- **de la clase** — *una prop que hoy no hace nada no se acepta en silencio*: o
+  no está en el contrato hasta que sirva, o su nombre dice que está reservada
+  (`especieFutura`), o el componente la usa. **Aceptarla y documentar en su
+  propio archivo que se ignora es la forma más cara**: cuesta un reporte del
+  founder y una lectura de código que confirma lo contrario de lo que pasa.
+
+**Corolario para todo censo de superficies:** censar *qué se pasa* no basta —
+hay que censar *qué se hace con lo que se pasa*. `L-451` dijo que un import no
+es un uso; ésta dice que **una prop tampoco lo es**.

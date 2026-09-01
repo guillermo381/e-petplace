@@ -1038,7 +1038,8 @@ export const prestadorEs = {
     direccionTitulo: 'A dónde ir',
     // marca "parte del plan" (D-338, S56-B T7) · LOTE S56, GATE PENDIENTE
     parteDelPlan: 'Parte del plan de {{nombre}}',
-    direccionAbrirMapa: 'Abrir en el mapa',
+    direccionComoLlegar: 'Cómo llegar',
+    direccionMapaEtiqueta: 'Mapa del destino',
     direccionSinDato: 'Esta cita no tiene una dirección registrada.',
     direccionMapaError: 'No pudimos abrir el mapa.',
     // durante
@@ -4236,6 +4237,6 @@ export const prestadorEs = {
     vacioTitulo: 'Hoy no tienes animales',
     vacioDetalle: 'Cuando una familia reserve un día, va a aparecer acá con su dirección.',
     marcarPendiente: 'Todavía no puedes marcar la recogida ni la entrega desde acá.',
-    marcarPendienteApoyo: 'Eso llega con el acta, que es donde se registra el estado del animal y lo que viaja con él.',
+    marcarPendienteApoyo: 'Por ahora esta lista es para saber a quién pasar a buscar y dónde.',
   },
 } as const;

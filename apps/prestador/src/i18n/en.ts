@@ -705,7 +705,8 @@ export const prestadorEn = {
     // A dónde ir — D-339 (S56-B TAREA 3) · LOTE S56, GATE PENDIENTE · Espejo de es.ts
     direccionTitulo: 'Where to go',
     parteDelPlan: "Part of {{nombre}}'s plan",
-    direccionAbrirMapa: 'Open in maps',
+    direccionComoLlegar: 'Get directions',
+    direccionMapaEtiqueta: 'Map of the destination',
     direccionSinDato: "This appointment doesn't have a saved address.",
     direccionMapaError: "We couldn't open the map.",
     // S59-B3 single state voice "Live" (§7) · LOTE S59, GATE PENDIENTE
@@ -3331,6 +3332,6 @@ export const prestadorEn = {
     vacioTitulo: 'No animals today',
     vacioDetalle: 'When a family books a day, it’ll show up here with their address.',
     marcarPendiente: 'You can’t mark pick-up or delivery from here yet.',
-    marcarPendienteApoyo: 'That comes with the handover record, where the animal’s condition and what travels with it are logged.',
+    marcarPendienteApoyo: 'For now this list is for knowing who to pick up, and where.',
   },
 } as const satisfies Espejo<typeof prestadorEs>;

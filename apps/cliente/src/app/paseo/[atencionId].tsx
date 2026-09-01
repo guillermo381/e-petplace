@@ -53,6 +53,7 @@ import {
   Texto,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   leerDetalleAtencion,
   obtenerCatalogoNovedadesPaseo,
   obtenerPerfilMascota,
@@ -246,7 +247,18 @@ export default function DetallePaseo() {
           if (!vigente || !p.ok) return;
           const url = p.data.mascota.foto_url !== null ? await resolverUrlFoto(p.data.mascota.foto_url) : null;
           if (!vigente) return;
-          setMascota({ nombre: p.data.mascota.nombre, ...(url !== null ? { fotoUrl: url } : null) });
+          /* ⭐ S109-D · LA ESCALERA, y acá el dato YA ESTABA A MANO: el perfil
+             trae `especie` y la pantalla se quedaba sólo con la foto ⇒ sin foto,
+             la huella. *No faltaba el dato: faltaba pedírselo a la escalera.*
+             `razaSlug: null` porque `mascotas.raza` es TEXTO LIBRE y
+             `resolverUrlRaza` exige el slug del catálogo — el peldaño ① entra
+             cuando el lector traiga `raza_ruta_imagen`, jamás slugificando. */
+          const cara = caraDeMascota({
+            especie: p.data.mascota.especie,
+            razaSlug: null,
+            fotoUri: url,
+          });
+          setMascota({ nombre: p.data.mascota.nombre, ...(cara !== null ? { fotoUrl: cara } : null) });
         }
       })();
       return () => {

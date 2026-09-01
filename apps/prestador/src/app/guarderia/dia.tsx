@@ -48,6 +48,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   obtenerEstadiasDelDia,
   obtenerMiPrestador,
   resolverUrlsFotos,
@@ -199,6 +200,28 @@ export default function DiaGuarderia() {
             {estado.estadias.map((e) => {
               const dir = comoDireccion(e.direccion);
               const foto = e.mascotaFotoUrl === null ? null : (estado.caras.get(e.mascotaFotoUrl) ?? null);
+              /* ⭐ S109-D · LA CARA SALE DE LA ESCALERA DE LA CASA, no de la
+                 pieza. Acá se pasaba `fotoUrl` crudo y sin foto salía LA
+                 HUELLA — con 111 caras sembradas a dos carpetas de distancia.
+
+                 🔴 Y leyendo el JSX parecía correcto: la llamada pasaba
+                 `especie`, así que se veía cableado. **`AvatarMascota` declara
+                 en su contrato que `especie` «hoy no cambia el render»** (está
+                 reservada al set ilustrado de `D-288`). *Una prop que se acepta
+                 y se ignora se lee como cableado, y el único que sabe que no
+                 hace nada es el archivo del componente.*
+
+                 ⚠️ `razaSlug: null` A PROPÓSITO: `EstadiaDelDia` no proyecta la
+                 raza, y `resolverUrlRaza` exige el slug de `cat_razas` — jamás
+                 uno derivado del texto tipeado, porque *una URL que acierta a
+                 veces muestra una cara equivocada, que es peor que ninguna*.
+                 Con esto se llega al peldaño ② (el genérico de su especie). El
+                 ① llega cuando el lector traiga `raza_ruta_imagen`. */
+              const cara = caraDeMascota({
+                especie: e.mascotaEspecie,
+                razaSlug: null,
+                fotoUri: foto,
+              });
               return (
                 <Tarjeta key={e.estadiaId} relleno="normal" elevacion="reposo">
                   <View style={{ gap: spacing[3] }}>
@@ -206,7 +229,7 @@ export default function DiaGuarderia() {
                       <AvatarMascota
                         nombre={e.mascotaNombre}
                         especie={especieDe(e.mascotaEspecie)}
-                        fotoUrl={foto ?? undefined}
+                        fotoUrl={cara ?? undefined}
                         tamano="md"
                       />
                       <View style={{ flex: 1, gap: spacing[1] }}>
@@ -229,7 +252,37 @@ export default function DiaGuarderia() {
               );
             })}
 
-            {/* 🔴 LO QUE FALTA SE DICE ACÁ, no se descubre buscando el botón. */}
+            {/* 🔴 LO QUE FALTA SE DICE ACÁ, no se descubre buscando el botón.
+
+                ⚠️ S109-D · SU CONDICIÓN DE MUERTE, y va escrita porque un texto
+                honesto sin fecha de vencimiento es cómo nace una lápida vencida
+                (`L-395`): esta tarjeta MUERE cuando exista **un escritor de
+                `guarderia_estadias.estado` con puerta** y esta pantalla lo
+                llame. Hoy no existe, y no es una impresión: medido contra la
+                base desplegada (31-ago-2026) —
+                  · las 95 estadías vivas están **todas en `reservada`**, con
+                    `a_bordo_en`, `llegada_en` y `entregada_en` en CERO;
+                  · el CHECK declara **siete** estados y **seis son
+                    inalcanzables**: ninguna función escribe la transición. Los
+                    únicos escritores de la tabla son `abrir_tramo_guarderia`
+                    —que sólo ata `tramo_recogida_id`/`tramo_devolucion_id`— y
+                    `mover_sujeto_por_reverso`, que cancela por plata devuelta.
+                  · `levantar_acta_guarderia` y `confirmar_acta_guarderia`
+                    existen y **sólo LEEN** la estadía.
+                *Un vocabulario de estados completo en un CHECK se lee como una
+                máquina que funciona; acá son seis palabras que nadie escribe.*
+
+                ⚠️ EL APOYO YA NO EXPLICA LA MECÁNICA, Y ES FIRMA DEL FOUNDER:
+                decía «eso llega con el acta» — *una frase sobre nuestro plan de
+                obra, no sobre su trabajo* — **y encima envejecía antes que el
+                título**: el acta YA llegó al motor (las dos RPC vivas, con
+                wrapper y con superficie del lado de la FAMILIA); lo único que
+                falta es su puerta del lado del prestador. ⇒ *dos frases con dos
+                fechas de vencimiento distintas, y el apoyo era el que se pudría
+                primero.* Ahora dice **qué SÍ se puede** —«saber a quién pasar a
+                buscar y dónde»—, que es lo que la pantalla de arriba realmente
+                hace: *un mensaje que sólo dice qué no se puede se lee como un
+                final, con una lista útil justo encima.* */}
             <Tarjeta relleno="normal" elevacion="reposo">
               <View style={{ gap: spacing[2] }}>
                 <Texto variante="cuerpo">{t('diaGuarderia.marcarPendiente')}</Texto>
