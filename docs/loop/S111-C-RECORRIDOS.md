@@ -184,3 +184,101 @@ ninguna tiene de qué hablar todavía.*
 hace que, cuando el motor llegue, la construcción no tenga que inventar el QUÉ.
 *El recorrido escrito antes es la diferencia entre montar un contrato y adivinar
 un producto.*
+
+---
+
+# GATE DEL FOUNDER · PRIMERA PASADA — los recorridos de ⑧ y ⑨
+
+## ⑧ · EL DURANTE DENTRO DE LA GUARDERÍA
+
+### QUÉ SE HEREDA DE VERDAD, medido antes de escribir una línea
+
+*El brief lo pidió así porque la letra dice «hereda su motor entero» y eso es
+cierto a medias.*
+
+| pieza | ¿existe? |
+|---|---|
+| `publicarMediaGuarderia({ mascotaIds: string[] })` | ✅ **multi-destino, un envío** |
+| `useCapturaMedia.capturarFoto` | ✅ |
+| `cola-media` con `CLIP_TECHO_S = 30` | ✅ **la cola sabe de clips** |
+| `EvidenciaFoto` · reglas de `encuadre.ts` | ✅ |
+| **`capturarClip` en el hook** | ❌ **falta** — la cola lo acepta, nadie lo captura |
+| **chips de comportamiento de guardería** | ❌ **no hay motor** |
+| **la pantalla del durante** | ❌ |
+
+🔴 **El multi-destino ya está resuelto en el motor y es la mitad grande:** una
+foto con `mascotaIds: [a, b, c]` es **UN envío con tres destinatarios**, no tres
+envíos. *No hay que construirlo — hay que no romperlo.*
+
+### EL RECORRIDO, en voz del cuidador
+
+«Son las once y están todos en el patio. Saco el teléfono, **una foto**, y ahí
+mismo **toco quiénes salen en ella** — Thor, Luna y Kira. Una foto, tres
+familias, un solo toque de envío.
+
+Si algo se ve mejor moviéndose, **grabo un clip corto**. La app me corta sola a
+los treinta segundos: no tengo que mirar el reloj mientras filmo un perro.
+
+**No me pide que escriba nada.** Estoy con los animales, no con el teléfono.
+
+Y sé que las familias no reciben una alarma por cada foto: **les llega un
+resumen**. Si mando ocho fotos en la mañana, ninguna familia recibe ocho
+alertas.»
+
+### LOS CAMINOS TRISTES
+
+«**Saqué una foto y salió una persona.** La descarto ahí mismo, antes de enviar
+— y la app me lo recuerda **antes de disparar**, no después.»
+
+«**Me equivoqué de animal al etiquetar.** Lo corrijo mientras no haya salido.
+Después no: ya está en el expediente de alguien.»
+
+«**No hay señal en el patio.** Sigo sacando fotos y salen solas cuando vuelve.
+La cola ya hace eso.»
+
+### 🔴 LO QUE NO SE CONSTRUYE Y SU MOTIVO
+
+**Los chips de comportamiento.** Medido: existen `cat_conductas_bitacora`
+(adiestramiento) y los nueve registrables de grooming, **y ninguno es de
+guardería**. *Reusar el vocabulario del adiestramiento acá sería trasplantar un
+criterio correcto a otra pregunta* — el mismo error que `D-976` nombra. **Van
+con su motor; pedido a A.**
+
+---
+
+## ⑨ · EL ORDEN DEL DÍA
+
+### EL RECORRIDO, en voz del cuidador
+
+«La lista sale **ordenada por la franja que cada familia acordó** — el de las
+7:00 antes que el de las 8:30. Ése es el orden natural del día.
+
+Pero yo sé que hoy conviene pasar primero por Luna porque me queda de camino.
+**Muevo su tarjeta arriba con el dedo** y listo. **Ese orden es mi viaje**: la
+barra y la lista lo respetan.
+
+Si cierro y abro la app, **mi orden sigue ahí**. No vuelvo a acomodar seis
+tarjetas cada vez que atiendo el teléfono.»
+
+### LOS CAMINOS TRISTES
+
+«**Mañana es otro día y otro orden.** El de hoy no se arrastra: cada día se
+acomoda solo por franja y yo decido si lo muevo.»
+
+«**Entró una reserva nueva a mitad del día.** Aparece en su lugar por franja,
+no al final ni arriba de todo — *el orden que yo moví se respeta, y lo nuevo
+entra donde le toca por hora.*»
+
+### 🔴 LO QUE NO SE CONSTRUYE, y tiene ficha
+
+**Ningún motor de ruteo.** Nada de optimizar recorrido, calcular distancias ni
+proponer orden. *Una ruta optimizada es un producto en sí mismo* —lo dice el
+brief de S107 y lo firmó el founder como «v1 sin ruta»—. **El cuidador ordena;
+la app recuerda.**
+
+### DÓNDE VIVE ESE ORDEN, y por qué ahí
+
+**Local, junto al viaje** (`viaje-guarderia.ts`). *El orden del viaje es de ESTE
+teléfono y ESTE día*, igual que el tramo que se está siguiendo: no es un dato
+del negocio ni algo que otra persona del refugio deba heredar. **Y perderlo
+cuesta un gesto, no un dato.**
