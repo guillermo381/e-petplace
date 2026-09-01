@@ -36,6 +36,16 @@ const MENSAJES = {
      decirle que no.* */
   acta_no_disponible:       'Todavía no podemos completar la adopción: falta cargar el acta. Es de nuestro lado.',
   sin_acceso:               'Esta publicación no es tuya.',
+  /* ── La mensajería ─────────────────────────────────────────────────────── */
+  publicacion_no_disponible:'Ese animal ya no está publicado en adopción.',
+  /* 🔴 El motor manda el id de la solicitud que YA existe detrás del código:
+     la pantalla LLEVA ahí en vez de decir que no (`L-424`). */
+  solicitud_ya_viva:        'Ya postulaste por este animal.',
+  solicitud_terminal:       'Esta conversación ya se cerró.',
+  estado_final_invalido:    'Esa forma de cerrar no existe.',
+  rol_no_puede:             'Sólo quien publicó al animal puede aceptar una solicitud.',
+  mensaje_vacio:            'Escribe algo antes de enviar.',
+  cuerpo_vacio:             'Escribe algo antes de enviar.',
   sin_sesion:               'No hay sesión activa.',
   datos_inconsistentes:     'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:        'Ocurrió un error inesperado. Prueba de nuevo.',
@@ -207,4 +217,198 @@ export async function traspasarMascotaAFamilia(params: {
       publicacionId: String(r.publicacion_id),
     },
   };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ④ LA MENSAJERÍA — la solicitud, el hilo y su desenlace
+   🔴 ESTOS WRAPPERS EXISTEN PORQUE FALTABAN, y la falta la midió C: las cuatro
+   RPC del motor estaban vivas y **sin una sola puerta** — desde `apps/` no se
+   llama `rpc()` directo. *El contrato de una pieza de motor incluye su wrapper*,
+   y esta vez el que lo olvidó fui yo.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ `EstadoSolicitudAdopcion`, NO `EstadoSolicitudAdopcion`: ese nombre ya lo usa
+   `veterinaria-mostrador` para OTRA cosa —la autorización del mostrador
+   (`pendiente | autorizada | rechazada | expirada`)—. *Dos uniones distintas
+   con el mismo nombre no chocan por casualidad: chocan porque el nombre no
+   decía de qué dominio era.* Lo cazó el typecheck, no una relectura. */
+export type EstadoSolicitudAdopcion = 'recibida' | 'en_conversacion' | 'aceptada' | 'declinada';
+
+export interface MensajeDelHilo {
+  mensajeId: string;
+  autorUserId: string;
+  cuerpo: string;
+  /** 🔴 `true` = la respuesta automática del publicador. **No cuenta como
+   *  respuesta**: si contara, el reloj de los 5 días no sonaría nunca. La
+   *  pantalla puede mostrarla distinta; el reloj la ignora. */
+  automatica: boolean;
+  creadoEn: string;
+}
+
+/** El hilo como lo ve LA FAMILIA. */
+export interface MiSolicitud {
+  solicitudId: string;
+  publicacionId: string;
+  estado: EstadoSolicitudAdopcion;
+  creadaEn: string;
+  cerradaEn: string | null;
+  mascotaId: string;
+  mascotaNombre: string;
+  mascotaEspecie: string;
+  mascotaFotoUrl: string | null;
+  publicadorNombre: string | null;
+  /** Vienen CON el hilo, no en otro viaje. */
+  mensajes: MensajeDelHilo[];
+}
+
+/** El hilo como lo ve EL PUBLICADOR. Es otro tipo a propósito: **ve al
+ *  solicitante y no ve al publicador**, porque es él. */
+export interface SolicitudRecibida {
+  solicitudId: string;
+  publicacionId: string;
+  estado: EstadoSolicitudAdopcion;
+  creadaEn: string;
+  cerradaEn: string | null;
+  solicitanteUserId: string;
+  solicitanteNombre: string | null;
+  mascotaId: string;
+  mascotaNombre: string;
+  mascotaFotoUrl: string | null;
+  mensajes: MensajeDelHilo[];
+}
+
+function leerMensajes(v: unknown): MensajeDelHilo[] {
+  if (!Array.isArray(v)) return [];
+  return (v as Record<string, unknown>[]).map((m) => ({
+    mensajeId: String(m.mensajeId),
+    autorUserId: String(m.autorUserId),
+    cuerpo: typeof m.cuerpo === 'string' ? m.cuerpo : '',
+    automatica: m.automatica === true,
+    creadoEn: String(m.creadoEn),
+  }));
+}
+
+/**
+ * Postula para adoptar. 🔴 **Si ya tenías una solicitud viva sobre ese animal,
+ * el rebote `solicitud_ya_viva` trae SU ID en `mensaje`** — la pantalla lleva
+ * ahí en vez de decir que no (`L-424`).
+ */
+export async function crearSolicitudAdopcion(params: {
+  publicacionId: string;
+  mensajeInicial?: string;
+}): Promise<ResultadoWrapper<{ solicitudId: string; estado: EstadoSolicitudAdopcion }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('crear_solicitud_adopcion', {
+    p_publicacion_id: params.publicacionId,
+    p_mensaje_inicial: params.mensajeInicial ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.solicitud_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { solicitudId: r.solicitud_id, estado: r.estado as EstadoSolicitudAdopcion } };
+}
+
+/** Escribe en el hilo. 🔑 **Si el que responde es el publicador y la solicitud
+ *  estaba `recibida`, el estado se mueve EN EL MISMO ACTO** — la pantalla no
+ *  tiene que acordarse: *un estado que alguien tiene que acordarse de mover es
+ *  un estado que va a estar mal.* */
+export async function responderSolicitudAdopcion(params: {
+  solicitudId: string;
+  cuerpo: string;
+}): Promise<ResultadoWrapper<{ mensajeId: string; estado: EstadoSolicitudAdopcion }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('responder_solicitud_adopcion', {
+    p_solicitud_id: params.solicitudId,
+    p_cuerpo: params.cuerpo,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.mensaje_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { mensajeId: r.mensaje_id, estado: r.estado as EstadoSolicitudAdopcion } };
+}
+
+/** Cierra la solicitud. **Sólo el publicador ACEPTA; declinar pueden los dos.**
+ *  ⚠️ `aceptada` **no** dispara el acta ni la transferencia del expediente: ese
+ *  arco vive en `traspasarMascotaAFamilia`, con su propio fail-closed. */
+export async function cerrarSolicitudAdopcion(params: {
+  solicitudId: string;
+  estadoFinal: 'aceptada' | 'declinada';
+}): Promise<ResultadoWrapper<{ estado: EstadoSolicitudAdopcion }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('cerrar_solicitud_adopcion', {
+    p_solicitud_id: params.solicitudId,
+    p_estado_final: params.estadoFinal,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { estado: (data as Record<string, unknown>).estado as EstadoSolicitudAdopcion } };
+}
+
+/** Mis solicitudes, con sus hilos. Lado FAMILIA. */
+export async function obtenerMisSolicitudesAdopcion(): Promise<
+  ResultadoWrapper<MiSolicitud[], CodigoErrorAdopcion>
+> {
+  const { data, error } = await getClient().rpc('obtener_mis_solicitudes_adopcion');
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: (data as Record<string, unknown>[]).map((f) => ({
+      solicitudId: String(f.solicitud_id),
+      publicacionId: String(f.publicacion_id),
+      estado: f.estado as EstadoSolicitudAdopcion,
+      creadaEn: String(f.creada_en),
+      cerradaEn: typeof f.cerrada_en === 'string' ? f.cerrada_en : null,
+      mascotaId: String(f.mascota_id),
+      mascotaNombre: typeof f.mascota_nombre === 'string' ? f.mascota_nombre : '',
+      mascotaEspecie: typeof f.mascota_especie === 'string' ? f.mascota_especie : '',
+      mascotaFotoUrl: typeof f.mascota_foto_url === 'string' ? f.mascota_foto_url : null,
+      publicadorNombre: typeof f.publicador_nombre === 'string' ? f.publicador_nombre : null,
+      mensajes: leerMensajes(f.mensajes),
+    })),
+  };
+}
+
+/** Las solicitudes de MIS publicaciones. Lado PUBLICADOR.
+ *  🔴 El gate es **la publicación, no el refugio**: dos personas del mismo
+ *  refugio no ven solicitudes de animales que no publicaron. */
+export async function obtenerSolicitudesDeMisPublicaciones(
+  soloPorRevisar = false,
+): Promise<ResultadoWrapper<SolicitudRecibida[], CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('obtener_solicitudes_de_mis_publicaciones', {
+    p_solo_por_revisar: soloPorRevisar,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: (data as Record<string, unknown>[]).map((f) => ({
+      solicitudId: String(f.solicitud_id),
+      publicacionId: String(f.publicacion_id),
+      estado: f.estado as EstadoSolicitudAdopcion,
+      creadaEn: String(f.creada_en),
+      cerradaEn: typeof f.cerrada_en === 'string' ? f.cerrada_en : null,
+      solicitanteUserId: String(f.solicitante_user_id),
+      solicitanteNombre: typeof f.solicitante_nombre === 'string' ? f.solicitante_nombre : null,
+      mascotaId: String(f.mascota_id),
+      mascotaNombre: typeof f.mascota_nombre === 'string' ? f.mascota_nombre : '',
+      mascotaFotoUrl: typeof f.mascota_foto_url === 'string' ? f.mascota_foto_url : null,
+      mensajes: leerMensajes(f.mensajes),
+    })),
+  };
+}
+
+/**
+ * Cuántas solicitudes tengo por revisar. 🔴 **Se cuenta en el SERVIDOR, a
+ * propósito.** Derivarlo contando lo que trajo la pantalla haría que el número
+ * dependa de cuántas páginas se pidieron — *y un contador que miente hacia
+ * abajo es peor que no tenerlo: dice que no hay trabajo pendiente.*
+ * **Puede llegar a cero**, que es lo que §9 pide de un contador.
+ */
+export async function contarSolicitudesPorRevisar(): Promise<
+  ResultadoWrapper<number, CodigoErrorAdopcion>
+> {
+  const { data, error } = await getClient().rpc('contar_solicitudes_por_revisar');
+  if (error) return fallo(error.message);
+  if (typeof data !== 'number') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data };
 }
