@@ -74,6 +74,29 @@ keystore de EAS**, no uno de debug. Y en esta máquina **no existe**
 
 ---
 
+## ③bis · 🔴 SON **TRES** ENTRADAS, NO UNA — medidas hoy
+
+**Cada app tiene su PROPIO keystore en EAS.** Medido de los dos APK de nube, no
+supuesto:
+
+| # | entrada | package | SHA-1 | de dónde salió |
+|---|---|---|---|---|
+| 1 | **cliente · nube** | `com.epetplace.cliente` | `3331ac303cdcf82517ae1279e0900ceedce95b61` | medido del APK 1.0.5 |
+| 2 | **prestador · nube** | `com.epetplace.prestador` | `498da5e3e26d59df3f900e0b170012df38bce956` | medido del APK 1.0.6 |
+| 3 | **tu binario local** | `com.epetplace.cliente` | ⬅️ **el del paso ②** | lo sacás vos del aparato |
+
+⚠️ **La 1 y la 2 son distintas entre sí**, y ésa es la parte que sorprende:
+*autorizar «la app» son DOS entradas, porque el SHA-1 no es del producto — es
+del par **package + keystore**.* Las builds de nube 1.0.7 que vienen **heredan
+la 1 y la 2**, así que conviene cargar las tres de una vez y no volver.
+
+**Cómo saber cuál es cuál sin adivinar:** el comando del paso ② imprime el SHA-1
+**del APK que está corriendo en tu teléfono**. Si lo que sale coincide con la
+fila 1, tu binario **es** el de nube (y la firma no es la causa); si sale
+distinto, es tu build local y **ésa es la tercera entrada**.
+
+---
+
 ## ④ CÓMO SE LEE EL RESULTADO
 
 - **Dibuja** ⇒ diagnóstico **cerrado y curado en el mismo acto**. La zona ya
