@@ -25642,3 +25642,67 @@ orden lo pone el cuidador**; el motor sólo tiene que dejar que lo mueva.
 
 **Disparo:** decisión del founder de abrir esa sesión. **Nada la bloquea y nada
 depende de ella.**
+
+---
+
+## 🔴 `L-465` — UN GENERADO QUE NO VIAJA EN EL REPO LO REGENERA QUIEN MERGEA, NO QUIEN ESCRIBE
+
+`apps/*/.expo/types/router.d.ts` es **generado y está fuera de git**. Quien
+agrega una ruta **no puede dejarlo en su commit**: su árbol lo tiene y el de los
+demás no.
+
+> ### ⇒ La rama llega correcta y `main` se pone roja al mergearla, sin que nadie haya escrito nada mal.
+
+**Frenó DOS veces en S111**, las dos con el mismo `R63·C` de `verify:diseno`:
+*«2 rutas del filesystem NO están en `router.d.ts` ⇒ el compilador no puede
+verlas y `router.push` hacia ellas pasa sin control»*.
+
+**La regla, en una línea: quien mergea lo regenera del filesystem REAL**
+(`expo start` en la app, y se corta cuando termina).
+
+🔴 **Y el corolario, que ya se pagó del otro lado y es el que hace que no se
+pueda editar a mano:** en S110 se copió un `router.d.ts` de otro worktree —viejo—
+y **produjo un ROJO FALSO de 43 errores** sobre rutas que existían. *Un verde —o
+un rojo— sobre un mapa escrito a mano no mide nada: mide el mapa.*
+
+**MECANISMO, y ya existe:** `R63·C` **frena solo** y dice el comando exacto. *Lo
+que faltaba escrito no era el detector: era de quién es la cura.* Por eso ésta
+es una lección de CONDUCCIÓN y no un gate nuevo — el gate ya estaba, y el rojo
+que produce es correcto: la ruta de verdad no está en el mapa que el compilador
+lee.
+
+---
+
+## 🔴 `L-466` — UNA COLA DE TRABAJO CONTESTA «QUÉ FALTA HACER», JAMÁS «QUÉ TIENE ESTE OBJETO»
+
+**Medida en el hallazgo ① del gate de S111**, y su síntoma es de la clase más
+cara que hay.
+
+El founder reportó: *«la cámara abre, la foto no queda»*. La causa: la hoja del
+acta leía la **cola de subida** (`pendientes`) para pintar sus fotos. Y esa cola
+excluye lo `publicada` — que es como el subidor marca **lo que salió bien**.
+
+> ### ⇒ La foto se subía correctamente **y desaparecía de la pantalla**. **La que FALLABA se quedaba a la vista.**
+
+**El síntoma apuntaba al revés de la causa**, y eso es lo que lo vuelve caro:
+todo el que mire va a buscar por qué la subida falla, cuando lo que falla es la
+lectura del éxito.
+
+**El error no era de la cola: era de la PREGUNTA.** `pendientes` contesta *«qué
+falta subir»*. La pantalla necesitaba *«qué fotos tiene esta acta»*, que es otra.
+*Una foto publicada dejó de ser trabajo pendiente y siguió siendo, exactamente
+igual, una foto del acta.*
+
+**La cura:** la hoja guarda `id + uri` y **deriva** el estado — *ausente de la
+cola = publicada*.
+
+🔴 **Y CÓMO SE CERRÓ, que es la mitad que vale para el método:** entre dos
+pistas. **C tenía el mecanismo** por lectura del código; **A tenía las tres
+filas** en la base —dos actas con media en su ventana— que probaban que las
+fotos SÍ llegaban. *Ninguna de las dos lo probaba sola: la lectura era una
+hipótesis bien fundada, y las filas sin el mecanismo eran un dato que no
+explicaba nada.*
+
+**El corolario operativo, como CATEGORÍA:** ante un *«no queda / no aparece»*,
+la primera pregunta es **si lo que se ve es el fracaso y no el éxito**. Un
+síntoma invertido no se descarta mirando más fuerte donde apunta.
