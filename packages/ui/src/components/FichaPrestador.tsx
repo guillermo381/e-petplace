@@ -523,7 +523,7 @@ export function FichaPrestador({
         ) : null}
 
         {zonaLat !== null && zonaLat !== undefined && zonaLon !== null && zonaLon !== undefined && zonaRadioM !== null && zonaRadioM !== undefined ? (
-          <MapaZona lat={zonaLat} lon={zonaLon} radioM={zonaRadioM} />
+          <MapaZona zonaLat={zonaLat} zonaLon={zonaLon} radioM={zonaRadioM} />
         ) : null}
 
         {servicios !== undefined && servicios.length > 0 ? (
