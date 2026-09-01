@@ -229,7 +229,32 @@ export default function DiaGuarderia() {
               );
             })}
 
-            {/* 🔴 LO QUE FALTA SE DICE ACÁ, no se descubre buscando el botón. */}
+            {/* 🔴 LO QUE FALTA SE DICE ACÁ, no se descubre buscando el botón.
+
+                ⚠️ S109-D · SU CONDICIÓN DE MUERTE, y va escrita porque un texto
+                honesto sin fecha de vencimiento es cómo nace una lápida vencida
+                (`L-395`): esta tarjeta MUERE cuando exista **un escritor de
+                `guarderia_estadias.estado` con puerta** y esta pantalla lo
+                llame. Hoy no existe, y no es una impresión: medido contra la
+                base desplegada (31-ago-2026) —
+                  · las 95 estadías vivas están **todas en `reservada`**, con
+                    `a_bordo_en`, `llegada_en` y `entregada_en` en CERO;
+                  · el CHECK declara **siete** estados y **seis son
+                    inalcanzables**: ninguna función escribe la transición. Los
+                    únicos escritores de la tabla son `abrir_tramo_guarderia`
+                    —que sólo ata `tramo_recogida_id`/`tramo_devolucion_id`— y
+                    `mover_sujeto_por_reverso`, que cancela por plata devuelta.
+                  · `levantar_acta_guarderia` y `confirmar_acta_guarderia`
+                    existen y **sólo LEEN** la estadía.
+                *Un vocabulario de estados completo en un CHECK se lee como una
+                máquina que funciona; acá son seis palabras que nadie escribe.*
+
+                ⚠️ Y EL APOYO ENVEJECE ANTES QUE EL TÍTULO: dice «eso llega con
+                el acta», y **el acta ya llegó al motor** (las dos RPC vivas, con
+                wrapper, y con superficie del lado de la FAMILIA). Lo que falta
+                es su puerta del lado del prestador. El día que se cablee, el
+                apoyo hay que reescribirlo AUNQUE el título siga siendo cierto —
+                *son dos frases con dos fechas de vencimiento distintas.* */}
             <Tarjeta relleno="normal" elevacion="reposo">
               <View style={{ gap: spacing[2] }}>
                 <Texto variante="cuerpo">{t('diaGuarderia.marcarPendiente')}</Texto>
