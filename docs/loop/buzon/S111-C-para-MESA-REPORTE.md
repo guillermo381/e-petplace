@@ -193,3 +193,60 @@ con su sello de tiempo.*
 espera**, y su espera se lee igual que «todavía no lo hizo».* Con un freno
 bloqueando los APK, esa diferencia cuesta horas. **La identidad de la pista se
 verifica antes de mandar, no se infiere del nombre de la sesión.**
+
+
+---
+
+# ⏩ LA TANDA DEL TOQUE — ①②③
+
+## ✅ ① · LA PUSH ABRE PANTALLA, en las dos apps
+
+**Hasta hoy no había un solo listener de toque en el repo.** El despachador ya
+mandaba el destino y nadie lo leía — `L-460` exacta.
+
+**Los tres estados, y el tercero no lo cubre un listener:** abierta y en fondo
+sí; **con la app CERRADA el toque ocurrió antes de que existiera el proceso**, así
+que además se pregunta por el toque que la arrancó. *Un listener solo anda en dos
+de los tres casos y se ve como si anduviera.*
+
+**Elegí (b) contra el voto de A**, y por un hecho que su voto no tenía: **el
+lector de `notificacion_intencion` no existe** ⇒ (a) era wrapper + RPC + policy
+nuevos **para ir a buscar afuera un dato que el servidor ya tiene en la mano**.
+Y con la app cerrada, (a) hace que el destino **dependa de una llamada de red**.
+A lo tomó y puso la línea.
+
+**Probado 9/9** con un caso positivo y ocho negativos —incluida la ruta vacía,
+que A midió como **el caso mayoritario hoy**, y las dos formas de ruta externa.
+
+## ✅ ② · EL EN VIVO — verificado en sus cuatro condiciones
+
+Un punto y **jamás la traza** *(garantía estructural: el array lleva
+exactamente uno)* · se apaga en `entregada`/`no_recogida`/`cancelada` · puerta
+desde el hub · **y ahora una segunda: la push.** *El aviso «Thor va en camino»
+ES la puerta, que era el punto del hallazgo.*
+
+## 🔶 ③ · EL DURANTE — fotos ✅ · clip ✅ · **chips ❌**
+
+**El clip está montado** con la pieza de B, reusando el grabador que ya corre en
+`adiestramiento/clips`. *Un segundo grabador serían dos formas de cortar a los
+30 s, y descubrir en el aparato cuál falla.*
+
+🔴 **Faltan los chips** — cero `registrarBitacoraGuarderia`. **Es de A y está en
+su cola.** *El vocabulario existe y sirve* (`cat_conductas_bitacora`, la bitácora
+universal); lo que falta es el escritor del prestador.
+
+⚠️ **Y es el que cierra el recorrido del cuidador** —*«al final del día marco
+cómo se portó cada uno»*—; el clip era un agregado sobre algo que ya andaba.
+
+## LO QUE ESTA TANDA DEJA COMO MÉTODO
+
+**Un tipo que dice menos de lo que la función garantiza empuja al consumidor a
+castear.** `reglasSegunLugar` prometía «array que puede estar vacío» y devuelve
+4 o 3. **Ahora promete la tupla no vacía — y no a mano:** el `filter` no conserva
+el largo, así que se enumera la primera regla aparte y **la garantía es del
+compilador**. *Afirmarla sobre el `filter` habría sido la promesa que el cambio
+existe para no hacer.*
+
+**Y su corolario, que es de B:** con el tipo arreglado, su segunda capa —el
+obturador se apaga si las reglas llegan vacías— **queda como cinturón que no se
+ejerce**, que es exactamente donde tiene que estar (`L-424`).

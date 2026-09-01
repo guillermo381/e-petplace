@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 // CURA S58 (causa raíz del crash del taller en NATIVO): SliderPrecio fue
 // el PRIMER GestureDetector en el CUERPO de una pantalla — Hoja/VisorFoto
@@ -11,7 +12,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // S85-C3: `DefaultTheme` y `ThemeProvider` salieron con el experimento del
 // fondo transparente — eran sus dos únicos consumidores (Ley 37: lo que sale
 // de la UI sale del código, imports incluidos). Su lápida está abajo.
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import { escuchaDeToque } from '@/lib/toque-de-push';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
@@ -102,6 +104,50 @@ export default function RootLayout() {
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
   // renderizar (los nombres coinciden con typography.family de @epetplace/ui)
   const [fontsLoaded] = useFonts(epetplaceFonts);
+
+  /**
+   * ① · EL TOQUE DE LA PUSH — a dónde lleva (S111-C).
+   *
+   * 🔴 **Los tres estados, y el tercero no lo cubre un listener:** abierta y en
+   * fondo las atiende `alTocar`; **con la app CERRADA el toque ocurrió antes de
+   * que existiera el proceso**, así que además se pregunta por el toque que la
+   * ARRANCÓ. *Un listener solo anda en dos de los tres casos y se ve como si
+   * anduviera.*
+   *
+   * ⚠️ **GUARD PROPIO DEL PRESTADOR, y lo trajo una medición de A:** hoy los
+   * cinco avisos del durante ponen `ruta = /guarderia/<estadiaId>`, que es **la
+   * ruta del CLIENTE**. No existe de este lado. Si un día un aviso de audiencia
+   * mixta llegara acá, navegar a ciegas abriría una pantalla que no resuelve.
+   *
+   * **Por eso este listener sólo navega a rutas que ESTA app tiene**, y lo dice
+   * cuando descarta. *Una app que navega a la ruta de la otra no falla con un
+   * error: falla con una pantalla en blanco, que es peor.*
+   */
+  useEffect(() => {
+    const escucha = escuchaDeToque();
+    if (escucha === null) return;
+    let vivo = true;
+    const irSiEsMia = (ruta: string) => {
+      if (!vivo) return;
+      /* El prefijo de guardería del cliente es el caso vivo de hoy. Se compara
+         por PREFIJO y no por igualdad: la ruta lleva un id atrás. */
+      if (ruta.startsWith('/guarderia/')) {
+        console.warn(`[toque-de-push] ruta del cliente, no se navega acá · ${ruta}`);
+        return;
+      }
+      router.push(ruta as never);
+    };
+    void (async () => {
+      const inicial = await escucha.destinoInicial();
+      if (inicial !== null) irSiEsMia(inicial);
+    })();
+    const retirar = escucha.alTocar(irSiEsMia);
+    return () => {
+      vivo = false;
+      retirar();
+    };
+  }, []);
+
   if (!fontsLoaded) return null;
 
   return (
