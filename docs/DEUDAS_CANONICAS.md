@@ -24663,6 +24663,17 @@ alguien.*
 **Y lo peor de todo: la rotación NO DEJA RASTRO EN EL REPO.** No hay commit, no
 hay diff, ningún gate la ve. El repo sigue verde mientras el producto está roto.
 
+> ### 🔴 Y por eso se mira la firma primero: **la señal fuerte que uno tiene a mano tapa la que no tiene.**
+> La firma es medible desde el código —`apksigner` la imprime, un script la
+> compara— así que es la que se investiga, se documenta y se cura. **La rotación
+> no es medible desde el repo en absoluto**, y lo que no se puede medir no se
+> propone como hipótesis. *No es que se elija mal entre dos candidatas: es que
+> una de las dos nunca entra a la lista.*
+>
+> **El correctivo es la pregunta de alcance, y hay que hacerla ANTES de mirar lo
+> que se puede medir:** ¿falla **una** app o **todas**? Si fallan todas, ninguna
+> explicación por-binario alcanza — y la firma es por-binario.
+
 **La regla:** una rotación se cura en **TODOS** los lugares donde la credencial
 vive, y ese censo **se hace, no se recuerda** — secrets del builder (uno por
 app), `.env` locales (**uno por worktree, y no están en git**), config de la app,
