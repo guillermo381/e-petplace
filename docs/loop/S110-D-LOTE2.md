@@ -39,6 +39,80 @@
 
 ---
 
+
+## ✅ ENMIENDAS DE LA PISTA E (1-sep) — RE-MEDIDAS POR D, A LA VISTA
+
+E re-corrió las cuatro con controles propios y **coincide en dirección en las
+cuatro**. Difiere en tres precisiones. **Las tres se re-midieron acá; dos
+CORRIGEN este documento y una lo confirma.**
+
+**① ④ — E ENCUENTRA ALGO MÁS DURO QUE LO QUE YO REPORTÉ, y tiene razón.**
+Yo dije que al padrinazgo le falta una columna de refugio en
+`pedido_item_destinos`. E midió el constraint:
+```
+chk_destino_excluyente:  CHECK ((NOT (es_donacion AND (mascota_id IS NOT NULL))))
++ guard gemelo en el body: RAISE EXCEPTION 'destino_contradictorio: un ítem no
+  puede ser donación Y de una mascota'
+```
+**El padrinazgo es exactamente donación CON destino** —la mascota apadrinada, y
+por eso recibe sus fotos—. ⇒ **no es agregar una columna: es enmendar un CHECK
+que hoy declara esa combinación una contradicción**, más su guard. **Mi §④ se
+queda corto y se corrige acá.** *El veredicto de ④ no cambia —el motor de
+entrega sigue admitiendo destinatario distinto—; lo que cambia es el tamaño del
+hueco del padrinazgo, que es mayor que el que reporté.*
+
+**② ⑤ — E DUDA DE MI «SEIS ESCRITORES». LO RE-MEDÍ: EL SEIS SOBREVIVE, Y EL
+DATO DE E ES OTRO Y TAMBIÉN ES CIERTO.**
+E advirtió que un conteo por substring captura `estado = 'confirmada'` de otras
+tablas. Mi regex estaba anclado en la tabla, **pero tenía un riesgo real que E
+no nombró y yo tampoco había visto: `estado` es prefijo de `estado_pago`.**
+Re-medido con límite de palabra y con dos controles:
+```
+A) regex original                                   -> 6 funciones
+B) PRECISO, \mestado\M (excluye estado_pago)        -> 6 funciones (IDÉNTICAS)
+C) CONTROL: escriben SOLO estado_pago y no estado    -> 0   (no había contaminación)
+E) CONTROL+: ¿\mestado\M pega en «SET estado_vida»? -> no pegó (distingue) ✅
+D) escriben motivo_cancelacion                       -> 2: _trg_mascotas_memorial_planes,
+                                                             mover_sujeto_por_reverso
+```
+⇒ **SEIS escriben `estado`; sólo DOS escriben `motivo_cancelacion`.** Las dos
+mediciones son verdaderas y miden cosas distintas. **Pero el dato de E afila
+una frase mía que se leía de más:** yo escribí *«el motivo NO es sólo "el
+usuario canceló"»*, y lo exacto es que **el motivo es una columna de primera
+clase que sólo 2 de 6 escritores completan** — `expirar_planes_sin_pago`,
+`vencer_links_mensuales`, `cerrar_y_renovar_planes` y `confirmar_pago_plan_paseo`
+mueven el estado **sin dejar motivo**. *Un padrinazgo que se corte por un
+motivo externo no tiene hoy quién lo escriba, salvo copiando a esas dos.*
+
+**③ ⑤ — HALLAZGO DE E QUE NO ESTÁ EN ESTE DOCUMENTO Y ES EL COSTO REAL.**
+Confirmado contra el objeto:
+```
+suscripciones_servicio_tipo_valido:
+  CHECK ((tipo_servicio = ANY (ARRAY['guarderia_mensual'::text, 'paseo_mensual'::text])))
+```
+**Cerrado a dos valores.** ⇒ un padrinazgo recurrente **no cabe sin enmendar ese
+CHECK**. Coherente con que §8 deje la recurrencia del aporte fuera de v1, **pero
+hay que decirlo**: mi *«el recurrente ya lo resuelve»* se lee como que sólo falta
+un lector, y falta también abrir el vocabulario. **Corregido acá.**
+
+**④ ⑥ — E REFUERZA, sin contradecir.** El eje **no es «tipo de cuenta»: es rol +
+capacidad** (`esGestor`, `montaAtender`); `ClaveTabPrestador` es un tipo cerrado
+de 5 claves atado por `satisfies Record<...>`, así que **el compilador obliga
+los tres lugares** — el costo de una tab nueva es exacto y verificable, no
+difuso. Y E lo verificó **contra el bundle**, que yo no pude:
+`ordenTabsPrestador` viaja horneada en `apps/prestador/dist` (4 ocurrencias) y
+**0 en el del cliente**.
+
+**⑤ ③ — E lo confirma entero** con evidencia propia (0 wrappers de 109, 0 rutas
+de 174) y coincide en que §6.4.7 excluye el caso por diseño.
+
+*Nota de método, porque es la tercera vez que la casa la cobra: ninguna de estas
+tres diferencias se resolvió discutiendo — las tres las resolvió el objeto. No
+hizo falta desconfiar de nadie: alcanzó con que dos lecturas no coincidieran y
+preguntarle al objeto cuál era cuál.*
+
+---
+
 # ③ ¿HAY MENSAJERÍA ENTRE DOS CUENTAS HOY?
 
 ## VEREDICTO

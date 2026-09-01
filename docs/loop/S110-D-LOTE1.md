@@ -113,6 +113,53 @@ vez**. Los dos archivos son trackeados y el NUL no debería estar ahí.
 
 ---
 
+## ✅ RE-VERIFICACIÓN ORDENADA POR LA MESA (1-sep, posterior a la publicación)
+
+**Orden:** re-verificar SOLO contra los dos archivos con NUL, con buscador a
+nivel de bytes; no re-correr el censo entero. **Hecho.** Los patrones que este
+censo corrió con `grep` sobre `.ts/.tsx`, pasados byte a byte por
+`PasoCierre.tsx` y `video-consumo/index.ts`:
+
+```
+CONTROL+ crearFamiliaConPrimeraMascota   3 hits en PasoCierre · 0 en video-consumo  ✅
+CONTROL- patronQueNoExisteJamas          0 · 0                                      ✅
+
+familia_id / familiaId          0 · 0     -> ①e NO estaba subcontado
+tiene_familia / tieneFamilia    0 · 0     -> ② el censo del guard NO estaba subcontado
+mascotas_count / mascotasCount  0 · 0     -> ② «ninguna pantalla lo lee» SOBREVIVE
+onboarding                      0 · 0     -> el censo de redirects NO estaba subcontado
+obtenerMascotasDeFamilia        0 · 0     ·  receptor/entrega_  0 · 0
+Tabs.Screen 0 · 0               ·  suscripcion/recurrent 0 · 0
+```
+
+**NINGÚN VEREDICTO CAMBIA.** Y lo que importa de esto es lo que confirma: **②
+se apoya en un CERO** —*«`mascotas_count` viaja y nadie lo lee»*— **y un cero
+era exactamente lo que el instrumento defectuoso fabricaba.** Ahora ese cero
+está verificado con un instrumento que produce sus dos colores, en vez de
+heredado del que no podía.
+
+**Dos cosas que la re-verificación sí destapó, y se anotan en vez de taparse:**
+
+1. **Hubo un SEGUNDO cero falso del mismo grep**, ya superado por lectura
+   directa pero no registrado hasta ahora: el barrido
+   `crear|agregar|await .*Familia` sobre `components/alta/` devolvió vacío, y
+   **`agregarMascotaAFamilia` tiene 3 hits ahí** (`:6`, `:34`, `:238`).
+   *Fueron dos ceros falsos del mismo archivo, no uno.*
+2. **`PasoCierre.tsx` tiene 4 `router.replace`/`push` que el censo de redirects
+   nunca vio** — pero **cero ocurrencias de `onboarding`**: no redirige HACIA el
+   onboarding, es la SALIDA de él (`salir(MODO[modo].salida)` en `:115-118`,
+   `:244`, `:359`, `:386`, después de `crearFamiliaConPrimeraMascota` en
+   `:230`). ⇒ **refuerza ② en vez de cambiarlo**: la única salida del
+   onboarding corre después de crear la mascota, y ahora está medida en el
+   archivo que la ejecuta.
+
+**Regla que esta pista adopta de acá en adelante (punto 2 de la mesa):** todo
+barrido de repo corre con **control positivo y negativo** — un patrón cuyo hit
+ya conozco y uno cuyo cero ya conozco. *Un instrumento que no puede producir su
+rojo no está midiendo.*
+
+---
+
 # ① ¿PUEDE EXISTIR UNA MASCOTA SIN FAMILIA?
 
 ## VEREDICTO
