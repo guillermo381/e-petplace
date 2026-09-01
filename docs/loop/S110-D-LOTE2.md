@@ -334,7 +334,14 @@ datos y la superficie** ya admiten destinatario distinto —no hay FK al comprad
 mecanismo del destinatario**. **Lo que sí es nuevo, y §8 lo nombra y yo no lo
 había medido, es *«la coordina el refugio»***: un rol de coordinación de la
 entrega por parte de un tercero que no compró — **eso no existe en ninguna
-tabla que haya medido.**
+tabla que haya medido**, y E le encontró el artefacto exacto, más duro que
+«falta un campo»: `cat_transiciones_pedido.actor` admite
+`admin · cliente · repartidor · sistema · vendedor`, **y el refugio no está
+entre ellos.** No falta una columna: **falta un ACTOR en el catálogo que
+gobierna quién puede empujar la máquina de estados del pedido.** *La casa ya
+tiene la cicatriz de al lado —S105: «un actor que el catálogo declara válido y
+la puerta no acepta es un callejón»—; ésta es la variante previa: ni siquiera
+está declarado.*
 
 *El veredicto de ④ se mantiene en su dirección y se le baja el volumen: no
 «corrige» la letra, la **acota**. La pieza nueva es la FIGURA y su coordinación,

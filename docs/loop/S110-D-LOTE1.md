@@ -512,6 +512,100 @@ admiten hoy. Lo que falta es **una puerta, no un modelo**:
 
 ---
 
+## 🔴 ANEXO A ① — LA SEGUNDA PUERTA QUE ESTE CENSO NO VIO (4ª pasada, 1-sep)
+
+**Lo trajo la pista E crudo, de un control positivo de otra medición, y lo medí
+yo.** Mi ① buscó por FK a `familia` y por FK a `mascotas`. **Hay un subsistema
+de adopción entero que no cuelga de ninguna de las dos, y por eso ningún brazo
+de mi censo podía verlo.** *Es la ley de la jornada de S107 en su forma exacta:
+el censo casi siempre encuentra una segunda puerta al mismo defecto.*
+
+```
+OBJETOS DE ADOPCION EN public: 4          (+ `donaciones`, que les apunta)
+nombre                 kind  rls    pol  cols
+adopcion_seguimiento   r     true   2    14
+mascotas_adopcion      r     true   4    29
+refugios               r     true   5    39
+solicitudes_adopcion   r     true   5    22
+CONTROL+ refugios presente : True   ·   CONTROL- tabla inventada : False
+```
+
+### `mascotas_adopcion` NO es una `mascotas`: es una entidad paralela
+
+**No tiene `familia_id`, ni `mascota_id`, ni `user_id`.** Tiene identidad propia
+(`nombre`, `especie`, `raza`, `edad` **text**, `sexo`, `foto`, `historia`) y todo
+el vocabulario de una vitrina de adopción que la casa nunca construyó:
+`urgente` · `activa` · `vacunada` · `esterilizada` · `compatible_ninos` ·
+`compatible_mascotas` · `requiere_jardin` · `requiere_espacio` ·
+`nivel_energia` · `nivel_adiestramiento` · `necesidades_especiales` · `vistas` ·
+`favoritos` · `costo_vacunas` · `costo_esteril` · `refugio_id`.
+
+Y `solicitudes_adopcion` trae el flujo de §5 ya dibujado: `score_compatibilidad`
+· `score_breakdown` jsonb · `entrevista_requerida` · `entrevista_fecha` ·
+`entrevista_notas` · `entrevista_resultado` · `motivo_rechazo` · `aprobado_por` ·
+`aprobado_en`. ⚠️ **Su `mascota_nombre` es TEXT**: la solicitud referencia a la
+mascota **por nombre, no por id.**
+
+### 🔑 EL DATO QUE DECIDE — el mundo de adopción está CERRADO SOBRE SÍ MISMO
+
+```
+adopcion_seguimiento.mascota_id  ->  FK a mascotas_adopcion(id) ON DELETE CASCADE
+                                     ...NO a `mascotas`.
+FK entrantes a mascotas_adopcion :  donaciones, adopcion_seguimiento
+FK salientes de mascotas_adopcion:  solo refugio_id -> refugios
+```
+***Ni una sola FK cruza entre el mundo de adopción y el mundo de `mascotas`.***
+
+### Está MUERTO, y eso es lo que lo vuelve peligroso
+
+```
+filas mascotas_adopcion 0 · solicitudes_adopcion 0 · adopcion_seguimiento 0
+       refugios 0 · donaciones 0
+funciones que escriben mascotas_adopcion : (NINGUNA)
+CONTROL+ funciones que mencionan `mascotas`: 98      ⇒ la búsqueda ve
+consumidores en el monorepo (buscador NUL-safe):
+   solo `packages/api/src/database.types.ts` (GENERADO) + 1 comentario en paises.ts
+   CONTROL+ obtenerMascotasDeFamilia -> 40 líneas     ⇒ el buscador ve
+```
+**Cero filas, cero escritores, cero consumidores.** Es el mismo cementerio que
+S94-A encontró con los 137 pedidos huérfanos: **legado de `e-petplace-v2`, que
+comparte esta base.**
+
+### QUÉ LE HACE ESTO A ① — el veredicto no cambia; su encuadre gana una trampa
+
+**① sigue en pie tal cual: una fila de `mascotas` no puede existir sin
+`familia_id`.** Lo que cambia es que **la pregunta tiene una segunda puerta que
+hoy está abierta**: *un «adoptable» ya puede existir sin familia — porque hoy no
+es una mascota, es una ficha de vitrina.*
+
+🔴 **Y esa puerta es exactamente la que §0 prohíbe cruzar.** §0 firma que *«la
+adopción no crea la mascota: le cambia la familia»* y que el refugio carga
+eventos **antes** de que exista la familia. Pero **`eventos_mascota` tiene FK a
+`mascotas`** (medido: `RESTRICT`) ⇒ **una `mascotas_adopcion` no puede tener ni
+un solo evento de expediente.** Construir el vertical sobre esa tabla daría un
+adoptable **sin expediente**, y obligaría a la adopción a **crear** la mascota —
+que es literalmente lo que §0 deroga.
+
+⚠️ **Por qué lo declaro como trampa y no como dato de color: es el candidato
+más plausible.** Tiene el nombre correcto, RLS puesta, 29 columnas con el
+vocabulario de vitrina que §4 va a pedir (`urgente`, `compatible_ninos`,
+`vistas`, `favoritos`) y el flujo de §5 con scoring y entrevista. **Quien abra
+el vertical y busque «dónde va el adoptable» la va a encontrar antes que a
+`mascotas`, y va a parecer un regalo.** *El costo no se vería al construir: se
+vería el día que una familia adopte y el expediente del rescate no exista.*
+
+**Una nota de forma que no es de mi lote y se declara en una línea:** la policy
+de lectura de `mascotas_adopcion` es `USING true` con `SELECT` concedido a
+`anon`. Hoy es inofensiva —0 filas—, pero **es la forma que un vertical
+heredaría** si reusa la tabla.
+
+**Lo que NO medí:** si estas cinco tablas tienen consumidores en las webs del
+legado (portal admin, `e-petplace-v2`), que comparten esta misma base. **Mi
+medición de «cero consumidores» es del MONOREPO, no del proyecto entero** — y
+S95-F ya midió que el portal admin lee tablas que el monorepo no conoce.
+
+---
+
 # ② ¿PUEDE EXISTIR UN USUARIO SIN MASCOTA?
 
 ## VEREDICTO
