@@ -295,3 +295,128 @@ la app recuerda.**
 teléfono y ESTE día*, igual que el tramo que se está siguiendo: no es un dato
 del negocio ni algo que otra persona del refugio deba heredar. **Y perderlo
 cuesta un gesto, no un dato.**
+
+---
+
+# LA TANDA DEL TOQUE — ①②③
+
+## ① · LA PUSH ABRE PANTALLA
+
+### EL RECORRIDO, en mi voz
+
+«Estoy en el trabajo y me vibra el teléfono: **"Thor ya está a bordo"**. Toco la
+notificación y la app se abre **en el día de Thor** — veo dónde va la camioneta.
+
+No me abre el home para que yo busque. No me hace acordarme de qué decía el
+aviso mientras navego tres pantallas.
+
+Y da igual cómo estaba la app: **abierta, en el bolsillo o cerrada del todo.**
+Toco y llego al mismo lugar.»
+
+### LOS CAMINOS TRISTES
+
+«**Toqué el aviso con la app cerrada.** Tarda un segundo en abrir, y **cuando
+abre estoy donde el aviso prometía**, no en el home con el aviso perdido.»
+
+«**Toqué un aviso viejo**, de una estadía que ya terminó. Me lleva igual a su
+día: ahí está lo que pasó. *No me dice "esto ya no existe" — existió, y es lo
+que fui a ver.*»
+
+«**Toqué un aviso de un tipo que todavía no tiene pantalla.** Me deja donde
+estaba y no me miente con una pantalla en blanco.»
+
+### 🔴 LA DECISIÓN QUE ME TOCABA, con lo que la decidió
+
+A ofreció dos caminos y votó **(a)** —leer la intención por `intencion_id`—
+*«porque sirve para todo tipo de aviso»*.
+
+**Medí y elijo (b), y la razón es un hecho que su voto no tenía:**
+
+- **El lector de `notificacion_intencion` NO EXISTE** — cero wrappers, medido con
+  control. ⇒ (a) **no es «un viaje más»: es un wrapper nuevo, un RPC nuevo y una
+  policy nueva** sobre una tabla de notificaciones, para leer un dato que el
+  servidor ya tiene en la mano cuando arma la push.
+- **Y su modo de falla es peor justo donde más duele:** con la app **cerrada** y
+  sin red todavía, (a) necesita **una consulta contra el servidor antes de poder
+  navegar**. *La push llegó, el usuario tocó, y el destino depende de una llamada
+  que puede fallar* — el destino ya viajaba en el sobre y lo fuimos a buscar
+  afuera.
+
+⇒ **(b): `ruta` viaja en el `data` de FCM.** Es donde el resto del mundo pone el
+deep link, y **el dato ya existe** en `notificacion_intencion.datos.ruta` (A lo
+dejó vivo): sólo hay que copiarlo al sobre.
+
+⚠️ **Y la objeción de A a (b) es correcta y se cura mejor del otro lado:** dice
+que el día que un tipo no ponga `ruta`, la app recibe un `data` incompleto. **Con
+(a) ese tipo tampoco tendría ruta** —la intención tampoco la traería— así que el
+problema no es del canal sino del emisor. **La app cae al home SABIENDO que
+cayó**, y eso se construye igual con (b): sin `ruta`, no navega y lo dice en el
+log. *Un dato ausente se declara; no se sale a buscarlo a otro lado.*
+
+### LA PUERTA
+
+**La push ES la puerta** — ése es todo el punto. Y su destino sale **del dato**
+(`data.ruta`), jamás de parsear el título: *un título es una frase para un
+humano, y leerlo como dirección lo convierte en API sin que nadie lo firme.*
+
+---
+
+## ② · EL EN VIVO DEL LADO FAMILIA
+
+### EL RECORRIDO, en mi voz
+
+«Toco el aviso de que van a buscar a Thor y **veo dónde está la camioneta.** Un
+punto, moviéndose, en un mapa.
+
+**No veo por dónde pasó ni a qué casas fue antes** — y no lo pienso, pero si lo
+pensara me parecería bien: *ésas son las casas de otras familias.*
+
+Cuando Thor llega a la guardería, **el mapa se apaga.** Ya no hay nada que
+mirar, y la app no me deja un punto viejo fingiendo que algo se mueve.»
+
+### LOS CAMINOS TRISTES
+
+«**Abro y todavía no salieron.** Me lo dice: todavía no hay dónde mirar. No me
+muestra un mapa vacío ni el último punto de ayer.»
+
+«**Se cortó la señal del cuidador.** El punto queda donde estaba con su hora, y
+la hora me dice si es de recién o de hace veinte minutos. *Prefiero saber que el
+dato es viejo a que me lo escondan.*»
+
+### LA PUERTA — y son dos
+
+**① la push** (con ① curada) y **② el hub de guardería**, que ya lleva al día.
+*La pieza no nace sin puerta: nace con dos.*
+
+### 🔴 LO QUE NO SE RE-DECIDE
+
+**Un punto o nada, jamás la traza.** Y no se sostiene con disciplina: el lector
+devuelve **un punto**, el escritor es UPSERT sobre `tramo_id`, y a
+`MapaRecorrido` se le pasa un array de **exactamente uno** — *una polilínea de un
+punto no dibuja nada.*
+
+---
+
+## ③ · EL DURANTE COMPLETO — clip y chips
+
+### EL RECORRIDO, en voz del cuidador
+
+«Además de fotos, **grabo un clip corto** cuando algo se ve mejor moviéndose. La
+app me corta sola a los treinta segundos.
+
+Y al final del día **marco cómo se portó cada uno**: durmió tranquilo, comió
+normal, se escondió. **Toco chips, no escribo un informe.**
+
+Las familias reciben **un resumen**, no una alarma por cada cosa que hice.»
+
+### LOS CAMINOS TRISTES
+
+«**Grabé de más.** Me lo corta y me lo dice antes de subir, no después.»
+
+«**Marqué un chip por error.** Lo destoco mientras no haya salido.»
+
+### LA PUERTA
+
+La misma hoja del durante, **ya cableada desde «Tu día»** con animales adentro.
+*El clip entra al lado del obturador y los chips como una sección más — no nace
+una pantalla nueva para cada cosa que el cuidador puede hacer en el patio.*
