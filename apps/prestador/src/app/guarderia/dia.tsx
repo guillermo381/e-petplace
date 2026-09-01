@@ -56,10 +56,12 @@ import {
   marcarLlegada,
   marcarRetorno,
   obtenerEstadiasDelDia,
+  obtenerMaquinaEstadia,
   obtenerMiPrestador,
   resolverUrlsFotos,
   type EstadiaDelDia,
   type EstadoEstadia,
+  type MaquinaEstadia,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -116,6 +118,8 @@ type Estado =
       prestadorId: string;
       estadias: EstadiaDelDia[];
       caras: Map<string, string>;
+      /** 🔴 La máquina, LEÍDA del motor — ver `actaQueCorresponde`. */
+      maquina: MaquinaEstadia | null;
     };
 
 export default function DiaGuarderia() {
@@ -163,9 +167,19 @@ export default function DiaGuarderia() {
          de saber qué día es se contradicen justo a la tarde, que es cuando se
          devuelven los animales. */
       const v = await leerViaje(hoyLocal());
+      /* La máquina es un CATÁLOGO: se pide una vez, con el día. Si falla, la
+         pantalla sigue mostrando el roster y sólo pierde los actos — un
+         catálogo caído no puede dejar al cuidador sin saber a quién buscar. */
+      const maq = await obtenerMaquinaEstadia();
       if (!vigente) return;
       setViaje(v);
-      setEstado({ fase: 'listo', prestadorId: p.data.id, estadias: r.data, caras });
+      setEstado({
+        fase: 'listo',
+        prestadorId: p.data.id,
+        estadias: r.data,
+        caras,
+        maquina: maq.ok ? maq.data : null,
+      });
     })();
     return () => {
       vigente = false;
@@ -194,30 +208,47 @@ export default function DiaGuarderia() {
   const especieDe = (x: string): 'perro' | 'gato' | undefined =>
     x === 'perro' || x === 'gato' ? x : undefined;
 
+  const listo = estado.fase === 'listo' ? estado : null;
+
   /**
-   * QUÉ ACTA CORRESPONDE, y `null` cuando no corresponde ninguna.
+   * QUÉ ACTA CORRESPONDE — **derivada de la máquina que devuelve el motor**,
+   * jamás repetida acá.
    *
-   * 🔴 Ley 23 — la puerta no ofrece lo que va a rechazar: sobre una estadía
-   * entregada, cancelada o no recogida **no hay acta que levantar**, y el
-   * botón no se dibuja. *Ofrecerlo y rebotarlo después sería enseñarle al
-   * cuidador que la pantalla adivina.*
+   * ═══════════════════════════════════════════════════════════════════════
+   * 🔴 **La primera versión la escribí de memoria y tenía DOS errores que
+   * ningún typecheck ve**, los dos encontrados al leer la tabla del motor:
+   *   · daba el acta de devolución colgando de `en_guarderia`, y **cuelga de
+   *     `retorno_en_curso`** — el botón aparecía antes de salir a devolver, y
+   *     el motor lo habría rebotado por transición ilegal;
+   *   · **ignoraba que `a_bordo` exige tramo de recogida abierto**, así que
+   *     ofrecía el acta sin viaje: rebote `sin_tramo_abierto`.
+   * *Dos veces la pantalla ofreciendo lo que el motor iba a rechazar — Ley 23
+   * rota en los dos sentidos, compilando perfecto.*
+   * ═══════════════════════════════════════════════════════════════════════
    *
-   * ⚠️ Los dos estados EN VIAJE (`recogida_en_curso`, `retorno_en_curso`) hoy
-   * son **inalcanzables** —nada mueve el estado— y por eso tampoco ofrecen
-   * acta: su acta ya se levantó al subir o al entregar. Cuando el motor los
-   * escriba, esta función no cambia.
+   * Por eso ahora **se lee**: la máquina trae `desde`, `exigeTramo`, `esLote` y
+   * `levantaActa` como DATO. *El día que cambie, esta pantalla la sigue sin que
+   * nadie se acuerde de tocarla.*
+   *
+   * Sin máquina (catálogo caído) **no se ofrece ninguna acta**: es preferible
+   * que el cuidador no vea el botón a que lo vea y rebote.
    */
   const actaQueCorresponde = (e: EstadoEstadia): DireccionActa | null => {
-    if (e === 'reservada') return 'recogida';
-    if (e === 'en_guarderia') return 'devolucion';
-    return null;
+    if (listo?.maquina == null) return null;
+    const acto = listo.maquina.actos.find(
+      (a) => a.desde === e && a.levantaActa !== null && !a.esLote,
+    );
+    if (acto?.levantaActa == null) return null;
+    /* Si el acto exige tramo, exige EL SUYO: con el viaje de vuelta abierto no
+       se levanta un acta de recogida. */
+    if (acto.exigeTramo !== null && viaje?.direccion !== acto.exigeTramo) return null;
+    return acto.levantaActa;
   };
 
   /* ── EL VIAJE ────────────────────────────────────────────────────────────
      Los conteos se DERIVAN del roster; nunca se guardan. El servidor ya tiene
      la verdad de cuántos subieron, y una copia local sería una segunda verdad
      que diverge el día que una subida falla. */
-  const listo = estado.fase === 'listo' ? estado : null;
   const porRecoger = listo?.estadias.filter((e) => e.estado === 'reservada') ?? [];
   const aBordo = listo?.estadias.filter((e) => e.estado === 'recogida_en_curso') ?? [];
   const adentro = listo?.estadias.filter((e) => e.estado === 'en_guarderia') ?? [];
@@ -307,6 +338,41 @@ export default function DiaGuarderia() {
       setEnVuelo(false);
     }
   };
+
+  /**
+   * EL CIERRE DEL DÍA. Del recorrido: *«Cuando entrego el último, el día se
+   * cierra y me lo dice sin fanfarria.»*
+   *
+   * 🔴 Es automático y no un botón porque **no hay nada que decidir**: si no
+   * queda nadie adentro ni volviendo, el viaje de devolución terminó. *Pedir un
+   * toque para confirmar un hecho que ya ocurrió es preguntar algo cuya
+   * respuesta ya sabemos* (Ley 23, corolario).
+   *
+   * El `ref` es el guard contra el re-disparo: `relanzar()` vuelve a correr el
+   * efecto y sin él cerraría el tramo en cada vuelta.
+   *
+   * ⚠️ **Este bloque ya se perdió una vez** — una limpieza por RANGO DE ÍNDICES
+   * se llevó al vecino de al lado, y **ningún gate lo vio**: nada lo
+   * referenciaba, así que el typecheck quedó verde sobre una función que había
+   * desaparecido. *Lo cazó un censo de piezas conocidas, no una relectura.*
+   */
+  const cerrando = useRef(false);
+  useEffect(() => {
+    if (viaje === null || viaje.direccion !== 'devolucion') return;
+    if (volviendo.length > 0 || adentro.length > 0) return;
+    if (cerrando.current) return;
+    cerrando.current = true;
+    void (async () => {
+      try {
+        await cerrarTramoGuarderia(viaje.tramoId);
+        await borrarViaje();
+        setViaje(null);
+        mostrar({ variante: 'exito', texto: t('diaGuarderia.diaCerrado') });
+      } finally {
+        cerrando.current = false;
+      }
+    })();
+  }, [viaje, volviendo.length, adentro.length, mostrar, t]);
 
   const alAtras = useCallback(() => router.back(), [router]);
 
