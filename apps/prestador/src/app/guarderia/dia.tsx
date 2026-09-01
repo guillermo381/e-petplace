@@ -120,6 +120,18 @@ function comoDireccion(d: unknown): {
   };
 }
 
+/**
+ * `'07:00:00'` → `'07:00'`. El motor manda `HH:MM:SS`; los segundos de una
+ * franja acordada son ruido — *nadie acuerda recoger a las 07:00:00.*
+ *
+ * ⚠️ **No se formatea con `Date`**: la franja es una hora del LUGAR, no un
+ * instante. *Pasarla por `Date` la ataría al huso del teléfono y un cuidador
+ * viajando la vería corrida.*
+ */
+function hhmm(hms: string): string {
+  return hms.slice(0, 5);
+}
+
 type Estado =
   | { fase: 'cargando' }
   | { fase: 'roto' }
@@ -633,6 +645,23 @@ export default function DiaGuarderia() {
                         <Texto variante="cuerpo">{e.mascotaNombre}</Texto>
                         {/* El espacio sólo si el motor lo asignó: `null` no se
                             pinta como «sin sala», se calla. */}
+                        {/* ⑨ · LA FRANJA — el dato que hace legible el orden.
+                            🔴 **Sin ella la lista sale ordenada y el cuidador no
+                            puede explicarse por qué**: vería un orden correcto
+                            sin la razón a la vista, que es casi tan malo como
+                            un orden equivocado.
+
+                            ⚠️ `null` es INFORMACIÓN, no un dato que falta: las
+                            terminales no tienen franja porque ya no les toca
+                            nada, y por eso el motor las manda al final solas
+                            (`NULLS LAST`). Acá simplemente **no se dibuja** —
+                            escribir «sin franja» le pondría nombre a una
+                            ausencia que ya se lee en su estado. */}
+                        {e.franjaDesde !== null && e.franjaHasta !== null ? (
+                          <Texto variante="dato">
+                            {`${hhmm(e.franjaDesde)}–${hhmm(e.franjaHasta)}`}
+                          </Texto>
+                        ) : null}
                         {e.espacioNombre !== null ? (
                           <Texto variante="apoyo">{e.espacioNombre}</Texto>
                         ) : null}
