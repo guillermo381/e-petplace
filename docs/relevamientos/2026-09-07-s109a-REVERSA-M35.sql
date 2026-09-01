@@ -1,0 +1,7 @@
+-- REVERSA de 20260907360000_s109a_el_programa_no_empieza_hoy.sql
+--
+-- ⚠️ Revertir devuelve el rebote a `slot_en_pasado` para una fecha que NO es
+--    pasada: la familia elige HOY y lee que eligió una hora que ya pasó.
+--
+-- `contratar_programa` vuelve a su cuerpo previo (20260715180000 y sucesoras);
+-- `pg_get_functiondef` lo da del objeto. No se transcribe.
