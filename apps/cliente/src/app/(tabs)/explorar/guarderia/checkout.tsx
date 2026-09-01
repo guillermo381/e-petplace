@@ -727,16 +727,51 @@ export default function CheckoutGuarderia() {
             /* ⭐ **NO SE PAGA UN TOTAL QUE LA PANTALLA NO PUDO LEER.** Y el
                 apagado DICE qué falta, cada causa con su frase — *una pared
                 muda hace creer que el producto está roto.* */
+            /* ═══════════════════════════════════════════════════════════
+               🔴 **SE PREGUNTA POR EL MEDIO ELEGIDO, NO POR LA TARJETA.**
+
+               Hasta hoy decía `medio.idTarjeta === null`, y **`idTarjeta` es
+               `null` cuando el medio elegido es DeUna** — lo pone así la propia
+               sección (`seccion-medio-de-pago.tsx:249`: sólo hay id si el tipo
+               es `tarjeta`).
+
+               ⇒ **Con DeUna, el botón NO PODÍA habilitarse nunca** en paquete y
+               mensualidad. Y por eso no se vio antes: **el día suelto no exige
+               medio en su condición**, así que el defecto vivía sólo en las dos
+               compras que jamás se habían cobrado por esta vía. *El caso que
+               nunca corrió era justo el que tenía el guard equivocado.*
+
+               ⚠️ Y el resto de este archivo **ya sabía de DeUna** —la rama de
+               envío la contempla entera, `medio.elegido?.tipo === 'deuna'`—:
+               quedaron atrás **el guard del botón y su voz**. *La pantalla
+               estaba lista para pagar por DeUna y se apagaba a sí misma antes
+               de dejar intentarlo.*
+
+               ✅ **Y lo que este botón destapa está MEDIDO, no supuesto** (A,
+               al curarlo): las 6 suscripciones de guardería tienen
+               `moneda = USD`, **cero NULL** ⇒ habilitar acá **no** hace
+               aparecer el rebote `desglose_incompleto`.
+
+               ⚠️ **Lo que sí espera del otro lado, y no es de esta pantalla:**
+               la única suscripción viva es de un **AVE**, y
+               `guarderia_mensual.especies_elegibles` es `["perro","gato"]` —
+               *la puerta de la mensualidad no consulta el recorte*. **El cobro
+               va a funcionar igual**, así que quien ejerza esto por acá está
+               probando sobre un dato que no debería existir. *No lo frena esta
+               pantalla: lo frena la puerta que lo dejó entrar.*
+               ═══════════════════════════════════════════════════════════ */
             deshabilitado={
-              ((esMensual || esPaquete) && medio.idTarjeta === null) ||
+              ((esMensual || esPaquete) && medio.elegido === null) ||
               (esPaquete && precioPaquete.fase !== 'listo')
             }
             razonDeshabilitado={
-              /* La tarjeta se pregunta PRIMERO: con el paquete cobrando de
-                 verdad, «falta el precio» sobre un carrito sin medio mandaría a
-                 mirar el lugar equivocado. */
-              medio.idTarjeta === null
-                ? t('lugarGuarderia.faltaTarjeta')
+              /* 🔴 EL MEDIO SE PREGUNTA PRIMERO, y la voz cambió con el guard:
+                 antes decía «falta la tarjeta» — que con DeUna elegida **mandaba
+                 a agregar una tarjeta que no hace falta**. *Un guard incorrecto
+                 con una voz que además apunta al lugar equivocado* (`L-455`).
+                 Ahora nombra lo que de verdad falta: elegir cómo pagar. */
+              medio.elegido === null
+                ? t('checkoutGuarderia.faltaMedio')
                 : precioPaquete.fase === 'noVende'
                   ? t('checkoutGuarderia.paqueteYaNoSeVende')
                   : precioPaquete.fase === 'noPudimos'

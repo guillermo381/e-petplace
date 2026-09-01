@@ -2391,6 +2391,7 @@ export const clienteEn = {
     paqueteNoEntro: 'The payment didn’t go through, so the pack wasn’t purchased. You weren’t charged.',
     mensualNoEntro: 'The payment didn’t go through, so the plan isn’t active. You weren’t charged. Try another card.',
     mensualCancelada: 'The plan didn’t become active.',
+    faltaMedio: 'Choose how you want to pay.',
     precioCargando: 'We’re loading your pack’s price.',
     precioNoLeido: 'We couldn’t load this pack’s price. Try again.',
     paqueteYaNoSeVende: 'This daycare no longer sells that pack. Pick another size.',

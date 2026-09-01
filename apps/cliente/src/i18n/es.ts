@@ -3362,6 +3362,7 @@ export const clienteEs = {
     /* ⭐ S108-C · Las tres voces del total que todavía no se pudo leer.
        *No se paga un total que la pantalla no conoce, y el CTA apagado
        dice cuál de las tres cosas pasó.* */
+    faltaMedio: 'Elige cómo quieres pagar.',
     precioCargando: 'Estamos leyendo el precio de tu paquete.',
     precioNoLeido: 'No pudimos leer el precio de este paquete. Prueba de nuevo.',
     paqueteYaNoSeVende: 'Esta guardería ya no vende ese paquete. Elige otro tamaño.',
