@@ -281,6 +281,37 @@ export default function DiaGuarderia() {
   const adentro = listo?.estadias.filter((e) => e.estado === 'en_guarderia') ?? [];
   const volviendo = listo?.estadias.filter((e) => e.estado === 'retorno_en_curso') ?? [];
 
+  /**
+   * ⑥ · QUIÉNES SE VEN. **Con un viaje abierto, sólo los que participan de ESE
+   * viaje.**
+   *
+   * ═══════════════════════════════════════════════════════════════════════
+   * 🔴 **`no_recogida` es TERMINAL y se arrastraba a la lista del retorno.**
+   * Medí las tres afirmaciones por separado y **dos ya se cumplían**: no entra
+   * al tramo (`salirADevolver` ata sólo `en_guarderia`) y no admite ningún
+   * acto (la máquina la tiene como `hasta` y nunca como `desde`). **La que
+   * fallaba era la lista**, que pintaba el día entero sin mirar el viaje.
+   * ═══════════════════════════════════════════════════════════════════════
+   *
+   * **Se DERIVA de la máquina, no se enumeran estados:** participan los `desde`
+   * y los `hasta` de los actos cuyo `exigeTramo` es esta dirección. Para
+   * recogida da `reservada → recogida_en_curso`; para devolución,
+   * `en_guarderia → retorno_en_curso`. *`entregada` queda afuera sola —su acto
+   * no exige tramo— y eso es exactamente lo correcto: el que ya se entregó sale
+   * del viaje.*
+   *
+   * ⚠️ **SIN viaje se ven TODAS, y no es una excepción:** ahí la lista es el
+   * día completo, y ahí es donde `no_recogida` tiene que verse con su motivo y
+   * su hora (el lector de `D-990` del lado del prestador). *Durante el viaje es
+   * ruido; al mirar el día es el registro.*
+   */
+  const participanDelViaje = (e: EstadoEstadia): boolean => {
+    if (viaje === null || listo?.maquina == null) return true;
+    return listo.maquina.actos.some(
+      (a) => a.exigeTramo === viaje.direccion && (a.desde === e || a.hasta === e),
+    );
+  };
+
   const relanzar = () => setIntento((n) => n + 1);
 
   /** La hora del TOQUE — la de la puerta. La del servidor existe para auditar
@@ -510,7 +541,7 @@ export default function DiaGuarderia() {
               />
             ) : null}
 
-            {estado.estadias.map((e) => {
+            {estado.estadias.filter((e) => participanDelViaje(e.estado)).map((e) => {
               const dir = comoDireccion(e.direccion);
               const foto = e.mascotaFotoUrl === null ? null : (estado.caras.get(e.mascotaFotoUrl) ?? null);
               /* ⭐ S109-D · LA CARA SALE DE LA ESCALERA DE LA CASA, no de la
