@@ -225,6 +225,33 @@ acepta y se ignora**, y por eso la llamada se lee cableada.
 > que no está pasando** — y por eso **ninguna la encontró un gate**: tres las
 > encontró el founder mirando la pantalla, y una la encontró un pliegue.
 
+### Y el corolario que cerró la sesión: **un gate atado a un NOMBRE mide la convención, no el hecho**
+`verify:jornada-completa` dio **rojo falso** dos veces, y las dos por lo mismo en
+lugares distintos del nombre: primero por el **sufijo** (`…DelDia` vs
+`…PorRango`), después por la **raíz** (`Estadias` y `Guarderia` son **dos raíces
+para UN oficio**).
+> **La convención se rompe en cada pieza del nombre, una por vez.** *Mientras hubo
+> un lector por oficio, derivación y verdad coincidían — y la coincidencia era del
+> DATO, no del diseño.*
+
+**La cura de S109-D es la que conviene recordar, porque no renuncia al principio:**
+por oficio, pero **por DECLARACIÓN y no por derivación** — y *la tabla no es una
+lista de oficios (ésa sí sería el sexto mapa cerrado): es la **clasificación** de
+lo que el objeto ya contiene.* Un lector sin clasificar **sale 2**; y **una
+entrada cuyo lector ya no existe, también** — *si ése era la última puerta de su
+oficio, el oficio desaparecería del universo y nadie volvería a exigirlo:* **un
+requisito no se pierde en silencio.**
+
+### 🟢 Y una sobre cómo se escriben las deudas, que esta sesión probó en vivo
+> **Una deuda declarada con su BLOQUEANTE NOMBRADO es una deuda que alguien puede
+> destrabar; una declarada como «pendiente» espera para siempre.**
+
+`historico.tsx` llevaba su deuda escrita con la frase *«lo que la destraba es UNA
+cosa»* y el nombre de esa cosa. **Duró exactamente lo que tardó en existir su
+bloqueante**: publicada la proyección, salió de deuda **en una línea** y
+`DEUDA_CONOCIDA` quedó **vacía**. *No hizo falta discutirlo — el bloqueante estaba
+nombrado.*
+
 ### La otra clase, que S109-B separó y por eso es útil
 > **Un `ELSE` SOBRA y se ve mirando ramas; un campo FALTA y no hay rama que
 > mirar.** Cuatro veces la primera; **tres la segunda** (`iva`, `base`,
