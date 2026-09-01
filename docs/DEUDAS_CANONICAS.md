@@ -25706,3 +25706,59 @@ explicaba nada.*
 **El corolario operativo, como CATEGORÍA:** ante un *«no queda / no aparece»*,
 la primera pregunta es **si lo que se ve es el fracaso y no el éxito**. Un
 síntoma invertido no se descarta mirando más fuerte donde apunta.
+
+---
+
+## 🔴 `L-467` — EL RUNTIME ES LA FRONTERA, Y CRUZARLA ES UN DATO QUE SE MIDE — JAMÁS UNA COSTUMBRE POST-GATE
+
+**Firma del founder, S111**, corrigiendo un acto de esta pista: *«se horneó APK
+sin medir si hacía falta»*.
+
+**La regla NO es «después de un gate se hornea».** Un binario y un OTA no son
+dos velocidades de la misma cosa: **son dos lados de una frontera**, y de qué
+lado cae un lote **es un hecho medible**, no una preferencia ni una inercia.
+
+> ### ⇒ Hornear un binario cuando alcanzaba un OTA se paga DOS VECES: el cupo de EAS, y el gate del founder — que pasa a costar desinstalar, descargar y reinstalar en vez de abrir la app que ya tiene.
+
+### EL DISCRIMINADOR, que se corre ANTES de cada corte y cuyo resultado SE DECLARA
+
+1. ¿Cambió alguna **dependencia nativa** (nueva, quitada o de versión)?
+2. ¿Cambiaron **permisos, plugins de config, o algo del app config**?
+3. ¿Cambió el **runtime version**, o el **canal**?
+
+**Los tres en NO ⇒ OTA** sobre el binario que el founder ya tiene instalado.
+**Cualquiera en SÍ ⇒ APK, y se dice CUÁL de los tres lo obligó.**
+
+⚠️ **Un OTA sólo llega a binarios de SU runtime.** Si hay duda, se **mide** el
+runtime del binario instalado contra el del bundle — *no se deduce*.
+
+### SU PRIMERA CORRIDA, con los números, porque es lo que la hace exigible
+
+Sobre la tanda de los diez hallazgos del gate (`4e04b2d5` → `f3c99216`):
+
+- **manifests**: los únicos cambios fueron **dos scripts** en el `package.json`
+  raíz y un paquete nuevo **`@epetplace/mensajeria` — TS puro, `private`, con
+  `typescript` como devDependency**. Cero dependencia de runtime.
+- **app config**: `app.json` · `app.config.ts` · `eas.json` · `android/` ·
+  `ios/` · manifest · plist ⇒ **diff vacío**.
+- **imports nativos agregados**: `expo-router` · `react-native` ·
+  `react-native-safe-area-context` — **los tres ya declarados en ambas apps**.
+  *Los dos sospechosos nombrados por la mesa se disolvieron al medirlos:* ⑧
+  reusó media que ya existía (el clip con cámara está **frenado**, no
+  construido) y ⑩ se curó **en el motor SQL**, no en config de push.
+- **fingerprint de EAS, binario instalado vs. binario en cola**:
+  cliente `adc1e1c96db1` **idéntico** · prestador `0897bfc87b61` **idéntico**.
+
+🟢 **Los tres en NO.** Los dos builds se **cancelaron en cola** y el lote salió
+por OTA: cliente `cab8058f` · prestador `6f0ac534`, runtime **1.0.7**, canal
+`preview`, ancla `f3c99216` con árbol limpio, `verify-ota` **verde en las dos**
+con su rojo producido primero.
+
+**Y el matiz que la vuelve barata de aplicar:** el fingerprint de EAS **ya
+responde las tres preguntas** —hashea deps nativas, plugins y app config— así
+que el discriminador cuesta una lectura de `build:list`. *Lo que faltaba no era
+el instrumento: era acordarse de preguntar antes de cortar.*
+
+⚠️ **Publicar este OTA NO levanta ninguna veda.** Es **entrega al founder para
+su gate**; el «autorizo» de publicar a producción sigue siendo suyo y no se
+deduce de un verde técnico.
