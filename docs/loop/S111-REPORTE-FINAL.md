@@ -45,8 +45,10 @@ como procedencia permanente del animal.
 **LA VIDRIERA SE VE SIN CUENTA**, como §4 firmó — incluidas las caras. *Quien
 llega de una foto en Instagram puede mirar antes de registrarse.*
 
-**LA CONVERSACIÓN ENTRE REFUGIO Y ADOPTANTE TIENE MOTOR**: solicitud, hilo,
-estados y el reloj de los 5 días. El diseño lo hizo D; A lo implementó.
+**LA CONVERSACIÓN ENTRE REFUGIO Y ADOPTANTE TIENE MOTOR Y PUERTA**: solicitud,
+hilo, estados, el reloj de los 5 días, **los dos lectores** —el de la familia y
+el del publicador, cada uno con sus mensajes— y **el contador de «por revisar»
+que puede llegar a cero**. El diseño lo hizo D; A lo implementó.
 
 **SE ABRIERON TRES PUERTAS QUE LA LETRA PEDÍA Y EL MOTOR DECLARABA
 IMPOSIBLES**: la donación con destino (§7), el padrinazgo recurrente (§1) y el
@@ -129,8 +131,9 @@ lista se lee como trabajo que faltó.*
 - **El traspaso de adopción nunca corrió de verdad** — no puede, hasta que
   exista el acta. Su camino feliz está probado **sólo** dentro de un arnés que
   cargó un acta de prueba y la deshizo.
-- **La mensajería tiene motor y ninguna pantalla la consume**: el módulo de
-  lógica y el motor existen, y el hilo no está montado.
+- **La mensajería tiene motor, puerta y ninguna pantalla montada todavía**: el
+  módulo de lógica, el motor y los siete wrappers existen; el hilo se dibuja
+  cuando C lo monte.
 - **La pieza de convivencia de B está entregada y no montada**, y va a seguir
   así hasta que se firme el modelo de datos (decisión 4).
 - **La vidriera anónima nunca se abrió en un navegador sin sesión.**
@@ -145,6 +148,14 @@ que la vidriera anónima no podía mostrar fotos **antes** de cablear la pantall
 entregarla.* D se corrigió a sí mismo dos veces. E depositó un censo que llevaba
 dos sesiones esperándote.
 
+**②bis Y el defecto que yo mismo cometí, porque es el más instructivo:**
+construí el motor de la mensajería **sin sus wrappers y sin el lector del
+hilo**. El motor pasaba sus pruebas, el typecheck estaba en verde, y **las dos
+superficies que le dan sentido no se podían ni empezar**. Lo midió C con un
+control sobre 770 funciones. *Es la lección que el brief de S107 marcó a fuego
+—el contrato de una pieza de motor incluye su wrapper— cobrada por séptima vez,
+y esta vez por mí.*
+
 **② Y el error de conducción que sí hubo, dicho sin maquillar:** ocho
 documentos de una pista estuvieron pusheados, anunciados y **fuera del canon
 durante horas**, porque yo mergeé sólo lo que me pidieron mergear. **Nada se veía
@@ -158,10 +169,10 @@ merge, incluidas las que no pidieron nada.
 
 | qué | valor |
 |---|---|
-| `main` | `cd81beb6`, pusheado y verificado por contenido |
+| `main` | `14962cc4`, pusheado y verificado por contenido |
 | ramas | las **cinco** contenidas en `origin/main` |
-| migraciones | **584** · 6 nuevas de A, **todas con reversa escrita ANTES** |
-| cinturones | **6 verdes**, todos con su rojo producido primero |
+| migraciones | **586** · **8 nuevas de A**, todas con reversa escrita ANTES |
+| cinturones | **8 verdes**, todos con su rojo producido primero |
 | typechecks | **5 en 0** (`api` · `ui` · `mensajeria` · `cliente` · `prestador`) |
 | `verify:diseno` | **VERDE, 62 reglas** |
 | `verify:mensajeria` | **53/53** |
