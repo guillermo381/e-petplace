@@ -746,6 +746,19 @@ export default function CheckoutGuarderia() {
                quedaron atrás **el guard del botón y su voz**. *La pantalla
                estaba lista para pagar por DeUna y se apagaba a sí misma antes
                de dejar intentarlo.*
+
+               ✅ **Y lo que este botón destapa está MEDIDO, no supuesto** (A,
+               al curarlo): las 6 suscripciones de guardería tienen
+               `moneda = USD`, **cero NULL** ⇒ habilitar acá **no** hace
+               aparecer el rebote `desglose_incompleto`.
+
+               ⚠️ **Lo que sí espera del otro lado, y no es de esta pantalla:**
+               la única suscripción viva es de un **AVE**, y
+               `guarderia_mensual.especies_elegibles` es `["perro","gato"]` —
+               *la puerta de la mensualidad no consulta el recorte*. **El cobro
+               va a funcionar igual**, así que quien ejerza esto por acá está
+               probando sobre un dato que no debería existir. *No lo frena esta
+               pantalla: lo frena la puerta que lo dejó entrar.*
                ═══════════════════════════════════════════════════════════ */
             deshabilitado={
               ((esMensual || esPaquete) && medio.elegido === null) ||
