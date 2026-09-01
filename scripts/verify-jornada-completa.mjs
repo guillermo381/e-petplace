@@ -86,34 +86,82 @@
  *     apariciones, comentario incluido: *un control que muta de más da verde
  *     donde el real da verde falso.* Hoy el mutante borra sólo el código.
  *
- * Salidas: 0 verde · 1 rojo · 2 NO CONCLUYENTE (control caído o lector nuevo).
+ * ── 🔴 ENMIENDA ③ — LA MISMA LECCIÓN, EN OTRA PARTE DEL NOMBRE ───────────
+ * Al publicar A `obtenerCitasGuarderiaDelDia`, el gate se puso **ROJO sobre dos
+ * superficies que YA muestran guardería** — con el otro lector. Rojo falso.
+ *
+ * La causa **no** es que midiera «por lector y no por oficio»: agrupaba por
+ * oficio, pero **derivaba el oficio del NOMBRE** (`obtenerCitasXDelDia` → `X`).
+ * Y un mismo oficio tiene **dos raíces distintas**: `Estadias` y `Guarderia`.
+ * ⇒ dos grupos para un solo oficio, y las superficies que lo cubrían por la
+ * primera puerta quedaron acusadas de no cubrir la segunda.
+ *
+ * > **Es la enmienda ① otra vez, corrida de lugar:** primero fue el SUFIJO
+ * > (`…DelDia` vs `…PorRango`), ahora la RAÍZ. *Un gate atado a cómo se escribe
+ * > un nombre mide la convención, no el hecho — y la convención se rompe en
+ * > cada pieza del nombre, una por vez.* Mientras hubo **un lector por oficio**
+ * > la derivación y la verdad coincidían; **la coincidencia era del dato, no
+ * > del diseño**, y se cayó el día que un oficio tuvo dos puertas.
+ *
+ * **Cura: el oficio se DECLARA por lector, y no se adivina.** Y eso no
+ * contradice el «el universo sale del objeto»: la lista de abajo **no es una
+ * lista de oficios** —ésa sí sería el sexto mapa cerrado— sino la
+ * **clasificación de lo que el objeto ya contiene**. El universo lo sigue
+ * poniendo `packages/api`; esta tabla sólo dice qué es cada cosa, y
+ * **nada puede faltar**: un lector sin clasificar **detiene el gate** y una
+ * entrada cuyo lector desapareció, también. *Un oficio no puede perder su
+ * requisito en silencio porque su última puerta se haya renombrado.*
+ *
+ * Salidas: 0 verde · 1 rojo · 2 NO CONCLUYENTE (control caído · lector sin
+ * clasificar · clasificación con un lector que ya no existe).
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const RAIZ = new URL('..', import.meta.url).pathname;
 
-/** Lectores de día que NO son de jornada, con su razón citada. Sacarlos de acá
- *  es una decisión de mesa: cada uno explica por qué no cuenta. */
-const EXENTOS = {
-  Plata: 'suma por FECHA y es agnóstico al oficio — es justo el que SÍ veía la estadía cuando la lista no',
-  Media: 'media de guardería (fotos/clip del día), no la jornada del prestador',
+/** QUÉ OFICIO CONTESTA CADA LECTOR. `null` = no es de jornada, con su razón.
+ *
+ *  🔴 NO ES UNA LISTA DE OFICIOS —eso sería el sexto mapa cerrado— sino la
+ *  CLASIFICACIÓN de lo que el objeto ya contiene: el universo lo sigue
+ *  poniendo `packages/api`, y todo lector que aparezca ahí tiene que estar
+ *  acá o el gate se detiene. Nada puede faltar por olvido; sí puede faltar
+ *  una DECISIÓN, y para eso está la salida 2. */
+const CLASIFICACION = {
+  obtenerCitasPaseoDelDia: 'paseo',
+  obtenerCitasGroomingDelDia: 'grooming',
+  obtenerCitasAdiestramientoDelDia: 'adiestramiento',
+  obtenerCitasVetDelDia: 'veterinaria',
+  /* Las TRES puertas de guardería, y por eso la derivación por nombre no
+     podía funcionar: dos raíces (`Estadias`, `Guarderia`) para un oficio. */
+  obtenerCitasGuarderiaDelDia: 'guarderia',
+  obtenerEstadiasDelDia: 'guarderia',
+  obtenerEstadiasPorRango: 'guarderia',
+  obtenerPlataDelDia: null,
+  obtenerMediaDelDia: null,
+};
+
+/** Por qué los `null` no cuentan. Se escribe aparte para que un exento sin
+ *  razón sea imposible de agregar distraídamente. */
+const RAZON_EXENTO = {
+  obtenerPlataDelDia: 'suma por FECHA y es agnóstico al oficio — es justo el que SÍ veía la estadía cuando la lista no',
+  obtenerMediaDelDia: 'media de guardería (fotos/clip del día), no la jornada del prestador',
 };
 
 /** Superficies rojas conocidas, con su bloqueante. NO son exenciones: son deuda
  *  con nombre. El gate también se pone rojo si una de éstas queda CURADA y sigue
  *  en la lista — un baseline que sólo baja tiene que poder notar que bajó. */
-const DEUDA_CONOCIDA = {
-  'apps/prestador/src/app/historico.tsx':
-    'S109-D · «Tu histórico» enumera cuatro y una estadía es trabajo hecho. NO se cura con el lector ' +
-    'por rango, y la razón se midió al intentarlo: (1) TECHO — el histórico ofrece «90 días» y un ' +
-    '«ver más» de 30 en 30 SIN TOPE, y `obtenerEstadiasPorRango` rebota sobre 62 días; (2) FORMA — ' +
-    'su lista es de `CitaAgendaPaseo` y una estadía no trae hora, tipo_servicio, duración, precio, ' +
-    'empleado ni atención: montarla ahí obliga a FABRICAR nueve campos, que es la fila verosímil-falsa ' +
-    'de L-139. Lo que la destraba es UNA cosa: que A publique la proyección de guardería con la MISMA ' +
-    'forma que sus cuatro hermanas (la cita existe — la estadía carga su `cita_id`). Con eso el ' +
-    'histórico es una línea y el techo desaparece con el contrato de las hermanas.',
-};
+/** Superficies rojas conocidas, con su bloqueante. NO son exenciones: son deuda
+ *  con nombre. El gate también se pone rojo si una de éstas queda CURADA y sigue
+ *  en la lista — un baseline que sólo baja tiene que poder notar que bajó.
+ *
+ *  ☠️ S109-D · VACÍA, y su única habitante murió por la puerta correcta:
+ *  `historico.tsx` entró acá porque su cura exigía FABRICAR nueve campos
+ *  (`L-139`), no porque nadie hubiera querido hacerla. A publicó la proyección
+ *  de guardería con la forma de sus hermanas y la deuda se pagó en una línea.
+ *  *Una deuda declarada con su bloqueante nombrado es una deuda que alguien
+ *  puede destrabar; una declarada como «pendiente» espera para siempre.* */
+const DEUDA_CONOCIDA = {};
 
 // ── 1 · el universo, del objeto ──────────────────────────────────────────
 const apiSrc = [];
@@ -125,29 +173,46 @@ const apiSrc = [];
   }
 })(join(RAIZ, 'packages/api/src'));
 
-/** oficio ← nombre del lector: `obtenerCitasPaseoDelDia` → `Paseo`,
- *  `obtenerEstadiasPorRango` → `Estadias`. El sufijo (día o rango) se descarta
- *  A PROPÓSITO: es la FIRMA del lector, no el oficio que contesta. */
-const oficioDe = (n) => n.replace(/^obtener(Citas)?/, '').replace(/(DelDia|PorRango)$/, '');
-
-/** oficio → lectores que lo contestan. Cualquiera de ellos lo satisface. */
-const porOficio = new Map();
+const lectores = new Set();
 for (const f of apiSrc)
-  for (const m of readFileSync(f, 'utf8').matchAll(/export\s+async\s+function\s+(obtener\w*(?:DelDia|PorRango))\b/g)) {
-    const o = oficioDe(m[1]);
-    porOficio.set(o, [...(porOficio.get(o) ?? []), m[1]]);
-  }
+  for (const m of readFileSync(f, 'utf8').matchAll(/export\s+async\s+function\s+(obtener\w*(?:DelDia|PorRango))\b/g))
+    lectores.add(m[1]);
 
-const lectores = new Set([...porOficio.values()].flat());
-const JORNADA = [...porOficio.keys()].filter((o) => !(o in EXENTOS)).sort();
+const sinClasificar = [...lectores].filter((l) => !(l in CLASIFICACION));
+const fantasmas = Object.keys(CLASIFICACION).filter((l) => !lectores.has(l));
 
-console.log(`verify:jornada-completa — ${lectores.size} lector(es) de jornada en packages/api`);
-for (const [o, r] of Object.entries(EXENTOS))
-  console.log(porOficio.has(o) ? `  ⏸  ${o} — EXENTO: ${r}` : `  ⚠️  ${o} — exento declarado que YA NO EXISTE (limpiar)`);
+/** oficio → lectores que lo contestan. CUALQUIERA de ellos lo satisface: lo que
+ *  se exige es que la superficie pregunte por el oficio, no con qué firma. */
+const porOficio = new Map();
+for (const l of lectores) {
+  const o = CLASIFICACION[l];
+  if (o) porOficio.set(o, [...(porOficio.get(o) ?? []), l]);
+}
+const JORNADA = [...porOficio.keys()].sort();
+
+console.log(`verify:jornada-completa — ${lectores.size} lector(es) de día en packages/api`);
+for (const [l, r] of Object.entries(RAZON_EXENTO)) if (lectores.has(l)) console.log(`  ⏸  ${l} — NO es de jornada: ${r}`);
 for (const o of JORNADA) console.log(`  · ${o} ← ${porOficio.get(o).join(' | ')}`);
 
 if (JORNADA.length < 2) {
-  console.error('\n⚠️  NO CONCLUYENTE — menos de dos lectores de jornada: el parser no está viendo el objeto.');
+  console.error('\n⚠️  NO CONCLUYENTE — menos de dos oficios: el parser no está viendo el objeto.');
+  process.exit(2);
+}
+if (sinClasificar.length) {
+  console.error(
+    `\n⚠️  NO CONCLUYENTE — lector(es) de día SIN CLASIFICAR: ${sinClasificar.join(', ')}.\n` +
+      `    Decidí y agregalo a CLASIFICACION: ¿es un OFICIO NUEVO, otra PUERTA de uno que ya está,\n` +
+      `    o no es de jornada (\`null\` + su razón)? El gate no lo adivina — adivinarlo fue el defecto\n` +
+      `    que la enmienda ③ vino a curar.`,
+  );
+  process.exit(2);
+}
+if (fantasmas.length) {
+  console.error(
+    `\n⚠️  NO CONCLUYENTE — clasificación con lector(es) que YA NO EXISTEN: ${fantasmas.join(', ')}.\n` +
+      `    Se detiene y no se limpia solo: si ése era la ÚLTIMA puerta de su oficio, el oficio\n` +
+      `    desaparecería del universo y NADIE volvería a exigirlo. Un requisito no se pierde en silencio.`,
+  );
   process.exit(2);
 }
 
@@ -173,19 +238,23 @@ function evaluar(txt) {
 // ── 3 · control positivo (mutante) y negativo, sobre el HOY ──────────────
 const HOY = 'apps/prestador/src/app/(tabs)/index.tsx';
 const txtHoy = readFileSync(join(RAIZ, HOY), 'utf8');
-const GUARDERIA = 'Estadias';
+const GUARDERIA = 'guarderia';
 /* 🔴 El mutante borra el lector SÓLO DEL CÓDIGO y deja los comentarios
    intactos: si además borrara la prosa, un gate que cuenta comentarios daría
    rojo igual y el control lo absolvería. *Un control que muta de más no
    discrimina.* Fue exactamente lo que pasó con la enmienda ②. */
-const mutante = codigoDe(txtHoy).replace(/\bobtenerEstadias(DelDia|PorRango)\b/g, '__borrado_por_el_control__');
+const puertasGuarderia = Object.keys(CLASIFICACION).filter((l) => CLASIFICACION[l] === GUARDERIA);
+const mutante = puertasGuarderia.reduce(
+  (t, l) => t.replace(new RegExp(`\\b${l}\\b`, 'g'), '__borrado_por_el_control__'),
+  codigoDe(txtHoy),
+);
 const faltaEnMutante = evaluar(mutante);
 const faltaEnReal = evaluar(txtHoy);
 
 if (!faltaEnMutante?.includes(GUARDERIA)) {
   console.error(
-    `\n⚠️  NO CONCLUYENTE — el control positivo NO dio rojo: con ${GUARDERIA} borrado del HOY, la regla ` +
-      `no lo acusó. El instrumento no está midiendo lo que dice medir.`,
+    `\n⚠️  NO CONCLUYENTE — el control positivo NO dio rojo: con las ${puertasGuarderia.length} puertas de ` +
+      `«${GUARDERIA}» borradas del HOY, la regla no lo acusó. El instrumento no está midiendo lo que dice medir.`,
   );
   process.exit(2);
 }
