@@ -874,12 +874,25 @@ export default function Cuenta() {
               NO-nulo (el id de assets/app.manifest — el founder leyó
               "update 6aab7106" corriendo el bundle embebido). El
               discriminador es isEmbeddedLaunch, no la nulidad (L-160). */}
+            {/* 🔴 S111-A (firma founder) · DICE **`updateId`** Y NO `update`, y la
+                palabra es toda la cura. El 1-sep el founder leyó `01a05e9d` y lo
+                reportó como **group id**; era el `updateId` del group anterior.
+                *Dos identificadores parecidos donde uno se lee como el otro
+                costó una vuelta entera del gate* — `D-785` otra vez.
+
+                ⚠️ **EL GROUP NO SE PUEDE MOSTRAR, y se declara para que nadie
+                lo vuelva a intentar:** medido contra `expo-updates` — expone
+                `updateId · channel · runtimeVersion · createdAt ·
+                isEmbeddedLaunch · manifest` y **NADA MÁS**. El group id vive en
+                EAS y **no viaja al cliente**. Nombrar bien el que sí está es lo
+                único construible, y resuelve el caso real: quien lea esto ya no
+                puede confundirlo con un group. ── */}
           <Texto variante="dato">
             {/* S89 orden 7: EL SELLO — id corto + canal + FECHA del update.
                 Verificar un bundle = leer este código; ningún diagnóstico de
                 OTA vuelve a empezar por «¿qué bundle corre?». */}
             {!Updates.isEmbeddedLaunch && Updates.updateId !== null
-              ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}${
+              ? `updateId ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}${
                   Updates.createdAt
                     ? ` · ${String(Updates.createdAt.getDate()).padStart(2, '0')}/${String(
                         Updates.createdAt.getMonth() + 1,
