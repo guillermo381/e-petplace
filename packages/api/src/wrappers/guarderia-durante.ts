@@ -47,6 +47,9 @@ const MENSAJES = {
   motivo_invalido:          'Ese motivo no está en la lista.',
   motivo_otro_exige_detalle:'Si el motivo es «otro», hay que contar qué pasó.',
   acto_invalido:            'Ese paso del día no existe.',
+  /* Los dos del carnet: el motor habla en vez de dejar salir el CHECK crudo. */
+  carnet_requerido_en_recogida:      'Falta decir si el carnet está en orden.',
+  carnet_no_se_pregunta_en_devolucion: 'El carnet se verifica al recibir, no al devolver.',
   falta_hora_de_la_puerta:  'Falta la hora en que ocurrió.',
   /* Un reloj adelantado no puede sellar un acto en el futuro. */
   hora_de_la_puerta_en_el_futuro: 'La hora que llegó es del futuro. Revisa la hora del teléfono.',
@@ -212,14 +215,31 @@ export async function marcarABordo(
   return leerActoUnico(data);
 }
 
+/**
+ * El payload del acta de DEVOLUCIÓN. 🔴 **No lleva `carnetVerificado`, y el
+ * tipo lo hace INEXPRESABLE** (`?: never`): el carnet se verifica **al
+ * recibir**, no al devolver (criterio legal §4, y hallazgo ⑤ del gate).
+ *
+ * *Sacada la pregunta no queda valor honesto que mandar: `false` afirma que se
+ * miró y no estaba en orden; `true` miente. Las dos escriben un hecho que nadie
+ * verificó, en el instrumento que existe para un litigio.*
+ *
+ * ⚠️ Y por eso el campo se prohíbe en vez de ignorarse: **una prop que se
+ * acepta y se ignora se lee como cableado** (`L-460`). Si esto lo aceptara y lo
+ * tirara, la pantalla lo seguiría mandando convencida de que viaja.
+ * El motor dice lo mismo con un CHECK — **las dos capas, no una.**
+ */
+export type PayloadActaDevolucion = Omit<PayloadActa, 'carnetVerificado'> & {
+  carnetVerificado?: never;
+};
+
 /** El animal vuelve a su casa. Levanta el acta ESPEJO de devolución y mueve
- *  `retorno_en_curso → entregada`. */
+ *  `retorno_en_curso → entregada`. **Sin carnet** — ver `PayloadActaDevolucion`. */
 export async function marcarEntregada(
-  estadiaId: string, acta: PayloadActa,
+  estadiaId: string, acta: PayloadActaDevolucion,
 ): Promise<ResultadoWrapper<ResultadoActoUnico, CodigoErrorGuarderiaDurante>> {
   const { data, error } = await getClient().rpc('marcar_entregada_guarderia', {
     p_estadia_id: estadiaId,
-    p_carnet_verificado: acta.carnetVerificado,
     p_ocurrido_en: acta.ocurridoEn,
     p_objetos: acta.objetos ?? undefined,
     p_observaciones: acta.observaciones ?? undefined,

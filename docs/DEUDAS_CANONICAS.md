@@ -25613,3 +25613,32 @@ join roto estaba en la misma tabla de resultados, en la columna de al lado.*
 quien lo lee mira primero si alguno es constante. `L-461` dijo que un buscador
 puede devolver cero en silencio; ésta dice que **un comparador puede devolver
 `true` en silencio**, y el segundo es más difícil de ver.
+
+---
+
+## 🟢 `D-996` — LA RUTA DEL VIAJE DE GUARDERÍA ES UN PRODUCTO PROPIO, NO UNA COLUMNA
+
+**Firma del founder, S111**, después de su primera pasada en aparato.
+
+**Lo que sería:** que el motor **proponga la ruta** del viaje —geocodificar las
+direcciones de recogida, optimizar el orden, y **recalcular** cuando algo se
+mueve en el día—.
+
+> ### Producto propio, sesión propia. **No se construye acá.**
+
+**LO QUE RIGE EN v1, y es la firma:** la lista del día **ordenada por franja** y
+**reordenable a mano por el cuidador**. *El que maneja sabe cosas que ninguna
+optimización sabe: dónde se estaciona, qué calle está cortada, qué familia
+tarda.*
+
+**Por qué queda 🟢 y no 🟡:** no es deuda de trabajo ni un hueco que alguien
+tenga que tapar — **es alcance que la mesa decidió dejar afuera con su
+reemplazo puesto**. *Una ruta optimizada es un producto en sí mismo, y el brief
+de S107 ya lo había anticipado con esas palabras cuando firmó «v1 sin ruta».*
+
+⚠️ **Y lo que esta ficha existe para evitar:** que alguien lea «el motor no
+ordena nada» como un pendiente y le agregue una columna de orden calculado. **El
+orden lo pone el cuidador**; el motor sólo tiene que dejar que lo mueva.
+
+**Disparo:** decisión del founder de abrir esa sesión. **Nada la bloquea y nada
+depende de ella.**

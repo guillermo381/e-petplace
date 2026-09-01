@@ -2102,6 +2102,7 @@ export type Database = {
           hasta: string
           levanta_acta: string | null
           orden: number
+          tipo_notificacion: string | null
         }
         Insert: {
           acto: string
@@ -2112,6 +2113,7 @@ export type Database = {
           hasta: string
           levanta_acta?: string | null
           orden: number
+          tipo_notificacion?: string | null
         }
         Update: {
           acto?: string
@@ -2122,6 +2124,7 @@ export type Database = {
           hasta?: string
           levanta_acta?: string | null
           orden?: number
+          tipo_notificacion?: string | null
         }
         Relationships: [
           {
@@ -10859,7 +10862,7 @@ export type Database = {
       }
       guarderia_actas: {
         Row: {
-          carnet_verificado: boolean
+          carnet_verificado: boolean | null
           cerrada_en: string
           clave_idempotencia: string | null
           conformidad: string
@@ -10874,7 +10877,7 @@ export type Database = {
           reserva_texto: string | null
         }
         Insert: {
-          carnet_verificado: boolean
+          carnet_verificado?: boolean | null
           cerrada_en: string
           clave_idempotencia?: string | null
           conformidad?: string
@@ -10889,7 +10892,7 @@ export type Database = {
           reserva_texto?: string | null
         }
         Update: {
-          carnet_verificado?: boolean
+          carnet_verificado?: boolean | null
           cerrada_en?: string
           clave_idempotencia?: string | null
           conformidad?: string
@@ -23186,7 +23189,7 @@ export type Database = {
       }
       levantar_acta_guarderia: {
         Args: {
-          p_carnet_verificado: boolean
+          p_carnet_verificado?: boolean
           p_cerrada_en?: string
           p_clave_idempotencia?: string
           p_direccion: string
@@ -23240,7 +23243,6 @@ export type Database = {
       }
       marcar_entregada_guarderia: {
         Args: {
-          p_carnet_verificado: boolean
           p_clave_idempotencia?: string
           p_estadia_id: string
           p_objetos?: string
