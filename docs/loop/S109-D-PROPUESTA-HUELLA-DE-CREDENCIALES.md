@@ -22,14 +22,43 @@ por hash (sin exponer ningún valor):
 | `GOOGLE_MAPS_API_KEY` | 3 | 1 | ✓ |
 | **`EXPO_PUBLIC_PAGOS_ALTA_URL`** | **3** | **2** | 🔴 **DESINCRONIZADA** |
 
-> ### 🔴 `EXPO_PUBLIC_PAGOS_ALTA_URL` ya tiene DOS valores distintos hoy.
-> `e-petplace-s101-d` apunta a un lugar; el worktree principal y `s107-a`, a
-> otro. **Nadie lo sabía, y es la URL del alta de pagos.**
+> ### ⚠️ CORRECCIÓN DE MI PROPIA ALARMA (medido después, 31-ago)
+>
+> Llamé **«desincronizada»** a `EXPO_PUBLIC_PAGOS_ALTA_URL` y **no lo está**.
+> Medido con los valores a la vista:
+>
+> | worktree | valor | fecha |
+> |---|---|---|
+> | `e-petplace` · `s107-a` | `https://epetplace-pagos-stg.vercel.app` | 19-ago · 28-ago |
+> | `s101-d` | `http://127.0.0.1:8899/index.html` | 21-ago |
+>
+> **No son dos versiones de la misma credencial: son producción y un BANCO
+> LOCAL**, puesto a propósito por la pista de pagos de S101 para probar la
+> página del alta sin desplegar.
+>
+> ✅ **Y lo que decide el riesgo real:** el **secret de EAS** —el que llevan los
+> binarios de nube, o sea lo que usa la familia— tiene
+> `https://epetplace-pagos-stg.vercel.app`, y **responde HTTP 200**. *El arco de
+> pagos está sano; lo que hay es un worktree de una pista cerrada con su banco
+> adentro.*
+>
+> **Mi hash no distinguía «vieja» de «deliberadamente distinta», y por eso
+> sonó más fuerte de lo que el hecho merecía.**
 
-⇒ **La propuesta no previene un problema futuro: destapa uno que ya existe.**
-*Y el modo en que se destapó vale por sí solo — apareció censando la key de
-mapas, que estaba sincronizada. La que estaba rota era la que nadie estaba
-mirando.*
+## ①bis · 🔴 Y ESO LE ENCONTRÓ UN DEFECTO A ESTA PROPUESTA, ANTES DE CONSTRUIRLA
+
+**El guard que propuse habría marcado ese worktree en ROJO** — sobre un valor
+**correcto y puesto a propósito**. Es exactamente el modo de falla que este mismo
+documento dice evitar: *un guard que grita donde no aplica enseña a ignorarlo.*
+
+⇒ **Condición de diseño que sale de acá, y que pido firmar con lo demás:** el
+mecanismo tiene que admitir **valores locales declarados** — una marca en el
+propio `.env.local` (`# banco: <razón>`) o una lista de variables exentas por
+worktree. **Sin eso, el guard nace enseñando a ignorarse.**
+
+*El censo por hash sirvió igual, y esto es lo que de verdad probó: **detectó una
+diferencia real y no supo interpretarla**. Un instrumento que compara valores
+sin saber qué significan encuentra desacuerdos, no defectos.*
 
 ---
 
@@ -105,6 +134,9 @@ consecuencia; **el rastro es el valor.**
 1. **Si va** — y si va con huella declarada (②) o con la variante barata: sólo
    comparar copias entre sí y avisar que difieren, **sin fuente de verdad**.
 2. **Dónde vive el archivo de huellas** — es territorio de A.
-3. 🔴 **Y lo urgente, que no espera al mecanismo: `EXPO_PUBLIC_PAGOS_ALTA_URL`
-   está desincronizada HOY.** Alguien tiene que decidir cuál de los dos valores
-   es el bueno. *No lo toco: es del arco de pagos.*
+3. ☠️ ~~Lo urgente de `EXPO_PUBLIC_PAGOS_ALTA_URL`~~ — **CERRADO al medirlo**:
+   no hay nada que firmar. El secret de EAS tiene la de Vercel, responde 200, y
+   los binarios de nube llevan la correcta. Lo otro es el banco local de una
+   pista cerrada. **Queda como higiene, no como riesgo.**
+4. 🔴 **La condición de ①bis:** que el mecanismo admita valores locales
+   declarados. *Sin eso nace enseñando a ignorarse.*
