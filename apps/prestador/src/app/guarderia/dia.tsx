@@ -72,11 +72,15 @@ import { GateRoto } from '@/components/gate-roto';
 import { SeccionDireccion } from '@/components/seccion-direccion';
 import { HojaActaGuarderia } from '@/components/hoja-acta-guarderia';
 import { HojaNoEstaba } from '@/components/hoja-no-estaba';
+import { HojaMediaGuarderia } from '@/components/hoja-media-guarderia';
 import { horaCorta } from '@/lib/ventas-formato';
 import type { DireccionActa } from '@/lib/cola-actas';
 import {
+  aplicarOrden,
   borrarViaje,
+  guardarOrden,
   guardarViaje,
+  leerOrden,
   leerViaje,
   type ViajeAbierto,
 } from '@/lib/viaje-guarderia';
@@ -146,6 +150,7 @@ export default function DiaGuarderia() {
   const [viaje, setViaje] = useState<ViajeAbierto | null>(null);
   /** La estadía cuyo «no estaba» se está anotando. `null` = no se monta. */
   const [noEstaba, setNoEstaba] = useState<EstadiaDelDia | null>(null);
+  const [mediaAbierta, setMediaAbierta] = useState(false);
   const [enVuelo, setEnVuelo] = useState(false);
 
   /**
@@ -198,12 +203,15 @@ export default function DiaGuarderia() {
          pantalla sigue mostrando el roster y sólo pierde los actos — un
          catálogo caído no puede dejar al cuidador sin saber a quién buscar. */
       const maq = await obtenerMaquinaEstadia();
+      /* ⑨ · El orden que el cuidador dejó hoy. Lo guardado manda; lo nuevo
+         cae al final por su orden natural. */
+      const orden = await leerOrden(hoyLocal());
       if (!vigente) return;
       setViaje(v);
       setEstado({
         fase: 'listo',
         prestadorId: p.data.id,
-        estadias: r.data,
+        estadias: aplicarOrden(r.data, orden),
         caras,
         maquina: maq.ok ? maq.data : null,
       });
@@ -313,6 +321,31 @@ export default function DiaGuarderia() {
   };
 
   const relanzar = () => setIntento((n) => n + 1);
+
+  /**
+   * ⑨ · MOVER UNA TARJETA. **Ese orden es el viaje.**
+   *
+   * ⚠️ **Es subir/bajar y no arrastrar, y lo declaro porque mi recorrido decía
+   * «con el dedo»:** el arrastre pide gesto + reanimated sobre una lista que ya
+   * lleva tarjetas con acciones adentro, y **dos gestos en la misma superficie
+   * pelean** —el que arrastra y el que toca un botón—. *Prefiero un control que
+   * se entiende sin explicación a un gesto que a veces mueve y a veces dispara
+   * otra cosa.* Si el founder quiere arrastre, es su firma y otra tanda.
+   *
+   * 🔴 **El orden se guarda ENTERO, no la posición del que se movió**: guardar
+   * «Luna está tercera» se rompe con la primera cancelación. La lista completa
+   * de ids sobrevive a que entren y salgan animales.
+   */
+  const mover = (estadiaId: string, delta: -1 | 1) => {
+    if (listo === null) return;
+    const lista = [...listo.estadias];
+    const i = lista.findIndex((e) => e.estadiaId === estadiaId);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= lista.length) return;
+    [lista[i], lista[j]] = [lista[j], lista[i]];
+    setEstado({ ...listo, estadias: lista });
+    void guardarOrden(hoyLocal(), lista.map((e) => e.estadiaId));
+  };
 
   /** La hora del TOQUE — la de la puerta. La del servidor existe para auditar
    *  y no se muestra: con cola offline sería la hora de la señal. */
@@ -541,6 +574,22 @@ export default function DiaGuarderia() {
               />
             ) : null}
 
+            {/* ⑧ · EL DURANTE, EN LAS INSTALACIONES. Sólo con animales
+                ADENTRO: §5 dice que **las fotos de estadía se toman en las
+                instalaciones**, así que ofrecerlo durante un viaje invitaría a
+                sacarlas en la calle o en la puerta de una casa — justo donde la
+                regla del primer plano existe para proteger la fachada.
+
+                Es `apoyada` y no `primario`: el CTA del día es salir, y una
+                superficie con dos acentos no tiene ninguno (Ley 5). */}
+            {viaje === null && adentro.length > 0 ? (
+              <Boton
+                variante="apoyada"
+                etiqueta={t('diaGuarderia.sacarFoto')}
+                onPress={() => setMediaAbierta(true)}
+              />
+            ) : null}
+
             {estado.estadias.filter((e) => participanDelViaje(e.estado)).map((e) => {
               const dir = comoDireccion(e.direccion);
               const foto = e.mascotaFotoUrl === null ? null : (estado.caras.get(e.mascotaFotoUrl) ?? null);
@@ -638,6 +687,27 @@ export default function DiaGuarderia() {
                         exactamente lo que el trinquete existe para evitar.* El
                         choque entre 22c y R47 está declarado en el propio lint;
                         acá se resuelve a favor del que mide. */}
+                    {/* ⑨ · Mover, sólo ANTES de salir: con el viaje abierto el
+                        orden ya está en la calle y reordenarlo no cambia nada
+                        de lo que pasó. *Un control que no tiene efecto es peor
+                        que no tenerlo.* */}
+                    {viaje === null && estado.estadias.length > 1 ? (
+                      <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                        <Boton
+                          variante="ghost"
+                          tamaño="sm"
+                          etiqueta={t('diaGuarderia.subir')}
+                          onPress={() => mover(e.estadiaId, -1)}
+                        />
+                        <Boton
+                          variante="ghost"
+                          tamaño="sm"
+                          etiqueta={t('diaGuarderia.bajar')}
+                          onPress={() => mover(e.estadiaId, 1)}
+                        />
+                      </View>
+                    ) : null}
+
                     {corresponde === null ? null : (
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}
@@ -701,6 +771,17 @@ export default function DiaGuarderia() {
           que levanta el acta y mueve el estado en una transacción— se inyecta
           acá, **en esta línea y en ninguna otra**, y la etiqueta de abajo pasa
           a prometer lo que el acto entonces sí hace. */}
+      {estado.fase === 'listo' ? (
+        <HojaMediaGuarderia
+          visible={mediaAbierta}
+          prestadorId={estado.prestadorId}
+          fecha={hoyLocal()}
+          /* El universo de etiquetado son los que HOY están adentro. */
+          presentes={adentro}
+          onCerrar={() => setMediaAbierta(false)}
+        />
+      ) : null}
+
       {/* «No estaba» — se monta con el catálogo del motor. Sin catálogo no se
           ofrece: un selector de motivos inventado acá sería el vocabulario del
           motor escrito a mano, y el CHECK lo rebotaría. */}

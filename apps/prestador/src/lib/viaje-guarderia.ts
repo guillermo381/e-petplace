@@ -114,3 +114,74 @@ export async function borrarViaje(): Promise<void> {
     await a.setItem(CLAVE, '');
   });
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ⑨ · EL ORDEN DEL DÍA — el que el cuidador acomoda con la mano
+//
+// **Vive acá, local, junto al viaje**, y por la misma razón: *el orden es de
+// ESTE teléfono y ESTE día.* No es un dato del negocio ni algo que otra persona
+// del refugio deba heredar — y perderlo cuesta un gesto, no un dato.
+//
+// 🔴 **Guarda IDS, no posiciones.** Con posiciones, una reserva nueva o una
+// cancelación corren todo y el orden guardado apunta a otra cosa. Con ids, lo
+// que ya no está **se ignora solo** y lo nuevo **cae al final por su orden
+// natural**, que es lo que el recorrido pide: *«lo nuevo entra donde le toca y
+// el orden que yo moví se respeta».*
+//
+// ⚠️ **Ningún motor de ruteo.** No se calcula nada: se recuerda lo que una
+// persona decidió. *Una ruta optimizada es un producto en sí mismo* (firma del
+// founder, «v1 sin ruta»).
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CLAVE_ORDEN = 'epp.orden_dia_guarderia.v1';
+
+interface OrdenGuardado {
+  fecha: string;
+  ids: string[];
+}
+
+/** El orden que el cuidador dejó para HOY, o `null`. Un orden de ayer no se
+ *  sigue hoy — misma regla del día que el viaje. */
+export async function leerOrden(hoy: string): Promise<string[] | null> {
+  try {
+    const a = almacenActual();
+    if (a === null) return null;
+    const txt = await a.getItem(CLAVE_ORDEN);
+    if (txt === null || txt === '') return null;
+    const dato: unknown = JSON.parse(txt);
+    if (typeof dato !== 'object' || dato === null) return null;
+    const r = dato as OrdenGuardado;
+    if (r.fecha !== hoy || !Array.isArray(r.ids)) return null;
+    return r.ids.filter((x): x is string => typeof x === 'string');
+  } catch (e) {
+    console.error(`[viaje-guarderia] ORDEN ilegible · ${String(e)}`);
+    return null;
+  }
+}
+
+export async function guardarOrden(hoy: string, ids: string[]): Promise<void> {
+  const a = almacenActual();
+  if (a === null) return;
+  await enFila(async () => {
+    await a.setItem(CLAVE_ORDEN, JSON.stringify({ fecha: hoy, ids }));
+  });
+}
+
+/**
+ * Aplica el orden guardado a la lista que vino del motor.
+ *
+ * **Lo guardado manda; lo que no está en él conserva su orden natural, al
+ * final.** *Así una reserva que entró a mitad del día no se cuela arriba ni
+ * desordena lo que el cuidador ya acomodó.*
+ */
+export function aplicarOrden<T extends { estadiaId: string }>(
+  lista: T[],
+  orden: string[] | null,
+): T[] {
+  if (orden === null || orden.length === 0) return lista;
+  const pos = new Map(orden.map((id, i) => [id, i]));
+  const conocidas = lista.filter((x) => pos.has(x.estadiaId));
+  const nuevas = lista.filter((x) => !pos.has(x.estadiaId));
+  conocidas.sort((a, b) => (pos.get(a.estadiaId) ?? 0) - (pos.get(b.estadiaId) ?? 0));
+  return [...conocidas, ...nuevas];
+}
