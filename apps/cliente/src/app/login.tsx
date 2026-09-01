@@ -35,6 +35,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import {
   Boton,
+  Separador,
   Campo,
   Encabezado,
   Entrada,
@@ -280,6 +281,33 @@ export default function Login() {
               >
                 {t('bienvenida.legales')}
               </Text>
+
+              {/* ═══ LA PUERTA 2 DE §4 · VER SIN CUENTA ════════════════════
+                  §4, literal: *«Sin cuenta: desde el login hay una puerta a ver
+                  mascotas en adopción.»* Es el camino de quien llegó por una
+                  foto y **todavía no quiere una cuenta** — al que ya se
+                  registró no hay que convencerlo.
+
+                  🔴 **Va DEBAJO de los legales y separada, no como cuarto
+                  botón:** las tres de arriba son acciones de CUENTA (entrar,
+                  entrar con Google, recuperar) y ésta no lo es. *Apilada con
+                  ellas se leería como una cuarta forma de identificarse, que es
+                  lo contrario de lo que ofrece.*
+
+                  ✅ **Y se cableó recién cuando las CARAS cargan.** La función
+                  aceptaba `anon` desde antes, pero el bucket seguía cerrado: la
+                  vidriera habría compilado y mostrado **una grilla de huellas
+                  grises**, que es exactamente el «inventario» que §4 prohíbe.
+                  *Entregada y montada son dos hechos distintos, y acá la
+                  diferencia era la promesa entera.* La policy de A la resolvió
+                  mirando la MASCOTA y no la carpeta. */}
+              <Separador />
+              <Boton
+                variante="ghost"
+                etiqueta={t('login.verAdopcion')}
+                bloque
+                onPress={() => router.push('/adoptar')}
+              />
             </View>
           </Entrada>
         </ScrollView>

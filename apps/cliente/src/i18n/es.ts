@@ -43,6 +43,7 @@ export const clienteEs = {
     probarDeNuevo: 'Probar de nuevo',
   },
   login: {
+    verAdopcion: 'Ver mascotas en adopción',
     olvide: '¿Olvidaste tu contraseña?',
     titulo: 'Iniciar sesión',
     emailLabel: 'Email',

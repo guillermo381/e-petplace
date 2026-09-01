@@ -39,6 +39,7 @@ export const clienteEn = {
     probarDeNuevo: 'Try again',
   },
   login: {
+    verAdopcion: 'See pets up for adoption',
     olvide: 'Forgot your password?',
     titulo: 'Sign in',
     emailLabel: 'Email',

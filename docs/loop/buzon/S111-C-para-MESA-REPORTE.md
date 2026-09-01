@@ -69,3 +69,73 @@ elevarlo**: quien lo eleva describe su mitad, no el hueco.*
 Y su gemela chica, cobrada dos veces el mismo día: **un censo por texto lee prosa
 como si fuera código.** `mascotas_count` daba 1 consumidor y **ese 1 era un
 comentario que había escrito yo media hora antes.**
+
+
+---
+
+# ⏩ ACTUALIZACIÓN AL CIERRE — después de que el motor de adopción llegó
+
+## ✅ CONSTRUIDO (se suma a lo de arriba)
+
+**La vidriera vive.** `/adoptar` era un «próximamente honesto» de S73 y **el
+motor lo volvió falso el mismo día**; se retiró en el acto que lo volvió falso,
+con sus dos claves. Alcanzable desde el Hogar, medido. Un solo filtro —especie—
+porque es lo único que el contrato acepta.
+
+## 🔴 LA PUERTA SIN CUENTA: ABIERTA A MEDIAS, Y POR ESO NO SE CABLEÓ
+
+A abrió `obtener_adoptables` a `anon` (tomó mi voto). **Pero las fotos no.**
+
+```
+bucket 'mascotas'   → public = false
+única policy SELECT → "mascotas_select_dueno_o_acceso" ... TO AUTHENTICATED
+```
+
+`resolverUrlsFotos` firma con `createSignedUrl`, que necesita ese SELECT ⇒ **un
+anónimo no obtiene ninguna firma y la vidriera sería una grilla de huellas
+grises con nombres.**
+
+**No se abrió la puerta, y el motivo es de producto:** §4 dice *«se presentan
+vidas, no inventario»*, y una grilla de siluetas **es** inventario. *Quien llega
+de una foto en Instagram y encuentra doce huellas se va peor que si nunca
+hubiéramos ofrecido la puerta.* La firma de esa pantalla es la cara.
+
+⚠️ **Y la cura obvia sería un agujero:** ese bucket tiene las fotos de **todas**
+las mascotas, no sólo las publicadas. Voto una policy de `anon` **acotada a
+mascotas con publicación viva** — mismo predicado que ya usa la función, para
+que las dos no puedan divergir. **Está con A.**
+
+## 🅿️ ESTACIONADO — ahora son tres
+
+1. **Qué crea «quiero adoptar»** (voto (a), con el 24).
+2. **El orden de la vidriera** — §4 pide «Llevan más tiempo esperando» y dice
+   explícito que **no es antigüedad pura**. El criterio vive en el servidor o no
+   vive: ordenar por `creadaEn` en la pantalla es justo lo que la letra prohíbe.
+3. **El modelo de convivencia** — bloquea a B. `Convivencia` está **entregada y
+   no montada**, y sigue así hasta que se firme cuántas dimensiones tiene y qué
+   significa «no se sabe». *`paseo_social_ok` no sirve: es un booleano de otra
+   cosa y no tiene el tercer estado.*
+
+## 🔴 FRENADO — el portal del publicador y el arco del cliente
+
+Medido con control (766 `CREATE FUNCTION`): **cero funciones de solicitud,
+padrinazgo o donación**. El Home del publicador es *«una sola cosa cuenta: las
+solicitudes por revisar»* — **sin ese motor, su Home es la pantalla vacía de lo
+que le da sentido**, y las otras dos tabs no hacen un «tercer eje» solas.
+**No se construyó a medias.**
+
+## 🧭 Y UNA MÁS QUE APRENDIÓ ESTA PISTA, cobrada en carne propia
+
+**Afirmé que A había mergeado con squash, y era falso.** Su medición lo desarmó
+en dos comandos. **La corregí a la vista, tachada y con su causa real.**
+
+*Lo que la hizo barata de corregir —y esto es de A— es que declaré el
+MECANISMO que suponía, no sólo el resultado.* Si hubiera escrito «el control
+falla» sin decir «por squash», **nadie habría podido medirlo**: una afirmación
+sin mecanismo no se puede falsar, sólo creer.
+
+**Y su gemela del mismo día, del lado del instrumento:** censé policies de
+storage con un regex que exigía el nombre sin comillas y me dio **9 sobre todo
+el repo**. El número era absurdo y el control lo delató: **son 330.** *Un censo
+por patrón acota, no cierra* — y lo que lo salvó fue mirar si el total tenía
+sentido, no el patrón.
