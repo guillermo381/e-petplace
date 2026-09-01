@@ -9,6 +9,7 @@ import {
   camposVisibles, puedeVer,
   avisaAlPadrino, REGLAS_FIN_PADRINAZGO,
   reducirCola, proximoAEnviar, puedeReintentar, hayFallidos, MAX_INTENTOS,
+  avisosDe,
 } from '../packages/mensajeria/src/index.ts';
 
 const d = (s) => new Date(s);
@@ -139,6 +140,44 @@ check('la causa sin aviso DECLARA su motivo',
   // no-op sobre clave ausente: una respuesta tardía no es un error
   check('acción sobre clave ausente es no-op, no excepción',
     reducirCola(c, { tipo: 'confirmar', claveIdempotencia: 'no_existe', idServidor: 'z' }).length, c.length);
+}
+
+
+// ── ⑥ AVISOS — categorías del modelo, y los DOS silencios ───────────────────
+{
+  const vivo = { mascotaEnMemorial: false };
+  const memorial = { mascotaEnMemorial: true };
+
+  const a1 = avisosDe({ clase: 'solicitud_creada', solicitudId: 's1', publicadorUserId: 'u-pub' }, vivo);
+  check('solicitud nueva → relacional, al publicador',
+    [a1.length, a1[0].tipo, a1[0].categoria, a1[0].audiencia, a1[0].destinatarioUserId],
+    [1, 'adopcion_solicitud_nueva', 'relacional', 'prestador', 'u-pub']);
+
+  const a2 = avisosDe({ clase: 'silencio_detectado', solicitudId: 's1', solicitanteUserId: 'u-fam' }, vivo);
+  check('🔑 «no respondieron» es OPERACION, no relacional (criterio S87)',
+    [a2[0].tipo, a2[0].categoria], ['adopcion_sin_respuesta', 'operacion']);
+  check('y su clave de dedupe es por solicitud: suena UNA vez',
+    a2[0].claveDedup, 'adopcion_sin_respuesta:s1');
+
+  const a3 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'adoptado' }, vivo);
+  check('padrinazgo: adoptado SÍ avisa', [a3.length, a3[0].tipo], [1, 'padrinazgo_ahijado_adoptado']);
+  const a4 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'refugio_inactivo' }, vivo);
+  check('padrinazgo: refugio inactivo es OPERACION', [a4[0].tipo, a4[0].categoria], ['padrinazgo_refugio_inactivo', 'operacion']);
+
+  // 🅿️ SILENCIO ①: lo estacionado
+  const a5 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'fallecido' }, vivo);
+  check('🅿️ ROJO: fallecido NO emite aviso (estacionado, fail-closed)', a5, []);
+
+  // 🔴 SILENCIO ②: el memorial apaga el vertical entero
+  check('🔴 ROJO: memorial apaga solicitud nueva',
+    avisosDe({ clase: 'solicitud_creada', solicitudId: 's1', publicadorUserId: 'u-pub' }, memorial), []);
+  check('🔴 ROJO: memorial apaga el aviso de silencio',
+    avisosDe({ clase: 'silencio_detectado', solicitudId: 's1', solicitanteUserId: 'u-fam' }, memorial), []);
+  check('🔴 ROJO: memorial apaga hasta el padrinazgo adoptado',
+    avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'adoptado' }, memorial), []);
+
+  const a6 = avisosDe({ clase: 'mensaje_nuevo', solicitudId: 's1', mensajeId: 'm9', destinatarioUserId: 'u-x' }, vivo);
+  check('mensaje nuevo dedupea por MENSAJE, no por solicitud', a6[0].claveDedup, 'adopcion_mensaje_nuevo:m9');
 }
 
 console.log(

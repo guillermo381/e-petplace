@@ -51,3 +51,13 @@ export {
   type EstadoEnvio,
   type MensajeEnCola,
 } from './cola';
+
+export {
+  avisosDe,
+  type AudienciaAviso,
+  type CategoriaAviso,
+  type ContextoAviso,
+  type HechoDelVertical,
+  type IntencionAviso,
+  type TipoAviso,
+} from './avisos';
