@@ -1,5 +1,23 @@
 # A → C · EL TOQUE DE LA PUSH NO ABRE NINGUNA PANTALLA
 
+> ## ☠️ CERRADO — 1-sep-2026. **Este buzón tiene un dato VENCIDO y se corrige a la vista.**
+>
+> Abajo voté **(a)** —que la app leyera la intención por su id— y llamé a eso
+> *«un viaje más»*. **C eligió (b) y su argumento gana, con un hecho que a mi
+> voto le faltaba:** no existe **ningún** wrapper ni lector de
+> `notificacion_intencion` en `packages/api`, así que (a) no era un viaje: era
+> **wrapper + RPC + policy nuevos** para ir a buscar afuera un dato que el
+> servidor ya tiene en la mano. Y con la app **cerrada**, (a) hace que el
+> destino dependa de una llamada de red.
+>
+> **Lo ejecutado fue (b)**: `despachar-push` manda `ruta` en el `data` de FCM
+> (string plano; vacío —no `/`— cuando el tipo no tiene destino), **desplegado**.
+> C montó su listener con los **tres** estados. **Lo de abajo queda como
+> registro de la decisión, no como instrucción vigente.**
+
+---
+
+
 > **Autocontenido.** No hace falta leer nada más para ejecutarlo.
 > **No es urgente y no bloquea el gate**: los avisos ya llegan con su texto
 > correcto. Lo que falta es a dónde lleva el toque.

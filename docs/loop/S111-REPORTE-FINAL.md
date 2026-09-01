@@ -34,10 +34,14 @@ más, completa** → recién ahí la autorización.
 > salió por OTA** — ver **`L-467`**, que es la corrección de método que lo
 > ordena.
 >
-> | app | OTA group | qué hacer |
-> |---|---|---|
-> | **cliente** | `cab8058f-7ffb-423e-87f3-4d86b40cddd6` | abrir el APK instalado **dos veces** |
-> | **prestador** | `6f0ac534-c3f7-49d3-8581-a02b6a9f13b1` | abrir el APK instalado **dos veces** |
+> | app | OTA group **VIGENTE** | ancla | qué hacer |
+> |---|---|---|---|
+> | **cliente** | `0b885c6a-7543-4362-88f5-e6bf9d09562e` | `df9b1c83` | abrir el APK instalado **dos veces** |
+> | **prestador** | `9e34d41a-bcbc-48fc-b142-aa682b2faaa0` | `f86b7e50` | abrir el APK instalado **dos veces** |
+>
+> ⚠️ **Los del cliente `cab8058f` y `2244c282` quedaron VENCIDOS el mismo día**
+> — ver `L-469`. **El pie de Cuenta muestra el `updateId`, no el group**: tiene
+> que decir **`01a05eed`**.
 >
 > Runtime **1.0.7**, canal `preview`, ancla `f3c99216` con árbol limpio,
 > `verify-ota` verde en las dos con su rojo producido primero. *La primera
