@@ -69,6 +69,8 @@ import {
   obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
+  obtenerEstadiasDelDia,
+  type EstadiaDelDia,
   obtenerCitasPorCoordinar,
   obtenerEquipoNegocio,
   obtenerFranjasHorario,
@@ -950,6 +952,40 @@ export default function Hoy() {
      dirección se deriva del gesto. La semántica del `null` no cambió: nadie
      eligió todavía ⇒ manda el día base. Ver `@/lib/dia-en-vista`. */
   const { dia: diaElegido, elegir: setDiaElegido } = useDiaEnVista();
+
+  /* ⭐ S109-D · LA QUINTA PATA DE LA JORNADA: LAS ESTADÍAS DE GUARDERÍA.
+     El HOY pedía CUATRO lectores escritos a mano —paseo, grooming,
+     adiestramiento, vet— y sus propios comentarios lo decían: «tercera pata
+     de la MISMA jornada», «CUARTA pata». **La quinta nunca se agregó**, así
+     que el día del prestador mostraba «no hay citas» mientras el header
+     cobraba $12 de una estadía. *Dos superficies de la misma pantalla, el
+     mismo dato, y sólo una lo veía* — el header suma por FECHA y es agnóstico
+     al oficio; la lista preguntaba por cuatro oficios.
+
+     ⚠️ VIENE EN SU PROPIO VIAJE, Y ESO ES UNA DEUDA DECLARADA, no un descuido:
+     los otros cuatro traen **diez días en un fetch** (S86-C) y elegir un día
+     es un filtro sobre memoria. `obtenerEstadiasDelDia` toma **UNA fecha**, así
+     que acá se re-consulta al cambiar de día. **Se pidió a A el lector por
+     rango**; el día que exista, esto se pliega al `Promise.all` de arriba y
+     este efecto muere. *Inventar el rango llamando diez veces habría pagado
+     dos veces la deuda que D-738 existe para no repetir.* */
+  const [estadias, setEstadias] = useState<EstadiaDelDia[]>([]);
+  useEffect(() => {
+    let vigente = true;
+    const dia = diaElegido ?? hoyLocal();
+    void (async () => {
+      const p = await obtenerMiPrestador();
+      if (!p.ok || p.data === null) return;
+      const r = await obtenerEstadiasDelDia(p.data.id, dia);
+      /* Ley 13: un fallo de lectura NO se disfraza de «no hay animales».
+         Se deja la lista como estaba y el bloque simplemente no habla — la
+         jornada de citas sigue siendo verdadera por su cuenta. */
+      if (vigente && r.ok) setEstadias(r.data);
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, [diaElegido]);
   /** Los días que el negocio declaró cerrados — la rueda los apaga y la
    *  pantalla los CONTESTA (el día cerrado se toca, no se deshabilita:
    *  decisión firmada dentro de la pieza). */
@@ -2521,7 +2557,40 @@ export default function Hoy() {
           </View>
         )}
 
-        {pantalla.estado === 'listo' && citasHoy.length === 0 && (
+        {/* ⭐ S109-D · QUIÉNES ESTÁN HOY — el bloque de PRESENCIA, arriba.
+            Firma del founder: las estadías van **agrupadas arriba**, no
+            intercaladas en la línea de horas. 🔴 *Poner las 00:00 o las 08:00
+            para que entren en una lista que ordena por hora es fabricar un dato
+            que nadie firmó, y el prestador lo lee como compromiso.*
+
+            Y el vocabulario es el de sus cuatro hermanas y el de la baldosa de
+            ATENDER: la guardería cuenta **presencias, no actos** — «3 animales
+            hoy», jamás «3 guarderías». */}
+        {pantalla.estado === 'listo' && estadias.length > 0 && (
+          <View style={{ gap: spacing[2] }}>
+            <Texto variante="seccion">{t('agenda.presenciaTitulo')}</Texto>
+            <Texto variante="apoyo">
+              {estadias.length === 1
+                ? t('agenda.presenciaUno')
+                : t('agenda.presenciaN', { n: estadias.length })}
+            </Texto>
+            {estadias.map((e) => (
+              <CeldaNavegacion
+                key={e.estadiaId}
+                icono="guarderia"
+                titulo={e.mascotaNombre}
+                /* «Toco una estadía y llego a donde ya llegaba» (firma): el día
+                   de guardería ya existe y se alcanza desde NEGOCIO. No se
+                   construye pantalla nueva. */
+                onPress={() => router.push('/guarderia/dia')}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* 🔴 El vacío cuenta lo que REALMENTE no hay: con animales a bordo,
+            «hoy no tienes citas» es falso. Firma del founder. */}
+        {pantalla.estado === 'listo' && citasHoy.length === 0 && estadias.length === 0 && (
           // S52-P7b: registro sereno — el día vacío se dice en el
           // flujo, sin display que grite (dosis baja). S61-B5: el vacío
           // POR FILTRO dice su verdad (hay jornada, no de este servicio).

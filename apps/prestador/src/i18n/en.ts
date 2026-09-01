@@ -173,6 +173,9 @@ export const prestadorEn = {
     despachoTitulo: 'Order {{orden}}',
   },
   agenda: {
+    presenciaTitulo: 'Who’s here today',
+    presenciaUno: '1 pet in daycare',
+    presenciaN: '{{n}} pets in daycare',
     // S60-C2.2 — Espejo de es.ts · LOTE S60
     // S71-B1 — the day header. `saludo` ('Your day today') died with the
     // generic label of finding 2 (Ley 37).
