@@ -490,6 +490,24 @@ export {
   type SenalAdoptable,
 } from './components/SenalesAdoptable'
 
+// SelectorDestinoDonacion — S111-B: A QUIÉN LLEGA ESTO (`LETRA_ADOPCION` §7).
+// Tres destinos: una mascota en adopción · un refugio · abierta.
+//
+//   🔴 `abierta` ES UNA ELECCIÓN, NO LA AUSENCIA DE UNA — su `voz` es
+//     OBLIGATORIA, y `destino: null` («todavía no eligió») es un valor
+//     DISTINTO. La despensa los colapsaba porque allá no hacía diferencia.
+//   ⚠️ NO reusa `SelectorDestinoItem` y la razón es medible: su variante
+//     `{ tipo: 'donacion' }` no tiene campo de destino — ES el «sin destino
+//     elegible» que §7 prohíbe heredar. Además su unión la consume el
+//     carrito vivo del cliente: ensancharla no sería aditivo. Nace hermana;
+//     la de la despensa NO se toca.
+export {
+  SelectorDestinoDonacion,
+  type SelectorDestinoDonacionProps,
+  type DestinoDonacion,
+  type OpcionDestino,
+} from './components/SelectorDestinoDonacion'
+
 // TarjetaPedido — S96-B: UN pedido en una lista, de los DOS lados. La fila
 // de la lista Hoy del vendedor (LETRA_PANEL_VENDEDOR_S96 §2.1) y la de
 // "Mis pedidos" de la familia (LETRA_RECORRIDO_DESPENSA_S96 §8.1).

@@ -100,6 +100,7 @@ import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
+import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
 import { PrecioText } from '../components/PrecioText'
@@ -4780,6 +4781,50 @@ function GaleriaInterna() {
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">una sola señal · sin rótulo</Texto>
               <SenalesAdoptable senales={[{ tipo: 'zona', voz: 'Valle de los Chillos' }]} />
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="SelectorDestinoDonacion (S111) — «abierta» es una elección, no un hueco">
+          {/* El gate de esta pieza es UNA pregunta: ¿el chip de la derecha se
+              lee como una opción elegida a propósito, o como «no elegí»? Si
+              se lee como hueco, la pieza falla su única ley (§7). Por eso
+              va en la MISMA hilera y con su voz, no en un renglón aparte. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">nadie elegido todavía · destino = null</Texto>
+              <SelectorDestinoDonacion
+                rotulo="¿A quién le llega?"
+                mascotas={[{ id: 'm1', nombre: 'Luna' }, { id: 'm2', nombre: 'Simón' }]}
+                refugios={[{ id: 'r1', nombre: 'Refugio Esperanza' }]}
+                abierta={{ voz: 'Donde más se necesite' }}
+                destino={null}
+                onCambiar={() => {}}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                control · «abierta» ELEGIDA — el mismo chip que arriba, ahora es una decisión
+              </Texto>
+              <SelectorDestinoDonacion
+                mascotas={[{ id: 'm1', nombre: 'Luna' }, { id: 'm2', nombre: 'Simón' }]}
+                refugios={[{ id: 'r1', nombre: 'Refugio Esperanza' }]}
+                abierta={{ voz: 'Donde más se necesite' }}
+                destino={{ tipo: 'abierta' }}
+                onCambiar={() => {}}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">una mascota elegida</Texto>
+              <SelectorDestinoDonacion
+                mascotas={[{ id: 'm1', nombre: 'Luna' }, { id: 'm2', nombre: 'Simón' }]}
+                refugios={[{ id: 'r1', nombre: 'Refugio Esperanza' }]}
+                abierta={{ voz: 'Donde más se necesite' }}
+                destino={{ tipo: 'mascota', mascotaId: 'm1' }}
+                onCambiar={() => {}}
+              />
             </View>
           </View>
         </Seccion>
