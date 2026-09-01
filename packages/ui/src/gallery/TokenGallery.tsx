@@ -101,6 +101,7 @@ import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
+import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
 import { PrecioText } from '../components/PrecioText'
@@ -4826,6 +4827,38 @@ function GaleriaInterna() {
                 onCambiar={() => {}}
               />
             </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="EstadoSolicitudAdopcion (S111) — la declinada es un desvío, y es digna">
+          {/* Los cuatro estados juntos. El gate son DOS preguntas:
+              ① ¿la declinada se lee como interrupción y no como final
+                 cumplido? ② ¿se lee SIN acusar a nadie? Si el desvío grita,
+                 la pieza falla §10.6 (la devolución jamás humilla).
+              ⚠️ La tercera tarjeta monta un estado que HOY no puede ocurrir
+                 en producción — se muestra para poder juzgarlo el día que
+                 el canal exista, no porque exista. */}
+          <View style={{ gap: spacing[6] }}>
+            {([
+              ['recibida', 'recién llegada · es la que cuenta el Home (§9)'],
+              ['aceptada', 'aceptada · el camino completo'],
+              ['en_conversacion', '⚠️ INALCANZABLE hoy: no hay canal (activador estacionado)'],
+              ['declinada', 'declinada · desvío NEUTRO, jamás alerta'],
+            ] as const).map(([e, nota]) => (
+              <View key={e} style={{ gap: spacing[2] }}>
+                <Texto variante="apoyo">{nota}</Texto>
+                <EstadoSolicitudAdopcion
+                  estado={e}
+                  registro="completa"
+                  voces={{
+                    recibida: 'Recibida',
+                    enConversacion: 'En conversación',
+                    aceptada: 'Aceptada',
+                  }}
+                  vozDeclinada="El refugio eligió otro hogar"
+                />
+              </View>
+            ))}
           </View>
         </Seccion>
 
