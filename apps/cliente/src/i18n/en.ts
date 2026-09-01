@@ -2508,4 +2508,15 @@ export const clienteEn = {
     errorDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',
   },
+  misSolicitudes: {
+    titulo: 'Your conversations',
+    vacioTitulo: 'You have not applied for anyone yet',
+    vacioDetalle: 'When you write to a shelter, the conversation will be here.',
+    verAdoptables: 'See who is waiting',
+    errorTitulo: 'We could not load your conversations',
+    errorDetalle: 'Check your connection and try again.',
+    reintentar: 'Try again',
+    entrada: 'Your conversations',
+    abrirHilo: 'Open the conversation about {{nombre}}',
+  },
 } as const satisfies Espejo<typeof clienteEs>;

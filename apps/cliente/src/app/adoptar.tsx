@@ -54,6 +54,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   AvatarMascota,
   Boton,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -200,6 +201,21 @@ export default function Adoptar() {
           paddingBottom: insets.bottom + spacing[8],
         }}
       >
+        {/* LA VUELTA A LAS CONVERSACIONES. Sólo con sesión: sin cuenta no hay
+            ninguna, y ofrecerla sería llevar a un vacío garantizado (Ley 23).
+
+            🔴 **Sin contador, y sin pedirlas para saber si hay.** Contar exigiría
+            un viaje más en CADA carga de la vidriera, y S94-PERF midió que el
+            techo de esta casa son los viajes, no las consultas. *Un número que
+            cuesta una espera en la pantalla más visitada no vale lo que informa*
+            — y el vacío del otro lado tiene su camino de vuelta. */}
+        {conSesion === true ? (
+          <CeldaNavegacion
+            titulo={t('misSolicitudes.entrada')}
+            onPress={() => router.push('/adoptar/solicitudes')}
+          />
+        ) : null}
+
         {/* EL ÚNICO FILTRO QUE EL MOTOR ACEPTA. `null` = todas, y es la opción
             que preside: la vidriera se abre mostrando a todos. */}
         <SelectorOpcion

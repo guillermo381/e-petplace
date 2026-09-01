@@ -3560,4 +3560,15 @@ export const clienteEs = {
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Probar de nuevo',
   },
+  misSolicitudes: {
+    titulo: 'Tus conversaciones',
+    vacioTitulo: 'Todavía no postulaste a nadie',
+    vacioDetalle: 'Cuando escribas a un refugio, la conversación va a quedar acá.',
+    verAdoptables: 'Ver quiénes esperan',
+    errorTitulo: 'No pudimos cargar tus conversaciones',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+    entrada: 'Tus conversaciones',
+    abrirHilo: 'Abrir la conversación sobre {{nombre}}',
+  },
 } as const;
