@@ -82,3 +82,44 @@ Las que necesitan ya existen: `FiltroPills`, `TarjetaProducto`, `Badge`.
 segunda tarjeta de `Convivencia` en la galería — el rescate de seis días, todo
 desconocido. **Si ese caso se lee como una ficha rota o vacía, la pieza falla su
 única ley**, y es el caso que la letra dice que cuesta un hogar.
+
+---
+
+## ④ CIERRE DE LA PISTA — estado verificado contra `origin/main` `9b15bc7b`
+
+**No por reporte ajeno: medido.** Los **seis** commits de B están en `main`; las
+**cuatro** piezas presentes; el guard viejo de `ActaDeEntrega` **muerto como
+código** (la lápida que lo cita no cuenta — ver L-170 abajo).
+
+**Se sumó a lo anterior una CURA fuera del backlog original**, pedida por C con
+el hallazgo ⑤ del gate: `ActaDeEntrega` dejó de auto-ocultarse.
+
+🔴 **Y su valor no fue la cura sino el censo del CONSUMIDOR:** midiendo quién
+montaba la pieza apareció **la segunda puerta al mismo defecto** — el lector del
+cliente componía el ítem `carnet` sin condicionar por dirección, así que **nunca
+iba a producir un checklist vacío** y mi cura no lo alcanzaba. *Mi cambio era
+necesario y no suficiente, y lo dije yo en vez de que lo encontrara el founder
+en el aparato.* **Verificado cerrado en `main`:** el ítem quedó dentro de un
+spread condicional por `acta.direccion === 'recogida'`
+(`apps/cliente/.../guarderia/[estadiaId].tsx:435`). ⇒ ⑤ cerrado de verdad, y los
+APK salen sobre un estado que es el que dice ser.
+
+**La lección de método que dejo, cobrada en carne propia:** mi primer instrumento
+dio **ROJO FALSO contra mi propia lápida** — el `grep` leyó el comentario que
+citaba la línea muerta como si fuera código (**L-170**). Curé el instrumento, no
+el archivo. *Quien mida líneas muertas por texto tiene este sesgo vivo: la lápida
+que nombra al muerto es exactamente lo que alimenta el falso positivo.*
+
+## ⑤ BACKLOG DE B: AGOTADO
+
+Todo lo restante tiene destino y ninguno es «no llegué»:
+**estacionado** (la salud del adoptable, §5.2 — con voto, **sin firma del
+founder: un voto de pista no la destraba**) · **frenado** (el hilo de mensajes,
+su activador espera firma) · **prohibido por la letra** (§6: el padrinazgo no
+construye su puerta de recurrentes; la de la casa existe) · **de otro territorio**
+(la composición de pantallas, de C) · y **`Convivencia` estacionada por C con su
+bloqueante nombrado** — `Adoptable` no modela convivencia, y modelarla es
+producto.
+
+**Lo único que espera al founder de mi lado: el gate en dispositivo de las cuatro
+piezas.** Están **entregadas, no montadas**.
