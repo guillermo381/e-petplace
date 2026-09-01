@@ -642,6 +642,19 @@ export interface EstadiaDelDia {
    * *Fabricar la ruta desde el texto libre daría un 404 con cara de foto.*
    */
   razaRutaImagen: string | null;
+  /* ── S111-A · LA FRANJA, que es de dónde sale el ORDEN del día ─────────
+     Es la franja **que le toca A CONTINUACIÓN**: `recogida` mientras espera
+     que la busquen, `devolucion` mientras espera volver.
+     🔴 **`null` en las terminales, y ese null es INFORMACIÓN**: *ya no le toca
+     nada*. No es un dato que falta.
+     El motor YA devuelve las filas en este orden (`franjaDesde` ascendente,
+     terminales al final) — la pantalla **no tiene que reordenar**, sólo
+     respetar lo que llega y aplicar encima el orden manual del cuidador. */
+  franjaTipo: 'recogida' | 'devolucion' | null;
+  /** 'HH:MM:SS' */
+  franjaDesde: string | null;
+  /** 'HH:MM:SS' */
+  franjaHasta: string | null;
 }
 
 /**
@@ -693,6 +706,9 @@ export async function obtenerEstadiasDelDia(
       retornoEn: typeof r.retorno_en === 'string' ? r.retorno_en : null,
       noRecogidaEn: typeof r.no_recogida_en === 'string' ? r.no_recogida_en : null,
       noRecogidaMotivo: typeof r.no_recogida_motivo === 'string' ? r.no_recogida_motivo : null,
+      franjaTipo: r.franja_tipo === 'recogida' || r.franja_tipo === 'devolucion' ? r.franja_tipo : null,
+      franjaDesde: typeof r.franja_desde === 'string' ? r.franja_desde : null,
+      franjaHasta: typeof r.franja_hasta === 'string' ? r.franja_hasta : null,
       razaRutaImagen: typeof r.raza_ruta_imagen === 'string' ? r.raza_ruta_imagen : null,
     });
   }
@@ -726,7 +742,12 @@ export async function obtenerEstadiasDelDia(
  * evitar.* Y el servidor rebota `rango_demasiado_largo` sobre más de 62 días:
  * *sin techo, «por rango» es «por todo».*
  */
-export interface EstadiaEnRango extends EstadiaDelDia {
+/* 🔴 OMITE la franja A PROPÓSITO: `obtener_estadias_por_rango` no la devuelve.
+   Heredarla fabricaría tres `null` que se leerían como *«esta estadía no tiene
+   franja»* cuando lo cierto es *«este lector no la trae»*. **Dos ausencias
+   distintas**, y con `Omit` la segunda es inexpresable en vez de confusa. */
+export interface EstadiaEnRango
+  extends Omit<EstadiaDelDia, 'franjaTipo' | 'franjaDesde' | 'franjaHasta'> {
   /** 'YYYY-MM-DD' — el día al que pertenece la fila. */
   fecha: string;
 }
