@@ -250,3 +250,59 @@ existe para no hacer.*
 **Y su corolario, que es de B:** con el tipo arreglado, su segunda capa —el
 obturador se apaga si las reglas llegan vacías— **queda como cinturón que no se
 ejerce**, que es exactamente donde tiene que estar (`L-424`).
+
+
+---
+
+# ✅ CIERRE — las tres piezas de la tanda del toque, y la franja
+
+| pieza | estado |
+|---|---|
+| ① la push abre pantalla, dos apps, tres estados | ✅ |
+| ② el en vivo, con **dos** puertas | ✅ |
+| ③ el durante: fotos · clip · chips | ✅ |
+| ⑨ la franja — el orden del día se puede explicar | ✅ |
+
+## LA FRANJA CERRÓ ALGO QUE YO NO HABÍA VISTO
+
+A midió que **mi «orden natural» era el ALFABÉTICO**: el cuidador veía *Bobby,
+Jack, Thor, Zeus* cuando necesita *primero los que hay que buscar*. **Las
+franjas existían y estaban pobladas** — el dato estaba y nadie lo leía. *Motor
+sin puerta, otra vez, y esta vez del lado del orden.*
+
+**Y no reordeno**: verifiqué con dos colores que sin orden manual devuelvo
+exactamente lo que vino del motor. *Reordenar acá sería la segunda fuente que el
+orden del servidor vino a evitar.*
+
+**La franja se MUESTRA**, y ésa es la mitad que la hace útil: *un orden correcto
+sin la razón a la vista es casi tan malo como uno equivocado — parece
+arbitrario, y lo arbitrario invita a re-acomodar todo a mano cada día.*
+
+## LAS TRES QUE OTRAS PISTAS CAZARON EN MI TRABAJO, y valen más que las mías
+
+**① B midió una fricción de tipos en mi archivo.** `reglasSegunLugar` prometía
+«array que puede estar vacío» y devuelve 4 o 3 ⇒ *el tipo decía menos de lo que
+la función garantiza*, y eso empuja al consumidor a castear. Arreglado **sin
+afirmar nada**: el `filter` no conserva el largo, así que se enumera la primera
+regla aparte y **la garantía es del compilador**.
+
+**② B vio que escribí «un clip sin micrófono sale mudo» sin medirlo** — en el
+código **y en la voz al usuario**. El contrato de `expo-camera` no dice qué pasa
+sin el permiso. *La decisión no cambió; lo que cambió es que el comentario ahora
+distingue qué medí de qué supuse.* ⇒ **una voz que explica un mecanismo es una
+afirmación más que hay que mantener verdadera**, y el usuario la lee justo cuando
+algo no anda.
+
+**③ A me avisó de la trampa de los objetivos antes de que la chocara.** El
+vocabulario mezcla conductas y objetivos y su escritor rechaza los segundos.
+*Pintarlos habría dado el peor tipo de rebote: el que culpa al usuario de una
+diferencia que la pantalla le escondió.*
+
+## LO QUE SIGUE SIN CONSTRUIR, con dueño
+
+**Estacionado:** qué crea «quiero adoptar» (voto (a), con el 24) · el orden base
+de la vidriera · el modelo de convivencia, que deja `Convivencia` de B
+**entregada y no montada**.
+
+**Y nada de esto se ejerció en aparato.** La veda de publish sigue: el founder
+camina, y recién ahí.
