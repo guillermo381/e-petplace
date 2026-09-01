@@ -1,6 +1,6 @@
 PEDIDO DE MERGE
 rama : pista/s111-e
-sha  : SHA_PLACEHOLDER
+sha  : 1f2eb126a69ce51b4ca140d3d43b78fea3eaf8f5
 alcance : 4 archivos · SÓLO DOCS (todos en docs/loop/buzon/)
 verificación esperada :
     git diff --stat origin/main...pista/s111-e -- . ':(exclude)docs/'   →  VACÍO
