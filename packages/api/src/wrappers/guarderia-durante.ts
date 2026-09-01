@@ -54,6 +54,17 @@ const MENSAJES = {
   /* Un reloj adelantado no puede sellar un acto en el futuro. */
   hora_de_la_puerta_en_el_futuro: 'La hora que llegó es del futuro. Revisa la hora del teléfono.',
 
+  /* ── La bitácora del prestador ───────────────────────────────────────── */
+  /* El motor manda el estado adentro del mensaje; la pantalla lo usa para
+     decir en qué punto está, no para adivinar. */
+  estadia_terminal:         'La estadía ya cerró. No se pueden anotar conductas.',
+  bitacora_vacia:           'Marca al menos una conducta o escribe una nota.',
+  chip_invalido:            'Esa conducta no existe en el vocabulario.',
+  /* 🔴 Rebote CARO de evitar y barato de explicar: el vocabulario trae
+     conductas Y objetivos; los objetivos son del adiestramiento y acá no
+     entran. Si la pantalla ofrece todo, el cuidador toca uno y esto suena. */
+  chip_no_aplica_a_la_mascota: 'Esa conducta no aplica a esta especie.',
+
   /* ── Los de siempre ──────────────────────────────────────────────────── */
   estadia_no_existe:        'No encontramos esa estadía.',
   tramo_no_existe:          'No encontramos ese viaje.',
@@ -409,4 +420,75 @@ export async function cerrarTramoGuarderia(
   const r = data as Record<string, unknown>;
   if (typeof r.tramo_id !== 'string') return fallaCodigo('datos_inconsistentes');
   return { ok: true, data: { tramoId: r.tramo_id, yaEstaba: r.ya_estaba === true } };
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA BITÁCORA DEL PRESTADOR — «cómo se portó hoy»
+   ══════════════════════════════════════════════════════════════════════════ */
+
+export interface ResultadoBitacoraGuarderia {
+  bitacoraId: string;
+  eventoId: string;
+  estadiaId: string;
+  /** `true` si ya había una bitácora de esta estadía y se le agregó a ella. */
+  yaExistia: boolean;
+  chipsRecibidos: number;
+  /** Cuántos entraron DE VERDAD. Con los mismos chips dos veces esto da 0
+   *  y `yaExistia` da `true` — así la pantalla puede decir «ya estaba»
+   *  en vez de fingir que escribió. */
+  chipsNuevos: number;
+}
+
+/**
+ * El cuidador anota cómo se portó el animal durante su día.
+ *
+ * 🔴 **No hay vocabulario nuevo.** Usa `cat_conductas_bitacora`, la bitácora
+ * UNIVERSAL de S91 — 25 conductas activas que son exactamente *«cómo se portó
+ * hoy»*. Los chips los pinta `obtenerVocabularioBitacora({ especie, sujeto })`,
+ * que **ya existe**.
+ *
+ * ⚠️ **Ese lector devuelve conductas Y OBJETIVOS.** Los objetivos son del
+ * currículum de adiestramiento y **este escritor los rechaza**
+ * (`chip_invalido`). La pantalla tiene que quedarse con `tipo === 'conducta'`.
+ *
+ * 🔴 **IDEMPOTENTE POR (estadía, conducta).** Una estadía ES un día, así que
+ * eso equivale a *(estadía, conducta, día)*. Hay **una sola fila de bitácora
+ * por estadía** y la clave del puente de chips hace que el duplicado sea
+ * **inexpresable** — no se cuenta ni se compara nada. El segundo toque devuelve
+ * `chipsNuevos: 0`, jamás un error.
+ *
+ * 🔴 **El texto se AGREGA, no se pisa.** Dos observaciones del día son dos;
+ * pisar la primera perdería lo que el cuidador ya había escrito.
+ *
+ * El evento entra al Bio-Expediente con procedencia **`declarado_por_prestador`**
+ * — *lo que él declara haber visto*, que no es lo mismo que verificado.
+ */
+export async function registrarBitacoraGuarderia(params: {
+  estadiaId: string;
+  /** Códigos de `cat_conductas_bitacora`. Sin objetivos. */
+  conductas?: string[];
+  texto?: string;
+}): Promise<ResultadoWrapper<ResultadoBitacoraGuarderia, CodigoErrorGuarderiaDurante>> {
+  const { data, error } = await getClient().rpc('registrar_bitacora_guarderia', {
+    p_estadia_id: params.estadiaId,
+    p_chips: (params.conductas ?? []).map((codigo) => ({ tipo: 'conducta', codigo })),
+    p_texto: params.texto ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.bitacoraId !== 'string' || typeof r.eventoId !== 'string') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      bitacoraId: r.bitacoraId,
+      eventoId: r.eventoId,
+      estadiaId: String(r.estadiaId),
+      yaExistia: r.yaExistia === true,
+      chipsRecibidos: typeof r.chipsRecibidos === 'number' ? r.chipsRecibidos : 0,
+      chipsNuevos: typeof r.chipsNuevos === 'number' ? r.chipsNuevos : 0,
+    },
+  };
 }

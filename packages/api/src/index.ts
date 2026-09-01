@@ -1669,6 +1669,8 @@ export {
   marcarNoRecogida,
   abrirTramoGuarderia,
   cerrarTramoGuarderia,
+  registrarBitacoraGuarderia,
+  type ResultadoBitacoraGuarderia,
 } from './wrappers/guarderia-durante';
 export type {
   MaquinaEstadia,
