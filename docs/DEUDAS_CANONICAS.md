@@ -26090,7 +26090,43 @@ escondido detrás de ella. *Una verdad que tapa otra cosa es más difícil de ca
 que un error.*
 
 **El gate que lo cierra, propuesto por C y tomado:** medir
-`razonDeshabilitado` sin `onRazon`. **Hoy daría 8, con baseline solo-baja.**
+`razonDeshabilitado` sin `onRazon`. ✅ **CONSTRUIDO** — `verify:razon-muda`,
+**baseline 6, solo-baja**, con auto-prueba (exit 2 si no distingue su rojo) y
+**su rojo producido** (sembré un mudo: 6 → 7, abortó; retirado, residuo 0).
+
+> ### ⚠️ ENMENDADO AL CONSTRUIRLO — EL DIAGNÓSTICO ERA INCOMPLETO, Y LA CURA QUE PARECÍA OBVIA NO PRODUCE LO QUE SE ESPERA.
+>
+> **Medido con control positivo** (el label del botón **sí** se pinta, así que el
+> instrumento distingue render de no-render): en `Boton.tsx`,
+> `razonDeshabilitado` **aparece UNA SOLA VEZ en el render, y es
+> `accessibilityHint`**.
+>
+> ### ⇒ **La razón NO SE DIBUJA NUNCA — ni con `onRazon` ni sin él.** Pasar `onRazon` hace el botón **tocable** y le da hint a los lectores de pantalla; **no hace aparecer ningún texto.**
+>
+> **Por eso el founder no vio ninguna razón, y no habría visto ninguna en las
+> otras cinco tampoco.** *No son «ocho mudas de trece»: son las doce, y el
+> mecanismo no es la prop que falta — es que el texto no se renderiza.*
+>
+> 🔴 **Y por eso NO se curaron las seis.** Pasarles `onRazon` habría dado un
+> verde en el gate **sin que el founder viera una sola palabra más** — *la peor
+> clase de cura: la que apaga el instrumento sin tocar el defecto.*
+
+### EL UNIVERSO, DECLARADO (pedido del founder al confirmar)
+
+| medida | valor |
+|---|---|
+| archivos de `apps/` que pasan `deshabilitado={` | **96** |
+| …que pasan `razonDeshabilitado=` | **12** |
+| …que además pasan `onRazon=` | **6** |
+| **mudos (el baseline)** | **6** — *no 7: C midió antes de curar la suya* |
+
+⚠️ **Los 84 que frenan SIN pasar razón siquiera quedan fuera del gate a
+propósito.** *Cuáles de ellos necesitan explicarse es decisión de producto, no
+de gate* — y meterlos ahora daría un baseline de 90 que nadie podría bajar.
+
+**LO QUE QUEDA VIVO, y es lo que de verdad cierra `D-999`: que `Boton` DIBUJE la
+razón.** Es `packages/ui`, es diseño visible, y **no se hace sin verlo en
+pantalla**. **DISPARO: la primera sesión de UI con el founder delante.**
 Es la forma del trinquete del voseo y por la misma razón: *lo que falla no es la
 barrida — es que entre una y otra nada mira.* **Entra en la cola de A.**
 
@@ -26499,3 +26535,123 @@ copia que uno tiene a mano.** Para un archivo del canon eso es literal —
 **ausencias que no existen** (C casi reporta números faltantes) y también
 **presencias que ya no están** (un dato borrado que la copia conserva). *Ninguna
 de las dos da error: las dos dan una respuesta.*
+
+---
+
+# Lecciones del cierre de S111 — depositadas por A el 1-sep-2026 · números releídos **en el mismo acto** con el comando por encabezado, y **verificados con `grep -c` = 0** uno por uno
+
+> ⚠️ **UNA DE LAS CUATRO QUE PIDIÓ LA MESA NO SE DEPOSITA, PORQUE YA EXISTE.**
+> *«Una verdad puede tapar otra cosa — una explicación correcta y suficiente no
+> agota la causa»*, con el caso del botón de DeUna, **es `L-473`**, depositada
+> hace unas horas con ese mismo contenido y ese mismo caso.
+> *Duplicarla con otro número sería exactamente el defecto que `L-470` acaba de
+> nombrar: dos leyes para un solo hecho, y una envejece sin que nadie la
+> contradiga.*
+
+---
+
+## 🔴 `L-475` — UN GUARD QUE NUNCA SE EJERCIÓ NUNCA PRODUJO SU ROJO: SOBREVIVE INTACTO HASTA EL PRIMER CASO REAL
+
+**Medido en el botón de pago con DeUna.** La condición era:
+
+```
+deshabilitado = ((esMensual || esPaquete) && medio.idTarjeta === null) || …
+```
+
+`medio.idTarjeta` es `null` cuando se elige DeUna, **por diseño** ⇒ con DeUna el
+botón **nunca podía habilitarse** para paquete ni mensualidad.
+
+> ### ⇒ Y el **día suelto no exige tarjeta** en su condición. **El defecto vivía sólo en las dos compras que jamás se habían cobrado por esa vía.**
+
+🔴 **Por eso ningún cobro real lo tocó:** los cuatro que DeUna aprobó ese día
+fueron compras y citas. *No había forma de encontrarlo mirando lo que
+funcionaba* — y lo que funcionaba era todo lo que alguna vez había corrido.
+
+### LA LEY, COMO CATEGORÍA
+
+**Un guard sólo se prueba cuando algo lo atraviesa.** Mientras nadie ejerza su
+caso, **no da verde ni rojo: no da nada**, y su silencio se lee como salud —
+igual que el silencio de un gate que nunca corrió.
+
+> ### **El caso que NUNCA CORRIÓ es el candidato natural a tener el guard equivocado.** No por probabilidad: **porque es el único que ninguna corrida pudo corregir.**
+
+**Su hermana ya está en el canon** —`L-459`: *la primera prueba de un guard nuevo
+no es que dé VERDE, es que dé ROJO sobre el primer caso real*—. **Ésta es su
+contracara temporal:** un guard viejo que **jamás tuvo un primer caso real** está
+en el mismo estado que uno recién escrito, **aunque lleve meses en producción**.
+
+**DISPARO: cuando se abra un camino nuevo sobre una pieza existente** — un riel
+de pago nuevo, un sujeto nuevo, una especie nueva. **Se censan los guards de los
+casos que ESE camino estrena, aunque la pieza «ya funcione».**
+
+---
+
+## 🔴 `L-476` — UNA CLAVE ADIVINADA NO DA ERROR: DA AUSENCIA — Y LA AUSENCIA SE LEE IGUAL QUE «NO APLICA»
+
+**La cometí yo, midiendo el recorte de especies de guardería.** Consulté
+`tipos_servicio.codigo = 'guarderia'` con un `LEFT JOIN`, y reporté
+*«guardería no tiene recorte de especies»*.
+
+**Era falso.** `'guarderia'` **no existe** — los códigos reales son
+**`guarderia_dia`** y **`guarderia_mensual`**, y el recorte **sí existe**:
+`["perro","gato"]`.
+
+> ### 🔴 Un `LEFT JOIN` contra una clave inventada **no falla, no avisa y no devuelve vacío: devuelve NULL** — que es una respuesta perfectamente creíble, y significa otra cosa.
+
+**Y el daño era del peor signo:** iba a reportar que **no hay recorte** cuando el
+hecho es que **hay recorte y la puerta no lo consulta** (`D-1001`). *La primera
+lectura absuelve al sistema; la segunda lo acusa. La clave adivinada me dio la
+absolución.*
+
+**Lo cazó el CONTROL POSITIVO** —`paseo → ["perro"]`— corrido **antes de
+reportar**. *Sin él, el cero se lee como hallazgo.*
+
+**Cura:** **el código real se verifica contra el objeto ANTES de consultarlo**,
+no después de que el resultado parezca raro. Es la **regla 40** en su forma más
+barata de cometer y más cara de creer.
+
+**DISPARO: toda consulta que filtre por un código, slug o enum escrito a mano.**
+
+---
+
+## 🔴 `L-477` — LA BARRIDA NO FALLA: FALLA QUE ENTRE UNA BARRIDA Y LA SIGUIENTE **NADA MIRA**
+
+**Medido en la voz.** El trinquete del voseo cazó strings míos **dos veces en un
+solo día** (`Revisá` → `Revisa`, `Escribí` → `Escribe`), y a otra pista dos veces
+más con `querés`. **Ninguna barrida había fallado**: las cuatro entraron
+**después** de la última.
+
+> ### ⇒ Una lección que un trinquete caza **dos veces en un día** no pide otra pasada: **pide mecanismo continuo.** *Otra barrida deja el mismo hueco del ancho de la próxima ventana.*
+
+**Y la forma que funciona ya está probada en esta casa: el trinquete solo-baja.**
+No prohíbe el estado malo —que puede tener casos legítimos— **prohíbe que el
+número SUBA**. Barato de tolerar, imposible de erosionar en silencio.
+
+**Su aplicación inmediata, propuesta por C y tomada:** `D-999` —ocho pantallas
+que pasan `razonDeshabilitado` sin `onRazon`— **con baseline 8, solo-baja**.
+*Sin trinquete, curar las siete restantes deja el hueco abierto para la novena.*
+
+⚠️ **Y su límite, que ya cobró:** un baseline en 0 **no dice «no hay»: dice «no
+vi, con la lista de hoy»** (`L-425`). El trinquete protege el número; **no
+protege de que el instrumento mire el conjunto equivocado.**
+
+**DISPARO: la segunda vez que un mismo gate caza la misma clase en una sola
+jornada.**
+
+---
+
+## ⚠️ ENMIENDA A `D-1002` — el instrumento por encabezado **salva a las `D-` y NO salva a las `L-`**
+
+Medido al depositar estas tres. El comando de E devuelve **`D-1002`** (correcto)
+y **`L-714`** (falso: el máximo real es `L-474`).
+
+**La causa es la misma autorreferencia que E encontró, movida de lugar:**
+`L-714` es un typo curado en S94, y **los encabezados de bloque de depósito lo
+MENCIONAN** —*«`L-714` sigue descartado por su propia ficha»*— así que el filtro
+por encabezado lo captura.
+
+> ### ⇒ *El texto que documenta un descarte contiene el string descartado.* **Filtrar por encabezado no es suficiente cuando los encabezados también narran.**
+
+**Lo que se usó acá, y se declara:** el máximo se leyó por encabezado **y cada
+número candidato se verificó uno por uno con `grep -c` = 0** antes de escribirlo.
+*Dos instrumentos, porque ninguno solo alcanza.*
