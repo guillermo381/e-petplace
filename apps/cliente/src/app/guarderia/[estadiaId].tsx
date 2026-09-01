@@ -416,12 +416,31 @@ export default function DuranteGuarderia() {
               /* 🔴 EL LECTOR DEVUELVE **HECHOS, NO VOZ** — los ítems se componen
                  acá, con el idioma de la casa. *El motor no sabe cómo se llama
                  «carnet a la vista» en esta letra, y no debe saberlo.* */
+              /* 🔴 EL CARNET SÓLO EN LA RECOGIDA — **la segunda puerta al
+                 mismo defecto**, y la encontró B midiendo el consumidor de su
+                 propia cura. *Yo curé el lado del prestador y la pieza, y este
+                 lector quedó abierto:* componía el ítem **sin condicionar por
+                 dirección**, así que en devolución iba a seguir dibujando la
+                 casilla que el founder rechazó (⑤).
+
+                 El criterio legal §4 lo dice: el acta espejo lleva estado con
+                 fotos, incidentes, objetos devueltos y conformidad. **El carnet
+                 se verifica al RECIBIR.**
+
+                 ⚠️ Y el modo de falla era silencioso: no rompe nada, **dibuja de
+                 más**, y se ve como si funcionara. Es la ley de la jornada de
+                 S107 — *el censo casi siempre encuentra una segunda puerta al
+                 mismo defecto*, y curar sólo la reportada es media cura. */
               items={[
-                {
-                  clave: 'carnet',
-                  etiqueta: t('duranteGuarderia.actaCarnet'),
-                  marcado: acta.carnetVerificado,
-                },
+                ...(acta.direccion === 'recogida'
+                  ? [
+                      {
+                        clave: 'carnet',
+                        etiqueta: t('duranteGuarderia.actaCarnet'),
+                        marcado: acta.carnetVerificado,
+                      },
+                    ]
+                  : []),
                 ...(acta.objetos !== null && acta.objetos.length > 0
                   ? [{ clave: 'objetos', etiqueta: acta.objetos, marcado: true }]
                   : []),

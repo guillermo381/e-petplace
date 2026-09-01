@@ -238,11 +238,17 @@ La cola ya hace eso.»
 
 ### 🔴 LO QUE NO SE CONSTRUYE Y SU MOTIVO
 
-**Los chips de comportamiento.** Medido: existen `cat_conductas_bitacora`
-(adiestramiento) y los nueve registrables de grooming, **y ninguno es de
-guardería**. *Reusar el vocabulario del adiestramiento acá sería trasplantar un
-criterio correcto a otra pregunta* — el mismo error que `D-976` nombra. **Van
-con su motor; pedido a A.**
+**Los chips de comportamiento.** ~~Medido: ninguno es de guardería…~~
+
+⏪ **ENMIENDA — la premisa era falsa.** `cat_conductas_bitacora` **es la bitácora
+universal**, no la del adiestramiento: sus códigos son `durmio_tranquilo`,
+`comio_normal`, `se_escondio`, `miedo_ruidos`… — *exactamente «cómo se portó
+hoy»*. El currículum vive en otras dos tablas; **miré la tabla de al lado**.
+
+⇒ **El vocabulario sirve y el recorte perro/gato es un filtro de datos**
+(`especies_aplicables`), no una decisión de producto. **Lo que falta es el
+escritor del prestador**, que es técnico y está en la cola de A. *La disciplina
+de no trasplantar era correcta; el hecho sobre el que la apliqué, no.*
 
 ---
 
