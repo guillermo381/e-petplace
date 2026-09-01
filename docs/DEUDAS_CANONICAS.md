@@ -26188,3 +26188,208 @@ Su hermana ya medida: **`suscripcion_servicio` (el plan de paseo) figura
 `cobrable_por_checkout = true` con su compuerta** — *el catálogo lo admite*, y
 lo que falta es la rama en la edge (**0 ocurrencias**, anexo A). **Confirma que
 el catálogo no es la puerta.**
+
+---
+
+## 🟡 `D-1000` — EL ESPEJO DEL TRAMO VIVO TIENE SU RETIRO CUMPLIDO
+
+**De C (F2), con su número asignado acá.**
+
+`apps/cliente/src/app/guarderia/[estadiaId].tsx` mantiene `estaViajando`, que
+**repite el criterio del servidor** para saber si hay viaje en curso. Nació
+porque **no existía wrapper**. **Hoy existe:** `obtenerTramoVivoDeMiMascota`
+(`guarderia-reserva.ts`, S111-A).
+
+> ### ⇒ La condición de retiro **ya se cumplió**. Lo que queda no es un rediseño: es **reemplazar una llamada**.
+
+**Por qué NO se hizo hoy, y es la decisión correcta:** cambiar el lector del
+durante **en el cierre** es tocar exactamente el camino que el founder está por
+caminar. *Un espejo que lleva semanas funcionando aguanta un día más; una
+regresión en el gate cuesta la pasada entera.*
+
+⚠️ **Mientras viva, el riesgo es el de todo espejo: diverge en silencio.** El
+día que el motor cambie su regla, la pantalla sigue con la vieja y **nada da
+rojo**.
+
+**DISPARO: la primera tanda que toque el durante del cliente.**
+
+---
+
+## 🔴 `D-1001` — LA MENSUALIDAD DE GUARDERÍA NO VALIDA ESPECIE
+
+**De C (F3), medida por A contra el objeto el 1-sep 17:00 -05.**
+
+`guarderia_mensual.especies_elegibles = ["perro","gato"]` — **el recorte
+existe**. Y la **única** suscripción de guardería activa es **`20d025ca`, de
+Pepe, que es un AVE**. Las otras cinco están canceladas.
+
+> ### ⇒ La puerta de la mensualidad **no consulta el recorte que el catálogo ya tiene**. No falta el dato: falta que alguien lo mire.
+
+**Y muerde dos veces:**
+- **Hoy**, porque es el **único sujeto vivo** para ejercer el cobro de
+  mensualidad por DeUna ⇒ *la prueba correría sobre un dato que no debería
+  existir*.
+- **El 30-sep**, porque deja de ser una fila de prueba y pasa a ser una familia
+  pagando por un servicio que su animal no puede recibir.
+
+**DISPARO: antes de la primera mensualidad real.** *Se cierra la puerta antes de
+vender, no después.*
+
+---
+
+## 🔴 `L-470` — UNA PIEZA MÁS ESTRICTA QUE LA FUENTE QUE LA ALIMENTA EMPUJA AL CAST, Y EL CAST BORRA LA LEY SIN DEJAR RASTRO
+
+**Medida por B y por C sobre el MISMO hecho, desde los dos lados** — se depositan
+**fusionadas** porque son una sola: `EvidenciaClip.reglas` exigía tupla **no
+vacía** y `reglasSegunLugar()` prometía `readonly ReglaEncuadre[]`.
+
+**B lo vio desde la pieza:** *la prop es más estricta que su fuente.*
+**C lo vio desde la fuente:** *el tipo dice menos de lo que la función
+garantiza.* **Es el mismo defecto, y su forma importa:**
+
+> ### El camino honesto obliga a estrechar; **el apurado castea — y ahí la ley desaparece sin dejar rastro.** Un `as` no falla, no avisa, y compila igual que la versión correcta.
+
+### LA CURA, EN DOS CAPAS
+
+**① Que la FUENTE prometa lo que ya cumple.** Y la parte fina es de C, y es la
+que salva la cura de ser decorativa: **no se afirma la tupla sobre el resultado
+de un `filter`** —*el `filter` no conserva el largo*, así que esa promesa sería
+exactamente la mentira que el cambio existía para evitar—. Se **enumera la regla
+madre aparte**, y entonces **la garantía es del compilador**.
+
+**② Que la PIEZA falle cerrado igual.** Sin guía, el obturador se apaga. *Una
+fuente arreglada no exime a la pieza: mañana la llama otro consumidor.*
+
+**DISPARO: toda pieza nueva de `packages/ui` cuya prop sea más estricta que lo
+que devuelve el helper de su consumidor.** Se cobra **al primer montaje**.
+
+---
+
+## 🔴 `L-471` — EL MENSAJE DE COMMIT QUE SE CORROMPE SOLO
+
+**De B, y medido en DOS pistas el mismo día, independientemente.**
+
+Las **backticks dentro de comillas dobles se ejecutan como sustitución de
+comandos** en zsh. A B le comió **dos fragmentos** de un mensaje — y no
+cualquiera: **el sujeto de la frase que explicaba por qué existe la segunda
+capa**.
+
+> ### 🔴 Un mensaje corrupto **no rompe nada, no avisa, y se lee como si estuviera completo.** El commit entra, el gate pasa, y lo que falta es justo la explicación.
+
+**Cura: todo mensaje largo va por archivo (`-F`), jamás `-m "…"`.**
+
+**DISPARO: cualquier `git commit -m` con backticks, comillas o `$` en el
+cuerpo.** *Se cobra en silencio, así que la única defensa es no usar esa forma.*
+
+---
+
+## 🔴 `L-472` — UNA VOZ QUE EXPLICA UN MECANISMO ES UNA AFIRMACIÓN MÁS QUE HAY QUE MANTENER VERDADERA
+
+**De C.** Escribió *«un clip sin micrófono sale mudo»* en el código **y en la
+voz al usuario**, sin haberlo medido. El contrato de `expo-camera` documenta
+`mute` como opción y **no dice qué hace cuando el permiso falta**.
+
+**La decisión no cambiaba** —en los dos casos el clip no sirve— **y la
+afirmación sí.**
+
+> ### 🔴 Y el costo se paga en el peor momento: **el usuario lee esa explicación justo cuando algo no anda.** Una voz que dice *qué* pasa envejece bien; una que dice *por qué* pasa hay que mantenerla verdadera para siempre.
+
+**Su corolario, ya aplicado:** el comentario ahora **dice qué se midió y qué
+no**. *Declarar el límite de lo medido cuesta una línea; una explicación falsa
+cuesta la confianza en todas las demás.*
+
+**DISPARO: cada vez que una voz explique un porqué y no sólo un qué.**
+
+---
+
+## ☠️ `L-473` — UNA VERDAD PUEDE TAPAR OTRA COSA
+
+**De C, y me nombra a mí, que es lo que la vuelve exigible.**
+
+El botón de pago seguía apagado tras la cura. Yo medí la causa: **el founder
+estaba mirando el lote anterior** —la cura estaba pusheada y fuera de `main`—.
+**Era correcta, estaba medida contra el objeto, y era suficiente para el gate.**
+
+**Y no explicaba por qué el botón estaba MUDO.**
+
+> ### Son DOS hechos, y sólo uno se iba con el OTA viejo. Si C hubiera cerrado con mi medición, **`D-999` quedaba vivo escondido detrás de una explicación buena** — ocho pantallas que frenan sin decir por qué.
+
+🔴 **Esto es más difícil de cazar que un error, porque no hay nada que
+contradecir:** la explicación es cierta, cierra el síntoma reportado, y **la
+única señal de que falta algo es un detalle que la causa no cubre**. Acá fue
+*«el founder no vio NINGUNA razón»* — un dato que la explicación buena dejaba
+sin tocar.
+
+**El corolario operativo:** cuando una causa explique el síntoma **pero no todos
+sus detalles**, los detalles sobrantes **no se descartan por elegancia**. *Se
+persiguen aparte.*
+
+**DISPARO: cuando una causa explique el síntoma reportado y quede un detalle
+suelto.**
+
+---
+
+## 🔴 `D-1002` — EL COMANDO CON QUE EL CANON MIDE SU PROPIO NÚMERO LIBRE **QUEDÓ ROTO HOY, PARA LOS DOS LADOS**
+
+**Nace del acto de depositar `D-1000`.** El `CLAUDE.md` declara —a propósito, y
+con buena razón— **el COMANDO en vez del número**, porque el número decae. El
+comando es:
+
+```
+grep -o "D-[0-9]\{3\}" docs/DEUDAS_CANONICAS.md | sort -u | tail -1
+```
+
+### EL ROJO, PRODUCIDO CONTRA EL OBJETO (1-sep-2026 17:40 -05)
+
+| instrumento | devuelve | real |
+|---|---|---|
+| **3 dígitos** (el del canon) | `D-999` | **`D-1001`** |
+| **4 dígitos** (la corrección obvia) | **`D-2026`** | **`D-1001`** |
+
+**Los dos fallan, y para lados OPUESTOS:**
+
+- **`\{3\}` SUBCUENTA**: `D-1000` matchea como `D-100`, y `sort -u | tail -1` lo
+  entierra. ⇒ **la próxima sesión lee `D-999` y pisa `D-1000` y `D-1001`.**
+- **`\{3,4\}` SOBRECUENTA**: devuelve **`D-2026`**, que **no es una ficha** — sale
+  de *«Resolución SPD**-2026**-0009-R»* dentro de una cita legal. ⇒ **la próxima
+  sesión saltaría mil números.**
+
+> ### ⇒ La cura obvia es peor que el defecto: uno hace **chocar**, el otro hace **saltar** — y el que salta no tiene síntoma, así que nadie lo va a notar nunca.
+
+### POR QUÉ ES 🔴 Y NO 🟡
+
+**El daño ya se cobró hoy con el comando VIEJO: `D-998` se tomó DOS VECES**
+mientras dos pistas medían en paralelo. *Y eso pasó cuando el instrumento
+todavía funcionaba.* A partir de `D-1000` **el choque deja de ser una carrera y
+pasa a ser el resultado normal**: toda sesión que obedezca el `CLAUDE.md` al pie
+va a leer `D-999`.
+
+🔴 **Y hereda el peor rasgo de su clase: un canon que enseña a medir mal es peor
+que uno que no enseña nada**, porque el que mide cree que midió.
+
+### LA FORMA QUE SÍ MIDE (medida, no propuesta)
+
+Contar **por ENCABEZADO**, no por ocurrencia de texto — *una ficha es un
+encabezado, no una mención* — y ordenar **numéricamente**:
+
+```
+grep -o "^## .*\`D-[0-9]\{3,4\}\`" docs/DEUDAS_CANONICAS.md \
+  | grep -o "D-[0-9]\{3,4\}" | sort -u | sort -t- -k2 -n | tail -1
+```
+
+Devuelve **`D-1001`**, que es el máximo real. **Y su control es el mismo defecto
+que lo parió:** el `sort -u` alfabético pone `D-999` después de `D-1000`; hace
+falta `sort -t- -k2 -n`. *La mitad del arreglo no está en el patrón: está en el
+orden.*
+
+### NO SE CURÓ, Y ES DELIBERADO
+
+**S111 cerró.** La orden del cierre es fichar y no curar salvo que deje `main`
+rojo, y esto no lo deja. **Pero su disparo es inmediato y por eso va 🔴.**
+
+**DISPARO: la PRIMERA sesión que vaya a depositar una ficha.** *Se cura antes de
+escribir el próximo número, no después de que dos pistas se pisen otra vez.*
+
+⚠️ **Mientras tanto, el número libre es `D-1003` y el máximo real es `D-1001`** —
+escrito acá **a propósito**, contra la propia ley de no escribir números, porque
+**hoy el comando no lo puede decir**.
