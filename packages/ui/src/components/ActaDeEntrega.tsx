@@ -159,8 +159,30 @@ export function ActaDeEntrega(props: ActaDeEntregaProps) {
   const { items, rotuloItems, media, rotuloMedia, rotuloObservaciones, conformidad, vozConformidad } =
     props
 
-  /* REGLA DE EXISTENCIA: sin ítems no hay acta que levantar ni que leer. */
-  if (items.length === 0) return null
+  /* ⏪ MURIÓ LA REGLA DE EXISTENCIA POR CHECKLIST (S111-B, pedido de C con
+     el hallazgo ⑤ del gate del founder). Decía:
+
+         if (items.length === 0) return null   // «sin ítems no hay acta»
+
+     🔴 **ERA FALSA, Y SU MODO DE FALLA ERA EL SILENCIO.** El checklist es una
+     SECCIÓN del acta, no su condición de existencia: la devolución lleva
+     estado con fotos · incidentes · objetos · conformidad (§4 de la letra) y
+     **el carnet no está en esa lista** — se verifica al RECIBIR, no al
+     devolver. Sacado ese ítem, la devolución se quedaba sin ningún ítem y
+     **la pieza entera desaparecía llevándose la media y las observaciones,
+     que sí existen. Sin error y sin aviso.**
+
+     *Una pieza que no se dibuja no se distingue de una que todavía no tiene
+     datos* — por eso no se reemplaza por otro guard más fino: **el acta no
+     se auto-oculta nunca.** Montarla o no es decisión de la PANTALLA, que es
+     la única que sabe si hay acta. Cada sección se omite sola cuando está
+     vacía, como `media` ya hacía.
+
+     ⚠️ Medido antes de tocar: los dos consumidores vivos
+     (`apps/cliente/.../guarderia/[estadiaId]` y
+     `apps/prestador/.../hoja-acta-guarderia`) pasan hoy al menos un ítem
+     ⇒ **ninguno dependía del `null`**, así que esto no hace aparecer un acta
+     vacía donde antes no había nada. */
 
   const editable = props.modo === 'levantar'
 
@@ -174,7 +196,9 @@ export function ActaDeEntrega(props: ActaDeEntregaProps) {
   return (
     <Tarjeta elevacion="reposo" relleno="amplio">
       <View style={{ gap: spacing[4] }}>
-        {/* EL CHECKLIST */}
+        {/* EL CHECKLIST — una sección más: se omite sola si no hay ítems,
+            igual que `media`. Su ausencia NO borra el resto del acta. */}
+        {items.length === 0 ? null : (
         <View style={{ gap: spacing[2] }}>
           {rotuloItems === undefined ? null : <Texto variante="seccion">{rotuloItems}</Texto>}
 
@@ -212,6 +236,7 @@ export function ActaDeEntrega(props: ActaDeEntregaProps) {
             )}
           </View>
         </View>
+        )}
 
         {/* LAS FOTOS DE ESTADO — slot; la captura es de la pantalla. */}
         {media === undefined ? null : (

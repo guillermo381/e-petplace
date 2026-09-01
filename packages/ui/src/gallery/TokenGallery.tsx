@@ -7115,6 +7115,24 @@ function PiezasDelOficioS107() {
           onConformar={() => {}}
           etiquetaConformar="Estoy conforme"
         />
+
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          🔴 EL CASO DE LA CURA S111-B · DEVOLUCIÓN SIN CHECKLIST — el carnet se
+          verifica al RECIBIR, no al devolver (§4 + hallazgo ⑤ del gate), así que
+          la devolución se queda sin ningún ítem. ANTES esta tarjeta NO SE DIBUJABA
+          y se llevaba la media y las observaciones, sin error y sin aviso. El gate
+          es una pregunta: ¿se ve el acta completa, sin sección de checklist?
+        </Text>
+        <ActaDeEntrega
+          modo="leer"
+          direccion="devolucion"
+          items={[]}
+          rotuloItems="Al devolverlo"
+          rotuloObservaciones="Observaciones"
+          observaciones="Volvió tranquilo, sin novedad."
+          conformidad="conforme"
+          vozConformidad="Conforme"
+        />
       </View>
 
       {/* ⑦ante · LA BALDOSA A DOS Y A TRES — el par que prueba la cura */}
