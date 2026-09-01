@@ -1676,6 +1676,7 @@ export type {
   ActoDelDurante,
   MotivoNoRecogida,
   PayloadActa,
+  PayloadActaDevolucion,
   ResultadoActoUnico,
   ResultadoLote,
   ResultadoNoRecogida,

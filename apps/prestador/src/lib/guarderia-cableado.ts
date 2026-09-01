@@ -134,8 +134,15 @@ export function cablearLevantarActa(): LevantarActa {
  */
 export function cablearActoUnico(): LevantarActa {
   return async (entrada) => {
-    const payload = {
-      carnetVerificado: entrada.carnetVerificado,
+    /* ⚠️ S111-A (A, en territorio de C, y se declara): el payload se PARTIÓ
+       porque el contrato cambió. `marcarEntregada` ya **no acepta**
+       `carnetVerificado` —el tipo lo prohíbe con `?: never`— porque el carnet
+       se verifica AL RECIBIR, no al devolver (criterio legal §4, hallazgo ⑤ del
+       gate). *Un payload compartido para las dos direcciones mandaba a la
+       devolución un hecho que nadie verificó.*
+       Lo tocó A porque su cambio de contrato rompió esta compilación; **si C
+       prefiere otra forma, es suya y se cambia sin pedir permiso.** */
+    const comun = {
       objetos: entrada.objetos,
       observaciones: entrada.observaciones,
       /* `levantadaEn` ES la hora de la puerta: nace en el aparato al crear el
@@ -146,8 +153,11 @@ export function cablearActoUnico(): LevantarActa {
     };
     const r =
       entrada.direccion === 'recogida'
-        ? await marcarABordo(entrada.estadiaId, payload)
-        : await marcarEntregada(entrada.estadiaId, payload);
+        ? await marcarABordo(entrada.estadiaId, {
+            ...comun,
+            carnetVerificado: entrada.carnetVerificado,
+          })
+        : await marcarEntregada(entrada.estadiaId, comun);
     if (!r.ok) return { ok: false, codigo: r.codigo, mensaje: r.mensaje };
     /* `actaYaExistia` y no `yaEstaba`: la cola pregunta por SU acta —si ya
        viajó, deja de reintentarla—, no por el estado de la estadía. Son dos
