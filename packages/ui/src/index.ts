@@ -524,6 +524,28 @@ export {
   type EstadoSolicitud,
 } from './components/EstadoSolicitudAdopcion'
 
+// EvidenciaClip — S111-B: GRABAR UN CLIP QUE SE PUEDE MANDAR (el durante de
+// guardería). `CRITERIO_LEGAL_GUARDERIA` §5 es LEY DE CAPTURA, no ayuda.
+//
+//   🔴 LA GUÍA NO DESAPARECE AL EMPEZAR A GRABAR — el segundo en que importa
+//     es el segundo en que se está encuadrando. La convención del video dice
+//     lo contrario y acá sería el error.
+//   🔴 NO MONTA LA CÁMARA (`vista` es slot). Medido: `packages/ui` no tiene
+//     `expo-camera` y `apps/cliente` TAMPOCO — un import duro rompería el
+//     bundle del cliente, y por nativo ni se arreglaría por OTA.
+//   🔴 `techoSeg` SIN DEFAULT: el número vive en la cola (`CLIP_TECHO_S`) y
+//     un default acá sería la segunda fuente.
+//   🔴 UN envío con N destinatarios (`onPublicar` recibe tupla NO VACÍA), y
+//     la cola ya lo soporta: `ItemMedia.mascotaIds: string[]`.
+//   ⚠️ Cero texto legal adentro: las reglas entran como { clave, voz }.
+export {
+  EvidenciaClip,
+  type EvidenciaClipProps,
+  type MomentoClip,
+  type ReglaConVoz,
+  type CandidatoClip,
+} from './components/EvidenciaClip'
+
 // TarjetaPedido — S96-B: UN pedido en una lista, de los DOS lados. La fila
 // de la lista Hoy del vendedor (LETRA_PANEL_VENDEDOR_S96 §2.1) y la de
 // "Mis pedidos" de la familia (LETRA_RECORRIDO_DESPENSA_S96 §8.1).
