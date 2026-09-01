@@ -39,6 +39,7 @@ import {
   Icono,
   CeldaNavegacion,
   FilaCita,
+  Insignia,
   FiltroPills,
   Tarjeta,
   Texto,
@@ -664,10 +665,45 @@ export default function LogGuarderia() {
                      y el día que el día suelto también venga sin precio la
                      marca se vuelve falsa sola. */
                   metadataMono={fechaCortaMono(e.fecha, idioma)}
+                  /* 🔴 `D-990` · QUE LA FAMILIA SE ENTERE SIN TENER QUE ENTRAR.
+                     La voz de «no se pudo recoger» existía desde S107-C, pero
+                     **sólo dentro del durante** — y la familia no tiene ninguna
+                     razón para entrar ahí si no sabe que pasó algo. *Una voz
+                     correcta en una pantalla a la que nadie va es la mitad que
+                     no se ve.*
+
+                     Va en `fin`, que es el slot de DATOS de la pieza, y como
+                     `Insignia` porque es ESTADO y no acción (19.4). `atencion`
+                     y no `danger`: es un hecho del día, no una alarma. */
+                  fin={
+                    e.estadoEstadia === 'no_recogida' ? (
+                      <Insignia estado="atencion" etiqueta={t('logGuarderia.noRecogidaChip')} />
+                    ) : undefined
+                  }
                   mascota={{ nombre: e.mascotaNombre, fotoUrl: undefined }}
                   onPress={() => setAbierta(abierta === e.citaId ? null : e.citaId)}
                   acciones={
-                    abierta === e.citaId && e.estadiaId !== null ? (
+                    /* 🔴 EL RECORTE FIRMADO, ENTERO Y NADA MÁS (firma ②): «no se
+                       pudo recoger · el día se cobró y no se repone». **Ni una
+                       palabra de mora, aviso ni protocolo** — `LETRA_GUARDERIA`
+                       §6 sigue frenada por riesgo penal.
+
+                       ✅ Y la segunda frase se escribe porque se MIDIÓ que es
+                       cierta, no porque esté firmada: `marcar_no_recogida_
+                       guarderia` no toca `bono`, `saldo`, `reverso`,
+                       `reembolso`, `precio` ni `cupo` — cero ocurrencias de las
+                       siete sobre su cuerpo. *No devuelve plata y no repone el
+                       día: es cierta por construcción.*
+
+                       🔴 Y NO SE OFRECE «Ver su día»: no hubo día. Sin viaje,
+                       sin fotos y sin acta, ese botón lleva a una pantalla que
+                       repite esta misma frase sobre un expediente vacío
+                       (Ley 23). */
+                    abierta === e.citaId && e.estadoEstadia === 'no_recogida' ? (
+                      <Texto variante="apoyo">
+                        {t('logGuarderia.noRecogidaDetalle', { nombre: e.mascotaNombre })}
+                      </Texto>
+                    ) : abierta === e.citaId && e.estadiaId !== null ? (
                       <Boton
                         variante="secundario"
                         bloque
