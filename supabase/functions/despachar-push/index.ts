@@ -47,6 +47,10 @@ type Datos = {
   titulo?: string;
   mensaje?: string;
   mascota_nombre?: string;
+  /** El destino del toque. Lo pone el emisor en `notificacion_intencion.datos`;
+   *  acá sólo se reenvía. **Ausente es un valor válido**: un tipo de aviso sin
+   *  destino tiene que verse como sin destino. */
+  ruta?: string;
 };
 
 // ── Lectura del diagnóstico de FCM ─────────────────────────────────────────
@@ -231,7 +235,25 @@ Deno.serve(async (req) => {
             },
             // El destino del toque. La app lo lee para abrir el aviso; nada
             // de esto se muestra en la pantalla bloqueada.
-            data: { intencion_id: i.id, tipo: i.tipo },
+            // 🔴 `ruta` VIAJA EN EL SOBRE (pedido de C, y su argumento gana al
+            // mío). Yo había votado que la app fuera a buscarla leyendo la
+            // intención por su id. C midió lo que a mi voto le faltaba: **no
+            // existe ningún wrapper ni lector de `notificacion_intencion`**, así
+            // que eso no era «un viaje más» — era un wrapper, un RPC y una
+            // policy nuevos para ir a buscar afuera un dato que el servidor ya
+            // tiene en la mano acá.
+            //
+            // Y su modo de falla es peor justo donde más duele: **con la app
+            // cerrada**, ir a buscarlo hace que el destino dependa de una
+            // llamada de red que puede fallar — *la push llegó, el usuario
+            // tocó, y no hay a dónde ir*.
+            //
+            // STRING PLANO: FCM exige que todo valor de `data` lo sea; un
+            // objeto acá se serializa distinto según plataforma.
+            // VACÍO, NO `/`: *un tipo sin destino tiene que verse como sin
+            // destino, no como «el home a propósito»* — el que no navega y lo
+            // declara es el consumidor, y para eso necesita poder distinguirlo.
+            data: { intencion_id: i.id, tipo: i.tipo, ruta: datos.ruta ?? '' },
           },
         }),
       });
