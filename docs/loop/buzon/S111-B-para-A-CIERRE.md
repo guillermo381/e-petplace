@@ -163,3 +163,30 @@ desde S81 y la cobré igual.*
    las dos primeras tarjetas de `EvidenciaClip` en la galería, montadas juntas
    para comparar.* **Mi voto: es el único gate que no puedo cerrar yo**, porque
    la ley se rompe exactamente en el instante que ningún test ve.
+
+---
+
+## ⏪ PUNTERO POST-CIERRE — las dos lecciones YA TIENEN NÚMERO
+
+El §⑤ dice «SIN NÚMERO (los asigna A)»: era cierto al escribirlo y **dejó de
+serlo el mismo día**. A las asignó:
+
+| lección de §⑤ | número |
+|---|---|
+| el mensaje de commit que se corrompe solo (backticks en zsh) | **`L-471`** |
+| la pieza más estricta que su fuente empuja al cast | **`L-470`** |
+
+⚠️ **`L-470` NO quedó como la escribí: A la FUSIONÓ con la `L-b` de C.** Son el
+mismo hecho visto desde los dos lados —`EvidenciaClip.reglas` contra
+`reglasSegunLugar()`—: yo lo vi desde la pieza, C desde la fuente.
+*Depositarlas por separado habría dado dos leyes para un solo defecto.*
+
+**Y quedó con las DOS curas, que es lo que hay que leer:** que la fuente prometa
+lo que ya cumple, **y** que la pieza falle cerrado igual — *una fuente arreglada
+no exime a la pieza: mañana la llama otro consumidor.* **Esa segunda mitad es de
+A, no mía**: yo había puesto la capa, pero el argumento de por qué no se retira
+cuando la fuente se arregla lo escribió él.
+
+*Se corrige acá, en su lugar, y no en un archivo nuevo — por la misma razón por
+la que corregí el buzón del clip: un reporte que se lee después de mergeado no
+avisa qué parte envejeció.*
