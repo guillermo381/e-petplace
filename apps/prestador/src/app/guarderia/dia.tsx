@@ -31,7 +31,7 @@
  * pantalla mintiendo sobre lo que puede hacer.*
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -80,6 +80,8 @@ import {
   leerViaje,
   type ViajeAbierto,
 } from '@/lib/viaje-guarderia';
+import { cablearEmitirPunto } from '@/lib/guarderia-cableado';
+import { usePuntoVivo } from '@/lib/use-punto-vivo';
 
 /** Fecha LOCAL. 🔴 `toISOString()` da UTC y en Guayaquil, pasadas las 19:00,
  *  devuelve el día siguiente — la jornada saldría vacía a la tarde. */
@@ -145,6 +147,26 @@ export default function DiaGuarderia() {
   /** La estadía cuyo «no estaba» se está anotando. `null` = no se monta. */
   const [noEstaba, setNoEstaba] = useState<EstadiaDelDia | null>(null);
   const [enVuelo, setEnVuelo] = useState(false);
+
+  /**
+   * EL PUNTO VIVO — lo que la familia ve mientras el vehículo va en camino.
+   *
+   * 🔴 **`activo` es el freno, y no es opcional:** `cerrarTramo` **borra** el
+   * punto a propósito —*lo que ya no se mueve no se sigue mostrando*— y desde
+   * S110-A el escritor **rebota `tramo_cerrado`**. Sin este freno, un emisor
+   * rezagado resucitaría el punto y la familia vería moverse un vehículo que ya
+   * llegó.
+   *
+   * ⚠️ **UN PUNTO O NADA, JAMÁS LA TRAZA**, y no se sostiene con disciplina:
+   * el escritor es un UPSERT sobre `tramo_id`, así que cada punto pisa al
+   * anterior. *Las paradas de una ruta son las casas de otras familias.*
+   */
+  const emitirPunto = useMemo(() => cablearEmitirPunto(), []);
+  const punto = usePuntoVivo({
+    tramoId: viaje?.tramoId ?? '',
+    activo: viaje !== null,
+    emitir: emitirPunto,
+  });
 
   useEffect(() => {
     if (gate !== 'permitido') return;
@@ -430,6 +452,16 @@ export default function DiaGuarderia() {
                   la devolución el viaje se cierra cuando se entrega el último,
                   no con un botón. Ley 23 — la puerta no ofrece lo que va a
                   rechazar. */}
+              {/* 🔴 EL PERMISO DENEGADO SE DICE. Sin ubicación, la familia no
+                  ve a dónde va su animal — y el único que puede arreglarlo es
+                  quien tiene el teléfono en la mano. *Callarlo deja a las dos
+                  puntas sin entender: la familia mirando un mapa vacío y el
+                  cuidador creyendo que emite.* (Ley 13.) */}
+              {punto.estado === 'permiso_denegado' ? (
+                <Texto variante="apoyo" color="warning">
+                  {t('diaGuarderia.puntoSinPermiso')}
+                </Texto>
+              ) : null}
               {viaje.direccion === 'recogida' && aBordo.length > 0 ? (
                 <Boton
                   variante="primario"

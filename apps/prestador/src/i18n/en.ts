@@ -3338,6 +3338,7 @@ export const prestadorEn = {
     llegamos: 'We are here',
     subio: 'On board',
     entregado: 'Dropped off',
+    puntoSinPermiso: 'Without location permission the family cannot see where you are.',
     noEstaba: 'Nobody there',
     noRecogidaDetalle: '{{motivo}} · {{hora}}',
     diaCerrado: 'You dropped off the last one. The day is closed.',

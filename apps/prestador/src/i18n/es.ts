@@ -4243,6 +4243,7 @@ export const prestadorEs = {
     llegamos: 'Llegamos',
     subio: 'Subió',
     entregado: 'Entregado',
+    puntoSinPermiso: 'Sin permiso de ubicación la familia no ve dónde vas.',
     noEstaba: 'No estaba',
     noRecogidaDetalle: '{{motivo}} · {{hora}}',
     diaCerrado: 'Entregaste al último. El día está cerrado.',
