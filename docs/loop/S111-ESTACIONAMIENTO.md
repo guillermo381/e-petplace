@@ -14,6 +14,24 @@
 > elige mal**.
 > 🔴 *Una entrada sin ④ no está estacionada: está abandonada. El punto de
 > estacionar es que el trabajo de alrededor SIGA, con la puerta cerrada.*
+>
+> ---
+>
+> ### 🔴 DOS VOTOS DE PISTA NO SON UNA FIRMA — y con cinco pistas votando, hay que decirlo
+>
+> **Lo levantó B, y sobre una entrada donde su voto y el de A coincidían** (§5.2,
+> la salud del adoptable). Su literal: *«tu voto coincide con el mío, y eso NO
+> la destraba. Si construyera la pieza apoyado en que somos dos, estaría
+> eligiendo la respuesta con código — que es justo lo que el estacionamiento
+> existe para evitar.»*
+>
+> **La coincidencia entre pistas es INFORMACIÓN para el founder, jamás un
+> sustituto de su firma.** *El riesgo es sutil y crece con el número de pistas:
+> cuatro votos alineados se sienten como una decisión tomada, y no lo son —
+> nadie con autoridad para firmarla participó.*
+>
+> ⇒ **Una entrada sale del estacionamiento SÓLO por firma del founder.** Que las
+> pistas coincidan cambia lo rápido que él decide, no si hace falta que decida.
 
 ---
 
