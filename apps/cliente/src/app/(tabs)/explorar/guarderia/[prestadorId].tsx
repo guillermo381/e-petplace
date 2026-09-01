@@ -392,7 +392,30 @@ export default function LugarGuarderia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('lugarGuarderia.titulo')} atras onAtras={alAtras} />
+      {/* ☠️ S109-D · ACÁ VIVÍA UN `Encabezado variante="navegacion"`, Y ERA LA
+          FRANJA. El founder lo vio como familia: *«la vitrina de guardería no
+          pinta la imagen hasta el techo como los demás oficios»*.
+
+          🔴 **LA CAUSA ES UNA CONTRADICCIÓN QUE LA PROPIA PANTALLA DECLARABA:**
+          montaba `FichaPrestador` con **`aSangre`** —que le pide a la pieza
+          sangrar BAJO la barra de estado, y por eso ella suma `insets.top` al
+          alto de la portada y baja lo que flota encima— **y encima le apilaba
+          una barra de navegación**. La foto sangraba, sí: bajo un encabezado
+          opaco que empezaba donde terminaba la barra. *`aSangre` y una barra
+          fija arriba son mutuamente excluyentes por construcción; pedir las
+          dos no falla, deja la franja.*
+
+          MEDIDO CONTRA LA VITRINA QUE SÍ LO HACE (`prestador/[prestadorId]`,
+          la de paseo, grooming y vet): tiene **cero** `Encabezado` —el volver
+          es la `FlechaVolver` flotando sobre la portada, que esta pantalla YA
+          pasaba en `sobrePortada`—, mismo `ScrollView`, mismo
+          `paddingBottom`. *La diferencia no era safe area ni padding de
+          contenedor: era un header propio, y de los tres candidatos era el
+          único que dejaba rastro en el árbol.*
+
+          ⚠️ Los otros dos `Encabezado` de este archivo —carga y error— SE
+          QUEDAN: ahí no hay vitrina que sangrar, y una pantalla de error sin
+          forma de volver es un callejón. */}
 
       {/* ══════════════════════════════════════════════════════════════════
           LA VITRINA · **`FichaPrestador`, la MISMA que grooming**
