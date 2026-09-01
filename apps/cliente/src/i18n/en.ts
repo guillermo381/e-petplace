@@ -1227,9 +1227,17 @@ export const clienteEn = {
   // S73 C3 — the adoption door (shelters, honest step 0)
   adoptar: {
     titulo: 'Adoption',
-    proximamenteTitulo: 'Shelters are coming soon',
-    proximamenteDetalle:
-      "We're bringing shelters to e-PetPlace. When they're here, you'll meet their pets up for adoption and get to give them a family.",
+    filtroEspecie: 'What are you looking for',
+    todas: 'All',
+    especie_perro: 'Dogs',
+    especie_gato: 'Cats',
+    sexo_macho: 'Male',
+    sexo_hembra: 'Female',
+    publicadoPor: 'From {{refugio}}',
+    vacioTitulo: 'No animals published yet',
+    vacioDetalle: 'When a shelter publishes their animals, you will meet them here.',
+    errorTitulo: 'We could not load the list',
+    errorDetalle: 'Check your connection and try again.',
   },
   // S55-A B3 — Account v1. Voiced strings APPROVED by founder (S55 batch).
   // «updates» es LA palabra inglesa para «avisos» — unificada por
