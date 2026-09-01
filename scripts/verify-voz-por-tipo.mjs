@@ -47,7 +47,11 @@ const VOZ = 'apps/cliente/src/lib/voz-servicio.ts';
 const GLIFO = 'apps/cliente/src/app/citas/[mascotaId].tsx';
 
 /**
- * Baseline SOLO-BAJA. **Nace en 3, MEDIDO y no deseado.**
+ * Baseline SOLO-BAJA — **en 0, y ahí se queda.**
+ *
+ * ☠️ Nació en 3 (medido, no deseado) y **los tres se curaron en el mismo acto,
+ * por firma del founder**: *«un gate que nace en 3 y se queda en 3 enseña lo
+ * mismo que la lápida que este gate existe para reemplazar»*.
  *
  * Lo estimé en 1 mirando sólo la voz; **el gate encontró que el GLIFO tiene más
  * deuda que la voz** — `consulta_general` y `vacunacion` tampoco lo tienen. *Un
@@ -62,7 +66,7 @@ const GLIFO = 'apps/cliente/src/app/citas/[mascotaId].tsx';
  * **4** y con `guarderia_dia` adentro da **3**. Mide el movimiento que le
  * importa.
  */
-const BASELINE = 3;
+const BASELINE = 0;
 
 /**
  * Exenciones — **con su razón, y la razón es letra firmada, no comodidad.**

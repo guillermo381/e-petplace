@@ -18,6 +18,9 @@ const KEY_VOZ_SERVICIO = {
   adiestramiento: 'servicioVoz.adiestramiento',
   // S68-A2: los comprables del mundo vet (V2 + urgencia same-day).
   consulta_general: 'servicioVoz.consultaGeneral',
+  /* S109-D · faltaba, y NO era hipotética: hay una cita real de una familia
+     con este tipo, listada MUDA hoy. La encontró el gate de voz-por-tipo. */
+  consulta_especializada: 'servicioVoz.consultaEspecializada',
   vacunacion: 'servicioVoz.vacunacion',
   urgencia_local: 'servicioVoz.urgenciaLocal',
   urgencia_domicilio: 'servicioVoz.urgenciaDomicilio',

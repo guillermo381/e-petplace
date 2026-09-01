@@ -103,7 +103,7 @@ function iconoDe(tipo: string | null): 'paseo' | 'grooming' | 'training' | 'tele
  *  Un oficio futuro sin glifo va sin ícono: cero genéricos (Ley 12). */
 function iconoOficio(
   tipo: string | null,
-): 'paseo' | 'grooming' | 'training' | 'telemedicina' | 'guarderia' | null {
+): 'paseo' | 'grooming' | 'training' | 'telemedicina' | 'guarderia' | 'veterinaria' | null {
   if (tipo?.startsWith('grooming')) return 'grooming';
   if (tipo === 'adiestramiento') return 'training';
   if (tipo?.startsWith('paseo')) return 'paseo';
@@ -113,6 +113,16 @@ function iconoOficio(
      mismo mapa cerrado que le quitaba el nombre, un renglón más abajo.* */
   if (tipo?.startsWith('guarderia')) return 'guarderia';
   if (esTeleconsulta(tipo)) return 'telemedicina';
+  /* S109-D · LO PRESENCIAL DEL VET, que faltaba entero. La teleconsulta tenía
+     su glifo y la consulta en el local no — así que una cita de vacunación o de
+     consulta se pintaba sin marca mientras la videollamada sí la tenía.
+     🔴 Lo encontró el gate, no el ojo: **el glifo tenía más deuda que la voz**,
+     y por eso el baseline nació en 3 y no en 1. Va DESPUÉS de `esTeleconsulta`
+     a propósito: la telemedicina es vet y tiene glifo propio — el orden es el
+     que decide, y si esta línea subiera se lo comería. */
+  if (tipo === 'consulta_general' || tipo === 'consulta_especializada' || tipo === 'vacunacion') {
+    return 'veterinaria';
+  }
   return null;
 }
 
