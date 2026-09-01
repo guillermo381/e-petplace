@@ -6714,7 +6714,7 @@ export type Database = {
           hora: string | null
           id: string
           llegada_en: string | null
-          mascota_id: string | null
+          mascota_id: string
           metadata: Json | null
           modalidad: string
           motivo: string | null
@@ -6749,7 +6749,7 @@ export type Database = {
           hora?: string | null
           id?: string
           llegada_en?: string | null
-          mascota_id?: string | null
+          mascota_id: string
           metadata?: Json | null
           modalidad?: string
           motivo?: string | null
@@ -6784,7 +6784,7 @@ export type Database = {
           hora?: string | null
           id?: string
           llegada_en?: string | null
-          mascota_id?: string | null
+          mascota_id?: string
           metadata?: Json | null
           modalidad?: string
           motivo?: string | null
@@ -11136,7 +11136,7 @@ export type Database = {
           estado: string
           familia_id: string
           id: string
-          mascota_id: string | null
+          mascota_id: string
           monto_esperado: number
           periodo_desde: string | null
           periodo_hasta: string | null
@@ -11157,7 +11157,7 @@ export type Database = {
           estado?: string
           familia_id: string
           id?: string
-          mascota_id?: string | null
+          mascota_id: string
           monto_esperado: number
           periodo_desde?: string | null
           periodo_hasta?: string | null
@@ -11178,7 +11178,7 @@ export type Database = {
           estado?: string
           familia_id?: string
           id?: string
-          mascota_id?: string | null
+          mascota_id?: string
           monto_esperado?: number
           periodo_desde?: string | null
           periodo_hasta?: string | null
@@ -22562,7 +22562,10 @@ export type Database = {
       }
       expirar_bonos_sin_pago: { Args: never; Returns: number }
       expirar_citas_pendientes: { Args: never; Returns: undefined }
+      expirar_mensualidades_sin_pago: { Args: never; Returns: number }
       expirar_pedidos_sin_pago: { Args: never; Returns: Json }
+      expirar_planes_sin_pago: { Args: never; Returns: number }
+      expirar_programas_sin_pago: { Args: never; Returns: number }
       expirar_reservas_vencidas: { Args: never; Returns: Json }
       exportar_mis_datos: { Args: never; Returns: Json }
       fijar_fecha_procedimiento: {
@@ -23134,6 +23137,25 @@ export type Database = {
           estadia_id: string
           estado: string
           estado_reserva: string
+          llegada_en: string
+          mascota_especie: string
+          mascota_foto_url: string
+          mascota_id: string
+          mascota_nombre: string
+        }[]
+      }
+      obtener_estadias_por_rango: {
+        Args: { p_desde: string; p_hasta: string; p_prestador_id: string }
+        Returns: {
+          a_bordo_en: string
+          cita_id: string
+          direccion_snapshot: Json
+          entregada_en: string
+          espacio_nombre: string
+          estadia_id: string
+          estado: string
+          estado_reserva: string
+          fecha: string
           llegada_en: string
           mascota_especie: string
           mascota_foto_url: string

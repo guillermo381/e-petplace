@@ -676,6 +676,84 @@ export async function obtenerEstadiasDelDia(
   return { ok: true, data: salida };
 }
 
+/**
+ * ═══ LAS ESTADÍAS DE UN RANGO, EN UN SOLO VIAJE — S109-A ═══════════════════
+ *
+ * **Por qué existe, con la medición de S109-D adentro:** los otros cuatro
+ * lectores de la jornada traen **diez días en un fetch** (S86-C) y elegir un
+ * día es **un filtro sobre memoria**. `obtenerEstadiasDelDia` toma UNA fecha,
+ * así que la quinta pata venía **en su propio viaje** y se re-consultaba al
+ * cambiar de día.
+ *
+ * 🔴 **Y D hizo bien en NO inventar el rango llamando diez veces:** eso habría
+ * pagado **dos veces** la deuda que `D-738` existe para no repetir. El peaje
+ * por petición es fijo (~150 ms) y la casa ya midió que **el techo no lo pone
+ * el servidor sino la cantidad de viajes por pantalla** (`L-223`).
+ *
+ * ⇒ Con esto la quinta pata **se pliega al `Promise.all`** de las otras cuatro
+ * y su efecto propio muere.
+ *
+ * 🟢 **`obtenerEstadiasDelDia` NO se retira**: tiene consumidores que piden un
+ * día y sólo un día. *Reemplazarla obligaría a cada uno a filtrar lo que no
+ * pidió.*
+ *
+ * ⚠️ **Devuelve `fecha` en cada fila, y sin eso no serviría:** quien llama
+ * tiene que poder separar los días en memoria. *Un lector de rango que no dice
+ * de qué día es cada fila obliga a volver a preguntar — justo lo que vino a
+ * evitar.* Y el servidor rebota `rango_demasiado_largo` sobre más de 62 días:
+ * *sin techo, «por rango» es «por todo».*
+ */
+export interface EstadiaEnRango extends EstadiaDelDia {
+  /** 'YYYY-MM-DD' — el día al que pertenece la fila. */
+  fecha: string;
+}
+
+export async function obtenerEstadiasPorRango(
+  prestadorId: string,
+  /** 'YYYY-MM-DD' */
+  desde: string,
+  /** 'YYYY-MM-DD' — inclusive. Máximo 62 días de distancia. */
+  hasta: string,
+): Promise<ResultadoWrapper<EstadiaEnRango[], CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('obtener_estadias_por_rango', {
+    p_prestador_id: prestadorId,
+    p_desde: desde,
+    p_hasta: hasta,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const salida: EstadiaEnRango[] = [];
+  for (const e of data) {
+    if (typeof e !== 'object' || e === null) return fallaCodigo('datos_inconsistentes');
+    const r = e as Record<string, unknown>;
+    /* Mismo guard de shape que su hermana, MÁS la fecha: sin ella la fila no
+       se puede ubicar en ningún día y el lector no cumpliría su propósito. */
+    if (typeof r.fecha !== 'string') return fallaCodigo('datos_inconsistentes');
+    if (typeof r.estadia_id !== 'string' || typeof r.cita_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    if (typeof r.estado !== 'string' || typeof r.mascota_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    salida.push({
+      fecha: r.fecha,
+      estadiaId: r.estadia_id,
+      citaId: r.cita_id,
+      estado: r.estado as EstadoEstadia,
+      mascotaId: r.mascota_id,
+      mascotaNombre: typeof r.mascota_nombre === 'string' ? r.mascota_nombre : '',
+      mascotaEspecie: typeof r.mascota_especie === 'string' ? r.mascota_especie : '',
+      mascotaFotoUrl: typeof r.mascota_foto_url === 'string' ? r.mascota_foto_url : null,
+      espacioNombre: typeof r.espacio_nombre === 'string' ? r.espacio_nombre : null,
+      direccion: r.direccion_snapshot ?? null,
+      aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
+      llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
+      entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+    });
+  }
+  return { ok: true, data: salida };
+}
+
 // ── ⑤ · LA MEDIA DEL DURANTE, EL PUNTO VIVO Y LAS ACTAS ─────────────────────
 
 export interface MediaGuarderia {

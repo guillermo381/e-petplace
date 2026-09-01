@@ -215,6 +215,38 @@ node scripts/verify-diseno.mjs >/dev/null 2>&1 || {
 }
 
 # ─────────────────────────────────────────────────────────────────────
+# ②bis LA JORNADA SE ENUMERA ENTERA (S109-D, cableado por A)
+#
+# 🔴 POR QUÉ ESTÁ ACÁ: la guardería existía —motor, wrapper, pantalla y
+#    cinco estadías vivas— y NO aparecía en TRES superficies del prestador,
+#    por tres mecanismos distintos con la misma forma: un `continue` por
+#    categoría, un mapa cerrado de cuatro claves, y cuatro lectores escritos
+#    a mano. **Ninguno falla: los tres OMITEN.** Y una omisión no tiene
+#    síntoma — el prestador leyó «hoy no tienes citas» con dos animales a
+#    bordo.
+#
+# ⚠️ ES APTO PARA EL HOOK PORQUE **NO NECESITA RED** (medido: 0 referencias
+#    a `lib-db`). Su universo sale de los lectores de `packages/api`, no de
+#    una lista adentro — *una lista habría sido el sexto mapa cerrado.*
+#
+# 🔴 Y POR ESO SU HERMANO **NO** ESTÁ ACÁ: `verify:voz-por-tipo` **EXIGE la
+#    base** (importa `lib-db`) y sin ella sale NO CONCLUYENTE. En el hook
+#    dejaría **sin poder commitear a cualquiera sin red**, y un gate que
+#    frena por no poder medir no protege: estorba. Su lugar es el paso ⓪ y
+#    el cierre, al lado de `verify:censo` — como lo declaró su autora.
+node scripts/verify-jornada-completa.mjs >/dev/null 2>&1 || {
+  echo ""
+  echo "✗ LA JORNADA NO SE ENUMERA ENTERA — el commit NO ocurre."
+  node scripts/verify-jornada-completa.mjs 2>&1 | grep -E "✗|🔴" | head -5
+  echo ""
+  echo "  Una superficie que enumera la jornada y se saltea un oficio no falla:"
+  echo "  OMITE. Y una omisión no tiene síntoma."
+  echo ""
+  echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+  exit 1
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # ③ EL TSC MIRA A LOS CONSUMIDORES, NO SOLO A LO QUE TOCASTE
 #    (S85-B11 — hueco nombrado por A tras el incidente del día).
 #

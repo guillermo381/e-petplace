@@ -1590,7 +1590,7 @@ export {
   type RequisitoFaltante,
   type EstadoRequisito,
   type ReservaGuarderia,
-  obtenerEstadiasDelDia,
+  obtenerEstadiasDelDia, obtenerEstadiasPorRango,
   publicarMediaGuarderia,
   obtenerMediaDelDia,
   obtenerMediaDeMiMascota,
@@ -1602,7 +1602,7 @@ export {
   type PuntoVivo,
   type DireccionActa,
   type Conformidad,
-  type EstadiaDelDia,
+  type EstadiaDelDia, type EstadiaEnRango,
   type EstadoEstadia,
   /* ── LAS DOS TIRAS DE DÍAS ────────────────────────────────────────────────
      🔴 **Las dos existían, compilaban y NINGUNA se podía llamar** — el
