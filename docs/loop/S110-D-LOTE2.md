@@ -91,9 +91,32 @@ suscripciones_servicio_tipo_valido:
   CHECK ((tipo_servicio = ANY (ARRAY['guarderia_mensual'::text, 'paseo_mensual'::text])))
 ```
 **Cerrado a dos valores.** ⇒ un padrinazgo recurrente **no cabe sin enmendar ese
-CHECK**. Coherente con que §8 deje la recurrencia del aporte fuera de v1, **pero
-hay que decirlo**: mi *«el recurrente ya lo resuelve»* se lee como que sólo falta
-un lector, y falta también abrir el vocabulario. **Corregido acá.**
+CHECK**. Mi *«el recurrente ya lo resuelve»* se leía como que sólo falta un
+lector, y falta también abrir el vocabulario. **Corregido acá.**
+
+🔴 **ENMIENDA DEL ENCUADRE (2ª pasada de E) — y separo lo medido de lo
+relevado, porque no son lo mismo.**
+
+**LO MEDIDO, y no cambió:** el CHECK está cerrado a `guarderia_mensual` y
+`paseo_mensual`. Eso lo verificamos los dos contra el objeto.
+
+**LO QUE CAMBIA ES SI ESO ES COSTO DE v1 O DEUDA DIFERIDA — y no es medible
+desde el repo.** Yo escribí primero *«coherente con §8, que deja la recurrencia
+del aporte fuera de v1»*, **tomando el encuadre de E**, que lo había leído
+contra `LETRA_ADOPCION_PADRINAZGO` **del 25-ago — la archivada**. E lo retira y
+releva que **`LETRA_ADOPCION` v1.0 del 31-ago define el padrinazgo como compra
+recurrente de PRODUCTOS en v1**, y que su §11 excluye el padrinazgo **en
+dinero**, no la recurrencia. ⇒ **`suscripciones_servicio_tipo_valido` habría que
+abrirlo PARA v1, no después.**
+
+⚠️ **Y esto se anota como RELEVO DE E, jamás como medición:** el documento del
+31-ago **no existe en ninguna rama** —medido en las 41 al abrir esta pista, con
+`git log --all` vacío—, así que **ni E ni yo pudimos leer ese §11**. Los dos
+estamos citando literales que viajan en nuestros mandatos y no en el repo.
+*Quien vote esto no puede verificar ninguna de las dos lecturas contra un
+documento: es exactamente el freno de puerta de mi lote 1, cobrándose por
+segunda vez y ahora sobre una decisión de alcance.* **La medición aguanta sola;
+el encuadre no, y por eso va con su fuente puesta.**
 
 **④ ⑥ — E REFUERZA, sin contradecir.** El eje **no es «tipo de cuenta»: es rol +
 capacidad** (`esGestor`, `montaAtender`); `ClaveTabPrestador` es un tipo cerrado
