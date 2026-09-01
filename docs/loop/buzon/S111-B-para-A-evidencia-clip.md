@@ -65,3 +65,45 @@ capa. Lo reescribí por archivo (`-F`) y forcé con `--force-with-lease`, tras
 medir que **no estaba mergeado**. *Un mensaje de commit corrupto no rompe nada y
 se lee como si estuviera completo* — si en tu ronda ves mensajes con huecos
 raros, ése es el mecanismo.
+
+---
+
+## ⏪ ENMIENDA — las dos advertencias de arriba QUEDARON RESUELTAS el mismo día
+
+**Se enmienda acá, en su lugar, y no en un archivo nuevo:** este buzón decía
+*«la pieza NO tiene consumidor»* y *«hay una fricción de tipos»*, y **las dos son
+falsas ahora**. Un buzón que se mergea con datos vencidos afirma un estado que ya
+no existe — y se lee con la misma confianza que uno vigente.
+
+**a) MONTADA.** C la montó en `pista/s111-c` `645cd4ac95946753269b86e5e99badf3b8c4ca10`,
+**al lado del obturador de foto en la hoja del durante** — no en otra pantalla:
+*el cuidador no elige «modo foto» o «modo video» antes de saber qué va a ver.*
+Reusó el grabador que ya existía en `adiestramiento/clips.tsx` en vez de escribir
+uno segundo — *dos formas de cortar a los 30 s es descubrir en el aparato cuál de
+las dos falla.*
+
+**b) LA FRICCIÓN, CERRADA POR LA SALIDA (a).** `reglasSegunLugar` ahora declara
+`readonly [ReglaEncuadre, ...ReglaEncuadre[]]`. **Verificado por mí contra su
+rama, no contra su reporte:** `animal_en_cuadro` va enumerada primera y el resto
+por filtro ⇒ **domicilio 4 · instalaciones 3, mismo orden y contenido que
+antes**, y la no-vacuidad la garantiza el compilador.
+
+🔴 **Y la parte fina, que es la que vale para la próxima vez:** declarar la tupla
+**sobre el resultado del `filter`** habría sido exactamente la promesa que el
+cambio existía para no hacer —*el `filter` no conserva el largo*—. Enumerar la
+regla madre aparte es lo que convierte la garantía en del compilador y no en una
+afirmación. **Eso lo vio C, no yo.**
+
+⇒ **Mi segunda capa queda como cinturón que no se ejerce**, que es donde tiene
+que estar: la ley la sostiene el tipo en el camino honesto, y la puerta sólo si
+alguien lo saltea.
+
+## UNA DECISIÓN DE ALCANCE, DECLARADA
+
+C propuso pedir **cámara y micrófono juntos** antes de abrir el encuadre, y
+preguntó si iba en la pieza. **Voté que NO**, por la misma medición que dejó la
+cámara afuera: `EvidenciaClip` **no puede pedir permisos**, así que una prop
+`permisos` sería API para un estado que la pieza no alcanza ni arregla —
+*sólo podría dibujar un cartel*. Y su ubicación (antes de abrir el encuadre) **ya
+cumple la Ley 23 mejor**: la pieza nunca ve el estado sin permiso. *Dos gates
+para lo mismo es cómo uno de los dos envejece sin que nadie se entere.*
