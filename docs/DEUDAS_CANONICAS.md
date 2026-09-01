@@ -24516,6 +24516,21 @@ la fila real. *Un `COALESCE` equivocado no falla: acierta plausiblemente hasta q
 topa con la primera fila que la historia dejó distinta.* Hermana de `L-439` — **un
 atajo que puede producir un valor equivocado no se declara: se hace inexpresable.**
 
+**⊕ EL TERCER MECANISMO DE LA MISMA FAMILIA, medido por S109-C:** un **parámetro
+OBLIGATORIO** sobre un motor que admite `NULL`. `obtener_inicios_adiestramiento_disponibles`
+acepta `p_comprable NULL` = *«los dos»*, y el wrapper lo tenía **requerido** ⇒
+**la pregunta «no filtres» era impreguntable.**
+
+> **Los tres aplastan un estado que el motor SÍ tiene, y conviene distinguirlos
+> porque se buscan en lugares distintos:**
+> · un `COALESCE` con valor aplasta **«no declaró»**
+> · un `DEFAULT` con valor aplasta **que el cuerpo lo necesita** (`L-447`)
+> · un **parámetro obligatorio** aplasta **«no filtres»**
+>
+> *Los dos primeros mienten sobre un valor; el tercero borra una pregunta* — y
+> por eso es el más silencioso: no hay valor equivocado que auditar, hay una
+> consulta que nadie puede hacer.
+
 ## 🔴 `L-446` — UNA CLAVE DE IDEMPOTENCIA QUE NO PUEDE REPETIRSE NO ES UNA CLAVE DE IDEMPOTENCIA
 
 **Medida en S109, entre A y B, sobre `pagos-deuna-solicitud`.**
@@ -24682,6 +24697,60 @@ semanas después, en manos de otro, y parece un defecto nuevo.*
 
 *Corolario: los worktrees viejos son el peor escondite — nadie los mira, y el día
 que alguien buildee desde uno se lleva la credencial muerta sin que nada avise.*
+
+## 🔴 `L-455` — UN GUARD CORRECTO PUEDE TENER UNA VOZ FALSA, Y EL CORRECTO TAPA A LA FALSA
+
+**Enunciada por S109-C sobre su propia medición, y es de método.**
+
+`contratar_programa` rechazaba **bien** que un programa empezara hoy (§12.2: el
+cierre exige aire entre la compra y la sesión 1). Y rebotaba **`slot_en_pasado`**
+—el mismo código que para una fecha realmente pasada—.
+
+> **HOY no es pasado.** La familia elegía hoy y leía que había elegido *una hora
+> que ya pasó*: **el guard frenaba por la razón correcta y la nombraba mal.**
+
+Su literal al reportarlo:
+> *«Medí que el guard rechazaba y me quedé en la consecuencia, sin leer qué
+> decía al rechazar.»*
+
+⇒ **Un censo de guards verifica que FRENEN, no que EXPLIQUEN** — y **un freno
+que funciona es exactamente donde nadie va a mirar el mensaje**, porque el
+comportamiento observable ya es el esperado. *La corrección del guard es lo que
+esconde la falsedad de su voz.*
+
+### ⊕ Y LA MITAD QUE EXPLICA POR QUÉ SOBREVIVIÓ — medida por S109-C al escribir la voz
+
+**La voz vieja YA COMPENSABA la mentira del código.** Decía *«Esa fecha ya pasó
+— **elige una desde mañana**»*, y **sus dos mitades no hablaban del mismo caso**:
+la primera es del pasado real; **la segunda era una MULETA** para cubrir que hoy
+tampoco sirve.
+
+> **Una frase que dice de más para compensar una mentira del código es cómo una
+> voz honesta termina ocultando el defecto: la pantalla ya decía lo correcto, así
+> que nadie fue a mirar el código.**
+
+🔴 **Y por eso ningún censo de una sola cosa lo encuentra:** un censo de guards
+**no lo ve** —el guard frena bien— y un censo de voces **tampoco** —la voz se lee
+bien—. **Sólo aparece cruzando las dos: qué frena el código contra qué dice la
+pantalla que frenó.**
+
+✅ **Y el dividendo de separarlo se cobra en la frase vieja, no en la nueva:**
+sin la muleta, **`slot_en_pasado` recupera su exactitud** — «ya pasó» vuelve a
+ser verdad y nada más. *Curar el código le devolvió la honestidad a un texto que
+parecía sano.*
+
+**Corolario exigible:** cuando un guard cubre **más de un caso**, se pregunta si
+los casos merecen **códigos distintos**. Dos razones distintas bajo un mismo
+código mandan a la familia —y a quien depure— **a buscar el problema donde no
+está**. Es la misma cura que ese mismo día recibieron `riel_no_declarado`
+(S109-A) y `programa_no_empieza_hoy`.
+
+⚠️ **Y la segunda mitad, que evita la cura incompleta:** darle voz honesta al
+rebote **no reemplaza al filtro de la superficie**. *Que el rebote sea honesto
+no lo vuelve aceptable con el dedo sobre «pagar».* Medido: el filtro de C **se
+resuelve al montar la barra y no se vuelve a evaluar** ⇒ la **carrera de la
+medianoche** —elegís mañana, pasa la medianoche, tocás pagar— **sólo la cubre el
+motor**. No eran dos curas del mismo problema: eran **dos mitades**.
 
 ## 🟠 `L-453` — EL SHA-1 NO ES DEL PRODUCTO: ES DEL PAR `package + keystore`, Y CADA APP TIENE EL SUYO EN EAS
 
