@@ -732,8 +732,11 @@ ser un refugio.*
 
 ## LO QUE ESTA PISTA NO MIDIÓ (declarado, no omitido)
 
-1. **Si `mascotas_update_familia` valida el `familia_id` nuevo** — exige un
-   UPDATE. **Bloqueante de la rama (ii).**
+1. ✅ **CERRADO por S110-A (1-sep): `mascotas_update_familia` NO valida el
+   `familia_id` nuevo — es PUERTA ABIERTA, `D-989` 🔴.** Mi sospecha razonada
+   («un WITH CHECK que revalida la fila vieja no valida nada») quedó confirmada
+   **ejerciéndola**, que es lo que esta pista no podía hacer sin escribir.
+   *Límite declarado por A: su sonda no aísla cuál de los dos brazos pasó.*
 2. **Si un `familia_id` ajeno es alcanzable por un no-miembro** — exige ejercer
    la policy. Decide si `familia_miembro_insert_titular_o_primero` necesita
    gate antes de que existan familias de refugio.
