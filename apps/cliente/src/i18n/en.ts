@@ -235,6 +235,7 @@ export const clienteEn = {
     historiaEmpiezaDetalle: 'Every walk, every vet visit, will be saved.',
     sinMascotas: 'Nobody here yet',
     sinMascotasDetalle: 'Add your pet to start their story.',
+    sinMascotasAgregar: 'Add my pet',
     errorHistoria: "We couldn't load the story",
     errorHistoriaDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',

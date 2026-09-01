@@ -301,6 +301,7 @@ export const clienteEs = {
     historiaEmpiezaDetalle: 'Cada paseo, cada visita al vet, va a quedar guardada.',
     sinMascotas: 'Todavía no hay nadie por acá',
     sinMascotasDetalle: 'Agrega a tu mascota para empezar su historia.',
+    sinMascotasAgregar: 'Agregar a mi mascota',
     errorHistoria: 'No pudimos cargar su historia',
     errorHistoriaDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Reintentar',

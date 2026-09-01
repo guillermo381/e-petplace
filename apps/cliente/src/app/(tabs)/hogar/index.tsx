@@ -968,10 +968,41 @@ export default function Hogar() {
     );
   }
 
+  /* ═══ EL HOGAR SIN NADIE — «cuenta sin mascota» es un estado legal ═══════
+     Medido por S110-D: **152 de 170 usuarios no tienen ninguna mascota**, y el
+     motor los representa como ciudadanos de primera clase (`mascotas_count`
+     explícito). Esta pantalla es su casa, no un error.
+
+     🔴 **LO QUE FALTABA ERA EL CAMINO.** El vacío decía «Agrega a tu mascota
+     para empezar su historia» **y no tenía con qué**: una instrucción sin
+     control es la Ley 17.5 rota — *el vacío invita a ACTUAR, no termina en un
+     estado de ánimo.* Ahora el mismo texto tiene su botón.
+
+     ✅ **Y EL COACH CALLA ACÁ POR CONSTRUCCIÓN, no por disciplina:** este
+     `return` corta antes de su destello (línea ~1566) y de `CoachHoja`
+     (~2249), así que **no hay forma de que salude a quien todavía no tiene de
+     quién hablarle.** *Un coach que saluda sin conocer a nadie enseña a
+     ignorarlo.* Verificado por posición, no supuesto.
+
+     ⚠️ **FALTA EL SEGUNDO CAMINO — «conocer a los que esperan»**, que es el que
+     el recorrido pide para quien entró a adoptar. **No se dibuja porque no
+     tiene a dónde ir:** medido, cero motor de adopción (0 funciones, 0
+     wrappers). *Un botón a una vidriera vacía es peor que no ofrecerla.* Entra
+     con el lector de A, pedido por buzón. */
   if (mascotas.length === 0) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
-        <EstadoVacio titulo={t('hogar.sinMascotas')} descripcion={t('hogar.sinMascotasDetalle')} />
+        <EstadoVacio
+          titulo={t('hogar.sinMascotas')}
+          descripcion={t('hogar.sinMascotasDetalle')}
+          accion={
+            <Boton
+              variante="primario"
+              etiqueta={t('hogar.sinMascotasAgregar')}
+              onPress={() => router.push('/hogar/agregar')}
+            />
+          }
+        />
       </View>
     );
   }
