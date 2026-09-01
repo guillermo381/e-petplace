@@ -37,6 +37,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AvatarMascota,
+  Boton,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -61,6 +62,8 @@ import { useGateGestor } from '@/lib/gate-gestor';
 import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
 import { SeccionDireccion } from '@/components/seccion-direccion';
+import { HojaActaGuarderia } from '@/components/hoja-acta-guarderia';
+import type { DireccionActa } from '@/lib/cola-actas';
 
 /** Fecha LOCAL. 🔴 `toISOString()` da UTC y en Guayaquil, pasadas las 19:00,
  *  devuelve el día siguiente — la jornada saldría vacía a la tarde. */
@@ -97,7 +100,12 @@ function comoDireccion(d: unknown): {
 type Estado =
   | { fase: 'cargando' }
   | { fase: 'roto' }
-  | { fase: 'listo'; estadias: EstadiaDelDia[]; caras: Map<string, string> };
+  | {
+      fase: 'listo';
+      prestadorId: string;
+      estadias: EstadiaDelDia[];
+      caras: Map<string, string>;
+    };
 
 export default function DiaGuarderia() {
   const router = useRouter();
@@ -108,6 +116,10 @@ export default function DiaGuarderia() {
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [intento, setIntento] = useState(0);
+  /** La estadía cuya acta está abierta. `null` = la hoja no se monta. */
+  const [acta, setActa] = useState<{ estadia: EstadiaDelDia; direccion: DireccionActa } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (gate !== 'permitido') return;
@@ -131,7 +143,7 @@ export default function DiaGuarderia() {
       const paths = r.data.map((e) => e.mascotaFotoUrl).filter((x): x is string => typeof x === 'string' && x.length > 0);
       const caras = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
       if (!vigente) return;
-      setEstado({ fase: 'listo', estadias: r.data, caras });
+      setEstado({ fase: 'listo', prestadorId: p.data.id, estadias: r.data, caras });
     })();
     return () => {
       vigente = false;
@@ -159,6 +171,25 @@ export default function DiaGuarderia() {
      avatar cae a su fallback en vez de recibir algo que no entiende. */
   const especieDe = (x: string): 'perro' | 'gato' | undefined =>
     x === 'perro' || x === 'gato' ? x : undefined;
+
+  /**
+   * QUÉ ACTA CORRESPONDE, y `null` cuando no corresponde ninguna.
+   *
+   * 🔴 Ley 23 — la puerta no ofrece lo que va a rechazar: sobre una estadía
+   * entregada, cancelada o no recogida **no hay acta que levantar**, y el
+   * botón no se dibuja. *Ofrecerlo y rebotarlo después sería enseñarle al
+   * cuidador que la pantalla adivina.*
+   *
+   * ⚠️ Los dos estados EN VIAJE (`recogida_en_curso`, `retorno_en_curso`) hoy
+   * son **inalcanzables** —nada mueve el estado— y por eso tampoco ofrecen
+   * acta: su acta ya se levantó al subir o al entregar. Cuando el motor los
+   * escriba, esta función no cambia.
+   */
+  const actaQueCorresponde = (e: EstadoEstadia): DireccionActa | null => {
+    if (e === 'reservada') return 'recogida';
+    if (e === 'en_guarderia') return 'devolucion';
+    return null;
+  };
 
   const alAtras = useCallback(() => router.back(), [router]);
 
@@ -222,6 +253,7 @@ export default function DiaGuarderia() {
                 razaSlug: null,
                 fotoUri: foto,
               });
+              const corresponde = actaQueCorresponde(e.estado);
               return (
                 <Tarjeta key={e.estadiaId} relleno="normal" elevacion="reposo">
                   <View style={{ gap: spacing[3] }}>
@@ -247,6 +279,40 @@ export default function DiaGuarderia() {
                         Con snapshot ausente o ilegible, `null` y la pieza lo
                         declara: nadie sale a buscar a una casa en blanco. */}
                     <SeccionDireccion direccion={dir} />
+
+                    {/* LA PUERTA DEL ACTA.
+
+                        🔴 **Por qué es un botón y no la tarjeta entera tocable**,
+                        que es lo que el recorrido pide («toco su tarjeta»):
+                        `SeccionDireccion` YA tiene un tocable adentro —el «cómo
+                        llegar» que abre el mapa—, y un tocable dentro de otro
+                        es la clase `D-311`: dos blancos superpuestos donde el
+                        dedo decide por vos. *La tarjeta entera se vuelve tocable
+                        el día que su contenido no tenga acciones propias, no
+                        antes.*
+
+                        Y es `apoyada` y no `primario` por la Ley 5: con seis
+                        animales en pantalla, seis CTAs de acento serían seis
+                        elementos peleando. El «cómo llegar» queda en `ghost`
+                        debajo — la jerarquía entre las dos acciones se lee sin
+                        leerlas.
+
+                        ⚠️ **`compacto` NO**, aunque 22c lo avale como letra
+                        viva: `R47` lo tiene jubilado POR POLÍTICA con trinquete
+                        solo-baja hacia 0. Mi uso pasaba el baseline por uno —
+                        *y hacer crecer un trinquete que todavía no rebota es
+                        exactamente lo que el trinquete existe para evitar.* El
+                        choque entre 22c y R47 está declarado en el propio lint;
+                        acá se resuelve a favor del que mide. */}
+                    {corresponde === null ? null : (
+                      <View style={{ alignSelf: 'flex-start' }}>
+                        <Boton
+                          variante="apoyada"
+                          etiqueta={t('actaGuarderia.guardarActa')}
+                          onPress={() => setActa({ estadia: e, direccion: corresponde })}
+                        />
+                      </View>
+                    )}
                   </View>
                 </Tarjeta>
               );
@@ -292,6 +358,45 @@ export default function DiaGuarderia() {
           </>
         )}
       </ScrollView>
+
+      {/* LA PUERTA DEL ACTA. Se monta con la estadía elegida y se desmonta al
+          cerrar: su estado interno (fotos, carnet, observaciones) muere con
+          ella a propósito — **un acta a medias de OTRO animal es el peor
+          arrastre posible en el instrumento que existe para un litigio.**
+
+          ⚠️ `lugar="domicilio"` en las DOS direcciones, y no es un descuido:
+          las actas se levantan en la puerta de la casa —tanto la de recogida
+          como la de devolución—, así que rige el primer plano del criterio
+          §5.3. *Las fotos de la ESTADÍA se toman en las instalaciones; ésas
+          son otras fotos y otra pantalla.*
+
+          ⚠️ Sin `alLevantar`: hoy el acta se levanta en la COLA LOCAL con la
+          hora de la puerta. Cuando exista el acto único de A —`marcarABordo`,
+          que levanta el acta y mueve el estado en una transacción— se inyecta
+          acá, **en esta línea y en ninguna otra**, y la etiqueta de abajo pasa
+          a prometer lo que el acto entonces sí hace. */}
+      {estado.fase === 'listo' && acta !== null ? (
+        <HojaActaGuarderia
+          estadia={acta.estadia}
+          direccion={acta.direccion}
+          prestadorId={estado.prestadorId}
+          fecha={hoyLocal()}
+          cara={
+            acta.estadia.mascotaFotoUrl === null
+              ? null
+              : (estado.caras.get(acta.estadia.mascotaFotoUrl) ?? null)
+          }
+          lugar="domicilio"
+          etiquetaActo={t('actaGuarderia.guardarActa')}
+          onCerrar={() => setActa(null)}
+          onLevantada={() => {
+            setActa(null);
+            /* Se re-lee el día: el acta puede haber cambiado lo que el motor
+               devuelve, y la pantalla LEE el estado — nunca lo declara. */
+            setIntento((n) => n + 1);
+          }}
+        />
+      ) : null}
     </View>
   );
 }
