@@ -24718,6 +24718,27 @@ que funciona es exactamente donde nadie va a mirar el mensaje**, porque el
 comportamiento observable ya es el esperado. *La corrección del guard es lo que
 esconde la falsedad de su voz.*
 
+### ⊕ Y LA MITAD QUE EXPLICA POR QUÉ SOBREVIVIÓ — medida por S109-C al escribir la voz
+
+**La voz vieja YA COMPENSABA la mentira del código.** Decía *«Esa fecha ya pasó
+— **elige una desde mañana**»*, y **sus dos mitades no hablaban del mismo caso**:
+la primera es del pasado real; **la segunda era una MULETA** para cubrir que hoy
+tampoco sirve.
+
+> **Una frase que dice de más para compensar una mentira del código es cómo una
+> voz honesta termina ocultando el defecto: la pantalla ya decía lo correcto, así
+> que nadie fue a mirar el código.**
+
+🔴 **Y por eso ningún censo de una sola cosa lo encuentra:** un censo de guards
+**no lo ve** —el guard frena bien— y un censo de voces **tampoco** —la voz se lee
+bien—. **Sólo aparece cruzando las dos: qué frena el código contra qué dice la
+pantalla que frenó.**
+
+✅ **Y el dividendo de separarlo se cobra en la frase vieja, no en la nueva:**
+sin la muleta, **`slot_en_pasado` recupera su exactitud** — «ya pasó» vuelve a
+ser verdad y nada más. *Curar el código le devolvió la honestidad a un texto que
+parecía sano.*
+
 **Corolario exigible:** cuando un guard cubre **más de un caso**, se pregunta si
 los casos merecen **códigos distintos**. Dos razones distintas bajo un mismo
 código mandan a la familia —y a quien depure— **a buscar el problema donde no
