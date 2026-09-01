@@ -129,6 +129,7 @@ import {
   listarPedidosDelVendedorEnRango,
   obtenerCitasAdiestramientoDelDia,
   obtenerCitasGroomingDelDia,
+  obtenerCitasGuarderiaDelDia,
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
   obtenerMiPrestador,
@@ -309,13 +310,28 @@ export default function Historico() {
 
   const traerCitas = useCallback(async (prestadorId: string, d: string, h: string) => {
     const rango = { prestador_id: prestadorId, fecha: d, fecha_hasta: h };
-    const [paseo, grooming, vet, adiestramiento] = await Promise.all([
+    /* ⭐ S109-D · LA QUINTA PATA TAMBIÉN ACÁ. «Tu histórico» es *el trabajo que
+       ya hiciste*, y una estadía de guardería es trabajo hecho: enumeraba
+       cuatro oficios y el quinto no existía para esta pantalla.
+
+       ⚠️ NO se curó con `obtenerEstadiasPorRango`, y la razón se midió al
+       intentarlo — no se supuso: (a) esta pantalla ofrece «90 días» y un «ver
+       más» de 30 en 30 SIN TOPE, y ese lector rebota sobre 62; (b) su lista es
+       de `CitaAgendaPaseo` y una estadía no trae hora, tipo, duración, precio,
+       empleado ni atención ⇒ montarla obligaba a **fabricar nueve campos**, que
+       es la fila verosímil-falsa de `L-139`.
+       *Lo que faltaba no era relleno: era la proyección.* A la publicó
+       (`obtenerCitasGuarderiaDelDia`, misma forma que sus cuatro hermanas — la
+       cita existe, la estadía carga su `cita_id`) y con eso esto es UNA línea
+       y el techo desaparece con el contrato de las hermanas. */
+    const [paseo, grooming, vet, adiestramiento, guarderia] = await Promise.all([
       obtenerCitasPaseoDelDia(rango),
       obtenerCitasGroomingDelDia(rango),
       obtenerCitasVetDelDia(rango),
       obtenerCitasAdiestramientoDelDia(rango),
+      obtenerCitasGuarderiaDelDia(rango),
     ]);
-    if (!paseo.ok && !grooming.ok && !vet.ok && !adiestramiento.ok) return null;
+    if (!paseo.ok && !grooming.ok && !vet.ok && !adiestramiento.ok && !guarderia.ok) return null;
     const juntas: CitaConOficio[] = [
       ...(paseo.ok ? paseo.data.map((c) => ({ cita: c, oficio: 'paseo' as const })) : []),
       ...(grooming.ok ? grooming.data.map((c) => ({ cita: c, oficio: 'grooming' as const })) : []),
@@ -323,6 +339,7 @@ export default function Historico() {
       ...(adiestramiento.ok
         ? adiestramiento.data.map((c) => ({ cita: c, oficio: 'adiestramiento' as const }))
         : []),
+      ...(guarderia.ok ? guarderia.data.map((c) => ({ cita: c, oficio: 'guarderia' as const })) : []),
     ];
     // MÁS RECIENTE PRIMERO: un archivo se lee hacia atrás.
     juntas.sort((x, y) => {
