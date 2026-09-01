@@ -845,12 +845,8 @@ export const clienteEn = {
     errorTitulo: "We couldn't load training.",
     sinElegiblesTitulo: 'Training is for dogs',
     sinElegiblesDetalle: "Your home doesn't have a dog registered yet.",
-    comprableEtiqueta: 'What do you want to book',
-    comprableSesion: 'Single session',
     comprablePrograma: 'Full program',
     // r32 · the day means something else with a program: when it STARTS.
-    cuandoEmpieza: 'When it starts',
-    horaPrimera: 'First session time',
     comprableProgramaVoz:
       'A program is several ordered sessions, one per week, with the same trainer. You pick the date and time of the first one and the rest are scheduled for you.',
     vacioTitulo: 'No trainers available yet',
@@ -863,6 +859,13 @@ export const clienteEn = {
     nivelExperto: 'Expert program',
     nivelEspecialidad: 'Specialty',
     sesionesN: '{{n}} sessions',
+    /* ⭐ S109-C · Ver las notas del espejo en `es.ts`: con el prestador
+       presidiendo, la sesión suelta necesita nombre porque ya no ES la fila. */
+    /* ☠️ S109-C · Las cuatro voces del paso del QUÉ, muertas con él (0
+       consumidores). Ver el espejo en `es.ts`. */
+    sesionSuelta: 'Single session',
+    duracionMin: '{{n}} min per session',
+    elegiQue: 'What would you like to book?',
     checkoutResumen: 'Your training session',
     exitoTitulo: 'Session booked',
     exitoDetalle: 'The trainer already has your session on their schedule.',
