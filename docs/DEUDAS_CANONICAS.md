@@ -26054,3 +26054,137 @@ contra un caso conocido.** *Un censo por patrón acota, no cierra* (`L-437`):
 ### LA LECCIÓN, en una línea
 
 > ### Una alarma que no se puede vaciar deja de ser una alarma: se vuelve ruido que se aprende a ignorar. Y un instrumento que decide un bloqueante de producción tiene que probarse contra un caso con resultado conocido **antes** de que su número entre a un documento.
+
+---
+
+## 🟠 `D-999` — LA RAZÓN DEL BOTÓN EXISTE Y **NO LA DIBUJA NADIE**: ocho pantallas mudas
+
+**Levantada por C** (`S111-C-para-A-ficha-boton-mudo.md`, sin número), **con su
+número asignado acá.** Una la curó; **quedan siete**.
+
+`Boton` sólo dibuja la razón si vienen **LAS DOS** props:
+
+```ts
+conRazon = deshabilitado && !cargando && razonDeshabilitado !== undefined && onRazon !== undefined
+```
+
+**Censado: 13 pantallas pasan `razonDeshabilitado`, 5 pasan `onRazon` ⇒ OCHO
+están mudas.**
+
+> ### ⇒ La frase existe, se arma en cuatro ramas, y **no la ve nadie**. Un botón apagado y mudo.
+
+🔴 **Y lo que lo vuelve caro es que NO SE VE COMO DEFECTO:** el botón *funciona*
+—frena bien—, sólo que **no explica**. `L-455` dice que un freno tiene que decir
+qué falta; acá el freno lo dice y **la pantalla se lo come**.
+
+**Cómo apareció, que es de método:** C tomó en serio *«el founder no vio NINGUNA
+razón»* **como un dato**, no como una impresión. Un botón apagado y mudo sólo
+puede ser dos cosas —una condición que la voz no cubre, o **una voz que no se
+dibuja**— y las dos son defecto propio. *No lo encontró leyendo código: lo
+encontró preguntándose qué produce ese síntoma exacto.*
+
+⚠️ **Y sobrevivió a una explicación buena**, que es lo difícil: la causa del
+síntoma reportado era otra —el OTA sin la cura— y **esa explicación era correcta
+y suficiente para el gate**. Si C hubiera cerrado ahí, esto quedaba vivo
+escondido detrás de ella. *Una verdad que tapa otra cosa es más difícil de cazar
+que un error.*
+
+**El gate que lo cierra, propuesto por C y tomado:** medir
+`razonDeshabilitado` sin `onRazon`. **Hoy daría 8, con baseline solo-baja.**
+Es la forma del trinquete del voseo y por la misma razón: *lo que falla no es la
+barrida — es que entre una y otra nada mira.* **Entra en la cola de A.**
+
+---
+
+## 🔴 `L-469` — EL AVISO LLEVA EL GROUP ID **Y EL SHA QUE CONTIENE** — Y EL CONTROL SE CORRE CONTRA EL HEAD DE LA RAMA, NO CONTRA EL SHA QUE TE NOMBRARON
+
+**Costó TRES vueltas en un solo día**, con el founder mirando un botón que ya
+estaba curado.
+
+**Un group id dice que hay un lote nuevo. JAMÁS dice que traiga la cura.**
+
+### LAS TRES VUELTAS, porque cada una falló distinto
+
+**①** Publiqué con el ancla al día, y el trabajo de otra pista **llegó después**.
+El OTA era correcto **en el momento de publicarlo** y envejeció en minutos.
+
+**②** La cura estaba **pusheada y FUERA DE `main`**. Nada se veía roto: la rama
+existía en origin, el árbol limpio, los gates verdes. **Lo cazó el control de
+ancestría sobre TODAS las ramas** —no sobre la que me pidieron mergear—, que ya
+va por su tercera captura de algo que nadie estaba buscando.
+
+**③** Verifiqué contra **el sha que la otra pista me nombró**, y era el correcto
+*en el momento de preguntar*. **Mientras yo publicaba, su rama siguió
+caminando** y sumó dos commits — uno de ellos la mitad que faltaba.
+
+> ### ⇒ *Un sha citado en un mensaje es una FOTO; la rama sigue caminando.* Es `L-462` —un cero verdadero caduca— aplicada a un sha en vez de a una medición.
+
+### LAS DOS CURAS, y ninguna es «acordarse»
+
+**① DÓNDE corre el control.** Lo tenía **después del merge**, que es tarde:
+entre el merge y el bundling hay una ventana, y en esa ventana la otra pista
+sigue empujando. **Corre INMEDIATAMENTE ANTES del publish**, sobre las ramas de
+todas las pistas, leyendo `origin` recién fetcheado.
+
+**② QUÉ dice el aviso.** El group id **y los shas que contiene**, verificados con
+`merge-base --is-ancestor <sha> <ancla>` **y con su control negativo** — que el
+ancla ANTERIOR *no* los tenía. *Sin el control negativo, un `--is-ancestor` que
+dice «sí» a todo no distingue nada.*
+
+⚠️ **Y una trampa de identificadores que costó su propia vuelta:** el pie de
+Cuenta muestra el **`updateId`**, no el **group**. El founder leyó `01a05e9d` y
+lo tomó por un lote posterior; **era el update del group anterior**. Dos
+identificadores parecidos donde uno se lee como el otro — **`D-785` otra vez**.
+*Al pedir el dato del aparato, se pregunta por el `updateId` y se traduce; jamás
+se compara contra un group.*
+
+---
+
+## 🟢 `D-997` · ANEXO D — ¿DeUna está habilitado para «mensualidad de guardería» en la configuración del motor? **NO EXISTE ESA CONFIGURACIÓN**
+
+**Medido contra el objeto, con controles de dos colores y con el código REAL del
+tipo de servicio verificado ANTES de consultarlo** (la corrección de mi propio
+falso positivo del anexo C).
+
+### LOS CONTROLES, primero
+
+| control | resultado |
+|---|---|
+| **positivo** — `paseo` existe en `tipos_servicio` | ✅ devuelve `paseo` |
+| **negativo** — `guarderia` pelado | ✅ **NO existe**, como ya había medido |
+| **códigos REALES** | **`guarderia_dia` · `guarderia_mensual`** |
+
+### LA RESPUESTA
+
+**No hay ninguna capa de datos que habilite o deshabilite un método de pago por
+tipo de compra.** Censado:
+
+- `app_config`: **cero** claves con `deuna` (las 18 que hay son de otras cosas).
+- **Cero columnas** en todo `public` cuyo nombre contenga `deuna`.
+- La única tabla de configuración de sujetos es **`cat_sujetos_de_pago`**, y sus
+  columnas son `codigo · columna_intento · descripcion · compuerta ·
+  compuerta_ausente_porque · cobrable_por_checkout`. **Ninguna nombra un
+  método ni un proveedor.**
+
+Y la fila del sujeto en cuestión:
+
+```
+mensualidad_guarderia | guarderia_suscripcion_id | cobrable_por_checkout = TRUE
+                      | compuerta: verificar_compuertas_mensualidad_g…
+```
+
+> ### ⇒ **La mensualidad de guardería está habilitada como sujeto cobrable, y la habilitación POR RIEL no es dato: es CÓDIGO** — vive en las cinco ramas de `pagos-deuna-solicitud` que ya se midieron (anexo A). **C descartó bien esa capa por lectura; queda confirmado contra el objeto.**
+
+### ⚠️ LO QUE ESTO DEJA DICHO, y vale más que la respuesta
+
+**Agregar un riel, o sacarle un sujeto a un riel, exige tocar una edge function
+— no una fila.** El catálogo dice *qué es cobrable*; **nada dice *por dónde***.
+
+*Hoy eso no hace daño porque los rieles son dos y las ramas están enumeradas con
+guard `never`. Pero es la clase de decisión que no se ve hasta que alguien
+necesita apagar un riel en caliente y descubre que es un deploy.*
+
+Su hermana ya medida: **`suscripcion_servicio` (el plan de paseo) figura
+`cobrable_por_checkout = true` con su compuerta** — *el catálogo lo admite*, y
+lo que falta es la rama en la edge (**0 ocurrencias**, anexo A). **Confirma que
+el catálogo no es la puerta.**
