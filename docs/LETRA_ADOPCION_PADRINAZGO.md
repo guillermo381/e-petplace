@@ -1,4 +1,31 @@
-# LETRA_ADOPCION_PADRINAZGO.md — e-PetPlace
+# ☠️ LETRA_ADOPCION_PADRINAZGO.md — **ARCHIVADA** (1-sep-2026)
+
+> # 🔴 ESTA LETRA YA NO RIGE. LA SUSTITUYE `docs/LETRA_ADOPCION.md` **v1.0 del 31-ago-2026**.
+>
+> **No se borra: se archiva.** Sus seis firmas viven en la nueva con su fecha
+> original, y la única que cambió está declarada allí. *Borrarla dejaría sin
+> rastro de dónde vino cada firma; dejarla sin marca dejaría a un lector
+> siguiéndola de buena fe.*
+>
+> **LO QUE QUEDA DEROGADO, con su porqué y no sólo con el nombre:**
+>
+> | § de esta letra | qué decía | qué rige hoy |
+> |---|---|---|
+> | **§3** | *«el motor lo soporta; esta letra no lo activa en v1»* | 🔴 **DEROGADO por §0 de la nueva: el expediente empieza en el RESCATE y se hereda.** Deja de ser una capacidad apagada y pasa a ser el eje del vertical |
+> | **§4** | la transferencia del expediente **fuera de v1** | 🔴 **DEROGADO por §0.** Si el expediente empieza en el rescate, heredarlo no es una función opcional: es lo que hace que la adopción signifique algo |
+>
+> ⚠️ **Todo lo demás de este documento se lee SÓLO como historia** — para saber
+> qué se pensaba el 25-ago, jamás como instrucción de construcción. Ante
+> cualquier diferencia, **gana `LETRA_ADOPCION.md`, que es posterior**.
+>
+> *Un texto honesto se retira en el MISMO acto que cambia lo que describe. Esta
+> marca y el registro de la letra nueva son un solo commit, a propósito: si
+> viajaran separados, habría una ventana en la que las dos letras firmadas se
+> contradicen y cualquiera puede citar la que le conviene estando «en regla».*
+
+---
+
+## ~~Cabecera original — conservada como historia~~
 
 > **Versión:** v1.0 · **Nace:** 25-ago-2026 (mesa founder + arquitecto).
 > **Fuentes que obedece:** `MODELO_LOYALTY` §7.2 (🔴 las donaciones jamás

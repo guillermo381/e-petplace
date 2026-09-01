@@ -247,6 +247,36 @@ node scripts/verify-jornada-completa.mjs >/dev/null 2>&1 || {
 }
 
 # ─────────────────────────────────────────────────────────────────────
+# ②ter · NINGÚN ARCHIVO TRACKEADO LLEVA UN BYTE NUL CRUDO (`L-461`, S110-A)
+#
+# 🔴 LO QUE MIDE Y POR QUÉ ESTÁ ACÁ: un byte NUL vuelve BINARIO al archivo
+#    para casi todo buscador —`grep -I`, `ugrep -I`, `git grep`, el buscador
+#    del editor— que lo saltea y **devuelve CERO SIN DECIR NADA**. No dice
+#    «binary file matches», no falla: contesta cero. **Un censo que toca ese
+#    archivo sale verde y está ciego**, y ya cobró un cero falso medido: una
+#    pista afirmó que una función no tenía llamadores, y tenía tres.
+#
+# 🔴 LO QUE NO EXIGE, y es la mitad que evita romper algo: **no prohíbe el
+#    CARÁCTER, prohíbe el BYTE.** Los tres casos vivos eran separadores
+#    deliberados de `join` y de plantilla — borrarlos habría cambiado una
+#    clave única por una concatenación sin separador, en silencio. Se
+#    escriben como ESCAPE de dos caracteres y el runtime no cambia.
+#
+# ⚠️ NO NECESITA RED y corre en un read por archivo — por eso sí va en el
+#    hook, a diferencia de `verify:censo` y `verify:voz-por-tipo`.
+#    Y **declara lo que no mide**: sólo extensiones de código y texto
+#    (.ts/.tsx/.js/.jsx/.mjs/.cjs/.sql/.json/.md). Un NUL en un binario
+#    legítimo —una imagen, una fuente— no es defecto y no se gatea.
+node scripts/verify-sin-byte-nul.mjs >/dev/null 2>&1 || {
+  echo ""
+  echo "✗ HAY UN BYTE NUL EN UN ARCHIVO TRACKEADO — el commit NO ocurre."
+  node scripts/verify-sin-byte-nul.mjs 2>&1 | grep -vE "^$" | head -12
+  echo ""
+  echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+  exit 1
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # ③ EL TSC MIRA A LOS CONSUMIDORES, NO SOLO A LO QUE TOCASTE
 #    (S85-B11 — hueco nombrado por A tras el incidente del día).
 #

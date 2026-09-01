@@ -623,6 +623,18 @@ export interface EstadiaDelDia {
   aBordoEn: string | null;
   llegadaEn: string | null;
   entregadaEn: string | null;
+  /* ── S110-A · las tres del durante, con la forma que pidió C ───────────
+     `retornoEn`: sin ella la única hora del viaje de vuelta sería la de
+     entrega, y **el momento en que salieron a devolver se perdía** — que es
+     justo lo que la columna nueva vino a arreglar.
+     🔴 `noRecogidaMotivo` viaja como **CÓDIGO DEL CATÁLOGO**
+     (`nadie_en_domicilio`…), jamás como voz: *si el motor mandara texto, el
+     vocabulario del motor saldría a pantalla.* La voz la pone el diccionario
+     de la app y la lee el founder en su lote; el catálogo completo sale de
+     `obtenerMaquinaEstadia().motivosNoRecogida`. */
+  retornoEn: string | null;
+  noRecogidaEn: string | null;
+  noRecogidaMotivo: string | null;
   /**
    * 🔴 EL PELDAÑO ② DE LA ESCALERA — cara de su raza → genérico de su especie
    * → la huella. `null` cuando `mascotas.raza` (texto libre) no matchea el
@@ -678,6 +690,9 @@ export async function obtenerEstadiasDelDia(
       aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
       llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
       entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+      retornoEn: typeof r.retorno_en === 'string' ? r.retorno_en : null,
+      noRecogidaEn: typeof r.no_recogida_en === 'string' ? r.no_recogida_en : null,
+      noRecogidaMotivo: typeof r.no_recogida_motivo === 'string' ? r.no_recogida_motivo : null,
       razaRutaImagen: typeof r.raza_ruta_imagen === 'string' ? r.raza_ruta_imagen : null,
     });
   }
@@ -757,6 +772,9 @@ export async function obtenerEstadiasPorRango(
       aBordoEn: typeof r.a_bordo_en === 'string' ? r.a_bordo_en : null,
       llegadaEn: typeof r.llegada_en === 'string' ? r.llegada_en : null,
       entregadaEn: typeof r.entregada_en === 'string' ? r.entregada_en : null,
+      retornoEn: typeof r.retorno_en === 'string' ? r.retorno_en : null,
+      noRecogidaEn: typeof r.no_recogida_en === 'string' ? r.no_recogida_en : null,
+      noRecogidaMotivo: typeof r.no_recogida_motivo === 'string' ? r.no_recogida_motivo : null,
       razaRutaImagen: typeof r.raza_ruta_imagen === 'string' ? r.raza_ruta_imagen : null,
     });
   }

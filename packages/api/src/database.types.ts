@@ -23318,7 +23318,10 @@ export type Database = {
           mascota_foto_url: string
           mascota_id: string
           mascota_nombre: string
+          no_recogida_en: string
+          no_recogida_motivo: string
           raza_ruta_imagen: string
+          retorno_en: string
         }[]
       }
       obtener_estadias_por_rango: {
@@ -23338,7 +23341,10 @@ export type Database = {
           mascota_foto_url: string
           mascota_id: string
           mascota_nombre: string
+          no_recogida_en: string
+          no_recogida_motivo: string
           raza_ruta_imagen: string
+          retorno_en: string
         }[]
       }
       obtener_estado_guarderia: {
