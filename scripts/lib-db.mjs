@@ -8,7 +8,20 @@ export function dbQuery(sql) {
   const r = spawnSync('npx', ['supabase', '--experimental', 'db', 'query', '--linked', sql], {
     encoding: 'utf8',
   });
-  if (r.status !== 0) {
+  /* 🔴 S110-A · UN TIMEOUT DE TELEMETRÍA HACÍA FALLAR UNA CONSULTA QUE RESPONDIÓ.
+     Medido: el CLI imprime las filas y DESPUÉS sale con `exit 1` y
+     `"Timeout while shutting down PostHog"`. *El dato estaba en la caja y el
+     helper lo tiraba* — mismo modo de falla que S102-B curó un piso más
+     arriba, y por eso se cura igual: se mira el CONTENIDO, no el código.
+     ⚠️ ACOTADO A PROPÓSITO: sólo se perdona **ese** error y **sólo** si las
+     filas se pudieron parsear. Cualquier otro exit≠0 sigue lanzando — *un
+     helper que perdona todo exit≠0 deja de ser un instrumento.* */
+  const soloTelemetria =
+    r.status !== 0 &&
+    /Timeout while shutting down PostHog/.test(`${r.stdout}${r.stderr}`) &&
+    r.stdout.includes('"rows"');
+
+  if (r.status !== 0 && !soloTelemetria) {
     /* 🔴 S102-B — ESTA LÍNEA DECÍA `(r.stderr || r.stdout || '')` Y ESCONDÍA LA
        CAUSA DE TODOS LOS FALLOS. Medido: el CLI manda a `stderr` un `npm warn`
        fijo (~200 chars) y **el error de Postgres va a `stdout`** ⇒ el `||`
@@ -36,7 +49,23 @@ export function dbQuery(sql) {
   }
   const inicio = r.stdout.indexOf('{');
   if (inicio === -1) throw new Error(`db query sin JSON en el output: ${r.stdout.slice(0, 400)}`);
-  return JSON.parse(r.stdout.slice(inicio)).rows;
+  /* El CLI puede pegar un SEGUNDO objeto JSON después del resultado (el error
+     de telemetría de arriba). `JSON.parse` sobre el resto crudo revienta con
+     «Unexpected non-whitespace character», que **no dice nada del dato**. Se
+     corta en el primer objeto completo, contando llaves fuera de comillas. */
+  const crudo = r.stdout.slice(inicio);
+  let prof = 0, enTexto = false, escapado = false, fin = -1;
+  for (let i = 0; i < crudo.length; i += 1) {
+    const ch = crudo[i];
+    if (escapado) { escapado = false; continue; }
+    if (ch === '\\' && enTexto) { escapado = true; continue; }
+    if (ch === '"') { enTexto = !enTexto; continue; }
+    if (enTexto) continue;
+    if (ch === '{') prof += 1;
+    else if (ch === '}') { prof -= 1; if (prof === 0) { fin = i + 1; break; } }
+  }
+  if (fin === -1) throw new Error(`db query con JSON incompleto: ${crudo.slice(0, 400)}`);
+  return JSON.parse(crudo.slice(0, fin)).rows;
 }
 
 // Fecha LOCAL yyyy-mm-dd (hallazgo S55: toISOString es UTC y corre el día post-19:00 en EC).
