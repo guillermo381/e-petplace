@@ -26350,9 +26350,45 @@ grep -o "D-[0-9]\{3\}" docs/DEUDAS_CANONICAS.md | sort -u | tail -1
 
 - **`\{3\}` SUBCUENTA**: `D-1000` matchea como `D-100`, y `sort -u | tail -1` lo
   entierra. ⇒ **la próxima sesión lee `D-999` y pisa `D-1000` y `D-1001`.**
-- **`\{3,4\}` SOBRECUENTA**: devuelve **`D-2026`**, que **no es una ficha** — sale
-  de *«Resolución SPD**-2026**-0009-R»* dentro de una cita legal. ⇒ **la próxima
-  sesión saltaría mil números.**
+- **`\{3,4\}` SOBRECUENTA**: devuelve **`D-2026`**, que **no es una ficha**. ⇒
+  **la próxima sesión saltaría mil números.**
+
+> ### ⚠️ ENMENDADO EL MISMO DÍA (medición de E). Esta línea decía que `D-2026` salía de *«Resolución SPD-2026-0009-R»*. **Es cierto para MI comando y no para el arreglo obvio, y la diferencia importa.**
+>
+> **Medido:** `grep -oE "\bD-[0-9]{4}\b"` contra esa cita da **0** — en
+> `SPD-2026` la `D` viene pegada a `SP`, **así que no hay boundary**. Mi grep no
+> usaba `\b`, por eso la capturaba.
+>
+> 🔴 **Y lo que E encontró es peor que la cita legal, porque sobrevive a `\b`:
+> el contaminante es ESTA MISMA FICHA**, que escribe `` `D-2026` `` como ejemplo
+> del problema — con backticks, o sea **con boundaries a los dos lados**.
+>
+> ### ⇒ *La ficha que documenta el bug contiene el string que causa el bug.* **Ninguna variante de regex sobre el CUERPO del archivo puede salvarse de eso**, por bien escrita que esté.
+
+### EL CANDIDATO MEDIDO POR E — depositado, NO aplicado
+
+Mide **los ENCABEZADOS de ficha, no las menciones**:
+
+```
+grep -oE "^#+ .*\bD-[0-9]{3,4}\b" docs/DEUDAS_CANONICAS.md \
+  | grep -oE "\bD-[0-9]{3,4}\b" | sort -u | sort -t- -k2 -n | tail -1
+```
+
+| control | resultado |
+|---|---|
+| **positivo** — encabezados detectados | **1028** |
+| **positivo** — máximo que devuelve | **`D-1002`**, el real |
+| **negativo** — ¿ve `D-2026`? | **0** |
+
+**Es inmune a los tres a la vez:** la subcuenta (por `{3,4}` **y orden
+numérico**), la cita legal (por `\b`) y **la autorreferencia** — que es la única
+que *sólo* el filtro por encabezado resuelve.
+
+⚠️ **Su límite, declarado por E y no descubierto después:** depende de que toda
+ficha lleve su número en un encabezado. Si alguna vive sin encabezado, **no la
+ve** — y **su modo de falla es el bueno: SUBCUENTA**, o sea que sólo devolvería
+un número tomado si la ficha más alta no tuviera encabezado. *E declara que no
+verificó eso contra las 1028: verificarlo es una corrida, y no la hizo.*
 
 > ### ⇒ La cura obvia es peor que el defecto: uno hace **chocar**, el otro hace **saltar** — y el que salta no tiene síntoma, así que nadie lo va a notar nunca.
 
