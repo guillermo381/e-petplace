@@ -33,9 +33,18 @@
  *   `capturarVideoDeGaleria` pero **no captura video con CÁMARA**
  *   (`capturarConCamara` no toma `mediaTypes` y su `normalizar` siempre
  *   devuelve `foto`). Pedido a B; la cola ya acepta clips con su techo de 30 s.
- * · **No pone chips de comportamiento.** No hay motor de guardería para eso —
- *   reusar el vocabulario del adiestramiento sería trasplantar un criterio
- *   correcto a otra pregunta (`D-976`). Pedido a A.
+ * · **No pone chips de comportamiento todavía** — y **la razón que escribí
+ *   primero era falsa**: dije que el vocabulario del adiestramiento no servía
+ *   porque «describe avances de un currículum». **Medido: `cat_conductas_bitacora`
+ *   es la bitácora UNIVERSAL** y sus códigos son exactamente *«cómo se portó»*
+ *   (`durmio_tranquilo`, `comio_normal`, `se_escondio`…). *Miré la tabla de al
+ *   lado — el currículum vive en otras dos.*
+ *
+ *   ⇒ **El vocabulario SIRVE.** Lo que falta es el **escritor del prestador**
+ *   (procedencia `declarado_por_prestador`, colgando del acto y no de la
+ *   familia), y está en la cola de A. *Frené por la razón correcta —`D-976`, no
+ *   trasplantar un criterio— sobre un hecho falso: la disciplina valía, la
+ *   premisa no.*
  */
 
 import { useMemo, useState } from 'react';

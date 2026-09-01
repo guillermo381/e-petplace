@@ -35,11 +35,29 @@ Censo con control (774 `CREATE FUNCTION`): existen `registrar_bitacora_familia`
 (adiestramiento, S63, sobre `cat_conductas_bitacora`) y los nueve registrables
 de grooming. **Ninguno es de guardería.**
 
-🔴 **Y NO los reusé, a propósito.** El vocabulario del adiestramiento describe
-**avances de un currículum**; los nueve de grooming son **servicios aplicados a
-un cuerpo**. Ninguno contesta *«cómo se portó hoy en el patio»*. *Reusar un
-criterio correcto en otra pregunta es más peligroso que inventarlo, porque llega
-con la autoridad de haber funcionado en otro lado* (`D-976`).
+🔴 ~~**Y NO los reusé, a propósito.** El vocabulario del adiestramiento describe
+**avances de un currículum**…~~
+
+### ⏪ ENMIENDA A LA VISTA — **mi premisa era FALSA y la verifiqué contra el objeto**
+
+**`cat_conductas_bitacora` NO es del adiestramiento: es la bitácora universal**,
+y sus conductas son exactamente *«cómo se portó»* — verificado en su migración
+(`20260715233000_s63_bitacora_familia.sql`) y en sus códigos sembrados:
+`durmio_tranquilo` · `comio_normal` · `se_escondio` · `miedo_ruidos` ·
+`destrozo_objetos` · `lloro_al_quedarse_solo` · `mas_carinoso`…
+
+**El currículum vive en OTRAS DOS tablas** (`cat_objetivos_adiestramiento`,
+`cat_curriculum_adiestramiento`). **Miré la tabla de al lado.**
+
+⇒ **No hay vocabulario que inventar ni firma que esperar.** Lo que falta es el
+**escritor del prestador** —con `procedencia='declarado_por_prestador'` y
+colgando del acto, no de la familia— y eso es técnico, no de mesa. **A lo tiene
+en su cola; NO se estaciona.**
+
+⚠️ **La disciplina era correcta y la premisa no**, y las dos cosas importan:
+`D-976` manda no trasplantar un criterio a otra pregunta — **pero antes hay que
+medir si de verdad es otra pregunta.** *Frené por la razón correcta sobre un
+hecho falso, y eso habría costado una firma de mesa que nadie necesitaba.*
 
 **Pido:** el vocabulario de guardería como **DATO** —catálogo, como los otros—
 y su escritor. **La voz la pongo yo**; lo que necesito son los códigos.
