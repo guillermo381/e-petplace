@@ -508,6 +508,22 @@ export {
   type OpcionDestino,
 } from './components/SelectorDestinoDonacion'
 
+// EstadoSolicitudAdopcion — S111-B: EN QUÉ ANDA MI SOLICITUD (§5).
+//
+//   🔴 `declinada` NO ES UN ESCALÓN: ES UN DESVÍO, y NEUTRO. Pintarla como
+//     paso 4 de 4 afirma que la adopción llegó a su final. El mapeo
+//     estado→forma vive ADENTRO: una pantalla que armara la escalera a
+//     mano podría marcar «declinada» como hecho y compilaría perfecto.
+//   ⚠️ `en_conversacion` es HOY INALCANZABLE — no hay mensajería entre
+//     cuentas (medido por la pista E) y su activador está estacionado. Se
+//     monta porque §5 la firma; se declara porque una banda que nunca se
+//     pinta no se distingue de una que todavía no le tocó.
+export {
+  EstadoSolicitudAdopcion,
+  type EstadoSolicitudAdopcionProps,
+  type EstadoSolicitud,
+} from './components/EstadoSolicitudAdopcion'
+
 // TarjetaPedido — S96-B: UN pedido en una lista, de los DOS lados. La fila
 // de la lista Hoy del vendedor (LETRA_PANEL_VENDEDOR_S96 §2.1) y la de
 // "Mis pedidos" de la familia (LETRA_RECORRIDO_DESPENSA_S96 §8.1).
