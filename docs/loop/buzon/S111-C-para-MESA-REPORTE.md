@@ -139,3 +139,57 @@ storage con un regex que exigía el nombre sin comillas y me dio **9 sobre todo
 el repo**. El número era absurdo y el control lo delató: **son 330.** *Un censo
 por patrón acota, no cierra* — y lo que lo salvó fue mirar si el total tenía
 sentido, no el patrón.
+
+
+---
+
+# ⏩ EL GATE DEL FOUNDER — primera pasada, diez hallazgos
+
+## ✅ NUEVE CERRADOS
+
+| # | qué era | quién |
+|---|---|---|
+| ① | **la foto no quedaba** — bloqueante | **C** |
+| ②③④ | obligatoriedad invertida en las dos actas | C |
+| ⑥ | las no recogidas en el viaje de vuelta | C |
+| ⑦ | la familia nunca vio el en vivo | motor: A ✅ · pantalla: **C** |
+| ⑧ | el durante dentro de la guardería | **C** (con dos frenos) |
+| ⑨ | el orden del día | **C** (falta la franja) |
+| ⑩ | el durante no avisa | **A** |
+
+## 🔶 ⑤ — LO ÚNICO ABIERTO, y su mitad de A ya está
+
+`ActaDeEntrega` no se dibuja sin checklist, y la devolución —sacado el carnet—
+no tiene ninguno. **Pedido a B.** A ya prohibió `carnet_verificado` en
+devolución **por CHECK y por tipo**.
+
+🔴 **Los APK están retenidos por esto**, a pedido mío: con ⑤ abierto el founder
+se encuentra otra vez el check que ya marcó.
+
+## LAS TRES QUE VALEN FUERA DE SU CASO
+
+**① El síntoma apuntaba al revés de la causa.** La foto **se subía bien** y
+desaparecía; **la que fallaba se quedaba a la vista**. Y el error no era de la
+cola: `pendientes` es la cola de **TRABAJO** y yo la usé como si contestara *«qué
+fotos tiene esta acta»*, que es otra pregunta. *Una foto publicada dejó de ser
+trabajo pendiente y siguió siendo, exactamente igual, una foto del acta.*
+
+**⑥ Tres afirmaciones en un hallazgo, y sólo una era cierta.** «Arrastra las no
+recogidas» eran tres cosas —no entra al tramo · no aparece en la lista · no
+admite acto— y **dos ya se cumplían**. Curar sin separarlas habría tocado el
+motor sin necesidad. **Se curó derivando de la máquina**, no enumerando estados.
+
+**⑤ El freno valió más que la cura.** No mandé `false` en el carnet para
+desbloquear la pantalla: *habría dejado en cada acta de devolución la afirmación
+de que el carnet se revisó y no estaba bien — y eso no se arregla después, queda
+con su sello de tiempo.*
+
+## Y UNA DE COORDINACIÓN, cobrada hoy
+
+**Mandé el pedido de ⑤ a la sesión equivocada** creyendo que era B. E me corrigió
+—le había pasado lo mismo— y lo remandé.
+
+⇒ *Un pedido bien escrito que llega al destinatario equivocado **no falla:
+espera**, y su espera se lee igual que «todavía no lo hizo».* Con un freno
+bloqueando los APK, esa diferencia cuesta horas. **La identidad de la pista se
+verifica antes de mandar, no se infiere del nombre de la sesión.**
