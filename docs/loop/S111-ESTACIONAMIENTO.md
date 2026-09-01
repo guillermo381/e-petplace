@@ -180,10 +180,29 @@ duplica las reglas de privacidad, y una regla duplicada por copia se cura dos
 veces o no se cura.*
 
 **④ CONSTRUIDO ALREDEDOR — fail-closed.** D construyó **el módulo de mensajería
-con la ley del hilo en TS** (`packages/mensajeria`, `verify:mensajeria` 26/26) y
-publicó su contrato de DB. **Nada está cableado a una superficie**, y el motor no
-existe todavía. *Si la mesa elige (b), lo que se mueve es dónde vive el canal, no
-la ley del hilo.*
+con la ley del hilo en TS** (`packages/mensajeria`, hoy `verify:mensajeria`
+**53/53**) y publicó su contrato de DB.
+
+> ### ⚠️ ENMENDADO A LA VISTA (1-sep-2026, hallazgo de E). Esta línea decía *«el motor no existe todavía»*. **EXISTE — lo construyó A el mismo día**, después de escribirse esto.
+
+`adopcion_solicitud` · `adopcion_mensaje` (append-only) ·
+`crear_solicitud_adopcion` · `responder_solicitud_adopcion` ·
+`cerrar_solicitud_adopcion` · `obtener_solicitudes_en_silencio` ·
+`_hilo_mensajes`, con la **policy colgando el hilo de `adopcion_solicitud`** —
+que **es literalmente la opción (a)**.
+
+🔴 **Y eso cambia el PESO de la firma, no su contenido: el founder ya no vota
+sobre papel, vota sobre un motor construido.** *Sigue siendo reversible sin
+perder datos —cero filas, cero pantallas— pero decirlo importa: una decisión que
+se toma frente a algo ya hecho no se toma igual que frente a una propuesta.*
+
+**Nada está cableado a una superficie.** *Si la mesa elige (b), lo que se mueve
+es dónde vive el canal, no la ley del hilo.*
+
+⚠️ **Y un aviso de nombres, de E:** la tabla NUEVA es **`adopcion_solicitud`**
+(singular); la LEGADO es **`solicitudes_adopcion`** (plural, `D-991`). *Dos
+nombres casi iguales para dos cosas distintas es exactamente cómo se construye
+sobre la tabla equivocada.*
 
 **⑤ SI SE ELIGE MAL.** Con (a) mal elegida: se ensancha un activador que la
 privacidad de S20 acotó a propósito. Con (b) mal elegida: dos canales que
