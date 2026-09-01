@@ -24973,3 +24973,70 @@ RANGO y `obtenerEstadiasDelDia` toma UNA fecha, así que curarla hoy sería
 llamarla una vez por día (`D-738`). **El gate se pone rojo también si una deuda
 listada aparece curada** — *un baseline que sólo baja tiene que poder notar que
 bajó* (`D-889`, que declaraba que ese mecanismo no existía en ninguna parte).
+
+## 🔴 `L-457` — UN GATE POR TEXTO QUE NO QUITA LOS COMENTARIOS LEE UNA LÁPIDA COMO PRUEBA DE VIDA
+
+**Medida en S109-D, horas después de nacer el gate y sobre el gate mismo.**
+
+`verify:jornada-completa` exige que toda superficie que enumere la jornada la
+enumere entera. Al plegar la quinta pata, el HOY dejó de llamar a
+`obtenerEstadiasDelDia` y pasó a `obtenerEstadiasPorRango` — y **el gate siguió
+dando VERDE**, por **dos** razones distintas que conviene no confundir:
+
+**① El universo estaba atado a un SUFIJO de nombre** (`…DelDia`). El lector nuevo
+termina en `…PorRango` ⇒ era invisible al censo. *Un gate atado a cómo se
+escribe un nombre mide la convención de nomenclatura, no el hecho.* La cura no es
+agregar el sufijo nuevo a la lista —eso repite el defecto con el tercer sufijo—
+sino **agrupar por lo que el lector CONTESTA** (el oficio) y dar por satisfecho al
+oficio con cualquiera de sus lectores.
+
+**② 🔴 Y el verde venía de un COMENTARIO.** El pliegue dejó su lápida, y la
+lápida **nombra al lector muerto** (*«`obtenerEstadiasDelDia` tomaba UNA
+fecha»*). El regex la contó como referencia viva: **la pantalla pasó el gate
+citando en prosa a un lector que ya no llama.**
+
+> **Y esto no es un descuido puntual: es estructural en esta casa.** La
+> disciplina de acá es escribir lápidas que **nombran el artefacto muerto** —
+> ☠️ `destacada`, ☠️ `senal-reserva.ts`, ☠️ `precio_plan`— porque el próximo que
+> lea tiene que saber qué murió y por qué. **Esa misma disciplina alimenta el
+> falso verde de todo gate por texto**: cuanto mejor documentada la muerte, más
+> viva parece. ⇒ ***todo gate que mide presencia de un identificador quita los
+> comentarios ANTES de medir.***
+
+**Y LA TERCERA PARTE, que es la que hay que recordar del control:** el control
+positivo **no lo cazó**, y no porque fuera débil sino porque **mutaba de más**.
+Borraba *todas* las apariciones del lector —comentario incluido— así que daba
+rojo por la razón correcta mientras el archivo real daba verde por la
+equivocada. ⇒ ***un control positivo tiene que mutar EXACTAMENTE lo que el gate
+dice medir; si muta de más, absuelve al instrumento en el único caso que
+importa.*** Hoy el mutante borra sólo el código.
+
+**El corolario para quien escriba el próximo gate por texto:** las tres cosas que
+lo vuelven confiable son las mismas tres, y ninguna es opcional — el universo
+sale del **objeto** y agrupado por lo que la cosa CONTESTA · el texto se mide
+**sin comentarios ni imports** · y el control **muta lo justo**. Faltando
+cualquiera, el gate no dice «no hay»: dice «no vi» (`L-425`).
+
+## 🟡 `L-458` — `aSangre` Y UNA BARRA FIJA ARRIBA SON EXCLUYENTES POR CONSTRUCCIÓN, Y PEDIR LAS DOS NO FALLA
+
+**Medida en S109-D sobre la vitrina de guardería** (reporte del founder como
+familia: *«no pinta la imagen hasta el techo como los demás oficios»*).
+
+La pantalla montaba `FichaPrestador` con **`aSangre`** —que le pide a la pieza
+sangrar **bajo la barra de estado**, y por eso ella suma `insets.top` al alto de
+la portada y baja lo que flota encima— **y encima le apilaba un
+`Encabezado variante="navegacion"`**. La foto sangraba, sí: **bajo un encabezado
+opaco**. Y la pantalla terminaba con **dos** formas de volver: la barra y la
+`FlechaVolver` que ya pasaba en `sobrePortada`.
+
+> *Dos props correctas, cada una bien implementada, que se anulan al convivir.
+> No hay excepción, ni warning, ni typecheck: hay una franja — y una franja se
+> lee como «así se diseñó», no como un defecto.*
+
+**Lo que lo hizo barato de encontrar fue medir contra la vitrina que SÍ lo hace**
+(`prestador/[prestadorId]`, la de paseo/grooming/vet) y descartar los candidatos
+**uno por uno**: safe area no (la pieza ya la resuelve adentro), padding de
+contenedor no (los dos `ScrollView` son idénticos), header propio **sí** — y de
+los tres era **el único que dejaba rastro en el árbol**. *Cuando dos pantallas
+deberían verse igual y no lo hacen, la pregunta no es «qué le falta a la rota»
+sino «qué tiene de más».*
