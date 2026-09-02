@@ -110,6 +110,7 @@ export {
   obtenerNombresReservadorPorCita,
   // S91 (pedido de C): la ficha PÚBLICA, por la vista y jamás por la tabla.
   obtenerPerfilesPublicos,
+  obtenerPerfilesPublicosPorCuenta,
   type PerfilPublico,
   type ServicioPublico,
   type NombreReservador,
