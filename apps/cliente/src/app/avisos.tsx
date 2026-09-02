@@ -116,6 +116,14 @@ export default function Avisos() {
         mostrar({ texto: r.mensaje, variante: 'error' });
       }
     });
+    /* La rama de la ruta del servidor va PRIMERO: es la única que no tiene
+       `pathname`, y preguntar por `params` sobre ella daría falso y caería al
+       `else`, que leería un `pathname` inexistente. *El orden de las ramas es
+       parte del estrechamiento, no un detalle de estilo.* */
+    if ('ruta' in destino) {
+      router.push(destino.ruta as never);
+      return;
+    }
     if ('params' in destino) {
       router.push({ pathname: destino.pathname, params: destino.params });
     } else {

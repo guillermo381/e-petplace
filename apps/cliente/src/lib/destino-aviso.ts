@@ -18,7 +18,20 @@
 
 import type { AvisoDeCampana } from '@epetplace/api';
 
+import { destinoDePushDeEstaApp } from './destino-de-push';
+
 export type DestinoAviso =
+  /**
+   * 🔴 **LA RUTA QUE MANDA EL SERVIDOR (S112).** Nació con el vertical de
+   * adopción y **no contradice la regla de arriba**: el motor emite **una
+   * intención por destinatario**, así que cada `ruta` ya es de una sola app.
+   *
+   * ⚠️ **Y no se navega cruda.** Pasa por `destinoDePushDeEstaApp`, el MISMO
+   * filtro que la push — *un guard que sirve a un camino y no al otro es cómo
+   * los dos terminan diciendo cosas distintas sobre la misma ruta*. Si la ruta
+   * no es de esta app, esta rama devuelve `null` y se cae al mapeo por tipo.
+   */
+  | { ruta: string }
   | { pathname: '/citas/[mascotaId]'; params: { mascotaId: string; nombre: string } }
   | { pathname: '/hogar/vacunas/[mascotaId]'; params: { mascotaId: string } }
   | { pathname: '/hogar/mascota/[mascotaId]'; params: { mascotaId: string } }
@@ -32,8 +45,23 @@ export function destinoDeAviso(a: {
   tipo: string;
   mascotaId: string | null;
   mascotaNombre: string | null;
+  /** Opcional en la firma **para no romper a quien la llame sin ella**: los
+   *  avisos viejos no tienen ruta y siguen resolviéndose por tipo. */
+  ruta?: string | null;
 }): DestinoAviso {
   if (!a.tieneDestino) return null;
+
+  /* LA RUTA DEL SERVIDOR PRESIDE, y sólo si es de esta app. **Sin ella el
+     vertical de adopción no tiene destino posible**: sus avisos no llevan
+     `mascotaId` a propósito —pasarla los descarta con `descartada_sin_acceso`,
+     porque ni el refugio ni el postulante son «familia» del adoptable antes de
+     la entrega— y el `solicitud_id` no viaja como columna. *El mapeo por tipo
+     no puede inventar un id que no recibió.* */
+  if (typeof a.ruta === 'string' && a.ruta.length > 0) {
+    const mia = destinoDePushDeEstaApp(a.ruta);
+    if (mia !== null) return { ruta: mia };
+    console.warn(`[avisos] ruta que esta app no atiende, se cae al mapeo por tipo · ${a.ruta}`);
+  }
 
   // La vacuna vive en el carnet — el expediente de la mascota.
   if (a.tipo === 'vacuna_vencida' && a.mascotaId !== null) {

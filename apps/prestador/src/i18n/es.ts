@@ -9,6 +9,8 @@
 
 export const prestadorEs = {
   tabs: {
+    adopcion: 'Refugio',
+    adoptables: 'Mis animales',
     hoy: 'Hoy',
     // S85-C25 — LA TAB SE LLAMA **DATOS** (firma de la mesa): la pantalla
     // creció hasta su eje —"a quiénes cuido"— y el founder lo pidió con
@@ -4329,6 +4331,33 @@ export const prestadorEs = {
     codigoInvalidoTitulo: 'Este documento no se acepta desde acá',
     codigoInvalidoDetalle: 'Los términos que el portal acepta son los del refugio.',
     errorTitulo: 'No pudimos cargar el documento',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+  },
+  // S112-C · MIS ANIMALES — la tab Mascotas del refugio (§4.2).
+  adoptables: {
+    titulo: 'Mis animales',
+    interruptor: 'Publicado',
+    // Los motivos llegan como CÓDIGO del motor y se traducen acá (D-539).
+    motivo_adoptable_no_esterilizado:
+      'Es adulto y no está esterilizado: se publica esterilizado.',
+    motivo_edad_no_declarada: 'Falta su edad estimada para poder publicarlo.',
+    motivo_animal_en_memorial: 'Ya no está entre nosotros.',
+    // El caso «el motor agregó un motivo que esta versión no conoce»: decirlo
+    // así es más honesto que mostrar un código crudo.
+    motivoDesconocido: 'Todavía no se puede publicar.',
+    estado_en_rescate: 'En rescate',
+    estado_publicada: 'Publicado',
+    estado_pausada: 'En pausa',
+    estado_en_proceso: 'En proceso',
+    estado_adoptada: 'Adoptado',
+    estado_no_disponible: 'Fuera de la vidriera',
+    estado_memorial: 'Memorial',
+    abrirFicha: 'Abrir la ficha de {{nombre}}',
+    fichaPronto: 'La ficha para editarlo llega en la próxima tanda.',
+    vacioTitulo: 'Todavía no cargaste ningún animal',
+    vacioDetalle: 'Cuando cargues al primero, lo vas a ver acá con su estado.',
+    errorTitulo: 'No pudimos cargar tus animales',
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Probar de nuevo',
   },
