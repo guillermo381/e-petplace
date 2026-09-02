@@ -2516,6 +2516,12 @@ export const clienteEn = {
     sinMensajes: 'No messages in this conversation yet.',
     escribirEtiqueta: 'Write to the shelter',
     enviar: 'Send',
+    desistir: "I'm no longer adopting",
+    desistirTitulo: "I'm no longer adopting",
+    desistirCuerpo:
+      "This conversation closes and can't be reopened. If you change your mind, you can apply again later.",
+    desistirConfirmar: "Yes, I'm out",
+    cancelar: 'Keep the conversation',
     cerrado: 'This conversation is closed.',
     noEstaTitulo: 'We could not find this request',
     noEstaDetalle: 'It may no longer be available.',

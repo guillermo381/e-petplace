@@ -27,7 +27,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Insignia,
+  EstadoSolicitudAdopcion as EscaleraSolicitud,
   Tarjeta,
   Texto,
   spacing,
@@ -37,7 +37,6 @@ import {
   caraDeMascota,
   obtenerMisSolicitudesAdopcion,
   resolverUrlsFotos,
-  type EstadoSolicitudAdopcion,
   type MiSolicitud,
 } from '@epetplace/api';
 
@@ -79,9 +78,9 @@ export default function MisSolicitudes() {
     }, [intento]),
   );
 
-  /** `declinada` en `atencion`, jamás `danger`: §10.6 — la devolución no humilla. */
-  const familiaDe = (e: EstadoSolicitudAdopcion): 'alDia' | 'atencion' | 'proximo' | 'info' =>
-    e === 'aceptada' ? 'alDia' : e === 'declinada' ? 'atencion' : e === 'recibida' ? 'proximo' : 'info';
+  /* ⏪ El mapeo estado→color vivía acá **y en el hilo, escrito dos veces**. Lo
+     lleva la pieza de B; se monta en su registro `compacta` —*la tira, para una
+     FILA de lista*— y las dos copias mueren juntas (Ley 37). */
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -166,9 +165,20 @@ export default function MisSolicitudes() {
                       </Texto>
                     ) : null}
                   </View>
-                  <Insignia
-                    estado={familiaDe(s.estado)}
-                    etiqueta={t(`hiloAdopcion.estado_${s.estado}` as 'hiloAdopcion.estado_recibida')}
+                </View>
+                {/* LA TIRA, debajo y en ancho completo: N24 — el control no
+                    cambia el tamaño de lo que lo contiene, y una escalera
+                    metida a la derecha del nombre le comería el renglón. */}
+                <View style={{ marginTop: spacing[3] }}>
+                  <EscaleraSolicitud
+                    estado={s.estado}
+                    registro="compacta"
+                    voces={{
+                      recibida: t('hiloAdopcion.estado_recibida'),
+                      enConversacion: t('hiloAdopcion.estado_en_conversacion'),
+                      aceptada: t('hiloAdopcion.estado_aceptada'),
+                    }}
+                    vozDeclinada={t('hiloAdopcion.estado_declinada')}
                   />
                 </View>
               </Tarjeta>
