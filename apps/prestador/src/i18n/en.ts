@@ -3417,6 +3417,16 @@ export const prestadorEn = {
     guardado: 'Saved · {{n}} new',
     sinCambios: 'That was already recorded.',
   },
+  legalesPortal: {
+    titulo: 'Shelter terms',
+    aceptar: 'I accept and continue',
+    razonFaltaLeer: 'Read the document to the end to accept it.',
+    codigoInvalidoTitulo: "This document isn't accepted here",
+    codigoInvalidoDetalle: 'The portal only accepts the shelter terms.',
+    errorTitulo: "We couldn't load the document",
+    errorDetalle: 'Check your connection and try again.',
+    reintentar: 'Try again',
+  },
   portalAdopcion: {
     titulo: 'Adoptions',
     porRevisar: 'To review',
