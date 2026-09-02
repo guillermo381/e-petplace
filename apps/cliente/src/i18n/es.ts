@@ -3314,6 +3314,7 @@ export const clienteEs = {
     sinHora: 'Todo el día',
     paqueteExito: 'Tu paquete quedó comprado',
     /* ⭐ S108-C · **«autorizado» ya no alcanza: queda ACTIVO y cobrado.** */
+    noPuedeTomarlo: '{{nombre}} no puede tomarlo. Elige otra mascota.',
     mensualExito: 'Tu plan mensual quedó activo',
     /* 🔴 **DOS VARIANTES, Y LA SEGUNDA NO ES UN RESPALDO PEREZOSO.** La fecha
        exacta del próximo cobro la tiene que decir el SERVIDOR: calcularla acá

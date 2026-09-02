@@ -2377,6 +2377,7 @@ export const clienteEn = {
     servicio: 'Daycare · one day',
     sinHora: 'All day',
     paqueteExito: 'Your pack is bought',
+    noPuedeTomarlo: '{{nombre}} can\u2019t take it. Choose another pet.',
     mensualExito: 'Your monthly plan is active',
     mensualExitoDetalle: 'Your plan is active from today. The next charge goes out on {{fecha}}. You can cancel it from Account whenever you want.',
     mensualExitoDetalleSinFecha: 'Your plan is active from today. The next charge goes out in a month. You can cancel it from Account whenever you want.',
