@@ -27165,3 +27165,38 @@ El censo por `pg_get_functiondef` sobre el nombre viejo es una línea, y **cierr
 archivo no protege a la migración que se escribe después.* El atajo de restaurar
 `estado_adopcion` con `NULL` se curó en `A1`… y se repitió en `A2b`, la
 migración siguiente, contra una columna `NOT NULL`.
+
+
+---
+
+## 🔴 `L-486` — UN ARNÉS QUE CREA LO QUE MIDE NO PRUEBA QUE ESO ESTÉ APLICADO
+
+**Error de conducción, S112-A, y lo destapó su autor.** D entregó la cura de la
+purga como *migración + reversa + arnés*. A corrió **el arnés**, lo vio verde, y
+declaró la cura aplicada — se lo dijo a D por escrito y lo puso en un commit.
+
+**El arnés crea la función dentro de su propia transacción y la deshace al
+terminar.** Su verde dice *«esta función, si existiera, se comportaría así»* —
+**jamás** *«esta función existe»*.
+
+🔴 **Y el estado real era el peor de los tres posibles**, porque las dos mitades
+llegaron por caminos distintos: `A10` **sí** había aplicado el estado `desistida`
+al CHECK, y la purga **no** se aplicó ⇒ *`desistida` se podía escribir y el
+borrado de identidad a los 90 días no la veía nunca — sin error, sin log, sin
+síntoma.* Con 0 filas costaba una migración; con una fila cuesta explicarle a
+una persona por qué sus datos siguen ahí.
+
+**Lo que lo hace difícil de ver:** el arnés es lo correcto, el verde es genuino,
+y el que lo corre está midiendo algo real. Lo que falla es **la inferencia**: de
+*«se comporta bien»* a *«está en la base»*.
+
+**El correctivo, y es de una línea:** después de aplicar una migración ajena, se
+le pregunta **al objeto** —`pg_get_functiondef` sobre la función viva, no el
+exit del arnés—. Es `L-422` («el ledger no es prueba; la prueba es preguntarle
+al objeto») aplicada a un arnés en vez de a un `db push`.
+
+**Su hermana declarada el mismo día:** *el `RAISE NOTICE` de una migración puede
+llevar un número hardcodeado que ya no es cierto.* El de la purga imprime «4
+estados leídos» y la función leyó **cinco** — verificado contra el objeto. **No
+se edita el archivo: la migración ya corrió y el repo tiene que decir lo que
+corrió**, así que la corrección vive acá y en su commit.
