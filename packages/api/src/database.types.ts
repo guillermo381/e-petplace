@@ -666,6 +666,7 @@ export type Database = {
       }
       adopcion_solicitud: {
         Row: {
+          aceptacion_id: string | null
           anonimizada_en: string | null
           aviso_silencio_emitido_en: string | null
           cerrada_en: string | null
@@ -674,9 +675,11 @@ export type Database = {
           estado: string
           id: string
           publicacion_id: string
+          respuestas: Json | null
           solicitante_user_id: string | null
         }
         Insert: {
+          aceptacion_id?: string | null
           anonimizada_en?: string | null
           aviso_silencio_emitido_en?: string | null
           cerrada_en?: string | null
@@ -685,9 +688,11 @@ export type Database = {
           estado?: string
           id?: string
           publicacion_id: string
+          respuestas?: Json | null
           solicitante_user_id?: string | null
         }
         Update: {
+          aceptacion_id?: string | null
           anonimizada_en?: string | null
           aviso_silencio_emitido_en?: string | null
           cerrada_en?: string | null
@@ -696,9 +701,17 @@ export type Database = {
           estado?: string
           id?: string
           publicacion_id?: string
+          respuestas?: Json | null
           solicitante_user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "adopcion_solicitud_aceptacion_id_fkey"
+            columns: ["aceptacion_id"]
+            isOneToOne: false
+            referencedRelation: "consentimientos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "adopcion_solicitud_publicacion_id_fkey"
             columns: ["publicacion_id"]
@@ -22096,6 +22109,7 @@ export type Database = {
         }
         Returns: string
       }
+      _columnas_solicitud_clasificadas: { Args: never; Returns: Json }
       _concepto_de_pago: { Args: { p_sujeto: string }; Returns: string }
       _corte_matricula: { Args: never; Returns: string }
       _crear_evento_padre_auto: {
@@ -22349,6 +22363,7 @@ export type Database = {
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
       }
+      _respuestas_postulacion_validas: { Args: { p: Json }; Returns: string }
       _tipo_documento_legible: { Args: { p_tipo: string }; Returns: string }
       _total_congelado_del_intento: {
         Args: { p_intento: string }
@@ -23190,7 +23205,12 @@ export type Database = {
         Returns: string
       }
       crear_solicitud_adopcion: {
-        Args: { p_mensaje_inicial?: string; p_publicacion_id: string }
+        Args: {
+          p_aceptacion_id?: string
+          p_mensaje_inicial?: string
+          p_publicacion_id: string
+          p_respuestas: Json
+        }
         Returns: Json
       }
       crear_solicitud_autorizacion: {
