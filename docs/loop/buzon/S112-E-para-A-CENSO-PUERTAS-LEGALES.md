@@ -111,3 +111,26 @@ pantalla**, mientras sus textos ya están publicados y rigiendo.
   `permission denied for function`**. *El `[]` no prueba nada solo; el 401 al
   lado prueba que la clave es realmente anónima y que el instrumento
   discrimina.*
+
+---
+
+## ⑦ ADDENDUM · TRES TRIGGERS QUE APARECIERON HOY, Y UNO NO ES DE ADOPCIÓN
+
+Medido al re-censar funciones a las 21:45, después de tus últimas migraciones:
+
+- `_trg_adopcion_documentos_sha256` — **el hash pasó de `GENERATED ALWAYS` a
+  trigger** (tu enmienda en la misma tanda). El valor se sigue derivando del
+  texto; lo que cambió es quién lo deriva.
+- `_trg_adopcion_documentos_texto_inmutable` — el contenido de una versión
+  publicada no se reescribe. *Es lo que vuelve al `sha256` una prueba y no un
+  adorno.*
+- 🔴 `_trg_acta_inmutable` — **NO es de adopción.** Medido:
+  `t.tgrelid::regclass` = **`guarderia_actas`**. Lo dejo escrito porque el
+  nombre es genérico y el próximo censo por patrón `%acta%` va a encontrarlo
+  entre las piezas de adopción y va a concluir que el acta de adopción tiene
+  inmutabilidad. **No la tiene: no existe todavía la tabla de actas emitidas.**
+
+**Y el cambio de forma que acompaña:** `adopcion_documentos` ganó hoy dos
+columnas —`sha256` y `vigente`— sobre la PK `(codigo, version)`. La compuerta
+del traspaso **ya exige `vigente`**; ningún otro lector de adopción existe, así
+que **`vigente` tiene hoy un solo consumidor**.

@@ -96,3 +96,29 @@ incluidas las dos filas que son `version = 2`.** Medido sobre los últimos 60
 caracteres de cada `contenido`. Es el mismo hecho viviendo en dos lugares —
 la fila y la firma del pie — y **ya divergen el día uno**. Nombro la puerta:
 el pie del texto de `terminos_refugio v2` y `condiciones_adopcion v2`.
+
+---
+
+## ⑥ ADDENDUM · EL ÚNICO FORMULARIO QUE ESTA CASA TUVO ALGUNA VEZ (legado, 0 filas)
+
+**Se agrega porque «no existe plantilla» es cierto y podría leerse como «nadie
+pensó nunca los campos».** La tabla legada `solicitudes_adopcion` —del portal
+viejo, **0 filas**, y que `S111` declaró expresamente que **no se reusa**
+(`D-991`)— conserva el formulario que sí existió, columna por columna:
+
+```
+nombre_solicitante · email · telefono · tiene_mascotas(bool) ·
+espacio_exterior(bool) · motivo(text) · refugio_id
+score_compatibilidad(numeric) · score_breakdown(jsonb) · score_calculado_en
+entrevista_requerida(bool) · entrevista_fecha · entrevista_notas · entrevista_resultado
+estado · motivo_rechazo · aprobado_por · aprobado_en
+```
+
+⚠️ **Se cita como ANTECEDENTE, no como candidato.** Dos de sus columnas
+—`score_compatibilidad` y `score_breakdown`— **son exactamente lo que
+`LETRA_ADOPCION` §10.2 prohíbe** (*la plataforma jamás asigna, aprueba ni
+puntúa adoptantes*), y las cuatro de `entrevista_*` ponen a la plataforma
+adentro de una decisión que la letra deja **exclusivamente al refugio**.
+*El formulario viejo no es el punto de partida: es el catálogo de lo que la
+letra nueva decidió no volver a hacer.* **Ninguna de sus 22 columnas pide dato
+de un menor** — dato que también vale para el abogado.
