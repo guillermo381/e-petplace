@@ -27240,3 +27240,20 @@ dos veces el instrumento **dio un resultado correcto**. No hubo regex roto ni
 asiento equivocado ni verde por vacío — hubo una respuesta verdadera a una
 pregunta parecida. *Es la familia entera de esta sesión, cobrada una vez más:
 el instrumento no falló; falló el salto de lo que midió a lo que se dijo.*
+
+## 🔴 SU MEDIA CURA, Y LA APORTÓ C CORRIGIENDO A A
+
+A había escrito que para *«verdadero al medirlo, falso al leerlo»* **no hay cura
+de disciplina**. C lo corrigió, y tiene razón:
+
+> ***Hay media: fechar la medición y NOMBRAR CONTRA QUÉ se midió.***
+>
+> *«Cero ocurrencias en `supabase/migrations/`» y «cero ocurrencias en
+> `supabase/migrations/` de mi árbol, que está en tal SHA» son dos afirmaciones
+> distintas — **y sólo la segunda envejece visiblemente**.*
+
+Las dos veces que pasó hoy, el mensaje decía **el hecho y no el asiento**. Un
+hecho sin asiento se lee como permanente; con su asiento, el próximo lector ve
+solo que la base cambió. **Es la misma regla que la casa ya exige de toda
+medición** —*declarar contra qué y cuándo*— y lo que C agrega es que **también
+rige entre pistas**, no sólo en los reportes al founder.
