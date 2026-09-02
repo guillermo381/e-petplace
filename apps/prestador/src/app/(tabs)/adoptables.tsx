@@ -52,7 +52,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -243,18 +243,19 @@ export default function MisAdoptables() {
               }}
               publicacion={publicacionDe(a)}
               etiqueta={t('adoptables.abrirFicha', { nombre: a.nombre })}
-              /* 🔴 **EL TOQUE NO LLEVA A LA FICHA DE EDICIÓN, Y NO ES PEREZA:
-                 NO HAY LECTOR.** `obtener_adoptable` lee
-                 `v_adoptables_publicos` ⇒ **rebota para un borrador**, que es
-                 justo el caso que hay que poder editar. Y `obtenerMisAdoptables`
-                 trae el resumen de la lista, no la ficha.
-                 *Abrir un formulario con los campos vacíos porque no pude
-                 leerlos, sobre una función que acepta `Partial`, es cómo se
-                 borra la historia de un animal con un guardado.* Pedido a A
-                 como lector de MI adoptable; hasta entonces el toque **dice qué
-                 falta**, que es el patrón que el founder firmó para «Apadrinar»
-                 (N7): visible, honesto, y no navega a un vacío. */
-              onPress={() => mostrar({ variante: 'neutro', texto: t('adoptables.fichaPronto') })}
+              /* ✅ **EL TOQUE YA LLEVA, y llegó por frenar en vez de improvisar.**
+                 Hasta hace un rato acá había un aviso honesto porque **no había
+                 lector**: `obtener_adoptable` rebota los borradores, que son
+                 justo los que hay que editar. *Abrir el formulario vacío sobre
+                 una función que acepta `Partial` habría borrado la historia de
+                 un animal con un guardado.* A entregó `obtenerMiAdoptable`, que
+                 trae la ficha ENTERA aunque haya nulos. */
+              onPress={() =>
+                router.push({
+                  pathname: '/adoptables/[publicacionId]',
+                  params: { publicacionId: a.publicacionId },
+                })
+              }
             />
           ))
         )}

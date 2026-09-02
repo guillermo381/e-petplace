@@ -290,6 +290,45 @@ export default function HiloDelPublicador() {
         </EvitaTeclado>
       )}
 
+      {/* ⭐ **EL HILO ES LA PUERTA DEL ACTA** — letra del founder: *«aceptada:
+
+          el hilo me lleva al acta»*. El aviso «acta lista» apunta al hilo a
+
+          propósito (decisión de D), así que **si el hilo no llevara, no llegaría
+
+          nadie**. */}
+
+      {estado.fase === 'listo' && estado.hilo.estado === 'aceptada' ? (
+
+        <View style={{ padding: spacing[5] }}>
+
+          <Boton
+
+            variante="primario"
+
+            bloque
+
+            etiqueta={t('portalHilo.verActa')}
+
+            onPress={() =>
+
+              router.push({
+
+                pathname: '/adopcion/acta/[solicitudId]',
+
+                params: { solicitudId: estado.hilo.solicitudId },
+
+              })
+
+            }
+
+          />
+
+        </View>
+
+      ) : null}
+
+
       {/* ── P1 · LA DOBLE CONFIRMACIÓN, con el SUJETO nombrado ── */}
       <HojaConfirmacionDestructiva
         visible={decidiendo === 'declinada'}
