@@ -39,6 +39,7 @@ import { obtenerAdoptables, obtenerServiciosPais, type ServiciosPais } from '@ep
 // S58 (D-361): adiestramiento migró al set b′ — la estrella murió
 // (violaba el set); el silbato canónico vive en el registry.
 import { useTraduccion } from '@/i18n';
+import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 
 // El soft launch es Ecuador (DEFINICION_SOFTLAUNCH); el país del
 // usuario llega con el riel de país del ciclo B1.
@@ -88,7 +89,9 @@ export default function Explorar() {
       void obtenerServiciosPais(PAIS_SOFT_LAUNCH).then((r) => {
         if (vigente) setServicios(r.ok ? r.data : 'error');
       });
-      void obtenerAdoptables({ limite: 1 }).then((r) => {
+      /* El gate corta ANTES de la petición: una lectura para decidir algo que
+         no se va a dibujar es un viaje pagado para nada. */
+      if (ADOPCION_ALCANZABLE) void obtenerAdoptables({ limite: 1 }).then((r) => {
         /* 🔴 Un fallo NO se lee como «no hay ninguno» (Ley 13). Con `null` la
            sección se queda quieta en vez de afirmar que nadie espera —
            *decirle a alguien que no hay animales en adopción porque se cayó la
@@ -330,7 +333,7 @@ export default function Explorar() {
               a ninguno.* */}
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('explorar.refugios')} />
-            {hayAdoptables === true ? (
+            {ADOPCION_ALCANZABLE && hayAdoptables === true ? (
               /* `CeldaNavegacion` y no `Celda`: **navega**, y la Ley 19.1 le
                  da su anatomía —glifo del set b′ + chevron de entrada—. Lo
                  cazó el typecheck, que exige `interactiva` explícito en la

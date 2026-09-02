@@ -111,6 +111,7 @@ import { CoachHoja } from '@/components/coach';
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { useTraduccion } from '@/i18n';
+import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
 import { contarPendientesDe, type FuentesDePendientes } from '@/lib/pendientes';
@@ -1017,7 +1018,13 @@ export default function Hogar() {
         >
           {/* ── ① LOS QUE ESPERAN — PRESIDE ─────────────────────────────
               🔴 **Sin contador, igual que en Explorar:** §4 prohíbe convertir
-              la lista en inventario. *Se presentan vidas, no stock.* */}
+              la lista en inventario. *Se presentan vidas, no stock.*
+
+              ⏸️ **APAGADA hasta el lote de adopción** (`ADOPCION_ALCANZABLE`):
+              construida y verificada, fuera del lote de guardería que el
+              founder recorre. Con el gate apagado esta pantalla queda como
+              estaba — la invitación a registrar, sola. */}
+          {ADOPCION_ALCANZABLE ? (
           <Tarjeta>
             <CeldaNavegacion
               icono="refugio"
@@ -1026,6 +1033,7 @@ export default function Hogar() {
               onPress={() => router.push('/adoptar')}
             />
           </Tarjeta>
+          ) : null}
 
           {/* ── ② LA INVITACIÓN, CON SU «i» (N22) ───────────────────────
               **Por qué la «i» y no un párrafo suelto:** N22 corta por FUNCIÓN,
