@@ -1167,3 +1167,59 @@ misma línea de vida y se distinguen.*
 **La vidriera quedó con TRES animales publicados** (Luna, Tito, Bruno) más Kira
 en borrador. *Se declara porque cambia lo que el founder va a ver en su
 recorrido: donde §0 dice cinco, hay cuatro y uno ya adoptado.*
+
+---
+
+# ADDENDUM 10 · 2-sep 21:00 — EL CANAL DEL CÓDIGO, MEDIDO
+
+*Era lo último del arco que nadie había mirado: `estado='entregada'` no es un
+buzón.* **Esto acota cuánto se puede afirmar.**
+
+## J1 · ✅ EL CÓDIGO SALE POR CORREO, y el proveedor lo aceptó
+
+Las **seis** intenciones de `codigo_firma_adopcion` emitidas durante E3:
+
+```
+total .................. 6
+con proveedor_id ....... 6      ← el transporte devolvió un id del proveedor
+canal_elegido = email .. 6
+cortadas por un gate ... 0
+```
+
+Y el `resuelto_como` de una, entero:
+
+```json
+{"despacho":"para_transporte","despacho_en":"2026-09-02T15:27:00Z",
+ "evaluado_en":"2026-09-02T15:26:44Z","proveedor_id":"318f3b49-…",
+ "canal_elegido":"email","gate_que_corto":null,
+ "canales_habilitados":["in_app","push","email"]}
+```
+
+**Lo que esto SÍ prueba:** el motor eligió `email`, ningún gate lo cortó, y **un
+proveedor de correo aceptó el mensaje y devolvió su id**. *Es bastante más que
+«se marcó entregada».*
+
+**Lo que NO prueba, y se dice:** **que el correo haya llegado a un buzón.** *Que
+un proveedor acepte un mensaje y que una persona lo reciba son dos hechos, y el
+segundo sólo lo puede verificar quien abre el correo.* **Queda para el founder,
+en el paso 7 y el 14 de su recorrido.**
+
+`correo_suprimido`: **0 filas** ⇒ ninguna de las dos direcciones está en la lista
+de supresión, que es la causa silenciosa más común de un correo que no llega.
+
+## J2 · ✅ EL CÓDIGO NO SE FILTRA A LA CAMPANA — y esta vez el cero significa algo
+
+```
+🔴 filas de codigo_firma_adopcion en `notificaciones` ....... 0
+✅ CONTROL+ · la campana tiene ....... 26 filas de 10 tipos
+```
+
+⚠️ **Mi primera pasada de esta sonda dio el mismo 0 y NO valía nada:** el control
+que corrí al lado era *«¿la campana tiene otras de adopción?»* y dio **0 también**
+⇒ el cero podía ser «la campana está vacía de adopción», no «el código está
+excluido». **El control bueno es que la campana reciba ALGO**, y recibe 26 cosas
+de 10 tipos.
+
+> **Séptima vez en dos días, y ya como reflejo:** *el control positivo no es
+> cualquiera que esté cerca — es el que, si fallara, explicaría el resultado por
+> otra razón.*
