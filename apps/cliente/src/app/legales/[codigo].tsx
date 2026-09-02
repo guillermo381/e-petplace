@@ -29,9 +29,19 @@
  *   acta.
  * · **El `sha256` tampoco se manda.** Lo lee el servidor del documento. *Si lo
  *   aportara el cliente, la evidencia diría lo que el cliente quiso decir.*
- * · **`ipHash` NO se manda, a propósito:** la app **no tiene** la IP, y
- *   fabricar un hash de algo que no conozco sería inventar evidencia legal. Se
- *   omite; el campo es opcional.
+ * · ☠️ **`ipHash` YA NO EXISTE — y esta pantalla es la razón.** El contrato lo
+ *   ofrecía como opcional y **no se mandó**: la app no tiene la IP, y fabricar
+ *   un hash de algo que no conozco sería inventar evidencia legal. Al reportar
+ *   esa negativa, A midió lo que había debajo y era mucho peor que un campo
+ *   vacío: **`consentimientos.ip_hash` estaba en NULL en las 97 filas de la
+ *   casa** — ni el alta ni la teleconsulta lo llenaron jamás. *Un campo que
+ *   sólo puede llenar quien no lo conoce no se llena nunca, y su modo de falla
+ *   es el peor: la fila existe, se ve completa, y el dato falta.* **Hoy la IP la
+ *   lee el servidor del header y la guarda hasheada; si el header no llega,
+ *   queda NULL y no se inventa.** La respuesta trae `ipCapturada` para que la
+ *   pantalla no tenga que suponerlo.
+ *   ⚠️ **No se muestra**: que la evidencia esté completa es asunto del registro
+ *   probatorio, no algo que la persona que acepta tenga que evaluar.
  */
 
 import { useCallback, useRef, useState } from 'react';
@@ -121,6 +131,12 @@ export default function LecturaDeDocumento() {
    * Por eso se mide en `onLayout` del contenido: si el contenido **cabe**, está
    * leído. La condición real no es «scrolleó», es **«vio todo»** — y con un
    * texto corto las dos cosas se separan.
+   *
+   * ✅ **Y el caso corto es REAL, no hipotético** (medido por A sobre los textos
+   * cargados): `terminos_refugio` tiene **12 324** caracteres —ahí scroll y
+   * lectura coinciden— pero **`condiciones_adopcion` tiene 1 711**, que en una
+   * pantalla grande entra sin scrollear. *El documento que esta pantalla sirve
+   * hoy es justamente el que habría dejado el botón muerto.*
    */
   const alMedirContenido = useCallback((_w: number, h: number) => {
     yaMidio.current = true;
