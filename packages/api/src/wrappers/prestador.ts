@@ -704,6 +704,14 @@ export async function obtenerNombresReservadorPorCita(
 
 export interface PerfilPublico {
   id: string;
+  /**
+   * S112-A · **EL PUENTE.** `v_adoptables_publicos` devuelve `publicador_id` =
+   * `cuentas_comerciales.id`, y este lector se pide por `prestadores.id`: sin
+   * esta columna la pantalla tenía un id y el lector quería el otro.
+   *
+   * ⚠️ No abre nada: el mismo id ya viaja público en cada adoptable.
+   */
+  cuenta_comercial_id: string | null;
   nombre_comercial: string;
   foto_url: string | null;
   ciudad: string | null;
@@ -755,7 +763,7 @@ export async function obtenerPerfilesPublicos(
     // intento partía el select en tres líneas con `+` y tsc marcó las 17
     // propiedades como inexistentes.)
     .select(
-      'id, nombre_comercial, foto_url, ciudad, sector, descripcion, cohorte, cohorte_anio, zona_lat, zona_lon, zona_radio_m, calificacion_promedio, total_resenas, total_citas, servicios, portadas, clip_url',
+      'id, cuenta_comercial_id, nombre_comercial, foto_url, ciudad, sector, descripcion, cohorte, cohorte_anio, zona_lat, zona_lon, zona_radio_m, calificacion_promedio, total_resenas, total_citas, servicios, portadas, clip_url',
     )
     .in('id', [...ids]);
   if (error) return { ok: false, codigo: 'error', mensaje: MENSAJE_RESERVADOR };
@@ -766,6 +774,9 @@ export async function obtenerPerfilesPublicos(
     ok: true,
     data: data.map((f) => ({
       id: String(f.id),
+      /* `null` y no cadena vacía: un prestador sin cuenta comercial no tiene
+         una cuenta llamada «» — quien lea tiene que poder distinguirlo. */
+      cuenta_comercial_id: f.cuenta_comercial_id ?? null,
       nombre_comercial: String(f.nombre_comercial ?? ''),
       foto_url: f.foto_url ?? null,
       ciudad: f.ciudad ?? null,

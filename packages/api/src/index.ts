@@ -1699,8 +1699,11 @@ export {
   publicarAdoptable,
   despublicarAdoptable,
   traspasarMascotaAFamilia,
+  poblarVitrinaRefugio,
 } from './wrappers/adopcion';
-export type { Adoptable, ResultadoTraspaso, CodigoErrorAdopcion } from './wrappers/adopcion';
+export type {
+  Adoptable, ResultadoTraspaso, CodigoErrorAdopcion, VitrinaRefugioGuardada,
+} from './wrappers/adopcion';
 
 /* S112-A4 · el refugio: su cuenta y su rama del arranque — hunk aditivo. */
 export { obtenerMiCuentaRefugio } from './wrappers/prestador';
