@@ -96,7 +96,10 @@ export default function Explorar() {
            sección se queda quieta en vez de afirmar que nadie espera —
            *decirle a alguien que no hay animales en adopción porque se cayó la
            red es la peor de las dos mentiras posibles acá.* */
-        if (vigente && r.ok) setHayAdoptables(r.data.length > 0);
+        /* ⚠️ ADAPTACION MECANICA DE A (S112-A2), PROVISIONAL. La forma cambio
+           a `{destacados, resto}`; el gate sigue preguntando lo mismo: **si hay
+           alguno**. C la revisa en C1. */
+        if (vigente && r.ok) setHayAdoptables(r.data.destacados.length + r.data.resto.length > 0);
       });
       return () => {
         vigente = false;
