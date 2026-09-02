@@ -77,8 +77,45 @@ export type OpcionFiltro<C extends string> = {
   capa?: 'identidad' | 'cuidado' | null
 }
 
-export interface FiltroPillsProps<C extends string> {
-  opciones: OpcionFiltro<C>[]
+/* ═══ S112-B · LA SELECCIÓN SE VUELVE UNA UNIÓN — TERCER ENSANCHE ═══════
+ * (los dos anteriores: `activo: null` en S91-B · `disposicion` en S100d-B)
+ *
+ * **Pedido de C para los filtros de convivencia de adopción** (§4: *convive
+ * bien con — perros · gatos · niños*), que se filtran **de a varios a la vez**.
+ *
+ * 🔴 **POR QUÉ ESTA PIEZA Y NO UNA NUEVA `ChipsConvivencia`:** el control es
+ * EL MISMO —chip con pata, placa de glifo, acento por casa, hundimiento por
+ * slot— y lo único distinto es cuántos pueden estar elegidos. *Una tira de
+ * chips propia en la pantalla sería la copia que L-175 prohíbe*, y esta pieza
+ * ya rechazó esa salida una vez con esas mismas palabras cuando nació
+ * `'envuelve'`. **Se ensancha, no se copia.**
+ *
+ * ── POR QUÉ UNIÓN Y NO UNA PROP MÁS ─────────────────────────────────────
+ * `activos?: C[]` al lado de `activo` dejaría **dos formas de decir lo
+ * mismo**, y la pieza tendría que elegir cuál gana — el día que alguien pase
+ * las dos, el que pierde se lee como un bug silencioso. Con la unión, **los
+ * dos modos son mutuamente excluyentes en el TIPO**: los `?: never` hacen que
+ * mezclarlos no compile. *El estado malo inexpresable, no documentado.*
+ *
+ * ⚠️ **ES ADITIVO Y NO ROMPE NADA, y eso no es suerte: es la condición.** Hay
+ * **15 archivos consumidores en las DOS apps** —territorio de C y de D—, así
+ * que un cambio que los obligue a migrar no era una opción disponible desde
+ * acá. La rama de una sola es **byte-idéntica a la de siempre**.
+ *
+ * ── LO QUE LA RAMA `varias` HACE POSIBLE, Y ES DE LA LETRA ───────────────
+ * §4: *«filtrar no borra al que no se midió»* — con un filtro de convivencia
+ * activo, arriba van los confirmados y abajo, con su título, los que todavía
+ * no se saben. **Esta pieza colabora NO TENIENDO el control que lo rompería:**
+ * un chip de convivencia se enciende o se apaga, y **no existe forma de
+ * seleccionar «ocultar a los no observados»** porque ese estado no es un valor
+ * del control. *La regla no vive en la disciplina de quien la monta.*
+ *
+ * ⛔ **Y lo que NO entra por acá, de piedra (§4): el filtro de RAZA.** No es
+ * una opción que falte — *filtrar por raza empuja a buscar raza*.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/** UNA sola elegida — el modo de siempre. */
+type SeleccionUna<C extends string> = {
   /** S91-B: acepta `null` = NINGUNO elegido. Nació para el histórico, donde
    *  un eje puede estar SIN filtrar — el mismo estado que `FiltroMascotas`
    *  ya expresaba con `elegida: null` cuando mató el chip «Todas». Los
@@ -92,6 +129,23 @@ export interface FiltroPillsProps<C extends string> {
    *  ella el eje se puede apagar. La diferencia es del consumidor, no de
    *  la pieza. */
   onLimpiar?: () => void
+  activos?: never
+  onAlternar?: never
+}
+
+/** VARIAS a la vez — S112-B, los filtros de convivencia. */
+type SeleccionVarias<C extends string> = {
+  activos: C[]
+  /** Tocar alterna: encendido lo apaga, apagado lo enciende. Por eso acá
+   *  NO existe `onLimpiar` — sería un segundo camino al mismo acto. */
+  onAlternar: (c: C) => void
+  activo?: never
+  onCambio?: never
+  onLimpiar?: never
+}
+
+export type FiltroPillsProps<C extends string> = {
+  opciones: OpcionFiltro<C>[]
   /**
    * 🔴 DÓNDE CAEN LOS CHIPS — `'tira'` (default, cero cambio) · `'envuelve'`
    * (S100d-B · punto 4 del gate, pedido por la pista C **con su número**).
@@ -134,16 +188,30 @@ export interface FiltroPillsProps<C extends string> {
    * no hay con qué competir.**
    */
   disposicion?: 'tira' | 'envuelve'
-}
+} & (SeleccionUna<C> | SeleccionVarias<C>)
 
-export function FiltroPills<C extends string>({
-  opciones,
-  activo,
-  onCambio,
-  onLimpiar,
-  disposicion = 'tira',
-}: FiltroPillsProps<C>) {
+export function FiltroPills<C extends string>(props: FiltroPillsProps<C>) {
+  const { opciones, disposicion = 'tira' } = props
   const { theme } = useTheme()
+
+  /* LOS DOS MODOS SE NORMALIZAN ACÁ Y EN NINGÚN OTRO LADO — si cada uso de
+     `elegido` tuviera que acordarse de los dos, el primero que se olvide
+     pinta distinto y nadie lo ve hasta mirarlo (el mismo motivo por el que
+     `Boton` resuelve su alias de variante en un solo lugar). */
+  const varias = props.activos !== undefined
+  const estaElegido = (c: C): boolean =>
+    props.activos !== undefined ? props.activos.includes(c) : props.activo === c
+  const alTocar = (c: C): void => {
+    if (props.activos !== undefined) {
+      props.onAlternar(c)
+      return
+    }
+    if (props.activo === c && props.onLimpiar) {
+      props.onLimpiar()
+      return
+    }
+    props.onCambio(c)
+  }
 
   /* El aire es EL MISMO en las dos disposiciones — es lo que hace que esto
      sea un ensanche y no una segunda pieza. ⚠️ El `paddingTop` no es
@@ -158,7 +226,7 @@ export function FiltroPills<C extends string>({
   }
 
   const chips = opciones.map((o) => {
-        const elegido = o.codigo === activo
+        const elegido = estaElegido(o.codigo)
         const colorPlaca =
           o.capa === 'identidad' ? theme.capa.identidad : o.capa === 'cuidado' ? theme.capa.cuidado : theme.text.primary
         const tintaGlifo = elegido ? theme.bg.card : theme.text.secondary
@@ -170,9 +238,13 @@ export function FiltroPills<C extends string>({
         return (
           <Pressable
             key={o.codigo}
-            onPress={() => (elegido && onLimpiar ? onLimpiar() : onCambio(o.codigo))}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: elegido }}
+            onPress={() => alTocar(o.codigo)}
+            /* 🔴 EL ROL CAMBIA CON EL MODO, y no es prolijidad de a11y: es la
+               VERDAD del control. `radio` le promete al lector de pantalla que
+               elegir uno suelta al otro — en el modo de varias eso es falso, y
+               una promesa falsa a un lector de pantalla es peor que ninguna. */
+            accessibilityRole={varias ? 'checkbox' : 'radio'}
+            accessibilityState={varias ? { checked: elegido } : { selected: elegido }}
             accessibilityLabel={o.etiqueta}
             style={{
               height: 44,

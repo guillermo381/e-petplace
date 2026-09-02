@@ -100,6 +100,7 @@ import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
 import { TarjetaAdoptable } from '../components/TarjetaAdoptable'
+import { BloqueConCriterio } from '../components/BloqueConCriterio'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
@@ -580,6 +581,67 @@ function GateRazonDelBoton() {
         </Texto>
         <Boton variante="primario" etiqueta="Guardar" deshabilitado onPress={() => {}} />
         <View style={{ height: 1, backgroundColor: theme.border.default }} />
+      </View>
+    </View>
+  )
+}
+
+/* ⭐ S112-B — LA VIDRIERA DE ADOPCIÓN: el bloque con su criterio y los chips
+ * de convivencia. Los chips son además el CONTROL POSITIVO del modo `varias`
+ * de `FiltroPills`: si este bloque compila y responde al dedo, la rama nueva
+ * existe de verdad. */
+function MuestraVidrieraAdopcion() {
+  const [convive, setConvive] = useState<string[]>(['perros'])
+  const alternar = (c: string) =>
+    setConvive((v) => (v.includes(c) ? v.filter((x) => x !== c) : [...v, c]))
+
+  return (
+    <View style={{ gap: spacing[5] }}>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          ① los filtros de convivencia · VARIAS a la vez. No existe un estado
+          «ocultar a los no observados»: §4 dice que filtrar no borra al que no
+          se midió, y el control no puede expresarlo
+        </Texto>
+        <FiltroPills
+          opciones={[
+            { codigo: 'perros', etiqueta: 'Convive con perros', icono: 'huella' },
+            { codigo: 'gatos', etiqueta: 'Convive con gatos', icono: 'huella' },
+            { codigo: 'ninos', etiqueta: 'Convive con niños', icono: null },
+          ]}
+          activos={convive}
+          onAlternar={alternar}
+          disposicion="envuelve"
+        />
+        <Texto variante="apoyo">elegidas: {convive.length === 0 ? '—' : convive.join(' · ')}</Texto>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          ② el bloque con su criterio · el «porqué» es OBLIGATORIO y es lo único
+          que lo separa de un ranking. Sin contador y sin numeración
+        </Texto>
+        <BloqueConCriterio
+          titulo="Llevan más tiempo esperando"
+          porque="Son los que más tiempo llevan esperando un hogar."
+        >
+          <TarjetaAdoptable
+            nombre="Lito"
+            especie="Perro"
+            raza={null}
+            sexo="Macho"
+            edad={null}
+            fotoUrl={null}
+            publicador="Rescatistas del Valle"
+            voces={{ edadNoInformada: 'Edad no informada' }}
+            onPress={() => {}}
+          />
+        </BloqueConCriterio>
+        <Texto variante="apoyo">
+          ⚠️ NO se monta en la app hasta que exista el flag `destacado_espera`
+          del servidor: alimentarlo por fecha de alta sería el orden por
+          antigüedad que §4 prohíbe.
+        </Texto>
       </View>
     </View>
   )
@@ -5074,6 +5136,10 @@ function GaleriaInterna() {
               />
             </View>
           </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S112 — LA VIDRIERA DE ADOPCIÓN · qué decide: (a) que los chips de convivencia se lean como MÚLTIPLES y no como una elección única, y (b) que el bloque «Llevan más tiempo esperando» se lea como un criterio explicado y JAMÁS como un ranking — el porqué es lo único que lo separa">
+          <MuestraVidrieraAdopcion />
         </Seccion>
 
         <Seccion titulo="⭐ GATE S112 — TarjetaAdoptable · qué decide: (a) que se lea como una VIDA presentada y no como un ítem de catálogo, y (b) que las DOS ausencias se lean bien — «edad no informada» dicha sin vergüenza y en el mismo peso, y la raza que nadie declaró simplemente ausente (jamás «mestizo» inventado por nosotros)">

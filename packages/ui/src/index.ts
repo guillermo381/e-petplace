@@ -484,6 +484,17 @@ export {
   type TarjetaAdoptableProps,
 } from './components/TarjetaAdoptable'
 
+// BloqueConCriterio — S112-B: un grupo que va PRIMERO dice por qué va primero.
+// `porque` es OBLIGATORIA y es toda la pieza: sin ella un orden se lee como
+// ranking. Sin contador y sin numeración, a propósito (§4: la lista no es
+// inventario). ⚠️ Su primer consumidor —«Llevan más tiempo esperando»— NO se
+// monta hasta que exista el flag `destacado_espera` del servidor: §4 prohíbe
+// explícito ordenar por antigüedad.
+export {
+  BloqueConCriterio,
+  type BloqueConCriterioProps,
+} from './components/BloqueConCriterio'
+
 // SenalesAdoptable — S111-B: LO QUE HAY QUE SABER ANTES DE ENAMORARSE.
 // `LETRA_ADOPCION` §3: urgente · pareja vinculada · tiempo en rescate ·
 // ubicación aproximada — JAMÁS la dirección exacta.
