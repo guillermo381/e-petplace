@@ -968,3 +968,116 @@ El `\d{8}` pegaba en otra cosa.
 > **Sexta vez en dos días.** *Un regex laxo sobre un corpus ajeno encuentra
 > siempre — y encuentra algo verdadero que no es lo que se preguntó.* **La forma:
 > antes de llamar rojo a una coincidencia, se mira la fila que la produjo.**
+
+---
+
+# ADDENDUM 8 · 2-sep 18:30–19:30 — LA FIRMA CORRIÓ · DOS AGUJEROS Y UN INSERT IMPOSIBLE
+
+**CONTRA QUÉ:** base viva + `main 42630c0c`. Tres sesiones reales sobre el
+fixture `8b747efd` (Nube), con el acta ya completa.
+
+## H1 · ✅ EL OTP NO VIAJA EN EL PAYLOAD — medido por mí, desde afuera
+
+*Lo declaré dos veces como no medido antes de darlo por bueno. Éste es el
+literal:*
+
+```json
+{"ok":true,"enviado_a":"guillo381+8@gmail.com","expira_en":"2026-09-02T15:18:21+00:00"}
+
+¿ocho dígitos seguidos? ........... ✅ NO
+¿alguna clave codigo/code/otp/pin?  ✅ NO
+¿dice A DÓNDE se mandó? ........... ✅ sí
+```
+
+Y del objeto: **`codigo_hash` de 64 caracteres** ⇒ hasheado en reposo. **El
+código sí existe y viaja: la intención lleva los 8 dígitos en su mensaje.** *El
+segundo factor va por su canal y no vuelve por el que la pantalla lee.*
+
+## H2 · 🔴 EL OTP ACEPTA INTENTOS ILIMITADOS — `intentos_agotados` es inalcanzable
+
+**Medido de tres formas independientes:**
+
+```
+seis intentos con código falso .... los SEIS: «codigo_incorrecto: quedan 4 intento(s)»
+la fila después de los seis ....... intentos = 0
+el literal ........................ UPDATE …SET intentos = intentos + 1 WHERE id = v_c.id;
+                                    RAISE EXCEPTION 'codigo_incorrecto: quedan %', 4 - v_c.intentos;
+```
+
+**El `UPDATE` y el `RAISE` están en la misma transacción** ⇒ la excepción
+**revierte el incremento**. `intentos` queda en 0 para siempre, `4 - 0` da 4
+siempre, y el guard de más arriba (`IF v_c.intentos >= 5`) **nunca se cumple**.
+
+> *No se puede contabilizar un intento fallido y lanzar en la misma transacción.*
+> **Y es de las que leer el código NO muestra: el `UPDATE` está ahí, escrito, y
+> parece correcto.** Aparece ejerciéndolo seis veces y mirando la fila.
+
+**Lo que deja:** un OTP de 8 dígitos, vida de 10 minutos, **sin techo de
+intentos**. *La ventana acota el daño; el límite de 5 que §5.5 pide no existe.*
+**PUERTA: `firmar_acta_adopcion`. Es de A.**
+
+## H3 · 🔴 LA SEGUNDA FIRMA NO COMPLETA — el INSERT del hito, contra otro esquema
+
+```
+el refugio firma → 🔴 column "tipo_evento" of relation "eventos_mascota" does not exist
+```
+
+**De las 8 columnas que el INSERT nombra, CINCO no existen:**
+
+| usa | existe |
+|---|---|
+| `mascota_id` · `fecha_evento` · `procedencia` | ✅ |
+| **`tipo_evento`** | 🔴 la real es **`tipo`** |
+| **`titulo`** · **`descripcion`** | 🔴 no están |
+| **`creado_por`** | 🔴 la real es **`creado_por_user_id`** |
+| **`metadata`** | 🔴 la real es **`datos`** |
+
+*Y la casa tiene tabla tipada para esto:* `evento_hito_narrativo (evento_id,
+mascota_id, country_code, clave, contexto)`. **El patrón es evento padre + fila
+tipada; el INSERT actual escribe contra un esquema que no es el de esta tabla.**
+
+**Daño cero, verificado:** 1 sola firma (la del adoptante) · Nube **sigue
+publicada** · la solicitud sigue en `aceptada`. *El traspaso se llama justo antes
+del INSERT, así que corrió y revirtió con todo lo demás — no quedó media
+adopción.*
+
+**⇒ El traspaso nunca se dispara, y el paso 15 no se puede cerrar.**
+
+## H4 · LO QUE SÍ QUEDÓ VERDE, todo por camino real
+
+| sonda | dio |
+|---|---|
+| **la familia FIRMA** | ✅ `folio F-2026-000050 · papel adoptante · firmas 1 · completa false` |
+| **el estado intermedio** de §4.1 | ✅ `firmas:[{papel:"adoptante", sello:…}] · mi_papel:"adoptante"` |
+| 🔴 **`ya_firmaste`** | ✅ **y en el lugar correcto: rebota al PEDIR el código, no al firmar** |
+| 🔴 `codigo_incorrecto` | ✅ con los intentos en el mensaje |
+| 🔴 un tercero: acta · código · firma | ✅ `sin_acceso` en las tres |
+| el refugio pide código | ✅ y su payload **tampoco** lleva el código |
+
+*Que `ya_firmaste` rebote al pedir el código y no al firmar es **mejor** de lo que
+§5.5 pedía: no se emite un código para algo que no se puede firmar.*
+
+## H5 · LO QUE SIGUE SIN PODER CORRER
+
+- **`codigo_vencido`** — exige esperar 10 minutos o mover `expira_en`, y mover un
+  código emitido es tocar la evidencia. *Se corre con la ventana real.*
+- **`acta_cambio_de_version`** — el camino real es **publicar `acta_adopcion v2`**
+  para que el código quede emitido sobre otro texto. **Publicar una versión de un
+  documento legal no es mío**: se pidió a A y no se hizo por cuenta propia.
+- **`intentos_agotados`** — inalcanzable por H2.
+
+## H6 · UNA NOTA PARA A Y D, sin medir a fondo
+
+Las intenciones del código salieron con **`estado='entregada'`**. *Que el motor
+las marque entregadas no es lo mismo que un correo llegando a un buzón.* **Sigue
+sin verificar, y es el pendiente declarado con D.**
+
+## H7 · LA FORMA QUE SE REPITIÓ TRES VECES HOY
+
+`retirada` que el CHECK no admite · el array de faltantes sin castear · y el
+INSERT del hito contra otro esquema. **Las tres compilan, las tres están
+escritas, y las tres revientan la primera vez que alguien las recorre.**
+
+> **Una rama que nunca se ejecutó no está probada por existir.** *Las tres
+> aparecieron por ejercer y ninguna por leer — y las tres estaban en el camino
+> feliz, no en un borde.*
