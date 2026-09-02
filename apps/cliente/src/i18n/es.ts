@@ -3640,6 +3640,27 @@ export const clienteEs = {
      repiten de la despensa **no tienen ningún lector en `packages/api`**. *Una
      sección que promete «todo lo que te cobra solo» y muestra dos de tres
      miente por omisión, y su modo de falla es el peor: se lee como completa.* */
+  /* A6 · LA VITRINA DEL REFUGIO, del lado de la familia.
+
+     🔴 **Los dos vacíos son distintos y por eso son dos frases.** «No armó su
+     página» y «todavía no publicó ninguno» describen situaciones que la
+     familia resuelve distinto: en una espera al refugio, en la otra vuelve
+     otro día. *Nombrar mal un vacío manda a esperar lo que no va a venir.* */
+  vitrinaRefugio: {
+    titulo: 'El refugio',
+    sinPagina: 'Este refugio todavía no armó su página',
+    sinPaginaPeroAnimales: 'Puedes ver sus animales igual.',
+    susAnimales: 'Sus animales en adopción',
+    sinAnimalesTitulo: 'Todavía no tiene animales publicados',
+    sinAnimalesDetalle: 'Cuando publique alguno, va a aparecer acá.',
+    edadNoInformada: 'Edad no informada',
+    comoAyudar: 'Cómo ayudar',
+    comoAyudarEtiqueta: 'Qué es «Cómo ayudar»',
+    comoAyudarPronto: 'Todavía no está listo. Cuando lo esté, vas a poder donar o apadrinar a un animal de este refugio desde acá.',
+    errorTitulo: 'No pudimos abrir esta página',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Probar de nuevo',
+  },
   recurrentes: {
     titulo: 'Pagos recurrentes y suscripciones',
     /* G8 · **El verbo que la familia viene a buscar.** Dice «cancelar
