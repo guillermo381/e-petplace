@@ -234,6 +234,32 @@ node scripts/verify-diseno.mjs >/dev/null 2>&1 || {
 #    dejaría **sin poder commitear a cualquiera sin red**, y un gate que
 #    frena por no poder medir no protege: estorba. Su lugar es el paso ⓪ y
 #    el cierre, al lado de `verify:censo` — como lo declaró su autora.
+# ── verify:vio-todo (S112-B, cableado por A) ──────────────────────────────
+# Corre en ~1 s e importa la funcion REAL, no una copia. Va al hook y no al
+# cierre por la razon que S109 dejo medida: **lo que decide son los gates del
+# hook, porque corren en cada commit y su silencio se lee como salud cada vez.**
+#
+# Y se confia en el por como se corrigio a si mismo: su primera version salio
+# por exit 2 («no pude medir») porque su auto-prueba afirmaba exactamente el
+# caso que estaba midiendo. *Una auto-prueba que comparte el supuesto con lo
+# que mide no verifica el instrumento: lo duplica* (`L-459`).
+#
+# 🔴 SU HERMANO `verify:rutas-de-aviso` **NO ESTA ACA TODAVIA**, y su autor lo
+#    declaro: sale 2 (no concluyente) hasta que las listas blancas de rutas de
+#    las apps esten en `main`. Ponerlo antes frenaria commits por una fuente
+#    ausente — que es peor que no tenerlo.
+if [ -f scripts/verify-vio-todo.mjs ]; then
+  node scripts/verify-vio-todo.mjs >/dev/null 2>&1
+  VIO=$?
+  if [ "$VIO" -eq 1 ]; then
+    echo "✗ verify:vio-todo EN ROJO — el commit NO ocurre."
+    node scripts/verify-vio-todo.mjs 2>&1 | grep -E "✗|🔴" | head -4
+    exit 1
+  elif [ "$VIO" -ne 0 ]; then
+    echo "⚠️  verify:vio-todo NO CONCLUYENTE (exit $VIO) — no frena, y lo dice."
+  fi
+fi
+
 node scripts/verify-jornada-completa.mjs >/dev/null 2>&1 || {
   echo ""
   echo "✗ LA JORNADA NO SE ENUMERA ENTERA — el commit NO ocurre."
