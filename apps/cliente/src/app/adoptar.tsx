@@ -51,6 +51,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  HojaFiltros,
   BloqueConCriterio,
   Boton,
   CeldaNavegacion,
@@ -67,6 +68,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  obtenerCatalogoCiudades,
   resolverUrlGenericaEspecie,
   obtenerAdoptables,
   obtenerSesion,
@@ -86,8 +88,10 @@ const ESPECIES = ['perro', 'gato'] as const;
 const TALLAS = ['S', 'M', 'L'] as const;
 const SEXOS = ['macho', 'hembra'] as const;
 
-/** Los ejes que se encienden y se apagan de a uno. */
-type Marca = 'urgente' | 'esterilizado' | 'conPareja' | 'perros' | 'gatos' | 'ninos';
+/* ☠️ `Marca` y `alternar` murieron con los chips inline (A1, Ley 37): sus
+   seis ejes viven ahora dentro de `HojaFiltros`, con **tres estados** los de
+   convivencia en vez de encendido/apagado — que es la corrección que trajo B y
+   que este tipo binario no podía expresar. */
 
 type Estado =
   | { fase: 'cargando' }
@@ -108,10 +112,26 @@ export default function Adoptar() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
 
-  const [especie, setEspecie] = useState<string | null>(null);
-  const [talla, setTalla] = useState<string | null>(null);
-  const [sexo, setSexo] = useState<string | null>(null);
-  const [marcas, setMarcas] = useState<Marca[]>([]);
+  /**
+   * ⭐ **A1 · UN SOLO OBJETO DE FILTROS, y es el que viaja al motor.**
+   *
+   * Antes eran cuatro variables (`especie`, `talla`, `sexo`, `marcas`) y un
+   * bloque que las traducía a `FiltrosAdoptables` en cada render. **Ese bloque
+   * era un mapa en el medio**, y un mapa entre dos vocabularios es la segunda
+   * verdad que diverge sola: el día que el motor acepte un filtro nuevo, la
+   * pantalla lo tiene que traducir dos veces —al entrar y al salir— y sólo una
+   * de las dos se acuerda.
+   *
+   * `HojaFiltros` devuelve **exactamente esta forma**, con los nombres de la
+   * lista blanca de `obtener_adoptables`, así que **no hay traducción**: lo que
+   * sale de la hoja entra al lector tal cual.
+   */
+  const [filtros, setFiltros] = useState<FiltrosAdoptables>({});
+  const [hojaFiltros, setHojaFiltros] = useState(false);
+  const [explicandoEsterilizado, setExplicandoEsterilizado] = useState(false);
+  /** El catálogo de ciudades. Ver la nota de su carga: **sin sesión llega
+   *  vacío**, y por eso el grupo no se dibuja con la lista en cero. */
+  const [ciudades, setCiudades] = useState<{ id: string; nombre: string }[]>([]);
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [trayendoMas, setTrayendoMas] = useState(false);
   /** `null` mientras no se sabe. **No se asume que no hay sesión**: con `false`
@@ -120,30 +140,11 @@ export default function Adoptar() {
   const [conSesion, setConSesion] = useState<boolean | null>(null);
   const [hojaPorQueCuenta, setHojaPorQueCuenta] = useState(false);
 
-  /**
-   * Los filtros, armados desde el estado de los chips.
-   *
-   * 🔴 **Los tres ejes de convivencia mandan `'si'`, jamás `'no_se_sabe'`.** El
-   * chip dice «convive con perros»; pedir `'no'` sería el filtro contrario y
-   * pedir `'no_se_sabe'` sería buscar a los que nadie probó. *Un chip cuya
-   * etiqueta y cuyo valor no coinciden es un filtro que devuelve lo que nadie
-   * pidió, y compila igual.*
-   */
-  const filtros: FiltrosAdoptables = {
-    ...(especie === null ? {} : { especie }),
-    ...(talla === null ? {} : { talla }),
-    ...(sexo === null ? {} : { sexo }),
-    ...(marcas.includes('urgente') ? { urgente: true } : {}),
-    ...(marcas.includes('esterilizado') ? { esterilizado: true } : {}),
-    ...(marcas.includes('conPareja') ? { conPareja: true } : {}),
-    ...(marcas.includes('perros') ? { convivePerros: 'si' as const } : {}),
-    ...(marcas.includes('gatos') ? { conviveGatos: 'si' as const } : {}),
-    ...(marcas.includes('ninos') ? { conviveNinos: 'si' as const } : {}),
-  };
-  /** La llave que reinicia la paginación: **cualquier cambio de filtro empieza
-   *  de cero**. Un cursor de la consulta anterior sobre un orden nuevo devuelve
-   *  filas que no corresponden. */
   const llave = JSON.stringify(filtros);
+  /** Cuántos ejes están puestos. Se cuenta sobre el objeto que viaja al motor
+   *  —no sobre un espejo—, así que no puede desincronizarse con lo que la
+   *  lista está aplicando de verdad. */
+  const cuantosFiltros = Object.keys(filtros).length;
 
   useFocusEffect(
     useCallback(() => {
@@ -154,12 +155,24 @@ export default function Adoptar() {
            lista (`L-223` — lo que se paga en reloj es la CADENA). Y se pregunta
            SIEMPRE, no sólo al postular: la línea de arriba tiene que decir la
            verdad desde el primer render. */
-        const [ses, r] = await Promise.all([
+        /* 🔴 **`cat_ciudades` SIN SESIÓN LLEGA VACÍO, Y NO ES UN FALLO.**
+           Medido: la tabla tiene RLS encendida y sus **dos policies son sólo
+           para `authenticated`** — `anon` tiene el GRANT y **ninguna policy**,
+           así que lee **cero filas sin error**. Esta vidriera se mira sin
+           cuenta, o sea que **el caso normal es la lista vacía**.
+           ⇒ El grupo de ciudad **no se le pasa a la hoja cuando está vacío**:
+           un grupo de filtro con su rótulo y ninguna opción se lee como algo
+           roto. *Un grant sin policy no da error: da silencio*, que es lo que
+           lo vuelve difícil de ver. Reportado a A (la policy) y a B (que el
+           grupo no dibuje con lista en cero). */
+        const [ses, r, ciu] = await Promise.all([
           obtenerSesion(),
           obtenerAdoptables({ filtros: JSON.parse(llave) as FiltrosAdoptables }),
+          obtenerCatalogoCiudades(),
         ]);
         if (!vigente) return;
         setConSesion(ses.ok && ses.data !== null);
+        setCiudades(ciu.ok ? ciu.data.map((x) => ({ id: x.id, nombre: x.nombre })) : []);
         /* Ley 13: un fallo JAMÁS se disfraza de «no hay nadie en adopción».
            *Ese vacío diría que ningún animal espera, que es lo contrario de lo
            que pasa.* */
@@ -267,9 +280,6 @@ export default function Adoptar() {
     />
   );
 
-  const alternar = (m: Marca) =>
-    setMarcas((xs) => (xs.includes(m) ? xs.filter((x) => x !== m) : [...xs, m]));
-
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado
@@ -321,68 +331,61 @@ export default function Adoptar() {
           </View>
         ) : null}
 
-        {/* ═══ LOS FILTROS ══════════════════════════════════════════════════
-            `disposicion="envuelve"` y no la tira: son doce chips en cuatro
-            ejes, y C midió en S100d que un riel horizontal esconde el 78 % de
-            un eje **sin decir cuánto esconde**. Acá el peor caso es peor que
-            aquél. */}
-        <View style={{ gap: spacing[3] }}>
-          <FiltroPills
-            disposicion="envuelve"
-            opciones={[
-              { codigo: 'todas', etiqueta: t('adoptar.todas'), icono: null },
-              ...ESPECIES.map((e) => ({
-                codigo: e,
-                etiqueta: t(`adoptar.especie_${e}` as 'adoptar.especie_perro'),
-                icono: null,
-                capa: 'identidad' as const,
-              })),
-            ]}
-            activo={especie ?? 'todas'}
-            onCambio={(c) => setEspecie(c === 'todas' ? null : c)}
+        {/* ═══ A1 · LOS FILTROS, EN UNA SOLA HOJA ═══════════════════════
+
+            ☠️ **Acá vivían TRES `FiltroPills` con doce chips**, en cuatro ejes
+            apilados sobre la lista. Se retiran enteros (Ley 37) y su razón se
+            conserva: *un riel horizontal esconde parte de un eje sin decir
+            cuánto esconde* — por eso eran `envuelve` y no una tira. **La hoja
+            resuelve lo mismo mejor:** no compite con la lista por el alto de la
+            pantalla, y al abrirse muestra los nueve ejes a la vez en vez de
+            tres.
+
+            🔑 **Y la hoja devuelve `FiltrosAdoptables` TAL CUAL** —los nombres
+            de la lista blanca del motor, `snake_case` incluido—, así que lo que
+            sale entra al lector sin traducción. *Ese pedido fue explícito: una
+            hoja que devuelve su propio vocabulario obliga a un mapa en el
+            medio, y ese mapa es la segunda verdad que diverge sola.* ── */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+          <Boton
+            variante="secundario"
+            tamaño="sm"
+            etiqueta={
+              /* El botón DICE CUÁNTOS filtros hay puestos. Sin el número, la
+                 hoja esconde lo que la lista ya está aplicando: *una lista
+                 filtrada que no se declara filtrada se lee como un catálogo
+                 pobre.* */
+              cuantosFiltros === 0
+                ? t('adoptar.filtrar')
+                : t('adoptar.filtrarConCuenta', { n: cuantosFiltros })
+            }
+            onPress={() => setHojaFiltros(true)}
           />
-          <FiltroPills
-            disposicion="envuelve"
-            opciones={[
-              { codigo: 'cualquiera', etiqueta: t('adoptar.tallaCualquiera'), icono: null },
-              ...TALLAS.map((x) => ({
-                codigo: x,
-                etiqueta: t(`adoptar.talla_${x}` as 'adoptar.talla_S'),
-                icono: null,
-              })),
-              ...SEXOS.map((x) => ({
-                codigo: x,
-                etiqueta: t(`adoptar.sexo_${x}` as 'adoptar.sexo_macho'),
-                icono: null,
-              })),
-            ]}
-            /* Dos ejes en una fila de chips, y **se comporta como uno**: elegir
-               una talla no debería apagar el sexo. Por eso el estado son dos
-               variables y el `activo` es el que corresponda al código tocado. */
-            activo={talla ?? sexo ?? 'cualquiera'}
-            onCambio={(c) => {
-              if (c === 'cualquiera') {
-                setTalla(null);
-                setSexo(null);
-                return;
-              }
-              if ((TALLAS as readonly string[]).includes(c)) setTalla(c === talla ? null : c);
-              else setSexo(c === sexo ? null : c);
-            }}
-          />
-          <FiltroPills
-            disposicion="envuelve"
-            opciones={[
-              { codigo: 'urgente', etiqueta: t('adoptar.filtroUrgente'), icono: null, capa: 'cuidado' },
-              { codigo: 'esterilizado', etiqueta: t('adoptar.filtroEsterilizado'), icono: null, capa: 'cuidado' },
-              { codigo: 'conPareja', etiqueta: t('adoptar.filtroPareja'), icono: null, capa: 'cuidado' },
-              { codigo: 'perros', etiqueta: t('adoptar.filtroPerros'), icono: null, capa: 'cuidado' },
-              { codigo: 'gatos', etiqueta: t('adoptar.filtroGatos'), icono: null, capa: 'cuidado' },
-              { codigo: 'ninos', etiqueta: t('adoptar.filtroNinos'), icono: null, capa: 'cuidado' },
-            ]}
-            activos={marcas}
-            onAlternar={(c) => alternar(c as Marca)}
-          />
+          {cuantosFiltros > 0 ? (
+            <Boton
+              variante="ghost"
+              tamaño="sm"
+              etiqueta={t('adoptar.limpiarFiltros')}
+              onPress={() => setFiltros({})}
+            />
+          ) : null}
+          {/* ⭐ **A6 · LA PUERTA AL BUSCADOR DE REFUGIOS** — segunda mitad del
+              literal del founder: *«en adopción puedo buscar un refugio por
+              nombre y ver sus animales»*.
+
+              Va acá, al lado de filtrar, porque es la otra forma de acotar la
+              vidriera: **una filtra animales, la otra entra por la casa que los
+              cuida.** Y va `ghost`: la acción principal de esta pantalla sigue
+              siendo mirar animales (Ley 5 — una superficie con dos acentos no
+              tiene ninguno). */}
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <Boton
+              variante="ghost"
+              tamaño="sm"
+              etiqueta={t('adoptar.verRefugios')}
+              onPress={() => router.push('/adoptar/refugios')}
+            />
+          </View>
         </View>
 
         {estado.fase === 'cargando' ? (
@@ -411,12 +414,7 @@ export default function Adoptar() {
                 <Boton
                   variante="secundario"
                   etiqueta={t('adoptar.limpiarFiltros')}
-                  onPress={() => {
-                    setEspecie(null);
-                    setTalla(null);
-                    setSexo(null);
-                    setMarcas([]);
-                  }}
+                  onPress={() => setFiltros({})}
                 />
               )
             }
@@ -487,6 +485,92 @@ export default function Adoptar() {
             bloque
             onPress={() => setHojaPorQueCuenta(false)}
           />
+        </View>
+      </Hoja>
+
+      {/* ═══ A1 · LA HOJA ═══════════════════════════════════════════════════
+
+          🔑 **`onAplicar` va DERECHO al estado de filtros** — la hoja devuelve
+          `FiltrosAdoptables` con los nombres de la lista blanca del motor
+          (`convive_perros`, `ciudad_id`, `con_pareja`, `snake_case` incluido),
+          así que **no hay mapa en el medio**. Un mapa entre dos vocabularios es
+          la segunda verdad que diverge sola.
+
+          ⚠️ **El grupo de ciudad se pasa VACÍO cuando el catálogo llegó vacío**,
+          y eso pasa **en el caso normal de esta pantalla**: se mira sin sesión y
+          `cat_ciudades` tiene RLS con policies sólo para `authenticated`.
+          *Un grant sin policy no da error: da silencio.* Pedido a A la policy y
+          a B que el grupo no dibuje con la lista en cero. ── */}
+      <HojaFiltros
+        visible={hojaFiltros}
+        onCerrar={() => setHojaFiltros(false)}
+        filtros={filtros}
+        onAplicar={setFiltros}
+        opciones={{
+          especies: ESPECIES.map((e) => ({
+            codigo: e,
+            etiqueta: t(`adoptar.especie_${e}` as 'adoptar.especie_perro'),
+            icono: null,
+          })),
+          tallas: TALLAS.map((x) => ({
+            codigo: x,
+            etiqueta: t(`adoptar.talla_${x}` as 'adoptar.talla_S'),
+            icono: null,
+          })),
+          sexos: SEXOS.map((x) => ({
+            codigo: x,
+            etiqueta: t(`adoptar.sexo_${x}` as 'adoptar.sexo_macho'),
+            icono: null,
+          })),
+          ciudades: ciudades.map((c) => ({ codigo: c.id, etiqueta: c.nombre, icono: null })),
+        }}
+        /* 🔴 OBLIGATORIA, y la razón es de B: este filtro **angosta escondiendo
+           una ausencia**. La persona pide esterilizados, recibe menos animales,
+           y no tiene forma de saber que los perdió por un dato que falta y no
+           por un hecho. *Un filtro que angosta en silencio es peor que uno que
+           no existe.* */
+        explicaEsterilizado={{
+          texto: '',
+          onExplicar: () => setExplicandoEsterilizado(true),
+          etiquetaExplicacion: t('adoptar.esterilizadoEtiqueta'),
+        }}
+        voces={{
+          titulo: t('adoptar.filtrosTitulo'),
+          aplicar: t('adoptar.filtrosAplicar'),
+          limpiar: t('adoptar.filtrosLimpiar'),
+          grupos: {
+            especie: t('adoptar.grupoEspecie'),
+            talla: t('adoptar.grupoTalla'),
+            sexo: t('adoptar.grupoSexo'),
+            ciudad: t('adoptar.grupoCiudad'),
+            convivePerros: t('adoptar.grupoPerros'),
+            conviveGatos: t('adoptar.grupoGatos'),
+            conviveNinos: t('adoptar.grupoNinos'),
+            binarios: t('adoptar.grupoMarcas'),
+          },
+          /* Los tres estados, y **el tercero se dice con todas las letras**: es
+             una opción elegible más, que es lo que dice sin palabras que
+             filtrar no lo descarta. */
+          convivencia: {
+            si: t('adoptar.conviveSi'),
+            no: t('adoptar.conviveNo'),
+            no_se_sabe: t('adoptar.conviveNoSeSabe'),
+          },
+          binarios: {
+            urgente: t('adoptar.filtroUrgente'),
+            esterilizado: t('adoptar.filtroEsterilizado'),
+            con_pareja: t('adoptar.filtroPareja'),
+          },
+        }}
+      />
+
+      <Hoja
+        visible={explicandoEsterilizado}
+        onCerrar={() => setExplicandoEsterilizado(false)}
+        titulo={t('adoptar.filtroEsterilizado')}
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Texto variante="cuerpo">{t('adoptar.esterilizadoExplicacion')}</Texto>
         </View>
       </Hoja>
     </SafeAreaView>
