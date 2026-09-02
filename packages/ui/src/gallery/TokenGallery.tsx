@@ -101,6 +101,8 @@ import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
 import { TarjetaAdoptable } from '../components/TarjetaAdoptable'
 import { BloqueConCriterio } from '../components/BloqueConCriterio'
+import { ConvivenciaInput } from '../components/ConvivenciaInput'
+import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
@@ -590,6 +592,38 @@ function GateRazonDelBoton() {
  * de convivencia. Los chips son además el CONTROL POSITIVO del modo `varias`
  * de `FiltroPills`: si este bloque compila y responde al dedo, la rama nueva
  * existe de verdad. */
+/**
+ * ENTRADA DE CATÁLOGO de `ConvivenciaInput` (R17) — **no es su gate.**
+ *
+ * El gate de esta pieza es la ficha de edición del adoptable, en el portal
+ * del refugio, con datos reales (orden del founder del 2-sep: las piezas se
+ * juzgan MONTADAS). Acá está por la otra ley, que sigue en pie: **ninguna
+ * pieza exportada queda invisible.**
+ *
+ * Con estado propio porque es un control CONTROLADO: montarlo muerto
+ * mostraría tres botones que no hacen nada, y de un control lo único que
+ * importa es qué pasa al tocarlo.
+ */
+function MuestraConvivenciaInput() {
+  const [estados, setEstados] = useState<Record<string, EstadoConvivencia>>({
+    perros: 'si',
+    gatos: 'no',
+    ninos: 'no_se_sabe',
+  })
+
+  return (
+    <ConvivenciaInput
+      ejes={[
+        { eje: 'perros', etiqueta: 'Con perros', estado: estados.perros! },
+        { eje: 'gatos', etiqueta: 'Con gatos', estado: estados.gatos! },
+        { eje: 'ninos', etiqueta: 'Con niños', estado: estados.ninos! },
+      ]}
+      voces={{ si: 'Sí', no: 'No', no_se_sabe: 'Todavía no se sabe' }}
+      onCambio={(eje, estado) => setEstados((p) => ({ ...p, [eje]: estado }))}
+    />
+  )
+}
+
 function MuestraVidrieraAdopcion() {
   const [convive, setConvive] = useState<string[]>(['perros'])
   const alternar = (c: string) =>
@@ -5265,6 +5299,15 @@ function GaleriaInterna() {
               />
             </View>
           </View>
+        </Seccion>
+
+        <Seccion titulo="ConvivenciaInput (S112) — la cara que ESCRIBE los mismos tres estados">
+          {/* Entrada de CATÁLOGO, no gate (2-sep): esta pieza se juzga en la
+              ficha de edición del refugio. Lo que se puede ver acá y no en un
+              PNG es lo único que un control tiene para mostrar: que los tres
+              se tocan, que el tercero pesa igual que los otros dos, y que
+              elegir no mueve nada de lugar (N24). */}
+          <MuestraConvivenciaInput />
         </Seccion>
 
         <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">

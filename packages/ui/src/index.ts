@@ -471,7 +471,20 @@ export {
   Convivencia,
   type ConvivenciaProps,
   type ConvivenciaCon,
+  /** Los tres estados, escritos una sola vez para las DOS caras. */
+  type EstadoConvivencia,
 } from './components/Convivencia'
+
+// ConvivenciaInput — S112-B (B1): LA CARA QUE ESCRIBE. «Todavía no se sabe»
+// es una RESPUESTA, no la ausencia de una: `estado` es obligatoria y de los
+// tres, así que ni un boolean ni un cuarto estado ni un hueco se pueden
+// expresar. No es un control nuevo: es `SelectorSegmentado proposito=
+// "eleccion"` atado al vocabulario de `Convivencia`.
+export {
+  ConvivenciaInput,
+  type ConvivenciaInputProps,
+  type EjeConvivencia,
+} from './components/ConvivenciaInput'
 
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
