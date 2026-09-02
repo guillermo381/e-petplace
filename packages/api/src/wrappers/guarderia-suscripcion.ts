@@ -31,6 +31,18 @@ const MENSAJES = {
      LLEVAR en vez de decir que no (`L-424`). */
   ya_tienes_plan_activo: 'Ya tienes un plan activo en esa guardería.',
   plan_no_cancelado: 'Ese plan no está cancelado.',
+  /* ═══ S112-A · `D-1001` — LAS TRES RAZONES QUE LA PUERTA EMPEZÓ A DAR ═════
+     La mensualidad no consultaba especie: había un AVE con plan de guardería
+     activo, y era la única suscripción viva. El gate se montó en el motor con
+     la MISMA pieza que usan las puertas del día suelto — y sin estas tres
+     claves la razón moría en el `error_desconocido`: *la familia vería «prueba
+     de nuevo» sobre algo que no va a funcionar nunca por más que pruebe.* */
+  mascota_no_elegible: 'Esta guardería no recibe a esa mascota.',
+  /* Segundo hueco del mismo censo, de otra clase: la puerta no verificaba que
+     la mascota fuera de quien firma. Su voz NO dice «de otra familia» — decirlo
+     confirmaría que esa mascota existe. */
+  no_access_to_mascota: 'No encontramos esa mascota en tu familia.',
+  mascota_requerida: 'Elige para qué mascota es el plan.',
   no_sos_de_esta_familia: 'Ese plan no es de tu familia.',
   sin_sesion: 'Necesitas iniciar sesión.',
   datos_inconsistentes: 'No pudimos leer la respuesta. Prueba de nuevo.',
