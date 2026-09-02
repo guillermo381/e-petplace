@@ -106,6 +106,7 @@ import {
   FormularioPostulacion,
   type RespuestasPostulacion,
 } from '../components/FormularioPostulacion'
+import { DocumentoLegalLectura } from '../components/DocumentoLegalLectura'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
@@ -688,6 +689,54 @@ function MuestraFormularioPostulacion() {
         motivo: { rotulo: '¿Por qué este animal?' },
       }}
     />
+  )
+}
+
+/* ENTRADA DE CATÁLOGO de `DocumentoLegalLectura` (R17) — no es su gate; su
+   gate son las condiciones (C4) y el acta (C8) con el texto real de A.
+
+   🔴 QUÉ HAY QUE VER, y es un DISCRIMINADOR de dos mitades: **el de la
+   izquierda entra sin scroll y su botón ya está encendido; el de la derecha
+   no entra y su botón está apagado con su razón hasta que se llegue al
+   fondo.** Si el corto también arrancara apagado, la pieza volvió a
+   implementar «vi todo» como EVENTO y la pantalla quedó muerta.
+
+   El caja de 260 es a propósito más chica que un teléfono: hace entrar el
+   caso corto en la galería. La pieza corre a pantalla completa. */
+function MuestraDocumentoLegal({ largo }: { largo: boolean }) {
+  const [vioTodo, setVioTodo] = useState(false)
+  const parrafo =
+    'El adoptante se compromete a brindar al animal alimento, agua, refugio y atención veterinaria, y a no cederlo ni venderlo a terceros sin dar aviso previo al refugio. '
+  return (
+    <View style={{ flex: 1, gap: spacing[2] }}>
+      <Texto variante="apoyo">
+        {largo ? 'largo · exige scrollear hasta el fondo' : 'corto · entra sin scroll (1 711 caracteres)'}
+      </Texto>
+      <View
+        style={{
+          height: 260,
+          borderRadius: radius.lg,
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: 'rgba(0,0,0,0.08)',
+        }}
+      >
+        <DocumentoLegalLectura
+          titulo="Condiciones de adopción"
+          texto={largo ? parrafo.repeat(9) : parrafo}
+          onVioTodo={() => setVioTodo(true)}
+          pie={
+            <Boton
+              etiqueta="Acepto y continúo"
+              bloque
+              deshabilitado={!vioTodo}
+              razonDeshabilitado={vioTodo ? undefined : 'Todavía no viste el documento entero'}
+              onPress={() => {}}
+            />
+          }
+        />
+      </View>
+    </View>
   )
 }
 
@@ -5382,6 +5431,20 @@ function GaleriaInterna() {
               que marcar la casilla ENCIENDE el botón y la razón se va sola,
               sin que nada salte de lugar (N24, con el espacio reservado). */}
           <MuestraFormularioPostulacion />
+        </Seccion>
+
+        <Seccion titulo="DocumentoLegalLectura (S112) — «vi todo» es un predicado, no un evento">
+          <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+            <MuestraDocumentoLegal largo={false} />
+            <MuestraDocumentoLegal largo />
+          </View>
+          <Texto variante="apoyo">
+            El de la izquierda entra sin scroll: su botón tiene que estar
+            ENCENDIDO de arranque. Si arranca apagado, «vi todo» volvió a ser un
+            evento y la pantalla queda muerta sin error — el caso medido son las
+            condiciones de adopción, 1 711 caracteres, que entran en un teléfono
+            grande y no en uno chico. Su gate de lógica es `pnpm verify:vio-todo`.
+          </Texto>
         </Seccion>
 
         <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">

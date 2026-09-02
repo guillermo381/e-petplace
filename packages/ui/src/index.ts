@@ -499,6 +499,21 @@ export {
   type EnvioDeFormulario,
 } from './components/FormularioPostulacion'
 
+// DocumentoLegalLectura — S112-B (B3): el texto entero, y la prueba de que se
+// PUDO ver. Una pieza para dos documentos (condiciones y acta): son el mismo
+// texto largo con el mismo pie, y lo único que cambia es qué hay entre el
+// texto y el botón. No trae ningún texto y no puede traerlo.
+export {
+  DocumentoLegalLectura,
+  type DocumentoLegalLecturaProps,
+} from './components/DocumentoLegalLectura'
+
+// pudoVerTodo — la cuenta de «vi todo», como PREDICADO y no como evento: un
+// documento que entra sin scroll no produce ningún `onScroll`, y un «vi todo»
+// hecho de eventos deja la pantalla muerta sin error. Se exporta para que su
+// gate (`pnpm verify:vio-todo`) mida la función REAL y no una copia.
+export { pudoVerTodo, TOLERANCIA_VIO_TODO } from './components/vio-todo'
+
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
 // sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.
