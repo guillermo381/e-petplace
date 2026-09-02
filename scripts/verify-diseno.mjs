@@ -1367,11 +1367,23 @@ function r29(archivos) {
   return { fallos, info: `${compuestos} control(es) compuesto(s) con sinPie · ${fallos.length} sin su pie` };
 }
 
-/** R17 · LA GALERÍA NO ENVEJECE (S82-B r16, orden founder: "toda pieza
- *  exportada desde packages/ui tiene que aparecer en la galería. Una
+/** R17 · NINGUNA EXPORTACIÓN QUEDA INVISIBLE (S82-B r16, orden founder: "toda
+ *  pieza exportada desde packages/ui tiene que aparecer en la galería. Una
  *  exportación nueva sin entrada = rojo"). El modo de fallo es el que YA
  *  ocurrió, y por eso existe: la galería se quedó atrás de S81 y S82 sin
  *  que nada lo dijera — lo vio el founder, no el sistema.
+ *
+ *  ⚠️ RE-REDACCIÓN DE SU RAZÓN (S112-A, lo midió B). La justificación de esta
+ *  regla decía «una pieza que nadie puede mirar no se puede firmar», y **esa
+ *  premisa la derogó el founder el 2-sep: las piezas se firman MONTADAS, no en
+ *  la galería** (`L-478`, tercer cobro del linaje S83 → S97 → S112).
+ *
+ *  La REGLA sobrevive; lo que se re-escribe es su porqué. El catálogo existe
+ *  para que **ninguna pieza quede sin que nadie sepa que está**, no para que
+ *  alguien la firme mirándola ahí. *Una regla cuya razón está vencida le enseña
+ *  a la próxima pista a hacer lo contrario de lo que el founder firmó* — que es
+ *  `L-395` aplicada a un gate: un puente que sobrevive a su río manda al
+ *  próximo a construir otro.
  *
  *  EXENTOS DECLARADOS — no es pereza: son piezas que NO SE PUEDEN MOSTRAR
  *  SIN CLONARLAS, y la regla dura de la orden manda declarar y no montar
@@ -1466,7 +1478,7 @@ function r17(fuentes) {
     if (EXENTOS_R17.has(n)) { exentas++; continue; }
     if (new RegExp('<' + n + '[\\s/>.]|\\b' + n + '\\(').test(gal)) { presentes++; continue; }
     if (SIN_ENTRADA_R17.has(n)) { pendientes++; continue; }
-    fallos.push(`R17: ${n} se exporta desde packages/ui y NO aparece en la galería — una pieza que nadie puede mirar no se puede firmar`);
+    fallos.push(`R17: ${n} se exporta desde packages/ui y NO aparece en la galería — una exportación sin entrada de catálogo es una pieza que nadie sabe que existe`);
   }
   // ANCLA: R17 deriva su corpus del PARSEO de index.ts. Si ese archivo
   // cambia de forma de export (o la galería deja de importar), el parseo

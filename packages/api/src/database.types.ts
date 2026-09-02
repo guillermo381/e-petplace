@@ -340,6 +340,50 @@ export type Database = {
           },
         ]
       }
+      adopcion_codigo_firma: {
+        Row: {
+          codigo_hash: string
+          creado_en: string
+          expira_en: string
+          id: string
+          intentos: number
+          solicitud_id: string
+          usado_en: string | null
+          user_id: string
+          version_acta: number
+        }
+        Insert: {
+          codigo_hash: string
+          creado_en?: string
+          expira_en: string
+          id?: string
+          intentos?: number
+          solicitud_id: string
+          usado_en?: string | null
+          user_id: string
+          version_acta: number
+        }
+        Update: {
+          codigo_hash?: string
+          creado_en?: string
+          expira_en?: string
+          id?: string
+          intentos?: number
+          solicitud_id?: string
+          usado_en?: string | null
+          user_id?: string
+          version_acta?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_codigo_firma_solicitud_id_fkey"
+            columns: ["solicitud_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_solicitud"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adopcion_documentos: {
         Row: {
           codigo: string
@@ -369,6 +413,59 @@ export type Database = {
           vigente_desde?: string
         }
         Relationships: []
+      }
+      adopcion_firma: {
+        Row: {
+          codigo_acta: string
+          dispositivo: string | null
+          folio: string
+          hash_fuente: string
+          hash_renderizado: string
+          id: string
+          ip_hash: string | null
+          papel: string
+          sello_servidor: string
+          solicitud_id: string
+          user_id: string
+          version_acta: number
+        }
+        Insert: {
+          codigo_acta: string
+          dispositivo?: string | null
+          folio: string
+          hash_fuente: string
+          hash_renderizado: string
+          id?: string
+          ip_hash?: string | null
+          papel: string
+          sello_servidor?: string
+          solicitud_id: string
+          user_id: string
+          version_acta: number
+        }
+        Update: {
+          codigo_acta?: string
+          dispositivo?: string | null
+          folio?: string
+          hash_fuente?: string
+          hash_renderizado?: string
+          id?: string
+          ip_hash?: string | null
+          papel?: string
+          sello_servidor?: string
+          solicitud_id?: string
+          user_id?: string
+          version_acta?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_firma_solicitud_id_fkey"
+            columns: ["solicitud_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_solicitud"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       adopcion_foto: {
         Row: {
@@ -578,6 +675,51 @@ export type Database = {
           {
             foreignKeyName: "adopcion_publicacion_pareja_id_fkey"
             columns: ["pareja_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicacion_id"]
+          },
+        ]
+      }
+      adopcion_reporte: {
+        Row: {
+          atendido_en: string | null
+          creado_en: string
+          detalle: string | null
+          id: string
+          motivo: string
+          publicacion_id: string
+          reportado_por: string | null
+        }
+        Insert: {
+          atendido_en?: string | null
+          creado_en?: string
+          detalle?: string | null
+          id?: string
+          motivo: string
+          publicacion_id: string
+          reportado_por?: string | null
+        }
+        Update: {
+          atendido_en?: string | null
+          creado_en?: string
+          detalle?: string | null
+          id?: string
+          motivo?: string
+          publicacion_id?: string
+          reportado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_reporte_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_publicacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_reporte_publicacion_id_fkey"
+            columns: ["publicacion_id"]
             isOneToOne: false
             referencedRelation: "v_adoptables_publicos"
             referencedColumns: ["publicacion_id"]
@@ -4879,6 +5021,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["estado_cuenta_rol_enum"]
           id: string
           metadata: Json
+          numero_acuerdo: string | null
           suspendido_en: string | null
           suspension_motivo: string | null
           tipo_actor: Database["public"]["Enums"]["tipo_actor_enum"]
@@ -4896,6 +5039,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["estado_cuenta_rol_enum"]
           id?: string
           metadata?: Json
+          numero_acuerdo?: string | null
           suspendido_en?: string | null
           suspension_motivo?: string | null
           tipo_actor: Database["public"]["Enums"]["tipo_actor_enum"]
@@ -4913,6 +5057,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["estado_cuenta_rol_enum"]
           id?: string
           metadata?: Json
+          numero_acuerdo?: string | null
           suspendido_en?: string | null
           suspension_motivo?: string | null
           tipo_actor?: Database["public"]["Enums"]["tipo_actor_enum"]
@@ -17011,6 +17156,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          cedula: string | null
           ciudad: string | null
           codigo_referido: string | null
           country_code: string
@@ -17025,6 +17171,7 @@ export type Database = {
           direccion_principal: string | null
           direccion_referencias: string | null
           direccion_sector: string | null
+          domicilio: string | null
           email: string
           foto_url: string | null
           id: string
@@ -17048,6 +17195,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          cedula?: string | null
           ciudad?: string | null
           codigo_referido?: string | null
           country_code?: string
@@ -17062,6 +17210,7 @@ export type Database = {
           direccion_principal?: string | null
           direccion_referencias?: string | null
           direccion_sector?: string | null
+          domicilio?: string | null
           email: string
           foto_url?: string | null
           id: string
@@ -17085,6 +17234,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          cedula?: string | null
           ciudad?: string | null
           codigo_referido?: string | null
           country_code?: string
@@ -17099,6 +17249,7 @@ export type Database = {
           direccion_principal?: string | null
           direccion_referencias?: string | null
           direccion_sector?: string | null
+          domicilio?: string | null
           email?: string
           foto_url?: string | null
           id?: string
@@ -22345,6 +22496,7 @@ export type Database = {
         Returns: string
       }
       _puede_operar_pedido: { Args: { p_pedido_id: string }; Returns: boolean }
+      _renderizar_acta: { Args: { p_solicitud_id: string }; Returns: Json }
       _resolver_fee_aplicable: {
         Args: {
           p_categoria_origen?: string
@@ -23399,6 +23551,10 @@ export type Database = {
         Args: { p_evento_id: string; p_motivo: string }
         Returns: undefined
       }
+      desistir_solicitud_adopcion: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
+      }
       despachar_notificaciones: { Args: { p_seco?: boolean }; Returns: Json }
       despachar_pedido: {
         Args: { p_pedido_id: string; p_repartidor_id: string }
@@ -23549,6 +23705,16 @@ export type Database = {
       }
       fijar_redes_autorizadas: {
         Args: { p_autorizadas: boolean; p_familia_id: string }
+        Returns: Json
+      }
+      firmar_acta_adopcion: {
+        Args: {
+          p_cedula?: string
+          p_codigo: string
+          p_dispositivo?: string
+          p_domicilio?: string
+          p_solicitud_id: string
+        }
         Returns: Json
       }
       generar_eventos_diferidos: {
@@ -23919,6 +24085,7 @@ export type Database = {
         Returns: undefined
       }
       notificar_recordatorios_cita: { Args: never; Returns: Json }
+      obtener_acta_adopcion: { Args: { p_solicitud_id: string }; Returns: Json }
       obtener_acta_guarderia: { Args: { p_acta_id: string }; Returns: Json }
       obtener_adiestradores_disponibles: {
         Args: {
@@ -25364,6 +25531,10 @@ export type Database = {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined
       }
+      reportar_publicacion: {
+        Args: { p_detalle?: string; p_motivo: string; p_publicacion_id: string }
+        Returns: Json
+      }
       reservar_dia_de_paquete_guarderia: {
         Args: {
           p_bono_id: string
@@ -25569,6 +25740,10 @@ export type Database = {
         Returns: Json
       }
       solicitar_cierre_cuenta: { Args: never; Returns: Json }
+      solicitar_codigo_firma: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
+      }
       solicitar_naturaleza_comercial: {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
