@@ -13,25 +13,34 @@
  *   hay capa — huella en capaText, registro AA, Ley 2).
  * Con foto: expo-image contentFit cover, SIN transition (Ley 13:
  * reemplazo directo, cero fade). El error de carga NO muestra ícono
- * ni reintento: cae a la huella digna y listo.
+ * ni reintento: baja un escalón y listo.
  *
- * Huella según Ley 12: outline 1.75, remates redondeados, UN color.
+ * ⏩ **LA ESCALERA, ENMENDADA POR EL FOUNDER (2-sep) — S112-B:**
+ *   ① `fotoUrl`       — la foto del animal.
+ *   ② `fotoDeEspecie` — **el avatar de la casa por raza, o por especie si
+ *      nadie declaró raza** (galería `especies-razas`, la misma cara que el
+ *      cliente ve en el alta de su mascota).
+ *   ③ el monograma — el residuo, y es decisión de esta pieza: ver su nota.
  *
- * Memorial (Ley 8): la foto degrada con desaturación leve (filter
- * saturate — estático, no es animación); la huella pierde el tint
- * de capa y queda neutral.
+ * ☠️ **La huella genérica se retira ENTERA.** Era el fallback más viejo de
+ * la casa y no se va por estar mal dibujada: se va porque *una huella dice
+ * «acá va un animal» y el avatar de su especie dice CUÁL*.
+ *
+ * Memorial (Ley 8): las dos imágenes degradan con desaturación leve (filter
+ * saturate — estático, no es animación); el residuo pierde el tint de capa
+ * y queda neutral.
  *
  * Accesibilidad: accessibilityLabel = nombre. La foto no es
  * decorativa: ES la mascota.
  */
 
 import { useState } from 'react'
-import { View } from 'react-native'
+import { Text, View } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
-import Svg, { Circle, Path } from 'react-native-svg'
 
 import { useTheme } from '../ThemeProvider'
 import { palette } from '../tokens/palette'
+import { typography } from '../tokens/typography'
 
 export type AvatarMascotaTamano = 'xs' | 'sm' | 'entidad' | 'md' | 'lg'
 export type AvatarMascotaCapa = 'vida' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
@@ -56,6 +65,24 @@ export interface AvatarMascotaProps {
    *  OJO: require() devuelve number en nativo y objeto en web — por eso
    *  el union incluye los tres y solo el string se envuelve en {uri}. */
   fotoUrl?: string | number | ImageSource
+  /**
+   * 🔴 S112-B · **EL AVATAR DE LA CASA — el segundo escalón, y el que retira
+   * la huella** (corrección del founder, 2-sep).
+   *
+   * URL **YA RESUELTA** de la galería `especies-razas`: `resolverUrlRaza`
+   * (especie + slug del catálogo) o, sin raza declarada,
+   * `resolverUrlGenericaEspecie`. **La pieza no la compone**, y no es
+   * pereza: `packages/ui` no depende de `packages/api`, y meterle esa
+   * dependencia al sistema de diseño para ahorrar una prop sería pagar con
+   * la propiedad más cara del paquete.
+   *
+   * ⚠️ Y la elección raza-vs-especie **tampoco es de la pieza**: el catálogo
+   * trae `ruta_imagen` como DATO, y armar la URL de dos pedazos acierta a
+   * veces —«Pastor Alemán» a mano da `pastor-aleman` (existe) o
+   * `ovejero-aleman` (no)— *y una URL que acierta a veces muestra una cara
+   * equivocada, que es peor que ninguna.*
+   */
+  fotoDeEspecie?: string
   /** Hoy no cambia el render; el set ilustrado por especie la
    *  consumirá (D-288). Código real de cat_especies. */
   especie?: AvatarMascotaEspecie
@@ -133,14 +160,9 @@ function radioAvatar(tamano: AvatarMascotaTamano, lado: number, anidadoEnChip: b
   return tamano === 'entidad' || anidadoEnChip ? radioEnChip(lado) : radioSquircle(lado)
 }
 
-// Tamaño óptico de la huella dentro del círculo (~55% del diámetro).
-const HUELLA: Record<AvatarMascotaTamano, number> = {
-  xs: 15,
-  sm: 22,
-  entidad: 28,
-  md: 36,
-  lg: 54,
-}
+// ☠️ S112-B · AQUÍ VIVÍA `HUELLA`, el tamaño óptico de la huella dentro del
+// círculo. Muere con ella (Ley 37): el segundo escalón es una IMAGEN a sangre
+// y el residuo es una letra, y ninguno de los dos necesita este número.
 
 /** Mismo vocabulario público que Insignia/CitaEnVivo; claves del tema. */
 const CAPA_A_KEY = {
@@ -205,32 +227,62 @@ const ANILLO_SOBRE_LLENO = { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.
 // por igual (la forma array [{saturate}] se ignora silenciosa en web).
 const FILTRO_MEMORIAL = 'saturate(0.55)'
 
-// Huella genérica — Ley 12: outline 1.75, round, UN color.
-function HuellaGenerica({ color, tamano }: { color: string; tamano: number }) {
-  const stroke = {
-    stroke: color,
-    strokeWidth: 1.75,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-    fill: 'none' as const,
-  }
-  return (
-    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-      <Circle cx={6.2} cy={9.6} r={1.75} {...stroke} />
-      <Circle cx={9.9} cy={7} r={1.75} {...stroke} />
-      <Circle cx={14.1} cy={7} r={1.75} {...stroke} />
-      <Circle cx={17.8} cy={9.6} r={1.75} {...stroke} />
-      <Path
-        d="M12 12c2.9 0 5.2 2.3 5.2 4.6 0 1.9-1.5 3.2-3 2.7-.9-.3-1.5-.45-2.2-.45s-1.3.15-2.2.45c-1.5.5-3-.8-3-2.7 0-2.3 2.3-4.6 5.2-4.6z"
-        {...stroke}
-      />
-    </Svg>
+/* ☠️ S112-B · AQUÍ VIVÍA `HuellaGenerica`, EL FALLBACK MÁS VIEJO DE LA CASA
+   —«enmienda final founder: fallback = huella genérica digna»—. **Lo retira
+   una corrección del propio founder (2-sep)**, y no porque estuviera mal
+   dibujada: porque apareció algo mejor que ya existía y esta pieza no estaba
+   usando. *Una huella dice «acá va un animal»; el avatar de su especie dice
+   CUÁL.* Se retira ENTERA en el mismo acto que su reemplazo entra (Ley 37):
+   dejarla viva por si acaso la volvería a montar alguien que no leyó esto.
+   Su dibujo vive en el historial, no en un comentario. */
+
+
+/**
+ * 🔴 S112-B · LA CAÍDA A LA HUELLA ES CORRECTA Y ES INDISTINGUIBLE — y eso
+ * último es el defecto.
+ *
+ * El fallback digno (arriba: *«el error de carga NO muestra ícono ni
+ * reintento: cae a la huella digna y listo»*) sigue siendo lo correcto para
+ * quien MIRA: una foto rota no se le muestra rota a nadie. **Pero para quien
+ * CONSTRUYE, ese mismo acierto borra la diferencia entre dos cosas que no son
+ * la misma:** «este animal no tiene foto» y «esta foto no cargó». Las dos se
+ * ven exactamente igual, sin error, sin log y sin síntoma.
+ *
+ * **Y hay un productor concreto y frecuente:** desde S47 el bucket es PRIVADO
+ * y `foto_url` guarda un **PATH**, no una URL — la pantalla tiene que firmarlo
+ * (`resolverUrlFoto`). *Un path sin firmar no puede cargar nunca*, así que el
+ * chip queda con su huella puesta como si el animal no tuviera foto. **Ése es
+ * el rojo: con foto, dibuja huella.**
+ *
+ * ⇒ **En producción no cambia NADA** (`L-244`): la huella digna se queda. Lo
+ * que se agrega es que **en desarrollo el fallo se nombra a sí mismo**, con
+ * dos avisos distintos porque son dos causas distintas:
+ *   ① la cadena **no puede ser una URL** (no tiene esquema) ⇒ es un path sin
+ *      firmar, y se dice antes de que la imagen siquiera lo intente.
+ *   ② la carga **falló de verdad** (firma vencida, objeto borrado, red).
+ *
+ * *Un fallback que protege al usuario y esconde la causa al que lo puso es la
+ * mitad buena de una cura.*
+ */
+function avisarSiNoPuedeSerUrl(fotoUrl: unknown, nombre: string) {
+  if (!__DEV__ || typeof fotoUrl !== 'string' || fotoUrl === '') return
+  if (/^(https?:|data:|file:|content:|blob:|asset:)/.test(fotoUrl)) return
+  console.warn(
+    `[AvatarMascota] «${nombre}»: \`fotoUrl\` no tiene esquema, así que jamás va a ` +
+      `cargar y el avatar va a caer a la huella COMO SI NO HUBIERA FOTO. ` +
+      `Desde S47 el bucket es privado y \`foto_url\` guarda un PATH: ` +
+      `firmalo con \`resolverUrlFoto\` antes de pasarlo. Recibido: ${fotoUrl}`,
   )
 }
 
-export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno = false, anidadoEn }: AvatarMascotaProps) {
+export function AvatarMascota({ nombre, fotoUrl, fotoDeEspecie, tamano = 'md', capa, sobreLleno = false, anidadoEn }: AvatarMascotaProps) {
   const { theme } = useTheme()
   const [falloCarga, setFalloCarga] = useState(false)
+  const [falloEspecie, setFalloEspecie] = useState(false)
+
+  // Se llama en el render y no en un efecto: no toca estado, y así avisa
+  // también cuando el valor cambia a otro que tampoco puede cargar.
+  avisarSiNoPuedeSerUrl(fotoUrl, nombre)
 
   const d = DIAMETRO[tamano]
   const esMemorial = theme.mode === 'memorial'
@@ -258,7 +310,16 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
           contentFit="cover"
           transition={0}
           style={{ position: 'absolute', width: FOTO_LADO, height: FOTO_LADO, left: FOTO_LEFT, top: FOTO_TOP }}
-          onError={() => setFalloCarga(true)}
+          onError={() => {
+            if (__DEV__) {
+              console.warn(
+                `[AvatarMascota] «${nombre}»: la foto NO CARGÓ y el avatar cae a la ` +
+                  `huella — que se ve igual que «no tiene foto». Si la URL estaba ` +
+                  `firmada, la firma pudo vencer o el objeto no existe.`,
+              )
+            }
+            setFalloCarga(true)
+          }}
         />
         {/* ③ el .cap: la foto DENTRO del marco (fusión D-506, material).
             ④ elegido: el anillo es CAPA del cap (literal :55) */}
@@ -270,7 +331,85 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
     )
   }
 
-  // Fallback: huella genérica. Capa solo fuera de memorial (Ley 8: neutral).
+  /* ── SEGUNDO ESCALÓN: EL AVATAR DE LA CASA (S112-B) ────────────────────
+     Sin foto propia va la cara de su raza —o de su especie si nadie declaró
+     raza—. **A sangre en el círculo, SIN el encuadre de la foto**: ese zoom
+     y ese corrimiento vertical existen porque en una foto de mascota la cara
+     queda alta, y aplicárselo a una ilustración que ya viene encuadrada la
+     recortaría mal. Dos imágenes distintas, dos tratamientos. */
+  const conEspecie = typeof fotoDeEspecie === 'string' && fotoDeEspecie !== '' && !falloEspecie
+  if (conEspecie) {
+    const radio = radioAvatar(tamano, d, anidadoEn === 'chip')
+    return (
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={nombre}
+        style={{
+          width: d,
+          height: d,
+          borderRadius: radio,
+          borderCurve: 'continuous',
+          overflow: 'hidden',
+          backgroundColor: theme.bg.overlay,
+          ...(esMemorial ? { filter: FILTRO_MEMORIAL } : null),
+          ...(sobreLleno ? ANILLO_SOBRE_LLENO : null),
+        }}
+      >
+        <Image
+          source={{ uri: fotoDeEspecie }}
+          contentFit="cover"
+          transition={0}
+          style={{ width: '100%', height: '100%' }}
+          onError={() => {
+            if (__DEV__) {
+              console.warn(
+                `[AvatarMascota] «${nombre}»: el avatar de especie/raza NO CARGÓ ` +
+                  `(${fotoDeEspecie}). Cae al monograma. El bucket es público, ` +
+                  `así que casi siempre es la ruta: usá \`ruta_imagen\` del ` +
+                  `catálogo en vez de armarla de especie + slug.`,
+              )
+            }
+            setFalloEspecie(true)
+          }}
+        />
+      </View>
+    )
+  }
+
+  /* ── ☠️ ACÁ VIVÍA LA HUELLA GENÉRICA, Y SE RETIRA POR CORRECCIÓN DEL
+     FOUNDER (2-sep) ─────────────────────────────────────────────────────
+     Era el fallback más viejo de la casa —«enmienda final founder: fallback
+     = huella genérica digna»— y lo reemplaza algo mejor que ya existía y que
+     esta pieza no estaba usando: **la galería `especies-razas`, 111 objetos,
+     la misma cara que el cliente ve en el alta de su mascota.** *Una huella
+     dice «acá va un animal»; el avatar de su especie dice CUÁL.*
+
+     🔴 **LO QUE QUEDA ES EL RESIDUO, Y ES DECISIÓN MÍA, NO SUYA —** el
+     founder nombró dos escalones (raza → especie) porque para una mascota
+     no debería haber un tercero. Pero el tercero es alcanzable y hay que
+     dibujar algo: cuando el consumidor no pasa `fotoDeEspecie`, o cuando la
+     imagen no existe (**medido: `reptil` NO tiene `generico.webp`, 404
+     verificado — y está apagado estructuralmente desde S91**).
+
+     El residuo es **el monograma**, no un círculo vacío ni la huella de
+     vuelta: es lo que la casa ya eligió dos veces como fallback honesto
+     (`LogoNegocio`, y la inicial de `ChipEntidad` para persona y cosa), y
+     dice algo verdadero —*esto es Luna*— sin afirmar una identidad animal
+     que no tiene con qué sostener.
+
+     ⚠️ **Y avisa en desarrollo**, porque llegar acá casi siempre significa
+     que el consumidor no resolvió la cara: 59 archivos montan esta pieza y
+     ninguno pasaba `fotoDeEspecie` cuando la huella se retiró. */
+  if (__DEV__ && !conFoto) {
+    console.warn(
+      `[AvatarMascota] «${nombre}»: sin foto y sin \`fotoDeEspecie\` ⇒ monograma. ` +
+        `La regla del founder (2-sep) dice que un animal sin foto muestra el ` +
+        `avatar de su raza —o de su especie si no hay raza—: resolvelo con ` +
+        `\`resolverUrlRaza\` / \`resolverUrlGenericaEspecie\` y pasalo.`,
+    )
+  }
+
   const conCapa = capa !== undefined && !esMemorial && 'capaBg' in theme
   const k = CAPA_A_KEY[capa ?? 'vida']
   // S73 (cura del gate: "el fallback pelea con el relleno") — sobre un
@@ -299,7 +438,19 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
         ...(sobreLleno ? ANILLO_SOBRE_LLENO : null),
       }}
     >
-      <HuellaGenerica color={color} tamano={HUELLA[tamano]} />
+      {/* EL MONOGRAMA — la inicial del nombre. UNA letra y no dos: un nombre
+          de mascota es casi siempre una palabra, y dos iniciales sobre
+          «Luna» darían «LU», que no es un monograma sino un recorte. */}
+      <Text
+        style={{
+          color,
+          fontFamily: typography.family.sans.medium,
+          fontSize: Math.round(d * 0.4),
+          lineHeight: Math.round(d * 0.5),
+        }}
+      >
+        {nombre.trim().charAt(0).toUpperCase()}
+      </Text>
     </View>
   )
 }

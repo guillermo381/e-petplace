@@ -125,6 +125,17 @@ export type PublicacionDeMascota = PuedePublicar | NoPuedePublicar
 export type TarjetaMascotaRefugioProps = {
   nombre: string
   fotoUrl?: string | null
+  /**
+   * 🔴 S112-B · **EL AVATAR DE LA CASA** (corrección del founder, 2-sep): sin
+   * foto propia va la cara de su raza —o de su especie si no hay raza
+   * declarada—. URL YA RESUELTA de `especies-razas`. La huella se retiró.
+   *
+   * ⚠️ **Acá pesa más que en la vidriera**: ésta es la lista de trabajo del
+   * refugio, y una columna de huellas idénticas no le deja distinguir a sus
+   * propios animales de un vistazo. *El avatar de especie es lo que vuelve
+   * la lista legible antes de leer un nombre.*
+   */
+  fotoDeEspecie?: string | null
   estado: EstadoMascotaRefugio
   /**
    * Las seis palabras. **`Record` y no un objeto a mano**: un estado nuevo
@@ -168,6 +179,7 @@ const FAMILIA: Record<EstadoMascotaRefugio, InsigniaEstado> = {
 export function TarjetaMascotaRefugio({
   nombre,
   fotoUrl,
+  fotoDeEspecie,
   estado,
   voces,
   publicacion,
@@ -185,7 +197,12 @@ export function TarjetaMascotaRefugio({
     <Tarjeta interactiva onPress={onPress} accessibilityRole="button" etiqueta={etiqueta}>
       <View style={{ gap: spacing[2] }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-          <AvatarMascota nombre={nombre} fotoUrl={fotoUrl ?? undefined} tamano="md" />
+          <AvatarMascota
+            nombre={nombre}
+            fotoUrl={fotoUrl ?? undefined}
+            fotoDeEspecie={fotoDeEspecie ?? undefined}
+            tamano="md"
+          />
 
           <View style={{ flex: 1, gap: spacing[1] }}>
             {/* El nombre manda por tamaño y peso, jamás por color (N23). */}

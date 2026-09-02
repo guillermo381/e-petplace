@@ -554,8 +554,26 @@ export {
   FichaAdoptable,
   type FichaAdoptableProps,
   type CtaDeFicha,
-  type ConExplicacion,
 } from './components/FichaAdoptable'
+
+// BotonExplicar — S112-B: la «i» en círculo, el estándar de la casa para
+// explicar (N22). Vivió una tanda como pieza interna de `FichaAdoptable`; la
+// promovió el SEGUNDO consumidor (`VitrinaRefugio`), no la primera necesidad.
+// Su límite no se reabre: una advertencia de salud JAMÁS se pliega.
+export {
+  BotonExplicar,
+  type ConExplicacion,
+} from './components/BotonExplicar'
+
+// VitrinaRefugio — S112-B: NO es una vitrina nueva. Es `FichaPrestador` con
+// los datos de un refugio (N17: una fuente, N consumidores; jamás se
+// duplican). 🔴 No expone zona ni dirección Y NO SE PUEDE: §5.2 acota la
+// vidriera anónima a nombre, foto y ciudad, y a la puerta de un refugio la
+// gente deja animales. No se puede exponer lo que no tiene por dónde entrar.
+export {
+  VitrinaRefugio,
+  type VitrinaRefugioProps,
+} from './components/VitrinaRefugio'
 
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
