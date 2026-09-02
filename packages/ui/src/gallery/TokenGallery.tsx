@@ -102,6 +102,10 @@ import { Convivencia } from '../components/Convivencia'
 import { TarjetaAdoptable } from '../components/TarjetaAdoptable'
 import { BloqueConCriterio } from '../components/BloqueConCriterio'
 import { ConvivenciaInput } from '../components/ConvivenciaInput'
+import {
+  FormularioPostulacion,
+  type RespuestasPostulacion,
+} from '../components/FormularioPostulacion'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
@@ -620,6 +624,69 @@ function MuestraConvivenciaInput() {
       ]}
       voces={{ si: 'Sí', no: 'No', no_se_sabe: 'Todavía no se sabe' }}
       onCambio={(eje, estado) => setEstados((p) => ({ ...p, [eje]: estado }))}
+    />
+  )
+}
+
+/**
+ * ENTRADA DE CATÁLOGO de `FormularioPostulacion` (R17) — **no es su gate.**
+ * Su gate es la pantalla de postulación con el documento real de A (C5).
+ *
+ * Se monta con el «Enviar» APAGADO a propósito: es el estado en el que la
+ * pantalla arranca —falta marcar el consentimiento— y el único que tiene
+ * algo que mostrar, porque es donde se ve la razón dibujada.
+ */
+function MuestraFormularioPostulacion() {
+  const [r, setR] = useState<RespuestasPostulacion>({
+    hogar: { adultos: 2, menores_0_5: 0, menores_6_12: 1, menores_13_17: 0 },
+    vivienda: 'casa_patio',
+    otros_animales: '',
+    horas_solo: 6,
+    experiencia: '',
+    motivo: '',
+  })
+  const [acepto, setAcepto] = useState(false)
+
+  return (
+    <FormularioPostulacion
+      respuestas={r}
+      onCambio={setR}
+      opcionesVivienda={[
+        { codigo: 'casa_patio', etiqueta: 'Casa con patio' },
+        { codigo: 'casa_sin_patio', etiqueta: 'Casa sin patio' },
+        { codigo: 'departamento', etiqueta: 'Departamento' },
+      ]}
+      consentimiento={{
+        texto:
+          'Autorizo al refugio a verificar la información de esta postulación y a hacer una visita al domicilio.',
+        marcado: acepto,
+        onCambio: setAcepto,
+      }}
+      envio={
+        acepto
+          ? { etiqueta: 'Enviar la postulación', onEnviar: () => {} }
+          : {
+              etiqueta: 'Enviar la postulación',
+              razon: 'Falta marcar la autorización de arriba',
+            }
+      }
+      voces={{
+        hogar: {
+          rotulo: 'Quiénes viven en casa',
+          adultos: 'Adultos',
+          menores_0_5: 'Menores de 0 a 5',
+          menores_6_12: 'Menores de 6 a 12',
+          menores_13_17: 'Menores de 13 a 17',
+        },
+        vivienda: 'Tipo de vivienda',
+        otrosAnimales: {
+          rotulo: '¿Tenés otros animales?',
+          ayuda: 'Cuáles, y cómo se llevan con otros',
+        },
+        horasSolo: { rotulo: '¿Cuántas horas al día estaría solo?' },
+        experiencia: { rotulo: 'Tu experiencia con animales' },
+        motivo: { rotulo: '¿Por qué este animal?' },
+      }}
     />
   )
 }
@@ -5308,6 +5375,13 @@ function GaleriaInterna() {
               se tocan, que el tercero pesa igual que los otros dos, y que
               elegir no mueve nada de lugar (N24). */}
           <MuestraConvivenciaInput />
+        </Seccion>
+
+        <Seccion titulo="FormularioPostulacion (S112) — seis preguntas, y ninguna más">
+          {/* Entrada de CATÁLOGO, no gate. Lo que se ve acá y no en un PNG:
+              que marcar la casilla ENCIENDE el botón y la razón se va sola,
+              sin que nada salte de lugar (N24, con el espacio reservado). */}
+          <MuestraFormularioPostulacion />
         </Seccion>
 
         <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">

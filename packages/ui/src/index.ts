@@ -486,6 +486,19 @@ export {
   type EjeConvivencia,
 } from './components/ConvivenciaInput'
 
+// FormularioPostulacion — S112-B (B2): LAS SEIS PREGUNTAS, Y NINGUNA MÁS. No
+// es un armador de formularios: un armador recibe los campos por prop, y un
+// campo de nombre de menor entra por esa misma puerta sin que nada lo note.
+// Las preguntas son de la pieza; el esquema es cerrado (`TS2353` a la clave
+// de más) y `envio` es una unión discriminada — apagado sin razón no compila.
+export {
+  FormularioPostulacion,
+  type FormularioPostulacionProps,
+  type RespuestasPostulacion,
+  type PreguntaDelFormulario,
+  type EnvioDeFormulario,
+} from './components/FormularioPostulacion'
+
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
 // sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.
