@@ -5534,6 +5534,35 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="⭐ S112 · LA ESCALERA DE LA CARA — la huella se retiró (corrección del founder, 2-sep)">
+          {/* 🔴 QUÉ HAY QUE VER: los TRES escalones juntos.
+              ① foto propia · ② el avatar de la casa por raza/especie —el que
+              el cliente ya ve en el alta de su mascota— · ③ el residuo.
+              **Ninguno es la huella.** Una huella decía «acá va un animal»;
+              el avatar de su especie dice CUÁL, y en una vidriera donde
+              presentamos vidas esa diferencia es la vidriera entera.
+              El ③ es un DEFECTO del consumidor, no un estado legítimo: toda
+              mascota tiene especie, y por eso avisa en desarrollo. */}
+          <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+            <View style={{ alignItems: 'center', gap: spacing[2] }}>
+              <AvatarMascota nombre="Luna" fotoUrl="https://placekitten.com/200/200" tamano="lg" />
+              <Texto variante="apoyo">① su foto</Texto>
+            </View>
+            <View style={{ alignItems: 'center', gap: spacing[2] }}>
+              <AvatarMascota
+                nombre="Nube"
+                fotoDeEspecie="https://placekitten.com/201/201"
+                tamano="lg"
+              />
+              <Texto variante="apoyo">② raza / especie</Texto>
+            </View>
+            <View style={{ alignItems: 'center', gap: spacing[2] }}>
+              <AvatarMascota nombre="Rocco" tamano="lg" />
+              <Texto variante="apoyo">③ residuo · avisa en dev</Texto>
+            </View>
+          </View>
+        </Seccion>
+
         <Seccion titulo="ConvivenciaInput (S112) — la cara que ESCRIBE los mismos tres estados">
           {/* Entrada de CATÁLOGO, no gate (2-sep): esta pieza se juzga en la
               ficha de edición del refugio. Lo que se puede ver acá y no en un

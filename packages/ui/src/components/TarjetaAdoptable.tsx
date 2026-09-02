@@ -66,9 +66,6 @@
  */
 import { Image, Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
-import Svg from 'react-native-svg'
-
-import { Huella, HUELLA_BOX } from '../brand/Huella'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
@@ -77,7 +74,8 @@ import { usePresionado } from './usePresionado'
 
 /** Ver la nota de la relación: 1:1 recorta menos el retrato real de refugio. */
 const RELACION_FOTO = 1
-const HUELLA_SIN_FOTO = 40
+// ☠️ S112-B · aquí vivía `HUELLA_SIN_FOTO` (40): el tamaño de la huella que
+// el founder retiró. Muere con ella (Ley 37).
 
 export type TarjetaAdoptableProps = {
   /** Siempre. Es lo que la vidriera presenta: un nombre, no un ítem. */
@@ -97,6 +95,16 @@ export type TarjetaAdoptableProps = {
    */
   edad?: string | null
   fotoUrl?: string | null
+  /**
+   * 🔴 S112-B · **EL AVATAR DE LA CASA** (corrección del founder, 2-sep): sin
+   * foto propia va la cara de su raza —o de su especie si el refugio no
+   * declaró raza, que es el caso normal de un rescate—. URL YA RESUELTA de la
+   * galería `especies-razas` (`resolverUrlRaza` / `resolverUrlGenericaEspecie`).
+   *
+   * *La huella decía «acá va un animal». Esto dice CUÁL* — y en una vidriera
+   * donde presentamos vidas, esa diferencia es la vidriera entera.
+   */
+  fotoDeEspecie?: string | null
   /** El refugio o la persona que publica. Procedencia, no protagonista. */
   publicador?: string | null
   /** OBLIGATORIA: la pieza no trae diccionario (precedente `EscaleraEstados`). */
@@ -112,12 +120,33 @@ export function TarjetaAdoptable({
   sexo,
   edad,
   fotoUrl,
+  fotoDeEspecie,
   publicador,
   voces,
   onPress,
 }: TarjetaAdoptableProps) {
   const { theme } = useTheme()
   const { handlers, estiloPresionado } = usePresionado()
+
+  /* LA ESCALERA DE LA CARA (S112-B): la foto del animal, y si no la hay, el
+     avatar de su raza o su especie. Se resuelve UNA vez y el render sólo
+     pregunta si hay algo — así el orden vive en un lugar y no en dos. */
+  const cara =
+    fotoUrl !== null && fotoUrl !== undefined && fotoUrl !== ''
+      ? fotoUrl
+      : fotoDeEspecie !== null && fotoDeEspecie !== undefined && fotoDeEspecie !== ''
+        ? fotoDeEspecie
+        : null
+
+  if (__DEV__ && cara === null) {
+    console.warn(
+      `[TarjetaAdoptable] «${nombre}»: sin foto y sin \`fotoDeEspecie\` ⇒ la ` +
+        `tarjeta queda con el fondo vacío. La regla del founder (2-sep) dice ` +
+        `que un animal sin foto muestra el avatar de su raza —o de su especie ` +
+        `si no hay raza declarada—: resolvelo con \`resolverUrlRaza\` / ` +
+        `\`resolverUrlGenericaEspecie\` y pasalo.`,
+    )
+  }
 
   /* LA LÍNEA DE IDENTIDAD. Lo no declarado no aporta palabra; la edad sí,
      porque su silencio se leería como hueco (ver la cabecera). El orden va de
@@ -148,21 +177,25 @@ export function TarjetaAdoptable({
           style={{
             aspectRatio: RELACION_FOTO,
             backgroundColor:
-              fotoUrl === null || fotoUrl === undefined ? theme.bg.hundido : theme.bg.card,
+              cara === null ? theme.bg.hundido : theme.bg.card,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          {fotoUrl === null || fotoUrl === undefined ? (
-            /* SIN FOTO — estado propio, estático, jamás esqueleto. La huella
-               es el fallback que el founder firmó para una mascota sin foto;
-               se reusa en vez de inventarle un glifo nuevo a este caso. */
-            <Svg width={HUELLA_SIN_FOTO} height={HUELLA_SIN_FOTO} viewBox={`0 0 ${HUELLA_BOX} ${HUELLA_BOX}`}>
-              <Huella color={theme.text.tertiary} />
-            </Svg>
+          {cara === null ? (
+            /* ☠️ ACÁ VIVÍA LA HUELLA, y la retira el founder (2-sep): el
+               estado «sin foto» de un animal es **el avatar de su especie o
+               su raza**, jamás una huella. Lo que queda para el residuo —ni
+               foto ni avatar de especie— es el fondo hundido y nada más: en
+               una tarjeta de 1:1 un monograma gigante sería un cartel, y acá
+               el nombre ya vive debajo con su propia voz.
+
+               ⚠️ Y llegar acá es un DEFECTO DEL CONSUMIDOR, no un estado
+               legítimo: toda mascota tiene especie. Por eso avisa en dev. */
+            null
           ) : (
             <Image
-              source={{ uri: fotoUrl }}
+              source={{ uri: cara }}
               style={{ width: '100%', height: '100%' }}
               resizeMode="cover"
               /* La foto ya está descrita por el label de la tarjeta. */
