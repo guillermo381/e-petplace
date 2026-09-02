@@ -26799,3 +26799,46 @@ ejercido» es exactamente el defecto que esa sección se creó para atajar: **lo
 construido y no ejercido se lee como hecho.***
 
 **DISPARO: ninguno. Rige desde su firma.**
+
+---
+
+## 🔴 `L-479` — UN GENERADO VIEJO Y GITIGNORED NO CIEGA: **ACUSA EN FALSO**, Y MANDA A CURAR CÓDIGO SANO
+
+**Medido dos veces el mismo día, por dos pistas, en direcciones opuestas** —
+`apps/prestador/.expo/types/router.d.ts`, que expo-router genera y `.gitignore`
+excluye.
+
+| pista | qué le pasó | qué habría concluido si no lo mira |
+|---|---|---|
+| **A** | Tras mergear rutas nuevas, `tsc apps/prestador` dio **2 errores** y `verify:diseno` **R63·C** dio rojo, los dos nombrando `/adopcion` | *«la pista que mergeé rompió el typecheck»* — y habría ido a **arreglar código que estaba bien** |
+| **C** | Al abrir el worktree, `tsc` salió **VERDE sin medir una sola ruta**; al generarlo, cazó **4 errores reales** de contrato de piezas | *«mi rama está limpia»* — con cuatro errores vivos |
+
+> ### ⇒ *El mismo archivo produce el falso rojo y el falso verde, según esté viejo o ausente.* **Y ninguna de las dos caras viaja en el repo, porque está gitignored: cada pista lo redescubre sola.**
+
+### POR QUÉ ES PEOR QUE UN GATE ROTO CUALQUIERA
+
+Un gate roto que da rojo se investiga. **Éste da un rojo VEROSÍMIL** —nombra
+rutas reales, aparece justo después de un merge, y apunta a archivos que
+efectivamente acaban de entrar— así que **invita a curar lo que no está roto**.
+*Un rojo que apunta al sospechoso correcto por la razón equivocada cuesta más
+que uno que no apunta a nadie.*
+
+Y su gemelo silencioso es peor: **el verde por ausencia**. `tsc` no puede
+verificar una ruta que el generado no declara, así que **`router.push` hacia una
+ruta inexistente pasa sin control** — el gate `R63·C` existe exactamente para
+eso y su texto ya nombra la cura.
+
+### LA CURA, y no es curar el archivo
+
+**`expo start` en la app** regenera el archivo. Lo que la lección exige es
+ANTES: **cuando un typecheck de una app Expo cambie de color justo después de un
+merge o de abrir un worktree, se regenera el router ANTES de diagnosticar.**
+*Regenerar cuesta un minuto; diagnosticar el rojo equivocado costó dos pistas.*
+
+⚠️ **Borde medido:** `expo start` **no regenera si el puerto está ocupado** —
+sale «Input is required, but 'npx expo' is in non-interactive mode», **skippea el
+dev server y devuelve éxito**. *El comando que regenera puede no regenerar y no
+decirlo.* Se verifica por el CONTENIDO del archivo (que nombre la ruta nueva),
+jamás por el código de salida.
+
+**DISPARO: ninguno. Es aviso permanente de la casa.**
