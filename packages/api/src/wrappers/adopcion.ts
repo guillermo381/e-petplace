@@ -523,6 +523,8 @@ export interface AceptacionRegistrada {
   consentimientoId: string;
   codigo: string;
   version: number;
+  /** false = el header no llegó y la evidencia quedó sin IP. No se inventa. */
+  ipCapturada?: boolean;
 }
 
 /**
@@ -530,17 +532,23 @@ export interface AceptacionRegistrada {
  * hash · sello de tiempo · IP · dispositivo. **Idempotente**: dos toques del
  * mismo botón no son dos consentimientos.
  *
- * `ipHash` y `dispositivo` son lo único que la app aporta, y son datos DE LA
- * APP —no del documento—: por eso sí pueden venir de acá.
+ * 🔴 **`ipHash` YA NO EXISTE, y lo destapó C negándose a mandarlo.** Su razón:
+ * *la app no conoce la IP, y fabricar un hash de algo que no conozco sería
+ * inventar evidencia legal.* Tenía razón — y un campo que sólo puede llenar
+ * quien no lo conoce **no se llena nunca**: medido, `consentimientos.ip_hash`
+ * estaba en NULL en las 97 filas de la casa.
+ *
+ * ⇒ Ahora **la IP la lee el servidor** de `x-forwarded-for` y la guarda
+ * hasheada. `dispositivo` sigue viniendo de acá porque la app SÍ lo conoce.
+ * La respuesta trae `ipCapturada` para que la pantalla sepa si la evidencia
+ * quedó completa **sin tener que adivinarlo**.
  */
 export async function aceptarDocumentoAdopcion(input: {
   codigo: 'terminos_refugio' | 'condiciones_adopcion';
-  ipHash?: string;
   dispositivo?: string;
 }): Promise<ResultadoWrapper<AceptacionRegistrada, CodigoErrorAdopcion>> {
   const { data, error } = await getClient().rpc('aceptar_documento_adopcion', {
     p_codigo: input.codigo,
-    p_ip_hash: input.ipHash,
     p_dispositivo: input.dispositivo,
   });
   if (error) return fallo(error.message);
@@ -553,6 +561,7 @@ export async function aceptarDocumentoAdopcion(input: {
       consentimientoId: r.consentimiento_id,
       codigo: String(r.codigo),
       version: Number(r.version),
+      ipCapturada: r.ip_capturada === true,
     },
   };
 }
