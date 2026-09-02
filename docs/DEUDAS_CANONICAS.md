@@ -26462,9 +26462,19 @@ rojo, y esto no lo deja. **Pero su disparo es inmediato y por eso va 🔴.**
 **DISPARO: la PRIMERA sesión que vaya a depositar una ficha.** *Se cura antes de
 escribir el próximo número, no después de que dos pistas se pisen otra vez.*
 
-⚠️ **Mientras tanto, el número libre es `D-1003` y el máximo real es `D-1001`** —
-escrito acá **a propósito**, contra la propia ley de no escribir números, porque
-**hoy el comando no lo puede decir**.
+> ### ☠️ CURADA EN S112-A. La línea que vivía acá se retira EN EL MISMO ACTO que la cura (`L-395`).
+>
+> Decía el número libre escrito a mano, **a propósito y contra la propia ley de
+> no escribir números**, con su razón declarada: *«hoy el comando no lo puede
+> decir»*. **Hoy lo dice** — `pnpm proximo:ficha` — así que la razón venció.
+>
+> 🔴 **Y su retiro no fue prolijidad: fue el guard de la cura exigiéndolo.** El
+> comando nuevo se niega a entregar un número que aparezca en cualquier parte
+> del archivo, y este párrafo hacía aparecer el que iba a entregar. *Un texto
+> que nombra el próximo número libre envenena a cualquier instrumento que mida
+> números* — **y el rojo lo produjo dos veces: la segunda contra el borrador de
+> esta misma nota de retiro, que también lo nombraba.* La cura vive en la ficha
+> inmediatamente siguiente a ésta.
 
 ---
 
@@ -26655,3 +26665,89 @@ por encabezado lo captura.
 **Lo que se usó acá, y se declara:** el máximo se leyó por encabezado **y cada
 número candidato se verificó uno por uno con `grep -c` = 0** antes de escribirlo.
 *Dos instrumentos, porque ninguno solo alcanza.*
+
+---
+
+## ☠️ `D-1003` — LA CURA DE `D-1002`: EL NÚMERO DE FICHA **SE PIDE, NO SE ELIGE** (nace y muere en S112-A)
+
+**Depositada por A el 1-sep-2026, con su rojo reproducido antes y su verde
+después.** Cierra `D-1002`.
+
+### ① EL ROJO, contra el objeto (`docs/DEUDAS_CANONICAS.md` en `cc55348b`, 20:49 -05)
+
+| lado | comando | devuelve | consecuencia |
+|---|---|---|---|
+| **subcuenta** | el del canon, `\{3\}` dígitos | **`D-999`** | próximo `D-1000` → **ya tomado, 6 ocurrencias medidas.** *Choca* |
+| **sobrecuenta** | la corrección obvia, número entero + orden numérico | **`D-2026`** | próximo `D-2027` → **salto de 1024** sobre el máximo real. *Y saltar no tiene síntoma* |
+| **el gemelo `L-`** | el del canon | **`L-714`** | el máximo real es `L-477`. `L-714` es un typo curado en S94 **que los encabezados de depósito narran** |
+
+**Por qué el regex de tres dígitos subcuenta:** trunca `D-1002` a `D-100`, y el
+máximo del conjunto truncado es `D-999`. **Por qué el de cuatro sobrecuenta:**
+captura `D-2026` de una cita legal *y de la propia ficha `D-1002`*, que lo
+escribe entre backticks como ejemplo del problema.
+
+> ### ⇒ *La ficha que documenta el bug contiene el string que causa el bug.* Ninguna variante de regex sobre el CUERPO del archivo se salva de eso.
+
+### ② LO QUE SE MIDIÓ Y NADIE HABÍA MEDIDO
+
+- **El límite que E declaró sin verificar, verificado:** hay **5 números `D-`
+  que viven en el cuerpo y no en un encabezado** (`D-163` · `D-757` · `D-821` ·
+  `D-948` · el que `D-1002` escribía como «próximo libre»). **Ninguno es una
+  ficha alta** ⇒ el ancla por encabezado no subcuenta el máximo. *Era una
+  corrida, y no se había hecho.*
+- 🔴 **El filtro por encabezado NO salva a las `L-`**, porque `L-714` vive en
+  **dos encabezados de bloque de depósito**. La enmienda anterior a `D-1002` ya
+  lo había anotado; acá se cierra: **el ancla no es «el número está en un
+  encabezado» sino «el encabezado EMPIEZA con el número»**, y esa forma sí lo
+  descarta (medido: 0).
+
+### ③ EL COMANDO NUEVO — y lo que un one-liner no podía tener
+
+```
+pnpm proximo:ficha            # node scripts/proximo-numero-ficha.mjs
+pnpm proximo:ficha --control  # + los positivos y los TRES negativos conocidos
+```
+
+Ancla en **encabezados cuyo primer token es el número entre backticks**, ordena
+**numéricamente** —*la mitad del arreglo no está en el patrón, está en el orden:
+`sort` alfabético pone `D-999` después de `D-1000`*— y entrega `tope + 1` para
+`D-` y para `L-` en la misma corrida.
+
+🔴 **Y trae el guard que ninguna variante de regex podía traer:** antes de
+entregar un número, **exige que ese número no aparezca NI UNA VEZ en todo el
+archivo**; si aparece, sale con **exit 2** y nombra las líneas. *`L-459`: un
+instrumento que sólo sabe decir un número no puede producir su propio rojo.*
+
+**Su modo de falla, declarado:** el ancla depende de la convención de encabezado
+(`L-459` — *un gate atado a un NOMBRE mide la CONVENCIÓN, no el hecho*). Si una
+ficha alta naciera con otro formato, el ancla no la vería… **y el guard la
+cazaría igual**, porque el número propuesto aparecería en el archivo. *Las dos
+mitades cubren modos de falla distintos a propósito.*
+
+### ④ EL VERDE, y el guard se cobró TRES VECES en el camino
+
+**Dos tomas seguidas dan N y N+1**: la primera entregó el número de esta ficha
+—y el de su lección hermana—; la segunda, ya con esta ficha depositada, entregó
+el siguiente. *Los números concretos NO se transcriben acá: transcribirlos es
+exactamente lo que rompe el instrumento.* **La evidencia de una toma es la
+corrida del comando, no su copia en prosa.**
+
+Antes de ese verde el guard salió en rojo **tres veces, y las tres con razón —
+las tres contra texto que estaba escribiendo el que curaba, no contra deuda
+vieja**: ① la ficha `D-1002` escribía a mano el número libre —lo hacía a
+propósito, *«porque hoy el comando no lo puede decir»*, y esa razón venció con
+esta cura, así que la línea se retiró en el mismo acto (`L-395`)—; ② **el
+borrador de la propia nota de retiro volvía a nombrarlo**; ③ **el borrador de
+ESTA ficha, que escribía las dos tomas con sus números literales «para dejar la
+evidencia».**
+
+> ### ⇒ *Un texto que nombra un número que todavía no es de ninguna ficha envenena a cualquier instrumento que mida números — incluido el texto que se escribe para explicar eso.*
+>
+> **De ahí sale la segunda mitad de la convención, y no es cosmética: el canon
+> no escribe números que todavía no están depositados.** *Tres capturas en una
+> sola cura, todas del mismo autor, dicen que la tentación es del que documenta
+> — no del que se distrae.*
+
+**DISPARO: ninguno. Nace cerrada.** Lo que queda vivo es el comando, y su
+convención de depósito: **toda ficha se deposita con su número entre backticks
+al principio de su encabezado.**
