@@ -28,12 +28,35 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 
 ALTER TABLE public.adopcion_documentos
-  ADD COLUMN IF NOT EXISTS sha256 text
-    GENERATED ALWAYS AS (encode(sha256(convert_to(contenido, 'UTF8')), 'hex')) STORED,
+  ADD COLUMN IF NOT EXISTS sha256 text,
   ADD COLUMN IF NOT EXISTS vigente boolean NOT NULL DEFAULT true;
 
+/* ⚠️ ENMENDADO EN LA MISMA TANDA, y la razón queda escrita porque el próximo
+   que lo intente va a tropezar igual: se escribió primero como columna
+   GENERATED ALWAYS y Postgres la rebotó con `generation expression is not
+   immutable` — `convert_to()` es STABLE, no IMMUTABLE, porque depende de la
+   codificación del servidor. *La idea era correcta y el mecanismo no existía
+   para esta expresión.*
+
+   El trigger da la MISMA garantía por otra vía: pisa el valor en cada INSERT y
+   en cada UPDATE, así que un sha256 escrito a mano no sobrevive al write. Lo
+   que se pierde frente a GENERATED no es la garantía: es que la garantía ahora
+   vive en un objeto que alguien podría deshabilitar. Por eso el cinturón la
+   verifica CONTRA EL TEXTO y no contra la existencia del trigger. */
+CREATE OR REPLACE FUNCTION public._trg_adopcion_documentos_sha256()
+RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public','pg_temp' AS $trg$
+BEGIN
+  NEW.sha256 := encode(sha256(convert_to(NEW.contenido, 'UTF8')), 'hex');
+  RETURN NEW;
+END $trg$;
+
+DROP TRIGGER IF EXISTS adopcion_documentos_sha256 ON public.adopcion_documentos;
+CREATE TRIGGER adopcion_documentos_sha256
+  BEFORE INSERT OR UPDATE ON public.adopcion_documentos
+  FOR EACH ROW EXECUTE FUNCTION public._trg_adopcion_documentos_sha256();
+
 COMMENT ON COLUMN public.adopcion_documentos.sha256 IS
-  'S112-A · derivado del texto, jamás escrito. Un hash que no corresponde al contenido es inexpresable por construcción (L-439).';
+  'S112-A · lo escribe un trigger en cada write, jamás la mano. Un hash que no corresponde al contenido no sobrevive a un INSERT ni a un UPDATE (L-439).';
 
 INSERT INTO public.adopcion_documentos (codigo, version, contenido, vigente_desde, vigente)
 VALUES ('terminos_refugio', 1, $texto$TÉRMINOS Y CONDICIONES — CUENTA DE REFUGIO O RESCATISTA
