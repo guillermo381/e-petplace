@@ -326,3 +326,103 @@ sonda de permisos corrida por `db query` mide la ausencia de TRIGGER, jamás la
 presencia de RLS.* **Su correctivo es barato y es el que apliqué: toda sonda de
 RLS lleva `SET LOCAL ROLE authenticated` + `request.jwt.claims`, y al lado un
 control positivo que pruebe que ese asiento SÍ lee algo** (acá: 27 filas y no 97).
+
+---
+
+# ADDENDUM · 2-sep 00:10–00:55 — LO QUE APARECIÓ AL SEMBRAR
+
+*Con 1 005 publicaciones sembradas (ya borradas, residuo cero) se pudieron correr
+los brazos que ayer quedaron ⚠️. **Y el vertical cambió mientras yo medía:** A
+reemplazó `obtener_adoptables` entero y creó `obtener_adoptable`,
+`actualizar_adoptable`, `cambiar_estado_adoptable` y la vista
+`v_adoptables_publicos`. **La §5.2 de arriba describe la función VIEJA.** Esto la
+enmienda.*
+
+## A1 · 🔴 EL HALLAZGO MAYOR — la vidriera anónima no puede mostrar NINGUNA foto
+
+**La policy `mascotas_select_vidriera_anon` no puede dar verdadero nunca.**
+
+Su predicado pregunta por filas de `mascotas`, `adopcion_publicacion` y
+`cat_estados_adopcion` — **tres tablas que `anon` no puede leer**. Cuando el
+predicado se evalúa *desde el asiento de `anon`*, la RLS de esas tres tablas se
+aplica **dentro del `EXISTS`** y lo vuelve falso.
+
+**Medido, el mismo predicado desde los dos asientos:**
+
+```
+predicado desde SUPERUSUARIO ............................ true
+🔴 el MISMO predicado desde el asiento ANON ............. false
+por qué: lo que anon VE de cada tabla del EXISTS
+         mascotas=0 · adopcion_publicacion=0 · cat_estados_adopcion=0
+```
+
+**Confirmado por camino real, con su discriminador:**
+
+```
+ANON  download portada de adoptable publicado  -> ⛔ Object not found
+AUTH  (dueño ajeno) mismo objeto               -> ⛔ Object not found
+AUTH  (su propia foto) otro objeto             -> ✅ 62 582 bytes   ← CONTROL POSITIVO
+```
+
+*El control positivo es lo que cierra el caso: el mismo cliente, la misma llamada,
+baja 62 kB cuando el objeto es suyo ⇒ **el ⛔ es la policy negando, no el archivo
+faltando** (Storage responde «Object not found» también cuando deniega: no revela
+existencia).*
+
+**Consecuencia, en la voz del recorrido:** **§0 pasos 8 y 9 no tienen foto.** La
+lista sin sesión y la ficha de Luna se dibujan sin imagen para un visitante
+anónimo. *No es una fuga: es lo contrario — está cerrado de más.* **La puerta:
+`mascotas_select_vidriera_anon`. Es de A.**
+
+## A2 · §5.2 RE-MEDIDA sobre la función nueva — ✅ VERDE
+
+Con datos, por camino real y con control negativo:
+
+| sonda | dio |
+|---|---|
+| `anon → rpc obtener_adoptables()` | ✅ **3 destacados + 2 resto**, con `cursor`, `hay_mas`, `orden_por_convivencia` |
+| las **37 claves** de una tarjeta | ✅ **ninguna prohibida** (sin teléfono, correo, dirección, RUC, cédula ni coordenadas) |
+| `anon → rpc con {"nombre_menor":"x"}` | ✅ **rebota `filtro_no_valido: nombre_menor`** |
+| `anon → rpc con cursor basura` | ✅ **rebota `cursor_no_valido`** |
+| CONTROL− `anon` sobre las 4 tablas de abajo | ✅ **0 filas en las cuatro** |
+
+🟠 **Pero `anon` alcanza la vista directamente** y con eso saltea paginación,
+tope y lista blanca: **1 005 filas, 36 columnas, 1,06 MB, p95 651 ms.** Sin
+columna prohibida ⇒ **no es fuga**, es que *la puerta de adelante tiene al lado
+una ventana sin marco.* **Detalle completo en `S112-E-PERFORMANCE.md` §5.**
+
+## A3 · §5.9 · media respuesta que sí se pudo dar
+
+El formulario sigue sin existir, **pero la lista blanca de filtros ya rebota una
+clave fuera de esquema**: mandarle `nombre_menor` a `obtener_adoptables` devuelve
+`filtro_no_valido: nombre_menor`. *Es el mismo mecanismo que §5.9 pide para las
+respuestas, ejercido en la otra puerta — y prueba que el patrón funciona.*
+
+## A4 · 🔴 LA MISMA TRAMPA, COBRADA DOS VECES EN UN DÍA, EN LAS DOS DIRECCIONES
+
+Ayer el asiento del superusuario me fabricó **tres rojos falsos** (§5.6). Hoy el
+mismo asiento me fabricó **un verde falso**: leí el predicado de la policy, lo
+evalué como superusuario, **dio `true`, y la policy está muerta**.
+
+> **Un predicado de RLS medido desde un asiento que RLS no alcanza no mide la
+> policy: mide otra pregunta parecida.** Y falla en las dos direcciones — de más
+> (inventa agujeros) y de menos (esconde puertas trancadas).
+>
+> **El correctivo, ejercido acá:** toda evaluación de un predicado de policy se
+> corre **con `SET LOCAL ROLE <el rol al que gatea>`**, y al lado se imprime
+> **qué ve ese rol de cada tabla que el predicado menciona** — que es lo que
+> convirtió un `false` inexplicable en un diagnóstico.
+
+## A5 · TABLA ACTUALIZADA
+
+| # | requisito | ayer | **hoy** |
+|---|---|---|---|
+| 5.2 | vidriera anónima | ⚠️ | ✅ **verde, re-medida sobre la función nueva** |
+| 5.4 | D-485 | 🔴 | 🔴 sin cambio |
+| 5.10 | storage | 🟠 | **🔴 la policy anon no puede dar verdadero — la vidriera no muestra fotos** |
+| 5.9 | menores | ⛔ | ⛔ (media respuesta: la whitelist de filtros sí rebota) |
+| — | vista alcanzable por `anon` | — | 🟠 **nuevo** |
+
+**Rojos abiertos: SEIS.** D-485 · N4 sin `tipo` · N1 sin techo de 3 · el cron sin
+una corrida · el refugio sin poder subir fotos · **la policy anon de storage
+muerta**. **Más un 🟠 nuevo:** el `GRANT SELECT` de `anon` sobre la vista.
