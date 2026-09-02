@@ -530,3 +530,50 @@ aplica igual a un usuario logueado, que también puede saltear la paginación.
 | 5.4 | `D-485` | 🔴 sin cambio |
 | 5.8 | N1 sin techo de 3 · el cron sin correr | 🔴 |
 | 5.5 · 5.9 · 5.11 | firma · formulario · reportes | ⛔ no existen |
+
+---
+
+# ADDENDUM 3 · 2-sep 13:00–13:30 — §5.3 CERRADA, con sus cuatro asientos
+
+**Escenario armado dentro de una transacción que termina en `ROLLBACK`**: una
+publicación viva del refugio real, el solicitante postulando **por la puerta**
+(`aceptar_documento_adopcion` → `crear_solicitud_adopcion`), y después la misma
+lectura desde **cuatro asientos distintos**.
+
+| # | asiento | pregunta | dio |
+|---|---|---|---|
+| 1 | **solicitante (+8)** | `crear_solicitud_adopcion` | ✅ creó `607a226c…` |
+| 2 | solicitante | ¿ve **su** solicitud? | **1 fila** |
+| 3 | solicitante | ¿ve **su** hilo? | **1 mensaje** |
+| 4 | solicitante | `obtener_mis_solicitudes_adopcion` | **1 fila** |
+| 5 | **CONTROL+ · el publicador (refugio)** | ¿ve la solicitud? | ✅ **1 fila** |
+| 6 | **CONTROL+ · el publicador** | ¿ve el hilo? | ✅ **1 mensaje** |
+| 7 | 🔴 **tercer usuario (+7)** | ¿ve la solicitud ajena? | ✅ **0 filas** |
+| 8 | 🔴 tercer usuario | ¿ve el hilo ajeno? | ✅ **0 mensajes** |
+| 9 | 🔴 tercer usuario | `obtener_mis_solicitudes_adopcion` | ✅ **0 filas** |
+| 10 | 🔴 **OTRO refugio** (rol otorgado en la txn) | ¿ve la solicitud ajena? | ✅ **0 filas** |
+| 11 | 🔴 OTRO refugio | ¿ve el hilo ajeno? | ✅ **0 mensajes** |
+| 12 | 🔴 **N1** · misma familia, mismo animal, segunda vez | segunda solicitud | ✅ **rebotó `solicitud_ya_viva: 607a226c…`** |
+
+**Los pasos 5 y 6 son lo que le da valor a los ceros de abajo:** el publicador
+**sí ve**, con los mismos datos y en la misma transacción ⇒ *los ceros del tercer
+usuario y del otro refugio son denegación, no una tabla vacía.*
+
+**Y de paso quedan ejercidos por camino real:**
+- **§5.12** — `aceptar_documento_adopcion` **corrió de verdad** (sin eso la
+  compuerta `condiciones_no_aceptadas` habría frenado la postulación).
+- **la mitad buena de N1** — con su **rebote hablado y con el id adentro**
+  (`L-424` cumplida: no es un `23505` crudo, lleva a dónde ir).
+
+**RESIDUO CERO, verificado:** `0` solicitudes · `0` mensajes · `0` publicaciones ·
+`0` familias de sonda · `0` mascotas de sonda · **1** rol de refugio (el
+original) · y `+8` sigue con sus **27** consentimientos, no 28.
+
+## Un hallazgo operativo para el recorrido del founder
+
+**`guillo381+refugio@gmail.com` NO entra con la clave compartida de las cuentas
+de prueba.** Medido: `+8`, `+7` y `+9` entran; **el refugio rebota con
+`Invalid login credentials`**. *No es un defecto —puede tener clave propia a
+propósito— pero es el paso 1 del recorrido de §0, así que el founder tiene que
+saber con qué clave entra antes de tener el teléfono en la mano.* **Se declara
+en `S112-E-ESCENARIO-DEL-FOUNDER.md` §1.**

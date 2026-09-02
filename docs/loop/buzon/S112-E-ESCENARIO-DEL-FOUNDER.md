@@ -30,6 +30,10 @@ teléfono en la mano y no después.*
 
 **Como refugio — app `e-PetPlace Negocios` (`com.epetplace.prestador`):**
 - correo **`guillo381+refugio@gmail.com`**
+- ⚠️ **NO entra con la clave compartida de las cuentas de prueba** — medido: `+8`,
+  `+7` y `+9` entran con ella, **el refugio rebota `Invalid login credentials`**.
+  *Puede tener clave propia a propósito, pero es el paso 1: el founder necesita
+  saber cuál es antes de agarrar el teléfono.*
 - es titular de la cuenta comercial **`Refugio de prueba Satori`** (`80c41ac7-c39e-44b2-9d70-fd4f9816b521`), **estado `activa`**, con **rol `refugio` activo** — *medido, no supuesto.*
 
 **Como familia — app cliente (`com.epetplace.cliente`):**
