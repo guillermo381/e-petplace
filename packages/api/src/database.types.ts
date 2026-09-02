@@ -21907,6 +21907,7 @@ export type Database = {
           cohorte: string | null
           cohorte_anio: number | null
           country_code: string | null
+          cuenta_comercial_id: string | null
           descripcion: string | null
           foto_url: string | null
           id: string | null
@@ -21924,6 +21925,27 @@ export type Database = {
           zona_radio_m: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "prestadores_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestadores_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "prestadores_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
           {
             foreignKeyName: "prestadores_user_id_fkey"
             columns: ["user_id"]
@@ -22287,6 +22309,10 @@ export type Database = {
         Args: { p_categoria: string }
         Returns: boolean
       }
+      _cerrar_otras_solicitudes_del_animal: {
+        Args: { p_mascota_id: string; p_solicitud_ganadora: string }
+        Returns: number
+      }
       _cerrar_teleconsulta_si_vencio: {
         Args: { p_cita_id: string }
         Returns: undefined
@@ -22492,6 +22518,10 @@ export type Database = {
       }
       _mascota_elegible_servicio: {
         Args: { p_mascota_id: string; p_tipo_servicio: string }
+        Returns: boolean
+      }
+      _media_guarderia_es_de_mi_mascota: {
+        Args: { p_nombre: string }
         Returns: boolean
       }
       _mensualidad_dias_habiles: {
@@ -24693,8 +24723,13 @@ export type Database = {
         Args: never
         Returns: {
           direccion_id: string
+          especie_aplica: boolean
+          especies_elegibles: Json
           estado: string
+          mascota_especie: string
+          mascota_foto_url: string
           mascota_id: string
+          mascota_nombre: string
           periodo_desde: string
           periodo_hasta: string
           precio_mensual: number
@@ -24999,6 +25034,7 @@ export type Database = {
           cerrada_en: string
           creada_en: string
           estado: string
+          mascota_especie: string
           mascota_foto_url: string
           mascota_id: string
           mascota_nombre: string
@@ -25129,6 +25165,15 @@ export type Database = {
       }
       pausar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
       planes_vencidos_pendientes: { Args: never; Returns: Json }
+      poblar_vitrina_refugio: {
+        Args: {
+          p_ciudad?: string
+          p_historia?: string
+          p_logo_url?: string
+          p_zona?: string
+        }
+        Returns: Json
+      }
       poner_pedido_primero: { Args: { p_pedido_id: string }; Returns: Json }
       preferencia_efectiva: {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }

@@ -19,6 +19,14 @@ import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
+  no_sos_refugio: 'Tu cuenta todavía no está verificada como refugio.',
+  /**
+   * 🔴 El detalle trae **el oficio que ya tiene** (`ya_tenes_prestador: clinica_veterinaria`).
+   * Sin ese dato la pantalla sólo puede decir un genérico, y *ése es justo el
+   * detalle que separa esta puerta de un `23505` traducido.* Ver `fallo()`:
+   * el detalle viaja detrás del código y NO se aplana.
+   */
+  ya_tenes_prestador: 'Tu cuenta ya está registrada con otro oficio.',
   /* 🔴 Hoy hay CERO cuentas con rol `refugio`: las crea el admin. Este rebote
      es el estado normal del sistema, no una falla — y por eso habla claro. */
   no_sos_cuenta_de_refugio: 'Esta cuenta todavía no está habilitada para publicar animales en adopción.',
@@ -1588,4 +1596,64 @@ export async function borrarFotoAdoptableDeStorage(
   const { error } = await getClient().storage.from('adopcion-fotos').remove([path]);
   if (error) return fallo(error.message);
   return { ok: true, data: { path } };
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A6 · EL EDITOR DE LA VITRINA DEL REFUGIO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface VitrinaRefugioGuardada {
+  prestadorId: string;
+  cuentaComercialId: string;
+  /** `true` si la fila del prestador nació en esta llamada. */
+  creada: boolean;
+  /**
+   * 🔴 `true` **sólo si hay historia**. El nombre y el logo NO cuentan: los
+   * tiene por existir; *la vitrina es lo que el refugio ARMÓ.* Es el mismo
+   * criterio con el que `packages/ui` hizo obligatoria `vozSinPagina`, así que
+   * las dos piezas dicen lo mismo sin que nadie las sincronice.
+   */
+  tienePagina: boolean;
+}
+
+/**
+ * Crea o actualiza la vitrina pública del refugio.
+ *
+ * ⚠️ **Sólo se manda lo que se tocó.** El motor hace `COALESCE`: *lo que no se
+ * manda no se borra.* Pasar el formulario entero con `undefined` en lo vacío
+ * está bien; pasar `null` explícito NO borra — tampoco escribe.
+ *
+ * 🔴 **Los dos rechazos son códigos distintos y se ramifican por `codigo`**
+ * (regla 35), porque se resuelven distinto: `no_sos_refugio` se destraba
+ * pidiendo la verificación; `ya_tenes_prestador` **no lo destraba nadie hoy**
+ * — es una persona que ya tiene otro oficio, y su `detalle` dice cuál.
+ */
+export async function poblarVitrinaRefugio(campos: {
+  historia?: string;
+  ciudad?: string;
+  zona?: string;
+  logoUrl?: string;
+}): Promise<ResultadoWrapper<VitrinaRefugioGuardada, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('poblar_vitrina_refugio', {
+    p_historia: campos.historia ?? undefined,
+    p_ciudad: campos.ciudad ?? undefined,
+    p_zona: campos.zona ?? undefined,
+    p_logo_url: campos.logoUrl ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.prestador_id !== 'string' || typeof r.cuenta_comercial_id !== 'string') {
+    return fallaCodigo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: {
+      prestadorId: r.prestador_id,
+      cuentaComercialId: r.cuenta_comercial_id,
+      creada: r.creada === true,
+      tienePagina: r.tiene_pagina === true,
+    },
+  };
 }
