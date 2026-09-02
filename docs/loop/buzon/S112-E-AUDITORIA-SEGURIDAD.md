@@ -577,3 +577,138 @@ de prueba.** Medido: `+8`, `+7` y `+9` entran; **el refugio rebota con
 propósito— pero es el paso 1 del recorrido de §0, así que el founder tiene que
 saber con qué clave entra antes de tener el teléfono en la mano.* **Se declara
 en `S112-E-ESCENARIO-DEL-FOUNDER.md` §1.**
+
+---
+
+# ADDENDUM 4 · 2-sep 14:00–15:00 — SOBRE DATOS REALES · el traspaso completa · y el bucket rompe DOS actos
+
+**CONTRA QUÉ:** base viva + `main 60ab4891`, con **los cinco animales de A6
+sembrados por las puertas reales** (Luna · Nube · Tito · Bruno publicados,
+**Kira en borrador**).
+
+## D1 · ✅ EL CRON 48 CORRIÓ — se cierra el último rojo de la primera pasada
+
+```
+now() UTC ......... 2026-09-02 14:23
+corridas .......... 1        última: 2026-09-02 14:00:00.21+00
+status ............ succeeded
+```
+
+*Ayer era «tendido, activo y con cero corridas». Hoy tiene su primera, y el
+cable ya estaba probado aparte con control negativo ⇒ **los dos hechos, que son
+distintos, están los dos medidos**.*
+
+## D2 · 🟢 EL TRASPASO COMPLETA — y `D-485` queda ejercido de punta a punta
+
+Corrido **sobre Luna**, en transacción con `ROLLBACK`:
+
+```
+🟢 ¿EL TRASPASO COMPLETA AHORA? ....... ✅ SÍ · {"ok": true, "evento_id": "d8e7f469…"}
+   estado de la publicación ........... adoptada · retirada_en=NULL      ✅
+   evento de procedencia escrito ...... 1                                 ✅
+   familia_id de Luna ................. ce057f90… (la familia adoptante)  ✅
+   user_id de Luna .................... 632727a3… (EL REFUGIO)            🔴
+   filas en mascota_codueño ........... 0                                 🔴
+🔴 ¿la familia VE a Luna? ............. NO — 0 filas
+🔴 ¿ve su expediente? ................. 0 eventos  (el refugio le había cargado 1)
+✅ CONTROL+ · mascotas que sí ve ...... 11
+🔴 ¿el REFUGIO la sigue viendo? ....... SÍ
+```
+
+**La cura de `retirada` es verde: el traspaso ya no muere.** Y con eso `D-485`
+pasa de predicción a **hecho ejercido**: *la vacuna que el refugio cargó antes de
+la entrega —que es literalmente la promesa del paso 15— queda invisible para la
+familia, y el refugio conserva la mascota como dueño.*
+
+## D3 · ✅ N4 EJERCIDA — cuatro rojos y su control
+
+| sonda | dio |
+|---|---|
+| criterio `NULL` | ✅ `criterio_requerido: escribi qué se revisó…` |
+| criterio **en blanco** (`'   '`) | ✅ `criterio_requerido` — *rechaza espacios, no sólo NULL* |
+| tipo inventado (`santuario`) | ✅ `tipo_de_refugio_no_valido: santuario` |
+| **CONTROL+** tipo y criterio válidos | ✅ pasó |
+| **§5.7** un NO-admin se otorga el rol | ✅ `solo_admin_otorga_rol_refugio` |
+
+Y las cuatro columnas pobladas de verdad: `tipo_verificacion=organizacion` ·
+`criterio_verificacion` con texto · `verificado_por` · `verificado_en`.
+
+## D4 · ✅ §5.2 SOBRE LA VIDRIERA REAL
+
+```
+anon → obtener_adoptables ..... 3 destacados + 1 resto = Tito, Luna, Nube, Bruno
+🔴 ¿aparece Kira (borrador)? .. ✅ NO
+claves prohibidas ............. ✅ ninguna de 38
+anon → select a la vista ...... ✅ ⛔ 42501
+```
+
+**Kira no se filtra**, que era el rojo que importaba de §5.2 con datos reales.
+
+## D5 · 🔴 EL BUCKET `adopcion-fotos` NO TIENE POLICY DE `SELECT`, Y ESO ROMPE DOS ACTOS
+
+**El camino de la foto funciona… hasta que hay que volver a tocarla.** Corrido
+como el refugio, con su clave:
+
+```
+① subir (sin upsert) ................... ✅ SUBIÓ
+② reemplazar con upsert:true ........... 🔴 new row violates row-level security policy
+③ reemplazar con .update() ............. 🔴 idem
+④ ANON la baja (bucket público) ........ ✅ 70 bytes
+⑤ agregar_foto_adoptable ............... ✅ {"ok":true,"es_portada":true,"orden":0}
+⑥ la ficha la devuelve ................. ✅ como URL pública  ← lo que §6 pedía
+⑦ quitar_foto_adoptable ................ ⛔ la función NO EXISTE
+```
+
+**Y al ir a limpiar apareció lo de fondo.** Las policies de `adopcion-fotos` son
+`a` (insert) ×2, `d` (delete) ×2 y `w` (update) — **ninguna de `SELECT`**:
+
+```
+el refugio → list() de SU PROPIA carpeta ....... vacío
+storage.objects para esa carpeta ............... 2 filas, owner = el refugio
+el refugio → remove([los dos paths exactos]) ... ✅ sin error, data.length=0
+storage.objects después ........................ 🔴 SIGUEN LAS 2
+```
+
+**Dos consecuencias, y la segunda es la peligrosa:**
+1. **La pantalla del refugio no puede listar sus propias fotos** ⇒ «subir,
+   ordenar, la primera es la portada» (§4.2) no tiene de dónde leer.
+2. 🔴 **`remove()` responde ÉXITO y no borra.** *Es `L-222` de esta casa otra vez:
+   el DELETE de Storage resuelve los objetos con un SELECT interno; sin policy de
+   SELECT no encuentra ninguno, borra cero y reporta bien.* **Un borrado que
+   miente es peor que uno que falla: nadie va a verificar lo que ya dijo que hizo.**
+
+⚠️ **RESIDUO QUE NO PUEDO LIMPIAR, DECLARADO:** quedan **2 objetos de sonda** en
+`adopcion-fotos/9adfbbe0-…/` (`e-1788359163167.png` y `portada.png`, 70 bytes cada
+uno, owner el refugio). **No los puedo borrar**: la API dice que sí y no lo hace,
+y el `DELETE` por SQL lo rebota `storage.protect_delete`. **Los borra A** con la
+policy de admin, o **desaparecen solos cuando exista la policy de `SELECT`.**
+*La fila de `adopcion_foto` sí quedó limpia (0).*
+
+## D6 · 🔴 LOS CINCO ANIMALES NO TIENEN NINGUNA FOTO
+
+```
+Bruno · Kira · Luna · Nube · Tito → foto_url = ~ SIN FOTO · galería = 0
+```
+
+**La policy de la vidriera está curada y la vidriera sigue sin fotos, por otra
+razón: no hay ninguna foto cargada.** *Dos causas distintas con el mismo síntoma
+— y si sólo se recuerda «la policy se curó», el recorrido del founder va a fallar
+igual y va a parecer que la cura no sirvió.*
+
+## D7 · 🔴 MI PROPIO FALSO ROJO, CAZADO ANTES DE REPORTARLO
+
+**Mi primera sonda de subida usaba `upsert: true` y dio
+`new row violates row-level security policy`.** Estuve a un paso de reportar *«el
+refugio no puede subir fotos»* — **y es falso: sin `upsert` sube perfecto.**
+
+*Tercera vez en dos días que el instrumento produce un rojo que no es del objeto,
+y la tercera con causa distinta: el asiento equivocado (§5.6), el predicado
+evaluado bajo RLS ajena (A1), y ahora **una bandera del cliente que cambia el
+camino que se está midiendo**.* **Lo que lo cazó fue el control positivo de
+siempre:** el mismo cliente subiendo al bucket `mascotas`, que funcionó — *si la
+sesión estuviera rota, ése habría fallado también.*
+
+> **Lección, y es la forma general de las tres:** *una sonda mide el camino que
+> toma, no el que uno cree que toma. Toda opción que se le pasa al cliente
+> (`upsert`, `head`, `count`) es parte del camino y hay que variarla antes de
+> llamar rojo a un rebote.*
