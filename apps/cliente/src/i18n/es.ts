@@ -294,6 +294,12 @@ export const clienteEs = {
     fichaVerCarnet: 'Ver su carnet',
     fichaCargarCarnet: 'Cargar su carnet',
     verEnVivo: 'Ver cómo va',
+    /* G4 · Las tres etapas del día de guardería, en voz de familia. Dicen
+       DÓNDE está el animal, que es lo único que la familia quiere saber — no
+       el nombre del estado del motor. «A bordo» sería vocabulario nuestro. */
+    guarderiaABordo: 'Va en camino a {{lugar}}',
+    guarderiaAdentro: 'Está en {{lugar}}',
+    guarderiaDeVuelta: 'Ya viene de vuelta a casa',
     proximaCita: 'Próxima cita',
     // D-319: el hold vigente del bloqueo 15 min — rima con checkout.holdVoz
     reservandoHorario: 'Reservando este horario',

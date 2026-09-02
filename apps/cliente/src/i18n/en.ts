@@ -229,6 +229,9 @@ export const clienteEn = {
     fichaVerCarnet: 'See their card',
     fichaCargarCarnet: 'Add their card',
     verEnVivo: 'See how it goes',
+    guarderiaABordo: 'On the way to {{lugar}}',
+    guarderiaAdentro: 'At {{lugar}}',
+    guarderiaDeVuelta: 'On the way back home',
     proximaCita: 'Next appointment',
     // D-319: live 15-min hold — rhymes with checkout.holdVoz
     reservandoHorario: 'Holding this time for you',
