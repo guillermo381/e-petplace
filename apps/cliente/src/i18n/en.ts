@@ -2658,6 +2658,8 @@ export const clienteEn = {
     estado_en_conversacion: 'In conversation',
     estado_aceptada: 'Accepted',
     estado_declinada: 'Did not go ahead',
+    estado_desistida: 'You withdrew it',
+    estado_no_concretada: 'It could not continue',
     automatica: 'Automatic reply from the shelter',
     sinMensajes: 'No messages in this conversation yet.',
     escribirEtiqueta: 'Write to the shelter',

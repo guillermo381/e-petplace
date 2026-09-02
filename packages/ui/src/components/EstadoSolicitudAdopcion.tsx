@@ -59,6 +59,18 @@ export type EstadoSolicitud =
   | 'en_conversacion'
   | 'aceptada'
   | 'declinada'
+  /** La familia se bajó. **No es `declinada`**: declinar es del publicador, y
+   *  reusarla le diría al refugio «yo la decliné» sobre alguien que se fue. */
+  | 'desistida'
+  /** 🟢 El animal falleció (firma del founder, 2-sep). Estado propio porque
+   *  **acá no decidió nadie**. Su voz es de duelo y **no invita a otro animal**
+   *  (D-3): ofrecerle otro adoptable a quien perdió al que eligió trata a un
+   *  animal como un reemplazo.
+   *
+   *  ⚠️ AÑADIDO POR A (S112) para que el motor no mienta en el contrato. Hoy
+   *  usa el mismo desvío neutro que `declinada`; **el trato visual propio es de
+   *  B** — un duelo y un «no» del refugio no tienen por qué verse igual. */
+  | 'no_concretada_fallecimiento'
 
 export type EstadoSolicitudAdopcionProps = {
   estado: EstadoSolicitud
@@ -72,6 +84,11 @@ export type EstadoSolicitudAdopcionProps = {
    * casa que lee tiene que poder escribir con sus palabras (§5 · §10.6).
    */
   vozDeclinada: string
+  /** 🔴 OBLIGATORIAS por la misma razón que `vozDeclinada`: **un estado sin voz
+   *  no compila**. Un desenlace mudo se dibujaría como un camino interrumpido
+   *  sin decir por qué. */
+  vozDesistida: string
+  vozNoConcretada: string
   registro?: 'compacta' | 'completa'
 }
 
@@ -82,6 +99,8 @@ export function EstadoSolicitudAdopcion({
   estado,
   voces,
   vozDeclinada,
+  vozDesistida,
+  vozNoConcretada,
   registro,
 }: EstadoSolicitudAdopcionProps) {
   const vozDe = {
@@ -93,8 +112,16 @@ export function EstadoSolicitudAdopcion({
   // Con la solicitud declinada el camino se INTERRUMPE: el paso alcanzado
   // queda hecho y lo que seguía se apaga entero — jamás se marca como
   // cumplido algo que no pasó.
-  const declinada = estado === 'declinada'
-  const indiceActual = declinada ? -1 : CAMINO.indexOf(estado as (typeof CAMINO)[number])
+  /* Los TRES desenlaces interrumpen el camino igual: el paso alcanzado queda
+     hecho y lo que seguía se apaga. Lo que cambia entre ellos es la VOZ, no la
+     mecánica — quién decidió es lo que las distingue, y eso lo dice el texto. */
+  const vozDesvio: Partial<Record<EstadoSolicitud, string>> = {
+    declinada: vozDeclinada,
+    desistida: vozDesistida,
+    no_concretada_fallecimiento: vozNoConcretada,
+  }
+  const interrumpida = vozDesvio[estado] !== undefined
+  const indiceActual = interrumpida ? -1 : CAMINO.indexOf(estado as (typeof CAMINO)[number])
 
   return (
     <EscaleraEstados
@@ -103,9 +130,9 @@ export function EstadoSolicitudAdopcion({
         clave,
         etiqueta: vozDe[clave],
         estado:
-          declinada
-            ? // Sólo `recibida` es seguro: toda solicitud declinada fue recibida.
-              // Los demás se apagan — no sabemos hasta dónde llegó.
+          interrumpida
+            ? // Sólo `recibida` es seguro: toda solicitud interrumpida fue
+              // recibida. Los demás se apagan — no sabemos hasta dónde llegó.
               i === 0
               ? 'hecho'
               : 'pendiente'
@@ -116,9 +143,10 @@ export function EstadoSolicitudAdopcion({
                 : 'pendiente',
       }))}
       desvio={
-        declinada
-          ? // 🔴 NEUTRO, jamás alerta: un «no» del refugio no acusa a nadie.
-            { etiqueta: vozDeclinada, tono: 'neutro' }
+        interrumpida
+          ? // 🔴 NEUTRO, jamás alerta: ni un «no» del refugio ni una muerte
+            // acusan a nadie.
+            { etiqueta: vozDesvio[estado] as string, tono: 'neutro' }
           : undefined
       }
     />

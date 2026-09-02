@@ -103,6 +103,13 @@ const MENSAJES = {
      solicitud sin que quede escrito que la declinó él. */
   solo_el_solicitante_desiste: 'Sólo quien postuló puede retirar su postulación.',
   motivo_no_valido:       'Ese motivo no existe.',
+  /* 🟢 FIRMA DEL FOUNDER (2-sep): el acta NO se firma con el animal en
+     memorial. *Un acta de adopción de un animal que murió no es un trámite que
+     se cierra: es un documento que no tiene objeto.* */
+  animal_en_memorial:     'Este animal falleció. La adopción no puede continuar.',
+  /* Bajarse de un acta que alguien ya firmó no es cerrar una conversación, y no
+     se resuelve con el mismo botón. */
+  acta_ya_firmada:        'El acta ya tiene una firma. No se puede dar de baja desde acá.',
   cuenta_no_existe:       'No encontramos esa cuenta.',
   /* Un campo fuera de la lista blanca rebota CON SU NOMBRE: un editor que
      ignora en silencio le dice a la pantalla que guardó algo que no guardó. */
@@ -390,7 +397,7 @@ export interface MiAdoptable {
    *  del founder (§4.2) y ninguna pantalla podía pasarlo con verdad hasta que
    *  existió el motor de firmas: `solicitudesVivas` cuenta «hay gente
    *  escribiendo», no «esta adopción está en curso». */
-  estado: EstadoAdoptable | 'memorial' | 'en_proceso';
+  estado: EstadoAdoptable | 'memorial';
   puedePublicar: boolean;
   /** 🔴 CÓDIGO, no frase — la pantalla lo traduce con el riel (`D-539`).
    *  **`null` SÓLO cuando de verdad puede publicar**: si no puede, la pantalla
@@ -689,7 +696,17 @@ export async function actualizarAdoptable(params: {
   return { ok: true, data: { publicacionId: params.publicacionId } };
 }
 
-export type EstadoAdoptable = 'borrador' | 'publicada' | 'pausada' | 'adoptada' | 'no_disponible';
+export type EstadoAdoptable =
+  | 'borrador'
+  | 'publicada'
+  | 'pausada'
+  /** 🔴 Sale de la FILA, no de un cálculo del lector. Antes era derivado y **la
+   *  fila seguía diciendo `publicada`**, así que el animal seguía en la vidriera
+   *  y la puerta de postular seguía abierta con una adopción en curso.
+   *  Lo escribe aceptar la solicitud; lo saca declinarla sin firmas. */
+  | 'en_proceso'
+  | 'adoptada'
+  | 'no_disponible';
 
 /** El veredicto de la regla de los seis meses (OM 019 art. 6.7), **antes** de
  *  intentar publicar. Existe para que el interruptor de la tarjeta pueda decir
@@ -911,7 +928,18 @@ export async function traspasarMascotaAFamilia(params: {
    (`pendiente | autorizada | rechazada | expirada`)—. *Dos uniones distintas
    con el mismo nombre no chocan por casualidad: chocan porque el nombre no
    decía de qué dominio era.* Lo cazó el typecheck, no una relectura. */
-export type EstadoSolicitudAdopcion = 'recibida' | 'en_conversacion' | 'aceptada' | 'declinada';
+export type EstadoSolicitudAdopcion =
+  | 'recibida'
+  | 'en_conversacion'
+  | 'aceptada'
+  | 'declinada'
+  /** La familia se bajó. **No es `declinada`**: declinar es del publicador. */
+  | 'desistida'
+  /** 🟢 El animal falleció (firma del founder, 2-sep). Estado propio y no
+   *  `declinada` porque **acá no decidió nadie** — reusarla le diría a la
+   *  familia «el refugio no continuó con tu postulación» sobre algo que el
+   *  refugio no eligió. Su voz es de duelo y **no invita a otro animal** (D-3). */
+  | 'no_concretada_fallecimiento';
 
 export interface MensajeDelHilo {
   mensajeId: string;

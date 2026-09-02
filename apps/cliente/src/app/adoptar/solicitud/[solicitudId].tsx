@@ -269,6 +269,8 @@ export default function HiloSolicitud() {
                     aceptada: t('hiloAdopcion.estado_aceptada'),
                   }}
                   vozDeclinada={t('hiloAdopcion.estado_declinada')}
+                    vozDesistida={t('hiloAdopcion.estado_desistida')}
+                    vozNoConcretada={t('hiloAdopcion.estado_no_concretada')}
                 />
               </View>
             </Tarjeta>

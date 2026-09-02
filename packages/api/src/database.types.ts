@@ -22217,6 +22217,29 @@ export type Database = {
           vigencia_dias: number
         }[]
       }
+      _adopcion_estados_declarados: { Args: never; Returns: string[] }
+      _adopcion_partes: {
+        Args: { p_solicitud_id: string }
+        Returns: {
+          estado: string
+          mascota_activa: boolean
+          mascota_id: string
+          mascota_nombre: string
+          refugio_nombre: string
+          refugio_user_id: string
+          solicitante_user_id: string
+          solicitud_id: string
+        }[]
+      }
+      _adopcion_ruta: {
+        Args: {
+          p_lado: string
+          p_mascota_id: string
+          p_solicitud_id: string
+          p_tipo: string
+        }
+        Returns: string
+      }
       _agenda_ocupacion: {
         Args: {
           p_duracion_minutos: number
@@ -22239,6 +22262,26 @@ export type Database = {
       _atencion_operable: {
         Args: { p_atencion_id: string }
         Returns: Record<string, unknown>
+      }
+      _avisar_adopcion_acta_lista: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
+      }
+      _avisar_adopcion_cierre: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
+      }
+      _avisar_adopcion_solicitud_nueva: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
+      }
+      _avisar_adopcion_solicitud_respondida: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
+      }
+      _avisar_adopcion_vida_nueva: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
       }
       _categoria_es_apagable: {
         Args: { p_categoria: string }
@@ -22605,6 +22648,15 @@ export type Database = {
           servicio_nombre: string
           tipo_servicio: string
         }[]
+      }
+      _voz_adopcion: {
+        Args: {
+          p_extra?: Json
+          p_mascota_nombre: string
+          p_tipo: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       _voz_adopcion_sin_respuesta: {
         Args: { p_mascota_nombre: string; p_user_id: string }
