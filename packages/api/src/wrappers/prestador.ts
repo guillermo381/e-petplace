@@ -862,6 +862,54 @@ export interface ContextoArranque {
    *  El pendiente-sin-aceptar NO aparece acá: vive en
    *  `misVinculosRepartidorPendientes` (el reclamo). */
   repartidorDe: { repartidor_id: string; cuenta_comercial_id: string; negocio: string }[];
+  /** S112-A4 · ¿esta cuenta es un refugio verificado? **Siempre fresco**: sale
+   *  del rol activo, no de una copia. Fail-closed contra un motor viejo. */
+  esRefugio: boolean;
+  /** S112-A4 · la cuenta de refugio, o `null` si no lo es. `null` honesto:
+   *  «no sos refugio» y «sos un refugio sin datos» son dos cosas distintas y la
+   *  pantalla las dibuja distinto.
+   *  🔴 `criterio_verificacion` **no viaja**: es la constancia interna de por
+   *  qué la casa verificó a este refugio, no un dato de su perfil. */
+  refugio: CuentaRefugio | null;
+}
+
+export interface CuentaRefugio {
+  cuentaComercialId: string;
+  nombreComercial: string | null;
+  estado: string;
+  countryCode: string | null;
+  /** `'organizacion' | 'rescatista'`, o `null` en un vínculo anterior a N4. */
+  tipo: string | null;
+  verificadoEn: string | null;
+  /** 🔴 El rol NO alcanza: la cuenta tiene que estar activa. Una cuenta
+   *  suspendida con rol vigente seguiría publicando animales. */
+  puedePublicar: boolean;
+}
+
+function aCuentaRefugio(v: unknown): CuentaRefugio | null {
+  if (typeof v !== 'object' || v === null) return null;
+  const r = v as Record<string, unknown>;
+  if (typeof r.cuenta_comercial_id !== 'string') return null;
+  return {
+    cuentaComercialId: r.cuenta_comercial_id,
+    nombreComercial: typeof r.nombre_comercial === 'string' ? r.nombre_comercial : null,
+    estado: String(r.estado ?? ''),
+    countryCode: typeof r.country_code === 'string' ? r.country_code : null,
+    tipo: typeof r.tipo === 'string' ? r.tipo : null,
+    verificadoEn: typeof r.verificado_en === 'string' ? r.verificado_en : null,
+    puedePublicar: r.puede_publicar === true,
+  };
+}
+
+/** ¿Soy un refugio? **Nombra el rol**, no hace un CROSS JOIN contra todas mis
+ *  cuentas: una persona puede tener una cuenta comercial que NO es refugio, y
+ *  devolverla abriría el portal para un veterinario. `null` = no lo sos. */
+export async function obtenerMiCuentaRefugio(): Promise<
+  ResultadoWrapper<CuentaRefugio | null, CodigoErrorPrestador>
+> {
+  const { data, error } = await getClient().rpc('obtener_mi_cuenta_refugio');
+  if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  return { ok: true, data: aCuentaRefugio(data) };
 }
 
 export async function obtenerContextoArranque(): Promise<
@@ -898,6 +946,8 @@ export async function obtenerContextoArranque(): Promise<
       currency_decimals?: unknown;
     } | null;
     repartidor_de?: unknown;
+    es_refugio?: unknown;
+    refugio?: unknown;
   } | null;
   if (!r || r.ok !== true) {
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
@@ -950,6 +1000,10 @@ export async function obtenerContextoArranque(): Promise<
       esVendedora: r.es_vendedora === true,
       haVendido: r.ha_vendido === true,
       moneda,
+      /* S112-A4. Fail-closed contra un bundle viejo: campo ausente ⇒ no es
+         refugio ⇒ el portal no se monta. Nunca al revés. */
+      esRefugio: r.es_refugio === true,
+      refugio: aCuentaRefugio(r.refugio),
       // Fail-closed: un bundle contra el motor viejo (campo ausente) lee []
       // — el repartidor degrada al callejón, jamás a un crash ni a un rol falso.
       repartidorDe: Array.isArray(r.repartidor_de)

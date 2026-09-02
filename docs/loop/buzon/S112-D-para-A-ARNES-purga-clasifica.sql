@@ -18,7 +18,14 @@ DECLARE
   v_r jsonb; v_n int; v_e text[]; v_detalle text;
 BEGIN
   -- ── FIXTURES ────────────────────────────────────────────────────────────
-  SELECT m.id INTO v_masc FROM public.mascotas m WHERE m.familia_id IS NOT NULL LIMIT 1;
+  /* Mismo criterio que el arnés de avisos: SIN publicación previa
+     (`uq_publicacion_viva_por_mascota`) y viva. Ver la nota larga allá. */
+  SELECT m.id INTO v_masc
+    FROM public.mascotas m
+   WHERE m.familia_id IS NOT NULL
+     AND m.estado_vida IS NOT DISTINCT FROM 'activa'
+     AND NOT EXISTS (SELECT 1 FROM public.adopcion_publicacion p WHERE p.mascota_id = m.id)
+   LIMIT 1;
   SELECT c.id, c.owner_profile_id INTO v_cuenta, v_refugio
     FROM public.cuentas_comerciales c WHERE c.owner_profile_id IS NOT NULL LIMIT 1;
   SELECT u.id INTO v_solic FROM auth.users u WHERE u.id <> v_refugio LIMIT 1;
