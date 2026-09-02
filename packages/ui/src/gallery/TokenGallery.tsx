@@ -5222,6 +5222,11 @@ function GaleriaInterna() {
               ① ¿los cortes se leen como interrupción y no como final
                  cumplido? ② ¿se leen SIN acusar a nadie? Si el desvío grita,
                  la pieza falla §10.6 (la devolución jamás humilla).
+              ⭐ Y las DOS últimas van juntas a propósito: **llegan al mismo
+                 dibujo por razones distintas** —una porque no hay proceso,
+                 la otra porque no hay juicio— y lo único que las separa es
+                 la VOZ. Si con los textos puestos se leen como lo mismo, el
+                 problema es del texto, no de la pieza.
               ⭐ ③ S112: ¿el fallecimiento se lee como una NOTICIA y no como
                  un trámite que no prosperó? Es la única que NO dibuja
                  escalera, y hay que poder ver por qué: mostrarle los pasos
@@ -5237,7 +5242,8 @@ function GaleriaInterna() {
               ['en_conversacion', '⚠️ INALCANZABLE hoy: no hay canal (activador estacionado)'],
               ['declinada', 'declinada · corte del PUBLICADOR · desvío NEUTRO, jamás alerta'],
               ['desistida', 'desistida · corte de la FAMILIA · misma forma, otra voz — nadie falló'],
-              ['no_concretada_fallecimiento', '⭐ el animal murió · SIN escalera, sin color de status: la noticia y nada más'],
+              ['no_concretada_fallecimiento', '⭐ el animal murió · SIN escalera: no hay PROCESO en el que estar'],
+              ['no_concretada_otra_familia', '⭐ encontró otra familia · SIN escalera: no hay JUICIO que mostrar — nadie evaluó esta postulación'],
             ] as const).map(([e, nota]) => (
               <View key={e} style={{ gap: spacing[2] }}>
                 <Texto variante="apoyo">{nota}</Texto>
@@ -5251,7 +5257,8 @@ function GaleriaInterna() {
                   }}
                   vozDeclinada="El refugio eligió otro hogar"
                   vozDesistida="Cancelaste tu postulación"
-                  vozNoConcretada="Nube falleció. Tu postulación no va a poder continuar. Lamentamos mucho darte esta noticia."
+                  vozNoConcretada="Nube falleció. Lo sentimos mucho."
+                  vozOtraFamilia="Nube ya encontró su hogar."
                 />
               </View>
             ))}
