@@ -625,6 +625,10 @@ export default function Hogar() {
   const pressedCoach = usePresionado(0.97);
 
   const [mascotas, setMascotas] = useState<EstadoMascotas>('cargando');
+  /* La «i» del hogar sin mascotas (N22). Vive acá arriba y no junto a su
+     `return`: **es un hook**, y un hook detrás de un return condicional
+     rompe el orden de llamada en el render siguiente. */
+  const [hojaPorQueRegistrar, setHojaPorQueRegistrar] = useState(false);
   /** S91 · id → nombre, para la voz del hito «{nombre} llegó a la familia».
    *  El timeline del hogar es MULTI-MASCOTA y su ítem trae `mascota_id` pero
    *  no el nombre; acá el nombre ya está cargado, así que no se pide de nuevo
@@ -984,25 +988,95 @@ export default function Hogar() {
      quién hablarle.** *Un coach que saluda sin conocer a nadie enseña a
      ignorarlo.* Verificado por posición, no supuesto.
 
-     ⚠️ **FALTA EL SEGUNDO CAMINO — «conocer a los que esperan»**, que es el que
-     el recorrido pide para quien entró a adoptar. **No se dibuja porque no
-     tiene a dónde ir:** medido, cero motor de adopción (0 funciones, 0
-     wrappers). *Un botón a una vidriera vacía es peor que no ofrecerla.* Entra
-     con el lector de A, pedido por buzón. */
+     ✅ **EL SEGUNDO CAMINO ENTRÓ (S112-C), Y SU CONDICIÓN LA ESCRIBIÓ ESTE
+     MISMO COMENTARIO.** Decía: *«no se dibuja porque no tiene a dónde ir:
+     medido, cero motor de adopción (0 funciones, 0 wrappers) — un botón a una
+     vidriera vacía es peor que no ofrecerla»*. **S111-A construyó el motor y
+     S111-C la vidriera**, así que la condición se cumplió y el botón lleva a
+     alguien. *Una deuda con su bloqueante NOMBRADO alguien la destraba; una
+     «pendiente» espera para siempre.*
+
+     🔴 **Y CAMBIÓ LA COMPOSICIÓN, no sólo el número de botones.** Voz del
+     founder: *«si vuelvo al home sin mascota, el home NO me muestra un cero:
+     me muestra el bloque de adopción y una invitación a registrar una mascota,
+     con la "i" de por qué»*. Un `EstadoVacio` centrado **es** mostrar un cero
+     —dice lo que falta antes que lo que hay—, así que la pantalla pasa a dos
+     cartas: **primero los que esperan, después la invitación.** El orden es el
+     dictado, y tiene su razón: quien llegó por adopción entró a ver animales,
+     no a llenar un formulario. */
   if (mascotas.length === 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
-        <EstadoVacio
-          titulo={t('hogar.sinMascotas')}
-          descripcion={t('hogar.sinMascotasDetalle')}
-          accion={
-            <Boton
-              variante="primario"
-              etiqueta={t('hogar.sinMascotasAgregar')}
-              onPress={() => router.push('/hogar/agregar')}
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            padding: spacing[5],
+            gap: spacing[4],
+          }}
+        >
+          {/* ── ① LOS QUE ESPERAN — PRESIDE ─────────────────────────────
+              🔴 **Sin contador, igual que en Explorar:** §4 prohíbe convertir
+              la lista en inventario. *Se presentan vidas, no stock.* */}
+          <Tarjeta>
+            <CeldaNavegacion
+              icono="refugio"
+              titulo={t('hogar.sinMascotasAdopcion')}
+              detalle={t('hogar.sinMascotasAdopcionDetalle')}
+              onPress={() => router.push('/adoptar')}
             />
-          }
-        />
+          </Tarjeta>
+
+          {/* ── ② LA INVITACIÓN, CON SU «i» (N22) ───────────────────────
+              **Por qué la «i» y no un párrafo suelto:** N22 corta por FUNCIÓN,
+              no por longitud — *lo que se necesita para DECIDIR queda a la
+              vista; lo que se necesita para ENTENDER va detrás de una «i»*. El
+              control se ve y decide; **por qué conviene registrarla** es
+              explicación, y se pliega.
+
+              `chevron={false}`: la celda ABRE el alta, no entra a una sección
+              (S58, patrón Hogar v2). */}
+          <Tarjeta>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+              <View style={{ flex: 1 }}>
+                <CeldaNavegacion
+                  icono="carnet"
+                  titulo={t('hogar.sinMascotasAgregar')}
+                  detalle={t('hogar.sinMascotasDetalle')}
+                  chevron={false}
+                  onPress={() => router.push('/hogar/agregar')}
+                />
+              </View>
+              {/* La «i» en círculo — el patrón vivo de la casa (`carrito.tsx`,
+                  S100b): `Pressable` + glifo `info` + Hoja. **Su etiqueta
+                  accesible es el texto que abre**, no la palabra «info»: quien
+                  navega con lector oye QUÉ va a leer, no el nombre del control. */}
+              <Pressable
+                onPress={() => setHojaPorQueRegistrar(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('hogar.sinMascotasPorQueTitulo')}
+                hitSlop={12}
+              >
+                <Icono nombre="info" tamano={20} registro="aa" />
+              </Pressable>
+            </View>
+          </Tarjeta>
+        </ScrollView>
+
+        <Hoja
+          visible={hojaPorQueRegistrar}
+          onCerrar={() => setHojaPorQueRegistrar(false)}
+          titulo={t('hogar.sinMascotasPorQueTitulo')}
+        >
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="cuerpo">{t('hogar.sinMascotasPorQueCuerpo')}</Texto>
+            <Boton
+              etiqueta={t('hogar.sinMascotasPorQueCierre')}
+              bloque
+              onPress={() => setHojaPorQueRegistrar(false)}
+            />
+          </View>
+        </Hoja>
       </View>
     );
   }

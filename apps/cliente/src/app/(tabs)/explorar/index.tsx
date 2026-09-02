@@ -4,8 +4,12 @@
  *   1. Servicios ACTIVOS por country_config (la DB dice la verdad —
  *      regla 21; cero hardcode). v1 son fichas informativas SIN CTA
  *      muerta: agendar llega con A2 y se dice honesto.
- *   2. Refugios/adopción (M0, día 1): hoy 0 refugios en DB → vacío
- *      digno que dice la verdad.
+ *   2. Refugios/adopción (M0, día 1) — 🔴 **S112-C: DEJÓ DE SER UN VACÍO.**
+ *      Decía «hoy 0 refugios en DB → vacío digno que dice la verdad», y era
+ *      cierto hasta que S111-A construyó el motor y S111-C la vidriera. Desde
+ *      entonces el texto pasó de honesto a FALSO, y **el vacío tampoco
+ *      navegaba**: la sección anunciaba la adopción y no llevaba a ella.
+ *      Ahora **PREGUNTA** y dice la verdad en los dos casos (ver §2 abajo).
  *   3. "Próximamente honesto" — sin fechas prometidas (hotel,
  *      guardería, seguros, telemedicina, Prime preparado-apagado).
  */
@@ -16,6 +20,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useFocusEffect } from 'expo-router';
 import {
   Celda,
+  CeldaNavegacion,
   Boton,
   Encabezado,
   Esqueleto,
@@ -29,7 +34,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import type { ReactNode } from 'react';
-import { obtenerServiciosPais, type ServiciosPais } from '@epetplace/api';
+import { obtenerAdoptables, obtenerServiciosPais, type ServiciosPais } from '@epetplace/api';
 
 // S58 (D-361): adiestramiento migró al set b′ — la estrella murió
 // (violaba el set); el silbato canónico vive en el registry.
@@ -61,12 +66,34 @@ export default function Explorar() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const [servicios, setServicios] = useState<ServiciosPais | 'cargando' | 'error'>('cargando');
+  /* ¿HAY ALGUIEN ESPERANDO? — `null` mientras no sabemos.
+
+     🔴 **Se PREGUNTA, y no se ofrece a ciegas, porque esta sección AFIRMA.**
+     Su vacío dice «todavía no hay refugios publicados»: sin medir, o se borra
+     esa frase o se la deja mintiendo. Midiendo, la sección dice la verdad en
+     los dos casos y **la entrada sólo aparece cuando lleva a alguien**.
+
+     ⚠️ `limite: 1` **a propósito**: la pregunta es «¿hay alguno?», no «¿cuáles?».
+     Traer la lista acá sería pagar la vidriera dos veces — y su contenido lo
+     decide ella, que es la que sabe ordenarlo (§4). */
+  const [hayAdoptables, setHayAdoptables] = useState<boolean | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
+      /* Las dos lecturas van JUNTAS y no encadenadas: ninguna depende de la
+         otra, y encadenarlas sumaría un viaje entero al foco de Explorar
+         (`L-223` — el peaje es la PETICIÓN, y lo que se paga en reloj es la
+         CADENA). */
       void obtenerServiciosPais(PAIS_SOFT_LAUNCH).then((r) => {
         if (vigente) setServicios(r.ok ? r.data : 'error');
+      });
+      void obtenerAdoptables({ limite: 1 }).then((r) => {
+        /* 🔴 Un fallo NO se lee como «no hay ninguno» (Ley 13). Con `null` la
+           sección se queda quieta en vez de afirmar que nadie espera —
+           *decirle a alguien que no hay animales en adopción porque se cayó la
+           red es la peor de las dos mentiras posibles acá.* */
+        if (vigente && r.ok) setHayAdoptables(r.data.length > 0);
       });
       return () => {
         vigente = false;
@@ -282,15 +309,54 @@ export default function Explorar() {
             )}
           </View>
 
-          {/* ── Refugios / adopción (M0) — vacío SERENO (P5b) ── */}
+          {/* ── Refugios / adopción — LA ENTRADA (S112-C) ──────────────────
+
+              **POR QUÉ ACÁ Y NO EN EL HOGAR**, que era la otra opción sobre la
+              mesa: `DISEÑO_EXPERIENCIA` §3 ya la ubicó —*«Refugios: adopción y
+              donaciones, día 1»* vive en EXPLORAR en el mapa firmado— y la
+              razón sigue en pie: **el Hogar es el estado de TU casa** y la
+              adopción es descubrimiento deliberado (§6). Además **el lugar ya
+              estaba hecho**: montarla acá retira, en el mismo acto, un texto
+              que había quedado falso (`L-395`).
+
+              ⚠️ **La excepción es el hogar SIN mascotas**, y no contradice
+              esto: ahí la adopción **sí** es el estado del hogar —no hay nadie
+              de quien contar— y por eso el founder la pidió en esa pantalla.
+              Son dos entradas porque son dos preguntas distintas.
+
+              🔴 **Sin contador, y no es un olvido:** §4 prohíbe convertir la
+              lista en inventario, y S111-C ya quitó el contador de resultados
+              de la vidriera por eso mismo. *Saber que hay 34 no ayuda a elegir
+              a ninguno.* */}
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('explorar.refugios')} />
-            <EstadoVacio
-              registro="seccion"
-              icono={<Icono nombre="refugio" tamano={48} />}
-              titulo={t('explorar.refugiosVacio')}
-              descripcion={t('explorar.refugiosVacioDetalle')}
-            />
+            {hayAdoptables === true ? (
+              /* `CeldaNavegacion` y no `Celda`: **navega**, y la Ley 19.1 le
+                 da su anatomía —glifo del set b′ + chevron de entrada—. Lo
+                 cazó el typecheck, que exige `interactiva` explícito en la
+                 Celda cruda: *la pieza correcta no era la que estaba a mano.* */
+              <Tarjeta>
+                <CeldaNavegacion
+                  icono="refugio"
+                  titulo={t('explorar.adopcionEntrada')}
+                  detalle={t('explorar.adopcionEntradaDetalle')}
+                  onPress={() => router.push('/adoptar')}
+                />
+              </Tarjeta>
+            ) : hayAdoptables === false ? (
+              <EstadoVacio
+                registro="seccion"
+                icono={<Icono nombre="refugio" tamano={48} />}
+                titulo={t('explorar.refugiosVacio')}
+                descripcion={t('explorar.refugiosVacioDetalle')}
+              />
+            ) : (
+              /* Todavía no sabemos: **no se afirma ninguna de las dos cosas.**
+                 Un esqueleto acá sería honesto pero ruidoso en una pantalla que
+                 ya tiene el suyo arriba; el silencio de una sección que aún no
+                 respondió no promete nada. */
+              null
+            )}
           </View>
 
           {/* ── Próximamente honesto — UNA sección, filas serenas en

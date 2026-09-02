@@ -303,6 +303,11 @@ export const clienteEs = {
     sinMascotas: 'Todavía no hay nadie por acá',
     sinMascotasDetalle: 'Agrega a tu mascota para empezar su historia.',
     sinMascotasAgregar: 'Agregar a mi mascota',
+    sinMascotasAdopcion: 'Conoce a los que están esperando',
+    sinMascotasAdopcionDetalle: 'Mascotas de refugios que buscan una familia.',
+    sinMascotasPorQueTitulo: '¿Por qué registrar a tu mascota?',
+    sinMascotasPorQueCuerpo: 'Cuando la registras, su vida empieza a documentarse acá: sus vacunas, sus visitas al veterinario, sus paseos y sus momentos. Todo queda en un solo lugar, y te sigue a donde vayas.',
+    sinMascotasPorQueCierre: 'Entendido',
     errorHistoria: 'No pudimos cargar su historia',
     errorHistoriaDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Reintentar',
@@ -775,6 +780,8 @@ export const clienteEs = {
     elegirMascota: '¿Para quién es el paseo?',
     // refugios / M0
     refugios: 'Refugios y adopción',
+    adopcionEntrada: 'Mascotas en adopción',
+    adopcionEntradaDetalle: 'Conoce a los que están esperando una familia.',
     refugiosVacio: 'Todavía no hay refugios publicados',
     refugiosVacioDetalle: 'Cuando un refugio se sume, sus mascotas en adopción van a vivir acá.',
     // próximamente honesto (§8 — sin fechas prometidas)
