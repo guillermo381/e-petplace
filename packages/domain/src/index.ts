@@ -36,3 +36,8 @@ export {
   type FiltroTrackDetalle,
   type PuntoTrackFiltrable,
 } from './filtroTrack';
+
+/* S112-A2 · la voz de la vidriera de adopción — hunk aditivo.
+   El motor devuelve números; la redacción vive acá y el riel la traduce.
+   *Una frase en español dentro de una RPC es una pantalla en un solo idioma.* */
+export { describirEspera, describirEdad, type VozRedactada } from './vozAdopcion';

@@ -29,7 +29,6 @@ import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
 import { Badge, useEtiquetaBadge } from '../components/Badge'
-import { CampoCodigo } from '../components/CampoCodigo'
 import { FichaPrestador } from '../components/FichaPrestador'
 import { MapaPunto } from '../components/MapaPunto'
 import { MapaZona } from '../components/MapaZona'
@@ -101,6 +100,15 @@ import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
 import { TarjetaAdoptable } from '../components/TarjetaAdoptable'
 import { BloqueConCriterio } from '../components/BloqueConCriterio'
+import { ConvivenciaInput } from '../components/ConvivenciaInput'
+import {
+  FormularioPostulacion,
+  type RespuestasPostulacion,
+} from '../components/FormularioPostulacion'
+import { DocumentoLegalLectura } from '../components/DocumentoLegalLectura'
+import { CampoCodigo } from '../components/CampoCodigo'
+import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
+import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
@@ -590,6 +598,189 @@ function GateRazonDelBoton() {
  * de convivencia. Los chips son además el CONTROL POSITIVO del modo `varias`
  * de `FiltroPills`: si este bloque compila y responde al dedo, la rama nueva
  * existe de verdad. */
+/**
+ * ENTRADA DE CATÁLOGO de `ConvivenciaInput` (R17) — **no es su gate.**
+ *
+ * El gate de esta pieza es la ficha de edición del adoptable, en el portal
+ * del refugio, con datos reales (orden del founder del 2-sep: las piezas se
+ * juzgan MONTADAS). Acá está por la otra ley, que sigue en pie: **ninguna
+ * pieza exportada queda invisible.**
+ *
+ * Con estado propio porque es un control CONTROLADO: montarlo muerto
+ * mostraría tres botones que no hacen nada, y de un control lo único que
+ * importa es qué pasa al tocarlo.
+ */
+function MuestraConvivenciaInput() {
+  const [estados, setEstados] = useState<Record<string, EstadoConvivencia>>({
+    perros: 'si',
+    gatos: 'no',
+    ninos: 'no_se_sabe',
+  })
+
+  return (
+    <ConvivenciaInput
+      ejes={[
+        { eje: 'perros', etiqueta: 'Con perros', estado: estados.perros! },
+        { eje: 'gatos', etiqueta: 'Con gatos', estado: estados.gatos! },
+        { eje: 'ninos', etiqueta: 'Con niños', estado: estados.ninos! },
+      ]}
+      voces={{ si: 'Sí', no: 'No', no_se_sabe: 'Todavía no se sabe' }}
+      onCambio={(eje, estado) => setEstados((p) => ({ ...p, [eje]: estado }))}
+    />
+  )
+}
+
+/**
+ * ENTRADA DE CATÁLOGO de `FormularioPostulacion` (R17) — **no es su gate.**
+ * Su gate es la pantalla de postulación con el documento real de A (C5).
+ *
+ * Se monta con el «Enviar» APAGADO a propósito: es el estado en el que la
+ * pantalla arranca —falta marcar el consentimiento— y el único que tiene
+ * algo que mostrar, porque es donde se ve la razón dibujada.
+ */
+function MuestraFormularioPostulacion() {
+  const [r, setR] = useState<RespuestasPostulacion>({
+    hogar: { adultos: 2, menores_0_5: 0, menores_6_12: 1, menores_13_17: 0 },
+    vivienda: 'casa_patio',
+    otros_animales: '',
+    horas_solo: 6,
+    experiencia: '',
+    motivo: '',
+  })
+  const [acepto, setAcepto] = useState(false)
+
+  return (
+    <FormularioPostulacion
+      respuestas={r}
+      onCambio={setR}
+      opcionesVivienda={[
+        { codigo: 'casa_patio', etiqueta: 'Casa con patio' },
+        { codigo: 'casa_sin_patio', etiqueta: 'Casa sin patio' },
+        { codigo: 'departamento', etiqueta: 'Departamento' },
+      ]}
+      consentimiento={{
+        texto:
+          'Autorizo al refugio a verificar la información de esta postulación y a hacer una visita al domicilio.',
+        marcado: acepto,
+        onCambio: setAcepto,
+      }}
+      envio={
+        acepto
+          ? { etiqueta: 'Enviar la postulación', onEnviar: () => {} }
+          : {
+              etiqueta: 'Enviar la postulación',
+              razon: 'Falta marcar la autorización de arriba',
+            }
+      }
+      voces={{
+        hogar: {
+          rotulo: 'Quiénes viven en casa',
+          adultos: 'Adultos',
+          menores_0_5: 'Menores de 0 a 5',
+          menores_6_12: 'Menores de 6 a 12',
+          menores_13_17: 'Menores de 13 a 17',
+        },
+        vivienda: 'Tipo de vivienda',
+        otrosAnimales: {
+          rotulo: '¿Tenés otros animales?',
+          ayuda: 'Cuáles, y cómo se llevan con otros',
+        },
+        horasSolo: { rotulo: '¿Cuántas horas al día estaría solo?' },
+        experiencia: { rotulo: 'Tu experiencia con animales' },
+        motivo: { rotulo: '¿Por qué este animal?' },
+      }}
+    />
+  )
+}
+
+/* ENTRADA DE CATÁLOGO de `DocumentoLegalLectura` (R17) — no es su gate; su
+   gate son las condiciones (C4) y el acta (C8) con el texto real de A.
+
+   🔴 QUÉ HAY QUE VER, y es un DISCRIMINADOR de dos mitades: **el de la
+   izquierda entra sin scroll y su botón ya está encendido; el de la derecha
+   no entra y su botón está apagado con su razón hasta que se llegue al
+   fondo.** Si el corto también arrancara apagado, la pieza volvió a
+   implementar «vi todo» como EVENTO y la pantalla quedó muerta.
+
+   El caja de 260 es a propósito más chica que un teléfono: hace entrar el
+   caso corto en la galería. La pieza corre a pantalla completa. */
+function MuestraDocumentoLegal({ largo }: { largo: boolean }) {
+  const [vioTodo, setVioTodo] = useState(false)
+  const parrafo =
+    'El adoptante se compromete a brindar al animal alimento, agua, refugio y atención veterinaria, y a no cederlo ni venderlo a terceros sin dar aviso previo al refugio. '
+  return (
+    <View style={{ flex: 1, gap: spacing[2] }}>
+      <Texto variante="apoyo">
+        {largo ? 'largo · exige scrollear hasta el fondo' : 'corto · entra sin scroll (1 711 caracteres)'}
+      </Texto>
+      <View
+        style={{
+          height: 260,
+          borderRadius: radius.lg,
+          overflow: 'hidden',
+          borderWidth: 1,
+          borderColor: 'rgba(0,0,0,0.08)',
+        }}
+      >
+        <DocumentoLegalLectura
+          titulo="Condiciones de adopción"
+          texto={largo ? parrafo.repeat(9) : parrafo}
+          onVioTodo={() => setVioTodo(true)}
+          pie={
+            <Boton
+              etiqueta="Acepto y continúo"
+              bloque
+              deshabilitado={!vioTodo}
+              razonDeshabilitado={vioTodo ? undefined : 'Todavía no viste el documento entero'}
+              onPress={() => {}}
+            />
+          }
+        />
+      </View>
+    </View>
+  )
+}
+
+/* ENTRADA DE CATÁLOGO de `CodigoFirmaInput` (R17) — no es su gate; su gate
+   es la pantalla del acta en las dos apps (C8).
+
+   🔴 QUÉ HAY QUE VER, y es una COMPARACIÓN: los dos campos dicen que el
+   código no sirvió. **El de arriba (alarma) reprocha; el de abajo (estado)
+   informa.** El de abajo es el que va en la firma de una adopción: vencido,
+   equivocado o intentos agotados no son un tipeo mal hecho — son el estado
+   de ese código, y lo único que hay que hacer es pedir otro. Si el de abajo
+   se lee como un reto, el tono no está haciendo su trabajo. */
+function MuestraCodigoFirma() {
+  const [a, setA] = useState('1234')
+  const [b, setB] = useState('12345')
+  return (
+    <View style={{ gap: spacing[5] }}>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">tono ALARMA (el de siempre) — lo que escribiste no sirve</Texto>
+        <CampoCodigo
+          largo={8}
+          valor={a}
+          onCambio={setA}
+          etiqueta="Código de verificación"
+          error="Ese código no es válido. Revisá los ocho dígitos."
+        />
+      </View>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">
+          ⭐ tono ESTADO — `CodigoFirmaInput`, el de la firma del acta (N23)
+        </Texto>
+        <CodigoFirmaInput
+          valor={b}
+          onCambio={setB}
+          etiqueta="Código para firmar"
+          ayuda="Te lo mandamos al correo de tu cuenta."
+          mensaje="Este código venció. Pedí uno nuevo y te lo mandamos otra vez."
+        />
+      </View>
+    </View>
+  )
+}
+
 function MuestraVidrieraAdopcion() {
   const [convive, setConvive] = useState<string[]>(['perros'])
   const alternar = (c: string) =>
@@ -5265,6 +5456,40 @@ function GaleriaInterna() {
               />
             </View>
           </View>
+        </Seccion>
+
+        <Seccion titulo="ConvivenciaInput (S112) — la cara que ESCRIBE los mismos tres estados">
+          {/* Entrada de CATÁLOGO, no gate (2-sep): esta pieza se juzga en la
+              ficha de edición del refugio. Lo que se puede ver acá y no en un
+              PNG es lo único que un control tiene para mostrar: que los tres
+              se tocan, que el tercero pesa igual que los otros dos, y que
+              elegir no mueve nada de lugar (N24). */}
+          <MuestraConvivenciaInput />
+        </Seccion>
+
+        <Seccion titulo="FormularioPostulacion (S112) — seis preguntas, y ninguna más">
+          {/* Entrada de CATÁLOGO, no gate. Lo que se ve acá y no en un PNG:
+              que marcar la casilla ENCIENDE el botón y la razón se va sola,
+              sin que nada salte de lugar (N24, con el espacio reservado). */}
+          <MuestraFormularioPostulacion />
+        </Seccion>
+
+        <Seccion titulo="DocumentoLegalLectura (S112) — «vi todo» es un predicado, no un evento">
+          <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+            <MuestraDocumentoLegal largo={false} />
+            <MuestraDocumentoLegal largo />
+          </View>
+          <Texto variante="apoyo">
+            El de la izquierda entra sin scroll: su botón tiene que estar
+            ENCENDIDO de arranque. Si arranca apagado, «vi todo» volvió a ser un
+            evento y la pantalla queda muerta sin error — el caso medido son las
+            condiciones de adopción, 1 711 caracteres, que entran en un teléfono
+            grande y no en uno chico. Su gate de lógica es `pnpm verify:vio-todo`.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="CodigoFirmaInput (S112) — un código vencido no es un tipeo equivocado">
+          <MuestraCodigoFirma />
         </Seccion>
 
         <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">

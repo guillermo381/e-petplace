@@ -109,6 +109,25 @@ import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 import { Texto } from './Texto'
 
+/**
+ * LOS TRES ESTADOS, ESCRITOS UNA SOLA VEZ PARA LAS DOS CARAS.
+ *
+ * Vive acá —en la pieza que LEE— y lo importa la que ESCRIBE
+ * (`ConvivenciaInput`), no al revés: el vocabulario es del dominio, y la
+ * cara de lectura es la que ya lo tenía. *Dos listas de estados que hay que
+ * acordarse de mantener iguales es exactamente cómo nace el cuarto estado
+ * que una cara dibuja y la otra no.*
+ *
+ * ⚠️ **QUÉ ROMPE SI NACE UN CUARTO, y qué NO — dicho para que nadie lea de
+ * más en este tipo (`L-459`):** `ConvivenciaInput` pide sus voces como
+ * `Record<EstadoConvivencia, string>`, así que **un estado nuevo rompe TODA
+ * pantalla que monte el input** y obliga a darle voz ahí donde se decide.
+ * Lo que **no** rompe solo: la unión `ConvivenciaCon` de abajo y el `ORDEN`
+ * del input siguen listando los tres a mano — un cuarto estado quedaría sin
+ * fila y sin botón, en silencio. *Son dos líneas, y están nombradas.*
+ */
+export type EstadoConvivencia = 'si' | 'no' | 'no_se_sabe'
+
 /** Una fila: con quién, y en qué estado está esa convivencia. */
 export type ConvivenciaCon =
   | { con: string; estado: 'si' }

@@ -18,15 +18,24 @@
  *  estado, y el día que alguien encienda uno solo, la mitad de la vertical
  *  aparece sin la otra.*
  */
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { AltaMascota } from '@/components/alta/AltaMascota';
 import { BifurcacionDeEntrada } from '@/components/alta/BifurcacionDeEntrada';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
+import { destinoDeVuelta } from '@/lib/volver-a';
 import { useTraduccion } from '@/i18n';
 
 export default function OnboardingInicio() {
   const { t } = useTraduccion();
+  /* 🔴 **A dónde vuelve quien vino de la vidriera.** No es «al home»: §4.1 dice
+     *«vuelvo exactamente a donde estaba (la ficha de Luna, o la lista)»*. El
+     destino cruzó registro y confirmación como dato porque los dos `replace`
+     del camino borran la pila.
+     ⚠️ **Se lee SIEMPRE, antes del gate**, aunque hoy la rama esté cerrada:
+     leerlo dentro de la rama lo ataría al gate, y el día que el gate abra
+     alguien tendría que acordarse de moverlo. */
+  const volverA = destinoDeVuelta(useLocalSearchParams().volverA);
 
   if (!ADOPCION_ALCANZABLE) return <AltaMascota modo="primera" pasoFijo="especie" />;
 
@@ -43,7 +52,10 @@ export default function OnboardingInicio() {
       /* «Si toco adoptar, no me pidas nada más: me llevás directo a ver los
          animales» — la cuenta sin mascota la crea el motor de A antes de
          navegar; hoy esta rama no se alcanza (ver la cabecera). */
-      onQuieroAdoptar={() => router.push('/adoptar')}
+      /* `replace` y no `push`: la pregunta del alta **no es un lugar al que se
+         vuelve**. Y si vino con destino, vuelve ahí — a la lista si entró por
+         la lista, a la ficha cuando la ficha exista. */
+      onQuieroAdoptar={() => router.replace(volverA ?? '/adoptar')}
     />
   );
 }
