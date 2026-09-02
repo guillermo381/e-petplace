@@ -1167,3 +1167,117 @@ misma línea de vida y se distinguen.*
 **La vidriera quedó con TRES animales publicados** (Luna, Tito, Bruno) más Kira
 en borrador. *Se declara porque cambia lo que el founder va a ver en su
 recorrido: donde §0 dice cinco, hay cuatro y uno ya adoptado.*
+
+---
+
+# ADDENDUM 10 · 2-sep 21:00 — EL CANAL DEL CÓDIGO, MEDIDO
+
+*Era lo último del arco que nadie había mirado: `estado='entregada'` no es un
+buzón.* **Esto acota cuánto se puede afirmar.**
+
+## J1 · ✅ EL CÓDIGO SALE POR CORREO, y el proveedor lo aceptó
+
+Las **seis** intenciones de `codigo_firma_adopcion` emitidas durante E3:
+
+```
+total .................. 6
+con proveedor_id ....... 6      ← el transporte devolvió un id del proveedor
+canal_elegido = email .. 6
+cortadas por un gate ... 0
+```
+
+Y el `resuelto_como` de una, entero:
+
+```json
+{"despacho":"para_transporte","despacho_en":"2026-09-02T15:27:00Z",
+ "evaluado_en":"2026-09-02T15:26:44Z","proveedor_id":"318f3b49-…",
+ "canal_elegido":"email","gate_que_corto":null,
+ "canales_habilitados":["in_app","push","email"]}
+```
+
+**Lo que esto SÍ prueba:** el motor eligió `email`, ningún gate lo cortó, y **un
+proveedor de correo aceptó el mensaje y devolvió su id**. *Es bastante más que
+«se marcó entregada».*
+
+**Lo que NO prueba, y se dice:** **que el correo haya llegado a un buzón.** *Que
+un proveedor acepte un mensaje y que una persona lo reciba son dos hechos, y el
+segundo sólo lo puede verificar quien abre el correo.* **Queda para el founder,
+en el paso 7 y el 14 de su recorrido.**
+
+`correo_suprimido`: **0 filas** ⇒ ninguna de las dos direcciones está en la lista
+de supresión, que es la causa silenciosa más común de un correo que no llega.
+
+## J2 · ✅ EL CÓDIGO NO SE FILTRA A LA CAMPANA — y esta vez el cero significa algo
+
+```
+🔴 filas de codigo_firma_adopcion en `notificaciones` ....... 0
+✅ CONTROL+ · la campana tiene ....... 26 filas de 10 tipos
+```
+
+⚠️ **Mi primera pasada de esta sonda dio el mismo 0 y NO valía nada:** el control
+que corrí al lado era *«¿la campana tiene otras de adopción?»* y dio **0 también**
+⇒ el cero podía ser «la campana está vacía de adopción», no «el código está
+excluido». **El control bueno es que la campana reciba ALGO**, y recibe 26 cosas
+de 10 tipos.
+
+> **Séptima vez en dos días, y ya como reflejo:** *el control positivo no es
+> cualquiera que esté cerca — es el que, si fallara, explicaría el resultado por
+> otra razón.*
+
+---
+
+# ADDENDUM 11 · 2-sep 21:40 — `codigo_vencido` CON LA VENTANA REAL · Y UNA ACEPTADA NO TIENE MARCHA ATRÁS
+
+## K1 · ✅ `codigo_vencido`, con su discriminador
+
+*No se movió `expira_en` de ningún código emitido —eso es tocar la evidencia—:
+se esperaron los diez minutos reales.*
+
+```
+CONTROL+ (ANTES de vencer) · código malo ... {"ok":false,"motivo":"codigo_incorrecto","intentos_restantes":4}
+🔴 (DESPUÉS) · el código BUENO, ya vencido . codigo_vencido
+```
+
+**El control es el que le da sentido:** el mismo código, minutos antes, daba
+`codigo_incorrecto` **y no `codigo_vencido`** ⇒ *la sonda distingue las dos
+causas, y el rojo de abajo es del reloj y no del hash.*
+
+**Con esto, de §5.5 queda sin correr un solo brazo: `acta_cambio_de_version`,
+que cubre A.**
+
+## K2 · 🔴 UNA SOLICITUD `aceptada` NO TIENE SALIDA POR NINGUNA PUERTA
+
+Apareció al ir a limpiar mi propia sonda:
+
+```
+la FAMILIA desiste de una aceptada ......... 🔴 solicitud_terminal: aceptada
+el REFUGIO la declina después de aceptar ... 🔴 solicitud_terminal
+```
+
+**Ninguno de los dos puede volver atrás.** La solicitud queda `aceptada` para
+siempre, **esperando dos firmas que quizá nunca lleguen**.
+
+**Y lo que lo vuelve caro, medido:** aceptar **saca al animal de la vidriera**
+—otra familia que intenta postular recibe `publicacion_no_disponible`—. ⇒ **un
+refugio que acepta por error, o una familia que desaparece, deja al animal
+ENTERRADO**: fuera de la vidriera, sin adopción firmada, y sin ninguna puerta que
+lo devuelva.
+
+*Lo bueno del mismo hecho: **no hay doble aceptación.** El animal comprometido no
+admite una segunda postulación, que es lo correcto.*
+
+**§0 no contempla este caso** y no es un borde raro: *«el refugio acepta y
+después la familia no aparece» es el desenlace más común de una adopción que no
+se concreta.* **PUERTA: una salida desde `aceptada`. Es de A y de la mesa** —
+*no propongo cuál: si vuelve a `en_conversacion`, si va a `declinada`, o si el
+animal se re-publica, es decisión de producto.*
+
+## K3 · ⚠️ RESIDUO QUE NO PUEDO LIMPIAR, y cambia el recorrido del founder
+
+**Bruno quedó con una solicitud `aceptada` (`ebb3b9df`), acta completa y 0
+firmas — y por eso SALIÓ DE LA VIDRIERA.** Lo produjo mi sonda de vencimiento, y
+**no hay puerta para revertirlo** (K2).
+
+**La vidriera queda hoy con TRES publicados** —Luna · Tito · Mica— **más Kira en
+borrador. Bruno está fuera.** *Se declara con todas las letras porque cambia lo
+que el founder va a ver, y porque el residuo es mío: sólo A puede devolverlo.*
