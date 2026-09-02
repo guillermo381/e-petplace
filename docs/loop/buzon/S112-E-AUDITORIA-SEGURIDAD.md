@@ -712,3 +712,74 @@ sesión estuviera rota, ése habría fallado también.*
 > toma, no el que uno cree que toma. Toda opción que se le pasa al cliente
 > (`upsert`, `head`, `count`) es parte del camino y hay que variarla antes de
 > llamar rojo a un rebote.*
+
+---
+
+# ADDENDUM 5 · 2-sep 15:30–16:15 — `D-485` CURADO Y EJERCIDO · §5.9 y N1 CERRADOS
+
+**CONTRA QUÉ:** base viva + `main 23ab355a`.
+
+## E1 · 🟢 `D-485` — los seis puntos dieron vuelta, sobre Luna
+
+```
+el traspaso .............................. ✅ ok
+user_id de Luna después .................. dd024680…  (el TITULAR destino, ya no el refugio)
+① ¿la familia VE a Luna? ................. ✅ SÍ
+② ¿ve su expediente? ..................... ✅ 2 eventos  (la vacuna del refugio + la procedencia)
+   CONTROL+ · total que ve ............... 12   (era 11: la de más es Luna)
+③ ¿el REFUGIO la sigue viendo? ........... ✅ ya no
+   CONTROL− · ¿un TERCERO la ve? ......... ✅ no
+```
+
+**El paso 15 de §0 está VERDE por camino real.** *«Luna está en su familia con la
+vacuna que el refugio cargó»* dejó de ser una promesa: son los 2 eventos de la
+línea ②.
+
+**Y el brazo que hace que este verde valga es el CONTROL NEGATIVO:** un tercero
+sigue sin verla. *Sin ese brazo, un helper que devolviera `true` siempre habría
+dado exactamente el mismo resultado en las tres primeras líneas.*
+
+## E2 · ✅ §5.9 — el esquema del formulario rebota nombrando la clave
+
+**Con el CONTROL POSITIVO PRIMERO**, que es lo que le da sentido a lo de abajo:
+
+| # | sonda | dio |
+|---|---|---|
+| 1 | **CONTROL+ · formulario VÁLIDO** | ✅ **creó la solicitud** |
+| 2 | el **mismo** payload + `hogar.nombre_menor` | ✅ `respuesta_no_valida: hogar.nombre_menor` |
+| 3 | el **mismo** + `hogar.edad_menor` | ✅ `respuesta_no_valida: hogar.edad_menor` |
+| 4 | el **mismo** + `sueldo` en la raíz | ✅ `respuesta_no_valida: sueldo` |
+
+**Rebota con el NOMBRE de la clave**, así que la pantalla puede llevar al campo
+exacto — y cuando la clave no está en el esquema, la persona ve **que ese dato no
+se pide**. *Es la respuesta que el abogado esperaba, ejercida y no leída.*
+
+## E3 · ✅ N1 completo
+
+```
+solicitud sobre el animal #2 ....... ✅ creó
+solicitud sobre el animal #3 ....... ✅ creó
+solicitud sobre el animal #4 ....... ⛔ tope_de_solicitudes: 3
+activas al final ................... 3
+```
+
+**Las dos mitades:** «una por animal» (índice + guard con el id) y «tres en
+total» (`tope_de_solicitudes: 3`, **hablado**). `L-424` cumplida en las dos.
+
+## E4 · 🔴 MI CUARTO FALSO — y esta vez fue un falso VERDE
+
+**Mi primera pasada de §5.9 «pasó»:** mandé `hogar.nombre_menor` y rebotó. **Pero
+rebotó por `por_que`** — una clave mía mal escrita, que el validador rechazaba
+antes de mirar el hogar. *El rojo era correcto y no era el mío.*
+
+**Lo que lo destapó fue que el CONTROL POSITIVO también rebotó**, con el mismo
+mensaje. *Un control positivo que falla no es un detalle del arnés: es el aviso de
+que todo lo demás que corriste no midió lo que creías.*
+
+> **Cuarta vez en dos días, y las cuatro con causa distinta:** el asiento
+> equivocado · el predicado evaluado bajo la RLS ajena · una bandera del cliente ·
+> y ahora **un payload inválido por otra razón**.
+>
+> **La forma que las cubre a las cuatro:** *el control positivo va PRIMERO, no
+> al lado. Si el caso que debe pasar no pasa, ningún rojo de abajo significa
+> nada — y se lee igual de convincente.*
