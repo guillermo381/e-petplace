@@ -329,27 +329,31 @@ export default function HiloSolicitud() {
                 }
               />
             ) : null}
-            {/* ⚠️ **ACÁ QUISE CALLAR «esta conversación está cerrada» CUANDO EL
-                ANIMAL FALLECIÓ, Y NO SE PUEDE TODAVÍA — el typecheck tenía
-                razón.** El razonamiento sigue en pie: la escalera de B **no
-                dibuja escalera en ese estado a propósito**, así que la voz es
-                todo lo que se ve, y *poner debajo un aviso de trámite le informa
-                a alguien que acaba de perder al animal que eligió que además el
-                hilo se cerró — la misma noticia dos veces, y la segunda en
-                lenguaje de formulario.*
+            {/* 🔴 **CON EL ANIMAL FALLECIDO NO SE DICE «esta conversación está
+                cerrada».** La escalera de B **no dibuja escalera en ese estado a
+                propósito** —*un duelo no es un trámite interrumpido*— así que la
+                voz es todo lo que se ve. *Poner debajo un aviso de trámite le
+                dice la misma noticia dos veces a alguien que acaba de perder al
+                animal que eligió, y la segunda en lenguaje de formulario.* En
+                `declinada` y `desistida` sí se dice: ahí el hilo cerrado ES el
+                hecho.
 
-                🔴 **Pero el estado NO EXISTE en el motor: cero ocurrencias de
-                `no_concretada_fallecimiento` en `supabase/migrations/`.** La
-                pieza está lista y el motor todavía no lo emite. Comparar contra
-                él sería montar contra una promesa — y el compilador lo dijo con
-                todas las letras (`TS2367`: los tipos no se superponen).
-                **Vuelve cuando el estado exista**, y la nota queda para que el
-                próximo no tenga que volver a razonarlo. */}
-            {cerrado ? (
+                ⚠️ **Esto se escribió, se retiró, y volvió — y la vuelta es el
+                dato.** Grepeé `no_concretada_fallecimiento` **contra mi propio
+                árbol**, que estaba atrás de dos migraciones, di cero y concluí
+                que el motor no lo emitía. *El `TS2367` era real —del objeto— y
+                revertir fue correcto con esa información; lo que no se sostenía
+                era la afirmación sobre el mundo, sacada de un árbol que no es el
+                mundo.* Contra `origin/main` el estado vive en el CHECK, en el
+                trigger del memorial, en la purga y en el tipo de
+                `packages/api`. **Medir la propia rama y llamarlo «el estado»**,
+                la clase que el canon nombra. *Se declara y no se borra: acá la
+                nota vale más que las tres líneas de código.* */}
+            {cerrado && estado.hilo.estado !== 'no_concretada_fallecimiento' ? (
               <Texto variante="apoyo" color="tertiary">
                 {t('hiloAdopcion.cerrado')}
               </Texto>
-            ) : (
+            ) : !cerrado ? (
               <>
                 <Campo
                   label={t('hiloAdopcion.escribirEtiqueta')}
@@ -375,7 +379,7 @@ export default function HiloSolicitud() {
                   onPress={() => setDesistiendo(true)}
                 />
               </>
-            )}
+            ) : null}
           </View>
         </>
       )}
