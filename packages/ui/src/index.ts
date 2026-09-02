@@ -524,6 +524,39 @@ export {
   type CodigoFirmaInputProps,
 } from './components/CodigoFirmaInput'
 
+// HitoUnaVidaNueva — S112-B (B5): la carta del hito, SIN CONFETI. El hito
+// queda en la línea de vida para siempre, con aniversario anual: no es una
+// felicitación que se ve una vez, es una carta que la familia va a volver a
+// encontrar dentro de tres años. Cero animación, cero acción, cero
+// diccionario.
+export {
+  HitoUnaVidaNueva,
+  type HitoUnaVidaNuevaProps,
+} from './components/HitoUnaVidaNueva'
+
+// TarjetaMascotaRefugio — S112-B (B7): sus animales como animales. El
+// interruptor de publicar/pausar NO PUEDE quedar mudo: `publicacion` es una
+// unión discriminada (o `onCambio`, o `razon`). El mapeo estado → familia de
+// Insignia vive en la pieza, no en la pantalla — dos pantallas que mapean a
+// mano divergen. `memorial` es uno de los seis estados, no otra tarjeta.
+export {
+  TarjetaMascotaRefugio,
+  type TarjetaMascotaRefugioProps,
+  type EstadoMascotaRefugio,
+  type PublicacionDeMascota,
+} from './components/TarjetaMascotaRefugio'
+
+// FichaAdoptable — S112-B (B8): el orden de §4.1 hecho ESTRUCTURA (N19). Los
+// contenidos entran por slots CON NOMBRE, así que la pantalla decide QUÉ va
+// en cada bloque y no puede decidir DÓNDE. ⚠️ `galeria` es slot: el carrusel
+// de la casa todavía vive dentro de `FichaPrestador` — ver su cabecera.
+export {
+  FichaAdoptable,
+  type FichaAdoptableProps,
+  type CtaDeFicha,
+  type ConExplicacion,
+} from './components/FichaAdoptable'
+
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
 // sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.
