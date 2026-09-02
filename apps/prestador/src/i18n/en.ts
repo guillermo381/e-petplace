@@ -9,6 +9,8 @@ import type { prestadorEs } from './es';
 
 export const prestadorEn = {
   tabs: {
+    adopcion: 'Shelter',
+    adoptables: 'My animals',
     hoy: 'Today',
     mascotas: 'Data',
     negocio: 'Business',
@@ -3424,6 +3426,29 @@ export const prestadorEn = {
     codigoInvalidoTitulo: "This document isn't accepted here",
     codigoInvalidoDetalle: 'The portal only accepts the shelter terms.',
     errorTitulo: "We couldn't load the document",
+    errorDetalle: 'Check your connection and try again.',
+    reintentar: 'Try again',
+  },
+  adoptables: {
+    titulo: 'My animals',
+    interruptor: 'Listed',
+    motivo_adoptable_no_esterilizado:
+      "They're an adult and not neutered: listing requires neutering.",
+    motivo_edad_no_declarada: 'Their estimated age is missing to list them.',
+    motivo_animal_en_memorial: "They're no longer with us.",
+    motivoDesconocido: "They can't be listed yet.",
+    estado_en_rescate: 'In rescue',
+    estado_publicada: 'Listed',
+    estado_pausada: 'Paused',
+    estado_en_proceso: 'In progress',
+    estado_adoptada: 'Adopted',
+    estado_no_disponible: 'Off the listing',
+    estado_memorial: 'Memorial',
+    abrirFicha: "Open {{nombre}}'s profile",
+    fichaPronto: 'The profile to edit them arrives in the next batch.',
+    vacioTitulo: "You haven't added any animals yet",
+    vacioDetalle: "Once you add the first one, you'll see them here with status.",
+    errorTitulo: "We couldn't load your animals",
     errorDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',
   },
