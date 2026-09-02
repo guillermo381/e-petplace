@@ -230,10 +230,36 @@ sesión (`s112a_textos_legales_adopcion`, `…_acta_plantilla`,
 
 > ### 🔴 Y de quién fue el error, porque importa más que el dato: **yo no lo medí, lo DEDUJE del canon de S111** —*«ni una palabra de texto legal; las puertas están fail-closed y se abren solas cuando el texto se cargue»*— que era cierto al cerrar S111 y **dejó de serlo hoy**. `L-166`: *todo dato vivo se lee al momento de usarlo, jamás de un reporte anterior.* Un dato heredado del canon se lee igual que uno medido, y por eso es peor.
 
-⚠️ **Lo que NO medí, para que no me creas de más en la otra dirección:** no
-corrí el traspaso de punta a punta. Sé que el texto está y que la firma lo
-acepta; **qué versión pasar y si queda algún fail-closed adentro se lo
-confirmás a A.** *Corregir de más es el mismo error espejado.*
+⚠️ **Y MI CORRECCIÓN TAMBIÉN SE PASÓ DE LARGO.** Dije *«el final SÍ se puede
+montar»* y **todavía no**. Lo midió C sin creerme —bien hecho— y lo verifiqué
+aparte, con censo ancho y control positivo. **La verdad es una TERCERA posición,
+ni la primera ni la segunda:**
+
+| pieza | estado |
+|---|---|
+| texto del acta | ✅ `acta_adopcion` v1 **vigente**, 5350 caracteres |
+| el motor lo acepta | ✅ `traspasar_mascota_a_familia(… p_acta_version …)` |
+| el wrapper lo pasa | ✅ `actaVersion: number` — **requerido**, no opcional |
+| **lector que dé esa versión** | 🔴 **NO EXISTE** |
+| **`firmar_acta_adopcion`** | 🔴 **NO EXISTE** |
+
+> ### 🔴 Es *motor sin puerta* en su forma más sutil: no falta la función — **la función pide un dato que sólo el servidor sabe y nadie devuelve.**
+
+**Censo ancho, para que el 0 cierre y no sólo acote** (`L-437`): funciones con
+`acta` en el nombre = **4**, y **las cuatro son de guardería**
+(`obtener_acta_guarderia`, `levantar_acta_guarderia`, `confirmar_acta_guarderia`,
+`_trg_acta_inmutable`). **Ninguna sirve acá** ⇒ el lector no existe *con otro
+nombre* tampoco. Y en `apps/`: **cero** ocurrencias de `actaVersion`, con
+control positivo (`publicacionId` sí aparece) que prueba que el grep ve.
+
+⇒ **Hoy la pantalla tendría que HARDCODEAR la versión** — y eso es justo lo que
+no se puede: el día que se publique la v2 del acta, la pantalla seguiría
+firmando contra la v1 **y todo compilaría**. **No lo montes así.** El lector es
+de A; C ya se lo pasó.
+
+*(Mi primera versión decía «no hay acta» —falso—; la segunda «se puede montar»
+—demasiado—. **Las dos veces afirmé de más sobre lo mismo.** La tercera es la
+medida, y la trajo alguien que no me creyó.)*
 
 ⚠️ **No hay foto del refugio en el contrato** — sólo `publicadorNombre` (texto).
 Si la cabecera la necesita, **es un ensanche de lector y se lo pedís a A**;
