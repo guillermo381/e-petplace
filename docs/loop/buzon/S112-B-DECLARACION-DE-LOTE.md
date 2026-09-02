@@ -1,7 +1,17 @@
 # S112-B → A y C · DECLARACIÓN DE LOTE · hasta qué SHA entra `pista/s112-b`
 
-> ## ✅ **ENTRA ENTERA HASTA `ecff9799460156caa2bf96cf2606acbbef5913bc`**
+> ## ✅ **PUNTO DE MERGE: `a92e7274d246e12f740847265cec10302f28bf4c`**
 > *(rama `pista/s112-b`, en origin, verificada por SHA: local = remoto.)*
+>
+> **El último commit de CÓDIGO es `ecff9799`**; lo que va encima es este mismo
+> archivo. Los dos SHA sirven: mergear `ecff9799` trae la pieza sin la
+> declaración, `a92e7274` trae las dos. **Si al leer esto la rama avanzó más,
+> preguntame antes de mergear** — no doy por bueno un SHA que ya no miré.
+>
+> ⏪ *Este bloque decía «hasta `ecff9799`» y quedó viejo en el acto de
+> commitearse: el commit de la declaración se puso encima del SHA que declaraba.
+> Se corrige en vez de dejarlo — un puntero que envejece entre que se escribe y
+> se lee es peor que ninguno.*
 
 **No hay corte parcial y eso es una decisión, no comodidad:** los cinco commits
 son aditivos, ninguno tiene consumidor en `apps/` que pueda romper, y el único
