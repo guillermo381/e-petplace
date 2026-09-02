@@ -939,7 +939,42 @@ export type EstadoSolicitudAdopcion =
    *  `declinada` porque **acá no decidió nadie** — reusarla le diría a la
    *  familia «el refugio no continuó con tu postulación» sobre algo que el
    *  refugio no eligió. Su voz es de duelo y **no invita a otro animal** (D-3). */
-  | 'no_concretada_fallecimiento';
+  | 'no_concretada_fallecimiento'
+  /** 🟢 **El animal fue adoptado por otra familia** (S112-A). Estado propio y
+   *  no `declinada` por la MISMA razón que el de fallecimiento: **acá nadie
+   *  la evaluó**. Reusar `declinada` le diría a esa persona *«el refugio te
+   *  evaluó y siguió con otra»* sobre algo que el refugio nunca decidió sobre
+   *  ella. La voz va sin duelo y **sin invitación a otro animal**. */
+  | 'no_concretada_otra_familia';
+
+/**
+ * 🔴 **PARSE, NO CAST.** Hasta S112 esto era `as EstadoSolicitudAdopcion`, y un
+ * `as` **no verifica nada**: cuando el motor ganó su séptimo estado, la unión
+ * siguió declarando seis y **ningún typecheck lo vio**. *Una fila con un valor
+ * que el tipo no conoce llegaba tipada como si lo fuera*, y la pantalla que
+ * enumeraba los terminales por nombre la hacía **desaparecer en silencio** —
+ * lo midió C sobre su propio arreglo, no un gate.
+ *
+ * ⚠️ **Devuelve `null` sobre lo desconocido en vez de adivinar.** El llamador
+ * decide: la lista lo trata como `datos_inconsistentes`. *Caer a un estado
+ * plausible sería exactamente el defecto que este parse existe para cerrar.*
+ *
+ * La lista vive acá y **no se deriva del tipo**: TypeScript no puede
+ * enumerar una unión en runtime. Si el motor gana un octavo estado y esta
+ * lista no crece, el parse lo RECHAZA — ruidoso, que es lo que se quiere.
+ */
+const ESTADOS_SOLICITUD: readonly EstadoSolicitudAdopcion[] = [
+  'recibida', 'en_conversacion', 'aceptada', 'declinada', 'desistida',
+  'no_concretada_fallecimiento', 'no_concretada_otra_familia',
+];
+
+function parseEstadoSolicitud(v: unknown): EstadoSolicitudAdopcion | null {
+  return typeof v === 'string'
+    && (ESTADOS_SOLICITUD as readonly string[]).includes(v)
+    ? (v as EstadoSolicitudAdopcion)
+    : null;
+}
+
 
 export interface MensajeDelHilo {
   mensajeId: string;
@@ -980,6 +1015,9 @@ export interface SolicitudRecibida {
   solicitanteNombre: string | null;
   mascotaId: string;
   mascotaNombre: string;
+  /** Para resolver la cara de la casa: sin ella el refugio ve la huella
+   *  genérica donde la familia ve la cara — la misma solicitud, dos caras. */
+  mascotaEspecie: string | null;
   mascotaFotoUrl: string | null;
   mensajes: MensajeDelHilo[];
 }
@@ -1059,11 +1097,13 @@ export async function crearSolicitudAdopcion(params: {
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
   const r = data as Record<string, unknown>;
   if (typeof r.solicitud_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  const e0 = parseEstadoSolicitud(r.estado);
+  if (e0 === null) return fallaCodigo('datos_inconsistentes');
   return {
     ok: true,
     data: {
       solicitudId: r.solicitud_id,
-      estado: r.estado as EstadoSolicitudAdopcion,
+      estado: e0,
       solicitudesVivas: Number(r.solicitudes_vivas ?? 1),
     },
   };
@@ -1085,7 +1125,9 @@ export async function responderSolicitudAdopcion(params: {
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
   const r = data as Record<string, unknown>;
   if (typeof r.mensaje_id !== 'string') return fallaCodigo('datos_inconsistentes');
-  return { ok: true, data: { mensajeId: r.mensaje_id, estado: r.estado as EstadoSolicitudAdopcion } };
+  const e1 = parseEstadoSolicitud(r.estado);
+  if (e1 === null) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { mensajeId: r.mensaje_id, estado: e1 } };
 }
 
 /** Cierra la solicitud. **Sólo el publicador ACEPTA; declinar pueden los dos.**
@@ -1101,7 +1143,9 @@ export async function cerrarSolicitudAdopcion(params: {
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
-  return { ok: true, data: { estado: (data as Record<string, unknown>).estado as EstadoSolicitudAdopcion } };
+  const e2 = parseEstadoSolicitud((data as Record<string, unknown>).estado);
+  if (e2 === null) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { estado: e2 } };
 }
 
 /** Mis solicitudes, con sus hilos. Lado FAMILIA. */
@@ -1111,12 +1155,23 @@ export async function obtenerMisSolicitudesAdopcion(): Promise<
   const { data, error } = await getClient().rpc('obtener_mis_solicitudes_adopcion');
   if (error) return fallo(error.message);
   if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const filas = data as Record<string, unknown>[];
+  /* 🔴 EL PRE-PASE: si UNA fila trae un estado que este paquete no conoce,
+     rebota la lista entera. *Una lista que se dibuja sin una de sus filas no
+     avisa de nada* — así desapareció en silencio la del séptimo estado. */
+  if (filas.some((f) => parseEstadoSolicitud(f.estado) === null)) {
+    return fallaCodigo('datos_inconsistentes');
+  }
   return {
     ok: true,
-    data: (data as Record<string, unknown>[]).map((f) => ({
+    data: filas.map((f) => ({
       solicitudId: String(f.solicitud_id),
       publicacionId: String(f.publicacion_id),
-      estado: f.estado as EstadoSolicitudAdopcion,
+      /* `!` seguro: el pre-pase de arriba ya rebotó si alguno era `null`.
+         *El rebote es de la LISTA ENTERA y no de la fila: una lista a la que
+         le falta una solicitud sin decirlo es peor que una lista que falla* —
+         es exactamente cómo desapareció la fila del séptimo estado. */
+      estado: parseEstadoSolicitud(f.estado)!,
       creadaEn: String(f.creada_en),
       cerradaEn: typeof f.cerrada_en === 'string' ? f.cerrada_en : null,
       mascotaId: String(f.mascota_id),
@@ -1140,18 +1195,32 @@ export async function obtenerSolicitudesDeMisPublicaciones(
   });
   if (error) return fallo(error.message);
   if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const filas = data as Record<string, unknown>[];
+  /* 🔴 EL PRE-PASE: si UNA fila trae un estado que este paquete no conoce,
+     rebota la lista entera. *Una lista que se dibuja sin una de sus filas no
+     avisa de nada* — así desapareció en silencio la del séptimo estado. */
+  if (filas.some((f) => parseEstadoSolicitud(f.estado) === null)) {
+    return fallaCodigo('datos_inconsistentes');
+  }
   return {
     ok: true,
-    data: (data as Record<string, unknown>[]).map((f) => ({
+    data: filas.map((f) => ({
       solicitudId: String(f.solicitud_id),
       publicacionId: String(f.publicacion_id),
-      estado: f.estado as EstadoSolicitudAdopcion,
+      /* `!` seguro: el pre-pase de arriba ya rebotó si alguno era `null`.
+         *El rebote es de la LISTA ENTERA y no de la fila: una lista a la que
+         le falta una solicitud sin decirlo es peor que una lista que falla* —
+         es exactamente cómo desapareció la fila del séptimo estado. */
+      estado: parseEstadoSolicitud(f.estado)!,
       creadaEn: String(f.creada_en),
       cerradaEn: typeof f.cerrada_en === 'string' ? f.cerrada_en : null,
       solicitanteUserId: String(f.solicitante_user_id),
       solicitanteNombre: typeof f.solicitante_nombre === 'string' ? f.solicitante_nombre : null,
       mascotaId: String(f.mascota_id),
       mascotaNombre: typeof f.mascota_nombre === 'string' ? f.mascota_nombre : '',
+      /* `null`, no `''`: la especie desconocida NO es una especie vacía — quien
+         resuelva la cara tiene que poder distinguir «no la sé» de un valor. */
+      mascotaEspecie: typeof f.mascota_especie === 'string' ? f.mascota_especie : null,
       mascotaFotoUrl: typeof f.mascota_foto_url === 'string' ? f.mascota_foto_url : null,
       mensajes: leerMensajes(f.mensajes),
     })),

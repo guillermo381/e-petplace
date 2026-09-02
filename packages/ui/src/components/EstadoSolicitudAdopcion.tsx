@@ -104,6 +104,27 @@ export type EstadoSolicitud =
   | 'desistida'
   /** S112-B · el animal murió. **No lleva escalera.** Ver la enmienda. */
   | 'no_concretada_fallecimiento'
+  /**
+   * S112-A (enmienda ADITIVA, bandera 76(d) — territorio de B, declarada) ·
+   * **el animal fue adoptado por otra familia.**
+   *
+   * 🔴 **SÍ lleva escalera, a diferencia del de fallecimiento, y la razón es
+   * la que B escribió para aquél:** *«la escalera existe para decir DÓNDE
+   * ESTÁS EN UN PROCESO»*. Con el fallecimiento **no hay proceso en el que
+   * estar** porque murió su sujeto. Acá **sí lo hubo**: esta persona postuló,
+   * conversó, y su camino se interrumpió con el animal vivo. Se dibuja
+   * **cortada**, igual que los otros dos cortes.
+   *
+   * ⚠️ Lo que la distingue de `declinada` **no es el dibujo, es la voz**:
+   * ahí decidió el publicador; acá **no decidió nadie sobre esta persona**.
+   * *Teñirla de rechazo diría que la evaluaron y la descartaron, y eso no
+   * pasó.* Sin duelo y **sin invitación a otro animal**.
+   *
+   * 👉 **B: la forma es una decisión tuya y la tomé para no dejar la app sin
+   * compilar. Si la escalera cortada no corresponde, cambiala — el motor no
+   * depende de esto.**
+   */
+  | 'no_concretada_otra_familia'
 
 export type EstadoSolicitudAdopcionProps = {
   estado: EstadoSolicitud
@@ -136,6 +157,16 @@ export type EstadoSolicitudAdopcionProps = {
    * escribe una noticia, no como se rotula un estado.
    */
   vozNoConcretada: string
+  /**
+   * S112-A (aditiva, bandera 76(d)) · lo que se le dice a quien postuló cuando
+   * **el animal fue adoptado por otra familia**.
+   *
+   * 🔴 **OBLIGATORIA, como sus hermanas.** *Una voz opcional que cuando falta
+   * no dibuja nada deja a esa persona con un camino cortado y sin una palabra
+   * que lo explique* — un hueco que se ve bien es peor que uno que falla.
+   * Sin duelo y **sin invitación a otro animal**.
+   */
+  vozOtraFamilia: string
   registro?: 'compacta' | 'completa'
 }
 
@@ -154,6 +185,7 @@ export function EstadoSolicitudAdopcion({
   vozDeclinada,
   vozDesistida,
   vozNoConcretada,
+  vozOtraFamilia,
   registro,
 }: EstadoSolicitudAdopcionProps) {
   /* 🔴 EL DUELO SALE ANTES DE LA ESCALERA, y el `return` temprano ES la
@@ -183,7 +215,10 @@ export function EstadoSolicitudAdopcion({
      alcanzado queda hecho y lo que seguía se apaga entero — jamás se marca
      como cumplido algo que no pasó. Lo que cambia es QUIÉN cortó, y eso lo
      dice la voz, no el dibujo. */
-  const cortada = estado === 'declinada' || estado === 'desistida'
+  const cortada =
+    estado === 'declinada' ||
+    estado === 'desistida' ||
+    estado === 'no_concretada_otra_familia'
   const indiceActual = cortada ? -1 : CAMINO.indexOf(estado as (typeof CAMINO)[number])
 
   return (
@@ -212,7 +247,9 @@ export function EstadoSolicitudAdopcion({
           ? { etiqueta: vozDeclinada, tono: 'neutro' }
           : estado === 'desistida'
             ? { etiqueta: vozDesistida, tono: 'neutro' }
-            : undefined
+            : estado === 'no_concretada_otra_familia'
+              ? { etiqueta: vozOtraFamilia, tono: 'neutro' }
+              : undefined
       }
     />
   )

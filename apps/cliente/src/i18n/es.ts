@@ -3737,6 +3737,8 @@ export const clienteEs = {
     // acá, así que esto es TODO lo que se ve. Y no se adorna: quien lo lee
     // eligió a ese animal.
     estado_no_concretada: '{{nombre}} falleció. Lo sentimos mucho.',
+    /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) — sin duelo y SIN invitar a otro animal. */
+    estado_otra_familia: '{{nombre}} ya encontró familia. Gracias por querer darle un hogar.',
     verActa: 'Ver el acta de adopción',
     titulo: 'Tu solicitud',
     de: 'De {{refugio}}',

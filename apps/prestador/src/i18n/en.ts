@@ -3546,6 +3546,10 @@ export const prestadorEn = {
   portalHilo: {
     estadoDesistida: 'The family withdrew their application',
     estadoNoConcretada: 'Passed away before handover.',
+    /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) · voz del PUBLICADOR: él sabe
+       que la entregó. No es «ya encontró familia», que es lo que se le dice
+       a quien postuló — la misma fila, dos asientos, dos frases. */
+    estadoOtraFamilia: 'Placed with another family.',
     verActa: 'See the adoption agreement',
     titulo: 'The request',
     alguienSinNombre: 'Someone from the community',

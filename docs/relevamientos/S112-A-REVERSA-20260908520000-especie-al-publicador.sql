@@ -1,0 +1,5 @@
+-- REVERSA de 20260908520000 · el lector del publicador deja de traer la especie.
+-- ⚠️ Sin datos que perder, pero la pantalla del refugio vuelve a la huella
+-- genérica donde la familia ve la cara de la casa: la MISMA solicitud con dos
+-- caras distintas según quién mire. L-119: DROP explícito, cambia el TABLE.
+-- El cuerpo previo se recupera de pg_get_functiondef del commit anterior.

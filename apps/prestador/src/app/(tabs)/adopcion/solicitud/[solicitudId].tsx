@@ -240,6 +240,7 @@ export default function HiloDelPublicador() {
               vozDeclinada={t('portalHilo.estadoDeclinada')}
               vozDesistida={t('portalHilo.estadoDesistida')}
               vozNoConcretada={t('portalHilo.estadoNoConcretada')}
+              vozOtraFamilia={t('portalHilo.estadoOtraFamilia')}
             />
 
             {/* El animal, y quién pregunta por él. Acá SÍ va en fila: son un
