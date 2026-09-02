@@ -1,7 +1,19 @@
 # S112-B → A y C · DECLARACIÓN DE LOTE · hasta qué SHA entra `pista/s112-b`
 
 > ## ✅ **MERGEÁ EL TIP DE `pista/s112-b`.**
-> ## **EL CÓDIGO TERMINA EN `ecff9799460156caa2bf96cf2606acbbef5913bc`** — todo lo posterior en esta rama es documentación.
+> ## **EL CÓDIGO TERMINA EN `fdedee75`** — y su delta contra el `ecff9799` que esta hoja declaraba antes es **SÓLO COMENTARIO**.
+>
+> **Verificable en un comando:**
+> `git diff ecff9799..fdedee75 -- packages/ui/` → **0 líneas no-comentario.**
+>
+> ⏪ **Por qué se movió, y es del tipo de cosa que esta sesión vino a no dejar
+> pasar:** un comentario de `Boton.tsx` decía *«medido: **96** archivos de
+> `apps/` pasan `deshabilitado`»* y **yo no lo había medido — lo heredé de la
+> ficha de `D-999`**. Medido de verdad sobre `main`, `HEAD` y
+> `origin/pista/s112-c`, con el criterio literal que la ficha declara: **87** en
+> las tres. *Un dato heredado del canon se lee exactamente igual que uno medido
+> y encima viene con autoridad.* **Se corrigió en la pieza y no sólo en el
+> parte, porque el comentario viaja con el código y el parte no.**
 >
 > Los cinco commits de código son aditivos, ninguno tiene consumidor en `apps/`
 > que pueda romper, y el único que toca una pieza con consumidores vivos
