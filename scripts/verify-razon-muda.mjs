@@ -66,11 +66,37 @@ function archivos(dir, out = []) {
 
 const cuenta = (txt, re) => (txt.match(re) ?? []).length;
 
+/** 🔴 EL CORPUS CUENTA CÓDIGO, NO PROSA (S112, lo cobró C sobre sí mismo).
+ *
+ *  Su caso, entero: subió a 143 por un freno real que había introducido — bien
+ *  cazado. **Lo retiró y siguió en 143**, porque el gate estaba contando la
+ *  palabra dentro del comentario que explicaba su propio hallazgo. Su cura fue
+ *  no nombrar la prop en la prosa: *resuelve su caso y no el de la próxima
+ *  pantalla.*
+ *
+ *  Es `L-170` —un censo por patrón lee los comentarios como código— por segunda
+ *  vez en su día. **La resta sigue siendo legítima como diseño; lo que no
+ *  distinguía prosa de código era el corpus.**
+ *
+ *  Se quitan bloques de comentario, líneas de `//` y los comentarios de JSX.
+ *  NO se tocan las cadenas: una prop dentro de un string es rarísima, y
+ *  quitarlas exigiría un parser — *un instrumento que necesita un parser para
+ *  medir una resta se volvió más caro que el defecto que vigila.*
+ *
+ *  ⚠️ Y de paso: la primera versión de ESTE comentario escribía la secuencia de
+ *  cierre de bloque como ejemplo, y **se cerró a sí misma**. La ironía queda
+ *  anotada — es la misma familia del hallazgo que viene a curar. */
+function sinComentarios(t) {
+  return t
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')   // bloque y JSX
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1 '); // línea, sin comerse `https://`
+}
+
 function medir(lista) {
   let frenos = 0, razones = 0;
   const porArchivo = [];
   for (const f of lista) {
-    const t = readFileSync(f, 'utf8');
+    const t = sinComentarios(readFileSync(f, 'utf8'));
     const a = cuenta(t, FRENO), b = cuenta(t, RAZON);
     frenos += a; razones += b;
     if (a - b > 0) porArchivo.push([f, a - b]);

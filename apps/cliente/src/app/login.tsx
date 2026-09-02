@@ -52,6 +52,7 @@ import {
 import { iniciarSesion, iniciarSesionConGoogle } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 
 /**
  * ⭐ **S109-C · A DÓNDE VOLVER DESPUÉS DE ENTRAR.**
@@ -301,13 +302,27 @@ export default function Login() {
                   *Entregada y montada son dos hechos distintos, y acá la
                   diferencia era la promesa entera.* La policy de A la resolvió
                   mirando la MASCOTA y no la carpeta. */}
-              <Separador />
-              <Boton
-                variante="ghost"
-                etiqueta={t('login.verAdopcion')}
-                bloque
-                onPress={() => router.push('/adoptar')}
-              />
+              {/* 🔴 **DETRÁS DEL MISMO INTERRUPTOR QUE TODO EL VERTICAL**, y esto
+                  es una cura: la puerta viajaba VIVA con `ADOPCION_ALCANZABLE`
+                  en `false`, así que el flag decía «adopción no es alcanzable» y
+                  el login la ofrecía igual. Lo midió E con un grep en cero sobre
+                  este archivo.
+                  *Un flag que apaga tres puertas de cuatro no apaga nada: apaga
+                  las que alguien se acordó de atar* — y es exactamente lo que
+                  `gate-adopcion` dice de sí mismo («dos interruptores para la
+                  misma puerta terminan en distinto estado»). Acá no eran dos
+                  interruptores: era una puerta sin ninguno. */}
+              {ADOPCION_ALCANZABLE ? (
+                <>
+                  <Separador />
+                  <Boton
+                    variante="ghost"
+                    etiqueta={t('login.verAdopcion')}
+                    bloque
+                    onPress={() => router.push('/adoptar')}
+                  />
+                </>
+              ) : null}
             </View>
           </Entrada>
         </ScrollView>

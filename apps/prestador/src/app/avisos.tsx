@@ -54,6 +54,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { destinoDePushDeEstaApp } from '@/lib/destino-de-push';
 
 /** Lado de la huella-marcador de no leído: presencia, jamás número. */
 const LADO_HUELLA = 10;
@@ -108,11 +109,27 @@ export default function Avisos() {
     return fechaCortaMono(iso, idioma);
   }
 
-  /** EL DESTINO se arma acá con tipo + referentes (jamás ruta del motor).
-   *  `null` = esta app no sabe llevarlo — la fila no se pinta tocable,
-   *  aunque el server diga que el hecho existe (lámina §3, lado app). */
+  /** EL DESTINO. `null` = esta app no sabe llevarlo — la fila no se pinta
+   *  tocable, aunque el server diga que el hecho existe (lámina §3, lado app).
+   *
+   *  ⏪ Acá decía *«se arma acá con tipo + referentes, JAMÁS ruta del motor»*, y
+   *  desde S112 el motor **sí** manda ruta para el vertical de adopción. **No
+   *  se contradicen:** el motor emite una intención POR DESTINATARIO, así que
+   *  cada ruta ya es de una sola app. El mapeo por tipo queda entero debajo y
+   *  los avisos viejos no cambian.
+   *
+   *  ⚠️ **Y la ruta no se navega cruda:** pasa por `destinoDePushDeEstaApp`, el
+   *  MISMO filtro que la push — *un guard que sirve a un camino y no al otro es
+   *  cómo los dos terminan diciendo cosas distintas sobre la misma ruta*, y acá
+   *  el riesgo es concreto: el aviso del acta va a los DOS lados con rutas
+   *  distintas, y la del cliente abriría una pantalla en blanco. */
   function destinoDe(a: AvisoDeCampana): string | null {
     if (!a.tieneDestino) return null;
+    if (typeof a.ruta === 'string' && a.ruta.length > 0) {
+      const mia = destinoDePushDeEstaApp(a.ruta);
+      if (mia !== null) return mia;
+      console.warn(`[avisos] ruta que esta app no atiende, se cae al mapeo por tipo · ${a.ruta}`);
+    }
     if ((a.tipo.startsWith('cita_') || a.tipo === 'procedimiento_agendado') && a.eventoId !== null) {
       return `/cita/${a.eventoId}`;
     }

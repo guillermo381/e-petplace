@@ -81,6 +81,10 @@ type EstadoSesionRaiz =
   // servicio con `atiende_local`, o la tienda activa).
   | {
       ok: true;
+      /* ⭐ S112-C: la naturaleza REFUGIO decide la barra entera, no una tab más.
+         Viaja hasta acá por lo mismo que el escalón: **la barra se arma en este
+         archivo**, y su composición es del resolvedor. */
+      esRefugioPuro: boolean;
       esGestor: boolean;
       montaAtender: boolean;
       /* 🔴 S99-D · L-251 — el escalón viaja hasta acá porque **el destino de
@@ -90,7 +94,17 @@ type EstadoSesionRaiz =
       // único que dice «la ceremonia no se preguntó porque no hay sujeto».
       // Reusar `'no-gestor'` habría afirmado algo falso (él SÍ es gestor) y
       // el forense habría mentido justo donde se lo lee para diagnosticar.
-      ceremonia: 'consultada' | 'resuelta-para-este-usuario' | 'no-gestor' | 'vendedor-puro';
+      /* ⭐ `'refugio'` es el quinto y dice lo mismo que `'vendedor-puro'` para
+         otro sujeto: **la ceremonia no se preguntó porque no hay a quién
+         preguntarle** — estampa sobre el titular activo de un `prestador`, y un
+         refugio puro no tiene esa fila. *Reusar `'no-gestor'` habría dicho algo
+         falso y el forense mentiría justo donde se lo lee para diagnosticar.* */
+      ceremonia:
+        | 'consultada'
+        | 'resuelta-para-este-usuario'
+        | 'no-gestor'
+        | 'vendedor-puro'
+        | 'refugio';
     }
   // S79-B (T2-B2, §2.3; T4-B1): primer ingreso del GESTOR según el MOTOR
   // (`registrar_primer_ingreso`, LETRA_PERFIL §4) → la carta preside
@@ -208,10 +222,11 @@ export default function TabsLayout() {
               ceremoniaResueltaPara = s.data.user_id;
               if (ingreso.data.esPrimerIngreso) return { bienvenida_pendiente: true };
             }
-            return { ok: true, esGestor, montaAtender, escalonAtender, ceremonia: 'consultada' as const };
+            return { ok: true, esRefugioPuro: false, esGestor, montaAtender, escalonAtender, ceremonia: 'consultada' as const };
           }
           return {
             ok: true,
+            esRefugioPuro: false,
             esGestor,
             montaAtender,
             escalonAtender,
@@ -264,10 +279,43 @@ export default function TabsLayout() {
             const { esGestor, montaAtender, escalonAtender } = capacidadDesdeContexto(c);
             return {
               ok: true,
+              esRefugioPuro: false,
               esGestor,
               montaAtender,
               escalonAtender,
               ceremonia: 'vendedor-puro' as const,
+            };
+          }
+          /* ⭐ S112-C · EL REFUGIO ENTRA A SU CASA (§4.2).
+             *«Mismo login de siempre… después, tres tabs: Home · Mascotas ·
+             Cuenta.»* Su Home es el portal, no el HOY.
+
+             🔴 **CERO VIAJE NUEVO:** `esRefugio` viene en el contexto que ya se
+             pidió. *Leerlo aparte con `obtenerMiCuentaRefugio` habría sumado
+             dos peticiones encadenadas al arranque de TODOS los prestadores,
+             incluidos los que no son refugio* — lo mismo que `contextoVentas()`
+             costaba acá antes de que la RPC lo trajera.
+
+             ⚠️ **VA DESPUÉS DEL VENDEDOR PURO Y ES DELIBERADO.** Quien fuera las
+             dos cosas cae en ventas, porque esa rama la firma el founder en
+             §2.0 (*«el vendedor puro… es un DUEÑO y tiene la casa entera»*) y
+             **reordenar una firma para acomodar un caso que hoy no existe sería
+             tomarle la decisión a la mesa**. Se declara en vez de resolverse.
+
+             ⚠️ Y **la ceremonia del primer ingreso NO se le pregunta**, por la
+             misma razón que al vendedor puro: estampa sobre el TITULAR ACTIVO
+             de un prestador, y un refugio puro no tiene esa fila. Pedirla sería
+             un veredicto sobre un sujeto que no existe. Sus TÉRMINOS —que sí
+             son su primera pantalla— los pide el propio portal, que es quien
+             sabe si los aceptó. */
+          if (c.esRefugio) {
+            return {
+              ok: true,
+              esRefugioPuro: true,
+              esGestor: false,
+              montaAtender: false,
+              escalonAtender: { escalon: 'varias' as const },
+              ceremonia: 'refugio' as const,
             };
           }
           /* 🔴 S99-D · Gate 2 ④ — EL REPARTIDOR ENTRA A LO SUYO.
@@ -595,9 +643,16 @@ export default function TabsLayout() {
     atender: 'atender',
     negocio: 'negocio',
     cuenta: 'cuenta',
+    /* S112-C · las dos del refugio. `refugio` para su casa —es el glifo que la
+       vidriera del cliente ya usa para el mismo actor, así que las dos apps lo
+       nombran igual— y `familia` para sus animales: son los que TIENE, no los
+       que atiende, y `datos` (el de la tab del prestador) diría otra cosa. */
+    adopcion: 'refugio',
+    adoptables: 'familia',
   } as const satisfies Record<ClaveTabPrestador, IconoNombre>;
 
   const items: BarraTabsItem[] = ordenTabsPrestador({
+    esRefugioPuro: sesion.esRefugioPuro,
     esGestor: sesion.esGestor,
     montaAtender: sesion.montaAtender,
     escalonAtender: sesion.escalonAtender,

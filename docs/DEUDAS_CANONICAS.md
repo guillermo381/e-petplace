@@ -27040,3 +27040,163 @@ mismo desde las dos puntas: la ubicación y la pertenencia no se suponen — se
 preguntan al objeto, y se preguntan ANTES.*
 
 **DISPARO: ninguno. Rige desde su depósito.**
+
+---
+
+## 🔴 `L-482` — EL CONTROL POSITIVO VA **PRIMERO**, NO AL LADO
+
+> **Enunciado de E (S112), con su literal:** *«Si el caso que DEBE pasar no pasa,
+> ningún rojo de abajo significa nada — y se lee igual de convincente.»*
+
+La casa ya tenía «todo rojo va con su control positivo». Lo que E midió en dos
+días es que **el orden importa**, y lo probó cobrándose **cuatro falsos con
+cuatro causas distintas**:
+
+| # | el falso | la causa |
+|---|---|---|
+| ① | tres rojos falsos: borrar un texto legal, editar una aceptación, borrarla | **el asiento**: el CLI conecta con un rol que RLS no alcanza ⇒ toda sonda de permisos por `db query` mide la ausencia de TRIGGER, jamás la presencia de RLS |
+| ② | un verde falso: leyó el predicado de una policy, lo evaluó como superusuario, dio `true` — **y la policy estaba muerta** | **el predicado bajo RLS ajena**: el `EXISTS` lee tres tablas que `anon` no atraviesa, y esa RLS se aplica *adentro* |
+| ③ | «el refugio no puede subir fotos» | **una bandera del cliente**: su sonda usaba `upsert:true`, que toma otro camino. Sin `upsert` sube perfecto |
+| ④ | 🔴 **un falso VERDE**: `hogar.nombre_menor` «rebotó» | **un payload inválido por OTRA razón**: rebotaba por una clave suya mal escrita, antes de mirar el hogar |
+
+**El ④ es el que la vuelve ley.** Los tres primeros le hicieron perseguir
+defectos que no existían — caro, pero visible. **El cuarto le habría hecho
+declarar cerrada una compuerta que nunca se probó**, y eso no se descubre nunca:
+*se lee exactamente igual que una compuerta que funciona.* Lo destapó que **el
+control positivo también rebotaba con el mismo mensaje**.
+
+**Corolario, y es el enunciado que E mandó antes:** *una sonda mide el camino que
+TOMA, no el que uno cree que toma* — toda opción que se le pasa al cliente
+(`upsert`, `head`, `count`) es parte del camino y hay que variarla antes de
+llamarle rojo a un rebote.
+
+**Y su tercer corolario, de los falsos ⑤ y ⑥ de E, cuya forma es genuinamente
+distinta de los cuatro de arriba:** *un regex laxo sobre un corpus ajeno
+encuentra siempre — y encuentra algo VERDADERO que no es lo que se preguntó.*
+Su sonda de «¿la campana lleva el código?» dio rojo sobre tres `cita_recordatorio`
+de citas reales; su sonda de placeholders marcó el acta en rojo por los `{{…}}`
+legítimos. Los cuatro primeros son sobre el asiento o el camino; **estos dos son
+sobre el instrumento midiendo otra pregunta y acertándola.** El correctivo:
+**antes de llamar rojo a una coincidencia, se mira la fila que la produjo.**
+
+**Su gemela de instrumentación**, medida el mismo día por A: *un cinturón que no
+ejerce el camino que la función existe para recorrer no mide la función: mide su
+andamiaje.* Los seis brazos de `A9` medían privilegios, índices, triggers y una
+solicitud inexistente; **ninguno renderizó un acta con un dato faltante**, que es
+el único camino donde el defecto vivía — y el defecto reventaba con un error
+crudo de Postgres en la cara de la persona.
+
+---
+
+## 🔴 `L-483` — «NUNCA CORRIÓ» NO PRUEBA «NO EXISTE»
+
+> **Enunciado de D (S112):** midió `0 intenciones con la clave 'ruta'` y lo
+> declaró como *«estos cinco avisos son los primeros productores»*. **Es falso:**
+> `_guarderia_aplicar_acto` ya la emite en código vivo.
+
+**Midió el EFECTO y lo declaró como un hecho sobre la CAUSA.** Un cero en la
+tabla de resultados significa *«ningún productor CORRIÓ y emitió una»*, **jamás**
+*«ningún productor emite una»*.
+
+**Es `L-402` invertida.** Aquella dice que *«alcanzable desde afuera» no prueba
+«corrió»*; ésta dice que *«nunca corrió» no prueba «no existe»*. Las dos son la
+misma confusión entre la disposición y su ejercicio, leída desde las dos puntas.
+
+🔴 **Y no se quedó en su documento:** C razonó bien desde ese número y dejó
+`/guarderia/` **fuera** de la lista blanca de rutas de push ⇒ el primer acto de
+guardería habría llegado y **no habría navegado**. *Un dato mal atribuido no
+daña donde se escribe: daña donde alguien lo usa bien.*
+
+**El censo correcto se hace por la CAUSA** (¿quién puede emitirla?) y con sus dos
+controles, y sólo entonces **CIERRA** en vez de acotar (`L-437`). Y la corrección
+se hizo **en los dos documentos entregados, no sólo en el chat**: *el chat no está
+ahí cuando alguien relee un documento mañana.*
+
+---
+
+## 🔴 `L-484` — UN BINARIO DONDE EL MUNDO TIENE TRES ESTADOS
+
+> **Enunciado de B (S112), sobre la tercera vez en el mismo vertical.**
+
+Tres cobros, en tres piezas que no se parecen entre sí:
+
+- **convivencia** (S111) — `boolean` para «¿convive con perros?», cuando el
+  rescate recién llegado no tiene respuesta;
+- **el código de firma** (`B4`) — un estado de error, cuando «vencido» y
+  «equivocado» y «agotado» son tres cosas distintas;
+- **la salud** (hoy) — `esterilizado: boolean | null`, donde `null` cargaba
+  **dos significados que no son el mismo**: «no lo declaró» y «no lo está».
+
+**La forma del defecto es siempre igual:** el `null` de un binario se convierte
+en el basurero de todo lo que el vocabulario no puede decir, y **cada lector
+elige qué significa**. Con tres estados, «no se sabe» es un valor de primera
+clase y la pantalla lo dibuja con el mismo peso.
+
+🔴 **Y el corolario que B midió y A no había visto: EL EJE DERIVADO CURA AL
+LECTOR Y DEJA AL ESCRITOR BINARIO.** A iba a normalizar los tres datos de salud
+en una vista y llamarlo curado; B señaló que la fuente seguía siendo `boolean`.
+*Curar la lectura es curar el síntoma tres veces y dejar la causa* — la
+conversión va en la columna.
+
+**La disciplina de la conversión, que es la mitad práctica:** se mide primero
+(¿cuántas filas tienen valor declarado?), se convierte después, **y se ABORTA con
+excepción si alguien ya había declarado** — porque ahí el mapeo booleano → tres
+estados es una decisión de producto, no un cast.
+
+---
+
+## 🔴 `L-485` — CURAR NO ES CENSAR, Y EL RENAME ES SU CASO PURO
+
+`S112-A1` jubiló el estado `retirada` de `adopcion_publicacion` **mirando la
+tabla y no a quién la escribe**. Quedó un escritor: el ÚLTIMO `UPDATE` de
+`traspasar_mascota_a_familia`.
+
+⇒ **el traspaso no podía terminar nunca.** Y **ningún gate podía verlo**: esa
+función tiene cero consumidores y nadie la había llamado jamás. Lo destapó E
+produciendo el **control positivo de otro rojo** — el brazo que existe para
+probar que el instrumento discrimina.
+
+**La forma general:** al renombrar un valor de un vocabulario cerrado, el CHECK
+protege a la tabla y **no dice nada de las funciones que escriben ese valor**.
+El censo por `pg_get_functiondef` sobre el nombre viejo es una línea, y **cierra**
+(no acota) porque en Postgres no hay otra forma de escribir una columna.
+
+**Y su hermana, del mismo día y de la misma pista:** *una cura que vive en un
+archivo no protege a la migración que se escribe después.* El atajo de restaurar
+`estado_adopcion` con `NULL` se curó en `A1`… y se repitió en `A2b`, la
+migración siguiente, contra una columna `NOT NULL`.
+
+
+---
+
+## 🔴 `L-486` — UN ARNÉS QUE CREA LO QUE MIDE NO PRUEBA QUE ESO ESTÉ APLICADO
+
+**Error de conducción, S112-A, y lo destapó su autor.** D entregó la cura de la
+purga como *migración + reversa + arnés*. A corrió **el arnés**, lo vio verde, y
+declaró la cura aplicada — se lo dijo a D por escrito y lo puso en un commit.
+
+**El arnés crea la función dentro de su propia transacción y la deshace al
+terminar.** Su verde dice *«esta función, si existiera, se comportaría así»* —
+**jamás** *«esta función existe»*.
+
+🔴 **Y el estado real era el peor de los tres posibles**, porque las dos mitades
+llegaron por caminos distintos: `A10` **sí** había aplicado el estado `desistida`
+al CHECK, y la purga **no** se aplicó ⇒ *`desistida` se podía escribir y el
+borrado de identidad a los 90 días no la veía nunca — sin error, sin log, sin
+síntoma.* Con 0 filas costaba una migración; con una fila cuesta explicarle a
+una persona por qué sus datos siguen ahí.
+
+**Lo que lo hace difícil de ver:** el arnés es lo correcto, el verde es genuino,
+y el que lo corre está midiendo algo real. Lo que falla es **la inferencia**: de
+*«se comporta bien»* a *«está en la base»*.
+
+**El correctivo, y es de una línea:** después de aplicar una migración ajena, se
+le pregunta **al objeto** —`pg_get_functiondef` sobre la función viva, no el
+exit del arnés—. Es `L-422` («el ledger no es prueba; la prueba es preguntarle
+al objeto») aplicada a un arnés en vez de a un `db push`.
+
+**Su hermana declarada el mismo día:** *el `RAISE NOTICE` de una migración puede
+llevar un número hardcodeado que ya no es cierto.* El de la purga imprime «4
+estados leídos» y la función leyó **cinco** — verificado contra el objeto. **No
+se edita el archivo: la migración ya corrió y el repo tiene que decir lo que
+corrió**, así que la corrección vive acá y en su commit.

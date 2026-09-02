@@ -1702,6 +1702,46 @@ export {
 } from './wrappers/adopcion';
 export type { Adoptable, ResultadoTraspaso, CodigoErrorAdopcion } from './wrappers/adopcion';
 
+/* S112-A4 · el refugio: su cuenta y su rama del arranque — hunk aditivo. */
+export { obtenerMiCuentaRefugio } from './wrappers/prestador';
+export type { CuentaRefugio } from './wrappers/prestador';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   S112-A1/A2 · EL ADOPTABLE COMPLETO Y SUS LECTORES — hunk aditivo (76c).
+   La ficha que §4.1 del loop describe pedía veinte datos que no existían.
+   🔴 `obtenerAdoptables` CAMBIÓ DE FORMA: devuelve `{destacados, resto, cursor,
+   hayMas}` en vez de un array. Es ruptura declarada — su único consumidor
+   (la vidriera de C) está apagado por `ADOPCION_ALCANZABLE`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+export {
+  obtenerAdoptable,
+  actualizarAdoptable,
+  cambiarEstadoAdoptable,
+  agregarFotoAdoptable,
+  reordenarFotosAdoptable,
+  borrarFotoAdoptable,
+} from './wrappers/adopcion';
+export {
+  evaluarEsterilizacionAdoptable, obtenerMisAdoptables, obtenerMiAdoptable,
+  obtenerActaAdopcion, solicitarCodigoFirma, firmarActaAdopcion,
+  desistirSolicitudAdopcion, reportarPublicacion,
+  subirFotoAdoptable, borrarFotoAdoptableDeStorage,
+} from './wrappers/adopcion';
+export type {
+  MotivoReporte,
+  ActaAdopcion,
+  MiAdoptableFicha,
+  RespuestasPostulacion,
+  MiAdoptable,
+  VeredictoEsterilizacion,
+  Convivencia,
+  FiltrosAdoptables,
+  PaginaAdoptables,
+  FichaAdoptable,
+  FichaEditable,
+  EstadoAdoptable,
+} from './wrappers/adopcion';
+
 /* S111-A · la mensajería de adopción — hunk aditivo. La puerta que le faltaba
    al motor: las cuatro RPC existían y no se podían llamar desde `apps/`. */
 export {

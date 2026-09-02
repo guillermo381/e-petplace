@@ -77,6 +77,7 @@ export async function resolverCapacidadDeBarra(
     resolverCapacidadAtender(prestadorId),
   ]);
   return {
+    esRefugioPuro: false,
     esGestor: rol.ok ? rol.data : false,
     montaAtender:
       (posicion.ok ? posicion.data.esMostradorOGestion : false) &&
@@ -123,6 +124,7 @@ export async function resolverCapacidadDeBarra(
 function barraVendedorPuro(contexto: ContextoVentas | null): CapacidadDeBarra {
   const cap = capacidadVendedorPuro(contexto);
   return {
+    esRefugioPuro: false,
     esGestor: true,
     montaAtender: hayCapacidad(cap),
     escalonAtender: escalonDeAtender(cap),
@@ -179,12 +181,46 @@ export function contextoVentasDesdeArranque(ctx: ContextoArranque): ContextoVent
 export function capacidadDesdeContexto(ctx: ContextoArranque): CapacidadDeBarra {
   if (ctx.prestador !== null) {
     return {
+      /* Tiene negocio de servicios ⇒ NO es refugio puro, aunque además sea
+         refugio. Ver el borde declarado en `CapacidadDeBarra.esRefugioPuro`. */
+      esRefugioPuro: false,
       esGestor: ctx.esGestor,
       montaAtender: ctx.esMostradorOGestion && (ctx.hayOficioLocal || ctx.esVendedora),
       escalonAtender: escalonDeAtender(capacidadParaContar(ctx)),
     };
   }
+  /* EL REFUGIO PURO, antes de caer al vendedor: no tiene contexto de ventas y
+     el `barraVendedorPuro` le daría una casa que no es la suya. */
+  if (ctx.esRefugio) return barraRefugio();
   return barraVendedorPuro(contextoVentasDesdeArranque(ctx));
+}
+
+/**
+ * LA BARRA DEL REFUGIO — tres tabs y ninguna pregunta más (§4.2).
+ *
+ * 🔴 **CERO LECTURAS, y es el punto.** `esRefugio` **ya viene en el contexto
+ * de arranque** (A lo agregó como hunk aditivo con guard), así que componer
+ * esta barra no cuesta un solo viaje. *Leerlo aparte con
+ * `obtenerMiCuentaRefugio` habría sumado dos peticiones encadenadas al arranque
+ * de TODOS los prestadores, incluidos los que no son refugio* — que es
+ * exactamente lo que la unión `QuienEntra` existe para evitar, y lo dice con
+ * esas palabras.
+ *
+ * ⚠️ **`puedePublicar` NO se mira acá.** El rol abre la casa; publicar exige
+ * además cuenta activa, y ese gate vive en el motor. *Cerrar la barra por no
+ * poder publicar le sacaría el portal a un refugio suspendido que igual tiene
+ * solicitudes vivas que responder.*
+ */
+function barraRefugio(): CapacidadDeBarra {
+  return {
+    esRefugioPuro: true,
+    /* Los tres de la barra de servicios quedan en su valor cerrado: la rama de
+       `ordenTabsPrestador` ni los mira, y dejarlos en `false` dice la verdad —
+       un refugio puro no tiene NEGOCIO ni ATENDER. */
+    esGestor: false,
+    montaAtender: false,
+    escalonAtender: { escalon: 'varias' },
+  };
 }
 
 /**

@@ -96,7 +96,19 @@ export default function Explorar() {
            sección se queda quieta en vez de afirmar que nadie espera —
            *decirle a alguien que no hay animales en adopción porque se cayó la
            red es la peor de las dos mentiras posibles acá.* */
-        if (vigente && r.ok) setHayAdoptables(r.data.length > 0);
+        /* ✅ **REVISADA Y CONFIRMADA (C, S112).** A la adaptó mecánicamente
+           cuando el lector cambió de forma y la marcó como provisional; la
+           medición dice que era correcta y se queda: la pregunta de esta
+           pantalla no es «cuántos hay» sino **«hay alguno»**, y la respuesta es
+           la suma de las dos listas.
+
+           ⚠️ **Y `limite: 1` NO trae una fila: trae hasta cuatro.** El límite
+           gobierna `resto`; los tres destacados vienen igual, porque son una
+           carta de portada y no una página. *Se declara para que nadie lo lea
+           como una consulta de una fila y lo copie a otro lado esperando eso.*
+           Aun así es la forma más barata de preguntar «hay alguno», porque los
+           destacados el servidor los computa de todos modos. */
+        if (vigente && r.ok) setHayAdoptables(r.data.destacados.length + r.data.resto.length > 0);
       });
       return () => {
         vigente = false;

@@ -23,10 +23,17 @@
  * de retiro es cómo una función terminada queda apagada seis meses.*
  *
  * **Lo que NO gatea, a propósito:** la vidriera (`/adoptar`) y el hilo siguen
- * existiendo como rutas. Quien tenga el link entra — **no son secreto ni dato
- * ajeno**, y la puerta sin sesión desde el login es de S111-C y ya estaba
- * gateada por su propia letra. Lo que esta constante apaga es el
- * DESCUBRIMIENTO: que la adopción aparezca sola delante de alguien que entró a
- * mirar su guardería.
+ * existiendo como RUTAS. Quien tenga el link entra — **no son secreto ni dato
+ * ajeno**. Lo que esta constante apaga es el DESCUBRIMIENTO: que la adopción
+ * aparezca sola delante de alguien que entró a mirar su guardería.
+ *
+ * ⏪ **Y acá decía una cosa que no era cierta: que «la puerta sin sesión desde
+ * el login ya estaba gateada por su propia letra».** No lo estaba —E lo midió
+ * con un grep en cero sobre `login.tsx`— así que el botón «Ver mascotas en
+ * adopción» viajaba VIVO mientras esta constante decía que la vertical no era
+ * alcanzable. **Hoy son CUATRO lectores y la puerta del login es uno.**
+ * *Un flag que apaga tres puertas de cuatro no apaga nada: apaga las que alguien
+ * se acordó de atar* — y es la misma trampa que este archivo describe dos
+ * párrafos más arriba, cobrada sobre sí mismo.
  */
 export const ADOPCION_ALCANZABLE = false;

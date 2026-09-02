@@ -30,11 +30,37 @@ import type { EscalonAtender } from './capacidad-atender';
 
 /** Las cinco claves de ruta de la barra. Cerrado a propósito: la tab nueva
  *  tiene que entrar por acá y contestar dónde va. */
-export type ClaveTabPrestador = 'index' | 'mascotas' | 'atender' | 'negocio' | 'cuenta';
+export type ClaveTabPrestador =
+  | 'index'
+  | 'mascotas'
+  | 'atender'
+  | 'negocio'
+  | 'cuenta'
+  /* S112-C · LAS DOS DEL REFUGIO. No son tabs de más en la barra del
+     prestador: son **las mismas ranuras apuntando a otras pantallas**, y por
+     eso van como claves propias y no bifurcando `index` y `mascotas` adentro.
+     *Dos pantallas de dominios distintos en un archivo obligan a cada cura
+     futura a preguntarse a cuál de las dos le pega.* */
+  | 'adopcion'
+  | 'adoptables';
 
 /** Las dos preguntas que MODULAN la barra. Las otras tres tabs no dependen
  *  de nada, y por eso no son parámetros. */
 export interface CapacidadDeBarra {
+  /**
+   * S112-C · **UN REFUGIO SIN NEGOCIO DE SERVICIOS TIENE OTRA CASA.** §4.2:
+   * *«tres tabs: Home · Mascotas · Cuenta»*, y su Home **no es el HOY** (es el
+   * portal) ni su Mascotas es la de hoy (la actual son los animales que el
+   * prestador ATIENDE; la del refugio son los que PUBLICA).
+   *
+   * ⚠️ **«PURO» ES LA PALABRA EXACTA, y su borde está declarado:** se compone
+   * esta barra sólo cuando NO hay `prestador`. Quien sea las dos cosas —una
+   * clínica que además rescata— **conserva la barra de prestador**, y su portal
+   * queda alcanzable por ruta pero **no por tab**. *No se resuelve acá: cuál de
+   * las dos casas preside cuando alguien tiene ambas es una decisión de
+   * producto, y elegirla en una función de layout sería tomarla de contrabando.*
+   */
+  esRefugioPuro: boolean;
   /** Rol `dueño` o `administrador` — abre NEGOCIO. */
   esGestor: boolean;
   /** El **Y** de §2.1bis: rol de mostrador Y capacidad — abre ATENDER. */
@@ -62,6 +88,12 @@ export interface CapacidadDeBarra {
  * levantar una app ni una sesión, que es lo que la vuelve verificable.
  */
 export function ordenTabsPrestador(c: CapacidadDeBarra): ClaveTabPrestador[] {
+  /* 🔴 **RAMA ENTERA Y NO UN AGREGADO.** La barra del refugio no es la del
+     prestador con dos tabs más: es OTRA. Un refugio puro no tiene HOY que
+     mostrar ni animales que atienda — mezclarlas le daría dos cuartos vacíos.
+     Es el mismo movimiento que `barraVendedorPuro`, que tampoco compone sobre
+     la barra ajena. */
+  if (c.esRefugioPuro) return ['adopcion', 'adoptables', 'cuenta'];
   return [
     'index',
     'mascotas',
@@ -80,4 +112,6 @@ export const KEY_ETIQUETA_TAB = {
   atender: 'tabs.atender',
   negocio: 'tabs.negocio',
   cuenta: 'tabs.cuenta',
+  adopcion: 'tabs.adopcion',
+  adoptables: 'tabs.adoptables',
 } as const satisfies Record<ClaveTabPrestador, string>;
