@@ -704,6 +704,14 @@ export async function obtenerNombresReservadorPorCita(
 
 export interface PerfilPublico {
   id: string;
+  /**
+   * S112-A · **EL PUENTE.** `v_adoptables_publicos` devuelve `publicador_id` =
+   * `cuentas_comerciales.id`, y este lector se pide por `prestadores.id`: sin
+   * esta columna la pantalla tenía un id y el lector quería el otro.
+   *
+   * ⚠️ No abre nada: el mismo id ya viaja público en cada adoptable.
+   */
+  cuenta_comercial_id: string | null;
   nombre_comercial: string;
   foto_url: string | null;
   ciudad: string | null;
@@ -755,7 +763,7 @@ export async function obtenerPerfilesPublicos(
     // intento partía el select en tres líneas con `+` y tsc marcó las 17
     // propiedades como inexistentes.)
     .select(
-      'id, nombre_comercial, foto_url, ciudad, sector, descripcion, cohorte, cohorte_anio, zona_lat, zona_lon, zona_radio_m, calificacion_promedio, total_resenas, total_citas, servicios, portadas, clip_url',
+      'id, cuenta_comercial_id, nombre_comercial, foto_url, ciudad, sector, descripcion, cohorte, cohorte_anio, zona_lat, zona_lon, zona_radio_m, calificacion_promedio, total_resenas, total_citas, servicios, portadas, clip_url',
     )
     .in('id', [...ids]);
   if (error) return { ok: false, codigo: 'error', mensaje: MENSAJE_RESERVADOR };
@@ -766,6 +774,99 @@ export async function obtenerPerfilesPublicos(
     ok: true,
     data: data.map((f) => ({
       id: String(f.id),
+      /* `null` y no cadena vacía: un prestador sin cuenta comercial no tiene
+         una cuenta llamada «» — quien lea tiene que poder distinguirlo. */
+      cuenta_comercial_id: f.cuenta_comercial_id ?? null,
+      nombre_comercial: String(f.nombre_comercial ?? ''),
+      foto_url: f.foto_url ?? null,
+      ciudad: f.ciudad ?? null,
+      sector: f.sector ?? null,
+      descripcion: f.descripcion ?? null,
+      // Estrechada con la MISMA pieza que el resto del archivo, no con un
+      // cast: un cast diría «confío», `estrecharCohorte` VERIFICA.
+      cohorte: estrecharCohorte(f.cohorte),
+      cohorte_anio: typeof f.cohorte_anio === 'number' ? f.cohorte_anio : null,
+      zona_lat: typeof f.zona_lat === 'number' ? f.zona_lat : null,
+      zona_lon: typeof f.zona_lon === 'number' ? f.zona_lon : null,
+      zona_radio_m: typeof f.zona_radio_m === 'number' ? f.zona_radio_m : null,
+      calificacion_promedio:
+        typeof f.calificacion_promedio === 'number' ? f.calificacion_promedio : null,
+      total_resenas: typeof f.total_resenas === 'number' ? f.total_resenas : null,
+      total_citas: typeof f.total_citas === 'number' ? f.total_citas : null,
+      // Guard de shape sobre jsonb (L-124): una fila con forma inesperada se
+      // OMITE en vez de viajar a medias y romper la ficha del consumidor.
+      servicios: (Array.isArray(f.servicios) ? f.servicios : []).flatMap((s) => {
+        const o = s as Record<string, unknown>;
+        if (typeof o?.id !== 'string' || typeof o?.tipo !== 'string') return [];
+        return [{
+          id: o.id,
+          tipo: o.tipo,
+          nombre: typeof o.nombre === 'string' ? o.nombre : o.tipo,
+          precio: typeof o.precio === 'number' ? o.precio : null,
+          duracion_minutos: typeof o.duracion_minutos === 'number' ? o.duracion_minutos : null,
+          categoria: typeof o.categoria === 'string' ? o.categoria : null,
+        }];
+      }),
+      portadas: (Array.isArray(f.portadas) ? f.portadas : []).filter(
+        (u): u is string => typeof u === 'string' && u.length > 0,
+      ),
+      clip_url: f.clip_url ?? null,
+    })),
+  };
+}
+
+/**
+ * Las MISMAS fichas públicas, pedidas **por cuenta comercial**.
+ *
+ * 🔴 **Por qué existe, y por qué no alcanzaba con exponer la columna:**
+ * `v_adoptables_publicos` entrega `publicador_id` = `cuentas_comerciales.id`,
+ * y el lector de arriba filtra por `prestadores.id`. Con sólo la columna
+ * expuesta se podía *confirmar a qué cuenta pertenece un prestador que ya se
+ * encontró* — **y no encontrarlo**. La columna era el dato; esto es la
+ * operación. (Diagnóstico de C, 2-sep.)
+ *
+ * ⚠️ **La firma es hermana y no un parámetro de la de arriba** para que el
+ * filtro no dependa de un booleano: *un lector que decide POR QUÉ COLUMNA
+ * filtra según un flag es un lector que puede filtrar por la equivocada.*
+ *
+ * ⚠️⚠️ **El `select` va otra vez en UNA SOLA CADENA LITERAL.** No se extrajo a
+ * una constante compartida a propósito: supabase-js infiere el tipo de la fila
+ * **parseando el string en tiempo de tipos**, y cualquier indirección lo
+ * vuelve `string` genérico ⇒ la fila entera cae a `GenericStringError`. *La
+ * duplicación acá es el precio de que el tipo exista* — el comentario del
+ * lector de arriba documenta lo que costó descubrirlo.
+ *
+ * Una cuenta sin fila de `prestadores` —el refugio que todavía no armó su
+ * página, o la clínica que además rescata y ya tiene la suya— **simplemente
+ * NO viene**: su ausencia es la respuesta, y dice *«no armó su vitrina»*.
+ */
+export async function obtenerPerfilesPublicosPorCuenta(
+  cuentaIds: readonly string[],
+): Promise<ResultadoWrapper<PerfilPublico[], CodigoReservador>> {
+  if (cuentaIds.length === 0) return { ok: true, data: [] };
+  const { data, error } = await getClient()
+    .from('v_prestadores_publicos')
+    // ⚠️ EN UNA SOLA CADENA LITERAL, no concatenada: supabase-js infiere el
+    // tipo de la fila PARSEANDO el string en tiempo de tipos, y una
+    // concatenación lo vuelve `string` genérico ⇒ toda la fila cae a
+    // `GenericStringError` y se pierde el chequeo entero. (Medido: el primer
+    // intento partía el select en tres líneas con `+` y tsc marcó las 17
+    // propiedades como inexistentes.)
+    .select(
+      'id, cuenta_comercial_id, nombre_comercial, foto_url, ciudad, sector, descripcion, cohorte, cohorte_anio, zona_lat, zona_lon, zona_radio_m, calificacion_promedio, total_resenas, total_citas, servicios, portadas, clip_url',
+    )
+    .in('cuenta_comercial_id', [...cuentaIds]);
+  if (error) return { ok: false, codigo: 'error', mensaje: MENSAJE_RESERVADOR };
+  if (!Array.isArray(data)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJE_RESERVADOR };
+  }
+  return {
+    ok: true,
+    data: data.map((f) => ({
+      id: String(f.id),
+      /* `null` y no cadena vacía: un prestador sin cuenta comercial no tiene
+         una cuenta llamada «» — quien lea tiene que poder distinguirlo. */
+      cuenta_comercial_id: f.cuenta_comercial_id ?? null,
       nombre_comercial: String(f.nombre_comercial ?? ''),
       foto_url: f.foto_url ?? null,
       ciudad: f.ciudad ?? null,
