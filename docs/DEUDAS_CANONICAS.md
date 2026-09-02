@@ -27070,6 +27070,15 @@ TOMA, no el que uno cree que toma* — toda opción que se le pasa al cliente
 (`upsert`, `head`, `count`) es parte del camino y hay que variarla antes de
 llamarle rojo a un rebote.
 
+**Y su tercer corolario, de los falsos ⑤ y ⑥ de E, cuya forma es genuinamente
+distinta de los cuatro de arriba:** *un regex laxo sobre un corpus ajeno
+encuentra siempre — y encuentra algo VERDADERO que no es lo que se preguntó.*
+Su sonda de «¿la campana lleva el código?» dio rojo sobre tres `cita_recordatorio`
+de citas reales; su sonda de placeholders marcó el acta en rojo por los `{{…}}`
+legítimos. Los cuatro primeros son sobre el asiento o el camino; **estos dos son
+sobre el instrumento midiendo otra pregunta y acertándola.** El correctivo:
+**antes de llamar rojo a una coincidencia, se mira la fila que la produjo.**
+
 **Su gemela de instrumentación**, medida el mismo día por A: *un cinturón que no
 ejerce el camino que la función existe para recorrer no mide la función: mide su
 andamiaje.* Los seis brazos de `A9` medían privilegios, índices, triggers y una

@@ -783,3 +783,188 @@ que todo lo demás que corriste no midió lo que creías.*
 > **La forma que las cubre a las cuatro:** *el control positivo va PRIMERO, no
 > al lado. Si el caso que debe pasar no pasa, ningún rojo de abajo significa
 > nada — y se lee igual de convincente.*
+
+---
+
+# ADDENDUM 6 · 2-sep 16:45–17:20 — E3 CORRIÓ POR CAMINO REAL Y MURIÓ EN EL ACTA
+
+**CONTRA QUÉ:** base viva + `main f81494aa`. **Dos sesiones reales** (la familia
+`+8` y el refugio), sobre **Nube** —no sobre Luna, para no tocar el animal del
+recorrido del founder—.
+
+## F1 · LO QUE CAMINÓ
+
+```
+① aceptar condiciones (familia) ....... ✅ nueva
+② postular con el formulario completo . ✅ solicitud 8b747efd-5f23-454a-990d-0d28ad9b59cd
+③ el refugio responde en el hilo ...... ✅
+④ el refugio ACEPTA ................... ✅ {"ok":true,"estado":"aceptada"}
+⑤ obtener_acta_adopcion ............... 🔴 malformed array literal: "adoptante_cedula"
+⑥ solicitar_codigo_firma .............. 🔴 el mismo error
+```
+
+**Los pasos 10 a 13 de §0 caminan de verdad**, con las dos personas, el hilo y la
+aceptación. **El arco muere al abrir el acta.**
+
+## F2 · 🔴 LA CAUSA, AISLADA CON DOS CONTROLES POSITIVOS
+
+```
+text[] := '{}' || 'literal sin casteo' ...... 🔴 malformed array literal
+CONTROL+ · el mismo CON ::text .............. ✅ {adoptante_cedula}
+CONTROL+ · array_append(v,'x') .............. ✅ {adoptante_cedula}
+¿y si el array YA tiene un elemento? ........ 🔴 igual
+```
+
+En `_renderizar_acta`: `v_falt text[] := '{}'` y después **trece líneas** de la
+forma `v_falt := v_falt || 'adoptante_cedula'`. *Con el literal sin tipo, Postgres
+resuelve `anyarray || anyarray` e intenta castear el texto a `text[]`.* **Las 13
+ocurrencias medidas, todas con la misma forma.**
+
+**Por qué no se vio antes, y es lo que lo vuelve caro:** la línea de
+`adoptante_nombre` **no falló** —el nombre sí estaba—; falló la siguiente. ⇒ **el
+defecto se manifiesta en la PRIMERA línea que se ejecute**, así que un acta a la
+que sólo le faltara `animal_senas` reventaría nombrando `animal_senas`.
+
+> **No es un caso borde: es toda la rama de los faltantes** — y hoy dispara
+> **siempre**, porque nadie tiene cédula cargada. *El único camino que pasa es el
+> del acta sin nada que falte, que es exactamente el que no va a ocurrir la
+> primera vez que alguien la use.*
+
+**Alcance del daño: cero.** Muere al abrir el acta ⇒ **0 firmas, 0 códigos
+emitidos**, nada a medias.
+
+**PUERTA: `_renderizar_acta`, sus 13 líneas. Es de A.** *No propongo la forma:
+hay dos que funcionan y elegir entre ellas no es mío.*
+
+## F3 · LO QUE ESTO DEJÓ SIN MEDIR, DECLARADO
+
+**El defecto del OTP que A pidió medir desde afuera —que
+`solicitar_codigo_firma` ya no devuelva el código en su payload— NO SE PUDO
+MEDIR:** la llamada muere antes de emitir nada.
+
+**Lo único que sí se puede afirmar:** `solicitar_codigo_firma` **murió con el
+mismo error** ⇒ *llama a `_renderizar_acta` ANTES de emitir*, así que **para un
+acta incompleta no emite código**. Eso es la mitad buena. **La otra mitad —que el
+payload no lo lleve cuando el acta SÍ está completa— queda SIN MEDIR**, y no se
+da por buena leyendo el cuerpo: se pidió medirla desde afuera y así se va a medir.
+
+## F4 · ESTADO REAL QUE ESTA CORRIDA DEJÓ, declarado y no limpiado
+
+**La solicitud `8b747efd-5f23-454a-990d-0d28ad9b59cd` sobre Nube quedó en
+`aceptada`, con 2 mensajes en el hilo y 0 firmas.** **No se limpió a propósito:**
+es exactamente el fixture que hace falta para probar la firma en cuanto el acta
+abra. *Se declara para que su dueño decida — no para que aparezca de sorpresa.*
+
+**Los seis rojos de §5.5, más `acta_cambio_de_version` y `acta_incompleta`,
+quedan escritos y corren el día que el acta abra.**
+
+---
+
+# ADDENDUM 7 · 2-sep 17:30–18:20 — EL ACTA ABRE · Y LA FIRMA SE FRENA EN EL CATÁLOGO DE AVISOS
+
+**CONTRA QUÉ:** base viva + `main ed984c9a`. **Tres sesiones reales** (familia,
+refugio, tercero), sobre la solicitud `8b747efd` de **Nube**.
+
+## G1 · ✅ EL ACTA ABRE, Y BIEN
+
+```
+⑤ obtener_acta_adopcion (familia) ....... ✅
+   faltantes ............................ ["adoptante_cedula","adoptante_ciudad",
+                                           "refugio_representante_cedula","animal_senas"]
+   versión · largo ...................... 1 · 5 121 chars
+   CONTROL+ · el refugio también la ve .. ✅
+   🔴 un TERCERO ........................ ✅ sin_acceso
+```
+
+**El texto se rinde de verdad**: el nombre del adoptante, «Nube» y el refugio
+aparecen. **Los únicos `{{…}}` que sobreviven son los cuatro que DEBEN
+sobrevivir hasta la firma** — `{{folio}}`, `{{firma_refugio}}`,
+`{{firma_adoptante}}`, `{{hash_documento}}`.
+
+⚠️ *Mi primera sonda los marcó en rojo: el regex buscaba `{{…}}` **o** guiones
+bajos, y los `{{…}}` legítimos lo dispararon. **Falso rojo, verificado antes de
+reportarlo.***
+
+## G2 · ✅ `acta_incompleta` NOMBRA LOS FALTANTES, y no hay callejón
+
+```
+solicitar_codigo_firma (familia) ... ✅ acta_incompleta: adoptante_cedula, adoptante_ciudad,
+                                        refugio_representante_cedula, animal_senas
+solicitar_codigo_firma (refugio) ... ✅ el mismo, con los mismos cuatro
+solicitar_codigo_firma (tercero) ... ✅ sin_acceso
+```
+
+**No se emite código para un acta con huecos** — que era el punto. **Y probé que
+el callejón que sospechaba NO existe**: cada actor puede llenar **su** faltante
+por camino real, sin depender de la firma.
+
+```
+familia → profiles.cedula + direccion_ciudad ....... ✅ escribió
+refugio → profiles.cedula (el representante) ....... ✅ escribió
+refugio → actualizar_adoptable(senas) .............. ✅ ok
+faltantes después .................................. []
+```
+
+*Importaba medirlo: `firmar_acta_adopcion` toma `p_cedula` y `p_domicilio`, y si
+ésa fuera la única puerta habría deadlock — el código exige el acta completa y la
+cédula se cargaría al firmar. **No lo es.***
+
+## G3 · 🔴 LA FIRMA NO PUEDE EMITIR CÓDIGO: falta el tipo en el catálogo de avisos
+
+**Con el acta ya completa (`faltantes: []`):**
+
+```
+solicitar_codigo_firma ....... 🔴 tipo_desconocido
+payload ...................... null
+```
+
+**Causa, medida:** la función llama a
+`registrar_intencion_notificacion('codigo_firma_adopcion', …)` y **ese código no
+está en `cat_notificacion_tipos`**:
+
+```
+tipos en el catálogo ......... 64
+los de adopción / firma ...... adopcion_mensaje_nuevo · adopcion_sin_respuesta ·
+                               adopcion_solicitud_nueva · adopcion_solicitud_respondida
+🔴 codigo_firma_adopcion ..... NO ESTÁ
+```
+
+**Alcance del daño: cero, y por la razón correcta** — `adopcion_codigo_firma`
+tiene **0 filas**: la excepción revierte la RPC entera, así que **no quedan
+códigos huérfanos**. *El diseño es sano; le falta una fila de catálogo.*
+
+**PUERTA: el tipo `codigo_firma_adopcion` en `cat_notificacion_tipos`. Es de A o de D.**
+
+## G4 · LO QUE ESTO DEJA SIN MEDIR — la sonda que A pidió, otra vez
+
+**No se pudo medir que el payload de `solicitar_codigo_firma` no lleve el
+código**, porque la llamada **no llega a devolver payload**. *Se declara por
+segunda vez en lugar de darse por buena leyendo el cuerpo.*
+
+**Lo que sí quedó medido de esa cura, y es la mitad del diseño:** el código
+**sale por el motor de intenciones** y el `RETURN` construye *«a dónde se mandó,
+jamás qué se mandó»*. **Eso es lectura, no medición, y así se declara.**
+
+## G5 · LOS ROJOS DE ACCESO, TODOS VERDES
+
+| sonda | dio |
+|---|---|
+| un tercero abre el acta | ✅ `sin_acceso` |
+| un tercero pide código | ✅ `sin_acceso` |
+| un tercero firma | ✅ `sin_acceso` |
+| firmar sin código emitido (×6) | ✅ `sin_codigo` las seis |
+
+*`sin_codigo` en los seis intentos es coherente: no hay código que acertar. **Los
+rojos de `codigo_vencido`, `codigo_incorrecto`, `intentos_agotados`, `ya_firmaste`
+y `acta_cambio_de_version` siguen sin poder correr**, y no se dan por buenos.*
+
+## G6 · MI SEXTO FALSO, y esta vez en la campana
+
+**Mi sonda de «¿la campana lleva el código?» dio 🔴 en las dos tablas.** Fui a
+mirar el crudo antes de reportar: **las tres filas son `cita_recordatorio` de
+citas de Thor y de Kira**, del mismo día, **sin ninguna relación con la firma**.
+El `\d{8}` pegaba en otra cosa.
+
+> **Sexta vez en dos días.** *Un regex laxo sobre un corpus ajeno encuentra
+> siempre — y encuentra algo verdadero que no es lo que se preguntó.* **La forma:
+> antes de llamar rojo a una coincidencia, se mira la fila que la produjo.**
