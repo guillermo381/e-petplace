@@ -15,10 +15,29 @@ Los cinco avisos del vertical (N3) van a emitir **`ruta`** en el `data` de la
 push. Vos ya tenés el parser (`rutaDelToque`, 9/9) y **su contrato es duro**:
 interna, arranca con `/`, nunca `//` ni `http` — si no, no navega y lo dice.
 
-🔴 **Dato que te va a interesar: `ruta` NUNCA se usó.** Medido: **0 intenciones
+🔴 **Dato que te va a interesar: `ruta` NUNCA LLEGÓ.** Medido: **0 intenciones
 con la clave, sobre 352**. El canal existe entero —motor → edge → tu parser— y
-**nadie puso jamás un valor adentro.** Estos cinco avisos son sus primeros
-productores, así que **tu parser se estrena de verdad con esto**.
+**ninguna intención viva lleva un valor adentro.**
+
+🔴 **CORRECCIÓN (2-sep, posterior): «primeros productores» ERA FALSO.** El censo
+por la CAUSA —y no por el efecto— encontró que **`_guarderia_aplicar_acto` ya
+emite `'ruta', '/guarderia/' || p_estadia_id`**, en código vivo (línea 90 de su
+cuerpo; verificado que no es comentario, `L-170`). *0 intenciones con la clave
+significa «ningún productor CORRIÓ y emitió una», jamás «ningún productor emite
+una».* Medí el efecto y lo declaré como un hecho sobre la causa — familia de
+`L-402`, invertida. **El censo cerrado, con sus controles:**
+
+| productor | ruta | app |
+|---|---|---|
+| `_guarderia_aplicar_acto` | `/guarderia/<estadiaId>` | cliente |
+| los cinco emisores de acá | las siete de §2 | ambas |
+
+Controles: `_voz_notificacion` excluido a mano (menciona rutas y no emite) · y
+**cero funciones escriben `notificacion_intencion` sin pasar por el motor** ⇒ el
+motor es la única puerta y el censo **cierra**, no acota.
+
+⇒ **tu lista blanca del cliente tiene que incluir `/guarderia/`**: su contrato
+está firmado en código, no en una intención mía.
 
 ## §2 · LAS RUTAS QUE VAN A LLEGAR
 
