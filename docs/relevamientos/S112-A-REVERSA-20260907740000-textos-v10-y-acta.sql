@@ -1,0 +1,21 @@
+-- REVERSA de 20260907740000 — los tres textos v1.0 del abogado + el acta plantilla.
+-- ESCRITA ANTES. S112-A · adenda 5.
+--
+-- QUÉ DESHACE:
+--   update adopcion_documentos set vigente = true
+--    where codigo in ('terminos_refugio','condiciones_adopcion') and version = 1;
+--   delete from adopcion_documentos
+--    where (codigo in ('terminos_refugio','condiciones_adopcion') and version = 2)
+--       or (codigo = 'acta_adopcion' and version = 1);
+--   drop trigger if exists adopcion_documentos_texto_inmutable on adopcion_documentos;
+--   alter table adopcion_documentos drop column if exists es_plantilla;
+--
+-- 🔴 QUÉ **NO** DESHACE:
+--   · **Borrar `acta_adopcion` VUELVE A CERRAR la puerta del traspaso.** Es el
+--     efecto buscado de la reversa, pero hay que saberlo: una adopción a medio
+--     camino quedaría sin poder firmarse.
+--   · Si alguien ya FIRMÓ un acta, la firma quedaría apuntando a un documento
+--     inexistente. Control obligatorio antes de correrla — hoy da 0 porque el
+--     registro de firmas todavía no existe.
+--   · El trigger de inmutabilidad no se puede «deshacer» sobre lo ya escrito:
+--     los textos cargados no se sobrescribieron nunca, que es el punto.
