@@ -60,7 +60,7 @@ import {
 } from '@epetplace/ui';
 import {
   caraDeMascota,
-  cerrarSolicitudAdopcion,
+  desistirSolicitudAdopcion,
   obtenerMisSolicitudesAdopcion,
   responderSolicitudAdopcion,
   resolverUrlsFotos,
@@ -167,10 +167,12 @@ export default function HiloSolicitud() {
     if (estado.fase !== 'listo' || trabajando) return;
     setTrabajando(true);
     try {
-      const r = await cerrarSolicitudAdopcion({
-        solicitudId: estado.hilo.solicitudId,
-        estadoFinal: 'declinada',
-      });
+      /* ⏪ Esto llamaba a `cerrarSolicitudAdopcion({estadoFinal:'declinada'})`,
+         que era lo correcto contra el CHECK de entonces. **Hoy `desistida` es un
+         estado propio** y tiene su verbo: *declinar es del publicador; desistir
+         es de la familia, y reusar el mismo haría que el refugio viera «yo la
+         decliné» sobre alguien que se fue solo.* */
+      const r = await desistirSolicitudAdopcion(estado.hilo.solicitudId);
       if (!r.ok) {
         mostrar({ variante: 'error', texto: r.mensaje });
         return;
@@ -307,6 +309,24 @@ export default function HiloSolicitud() {
               gap: spacing[2],
             }}
           >
+            {/* ⭐ **EL HILO ES LA PUERTA DEL ACTA** — letra del founder: *«cuando
+                el refugio acepta, el hilo mismo me lleva al final»*. Por eso el
+                aviso de «acta lista» apunta acá y no a una pantalla suelta, y
+                por eso este camino tiene que existir: *el aviso no saltea el
+                hilo, así que si el hilo no llevara, no llegaría nadie.* */}
+            {estado.hilo.estado === 'aceptada' ? (
+              <Boton
+                variante="primario"
+                bloque
+                etiqueta={t('hiloAdopcion.verActa')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/adoptar/acta/[solicitudId]',
+                    params: { solicitudId: estado.hilo.solicitudId },
+                  })
+                }
+              />
+            ) : null}
             {cerrado ? (
               <Texto variante="apoyo" color="tertiary">
                 {t('hiloAdopcion.cerrado')}

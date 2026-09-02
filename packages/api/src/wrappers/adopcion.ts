@@ -386,7 +386,11 @@ export interface MiAdoptable {
   fotoUrl: string | null;
   ingresadoEn: string;
   esperaDias: number;
-  estado: EstadoAdoptable | 'memorial';
+  /** `'en_proceso'` = **aceptada con menos de DOS firmas**. Vivía en la letra
+   *  del founder (§4.2) y ninguna pantalla podía pasarlo con verdad hasta que
+   *  existió el motor de firmas: `solicitudesVivas` cuenta «hay gente
+   *  escribiendo», no «esta adopción está en curso». */
+  estado: EstadoAdoptable | 'memorial' | 'en_proceso';
   puedePublicar: boolean;
   /** 🔴 CÓDIGO, no frase — la pantalla lo traduce con el riel (`D-539`).
    *  **`null` SÓLO cuando de verdad puede publicar**: si no puede, la pantalla
@@ -425,7 +429,7 @@ export async function obtenerMisAdoptables(): Promise<
       fotoUrl: typeof v.foto_url === 'string' ? v.foto_url : null,
       ingresadoEn: String(v.ingresado_en ?? ''),
       esperaDias: Number(v.espera_dias ?? 0),
-      estado: String(v.estado ?? 'borrador') as EstadoAdoptable | 'memorial',
+      estado: String(v.estado ?? 'borrador') as MiAdoptable['estado'],
       puedePublicar: v.puede_publicar === true,
       motivoNoPublica:
         mv === 'adoptable_no_esterilizado' || mv === 'edad_no_declarada' || mv === 'animal_en_memorial'
@@ -1354,6 +1358,28 @@ export async function firmarActaAdopcion(params: {
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
   const r = data as Record<string, unknown>;
+
+  /* 🔴 LOS DOS CASOS DEL CÓDIGO VUELVEN COMO `{ok:false}`, NO COMO EXCEPCIÓN, y
+     no es un capricho del motor: **un `RAISE` habría revertido el contador de
+     intentos en la misma transacción** — que es exactamente el defecto que
+     dejaba el OTP sin techo (los seis intentos decían «quedan 4»).
+     *Un código mal tecleado no es una excepción: pasa todos los días.* */
+  if (r.ok === false) {
+    const m = r.motivo;
+    const codigo: CodigoErrorAdopcion =
+      m === 'intentos_agotados' ? 'intentos_agotados' : 'codigo_incorrecto';
+    const quedan = Number(r.intentos_restantes ?? 0);
+    return {
+      ok: false,
+      codigo,
+      mensaje:
+        codigo === 'codigo_incorrecto'
+          ? `${MENSAJES.codigo_incorrecto} Te ${quedan === 1 ? 'queda' : 'quedan'} ${quedan} ${quedan === 1 ? 'intento' : 'intentos'}.`
+          : MENSAJES.intentos_agotados,
+      detalle: null,
+    };
+  }
+
   return {
     ok: true,
     data: {
@@ -1412,4 +1438,47 @@ export async function reportarPublicacion(params: {
   const r = data as Record<string, unknown>;
   if (typeof r.reporte_id !== 'string') return fallaCodigo('datos_inconsistentes');
   return { ok: true, data: { reporteId: r.reporte_id, yaExistia: r.ya_existia === true } };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑧ LAS FOTOS EN STORAGE — S112-A (pedido de C)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Sube la foto al bucket. 🔴 **El `path` lo arma ESTE wrapper, jamás la
+ *  pantalla**: la carpeta `<publicacionId>/` **es lo que la policy del bucket
+ *  mira** para decidir de quién es el archivo. Compuesto acá, no se puede
+ *  escribir mal; compuesto en una plantilla de string, cualquiera lo tipea
+ *  distinto y el rebote llega en el aparato.
+ *
+ *  `upsert:false` a propósito: dos subidas nunca pisan la misma foto, y el
+ *  nombre lleva el instante. */
+export async function subirFotoAdoptable(
+  publicacionId: string,
+  bytes: ArrayBuffer,
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
+): Promise<ResultadoWrapper<{ path: string }, CodigoErrorAdopcion>> {
+  const ext = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg';
+  const path = `${publicacionId}/foto-${Date.now()}.${ext}`;
+  const { error } = await getClient().storage.from('adopcion-fotos').upload(path, bytes, {
+    contentType,
+    upsert: false,
+  });
+  if (error) return fallo(error.message);
+  return { ok: true, data: { path } };
+}
+
+/** Borra el ARCHIVO del bucket. **Es la gemela de `borrarFotoAdoptable`**, que
+ *  borra la FILA y devuelve el `pathABorrar`.
+ *
+ *  🔴 Las dos viven acá, del mismo lado, a pedido de C y con su razón: si la
+ *  pantalla tuviera que llamar a las dos, **puede olvidarse de la mitad** — y la
+ *  mitad que se olvida deja un huérfano **público y alcanzable por URL**, la
+ *  misma clase que `D-731`. Usalas siempre en par:
+ *  `const r = await borrarFotoAdoptable(id); if (r.ok) await borrarFotoAdoptableDeStorage(r.data.pathABorrar);` */
+export async function borrarFotoAdoptableDeStorage(
+  path: string,
+): Promise<ResultadoWrapper<{ path: string }, CodigoErrorAdopcion>> {
+  const { error } = await getClient().storage.from('adopcion-fotos').remove([path]);
+  if (error) return fallo(error.message);
+  return { ok: true, data: { path } };
 }

@@ -22240,6 +22240,10 @@ export type Database = {
         Args: { p_atencion_id: string }
         Returns: Record<string, unknown>
       }
+      _categoria_es_apagable: {
+        Args: { p_categoria: string }
+        Returns: boolean
+      }
       _cerrar_teleconsulta_si_vencio: {
         Args: { p_cita_id: string }
         Returns: undefined

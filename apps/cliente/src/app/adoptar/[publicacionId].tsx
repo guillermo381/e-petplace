@@ -79,10 +79,11 @@ import {
 } from '@epetplace/ui';
 import {
   caraDeMascota,
-  crearSolicitudAdopcion,
   obtenerAdoptable,
   obtenerSesion,
+  reportarPublicacion,
   type FichaAdoptable,
+  type MotivoReporte,
 } from '@epetplace/api';
 import { describirEdad, describirEspera } from '@epetplace/domain';
 
@@ -97,7 +98,17 @@ type Estado =
 /** Cuál de las tres hojas está abierta. `null` = ninguna. **Una variable y no
  *  tres booleanos**: dos hojas abiertas a la vez es un estado que no existe, y
  *  con tres banderas sería expresable. */
-type HojaAbierta = 'bono' | 'padrinazgo' | 'verificacion' | null;
+type HojaAbierta = 'bono' | 'padrinazgo' | 'verificacion' | 'reportar' | null;
+
+/** Los cinco motivos del motor. **Se declaran y no se derivan**: no hay
+ *  catálogo que los traiga, y el enum los cierra del otro lado. */
+const MOTIVOS: readonly MotivoReporte[] = [
+  'maltrato',
+  'venta_encubierta',
+  'datos_falsos',
+  'no_es_adopcion',
+  'otro',
+];
 
 export default function PantallaFichaAdoptable() {
   const { publicacionId } = useLocalSearchParams<{ publicacionId: string }>();
@@ -108,8 +119,8 @@ export default function PantallaFichaAdoptable() {
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [conSesion, setConSesion] = useState<boolean | null>(null);
-  const [postulando, setPostulando] = useState(false);
   const [hoja, setHoja] = useState<HojaAbierta>(null);
+  const [reportando, setReportando] = useState(false);
   const [intento, setIntento] = useState(0);
 
   useFocusEffect(
@@ -143,56 +154,49 @@ export default function PantallaFichaAdoptable() {
    * decirle algo que ya sabíamos*, y sin el destino volvería al Hogar en vez de
    * a este animal — lo que §4.1 prohíbe con todas las letras.
    */
-  const postular = async (f: FichaAdoptable) => {
-    if (postulando) return;
+  const postular = (f: FichaAdoptable) => {
     if (conSesion !== true) {
       router.push({ pathname: '/registro', params: { volverA: '/adoptar' } });
       return;
     }
-    setPostulando(true);
+    /* ⏪ **ACÁ VIVÍA UN PLACEHOLDER QUE HABRÍA ESCRITO DECLARACIONES FALSAS.**
+       Cuando `crear_solicitud_adopcion` pasó a exigir `respuestas`, esta llamada
+       dejó de compilar y se adaptó mecánicamente con un hogar inventado y un
+       motivo que decía «PENDIENTE». *Del otro lado hay un refugio decidiendo a
+       quién le entrega un animal con esas respuestas a la vista.* Se declaró en
+       el código y no viajó así.
+
+       ✅ **Postular ya no es un toque: es el formulario**, que es lo que §4.1
+       pide. Esta pantalla lleva; la solicitud la crea la que recoge lo que la
+       persona declaró. **El nombre viaja** para que el encabezado diga a quién
+       postula — *un formulario sin sujeto se lee como un trámite.* */
+    router.push({
+      pathname: '/adoptar/postular/[publicacionId]',
+      params: { publicacionId: f.publicacionId, nombre: f.nombre },
+    });
+  };
+
+  /**
+   * REPORTAR. **Idempotente y hablada**: el segundo toque devuelve el reporte
+   * que existe, y por eso `yaExistia` **no se trata como error** — *sobre un
+   * acto delicado, un rebote técnico se lee como «no se pudo denunciar»*.
+   *
+   * 🔴 **Y el refugio NO ve quién reportó**: no está en su policy. La pantalla
+   * no lo promete ni lo insinúa; simplemente es verdad del otro lado.
+   */
+  const reportar = async (f: FichaAdoptable, motivo: MotivoReporte) => {
+    if (reportando) return;
+    setReportando(true);
     try {
-      /* ⚠️ ADAPTACIÓN MECÁNICA DE A (S112-A7), PROVISIONAL Y DECLARADA.
-         `crearSolicitudAdopcion` ahora EXIGE las respuestas del formulario —
-         postular dejó de ser un toque, que es lo que §4.1 pide. Esto manda un
-         formulario MÍNIMO sólo para que el árbol compile; **C lo reemplaza en
-         C5 por la pantalla real** (`FormularioPostulacion` de B ya está).
-         🔴 Mientras esta línea viva, lo que se guarda NO es lo que la persona
-         declaró: es un placeholder. No se publica así. */
-      const r = await crearSolicitudAdopcion({
-        publicacionId: f.publicacionId,
-        respuestas: {
-          hogar: { adultos: 1, menores_0_5: 0, menores_6_12: 0, menores_13_17: 0 },
-          vivienda: 'otro',
-          horas_solo: 0,
-          motivo: 'PENDIENTE — formulario no montado (S112-C5)',
-        },
-      });
+      const r = await reportarPublicacion({ publicacionId: f.publicacionId, motivo });
       if (!r.ok) {
-        /* La compuerta NO se muestra: se resuelve. **No se re-postula sola al
-           volver**: postular es un acto de la persona, y encadenarlo
-           convertiría «acepto las condiciones» en «acepto y de paso mando la
-           solicitud». */
-        if (r.codigo === 'condiciones_no_aceptadas') {
-          router.push({
-            pathname: '/legales/[codigo]',
-            params: { codigo: 'condiciones_adopcion', volverA: '/adoptar' },
-          });
-          return;
-        }
-        if (r.codigo === 'solicitud_ya_viva') {
-          mostrar({ variante: 'neutro', texto: r.mensaje });
-          router.push('/adoptar/solicitudes');
-          return;
-        }
         mostrar({ variante: 'error', texto: r.mensaje });
         return;
       }
-      router.push({
-        pathname: '/adoptar/solicitud/[solicitudId]',
-        params: { solicitudId: r.data.solicitudId },
-      });
+      setHoja(null);
+      mostrar({ variante: 'neutro', texto: t('fichaAdoptable.reporteGracias') });
     } finally {
-      setPostulando(false);
+      setReportando(false);
     }
   };
 
@@ -363,7 +367,14 @@ export default function PantallaFichaAdoptable() {
             conSesion === false
               ? t('adoptar.postularSinCuenta')
               : t('adoptar.postular', { nombre: f.nombre }),
-          onPress: () => void postular(f),
+          onPress: () => postular(f),
+        }}
+        /* «Reportar esta publicación» — discreto y al final (§4.1). Se dibuja
+           porque `reportar_publicacion` EXISTE: hasta hace un rato no estaba y
+           el control no se ofrecía apagado (Ley 23). */
+        reportar={{
+          etiqueta: t('fichaAdoptable.reportar'),
+          onPress: () => setHoja('reportar'),
         }}
         apadrinar={{
           texto: t('fichaAdoptable.apadrinar'),
@@ -452,6 +463,36 @@ export default function PantallaFichaAdoptable() {
         <View style={{ gap: spacing[3] }}>
           <Texto variante="cuerpo">{t('fichaAdoptable.bonoCuerpo')}</Texto>
           <Boton etiqueta={t('fichaAdoptable.cerrar')} bloque onPress={() => setHoja(null)} />
+        </View>
+      </Hoja>
+
+      <Hoja
+        visible={hoja === 'reportar'}
+        onCerrar={() => setHoja(null)}
+        titulo={t('fichaAdoptable.reportar')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="cuerpo">{t('fichaAdoptable.reportarCuerpo')}</Texto>
+          {/* Un motivo por botón y ninguno preseleccionado: *un motivo elegido
+              por default es una denuncia que la pantalla escribió.* */}
+          {MOTIVOS.map((m) => (
+            <Boton
+              key={m}
+              variante="secundario"
+              bloque
+              etiqueta={t(`fichaAdoptable.motivo_${m}` as 'fichaAdoptable.motivo_maltrato')}
+              cargando={reportando}
+              onPress={() => {
+                if (estado.fase === 'listo') void reportar(estado.ficha, m);
+              }}
+            />
+          ))}
+          <Boton
+            variante="ghost"
+            bloque
+            etiqueta={t('fichaAdoptable.cerrar')}
+            onPress={() => setHoja(null)}
+          />
         </View>
       </Hoja>
 
