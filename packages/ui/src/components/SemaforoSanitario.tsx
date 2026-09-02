@@ -83,44 +83,96 @@ import { Chevron } from './chevron'
 /**
  * 🔴 UNIÓN DISCRIMINADA — ver el encabezado. `falta` SIN camino no compila.
  */
-export type RequisitoSanitario =
-  | {
-      /** Identidad estable. Jamás se muestra. */
-      clave: string
-      /** El requisito en voz de la app: «Vacuna antirrábica». */
-      etiqueta: string
-      estado: 'al_dia'
-      /**
-       * El respaldo, si la app lo quiere mostrar: «vence 12 mar 2027», ya
-       * formateado por el riel. Opcional — un «al día» se sostiene solo.
-       */
-      detalle?: string
-    }
-  | {
-      clave: string
-      etiqueta: string
-      estado: 'falta'
-      detalle?: string
-      /**
-       * 🔴 **OBLIGATORIO.** El camino a resolver, a UN toque: abre la carga
-       * del carnet. Sin esto la pieza no compila, y ése es el punto.
-       */
-      onResolver: () => void
-      /**
-       * 🔴 **OBLIGATORIO.** Qué va a pasar al tocar, en voz de la app
-       * («Cargar el carnet»). Viaja al `accessibilityLabel`: quien no ve la
-       * pantalla necesita saber que la fila **hace algo**, no solo que falta.
-       *
-       * Por prop como todo texto de esta pieza — ver `FichaFranja`.
-       */
-      etiquetaResolver: string
-    }
-
-export type SemaforoSanitarioProps = {
-  requisitos: RequisitoSanitario[]
-  /** Rótulo del grupo, en voz de la app. */
-  rotulo?: string
+/** Lo que TODO requisito trae, mire quien mire. */
+type BaseRequisito = {
+  /** Identidad estable. Jamás se muestra. */
+  clave: string
+  /** El requisito en voz de la app: «Vacuna antirrábica». */
+  etiqueta: string
 }
+
+/** El respaldo, si la app lo quiere mostrar: «vence 12 mar 2027», ya
+ *  formateado por el riel. Opcional — un «al día» se sostiene solo. */
+type ConDetalle = { detalle?: string }
+
+/**
+ * 🔴 EL TERCER ESTADO (S112-B) — «NADIE LO DIJO» NO ES «NO ESTÁ HECHO».
+ *
+ * Nace de un dato, no de una idea: el contrato del adoptable devuelve
+ * `estadoVacunal: string | null`, y ese `null` significa **«el refugio no lo
+ * declaró»**. Pintarlo como `falta` **afirma algo que nadie dijo** — y lo que
+ * se afirmaría es lo peor que se puede decir de un animal que espera un
+ * hogar.
+ *
+ * ⇒ **`voz` es OBLIGATORIA, igual que en `Convivencia`**, y por la misma
+ * razón exacta: el estado que cuesta caro no puede depender de que alguien se
+ * acuerde de explicarlo. *Es la TERCERA vez que esta casa encuentra el mismo
+ * defecto en el mismo vertical* —convivencia, el código de firma, y ahora la
+ * salud—: **un dominio donde «no se sabe» es una respuesta legítima necesita
+ * decirlo, no dejar el hueco.**
+ *
+ * `detalle` queda prohibido acá (`?: never`): dos textos bajo una fila que no
+ * tiene nada que respaldar es ruido, y `voz` ya es su explicación.
+ */
+type SinDeclarar = { estado: 'no_declarado'; voz: string; detalle?: never }
+
+/**
+ * EL CAMINO, obligatorio donde quien mira PUEDE resolver.
+ *
+ * 🔴 **OBLIGATORIO.** El camino a resolver, a UN toque: abre la carga del
+ * carnet. Sin esto la pieza no compila, y ése es el punto.
+ * `etiquetaResolver` viaja al `accessibilityLabel`: quien no ve la pantalla
+ * necesita saber que la fila **hace algo**, no sólo que falta.
+ */
+type ConCamino = { onResolver: () => void; etiquetaResolver: string }
+/** Y su prohibición explícita del otro lado. */
+type SinCamino = { onResolver?: never; etiquetaResolver?: never }
+
+/**
+ * LO QUE VE EL RESPONSABLE — la familia, el prestador: quien PUEDE resolver.
+ * Todo pendiente lleva su camino, y sin él no compila.
+ */
+export type RequisitoSanitario =
+  | (BaseRequisito & ConDetalle & { estado: 'al_dia' })
+  | (BaseRequisito & ConDetalle & { estado: 'falta' } & ConCamino)
+  | (BaseRequisito & SinDeclarar & ConCamino)
+
+/**
+ * LO QUE VE EL OBSERVADOR — quien mira la ficha de un adoptable: **no puede
+ * resolver nada.**
+ *
+ * 🔴 Acá el camino no es opcional: **es imposible.** Los `?: never` lo
+ * impiden, y no por prolijidad — *un `onResolver` en esta pantalla sería una
+ * promesa que nadie puede cumplir, y la única forma de compilar sin esto
+ * sería inventar uno, que es peor que el hueco.* Es el ítem 11 firmado por el
+ * founder: **el adoptante ve lo que falta de salud como INFORMACIÓN, no como
+ * alerta.**
+ */
+export type RequisitoSanitarioObservado =
+  | (BaseRequisito & ConDetalle & { estado: 'al_dia' })
+  | (BaseRequisito & ConDetalle & { estado: 'falta' } & SinCamino)
+  | (BaseRequisito & SinDeclarar & SinCamino)
+
+/**
+ * QUIÉN MIRA — y es lo que decide si un pendiente lleva camino.
+ *
+ * La regla que ordena esta pieza —*«un pendiente que el dueño no puede
+ * resolver es peor que no mostrarlo»*— **no se ablanda: se dice entera.** Su
+ * sujeto siempre fue *el dueño*, o sea quien PUEDE hacer algo. En la ficha de
+ * un adoptable quien mira está DECIDIENDO si adopta, y ahí el mismo dato es
+ * información que cambia su decisión.
+ *
+ * ⇒ **Las dos garantías conviven y ninguna se debilita:** el responsable
+ * sigue sin poder mostrar un pendiente mudo, y el observador sigue sin poder
+ * dibujar un camino que no existe. *El eje no es cuánto se exige: es quién
+ * mira.*
+ *
+ * Default `'responsable'`: los consumidores vivos no cambian en un byte
+ * (`L-244`).
+ */
+export type SemaforoSanitarioProps =
+  | { requisitos: RequisitoSanitario[]; rotulo?: string; lector?: 'responsable' }
+  | { requisitos: RequisitoSanitarioObservado[]; rotulo?: string; lector: 'observador' }
 
 /* 🔴 LA GEOMETRÍA DE FILA, EN UN SOLO LUGAR (S107-B, pedido de C con su
  *  medición — gate del founder: *«quedó MUY ANCHO… la caja no está bien
@@ -154,16 +206,30 @@ const GEOMETRIA_FILA = {
   justifyContent: 'center',
 } as const
 
-function Fila({ requisito }: { requisito: RequisitoSanitario }) {
+function Fila({ requisito }: { requisito: RequisitoSanitario | RequisitoSanitarioObservado }) {
   const { theme } = useTheme()
   const falta = requisito.estado === 'falta'
+  const sinDeclarar = requisito.estado === 'no_declarado'
+  /* El camino existe sólo si el consumidor lo pasó — y el tipo garantiza que
+     lo pasó si y sólo si podía. Acá no se decide nada: se lee. */
+  const camino = 'onResolver' in requisito ? requisito.onResolver : undefined
 
   /* La MARCA de estado. Un glifo de texto y no un `Icono`: acá no hay objeto
      de oficio que dibujar (Ley 12 pide objeto + huella, y un check no es ni
      una cosa ni una mascota). Es el mismo criterio con el que el chevron vive
-     en `chevron.tsx` y no en el registry. */
-  const marca = falta ? '—' : '✓'
-  const colorMarca = falta ? theme.status.warningText : theme.status.successText
+     en `chevron.tsx` y no en el registry.
+
+     🔴 LA TERCERA MARCA, y su color es la decisión: `·` en `text.tertiary`,
+     **jamás el ochre del pendiente.** Un «nadie lo dijo» pintado como tarea
+     afirma que hay algo que hacer, y no lo hay: falta el DATO, no el acto.
+     Es la misma doctrina con la que un código de firma vencido no se pinta de
+     rojo (N23: el acento se reserva para lo accionable y para la alarma). */
+  const marca = sinDeclarar ? '·' : falta ? '—' : '✓'
+  const colorMarca = sinDeclarar
+    ? theme.text.tertiary
+    : falta
+      ? theme.status.warningText
+      : theme.status.successText
 
   const cuerpo = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
@@ -195,7 +261,14 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
 
       <View style={{ flex: 1, gap: spacing[0.5] }}>
         <Texto variante="cuerpo">{requisito.etiqueta}</Texto>
-        {requisito.detalle === undefined ? null : (
+        {/* La segunda línea: el respaldo del dato, o —en el tercer estado— la
+            voz que dice que nadie lo declaró. Nunca las dos: el tipo prohíbe
+            `detalle` en `no_declarado`. */}
+        {sinDeclarar ? (
+          <Texto variante="apoyo" color="tertiary">
+            {requisito.voz}
+          </Texto>
+        ) : requisito.detalle === undefined ? null : (
           <Texto variante="apoyo" color="tertiary">
             {requisito.detalle}
           </Texto>
@@ -203,20 +276,31 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
       </View>
 
       {/* El chevron SOLO donde hay camino (Ley 18: la estructura informa). En
-          una fila al día sería una promesa de navegación que nadie cumple. */}
+          una fila al día sería una promesa de navegación que nadie cumple —
+          **y en la ficha de un adoptable lo sería en TODAS**, porque quien
+          mira no puede resolver ninguna. Por eso se pregunta por el camino y
+          no por el estado: el mismo `falta` lleva chevron para el
+          responsable y no lo lleva para el observador. */}
       {/* ⏪ MISMO DEFECTO QUE `SeccionPlegable`, y del mismo autor: el `d` del
           path salía impreso como texto. **Se usa la pieza.** */}
-      {falta ? <Chevron direccion="derecha" /> : null}
+      {camino === undefined ? null : <Chevron direccion="derecha" />}
     </View>
   )
 
-  if (!falta) {
-    /* Al día: NO es tocable. No hay nada que resolver, y una fila que se
-       hunde sin hacer nada es una promesa rota. */
+  if (camino === undefined) {
+    /* Sin camino: NO es tocable. Vale para el «al día» —no hay nada que
+       resolver— y para TODA fila del observador: una fila que se hunde sin
+       hacer nada es una promesa rota, y en la ficha del adoptable serían
+       todas. */
     return (
       <View
         accessibilityRole="text"
-        accessibilityLabel={[requisito.etiqueta, requisito.detalle].filter(Boolean).join('. ')}
+        accessibilityLabel={[
+          requisito.etiqueta,
+          sinDeclarar ? requisito.voz : requisito.detalle,
+        ]
+          .filter(Boolean)
+          .join('. ')}
         style={GEOMETRIA_FILA}
       >
         {cuerpo}
@@ -226,12 +310,16 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
 
   return (
     <Pressable
-      onPress={requisito.onResolver}
+      onPress={camino}
       accessibilityRole="button"
       /* El camino entra al label: sin esto, quien usa lector sabe que falta
          algo y no que puede resolverlo acá mismo — que es justo el daño que
          esta pieza existe para evitar. */
-      accessibilityLabel={[requisito.etiqueta, requisito.detalle, requisito.etiquetaResolver]
+      accessibilityLabel={[
+        requisito.etiqueta,
+        sinDeclarar ? requisito.voz : requisito.detalle,
+        'etiquetaResolver' in requisito ? requisito.etiquetaResolver : undefined,
+      ]
         .filter(Boolean)
         .join('. ')}
       style={({ pressed }) => ({
@@ -250,6 +338,11 @@ function Fila({ requisito }: { requisito: RequisitoSanitario }) {
 }
 
 export function SemaforoSanitario({ requisitos, rotulo }: SemaforoSanitarioProps) {
+  /* `lector` no se lee acá y no es un olvido: **no cambia nada del dibujo.**
+     Su trabajo entero es de TIPO — elegir cuál de las dos uniones acepta
+     `requisitos` — y cada fila deriva su forma del camino que recibió. *Un
+     `if (lector === 'observador')` sería una segunda fuente de verdad al lado
+     del tipo, y las dos podrían discrepar.* */
   /* REGLA DE EXISTENCIA: sin requisitos no hay semáforo. No se dibuja un
      estado vacío decorativo (Ley 13: el vacío se confirma, y acá el vacío
      significa «este lugar no pide nada», que no es una pantalla). */

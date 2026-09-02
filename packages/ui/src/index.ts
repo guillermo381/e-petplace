@@ -948,6 +948,8 @@ export {
   SemaforoSanitario,
   type SemaforoSanitarioProps,
   type RequisitoSanitario,
+  /** S112-B: lo que ve quien NO puede resolver — el camino es imposible. */
+  type RequisitoSanitarioObservado,
 } from './components/SemaforoSanitario'
 
 export {
