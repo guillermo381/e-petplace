@@ -22978,6 +22978,16 @@ export type Database = {
         Args: { p_country_code?: string; p_telefono: string }
         Returns: Json
       }
+      buscar_refugios: {
+        Args: { p_limite?: number; p_texto?: string }
+        Returns: {
+          ciudad: string
+          cuenta_comercial_id: string
+          logo_url: string
+          nombre: string
+          prestador_id: string
+        }[]
+      }
       calcular_etapa_vida: {
         Args: { p_especie: string; p_fecha_nacimiento: string }
         Returns: string
