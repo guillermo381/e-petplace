@@ -76,7 +76,7 @@ import {
   type PublicacionDeMascota,
 } from '@epetplace/ui';
 import {
-  caraDeMascota,
+  resolverUrlGenericaEspecie,
   cambiarEstadoAdoptable,
   obtenerMisAdoptables,
   resolverUrlsFotos,
@@ -237,39 +237,23 @@ export default function MisAdoptables() {
             <TarjetaMascotaRefugio
               key={a.publicacionId}
               nombre={a.nombre}
-              /* ⭐ **A4 · LA ESCALERA DE LA CASA, no el `undefined`.** Acá el
-                 sin-foto caía en `undefined` y la pieza dibujaba LA HUELLA —
-                 con 111 caras sembradas en `especies-razas` desde S90 y **cero
-                 código que las leyera** (`L-318` en su forma más cara: el
-                 activo existía y no tenía puerta).
+              /* ⭐ **A4 · LA FORMA CORRECTA (B, `90bebbfd`).** `fotoDeEspecie` va
+                 APARTE de `fotoUrl`, y la distinción no es cosmética: **la foto
+                 propia lleva encuadre de retrato** —zoom + corrimiento, porque
+                 en una foto de mascota la cara queda alta— **y la ilustración
+                 de la casa va a sangre**, porque ya viene encuadrada y el zoom
+                 la recortaría mal. Pasarla por `fotoUrl`, como hice mientras el
+                 contrato no estaba en `main`, le aplicaba un recorte pensado
+                 para otra cosa: funcionaba y estaba mal de forma.
 
-                 Firma del founder (2-sep): *con foto, la foto; sin foto, el
-                 avatar de la casa por especie/raza; **huella en ningún lado.***
-
-                 `razaSlug: null` A PROPÓSITO: el lector trae `especie` y no la
-                 ruta resuelta, y **slugificar el nombre de una raza es
-                 exactamente lo que la casa prohíbe** (la ruta sale de un LOOKUP
-                 contra `cat_razas`, jamás de convertir texto). Sin ruta se cae
-                 al genérico de la especie, que es una cara igual.
-
-                 ⏳ **INTERINO CON FECHA, y se declara para que no se
-                 calcifique.** B entregó el contrato correcto en `90bebbfd`:
-                 `fotoDeEspecie` **aparte** de `fotoUrl`. La distinción no es
-                 cosmética — la foto propia lleva **encuadre de retrato** (zoom
-                 + corrimiento, porque en una foto de mascota la cara queda
-                 alta) y la ilustración de la casa **va a sangre**: pasarla por
-                 `fotoUrl`, como acá, *le aplica un recorte pensado para otra
-                 cosa*. Hoy no puedo consumirlo: ese commit vive en
-                 `origin/pista/s112-b` y **no está en `main`** (medido con
-                 `branch -r --contains`). **Migra a `fotoDeEspecie` en cuanto
-                 A lo mergee.***/
-              fotoUrl={
-                caraDeMascota({
-                  especie: a.especie,
-                  razaSlug: null,
-                  fotoUri: a.fotoUrl === null ? null : (estado.caras.get(a.fotoUrl) ?? null),
-                }) ?? undefined
-              }
+                 `resolverUrlGenericaEspecie` y no `resolverUrlRaza`: **para un
+                 adoptable el caso normal es SIN raza declarada** (medido por B)
+                 y armar la URL de dos pedazos acierta a veces — *«Pastor
+                 Alemán» a mano da `pastor-aleman`, que existe, o
+                 `ovejero-aleman`, que no*. Una URL que acierta a veces muestra
+                 una cara equivocada, que es peor que ninguna. */
+              fotoUrl={a.fotoUrl === null ? undefined : (estado.caras.get(a.fotoUrl) ?? undefined)}
+              fotoDeEspecie={resolverUrlGenericaEspecie(a.especie)}
               estado={ESTADO_PIEZA[a.estado]}
               voces={{
                 en_rescate: t('adoptables.estado_en_rescate'),

@@ -64,7 +64,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
-  caraDeMascota,
+  resolverUrlGenericaEspecie,
   cerrarSolicitudAdopcion,
   obtenerSesion,
   obtenerSolicitudesDeMisPublicaciones,
@@ -79,7 +79,7 @@ type Estado =
   | { fase: 'cargando' }
   | { fase: 'error' }
   | { fase: 'noEsTuya' }
-  | { fase: 'listo'; hilo: SolicitudRecibida; miUid: string; cara: string | null };
+  | { fase: 'listo'; hilo: SolicitudRecibida; miUid: string; cara: string | null; caraDeEspecie: string | null };
 
 export default function HiloDelPublicador() {
   const { theme } = useTheme();
@@ -123,12 +123,16 @@ export default function HiloDelPublicador() {
        del publicador; A la entregó en `20260908520000`. Sin ella el refugio
        veía la huella sobre el mismo animal que la familia veía con la cara de
        la casa — *la misma solicitud con dos caras según quién mira*. */
-    const cara = caraDeMascota({
-      especie: hilo.mascotaEspecie,
-      razaSlug: null,
-      fotoUri: firmada,
+    const cara = firmada;
+    setEstado({
+      fase: 'listo',
+      hilo,
+      miUid: uid,
+      cara,
+      /* APARTE de la foto: la propia lleva encuadre de retrato, la ilustración
+         va a sangre (contrato de B, `90bebbfd`). */
+      caraDeEspecie: resolverUrlGenericaEspecie(hilo.mascotaEspecie),
     });
-    setEstado({ fase: 'listo', hilo, miUid: uid, cara });
   }, [params.solicitudId]);
 
   useFocusEffect(
@@ -259,6 +263,7 @@ export default function HiloDelPublicador() {
               <AvatarMascota
                 nombre={estado.hilo.mascotaNombre}
                 fotoUrl={estado.cara ?? undefined}
+                fotoDeEspecie={estado.caraDeEspecie ?? undefined}
                 tamano="md"
               />
               <View style={{ flex: 1, gap: spacing[1] }}>
