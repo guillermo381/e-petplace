@@ -51,6 +51,14 @@ donde alguien lo va a leer como «C rompió algo».
 1. **Jubilarlo con lápida** (precedente `verify-edge-simbolos`): su propiedad
    dejó de indicar un defecto. **Es mi voto.** *Un gate cuya premisa es falsa no
    se arregla bajándole el número.*
+
+   **Y la FORMA de la lápida la fijó D hoy, retirando `silencio_detectado` por
+   esta misma clase** (`verify:mensajeria` 53/53 → 50/50): *la lápida dice DÓNDE
+   VIVE CADA MITAD AHORA, jamás «se hará después»*. Acá las dos mitades tienen
+   dónde: **la razón se dibuja** —eso lo cubre `Boton` y se gatea en el
+   recorrido, no en un contador— y **los 84 frenos sin razón** siguen siendo
+   decisión de producto por pantalla, que es donde S111 los dejó a propósito.
+   ⇒ *nada queda sin dueño al retirarlo.*
 2. **Re-apuntarlo** a la clase que hoy sí es defecto: **los 84 frenos que no
    pasan razón siquiera**. La propia ficha de `D-999` los dejó fuera a propósito
    —*«cuáles necesitan explicarse es decisión de producto, no de gate»*, y un

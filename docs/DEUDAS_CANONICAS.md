@@ -26751,3 +26751,94 @@ evidencia».**
 **DISPARO: ninguno. Nace cerrada.** Lo que queda vivo es el comando, y su
 convención de depósito: **toda ficha se deposita con su número entre backticks
 al principio de su encabezado.**
+
+---
+
+## 🔴 `L-478` — UNA PIEZA MIRADA FUERA DE SU PANTALLA SE JUZGA CONTRA UN FONDO QUE NO EXISTE
+
+**Firma del founder, 2-sep-2026.** *«Se acaban las láminas de galería como
+gate.»* Depositada en los DOS lugares donde vive el procedimiento —
+`CONTRATO_TRABAJO` regla 80 y `DIRECCION_DISENO_S99` §1 — **y no en un parte de
+pista**, por el precedente que ese mismo §1 ya registra: *una firma que vive en
+un parte no está firmada.*
+
+### LA LEY
+
+**El gate de una pieza de UI es su MONTAJE en la pantalla real, dentro del
+lote.** El founder no juzga en galería: juzga en la app, en el contexto real de
+la pieza, durante su recorrido por objetivo cumplido.
+
+⇒ **Una pieza que sólo existe en galería es ENTREGADA Y NO MONTADA**, y se
+reporta en esa sección del cierre, con su PUERTA nombrada.
+
+### POR QUÉ ES LEY Y NO PREFERENCIA: ES EL TERCER GOLPE AL MISMO DEFECTO
+
+| sesión | qué se mató | por qué |
+|---|---|---|
+| **S83** | la lámina **HTML** | la traducción HTML→RN **reabría todas las decisiones que la lámina creía cerradas**, y su CSS tentaba a portarse como fuente |
+| **S97** | el gate **por pantalla** | gatear de a una pantalla no dice cómo se siente el **recorrido** |
+| **S112** | la lámina **de galería** | una pieza sola sobre un tapiz se juzga **sin sus datos, sin su fondo y sin lo que la rodea** |
+
+> ### ⇒ *Las tres veces el instrumento era más barato de mirar que la cosa real, y las tres veces midió otra cosa.* **Un sustituto del objeto se elige por su costo y se paga en su fidelidad.**
+
+### LO QUE NO CAMBIA, declarado para que nadie lo recorte de más
+
+- **El toque 2 sigue siendo de B y sigue teniendo poder de rojo.** Lo que cambia
+  es **contra qué** lo ejerce.
+- ⚠️ **Las láminas ⭐ GATE existentes NO se borran.** Siguen sirviendo para ver
+  estados difíciles de producir en vivo —un memorial, un error de red, una lista
+  vacía—. **Lo que se prohíbe es CITARLAS COMO GATE.** *Un instrumento que deja
+  de ser prueba no deja de ser útil: lo que cambia es qué se puede afirmar con
+  él.*
+
+### SU CONSECUENCIA INMEDIATA EN EL REPORTE
+
+La sección **③ ENTREGADO Y NO MONTADO** deja de ser una cortesía y pasa a ser el
+destino obligatorio de toda pieza sin pantalla. *Contarla en «construido y
+ejercido» es exactamente el defecto que esa sección se creó para atajar: **lo
+construido y no ejercido se lee como hecho.***
+
+**DISPARO: ninguno. Rige desde su firma.**
+
+---
+
+## 🔴 `L-479` — UN GENERADO VIEJO Y GITIGNORED NO CIEGA: **ACUSA EN FALSO**, Y MANDA A CURAR CÓDIGO SANO
+
+**Medido dos veces el mismo día, por dos pistas, en direcciones opuestas** —
+`apps/prestador/.expo/types/router.d.ts`, que expo-router genera y `.gitignore`
+excluye.
+
+| pista | qué le pasó | qué habría concluido si no lo mira |
+|---|---|---|
+| **A** | Tras mergear rutas nuevas, `tsc apps/prestador` dio **2 errores** y `verify:diseno` **R63·C** dio rojo, los dos nombrando `/adopcion` | *«la pista que mergeé rompió el typecheck»* — y habría ido a **arreglar código que estaba bien** |
+| **C** | Al abrir el worktree, `tsc` salió **VERDE sin medir una sola ruta**; al generarlo, cazó **4 errores reales** de contrato de piezas | *«mi rama está limpia»* — con cuatro errores vivos |
+
+> ### ⇒ *El mismo archivo produce el falso rojo y el falso verde, según esté viejo o ausente.* **Y ninguna de las dos caras viaja en el repo, porque está gitignored: cada pista lo redescubre sola.**
+
+### POR QUÉ ES PEOR QUE UN GATE ROTO CUALQUIERA
+
+Un gate roto que da rojo se investiga. **Éste da un rojo VEROSÍMIL** —nombra
+rutas reales, aparece justo después de un merge, y apunta a archivos que
+efectivamente acaban de entrar— así que **invita a curar lo que no está roto**.
+*Un rojo que apunta al sospechoso correcto por la razón equivocada cuesta más
+que uno que no apunta a nadie.*
+
+Y su gemelo silencioso es peor: **el verde por ausencia**. `tsc` no puede
+verificar una ruta que el generado no declara, así que **`router.push` hacia una
+ruta inexistente pasa sin control** — el gate `R63·C` existe exactamente para
+eso y su texto ya nombra la cura.
+
+### LA CURA, y no es curar el archivo
+
+**`expo start` en la app** regenera el archivo. Lo que la lección exige es
+ANTES: **cuando un typecheck de una app Expo cambie de color justo después de un
+merge o de abrir un worktree, se regenera el router ANTES de diagnosticar.**
+*Regenerar cuesta un minuto; diagnosticar el rojo equivocado costó dos pistas.*
+
+⚠️ **Borde medido:** `expo start` **no regenera si el puerto está ocupado** —
+sale «Input is required, but 'npx expo' is in non-interactive mode», **skippea el
+dev server y devuelve éxito**. *El comando que regenera puede no regenerar y no
+decirlo.* Se verifica por el CONTENIDO del archivo (que nombre la ruta nueva),
+jamás por el código de salida.
+
+**DISPARO: ninguno. Es aviso permanente de la casa.**
