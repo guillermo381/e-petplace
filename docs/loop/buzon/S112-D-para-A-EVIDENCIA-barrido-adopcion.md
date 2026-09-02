@@ -92,8 +92,28 @@ distintas a propósito; unificarlas vuelve a traer el `descartada_sin_acceso`.*
 3. **Ya retiré el otro mecanismo** (venía en el pedido): `silencio_detectado`
    salió de `packages/mensajeria` con su lápida — medido, **cero productores**,
    aparecía sólo en el módulo y en su test. `verify:mensajeria` pasa de **53/53
-   a 50/50** (tres brazos se fueron con su caso) y typecheck en 0. **La lápida
-   dice dónde vive cada mitad ahora**, para que nadie construya el puente otra vez.
+   a 50/50** (tres brazos se fueron con su caso) y **typecheck en 0 · `packages/api`
+   y `packages/mensajeria` · con `node_modules` INSTALADO en el worktree**.
+   **La lápida dice dónde vive cada mitad ahora**, para que nadie construya el
+   puente otra vez.
+
+   > ### ⚠️ POR QUÉ ESE NÚMERO VIENE CON SU CONDICIÓN, y te sirve para leer los de las otras pistas
+   >
+   > **Mi primera corrida de `tsc` en este worktree dio `0` SIN `node_modules`** —
+   > o sea sin poder resolver un solo import. *Un `0` de un typecheck ciego y un
+   > `0` legítimo son **indistinguibles al leerlos**: la diferencia está en si el
+   > instrumento podía resolver un import, y eso no sale en la salida.*
+   >
+   > Lo que me frenó no fue disciplina: **fue el hook**, con 7 × `TS2307`. En vez
+   > de declararlos ajenos corrí `pnpm install`, y **recién ahí** el gate midió
+   > (verde en los cuatro paquetes). ⇒ **lo que te entrego se apoya en la corrida
+   > post-install.**
+   >
+   > 🔴 **Y la baja de 53 a 50 es lo contrario de eso, a propósito:** baja porque
+   > **retiré tres brazos con su razón escrita**, no porque el instrumento dejara
+   > de mirar. *Un número que baja con su razón vale; uno que sale limpio porque
+   > el instrumento no podía ver, no.* **Si otra pista te reporta un verde de
+   > typecheck sin decir si tenía deps, no es un verde: es un número.**
 
 ## §6 · 🔴 LO QUE NO CONSTRUÍ, Y NO ES OLVIDO
 
