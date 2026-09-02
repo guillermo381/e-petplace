@@ -1,0 +1,12 @@
+-- REVERSA de 20260907860000 — el rol de refugio. ESCRITA ANTES.
+-- drop function if exists public.otorgar_rol_refugio(uuid,text);
+-- drop function if exists public.revocar_rol_refugio(uuid,text);
+--
+-- 🔴 QUÉ NO DESHACE: los roles YA OTORGADOS siguen vivos en cuenta_roles.
+-- Borrar las funciones no revoca nada — y es lo correcto: un refugio que ya
+-- publica no puede quedarse sin rol porque alguien revirtio una migracion.
+-- Para revocar de verdad esta revocar_rol_refugio, que es un ACTO y no un
+-- efecto secundario de una reversa.
+--
+-- Control antes de correrla:
+--   select count(*) from cuenta_roles where tipo_actor='refugio' and estado='activo';
