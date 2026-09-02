@@ -10,7 +10,7 @@ import type { prestadorEs } from './es';
 export const prestadorEn = {
   tabs: {
     adopcion: 'Shelter',
-    adoptables: 'My animals',
+    adoptables: 'Furballs',
     hoy: 'Today',
     mascotas: 'Data',
     negocio: 'Business',
@@ -591,6 +591,8 @@ export const prestadorEn = {
     errorCargar: "We couldn't load this. Try again.",
     // S77-B — D-536 (espejo): mismo criterio que el castellano.
     identidadNoCargo: "We couldn't load your business.",
+    refugioOrganizacion: 'Organization',
+    refugioRescatista: 'Independent rescuer',
     guardar: 'Save changes',
     nombreLabel: 'Your name',
     telefonoLabel: 'Phone',
@@ -3336,6 +3338,8 @@ export const prestadorEn = {
     salgoABuscar: 'Heading out to pick up',
     comoSePorto: 'How they did',
     sacarFoto: 'Take a photo',
+    fotoRazonViaje: "Photos are taken at the facility. You'll be able to when you're back.",
+    fotoRazonNadieAdentro: "Nobody's inside yet. As soon as the first one arrives, you'll be able to.",
     subir: 'Up',
     bajar: 'Down',
     salgoADevolver: 'Heading out to drop off',
@@ -3526,6 +3530,12 @@ export const prestadorEn = {
     alDiaTitulo: "You're all caught up",
     alDiaDetalle: 'No requests are waiting for your reply.',
     enCurso: 'In conversation',
+    cerradas: 'Closed',
+    cerradaAceptada: 'Accepted',
+    cerradaDeclinada: "Didn't go ahead",
+    cerradaDesistida: 'The family stepped back',
+    cerradaNoConcretada: "Didn't happen",
+    cerradaGenerica: 'Closed',
     novedades: 'Sponsorships & donations',
     novedadesTitulo: "They haven't arrived yet",
     novedadesDetalle: "When someone sponsors or donates, you'll see it here.",
@@ -3536,6 +3546,10 @@ export const prestadorEn = {
   portalHilo: {
     estadoDesistida: 'The family withdrew their application',
     estadoNoConcretada: 'Passed away before handover.',
+    /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) · voz del PUBLICADOR: él sabe
+       que la entregó. No es «ya encontró familia», que es lo que se le dice
+       a quien postuló — la misma fila, dos asientos, dos frases. */
+    estadoOtraFamilia: 'Placed with another family.',
     verActa: 'See the adoption agreement',
     titulo: 'The request',
     alguienSinNombre: 'Someone from the community',

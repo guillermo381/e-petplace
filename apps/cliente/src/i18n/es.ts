@@ -294,6 +294,12 @@ export const clienteEs = {
     fichaVerCarnet: 'Ver su carnet',
     fichaCargarCarnet: 'Cargar su carnet',
     verEnVivo: 'Ver cómo va',
+    /* G4 · Las tres etapas del día de guardería, en voz de familia. Dicen
+       DÓNDE está el animal, que es lo único que la familia quiere saber — no
+       el nombre del estado del motor. «A bordo» sería vocabulario nuestro. */
+    guarderiaABordo: 'Va en camino a {{lugar}}',
+    guarderiaAdentro: 'Está en {{lugar}}',
+    guarderiaDeVuelta: 'Ya viene de vuelta a casa',
     proximaCita: 'Próxima cita',
     // D-319: el hold vigente del bloqueo 15 min — rima con checkout.holdVoz
     reservandoHorario: 'Reservando este horario',
@@ -3636,6 +3642,17 @@ export const clienteEs = {
      miente por omisión, y su modo de falla es el peor: se lee como completa.* */
   recurrentes: {
     titulo: 'Pagos recurrentes y suscripciones',
+    /* G8 · **El verbo que la familia viene a buscar.** Dice «cancelar
+       suscripción» y no «apagar renovación» porque *ésa es la palabra con la
+       que alguien entra a esta pantalla*; lo que el acto realmente hace —el
+       período pagado corre entero— lo explica la Hoja de confirmación, que es
+       donde se puede explicar sin abreviar. */
+    cancelar: 'Cancelar suscripción',
+    /* Dice el hecho y a quién le pasa, sin culpar a nadie: el plan no es
+       para esa especie. No dice «error» ni «no autorizado» — nadie hizo
+       nada mal, y del otro lado hay alguien pagando todos los meses. */
+    especieNoAplica: 'Este plan es para {{especies}}, y {{nombre}} no puede usarlo.',
+    reactivar: 'Volver a activarla',
     intro: 'Todo lo que se te cobra solo, en un lugar.',
     /* El vacío HABLA con calma: no es un error ni una carencia. */
     vacioTitulo: 'No tienes nada que se cobre solo',
@@ -3720,6 +3737,8 @@ export const clienteEs = {
     // acá, así que esto es TODO lo que se ve. Y no se adorna: quien lo lee
     // eligió a ese animal.
     estado_no_concretada: '{{nombre}} falleció. Lo sentimos mucho.',
+    /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) — sin duelo y SIN invitar a otro animal. */
+    estado_otra_familia: '{{nombre}} ya encontró familia. Gracias por querer darle un hogar.',
     verActa: 'Ver el acta de adopción',
     titulo: 'Tu solicitud',
     de: 'De {{refugio}}',

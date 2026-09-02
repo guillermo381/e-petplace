@@ -229,6 +229,9 @@ export const clienteEn = {
     fichaVerCarnet: 'See their card',
     fichaCargarCarnet: 'Add their card',
     verEnVivo: 'See how it goes',
+    guarderiaABordo: 'On the way to {{lugar}}',
+    guarderiaAdentro: 'At {{lugar}}',
+    guarderiaDeVuelta: 'On the way back home',
     proximaCita: 'Next appointment',
     // D-319: live 15-min hold — rhymes with checkout.holdVoz
     reservandoHorario: 'Holding this time for you',
@@ -2615,6 +2618,9 @@ export const clienteEn = {
   },
   recurrentes: {
     titulo: 'Recurring payments and subscriptions',
+    cancelar: 'Cancel subscription',
+    especieNoAplica: 'This plan is for {{especies}}, and {{nombre}} cannot use it.',
+    reactivar: 'Turn it back on',
     intro: 'Everything that charges you automatically, in one place.',
     vacioTitulo: 'Nothing is charging you automatically',
     vacioDetalle: 'When you sign up for a plan or a repeating purchase, it’ll show up here.',
@@ -2653,6 +2659,8 @@ export const clienteEn = {
   hiloAdopcion: {
     estado_desistida: 'You withdrew your application',
     estado_no_concretada: "{{nombre}} passed away. We're very sorry.",
+    /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) — sin duelo y SIN invitar a otro animal. */
+    estado_otra_familia: "{{nombre}} found a family. Thank you for wanting to give them a home.",
     verActa: 'See the adoption agreement',
     titulo: 'Your request',
     de: 'From {{refugio}}',

@@ -80,6 +80,8 @@ import {
   leerDetalleAtencion,
   leerTimelineHogar,
   obtenerEstadoHogar,
+  obtenerMisEstadiasGuarderia,
+  type EstadiaDeMiMascota,
   obtenerMascotasDeFamilia,
   obtenerMisPlanesPaseo,
   obtenerCitasActivasHogar,
@@ -640,6 +642,25 @@ export default function Hogar() {
   );
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [estadoHogar, setEstadoHogar] = useState<EstadoHogar | null>(null);
+  /**
+   * ⭐ **G4 · EL DÍA DE GUARDERÍA ENTRA AL «EN VIVO» DEL HOGAR.**
+   *
+   * 🔴 Medido antes de montarlo: `obtenerTramoVivoDeMiMascota` tenía **UN solo
+   * consumidor** —la ficha de la estadía— y **cero puerta acá**. O sea que una
+   * familia cuyo animal estaba en la guardería abría su casa y **no veía nada**:
+   * el servicio más largo del día era el único invisible desde el Hogar.
+   *
+   * ⚠️ **La fuente NO es `obtenerTramoVivoDeMiMascota`, y por eso esto entra en
+   * UN viaje y no en N.** Ese wrapper es POR MASCOTA: usarlo acá costaría una
+   * petición por animal, y `L-223` ya midió que el techo del producto lo pone
+   * la cantidad de viajes, no el trabajo del servidor.
+   * `obtenerMisEstadiasGuarderia()` sin argumentos trae las de TODAS mis
+   * mascotas de una, **con `estadoEstadia` ya resuelto por el servidor** — que
+   * es exactamente la etapa que hay que dibujar.
+   */
+  const [estadiasVivas, setEstadiasVivas] = useState<
+    (EstadiaDeMiMascota & { estadiaId: string })[]
+  >([]);
 
   // Zona 4 — timeline del hogar: merge multi-mascota con cursor por mascota.
   // S61-A11: cada item porta SU mascota (el merge la etiqueta) — el
@@ -801,6 +822,24 @@ export default function Hogar() {
         // señales + fotos + timeline en paralelo — reemplazo directo (Ley 13)
         void obtenerEstadoHogar(lista.map((m) => m.id)).then((eh) => {
           if (vigente && eh.ok) setEstadoHogar(eh.data);
+        });
+        /* G4 · en PARALELO con las demás, jamás encadenado: el prólogo serial
+           es lo que S94-PERF midió como el costo real de esta pantalla. */
+        void obtenerMisEstadiasGuarderia().then((es) => {
+          if (!vigente || !es.ok) return;
+          /* Las tres etapas del durante, y **sólo ésas**. `reservada` no está
+             en curso —es una promesa para más tarde, y su lugar es la agenda—;
+             `entregada`, `cancelada` y `no_recogida` ya pasaron. *Un «en vivo»
+             que incluye lo que todavía no empezó deja de significar «ahora».* */
+          setEstadiasVivas(
+            es.data.filter(
+              (e): e is EstadiaDeMiMascota & { estadiaId: string } =>
+                e.estadiaId !== null &&
+                (e.estadoEstadia === 'recogida_en_curso' ||
+                  e.estadoEstadia === 'en_guarderia' ||
+                  e.estadoEstadia === 'retorno_en_curso'),
+            ),
+          );
         });
         void obtenerMisPlanesPaseo().then((pl) => {
           if (vigente && pl.ok) {
@@ -1772,6 +1811,62 @@ export default function Hogar() {
           En curso gana el lugar (Ley 7); si no, el próximo paseo en
           tarjeta de DOS PISOS: servicio+estado relativo en capa teal /
           dirección con pin y chevron (entra al hub). Sin nada: silencio. */}
+      {/* ═══ G4 · LA GUARDERÍA, CON SU ETAPA ═══════════════════════════════
+
+          Va ANTES de los paseos y groomings a propósito: **la guardería dura
+          todo el día**, así que si hay una viva es lo más vivo que tiene esa
+          familia hoy. No compite por el hero — se suma a él (Ley 7 sigue
+          intacta: cada celda envuelve algo que está pasando de verdad).
+
+          🔴 **La etapa la dice el SERVIDOR, no una cuenta de esta pantalla.**
+          `estadoEstadia` ya trae los tres momentos; deducirlos acá de
+          `aBordoEn`/`llegadaEn`/`entregadaEn` sería un espejo de la máquina de
+          estados del motor, *y un espejo diverge en silencio* — el día que el
+          motor cambie una transición, la casa sigue con la vieja y nada da
+          rojo. Es el defecto que el propio wrapper del tramo declara en su
+          cabecera. ── */}
+      {estadiasVivas.length > 0 ? (
+        <Animated.View
+          entering={entradaZona(0)}
+          style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[4] }}
+        >
+          {estadiasVivas.map((e) => (
+            <CitaEnVivo key={e.citaId} capa="cuidado">
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                /* Sin `estadiaId` **no hay a dónde llevar**, así que esas filas
+                   no entran a esta lista: el filtro lo exige con un predicado
+                   de tipo y acá ya está garantizado. *Preferí que el tipo lo
+                   sostenga a poner un `as` y confiar en que el filtro de arriba
+                   nunca cambie.* (Y es implicación del motor, no una defensa
+                   inventada: si hay `estadoEstadia`, hay fila de estadía.) */
+                onPress={() =>
+                  router.push({
+                    pathname: '/guarderia/[estadiaId]',
+                    params: { estadiaId: e.estadiaId },
+                  })
+                }
+                titulo={e.mascotaNombre}
+                subtitulo={t(
+                  e.estadoEstadia === 'recogida_en_curso'
+                    ? 'hogar.guarderiaABordo'
+                    : e.estadoEstadia === 'en_guarderia'
+                      ? 'hogar.guarderiaAdentro'
+                      : 'hogar.guarderiaDeVuelta',
+                  { lugar: e.prestadorNombre },
+                )}
+                fin={
+                  <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.accent.primary }}>
+                    {t('hogar.verEnVivo')}
+                  </Text>
+                }
+              />
+            </CitaEnVivo>
+          ))}
+        </Animated.View>
+      ) : null}
+
       {enCurso.length > 0 ? (
         // §7.5: una celda VIVA por atención en curso — cada CitaEnVivo
         // envuelve una cita REAL ejecutándose ahora (el espíritu de la

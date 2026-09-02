@@ -271,6 +271,7 @@ export default function HiloSolicitud() {
                   vozDeclinada={t('hiloAdopcion.estado_declinada')}
                   vozDesistida={t('hiloAdopcion.estado_desistida')}
                   vozNoConcretada={t('hiloAdopcion.estado_no_concretada', { nombre: estado.hilo.mascotaNombre })}
+                  vozOtraFamilia={t('hiloAdopcion.estado_otra_familia', { nombre: estado.hilo.mascotaNombre })}
                 />
               </View>
             </Tarjeta>

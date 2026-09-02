@@ -76,6 +76,7 @@ import {
   type PublicacionDeMascota,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   cambiarEstadoAdoptable,
   obtenerMisAdoptables,
   resolverUrlsFotos,
@@ -236,7 +237,27 @@ export default function MisAdoptables() {
             <TarjetaMascotaRefugio
               key={a.publicacionId}
               nombre={a.nombre}
-              fotoUrl={a.fotoUrl === null ? undefined : (estado.caras.get(a.fotoUrl) ?? undefined)}
+              /* ⭐ **A4 · LA ESCALERA DE LA CASA, no el `undefined`.** Acá el
+                 sin-foto caía en `undefined` y la pieza dibujaba LA HUELLA —
+                 con 111 caras sembradas en `especies-razas` desde S90 y **cero
+                 código que las leyera** (`L-318` en su forma más cara: el
+                 activo existía y no tenía puerta).
+
+                 Firma del founder (2-sep): *con foto, la foto; sin foto, el
+                 avatar de la casa por especie/raza; **huella en ningún lado.***
+
+                 `razaSlug: null` A PROPÓSITO: el lector trae `especie` y no la
+                 ruta resuelta, y **slugificar el nombre de una raza es
+                 exactamente lo que la casa prohíbe** (la ruta sale de un LOOKUP
+                 contra `cat_razas`, jamás de convertir texto). Sin ruta se cae
+                 al genérico de la especie, que es una cara igual. */
+              fotoUrl={
+                caraDeMascota({
+                  especie: a.especie,
+                  razaSlug: null,
+                  fotoUri: a.fotoUrl === null ? null : (estado.caras.get(a.fotoUrl) ?? null),
+                }) ?? undefined
+              }
               estado={ESTADO_PIEZA[a.estado]}
               voces={{
                 en_rescate: t('adoptables.estado_en_rescate'),

@@ -50,6 +50,7 @@ import {
   cerrarSesion,
   obtenerFranjasHorario,
   obtenerMiPosicionEnPrestador,
+  obtenerMiCuentaRefugio,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
@@ -156,6 +157,12 @@ type Identidad = {
   /** S85-C39: el año de la cohorte, para la placa. `null` = la placa no se
    *  monta — el año sale del DATO y jamás se hornea. */
   cohorteAnio: number | null;
+  /** ⭐ A7 · **QUÉ CLASE DE CASA ES**, cuando la casa es un refugio:
+   *  «Organización» o «Rescatista independiente» (`N4`). Va en el subtítulo,
+   *  al lado de la voz del oficio, porque es lo que ocupa ese lugar para un
+   *  actor que no tiene oficio: *no es una ciudad y no se disfraza de una.*
+   *  `null` en todos los demás. */
+  vozRefugio: string | null;
 };
 
 /** Lo que sale de las lecturas de oferta y agenda. Llega DESPUÉS y
@@ -290,6 +297,56 @@ export default function Cuenta() {
                 ciudad: null,
                 logoPath: null,
                 cohorteAnio: null,
+                vozRefugio: null,
+              });
+              return;
+            }
+          }
+          /* ═══ A7 · EL REFUGIO LEÍA «NO PUDIMOS CARGAR TU NEGOCIO» ═══════
+
+             🔴 **Es `L-178` otra vez, un actor después.** El refugio **no tiene
+             fila en `prestadores`** —su casa es una cuenta comercial de tipo
+             refugio—, así que `obtenerMiPrestador` devuelve `sin_prestador` y
+             esta rama lo mandaba al fallo. *Un dato que no existe salía
+             disfrazado de algo que no se pudo leer*, y el refugio abría su
+             Cuenta y veía un error donde hay un ESTADO perfectamente sano.
+
+             La cura es LITERALMENTE la de S99-C dos ramas más arriba —el
+             vendedor puro tenía el mismo defecto, encontrado en la misma
+             caminata—, y por eso va acá y no en otro lado: **éste es el único
+             punto donde `sin_prestador` ya está resuelto** y preguntar de nuevo
+             abajo sería un viaje para un dato que este `if` tiene en la mano.
+
+             ⚠️ **Se pinta lo que el contrato trae y NADA MÁS.** `obtener_mi_
+             cuenta_refugio` da nombre, tipo, estado y `puede_publicar`; **no da
+             ciudad ni zona** —el founder las pidió y hoy viven en
+             `v_prestadores_publicos`, que el refugio todavía no puebla porque
+             `prestadores.tipo` no acepta `refugio` (medido por A)—. *Se declara
+             en vez de inventarse* (`L-139`): sin ciudad, la línea no la dibuja.
+
+             🔑 **`puedePublicar` NO se deriva de `estado` ni de `verificadoEn`**
+             — los tres pueden divergir y el booleano es el que manda (aviso
+             literal de A). Acá todavía no gatea nada; queda nombrado para la
+             vitrina (A6). */
+          if (prestador.codigo === 'sin_prestador') {
+            const refugio = await obtenerMiCuentaRefugio();
+            if (!vigente) return;
+            if (refugio.ok && refugio.data !== null) {
+              setSoloPedidos(false);
+              setFallo(null);
+              setIdentidad({
+                nombre: refugio.data.nombreComercial ?? '',
+                ciudad: null,
+                logoPath: null,
+                cohorteAnio: null,
+                vozRefugio:
+                  refugio.data.tipo === 'organizacion'
+                    ? t('miCuenta.refugioOrganizacion')
+                    : refugio.data.tipo === 'rescatista'
+                      ? t('miCuenta.refugioRescatista')
+                      : /* `null` es legal: un vínculo anterior a N4. **No se
+                           adivina la clase de casa** — se omite la línea. */
+                        null,
               });
               return;
             }
@@ -307,6 +364,7 @@ export default function Cuenta() {
           ciudad: prestador.data.ciudad,
           logoPath: prestador.data.foto_url,
           cohorteAnio: prestador.data.cohorte_anio,
+          vozRefugio: null,
         });
 
         /* ⭐ S88-C (hallazgo del gate founder) · TITULARIDAD para las
@@ -614,9 +672,13 @@ export default function Cuenta() {
                 >
                   {identidad.nombre}
                 </Text>
-                {(vozDelOficio !== null || identidad.ciudad !== null) && (
+                {(vozDelOficio !== null ||
+                  identidad.vozRefugio !== null ||
+                  identidad.ciudad !== null) && (
                   <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: palette.light0 }}>
-                    {[vozDelOficio, identidad.ciudad].filter((x): x is string => x !== null).join(' · ')}
+                    {[vozDelOficio, identidad.vozRefugio, identidad.ciudad]
+                      .filter((x): x is string => x !== null)
+                      .join(' · ')}
                   </Text>
                 )}
                 {/* LA PLACA: pill de vidrio con papel (informa = píldora,
@@ -788,65 +850,34 @@ export default function Cuenta() {
               inalcanzable por una razón distinta.**
               El pie queda SOLO con el marcador de update, que es lo único
               que pertenece al final. */}
-          {/* ── S83-C15 · LA PUERTA DE LA GALERÍA (decisión founder).
-              El prestador NUNCA la tuvo: `/gallery` está registrada en
-              el layout pero vive SOLO por URL (medido en C10) — y con
-              las tres firmas de atmósfera publicadas, eso dejaba TRES
-              gates del founder inalcanzables. Es L-161 al pie de la
-              letra: una superficie de gate que no se puede alcanzar no
-              es un gate. El cliente la tiene desde D-580; ésta es su
-              hermana. SIN `__DEV__`: en un APK preview `__DEV__` es
-              false y la entrada desaparecería justo donde tiene que
-              existir — el defecto exacto que R18 vigila del lado
-              cliente.
+          {/* ── ☠️ S112-C · LA ENTRADA A LA GALERÍA SE RETIRA TAMBIÉN ACÁ
+              (firma del founder, 2-sep-2026 — A8, `L-478`): *«sacá "Láminas
+              de gate · para firmar" del menú de Cuenta en las dos apps: la
+              galería no es una puerta del producto.»*
 
-              ⚠️ SU CONDICIÓN NO ES LA DE SU VECINA, y la distinción es
-              lo que hay que leer antes de tocarla: la celda de Perfil v2
-              (arriba) SÍ muere — cuando esa pantalla se firme y
-              reemplace a la vieja. **Ésta NO se retira por iniciativa de
-              ninguna sesión.** La enmienda FIRMADA del founder en D-580
-              lo dice para la hermana del cliente y rige igual acá: la
-              galería queda visible en Cuenta, no se esconde tras
-              `__DEV__` sin orden explícita, y **su retiro se DECIDE en
-              el gate de producción — es una FIRMA, no una fecha del
-              calendario**. El checklist de tiendas es insumo de esa
-              decisión, no la decisión.
-              Se escribe así, y no como "provisional", porque el modo de
-              falla real es que alguien la borre creyendo que paga una
-              deuda: del lado cliente eso lo caza el guard R18, cuya
-              polaridad es que la entrada EXISTA.
-              ⚠️ HUECO DECLARADO: **R18 mira SOLO la Cuenta del cliente**
-              (`CUENTA_CLIENTE` en `verify-diseno.mjs`) — esta entrada
-              queda SIN guard hasta que la regla se ensanche a las dos
-              casas. Es una línea, y va aparte de este OTA.
+              🔑 **Ésta es la firma que su propio texto pedía.** La fila decía,
+              literal, que **no se retiraba por iniciativa de ninguna sesión** y
+              que su retiro *«se DECIDE en el gate de producción — es una FIRMA,
+              no una fecha del calendario»*. Llegó la firma; por eso se va, y
+              por eso el aviso queda escrito: quien lea el historial no va a
+              encontrar una sesión que se pasó por encima de esa cláusula.
 
-              Los textos van LITERALES fuera del riel i18n — igual que su
-              hermana del cliente: la galería no es pantalla de producto
-              y su copy no pertenece al lote de strings. ── */}
-          {/* ⭐ S85-C2 — LA FILA DESNUDA #1 SE VISTE. El censo la midió
-              como la única fila del índice que caía sobre el papel
-              mientras sus cuatro hermanas vivían en una `Tarjeta` — y una
-              fila sin superficie al lado de cuatro con superficie no se
-              lee como "distinta", se lee como suelta. Ahora tiene su
-              propia Tarjeta: sigue SEPARADA de las cuatro (no es una
-              puerta del producto), pero deja de estar desvestida. */}
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            <CeldaNavegacion
-              icono="preferencias"
-              /* S84-C9 (Ley 17.2 — los nombres van del lado del usuario).
-                 El founder no la encontraba, y B midió que no estaba
-                 escondida: **estaba nombrada en NUESTRO idioma**. "Galería
-                 de tokens" es vocabulario de quien construye, y su
-                 subtítulo —"no es pantalla de producto"— le decía
-                 literalmente que eso no era para él. El nombre nuevo dice
-                 QUÉ HAY y QUÉ SE ESPERA DE ÉL: son láminas, son de gate, y
-                 las tiene que firmar. */
-              titulo="Láminas de gate · para firmar"
-              detalle="lo que espera tu ojo esta sesión"
-              registro="aa"
-              onPress={() => router.push('/gallery')}
-            />
-          </Tarjeta>
+              La hermana del cliente se había retirado en S107-C con la misma
+              razón, y la nota de allá anunciaba que **ésta se conservaba hasta
+              el gate**. Esa asimetría termina hoy: las dos casas quedan sin
+              entrada.
+
+              ⚠️ **La galería NO murió y sigue siendo obligatoria (`R17`).** Lo
+              que se retira es el CAMINO desde Cuenta; `/gallery` sigue
+              registrada y se alcanza por deep link con cable, igual que antes
+              de que esta fila existiera.
+
+              ⚠️ **`R18` no se toca desde acá.** Su corpus (`CUENTAS_GALERIA`)
+              vive en `scripts/verify-diseno.mjs`, territorio de B, y su
+              polaridad es que la entrada EXISTA — o sea que este retiro la deja
+              en rojo hasta que B la angoste o la jubile. *Se declara en vez de
+              editarla de contrabando: una regla que la casa cambia sin pedirlo
+              deja de ser una regla.* Pedido a B en el buzón. ── */}
 
           {/* ── Sesión y cuenta (la sesión se MUDÓ desde Negocio) ── */}
           <View style={{ gap: spacing[3] }}>

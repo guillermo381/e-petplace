@@ -251,8 +251,9 @@ const galeria = leer(archivosTsx('packages/ui/src/gallery'));
  *  cada regla se filtra adentro. R13 mira solo `apps/cliente/` y por eso
  *  su casa está anclada aparte; pero una regla futura que filtre por una
  *  carpeta más chica vuelve a tener el hueco, y esa ancla es SUYA. Las
- *  reglas con corpus propio (R11 diccionarios · R17 exports · R18 Cuentas
- *  · R24 explorar/ · R25 la primitiva) ya traen la suya y no se tocan.
+ *  reglas con corpus propio (R11 diccionarios · R17 exports · R24 explorar/
+ *  · R25 la primitiva) ya traen la suya y no se tocan. (R18 tenía la suya y
+ *  se jubiló en S112-C con su corpus: ver su lápida.)
  *
  *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. Lo que sí
  *  cambia es el mínimo, y lo cambia quien MIDA, en el commit que mueva el
@@ -1497,137 +1498,40 @@ const FUENTES_R17 = {
   galeria: readFileSync('packages/ui/src/gallery/TokenGallery.tsx', 'utf8'),
 };
 
-/** R18 · D-580 ENMENDADA (orden founder S82): LA ENTRADA A LA GALERÍA
- *  EN CUENTA **QUEDA VISIBLE** hasta el gate de producción, y su retiro
- *  exige FIRMA — ninguna sesión la paga por iniciativa propia.
+/* ☠️ R18 SE RETIRÓ EN S112-C — Y LA ORDEN DE RETIRARLA ESTABA ESCRITA EN
+ *  ELLA MISMA, palabra por palabra: *«El día que el founder firme el retiro
+ *  del prestador, ahí sí la regla se borra entera, en el mismo commit de la
+ *  firma.»* Ese día es hoy.
  *
- *  LA POLARIDAD ES EL PUNTO (letra founder): el modo de falla de este
- *  guard es que la entrada **DESAPAREZCA**, jamás que aparezca. Un
- *  guard con la polaridad invertida (vigilar que NO esté) haría el
- *  trabajo de retirarla sin firma, que es exactamente lo que la orden
- *  prohíbe. Por eso vigila DOS cosas y las dos en positivo:
- *    ① la navegación a '/gallery' EXISTE en la Cuenta del cliente
- *    ② y NO está escondida tras `__DEV__` (el gate corre sobre el APK
- *      preview, donde `__DEV__` es false: esconderla ahí la mata justo
- *      donde se la necesita — L-161, la misma lección del marcador).
- *  ⏪ ACÁ DECÍA: *«el día que el founder firme el retiro, esta regla se
- *  BORRA en el mismo acto»*. **La firma llegó (mesa, S107) y NO la borró:
- *  LA ENMENDÓ.** Se marca en vez de reescribirse, porque la instrucción
- *  vieja mandaba borrar un guard que hoy sigue haciendo falta.
+ *  LA FIRMA (founder, 2-sep-2026 — ficha A8, `L-478`): *«sacá "Láminas de gate
+ *  · para firmar" del menú de Cuenta en las dos apps: la galería no es una
+ *  puerta del producto.»*
  *
- *  🔴 **LO FIRMADO: se retira la entrada del CLIENTE; la del PRESTADOR
- *  queda, y R18 pasa a vigilar SÓLO ésa.**
+ *  QUÉ VIGILABA: que la navegación a `/gallery` EXISTIERA en la Cuenta —**la
+ *  polaridad era el punto**: su modo de falla era que la entrada DESAPARECIERA,
+ *  jamás que apareciera— y que no viviera detrás de `__DEV__` (que en el APK
+ *  preview es `false` y la mataba justo donde se la necesitaba, `L-161`).
  *
- *  **Por qué enmendar y no borrar, que es lo que cambia el resultado:** la
- *  polaridad de arriba **sigue siendo el punto**. Si la regla se borrara,
- *  la entrada del prestador —la única que queda— pasaría a no tener guard,
- *  y su modo de falla es el de siempre: *desaparece y nadie se entera*.
- *  **Borrar el guard junto con una de sus dos casas habría dejado
- *  desprotegida a la que sobrevive** — exactamente el hueco que S84-B8
- *  cerró cuando R18 miraba sólo al cliente, ahora en espejo.
+ *  POR QUÉ SE VA ENTERA Y NO SE ANGOSTA UNA VEZ MÁS: en S107 se angostó de dos
+ *  casas a una porque **quedaba una entrada que la firma mandaba conservar**.
+ *  Hoy no queda ninguna. Un guard cuyo corpus es la lista vacía no protege:
+ *  **su verde pasa a significar «no había nada que mirar»**, que es el modo de
+ *  falla exacto que `L-192` existe para matar — y su ancla lo habría dicho en
+ *  rojo, que es para lo que el ancla está.
  *
- *  ⚠️ **Y EL ANCLA BAJA DE 2 A 1 EN EL MISMO ACTO.** No es cosmético: el
- *  ancla exige un mínimo de casas para que el silencio de la regla
- *  signifique algo, y con `2` sobre una sola casa **R18 saldría ROJA por
- *  ANCLA ROTA** — un rojo que no habla del defecto que vigila. *Bajar un
- *  ancla es aflojar un guard y por eso se declara: acá se baja porque el
- *  corpus se achicó POR FIRMA, no para que pase un rojo.* */
-// S84-B8 ② — LAS DOS CASAS. Hasta hoy R18 miraba SOLO la del cliente y
-// el propio código de la entrada del prestador declaraba el hueco: "R18
-// mira SOLO la Cuenta del cliente… esta entrada queda SIN guard". Una
-// entrada de gate que puede desaparecer sin que nadie se entere es el
-// modo de falla de siempre — y con la galería especializada en láminas
-// (enmienda de método 2-ago) importa MÁS, no menos: es el único camino
-// del founder a lo que tiene que firmar.
-/* ✏️ ENMIENDA S107 — FIRMA DE LA MESA (28-ago-2026). **R18 NO SE BORRA: SE
- *  ANGOSTA A UNA SOLA CASA.**
+ *  🔴 LO QUE NO SE VA CON ELLA, y es lo que hay que leer antes de dar por
+ *  muerta la galería: **`R17` sigue rigiendo**. Toda pieza exportada sigue
+ *  obligada a estar montada en `/gallery` — es el único mecanismo que hace que
+ *  el typecheck vea una prop sin llenar. *Lo que se retiró es el CAMINO desde
+ *  Cuenta, no la sala:* `/gallery` sigue registrada en las dos apps y se
+ *  alcanza por deep link con cable.
  *
- *  Lo firmado: **se retira la entrada del CLIENTE; la del PRESTADOR se
- *  conserva hasta el gate de producción.** *La galería salió de sala de
- *  revisión (firma S106) — pero salió como lugar donde el founder JUZGA, no
- *  como pieza: `R17` sigue exigiendo que toda pieza exportada esté montada
- *  ahí, y ése sigue siendo el único mecanismo que hace que el typecheck vea
- *  una prop sin llenar.*
- *
- *  🔴 POR QUÉ SE ANGOSTA EN VEZ DE BORRARSE, que es la parte que se pierde
- *  si no queda escrita: la polaridad de R18 es lo valioso — vigila que la
- *  entrada **EXISTA**, porque su modo de falla es que DESAPAREZCA sin firma.
- *  Borrar la regla entera para retirar UNA de las dos entradas dejaría a la
- *  otra —la que la firma manda conservar— **sin guard**, y su desaparición
- *  volvería a ser silenciosa. *Se retira lo que la firma retira, y se sigue
- *  vigilando lo que la firma conserva.*
- *
- *  El día que el founder firme el retiro del prestador, ahí sí la regla se
- *  borra entera, en el mismo commit de la firma. */
-const CUENTAS_GALERIA = [
-  // ☠️ 'apps/cliente/...' — RETIRADA POR FIRMA DE MESA (S107). La entrada del
-  // cliente se saca de la app; el retiro del ARCHIVO es de C. Esta línea se
-  // deja como lápida para que nadie la re-agregue creyendo que falta.
-  'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
-];
-/* S85-B1 · EL MENSAJE GRITABA UNA CAUSA QUE EL PREDICADO NO MEDÍA — la
- *  forma exacta del freno falso de S84. El brazo `__DEV__` preguntaba
- *  `/__DEV__/.test(archivo entero)` y respondía "la entrada a la galería
- *  NO se esconde ahí": medido con la entrada PRESENTE en las dos casas y
- *  un `__DEV__` ajeno (un console.log), salía ROJO acusando de esconder
- *  una entrada que estaba a la vista.
- *
- *  SE CURAN LAS DOS PUNTAS, y por qué las dos: bajar solo el mensaje
- *  dejaría el guard sin nombrar nunca el defecto real de D-580; subir
- *  solo el predicado cambiaría una red gruesa por un parser —y un
- *  parser que no matchea pasa en VERDE, que es el modo de falla que
- *  L-192 existe para matar. Entonces:
- *   ① BRAZO PRECISO: si el `__DEV__` ENVUELVE la entrada, el mensaje
- *     dice eso, que es el defecto que D-580 prohíbe.
- *   ② BRAZO GRUESO: si hay `__DEV__` y no se pudo probar que envuelve,
- *     sigue siendo ROJO —la red no se afloja— pero el mensaje DECLARA
- *     que no probó la relación, en vez de afirmarla.
- *  La detección de ① es TEXTUAL y por eso es la que puede fallar; su
- *  falla cae siempre en ②, nunca en verde. */
-const RE_ENTRADA_GALERIA = /router\.push\(['"]\/gallery['"]\)/;
-/** ¿ese `__DEV__` envuelve a la entrada? Heurística declarada: cubre las
- *  dos formas con las que se esconde algo en esta casa —`__DEV__ && …` en
- *  JSX y `if (__DEV__) { … }`— exigiendo que entre el guard y la entrada
- *  no se haya cerrado ninguna llave. No pretende ser un parser. */
-function devEnvuelve(limpio, iDev, iEntrada) {
-  if (iEntrada === -1 || iEntrada <= iDev) return false;
-  const entre = limpio.slice(iDev + '__DEV__'.length, iEntrada);
-  if (/\}/.test(entre)) return false;
-  return /^\s*&&/.test(entre) || /^\s*\)\s*\{/.test(entre);
-}
-function r18(casas) {
-  const fallos = [];
-  for (const { ruta, src } of casas) {
-    const limpio = sinComentarios(src ?? '');
-    if (!RE_ENTRADA_GALERIA.test(limpio)) {
-      fallos.push(
-        `${ruta} — LA ENTRADA A /gallery DESAPARECIÓ. D-580 (enmienda founder S82): queda VISIBLE hasta el gate de producción; su retiro exige FIRMA EXPLÍCITA, y con la firma se borra esta regla en el mismo acto.`,
-      );
-    }
-    const iEntrada = limpio.search(RE_ENTRADA_GALERIA);
-    const devs = [...limpio.matchAll(/__DEV__/g)];
-    const envuelto = devs.some((d) => devEnvuelve(limpio, d.index, iEntrada));
-    if (envuelto) {
-      fallos.push(
-        `${ruta} — LA ENTRADA A /gallery ESTÁ DETRÁS DE __DEV__. El gate corre sobre el APK preview, donde __DEV__ es false: ahí la entrada muere justo donde se la necesita (L-161, la misma lección del marcador).`,
-      );
-    } else if (devs.length > 0) {
-      fallos.push(
-        `${ruta} — hay ${devs.length} uso(s) de __DEV__ en la Cuenta de la galería. Este guard NO probó que alcancen a la entrada (su análisis es textual): se declara ROJO por precaución, porque la Cuenta que lleva al gate se mantiene sin ramas que el APK preview no ejecuta. Si el uso es legítimo, la decisión es de mesa y se declara acá — no se afloja el guard en silencio.`,
-      );
-    }
-  }
-  // ANCLA: sin casas que mirar la regla informaría "0 fallos" sin haber
-  // abierto un archivo — verde sin verificación (L-192).
-  // ✏️ S107: baja de 2 a 1 porque la FIRMA retiró la casa del cliente. El
-  // ancla no se afloja «para que pase»: se mueve al número que la firma dejó,
-  // y sigue siendo el que impide que la regla mire cero archivos. *Y el que
-  // cazó este cambio fue el ancla misma — dio rojo en cuanto la lista bajó a
-  // uno, que es exactamente para lo que existe.*
-  // (A y B escribieron esta misma enmienda en paralelo; se conserva una sola.)
-  fallos.push(...ancla('R18', casas.length, 1, 'Cuenta(s) de galería vigiladas'));
-  return { fallos, info: fallos.length === 0 ? `${casas.length} entradas vivas y sin __DEV__` : `${fallos.length} fallo(s)` };
-}
+ *  ⚠️ TERRITORIO: este archivo es de B. C lo tocó porque **la propia regla
+ *  delega su retiro en quien traiga la firma y lo pide «en el mismo commit»** —
+ *  dejarla roja habría frenado el pre-commit de las cuatro pistas por un rojo
+ *  que no habla de ningún defecto. Declarado a B en el buzón, con el literal de
+ *  la firma. */
+
 
 /* ☠️ R23 SE RETIRÓ EN S82-B (`d1e0e36`) Y SE FUE SIN LÁPIDA — ésta se le
  *  pone en S85-B, tres sesiones después, porque un hueco de numeración sin
@@ -2543,7 +2447,6 @@ const FIXTURES = {
   // S83-B7 · el ancla prueba SOLO el brazo de la entrada ausente. El de
   // __DEV__ va en EXTRAS_BRAZOS: ensanchar este string encendía los dos y
   // ninguno quedaba probado por separado — medido, no supuesto.
-  R18: [{ ruta: '(fixture)', src: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }],
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
   // la marca anidada adentro de la placa: el defecto que se ve como layout
   // S83-B3 · el fixture trae la MITAD CLARA SANA a propósito, para que el
@@ -6510,7 +6413,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6666,14 +6569,10 @@ const EXTRAS_BRAZOS = [
   ]],
   // ── R16: el guard de fuente que nació decorativo EN B3, escrito por mí ──
   ['R16·sin los tokens del tapiz en palette', r16, { palette: '', temas: '' }],
-  // ── R18: la entrada VIVE (no dispara su otro brazo) y hay __DEV__ ──
   // S85-B1 · los DOS brazos de __DEV__ tienen su rojo por separado, y el
   // orden importa: en el GRUESO el `__DEV__` va DESPUÉS de la entrada, así
   // que no puede envolverla ni encender el preciso. Un fixture que
   // encendiera los dos no probaría ninguno (el precedente de R16/R24).
-  ['R18·__DEV__ ajeno, sin envolver (brazo grueso)', r18, [{ ruta: '(fixture)', src: 'router.push("/gallery")\nif (__DEV__) console.log("nada que ver")' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
-  ['R18·__DEV__ ENVUELVE la entrada — if (brazo preciso)', r18, [{ ruta: '(fixture)', src: 'if (__DEV__) { router.push("/gallery") }' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
-  ['R18·__DEV__ ENVUELVE la entrada — && en JSX (brazo preciso)', r18, [{ ruta: '(fixture)', src: '{__DEV__ && <Celda onPress={() => router.push("/gallery")} />}' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
   // ── R30: el ANCLA, que es el guard de fuente de esta regla. Sin
   //    registry el SET queda vacío, ningún path matchea y la regla pasaría
   //    en VERDE habiendo comparado contra NADA. Su fixture principal trae
@@ -6861,7 +6760,6 @@ corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
-corridas.push(['R18 (D-580 enmendada S107: la entrada a la galería NO desaparece — sólo el PRESTADOR; la del cliente se retiró por firma)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R30 (el glifo no se re-dibuja: apps contra el registry)', r30([...apps, ...ui])]);

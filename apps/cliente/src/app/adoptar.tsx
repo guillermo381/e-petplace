@@ -67,6 +67,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   obtenerAdoptables,
   obtenerSesion,
   resolverUrlsFotos,
@@ -241,7 +242,16 @@ export default function Adoptar() {
       raza={a.raza}
       sexo={a.sexo === null ? null : t(`adoptar.sexo_${a.sexo}` as 'adoptar.sexo_macho')}
       edad={a.fechaNacimiento === null ? null : edadDe(a)}
-      fotoUrl={a.fotoUrl === null ? null : (caras.get(a.fotoUrl) ?? null)}
+      /* ⭐ **A4 · sin foto, la cara de la casa; huella en ningún lado**
+         (firma del founder, 2-sep). `razaSlug: null` porque el lector trae el
+         NOMBRE de la raza y no su ruta: **slugificar texto es justo lo que la
+         casa prohíbe** — la ruta sale de un LOOKUP contra `cat_razas`. Se cae
+         al genérico de la especie, que es una cara igual. */
+      fotoUrl={caraDeMascota({
+        especie: a.especie,
+        razaSlug: null,
+        fotoUri: a.fotoUrl === null ? null : (caras.get(a.fotoUrl) ?? null),
+      })}
       publicador={a.publicadorNombre}
       voces={{ edadNoInformada: t('adoptar.edadNoInformada') }}
       onPress={() =>
