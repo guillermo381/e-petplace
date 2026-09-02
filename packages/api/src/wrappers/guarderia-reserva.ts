@@ -265,6 +265,24 @@ export interface PlanGuarderia {
   prestadorId: string;
   prestadorNombre: string;
   mascotaId: string | null;
+  /**
+   * 🟢 **Todo se contrata POR MASCOTA** (firma del founder, S109) ⇒ el plan
+   * tiene que poder DECIR de quién es: *una familia con dos animales no
+   * debería adivinar cuál está pagando.*
+   *
+   * ⚠️ **`mascotaNombre` puede ser `null` y NO es un defecto**: el mandato
+   * admite mascota nula y hay planes vivos así. La pantalla dice el nombre
+   * cuando existe; cuando no, **no inventa uno**.
+   */
+  mascotaNombre: string | null;
+  mascotaEspecie: string | null;
+  /**
+   * 🔴 **ES UNA RUTA DE STORAGE, NO UNA URL.** Se firma en la pantalla con
+   * `resolverUrlFoto`, igual que toda foto privada de la casa (`D-308`).
+   * *Pintarla directo como URI no muestra nada* — es el defecto exacto que C
+   * midió en la foto del durante de guardería.
+   */
+  mascotaFotoUrl: string | null;
   precioMensual: number;
   estado: 'activa' | 'pausada' | 'cancelada' | 'vencida';
   /** 'YYYY-MM-DD' */
@@ -325,6 +343,9 @@ export async function obtenerMisPlanesGuarderia(): Promise<
       prestadorNombre: typeof r.prestador_nombre === 'string' ? r.prestador_nombre : '',
       mascotaId: typeof r.mascota_id === 'string' ? r.mascota_id : null,
       precioMensual: r.precio_mensual,
+      mascotaNombre: typeof r.mascota_nombre === 'string' ? r.mascota_nombre : null,
+      mascotaEspecie: typeof r.mascota_especie === 'string' ? r.mascota_especie : null,
+      mascotaFotoUrl: typeof r.mascota_foto_url === 'string' ? r.mascota_foto_url : null,
       estado: r.estado as PlanGuarderia['estado'],
       periodoDesde: typeof r.periodo_desde === 'string' ? r.periodo_desde : null,
       periodoHasta: typeof r.periodo_hasta === 'string' ? r.periodo_hasta : null,
