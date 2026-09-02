@@ -1563,7 +1563,85 @@ export const clienteEs = {
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
   // S73 C3 — la puerta de la adopción (refugios, peldaño 0 honesto)
+  // S112-C · LA VOZ DE LA EDAD Y LA ESPERA. Las claves las nombra
+  // `packages/domain/vozAdopcion` (`describirEdad` · `describirEspera`), que
+  // devuelve {clave, params} en vez de una frase: una frase adentro de una RPC
+  // es una pantalla en un solo idioma (D-539).
+  edad: {
+    desconocida: 'Edad no informada',
+    meses: '{{meses}} meses',
+    mesesEstimada: 'unos {{meses}} meses',
+    anios: '{{anios}} años',
+    aniosEstimada: 'unos {{anios}} años',
+  },
+  espera: {
+    dias: '{{dias}} días',
+    semanas: '{{semanas}} semanas',
+    meses: '{{meses}} meses',
+    anios: '{{anios}} años',
+  },
+  // S112-C · LA FICHA DEL ADOPTABLE (§4.1). La composición es de B
+  // (`FichaAdoptable`); acá vive su voz.
+  fichaAdoptable: {
+    titulo: 'Adopción',
+    noSeSabe: 'Todavía no se sabe',
+    convivenciaRotulo: 'Con quién puede vivir',
+    conPerros: 'Con perros',
+    conGatos: 'Con gatos',
+    conNinos: 'Con niños',
+    convSi: 'Sí',
+    convNo: 'No',
+    sinObservar: 'Todavía lo están conociendo',
+    saludRotulo: 'Salud',
+    historiaRotulo: 'Su historia',
+    senalesRotulo: 'Lo que hay que saber',
+    publicadorRotulo: 'Quién lo publica',
+    bonoRotulo: 'Bono de adopción',
+    senalUrgente: 'Necesita hogar con urgencia',
+    senalPareja: 'Se adopta junto con {{nombre}}',
+    senalEspera: 'Lleva {{cuanto}} esperando',
+    verificado: 'Refugio verificado por e-PetPlace',
+    verificadoTitulo: '¿Qué significa «verificado»?',
+    verificadoCuerpo:
+      'Alguien de e-PetPlace revisó quién es este refugio antes de dejarlo publicar. No es una garantía sobre el animal ni sobre la adopción: es que sabemos con quién estás hablando.',
+    bono: 'Bono de adopción: ${{monto}} · {{destino}}',
+    bonoDestinoSinDeclarar: 'destino no declarado',
+    bonoTitulo: '¿Qué es el bono de adopción?',
+    bonoCuerpo:
+      'Es un aporte que el refugio pide para sostener su trabajo. Se paga al refugio, fuera de la app, cuando conoces al animal. e-PetPlace no lo cobra ni se queda con nada.',
+    apadrinar: 'Apadrinar',
+    apadrinarCuerpo:
+      'Pronto vas a poder apadrinar a un animal que todavía espera hogar: ayudarlo a distancia mientras llega su familia. Todavía no está listo.',
+    cerrar: 'Entendido',
+    noDisponibleTitulo: 'Esta publicación ya no está',
+    noDisponibleDetalle: 'Puede que ya haya encontrado familia. Hay otros esperando.',
+    verOtros: 'Ver quiénes esperan',
+    errorTitulo: 'No pudimos cargar esta ficha',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+  },
   adoptar: {
+    especieVoz_perro: 'Perro',
+    especieVoz_gato: 'Gato',
+    edadNoInformada: 'Edad no informada',
+    tallaCualquiera: 'Cualquier tamaño',
+    talla_S: 'Pequeño',
+    talla_M: 'Mediano',
+    talla_L: 'Grande',
+    filtroUrgente: 'Urgentes',
+    filtroEsterilizado: 'Esterilizados',
+    filtroPareja: 'En pareja',
+    filtroPerros: 'Convive con perros',
+    filtroGatos: 'Convive con gatos',
+    filtroNinos: 'Convive con niños',
+    destacadosTitulo: 'Llevan más tiempo esperando',
+    destacadosPorque: 'Son los que más tiempo llevan esperando un hogar.',
+    esperaDesde: 'Lleva {{cuanto}} esperando',
+    ordenConvivencia: 'Primero los confirmados. Abajo, los que todavía no se sabe.',
+    cargarMas: 'Ver más',
+    vacioFiltradoTitulo: 'Nadie coincide con eso',
+    vacioFiltradoDetalle: 'Prueba con menos filtros: hay más animales esperando.',
+    limpiarFiltros: 'Quitar los filtros',
     sinCuentaLinea: 'Para postular vas a necesitar una cuenta.',
     sinCuentaPorQueTitulo: '¿Por qué hace falta una cuenta?',
     sinCuentaPorQueCuerpo:
