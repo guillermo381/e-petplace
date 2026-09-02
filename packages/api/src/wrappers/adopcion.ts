@@ -83,6 +83,21 @@ const MENSAJES = {
   respuesta_no_valida:    'Revisa ese dato del formulario.',
   tope_de_solicitudes:    'Ya tienes tres postulaciones abiertas. Cierra una antes de abrir otra.',
   aceptacion_no_es_tuya:  'Esa aceptación no es tuya.',
+  /* ═══ S112-A9 · el acta y la firma ═══════════════════════════════════════
+     `acta_incompleta` NO es un error de la persona: nombra lo que falta para
+     que la pantalla lo pida. Y `acta_cambio_de_version` es el que protege lo
+     que de verdad importa — *firmar con un código emitido sobre otro texto es
+     firmar algo que no se leyó.* */
+  solicitud_no_aceptada:  'El acta existe cuando el refugio acepta la solicitud.',
+  acta_incompleta:        'Faltan datos para completar el acta.',
+  acta_cambio_de_version: 'El acta cambió mientras esperabas. Vuelve a leerla y pide otro código.',
+  ya_firmaste:            'Ya firmaste esta acta.',
+  sin_codigo:             'Pide un código antes de firmar.',
+  codigo_vencido:         'Ese código venció. Pide otro.',
+  codigo_incorrecto:      'Ese código no es el correcto.',
+  intentos_agotados:      'Se agotaron los intentos. Pide un código nuevo.',
+  firma_inmutable:        'Una firma no se edita ni se borra.',
+  solicitud_no_existe:    'No encontramos esa solicitud.',
   cuenta_no_existe:       'No encontramos esa cuenta.',
   /* Un campo fuera de la lista blanca rebota CON SU NOMBRE: un editor que
      ignora en silencio le dice a la pantalla que guardó algo que no guardó. */
@@ -1222,6 +1237,125 @@ export async function aceptarDocumentoAdopcion(input: {
       codigo: String(r.codigo),
       version: Number(r.version),
       ipCapturada: r.ip_capturada === true,
+    },
+  };
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑥ EL ACTA Y LA FIRMA — S112-A9 (Ley 67, arts. 13-14)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface ActaAdopcion {
+  codigo: string;
+  /** 🔴 **Viaja ida y vuelta por el servidor y la pantalla NO la escribe.** Si
+   *  el acta cambia entre que se pide el código y se firma, `firmarActa` rebota
+   *  con `acta_cambio_de_version`: *firmar con un código emitido sobre otro
+   *  texto es firmar algo que no se leyó.* */
+  version: number;
+  textoRenderizado: string;
+  /** El hash de ESTA acta, con estos nombres. **No es el de la plantilla**: dos
+   *  actas distintas tendrían el mismo y el expediente no probaría cuál se
+   *  firmó. El de la plantilla viaja al lado como `hashFuente`. */
+  hashRenderizado: string;
+  hashFuente: string;
+  /** Los NOMBRES de las variables vacías. §4.1: «arriba del botón una lista con
+   *  nombre: Falta tu cédula». Sólo `microchip` y `remetfu` tienen «si vacío» —
+   *  las demás faltan de verdad y el acta no se firma sin ellas. */
+  faltantes: string[];
+  miPapel: 'adoptante' | 'refugio' | null;
+  firmas: { papel: string; sello: string }[];
+}
+
+export async function obtenerActaAdopcion(
+  solicitudId: string,
+): Promise<ResultadoWrapper<ActaAdopcion, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('obtener_acta_adopcion', {
+    p_solicitud_id: solicitudId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.texto_renderizado !== 'string') return fallaCodigo('datos_inconsistentes');
+  const p = r.mi_papel;
+  return {
+    ok: true,
+    data: {
+      codigo: String(r.codigo ?? ''),
+      version: Number(r.version ?? 0),
+      textoRenderizado: r.texto_renderizado,
+      hashRenderizado: String(r.hash_renderizado ?? ''),
+      hashFuente: String(r.hash_fuente ?? ''),
+      faltantes: Array.isArray(r.faltantes) ? (r.faltantes as string[]) : [],
+      miPapel: p === 'adoptante' || p === 'refugio' ? p : null,
+      firmas: Array.isArray(r.firmas)
+        ? (r.firmas as Record<string, unknown>[]).map((f) => ({
+            papel: String(f.papel ?? ''),
+            sello: String(f.sello ?? ''),
+          }))
+        : [],
+    },
+  };
+}
+
+/** Pide el código de firma. 🔴 **Devuelve A DÓNDE se mandó, jamás QUÉ se mandó.**
+ *  El código sale sólo por correo y **no entra a la campana**: si volviera acá o
+ *  apareciera en el centro de avisos, alguien con la sesión abierta firmaría sin
+ *  abrir el correo — *y el código existe justamente para probar que controla ese
+ *  correo.* No alcanzaba con que este wrapper lo borrara: la RPC es alcanzable
+ *  por HTTP con la misma clave, así que la cura vive en el servidor. */
+export async function solicitarCodigoFirma(
+  solicitudId: string,
+): Promise<ResultadoWrapper<{ enviadoA: string; expiraEn: string }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('solicitar_codigo_firma', {
+    p_solicitud_id: solicitudId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: { enviadoA: String(r.enviado_a ?? ''), expiraEn: String(r.expira_en ?? '') },
+  };
+}
+
+/** Firma. **La SEGUNDA firma válida hace el traspaso y escribe el hito, en la
+ *  misma transacción** — la pantalla no lo llama después: *si tuviera que
+ *  hacerlo, una adopción quedaría firmada por los dos y sin ocurrir cada vez que
+ *  se corte la red.*
+ *
+ *  `cedula` y `domicilio` se cargan ACÁ, y se escriben ANTES de renderizar: §4.1
+ *  pide un campo para cargarlos «ahí mismo», y renderizar antes daría un acta
+ *  con los guiones que la persona acaba de completar. */
+export async function firmarActaAdopcion(params: {
+  solicitudId: string;
+  codigo: string;
+  cedula?: string;
+  domicilio?: string;
+  dispositivo?: string;
+}): Promise<
+  ResultadoWrapper<
+    { papel: string; folio: string; firmas: number; completa: boolean },
+    CodigoErrorAdopcion
+  >
+> {
+  const { data, error } = await getClient().rpc('firmar_acta_adopcion', {
+    p_solicitud_id: params.solicitudId,
+    p_codigo: params.codigo,
+    p_cedula: params.cedula ?? undefined,
+    p_domicilio: params.domicilio ?? undefined,
+    p_dispositivo: params.dispositivo ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      papel: String(r.papel ?? ''),
+      folio: String(r.folio ?? ''),
+      firmas: Number(r.firmas ?? 0),
+      completa: r.completa === true,
     },
   };
 }
