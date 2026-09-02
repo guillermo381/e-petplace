@@ -52,11 +52,35 @@ const CATALOGO: Readonly<Record<TipoAviso, { categoria: CategoriaAviso; audienci
   padrinazgo_refugio_inactivo:   { categoria: 'operacion',  audiencia: 'cliente' },
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   ☠️ `silencio_detectado` — RETIRADO EN S112-D. No volvió a otro lado: **su ley
+   vive ahora en SQL**, y este archivo dejó de ser uno de los dos lugares.
+
+   **Por qué murió, medido:** tenía **CERO productores** (aparecía sólo acá y en
+   su propio test) y el barrido de los 5 días **es un cron de SQL**, que jamás
+   llama a este módulo. Era *motor sin puerta* — y peor: **el segundo de dos
+   mecanismos de «una sola vez» para el mismo aviso**, cada uno pareciendo
+   respaldado por el otro y **ninguno corriendo**.
+
+   **Dónde vive hoy cada mitad que este caso tenía adentro** — no hay que
+   buscarlas:
+   - *«suena UNA vez»* → `adopcion_solicitud.aviso_silencio_emitido_en`, sellado
+     en el mismo acto que la emisión, **con el `UNIQUE (clave_dedup)` de
+     `notificacion_intencion` como piso**. Las dos capas de `L-424`.
+   - *«el memorial lo apaga»* → el `WHERE m.estado_vida IS NOT DISTINCT FROM
+     'activa'` de `avisar_adopcion_sin_respuesta()`, **y ahí es obligatorio**:
+     con `p_mascota_id => NULL` el GATE 1 del motor de avisos no corre.
+   - *la categoría `operacion`* → `cat_notificacion_tipos`, que es donde el
+     motor la lee de verdad.
+
+   ⚠️ **Los otros cuatro `HechoDelVertical` siguen vivos y siguen sin productor.**
+   Éste se retira porque su productor **existe y es otro**; los demás todavía
+   esperan el suyo. *No se retiran por parecerse a éste.*
+   ═══════════════════════════════════════════════════════════════════════════ */
 export type HechoDelVertical =
   | { readonly clase: 'solicitud_creada'; readonly solicitudId: string; readonly publicadorUserId: string }
   | { readonly clase: 'mensaje_nuevo'; readonly solicitudId: string; readonly mensajeId: string; readonly destinatarioUserId: string }
   | { readonly clase: 'solicitud_cerrada'; readonly solicitudId: string; readonly solicitanteUserId: string }
-  | { readonly clase: 'silencio_detectado'; readonly solicitudId: string; readonly solicitanteUserId: string }
   | {
       readonly clase: 'padrinazgo_terminado';
       readonly padrinazgoId: string;
@@ -103,11 +127,6 @@ export function avisosDe(
     case 'solicitud_cerrada':
       return [armar('adopcion_solicitud_respondida', hecho.solicitanteUserId,
         `adopcion_solicitud_respondida:${hecho.solicitudId}`)];
-    case 'silencio_detectado':
-      // Una sola vez por solicitud: la clave lo garantiza aunque el barrido
-      // corra mil veces.
-      return [armar('adopcion_sin_respuesta', hecho.solicitanteUserId,
-        `adopcion_sin_respuesta:${hecho.solicitudId}`)];
     case 'padrinazgo_terminado': {
       // 🅿️ `fallecido` devuelve `false` y por eso NO sale aviso. Es la decisión
       // estacionada, no un olvido — y el cobro se detiene igual.
