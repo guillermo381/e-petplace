@@ -213,11 +213,27 @@ las partes. **El canal existe para que no haga falta.** No agregues un «llamar�
 | estado como **etiqueta de clase (N23)** | `estado` | **jamás rojo/alarma**, ni en `declinada` |
 | «el hilo me lleva al final» | `estado === 'aceptada'` | 🔴 **el destino NO existe todavía** |
 
-🔴 **Sobre el último:** *«los avisos del animal y el acta»* es §5, y **el acta no
-tiene texto cargado** — `traspasarMascotaAFamilia` rebota `acta_no_disponible`
-(*«falta cargar el acta. Es de nuestro lado»*). ⇒ **Montá el hilo hasta
-`aceptada` y no prometas el final que todavía no puede ocurrir.** Cuando el
-texto se cargue, la puerta se abre sola.
+🔴 **CORREGIDO — ESTO CAMBIÓ MIENTRAS ESCRIBÍA, Y EN LA DIRECCIÓN QUE TE COSTABA
+TRABAJO.** Acá decía que *«el acta no tiene texto cargado»* y que **no
+prometieras ese final**. **Medido de nuevo: es falso.**
+
+| qué | estado HOY (medido) |
+|---|---|
+| `adopcion_documentos` | **5 filas** — `acta_adopcion`, `condiciones_adopcion`, `terminos_refugio` |
+| `acta_adopcion` v1 | **`vigente: true`**, plantilla, 5350 caracteres |
+| `traspasar_mascota_a_familia` | ahora toma **`p_acta_version`**: el acta es un INSUMO, no un pendiente |
+| `traspasarMascotaAFamilia` (wrapper) | **ya pasa `actaVersion`** — el camino está alineado de punta a punta |
+
+⇒ **El final SÍ se puede montar.** A cargó los textos legales durante esta misma
+sesión (`s112a_textos_legales_adopcion`, `…_acta_plantilla`,
+`…_compuerta_acta_exige_vigencia`).
+
+> ### 🔴 Y de quién fue el error, porque importa más que el dato: **yo no lo medí, lo DEDUJE del canon de S111** —*«ni una palabra de texto legal; las puertas están fail-closed y se abren solas cuando el texto se cargue»*— que era cierto al cerrar S111 y **dejó de serlo hoy**. `L-166`: *todo dato vivo se lee al momento de usarlo, jamás de un reporte anterior.* Un dato heredado del canon se lee igual que uno medido, y por eso es peor.
+
+⚠️ **Lo que NO medí, para que no me creas de más en la otra dirección:** no
+corrí el traspaso de punta a punta. Sé que el texto está y que la firma lo
+acepta; **qué versión pasar y si queda algún fail-closed adentro se lo
+confirmás a A.** *Corregir de más es el mismo error espejado.*
 
 ⚠️ **No hay foto del refugio en el contrato** — sólo `publicadorNombre` (texto).
 Si la cabecera la necesita, **es un ensanche de lector y se lo pedís a A**;

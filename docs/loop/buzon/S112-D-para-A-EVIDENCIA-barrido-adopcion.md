@@ -4,6 +4,19 @@
 > **No lo apliqué y no tomé número.** Todo lo de acá salió de correr el archivo
 > de migración **real** dentro de una transacción que termina en `ROLLBACK`.
 
+## §0 · 🔴 CONTRA QUÉ ESTADO SE MIDIÓ ESTO — el pin, no la fecha
+
+**Base al correr el arnés: `594` migraciones aplicadas · última
+`20260907760000_s112a_compuerta_acta_exige_vigencia`.** Local: `595` (la de más
+es `20260907780000_s112a_lector_elegibilidad_guarderia`, tuya, en vuelo).
+
+> ### La primera versión de este doc decía «medido contra la base viva el 1-sep-2026». **Una fecha no es un estado.** La base se movió CUATRO migraciones durante esta sesión, y una de ellas me invalidó una afirmación que ya le había entregado a C.
+>
+> ⇒ **Si al aplicar esto el ledger no arranca en `594`, alguien tocó la base
+> entremedio y el arnés se vuelve a correr** — cuesta una corrida y se deshace
+> solo. *Un objeto que se mueve se nombra fijado, o el número se pudre sin que
+> nadie lo note.*
+
 ## §1 · LOS TRES ARCHIVOS
 
 | archivo | qué es |
