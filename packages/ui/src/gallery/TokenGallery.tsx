@@ -99,6 +99,7 @@ import { Mutacion } from '../components/Mutacion'
 import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
+import { TarjetaAdoptable } from '../components/TarjetaAdoptable'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
@@ -5072,6 +5073,75 @@ function GaleriaInterna() {
                 }}
               />
             </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S112 — TarjetaAdoptable · qué decide: (a) que se lea como una VIDA presentada y no como un ítem de catálogo, y (b) que las DOS ausencias se lean bien — «edad no informada» dicha sin vergüenza y en el mismo peso, y la raza que nadie declaró simplemente ausente (jamás «mestizo» inventado por nosotros)">
+          <View style={{ gap: spacing[4] }}>
+            <Texto variante="apoyo">
+              Las cuatro que existen de verdad en la vidriera. Ninguna tiene
+              favorito, swipe ni puntaje: §4 los prohíbe.
+            </Texto>
+
+            <Texto variante="dato">① completa · el caso feliz</Texto>
+            <TarjetaAdoptable
+              nombre="Simona"
+              especie="Perro"
+              raza="Mestiza"
+              sexo="Hembra"
+              edad="2 años"
+              fotoUrl="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600"
+              publicador="Refugio Patitas"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
+
+            <Texto variante="dato">
+              ② SIN EDAD · nadie la declaró y el wrapper no la infiere — tiene
+              que leerse como honestidad, mismo peso que el resto de la línea
+            </Texto>
+            <TarjetaAdoptable
+              nombre="Rocco"
+              especie="Perro"
+              raza="Mestizo"
+              sexo="Macho"
+              edad={null}
+              fotoUrl="https://images.unsplash.com/photo-1552053831-71594a27632d?w=600"
+              publicador="Refugio Patitas"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
+
+            <Texto variante="dato">
+              ③ SIN RAZA NI SEXO · no se dice nada: «no lo declararon» no es
+              «mestizo», y la pieza jamás se lo inventa
+            </Texto>
+            <TarjetaAdoptable
+              nombre="Nube"
+              especie="Gato"
+              raza={null}
+              sexo={null}
+              edad="8 meses"
+              fotoUrl="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
+
+            <Texto variante="dato">
+              ④ EL CASO DURO · sin foto y sin edad: la huella de la casa, jamás
+              un hueco ni algo que parezca cargando
+            </Texto>
+            <TarjetaAdoptable
+              nombre="Lito"
+              especie="Perro"
+              raza={null}
+              sexo="Macho"
+              edad={null}
+              fotoUrl={null}
+              publicador="Rescatistas del Valle"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
           </View>
         </Seccion>
 
