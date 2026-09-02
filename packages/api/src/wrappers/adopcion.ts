@@ -1657,3 +1657,62 @@ export async function poblarVitrinaRefugio(campos: {
     },
   };
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A6 · BUSCAR UN REFUGIO POR NOMBRE — *«y en adopción puedo buscar un refugio
+   por nombre y ver sus animales»* (literal del founder).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface RefugioEnBusqueda {
+  /** Con esto se pide su vitrina: `obtenerPerfilesPublicosPorCuenta([id])`. */
+  cuentaComercialId: string;
+  prestadorId: string;
+  nombre: string;
+  /** RUTA de Storage, no URL: se firma en pantalla (`D-308`). */
+  logoUrl: string | null;
+  ciudad: string | null;
+}
+
+/**
+ * Refugios por nombre. **Anónima por firma** — la vidriera de adopción no
+ * exige sesión.
+ *
+ * 🔴 **El recorte `tipo='refugio'` vive en el SERVIDOR y no acá.** Filtrarlo
+ * en la pantalla se vería igual de bien y convertiría esto en *un directorio
+ * público de todos los prestadores* —clínicas, paseadores, groomers—
+ * buscables por nombre y sin sesión. *No sería una fuga (la vista ya es
+ * pública) sino una decisión de producto que nadie tomó*, y de las que se
+ * descubren cuando alguien la usa. (Riesgo nombrado por C antes de que
+ * pasara.)
+ *
+ * ⚠️ **Sin texto devuelve el directorio** (con techo de 100). Y **devuelve
+ * refugios sin animales publicados a propósito**: *un buscador que sólo
+ * encuentra a los que tienen stock le esconde a la familia justo a los que
+ * necesitan que los encuentren.*
+ *
+ * Los acentos se normalizan **en los dos lados, en el motor** — «SATORÍ»
+ * encuentra «Satori» y al revés. Cierra el hueco que `despensa-catalogo` dejó
+ * declarado por no poder resolverlo desde el cliente.
+ */
+export async function buscarRefugios(
+  texto?: string,
+  limite = 20,
+): Promise<ResultadoWrapper<RefugioEnBusqueda[], CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('buscar_refugios', {
+    p_texto: texto ?? undefined,
+    p_limite: limite,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: (data as Record<string, unknown>[]).map((f) => ({
+      cuentaComercialId: String(f.cuenta_comercial_id),
+      prestadorId: String(f.prestador_id),
+      nombre: String(f.nombre ?? ''),
+      logoUrl: typeof f.logo_url === 'string' ? f.logo_url : null,
+      ciudad: typeof f.ciudad === 'string' ? f.ciudad : null,
+    })),
+  };
+}
