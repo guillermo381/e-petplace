@@ -111,6 +111,19 @@ const MENSAJES = {
   guarderia_no_disponible:'Esta guardería no está recibiendo reservas.',
   fecha_pasada:           'Ese día ya pasó.',
   mascota_no_elegible:    'La guardería es solo para perros y gatos.',
+  /* ═══ S112-A · `D-1001` — los dos que faltaban, y los midió C ══════════════
+     El gate de especie ya hablaba acá. Lo que NO hablaba es el segundo hueco
+     del mismo censo: `contratar_mensualidad_guarderia` no verificaba que la
+     mascota fuera de quien firma. **Yo puse estas claves en el wrapper de
+     al lado** (`guarderia-suscripcion.ts`) **y la mensualidad no las usa: su
+     wrapper vive acá.** *Motor sin puerta, y lo cazó C midiendo contra el
+     objeto en vez de creerle a mi reporte.*
+
+     ⚠️ Y al agregarlas el typecheck cazó que `no_access_to_mascota` YA ESTABA
+     acá con su voz. *La medición de C decía «no están las tres» y era cierta
+     para el archivo que yo toqué; para ESTE archivo faltaba una sola.* Se
+     conserva la voz que ya existía: cambiarla no era el pedido. */
+  mascota_requerida:      'Elige para qué mascota es el plan.',
   no_access_to_mascota:   'No tienes acceso a esa mascota.',
   sin_sesion:             'No hay sesión activa.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
@@ -1481,4 +1494,51 @@ export async function obtenerMisPaquetesGuarderia(): Promise<
     });
   }
   return { ok: true, data: salida };
+}
+
+/**
+ * ═══ S112-A · LA PANTALLA PREGUNTA CON LA MISMA PIEZA QUE DECIDE LA PUERTA ═══
+ *
+ * **Pedido de C, y lo midió C**: para apagar el plan ANTES del botón hace falta
+ * la elegibilidad en el lector — sin esto el motor corta igual, pero la familia
+ * se entera al tocar.
+ *
+ * 🔴 **No trae una copia del criterio.** La RPC llama a
+ * `_mascota_elegible_servicio`, exactamente la misma función que cortan las
+ * cuatro puertas de guardería. *Un lector con su propia copia del criterio es
+ * la forma más común de que la pantalla ofrezca lo que la puerta rechaza.*
+ *
+ * `motivo` viene PARTIDO a propósito: una mascota en memorial no es «esta
+ * guardería no la recibe», y la voz de la pantalla no puede ser la misma.
+ * `especiesElegibles` viaja para que C redacte sin adivinar el recorte.
+ */
+export interface ElegibilidadGuarderia {
+  puede: boolean;
+  especie: string | null;
+  /** sólo cuando `puede` es false */
+  motivo?: 'especie_no_admitida' | 'mascota_no_activa';
+  /** sólo cuando `puede` es false; el recorte vigente del servicio */
+  especiesElegibles?: string[];
+}
+
+export async function puedeContratarGuarderia(
+  mascotaId: string,
+): Promise<ResultadoWrapper<ElegibilidadGuarderia, CodigoErrorGuarderiaReserva>> {
+  const { data, error } = await getClient().rpc('puede_contratar_guarderia', {
+    p_mascota_id: mascotaId,
+  });
+  if (error) return fallo(error.message);
+  const r = data as Record<string, unknown> | null;
+  if (r === null || typeof r.puede !== 'boolean') return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: {
+      puede: r.puede,
+      especie: typeof r.especie === 'string' ? r.especie : null,
+      motivo: r.motivo as ElegibilidadGuarderia['motivo'],
+      especiesElegibles: Array.isArray(r.especies_elegibles)
+        ? (r.especies_elegibles as string[])
+        : undefined,
+    },
+  };
 }

@@ -1,0 +1,6 @@
+-- REVERSA de 20260907780000 — el lector de elegibilidad para la pantalla. ESCRITA ANTES.
+-- DROP FUNCTION IF EXISTS public.puede_contratar_guarderia(uuid);
+-- No toca datos ni otras funciones: nace aditiva y sin consumidores previos.
+-- 🔴 Revertirla deja a la pantalla sin poder apagar el plan ANTES del boton:
+--    el motor sigue cortando, pero la familia se entera al tocar. No es un
+--    agujero de seguridad; es volver al rebote tardio.

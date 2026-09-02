@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -344,19 +369,28 @@ export type Database = {
         Row: {
           codigo: string
           contenido: string
+          es_plantilla: boolean
+          sha256: string | null
           version: number
+          vigente: boolean
           vigente_desde: string
         }
         Insert: {
           codigo: string
           contenido: string
+          es_plantilla?: boolean
+          sha256?: string | null
           version: number
+          vigente?: boolean
           vigente_desde?: string
         }
         Update: {
           codigo?: string
           contenido?: string
+          es_plantilla?: boolean
+          sha256?: string | null
           version?: number
+          vigente?: boolean
           vigente_desde?: string
         }
         Relationships: []
@@ -23568,6 +23602,9 @@ export type Database = {
           estadia_id: string
           estado: string
           estado_reserva: string
+          franja_desde: string
+          franja_hasta: string
+          franja_tipo: string
           llegada_en: string
           mascota_especie: string
           mascota_foto_url: string
@@ -24372,6 +24409,10 @@ export type Database = {
       }
       publicar_oferta_sku: {
         Args: { p_country_code?: string; p_precio: number; p_sku_id: string }
+        Returns: Json
+      }
+      puede_contratar_guarderia: {
+        Args: { p_mascota_id: string }
         Returns: Json
       }
       puede_encender_vitrina: { Args: never; Returns: boolean }
@@ -25353,6 +25394,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [
