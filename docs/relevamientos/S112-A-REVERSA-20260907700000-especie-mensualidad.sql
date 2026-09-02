@@ -1,0 +1,35 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260907700000 — el gate de especie en las puertas de mensualidad
+-- ESCRITA ANTES DE APLICAR (regla de la casa). S112-A · D-1001.
+--
+-- QUÉ DESHACE: devuelve `contratar_mensualidad_guarderia` y
+-- `reactivar_mensualidad_guarderia` a su cuerpo SIN los dos guards.
+--
+-- 🔴 QUÉ **NO** DESHACE, y hay que leerlo antes de correrla:
+--   · NO borra ni corrige suscripciones creadas mientras el gate estuvo puesto.
+--   · REVERTIRLA **REABRE** el agujero: vuelve a permitir contratar una
+--     mensualidad de guardería para un ave, para una mascota en memorial, y
+--     para una mascota de OTRA familia. *Esto último no es D-1001: es un
+--     hueco de propiedad que el mismo censo destapó.*
+--   · La fila viva `20d025ca` (Pepe, ave) NO la toca ni la migración ni esta
+--     reversa: es dato de pruebas y su destino lo decide el founder.
+--
+-- CÓMO: se re-crean las dos funciones con el cuerpo previo. El cuerpo previo
+-- se recupera del objeto, no de memoria:
+--   supabase db query --linked -c "select pg_get_functiondef(p.oid) ..."
+-- ejecutado ANTES de aplicar y guardado junto a este archivo si hiciera falta.
+--
+-- ⚠️ Los dos guards son ADITIVOS y no tocan firma, tipo de retorno ni ACL:
+-- revertir es re-crear, jamás DROP (L-119: un DROP dejaría sin puerta a los
+-- wrappers vivos).
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Paso 1 · quitar el guard de contratar_mensualidad_guarderia
+--   (borrar el bloque marcado `-- S112-A · D-1001` de su cuerpo y re-crear)
+-- Paso 2 · idem en reactivar_mensualidad_guarderia
+--
+-- Control de la reversa (tiene que dar el ROJO ORIGINAL, o no revirtió):
+--   BEGIN;
+--     -- con un ave y su familia, contratar_mensualidad_guarderia NO debe
+--     -- levantar 'mascota_no_elegible'.
+--   ROLLBACK;
