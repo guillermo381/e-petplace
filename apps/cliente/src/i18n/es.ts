@@ -780,6 +780,9 @@ export const clienteEs = {
     elegirMascota: '¿Para quién es el paseo?',
     // refugios / M0
     refugios: 'Refugios y adopción',
+    sinNadieTitulo: 'Tu hogar todavía no tiene mascotas',
+    sinNadieDetalle: 'Agrega a tu mascota y vas a poder reservar.',
+    sinNadieAccion: 'Agregar a mi mascota',
     adopcionEntrada: 'Mascotas en adopción',
     adopcionEntradaDetalle: 'Conoce a los que están esperando una familia.',
     refugiosVacio: 'Todavía no hay refugios publicados',
