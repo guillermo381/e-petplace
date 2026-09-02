@@ -1723,6 +1723,7 @@ export const clienteEs = {
        esconde lo que la lista ya está aplicando, y una lista filtrada que no
        se declara filtrada se lee como un catálogo pobre. */
     filtrar: 'Filtrar',
+    verRefugios: 'Refugios',
     filtrarConCuenta: 'Filtrar · {{n}}',
     filtrosTitulo: 'Filtrar',
     filtrosAplicar: 'Ver resultados',
@@ -3672,6 +3673,21 @@ export const clienteEs = {
      página» y «todavía no publicó ninguno» describen situaciones que la
      familia resuelve distinto: en una espera al refugio, en la otra vuelve
      otro día. *Nombrar mal un vacío manda a esperar lo que no va a venir.* */
+  /* A6 · Buscar un refugio por nombre. **Los dos vacíos son distintos:** «no
+     encontramos ninguno con ese nombre» tiene salida —borrar el texto— y
+     «todavía no hay refugios» no la tiene, así que no se le ofrece una. */
+  buscarRefugios: {
+    titulo: 'Refugios',
+    campo: 'Buscar por nombre',
+    vacioTitulo: 'Todavía no hay refugios',
+    vacioDetalle: 'Cuando alguno se sume, va a aparecer acá.',
+    sinResultadosTitulo: 'No encontramos ninguno con ese nombre',
+    sinResultadosDetalle: 'Prueba con menos letras, o mira todos borrando la búsqueda.',
+    limpiar: 'Ver todos',
+    errorTitulo: 'No pudimos buscar',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Probar de nuevo',
+  },
   vitrinaRefugio: {
     titulo: 'El refugio',
     sinPagina: 'Este refugio todavía no armó su página',

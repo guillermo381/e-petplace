@@ -369,6 +369,23 @@ export default function Adoptar() {
               onPress={() => setFiltros({})}
             />
           ) : null}
+          {/* ⭐ **A6 · LA PUERTA AL BUSCADOR DE REFUGIOS** — segunda mitad del
+              literal del founder: *«en adopción puedo buscar un refugio por
+              nombre y ver sus animales»*.
+
+              Va acá, al lado de filtrar, porque es la otra forma de acotar la
+              vidriera: **una filtra animales, la otra entra por la casa que los
+              cuida.** Y va `ghost`: la acción principal de esta pantalla sigue
+              siendo mirar animales (Ley 5 — una superficie con dos acentos no
+              tiene ninguno). */}
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <Boton
+              variante="ghost"
+              tamaño="sm"
+              etiqueta={t('adoptar.verRefugios')}
+              onPress={() => router.push('/adoptar/refugios')}
+            />
+          </View>
         </View>
 
         {estado.fase === 'cargando' ? (
