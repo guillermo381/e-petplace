@@ -26,11 +26,12 @@ import {
   View,
   type ViewStyle,
 } from 'react-native'
-import Animated from 'react-native-reanimated'
+import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 import { CHEVRON } from './chevron'
 
 import { usePresionado } from './usePresionado'
+import { Texto } from './Texto'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { typography } from '../tokens/typography'
@@ -211,19 +212,35 @@ export interface BotonProps {
    * verdad del control) y la razón viaja en `accessibilityHint`, así el
    * lector la anuncia AL ENFOCAR — sin depender del toque.
    *
-   * NO REEMPLAZA A LA FORMA VISIBLE, y esto es letra vigente: el
-   * precedente S63-B dice *"el Confirmar apagado dice QUÉ FALTA,
-   * SIEMPRE"*, y la segunda enmienda de SliderPrecio (S68) fijó que la
-   * affordance es VISIBLE, no solo accesible. Una razón que aparece
-   * únicamente al tocar está escondida. Lo preferido sigue siendo
-   * decirla en la pantalla (un `Texto apoyo` bajo el botón, o la
-   * etiqueta que ya nombra lo que falta); esta prop es para cuando el
-   * motivo no cabe ahí, y para que el toque JAMÁS quede muerto.
+   * ⏪ **S112-B · D-999 — ESTE PÁRRAFO DECÍA LO CORRECTO Y LA PIEZA NO LO
+   * HACÍA, y por eso se reescribe en el mismo acto que lo cumple.** Decía:
+   * *«NO REEMPLAZA A LA FORMA VISIBLE… lo preferido sigue siendo decirla
+   * en la pantalla (un `Texto apoyo` bajo el botón)»* — citando el
+   * precedente S63-B (*«el Confirmar apagado dice QUÉ FALTA, SIEMPRE»*) y
+   * la enmienda de `SliderPrecio` (S68: la affordance es VISIBLE, no sólo
+   * accesible). **Las dos leyes seguían vigentes y ninguna pantalla las
+   * cumplía: mandaban el trabajo a 96 sitios que no lo hicieron.**
+   *
+   * ⇒ **AHORA LA FORMA VISIBLE LA PONE LA PIEZA.** Pasar esta prop DIBUJA
+   * el motivo en un `Texto apoyo` bajo el botón —atenuado, nunca `danger`—
+   * y su renglón queda reservado para que apagarse y encenderse no salte
+   * (N24). *Lo que era una recomendación que había que recordar pasó a ser
+   * el comportamiento por default de la pieza.*
+   *
+   * **Escribila corta y en una línea:** es lo que se lee para DECIDIR, no
+   * la explicación de por qué (eso, si hace falta, es N22 con su «i»).
    */
   razonDeshabilitado?: string
   /** Qué hacer cuando tocan un botón apagado con razón: señalar el
    *  campo que falta, abrir un aviso, scrollear a la hilera. Lo decide
-   *  la PANTALLA — el componente no elige cómo se cuenta. */
+   *  la PANTALLA — el componente no elige cómo se cuenta.
+   *
+   *  🔴 **OPCIONAL, Y DESDE S112-B YA NO GOBIERNA SI LA RAZÓN SE VE.**
+   *  Antes era la mitad indispensable de un par: sin ella, `Boton` ni
+   *  siquiera daba el hint. Su trabajo real siempre fue el TOQUE —LLEVAR a
+   *  donde se resuelve— y estaba de guardia sobre el TEXTO. Un botón que
+   *  explica y no tiene a dónde llevar es el caso normal, no un defecto:
+   *  pasá `razonDeshabilitado` sola y la línea se dibuja igual. */
   onRazon?: () => void
 }
 
@@ -249,11 +266,28 @@ export function Boton({
 
   const t = TAMAÑOS[tamaño]
   const inactivo = deshabilitado || cargando
-  // Apagado CON motivo: sigue tocable y el toque cuenta el porqué. No
-  // rige mientras carga (ahí el motivo es obvio y el toque no debe hacer
-  // nada) ni sin `onRazon` (un toque que no lleva a ningún lado sería el
-  // mismo botón muerto con más código).
-  const conRazon = deshabilitado && !cargando && razonDeshabilitado !== undefined && onRazon !== undefined
+  /* ═══ D-999 · EL BOTÓN DIBUJA SU RAZÓN (S112-B) ═══════════════════════
+   * Hasta hoy `razonDeshabilitado` aparecía UNA sola vez en el render, y
+   * era `accessibilityHint`. ⇒ **la razón no se dibujaba nunca** — ni con
+   * `onRazon` ni sin él. Pasar `onRazon` hacía el botón tocable y le daba
+   * hint al lector de pantalla; **no hacía aparecer ninguna palabra.**
+   * Medido con control positivo el 1-sep-2026 (el label sí se pinta, así
+   * que el instrumento distinguía render de no-render).
+   *
+   * Desde acá son DOS HECHOS DISTINTOS, y separarlos es la cura:
+   *   · `hayRazon` → hay algo que DECIR   ⇒ **se dibuja la línea.**
+   *   · `conRazon` → además hay a dónde LLEVAR ⇒ el toque va a `onRazon`.
+   *
+   * 🔴 **`onRazon` DEJA DE SER CONDICIÓN PARA QUE LA RAZÓN SE VEA**, y ése
+   * es el punto: hacía falta para el TOQUE, y estaba gobernando el TEXTO.
+   * Un botón que explica sin tener a dónde llevar es el caso normal.
+   * Ninguno de los 12 consumidores vivos cambia de comportamiento salvo
+   * ganar la línea que ya le estaba pasando a esta pieza. */
+  const hayRazon = deshabilitado && !cargando && razonDeshabilitado !== undefined
+  // El toque sobre el apagado: como siempre. No rige mientras carga (ahí
+  // el motivo es obvio) ni sin `onRazon` (un toque que no lleva a ningún
+  // lado sería el mismo botón muerto con más código).
+  const conRazon = hayRazon && onRazon !== undefined
 
   // Regla emil: "loading solo se muestra si la operación supera 150ms;
   // debajo de eso, nada". El spinner aparece recién pasado el umbral
@@ -268,6 +302,72 @@ export function Boton({
     const timer = setTimeout(() => setMostrarSpinner(true), motion.duration.fast)
     return () => clearTimeout(timer)
   }, [cargando])
+
+  /* ── EL RENGLÓN NO SE DEVUELVE — N24, y por su LETRA, no por su cura ──
+   * La ley que sobrevive dice: *un control que cambia de forma según su
+   * estado no cambia el tamaño ni el renglón de lo que lo contiene.* Su
+   * mitad de cura —«reservá el espacio máximo desde el primer render»—
+   * quedó DEROGADA por el gate del founder, y su razón medida era ésta:
+   * **el hueco se pagaba en el 100 % de las tarjetas y lo usaba una
+   * minoría.**
+   *
+   * ⇒ Acá la reserva **no se paga de entrada: se LATCHEA.** Un botón que
+   * nunca recibió razón no reserva nada y su árbol queda idéntico al de
+   * hoy (medido: **96 archivos de `apps/` pasan `deshabilitado`, 12 pasan
+   * razón** — el 87 % no paga un píxel). Uno que YA mostró una razón se
+   * queda con su renglón para siempre dentro de ese montaje.
+   *
+   * Con eso las dos frases del founder se cumplen a la vez, sin elegir:
+   *   · *«si no recibe razón, no dibuja nada»* → nunca latcheó ⇒ nada.
+   *   · *«la línea se va y el botón se enciende, sin saltos: el espacio
+   *      ya está reservado»* → latcheó ⇒ el renglón queda y nada salta.
+   *
+   * **El alto no es un número: es el texto real montado invisible**, el
+   * mismo truco que el label de esta pieza usa bajo el spinner («preserva
+   * el ancho exacto — cero layout shift»). Un `minHeight: 20` copiado del
+   * `leading` de `Texto.apoyo` habría sido correcto hoy y falso el día que
+   * la razón envuelva a dos líneas, o el día que ese token cambie sin que
+   * este archivo se entere. */
+  const [razonUltima, setRazonUltima] = useState<string | undefined>(undefined)
+  useEffect(() => {
+    if (hayRazon) setRazonUltima(razonDeshabilitado)
+  }, [hayRazon, razonDeshabilitado])
+  /** El texto del renglón: el vigente, o el último que hubo (ya invisible). */
+  const renglon = hayRazon ? razonDeshabilitado : razonUltima
+
+  /* «EL BOTÓN SE ENCIENDE CON LA TRANSICIÓN SUAVE DE SIEMPRE» — y el
+   * literal dice *de siempre* cuando en realidad **no existía**: el
+   * `opacity` de esta pieza era un reemplazo directo. Se construye acá,
+   * y **ACOTADA a los botones que explican**, no a los 501 de la casa.
+   *
+   * 🔴 POR QUÉ ACOTADA, que es una decisión y no una tibieza: re-cronometrar
+   * el encendido de todos los botones es un cambio VISIBLE en las dos apps
+   * que nadie pidió y ningún gate vería — el mismo argumento con el que
+   * esta pieza se niega a mover su `variante` por default (*«cambiar un
+   * default es editar código que nadie abrió»*, L-244). Acá el fundido es
+   * **parte del mecanismo de la razón**: ata «la razón se fue» con «el
+   * botón se encendió», que es justo lo que el founder describió. El día
+   * que se quiera para toda la casa, es una línea — y un gate en aparato.
+   *
+   * Números de la casa, ninguno inventado: `micro` 150 es el registro que
+   * el propio token declara para *«crossfade de estado»*; el `transform`
+   * conserva EXACTAMENTE su receta de `usePresionado` (fast 150 + spring)
+   * porque este objeto pisa su `transitionProperty` y **quien pisa una
+   * transición se hace cargo de las dos**. Arrays en orden, que es el
+   * contrato de Reanimated 4 (referencia del stack: react-native-best-
+   * practices · CSS Transitions).
+   *
+   * En MEMORIAL no hay fundido: `usePresionado` ya fija que ahí el cambio
+   * de estado es reemplazo directo, y esta pieza no abre una excepción. */
+  const enciendeSuave = renglon !== undefined && theme.mode !== 'memorial'
+  const transicionDeEncendido = {
+    transitionProperty: ['transform', 'opacity'] as const,
+    transitionDuration: [motion.duration.fast, motion.duration.micro] as const,
+    transitionTimingFunction: [
+      cubicBezier(...motion.easing.spring.bezier),
+      cubicBezier(...motion.easing.easeOut.bezier),
+    ] as const,
+  }
 
   // En memorial el gradiente firma es transparent (B2): marca degrada a primario.
   const esMarca =
@@ -612,7 +712,9 @@ export function Boton({
    *
    * *Es la misma forma que ya existía escrita a mano en tres pantallas;
    * lo único que cambia es quién se tiene que acordar.* */
-  return (
+  /** LA FILA DEL BOTÓN — tal cual estaba. El renglón de la razón, si
+   *  existe, la envuelve más abajo SIN tocarle una línea. */
+  const fila = (
     <View
       /* 🔴 `box-none` NO ES PRUDENCIA: con el padre por default el
          envoltorio se ESTIRA a todo el ancho, y un View estirado sin esto
@@ -651,6 +753,8 @@ export function Boton({
               opacity: deshabilitado ? opacity.disabled : 1,
               borderRadius: radius.md,
               ...(bloque ? { alignSelf: 'stretch' as const } : null),
+              // Va DESPUÉS de `estiloPresionado` a propósito: lo pisa.
+              ...(enciendeSuave ? transicionDeEncendido : null),
             },
             // Focus visible en web (RN-web lo exige): outline accent.active
             Platform.OS === 'web' && enfocado
@@ -678,6 +782,53 @@ export function Boton({
           )}
         </Animated.View>
       </Pressable>
+    </View>
+  )
+
+  /* 🔴 EL BOTÓN QUE NUNCA TUVO RAZÓN DEVUELVE EL MISMO ÁRBOL DE SIEMPRE.
+   * No es una optimización: es lo que hace que esta cura no pueda ser una
+   * regresión. El envoltorio de S103-B —el que devolvió la alineación al
+   * padre— tiene un ensayo entero escrito arriba explicando por qué su
+   * forma es exactamente ésa; **envolverlo para todos habría reabierto esa
+   * discusión en 501 sitios para servir a 12.** */
+  if (renglon === undefined) return fila
+
+  /* ── LA COLUMNA, y por qué `flex-start` y no `center` ────────────────
+   * El envoltorio nuevo NO fija `alignSelf`: lo hereda, igual que la fila,
+   * así que la cura de S103-B sigue rigiendo (padre que centra → esto se
+   * centra como bloque). `alignItems: 'flex-start'` gobierna el eje de
+   * adentro y deja al botón abrazando su contenido, idéntico a hoy.
+   * **`center` habría sido el error fácil:** con el padre por default
+   * (`stretch`) esta columna ocupa todo el ancho, y centrar adentro
+   * habría corrido de lugar a todo botón que gane una razón.
+   * ⚠️ Consecuencia declarada, no escondida: con un padre que centra y una
+   * razón MÁS ANCHA que el botón, el botón queda a la izquierda del
+   * bloque. Es el caso que la letra del founder ya acota —*«en una línea
+   * corta»*— y va al contrato de C en vez de a una prop nueva. */
+  return (
+    <View style={bloque ? { alignSelf: 'stretch' } : { alignItems: 'flex-start' }}>
+      {fila}
+      <View
+        style={{
+          marginTop: spacing[2],
+          /* EL RENGLÓN SE VACÍA, NO SE VA (N24). Invisible pero montado:
+             el alto lo pone el texto real —una línea o dos— y no un número
+             copiado del `leading` de otra pieza. */
+          opacity: hayRazon ? 1 : 0,
+        }}
+        /* Y VACÍO NO SE LEE: un lector de pantalla que anunciara la razón
+           de un botón YA ENCENDIDO estaría diciendo algo falso. Las dos
+           props porque son dos plataformas (iOS · Android/web). */
+        accessibilityElementsHidden={!hayRazon}
+        importantForAccessibility={hayRazon ? 'auto' : 'no-hide-descendants'}
+      >
+        {/* `apoyo` resuelve a `text.secondary` por default: ATENUADO, y
+            jamás `danger` — N23, y la letra del founder: *no es un error
+            mío, es un estado*. Sin «i» en círculo, y es lectura de N22, no
+            olvido: la «i» es para lo que hace falta para ENTENDER; esto es
+            lo que hace falta para DECIDIR, y eso queda a la vista. */}
+        <Texto variante="apoyo">{renglon}</Texto>
+      </View>
     </View>
   )
 }

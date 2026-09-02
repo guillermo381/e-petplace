@@ -524,6 +524,66 @@ function MuestraPieRevelar() {
   )
 }
 
+/* ⭐ LÁMINA DE GATE S112 — D-999 · EL BOTÓN DIBUJA SU RAZÓN.
+ *
+ * Se mira TOCANDO, no leyendo: el defecto que la cura evita —el salto— sólo
+ * existe en la TRANSICIÓN. Por eso la lámina trae el interruptor de la
+ * condición y una REGLA debajo: si la regla se mueve al encender el botón,
+ * la cura falló. */
+function GateRazonDelBoton() {
+  const { theme } = useTheme()
+  const [faltaMascota, setFaltaMascota] = useState(true)
+
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <Texto variante="apoyo">
+        Tocá «elegí la mascota» y mirá DOS cosas: que la línea se va y el botón se
+        enciende suave, y que la regla gris de abajo NO se mueve.
+      </Texto>
+
+      <Boton
+        variante="secundario"
+        etiqueta={faltaMascota ? 'Elegí la mascota' : 'Quitar la mascota'}
+        onPress={() => setFaltaMascota((v) => !v)}
+      />
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">① el CTA del pie · con razón</Texto>
+        <Boton
+          variante="primario"
+          bloque
+          etiqueta="Reservar"
+          deshabilitado={faltaMascota}
+          razonDeshabilitado={faltaMascota ? 'Elegí para qué mascota es' : undefined}
+          onPress={() => {}}
+        />
+        {/* LA REGLA: lo que se movería si el renglón se devolviera. */}
+        <View style={{ height: 1, backgroundColor: theme.border.default }} />
+        <Texto variante="dato">← esta regla no se mueve</Texto>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">② el mismo botón chico, sin bloque</Texto>
+        <Boton
+          variante="primario"
+          etiqueta="Continuar"
+          deshabilitado={faltaMascota}
+          razonDeshabilitado={faltaMascota ? 'Falta elegir un día' : undefined}
+          onPress={() => {}}
+        />
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          ③ EL CONTROL — apagado y SIN razón: no dibuja nada, ni un píxel de hueco
+        </Texto>
+        <Boton variante="primario" etiqueta="Guardar" deshabilitado onPress={() => {}} />
+        <View style={{ height: 1, backgroundColor: theme.border.default }} />
+      </View>
+    </View>
+  )
+}
+
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   const { theme } = useTheme()
   return (
@@ -2611,6 +2671,10 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S112 — D-999 · EL BOTÓN DIBUJA SU RAZÓN · qué decide: (a) que la línea se lea como una EXPLICACIÓN de la casa —atenuada, jamás un error— y (b) que al encenderse el botón NADA salte. El control ③ prueba que un apagado sin razón sigue sin dibujar nada">
+          <GateRazonDelBoton />
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S106 — EL AVISO PREVIO DE TELECONSULTA (§3) · qué decide: (a) que las TRES salidas se lean de PESO PAR —ninguna preside, es tu firma— y (b) que los cinco signos se lean como CRITERIO y no como letra chica. Texto: LETRA_TELEMEDICINA v1.1 (tuteo, con la línea de tránsito PROVISIONAL al pie)">
           <Texto variante="apoyo">
             Tres Celda, no tres botones: tres sólidos son ilegales (D-484 y el pie
@@ -5027,7 +5091,7 @@ function GaleriaInterna() {
               <Texto variante="apoyo">los tres estados · sí · no · todavía no se sabe</Texto>
               <Convivencia
                 rotulo="Convive con"
-                voces={{ si: 'Sí', no: 'No' }}
+                voces={{ si: 'Sí', no: 'No', sinObservar: 'Todavía lo están conociendo' }}
                 filas={[
                   { con: 'Perros', estado: 'si' },
                   { con: 'Gatos', estado: 'no' },
@@ -5038,11 +5102,14 @@ function GaleriaInterna() {
 
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">
-                control · rescate de seis días: nada medido todavía
+                ⭐ GATE S112 · rescate de seis días: nada medido todavía. Tiene
+                que leerse como HONESTIDAD (algo está pasando: lo están
+                conociendo) y jamás como ficha rota. Se juzga CONTRA la de
+                arriba: título propio, voces del mismo peso, cero gris de vacío
               </Texto>
               <Convivencia
                 rotulo="Convive con"
-                voces={{ si: 'Sí', no: 'No' }}
+                voces={{ si: 'Sí', no: 'No', sinObservar: 'Todavía lo están conociendo' }}
                 filas={[
                   { con: 'Perros', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
                   { con: 'Gatos', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
@@ -5054,7 +5121,7 @@ function GaleriaInterna() {
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">sin rótulo · embebido en una ficha</Texto>
               <Convivencia
-                voces={{ si: 'Sí', no: 'No' }}
+                voces={{ si: 'Sí', no: 'No', sinObservar: 'Todavía lo están conociendo' }}
                 filas={[
                   { con: 'Perros', estado: 'si' },
                   { con: 'Gatos', estado: 'si' },
