@@ -1719,6 +1719,33 @@ export const clienteEs = {
     vacioFiltradoTitulo: 'Nadie coincide con eso',
     vacioFiltradoDetalle: 'Prueba con menos filtros: hay más animales esperando.',
     limpiarFiltros: 'Quitar los filtros',
+    /* A1 · El botón DICE CUÁNTOS filtros hay puestos: sin el número, la hoja
+       esconde lo que la lista ya está aplicando, y una lista filtrada que no
+       se declara filtrada se lee como un catálogo pobre. */
+    filtrar: 'Filtrar',
+    verRefugios: 'Refugios',
+    filtrarConCuenta: 'Filtrar · {{n}}',
+    filtrosTitulo: 'Filtrar',
+    filtrosAplicar: 'Ver resultados',
+    filtrosLimpiar: 'Limpiar',
+    filtrosCerrar: 'Cerrar',
+    grupoEspecie: 'Especie',
+    grupoTalla: 'Tamaño',
+    grupoSexo: 'Sexo',
+    grupoCiudad: 'Ciudad',
+    grupoPerros: 'Convive con perros',
+    grupoGatos: 'Convive con gatos',
+    grupoNinos: 'Convive con niños',
+    grupoMarcas: 'Otros',
+    conviveSi: 'Sí',
+    conviveNo: 'No',
+    conviveNoSeSabe: 'Todavía no se sabe',
+    /* 🔴 La «i» de esterilizado es OBLIGATORIA en la pieza, y su razón la trajo
+       B: este filtro **angosta escondiendo una ausencia** — la persona pide
+       esterilizados, recibe menos animales, y no tiene forma de saber que los
+       perdió por un dato que falta y no por un hecho. */
+    esterilizadoEtiqueta: 'Qué quiere decir «esterilizado»',
+    esterilizadoExplicacion: 'Solo mostramos los que el refugio declaró esterilizados. Los que todavía no lo declararon quedan afuera de este filtro, y eso no quiere decir que no lo estén.',
     sinCuentaLinea: 'Para postular vas a necesitar una cuenta.',
     sinCuentaPorQueTitulo: '¿Por qué hace falta una cuenta?',
     sinCuentaPorQueCuerpo:
@@ -3646,6 +3673,21 @@ export const clienteEs = {
      página» y «todavía no publicó ninguno» describen situaciones que la
      familia resuelve distinto: en una espera al refugio, en la otra vuelve
      otro día. *Nombrar mal un vacío manda a esperar lo que no va a venir.* */
+  /* A6 · Buscar un refugio por nombre. **Los dos vacíos son distintos:** «no
+     encontramos ninguno con ese nombre» tiene salida —borrar el texto— y
+     «todavía no hay refugios» no la tiene, así que no se le ofrece una. */
+  buscarRefugios: {
+    titulo: 'Refugios',
+    campo: 'Buscar por nombre',
+    vacioTitulo: 'Todavía no hay refugios',
+    vacioDetalle: 'Cuando alguno se sume, va a aparecer acá.',
+    sinResultadosTitulo: 'No encontramos ninguno con ese nombre',
+    sinResultadosDetalle: 'Prueba con menos letras, o mira todos borrando la búsqueda.',
+    limpiar: 'Ver todos',
+    errorTitulo: 'No pudimos buscar',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Probar de nuevo',
+  },
   vitrinaRefugio: {
     titulo: 'El refugio',
     sinPagina: 'Este refugio todavía no armó su página',
