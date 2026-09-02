@@ -3582,4 +3582,13 @@ export const clienteEs = {
     entrada: 'Tus conversaciones',
     abrirHilo: 'Abrir la conversación sobre {{nombre}}',
   },
+  bifurcacion: {
+    titulo: '¿Tienes una mascota o quieres adoptar?',
+    tengoMascota: 'Tengo una mascota',
+    tengoMascotaDetalle: 'Empieza su historia acá.',
+    tengoMascotaAccion: 'Registrar a mi mascota',
+    quieroAdoptar: 'Quiero adoptar',
+    quieroAdoptarDetalle: 'Conoce a los que están esperando una familia.',
+    quieroAdoptarAccion: 'Ver quiénes esperan',
+  },
 } as const;

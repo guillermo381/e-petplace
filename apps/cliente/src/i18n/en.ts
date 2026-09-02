@@ -2530,4 +2530,13 @@ export const clienteEn = {
     entrada: 'Your conversations',
     abrirHilo: 'Open the conversation about {{nombre}}',
   },
+  bifurcacion: {
+    titulo: 'Do you have a pet, or would you like to adopt?',
+    tengoMascota: 'I have a pet',
+    tengoMascotaDetalle: 'Start their story here.',
+    tengoMascotaAccion: 'Register my pet',
+    quieroAdoptar: 'I want to adopt',
+    quieroAdoptarDetalle: 'Meet the ones waiting for a family.',
+    quieroAdoptarAccion: 'See who is waiting',
+  },
 } as const satisfies Espejo<typeof clienteEs>;
