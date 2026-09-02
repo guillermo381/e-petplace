@@ -111,7 +111,14 @@ export default function Adoptar() {
            que decir la verdad desde el primer render. */
         const ses = await obtenerSesion();
         if (vigente) setConSesion(ses.ok && ses.data !== null);
-        const r = await obtenerAdoptables({ especie: especie ?? undefined });
+        /* ⚠️ ADAPTACION MECANICA DE A (S112-A2), PROVISIONAL Y DECLARADA.
+           `obtenerAdoptables` paso a devolver `{destacados, resto, cursor,
+           hayMas}` en vez de un array. Esto NO es la lista que §4.1 pide —es
+           el minimo para que el arbol compile— y **C la reescribe en C2** con
+           destacados, filtros y keyset. */
+        const r = await obtenerAdoptables({
+          filtros: especie != null ? { especie } : undefined,
+        });
         if (!vigente) return;
         /* Ley 13: un fallo JAMÁS se disfraza de «no hay nadie en adopción».
            *Ese vacío diría que ningún animal espera, que es lo contrario de lo
@@ -120,12 +127,13 @@ export default function Adoptar() {
           setEstado({ fase: 'error' });
           return;
         }
-        const paths = r.data
+        const lista = [...r.data.destacados, ...r.data.resto];
+        const paths = lista
           .map((a) => a.fotoUrl)
           .filter((x): x is string => typeof x === 'string' && x.length > 0);
         const caras = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
         if (!vigente) return;
-        setEstado({ fase: 'listo', lista: r.data, caras });
+        setEstado({ fase: 'listo', lista, caras });
       })();
       return () => {
         vigente = false;

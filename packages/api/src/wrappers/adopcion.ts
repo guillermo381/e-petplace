@@ -60,6 +60,26 @@ const MENSAJES = {
   /* El acta NO se acepta: se FIRMA. Son dos actos distintos y el motor los
      separa a propósito. */
   documento_no_aceptable: 'Ese documento no se acepta por esta vía.',
+  /* ═══ S112-A1/A2 · el adoptable completo y sus lectores ═══════════════════
+     `ingresado_en` es obligatoria y NO tiene default a propósito: un default
+     haría que todo rescate viejo entrara como si hubiera llegado hoy, y esa
+     fecha es la que ordena los destacados. */
+  ingresado_en_requerido: 'Falta la fecha en que el animal llegó al rescate.',
+  /* 🔴 El rol no alcanza: la cuenta tiene que estar ACTIVA. Una cuenta
+     suspendida con rol vigente seguiría publicando animales. */
+  cuenta_no_activa:       'Esta cuenta no está activa.',
+  estado_no_valido:       'Ese estado no existe.',
+  /* `adoptada` la escribe el acta con las dos firmas, jamás una pantalla. */
+  adoptada_la_escribe_el_acta: 'Un animal pasa a «adoptada» cuando se firma el acta, no antes.',
+  /* Un campo fuera de la lista blanca rebota CON SU NOMBRE: un editor que
+     ignora en silencio le dice a la pantalla que guardó algo que no guardó. */
+  campo_no_editable:      'Ese campo no se puede editar desde acá.',
+  filtro_no_valido:       'Ese filtro no existe.',
+  cursor_no_valido:       'La paginación se perdió. Vuelve a cargar la lista.',
+  path_requerido:         'Falta el archivo.',
+  tope_de_fotos:          'Llegaste al tope de fotos de esta ficha.',
+  foto_no_existe:         'No encontramos esa foto.',
+  orden_incompleto:       'El orden llegó incompleto: manda todas las fotos.',
 } as const;
 
 export type CodigoErrorAdopcion = keyof typeof MENSAJES;
@@ -117,6 +137,9 @@ function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorAdopcion> {
    estado la vidriera no se olvida de él.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/** Una fila de la vidriera. **Es lo que la ventana pública deja salir y nada
+ *  más** — la lista blanca vive en `v_adoptables_publicos` y agregar un campo
+ *  acá exige agregarlo allá primero, que es una decisión de privacidad. */
 export interface Adoptable {
   publicacionId: string;
   mascotaId: string;
@@ -126,59 +149,247 @@ export interface Adoptable {
   sexo: string | null;
   /** `null` = no se sabe. **No se infiere una edad que nadie declaró.** */
   fechaNacimiento: string | null;
+  /** Cómo de precisa es esa fecha: la redacción la usa para no mentir. */
+  fechaNacimientoPrecision: string | null;
   fotoUrl: string | null;
+  talla: string | null;
+  esterilizado: boolean | null;
+  /** Días desde que llegó al rescate. **Es un número, no una frase**: la
+   *  redacción vive en el riel (`describirEspera`), no en el motor. */
+  esperaDias: number;
+  ingresadoEn: string;
+  urgente: boolean;
+  /** 🔴 TRES estados, jamás un boolean: `'si' | 'no' | 'no_se_sabe'`. */
+  conviveperros: Convivencia;
+  conviveGatos: Convivencia;
+  conviveNinos: Convivencia;
+  ciudadNombre: string | null;
+  zona: string | null;
+  historia: string | null;
+  senas: string | null;
+  estadoVacunal: string | null;
+  desparasitado: Convivencia | null;
+  bonoMonto: number | null;
+  bonoDestino: string | null;
+  parejaId: string | null;
+  tieneMicrochip: boolean;
+  tieneRemetfu: boolean;
   /** Quién lo publicó. El refugio es procedencia, no un adorno. */
+  publicadorId: string | null;
   publicadorNombre: string | null;
+  publicadorFoto: string | null;
   creadaEn: string;
 }
 
-export async function obtenerAdoptables(params?: {
+/** 🔴 Los tres estados de convivencia. **No hay un cuarto y no hay boolean**:
+ *  con un boolean, «no se sabe» se guarda como `false` o como `null` y las dos
+ *  lecturas mienten — `false` dice «no convive» sobre un animal que nadie
+ *  probó. Con tres estados, «no se sabe» es un valor de primera clase y la
+ *  pantalla lo dibuja con el mismo peso. */
+export type Convivencia = 'si' | 'no' | 'no_se_sabe';
+
+export interface FiltrosAdoptables {
   especie?: string;
+  talla?: string;
+  sexo?: string;
+  urgente?: boolean;
+  esterilizado?: boolean;
+  convivePerros?: Convivencia;
+  conviveGatos?: Convivencia;
+  conviveNinos?: Convivencia;
+  conPareja?: boolean;
+  ciudadId?: string;
   countryCode?: string;
+  edadMaxMeses?: number;
+  edadMinMeses?: number;
+}
+
+export interface PaginaAdoptables {
+  /** Los tres que más esperan. **Sólo en la primera página**: son una carta de
+   *  portada, no una sección que se repite al scrollear. */
+  destacados: Adoptable[];
+  resto: Adoptable[];
+  /** Keyset. `null` = no hay más. **Se pasa tal cual vino** — lleva la clave de
+   *  orden completa y armarlo a mano en la pantalla saltea filas. */
+  cursor: string | null;
+  hayMas: boolean;
+  /** `true` cuando hay filtro de convivencia: los confirmados van primero y los
+   *  «todavía no se sabe» abajo, **con su título y con el mismo peso**. */
+  ordenPorConvivencia: boolean;
+}
+
+function aConvivencia(v: unknown): Convivencia {
+  return v === 'si' || v === 'no' ? v : 'no_se_sabe';
+}
+
+function aAdoptable(f: Record<string, unknown>): Adoptable | null {
+  if (typeof f.publicacion_id !== 'string' || typeof f.mascota_id !== 'string') return null;
+  const txt = (k: string) => (typeof f[k] === 'string' ? (f[k] as string) : null);
+  const num = (k: string) => (typeof f[k] === 'number' ? (f[k] as number) : Number(f[k] ?? NaN));
+  return {
+    publicacionId: f.publicacion_id,
+    mascotaId: f.mascota_id,
+    nombre: txt('nombre') ?? '',
+    especie: txt('especie') ?? '',
+    raza: txt('raza'),
+    sexo: txt('sexo'),
+    fechaNacimiento: txt('fecha_nacimiento'),
+    fechaNacimientoPrecision: txt('fecha_nacimiento_precision'),
+    fotoUrl: txt('foto_url'),
+    talla: txt('talla'),
+    esterilizado: typeof f.esterilizado === 'boolean' ? f.esterilizado : null,
+    esperaDias: Number.isFinite(num('espera_dias')) ? num('espera_dias') : 0,
+    ingresadoEn: txt('ingresado_en') ?? '',
+    urgente: f.urgente === true,
+    conviveperros: aConvivencia(f.convive_perros),
+    conviveGatos: aConvivencia(f.convive_gatos),
+    conviveNinos: aConvivencia(f.convive_ninos),
+    ciudadNombre: txt('ciudad_nombre'),
+    zona: txt('zona'),
+    historia: txt('historia'),
+    senas: txt('senas'),
+    estadoVacunal: txt('estado_vacunal'),
+    desparasitado: f.desparasitado == null ? null : aConvivencia(f.desparasitado),
+    bonoMonto: f.bono_monto == null ? null : Number(f.bono_monto),
+    bonoDestino: txt('bono_destino'),
+    parejaId: txt('pareja_id'),
+    tieneMicrochip: f.tiene_microchip === true,
+    tieneRemetfu: f.tiene_remetfu === true,
+    publicadorId: txt('publicador_id'),
+    publicadorNombre: txt('publicador_nombre'),
+    publicadorFoto: txt('publicador_foto'),
+    creadaEn: String(f.creada_en ?? ''),
+  };
+}
+
+/** La lista de la vidriera, **por keyset**. Se ve SIN sesión (§0.8).
+ *
+ *  El `cursor` se pasa tal cual vino en la página anterior. **Jamás se arma en
+ *  la pantalla**: lleva la clave de orden completa (`rango|fecha|id`) porque el
+ *  orden cambia cuando hay filtro de convivencia — un cursor parcial saltearía
+ *  filas sin error y sin síntoma, que es exactamente lo que la línea de vida
+ *  cobró en S99 (55 de 62). */
+export async function obtenerAdoptables(params?: {
+  filtros?: FiltrosAdoptables;
+  cursor?: string | null;
   limite?: number;
-}): Promise<ResultadoWrapper<Adoptable[], CodigoErrorAdopcion>> {
+}): Promise<ResultadoWrapper<PaginaAdoptables, CodigoErrorAdopcion>> {
+  const f = params?.filtros ?? {};
+  const p_filtros: Record<string, unknown> = {};
+  if (f.especie !== undefined) p_filtros.especie = f.especie;
+  if (f.talla !== undefined) p_filtros.talla = f.talla;
+  if (f.sexo !== undefined) p_filtros.sexo = f.sexo;
+  if (f.urgente !== undefined) p_filtros.urgente = f.urgente;
+  if (f.esterilizado !== undefined) p_filtros.esterilizado = f.esterilizado;
+  if (f.convivePerros !== undefined) p_filtros.convive_perros = f.convivePerros;
+  if (f.conviveGatos !== undefined) p_filtros.convive_gatos = f.conviveGatos;
+  if (f.conviveNinos !== undefined) p_filtros.convive_ninos = f.conviveNinos;
+  if (f.conPareja !== undefined) p_filtros.con_pareja = f.conPareja;
+  if (f.ciudadId !== undefined) p_filtros.ciudad_id = f.ciudadId;
+  if (f.countryCode !== undefined) p_filtros.country_code = f.countryCode;
+  if (f.edadMaxMeses !== undefined) p_filtros.edad_max_meses = f.edadMaxMeses;
+  if (f.edadMinMeses !== undefined) p_filtros.edad_min_meses = f.edadMinMeses;
+
   const { data, error } = await getClient().rpc('obtener_adoptables', {
-    p_especie: params?.especie ?? undefined,
-    p_country_code: params?.countryCode ?? undefined,
+    p_filtros: comoJson(p_filtros),
+    p_cursor: params?.cursor ?? undefined,
     p_limite: params?.limite ?? undefined,
   });
   if (error) return fallo(error.message);
-  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
-  const salida: Adoptable[] = [];
-  for (const fila of data as Record<string, unknown>[]) {
-    if (typeof fila.publicacion_id !== 'string' || typeof fila.mascota_id !== 'string') {
-      return fallaCodigo('datos_inconsistentes');
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (!Array.isArray(r.destacados) || !Array.isArray(r.resto)) return fallaCodigo('datos_inconsistentes');
+
+  const mapear = (xs: unknown[]): Adoptable[] | null => {
+    const out: Adoptable[] = [];
+    for (const x of xs) {
+      const a = aAdoptable(x as Record<string, unknown>);
+      if (a === null) return null;
+      out.push(a);
     }
-    salida.push({
-      publicacionId: fila.publicacion_id,
-      mascotaId: fila.mascota_id,
-      nombre: typeof fila.nombre === 'string' ? fila.nombre : '',
-      especie: typeof fila.especie === 'string' ? fila.especie : '',
-      raza: typeof fila.raza === 'string' ? fila.raza : null,
-      sexo: typeof fila.sexo === 'string' ? fila.sexo : null,
-      fechaNacimiento: typeof fila.fecha_nacimiento === 'string' ? fila.fecha_nacimiento : null,
-      fotoUrl: typeof fila.foto_url === 'string' ? fila.foto_url : null,
-      publicadorNombre: typeof fila.publicador_nombre === 'string' ? fila.publicador_nombre : null,
-      creadaEn: String(fila.creada_en),
-    });
-  }
-  return { ok: true, data: salida };
+    return out;
+  };
+  const destacados = mapear(r.destacados);
+  const resto = mapear(r.resto);
+  if (destacados === null || resto === null) return fallaCodigo('datos_inconsistentes');
+
+  return {
+    ok: true,
+    data: {
+      destacados,
+      resto,
+      cursor: typeof r.cursor === 'string' ? r.cursor : null,
+      hayMas: r.hay_mas === true,
+      ordenPorConvivencia: r.orden_por_convivencia === true,
+    },
+  };
+}
+
+/** La ficha, **en un viaje**. Trae todo lo que §4.1 dibuja, fotos incluidas.
+ *
+ *  🔴 Rebota `publicacion_no_disponible` **sin distinguir** entre «no existe»,
+ *  «está en borrador», «pausada», «adoptada» o «el animal falleció»: distinguir
+ *  le contaría a un anónimo el estado interno de un refugio. */
+export interface FichaAdoptable extends Adoptable {
+  /** URLs públicas, ya armadas, **en orden**. La primera es la portada. */
+  fotos: string[];
+  pareja: { publicacionId: string; nombre: string; fotoUrl: string | null } | null;
+}
+
+export async function obtenerAdoptable(
+  publicacionId: string,
+): Promise<ResultadoWrapper<FichaAdoptable, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('obtener_adoptable', {
+    p_publicacion_id: publicacionId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  const base = aAdoptable(r);
+  if (base === null) return fallaCodigo('datos_inconsistentes');
+  const par = r.pareja as Record<string, unknown> | null | undefined;
+  return {
+    ok: true,
+    data: {
+      ...base,
+      fotos: Array.isArray(r.fotos) ? (r.fotos.filter((x) => typeof x === 'string') as string[]) : [],
+      pareja:
+        par != null && typeof par.publicacion_id === 'string'
+          ? {
+              publicacionId: par.publicacion_id,
+              nombre: typeof par.nombre === 'string' ? par.nombre : '',
+              fotoUrl: typeof par.foto_url === 'string' ? par.foto_url : null,
+            }
+          : null,
+    },
+  };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ② PUBLICAR Y RETIRAR — del lado del refugio
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/** Publica al animal en la vidriera. **Idempotente y hablada**: si ya estaba
- *  publicado devuelve la publicación que existe, con `yaExistia: true` — *un
- *  guard que vive en un índice sólo sabe negarse* (`L-424`). */
+/** Crea la ficha del animal. **Nace en `borrador`, no publicada** — §0 paso 4:
+ *  el refugio llena la ficha y DESPUÉS enciende «publicado». Publicar en el
+ *  mismo acto de crear haría inalcanzable el único momento donde la regla de
+ *  los seis meses puede frenarlo con la ficha a la vista.
+ *
+ *  **Idempotente y hablada**: si ya hay una publicación viva devuelve la que
+ *  existe con `yaExistia: true` — *un guard que vive en un índice sólo sabe
+ *  negarse* (`L-424`). */
 export async function publicarAdoptable(params: {
   mascotaId: string;
   cuentaComercialId: string;
+  /** 🔴 Obligatoria: la fecha en que el animal llegó al rescate. Es la que
+   *  ordena los destacados, así que un default mentiría justo ahí. */
+  ingresadoEn: string;
+  ficha?: Partial<FichaEditable>;
 }): Promise<ResultadoWrapper<{ publicacionId: string; yaExistia: boolean }, CodigoErrorAdopcion>> {
   const { data, error } = await getClient().rpc('publicar_adoptable', {
     p_mascota_id: params.mascotaId,
     p_cuenta_comercial_id: params.cuentaComercialId,
+    p_ingresado_en: params.ingresadoEn,
+    p_ficha: comoJson(aFichaJson(params.ficha ?? {})),
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
@@ -187,20 +398,176 @@ export async function publicarAdoptable(params: {
   return { ok: true, data: { publicacionId: r.publicacion_id, yaExistia: r.ya_existia === true } };
 }
 
-/** Retira la publicación. 🔴 **Retirar NO es rechazar**: la mascota queda en
- *  `pausada`, no en `no_aplica` — *el día que el refugio la vuelva a publicar,
- *  su historia sigue.* */
-export async function despublicarAdoptable(params: {
+/** Los campos editables de la ficha. **Lista blanca**: mandar una clave que no
+ *  esté acá rebota con `campo_no_editable` **nombrándola**. */
+export interface FichaEditable {
+  ciudadId: string | null;
+  zona: string | null;
+  senas: string | null;
+  origenRescate: 'rescate' | 'cesion' | null;
+  fechaCesion: string | null;
+  estadoVacunal: 'al_dia' | 'incompleto' | 'sin_datos' | null;
+  desparasitado: Convivencia | null;
+  urgente: boolean;
+  bonoMonto: number | null;
+  bonoDestino: string | null;
+  historia: string | null;
+  convivePerros: Convivencia;
+  conviveGatos: Convivencia;
+  conviveNinos: Convivencia;
+  ingresadoEn: string;
+  parejaId: string | null;
+}
+
+const CLAVES_FICHA: Record<keyof FichaEditable, string> = {
+  ciudadId: 'ciudad_id',
+  zona: 'zona',
+  senas: 'senas',
+  origenRescate: 'origen_rescate',
+  fechaCesion: 'fecha_cesion',
+  estadoVacunal: 'estado_vacunal',
+  desparasitado: 'desparasitado',
+  urgente: 'urgente',
+  bonoMonto: 'bono_monto',
+  bonoDestino: 'bono_destino',
+  historia: 'historia',
+  convivePerros: 'convive_perros',
+  conviveGatos: 'convive_gatos',
+  conviveNinos: 'convive_ninos',
+  ingresadoEn: 'ingresado_en',
+  parejaId: 'pareja_id',
+};
+
+/** El cliente tipa `jsonb` como `Json`, que es una union recursiva. Un
+ *  `Record<string, unknown>` no le encaja aunque sea exactamente eso en
+ *  tiempo de ejecucion — se estrecha en UN solo lugar, y no en cada llamada. */
+function comoJson(o: Record<string, unknown>) {
+  return o as unknown as Record<string, string | number | boolean | null>;
+}
+
+function aFichaJson(f: Partial<FichaEditable>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, col] of Object.entries(CLAVES_FICHA) as [keyof FichaEditable, string][]) {
+    if (f[k] !== undefined) out[col] = f[k];
+  }
+  return out;
+}
+
+/** Edita la ficha. Sólo se mandan las claves que cambiaron: **lo que no viaja,
+ *  no se toca** — así dos pantallas editando bloques distintos no se pisan. */
+export async function actualizarAdoptable(params: {
   publicacionId: string;
-  motivo?: string;
-}): Promise<ResultadoWrapper<{ yaEstaba: boolean }, CodigoErrorAdopcion>> {
-  const { data, error } = await getClient().rpc('despublicar_adoptable', {
+  ficha: Partial<FichaEditable>;
+}): Promise<ResultadoWrapper<{ publicacionId: string }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('actualizar_adoptable', {
     p_publicacion_id: params.publicacionId,
+    p_ficha: comoJson(aFichaJson(params.ficha)),
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { publicacionId: params.publicacionId } };
+}
+
+export type EstadoAdoptable = 'borrador' | 'publicada' | 'pausada' | 'adoptada' | 'no_disponible';
+
+/** Mueve el estado de la publicación. **Una sola puerta para los cinco.**
+ *
+ *  🔴 `adoptada` NO se escribe desde acá: la escribe el acta con las dos firmas.
+ *  Un refugio que pudiera marcarla a mano podría sacar un animal de la vidriera
+ *  sin que exista el documento que la ley exige. */
+export async function cambiarEstadoAdoptable(params: {
+  publicacionId: string;
+  estado: EstadoAdoptable;
+  motivo?: string;
+}): Promise<
+  ResultadoWrapper<{ yaEstaba: boolean; estado: string; estadoAnterior?: string }, CodigoErrorAdopcion>
+> {
+  const { data, error } = await getClient().rpc('cambiar_estado_adoptable', {
+    p_publicacion_id: params.publicacionId,
+    p_estado: params.estado,
     p_motivo: params.motivo ?? undefined,
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
-  return { ok: true, data: { yaEstaba: (data as Record<string, unknown>).ya_estaba === true } };
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      yaEstaba: r.ya_estaba === true,
+      estado: String(r.estado ?? params.estado),
+      estadoAnterior: typeof r.estado_anterior === 'string' ? r.estado_anterior : undefined,
+    },
+  };
+}
+
+/** Retira la publicación. Consumidor de `cambiarEstadoAdoptable`, no una
+ *  segunda implementación: *dos funciones que mueven el mismo estado divergen
+ *  el día que una gana un gate y la otra no.* */
+export async function despublicarAdoptable(params: {
+  publicacionId: string;
+  motivo?: string;
+}): Promise<ResultadoWrapper<{ yaEstaba: boolean }, CodigoErrorAdopcion>> {
+  const r = await cambiarEstadoAdoptable({
+    publicacionId: params.publicacionId,
+    estado: 'no_disponible',
+    motivo: params.motivo,
+  });
+  if (!r.ok) return r;
+  return { ok: true, data: { yaEstaba: r.data.yaEstaba } };
+}
+
+/* ── Las fotos ─────────────────────────────────────────────────────────────
+   El ORDEN lo asigna el servidor. Si lo mandara la pantalla, dos subidas
+   simultáneas pelearían por el mismo número y el rebote sería un `23505` crudo
+   que no explica nada. */
+
+export async function agregarFotoAdoptable(params: {
+  publicacionId: string;
+  path: string;
+}): Promise<ResultadoWrapper<{ fotoId: string; orden: number; esPortada: boolean }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('agregar_foto_adoptable', {
+    p_publicacion_id: params.publicacionId,
+    p_path: params.path,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.foto_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: { fotoId: r.foto_id, orden: Number(r.orden ?? 0), esPortada: r.es_portada === true },
+  };
+}
+
+/** Reordena. **La lista tiene que ser COMPLETA**: con una parcial, las fotos que
+ *  faltan quedan con su orden viejo chocando contra los nuevos. El motor lo
+ *  rebota diciendo cuántas hay y cuántas llegaron. */
+export async function reordenarFotosAdoptable(params: {
+  publicacionId: string;
+  idsEnOrden: string[];
+}): Promise<ResultadoWrapper<{ fotos: number }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('reordenar_fotos_adoptable', {
+    p_publicacion_id: params.publicacionId,
+    p_ids: params.idsEnOrden,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { fotos: Number((data as Record<string, unknown>).fotos ?? 0) } };
+}
+
+/** Borra la fila **y devuelve el path que la pantalla tiene que borrar del
+ *  bucket**. 🔴 Postgres no alcanza Storage (`storage.protect_delete`): si la
+ *  pantalla no completa el borrado, queda un huérfano **público y alcanzable
+ *  por URL** — la misma clase que `D-731`. */
+export async function borrarFotoAdoptable(
+  fotoId: string,
+): Promise<ResultadoWrapper<{ pathABorrar: string }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('borrar_foto_adoptable', { p_foto_id: fotoId });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.path_a_borrar !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { pathABorrar: r.path_a_borrar } };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
