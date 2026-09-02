@@ -55,6 +55,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  resolverUrlGenericaEspecie,
   contarSolicitudesPorRevisar,
   obtenerSolicitudesDeMisPublicaciones,
   resolverUrlsFotos,
@@ -325,7 +326,17 @@ function FilaSolicitud({
   conEstado?: boolean;
 }) {
   const { t } = useTraduccion();
+  /* ⭐ **A4 CERRADA DE ESTE LADO.** Faltaba `mascota_especie` en el lector del
+     PUBLICADOR —el de la familia sí lo traía—, así que **la misma solicitud
+     tenía dos caras según quién mirara**: la familia veía la cara de la casa y
+     el refugio la huella. A lo entregó en `20260908520000` y acá se consume. */
   const cara = s.mascotaFotoUrl !== null ? (caras.get(s.mascotaFotoUrl) ?? null) : null;
+  /* La ilustración va APARTE de la foto: `AvatarMascota` le da a la propia el
+     encuadre de retrato y a ésta la deja a sangre (contrato de B, `90bebbfd`).
+     Se pasa con `?? undefined` porque en `AvatarMascota` la prop es
+     `string | undefined` mientras que en `TarjetaMascotaRefugio` admite `null`
+     — se adapta acá y no se pide ensanchar una pieza por una línea. */
+  const caraDeEspecie = resolverUrlGenericaEspecie(s.mascotaEspecie);
   /* Texto, no pill: acá no es la escalera —esa vive en el hilo, y su lugar es
      arriba y ancho completo (A3)—. Es una nota al pie de un animal que ya no
      necesita atención. */
@@ -334,6 +345,10 @@ function FilaSolicitud({
     declinada: t('portalAdopcion.cerradaDeclinada'),
     desistida: t('portalAdopcion.cerradaDesistida'),
     no_concretada_fallecimiento: t('portalAdopcion.cerradaNoConcretada'),
+    /* El séptimo, ya en la unión de A. Se nombra en vez de caer al genérico:
+       **«Cerrada» no dice nada y este hecho sí lo dice** — el animal se fue con
+       otro hogar, que del lado del refugio es una buena noticia. */
+    no_concretada_otra_familia: t('portalAdopcion.cerradaOtraFamilia'),
   };
   const enQueTermino = voces[s.estado] ?? t('portalAdopcion.cerradaGenerica');
   return (
@@ -351,7 +366,12 @@ function FilaSolicitud({
         })
       }
     >
-      <AvatarMascota nombre={s.mascotaNombre} fotoUrl={cara ?? undefined} tamano="md" />
+      <AvatarMascota
+        nombre={s.mascotaNombre}
+        fotoUrl={cara ?? undefined}
+        fotoDeEspecie={caraDeEspecie ?? undefined}
+        tamano="md"
+      />
       <View style={{ flex: 1, gap: spacing[1] }}>
         <Texto variante="titulo">{s.mascotaNombre}</Texto>
         {/* `solicitanteNombre` puede ser `null` — **no se inventa un nombre**:
