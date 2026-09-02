@@ -4456,6 +4456,7 @@ export const prestadorEs = {
     /* La salida por defecto del mapa: **no inventa un motivo**. Cubre el
        séptimo estado que el motor ya emite y este tipo todavía no declara
        (`no_concretada_otra_familia`) y cualquiera que venga después. */
+    cerradaOtraFamilia: 'Se fue con otro hogar',
     cerradaGenerica: 'Cerrada',
     novedades: 'Padrinazgos y donaciones',
     novedadesTitulo: 'Todavía no llegaron',

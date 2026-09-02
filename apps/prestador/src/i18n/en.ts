@@ -3535,6 +3535,7 @@ export const prestadorEn = {
     cerradaDeclinada: "Didn't go ahead",
     cerradaDesistida: 'The family stepped back',
     cerradaNoConcretada: "Didn't happen",
+    cerradaOtraFamilia: 'Went to another home',
     cerradaGenerica: 'Closed',
     novedades: 'Sponsorships & donations',
     novedadesTitulo: "They haven't arrived yet",

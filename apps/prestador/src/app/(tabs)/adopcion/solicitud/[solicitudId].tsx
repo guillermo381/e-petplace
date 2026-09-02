@@ -64,6 +64,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  resolverUrlGenericaEspecie,
   cerrarSolicitudAdopcion,
   obtenerSesion,
   obtenerSolicitudesDeMisPublicaciones,
@@ -78,7 +79,7 @@ type Estado =
   | { fase: 'cargando' }
   | { fase: 'error' }
   | { fase: 'noEsTuya' }
-  | { fase: 'listo'; hilo: SolicitudRecibida; miUid: string; cara: string | null };
+  | { fase: 'listo'; hilo: SolicitudRecibida; miUid: string; cara: string | null; caraDeEspecie: string | null };
 
 export default function HiloDelPublicador() {
   const { theme } = useTheme();
@@ -114,11 +115,24 @@ export default function HiloDelPublicador() {
        el del publicador no. Pedido a A por nombre; hasta entonces el
        sin-foto sigue en huella y se declara en vez de disimularse. */
     const ruta = hilo.mascotaFotoUrl;
-    const cara =
+    const firmada =
       typeof ruta === 'string' && ruta.length > 0
         ? ((await resolverUrlsFotos([ruta])).get(ruta) ?? null)
         : null;
-    setEstado({ fase: 'listo', hilo, miUid: uid, cara });
+    /* ⭐ **A4 CERRADA.** La mitad que faltaba era `mascota_especie` en el lector
+       del publicador; A la entregó en `20260908520000`. Sin ella el refugio
+       veía la huella sobre el mismo animal que la familia veía con la cara de
+       la casa — *la misma solicitud con dos caras según quién mira*. */
+    const cara = firmada;
+    setEstado({
+      fase: 'listo',
+      hilo,
+      miUid: uid,
+      cara,
+      /* APARTE de la foto: la propia lleva encuadre de retrato, la ilustración
+         va a sangre (contrato de B, `90bebbfd`). */
+      caraDeEspecie: resolverUrlGenericaEspecie(hilo.mascotaEspecie),
+    });
   }, [params.solicitudId]);
 
   useFocusEffect(
@@ -249,6 +263,7 @@ export default function HiloDelPublicador() {
               <AvatarMascota
                 nombre={estado.hilo.mascotaNombre}
                 fotoUrl={estado.cara ?? undefined}
+                fotoDeEspecie={estado.caraDeEspecie ?? undefined}
                 tamano="md"
               />
               <View style={{ flex: 1, gap: spacing[1] }}>
