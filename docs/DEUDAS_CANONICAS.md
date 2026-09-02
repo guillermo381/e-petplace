@@ -26983,3 +26983,60 @@ el founder acaba de firmar.*
 > `adopcion-fotos` **existe y es PÚBLICO**, es el único bucket de adopción, y
 > quien construya el adjunto lo va a encontrar primero. *El error no va a ser
 > descuidado: va a ser razonable.* Nada de una conversación va ahí, nunca.
+
+---
+
+## 🔴 `L-481` — `--show-toplevel` CONFIRMA QUE EXISTÍS, JAMÁS QUE ESTÁS EN TU LUGAR
+
+**Medida por D el 2-sep-2026, escribiendo sin querer en el worktree de A.**
+
+## QUÉ PASÓ
+
+Un `cd` con fallback dejó a D parado en el **árbol primario, sobre `main`** —el
+de A— en vez de su propio worktree. **Escribió un archivo suyo, en el árbol de
+otra pista.** Lo encontró recién al ir a commitear.
+
+**Lo sacó por parche, restauró el árbol ajeno a limpio y recién ahí lo aplicó en
+el suyo**, con `git apply --check` probando que la base era la misma. Su propia
+lectura, y es la que vale:
+
+> *«No costó nada porque el árbol de A estaba limpio en ese instante — o sea que
+> no me salvó el método, me salvó la suerte.»*
+
+## LA LEY
+
+**`git rev-parse --show-toplevel` responde el árbol DONDE ESTÁS PARADO, no el
+tuyo.** Contesta siempre, y contesta bien — por eso engaña: *confirma que
+existís en un repo, jamás que estás en el tuyo.* Es la misma familia que este
+canon viene fichando toda la sesión: **un instrumento que responde con seguridad
+a una pregunta parecida a la que hiciste.**
+
+**Lo único que lo dice es `git branch --show-current` contra la rama propia. Y va
+ANTES DE ESCRIBIR, no antes de commitear.** D lo corrió antes de commitear: por
+eso lo encontró, y **por eso lo encontró tarde**.
+
+## POR QUÉ ES DE LA CASA Y NO DE UNA PISTA
+
+Con cuatro o cinco worktrees vivos y un árbol primario que es de quien conduce,
+**escribir en el árbol de otro no produce ningún error**: produce un archivo sin
+commitear en un repo ajeno. Y su daño depende de algo que quien escribe no
+controla — **si el otro tenía trabajo sin commitear en ese instante.**
+
+**Precedente medido de esa clase:** S91 registró worktrees para B y D y **ninguno
+para C**, que trabajaba en el primario; S82 dejó *«worktree por pista es la
+PRIMERA decisión de una sesión paralela»* como regla 85. Esta lección es su
+mitad que faltaba: **tener worktree no alcanza si nada verifica que estás parado
+en él.**
+
+## SU GEMELA, y las dos son de la misma jornada
+
+`L-481` es de dónde ESCRIBÍS; su hermana es de qué RECIBÍS:
+
+> ### **La entrega se declara por RAMA; la recepción se verifica por COMMIT.**
+
+D declaró un tip y **dos de sus siete commits quedaron afuera igual**; A lo
+verificó uno por uno con `merge-base` y los encontró. *Las dos mitades dicen lo
+mismo desde las dos puntas: la ubicación y la pertenencia no se suponen — se
+preguntan al objeto, y se preguntan ANTES.*
+
+**DISPARO: ninguno. Rige desde su depósito.**
