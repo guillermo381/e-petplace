@@ -126,6 +126,8 @@ export function HojaMediaGuarderia({
     | { fase: 'tomado'; uri: string; duracionS: number }
   >({ fase: 'cerrado' });
   const [elegidosClip, setElegidosClip] = useState<string[]>([]);
+  /** Sin permiso de micrófono se graba MUDO, no se deja de grabar. */
+  const [sinAudio, setSinAudio] = useState(false);
 
   const publicar = useMemo(() => cablearPublicarMedia(prestadorId), [prestadorId]);
   const captura = useCapturaMedia({
@@ -161,47 +163,55 @@ export function HojaMediaGuarderia({
     ...restoReglas.map((r) => ({ clave: r, voz: vozRegla(r) })),
   ];
 
-  const sacarFoto = async () => {
-    const r = await captura.capturarFoto();
-    if (r.estado === 'permiso_denegado') {
-      mostrar({ variante: 'error', texto: t('mediaGuarderia.sinPermiso') });
-      return;
-    }
-    if (r.estado !== 'capturada') return;
-    setCapturada(r.uri);
-  };
+  /* ☠️ **`sacarFoto` MURIÓ CON LA CURA DE ARRIBA** (Ley 37). Hacía las tres
+     cosas que la pieza ya hace —pedir permiso, abrir la cámara, redimensionar—
+     y su aviso de permiso denegado **competía con la superficie propia de la
+     pieza**, que dibuja «probar de nuevo». *Dos caminos para el mismo permiso
+     es cómo uno de los dos envejece sin que nadie se entere.* */
 
   /**
-   * Abre el encuadre pidiendo **los DOS permisos**, cámara y micrófono.
+   * ABRE EL ENCUADRE. **La cámara es la condición; el micrófono NO.**
    *
-   * ⚠️ **QUÉ SÉ Y QUÉ NO, declarado porque lo escribí como hecho y no lo era:**
-   * *no medí* si sin permiso de micrófono `recordAsync` graba mudo o falla
-   * directo — el contrato de `expo-camera` documenta `mute` como opción, pero
-   * **no dice qué hace cuando el permiso falta**.
+   * ═══════════════════════════════════════════════════════════════════════
+   * 🔴 **ACÁ MORÍA «GRABAR CLIP», Y NO ERA LA CÁMARA.** El micrófono era
+   * **bloqueante**: si `pedirMic()` no concedía, se salía con un aviso y **el
+   * encuadre nunca se abría**. Y el peor caso ni siquiera muestra un diálogo —
+   * con el permiso negado dos veces, Android devuelve `granted: false` **de
+   * inmediato y sin preguntar** (`canAskAgain: false`) ⇒ desde el asiento del
+   * cuidador **el botón no hace nada**.
    *
-   * 🔴 **La decisión no depende de eso, y por eso se sostiene igual:** en los
-   * dos casos el clip no sirve, y el cuidador se entera **después de grabar**.
-   * *Pedir dos permisos molesta una vez; un clip perdido se pierde entero.*
+   * ⚠️ **La decisión que había escrita se apoyaba en algo que su propio autor
+   * declaró no haber medido:** *«no medí si sin permiso de micrófono
+   * `recordAsync` graba mudo o falla directo»*, y de ahí concluía *«en los dos
+   * casos el clip no sirve»*. **La segunda mitad no se sigue de la primera:**
+   * `CameraView` tiene `mute`, así que sin audio **el clip existe igual** — y
+   * un clip mudo de un perro jugando es infinitamente más que ningún clip.
+   * ═══════════════════════════════════════════════════════════════════════
    *
-   * **Y va acá y no en la pieza** (voto de B, y coincido): `EvidenciaClip` no
-   * tiene `expo-camera` ni puede tenerlo —rompería el bundle del cliente—, así
-   * que una prop de permisos sería **API para un estado que la pieza no puede
-   * alcanzar ni arreglar**: sólo podría dibujar «falta el micrófono» y quedarse
-   * mirando. *Eso no es una puerta, es un cartel.* Pidiéndolos acá, **la pieza
-   * nunca ve el estado sin permiso** (Ley 23) y no hay dos gates para lo mismo
-   * — que es cómo uno de los dos envejece sin que nadie se entere.
+   * ⇒ **Cámara denegada: no se abre y se dice** (sin ella no hay nada que
+   * grabar). **Micrófono denegado: se abre igual, en silencio, y la «i» lo
+   * explica** — no se pide dos veces ni se convierte en una pared.
    */
   const abrirClip = async () => {
     const c = permisoCamara?.granted === true ? permisoCamara : await pedirCamara();
     if (!c.granted) {
-      mostrar({ variante: 'error', texto: t('mediaGuarderia.sinPermiso') });
+      /* La voz distingue los dos noes, porque **la salida es distinta**: si
+         todavía se puede preguntar, volver a tocar sirve; si no, el único
+         camino son los Ajustes del teléfono. *Decir «dale permiso» a quien ya
+         no puede darlo desde acá es mandarlo a un botón que no existe.* */
+      mostrar({
+        variante: 'error',
+        texto: c.canAskAgain
+          ? t('mediaGuarderia.sinPermiso')
+          : t('mediaGuarderia.sinPermisoAjustes'),
+      });
       return;
     }
+    /* El micrófono se PIDE una vez y **no frena**. `sinAudio` viaja al
+       grabador: es el dato, no una bandera de UI. */
     const m = permisoMic?.granted === true ? permisoMic : await pedirMic();
-    if (!m.granted) {
-      mostrar({ variante: 'error', texto: t('mediaGuarderia.sinPermisoMic') });
-      return;
-    }
+    setSinAudio(!m.granted);
+    if (!m.granted) mostrar({ variante: 'neutro', texto: t('mediaGuarderia.clipSinAudio') });
     setElegidosClip([]);
     setClip({ fase: 'encuadre' });
   };
@@ -304,7 +314,19 @@ export function HojaMediaGuarderia({
         {/* EL OBTURADOR — o la foto recién sacada esperando sus etiquetas. */}
         {capturada === null && clip.fase === 'cerrado' ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-            <EvidenciaFoto.Capturar onFoto={() => void sacarFoto()} deshabilitado={enviando} />
+            {/* 🔴 **ACÁ SE ABRÍAN DOS CÁMARAS POR UN SOLO TOQUE, y por eso la
+                foto «se guardaba a la segunda».** `EvidenciaFoto.Capturar`
+                **ya captura**: pide permiso, redimensiona a 1600 y entrega el
+                uri en `onFoto(uri)`. Esta línea **tiraba ese argumento**
+                (`onFoto={() => …}`) y volvía a capturar por su cuenta ⇒ la
+                primera foto se perdía y quedaba la segunda.
+                *No era una carrera de estado: era ignorar el dato que el
+                callback traía y pedirlo de nuevo.*
+                ✅ El contraste lo probó: las otras tres pantallas de la casa
+                que montan esta pieza reciben el uri (`onFoto={(uri) => …}`).
+                **Las dos que no lo hacían eran las dos hojas de guardería** —
+                el founder reportó una y había dos. */}
+            <EvidenciaFoto.Capturar onFoto={(uri) => setCapturada(uri)} deshabilitado={enviando} />
             {/* ③ · EL CLIP, al lado del obturador y no en otra pantalla. *El
                 cuidador no elige «modo foto» o «modo video» antes de saber qué
                 va a ver: saca lo que el momento pide.* */}
@@ -328,6 +350,14 @@ export function HojaMediaGuarderia({
                 facing="back"
                 videoQuality="720p"
                 videoBitrate={2_500_000}
+                /* 🔴 `mute` es prop de LA VISTA, no opción de `recordAsync` —
+                   lo escribí en el grabador y **el typecheck me mandó a leer el
+                   tipo instalado**: `CameraRecordingOptions` de este runtime
+                   sólo acepta `maxDuration · maxFileSize · mirror · codec`.
+                   *Mi premisa venía de la doc; el tipo del runtime es el que
+                   manda.* Sale del PERMISO y no de una preferencia: pedirle
+                   audio al grabador es pedirle lo que el sistema ya negó. */
+                mute={sinAudio}
               />
             }
             /* Las reglas ya vienen FILTRADAS por lugar: la pieza no sabe de

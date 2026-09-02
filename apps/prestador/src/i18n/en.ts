@@ -3390,6 +3390,9 @@ export const prestadorEn = {
     confirmar: 'Record it',
   },
   mediaGuarderia: {
+    sinPermisoAjustes:
+      "The camera is blocked for this app. You can enable it in your phone's settings.",
+    clipSinAudio: 'No microphone permission: the clip records without sound.',
     titulo: 'Photo of the day',
     encuadre_animal_en_cuadro: 'Make sure the animal is in frame.',
     encuadre_personas_no: 'No people in the photo.',

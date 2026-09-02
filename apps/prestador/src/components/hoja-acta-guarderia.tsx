@@ -235,13 +235,19 @@ export function HojaActaGuarderia({
   const vozRegla = (r: ReglaEncuadre): string =>
     t(`actaGuarderia.encuadre_${r}` as 'actaGuarderia.encuadre_animal_en_cuadro');
 
-  const sacarFoto = async () => {
-    const r = await captura.capturarFoto();
-    if (r.estado === 'permiso_denegado') {
-      mostrar({ variante: 'error', texto: t('actaGuarderia.sinPermisoCamara') });
-      return;
-    }
-    if (r.estado !== 'capturada') return;
+  /**
+   * 🔴 **RECIBE EL URI, NO VUELVE A CAPTURAR.** ⏪ Acá se llamaba
+   * `captura.capturarFoto()` **después** de que `EvidenciaFoto.Capturar` ya
+   * había capturado ⇒ **dos cámaras por un toque**, la primera foto tirada y la
+   * segunda guardada. *No era una carrera de estado: era ignorar el argumento
+   * del callback y volver a pedir el dato.* Es la gemela exacta del defecto de
+   * la hoja del durante — **el founder reportó una y eran dos**.
+   *
+   * ☠️ Con la cura muere también el aviso de `sinPermisoCamara` de esta hoja:
+   * **la pieza dibuja su propio camino** («probar de nuevo») y dos superficies
+   * para el mismo permiso es cómo una de las dos envejece sin que nadie mire.
+   */
+  const guardarFoto = async (uri: string) => {
     try {
       /* La foto llega al expediente de ESTE animal. La firma ① del founder
          —etiquetar a todos los que salen en la foto— es de la captura del
@@ -249,11 +255,11 @@ export function HojaActaGuarderia({
          ofrecer acá un selector de otros animales sería preguntar algo cuya
          respuesta ya sabemos (Ley 23, corolario S73). */
       const id = await captura.publicarCaptura({
-        uri: r.uri,
+        uri,
         tipo: 'foto',
         mascotaIds: [estadia.mascotaId],
       });
-      setFotos((f) => [...f, { id, uri: r.uri }]);
+      setFotos((f) => [...f, { id, uri }]);
     } catch {
       /* La cola guarda en disco antes de subir: si esto falla, no es la red —
          es que no se pudo ni encolar, y el cuidador tiene que saberlo AHORA
@@ -384,7 +390,7 @@ export function HojaActaGuarderia({
                     onReintentar={() => void captura.reintentarPendiente(f.id)}
                   />
                 ))}
-                <EvidenciaFoto.Capturar onFoto={() => void sacarFoto()} deshabilitado={levantando} />
+                <EvidenciaFoto.Capturar onFoto={(uri) => void guardarFoto(uri)} deshabilitado={levantando} />
               </View>
             </View>
           }

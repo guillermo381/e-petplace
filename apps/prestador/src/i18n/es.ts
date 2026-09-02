@@ -4295,6 +4295,9 @@ export const prestadorEs = {
     confirmar: 'Dejarlo anotado',
   },
   mediaGuarderia: {
+    sinPermisoAjustes:
+      'La cámara está bloqueada para esta app. Se habilita desde los ajustes del teléfono.',
+    clipSinAudio: 'Sin permiso de micrófono: el clip se graba sin sonido.',
     titulo: 'Foto del día',
     encuadre_animal_en_cuadro: 'Que se vea el animal.',
     encuadre_personas_no: 'Sin personas en la foto.',

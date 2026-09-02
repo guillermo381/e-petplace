@@ -76,6 +76,7 @@ import {
   confirmarActaGuarderia,
   obtenerActaGuarderia,
   obtenerMediaDeMiMascota,
+  resolverUrlsFotos,
   obtenerMisEstadiasGuarderia,
   obtenerPuntoVivo,
   obtenerTramoVivoDeMiMascota,
@@ -191,7 +192,28 @@ export default function DuranteGuarderia() {
       /* Un fallo JAMÁS se disfraza de «no hay fotos» (Ley 13): la familia
          leería «no le sacaron ninguna» cuando lo cierto es «no pudimos
          preguntar» — y en el durante esa diferencia es angustia. */
-      setMedia(r.ok ? { fase: 'listo', lista: r.data } : { fase: 'error' });
+      if (!r.ok) {
+        setMedia({ fase: 'error' });
+        return;
+      }
+      /* 🔴 **`archivoUrl` ES UN PATH DE STORAGE, NO UNA URL** — el lector
+         devuelve `m.archivo_url` tal cual, y esta pantalla lo pasaba **crudo** a
+         `<Image>` y a `VisorFoto` ⇒ **hueco, siempre, aunque la foto exista**.
+         *No fallaba: dibujaba nada. Y ningún typecheck lo ve, porque un path y
+         una URL son los dos `string`.*
+         El censo lo puso en contexto: de las 51 pantallas de las dos apps que
+         dibujan una imagen, **25 firman y ésta era una de las tres que no**.
+         ⇒ se firma con el resolvedor de la casa (`D-308`, el precedente del
+         carnet desde S47: *una foto privada se muestra FIRMADA*). */
+      const paths = r.data
+        .map((m) => m.archivoUrl)
+        .filter((x): x is string => typeof x === 'string' && x.length > 0);
+      const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
+      if (!vigente) return;
+      setMedia({
+        fase: 'listo',
+        lista: r.data.map((m) => ({ ...m, archivoUrl: urls.get(m.archivoUrl) ?? m.archivoUrl })),
+      });
     })();
     return () => {
       vigente = false;
