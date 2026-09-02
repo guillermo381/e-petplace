@@ -64,6 +64,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  caraDeMascota,
   cerrarSolicitudAdopcion,
   obtenerSesion,
   obtenerSolicitudesDeMisPublicaciones,
@@ -114,10 +115,19 @@ export default function HiloDelPublicador() {
        el del publicador no. Pedido a A por nombre; hasta entonces el
        sin-foto sigue en huella y se declara en vez de disimularse. */
     const ruta = hilo.mascotaFotoUrl;
-    const cara =
+    const firmada =
       typeof ruta === 'string' && ruta.length > 0
         ? ((await resolverUrlsFotos([ruta])).get(ruta) ?? null)
         : null;
+    /* ⭐ **A4 CERRADA.** La mitad que faltaba era `mascota_especie` en el lector
+       del publicador; A la entregó en `20260908520000`. Sin ella el refugio
+       veía la huella sobre el mismo animal que la familia veía con la cara de
+       la casa — *la misma solicitud con dos caras según quién mira*. */
+    const cara = caraDeMascota({
+      especie: hilo.mascotaEspecie,
+      razaSlug: null,
+      fotoUri: firmada,
+    });
     setEstado({ fase: 'listo', hilo, miUid: uid, cara });
   }, [params.solicitudId]);
 
