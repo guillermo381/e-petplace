@@ -1,0 +1,21 @@
+-- REVERSA de 20260907720000 — los dos textos legales de adopción. ESCRITA ANTES.
+-- S112-A · punto 9-bis.
+--
+-- QUÉ DESHACE:
+--   delete from adopcion_documentos where codigo in ('terminos_refugio','condiciones_adopcion') and version = 1;
+--   alter table adopcion_documentos drop column if exists vigente;
+--   alter table adopcion_documentos drop column if exists sha256;
+--
+-- 🔴 QUÉ **NO** DESHACE, y es lo que hay que saber antes de correrla:
+--   · Si alguien ya ACEPTÓ uno de los dos documentos, borrar la fila deja la
+--     aceptación apuntando a un documento que no existe. **La reversa es segura
+--     SOLO mientras no haya aceptaciones registradas.** Control obligatorio
+--     antes de correrla:
+--       select count(*) from adopcion_documento_aceptaciones
+--        where codigo in ('terminos_refugio','condiciones_adopcion');
+--     (si esa tabla todavía no existe, el control es trivialmente 0)
+--   · NO toca `acta_adopcion`: esa nunca se cargó y su puerta sigue cerrada.
+--
+-- ⚠️ `sha256` es GENERATED ALWAYS: no se puede escribir a mano ni quedar
+-- desincronizado del texto. Al dropear la columna se pierde esa garantía, no
+-- el dato — el dato se re-deriva del texto.
