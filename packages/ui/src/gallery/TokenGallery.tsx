@@ -800,6 +800,7 @@ function MuestraTarjetasRefugio() {
     pausada: 'Pausada',
     en_proceso: 'En proceso',
     adoptada: 'Adoptada',
+    no_disponible: 'Fuera de la vidriera',
     memorial: 'Memorial',
   }
   return (
@@ -829,6 +830,17 @@ function MuestraTarjetasRefugio() {
         estado="adoptada"
         voces={VOCES}
         etiqueta="Bruno, adoptado"
+        onPress={() => {}}
+      />
+      {/* ⭐ EL SÉPTIMO (S112-B): retiro DEFINITIVO del publicador. Va junto a
+          «Adoptada» a propósito — hay que poder ver que las dos terminan el
+          ciclo y ninguna ofrece interruptor. Lo que las separa es la VOZ, no
+          el color: `pausada` se puede volver a publicar, ésta no. */}
+      <TarjetaMascotaRefugio
+        nombre="Rocco"
+        estado="no_disponible"
+        voces={VOCES}
+        etiqueta="Rocco, fuera de la vidriera"
         onPress={() => {}}
       />
     </View>
