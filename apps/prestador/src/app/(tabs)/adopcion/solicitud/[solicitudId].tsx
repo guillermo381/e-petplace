@@ -67,6 +67,7 @@ import {
   cerrarSolicitudAdopcion,
   obtenerSesion,
   obtenerSolicitudesDeMisPublicaciones,
+  resolverUrlsFotos,
   responderSolicitudAdopcion,
   type SolicitudRecibida,
 } from '@epetplace/api';
@@ -77,7 +78,7 @@ type Estado =
   | { fase: 'cargando' }
   | { fase: 'error' }
   | { fase: 'noEsTuya' }
-  | { fase: 'listo'; hilo: SolicitudRecibida; miUid: string };
+  | { fase: 'listo'; hilo: SolicitudRecibida; miUid: string; cara: string | null };
 
 export default function HiloDelPublicador() {
   const { theme } = useTheme();
@@ -102,7 +103,22 @@ export default function HiloDelPublicador() {
        **no tiene acceso** lo invita a reintentar para siempre (Ley 13). */
     if (hilo === null) return setEstado({ fase: 'noEsTuya' });
     const uid = ses.ok && ses.data !== null ? ses.data.user_id : '';
-    setEstado({ fase: 'listo', hilo, miUid: uid });
+    /* ⭐ A4 · LA CARA SE FIRMA, y acá no se firmaba NADA: se pasaba
+       `nombre` y punto, así que **hasta los animales CON foto salían con la
+       huella**. `mascotas` es bucket privado ⇒ el path crudo no se pinta
+       (`D-308`, el mismo precedente que curó la lista).
+
+       ⚠️ **La mitad que falta tiene dueño y nombre:** sin foto no puedo caer
+       a la cara de la casa porque `obtener_solicitudes_de_mis_publicaciones`
+       **no devuelve `mascota_especie`** — el lector de la FAMILIA sí lo trae,
+       el del publicador no. Pedido a A por nombre; hasta entonces el
+       sin-foto sigue en huella y se declara en vez de disimularse. */
+    const ruta = hilo.mascotaFotoUrl;
+    const cara =
+      typeof ruta === 'string' && ruta.length > 0
+        ? ((await resolverUrlsFotos([ruta])).get(ruta) ?? null)
+        : null;
+    setEstado({ fase: 'listo', hilo, miUid: uid, cara });
   }, [params.solicitudId]);
 
   useFocusEffect(
@@ -185,35 +201,62 @@ export default function HiloDelPublicador() {
         </View>
       ) : (
         <EvitaTeclado>
-          {/* ── LA CABECERA: el animal, y quién pregunta por él ── */}
-          <View style={{ padding: spacing[5], gap: spacing[3] }}>
+          {/* ═══ A3 · LA CABECERA, RE-APILADA (rojo del founder, 2-sep) ═══
+
+              🔴 **`EstadoSolicitudAdopcion` NO es una pill: es una ESCALERA.**
+              Su propio encabezado lo dice —*«reusa `EscaleraEstados`»*— y yo la
+              monté como tercer hijo de un `flexDirection: 'row'`, al lado del
+              avatar y del nombre. Una escalera de tres pasos con sus palabras
+              **no entra en lo que sobra de una fila**: quedó pegada al borde
+              derecho, con el texto cortado, y el animal exprimido a la
+              izquierda.
+
+              ⚠️ **Y ningún gate podía verlo.** El typecheck estaba en verde —los
+              tipos eran correctos—, `verify:diseno` mide formas y tokens, no
+              anchos resueltos en tiempo de layout. *Un desborde no es un error:
+              es una medida que sólo existe cuando algo se pinta*, y por eso lo
+              encontró el ojo del founder y no una corrida.
+
+              ⇒ **Columna, no fila.** La escalera va ARRIBA, ancho completo,
+              porque es el estado de todo lo que hay debajo; después el bloque
+              del animal; después el hilo. *El orden no es estético: primero en
+              qué anda esto, después de quién se trata.* ── */}
+          <View style={{ padding: spacing[5], gap: spacing[4] }}>
+            {/* El estado como **etiqueta de clase (N23)**, jamás alarma — ni
+                siquiera en `declinada`: *el color marca clase, no gravedad.*
+
+                Las voces son OBLIGATORIAS y la pieza no trae diccionario: la
+                casa que lee escribe sus palabras. **`vozDeclinada` va aparte a
+                propósito** — es la única que cada superficie tiene que poder
+                decir con su tono (§5 · §10.6: *la devolución jamás humilla*), y
+                acá el refugio lee «No siguió», no «rechazada». */}
+            <PillEstado
+              estado={estado.hilo.estado}
+              voces={{
+                recibida: t('portalHilo.estadoRecibida'),
+                enConversacion: t('portalHilo.estadoEnConversacion'),
+                aceptada: t('portalHilo.estadoAceptada'),
+              }}
+              vozDeclinada={t('portalHilo.estadoDeclinada')}
+              vozDesistida={t('portalHilo.estadoDesistida')}
+              vozNoConcretada={t('portalHilo.estadoNoConcretada')}
+              vozOtraFamilia={t('portalHilo.estadoOtraFamilia')}
+            />
+
+            {/* El animal, y quién pregunta por él. Acá SÍ va en fila: son un
+                avatar y dos líneas cortas, que es para lo que una fila sirve. */}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-              <AvatarMascota nombre={estado.hilo.mascotaNombre} tamano="md" />
+              <AvatarMascota
+                nombre={estado.hilo.mascotaNombre}
+                fotoUrl={estado.cara ?? undefined}
+                tamano="md"
+              />
               <View style={{ flex: 1, gap: spacing[1] }}>
                 <Texto variante="titulo">{estado.hilo.mascotaNombre}</Texto>
                 <Texto variante="apoyo">
                   {estado.hilo.solicitanteNombre ?? t('portalHilo.alguienSinNombre')}
                 </Texto>
               </View>
-              {/* El estado como **etiqueta de clase (N23)**, jamás alarma — ni
-                  siquiera en `declinada`: *el color marca clase, no gravedad.* */}
-              {/* Las voces son OBLIGATORIAS y la pieza no trae diccionario:
-                  la casa que lee escribe sus palabras. **`vozDeclinada` va
-                  aparte a propósito** — es la única que cada superficie tiene
-                  que poder decir con su tono (§5 · §10.6: *la devolución jamás
-                  humilla*), y acá el refugio lee «No siguió», no «rechazada». */}
-              <PillEstado
-                estado={estado.hilo.estado}
-                voces={{
-                  recibida: t('portalHilo.estadoRecibida'),
-                  enConversacion: t('portalHilo.estadoEnConversacion'),
-                  aceptada: t('portalHilo.estadoAceptada'),
-                }}
-                vozDeclinada={t('portalHilo.estadoDeclinada')}
-                vozDesistida={t('portalHilo.estadoDesistida')}
-                vozNoConcretada={t('portalHilo.estadoNoConcretada')}
-                vozOtraFamilia={t('portalHilo.estadoOtraFamilia')}
-              />
             </View>
           </View>
 

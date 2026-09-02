@@ -60,7 +60,6 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Hoja,
-  Interruptor,
   Separador,
   Tarjeta,
   Texto,
@@ -105,6 +104,28 @@ interface Item {
    */
   mascotaNombre: string | null;
   mascotaEspecie: string | null;
+  /**
+   * ⭐ **G7, la mitad que faltaba: el plan dice PARA QUIÉN SIRVE.**
+   *
+   * Pepe es un AVE con una mensualidad de guardería viva, y guardería es de
+   * perros y gatos: *lo firmó un arnés y nada lo frenó*. El motor ya cerró la
+   * puerta (el reloj no le crea estadías), pero la familia **seguía pagando sin
+   * que nada se lo dijera** — y una plata que sale todos los meses por un
+   * servicio que no se puede usar es peor que un rebote.
+   *
+   * ⚠️ **Es SÓLO la especie**, y por eso la frase que se escribe también lo es.
+   * El guard del motor tiene dos cláusulas —especie y `estado_vida`— y A partió
+   * el contrato a propósito: *un booleano que junta dos razones obliga a quien
+   * lo lee a inventar cuál de las dos fue*. Acá se dice la del recorte y nada
+   * más; el memorial tiene su propia voz en otro lado.
+   *
+   * `null` = **no hay pregunta que contestar** (el mandato no tiene mascota).
+   * No es «no puede», y no se pinta como tal.
+   */
+  especieNoAplica: boolean;
+  /** Las especies que el comprable SÍ admite, del catálogo. Se dicen para que
+   *  la frase no invente el recorte. `null` = sin recorte. */
+  especiesElegibles: string[] | null;
   /** Ya FIRMADA por la pantalla — el lector entrega la ruta (`D-308`). */
   mascotaCara: string | null;
   tipo: 'guarderia' | 'paseo';
@@ -204,6 +225,13 @@ export default function Recurrentes() {
           clave: `g:${s.suscripcionId}`,
           mascotaNombre: s.mascotaNombre,
           mascotaEspecie: s.mascotaEspecie,
+          /* 🔑 `=== false` y no `!s.especieAplica`: **`null` no es «no puede»**
+             —es «no hay pregunta que contestar», porque el mandato no tiene
+             mascota— y la negación lógica los aplastaría en el mismo valor.
+             *Ese aplastamiento le diría a una familia que su plan no sirve para
+             un animal que ni siquiera nombró.* */
+          especieNoAplica: s.especieAplica === false,
+          especiesElegibles: s.especiesElegibles,
           /* Se completa abajo con la URL firmada: el lector trae la RUTA. */
           mascotaCara: null,
           tipo: 'guarderia',
@@ -233,6 +261,11 @@ export default function Recurrentes() {
              dos dice la verdad.* */
           mascotaNombre: null,
           mascotaEspecie: null,
+          /* El plan de paseo no recorta por especie **y su lector no publica
+             nada del tema**: se declara que no hay aviso, en vez de dejarlo
+             fuera del objeto. */
+          especieNoAplica: false,
+          especiesElegibles: null,
           mascotaCara: null,
           tipo: 'paseo',
           id: s.id,
@@ -475,22 +508,36 @@ export default function Recurrentes() {
                       <Texto variante="cuerpo">{it.mascotaNombre}</Texto>
                     </View>
                   ) : null}
+                  {/* ═══ G8 · EL INTERRUPTOR NO SE ENCONTRABA ══════════════
+
+                      🔴 **Rojo del founder (2-sep): no encontró «Cancelar
+                      suscripción».** Y no estaba escondida: estaba **acá**, como
+                      un `Interruptor` en el `fin` de esta celda. *Su etiqueta
+                      era el título del plan* —o sea que la palabra «cancelar» no
+                      aparecía en ningún lado de la pantalla—, y un switch dice
+                      «encendido/apagado», jamás **qué pasa si lo movés**.
+
+                      ⚠️ **Lo que falla no es el descubrimiento, es el NOMBRE.**
+                      Alguien que viene a dar de baja busca un verbo; un
+                      interruptor es un estado. *Un control que existe y no se
+                      llama como lo que hace es indistinguible de uno que no
+                      existe.*
+
+                      ⇒ **Un botón por fila, visible, con el verbo escrito** — no
+                      detrás de otro toque, que es la letra del founder. El
+                      switch muere (Ley 37): dos controles para el mismo acto
+                      dejan a la familia preguntándose si hacen lo mismo.
+
+                      🔑 **El botón sigue diciendo lo que el motor hace, no lo que
+                      la palabra promete:** cancelar detiene la RENOVACIÓN, y el
+                      período ya pagado corre entero (`P24`). Por eso el botón
+                      abre la MISMA Hoja de confirmación de antes —la que
+                      explica eso— y la línea de abajo sigue diciendo hasta qué
+                      día está cubierto. ── */}
                   <Celda
                     titulo={it.titulo}
                     subtitulo={it.donde ?? undefined}
                     metadataMono={t('recurrentes.alMes', { precio: it.precio.toFixed(2) })}
-                    fin={
-                      <Interruptor
-                        encendido={it.encendido}
-                        etiqueta={it.titulo}
-                        onCambio={(v) => {
-                          /* Apagar SIEMPRE confirma. Encender no: no hay nada
-                             que perder y el gesto ya es deliberado. */
-                          if (v) void encender(it);
-                          else setConfirmando(it);
-                        }}
-                      />
-                    }
                   />
                   <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3], gap: 2 }}>
                     {/* 🔴 Antes que nada: si el cobro no entró, **eso** es lo
@@ -520,6 +567,57 @@ export default function Recurrentes() {
                             })}
                       </Texto>
                     )}
+
+                    {/* ⭐ **G7 · EL PLAN QUE NO SIRVE PARA ESA MASCOTA LO DICE.**
+                        Va ARRIBA del verbo y no abajo: *si la familia está por
+                        cancelar, ésta es la razón por la que vino* — y si no lo
+                        estaba, es la razón por la que debería.
+
+                        Se nombran las especies que el comprable SÍ admite,
+                        leídas del catálogo, **jamás escritas acá**: el día que
+                        guardería acepte conejos, esta frase cambia sola. Sin
+                        lista no se dibuja nada — *«tu plan no sirve» sin decir
+                        para qué sirve es una acusación, no una explicación.* */}
+                    {it.especieNoAplica && it.especiesElegibles !== null && it.mascotaNombre !== null ? (
+                      <Texto variante="apoyo">
+                        {t('recurrentes.especieNoAplica', {
+                          nombre: it.mascotaNombre,
+                          especies: it.especiesElegibles.join(' · '),
+                        })}
+                      </Texto>
+                    ) : null}
+
+                    {/* El verbo, visible. **Encender no confirma** —no hay nada
+                        que perder y el gesto ya es deliberado—; **apagar
+                        siempre**, porque del otro lado hay un servicio que la
+                        familia está usando.
+
+                        Apagado y NO `reversible` ⇒ **no se dibuja nada**, y eso
+                        es Ley 23 en su forma barata: la guardería no vuelve a
+                        `activa` por ninguna función del motor (medido), así que
+                        ofrecer «Reactivar» ahí sería enseñarle a la familia a
+                        deshacer algo que no se puede deshacer. La línea de
+                        arriba ya dice hasta cuándo sigue cubierta. */}
+                    {it.encendido ? (
+                      <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
+                        <Boton
+                          variante="secundario"
+                          tamaño="sm"
+                          etiqueta={t('recurrentes.cancelar')}
+                          onPress={() => setConfirmando(it)}
+                        />
+                      </View>
+                    ) : it.reversible ? (
+                      <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
+                        <Boton
+                          variante="secundario"
+                          tamaño="sm"
+                          etiqueta={t('recurrentes.reactivar')}
+                          cargando={trabajando}
+                          onPress={() => void encender(it)}
+                        />
+                      </View>
+                    ) : null}
                   </View>
                 </View>
               ))}

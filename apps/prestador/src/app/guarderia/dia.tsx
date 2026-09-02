@@ -597,10 +597,38 @@ export default function DiaGuarderia() {
 
                 Es `apoyada` y no `primario`: el CTA del día es salir, y una
                 superficie con dos acentos no tiene ninguno (Ley 5). */}
-            {viaje === null && adentro.length > 0 ? (
+            {/* ⭐ **FIRMA DEL FOUNDER (2-sep): el recorte SE QUEDA, y ahora
+                DICE POR QUÉ.**
+
+                🔴 La medición que lo puso sobre la mesa: A midió que
+                `publicar_media_guarderia` **NO exige `en_guarderia`** ⇒ el
+                recorte es de ESTA pantalla, no del motor. Y las estadías del
+                founder estuvieron adentro **68 segundos** ⇒ el botón se abría y
+                se cerraba solo en poco más de un minuto. *Un control que
+                aparece y desaparece sin decir nada se lee como que la app se
+                rompió*, y ésa era la mitad real del reporte «sigue sin
+                funcionar bien».
+
+                ⇒ **No se ensancha la ventana** (§5: las fotos se toman en las
+                instalaciones — durante un viaje se sacarían en la calle o en la
+                puerta de una casa, justo donde la regla del primer plano existe
+                para proteger la fachada). **Se ensancha la EXPLICACIÓN:** el
+                botón deja de desaparecer y pasa a estar apagado con su razón
+                debajo.
+
+                *Desaparecer y estar apagado cuestan lo mismo de construir y no
+                cuestan lo mismo de entender: uno deja al cuidador buscando algo
+                que vio hace un minuto; el otro le dice cuándo vuelve.* ── */}
+            {estado.estadias.length > 0 ? (
               <Boton
                 variante="apoyada"
                 etiqueta={t('diaGuarderia.sacarFoto')}
+                deshabilitado={viaje !== null || adentro.length === 0}
+                razonDeshabilitado={
+                  viaje !== null
+                    ? t('diaGuarderia.fotoRazonViaje')
+                    : t('diaGuarderia.fotoRazonNadieAdentro')
+                }
                 onPress={() => setMediaAbierta(true)}
               />
             ) : null}

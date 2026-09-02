@@ -10,7 +10,11 @@
 export const prestadorEs = {
   tabs: {
     adopcion: 'Refugio',
-    adoptables: 'Mis animales',
+    /* A5 (voz del founder, 2-sep): **«Peluditos»**, y la razón es de forma
+       antes que de cariño — *«Mis animales» desborda el botón de la tab y el
+       texto se corta*. Una etiqueta truncada no es un nombre: es un defecto
+       que se lee como descuido cada vez que el refugio abre la app. */
+    adoptables: 'Peluditos',
     hoy: 'Hoy',
     // S85-C25 — LA TAB SE LLAMA **DATOS** (firma de la mesa): la pantalla
     // creció hasta su eje —"a quiénes cuido"— y el founder lo pidió con
@@ -882,6 +886,8 @@ export const prestadorEs = {
     // puede ser otra. La acción va aparte y reusa `agenda.reintentar`,
     // que ya está aprobado — cero copy nuevo para el botón.
     identidadNoCargo: 'No pudimos cargar tu negocio.',
+    refugioOrganizacion: 'Organización',
+    refugioRescatista: 'Rescatista independiente',
     guardar: 'Guardar cambios',
     nombreLabel: 'Tu nombre',
     telefonoLabel: 'Teléfono',
@@ -4241,6 +4247,8 @@ export const prestadorEs = {
     salgoABuscar: 'Salgo a buscar',
     comoSePorto: 'Cómo se portó',
     sacarFoto: 'Sacar una foto',
+    fotoRazonViaje: 'Las fotos se toman en las instalaciones. Cuando vuelvas, vas a poder.',
+    fotoRazonNadieAdentro: 'Todavía no hay nadie adentro. En cuanto llegue el primero, vas a poder.',
     subir: 'Subir',
     bajar: 'Bajar',
     salgoADevolver: 'Salgo a devolver',
@@ -4437,6 +4445,18 @@ export const prestadorEs = {
     alDiaTitulo: 'Estás al día',
     alDiaDetalle: 'No hay solicitudes esperando tu respuesta.',
     enCurso: 'En conversación',
+    /* A9 · Las cerradas dicen en qué terminaron, en voz de refugio y sin
+       humillar a nadie (§10.6). «No siguió» y no «rechazada»: el refugio
+       eligió otro hogar, no descalificó a una familia. */
+    cerradas: 'Cerradas',
+    cerradaAceptada: 'Aceptada',
+    cerradaDeclinada: 'No siguió',
+    cerradaDesistida: 'La familia se bajó',
+    cerradaNoConcretada: 'No se concretó',
+    /* La salida por defecto del mapa: **no inventa un motivo**. Cubre el
+       séptimo estado que el motor ya emite y este tipo todavía no declara
+       (`no_concretada_otra_familia`) y cualquiera que venga después. */
+    cerradaGenerica: 'Cerrada',
     novedades: 'Padrinazgos y donaciones',
     novedadesTitulo: 'Todavía no llegaron',
     novedadesDetalle: 'Cuando alguien apadrine o done, lo vas a ver acá.',
