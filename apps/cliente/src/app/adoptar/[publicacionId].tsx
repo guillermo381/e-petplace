@@ -108,7 +108,6 @@ export default function PantallaFichaAdoptable() {
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [conSesion, setConSesion] = useState<boolean | null>(null);
-  const [postulando, setPostulando] = useState(false);
   const [hoja, setHoja] = useState<HojaAbierta>(null);
   const [intento, setIntento] = useState(0);
 
@@ -143,57 +142,26 @@ export default function PantallaFichaAdoptable() {
    * decirle algo que ya sabíamos*, y sin el destino volvería al Hogar en vez de
    * a este animal — lo que §4.1 prohíbe con todas las letras.
    */
-  const postular = async (f: FichaAdoptable) => {
-    if (postulando) return;
+  const postular = (f: FichaAdoptable) => {
     if (conSesion !== true) {
       router.push({ pathname: '/registro', params: { volverA: '/adoptar' } });
       return;
     }
-    setPostulando(true);
-    try {
-      /* ⚠️ ADAPTACIÓN MECÁNICA DE A (S112-A7), PROVISIONAL Y DECLARADA.
-         `crearSolicitudAdopcion` ahora EXIGE las respuestas del formulario —
-         postular dejó de ser un toque, que es lo que §4.1 pide. Esto manda un
-         formulario MÍNIMO sólo para que el árbol compile; **C lo reemplaza en
-         C5 por la pantalla real** (`FormularioPostulacion` de B ya está).
-         🔴 Mientras esta línea viva, lo que se guarda NO es lo que la persona
-         declaró: es un placeholder. No se publica así. */
-      const r = await crearSolicitudAdopcion({
-        publicacionId: f.publicacionId,
-        respuestas: {
-          hogar: { adultos: 1, menores_0_5: 0, menores_6_12: 0, menores_13_17: 0 },
-          vivienda: 'otro',
-          horas_solo: 0,
-          motivo: 'PENDIENTE — formulario no montado (S112-C5)',
-        },
-      });
-      if (!r.ok) {
-        /* La compuerta NO se muestra: se resuelve. **No se re-postula sola al
-           volver**: postular es un acto de la persona, y encadenarlo
-           convertiría «acepto las condiciones» en «acepto y de paso mando la
-           solicitud». */
-        if (r.codigo === 'condiciones_no_aceptadas') {
-          router.push({
-            pathname: '/legales/[codigo]',
-            params: { codigo: 'condiciones_adopcion', volverA: '/adoptar' },
-          });
-          return;
-        }
-        if (r.codigo === 'solicitud_ya_viva') {
-          mostrar({ variante: 'neutro', texto: r.mensaje });
-          router.push('/adoptar/solicitudes');
-          return;
-        }
-        mostrar({ variante: 'error', texto: r.mensaje });
-        return;
-      }
-      router.push({
-        pathname: '/adoptar/solicitud/[solicitudId]',
-        params: { solicitudId: r.data.solicitudId },
-      });
-    } finally {
-      setPostulando(false);
-    }
+    /* ⏪ **ACÁ VIVÍA UN PLACEHOLDER QUE HABRÍA ESCRITO DECLARACIONES FALSAS.**
+       Cuando `crear_solicitud_adopcion` pasó a exigir `respuestas`, esta llamada
+       dejó de compilar y se adaptó mecánicamente con un hogar inventado y un
+       motivo que decía «PENDIENTE». *Del otro lado hay un refugio decidiendo a
+       quién le entrega un animal con esas respuestas a la vista.* Se declaró en
+       el código y no viajó así.
+
+       ✅ **Postular ya no es un toque: es el formulario**, que es lo que §4.1
+       pide. Esta pantalla lleva; la solicitud la crea la que recoge lo que la
+       persona declaró. **El nombre viaja** para que el encabezado diga a quién
+       postula — *un formulario sin sujeto se lee como un trámite.* */
+    router.push({
+      pathname: '/adoptar/postular/[publicacionId]',
+      params: { publicacionId: f.publicacionId, nombre: f.nombre },
+    });
   };
 
   const contenido = (f: FichaAdoptable) => {
@@ -363,7 +331,7 @@ export default function PantallaFichaAdoptable() {
             conSesion === false
               ? t('adoptar.postularSinCuenta')
               : t('adoptar.postular', { nombre: f.nombre }),
-          onPress: () => void postular(f),
+          onPress: () => postular(f),
         }}
         apadrinar={{
           texto: t('fichaAdoptable.apadrinar'),
