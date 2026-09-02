@@ -21973,7 +21973,7 @@ export type Database = {
         Returns: Json
       }
       aceptar_documento_adopcion: {
-        Args: { p_codigo: string; p_dispositivo?: string; p_ip_hash?: string }
+        Args: { p_codigo: string; p_dispositivo?: string }
         Returns: Json
       }
       aceptar_documentos_guarderia: {
