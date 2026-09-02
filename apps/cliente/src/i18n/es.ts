@@ -3642,6 +3642,10 @@ export const clienteEs = {
        período pagado corre entero— lo explica la Hoja de confirmación, que es
        donde se puede explicar sin abreviar. */
     cancelar: 'Cancelar suscripción',
+    /* Dice el hecho y a quién le pasa, sin culpar a nadie: el plan no es
+       para esa especie. No dice «error» ni «no autorizado» — nadie hizo
+       nada mal, y del otro lado hay alguien pagando todos los meses. */
+    especieNoAplica: 'Este plan es para {{especies}}, y {{nombre}} no puede usarlo.',
     reactivar: 'Volver a activarla',
     intro: 'Todo lo que se te cobra solo, en un lugar.',
     /* El vacío HABLA con calma: no es un error ni una carencia. */

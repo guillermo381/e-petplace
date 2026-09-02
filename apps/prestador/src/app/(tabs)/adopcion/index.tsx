@@ -157,15 +157,33 @@ export default function PortalAdopcionHome() {
      rótulo de sección puede volver a mentir; una fila que lleva su propio
      estado, no.* ── */
   const lista = estado.fase === 'listo' ? estado.lista : [];
-  const porRevisar = lista.filter((s) => s.estado === 'recibida');
-  const conversando = lista.filter((s) => s.estado === 'en_conversacion');
-  const cerradas = lista.filter(
-    (s) =>
-      s.estado === 'aceptada' ||
-      s.estado === 'declinada' ||
-      s.estado === 'desistida' ||
-      s.estado === 'no_concretada_fallecimiento',
-  );
+  /* ⭐ **EL DISCRIMINADOR ES `cerradaEn`, NO EL NOMBRE DEL ESTADO** — y esto
+     dejó de ser preferencia el mismo día que se escribió.
+
+     🔴 Medido contra el CHECK vivo de `adopcion_solicitud`: **el motor tiene
+     SIETE estados** (entró `no_concretada_otra_familia`, que cierra las demás
+     solicitudes cuando el animal encuentra familia) y
+     `EstadoSolicitudAdopcion` en `packages/api` declara **SEIS**. El wrapper
+     los pasa con `as`, o sea que **una fila con el séptimo llega tipada como
+     uno de los seis y ningún typecheck lo ve.**
+
+     ⇒ Enumerar los terminales POR NOMBRE —que fue mi primer arreglo— cambiaba
+     un rótulo mentiroso por algo peor: **esa fila no entraba en ningún grupo y
+     desaparecía de la pantalla.** *Filtrar por complemento miente en voz alta;
+     filtrar por una lista incompleta calla, y callar es el modo de falla que
+     nadie encuentra.*
+
+     El motor ya publica el invariante y no hay que deducirlo: su segundo CHECK
+     dice que las vivas tienen `cerrada_en IS NULL` y las terminales
+     `IS NOT NULL`. **Eso es cierto para los siete y para el octavo.**
+
+     Y lo que no encaja **no se traga**: una solicitud viva que esta app no sabe
+     nombrar cae en «por revisar», porque *una solicitud abierta es trabajo aunque
+     no sepamos cómo se llama* — el único desenlace inaceptable es que no se vea. */
+  const cerradas = lista.filter((s) => s.cerradaEn !== null);
+  const vivas = lista.filter((s) => s.cerradaEn === null);
+  const conversando = vivas.filter((s) => s.estado === 'en_conversacion');
+  const porRevisar = vivas.filter((s) => s.estado !== 'en_conversacion');
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -282,6 +300,18 @@ export default function PortalAdopcionHome() {
 
 /** Una solicitud en la lista. **El animal preside**: en la cabeza del refugio
  *  son animales, no publicaciones (§9). El solicitante va debajo. */
+/** A9 · La voz de cada final, POR CLAVE y con salida por defecto.
+ *
+ *  🔴 **Una cadena de ternarios no tiene «ninguno de los anteriores»: tiene un
+ *  ÚLTIMO.** La que había acá terminaba en la voz del fallecimiento, así que el
+ *  séptimo estado del motor —`no_concretada_otra_familia`, que existe y este
+ *  tipo todavía no declara— habría salido diciéndole al refugio que el animal
+ *  murió. *La forma equivocada no es larga: es que su rama final AFIRMA en vez
+ *  de admitir que no sabe.*
+ *
+ *  Un mapa con `??` sí distingue: lo que no está escrito cae en una voz que no
+ *  inventa un motivo. Y el día que A ensanche la unión, el estado nuevo entra
+ *  como una línea acá. */
 function FilaSolicitud({
   s,
   caras,
@@ -299,14 +329,13 @@ function FilaSolicitud({
   /* Texto, no pill: acá no es la escalera —esa vive en el hilo, y su lugar es
      arriba y ancho completo (A3)—. Es una nota al pie de un animal que ya no
      necesita atención. */
-  const enQueTermino =
-    s.estado === 'aceptada'
-      ? t('portalAdopcion.cerradaAceptada')
-      : s.estado === 'declinada'
-        ? t('portalAdopcion.cerradaDeclinada')
-        : s.estado === 'desistida'
-          ? t('portalAdopcion.cerradaDesistida')
-          : t('portalAdopcion.cerradaNoConcretada');
+  const voces: Record<string, string> = {
+    aceptada: t('portalAdopcion.cerradaAceptada'),
+    declinada: t('portalAdopcion.cerradaDeclinada'),
+    desistida: t('portalAdopcion.cerradaDesistida'),
+    no_concretada_fallecimiento: t('portalAdopcion.cerradaNoConcretada'),
+  };
+  const enQueTermino = voces[s.estado] ?? t('portalAdopcion.cerradaGenerica');
   return (
     /* `Pressable` y no un `View` con `onTouchEnd`: **el touch crudo no da rol,
        no da foco y no lo alcanza un lector de pantalla** — se ve igual y no se

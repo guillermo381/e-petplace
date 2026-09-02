@@ -886,6 +886,8 @@ export const prestadorEs = {
     // puede ser otra. La acción va aparte y reusa `agenda.reintentar`,
     // que ya está aprobado — cero copy nuevo para el botón.
     identidadNoCargo: 'No pudimos cargar tu negocio.',
+    refugioOrganizacion: 'Organización',
+    refugioRescatista: 'Rescatista independiente',
     guardar: 'Guardar cambios',
     nombreLabel: 'Tu nombre',
     telefonoLabel: 'Teléfono',
@@ -4451,6 +4453,10 @@ export const prestadorEs = {
     cerradaDeclinada: 'No siguió',
     cerradaDesistida: 'La familia se bajó',
     cerradaNoConcretada: 'No se concretó',
+    /* La salida por defecto del mapa: **no inventa un motivo**. Cubre el
+       séptimo estado que el motor ya emite y este tipo todavía no declara
+       (`no_concretada_otra_familia`) y cualquiera que venga después. */
+    cerradaGenerica: 'Cerrada',
     novedades: 'Padrinazgos y donaciones',
     novedadesTitulo: 'Todavía no llegaron',
     novedadesDetalle: 'Cuando alguien apadrine o done, lo vas a ver acá.',

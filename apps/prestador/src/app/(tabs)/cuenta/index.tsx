@@ -50,6 +50,7 @@ import {
   cerrarSesion,
   obtenerFranjasHorario,
   obtenerMiPosicionEnPrestador,
+  obtenerMiCuentaRefugio,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
@@ -156,6 +157,12 @@ type Identidad = {
   /** S85-C39: el año de la cohorte, para la placa. `null` = la placa no se
    *  monta — el año sale del DATO y jamás se hornea. */
   cohorteAnio: number | null;
+  /** ⭐ A7 · **QUÉ CLASE DE CASA ES**, cuando la casa es un refugio:
+   *  «Organización» o «Rescatista independiente» (`N4`). Va en el subtítulo,
+   *  al lado de la voz del oficio, porque es lo que ocupa ese lugar para un
+   *  actor que no tiene oficio: *no es una ciudad y no se disfraza de una.*
+   *  `null` en todos los demás. */
+  vozRefugio: string | null;
 };
 
 /** Lo que sale de las lecturas de oferta y agenda. Llega DESPUÉS y
@@ -290,6 +297,56 @@ export default function Cuenta() {
                 ciudad: null,
                 logoPath: null,
                 cohorteAnio: null,
+                vozRefugio: null,
+              });
+              return;
+            }
+          }
+          /* ═══ A7 · EL REFUGIO LEÍA «NO PUDIMOS CARGAR TU NEGOCIO» ═══════
+
+             🔴 **Es `L-178` otra vez, un actor después.** El refugio **no tiene
+             fila en `prestadores`** —su casa es una cuenta comercial de tipo
+             refugio—, así que `obtenerMiPrestador` devuelve `sin_prestador` y
+             esta rama lo mandaba al fallo. *Un dato que no existe salía
+             disfrazado de algo que no se pudo leer*, y el refugio abría su
+             Cuenta y veía un error donde hay un ESTADO perfectamente sano.
+
+             La cura es LITERALMENTE la de S99-C dos ramas más arriba —el
+             vendedor puro tenía el mismo defecto, encontrado en la misma
+             caminata—, y por eso va acá y no en otro lado: **éste es el único
+             punto donde `sin_prestador` ya está resuelto** y preguntar de nuevo
+             abajo sería un viaje para un dato que este `if` tiene en la mano.
+
+             ⚠️ **Se pinta lo que el contrato trae y NADA MÁS.** `obtener_mi_
+             cuenta_refugio` da nombre, tipo, estado y `puede_publicar`; **no da
+             ciudad ni zona** —el founder las pidió y hoy viven en
+             `v_prestadores_publicos`, que el refugio todavía no puebla porque
+             `prestadores.tipo` no acepta `refugio` (medido por A)—. *Se declara
+             en vez de inventarse* (`L-139`): sin ciudad, la línea no la dibuja.
+
+             🔑 **`puedePublicar` NO se deriva de `estado` ni de `verificadoEn`**
+             — los tres pueden divergir y el booleano es el que manda (aviso
+             literal de A). Acá todavía no gatea nada; queda nombrado para la
+             vitrina (A6). */
+          if (prestador.codigo === 'sin_prestador') {
+            const refugio = await obtenerMiCuentaRefugio();
+            if (!vigente) return;
+            if (refugio.ok && refugio.data !== null) {
+              setSoloPedidos(false);
+              setFallo(null);
+              setIdentidad({
+                nombre: refugio.data.nombreComercial ?? '',
+                ciudad: null,
+                logoPath: null,
+                cohorteAnio: null,
+                vozRefugio:
+                  refugio.data.tipo === 'organizacion'
+                    ? t('miCuenta.refugioOrganizacion')
+                    : refugio.data.tipo === 'rescatista'
+                      ? t('miCuenta.refugioRescatista')
+                      : /* `null` es legal: un vínculo anterior a N4. **No se
+                           adivina la clase de casa** — se omite la línea. */
+                        null,
               });
               return;
             }
@@ -307,6 +364,7 @@ export default function Cuenta() {
           ciudad: prestador.data.ciudad,
           logoPath: prestador.data.foto_url,
           cohorteAnio: prestador.data.cohorte_anio,
+          vozRefugio: null,
         });
 
         /* ⭐ S88-C (hallazgo del gate founder) · TITULARIDAD para las
@@ -614,9 +672,13 @@ export default function Cuenta() {
                 >
                   {identidad.nombre}
                 </Text>
-                {(vozDelOficio !== null || identidad.ciudad !== null) && (
+                {(vozDelOficio !== null ||
+                  identidad.vozRefugio !== null ||
+                  identidad.ciudad !== null) && (
                   <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: palette.light0 }}>
-                    {[vozDelOficio, identidad.ciudad].filter((x): x is string => x !== null).join(' · ')}
+                    {[vozDelOficio, identidad.vozRefugio, identidad.ciudad]
+                      .filter((x): x is string => x !== null)
+                      .join(' · ')}
                   </Text>
                 )}
                 {/* LA PLACA: pill de vidrio con papel (informa = píldora,

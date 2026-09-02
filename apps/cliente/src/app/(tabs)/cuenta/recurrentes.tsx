@@ -104,6 +104,28 @@ interface Item {
    */
   mascotaNombre: string | null;
   mascotaEspecie: string | null;
+  /**
+   * ⭐ **G7, la mitad que faltaba: el plan dice PARA QUIÉN SIRVE.**
+   *
+   * Pepe es un AVE con una mensualidad de guardería viva, y guardería es de
+   * perros y gatos: *lo firmó un arnés y nada lo frenó*. El motor ya cerró la
+   * puerta (el reloj no le crea estadías), pero la familia **seguía pagando sin
+   * que nada se lo dijera** — y una plata que sale todos los meses por un
+   * servicio que no se puede usar es peor que un rebote.
+   *
+   * ⚠️ **Es SÓLO la especie**, y por eso la frase que se escribe también lo es.
+   * El guard del motor tiene dos cláusulas —especie y `estado_vida`— y A partió
+   * el contrato a propósito: *un booleano que junta dos razones obliga a quien
+   * lo lee a inventar cuál de las dos fue*. Acá se dice la del recorte y nada
+   * más; el memorial tiene su propia voz en otro lado.
+   *
+   * `null` = **no hay pregunta que contestar** (el mandato no tiene mascota).
+   * No es «no puede», y no se pinta como tal.
+   */
+  especieNoAplica: boolean;
+  /** Las especies que el comprable SÍ admite, del catálogo. Se dicen para que
+   *  la frase no invente el recorte. `null` = sin recorte. */
+  especiesElegibles: string[] | null;
   /** Ya FIRMADA por la pantalla — el lector entrega la ruta (`D-308`). */
   mascotaCara: string | null;
   tipo: 'guarderia' | 'paseo';
@@ -203,6 +225,13 @@ export default function Recurrentes() {
           clave: `g:${s.suscripcionId}`,
           mascotaNombre: s.mascotaNombre,
           mascotaEspecie: s.mascotaEspecie,
+          /* 🔑 `=== false` y no `!s.especieAplica`: **`null` no es «no puede»**
+             —es «no hay pregunta que contestar», porque el mandato no tiene
+             mascota— y la negación lógica los aplastaría en el mismo valor.
+             *Ese aplastamiento le diría a una familia que su plan no sirve para
+             un animal que ni siquiera nombró.* */
+          especieNoAplica: s.especieAplica === false,
+          especiesElegibles: s.especiesElegibles,
           /* Se completa abajo con la URL firmada: el lector trae la RUTA. */
           mascotaCara: null,
           tipo: 'guarderia',
@@ -232,6 +261,11 @@ export default function Recurrentes() {
              dos dice la verdad.* */
           mascotaNombre: null,
           mascotaEspecie: null,
+          /* El plan de paseo no recorta por especie **y su lector no publica
+             nada del tema**: se declara que no hay aviso, en vez de dejarlo
+             fuera del objeto. */
+          especieNoAplica: false,
+          especiesElegibles: null,
           mascotaCara: null,
           tipo: 'paseo',
           id: s.id,
@@ -533,6 +567,25 @@ export default function Recurrentes() {
                             })}
                       </Texto>
                     )}
+
+                    {/* ⭐ **G7 · EL PLAN QUE NO SIRVE PARA ESA MASCOTA LO DICE.**
+                        Va ARRIBA del verbo y no abajo: *si la familia está por
+                        cancelar, ésta es la razón por la que vino* — y si no lo
+                        estaba, es la razón por la que debería.
+
+                        Se nombran las especies que el comprable SÍ admite,
+                        leídas del catálogo, **jamás escritas acá**: el día que
+                        guardería acepte conejos, esta frase cambia sola. Sin
+                        lista no se dibuja nada — *«tu plan no sirve» sin decir
+                        para qué sirve es una acusación, no una explicación.* */}
+                    {it.especieNoAplica && it.especiesElegibles !== null && it.mascotaNombre !== null ? (
+                      <Texto variante="apoyo">
+                        {t('recurrentes.especieNoAplica', {
+                          nombre: it.mascotaNombre,
+                          especies: it.especiesElegibles.join(' · '),
+                        })}
+                      </Texto>
+                    ) : null}
 
                     {/* El verbo, visible. **Encender no confirma** —no hay nada
                         que perder y el gesto ya es deliberado—; **apagar

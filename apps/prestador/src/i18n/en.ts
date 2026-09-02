@@ -591,6 +591,8 @@ export const prestadorEn = {
     errorCargar: "We couldn't load this. Try again.",
     // S77-B — D-536 (espejo): mismo criterio que el castellano.
     identidadNoCargo: "We couldn't load your business.",
+    refugioOrganizacion: 'Organization',
+    refugioRescatista: 'Independent rescuer',
     guardar: 'Save changes',
     nombreLabel: 'Your name',
     telefonoLabel: 'Phone',
@@ -3533,6 +3535,7 @@ export const prestadorEn = {
     cerradaDeclinada: "Didn't go ahead",
     cerradaDesistida: 'The family stepped back',
     cerradaNoConcretada: "Didn't happen",
+    cerradaGenerica: 'Closed',
     novedades: 'Sponsorships & donations',
     novedadesTitulo: "They haven't arrived yet",
     novedadesDetalle: "When someone sponsors or donates, you'll see it here.",

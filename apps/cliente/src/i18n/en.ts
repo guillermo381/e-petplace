@@ -2616,6 +2616,7 @@ export const clienteEn = {
   recurrentes: {
     titulo: 'Recurring payments and subscriptions',
     cancelar: 'Cancel subscription',
+    especieNoAplica: 'This plan is for {{especies}}, and {{nombre}} cannot use it.',
     reactivar: 'Turn it back on',
     intro: 'Everything that charges you automatically, in one place.',
     vacioTitulo: 'Nothing is charging you automatically',
