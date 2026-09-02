@@ -4337,6 +4337,14 @@ export const prestadorEs = {
   // S112-C · MIS ANIMALES — la tab Mascotas del refugio (§4.2).
   // S112-C · LA FICHA DE EDICIÓN DEL ADOPTABLE (§4.2).
   editarAdoptable: {
+    permisoFotos: 'Necesitamos permiso para ver tus fotos.',
+    huerfano: 'Sacamos la foto de la ficha, pero el archivo quedó. Avísanos.',
+    sinFotos: 'Todavía no tiene fotos. La primera que subas es la portada.',
+    esPortada: 'Portada',
+    foto: 'Foto {{n}}',
+    subirUna: 'Subir',
+    borrarFoto: 'Quitar',
+    agregarFoto: 'Agregar una foto',
     titulo: 'Su ficha',
     especie: 'Especie',
     sexo: 'Sexo',

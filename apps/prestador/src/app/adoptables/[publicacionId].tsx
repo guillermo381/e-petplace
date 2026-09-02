@@ -36,21 +36,30 @@
  * · **pareja vinculada** — `parejaId` exige elegir otra publicación del mismo
  *   refugio, y eso es un selector propio. Se declara.
  *
- * ── LAS FOTOS ───────────────────────────────────────────────────────────
- * Van en su propio tramo: **subir exige redimensionar en el cliente a ≤1600 px**
- * (§6) y el path tiene que caer en `<publicacionId>/`, que es lo que la policy
- * del bucket mira. Los escritores existen (`agregarFotoAdoptable`,
- * `reordenarFotosAdoptable`, `borrarFotoAdoptable`); acá se **muestran** las que
- * hay, para que la ficha no mienta sobre lo que el animal tiene.
+ * ── LAS FOTOS: SUBIR, ORDENAR Y LA PORTADA ──────────────────────────────
+ * · **Se redimensionan a ≤1600 antes de subir** (§6), el mismo número que
+ *   `EvidenciaFoto`: la foto del adoptable se abre a pantalla completa y con
+ *   los 800 del avatar quedaría blanda (`D-734`).
+ * · **El path lo arma el wrapper**, no esta pantalla: `<publicacionId>/` es lo
+ *   que mira la policy del bucket, y en una plantilla de string cualquiera lo
+ *   tipea distinto.
+ * · 🔴 **Subir son DOS pasos y el segundo puede fallar solo.** Si el catálogo
+ *   rebota después de que el archivo subió, queda un objeto que ninguna fila
+ *   nombra — *un huérfano público alcanzable por URL* (`D-731`). Se borra en el
+ *   acto. Y borrar son las dos mitades siempre: la fila y el archivo.
+ * · **La primera es la portada**, así que mover al frente ES elegir portada. No
+ *   hay botón aparte: *dos controles para el mismo hecho terminan diciendo
+ *   cosas distintas.*
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Campo,
+  capturarDeGaleria,
   ConvivenciaInput,
   Encabezado,
   Esqueleto,
@@ -58,7 +67,9 @@ import {
   EstadoVacio,
   FilaDato,
   Interruptor,
+  leerBytes,
   MarcaDeAgua,
+  radius,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -70,7 +81,12 @@ import {
 } from '@epetplace/ui';
 import {
   actualizarAdoptable,
+  borrarFotoAdoptable,
+  borrarFotoAdoptableDeStorage,
+  agregarFotoAdoptable,
   obtenerMiAdoptable,
+  reordenarFotosAdoptable,
+  subirFotoAdoptable,
   type FichaEditable,
   type MiAdoptableFicha,
 } from '@epetplace/api';
@@ -99,6 +115,11 @@ export default function EditarAdoptable() {
   /** El borrador de edición. `null` mientras no cargó. */
   const [ficha, setFicha] = useState<FichaEditable | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [subiendo, setSubiendo] = useState(false);
+  /** El id de la foto en la que se está trabajando: borrar o mover. `null` =
+   *  ninguna. **Uno solo a la vez**: dos reordenamientos en vuelo sobre la misma
+   *  lista dejan un orden que ninguno de los dos pidió. */
+  const [tocando, setTocando] = useState<string | null>(null);
   const [intento, setIntento] = useState(0);
 
   useFocusEffect(
@@ -165,6 +186,106 @@ export default function EditarAdoptable() {
       setIntento((n) => n + 1);
     } finally {
       setGuardando(false);
+    }
+  };
+
+  /**
+   * SUBIR UNA FOTO.
+   *
+   * 🔴 **REDIMENSIONA A ≤1600 ANTES DE SUBIR (§6), y el número no es libre:**
+   * es el mismo que `EvidenciaFoto` usa y por la misma razón — la foto del
+   * adoptable **se abre a pantalla completa**, y con los 800 del avatar quedaría
+   * blanda. *Una foto liviana que se ve mal no es una cura: es una regresión con
+   * mejor número* (`D-734`).
+   *
+   * 🔴 **EL PATH LO ARMA EL WRAPPER, no esta pantalla.** `<publicacionId>/` es lo
+   * que mira la policy del bucket: *si lo compusiera acá, la regla viviría en una
+   * plantilla de string que cualquiera tipea distinto.*
+   */
+  const subir = async () => {
+    if (subiendo) return;
+    const r = await capturarDeGaleria({ redimensionarA: 1600 });
+    /* Cancelar NO es un error: es una decisión, y no se avisa. El permiso
+       denegado SÍ se dice — es lo único que la persona puede resolver. */
+    if (r.tipo === 'cancelada') return;
+    if (r.tipo === 'permiso_denegado') {
+      mostrar({ variante: 'neutro', texto: t('editarAdoptable.permisoFotos') });
+      return;
+    }
+    setSubiendo(true);
+    try {
+      /* `leerBytes` es la frontera dual-forma de la casa (`L-137`): en Expo Go
+         el uri llega con `%40` literales y toda API de FS los decodifica. */
+      const bytes = await leerBytes(r.foto.uri);
+      const sub = await subirFotoAdoptable(publicacionId, bytes);
+      if (!sub.ok) {
+        mostrar({ variante: 'error', texto: sub.mensaje });
+        return;
+      }
+      /* 🔴 **DOS PASOS Y EL SEGUNDO PUEDE FALLAR SOLO.** Si el catálogo rebota
+         después de que el archivo subió, queda un objeto en el bucket que
+         ninguna fila nombra — *un huérfano público alcanzable por URL*
+         (`D-731`). Se borra en el acto, con el path que el wrapper devolvió. */
+      const alta = await agregarFotoAdoptable({ publicacionId, path: sub.data.path });
+      if (!alta.ok) {
+        await borrarFotoAdoptableDeStorage(sub.data.path);
+        mostrar({ variante: 'error', texto: alta.mensaje });
+        return;
+      }
+      setIntento((n) => n + 1);
+    } finally {
+      setSubiendo(false);
+    }
+  };
+
+  /**
+   * BORRAR UNA FOTO — **las dos mitades, siempre.** `borrarFotoAdoptable` saca
+   * la fila y devuelve `pathABorrar`; sin el segundo llamado el archivo queda
+   * público y alcanzable por URL. *La mitad que se olvida no falla: se ve como
+   * que funcionó.*
+   */
+  const borrar = async (fotoId: string) => {
+    if (tocando !== null) return;
+    setTocando(fotoId);
+    try {
+      const r = await borrarFotoAdoptable(fotoId);
+      if (!r.ok) {
+        mostrar({ variante: 'error', texto: r.mensaje });
+        return;
+      }
+      const st = await borrarFotoAdoptableDeStorage(r.data.pathABorrar);
+      /* Si el archivo no se pudo borrar **se DICE**: la fila ya no está, así que
+         nadie va a volver a intentarlo desde acá. *Callarlo dejaría el huérfano
+         sin que nadie sepa que existe.* */
+      if (!st.ok) mostrar({ variante: 'error', texto: t('editarAdoptable.huerfano') });
+      setIntento((n) => n + 1);
+    } finally {
+      setTocando(null);
+    }
+  };
+
+  /**
+   * MOVER UNA FOTO. **La primera es la portada** (§4.2), así que mover al frente
+   * ES elegir portada — no hay un botón aparte: *dos controles para el mismo
+   * hecho terminan diciendo cosas distintas.*
+   */
+  const mover = async (fotos: MiAdoptableFicha['fotos'], fotoId: string, delta: -1 | 1) => {
+    if (tocando !== null) return;
+    const i = fotos.findIndex((f) => f.fotoId === fotoId);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= fotos.length) return;
+    const ids = fotos.map((f) => f.fotoId);
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    setTocando(fotoId);
+    try {
+      const r = await reordenarFotosAdoptable({ publicacionId, idsEnOrden: ids });
+      if (!r.ok) {
+        mostrar({ variante: 'error', texto: r.mensaje });
+        return;
+      }
+      setIntento((n) => n + 1);
+    } finally {
+      setTocando(null);
     }
   };
 
@@ -304,10 +425,58 @@ export default function EditarAdoptable() {
           onChangeText={(v) => poner('bonoDestino', v === '' ? null : v)}
         />
 
-        {/* LAS FOTOS, en lectura. Subirlas es su propio tramo (ver cabecera). */}
-        <Texto variante="apoyo" color="tertiary">
-          {t('editarAdoptable.fotos', { n: o.fotos.length })}
-        </Texto>
+        {/* ═══ LAS FOTOS ══════════════════════════════════════════════════
+            **La primera es la portada** (§4.2), y por eso mover al frente ES
+            elegir portada: sin botón aparte. */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="apoyo" color="tertiary">
+            {o.fotos.length === 0
+              ? t('editarAdoptable.sinFotos')
+              : t('editarAdoptable.fotos', { n: o.fotos.length })}
+          </Texto>
+          {o.fotos.map((foto, i) => (
+            <View
+              key={foto.fotoId}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}
+            >
+              <Image
+                source={{ uri: foto.url }}
+                style={{ width: 72, height: 72, borderRadius: radius.suave }}
+                resizeMode="cover"
+                accessibilityLabel={
+                  i === 0 ? t('editarAdoptable.esPortada') : t('editarAdoptable.foto', { n: i + 1 })
+                }
+              />
+              <View style={{ flex: 1 }}>
+                <Texto variante="apoyo" color="tertiary">
+                  {i === 0 ? t('editarAdoptable.esPortada') : t('editarAdoptable.foto', { n: i + 1 })}
+                </Texto>
+              </View>
+              {/* Subir sólo si hay a dónde: la primera ya es la portada. */}
+              {i > 0 ? (
+                <Boton
+                  variante="compacto"
+                  etiqueta={t('editarAdoptable.subirUna')}
+                  cargando={tocando === foto.fotoId}
+                  onPress={() => void mover(o.fotos, foto.fotoId, -1)}
+                />
+              ) : null}
+              <Boton
+                variante="ghost"
+                etiqueta={t('editarAdoptable.borrarFoto')}
+                cargando={tocando === foto.fotoId}
+                onPress={() => void borrar(foto.fotoId)}
+              />
+            </View>
+          ))}
+          <Boton
+            variante="secundario"
+            bloque
+            etiqueta={t('editarAdoptable.agregarFoto')}
+            cargando={subiendo}
+            onPress={() => void subir()}
+          />
+        </View>
 
         <Boton
           variante="primario"
