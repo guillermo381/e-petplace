@@ -857,3 +857,114 @@ abra. *Se declara para que su dueño decida — no para que aparezca de sorpresa
 
 **Los seis rojos de §5.5, más `acta_cambio_de_version` y `acta_incompleta`,
 quedan escritos y corren el día que el acta abra.**
+
+---
+
+# ADDENDUM 7 · 2-sep 17:30–18:20 — EL ACTA ABRE · Y LA FIRMA SE FRENA EN EL CATÁLOGO DE AVISOS
+
+**CONTRA QUÉ:** base viva + `main ed984c9a`. **Tres sesiones reales** (familia,
+refugio, tercero), sobre la solicitud `8b747efd` de **Nube**.
+
+## G1 · ✅ EL ACTA ABRE, Y BIEN
+
+```
+⑤ obtener_acta_adopcion (familia) ....... ✅
+   faltantes ............................ ["adoptante_cedula","adoptante_ciudad",
+                                           "refugio_representante_cedula","animal_senas"]
+   versión · largo ...................... 1 · 5 121 chars
+   CONTROL+ · el refugio también la ve .. ✅
+   🔴 un TERCERO ........................ ✅ sin_acceso
+```
+
+**El texto se rinde de verdad**: el nombre del adoptante, «Nube» y el refugio
+aparecen. **Los únicos `{{…}}` que sobreviven son los cuatro que DEBEN
+sobrevivir hasta la firma** — `{{folio}}`, `{{firma_refugio}}`,
+`{{firma_adoptante}}`, `{{hash_documento}}`.
+
+⚠️ *Mi primera sonda los marcó en rojo: el regex buscaba `{{…}}` **o** guiones
+bajos, y los `{{…}}` legítimos lo dispararon. **Falso rojo, verificado antes de
+reportarlo.***
+
+## G2 · ✅ `acta_incompleta` NOMBRA LOS FALTANTES, y no hay callejón
+
+```
+solicitar_codigo_firma (familia) ... ✅ acta_incompleta: adoptante_cedula, adoptante_ciudad,
+                                        refugio_representante_cedula, animal_senas
+solicitar_codigo_firma (refugio) ... ✅ el mismo, con los mismos cuatro
+solicitar_codigo_firma (tercero) ... ✅ sin_acceso
+```
+
+**No se emite código para un acta con huecos** — que era el punto. **Y probé que
+el callejón que sospechaba NO existe**: cada actor puede llenar **su** faltante
+por camino real, sin depender de la firma.
+
+```
+familia → profiles.cedula + direccion_ciudad ....... ✅ escribió
+refugio → profiles.cedula (el representante) ....... ✅ escribió
+refugio → actualizar_adoptable(senas) .............. ✅ ok
+faltantes después .................................. []
+```
+
+*Importaba medirlo: `firmar_acta_adopcion` toma `p_cedula` y `p_domicilio`, y si
+ésa fuera la única puerta habría deadlock — el código exige el acta completa y la
+cédula se cargaría al firmar. **No lo es.***
+
+## G3 · 🔴 LA FIRMA NO PUEDE EMITIR CÓDIGO: falta el tipo en el catálogo de avisos
+
+**Con el acta ya completa (`faltantes: []`):**
+
+```
+solicitar_codigo_firma ....... 🔴 tipo_desconocido
+payload ...................... null
+```
+
+**Causa, medida:** la función llama a
+`registrar_intencion_notificacion('codigo_firma_adopcion', …)` y **ese código no
+está en `cat_notificacion_tipos`**:
+
+```
+tipos en el catálogo ......... 64
+los de adopción / firma ...... adopcion_mensaje_nuevo · adopcion_sin_respuesta ·
+                               adopcion_solicitud_nueva · adopcion_solicitud_respondida
+🔴 codigo_firma_adopcion ..... NO ESTÁ
+```
+
+**Alcance del daño: cero, y por la razón correcta** — `adopcion_codigo_firma`
+tiene **0 filas**: la excepción revierte la RPC entera, así que **no quedan
+códigos huérfanos**. *El diseño es sano; le falta una fila de catálogo.*
+
+**PUERTA: el tipo `codigo_firma_adopcion` en `cat_notificacion_tipos`. Es de A o de D.**
+
+## G4 · LO QUE ESTO DEJA SIN MEDIR — la sonda que A pidió, otra vez
+
+**No se pudo medir que el payload de `solicitar_codigo_firma` no lleve el
+código**, porque la llamada **no llega a devolver payload**. *Se declara por
+segunda vez en lugar de darse por buena leyendo el cuerpo.*
+
+**Lo que sí quedó medido de esa cura, y es la mitad del diseño:** el código
+**sale por el motor de intenciones** y el `RETURN` construye *«a dónde se mandó,
+jamás qué se mandó»*. **Eso es lectura, no medición, y así se declara.**
+
+## G5 · LOS ROJOS DE ACCESO, TODOS VERDES
+
+| sonda | dio |
+|---|---|
+| un tercero abre el acta | ✅ `sin_acceso` |
+| un tercero pide código | ✅ `sin_acceso` |
+| un tercero firma | ✅ `sin_acceso` |
+| firmar sin código emitido (×6) | ✅ `sin_codigo` las seis |
+
+*`sin_codigo` en los seis intentos es coherente: no hay código que acertar. **Los
+rojos de `codigo_vencido`, `codigo_incorrecto`, `intentos_agotados`, `ya_firmaste`
+y `acta_cambio_de_version` siguen sin poder correr**, y no se dan por buenos.*
+
+## G6 · MI SEXTO FALSO, y esta vez en la campana
+
+**Mi sonda de «¿la campana lleva el código?» dio 🔴 en las dos tablas.** Fui a
+mirar el crudo antes de reportar: **las tres filas son `cita_recordatorio` de
+citas de Thor y de Kira**, del mismo día, **sin ninguna relación con la firma**.
+El `\d{8}` pegaba en otra cosa.
+
+> **Sexta vez en dos días.** *Un regex laxo sobre un corpus ajeno encuentra
+> siempre — y encuentra algo verdadero que no es lo que se preguntó.* **La forma:
+> antes de llamar rojo a una coincidencia, se mira la fila que la produjo.**
