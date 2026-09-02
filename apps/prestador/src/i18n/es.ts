@@ -4442,6 +4442,12 @@ export const prestadorEs = {
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
   },
   portalHilo: {
+    // El MISMO hecho que ve la familia, dicho desde acá: neutro y sin culpa
+    // (§10.6). «Se bajó» nombra el acto; quién lo hizo ya está en la cabecera.
+    estadoDesistida: 'La familia retiró su postulación',
+    // Sin nombre de animal: el portal ya lo tiene arriba, y repetirlo en una
+    // noticia de muerte suena a formulario.
+    estadoNoConcretada: 'Falleció antes de la entrega.',
     verActa: 'Ver el acta de adopción',
     titulo: 'La solicitud',
     alguienSinNombre: 'Alguien de la comunidad',
@@ -4465,11 +4471,6 @@ export const prestadorEs = {
     estadoEnConversacion: 'En conversación',
     estadoAceptada: 'Aceptada',
     estadoDeclinada: 'No siguió',
-    /* La FAMILIA se bajó. Reusar «No siguió» le diría al refugio que la
-       declinó él sobre alguien que se fue solo. */
-    estadoDesistida: 'La retiró la familia',
-    /* 🔴 Voz de DUELO. Del lado del refugio también: es quien se despide. */
-    estadoNoConcretada: 'Ya no pudo continuar',
     noEsTuyaTitulo: 'No encontramos esta solicitud',
     noEsTuyaDetalle: 'Puede que ya no esté disponible o que no sea de una de tus publicaciones.',
     errorTitulo: 'No pudimos cargar la conversación',

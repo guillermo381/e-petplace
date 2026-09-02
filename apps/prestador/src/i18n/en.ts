@@ -3531,6 +3531,8 @@ export const prestadorEn = {
     errorDetalle: 'Check your connection and try again.',
   },
   portalHilo: {
+    estadoDesistida: 'The family withdrew their application',
+    estadoNoConcretada: 'Passed away before handover.',
     verActa: 'See the adoption agreement',
     titulo: 'The request',
     alguienSinNombre: 'Someone from the community',
@@ -3554,8 +3556,6 @@ export const prestadorEn = {
     estadoEnConversacion: 'In conversation',
     estadoAceptada: 'Accepted',
     estadoDeclinada: "Didn't go ahead",
-    estadoDesistida: 'The family withdrew it',
-    estadoNoConcretada: 'It could not continue',
     noEsTuyaTitulo: "We couldn't find this request",
     noEsTuyaDetalle: "It may no longer be available, or it isn't from one of your listings.",
     errorTitulo: "We couldn't load the conversation",

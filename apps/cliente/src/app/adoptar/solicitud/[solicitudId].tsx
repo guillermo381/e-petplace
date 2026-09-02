@@ -269,8 +269,8 @@ export default function HiloSolicitud() {
                     aceptada: t('hiloAdopcion.estado_aceptada'),
                   }}
                   vozDeclinada={t('hiloAdopcion.estado_declinada')}
-                    vozDesistida={t('hiloAdopcion.estado_desistida')}
-                    vozNoConcretada={t('hiloAdopcion.estado_no_concretada')}
+                  vozDesistida={t('hiloAdopcion.estado_desistida')}
+                  vozNoConcretada={t('hiloAdopcion.estado_no_concretada', { nombre: estado.hilo.mascotaNombre })}
                 />
               </View>
             </Tarjeta>
@@ -329,6 +329,22 @@ export default function HiloSolicitud() {
                 }
               />
             ) : null}
+            {/* ⚠️ **ACÁ QUISE CALLAR «esta conversación está cerrada» CUANDO EL
+                ANIMAL FALLECIÓ, Y NO SE PUEDE TODAVÍA — el typecheck tenía
+                razón.** El razonamiento sigue en pie: la escalera de B **no
+                dibuja escalera en ese estado a propósito**, así que la voz es
+                todo lo que se ve, y *poner debajo un aviso de trámite le informa
+                a alguien que acaba de perder al animal que eligió que además el
+                hilo se cerró — la misma noticia dos veces, y la segunda en
+                lenguaje de formulario.*
+
+                🔴 **Pero el estado NO EXISTE en el motor: cero ocurrencias de
+                `no_concretada_fallecimiento` en `supabase/migrations/`.** La
+                pieza está lista y el motor todavía no lo emite. Comparar contra
+                él sería montar contra una promesa — y el compilador lo dijo con
+                todas las letras (`TS2367`: los tipos no se superponen).
+                **Vuelve cuando el estado exista**, y la nota queda para que el
+                próximo no tenga que volver a razonarlo. */}
             {cerrado ? (
               <Texto variante="apoyo" color="tertiary">
                 {t('hiloAdopcion.cerrado')}
