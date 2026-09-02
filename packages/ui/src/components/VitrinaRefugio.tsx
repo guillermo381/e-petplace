@@ -58,6 +58,7 @@ import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import { spacing } from '../tokens/spacing'
 import { BotonExplicar, type ConExplicacion } from './BotonExplicar'
+import { EstadoVacio } from './EstadoVacio'
 import { FichaPrestador } from './FichaPrestador'
 import { Texto } from './Texto'
 
@@ -90,6 +91,26 @@ export type VitrinaRefugioProps = {
   /** Lo que flota sobre la portada (la flecha de volver es del consumidor). */
   sobrePortada?: ReactNode
   aSangre?: boolean
+  /**
+   * 🔴 QUÉ DECIR CUANDO NO HAY PÁGINA. **OBLIGATORIA**, y es lo que impide
+   * que esta pieza dibuje un cascarón.
+   *
+   * ── EL CASO ES REAL Y ESTÁ MEDIDO, no defensivo ─────────────────────────
+   * `uq_prestadores_user_id` es **1 humano = 1 prestador**, así que una
+   * clínica que además rescata **no puede** tener fila de refugio: para ese
+   * publicador el lector devuelve vacío. Y aunque la fila exista, un refugio
+   * recién verificado todavía no cargó portada ni historia.
+   *
+   * ⇒ Sin esto la vitrina renderiza **una pantalla en blanco con un nombre**,
+   * que es indistinguible de un fallo de red (Ley 13: *el vacío se
+   * confirma*). Con esto dice lo único que es cierto: **todavía no armaron su
+   * página** — que no es un error de nadie.
+   *
+   * Ej.: «Este refugio todavía no armó su página.»
+   */
+  vozSinPagina: string
+  /** El tono que acompaña, opcional. Ej.: «Podés ver sus animales igual.» */
+  descripcionSinPagina?: string
 }
 
 export function VitrinaRefugio({
@@ -103,7 +124,35 @@ export function VitrinaRefugio({
   pie,
   sobrePortada,
   aSangre,
+  vozSinPagina,
+  descripcionSinPagina,
 }: VitrinaRefugioProps) {
+  /* 🔴 QUÉ CUENTA COMO «TENER PÁGINA», y el nombre NO cuenta.
+     Una vitrina es lo que el refugio ARMÓ para presentarse: sus fotos, su
+     historia, lo que hace. El nombre y el logo los tiene por existir, no por
+     haber armado nada — una pantalla con un monograma y nada más es
+     exactamente el cascarón que esto viene a no dibujar. */
+  const tienePagina =
+    (portadas !== undefined && portadas.length > 0) ||
+    (historia !== null && historia !== undefined && historia !== '') ||
+    (lista !== undefined && lista.length > 0)
+
+  if (!tienePagina) {
+    /* El `pie` SE CONSERVA: los animales del refugio no dependen de que haya
+       armado su página, y son lo que la familia vino a ver. *Un refugio sin
+       vitrina igual tiene animales esperando.* */
+    return (
+      <View style={{ flex: 1, padding: spacing[5], gap: spacing[5] }}>
+        <EstadoVacio
+          titulo={vozSinPagina}
+          descripcion={descripcionSinPagina}
+          registro={pie === undefined ? 'pantalla' : 'seccion'}
+        />
+        {pie}
+      </View>
+    )
+  }
+
   return (
     <FichaPrestador
       nombre={nombre}
