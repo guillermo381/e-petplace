@@ -4465,6 +4465,11 @@ export const prestadorEs = {
     estadoEnConversacion: 'En conversación',
     estadoAceptada: 'Aceptada',
     estadoDeclinada: 'No siguió',
+    /* La FAMILIA se bajó. Reusar «No siguió» le diría al refugio que la
+       declinó él sobre alguien que se fue solo. */
+    estadoDesistida: 'La retiró la familia',
+    /* 🔴 Voz de DUELO. Del lado del refugio también: es quien se despide. */
+    estadoNoConcretada: 'Ya no pudo continuar',
     noEsTuyaTitulo: 'No encontramos esta solicitud',
     noEsTuyaDetalle: 'Puede que ya no esté disponible o que no sea de una de tus publicaciones.',
     errorTitulo: 'No pudimos cargar la conversación',

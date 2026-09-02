@@ -5229,6 +5229,9 @@ function GaleriaInterna() {
               ['aceptada', 'aceptada · el camino completo'],
               ['en_conversacion', '⚠️ INALCANZABLE hoy: no hay canal (activador estacionado)'],
               ['declinada', 'declinada · desvío NEUTRO, jamás alerta'],
+              ['desistida', 'desistida · la FAMILIA se bajó — no es lo mismo que declinada'],
+              ['no_concretada_fallecimiento',
+               'el animal falleció · voz de DUELO, sin invitación a otro animal (D-3)'],
             ] as const).map(([e, nota]) => (
               <View key={e} style={{ gap: spacing[2] }}>
                 <Texto variante="apoyo">{nota}</Texto>
@@ -5240,6 +5243,8 @@ function GaleriaInterna() {
                     enConversacion: 'En conversación',
                     aceptada: 'Aceptada',
                   }}
+                  vozDesistida="Retiraste tu postulación"
+                  vozNoConcretada="El animal falleció. La postulación no continúa."
                   vozDeclinada="El refugio eligió otro hogar"
                 />
               </View>

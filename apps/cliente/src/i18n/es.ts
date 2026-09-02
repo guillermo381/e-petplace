@@ -3719,6 +3719,11 @@ export const clienteEs = {
     estado_en_conversacion: 'En conversación',
     estado_aceptada: 'Aceptada',
     estado_declinada: 'No siguió',
+    /* La FAMILIA se bajó — no es lo mismo que declinar, que es del refugio. */
+    estado_desistida: 'La retiraste',
+    /* 🔴 Voz de DUELO, y sin invitación a otro animal (D-3): ofrecerle otro
+       adoptable a quien perdió al que eligió trata a un animal como reemplazo. */
+    estado_no_concretada: 'Ya no pudo continuar',
     automatica: 'Respuesta automática del refugio',
     sinMensajes: 'Todavía no hay mensajes en esta conversación.',
     escribirEtiqueta: 'Escríbele al refugio',
