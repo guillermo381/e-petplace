@@ -99,6 +99,8 @@ import { Mutacion } from '../components/Mutacion'
 import { ALTO_STEPPER_ANCHO } from '../components/StepperCantidad'
 import { EscaleraEstados } from '../components/EscaleraEstados'
 import { Convivencia } from '../components/Convivencia'
+import { TarjetaAdoptable } from '../components/TarjetaAdoptable'
+import { BloqueConCriterio } from '../components/BloqueConCriterio'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
@@ -520,6 +522,127 @@ function MuestraPieRevelar() {
         La etiqueta dice el número — jamás un "Ver más" mudo. Con n=0 y sin revelar, no se dibuja.
         No es paginación (eso es el pie de LineaDeVida): solo muestra lo que ya está en memoria.
       </Texto>
+    </View>
+  )
+}
+
+/* ⭐ LÁMINA DE GATE S112 — D-999 · EL BOTÓN DIBUJA SU RAZÓN.
+ *
+ * Se mira TOCANDO, no leyendo: el defecto que la cura evita —el salto— sólo
+ * existe en la TRANSICIÓN. Por eso la lámina trae el interruptor de la
+ * condición y una REGLA debajo: si la regla se mueve al encender el botón,
+ * la cura falló. */
+function GateRazonDelBoton() {
+  const { theme } = useTheme()
+  const [faltaMascota, setFaltaMascota] = useState(true)
+
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <Texto variante="apoyo">
+        Tocá «elegí la mascota» y mirá DOS cosas: que la línea se va y el botón se
+        enciende suave, y que la regla gris de abajo NO se mueve.
+      </Texto>
+
+      <Boton
+        variante="secundario"
+        etiqueta={faltaMascota ? 'Elegí la mascota' : 'Quitar la mascota'}
+        onPress={() => setFaltaMascota((v) => !v)}
+      />
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">① el CTA del pie · con razón</Texto>
+        <Boton
+          variante="primario"
+          bloque
+          etiqueta="Reservar"
+          deshabilitado={faltaMascota}
+          razonDeshabilitado={faltaMascota ? 'Elegí para qué mascota es' : undefined}
+          onPress={() => {}}
+        />
+        {/* LA REGLA: lo que se movería si el renglón se devolviera. */}
+        <View style={{ height: 1, backgroundColor: theme.border.default }} />
+        <Texto variante="dato">← esta regla no se mueve</Texto>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">② el mismo botón chico, sin bloque</Texto>
+        <Boton
+          variante="primario"
+          etiqueta="Continuar"
+          deshabilitado={faltaMascota}
+          razonDeshabilitado={faltaMascota ? 'Falta elegir un día' : undefined}
+          onPress={() => {}}
+        />
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          ③ EL CONTROL — apagado y SIN razón: no dibuja nada, ni un píxel de hueco
+        </Texto>
+        <Boton variante="primario" etiqueta="Guardar" deshabilitado onPress={() => {}} />
+        <View style={{ height: 1, backgroundColor: theme.border.default }} />
+      </View>
+    </View>
+  )
+}
+
+/* ⭐ S112-B — LA VIDRIERA DE ADOPCIÓN: el bloque con su criterio y los chips
+ * de convivencia. Los chips son además el CONTROL POSITIVO del modo `varias`
+ * de `FiltroPills`: si este bloque compila y responde al dedo, la rama nueva
+ * existe de verdad. */
+function MuestraVidrieraAdopcion() {
+  const [convive, setConvive] = useState<string[]>(['perros'])
+  const alternar = (c: string) =>
+    setConvive((v) => (v.includes(c) ? v.filter((x) => x !== c) : [...v, c]))
+
+  return (
+    <View style={{ gap: spacing[5] }}>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          ① los filtros de convivencia · VARIAS a la vez. No existe un estado
+          «ocultar a los no observados»: §4 dice que filtrar no borra al que no
+          se midió, y el control no puede expresarlo
+        </Texto>
+        <FiltroPills
+          opciones={[
+            { codigo: 'perros', etiqueta: 'Convive con perros', icono: 'huella' },
+            { codigo: 'gatos', etiqueta: 'Convive con gatos', icono: 'huella' },
+            { codigo: 'ninos', etiqueta: 'Convive con niños', icono: null },
+          ]}
+          activos={convive}
+          onAlternar={alternar}
+          disposicion="envuelve"
+        />
+        <Texto variante="apoyo">elegidas: {convive.length === 0 ? '—' : convive.join(' · ')}</Texto>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          ② el bloque con su criterio · el «porqué» es OBLIGATORIO y es lo único
+          que lo separa de un ranking. Sin contador y sin numeración
+        </Texto>
+        <BloqueConCriterio
+          titulo="Llevan más tiempo esperando"
+          porque="Son los que más tiempo llevan esperando un hogar."
+        >
+          <TarjetaAdoptable
+            nombre="Lito"
+            especie="Perro"
+            raza={null}
+            sexo="Macho"
+            edad={null}
+            fotoUrl={null}
+            publicador="Rescatistas del Valle"
+            voces={{ edadNoInformada: 'Edad no informada' }}
+            onPress={() => {}}
+          />
+        </BloqueConCriterio>
+        <Texto variante="apoyo">
+          ⚠️ NO se monta en la app hasta que exista el flag `destacado_espera`
+          del servidor: alimentarlo por fecha de alta sería el orden por
+          antigüedad que §4 prohíbe.
+        </Texto>
+      </View>
     </View>
   )
 }
@@ -2611,6 +2734,10 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S112 — D-999 · EL BOTÓN DIBUJA SU RAZÓN · qué decide: (a) que la línea se lea como una EXPLICACIÓN de la casa —atenuada, jamás un error— y (b) que al encenderse el botón NADA salte. El control ③ prueba que un apagado sin razón sigue sin dibujar nada">
+          <GateRazonDelBoton />
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S106 — EL AVISO PREVIO DE TELECONSULTA (§3) · qué decide: (a) que las TRES salidas se lean de PESO PAR —ninguna preside, es tu firma— y (b) que los cinco signos se lean como CRITERIO y no como letra chica. Texto: LETRA_TELEMEDICINA v1.1 (tuteo, con la línea de tránsito PROVISIONAL al pie)">
           <Texto variante="apoyo">
             Tres Celda, no tres botones: tres sólidos son ilegales (D-484 y el pie
@@ -5011,6 +5138,79 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="⭐ GATE S112 — LA VIDRIERA DE ADOPCIÓN · qué decide: (a) que los chips de convivencia se lean como MÚLTIPLES y no como una elección única, y (b) que el bloque «Llevan más tiempo esperando» se lea como un criterio explicado y JAMÁS como un ranking — el porqué es lo único que lo separa">
+          <MuestraVidrieraAdopcion />
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S112 — TarjetaAdoptable · qué decide: (a) que se lea como una VIDA presentada y no como un ítem de catálogo, y (b) que las DOS ausencias se lean bien — «edad no informada» dicha sin vergüenza y en el mismo peso, y la raza que nadie declaró simplemente ausente (jamás «mestizo» inventado por nosotros)">
+          <View style={{ gap: spacing[4] }}>
+            <Texto variante="apoyo">
+              Las cuatro que existen de verdad en la vidriera. Ninguna tiene
+              favorito, swipe ni puntaje: §4 los prohíbe.
+            </Texto>
+
+            <Texto variante="dato">① completa · el caso feliz</Texto>
+            <TarjetaAdoptable
+              nombre="Simona"
+              especie="Perro"
+              raza="Mestiza"
+              sexo="Hembra"
+              edad="2 años"
+              fotoUrl="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600"
+              publicador="Refugio Patitas"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
+
+            <Texto variante="dato">
+              ② SIN EDAD · nadie la declaró y el wrapper no la infiere — tiene
+              que leerse como honestidad, mismo peso que el resto de la línea
+            </Texto>
+            <TarjetaAdoptable
+              nombre="Rocco"
+              especie="Perro"
+              raza="Mestizo"
+              sexo="Macho"
+              edad={null}
+              fotoUrl="https://images.unsplash.com/photo-1552053831-71594a27632d?w=600"
+              publicador="Refugio Patitas"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
+
+            <Texto variante="dato">
+              ③ SIN RAZA NI SEXO · no se dice nada: «no lo declararon» no es
+              «mestizo», y la pieza jamás se lo inventa
+            </Texto>
+            <TarjetaAdoptable
+              nombre="Nube"
+              especie="Gato"
+              raza={null}
+              sexo={null}
+              edad="8 meses"
+              fotoUrl="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
+
+            <Texto variante="dato">
+              ④ EL CASO DURO · sin foto y sin edad: la huella de la casa, jamás
+              un hueco ni algo que parezca cargando
+            </Texto>
+            <TarjetaAdoptable
+              nombre="Lito"
+              especie="Perro"
+              raza={null}
+              sexo="Macho"
+              edad={null}
+              fotoUrl={null}
+              publicador="Rescatistas del Valle"
+              voces={{ edadNoInformada: 'Edad no informada' }}
+              onPress={() => {}}
+            />
+          </View>
+        </Seccion>
+
         <Seccion titulo="Convivencia (S111) — el tercer estado tiene voz propia">
           {/* LOS TRES ESTADOS JUNTOS, porque la comparación ES el gate:
               lo que hay que poder ver de un vistazo es que «todavía no se
@@ -5027,7 +5227,7 @@ function GaleriaInterna() {
               <Texto variante="apoyo">los tres estados · sí · no · todavía no se sabe</Texto>
               <Convivencia
                 rotulo="Convive con"
-                voces={{ si: 'Sí', no: 'No' }}
+                voces={{ si: 'Sí', no: 'No', sinObservar: 'Todavía lo están conociendo' }}
                 filas={[
                   { con: 'Perros', estado: 'si' },
                   { con: 'Gatos', estado: 'no' },
@@ -5038,11 +5238,14 @@ function GaleriaInterna() {
 
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">
-                control · rescate de seis días: nada medido todavía
+                ⭐ GATE S112 · rescate de seis días: nada medido todavía. Tiene
+                que leerse como HONESTIDAD (algo está pasando: lo están
+                conociendo) y jamás como ficha rota. Se juzga CONTRA la de
+                arriba: título propio, voces del mismo peso, cero gris de vacío
               </Texto>
               <Convivencia
                 rotulo="Convive con"
-                voces={{ si: 'Sí', no: 'No' }}
+                voces={{ si: 'Sí', no: 'No', sinObservar: 'Todavía lo están conociendo' }}
                 filas={[
                   { con: 'Perros', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
                   { con: 'Gatos', estado: 'no_se_sabe', voz: 'Todavía no se sabe' },
@@ -5054,7 +5257,7 @@ function GaleriaInterna() {
             <View style={{ gap: spacing[2] }}>
               <Texto variante="apoyo">sin rótulo · embebido en una ficha</Texto>
               <Convivencia
-                voces={{ si: 'Sí', no: 'No' }}
+                voces={{ si: 'Sí', no: 'No', sinObservar: 'Todavía lo están conociendo' }}
                 filas={[
                   { con: 'Perros', estado: 'si' },
                   { con: 'Gatos', estado: 'si' },
