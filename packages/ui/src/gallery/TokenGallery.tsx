@@ -5783,6 +5783,12 @@ function GaleriaInterna() {
               historia="La encontraron en la vía a Nono, con frío y sin collar. Lleva cuatro meses en el refugio y duerme apoyada contra la puerta."
               publicador={{
                 nombre: 'Refugio Patitas del Sur',
+                /* ⭐ S112-B · LLEVA a su vitrina (firma A6). Con `onPress`
+                   la fila gana chevron y se hunde; sin él, ni una cosa ni
+                   la otra — la estructura informa (Ley 18). Y la «i» de
+                   verificación queda en su fila APARTE: dos gestos, no un
+                   tocable anidado. */
+                onPress: () => {},
                 verificacion: {
                   texto: 'Refugio verificado por e-PetPlace',
                   onExplicar: () => {},
