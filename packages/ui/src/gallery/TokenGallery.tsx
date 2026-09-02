@@ -7709,6 +7709,29 @@ function PiezasDelOficioS107() {
         />
       </View>
 
+      {/* ③bis EL MISMO SEMÁFORO, LEÍDO POR QUIEN NO PUEDE RESOLVER (S112-B) */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ⭐ lector="observador" · la ficha del adoptable: NINGUNA fila lleva chevron ni se hunde, porque
+          quien mira no puede resolver nada (ítem 11). Y el tercer estado —«nadie lo dijo»— va en `·`
+          NEUTRO, jamás en el ochre del pendiente: pintarlo como tarea afirmaría algo que nadie dijo
+        </Text>
+        <SemaforoSanitario
+          lector="observador"
+          rotulo="Su salud"
+          requisitos={[
+            { clave: 'esteril', etiqueta: 'Esterilizada', estado: 'al_dia' },
+            { clave: 'rabia', etiqueta: 'Vacuna antirrábica', estado: 'falta' },
+            {
+              clave: 'desparasitacion',
+              etiqueta: 'Desparasitación',
+              estado: 'no_declarado',
+              voz: 'El refugio todavía no lo declaró',
+            },
+          ]}
+        />
+      </View>
+
       {/* ④ EL SELECTOR DE ROSTER */}
       <View style={{ gap: spacing[2] }}>
         <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
