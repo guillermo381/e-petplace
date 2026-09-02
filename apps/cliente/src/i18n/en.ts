@@ -1237,6 +1237,11 @@ export const clienteEn = {
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)
   adoptar: {
+    sinCuentaLinea: "You'll need an account to apply.",
+    sinCuentaPorQueTitulo: 'Why do I need an account?',
+    sinCuentaPorQueCuerpo:
+      "Browsing asks for nothing. You only need an account when you apply, because from then on there's a conversation with the shelter and it needs to know who it's talking to.",
+    sinCuentaPorQueCierre: 'Got it',
     titulo: 'Adoption',
     filtroEspecie: 'What are you looking for',
     todas: 'All',

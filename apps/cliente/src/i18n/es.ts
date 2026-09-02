@@ -1564,6 +1564,11 @@ export const clienteEs = {
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
   // S73 C3 — la puerta de la adopción (refugios, peldaño 0 honesto)
   adoptar: {
+    sinCuentaLinea: 'Para postular vas a necesitar una cuenta.',
+    sinCuentaPorQueTitulo: '¿Por qué hace falta una cuenta?',
+    sinCuentaPorQueCuerpo:
+      'Mirar no pide nada. La cuenta hace falta recién cuando postulas, porque a partir de ahí hay una conversación con el refugio y tiene que saber con quién habla.',
+    sinCuentaPorQueCierre: 'Entendido',
     titulo: 'Adopción',
     filtroEspecie: 'Qué estás buscando',
     todas: 'Todas',
