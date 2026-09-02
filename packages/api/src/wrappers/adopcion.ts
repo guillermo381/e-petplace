@@ -49,6 +49,17 @@ const MENSAJES = {
   sin_sesion:               'No hay sesión activa.',
   datos_inconsistentes:     'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:        'Ocurrió un error inesperado. Prueba de nuevo.',
+  /* ═══ S112-A · adenda 10 punto 3 — las tres voces de los documentos ═══════
+     `condiciones_no_aceptadas` es la razón de la compuerta de postular, y su
+     voz NO dice «error»: dice qué falta hacer. La pantalla lleva a la lectura,
+     no muestra un rebote. */
+  condiciones_no_aceptadas: 'Antes de postular hay que leer y aceptar las condiciones de adopción.',
+  /* Fail-closed CON VOZ: el documento no está cargado. La familia no hizo nada
+     mal — nombrar el código sirve para que la pantalla diga cuál falta. */
+  documento_no_disponible: 'Ese documento todavía no está publicado.',
+  /* El acta NO se acepta: se FIRMA. Son dos actos distintos y el motor los
+     separa a propósito. */
+  documento_no_aceptable: 'Ese documento no se acepta por esta vía.',
 } as const;
 
 export type CodigoErrorAdopcion = keyof typeof MENSAJES;
@@ -449,4 +460,99 @@ export async function contarSolicitudesPorRevisar(): Promise<
   if (error) return fallo(error.message);
   if (typeof data !== 'number') return fallaCodigo('datos_inconsistentes');
   return { ok: true, data };
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * S112-A · LOS DOCUMENTOS DE ADOPCIÓN — entrega para C (adenda 10 punto 3).
+ *
+ * 🔴 **LA VERSIÓN VIAJA CON EL CUERPO, Y ESO NO ES COMODIDAD.** Es para que la
+ * app NUNCA elija una versión: versión y texto son el mismo dato y viven juntos
+ * (`L-166`, el precedente de `URL_LEGAL`/`VERSION_LEGAL` de S104). Si la
+ * pantalla hardcodeara la versión, el día que se publique la v2 seguiría
+ * mostrando y aceptando la v1 **y todo compilaría** — ni el typecheck ni ningún
+ * gate lo verían.
+ *
+ * Por la misma razón `aceptar` **no recibe versión**: la resuelve el servidor.
+ * Y **el hash tampoco viene del cliente**: si la app lo mandara, la evidencia
+ * diría lo que el cliente quiso decir.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface DocumentoVigente {
+  codigo: string;
+  /** Se pasa de vuelta tal cual al aceptar o al firmar. La app no la elige. */
+  version: number;
+  contenido: string;
+  sha256: string;
+  esPlantilla: boolean;
+  vigenteDesde: string;
+}
+
+export async function obtenerDocumentoVigente(
+  codigo: 'terminos_refugio' | 'condiciones_adopcion' | 'acta_adopcion',
+): Promise<ResultadoWrapper<DocumentoVigente, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('obtener_documento_vigente', { p_codigo: codigo });
+  if (error) return fallo(error.message);
+  const r = data as Record<string, unknown> | null;
+  if (r === null || typeof r.contenido !== 'string') return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: {
+      codigo: String(r.codigo),
+      version: Number(r.version),
+      contenido: r.contenido,
+      sha256: String(r.sha256),
+      esPlantilla: r.es_plantilla === true,
+      vigenteDesde: String(r.vigente_desde),
+    },
+  };
+}
+
+/** ¿Este usuario ya aceptó la versión VIGENTE? Aceptar la v1 no vale si rige la v2. */
+export async function tengoAceptadoDocumento(
+  codigo: 'terminos_refugio' | 'condiciones_adopcion',
+): Promise<ResultadoWrapper<boolean, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('tengo_aceptado_documento', { p_codigo: codigo });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'boolean') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data };
+}
+
+export interface AceptacionRegistrada {
+  yaEstaba: boolean;
+  consentimientoId: string;
+  codigo: string;
+  version: number;
+}
+
+/**
+ * Registra la aceptación con su evidencia: usuario · documento · versión ·
+ * hash · sello de tiempo · IP · dispositivo. **Idempotente**: dos toques del
+ * mismo botón no son dos consentimientos.
+ *
+ * `ipHash` y `dispositivo` son lo único que la app aporta, y son datos DE LA
+ * APP —no del documento—: por eso sí pueden venir de acá.
+ */
+export async function aceptarDocumentoAdopcion(input: {
+  codigo: 'terminos_refugio' | 'condiciones_adopcion';
+  ipHash?: string;
+  dispositivo?: string;
+}): Promise<ResultadoWrapper<AceptacionRegistrada, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('aceptar_documento_adopcion', {
+    p_codigo: input.codigo,
+    p_ip_hash: input.ipHash,
+    p_dispositivo: input.dispositivo,
+  });
+  if (error) return fallo(error.message);
+  const r = data as Record<string, unknown> | null;
+  if (r === null || typeof r.consentimiento_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: {
+      yaEstaba: r.ya_estaba === true,
+      consentimientoId: r.consentimiento_id,
+      codigo: String(r.codigo),
+      version: Number(r.version),
+    },
+  };
 }
