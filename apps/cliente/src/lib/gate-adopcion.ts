@@ -36,4 +36,14 @@
  * se acordó de atar* — y es la misma trampa que este archivo describe dos
  * párrafos más arriba, cobrada sobre sí mismo.
  */
-export const ADOPCION_ALCANZABLE = false;
+/* 🟢 ENCENDIDA EN EL ÚLTIMO COMMIT DEL LOTE DE ADOPCIÓN (S112-A, 2-sep).
+ *
+ * Va acá y no antes por la ley del loop: **el vertical se vuelve descubrible
+ * cuando está entero**, no mientras se construye — con el flag encendido a
+ * mitad de camino, cualquier OTA intermedio le habría puesto la adopción
+ * delante a alguien que entró a mirar su guardería, con pantallas a medias.
+ *
+ * Lo que enciende, medido: los CUATRO lectores. La puerta del login es uno de
+ * ellos, y ese era el que viajaba vivo mientras esta constante decía lo
+ * contrario. */
+export const ADOPCION_ALCANZABLE = true;
