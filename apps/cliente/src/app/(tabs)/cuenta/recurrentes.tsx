@@ -60,7 +60,6 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Hoja,
-  Interruptor,
   Separador,
   Tarjeta,
   Texto,
@@ -475,22 +474,36 @@ export default function Recurrentes() {
                       <Texto variante="cuerpo">{it.mascotaNombre}</Texto>
                     </View>
                   ) : null}
+                  {/* ═══ G8 · EL INTERRUPTOR NO SE ENCONTRABA ══════════════
+
+                      🔴 **Rojo del founder (2-sep): no encontró «Cancelar
+                      suscripción».** Y no estaba escondida: estaba **acá**, como
+                      un `Interruptor` en el `fin` de esta celda. *Su etiqueta
+                      era el título del plan* —o sea que la palabra «cancelar» no
+                      aparecía en ningún lado de la pantalla—, y un switch dice
+                      «encendido/apagado», jamás **qué pasa si lo movés**.
+
+                      ⚠️ **Lo que falla no es el descubrimiento, es el NOMBRE.**
+                      Alguien que viene a dar de baja busca un verbo; un
+                      interruptor es un estado. *Un control que existe y no se
+                      llama como lo que hace es indistinguible de uno que no
+                      existe.*
+
+                      ⇒ **Un botón por fila, visible, con el verbo escrito** — no
+                      detrás de otro toque, que es la letra del founder. El
+                      switch muere (Ley 37): dos controles para el mismo acto
+                      dejan a la familia preguntándose si hacen lo mismo.
+
+                      🔑 **El botón sigue diciendo lo que el motor hace, no lo que
+                      la palabra promete:** cancelar detiene la RENOVACIÓN, y el
+                      período ya pagado corre entero (`P24`). Por eso el botón
+                      abre la MISMA Hoja de confirmación de antes —la que
+                      explica eso— y la línea de abajo sigue diciendo hasta qué
+                      día está cubierto. ── */}
                   <Celda
                     titulo={it.titulo}
                     subtitulo={it.donde ?? undefined}
                     metadataMono={t('recurrentes.alMes', { precio: it.precio.toFixed(2) })}
-                    fin={
-                      <Interruptor
-                        encendido={it.encendido}
-                        etiqueta={it.titulo}
-                        onCambio={(v) => {
-                          /* Apagar SIEMPRE confirma. Encender no: no hay nada
-                             que perder y el gesto ya es deliberado. */
-                          if (v) void encender(it);
-                          else setConfirmando(it);
-                        }}
-                      />
-                    }
                   />
                   <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[3], gap: 2 }}>
                     {/* 🔴 Antes que nada: si el cobro no entró, **eso** es lo
@@ -520,6 +533,38 @@ export default function Recurrentes() {
                             })}
                       </Texto>
                     )}
+
+                    {/* El verbo, visible. **Encender no confirma** —no hay nada
+                        que perder y el gesto ya es deliberado—; **apagar
+                        siempre**, porque del otro lado hay un servicio que la
+                        familia está usando.
+
+                        Apagado y NO `reversible` ⇒ **no se dibuja nada**, y eso
+                        es Ley 23 en su forma barata: la guardería no vuelve a
+                        `activa` por ninguna función del motor (medido), así que
+                        ofrecer «Reactivar» ahí sería enseñarle a la familia a
+                        deshacer algo que no se puede deshacer. La línea de
+                        arriba ya dice hasta cuándo sigue cubierta. */}
+                    {it.encendido ? (
+                      <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
+                        <Boton
+                          variante="secundario"
+                          tamaño="sm"
+                          etiqueta={t('recurrentes.cancelar')}
+                          onPress={() => setConfirmando(it)}
+                        />
+                      </View>
+                    ) : it.reversible ? (
+                      <View style={{ alignSelf: 'flex-start', paddingTop: spacing[2] }}>
+                        <Boton
+                          variante="secundario"
+                          tamaño="sm"
+                          etiqueta={t('recurrentes.reactivar')}
+                          cargando={trabajando}
+                          onPress={() => void encender(it)}
+                        />
+                      </View>
+                    ) : null}
                   </View>
                 </View>
               ))}

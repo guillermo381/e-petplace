@@ -3636,6 +3636,13 @@ export const clienteEs = {
      miente por omisión, y su modo de falla es el peor: se lee como completa.* */
   recurrentes: {
     titulo: 'Pagos recurrentes y suscripciones',
+    /* G8 · **El verbo que la familia viene a buscar.** Dice «cancelar
+       suscripción» y no «apagar renovación» porque *ésa es la palabra con la
+       que alguien entra a esta pantalla*; lo que el acto realmente hace —el
+       período pagado corre entero— lo explica la Hoja de confirmación, que es
+       donde se puede explicar sin abreviar. */
+    cancelar: 'Cancelar suscripción',
+    reactivar: 'Volver a activarla',
     intro: 'Todo lo que se te cobra solo, en un lugar.',
     /* El vacío HABLA con calma: no es un error ni una carencia. */
     vacioTitulo: 'No tienes nada que se cobre solo',

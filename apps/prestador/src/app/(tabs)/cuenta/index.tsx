@@ -788,65 +788,34 @@ export default function Cuenta() {
               inalcanzable por una razón distinta.**
               El pie queda SOLO con el marcador de update, que es lo único
               que pertenece al final. */}
-          {/* ── S83-C15 · LA PUERTA DE LA GALERÍA (decisión founder).
-              El prestador NUNCA la tuvo: `/gallery` está registrada en
-              el layout pero vive SOLO por URL (medido en C10) — y con
-              las tres firmas de atmósfera publicadas, eso dejaba TRES
-              gates del founder inalcanzables. Es L-161 al pie de la
-              letra: una superficie de gate que no se puede alcanzar no
-              es un gate. El cliente la tiene desde D-580; ésta es su
-              hermana. SIN `__DEV__`: en un APK preview `__DEV__` es
-              false y la entrada desaparecería justo donde tiene que
-              existir — el defecto exacto que R18 vigila del lado
-              cliente.
+          {/* ── ☠️ S112-C · LA ENTRADA A LA GALERÍA SE RETIRA TAMBIÉN ACÁ
+              (firma del founder, 2-sep-2026 — A8, `L-478`): *«sacá "Láminas
+              de gate · para firmar" del menú de Cuenta en las dos apps: la
+              galería no es una puerta del producto.»*
 
-              ⚠️ SU CONDICIÓN NO ES LA DE SU VECINA, y la distinción es
-              lo que hay que leer antes de tocarla: la celda de Perfil v2
-              (arriba) SÍ muere — cuando esa pantalla se firme y
-              reemplace a la vieja. **Ésta NO se retira por iniciativa de
-              ninguna sesión.** La enmienda FIRMADA del founder en D-580
-              lo dice para la hermana del cliente y rige igual acá: la
-              galería queda visible en Cuenta, no se esconde tras
-              `__DEV__` sin orden explícita, y **su retiro se DECIDE en
-              el gate de producción — es una FIRMA, no una fecha del
-              calendario**. El checklist de tiendas es insumo de esa
-              decisión, no la decisión.
-              Se escribe así, y no como "provisional", porque el modo de
-              falla real es que alguien la borre creyendo que paga una
-              deuda: del lado cliente eso lo caza el guard R18, cuya
-              polaridad es que la entrada EXISTA.
-              ⚠️ HUECO DECLARADO: **R18 mira SOLO la Cuenta del cliente**
-              (`CUENTA_CLIENTE` en `verify-diseno.mjs`) — esta entrada
-              queda SIN guard hasta que la regla se ensanche a las dos
-              casas. Es una línea, y va aparte de este OTA.
+              🔑 **Ésta es la firma que su propio texto pedía.** La fila decía,
+              literal, que **no se retiraba por iniciativa de ninguna sesión** y
+              que su retiro *«se DECIDE en el gate de producción — es una FIRMA,
+              no una fecha del calendario»*. Llegó la firma; por eso se va, y
+              por eso el aviso queda escrito: quien lea el historial no va a
+              encontrar una sesión que se pasó por encima de esa cláusula.
 
-              Los textos van LITERALES fuera del riel i18n — igual que su
-              hermana del cliente: la galería no es pantalla de producto
-              y su copy no pertenece al lote de strings. ── */}
-          {/* ⭐ S85-C2 — LA FILA DESNUDA #1 SE VISTE. El censo la midió
-              como la única fila del índice que caía sobre el papel
-              mientras sus cuatro hermanas vivían en una `Tarjeta` — y una
-              fila sin superficie al lado de cuatro con superficie no se
-              lee como "distinta", se lee como suelta. Ahora tiene su
-              propia Tarjeta: sigue SEPARADA de las cuatro (no es una
-              puerta del producto), pero deja de estar desvestida. */}
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            <CeldaNavegacion
-              icono="preferencias"
-              /* S84-C9 (Ley 17.2 — los nombres van del lado del usuario).
-                 El founder no la encontraba, y B midió que no estaba
-                 escondida: **estaba nombrada en NUESTRO idioma**. "Galería
-                 de tokens" es vocabulario de quien construye, y su
-                 subtítulo —"no es pantalla de producto"— le decía
-                 literalmente que eso no era para él. El nombre nuevo dice
-                 QUÉ HAY y QUÉ SE ESPERA DE ÉL: son láminas, son de gate, y
-                 las tiene que firmar. */
-              titulo="Láminas de gate · para firmar"
-              detalle="lo que espera tu ojo esta sesión"
-              registro="aa"
-              onPress={() => router.push('/gallery')}
-            />
-          </Tarjeta>
+              La hermana del cliente se había retirado en S107-C con la misma
+              razón, y la nota de allá anunciaba que **ésta se conservaba hasta
+              el gate**. Esa asimetría termina hoy: las dos casas quedan sin
+              entrada.
+
+              ⚠️ **La galería NO murió y sigue siendo obligatoria (`R17`).** Lo
+              que se retira es el CAMINO desde Cuenta; `/gallery` sigue
+              registrada y se alcanza por deep link con cable, igual que antes
+              de que esta fila existiera.
+
+              ⚠️ **`R18` no se toca desde acá.** Su corpus (`CUENTAS_GALERIA`)
+              vive en `scripts/verify-diseno.mjs`, territorio de B, y su
+              polaridad es que la entrada EXISTA — o sea que este retiro la deja
+              en rojo hasta que B la angoste o la jubile. *Se declara en vez de
+              editarla de contrabando: una regla que la casa cambia sin pedirlo
+              deja de ser una regla.* Pedido a B en el buzón. ── */}
 
           {/* ── Sesión y cuenta (la sesión se MUDÓ desde Negocio) ── */}
           <View style={{ gap: spacing[3] }}>

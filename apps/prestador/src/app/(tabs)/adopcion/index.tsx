@@ -132,8 +132,40 @@ export default function PortalAdopcionHome() {
     }, []),
   );
 
-  const porRevisar = estado.fase === 'listo' ? estado.lista.filter((s) => s.estado === 'recibida') : [];
-  const resto = estado.fase === 'listo' ? estado.lista.filter((s) => s.estado !== 'recibida') : [];
+  /* ═══ A9 · LA SECCIÓN DECÍA «EN CONVERSACIÓN» Y GUARDABA TODO ═══════════
+
+     🔴 **El rojo del founder, con nombre y apellido:** después del traspaso, la
+     Home listaba a **Nube** —solicitud `aceptada`— bajo el título «En
+     conversación». Medido antes de tocar nada: **hay UNA sola solicitud de
+     Nube** (`8b747efd`, `aceptada`, 2 mensajes) y una de Bruno (`declinada`).
+     *No eran dos filas: era una fila bajo un rótulo falso.*
+
+     La causa es el complemento: `resto = estado !== 'recibida'` mete adentro
+     **los cuatro estados terminales** —`aceptada`, `declinada`, `desistida`,
+     `no_concretada_fallecimiento`— y el rótulo afirmaba de todos ellos que
+     estaban conversando.
+
+     ⚠️ **Filtrar por «lo que no es X» es lo que lo produjo**, y no es un detalle
+     de estilo: un complemento **hereda cada estado nuevo que el motor invente**,
+     sin que nadie lo revise. Este mes entraron dos (`desistida` y
+     `no_concretada_fallecimiento`, S112-B) y cayeron acá solos. ⇒ **Los tres
+     grupos se enumeran por INCLUSIÓN**, y lo que no entra en ninguno es un
+     estado nuevo que alguien tiene que ubicar a mano — que es exactamente el
+     momento en que hay que pensarlo.
+
+     Y la mitad estructural: **las cerradas dicen su estado en la fila**. *Un
+     rótulo de sección puede volver a mentir; una fila que lleva su propio
+     estado, no.* ── */
+  const lista = estado.fase === 'listo' ? estado.lista : [];
+  const porRevisar = lista.filter((s) => s.estado === 'recibida');
+  const conversando = lista.filter((s) => s.estado === 'en_conversacion');
+  const cerradas = lista.filter(
+    (s) =>
+      s.estado === 'aceptada' ||
+      s.estado === 'declinada' ||
+      s.estado === 'desistida' ||
+      s.estado === 'no_concretada_fallecimiento',
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -195,15 +227,35 @@ export default function PortalAdopcionHome() {
             )}
           </View>
 
-          {/* ── ② LAS QUE YA ESTÁN EN CAMINO — sin contador ── */}
-          {resto.length > 0 ? (
+          {/* ── ② LAS QUE YA ESTÁN EN CAMINO — sin contador.
+              Ahora el rótulo dice la verdad: **sólo `en_conversacion`**. ── */}
+          {conversando.length > 0 ? (
             <View style={{ gap: spacing[3] }}>
               <Texto variante="seccion">{t('portalAdopcion.enCurso')}</Texto>
               <Tarjeta>
-                {resto.map((s, i) => (
+                {conversando.map((s, i) => (
                   <View key={s.solicitudId}>
                     {i > 0 ? <Separador /> : null}
                     <FilaSolicitud s={s} caras={estado.caras} />
+                  </View>
+                ))}
+              </Tarjeta>
+            </View>
+          ) : null}
+
+          {/* ── ②bis LAS CERRADAS — y no se esconden.
+              *El refugio quiere poder volver a la que aceptó* (es la puerta del
+              acta), y una lista de trabajo que borra lo resuelto le deja la
+              sensación de que la app se olvidó. Van abajo, sin contador, **y
+              cada fila dice en qué terminó**. ── */}
+          {cerradas.length > 0 ? (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('portalAdopcion.cerradas')}</Texto>
+              <Tarjeta>
+                {cerradas.map((s, i) => (
+                  <View key={s.solicitudId}>
+                    {i > 0 ? <Separador /> : null}
+                    <FilaSolicitud s={s} caras={estado.caras} conEstado />
                   </View>
                 ))}
               </Tarjeta>
@@ -230,9 +282,31 @@ export default function PortalAdopcionHome() {
 
 /** Una solicitud en la lista. **El animal preside**: en la cabeza del refugio
  *  son animales, no publicaciones (§9). El solicitante va debajo. */
-function FilaSolicitud({ s, caras }: { s: SolicitudRecibida; caras: Map<string, string> }) {
+function FilaSolicitud({
+  s,
+  caras,
+  conEstado = false,
+}: {
+  s: SolicitudRecibida;
+  caras: Map<string, string>;
+  /** A9 · Sólo las cerradas lo llevan: en las vivas el rótulo de la sección ya
+   *  lo dice, y repetirlo en cada fila sería ruido. En las cerradas **el hecho
+   *  vive en la fila** para que ningún rótulo pueda volver a mentir. */
+  conEstado?: boolean;
+}) {
   const { t } = useTraduccion();
   const cara = s.mascotaFotoUrl !== null ? (caras.get(s.mascotaFotoUrl) ?? null) : null;
+  /* Texto, no pill: acá no es la escalera —esa vive en el hilo, y su lugar es
+     arriba y ancho completo (A3)—. Es una nota al pie de un animal que ya no
+     necesita atención. */
+  const enQueTermino =
+    s.estado === 'aceptada'
+      ? t('portalAdopcion.cerradaAceptada')
+      : s.estado === 'declinada'
+        ? t('portalAdopcion.cerradaDeclinada')
+        : s.estado === 'desistida'
+          ? t('portalAdopcion.cerradaDesistida')
+          : t('portalAdopcion.cerradaNoConcretada');
   return (
     /* `Pressable` y no un `View` con `onTouchEnd`: **el touch crudo no da rol,
        no da foco y no lo alcanza un lector de pantalla** — se ve igual y no se
@@ -256,6 +330,11 @@ function FilaSolicitud({ s, caras }: { s: SolicitudRecibida; caras: Map<string, 
         <Texto variante="apoyo">
           {s.solicitanteNombre ?? t('portalAdopcion.alguienSinNombre')}
         </Texto>
+        {conEstado ? (
+          <Texto variante="dato" color="tertiary">
+            {enQueTermino}
+          </Texto>
+        ) : null}
       </View>
     </Pressable>
   );

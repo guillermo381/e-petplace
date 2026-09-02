@@ -2615,6 +2615,8 @@ export const clienteEn = {
   },
   recurrentes: {
     titulo: 'Recurring payments and subscriptions',
+    cancelar: 'Cancel subscription',
+    reactivar: 'Turn it back on',
     intro: 'Everything that charges you automatically, in one place.',
     vacioTitulo: 'Nothing is charging you automatically',
     vacioDetalle: 'When you sign up for a plan or a repeating purchase, it’ll show up here.',
