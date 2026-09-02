@@ -13,6 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // fondo transparente — eran sus dos únicos consumidores (Ley 37: lo que sale
 // de la UI sale del código, imports incluidos). Su lápida está abajo.
 import { router, Stack } from 'expo-router';
+import { destinoDePushDeEstaApp } from '@/lib/destino-de-push';
 import { escuchaDeToque } from '@/lib/toque-de-push';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -129,13 +130,19 @@ export default function RootLayout() {
     let vivo = true;
     const irSiEsMia = (ruta: string) => {
       if (!vivo) return;
-      /* El prefijo de guardería del cliente es el caso vivo de hoy. Se compara
-         por PREFIJO y no por igualdad: la ruta lleva un id atrás. */
-      if (ruta.startsWith('/guarderia/')) {
-        console.warn(`[toque-de-push] ruta del cliente, no se navega acá · ${ruta}`);
+      /* ⏪ **ACÁ VIVÍA UNA LISTA NEGRA DE UN SOLO PREFIJO** (`/guarderia/`) y el
+         comentario de arriba la describe como lista blanca: *«sólo navega a
+         rutas que ESTA app tiene»*. **No era cierto**: navegaba a todo lo demás,
+         incluidas las tres rutas del cliente que el vertical de adopción está a
+         punto de emitir. *Una lista negra con la descripción de una lista blanca
+         es peor que ninguna: el próximo lector cree que el caso está cubierto.*
+         La lista blanca real vive en `lib/destino-de-push`, con su medición. */
+      const mia = destinoDePushDeEstaApp(ruta);
+      if (mia === null) {
+        console.warn(`[toque-de-push] ruta que esta app no atiende, no se navega · ${ruta}`);
         return;
       }
-      router.push(ruta as never);
+      router.push(mia as never);
     };
     void (async () => {
       const inicial = await escucha.destinoInicial();

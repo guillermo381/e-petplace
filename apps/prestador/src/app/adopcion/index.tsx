@@ -58,6 +58,7 @@ import {
   contarSolicitudesPorRevisar,
   obtenerSolicitudesDeMisPublicaciones,
   resolverUrlsFotos,
+  tengoAceptadoDocumento,
   type SolicitudRecibida,
 } from '@epetplace/api';
 
@@ -78,13 +79,34 @@ export default function PortalAdopcionHome() {
     useCallback(() => {
       let vigente = true;
       void (async () => {
-        /* Las dos JUNTAS y no encadenadas: ninguna depende de la otra
-           (`L-223` — lo que se paga en reloj es la CADENA). */
-        const [lista, cuenta] = await Promise.all([
+        /* Las tres JUNTAS y no encadenadas: ninguna depende de la otra
+           (`L-223` — lo que se paga en reloj es la CADENA). La de los términos
+           entra acá y no en un viaje aparte por la misma razón: *un guard que
+           se paga con una espera propia se termina moviendo a donde no
+           frena.* */
+        const [lista, cuenta, acepto] = await Promise.all([
           obtenerSolicitudesDeMisPublicaciones(),
           contarSolicitudesPorRevisar(),
+          tengoAceptadoDocumento('terminos_refugio'),
         ]);
         if (!vigente) return;
+        /* ═══ LA PUERTA DEL PORTAL (§4.2) ═══════════════════════════════════
+           *«La primera vez, mis términos (los del refugio) con "Acepto" apagado
+           hasta ver todo. **Después**, tres tabs.»* — los términos van ANTES,
+           no al costado.
+
+           🔴 **`acepto.ok && acepto.data === false` y no `!acepto.data`.** Si la
+           lectura FALLA, `data` no existe y la forma corta mandaría a firmar
+           términos a alguien que quizá ya los firmó: *hacer firmar dos veces un
+           documento legal por un error de red no es una molestia, es evidencia
+           duplicada de un acto que ocurrió una vez.* Con el fallo se sigue de
+           largo y el portal se dibuja — la compuerta dura de publicar vive en el
+           motor, no acá. **Esta pantalla no es la defensa: es la cortesía de
+           pedirlo en el momento correcto.** */
+        if (acepto.ok && acepto.data === false) {
+          router.replace({ pathname: '/legales/[codigo]', params: { codigo: 'terminos_refugio' } });
+          return;
+        }
         /* 🔴 Un fallo NO se disfraza de «no hay solicitudes» (Ley 13): al
            refugio le diría que nadie escribió cuando lo cierto es que no
            pudimos preguntar — y acá esa diferencia es una familia esperando. */

@@ -4322,6 +4322,16 @@ export const prestadorEs = {
     guardado: 'Guardado · {{n}} nuevas',
     sinCambios: 'Eso ya estaba anotado.',
   },
+  legalesPortal: {
+    titulo: 'Términos del refugio',
+    aceptar: 'Acepto y continúo',
+    razonFaltaLeer: 'Lee el documento hasta el final para poder aceptarlo.',
+    codigoInvalidoTitulo: 'Este documento no se acepta desde acá',
+    codigoInvalidoDetalle: 'Los términos que el portal acepta son los del refugio.',
+    errorTitulo: 'No pudimos cargar el documento',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+  },
   portalAdopcion: {
     titulo: 'Adopciones',
     porRevisar: 'Por revisar',
