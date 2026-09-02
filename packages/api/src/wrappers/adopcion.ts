@@ -78,6 +78,11 @@ const MENSAJES = {
   edad_no_declarada:      'Falta la edad. Una fecha estimada alcanza.',
   tipo_de_refugio_no_valido: 'Ese tipo de refugio no existe.',
   criterio_requerido:     'Escribe qué se revisó para verificar este refugio.',
+  /* 🔴 N1 y el esquema cerrado. Los tres nombran el dato: la pantalla lleva al
+     campo, o al animal que ya tenés postulado, en vez de decir sólo que no. */
+  respuesta_no_valida:    'Revisa ese dato del formulario.',
+  tope_de_solicitudes:    'Ya tienes tres postulaciones abiertas. Cierra una antes de abrir otra.',
+  aceptacion_no_es_tuya:  'Esa aceptación no es tuya.',
   cuenta_no_existe:       'No encontramos esa cuenta.',
   /* Un campo fuera de la lista blanca rebota CON SU NOMBRE: un editor que
      ignora en silencio le dice a la pantalla que guardó algo que no guardó. */
@@ -843,19 +848,69 @@ function leerMensajes(v: unknown): MensajeDelHilo[] {
  * humana y jamás lleva el uuid. Se ramifica por `codigo`, se navega con
  * `detalle`.
  */
+/** Las respuestas del formulario. **Esquema CERRADO**: una clave que no esté
+ *  acá rebota con `respuesta_no_valida` **nombrándola**.
+ *
+ *  🔴 Los menores se cuentan **por rango, jamás por nombre ni edad exacta**
+ *  (§5.9). Y no es una convención de esta interfaz: el motor rechaza
+ *  `hogar.nombre_menor` y la tabla tiene un CHECK que lo hace inexpresable
+ *  también por fuera de la puerta. *Si se ignorara en silencio, la casa
+ *  guardaría datos de un menor que nadie autorizó a guardar.* */
+export interface RespuestasPostulacion {
+  hogar: {
+    /** Al menos 1: un hogar de puros menores no es un hogar. */
+    adultos: number;
+    menores_0_5: number;
+    menores_6_12: number;
+    menores_13_17: number;
+  };
+  vivienda: 'casa_con_patio' | 'casa_sin_patio' | 'departamento' | 'otro';
+  otros_animales?: string;
+  /** Horas al día que el animal estaría solo. 0-24. */
+  horas_solo: number;
+  experiencia?: string;
+  /** Obligatorio: «por qué este animal». */
+  motivo: string;
+}
+
+/** Postula. **Tres compuertas, y las tres explican:**
+ *  · `condiciones_no_aceptadas` — falta leer y aceptar las condiciones;
+ *  · `respuesta_no_valida: <campo>` — con el nombre, para llevar al campo;
+ *  · `tope_de_solicitudes: <n>` y `solicitud_ya_viva: <id>` — N1, y el segundo
+ *    **lleva el id** para que la pantalla lleve ahí en vez de decir que no.
+ *
+ *  `aceptacionId` es opcional: **el servidor la resuelve solo**. Si la mandás y
+ *  no es tuya, rebota — *creerle a la pantalla dejaría la solicitud apuntando a
+ *  la aceptación de otra persona.* */
 export async function crearSolicitudAdopcion(params: {
   publicacionId: string;
+  respuestas: RespuestasPostulacion;
+  aceptacionId?: string;
   mensajeInicial?: string;
-}): Promise<ResultadoWrapper<{ solicitudId: string; estado: EstadoSolicitudAdopcion }, CodigoErrorAdopcion>> {
+}): Promise<
+  ResultadoWrapper<
+    { solicitudId: string; estado: EstadoSolicitudAdopcion; solicitudesVivas: number },
+    CodigoErrorAdopcion
+  >
+> {
   const { data, error } = await getClient().rpc('crear_solicitud_adopcion', {
     p_publicacion_id: params.publicacionId,
+    p_respuestas: comoJson(params.respuestas as unknown as Record<string, unknown>),
+    p_aceptacion_id: params.aceptacionId ?? undefined,
     p_mensaje_inicial: params.mensajeInicial ?? undefined,
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
   const r = data as Record<string, unknown>;
   if (typeof r.solicitud_id !== 'string') return fallaCodigo('datos_inconsistentes');
-  return { ok: true, data: { solicitudId: r.solicitud_id, estado: r.estado as EstadoSolicitudAdopcion } };
+  return {
+    ok: true,
+    data: {
+      solicitudId: r.solicitud_id,
+      estado: r.estado as EstadoSolicitudAdopcion,
+      solicitudesVivas: Number(r.solicitudes_vivas ?? 1),
+    },
+  };
 }
 
 /** Escribe en el hilo. 🔑 **Si el que responde es el publicador y la solicitud

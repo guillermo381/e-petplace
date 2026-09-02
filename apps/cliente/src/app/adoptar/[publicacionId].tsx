@@ -151,7 +151,22 @@ export default function PantallaFichaAdoptable() {
     }
     setPostulando(true);
     try {
-      const r = await crearSolicitudAdopcion({ publicacionId: f.publicacionId });
+      /* ⚠️ ADAPTACIÓN MECÁNICA DE A (S112-A7), PROVISIONAL Y DECLARADA.
+         `crearSolicitudAdopcion` ahora EXIGE las respuestas del formulario —
+         postular dejó de ser un toque, que es lo que §4.1 pide. Esto manda un
+         formulario MÍNIMO sólo para que el árbol compile; **C lo reemplaza en
+         C5 por la pantalla real** (`FormularioPostulacion` de B ya está).
+         🔴 Mientras esta línea viva, lo que se guarda NO es lo que la persona
+         declaró: es un placeholder. No se publica así. */
+      const r = await crearSolicitudAdopcion({
+        publicacionId: f.publicacionId,
+        respuestas: {
+          hogar: { adultos: 1, menores_0_5: 0, menores_6_12: 0, menores_13_17: 0 },
+          vivienda: 'otro',
+          horas_solo: 0,
+          motivo: 'PENDIENTE — formulario no montado (S112-C5)',
+        },
+      });
       if (!r.ok) {
         /* La compuerta NO se muestra: se resuelve. **No se re-postula sola al
            volver**: postular es un acto de la persona, y encadenarlo

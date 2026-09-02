@@ -1723,6 +1723,7 @@ export {
 } from './wrappers/adopcion';
 export { evaluarEsterilizacionAdoptable, obtenerMisAdoptables } from './wrappers/adopcion';
 export type {
+  RespuestasPostulacion,
   MiAdoptable,
   VeredictoEsterilizacion,
   Convivencia,
