@@ -4465,6 +4465,54 @@ export const prestadorEs = {
     errorTitulo: 'No pudimos cargar las solicitudes',
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
   },
+  /* A6 · MI VITRINA — cómo se presenta el refugio.
+
+     🔴 **Los dos «no» se dicen distinto porque se resuelven distinto.** Uno
+     tiene camino (pedir la verificación) y el otro **hoy no lo destraba
+     nadie** — decirlos igual convertiría una gestión pendiente en un muro. */
+  miVitrina: {
+    titulo: 'Mi vitrina',
+    detalleCelda: 'cómo te ve una familia',
+    /* El vacío es una INVITACIÓN, no una carencia: la fila de prestador la
+       crea la primera edición, así que este texto describe un acto que está
+       a un toque. */
+    sinPaginaTitulo: 'Todavía no armaste tu página',
+    sinPaginaDetalle: 'Cuenta quiénes son y desde dónde rescatan. Es lo que ve una familia antes de escribirles.',
+    armarla: 'Armar mi página',
+    /* El de la pieza, para el caso en que la fila exista y esté vacía. */
+    vozSinPagina: 'Tu página todavía está en blanco',
+    descripcionSinPagina: 'Tus animales publicados se ven igual.',
+    editar: 'Editar mi página',
+    editarTitulo: 'Tu página',
+    campoHistoria: 'Su historia',
+    campoCiudad: 'Ciudad',
+    campoZona: 'Zona',
+    guardar: 'Guardar',
+    guardado: 'Listo, se guardó.',
+    tusAnimales: 'Tus animales publicados',
+    sinPublicadosTitulo: 'Todavía no publicaste ninguno',
+    /* No dice «no tenés animales»: puede tener varios en rescate sin
+       publicar, y nombrar mal la causa manda a arreglar lo que no está roto. */
+    sinPublicadosDetalle: 'Los que estén en rescate no se ven acá hasta que los publiques.',
+    edadNoInformada: 'Edad no informada',
+    /* Se DICE que faltan, en vez de callarlo: el silencio se leería como que
+       la vitrina no tiene portada. */
+    sinFotosAun: 'La portada y el logo todavía no se editan desde acá.',
+    comoAyudar: 'Cómo ayudar',
+    comoAyudarEtiqueta: 'Qué es «Cómo ayudar»',
+    especiePerro: 'Perro',
+    especieGato: 'Gato',
+    comoAyudarPronto: 'Todavía no está listo. Cuando lo esté, vas a poder recibir donaciones y padrinazgos desde tu página.',
+    /* Este SÍ tiene camino, y la frase lo nombra. */
+    noSosRefugio: 'Tu cuenta todavía no está verificada como refugio. Escríbenos para que la revisemos.',
+    /* ⭐ El oficio viaja en `detalle`, así que la frase lo nombra. Sin él
+       diría «con otro oficio»: cierto, y sin nada que hacer con eso. */
+    yaTenesPrestadorConOficio: 'Tu cuenta ya está registrada como {{oficio}}. Hoy una misma cuenta no puede ser las dos cosas.',
+    yaTenesPrestador: 'Tu cuenta ya está registrada con otro oficio. Hoy una misma cuenta no puede ser las dos cosas.',
+    errorTitulo: 'No pudimos abrir tu página',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Probar de nuevo',
+  },
   portalHilo: {
     // El MISMO hecho que ve la familia, dicho desde acá: neutro y sin culpa
     // (§10.6). «Se bajó» nombra el acto; quién lo hizo ya está en la cabecera.

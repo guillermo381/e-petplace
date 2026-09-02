@@ -262,6 +262,12 @@ export default function Cuenta() {
   // El reintento re-corre EL MISMO camino de carga en vez de duplicarlo:
   // el efecto de foco depende de este contador.
   const [intento, setIntento] = useState(0);
+  /* ⭐ **A6 · la puerta a «Mi vitrina» sólo existe para un refugio.** Un
+     veterinario no la ve: su vitrina es «Así te ven», que ya tiene su fila.
+     *Dos entradas a lo mismo con nombres distintos le enseñan a la casa que
+     son dos cosas.* Sale del MISMO `obtenerMiCuentaRefugio` que resuelve la
+     identidad de arriba — cero viaje nuevo. */
+  const [esRefugio, setEsRefugio] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -333,6 +339,7 @@ export default function Cuenta() {
             if (!vigente) return;
             if (refugio.ok && refugio.data !== null) {
               setSoloPedidos(false);
+              setEsRefugio(true);
               setFallo(null);
               setIdentidad({
                 nombre: refugio.data.nombreComercial ?? '',
@@ -357,6 +364,18 @@ export default function Cuenta() {
           });
           return;
         }
+        /* 🔴 **Y también se pregunta acá, que es el caso que se me iba a
+           escapar:** en cuanto el refugio arma su página gana fila en
+           `prestadores`, así que `obtenerMiPrestador` **deja de devolver
+           `sin_prestador`** y cae por el camino feliz. Preguntar sólo en la
+           rama de arriba habría hecho desaparecer la entrada **justo después
+           de usarla** — el refugio arma su vitrina y pierde la puerta para
+           volver a ella. *Un gate que sólo se evalúa en el estado inicial deja
+           de valer en cuanto alguien hace algo.* */
+        void obtenerMiCuentaRefugio().then((rf) => {
+          if (vigente && rf.ok && rf.data !== null) setEsRefugio(true);
+        });
+
         // ── EL HEADER PINTA ACÁ: los 2 viajes que de verdad necesita ──
         setFallo(null);
         setIdentidad({
@@ -795,6 +814,33 @@ export default function Cuenta() {
               />
             </Tarjeta>
           )}
+
+          {/* ⭐ **A6 · MI VITRINA — la puerta del refugio a su propia página.**
+              Voz del founder: *«En Cuenta, el refugio tiene "Mi vitrina" igual
+              que un prestador.»*
+
+              🔴 **REGLA DE EXISTENCIA, no `__DEV__` ni condición de pantalla:**
+              se dibuja **sólo si la cuenta es refugio**, y eso sale del mismo
+              `obtenerMiCuentaRefugio` que ya resuelve la identidad de arriba —
+              cero viaje nuevo. Un veterinario no la ve: **su** vitrina es «Así
+              te ven», y dos entradas a la misma clase de cosa con nombres
+              distintos le enseñan a la casa que son dos cosas.
+
+              ⚠️ El gate se pregunta en **las DOS ramas** del cargador, y ése
+              era el borde que se me iba a escapar: en cuanto el refugio arma
+              su página gana fila en `prestadores`, así que deja de caer por
+              `sin_prestador`. Preguntarlo sólo ahí habría hecho desaparecer
+              esta entrada **justo después de usarla**. ── */}
+          {esRefugio ? (
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="familia"
+                titulo={t('miVitrina.titulo')}
+                detalle={t('miVitrina.detalleCelda')}
+                onPress={() => router.push('/cuenta/mi-vitrina')}
+              />
+            </Tarjeta>
+          ) : null}
 
           {/* S91-B (firma founder 8-ago-2026) · EL HISTÓRICO NAVEGABLE.
               Nace de un hallazgo de gate: la relectura de la receta estaba
