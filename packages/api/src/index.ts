@@ -1725,6 +1725,7 @@ export {
   evaluarEsterilizacionAdoptable, obtenerMisAdoptables, obtenerMiAdoptable,
   obtenerActaAdopcion, solicitarCodigoFirma, firmarActaAdopcion,
   desistirSolicitudAdopcion, reportarPublicacion,
+  subirFotoAdoptable, borrarFotoAdoptableDeStorage,
 } from './wrappers/adopcion';
 export type {
   MotivoReporte,

@@ -92,6 +92,11 @@ const ESTADO_PIEZA = {
   borrador: 'en_rescate',
   publicada: 'publicada',
   pausada: 'pausada',
+  /* S112-A: `en_proceso` = aceptada con menos de DOS firmas. El motor lo
+     distingue desde que existe la firma; la pieza ya lo tenía y **ninguna fila
+     lo usaba**. El `satisfies` exhaustivo fue el que lo pidió — que es
+     exactamente para lo que está. */
+  en_proceso: 'en_proceso',
   adoptada: 'adoptada',
   no_disponible: 'no_disponible',
   memorial: 'memorial',
