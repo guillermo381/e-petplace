@@ -783,3 +783,77 @@ que todo lo demás que corriste no midió lo que creías.*
 > **La forma que las cubre a las cuatro:** *el control positivo va PRIMERO, no
 > al lado. Si el caso que debe pasar no pasa, ningún rojo de abajo significa
 > nada — y se lee igual de convincente.*
+
+---
+
+# ADDENDUM 6 · 2-sep 16:45–17:20 — E3 CORRIÓ POR CAMINO REAL Y MURIÓ EN EL ACTA
+
+**CONTRA QUÉ:** base viva + `main f81494aa`. **Dos sesiones reales** (la familia
+`+8` y el refugio), sobre **Nube** —no sobre Luna, para no tocar el animal del
+recorrido del founder—.
+
+## F1 · LO QUE CAMINÓ
+
+```
+① aceptar condiciones (familia) ....... ✅ nueva
+② postular con el formulario completo . ✅ solicitud 8b747efd-5f23-454a-990d-0d28ad9b59cd
+③ el refugio responde en el hilo ...... ✅
+④ el refugio ACEPTA ................... ✅ {"ok":true,"estado":"aceptada"}
+⑤ obtener_acta_adopcion ............... 🔴 malformed array literal: "adoptante_cedula"
+⑥ solicitar_codigo_firma .............. 🔴 el mismo error
+```
+
+**Los pasos 10 a 13 de §0 caminan de verdad**, con las dos personas, el hilo y la
+aceptación. **El arco muere al abrir el acta.**
+
+## F2 · 🔴 LA CAUSA, AISLADA CON DOS CONTROLES POSITIVOS
+
+```
+text[] := '{}' || 'literal sin casteo' ...... 🔴 malformed array literal
+CONTROL+ · el mismo CON ::text .............. ✅ {adoptante_cedula}
+CONTROL+ · array_append(v,'x') .............. ✅ {adoptante_cedula}
+¿y si el array YA tiene un elemento? ........ 🔴 igual
+```
+
+En `_renderizar_acta`: `v_falt text[] := '{}'` y después **trece líneas** de la
+forma `v_falt := v_falt || 'adoptante_cedula'`. *Con el literal sin tipo, Postgres
+resuelve `anyarray || anyarray` e intenta castear el texto a `text[]`.* **Las 13
+ocurrencias medidas, todas con la misma forma.**
+
+**Por qué no se vio antes, y es lo que lo vuelve caro:** la línea de
+`adoptante_nombre` **no falló** —el nombre sí estaba—; falló la siguiente. ⇒ **el
+defecto se manifiesta en la PRIMERA línea que se ejecute**, así que un acta a la
+que sólo le faltara `animal_senas` reventaría nombrando `animal_senas`.
+
+> **No es un caso borde: es toda la rama de los faltantes** — y hoy dispara
+> **siempre**, porque nadie tiene cédula cargada. *El único camino que pasa es el
+> del acta sin nada que falte, que es exactamente el que no va a ocurrir la
+> primera vez que alguien la use.*
+
+**Alcance del daño: cero.** Muere al abrir el acta ⇒ **0 firmas, 0 códigos
+emitidos**, nada a medias.
+
+**PUERTA: `_renderizar_acta`, sus 13 líneas. Es de A.** *No propongo la forma:
+hay dos que funcionan y elegir entre ellas no es mío.*
+
+## F3 · LO QUE ESTO DEJÓ SIN MEDIR, DECLARADO
+
+**El defecto del OTP que A pidió medir desde afuera —que
+`solicitar_codigo_firma` ya no devuelva el código en su payload— NO SE PUDO
+MEDIR:** la llamada muere antes de emitir nada.
+
+**Lo único que sí se puede afirmar:** `solicitar_codigo_firma` **murió con el
+mismo error** ⇒ *llama a `_renderizar_acta` ANTES de emitir*, así que **para un
+acta incompleta no emite código**. Eso es la mitad buena. **La otra mitad —que el
+payload no lo lleve cuando el acta SÍ está completa— queda SIN MEDIR**, y no se
+da por buena leyendo el cuerpo: se pidió medirla desde afuera y así se va a medir.
+
+## F4 · ESTADO REAL QUE ESTA CORRIDA DEJÓ, declarado y no limpiado
+
+**La solicitud `8b747efd-5f23-454a-990d-0d28ad9b59cd` sobre Nube quedó en
+`aceptada`, con 2 mensajes en el hilo y 0 firmas.** **No se limpió a propósito:**
+es exactamente el fixture que hace falta para probar la firma en cuanto el acta
+abra. *Se declara para que su dueño decida — no para que aparezca de sorpresa.*
+
+**Los seis rojos de §5.5, más `acta_cambio_de_version` y `acta_incompleta`,
+quedan escritos y corren el día que el acta abra.**
