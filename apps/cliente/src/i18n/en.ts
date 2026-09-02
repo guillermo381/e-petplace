@@ -2651,6 +2651,8 @@ export const clienteEn = {
     despensaDetalle: 'We can’t show them here yet. For now you manage them from the pantry, in the purchase where you turned them on.',
   },
   hiloAdopcion: {
+    estado_desistida: 'You withdrew your application',
+    estado_no_concretada: "{{nombre}} passed away. We're very sorry.",
     verActa: 'See the adoption agreement',
     titulo: 'Your request',
     de: 'From {{refugio}}',

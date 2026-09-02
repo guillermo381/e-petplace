@@ -210,6 +210,8 @@ export default function HiloDelPublicador() {
                   aceptada: t('portalHilo.estadoAceptada'),
                 }}
                 vozDeclinada={t('portalHilo.estadoDeclinada')}
+                vozDesistida={t('portalHilo.estadoDesistida')}
+                vozNoConcretada={t('portalHilo.estadoNoConcretada')}
               />
             </View>
           </View>

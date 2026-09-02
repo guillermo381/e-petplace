@@ -3712,6 +3712,14 @@ export const clienteEs = {
     despensaDetalle: 'Todavía no podemos mostrarlas acá. Por ahora las manejas desde la despensa, en la compra donde las activaste.',
   },
   hiloAdopcion: {
+    // 🔴 DOS VOCES PARA DOS HECHOS DISTINTOS, no un sinónimo de `declinada`:
+    // declinar es un acto del PUBLICADOR y desistir es de la familia. Del lado
+    // de quien se bajó, la frase es SUYA y en primera persona.
+    estado_desistida: 'Cancelaste tu postulación',
+    // 🔴 ES UNA NOTICIA, NO UN RÓTULO DE ESTADO — la pieza no dibuja escalera
+    // acá, así que esto es TODO lo que se ve. Y no se adorna: quien lo lee
+    // eligió a ese animal.
+    estado_no_concretada: '{{nombre}} falleció. Lo sentimos mucho.',
     verActa: 'Ver el acta de adopción',
     titulo: 'Tu solicitud',
     de: 'De {{refugio}}',

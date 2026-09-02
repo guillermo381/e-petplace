@@ -3531,6 +3531,8 @@ export const prestadorEn = {
     errorDetalle: 'Check your connection and try again.',
   },
   portalHilo: {
+    estadoDesistida: 'The family withdrew their application',
+    estadoNoConcretada: 'Passed away before handover.',
     verActa: 'See the adoption agreement',
     titulo: 'The request',
     alguienSinNombre: 'Someone from the community',
