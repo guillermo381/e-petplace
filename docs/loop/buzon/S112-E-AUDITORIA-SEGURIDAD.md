@@ -1081,3 +1081,89 @@ escritas, y las tres revientan la primera vez que alguien las recorre.**
 > **Una rama que nunca se ejecutó no está probada por existir.** *Las tres
 > aparecieron por ejercer y ninguna por leer — y las tres estaban en el camino
 > feliz, no en un borde.*
+
+---
+
+# ADDENDUM 9 · 2-sep 20:00–20:40 — 🟢 **E3 CERRADO: EL PRIMER TRASPASO REAL CORRIÓ DE PUNTA A PUNTA**
+
+**CONTRA QUÉ:** base viva + `main 4ec71100`. Tres sesiones reales sobre el
+fixture `8b747efd` (**Nube**).
+
+## I1 · ✅ EL TECHO DE INTENTOS, con su discriminador
+
+```
+intento 1 .. {"ok":false,"motivo":"codigo_incorrecto","intentos_restantes":4}
+intento 2 .. 3      intento 3 .. 2      intento 4 .. 1      intento 5 .. 0
+intento 6 .. {"ok":false,"motivo":"intentos_agotados","intentos_restantes":0}
+la fila .... intentos = 5
+```
+
+**Y el brazo que hace que el techo sirva de algo** — sin él sólo frenaría a los
+equivocados, que es justo a quien no hace falta frenar:
+
+```
+firmar con el código CORRECTO, ya agotado → {"ok":false,"motivo":"intentos_agotados"}
+```
+
+*Un código errado dejó de ser una excepción y pasó a ser un resultado: por eso el
+`UPDATE` commitea. La cura es de A; la medición, independiente.*
+
+## I2 · 🟢 LAS DOS FIRMAS Y EL TRASPASO
+
+```
+el refugio firma → {"ok":true,"folio":"F-2026-000054","papel":"refugio","firmas":2,
+                    "completa":true,"hito_id":"55ae3cb5…","traspaso":{"ok":true,…}}
+
+el acta, con las dos firmas:
+  [{"papel":"adoptante","sello":"…15:09:58…"},{"papel":"refugio","sello":"…15:22:23…"}]
+```
+
+## I3 · 🟢 EL PASO 15 DE §0, VERIFICADO DESDE CADA ASIENTO
+
+| # | qué promete §0 | dio |
+|---|---|---|
+| ① | Nube está en su familia | ✅ **la familia la ve** · `estado_adopcion=adoptada` · `user_id` = el titular |
+| ② | **con la vacuna que el refugio cargó** | ✅ **3 eventos**, y **uno es de las 13:26**, de antes de la firma ⇒ *el expediente que el refugio cargó ANTES de la entrega viajó con ella* |
+| ③ | procedencia: el refugio | ✅ `80c41ac7…` en el evento de transferencia |
+| ④ | el hito | ✅ **dos hitos, y son dos momentos distintos** (abajo) |
+| ⑤ | sale de la vidriera | ✅ `obtener_adoptables` ya no la lista |
+| ⑥ | el refugio deja de verla | ✅ |
+| — | **CONTROL−** · un tercero | ✅ **tampoco la ve** |
+
+**Los dos hitos, medidos con su hora, porque a primera vista parecían un
+duplicado:**
+
+```
+13:26:58  hito_narrativo · llego_a_la_familia    ← el rescate (A la sembró)
+15:22:23  transferencia_familia                  ← el traspaso
+15:22:23  hito_narrativo · adopcion_completada   ← la firma
+```
+
+⇒ **No es ruido: son el rescate y la adopción, separados.** *La decisión de A de
+**no** reusar `vida_nueva_empieza` —porque esa clave describe el alta de un
+animal individual— queda validada en el objeto: los dos momentos conviven en la
+misma línea de vida y se distinguen.*
+
+## I4 · LA TABLA DE §5, AL CIERRE DE E3
+
+| # | requisito | estado |
+|---|---|---|
+| 5.1 · 5.2 · 5.3 · 5.4 · 5.6 · 5.7 · 5.8 · 5.9 · 5.10 · 5.12 | — | ✅ **verde, ejercido** |
+| 5.5 | firma / OTP | ✅ **verde salvo dos brazos** (abajo) |
+| 5.11 | reportar publicación | ⚪ **no medido por E** — A la aplicó en A10 |
+
+**Los dos brazos de §5.5 que no corrieron, y por qué:**
+- **`codigo_vencido`** — exige esperar los 10 minutos reales o mover `expira_en`
+  de un código emitido, que es tocar la evidencia. *Se corre con la ventana real.*
+- **`acta_cambio_de_version`** — el camino real exige **publicar `acta_adopcion
+  v2`**, que deja rastro en una tabla inmutable y le cambiaría el texto a
+  cualquiera que abra un acta en ese instante. **Se frenó y se pidió a A**, que
+  lo cubre en un cinturón con `ROLLBACK`. *No se hizo por cuenta propia.*
+
+## I5 · ESTADO QUE ESTA CORRIDA DEJÓ EN LA BASE, declarado
+
+**Nube está adoptada de verdad.** `8b747efd` cerrada con sus dos firmas, folios
+`F-2026-000050` y `F-2026-000054`, y Nube vive en la familia de `guillo381+8`.
+**La vidriera quedó con TRES animales publicados** (Luna, Tito, Bruno) más Kira
+en borrador. *Se declara porque cambia lo que el founder va a ver en su
+recorrido: donde §0 dice cinco, hay cuatro y uno ya adoptado.*
