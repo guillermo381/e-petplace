@@ -52,20 +52,57 @@ import { Interruptor } from './Interruptor'
 import { Tarjeta } from './Tarjeta'
 import { Texto } from './Texto'
 
-/** Los seis estados en que el refugio ve a un animal suyo (§4.2). */
+/**
+ * Los estados en que el refugio ve a un animal suyo.
+ *
+ * ── DE DÓNDE SALE CADA UNO, porque NO son los del motor y eso es a propósito
+ * Los cuatro de `§4.2` los nombró el founder —*«en rescate · publicado · en
+ * proceso · adoptado»*— y esta unión sigue SU palabra, no la de la tabla:
+ * `en_rescate` es lo que el motor llama `borrador`. **Divergimos donde el
+ * founder puso otra palabra, y sólo ahí.**
+ *
+ * ── 🔴 `no_disponible` — EL SÉPTIMO, Y NO SE MAPEA A `pausada` (S112-B) ───
+ * Lo trajo C frenando antes de mapear, y el motor le da la razón **por
+ * constraint**: `chk_no_disponible_coherente` exige `retirada_en NOT NULL`, y
+ * `despublicar_adoptable` escribe además `motivo_retiro`. **Es un retiro
+ * DEFINITIVO del publicador**, mientras que el catálogo define `pausada` como
+ * *«la retiró temporalmente. No es un rechazo»*. *Pintarlos igual le diría al
+ * refugio que puede volver a publicar algo que retiró.*
+ *
+ * **Conserva el nombre del motor, y ésa es la decisión:** la migración
+ * `20260907880000` jubiló `retirada` con la razón exacta que esta casa usa
+ * —*«la palabra vieja describía el acto y no el estado»*— así que el trabajo
+ * de nombrar ya estaba hecho y bien hecho. *Inventarle un sinónimo sería un
+ * segundo vocabulario para el mismo hecho, sin razón.*
+ *
+ * ── ⚠️ `en_proceso` NO TIENE PRODUCTOR HOY, y se declara en vez de sacarse ─
+ * Es letra firmada del founder (`§4.2`) y por eso queda. **Pero medido por C
+ * contra el motor: después de que el refugio acepta, la publicación sigue en
+ * `publicada` hasta el traspaso, que la pasa a `adoptada` — no hay estado
+ * intermedio.** Lo único cerca es `solicitudesVivas`, que cuenta *«hay gente
+ * escribiendo»* y **no** *«esta adopción está en curso»*: derivarlo de ahí
+ * pintaría «en proceso» sobre un animal que apenas recibió una consulta.
+ *
+ * ⇒ **Ninguna fila lo va a usar hasta que el motor distinga «aceptada,
+ * traspaso pendiente».** Queda con su costo dicho: cada pantalla tiene que
+ * escribirle una voz a un estado que todavía no se dibuja. *Se paga porque la
+ * alternativa —sacarlo y volver a ponerlo— rompe el `voces` de todos los
+ * consumidores el día que el motor lo produzca.*
+ */
 export type EstadoMascotaRefugio =
   | 'en_rescate'
   | 'publicada'
   | 'pausada'
   | 'en_proceso'
   | 'adoptada'
+  | 'no_disponible'
   | 'memorial'
 
 /**
  * El interruptor de publicar/pausar.
  *
- * **Ausente** = no hay interruptor (adoptada, memorial): el ciclo terminó y
- * ofrecer un control muerto es peor que no ofrecerlo.
+ * **Ausente** = no hay interruptor (adoptada, `no_disponible`, memorial): el
+ * ciclo terminó y ofrecer un control muerto es peor que no ofrecerlo.
  * **Con `onCambio`** = se puede mover.
  * **Con `razon`** = no se puede, y se dice por qué. Los `?: never` impiden
  * mezclar las dos formas y omitir las dos.
@@ -103,15 +140,15 @@ export type TarjetaMascotaRefugioProps = {
 }
 
 /**
- * EL MAPEO, y las seis decisiones que contiene.
+ * EL MAPEO, y las siete decisiones que contiene.
  *
  * `alDia` para lo que está corriendo bien (publicada) y para el final feliz
  * (adoptada). `proximo` para lo que está en curso y va a pasar (en proceso).
- * `info` para los tres estados neutros — en rescate, pausada y memorial: son
- * hechos, no pendientes.
+ * `info` para los cuatro estados neutros — en rescate, pausada, no disponible
+ * y memorial: son hechos, no pendientes.
  *
  * 🔴 **`atencion` no aparece a propósito.** Es la familia que grita, y
- * ninguno de los seis lo merece: un animal esperando no es un error.
+ * ninguno de los siete lo merece: un animal esperando no es un error.
  */
 const FAMILIA: Record<EstadoMascotaRefugio, InsigniaEstado> = {
   en_rescate: 'info',
@@ -119,6 +156,12 @@ const FAMILIA: Record<EstadoMascotaRefugio, InsigniaEstado> = {
   pausada: 'info',
   en_proceso: 'proximo',
   adoptada: 'alDia',
+  /* Retiro definitivo del publicador: un hecho, no un pendiente ni un
+     problema. Va con los otros neutros — y NO con `pausada`, aunque
+     compartan familia: lo que los distingue no es el color sino la
+     VOZ, que la escribe la pantalla, y que el retirado no tenga
+     interruptor. */
+  no_disponible: 'info',
   memorial: 'info',
 }
 
