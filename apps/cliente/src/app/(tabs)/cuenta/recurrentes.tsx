@@ -52,6 +52,7 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AvatarMascota,
   Boton,
   Celda,
   Encabezado,
@@ -69,6 +70,8 @@ import {
 } from '@epetplace/ui';
 import {
   cancelarMensualidadGuarderia,
+  caraDeMascota,
+  resolverUrlsFotos,
   reactivarMensualidadGuarderia,
   configurarRenovacionPlan,
   obtenerMisPlanesGuarderia,
@@ -89,6 +92,21 @@ import { hoyLocal } from '@/lib/corte-agenda';
  */
 interface Item {
   clave: string;
+  /**
+   * ⭐ **DE QUIÉN ES EL PLAN** (G7, voz del founder: *«la cara y el nombre de la
+   * mascota»*). Todo se contrata POR MASCOTA desde S109, así que el plan tiene
+   * que poder decirlo: *una familia con dos animales no debería adivinar cuál
+   * está pagando.*
+   *
+   * ⚠️ **`null` es LEGAL y no un defecto:** el mandato admite mascota nula y hay
+   * planes vivos así — A puso `LEFT JOIN` a propósito, porque con `INNER` **ese
+   * plan desaparecía de la pantalla mientras la familia lo paga**, que es peor
+   * que no saber de quién es. Se dice el nombre cuando existe; **no se inventa**.
+   */
+  mascotaNombre: string | null;
+  mascotaEspecie: string | null;
+  /** Ya FIRMADA por la pantalla — el lector entrega la ruta (`D-308`). */
+  mascotaCara: string | null;
   tipo: 'guarderia' | 'paseo';
   id: string;
   titulo: string;
@@ -184,6 +202,10 @@ export default function Recurrentes() {
         if (!vigenteAun) continue;
         items.push({
           clave: `g:${s.suscripcionId}`,
+          mascotaNombre: s.mascotaNombre,
+          mascotaEspecie: s.mascotaEspecie,
+          /* Se completa abajo con la URL firmada: el lector trae la RUTA. */
+          mascotaCara: null,
           tipo: 'guarderia',
           id: s.suscripcionId,
           titulo: t('recurrentes.guarderiaPlan'),
@@ -205,6 +227,13 @@ export default function Recurrentes() {
         if (s.estado !== 'activa') continue;
         items.push({
           clave: `p:${s.id}`,
+          /* El plan de paseo **no publica su mascota**: su lector no la trae.
+             Se declara en `null` en vez de dejar el campo fuera — *un campo
+             ausente y uno vacío se leen igual desde el render, y sólo uno de los
+             dos dice la verdad.* */
+          mascotaNombre: null,
+          mascotaEspecie: null,
+          mascotaCara: null,
           tipo: 'paseo',
           id: s.id,
           titulo: t('recurrentes.paseoPlan'),
@@ -228,6 +257,33 @@ export default function Recurrentes() {
       /* El nombre del lugar del paseo hay que ir a buscarlo — su lector no lo
          trae. **La pantalla no lo espera**: se pinta y el nombre completa. */
       setEstado({ fase: 'listo', items, pendientes: mp.data });
+
+      /* LAS CARAS, FIRMADAS. El lector entrega `mascotaFotoUrl` como RUTA de
+         Storage — **Postgres no puede firmar una URL**: la firma es un acto de
+         la Storage API con su credencial y su TTL. *Devolverla «firmada» desde
+         el motor sería una ruta cruda con nombre de URL*, el defecto exacto que
+         el censo G3 midió en tres pantallas.
+         Va DESPUÉS de pintar, como el nombre del lugar del paseo: la pantalla no
+         espera a las fotos para existir. */
+      const rutas = g.data
+        .map((x) => x.mascotaFotoUrl)
+        .filter((x): x is string => typeof x === 'string' && x.length > 0);
+      if (rutas.length > 0) {
+        const caras = await resolverUrlsFotos(rutas);
+        if (!vigente) return;
+        setEstado((prev) =>
+          prev.fase !== 'listo'
+            ? prev
+            : {
+                ...prev,
+                items: prev.items.map((it) => {
+                  const plan = g.data.find((x) => `g:${x.suscripcionId}` === it.clave);
+                  const ruta = plan?.mascotaFotoUrl ?? null;
+                  return ruta === null ? it : { ...it, mascotaCara: caras.get(ruta) ?? null };
+                }),
+              },
+        );
+      }
       const ids = [...new Set(p.data.filter((x) => x.estado === 'activa').map((x) => x.prestador_id))];
       if (ids.length === 0) return;
       const perfiles = await obtenerPerfilesPublicos(ids);
@@ -389,6 +445,36 @@ export default function Recurrentes() {
               {estado.items.map((it, i) => (
                 <View key={it.clave}>
                   {i > 0 ? <Separador /> : null}
+                  {/* ⭐ **DE QUIÉN ES ESTE PLAN** (G7). La cara PRESIDE la fila:
+                      *«todo se contrata por mascota»* es firma del founder, y
+                      una familia con dos animales no debería adivinar cuál está
+                      pagando. Sin nombre no se dibuja nada — **no se inventa un
+                      sujeto**, y el plan sigue visible con su precio y su fecha,
+                      que es lo que la familia vino a mirar. */}
+                  {it.mascotaNombre !== null ? (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: spacing[3],
+                        paddingHorizontal: spacing[4],
+                        paddingTop: spacing[3],
+                      }}
+                    >
+                      <AvatarMascota
+                        nombre={it.mascotaNombre}
+                        fotoUrl={
+                          caraDeMascota({
+                            especie: it.mascotaEspecie ?? '',
+                            razaSlug: null,
+                            fotoUri: it.mascotaCara,
+                          }) ?? undefined
+                        }
+                        tamano="sm"
+                      />
+                      <Texto variante="cuerpo">{it.mascotaNombre}</Texto>
+                    </View>
+                  ) : null}
                   <Celda
                     titulo={it.titulo}
                     subtitulo={it.donde ?? undefined}
