@@ -22381,6 +22381,10 @@ export type Database = {
         Args: { p_mascota_id: string; p_user_id: string }
         Returns: boolean
       }
+      _user_es_de_la_familia_de: {
+        Args: { p_mascota_id: string; p_user_id: string }
+        Returns: boolean
+      }
       _user_es_familia_de_mascota: {
         Args: { p_mascota_id: string; p_user_id: string }
         Returns: boolean
@@ -24373,6 +24377,10 @@ export type Database = {
         }[]
       }
       obtener_mes_pendiente_guarderia: { Args: never; Returns: Json }
+      obtener_mi_adoptable: {
+        Args: { p_publicacion_id: string }
+        Returns: Json
+      }
       obtener_mi_cuenta_refugio: { Args: never; Returns: Json }
       obtener_mi_posicion_en_prestador: {
         Args: { p_prestador_id: string }
@@ -24999,6 +25007,7 @@ export type Database = {
         Args: { p_grooming_id: string; p_momento: string }
         Returns: Json
       }
+      quitar_foto_adoptable: { Args: { p_foto_id: string }; Returns: Json }
       quitar_objetivo_adiestramiento: {
         Args: { p_adiestramiento_id: string; p_objetivo_codigo: string }
         Returns: Json

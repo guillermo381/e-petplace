@@ -1721,8 +1721,9 @@ export {
   reordenarFotosAdoptable,
   borrarFotoAdoptable,
 } from './wrappers/adopcion';
-export { evaluarEsterilizacionAdoptable, obtenerMisAdoptables } from './wrappers/adopcion';
+export { evaluarEsterilizacionAdoptable, obtenerMisAdoptables, obtenerMiAdoptable } from './wrappers/adopcion';
 export type {
+  MiAdoptableFicha,
   RespuestasPostulacion,
   MiAdoptable,
   VeredictoEsterilizacion,
