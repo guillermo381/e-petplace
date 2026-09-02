@@ -1,0 +1,6 @@
+-- REVERSA de 20260908480000 · la puerta que crea las estadías de la
+-- mensualidad deja de validar especie.
+-- 🔴 REVERTIR REABRE EL AGUJERO: el reloj vuelve a crear estadías para
+-- cualquier especie sobre mandatos firmados antes del guard. No borra datos.
+-- El cuerpo previo se recupera de `pg_get_functiondef` del commit anterior a
+-- esta migración; NO se transcribe acá para no dejar dos fuentes.
