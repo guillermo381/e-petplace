@@ -38,11 +38,16 @@
  *   bucket `adopcion-fotos` tiene INSERT en `is_admin()` ⇒ un refugio no puede
  *   subir). **Un carrusel de un elemento no es un carrusel.** Cuando el portal
  *   suba fotos de verdad, la decisión se toma con B y A juntos.
- * · **EL SEMÁFORO SANITARIO (ítem 11)** — `SemaforoSanitario` exige
- *   `onResolver` cuando algo falta, y **acá el que mira no puede resolver
- *   nada**: lo completa el refugio. Montarlo con un `onResolver` inventado sería
- *   dibujar un camino que no existe. **Pedido a B como brazo informativo**; NO
- *   se dibuja a mano al lado de su pieza (`D-645`).
+ * ✅ **EL SEMÁFORO SANITARIO (ítem 11) ESTÁ, y llegó por pedir en vez de
+ *   copiar.** La pieza exigía `onResolver` cuando algo falta —correcto para la
+ *   mascota de la familia, donde el camino existe— y acá el que mira no puede
+ *   resolver nada. En vez de montarla con un `onResolver` de mentira o
+ *   dibujarla a mano al lado (`D-645`), se le pidió el ensanche a B: hoy
+ *   `lector="observador"` vuelve el camino **imposible de pasar**, no opcional.
+ *   *Las dos garantías conviven y ninguna se ablandó.*
+ *   Y B encontró un SEGUNDO hueco a partir del dato que iba al costado: nació
+ *   `no_declarado`, porque **los tres campos de salud dicen «no se sabe» de
+ *   tres formas distintas** y ninguna es una carencia.
  * · **«Reportar esta publicación»** — `reportar_publicacion` no existe todavía
  *   (medido: cero en `packages/api`). No se dibuja apagado: *un control que no
  *   hace nada es una promesa rota a un toque* (Ley 23).
@@ -62,12 +67,14 @@ import {
   FichaAdoptable as FichaDeAdopcion,
   Hoja,
   Icono,
+  SemaforoSanitario,
   SenalesAdoptable,
   Texto,
   spacing,
   useAviso,
   useTheme,
   type ConvivenciaCon,
+  type RequisitoSanitarioObservado,
   type SenalAdoptable,
 } from '@epetplace/ui';
 import {
@@ -187,6 +194,54 @@ export default function PantallaFichaAdoptable() {
           ? { con, estado: 'no' }
           : { con, estado: 'no_se_sabe', voz: t('fichaAdoptable.noSeSabe') };
 
+    /**
+     * EL SEMÁFORO, con `lector="observador"`: acá el camino es **imposible de
+     * pasar** (`?: never`), no opcional. Es el ítem 11 hecho tipo — *quien mira
+     * no puede resolver nada, lo completa el refugio desde su portal*.
+     *
+     * 🔴 **LOS TRES CAMPOS DICEN «NO SE SABE» DE TRES FORMAS DISTINTAS**, y el
+     * tercer estado de la pieza existe para eso: `esterilizado: null` ·
+     * `desparasitado: 'no_se_sabe'` (o `null`) · `estadoVacunal: null` o
+     * `'sin_datos'`. **Ninguna se pinta como carencia**: falta el DATO, no el
+     * acto, y un «nadie lo dijo» dibujado como pendiente afirma que hay algo
+     * que hacer sobre un animal que alguien está por adoptar.
+     *
+     * ⚠️ **`'sin_datos'` y `null` colapsan en la misma voz, a propósito.** El
+     * primero se eligió de una lista y el segundo nunca se tocó — *pero para
+     * quien decide adoptar el hecho es el mismo, y distinguirlos exigiría
+     * afirmar una intención que el dato no trae.* Se declara el colapso en vez
+     * de inventar dos frases.
+     */
+    const noDeclarado = (clave: string, etiqueta: string): RequisitoSanitarioObservado => ({
+      clave,
+      etiqueta,
+      estado: 'no_declarado',
+      voz: t('fichaAdoptable.saludSinDeclarar'),
+    });
+    const requisitos: RequisitoSanitarioObservado[] = [
+      f.esterilizado === null
+        ? noDeclarado('esterilizado', t('fichaAdoptable.saludEsterilizado'))
+        : {
+            clave: 'esterilizado',
+            etiqueta: t('fichaAdoptable.saludEsterilizado'),
+            estado: f.esterilizado ? 'al_dia' : 'falta',
+          },
+      f.estadoVacunal === 'al_dia' || f.estadoVacunal === 'incompleto'
+        ? {
+            clave: 'vacunas',
+            etiqueta: t('fichaAdoptable.saludVacunas'),
+            estado: f.estadoVacunal === 'al_dia' ? 'al_dia' : 'falta',
+          }
+        : noDeclarado('vacunas', t('fichaAdoptable.saludVacunas')),
+      f.desparasitado === 'si' || f.desparasitado === 'no'
+        ? {
+            clave: 'desparasitado',
+            etiqueta: t('fichaAdoptable.saludDesparasitado'),
+            estado: f.desparasitado === 'si' ? 'al_dia' : 'falta',
+          }
+        : noDeclarado('desparasitado', t('fichaAdoptable.saludDesparasitado')),
+    ];
+
     const senales: SenalAdoptable[] = [
       ...(f.urgente ? [{ tipo: 'urgente' as const, voz: t('fichaAdoptable.senalUrgente') }] : []),
       ...(f.pareja === null
@@ -244,6 +299,7 @@ export default function PantallaFichaAdoptable() {
           ...(f.sexo === null ? [] : [t(`adoptar.sexo_${f.sexo}` as 'adoptar.sexo_macho')]),
           ...(f.talla === null ? [] : [t(`adoptar.talla_${f.talla}` as 'adoptar.talla_S')]),
         ]}
+        semaforo={<SemaforoSanitario lector="observador" requisitos={requisitos} />}
         convivencia={
           <Convivencia
             filas={[

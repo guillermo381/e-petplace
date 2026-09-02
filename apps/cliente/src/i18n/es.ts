@@ -1583,6 +1583,10 @@ export const clienteEs = {
   // S112-C · LA FICHA DEL ADOPTABLE (§4.1). La composición es de B
   // (`FichaAdoptable`); acá vive su voz.
   fichaAdoptable: {
+    saludSinDeclarar: 'El refugio todavía no lo declaró',
+    saludEsterilizado: 'Esterilizado',
+    saludVacunas: 'Vacunas',
+    saludDesparasitado: 'Desparasitación',
     titulo: 'Adopción',
     noSeSabe: 'Todavía no se sabe',
     convivenciaRotulo: 'Con quién puede vivir',

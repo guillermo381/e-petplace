@@ -1250,6 +1250,10 @@ export const clienteEn = {
     anios: '{{anios}} years',
   },
   fichaAdoptable: {
+    saludSinDeclarar: "The shelter hasn't stated this yet",
+    saludEsterilizado: 'Neutered',
+    saludVacunas: 'Vaccines',
+    saludDesparasitado: 'Deworming',
     titulo: 'Adoption',
     noSeSabe: "We don't know yet",
     convivenciaRotulo: 'Who they can live with',
