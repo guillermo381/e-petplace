@@ -71,6 +71,14 @@ const MENSAJES = {
   estado_no_valido:       'Ese estado no existe.',
   /* `adoptada` la escribe el acta con las dos firmas, jamás una pantalla. */
   adoptada_la_escribe_el_acta: 'Un animal pasa a «adoptada» cuando se firma el acta, no antes.',
+  /* 🔴 La regla de los seis meses (OM 019 art. 6.7). Los dos motivos son
+     DISTINTOS a propósito: mandar a esterilizar cuando lo que falta es la edad
+     manda al refugio a hacer algo que no resuelve nada. */
+  adoptable_no_esterilizado: 'Pasados los seis meses, se publica esterilizado.',
+  edad_no_declarada:      'Falta la edad. Una fecha estimada alcanza.',
+  tipo_de_refugio_no_valido: 'Ese tipo de refugio no existe.',
+  criterio_requerido:     'Escribe qué se revisó para verificar este refugio.',
+  cuenta_no_existe:       'No encontramos esa cuenta.',
   /* Un campo fuera de la lista blanca rebota CON SU NOMBRE: un editor que
      ignora en silencio le dice a la pantalla que guardó algo que no guardó. */
   campo_no_editable:      'Ese campo no se puede editar desde acá.',
@@ -154,7 +162,14 @@ export interface Adoptable {
   fechaNacimientoPrecision: string | null;
   fotoUrl: string | null;
   talla: string | null;
-  esterilizado: boolean | null;
+  /** 🔴 TRES estados. Nació `boolean | null` y se convirtió el mismo día:
+   *  `null` cargaba dos significados que no son el mismo — «no lo declaró» y
+   *  «no lo está» — y desde afuera no se distinguían. */
+  esterilizado: Convivencia;
+  /** El semáforo, con los tres datos en EL MISMO vocabulario. `estadoVacunal`
+   *  sigue viajando entero al lado porque `incompleto` no es «no vacunado»:
+   *  es «no está al día», y ese matiz no cabe en tres estados. */
+  salud: { vacunas: Convivencia; esterilizado: Convivencia; desparasitado: Convivencia };
   /** Días desde que llegó al rescate. **Es un número, no una frase**: la
    *  redacción vive en el riel (`describirEspera`), no en el motor. */
   esperaDias: number;
@@ -194,6 +209,8 @@ export interface FiltrosAdoptables {
   talla?: string;
   sexo?: string;
   urgente?: boolean;
+  /** Sólo trae los declarados `'si'`: **`no_se_sabe` no cuenta como sí**, que
+   *  es la diferencia entera entre este vocabulario y el binario que reemplaza. */
   esterilizado?: boolean;
   convivePerros?: Convivencia;
   conviveGatos?: Convivencia;
@@ -238,7 +255,15 @@ function aAdoptable(f: Record<string, unknown>): Adoptable | null {
     fechaNacimientoPrecision: txt('fecha_nacimiento_precision'),
     fotoUrl: txt('foto_url'),
     talla: txt('talla'),
-    esterilizado: typeof f.esterilizado === 'boolean' ? f.esterilizado : null,
+    esterilizado: aConvivencia(f.esterilizado),
+    salud: (() => {
+      const sd = (f.salud ?? {}) as Record<string, unknown>;
+      return {
+        vacunas: aConvivencia(sd.vacunas),
+        esterilizado: aConvivencia(sd.esterilizado),
+        desparasitado: aConvivencia(sd.desparasitado),
+      };
+    })(),
     esperaDias: Number.isFinite(num('espera_dias')) ? num('espera_dias') : 0,
     ingresadoEn: txt('ingresado_en') ?? '',
     urgente: f.urgente === true,
@@ -470,6 +495,47 @@ export async function actualizarAdoptable(params: {
 }
 
 export type EstadoAdoptable = 'borrador' | 'publicada' | 'pausada' | 'adoptada' | 'no_disponible';
+
+/** El veredicto de la regla de los seis meses (OM 019 art. 6.7), **antes** de
+ *  intentar publicar. Existe para que el interruptor de la tarjeta pueda decir
+ *  POR QUÉ está apagado sin tener que provocar un rebote — *un control apagado
+ *  sin razón a la vista es el defecto* (§2 del loop).
+ *
+ *  Los tres motivos son distintos a propósito: `edad_no_declarada` **no se
+ *  disfraza** de `adoptable_no_esterilizado`, porque mandaría al refugio a
+ *  esterilizar cuando lo que falta es otra cosa. */
+export interface VeredictoEsterilizacion {
+  puede: boolean;
+  motivo: 'adoptable_no_esterilizado' | 'edad_no_declarada' | null;
+  /** Un cachorro pasa, **y el compromiso viaja de vuelta**: dejarlo pasar sin
+   *  nombrarlo convertiría una obligación legal en un olvido. */
+  requiereCompromiso: boolean;
+  edadMeses: number | null;
+  detalle: string | null;
+}
+
+export async function evaluarEsterilizacionAdoptable(
+  publicacionId: string,
+): Promise<ResultadoWrapper<VeredictoEsterilizacion, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('evaluar_esterilizacion_adoptable', {
+    p_publicacion_id: publicacionId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  const m = r.motivo;
+  return {
+    ok: true,
+    data: {
+      puede: r.puede === true,
+      motivo:
+        m === 'adoptable_no_esterilizado' || m === 'edad_no_declarada' ? m : null,
+      requiereCompromiso: r.requiere_compromiso === true,
+      edadMeses: typeof r.edad_meses === 'number' ? r.edad_meses : null,
+      detalle: typeof r.detalle === 'string' ? r.detalle : null,
+    },
+  };
+}
 
 /** Mueve el estado de la publicación. **Una sola puerta para los cinco.**
  *
