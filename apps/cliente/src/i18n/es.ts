@@ -1583,6 +1583,29 @@ export const clienteEs = {
   // S112-C · LA FICHA DEL ADOPTABLE (§4.1). La composición es de B
   // (`FichaAdoptable`); acá vive su voz.
   // S112-C · EL FORMULARIO DE POSTULACIÓN (§4.1).
+  // S112-C · EL ACTA Y LA FIRMA (§4.1).
+  acta: {
+    titulo: 'El acta de adopción',
+    estadoFirmas: 'Firmaste · falta la firma del refugio ({{n}} de 2)',
+    falta_cedula: 'Tu cédula',
+    falta_domicilio: 'Tu domicilio',
+    faltaOtro: 'Falta un dato del acta: {{que}}. Escríbele al refugio.',
+    faltaCargar: 'Carga lo que falta arriba para poder firmar.',
+    faltaLeer: 'Lee el acta hasta el final para poder firmar.',
+    pedirCodigo: 'Firmar',
+    codigoEtiqueta: 'Tu código de firma',
+    codigoAyuda: 'Te lo mandamos a {{a}}. Vence en 10 minutos.',
+    codigoEnviado: 'Te mandamos el código a {{a}}.',
+    faltaCodigo: 'Escribe los 8 dígitos que te mandamos.',
+    firmar: 'Firmar el acta',
+    hitoTitulo: 'Una vida nueva empieza',
+    hitoHoy: 'Hoy',
+    folio: 'Folio {{folio}}',
+    irAlHogar: 'Ver su expediente',
+    errorTitulo: 'No pudimos abrir el acta',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+  },
   postular: {
     titulo: 'Tu postulación',
     tituloCon: 'Postular por {{nombre}}',
@@ -1618,6 +1641,15 @@ export const clienteEs = {
     reintentar: 'Probar de nuevo',
   },
   fichaAdoptable: {
+    reportar: 'Reportar esta publicación',
+    reportarCuerpo:
+      'Si algo acá no está bien, cuéntanos qué pasa. Lo revisa e-PetPlace, y el refugio no ve quién lo reportó.',
+    motivo_maltrato: 'Hay señales de maltrato',
+    motivo_venta_encubierta: 'Parece una venta, no una adopción',
+    motivo_datos_falsos: 'Los datos no son ciertos',
+    motivo_no_es_adopcion: 'Esto no es una adopción',
+    motivo_otro: 'Otra cosa',
+    reporteGracias: 'Gracias. Lo vamos a revisar.',
     saludSinDeclarar: 'El refugio todavía no lo declaró',
     saludEsterilizado: 'Esterilizado',
     saludVacunas: 'Vacunas',
@@ -3680,6 +3712,7 @@ export const clienteEs = {
     despensaDetalle: 'Todavía no podemos mostrarlas acá. Por ahora las manejas desde la despensa, en la compra donde las activaste.',
   },
   hiloAdopcion: {
+    verActa: 'Ver el acta de adopción',
     titulo: 'Tu solicitud',
     de: 'De {{refugio}}',
     estado_recibida: 'Recibida',

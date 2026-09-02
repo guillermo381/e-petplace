@@ -79,10 +79,11 @@ import {
 } from '@epetplace/ui';
 import {
   caraDeMascota,
-  crearSolicitudAdopcion,
   obtenerAdoptable,
   obtenerSesion,
+  reportarPublicacion,
   type FichaAdoptable,
+  type MotivoReporte,
 } from '@epetplace/api';
 import { describirEdad, describirEspera } from '@epetplace/domain';
 
@@ -97,7 +98,17 @@ type Estado =
 /** Cuál de las tres hojas está abierta. `null` = ninguna. **Una variable y no
  *  tres booleanos**: dos hojas abiertas a la vez es un estado que no existe, y
  *  con tres banderas sería expresable. */
-type HojaAbierta = 'bono' | 'padrinazgo' | 'verificacion' | null;
+type HojaAbierta = 'bono' | 'padrinazgo' | 'verificacion' | 'reportar' | null;
+
+/** Los cinco motivos del motor. **Se declaran y no se derivan**: no hay
+ *  catálogo que los traiga, y el enum los cierra del otro lado. */
+const MOTIVOS: readonly MotivoReporte[] = [
+  'maltrato',
+  'venta_encubierta',
+  'datos_falsos',
+  'no_es_adopcion',
+  'otro',
+];
 
 export default function PantallaFichaAdoptable() {
   const { publicacionId } = useLocalSearchParams<{ publicacionId: string }>();
@@ -109,6 +120,7 @@ export default function PantallaFichaAdoptable() {
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [conSesion, setConSesion] = useState<boolean | null>(null);
   const [hoja, setHoja] = useState<HojaAbierta>(null);
+  const [reportando, setReportando] = useState(false);
   const [intento, setIntento] = useState(0);
 
   useFocusEffect(
@@ -162,6 +174,30 @@ export default function PantallaFichaAdoptable() {
       pathname: '/adoptar/postular/[publicacionId]',
       params: { publicacionId: f.publicacionId, nombre: f.nombre },
     });
+  };
+
+  /**
+   * REPORTAR. **Idempotente y hablada**: el segundo toque devuelve el reporte
+   * que existe, y por eso `yaExistia` **no se trata como error** — *sobre un
+   * acto delicado, un rebote técnico se lee como «no se pudo denunciar»*.
+   *
+   * 🔴 **Y el refugio NO ve quién reportó**: no está en su policy. La pantalla
+   * no lo promete ni lo insinúa; simplemente es verdad del otro lado.
+   */
+  const reportar = async (f: FichaAdoptable, motivo: MotivoReporte) => {
+    if (reportando) return;
+    setReportando(true);
+    try {
+      const r = await reportarPublicacion({ publicacionId: f.publicacionId, motivo });
+      if (!r.ok) {
+        mostrar({ variante: 'error', texto: r.mensaje });
+        return;
+      }
+      setHoja(null);
+      mostrar({ variante: 'neutro', texto: t('fichaAdoptable.reporteGracias') });
+    } finally {
+      setReportando(false);
+    }
   };
 
   const contenido = (f: FichaAdoptable) => {
@@ -333,6 +369,13 @@ export default function PantallaFichaAdoptable() {
               : t('adoptar.postular', { nombre: f.nombre }),
           onPress: () => postular(f),
         }}
+        /* «Reportar esta publicación» — discreto y al final (§4.1). Se dibuja
+           porque `reportar_publicacion` EXISTE: hasta hace un rato no estaba y
+           el control no se ofrecía apagado (Ley 23). */
+        reportar={{
+          etiqueta: t('fichaAdoptable.reportar'),
+          onPress: () => setHoja('reportar'),
+        }}
         apadrinar={{
           texto: t('fichaAdoptable.apadrinar'),
           onExplicar: () => setHoja('padrinazgo'),
@@ -420,6 +463,36 @@ export default function PantallaFichaAdoptable() {
         <View style={{ gap: spacing[3] }}>
           <Texto variante="cuerpo">{t('fichaAdoptable.bonoCuerpo')}</Texto>
           <Boton etiqueta={t('fichaAdoptable.cerrar')} bloque onPress={() => setHoja(null)} />
+        </View>
+      </Hoja>
+
+      <Hoja
+        visible={hoja === 'reportar'}
+        onCerrar={() => setHoja(null)}
+        titulo={t('fichaAdoptable.reportar')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="cuerpo">{t('fichaAdoptable.reportarCuerpo')}</Texto>
+          {/* Un motivo por botón y ninguno preseleccionado: *un motivo elegido
+              por default es una denuncia que la pantalla escribió.* */}
+          {MOTIVOS.map((m) => (
+            <Boton
+              key={m}
+              variante="secundario"
+              bloque
+              etiqueta={t(`fichaAdoptable.motivo_${m}` as 'fichaAdoptable.motivo_maltrato')}
+              cargando={reportando}
+              onPress={() => {
+                if (estado.fase === 'listo') void reportar(estado.ficha, m);
+              }}
+            />
+          ))}
+          <Boton
+            variante="ghost"
+            bloque
+            etiqueta={t('fichaAdoptable.cerrar')}
+            onPress={() => setHoja(null)}
+          />
         </View>
       </Hoja>
 
