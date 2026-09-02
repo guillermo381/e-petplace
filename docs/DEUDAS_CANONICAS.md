@@ -26842,3 +26842,45 @@ decirlo.* Se verifica por el CONTENIDO del archivo (que nombre la ruta nueva),
 jamás por el código de salida.
 
 **DISPARO: ninguno. Es aviso permanente de la casa.**
+
+---
+
+## 🔴 `L-480` — ANTES DE LLAMAR «HEREDADO» A UN ROJO, MEDÍ SI EL INSTRUMENTO PODÍA VER ALGO
+
+**Firma del founder, 2-sep-2026.** Nace de dos pistas que llegaron al mismo
+correctivo el mismo día, **una por el camino barato y otra por el caro**.
+
+| pista | qué pasó |
+|---|---|
+| **D** | Su primer `tsc` en el worktree dio **`0` SIN `node_modules`** — sin poder resolver un solo import. *Un typecheck ciego y uno legítimo se leen igual: los dos imprimen `0`.* Lo frenó el hook con **7 × `TS2307`**; en vez de declararlos ajenos corrió `pnpm install`, y **recién ahí el gate midió** |
+| **B** | Llegó al mismo correctivo **por el camino caro**: declaró «clase heredada» sobre un rojo **que era suyo** |
+
+> ### ⇒ *Un verde de typecheck que no dice si había dependencias no es un verde: es un número.* **Y «heredado» es la coartada más barata que existe frente a un rojo — se acepta sola, no pide evidencia, y deja el defecto adentro.**
+
+### LO QUE LA CONVIERTE EN LEY Y NO EN ANÉCDOTA
+
+El propio gate del monorepo **ya declara esta trampa** cuando toca un paquete
+compartido: *«este guard NO sabe si lo rompiste vos: mide el ÁRBOL, no tu
+cambio… antes de buscar en lo que editaste, mirá si el rojo ya existía»*. **Esa
+advertencia, leída con prisa, se lee como permiso.** La ley cierra el hueco por
+el otro lado: **la salida «es ajeno» exige la misma evidencia que cualquier
+otra afirmación** — reproducirlo sin tu cambio, o nombrar el commit que lo trajo.
+
+### EL PAR QUE HAY QUE CORRER, y son dos preguntas distintas
+
+1. **¿El instrumento podía ver?** Dependencias instaladas · generados al día
+   (`L-479`) · el corpus no vacío. **Un `0` sobre cero archivos es un `0`.**
+2. **¿Y el rojo es mío?** Recién con la ① contestada: `git stash -u` y volver a
+   medir, o nombrar el commit ajeno.
+
+*Hacer la ② sin la ① es cómo se archiva un defecto propio con el nombre de otro.*
+
+### SU HERMANA, y por qué van juntas
+
+`L-479` dice que **un generado viejo acusa en falso**; ésta dice que **un
+entorno incompleto absuelve en falso**. **Las dos son el mismo eje: el estado
+del entorno decide qué significa el número, y el número no lo declara.** Por eso
+el correctivo es el mismo — *todo verde de gate viaja con la condición en que se
+midió, o no viaja.*
+
+**DISPARO: ninguno. Rige desde su firma.**
