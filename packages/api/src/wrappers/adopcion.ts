@@ -78,6 +78,7 @@ const MENSAJES = {
   cursor_no_valido:       'La paginación se perdió. Vuelve a cargar la lista.',
   path_requerido:         'Falta el archivo.',
   tope_de_fotos:          'Llegaste al tope de fotos de esta ficha.',
+  path_fuera_de_la_carpeta: 'Esa foto no está en la carpeta de esta ficha.',
   foto_no_existe:         'No encontramos esa foto.',
   orden_incompleto:       'El orden llegó incompleto: manda todas las fotos.',
 } as const;
@@ -521,6 +522,11 @@ export async function despublicarAdoptable(params: {
    simultáneas pelearían por el mismo número y el rebote sería un `23505` crudo
    que no explica nada. */
 
+/** 🔴 EL `path` VA DENTRO DE LA CARPETA DE LA PUBLICACIÓN: `<publicacionId>/…`.
+ *  No es una convención: **es lo que la policy del bucket mira** para decidir
+ *  de quién es el archivo. Un path fuera de esa carpeta rebota con
+ *  `path_fuera_de_la_carpeta` — *si no rebotara acá, la fila quedaría apuntando
+ *  a un archivo que el bucket nunca va a aceptar, y la pantalla la dibujaría.* */
 export async function agregarFotoAdoptable(params: {
   publicacionId: string;
   path: string;
