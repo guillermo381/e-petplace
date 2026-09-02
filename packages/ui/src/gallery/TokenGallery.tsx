@@ -29,7 +29,6 @@ import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
 import { Badge, useEtiquetaBadge } from '../components/Badge'
-import { CampoCodigo } from '../components/CampoCodigo'
 import { FichaPrestador } from '../components/FichaPrestador'
 import { MapaPunto } from '../components/MapaPunto'
 import { MapaZona } from '../components/MapaZona'
@@ -107,6 +106,8 @@ import {
   type RespuestasPostulacion,
 } from '../components/FormularioPostulacion'
 import { DocumentoLegalLectura } from '../components/DocumentoLegalLectura'
+import { CampoCodigo } from '../components/CampoCodigo'
+import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
@@ -734,6 +735,46 @@ function MuestraDocumentoLegal({ largo }: { largo: boolean }) {
               onPress={() => {}}
             />
           }
+        />
+      </View>
+    </View>
+  )
+}
+
+/* ENTRADA DE CATÁLOGO de `CodigoFirmaInput` (R17) — no es su gate; su gate
+   es la pantalla del acta en las dos apps (C8).
+
+   🔴 QUÉ HAY QUE VER, y es una COMPARACIÓN: los dos campos dicen que el
+   código no sirvió. **El de arriba (alarma) reprocha; el de abajo (estado)
+   informa.** El de abajo es el que va en la firma de una adopción: vencido,
+   equivocado o intentos agotados no son un tipeo mal hecho — son el estado
+   de ese código, y lo único que hay que hacer es pedir otro. Si el de abajo
+   se lee como un reto, el tono no está haciendo su trabajo. */
+function MuestraCodigoFirma() {
+  const [a, setA] = useState('1234')
+  const [b, setB] = useState('12345')
+  return (
+    <View style={{ gap: spacing[5] }}>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">tono ALARMA (el de siempre) — lo que escribiste no sirve</Texto>
+        <CampoCodigo
+          largo={8}
+          valor={a}
+          onCambio={setA}
+          etiqueta="Código de verificación"
+          error="Ese código no es válido. Revisá los ocho dígitos."
+        />
+      </View>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">
+          ⭐ tono ESTADO — `CodigoFirmaInput`, el de la firma del acta (N23)
+        </Texto>
+        <CodigoFirmaInput
+          valor={b}
+          onCambio={setB}
+          etiqueta="Código para firmar"
+          ayuda="Te lo mandamos al correo de tu cuenta."
+          mensaje="Este código venció. Pedí uno nuevo y te lo mandamos otra vez."
         />
       </View>
     </View>
@@ -5445,6 +5486,10 @@ function GaleriaInterna() {
             condiciones de adopción, 1 711 caracteres, que entran en un teléfono
             grande y no en uno chico. Su gate de lógica es `pnpm verify:vio-todo`.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="CodigoFirmaInput (S112) — un código vencido no es un tipeo equivocado">
+          <MuestraCodigoFirma />
         </Seccion>
 
         <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">

@@ -514,6 +514,16 @@ export {
 // gate (`pnpm verify:vio-todo`) mida la función REAL y no una copia.
 export { pudoVerTodo, TOLERANCIA_VIO_TODO } from './components/vio-todo'
 
+// CodigoFirmaInput — S112-B (B4): `CampoCodigo` con las dos decisiones del
+// vertical puestas (8 dígitos · tono de ESTADO). No es una pieza nueva: el
+// ensanche real fue `tono` en `PieDeCampo`, la anatomía que comparten las
+// tres piezas de campo. Vencido / equivocado / intentos agotados NO son un
+// tipeo equivocado y no se pintan de rojo (N23).
+export {
+  CodigoFirmaInput,
+  type CodigoFirmaInputProps,
+} from './components/CodigoFirmaInput'
+
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
 // sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.
