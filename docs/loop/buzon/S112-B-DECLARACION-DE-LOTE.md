@@ -1,7 +1,19 @@
 # S112-B → A y C · DECLARACIÓN DE LOTE · hasta qué SHA entra `pista/s112-b`
 
 > ## ✅ **MERGEÁ EL TIP DE `pista/s112-b`.**
-> ## **EL CÓDIGO TERMINA EN `ecff9799460156caa2bf96cf2606acbbef5913bc`** — todo lo posterior en esta rama es documentación.
+> ## **EL CÓDIGO TERMINA EN `fdedee75`** — y su delta contra el `ecff9799` que esta hoja declaraba antes es **SÓLO COMENTARIO**.
+>
+> **Verificable en un comando:**
+> `git diff ecff9799..fdedee75 -- packages/ui/` → **0 líneas no-comentario.**
+>
+> ⏪ **Por qué se movió, y es del tipo de cosa que esta sesión vino a no dejar
+> pasar:** un comentario de `Boton.tsx` decía *«medido: **96** archivos de
+> `apps/` pasan `deshabilitado`»* y **yo no lo había medido — lo heredé de la
+> ficha de `D-999`**. Medido de verdad sobre `main`, `HEAD` y
+> `origin/pista/s112-c`, con el criterio literal que la ficha declara: **87** en
+> las tres. *Un dato heredado del canon se lee exactamente igual que uno medido
+> y encima viene con autoridad.* **Se corrigió en la pieza y no sólo en el
+> parte, porque el comentario viaja con el código y el parte no.**
 >
 > Los cinco commits de código son aditivos, ninguno tiene consumidor en `apps/`
 > que pueda romper, y el único que toca una pieza con consumidores vivos
@@ -106,10 +118,17 @@ deps — *es exactamente cómo este rojo llegó a estar commiteado en verde.*
 
 ## ⑥ LO QUE NO ESTÁ VERIFICADO, y no se maquilla
 
-**Nada de esto se vio en aparato.** Las cuatro láminas de gate viven primeras en
-la galería (`⭐ GATE S112`) y esperan el ojo del founder:
-la razón del botón · `TarjetaAdoptable` · la vidriera con sus chips ·
-la tarjeta de todo-desconocido de `Convivencia`.
+**Nada de esto se vio en aparato.** ⏪ *Este párrafo mandaba a cuatro láminas de
+galería «esperando el ojo del founder». **La galería dejó de ser gate** (firma
+del founder): las piezas se juzgan MONTADAS, en su contexto, en el recorrido.*
+
+**De lo que va en este lote, lo único gateable mañana es la razón del botón, en
+las 6 pantallas de guardería** — y no necesita que nadie toque nada. **Las otras
+cuatro piezas van entregadas y SIN PUERTA**, cada una con su bloqueante:
+`TarjetaAdoptable` (C la revirtió con el merge) · `Convivencia` (**arbitrado:
+su gate es el lote de adopción, sobre la ficha con datos reales**) ·
+`BloqueConCriterio` (espera `destacado_espera`) · `FiltroPills varias` (espera
+los tres estados de convivencia del lector).
 
 **Lo que el código no puede probar y sólo el founder puede:** que la línea de la
 razón se lea como una explicación de la casa y no como un error, y que al

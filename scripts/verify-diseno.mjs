@@ -1424,6 +1424,18 @@ const EXENTOS_R17 = new Set([
   // 25 preexistentes de una vez: es decisión de mesa, no de esta tanda.
   'sugerir', 'coincidenciasPrimero', 'normalizarVoz', 'palabrasDeBusqueda',
   'puntajeDeCoincidencia',
+  // S112-B · MISMA CLASE QUE `ALTO_PIE_CAMPO`, y se declaran por su misma
+  // razón (el día que el filtro se ensanche, la decisión ya está tomada):
+  // `pudoVerTodo` es una CUENTA de tres restas y `TOLERANCIA_VIO_TODO` es un
+  // número. Mirarlos en una galería no diría nada — lo que hay que poder ver
+  // es la PIEZA que los usa, y `DocumentoLegalLectura` sí tiene entrada, con
+  // su discriminador de dos mitades (corto que entra sin scroll vs largo).
+  //
+  // 🔴 Y su gate NO es la galería: es `pnpm verify:vio-todo`, que importa la
+  // función REAL —jamás una copia— y la corre contra los seis casos, con el
+  // que rompe a la cabeza. Se probó EN ROJO re-implementándola como evento:
+  // salió exit 1 nombrando los casos ① y ②.
+  'pudoVerTodo', 'TOLERANCIA_VIO_TODO',
 ]);
 /** VACÍO desde S82-B r17: las NUEVE ganaron su entrada en la misma
  *  tanda que la regla las enumeró — importadas, jamás reimplementadas.

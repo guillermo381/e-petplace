@@ -62,7 +62,7 @@ import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 import { Boton } from './Boton'
-import { EtiquetaDeCampo, PieDeCampo } from './Campo'
+import { EtiquetaDeCampo, PieDeCampo, type TonoDelPie } from './Campo'
 
 /**
  * S104-C · EL BOTÓN «PEGAR» — con la sonda nativa de la casa (D-579/L-187).
@@ -136,6 +136,15 @@ export interface CampoCodigoProps {
   /** Mensaje de error (dangerText en el pie; borde danger en las cajas,
    *  sin gritar) — anunciado con liveRegion polite vía PieDeCampo. */
   error?: string
+  /**
+   * CÓMO SE LEE ESE MENSAJE — S112-B (B4). Ver `TonoDelPie` en `Campo`.
+   *
+   * Con `'estado'` el mensaje se dice sin rojo **y las cajas no se pintan**:
+   * un código de firma vencido o con los intentos agotados no es un tipeo
+   * equivocado, es el estado de ese código. Default `'alarma'`, así que los
+   * cuatro consumidores vivos no cambian en un byte.
+   */
+  tono?: TonoDelPie
   deshabilitado?: boolean
 }
 
@@ -146,6 +155,7 @@ export function CampoCodigo({
   etiqueta,
   ayuda,
   error,
+  tono = 'alarma',
   deshabilitado = false,
 }: CampoCodigoProps) {
   const { theme } = useTheme()
@@ -225,7 +235,7 @@ export function CampoCodigo({
                    byte (su propio comentario decía «receta Campo»), y N11
                    lo vuelve exigible: *dos estilos de campo jamás conviven*
                    — dejar esta caja atrás fabricaría el segundo estilo. */
-                ...estiloDeCaja(theme, { error: !!error, enfocado: enfocado && i === indiceActivo }),
+                ...estiloDeCaja(theme, { error: !!error && tono === 'alarma', enfocado: enfocado && i === indiceActivo }),
                 transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
               }}
             >
@@ -281,7 +291,7 @@ export function CampoCodigo({
         </View>
       )}
 
-      <PieDeCampo ayuda={ayuda} error={error} />
+      <PieDeCampo ayuda={ayuda} error={error} tono={tono} />
     </View>
   )
 }

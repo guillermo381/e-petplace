@@ -123,11 +123,33 @@ export function EtiquetaDeCampo({ children }: EtiquetaDeCampoProps) {
   )
 }
 
+/**
+ * CÓMO SE LEE EL MENSAJE DEL PIE — S112-B (B4).
+ *
+ * `'alarma'` (default, el de siempre): **lo que escribiste no sirve.** Rojo,
+ * porque hay algo que corregir y la corrección es tuya (N12.4).
+ *
+ * `'estado'`: **lo que pasó no depende de vos.** Un código de firma que
+ * venció, o los intentos agotados, no son un error de tipeo — son el estado
+ * de ese código. Pintarlos de rojo le dice a la persona que hizo algo mal
+ * en el momento más cargado del recorrido, cuando lo único que hay que
+ * hacer es pedir otro. **N23: el acento se reserva para lo accionable y
+ * para lo que necesita ALARMA, y esto no es ninguno de los dos.**
+ *
+ * 🔴 **Lo que NO cambia con el tono: el anuncio.** `liveRegion` sigue en
+ * `polite` en los dos casos. *Un mensaje que aparece sin anunciarse no
+ * existe para quien no ve la pantalla, y bajar el color no es una razón
+ * para bajar la accesibilidad.*
+ */
+export type TonoDelPie = 'alarma' | 'estado'
+
 export interface PieDeCampoProps {
   /** Helper. `error` lo reemplaza en el MISMO slot. */
   ayuda?: string
   /** Mensaje de error (dangerText) — anunciado con liveRegion polite. */
   error?: string
+  /** Default `'alarma'`: los consumidores viejos no cambian en un byte. */
+  tono?: TonoDelPie
 }
 
 /**
@@ -143,7 +165,7 @@ export interface PieDeCampoProps {
  * del teclado vivía duplicada en dos archivos y curar uno dejaba el otro
  * roto; acá se cura de raíz antes de que pase.
  */
-export function PieDeCampo({ ayuda, error }: PieDeCampoProps) {
+export function PieDeCampo({ ayuda, error, tono = 'alarma' }: PieDeCampoProps) {
   const { theme } = useTheme()
   const mensaje = error ?? ayuda
 
@@ -170,7 +192,7 @@ export function PieDeCampo({ ayuda, error }: PieDeCampoProps) {
             // gate (`verify-contrast.ts:97`) y pasa en los tres.
             // MÁXIMO ALCANCE POR SITIO: no es una pantalla — lo hereda
             // CADA `Campo` de la casa, en las dos apps.
-            color: error ? theme.status.dangerText : theme.text.secondary,
+            color: error && tono === 'alarma' ? theme.status.dangerText : theme.text.secondary,
             marginTop: spacing[1],
           }}
         >

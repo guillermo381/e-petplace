@@ -471,7 +471,58 @@ export {
   Convivencia,
   type ConvivenciaProps,
   type ConvivenciaCon,
+  /** Los tres estados, escritos una sola vez para las DOS caras. */
+  type EstadoConvivencia,
 } from './components/Convivencia'
+
+// ConvivenciaInput — S112-B (B1): LA CARA QUE ESCRIBE. «Todavía no se sabe»
+// es una RESPUESTA, no la ausencia de una: `estado` es obligatoria y de los
+// tres, así que ni un boolean ni un cuarto estado ni un hueco se pueden
+// expresar. No es un control nuevo: es `SelectorSegmentado proposito=
+// "eleccion"` atado al vocabulario de `Convivencia`.
+export {
+  ConvivenciaInput,
+  type ConvivenciaInputProps,
+  type EjeConvivencia,
+} from './components/ConvivenciaInput'
+
+// FormularioPostulacion — S112-B (B2): LAS SEIS PREGUNTAS, Y NINGUNA MÁS. No
+// es un armador de formularios: un armador recibe los campos por prop, y un
+// campo de nombre de menor entra por esa misma puerta sin que nada lo note.
+// Las preguntas son de la pieza; el esquema es cerrado (`TS2353` a la clave
+// de más) y `envio` es una unión discriminada — apagado sin razón no compila.
+export {
+  FormularioPostulacion,
+  type FormularioPostulacionProps,
+  type RespuestasPostulacion,
+  type PreguntaDelFormulario,
+  type EnvioDeFormulario,
+} from './components/FormularioPostulacion'
+
+// DocumentoLegalLectura — S112-B (B3): el texto entero, y la prueba de que se
+// PUDO ver. Una pieza para dos documentos (condiciones y acta): son el mismo
+// texto largo con el mismo pie, y lo único que cambia es qué hay entre el
+// texto y el botón. No trae ningún texto y no puede traerlo.
+export {
+  DocumentoLegalLectura,
+  type DocumentoLegalLecturaProps,
+} from './components/DocumentoLegalLectura'
+
+// pudoVerTodo — la cuenta de «vi todo», como PREDICADO y no como evento: un
+// documento que entra sin scroll no produce ningún `onScroll`, y un «vi todo»
+// hecho de eventos deja la pantalla muerta sin error. Se exporta para que su
+// gate (`pnpm verify:vio-todo`) mida la función REAL y no una copia.
+export { pudoVerTodo, TOLERANCIA_VIO_TODO } from './components/vio-todo'
+
+// CodigoFirmaInput — S112-B (B4): `CampoCodigo` con las dos decisiones del
+// vertical puestas (8 dígitos · tono de ESTADO). No es una pieza nueva: el
+// ensanche real fue `tono` en `PieDeCampo`, la anatomía que comparten las
+// tres piezas de campo. Vencido / equivocado / intentos agotados NO son un
+// tipeo equivocado y no se pintan de rojo (N23).
+export {
+  CodigoFirmaInput,
+  type CodigoFirmaInputProps,
+} from './components/CodigoFirmaInput'
 
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
