@@ -59,7 +59,7 @@ import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
-import { CabezalOficio, DiaSinHorarios, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
+import { CabezalOficio, DiaSinHorarios, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -455,21 +455,25 @@ export default function PaseoCuando() {
             />
           </View>
         ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
+          /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
+             verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
+             no aplican, y hasta hoy los dos recibían la misma frase — la del
+             otro caso la mitad de las veces. El discriminador es `mascotas`,
+             que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
           <View style={{ paddingHorizontal: spacing[4] }}>
-            <EstadoVacio
+            <SinQuienReservar
               icono={<Icono nombre="paseo" tamano={48} />}
-              titulo={t('paquete.sinPerrosTitulo')}
-              descripcion={t('paquete.sinPerrosDetalle')}
-              accion={
-                <Boton
-                  variante="primario"
-                  etiqueta={t('paquete.sinPerrosAccion')}
-                  onPress={() => {
-                    if (router.canDismiss()) router.dismissAll();
-                    router.navigate('/hogar/agregar');
-                  }}
-                />
-              }
+              hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
+              tituloSinNadie={t('explorar.sinNadieTitulo')}
+              detalleSinNadie={t('explorar.sinNadieDetalle')}
+              tituloEspecie={t('paquete.sinPerrosTitulo')}
+              detalleEspecie={t('paquete.sinPerrosDetalle')}
+              etiquetaSinNadie={t('explorar.sinNadieAccion')}
+              etiquetaEspecie={t('paquete.sinPerrosAccion')}
+              onAccion={() => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/agregar');
+              }}
             />
           </View>
         ) : oferta.length === 0 ? (
