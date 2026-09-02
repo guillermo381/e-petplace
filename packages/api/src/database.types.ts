@@ -24390,6 +24390,7 @@ export type Database = {
           zona_radio_m: number
         }[]
       }
+      obtener_mis_adoptables: { Args: never; Returns: Json }
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
@@ -24406,6 +24407,7 @@ export type Database = {
           mascota_id: string
           mascota_nombre: string
           mensaje: string
+          ruta: string
           tiene_destino: boolean
           tipo: string
           titulo: string

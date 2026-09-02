@@ -180,7 +180,7 @@ export default function PantallaFichaAdoptable() {
 
     /* La voz de `no_se_sabe` viaja POR FILA porque la pieza la exige así: *sin
        voz, el tercer estado no compila* — así no puede quedar mudo. */
-    const fila = (con: string, e: FichaAdoptable['conviveperros']): ConvivenciaCon =>
+    const fila = (con: string, e: FichaAdoptable['convivePerros']): ConvivenciaCon =>
       e === 'si'
         ? { con, estado: 'si' }
         : e === 'no'
@@ -247,7 +247,7 @@ export default function PantallaFichaAdoptable() {
         convivencia={
           <Convivencia
             filas={[
-              fila(t('fichaAdoptable.conPerros'), f.conviveperros),
+              fila(t('fichaAdoptable.conPerros'), f.convivePerros),
               fila(t('fichaAdoptable.conGatos'), f.conviveGatos),
               fila(t('fichaAdoptable.conNinos'), f.conviveNinos),
             ]}
