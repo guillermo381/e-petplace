@@ -11,6 +11,7 @@ import { useColorScheme } from 'react-native';
 import '@/lib/livekit';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { router, Stack } from 'expo-router';
+import { destinoDePushDeEstaApp } from '@/lib/destino-de-push';
 import { escuchaDeToque } from '@/lib/toque-de-push';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
@@ -101,15 +102,29 @@ export default function RootLayout() {
     const escucha = escuchaDeToque();
     if (escucha === null) return;
     let vivo = true;
+    /* 🔴 **SÓLO RUTAS DE ESTA APP.** ⏪ Acá se hacía `router.push(ruta as never)`
+       sin filtro alguno: una ruta del portal del prestador —que las dos apps
+       pueden recibir el mismo día, porque el aviso del acta va a los dos lados
+       con su ruta propia— habría abierto **una pantalla en blanco**, que es el
+       modo de falla peor: no tira error, no deja rastro y se ve como si la app
+       se hubiera colgado. El porqué del filtro y por qué no alcanza con mirar
+       el primer segmento están en `lib/destino-de-push`. */
+    const irSiEsMia = (ruta: string) => {
+      if (!vivo) return;
+      const mia = destinoDePushDeEstaApp(ruta);
+      if (mia === null) {
+        console.warn(`[toque-de-push] ruta que esta app no atiende, no se navega · ${ruta}`);
+        return;
+      }
+      router.push(mia as never);
+    };
     void (async () => {
       const inicial = await escucha.destinoInicial();
       /* El guard de vida importa acá y no sólo en el listener: entre pedir el
          destino inicial y recibirlo, el layout puede haberse desmontado. */
-      if (vivo && inicial !== null) router.push(inicial as never);
+      if (inicial !== null) irSiEsMia(inicial);
     })();
-    const retirar = escucha.alTocar((ruta) => {
-      if (vivo) router.push(ruta as never);
-    });
+    const retirar = escucha.alTocar(irSiEsMia);
     return () => {
       vivo = false;
       retirar();
