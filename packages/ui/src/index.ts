@@ -575,6 +575,17 @@ export {
   type VitrinaRefugioProps,
 } from './components/VitrinaRefugio'
 
+// HojaFiltros — S112-B: los nueve filtros de la vidriera. 🔴 Devuelve el
+// objeto que va al motor TAL CUAL, con los nombres de la lista blanca de
+// `obtener_adoptables` — una hoja con vocabulario propio obliga a un mapa en
+// el medio, y ese mapa es la segunda verdad que diverge sola. Cero control
+// nuevo: son ocho `FiltroPills`. Convivencia en TRES estados, jamás un check.
+export {
+  HojaFiltros,
+  type HojaFiltrosProps,
+  type FiltrosAdoptables,
+} from './components/HojaFiltros'
+
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
 // sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.

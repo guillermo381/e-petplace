@@ -46,9 +46,28 @@
  * «Reportar» (es una acción suelta al final).
  *
  * ── N22 · LAS TRES «i» ───────────────────────────────────────────────────
- * Publicador, bono y «Apadrinar» explican; no deciden. *Lo que se necesita
- * para decidir queda a la vista; lo que se necesita para entender va detrás
- * de una «i».*
+ * Bono y «Apadrinar» explican; no deciden. *Lo que se necesita para decidir
+ * queda a la vista; lo que se necesita para entender va detrás de una «i».*
+ *
+ * ⏪ **ACÁ DECÍA «Publicador, bono y "Apadrinar" explican; no deciden», y
+ * dejó de ser cierto** — enmienda S112-B con firma más nueva que la línea:
+ * *«en la ficha de Luna toco el nombre del refugio y entro a su vitrina»*
+ * (founder, A6). **El publicador ahora LLEVA**, y la línea se corrige acá en
+ * vez de dejar una letra que contradice a la pieza: *una cabecera que
+ * sobrevive a su razón manda al próximo a construir contra ella.*
+ *
+ * 🔴 **Y las dos cosas conviven porque son dos gestos, no uno con dos
+ * caras** — es la gramática que la casa ya tiene: *información despliega,
+ * acción lleva.* La «i» explica **qué significa verificado** (entender); el
+ * nombre lleva a **quién es** (conocer). Van en filas distintas y **NO se
+ * anidan**: el toque de navegación cubre la fila del nombre, y la línea de
+ * verificación con su «i» queda aparte. *Un «i» adentro de una fila que
+ * navega es la trampa del tocable anidado, y acá no hace falta pagarla.*
+ *
+ * ⚠️ Lo que **sí** cambia de la letra vieja y hay que decirlo: «el refugio es
+ * procedencia, no protagonista» sigue rigiendo para su LUGAR —va séptimo, no
+ * arriba— pero deja de regir para su alcance. *El refugio deja de ser sólo
+ * procedencia justo cuando la familia está por escribirle.*
  *
  * ✅ **La «i» YA NO ES INTERNA (S112-B): se promovió a `BotonExplicar`.** Y
  * lo que la promovió no fue que hiciera falta acá —eso ya pasaba— sino que
@@ -71,9 +90,10 @@
 import type { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
 import { spacing } from '../tokens/spacing'
-import { AvatarMascota } from './AvatarMascota'
 import { Boton } from './Boton'
 import { BotonExplicar, type ConExplicacion } from './BotonExplicar'
+import { Chevron } from './chevron'
+import { LogoNegocio } from './LogoNegocio'
 import { PantallaConPie } from './PantallaConPie'
 import { Tarjeta } from './Tarjeta'
 import { Texto } from './Texto'
@@ -114,6 +134,16 @@ export type FichaAdoptableProps = {
     nombre: string
     fotoUrl?: string | null
     verificacion: ConExplicacion
+    /**
+     * 🔴 S112-B · LLEVA A SU VITRINA (`VitrinaRefugio`). Firma del founder
+     * (A6): *«toco el nombre del refugio y entro a su vitrina»*.
+     *
+     * **Opcional a propósito:** la misma ficha se monta donde la vitrina no
+     * se alcanza —el espejo del propio refugio, por ejemplo— y ahí un toque
+     * que no lleva a ningún lado es una promesa rota. Sin esto la fila no
+     * se hunde ni dibuja chevron: *la estructura informa* (Ley 18).
+     */
+    onPress?: () => void
   }
 
   /** ⑧ EL BONO, si lo hay: monto y destino, con la «i» de que se paga afuera. */
@@ -147,6 +177,43 @@ function Bloque({ rotulo, children }: { rotulo: string; children: ReactNode }) {
         {children}
       </View>
     </Tarjeta>
+  )
+}
+
+/**
+ * La fila del publicador: su logo y su nombre, y —si lleva a algún lado— el
+ * chevron y la física de presión de la casa.
+ */
+function FilaPublicador({
+  publicador,
+  onPress,
+}: {
+  publicador: { nombre: string; fotoUrl?: string | null }
+  onPress?: () => void
+}) {
+  const fila = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+      <LogoNegocio nombre={publicador.nombre} logoUrl={publicador.fotoUrl} tamano={40} />
+      <View style={{ flex: 1 }}>
+        <Texto variante="enfasis" numberOfLines={1}>
+          {publicador.nombre}
+        </Texto>
+      </View>
+      {onPress === undefined ? null : <Chevron direccion="derecha" />}
+    </View>
+  )
+
+  if (onPress === undefined) return fila
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={publicador.nombre}
+      style={{ paddingVertical: spacing[1] }}
+    >
+      {fila}
+    </Pressable>
   )
 }
 
@@ -240,18 +307,23 @@ export function FichaAdoptable({
             lo que hace que una adopción no se lea como un clasificado. */}
         {publicador === undefined ? null : (
           <Bloque rotulo={voces.publicador}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-              <AvatarMascota
-                nombre={publicador.nombre}
-                fotoUrl={publicador.fotoUrl ?? undefined}
-                tamano="sm"
-              />
-              <View style={{ flex: 1 }}>
-                <Texto variante="enfasis" numberOfLines={1}>
-                  {publicador.nombre}
-                </Texto>
-              </View>
-            </View>
+            {/* LA FILA DEL NOMBRE — la que LLEVA. `LogoNegocio` y no
+                `AvatarMascota`: un refugio es un negocio, y su fallback
+                honesto es el monograma de su nombre, no la cara de una
+                especie. *Que `AvatarMascota` diera monograma desde que se
+                retiró la huella lo hacía funcionar por accidente; acá se
+                monta la pieza que lo dice.* */}
+            <FilaPublicador
+              publicador={publicador}
+              /* Sin `onPress` NO se hunde ni dibuja chevron: la estructura
+                 informa (Ley 18), y un toque que no lleva es peor que
+                 ninguno. */
+              onPress={publicador.onPress}
+            />
+
+            {/* LA VERIFICACIÓN — fila APARTE, con su «i». No se anida dentro
+                del tocable de arriba: son dos gestos distintos y separarlos
+                evita la trampa del tocable anidado sin costar nada. */}
             <LineaConExplicacion dato={publicador.verificacion} />
           </Bloque>
         )}
