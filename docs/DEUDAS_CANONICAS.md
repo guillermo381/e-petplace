@@ -27200,3 +27200,43 @@ llevar un número hardcodeado que ya no es cierto.* El de la purga imprime «4
 estados leídos» y la función leyó **cinco** — verificado contra el objeto. **No
 se edita el archivo: la migración ya corrió y el repo tiene que decir lo que
 corrió**, así que la corrección vive acá y en su commit.
+
+---
+
+## 🔴 `L-487` — UN HALLAZGO SOBRE EL MOTOR SE MIDE CONTRA `origin/main`, JAMÁS CONTRA EL ÁRBOL PROPIO
+
+**Dos casos el mismo día, en direcciones opuestas, y ninguno de los dos autores
+midió mal: los dos midieron OTRA COSA.**
+
+| # | quién | lo que midió | lo que declaró |
+|---|---|---|---|
+| ① | C | `TS2367` al ramificar sobre `no_concretada_fallecimiento` · `grep` en cero sobre `supabase/migrations/` **de su árbol** | *«el motor no lo emite»* — y el motor lo emitía en 20 líneas de dos migraciones aplicadas |
+| ② | B | `tsc 0/0/0` sobre dos estados nuevos, **desde un árbol sin las pantallas de C** | *«sin rojos»* — el número era cierto y no contestaba la pregunta |
+
+**La forma, y es la que la vuelve ley:**
+
+> ***«El compilador me frenó» y «el motor no lo emite» son dos afirmaciones
+> distintas, y sólo la primera sale del objeto.***
+
+En ① el compilador dijo la verdad sobre el árbol de C; **la conclusión sobre el
+mundo no salía de ahí**. En ② el typecheck dijo la verdad sobre el árbol de B;
+**la pregunta era sobre los consumidores**, que no estaban.
+
+🔴 **Y el costo de ① no fue una discusión: C REVIRTIÓ TRABAJO CORRECTO** — había
+hecho que el estado de duelo callara «esta conversación está cerrada», que
+extiende bien la decisión de no dibujar escalera. *Perdió trabajo por una
+medición, no por una decisión.*
+
+**El correctivo es de una línea y ya estaba en la casa con otro nombre** — es
+`L-217` y la lección de S107 (*«el canon se mide contra `main`, jamás contra el
+árbol de quien escribe»*) aplicadas a un hallazgo entre pistas: **antes de
+declarar algo sobre el MOTOR, `git fetch` y medir contra `origin/main`.** Un
+`grep` sobre `supabase/migrations/` del árbol propio mide qué migraciones tenés
+bajadas, no cuáles existen — y contra la base, ninguna de las dos: se le
+pregunta a `pg_proc` o al CHECK vivo.
+
+**Lo que hace que esta valga escribirse y no sea sólo `L-217` otra vez:** las
+dos veces el instrumento **dio un resultado correcto**. No hubo regex roto ni
+asiento equivocado ni verde por vacío — hubo una respuesta verdadera a una
+pregunta parecida. *Es la familia entera de esta sesión, cobrada una vez más:
+el instrumento no falló; falló el salto de lo que midió a lo que se dijo.*
