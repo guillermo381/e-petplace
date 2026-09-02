@@ -69,6 +69,7 @@ import {
 import {
   obtenerAdoptables,
   obtenerSesion,
+  resolverUrlsFotos,
   type Adoptable,
   type FiltrosAdoptables,
 } from '@epetplace/api';
@@ -94,6 +95,8 @@ type Estado =
       fase: 'listo';
       destacados: Adoptable[];
       resto: Adoptable[];
+      /** path → URL firmada. Ver la nota de `caras` en el efecto. */
+      caras: Map<string, string>;
       cursor: string | null;
       hayMas: boolean;
       ordenPorConvivencia: boolean;
@@ -163,7 +166,20 @@ export default function Adoptar() {
           setEstado({ fase: 'error' });
           return;
         }
-        setEstado({ fase: 'listo', ...r.data });
+        /* 🔴 **LA LISTA TRAE LA RUTA; LA FICHA TRAE LA URL** — medido en el
+           motor: `obtener_adoptables` devuelve `m.foto_url` **crudo**
+           (`20260907900000:114`) mientras `obtener_adoptable` arma la URL con
+           su base. *Por eso la portada sólo se veía al entrar al detalle: no
+           era que la lista no tuviera foto, era que tenía un path donde la
+           pantalla esperaba una URL.*
+           ⇒ Se firma acá, con el resolvedor de la casa (`D-308`), que es lo que
+           hacen las otras 25 pantallas que dibujan fotos. */
+        const paths = [...r.data.destacados, ...r.data.resto]
+          .map((a) => a.fotoUrl)
+          .filter((x): x is string => typeof x === 'string' && x.length > 0);
+        const caras = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
+        if (!vigente) return;
+        setEstado({ fase: 'listo', ...r.data, caras });
       })();
       return () => {
         vigente = false;
@@ -185,12 +201,19 @@ export default function Adoptar() {
     try {
       const r = await obtenerAdoptables({ filtros, cursor: estado.cursor });
       if (!r.ok) return;
+      /* Las páginas nuevas firman sus propias portadas y se SUMAN al mapa: no
+         se re-firma lo que ya está. */
+      const nuevos = r.data.resto
+        .map((a) => a.fotoUrl)
+        .filter((x): x is string => typeof x === 'string' && x.length > 0);
+      const masCaras = nuevos.length > 0 ? await resolverUrlsFotos(nuevos) : new Map<string, string>();
       setEstado((prev) =>
         prev.fase !== 'listo'
           ? prev
           : {
               ...prev,
               resto: [...prev.resto, ...r.data.resto],
+              caras: new Map([...prev.caras, ...masCaras]),
               cursor: r.data.cursor,
               hayMas: r.data.hayMas,
             },
@@ -208,7 +231,7 @@ export default function Adoptar() {
     return t(v.clave as 'edad.desconocida', v.params);
   };
 
-  const tarjeta = (a: Adoptable) => (
+  const tarjeta = (a: Adoptable, caras: Map<string, string>) => (
     <TarjetaAdoptable
       key={a.publicacionId}
       nombre={a.nombre}
@@ -218,7 +241,7 @@ export default function Adoptar() {
       raza={a.raza}
       sexo={a.sexo === null ? null : t(`adoptar.sexo_${a.sexo}` as 'adoptar.sexo_macho')}
       edad={a.fechaNacimiento === null ? null : edadDe(a)}
-      fotoUrl={a.fotoUrl}
+      fotoUrl={a.fotoUrl === null ? null : (caras.get(a.fotoUrl) ?? null)}
       publicador={a.publicadorNombre}
       voces={{ edadNoInformada: t('adoptar.edadNoInformada') }}
       onPress={() =>
@@ -400,7 +423,7 @@ export default function Adoptar() {
                     const e = describirEspera(a.esperaDias);
                     return (
                       <View key={a.publicacionId} style={{ gap: spacing[1] }}>
-                        {tarjeta(a)}
+                        {tarjeta(a, estado.caras)}
                         <Texto variante="apoyo" color="tertiary">
                           {t('adoptar.esperaDesde', {
                             cuanto: t(e.clave as 'espera.dias', e.params),
@@ -422,7 +445,7 @@ export default function Adoptar() {
                 {t('adoptar.ordenConvivencia')}
               </Texto>
             ) : null}
-            <View style={{ gap: spacing[4] }}>{estado.resto.map(tarjeta)}</View>
+            <View style={{ gap: spacing[4] }}>{estado.resto.map((a) => tarjeta(a, estado.caras))}</View>
 
             {estado.hayMas ? (
               <Boton
