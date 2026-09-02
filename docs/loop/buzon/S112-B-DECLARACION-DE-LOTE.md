@@ -118,10 +118,17 @@ deps — *es exactamente cómo este rojo llegó a estar commiteado en verde.*
 
 ## ⑥ LO QUE NO ESTÁ VERIFICADO, y no se maquilla
 
-**Nada de esto se vio en aparato.** Las cuatro láminas de gate viven primeras en
-la galería (`⭐ GATE S112`) y esperan el ojo del founder:
-la razón del botón · `TarjetaAdoptable` · la vidriera con sus chips ·
-la tarjeta de todo-desconocido de `Convivencia`.
+**Nada de esto se vio en aparato.** ⏪ *Este párrafo mandaba a cuatro láminas de
+galería «esperando el ojo del founder». **La galería dejó de ser gate** (firma
+del founder): las piezas se juzgan MONTADAS, en su contexto, en el recorrido.*
+
+**De lo que va en este lote, lo único gateable mañana es la razón del botón, en
+las 6 pantallas de guardería** — y no necesita que nadie toque nada. **Las otras
+cuatro piezas van entregadas y SIN PUERTA**, cada una con su bloqueante:
+`TarjetaAdoptable` (C la revirtió con el merge) · `Convivencia` (**arbitrado:
+su gate es el lote de adopción, sobre la ficha con datos reales**) ·
+`BloqueConCriterio` (espera `destacado_espera`) · `FiltroPills varias` (espera
+los tres estados de convivencia del lector).
 
 **Lo que el código no puede probar y sólo el founder puede:** que la línea de la
 razón se lea como una explicación de la casa y no como un error, y que al
