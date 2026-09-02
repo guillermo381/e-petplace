@@ -360,13 +360,26 @@ export function Boton({
    * En MEMORIAL no hay fundido: `usePresionado` ya fija que ahí el cambio
    * de estado es reemplazo directo, y esta pieza no abre una excepción. */
   const enciendeSuave = renglon !== undefined && theme.mode !== 'memorial'
-  const transicionDeEncendido = {
-    transitionProperty: ['transform', 'opacity'] as const,
-    transitionDuration: [motion.duration.fast, motion.duration.micro] as const,
+  /* ⚠️ TIPADO EXPLÍCITO Y SIN `as const`, y las dos mitades tienen su rojo:
+   *  · `as const` los vuelve tuplas **`readonly`**, y la prop de estilo pide
+   *    arrays mutables. (Lo levantó C contra su árbol; el mío lo aceptaba —
+   *    ver la nota de la divergencia en el parte.)
+   *  · sin anotar, `[150, 150]` infiere **`150[]`**, un array de literales que
+   *    deja de servir en cuanto una de las dos duraciones cambie.
+   * ⚠️ Y VAN SPREADEADOS DENTRO DEL OBJETO DE ESTILO, no como entrada suelta
+   * del array: **medido, una entrada que trae SÓLO `transition*` no compila**
+   * — el tipo de Reanimated las admite como parte de un estilo, jamás solas. */
+  const transicionDeEncendido: {
+    transitionProperty: string[]
+    transitionDuration: number[]
+    transitionTimingFunction: ReturnType<typeof cubicBezier>[]
+  } = {
+    transitionProperty: ['transform', 'opacity'],
+    transitionDuration: [motion.duration.fast, motion.duration.micro],
     transitionTimingFunction: [
       cubicBezier(...motion.easing.spring.bezier),
       cubicBezier(...motion.easing.easeOut.bezier),
-    ] as const,
+    ],
   }
 
   // En memorial el gradiente firma es transparent (B2): marca degrada a primario.
@@ -516,6 +529,14 @@ export function Boton({
   // gradiente (location 1, teal) vale SOLO si el texto nunca la alcanza.
   // marca garantiza paddingHorizontal ≥ 24 (spacing[6]) en todo tamaño.
   const padX = esMarca ? Math.max(t.padX, spacing[6]) : t.padX
+
+  /** El estilo del cuerpo animado, en UNA pieza: se compone con la transición
+   *  o se usa tal cual (ver la nota en el `Animated.View`). */
+  const cuerpoAnimado = {
+    opacity: deshabilitado ? opacity.disabled : 1,
+    borderRadius: radius.md,
+    ...(bloque ? { alignSelf: 'stretch' as const } : null),
+  }
 
   const esCompacto = varianteEfectiva === 'compacto'
   const cuerpo: ViewStyle = {
@@ -749,13 +770,23 @@ export function Boton({
         <Animated.View
           style={[
             estiloPresionado,
-            {
-              opacity: deshabilitado ? opacity.disabled : 1,
-              borderRadius: radius.md,
-              ...(bloque ? { alignSelf: 'stretch' as const } : null),
-              // Va DESPUÉS de `estiloPresionado` a propósito: lo pisa.
-              ...(enciendeSuave ? transicionDeEncendido : null),
-            },
+            /* 🔴 SE ELIGE ENTRE DOS OBJETOS COMPLETOS, NO SE SPREADEA UNA
+             * CONDICIÓN ADENTRO — y esto NO es estilo: es lo único que compila.
+             *
+             * `...(cond ? obj : null)` deja las tres `transition*` declaradas
+             * como **`?: T | undefined`**, y el tipo de estilo de Reanimated no
+             * las acepta así: un `| undefined` explícito no es lo mismo que
+             * «ausente». **Medido con su rojo**: el tsconfig de `apps/prestador`
+             * lo rechaza con `TS2322` mientras `packages/ui` y `apps/cliente` lo
+             * dejan pasar — el mismo defecto es visible en un árbol e invisible
+             * en otro, que es por lo que estuvo commiteado en verde.
+             *
+             * Elegido así, ninguna rama tiene claves opcionales: **una las trae
+             * todas presentes y la otra no las tiene.** Y sigue pisando a
+             * `estiloPresionado`, que es su razón de ir después. */
+            enciendeSuave
+              ? { ...cuerpoAnimado, ...transicionDeEncendido }
+              : cuerpoAnimado,
             // Focus visible en web (RN-web lo exige): outline accent.active
             Platform.OS === 'web' && enfocado
               ? ({
