@@ -5215,11 +5215,16 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        <Seccion titulo="EstadoSolicitudAdopcion (S111) — la declinada es un desvío, y es digna">
-          {/* Los cuatro estados juntos. El gate son DOS preguntas:
-              ① ¿la declinada se lee como interrupción y no como final
-                 cumplido? ② ¿se lee SIN acusar a nadie? Si el desvío grita,
+        <Seccion titulo="EstadoSolicitudAdopcion (S111 · S112) — los cortes son desvíos, y el duelo no lleva escalera">
+          {/* Los SEIS estados juntos. El gate son TRES preguntas:
+              ① ¿los cortes se leen como interrupción y no como final
+                 cumplido? ② ¿se leen SIN acusar a nadie? Si el desvío grita,
                  la pieza falla §10.6 (la devolución jamás humilla).
+              ⭐ ③ S112: ¿el fallecimiento se lee como una NOTICIA y no como
+                 un trámite que no prosperó? Es la única que NO dibuja
+                 escalera, y hay que poder ver por qué: mostrarle los pasos
+                 apagados a alguien que perdió al animal que eligió le informa
+                 hasta qué punto del trámite había llegado.
               ⚠️ La tercera tarjeta monta un estado que HOY no puede ocurrir
                  en producción — se muestra para poder juzgarlo el día que
                  el canal exista, no porque exista. */}
@@ -5228,10 +5233,9 @@ function GaleriaInterna() {
               ['recibida', 'recién llegada · es la que cuenta el Home (§9)'],
               ['aceptada', 'aceptada · el camino completo'],
               ['en_conversacion', '⚠️ INALCANZABLE hoy: no hay canal (activador estacionado)'],
-              ['declinada', 'declinada · desvío NEUTRO, jamás alerta'],
-              ['desistida', 'desistida · la FAMILIA se bajó — no es lo mismo que declinada'],
-              ['no_concretada_fallecimiento',
-               'el animal falleció · voz de DUELO, sin invitación a otro animal (D-3)'],
+              ['declinada', 'declinada · corte del PUBLICADOR · desvío NEUTRO, jamás alerta'],
+              ['desistida', 'desistida · corte de la FAMILIA · misma forma, otra voz — nadie falló'],
+              ['no_concretada_fallecimiento', '⭐ el animal murió · SIN escalera, sin color de status: la noticia y nada más'],
             ] as const).map(([e, nota]) => (
               <View key={e} style={{ gap: spacing[2] }}>
                 <Texto variante="apoyo">{nota}</Texto>
@@ -5243,9 +5247,9 @@ function GaleriaInterna() {
                     enConversacion: 'En conversación',
                     aceptada: 'Aceptada',
                   }}
-                  vozDesistida="Retiraste tu postulación"
-                  vozNoConcretada="El animal falleció. La postulación no continúa."
                   vozDeclinada="El refugio eligió otro hogar"
+                  vozDesistida="Cancelaste tu postulación"
+                  vozNoConcretada="Nube falleció. Tu postulación no va a poder continuar. Lamentamos mucho darte esta noticia."
                 />
               </View>
             ))}

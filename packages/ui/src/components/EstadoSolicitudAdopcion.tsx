@@ -50,26 +50,59 @@
  * Una voz no se deduplica.
  *
  * Reusa `EscaleraEstados` — cero escalera nueva. Sin animación (Ley 6/13).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ⏩ ENMIENDA S112-B — LOS DOS CORTES QUE FALTABAN, Y UNO NO SE DIBUJA IGUAL
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * El motor creció y el tipo lo cazó donde tenía que cazarlo: el valor quedó
+ * más ancho que la unión y `TS2322` saltó **en el sitio de llamada**, que es
+ * donde alguien tiene que decidir cómo se ve cada estado nuevo.
+ *
+ * ── ① `desistida` — LA FAMILIA SE BAJÓ ───────────────────────────────────
+ * **No es `declinada`, y reusarla habría dicho algo falso:** declinar es un
+ * acto del PUBLICADOR. Con el mapeo fácil, el refugio leería *«yo la
+ * decliné»* sobre alguien que se fue solo. Estructuralmente es el mismo
+ * desvío —el camino se interrumpe y no se completa— así que comparte la
+ * forma y cambia la voz. `tono: 'neutro'`: nadie falló.
+ *
+ * ── ② `no_concretada_fallecimiento` — 🔴 Y ÉSTE NO LLEVA ESCALERA ─────────
+ * Firma del founder (2-sep): **el acta no se firma con el animal en
+ * memorial.** Cuando el refugio marca la muerte, un trigger cierra las
+ * solicitudes vivas de ese animal.
+ *
+ * **La escalera existe para decir DÓNDE ESTÁS EN UN PROCESO. Acá no hay
+ * proceso en el que estar: murió su sujeto.** Dibujarla apagada —«recibida ✓,
+ * el resto gris»— es la versión burocrática de la misma noticia: le informa a
+ * alguien que perdió al animal que eligió **hasta qué paso del trámite había
+ * llegado.** *Un duelo dibujado como un rechazo interrumpido dice que el
+ * refugio no continuó con su postulación, y no fue eso lo que pasó.*
+ *
+ * ⇒ **Con este estado la pieza dibuja LA NOTICIA Y NADA MÁS.** Sin pasos, sin
+ * marcas de estado, sin color de status. Es el mismo movimiento con el que
+ * `Convivencia` le da título propio al bloque sin observar en vez de fingir
+ * que sus filas son el contenido.
+ *
+ * **La mitad estructural de `D-3` (no invitar a otro animal):** esta pieza
+ * **no tiene slot de acción**, ni acá ni en ningún estado. *No hay dónde
+ * poner un «Ver otros animales».* La otra mitad es del texto y la cuida el
+ * cinturón del motor — el diseño cierra la puerta ancha, no la angosta.
  */
+import { View } from 'react-native'
+import { spacing } from '../tokens/spacing'
 import { EscaleraEstados } from './EscaleraEstados'
+import { Texto } from './Texto'
 
 export type EstadoSolicitud =
   | 'recibida'
   /** ⚠️ Hoy inalcanzable: no hay canal. Ver el encabezado. */
   | 'en_conversacion'
   | 'aceptada'
+  /** Corte del PUBLICADOR. */
   | 'declinada'
-  /** La familia se bajó. **No es `declinada`**: declinar es del publicador, y
-   *  reusarla le diría al refugio «yo la decliné» sobre alguien que se fue. */
+  /** S112-B · corte de la FAMILIA: se bajó sola. Ver la enmienda. */
   | 'desistida'
-  /** 🟢 El animal falleció (firma del founder, 2-sep). Estado propio porque
-   *  **acá no decidió nadie**. Su voz es de duelo y **no invita a otro animal**
-   *  (D-3): ofrecerle otro adoptable a quien perdió al que eligió trata a un
-   *  animal como un reemplazo.
-   *
-   *  ⚠️ AÑADIDO POR A (S112) para que el motor no mienta en el contrato. Hoy
-   *  usa el mismo desvío neutro que `declinada`; **el trato visual propio es de
-   *  B** — un duelo y un «no» del refugio no tienen por qué verse igual. */
+  /** S112-B · el animal murió. **No lleva escalera.** Ver la enmienda. */
   | 'no_concretada_fallecimiento'
 
 export type EstadoSolicitudAdopcionProps = {
@@ -84,13 +117,33 @@ export type EstadoSolicitudAdopcionProps = {
    * casa que lee tiene que poder escribir con sus palabras (§5 · §10.6).
    */
   vozDeclinada: string
-  /** 🔴 OBLIGATORIAS por la misma razón que `vozDeclinada`: **un estado sin voz
-   *  no compila**. Un desenlace mudo se dibujaría como un camino interrumpido
-   *  sin decir por qué. */
+  /**
+   * 🔴 S112-B · OBLIGATORIA. La familia se bajó. *«Cancelaste tu
+   * postulación»* del lado de la familia, *«Se bajó»* del lado del refugio —
+   * el mismo hecho con dos voces, que es la razón de siempre.
+   */
   vozDesistida: string
+  /**
+   * 🔴 S112-B · OBLIGATORIA, y es la más delicada de las tres.
+   *
+   * **Es una noticia que la casa DA, no una decisión que alguien tomó** — ahí
+   * se separa de las otras dos, que son actos de una parte. El motor ya la
+   * tiene escrita en los dos idiomas y su cinturón **falla si el mensaje
+   * menciona otro animal** (`D-3`).
+   *
+   * ⚠️ **Con este estado esta voz es TODO lo que se dibuja** (ver la
+   * enmienda): no hay escalera detrás que la acompañe. Escribila como se
+   * escribe una noticia, no como se rotula un estado.
+   */
   vozNoConcretada: string
   registro?: 'compacta' | 'completa'
 }
+
+/** Los tres cortes tienen prop propia en vez de un `Record` a propósito: los
+ *  escribe gente distinta en registros distintos, y agruparlos invita a
+ *  redactarlos como un set con un solo tono. `vozDeclinada` conserva su
+ *  nombre porque cambiarlo le costaría churn a dos montajes vivos por cero
+ *  ganancia. */
 
 /** El camino, sin la declinada: ésa no es un escalón. */
 const CAMINO = ['recibida', 'en_conversacion', 'aceptada'] as const
@@ -103,25 +156,35 @@ export function EstadoSolicitudAdopcion({
   vozNoConcretada,
   registro,
 }: EstadoSolicitudAdopcionProps) {
+  /* 🔴 EL DUELO SALE ANTES DE LA ESCALERA, y el `return` temprano ES la
+     decisión de diseño (ver la enmienda de la cabecera). No hay pasos que
+     mostrar cuando murió el sujeto del proceso: la escalera apagada sería
+     informarle a alguien que perdió al animal que eligió hasta qué punto del
+     trámite había llegado.
+
+     Sin color de status —ni neutro ni alerta— y sin marca: `cuerpo` en la
+     tinta de siempre. La noticia se sostiene sola; teñirla la convertiría en
+     una etiqueta de estado, que es exactamente lo que no es. */
+  if (estado === 'no_concretada_fallecimiento') {
+    return (
+      <View style={{ paddingVertical: spacing[2] }}>
+        <Texto variante="cuerpo">{vozNoConcretada}</Texto>
+      </View>
+    )
+  }
+
   const vozDe = {
     recibida: voces.recibida,
     en_conversacion: voces.enConversacion,
     aceptada: voces.aceptada,
   }
 
-  // Con la solicitud declinada el camino se INTERRUMPE: el paso alcanzado
-  // queda hecho y lo que seguía se apaga entero — jamás se marca como
-  // cumplido algo que no pasó.
-  /* Los TRES desenlaces interrumpen el camino igual: el paso alcanzado queda
-     hecho y lo que seguía se apaga. Lo que cambia entre ellos es la VOZ, no la
-     mecánica — quién decidió es lo que las distingue, y eso lo dice el texto. */
-  const vozDesvio: Partial<Record<EstadoSolicitud, string>> = {
-    declinada: vozDeclinada,
-    desistida: vozDesistida,
-    no_concretada_fallecimiento: vozNoConcretada,
-  }
-  const interrumpida = vozDesvio[estado] !== undefined
-  const indiceActual = interrumpida ? -1 : CAMINO.indexOf(estado as (typeof CAMINO)[number])
+  /* Los DOS cortes comparten forma y no voz: el camino se INTERRUMPE, el paso
+     alcanzado queda hecho y lo que seguía se apaga entero — jamás se marca
+     como cumplido algo que no pasó. Lo que cambia es QUIÉN cortó, y eso lo
+     dice la voz, no el dibujo. */
+  const cortada = estado === 'declinada' || estado === 'desistida'
+  const indiceActual = cortada ? -1 : CAMINO.indexOf(estado as (typeof CAMINO)[number])
 
   return (
     <EscaleraEstados
@@ -130,9 +193,9 @@ export function EstadoSolicitudAdopcion({
         clave,
         etiqueta: vozDe[clave],
         estado:
-          interrumpida
-            ? // Sólo `recibida` es seguro: toda solicitud interrumpida fue
-              // recibida. Los demás se apagan — no sabemos hasta dónde llegó.
+          cortada
+            ? // Sólo `recibida` es seguro: toda solicitud cortada fue recibida.
+              // Los demás se apagan — no sabemos hasta dónde llegó.
               i === 0
               ? 'hecho'
               : 'pendiente'
@@ -143,11 +206,13 @@ export function EstadoSolicitudAdopcion({
                 : 'pendiente',
       }))}
       desvio={
-        interrumpida
-          ? // 🔴 NEUTRO, jamás alerta: ni un «no» del refugio ni una muerte
-            // acusan a nadie.
-            { etiqueta: vozDesvio[estado] as string, tono: 'neutro' }
-          : undefined
+        // 🔴 NEUTRO en los dos, jamás alerta: ni un «no» del refugio ni un
+        // «me bajo» de la familia acusan a nadie.
+        estado === 'declinada'
+          ? { etiqueta: vozDeclinada, tono: 'neutro' }
+          : estado === 'desistida'
+            ? { etiqueta: vozDesistida, tono: 'neutro' }
+            : undefined
       }
     />
   )
