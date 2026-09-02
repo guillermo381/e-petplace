@@ -172,6 +172,37 @@ const ORDEN_CONVIVENCIA: readonly EstadoConvivencia[] = ['si', 'no', 'no_se_sabe
  * Vive en UN solo lugar y no en los cuatro sitios de llamada, por la razón de
  * siempre: cuatro copias de una condición son cuatro lugares donde puede
  * faltar una.
+ *
+ * ── ⚖️ EL CORTE ES EN CERO Y NO EN UNA — decidido, con su medición ────────
+ * *Con UNA sola opción el grupo se dibuja y filtrar no cambia nada*, y eso
+ * roza la ley de la casa sobre los toques que no hacen nada. **Se midió antes
+ * de decidir: `cat_ciudades` activas son EC = 8 · CO = 1**, así que el caso
+ * existe hoy — aunque no llegue a esta pantalla, porque la vidriera es
+ * anónima, no sabe de qué país mira quien mira, y pide el catálogo entero.
+ *
+ * 🔴 **Y la razón de NO cortar en una es mejor que la de cortar** (es de C,
+ * y es la que decide): *un control que APARECE cuando el catálogo crece es
+ * peor que uno que no angosta.* Con corte en una, el grupo «Ciudad» se
+ * materializa el día que alguien agrega la segunda ciudad de Colombia —
+ * **una superficie que cambia de forma según cuántas filas tiene una tabla le
+ * enseña a la familia que la app es inestable**, y quien la ve dos veces no
+ * puede saber qué cambió.
+ *
+ * Sus otras dos, conservadas porque cierran el caso: con una opción, *«sólo
+ * operamos en Quito»* **es lo que la persona necesita saber** antes de
+ * recorrer una lista buscando su ciudad — esconderlo le ahorra un toque
+ * inútil y le cuesta el dato · y el defecto real de ese caso **no es el
+ * grupo: es que la única opción no se distingue de «todas»**, y ocultar el
+ * grupo borra información en vez de curarlo.
+ *
+ * ── ✅ Y LA REGLA SOBREVIVIÓ A QUE SU CASO SE CURARA EN EL MOTOR ──────────
+ * A abrió `cat_ciudades_select_anon USING (activo = true)`
+ * (`20260908600000`), así que **la lista ya no llega vacía y esta regla no se
+ * dispara en el montaje de hoy**. **No se retira**, y la razón es la que las
+ * dos pistas habían escrito ANTES de que la policy existiera: *el dibujo no
+ * puede depender de que un catálogo siempre tenga filas.* Lo que cambió es
+ * que dejó de ser el camino más transitado y volvió a ser lo que siempre
+ * debió proteger — **un catálogo que no respondió.**
  */
 function GrupoDeCatalogo<C extends string>({
   rotulo,
