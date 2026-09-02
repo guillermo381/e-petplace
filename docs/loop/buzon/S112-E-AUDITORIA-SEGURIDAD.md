@@ -968,3 +968,202 @@ El `\d{8}` pegaba en otra cosa.
 > **Sexta vez en dos días.** *Un regex laxo sobre un corpus ajeno encuentra
 > siempre — y encuentra algo verdadero que no es lo que se preguntó.* **La forma:
 > antes de llamar rojo a una coincidencia, se mira la fila que la produjo.**
+
+---
+
+# ADDENDUM 8 · 2-sep 18:30–19:30 — LA FIRMA CORRIÓ · DOS AGUJEROS Y UN INSERT IMPOSIBLE
+
+**CONTRA QUÉ:** base viva + `main 42630c0c`. Tres sesiones reales sobre el
+fixture `8b747efd` (Nube), con el acta ya completa.
+
+## H1 · ✅ EL OTP NO VIAJA EN EL PAYLOAD — medido por mí, desde afuera
+
+*Lo declaré dos veces como no medido antes de darlo por bueno. Éste es el
+literal:*
+
+```json
+{"ok":true,"enviado_a":"guillo381+8@gmail.com","expira_en":"2026-09-02T15:18:21+00:00"}
+
+¿ocho dígitos seguidos? ........... ✅ NO
+¿alguna clave codigo/code/otp/pin?  ✅ NO
+¿dice A DÓNDE se mandó? ........... ✅ sí
+```
+
+Y del objeto: **`codigo_hash` de 64 caracteres** ⇒ hasheado en reposo. **El
+código sí existe y viaja: la intención lleva los 8 dígitos en su mensaje.** *El
+segundo factor va por su canal y no vuelve por el que la pantalla lee.*
+
+## H2 · 🔴 EL OTP ACEPTA INTENTOS ILIMITADOS — `intentos_agotados` es inalcanzable
+
+**Medido de tres formas independientes:**
+
+```
+seis intentos con código falso .... los SEIS: «codigo_incorrecto: quedan 4 intento(s)»
+la fila después de los seis ....... intentos = 0
+el literal ........................ UPDATE …SET intentos = intentos + 1 WHERE id = v_c.id;
+                                    RAISE EXCEPTION 'codigo_incorrecto: quedan %', 4 - v_c.intentos;
+```
+
+**El `UPDATE` y el `RAISE` están en la misma transacción** ⇒ la excepción
+**revierte el incremento**. `intentos` queda en 0 para siempre, `4 - 0` da 4
+siempre, y el guard de más arriba (`IF v_c.intentos >= 5`) **nunca se cumple**.
+
+> *No se puede contabilizar un intento fallido y lanzar en la misma transacción.*
+> **Y es de las que leer el código NO muestra: el `UPDATE` está ahí, escrito, y
+> parece correcto.** Aparece ejerciéndolo seis veces y mirando la fila.
+
+**Lo que deja:** un OTP de 8 dígitos, vida de 10 minutos, **sin techo de
+intentos**. *La ventana acota el daño; el límite de 5 que §5.5 pide no existe.*
+**PUERTA: `firmar_acta_adopcion`. Es de A.**
+
+## H3 · 🔴 LA SEGUNDA FIRMA NO COMPLETA — el INSERT del hito, contra otro esquema
+
+```
+el refugio firma → 🔴 column "tipo_evento" of relation "eventos_mascota" does not exist
+```
+
+**De las 8 columnas que el INSERT nombra, CINCO no existen:**
+
+| usa | existe |
+|---|---|
+| `mascota_id` · `fecha_evento` · `procedencia` | ✅ |
+| **`tipo_evento`** | 🔴 la real es **`tipo`** |
+| **`titulo`** · **`descripcion`** | 🔴 no están |
+| **`creado_por`** | 🔴 la real es **`creado_por_user_id`** |
+| **`metadata`** | 🔴 la real es **`datos`** |
+
+*Y la casa tiene tabla tipada para esto:* `evento_hito_narrativo (evento_id,
+mascota_id, country_code, clave, contexto)`. **El patrón es evento padre + fila
+tipada; el INSERT actual escribe contra un esquema que no es el de esta tabla.**
+
+**Daño cero, verificado:** 1 sola firma (la del adoptante) · Nube **sigue
+publicada** · la solicitud sigue en `aceptada`. *El traspaso se llama justo antes
+del INSERT, así que corrió y revirtió con todo lo demás — no quedó media
+adopción.*
+
+**⇒ El traspaso nunca se dispara, y el paso 15 no se puede cerrar.**
+
+## H4 · LO QUE SÍ QUEDÓ VERDE, todo por camino real
+
+| sonda | dio |
+|---|---|
+| **la familia FIRMA** | ✅ `folio F-2026-000050 · papel adoptante · firmas 1 · completa false` |
+| **el estado intermedio** de §4.1 | ✅ `firmas:[{papel:"adoptante", sello:…}] · mi_papel:"adoptante"` |
+| 🔴 **`ya_firmaste`** | ✅ **y en el lugar correcto: rebota al PEDIR el código, no al firmar** |
+| 🔴 `codigo_incorrecto` | ✅ con los intentos en el mensaje |
+| 🔴 un tercero: acta · código · firma | ✅ `sin_acceso` en las tres |
+| el refugio pide código | ✅ y su payload **tampoco** lleva el código |
+
+*Que `ya_firmaste` rebote al pedir el código y no al firmar es **mejor** de lo que
+§5.5 pedía: no se emite un código para algo que no se puede firmar.*
+
+## H5 · LO QUE SIGUE SIN PODER CORRER
+
+- **`codigo_vencido`** — exige esperar 10 minutos o mover `expira_en`, y mover un
+  código emitido es tocar la evidencia. *Se corre con la ventana real.*
+- **`acta_cambio_de_version`** — el camino real es **publicar `acta_adopcion v2`**
+  para que el código quede emitido sobre otro texto. **Publicar una versión de un
+  documento legal no es mío**: se pidió a A y no se hizo por cuenta propia.
+- **`intentos_agotados`** — inalcanzable por H2.
+
+## H6 · UNA NOTA PARA A Y D, sin medir a fondo
+
+Las intenciones del código salieron con **`estado='entregada'`**. *Que el motor
+las marque entregadas no es lo mismo que un correo llegando a un buzón.* **Sigue
+sin verificar, y es el pendiente declarado con D.**
+
+## H7 · LA FORMA QUE SE REPITIÓ TRES VECES HOY
+
+`retirada` que el CHECK no admite · el array de faltantes sin castear · y el
+INSERT del hito contra otro esquema. **Las tres compilan, las tres están
+escritas, y las tres revientan la primera vez que alguien las recorre.**
+
+> **Una rama que nunca se ejecutó no está probada por existir.** *Las tres
+> aparecieron por ejercer y ninguna por leer — y las tres estaban en el camino
+> feliz, no en un borde.*
+
+---
+
+# ADDENDUM 9 · 2-sep 20:00–20:40 — 🟢 **E3 CERRADO: EL PRIMER TRASPASO REAL CORRIÓ DE PUNTA A PUNTA**
+
+**CONTRA QUÉ:** base viva + `main 4ec71100`. Tres sesiones reales sobre el
+fixture `8b747efd` (**Nube**).
+
+## I1 · ✅ EL TECHO DE INTENTOS, con su discriminador
+
+```
+intento 1 .. {"ok":false,"motivo":"codigo_incorrecto","intentos_restantes":4}
+intento 2 .. 3      intento 3 .. 2      intento 4 .. 1      intento 5 .. 0
+intento 6 .. {"ok":false,"motivo":"intentos_agotados","intentos_restantes":0}
+la fila .... intentos = 5
+```
+
+**Y el brazo que hace que el techo sirva de algo** — sin él sólo frenaría a los
+equivocados, que es justo a quien no hace falta frenar:
+
+```
+firmar con el código CORRECTO, ya agotado → {"ok":false,"motivo":"intentos_agotados"}
+```
+
+*Un código errado dejó de ser una excepción y pasó a ser un resultado: por eso el
+`UPDATE` commitea. La cura es de A; la medición, independiente.*
+
+## I2 · 🟢 LAS DOS FIRMAS Y EL TRASPASO
+
+```
+el refugio firma → {"ok":true,"folio":"F-2026-000054","papel":"refugio","firmas":2,
+                    "completa":true,"hito_id":"55ae3cb5…","traspaso":{"ok":true,…}}
+
+el acta, con las dos firmas:
+  [{"papel":"adoptante","sello":"…15:09:58…"},{"papel":"refugio","sello":"…15:22:23…"}]
+```
+
+## I3 · 🟢 EL PASO 15 DE §0, VERIFICADO DESDE CADA ASIENTO
+
+| # | qué promete §0 | dio |
+|---|---|---|
+| ① | Nube está en su familia | ✅ **la familia la ve** · `estado_adopcion=adoptada` · `user_id` = el titular |
+| ② | **con la vacuna que el refugio cargó** | ✅ **3 eventos**, y **uno es de las 13:26**, de antes de la firma ⇒ *el expediente que el refugio cargó ANTES de la entrega viajó con ella* |
+| ③ | procedencia: el refugio | ✅ `80c41ac7…` en el evento de transferencia |
+| ④ | el hito | ✅ **dos hitos, y son dos momentos distintos** (abajo) |
+| ⑤ | sale de la vidriera | ✅ `obtener_adoptables` ya no la lista |
+| ⑥ | el refugio deja de verla | ✅ |
+| — | **CONTROL−** · un tercero | ✅ **tampoco la ve** |
+
+**Los dos hitos, medidos con su hora, porque a primera vista parecían un
+duplicado:**
+
+```
+13:26:58  hito_narrativo · llego_a_la_familia    ← el rescate (A la sembró)
+15:22:23  transferencia_familia                  ← el traspaso
+15:22:23  hito_narrativo · adopcion_completada   ← la firma
+```
+
+⇒ **No es ruido: son el rescate y la adopción, separados.** *La decisión de A de
+**no** reusar `vida_nueva_empieza` —porque esa clave describe el alta de un
+animal individual— queda validada en el objeto: los dos momentos conviven en la
+misma línea de vida y se distinguen.*
+
+## I4 · LA TABLA DE §5, AL CIERRE DE E3
+
+| # | requisito | estado |
+|---|---|---|
+| 5.1 · 5.2 · 5.3 · 5.4 · 5.6 · 5.7 · 5.8 · 5.9 · 5.10 · 5.12 | — | ✅ **verde, ejercido** |
+| 5.5 | firma / OTP | ✅ **verde salvo dos brazos** (abajo) |
+| 5.11 | reportar publicación | ⚪ **no medido por E** — A la aplicó en A10 |
+
+**Los dos brazos de §5.5 que no corrieron, y por qué:**
+- **`codigo_vencido`** — exige esperar los 10 minutos reales o mover `expira_en`
+  de un código emitido, que es tocar la evidencia. *Se corre con la ventana real.*
+- **`acta_cambio_de_version`** — el camino real exige **publicar `acta_adopcion
+  v2`**, que deja rastro en una tabla inmutable y le cambiaría el texto a
+  cualquiera que abra un acta en ese instante. **Se frenó y se pidió a A**, que
+  lo cubre en un cinturón con `ROLLBACK`. *No se hizo por cuenta propia.*
+
+## I5 · ESTADO QUE ESTA CORRIDA DEJÓ EN LA BASE, declarado
+
+**Nube está adoptada de verdad.** `8b747efd` cerrada con sus dos firmas, folios
+`F-2026-000050` y `F-2026-000054`, y Nube vive en la familia de `guillo381+8`.
+**La vidriera quedó con TRES animales publicados** (Luna, Tito, Bruno) más Kira
+en borrador. *Se declara porque cambia lo que el founder va a ver en su
+recorrido: donde §0 dice cinco, hay cuatro y uno ya adoptado.*
