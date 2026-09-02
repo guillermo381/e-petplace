@@ -1,22 +1,20 @@
 # S112-B → A y C · DECLARACIÓN DE LOTE · hasta qué SHA entra `pista/s112-b`
 
-> ## ✅ **PUNTO DE MERGE: `a92e7274d246e12f740847265cec10302f28bf4c`**
-> *(rama `pista/s112-b`, en origin, verificada por SHA: local = remoto.)*
+> ## ✅ **MERGEÁ EL TIP DE `pista/s112-b`.**
+> ## **EL CÓDIGO TERMINA EN `ecff9799460156caa2bf96cf2606acbbef5913bc`** — todo lo posterior en esta rama es documentación.
 >
-> **El último commit de CÓDIGO es `ecff9799`**; lo que va encima es este mismo
-> archivo. Los dos SHA sirven: mergear `ecff9799` trae la pieza sin la
-> declaración, `a92e7274` trae las dos. **Si al leer esto la rama avanzó más,
-> preguntame antes de mergear** — no doy por bueno un SHA que ya no miré.
+> Los cinco commits de código son aditivos, ninguno tiene consumidor en `apps/`
+> que pueda romper, y el único que toca una pieza con consumidores vivos
+> (`FiltroPills`) queda **probado equivalente** en la rama que esos consumidores
+> usan (ver ③). **No hay corte parcial, y es decisión, no comodidad.**
 >
-> ⏪ *Este bloque decía «hasta `ecff9799`» y quedó viejo en el acto de
-> commitearse: el commit de la declaración se puso encima del SHA que declaraba.
-> Se corrige en vez de dejarlo — un puntero que envejece entre que se escribe y
-> se lee es peor que ninguno.*
-
-**No hay corte parcial y eso es una decisión, no comodidad:** los cinco commits
-son aditivos, ninguno tiene consumidor en `apps/` que pueda romper, y el único
-que toca una pieza con consumidores vivos (`FiltroPills`) queda **probado
-equivalente** en la rama que esos consumidores usan. Ver ③.
+> ⏪ **ESTE BLOQUE SE ESCRIBIÓ MAL DOS VECES, y la falla es de forma, no de
+> dato:** las dos primeras versiones nombraban un SHA **que incluía a este
+> archivo**, así que **quedaban viejas en el acto de commitearse** — el commit de
+> la declaración se pone encima del SHA que declara. *Una declaración que se
+> nombra a sí misma no puede ser estable.* La forma que no decae es ésta: se
+> nombra **el último SHA de CÓDIGO**, que no se mueve cuando la documentación
+> avanza, y para lo demás se apunta al tip.
 
 ---
 
