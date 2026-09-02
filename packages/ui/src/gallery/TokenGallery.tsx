@@ -110,6 +110,7 @@ import { CampoCodigo } from '../components/CampoCodigo'
 import { HitoUnaVidaNueva } from '../components/HitoUnaVidaNueva'
 import { TarjetaMascotaRefugio } from '../components/TarjetaMascotaRefugio'
 import { FichaAdoptable } from '../components/FichaAdoptable'
+import { BotonExplicar } from '../components/BotonExplicar'
 import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
@@ -5631,6 +5632,22 @@ function GaleriaInterna() {
                 publicador: 'Quién la publica',
                 bono: 'Bono de adopción',
               }}
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="BotonExplicar (N22 · promovida S112-B) — lo que se necesita para ENTENDER va detrás de una «i»">
+          {/* Entrada de catálogo. Vivió una tanda como pieza interna de
+              `FichaAdoptable`; la promovió el SEGUNDO consumidor
+              (`VitrinaRefugio`), no la primera necesidad.
+              🔴 Su límite no se reabre: una advertencia de SALUD jamás se
+              pliega. La «i» explica; nunca esconde un riesgo. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+            <Texto variante="cuerpo">Refugio verificado por e-PetPlace</Texto>
+            <BotonExplicar
+              texto=""
+              onExplicar={() => {}}
+              etiquetaExplicacion="Qué significa verificado"
             />
           </View>
         </Seccion>

@@ -228,9 +228,51 @@ function HuellaGenerica({ color, tamano }: { color: string; tamano: number }) {
   )
 }
 
+/**
+ * 🔴 S112-B · LA CAÍDA A LA HUELLA ES CORRECTA Y ES INDISTINGUIBLE — y eso
+ * último es el defecto.
+ *
+ * El fallback digno (arriba: *«el error de carga NO muestra ícono ni
+ * reintento: cae a la huella digna y listo»*) sigue siendo lo correcto para
+ * quien MIRA: una foto rota no se le muestra rota a nadie. **Pero para quien
+ * CONSTRUYE, ese mismo acierto borra la diferencia entre dos cosas que no son
+ * la misma:** «este animal no tiene foto» y «esta foto no cargó». Las dos se
+ * ven exactamente igual, sin error, sin log y sin síntoma.
+ *
+ * **Y hay un productor concreto y frecuente:** desde S47 el bucket es PRIVADO
+ * y `foto_url` guarda un **PATH**, no una URL — la pantalla tiene que firmarlo
+ * (`resolverUrlFoto`). *Un path sin firmar no puede cargar nunca*, así que el
+ * chip queda con su huella puesta como si el animal no tuviera foto. **Ése es
+ * el rojo: con foto, dibuja huella.**
+ *
+ * ⇒ **En producción no cambia NADA** (`L-244`): la huella digna se queda. Lo
+ * que se agrega es que **en desarrollo el fallo se nombra a sí mismo**, con
+ * dos avisos distintos porque son dos causas distintas:
+ *   ① la cadena **no puede ser una URL** (no tiene esquema) ⇒ es un path sin
+ *      firmar, y se dice antes de que la imagen siquiera lo intente.
+ *   ② la carga **falló de verdad** (firma vencida, objeto borrado, red).
+ *
+ * *Un fallback que protege al usuario y esconde la causa al que lo puso es la
+ * mitad buena de una cura.*
+ */
+function avisarSiNoPuedeSerUrl(fotoUrl: unknown, nombre: string) {
+  if (!__DEV__ || typeof fotoUrl !== 'string' || fotoUrl === '') return
+  if (/^(https?:|data:|file:|content:|blob:|asset:)/.test(fotoUrl)) return
+  console.warn(
+    `[AvatarMascota] «${nombre}»: \`fotoUrl\` no tiene esquema, así que jamás va a ` +
+      `cargar y el avatar va a caer a la huella COMO SI NO HUBIERA FOTO. ` +
+      `Desde S47 el bucket es privado y \`foto_url\` guarda un PATH: ` +
+      `firmalo con \`resolverUrlFoto\` antes de pasarlo. Recibido: ${fotoUrl}`,
+  )
+}
+
 export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno = false, anidadoEn }: AvatarMascotaProps) {
   const { theme } = useTheme()
   const [falloCarga, setFalloCarga] = useState(false)
+
+  // Se llama en el render y no en un efecto: no toca estado, y así avisa
+  // también cuando el valor cambia a otro que tampoco puede cargar.
+  avisarSiNoPuedeSerUrl(fotoUrl, nombre)
 
   const d = DIAMETRO[tamano]
   const esMemorial = theme.mode === 'memorial'
@@ -258,7 +300,16 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
           contentFit="cover"
           transition={0}
           style={{ position: 'absolute', width: FOTO_LADO, height: FOTO_LADO, left: FOTO_LEFT, top: FOTO_TOP }}
-          onError={() => setFalloCarga(true)}
+          onError={() => {
+            if (__DEV__) {
+              console.warn(
+                `[AvatarMascota] «${nombre}»: la foto NO CARGÓ y el avatar cae a la ` +
+                  `huella — que se ve igual que «no tiene foto». Si la URL estaba ` +
+                  `firmada, la firma pudo vencer o el objeto no existe.`,
+              )
+            }
+            setFalloCarga(true)
+          }}
         />
         {/* ③ el .cap: la foto DENTRO del marco (fusión D-506, material).
             ④ elegido: el anillo es CAPA del cap (literal :55) */}

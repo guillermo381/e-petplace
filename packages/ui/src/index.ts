@@ -554,8 +554,16 @@ export {
   FichaAdoptable,
   type FichaAdoptableProps,
   type CtaDeFicha,
-  type ConExplicacion,
 } from './components/FichaAdoptable'
+
+// BotonExplicar — S112-B: la «i» en círculo, el estándar de la casa para
+// explicar (N22). Vivió una tanda como pieza interna de `FichaAdoptable`; la
+// promovió el SEGUNDO consumidor (`VitrinaRefugio`), no la primera necesidad.
+// Su límite no se reabre: una advertencia de salud JAMÁS se pliega.
+export {
+  BotonExplicar,
+  type ConExplicacion,
+} from './components/BotonExplicar'
 
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,

@@ -48,11 +48,13 @@
  * ── N22 · LAS TRES «i» ───────────────────────────────────────────────────
  * Publicador, bono y «Apadrinar» explican; no deciden. *Lo que se necesita
  * para decidir queda a la vista; lo que se necesita para entender va detrás
- * de una «i».* La «i» es interna a esta pieza y **no se exporta**: es un
- * candidato claro a pieza de la casa —N22 la declara estándar y hay al
- * menos tres montajes a mano en pantallas (`carrito.tsx`,
- * `checkout.tsx`)— pero promover un estándar de la casa es decisión de
- * mesa, no de la pieza que lo necesitó tercera.
+ * de una «i».*
+ *
+ * ✅ **La «i» YA NO ES INTERNA (S112-B): se promovió a `BotonExplicar`.** Y
+ * lo que la promovió no fue que hiciera falta acá —eso ya pasaba— sino que
+ * `VitrinaRefugio` la necesitó para «Cómo ayudar»: **dos consumidores dentro
+ * del mismo paquete.** *La promoción la decide el segundo consumidor, no la
+ * primera necesidad.* Su copia local murió en el mismo acto (Ley 37).
  *
  * ── MEMORIAL: SE REUSA, NO SE DUPLICA ────────────────────────────────────
  * No hay `MemorialAdoptable` y no debe haberlo: la dignidad es del TEMA
@@ -69,10 +71,9 @@
 import type { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
 import { spacing } from '../tokens/spacing'
-import { useTheme } from '../ThemeProvider'
 import { AvatarMascota } from './AvatarMascota'
 import { Boton } from './Boton'
-import { Icono } from './Icono'
+import { BotonExplicar, type ConExplicacion } from './BotonExplicar'
 import { PantallaConPie } from './PantallaConPie'
 import { Tarjeta } from './Tarjeta'
 import { Texto } from './Texto'
@@ -81,16 +82,6 @@ import { Texto } from './Texto'
 type CtaListo = { etiqueta: string; onPress: () => void; razon?: never }
 type CtaApagado = { etiqueta: string; razon: string; onPress?: never }
 export type CtaDeFicha = CtaListo | CtaApagado
-
-/** Un dato que se explica: su texto a la vista, el porqué detrás de la «i». */
-export type ConExplicacion = {
-  /** Lo que se lee sin tocar nada. */
-  texto: string
-  /** Abre la Hoja con la explicación. La escribe la pantalla. */
-  onExplicar: () => void
-  /** accessibilityLabel del botón «i». */
-  etiquetaExplicacion: string
-}
 
 export type FichaAdoptableProps = {
   /**
@@ -145,29 +136,6 @@ export type FichaAdoptableProps = {
     publicador: string
     bono: string
   }
-}
-
-/**
- * LA «i» EN CÍRCULO (N22). Interna: ver la nota de la cabecera sobre por qué
- * no se exporta todavía.
- */
-function BotonExplicar({ onExplicar, etiquetaExplicacion }: ConExplicacion) {
-  const { theme } = useTheme()
-  return (
-    <Pressable
-      onPress={onExplicar}
-      accessibilityRole="button"
-      accessibilityLabel={etiquetaExplicacion}
-      /* El glifo mide 20; el target táctil llega a 44 por hitSlop, sin que
-         el ícono crezca ni empuje la línea que lo contiene (N24). */
-      hitSlop={12}
-    >
-      {/* `registro="aa"` y no `capa`: la «i» es andamiaje funcional —
-          informa, no es un objeto del expediente— y `tinta` la baja al
-          secundario para que explique sin competir con el dato. */}
-      <Icono nombre="info" tamano={20} registro="aa" tinta={theme.text.secondary} />
-    </Pressable>
-  )
 }
 
 /** Un bloque con rótulo ⇒ va en carta (N21, criterio operativo). */
