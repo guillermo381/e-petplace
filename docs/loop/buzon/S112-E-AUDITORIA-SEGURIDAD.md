@@ -1223,3 +1223,61 @@ de 10 tipos.
 > **Séptima vez en dos días, y ya como reflejo:** *el control positivo no es
 > cualquiera que esté cerca — es el que, si fallara, explicaría el resultado por
 > otra razón.*
+
+---
+
+# ADDENDUM 11 · 2-sep 21:40 — `codigo_vencido` CON LA VENTANA REAL · Y UNA ACEPTADA NO TIENE MARCHA ATRÁS
+
+## K1 · ✅ `codigo_vencido`, con su discriminador
+
+*No se movió `expira_en` de ningún código emitido —eso es tocar la evidencia—:
+se esperaron los diez minutos reales.*
+
+```
+CONTROL+ (ANTES de vencer) · código malo ... {"ok":false,"motivo":"codigo_incorrecto","intentos_restantes":4}
+🔴 (DESPUÉS) · el código BUENO, ya vencido . codigo_vencido
+```
+
+**El control es el que le da sentido:** el mismo código, minutos antes, daba
+`codigo_incorrecto` **y no `codigo_vencido`** ⇒ *la sonda distingue las dos
+causas, y el rojo de abajo es del reloj y no del hash.*
+
+**Con esto, de §5.5 queda sin correr un solo brazo: `acta_cambio_de_version`,
+que cubre A.**
+
+## K2 · 🔴 UNA SOLICITUD `aceptada` NO TIENE SALIDA POR NINGUNA PUERTA
+
+Apareció al ir a limpiar mi propia sonda:
+
+```
+la FAMILIA desiste de una aceptada ......... 🔴 solicitud_terminal: aceptada
+el REFUGIO la declina después de aceptar ... 🔴 solicitud_terminal
+```
+
+**Ninguno de los dos puede volver atrás.** La solicitud queda `aceptada` para
+siempre, **esperando dos firmas que quizá nunca lleguen**.
+
+**Y lo que lo vuelve caro, medido:** aceptar **saca al animal de la vidriera**
+—otra familia que intenta postular recibe `publicacion_no_disponible`—. ⇒ **un
+refugio que acepta por error, o una familia que desaparece, deja al animal
+ENTERRADO**: fuera de la vidriera, sin adopción firmada, y sin ninguna puerta que
+lo devuelva.
+
+*Lo bueno del mismo hecho: **no hay doble aceptación.** El animal comprometido no
+admite una segunda postulación, que es lo correcto.*
+
+**§0 no contempla este caso** y no es un borde raro: *«el refugio acepta y
+después la familia no aparece» es el desenlace más común de una adopción que no
+se concreta.* **PUERTA: una salida desde `aceptada`. Es de A y de la mesa** —
+*no propongo cuál: si vuelve a `en_conversacion`, si va a `declinada`, o si el
+animal se re-publica, es decisión de producto.*
+
+## K3 · ⚠️ RESIDUO QUE NO PUEDO LIMPIAR, y cambia el recorrido del founder
+
+**Bruno quedó con una solicitud `aceptada` (`ebb3b9df`), acta completa y 0
+firmas — y por eso SALIÓ DE LA VIDRIERA.** Lo produjo mi sonda de vencimiento, y
+**no hay puerta para revertirlo** (K2).
+
+**La vidriera queda hoy con TRES publicados** —Luna · Tito · Mica— **más Kira en
+borrador. Bruno está fuera.** *Se declara con todas las letras porque cambia lo
+que el founder va a ver, y porque el residuo es mío: sólo A puede devolverlo.*
