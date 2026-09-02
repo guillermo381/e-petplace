@@ -53,8 +53,22 @@ export interface AvisoDeCampana {
    *  porque su referente sí**. */
   mascotaNombre: string | null;
   eventoId: string | null;
+  /** S112-A2e · LA RUTA que el motor emitió **para este destinatario**.
+   *
+   *  🔴 Existe porque los cinco avisos del vertical de adopción **no llevan
+   *  `mascotaId` a propósito**: pasarla los descarta con `descartada_sin_acceso`
+   *  —ni el refugio ni el postulante son «familia» del adoptable antes de la
+   *  entrega—, y sin ella la campana no tenía con qué armar el destino.
+   *
+   *  `null` = la intención nació sin ruta ⇒ **la app cae a su mapeo por tipo**.
+   *  Los avisos viejos no cambian. Y la ruta pasa por el MISMO filtro que la
+   *  push, con `verify:rutas-de-aviso` vigilando los dos caminos: *un guard que
+   *  sirve a dos consumidores no puede discrepar consigo mismo.* */
+  ruta: string | null;
   /** **La lámina: «un aviso sin destino no se pinta como si lo tuviera».**
-   *  Con `false`, la fila se muestra pero NO es tocable. */
+   *  Con `false`, la fila se muestra pero NO es tocable.
+   *  🔴 Desde S112-A2e **la `ruta` cuenta como destino**: antes miraba sólo los
+   *  referentes y pintaba no-tocable un aviso que sí tenía a dónde ir. */
   tieneDestino: boolean;
   creadoEn: string;
   leida: boolean;
@@ -88,6 +102,7 @@ export async function obtenerMisAvisos(
       mascotaId: f.mascota_id,
       mascotaNombre: f.mascota_nombre,
       eventoId: f.evento_id,
+      ruta: f.ruta,
       tieneDestino: f.tiene_destino,
       creadoEn: f.creado_en,
       leida: f.leida,

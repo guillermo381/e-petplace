@@ -176,7 +176,7 @@ export interface Adoptable {
   ingresadoEn: string;
   urgente: boolean;
   /** 🔴 TRES estados, jamás un boolean: `'si' | 'no' | 'no_se_sabe'`. */
-  conviveperros: Convivencia;
+  convivePerros: Convivencia;
   conviveGatos: Convivencia;
   conviveNinos: Convivencia;
   ciudadNombre: string | null;
@@ -267,7 +267,7 @@ function aAdoptable(f: Record<string, unknown>): Adoptable | null {
     esperaDias: Number.isFinite(num('espera_dias')) ? num('espera_dias') : 0,
     ingresadoEn: txt('ingresado_en') ?? '',
     urgente: f.urgente === true,
-    conviveperros: aConvivencia(f.convive_perros),
+    convivePerros: aConvivencia(f.convive_perros),
     conviveGatos: aConvivencia(f.convive_gatos),
     conviveNinos: aConvivencia(f.convive_ninos),
     ciudadNombre: txt('ciudad_nombre'),
@@ -349,6 +349,68 @@ export async function obtenerAdoptables(params?: {
       ordenPorConvivencia: r.orden_por_convivencia === true,
     },
   };
+}
+
+/** Un animal del refugio, **en cualquier estado**. Es lo que la vidriera NO
+ *  puede devolver: un borrador no sale ahí, ni debe. */
+export interface MiAdoptable {
+  publicacionId: string;
+  mascotaId: string;
+  nombre: string;
+  especie: string;
+  fotoUrl: string | null;
+  ingresadoEn: string;
+  esperaDias: number;
+  estado: EstadoAdoptable | 'memorial';
+  puedePublicar: boolean;
+  /** 🔴 CÓDIGO, no frase — la pantalla lo traduce con el riel (`D-539`).
+   *  **`null` SÓLO cuando de verdad puede publicar**: si no puede, la pantalla
+   *  tiene garantizado un motivo, que es lo que `TarjetaMascotaRefugio` exige
+   *  para poder dibujar el interruptor (un interruptor bloqueado y mudo no
+   *  compila). */
+  motivoNoPublica:
+    | 'adoptable_no_esterilizado'
+    | 'edad_no_declarada'
+    | 'animal_en_memorial'
+    | null;
+  fotos: number;
+  solicitudesVivas: number;
+}
+
+/** Los animales del refugio, en TODOS los estados y **ordenados por lo que pide
+ *  acción**: borrador arriba, memorial abajo. El orden lo decide el motor y no
+ *  la pantalla, para que las dos apps digan lo mismo. */
+export async function obtenerMisAdoptables(): Promise<
+  ResultadoWrapper<MiAdoptable[], CodigoErrorAdopcion>
+> {
+  const { data, error } = await getClient().rpc('obtener_mis_adoptables');
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  const out: MiAdoptable[] = [];
+  for (const v of data as Record<string, unknown>[]) {
+    if (typeof v.publicacion_id !== 'string' || typeof v.mascota_id !== 'string') {
+      return fallaCodigo('datos_inconsistentes');
+    }
+    const mv = v.motivo_no_publica;
+    out.push({
+      publicacionId: v.publicacion_id,
+      mascotaId: v.mascota_id,
+      nombre: typeof v.nombre === 'string' ? v.nombre : '',
+      especie: typeof v.especie === 'string' ? v.especie : '',
+      fotoUrl: typeof v.foto_url === 'string' ? v.foto_url : null,
+      ingresadoEn: String(v.ingresado_en ?? ''),
+      esperaDias: Number(v.espera_dias ?? 0),
+      estado: String(v.estado ?? 'borrador') as EstadoAdoptable | 'memorial',
+      puedePublicar: v.puede_publicar === true,
+      motivoNoPublica:
+        mv === 'adoptable_no_esterilizado' || mv === 'edad_no_declarada' || mv === 'animal_en_memorial'
+          ? mv
+          : null,
+      fotos: Number(v.fotos ?? 0),
+      solicitudesVivas: Number(v.solicitudes_vivas ?? 0),
+    });
+  }
+  return { ok: true, data: out };
 }
 
 /** La ficha, **en un viaje**. Trae todo lo que §4.1 dibuja, fotos incluidas.
