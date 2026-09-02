@@ -28,6 +28,7 @@
     "verify:sin-byte-nul": "node scripts/verify-sin-byte-nul.mjs",
     "_comentario_mensajeria": "S111-D: la ley del canal interno (packages/mensajeria) es dominio PURO, y por eso se ejerce sin levantar app ni sesion. El arnes corre su AUTO-PRUEBA antes de contar un verde: siembra un rojo conocido y si NO lo detecta sale con codigo 2, porque «no pude medir» no es «no encontre nada» (L-459). No toca red ni DB.",
     "verify:mensajeria": "tsx scripts/verify-mensajeria.mjs",
+    "verify:rebote-lleva-id": "tsx scripts/verify-rebote-lleva-id.mjs",
     "_comentario_razon": "S111-A (firma founder, L-477): TRINQUETE de la razón. Mide consumidores de apps/ que pasan razonDeshabilitado SIN onRazon — sin él, Boton calcula conRazon=false y el botón queda apagado y sin hint de a11y. Es trinquete y no barrida porque la lección de la voz se cazó DOS VECES en un día con el del voseo y ninguna barrida había fallado: las cuatro entraron DESPUÉS de la última. No prohíbe el estado, prohíbe que el número SUBA. 🔴 DECLARA ADENTRO LAS TRES COSAS QUE NO VE: (1) que la razón NO SE DIBUJA NUNCA —medido: en Boton.tsx razonDeshabilitado sólo aparece en accessibilityHint, así que pasar onRazon no hace aparecer ningún texto—, (2) los 84 archivos que frenan sin pasar razón siquiera, y (3) que mide por archivo y no por botón. Auto-prueba antes de contar un verde: exit 2 si no puede distinguir su rojo. No necesita red. Apto para el hook.",
     "verify:razon-muda": "node scripts/verify-razon-muda.mjs"
   },
