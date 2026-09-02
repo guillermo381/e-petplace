@@ -250,6 +250,15 @@ export interface FiltrosAdoptables {
   conPareja?: boolean;
   ciudadId?: string;
   countryCode?: string;
+  /**
+   * S112-A · los animales de UN publicador — la vitrina del refugio.
+   *
+   * 🔴 **Se filtra acá y jamás en el cliente.** La lista es keyset paginada:
+   * quedarse con los de un refugio dentro de la página que tocó mostraría
+   * *«tres de sus animales»* sobre un refugio que tiene doce, **y se vería
+   * completa**. Es el id de `publicadorId` del propio `Adoptable`.
+   */
+  publicadorId?: string;
   edadMaxMeses?: number;
   edadMinMeses?: number;
 }
@@ -345,6 +354,7 @@ export async function obtenerAdoptables(params?: {
   if (f.conPareja !== undefined) p_filtros.con_pareja = f.conPareja;
   if (f.ciudadId !== undefined) p_filtros.ciudad_id = f.ciudadId;
   if (f.countryCode !== undefined) p_filtros.country_code = f.countryCode;
+  if (f.publicadorId !== undefined) p_filtros.publicador_id = f.publicadorId;
   if (f.edadMaxMeses !== undefined) p_filtros.edad_max_meses = f.edadMaxMeses;
   if (f.edadMinMeses !== undefined) p_filtros.edad_min_meses = f.edadMinMeses;
 
