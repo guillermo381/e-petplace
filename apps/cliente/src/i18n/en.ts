@@ -2543,4 +2543,16 @@ export const clienteEn = {
     quieroAdoptarDetalle: 'Meet the ones waiting for a family.',
     quieroAdoptarAccion: 'See who is waiting',
   },
+  legales: {
+    titulo: 'Document',
+    tituloCondiciones: 'Adoption terms',
+    tituloRefugio: 'Shelter terms',
+    aceptar: 'I accept and continue',
+    razonFaltaLeer: 'Scroll to the end to accept.',
+    codigoInvalidoTitulo: 'This document is not accepted here',
+    codigoInvalidoDetalle: 'The adoption deed is signed, not accepted. You will see it when the shelter accepts your request.',
+    errorTitulo: 'We could not load the text',
+    errorDetalle: 'Check your connection and try again.',
+    reintentar: 'Try again',
+  },
 } as const satisfies Espejo<typeof clienteEs>;

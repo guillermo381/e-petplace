@@ -174,6 +174,25 @@ export default function Adoptar() {
            que la que busca está a un toque.
            **Cuando A publique la cura, el id viene en `detalle`** y esto pasa a
            llevar al hilo exacto: es cambiar el destino, nada más. */
+        /* 🔴 **LA COMPUERTA NO SE MUESTRA: SE RESUELVE.** A la puso hoy
+           (`crear_solicitud_adopcion` rebota `condiciones_no_aceptadas` si la
+           persona no las aceptó) y su voz **no dice «error», dice qué falta**.
+           *Mostrar el rebote y dejarla ahí sería contarle un requisito y no
+           darle con qué cumplirlo* — el mismo defecto que `L-424` nombra para
+           los guards que sólo saben negarse.
+
+           Se lleva a la LECTURA, con `volverA` para que al aceptar caiga de
+           vuelta acá y pueda postular. **No se re-postula sola al volver**, y
+           es deliberado: postular es un acto de la persona, y encadenarlo a
+           una aceptación convertiría «acepto las condiciones» en «acepto y de
+           paso mando la solicitud». */
+        if (r.codigo === 'condiciones_no_aceptadas') {
+          router.push({
+            pathname: '/legales/[codigo]',
+            params: { codigo: 'condiciones_adopcion', volverA: '/adoptar' },
+          });
+          return;
+        }
         if (r.codigo === 'solicitud_ya_viva') {
           mostrar({ variante: 'neutro', texto: r.mensaje });
           router.push('/adoptar/solicitudes');

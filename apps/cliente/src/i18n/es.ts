@@ -3595,4 +3595,16 @@ export const clienteEs = {
     quieroAdoptarDetalle: 'Conoce a los que están esperando una familia.',
     quieroAdoptarAccion: 'Ver quiénes esperan',
   },
+  legales: {
+    titulo: 'Documento',
+    tituloCondiciones: 'Condiciones de adopción',
+    tituloRefugio: 'Términos del refugio',
+    aceptar: 'Acepto y continúo',
+    razonFaltaLeer: 'Desliza hasta el final para poder aceptar.',
+    codigoInvalidoTitulo: 'Este documento no se acepta desde acá',
+    codigoInvalidoDetalle: 'El acta de adopción se firma, no se acepta. La vas a ver cuando el refugio acepte tu solicitud.',
+    errorTitulo: 'No pudimos traer el texto',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
+  },
 } as const;
