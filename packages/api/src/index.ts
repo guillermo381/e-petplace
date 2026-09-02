@@ -1724,8 +1724,10 @@ export {
 export {
   evaluarEsterilizacionAdoptable, obtenerMisAdoptables, obtenerMiAdoptable,
   obtenerActaAdopcion, solicitarCodigoFirma, firmarActaAdopcion,
+  desistirSolicitudAdopcion, reportarPublicacion,
 } from './wrappers/adopcion';
 export type {
+  MotivoReporte,
   ActaAdopcion,
   MiAdoptableFicha,
   RespuestasPostulacion,

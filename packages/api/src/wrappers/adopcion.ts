@@ -98,6 +98,11 @@ const MENSAJES = {
   intentos_agotados:      'Se agotaron los intentos. Pide un código nuevo.',
   firma_inmutable:        'Una firma no se edita ni se borra.',
   solicitud_no_existe:    'No encontramos esa solicitud.',
+  /* S112-A10 · desistir y reportar. `solo_el_solicitante_desiste` protege algo
+     concreto: si el publicador pudiera, tendría una forma de cerrar una
+     solicitud sin que quede escrito que la declinó él. */
+  solo_el_solicitante_desiste: 'Sólo quien postuló puede retirar su postulación.',
+  motivo_no_valido:       'Ese motivo no existe.',
   cuenta_no_existe:       'No encontramos esa cuenta.',
   /* Un campo fuera de la lista blanca rebota CON SU NOMBRE: un editor que
      ignora en silencio le dice a la pantalla que guardó algo que no guardó. */
@@ -1358,4 +1363,53 @@ export async function firmarActaAdopcion(params: {
       completa: r.completa === true,
     },
   };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑦ DESISTIR Y REPORTAR — S112-A10
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** La familia retira su postulación. **`desistida` es un estado propio, no
+ *  `declinada`**: declinar es del publicador y desistir es de la familia, y
+ *  reusar el mismo haría que el refugio viera «yo la decliné» sobre alguien que
+ *  se fue solo. El hilo queda en lectura para los dos. */
+export async function desistirSolicitudAdopcion(
+  solicitudId: string,
+): Promise<ResultadoWrapper<{ estado: string }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('desistir_solicitud_adopcion', {
+    p_solicitud_id: solicitudId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { estado: String((data as Record<string, unknown>).estado ?? '') } };
+}
+
+export type MotivoReporte =
+  | 'maltrato'
+  | 'venta_encubierta'
+  | 'datos_falsos'
+  | 'no_es_adopcion'
+  | 'otro';
+
+/** Reporta una publicación. 🔴 **El refugio NO puede ver quién lo reportó** — no
+ *  está en la policy de lectura, y ése es el punto entero: *un reporte cuyo
+ *  autor el reportado puede ver no es un reporte, es una confrontación.*
+ *
+ *  Idempotente y hablada: el segundo toque devuelve el que ya existe. Sobre un
+ *  acto delicado, un error técnico se lee como «no se pudo denunciar». */
+export async function reportarPublicacion(params: {
+  publicacionId: string;
+  motivo: MotivoReporte;
+  detalle?: string;
+}): Promise<ResultadoWrapper<{ reporteId: string; yaExistia: boolean }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('reportar_publicacion', {
+    p_publicacion_id: params.publicacionId,
+    p_motivo: params.motivo,
+    p_detalle: params.detalle ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.reporte_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { reporteId: r.reporte_id, yaExistia: r.ya_existia === true } };
 }

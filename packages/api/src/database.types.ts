@@ -681,6 +681,51 @@ export type Database = {
           },
         ]
       }
+      adopcion_reporte: {
+        Row: {
+          atendido_en: string | null
+          creado_en: string
+          detalle: string | null
+          id: string
+          motivo: string
+          publicacion_id: string
+          reportado_por: string | null
+        }
+        Insert: {
+          atendido_en?: string | null
+          creado_en?: string
+          detalle?: string | null
+          id?: string
+          motivo: string
+          publicacion_id: string
+          reportado_por?: string | null
+        }
+        Update: {
+          atendido_en?: string | null
+          creado_en?: string
+          detalle?: string | null
+          id?: string
+          motivo?: string
+          publicacion_id?: string
+          reportado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_reporte_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_publicacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_reporte_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicacion_id"]
+          },
+        ]
+      }
       adopcion_seguimiento: {
         Row: {
           adoptante_id: string
@@ -23506,6 +23551,10 @@ export type Database = {
         Args: { p_evento_id: string; p_motivo: string }
         Returns: undefined
       }
+      desistir_solicitud_adopcion: {
+        Args: { p_solicitud_id: string }
+        Returns: Json
+      }
       despachar_notificaciones: { Args: { p_seco?: boolean }; Returns: Json }
       despachar_pedido: {
         Args: { p_pedido_id: string; p_repartidor_id: string }
@@ -25481,6 +25530,10 @@ export type Database = {
       reordenar_fotos_prestador: {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined
+      }
+      reportar_publicacion: {
+        Args: { p_detalle?: string; p_motivo: string; p_publicacion_id: string }
+        Returns: Json
       }
       reservar_dia_de_paquete_guarderia: {
         Args: {
