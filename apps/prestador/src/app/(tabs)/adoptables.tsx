@@ -30,13 +30,19 @@
  *   retiro definitivo que la base **obliga** a tener fecha y motivo
  *   (`chk_no_disponible_coherente`). *Pintarlos igual le diría al refugio que
  *   puede volver a publicar algo que retiró.* B agregó el séptimo.
- * · **`en_proceso` existe en la unión y NINGUNA fila lo usa.** Medido: después
- *   de que el refugio acepta, la publicación sigue en `publicada` hasta el
- *   traspaso. `solicitudesVivas` cuenta *«hay gente escribiendo»*, no *«esta
- *   adopción está en curso»* — derivarlo de ahí pintaría «en proceso» sobre un
- *   animal que apenas recibió una consulta. **Su voz se escribe igual** porque
- *   `voces` es un `Record` y sacarlo hoy rompería a todos los consumidores el
- *   día que el motor lo produzca.
+ * · ✅ **`en_proceso` YA OCURRE, y esta nota decía lo contrario.** ⏪ Decía
+ *   *«existe en la unión y ninguna fila lo usa»*, y era cierto: después de
+ *   aceptar, la publicación seguía en `publicada` hasta el traspaso, y
+ *   `solicitudesVivas` cuenta *«hay gente escribiendo»*, no *«esta adopción está
+ *   en curso»*. **Con el motor de firmas el hecho se volvió distinguible** —
+ *   *aceptada con menos de DOS firmas*— y A lo derivó con esa definición
+ *   exacta. *Se escribió su voz antes de que existiera porque `voces` es un
+ *   `Record` y sacarla habría roto a todos los consumidores el día que naciera;
+ *   ese día llegó.*
+ * · **Su interruptor lo gobierna `puedePublicar`, como el de todos.** No se le
+ *   agrega una regla propia acá: *si publicar o pausar un animal con traspaso
+ *   pendiente tiene que estar prohibido, eso lo dice el motor y no una lista de
+ *   estados en la pantalla.*
  *
  * ── ⚠️ LO QUE FALTA, CON SU BLOQUEANTE NOMBRADO ─────────────────────────
  * · **La ficha de edición: NO HAY LECTOR.** `obtener_adoptable` lee
