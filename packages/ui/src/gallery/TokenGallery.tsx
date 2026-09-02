@@ -111,6 +111,7 @@ import { HitoUnaVidaNueva } from '../components/HitoUnaVidaNueva'
 import { TarjetaMascotaRefugio } from '../components/TarjetaMascotaRefugio'
 import { FichaAdoptable } from '../components/FichaAdoptable'
 import { BotonExplicar } from '../components/BotonExplicar'
+import { VitrinaRefugio } from '../components/VitrinaRefugio'
 import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
@@ -5560,6 +5561,36 @@ function GaleriaInterna() {
               <AvatarMascota nombre="Rocco" tamano="lg" />
               <Texto variante="apoyo">③ residuo · avisa en dev</Texto>
             </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="VitrinaRefugio (S112) — la MISMA vitrina, otro oficio">
+          {/* 🔴 QUÉ HAY QUE VER: que se ve como la vitrina de un prestador,
+              porque ES la vitrina de un prestador — portada con su carrusel,
+              logo con su escalera, historia y lista. Cero pieza nueva (N17).
+              Y lo que NO se ve porque no puede entrar: zona y dirección.
+              «Cómo ayudar» va último y discreto: dice «pronto» detrás de su
+              «i» y no navega, así que no compite con lo que sí está. */}
+          <View
+            style={{
+              height: 420,
+              borderRadius: radius.lg,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.08)',
+            }}
+          >
+            <VitrinaRefugio
+              nombre="Refugio Patitas del Sur"
+              ciudad="Quito"
+              historia="Rescatamos desde 2019. Hoy cuidamos a 34 animales mientras esperan su casa."
+              lista={['Rescate', 'Adopción', 'Esterilización']}
+              comoAyudar={{
+                texto: 'Cómo ayudar',
+                onExplicar: () => {},
+                etiquetaExplicacion: 'Qué se va a poder hacer',
+              }}
+            />
           </View>
         </Seccion>
 
