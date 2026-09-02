@@ -84,6 +84,28 @@ frena antes de que se escriba.**
 - **Mecanización:** toda ley que pueda vivir en `verify:diseno` se mecaniza.
   **Una ley que vive en el lint no se degrada.**
 
+> ### ⭐ ENMIENDA S112 (founder, 2-sep-2026) — **EL TOQUE 2 SE MIDE EN LA APP, NO EN LA GALERÍA**
+>
+> **El gate de una pieza de UI es su MONTAJE en la pantalla real, dentro del
+> lote.** El founder no juzga en galería: juzga en la app, en el contexto real
+> de la pieza, durante su recorrido por objetivo cumplido.
+>
+> ⇒ **Una pieza que sólo existe en galería es ENTREGADA Y NO MONTADA**, y así
+> se reporta en el cierre — con su PUERTA nombrada (qué pista la monta).
+> *Contarla como construida-y-ejercida es exactamente la sección que el canon
+> creó para que lo construido no se lea como hecho.*
+>
+> **Lo que esto NO cambia:** el toque 2 sigue siendo de B y sigue teniendo
+> poder de rojo. Lo que cambia es **contra qué** lo ejerce: la pantalla del
+> lote, con sus datos y su fondo, no la pieza sola sobre un tapiz.
+>
+> ⚠️ **Las láminas ⭐ GATE existentes no se borran ni se citan como gate.**
+> Siguen sirviendo para ver estados difíciles de producir en vivo — un
+> memorial, un error de red, una lista vacía. *Lo que se pierde no es su
+> utilidad: es su valor como prueba.*
+>
+> Lección: **`L-478`**.
+
 ---
 
 ## N11 · EL CAMPO DE ESCRITURA

@@ -155,8 +155,30 @@ export default function Adoptar() {
     try {
       const r = await crearSolicitudAdopcion({ publicacionId: a.publicacionId });
       if (!r.ok) {
-        /* `solicitud_ya_viva` trae el id de la que existe: se lleva ahí en vez
-           de decir que no (`L-424` — un guard que sólo sabe negarse). */
+        /* 🔴 **ACÁ HABÍA UN COMENTARIO QUE DESCRIBÍA UN CÓDIGO QUE NO EXISTÍA.**
+           Decía: *«`solicitud_ya_viva` trae el id de la que existe: se lleva ahí
+           en vez de decir que no (`L-424`)»* — **y debajo sólo mostraba el
+           mensaje.** No llevaba a ningún lado. *Un comentario que afirma un
+           comportamiento que su código no tiene es peor que no tenerlo: el
+           próximo lector cree que el caso está resuelto y no lo mira.*
+
+           **Y aunque hubiera querido llevar, no podía**: D lo midió contra el
+           motor (`S112-D-para-C-CONTRATO-DEL-HILO` §2①). El motor **sí** manda
+           el id (`RAISE 'solicitud_ya_viva: %', v_sol`), pero `fallo()` mapea
+           por prefijo y **devuelve el mensaje estático, tirando el uuid**. Así
+           que el id nunca llegó a esta pantalla.
+
+           ✅ **Lo que sí se puede hoy, y es el espíritu de `L-424`: llevar a la
+           LISTA.** No es la solicitud exacta, pero *deja de ser un «no» y pasa
+           a ser un camino* — y la lista tiene una sola entrada por animal, así
+           que la que busca está a un toque.
+           **Cuando A publique la cura, el id viene en `detalle`** y esto pasa a
+           llevar al hilo exacto: es cambiar el destino, nada más. */
+        if (r.codigo === 'solicitud_ya_viva') {
+          mostrar({ variante: 'neutro', texto: r.mensaje });
+          router.push('/adoptar/solicitudes');
+          return;
+        }
         mostrar({ variante: 'error', texto: r.mensaje });
         return;
       }

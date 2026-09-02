@@ -26462,9 +26462,19 @@ rojo, y esto no lo deja. **Pero su disparo es inmediato y por eso va 🔴.**
 **DISPARO: la PRIMERA sesión que vaya a depositar una ficha.** *Se cura antes de
 escribir el próximo número, no después de que dos pistas se pisen otra vez.*
 
-⚠️ **Mientras tanto, el número libre es `D-1003` y el máximo real es `D-1001`** —
-escrito acá **a propósito**, contra la propia ley de no escribir números, porque
-**hoy el comando no lo puede decir**.
+> ### ☠️ CURADA EN S112-A. La línea que vivía acá se retira EN EL MISMO ACTO que la cura (`L-395`).
+>
+> Decía el número libre escrito a mano, **a propósito y contra la propia ley de
+> no escribir números**, con su razón declarada: *«hoy el comando no lo puede
+> decir»*. **Hoy lo dice** — `pnpm proximo:ficha` — así que la razón venció.
+>
+> 🔴 **Y su retiro no fue prolijidad: fue el guard de la cura exigiéndolo.** El
+> comando nuevo se niega a entregar un número que aparezca en cualquier parte
+> del archivo, y este párrafo hacía aparecer el que iba a entregar. *Un texto
+> que nombra el próximo número libre envenena a cualquier instrumento que mida
+> números* — **y el rojo lo produjo dos veces: la segunda contra el borrador de
+> esta misma nota de retiro, que también lo nombraba.* La cura vive en la ficha
+> inmediatamente siguiente a ésta.
 
 ---
 
@@ -26655,3 +26665,378 @@ por encabezado lo captura.
 **Lo que se usó acá, y se declara:** el máximo se leyó por encabezado **y cada
 número candidato se verificó uno por uno con `grep -c` = 0** antes de escribirlo.
 *Dos instrumentos, porque ninguno solo alcanza.*
+
+---
+
+## ☠️ `D-1003` — LA CURA DE `D-1002`: EL NÚMERO DE FICHA **SE PIDE, NO SE ELIGE** (nace y muere en S112-A)
+
+**Depositada por A el 1-sep-2026, con su rojo reproducido antes y su verde
+después.** Cierra `D-1002`.
+
+### ① EL ROJO, contra el objeto (`docs/DEUDAS_CANONICAS.md` en `cc55348b`, 20:49 -05)
+
+| lado | comando | devuelve | consecuencia |
+|---|---|---|---|
+| **subcuenta** | el del canon, `\{3\}` dígitos | **`D-999`** | próximo `D-1000` → **ya tomado, 6 ocurrencias medidas.** *Choca* |
+| **sobrecuenta** | la corrección obvia, número entero + orden numérico | **`D-2026`** | próximo `D-2027` → **salto de 1024** sobre el máximo real. *Y saltar no tiene síntoma* |
+| **el gemelo `L-`** | el del canon | **`L-714`** | el máximo real es `L-477`. `L-714` es un typo curado en S94 **que los encabezados de depósito narran** |
+
+**Por qué el regex de tres dígitos subcuenta:** trunca `D-1002` a `D-100`, y el
+máximo del conjunto truncado es `D-999`. **Por qué el de cuatro sobrecuenta:**
+captura `D-2026` de una cita legal *y de la propia ficha `D-1002`*, que lo
+escribe entre backticks como ejemplo del problema.
+
+> ### ⇒ *La ficha que documenta el bug contiene el string que causa el bug.* Ninguna variante de regex sobre el CUERPO del archivo se salva de eso.
+
+### ② LO QUE SE MIDIÓ Y NADIE HABÍA MEDIDO
+
+- **El límite que E declaró sin verificar, verificado:** hay **5 números `D-`
+  que viven en el cuerpo y no en un encabezado** (`D-163` · `D-757` · `D-821` ·
+  `D-948` · el que `D-1002` escribía como «próximo libre»). **Ninguno es una
+  ficha alta** ⇒ el ancla por encabezado no subcuenta el máximo. *Era una
+  corrida, y no se había hecho.*
+- 🔴 **El filtro por encabezado NO salva a las `L-`**, porque `L-714` vive en
+  **dos encabezados de bloque de depósito**. La enmienda anterior a `D-1002` ya
+  lo había anotado; acá se cierra: **el ancla no es «el número está en un
+  encabezado» sino «el encabezado EMPIEZA con el número»**, y esa forma sí lo
+  descarta (medido: 0).
+
+### ③ EL COMANDO NUEVO — y lo que un one-liner no podía tener
+
+```
+pnpm proximo:ficha            # node scripts/proximo-numero-ficha.mjs
+pnpm proximo:ficha --control  # + los positivos y los TRES negativos conocidos
+```
+
+Ancla en **encabezados cuyo primer token es el número entre backticks**, ordena
+**numéricamente** —*la mitad del arreglo no está en el patrón, está en el orden:
+`sort` alfabético pone `D-999` después de `D-1000`*— y entrega `tope + 1` para
+`D-` y para `L-` en la misma corrida.
+
+🔴 **Y trae el guard que ninguna variante de regex podía traer:** antes de
+entregar un número, **exige que ese número no aparezca NI UNA VEZ en todo el
+archivo**; si aparece, sale con **exit 2** y nombra las líneas. *`L-459`: un
+instrumento que sólo sabe decir un número no puede producir su propio rojo.*
+
+**Su modo de falla, declarado:** el ancla depende de la convención de encabezado
+(`L-459` — *un gate atado a un NOMBRE mide la CONVENCIÓN, no el hecho*). Si una
+ficha alta naciera con otro formato, el ancla no la vería… **y el guard la
+cazaría igual**, porque el número propuesto aparecería en el archivo. *Las dos
+mitades cubren modos de falla distintos a propósito.*
+
+### ④ EL VERDE, y el guard se cobró TRES VECES en el camino
+
+**Dos tomas seguidas dan N y N+1**: la primera entregó el número de esta ficha
+—y el de su lección hermana—; la segunda, ya con esta ficha depositada, entregó
+el siguiente. *Los números concretos NO se transcriben acá: transcribirlos es
+exactamente lo que rompe el instrumento.* **La evidencia de una toma es la
+corrida del comando, no su copia en prosa.**
+
+Antes de ese verde el guard salió en rojo **tres veces, y las tres con razón —
+las tres contra texto que estaba escribiendo el que curaba, no contra deuda
+vieja**: ① la ficha `D-1002` escribía a mano el número libre —lo hacía a
+propósito, *«porque hoy el comando no lo puede decir»*, y esa razón venció con
+esta cura, así que la línea se retiró en el mismo acto (`L-395`)—; ② **el
+borrador de la propia nota de retiro volvía a nombrarlo**; ③ **el borrador de
+ESTA ficha, que escribía las dos tomas con sus números literales «para dejar la
+evidencia».**
+
+> ### ⇒ *Un texto que nombra un número que todavía no es de ninguna ficha envenena a cualquier instrumento que mida números — incluido el texto que se escribe para explicar eso.*
+>
+> **De ahí sale la segunda mitad de la convención, y no es cosmética: el canon
+> no escribe números que todavía no están depositados.** *Tres capturas en una
+> sola cura, todas del mismo autor, dicen que la tentación es del que documenta
+> — no del que se distrae.*
+
+**DISPARO: ninguno. Nace cerrada.** Lo que queda vivo es el comando, y su
+convención de depósito: **toda ficha se deposita con su número entre backticks
+al principio de su encabezado.**
+
+---
+
+## 🔴 `L-478` — UNA PIEZA MIRADA FUERA DE SU PANTALLA SE JUZGA CONTRA UN FONDO QUE NO EXISTE
+
+**Firma del founder, 2-sep-2026.** *«Se acaban las láminas de galería como
+gate.»* Depositada en los DOS lugares donde vive el procedimiento —
+`CONTRATO_TRABAJO` regla 80 y `DIRECCION_DISENO_S99` §1 — **y no en un parte de
+pista**, por el precedente que ese mismo §1 ya registra: *una firma que vive en
+un parte no está firmada.*
+
+### LA LEY
+
+**El gate de una pieza de UI es su MONTAJE en la pantalla real, dentro del
+lote.** El founder no juzga en galería: juzga en la app, en el contexto real de
+la pieza, durante su recorrido por objetivo cumplido.
+
+⇒ **Una pieza que sólo existe en galería es ENTREGADA Y NO MONTADA**, y se
+reporta en esa sección del cierre, con su PUERTA nombrada.
+
+### POR QUÉ ES LEY Y NO PREFERENCIA: ES EL TERCER GOLPE AL MISMO DEFECTO
+
+| sesión | qué se mató | por qué |
+|---|---|---|
+| **S83** | la lámina **HTML** | la traducción HTML→RN **reabría todas las decisiones que la lámina creía cerradas**, y su CSS tentaba a portarse como fuente |
+| **S97** | el gate **por pantalla** | gatear de a una pantalla no dice cómo se siente el **recorrido** |
+| **S112** | la lámina **de galería** | una pieza sola sobre un tapiz se juzga **sin sus datos, sin su fondo y sin lo que la rodea** |
+
+> ### ⇒ *Las tres veces el instrumento era más barato de mirar que la cosa real, y las tres veces midió otra cosa.* **Un sustituto del objeto se elige por su costo y se paga en su fidelidad.**
+
+### LO QUE NO CAMBIA, declarado para que nadie lo recorte de más
+
+- **El toque 2 sigue siendo de B y sigue teniendo poder de rojo.** Lo que cambia
+  es **contra qué** lo ejerce.
+- ⚠️ **Las láminas ⭐ GATE existentes NO se borran.** Siguen sirviendo para ver
+  estados difíciles de producir en vivo —un memorial, un error de red, una lista
+  vacía—. **Lo que se prohíbe es CITARLAS COMO GATE.** *Un instrumento que deja
+  de ser prueba no deja de ser útil: lo que cambia es qué se puede afirmar con
+  él.*
+
+### SU CONSECUENCIA INMEDIATA EN EL REPORTE
+
+La sección **③ ENTREGADO Y NO MONTADO** deja de ser una cortesía y pasa a ser el
+destino obligatorio de toda pieza sin pantalla. *Contarla en «construido y
+ejercido» es exactamente el defecto que esa sección se creó para atajar: **lo
+construido y no ejercido se lee como hecho.***
+
+**DISPARO: ninguno. Rige desde su firma.**
+
+---
+
+## 🔴 `L-479` — UN GENERADO VIEJO Y GITIGNORED NO CIEGA: **ACUSA EN FALSO**, Y MANDA A CURAR CÓDIGO SANO
+
+**Medido dos veces el mismo día, por dos pistas, en direcciones opuestas** —
+`apps/prestador/.expo/types/router.d.ts`, que expo-router genera y `.gitignore`
+excluye.
+
+| pista | qué le pasó | qué habría concluido si no lo mira |
+|---|---|---|
+| **A** | Tras mergear rutas nuevas, `tsc apps/prestador` dio **2 errores** y `verify:diseno` **R63·C** dio rojo, los dos nombrando `/adopcion` | *«la pista que mergeé rompió el typecheck»* — y habría ido a **arreglar código que estaba bien** |
+| **C** | Al abrir el worktree, `tsc` salió **VERDE sin medir una sola ruta**; al generarlo, cazó **4 errores reales** de contrato de piezas | *«mi rama está limpia»* — con cuatro errores vivos |
+
+> ### ⇒ *El mismo archivo produce el falso rojo y el falso verde, según esté viejo o ausente.* **Y ninguna de las dos caras viaja en el repo, porque está gitignored: cada pista lo redescubre sola.**
+
+### POR QUÉ ES PEOR QUE UN GATE ROTO CUALQUIERA
+
+Un gate roto que da rojo se investiga. **Éste da un rojo VEROSÍMIL** —nombra
+rutas reales, aparece justo después de un merge, y apunta a archivos que
+efectivamente acaban de entrar— así que **invita a curar lo que no está roto**.
+*Un rojo que apunta al sospechoso correcto por la razón equivocada cuesta más
+que uno que no apunta a nadie.*
+
+Y su gemelo silencioso es peor: **el verde por ausencia**. `tsc` no puede
+verificar una ruta que el generado no declara, así que **`router.push` hacia una
+ruta inexistente pasa sin control** — el gate `R63·C` existe exactamente para
+eso y su texto ya nombra la cura.
+
+### LA CURA, y no es curar el archivo
+
+**`expo start` en la app** regenera el archivo. Lo que la lección exige es
+ANTES: **cuando un typecheck de una app Expo cambie de color justo después de un
+merge o de abrir un worktree, se regenera el router ANTES de diagnosticar.**
+*Regenerar cuesta un minuto; diagnosticar el rojo equivocado costó dos pistas.*
+
+⚠️ **Borde medido:** `expo start` **no regenera si el puerto está ocupado** —
+sale «Input is required, but 'npx expo' is in non-interactive mode», **skippea el
+dev server y devuelve éxito**. *El comando que regenera puede no regenerar y no
+decirlo.* Se verifica por el CONTENIDO del archivo (que nombre la ruta nueva),
+jamás por el código de salida.
+
+**DISPARO: ninguno. Es aviso permanente de la casa.**
+
+---
+
+## 🔴 `L-480` — ANTES DE LLAMAR «HEREDADO» A UN ROJO, MEDÍ SI EL INSTRUMENTO PODÍA VER ALGO
+
+**Firma del founder, 2-sep-2026.** Nace de dos pistas que llegaron al mismo
+correctivo el mismo día, **una por el camino barato y otra por el caro**.
+
+| pista | qué pasó |
+|---|---|
+| **D** | Su primer `tsc` en el worktree dio **`0` SIN `node_modules`** — sin poder resolver un solo import. *Un typecheck ciego y uno legítimo se leen igual: los dos imprimen `0`.* Lo frenó el hook con **7 × `TS2307`**; en vez de declararlos ajenos corrió `pnpm install`, y **recién ahí el gate midió** |
+| **B** | Llegó al mismo correctivo **por el camino caro**: declaró «clase heredada» sobre un rojo **que era suyo** |
+
+> ### ⇒ *Un verde de typecheck que no dice si había dependencias no es un verde: es un número.* **Y «heredado» es la coartada más barata que existe frente a un rojo — se acepta sola, no pide evidencia, y deja el defecto adentro.**
+
+### LO QUE LA CONVIERTE EN LEY Y NO EN ANÉCDOTA
+
+El propio gate del monorepo **ya declara esta trampa** cuando toca un paquete
+compartido: *«este guard NO sabe si lo rompiste vos: mide el ÁRBOL, no tu
+cambio… antes de buscar en lo que editaste, mirá si el rojo ya existía»*. **Esa
+advertencia, leída con prisa, se lee como permiso.** La ley cierra el hueco por
+el otro lado: **la salida «es ajeno» exige la misma evidencia que cualquier
+otra afirmación** — reproducirlo sin tu cambio, o nombrar el commit que lo trajo.
+
+### EL PAR QUE HAY QUE CORRER, y son dos preguntas distintas
+
+1. **¿El instrumento podía ver?** Dependencias instaladas · generados al día
+   (`L-479`) · el corpus no vacío. **Un `0` sobre cero archivos es un `0`.**
+2. **¿Y el rojo es mío?** Recién con la ① contestada: `git stash -u` y volver a
+   medir, o nombrar el commit ajeno.
+
+*Hacer la ② sin la ① es cómo se archiva un defecto propio con el nombre de otro.*
+
+### SU HERMANA, y por qué van juntas
+
+`L-479` dice que **un generado viejo acusa en falso**; ésta dice que **un
+entorno incompleto absuelve en falso**. **Las dos son el mismo eje: el estado
+del entorno decide qué significa el número, y el número no lo declara.** Por eso
+el correctivo es el mismo — *todo verde de gate viaja con la condición en que se
+midió, o no viaja.*
+
+**DISPARO: ninguno. Rige desde su firma.**
+
+---
+
+## 🟡 `D-1004` — EL ADJUNTO DE IMAGEN DEL HILO DE ADOPCIÓN NO EXISTE EN NINGUNO DE LOS TRES LUGARES
+
+**Qué se pidió (ítem 14):** que en el hilo de una solicitud se pueda adjuntar una
+imagen, **sólo del lado del publicador**.
+
+**Qué hay hoy — medido contra la base viva el 1-sep-2026, cada cero con su
+control positivo** *(sin el control, un 0 no distingue el mundo del
+instrumento — y en esta misma sesión un `0` de buckets resultó ser un worktree
+sin linkear)*:
+
+| dónde tendría que estar | adopción | control positivo |
+|---|---|---|
+| columna de adjunto en `adopcion_mensaje` | **0** | **2** en `evento_archivo_adjunto` |
+| parámetro en `responder_solicitud_adopcion` | **0** — la firma es `(p_solicitud_id uuid, p_cuerpo text)` | — |
+| bucket **privado** de adopción | **0** | **8** buckets privados en la casa |
+
+⇒ **No es un guard que frene al adoptante: es que la puerta no está
+construida.** Y así lo decidió A al escribir el motor, con su razón:
+*«sin bucket la puerta no existe, en vez de existir abierta»*.
+
+> ### 🔴 NO SE PUDO PRODUCIR EL ROJO «el adoptante no adjunta», y eso ES el hallazgo.
+> Una puerta que no existe **no se puede probar cerrada**. Se reporta la
+> ausencia; **jamás un verde**. *Un arnés que da verde sobre una compuerta que
+> no existe es exactamente el defecto que `L-438` nombra.*
+
+---
+
+### 🔴 LA TRAMPA, Y ES LO QUE MÁS IMPORTA DE ESTA FICHA
+
+**Existe `adopcion-fotos`, y es `public: true`.** Es la vidriera — las fotos del
+animal publicado, que tienen que ser públicas para que alguien lo vea y postule.
+
+**Es el único bucket de adopción que hay.** ⇒ Quien construya el adjunto va a
+encontrarlo, va a ver que «ya existe el bucket de adopción», y **las imágenes de
+una conversación privada entre dos personas van a quedar en un bucket público**.
+
+> ### El error no va a ser descuidado: va a ser razonable. Por eso la ficha existe antes que el trabajo.
+
+**El adjunto va en bucket PRIVADO NUEVO. Jamás en `adopcion-fotos`.**
+
+---
+
+### QUÉ HACE FALTA CUANDO ENTRE — las cinco piezas, en orden
+
+1. **Bucket privado nuevo** (`adopcion-hilo`, o el nombre que la casa elija), con
+   límite de tamaño y `mime` acotado a imagen. *La casa ya tiene 8 privados: el
+   molde existe, no se inventa.*
+2. **Policies de Storage con el MISMO gate que la RLS del hilo** —
+   `_user_publico_esta_publicacion` para escribir, y las **dos** partes para
+   leer. 🔴 **El gate es la PUBLICACIÓN, no el refugio** (§5: *«sólo lo ve el
+   publicador del ANIMAL solicitado»*): gatear por organización ensancha por
+   encima de la letra.
+3. **Columna en `adopcion_mensaje`** (path, no URL — la casa ya migró a paths en
+   S47) **+ parámetro en `responder_solicitud_adopcion`**, con el guard de
+   **sólo el publicador** *en el cuerpo de la RPC*, no en la pantalla.
+4. **El arnés que hoy no se puede escribir:** el adoptante intenta adjuntar y
+   **rebota con código propio**; el publicador adjunta y **entra**. *Ese par es
+   el que hoy no existe — y su ausencia es toda esta ficha.*
+5. **La purga de los 90 días tiene que alcanzarlo.** Si el hilo se anonimiza y
+   **el archivo queda en Storage**, la identidad vuelve por la puerta de atrás:
+   una foto es un dato personal. ⚠️ Y la casa ya tiene el precedente exacto —
+   `D-731`: *borrar la fila dejaba el objeto vivo en Storage para siempre*, y se
+   curó con una **cola de borrado + barredor**, porque **Postgres no puede
+   borrar el blob**. **Ese mecanismo ya existe: se reusa, no se reinventa.**
+
+---
+
+### DISPARO
+
+**Cuando el founder pida el adjunto**, o cuando alguien vaya a construirlo.
+**No antes:** hoy `C` tiene instrucción explícita de **no montar botón de
+adjuntar**, y la letra §5 **no lo nombra** — el adjunto fue propuesta mía en el
+diseño de S111, **votada y no firmada**.
+
+⚠️ **Y si entra, entra con su purga (pieza 5) en la misma tanda.** *Un adjunto
+que sobrevive a la anonimización deshace en silencio la regla de los 90 días que
+el founder acaba de firmar.*
+
+---
+
+> ### 📌 DEPOSITADA POR A · el número salió del comando, no de la memoria
+>
+> **Texto de D, sin re-redactar.** Lo único que cambió es el encabezado: pasa a
+> la forma anclada que `D-1003` exige —el número entre backticks al principio—
+> para que `pnpm proximo:ficha` la vea.
+>
+> ⚠️ **Y el propio borrador citaba el comando VIEJO** (`grep` de tres dígitos)
+> como la forma de tomar el número. Ese comando devolvía `D-999` con fichas de
+> cuatro dígitos vivas: **si D lo hubiera corrido, habría tomado un número
+> tomado.** *La cura de `D-1003` llegó el mismo día por el otro lado del mismo
+> defecto.*
+>
+> **Y la trampa que esta ficha existe para dejar escrita, en una línea:**
+> `adopcion-fotos` **existe y es PÚBLICO**, es el único bucket de adopción, y
+> quien construya el adjunto lo va a encontrar primero. *El error no va a ser
+> descuidado: va a ser razonable.* Nada de una conversación va ahí, nunca.
+
+---
+
+## 🔴 `L-481` — `--show-toplevel` CONFIRMA QUE EXISTÍS, JAMÁS QUE ESTÁS EN TU LUGAR
+
+**Medida por D el 2-sep-2026, escribiendo sin querer en el worktree de A.**
+
+## QUÉ PASÓ
+
+Un `cd` con fallback dejó a D parado en el **árbol primario, sobre `main`** —el
+de A— en vez de su propio worktree. **Escribió un archivo suyo, en el árbol de
+otra pista.** Lo encontró recién al ir a commitear.
+
+**Lo sacó por parche, restauró el árbol ajeno a limpio y recién ahí lo aplicó en
+el suyo**, con `git apply --check` probando que la base era la misma. Su propia
+lectura, y es la que vale:
+
+> *«No costó nada porque el árbol de A estaba limpio en ese instante — o sea que
+> no me salvó el método, me salvó la suerte.»*
+
+## LA LEY
+
+**`git rev-parse --show-toplevel` responde el árbol DONDE ESTÁS PARADO, no el
+tuyo.** Contesta siempre, y contesta bien — por eso engaña: *confirma que
+existís en un repo, jamás que estás en el tuyo.* Es la misma familia que este
+canon viene fichando toda la sesión: **un instrumento que responde con seguridad
+a una pregunta parecida a la que hiciste.**
+
+**Lo único que lo dice es `git branch --show-current` contra la rama propia. Y va
+ANTES DE ESCRIBIR, no antes de commitear.** D lo corrió antes de commitear: por
+eso lo encontró, y **por eso lo encontró tarde**.
+
+## POR QUÉ ES DE LA CASA Y NO DE UNA PISTA
+
+Con cuatro o cinco worktrees vivos y un árbol primario que es de quien conduce,
+**escribir en el árbol de otro no produce ningún error**: produce un archivo sin
+commitear en un repo ajeno. Y su daño depende de algo que quien escribe no
+controla — **si el otro tenía trabajo sin commitear en ese instante.**
+
+**Precedente medido de esa clase:** S91 registró worktrees para B y D y **ninguno
+para C**, que trabajaba en el primario; S82 dejó *«worktree por pista es la
+PRIMERA decisión de una sesión paralela»* como regla 85. Esta lección es su
+mitad que faltaba: **tener worktree no alcanza si nada verifica que estás parado
+en él.**
+
+## SU GEMELA, y las dos son de la misma jornada
+
+`L-481` es de dónde ESCRIBÍS; su hermana es de qué RECIBÍS:
+
+> ### **La entrega se declara por RAMA; la recepción se verifica por COMMIT.**
+
+D declaró un tip y **dos de sus siete commits quedaron afuera igual**; A lo
+verificó uno por uno con `merge-base` y los encontró. *Las dos mitades dicen lo
+mismo desde las dos puntas: la ubicación y la pertenencia no se suponen — se
+preguntan al objeto, y se preguntan ANTES.*
+
+**DISPARO: ninguno. Rige desde su depósito.**

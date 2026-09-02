@@ -673,6 +673,29 @@ comodidad se interpuso entre la medición y la conclusión, y no avisó.*
 
 **El porqué, con la letra del founder:** *las idas y vueltas de la traducción HTML→RN cuestan más que el resultado.* Una lámina que se aprueba hay que traducirla, y la traducción **vuelve a abrir todas las decisiones que la lámina creía cerradas** — con el agravante medido de que el CSS de la lámina **tienta a portarse como fuente** (S82: tres portes literales, `#EEECE8` entre ellos).
 
+> ### ENMIENDA S112 (founder, 2-sep-2026) — **SE ACABAN LAS LÁMINAS DE GALERÍA COMO GATE**
+>
+> > **El gate de una pieza de UI es su MONTAJE en la pantalla real, dentro del
+> > lote.** El founder **no juzga en galería: juzga en la app**, en el contexto
+> > real de la pieza, durante su recorrido por objetivo cumplido.
+> >
+> > ⇒ **Una pieza que sólo existe en galería es ENTREGADA Y NO MONTADA, y se
+> > reporta en esa sección del cierre** — jamás en «construido y ejercido».
+> >
+> > **Es el TERCER golpe al mismo defecto, y por eso vale como ley y no como
+> > preferencia:** S83 mató la lámina HTML porque la traducción reabría lo que
+> > la lámina creía cerrado; S97 movió el gate de la pantalla al lote porque
+> > gatear de a una pantalla no dice cómo se siente el recorrido; y esto mata
+> > la galería porque **una pieza mirada fuera de su pantalla se juzga contra
+> > un fondo que no existe, con datos que nadie tiene y sin lo que la rodea.**
+> > *Las tres veces el instrumento era más barato de mirar que la cosa real, y
+> > las tres veces midió otra cosa.*
+>
+> ⚠️ **Las láminas ⭐ GATE ya existentes NO se borran** — siguen sirviendo para
+> ver estados difíciles de producir en vivo. **Lo que se prohíbe es CITARLAS
+> COMO GATE.** *Un instrumento que deja de ser prueba no deja de ser útil; lo
+> que cambia es qué se puede afirmar con él.*
+
 > ### ENMIENDA S97 (founder, 13-ago-2026) — **EL GATE PASA A SER POR LOTE, NO POR PANTALLA**
 >
 > > **La firma del founder se reserva para TRES cosas: ① enmiendas de ley

@@ -290,8 +290,44 @@ export default function CheckoutGuarderia() {
         if (router.canDismiss()) router.dismissAll();
         router.navigate('/hogar/guarderia');
       }
+
+      /* ── 🔴 `D-1001` · LA ESPECIE, DICHA CON NOMBRE Y CON CAMINO ─────────
+         El motor ya recorta (`20260907700000_s112a`, S112-A): la mensualidad
+         de guardería rebota si la mascota no es de una especie elegible. Hasta
+         hoy ese rebote llegaba como una frase de catálogo —*«La guardería es
+         solo para perros y gatos»*— **sin decir de quién habla**.
+
+         Voz del founder: *«no quiero un botón gris mudo; quiero "Este plan es
+         para perros y gatos. Pepe no puede tomarlo"»*. **El nombre es la mitad
+         del mensaje**: sin él, una familia con tres mascotas no sabe cuál
+         rebotó.
+
+         ⚠️ **Y NO SE OFRECE UNA MASCOTA CONCRETA, a propósito.** El founder
+         pidió *«si tengo otra que sí puede, que me la ofrezca»* — para eso hay
+         que saber **qué especies acepta el plan**, y ese recorte
+         (`especies_elegibles`) **no lo expone ningún lector**: medido, 0
+         ocurrencias en `packages/api`. *Ofrecer «probá con Thor» sin saber si
+         Thor puede es cambiar un rebote honesto por uno equivocado con mejor
+         cara.* Se ofrece **volver a elegir**, que es cierto siempre. El pedido
+         está en `S112-C-para-A-PEDIDO-1` §⑦②, y con él esto pasa de rebote a
+         puerta apagada ANTES del toque (Ley 23), que es lo que de verdad pidió.
+
+         🔴 **`mascota_requerida` NO ENTRA ACÁ, y no es olvido:** el motor lo
+         emite (línea 59 de esa migración) y **`guarderia-reserva.ts` no lo
+         mapea** —vive en `guarderia-suscripcion.ts`, que es otro wrapper—, así
+         que hoy caería en `error_desconocido`. **Reportado a A**; ramificar acá
+         por un código que el wrapper nunca va a devolver sería un brazo muerto
+         que parece cobertura. */
+      if (codigo === 'mascota_no_elegible' || codigo === 'no_access_to_mascota') {
+        const nombre = texto('mascotaNombre');
+        setRebote(
+          nombre === ''
+            ? mensaje
+            : `${mensaje} ${t('checkoutGuarderia.noPuedeTomarlo', { nombre })}`,
+        );
+      }
     },
-    [router, mostrar],
+    [router, mostrar, t, texto],
   );
 
   /**

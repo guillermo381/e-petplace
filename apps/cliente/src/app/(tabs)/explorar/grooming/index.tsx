@@ -60,7 +60,7 @@ import { useTraduccion } from '@/i18n';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
-import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
+import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia, SinQuienReservar } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
 
 function fechaLocalISO(d: Date): string {
@@ -299,21 +299,24 @@ export default function GroomingCuando() {
             />
           </View>
         ) : faseEspecies.fase === 'listo' && elegibles.length === 0 ? (
-          // §5 con camino: el hogar no tiene mascotas elegibles (perro/gato)
-          <EstadoVacio
+          /* 🔴 **DOS HECHOS, DOS VOCES (S112-C).** `elegibles.length === 0` es
+             verdadero con el hogar VACÍO y con un hogar que tiene mascotas que
+             no aplican, y hasta hoy los dos recibían la misma frase — la del
+             otro caso la mitad de las veces. El discriminador es `mascotas`,
+             que esta pantalla ya tenía en la mano. Ver `SinQuienReservar`. */
+          <SinQuienReservar
             icono={<Icono nombre="grooming" tamano={48} />}
-            titulo={t('grooming.sinElegiblesTitulo')}
-            descripcion={t('grooming.sinElegiblesDetalle')}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('paquete.sinPerrosAccion')}
-                onPress={() => {
-                  if (router.canDismiss()) router.dismissAll();
-                  router.navigate('/hogar/agregar');
-                }}
-              />
-            }
+            hayMascotas={Array.isArray(mascotas) && mascotas.length > 0}
+            tituloSinNadie={t('explorar.sinNadieTitulo')}
+            detalleSinNadie={t('explorar.sinNadieDetalle')}
+            tituloEspecie={t('grooming.sinElegiblesTitulo')}
+            detalleEspecie={t('grooming.sinElegiblesDetalle')}
+            etiquetaSinNadie={t('explorar.sinNadieAccion')}
+            etiquetaEspecie={t('paquete.sinPerrosAccion')}
+            onAccion={() => {
+              if (router.canDismiss()) router.dismissAll();
+              router.navigate('/hogar/agregar');
+            }}
           />
         ) : (
           <>
