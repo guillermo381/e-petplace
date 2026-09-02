@@ -41,14 +41,24 @@
  *   buscar raza.* La raza se **muestra** cuando el refugio la sabe; no se
  *   ofrece como criterio.
  *
- * ⚠️ **Y falta la PUERTA SIN CUENTA de §4** —*«desde el login hay una puerta a
- * ver mascotas en adopción»*—: medido, `obtener_adoptables` está `REVOKE`
- * de `anon` y exige `auth.uid()`. **No se rodea desde acá.** Cuando A abra la
- * función, **esta misma pantalla sirve a las dos puertas sin tocarse.**
+ * ✅ **LA PUERTA SIN CUENTA DE §4 ESTÁ ABIERTA, y esta nota decía lo contrario.**
+ * ⏪ Decía *«medido, `obtener_adoptables` está REVOKE de anon y exige
+ * auth.uid(); cuando A abra la función…»*. **A la abrió** —medido en
+ * `20260907520000_s111a_tres_destinos_actor_refugio.sql:345`,
+ * `GRANT EXECUTE … TO authenticated, anon`, y la mitad que faltaba (las fotos)
+ * en `20260907560000`—. *Una medición correcta se vuelve falsa el día que otra
+ * pista cura lo que medía, y nada avisa: sigue leyéndose como un límite vivo*
+ * (`L-166`). El botón vive en `login.tsx` y esta misma pantalla sirve a las dos
+ * puertas sin tocarse, tal como la nota vieja anticipaba.
+ *
+ * ✅ **Y lo que la puerta sin cuenta agrega acá (§4.1): UNA LÍNEA, nada más.**
+ * *«Para postular vas a necesitar una cuenta»* con su «i», sólo cuando la
+ * sesión está medida y es `false`. No hay CTA de registro: el botón de cada
+ * animal ya lo dice en el momento en que hace falta.
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -59,6 +69,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Hoja,
   Icono,
   SelectorOpcion,
   Tarjeta,
@@ -100,6 +111,7 @@ export default function Adoptar() {
    *  entró. */
   const [conSesion, setConSesion] = useState<boolean | null>(null);
   const [postulando, setPostulando] = useState<string | null>(null);
+  const [hojaPorQueCuenta, setHojaPorQueCuenta] = useState(false);
   const { mostrar } = useAviso();
 
   useFocusEffect(
@@ -148,15 +160,24 @@ export default function Adoptar() {
    * al motor para que conteste «sin sesión» y recién ahí mandar al alta es
    * hacerle pagar al usuario un viaje para decirle algo que ya sabíamos.*
    *
-   * ⚠️ **Y no se pierde a quién estaba mirando:** la vidriera queda atrás en la
-   * pila, así que al volver del registro sigue acá. *Devolverlo al principio
-   * de la lista después de decidirse sería castigarlo por haberse decidido* —
-   * el camino triste que el recorrido nombra.
+   * ⚠️ **Y no se pierde a quién estaba mirando** — pero NO por la pila. ⏪ Acá
+   * decía *«la vidriera queda atrás en la pila, así que al volver del registro
+   * sigue acá»*, **y es falso**: `registro.tsx` termina en
+   * `router.replace('/onboarding')`, que borra la pila entera. *Una afirmación
+   * verosímil sobre navegación es casi imposible de desmentir leyendo la
+   * pantalla que la escribe: hay que ir a la otra.* El destino viaja como dato
+   * (`lib/volver-a`) y cruza los dos `replace` del alta.
    */
   const postular = async (a: Adoptable) => {
     if (postulando !== null) return;
     if (conSesion !== true) {
-      router.push('/registro');
+      /* 🔴 **EL DESTINO VIAJA, porque la pila NO sobrevive.** `registro` hace
+         `replace('/onboarding')` y con eso *volver acá deja de ser posible*: la
+         nota vieja de este archivo decía «la vidriera queda atrás en la pila,
+         así que al volver del registro sigue acá» y **era falsa** — medido en
+         `registro.tsx`. §4.1 pide lo contrario: volver exactamente a donde
+         estaba. Se declara el destino y él cruza los dos `replace`. */
+      router.push({ pathname: '/registro', params: { volverA: '/adoptar' } });
       return;
     }
     setPostulando(a.publicacionId);
@@ -182,6 +203,25 @@ export default function Adoptar() {
            que la que busca está a un toque.
            **Cuando A publique la cura, el id viene en `detalle`** y esto pasa a
            llevar al hilo exacto: es cambiar el destino, nada más. */
+        /* 🔴 **LA COMPUERTA NO SE MUESTRA: SE RESUELVE.** A la puso hoy
+           (`crear_solicitud_adopcion` rebota `condiciones_no_aceptadas` si la
+           persona no las aceptó) y su voz **no dice «error», dice qué falta**.
+           *Mostrar el rebote y dejarla ahí sería contarle un requisito y no
+           darle con qué cumplirlo* — el mismo defecto que `L-424` nombra para
+           los guards que sólo saben negarse.
+
+           Se lleva a la LECTURA, con `volverA` para que al aceptar caiga de
+           vuelta acá y pueda postular. **No se re-postula sola al volver**, y
+           es deliberado: postular es un acto de la persona, y encadenarlo a
+           una aceptación convertiría «acepto las condiciones» en «acepto y de
+           paso mando la solicitud». */
+        if (r.codigo === 'condiciones_no_aceptadas') {
+          router.push({
+            pathname: '/legales/[codigo]',
+            params: { codigo: 'condiciones_adopcion', volverA: '/adoptar' },
+          });
+          return;
+        }
         if (r.codigo === 'solicitud_ya_viva') {
           mostrar({ variante: 'neutro', texto: r.mensaje });
           router.push('/adoptar/solicitudes');
@@ -244,6 +284,42 @@ export default function Adoptar() {
             titulo={t('misSolicitudes.entrada')}
             onPress={() => router.push('/adoptar/solicitudes')}
           />
+        ) : null}
+
+        {/* ═══ LA LÍNEA DE LA PUERTA SIN CUENTA (§4.1) ═══════════════════════
+            Literal del founder: *«Arriba de la lista, una línea: "Para postular
+            vas a necesitar una cuenta" con la "i". **Nada más**.»*
+
+            🔴 **`=== false` y no `!== true`**, y la diferencia es la pantalla
+            entera: mientras la sesión se está preguntando el valor es `null`, y
+            `!== true` pintaría la línea durante ese instante **para alguien que
+            sí tiene cuenta**. *Decirle a quien ya entró que va a necesitar una
+            cuenta es la app admitiendo que no sabe quién es.*
+
+            🔴 **Y NO es un botón ni una carta.** §4.1 corta con «nada más»: acá
+            no se ofrece crear la cuenta —eso ya lo dice el botón de cada
+            animal, en el momento en que hace falta—. *Poner un CTA de registro
+            arriba de la vidriera convierte «mirá» en «registrate»*, que es
+            exactamente al que esta puerta viene a no espantar. */}
+        {conSesion === false ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+            <View style={{ flex: 1 }}>
+              <Texto variante="apoyo" color="tertiary">
+                {t('adoptar.sinCuentaLinea')}
+              </Texto>
+            </View>
+            <Pressable
+              onPress={() => setHojaPorQueCuenta(true)}
+              accessibilityRole="button"
+              /* La etiqueta accesible es el TEXTO QUE ABRE, no «info»: quien
+                 navega con lector oye qué va a leer, no cómo se llama el
+                 control. */
+              accessibilityLabel={t('adoptar.sinCuentaPorQueTitulo')}
+              hitSlop={12}
+            >
+              <Icono nombre="info" tamano={20} registro="aa" />
+            </Pressable>
+          </View>
         ) : null}
 
         {/* EL ÚNICO FILTRO QUE EL MOTOR ACEPTA. `null` = todas, y es la opción
@@ -335,6 +411,25 @@ export default function Adoptar() {
           })
         )}
       </ScrollView>
+
+      {/* N22 · LA «i» EXPLICA — y lo que explica es POR QUÉ, no CÓMO. La
+          persona no necesita instrucciones para registrarse: necesita saber que
+          la cuenta es del refugio que va a conversar con ella, no un peaje
+          nuestro. */}
+      <Hoja
+        visible={hojaPorQueCuenta}
+        onCerrar={() => setHojaPorQueCuenta(false)}
+        titulo={t('adoptar.sinCuentaPorQueTitulo')}
+      >
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="cuerpo">{t('adoptar.sinCuentaPorQueCuerpo')}</Texto>
+          <Boton
+            etiqueta={t('adoptar.sinCuentaPorQueCierre')}
+            bloque
+            onPress={() => setHojaPorQueCuenta(false)}
+          />
+        </View>
+      </Hoja>
     </SafeAreaView>
   );
 }

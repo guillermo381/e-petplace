@@ -44,6 +44,7 @@ import {
 import { confirmarAltaConCodigo, reenviarCodigoAlta } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { destinoDeVuelta } from '@/lib/volver-a';
 
 const LARGO_CODIGO = 8;
 const ESPERA_REENVIO = 60; // s — el correo recién salió del alta
@@ -55,7 +56,11 @@ export default function VerificarCorreo() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
-  const { email = '' } = useLocalSearchParams<{ email?: string }>();
+  const params = useLocalSearchParams<{ email?: string; volverA?: string }>();
+  const email = params.email ?? '';
+  /* El destino cruza también este paso: confirmar el correo es parte del alta,
+     no un desvío. */
+  const volverA = destinoDeVuelta(params.volverA);
 
   const [codigo, setCodigo] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -108,7 +113,13 @@ export default function VerificarCorreo() {
     // Igual que el registro con sesión viva: la huella de llegada y recién ahí
     // el onboarding. Confirmar el correo ES entrar.
     setLlegando(true);
-    setTimeout(() => router.replace('/onboarding'), 460);
+    setTimeout(
+      () =>
+        router.replace(
+          volverA === null ? '/onboarding' : { pathname: '/onboarding', params: { volverA } },
+        ),
+      460,
+    );
   }
 
   async function reenviar() {

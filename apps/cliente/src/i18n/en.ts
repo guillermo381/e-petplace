@@ -1237,6 +1237,11 @@ export const clienteEn = {
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)
   adoptar: {
+    sinCuentaLinea: "You'll need an account to apply.",
+    sinCuentaPorQueTitulo: 'Why do I need an account?',
+    sinCuentaPorQueCuerpo:
+      "Browsing asks for nothing. You only need an account when you apply, because from then on there's a conversation with the shelter and it needs to know who it's talking to.",
+    sinCuentaPorQueCierre: 'Got it',
     titulo: 'Adoption',
     filtroEspecie: 'What are you looking for',
     todas: 'All',
@@ -2516,6 +2521,12 @@ export const clienteEn = {
     sinMensajes: 'No messages in this conversation yet.',
     escribirEtiqueta: 'Write to the shelter',
     enviar: 'Send',
+    desistir: "I'm no longer adopting",
+    desistirTitulo: "I'm no longer adopting",
+    desistirCuerpo:
+      "This conversation closes and can't be reopened. If you change your mind, you can apply again later.",
+    desistirConfirmar: "Yes, I'm out",
+    cancelar: 'Keep the conversation',
     cerrado: 'This conversation is closed.',
     noEstaTitulo: 'We could not find this request',
     noEstaDetalle: 'It may no longer be available.',
@@ -2542,5 +2553,17 @@ export const clienteEn = {
     quieroAdoptar: 'I want to adopt',
     quieroAdoptarDetalle: 'Meet the ones waiting for a family.',
     quieroAdoptarAccion: 'See who is waiting',
+  },
+  legales: {
+    titulo: 'Document',
+    tituloCondiciones: 'Adoption terms',
+    tituloRefugio: 'Shelter terms',
+    aceptar: 'I accept and continue',
+    razonFaltaLeer: 'Scroll to the end to accept.',
+    codigoInvalidoTitulo: 'This document is not accepted here',
+    codigoInvalidoDetalle: 'The adoption deed is signed, not accepted. You will see it when the shelter accepts your request.',
+    errorTitulo: 'We could not load the text',
+    errorDetalle: 'Check your connection and try again.',
+    reintentar: 'Try again',
   },
 } as const satisfies Espejo<typeof clienteEs>;

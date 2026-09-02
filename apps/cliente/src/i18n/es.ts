@@ -1564,6 +1564,11 @@ export const clienteEs = {
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
   // S73 C3 — la puerta de la adopción (refugios, peldaño 0 honesto)
   adoptar: {
+    sinCuentaLinea: 'Para postular vas a necesitar una cuenta.',
+    sinCuentaPorQueTitulo: '¿Por qué hace falta una cuenta?',
+    sinCuentaPorQueCuerpo:
+      'Mirar no pide nada. La cuenta hace falta recién cuando postulas, porque a partir de ahí hay una conversación con el refugio y tiene que saber con quién habla.',
+    sinCuentaPorQueCierre: 'Entendido',
     titulo: 'Adopción',
     filtroEspecie: 'Qué estás buscando',
     todas: 'Todas',
@@ -3566,8 +3571,14 @@ export const clienteEs = {
     estado_declinada: 'No siguió',
     automatica: 'Respuesta automática del refugio',
     sinMensajes: 'Todavía no hay mensajes en esta conversación.',
-    escribirEtiqueta: 'Escribile al refugio',
+    escribirEtiqueta: 'Escríbele al refugio',
     enviar: 'Enviar',
+    desistir: 'Ya no quiero adoptar',
+    desistirTitulo: 'Ya no quiero adoptar',
+    desistirCuerpo:
+      'Se cierra esta conversación y no se puede volver a abrir. Si cambias de idea, puedes postular de nuevo más adelante.',
+    desistirConfirmar: 'Sí, ya no quiero',
+    cancelar: 'Seguir con la conversación',
     cerrado: 'Esta conversación está cerrada.',
     noEstaTitulo: 'No encontramos esta solicitud',
     noEstaDetalle: 'Puede que ya no esté disponible.',
@@ -3594,5 +3605,17 @@ export const clienteEs = {
     quieroAdoptar: 'Quiero adoptar',
     quieroAdoptarDetalle: 'Conoce a los que están esperando una familia.',
     quieroAdoptarAccion: 'Ver quiénes esperan',
+  },
+  legales: {
+    titulo: 'Documento',
+    tituloCondiciones: 'Condiciones de adopción',
+    tituloRefugio: 'Términos del refugio',
+    aceptar: 'Acepto y continúo',
+    razonFaltaLeer: 'Desliza hasta el final para poder aceptar.',
+    codigoInvalidoTitulo: 'Este documento no se acepta desde acá',
+    codigoInvalidoDetalle: 'El acta de adopción se firma, no se acepta. La vas a ver cuando el refugio acepte tu solicitud.',
+    errorTitulo: 'No pudimos traer el texto',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Probar de nuevo',
   },
 } as const;

@@ -19,7 +19,7 @@
 
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -40,11 +40,16 @@ import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetpl
 
 import { useTraduccion } from '@/i18n';
 import { causaNoEnvia } from '@/lib/registro-guard';
+import { destinoDeVuelta } from '@/lib/volver-a';
 
 const ISOTIPO_ESQUINA = 28;
 
 export default function Registro() {
   const router = useRouter();
+  /* §4.1 — «si toco adoptar, no me pidas nada más: vuelvo exactamente a donde
+     estaba». La intención se declaró ANTES de la cuenta, y `replace` borra la
+     pila: viaja como dato o se pierde. `null` = el camino de siempre. */
+  const volverA = destinoDeVuelta(useLocalSearchParams().volverA);
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -101,12 +106,23 @@ export default function Registro() {
       // en el alta (sin sesión) y se persiste al confirmar (D-893); la URL la
       // resuelve `URL_LEGAL` en packages/api, no viaja por la pantalla.
       setCargando(false);
-      router.replace({ pathname: '/verificar-correo', params: { email: email.trim() } });
+      router.replace({
+        pathname: '/verificar-correo',
+        /* El destino VIAJA con el correo: la confirmación es un paso más del
+           mismo camino, y perder la intención ahí sería perderla igual. */
+        params: { email: email.trim(), ...(volverA === null ? {} : { volverA }) },
+      });
       return;
     }
     // §5 · la huella de llegada, y recién ahí el onboarding.
     setLlegando(true);
-    setTimeout(() => router.replace('/onboarding'), 460);
+    setTimeout(
+      () =>
+        router.replace(
+          volverA === null ? '/onboarding' : { pathname: '/onboarding', params: { volverA } },
+        ),
+      460,
+    );
   }
 
   return (
