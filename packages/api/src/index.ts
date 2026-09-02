@@ -1702,6 +1702,10 @@ export {
 } from './wrappers/adopcion';
 export type { Adoptable, ResultadoTraspaso, CodigoErrorAdopcion } from './wrappers/adopcion';
 
+/* S112-A4 · el refugio: su cuenta y su rama del arranque — hunk aditivo. */
+export { obtenerMiCuentaRefugio } from './wrappers/prestador';
+export type { CuentaRefugio } from './wrappers/prestador';
+
 /* ═══════════════════════════════════════════════════════════════════════════
    S112-A1/A2 · EL ADOPTABLE COMPLETO Y SUS LECTORES — hunk aditivo (76c).
    La ficha que §4.1 del loop describe pedía veinte datos que no existían.
@@ -1717,7 +1721,9 @@ export {
   reordenarFotosAdoptable,
   borrarFotoAdoptable,
 } from './wrappers/adopcion';
+export { evaluarEsterilizacionAdoptable } from './wrappers/adopcion';
 export type {
+  VeredictoEsterilizacion,
   Convivencia,
   FiltrosAdoptables,
   PaginaAdoptables,
