@@ -37,6 +37,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated'
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
+import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 
 const ANCHO = 48
@@ -51,9 +52,45 @@ export interface InterruptorProps {
   etiqueta: string
   /** Ley 22 por registro: 'control' (cliente, default) · 'oficio' (prestador, tealDark). */
   registro?: 'control' | 'oficio'
+  /**
+   * S112-B (B7) · **NO SE PUEDE MOVER**, y no es lo mismo que estar apagado.
+   *
+   * 🔴 **APAGADO vs DESHABILITADO — la distinción que la cabecera de esta
+   * pieza ya defendía sin nombrarla.** *Apagado es un VALOR* («esta
+   * publicación está pausada») y por eso sigue siendo sereno, sin rojo y sin
+   * opacidad. *Deshabilitado es que NO PODÉS CAMBIARLO* («este animal es
+   * adulto y no está esterilizado: se publica esterilizado»), y ése sí baja
+   * de opacidad, no dispara `onCambio` y se anuncia como deshabilitado.
+   *
+   * Default `false`: los consumidores vivos no cambian en un byte (`L-244`).
+   */
+  deshabilitado?: boolean
+  /**
+   * POR QUÉ no se puede mover. Va al `accessibilityHint`.
+   *
+   * 🔴 **LA LÍNEA VISIBLE NO SE DIBUJA ACÁ, Y ES DELIBERADO.** Este control
+   * vive a la derecha de una fila; una línea colgada debajo de un riel de 28
+   * px rompe la fila que lo contiene (N24). **La razón visible es de quien
+   * compone la fila, que es el único que sabe dónde termina.**
+   *
+   * ⚠️ Y eso deja un hueco que un tipo no puede cerrar desde acá: nada
+   * obliga al contenedor a dibujarla. **Lo cierra `TarjetaMascotaRefugio`
+   * con una unión discriminada** —o hay `onCambio`, o hay `razon`— para que
+   * en la superficie donde esto importa el mudo no se pueda expresar. *Dos
+   * capas, cada una con lo que sabe* (el precedente es `StepperCantidad` con
+   * el stock).
+   */
+  razonDeshabilitado?: string
 }
 
-export function Interruptor({ encendido, onCambio, etiqueta, registro = 'control' }: InterruptorProps) {
+export function Interruptor({
+  encendido,
+  onCambio,
+  etiqueta,
+  registro = 'control',
+  deshabilitado = false,
+  razonDeshabilitado,
+}: InterruptorProps) {
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
 
@@ -67,12 +104,18 @@ export function Interruptor({ encendido, onCambio, etiqueta, registro = 'control
 
   return (
     <Pressable
-      onPress={() => onCambio(!encendido)}
+      onPress={deshabilitado ? undefined : () => onCambio(!encendido)}
+      disabled={deshabilitado}
       accessibilityRole="switch"
       accessibilityLabel={etiqueta}
-      accessibilityState={{ checked: encendido }}
+      accessibilityState={{ checked: encendido, disabled: deshabilitado }}
+      accessibilityHint={deshabilitado ? razonDeshabilitado : undefined}
       hitSlop={(44 - ALTO) / 2}
       style={{
+        // La opacidad SÓLO por deshabilitado. Apagado NO la baja — sigue
+        // siendo un estado sereno, que es lo que esta pieza defiende desde
+        // que nació.
+        opacity: deshabilitado ? opacity.disabled : 1,
         width: ANCHO,
         height: ALTO,
         borderRadius: radius.full,

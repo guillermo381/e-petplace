@@ -107,6 +107,9 @@ import {
 } from '../components/FormularioPostulacion'
 import { DocumentoLegalLectura } from '../components/DocumentoLegalLectura'
 import { CampoCodigo } from '../components/CampoCodigo'
+import { HitoUnaVidaNueva } from '../components/HitoUnaVidaNueva'
+import { TarjetaMascotaRefugio } from '../components/TarjetaMascotaRefugio'
+import { FichaAdoptable } from '../components/FichaAdoptable'
 import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
@@ -777,6 +780,57 @@ function MuestraCodigoFirma() {
           mensaje="Este código venció. Pedí uno nuevo y te lo mandamos otra vez."
         />
       </View>
+    </View>
+  )
+}
+
+/* ENTRADA DE CATÁLOGO de `TarjetaMascotaRefugio` (R17) — no es su gate; su
+   gate es la tab Mascotas del portal (C7).
+
+   🔴 QUÉ HAY QUE VER: **el interruptor de Kira no se mueve y dice por qué,
+   debajo de la fila entera y sin rojo.** Es el ítem 16 del recorrido del
+   founder. Los otros dos son el control: Luna se publica y se pausa; Bruno
+   ya no tiene interruptor porque su ciclo terminó — ofrecer un control
+   muerto es peor que no ofrecerlo. */
+function MuestraTarjetasRefugio() {
+  const [luna, setLuna] = useState(true)
+  const VOCES = {
+    en_rescate: 'En rescate',
+    publicada: 'Publicada',
+    pausada: 'Pausada',
+    en_proceso: 'En proceso',
+    adoptada: 'Adoptada',
+    memorial: 'Memorial',
+  }
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <TarjetaMascotaRefugio
+        nombre="Luna"
+        estado={luna ? 'publicada' : 'pausada'}
+        voces={VOCES}
+        etiqueta="Luna, publicada"
+        onPress={() => {}}
+        publicacion={{ etiqueta: 'Publicar a Luna', encendido: luna, onCambio: setLuna }}
+      />
+      <TarjetaMascotaRefugio
+        nombre="Kira"
+        estado="en_rescate"
+        voces={VOCES}
+        etiqueta="Kira, en rescate"
+        onPress={() => {}}
+        publicacion={{
+          etiqueta: 'Publicar a Kira',
+          encendido: false,
+          razon: 'Es adulta y no está esterilizada: se publica esterilizada.',
+        }}
+      />
+      <TarjetaMascotaRefugio
+        nombre="Bruno"
+        estado="adoptada"
+        voces={VOCES}
+        etiqueta="Bruno, adoptado"
+        onPress={() => {}}
+      />
     </View>
   )
 }
@@ -5492,6 +5546,74 @@ function GaleriaInterna() {
           <MuestraCodigoFirma />
         </Seccion>
 
+        <Seccion titulo="HitoUnaVidaNueva (S112) — se celebra con permanencia, no con movimiento">
+          {/* Entrada de CATÁLOGO. Cero animación a propósito: el hito queda en
+              la línea de vida con aniversario anual — una animación de confeti
+              se ve bien la primera vez y es ruido las otras cincuenta. */}
+          <HitoUnaVidaNueva
+            titulo="Una vida nueva empieza"
+            fecha="2 de septiembre de 2026"
+            procedencia={{ etiqueta: 'Procedencia', valor: 'Refugio Patitas del Sur' }}
+          />
+        </Seccion>
+
+        <Seccion titulo="TarjetaMascotaRefugio (S112) — el interruptor que no se puede mover DICE por qué">
+          <MuestraTarjetasRefugio />
+        </Seccion>
+
+        <Seccion titulo="FichaAdoptable (S112) — el orden de §4.1 hecho estructura (N19)">
+          {/* Entrada de CATÁLOGO. La pieza corre a pantalla completa, así que
+              va en caja acotada como `PantallaConPie`. Lo que se ve: el orden
+              —identidad · salud · convivencia · historia · señales ·
+              publicador · bono— y que NO hay prop para moverlo. La galería va
+              vacía a propósito: es slot, y su porqué está en la cabecera. */}
+          <View
+            style={{
+              height: 420,
+              borderRadius: radius.lg,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.08)',
+            }}
+          >
+            <FichaAdoptable
+              nombre="Luna"
+              edad="2 años (estimada)"
+              detalles={['Perra', 'Hembra', 'Mediana']}
+              historia="La encontraron en la vía a Nono, con frío y sin collar. Lleva cuatro meses en el refugio y duerme apoyada contra la puerta."
+              publicador={{
+                nombre: 'Refugio Patitas del Sur',
+                verificacion: {
+                  texto: 'Refugio verificado por e-PetPlace',
+                  onExplicar: () => {},
+                  etiquetaExplicacion: 'Qué significa verificado',
+                },
+              }}
+              bono={{
+                texto: '$40 · para su esterilización',
+                onExplicar: () => {},
+                etiquetaExplicacion: 'Cómo se paga el bono',
+              }}
+              apadrinar={{
+                texto: 'Apadrinar a Luna',
+                onExplicar: () => {},
+                etiquetaExplicacion: 'Qué es apadrinar',
+              }}
+              reportar={{ etiqueta: 'Reportar esta publicación', onPress: () => {} }}
+              cta={{ etiqueta: 'Quiero adoptar a Luna', onPress: () => {} }}
+              voces={{
+                edadNoInformada: 'Edad no informada',
+                salud: 'Su salud',
+                convivencia: 'Convive con',
+                historia: 'Su historia',
+                senales: 'Señales',
+                publicador: 'Quién la publica',
+                bono: 'Bono de adopción',
+              }}
+            />
+          </View>
+        </Seccion>
+
         <Seccion titulo="EscaleraEstados (S96) — dónde está y cuánto falta, sin abrir nada">
           {/* Los CUATRO estados que el contrato distingue, montados
               juntos porque la comparación ES el gate:
@@ -7582,6 +7704,29 @@ function PiezasDelOficioS107() {
               estado: 'falta',
               onResolver: () => {},
               etiquetaResolver: 'Cargar el carnet',
+            },
+          ]}
+        />
+      </View>
+
+      {/* ③bis EL MISMO SEMÁFORO, LEÍDO POR QUIEN NO PUEDE RESOLVER (S112-B) */}
+      <View style={{ gap: spacing[2] }}>
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+          ⭐ lector="observador" · la ficha del adoptable: NINGUNA fila lleva chevron ni se hunde, porque
+          quien mira no puede resolver nada (ítem 11). Y el tercer estado —«nadie lo dijo»— va en `·`
+          NEUTRO, jamás en el ochre del pendiente: pintarlo como tarea afirmaría algo que nadie dijo
+        </Text>
+        <SemaforoSanitario
+          lector="observador"
+          rotulo="Su salud"
+          requisitos={[
+            { clave: 'esteril', etiqueta: 'Esterilizada', estado: 'al_dia' },
+            { clave: 'rabia', etiqueta: 'Vacuna antirrábica', estado: 'falta' },
+            {
+              clave: 'desparasitacion',
+              etiqueta: 'Desparasitación',
+              estado: 'no_declarado',
+              voz: 'El refugio todavía no lo declaró',
             },
           ]}
         />
