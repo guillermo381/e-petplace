@@ -219,7 +219,7 @@ export interface BotonProps {
    * precedente S63-B (*«el Confirmar apagado dice QUÉ FALTA, SIEMPRE»*) y
    * la enmienda de `SliderPrecio` (S68: la affordance es VISIBLE, no sólo
    * accesible). **Las dos leyes seguían vigentes y ninguna pantalla las
-   * cumplía: mandaban el trabajo a 96 sitios que no lo hicieron.**
+   * cumplía: mandaban el trabajo a 87 sitios que no lo hicieron.**
    *
    * ⇒ **AHORA LA FORMA VISIBLE LA PONE LA PIEZA.** Pasar esta prop DIBUJA
    * el motivo en un `Texto apoyo` bajo el botón —atenuado, nunca `danger`—
@@ -313,9 +313,21 @@ export function Boton({
    *
    * ⇒ Acá la reserva **no se paga de entrada: se LATCHEA.** Un botón que
    * nunca recibió razón no reserva nada y su árbol queda idéntico al de
-   * hoy (medido: **96 archivos de `apps/` pasan `deshabilitado`, 12 pasan
-   * razón** — el 87 % no paga un píxel). Uno que YA mostró una razón se
-   * queda con su renglón para siempre dentro de ese montaje.
+   * hoy (**87 archivos de `apps/` pasan `deshabilitado={`, 12 pasan razón**
+   * — el 86 % no paga un píxel). Uno que YA mostró una razón se queda con
+   * su renglón para siempre dentro de ese montaje.
+   *
+   * ⏪ **ACÁ DECÍA «medido: 96» Y NO LO HABÍA MEDIDO: lo heredé de la ficha
+   * de `D-999`.** Medido de verdad el 1-sep sobre `main`, `HEAD` y
+   * `origin/pista/s112-c` —los tres— con el criterio literal que la ficha
+   * declara (`deshabilitado={` en `apps/`): **87**. No reproduce con
+   * ninguna variante razonable (`deshabilitado` suelto en apps: 92 · con
+   * `packages/` adentro: 102), así que o el censo original midió otra cosa
+   * o el árbol se movió desde S111. **Cuál de las dos es no cambia de quién
+   * es el error: escribí «medido» sobre un número que no corrí.**
+   * *Un dato heredado del canon se lee exactamente igual que uno medido, y
+   * encima viene con autoridad* (`L-166`; lo levantó D encontrando la misma
+   * clase en su propio entregable el mismo día).
    *
    * Con eso las dos frases del founder se cumplen a la vez, sin elegir:
    *   · *«si no recibe razón, no dibuja nada»* → nunca latcheó ⇒ nada.
