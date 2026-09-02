@@ -1721,8 +1721,12 @@ export {
   reordenarFotosAdoptable,
   borrarFotoAdoptable,
 } from './wrappers/adopcion';
-export { evaluarEsterilizacionAdoptable, obtenerMisAdoptables, obtenerMiAdoptable } from './wrappers/adopcion';
+export {
+  evaluarEsterilizacionAdoptable, obtenerMisAdoptables, obtenerMiAdoptable,
+  obtenerActaAdopcion, solicitarCodigoFirma, firmarActaAdopcion,
+} from './wrappers/adopcion';
 export type {
+  ActaAdopcion,
   MiAdoptableFicha,
   RespuestasPostulacion,
   MiAdoptable,
