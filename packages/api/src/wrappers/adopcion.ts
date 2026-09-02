@@ -54,15 +54,49 @@ const MENSAJES = {
 export type CodigoErrorAdopcion = keyof typeof MENSAJES;
 const CODIGOS = Object.keys(MENSAJES) as CodigoErrorAdopcion[];
 
-function fallaCodigo<T>(c: CodigoErrorAdopcion): ResultadoWrapper<T, CodigoErrorAdopcion> {
-  return { ok: false, codigo: c, mensaje: MENSAJES[c] };
+function fallaCodigo<T>(
+  c: CodigoErrorAdopcion,
+  detalle: string | null = null,
+): ResultadoWrapper<T, CodigoErrorAdopcion> {
+  return { ok: false, codigo: c, mensaje: MENSAJES[c], detalle };
 }
 /* Regla 35: se discrimina por PREFIJO de código, jamás por prosa. El motor manda
-   `acta_no_disponible: acta_adopcion v1` y el detalle viaja detrás del código. */
+   `acta_no_disponible: acta_adopcion v1` y el detalle viaja detrás del código.
+   ═══════════════════════════════════════════════════════════════════════════
+   🔴 LO QUE ESTA FUNCIÓN TIRABA, Y POR QUÉ IMPORTA (S112-D)
+
+   El comentario de arriba ya decía *«el detalle viaja detrás del código»* — y
+   **esta función lo descartaba**: mapeaba por prefijo y devolvía el mensaje
+   estático, sin el resto del crudo. ⇒ `crear_solicitud_adopcion` se toma el
+   trabajo de mandar `solicitud_ya_viva: <uuid>` **para poder LLEVAR a esa
+   solicitud** (`L-424`: *el índice sólo sabe negarse; el guard explica*), y el
+   uuid **moría acá**.
+
+   > ### `L-424` quedaba cumplida en el motor y deshecha en la puerta.
+
+   Y su forma era la peor posible: **el JSDoc de `crearSolicitudAdopcion`
+   afirmaba que el id viajaba en `mensaje`** (hoy corregido). *Un hueco callado
+   deja a alguien buscando; un comentario que promete de más lo manda a
+   construir contra algo que no existe.*
+
+   ⚠️ **La regla 35 NO se afloja, y el campo nació justo para esto:** `detalle`
+   se agregó a `ResultadoWrapper` en S109 porque *«el motor ya calculaba la
+   causa y el wrapper la tiraba»*. Se **muestra** y se **navega** con él; se
+   **ramifica** SIEMPRE por `codigo`. Lo vigila `scripts/verify-rebote-lleva-id.mjs`,
+   que tiene un brazo en rojo si alguien mete el crudo en `mensaje`.
+   ═══════════════════════════════════════════════════════════════════════════ */
 function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorAdopcion> {
   if (raw === 'auth_required') return fallaCodigo('sin_sesion');
-  for (const c of CODIGOS) if (raw.startsWith(c)) return fallaCodigo(c);
-  return fallaCodigo('error_desconocido');
+  for (const c of CODIGOS) {
+    if (!raw.startsWith(c)) continue;
+    /* Lo que el motor dijo ADEMÁS del código. Vacío ⇒ `null`: un detalle
+       inventado es peor que ninguno. */
+    const resto = raw.slice(c.length).replace(/^:\s*/, '').trim();
+    return fallaCodigo(c, resto || null);
+  }
+  /* Un crudo que no reconocemos se CONSERVA entero: es lo único que va a tener
+     quien diagnostique el día que el motor agregue un código y esta lista no. */
+  return fallaCodigo('error_desconocido', raw);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -290,8 +324,12 @@ function leerMensajes(v: unknown): MensajeDelHilo[] {
 
 /**
  * Postula para adoptar. 🔴 **Si ya tenías una solicitud viva sobre ese animal,
- * el rebote `solicitud_ya_viva` trae SU ID en `mensaje`** — la pantalla lleva
+ * el rebote `solicitud_ya_viva` trae SU ID en `detalle`** — la pantalla lleva
  * ahí en vez de decir que no (`L-424`).
+ *
+ * ⚠️ **Decía `mensaje` y era falso** (curado S112-D): `mensaje` es la frase
+ * humana y jamás lleva el uuid. Se ramifica por `codigo`, se navega con
+ * `detalle`.
  */
 export async function crearSolicitudAdopcion(params: {
   publicacionId: string;
