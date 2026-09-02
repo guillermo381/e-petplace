@@ -418,6 +418,110 @@ export async function obtenerMisAdoptables(): Promise<
   return { ok: true, data: out };
 }
 
+/** La ficha COMPLETA de un animal propio, **en cualquier estado**.
+ *
+ *  🔴 Existe porque `obtenerAdoptable` lee la vidriera y **rebota para un
+ *  borrador** — que es exactamente el que hay que editar. Y sin poder leerlo,
+ *  abrir el formulario vacío sobre `actualizarAdoptable` (que acepta `Partial`)
+ *  **borra la historia del animal con un solo guardado**. Lo midió C y frenó la
+ *  pantalla antes de montarla; ésta es la mitad que le faltaba.
+ *
+ *  Función aparte y no un brazo de la pública: *la vidriera es anónima, y meterle
+ *  una rama «si sos el dueño devolvé más» pondría un camino privilegiado adentro
+ *  de la función que `anon` ejecuta.* */
+export interface MiAdoptableFicha {
+  publicacionId: string;
+  mascotaId: string;
+  nombre: string;
+  especie: string;
+  sexo: string | null;
+  fechaNacimiento: string | null;
+  fechaNacimientoPrecision: string | null;
+  talla: string | null;
+  esterilizado: Convivencia;
+  microchip: string | null;
+  remetfu: string | null;
+  fotoUrl: string | null;
+  estado: EstadoAdoptable | 'memorial';
+  /** La `FichaEditable` **entera**, aunque algo sea `null`: con `Partial`, un
+   *  campo ausente y uno vacío se guardan igual, y uno de los dos borra. */
+  ficha: FichaEditable;
+  /** Con su `fotoId`: reordenar y borrar necesitan el id, no la URL. */
+  fotos: { fotoId: string; url: string; orden: number; path: string }[];
+  veredictoPublicacion: VeredictoEsterilizacion;
+}
+
+export async function obtenerMiAdoptable(
+  publicacionId: string,
+): Promise<ResultadoWrapper<MiAdoptableFicha, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('obtener_mi_adoptable', {
+    p_publicacion_id: publicacionId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  if (typeof r.publicacion_id !== 'string') return fallaCodigo('datos_inconsistentes');
+  const f = (r.ficha ?? {}) as Record<string, unknown>;
+  const v = (r.veredicto_publicacion ?? {}) as Record<string, unknown>;
+  const t = (o: Record<string, unknown>, k: string) => (typeof o[k] === 'string' ? (o[k] as string) : null);
+  const mv = v.motivo;
+  return {
+    ok: true,
+    data: {
+      publicacionId: r.publicacion_id,
+      mascotaId: String(r.mascota_id ?? ''),
+      nombre: t(r, 'nombre') ?? '',
+      especie: t(r, 'especie') ?? '',
+      sexo: t(r, 'sexo'),
+      fechaNacimiento: t(r, 'fecha_nacimiento'),
+      fechaNacimientoPrecision: t(r, 'fecha_nacimiento_precision'),
+      talla: t(r, 'talla'),
+      esterilizado: aConvivencia(r.esterilizado),
+      microchip: t(r, 'microchip'),
+      remetfu: t(r, 'remetfu'),
+      fotoUrl: t(r, 'foto_url'),
+      estado: String(r.estado ?? 'borrador') as EstadoAdoptable | 'memorial',
+      ficha: {
+        ingresadoEn: t(f, 'ingresado_en') ?? '',
+        ciudadId: t(f, 'ciudad_id'),
+        zona: t(f, 'zona'),
+        senas: t(f, 'senas'),
+        origenRescate: (t(f, 'origen_rescate') as 'rescate' | 'cesion' | null) ?? null,
+        fechaCesion: t(f, 'fecha_cesion'),
+        estadoVacunal: (t(f, 'estado_vacunal') as FichaEditable['estadoVacunal']) ?? null,
+        desparasitado: f.desparasitado == null ? null : aConvivencia(f.desparasitado),
+        urgente: f.urgente === true,
+        bonoMonto: f.bono_monto == null ? null : Number(f.bono_monto),
+        bonoDestino: t(f, 'bono_destino'),
+        historia: t(f, 'historia'),
+        convivePerros: aConvivencia(f.convive_perros),
+        conviveGatos: aConvivencia(f.convive_gatos),
+        conviveNinos: aConvivencia(f.convive_ninos),
+        parejaId: t(f, 'pareja_id'),
+      },
+      fotos: Array.isArray(r.fotos)
+        ? (r.fotos as Record<string, unknown>[]).flatMap((x) =>
+            typeof x.foto_id === 'string'
+              ? [{
+                  fotoId: x.foto_id,
+                  url: String(x.url ?? ''),
+                  orden: Number(x.orden ?? 0),
+                  path: String(x.path ?? ''),
+                }]
+              : [],
+          )
+        : [],
+      veredictoPublicacion: {
+        puede: v.puede === true,
+        motivo: mv === 'adoptable_no_esterilizado' || mv === 'edad_no_declarada' ? mv : null,
+        requiereCompromiso: v.requiere_compromiso === true,
+        edadMeses: typeof v.edad_meses === 'number' ? v.edad_meses : null,
+        detalle: typeof v.detalle === 'string' ? v.detalle : null,
+      },
+    },
+  };
+}
+
 /** La ficha, **en un viaje**. Trae todo lo que §4.1 dibuja, fotos incluidas.
  *
  *  🔴 Rebota `publicacion_no_disponible` **sin distinguir** entre «no existe»,
