@@ -95,10 +95,28 @@ mientras la casa clasifica los desenlaces de cita como `operacion`. Medido: hoy
 **no cambia nada** (las dos categorías arrancan `default_habilitada = true`, techo
 20/24 h) ⇒ es **latente**. Gana la base, como manda el loop. **Es tuya la decisión.**
 
-**Y un dato para tu tabla de «construido y no ejercido»: `ruta` NUNCA se usó.**
-0 intenciones con la clave sobre 352. El canal existe de punta a punta —motor →
-edge → parser de C, 9/9— **y nadie puso nunca un valor adentro.** Estos cinco
-avisos son sus **primeros productores**.
+**Y un dato para tu tabla de «construido y no ejercido»: `ruta` NUNCA LLEGÓ.**
+0 intenciones con la clave sobre 352.
+
+🔴 **CORRECCIÓN (2-sep, posterior): «primeros productores» ERA FALSO.** El censo
+por la CAUSA —y no por el efecto— encontró que **`_guarderia_aplicar_acto` ya
+emite `'ruta', '/guarderia/' || p_estadia_id`**, en código vivo (línea 90 de su
+cuerpo; verificado que no es comentario, `L-170`). *0 intenciones con la clave
+significa «ningún productor CORRIÓ y emitió una», jamás «ningún productor emite
+una».* Medí el efecto y lo declaré como un hecho sobre la causa — familia de
+`L-402`, invertida. **El censo cerrado, con sus controles:**
+
+| productor | ruta | app |
+|---|---|---|
+| `_guarderia_aplicar_acto` | `/guarderia/<estadiaId>` | cliente |
+| los cinco emisores de acá | las siete de §2 | ambas |
+
+Controles: `_voz_notificacion` excluido a mano (menciona rutas y no emite) · y
+**cero funciones escriben `notificacion_intencion` sin pasar por el motor** ⇒ el
+motor es la única puerta y el censo **cierra**, no acota.
+
+⇒ para tu tabla, la fila correcta es: **el productor de guardería está construido
+y NO ejercido**, y el canal `ruta` entero también.
 
 ---
 

@@ -21,11 +21,26 @@ DECLARE
   v_i1          uuid;  v_i2 uuid; v_titulo text;
 BEGIN
   -- ── FIXTURES ────────────────────────────────────────────────────────────
-  SELECT m.id INTO v_masc FROM public.mascotas m
-   WHERE m.familia_id IS NOT NULL AND m.estado_vida IS NOT DISTINCT FROM 'activa' LIMIT 1;
-  SELECT fm.user_id INTO v_fam_user FROM public.mascotas m
+  /* 🔴 EL FIXTURE SE ELIGE POR LAS PROPIEDADES QUE LA PRUEBA NECESITA, EN UNA
+     SOLA CONSULTA — no por conveniencia. La versión anterior hacía `LIMIT 1`
+     sobre «mascota con familia» y BUSCABA APARTE un miembro válido: pasó dos
+     veces **por suerte**, y a la tercera eligió una mascota cuya familia no
+     tiene ningún miembro con rol vigente. *Un fixture elegido por una condición
+     más débil que la que la prueba exige falla en un día cualquiera, y su rojo
+     no se distingue de un defecto real del código.*
+     Las tres condiciones, juntas y a la vez:
+       · familia con miembro VIGENTE (lo exige `_user_es_familia_de_mascota`),
+       · viva (los brazos de memorial la matan y la reviven),
+       · SIN publicación (existe `uq_publicacion_viva_por_mascota`, y desde la
+         siembra de A6 hay publicaciones reales). */
+  SELECT m.id, fm.user_id INTO v_masc, v_fam_user
+    FROM public.mascotas m
     JOIN public.familia_miembro fm ON fm.familia_id = m.familia_id
-   WHERE m.id = v_masc AND fm.hasta IS NULL AND fm.rol IN ('adulto_titular','adulto_autorizado') LIMIT 1;
+   WHERE fm.hasta IS NULL
+     AND fm.rol IN ('adulto_titular','adulto_autorizado')
+     AND m.estado_vida IS NOT DISTINCT FROM 'activa'
+     AND NOT EXISTS (SELECT 1 FROM public.adopcion_publicacion p WHERE p.mascota_id = m.id)
+   LIMIT 1;
   SELECT c.id, c.owner_profile_id INTO v_cuenta, v_refugio
     FROM public.cuentas_comerciales c WHERE c.owner_profile_id IS NOT NULL LIMIT 1;
   SELECT u.id INTO v_solic FROM auth.users u
@@ -35,8 +50,15 @@ BEGIN
 
   IF v_masc IS NULL OR v_fam_user IS NULL OR v_cuenta IS NULL
      OR v_solic IS NULL OR v_tercero IS NULL THEN
-    RAISE EXCEPTION 'ARNES ABORTA: faltan fixtures (masc=% fam=% cuenta=% solic=% terc=%)',
-      v_masc, v_fam_user, v_cuenta, v_solic, v_tercero;
+    /* El aborto DICE cuál falta y cuántos candidatos había: «faltan fixtures»
+       manda a adivinar; un conteo se resuelve mirándolo. */
+    RAISE EXCEPTION 'ARNES ABORTA: masc=% fam=% cuenta=% solic=% terc=% · candidatos de mascota=%',
+      v_masc, v_fam_user, v_cuenta, v_solic, v_tercero,
+      (SELECT count(*) FROM public.mascotas m
+         JOIN public.familia_miembro fm ON fm.familia_id = m.familia_id
+        WHERE fm.hasta IS NULL AND fm.rol IN ('adulto_titular','adulto_autorizado')
+          AND m.estado_vida IS NOT DISTINCT FROM 'activa'
+          AND NOT EXISTS (SELECT 1 FROM public.adopcion_publicacion p WHERE p.mascota_id = m.id));
   END IF;
 
   INSERT INTO public.adopcion_publicacion (mascota_id, cuenta_comercial_id, estado, country_code, ingresado_en)

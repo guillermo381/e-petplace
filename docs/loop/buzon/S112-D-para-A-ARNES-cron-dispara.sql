@@ -19,8 +19,12 @@ DECLARE
   v_masc uuid; v_cuenta uuid; v_refugio uuid; v_solic uuid; v_otro uuid;
   v_pub uuid; v_vieja uuid; v_ayer uuid; v_r jsonb; v_n int; v_cmd text;
 BEGIN
+  /* SIN publicación previa: desde la siembra de A6 hay publicaciones reales y
+     `uq_publicacion_viva_por_mascota` rebota la segunda. */
   SELECT m.id INTO v_masc FROM public.mascotas m
-   WHERE m.familia_id IS NOT NULL AND m.estado_vida IS NOT DISTINCT FROM 'activa' LIMIT 1;
+   WHERE m.familia_id IS NOT NULL AND m.estado_vida IS NOT DISTINCT FROM 'activa'
+     AND NOT EXISTS (SELECT 1 FROM public.adopcion_publicacion p WHERE p.mascota_id = m.id)
+   LIMIT 1;
   SELECT c.id, c.owner_profile_id INTO v_cuenta, v_refugio
     FROM public.cuentas_comerciales c WHERE c.owner_profile_id IS NOT NULL LIMIT 1;
   SELECT u.id INTO v_solic FROM auth.users u WHERE u.id <> v_refugio LIMIT 1;
