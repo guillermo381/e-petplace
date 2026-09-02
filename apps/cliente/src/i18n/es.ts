@@ -3092,6 +3092,9 @@ export const clienteEs = {
     /* 🔴 El bono YA existe: decir solo «no se pudo» dejaría a la familia
        creyendo que perdió la plata. */
     paqueteSinPrimera: 'Compramos tu paquete, pero no pudimos agendar ese día: {{mensaje}} Puedes agendarlo desde Guardería.',
+    especieNoAdmitida: 'Este plan es para {{especies}}. {{nombre}} no puede tomarlo.',
+    mascotaNoActiva: 'Esta mascota ya no puede contratar servicios.',
+    esaMascota: 'Esa mascota',
     faltaRequisitos: 'Falta lo que la guardería pide para recibirlo.',
     titulo: 'La guardería',
     franjasTitulo: 'Cuándo pasan y cuándo lo traen',
