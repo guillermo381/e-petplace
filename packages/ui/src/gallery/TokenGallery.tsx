@@ -110,6 +110,8 @@ import { CampoCodigo } from '../components/CampoCodigo'
 import { HitoUnaVidaNueva } from '../components/HitoUnaVidaNueva'
 import { TarjetaMascotaRefugio } from '../components/TarjetaMascotaRefugio'
 import { FichaAdoptable } from '../components/FichaAdoptable'
+import { BotonExplicar } from '../components/BotonExplicar'
+import { VitrinaRefugio } from '../components/VitrinaRefugio'
 import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
@@ -5220,6 +5222,11 @@ function GaleriaInterna() {
               ① ¿los cortes se leen como interrupción y no como final
                  cumplido? ② ¿se leen SIN acusar a nadie? Si el desvío grita,
                  la pieza falla §10.6 (la devolución jamás humilla).
+              ⭐ Y las DOS últimas van juntas a propósito: **llegan al mismo
+                 dibujo por razones distintas** —una porque no hay proceso,
+                 la otra porque no hay juicio— y lo único que las separa es
+                 la VOZ. Si con los textos puestos se leen como lo mismo, el
+                 problema es del texto, no de la pieza.
               ⭐ ③ S112: ¿el fallecimiento se lee como una NOTICIA y no como
                  un trámite que no prosperó? Es la única que NO dibuja
                  escalera, y hay que poder ver por qué: mostrarle los pasos
@@ -5235,8 +5242,8 @@ function GaleriaInterna() {
               ['en_conversacion', '⚠️ INALCANZABLE hoy: no hay canal (activador estacionado)'],
               ['declinada', 'declinada · corte del PUBLICADOR · desvío NEUTRO, jamás alerta'],
               ['desistida', 'desistida · corte de la FAMILIA · misma forma, otra voz — nadie falló'],
-              ['no_concretada_fallecimiento', '⭐ el animal murió · SIN escalera, sin color de status: la noticia y nada más'],
-              ['no_concretada_otra_familia', '⭐ S112-A · lo adoptó OTRA familia · SÍ lleva escalera cortada (hubo proceso, a diferencia del de arriba) · nadie decidió sobre esta persona'],
+              ['no_concretada_fallecimiento', '⭐ el animal murió · SIN escalera: no hay PROCESO en el que estar'],
+              ['no_concretada_otra_familia', '⭐ encontró otra familia · SIN escalera: no hay JUICIO que mostrar — nadie evaluó esta postulación'],
             ] as const).map(([e, nota]) => (
               <View key={e} style={{ gap: spacing[2] }}>
                 <Texto variante="apoyo">{nota}</Texto>
@@ -5250,8 +5257,8 @@ function GaleriaInterna() {
                   }}
                   vozDeclinada="El refugio eligió otro hogar"
                   vozDesistida="Cancelaste tu postulación"
-                  vozOtraFamilia="Ya encontró familia. Gracias por querer darle un hogar."
-                  vozNoConcretada="Nube falleció. Tu postulación no va a poder continuar. Lamentamos mucho darte esta noticia."
+                  vozNoConcretada="Nube falleció. Lo sentimos mucho."
+                  vozOtraFamilia="Nube ya encontró su hogar."
                 />
               </View>
             ))}
@@ -5535,6 +5542,65 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        <Seccion titulo="⭐ S112 · LA ESCALERA DE LA CARA — la huella se retiró (corrección del founder, 2-sep)">
+          {/* 🔴 QUÉ HAY QUE VER: los TRES escalones juntos.
+              ① foto propia · ② el avatar de la casa por raza/especie —el que
+              el cliente ya ve en el alta de su mascota— · ③ el residuo.
+              **Ninguno es la huella.** Una huella decía «acá va un animal»;
+              el avatar de su especie dice CUÁL, y en una vidriera donde
+              presentamos vidas esa diferencia es la vidriera entera.
+              El ③ es un DEFECTO del consumidor, no un estado legítimo: toda
+              mascota tiene especie, y por eso avisa en desarrollo. */}
+          <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+            <View style={{ alignItems: 'center', gap: spacing[2] }}>
+              <AvatarMascota nombre="Luna" fotoUrl="https://placekitten.com/200/200" tamano="lg" />
+              <Texto variante="apoyo">① su foto</Texto>
+            </View>
+            <View style={{ alignItems: 'center', gap: spacing[2] }}>
+              <AvatarMascota
+                nombre="Nube"
+                fotoDeEspecie="https://placekitten.com/201/201"
+                tamano="lg"
+              />
+              <Texto variante="apoyo">② raza / especie</Texto>
+            </View>
+            <View style={{ alignItems: 'center', gap: spacing[2] }}>
+              <AvatarMascota nombre="Rocco" tamano="lg" />
+              <Texto variante="apoyo">③ residuo · avisa en dev</Texto>
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="VitrinaRefugio (S112) — la MISMA vitrina, otro oficio">
+          {/* 🔴 QUÉ HAY QUE VER: que se ve como la vitrina de un prestador,
+              porque ES la vitrina de un prestador — portada con su carrusel,
+              logo con su escalera, historia y lista. Cero pieza nueva (N17).
+              Y lo que NO se ve porque no puede entrar: zona y dirección.
+              «Cómo ayudar» va último y discreto: dice «pronto» detrás de su
+              «i» y no navega, así que no compite con lo que sí está. */}
+          <View
+            style={{
+              height: 420,
+              borderRadius: radius.lg,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.08)',
+            }}
+          >
+            <VitrinaRefugio
+              nombre="Refugio Patitas del Sur"
+              ciudad="Quito"
+              historia="Rescatamos desde 2019. Hoy cuidamos a 34 animales mientras esperan su casa."
+              lista={['Rescate', 'Adopción', 'Esterilización']}
+              comoAyudar={{
+                texto: 'Cómo ayudar',
+                onExplicar: () => {},
+                etiquetaExplicacion: 'Qué se va a poder hacer',
+              }}
+            />
+          </View>
+        </Seccion>
+
         <Seccion titulo="ConvivenciaInput (S112) — la cara que ESCRIBE los mismos tres estados">
           {/* Entrada de CATÁLOGO, no gate (2-sep): esta pieza se juzga en la
               ficha de edición del refugio. Lo que se puede ver acá y no en un
@@ -5633,6 +5699,22 @@ function GaleriaInterna() {
                 publicador: 'Quién la publica',
                 bono: 'Bono de adopción',
               }}
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="BotonExplicar (N22 · promovida S112-B) — lo que se necesita para ENTENDER va detrás de una «i»">
+          {/* Entrada de catálogo. Vivió una tanda como pieza interna de
+              `FichaAdoptable`; la promovió el SEGUNDO consumidor
+              (`VitrinaRefugio`), no la primera necesidad.
+              🔴 Su límite no se reabre: una advertencia de SALUD jamás se
+              pliega. La «i» explica; nunca esconde un riesgo. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+            <Texto variante="cuerpo">Refugio verificado por e-PetPlace</Texto>
+            <BotonExplicar
+              texto=""
+              onExplicar={() => {}}
+              etiquetaExplicacion="Qué significa verificado"
             />
           </View>
         </Seccion>

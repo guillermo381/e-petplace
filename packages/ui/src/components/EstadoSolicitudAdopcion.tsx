@@ -66,6 +66,29 @@
  * desvío —el camino se interrumpe y no se completa— así que comparte la
  * forma y cambia la voz. `tono: 'neutro'`: nadie falló.
  *
+ * ── ③ `no_concretada_otra_familia` — TAMPOCO, Y POR OTRA RAZÓN ───────────
+ * El animal encontró familia y no fue la tuya; el motor cierra las demás
+ * solicitudes solo. **C lo leyó como desvío —hubo proceso y se interrumpió—
+ * y es la lectura razonable; no es la que rige, y el porqué importa:**
+ *
+ * *La escalera lleva a `aceptada`. Dibujarla interrumpida dice que alguien
+ * miró tu postulación y no llegaste.* En `declinada` eso es EXACTAMENTE lo
+ * que pasó, y por eso ahí la escalera es información sobre tu propia
+ * situación. **Acá nadie evaluó nada tuyo:** el refugio aceptó a OTRO, y tu
+ * solicitud la cerró un trigger. Pintar los pasos apagados **le atribuye a
+ * quien lee un juicio que nunca existió**, y encima con la forma que en toda
+ * esta pieza significa rechazo.
+ *
+ * ⇒ Es el mismo tratamiento que el fallecimiento —la noticia y nada más— con
+ * una razón distinta: **allá no hay proceso porque murió su sujeto; acá no
+ * hay juicio que mostrar.** *Dos caminos al mismo dibujo no es una
+ * coincidencia que se acomoda: es que el dibujo dice «esto es una noticia»,
+ * y las dos lo son.*
+ *
+ * Y la voz las separa por completo: una es duelo, la otra es una buena
+ * noticia sobre el animal que a quien lee le duele igual. **Las dos cosas
+ * son ciertas y la voz sostiene las dos.**
+ *
  * ── ② `no_concretada_fallecimiento` — 🔴 Y ÉSTE NO LLEVA ESCALERA ─────────
  * Firma del founder (2-sep): **el acta no se firma con el animal en
  * memorial.** Cuando el refugio marca la muerte, un trigger cierra las
@@ -105,24 +128,9 @@ export type EstadoSolicitud =
   /** S112-B · el animal murió. **No lleva escalera.** Ver la enmienda. */
   | 'no_concretada_fallecimiento'
   /**
-   * S112-A (enmienda ADITIVA, bandera 76(d) — territorio de B, declarada) ·
-   * **el animal fue adoptado por otra familia.**
-   *
-   * 🔴 **SÍ lleva escalera, a diferencia del de fallecimiento, y la razón es
-   * la que B escribió para aquél:** *«la escalera existe para decir DÓNDE
-   * ESTÁS EN UN PROCESO»*. Con el fallecimiento **no hay proceso en el que
-   * estar** porque murió su sujeto. Acá **sí lo hubo**: esta persona postuló,
-   * conversó, y su camino se interrumpió con el animal vivo. Se dibuja
-   * **cortada**, igual que los otros dos cortes.
-   *
-   * ⚠️ Lo que la distingue de `declinada` **no es el dibujo, es la voz**:
-   * ahí decidió el publicador; acá **no decidió nadie sobre esta persona**.
-   * *Teñirla de rechazo diría que la evaluaron y la descartaron, y eso no
-   * pasó.* Sin duelo y **sin invitación a otro animal**.
-   *
-   * 👉 **B: la forma es una decisión tuya y la tomé para no dejar la app sin
-   * compilar. Si la escalera cortada no corresponde, cambiala — el motor no
-   * depende de esto.**
+   * S112-B · el animal encontró familia — **otra**. Las demás solicitudes se
+   * cierran solas. **Tampoco lleva escalera**, y la razón NO es la misma que
+   * la del fallecimiento: ver la enmienda.
    */
   | 'no_concretada_otra_familia'
 
@@ -145,7 +153,18 @@ export type EstadoSolicitudAdopcionProps = {
    */
   vozDesistida: string
   /**
-   * 🔴 S112-B · OBLIGATORIA, y es la más delicada de las tres.
+   * 🔴 S112-B · OBLIGATORIA. El animal encontró familia y no fue la tuya.
+   *
+   * **La noticia es BUENA para el animal**, que es lo que el vertical
+   * entero existe para lograr, y **mala para quien lee**. Las dos cosas son
+   * ciertas a la vez y la voz tiene que sostener las dos: *«Luna ya
+   * encontró su hogar»* dice el hecho sin pedir perdón por él.
+   *
+   * ⚠️ **Con este estado esta voz es TODO lo que se dibuja.**
+   */
+  vozOtraFamilia: string
+  /**
+   * 🔴 S112-B · OBLIGATORIA, y es la más delicada de las cuatro.
    *
    * **Es una noticia que la casa DA, no una decisión que alguien tomó** — ahí
    * se separa de las otras dos, que son actos de una parte. El motor ya la
@@ -157,16 +176,6 @@ export type EstadoSolicitudAdopcionProps = {
    * escribe una noticia, no como se rotula un estado.
    */
   vozNoConcretada: string
-  /**
-   * S112-A (aditiva, bandera 76(d)) · lo que se le dice a quien postuló cuando
-   * **el animal fue adoptado por otra familia**.
-   *
-   * 🔴 **OBLIGATORIA, como sus hermanas.** *Una voz opcional que cuando falta
-   * no dibuja nada deja a esa persona con un camino cortado y sin una palabra
-   * que lo explique* — un hueco que se ve bien es peor que uno que falla.
-   * Sin duelo y **sin invitación a otro animal**.
-   */
-  vozOtraFamilia: string
   registro?: 'compacta' | 'completa'
 }
 
@@ -188,19 +197,31 @@ export function EstadoSolicitudAdopcion({
   vozOtraFamilia,
   registro,
 }: EstadoSolicitudAdopcionProps) {
-  /* 🔴 EL DUELO SALE ANTES DE LA ESCALERA, y el `return` temprano ES la
-     decisión de diseño (ver la enmienda de la cabecera). No hay pasos que
-     mostrar cuando murió el sujeto del proceso: la escalera apagada sería
-     informarle a alguien que perdió al animal que eligió hasta qué punto del
-     trámite había llegado.
+  /* 🔴 LAS NOTICIAS SALEN ANTES DE LA ESCALERA, y el `return` temprano ES la
+     decisión de diseño (ver la enmienda de la cabecera).
+
+     **Son DOS estados y llegan al mismo dibujo por caminos distintos**, que
+     es la parte que no hay que perder al leer este `if`:
+       · el fallecimiento — **no hay proceso** en el que estar: murió su
+         sujeto. La escalera apagada le informaría a alguien que perdió al
+         animal que eligió hasta qué paso del trámite había llegado.
+       · la otra familia — **no hay juicio** que mostrar: nadie evaluó esta
+         postulación, la cerró un trigger. Los pasos apagados le atribuirían
+         a quien lee un veredicto que nunca existió, con la forma que en toda
+         esta pieza significa rechazo.
 
      Sin color de status —ni neutro ni alerta— y sin marca: `cuerpo` en la
      tinta de siempre. La noticia se sostiene sola; teñirla la convertiría en
      una etiqueta de estado, que es exactamente lo que no es. */
-  if (estado === 'no_concretada_fallecimiento') {
+  const NOTICIA: Partial<Record<EstadoSolicitud, string>> = {
+    no_concretada_fallecimiento: vozNoConcretada,
+    no_concretada_otra_familia: vozOtraFamilia,
+  }
+  const noticia = NOTICIA[estado]
+  if (noticia !== undefined) {
     return (
       <View style={{ paddingVertical: spacing[2] }}>
-        <Texto variante="cuerpo">{vozNoConcretada}</Texto>
+        <Texto variante="cuerpo">{noticia}</Texto>
       </View>
     )
   }
@@ -215,10 +236,7 @@ export function EstadoSolicitudAdopcion({
      alcanzado queda hecho y lo que seguía se apaga entero — jamás se marca
      como cumplido algo que no pasó. Lo que cambia es QUIÉN cortó, y eso lo
      dice la voz, no el dibujo. */
-  const cortada =
-    estado === 'declinada' ||
-    estado === 'desistida' ||
-    estado === 'no_concretada_otra_familia'
+  const cortada = estado === 'declinada' || estado === 'desistida'
   const indiceActual = cortada ? -1 : CAMINO.indexOf(estado as (typeof CAMINO)[number])
 
   return (
@@ -247,9 +265,7 @@ export function EstadoSolicitudAdopcion({
           ? { etiqueta: vozDeclinada, tono: 'neutro' }
           : estado === 'desistida'
             ? { etiqueta: vozDesistida, tono: 'neutro' }
-            : estado === 'no_concretada_otra_familia'
-              ? { etiqueta: vozOtraFamilia, tono: 'neutro' }
-              : undefined
+            : undefined
       }
     />
   )
