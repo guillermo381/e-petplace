@@ -1719,6 +1719,32 @@ export const clienteEs = {
     vacioFiltradoTitulo: 'Nadie coincide con eso',
     vacioFiltradoDetalle: 'Prueba con menos filtros: hay más animales esperando.',
     limpiarFiltros: 'Quitar los filtros',
+    /* A1 · El botón DICE CUÁNTOS filtros hay puestos: sin el número, la hoja
+       esconde lo que la lista ya está aplicando, y una lista filtrada que no
+       se declara filtrada se lee como un catálogo pobre. */
+    filtrar: 'Filtrar',
+    filtrarConCuenta: 'Filtrar · {{n}}',
+    filtrosTitulo: 'Filtrar',
+    filtrosAplicar: 'Ver resultados',
+    filtrosLimpiar: 'Limpiar',
+    filtrosCerrar: 'Cerrar',
+    grupoEspecie: 'Especie',
+    grupoTalla: 'Tamaño',
+    grupoSexo: 'Sexo',
+    grupoCiudad: 'Ciudad',
+    grupoPerros: 'Convive con perros',
+    grupoGatos: 'Convive con gatos',
+    grupoNinos: 'Convive con niños',
+    grupoMarcas: 'Otros',
+    conviveSi: 'Sí',
+    conviveNo: 'No',
+    conviveNoSeSabe: 'Todavía no se sabe',
+    /* 🔴 La «i» de esterilizado es OBLIGATORIA en la pieza, y su razón la trajo
+       B: este filtro **angosta escondiendo una ausencia** — la persona pide
+       esterilizados, recibe menos animales, y no tiene forma de saber que los
+       perdió por un dato que falta y no por un hecho. */
+    esterilizadoEtiqueta: 'Qué quiere decir «esterilizado»',
+    esterilizadoExplicacion: 'Solo mostramos los que el refugio declaró esterilizados. Los que todavía no lo declararon quedan afuera de este filtro, y eso no quiere decir que no lo estén.',
     sinCuentaLinea: 'Para postular vas a necesitar una cuenta.',
     sinCuentaPorQueTitulo: '¿Por qué hace falta una cuenta?',
     sinCuentaPorQueCuerpo:

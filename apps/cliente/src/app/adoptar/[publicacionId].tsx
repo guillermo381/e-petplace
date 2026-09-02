@@ -348,6 +348,29 @@ export default function PantallaFichaAdoptable() {
                   onExplicar: () => setHoja('verificacion'),
                   etiquetaExplicacion: t('fichaAdoptable.verificadoTitulo'),
                 },
+                /* ⭐ **A6 · LA PUERTA A LA VITRINA** — firma del founder:
+                   *«en la ficha de Luna toco el nombre del refugio y entro a
+                   su vitrina»*.
+
+                   🔑 **Se entra por CUENTA COMERCIAL**: `publicadorId` es
+                   `cc.id`, y ése es el id que `obtenerPerfilesPublicosPorCuenta`
+                   sabe resolver. *No es un detalle de ruteo — durante una vuelta
+                   entera el lector sólo sabía filtrar por id de prestador, y con
+                   eso se podía confirmar a qué cuenta pertenece un prestador que
+                   ya encontraste, pero no encontrarlo.*
+
+                   **Sin `publicadorId` no se pasa nada, y eso es Ley 23**: la
+                   pieza no hunde la fila ni dibuja chevron, así que un refugio
+                   que la vidriera no puede identificar **no promete un camino
+                   que no existe**. */
+                onPress:
+                  f.publicadorId === null
+                    ? undefined
+                    : () =>
+                        router.push({
+                          pathname: '/adoptar/refugio/[cuentaId]',
+                          params: { cuentaId: f.publicadorId as string },
+                        }),
               }
         }
         bono={
