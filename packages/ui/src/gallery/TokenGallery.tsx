@@ -112,6 +112,7 @@ import { TarjetaMascotaRefugio } from '../components/TarjetaMascotaRefugio'
 import { FichaAdoptable } from '../components/FichaAdoptable'
 import { BotonExplicar } from '../components/BotonExplicar'
 import { VitrinaRefugio } from '../components/VitrinaRefugio'
+import { HojaFiltros, type FiltrosAdoptables } from '../components/HojaFiltros'
 import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
@@ -844,6 +845,84 @@ function MuestraTarjetasRefugio() {
         voces={VOCES}
         etiqueta="Rocco, fuera de la vidriera"
         onPress={() => {}}
+      />
+    </View>
+  )
+}
+
+/* ENTRADA DE CATÁLOGO de `HojaFiltros` (R17) — su gate es la lista (C2).
+   🔴 QUÉ HAY QUE VER: que los tres ejes de convivencia ofrecen **el tercer
+   estado como una opción elegible más**. Eso es lo que dice, sin palabras,
+   que filtrar por convivencia NO descarta a los que nadie probó — el lector
+   los manda abajo con su título, no los esconde.
+   Y que el grupo de binarios lleva su «i»: `esterilizado` sólo trae los
+   DECLARADOS, así que angosta escondiendo una ausencia, y un filtro que
+   angosta en silencio es peor que uno que no existe. */
+function MuestraHojaFiltros() {
+  const [abierta, setAbierta] = useState(false)
+  const [filtros, setFiltros] = useState<FiltrosAdoptables>({})
+  const puestos = Object.keys(filtros).length
+
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Boton
+        etiqueta={puestos === 0 ? 'Filtrar' : `Filtrar · ${puestos}`}
+        variante="secundario"
+        onPress={() => setAbierta(true)}
+      />
+      <Texto variante="apoyo">
+        devuelve tal cual: {JSON.stringify(filtros)}
+      </Texto>
+      <HojaFiltros
+        visible={abierta}
+        onCerrar={() => setAbierta(false)}
+        filtros={filtros}
+        onAplicar={setFiltros}
+        opciones={{
+          especies: [
+            { codigo: 'perro', etiqueta: 'Perros', icono: null },
+            { codigo: 'gato', etiqueta: 'Gatos', icono: null },
+          ],
+          tallas: [
+            { codigo: 'pequeno', etiqueta: 'Pequeño', icono: null },
+            { codigo: 'mediano', etiqueta: 'Mediano', icono: null },
+            { codigo: 'grande', etiqueta: 'Grande', icono: null },
+          ],
+          sexos: [
+            { codigo: 'macho', etiqueta: 'Macho', icono: null },
+            { codigo: 'hembra', etiqueta: 'Hembra', icono: null },
+          ],
+          ciudades: [
+            { codigo: 'uio', etiqueta: 'Quito', icono: null },
+            { codigo: 'gye', etiqueta: 'Guayaquil', icono: null },
+          ],
+        }}
+        explicaEsterilizado={{
+          texto: '',
+          onExplicar: () => {},
+          etiquetaExplicacion: 'Qué muestra el filtro de esterilizados',
+        }}
+        voces={{
+          titulo: 'Filtrar',
+          aplicar: 'Ver resultados',
+          limpiar: 'Limpiar todo',
+          grupos: {
+            especie: 'Especie',
+            talla: 'Tamaño',
+            sexo: 'Sexo',
+            ciudad: 'Ciudad',
+            convivePerros: 'Convive con perros',
+            conviveGatos: 'Convive con gatos',
+            conviveNinos: 'Convive con niños',
+            binarios: 'Mostrar sólo',
+          },
+          convivencia: { si: 'Sí', no: 'No', no_se_sabe: 'Todavía no se sabe' },
+          binarios: {
+            urgente: 'Urgentes',
+            esterilizado: 'Esterilizados',
+            con_pareja: 'Con pareja',
+          },
+        }}
       />
     </View>
   )
@@ -5627,6 +5706,10 @@ function GaleriaInterna() {
               descripcionSinPagina="Podés ver sus animales igual."
             />
           </View>
+        </Seccion>
+
+        <Seccion titulo="HojaFiltros (S112) — devuelve el objeto del motor, tal cual">
+          <MuestraHojaFiltros />
         </Seccion>
 
         <Seccion titulo="ConvivenciaInput (S112) — la cara que ESCRIBE los mismos tres estados">
