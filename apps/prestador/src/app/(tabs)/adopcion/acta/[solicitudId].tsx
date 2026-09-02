@@ -246,7 +246,18 @@ export default function ActaDelRefugio() {
                   etiqueta={t('actaRefugio.codigoEtiqueta')}
                   ayuda={t('actaRefugio.codigoAyuda', { a: enviadoA })}
                   mensaje={mensajeCodigo}
-                  deshabilitado={firmando}
+                  /* ⏪ Acá el campo se apagaba mientras se firmaba, y
+                     `verify:razon-muda` lo cazó como freno mudo. Tenía razón:
+                     se apagaba y nada decía por qué. *La cura no era escribirle
+                     una razón — era que no hiciera falta apagarlo.* El botón ya
+                     queda en `cargando`, que bloquea el segundo toque, y el
+                     valor que viaja se capturó al enviar: escribir mientras el
+                     pedido vuela no rompe nada.
+                     ⚠️ **Y este comentario NO puede nombrar la prop retirada**:
+                     el gate cuenta por TEXTO y leería la palabra del comentario
+                     como un freno vivo (`L-170` — un censo por patrón lee los
+                     comentarios como código). *Me lo cobró a mí, en el
+                     comentario que explicaba su propio hallazgo.* */
                 />
                 <Boton
                   variante="primario"
