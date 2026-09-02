@@ -1,0 +1,9 @@
+-- REVERSA de 20260907840000 — la IP del consentimiento la pone el servidor. ESCRITA ANTES.
+-- drop function if exists public.aceptar_documento_adopcion(text,text);
+-- y re-crear la firma de 3 args (p_codigo, p_ip_hash, p_dispositivo) del objeto.
+--
+-- 🔴 Revertirla devuelve el parametro p_ip_hash al cliente, y eso es PEOR que
+-- no tener IP: habilita a la app a fabricar evidencia legal sobre un dato que
+-- no conoce. C se nego a rellenarlo con razon; la reversa le devuelve a otro
+-- la posibilidad de rellenarlo mal.
+-- No toca datos: las filas ya escritas conservan su ip_hash.

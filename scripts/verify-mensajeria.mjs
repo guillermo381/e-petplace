@@ -153,12 +153,6 @@ check('la causa sin aviso DECLARA su motivo',
     [a1.length, a1[0].tipo, a1[0].categoria, a1[0].audiencia, a1[0].destinatarioUserId],
     [1, 'adopcion_solicitud_nueva', 'relacional', 'prestador', 'u-pub']);
 
-  const a2 = avisosDe({ clase: 'silencio_detectado', solicitudId: 's1', solicitanteUserId: 'u-fam' }, vivo);
-  check('🔑 «no respondieron» es OPERACION, no relacional (criterio S87)',
-    [a2[0].tipo, a2[0].categoria], ['adopcion_sin_respuesta', 'operacion']);
-  check('y su clave de dedupe es por solicitud: suena UNA vez',
-    a2[0].claveDedup, 'adopcion_sin_respuesta:s1');
-
   const a3 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'adoptado' }, vivo);
   check('padrinazgo: adoptado SÍ avisa', [a3.length, a3[0].tipo], [1, 'padrinazgo_ahijado_adoptado']);
   const a4 = avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'refugio_inactivo' }, vivo);
@@ -171,8 +165,9 @@ check('la causa sin aviso DECLARA su motivo',
   // 🔴 SILENCIO ②: el memorial apaga el vertical entero
   check('🔴 ROJO: memorial apaga solicitud nueva',
     avisosDe({ clase: 'solicitud_creada', solicitudId: 's1', publicadorUserId: 'u-pub' }, memorial), []);
-  check('🔴 ROJO: memorial apaga el aviso de silencio',
-    avisosDe({ clase: 'silencio_detectado', solicitudId: 's1', solicitanteUserId: 'u-fam' }, memorial), []);
+  /* ☠️ El brazo del silencio se retiró con su caso (S112-D): su ley vive en
+     `avisar_adopcion_sin_respuesta()` y la prueba su arnés, con el par que
+     discrimina (con el filtro 1 avisada / 1 saltada; sin él, 2 / 0). */
   check('🔴 ROJO: memorial apaga hasta el padrinazgo adoptado',
     avisosDe({ clase: 'padrinazgo_terminado', padrinazgoId: 'p1', padrinoUserId: 'u-pad', causa: 'adoptado' }, memorial), []);
 

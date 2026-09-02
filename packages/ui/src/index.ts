@@ -473,6 +473,28 @@ export {
   type ConvivenciaCon,
 } from './components/Convivencia'
 
+// TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
+// «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
+// sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.
+// La ausencia se dibuja según QUÉ ausencia es: `edad` null SE DICE (§3 pide
+// edad estimada y el wrapper no la infiere); `raza` null NO se dice, porque
+// «no la declararon» no es «mestizo» y mestizo es categoría legítima.
+export {
+  TarjetaAdoptable,
+  type TarjetaAdoptableProps,
+} from './components/TarjetaAdoptable'
+
+// BloqueConCriterio — S112-B: un grupo que va PRIMERO dice por qué va primero.
+// `porque` es OBLIGATORIA y es toda la pieza: sin ella un orden se lee como
+// ranking. Sin contador y sin numeración, a propósito (§4: la lista no es
+// inventario). ⚠️ Su primer consumidor —«Llevan más tiempo esperando»— NO se
+// monta hasta que exista el flag `destacado_espera` del servidor: §4 prohíbe
+// explícito ordenar por antigüedad.
+export {
+  BloqueConCriterio,
+  type BloqueConCriterioProps,
+} from './components/BloqueConCriterio'
+
 // SenalesAdoptable — S111-B: LO QUE HAY QUE SABER ANTES DE ENAMORARSE.
 // `LETRA_ADOPCION` §3: urgente · pareja vinculada · tiempo en rescate ·
 // ubicación aproximada — JAMÁS la dirección exacta.

@@ -1618,6 +1618,8 @@ export {
      todos los lugares (la que P2 necesita: un día sirve si algún lugar puede).
      `obtenerDiasGuarderia` — **por prestador**, la de después de elegir lugar. */
   contratarMensualidadGuarderia,
+  puedeContratarGuarderia,
+  type ElegibilidadGuarderia,
   obtenerMisPlanesGuarderia,
   type PlanGuarderia,
   type MandatoMensualidad,
@@ -1703,7 +1705,12 @@ export type { Adoptable, ResultadoTraspaso, CodigoErrorAdopcion } from './wrappe
 /* S111-A · la mensajería de adopción — hunk aditivo. La puerta que le faltaba
    al motor: las cuatro RPC existían y no se podían llamar desde `apps/`. */
 export {
-  crearSolicitudAdopcion, responderSolicitudAdopcion, cerrarSolicitudAdopcion,
+  crearSolicitudAdopcion,
+  obtenerDocumentoVigente,
+  tengoAceptadoDocumento,
+  aceptarDocumentoAdopcion,
+  type DocumentoVigente,
+  type AceptacionRegistrada, responderSolicitudAdopcion, cerrarSolicitudAdopcion,
   obtenerMisSolicitudesAdopcion, obtenerSolicitudesDeMisPublicaciones,
   contarSolicitudesPorRevisar,
 } from './wrappers/adopcion';

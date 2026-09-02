@@ -64,6 +64,7 @@ import { obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { PieReserva } from '@/components/reserva-piezas';
+import { puedeContratarGuarderia, type ElegibilidadGuarderia } from '@epetplace/api';
 import { FlechaVolver } from '@/components/flecha-volver';
 import { urlGaleria } from '@/lib/url-galeria';
 
@@ -158,6 +159,53 @@ export default function LugarGuarderia() {
     mascotaId?: string;
     prestadorNombre?: string;
   }>();
+
+  /* ── 🔴 `D-1001` · LA PUERTA NO OFRECE LO QUE VA A RECHAZAR ─────────────
+     Voz del founder: *«al elegir mascota, los planes que no aplican ya se ven
+     apagados con su porqué, ANTES de llegar al botón»*. Hasta que A publicó
+     `puedeContratarGuarderia` esto **sólo se podía saber rebotando**, y un
+     rebote es la puerta ofreciendo lo que va a rechazar (Ley 23).
+
+     ⚠️ **Un fallo NO se lee como «no puede».** `null` = no sabemos, y con `null`
+     el botón queda como estaba: *apagar una compra porque se cayó la red le
+     dice a la familia que su animal no es aceptado, que es una afirmación
+     mucho más cara que un intento fallido.*
+
+     ⚠️ **Y sobre una mascota ajena la RPC LANZA** (`no_access_to_mascota`), no
+     devuelve `puede:false` — lo declaró A al entregarla. Por eso el rebote se
+     deja en `null` y no se traduce a «no puede»: *un `false` ahí afirmaría algo
+     sobre el animal de otra familia.* */
+  const [elegibilidad, setElegibilidad] = useState<ElegibilidadGuarderia | null>(null);
+  useEffect(() => {
+    if (!esMensual || typeof mascotaId !== 'string' || mascotaId.length === 0) {
+      setElegibilidad(null);
+      return;
+    }
+    let vigente = true;
+    void puedeContratarGuarderia(mascotaId).then((r) => {
+      if (vigente && r.ok) setElegibilidad(r.data);
+    });
+    return () => { vigente = false; };
+  }, [esMensual, mascotaId]);
+
+  /** Sólo frena con un `false` MEDIDO; `null` deja pasar (ver arriba). */
+  const especieFrena = elegibilidad !== null && !elegibilidad.puede;
+
+  /* 🔴 **El motivo viene PARTIDO y las voces NO se mezclan** (decisión de A):
+     una mascota en memorial **no es** «esta guardería no la recibe». *Darles la
+     misma frase convertiría una ausencia dolorosa en un rechazo comercial.* */
+  const razonEspecie =
+    !especieFrena || elegibilidad === null
+      ? null
+      : elegibilidad.motivo === 'mascota_no_activa'
+        ? t('lugarGuarderia.mascotaNoActiva')
+        : t('lugarGuarderia.especieNoAdmitida', {
+            nombre: params.mascotaNombre ?? t('lugarGuarderia.esaMascota'),
+            /* Las especies salen del CATÁLOGO VIVO que trae el lector, jamás de
+               una lista escrita acá: *el día que la guardería acepte conejos, un
+               texto hardcodeado seguiría diciendo «perros y gatos».* */
+            especies: (elegibilidad.especiesElegibles ?? []).join(' · '),
+          });
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
   const [intento, setIntento] = useState(0);
@@ -560,13 +608,18 @@ export default function LugarGuarderia() {
                   ? t('lugarGuarderia.contratarMensualAqui')
                   : t('lugarGuarderia.comprarDiaAqui')
         }
-        habilitado={puedeReservar}
+        habilitado={puedeReservar && !especieFrena}
         insetBottom={insets.bottom}
         /* 🔴 Y ESTABA APAGADO SIN DECIR POR QUÉ — `aria-disabled=true` y ni una
            palabra. *Una pared muda le hace creer a la familia que el producto
            está roto, cuando lo único que falta es que toque un día.* */
         razonDeshabilitado={
-          elegido === null
+          /* La razón de la especie PRESIDE sobre las otras dos: si el plan no
+             es para esta mascota, decirle «te falta elegir un día» la manda a
+             resolver algo que no la va a desbloquear. */
+          razonEspecie !== null
+            ? razonEspecie
+            : elegido === null
               ? t('lugarGuarderia.faltaDia')
               : t('lugarGuarderia.faltaRequisitos')
         }

@@ -39,7 +39,7 @@
  * cerró en el orden correcto: primero el motor, después la pantalla.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -340,6 +340,88 @@ export function DiaSinHorarios({
         }
       />
     </View>
+  );
+}
+
+/**
+ * SIN QUIÉN RESERVAR — **dos hechos distintos que compartían una sola voz**
+ * (S112-C, censo del ítem 15).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **EL DEFECTO QUE LA PARIÓ, medido en las cinco raíces de oficio:** todas
+ * decidían con `elegibles.length === 0`, que es VERDADERO en dos situaciones
+ * que no se parecen en nada:
+ *   ① **el hogar está vacío** — no hay ninguna mascota;
+ *   ② **hay mascotas y ninguna aplica** — el hogar tiene un ave y el paseo es
+ *      para perros.
+ *
+ * Con una sola voz, tres de las cinco **mentían en el caso ①**: paseo decía
+ * *«El paseo es para perros — tu hogar todavía no tiene un perro registrado»*
+ * a alguien que **no tiene ninguna mascota**, y eso se lee como *«tenés
+ * mascotas pero ninguna es perro»*. **Y veterinaria mentía en el ② al revés:**
+ * decía *«Tu hogar todavía no tiene mascotas»* a quien sí las tiene.
+ *
+ * *Ninguna de las dos frases es falsa por descuido: cada una es la verdad del
+ * otro caso.* **El defecto no era el texto — era que un guard con dos hechos
+ * adentro sólo puede decir uno.**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * **Por qué una pieza y no cinco ternarios:** la voz del caso ① es la MISMA en
+ * los cinco oficios (no hay nadie en el hogar — el oficio no cambia ese
+ * hecho), y la del ② es propia de cada uno. *Cinco copias de la voz universal
+ * es cómo una queda vieja.* Acá vive el reparto; cada oficio sigue trayendo su
+ * propia frase de especie por props, donde siempre estuvo.
+ *
+ * ⚠️ **NO ofrece adopción, y es deliberado.** El founder la pidió en el HOGAR
+ * sin mascotas, que es donde la persona está mirando su casa. Acá está a mitad
+ * de una reserva: ofrecerle adoptar a quien vino a reservar un baño es cambiarle
+ * de tema. *El camino honesto acá es el que ya estaba — agregar su mascota.*
+ */
+export function SinQuienReservar({
+  hayMascotas,
+  tituloSinNadie,
+  detalleSinNadie,
+  tituloEspecie,
+  detalleEspecie,
+  etiquetaSinNadie,
+  etiquetaEspecie,
+  onAccion,
+  icono,
+}: {
+  /** 🔴 **El discriminador.** `true` = hay mascotas y ninguna aplica (②);
+   *  `false` = el hogar está vacío (①). Se pasa el HECHO, no la voz elegida:
+   *  *si el llamador eligiera el texto, cada pantalla podría volver a
+   *  equivocarse de caso, que es el defecto que esta pieza cierra.* */
+  hayMascotas: boolean;
+  tituloSinNadie: string;
+  detalleSinNadie: string;
+  tituloEspecie: string;
+  detalleEspecie: string;
+  /** 🔴 **LA ETIQUETA TAMBIÉN SE PARTE, y fue el tercer hallazgo del censo:**
+   *  las cuatro raíces mandaban `paquete.sinPerrosAccion` —*«Agregar a mi
+   *  perro»*— **incluida veterinaria, que atiende a todas las especies**, y
+   *  grooming, que atiende perros y gatos. Con el hogar vacío eso le dice a
+   *  alguien que para usar al veterinario tiene que conseguirse un perro.
+   *  *El botón es parte del guard: si el título se parte y la etiqueta no, la
+   *  mitad del mensaje sigue siendo del otro caso.* */
+  etiquetaSinNadie: string;
+  etiquetaEspecie: string;
+  onAccion: () => void;
+  icono?: ReactNode;
+}) {
+  return (
+    <EstadoVacio
+      icono={icono}
+      titulo={hayMascotas ? tituloEspecie : tituloSinNadie}
+      descripcion={hayMascotas ? detalleEspecie : detalleSinNadie}
+      accion={
+        <Boton
+          variante="primario"
+          etiqueta={hayMascotas ? etiquetaEspecie : etiquetaSinNadie}
+          onPress={onAccion}
+        />
+      }
+    />
   );
 }
 

@@ -78,10 +78,12 @@ import {
   obtenerMediaDeMiMascota,
   obtenerMisEstadiasGuarderia,
   obtenerPuntoVivo,
+  obtenerTramoVivoDeMiMascota,
   type ActaGuarderia,
   type EstadiaDeMiMascota,
   type MediaGuarderia,
   type PuntoVivo,
+  type TramoVivo,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -99,53 +101,21 @@ const horaCorta = (iso: string) =>
    objeto. *El contrato prometía morir en una línea cuando el lector existiera —
    y así fue* (Ley 37: el andamio se retira con su razón). */
 
-/**
- * ¿Hay viaje que mirar?
- *
- * ═══════════════════════════════════════════════════════════════════════════
- * 🔴 **ANTES DECÍA «`recogida_en_curso` o `retorno_en_curso`» Y LA FAMILIA
- * NUNCA VEÍA EL EN VIVO CON SU ANIMAL PENDIENTE** — que es *«7:40, en camino a
- * buscar a Thor»*, el momento en que más quiere mirar.
- *
- * El motor ya lo resolvió (S110-A): manda **el TRAMO ABIERTO** y el estado sólo
- * APAGA. **La pantalla se quedó atrás enumerando dos estados**, así que el
- * punto llegaba y nadie lo pedía.
- * ═══════════════════════════════════════════════════════════════════════════
- *
- * ⚠️ **ESTO ES UN ESPEJO DECLARADO DE LA REGLA DEL MOTOR, y SU CONDICIÓN DE
- * RETIRO YA SE CUMPLIÓ** (medido 1-sep 17:27): `obtenerTramoVivoDeMiMascota`
- * **ya existe** (`guarderia-reserva.ts:938`) y contesta la pregunta entera —
- * incluido lo que este espejo **no puede saber**: si el tramo sigue abierto.
- *
- * 🔴 **No se retira acá porque S111 cerró**, y cambiar el lector del durante en
- * el cierre es tocar el camino que el founder está por caminar. **Va con ficha
- * y disparo**: se retira en la primera tanda que toque esta pantalla, y es un
- * reemplazo de una llamada, no un rediseño.
- *
- * *Se declara con su fecha porque un espejo sin fecha de retiro se vuelve
- * permanente por accidente — y éste ya tiene con qué morir.*
- *
- * **Lo que el espejo NO puede saber:** si el tramo sigue abierto. Con uno
- * cerrado, `obtenerPuntoVivo` devuelve `null` —el punto se borra al cerrar— y
- * la pantalla dice que todavía no hay dónde mirar. *Impreciso, no falso.*
- */
-function estaViajando(e: EstadiaDeMiMascota): boolean {
-  if (e.estadoEstadia === 'entregada' || e.estadoEstadia === 'no_recogida') return false;
-  if (e.estadoEstadia === 'cancelada') return false;
-  return tramoDelMomento(e) !== null;
-}
+/* ☠️ **ACÁ VIVÍAN `estaViajando` Y `tramoDelMomento` — EL ESPEJO DE `D-1000`,
+   Y SU CONDICIÓN DE RETIRO SE CUMPLIÓ.**
 
-/** El tramo que corresponde al momento — ida mientras va a buscarlo, vuelta
- *  mientras lo trae. Espejo de la misma regla del motor; ver arriba. */
-function tramoDelMomento(e: EstadiaDeMiMascota): string | null {
-  if (e.estadoEstadia === 'reservada' || e.estadoEstadia === 'recogida_en_curso') {
-    return e.tramoRecogidaId;
-  }
-  if (e.estadoEstadia === 'en_guarderia' || e.estadoEstadia === 'retorno_en_curso') {
-    return e.tramoDevolucionId;
-  }
-  return null;
-}
+   Repetían del lado de la pantalla la regla del servidor sobre qué tramo mirar.
+   Nacieron porque **no existía wrapper**; `obtenerTramoVivoDeMiMascota`
+   (`guarderia-reserva.ts:938`, S111-A) lo contesta entero, y la ficha lo dice
+   sin rodeos: *lo que queda no es un rediseño, es reemplazar una llamada*.
+
+   🔴 **Y NO ES UN EMPATE: el motor sabe algo que el espejo NO PODÍA SABER.**
+   Su propia cabecera lo declaraba —*«lo que el espejo no puede saber: si el
+   tramo sigue abierto»*—. Con un tramo ya cerrado el espejo seguía diciendo
+   «está viajando» y la sección se dibujaba para decir que no había nada que
+   ver. **Ahora no se dibuja**, que es la verdad.
+
+   *Se retira en el acto que lo vuelve reemplazable, no después* (`L-395`). */
 
 type Estadia =
   | { fase: 'cargando' }
@@ -170,6 +140,12 @@ export default function DuranteGuarderia() {
   const [media, setMedia] = useState<Media>({ fase: 'cargando' });
   const [visor, setVisor] = useState<number | null>(null);
   const [punto, setPunto] = useState<PuntoVivo | null>(null);
+  /* `null` = no hay viaje en curso, y **es respuesta legítima y frecuente**,
+     jamás un fallo (lo dice el contrato del wrapper). `undefined` = todavía no
+     preguntamos: se distinguen porque **con `null` la sección NO se dibuja** y
+     mientras no sepamos tampoco — *ofrecer «dónde va» y contestar «no sabemos»
+     es peor que no ofrecerlo*. */
+  const [tramoVivo, setTramoVivo] = useState<TramoVivo | null | undefined>(undefined);
   const [acta, setActa] = useState<ActaGuarderia | null>(null);
   const [conformando, setConformando] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -222,18 +198,33 @@ export default function DuranteGuarderia() {
     };
   }, [params.mascotaId, params.fecha]);
 
-  /* ✅ EL PUNTO VIVO, ENCENDIDO — A proyectó los dos `tramo_id` el 29-ago.
-     ⏪ *Y su hueco cambió de clase dos veces antes de llegar acá: primero
-     escribí que faltaba la ENTIDAD (falso), después medí que faltaba la
-     PROYECCIÓN (cierto). La segunda medición es la que lo destrabó.* */
+  /* ✅ EL VIAJE VIVO — LO DICE EL SERVIDOR (`D-1000` cerrada).
+
+     ⚠️ **La cadencia NO cambia y es a propósito.** El tramo se resuelve cuando
+     cambia la estadía (o sea, en cada foco, que es cuando se re-lee) y el punto
+     sigue sondeando a ~30 s. *Meter el tramo adentro del tick duplicaría las
+     peticiones del durante para enterarse antes de un cambio —de recogida a
+     devolución— que ocurre una vez al día y ya se veía en el foco siguiente*
+     (`L-223`: el peaje es la PETICIÓN). **Es un reemplazo de llamada, no un
+     rediseño del sondeo** — que es exactamente lo que la ficha autorizaba. */
   useEffect(() => {
     if (estadia.fase !== 'listo') return;
-    const e = estadia.e;
-    /* El tramo del momento: recogida mientras va a buscarlo, devolución
-       mientras vuelve. **Fuera de esos dos no hay viaje que mirar.** */
-    /* Una sola fuente para «qué tramo miro»: la de arriba. *Dos copias de esta
-       regla en el mismo archivo es cómo una queda vieja.* */
-    const tramoId = estaViajando(e) ? tramoDelMomento(e) : null;
+    let vigente = true;
+    void (async () => {
+      const r = await obtenerTramoVivoDeMiMascota(estadia.e.mascotaId);
+      if (!vigente) return;
+      /* 🔴 Un fallo de red NO se lee como «no hay viaje» (Ley 13). Con `null`
+         la sección desaparece, y desaparecer por no haber podido preguntar le
+         diría a la familia que su animal no está viajando cuando quizá sí.
+         Sin respuesta nos quedamos en `undefined`: la sección tampoco aparece,
+         pero **no afirmamos nada**. */
+      if (r.ok) setTramoVivo(r.data);
+    })();
+    return () => { vigente = false; };
+  }, [estadia]);
+
+  useEffect(() => {
+    const tramoId = tramoVivo?.tramoId ?? null;
     if (tramoId === null) { setPunto(null); return; }
     let vigente = true;
     const leer = async () => {
@@ -245,7 +236,7 @@ export default function DuranteGuarderia() {
        🔴 Y **jamás se promete «tiempo real»**: la voz dice cuándo se lo vio. */
     const id = setInterval(() => void leer(), 30_000);
     return () => { vigente = false; clearInterval(id); };
-  }, [estadia]);
+  }, [tramoVivo]);
 
   /* EL ACTA. Se pide la de DEVOLUCIÓN si existe —es la que el dueño conforma al
      recibirlo— y si no, la de recogida. */
@@ -352,7 +343,7 @@ export default function DuranteGuarderia() {
         )}
 
         {/* ── ② DÓNDE VA — sólo mientras viaja, y sólo si hay punto ── */}
-        {estadia.fase === 'listo' && estaViajando(estadia.e) ? (
+        {estadia.fase === 'listo' && tramoVivo != null ? (
           <Tarjeta>
             <View style={{ gap: spacing[3] }}>
               <Texto variante="seccion">{t('duranteGuarderia.dondeVa')}</Texto>

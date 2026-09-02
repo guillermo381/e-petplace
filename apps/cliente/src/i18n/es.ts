@@ -303,6 +303,11 @@ export const clienteEs = {
     sinMascotas: 'Todavía no hay nadie por acá',
     sinMascotasDetalle: 'Agrega a tu mascota para empezar su historia.',
     sinMascotasAgregar: 'Agregar a mi mascota',
+    sinMascotasAdopcion: 'Conoce a los que están esperando',
+    sinMascotasAdopcionDetalle: 'Mascotas de refugios que buscan una familia.',
+    sinMascotasPorQueTitulo: '¿Por qué registrar a tu mascota?',
+    sinMascotasPorQueCuerpo: 'Cuando la registras, su vida empieza a documentarse acá: sus vacunas, sus visitas al veterinario, sus paseos y sus momentos. Todo queda en un solo lugar, y te sigue a donde vayas.',
+    sinMascotasPorQueCierre: 'Entendido',
     errorHistoria: 'No pudimos cargar su historia',
     errorHistoriaDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Reintentar',
@@ -775,6 +780,11 @@ export const clienteEs = {
     elegirMascota: '¿Para quién es el paseo?',
     // refugios / M0
     refugios: 'Refugios y adopción',
+    sinNadieTitulo: 'Tu hogar todavía no tiene mascotas',
+    sinNadieDetalle: 'Agrega a tu mascota y vas a poder reservar.',
+    sinNadieAccion: 'Agregar a mi mascota',
+    adopcionEntrada: 'Mascotas en adopción',
+    adopcionEntradaDetalle: 'Conoce a los que están esperando una familia.',
     refugiosVacio: 'Todavía no hay refugios publicados',
     refugiosVacioDetalle: 'Cuando un refugio se sume, sus mascotas en adopción van a vivir acá.',
     // próximamente honesto (§8 — sin fechas prometidas)
@@ -3082,6 +3092,9 @@ export const clienteEs = {
     /* 🔴 El bono YA existe: decir solo «no se pudo» dejaría a la familia
        creyendo que perdió la plata. */
     paqueteSinPrimera: 'Compramos tu paquete, pero no pudimos agendar ese día: {{mensaje}} Puedes agendarlo desde Guardería.',
+    especieNoAdmitida: 'Este plan es para {{especies}}. {{nombre}} no puede tomarlo.',
+    mascotaNoActiva: 'Esta mascota ya no puede contratar servicios.',
+    esaMascota: 'Esa mascota',
     faltaRequisitos: 'Falta lo que la guardería pide para recibirlo.',
     titulo: 'La guardería',
     franjasTitulo: 'Cuándo pasan y cuándo lo traen',
@@ -3304,6 +3317,7 @@ export const clienteEs = {
     sinHora: 'Todo el día',
     paqueteExito: 'Tu paquete quedó comprado',
     /* ⭐ S108-C · **«autorizado» ya no alcanza: queda ACTIVO y cobrado.** */
+    noPuedeTomarlo: '{{nombre}} no puede tomarlo. Elige otra mascota.',
     mensualExito: 'Tu plan mensual quedó activo',
     /* 🔴 **DOS VARIANTES, Y LA SEGUNDA NO ES UN RESPALDO PEREZOSO.** La fecha
        exacta del próximo cobro la tiene que decir el SERVIDOR: calcularla acá
@@ -3571,5 +3585,14 @@ export const clienteEs = {
     reintentar: 'Probar de nuevo',
     entrada: 'Tus conversaciones',
     abrirHilo: 'Abrir la conversación sobre {{nombre}}',
+  },
+  bifurcacion: {
+    titulo: '¿Tienes una mascota o quieres adoptar?',
+    tengoMascota: 'Tengo una mascota',
+    tengoMascotaDetalle: 'Empieza su historia acá.',
+    tengoMascotaAccion: 'Registrar a mi mascota',
+    quieroAdoptar: 'Quiero adoptar',
+    quieroAdoptarDetalle: 'Conoce a los que están esperando una familia.',
+    quieroAdoptarAccion: 'Ver quiénes esperan',
   },
 } as const;

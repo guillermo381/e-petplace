@@ -1,0 +1,15 @@
+-- REVERSA de 20260907760000 — la compuerta del acta exige vigente. ESCRITA ANTES.
+-- S112-A · adenda 8 punto 0.
+--
+-- QUÉ DESHACE: re-crea traspasar_mascota_a_familia con el predicado anterior
+--   IF NOT EXISTS (SELECT 1 FROM adopcion_documentos
+--                   WHERE codigo = p_acta_codigo AND version = p_acta_version)
+--
+-- 🔴 QUÉ NO DESHACE, y por qué revertirla es peor de lo que parece:
+--   revertir REABRE la puerta a un acta JUBILADA. El daño no es que falle:
+--   es que un traspaso quedaría registrado contra un texto que la casa ya
+--   retiró, y esa acta es la prueba de qué firmó la familia. **Un acta que
+--   abre la puerta después de jubilada produce una firma inauditable.**
+--
+--   No toca datos: ningún traspaso ocurrió (0 publicaciones, 0 solicitudes,
+--   medido antes de aplicar).
