@@ -44,18 +44,18 @@
  *   probatorio, no algo que la persona que acepta tenga que evaluar.
  */
 
-import { useCallback, useRef, useState } from 'react';
-import { Platform, ScrollView, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Platform, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
+  DocumentoLegalLectura,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   MarcaDeAgua,
-  Texto,
   spacing,
   useAviso,
   useTheme,
@@ -81,10 +81,6 @@ type Estado =
   | { fase: 'codigoInvalido' }
   | { fase: 'listo'; doc: DocumentoVigente };
 
-/** Cuánto falta para el fondo para darlo por leído. Un umbral y no `=== 0`:
- *  el scroll de RN no siempre aterriza exacto en el final. */
-const MARGEN_FONDO = 24;
-
 export default function LecturaDeDocumento() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -92,9 +88,8 @@ export default function LecturaDeDocumento() {
   const aviso = useAviso();
   const params = useLocalSearchParams<{ codigo?: string; volverA?: string }>();
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
-  const [llegoAlFinal, setLlegoAlFinal] = useState(false);
+  const [vioTodo, setVioTodo] = useState(false);
   const [aceptando, setAceptando] = useState(false);
-  const yaMidio = useRef(false);
 
   const codigo = ACEPTABLES.includes(params.codigo as CodigoAceptable)
     ? (params.codigo as CodigoAceptable)
@@ -121,42 +116,29 @@ export default function LecturaDeDocumento() {
   );
 
   /**
-   * ¿LLEGÓ AL FINAL?
+   * ⏪ **ACÁ VIVÍA LA MECÁNICA DE «VIO TODO», ESCRITA A MANO**, y muere en el
+   * mismo acto en que se monta la pieza que la lleva adentro (Ley 37; el
+   * precedente es `D-645`: *una promoción NO es una migración* — dejar la copia
+   * viva al lado de la pieza es cómo `aceptacion-terminos.tsx` sobrevivió
+   * sesiones enteras junto a `AceptacionDeDocumentos`, y nada la señalaba).
    *
-   * 🔴 **EL CASO QUE ROMPE ESTA PANTALLA SI NADIE LO PIENSA: un documento CORTO
-   * que entra entero en la pantalla NO GENERA SCROLL**, así que `onScroll` no
-   * dispara nunca y el botón queda apagado **para siempre**. *La persona ve el
-   * texto completo delante de los ojos y un botón que le dice que lo lea.*
+   * ✅ **B llegó al mismo defecto por su cuenta y con el mismo número (1 711).**
+   * *Dos mediciones independientes sobre el mismo objeto es lo más cerca que
+   * estamos de estar seguros.* Y su pieza lo construye mejor de lo que yo lo
+   * tenía: la cuenta vive en su propio módulo (`vio-todo.ts`) **como PREDICADO
+   * sobre la geometría de ahora, no como evento**, con gate propio
+   * (`verify:vio-todo`) probado en rojo. El texto corto deja de ser una rama
+   * especial: es la misma cuenta dando verdadero en el primer layout, con
+   * desplazamiento 0.
    *
-   * Por eso se mide en `onLayout` del contenido: si el contenido **cabe**, está
-   * leído. La condición real no es «scrolleó», es **«vio todo»** — y con un
-   * texto corto las dos cosas se separan.
-   *
-   * ✅ **Y el caso corto es REAL, no hipotético** (medido por A sobre los textos
-   * cargados): `terminos_refugio` tiene **12 324** caracteres —ahí scroll y
-   * lectura coinciden— pero **`condiciones_adopcion` tiene 1 711**, que en una
-   * pantalla grande entra sin scrollear. *El documento que esta pantalla sirve
-   * hoy es justamente el que habría dejado el botón muerto.*
+   * 🔴 **Y su nombre importa más que su código: la pieza NO prueba que leyó —
+   * prueba que PUDO VER.** Es la única vara que un teléfono puede medir, y por
+   * eso esta pantalla no dice más fuerte de lo que la pieza sostiene (§5.12: no
+   * se inventa evidencia).
    */
-  const alMedirContenido = useCallback((_w: number, h: number) => {
-    yaMidio.current = true;
-    setAlto((a) => ({ ...a, contenido: h }));
-  }, []);
-  const [alto, setAlto] = useState<{ visor: number; contenido: number }>({ visor: 0, contenido: 0 });
-
-  const alScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
-    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - MARGEN_FONDO) {
-      setLlegoAlFinal(true);
-    }
-  }, []);
-
-  /* El documento que cabe entero se da por leído sin scrollear. */
-  const cabeEntero = yaMidio.current && alto.visor > 0 && alto.contenido <= alto.visor;
-  const puedeAceptar = llegoAlFinal || cabeEntero;
 
   async function aceptar() {
-    if (estado.fase !== 'listo' || codigo === null || aceptando || !puedeAceptar) return;
+    if (estado.fase !== 'listo' || codigo === null || aceptando || !vioTodo) return;
     setAceptando(true);
     const r = await aceptarDocumentoAdopcion({
       codigo,
@@ -224,42 +206,26 @@ export default function LecturaDeDocumento() {
           />
         </View>
       ) : (
-        <>
-          <ScrollView
-            style={{ flex: 1 }}
-            onLayout={(e) => setAlto((a) => ({ ...a, visor: e.nativeEvent.layout.height }))}
-            onContentSizeChange={alMedirContenido}
-            onScroll={alScroll}
-            scrollEventThrottle={16}
-            contentContainerStyle={{ padding: spacing[5], gap: spacing[3] }}
-          >
-            {/* EL TEXTO ENTERO, EN LA LETRA DE LA CASA. `Texto variante="cuerpo"`
-                y no un WebView: *el founder pidió la letra de la casa, y en un
-                WebView el texto deja de tenerla y «llegué al final» deja de ser
-                medible.* Por eso el contrato devuelve `contenido`, no una url. */}
-            <Texto variante="cuerpo">{estado.doc.contenido}</Texto>
-          </ScrollView>
-
-          <View
-            style={{
-              padding: spacing[5],
-              paddingBottom: insets.bottom + spacing[4],
-              gap: spacing[2],
-            }}
-          >
+        <DocumentoLegalLectura
+          texto={estado.doc.contenido}
+          onVioTodo={() => setVioTodo(true)}
+          /* 🔴 EL PIE VA COMO CONTROL SUELTO, JAMÁS envuelto en un `View` propio:
+             es la trampa documentada de `PantallaConPie` — un `View` intermedio
+             captura el gesto en todo su rectángulo y reabre la zona muerta. */
+          pie={
             <Boton
               variante="primario"
               bloque
               etiqueta={t('legales.aceptar')}
-              deshabilitado={!puedeAceptar}
-              /* La razón se DIBUJA (D-999, cura de B): sin ella el botón sería
-                 una pared muda justo donde la persona no sabe qué le falta. */
+              deshabilitado={!vioTodo}
+              /* La razón se DIBUJA (D-999): sin ella el botón sería una pared
+                 muda justo donde la persona no sabe qué le falta. */
               razonDeshabilitado={t('legales.razonFaltaLeer')}
               cargando={aceptando}
               onPress={() => void aceptar()}
             />
-          </View>
-        </>
+          }
+        />
       )}
     </View>
   );

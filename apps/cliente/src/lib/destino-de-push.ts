@@ -33,19 +33,37 @@
  * ── SU CONDICIÓN DE CRECIMIENTO, para que no se vuelva un freno ─────────
  * **Un aviso nuevo con destino agrega su prefijo acá, en la app que lo recibe.**
  *
- * 🔴 **LO QUE ESTA LISTA DEJA AFUERA HOY, DICHO CON NOMBRE: GUARDERÍA.**
- * `/guarderia/<estadiaId>` **es una ruta real de esta app** y sin embargo no
- * está acá — porque **ningún aviso de guardería emite `ruta`** (los 0 de 352 de
- * D son de TODO el producto, no sólo de adopción). *Poner un prefijo «por las
- * dudas» sería declarar un contrato que nadie firmó, y el día que guardería
- * emita su ruta nadie sabría si el prefijo lo puso su contrato o mi prudencia.*
- * ⇒ **El día que guardería (o cualquier otro vertical) le ponga `ruta` a un
- * aviso, agrega su prefijo acá en el mismo acto.** Si no lo hace, el aviso llega
- * y no navega — y el log lo dice, que es cómo se descubre en una tarde en vez
- * de en un reporte de campo.
- * Si el motor manda una ruta que no está en la lista, **no se navega y se dice
- * en el log** — que es lo que se quiere: *una ruta descartada deja rastro; una
- * pantalla en blanco no deja ninguno.*
+ * 🔴 **ESTA NOTA DECÍA QUE GUARDERÍA QUEDABA AFUERA, Y ERA UN DEFECTO REAL QUE
+ * CASI VIAJA.** Decía: *«`/guarderia/<estadiaId>` es ruta viva y sin embargo no
+ * está acá, porque ningún aviso de guardería emite `ruta`»*. **Falso.**
+ * `_guarderia_aplicar_acto` emite esa ruta **en código vivo**, y su productor es
+ * anterior a los de adopción. Antes de este archivo el cliente navegaba a
+ * cualquier ruta, así que ese aviso habría funcionado; **con mi lista sin el
+ * prefijo, habría dejado de funcionar el día que alguien lo tocara** — una
+ * regresión que sólo se descubre tocando una push.
+ *
+ * ⚠️ **Y el error de razonamiento importa más que el prefijo que faltaba, porque
+ * es reusable:** el número que lo produjo (`0 intenciones con la clave `ruta`,
+ * sobre 352`) es una medición del EFECTO, y se leyó como un hecho sobre la
+ * CAUSA. *«Ningún productor CORRIÓ y emitió una» no es «ningún productor emite
+ * una».* Un censo de productores se hace sobre los PRODUCTORES. El de verdad,
+ * hecho después por D con dos controles (`_voz_notificacion` excluido a mano por
+ * mencionar rutas sin emitirlas · cero escritores de `notificacion_intencion`
+ * fuera del motor ⇒ el censo CIERRA, no acota), da exactamente dos: guardería y
+ * los cinco de adopción.
+ *
+ * ⚠️ **EL RESIDUO QUE ESTE PREFIJO NO CIERRA, declarado en vez de disimulado:**
+ * `/guarderia/` acepta también `/guarderia/dia` y `/guarderia/taller`, que son
+ * **pantallas del PORTAL**. Hoy no llegan —ningún aviso del portal lleva ruta— y
+ * el único productor de este prefijo emite un uuid de estadía. *No se cierra con
+ * una lista negra adentro de la lista blanca ni adivinando la forma de un uuid:
+ * si esas rutas llegaran al cliente, el defecto sería del motor mandándole un
+ * aviso a quien no es su destinatario, y ese guard no vive acá.* Se declara para
+ * que quien lo encuentre sepa que se miró y se decidió, no que se pasó por alto.
+ *
+ * ⇒ **El día que un vertical nuevo le ponga `ruta` a un aviso, agrega su prefijo
+ * acá en el mismo acto.** Si no, el aviso llega, no navega, y queda en el log —
+ * que es cómo se descubre en una tarde y no en un reporte de campo.
  */
 
 /**
@@ -57,6 +75,13 @@
  * la puerta de `/adoptar/solicitud` — y son dos pantallas distintas.*
  */
 export const DESTINOS_DE_PUSH: readonly string[] = [
+  /* GUARDERÍA — su productor es ANTERIOR a los de adopción y está vivo:
+     `_guarderia_aplicar_acto` emite `'/guarderia/' || p_estadia_id` en el cuerpo
+     de la función, no en un comentario (D lo verificó con `L-170` en la mano).
+     Su nota decía *«se deja la ruta AQUÍ para que el día que la app monte su
+     listener no haya que tocar el motor»* — **ese día es hoy.** */
+  '/guarderia/',
+  /* ADOPCIÓN — `S112-D-para-C-ADDENDUM-AVISOS-Y-RUTAS` §2. */
   '/adoptar/solicitud/',
   '/adoptar/solicitudes',
   '/hogar/mascota/',

@@ -33,19 +33,21 @@
  * ── SU CONDICIÓN DE CRECIMIENTO, para que no se vuelva un freno ─────────
  * **Un aviso nuevo con destino agrega su prefijo acá, en la app que lo recibe.**
  *
- * 🔴 **LO QUE ESTA LISTA DEJA AFUERA HOY, DICHO CON NOMBRE: GUARDERÍA.**
- * `/guarderia/<estadiaId>` **es una ruta real de esta app** y sin embargo no
- * está acá — porque **ningún aviso de guardería emite `ruta`** (los 0 de 352 de
- * D son de TODO el producto, no sólo de adopción). *Poner un prefijo «por las
- * dudas» sería declarar un contrato que nadie firmó, y el día que guardería
- * emita su ruta nadie sabría si el prefijo lo puso su contrato o mi prudencia.*
- * ⇒ **El día que guardería (o cualquier otro vertical) le ponga `ruta` a un
- * aviso, agrega su prefijo acá en el mismo acto.** Si no lo hace, el aviso llega
- * y no navega — y el log lo dice, que es cómo se descubre en una tarde en vez
- * de en un reporte de campo.
- * Si el motor manda una ruta que no está en la lista, **no se navega y se dice
- * en el log** — que es lo que se quiere: *una ruta descartada deja rastro; una
- * pantalla en blanco no deja ninguno.*
+ * 🔴 **GUARDERÍA NO ENTRA ACÁ, Y ESTA VEZ ESTÁ MEDIDO.** `/guarderia/<estadiaId>`
+ * lo emite `_guarderia_aplicar_acto` **para el cliente**: es la estadía como la
+ * ve la familia. El portal tiene `/guarderia/dia` y `/guarderia/taller`, que son
+ * otras pantallas — *el mismo primer segmento en las dos apps, llevando a
+ * lugares distintos, que es exactamente por lo que esta lista existe y por lo
+ * que mirar el primer segmento no alcanza.*
+ *
+ * ⚠️ La versión de este archivo en el cliente cuenta el error que casi viaja:
+ * yo había dejado guardería afuera **de las dos** apoyándome en un `0` que medía
+ * el EFECTO (*ninguna intención con la clave*) y lo leí como un hecho sobre la
+ * CAUSA (*ningún productor la emite*). Acá el resultado es el mismo por una
+ * razón distinta —esta app no es su destinataria—, y por eso la línea se queda.
+ *
+ * ⇒ **El día que un aviso del PORTAL lleve ruta, agrega su prefijo acá en el
+ * mismo acto.** Si no, llega, no navega, y queda en el log.
  */
 
 /**
