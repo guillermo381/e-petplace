@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       _test_resultado_d242: {
@@ -395,6 +370,48 @@ export type Database = {
         }
         Relationships: []
       }
+      adopcion_foto: {
+        Row: {
+          id: string
+          orden: number
+          path: string
+          publicacion_id: string
+          subida_en: string
+          subida_por: string | null
+        }
+        Insert: {
+          id?: string
+          orden: number
+          path: string
+          publicacion_id: string
+          subida_en?: string
+          subida_por?: string | null
+        }
+        Update: {
+          id?: string
+          orden?: number
+          path?: string
+          publicacion_id?: string
+          subida_en?: string
+          subida_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_foto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_publicacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_foto_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicacion_id"]
+          },
+        ]
+      }
       adopcion_mensaje: {
         Row: {
           automatica: boolean
@@ -432,45 +449,110 @@ export type Database = {
       }
       adopcion_publicacion: {
         Row: {
+          actualizada_en: string
+          bono_destino: string | null
+          bono_monto: number | null
+          ciudad_id: string | null
+          convive_gatos: string
+          convive_ninos: string
+          convive_perros: string
           country_code: string
           creada_en: string
           cuenta_comercial_id: string
+          desparasitado: string | null
           estado: string
+          estado_vacunal: string | null
+          fecha_cesion: string | null
+          historia: string | null
           id: string
+          ingresado_en: string
           mascota_id: string
           motivo_retiro: string | null
+          origen_rescate: string | null
+          pareja_id: string | null
           publicada_por: string | null
           retirada_en: string | null
+          senas: string | null
+          urgente: boolean
+          zona: string | null
         }
         Insert: {
+          actualizada_en?: string
+          bono_destino?: string | null
+          bono_monto?: number | null
+          ciudad_id?: string | null
+          convive_gatos?: string
+          convive_ninos?: string
+          convive_perros?: string
           country_code: string
           creada_en?: string
           cuenta_comercial_id: string
+          desparasitado?: string | null
           estado?: string
+          estado_vacunal?: string | null
+          fecha_cesion?: string | null
+          historia?: string | null
           id?: string
+          ingresado_en: string
           mascota_id: string
           motivo_retiro?: string | null
+          origen_rescate?: string | null
+          pareja_id?: string | null
           publicada_por?: string | null
           retirada_en?: string | null
+          senas?: string | null
+          urgente?: boolean
+          zona?: string | null
         }
         Update: {
+          actualizada_en?: string
+          bono_destino?: string | null
+          bono_monto?: number | null
+          ciudad_id?: string | null
+          convive_gatos?: string
+          convive_ninos?: string
+          convive_perros?: string
           country_code?: string
           creada_en?: string
           cuenta_comercial_id?: string
+          desparasitado?: string | null
           estado?: string
+          estado_vacunal?: string | null
+          fecha_cesion?: string | null
+          historia?: string | null
           id?: string
+          ingresado_en?: string
           mascota_id?: string
           motivo_retiro?: string | null
+          origen_rescate?: string | null
+          pareja_id?: string | null
           publicada_por?: string | null
           retirada_en?: string | null
+          senas?: string | null
+          urgente?: boolean
+          zona?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "adopcion_publicacion_ciudad_id_fkey"
+            columns: ["ciudad_id"]
+            isOneToOne: false
+            referencedRelation: "cat_ciudades"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "adopcion_publicacion_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "adopcion_publicacion_cuenta_comercial_id_fkey"
@@ -485,6 +567,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mascotas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_pareja_id_fkey"
+            columns: ["pareja_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_publicacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_pareja_id_fkey"
+            columns: ["pareja_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicacion_id"]
           },
         ]
       }
@@ -609,6 +705,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "adopcion_publicacion"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_solicitud_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicacion_id"]
           },
         ]
       }
@@ -1373,6 +1476,13 @@ export type Database = {
             foreignKeyName: "caso_clinico_cuenta_comercial_tratante_id_fkey"
             columns: ["cuenta_comercial_tratante_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "caso_clinico_cuenta_comercial_tratante_id_fkey"
+            columns: ["cuenta_comercial_tratante_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -1446,6 +1556,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "caso_clinico_consultor_cuenta_comercial_consultor_id_fkey"
+            columns: ["cuenta_comercial_consultor_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "caso_clinico_consultor_cuenta_comercial_consultor_id_fkey"
@@ -3615,6 +3732,13 @@ export type Database = {
             foreignKeyName: "cliente_pendiente_registro_creado_por_cuenta_comercial_id_fkey"
             columns: ["creado_por_cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "cliente_pendiente_registro_creado_por_cuenta_comercial_id_fkey"
+            columns: ["creado_por_cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -4579,6 +4703,13 @@ export type Database = {
             foreignKeyName: "criaderos_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "criaderos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -4670,6 +4801,13 @@ export type Database = {
             foreignKeyName: "cuenta_comercial_documentos_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "cuenta_comercial_documentos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -4701,6 +4839,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cuenta_onboarding_salto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "cuenta_onboarding_salto_cuenta_comercial_id_fkey"
@@ -4758,6 +4903,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cuenta_roles_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "cuenta_roles_cuenta_comercial_id_fkey"
@@ -5616,6 +5768,13 @@ export type Database = {
             foreignKeyName: "entrega_turnos_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "entrega_turnos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -5780,6 +5939,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "envios_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "envios_cuenta_comercial_id_fkey"
@@ -6684,6 +6850,13 @@ export type Database = {
             foreignKeyName: "evento_caso_clinico_abierto_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_abierto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -6758,6 +6931,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_cerrado_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "evento_caso_clinico_cerrado_cuenta_comercial_id_fkey"
@@ -6838,6 +7018,13 @@ export type Database = {
             foreignKeyName: "evento_caso_clinico_transferid_cuenta_comercial_destino_id_fkey"
             columns: ["cuenta_comercial_destino_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferid_cuenta_comercial_destino_id_fkey"
+            columns: ["cuenta_comercial_destino_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -6854,6 +7041,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferido_cuenta_comercial_origen_id_fkey"
+            columns: ["cuenta_comercial_origen_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "evento_caso_clinico_transferido_cuenta_comercial_origen_id_fkey"
@@ -9832,6 +10026,13 @@ export type Database = {
             foreignKeyName: "eventos_economicos_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "eventos_economicos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -9994,6 +10195,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_mascota_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "eventos_mascota_cuenta_comercial_id_fkey"
@@ -10465,6 +10673,13 @@ export type Database = {
             foreignKeyName: "facturas_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "facturas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -10556,6 +10771,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "familia_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "familia_cuenta_comercial_id_fkey"
@@ -10751,6 +10973,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_configs_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "fee_configs_cuenta_comercial_id_fkey"
@@ -12208,6 +12437,13 @@ export type Database = {
             foreignKeyName: "liquidaciones_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "liquidaciones_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -12618,6 +12854,13 @@ export type Database = {
             foreignKeyName: "mascota_acceso_prestador_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "mascota_acceso_prestador_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -12925,6 +13168,7 @@ export type Database = {
           estado_adopcion: string
           estado_vida: string
           estado_vida_desde: string
+          esterilizado: boolean | null
           familia_id: string
           fecha_alta: string
           fecha_montaje: string | null
@@ -12943,6 +13187,7 @@ export type Database = {
           pet_hash: string
           raza: string | null
           refugio_id: string | null
+          remetfu: string | null
           sexo: string | null
           sujeto: string
           talla: string | null
@@ -12958,6 +13203,7 @@ export type Database = {
           estado_adopcion?: string
           estado_vida?: string
           estado_vida_desde?: string
+          esterilizado?: boolean | null
           familia_id: string
           fecha_alta?: string
           fecha_montaje?: string | null
@@ -12976,6 +13222,7 @@ export type Database = {
           pet_hash?: string
           raza?: string | null
           refugio_id?: string | null
+          remetfu?: string | null
           sexo?: string | null
           sujeto?: string
           talla?: string | null
@@ -12991,6 +13238,7 @@ export type Database = {
           estado_adopcion?: string
           estado_vida?: string
           estado_vida_desde?: string
+          esterilizado?: boolean | null
           familia_id?: string
           fecha_alta?: string
           fecha_montaje?: string | null
@@ -13009,6 +13257,7 @@ export type Database = {
           pet_hash?: string
           raza?: string | null
           refugio_id?: string | null
+          remetfu?: string | null
           sexo?: string | null
           sujeto?: string
           talla?: string | null
@@ -13719,6 +13968,13 @@ export type Database = {
             foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -14241,6 +14497,13 @@ export type Database = {
             foreignKeyName: "pedido_item_destinos_refugio_cuenta_comercial_id_fkey"
             columns: ["refugio_cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "pedido_item_destinos_refugio_cuenta_comercial_id_fkey"
+            columns: ["refugio_cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -14326,6 +14589,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedido_items_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "pedido_items_cuenta_comercial_id_fkey"
@@ -14595,6 +14865,13 @@ export type Database = {
             foreignKeyName: "pedidos_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "pedidos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -14712,6 +14989,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_recurrencias_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "pedidos_recurrencias_cuenta_comercial_id_fkey"
@@ -15018,6 +15302,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_atencion_log_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "prestador_atencion_log_cuenta_comercial_id_fkey"
@@ -16071,6 +16362,13 @@ export type Database = {
             foreignKeyName: "prestadores_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "prestadores_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -16165,6 +16463,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "presupuesto_cuenta_comercial_id_fkey"
@@ -17185,6 +17490,13 @@ export type Database = {
             foreignKeyName: "recursos_reparto_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "recursos_reparto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -17410,6 +17722,13 @@ export type Database = {
             foreignKeyName: "refugios_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "refugios_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -17489,6 +17808,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reglas_envio_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "reglas_envio_cuenta_comercial_id_fkey"
@@ -17613,6 +17939,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repartidores_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "repartidores_cuenta_comercial_id_fkey"
@@ -18293,6 +18626,13 @@ export type Database = {
             foreignKeyName: "seller_perfil_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "seller_perfil_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -18543,6 +18883,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitud_autorizacion_mostrador_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "solicitud_autorizacion_mostrador_cuenta_comercial_id_fkey"
@@ -19889,6 +20236,13 @@ export type Database = {
             foreignKeyName: "vendedor_bodegas_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "vendedor_bodegas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -19972,6 +20326,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendedor_skus_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "vendedor_skus_cuenta_comercial_id_fkey"
@@ -20176,6 +20537,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ventas_mostrador_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "ventas_mostrador_cuenta_comercial_id_fkey"
@@ -20684,6 +21052,83 @@ export type Database = {
       }
     }
     Views: {
+      v_adoptables_publicos: {
+        Row: {
+          bono_destino: string | null
+          bono_monto: number | null
+          ciudad_id: string | null
+          ciudad_nombre: string | null
+          convive_gatos: string | null
+          convive_ninos: string | null
+          convive_perros: string | null
+          country_code: string | null
+          creada_en: string | null
+          desparasitado: string | null
+          especie: string | null
+          espera_dias: number | null
+          estado_vacunal: string | null
+          esterilizado: boolean | null
+          fecha_cesion: string | null
+          fecha_nacimiento: string | null
+          fecha_nacimiento_precision: string | null
+          foto_url: string | null
+          historia: string | null
+          ingresado_en: string | null
+          mascota_id: string | null
+          nombre: string | null
+          origen_rescate: string | null
+          pareja_id: string | null
+          publicacion_id: string | null
+          publicador_foto: string | null
+          publicador_id: string | null
+          publicador_nombre: string | null
+          raza: string | null
+          senas: string | null
+          sexo: string | null
+          talla: string | null
+          tiene_microchip: boolean | null
+          tiene_remetfu: boolean | null
+          urgente: boolean | null
+          zona: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_publicacion_ciudad_id_fkey"
+            columns: ["ciudad_id"]
+            isOneToOne: false
+            referencedRelation: "cat_ciudades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_pareja_id_fkey"
+            columns: ["pareja_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_publicacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_publicacion_pareja_id_fkey"
+            columns: ["pareja_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicacion_id"]
+          },
+          {
+            foreignKeyName: "mascotas_especie_fk"
+            columns: ["especie"]
+            isOneToOne: false
+            referencedRelation: "cat_especies"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       v_conversion_funnel: {
         Row: {
           carritos: number | null
@@ -20893,6 +21338,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_economicos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "eventos_economicos_cuenta_comercial_id_fkey"
@@ -21113,6 +21565,13 @@ export type Database = {
             foreignKeyName: "liquidaciones_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "liquidaciones_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -21226,6 +21685,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "pedidos_cuenta_comercial_id_fkey"
@@ -21406,6 +21872,13 @@ export type Database = {
             foreignKeyName: "vendedor_skus_cuenta_comercial_id_fkey"
             columns: ["cuenta_comercial_id"]
             isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "vendedor_skus_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
             referencedRelation: "v_eventos_resumen_cuenta"
             referencedColumns: ["cuenta_comercial_id"]
           },
@@ -21518,6 +21991,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cuentas_comerciales"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
           },
           {
             foreignKeyName: "ofertas_cuenta_comercial_id_fkey"
@@ -22008,6 +22488,10 @@ export type Database = {
         Args: { p_motivo?: string; p_prestador_id: string; p_veredicto: string }
         Returns: Json
       }
+      actualizar_adoptable: {
+        Args: { p_ficha: Json; p_publicacion_id: string }
+        Returns: Json
+      }
       actualizar_datos_bancarios: {
         Args: {
           p_banco_codigo?: string
@@ -22078,6 +22562,10 @@ export type Database = {
       }
       adjuntar_fotos_producto: {
         Args: { p_imagenes: Json; p_producto_id: string }
+        Returns: Json
+      }
+      agregar_foto_adoptable: {
+        Args: { p_path: string; p_publicacion_id: string }
         Returns: Json
       }
       agregar_incidencia_atencion: {
@@ -22206,6 +22694,7 @@ export type Database = {
       avisar_renovaciones_guarderia: { Args: never; Returns: Json }
       barrer_adopcion_diario: { Args: never; Returns: Json }
       barrer_solicitudes_expiradas: { Args: never; Returns: Json }
+      borrar_foto_adoptable: { Args: { p_foto_id: string }; Returns: Json }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
       buscar_cliente_por_telefono: {
         Args: { p_country_code?: string; p_telefono: string }
@@ -22222,6 +22711,10 @@ export type Database = {
           p_fecha_programada?: string
           p_servicio?: string
         }
+        Returns: Json
+      }
+      cambiar_estado_adoptable: {
+        Args: { p_estado: string; p_motivo?: string; p_publicacion_id: string }
         Returns: Json
       }
       cancelar_cita_suelta: { Args: { p_cita_id: string }; Returns: Json }
@@ -23403,20 +23896,10 @@ export type Database = {
           vigencia_dias: number
         }[]
       }
+      obtener_adoptable: { Args: { p_publicacion_id: string }; Returns: Json }
       obtener_adoptables: {
-        Args: { p_country_code?: string; p_especie?: string; p_limite?: number }
-        Returns: {
-          creada_en: string
-          especie: string
-          fecha_nacimiento: string
-          foto_url: string
-          mascota_id: string
-          nombre: string
-          publicacion_id: string
-          publicador_nombre: string
-          raza: string
-          sexo: string
-        }[]
+        Args: { p_cursor?: string; p_filtros?: Json; p_limite?: number }
+        Returns: Json
       }
       obtener_alertas_activas_mascota_para_familia_servicio: {
         Args: { p_familia_servicio: string; p_mascota_id: string }
@@ -24325,6 +24808,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      otorgar_rol_refugio: {
+        Args: { p_cuenta_comercial_id: string; p_motivo?: string }
+        Returns: Json
+      }
       otorgar_rol_vendedor: {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
@@ -24409,7 +24896,12 @@ export type Database = {
         Returns: string
       }
       publicar_adoptable: {
-        Args: { p_cuenta_comercial_id: string; p_mascota_id: string }
+        Args: {
+          p_cuenta_comercial_id: string
+          p_ficha?: Json
+          p_ingresado_en: string
+          p_mascota_id: string
+        }
         Returns: Json
       }
       publicar_media_guarderia: {
@@ -24803,6 +25295,10 @@ export type Database = {
         Args: { p_periodo: string; p_suscripcion_id: string }
         Returns: Json
       }
+      reordenar_fotos_adoptable: {
+        Args: { p_ids: string[]; p_publicacion_id: string }
+        Returns: Json
+      }
       reordenar_fotos_prestador: {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined
@@ -24918,6 +25414,10 @@ export type Database = {
         Returns: Json
       }
       revocar_invitacion_familia: { Args: { p_id: string }; Returns: undefined }
+      revocar_rol_refugio: {
+        Args: { p_cuenta_comercial_id: string; p_motivo?: string }
+        Returns: Json
+      }
       saltar_cita_plan: {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
         Returns: Json
@@ -25413,9 +25913,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       estado_cuenta_comercial_enum: [
