@@ -398,7 +398,7 @@ export type Database = {
       adopcion_mensaje: {
         Row: {
           automatica: boolean
-          autor_user_id: string
+          autor_user_id: string | null
           creado_en: string
           cuerpo: string
           id: string
@@ -406,7 +406,7 @@ export type Database = {
         }
         Insert: {
           automatica?: boolean
-          autor_user_id: string
+          autor_user_id?: string | null
           creado_en?: string
           cuerpo: string
           id?: string
@@ -414,7 +414,7 @@ export type Database = {
         }
         Update: {
           automatica?: boolean
-          autor_user_id?: string
+          autor_user_id?: string | null
           creado_en?: string
           cuerpo?: string
           id?: string
@@ -570,6 +570,7 @@ export type Database = {
       }
       adopcion_solicitud: {
         Row: {
+          anonimizada_en: string | null
           aviso_silencio_emitido_en: string | null
           cerrada_en: string | null
           country_code: string
@@ -577,9 +578,10 @@ export type Database = {
           estado: string
           id: string
           publicacion_id: string
-          solicitante_user_id: string
+          solicitante_user_id: string | null
         }
         Insert: {
+          anonimizada_en?: string | null
           aviso_silencio_emitido_en?: string | null
           cerrada_en?: string | null
           country_code: string
@@ -587,9 +589,10 @@ export type Database = {
           estado?: string
           id?: string
           publicacion_id: string
-          solicitante_user_id: string
+          solicitante_user_id?: string | null
         }
         Update: {
+          anonimizada_en?: string | null
           aviso_silencio_emitido_en?: string | null
           cerrada_en?: string | null
           country_code?: string
@@ -597,7 +600,7 @@ export type Database = {
           estado?: string
           id?: string
           publicacion_id?: string
-          solicitante_user_id?: string
+          solicitante_user_id?: string | null
         }
         Relationships: [
           {
@@ -3855,6 +3858,7 @@ export type Database = {
           aceptado: boolean | null
           cita_id: string | null
           created_at: string | null
+          documento_sha256: string | null
           id: string
           ip_hash: string | null
           metadata: Json | null
@@ -3866,6 +3870,7 @@ export type Database = {
           aceptado?: boolean | null
           cita_id?: string | null
           created_at?: string | null
+          documento_sha256?: string | null
           id?: string
           ip_hash?: string | null
           metadata?: Json | null
@@ -3877,6 +3882,7 @@ export type Database = {
           aceptado?: boolean | null
           cita_id?: string | null
           created_at?: string | null
+          documento_sha256?: string | null
           id?: string
           ip_hash?: string | null
           metadata?: Json | null
@@ -21924,6 +21930,10 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      _voz_adopcion_sin_respuesta: {
+        Args: { p_mascota_nombre: string; p_user_id: string }
+        Returns: Json
+      }
       _voz_notificacion: {
         Args: {
           p_extra?: Json
@@ -21960,6 +21970,10 @@ export type Database = {
           p_fecha: string
           p_prestador_id: string
         }
+        Returns: Json
+      }
+      aceptar_documento_adopcion: {
+        Args: { p_codigo: string; p_dispositivo?: string; p_ip_hash?: string }
         Returns: Json
       }
       aceptar_documentos_guarderia: {
@@ -22183,12 +22197,14 @@ export type Database = {
         Args: { p_item_id: string; p_mascota_id: string }
         Returns: Json
       }
+      avisar_adopcion_sin_respuesta: { Args: never; Returns: Json }
       avisar_invitacion_familia: {
         Args: { p_invitacion_id: string }
         Returns: string
       }
       avisar_recurrencias_proximas: { Args: never; Returns: Json }
       avisar_renovaciones_guarderia: { Args: never; Returns: Json }
+      barrer_adopcion_diario: { Args: never; Returns: Json }
       barrer_solicitudes_expiradas: { Args: never; Returns: Json }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
       buscar_cliente_por_telefono: {
@@ -23564,6 +23580,7 @@ export type Database = {
           ya_reservado: boolean
         }[]
       }
+      obtener_documento_vigente: { Args: { p_codigo: string }; Returns: Json }
       obtener_documentos_guarderia: {
         Args: never
         Returns: {
@@ -24433,6 +24450,7 @@ export type Database = {
           motivo: string
         }[]
       }
+      purgar_postulaciones_vencidas: { Args: never; Returns: Json }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }
         Returns: Json
@@ -24994,6 +25012,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_tipo_actor: string }
         Returns: Json
       }
+      tengo_aceptado_documento: { Args: { p_codigo: string }; Returns: boolean }
       terminar_atencion_adiestramiento: {
         Args: { p_adiestramiento_id: string }
         Returns: Json

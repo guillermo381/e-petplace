@@ -1,0 +1,21 @@
+-- REVERSA de 20260907820000 — el lector y la aceptación de documentos de adopción.
+-- ESCRITA ANTES. S112-A · adenda 10 punto 3.
+--
+-- QUÉ DESHACE:
+--   drop function if exists public.aceptar_documento_adopcion(text,integer,text,text);
+--   drop function if exists public.tengo_aceptado_documento(text);
+--   drop function if exists public.obtener_documento_vigente(text);
+--   alter table public.consentimientos drop column if exists documento_sha256;
+--   -- y devolver el CHECK de tipo a sus SIETE valores originales.
+--   -- y re-crear crear_solicitud_adopcion SIN la compuerta (cuerpo previo, del objeto).
+--
+-- 🔴 QUÉ NO DESHACE, y hay que leerlo antes de correrla:
+--   · **El CHECK viejo NO se puede reponer si ya existe una aceptación de
+--     adopción.** El ALTER va a fallar, y eso es correcto: significa que hay
+--     evidencia de consentimiento que la reversa dejaría inexpresable.
+--     Control obligatorio antes:
+--       select count(*) from consentimientos
+--        where tipo in ('terminos_refugio','condiciones_adopcion');
+--     Si da > 0, la reversa NO se corre: se decide qué pasa con esas filas.
+--   · Revertir deja a la puerta de postular SIN su compuerta ⇒ vuelve a poderse
+--     postular sin haber aceptado nada. Esa es la razón de existir de la pieza.
