@@ -246,7 +246,19 @@ export default function Adoptar() {
          (firma del founder, 2-sep). `razaSlug: null` porque el lector trae el
          NOMBRE de la raza y no su ruta: **slugificar texto es justo lo que la
          casa prohíbe** — la ruta sale de un LOOKUP contra `cat_razas`. Se cae
-         al genérico de la especie, que es una cara igual. */
+         al genérico de la especie, que es una cara igual.
+
+         ⏳ **INTERINO CON FECHA, y se declara para que no se
+         calcifique.** B entregó el contrato correcto en `90bebbfd`:
+         `fotoDeEspecie` **aparte** de `fotoUrl`. La distinción no es
+         cosmética — la foto propia lleva **encuadre de retrato** (zoom
+         + corrimiento, porque en una foto de mascota la cara queda
+         alta) y la ilustración de la casa **va a sangre**: pasarla por
+         `fotoUrl`, como acá, *le aplica un recorte pensado para otra
+         cosa*. Hoy no puedo consumirlo: ese commit vive en
+         `origin/pista/s112-b` y **no está en `main`** (medido con
+         `branch -r --contains`). **Migra a `fotoDeEspecie` en cuanto
+         A lo mergee.***/
       fotoUrl={caraDeMascota({
         especie: a.especie,
         razaSlug: null,
