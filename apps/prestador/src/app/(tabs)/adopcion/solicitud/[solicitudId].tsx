@@ -212,6 +212,7 @@ export default function HiloDelPublicador() {
                 vozDeclinada={t('portalHilo.estadoDeclinada')}
                 vozDesistida={t('portalHilo.estadoDesistida')}
                 vozNoConcretada={t('portalHilo.estadoNoConcretada')}
+                vozOtraFamilia={t('portalHilo.estadoOtraFamilia')}
               />
             </View>
           </View>

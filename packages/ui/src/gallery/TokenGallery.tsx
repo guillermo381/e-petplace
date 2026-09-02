@@ -5236,6 +5236,7 @@ function GaleriaInterna() {
               ['declinada', 'declinada · corte del PUBLICADOR · desvío NEUTRO, jamás alerta'],
               ['desistida', 'desistida · corte de la FAMILIA · misma forma, otra voz — nadie falló'],
               ['no_concretada_fallecimiento', '⭐ el animal murió · SIN escalera, sin color de status: la noticia y nada más'],
+              ['no_concretada_otra_familia', '⭐ S112-A · lo adoptó OTRA familia · SÍ lleva escalera cortada (hubo proceso, a diferencia del de arriba) · nadie decidió sobre esta persona'],
             ] as const).map(([e, nota]) => (
               <View key={e} style={{ gap: spacing[2] }}>
                 <Texto variante="apoyo">{nota}</Texto>
@@ -5249,6 +5250,7 @@ function GaleriaInterna() {
                   }}
                   vozDeclinada="El refugio eligió otro hogar"
                   vozDesistida="Cancelaste tu postulación"
+                  vozOtraFamilia="Ya encontró familia. Gracias por querer darle un hogar."
                   vozNoConcretada="Nube falleció. Tu postulación no va a poder continuar. Lamentamos mucho darte esta noticia."
                 />
               </View>

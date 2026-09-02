@@ -4451,6 +4451,10 @@ export const prestadorEs = {
     // Sin nombre de animal: el portal ya lo tiene arriba, y repetirlo en una
     // noticia de muerte suena a formulario.
     estadoNoConcretada: 'Falleció antes de la entrega.',
+    /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) · voz del PUBLICADOR: él sabe
+       que la entregó. No es «ya encontró familia», que es lo que se le dice
+       a quien postuló — la misma fila, dos asientos, dos frases. */
+    estadoOtraFamilia: 'Se entregó a otra familia.',
     verActa: 'Ver el acta de adopción',
     titulo: 'La solicitud',
     alguienSinNombre: 'Alguien de la comunidad',

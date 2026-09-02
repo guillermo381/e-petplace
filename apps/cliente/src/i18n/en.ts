@@ -2653,6 +2653,8 @@ export const clienteEn = {
   hiloAdopcion: {
     estado_desistida: 'You withdrew your application',
     estado_no_concretada: "{{nombre}} passed away. We're very sorry.",
+    /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) — sin duelo y SIN invitar a otro animal. */
+    estado_otra_familia: "{{nombre}} found a family. Thank you for wanting to give them a home.",
     verActa: 'See the adoption agreement',
     titulo: 'Your request',
     de: 'From {{refugio}}',

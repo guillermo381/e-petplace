@@ -181,6 +181,7 @@ export default function MisSolicitudes() {
                     vozDeclinada={t('hiloAdopcion.estado_declinada')}
                   vozDesistida={t('hiloAdopcion.estado_desistida')}
                   vozNoConcretada={t('hiloAdopcion.estado_no_concretada', { nombre: s.mascotaNombre })}
+                  vozOtraFamilia={t('hiloAdopcion.estado_otra_familia', { nombre: s.mascotaNombre })}
                   />
                 </View>
               </Tarjeta>
