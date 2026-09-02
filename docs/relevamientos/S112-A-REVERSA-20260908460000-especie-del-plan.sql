@@ -1,0 +1,6 @@
+-- REVERSA de 20260908460000 · el lector deja de decir qué especies admite el plan.
+-- ⚠️ Revertirlo NO pierde datos, pero la pantalla vuelve a no poder explicar
+-- por qué un plan no aplica — y la salida que le queda es escribir la lista
+-- perro/gato EN LA PANTALLA, que es la regla de producto migrando a la UI.
+-- L-119: se re-crea con DROP porque cambia el TABLE de retorno.
+-- (El cuerpo previo es el de 20260908440000; ver esa migración.)

@@ -283,6 +283,24 @@ export interface PlanGuarderia {
    * midió en la foto del durante de guardería.
    */
   mascotaFotoUrl: string | null;
+  /**
+   * Las especies que admite el comprable, **leídas del catálogo**, no escritas
+   * acá. `null` = sin recorte. Hoy: `['perro','gato']`.
+   */
+  especiesElegibles: string[] | null;
+  /**
+   * ⚠️ **SÓLO LA ESPECIE. NO es la elegibilidad completa.**
+   *
+   * El guard real del motor tiene DOS cláusulas: la especie **y**
+   * `estado_vida = 'activa'` (`D-658`). Este campo contesta la primera y nada
+   * más. *Si dijera las dos, la pantalla escribiría «este plan es para perros
+   * y gatos» sobre un perro en memorial — una frase verdadera en general y
+   * falsa sobre ese animal.*
+   *
+   * `null` cuando el mandato no tiene mascota: **no hay pregunta que
+   * contestar**, y eso no es lo mismo que `false`.
+   */
+  especieAplica: boolean | null;
   precioMensual: number;
   estado: 'activa' | 'pausada' | 'cancelada' | 'vencida';
   /** 'YYYY-MM-DD' */
@@ -345,6 +363,10 @@ export async function obtenerMisPlanesGuarderia(): Promise<
       precioMensual: r.precio_mensual,
       mascotaNombre: typeof r.mascota_nombre === 'string' ? r.mascota_nombre : null,
       mascotaEspecie: typeof r.mascota_especie === 'string' ? r.mascota_especie : null,
+      especiesElegibles: Array.isArray(r.especies_elegibles)
+        ? (r.especies_elegibles as unknown[]).filter((e): e is string => typeof e === 'string')
+        : null,
+      especieAplica: typeof r.especie_aplica === 'boolean' ? r.especie_aplica : null,
       mascotaFotoUrl: typeof r.mascota_foto_url === 'string' ? r.mascota_foto_url : null,
       estado: r.estado as PlanGuarderia['estado'],
       periodoDesde: typeof r.periodo_desde === 'string' ? r.periodo_desde : null,
