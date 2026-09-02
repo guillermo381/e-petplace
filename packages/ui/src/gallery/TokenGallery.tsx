@@ -5588,6 +5588,7 @@ function GaleriaInterna() {
             }}
           >
             <VitrinaRefugio
+              vozSinPagina="Este refugio todavía no armó su página."
               nombre="Refugio Patitas del Sur"
               ciudad="Quito"
               historia="Rescatamos desde 2019. Hoy cuidamos a 34 animales mientras esperan su casa."
@@ -5597,6 +5598,33 @@ function GaleriaInterna() {
                 onExplicar: () => {},
                 etiquetaExplicacion: 'Qué se va a poder hacer',
               }}
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ VitrinaRefugio SIN PÁGINA — el caso que evita el cascarón">
+          {/* 🔴 QUÉ HAY QUE VER: que DICE que no hay página, en vez de
+              dibujar una pantalla en blanco con un nombre — que es
+              indistinguible de un fallo de red (Ley 13).
+              El caso es REAL y está medido: `uq_prestadores_user_id` es 1
+              humano = 1 prestador, así que una clínica que además rescata no
+              puede tener fila de refugio. Y un refugio recién verificado
+              todavía no cargó nada.
+              ⚠️ El nombre NO cuenta como «tener página»: lo tiene por
+              existir, no por haber armado algo. */}
+          <View
+            style={{
+              height: 220,
+              borderRadius: radius.lg,
+              overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.08)',
+            }}
+          >
+            <VitrinaRefugio
+              nombre="Refugio Los Andes"
+              vozSinPagina="Este refugio todavía no armó su página."
+              descripcionSinPagina="Podés ver sus animales igual."
             />
           </View>
         </Seccion>
