@@ -1,0 +1,3 @@
+-- REVERSA de 20260908820000 · `obtener_mi_prestador` deja de devolver la zona.
+-- La app vuelve al default de la casa (correcto hoy, equivocado con el primer
+-- prestador fuera de Ecuador). El cuerpo previo, de pg_get_functiondef.

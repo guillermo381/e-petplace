@@ -1650,6 +1650,8 @@ export interface VitrinaRefugioGuardada {
   cuentaComercialId: string;
   /** `true` si la fila del prestador nació en esta llamada. */
   creada: boolean;
+  /** `true` si hay portada cargada. La vitrina se ve pobre sin ella. */
+  tienePortada: boolean;
   /**
    * 🔴 `true` **sólo si hay historia**. El nombre y el logo NO cuentan: los
    * tiene por existir; *la vitrina es lo que el refugio ARMÓ.* Es el mismo
@@ -1675,7 +1677,12 @@ export async function poblarVitrinaRefugio(campos: {
   historia?: string;
   ciudad?: string;
   zona?: string;
+  /** RUTA devuelta por `subirImagenVitrinaRefugio('logo', …)`. */
   logoUrl?: string;
+  /* ☠️ S112-A · aquí iba `portadaUrl`, y murió el mismo día. La portada vive
+     en `prestador_fotos` con **su propia puerta** —la misma que las fotos del
+     animal— y C lo midió antes de consumirlo: *un parámetro que duplica una
+     puerta existente no agrega un camino, agrega una segunda verdad.* */
 }): Promise<ResultadoWrapper<VitrinaRefugioGuardada, CodigoErrorAdopcion>> {
   const { data, error } = await getClient().rpc('poblar_vitrina_refugio', {
     p_historia: campos.historia ?? undefined,
@@ -1696,6 +1703,7 @@ export async function poblarVitrinaRefugio(campos: {
       cuentaComercialId: r.cuenta_comercial_id,
       creada: r.creada === true,
       tienePagina: r.tiene_pagina === true,
+      tienePortada: r.tiene_portada === true,
     },
   };
 }
@@ -1810,4 +1818,39 @@ export async function definirRespuestaAutomaticaRefugio(
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
   return { ok: true, data: { activa: (data as Record<string, unknown>).activa === true } };
+}
+
+
+/**
+ * Sube la portada o el logo de la vitrina del refugio.
+ *
+ * 🔴 **El `path` lo arma ESTE wrapper, jamás la pantalla** — mismo criterio
+ * que `subirFotoAdoptable`. *Si la pantalla eligiera el path, la policy sería
+ * lo único entre una carpeta ajena y un archivo, y una policy es una defensa,
+ * no un diseño.*
+ *
+ * ⚠️ **Devuelve la RUTA, no una URL.** El bucket es público, así que la
+ * pantalla la resuelve con el helper de la casa; **el motor guarda la ruta**.
+ * *Guardar una URL absoluta ata el dato al dominio de hoy.*
+ *
+ * ⚠️ **Redimensioná ANTES de llamar.** El bucket tiene techo de 5 MB y la
+ * cámara de un teléfono lo pasa: *una subida que rebota por tamaño se lee como
+ * «no anda», no como «achicá la foto».*
+ */
+export async function subirImagenVitrinaRefugio(
+  cuentaComercialId: string,
+  tipo: 'portada' | 'logo',
+  bytes: ArrayBuffer,
+  contentType: 'image/jpeg' | 'image/png' | 'image/webp' = 'image/jpeg',
+): Promise<ResultadoWrapper<{ path: string }, CodigoErrorAdopcion>> {
+  const ext = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg';
+  /* `vitrina/<cuenta>/…` — el prefijo que la policy exige. El sello de tiempo
+     evita pisar la anterior mientras la vista pública todavía la sirve. */
+  const path = `vitrina/${cuentaComercialId}/${tipo}-${Date.now()}.${ext}`;
+  const { error } = await getClient().storage.from('adopcion-fotos').upload(path, bytes, {
+    contentType,
+    upsert: false,
+  });
+  if (error) return fallo(error.message);
+  return { ok: true, data: { path } };
 }

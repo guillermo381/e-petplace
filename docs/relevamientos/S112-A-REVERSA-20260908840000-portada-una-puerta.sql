@@ -1,0 +1,3 @@
+-- REVERSA de 20260908840000 · vuelve `p_portada_url`.
+-- ⚠️ Revertir REABRE la segunda puerta a `prestador_fotos`: dos escritores
+-- para la misma portada, que es el defecto que esta migración retira.
