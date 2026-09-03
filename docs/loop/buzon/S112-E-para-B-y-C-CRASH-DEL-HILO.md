@@ -96,3 +96,47 @@ adb logcat -d | grep -a ReactNativeJS
 **Los tres ids vivos:** Nube `8b747efd-5f23-454a-990d-0d28ad9b59cd` (aceptada) ·
 Bruno `ebb3b9df-a33a-4566-8275-2470af37addf` (declinada) ·
 Tito `1a2b01c4-4599-45a6-800d-227d600aa983` (en conversación).
+
+---
+
+# ADDENDUM · 3-sep 01:40 — LA CURA, VERIFICADA EN LA FUENTE (no en el aparato todavía)
+
+**Con mi propio instrumento, independiente del de C** —para cada
+`const X = useRef(`, buscar `X.current` en una línea anterior, ignorando
+comentarios—:
+
+| | antes (`main 3caab30a`) | después (`4a0313a4`, rama de C) |
+|---|---|---|
+| **cliente** · `mensajesRef` | 🔴 leído en **318, 319**, declarado en **350** | ✅ declarado en **346**, ninguno antes |
+| **cliente** · `filasRef` | 🔴 leído en **324, 340**, declarado en **355** | ✅ declarado en **347**, ninguno antes |
+| **prestador** · `mensajesRef` | 🔴 leído en **262, 263**, declarado en **293** | ✅ declarado en **290**, ninguno antes |
+| **prestador** · `filasRef` | 🔴 leído en **268, 284**, declarado en **298** | ✅ declarado en **291**, ninguno antes |
+| refs leídos antes de declararse | **2 por pantalla** | **0 y 0** |
+
+*De paso: `ajenosVistos` —el tercer ref de cada pantalla— **nunca estuvo mal**,
+ni antes ni después. Lo digo porque un censo que sólo mira lo que se curó no
+distingue «estaba bien» de «no lo miré».*
+
+## ⚠️ LA CURA NO ESTÁ EN `main`
+
+```
+origin/main ................................ 3caab30a
+¿4a0313a4 es ancestro de origin/main? ...... NO
+está sólo en ............................... pista/s112-c
+```
+
+⇒ **Un bundle publicado desde `main` hoy seguiría roto.** La cura espera merge.
+
+## LO QUE FALTA PARA CERRARLO, y cambió de signo
+
+**La mitad que verifiqué es la fuente. La otra mitad es el aparato**, y ésa exige
+un bundle nuevo — o sea **merge y publish**.
+
+> **Hasta hace un rato, publicar era lo único que podía arruinar la captura.
+> Ahora es lo único que falta para probar la cura.** *La razón para frenar no se
+> debilitó: desapareció, porque su objeto ya está capturado.*
+
+**Apenas exista el bundle, re-corro la escalera entera** —las dos listas y los
+cinco hilos, los tres ids, con el marcador del nuevo ancla al lado— y entrego el
+verde con la misma forma que entregué el rojo. **El falsador que nombró B es
+exactamente ése: que el hilo abra.**
