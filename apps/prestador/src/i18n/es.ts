@@ -4552,6 +4552,39 @@ export const prestadorEs = {
     reintentar: 'Probar de nuevo',
   },
   portalHilo: {
+    /* C6 · «Ver postulación». Las respuestas viven en SU pantalla y no en el
+       hilo: lo que se lee una vez para decidir no va en el mismo lugar que lo
+       que se lee todos los días. */
+    verPostulacion: 'Ver postulación',
+    postulacionTitulo: 'Su postulación',
+    postulacionSinDatos: 'Esta solicitud no trae formulario.',
+    postHogar: 'Quiénes viven en casa',
+    /* Los menores van POR RANGO, jamás por nombre ni edad exacta (§5.9): el
+       motor lo rechaza y la tabla tiene un CHECK que lo hace inexpresable. */
+    postAdultos_one: '{{count}} adulto',
+    postAdultos_other: '{{count}} adultos',
+    postAdultos: '{{count}} adultos',
+    postMenores05_one: '{{count}} de 0 a 5',
+    postMenores05_other: '{{count}} de 0 a 5',
+    postMenores05: '{{count}} de 0 a 5',
+    postMenores612_one: '{{count}} de 6 a 12',
+    postMenores612_other: '{{count}} de 6 a 12',
+    postMenores612: '{{count}} de 6 a 12',
+    postMenores1317_one: '{{count}} de 13 a 17',
+    postMenores1317_other: '{{count}} de 13 a 17',
+    postMenores1317: '{{count}} de 13 a 17',
+    postVivienda: 'Dónde vive',
+    vivienda_casa_con_patio: 'Casa con patio',
+    vivienda_casa_sin_patio: 'Casa sin patio',
+    vivienda_departamento: 'Departamento',
+    vivienda_otro: 'Otro',
+    postHorasSolo: 'Cuántas horas queda solo',
+    postHoras_one: '{{count}} hora al día',
+    postHoras_other: '{{count}} horas al día',
+    postHoras: '{{count}} horas al día',
+    postOtrosAnimales: 'Otros animales en casa',
+    postExperiencia: 'Su experiencia',
+    postMotivo: 'Por qué quiere adoptar',
     /* §1 · las cinco etapas, en voz de REFUGIO. Mismos hechos, otro asiento:
        la familia lee «Estás en», el refugio lee «La solicitud está en». */
     etapaEnviada: 'Enviada',

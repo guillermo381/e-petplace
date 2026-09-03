@@ -73,6 +73,7 @@ import {
 import {
   desistirSolicitudAdopcion,
   marcarHiloLeido,
+  suscribirseAlHilo,
   obtenerSesion,
   resolverUrlGenericaEspecie,
   obtenerMisSolicitudesAdopcion,
@@ -196,35 +197,35 @@ export default function HiloSolicitud() {
      pantalla que armara la escalera a mano podría marcar 'declinada' como hecho
      y compilaría perfecto»*. Se monta la pieza y el mapeo muere (Ley 37). */
 
-  /* ═══ C4 · LOS NUEVOS LLEGAN SOLOS ══════════════════════════════════════
+  /* ═══ C4 · LOS NUEVOS LLEGAN SOLOS — POR REALTIME ══════════════════════
 
-     🔴 **SONDEO DE 5 s, Y ESTÁ DECLARADO PORQUE LA LETRA LO PIDE ASÍ.** §2.4:
-     *«realtime de la casa si existe para esta tabla; si no, sondeo cada 5 s con
-     la pantalla en foco, **y se declara cuál**»*.
+     ☠️ **MURIÓ EL SONDEO DE 5 s** (Ley 37), y con él su comentario de tres
+     párrafos. §2.4 daba las dos opciones —*«realtime de la casa si existe para
+     esta tabla; si no, sondeo cada 5 s… y se declara cuál»*— y ahora existe:
+     A publicó la tabla (`20260908720000`) **y su puerta**
+     (`suscribirseAlHilo`), que era la mitad que faltaba.
 
-     ⏪ **ESTE COMENTARIO DECÍA QUE LA TABLA NO ESTABA PUBLICADA, Y DEJÓ DE SER
-     CIERTO EL MISMO DÍA.** A la agregó (`20260908720000`): la publicación pasó
-     de 14 tablas a 15 y **`adopcion_mensaje` YA ESTÁ**. *Se corrige acá y no se
-     borra, porque un comentario que describe mal el mundo se lee con la misma
-     autoridad que uno que lo describe bien.*
+     🔴 **Y la diferencia no es de elegancia: es de costo.** El sondeo hacía
+     **12 peticiones por minuto** con la pantalla abierta, tuviera o no
+     mensajes nuevos. El socket hace **cero** hasta que alguien escribe. Es
+     `L-223` con su reloj: *el techo del producto lo pone la cantidad de
+     viajes.*
 
-     🔴 **Y sigue el sondeo igual, por una razón distinta a la de ayer: la tabla
-     está publicada y NO HAY PUERTA.** Medido: **cero `.channel(` en todo el
-     monorepo** y ningún wrapper de suscripción en `packages/api`. Abrir el canal
-     desde acá saltearía la puerta única, que es regla de la casa. ⇒ `L-318`
-     visto desde el otro lado: el motor quedó listo y su consumidor no puede
-     llamarlo. **Pedido a A por nombre**; el día que llegue, esto son dos
-     líneas menos.
+     ⚠️ **La desuscripción NO es higiene: es lo único que cierra el socket** —
+     lo dice el wrapper. Por eso el `return` del efecto la llama, y por eso el
+     efecto es de FOCO: al salir de la pantalla el canal se cierra.
 
-     ⚠️ **Sólo en foco**, que es la mitad que evita el costo: `useFocusEffect`
-     limpia el intervalo al salir. *Un sondeo que sigue corriendo con la
-     pantalla cerrada es una petición cada cinco segundos por una conversación
-     que nadie está mirando* — `L-223` con reloj. */
+     ⚠️ **Se recarga en vez de empujar el mensaje a la lista**, y es a
+     propósito: el motor pudo haber movido el estado a `en_conversacion` en el
+     mismo acto. *Pintar sólo la burbuja dejaría la escalera diciendo
+     «recibida» sobre un hilo que ya conversa* — el mismo argumento que ya
+     regía al enviar. El viaje extra ocurre **sólo cuando de verdad llegó
+     algo**, que es exactamente cuando vale la pena. */
   useFocusEffect(
     useCallback(() => {
-      const id = setInterval(() => setIntento((n) => n + 1), 5000);
-      return () => clearInterval(id);
-    }, []),
+      if (typeof solicitudId !== 'string' || solicitudId.length === 0) return;
+      return suscribirseAlHilo(solicitudId, () => setIntento((n) => n + 1));
+    }, [solicitudId]),
   );
 
   /**
