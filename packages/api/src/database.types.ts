@@ -23278,6 +23278,7 @@ export type Database = {
         Args: { p_empleado_id: string }
         Returns: number
       }
+      contar_pendientes: { Args: never; Returns: Json }
       contar_solicitudes_por_revisar: { Args: never; Returns: number }
       conteos_vitrina_por_eje: { Args: never; Returns: Json }
       contratar_mensualidad_guarderia: {

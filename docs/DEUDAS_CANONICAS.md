@@ -3094,6 +3094,34 @@ Origen: S86-A, medición para C.
 
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando `obtenerOfertaGroomingPublica` pase a RPC con el gate 7.13 (el molde del paseo ya existe: es copiar, no diseñar) **o** cuando se mida que un groomer activo sin cuenta cobrable es imposible por construcción — lo segundo cerraría la deuda sin escribir código, y es la primera pregunta que hay que hacerse antes de tocar nada. **Disparo natural:** el primer groomer real (§10.3 sigue vigente: los seeds son `es_seed_preliminar`). **Quién la retira:** la pista que toque el mundo grooming.
 
+
+### `D-1009` 🟡 — el predicado de «sin leer» vive escrito TRES veces
+
+**Qué.** `autor_user_id IS DISTINCT FROM auth.uid() AND creado_en >
+COALESCE(leido_hasta,'-infinity')` está copiado, idéntico, en
+`obtener_mis_solicitudes_adopcion`, en `obtener_solicitudes_de_mis_publicaciones`
+y ahora en `contar_pendientes`. **Hoy los tres dan el mismo número** y el
+cinturón de `20260908880000` lo verifica con una sonda; *el problema no es que
+difieran, es que pueden* — y **ningún typecheck ve dos SQL que se parecen**.
+
+**Por qué no se curó al construir.** La extracción (`_sin_leer_por_hilo(uuid)`
+y que los tres la llamen) toca **dos lectores que C consume en el mismo lote**.
+*Cambiar un lector vivo por elegancia, a mitad de lote, es apostar el lote.*
+
+**Qué NO es.** No es la hermana de la duplicación de «por revisar», que **sí se
+curó el mismo día** (`20260908900000`): aquélla tenía una función escalar ya
+hecha y llamarla fue gratis. Ésta sólo tiene el predicado embebido dentro de dos
+lectores que devuelven el hilo entero en jsonb — *llamarlos para sumar un entero
+traería todos los cuerpos de todos los mensajes en cada refresco de una burbuja*.
+
+**Disparo.** La primera tanda que toque cualquiera de los dos lectores por otro
+motivo. Se extrae ahí, con los tres apuntando a la misma función.
+
+**Cómo se supo.** El censo que la habría encontrado antes es **por CUERPO**
+(`prosrc like '%adopcion_solicitud%'` → 28 funciones del frente), no por nombre:
+el censo por `%pendiente%`/`%hilo%` devolvió limpio y la función duplicada no
+matcheaba ninguno de los dos. `L-437`.
+
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
 
 ### Lecciones del cierre S80 (L-181 → L-190; números verificados libres)

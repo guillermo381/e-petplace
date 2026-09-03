@@ -1,0 +1,5 @@
+-- REVERSA de 20260908900000 · `contar_pendientes` vuelve a repetir el predicado
+-- de «por revisar» en vez de llamar a `contar_solicitudes_por_revisar()`.
+-- Devuelve el MISMO número (los dos predicados son idénticos hoy): lo que se
+-- pierde no es un dato, es la garantía de que no puedan divergir mañana.
+-- Sin datos que perder. El cuerpo previo está en 20260908880000.
