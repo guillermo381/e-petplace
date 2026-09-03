@@ -108,7 +108,26 @@ BEGIN
   SELECT count(*) INTO v_n FROM public.notificacion_intencion
    WHERE clave_dedup = 'adopcion_sol_resp:' || v_sol::text;
   IF v_n <> 0 THEN RAISE EXCEPTION 'ROJO-2c: el memorial dejo pasar % intenciones', v_n; END IF;
+  /* 🔴 EFECTO COLATERAL MEDIDO, y no lo era cuando este arnés se escribió:
+     matar al animal dispara `trg_mascotas_cierra_solicitudes_memorial` (de A,
+     `20260908380000`), que **cierra sus solicitudes abiertas** a
+     `no_concretada_fallecimiento`. La primera corrida contra las funciones ya
+     aplicadas falló acá abajo, en el brazo ⑤, por esto — *el arnés no encontró
+     un defecto: encontró que el mundo cambió debajo de su fixture, que es
+     exactamente para lo que sirve volver a correrlo.*
+     ⇒ en vez de esquivarlo, se MIDE: la cascada pasa a ser un brazo. */
+  SELECT count(*) INTO v_n FROM public.adopcion_solicitud
+   WHERE id = v_sol AND estado = 'no_concretada_fallecimiento';
+  IF v_n <> 1 THEN
+    RAISE EXCEPTION 'ROJO-2d: el memorial NO cerró la solicitud abierta (cascada de A ausente o cambiada)';
+  END IF;
+  INSERT INTO arnes_resultado(paso, veredicto)
+  VALUES ('VERDE 2b', 'la cascada de memorial cierra la solicitud abierta a no_concretada_fallecimiento');
+
+  /* Se restauran LAS DOS cosas: el animal y el estado que la cascada movió.
+     Restaurar sólo el animal dejaría el fixture mintiendo sobre su estado. */
   UPDATE public.mascotas SET estado_vida = 'activa' WHERE id = v_masc;
+  UPDATE public.adopcion_solicitud SET estado = 'recibida', cerrada_en = NULL WHERE id = v_sol;
   INSERT INTO arnes_resultado(paso, veredicto) VALUES ('VERDE 2', 'memorial: vivo emite · fallecida no emite y no deja fila');
 
   -- ════════════════════════════════════════════════════════════════════════

@@ -329,6 +329,35 @@ node scripts/verify-jornada-completa.mjs >/dev/null 2>&1 || {
 #    parecido, no medido.* El primer commit que agregue un nativo sin declarar
 #    es su prueba real; hasta entonces esto es un gate con su rojo probado y su
 #    cableado supuesto.
+# ── verify:rutas-de-aviso ── S112-D, cableado por A en S112 ────────────────
+#    Una push que llega, la persona toca, **y no pasa nada**: la ruta se emite
+#    y ninguna app la acepta. No falla en ningún lado — la notificación sale
+#    bien y el destino no existe.
+#    🔴 NACIÓ SALIENDO 2 (fuente ausente) y por eso NO se cableó entonces:
+#    *un gate que no puede medir no se pone en el hook, se declara.* Hoy sus
+#    dos fuentes están en `main` y da verde con 4 emitibles, todas con destino.
+#    ✅ Su ROJO se probó ANTES de cablearlo: sembrando `/guarderia/` roto en
+#    las dos listas de destino → exit 1, nombrando la ruta y su productor.
+#    ⚠️ El primer intento sembró en `checkout.tsx` y salió verde — *el gate lee
+#    las LISTAS, no cualquier ocurrencia*: el rojo era del control, no suyo.
+if [ -f scripts/verify-rutas-de-aviso.mjs ]; then
+  node scripts/verify-rutas-de-aviso.mjs >/dev/null 2>&1
+  ESTADO_RUTAS=$?
+  if [ "$ESTADO_RUTAS" = "2" ]; then
+    echo ""
+    echo "⚠️  verify:rutas-de-aviso NO CONCLUYENTE — le falta una fuente."
+    echo "   (no es que haya una ruta huérfana: es que no pudo mirar. El commit SIGUE.)"
+    echo ""
+  elif [ "$ESTADO_RUTAS" != "0" ]; then
+    echo ""
+    echo "✗ UNA PUSH LLEVA A NINGUNA PARTE — el commit NO ocurre."
+    node scripts/verify-rutas-de-aviso.mjs 2>&1 | grep -E "EMITIBLE|⇒" | head -4
+    echo ""
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+fi
+
 if [ -f scripts/_censo-hoisting-nativo.mjs ]; then
   node scripts/_censo-hoisting-nativo.mjs >/dev/null 2>&1
   if [ "$?" != "0" ]; then
