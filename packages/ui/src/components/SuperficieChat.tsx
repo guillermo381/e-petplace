@@ -70,16 +70,47 @@
  * El hilo de la solicitud en las DOS apps (C1). **Entregada y no montada.**
  */
 import type { ReactNode } from 'react'
-import { useCallback } from 'react'
+import { memo, useCallback, useRef } from 'react'
 import { FlatList, View } from 'react-native'
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { mismaFila } from './misma-fila'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 
 /** Cuántos píxeles del fondo cuentan como «estoy abajo». Media línea de
  *  texto: menos que eso es ruido de scroll, más ya es haberse ido. */
 const MARGEN_FONDO = 24
+
+/**
+ * 🔴 LA FILA MEMOIZADA (S112-B · A14) — y su comparador es toda la cura.
+ *
+ * **El defecto que cierra:** `renderItem` era una flecha nueva en cada
+ * render, así que `FlatList` recibía una función distinta cada vez y
+ * **redibujaba todas las filas aunque no hubiera pasado nada**. En un hilo
+ * eso se paga en cada tecla que alguien escribe, porque el estado del campo
+ * vive arriba.
+ *
+ * ⚠️ **Y memoizar `renderItem` SOLO no alcanzaba**, que es la parte que
+ * importa: `useCallback` depende de `renderMensaje`, y `renderMensaje` lo
+ * pasa la pantalla —casi siempre como flecha inline—, así que la
+ * dependencia cambia en cada render y el `useCallback` no memoiza nada.
+ * *Un `useCallback` sobre una prop inestable es un adorno.*
+ *
+ * ⇒ **la fila se memoiza sobre el ITEM y recibe una función ya estabilizada
+ * por `ref`**. Así el número no depende de que el consumidor se acuerde de
+ * memoizar — que es la única forma de que sea cierto en las dos apps.
+ *
+ * **Y su precio, declarado:** obliga al contrato de pureza de
+ * `renderMensaje`. *Sin ese contrato, «cero filas redibujadas» sería un
+ * número que se paga con datos viejos en pantalla.*
+ */
+const Fila = memo(
+  function Fila<T>({ item, dibujar }: { item: T; dibujar: (item: T) => ReactNode }) {
+    return <>{dibujar(item)}</>
+  },
+  mismaFila,
+) as <T>(props: { item: T; dibujar: (item: T) => ReactNode }) => ReactNode
 
 export type SuperficieChatProps<T> = {
   /** Fijo arriba: la escalera, la cabecera, las acciones. No scrollea. */
@@ -90,9 +121,25 @@ export type SuperficieChatProps<T> = {
    * adelante, sin ningún error.
    */
   datosDelMasNuevoAlMasViejo: T[]
-  /** Identidad estable de cada mensaje. */
+  /**
+   * Identidad estable de cada mensaje. **Tiene que ser PURA sobre el item**
+   * —el id, no el índice—: se la estabiliza adentro con una `ref`, así que
+   * una que dependa de estado de la pantalla devolvería claves viejas.
+   */
   claveDe: (item: T) => string
-  /** La burbuja la dibuja quien sabe de qué lado va. */
+  /**
+   * La burbuja la dibuja quien sabe de qué lado va.
+   *
+   * 🔴 **CONTRATO DE PUREZA, y es lo que hace CIERTA la memoización:** todo
+   * lo que la fila dibuja tiene que venir **en el item**. Las filas están
+   * memoizadas por item, así que *un `renderMensaje` que cierre sobre estado
+   * de la pantalla no va a repintar cuando ese estado cambie.*
+   *
+   * No es una restricción caprichosa: es la condición sin la cual «cero filas
+   * redibujadas» sería un número que se paga con datos viejos en pantalla.
+   * Si algo de la burbuja cambia —un reintento, un estado de envío— **va en
+   * el item**, que es donde el resto de esta superficie ya lo busca.
+   */
   renderMensaje: (item: T) => ReactNode
   /** El campo + enviar, o la variante en lectura. Va pegado al teclado. */
   barra?: ReactNode
@@ -118,6 +165,22 @@ export function SuperficieChat<T>({
   const insets = useSafeAreaInsets()
   const teclado = useAnimatedKeyboard()
 
+  /* LAS DOS FUNCIONES DE LA PANTALLA, ESTABILIZADAS ACÁ. La `ref` se
+     actualiza en cada render —así la última versión es la que corre— y las
+     envolturas de abajo **nunca cambian de identidad**, que es lo que
+     `FlatList` mira para decidir si redibuja. */
+  const refRender = useRef(renderMensaje)
+  refRender.current = renderMensaje
+  const refClave = useRef(claveDe)
+  refClave.current = claveDe
+
+  const dibujar = useCallback((item: T) => refRender.current(item), [])
+  const clave = useCallback((item: T) => refClave.current(item), [])
+  const renderFila = useCallback(
+    ({ item }: { item: T }) => <Fila item={item} dibujar={dibujar} />,
+    [dibujar],
+  )
+
   /* EL INSET: el alto del teclado, y con el teclado cerrado el borde seguro
      del teléfono. `Math.max` y no una condición sobre el estado del teclado:
      durante la transición el alto pasa por valores menores al inset, y ahí
@@ -142,8 +205,8 @@ export function SuperficieChat<T>({
         <FlatList
           inverted
           data={datosDelMasNuevoAlMasViejo}
-          keyExtractor={claveDe}
-          renderItem={({ item }) => <>{renderMensaje(item)}</>}
+          keyExtractor={clave}
+          renderItem={renderFila}
           /* «Si deslizo la lista hacia abajo, el teclado se guarda solo»
              (§2.2) — y `on-drag` lo hace con el gesto, no al soltar. */
           keyboardDismissMode="on-drag"
