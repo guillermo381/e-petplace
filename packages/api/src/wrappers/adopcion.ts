@@ -1854,3 +1854,61 @@ export async function subirImagenVitrinaRefugio(
   if (error) return fallo(error.message);
   return { ok: true, data: { path } };
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⑦ LA BURBUJA DE PENDIENTES — un viaje para toda la barra
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Lo que la burbuja necesita saber, y **nada más**.
+ *
+ * ⚠️ `hilosConSinLeer` son ids de hilos que quien pregunta **ya puede abrir**:
+ * un id es un filtro, jamás un permiso. Sirve para pintar el punto en la fila
+ * correcta sin un segundo viaje.
+ *
+ * ⚠️ **El número POR HILO no está acá a propósito** — ya viaja en
+ * `obtenerMisSolicitudesAdopcion` / `obtenerSolicitudesDeMisPublicaciones`,
+ * fila por fila. *Mandarlo dos veces por caminos distintos es fabricar la
+ * divergencia que este diseño evita.*
+ */
+export interface Pendientes {
+  /** Mensajes de OTROS posteriores a lo último que leí, sumando los dos lados. */
+  mensajesSinLeer: number;
+  /** Los hilos donde hay al menos uno. */
+  hilosConSinLeer: string[];
+  /** Sólo para quien publica: solicitudes en `recibida` o `en_conversacion`. */
+  solicitudesPorRevisar: number;
+}
+
+/**
+ * Todo lo que la barra tiene que mostrar, **en un viaje**.
+ *
+ * 🔴 Cuenta LOS DOS LADOS de la misma cuenta: una persona puede ser familia
+ * que solicita **y** refugio que publica. No hay dos llamadas.
+ *
+ * ⚠️ La función del motor es `SECURITY INVOKER` — **la puerta es la misma RLS
+ * que sirve los mensajes**, no un predicado copiado. Medido antes de elegirlo:
+ * la variante `DEFINER`, que es como escribe el resto de la casa, le mostró a
+ * un tercero **los 6 mensajes de la casa**.
+ *
+ * ⚠️ Hoy «pendiente» es sólo adopción. Si mañana entra guardería, se ensancha
+ * **esta** función: *dos contadores distintos en la misma barra terminan
+ * discrepando y nadie sabe cuál mirar.*
+ */
+export async function contarPendientes(): Promise<
+  ResultadoWrapper<Pendientes, CodigoErrorAdopcion>
+> {
+  const { data, error } = await getClient().rpc('contar_pendientes');
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  const hilos = Array.isArray(r.hilos_con_sin_leer) ? r.hilos_con_sin_leer : [];
+  return {
+    ok: true,
+    data: {
+      mensajesSinLeer: Number(r.mensajes_sin_leer ?? 0),
+      hilosConSinLeer: hilos.filter((h): h is string => typeof h === 'string'),
+      solicitudesPorRevisar: Number(r.solicitudes_por_revisar ?? 0),
+    },
+  };
+}

@@ -25,6 +25,7 @@
     "verify:voz-por-tipo": "node scripts/verify-voz-por-tipo.mjs",
     "_comentario_ref": "S112-C: los dos useRef del hilo estaban declarados DESPUES del useMemo que los lee. El cuerpo de un useMemo corre durante el render ⇒ zona muerta temporal, y con Hermes el const en TDZ compila a var: el identificador vale undefined y undefined.current tira el TypeError que mato las dos pantallas de hilo, siempre, con cualquier dato. No es un defecto de dato: es orden de render, por eso ningun typecheck ni gate lo veia. Su verde esta probado en ROJO sobre las cuatro lineas reales. El censo borra los comentarios ANTES de medir y no filtra despues: filtrar despues obliga a acertar que linea era prosa; borrar antes hace la pregunta inexpresable (L-170).",
     "verify:ref-antes-de-uso": "node scripts/verify-ref-antes-de-uso.mjs",
+    "verify:mis-hilos-realtime": "node scripts/verify-s112a-mis-hilos-realtime.mjs",
     "verify:rutas-de-aviso": "node scripts/verify-rutas-de-aviso.mjs",
     "_comentario_jornada": "S109-D: la guarderia existia —motor, wrapper, pantalla, cinco estadias vivas— y no aparecia en TRES superficies del prestador por tres mecanismos distintos con la misma forma (un continue por categoria, un mapa cerrado de cuatro claves, y cuatro lectores escritos a mano). Ninguno falla: los tres OMITEN, y una omision no tiene sintoma — el prestador leyo 'hoy no tienes citas' con dos animales a bordo. El gate exige que toda superficie que enumere la jornada la enumere ENTERA, con el universo derivado de los lectores de packages/api (una lista adentro lo volveria el sexto mapa cerrado). NO necesita red y es apto para el hook, pero el hook es territorio de A: se deja aca y se pide alli. Declara adentro las cuatro cosas que NO ve.",
     "verify:jornada-completa": "node scripts/verify-jornada-completa.mjs",
@@ -38,7 +39,8 @@
     "_comentario_hoisting": "S112-C midio la clase y S112-A la convirtio en gate: un modulo NATIVO usado por una app que no lo declara resuelve por hoisting de la raiz, compila, corre en dev, pasa los cuatro typechecks y el APK NO LO TIENE (misma forma que la key de mapas de S84). Salia con exit 0 SIEMPRE: como gate habria dicho que si pase lo que pase. Ahora corta, con su lista de TOLERADOS escrita —cada uno con su razon— porque el censo nombra y clasifica quien conoce la letra (L-488). Corre en 0,26 s y no toca red: apto para el hook. DECLARA ADENTRO LAS TRES COSAS QUE NO VE, y la segunda importa: solo escanea apps/<app>/src, asi que un nativo usado a traves de packages/ui es invisible.",
     "verify:hoisting-nativo": "node scripts/_censo-hoisting-nativo.mjs",
     "verify:vio-todo": "tsx scripts/verify-vio-todo.mjs",
-    "verify:fila-memoizada": "tsx scripts/verify-fila-memoizada.mjs"
+    "verify:fila-memoizada": "tsx scripts/verify-fila-memoizada.mjs",
+    "verify:abanico": "tsx scripts/verify-abanico.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",

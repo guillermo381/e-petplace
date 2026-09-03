@@ -1761,10 +1761,15 @@ export {
   type DocumentoVigente,
   type AceptacionRegistrada, responderSolicitudAdopcion, cerrarSolicitudAdopcion,
   obtenerMisSolicitudesAdopcion, obtenerSolicitudesDeMisPublicaciones,
-  contarSolicitudesPorRevisar,
+  contarSolicitudesPorRevisar, contarPendientes,
 } from './wrappers/adopcion';
 export type {
-  EstadoSolicitudAdopcion, MensajeDelHilo, MiSolicitud, SolicitudRecibida,
+  EstadoSolicitudAdopcion, MensajeDelHilo, MiSolicitud, SolicitudRecibida, Pendientes,
 } from './wrappers/adopcion';
-export { suscribirseAlHilo, type MensajeEnVivo } from './wrappers/adopcion-hilo-vivo';
+export {
+  suscribirseAlHilo,
+  suscribirseAMisHilos,
+  type MensajeEnVivo,
+  type CambioEnMisHilos,
+} from './wrappers/adopcion-hilo-vivo';
 export type { AnotacionDeBitacora, ChipDeBitacora } from './wrappers/guarderia-durante';
