@@ -26,6 +26,7 @@ import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
+import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
   Boton,
   CeldaNavegacion,
@@ -41,6 +42,7 @@ import {
   Texto,
   spacing,
   useTheme,
+  conIconos,
 } from '@epetplace/ui';
 import {
   listarMisPedidos,
@@ -55,7 +57,6 @@ import {
   type PortadorDeEstado,
   type VocesEscalera,
 } from '@/lib/despensa/escalera';
-import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { useTraduccion } from '@/i18n';
 
@@ -286,7 +287,7 @@ export default function DespensaPedidos() {
             : undefined
         }
         monto={`$ ${p.total.toFixed(2)}`}
-        pasos={conIconos(pasos)}
+        pasos={conIconos(pasos, GLIFO_NODO)}
         desvio={desvio}
         acento="control"
         etiqueta={t('despensa.verPedido')}

@@ -1702,6 +1702,8 @@ export {
   traspasarMascotaAFamilia,
   poblarVitrinaRefugio,
   buscarRefugios,
+  marcarHiloLeido,
+  definirRespuestaAutomaticaRefugio,
 } from './wrappers/adopcion';
 export type {
   Adoptable, ResultadoTraspaso, CodigoErrorAdopcion, VitrinaRefugioGuardada, RefugioEnBusqueda,

@@ -1,0 +1,6 @@
+-- REVERSA de 20260908680000 · los dos lectores de la lista dejan de decir
+-- cuántos mensajes sin leer tiene cada hilo.
+-- ⚠️ Revertir no pierde datos —`adopcion_lectura` queda— pero la lista y la
+-- campana vuelven a no poder mostrar el número, o a derivarlo del cliente
+-- contando mensajes traídos: eso funciona hasta el día que la lista pagine.
+-- Los cuerpos previos se recuperan de pg_get_functiondef del commit anterior.

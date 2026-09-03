@@ -1080,3 +1080,4 @@ export {
    la migración no es compatibilidad: es deuda con buena intención.* */
 
 export { SeccionPlegable, type SeccionPlegableProps } from './components/SeccionPlegable'
+export { conIconos, GLIFOS_PEDIDO } from './components/EscaleraIconos'

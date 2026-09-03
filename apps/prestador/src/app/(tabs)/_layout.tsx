@@ -193,7 +193,42 @@ export default function TabsLayout() {
           return { error: true, detalle: ctx.mensaje };
         }
         const c = ctx.data;
-        if (c.prestador !== null) {
+        /* ═══ A10 · UN REFUGIO NO ENTRA POR LA PUERTA DEL PRESTADOR ═══════
+
+           🔴 **REGRESIÓN MÍA, y su causa está a dos saltos de donde se ve.**
+           Esta rama es la PRIMERA, y funcionaba mientras un refugio no tuviera
+           fila en `prestadores`. **A6 le dio una:** `poblar_vitrina_refugio`
+           —la RPC que pedí para que el refugio pudiera armar su vitrina— **crea
+           esa fila**. ⇒ desde que el refugio arma su página, `c.prestador` deja
+           de ser `null`, entra acá y **nunca llega a su propia rama**: aparece
+           en la app de negocios con la barra de un prestador.
+
+           *Y el defecto es peor que un orden equivocado: **la vitrina no se
+           podía armar sin perder la casa**. A6 y A10 son la misma línea vista
+           desde los dos lados.*
+
+           Medido: ese refugio tiene `tipo='refugio'`, `estado='activo'` y
+           **`prestador_servicios` activos = 0** — *no es un prestador en ningún
+           sentido útil: no puede ofrecer nada, no tiene agenda, no cobra.*
+
+           ⚠️ **SE GUARDA LA RAMA; NO SE MUEVE LA DEL REFUGIO.** Mi primer
+           arreglo fue subir el bloque de refugio arriba de éste, y **eso
+           invertía una firma**: el vendedor puro va ANTES que el refugio (§2.0,
+           *«el vendedor puro es un DUEÑO y tiene la casa entera»*) y su rama
+           vive DEBAJO de ésta. Subir el refugio lo ponía por encima del
+           vendedor sin que nadie lo decidiera. *Curar un orden rompiendo otro
+           no es curar: es mover el defecto de lugar.*
+
+           🔴 **Y ESTE GUARD ES EL PARCHE, NO LA CURA.** `!c.esRefugio` también
+           excluiría a un refugio que SÍ ofrezca un servicio, y ése tiene que
+           entrar por las dos puertas. El discriminador correcto **no es la
+           etiqueta `tipo` sino `prestador_servicios` activo** —*`tipo` es una
+           etiqueta que alguien puede cambiar; tener oferta viva es el hecho de
+           ser prestador*— y ése vive en el contrato: A lo cierra en
+           `obtener_contexto_arranque`, que hoy le dice a **todo consumidor** que
+           este refugio es un prestador, y este layout es sólo el primero que se
+           lo cree. **Cuando eso llegue, este guard sobra y se retira.** ── */
+        if (c.prestador !== null && !c.esRefugio) {
           // S79-B (T3-B3; T4-B3 · D-560): LISTA BLANCA — al portal entra
           // SOLO 'activo'; TODO lo demás (pendiente, en_revision,
           // suspendido, rechazado, y el sexto estado que nazca mañana)
