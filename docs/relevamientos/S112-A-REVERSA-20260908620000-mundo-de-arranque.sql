@@ -1,0 +1,6 @@
+-- REVERSA de 20260908620000 · el contexto de arranque deja de decir en qué
+-- mundo entra la cuenta.
+-- 🔴 REVERTIR REABRE LA REGRESIÓN A10: la app vuelve a inferir el mundo de la
+-- PRESENCIA de una fila de prestador, y una cuenta de refugio —que tiene esa
+-- fila para poder mostrar su vitrina— vuelve a entrar con la barra de negocio.
+-- No borra datos. El cuerpo previo se recupera de pg_get_functiondef.
