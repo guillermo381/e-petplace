@@ -1,0 +1,4 @@
+-- REVERSA de 20260908700000 · el hilo de la familia deja de traer el id y la
+-- foto del refugio. La cabecera vuelve a mostrar un nombre que no lleva a
+-- ningún lado. Sin datos que perder.
+-- El cuerpo previo se recupera de pg_get_functiondef del commit anterior.
