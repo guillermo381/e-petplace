@@ -27352,3 +27352,51 @@ entonces ya va a haber datos escritos con el día equivocado.*
 **La lección de forma:** *una constante repetida 58 veces no es una decisión
 tomada 58 veces: es una decisión tomada una vez y copiada, y la copia no sabe
 que era una decisión.*
+
+---
+
+## 🔴 `D-1008` — UN ERROR QUE TIRA UNA PANTALLA NO LLEGA A NINGÚN LADO
+
+**Deuda de PLATAFORMA. Medida al pedir un error concreto y no poder traerlo.**
+
+**El pedido que la destapó (founder, S112):** *«traé el error del hilo de
+adopción de hoy 23:37, literal»*. **No se puede.** No existe.
+
+**Censado por CUATRO vías, ninguna con resultado:**
+
+| dónde se buscó | resultado |
+|---|---|
+| Sentry · Bugsnag · Rollbar · Crashlytics en `package.json` | **ninguno** |
+| tabla de errores en la base | **ninguna** (`audit_log` existe y tiene **0 filas**) |
+| `captureException` / `reportError` / `logError` en wrappers, apps o edges | **cero** |
+| edge de telemetría | **ninguna** |
+
+**Lo único que ocurre:** el `ErrorBoundary` hace `console.error('[caida] render
+roto: …')` ⇒ **va al logcat del aparato y muere ahí**. Si el teléfono no está
+enchufado a una consola en ese instante, **el error no existió para nadie**.
+
+🔴 **Por qué es grave y no una comodidad de diagnóstico:**
+- El founder **ve la pantalla caída** y nosotros **no vemos nada**. La única
+  evidencia posible es que él saque una foto o transcriba a mano.
+- La pantalla caída **es la que MÁS necesita reportarse**: es justo el caso
+  donde el usuario no puede seguir y donde el motivo no se deduce del estado.
+- *Un `console.error` en una app instalada es una nota escrita en un papel que
+  se quema.*
+
+⚠️ **Y lo peor es de forma: hoy pasa por VERDE.** No hay gate que mida esto —
+`verify:diseno` mira composición, los typechecks miran tipos— así que la
+ausencia de reporte **no le baja el número a nadie**. *Una capacidad que nunca
+existió no deja hueco visible: deja silencio, y el silencio se lee como que no
+hubo errores.*
+
+**No se cura desde un frente de producto:** elegir destino (servicio externo
+vs tabla propia), qué se manda (¿el mensaje? ¿el stack? ¿el usuario?) y **qué
+NO se manda** —el expediente de una mascota no puede viajar en un reporte de
+crash— es decisión de plataforma **con su pata de privacidad**.
+
+**Disparo:** antes del soft launch. *El día que haya familias reales, un error
+que nadie ve es un error que nadie arregla.*
+
+**La lección de forma:** *cuando alguien pide «traeme el error» y la respuesta
+es «no existe», lo que se descubrió no es un error perdido: es que no había
+dónde perderlo.*
