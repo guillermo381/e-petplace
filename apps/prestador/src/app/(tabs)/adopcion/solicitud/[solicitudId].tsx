@@ -77,6 +77,7 @@ import {
   obtenerSolicitudesDeMisPublicaciones,
   resolverUrlsFotos,
   responderSolicitudAdopcion,
+  suscribirseAlHilo,
   type SolicitudRecibida,
 } from '@epetplace/api';
 
@@ -102,6 +103,95 @@ type Estado =
   | { fase: 'noEsTuya' }
   | { fase: 'listo'; hilo: SolicitudRecibida; miUid: string; cara: string | null; caraDeEspecie: string | null };
 
+/**
+ * LAS RESPUESTAS DEL FORMULARIO, LEÍDAS (S112-C · C6).
+ *
+ * 🔴 **Lee `Record<string, unknown>` y no un tipo cerrado, a propósito.** El
+ * lector entrega el `jsonb` tal cual, y el esquema de la postulación **puede
+ * ganar preguntas antes que esta pantalla**. Un tipo cerrado acá haría que una
+ * respuesta nueva **desapareciera en silencio**: el refugio leería un
+ * formulario incompleto sin señal de que falta algo.
+ *
+ * ⇒ Se dibuja **lo conocido con su rótulo** y, al final, **lo que no se conoce
+ * con su clave cruda**. *Una clave fea a la vista es peor que fea: es honesta —
+ * y le dice a quien la ve que hay una pregunta que esta pantalla todavía no
+ * sabe presentar.*
+ */
+function PostulacionLeida({
+  r,
+  t,
+}: {
+  r: Record<string, unknown>;
+  t: (k: never, o?: Record<string, string | number>) => string;
+}) {
+  const CONOCIDAS = ['hogar', 'vivienda', 'otros_animales', 'horas_solo', 'experiencia', 'motivo'];
+  const hogar = (r.hogar ?? null) as Record<string, unknown> | null;
+  const texto = (v: unknown): string | null =>
+    typeof v === 'string' && v.trim().length > 0 ? v.trim() : null;
+  const numero = (v: unknown): number | null => (typeof v === 'number' ? v : null);
+
+  const filas: { rotulo: string; valor: string }[] = [];
+
+  if (hogar !== null) {
+    /* Los menores, **por rango y sumados**: es lo único que el esquema guarda y
+       lo único que hace falta para saber si el hogar tiene chicos. */
+    const partes: string[] = [];
+    const ad = numero(hogar.adultos);
+    if (ad !== null) partes.push(t('portalHilo.postAdultos' as never, { n: ad }));
+    for (const [clave, k] of [
+      ['menores_0_5', 'postMenores05'],
+      ['menores_6_12', 'postMenores612'],
+      ['menores_13_17', 'postMenores1317'],
+    ] as const) {
+      const n = numero(hogar[clave]);
+      /* Los rangos en CERO no se dicen: «0 niños de 6 a 12» es una línea que
+         hay que leer para descartar. */
+      if (n !== null && n > 0) partes.push(t(k as never, { n }));
+    }
+    if (partes.length > 0) filas.push({ rotulo: t('portalHilo.postHogar' as never), valor: partes.join(' · ') });
+  }
+
+  const vivienda = texto(r.vivienda);
+  if (vivienda !== null) {
+    filas.push({
+      rotulo: t('portalHilo.postVivienda' as never),
+      valor: t(`portalHilo.vivienda_${vivienda}` as never),
+    });
+  }
+  const horas = numero(r.horas_solo);
+  if (horas !== null) {
+    filas.push({ rotulo: t('portalHilo.postHorasSolo' as never), valor: t('portalHilo.postHoras' as never, { n: horas }) });
+  }
+  /* Las OPCIONALES sólo si tienen contenido: un rótulo con una raya dice «no
+     contestó», y lo cierto es que no se le preguntó como obligatorio. */
+  const otros = texto(r.otros_animales);
+  if (otros !== null) filas.push({ rotulo: t('portalHilo.postOtrosAnimales' as never), valor: otros });
+  const exp = texto(r.experiencia);
+  if (exp !== null) filas.push({ rotulo: t('portalHilo.postExperiencia' as never), valor: exp });
+  const motivo = texto(r.motivo);
+  if (motivo !== null) filas.push({ rotulo: t('portalHilo.postMotivo' as never), valor: motivo });
+
+  /* Lo que esta pantalla no conoce, con su clave cruda. Ver la cabecera. */
+  const desconocidas = Object.keys(r).filter((k) => !CONOCIDAS.includes(k));
+
+  return (
+    <View style={{ gap: spacing[4] }}>
+      {filas.map((f) => (
+        <View key={f.rotulo} style={{ gap: spacing[1] }}>
+          <Texto variante="seccion">{f.rotulo}</Texto>
+          <Texto variante="cuerpo">{f.valor}</Texto>
+        </View>
+      ))}
+      {desconocidas.map((k) => (
+        <View key={k} style={{ gap: spacing[1] }}>
+          <Texto variante="dato" color="tertiary">{k}</Texto>
+          <Texto variante="cuerpo">{String(r[k])}</Texto>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function HiloDelPublicador() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -122,6 +212,7 @@ export default function HiloDelPublicador() {
     [params.solicitudId],
   );
   const [escaleraAbierta, setEscaleraAbierta] = useState(true);
+  const [viendoPostulacion, setViendoPostulacion] = useState(false);
   const [alFondo, setAlFondo] = useState(true);
   const [nuevosSinVer, setNuevosSinVer] = useState(0);
   const [enVuelo, setEnVuelo] = useState<
@@ -281,6 +372,24 @@ export default function HiloDelPublicador() {
     }, [cargar]),
   );
 
+  /* ═══ C4 · LOS NUEVOS LLEGAN SOLOS, y de este lado NUNCA hubo sondeo ═══════
+     El hilo del refugio se quedó sin actualización automática mientras el de
+     la familia sondeaba: **la misma conversación, con una punta que se enteraba
+     y otra que no.** Ahora las dos escuchan el mismo canal.
+
+     ⚠️ La desuscripción **no es higiene: es lo único que cierra el socket** (lo
+     dice el wrapper), y por eso vive en el `return` de un efecto de FOCO. */
+  useFocusEffect(
+    useCallback(() => {
+      const id = params.solicitudId;
+      if (typeof id !== 'string' || id.length === 0) return;
+      /* Se RECARGA en vez de empujar la burbuja: el motor pudo haber movido el
+         estado en el mismo acto, y pintar sólo el mensaje dejaría la escalera
+         diciendo «recibida» sobre un hilo que ya conversa. */
+      return suscribirseAlHilo(id, () => void cargar());
+    }, [params.solicitudId, cargar]),
+  );
+
   const cerrado =
     estado.fase === 'listo' && (estado.hilo.estado === 'aceptada' || estado.hilo.estado === 'declinada');
 
@@ -417,30 +526,45 @@ export default function HiloDelPublicador() {
                    🔑 Y la pieza de B **no tiene slot de acciones en la barra**,
                    a propósito: *no hay dónde ponerlo mal.* La letra se sostiene
                    en la forma del contrato, no en que yo me acuerde. */
-                /* 🔴 **«VER POSTULACIÓN» NO SE DIBUJA, Y NO ES RECORTE.**
-                   §2.1 la pide —*«las respuestas del formulario, en su pantalla,
-                   no dentro del chat»*— y **no hay qué mostrar**: medido,
-                   `SolicitudRecibida` trae `solicitanteNombre` y **no trae
-                   `respuestas`**. Un botón que abriera una pantalla vacía sería
-                   peor que su ausencia: *le diría al refugio que la familia no
-                   contestó nada.* Pedido a A por nombre. */
+                /* ⭐ **«VER POSTULACIÓN» ENTRA** (§2.1: *«las respuestas del
+                   formulario, en su pantalla, no dentro del chat»*).
+
+                   ⏪ Acá decía que no se podía, y era cierto: `SolicitudRecibida`
+                   no traía `respuestas`. Llegó (A), y **verificado contra el
+                   objeto antes de montarlo**: el lector las devuelve y las dos
+                   solicitudes vivas tienen sus seis claves. *Se corrige la nota
+                   en vez de borrarla — explica por qué este botón no existió.*
+
+                   🔴 **Y va SIEMPRE, también con el hilo cerrado**: leer por qué
+                   una familia postuló no deja de importar porque la solicitud
+                   terminó — *un refugio que declinó y quiere releer qué le
+                   escribieron no está haciendo nada indebido.* Lo que se recorta
+                   con el cierre son las DECISIONES, no la lectura. */
                 acciones={
-                  cerrado ? undefined : (
-                    <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                      <Boton
-                        variante="secundario"
-                        tamaño="sm"
-                        etiqueta={t('portalHilo.aceptar')}
-                        onPress={() => setDecidiendo('aceptada')}
-                      />
-                      <Boton
-                        variante="ghost"
-                        tamaño="sm"
-                        etiqueta={t('portalHilo.declinar')}
-                        onPress={() => setDecidiendo('declinada')}
-                      />
-                    </View>
-                  )
+                  <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                    <Boton
+                      variante="ghost"
+                      tamaño="sm"
+                      etiqueta={t('portalHilo.verPostulacion')}
+                      onPress={() => setViendoPostulacion(true)}
+                    />
+                    {cerrado ? null : (
+                      <>
+                        <Boton
+                          variante="secundario"
+                          tamaño="sm"
+                          etiqueta={t('portalHilo.aceptar')}
+                          onPress={() => setDecidiendo('aceptada')}
+                        />
+                        <Boton
+                          variante="ghost"
+                          tamaño="sm"
+                          etiqueta={t('portalHilo.declinar')}
+                          onPress={() => setDecidiendo('declinada')}
+                        />
+                      </>
+                    )}
+                  </View>
                 }
               />
 
@@ -565,6 +689,39 @@ export default function HiloDelPublicador() {
 
       ) : null}
 
+
+      {/* ═══ C6 · LA POSTULACIÓN, EN SU PANTALLA Y NO ADENTRO DEL CHAT ═════
+          §2.1 lo dice así: *«las respuestas del formulario, **en su pantalla**,
+          no dentro del chat»*. Volcarlas al hilo las mezclaría con la
+          conversación y las volvería imposibles de releer: *lo que se lee una
+          vez para decidir no vive en el mismo lugar que lo que se lee todos los
+          días.*
+
+          🔴 **Se dibuja lo que HAY, clave por clave, y nada más.** Las opcionales
+          —`otros_animales`, `experiencia`— **se omiten si vienen vacías** en vez
+          de mostrar un rótulo con una raya: *un campo vacío con su título dice
+          «no contestó», y lo cierto es que no se le preguntó como obligatorio.*
+
+          ⚠️ **Los menores van POR RANGO y jamás por nombre ni edad exacta**
+          (§5.9). No es una convención de esta pantalla: **el motor rechaza
+          `hogar.nombre_menor` y la tabla tiene un CHECK que lo hace
+          inexpresable**. Acá sólo se muestra lo que ese esquema permitió
+          guardar. */}
+      <Hoja
+        visible={viendoPostulacion}
+        onCerrar={() => setViendoPostulacion(false)}
+        titulo={t('portalHilo.postulacionTitulo')}
+      >
+        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+          {estado.fase !== 'listo' || estado.hilo.respuestas === null ? (
+            /* `null` es legal y **no es un error**: una solicitud puede existir
+               sin formulario. Se dice, en vez de dibujar una hoja vacía. */
+            <Texto variante="cuerpo">{t('portalHilo.postulacionSinDatos')}</Texto>
+          ) : (
+            <PostulacionLeida r={estado.hilo.respuestas} t={t} />
+          )}
+        </View>
+      </Hoja>
 
       {/* ── P1 · LA DOBLE CONFIRMACIÓN, con el SUJETO nombrado ── */}
       <HojaConfirmacionDestructiva
