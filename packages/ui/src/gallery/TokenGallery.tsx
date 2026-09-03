@@ -4528,6 +4528,15 @@ function GaleriaInterna() {
                 etiquetaAbanico="Tenés 5 pendientes"
               />
             </View>
+            <View style={{ width: 96, height: 96 }}>
+              <BurbujaPendientes
+                pendientes={[
+                  { clase: 'mensajes', cuenta: 2, onAbrir: () => {}, etiqueta: 'Ver tus mensajes, 2 conversaciones', titulo: 'Mensajes' },
+                  { clase: 'solicitudes', cuenta: 4, onAbrir: () => {}, etiqueta: 'Ver solicitudes, 4 por revisar', titulo: 'Solicitudes' },
+                ]}
+                etiquetaAbanico="Tenés 6 pendientes"
+              />
+            </View>
           </View>
           <Texto variante="apoyo">
             Catálogo, NO gate: esta pieza se juzga montada en el recorrido, con el pulgar. Los tres

@@ -24,6 +24,8 @@ if (clasesVivas([{ cuenta: 1 }]).length !== 1) { di('ROJO · auto-prueba: pierde
 
 const C = (n) => ({ clase: 'carrito', cuenta: n })
 const M = (n) => ({ clase: 'mensajes', cuenta: n })
+/* S112 · la tercera clase (refugio). El umbral es «dos o más», no «dos». */
+const S = (n) => ({ clase: 'solicitudes', cuenta: n })
 
 const casos = [
   ['nada',                        [],              false, 0],
@@ -33,6 +35,9 @@ const casos = [
   ['🔴 las dos en 0',             [C(0), M(0)],    false, 0],
   ['las dos con algo',            [C(3), M(2)],    true,  2],
   ['negativo no cuenta',          [C(3), M(-1)],   false, 1],
+  ['refugio: mensajes + solicitudes', [M(2), S(4)], true,  2],
+  ['🔴 refugio sin nada por revisar',  [M(2), S(0)], false, 1],
+  ['tres clases: el abanico crece',   [C(1), M(2), S(3)], true, 3],
 ]
 
 let fallo = 0

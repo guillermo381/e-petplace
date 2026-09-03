@@ -6,6 +6,13 @@
  * opciones hacia arriba, cada una con glifo y número, que sólo aparece cuando
  * hay dos clases. Con una sola clase, el toque va directo.»*
  *
+ * ⚠️ **DOS ERA EL NÚMERO DE ESE DÍA, NO UNA LEY.** Con `solicitudes` ya son
+ * tres clases posibles, y el abanico dibuja **las que haya**: el umbral es
+ * *«dos o más»*, no *«exactamente dos»*. **Hoy ninguna app puede producir
+ * tres** —`carrito` es del cliente, `solicitudes` del refugio— pero la pieza
+ * no lo impide, **y no debe**: *un tope tecleado acá se descubriría el día que
+ * una clase nueva desaparezca sin error.*
+ *
  * ── 🔴 LA MEDICIÓN DE N25 QUE EL FOUNDER PIDIÓ ANTES DE CONSTRUIR ──────
  * El encargo venía con su freno: *«si «una puerta al carrito» lo prohíbe como
  * está escrito, no construyas»*. **Medido: NO lo prohíbe.** Y conviene dejar
@@ -132,13 +139,25 @@ export const COLA_BURBUJA_PENDIENTES = DISCO + spacing[5] + spacing[4]
 
 /** Las clases que pueden estar pendientes. **Crece acá y rompe en el mapa de
  *  glifos**, que es `Record` completo a propósito: *un cuarto cuarto no puede
- *  entrar sin que alguien decida su dibujo.* */
-export type ClasePendiente = 'carrito' | 'mensajes'
+ *  entrar sin que alguien decida su dibujo.*
+ *
+ *  ✅ **Y ya se cobró una vez, que es para lo que servía:** `solicitudes` entró
+ *  en S112 (firma del founder, refugio) y **el compilador exigió su dibujo** en
+ *  el mismo acto. *Una clase nueva no puede colarse sin glifo.* */
+export type ClasePendiente = 'carrito' | 'mensajes' | 'solicitudes'
 
 const GLIFO_DE: Record<ClasePendiente, IconoNombre> = {
   carrito: 'carrito',
   /* Los dos globos de la escalera de adopción. Se ensancha, no se copia. */
   mensajes: 'burbujas',
+  /* El sobre de la escalera, **visto desde el otro lado**: ahí marca la etapa
+     «enviada» —el adoptante la manda— y acá cuenta las que llegaron a revisar.
+     *Es el mismo objeto y los dos extremos del mismo acto*, así que reusarlo
+     no es economía: es decir la verdad. Lo que NO se hizo, y se declara: meter
+     las solicitudes adentro de `mensajes` — el disco mostraría un glifo de
+     conversación para avisar de algo que no es una conversación, que es el
+     mismo defecto que el carrito avisando de un mensaje. */
+  solicitudes: 'sobre',
 }
 
 export interface Pendiente {
