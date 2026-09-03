@@ -3588,6 +3588,13 @@ export const prestadorEn = {
     errorDetalle: 'Check your connection and try again.',
   },
   miVitrina: {
+    permisoFotos: 'We need permission to see your photos.',
+    fotoErrorRed: "We couldn't upload it. Check your connection.",
+    fotoErrorSubida: "We couldn't upload it. Try again.",
+    logoSoloPng: 'The logo has to be a PNG, so it shows without a background.',
+    subirPortada: 'Add a cover photo',
+    subirLogo: 'Change the logo',
+    fotosTitulo: 'Your photos',
     titulo: 'My page',
     detalleCelda: 'how a family sees you',
     sinPaginaTitulo: "You haven't built your page yet",

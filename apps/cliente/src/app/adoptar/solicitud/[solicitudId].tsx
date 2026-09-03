@@ -66,6 +66,7 @@ import {
 } from '@epetplace/ui';
 import {
   armarHilo,
+  fusionarFilas,
   fusionarPorId,
   leerEscalera,
   type FilaDelHilo,
@@ -316,16 +317,28 @@ export default function HiloSolicitud() {
        llegan los mismos, las filas salen iguales y la lista no se mueve. */
     const base = fusionarPorId(mensajesRef.current, estado.hilo.mensajes);
     mensajesRef.current = base;
-    return armarHilo([
+    /* ⚠️ El `ref` se escribe adentro del `useMemo` **a propósito y declarado**:
+       es memoización, no un efecto de producto — nada de afuera lo observa, y
+       moverlo a un `useEffect` haría que la primera pasada compare contra
+       vacío y redibuje todo una vez de más. */
+    const armadas = fusionarFilas(filasRef.current, armarHilo([
       ...base,
+      /* ⭐ **El estado de envío VIAJA EN EL MENSAJE**, no en un `Set` que la
+         pantalla consulta al renderizar: la fila está memoizada por su item, y
+         con el estado afuera **no se repintaría al pasar de «enviando» a
+         «enviado»** (contrato de B). */
       ...enVuelo.map((x) => ({
         mensajeId: `local:${x.clientId}`,
         autorUserId: miUid,
         cuerpo: x.cuerpo,
         automatica: false,
         creadoEn: ahora,
+        envio: x.estado,
+        clientId: x.clientId,
       })),
-    ]);
+    ]));
+    filasRef.current = armadas;
+    return armadas;
   }, [estado, enVuelo, miUid]);
 
   /** Cuántos ajenos llegaron desde la última vez que estuve al fondo. */
@@ -335,6 +348,11 @@ export default function HiloSolicitud() {
      cambió**. La fusión devuelve los objetos anteriores —y el arreglo anterior
      entero si nada cambió—, así que las filas quietas se quedan quietas. */
   const mensajesRef = useRef<readonly MensajeParaHilo[]>([]);
+  /* 🔴 **Y las FILAS también**: fusionar los mensajes no alcanza porque
+     `armarHilo` los envuelve en filas nuevas, y **la lista memoiza por la
+     FILA**. Con mensajes fusionados y filas nuevas, el trabajo se hace y el
+     número no se mueve. */
+  const filasRef = useRef<readonly FilaDelHilo[]>([]);
 
   const ajenosVistos = useRef(0);
   useEffect(() => {
@@ -399,9 +417,7 @@ export default function HiloSolicitud() {
     }
     const m = f.mensaje;
     const mio = m.autorUserId === miUid;
-    const enVueloDeEste = m.mensajeId.startsWith('local:')
-      ? enVuelo.find((x) => `local:${x.clientId}` === m.mensajeId)
-      : undefined;
+
     /* La hora se pasa **SIEMPRE** aunque no se dibuje: la pieza la calla donde
        no va. *Si la pantalla eligiera cuándo pasarla, la regla «la hora va bajo
        el último del grupo» viviría en cada consumidor* (decisión de B). */
@@ -432,8 +448,10 @@ export default function HiloSolicitud() {
        unión no admite «tal vez tiene salida»: un fallo sin salida deja a la
        persona creyendo que mandó algo que no mandó.* El typecheck lo dijo antes
        que cualquier gate. */
-    if (enVueloDeEste?.estado === 'no_se_envio') {
-      const clientId = enVueloDeEste.clientId;
+    /* 🔑 El estado sale DEL ITEM (`f.envio`), no de un `Set` que este render
+       consulte: la fila está memoizada y un estado de afuera no la repinta. */
+    if (f.envio === 'no_se_envio' && f.clientId !== null) {
+      const clientId = f.clientId;
       return (
         <BurbujaMensaje
           mio
@@ -452,7 +470,7 @@ export default function HiloSolicitud() {
         texto={m.cuerpo}
         hora={hora}
         posicion={f.posicion}
-        estado={enVueloDeEste === undefined ? 'enviado' : 'enviando'}
+        estado={f.envio === 'no_se_envio' ? 'enviando' : f.envio}
       />
     );
   }, [estado, enVuelo, t, idioma]);
@@ -652,7 +670,12 @@ export default function HiloSolicitud() {
               </View>
             </View>
           }
-          datosDelMasNuevoAlMasViejo={filas}
+          /* `[...]` porque la pieza pide un arreglo mutable y la fusión
+             devuelve `readonly`. **Es una copia superficial: los ITEMS siguen
+             siendo los mismos objetos**, que es lo único que la memoización
+             mira. *Copiar el arreglo no rompe la garantía; copiar los items
+             sí.* */
+          datosDelMasNuevoAlMasViejo={[...filas]}
           claveDe={(f) => f.clave}
           renderMensaje={renderFila}
           onAlFondoCambia={setAlFondo}

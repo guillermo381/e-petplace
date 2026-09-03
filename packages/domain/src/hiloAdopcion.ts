@@ -35,6 +35,10 @@
 /** El mensaje como lo entrega el contrato de D. Sólo lo que se necesita acá. */
 export interface MensajeParaHilo {
   mensajeId: string;
+  /** Ver `EstadoDeEnvio`. Los del servidor llegan como `'enviado'`. */
+  envio?: EstadoDeEnvio;
+  /** Sólo los optimistas. */
+  clientId?: string | null;
   autorUserId: string;
   cuerpo: string;
   automatica: boolean;
@@ -52,6 +56,21 @@ export interface EventoParaHilo {
 
 export type PosicionEnGrupo = 'solo' | 'primero' | 'medio' | 'ultimo';
 
+/**
+ * ⭐ **EL ESTADO DE ENVÍO VIAJA EN EL ITEM, no en un `Set` aparte.**
+ *
+ * 🔴 La lista memoiza por `item === item`, así que **todo lo que la burbuja
+ * dibuja tiene que venir adentro**. Con el estado afuera —en un arreglo de «en
+ * vuelo» que la pantalla consulta al renderizar— la fila **no se repinta cuando
+ * el mensaje pasa de «enviando» a «enviado»**: se queda con el reloj para
+ * siempre.
+ *
+ * *Y ése es el precio real de memoizar: «cero filas redibujadas» sería un
+ * número que se paga con datos viejos en pantalla, que es peor que el
+ * redibujado.* (Contrato de B, S112-B.)
+ */
+export type EstadoDeEnvio = 'enviando' | 'enviado' | 'no_se_envio';
+
 export type FilaDelHilo =
   | { tipo: 'dia'; clave: string; fechaIso: string }
   | { tipo: 'evento'; clave: string; evento: EventoParaHilo }
@@ -63,6 +82,10 @@ export type FilaDelHilo =
       posicion: PosicionEnGrupo;
       /** `true` sólo en el primero del grupo: es donde va el nombre. */
       abreGrupo: boolean;
+      /** Ver `EstadoDeEnvio`: viaja EN el item porque la fila está memoizada. */
+      envio: EstadoDeEnvio;
+      /** El id local del optimista, para poder reintentarlo. `null` = del servidor. */
+      clientId: string | null;
     };
 
 /** Minutos dentro de los cuales dos mensajes del mismo autor van juntos. */
@@ -147,6 +170,8 @@ export function armarHilo(
       mensaje: c.m,
       posicion,
       abreGrupo: !sigueALaAnterior,
+      envio: c.m.envio ?? 'enviado',
+      clientId: c.m.clientId ?? null,
     });
   }
 
@@ -261,6 +286,54 @@ export function leerEscalera(
  * arreglo nuevo con los mismos objetos adentro igual rompe la memoización de
  * quien lo recibe. *La identidad tiene que sobrevivir en los dos niveles.*
  */
+/**
+ * 🔴 **Y LAS FILAS TAMBIÉN CONSERVAN IDENTIDAD, no sólo los mensajes.**
+ *
+ * Fusionar los mensajes no alcanza: `armarHilo` los **envuelve** en una fila
+ * nueva (`{tipo, clave, mensaje, posicion, …}`) en cada corrida, y **la lista
+ * memoiza por la FILA**, no por el mensaje que lleva adentro. *Con los mensajes
+ * fusionados y las filas nuevas, la memoización sigue dando `false` para todas
+ * — el trabajo se hace y el número no se mueve.*
+ *
+ * Compara **el contenido de la fila**, que es corto y plano a propósito: si
+ * cambió la posición en el grupo o el estado de envío, la fila cambió de verdad
+ * y tiene que repintarse.
+ */
+export function fusionarFilas(
+  previas: readonly FilaDelHilo[],
+  nuevas: readonly FilaDelHilo[],
+): readonly FilaDelHilo[] {
+  const antes = new Map(previas.map((f) => [f.clave, f]));
+  let cambio = previas.length !== nuevas.length;
+  const salida = nuevas.map((n, i) => {
+    const v = antes.get(n.clave);
+    if (v !== undefined && v.tipo === n.tipo && mismaFila(v, n)) {
+      if (previas[i] !== v) cambio = true;
+      return v;
+    }
+    cambio = true;
+    return n;
+  });
+  return cambio ? salida : previas;
+}
+
+function mismaFila(a: FilaDelHilo, b: FilaDelHilo): boolean {
+  if (a.tipo === 'dia' && b.tipo === 'dia') return a.fechaIso === b.fechaIso;
+  if (a.tipo === 'evento' && b.tipo === 'evento') {
+    return a.evento.etiqueta === b.evento.etiqueta && a.evento.pideAccion === b.evento.pideAccion;
+  }
+  if (a.tipo === 'mensaje' && b.tipo === 'mensaje') {
+    return (
+      a.mensaje.cuerpo === b.mensaje.cuerpo &&
+      a.posicion === b.posicion &&
+      a.abreGrupo === b.abreGrupo &&
+      a.envio === b.envio &&
+      a.mensaje.autorUserId === b.mensaje.autorUserId
+    );
+  }
+  return false;
+}
+
 export function fusionarPorId<T extends { mensajeId: string; cuerpo: string }>(
   previos: readonly T[],
   nuevos: readonly T[],

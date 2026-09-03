@@ -67,7 +67,9 @@ export {
      las DOS superficies tienen que derivarlo igual: si la familia y el refugio
      mostraran etapas distintas para la misma solicitud, una estaría mintiendo
      y no habría forma de saber cuál. */
+  fusionarFilas,
   fusionarPorId,
+  type EstadoDeEnvio,
   leerEscalera,
   type EtapaEscalera,
   type FinalEscalera,

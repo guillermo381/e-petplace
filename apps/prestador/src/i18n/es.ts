@@ -4527,6 +4527,15 @@ export const prestadorEs = {
      tiene camino (pedir la verificación) y el otro **hoy no lo destraba
      nadie** — decirlos igual convertiría una gestión pendiente en un muro. */
   miVitrina: {
+    permisoFotos: 'Necesitamos permiso para ver tus fotos.',
+    fotoErrorRed: 'No pudimos subirla. Revisa tu conexión.',
+    fotoErrorSubida: 'No pudimos subirla. Prueba de nuevo.',
+    /* El logo es PNG por orden del founder: el resize de la casa re-codifica a
+       JPEG y mataría la transparencia. */
+    logoSoloPng: 'El logo tiene que ser PNG, para que se vea sin fondo.',
+    subirPortada: 'Agregar foto de portada',
+    subirLogo: 'Cambiar el logo',
+    fotosTitulo: 'Tus fotos',
     titulo: 'Mi vitrina',
     detalleCelda: 'cómo te ve una familia',
     /* El vacío es una INVITACIÓN, no una carencia: la fila de prestador la

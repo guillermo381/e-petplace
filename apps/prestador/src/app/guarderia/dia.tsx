@@ -74,7 +74,6 @@ import { HojaActaGuarderia } from '@/components/hoja-acta-guarderia';
 import { HojaNoEstaba } from '@/components/hoja-no-estaba';
 import { HojaMediaGuarderia } from '@/components/hoja-media-guarderia';
 import { HojaChipsGuarderia } from '@/components/hoja-chips-guarderia';
-import { horaCorta } from '@/lib/ventas-formato';
 import type { DireccionActa } from '@/lib/cola-actas';
 import {
   aplicarOrden,
@@ -88,13 +87,20 @@ import {
 import { cablearEmitirPunto } from '@/lib/guarderia-cableado';
 import { usePuntoVivo } from '@/lib/use-punto-vivo';
 import { contarPresencia, vozDePresencia } from '@epetplace/domain';
+import { hoyEnZona, horaEnZona } from '@/lib/dia-local';
 
-/** Fecha LOCAL. 🔴 `toISOString()` da UTC y en Guayaquil, pasadas las 19:00,
- *  devuelve el día siguiente — la jornada saldría vacía a la tarde. */
-function hoyLocal(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+/* ☠️ **ACÁ VIVÍA UNA COPIA DE `hoyLocal`, Y ES LA RAÍZ DEL DÍA EQUIVOCADO.**
+   Su comentario decía la verdad —`toISOString()` da UTC y a la tarde corre el
+   día— y **curaba media clase**: dejaba de usar UTC y pasaba a usar **la zona
+   del DISPOSITIVO**, que tampoco es la del negocio.
+
+   *Una copia con su trampa documentada es más peligrosa que una sin comentario:
+   el comentario dice que alguien lo pensó, así que nadie lo vuelve a mirar.*
+
+   Muere (Ley 37) y la reemplaza `hoyEnZona()` de `@/lib/dia-local`, que pide el
+   día **en la zona del negocio** — la misma que usa `hoy_local()` en la base,
+   que es la única forma de que el día que se pide y el que se responde sean el
+   mismo. */
 
 /**
  * El snapshot llega como `unknown`. Se estrecha **mirando la forma**, no
@@ -200,7 +206,7 @@ export default function DiaGuarderia() {
         setEstado({ fase: 'roto' });
         return;
       }
-      const r = await obtenerEstadiasDelDia(p.data.id, hoyLocal());
+      const r = await obtenerEstadiasDelDia(p.data.id, hoyEnZona());
       if (!vigente) return;
       /* Un fallo JAMÁS se disfraza de «hoy no tenés animales» (Ley 13): el
          cuidador se quedaría en su casa creyendo que no hay jornada. */
@@ -214,14 +220,14 @@ export default function DiaGuarderia() {
       /* El viaje se lee del disco con la MISMA fecha que el roster: dos formas
          de saber qué día es se contradicen justo a la tarde, que es cuando se
          devuelven los animales. */
-      const v = await leerViaje(hoyLocal());
+      const v = await leerViaje(hoyEnZona());
       /* La máquina es un CATÁLOGO: se pide una vez, con el día. Si falla, la
          pantalla sigue mostrando el roster y sólo pierde los actos — un
          catálogo caído no puede dejar al cuidador sin saber a quién buscar. */
       const maq = await obtenerMaquinaEstadia();
       /* ⑨ · El orden que el cuidador dejó hoy. Lo guardado manda; lo nuevo
          cae al final por su orden natural. */
-      const orden = await leerOrden(hoyLocal());
+      const orden = await leerOrden(hoyEnZona());
       if (!vigente) return;
       setViaje(v);
       setEstado({
@@ -400,7 +406,7 @@ export default function DiaGuarderia() {
     if (i < 0 || j < 0 || j >= lista.length) return;
     [lista[i], lista[j]] = [lista[j], lista[i]];
     setEstado({ ...listo, estadias: lista });
-    void guardarOrden(hoyLocal(), lista.map((e) => e.estadiaId));
+    void guardarOrden(hoyEnZona(), lista.map((e) => e.estadiaId));
   };
 
   /** La hora del TOQUE — la de la puerta. La del servidor existe para auditar
@@ -415,7 +421,7 @@ export default function DiaGuarderia() {
     try {
       const r = await abrirTramoGuarderia({
         prestadorId: listo.prestadorId,
-        fecha: hoyLocal(),
+        fecha: hoyEnZona(),
         direccion: 'recogida',
         estadias: porRecoger.map((e) => e.estadiaId),
       });
@@ -423,7 +429,7 @@ export default function DiaGuarderia() {
       const v: ViajeAbierto = {
         tramoId: r.data.tramoId,
         direccion: 'recogida',
-        fecha: hoyLocal(),
+        fecha: hoyEnZona(),
         prestadorId: listo.prestadorId,
         abiertoEn: Date.now(),
       };
@@ -442,7 +448,7 @@ export default function DiaGuarderia() {
       const ids = adentro.map((e) => e.estadiaId);
       const r = await abrirTramoGuarderia({
         prestadorId: listo.prestadorId,
-        fecha: hoyLocal(),
+        fecha: hoyEnZona(),
         direccion: 'devolucion',
         estadias: ids,
       });
@@ -457,7 +463,7 @@ export default function DiaGuarderia() {
       const v: ViajeAbierto = {
         tramoId: r.data.tramoId,
         direccion: 'devolucion',
-        fecha: hoyLocal(),
+        fecha: hoyEnZona(),
         prestadorId: listo.prestadorId,
         abiertoEn: Date.now(),
       };
@@ -805,7 +811,17 @@ export default function DiaGuarderia() {
                               motivo: t(
                                 `noEstaba.motivo_${e.noRecogidaMotivo as MotivoNoRecogida}` as 'noEstaba.motivo_nadie_en_domicilio',
                               ),
-                              hora: e.noRecogidaEn === null ? '' : horaCorta(e.noRecogidaEn),
+                              /* ⏪ **DECÍA LA HORA DEL APARATO** (`horaCorta`,
+                                 `Intl` sin `timeZone`). Un sello se guarda en
+                                 UTC y **se lee donde ocurrió**: con el teléfono
+                                 en otra zona, una llegada de las 13:38 en Quito
+                                 se leía «18:38» y nada avisaba.
+                                 ⚠️ Y acá pesa doble: A midió que `Kira Tres`
+                                 tiene su `no_recogida_en` del 3 en una estadía
+                                 del 2 —el acto se registró después de medianoche
+                                 UTC—, así que **la hora sin su zona se lee como
+                                 un acto del día equivocado**. */
+                              hora: e.noRecogidaEn === null ? '' : horaEnZona(e.noRecogidaEn),
                             })}
                           </Texto>
                         ) : null}
@@ -953,7 +969,7 @@ export default function DiaGuarderia() {
         <HojaMediaGuarderia
           visible={mediaAbierta}
           prestadorId={estado.prestadorId}
-          fecha={hoyLocal()}
+          fecha={hoyEnZona()}
           /* El universo de etiquetado son los que HOY están adentro. */
           presentes={adentro}
           onCerrar={() => setMediaAbierta(false)}
@@ -989,7 +1005,7 @@ export default function DiaGuarderia() {
           estadia={acta.estadia}
           direccion={acta.direccion}
           prestadorId={estado.prestadorId}
-          fecha={hoyLocal()}
+          fecha={hoyEnZona()}
           cara={
             acta.estadia.mascotaFotoUrl === null
               ? null
