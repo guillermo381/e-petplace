@@ -1008,6 +1008,15 @@ export interface MensajeDelHilo {
 /** El hilo como lo ve LA FAMILIA. */
 export interface MiSolicitud {
   solicitudId: string;
+  /**
+   * Mensajes que esta familia no leyó, **contados en el servidor**.
+   *
+   * ⚠️ Nació sin declararse: el mapeador ya lo devolvía y **el typecheck pasó
+   * igual** — el chequeo de propiedades de más no lo cazó, así que `MiSolicitud`
+   * decía menos de lo que la función entregaba. *Un tipo que declara de menos
+   * no rompe nada: esconde un dato que ya está viajando.*
+   */
+  sinLeer: number;
   publicacionId: string;
   estado: EstadoSolicitudAdopcion;
   creadaEn: string;
@@ -1037,6 +1046,14 @@ export interface SolicitudRecibida {
    *  genérica donde la familia ve la cara — la misma solicitud, dos caras. */
   mascotaEspecie: string | null;
   mascotaFotoUrl: string | null;
+  /**
+   * Mensajes que esta persona no leyó. **Lo cuenta el SERVIDOR** — derivarlo
+   * acá obligaría a traer los mensajes de todos los hilos para contar los de
+   * cada uno: *funciona hasta el día que la lista pagine* (argumento de C).
+   * Sin fila de lectura, **todo cuenta**: nunca abrió el hilo. Los propios no
+   * cuentan — *nadie tiene mensajes sin leer de sí mismo.*
+   */
+  sinLeer: number;
   mensajes: MensajeDelHilo[];
 }
 
@@ -1197,6 +1214,7 @@ export async function obtenerMisSolicitudesAdopcion(): Promise<
       mascotaEspecie: typeof f.mascota_especie === 'string' ? f.mascota_especie : '',
       mascotaFotoUrl: typeof f.mascota_foto_url === 'string' ? f.mascota_foto_url : null,
       publicadorNombre: typeof f.publicador_nombre === 'string' ? f.publicador_nombre : null,
+      sinLeer: Number(f.sin_leer ?? 0),
       mensajes: leerMensajes(f.mensajes),
     })),
   };
@@ -1240,6 +1258,7 @@ export async function obtenerSolicitudesDeMisPublicaciones(
          resuelva la cara tiene que poder distinguir «no la sé» de un valor. */
       mascotaEspecie: typeof f.mascota_especie === 'string' ? f.mascota_especie : null,
       mascotaFotoUrl: typeof f.mascota_foto_url === 'string' ? f.mascota_foto_url : null,
+      sinLeer: Number(f.sin_leer ?? 0),
       mensajes: leerMensajes(f.mensajes),
     })),
   };
@@ -1715,4 +1734,57 @@ export async function buscarRefugios(
       ciudad: typeof f.ciudad === 'string' ? f.ciudad : null,
     })),
   };
+}
+
+
+/* ═══ EL HILO: marcar leído y la respuesta automática del refugio ═══ */
+
+/**
+ * Marca el hilo como leído **hasta su último mensaje**, no hasta `now()`:
+ * *anclar al reloj marcaría leído un mensaje que llegue en el mismo instante
+ * y nadie vio.* Nunca retrocede — releer lo viejo no vuelve nuevo lo leído.
+ *
+ * Se llama **al abrir el hilo**. Sin esto el contador sólo sube, *y un número
+ * que sólo sube es peor que ninguno.*
+ */
+export async function marcarHiloLeido(
+  solicitudId: string,
+): Promise<ResultadoWrapper<{ leidoHasta: string | null }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('marcar_hilo_leido', {
+    p_solicitud_id: solicitudId,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  const r = data as Record<string, unknown>;
+  return {
+    ok: true,
+    data: { leidoHasta: typeof r.leido_hasta === 'string' ? r.leido_hasta : null },
+  };
+}
+
+/**
+ * El texto que el refugio le manda automáticamente a quien postula.
+ *
+ * 🔴 **El texto es del refugio, jamás de la casa.** Si la app lo inventara, le
+ * pondría palabras en la boca a un refugio que no las escribió — y esa frase
+ * la lee una familia creyendo que se la escribieron a ella.
+ *
+ * ⚠️ **Vaciarlo lo RETIRA** (mandá `''` o nada). Sin texto no hay mensaje
+ * automático, y está bien: el hilo igual tiene el de quien postula, así que
+ * no nace vacío. *Un saludo genérico de la plataforma enseña que el refugio
+ * contestó cuando no contestó.*
+ *
+ * El mensaje que nace queda **atribuido a la persona del refugio**, no a «la
+ * casa»: `adopcion_mensaje` no admite un mensaje sin autor, y tiene razón —
+ * alguien escribió ese texto. `automatica` dice **cómo se envió**.
+ */
+export async function definirRespuestaAutomaticaRefugio(
+  cuerpo: string,
+): Promise<ResultadoWrapper<{ activa: boolean }, CodigoErrorAdopcion>> {
+  const { data, error } = await getClient().rpc('definir_respuesta_automatica_refugio', {
+    p_cuerpo: cuerpo,
+  });
+  if (error) return fallo(error.message);
+  if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');
+  return { ok: true, data: { activa: (data as Record<string, unknown>).activa === true } };
 }

@@ -509,6 +509,32 @@ export type Database = {
           },
         ]
       }
+      adopcion_lectura: {
+        Row: {
+          leido_hasta: string
+          solicitud_id: string
+          user_id: string
+        }
+        Insert: {
+          leido_hasta: string
+          solicitud_id: string
+          user_id: string
+        }
+        Update: {
+          leido_hasta?: string
+          solicitud_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_lectura_solicitud_id_fkey"
+            columns: ["solicitud_id"]
+            isOneToOne: false
+            referencedRelation: "adopcion_solicitud"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adopcion_mensaje: {
         Row: {
           automatica: boolean
@@ -723,6 +749,49 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_adoptables_publicos"
             referencedColumns: ["publicacion_id"]
+          },
+        ]
+      }
+      adopcion_respuesta_automatica: {
+        Row: {
+          actualizado: string
+          actualizado_por: string | null
+          cuenta_comercial_id: string
+          cuerpo: string
+        }
+        Insert: {
+          actualizado?: string
+          actualizado_por?: string | null
+          cuenta_comercial_id: string
+          cuerpo: string
+        }
+        Update: {
+          actualizado?: string
+          actualizado_por?: string | null
+          cuenta_comercial_id?: string
+          cuerpo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adopcion_respuesta_automatica_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: true
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adopcion_respuesta_automatica_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: true
+            referencedRelation: "v_adoptables_publicos"
+            referencedColumns: ["publicador_id"]
+          },
+          {
+            foreignKeyName: "adopcion_respuesta_automatica_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: true
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
           },
         ]
       }
@@ -23628,6 +23697,10 @@ export type Database = {
         }
         Returns: Json
       }
+      definir_respuesta_automatica_refugio: {
+        Args: { p_cuerpo: string }
+        Returns: Json
+      }
       definir_turno_entrega: {
         Args: {
           p_codigo: string
@@ -24115,6 +24188,7 @@ export type Database = {
         }
         Returns: Json
       }
+      marcar_hilo_leido: { Args: { p_solicitud_id: string }; Returns: Json }
       marcar_invitacion_aceptada: {
         Args: { p_invitacion_id: string }
         Returns: boolean
@@ -24800,6 +24874,7 @@ export type Database = {
           mensajes: Json
           publicacion_id: string
           publicador_nombre: string
+          sin_leer: number
           solicitud_id: string
         }[]
       }
@@ -25050,6 +25125,7 @@ export type Database = {
           mascota_nombre: string
           mensajes: Json
           publicacion_id: string
+          sin_leer: number
           solicitante_nombre: string
           solicitante_user_id: string
           solicitud_id: string
