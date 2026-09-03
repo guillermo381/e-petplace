@@ -90,6 +90,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { marcarLeidoLocal } from '@/lib/pendientes-adopcion';
 
 /** Los borradores vivos, por hilo. **Sólo en memoria**: sobrevive a la
  *  pantalla y no al cierre de la app — que es lo que §2.4 pide («cuando vuelvo
@@ -187,6 +188,12 @@ export default function HiloSolicitud() {
            ⚠️ Va con `void` a propósito y NO dentro del `Promise.all`: **su
            resultado no lo dibuja nadie.** */
         void marcarHiloLeido(hilo.solicitudId);
+        /* ⭐ **S112-C · Y EL NÚMERO BAJA AL INSTANTE**, sin esperar a esa
+           respuesta (firma del founder). El de arriba le avisa al SERVIDOR;
+           éste corrige lo que el shell ya tiene en memoria — cero viaje.
+           *Esperar al servidor para bajar un número que ya sabemos que bajó
+           deja la burbuja marcando mensajes que la persona está leyendo.* */
+        marcarLeidoLocal(hilo.solicitudId);
         const caras =
           hilo.mascotaFotoUrl === null
             ? new Map<string, string>()
