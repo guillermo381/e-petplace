@@ -27567,3 +27567,57 @@ movía su propio fixture**. E no lo esquivó: **lo convirtió en un brazo que
 prueba la cascada ajena**. *Un arnés no encontró un defecto: encontró que el
 mundo cambió debajo de su fixture — que es exactamente para lo que sirve volver
 a correrlo.*
+
+### `L-490` — `core.hooksPath` es una ruta ABSOLUTA al árbol PRINCIPAL: no obedece a ninguna rama
+
+**Qué medí, y por qué lo tenía mal.** Curé el `set -e` del hook, publiqué
+`f4bc5f36`, y cuando C reportó que su primer intento de `8c2d87b6` murió
+mudo (síntoma exacto del defecto que acababa de curar), **expliqué el hecho
+con el modelo mental equivocado**: *«tu rama no lo tenía todavía»* — como si
+el hook que corre para cada `git commit` saliera del checkout de quien
+commitea.
+
+**Lo que el objeto dice, verificado en el worktree de C y no sólo en el mío:**
+
+```
+$ git config --show-origin --get core.hooksPath
+file:.git/config  /Users/…/e-petplace/.githooks
+
+$ git -C …/e-petplace-s112-c config --get core.hooksPath
+/Users/…/e-petplace/.githooks          ← LA MISMA RUTA, mismo worktree ajeno
+```
+
+`core.hooksPath` vive en `.git/config` del **git-common-dir**, y ese archivo
+lo comparten TODOS los worktrees por diseño de git (no es de la lista que
+`extensions.worktreeConfig` aísla por worktree). Como el valor es una **ruta
+absoluta**, cada `git commit` — sin importar en qué worktree, en qué rama, en
+qué commit esté parado — ejecuta el MISMO archivo físico:
+`/Users/…/e-petplace/.githooks/pre-commit`, tal como esté en disco en el
+árbol PRINCIPAL en ese instante.
+
+**Lo que eso invierte, en las dos direcciones:**
+
+- **A favor:** una cura del hook llega a TODAS las pistas en el instante en
+  que el árbol principal tiene ese commit — nadie necesita mergear `main`
+  para recibirla. Publicar la cura fue suficiente; el aviso de "mergeá main"
+  habría sido innecesario.
+- **En contra, y es el riesgo real:** si el árbol principal queda parado en
+  un commit VIEJO (por ejemplo, mientras reviso algo, hago un `checkout`
+  temporal, o simplemente no pusheo), **TODAS las pistas pierden la cura al
+  mismo tiempo**, aunque cada una tenga `main` mergeado en su propia rama. Y
+  el síntoma no se lee como "el hook está viejo": se lee como **"a mí no me
+  pasa"**, porque quien lo sufre no tiene forma de saber que el archivo que
+  corrió no es el de su propio checkout.
+
+**El corolario que corrige la práctica:** un defecto del hook nunca se
+diagnostica preguntando "¿qué rama tenía esa pista?" — se diagnostica
+preguntando **"¿qué tenía el árbol PRINCIPAL en ese instante?"**, porque ese
+es el único árbol que importa. La numeración por pista, el merge, el push —
+todo eso decide qué entra a `main`; **ninguno de esos actos decide qué hook
+corre**, porque el hook no lee `main`, lee una ruta.
+
+**Quién lo encontró.** C lo midió por su cuenta —contra su propio `git
+config`, no contra el mío— cuando mi explicación no le cerraba, y me lo
+corrigió con el comando y su salida, no con una afirmación. Es la misma
+disciplina que `L-489` pide: una corrección que llega con su propia
+evidencia se acepta; una que llega sin ella se mide antes.
