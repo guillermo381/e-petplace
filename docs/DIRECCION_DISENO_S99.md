@@ -672,15 +672,44 @@ aprender lo mismo, y la segunda le roba sentido a la primera.* La del
 encabezado vive en `x=[344,368] · y=[80,104]` — **el ángulo superior derecho,
 la peor zona para un pulgar** en una pantalla de 832 dp.
 
-**③ Y NO NECESITA MECANISMO NUEVO, que es lo que la vuelve barata:** una
+> ## ⏪ 🔴 ③ Y SU ⚠️ ESTÁN DEROGADOS — RIGE **N28**, del mismo día
+>
+> El founder firmó N28 en **S100d·bis**, horas después: *«mientras tenga
+> productos debe estar visible en TODA la app»* + *«el montaje **ES** la
+> decisión»*. Eso mueve el flotante **al SHELL**, y con eso caen las dos
+> mitades de abajo:
+>
+> · **③ manda montarlo como `pie` de `PantallaConPie`** — un montaje **por
+>   pantalla**. N28 dice que la pieza es del shell **porque su condición de
+>   existencia es un DATO y no una ruta**. *Son dos lugares distintos, no dos
+>   redacciones del mismo.*
+> · **La ⚠️ acota el flotante a la VITRINA.** N28 lo ensancha a toda la app
+>   con **lista explícita de silencio: `carrito` y `checkout`**.
+>   ⚠️ Y un detalle medido al enmendar: **la ⚠️ nombra TRES pantallas y sólo
+>   existen DOS** (`despensa/carrito.tsx` y `despensa/checkout.tsx`; **no hay
+>   `resumen`**). La lista de N28 coincide con el objeto — *no hay una
+>   diferencia que arbitrar, hay una pantalla que N25 nombró y nunca existió.*
+>
+> **Lo que de ③ SIGUE VIVO:** que una flotante montada a mano con
+> `position:'absolute'` reintroduce **H-105** y **R53 muerde**. Eso no era del
+> montaje por pantalla: es de cómo se reserva el espacio, y vale igual en el
+> shell.
+>
+> 🔴 **Se enmienda ACÁ, en su lugar, y no sólo en el historial.** *Dos letras
+> firmadas que se contradicen son peores que una equivocada: cualquiera cita
+> la que le conviene y está «en regla».* Mismo precedente que el magenta de
+> S72→S83 y la plata de S83→S88. **Lo encontró B midiendo, no leyendo** — y el
+> documento no decía nada: sólo el objeto lo decía.
+
+~~**③ Y NO NECESITA MECANISMO NUEVO, que es lo que la vuelve barata:** una
 flotante sobre un scroll reintroduce **H-105** (el pie que tapa contenido),
 que es justo lo que S100b curó. **`PantallaConPie` ya lo resuelve**: su
 reserva es DERIVADA, así que **una flotante montada como su `pie` no puede
 tapar contenido.** *Montada a mano con `position:'absolute'` vuelve el
-defecto — y R53 muerde, que es lo que tiene que hacer.*
+defecto — y R53 muerde, que es lo que tiene que hacer.*~~
 
-⚠️ **La flotante es de la VITRINA.** En el carrito, el checkout y el resumen
-no va: ahí el carrito no es un destino, es la pantalla en la que ya estás.
+~~⚠️ **La flotante es de la VITRINA.** En el carrito, el checkout y el resumen
+no va: ahí el carrito no es un destino, es la pantalla en la que ya estás.~~
 
 **④ LA ELIMINACIÓN DA ACUSE.** Sin confirmación previa —firmado en S100b: la
 acción es inmediata y el deshacer es de la pantalla, la única que sabe qué se
@@ -1102,6 +1131,12 @@ destape). B la prototipa SOLO si le ve valor; entra únicamente por gate en
 dispositivo, como enmienda de primitiva — jamás por pantalla.
 
 ## Historial
+
+- **v1.4 (3-sep-2026, S112-A):** **N25 ③ y su ⚠️ quedan DEROGADAS en su propio
+  lugar**, con el texto viejo tachado y no borrado, apuntando a N28. No entra
+  letra nueva: se marca una contradicción que existía desde el 18-ago y que
+  **sólo el objeto declaraba**. *Un lector de N25 estaba construyendo contra
+  letra que ya no rige.* Lo midió B; lo depositó A porque `docs/` es suyo.
 
 - **v1.3 (18-ago-2026, S100d·bis):** entra **N28 — LO QUE VIVE EN EL SHELL**,
   con el criterio (*existe por el DATO, se calla por SUPERFICIE*) y su costo
