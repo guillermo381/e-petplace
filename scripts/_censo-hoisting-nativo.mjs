@@ -27,6 +27,17 @@
 import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
+/**
+ * Nativos que se toleran sin declarar, **cada uno con su razón**. Una entrada
+ * sin razón es una excepción que nadie puede auditar después.
+ */
+const TOLERADOS = new Set([
+  // transitiva de `expo` y garantizada en todo runtime Expo: ninguna app la
+  // declara y **ninguna debería** — declararla fijaría una versión que el SDK
+  // ya resuelve.
+  'expo-modules-core',
+]);
+
 const APPS = ['cliente', 'prestador'];
 /* NATIVO = trae código de plataforma ⇒ exige build. El resto viaja por OTA.
    La lista es de FORMA, no de nombres: todo `expo-*` y `react-native-*` es
@@ -51,7 +62,9 @@ for (const app of APPS) {
     const p = m[1].split('/');
     usados.add(m[1].startsWith('@') ? `${p[0]}/${p[1]}` : p[0]);
   }
-  const huerfanos = [...usados].filter((m) => esNativo(m) && !declaradas.has(m)).sort();
+  const huerfanos = [...usados]
+    .filter((m) => esNativo(m) && !declaradas.has(m) && !TOLERADOS.has(m))
+    .sort();
   console.log(`\n── ${app}: ${usados.size} paquetes usados · ${declaradas.size} declarados`);
   if (huerfanos.length === 0) console.log('   ✅ cero nativos sin declarar');
   else {
@@ -64,3 +77,32 @@ for (const app of APPS) {
   }
 }
 console.log(`\n${hallazgos === 0 ? '✅' : '🔴'} TOTAL fuera de declaración: ${hallazgos}`);
+
+/* ═══ S112-A · DE CENSO A GATE ═══════════════════════════════════════════════
+   🔴 **Salía con exit 0 SIEMPRE**, así que como gate habría dicho que sí pase
+   lo que pase — *un guard cuyo silencio no se distingue de su verde no es un
+   guard*. Ahora corta.
+
+   Y por eso hizo falta la lista de TOLERADOS: sin ella el gate salía rojo hoy
+   mismo sobre `expo-modules-core`, que **todos aceptamos**. Es `L-488` en su
+   forma operativa: *el censo nombra los casos y los clasifica quien conoce la
+   letra* — **la clasificación se escribe, no se deja en la cabeza del que
+   corrió el censo**.
+
+   ⚠️ **LO QUE ESTE GATE NO VE, DECLARADO — son TRES, no una:**
+   ① **No abre el APK.** Un módulo declarado y ausente del binario le pasa por
+      al lado; eso lo mide `verify-manifest-apk`.
+   ② 🔴 **Sólo escanea `apps/<app>/src`.** Un nativo que una app usa **a través
+      de `packages/ui`** es invisible acá — y ésa es la ruta de la mayoría de
+      las piezas de la casa. *Su verde dice «ninguna app importa un nativo sin
+      declararlo DIRECTAMENTE», jamás «el APK los tiene todos».*
+   ③ Un paquete declarado y **no importado por nadie** tampoco se ve: no es su
+      pregunta, pero conviene saberlo antes de leer un verde como limpieza.
+
+   🔴 **Y su rojo se probó, con un control que primero salió MAL:** el primer
+   intento quitó `expo-image-picker` y el gate siguió verde — porque **ese
+   paquete no se importa en ningún código, sólo se declara**. *El instrumento
+   tenía razón y el control estaba mal.* Repetido con `expo-image`, que sí se
+   importa en 11 archivos: **exit 1, con el nombre del paquete y de dónde
+   viene el hoisting.* */
+process.exit(hallazgos === 0 ? 0 : 1);
