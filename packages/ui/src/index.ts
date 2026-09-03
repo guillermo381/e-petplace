@@ -74,6 +74,9 @@ export { GlifoConContador, type GlifoConContadorProps } from './components/Glifo
 // hace entrar, y eso ES «al agregar se abre el flotante».
 // ⚠️ Su montaje y el RETIRO de la canasta del encabezado van en el MISMO
 // commit: montarla sola deja dos puertas; retirar la otra sola deja cero.
+export { BurbujaPendientes, COLA_BURBUJA_PENDIENTES, type BurbujaPendientesProps, type Pendiente, type ClasePendiente } from './components/BurbujaPendientes'
+// ☠️ CarritoFlotante — envoltorio delgado sobre BurbujaPendientes. Muere
+// cuando el shell monte la nueva (ver su cabecera: disparo nombrado).
 export { CarritoFlotante, COLA_CARRITO_FLOTANTE, type CarritoFlotanteProps } from './components/CarritoFlotante'
 // FichaRepartidor — S100d-B (punto 25): quién va a tocar el timbre. LA PLACA
 // MANDA (es lo único verificable desde la puerta) · sin placa el nombre

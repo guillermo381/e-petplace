@@ -90,7 +90,7 @@ import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
-import { CarritoFlotante } from '../components/CarritoFlotante'
+import { BurbujaPendientes } from '../components/BurbujaPendientes'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
 import { GotaUbicacion } from '../components/GotaUbicacion'
@@ -4505,18 +4505,36 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        <Seccion titulo="CarritoFlotante (S100d) — la ÚNICA puerta al carrito, donde llega el pulgar">
-          <View style={{ flexDirection: 'row', gap: spacing[7], alignItems: 'center' }}>
-            <CarritoFlotante cuenta={1} onAbrir={() => {}} etiqueta="Ver tu carrito, 1 producto" />
-            <CarritoFlotante cuenta={12} onAbrir={() => {}} etiqueta="Ver tu carrito, 12 productos" />
-            <CarritoFlotante cuenta={140} onAbrir={() => {}} etiqueta="Ver tu carrito, 140 productos" />
+        <Seccion titulo="BurbujaPendientes (S112) — la puerta única a lo que te espera">
+          <View style={{ flexDirection: 'row', gap: spacing[7] }}>
+            <View style={{ width: 96, height: 96 }}>
+              <BurbujaPendientes
+                pendientes={[{ clase: 'carrito', cuenta: 3, onAbrir: () => {}, etiqueta: 'Ver tu carrito, 3 productos', titulo: 'Carrito' }]}
+                etiquetaAbanico="Tenés 3 pendientes"
+              />
+            </View>
+            <View style={{ width: 96, height: 96 }}>
+              <BurbujaPendientes
+                pendientes={[{ clase: 'mensajes', cuenta: 2, onAbrir: () => {}, etiqueta: 'Ver tus mensajes, 2 sin leer', titulo: 'Mensajes' }]}
+                etiquetaAbanico="Tenés 2 pendientes"
+              />
+            </View>
+            <View style={{ width: 96, height: 96 }}>
+              <BurbujaPendientes
+                pendientes={[
+                  { clase: 'carrito', cuenta: 3, onAbrir: () => {}, etiqueta: 'Ver tu carrito, 3 productos', titulo: 'Carrito' },
+                  { clase: 'mensajes', cuenta: 2, onAbrir: () => {}, etiqueta: 'Ver tus mensajes, 2 sin leer', titulo: 'Mensajes' },
+                ]}
+                etiquetaAbanico="Tenés 5 pendientes"
+              />
+            </View>
           </View>
           <Texto variante="apoyo">
-            El cuarto caso es el que NO se ve, y es el discriminador: con `cuenta={0}` la pieza no se
-            dibuja — no hay nada del otro lado de esa puerta. Por eso «al agregar se abre el
-            flotante»: el primer + la hace entrar. Ocre (F-OCRE, acción de compra) con el glifo en
-            tinta —el par 8.40 del CTA— y el contador en tinta sobre papel, que además lo separa del
-            oro. El carrito lleva ruedas y NO lleva huella: es un control.
+            Catálogo, NO gate: esta pieza se juzga montada en el recorrido, con el pulgar. Los tres
+            casos son una clase (glifo con su insignia), la otra clase, y las dos — donde el número
+            ES el contenido porque cualquier glifo mentiría sobre la mitad. El caso que no se ve es
+            el cuarto: con todo en cero la pieza no se dibuja. Y el abanico no tiene prop: con una
+            sola clase el toque va directo y no puede desplegarse.
           </Texto>
         </Seccion>
 
