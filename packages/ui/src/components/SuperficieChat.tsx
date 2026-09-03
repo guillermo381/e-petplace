@@ -29,15 +29,56 @@
  * (`D-498`, *«la casa tiene UNA»*). Acá el segundo consumidor aparece **el
  * mismo día**, así que la copia nacería ya condenada.
  *
- * ── ① EL INSET DEL TECLADO, y por qué `useAnimatedKeyboard` ──────────────
- * La barra viaja **CON** el teclado, no después: el inset se lee del sistema
- * en el hilo de UI y se aplica como estilo animado. *Un
- * `KeyboardAvoidingView` con offsets a ojo llega tarde y llega distinto en
- * cada teléfono* — la letra lo prohíbe con todas las letras (§2.2).
+ * ── ① EL TECLADO — ⏪ ENMENDADO: se monta `EvitaTeclado`, la pieza de la casa
+ * ⏪ **ACÁ VIVÍA `useAnimatedKeyboard()`**, con el argumento de que la barra
+ * viajara *con* el teclado en vez de detrás. **Se retira, y por TRES hechos
+ * medidos — ninguno de ellos la hipótesis del crash que C reportó:**
  *
- * ⚠️ **Y con el teclado cerrado el inset cae al borde seguro del teléfono**,
- * no a cero: la barra respeta el borde inferior (§2.2). De los dos errores
- * posibles se elige el que no pega la barra al filo.
+ * ① **Está `@deprecated` en la Reanimated instalada (4.5.0)**, con guía de
+ *    migración a otra librería. *Lo introduje sin medir que estaba
+ *    deprecada*, que es exactamente lo que esta casa le exige a cualquier
+ *    dependencia nueva.
+ * ② **La casa YA TIENE la pieza**: `EvitaTeclado` subió a `packages/ui` por
+ *    `D-498` —*«la casa tiene UNA»*— y yo escribí una segunda respuesta al
+ *    mismo problema. *Es literal lo que le vengo diciendo a C todo el día.*
+ * ③ **Su forma se eligió MIDIENDO EN DISPOSITIVO, contra este mismo modo de
+ *    falla:** S73-B nació de un hallazgo de campo del founder («escribí a
+ *    ciegas») y S83-B36 fijó `behavior="padding"` en las dos plataformas
+ *    porque *bajo edge-to-edge (SDK 57) la ventana ya no se achica y
+ *    `adjustResize` es letra muerta*. **Mi inset animado era una segunda
+ *    solución a un problema que ya estaba resuelto con número.**
+ *
+ * ⚠️ **Y §2.2 no lo prohíbe, aunque parezca:** la letra prohíbe *«un
+ * `KeyboardAvoidingView` a ojo con offsets fijos»*. `EvitaTeclado` **no
+ * lleva offset**: empuja con el inset del teclado, que sí llega. *La letra
+ * nombra una mala práctica, no la pieza.*
+ *
+ * 🔴 **LO QUE SE PIERDE, y se declara:** el inset animado hacía que la barra
+ * siguiera el teclado **cuadro a cuadro**. Con `EvitaTeclado` sigue la
+ * animación del sistema, que es un pelo distinta. *Es un costo real y el
+ * único juez es el aparato* — va al gate de C junto con el resto.
+ *
+ * ── 🔴 Y LO QUE LA MEDICIÓN DIJO DEL CRASH, que NO es lo que se esperaba ──
+ * La hipótesis que llegó era *«el binario nunca ejercitó esta llamada, así
+ * que su lado nativo no la soporta»*. **Se midió contra el lockfile del ancla
+ * del binario (`28daa703`) y las DOS mitades dan FALSO:**
+ *
+ * · **la versión es la MISMA** — el APK trae `react-native-reanimated@4.5.0`,
+ *   idéntica a la instalada hoy, así que su lado nativo **sí** implementa
+ *   `subscribeForKeyboardEvents`.
+ * · **el plugin está** — no hace falta `babel.config.js` (medido: ninguna de
+ *   las dos apps tiene uno): `babel-preset-expo` incluye el de worklets
+ *   cuando Reanimated está instalada. *Y si no estuviera, no fallaría sólo
+ *   esta llamada: fallarían las transiciones de `Boton` y el thumb de
+ *   `Interruptor`, que corren desde hace sesiones.*
+ *
+ * ⇒ **`useAnimatedKeyboard` NO está probado como la causa del crash**, y
+ * decirlo importa: si el crash sobrevive a este cambio, **la causa sigue
+ * suelta** y hay que buscarla en otro lado en vez de darla por curada. *Esto
+ * se retira porque no debió entrar —deprecada y duplicando una pieza de la
+ * casa—, no porque se haya demostrado que rompe.*
+ *
+ * Con el teclado cerrado la barra respeta el **borde seguro** del teléfono.
  *
  * ── ② LA LISTA VA INVERTIDA, y eso es lo que la ancla ────────────────────
  * **Anclada al final POR CONSTRUCCIÓN, no por un efecto.** *Un `scrollToEnd`
@@ -72,8 +113,8 @@
 import type { ReactNode } from 'react'
 import { memo, useCallback, useRef } from 'react'
 import { FlatList, View } from 'react-native'
-import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { EvitaTeclado } from './EvitaTeclado'
 import { mismaFila } from './misma-fila'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
@@ -163,7 +204,6 @@ export function SuperficieChat<T>({
 }: SuperficieChatProps<T>) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
-  const teclado = useAnimatedKeyboard()
 
   /* LAS DOS FUNCIONES DE LA PANTALLA, ESTABILIZADAS ACÁ. La `ref` se
      actualiza en cada render —así la última versión es la que corre— y las
@@ -181,14 +221,6 @@ export function SuperficieChat<T>({
     [dibujar],
   )
 
-  /* EL INSET: el alto del teclado, y con el teclado cerrado el borde seguro
-     del teléfono. `Math.max` y no una condición sobre el estado del teclado:
-     durante la transición el alto pasa por valores menores al inset, y ahí
-     una condición haría saltar la barra dos veces. */
-  const estiloPie = useAnimatedStyle(() => ({
-    paddingBottom: Math.max(teclado.height.value, insets.bottom),
-  }))
-
   /* En una lista INVERTIDA el «fondo» es `contentOffset.y === 0`. */
   const alScrollear = useCallback(
     (e: { nativeEvent: { contentOffset: { y: number } } }) => {
@@ -198,44 +230,50 @@ export function SuperficieChat<T>({
   )
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {encabezado}
+    /* `EvitaTeclado` envuelve la superficie ENTERA —lista y barra— para que
+       el empuje mueva las dos juntas. Envolver sólo la barra la despegaría
+       de la lista, que es el defecto que esto viene a no tener. */
+    <EvitaTeclado>
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        {encabezado}
 
-      <View style={{ flex: 1 }}>
-        <FlatList
-          inverted
-          data={datosDelMasNuevoAlMasViejo}
-          keyExtractor={clave}
-          renderItem={renderFila}
-          /* «Si deslizo la lista hacia abajo, el teclado se guarda solo»
-             (§2.2) — y `on-drag` lo hace con el gesto, no al soltar. */
-          keyboardDismissMode="on-drag"
-          /* Que un toque en un mensaje funcione con el teclado abierto sin
-             pedir dos toques. */
-          keyboardShouldPersistTaps="handled"
-          onEndReached={onCargarAnteriores}
-          onEndReachedThreshold={0.4}
-          onScroll={alScrollear}
-          scrollEventThrottle={16}
-          contentContainerStyle={{ paddingVertical: spacing[2] }}
-        />
+        <View style={{ flex: 1 }}>
+          <FlatList
+            inverted
+            data={datosDelMasNuevoAlMasViejo}
+            keyExtractor={clave}
+            renderItem={renderFila}
+            /* «Si deslizo la lista hacia abajo, el teclado se guarda solo»
+               (§2.2) — y `on-drag` lo hace con el gesto, no al soltar. */
+            keyboardDismissMode="on-drag"
+            /* Que un toque en un mensaje funcione con el teclado abierto sin
+               pedir dos toques. */
+            keyboardShouldPersistTaps="handled"
+            onEndReached={onCargarAnteriores}
+            onEndReachedThreshold={0.4}
+            onScroll={alScrollear}
+            scrollEventThrottle={16}
+            contentContainerStyle={{ paddingVertical: spacing[2] }}
+          />
 
-        {/* LO SOBREPUESTO — flota sobre la lista y **debajo de la barra**:
-            una pastilla tapada por el campo no la ve nadie. `box-none` para
-            que el scroll pase entre sus hijos. */}
-        {sobrepuesto === undefined ? null : (
-          <View
-            pointerEvents="box-none"
-            style={{ position: 'absolute', left: 0, right: 0, bottom: spacing[3] }}
-          >
-            {sobrepuesto}
-          </View>
-        )}
+          {/* LO SOBREPUESTO — flota sobre la lista y **debajo de la barra**:
+              una pastilla tapada por el campo no la ve nadie. `box-none` para
+              que el scroll pase entre sus hijos. */}
+          {sobrepuesto === undefined ? null : (
+            <View
+              pointerEvents="box-none"
+              style={{ position: 'absolute', left: 0, right: 0, bottom: spacing[3] }}
+            >
+              {sobrepuesto}
+            </View>
+          )}
+        </View>
+
+        {/* LA BARRA. Va FUERA del contenedor de la lista para que su alto no
+            se lo coma al hilo. Con el teclado cerrado respeta el borde
+            seguro; con el teclado abierto, `EvitaTeclado` empuja todo. */}
+        <View style={{ paddingBottom: insets.bottom }}>{barra}</View>
       </View>
-
-      {/* LA BARRA, pegada al teclado. Va FUERA del contenedor de la lista
-          para que el inset no le coma alto al hilo. */}
-      <Animated.View style={estiloPie}>{barra}</Animated.View>
-    </View>
+    </EvitaTeclado>
   )
 }

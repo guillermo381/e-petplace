@@ -102,7 +102,27 @@ export interface FilaCitaProps {
      tiene un consumidor en `apps/prestador/historico.tsx`, y sacarlo le
      rompe el typecheck: el retiro se secuencia contra quien todavía lo
      consume. Vigilada por `R62` en baseline 1, SOLO-BAJA. */
-  mascota: { nombre: string; fotoUrl?: string; especie?: AvatarMascotaEspecie }
+  /* 🔴 S112-B · `fotoDeEspecie` — EL AVATAR DE LA CASA (corrección del
+     founder, 2-sep): sin foto propia va la cara de su raza, o de su especie
+     si no hay raza. URL YA RESUELTA (`resolverUrlRaza` /
+     `resolverUrlGenericaEspecie`).
+
+     **Y acá NO es un borde: es el caso normal.** Medido por A sobre el día de
+     guardería: **la foto propia es `null` en las CINCO**, así que la fila cae
+     siempre a la cara de la casa. Hasta hoy C la pasaba por `fotoUrl`, con el
+     encuadre de RETRATO aplicado a una ilustración —zoom y corrimiento
+     pensados para una cara alta en una foto—, que la recorta mal.
+
+     ⚠️ **NO CONFUNDIR CON `especie`, que está arriba y es OTRA COSA:** aquél
+     es el enum muerto que viaja y no pinta; éste es la imagen que sí se
+     dibuja. *Dos campos con la misma palabra adentro y destinos opuestos es
+     una trampa de lectura, y por eso se dice acá y no en el commit.* */
+  mascota: {
+    nombre: string
+    fotoUrl?: string
+    fotoDeEspecie?: string
+    especie?: AvatarMascotaEspecie
+  }
   /**
    * ¿SE DIBUJA LA CARA? Default `true` — cero consumidores existentes
    * cambian.
@@ -189,6 +209,7 @@ export function FilaCita({
             <AvatarMascota
               nombre={mascota.nombre}
               fotoUrl={mascota.fotoUrl}
+              fotoDeEspecie={mascota.fotoDeEspecie}
               especie={mascota.especie}
               tamano="sm"
             />
