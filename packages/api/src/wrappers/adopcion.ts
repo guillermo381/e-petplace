@@ -1009,6 +1009,14 @@ export interface MensajeDelHilo {
 export interface MiSolicitud {
   solicitudId: string;
   /**
+   * La cuenta comercial del refugio — **con esto la cabecera LLEVA**:
+   * `obtenerPerfilesPublicosPorCuenta([id])` abre su vitrina.
+   * *Un nombre sin id es una etiqueta, no una puerta.*
+   */
+  publicadorCuentaId: string | null;
+  /** RUTA de Storage, se firma en pantalla (`D-308`). `null` = sin logo. */
+  publicadorFoto: string | null;
+  /**
    * Mensajes que esta familia no leyó, **contados en el servidor**.
    *
    * ⚠️ Nació sin declararse: el mapeador ya lo devolvía y **el typecheck pasó
@@ -1215,6 +1223,9 @@ export async function obtenerMisSolicitudesAdopcion(): Promise<
       mascotaFotoUrl: typeof f.mascota_foto_url === 'string' ? f.mascota_foto_url : null,
       publicadorNombre: typeof f.publicador_nombre === 'string' ? f.publicador_nombre : null,
       sinLeer: Number(f.sin_leer ?? 0),
+      publicadorCuentaId:
+        typeof f.publicador_cuenta_id === 'string' ? f.publicador_cuenta_id : null,
+      publicadorFoto: typeof f.publicador_foto === 'string' ? f.publicador_foto : null,
       mensajes: leerMensajes(f.mensajes),
     })),
   };

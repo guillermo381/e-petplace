@@ -24873,6 +24873,8 @@ export type Database = {
           mascota_nombre: string
           mensajes: Json
           publicacion_id: string
+          publicador_cuenta_id: string
+          publicador_foto: string
           publicador_nombre: string
           sin_leer: number
           solicitud_id: string
