@@ -87,6 +87,7 @@ import {
 } from '@/lib/viaje-guarderia';
 import { cablearEmitirPunto } from '@/lib/guarderia-cableado';
 import { usePuntoVivo } from '@/lib/use-punto-vivo';
+import { contarPresencia, vozDePresencia } from '@epetplace/domain';
 
 /** Fecha LOCAL. 🔴 `toISOString()` da UTC y en Guayaquil, pasadas las 19:00,
  *  devuelve el día siguiente — la jornada saldría vacía a la tarde. */
@@ -304,16 +305,56 @@ export default function DiaGuarderia() {
   const adentro = listo?.estadias.filter((e) => e.estado === 'en_guarderia') ?? [];
   const volviendo = listo?.estadias.filter((e) => e.estado === 'retorno_en_curso') ?? [];
 
+  /* ═══ 🔴 EL VIAJE FANTASMA — el día quedaba pegado «en ruta» ═════════════
+
+     **El rojo del founder:** «0 a bordo · faltan 0», «5 animales hoy», el botón
+     de foto apagado con la razón del VIAJE, y **ni la lista ni los cinco
+     actos**. Medido contra la base con el JWT de demo-vet: ese día tiene
+     **3 `en_guarderia` y 2 `no_recogida`** — o sea que **el viaje terminó de
+     hecho**: los tres subieron a las 18:37 y llegaron a las 18:38.
+
+     🔴 **LA CAUSA SON DOS FUENTES DE VERDAD.** El viaje abierto vive **en el
+     disco del teléfono** (`leerViaje`) y **sólo se borra si el cuidador toca
+     «Llegamos»** — el único camino que llama a `borrarViaje()`. Si ese toque no
+     ocurre, o la app muere entre `marcarLlegada` y `borrarViaje`, **el disco
+     sigue diciendo «estoy en la calle» sobre animales que ya están adentro.**
+
+     Y ahí se encadena todo lo reportado: con viaje abierto, ⑥ muestra **sólo a
+     los que participan de ESE viaje** —ninguno— así que la lista queda vacía;
+     los dos CTA de salir se apagan porque preguntan `viaje === null`; y el
+     botón de foto muestra la razón del viaje.
+
+     ⇒ **EL VIAJE SE DERIVA DE LOS DATOS, NO DEL DISCO.** Un viaje es real
+     **si y sólo si hay alguien en su estado de tránsito**: `recogida_en_curso`
+     para el de ida, `retorno_en_curso` para el de vuelta. *El disco pasa de ser
+     la verdad a ser una pista: dice qué tramo era, y los datos dicen si sigue
+     vivo.*
+
+     ⚠️ **No se borra el registro acá.** Esto es render: borrar durante el
+     dibujo sería un efecto escondido en una derivación. Se ignora el fantasma y
+     el disco se limpia en su efecto —abajo—, que es donde se puede fallar sin
+     dejar la pantalla a medias. */
+  const viajeReal =
+    viaje === null
+      ? null
+      : viaje.direccion === 'recogida'
+        ? aBordo.length > 0
+          ? viaje
+          : null
+        : volviendo.length > 0
+          ? viaje
+          : null;
+
   /**
-   * ⑥ · QUIÉNES SE VEN. **Con un viaje abierto, sólo los que participan de ESE
-   * viaje.**
+   * ⑥ · QUIÉNES SE VEN. **Con un viajeReal abierto, sólo los que participan de ESE
+   * viajeReal.**
    *
    * ═══════════════════════════════════════════════════════════════════════
    * 🔴 **`no_recogida` es TERMINAL y se arrastraba a la lista del retorno.**
    * Medí las tres afirmaciones por separado y **dos ya se cumplían**: no entra
    * al tramo (`salirADevolver` ata sólo `en_guarderia`) y no admite ningún
    * acto (la máquina la tiene como `hasta` y nunca como `desde`). **La que
-   * fallaba era la lista**, que pintaba el día entero sin mirar el viaje.
+   * fallaba era la lista**, que pintaba el día entero sin mirar el viajeReal.
    * ═══════════════════════════════════════════════════════════════════════
    *
    * **Se DERIVA de la máquina, no se enumeran estados:** participan los `desde`
@@ -321,24 +362,24 @@ export default function DiaGuarderia() {
    * recogida da `reservada → recogida_en_curso`; para devolución,
    * `en_guarderia → retorno_en_curso`. *`entregada` queda afuera sola —su acto
    * no exige tramo— y eso es exactamente lo correcto: el que ya se entregó sale
-   * del viaje.*
+   * del viajeReal.*
    *
-   * ⚠️ **SIN viaje se ven TODAS, y no es una excepción:** ahí la lista es el
+   * ⚠️ **SIN viajeReal se ven TODAS, y no es una excepción:** ahí la lista es el
    * día completo, y ahí es donde `no_recogida` tiene que verse con su motivo y
-   * su hora (el lector de `D-990` del lado del prestador). *Durante el viaje es
+   * su hora (el lector de `D-990` del lado del prestador). *Durante el viajeReal es
    * ruido; al mirar el día es el registro.*
    */
   const participanDelViaje = (e: EstadoEstadia): boolean => {
-    if (viaje === null || listo?.maquina == null) return true;
+    if (viajeReal === null || listo?.maquina == null) return true;
     return listo.maquina.actos.some(
-      (a) => a.exigeTramo === viaje.direccion && (a.desde === e || a.hasta === e),
+      (a) => a.exigeTramo === viajeReal.direccion && (a.desde === e || a.hasta === e),
     );
   };
 
   const relanzar = () => setIntento((n) => n + 1);
 
   /**
-   * ⑨ · MOVER UNA TARJETA. **Ese orden es el viaje.**
+   * ⑨ · MOVER UNA TARJETA. **Ese orden es el viajeReal.**
    *
    * ⚠️ **Es subir/bajar y no arrastrar, y lo declaro porque mi recorrido decía
    * «con el dedo»:** el arrastre pide gesto + reanimated sobre una lista que ya
@@ -429,14 +470,14 @@ export default function DiaGuarderia() {
   };
 
   const llegamos = async () => {
-    if (viaje === null || enVuelo) return;
+    if (viajeReal === null || enVuelo) return;
     setEnVuelo(true);
     try {
       const m = await marcarLlegada(aBordo.map((e) => e.estadiaId), ahora());
       if (!m.ok) return avisarFallo(m.mensaje);
       /* El tramo se cierra DESPUÉS de que llegaron, y cerrarlo borra el punto
          vivo: lo que ya no se mueve no se sigue mostrando. */
-      await cerrarTramoGuarderia(viaje.tramoId);
+      await cerrarTramoGuarderia(viajeReal.tramoId);
       await borrarViaje();
       setViaje(null);
       relanzar();
@@ -450,7 +491,7 @@ export default function DiaGuarderia() {
    * cierra y me lo dice sin fanfarria.»*
    *
    * 🔴 Es automático y no un botón porque **no hay nada que decidir**: si no
-   * queda nadie adentro ni volviendo, el viaje de devolución terminó. *Pedir un
+   * queda nadie adentro ni volviendo, el viajeReal de devolución terminó. *Pedir un
    * toque para confirmar un hecho que ya ocurrió es preguntar algo cuya
    * respuesta ya sabemos* (Ley 23, corolario).
    *
@@ -462,15 +503,35 @@ export default function DiaGuarderia() {
    * referenciaba, así que el typecheck quedó verde sobre una función que había
    * desaparecido. *Lo cazó un censo de piezas conocidas, no una relectura.*
    */
+  /* ⭐ **EL DISCO SE LIMPIA DEL FANTASMA, en su propio efecto.**
+     La derivación de arriba ya deja la pantalla correcta; esto saca la fila
+     muerta para que el próximo arranque no vuelva a leerla. *Va en un efecto y
+     no en el render porque escribir en disco durante el dibujo es un efecto
+     escondido, y porque acá puede fallar sin dejar la pantalla a medias.*
+
+     ⚠️ **Sólo con la pantalla EN `listo`.** Mientras carga, `aBordo` y
+     `volviendo` están vacíos por ausencia de datos, no por ausencia de viaje —
+     *borrar ahí destruiría un viaje legítimo justo mientras se está leyendo*, y
+     el error sería invisible: la próxima vez simplemente no estaría. Es el
+     mismo guard de dos hechos que produjo el defecto, del otro lado. */
+  useEffect(() => {
+    if (listo === null) return;
+    if (viaje === null || viajeReal !== null) return;
+    void (async () => {
+      await borrarViaje();
+      setViaje(null);
+    })();
+  }, [listo, viaje, viajeReal]);
+
   const cerrando = useRef(false);
   useEffect(() => {
-    if (viaje === null || viaje.direccion !== 'devolucion') return;
+    if (viajeReal === null || viajeReal.direccion !== 'devolucion') return;
     if (volviendo.length > 0 || adentro.length > 0) return;
     if (cerrando.current) return;
     cerrando.current = true;
     void (async () => {
       try {
-        await cerrarTramoGuarderia(viaje.tramoId);
+        await cerrarTramoGuarderia(viajeReal.tramoId);
         await borrarViaje();
         setViaje(null);
         mostrar({ variante: 'exito', texto: t('diaGuarderia.diaCerrado') });
@@ -478,7 +539,7 @@ export default function DiaGuarderia() {
         cerrando.current = false;
       }
     })();
-  }, [viaje, volviendo.length, adentro.length, mostrar, t]);
+  }, [viajeReal, volviendo.length, adentro.length, mostrar, t]);
 
   const alAtras = useCallback(() => router.back(), [router]);
 
@@ -506,12 +567,12 @@ export default function DiaGuarderia() {
       {/* ═══ EL VIAJE ═══════════════════════════════════════════════════════
           Del recorrido: *«arriba queda una barra fina, viva, que dice cuántos
           llevo a bordo y cuántos me faltan. Esa barra no se mueve de ahí hasta
-          que cierro el viaje.»*
+          que cierro el viajeReal.»*
 
           🔴 Vive FUERA del ScrollView a propósito: adentro se iría con el
           scroll, y el cuidador mira el teléfono con una mano mientras maneja o
           toca timbres. *Una barra que hay que ir a buscar no es una barra.* */}
-      {viaje !== null ? (
+      {viajeReal !== null ? (
         <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3] }}>
           <Tarjeta relleno="normal" elevacion="reposo">
             <View
@@ -519,7 +580,7 @@ export default function DiaGuarderia() {
             >
               <View style={{ flex: 1 }}>
                 <Texto variante="cuerpo">
-                  {viaje.direccion === 'recogida'
+                  {viajeReal.direccion === 'recogida'
                     ? t('diaGuarderia.viajeRecogida', {
                         aBordo: aBordo.length,
                         faltan: porRecoger.length,
@@ -528,7 +589,7 @@ export default function DiaGuarderia() {
                 </Texto>
               </View>
               {/* «Llegamos» sólo en la recogida y sólo con alguien a bordo: en
-                  la devolución el viaje se cierra cuando se entrega el último,
+                  la devolución el viajeReal se cierra cuando se entrega el último,
                   no con un botón. Ley 23 — la puerta no ofrece lo que va a
                   rechazar. */}
               {/* 🔴 EL PERMISO DENEGADO SE DICE. Sin ubicación, la familia no
@@ -541,7 +602,7 @@ export default function DiaGuarderia() {
                   {t('diaGuarderia.puntoSinPermiso')}
                 </Texto>
               ) : null}
-              {viaje.direccion === 'recogida' && aBordo.length > 0 ? (
+              {viajeReal.direccion === 'recogida' && aBordo.length > 0 ? (
                 <Boton
                   variante="primario"
                   tamaño="sm"
@@ -565,14 +626,30 @@ export default function DiaGuarderia() {
           />
         ) : (
           <>
+            {/* ⏪ **DECÍA EL TOTAL** («5 animales hoy»), que es cierto y no
+                sirve: *esconde justo la diferencia que decide qué hace el
+                cuidador ahora*. Y en el día que quedó pegado decía «5» mientras
+                la pantalla no mostraba a ninguno — el total sobrevive a
+                cualquier defecto de la lista, así que **no puede ser lo único
+                que se lee**.
+                Mismo criterio que la baldosa del HOY, con el MISMO contador
+                (`contarPresencia`): dos cuentas de «cuántos hay adentro» serían
+                dos criterios que divergen. */}
             <Texto variante="titulo">
-              {t('diaGuarderia.cuantos', { n: estado.estadias.length })}
+              {vozDePresencia(contarPresencia(estado.estadias), {
+                reservadas: (n) => t('diaGuarderia.pReservadas', { n }),
+                aBordo: (n) => t('diaGuarderia.pABordo', { n }),
+                adentro: (n) => t('diaGuarderia.pAdentro', { n }),
+                volviendo: (n) => t('diaGuarderia.pVolviendo', { n }),
+                entregadas: (n) => t('diaGuarderia.pEntregadas', { n }),
+                noRecogidas: (n) => t('diaGuarderia.pNoRecogidas', { n }),
+              }) ?? t('diaGuarderia.cuantos', { n: estado.estadias.length })}
             </Texto>
 
             {/* EL ARRANQUE. Un solo botón por vez y sólo si hay a quién ir a
                 buscar o a quién devolver — con el día vacío de ese lado, el
                 botón no existe en vez de rebotar. */}
-            {viaje === null && porRecoger.length > 0 ? (
+            {viajeReal === null && porRecoger.length > 0 ? (
               <Boton
                 variante="primario"
                 etiqueta={t('diaGuarderia.salgoABuscar')}
@@ -580,7 +657,7 @@ export default function DiaGuarderia() {
                 cargando={enVuelo}
               />
             ) : null}
-            {viaje === null && porRecoger.length === 0 && adentro.length > 0 ? (
+            {viajeReal === null && porRecoger.length === 0 && adentro.length > 0 ? (
               <Boton
                 variante="primario"
                 etiqueta={t('diaGuarderia.salgoADevolver')}
@@ -591,7 +668,7 @@ export default function DiaGuarderia() {
 
             {/* ⑧ · EL DURANTE, EN LAS INSTALACIONES. Sólo con animales
                 ADENTRO: §5 dice que **las fotos de estadía se toman en las
-                instalaciones**, así que ofrecerlo durante un viaje invitaría a
+                instalaciones**, así que ofrecerlo durante un viajeReal invitaría a
                 sacarlas en la calle o en la puerta de una casa — justo donde la
                 regla del primer plano existe para proteger la fachada.
 
@@ -610,7 +687,7 @@ export default function DiaGuarderia() {
                 funcionar bien».
 
                 ⇒ **No se ensancha la ventana** (§5: las fotos se toman en las
-                instalaciones — durante un viaje se sacarían en la calle o en la
+                instalaciones — durante un viajeReal se sacarían en la calle o en la
                 puerta de una casa, justo donde la regla del primer plano existe
                 para proteger la fachada). **Se ensancha la EXPLICACIÓN:** el
                 botón deja de desaparecer y pasa a estar apagado con su razón
@@ -623,7 +700,7 @@ export default function DiaGuarderia() {
               <Boton
                 variante="apoyada"
                 etiqueta={t('diaGuarderia.sacarFoto')}
-                deshabilitado={viaje !== null || adentro.length === 0}
+                deshabilitado={viajeReal !== null || adentro.length === 0}
                 /* ⏪ **LA RAZÓN EXISTÍA Y DESCRIBÍA UN ESTADO, NO UN ACTO.**
                    Decía *«todavía no hay nadie adentro»*: cierto, y deja al
                    cuidador sin saber qué depende de él. La letra del founder la
@@ -639,7 +716,7 @@ export default function DiaGuarderia() {
                    a registrar justo a ése. Con varios se dice «la primera
                    llegada», que es verdad para cualquiera. */
                 razonDeshabilitado={
-                  viaje !== null
+                  viajeReal !== null
                     ? t('diaGuarderia.fotoRazonViaje')
                     : porRecoger.length === 1
                       ? t('diaGuarderia.fotoRazonLlegadaDe', {
@@ -788,11 +865,11 @@ export default function DiaGuarderia() {
                       </View>
                     ) : null}
 
-                    {/* ⑨ · Mover, sólo ANTES de salir: con el viaje abierto el
+                    {/* ⑨ · Mover, sólo ANTES de salir: con el viajeReal abierto el
                         orden ya está en la calle y reordenarlo no cambia nada
                         de lo que pasó. *Un control que no tiene efecto es peor
                         que no tenerlo.* */}
-                    {viaje === null && estado.estadias.length > 1 ? (
+                    {viajeReal === null && estado.estadias.length > 1 ? (
                       <View style={{ flexDirection: 'row', gap: spacing[2] }}>
                         <Boton
                           variante="ghost"

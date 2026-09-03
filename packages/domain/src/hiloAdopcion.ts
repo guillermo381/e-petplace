@@ -235,3 +235,48 @@ export function leerEscalera(
 
   return { etapa, final };
 }
+
+/**
+ * FUSIONA POR ID — para que un refresco NO reemplace el arreglo (S112-C · A14).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **EL PROBLEMA NO ES QUE LA LISTA CAMBIE: ES QUE CAMBIA SIN CAMBIAR.**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Cada recarga del hilo devuelve **objetos nuevos** aunque el contenido sea
+ * idéntico. Para React eso es una lista distinta: **todas las filas se
+ * re-dibujan**, aunque ninguna cambió. Con el sondeo eso pasaba cada 5 s —el
+ * parpadeo que el founder ve— y **sigue pasando en cada llegada** aunque el
+ * sondeo haya muerto.
+ *
+ * ⇒ Esto devuelve **el objeto ANTERIOR cuando el mensaje no cambió**, así que
+ * las filas que ya estaban conservan su identidad y React las deja quietas.
+ *
+ * ⚠️ **Compara CONTENIDO, no sólo id.** Un mensaje puede editarse —hoy no, pero
+ * el tipo lo admite— y devolver el viejo por tener el mismo id **mostraría el
+ * texto anterior para siempre**, sin error y sin síntoma. *Reusar por id a
+ * secas es más rápido y puede mentir; reusar por id Y contenido no puede.*
+ *
+ * ⚠️ **Y devuelve el arreglo ANTERIOR entero si nada cambió**: sin eso, un
+ * arreglo nuevo con los mismos objetos adentro igual rompe la memoización de
+ * quien lo recibe. *La identidad tiene que sobrevivir en los dos niveles.*
+ */
+export function fusionarPorId<T extends { mensajeId: string; cuerpo: string }>(
+  previos: readonly T[],
+  nuevos: readonly T[],
+): readonly T[] {
+  const antes = new Map(previos.map((m) => [m.mensajeId, m]));
+  let huboCambio = previos.length !== nuevos.length;
+  const salida = nuevos.map((n, i) => {
+    const v = antes.get(n.mensajeId);
+    if (v !== undefined && v.cuerpo === n.cuerpo) {
+      /* El orden también cuenta: si el mismo mensaje cambió de posición, el
+         arreglo SÍ cambió aunque sus objetos se reusen. */
+      if (previos[i] !== v) huboCambio = true;
+      return v;
+    }
+    huboCambio = true;
+    return n;
+  });
+  return huboCambio ? salida : previos;
+}

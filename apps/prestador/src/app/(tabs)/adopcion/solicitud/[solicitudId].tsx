@@ -42,7 +42,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { armarHilo, leerEscalera, type FilaDelHilo } from '@epetplace/domain';
+import {
+  armarHilo,
+  fusionarPorId,
+  leerEscalera,
+  type FilaDelHilo,
+  type MensajeParaHilo,
+} from '@epetplace/domain';
 import { etiquetaDeDiaDeMensaje, horaCortaDeMensaje, obtenerIdiomaActual } from '@epetplace/i18n';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -54,6 +60,7 @@ import {
   CabeceraHilo,
   Encabezado,
   EventoDelHilo,
+  Icono,
   PastillaNuevoMensaje,
   SeparadorDia,
   SuperficieChat,
@@ -211,7 +218,24 @@ export default function HiloDelPublicador() {
     },
     [params.solicitudId],
   );
-  const [escaleraAbierta, setEscaleraAbierta] = useState(true);
+  /**
+   * ⭐ **A12 · ARRANCA COLAPSADA SI YA HAY CONVERSACIÓN.**
+   *
+   * Voz del founder: *«quiero ver la conversación; la escalera es un renglón
+   * que abro si quiero»*. Con mensajes en el hilo, abierta se comía la pantalla
+   * y dejaba «Hola» asomando abajo.
+   *
+   * 🔴 **`null` mientras carga, y no `true`.** El dato que decide —si hay
+   * mensajes— llega con el hilo, así que arrancar en `true` la abriría y la
+   * cerraría sola en cuanto responda el lector: *un salto que la persona ve y
+   * que se lee como que la pantalla se arrepintió.* Con `null` no se dibuja
+   * ninguna de las dos formas hasta saber cuál corresponde.
+   *
+   * ⚠️ **Sin mensajes SÍ abre**, y no es lo mismo por descarte: un hilo recién
+   * creado no tiene nada que tapar, y la escalera es justo lo único que hay que
+   * mirar ahí.
+   */
+  const [escaleraAbierta, setEscaleraAbierta] = useState<boolean | null>(null);
   const [viendoPostulacion, setViendoPostulacion] = useState(false);
   const [alFondo, setAlFondo] = useState(true);
   const [nuevosSinVer, setNuevosSinVer] = useState(0);
@@ -232,8 +256,12 @@ export default function HiloDelPublicador() {
   const filas = useMemo(() => {
     if (estado.fase !== 'listo') return [];
     const ahora = new Date().toISOString();
+    /* La fusión ANTES de armar: `armarHilo` deriva de estos objetos, así que si
+       llegan los mismos, las filas salen iguales y la lista no se mueve. */
+    const base = fusionarPorId(mensajesRef.current, estado.hilo.mensajes);
+    mensajesRef.current = base;
     return armarHilo([
-      ...estado.hilo.mensajes,
+      ...base,
       ...enVuelo.map((x) => ({
         mensajeId: `local:${x.clientId}`,
         autorUserId: estado.miUid,
@@ -243,6 +271,13 @@ export default function HiloDelPublicador() {
       })),
     ]);
   }, [estado, enVuelo]);
+
+  /* ⭐ **A14 · LOS MENSAJES SE FUSIONAN POR ID, no se reemplazan.** Cada
+     recarga trae objetos nuevos aunque el contenido sea idéntico, y para React
+     eso es una lista distinta: **todas las filas se re-dibujan aunque ninguna
+     cambió**. La fusión devuelve los objetos anteriores —y el arreglo anterior
+     entero si nada cambió—, así que las filas quietas se quedan quietas. */
+  const mensajesRef = useRef<readonly MensajeParaHilo[]>([]);
 
   const ajenosVistos = useRef(0);
   useEffect(() => {
@@ -256,7 +291,17 @@ export default function HiloDelPublicador() {
     setNuevosSinVer(Math.max(0, ajenos - ajenosVistos.current));
   }, [estado, alFondo]);
 
-  const renderFila = (f: FilaDelHilo) => {
+  /* 🔴 **ESTABLE CON `useCallback`, y no es micro-optimización.** Sin esto,
+     **cada tecla** crea una función nueva, la lista la ve como prop distinta y
+     **redibuja todas las filas** — el parpadeo que el founder ve, y con él la
+     pérdida del cursor. *El campo y la lista viven en el mismo componente, así
+     que lo único que las separa es que lo que la lista recibe no cambie.*
+
+     ⚠️ **Y esto es la MITAD de la cura.** La otra es de la pieza: su
+     `renderItem={({item}) => <>{renderMensaje(item)}</>}` es una flecha nueva
+     en cada render suyo, así que aunque yo pase algo estable, `FlatList`
+     recibe un `renderItem` distinto. Pedido a B con la evidencia. */
+  const renderFila = useCallback((f: FilaDelHilo) => {
     if (f.tipo === 'dia') {
       return (
         <SeparadorDia
@@ -313,7 +358,7 @@ export default function HiloDelPublicador() {
         estado={enV === undefined ? 'enviado' : 'enviando'}
       />
     );
-  };
+  }, [estado, enVuelo, t, idioma]);
   const [decidiendo, setDecidiendo] = useState<'aceptada' | 'declinada' | null>(null);
   const [trabajando, setTrabajando] = useState(false);
 
@@ -568,6 +613,18 @@ export default function HiloDelPublicador() {
                 }
               />
 
+              {/* 🔴 **A11 · EL MARGEN LO PONE ESTE ENVOLTORIO, NO LA PIEZA.**
+                  Medido: `CabeceraHilo` trae su propio `paddingHorizontal` y
+                  `EscaleraSolicitud` **no trae ninguno** — por eso la cabecera
+                  respetaba el margen y la escalera quedaba **pegada al borde
+                  izquierdo**, en las dos apps.
+
+                  *Y por eso el arreglo no es meterle padding a la pieza:* la
+                  escalera se monta en más lugares —la lista de solicitudes la
+                  usa dentro de una `Tarjeta`, que ya tiene su relleno— y
+                  dárselo adentro la desalinearía ahí. **El margen es del
+                  consumidor**, que es quien sabe sobre qué superficie cae. */}
+              <View style={{ paddingHorizontal: spacing[4] }}>
               {/* C2 · la escalera, con **LA VOZ DEL REFUGIO**. §1: *«misma
                   pieza en las dos apps, con las voces de cada asiento: la
                   familia lee "Estás en", el refugio lee "La solicitud está
@@ -600,18 +657,19 @@ export default function HiloDelPublicador() {
                   vozEstado={t('portalHilo.laSolicitudEstaEn', {
                     etapa: t(`portalHilo.etapa${ETAPA_CLAVE[escalera.etapa]}` as 'portalHilo.etapaEnviada'),
                   })}
-                  abierta={escaleraAbierta}
+                  abierta={escaleraAbierta ?? estado.hilo.mensajes.length === 0}
                   onAlternar={() => setEscaleraAbierta((v) => !v)}
                   etiquetaAlternar={t('portalHilo.escaleraAlternar')}
                   /* `oficio` y no `control`: es la casa del prestador. */
                   acento="oficio"
                 />
               )}
+              </View>
             </View>
           }
           datosDelMasNuevoAlMasViejo={filas}
           claveDe={(f) => f.clave}
-          renderMensaje={(f) => renderFila(f)}
+          renderMensaje={renderFila}
           onAlFondoCambia={setAlFondo}
           sobrepuesto={
             !alFondo && nuevosSinVer > 0 ? (
@@ -634,16 +692,23 @@ export default function HiloDelPublicador() {
                 valor={borrador}
                 onCambio={(v) => {
                   setBorrador(v);
+                  /* §1: *«se colapsa sola cuando empiezo a escribir»*. Sólo al
+                     primer carácter: colapsarla en cada tecla pelearía con
+                     quien la abrió a propósito mientras escribe. */
                   if (v.length > 0 && borrador.length === 0) setEscaleraAbierta(false);
                 }}
                 onEnviar={(texto) => void enviar(texto)}
                 placeholder={t('portalHilo.escribirlePlaceholder', {
                   quien: estado.hilo.solicitanteNombre ?? t('portalHilo.alguienSinNombre'),
                 })}
-                /* Misma deuda que del lado familia, misma salida: el registry no
-                   tiene glifo de «enviar» y prestar uno cercano le enseñaría dos
-                   significados. Va la palabra hasta que §6b dé el suyo. */
-                glifoEnviar={<Texto variante="dato">{t('portalHilo.enviar')}</Texto>}
+                /* ⏪ **A13 · ACÁ IBA LA PALABRA Y SE PARTÍA EN DOS LÍNEAS**
+                   («Envia / r»): el slot del glifo es angosto, y un texto adentro
+                   se envuelve. *La palabra no mentía —era honesta mientras el
+                   registry no tenía el glifo— pero rota deja de ser legible, que
+                   es peor que ambigua.* B lo construyó y entra acá igual que del
+                   lado familia. Es CONTROL: sin huella, y su color lo pone el
+                   estado del campo. */
+                glifoEnviar={<Icono nombre="enviar" tamano={24} registro="aa" />}
                 etiquetaEnviar={t('portalHilo.enviar')}
               />
             )

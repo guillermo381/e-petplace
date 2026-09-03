@@ -64,7 +64,13 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { armarHilo, leerEscalera, type FilaDelHilo } from '@epetplace/domain';
+import {
+  armarHilo,
+  fusionarPorId,
+  leerEscalera,
+  type FilaDelHilo,
+  type MensajeParaHilo,
+} from '@epetplace/domain';
 import {
   etiquetaDeDiaDeMensaje,
   horaCortaDeMensaje,
@@ -128,7 +134,11 @@ export default function HiloSolicitud() {
    *  decide comparando `autorUserId` contra la sesión (contrato de D). */
   const [miUid, setMiUid] = useState('');
   const idioma = obtenerIdiomaActual();
-  const [escaleraAbierta, setEscaleraAbierta] = useState(true);
+  /** A12 · arranca COLAPSADA si ya hay conversación — misma ley que el
+   *  refugio. `null` mientras carga: arrancar en `true` la abriría y la cerraría
+   *  sola al responder el lector, y ese salto se lee como que la pantalla se
+   *  arrepintió. */
+  const [escaleraAbierta, setEscaleraAbierta] = useState<boolean | null>(null);
   const [alFondo, setAlFondo] = useState(true);
   const [nuevosSinVer, setNuevosSinVer] = useState(0);
   /**
@@ -302,8 +312,12 @@ export default function HiloSolicitud() {
   const filas = useMemo(() => {
     if (estado.fase !== 'listo') return [];
     const ahora = new Date().toISOString();
+    /* La fusión ANTES de armar: `armarHilo` deriva de estos objetos, así que si
+       llegan los mismos, las filas salen iguales y la lista no se mueve. */
+    const base = fusionarPorId(mensajesRef.current, estado.hilo.mensajes);
+    mensajesRef.current = base;
     return armarHilo([
-      ...estado.hilo.mensajes,
+      ...base,
       ...enVuelo.map((x) => ({
         mensajeId: `local:${x.clientId}`,
         autorUserId: miUid,
@@ -315,6 +329,13 @@ export default function HiloSolicitud() {
   }, [estado, enVuelo, miUid]);
 
   /** Cuántos ajenos llegaron desde la última vez que estuve al fondo. */
+  /* ⭐ **A14 · LOS MENSAJES SE FUSIONAN POR ID, no se reemplazan.** Cada
+     recarga trae objetos nuevos aunque el contenido sea idéntico, y para React
+     eso es una lista distinta: **todas las filas se re-dibujan aunque ninguna
+     cambió**. La fusión devuelve los objetos anteriores —y el arreglo anterior
+     entero si nada cambió—, así que las filas quietas se quedan quietas. */
+  const mensajesRef = useRef<readonly MensajeParaHilo[]>([]);
+
   const ajenosVistos = useRef(0);
   useEffect(() => {
     if (estado.fase !== 'listo') return;
@@ -329,7 +350,17 @@ export default function HiloSolicitud() {
     setNuevosSinVer(Math.max(0, ajenos - ajenosVistos.current));
   }, [estado, alFondo, miUid]);
 
-  const renderFila = (f: FilaDelHilo) => {
+  /* 🔴 **ESTABLE CON `useCallback`, y no es micro-optimización.** Sin esto,
+     **cada tecla** crea una función nueva, la lista la ve como prop distinta y
+     **redibuja todas las filas** — el parpadeo que el founder ve, y con él la
+     pérdida del cursor. *El campo y la lista viven en el mismo componente, así
+     que lo único que las separa es que lo que la lista recibe no cambie.*
+
+     ⚠️ **Y esto es la MITAD de la cura.** La otra es de la pieza: su
+     `renderItem={({item}) => <>{renderMensaje(item)}</>}` es una flecha nueva
+     en cada render suyo, así que aunque yo pase algo estable, `FlatList`
+     recibe un `renderItem` distinto. Pedido a B con la evidencia. */
+  const renderFila = useCallback((f: FilaDelHilo) => {
     if (f.tipo === 'dia') {
       return (
         <SeparadorDia
@@ -424,7 +455,7 @@ export default function HiloSolicitud() {
         estado={enVueloDeEste === undefined ? 'enviado' : 'enviando'}
       />
     );
-  };
+  }, [estado, enVuelo, t, idioma]);
 
 
   /**
@@ -557,6 +588,18 @@ export default function HiloSolicitud() {
                 }}
               />
 
+              {/* 🔴 **A11 · EL MARGEN LO PONE ESTE ENVOLTORIO, NO LA PIEZA.**
+                  Medido: `CabeceraHilo` trae su propio `paddingHorizontal` y
+                  `EscaleraSolicitud` **no trae ninguno** — por eso la cabecera
+                  respetaba el margen y la escalera quedaba **pegada al borde
+                  izquierdo**, en las dos apps.
+
+                  *Y por eso el arreglo no es meterle padding a la pieza:* la
+                  escalera se monta en más lugares —la lista de solicitudes la
+                  usa dentro de una `Tarjeta`, que ya tiene su relleno— y
+                  dárselo adentro la desalinearía ahí. **El margen es del
+                  consumidor**, que es quien sabe sobre qué superficie cae. */}
+              <View style={{ paddingHorizontal: spacing[4] }}>
               {/* ═══ C2 · LA ESCALERA ═══════════════════════════════════
                   §1: *«arriba del hilo, colapsable… se colapsa sola cuando
                   empiezo a escribir»*.
@@ -600,17 +643,18 @@ export default function HiloSolicitud() {
                   vozEstado={t('hiloAdopcion.estasEn', {
                     etapa: t(`hiloAdopcion.etapa_${escalera.etapa}` as 'hiloAdopcion.etapa_enviada'),
                   })}
-                  abierta={escaleraAbierta}
+                  abierta={escaleraAbierta ?? estado.hilo.mensajes.length === 0}
                   onAlternar={() => setEscaleraAbierta((v) => !v)}
                   etiquetaAlternar={t('hiloAdopcion.escaleraAlternar')}
                   acento="control"
                 />
               )}
+              </View>
             </View>
           }
           datosDelMasNuevoAlMasViejo={filas}
           claveDe={(f) => f.clave}
-          renderMensaje={(f) => renderFila(f)}
+          renderMensaje={renderFila}
           onAlFondoCambia={setAlFondo}
           sobrepuesto={
             /* ═══ C4 · LA PASTILLA ═══════════════════════════════════════
