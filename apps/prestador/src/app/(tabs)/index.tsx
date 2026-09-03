@@ -62,6 +62,7 @@ import {
   type InsigniaEstado,
 } from '@epetplace/ui';
 import {
+  caraDeMascotaPorRuta,
   caraDeMascota,
   obtenerBloqueosPrestador,
   obtenerCitasAdiestramientoDelDia,
@@ -624,9 +625,9 @@ function vozPresencia(
     (e) => e.estado === 'recogida_en_curso' || e.estado === 'retorno_en_curso',
   ).length;
   const partes: string[] = [];
-  if (adentro > 0) partes.push(t('agenda.presenciaAdentro' as never, { n: adentro }));
-  if (enViaje > 0) partes.push(t('agenda.presenciaEnViaje' as never, { n: enViaje }));
-  if (reservados > 0) partes.push(t('agenda.presenciaReservados' as never, { n: reservados }));
+  if (adentro > 0) partes.push(t('agenda.presenciaAdentro' as never, { count: adentro }));
+  if (enViaje > 0) partes.push(t('agenda.presenciaEnViaje' as never, { count: enViaje }));
+  if (reservados > 0) partes.push(t('agenda.presenciaReservados' as never, { count: reservados }));
   /* Si ninguna parte existe, el día tiene estadías en estados terminales
      —entregadas, canceladas—: se dice el total en vez de una línea vacía. */
   return partes.length > 0
@@ -906,7 +907,7 @@ function FilaSalida({
         onPress={onToggle}
         accessibilityRole="button"
         titulo={titulo}
-        subtitulo={`${primera.tipo.nombre} · ${t('agenda.salidaDe', { n: citas.length })}`}
+        subtitulo={`${primera.tipo.nombre} · ${t('agenda.salidaDe', { count: citas.length })}`}
         inicio={
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {citas.slice(0, 3).map((c, i) => (
@@ -1884,29 +1885,29 @@ export default function Hoy() {
     forma.clave === 'omitida'
       ? undefined
       : forma.clave === 'quedan'
-        ? t('agenda.datoQuedan', { n: forma.n, hora: forma.hora })
+        ? t('agenda.datoQuedan', { count: forma.n, hora: forma.hora })
         : forma.clave === 'queda1'
           ? t('agenda.datoQueda1', { hora: forma.hora })
           : forma.clave === 'quedanSinHora'
-            ? t('agenda.datoQuedanSinHora', { n: forma.n })
+            ? t('agenda.datoQuedanSinHora', { count: forma.n })
             : forma.clave === 'queda1SinHora'
               ? t('agenda.datoQueda1SinHora')
               : forma.clave === 'completa'
                 ? t('agenda.datoCompleta')
                 : forma.clave === 'porCoordinar'
-                  ? t('agenda.datoPorCoordinar', { n: forma.n })
+                  ? t('agenda.datoPorCoordinar', { count: forma.n })
                   : /* S86-C · las dos del pasado */
                     forma.clave === 'pasadoPendientes'
                     ? forma.n === 1
                       ? t('agenda.datoPasadoPendiente1')
-                      : t('agenda.datoPasadoPendientes', { n: forma.n })
+                      : t('agenda.datoPasadoPendientes', { count: forma.n })
                     : forma.clave === 'sinCitas'
                       ? t('agenda.datoSinCitas')
                       : forma.clave === 'pasadoCerrado'
                       ? forma.n === 1
                         ? t('agenda.datoPasadoCerrado1')
-                        : t('agenda.datoPasadoCerradoN', { n: forma.n })
-                      : t('agenda.datoLibreConSemana', { n: forma.n });
+                        : t('agenda.datoPasadoCerradoN', { count: forma.n })
+                      : t('agenda.datoLibreConSemana', { count: forma.n });
 
   /* E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
      nombre, el saludo va SOLO (jamás inventado).
@@ -1951,7 +1952,7 @@ export default function Hoy() {
       atencionItems.push({
         clave: 'coordinar',
         icono: 'mes',
-        titulo: a.coordinar === 1 ? t('atencion.coordinar1') : t('atencion.coordinarN', { n: a.coordinar }),
+        titulo: a.coordinar === 1 ? t('atencion.coordinar1') : t('atencion.coordinarN', { count: a.coordinar }),
         // La bandeja YA existe y vive más abajo en esta misma portada: el
         // bloque no la duplica, la ANUNCIA. Por eso lleva a la pantalla de
         // coordinar de la primera, que es lo que el prestador va a hacer.
@@ -1963,7 +1964,7 @@ export default function Hoy() {
       atencionItems.push({
         clave: 'presupuestos',
         icono: 'presupuesto',
-        titulo: a.presupuestos === 1 ? t('atencion.presupuesto1') : t('atencion.presupuestoN', { n: a.presupuestos }),
+        titulo: a.presupuestos === 1 ? t('atencion.presupuesto1') : t('atencion.presupuestoN', { count: a.presupuestos }),
         onPress: () => router.push('/veterinaria/movimiento'),
       });
     }
@@ -1976,7 +1977,7 @@ export default function Hoy() {
       atencionItems.push({
         clave: 'abiertas',
         icono: 'caso',
-        titulo: a.abiertas === 1 ? t('atencion.abierta1') : t('atencion.abiertaN', { n: a.abiertas }),
+        titulo: a.abiertas === 1 ? t('atencion.abierta1') : t('atencion.abiertaN', { count: a.abiertas }),
         /* Lleva a la MÁS VIEJA. Si su cita no viaja (atención suelta sin
            cita), la fila NO se monta: una celda con chevron que no navega
            es un final mudo (Ley 23). */
@@ -2125,7 +2126,7 @@ export default function Hoy() {
                    decía literal (`plataDelDia: 'today'`). */
                 rotulo:
                   (p.sinPrecio ?? 0) > 0
-                    ? t('techo.plataParcial', { n: p.sinPrecio ?? 0 })
+                    ? t('techo.plataParcial', { count: p.sinPrecio ?? 0 })
                     : vistaEsHoy || diaVista === null
                       ? t('techo.plataDelDia')
                       : t('techo.plataDelDiaOtro', {
@@ -2712,8 +2713,28 @@ export default function Hoy() {
                      acá sería un segundo viaje por foto para la misma
                      pantalla.* Sin foto, `AvatarMascota` cae a la cara de la
                      casa por especie. */
+                  /* 🔴 **H2 · LA FOTO NO LLEGABA PORQUE NO HAY FOTO.** La ruta
+                     sí viaja y sí se firma — A lo midió: `mascota_foto_url` es
+                     **`null` en las cinco** del día. *No era la resolución
+                     (`D-308`): era que no hay nada que resolver.*
+
+                     ⇒ Sin foto propia cae **la cara de la casa**, con la
+                     escalera entera: ruta de raza si la declaró, genérico de
+                     especie si no. A midió que **tres de cinco no tienen raza**,
+                     así que la mayoría cae al genérico — *y eso es el escalón
+                     correcto, no un fallback pobre.*
+
+                     ⏳ **Va por `fotoUrl` y no por `fotoDeEspecie` porque
+                     `FilaCita` no tiene ese slot** (`AvatarMascota` sí). La
+                     consecuencia está declarada y es la misma de siempre: la
+                     ilustración recibe el encuadre de retrato. Pedido a B. */
                   fotoUrl:
-                    e.mascotaFotoUrl === null ? undefined : urlsFotos.get(e.mascotaFotoUrl),
+                    (e.mascotaFotoUrl === null ? undefined : urlsFotos.get(e.mascotaFotoUrl)) ??
+                    caraDeMascotaPorRuta({
+                      especie: e.mascotaEspecie,
+                      rutaImagen: e.razaRutaImagen,
+                    }) ??
+                    undefined,
                   especie: esEspecie(e.mascotaEspecie) ? e.mascotaEspecie : undefined,
                 }}
                 cara
@@ -2914,7 +2935,7 @@ export default function Hoy() {
             {porCoordinar.length > 3 && !verTodasCoord && (
               <Boton
                 variante="compacto"
-                etiqueta={t('agenda.verLasN', { n: porCoordinar.length })}
+                etiqueta={t('agenda.verLasN', { count: porCoordinar.length })}
                 onPress={() => setVerTodasCoord(true)}
               />
             )}
@@ -2960,7 +2981,7 @@ export default function Hoy() {
                 sección cerrada, el conteo ES el dato (§15b.3). */}
             <SeccionDesplegable
               titulo={t('agenda.yaAtendidasTitulo')}
-              resumen={t('agenda.yaAtendidasResumen', { n: resto.filter(esAtendida).length })}
+              resumen={t('agenda.yaAtendidasResumen', { count: resto.filter(esAtendida).length })}
               abierta={atendidasAbierto}
               onAlternar={() => setAtendidasAbierto((v) => !v)}
             >

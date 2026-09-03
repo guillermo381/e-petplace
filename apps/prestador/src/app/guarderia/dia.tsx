@@ -643,13 +643,13 @@ export default function DiaGuarderia() {
                 dos criterios que divergen. */}
             <Texto variante="titulo">
               {vozDePresencia(contarPresencia(estado.estadias), {
-                reservadas: (n) => t('diaGuarderia.pReservadas', { n }),
-                aBordo: (n) => t('diaGuarderia.pABordo', { n }),
-                adentro: (n) => t('diaGuarderia.pAdentro', { n }),
-                volviendo: (n) => t('diaGuarderia.pVolviendo', { n }),
-                entregadas: (n) => t('diaGuarderia.pEntregadas', { n }),
-                noRecogidas: (n) => t('diaGuarderia.pNoRecogidas', { n }),
-              }) ?? t('diaGuarderia.cuantos', { n: estado.estadias.length })}
+                reservadas: (count) => t('diaGuarderia.pReservadas', { count }),
+                aBordo: (count) => t('diaGuarderia.pABordo', { count }),
+                adentro: (count) => t('diaGuarderia.pAdentro', { count }),
+                volviendo: (count) => t('diaGuarderia.pVolviendo', { count }),
+                entregadas: (count) => t('diaGuarderia.pEntregadas', { count }),
+                noRecogidas: (count) => t('diaGuarderia.pNoRecogidas', { count }),
+              }) ?? t('diaGuarderia.cuantos', { count: estado.estadias.length })}
             </Texto>
 
             {/* EL ARRANQUE. Un solo botón por vez y sólo si hay a quién ir a
