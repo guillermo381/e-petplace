@@ -47,6 +47,10 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { dbQuery } from './lib-db.mjs';
 
+/* Alias con nombre propio: deja a la vista que ESTA llamada es la que puede
+   no tener base, y que su fallo es «no pude mirar», no «encontré algo». */
+const dbQueryRutas = dbQuery;
+
 /* `RUTAS_BASE` existe SÓLO para poder ejercer este gate contra copias de las
    listas antes de que estén mergeadas — no es configuración de producción. Sin
    ella se leen del repo, que es lo que corre en el hook. *Un gate que no se
@@ -70,7 +74,20 @@ const salir = (codigo, ...lineas) => { for (const l of lineas) console.log(l); p
 
 // ── ① EL CENSO DEL SERVIDOR: qué rutas PUEDE emitir el motor ───────────────
 function censarEmitibles() {
-  const filas = dbQuery(`
+  /* 🔴 S112-A · SIN BASE, ESTE GATE NO PUEDE MEDIR — y hasta hoy salía 1.
+     `lib-db` LANZA en un worktree sin linkear, y una excepción no atrapada da
+     exit 1 ⇒ el hook lo leía como *«UNA PUSH LLEVA A NINGUNA PARTE»*, que **no
+     es lo que pasó**. Medido por C: `s112-d` y `s112-e` tienen link, `s112-b`
+     y `s112-c` no ⇒ B iba a chocar con esto y a leer que tiene una ruta
+     huérfana.
+
+     *Un gate que acusa de otra cosa es peor que uno que no corre: manda a
+     curar lo que no está roto.* Su propia cabecera lo dice — **un gate que no
+     puede medir no se pone en el hook, se declara** — y hoy se ponía sin
+     declararse. Sale **2**, que el hook ya sabe tratar: avisa y deja pasar. */
+  let filas;
+  try {
+    filas = dbQueryRutas(`
     SELECT p.proname, p.prosrc
       FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
      WHERE n.nspname = 'public'
@@ -80,6 +97,11 @@ function censarEmitibles() {
        )
        AND p.proname <> 'registrar_intencion_notificacion'
      ORDER BY p.proname;`);
+  } catch (e) {
+    salir(2, `NO CONCLUYENTE · no se pudo consultar la base: ${String(e).slice(0, 120)}`,
+      '   (no es que haya una ruta huérfana: es que este árbol no puede mirar el motor.',
+      '    Un worktree sin `supabase link` no ve `pg_proc`. El commit SIGUE.)');
+  }
 
   const rutas = new Map();          // ruta -> [funciones]
   const mudos = [];                 // productores que hablan de ruta y no rindieron ninguna
