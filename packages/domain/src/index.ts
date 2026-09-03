@@ -41,3 +41,15 @@ export {
    El motor devuelve números; la redacción vive acá y el riel la traduce.
    *Una frase en español dentro de una RPC es una pantalla en un solo idioma.* */
 export { describirEspera, describirEdad, type VozRedactada } from './vozAdopcion';
+
+/* S112-C · El hilo de adopción, armado: agrupado, separadores de día y
+   eventos del trámite. Derivación PURA sobre el contrato de D, idéntica en las
+   dos superficies — la familia y el refugio ven la misma conversación agrupada
+   de la misma forma, y dos copias serían dos reglas que divergen. */
+export {
+  armarHilo,
+  type FilaDelHilo,
+  type MensajeParaHilo,
+  type EventoParaHilo,
+  type PosicionEnGrupo,
+} from './hiloAdopcion';

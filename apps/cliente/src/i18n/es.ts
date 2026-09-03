@@ -3792,6 +3792,19 @@ export const clienteEs = {
     despensaDetalle: 'Todavía no podemos mostrarlas acá. Por ahora las manejas desde la despensa, en la compra donde las activaste.',
   },
   hiloAdopcion: {
+    /* §2.3 · los separadores del hilo. «Hoy» y «Ayer» los redacta la casa; el
+       resto lo formatea el riel con el locale. */
+    hoy: 'Hoy',
+    ayer: 'Ayer',
+    /* 🔴 La línea ENTERA del fallo, no sólo la palabra del botón: el estado y
+       su salida se leen juntos (contrato de B). */
+    noSeEnvio: 'No se envió · Reintentar',
+    refugioSinNombre: 'El refugio',
+    escaleraAlternar: 'Ver los pasos de la solicitud',
+    escribirlePlaceholder: 'Escríbele a {{refugio}}',
+    nuevos_one: '{{count}} mensaje nuevo',
+    nuevos_other: '{{count}} mensajes nuevos',
+    nuevos: '{{count}} mensajes nuevos',
     // 🔴 DOS VOCES PARA DOS HECHOS DISTINTOS, no un sinónimo de `declinada`:
     // declinar es un acto del PUBLICADOR y desistir es de la familia. Del lado
     // de quien se bajó, la frase es SUYA y en primera persona.

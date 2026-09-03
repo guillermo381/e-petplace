@@ -2704,6 +2704,15 @@ export const clienteEn = {
     despensaDetalle: 'We can’t show them here yet. For now you manage them from the pantry, in the purchase where you turned them on.',
   },
   hiloAdopcion: {
+    hoy: 'Today',
+    ayer: 'Yesterday',
+    noSeEnvio: "Didn't send · Retry",
+    refugioSinNombre: 'The shelter',
+    escaleraAlternar: 'See the request steps',
+    escribirlePlaceholder: 'Write to {{refugio}}',
+    nuevos_one: '{{count}} new message',
+    nuevos_other: '{{count}} new messages',
+    nuevos: '{{count}} new messages',
     estado_desistida: 'You withdrew your application',
     estado_no_concretada: "{{nombre}} passed away. We're very sorry.",
     /* ⏳ GATE DEL FOUNDER PENDIENTE (S112-A) — sin duelo y SIN invitar a otro animal. */

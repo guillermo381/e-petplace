@@ -28,7 +28,12 @@
  * ══ QUÉ MIDE AHORA ════════════════════════════════════════════════════════
  * **Botones que se apagan SIN NINGUNA RAZÓN.** Por OCURRENCIA y no por archivo
  * —un archivo puede crecer sin cambiar de fila, y el segundo botón mudo del
- * mismo archivo era invisible—. Baseline **141**, firmado, SOLO-BAJA.
+ * mismo archivo era invisible—. Baseline **140**, SOLO-BAJA.
+ * ⏪ Bajó de 141 en S112-C: la barra vieja del hilo de adopción tenía un
+ * `Boton deshabilitado` con su razón, y murió al montar `BarraEscribir` — que
+ * resuelve lo mismo **sin freno**: el glifo de enviar se atenúa y tocarlo vacío
+ * no hace nada, así que no hay nada que explicar. *El trinquete baja cuando la
+ * cura elimina el freno, no cuando alguien le escribe una razón.*
  *
  * ⚠️ LO QUE NO VE, declarado (correctivo de `L-459`):
  * ① **Es una RESTA, no un emparejamiento por elemento.** Cuenta `deshabilitado={`
