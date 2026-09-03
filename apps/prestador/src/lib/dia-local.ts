@@ -47,15 +47,26 @@ export function sumarDias(iso: string, dias: number): string {
  *
  * 🔴 **LÍMITE DECLARADO:** el default es la zona de la casa porque **el
  * prestador todavía no publica la suya donde esta pantalla mira** — `MiPrestador`
- * trae `country_code` y no zona, y `zonaHoraria` vive **por franja** en la
- * config de guardería, que el día no lee. *Es exactamente igual de correcto que
- * hoy para un negocio en Ecuador y exactamente igual de equivocado para uno que
- * no lo esté* — con la diferencia de que ahora **no depende del teléfono**, que
- * era el defecto. Pedido a A: la zona del prestador en su fila.
+ * trae `country_code` y no zona, y `zonaHoraria` vive por franja en la config
+ * de guardería, que el día no lee. **A la cerró: `obtener_mi_prestador` ya
+ * devolvía `zona_horaria` desde `20260908820000` — el hueco era EL TIPO.** El
+ * `Pick` de `MiPrestador` no la incluía y el wrapper hace spread, así que *el
+ * dato ya viajaba en la respuesta y no aparecía en el autocompletado de nadie*.
+ *
+ * 🔴 **Y POR ESO EL DEFAULT MURIÓ, que es la cura de verdad.** Mientras la zona
+ * fue opcional, `hoyEnZona()` sin argumento devolvía la de Ecuador **sin error y
+ * sin aviso** — un valor plausible para un negocio que puede no estar acá.
+ * *Un atajo que puede producir un valor equivocado no se documenta: se vuelve
+ * inexpresable.* Ahora la zona es OBLIGATORIA y el compilador no deja llamar
+ * sin ella.
+ *
+ * `ZONA_DE_LA_CASA` sigue exportada como último recurso **para escribirse EN EL
+ * LLAMADOR, a la vista** —`p.data.zona_horaria ?? ZONA_DE_LA_CASA`— y no
+ * escondida en una firma: ahí se lee que hubo una decisión.
  */
 export const ZONA_DE_LA_CASA = 'America/Guayaquil';
 
-export function hoyEnZona(zona: string = ZONA_DE_LA_CASA): string {
+export function hoyEnZona(zona: string): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: zona }).format(new Date());
 }
 
@@ -66,7 +77,7 @@ export function hoyEnZona(zona: string = ZONA_DE_LA_CASA): string {
  * teléfono haría que una llegada de las 13:38 en Quito se lea «18:38» para
  * quien tenga el aparato en otra zona — y no hay nada que avise.
  */
-export function horaEnZona(iso: string, zona: string = ZONA_DE_LA_CASA): string {
+export function horaEnZona(iso: string, zona: string): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: zona,
     hour: '2-digit',
