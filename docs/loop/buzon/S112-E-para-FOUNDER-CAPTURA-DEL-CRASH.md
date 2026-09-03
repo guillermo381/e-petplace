@@ -32,11 +32,18 @@ Tiene que decir **`01a06586`**. En la app de NEGOCIOS tiene que decir
 > capturemos va a mandarnos a código que ya no existe. Son diez segundos que
 > evitan perder la pasada entera.*
 
-**④ En la app CLIENTE: abrí el hilo de adopción hasta que se cierre.**
+**④ PRIMERO, en la app de NEGOCIOS: abrí la pestaña de adopción y QUEDATE en la
+lista, sin abrir ninguna solicitud.**
+> **Este paso vale por dos y por eso va antes que todo lo demás.** Si esa lista
+> ya se cierra sola, el problema **no es el chat**: es cómo se dibujan los
+> animales. Y lo sabemos **sin abrir un solo hilo**. Si la lista abre bien,
+> también aprendimos algo: el problema está adentro del hilo.
+
+**⑤ En la app CLIENTE: abrí el hilo de adopción hasta que se cierre.**
 Andá a tus solicitudes y abrí la conversación. **Si se cierra, abrila de nuevo y
 que se cierre otra vez** — la segunda vez suele traer más detalle.
 
-**⑤ Y ACÁ ESTÁ LA PARTE QUE MÁS SIRVE, y te lleva un minuto más:**
+**⑥ Y ACÁ ESTÁ LA OTRA PARTE QUE MÁS SIRVE, y te lleva un minuto:**
 probá con **animales distintos**, y decime **con cuáles se cerró y con cuáles
 no**:
 
@@ -51,9 +58,9 @@ no**:
 > las otras pistas medio día de buscar en el lugar equivocado — y la das vos con
 > tres toques.
 
-**⑥ Repetí ④ y ⑤ en la app de NEGOCIOS**, abriendo la solicitud desde Home.
+**⑦ Repetí ⑤ y ⑥ en la app de NEGOCIOS**, abriendo la solicitud desde Home.
 
-**⑦ Decime «terminé».** Yo corto la grabación y reparto el error a quien lo
+**⑧ Decime «terminé».** Yo corto la grabación y reparto el error a quien lo
 tiene que curar.
 
 ---
