@@ -27314,3 +27314,41 @@ conviven con dos anatomías**.
 **La lección de forma:** *una decisión de dibujo con su número adentro se vence
 cuando el número cambia, y el dibujo no avisa.* Es la misma familia que
 `L-395` (un puente que sobrevive a su río).
+
+---
+
+## 🟡 `D-1007` — `hoy_local()` NO MIRA LA ZONA DEL PRESTADOR, Y 58 FUNCIONES HACEN LO MISMO
+
+**Deuda de PLATAFORMA. No se cura desde un frente de producto.**
+
+**Lo medido (S112-A):** `hoy_local()` es
+`(now() AT TIME ZONE 'America/Guayaquil')::date` — **la zona es una constante
+en el cuerpo**, y **58 funciones de `public` la repiten**. Existen columnas
+`zona_horaria` por entidad —`guarderia_franjas`, `eventos`,
+`vendedor_bodegas`, `entrega_turnos`— **y ninguna se lee**. *Un dato que
+existe y nadie consulta se lee como si estuviera rigiendo.*
+
+**Lo que S112-A SÍ hizo, y por qué no alcanza:** `prestadores.zona_horaria`
+existe y viaja por `obtener_mi_prestador` y por el contexto de arranque ⇒ **la
+APP ya pide el día correcto**. Pero **el MOTOR sigue calculando con la
+constante**. ⇒ el día que exista un prestador con otra zona, **la app y el
+motor van a discrepar, y la app va a tener razón**.
+
+🔴 **Por qué es de plataforma y no de adopción ni de guardería:** cambiar
+`hoy_local()` para que tome la zona de un prestador **exige decidir de QUIÉN
+es el día** en funciones que hoy no reciben prestador — barridos, crones,
+reportes, conciliaciones. *Un barrido nocturno no tiene un prestador: tiene
+todos.* Hacerlo de refilón desde un frente movería 58 funciones sin que nadie
+lo haya pedido.
+
+**Hoy NO muerde, medido:** los **12 prestadores son `country_code = 'EC'`** y
+la columna nació con exactamente la constante que ya los gobernaba ⇒ **ningún
+día cambia**. *Muerde con el primer prestador fuera de Ecuador, y para
+entonces ya va a haber datos escritos con el día equivocado.*
+
+**Disparo:** el alta del primer prestador con zona distinta de
+`America/Guayaquil` — o antes, si alguien abre el frente de multi-país.
+
+**La lección de forma:** *una constante repetida 58 veces no es una decisión
+tomada 58 veces: es una decisión tomada una vez y copiada, y la copia no sabe
+que era una decisión.*

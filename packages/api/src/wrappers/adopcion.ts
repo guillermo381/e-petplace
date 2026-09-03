@@ -1679,15 +1679,16 @@ export async function poblarVitrinaRefugio(campos: {
   zona?: string;
   /** RUTA devuelta por `subirImagenVitrinaRefugio('logo', …)`. */
   logoUrl?: string;
-  /** RUTA devuelta por `subirImagenVitrinaRefugio('portada', …)`. */
-  portadaUrl?: string;
+  /* ☠️ S112-A · aquí iba `portadaUrl`, y murió el mismo día. La portada vive
+     en `prestador_fotos` con **su propia puerta** —la misma que las fotos del
+     animal— y C lo midió antes de consumirlo: *un parámetro que duplica una
+     puerta existente no agrega un camino, agrega una segunda verdad.* */
 }): Promise<ResultadoWrapper<VitrinaRefugioGuardada, CodigoErrorAdopcion>> {
   const { data, error } = await getClient().rpc('poblar_vitrina_refugio', {
     p_historia: campos.historia ?? undefined,
     p_ciudad: campos.ciudad ?? undefined,
     p_zona: campos.zona ?? undefined,
     p_logo_url: campos.logoUrl ?? undefined,
-    p_portada_url: campos.portadaUrl ?? undefined,
   });
   if (error) return fallo(error.message);
   if (typeof data !== 'object' || data === null) return fallaCodigo('datos_inconsistentes');

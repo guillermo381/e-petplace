@@ -25264,7 +25264,6 @@ export type Database = {
           p_ciudad?: string
           p_historia?: string
           p_logo_url?: string
-          p_portada_url?: string
           p_zona?: string
         }
         Returns: Json
