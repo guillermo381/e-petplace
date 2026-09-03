@@ -38,18 +38,24 @@
  *   y no trae solicitante, **a propósito** — cada lado ve al otro.
  */
 
-import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  AvatarMascota,
+  BarraEscribir,
+  EscaleraSolicitud,
   Boton,
-  Campo,
+  BurbujaMensaje,
+  CabeceraHilo,
   Encabezado,
+  EventoDelHilo,
+  Icono,
+  PastillaNuevoMensaje,
+  SeparadorDia,
+  SuperficieChat,
   Esqueleto,
   EsqueletoGrupo,
-  EstadoSolicitudAdopcion as EscaleraSolicitud,
   EstadoVacio,
   HojaConfirmacionDestructiva,
   Tarjeta,
@@ -58,9 +64,17 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
+import { armarHilo, leerEscalera, type FilaDelHilo } from '@epetplace/domain';
 import {
-  caraDeMascota,
+  etiquetaDeDiaDeMensaje,
+  horaCortaDeMensaje,
+  obtenerIdiomaActual,
+} from '@epetplace/i18n';
+import {
   desistirSolicitudAdopcion,
+  marcarHiloLeido,
+  obtenerSesion,
+  resolverUrlGenericaEspecie,
   obtenerMisSolicitudesAdopcion,
   responderSolicitudAdopcion,
   resolverUrlsFotos,
@@ -68,6 +82,11 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+
+/** Los borradores vivos, por hilo. **Sólo en memoria**: sobrevive a la
+ *  pantalla y no al cierre de la app — que es lo que §2.4 pide («cuando vuelvo
+ *  a ese hilo»), sin escribir en disco un texto que la persona no envió. */
+const BORRADORES = new Map<string, string>();
 
 type Estado =
   | { fase: 'cargando' }
@@ -83,20 +102,58 @@ export default function HiloSolicitud() {
   const insets = useSafeAreaInsets();
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
-  const [borrador, setBorrador] = useState('');
+  /* ⭐ **C4 · BORRADOR POR HILO.** §2.4: *«si me voy sin enviar, lo que
+     escribí sigue ahí cuando vuelvo a ese hilo»*. Vive en un módulo y no en el
+     estado porque **el estado muere al desmontar la pantalla**, que es
+     exactamente cuando hay que conservarlo. Y va por `solicitudId`: *un
+     borrador global aparecería en la conversación equivocada, que es peor que
+     perderlo.* */
+  const [borrador, setBorradorLocal] = useState(() => BORRADORES.get(solicitudId) ?? '');
+  const setBorrador = useCallback(
+    (v: string) => {
+      setBorradorLocal(v);
+      if (v.length === 0) BORRADORES.delete(solicitudId);
+      else BORRADORES.set(solicitudId, v);
+    },
+    [solicitudId],
+  );
   const [enviando, setEnviando] = useState(false);
   const [intento, setIntento] = useState(0);
   /** P1: desistir es irreversible (`declinada` es terminal para los dos), así
    *  que pasa por doble confirmación con el sujeto nombrado. */
   const [desistiendo, setDesistiendo] = useState(false);
   const [trabajando, setTrabajando] = useState(false);
+  /** Mi uid. **No hay campo «mío» en el contrato**: el lado de la burbuja se
+   *  decide comparando `autorUserId` contra la sesión (contrato de D). */
+  const [miUid, setMiUid] = useState('');
+  const idioma = obtenerIdiomaActual();
+  const [escaleraAbierta, setEscaleraAbierta] = useState(true);
+  const [alFondo, setAlFondo] = useState(true);
+  const [nuevosSinVer, setNuevosSinVer] = useState(0);
+  /**
+   * ⭐ **C5 · ENVÍO OPTIMISTA.** Los míos que todavía no confirmó el servidor.
+   * §2.5: *«al enviar, el mensaje aparece al instante en la lista y el campo se
+   * vacía; si falla, queda con "No se envió · Reintentar"»*.
+   *
+   * 🔴 **Viven APARTE de los del servidor y no se mezclan en el estado del
+   * hilo**: cuando la recarga trae el mensaje ya confirmado, el optimista se
+   * retira por su `clientId`. *Fusionarlos obligaría a adivinar cuál del
+   * servidor corresponde a cuál mío —el motor no devuelve mi id— y el día que
+   * dos mensajes tengan el mismo texto, uno se duplicaría en pantalla.*
+   */
+  const [enVuelo, setEnVuelo] = useState<
+    { clientId: string; cuerpo: string; estado: 'enviando' | 'no_se_envio' }[]
+  >([]);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       setEstado({ fase: 'cargando' });
       void (async () => {
-        const r = await obtenerMisSolicitudesAdopcion();
+        /* Las dos JUNTAS: el uid decide de qué lado va cada burbuja y no es
+           precondición de la lista (`L-223` — lo que se paga es la CADENA). */
+        const [r, ses] = await Promise.all([obtenerMisSolicitudesAdopcion(), obtenerSesion()]);
+        if (vigente && ses.ok && ses.data !== null) setMiUid(ses.data.user_id);
         if (!vigente) return;
         /* Ley 13: el fallo JAMÁS se disfraza de «no existe». *Decirle que su
            solicitud no está cuando lo que falló fue la red es hacerle creer que
@@ -110,6 +167,14 @@ export default function HiloSolicitud() {
           setEstado({ fase: 'noEsta' });
           return;
         }
+        /* ⭐ **C4 · SE MARCA LEÍDO AL ABRIR** (§2.4). Se pide **una vez por
+           carga** y no se espera: el contador de la lista es del servidor, así
+           que si esto falla el número queda alto y se corrige la próxima —
+           *bloquear el hilo por un contador sería cambiar lo importante por lo
+           accesorio*.
+           ⚠️ Va con `void` a propósito y NO dentro del `Promise.all`: **su
+           resultado no lo dibuja nadie.** */
+        void marcarHiloLeido(hilo.solicitudId);
         const caras =
           hilo.mascotaFotoUrl === null
             ? new Map<string, string>()
@@ -131,22 +196,235 @@ export default function HiloSolicitud() {
      pantalla que armara la escalera a mano podría marcar 'declinada' como hecho
      y compilaría perfecto»*. Se monta la pieza y el mapeo muere (Ley 37). */
 
-  const enviar = async () => {
-    const cuerpo = borrador.trim();
-    if (cuerpo.length === 0 || enviando || estado.fase !== 'listo') return;
-    setEnviando(true);
-    try {
-      const r = await responderSolicitudAdopcion({ solicitudId: estado.hilo.solicitudId, cuerpo });
-      if (!r.ok) {
-        mostrar({ variante: 'error', texto: r.mensaje });
-        return;
-      }
-      setBorrador('');
-      setIntento((n) => n + 1);
-    } finally {
-      setEnviando(false);
+  /* ═══ C4 · LOS NUEVOS LLEGAN SOLOS ══════════════════════════════════════
+
+     🔴 **SONDEO DE 5 s, Y ESTÁ DECLARADO PORQUE LA LETRA LO PIDE ASÍ.** §2.4:
+     *«realtime de la casa si existe para esta tabla; si no, sondeo cada 5 s con
+     la pantalla en foco, **y se declara cuál**»*.
+
+     ⏪ **ESTE COMENTARIO DECÍA QUE LA TABLA NO ESTABA PUBLICADA, Y DEJÓ DE SER
+     CIERTO EL MISMO DÍA.** A la agregó (`20260908720000`): la publicación pasó
+     de 14 tablas a 15 y **`adopcion_mensaje` YA ESTÁ**. *Se corrige acá y no se
+     borra, porque un comentario que describe mal el mundo se lee con la misma
+     autoridad que uno que lo describe bien.*
+
+     🔴 **Y sigue el sondeo igual, por una razón distinta a la de ayer: la tabla
+     está publicada y NO HAY PUERTA.** Medido: **cero `.channel(` en todo el
+     monorepo** y ningún wrapper de suscripción en `packages/api`. Abrir el canal
+     desde acá saltearía la puerta única, que es regla de la casa. ⇒ `L-318`
+     visto desde el otro lado: el motor quedó listo y su consumidor no puede
+     llamarlo. **Pedido a A por nombre**; el día que llegue, esto son dos
+     líneas menos.
+
+     ⚠️ **Sólo en foco**, que es la mitad que evita el costo: `useFocusEffect`
+     limpia el intervalo al salir. *Un sondeo que sigue corriendo con la
+     pantalla cerrada es una petición cada cinco segundos por una conversación
+     que nadie está mirando* — `L-223` con reloj. */
+  useFocusEffect(
+    useCallback(() => {
+      const id = setInterval(() => setIntento((n) => n + 1), 5000);
+      return () => clearInterval(id);
+    }, []),
+  );
+
+  /**
+   * ⭐ **C5 · ENVIAR, OPTIMISTA.** El mensaje se ve **antes** de que el servidor
+   * conteste (§2.7), y si falla queda con su salida.
+   *
+   * 🔴 **El campo se vacía ANTES del viaje, no después.** Vaciarlo al volver
+   * deja el texto a la vista mientras la burbuja ya existe abajo — *el mismo
+   * mensaje dos veces en pantalla, y quien lo ve toca enviar de nuevo.*
+   */
+  const enviar = async (texto: string) => {
+    const cuerpo = texto.trim();
+    /* §2.5: *«un mensaje sólo de espacios no se envía»*. El `trim` no es
+       cosmético: sin él se manda una burbuja vacía que el otro lado recibe. */
+    if (cuerpo.length === 0 || estado.fase !== 'listo') return;
+    const clientId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setEnVuelo((xs) => [...xs, { clientId, cuerpo, estado: 'enviando' }]);
+    setBorrador('');
+    const r = await responderSolicitudAdopcion({ solicitudId: estado.hilo.solicitudId, cuerpo });
+    if (!r.ok) {
+      /* **No se muestra un aviso Y se marca la burbuja: sólo la burbuja.** El
+         aviso se va solo y deja un mensaje que parece enviado; la burbuja se
+         queda con su salida al lado. *El estado y su reintento se leen
+         juntos.* */
+      setEnVuelo((xs) =>
+        xs.map((x) => (x.clientId === clientId ? { ...x, estado: 'no_se_envio' as const } : x)),
+      );
+      return;
     }
+    /* El optimista se retira y la recarga trae el confirmado. Se retira POR
+       `clientId` y no por texto: dos mensajes iguales son legales. */
+    setEnVuelo((xs) => xs.filter((x) => x.clientId !== clientId));
+    setIntento((n) => n + 1);
   };
+
+  const reintentar = async (clientId: string) => {
+    const fallido = enVuelo.find((x) => x.clientId === clientId);
+    if (fallido === undefined || estado.fase !== 'listo') return;
+    setEnVuelo((xs) =>
+      xs.map((x) => (x.clientId === clientId ? { ...x, estado: 'enviando' as const } : x)),
+    );
+    const r = await responderSolicitudAdopcion({
+      solicitudId: estado.hilo.solicitudId,
+      cuerpo: fallido.cuerpo,
+    });
+    if (!r.ok) {
+      setEnVuelo((xs) =>
+        xs.map((x) => (x.clientId === clientId ? { ...x, estado: 'no_se_envio' as const } : x)),
+      );
+      return;
+    }
+    setEnVuelo((xs) => xs.filter((x) => x.clientId !== clientId));
+    setIntento((n) => n + 1);
+  };
+
+  /* ═══ C3 · EL HILO ARMADO ═════════════════════════════════════════════
+     El agrupado, los separadores de día y el orden invertido viven en
+     `armarHilo` (`packages/domain`): es derivación pura y **la misma en las dos
+     superficies**. *Dos copias serían dos reglas de agrupado que divergen el
+     día que alguien toque una.*
+
+     Los optimistas se anexan como mensajes normales con mi `uid`, así que **el
+     agrupado los agrupa igual**: si mando tres seguidos, se ven pegados antes
+     de que el servidor conteste, como se verán después. */
+  /** C2 · el estado → la etapa, derivado UNA vez y en el dominio. */
+  const escalera = useMemo(
+    () =>
+      estado.fase === 'listo'
+        ? leerEscalera(estado.hilo.estado, { huboMensajes: estado.hilo.mensajes.length > 0 })
+        : { etapa: null as null, final: null as null },
+    [estado],
+  );
+
+  const filas = useMemo(() => {
+    if (estado.fase !== 'listo') return [];
+    const ahora = new Date().toISOString();
+    return armarHilo([
+      ...estado.hilo.mensajes,
+      ...enVuelo.map((x) => ({
+        mensajeId: `local:${x.clientId}`,
+        autorUserId: miUid,
+        cuerpo: x.cuerpo,
+        automatica: false,
+        creadoEn: ahora,
+      })),
+    ]);
+  }, [estado, enVuelo, miUid]);
+
+  /** Cuántos ajenos llegaron desde la última vez que estuve al fondo. */
+  const ajenosVistos = useRef(0);
+  useEffect(() => {
+    if (estado.fase !== 'listo') return;
+    const ajenos = estado.hilo.mensajes.filter((m) => m.autorUserId !== miUid).length;
+    if (alFondo) {
+      /* Al fondo, lo nuevo YA SE VE: la cuenta se pone al día en vez de
+         acumular. *Una pastilla sobre un mensaje visible enseña a ignorarla.* */
+      ajenosVistos.current = ajenos;
+      setNuevosSinVer(0);
+      return;
+    }
+    setNuevosSinVer(Math.max(0, ajenos - ajenosVistos.current));
+  }, [estado, alFondo, miUid]);
+
+  const renderFila = (f: FilaDelHilo) => {
+    if (f.tipo === 'dia') {
+      return (
+        <SeparadorDia
+          etiqueta={etiquetaDeDiaDeMensaje(f.fechaIso, idioma, {
+            hoy: t('hiloAdopcion.hoy'),
+            ayer: t('hiloAdopcion.ayer'),
+          })}
+        />
+      );
+    }
+    if (f.tipo === 'evento') {
+      /* §2.3: los hechos del trámite van **en el hilo, centrados, como una
+         etiqueta**, y si piden algo mío llevan su carta debajo. *Así el chat
+         cuenta la historia entera y no hay que buscar el siguiente paso en otro
+         lado.* */
+      return (
+        <EventoDelHilo
+          etiqueta={f.evento.etiqueta}
+          accion={
+            f.evento.pideAccion === true && estado.fase === 'listo' ? (
+              <Boton
+                variante="primario"
+                tamaño="sm"
+                etiqueta={t('hiloAdopcion.verActa')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/adoptar/acta/[solicitudId]',
+                    params: { solicitudId: estado.hilo.solicitudId },
+                  })
+                }
+              />
+            ) : undefined
+          }
+        />
+      );
+    }
+    const m = f.mensaje;
+    const mio = m.autorUserId === miUid;
+    const enVueloDeEste = m.mensajeId.startsWith('local:')
+      ? enVuelo.find((x) => `local:${x.clientId}` === m.mensajeId)
+      : undefined;
+    /* La hora se pasa **SIEMPRE** aunque no se dibuje: la pieza la calla donde
+       no va. *Si la pantalla eligiera cuándo pasarla, la regla «la hora va bajo
+       el último del grupo» viviría en cada consumidor* (decisión de B). */
+    const hora = horaCortaDeMensaje(m.creadoEn, idioma);
+    if (!mio) {
+      return (
+        <BurbujaMensaje
+          mio={false}
+          texto={
+            /* 🔴 La automática se DICE. *Un texto que el refugio no escribió a
+               esta familia, presentado como si lo hubiera escrito, le hace creer
+               que ya le contestaron* — y el reloj de los cinco días, que la
+               ignora a propósito, seguiría corriendo sin que ella entienda por
+               qué. ⚠️ Y **sí lleva autor**: A midió que la tabla rebota
+               `mensaje_sin_autor`, así que la escribió una persona del refugio;
+               `automatica` dice CÓMO se envió, no que no tenga dueño. */
+            m.automatica ? `${t('hiloAdopcion.automatica')}\n${m.cuerpo}` : m.cuerpo
+          }
+          hora={hora}
+          posicion={f.posicion}
+          autor={f.abreGrupo ? (estado.fase === 'listo' ? (estado.hilo.publicadorNombre ?? undefined) : undefined) : undefined}
+        />
+      );
+    }
+    /* 🔴 **DOS RAMAS EXPLÍCITAS Y NO UN OBJETO CON TERNARIOS**, y el tipo de B
+       me obligó: la rama `no_se_envio` **exige** `onReintentar` y
+       `vozReintentar`, así que pasarlas como `X | undefined` no compila. *Su
+       unión no admite «tal vez tiene salida»: un fallo sin salida deja a la
+       persona creyendo que mandó algo que no mandó.* El typecheck lo dijo antes
+       que cualquier gate. */
+    if (enVueloDeEste?.estado === 'no_se_envio') {
+      const clientId = enVueloDeEste.clientId;
+      return (
+        <BurbujaMensaje
+          mio
+          texto={m.cuerpo}
+          hora={hora}
+          posicion={f.posicion}
+          estado="no_se_envio"
+          onReintentar={() => void reintentar(clientId)}
+          vozReintentar={t('hiloAdopcion.noSeEnvio')}
+        />
+      );
+    }
+    return (
+      <BurbujaMensaje
+        mio
+        texto={m.cuerpo}
+        hora={hora}
+        posicion={f.posicion}
+        estado={enVueloDeEste === undefined ? 'enviado' : 'enviando'}
+      />
+    );
+  };
+
 
   /**
    * DESISTIR — «ya no quiero adoptar a Luna».
@@ -224,165 +502,162 @@ export default function HiloSolicitud() {
           />
         </View>
       ) : (
-        <>
-          <ScrollView
-            contentContainerStyle={{
-              padding: spacing[5],
-              gap: spacing[4],
-              paddingBottom: insets.bottom + spacing[8],
-            }}
-          >
-            {/* QUIÉN Y EN QUÉ ESTÁ — la firma de la pantalla. */}
-            <Tarjeta relleno="normal" elevacion="reposo">
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <AvatarMascota
-                  nombre={estado.hilo.mascotaNombre}
-                  fotoUrl={
-                    caraDeMascota({
-                      especie: estado.hilo.mascotaEspecie,
-                      razaSlug: null,
-                      fotoUri: estado.cara,
-                    }) ?? undefined
-                  }
-                  tamano="md"
-                />
-                <View style={{ flex: 1, gap: spacing[1] }}>
-                  <Texto variante="cuerpo">{estado.hilo.mascotaNombre}</Texto>
-                  {estado.hilo.publicadorNombre !== null ? (
-                    <Texto variante="apoyo" color="tertiary">
-                      {t('hiloAdopcion.de', { refugio: estado.hilo.publicadorNombre })}
-                    </Texto>
-                  ) : null}
-                </View>
-              </View>
-              {/* EL ESTADO, DEBAJO Y EN ANCHO COMPLETO. La escalera no es una
-                  etiqueta: dice DÓNDE va la solicitud, no sólo cómo se llama su
-                  momento — y eso es lo único que la persona vino a saber
-                  (`FIRMA`, arriba). Apretada al costado del avatar no entra. */}
-              <View style={{ marginTop: spacing[4] }}>
-                <EscaleraSolicitud
-                  estado={estado.hilo.estado}
-                  registro="completa"
-                  voces={{
-                    recibida: t('hiloAdopcion.estado_recibida'),
-                    enConversacion: t('hiloAdopcion.estado_en_conversacion'),
-                    aceptada: t('hiloAdopcion.estado_aceptada'),
-                  }}
-                  vozDeclinada={t('hiloAdopcion.estado_declinada')}
-                  vozDesistida={t('hiloAdopcion.estado_desistida')}
-                  vozNoConcretada={t('hiloAdopcion.estado_no_concretada', { nombre: estado.hilo.mascotaNombre })}
-                  vozOtraFamilia={t('hiloAdopcion.estado_otra_familia', { nombre: estado.hilo.mascotaNombre })}
-                />
-              </View>
-            </Tarjeta>
+        <SuperficieChat
+          /* ═══ C1 · EL TECLADO ═══════════════════════════════════════════
+             🔴 **EL ROJO ERA ESTE ARCHIVO.** Medido antes de tocar: esta
+             pantalla montaba un `ScrollView` y **cero manejo de teclado** —ni
+             `EvitaTeclado`—, así que al enfocar el campo **el teclado lo
+             tapaba**. Es el defecto que el founder ve.
 
-            {/* LA CONVERSACIÓN. Sin sello de hora por mensaje (Chanel). */}
-            {estado.hilo.mensajes.length === 0 ? (
-              <Texto variante="apoyo" color="tertiary">
-                {t('hiloAdopcion.sinMensajes')}
-              </Texto>
-            ) : (
-              estado.hilo.mensajes.map((m) => (
-                <Tarjeta key={m.mensajeId} relleno="normal">
-                  <View style={{ gap: spacing[1] }}>
-                    {/* 🔴 La automática se DICE. *Un texto que el refugio no
-                        escribió, presentado como si lo hubiera escrito, le hace
-                        creer a la familia que ya le contestaron* — y el reloj
-                        de los cinco días, que la ignora a propósito, seguiría
-                        corriendo sin que ella entienda por qué. */}
-                    {m.automatica ? (
-                      <Texto variante="apoyo" color="tertiary">
-                        {t('hiloAdopcion.automatica')}
-                      </Texto>
-                    ) : null}
-                    <Texto variante="cuerpo">{m.cuerpo}</Texto>
-                  </View>
-                </Tarjeta>
-              ))
-            )}
-          </ScrollView>
+             Y la mitad que no se veía: el hilo del refugio **sí** tenía
+             `EvitaTeclado`, pero con un `ScrollView` plano sin anclar al final.
+             *Dos comportamientos distintos para la misma conversación* — que es
+             exactamente lo que «las dos apps con la misma calidad» viene a
+             corregir, y por lo que esto es UNA pieza y no dos composiciones.
 
-          {/* ESCRIBIR — sólo mientras el hilo esté abierto. Ley 23: sobre un
-              hilo cerrado el motor rebota, así que no se ofrece el campo; en su
-              lugar se dice por qué, con la voz de su estado. */}
-          <View
-            style={{
-              padding: spacing[5],
-              paddingBottom: insets.bottom + spacing[4],
-              gap: spacing[2],
-            }}
-          >
-            {/* ⭐ **EL HILO ES LA PUERTA DEL ACTA** — letra del founder: *«cuando
-                el refugio acepta, el hilo mismo me lleva al final»*. Por eso el
-                aviso de «acta lista» apunta acá y no a una pantalla suelta, y
-                por eso este camino tiene que existir: *el aviso no saltea el
-                hilo, así que si el hilo no llevara, no llegaría nadie.* */}
-            {estado.hilo.estado === 'aceptada' ? (
-              <Boton
-                variante="primario"
-                bloque
-                etiqueta={t('hiloAdopcion.verActa')}
-                onPress={() =>
-                  router.push({
-                    pathname: '/adoptar/acta/[solicitudId]',
-                    params: { solicitudId: estado.hilo.solicitudId },
-                  })
-                }
+             La pieza resuelve el inset animado, la lista invertida anclada al
+             final, la barra pegada al teclado, el cierre al deslizar y el borde
+             inferior. Acá sólo se le dice QUÉ dibujar. ── */
+          encabezado={
+            <View style={{ gap: spacing[3] }}>
+              <CabeceraHilo
+                animal={{
+                  nombre: estado.hilo.mascotaNombre,
+                  fotoUrl: estado.cara,
+                  fotoDeEspecie: resolverUrlGenericaEspecie(estado.hilo.mascotaEspecie),
+                  onPress: () =>
+                    router.push({
+                      pathname: '/adoptar/[publicacionId]',
+                      params: { publicacionId: estado.hilo.publicacionId },
+                    }),
+                }}
+                contraparte={{
+                  nombre: estado.hilo.publicadorNombre ?? t('hiloAdopcion.refugioSinNombre'),
+                  /* 🔴 **§2.1 PIDE «toco el refugio y voy a su vitrina» Y HOY NO
+                     SE PUEDE**, medido: `MiSolicitud` trae `publicadorNombre` y
+                     **no trae la cuenta comercial**, que es el id con el que la
+                     vitrina se resuelve (`obtenerPerfilesPublicosPorCuenta`).
+
+                     No se pasa `onPress`, así que **la pieza no lo hace tocable**
+                     y no promete un camino que no existe (Ley 23). Pedido a A:
+                     `publicadorCuentaId` en el lector de la familia. */
+                }}
               />
-            ) : null}
-            {/* 🔴 **CON EL ANIMAL FALLECIDO NO SE DICE «esta conversación está
-                cerrada».** La escalera de B **no dibuja escalera en ese estado a
-                propósito** —*un duelo no es un trámite interrumpido*— así que la
-                voz es todo lo que se ve. *Poner debajo un aviso de trámite le
-                dice la misma noticia dos veces a alguien que acaba de perder al
-                animal que eligió, y la segunda en lenguaje de formulario.* En
-                `declinada` y `desistida` sí se dice: ahí el hilo cerrado ES el
-                hecho.
 
-                ⚠️ **Esto se escribió, se retiró, y volvió — y la vuelta es el
-                dato.** Grepeé `no_concretada_fallecimiento` **contra mi propio
-                árbol**, que estaba atrás de dos migraciones, di cero y concluí
-                que el motor no lo emitía. *El `TS2367` era real —del objeto— y
-                revertir fue correcto con esa información; lo que no se sostenía
-                era la afirmación sobre el mundo, sacada de un árbol que no es el
-                mundo.* Contra `origin/main` el estado vive en el CHECK, en el
-                trigger del memorial, en la purga y en el tipo de
-                `packages/api`. **Medir la propia rama y llamarlo «el estado»**,
-                la clase que el canon nombra. *Se declara y no se borra: acá la
-                nota vale más que las tres líneas de código.* */}
-            {cerrado && estado.hilo.estado !== 'no_concretada_fallecimiento' ? (
-              <Texto variante="apoyo" color="tertiary">
-                {t('hiloAdopcion.cerrado')}
-              </Texto>
-            ) : !cerrado ? (
-              <>
-                <Campo
-                  label={t('hiloAdopcion.escribirEtiqueta')}
-                  value={borrador}
-                  onChangeText={setBorrador}
-                  multilinea={2}
+              {/* ═══ C2 · LA ESCALERA ═══════════════════════════════════
+                  §1: *«arriba del hilo, colapsable… se colapsa sola cuando
+                  empiezo a escribir»*.
+
+                  🔑 **Colapsar es de la PANTALLA y abrir/cerrar es de la
+                  PIEZA**: ella trae su toque y su etiqueta, y yo le digo si
+                  está abierta. *El dato que la colapsa —que alguien empezó a
+                  escribir— vive en el campo de texto, que es mío.*
+
+                  🔴 **Con `etapa: null` no se dibuja NADA** —ni fila ni línea—:
+                  es el memorial, y no se le dice dos veces la misma noticia a
+                  alguien que acaba de perder al animal que eligió. */}
+              {escalera.etapa === null ? null : (
+                <EscaleraSolicitud
+                  etapa={escalera.etapa}
+                  final={
+                    escalera.final === null
+                      ? undefined
+                      : {
+                          tipo: escalera.final,
+                          etiqueta:
+                            escalera.final === 'declinada'
+                              ? t('hiloAdopcion.estado_declinada')
+                              : escalera.final === 'desistida'
+                                ? t('hiloAdopcion.estado_desistida')
+                                : t('hiloAdopcion.estado_otra_familia', {
+                                    nombre: estado.hilo.mascotaNombre,
+                                  }),
+                        }
+                  }
+                  voces={{
+                    enviada: t('hiloAdopcion.etapa_enviada'),
+                    en_conversacion: t('hiloAdopcion.etapa_en_conversacion'),
+                    aceptada: t('hiloAdopcion.etapa_aceptada'),
+                    acta_firmada: t('hiloAdopcion.etapa_acta_firmada'),
+                    una_vida_nueva: t('hiloAdopcion.etapa_una_vida_nueva'),
+                  }}
+                  /* La línea de abajo, ENTERA y en voz de FAMILIA: «Estás en:
+                     …». El refugio lee «La solicitud está en: …» — misma pieza,
+                     dos asientos (§1). */
+                  vozEstado={t('hiloAdopcion.estasEn', {
+                    etapa: t(`hiloAdopcion.etapa_${escalera.etapa}` as 'hiloAdopcion.etapa_enviada'),
+                  })}
+                  abierta={escaleraAbierta}
+                  onAlternar={() => setEscaleraAbierta((v) => !v)}
+                  etiquetaAlternar={t('hiloAdopcion.escaleraAlternar')}
+                  acento="control"
                 />
-                <Boton
-                  variante="primario"
-                  bloque
-                  etiqueta={t('hiloAdopcion.enviar')}
-                  deshabilitado={borrador.trim().length === 0}
-                  cargando={enviando}
-                  onPress={() => void enviar()}
-                />
-                {/* DESISTIR — en `ghost` y al final, a propósito: es la salida,
-                    no una acción par de «Enviar». *Dos botones del mismo peso
-                    convierten «hablá con el refugio» en «hablá o abandoná».* */}
-                <Boton
-                  variante="ghost"
-                  bloque
-                  etiqueta={t('hiloAdopcion.desistir')}
-                  onPress={() => setDesistiendo(true)}
-                />
-              </>
-            ) : null}
-          </View>
-        </>
+              )}
+            </View>
+          }
+          datosDelMasNuevoAlMasViejo={filas}
+          claveDe={(f) => f.clave}
+          renderMensaje={(f) => renderFila(f)}
+          onAlFondoCambia={setAlFondo}
+          sobrepuesto={
+            /* ═══ C4 · LA PASTILLA ═══════════════════════════════════════
+                §2.4: *«si estoy leyendo arriba y llega uno, no me arrastran»*.
+                Sólo cuando hay algo nuevo **y** no estoy al fondo: al fondo el
+                mensaje ya se ve, y una pastilla sobre algo visible enseña a
+                ignorarla. */
+            !alFondo && nuevosSinVer > 0 ? (
+              <PastillaNuevoMensaje
+                etiqueta={t('hiloAdopcion.nuevos', { n: nuevosSinVer })}
+                onPress={() => {
+                  setNuevosSinVer(0);
+                  setAlFondo(true);
+                }}
+              />
+            ) : null
+          }
+          barra={
+            cerrado ? (
+              /* ═══ C5 · LA VARIANTE EN LECTURA ══════════════════════════
+                  §2.6: la barra **se reemplaza por una línea en el mismo
+                  lugar**, no desaparece. *Un campo que se va deja el hilo con
+                  cara de roto; una línea que dice por qué lo deja cerrado.*
+
+                  🔴 **Con el animal fallecido NO hay línea** (decisión tomada):
+                  la escalera ya no se dibuja y ésta sería la misma noticia por
+                  segunda vez, en lenguaje de formulario. */
+              estado.hilo.estado === 'no_concretada_fallecimiento' ? null : (
+                <BarraEscribir enLectura={t('hiloAdopcion.cerrado')} />
+              )
+            ) : (
+              <BarraEscribir
+                valor={borrador}
+                onCambio={(v) => {
+                  setBorrador(v);
+                  /* §1: *«se colapsa sola cuando empiezo a escribir»*. Sólo al
+                     empezar: colapsarla en cada tecla pelearía con quien la
+                     abrió a propósito mientras escribe. */
+                  if (v.length > 0 && borrador.length === 0) setEscaleraAbierta(false);
+                }}
+                onEnviar={(texto) => void enviar(texto)}
+                placeholder={t('hiloAdopcion.escribirlePlaceholder', {
+                  refugio: estado.hilo.publicadorNombre ?? t('hiloAdopcion.refugioSinNombre'),
+                })}
+                /* ⏪ **ACÁ IBA LA PALABRA «Enviar», Y DURÓ UNA VUELTA.**
+                   §2.5 pide un glifo; el registry no lo tenía —40 nombres, y
+                   los cercanos mienten: `compartir` es mandar afuera, `correo`
+                   es email— así que puse la palabra, que no miente. **B lo
+                   construyó y ahora existe**: se cambia en el mismo acto (Ley
+                   37) y la nota queda para que no parezca que la palabra fue
+                   una preferencia.
+
+                   Es CONTROL: sin huella, y su color lo pone el estado del
+                   campo — atenuado sin texto, encendido con texto (§2.5). */
+                glifoEnviar={<Icono nombre="enviar" tamano={24} registro="aa" />}
+                etiquetaEnviar={t('hiloAdopcion.enviar')}
+              />
+            )
+          }
+        />
       )}
 
       {/* ── P1 · LA DOBLE CONFIRMACIÓN, con el SUJETO nombrado ── */}

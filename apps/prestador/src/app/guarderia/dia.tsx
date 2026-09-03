@@ -624,10 +624,28 @@ export default function DiaGuarderia() {
                 variante="apoyada"
                 etiqueta={t('diaGuarderia.sacarFoto')}
                 deshabilitado={viaje !== null || adentro.length === 0}
+                /* ⏪ **LA RAZÓN EXISTÍA Y DESCRIBÍA UN ESTADO, NO UN ACTO.**
+                   Decía *«todavía no hay nadie adentro»*: cierto, y deja al
+                   cuidador sin saber qué depende de él. La letra del founder la
+                   corrige — *«se habilita cuando registrás la llegada de
+                   ‹nombre›»*— y la diferencia es la que importa: **nombra el
+                   acto que la destraba**, no la condición que falta.
+
+                   *Una razón que describe el estado le dice a alguien que
+                   espere; una que nombra el acto le dice qué hacer.*
+
+                   Y **nombra al animal sólo cuando hay UNO esperando**: con
+                   varios, elegir uno de los nombres sería arbitrario y mandaría
+                   a registrar justo a ése. Con varios se dice «la primera
+                   llegada», que es verdad para cualquiera. */
                 razonDeshabilitado={
                   viaje !== null
                     ? t('diaGuarderia.fotoRazonViaje')
-                    : t('diaGuarderia.fotoRazonNadieAdentro')
+                    : porRecoger.length === 1
+                      ? t('diaGuarderia.fotoRazonLlegadaDe', {
+                          nombre: porRecoger[0].mascotaNombre,
+                        })
+                      : t('diaGuarderia.fotoRazonPrimeraLlegada')
                 }
                 onPress={() => setMediaAbierta(true)}
               />

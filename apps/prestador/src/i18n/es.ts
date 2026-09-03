@@ -4248,7 +4248,12 @@ export const prestadorEs = {
     comoSePorto: 'Cómo se portó',
     sacarFoto: 'Sacar una foto',
     fotoRazonViaje: 'Las fotos se toman en las instalaciones. Cuando vuelvas, vas a poder.',
-    fotoRazonNadieAdentro: 'Todavía no hay nadie adentro. En cuanto llegue el primero, vas a poder.',
+    /* ⏪ Reemplaza a `fotoRazonNadieAdentro`, que describía el ESTADO
+       («todavía no hay nadie adentro») en vez del ACTO. Letra del founder: una
+       razón que nombra lo que hay que hacer destraba; una que nombra lo que
+       falta sólo pide esperar. */
+    fotoRazonLlegadaDe: 'Se habilita cuando registres la llegada de {{nombre}}',
+    fotoRazonPrimeraLlegada: 'Se habilita cuando registres la primera llegada',
     subir: 'Subir',
     bajar: 'Bajar',
     salgoADevolver: 'Salgo a devolver',
@@ -4521,6 +4526,22 @@ export const prestadorEs = {
     reintentar: 'Probar de nuevo',
   },
   portalHilo: {
+    /* §1 · las cinco etapas, en voz de REFUGIO. Mismos hechos, otro asiento:
+       la familia lee «Estás en», el refugio lee «La solicitud está en». */
+    etapaEnviada: 'Enviada',
+    etapaEnConversacion: 'En conversación',
+    etapaAceptada: 'Aceptada',
+    etapaActaFirmada: 'Acta firmada',
+    etapaUnaVidaNueva: 'Una vida nueva',
+    laSolicitudEstaEn: 'La solicitud está en: {{etapa}}',
+    escaleraAlternar: 'Ver los pasos de la solicitud',
+    hoy: 'Hoy',
+    ayer: 'Ayer',
+    noSeEnvio: 'No se envió · Reintentar',
+    escribirlePlaceholder: 'Escríbele a {{quien}}',
+    nuevos_one: '{{count}} mensaje nuevo',
+    nuevos_other: '{{count}} mensajes nuevos',
+    nuevos: '{{count}} mensajes nuevos',
     // El MISMO hecho que ve la familia, dicho desde acá: neutro y sin culpa
     // (§10.6). «Se bajó» nombra el acto; quién lo hizo ya está en la cabecera.
     estadoDesistida: 'La familia retiró su postulación',
