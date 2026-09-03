@@ -71,6 +71,21 @@ export type IconoNombre =
    *  de la escalera son las 7 narrativas: si mañana cambia el vocabulario
    *  del motor, se ve en el nombre del glifo. */
   | 'nodoConfirmado' | 'nodoPreparando' | 'nodoEnCamino' | 'nodoEntregado'
+  /* ── S112-B · LA ESCALERA DE LA ADOPCIÓN Y SU BARRA (firma founder, 2-sep)
+     Cinco de ETAPA —clasificación de mesa: *informan y no accionan*— y uno de
+     CONTROL. **Los cinco de etapa van SIN HUELLA y se declara acá, no en el
+     gate** (§6b paso 6): sobre, burbujas, check y pluma son objetos de
+     trámite, y una huella sobre un sobre diría «sobre de mascota», que no
+     significa nada.
+
+     🔴 **Y falta uno de los seis a propósito: «casa con huella» NO se
+     dibujó** — el censo de metáforas (§6b paso 2) encontró que **ya existe y
+     es el mismo dibujo**: `hogar`, *«la casa que abriga — la huella vive
+     adentro»*. No es un préstamo entre significados distintos —lo que la casa
+     prohíbe— es EL MISMO significado: el animal adentro de una casa. Dibujar
+     un segundo sería fabricar la deuda que la regla de economía de §6b nombra.
+     Se declara para que el gate sepa que son CINCO y no seis, y por qué. */
+  | 'sobre' | 'burbujas' | 'checkEnCirculo' | 'pluma' | 'enviar'
   // ── LOS DOS PRIMEROS GLIFOS DE CONTROL (S82-B r7, importados del
   //    archivo de referencia que el founder entregó: `ficha-mascota`).
   //    GATE POR ÍCONO A 21px PENDIENTE (§2.9) · su LETRA NO SE ESCRIBE
@@ -1074,6 +1089,100 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       fill={tinta}
     />
   ),
+
+  /* ══ S112-B · LOS CINCO DE LA ADOPCIÓN (§6b, firma founder 2-sep) ══════
+     §6b PASO 1 · LOS NÚMEROS, y el desvío declarado:
+     grilla 24 · trazo 1.9 round · densidad 2-4 trazos — **la anatomía
+     canónica del registry, NO la de sus vecinos `nodo*`.**
+
+     ⚠️ **Ése es el desvío y se declara, no se disimula.** Los `nodo*` son
+     SILUETA RELLENA con su razón escrita: *«un check de trazo a 12 px es
+     exactamente el caso que esta nota vino a evitar»*. **Ese 12 ya no
+     existe:** medido en `EscaleraEstados`, `NODO = 32` y `GLIFO_EN_NODO =
+     24` — G-15 lo creció— y **los dos registros usan las mismas
+     constantes**. A 24 el trazo dibuja, así que estos vuelven a la anatomía
+     de la casa en vez de heredar una decisión tomada para un tamaño que ya
+     no rige.
+
+     📌 Y queda anotado lo que NO es mío: los `nodo*` siguen con la anatomía
+     del 12 en un nodo de 24. Es de despensa y se declara, no se toca.
+
+     §6b PASO 6 · SON GLIFOS DE ESTADO —clasificación de mesa: *informan y no
+     accionan*— y por eso **van SIN HUELLA**. Se declara acá y no se descubre
+     en el gate. */
+
+  /* EL SOBRE — «enviada». Rectángulo + la V de la solapa, que es lo único
+     que lo separa de una tarjeta a 21px: sin ella son dos rectángulos.
+     Riesgo declarado: a tamaño chico puede leerse como «mensaje»; lo separa
+     que su vecino de la derecha SON las burbujas, y en vecindad la V manda. */
+  sobre: ({ tinta }) => (
+    <>
+      <Path d="M3.6 6.6h16.8v10.8H3.6Z" {...trazo(tinta)} />
+      <Path d="M3.6 6.6 12 13.2l8.4-6.6" {...trazo(tinta)} />
+    </>
+  ),
+
+  /* LAS BURBUJAS — «en conversación». **DOS y no una, y es la decisión:**
+     una burbuja sola dice «un mensaje»; dos superpuestas dicen que hay ida y
+     vuelta, que es lo que esta etapa significa. La de atrás asoma por arriba
+     a la izquierda — el solape es lo que las vuelve conversación en vez de
+     dos globos sueltos.
+     Riesgo declarado: a 21px el solape puede empastar; se compensa con la
+     de atrás más chica y desplazada, no con más trazo. */
+  burbujas: ({ tinta }) => (
+    <>
+      <Path d="M3.4 5.2h11.2v7.2H8.2L5.2 15V12.4H3.4Z" {...trazo(tinta)} />
+      <Path d="M9.4 10.4h11.2v7.2h-1.8v2.6l-3-2.6H9.4Z" {...trazo(tinta)} />
+    </>
+  ),
+
+  /* EL CHECK EN CÍRCULO — «aceptada». El círculo es lo que lo separa del
+     visto suelto de `nodoEntregado`: acá **alguien decidió**, y el círculo es
+     esa decisión conteniendo el hecho.
+     Riesgo declarado: se puede confundir con un «listo» genérico. Lo separa
+     su posición —tercera de cinco— y que las dos que siguen son de trámite. */
+  checkEnCirculo: ({ tinta }) => (
+    <>
+      <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
+      <Path d="M8.1 12.2 10.9 15l5-5" {...trazo(tinta)} />
+    </>
+  ),
+
+  /* LA PLUMA — «acta firmada». 🔴 **NO reusa `lapiz`, y su propio vecino ya
+     escribió el criterio:** *«el `carnet` usa un lápiz COMO OBJETO con su
+     huella: son distintos por ROL, y por eso este no lo reusa»*. Acá pasa lo
+     mismo un piso más allá — `lapiz` es EDITAR (control) y esto es FIRMAR
+     (un hecho que no se deshace).
+     La diferencia se dibuja: cuerpo curvo con la barba de la pluma, y la
+     línea de firma debajo. Sin la línea sería un lápiz raro.
+     Riesgo declarado, y es el más alto de los cinco: a 21px una pluma y un
+     lápiz convergen. La línea de abajo es lo que los separa, y es la primera
+     que hay que mirar en el gate. */
+  pluma: ({ tinta }) => (
+    <>
+      <Path d="M18.6 4.2c-6.2.9-9.6 4.4-10.8 8.2l-1.4 3.6 3.6-1.4c3.8-1.2 7.3-4.6 8.6-10.4Z" {...trazo(tinta)} />
+      <Path d="M12.6 9.6 6.4 15.8" {...trazo(tinta)} />
+      <Path d="M4.2 19.8h15.6" {...trazo(tinta)} />
+    </>
+  ),
+
+  /* ══ EL ENVIAR — GLIFO DE CONTROL (§6b paso 6, clasificación de mesa) ══
+     **Sin huella, y por la Ley 9 en su alcance:** *en un glifo de control no
+     hay mascota, hay interfaz.*
+
+     LA FORMA: el avión de papel y **no** una flecha. La flecha ya está
+     ocupada como movimiento (`nodoEnCamino`) y como dirección (`Chevron`);
+     el avión dice **mandar**, que es otra cosa.
+     Riesgo declarado: el avión es un cliché de mensajería, y ése es
+     justamente su valor acá — la barra de escribir no es el lugar para
+     enseñar un símbolo nuevo. La quilla interior es lo que evita que a 21px
+     se lea como un triángulo. */
+  enviar: ({ tinta }) => (
+    <>
+      <Path d="M20.4 3.6 2.8 10.4l6.6 2.6 2.6 6.6Z" {...trazo(tinta)} />
+      <Path d="M20.4 3.6 9.4 13" {...trazo(tinta)} />
+    </>
+  ),
   ayuda: ({ tinta, huella }) => (
     <>
       <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
@@ -1794,6 +1903,17 @@ export function Icono({
      * compila, y dejarlo resuelto evita que el próximo que lo monte
      * fuera de la escalera herede un color por descarte. */
     nodoConfirmado: cuidado, nodoPreparando: cuidado, nodoEnCamino: cuidado, nodoEntregado: cuidado,
+    /* S112-B · LOS CINCO DE LA ADOPCIÓN. **`comunidad` y no `cuidado`**, y no
+       es simetría con sus vecinos de despensa: la adopción es el eje de la
+       COMUNIDAD —a quién pertenece— y `refugio` ya vive en esa capa. Un
+       trámite de adopción pintado con la capa del cuidado diría que es un
+       servicio, y no lo es.
+       `enviar` va aparte: es CONTROL, y un control no tiene capa — su color
+       lo pone quien lo monta (acá, el estado del campo). Se le da `comunidad`
+       porque el mapa exige un valor para cada nombre; **su registro real es
+       `aa`/`tinta`, jamás `capa`.** */
+    sobre: comunidad, burbujas: comunidad, checkEnCirculo: comunidad,
+    pluma: comunidad, enviar: comunidad,
     // ATENDER va a CUIDADO y la elección es de taxonomía (Ley 10: se
     // reparte por lo que la cosa ES, no por dónde aparece). Atender a
     // quien llegó por la puerta es EL TRABAJO DEL DÍA — la misma capa

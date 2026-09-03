@@ -691,22 +691,23 @@ export {
   type DestinoDonacion,
   type OpcionDestino,
 } from './components/SelectorDestinoDonacion'
+// ☠️ S112-B · AQUÍ VIVÍA `EstadoSolicitudAdopcion` (S111-B). La retira la
+// letra del chat: dibujaba tres pasos EN MAGENTA y con nodos sin glifo, y §1
+// nombra las dos cosas como defecto. **La reemplaza `EscaleraSolicitud`**,
+// que reusa la pieza de despensa con los cinco glifos de §6b.
+// 🔑 El mapeo de los siete estados del motor a `etapa` + `final` vive en la
+// cabecera de `EscaleraSolicitud`, para que migrar no sea deducir.
 
-// EstadoSolicitudAdopcion — S111-B: EN QUÉ ANDA MI SOLICITUD (§5).
-//
-//   🔴 `declinada` NO ES UN ESCALÓN: ES UN DESVÍO, y NEUTRO. Pintarla como
-//     paso 4 de 4 afirma que la adopción llegó a su final. El mapeo
-//     estado→forma vive ADENTRO: una pantalla que armara la escalera a
-//     mano podría marcar «declinada» como hecho y compilaría perfecto.
-//   ⚠️ `en_conversacion` es HOY INALCANZABLE — no hay mensajería entre
-//     cuentas (medido por la pista E) y su activador está estacionado. Se
-//     monta porque §5 la firma; se declara porque una banda que nunca se
-//     pinta no se distingue de una que todavía no le tocó.
+// EscaleraSolicitud — S112-B (B1): los pasos de la adopción con la pieza de
+// despensa. Reusa `EscaleraEstados` y el mecanismo `conIconos`; trae su
+// propio vocabulario de cinco glifos (§6b). 🔴 El mapa es un `Record` cerrado:
+// una etapa sin glifo NO COMPILA.
 export {
-  EstadoSolicitudAdopcion,
-  type EstadoSolicitudAdopcionProps,
-  type EstadoSolicitud,
-} from './components/EstadoSolicitudAdopcion'
+  EscaleraSolicitud,
+  type EscaleraSolicitudProps,
+  type EtapaSolicitud,
+  type FinalSolicitud,
+} from './components/EscaleraSolicitud'
 
 // EvidenciaClip — S111-B: GRABAR UN CLIP QUE SE PUEDE MANDAR (el durante de
 // guardería). `CRITERIO_LEGAL_GUARDERIA` §5 es LEY DE CAPTURA, no ayuda.
