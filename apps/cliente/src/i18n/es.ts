@@ -286,6 +286,10 @@ export const clienteEs = {
     hechoVacuna: 'Recibió la vacuna {{nombre}}',
     hechoVacunaSinNombre: 'Recibió una vacuna',
     hechoConsulta: 'Visita al veterinario',
+    // S112-C · la bitácora: MISMO tipo de evento, dos manos. La voz la
+    // decide quién anotó (`prestador_id`), jamás el tipo.
+    hechoBitacoraFamilia: 'Anotaste cómo estuvo',
+    hechoBitacoraCuidador: 'El cuidador anotó cómo estuvo',
     // S91 · LOS HITOS. Voces FIRMADAS verbatim (founder, 8-ago-2026).
     // Solo la de llegada lleva {{nombre}}: «Una vida nueva empieza» sobre la
     // ficha de Thor no necesita decir Thor — así está firmado.
@@ -3431,6 +3435,11 @@ export const clienteEs = {
     sinPunto: 'Todavía no vemos dónde va. Te lo mostramos apenas salgan.',
     vistoA: 'Visto a las {{hora}}',
     suDia: 'Su día',
+    // H4 (S112-C) · la bitácora del día. La hora va en la línea porque una
+    // conducta sin cuándo no se puede cruzar con nada de lo que la familia vio.
+    bitacoraDelCuidador: 'El cuidador anotó a las {{hora}}',
+    bitacoraTuya: 'Anotaste a las {{hora}}',
+    bitacoraNoCargo: 'No pudimos cargar lo que anotaron.',
     cuenta: '{{n}} momentos de hoy',
     cuentaUna: '1 momento de hoy',
     sinMediaTodavia: 'Todavía no hay fotos de hoy. Van a ir apareciendo acá.',
