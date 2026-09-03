@@ -115,7 +115,7 @@ import { ventanaVencida } from '@/lib/despensa/ventana';
 import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
-import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
+import { FAMILIA_DE_TIPO, capaDeHecho, etiquetasDeChips, vozHecho } from '@/lib/voz-hecho';
 import { contarPendientesDe, type FuentesDePendientes } from '@/lib/pendientes';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { composicionDe } from '@/lib/composicion-sujeto';
@@ -2377,8 +2377,44 @@ export default function Hogar() {
                                  `null` NO se degrada a «presencial»: una cita
                                  sin modalidad escrita no dice nada — decirlo
                                  sería inventar un hecho clínico. */
+                              /* ⭐ **H4 (S112-C) · LAS CONDUCTAS DE LA BITÁCORA
+                                 ENTRAN POR ACÁ.** Hasta hoy la anotación se leía
+                                 con su voz correcta —«El cuidador anotó cómo
+                                 estuvo»— **y sus conductas no se veían**: el dato
+                                 llegaba (`ItemTimeline.chips`, A) y no había dónde
+                                 ponerlo. *La misma anotación se mostraba COMPLETA
+                                 en la ficha del durante e INCOMPLETA acá* — la
+                                 clase que esta sesión curó en el chat, donde la
+                                 misma conversación se comportaba distinto según
+                                 qué punta la mirara.
+
+                                 ⚠️ **B expuso `etiquetas` en `LineaDeVidaItem`, y
+                                 esta pantalla NO usa esa ruta**: compone a mano con
+                                 `EventoVida`. Así que entran por `marca`, con **su
+                                 receta exacta** —`Insignia capa="cuidado"
+                                 tamaño="sm"` en fila que envuelve— *para que las
+                                 mismas conductas no se vean de dos formas según la
+                                 pantalla, que es justo lo que se vino a cerrar.*
+
+                                 Van PRIMERO y son excluyentes con la teleconsulta:
+                                 un evento de bitácora no es una cita, así que las
+                                 dos ramas nunca compiten por el mismo evento —
+                                 el orden lo dice, no lo supone. */
                               marca={
-                                it.modalidad === 'telemedicina' ? (
+                                it.chips.length > 0 ? (
+                                  <View
+                                    style={{
+                                      flexDirection: 'row',
+                                      flexWrap: 'wrap',
+                                      gap: spacing[2],
+                                      marginTop: spacing[1],
+                                    }}
+                                  >
+                                    {etiquetasDeChips(it.chips, idioma).map((e) => (
+                                      <Insignia key={e} capa="cuidado" etiqueta={e} tamaño="sm" />
+                                    ))}
+                                  </View>
+                                ) : it.modalidad === 'telemedicina' ? (
                                   <View style={{ alignSelf: 'flex-start', marginTop: spacing[1] }}>
                                     <Insignia modalidad="teleconsulta" tamaño="sm" />
                                   </View>

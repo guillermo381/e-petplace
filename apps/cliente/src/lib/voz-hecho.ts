@@ -169,3 +169,24 @@ export function capaDeHecho(ejeJtbd: string | null): 'identidad' | 'cuidado' | n
   if (ejeJtbd === null) return null;
   return CAPA_DE_EJE[ejeJtbd] ?? null;
 }
+
+/**
+ * Las CONDUCTAS de una bitácora, listas para pintar (S112-C · H4).
+ *
+ * El motor resuelve la voz en los DOS idiomas (`cat_conductas_bitacora`) y acá
+ * sólo se elige. **`nombreFamiliaEn` null cae al español —la voz base de la
+ * casa— y JAMÁS al código**: *un código en pantalla no es un idioma que falta,
+ * es la app hablándole a la familia en su lenguaje interno.*
+ *
+ * Vive acá y no en la pantalla porque **son dos superficies** —la línea de vida
+ * y la ficha del durante— *y dos elecciones de idioma separadas se desincronizan
+ * en la primera que alguien toque* (Ley 3: el diccionario vive UNA vez).
+ *
+ * Vacío en todo evento que no sea bitácora ⇒ la pieza no dibuja nada.
+ */
+export function etiquetasDeChips(
+  chips: readonly { nombreFamilia: string; nombreFamiliaEn: string | null }[],
+  idioma: string,
+): string[] {
+  return chips.map((c) => (idioma === 'en' && c.nombreFamiliaEn !== null ? c.nombreFamiliaEn : c.nombreFamilia));
+}
