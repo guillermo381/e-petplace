@@ -36,9 +36,21 @@ la pieza sospechosa — y eso **da vuelta el argumento**:
 > escondido.** Y acá el hilo es donde una familia y un refugio conversan sobre un
 > animal — no es el lugar donde conviene tener un defecto dormido.
 
-*Y si después del bundle de B el crash sigue, capturamos otra vez y comparamos
+*Y si después del próximo bundle el crash sigue, capturamos otra vez y comparamos
 los dos stacks: dos mediciones del mismo defecto con una variable cambiada, que
 es mejor que cualquiera de las dos sola.*
+
+**C propuso esperar al próximo bundle** —trae una pantalla que muestra el error
+con un botón de copiar, y con eso no haría falta el cable—. **Es una mejora real
+y va a servir para el próximo crash. Para éste decidí capturar igual, por dos
+razones:**
+- **Esa pantalla sólo sirve si el crash SIGUE existiendo después del bundle.** En
+  ese tren van tres cambios sobre el mismo arco que revienta; si lo tapan, la
+  pantalla no muestra nada y nos quedamos **sin diagnóstico** de algo que sí pasó.
+- **Un stack de un bundle que ya no corre no se puede capturar hacia atrás.** Si
+  hoy no capturamos y mañana el crash desapareció, esa información se perdió.
+
+> **Esperar apuesta a que el crash sobreviva. Capturar ahora no apuesta a nada.**
 
 ⚠️ **Queda anotado, porque cambia cómo se lee el stack: el bundle que vamos a
 capturar TIENE `useAnimatedKeyboard`.** Si el stack la menciona, no cierra nada
@@ -88,7 +100,9 @@ Abrila **dos veces**: la segunda suele traer más detalle.
 **⑧ Repetí ⑥ y ⑦ en NEGOCIOS**, abriendo la solicitud desde la lista.
 
 **⑨ Decime «terminé».** Corto la grabación y reparto el error literal a quien lo
-tiene que curar.
+tiene que curar — **junto con EN QUÉ PASO cayó**, que es la mitad del dato: un
+stack sin saber si vino del ④ o del ⑥ obliga a las otras pistas a adivinar qué
+rama estaba viva.
 
 ---
 
