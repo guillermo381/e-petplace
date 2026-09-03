@@ -244,13 +244,22 @@ node scripts/verify-diseno.mjs >/dev/null 2>&1 || {
 # caso que estaba midiendo. *Una auto-prueba que comparte el supuesto con lo
 # que mide no verifica el instrumento: lo duplica* (`L-459`).
 #
-# 🔴 SU HERMANO `verify:rutas-de-aviso` **NO ESTA ACA TODAVIA**, y su autor lo
-#    declaro: sale 2 (no concluyente) hasta que las listas blancas de rutas de
-#    las apps esten en `main`. Ponerlo antes frenaria commits por una fuente
-#    ausente — que es peor que no tenerlo.
+# 🔴 SU HERMANO `verify:rutas-de-aviso` YA ESTÁ ACÁ (más abajo, cableado por
+#    A en S112) — esta línea decía "no está" cuando ya llevaba un rato
+#    cableado: texto honesto que dejó de serlo y nadie lo retiró en el mismo
+#    acto (`L-395`). Curado ACÁ, junto con la cura del set -e que lo tocaba.
 if [ -f scripts/verify-vio-todo.mjs ]; then
-  node scripts/verify-vio-todo.mjs >/dev/null 2>&1
-  VIO=$?
+  # 🔴 S112-A · `set -e` mataba el script ACÁ MISMO si el gate devolvía
+  # nonzero — la rama de exit 2 (abajo) era código MUERTO y un fallo se iba
+  # sin nombrarse (medido: EXIT DEL HOOK: 2, salida vacía). La forma
+  # `if comando; then …; else X=$?; fi` está EXENTA de errexit — es la
+  # condición de un `if`, y esa es justo la excepción que la spec de POSIX
+  # le da a `set -e`. Probado en las dos direcciones antes de cablearlo.
+  if node scripts/verify-vio-todo.mjs >/dev/null 2>&1; then
+    VIO=0
+  else
+    VIO=$?
+  fi
   if [ "$VIO" -eq 1 ]; then
     echo "✗ verify:vio-todo EN ROJO — el commit NO ocurre."
     node scripts/verify-vio-todo.mjs 2>&1 | grep -E "✗|🔴" | head -4
@@ -341,8 +350,12 @@ node scripts/verify-jornada-completa.mjs >/dev/null 2>&1 || {
 #    ⚠️ El primer intento sembró en `checkout.tsx` y salió verde — *el gate lee
 #    las LISTAS, no cualquier ocurrencia*: el rojo era del control, no suyo.
 if [ -f scripts/verify-rutas-de-aviso.mjs ]; then
-  node scripts/verify-rutas-de-aviso.mjs >/dev/null 2>&1
-  ESTADO_RUTAS=$?
+  # Mismo defecto que vio-todo, mismo remedio (ver su comentario arriba).
+  if node scripts/verify-rutas-de-aviso.mjs >/dev/null 2>&1; then
+    ESTADO_RUTAS=0
+  else
+    ESTADO_RUTAS=$?
+  fi
   if [ "$ESTADO_RUTAS" = "2" ]; then
     echo ""
     echo "⚠️  verify:rutas-de-aviso NO CONCLUYENTE — le falta una fuente."
@@ -359,8 +372,9 @@ if [ -f scripts/verify-rutas-de-aviso.mjs ]; then
 fi
 
 if [ -f scripts/_censo-hoisting-nativo.mjs ]; then
-  node scripts/_censo-hoisting-nativo.mjs >/dev/null 2>&1
-  if [ "$?" != "0" ]; then
+  # Este es binario (no distingue 1 de 2), así que `if ! comando` alcanza —
+  # la negación tampoco dispara `set -e` (misma excepción de POSIX).
+  if ! node scripts/_censo-hoisting-nativo.mjs >/dev/null 2>&1; then
     echo ""
     echo "✗ UN NATIVO SE USA SIN DECLARARSE — el commit NO ocurre."
     node scripts/_censo-hoisting-nativo.mjs 2>&1 | grep -E "🔴|✅" | head -5
@@ -378,8 +392,11 @@ if [ ! -f scripts/verify-sin-byte-nul.mjs ]; then
   echo "   (worktree anterior al gate; NO es un byte NUL. El commit SIGUE.)"
   echo ""
 else
-  node scripts/verify-sin-byte-nul.mjs >/dev/null 2>&1
-  ESTADO_NUL=$?
+  if node scripts/verify-sin-byte-nul.mjs >/dev/null 2>&1; then
+    ESTADO_NUL=0
+  else
+    ESTADO_NUL=$?
+  fi
   if [ "$ESTADO_NUL" = "2" ]; then
     echo ""
     echo "✗ EL DETECTOR DE BYTE NUL NO PUEDE MEDIR — el commit NO ocurre."
@@ -446,7 +463,11 @@ if [ -n "$VERIFICAR" ]; then
   TMPTSC=$(mktemp -d)
   for P in $VERIFICAR; do
     K=$(echo "$P" | tr / _)
-    ( cd "$P" && npx tsc --noEmit > "$TMPTSC/$K.log" 2>&1; echo $? > "$TMPTSC/$K.exit" ) &
+    # `set +e` ACOTADO al subshell: no afecta al padre ni a los hermanos en
+    # paralelo — el fallback `|| echo 1` del lector de abajo ya lo cubría por
+    # accidente (el .log queda escrito igual, la redirección corre ANTES del
+    # posible corte), pero se cura de raíz para no depender de eso.
+    ( set +e; cd "$P" && npx tsc --noEmit > "$TMPTSC/$K.log" 2>&1; echo $? > "$TMPTSC/$K.exit" ) &
   done
   wait || true
   ROJOS=""
