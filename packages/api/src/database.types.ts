@@ -25127,6 +25127,7 @@ export type Database = {
           mascota_nombre: string
           mensajes: Json
           publicacion_id: string
+          respuestas: Json
           sin_leer: number
           solicitante_nombre: string
           solicitante_user_id: string
