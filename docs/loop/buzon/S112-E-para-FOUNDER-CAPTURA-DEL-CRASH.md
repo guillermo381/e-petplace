@@ -106,6 +106,19 @@ rama estaba viva.
 
 ---
 
+## ⚠️ DOS COSAS QUE VAS A VER Y **NO** SON DEFECTOS NUEVOS
+
+*Las anoto para que no perdamos tiempo persiguiéndolas — las dos están medidas.*
+
+1. **Si en NEGOCIOS aparece un botón «Copiar» y no hace nada**, es `expo-clipboard`:
+   está declarado pero **no horneado en el APK que tenés**, y sólo entra con la
+   próxima build nativa. *El texto sí se puede seleccionar a mano, en cualquier
+   binario.* (medido por C)
+2. **Si el hilo se cierra más de una vez seguida**, es lo esperado y conviene:
+   cada cierre deja su propia traza y la segunda suele traer más detalle.
+
+---
+
 ## LO QUE NO TENÉS QUE HACER
 
 - **No copies el error ni le saques foto.** Queda grabado entero, con mucho más
