@@ -1674,6 +1674,7 @@ export {
   cerrarTramoGuarderia,
   registrarBitacoraGuarderia,
   type ResultadoBitacoraGuarderia,
+  obtenerBitacoraDeEstadia,
 } from './wrappers/guarderia-durante';
 export type {
   MaquinaEstadia,
@@ -1766,3 +1767,4 @@ export type {
   EstadoSolicitudAdopcion, MensajeDelHilo, MiSolicitud, SolicitudRecibida,
 } from './wrappers/adopcion';
 export { suscribirseAlHilo, type MensajeEnVivo } from './wrappers/adopcion-hilo-vivo';
+export type { AnotacionDeBitacora, ChipDeBitacora } from './wrappers/guarderia-durante';

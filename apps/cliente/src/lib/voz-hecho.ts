@@ -40,7 +40,21 @@ const VOZ_HITO: Record<string, 'hogar.hechoHitoVidaNueva' | 'hogar.hechoHitoLleg
  * de falla silencioso no es un modo de falla aceptable).
  */
 export function vozHecho(
-  item: { tipo: string; vacuna_nombre: string | null; hito_clave?: string | null },
+  item: {
+    tipo: string;
+    vacuna_nombre: string | null;
+    hito_clave?: string | null;
+    /* 🔴 **S112-C · QUIÉN ANOTÓ, y de acá sale la voz de la bitácora.** El
+       tipo `bitacora_familia` lo escriben DOS MANOS —la familia desde su app
+       y el cuidador desde la guardería—, así que *decidir la voz por el TIPO
+       le diría «anotaste» a una familia sobre algo que no escribió.*
+
+       El dato **ya viajaba en el `select` del wrapper y se descartaba en el
+       mapeo**: no costó una columna ni una petición, costó dejar de tirarlo.
+       *Iba a escribir una sola voz para los dos y me frenó el aviso de A —
+       no un gate: eso habría salido verde en todo.* */
+    prestador_id?: string | null;
+  },
   t: Traductor,
   nombreMascota: string,
 ): string {
@@ -56,6 +70,14 @@ export function vozHecho(
         ? t('hogar.hechoVacuna', { nombre: item.vacuna_nombre })
         : t('hogar.hechoVacunaSinNombre');
     case 'historia_clinica_registrada': return t('hogar.hechoConsulta');
+    /* `null` = la familia · con valor = el cuidador. **El nombre del negocio
+       NO se repite acá**: ya viaja en `titulo_fuente` y la fila lo muestra
+       como autor — repetirlo sería la insignia diciendo lo mismo que el
+       título. */
+    case 'bitacora_familia':
+      return item.prestador_id != null
+        ? t('hogar.hechoBitacoraCuidador')
+        : t('hogar.hechoBitacoraFamilia');
     default: return t('hogar.hechoMomento');
   }
 }

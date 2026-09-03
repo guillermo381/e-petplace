@@ -145,7 +145,7 @@ function PostulacionLeida({
        lo único que hace falta para saber si el hogar tiene chicos. */
     const partes: string[] = [];
     const ad = numero(hogar.adultos);
-    if (ad !== null) partes.push(t('portalHilo.postAdultos' as never, { n: ad }));
+    if (ad !== null) partes.push(t('portalHilo.postAdultos' as never, { count: ad }));
     for (const [clave, k] of [
       ['menores_0_5', 'postMenores05'],
       ['menores_6_12', 'postMenores612'],
@@ -154,7 +154,7 @@ function PostulacionLeida({
       const n = numero(hogar[clave]);
       /* Los rangos en CERO no se dicen: «0 niños de 6 a 12» es una línea que
          hay que leer para descartar. */
-      if (n !== null && n > 0) partes.push(t(k as never, { n }));
+      if (n !== null && n > 0) partes.push(t(k as never, { count: n }));
     }
     if (partes.length > 0) filas.push({ rotulo: t('portalHilo.postHogar' as never), valor: partes.join(' · ') });
   }
@@ -168,7 +168,7 @@ function PostulacionLeida({
   }
   const horas = numero(r.horas_solo);
   if (horas !== null) {
-    filas.push({ rotulo: t('portalHilo.postHorasSolo' as never), valor: t('portalHilo.postHoras' as never, { n: horas }) });
+    filas.push({ rotulo: t('portalHilo.postHorasSolo' as never), valor: t('portalHilo.postHoras' as never, { count: horas }) });
   }
   /* Las OPCIONALES sólo si tienen contenido: un rótulo con una raya dice «no
      contestó», y lo cierto es que no se le preguntó como obligatorio. */
@@ -696,7 +696,7 @@ export default function HiloDelPublicador() {
           sobrepuesto={
             !alFondo && nuevosSinVer > 0 ? (
               <PastillaNuevoMensaje
-                etiqueta={t('portalHilo.nuevos', { n: nuevosSinVer })}
+                etiqueta={t('portalHilo.nuevos', { count: nuevosSinVer })}
                 onPress={() => {
                   setNuevosSinVer(0);
                   setAlFondo(true);

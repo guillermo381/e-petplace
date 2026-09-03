@@ -35,6 +35,7 @@ import { HojaFotoMascota } from '@/components/HojaFotoMascota';
 import { ENCUADRE_DEFAULT, clampEncuadre, type DimFoto, type Encuadre } from '@/components/foto-encuadre';
 import { subirAvatar } from '@/lib/subir-avatar';
 import { useTraduccion } from '@/i18n';
+import { urlGenericaDeEspecie } from '@/lib/cara-mascota';
 
 type FotoVigente =
   | { t: 'cargando' }
@@ -48,7 +49,7 @@ export default function FotoMascota() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ mascotaId: string; nombre?: string }>();
+  const params = useLocalSearchParams<{ mascotaId: string; nombre?: string; especie?: string }>();
   const mascotaId = params.mascotaId ?? '';
   const [nombre, setNombre] = useState(params.nombre ?? '');
   /* ☠️ S103-C — MURIÓ el estado `especie`. Su único lector era el
@@ -196,7 +197,22 @@ export default function FotoMascota() {
 
         {vigente.t === 'sin_foto' && fotoNueva === null ? (
           <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
-            <AvatarMascota nombre={nombre} tamano="lg" />
+            {/* 🔴 C-B (S112-C) · ESTA ES LA PANTALLA DE «no tiene foto», y era
+                justo donde el monograma se veía más grande: una inicial en el
+                lugar exacto donde el dueño viene a poner una cara. Ahora
+                muestra la de su especie — *la app dice qué animal es mientras
+                él elige la foto, en vez de decirle que no sabe.*
+
+                ⭐ La especie **viaja por la RUTA**, no por una consulta: la
+                pantalla que navega acá ya la tiene en la mano. Pedirla de
+                nuevo sería un viaje entero por un dato que estaba a un
+                parámetro de distancia (L-223: el costo es la petición).
+
+                ☠️ Esto resucita —con lector de verdad— lo que S103-C mató con
+                razón: aquel estado `especie` alimentaba un prop que **no
+                pintaba nada**. Lo que cambió no es que el dato volvió: es que
+                ahora algo lo lee. */}
+            <AvatarMascota nombre={nombre} fotoUrl={urlGenericaDeEspecie(params.especie)} tamano="lg" />
             <Texto variante="apoyo" centrado>
               {t('fotoEncuadre.elegirDetalle')}
             </Texto>

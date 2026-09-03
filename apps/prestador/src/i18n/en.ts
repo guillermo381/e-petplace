@@ -264,6 +264,7 @@ export const prestadorEn = {
     filtroAdiestramiento: 'Training',
     // S69-B: the fourth trade in the day filter · LOTE S69, GATE PENDIENTE
     filtroVeterinaria: 'Veterinary',
+    filtroGuarderia: 'Daycare',
     filtroVacio: 'No appointments for this service today.',
     // LOTE S62 (D-385): la salida grupal — una fila, N mascotas
     salidaNombresDos: '{{a}} and {{b}}',
@@ -313,6 +314,10 @@ export const prestadorEn = {
     vidasTutores: 'owners',
     vidasPaciente1: 'patient',
     vidasPacientes: 'patients',
+    cargaEstadia1: 'stay',
+    cargaEstadias: 'stays',
+    vidasHuesped1: 'guest',
+    vidasHuespedes: 'guests',
     vidasMascota1: 'pet',
     vidasMascotas: 'pets',
     vidasAlumno1: 'student',
@@ -604,6 +609,7 @@ export const prestadorEn = {
     oficioEstetica: 'Grooming',
     oficioAdiestramiento: 'Training',
     oficioVeterinaria: 'Veterinary care',
+    oficioGuarderia: 'Daycare',
     desde: 'Since {{anio}}',
     hitoOferta: 'active offer',
     hitoAgenda: '{{n}}-day schedule',
@@ -2423,6 +2429,12 @@ export const prestadorEn = {
     titulo: 'This screen could not be shown',
     detalle: 'It is a problem on our side, not your setup — your data is safe. Try again.',
     reintentar: 'Try again',
+    // C-A (S112-C) · the forensic block, outside production only.
+    verDetalle: 'Show technical details',
+    ocultarDetalle: 'Hide technical details',
+    copiar: 'Copy details',
+    copiado: 'Copied',
+    sinCopiar: 'Could not copy — select the text',
   },
   // S79-B · the role gate with contradictory data — never a mute expulsion · LOTE S79
   gateRoto: {
@@ -3068,10 +3080,10 @@ export const prestadorEn = {
     entendido: 'Got it',
     enConstruccion: 'This step sits on what already exists: as soon as its composition lands, it will show up here.',
     oficioVeterinaria: 'Veterinary',
+    oficioGuarderia: 'Daycare',
     oficioGrooming: 'Grooming',
     oficioPaseo: 'Walking',
     oficioAdiestramiento: 'Training',
-    oficioGuarderia: 'Daycare',
 
     paso1: {
       titulo: 'Your business',

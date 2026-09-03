@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@epetplace/api": "workspace:*",
+    "@epetplace/cuadro-video": "workspace:*",
     "@epetplace/domain": "workspace:*",
     "@epetplace/i18n": "workspace:*",
     "@epetplace/ui": "workspace:*",
@@ -13,6 +14,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.4",
     "expo-camera": "~57.0.2",
+    "expo-clipboard": "~57.0.1",
     "expo-constants": "~57.0.3",
     "expo-dev-client": "~57.0.5",
     "expo-device": "~57.0.0",
@@ -50,8 +52,7 @@
     "react-native-screens": "4.25.2",
     "react-native-svg": "15.15.4",
     "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.10.0",
-    "@epetplace/cuadro-video": "workspace:*"
+    "react-native-worklets": "0.10.0"
   },
   "devDependencies": {
     "@livekit/react-native-expo-plugin": "1.0.2",

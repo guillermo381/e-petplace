@@ -687,7 +687,7 @@ export default function HiloSolicitud() {
                 ignorarla. */
             !alFondo && nuevosSinVer > 0 ? (
               <PastillaNuevoMensaje
-                etiqueta={t('hiloAdopcion.nuevos', { n: nuevosSinVer })}
+                etiqueta={t('hiloAdopcion.nuevos', { count: nuevosSinVer })}
                 onPress={() => {
                   setNuevosSinVer(0);
                   setAlFondo(true);

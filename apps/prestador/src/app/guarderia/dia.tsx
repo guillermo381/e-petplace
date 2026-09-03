@@ -87,7 +87,7 @@ import {
 import { cablearEmitirPunto } from '@/lib/guarderia-cableado';
 import { usePuntoVivo } from '@/lib/use-punto-vivo';
 import { contarPresencia, vozDePresencia } from '@epetplace/domain';
-import { hoyEnZona, horaEnZona } from '@/lib/dia-local';
+import { ZONA_DE_LA_CASA, hoyEnZona, horaEnZona } from '@/lib/dia-local';
 
 /* ☠️ **ACÁ VIVÍA UNA COPIA DE `hoyLocal`, Y ES LA RAÍZ DEL DÍA EQUIVOCADO.**
    Su comentario decía la verdad —`toISOString()` da UTC y a la tarde corre el
@@ -97,7 +97,7 @@ import { hoyEnZona, horaEnZona } from '@/lib/dia-local';
    *Una copia con su trampa documentada es más peligrosa que una sin comentario:
    el comentario dice que alguien lo pensó, así que nadie lo vuelve a mirar.*
 
-   Muere (Ley 37) y la reemplaza `hoyEnZona()` de `@/lib/dia-local`, que pide el
+   Muere (Ley 37) y la reemplaza `hoyEnZona(zonaRef.current)` de `@/lib/dia-local`, que pide el
    día **en la zona del negocio** — la misma que usa `hoy_local()` en la base,
    que es la única forma de que el día que se pide y el que se responde sean el
    mismo. */
@@ -160,6 +160,11 @@ export default function DiaGuarderia() {
   const { gate, reintentarGate } = useGateGestor();
 
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
+  /* ⭐ LA ZONA DEL NEGOCIO, en un ref y no en estado: la leen callbacks que no
+     tienen por qué re-renderizar cuando llega. Arranca en la de la casa y se
+     pisa con la del prestador apenas carga — el fallback está ACÁ, escrito y
+     no en la firma del helper (ver `dia-local.ts`). */
+  const zonaRef = useRef(ZONA_DE_LA_CASA);
   const [intento, setIntento] = useState(0);
   /** La estadía cuya acta está abierta. `null` = la hoja no se monta. */
   const [acta, setActa] = useState<{ estadia: EstadiaDelDia; direccion: DireccionActa } | null>(
@@ -206,7 +211,12 @@ export default function DiaGuarderia() {
         setEstado({ fase: 'roto' });
         return;
       }
-      const r = await obtenerEstadiasDelDia(p.data.id, hoyEnZona());
+      /* 🔴 SE FIJA ANTES DEL PRIMER USO. Si se fijara después, la primera
+         lectura del roster pediría el día en la zona equivocada — y devolvería
+         una lista plausible del día de al lado, que es el peor modo de falla:
+         sin error y sin aviso. */
+      zonaRef.current = p.data.zona_horaria ?? ZONA_DE_LA_CASA;
+      const r = await obtenerEstadiasDelDia(p.data.id, hoyEnZona(zonaRef.current));
       if (!vigente) return;
       /* Un fallo JAMÁS se disfraza de «hoy no tenés animales» (Ley 13): el
          cuidador se quedaría en su casa creyendo que no hay jornada. */
@@ -220,14 +230,14 @@ export default function DiaGuarderia() {
       /* El viaje se lee del disco con la MISMA fecha que el roster: dos formas
          de saber qué día es se contradicen justo a la tarde, que es cuando se
          devuelven los animales. */
-      const v = await leerViaje(hoyEnZona());
+      const v = await leerViaje(hoyEnZona(zonaRef.current));
       /* La máquina es un CATÁLOGO: se pide una vez, con el día. Si falla, la
          pantalla sigue mostrando el roster y sólo pierde los actos — un
          catálogo caído no puede dejar al cuidador sin saber a quién buscar. */
       const maq = await obtenerMaquinaEstadia();
       /* ⑨ · El orden que el cuidador dejó hoy. Lo guardado manda; lo nuevo
          cae al final por su orden natural. */
-      const orden = await leerOrden(hoyEnZona());
+      const orden = await leerOrden(hoyEnZona(zonaRef.current));
       if (!vigente) return;
       setViaje(v);
       setEstado({
@@ -406,7 +416,7 @@ export default function DiaGuarderia() {
     if (i < 0 || j < 0 || j >= lista.length) return;
     [lista[i], lista[j]] = [lista[j], lista[i]];
     setEstado({ ...listo, estadias: lista });
-    void guardarOrden(hoyEnZona(), lista.map((e) => e.estadiaId));
+    void guardarOrden(hoyEnZona(zonaRef.current), lista.map((e) => e.estadiaId));
   };
 
   /** La hora del TOQUE — la de la puerta. La del servidor existe para auditar
@@ -421,7 +431,7 @@ export default function DiaGuarderia() {
     try {
       const r = await abrirTramoGuarderia({
         prestadorId: listo.prestadorId,
-        fecha: hoyEnZona(),
+        fecha: hoyEnZona(zonaRef.current),
         direccion: 'recogida',
         estadias: porRecoger.map((e) => e.estadiaId),
       });
@@ -429,7 +439,7 @@ export default function DiaGuarderia() {
       const v: ViajeAbierto = {
         tramoId: r.data.tramoId,
         direccion: 'recogida',
-        fecha: hoyEnZona(),
+        fecha: hoyEnZona(zonaRef.current),
         prestadorId: listo.prestadorId,
         abiertoEn: Date.now(),
       };
@@ -448,7 +458,7 @@ export default function DiaGuarderia() {
       const ids = adentro.map((e) => e.estadiaId);
       const r = await abrirTramoGuarderia({
         prestadorId: listo.prestadorId,
-        fecha: hoyEnZona(),
+        fecha: hoyEnZona(zonaRef.current),
         direccion: 'devolucion',
         estadias: ids,
       });
@@ -463,7 +473,7 @@ export default function DiaGuarderia() {
       const v: ViajeAbierto = {
         tramoId: r.data.tramoId,
         direccion: 'devolucion',
-        fecha: hoyEnZona(),
+        fecha: hoyEnZona(zonaRef.current),
         prestadorId: listo.prestadorId,
         abiertoEn: Date.now(),
       };
@@ -643,13 +653,13 @@ export default function DiaGuarderia() {
                 dos criterios que divergen. */}
             <Texto variante="titulo">
               {vozDePresencia(contarPresencia(estado.estadias), {
-                reservadas: (n) => t('diaGuarderia.pReservadas', { n }),
-                aBordo: (n) => t('diaGuarderia.pABordo', { n }),
-                adentro: (n) => t('diaGuarderia.pAdentro', { n }),
-                volviendo: (n) => t('diaGuarderia.pVolviendo', { n }),
-                entregadas: (n) => t('diaGuarderia.pEntregadas', { n }),
-                noRecogidas: (n) => t('diaGuarderia.pNoRecogidas', { n }),
-              }) ?? t('diaGuarderia.cuantos', { n: estado.estadias.length })}
+                reservadas: (count) => t('diaGuarderia.pReservadas', { count }),
+                aBordo: (count) => t('diaGuarderia.pABordo', { count }),
+                adentro: (count) => t('diaGuarderia.pAdentro', { count }),
+                volviendo: (count) => t('diaGuarderia.pVolviendo', { count }),
+                entregadas: (count) => t('diaGuarderia.pEntregadas', { count }),
+                noRecogidas: (count) => t('diaGuarderia.pNoRecogidas', { count }),
+              }) ?? t('diaGuarderia.cuantos', { count: estado.estadias.length })}
             </Texto>
 
             {/* EL ARRANQUE. Un solo botón por vez y sólo si hay a quién ir a
@@ -821,7 +831,7 @@ export default function DiaGuarderia() {
                                  del 2 —el acto se registró después de medianoche
                                  UTC—, así que **la hora sin su zona se lee como
                                  un acto del día equivocado**. */
-                              hora: e.noRecogidaEn === null ? '' : horaEnZona(e.noRecogidaEn),
+                              hora: e.noRecogidaEn === null ? '' : horaEnZona(e.noRecogidaEn, zonaRef.current),
                             })}
                           </Texto>
                         ) : null}
@@ -969,7 +979,7 @@ export default function DiaGuarderia() {
         <HojaMediaGuarderia
           visible={mediaAbierta}
           prestadorId={estado.prestadorId}
-          fecha={hoyEnZona()}
+          fecha={hoyEnZona(zonaRef.current)}
           /* El universo de etiquetado son los que HOY están adentro. */
           presentes={adentro}
           onCerrar={() => setMediaAbierta(false)}
@@ -1005,7 +1015,7 @@ export default function DiaGuarderia() {
           estadia={acta.estadia}
           direccion={acta.direccion}
           prestadorId={estado.prestadorId}
-          fecha={hoyEnZona()}
+          fecha={hoyEnZona(zonaRef.current)}
           cara={
             acta.estadia.mascotaFotoUrl === null
               ? null

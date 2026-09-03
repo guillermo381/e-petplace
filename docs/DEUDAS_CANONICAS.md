@@ -27400,3 +27400,56 @@ que nadie ve es un error que nadie arregla.*
 **La lección de forma:** *cuando alguien pide «traeme el error» y la respuesta
 es «no existe», lo que se descubrió no es un error perdido: es que no había
 dónde perderlo.*
+
+---
+
+### `L-488` — UN CENSO ESTÁTICO ENTREGA CANDIDATOS, NO VEREDICTOS
+
+> **Escrita por C (`e-petplace-83`) en S112, con la lectura que separa las dos
+> familias aportada por E (`e-petplace-6a`). Depositada por A, que sólo pone el
+> número.** Su texto vive también en `docs/loop/S112-C.md` §21 (`fac1704a`).
+
+**Un censo estático entrega candidatos, no veredictos.** Ninguna medición sobre
+el árbol distingue una ausencia que es **defecto** de una que es **criterio
+firmado** — y no porque la firma esté fuera del alcance: puede estar **tres
+líneas arriba de la puerta, en el mismo archivo**, y el instrumento la lee como
+prosa. *Ningún grep puede leer una intención.* La diferencia **no se cura con
+un instrumento mejor**. Su consecuencia operativa: el censo **nombra** los
+casos y **los clasifica quien conoce la letra**; un censo que entrega un número
+como veredicto está afirmando algo que no midió.
+
+**🔴 EL COROLARIO, que es lo que la separa de su vecina:** un instrumento que
+mide **desde el asiento equivocado** se cura **cambiando de asiento**; éste
+**no se cura midiendo mejor**.
+
+**EL CASO QUE LA PARIÓ, medido — cuatro pasadas sobre la misma pregunta.**
+Censo de qué puertas caen al monograma en vez de mostrar la cara de especie
+(rojo del founder: *«Jack con J»*):
+
+| pasada | qué miró | resultado |
+|---|---|---|
+| v1 | el bloque de props | **22 rojos** — tres ya curados **aguas arriba** |
+| v2 | el identificador | **18** — al menos tres seguían falsos |
+| v3 | *¿pasa `fotoUrl`, sí o no?* — una pregunta que la puerta contesta y no admite falso positivo | **8** |
+| — | y de esos ocho… | **CINCO no eran defecto: eran decisión firmada** (`cara={false}`, r40-2b/r41) |
+
+**La firma estaba en el árbol, tres líneas arriba de la puerta, en el mismo
+archivo.** El censo abrió ese archivo, leyó esa puerta y **pasó por encima del
+comentario que la autorizaba**.
+
+⚠️ *No le faltó alcance: le faltó poder leer intención* — **y eso es peor**,
+porque quien audite el censo va a encontrar la evidencia **justo al lado del
+rojo** y va a pensar que el instrumento fue descuidado.
+
+**La familia:** hermana de `L-437` (*un censo por patrón acota, no cierra*) y
+de `L-170` (*un censo por `pg_get_functiondef` lee los comentarios como
+código*). **Lo que agrega:** aquellas dos se curan afinando el instrumento;
+**ésta no tiene cura instrumental** — se cura poniendo un lector humano entre
+el número y la conclusión.
+
+**El día que la parió las dos formas aparecieron juntas, una en cada pista:** a
+C se le cayó una hipótesis **fuerte por el razonamiento y no por una
+medición**; a E se le cayeron siete mediciones **fuertes por el instrumento y
+no por el asiento desde donde miró**. *Confiar en lo que suena bien y confiar
+en lo que el instrumento dice sin preguntarle desde dónde miró son el mismo
+error con distinta ropa.*
