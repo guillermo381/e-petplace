@@ -73,3 +73,43 @@ export async function recontarPendientes(): Promise<void> {
 export function marcarLeidoLocal(solicitudId: string): void {
   emitir(descontarHilo(filas, solicitudId));
 }
+
+/* ═══ EL SILENCIO, Y AHORA ES POR CLASE ═══════════════════════════════════════
+ *
+ * N28 manda que una pieza del shell **se calle por SUPERFICIE, con lista
+ * explícita y su razón escrita**: *el silencio es una decisión que se declara,
+ * nunca un olvido que se descubre.*
+ *
+ * 🔴 **Y con el abanico de B el silencio dejó de ser de la PIEZA para ser de la
+ * CLASE, que es lo que mi diseño original no podía expresar.** Con dos burbujas
+ * había que apagar una entera; acá **la clase sale del arreglo y la otra sigue
+ * viva** — porque *un mensaje pendiente en el checkout sigue estando pendiente*,
+ * y apagarlo ahí sería esconder trabajo por estar en otra pantalla.
+ *
+ * ⚠️ **SE DETECTA CON `useSegments()`, JAMÁS con el nombre del tab.** El guard
+ * del carrito vivió muerto por eso: recibía `state.routes[state.index].name`,
+ * que devuelve el nombre del TAB (`despensa`, `explorar`…) y **nunca vale
+ * `'checkout'`**. *Un guard que compara contra un valor que su fuente no puede
+ * producir no falla: pasa siempre — y su comentario lo hace peor, porque el que
+ * lo lee cree que está cubierto.*
+ */
+export function silenciaMensajes(segmentos: readonly string[]): boolean {
+  /* EN EL HILO. Es la pantalla que ya es el destino —*una puerta al cuarto donde
+     estás parado es ruido con forma de atajo*— y además **el disco cae justo
+     sobre la barra de escribir**: el rojo que el founder nombró. */
+  return segmentos.some((s) => s === 'solicitud' || s === '[solicitudId]');
+}
+
+export function silenciaCarrito(segmentos: readonly string[]): boolean {
+  /* N25: en `carrito` y `checkout` el carrito no es un destino, es la pantalla
+     en la que ya estás. **Cubre los DOS checkouts** —despensa y reserva—
+     porque `useSegments()` devuelve la ruta anidada. */
+  return segmentos.some((s) => s === 'carrito' || s === 'checkout');
+}
+
+/** Las clases que sobreviven a la pantalla actual. La pieza filtra después las
+ *  que están en cero (`clasesVivas`), así que acá **sólo se decide el
+ *  silencio** — dos preguntas distintas, dos lugares. */
+export function clasesVisibles(segmentos: readonly string[]): { carrito: boolean; mensajes: boolean } {
+  return { carrito: !silenciaCarrito(segmentos), mensajes: !silenciaMensajes(segmentos) };
+}
