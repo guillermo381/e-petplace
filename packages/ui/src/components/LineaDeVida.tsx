@@ -199,6 +199,30 @@ export interface LineaDeVidaItem {
    *  derivado de la cita padre o columna propia del evento, la pieza
    *  recibe el valor ya resuelto y no lo infiere. */
   modalidad?: InsigniaModalidad | null
+  /**
+   * 🔴 S112-B · LO QUE EL NODO ANOTÓ — las conductas de una bitácora.
+   *
+   * ── EL DEFECTO QUE CURA, medido por C ────────────────────────────────
+   * La misma anotación se veía **completa en la ficha del durante e
+   * incompleta en la línea de vida**: ahí la bitácora se leía con su voz
+   * («El cuidador anotó cómo estuvo») **y sus conductas no aparecían por
+   * ningún lado**. *Una superficie que cuenta la mitad de un hecho que la
+   * otra cuenta entero le enseña al dueño que una de las dos miente.*
+   *
+   * ── POR QUÉ NO ES `modalidad` ────────────────────────────────────────
+   * Porque **una modalidad es UNA y un conjunto de conductas son VARIAS**.
+   * Reusar ese campo habría obligado a elegir cuál de las cinco anotaciones
+   * mostrar — y elegir por la pieza cuál conducta importa es exactamente lo
+   * que la pieza no puede saber.
+   *
+   * ── `string[]` Y NO CÓDIGOS, y es la decisión ────────────────────────
+   * Llegan **ya redactadas**. *La pieza no debería saber qué es
+   * `cat_conductas_bitacora`* —el voto es de C y es el correcto—, y el motor
+   * ya resuelve la voz en los dos idiomas: acá sólo se pinta la etiqueta que
+   * llega. **Ausente o vacío = no se dibuja nada**, que es el caso de todo
+   * evento que no sea bitácora.
+   */
+  etiquetas?: string[]
 }
 
 export type LineaDeVidaEstadoPie = 'nada' | 'mas' | 'cargando' | 'error'
@@ -312,6 +336,30 @@ function Nodo({
       {item.modalidad ? (
         <View style={{ marginTop: spacing[1.5] }}>
           <Insignia modalidad={item.modalidad} tamaño="sm" />
+        </View>
+      ) : null}
+      {/* S112-B · LAS CONDUCTAS ANOTADAS. Mismo lugar y misma razón que la
+          modalidad —debajo del quién, arriba de la hora: acá el nodo habla
+          del ACTO— y **envuelven**, porque son varias y de largo distinto:
+          una tira horizontal escondería las últimas sin decir cuántas.
+
+          🔴 **`capa="cuidado"` y `tamaño="sm"`, que es EXACTAMENTE como las
+          dibuja la ficha del durante** (`guarderia/[estadiaId]`, sección «SU
+          DÍA»). *No es coincidencia ni gusto: es el punto entero del
+          pedido* — la misma anotación tiene que verse igual en las dos
+          superficies, o el dueño cree que son dos cosas distintas. */}
+      {item.etiquetas !== undefined && item.etiquetas.length > 0 ? (
+        <View
+          style={{
+            marginTop: spacing[1.5],
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: spacing[2],
+          }}
+        >
+          {item.etiquetas.map((e) => (
+            <Insignia key={e} capa="cuidado" etiqueta={e} tamaño="sm" />
+          ))}
         </View>
       ) : null}
       {/* fecha-sola NO tiene hora: mostrarla sería inventarla (B6.3) */}
