@@ -27,7 +27,7 @@ La letra de 25-ago, **firma ③**, decía: *«Lo que se crea es una cuenta de
 e-PetPlace con los datos de la mascota. Eso es todo lo que hace v1»*, y dejaba
 la transferencia del expediente declarada pero **no activada**.
 
-**Queda derogada.** *(Firma ① del founder, 31-ago-2026.)*
+**Queda derogada.** *(Decidida en mesa 31-ago-2026, firma ① 3-sep-2026.)*
 
 **La vida de la mascota en e-PetPlace empieza en el período de adopción, no en
 la entrega.** El refugio carga eventos al expediente desde antes de que exista
@@ -76,7 +76,7 @@ e-PetPlace**, jamás plata de terceros — y va a la lista del contador.
 - **Cuenta comercial que no factura y no cobra.** No tiene fee, no tiene agenda,
   no aparece en el marketplace de servicios. Aparece **solo** en la sección de
   adopción.
-- 🔴 **La verificación es MANUAL y del founder.** *(Firma ④, 31-ago-2026.)* No
+- 🔴 **La verificación es MANUAL y del founder.** *(Decidida en mesa 31-ago-2026, firma ④ 3-sep-2026.)* No
   hay autoregistro: el administrador crea la cuenta. Es lo único que escala a
   cero al arrancar, y resuelve de un golpe los muros anti-venta y anti-cría que
   `MODELO_ADOPCION` §6 dejaba abiertos.
@@ -116,7 +116,7 @@ padrinos una comunicación humana** — su ficha jamás desaparece en silencio.
 
 ## §4 · LA SECCIÓN PÚBLICA — cómo se llega y qué se ve
 
-*(Firma ⑦ del founder, 31-ago-2026.)*
+*(Decidida en mesa 31-ago-2026, firma ⑦ 3-sep-2026.)*
 
 **Dos puertas:**
 1. Cuenta existente → la sección de adopción.
@@ -156,7 +156,7 @@ match visible. **Se presentan vidas, no inventario.**
 
 ## §5 · LA SOLICITUD, Y LA ADOPCIÓN COMO SU FINAL
 
-*(Firma ⑧ del founder, 31-ago-2026.)*
+*(Decidida en mesa 31-ago-2026, firma ⑧ 3-sep-2026.)*
 
 - El formulario es **del publicador**; la plataforma ofrece plantillas y no
   impone ni prohíbe barreras.
@@ -176,9 +176,42 @@ match visible. **Se presentan vidas, no inventario.**
 
 ---
 
+## §5-bis · LA SOLICITUD CERRADA SIN ADOPCIÓN SE BORRA A LOS 90 DÍAS
+
+*(Firma del founder, 1-sep-2026 — «se borra el formulario Y la identidad».)*
+
+**Construido y aplicado** (`purgar_postulaciones_vencidas`, S112): un job
+diario clasifica cada estado de la solicitud en una de dos cosas y **ninguno
+puede quedar sin clasificar** — la propia función rebota si el catálogo de
+estados admite uno que no está en ninguna de las dos listas.
+
+- **SE PURGA** — `declinada` · `desistida` · `no_concretada_fallecimiento`:
+  se cerró sin que hubiera adopción. A los 90 días de `cerrada_en`:
+  - **la identidad se borra**: `solicitante_user_id = NULL`.
+  - **el formulario se borra**: `respuestas = NULL`, `aceptacion_id = NULL`.
+  - **el hilo queda legible y anónimo**: los mensajes del solicitante pierden
+    su autoría (`autor_user_id = NULL`) — **primero los mensajes, después la
+    identidad**, porque anonimizar al revés perdería la referencia de cuáles
+    mensajes eran suyos.
+- **SE CONSERVA** — `recibida` · `en_conversacion` · `aceptada`: o el plazo
+  todavía no empezó (sigue viva), o es el respaldo de una adopción que
+  ocurrió, y **eso nunca se toca**.
+
+⚠️ **No es lo mismo que el reloj de 5 días de §5** — ése avisa a la familia
+cuando el refugio no respondió; éste borra datos de una solicitud que ya
+terminó. Los dos viven en la misma letra porque los dos son del ciclo de
+vida de la solicitud, no porque sean el mismo mecanismo.
+
+🔴 **Se depositó tarde a propósito, no por olvido:** el motor se construyó y
+aplicó primero (S112), y esta sección documenta el objeto que ya existe —
+*escribir la letra antes de medir el motor habría sido inventar el
+mecanismo antes de saberlo.*
+
+---
+
 ## §6 · PADRINAZGO — la canasta del refugio
 
-*(Firma ⑨ del founder, 31-ago-2026.)*
+*(Decidida en mesa 31-ago-2026, firma ⑨ 3-sep-2026.)*
 
 - 🔴 **El refugio NO carga catálogo: MARCA del nuestro.** Entra a la despensa,
   marca *«esto es lo que necesitamos»*, y eso arma su canasta. Cero productos
@@ -195,8 +228,7 @@ match visible. **Se presentan vidas, no inventario.**
   refugio se va, **el cobro recurrente se detiene solo — jamás sigue por
   inercia.** El padrino recibe correo y aviso en la app: *tu ahijado fue
   adoptado*, con la novedad **sin violar la privacidad de la familia que
-  adoptó**, el agradecimiento, y la invitación a apadrinar a otro. *(Firma ⑩,
-  31-ago-2026.)* ⚠️ El aviso de adopción **no es un beneficio comercial**: §7 de
+  adoptó**, el agradecimiento, y la invitación a apadrinar a otro. *(Decidida en mesa 31-ago-2026, firma ⑩ 3-sep-2026.)* ⚠️ El aviso de adopción **no es un beneficio comercial**: §7 de
   LOYALTY queda intacto.
 - **Su puerta de cancelación es la de la casa:** *Pagos recurrentes y
   suscripciones*, en Cuenta (`D-9xx`). El padrinazgo **no construye la suya**.
@@ -205,7 +237,7 @@ match visible. **Se presentan vidas, no inventario.**
 
 ## §7 · DONACIÓN — un objeto con destino, no tres flujos
 
-*(Firma ⑪ del founder, 31-ago-2026.)*
+*(Decidida en mesa 31-ago-2026, firma ⑪ 3-sep-2026.)*
 
 **Compra puntual del catálogo ENTERO** —el donante elige lo que quiera— con un
 **campo de destino** de tres valores:
@@ -223,7 +255,7 @@ precisamente lo que estas figuras no pueden ser.*
 
 ## §8 · LA ENTREGA — a la dirección de un tercero
 
-*(Firma ⑫ del founder, 31-ago-2026.)*
+*(Decidida en mesa 31-ago-2026, firma ⑫ 3-sep-2026.)*
 
 La compra se entrega **al refugio**, no a quien pagó. **La coordina el refugio.**
 
@@ -235,7 +267,7 @@ al construir.
 
 ## §9 · EL PORTAL DEL PUBLICADOR — tres tabs en la app de negocios
 
-*(Firma ⑬ del founder, 31-ago-2026.)*
+*(Decidida en mesa 31-ago-2026, firma ⑬ 3-sep-2026.)*
 
 Mismo login, misma cuenta, mismo diseño, misma configuración. **El tipo de
 cuenta decide las tabs**, y las de adopción son tres:
@@ -320,21 +352,31 @@ paga, con el refugio como destinatario?
 
 | # | Qué | Estado |
 |---|---|---|
-| ① | El expediente empieza en el rescate y se hereda (§0) | 🟡 **founder, 31-ago** — *deroga la firma ③ del 25-ago* |
+| ① | El expediente empieza en el rescate y se hereda (§0) | ✅ **founder, 3-sep** — *deroga la firma ③ del 25-ago* |
 | ② | Padrinazgo en productos, jamás plata (§1) | ✅ heredada 25-ago, ratificada 31-ago |
 | ③ | El 5 % extra a la fundación (§1) | ✅ heredada 25-ago |
-| ④ | Verificación manual del publicador (§2) | 🟡 founder, 31-ago |
+| ④ | Verificación manual del publicador (§2) | ✅ founder, 3-sep |
 | ⑤ | El publicador decide siempre (§2) | ✅ heredada 25-ago |
 | ⑥ | Responsabilidad del refugio durante el proceso (§2) | ✅ heredada 25-ago |
-| ⑦ | Las dos puertas, el orden y los filtros (§4) | 🟡 founder, 31-ago |
-| ⑧ | La adopción vive dentro de la solicitud + el reloj de 5 días (§5) | 🟡 founder, 31-ago |
-| ⑨ | La canasta del refugio marcada del catálogo (§6) | 🟡 founder, 31-ago |
-| ⑩ | El padrinazgo sabe morir (§6) | 🟡 founder, 31-ago |
-| ⑪ | La donación es un objeto con destino (§7) | 🟡 founder, 31-ago |
-| ⑫ | La entrega la coordina el refugio (§8) | 🟡 founder, 31-ago |
-| ⑬ | El portal de tres tabs (§9) | 🟡 founder, 31-ago |
+| ⑦ | Las dos puertas, el orden y los filtros (§4) | ✅ founder, 3-sep |
+| ⑧ | La adopción vive dentro de la solicitud + el reloj de 5 días (§5) | ✅ founder, 3-sep |
+| — | El borrado a 90 días del formulario y la identidad (§5-bis) | ✅ founder, 1-sep |
+| ⑨ | La canasta del refugio marcada del catálogo (§6) | ✅ founder, 3-sep |
+| ⑩ | El padrinazgo sabe morir (§6) | ✅ founder, 3-sep |
+| ⑪ | La donación es un objeto con destino (§7) | ✅ founder, 3-sep |
+| ⑫ | La entrega la coordina el refugio (§8) | ✅ founder, 3-sep |
+| ⑬ | El portal de tres tabs (§9) | ✅ founder, 3-sep |
 
-> 🟡 = decidida en mesa hoy, **pendiente de que el founder firme el documento**.
+> **CIERRE DE S112 (3-sep-2026): «firmo la letra entera».** Las nueve firmas
+> que estaban 🟡 pasan a ✅. ⚠️ **Medido antes de fechar, no asumido:** el
+> founder pidió que ①④⑦⑧⑬ conservaran su fecha original del 1-sep **si ya
+> la tenían** — medido en el cuerpo del documento (las cinco citas inline
+> decían "31-ago", ninguna "1-sep") ⇒ la condición no se cumplía para
+> ninguna de las cinco, y las cinco quedan fechadas **3-sep** como el resto.
+> La única excepción real es **§5-bis**, cuyo comentario en el motor
+> (`purgar_postulaciones_vencidas`) sí cita **1-sep** como la fecha en que
+> se firmó "se borra el formulario Y la identidad" — ésa se respeta tal cual
+> la trae el objeto.
 > Nada de §12 se construye antes de medirse.
 
 ---
@@ -344,3 +386,11 @@ paga, con el refugio como destinatario?
 - **v1.0 (31-ago-2026, S108):** nace en mesa consolidando `LETRA_ADOPCION_PADRINAZGO`
   v1.0 (25-ago, archivada) con las decisiones del founder de hoy. La enmienda de
   §0 es la que cambia el vertical: el expediente empieza en el rescate.
+- **v1.1 (3-sep-2026, S112, cierre):** el founder firma la letra entera — las
+  nueve firmas 🟡 de §14 pasan a ✅. Entra **§5-bis** (el borrado a 90 días,
+  construido y aplicado en el motor pero nunca depositado en la letra hasta
+  hoy), con su propia firma del **1-sep**, tomada del comentario del motor
+  y no reinventada. Las cinco citas inline de ①④⑦⑧⑬ (y de paso ⑨⑩⑪⑫) pasan a
+  distinguir **decisión de mesa** (31-ago) de **firma del documento** (3-sep)
+  — antes decían "Firma … 31-ago", que ya no era cierto una vez que el
+  founder firmó el documento en una fecha distinta a la de la mesa.
