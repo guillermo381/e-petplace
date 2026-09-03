@@ -124,7 +124,7 @@ import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
-import { EstadoSolicitudAdopcion } from '../components/EstadoSolicitudAdopcion'
+import { EscaleraSolicitud } from '../components/EscaleraSolicitud'
 import { EvidenciaClip } from '../components/EvidenciaClip'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -1002,7 +1002,10 @@ function MuestraHiloDeChat() {
         onCambio={setTexto}
         onEnviar={() => setTexto('')}
         placeholder="Escribile a Refugio Patitas del Sur"
-        glifoEnviar={<Chevron direccion="derecha" />}
+        /* ⭐ S112-B · YA NO ES UN ANDAMIO: el glifo existe. Va en `aa`
+           —es CONTROL, no objeto de expediente— y su color lo pone el
+           estado del campo, no una capa. */
+        glifoEnviar={<Icono nombre="enviar" tamano={24} registro="aa" />}
         etiquetaEnviar="Enviar"
       />
       <Texto variante="apoyo">
@@ -5382,51 +5385,65 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        <Seccion titulo="EstadoSolicitudAdopcion (S111 · S112) — los cortes son desvíos, y el duelo no lleva escalera">
-          {/* Los SEIS estados juntos. El gate son TRES preguntas:
-              ① ¿los cortes se leen como interrupción y no como final
-                 cumplido? ② ¿se leen SIN acusar a nadie? Si el desvío grita,
-                 la pieza falla §10.6 (la devolución jamás humilla).
-              ⭐ Y las DOS últimas van juntas a propósito: **llegan al mismo
-                 dibujo por razones distintas** —una porque no hay proceso,
-                 la otra porque no hay juicio— y lo único que las separa es
-                 la VOZ. Si con los textos puestos se leen como lo mismo, el
-                 problema es del texto, no de la pieza.
-              ⭐ ③ S112: ¿el fallecimiento se lee como una NOTICIA y no como
-                 un trámite que no prosperó? Es la única que NO dibuja
-                 escalera, y hay que poder ver por qué: mostrarle los pasos
-                 apagados a alguien que perdió al animal que eligió le informa
-                 hasta qué punto del trámite había llegado.
-              ⚠️ La tercera tarjeta monta un estado que HOY no puede ocurrir
-                 en producción — se muestra para poder juzgarlo el día que
-                 el canal exista, no porque exista. */}
+        <Seccion titulo="⭐ EscaleraSolicitud (S112) — la pieza de despensa, con los glifos de §6b">
+          {/* ☠️ ACÁ VIVÍA `EstadoSolicitudAdopcion`, y la retira la letra del
+              chat: dibujaba tres pasos EN MAGENTA y con nodos sin glifo. §1
+              nombra las dos cosas como defecto —«nada magenta, nada de bolas
+              sueltas»— y la reemplaza esta, que reusa `EscaleraEstados` y el
+              mecanismo `conIconos` de despensa con su propio vocabulario.
+
+              🔴 QUÉ HAY QUE VER, y es el gate de los cinco glifos EN SU
+              LUGAR (que es donde la letra dice que se juzgan):
+              ① ¿se distingue cada etapa SIN leer su palabra? Ése es el punto
+                 de que cada nodo tenga glifo.
+              ② `pluma` en el nodo 4: a este tamaño, ¿se lee como firma o
+                 como lápiz? Es el riesgo más alto de los cinco.
+              ③ el final alterno REEMPLAZA la línea y la fila queda como
+                 estaba — no avanza por haberse cerrado.
+              ④ colapsada queda SÓLO la línea. */}
           <View style={{ gap: spacing[6] }}>
             {([
-              ['recibida', 'recién llegada · es la que cuenta el Home (§9)'],
-              ['aceptada', 'aceptada · el camino completo'],
-              ['en_conversacion', '⚠️ INALCANZABLE hoy: no hay canal (activador estacionado)'],
-              ['declinada', 'declinada · corte del PUBLICADOR · desvío NEUTRO, jamás alerta'],
-              ['desistida', 'desistida · corte de la FAMILIA · misma forma, otra voz — nadie falló'],
-              ['no_concretada_fallecimiento', '⭐ el animal murió · SIN escalera: no hay PROCESO en el que estar'],
-              ['no_concretada_otra_familia', '⭐ encontró otra familia · SIN escalera: no hay JUICIO que mostrar — nadie evaluó esta postulación'],
-            ] as const).map(([e, nota]) => (
-              <View key={e} style={{ gap: spacing[2] }}>
+              ['en_conversacion', undefined, 'el camino, abierto · la etapa actual llena y las que faltan atenuadas'],
+              ['acta_firmada', undefined, 'más adelante · la pluma en el nodo 4'],
+              ['aceptada', { tipo: 'declinada' as const, etiqueta: 'Declinada · 12 sep' }, '⭐ final alterno: la etiqueta REEMPLAZA la línea y la fila queda donde estaba'],
+            ] as const).map(([etapa, final, nota]) => (
+              <View key={etapa + (final?.tipo ?? '')} style={{ gap: spacing[2] }}>
                 <Texto variante="apoyo">{nota}</Texto>
-                <EstadoSolicitudAdopcion
-                  estado={e}
-                  registro="completa"
+                <EscaleraSolicitud
+                  etapa={etapa}
+                  final={final}
+                  abierta
+                  onAlternar={() => {}}
+                  etiquetaAlternar="Ver los pasos"
+                  vozEstado="Estás en: En conversación"
                   voces={{
-                    recibida: 'Recibida',
-                    enConversacion: 'En conversación',
+                    enviada: 'Enviada',
+                    en_conversacion: 'En conversación',
                     aceptada: 'Aceptada',
+                    acta_firmada: 'Acta firmada',
+                    una_vida_nueva: 'Una vida nueva',
                   }}
-                  vozDeclinada="El refugio eligió otro hogar"
-                  vozDesistida="Cancelaste tu postulación"
-                  vozNoConcretada="Nube falleció. Lo sentimos mucho."
-                  vozOtraFamilia="Nube ya encontró su hogar."
                 />
               </View>
             ))}
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">COLAPSADA · queda sólo la línea, y el toque la abre</Texto>
+              <EscaleraSolicitud
+                etapa="aceptada"
+                abierta={false}
+                onAlternar={() => {}}
+                etiquetaAlternar="Ver los pasos"
+                vozEstado="La solicitud está en: Aceptada"
+                voces={{
+                  enviada: 'Enviada',
+                  en_conversacion: 'En conversación',
+                  aceptada: 'Aceptada',
+                  acta_firmada: 'Acta firmada',
+                  una_vida_nueva: 'Una vida nueva',
+                }}
+                acento="oficio"
+              />
+            </View>
           </View>
         </Seccion>
 
@@ -5791,6 +5808,63 @@ function GaleriaInterna() {
               vozSinPagina="Este refugio todavía no armó su página."
               descripcionSinPagina="Podés ver sus animales igual."
             />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ §6b · HOJA DE CONTACTO — LOS CINCO GLIFOS DE LA ADOPCIÓN (gate POR ÍCONO)">
+          {/* §6b paso 4 · el montaje canónico: 21px Y 44px, EN VECINDAD con
+              cinco del registry, en claro y en oscuro. *Un glifo que sólo
+              funciona solo, no funciona.*
+
+              ⚠️ Y su límite, por la enmienda S99: **esto NO es el gate.** El
+              gate del founder es el aparato — la escalera montada en el hilo
+              y el glifo en la barra. Esta hoja mide la VECINDAD, que es lo
+              único que una fila de íconos puede medir.
+
+              🔴 LO QUE HAY QUE MIRAR PRIMERO, en orden de riesgo declarado:
+              ① `pluma` contra `lapiz` a 21px — es el par que más converge, y
+                 lo que los separa es la LÍNEA DE FIRMA de abajo.
+              ② `burbujas`: ¿el solape se lee como conversación o empasta?
+              ③ `sobre` contra `burbujas`: ¿la V de la solapa alcanza?
+              ④ `enviar`: ¿la quilla evita que se lea como un triángulo? */}
+          <View style={{ gap: spacing[4] }}>
+            {([21, 44] as const).map((px) => (
+              <View key={px} style={{ gap: spacing[2] }}>
+                <Texto variante="apoyo">
+                  {px}px · los cinco nuevos, y a la derecha sus vecinos de riesgo:
+                  lapiz · compartir · hogar · refugio · caso
+                </Texto>
+                <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
+                  {(['sobre', 'burbujas', 'checkEnCirculo', 'pluma', 'enviar'] as IconoNombre[]).map((n) => (
+                    <Icono key={n} nombre={n} tamano={px} />
+                  ))}
+                  <Separador />
+                  {(['lapiz', 'compartir', 'hogar', 'refugio', 'caso'] as IconoNombre[]).map((n) => (
+                    <Icono key={n} nombre={n} tamano={px} />
+                  ))}
+                </View>
+              </View>
+            ))}
+
+            <ThemeProvider defaultMode="dark">
+              <View style={{ gap: spacing[2], padding: spacing[3], borderRadius: radius.md }}>
+                <Texto variante="apoyo">en OSCURO · 21px</Texto>
+                <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
+                  {(['sobre', 'burbujas', 'checkEnCirculo', 'pluma', 'enviar', 'lapiz', 'hogar'] as IconoNombre[]).map((n) => (
+                    <Icono key={n} nombre={n} tamano={21} />
+                  ))}
+                </View>
+              </View>
+            </ThemeProvider>
+
+            <Texto variante="apoyo">
+              ⚠️ SON CINCO Y NO SEIS: «casa con huella» NO se dibujó — el censo
+              de metáforas (§6b paso 2) encontró que YA EXISTE y es el mismo
+              dibujo (`hogar`, la última de la fila de vecinos). No es un
+              préstamo entre significados distintos: es el mismo significado —
+              el animal adentro de una casa. Dibujar un segundo sería la deuda
+              que la regla de economía de §6b nombra.
+            </Texto>
           </View>
         </Seccion>
 

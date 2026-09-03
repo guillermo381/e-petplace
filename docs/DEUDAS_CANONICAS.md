@@ -27257,3 +27257,60 @@ hecho sin asiento se lee como permanente; con su asiento, el próximo lector ve
 solo que la base cambió. **Es la misma regla que la casa ya exige de toda
 medición** —*declarar contra qué y cuándo*— y lo que C agrega es que **también
 rige entre pistas**, no sólo en los reportes al founder.
+
+---
+
+## 🟢 `D-1005` — EL MAPA DE GLIFOS DE LA ESCALERA VIVÍA DENTRO DE UNA APP, Y POR ESO LA OTRA DIBUJABA LA VERSIÓN POBRE
+
+**Estado: CURADA en S112-A.** Se deposita igual porque su forma vuelve.
+
+**Lo medido (hallazgo de B buscando otra cosa):** el cliente dibujaba la
+escalera del pedido con **un glifo por etapa**; el prestador dibujaba **la
+misma escalera del mismo pedido sin ninguno**. La causa **no era un olvido**:
+el mapa vivía en `apps/cliente/src/lib/despensa/`, así que **el prestador no
+podía alcanzarlo aunque quisiera**.
+
+*Misma escalera, dos caras, y una era la versión pobre de la otra* — que es
+literal lo que la casa prohíbe.
+
+**La cura, y su decisión de forma:** subió el **MECANISMO** a
+`packages/ui` (`conIconos`) **y el mapa entra como ARGUMENTO**. Mudarlo con el
+mapa de despensa adentro habría metido el vocabulario de un dominio en el
+paquete compartido **y no habría servido para adopción**, cuyas etapas no son
+las de un pedido. *Una pieza compartida con el vocabulario de un dominio
+adentro no es compartida: es la del primero que llegó.* `GLIFOS_PEDIDO` sube
+aparte porque **un pedido no es vocabulario privado de una app**.
+
+**La clase, para la próxima:** cuando dos superficies muestran **el mismo
+objeto**, un helper que vive dentro de una de ellas **no es una decisión de
+organización: es un techo** para la otra. Precedente: `EvitaTeclado` (`D-498`),
+que subió al aparecer su segundo consumidor. `N17`.
+
+---
+
+## 🟡 `D-1006` — LOS CUATRO `nodo*` SIGUEN DIBUJADOS PARA 12 px EN UN NODO DE 24
+
+**Hallazgo de B (S112), midiendo si «casa con huella» chocaba contra Ley 9.**
+
+Los glifos `nodo*` de la escalera de despensa nacieron como **silueta rellena**
+con su razón escrita: *«un check de trazo a 12 px se convierte en una mancha»*.
+
+🔴 **Ese 12 ya no existe.** El nodo creció: `NODO = 32` y
+`GLIFO_EN_NODO = NODO - 8 = 24`. ⇒ **su razón de forma está vencida y ninguno
+de los dos números lo dice** — el glifo sigue siendo correcto a la vista, pero
+el argumento que eligió su anatomía ya no aplica.
+
+**Por qué NO se tocó desde acá:** son de **despensa**, tienen su gate por ícono,
+y redibujarlos desde un frente de adopción **cambiaría lo que el founder ya
+aprobó en otra pantalla**. Los cinco glifos nuevos de adopción **sí** nacen con
+la anatomía canónica del registry.
+
+⚠️ **Consecuencia declarada:** hasta que alguien mire ésta, **las dos escaleras
+conviven con dos anatomías**.
+
+**Disparo:** la próxima sesión que toque los glifos de despensa, o un gate por
+ícono del founder sobre la escalera del pedido.
+
+**La lección de forma:** *una decisión de dibujo con su número adentro se vence
+cuando el número cambia, y el dibujo no avisa.* Es la misma familia que
+`L-395` (un puente que sobrevive a su río).

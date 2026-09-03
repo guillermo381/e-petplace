@@ -57,6 +57,19 @@ import type { PasoEscalera } from './EscaleraEstados';
  * ⚠️ Esto NO contradice que `conIconos` reciba el mapa: **el mecanismo es
  * genérico y este mapa es UNO de los que puede recibir.** Adopción traerá el
  * suyo, con sus etapas, sin tocar éste.
+ *
+ * ⚠️ **DEUDA DECLARADA (`D-1006`, hallazgo de B, S112): los cuatro `nodo*`
+ * siguen dibujados para 12 px y el nodo mide 24.** Nacieron con la anatomía
+ * de silueta rellena porque *«un check de trazo a 12 px se convierte en una
+ * mancha»* — **y ese 12 ya no existe**: el nodo creció y `GLIFO_EN_NODO` es
+ * `NODO - 8 = 24`. ⇒ *su razón de forma está vencida y ninguno de los dos
+ * números lo dice.*
+ *
+ * **No se tocan acá y es a propósito:** son de despensa, tienen su gate por
+ * ícono, y redibujarlos desde un frente de adopción cambiaría lo que el
+ * founder ya aprobó en otra pantalla. Los cinco glifos nuevos de adopción SÍ
+ * nacen con la anatomía canónica del registry — *así que las dos escaleras
+ * van a convivir con dos anatomías hasta que alguien mire ésta.*
  */
 export const GLIFOS_PEDIDO: Readonly<Record<string, IconoNombre>> = {
   confirmado: 'nodoConfirmado', // la bolsa — el pedido tomado
