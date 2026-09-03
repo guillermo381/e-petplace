@@ -72,3 +72,4 @@ export {
   type FinalEscalera,
   type LecturaDeEscalera,
 } from './hiloAdopcion';
+export { diaDelNegocio, horaDelActo } from './diaDelNegocio';

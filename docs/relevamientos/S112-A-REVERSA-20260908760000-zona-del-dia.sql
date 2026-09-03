@@ -1,0 +1,5 @@
+-- REVERSA de 20260908760000 · el contexto de arranque deja de decir con qué
+-- zona la base define «hoy».
+-- ⚠️ Revertir NO rompe nada visible: la app vuelve a calcular el día con el
+-- reloj del teléfono y **acierta 19 de cada 24 horas**. Las otras cinco pide
+-- el día siguiente y el lector devuelve filas — en otro estado. Sin error.

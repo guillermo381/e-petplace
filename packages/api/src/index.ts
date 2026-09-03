@@ -1701,6 +1701,7 @@ export {
   despublicarAdoptable,
   traspasarMascotaAFamilia,
   poblarVitrinaRefugio,
+  subirImagenVitrinaRefugio,
   buscarRefugios,
   marcarHiloLeido,
   definirRespuestaAutomaticaRefugio,

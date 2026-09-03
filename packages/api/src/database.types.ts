@@ -22633,6 +22633,7 @@ export type Database = {
         Args: { p_nombre: string }
         Returns: boolean
       }
+      _path_es_de_mi_vitrina: { Args: { p_name: string }; Returns: boolean }
       _prestador_bloqueado: {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: boolean
@@ -25259,6 +25260,7 @@ export type Database = {
           p_ciudad?: string
           p_historia?: string
           p_logo_url?: string
+          p_portada_url?: string
           p_zona?: string
         }
         Returns: Json
