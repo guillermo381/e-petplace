@@ -124,7 +124,7 @@ probaron en teléfono.**
 | `TarjetaMascotaRefugio` séptimo estado | B | tab Mascotas (C) | ✅ montada |
 | El menú «Quiénes están hoy» de fila | B | Hoy del prestador (C) | 🟡 C no lo pidió a propósito — el lector no falta (`obtener_estadias_del_dia`), pero pedir con un contrato adivinado es cómo nacen las piezas que nadie monta |
 | Burbuja del refugio (mensajes+solicitudes) | B+C | shell del prestador (A merge) | ✅ montada, **NO publicada** — primer objetivo de S113 |
-| `SemaforoSanitario` — el compromiso de esterilización | B | ficha + portal del refugio (C) | ⏸ espera firma del founder sobre esterilización (ver hoja de decisión) |
+| `SemaforoSanitario` — el compromiso de esterilización | B | ficha + portal del refugio (C) | ⏸ espera firma del founder — ítem 13 de `S112-HOJA-DE-DECISION.md` |
 
 ---
 
