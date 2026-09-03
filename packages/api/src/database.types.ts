@@ -23144,6 +23144,15 @@ export type Database = {
       cerrar_teleconsulta: { Args: { p_cita_id: string }; Returns: Json }
       cerrar_tramo_guarderia: { Args: { p_tramo_id: string }; Returns: Json }
       cerrar_y_renovar_planes: { Args: never; Returns: Json }
+      chips_de_bitacora: {
+        Args: { p_evento_ids: string[] }
+        Returns: {
+          codigo: string
+          evento_id: string
+          nombre_familia: string
+          nombre_familia_en: string
+        }[]
+      }
       cleanup_pendientes_vencidos: {
         Args: never
         Returns: {
@@ -24318,6 +24327,18 @@ export type Database = {
           redes_autorizadas: boolean
           urgencia_tope_moneda: string
           urgencia_tope_monto: number
+        }[]
+      }
+      obtener_bitacora_de_estadia: {
+        Args: { p_estadia_id: string }
+        Returns: {
+          anotada_en: string
+          autor: string
+          chips: Json
+          evento_id: string
+          mascota_id: string
+          prestador_id: string
+          texto: string
         }[]
       }
       obtener_casos_activos_mascota: {

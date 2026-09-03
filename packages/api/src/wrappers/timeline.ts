@@ -56,6 +56,28 @@ export interface ItemTimeline {
    *  escribe el trigger _trg_vacuna_crear_evento) — insumo de la voz
    *  "Recibió la vacuna {nombre}" de LineaDeVida (S47-B1.2 C). */
   vacuna_nombre: string | null;
+  /**
+   * 🔴 **QUIÉN LO ANOTÓ — y sin esto la voz no se puede escribir.**
+   * `bitacora_familia` lo escriben **las dos manos**: la familia desde su app
+   * y el cuidador desde la guardería. *Una sola voz para los dos diría
+   * «anotaste» sobre algo que anotó el cuidador.* `null` = lo escribió la
+   * familia.
+   *
+   * ⚠️ Ya venía en el `select` de la consulta **y se tiraba en el mapeo** —
+   * o sea que el wrapper pagaba el viaje y descartaba el dato. *No costó una
+   * columna ni una petición: costó dejar de tirarlo.* (Medición de C.)
+   */
+  prestador_id: string | null;
+  /**
+   * Las conductas que el cuidador marcó, **con su nombre en voz de familia ya
+   * resuelto** — el idioma sale de `cat_conductas_bitacora` y esa tabla no la
+   * lee la app. Vacío en todo evento que no sea bitácora.
+   *
+   * Viene **dentro del ítem** a propósito: un lector aparte sería *una
+   * petición por fila* en un timeline paginado (`L-223`), y obligaría a
+   * coserlos por id en la pantalla, que es donde se rompe.
+   */
+  chips: { codigo: string; nombreFamilia: string; nombreFamiliaEn: string | null }[];
   /** Evento de FECHA sola (S48-B6.3): su fuente de verdad es un date
    *  sin hora (vacuna del carnet) y el trigger ancla fecha_evento en la
    *  medianoche UTC de ese día SOLO para ordenar. El display muestra el
@@ -210,6 +232,36 @@ async function _timeline(
       fotosPorEvento.set(a.evento_padre_id, (fotosPorEvento.get(a.evento_padre_id) ?? 0) + 1);
     }
   }
+  /* ═══ LOS CHIPS DE LA BITÁCORA, EN UN SOLO VIAJE ═════════════════════════
+     Se piden **por lote** para los eventos de esta página. Uno por evento
+     sería *una petición por fila* en un timeline paginado, y el costo de la
+     casa es la PETICIÓN, no el dato (`L-223`).
+
+     ⚠️ Si el lote falla, **los chips quedan vacíos y el timeline se dibuja
+     igual**: *un expediente que no se muestra porque no se pudo resolver una
+     conducta es peor que uno con una conducta de menos.* El hueco se ve; la
+     pantalla en blanco no dice nada. */
+  const chipsPorEvento = new Map<
+    string,
+    { codigo: string; nombreFamilia: string; nombreFamiliaEn: string | null }[]
+  >();
+  const idsBitacora = eventos.filter((e) => e.tipo === 'bitacora_familia').map((e) => e.id);
+  if (idsBitacora.length > 0) {
+    const { data: chs } = await getClient().rpc('chips_de_bitacora', {
+      p_evento_ids: idsBitacora,
+    });
+    for (const c of (chs as Record<string, unknown>[] | null) ?? []) {
+      const ev = String(c.evento_id);
+      const lista = chipsPorEvento.get(ev) ?? [];
+      lista.push({
+        codigo: String(c.codigo),
+        nombreFamilia: String(c.nombre_familia ?? c.codigo),
+        nombreFamiliaEn: typeof c.nombre_familia_en === 'string' ? c.nombre_familia_en : null,
+      });
+      chipsPorEvento.set(ev, lista);
+    }
+  }
+
   const nombrePrestador = new Map((prestadores.data ?? []).map((p) => [p.id, p.nombre_comercial]));
   const modalidadPorPadre = new Map<string, string | null>();
   for (const c of citasPadre.data ?? []) {
@@ -241,6 +293,9 @@ async function _timeline(
       atencion_id: at?.id ?? null,
       fotos_count: fotosPorEvento.get(e.id) ?? 0,
       vacuna_nombre: vacuna,
+      /* Dejó de tirarse: ya venía en el `select`. */
+      prestador_id: e.prestador_id ?? null,
+      chips: chipsPorEvento.get(e.id) ?? [],
       hito_clave: hito,
       modalidad: e.evento_padre_id !== null
         ? modalidadPorPadre.get(e.evento_padre_id) ?? null
