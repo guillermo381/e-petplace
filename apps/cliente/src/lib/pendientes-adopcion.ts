@@ -32,7 +32,7 @@ import {
   type ResumenPendientes,
 } from '@epetplace/domain';
 
-const VACIO: ResumenPendientes = { total: 0, conversaciones: 0, unica: null };
+const VACIO: ResumenPendientes = { total: 0, conversaciones: 0, unica: null, porRevisar: 0 };
 const CERO: ContadorPendientes = { hilosConSinLeer: [], solicitudesPorRevisar: 0 };
 
 let contador: ContadorPendientes = CERO;
@@ -125,11 +125,35 @@ export function escucharPendientes(): () => void {
  * producir no falla: pasa siempre — y su comentario lo hace peor, porque el que
  * lo lee cree que está cubierto.*
  */
+/* 🔴 **EL HILO CALLA LA PIEZA ENTERA, NO UNA CLASE — y es una razón DISTINTA.**
+ *
+ * El silencio por clase (N25/N28) contesta *«¿es esta pantalla el destino de
+ * esta puerta?»*. **El hilo no se calla por eso.** Se calla porque **el disco
+ * cae físicamente sobre la barra de escribir**: es el rojo que el founder
+ * nombró — *«la burbuja tapando el campo del chat»*.
+ *
+ * ⚠️ **Y por eso apagar sólo `mensajes` ahí ESTABA MAL** (lo estuvo en
+ * `8c2d87b6`, una hora): con el carrito lleno, la burbuja seguía dibujándose
+ * sobre el campo de texto. *La clase correcta se callaba y la pieza seguía
+ * tapando* — el defecto exacto, entrando por la puerta de al lado.
+ *
+ * ⇒ **Son DOS preguntas y se contestan por separado:** qué clase no
+ * corresponde acá, y si la pieza puede estar acá. *Colapsarlas fue el error.*
+ */
+export function silenciaTodo(segmentos: readonly string[]): boolean {
+  /* ⚠️ **SÓLO el segmento `solicitud`, jamás `[solicitudId]`.** El primer
+     intento incluía el parámetro y **también apagaba el ACTA**, que vive en
+     `acta/[solicitudId]` y **no tiene barra de escribir**: la burbuja ahí es
+     legítima. *Lo cazó el arnés, no el typecheck — un segmento de más no rompe
+     nada, apaga de más.*
+     `solicitudes` (la LISTA) no colisiona: es otra palabra. */
+  return segmentos.includes('solicitud');
+}
+
+/** EN EL HILO: la conversación es el destino de esta clase. *Una puerta al
+ *  cuarto donde estás parado es ruido con forma de atajo.* */
 export function silenciaMensajes(segmentos: readonly string[]): boolean {
-  /* EN EL HILO. Es la pantalla que ya es el destino —*una puerta al cuarto donde
-     estás parado es ruido con forma de atajo*— y además **el disco cae justo
-     sobre la barra de escribir**: el rojo que el founder nombró. */
-  return segmentos.some((s) => s === 'solicitud' || s === '[solicitudId]');
+  return silenciaTodo(segmentos);
 }
 
 export function silenciaCarrito(segmentos: readonly string[]): boolean {
@@ -143,5 +167,6 @@ export function silenciaCarrito(segmentos: readonly string[]): boolean {
  *  que están en cero (`clasesVivas`), así que acá **sólo se decide el
  *  silencio** — dos preguntas distintas, dos lugares. */
 export function clasesVisibles(segmentos: readonly string[]): { carrito: boolean; mensajes: boolean } {
+  if (silenciaTodo(segmentos)) return { carrito: false, mensajes: false };
   return { carrito: !silenciaCarrito(segmentos), mensajes: !silenciaMensajes(segmentos) };
 }

@@ -16,11 +16,14 @@
  *   error de red/config → detalle específico + reintentar (regla 36)
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Redirect, Tabs, useFocusEffect, useRouter } from 'expo-router';
+import { Redirect, Tabs, useFocusEffect, useRouter, useSegments } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  ALTO_FILA_TABS,
   BarraTabs,
+  BurbujaPendientes,
   Boton,
   Esqueleto,
   EsqueletoGrupo,
@@ -29,6 +32,7 @@ import {
   spacing,
   useTheme,
   type BarraTabsItem,
+  type Pendiente,
   type IconoNombre,
 } from '@epetplace/ui';
 import {
@@ -47,6 +51,7 @@ import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { ReclamoVinculo } from '@/components/reclamo-vinculo';
 import { useTraduccion } from '@/i18n';
+import { clasesVisibles, escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
 import { capacidadDesdeContexto } from '@/lib/barra-prestador-lectura';
 import type { EscalonAtender } from '@/lib/capacidad-atender';
 import {
@@ -151,6 +156,59 @@ type EstadoSesionRaiz =
 // EL user_id que ya resolvió; otro usuario en el mismo proceso vuelve a
 // preguntar. Y el skip HABLA (el forense lo distingue — puede salir rojo).
 let ceremoniaResueltaPara: string | null = null;
+
+
+/**
+ * ⭐ **LA BURBUJA DE PENDIENTES DEL REFUGIO** (S112-C; la pieza es de B).
+ *
+ * **DOS CLASES, y por eso el refugio tiene abanico de verdad:** *mensajes* y
+ * *solicitudes por revisar* son **dos clases de trabajo que llevan a dos
+ * lugares distintos** — el hilo y la portada de Refugio. Meterlas en una sola
+ * habría mostrado un glifo de mensaje para avisar de una solicitud que no lo
+ * es. **El prestador no tiene carrito**: la despensa es de la familia.
+ *
+ * Vive en el shell por N28 —*su condición de existencia es un DATO, no una
+ * ruta*— y su silencio se decide en `lib/pendientes-adopcion.ts`, con arnés.
+ */
+function BurbujaDelShell({ altoBarra }: { altoBarra: number }) {
+  const { t } = useTraduccion();
+  const router = useRouter();
+  const pendientes = usePendientesAdopcion();
+  /* `useSegments()`, jamás el nombre del tab: ése devuelve `adopcion` y nunca
+     puede valer `solicitud`. El guard del carrito del cliente vivió muerto por
+     exactamente eso. */
+  const visibles = clasesVisibles(useSegments() as string[]);
+
+  const lista: Pendiente[] = [
+    {
+      clase: 'mensajes',
+      cuenta: visibles.mensajes ? pendientes.conversaciones : 0,
+      /* La regla del toque la decide el DOMINIO: `unica` trae el id **si y sólo
+         si** hay una conversación y nada más que atender. En el refugio, con
+         solicitudes por revisar encima, es `null` ⇒ a la lista. */
+      onAbrir: () =>
+        pendientes.unica !== null
+          ? router.push({ pathname: '/(tabs)/adopcion/solicitud/[solicitudId]', params: { solicitudId: pendientes.unica } })
+          : router.push('/(tabs)/adopcion'),
+      etiqueta: t('burbuja.mensajesEtiqueta'),
+      titulo: t('burbuja.mensajesTitulo'),
+    },
+    {
+      clase: 'solicitudes',
+      /* ⚠️ **`porRevisar` DERIVADO, jamás `total - conversaciones`.** El total
+         mezcla las dos clases y la pieza necesita cada una por separado — *el
+         disco suma, el abanico separa*. Restarlo acá serían **dos números que
+         deben coincidir saliendo de dos cuentas distintas**, que es la forma
+         que esta casa ya pagó. */
+      cuenta: visibles.solicitudes ? pendientes.porRevisar : 0,
+      onAbrir: () => router.push('/(tabs)/adopcion'),
+      etiqueta: t('burbuja.solicitudesEtiqueta'),
+      titulo: t('burbuja.solicitudesTitulo'),
+    },
+  ];
+
+  return <BurbujaPendientes pendientes={lista} etiquetaAbanico={t('burbuja.abanico')} aireInferior={altoBarra} />;
+}
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -686,6 +744,20 @@ export default function TabsLayout() {
     adoptables: 'familia',
   } as const satisfies Record<ClaveTabPrestador, IconoNombre>;
 
+  /* ⭐ **EL ALTO DE LA BARRA SE MIDE, NO SE TECLEA** — el prestador no lo medía
+     porque no tenía nada flotando encima. Su valor de ARRANQUE ya es correcto
+     (`ALTO_FILA_TABS + insets.bottom`, la fórmula propia de `BarraTabs`), y eso
+     es lo que hace segura la medición asincrónica: *perder la carrera del
+     `onLayout` con un arranque bueno no cuesta nada; con uno malo, perderla ES
+     el defecto* — que es cómo el flotante del cliente quedó 28,1 dp debajo del
+     menú. */
+  const insetsBarra = useSafeAreaInsets();
+  const [altoBarra, setAltoBarra] = useState(ALTO_FILA_TABS + insetsBarra.bottom);
+
+  /* UNA suscripción por SESIÓN. Su `'reconectado'` llega también en la primera
+     conexión ⇒ la carga inicial y el refresco son el mismo camino. */
+  useEffect(() => escucharPendientes(), []);
+
   const items: BarraTabsItem[] = ordenTabsPrestador({
     esRefugioPuro: sesion.esRefugioPuro,
     esGestor: sesion.esGestor,
@@ -703,6 +775,17 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{ headerShown: false }}
       tabBar={({ state, navigation }) => (
+        <>
+          <BurbujaDelShell altoBarra={altoBarra} />
+          <View
+            onLayout={(e) => {
+              const alto = e.nativeEvent.layout.height;
+              /* Se ignora el 0 del primer paso: un cero mediría «no hay barra» y
+                 bajaría la burbuja justo donde la tapa. El umbral evita
+                 re-render por ruido de sub-píxel. */
+              setAltoBarra((previo) => (alto > 0 && Math.abs(previo - alto) > 0.5 ? alto : previo));
+            }}
+          >
         <BarraTabs
           items={items}
           activo={state.routes[state.index].name}
@@ -748,6 +831,8 @@ export default function TabsLayout() {
           // la tab activa se marca porque su huella APARECE
           estadoPorHuella
         />
+          </View>
+        </>
       )}
     >
       <Tabs.Screen name="index" />

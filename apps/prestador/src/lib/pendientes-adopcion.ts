@@ -32,7 +32,7 @@ import {
   type ResumenPendientes,
 } from '@epetplace/domain';
 
-const VACIO: ResumenPendientes = { total: 0, conversaciones: 0, unica: null };
+const VACIO: ResumenPendientes = { total: 0, conversaciones: 0, unica: null, porRevisar: 0 };
 const CERO: ContadorPendientes = { hilosConSinLeer: [], solicitudesPorRevisar: 0 };
 
 let contador: ContadorPendientes = CERO;
@@ -125,16 +125,48 @@ export function escucharPendientes(): () => void {
  * producir no falla: pasa siempre — y su comentario lo hace peor, porque el que
  * lo lee cree que está cubierto.*
  */
-export function silenciaMensajes(segmentos: readonly string[]): boolean {
-  /* EN EL HILO. Es la pantalla que ya es el destino —*una puerta al cuarto donde
-     estás parado es ruido con forma de atajo*— y además **el disco cae justo
-     sobre la barra de escribir**: el rojo que el founder nombró. */
-  return segmentos.some((s) => s === 'solicitud' || s === '[solicitudId]');
+/* 🔴 **EL HILO CALLA LA PIEZA ENTERA, NO UNA CLASE — y es una razón DISTINTA.**
+ *
+ * El silencio por clase (N25/N28) contesta *«¿es esta pantalla el destino de
+ * esta puerta?»*. **El hilo no se calla por eso.** Se calla porque **el disco
+ * cae físicamente sobre la barra de escribir**: es el rojo que el founder
+ * nombró — *«la burbuja tapando el campo del chat»*.
+ *
+ * ⚠️ **Y por eso apagar sólo `mensajes` ahí ESTABA MAL** (lo estuvo en
+ * `8c2d87b6`, una hora): con el carrito lleno, la burbuja seguía dibujándose
+ * sobre el campo de texto. *La clase correcta se callaba y la pieza seguía
+ * tapando* — el defecto exacto, entrando por la puerta de al lado.
+ *
+ * ⇒ **Son DOS preguntas y se contestan por separado:** qué clase no
+ * corresponde acá, y si la pieza puede estar acá. *Colapsarlas fue el error.*
+ */
+export function silenciaTodo(segmentos: readonly string[]): boolean {
+  /* ⚠️ **SÓLO el segmento `solicitud`, jamás `[solicitudId]`.** El primer
+     intento incluía el parámetro y **también apagaba el ACTA**, que vive en
+     `acta/[solicitudId]` y **no tiene barra de escribir**: la burbuja ahí es
+     legítima. *Lo cazó el arnés, no el typecheck — un segmento de más no rompe
+     nada, apaga de más.*
+     `solicitudes` (la LISTA) no colisiona: es otra palabra. */
+  return segmentos.includes('solicitud');
 }
 
-/** El prestador **no tiene carrito** —la despensa es de la familia—, así que su
- *  burbuja lleva UNA sola clase y el abanico no puede nacer acá. *Se dice en vez
- *  de deducirse del hecho de que hoy no haya carrito.* */
-export function clasesVisibles(segmentos: readonly string[]): { mensajes: boolean } {
-  return { mensajes: !silenciaMensajes(segmentos) };
+/** EN EL HILO: la conversación es el destino de esta clase. */
+export function silenciaMensajes(segmentos: readonly string[]): boolean {
+  return silenciaTodo(segmentos);
+}
+
+/** EN LA PORTADA DE REFUGIO: ahí ESTÁN las solicitudes por revisar. Misma razón
+ *  que el carrito en `carrito` — *la puerta al cuarto donde ya estás parado*.
+ *  ⚠️ **Y no se calla en el hilo por esta vía**: ahí la calla la pieza entera. */
+export function silenciaSolicitudes(segmentos: readonly string[]): boolean {
+  return segmentos.includes('adopcion') && !segmentos.includes('solicitud') && !segmentos.includes('acta');
+}
+
+/** El prestador **no tiene carrito** —la despensa es de la familia—: sus dos
+ *  clases son **mensajes** y **solicitudes por revisar**. *Son dos clases de
+ *  trabajo y llevan a dos lugares distintos*, y por eso el refugio tiene
+ *  abanico de verdad. */
+export function clasesVisibles(segmentos: readonly string[]): { mensajes: boolean; solicitudes: boolean } {
+  if (silenciaTodo(segmentos)) return { mensajes: false, solicitudes: false };
+  return { mensajes: !silenciaMensajes(segmentos), solicitudes: !silenciaSolicitudes(segmentos) };
 }

@@ -55,6 +55,11 @@ export interface ResumenPendientes {
    * equivocado — y eso no lo ve ningún typecheck.*
    */
   readonly unica: string | null;
+  /** SÓLO refugio: las que esperan veredicto. **Se expone derivado y no se
+   *  recalcula en la pantalla** — `total - conversaciones` habría sido *dos
+   *  números que deben coincidir saliendo de dos cuentas*, la forma que esta
+   *  casa ya pagó (`L-284`). Cero en la app de la familia. */
+  readonly porRevisar: number;
 }
 
 /** Un contador que llega roto aporta 0.
@@ -73,6 +78,7 @@ export function resumirPendientes(c: ContadorPendientes): ResumenPendientes {
   return {
     total: hilos.length + revisar,
     conversaciones: hilos.length,
+    porRevisar: revisar,
     unica: hilos.length === 1 && revisar === 0 ? (hilos[0] ?? null) : null,
   };
 }
