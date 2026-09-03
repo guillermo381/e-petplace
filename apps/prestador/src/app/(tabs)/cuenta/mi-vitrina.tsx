@@ -71,7 +71,12 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
+import { capturarDeGaleria } from '@epetplace/ui';
+import { borrarBytesFotoGaleria, resolverUrlFotoGaleria, subirFotoGaleria } from '@/lib/subir-galeria';
+import { subirLogoNegocio } from '@/lib/subir-logo';
 import {
+  agregarFotoGaleria,
+  listarFotosGaleria,
   obtenerMiPrestador,
   obtenerMisAdoptables,
   poblarVitrinaRefugio,
@@ -85,11 +90,17 @@ import { useTraduccion } from '@/i18n';
 
 /** Lo cargado, para poder comparar y mandar SÓLO lo que cambió. */
 interface Cargado {
+  /** Hace falta para la galería: sus fotos cuelgan del prestador. */
+  prestadorId: string;
   nombre: string | null;
   historia: string | null;
   ciudad: string | null;
   zona: string | null;
   logoUrl: string | null;
+  /** Las portadas, YA firmadas. La primera es la que manda (contrato de la
+   *  galería: `listarFotosGaleria` devuelve ordenado y **[0] es la portada**;
+   *  acá se respeta, no se re-decide). */
+  portadas: string[];
 }
 
 type Estado =
@@ -109,12 +120,18 @@ export default function MiVitrina() {
   const [historia, setHistoria] = useState('');
   const [ciudad, setCiudad] = useState('');
   const [zona, setZona] = useState('');
+  const [subiendo, setSubiendo] = useState<'logo' | 'portada' | null>(null);
   const [explicandoAyuda, setExplicandoAyuda] = useState(false);
 
   const cargar = useCallback(async () => {
     /* En paralelo: la identidad y sus animales no dependen una de la otra, y
        encadenarlas paga dos peajes de red por nada (`L-223`). */
     const [p, a] = await Promise.all([obtenerMiPrestador(), obtenerMisAdoptables()]);
+    /* Las portadas se piden DESPUÉS y sólo si hay prestador: cuelgan de su id,
+       así que antes de saberlo no hay a quién preguntarle. */
+    const fotos = p.ok && p.data !== null
+      ? await listarFotosGaleria(p.data.id)
+      : ({ ok: false } as const);
     if (!p.ok) {
       /* 🔴 `sin_prestador` **no es un fallo acá**: es el estado normal de un
          refugio que todavía no armó su página, y esta pantalla existe para
@@ -128,11 +145,13 @@ export default function MiVitrina() {
     setEstado({
       fase: 'listo',
       v: {
+        prestadorId: p.data.id,
         nombre: p.data.nombre_comercial,
         historia: p.data.descripcion,
         ciudad: p.data.ciudad,
         zona: p.data.sector,
         logoUrl: resolverUrlLogoNegocio(p.data.foto_url ?? null),
+        portadas: fotos.ok ? fotos.data.map((f) => resolverUrlFotoGaleria(f.url)) : [],
       },
       animales,
       caras,
@@ -159,6 +178,86 @@ export default function MiVitrina() {
     setZona(v?.zona ?? '');
     setEditando(true);
   }
+
+
+  /* ═══ A15 · LAS FOTOS, POR EL MISMO CAMINO QUE LAS DEMÁS ══════════════════
+
+     Voz del founder: *«subo las fotos como subo las de un animal»*. Se reusan
+     **las tres piezas que la casa ya tiene** —`capturarDeGaleria`,
+     `subirFotoGaleria`/`subirLogoNegocio`, y la galería de `prestador_fotos`—
+     en vez de construir un camino de subida para el refugio. *Un segundo
+     camino de subida es un segundo lugar donde el tamaño, el formato y el
+     reintento pueden divergir.*
+
+     🔴 **El motor NO recibe portada**, medido: `poblarVitrinaRefugio` toma
+     `historia · ciudad · zona · logoUrl` y nada más. **Y no hace falta que la
+     reciba**: la portada vive en `prestador_fotos` con su propia puerta, y el
+     refugio ya tiene fila de prestador desde que armó su página. *Pedirle a A
+     un parámetro que duplicaría una puerta existente sería fabricar la segunda
+     verdad.* */
+  const subirPortada = async () => {
+    if (estado.fase !== 'listo' || subiendo !== null) return;
+    /* 1600 y `calidad: 0.9`, los mismos números que la vitrina del prestador:
+       es la misma superficie y se ve a sangre. */
+    const cap = await capturarDeGaleria({ calidad: 0.9, redimensionarA: 1600 });
+    if (cap.tipo === 'cancelada') return;
+    if (cap.tipo === 'permiso_denegado') {
+      return aviso.mostrar({ variante: 'error', texto: t('miVitrina.permisoFotos') });
+    }
+    setSubiendo('portada');
+    const sub = await subirFotoGaleria({ uri: cap.foto.uri });
+    if (!sub.ok) {
+      setSubiendo(null);
+      return aviso.mostrar({
+        variante: 'error',
+        texto:
+          sub.causa === 'red' ? t('miVitrina.fotoErrorRed') : t('miVitrina.fotoErrorSubida'),
+      });
+    }
+    const fila = await agregarFotoGaleria(estado.v.prestadorId, sub.path);
+    setSubiendo(null);
+    if (!fila.ok) {
+      /* 🔴 **La fila falló y los BYTES ya están arriba.** Se borran: sin esto
+         queda un objeto en Storage que ninguna fila referencia — el huérfano
+         que `D-731` existe para no volver a fabricar. */
+      void borrarBytesFotoGaleria(sub.path);
+      return aviso.mostrar({ variante: 'error', texto: fila.mensaje });
+    }
+    await cargar();
+  };
+
+  const subirLogo = async () => {
+    if (estado.fase !== 'listo' || subiendo !== null) return;
+    /* 🔴 **SIN `redimensionarA` NI CALIDAD, y no es un olvido:** el resize de
+       la casa re-codifica a **JPEG** y el logo es **PNG por orden del founder**
+       — pasarlo por ahí mataría el alfa, y `subir-logo` rechazaría su propio
+       archivo. Es `D-740`, escrita y viva. */
+    const cap = await capturarDeGaleria({});
+    if (cap.tipo === 'cancelada') return;
+    if (cap.tipo === 'permiso_denegado') {
+      return aviso.mostrar({ variante: 'error', texto: t('miVitrina.permisoFotos') });
+    }
+    setSubiendo('logo');
+    const sub = await subirLogoNegocio({ uri: cap.foto.uri });
+    if (!sub.ok) {
+      setSubiendo(null);
+      return aviso.mostrar({
+        variante: 'error',
+        texto:
+          sub.causa === 'formato_no_png'
+            ? t('miVitrina.logoSoloPng')
+            : sub.causa === 'red'
+              ? t('miVitrina.fotoErrorRed')
+              : t('miVitrina.fotoErrorSubida'),
+      });
+    }
+    /* El path va por el MISMO motor que la historia: el logo es un campo de la
+       vitrina, no una entidad aparte. */
+    const g = await poblarVitrinaRefugio({ logoUrl: sub.path });
+    setSubiendo(null);
+    if (!g.ok) return aviso.mostrar({ variante: 'error', texto: g.mensaje });
+    await cargar();
+  };
 
   async function guardar() {
     if (guardando) return;
@@ -253,6 +352,7 @@ export default function MiVitrina() {
           <VitrinaRefugio
             nombre={estado.v.nombre}
             logoUrl={estado.v.logoUrl}
+            portadas={estado.v.portadas}
             historia={estado.v.historia}
             ciudad={
               /* Ciudad y zona son **dos campos** y la pieza toma uno: se unen
@@ -312,9 +412,25 @@ export default function MiVitrina() {
                     DICE. Callarlo se leería como que la vitrina no tiene
                     portada; decirlo deja claro que falta el camino, no la
                     pieza. */}
-                <Texto variante="apoyo" color="tertiary">
-                  {t('miVitrina.sinFotosAun')}
-                </Texto>
+
+                {/* A15 · las fotos, con los mismos actos que el resto de la
+                    casa. Van juntas y debajo de los animales: **primero lo que
+                    la vitrina muestra, después con qué se la viste.** */}
+                <Texto variante="seccion">{t('miVitrina.fotosTitulo')}</Texto>
+                <Boton
+                  variante="secundario"
+                  bloque
+                  etiqueta={t('miVitrina.subirPortada')}
+                  cargando={subiendo === 'portada'}
+                  onPress={() => void subirPortada()}
+                />
+                <Boton
+                  variante="secundario"
+                  bloque
+                  etiqueta={t('miVitrina.subirLogo')}
+                  cargando={subiendo === 'logo'}
+                  onPress={() => void subirLogo()}
+                />
                 <Boton variante="secundario" bloque etiqueta={t('miVitrina.editar')} onPress={abrirEditor} />
               </View>
             }

@@ -67,9 +67,21 @@ export {
      las DOS superficies tienen que derivarlo igual: si la familia y el refugio
      mostraran etapas distintas para la misma solicitud, una estaría mintiendo
      y no habría forma de saber cuál. */
+  fusionarFilas,
+  fusionarPorId,
+  type EstadoDeEnvio,
   leerEscalera,
   type EtapaEscalera,
   type FinalEscalera,
   type LecturaDeEscalera,
 } from './hiloAdopcion';
 export { diaDelNegocio, horaDelActo } from './diaDelNegocio';
+
+/* S112-C · la cuenta del día de guardería, POR ESTADO. La cuentan dos
+   superficies —el HOY y el día— y dos copias serían dos criterios de qué es
+   «adentro», que divergen el día que el motor sume un estado. */
+export {
+  contarPresencia,
+  vozDePresencia,
+  type PresenciaDelDia,
+} from './presenciaGuarderia';
