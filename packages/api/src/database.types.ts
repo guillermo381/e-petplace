@@ -16490,6 +16490,7 @@ export type Database = {
           updated_at: string
           user_id: string
           whatsapp: string
+          zona_horaria: string
         }
         Insert: {
           acepta_emergencias?: boolean | null
@@ -16532,6 +16533,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           whatsapp: string
+          zona_horaria?: string
         }
         Update: {
           acepta_emergencias?: boolean | null
@@ -16574,6 +16576,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           whatsapp?: string
+          zona_horaria?: string
         }
         Relationships: [
           {
@@ -24751,6 +24754,7 @@ export type Database = {
           telefono: string
           tipo: string
           whatsapp: string
+          zona_horaria: string
           zona_lat: number
           zona_lon: number
           zona_radio_m: number
