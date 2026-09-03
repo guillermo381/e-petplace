@@ -27,8 +27,21 @@
  * ── SALIDAS ───────────────────────────────────────────────────────────────
  *   0 — verde: toda ruta emitible está aceptada por alguna app.
  *   1 — ROJO: hay rutas emitibles que ninguna app acepta (o cruzadas).
- *   2 — NO CONCLUYENTE: falta una fuente (las listas, la DB) o el extractor no
- *       pudo leer algo que sabemos que existe. **Jamás verde por vacío.**
+ *   2 — FUENTE AUSENTE: falta algo de AFUERA (una lista que no está o no
+ *       parsea). No es culpa de quien commitea y puede ser un estado
+ *       transitorio del repo ⇒ el hook avisa y **deja pasar**.
+ *   3 — 🔴 EL INSTRUMENTO NO ENTIENDE LO QUE VE: el censo salió vacío, el
+ *       control positivo cayó, o **hay un productor que emite una ruta en una
+ *       forma que el extractor no sabe leer**. ⇒ el hook **FRENA**.
+ *
+ * 🔴 POR QUÉ 2 Y 3 SON DISTINTOS, y no es prolijidad: **«no encuentro tu
+ *    archivo» y «encontré algo que no entiendo» son dos hechos opuestos.** El
+ *    primero es una ausencia; el segundo es un HALLAZGO — el gate viendo un
+ *    productor nuevo cuya ruta no puede clasificar. Dejarlo pasar con un aviso
+ *    sería *omitir en silencio lo que no se conoce*, que es exactamente el
+ *    defecto que este gate y la purga de adopción existen para matar. **Un gate
+ *    que se calla ante lo que no entiende deja de proteger sin decirlo, y su
+ *    silencio se lee como salud.**
  * ═══════════════════════════════════════════════════════════════════════════
  */
 import { readFileSync, existsSync } from 'node:fs';
@@ -112,6 +125,7 @@ function leerLista(ruta) {
 function main() {
   const rojoSintetico = process.argv.includes('--probar-rojo');
 
+  const NO_ENTIENDE = 3;   // hallazgo del instrumento ⇒ frena
   const listas = {};
   for (const [app, ruta] of Object.entries(LISTAS)) {
     const l = leerLista(ruta);
@@ -128,12 +142,12 @@ function main() {
 
   const { rutas, mudos } = censarEmitibles();
   if (mudos.length) {
-    salir(2, 'NO CONCLUYENTE · hay productores que nombran `ruta` y el extractor no supo leer cuál:',
+    salir(NO_ENTIENDE, '🔴 EL EXTRACTOR NO ENTIENDE UN PRODUCTOR · nombra `ruta` y no se pudo leer cuál:',
              ...mudos.map((f) => `  · ${f}`),
              '  Se declara en vez de ignorarse: un punto ciego callado da verde por no mirar.');
   }
   if (rutas.size === 0) {
-    salir(2, 'NO CONCLUYENTE · el censo del servidor no encontró NINGUNA ruta emitible.',
+    salir(NO_ENTIENDE, '🔴 EL CENSO DEL SERVIDOR SALIÓ VACÍO · ninguna ruta emitible.',
              '  Con cero rutas la comparación pasa por vacío. El extractor está roto.');
   }
   if (rojoSintetico) {
@@ -142,12 +156,12 @@ function main() {
     const sintetico = "PERFORM registrar_intencion_notificacion(..., jsonb_build_object('ruta', '/inventada/' || x), ...)";
     const halladas = [...sintetico.matchAll(/'ruta'\s*,\s*'(\/[^']*)'/g)].map((m) => m[1]);
     if (halladas.length !== 1) {
-      salir(2, 'NO CONCLUYENTE · la prueba de rojo no pudo extraer su propia ruta sintética.');
+      salir(NO_ENTIENDE, '🔴 la prueba de rojo no pudo extraer su propia ruta sintética.');
     }
     rutas.set(halladas[0], ['(sintética · --probar-rojo)']);
   }
   if (!rutas.has(CONTROL_POSITIVO)) {
-    salir(2, `NO CONCLUYENTE · el control positivo falló: el censo NO encontró ${CONTROL_POSITIVO}.`,
+    salir(NO_ENTIENDE, `🔴 EL CONTROL POSITIVO CAYÓ · el censo NO encontró ${CONTROL_POSITIVO}.`,
              '  Ese valor se leyó A MANO del cuerpo de `_guarderia_aplicar_acto`, no del extractor.',
              '  Si no aparece, lo que está roto es el extractor — no el mundo.');
   }
