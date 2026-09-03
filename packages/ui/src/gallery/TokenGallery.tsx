@@ -5795,6 +5795,12 @@ function GaleriaInterna() {
         </Seccion>
 
         <Seccion titulo="EL CHAT DE ADOPCIÓN (S112) — las mismas piezas en las dos apps">
+          {/* ⚠️ Acá las piezas van SUELTAS y apiladas a propósito: lo que se
+              juzga es cada una. `SuperficieChat` —el teclado, la lista
+              invertida y la barra pegada— **no se puede mostrar acá**: su
+              contrato es ocupar la pantalla entera y su gate es el aparato,
+              con el teclado abierto. Montarla en una caja de la galería
+              mostraría un chat que no se comporta como el chat. */}
           <MuestraHiloDeChat />
         </Seccion>
 

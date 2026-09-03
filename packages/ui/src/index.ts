@@ -624,6 +624,17 @@ export {
   type BotonBajarAlFinalProps,
 } from './components/BotonBajarAlFinal'
 
+// SuperficieChat — S112-B: el teclado, la lista y la barra, UNA sola vez. Es
+// la pieza que impide que las dos apps tengan dos chats distintos — hoy los
+// tienen (medido por C: el cliente sin `EvitaTeclado`, el prestador con él y
+// sin anclar). 🔴 `datosDelMasNuevoAlMasViejo` va INVERTIDO: es lo contrario
+// de lo que uno escribe sin pensar, y al revés la conversación se lee de
+// atrás para adelante SIN ningún error.
+export {
+  SuperficieChat,
+  type SuperficieChatProps,
+} from './components/SuperficieChat'
+
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
 // sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.
