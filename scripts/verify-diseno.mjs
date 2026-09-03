@@ -1404,6 +1404,14 @@ function r29(archivos) {
  *  sale de la lista y no vuelve; toda exportación NUEVA es roja desde el
  *  primer día. */
 const EXENTOS_R17 = new Set([
+  // ☠️ S112-B · ENVOLTORIO MORIBUNDO CON DISPARO NOMBRADO. `CarritoFlotante`
+  // ya no es una pieza: es `BurbujaPendientes` con una sola clase, vivo sólo
+  // para que el shell y las dos pantallas de despensa compilen mientras C
+  // migra. **Su entrada de catálogo la tiene su sucesora** — dos entradas
+  // para un dibujo enseñarían que son dos piezas, que es justo lo que
+  // matamos. Sale de esta lista muriendo, no volviendo a la galería: el día
+  // que el shell monte la nueva, el archivo y esta línea se borran juntos.
+  'CarritoFlotante',
   'usePresionado', 'useTraduccionUi', 'recursosUi', 'useAviso', 'AvisoProvider',
   'ThemeProvider', 'useTheme', 'EvidenciaFotoCapturar',
   // NÚMEROS, no piezas: la anatomía firmada de la pata (S82 r37). Se
