@@ -892,10 +892,13 @@ function MuestraHojaFiltros() {
             { codigo: 'macho', etiqueta: 'Macho', icono: null },
             { codigo: 'hembra', etiqueta: 'Hembra', icono: null },
           ],
-          ciudades: [
-            { codigo: 'uio', etiqueta: 'Quito', icono: null },
-            { codigo: 'gye', etiqueta: 'Guayaquil', icono: null },
-          ],
+          /* ⭐ S112-B · VACÍO A PROPÓSITO — es el caso NORMAL de la vidriera
+             anónima: `cat_ciudades` tiene policies sólo para `authenticated`,
+             y `anon` lee cero filas SIN error. **El grupo «Ciudad» no tiene
+             que aparecer**: un rótulo con nada debajo no dice «no hay», dice
+             «esto se rompió». Cambiá esta lista por dos ciudades y el grupo
+             vuelve — ése es el discriminador. */
+          ciudades: [],
         }}
         explicaEsterilizado={{
           texto: '',

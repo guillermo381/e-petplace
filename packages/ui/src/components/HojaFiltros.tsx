@@ -153,6 +153,84 @@ export type HojaFiltrosProps = {
 /** El orden semántico de los tres, igual que en `ConvivenciaInput`. */
 const ORDEN_CONVIVENCIA: readonly EstadoConvivencia[] = ['si', 'no', 'no_se_sabe']
 
+/**
+ * 🔴 REGLA DE EXISTENCIA — UN GRUPO SIN OPCIONES NO SE DIBUJA (S112-B).
+ *
+ * *Un grupo de filtro con rótulo y sin opciones debajo no dice «no hay»: dice
+ * «esto se rompió».* Y el caso no es un borde — **es el normal**, medido por
+ * C contra la base: `cat_ciudades` tiene RLS con policies sólo para
+ * `authenticated`, y `anon` **tiene el GRANT y ninguna policy** ⇒ lee **cero
+ * filas SIN error**. La vidriera de adopción se mira **sin sesión por firma
+ * del founder**, así que el grupo de ciudad llega vacío en el camino más
+ * transitado del vertical.
+ *
+ * ⚠️ **Y la regla vale aunque la policy llegue**, que es lo que la vuelve una
+ * regla y no un parche: sirve igual a un catálogo que falló, a un eje que
+ * todavía no cargó y a un país con una sola ciudad. *El dibujo no puede
+ * depender de que un catálogo siempre tenga filas.*
+ *
+ * Vive en UN solo lugar y no en los cuatro sitios de llamada, por la razón de
+ * siempre: cuatro copias de una condición son cuatro lugares donde puede
+ * faltar una.
+ *
+ * ── ⚖️ EL CORTE ES EN CERO Y NO EN UNA — decidido, con su medición ────────
+ * *Con UNA sola opción el grupo se dibuja y filtrar no cambia nada*, y eso
+ * roza la ley de la casa sobre los toques que no hacen nada. **Se midió antes
+ * de decidir: `cat_ciudades` activas son EC = 8 · CO = 1**, así que el caso
+ * existe hoy — aunque no llegue a esta pantalla, porque la vidriera es
+ * anónima, no sabe de qué país mira quien mira, y pide el catálogo entero.
+ *
+ * 🔴 **Y la razón de NO cortar en una es mejor que la de cortar** (es de C,
+ * y es la que decide): *un control que APARECE cuando el catálogo crece es
+ * peor que uno que no angosta.* Con corte en una, el grupo «Ciudad» se
+ * materializa el día que alguien agrega la segunda ciudad de Colombia —
+ * **una superficie que cambia de forma según cuántas filas tiene una tabla le
+ * enseña a la familia que la app es inestable**, y quien la ve dos veces no
+ * puede saber qué cambió.
+ *
+ * Sus otras dos, conservadas porque cierran el caso: con una opción, *«sólo
+ * operamos en Quito»* **es lo que la persona necesita saber** antes de
+ * recorrer una lista buscando su ciudad — esconderlo le ahorra un toque
+ * inútil y le cuesta el dato · y el defecto real de ese caso **no es el
+ * grupo: es que la única opción no se distingue de «todas»**, y ocultar el
+ * grupo borra información en vez de curarlo.
+ *
+ * ── ✅ Y LA REGLA SOBREVIVIÓ A QUE SU CASO SE CURARA EN EL MOTOR ──────────
+ * A abrió `cat_ciudades_select_anon USING (activo = true)`
+ * (`20260908600000`), así que **la lista ya no llega vacía y esta regla no se
+ * dispara en el montaje de hoy**. **No se retira**, y la razón es la que las
+ * dos pistas habían escrito ANTES de que la policy existiera: *el dibujo no
+ * puede depender de que un catálogo siempre tenga filas.* Lo que cambió es
+ * que dejó de ser el camino más transitado y volvió a ser lo que siempre
+ * debió proteger — **un catálogo que no respondió.**
+ */
+function GrupoDeCatalogo<C extends string>({
+  rotulo,
+  opciones,
+  activo,
+  onCambio,
+  onLimpiar,
+}: {
+  rotulo: string
+  opciones: OpcionFiltro<C>[]
+  activo: C | null
+  onCambio: (c: C) => void
+  onLimpiar: () => void
+}) {
+  if (opciones.length === 0) return null
+  return (
+    <Grupo rotulo={rotulo}>
+      <FiltroPills
+        opciones={opciones}
+        disposicion="envuelve"
+        activo={activo}
+        onCambio={onCambio}
+        onLimpiar={onLimpiar}
+      />
+    </Grupo>
+  )
+}
+
 /** Un grupo con su rótulo, y su «i» al lado si la tiene. */
 function Grupo({
   rotulo,
@@ -253,25 +331,23 @@ export function HojaFiltros({
       }
     >
       <View style={{ gap: spacing[6] }}>
-        <Grupo rotulo={voces.grupos.especie}>
-          <FiltroPills opciones={opciones.especies} disposicion="envuelve" {...uno('especie')} />
-        </Grupo>
-
-        <Grupo rotulo={voces.grupos.talla}>
-          <FiltroPills opciones={opciones.tallas} disposicion="envuelve" {...uno('talla')} />
-        </Grupo>
-
-        <Grupo rotulo={voces.grupos.sexo}>
-          <FiltroPills opciones={opciones.sexos} disposicion="envuelve" {...uno('sexo')} />
-        </Grupo>
-
-        <Grupo rotulo={voces.grupos.ciudad}>
-          <FiltroPills opciones={opciones.ciudades} disposicion="envuelve" {...uno('ciudad_id')} />
-        </Grupo>
+        {/* LOS CUATRO DE CATÁLOGO — cada uno desaparece si su lista vino
+            vacía. Ver la regla de existencia arriba: el caso NORMAL de la
+            vidriera anónima es que `ciudad` no traiga nada. */}
+        <GrupoDeCatalogo rotulo={voces.grupos.especie} opciones={opciones.especies} {...uno('especie')} />
+        <GrupoDeCatalogo rotulo={voces.grupos.talla} opciones={opciones.tallas} {...uno('talla')} />
+        <GrupoDeCatalogo rotulo={voces.grupos.sexo} opciones={opciones.sexos} {...uno('sexo')} />
+        <GrupoDeCatalogo rotulo={voces.grupos.ciudad} opciones={opciones.ciudades} {...uno('ciudad_id')} />
 
         {/* LOS TRES EJES DE CONVIVENCIA, cada uno con sus TRES estados. El
             tercero se ve y se puede elegir: eso es lo que dice, sin palabras,
-            que filtrar no lo descarta. */}
+            que filtrar no lo descarta.
+
+            ⚠️ Éstos y el de binarios **no pasan por la regla de existencia, y
+            no es un olvido**: sus opciones no vienen de un catálogo — las
+            arma la pieza con las voces obligatorias, así que nunca pueden
+            llegar vacías. *La regla protege de un catálogo que no respondió;
+            acá no hay catálogo del que depender.* */}
         <Grupo rotulo={voces.grupos.convivePerros} explica={explicaConvivencia}>
           <FiltroPills disposicion="envuelve" {...convivencia('convive_perros')} />
         </Grupo>
