@@ -533,14 +533,26 @@ export default function HiloSolicitud() {
                 }}
                 contraparte={{
                   nombre: estado.hilo.publicadorNombre ?? t('hiloAdopcion.refugioSinNombre'),
-                  /* 🔴 **§2.1 PIDE «toco el refugio y voy a su vitrina» Y HOY NO
-                     SE PUEDE**, medido: `MiSolicitud` trae `publicadorNombre` y
-                     **no trae la cuenta comercial**, que es el id con el que la
-                     vitrina se resuelve (`obtenerPerfilesPublicosPorCuenta`).
+                  /* ⭐ **§2.1 CERRADA: «toco el refugio y voy a su vitrina».**
+                     Llegó `publicadorCuentaId` (A) y con él se cablea — es la
+                     CUENTA COMERCIAL, que es el id que la vitrina sabe resolver
+                     (`obtenerPerfilesPublicosPorCuenta`).
 
-                     No se pasa `onPress`, así que **la pieza no lo hace tocable**
-                     y no promete un camino que no existe (Ley 23). Pedido a A:
-                     `publicadorCuentaId` en el lector de la familia. */
+                     ⏪ Acá decía que no se podía, y era cierto ese día: el lector
+                     no lo traía. *Se corrige en vez de borrarse, porque la nota
+                     explica por qué esta fila estuvo muda una vuelta.*
+
+                     **Sin id sigue sin pasarse nada** y la pieza no lo hace
+                     tocable: un publicador que la vidriera no puede identificar
+                     no promete un camino que no existe (Ley 23). */
+                  onPress:
+                    estado.hilo.publicadorCuentaId === null
+                      ? undefined
+                      : () =>
+                          router.push({
+                            pathname: '/adoptar/refugio/[cuentaId]',
+                            params: { cuentaId: estado.hilo.publicadorCuentaId as string },
+                          }),
                 }}
               />
 

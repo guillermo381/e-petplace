@@ -292,6 +292,32 @@ export const prestadorEs = {
     despachoTitulo: 'Pedido {{orden}}',
   },
   agenda: {
+    /* G10 · La cabecera dice la verdad POR ESTADO. Un total («3 animales hoy»)
+       es cierto y esconde justo la diferencia que decide qué hace el cuidador
+       ahora. Las partes en cero no se dicen: «0 adentro» es ruido que hay que
+       leer para descartar. */
+    presenciaAdentro_one: '{{count}} adentro',
+    presenciaAdentro_other: '{{count}} adentro',
+    presenciaEnViaje_one: '{{count}} en viaje',
+    presenciaEnViaje_other: '{{count}} en viaje',
+    presenciaReservados_one: '{{count}} reservado',
+    presenciaReservados_other: '{{count}} reservados',
+    presenciaAdentro: '{{count}} adentro',
+    presenciaEnViaje: '{{count}} en viaje',
+    presenciaReservados: '{{count}} reservados',
+    /* El estado CON SU HORA, y la hora sale del sello de ESE estado. Sin sello
+       se dice el estado a secas: una hora inventada se lee como dato y miente. */
+    estadiaAdentroDesde: 'Adentro desde {{hora}}',
+    estadiaAdentro: 'Adentro',
+    estadiaEnCaminoDesde: 'En camino desde {{hora}}',
+    estadiaEnCamino: 'En camino',
+    estadiaDeVueltaDesde: 'De vuelta desde {{hora}}',
+    estadiaDeVuelta: 'De vuelta',
+    estadiaEntregadaA: 'Entregado a las {{hora}}',
+    estadiaEntregada: 'Entregado',
+    estadiaNoRecogida: 'No lo recogieron',
+    estadiaCancelada: 'Cancelada',
+    estadiaReservada: 'Reservado',
     presenciaTitulo: 'Quiénes están hoy',
     presenciaUno: '1 animal en guardería',
     presenciaN: '{{n}} animales en guardería',
