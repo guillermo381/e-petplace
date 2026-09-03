@@ -3394,6 +3394,10 @@ export const prestadorEn = {
     confirmar: 'Record it',
   },
   mediaGuarderia: {
+    grabando: 'Recording',
+    usarClip: 'Use it',
+    repetirClip: 'Redo',
+    cerrarGrabador: 'Exit',
     sinPermisoAjustes:
       "The camera is blocked for this app. You can enable it in your phone's settings.",
     clipSinAudio: 'No microphone permission: the clip records without sound.',
