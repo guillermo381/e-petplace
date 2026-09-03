@@ -39,6 +39,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
   Boton,
   Celda,
@@ -59,6 +60,7 @@ import {
   spacing,
   useAviso,
   useTheme,
+  conIconos,
 } from '@epetplace/ui';
 import {
   atarItemAMascota,
@@ -78,7 +80,6 @@ import { fechaLargaHumana } from '@epetplace/i18n';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, escaleraMuda, type VocesEscalera } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
-import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { CelebracionEntrega } from '@/components/celebracion-entrega';
 import { urlWhatsApp, WHATSAPP_EQUIPO_HUMANO } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
@@ -473,7 +474,7 @@ export default function DespensaPedido() {
                 }
                 return (
                   <EscaleraEstados
-                    pasos={conIconos(pasos)}
+                    pasos={conIconos(pasos, GLIFO_NODO)}
                     desvio={desvio}
                     registro="completa"
                     acento="control"
