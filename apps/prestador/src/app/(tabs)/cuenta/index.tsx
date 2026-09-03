@@ -53,6 +53,7 @@ import {
   obtenerMiCuentaRefugio,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
+  obtenerOfertaGuarderiaPropia,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
@@ -405,11 +406,13 @@ export default function Cuenta() {
         // S79-B (T2-B3): entran vet y adiestramiento — la voz de oficio ya
         // no es ciega a la mitad de los oficios (+2 viajes en la carga
         // SECUNDARIA; el header ya pintó — D-531 intacta).
-        const [rPaseo, rGrooming, rAdiestramiento, rVet, rFranjas] = await Promise.all([
+        const [rPaseo, rGrooming, rAdiestramiento, rVet, rGuarderia, rFranjas] = await Promise.all([
           obtenerOfertasPaseoPropias(prestador.data.id),
           obtenerOfertasGroomingPropias(prestador.data.id),
           obtenerOfertaAdiestramientoPropia(prestador.data.id),
           obtenerMundoVeterinariaPropio(prestador.data.id),
+          // C-C · en la MISMA ola que las otras cuatro: cero espera nueva.
+          obtenerOfertaGuarderiaPropia(prestador.data.id),
           obtenerFranjasHorario(prestador.data.id),
         ]);
         if (!vigente) return;
@@ -418,19 +421,35 @@ export default function Cuenta() {
         const adiestramientoActivo =
           rAdiestramiento.ok && (rAdiestramiento.data.oferta?.activo ?? false);
         const vetActivo = rVet.ok && rVet.data.servicios.some((s) => s.activo);
+        /* ⭐ C-C (S112-C) · EL QUINTO OFICIO TAMBIÉN ACÁ, y lo encontró el
+           TYPECHECK, no un gate: al hacer `OficiosActivos` una sola verdad,
+           esta llamada dejó de compilar. *Si el tipo hubiera seguido escrito
+           a mano en cada lugar, esta pantalla habría seguido en verde
+           diciéndole a una guardería que no tiene oficio.*
+
+           Y no es cosmético: `vozOficio` es la identidad del negocio en su
+           propia Cuenta — un negocio de sólo guardería la leía VACÍA, que es
+           el mismo mudo que este archivo curó en S79 para vet. */
+        const guarderiaActiva = rGuarderia.ok && (rGuarderia.data?.activo ?? false);
         const diasActivos = rFranjas.ok
           ? new Set(rFranjas.data.filter((f) => f.activo).map((f) => f.diaSemana)).size
           : 0;
         const domicilio = rGrooming.ok && rGrooming.data.some((o) => o.activo && o.atiendeDomicilio);
         // el trío: SOLO datos reales — sin nada, la banda no existe
         const hitos: string[] = [];
-        if (paseoActivo || groomingActivo || adiestramientoActivo || vetActivo)
+        if (paseoActivo || groomingActivo || adiestramientoActivo || vetActivo || guarderiaActiva)
           hitos.push(t('miCuenta.hitoOferta'));
         if (diasActivos > 0) hitos.push(t('miCuenta.hitoAgenda', { n: diasActivos }));
         if (domicilio) hitos.push(t('miCuenta.hitoDomicilio'));
         setNegocio({
           vozOficio: vozOficio(
-            { paseo: paseoActivo, grooming: groomingActivo, adiestramiento: adiestramientoActivo, vet: vetActivo },
+            {
+              paseo: paseoActivo,
+              grooming: groomingActivo,
+              adiestramiento: adiestramientoActivo,
+              vet: vetActivo,
+              guarderia: guarderiaActiva,
+            },
             t,
           ),
           hitos,

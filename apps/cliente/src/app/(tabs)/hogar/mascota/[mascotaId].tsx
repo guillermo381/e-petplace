@@ -875,7 +875,7 @@ export default function PerfilDeMascota() {
                     accessibilityRole="button"
                     accessibilityLabel={t('perfil.editar')}
                     onPress={() =>
-                      router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+                      router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
                     }
                     style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                   >
@@ -914,7 +914,7 @@ export default function PerfilDeMascota() {
                   accessibilityRole="button"
                   accessibilityLabel={t('fotoEncuadre.editarFotoA11y', { nombre: mascota.nombre })}
                   onPress={() =>
-                    router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+                    router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
                   }
                   {...presionAvatar.handlers}
                 >

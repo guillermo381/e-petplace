@@ -31,6 +31,12 @@ export const clienteEn = {
     titulo: 'This screen could not be shown',
     detalle: 'It is a problem on our side, not your setup — your data is safe. Try again.',
     reintentar: 'Try again',
+    // C-A (S112-C) · the forensic block, outside production only.
+    verDetalle: 'Show technical details',
+    ocultarDetalle: 'Hide technical details',
+    copiar: 'Copy details',
+    copiado: 'Copied',
+    sinCopiar: 'Could not copy — select the text',
   },
   // S55-A A3 (D-315): root + auth on the rail
   raiz: {

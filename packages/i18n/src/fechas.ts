@@ -90,9 +90,15 @@ export function fechaCortaMono(iso: string, idioma: IdiomaSoportado): string {
  * con formato de dato que la Ley 16 saca.
  */
 export function horaCortaDeMensaje(iso: string, idioma: IdiomaSoportado): string {
+  /* 🔴 **`hour12: false` EXPLÍCITO, y lo cazó un arnés y no la lectura.** Sin
+     él, `es-EC` devuelve **«01:38 p. m.»** — el reloj de 12 con su sufijo—, y
+     §2.3 pide «14:32». *Un formato de hora que «se ve bien» en una captura
+     ocupa el doble de ancho bajo cada burbuja y no se parece a ninguna otra
+     hora de la casa.* */
   return new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   });
 }
 
