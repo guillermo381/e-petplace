@@ -20,6 +20,34 @@ copiar — a partir del próximo lote esto ya no va a depender del cable. Para
 
 ---
 
+## 🔴 CAPTURAR AHORA ES MEJOR QUE ESPERAR — y la razón no es la prisa
+
+Estuve por pedirte que esperaras a un bundle nuevo. **B midió que su cambio
+todavía NO está en `main`**, así que lo que tenés en el teléfono sigue teniendo
+la pieza sospechosa — y eso **da vuelta el argumento**:
+
+- **Capturar ahora** → el crash **se reproduce** y el stack nombra la causa real.
+- **Capturar después** → si el crash desapareció, tenemos **una cura sin
+  diagnóstico**. Y B midió que su cambio **no está probado como la causa** ⇒ un
+  crash que se va nos deja sin saber qué pasó: pudo taparlo otra cosa del mismo
+  lote **y volver la semana que viene con otra cara**.
+
+> **Un crash que desaparece sin que sepamos por qué no está curado: está
+> escondido.** Y acá el hilo es donde una familia y un refugio conversan sobre un
+> animal — no es el lugar donde conviene tener un defecto dormido.
+
+*Y si después del bundle de B el crash sigue, capturamos otra vez y comparamos
+los dos stacks: dos mediciones del mismo defecto con una variable cambiada, que
+es mejor que cualquiera de las dos sola.*
+
+⚠️ **Queda anotado, porque cambia cómo se lee el stack: el bundle que vamos a
+capturar TIENE `useAnimatedKeyboard`.** Si el stack la menciona, no cierra nada
+por sí sola —era la única llamada nativa nueva del lote, así que aparecería
+aunque fuera víctima y no causa—. **Si NO la menciona, sabemos que el retiro de B
+no era el punto**, que es exactamente lo que él necesita saber.
+
+---
+
 ## LA ESCALERA — cada paso descarta algo, y por eso el ORDEN importa
 
 **Tres pistas me dieron tres preguntas distintas y las ordené para que cada toque
