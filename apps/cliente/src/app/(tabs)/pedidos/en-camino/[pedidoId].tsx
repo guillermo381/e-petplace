@@ -78,6 +78,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GLIFO_NODO } from '@/lib/despensa/escalera';
 import {
   Pressable,
   ScrollView,
@@ -109,6 +110,7 @@ import {
   radius,
   spacing,
   useTheme,
+  conIconos,
 } from '@epetplace/ui';
 import {
   obtenerCodigoEntrega,
@@ -119,7 +121,6 @@ import {
 } from '@epetplace/api';
 import { escaleraDePedido, type VocesEscalera } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
-import { conIconos } from '@/lib/despensa/escalera-iconos';
 import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 
@@ -985,7 +986,7 @@ export default function DespensaEnCamino() {
                     const { pasos, desvio } = escaleraDePedido(detalle.pedido.narrativa, voces);
                     return (
                       <EscaleraEstados
-                        pasos={conIconos(pasos)}
+                        pasos={conIconos(pasos, GLIFO_NODO)}
                         desvio={desvio}
                         registro="completa"
                         acento="control"

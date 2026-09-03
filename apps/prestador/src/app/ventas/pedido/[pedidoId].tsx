@@ -33,6 +33,8 @@ import {
   Celda,
   Encabezado,
   EscaleraEstados,
+  conIconos,
+  GLIFOS_PEDIDO,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -301,7 +303,16 @@ export default function PedidoVentas() {
           {/* ── la escalera a la vista: dónde está y cuánto falta ── */}
           {pasos.length > 0 && (
             <Tarjeta>
-              <EscaleraEstados registro="completa" pasos={pasos} desvio={desvio} acento="oficio" />
+              {/* 🔴 S112-A · `conIconos` — el prestador dibujaba esta MISMA escalera del
+                  MISMO pedido **sin un solo glifo**, y no era un olvido: el mapa vivía
+                  dentro de `apps/cliente` y desde acá no se alcanzaba. *Misma escalera,
+                  dos caras, y una era la versión pobre de la otra.* Lo midió B. */}
+              <EscaleraEstados
+                registro="completa"
+                pasos={conIconos(pasos, GLIFOS_PEDIDO)}
+                desvio={desvio}
+                acento="oficio"
+              />
             </Tarjeta>
           )}
 

@@ -113,12 +113,11 @@ const ESCALERA: { clave: NarrativaPedido; voz: keyof VocesEscalera }[] = [
  * quitársela por Ley 9 (punto 17: *«sin huella dentro»*). **Hasta que ese
  * commit llegue, este nodo se ve recargado** — se declara para que quien lo
  * mire antes no lo lea como un desvío nuevo. */
-export const GLIFO_NODO: Record<string, IconoNombre> = {
-  confirmado: 'nodoConfirmado', // la bolsa — el pedido tomado
-  preparando: 'nodoPreparando', // la caja abierta — se está armando
-  en_camino: 'nodoEnCamino', // la flecha — el movimiento
-  entregado: 'ubicacion', // la gota — TU casa, que es donde termina el camino
-};
+/* ☠️ S112-A · AQUÍ VIVÍA `GLIFO_NODO`. Subió a `packages/ui` como
+   `GLIFOS_PEDIDO` porque **el prestador dibujaba el mismo pedido sin glifos**:
+   el mapa estaba dentro de esta app y no lo alcanzaba. Se re-exporta con su
+   nombre viejo para no mover a los tres consumidores de acá. */
+export { GLIFOS_PEDIDO as GLIFO_NODO } from '@epetplace/ui';
 
 /**
  * ¿LA ESCALERA NO DIBUJA NADA? Entonces el estado necesita OTRO portador.
