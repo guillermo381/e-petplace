@@ -113,6 +113,13 @@ import { FichaAdoptable } from '../components/FichaAdoptable'
 import { BotonExplicar } from '../components/BotonExplicar'
 import { VitrinaRefugio } from '../components/VitrinaRefugio'
 import { HojaFiltros, type FiltrosAdoptables } from '../components/HojaFiltros'
+import { BurbujaMensaje } from '../components/BurbujaMensaje'
+import { SeparadorDia } from '../components/SeparadorDia'
+import { EventoDelHilo } from '../components/EventoDelHilo'
+import { CabeceraHilo } from '../components/CabeceraHilo'
+import { BarraEscribir } from '../components/BarraEscribir'
+import { PastillaNuevoMensaje } from '../components/PastillaNuevoMensaje'
+import { BotonBajarAlFinal } from '../components/BotonBajarAlFinal'
 import { CodigoFirmaInput } from '../components/CodigoFirmaInput'
 import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
@@ -927,6 +934,82 @@ function MuestraHojaFiltros() {
           },
         }}
       />
+    </View>
+  )
+}
+
+/* ENTRADA DE CATÁLOGO del CHAT (R17). Su gate es el hilo en las dos apps.
+   🔴 QUÉ HAY QUE VER, y es un HILO y no siete piezas sueltas: las burbujas
+   agrupadas —nombre sólo al abrir el grupo, hora sólo al cerrarlo—, el hecho
+   del trámite CENTRADO con su carta, y el fallo que dice qué pasó y cómo se
+   sigue **sin rojo de alarma**. Si el «no se envió» se lee como un reto, el
+   tono no está haciendo su trabajo. */
+function MuestraHiloDeChat() {
+  const [texto, setTexto] = useState('')
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <CabeceraHilo
+        animal={{ nombre: 'Luna', onPress: () => {} }}
+        contraparte={{ nombre: 'Refugio Patitas del Sur', onPress: () => {} }}
+      />
+
+      <SeparadorDia etiqueta="Ayer" />
+
+      <BurbujaMensaje
+        mio={false}
+        autor="Refugio Patitas del Sur"
+        posicion="primero"
+        texto="¡Hola! Gracias por postularte por Luna."
+        hora="14:30"
+      />
+      <BurbujaMensaje
+        mio={false}
+        posicion="ultimo"
+        texto="¿Tenés patio o vivís en departamento?"
+        hora="14:31"
+      />
+
+      <BurbujaMensaje mio posicion="solo" texto="Casa con patio cerrado 🙂" hora="14:44" estado="enviado" />
+
+      <SeparadorDia etiqueta="Hoy" />
+
+      <EventoDelHilo
+        etiqueta="El refugio aceptó tu solicitud"
+        accion={
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <Boton etiqueta="Firmar el acta" bloque onPress={() => {}} />
+          </View>
+        }
+      />
+
+      <BurbujaMensaje
+        mio
+        posicion="solo"
+        texto="¡Gracias! La firmo hoy mismo."
+        hora="09:12"
+        estado="no_se_envio"
+        onReintentar={() => {}}
+        vozReintentar="No se envió · Reintentar"
+      />
+
+      <View style={{ alignItems: 'center', gap: spacing[2] }}>
+        <PastillaNuevoMensaje etiqueta="1 mensaje nuevo" onPress={() => {}} />
+        <BotonBajarAlFinal etiqueta="Bajar al último mensaje" onPress={() => {}} />
+      </View>
+
+      <BarraEscribir
+        valor={texto}
+        onCambio={setTexto}
+        onEnviar={() => setTexto('')}
+        placeholder="Escribile a Refugio Patitas del Sur"
+        glifoEnviar={<Chevron direccion="derecha" />}
+        etiquetaEnviar="Enviar"
+      />
+      <Texto variante="apoyo">
+        ⭐ el glifo se enciende con el texto y no es un `Boton`; el contador
+        aparece recién a los 900 · el de abajo es la variante EN LECTURA
+      </Texto>
+      <BarraEscribir enLectura="Esta conversación quedó en lectura · Declinada" />
     </View>
   )
 }
@@ -5709,6 +5792,10 @@ function GaleriaInterna() {
               descripcionSinPagina="Podés ver sus animales igual."
             />
           </View>
+        </Seccion>
+
+        <Seccion titulo="EL CHAT DE ADOPCIÓN (S112) — las mismas piezas en las dos apps">
+          <MuestraHiloDeChat />
         </Seccion>
 
         <Seccion titulo="HojaFiltros (S112) — devuelve el objeto del motor, tal cual">

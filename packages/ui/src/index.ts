@@ -586,6 +586,44 @@ export {
   type FiltrosAdoptables,
 } from './components/HojaFiltros'
 
+// ── EL CHAT DE ADOPCIÓN (S112-B · DIRECCION_CHAT_ADOPCION) ────────────────
+// Las mismas piezas en las DOS apps: lo que cambia por casa se resuelve en el
+// TEMA (`accent.*` es slot por casa), no en una segunda pieza.
+
+// BurbujaMensaje — el color marca DE QUIÉN ES, no importancia (N23). 🔴 No
+// existe «leído» y no se puede agregar desde afuera: el motor no lo sabe.
+export {
+  BurbujaMensaje,
+  type BurbujaMensajeProps,
+  type EstadoMensaje,
+  type PosicionEnGrupo,
+} from './components/BurbujaMensaje'
+
+// SeparadorDia · EventoDelHilo — los hechos del trámite viven EN el hilo, así
+// el chat cuenta la historia entera y nadie busca el próximo paso en otro lado.
+export { SeparadorDia, type SeparadorDiaProps } from './components/SeparadorDia'
+export { EventoDelHilo, type EventoDelHiloProps } from './components/EventoDelHilo'
+
+// CabeceraHilo — con quién hablo Y por qué. El menú del refugio va acá; la
+// letra dice dónde NO va, y la barra no tiene dónde ponerlo mal.
+export { CabeceraHilo, type CabeceraHiloProps } from './components/CabeceraHilo'
+
+// BarraEscribir — el enviar es un GLIFO que se enciende con el texto, no un
+// `Boton`: no hay razón que dar cuando el motivo es lo único a la vista.
+export { BarraEscribir, type BarraEscribirProps } from './components/BarraEscribir'
+
+// PastillaNuevoMensaje · BotonBajarAlFinal — existen para NO arrastrar a
+// nadie: saltar al último mientras alguien lee arriba le saca de los ojos lo
+// que estaba entendiendo.
+export {
+  PastillaNuevoMensaje,
+  type PastillaNuevoMensajeProps,
+} from './components/PastillaNuevoMensaje'
+export {
+  BotonBajarAlFinal,
+  type BotonBajarAlFinalProps,
+} from './components/BotonBajarAlFinal'
+
 // TarjetaAdoptable — S112-B: LA FILA DE LA VIDRIERA DE ADOPCIÓN.
 // «Se presentan vidas, no inventario» (LETRA_ADOPCION §4). Sin favorito,
 // sin swipe, sin puntaje — los tres están PROHIBIDOS, no pendientes.
