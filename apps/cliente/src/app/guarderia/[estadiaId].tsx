@@ -64,6 +64,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Hoja,
+  Insignia,
   MapaRecorrido,
   MarcaDeMapa,
   radius,
@@ -87,9 +88,12 @@ import {
   type MediaGuarderia,
   type PuntoVivo,
   type TramoVivo,
+  obtenerBitacoraDeEstadia,
+  type AnotacionDeBitacora,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { obtenerIdiomaActual } from '@epetplace/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 
 const LADO_THUMB = 96;
@@ -127,6 +131,7 @@ type Estadia =
   | { fase: 'noEsTuya' }
   | { fase: 'listo'; e: EstadiaDeMiMascota };
 type Media = { fase: 'cargando' } | { fase: 'error' } | { fase: 'listo'; lista: MediaGuarderia[] };
+type Bitacora = { fase: 'cargando' } | { fase: 'error' } | { fase: 'listo'; lista: AnotacionDeBitacora[] };
 
 export default function DuranteGuarderia() {
   const { theme } = useTheme();
@@ -141,6 +146,7 @@ export default function DuranteGuarderia() {
 
   const [estadia, setEstadia] = useState<Estadia>({ fase: 'cargando' });
   const [media, setMedia] = useState<Media>({ fase: 'cargando' });
+  const [bitacora, setBitacora] = useState<Bitacora>({ fase: 'cargando' });
   const [visor, setVisor] = useState<number | null>(null);
   const [punto, setPunto] = useState<PuntoVivo | null>(null);
   /* `null` = no hay viaje en curso, y **es respuesta legítima y frecuente**,
@@ -178,6 +184,36 @@ export default function DuranteGuarderia() {
     })();
     return () => { vigente = false; };
   }, [params.estadiaId, params.mascotaId]);
+
+  /* ⭐ **H4 (S112-C) · LA BITÁCORA DEL DÍA — «qué le pasó».**
+     Firma del founder (2-sep): la bitácora va al expediente **y** acá. *Se
+     escribe MIENTRAS el animal está adentro, y una anotación que sólo aparece
+     en el expediente llega cuando ya no sirve para nada más que el registro.*
+     Y desde la pantalla: **una sección llamada «SU DÍA» que no puede decir qué
+     le pasó hoy está incompleta por definición, no por alcance.**
+
+     Va en su propio efecto y no pegada a la media: *son dos lecturas
+     independientes, y colapsarlas haría que un fallo de fotos se llevara
+     puestas las conductas —o al revés—, que es justo lo que la Ley 13 no
+     permite.* */
+  useEffect(() => {
+    const estadiaId = params.estadiaId;
+    if (typeof estadiaId !== 'string' || estadiaId.length === 0) {
+      setBitacora({ fase: 'error' });
+      return;
+    }
+    let vigente = true;
+    void (async () => {
+      const r = await obtenerBitacoraDeEstadia(estadiaId);
+      if (!vigente) return;
+      /* Un fallo JAMÁS se disfraza de «no anotaron nada» (Ley 13): la familia
+         leería que el día no tuvo nada que contar. */
+      setBitacora(r.ok ? { fase: 'listo', lista: r.data } : { fase: 'error' });
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, [params.estadiaId]);
 
   /* ✅ LA MITAD VIVA. Sólo necesita mascota y fecha, y las dos viajan por
      parámetro — por eso funciona hoy aunque la estadía no se pueda leer. */
@@ -524,6 +560,47 @@ export default function DuranteGuarderia() {
         <Tarjeta>
           <View style={{ gap: spacing[3] }}>
             <Texto variante="seccion">{t('duranteGuarderia.suDia')}</Texto>
+
+            {/* ── QUÉ LE PASÓ (la bitácora) va ANTES de las fotos: *las
+                conductas son lo que la familia vino a saber; las fotos son
+                cómo lo ve.* Una anotación sin chips igual se muestra: el
+                cuidador pudo escribir sólo texto. */}
+            {bitacora.fase === 'error' ? (
+              <Texto variante="apoyo">{t('duranteGuarderia.bitacoraNoCargo')}</Texto>
+            ) : bitacora.fase === 'listo' && bitacora.lista.length > 0 ? (
+              <View style={{ gap: spacing[3] }}>
+                {bitacora.lista.map((a) => (
+                  <View key={a.eventoId} style={{ gap: spacing[2] }}>
+                    <Texto variante="apoyo">
+                      {a.prestadorId !== null
+                        ? t('duranteGuarderia.bitacoraDelCuidador', { hora: horaCorta(a.anotadaEn) })
+                        : t('duranteGuarderia.bitacoraTuya', { hora: horaCorta(a.anotadaEn) })}
+                    </Texto>
+                    {a.chips.length > 0 && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                        {a.chips.map((c) => (
+                          <Insignia
+                            key={c.codigo}
+                            capa="cuidado"
+                            etiqueta={
+                              /* La voz la resolvió el motor en los dos idiomas;
+                                 acá sólo se elige. `nombreFamiliaEn` puede ser
+                                 null ⇒ cae al español, que es la voz base de la
+                                 casa — jamás el código. */
+                              obtenerIdiomaActual() === 'en' && c.nombreFamiliaEn !== null
+                                ? c.nombreFamiliaEn
+                                : c.nombreFamilia
+                            }
+                            tamaño="sm"
+                          />
+                        ))}
+                      </View>
+                    )}
+                    {a.texto !== null && a.texto.length > 0 && <Texto variante="cuerpo">{a.texto}</Texto>}
+                  </View>
+                ))}
+              </View>
+            ) : null}
 
             {media.fase === 'cargando' ? (
               <EsqueletoGrupo>
