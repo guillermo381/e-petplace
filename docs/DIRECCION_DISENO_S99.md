@@ -700,6 +700,14 @@ la peor zona para un pulgar** en una pantalla de 832 dp.
 > la que le conviene y está «en regla».* Mismo precedente que el magenta de
 > S72→S83 y la plata de S83→S88. **Lo encontró B midiendo, no leyendo** — y el
 > documento no decía nada: sólo el objeto lo decía.
+>
+> **✅ FIRMADO POR EL FOUNDER (3-sep-2026, S112-A).** Deja de ser una lectura
+> de mesa contra letra ya firmada: es enmienda firmada sobre enmienda
+> depositada. Y no quedó en teoría — el mismo día `packages/ui` ganó
+> `BurbujaPendientes` (S112-B), montada en el shell por el MISMO mecanismo
+> que N28 le dio al carrito: **comparte la puerta.** `CarritoFlotante` y
+> `COLA_CARRITO_FLOTANTE` se retiraron en el mismo commit que la montó
+> (`L-395`: el montaje y el retiro juntos, no uno antes que el otro).
 
 ~~**③ Y NO NECESITA MECANISMO NUEVO, que es lo que la vuelve barata:** una
 flotante sobre un scroll reintroduce **H-105** (el pie que tapa contenido),
@@ -1132,11 +1140,15 @@ dispositivo, como enmienda de primitiva — jamás por pantalla.
 
 ## Historial
 
-- **v1.4 (3-sep-2026, S112-A):** **N25 ③ y su ⚠️ quedan DEROGADAS en su propio
-  lugar**, con el texto viejo tachado y no borrado, apuntando a N28. No entra
-  letra nueva: se marca una contradicción que existía desde el 18-ago y que
-  **sólo el objeto declaraba**. *Un lector de N25 estaba construyendo contra
-  letra que ya no rige.* Lo midió B; lo depositó A porque `docs/` es suyo.
+- **v1.4 (3-sep-2026, S112-A → FIRMADA 3-sep-2026):** **N25 ③ y su ⚠️
+  quedan DEROGADAS en su propio lugar**, con el texto viejo tachado y no
+  borrado, apuntando a N28. No entra letra nueva: se marca una contradicción
+  que existía desde el 18-ago y que **sólo el objeto declaraba**. *Un lector
+  de N25 estaba construyendo contra letra que ya no rige.* Lo midió B; lo
+  depositó A porque `docs/` es suyo; **el founder la firmó el mismo día**,
+  con `BurbujaPendientes` (S112-B) ya montada en el shell compartiendo la
+  puerta del carrito — la enmienda dejó de ser una lectura y pasó a ser el
+  mecanismo real.
 
 - **v1.3 (18-ago-2026, S100d·bis):** entra **N28 — LO QUE VIVE EN EL SHELL**,
   con el criterio (*existe por el DATO, se calla por SUPERFICIE*) y su costo
