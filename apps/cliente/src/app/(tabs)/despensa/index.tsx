@@ -50,7 +50,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Campo,
-  COLA_CARRITO_FLOTANTE,
+  COLA_BURBUJA_PENDIENTES,
   Encabezado,
   Entrada,
   Esqueleto,
@@ -905,7 +905,7 @@ export default function DespensaDescubrir() {
           // propio tamaño: *un número tecleado que tenga que coincidir con
           // el diámetro de un disco de otro paquete son dos cuentas que
           // tienen que dar igual.*
-          paddingBottom: spacing[8] + COLA_CARRITO_FLOTANTE,
+          paddingBottom: spacing[8] + COLA_BURBUJA_PENDIENTES,
           gap: spacing[5],
         }}
       >
@@ -1337,7 +1337,10 @@ export default function DespensaDescubrir() {
           no ve dos montajes de la misma pieza: los dos compilan.
 
           ⚠️ **LO QUE NO MURIÓ CON ÉL, y es la mitad que se olvida:
-          `COLA_CARRITO_FLOTANTE` en el `paddingBottom` del scroll SE QUEDA.**
+          `COLA_BURBUJA_PENDIENTES` en el `paddingBottom` del scroll SE QUEDA.**
+          ⏪ S112-C: se llamaba `COLA_CARRITO_FLOTANTE`. *Una constante que dice
+          «carrito» y reserva espacio para mensajes miente en el nombre, que
+          es donde nadie la lee* (B).
           El disco del shell sigue flotando ENCIMA de esta pantalla; *sacar la
           cola junto con el montaje cambiaría dos carritos por un carrito que
           tapa el último producto.* */}

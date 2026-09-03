@@ -7,27 +7,36 @@
  * para el mismo hecho, y ninguna forma de saber cuál miente* — que es la misma
  * razón por la que `armarHilo` y `leerEscalera` viven acá.
  *
- * ── DE DÓNDE SALE EL NÚMERO, y por qué NO hace falta una RPC nueva ──────────
- * El mandato nombraba un `contar_pendientes`. **Medido: no existe** — ni en la
- * base ni en los wrappers. **Pero `sinLeer` YA VIAJA** por solicitud en los dos
- * lectores de listado (`obtenerMisSolicitudesAdopcion` ·
- * `obtenerSolicitudesDeMisPublicaciones`), así que el total se **deriva** de lo
- * que ya se pide. *Pedir una función nueva para sumar un campo que ya llega es
- * pagar un viaje por una cuenta.*
+ * ── DE DÓNDE SALE, y qué cuenta ─────────────────────────────────────────────
+ * De `contarPendientes()` (A): **un viaje**, `{ mensajesSinLeer,
+ * hilosConSinLeer, solicitudesPorRevisar }`. Vivo con `suscribirseAMisHilos`
+ * — **una suscripción por sesión**, cuyo `'reconectado'` llega también en la
+ * primera conexión, así que la carga inicial y el refresco son **un solo
+ * camino**: *«llegó algo, pedí el contador»*.
  *
- * 🔴 **LO QUE ESTO NO DA, declarado: el TIEMPO REAL.** El mandato pedía
- * `suscribirseAMisHilos`, que tampoco existe (hay `suscribirseAlHilo`, POR
- * hilo). ⇒ el número se recalcula al arrancar, al volver a la app y al marcar
- * leído — **no cuando llega un mensaje con la app abierta**. Es un pedido con
- * nombre a A/D, no un olvido.
+ * 🔴 **EL NÚMERO CUENTA CONVERSACIONES, NO MENSAJES** (firma del founder). Dos
+ * razones, y la segunda es la que lo vuelve exigible:
+ *
+ * ① **cada unidad es UNA COSA QUE ATENDER.** Cinco mensajes en dos
+ *    conversaciones son dos cosas que hacer, no cinco.
+ * ② 🔴 **hace EXACTO el descuento al instante.** `hilosConSinLeer` son **ids
+ *    SIN su cuenta**, así que contando mensajes *no hay forma de saber cuántos
+ *    descontar al abrir un hilo* — habría que inventar un número o pedirle un
+ *    campo más a A. Contando conversaciones, abrir un hilo lo saca de la lista
+ *    y el número baja **1, exacto y sin viaje.**
+ *
+ * ⚠️ **Su costo, declarado:** un segundo mensaje en una conversación ya sin
+ * leer **no mueve el número**. *Es correcto — «alguien te espera» ya era
+ * cierto* — pero es una diferencia visible y se dice, no se descubre.
+ * ⇒ `mensajesSinLeer` de A queda **sin consumidor por esta decisión**, no por
+ * olvido.
  */
 
-/** Lo mínimo que las DOS filas comparten. Tipado por estructura a propósito:
- *  `MiSolicitud` y `SolicitudRecibida` no son el mismo tipo y no tienen por qué
- *  serlo — lo que comparten es el hecho. */
-export interface FilaConSinLeer {
-  readonly solicitudId: string;
-  readonly sinLeer: number;
+/** Lo que `contarPendientes()` devuelve, en lo que a esta regla le importa.
+ *  Tipado por estructura a propósito: la regla no depende del wrapper. */
+export interface ContadorPendientes {
+  readonly hilosConSinLeer: readonly string[];
+  readonly solicitudesPorRevisar: number;
 }
 
 export interface ResumenPendientes {
@@ -48,30 +57,23 @@ export interface ResumenPendientes {
   readonly unica: string | null;
 }
 
-/** Un contador que llega roto no rompe la burbuja: aporta 0.
- *  *Un `NaN` sumado deja el número entero en `NaN`, y la pieza dibujaría
- *  «NaN» sobre la app — un dato imposible es peor que un dato ausente.* */
+/** Un contador que llega roto aporta 0.
+ *  *Un `NaN` sumado deja el número entero en `NaN` y la pieza dibujaría «NaN»
+ *  sobre la app — un dato imposible es peor que un dato ausente.* */
 function sano(n: number): number {
   return Number.isFinite(n) && n > 0 ? Math.trunc(n) : 0;
 }
 
-/**
- * @param filas   las solicitudes con su `sinLeer`
- * @param porRevisar  SÓLO refugio: solicitudes esperando su veredicto. Suman al
- *   número **y fuerzan el destino a la lista** — *hay dos clases de cosa que
- *   atender y una sola no alcanza para elegir a dónde llevar.*
- */
-export function resumirPendientes(
-  filas: readonly FilaConSinLeer[],
-  porRevisar = 0,
-): ResumenPendientes {
-  const conAlgo = filas.filter((f) => sano(f.sinLeer) > 0);
-  const mensajes = conAlgo.reduce((n, f) => n + sano(f.sinLeer), 0);
-  const revisar = sano(porRevisar);
+/** Ids repetidos NO cuentan dos veces. *El lector no debería mandarlos, y si
+ *  algún día los manda, el defecto no puede ser un número inflado en pantalla
+ *  que nadie sabe de dónde salió.* */
+export function resumirPendientes(c: ContadorPendientes): ResumenPendientes {
+  const hilos = [...new Set(c.hilosConSinLeer.filter((h) => typeof h === 'string' && h !== ''))];
+  const revisar = sano(c.solicitudesPorRevisar);
   return {
-    total: mensajes + revisar,
-    conversaciones: conAlgo.length,
-    unica: conAlgo.length === 1 && revisar === 0 ? (conAlgo[0]?.solicitudId ?? null) : null,
+    total: hilos.length + revisar,
+    conversaciones: hilos.length,
+    unica: hilos.length === 1 && revisar === 0 ? (hilos[0] ?? null) : null,
   };
 }
 
@@ -79,14 +81,17 @@ export function resumirPendientes(
  * El descuento AL INSTANTE al abrir un hilo (firma del founder: *«marcarHiloLeido
  * baja el número al instante, sin esperar al servidor»*).
  *
- * *Se descuenta lo de ESA conversación, no «uno»*: si el hilo traía cuatro sin
- * leer, abrirlo los lee los cuatro. **Restar 1 dejaría la burbuja en 3 sobre un
- * hilo ya leído**, y el próximo recuento la corregiría sola — o sea un número
- * equivocado que se arregla solo, que es el más difícil de reportar.
+ * **Saca el hilo de la lista** — no resta un número a ciegas. Con el número
+ * contando conversaciones eso es **exacto por construcción**: la conversación
+ * deja de estar sin leer, y baja exactamente una.
  */
-export function descontarHilo(
-  filas: readonly FilaConSinLeer[],
-  solicitudId: string,
-): readonly FilaConSinLeer[] {
-  return filas.map((f) => (f.solicitudId === solicitudId ? { ...f, sinLeer: 0 } : f));
+export function descontarHilo(c: ContadorPendientes, solicitudId: string): ContadorPendientes {
+  return {
+    hilosConSinLeer: c.hilosConSinLeer.filter((h) => h !== solicitudId),
+    /* ⚠️ **El por-revisar se CONSERVA**: abrir una conversación no revisa una
+       solicitud. *Ponerlo en 0 acá haría desaparecer del número un trabajo que
+       nadie hizo, y volvería en el próximo contador* — la forma en que un
+       número miente y después se corrige solo. */
+    solicitudesPorRevisar: c.solicitudesPorRevisar,
+  };
 }

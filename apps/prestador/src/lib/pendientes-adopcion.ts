@@ -22,26 +22,30 @@
  * cero por fallo se lee «no tenés nada» y la familia deja de mirar; un número
  * viejo, en cambio, la manda a una lista que le dice la verdad.* (Ley 13.)
  */
+
 import { useSyncExternalStore } from 'react';
-import { contarSolicitudesPorRevisar, obtenerSolicitudesDeMisPublicaciones } from '@epetplace/api';
-import { descontarHilo, resumirPendientes, type FilaConSinLeer, type ResumenPendientes } from '@epetplace/domain';
+import { contarPendientes, suscribirseAMisHilos } from '@epetplace/api';
+import {
+  descontarHilo,
+  resumirPendientes,
+  type ContadorPendientes,
+  type ResumenPendientes,
+} from '@epetplace/domain';
 
 const VACIO: ResumenPendientes = { total: 0, conversaciones: 0, unica: null };
+const CERO: ContadorPendientes = { hilosConSinLeer: [], solicitudesPorRevisar: 0 };
 
-let filas: readonly FilaConSinLeer[] = [];
-/* El resumen se guarda DERIVADO, no se calcula en `leer()`: `useSyncExternalStore`
-   exige una referencia estable y derivar en cada lectura devolvería un objeto
-   nuevo cada vez ⇒ re-render infinito. Mismo criterio que el carrito. */
+let contador: ContadorPendientes = CERO;
+/* El resumen se guarda DERIVADO, no se calcula en `leer()`:
+   `useSyncExternalStore` exige una referencia estable y derivar en cada lectura
+   devolvería un objeto nuevo cada vez ⇒ re-render infinito. Mismo criterio que
+   `useCarrito`. */
 let resumen: ResumenPendientes = VACIO;
-/** Lo último que dijo `contar_solicitudes_por_revisar`, para no perderlo en un
- *  descuento local (ver `marcarLeidoLocal`). */
-let revisarActual = 0;
 const oyentes = new Set<() => void>();
 
-function emitir(nuevas: readonly FilaConSinLeer[], porRevisar = 0): void {
-  filas = nuevas;
-  revisarActual = porRevisar;
-  resumen = resumirPendientes(nuevas, porRevisar);
+function emitir(c: ContadorPendientes): void {
+  contador = c;
+  resumen = resumirPendientes(c);
   for (const o of oyentes) o();
 }
 
@@ -57,35 +61,49 @@ export function usePendientesAdopcion(): ResumenPendientes {
   return useSyncExternalStore(suscribir, leer, leer);
 }
 
-/** Relee del servidor. Silencioso: si falla, el número no se mueve. */
+/**
+ * Relee del servidor. **Silencioso: si falla, el número no se mueve.**
+ * *Un cero por fallo se lee «no tenés nada» y la persona deja de mirar; un
+ * número viejo, en cambio, la manda a una lista que le dice la verdad* (Ley 13).
+ */
 export async function recontarPendientes(): Promise<void> {
-  /* Los dos en paralelo: son dos preguntas independientes y encadenarlas
-     pagaría dos olas por un número que se dibuja de una sola vez (L-223). */
-  const [r, rev] = await Promise.all([obtenerSolicitudesDeMisPublicaciones(), contarSolicitudesPorRevisar()]);
+  const r = await contarPendientes();
   if (!r.ok) return;
-  if (!rev.ok) console.warn(`[pendientes] por-revisar no se pudo leer: ${rev.mensaje}`);
-  emitir(
-    r.data.map((s) => ({ solicitudId: s.solicitudId, sinLeer: s.sinLeer })),
-    rev.ok ? rev.data : 0,
-  );
+  emitir({ hilosConSinLeer: r.data.hilosConSinLeer, solicitudesPorRevisar: r.data.solicitudesPorRevisar });
 }
 
 /**
  * 🔴 **EL DESCUENTO AL INSTANTE** (firma del founder: *«baja el número al
- * instante, sin esperar al servidor»*). Corre sobre las filas que el shell YA
- * tiene ⇒ **cero viaje**, que es lo que lo hace instantáneo.
+ * instante, sin esperar al servidor»*). Saca el hilo de la lista que el shell YA
+ * tiene ⇒ **cero viaje**, que es lo que lo hace instantáneo — y **exacto**,
+ * porque el número cuenta conversaciones.
  *
- * *Pone esa conversación en CERO, no resta uno*: si el hilo traía cuatro sin
- * leer, abrirlo los lee los cuatro. **Restar 1 dejaría la burbuja en 3 sobre un
- * hilo ya leído**, y el próximo recuento lo corregiría solo — o sea un número
- * equivocado que se arregla solo, que es el más difícil de reportar.
+ * *El servidor se enterará igual por `marcarHiloLeido`, y su `'lectura'` va a
+ * traer el contador bueno unos milisegundos después. Esto no lo reemplaza: le
+ * gana de mano.*
  */
 export function marcarLeidoLocal(solicitudId: string): void {
-  /* ⚠️ **El por-revisar se CONSERVA**: abrir una conversación no revisa una
-     solicitud. *Pasarlo como 0 acá haría desaparecer del número un trabajo
-     pendiente que nadie hizo* — y volvería en el próximo recuento, que es la
-     forma en que un número miente y después se corrige solo. */
-  emitir(descontarHilo(filas, solicitudId), revisarActual);
+  emitir(descontarHilo(contador, solicitudId));
+}
+
+/**
+ * ⭐ **EL VIVO, con UN SOLO CAMINO.** `suscribirseAMisHilos` emite
+ * `'reconectado'` **también en la primera conexión** (contrato de A, a
+ * propósito) ⇒ *la carga inicial y el refresco son el mismo código*: llegó
+ * algo, pedí el contador.
+ *
+ * ⚠️ **`esMio` se descarta a propósito:** mandar un mensaje no puede hacer
+ * parpadear tu propia burbuja. *Un indicador que reacciona a lo que uno acaba
+ * de hacer enseña a ignorarlo.*
+ *
+ * Lo monta el SHELL y se desmonta con él — una suscripción por sesión, no una
+ * por pantalla.
+ */
+export function escucharPendientes(): () => void {
+  return suscribirseAMisHilos((c) => {
+    if (c.tipo === 'mensaje' && c.esMio) return;
+    void recontarPendientes();
+  });
 }
 
 /* ═══ EL SILENCIO, Y AHORA ES POR CLASE ═══════════════════════════════════════

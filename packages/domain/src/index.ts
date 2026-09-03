@@ -91,6 +91,6 @@ export {
 export {
   descontarHilo,
   resumirPendientes,
-  type FilaConSinLeer,
+  type ContadorPendientes,
   type ResumenPendientes,
 } from './pendientesAdopcion';
