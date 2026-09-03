@@ -3792,6 +3792,15 @@ export const clienteEs = {
     despensaDetalle: 'Todavía no podemos mostrarlas acá. Por ahora las manejas desde la despensa, en la compra donde las activaste.',
   },
   hiloAdopcion: {
+    /* §1 · las cinco etapas del camino, en voz de FAMILIA. Las dos últimas no
+       salen del estado de la solicitud: viven en la firma y en el traspaso. */
+    etapa_enviada: 'Enviada',
+    etapa_en_conversacion: 'En conversación',
+    etapa_aceptada: 'Aceptada',
+    etapa_acta_firmada: 'Acta firmada',
+    etapa_una_vida_nueva: 'Una vida nueva',
+    /* La línea de abajo, entera. El refugio lee «La solicitud está en». */
+    estasEn: 'Estás en: {{etapa}}',
     /* §2.3 · los separadores del hilo. «Hoy» y «Ayer» los redacta la casa; el
        resto lo formatea el riel con el locale. */
     hoy: 'Hoy',

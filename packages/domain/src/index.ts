@@ -52,4 +52,12 @@ export {
   type MensajeParaHilo,
   type EventoParaHilo,
   type PosicionEnGrupo,
+  /* C2 · el estado de la solicitud → la etapa de la escalera. Va acá porque
+     las DOS superficies tienen que derivarlo igual: si la familia y el refugio
+     mostraran etapas distintas para la misma solicitud, una estaría mintiendo
+     y no habría forma de saber cuál. */
+  leerEscalera,
+  type EtapaEscalera,
+  type FinalEscalera,
+  type LecturaDeEscalera,
 } from './hiloAdopcion';

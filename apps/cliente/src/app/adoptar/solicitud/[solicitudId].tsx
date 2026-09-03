@@ -44,17 +44,18 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BarraEscribir,
+  EscaleraSolicitud,
   Boton,
   BurbujaMensaje,
   CabeceraHilo,
   Encabezado,
   EventoDelHilo,
+  Icono,
   PastillaNuevoMensaje,
   SeparadorDia,
   SuperficieChat,
   Esqueleto,
   EsqueletoGrupo,
-  EstadoSolicitudAdopcion as EscaleraSolicitud,
   EstadoVacio,
   HojaConfirmacionDestructiva,
   Tarjeta,
@@ -63,7 +64,7 @@ import {
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { armarHilo, type FilaDelHilo } from '@epetplace/domain';
+import { armarHilo, leerEscalera, type FilaDelHilo } from '@epetplace/domain';
 import {
   etiquetaDeDiaDeMensaje,
   horaCortaDeMensaje,
@@ -201,9 +202,19 @@ export default function HiloSolicitud() {
      *«realtime de la casa si existe para esta tabla; si no, sondeo cada 5 s con
      la pantalla en foco, **y se declara cuál**»*.
 
-     **Medido contra la base:** la publicación `supabase_realtime` tiene **14
-     tablas** —`bonos`, `estadias`, `notificaciones`, `pedidos`…— y
-     **`adopcion_mensaje` NO está**. ⇒ sondeo.
+     ⏪ **ESTE COMENTARIO DECÍA QUE LA TABLA NO ESTABA PUBLICADA, Y DEJÓ DE SER
+     CIERTO EL MISMO DÍA.** A la agregó (`20260908720000`): la publicación pasó
+     de 14 tablas a 15 y **`adopcion_mensaje` YA ESTÁ**. *Se corrige acá y no se
+     borra, porque un comentario que describe mal el mundo se lee con la misma
+     autoridad que uno que lo describe bien.*
+
+     🔴 **Y sigue el sondeo igual, por una razón distinta a la de ayer: la tabla
+     está publicada y NO HAY PUERTA.** Medido: **cero `.channel(` en todo el
+     monorepo** y ningún wrapper de suscripción en `packages/api`. Abrir el canal
+     desde acá saltearía la puerta única, que es regla de la casa. ⇒ `L-318`
+     visto desde el otro lado: el motor quedó listo y su consumidor no puede
+     llamarlo. **Pedido a A por nombre**; el día que llegue, esto son dos
+     líneas menos.
 
      ⚠️ **Sólo en foco**, que es la mitad que evita el costo: `useFocusEffect`
      limpia el intervalo al salir. *Un sondeo que sigue corriendo con la
@@ -278,6 +289,15 @@ export default function HiloSolicitud() {
      Los optimistas se anexan como mensajes normales con mi `uid`, así que **el
      agrupado los agrupa igual**: si mando tres seguidos, se ven pegados antes
      de que el servidor conteste, como se verán después. */
+  /** C2 · el estado → la etapa, derivado UNA vez y en el dominio. */
+  const escalera = useMemo(
+    () =>
+      estado.fase === 'listo'
+        ? leerEscalera(estado.hilo.estado, { huboMensajes: estado.hilo.mensajes.length > 0 })
+        : { etapa: null as null, final: null as null },
+    [estado],
+  );
+
   const filas = useMemo(() => {
     if (estado.fase !== 'listo') return [];
     const ahora = new Date().toISOString();
@@ -524,39 +544,54 @@ export default function HiloSolicitud() {
                 }}
               />
 
-              {/* ═══ C2 · LA ESCALERA, COLAPSABLE ═════════════════════════
+              {/* ═══ C2 · LA ESCALERA ═══════════════════════════════════
                   §1: *«arriba del hilo, colapsable… se colapsa sola cuando
                   empiezo a escribir»*.
 
-                  🔑 **Colapsar es de la PANTALLA, no de la pieza**, y B lo dejó
-                  dicho: `EstadoSolicitudAdopcion` no sabe que está arriba de un
-                  hilo ni que alguien empezó a escribir. *Ese es un hecho del
-                  campo de texto, que vive de este lado.*
+                  🔑 **Colapsar es de la PANTALLA y abrir/cerrar es de la
+                  PIEZA**: ella trae su toque y su etiqueta, y yo le digo si
+                  está abierta. *El dato que la colapsa —que alguien empezó a
+                  escribir— vive en el campo de texto, que es mío.*
 
-                  🔴 **Y con el animal en memorial no se dibuja NADA** —ni fila
-                  ni línea—, que es decisión tomada: *no se le dice dos veces la
-                  misma noticia a alguien que acaba de perder al animal que
-                  eligió.* */}
-              {estado.hilo.estado === 'no_concretada_fallecimiento' ? null : (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('hiloAdopcion.escaleraAlternar')}
-                  onPress={() => setEscaleraAbierta((v) => !v)}
-                >
-                  <EscaleraSolicitud
-                    estado={estado.hilo.estado}
-                    registro={escaleraAbierta ? 'completa' : 'compacta'}
-                    voces={{
-                      recibida: t('hiloAdopcion.estado_recibida'),
-                      enConversacion: t('hiloAdopcion.estado_en_conversacion'),
-                      aceptada: t('hiloAdopcion.estado_aceptada'),
-                    }}
-                    vozDeclinada={t('hiloAdopcion.estado_declinada')}
-                    vozDesistida={t('hiloAdopcion.estado_desistida')}
-                    vozNoConcretada={t('hiloAdopcion.estado_no_concretada', { nombre: estado.hilo.mascotaNombre })}
-                    vozOtraFamilia={t('hiloAdopcion.estado_otra_familia', { nombre: estado.hilo.mascotaNombre })}
-                  />
-                </Pressable>
+                  🔴 **Con `etapa: null` no se dibuja NADA** —ni fila ni línea—:
+                  es el memorial, y no se le dice dos veces la misma noticia a
+                  alguien que acaba de perder al animal que eligió. */}
+              {escalera.etapa === null ? null : (
+                <EscaleraSolicitud
+                  etapa={escalera.etapa}
+                  final={
+                    escalera.final === null
+                      ? undefined
+                      : {
+                          tipo: escalera.final,
+                          etiqueta:
+                            escalera.final === 'declinada'
+                              ? t('hiloAdopcion.estado_declinada')
+                              : escalera.final === 'desistida'
+                                ? t('hiloAdopcion.estado_desistida')
+                                : t('hiloAdopcion.estado_otra_familia', {
+                                    nombre: estado.hilo.mascotaNombre,
+                                  }),
+                        }
+                  }
+                  voces={{
+                    enviada: t('hiloAdopcion.etapa_enviada'),
+                    en_conversacion: t('hiloAdopcion.etapa_en_conversacion'),
+                    aceptada: t('hiloAdopcion.etapa_aceptada'),
+                    acta_firmada: t('hiloAdopcion.etapa_acta_firmada'),
+                    una_vida_nueva: t('hiloAdopcion.etapa_una_vida_nueva'),
+                  }}
+                  /* La línea de abajo, ENTERA y en voz de FAMILIA: «Estás en:
+                     …». El refugio lee «La solicitud está en: …» — misma pieza,
+                     dos asientos (§1). */
+                  vozEstado={t('hiloAdopcion.estasEn', {
+                    etapa: t(`hiloAdopcion.etapa_${escalera.etapa}` as 'hiloAdopcion.etapa_enviada'),
+                  })}
+                  abierta={escaleraAbierta}
+                  onAlternar={() => setEscaleraAbierta((v) => !v)}
+                  etiquetaAlternar={t('hiloAdopcion.escaleraAlternar')}
+                  acento="control"
+                />
               )}
             </View>
           }
@@ -607,24 +642,17 @@ export default function HiloSolicitud() {
                 placeholder={t('hiloAdopcion.escribirlePlaceholder', {
                   refugio: estado.hilo.publicadorNombre ?? t('hiloAdopcion.refugioSinNombre'),
                 })}
-                /* 🔴 **VA LA PALABRA, NO UN GLIFO, Y ES DELIBERADO.**
-                   §2.5 pide *«el glifo de enviar»* y **el registry no lo
-                   tiene**: 40 nombres y ninguno dice enviar (medido por B, y lo
-                   verifiqué contra `IconoNombre` — tampoco hay `chevron`).
+                /* ⏪ **ACÁ IBA LA PALABRA «Enviar», Y DURÓ UNA VUELTA.**
+                   §2.5 pide un glifo; el registry no lo tenía —40 nombres, y
+                   los cercanos mienten: `compartir` es mandar afuera, `correo`
+                   es email— así que puse la palabra, que no miente. **B lo
+                   construyó y ahora existe**: se cambia en el mismo acto (Ley
+                   37) y la nota queda para que no parezca que la palabra fue
+                   una preferencia.
 
-                   Los candidatos cercanos son `compartir` y `correo`, y los dos
-                   **mienten**: compartir es mandar afuera, correo es email, y
-                   esto no es ninguna de las dos. *Un glifo con dos significados
-                   es informar sin informar* — la casa lo prohíbe, y prestarlo
-                   acá le enseñaría a la familia que ese dibujo significa dos
-                   cosas en dos pantallas.
-
-                   **La palabra no miente**: dice exactamente lo que hace, se
-                   atenúa y se enciende igual, y no ocupa un nombre del registry
-                   que después habría que desalojar. ☠️ **Muere el día que §6b
-                   dé su glifo** — es la misma deuda que B declaró, resuelta del
-                   lado honesto mientras tanto. */
-                glifoEnviar={<Texto variante="dato">{t('hiloAdopcion.enviar')}</Texto>}
+                   Es CONTROL: sin huella, y su color lo pone el estado del
+                   campo — atenuado sin texto, encendido con texto (§2.5). */
+                glifoEnviar={<Icono nombre="enviar" tamano={24} registro="aa" />}
                 etiquetaEnviar={t('hiloAdopcion.enviar')}
               />
             )

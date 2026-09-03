@@ -2704,6 +2704,12 @@ export const clienteEn = {
     despensaDetalle: 'We can’t show them here yet. For now you manage them from the pantry, in the purchase where you turned them on.',
   },
   hiloAdopcion: {
+    etapa_enviada: 'Sent',
+    etapa_en_conversacion: 'In conversation',
+    etapa_aceptada: 'Accepted',
+    etapa_acta_firmada: 'Agreement signed',
+    etapa_una_vida_nueva: 'A new life',
+    estasEn: "You're at: {{etapa}}",
     hoy: 'Today',
     ayer: 'Yesterday',
     noSeEnvio: "Didn't send · Retry",

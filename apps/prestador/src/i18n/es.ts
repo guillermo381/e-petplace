@@ -4521,6 +4521,22 @@ export const prestadorEs = {
     reintentar: 'Probar de nuevo',
   },
   portalHilo: {
+    /* §1 · las cinco etapas, en voz de REFUGIO. Mismos hechos, otro asiento:
+       la familia lee «Estás en», el refugio lee «La solicitud está en». */
+    etapaEnviada: 'Enviada',
+    etapaEnConversacion: 'En conversación',
+    etapaAceptada: 'Aceptada',
+    etapaActaFirmada: 'Acta firmada',
+    etapaUnaVidaNueva: 'Una vida nueva',
+    laSolicitudEstaEn: 'La solicitud está en: {{etapa}}',
+    escaleraAlternar: 'Ver los pasos de la solicitud',
+    hoy: 'Hoy',
+    ayer: 'Ayer',
+    noSeEnvio: 'No se envió · Reintentar',
+    escribirlePlaceholder: 'Escríbele a {{quien}}',
+    nuevos_one: '{{count}} mensaje nuevo',
+    nuevos_other: '{{count}} mensajes nuevos',
+    nuevos: '{{count}} mensajes nuevos',
     // El MISMO hecho que ve la familia, dicho desde acá: neutro y sin culpa
     // (§10.6). «Se bajó» nombra el acto; quién lo hizo ya está en la cabecera.
     estadoDesistida: 'La familia retiró su postulación',

@@ -156,3 +156,82 @@ export function armarHilo(
      donde va. */
   return filas.reverse();
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL ESTADO DE LA SOLICITUD → LA ETAPA DE LA ESCALERA (S112-C · C2)
+   ═══════════════════════════════════════════════════════════════════════════
+
+   🔴 **NO ES UN MAPA DE UNO A UNO, y por eso vive acá y no en cada pantalla.**
+   `EscaleraSolicitud` recibe `etapa` **y** `final` porque son dos hechos a la
+   vez: una declinada tiene la fila congelada **donde llegó** y además su
+   etiqueta. Derivar eso son tres decisiones —qué etapa, si hay final, y cuál—
+   y **las dos superficies tienen que tomarlas igual**: *si la familia y el
+   refugio mostraran etapas distintas para la misma solicitud, una de las dos
+   estaría mintiendo y no habría forma de saber cuál.*
+
+   ⚠️ **Las dos últimas etapas NO salen del estado**, y lo dice el contrato de
+   B: `acta_firmada` y `una_vida_nueva` viven en la firma y en el traspaso. Por
+   eso entran como argumento y no se adivinan — *una derivación que las
+   inventara acertaría hoy y fallaría el día que alguien firme sin que la
+   solicitud cambie.* */
+
+export type EtapaEscalera =
+  | 'enviada'
+  | 'en_conversacion'
+  | 'aceptada'
+  | 'acta_firmada'
+  | 'una_vida_nueva';
+
+export type FinalEscalera = 'declinada' | 'desistida' | 'no_concretada';
+
+export interface LecturaDeEscalera {
+  /** `null` = **no se dibuja nada**: el animal está en memorial. */
+  etapa: EtapaEscalera | null;
+  final: FinalEscalera | null;
+}
+
+export function leerEscalera(
+  estado: string,
+  hechos: {
+    /** ¿Hubo conversación? **Sale de que existan mensajes, no de una suposición.** */
+    huboMensajes: boolean;
+    /** De la firma, no del estado de la solicitud. */
+    actaFirmada?: boolean;
+    /** Del traspaso. */
+    traspasada?: boolean;
+  },
+): LecturaDeEscalera {
+  /* 🔴 **MEMORIAL: NADA.** Ni fila ni línea — decisión tomada, y su razón es
+     que *no se le dice dos veces la misma noticia a alguien que acaba de perder
+     al animal que eligió.* Va PRIMERO: cualquier otra rama antes que ésta
+     dibujaría algo. */
+  if (estado === 'no_concretada_fallecimiento') return { etapa: null, final: null };
+
+  /* La etapa alcanzada. **Se deriva de HECHOS y en orden descendente**: lo más
+     avanzado gana. *Preguntarlo al revés haría que un traspaso quedara marcado
+     como «enviada» porque la primera condición también era cierta.* */
+  const etapa: EtapaEscalera =
+    hechos.traspasada === true
+      ? 'una_vida_nueva'
+      : hechos.actaFirmada === true
+        ? 'acta_firmada'
+        : estado === 'aceptada'
+          ? 'aceptada'
+          : /* Para los terminales, la fila queda **donde llegó**: si hubo
+               mensajes, la conversación ocurrió. *Es un hecho medible —existen
+               mensajes— y no una suposición sobre qué tan lejos llegó.* */
+            hechos.huboMensajes || estado === 'en_conversacion'
+            ? 'en_conversacion'
+            : 'enviada';
+
+  const final: FinalEscalera | null =
+    estado === 'declinada'
+      ? 'declinada'
+      : estado === 'desistida'
+        ? 'desistida'
+        : estado === 'no_concretada_otra_familia'
+          ? 'no_concretada'
+          : null;
+
+  return { etapa, final };
+}
