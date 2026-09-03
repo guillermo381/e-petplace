@@ -4248,7 +4248,12 @@ export const prestadorEs = {
     comoSePorto: 'Cómo se portó',
     sacarFoto: 'Sacar una foto',
     fotoRazonViaje: 'Las fotos se toman en las instalaciones. Cuando vuelvas, vas a poder.',
-    fotoRazonNadieAdentro: 'Todavía no hay nadie adentro. En cuanto llegue el primero, vas a poder.',
+    /* ⏪ Reemplaza a `fotoRazonNadieAdentro`, que describía el ESTADO
+       («todavía no hay nadie adentro») en vez del ACTO. Letra del founder: una
+       razón que nombra lo que hay que hacer destraba; una que nombra lo que
+       falta sólo pide esperar. */
+    fotoRazonLlegadaDe: 'Se habilita cuando registres la llegada de {{nombre}}',
+    fotoRazonPrimeraLlegada: 'Se habilita cuando registres la primera llegada',
     subir: 'Subir',
     bajar: 'Bajar',
     salgoADevolver: 'Salgo a devolver',
