@@ -17,6 +17,12 @@ export type OficiosActivos = {
   grooming: boolean;
   adiestramiento: boolean;
   vet: boolean;
+  /* ⭐ C-C (S112-C) · EL QUINTO OFICIO. Guardería ya era el quinto en el
+     motor y en el tab Negocio; acá faltaba, y por eso el Home no la
+     nombraba en ningún lado. *Un negocio de sólo guardería leía su propia
+     identidad sin oficio: exactamente el mudo que este archivo nació para
+     curar, una especie más abajo.* */
+  guarderia: boolean;
 };
 
 /** Firma angosta (patrón voz-cita-vet): el `t` tipado del app es asignable. */
@@ -25,7 +31,8 @@ type TOficio = (
     | 'miCuenta.oficioPaseos'
     | 'miCuenta.oficioEstetica'
     | 'miCuenta.oficioAdiestramiento'
-    | 'miCuenta.oficioVeterinaria',
+    | 'miCuenta.oficioVeterinaria'
+    | 'miCuenta.oficioGuarderia',
 ) => string;
 
 /** null = ningún oficio activo (la superficie omite la línea, jamás inventa). */
@@ -35,5 +42,7 @@ export function vozOficio(oficios: OficiosActivos, t: TOficio): string | null {
   if (oficios.grooming) partes.push(t('miCuenta.oficioEstetica'));
   if (oficios.adiestramiento) partes.push(t('miCuenta.oficioAdiestramiento'));
   if (oficios.vet) partes.push(t('miCuenta.oficioVeterinaria'));
+  // El orden sigue al del tab Negocio (Ley 17.3): guardería va última ahí.
+  if (oficios.guarderia) partes.push(t('miCuenta.oficioGuarderia'));
   return partes.length > 0 ? partes.join(' · ') : null;
 }

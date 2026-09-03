@@ -35,6 +35,14 @@ export const clienteEs = {
     titulo: 'Esta pantalla no se pudo mostrar',
     detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',
     reintentar: 'Reintentar',
+    // C-A (S112-C) · el forense en la pantalla, sólo fuera de producción.
+    // `sinCopiar` NO es un error: es la salida honesta en un binario sin el
+    // módulo nativo — y nombra la vía que SÍ funciona ahí.
+    verDetalle: 'Ver el detalle técnico',
+    ocultarDetalle: 'Ocultar el detalle técnico',
+    copiar: 'Copiar el detalle',
+    copiado: 'Copiado',
+    sinCopiar: 'No se pudo copiar — selecciona el texto',
   },
   // S55-A A3 (D-315): raíz + auth extraídos al riel (voseo→tuteo al tocarse)
   raiz: {
