@@ -4303,6 +4303,13 @@ export const prestadorEs = {
     confirmar: 'Dejarlo anotado',
   },
   mediaGuarderia: {
+    /* G9 · El grabador a pantalla completa. «Usar»/«Repetir» y no
+       «Guardar»/«Descartar»: el cuidador no está archivando, está decidiendo
+       si ese intento sirve. */
+    grabando: 'Grabando',
+    usarClip: 'Usar',
+    repetirClip: 'Repetir',
+    cerrarGrabador: 'Salir',
     sinPermisoAjustes:
       'La cámara está bloqueada para esta app. Se habilita desde los ajustes del teléfono.',
     clipSinAudio: 'Sin permiso de micrófono: el clip se graba sin sonido.',

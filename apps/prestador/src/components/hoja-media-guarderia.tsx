@@ -50,6 +50,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
+
+import { GrabadorClip } from '@/components/grabador-clip';
 import {
   Boton,
   EvidenciaClip,
@@ -123,6 +125,13 @@ export function HojaMediaGuarderia({
     | { fase: 'cerrado' }
     | { fase: 'encuadre' }
     | { fase: 'grabando'; inicioTs: number }
+    /** ⭐ **G9 · el clip GRABADO Y TODAVÍA NO ACEPTADO.** Es una fase propia y
+     *  no un flag sobre `tomado`: en `revisando` el clip **existe en disco y
+     *  puede no usarse nunca**, y `tomado` significa lo contrario —el cuidador
+     *  ya dijo que sirve y lo que falta es a quién le llega—. *Aplastarlas
+     *  habría dejado la lista de destinatarios ofreciéndose sobre un clip que
+     *  todavía se podía descartar.* */
+    | { fase: 'revisando'; uri: string; duracionS: number }
     | { fase: 'tomado'; uri: string; duracionS: number }
   >({ fase: 'cerrado' });
   const [elegidosClip, setElegidosClip] = useState<string[]>([]);
@@ -216,12 +225,15 @@ export function HojaMediaGuarderia({
     setClip({ fase: 'encuadre' });
   };
 
-  const obturadorClip = async () => {
-    if (clip.fase === 'grabando') {
-      camRef.current?.stopRecording();
-      return;
-    }
-    if (clip.fase !== 'encuadre' || camRef.current === null) return;
+  /* 🔴 **La cámara la trae el GRABADOR, no un `ref` de esta hoja.** Antes vivía
+     acá y se pasaba como slot a `EvidenciaClip`, que la renderizaba **sin
+     alto** — la `CameraView` lleva `flex: 1` y su contenedor se dimensiona por
+     contenido, así que medía CERO. *La cámara estaba encendida y grabando; lo
+     que no existía era su superficie.* Ahora la monta la pantalla completa y
+     esta hoja recibe la instancia sólo para mandarle `stop`. */
+  const obturadorClip = async (cam: CameraView) => {
+    if (clip.fase !== 'encuadre') return;
+    camRef.current = cam;
     const inicioTs = Date.now();
     setClip({ fase: 'grabando', inicioTs });
     try {
@@ -234,7 +246,11 @@ export function HojaMediaGuarderia({
         CLIP_TECHO_S,
       );
       if (video?.uri !== undefined) {
-        setClip({ fase: 'tomado', uri: video.uri, duracionS });
+        /* **A revisar, no a publicar.** Es la letra del founder: *«al parar, veo
+           el clip un segundo y elijo usar o repetir»*. Sin este paso el cuidador
+           manda un clip que no vio — *la única forma de saber si salió bien era
+           publicarlo y mirarlo del otro lado.* */
+        setClip({ fase: 'revisando', uri: video.uri, duracionS });
       } else {
         setClip({ fase: 'encuadre' });
       }
@@ -285,6 +301,7 @@ export function HojaMediaGuarderia({
   };
 
   return (
+    <>
     <Hoja visible titulo={t('mediaGuarderia.titulo')} onCerrar={onCerrar}>
       <HojaScroll contentContainerStyle={{ gap: spacing[4], paddingBottom: spacing[4] }}>
         {/* LA GUÍA DE ENCUADRE — ley de captura (criterio §5), antes del
@@ -342,24 +359,18 @@ export function HojaMediaGuarderia({
              duro allá rompería su bundle, y por nativo ni se arregla por OTA.
              El prestador sí lo trae, con su plugin declarado. */
           <EvidenciaClip
-            vista={
-              <CameraView
-                ref={camRef}
-                style={{ flex: 1 }}
-                mode="video"
-                facing="back"
-                videoQuality="720p"
-                videoBitrate={2_500_000}
-                /* 🔴 `mute` es prop de LA VISTA, no opción de `recordAsync` —
-                   lo escribí en el grabador y **el typecheck me mandó a leer el
-                   tipo instalado**: `CameraRecordingOptions` de este runtime
-                   sólo acepta `maxDuration · maxFileSize · mirror · codec`.
-                   *Mi premisa venía de la doc; el tipo del runtime es el que
-                   manda.* Sale del PERMISO y no de una preferencia: pedirle
-                   audio al grabador es pedirle lo que el sistema ya negó. */
-                mute={sinAudio}
-              />
-            }
+            /* ⭐ **G9 · LA VISTA YA NO ES LA CÁMARA.** Acá se le pasaba una
+               `CameraView` y la pieza la renderizaba **sin alto** —`flex: 1`
+               dentro de un contenedor dimensionado por contenido ⇒ CERO—, así
+               que se grababa a ciegas. El durante se mudó a `GrabadorClip`, a
+               pantalla completa, que es lo que el founder pidió.
+
+               Se pasa `null` y no se quita la prop: **el slot sigue siendo
+               correcto** —la pieza no puede montar `expo-camera` porque el
+               cliente no lo trae— y el día que haga falta una vista para el
+               antes (una foto de referencia, un encuadre guía) entra por acá
+               sin cambiar el contrato. */
+            vista={null}
             /* Las reglas ya vienen FILTRADAS por lugar: la pieza no sabe de
                instalaciones ni de domicilio, y no debe — eso es negocio. */
             reglas={reglasConVoz}
@@ -367,13 +378,13 @@ export function HojaMediaGuarderia({
                cola. Acá se lo pasa quien la conoce. */
             techoSeg={CLIP_TECHO_S}
             momento={
-              clip.fase === 'grabando'
-                ? { fase: 'grabando', inicioTs: clip.inicioTs }
-                : clip.fase === 'tomado'
-                  ? { fase: 'tomado' }
-                  : { fase: 'encuadre' }
+              /* La pieza sólo conoce el ANTES y el DESPUÉS. `grabando` y
+                 `revisando` viven en el grabador a pantalla completa, así que
+                 desde acá se ven como «todavía no hay clip». */
+              clip.fase === 'tomado' ? { fase: 'tomado' } : { fase: 'encuadre' }
             }
-            onObturador={() => void obturadorClip()}
+            /* Su obturador **abre el grabador**; grabar es del otro lado. */
+            onObturador={() => setClip({ fase: 'encuadre' })}
             onTecho={() => camRef.current?.stopRecording()}
             candidatos={presentes.map((x) => ({ id: x.mascotaId, nombre: x.mascotaNombre }))}
             elegidos={elegidosClip}
@@ -453,5 +464,49 @@ export function HojaMediaGuarderia({
         </View>
       ) : null}
     </Hoja>
+
+      {/* ═══ G9 · EL DURANTE, A PANTALLA COMPLETA ═══════════════════════════
+          Fuera de la `Hoja` a propósito: **es una superficie, no un paso del
+          formulario**. Mientras se graba, la guía, los destinatarios y el resto
+          de la hoja no sirven para nada y compiten por el ojo. ── */}
+      <GrabadorClip
+        visible={clip.fase === 'encuadre' || clip.fase === 'grabando' || clip.fase === 'revisando'}
+        momento={
+          clip.fase === 'grabando'
+            ? { fase: 'grabando', inicioTs: clip.inicioTs }
+            : clip.fase === 'revisando'
+              ? { fase: 'revisando', uri: clip.uri, duracionS: clip.duracionS }
+              : { fase: 'encuadre' }
+        }
+        techoSeg={CLIP_TECHO_S}
+        sinAudio={sinAudio}
+        onGrabar={(cam) => void obturadorClip(cam)}
+        onDetener={() => camRef.current?.stopRecording()}
+        onTecho={() => camRef.current?.stopRecording()}
+        /* **Usar** cierra el grabador y devuelve a la hoja con el clip tomado:
+           ahí eligen a quién le llega. */
+        onUsar={() =>
+          setClip((c) =>
+            c.fase === 'revisando'
+              ? { fase: 'tomado', uri: c.uri, duracionS: c.duracionS }
+              : c,
+          )
+        }
+        /* **Repetir** vuelve a encuadre. El archivo anterior queda en el
+           temporal del sistema y **no se publica nunca** — no se lo referencia
+           más. *Un clip descartado que siguiera en el estado sería basura que
+           alguien manda por error.* */
+        onRepetir={() => setClip({ fase: 'encuadre' })}
+        onCerrar={() => setClip({ fase: 'cerrado' })}
+        voces={{
+          grabando: t('mediaGuarderia.grabando'),
+          detener: t('mediaGuarderia.detener'),
+          grabar: t('mediaGuarderia.grabar'),
+          usar: t('mediaGuarderia.usarClip'),
+          repetir: t('mediaGuarderia.repetirClip'),
+          cerrar: t('mediaGuarderia.cerrarGrabador'),
+        }}
+      />
+    </>
   );
 }
