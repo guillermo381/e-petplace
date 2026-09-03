@@ -1449,6 +1449,21 @@ const EXENTOS_R17 = new Set([
   // que rompe a la cabeza. Se probó EN ROJO re-implementándola como evento:
   // salió exit 1 nombrando los casos ① y ②.
   'pudoVerTodo', 'TOLERANCIA_VIO_TODO',
+  // S112-B · MISMA CLASE QUE `EvidenciaFotoCapturar`: montarla en la galería
+  // HACE algo que la galería no debería hacer. `SuperficieChat` escucha el
+  // TECLADO del sistema (`useAnimatedKeyboard`), así que enfocar cualquier
+  // campo de la galería —`CampoCodigo`, `HojaFiltros`, `BarraEscribir`— le
+  // movería la barra a una muestra que no tiene nada que ver. *Un catálogo
+  // donde una pieza reacciona a otra muestra cosas que no pasan.*
+  //
+  // 🔴 Y la razón de fondo: su contrato es OCUPAR LA PANTALLA, y lo que hay
+  // que juzgar de ella es el teclado abierto. En una caja de 400 px se vería
+  // una lista con una barra debajo —o sea, cualquier cosa menos la pieza—.
+  // **Su gate es el aparato con el teclado arriba** (C1), y la letra lo pide
+  // así: *«medilo en el aparato del founder: es el defecto que él ve»*.
+  //
+  // Sus PARTES sí están en el catálogo, una por una, en la sección del chat.
+  'SuperficieChat',
 ]);
 /** VACÍO desde S82-B r17: las NUEVE ganaron su entrada en la misma
  *  tanda que la regla las enumeró — importadas, jamás reimplementadas.
