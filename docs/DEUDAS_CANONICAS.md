@@ -2883,6 +2883,36 @@ Origen: S86-A, medición para C.
 #### D-485 — La visibilidad del dueño sobre mascotas cuelga de `user_id` legacy, no del modelo de familia 🟠
 🟠 MEDIA-ALTA. **Hallazgo del fixture memorial (S73-A, motor de elegibilidad):** la visibilidad del dueño sobre `mascotas` cuelga de `user_id` legacy por-mascota (la pata "dueño de la mascota" de `user_tiene_acceso_a_mascota`); `mascota_codueño` tiene **cero filas** en la familia demo; **no hay policy SELECT por familia** (relevado literal: `mascotas_select_admin` · `mascotas_select_codueño` · `mascotas_select_prestador_con_acceso` — ninguna consulta `familia_miembro`). **El modelo de familia existe en la letra y no en la RLS del lado dueño.** Consecuencia práctica: una mascota dada de alta sin `user_id` estampado es invisible para el resto de la familia (el fixture S73 lo probó: INSERT directo → invisible al lector del titular). Referencia: es la cara RLS del **hueco §6.4.5** conocido (la familia humana no visible, S51). **NO se cura en S73. DISPARO: el arco S74 "quién ve qué del Bio-Expediente"** — es la mitad FAMILIA del mismo problema que la ventana de equipo resuelve del lado negocio. Origen: S73-A (imprevisto declarado del reporte 2, adjudicado por mesa). **CAÍDA DECLARADA (S74-A, cierre — orden de mesa):** el brief de arranque S74 la daba por sostenida ("el resto se sostiene") y **ninguna tanda de S74 la nombró — se cayó en silencio**. Se registra para que no reaparezca en tres sesiones como sorpresa: es el gemelo exacto del hueco que S73 cerró del lado negocio (`empleado_roles`); **la mitad FAMILIA sigue sin dueño**. El porqué de la caída: la tanda A se llenó con D-495/D-497/D-489a y los depósitos de mesa, y la superficie de recepción (mesa S74) se resolvió SIN tocar el modelo de familia — precisamente el contacto-de-la-visita se decidió para NO depender de esta deuda; nadie volvió a mirarla. El disparo queda INTACTO. Origen de la caída declarada: S74-A (tanda de cierre).
 
+> ### ✅ ENMENDADA Y CERRADA — S112-A, 3-sep-2026
+>
+> **`mascotas` SELECT** ya lee familia desde `20260908080000` (el helper
+> único `user_tiene_acceso_a_mascota_como` gana la rama `_user_es_de_la_
+> familia_de`, con `user_acceso_clinico_a_mascota` en la misma migración —
+> sin eso la familia vería a su mascota y no su expediente). **El traspaso**
+> reapunta `user_id` al titular destino, no lo deja en el refugio.
+>
+> **El censo pedido por el founder ("todas las tablas colgadas de la
+> mascota") encontró la MISMA clase repetida en cinco lugares más** —
+> `estadias` · `programas_contratados` · `suscripciones_servicio` ·
+> `mascota_acceso_prestador` · `accion_destructiva_pendiente` — cerrados en
+> `20260908920000`, cinco policies aditivas sobre la misma fuente única
+> `_user_es_de_la_familia_de`.
+>
+> **Medido, no supuesto:** de las 81 tablas con `mascota_id`, 48 ya leían
+> familia por herencia de los dos helpers; 26 tenían predicado propio (de las
+> cuales sólo estas 5 compartían la clase — las otras 21 son contenido
+> público, notificaciones dirigidas o las tablas que DEFINEN la relación); 7
+> sin policy de SELECT, fuera de alcance.
+>
+> **Verificado por camino real** (`pnpm verify:d485-familia-lee`, PostgREST
+> con anon key + sesión real, no SQL simulado): familiar=1 · tercero=0 ·
+> anon=0, en `mascotas` y `estadias`; las otras cuatro bajo `SET LOCAL ROLE
+> authenticated` en el cinturón de la migración — misma mecánica que
+> PostgREST sin la capa HTTP. Las dos migraciones son **puramente
+> aditivas**: cero `DROP`/`ALTER` sobre policies existentes, así que las
+> tablas legado con `user_id` no pudieron divergir — nada les cambió.
+
+
 ---
 
 ### Deudas de S78 (D-546 → D-548)
