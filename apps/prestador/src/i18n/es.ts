@@ -416,6 +416,8 @@ export const prestadorEs = {
     filtroAdiestramiento: 'Adiestramiento',
     // S69-B: el cuarto oficio en el filtro del HOY · LOTE S69, GATE PENDIENTE
     filtroVeterinaria: 'Veterinaria',
+    // C-C (S112-C) · el chip del quinto oficio en el HOY.
+    filtroGuarderia: 'Guardería',
     filtroVacio: 'Hoy no tienes citas de este servicio.',
     // LOTE S62 (D-385): la salida grupal — una fila, N mascotas
     salidaNombresDos: '{{a}} y {{b}}',
@@ -498,6 +500,12 @@ export const prestadorEs = {
     vidasTutores: 'tutores',
     vidasPaciente1: 'paciente',
     vidasPacientes: 'pacientes',
+    // C-C (S112-C) · la unidad de una guardería: aloja ESTADÍAS y sus
+    // vidas son HUÉSPEDES — «turnos» y «mascotas» son de otro negocio.
+    cargaEstadia1: 'estadía',
+    cargaEstadias: 'estadías',
+    vidasHuesped1: 'huésped',
+    vidasHuespedes: 'huéspedes',
     vidasMascota1: 'mascota',
     vidasMascotas: 'mascotas',
     vidasAlumno1: 'alumno',
@@ -890,6 +898,8 @@ export const prestadorEs = {
     oficioEstetica: 'Estética',
     oficioAdiestramiento: 'Adiestramiento',
     oficioVeterinaria: 'Veterinaria',
+    // C-C (S112-C) · el quinto oficio en la identidad del negocio.
+    oficioGuarderia: 'Guardería',
     /* ☠️ S85-C39 · `fundador: 'Prestador fundador'` MURIÓ en sus dos
        consumidores. Repetía el acto de habla que el founder acaba de
        rechazar: OTORGABA UN RECONOCIMIENTO en vez de decir un hecho.
@@ -3108,6 +3118,14 @@ export const prestadorEs = {
     titulo: 'Esta pantalla no se pudo mostrar',
     detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',
     reintentar: 'Reintentar',
+    // C-A (S112-C) · el forense en la pantalla, sólo fuera de producción.
+    // `sinCopiar` NO es un error: es la salida honesta en un binario sin el
+    // módulo nativo — y nombra la vía que SÍ funciona ahí.
+    verDetalle: 'Ver el detalle técnico',
+    ocultarDetalle: 'Ocultar el detalle técnico',
+    copiar: 'Copiar el detalle',
+    copiado: 'Copiado',
+    sinCopiar: 'No se pudo copiar — selecciona el texto',
   },
   // S79-B (cura del blanco) · el gate de rol con datos CONTRADICTORIOS —
   // jamás expulsión muda (Ley 13/D-541) · LOTE S79, GATE PENDIENTE

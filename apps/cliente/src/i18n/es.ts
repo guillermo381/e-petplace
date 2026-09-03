@@ -35,6 +35,14 @@ export const clienteEs = {
     titulo: 'Esta pantalla no se pudo mostrar',
     detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',
     reintentar: 'Reintentar',
+    // C-A (S112-C) · el forense en la pantalla, sólo fuera de producción.
+    // `sinCopiar` NO es un error: es la salida honesta en un binario sin el
+    // módulo nativo — y nombra la vía que SÍ funciona ahí.
+    verDetalle: 'Ver el detalle técnico',
+    ocultarDetalle: 'Ocultar el detalle técnico',
+    copiar: 'Copiar el detalle',
+    copiado: 'Copiado',
+    sinCopiar: 'No se pudo copiar — selecciona el texto',
   },
   // S55-A A3 (D-315): raíz + auth extraídos al riel (voseo→tuteo al tocarse)
   raiz: {
@@ -278,6 +286,10 @@ export const clienteEs = {
     hechoVacuna: 'Recibió la vacuna {{nombre}}',
     hechoVacunaSinNombre: 'Recibió una vacuna',
     hechoConsulta: 'Visita al veterinario',
+    // S112-C · la bitácora: MISMO tipo de evento, dos manos. La voz la
+    // decide quién anotó (`prestador_id`), jamás el tipo.
+    hechoBitacoraFamilia: 'Anotaste cómo estuvo',
+    hechoBitacoraCuidador: 'El cuidador anotó cómo estuvo',
     // S91 · LOS HITOS. Voces FIRMADAS verbatim (founder, 8-ago-2026).
     // Solo la de llegada lleva {{nombre}}: «Una vida nueva empieza» sobre la
     // ficha de Thor no necesita decir Thor — así está firmado.
@@ -3423,6 +3435,11 @@ export const clienteEs = {
     sinPunto: 'Todavía no vemos dónde va. Te lo mostramos apenas salgan.',
     vistoA: 'Visto a las {{hora}}',
     suDia: 'Su día',
+    // H4 (S112-C) · la bitácora del día. La hora va en la línea porque una
+    // conducta sin cuándo no se puede cruzar con nada de lo que la familia vio.
+    bitacoraDelCuidador: 'El cuidador anotó a las {{hora}}',
+    bitacoraTuya: 'Anotaste a las {{hora}}',
+    bitacoraNoCargo: 'No pudimos cargar lo que anotaron.',
     cuenta: '{{n}} momentos de hoy',
     cuentaUna: '1 momento de hoy',
     sinMediaTodavia: 'Todavía no hay fotos de hoy. Van a ir apareciendo acá.',

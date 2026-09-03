@@ -31,6 +31,12 @@ export const clienteEn = {
     titulo: 'This screen could not be shown',
     detalle: 'It is a problem on our side, not your setup — your data is safe. Try again.',
     reintentar: 'Try again',
+    // C-A (S112-C) · the forensic block, outside production only.
+    verDetalle: 'Show technical details',
+    ocultarDetalle: 'Hide technical details',
+    copiar: 'Copy details',
+    copiado: 'Copied',
+    sinCopiar: 'Could not copy — select the text',
   },
   // S55-A A3 (D-315): root + auth on the rail
   raiz: {
@@ -215,6 +221,8 @@ export const clienteEn = {
     hechoVacuna: 'Got the {{nombre}} vaccine',
     hechoVacunaSinNombre: 'Got a vaccine',
     hechoConsulta: 'Vet visit',
+    hechoBitacoraFamilia: 'You noted how they were',
+    hechoBitacoraCuidador: 'The caretaker noted how they were',
     // S91 · milestones. English is A's PROPOSAL — the founder signs.
     hechoHitoVidaNueva: 'A new life begins',
     hechoHitoLlegoALaFamilia: '{{nombre}} joined the family',
@@ -2489,6 +2497,9 @@ export const clienteEn = {
     sinPunto: 'We can’t see where they are yet. We’ll show you as soon as they leave.',
     vistoA: 'Seen at {{hora}}',
     suDia: 'Their day',
+    bitacoraDelCuidador: 'The caretaker noted at {{hora}}',
+    bitacoraTuya: 'You noted at {{hora}}',
+    bitacoraNoCargo: 'We could not load what they noted.',
     cuenta: '{{n}} moments from today',
     cuentaUna: '1 moment from today',
     sinMediaTodavia: 'No photos from today yet. They’ll show up here.',

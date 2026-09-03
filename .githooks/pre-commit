@@ -311,6 +311,67 @@ node scripts/verify-jornada-completa.mjs >/dev/null 2>&1 || {
 #    · exit 2 (la auto-prueba del instrumento falló) → **FRENA**: si el
 #      detector no puede ver un NUL sembrado, su cero no vale nada.
 #    · exit 1 (encontró) → **FRENA**, que es su trabajo.
+# ── verify:hoisting-nativo ── S112-A (clase medida por S112-C) ──────────────
+#    Un módulo NATIVO usado por una app que NO lo declara resuelve por hoisting
+#    de la raíz: **compila, corre en dev, pasa los cuatro typechecks — y el APK
+#    no lo tiene.** Misma forma que la key de mapas de S84, que costó tres
+#    sesiones. 0,26 s, sin red.
+#    ⚠️ Mismo trato que el de arriba: si el script no está (worktree viejo), se
+#    dice y se deja pasar — *frenar por un gate que no existe es un rojo falso*.
+#
+#    🔴 LO QUE NO SE PROBÓ, DECLARADO (S112-A): **el gate SÍ da rojo** —exit 1,
+#    nombrando el paquete y de dónde viene el hoisting, verificado sembrando un
+#    import de `expo-camera` en el cliente—. **Lo que NO se pudo reproducir es
+#    este bloque disparando dentro del hook**: los dos controles chocaron con
+#    gates ANTERIORES (uno rompía el typecheck al quitar la dependencia; el
+#    otro cayó en «COMMIT A SECAS»). *Su forma es la del bloque de
+#    `sin-byte-nul`, que sí está probado, y `bash -n` pasa — pero eso es
+#    parecido, no medido.* El primer commit que agregue un nativo sin declarar
+#    es su prueba real; hasta entonces esto es un gate con su rojo probado y su
+#    cableado supuesto.
+# ── verify:rutas-de-aviso ── S112-D, cableado por A en S112 ────────────────
+#    Una push que llega, la persona toca, **y no pasa nada**: la ruta se emite
+#    y ninguna app la acepta. No falla en ningún lado — la notificación sale
+#    bien y el destino no existe.
+#    🔴 NACIÓ SALIENDO 2 (fuente ausente) y por eso NO se cableó entonces:
+#    *un gate que no puede medir no se pone en el hook, se declara.* Hoy sus
+#    dos fuentes están en `main` y da verde con 4 emitibles, todas con destino.
+#    ✅ Su ROJO se probó ANTES de cablearlo: sembrando `/guarderia/` roto en
+#    las dos listas de destino → exit 1, nombrando la ruta y su productor.
+#    ⚠️ El primer intento sembró en `checkout.tsx` y salió verde — *el gate lee
+#    las LISTAS, no cualquier ocurrencia*: el rojo era del control, no suyo.
+if [ -f scripts/verify-rutas-de-aviso.mjs ]; then
+  node scripts/verify-rutas-de-aviso.mjs >/dev/null 2>&1
+  ESTADO_RUTAS=$?
+  if [ "$ESTADO_RUTAS" = "2" ]; then
+    echo ""
+    echo "⚠️  verify:rutas-de-aviso NO CONCLUYENTE — le falta una fuente."
+    echo "   (no es que haya una ruta huérfana: es que no pudo mirar. El commit SIGUE.)"
+    echo ""
+  elif [ "$ESTADO_RUTAS" != "0" ]; then
+    echo ""
+    echo "✗ UNA PUSH LLEVA A NINGUNA PARTE — el commit NO ocurre."
+    node scripts/verify-rutas-de-aviso.mjs 2>&1 | grep -E "EMITIBLE|⇒" | head -4
+    echo ""
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+fi
+
+if [ -f scripts/_censo-hoisting-nativo.mjs ]; then
+  node scripts/_censo-hoisting-nativo.mjs >/dev/null 2>&1
+  if [ "$?" != "0" ]; then
+    echo ""
+    echo "✗ UN NATIVO SE USA SIN DECLARARSE — el commit NO ocurre."
+    node scripts/_censo-hoisting-nativo.mjs 2>&1 | grep -E "🔴|✅" | head -5
+    echo ""
+    echo "  Hoy resuelve por hoisting y anda en dev. En el APK NO va a estar."
+    echo "  curalo declarándolo en el package.json de esa app,"
+    echo "  o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+fi
+
 if [ ! -f scripts/verify-sin-byte-nul.mjs ]; then
   echo ""
   echo "⚠️  verify:sin-byte-nul NO CONCLUYENTE — el script no existe en este árbol."

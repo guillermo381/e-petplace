@@ -38,7 +38,7 @@ import { FiltroPills, type OpcionFiltro } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
-export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming' | 'adiestramiento' | 'vet';
+export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming' | 'adiestramiento' | 'vet' | 'guarderia';
 
 export function FiltroOficio({
   activo,
@@ -48,7 +48,7 @@ export function FiltroOficio({
   activo: FiltroOficioValor;
   onCambio: (v: FiltroOficioValor) => void;
   /** S63-B: solo los oficios con oferta ACTIVA ganan segmento. S69-B: +vet. */
-  oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean; vet: boolean };
+  oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean; vet: boolean; guarderia: boolean };
 }) {
   const { t } = useTraduccion();
 
@@ -75,6 +75,13 @@ export function FiltroOficio({
       : []),
     ...(oficios.vet
       ? [{ codigo: 'vet' as const, etiqueta: t('agenda.filtroVeterinaria'), icono: 'veterinaria' as const, capa: 'identidad' as const }]
+      : []),
+    /* ⭐ C-C (S112-C) · GUARDERÍA, con su glifo propio del registry y capa
+       CUIDADO (la taxonomía de Ley 10 ya la clasifica ahí, medido en
+       `Icono.tsx`). **No comparte el de hotel ni cae al genérico**: el
+       founder pidió que aparezca «sola con su glifo». */
+    ...(oficios.guarderia
+      ? [{ codigo: 'guarderia' as const, etiqueta: t('agenda.filtroGuarderia'), icono: 'guarderia' as const, capa: 'cuidado' as const }]
       : []),
   ];
 

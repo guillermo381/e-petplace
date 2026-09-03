@@ -62,6 +62,7 @@ import {
   type InsigniaEstado,
 } from '@epetplace/ui';
 import {
+  caraDeMascotaPorRuta,
   caraDeMascota,
   obtenerBloqueosPrestador,
   obtenerCitasAdiestramientoDelDia,
@@ -83,6 +84,7 @@ import {
   obtenerContextoArranque,
   obtenerTitularId,
   obtenerMundoVeterinariaPropio,
+  obtenerOfertaGuarderiaPropia,
   obtenerAtencionesAbiertas,
   obtenerEstadoOnboardingWizard,
   hayNovedades,
@@ -119,7 +121,7 @@ import { CeldasModuloVentas } from '@/components/celdas-modulo-ventas';
 import { VentanaPedidos } from '@/components/ventana-pedidos';
 import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
-import { vozOficio } from '@/lib/voz-oficio';
+import { vozOficio, type OficiosActivos } from '@/lib/voz-oficio';
 import { duracionCorta, montoCorto } from '@/lib/formato-techo';
 import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 // ⏪ S88-C: el import de AgendaRecepcion salió con el desvío por rol
@@ -188,7 +190,7 @@ type Pantalla =
        *  día. Si el fetch de ofertas falla, el control no existe: es
        *  azúcar de vista, jamás esconde citas (las citas tienen su
        *  propio camino de error, Ley 13 intacta). */
-      oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean; vet: boolean };
+      oficios: OficiosActivos;
       /** S70-B2-v2: la bandeja "Por coordinar" — citas de presupuesto
        *  aprobado sin fecha (D-439). Vacía para negocios no-vet. */
       porCoordinar: CitaPorCoordinar[];
@@ -287,16 +289,13 @@ type Pantalla =
  * Una cita sin mascota legible **no suma y no inventa**: no hay un
  * "desconocido" que contar.
  */
-type UnidadCarga = 'tiempo' | 'citas' | 'turnos' | 'consultas' | 'sesiones';
-type UnidadVidas = 'tutores' | 'pacientes' | 'mascotas' | 'alumnos';
+type UnidadCarga = 'tiempo' | 'citas' | 'turnos' | 'consultas' | 'sesiones' | 'estadias';
+type UnidadVidas = 'tutores' | 'pacientes' | 'mascotas' | 'alumnos' | 'huespedes';
 
-function unidadesDelTecho(oficios: {
-  paseo: boolean;
-  grooming: boolean;
-  adiestramiento: boolean;
-  vet: boolean;
-}): { carga: UnidadCarga; vidas: UnidadVidas } {
-  const activos = [oficios.paseo, oficios.grooming, oficios.adiestramiento, oficios.vet].filter(Boolean).length;
+function unidadesDelTecho(oficios: OficiosActivos): { carga: UnidadCarga; vidas: UnidadVidas } {
+  const activos = [oficios.paseo, oficios.grooming, oficios.adiestramiento, oficios.vet, oficios.guarderia].filter(
+    Boolean,
+  ).length;
   // LA EXCEPCIÓN va PRIMERO: con paseo entre los activos el tiempo gana,
   // haya uno o cuatro oficios. Ponerla después del conteo la volvería
   // inalcanzable para el caso que existe para cubrir.
@@ -304,6 +303,13 @@ function unidadesDelTecho(oficios: {
   if (activos > 1) return { carga: 'citas', vidas: 'mascotas' };
   if (oficios.vet) return { carga: 'consultas', vidas: 'pacientes' };
   if (oficios.adiestramiento) return { carga: 'sesiones', vidas: 'alumnos' };
+  /* ⭐ C-C (S112-C) · GUARDERÍA SOLA. Va DESPUÉS de las otras y antes del
+     resto, misma mecánica que sus hermanas. Su unidad no es «turnos»: una
+     guardería no atiende turnos, **aloja estadías** — y las vidas no son
+     mascotas genéricas, son HUÉSPEDES. *La unidad es lo único del techo que
+     habla el idioma del oficio; dejarla en «turnos» sería el esqueleto
+     correcto diciendo la palabra de otro negocio.* */
+  if (oficios.guarderia) return { carga: 'estadias', vidas: 'huespedes' };
   /* grooming, o CERO oficios activos.
      ⏪ S86-C: esta nota decía *"el bloque no se monta sin citas, y sin
      oficios tampoco hay citas"* — **vencida**: desde la cura firmada el
@@ -624,9 +630,9 @@ function vozPresencia(
     (e) => e.estado === 'recogida_en_curso' || e.estado === 'retorno_en_curso',
   ).length;
   const partes: string[] = [];
-  if (adentro > 0) partes.push(t('agenda.presenciaAdentro' as never, { n: adentro }));
-  if (enViaje > 0) partes.push(t('agenda.presenciaEnViaje' as never, { n: enViaje }));
-  if (reservados > 0) partes.push(t('agenda.presenciaReservados' as never, { n: reservados }));
+  if (adentro > 0) partes.push(t('agenda.presenciaAdentro' as never, { count: adentro }));
+  if (enViaje > 0) partes.push(t('agenda.presenciaEnViaje' as never, { count: enViaje }));
+  if (reservados > 0) partes.push(t('agenda.presenciaReservados' as never, { count: reservados }));
   /* Si ninguna parte existe, el día tiene estadías en estados terminales
      —entregadas, canceladas—: se dice el total en vez de una línea vacía. */
   return partes.length > 0
@@ -805,7 +811,39 @@ function FilaCita({
       metadataMono={sinHora ? (dur ? `${dur} min` : undefined) : `${hora}${dur ? ` · ${dur} min` : ''}`}
       mascota={{
         nombre,
-        fotoUrl,
+        /* 🔴 **C-B (S112-C) · EL TERCER ESCALÓN ES LA ESPECIE, JAMÁS EL
+           MONOGRAMA.** Rojo del founder: «Jack con J». Sin foto propia esta
+           fila caía a la inicial — *y una letra sobre un círculo no dice que
+           ahí hay un animal; dice que falta un dato.*
+
+           **Y `especie` no alcanzaba, aunque estuviera puesta:** `FilaCita`
+           la recibe y la pasa a `AvatarMascota`, pero ahí `especie` está
+           declarada como **«hoy no cambia el render»** (su propio JSDoc) —
+           la cara sale de `fotoDeEspecie`, que `FilaCita` **no expone**.
+           *El dato viajaba entero hasta la pieza y no pintaba nada: la clase
+           de defecto que se lee como cableado hecho.*
+
+           ⇒ La cara se resuelve ACÁ con `caraDeMascota`, que es la escalera
+           completa de la casa (foto → raza → genérico de especie) y se
+           entrega por `fotoUrl`, el único slot que `FilaCita` tiene.
+
+           **UNA PUERTA, CINCO LUGARES:** el `FilaCita` local (línea 671)
+           envuelve a este `FilaCitaUi`, y sus cuatro llamadores del HOY
+           pasan por acá. *Curarlo en los cinco llamadores habría sido curar
+           el caso; curarlo acá cura la clase.*
+
+           ⏳ Sigue el pedido a B de `fotoDeEspecie` en `FilaCita`: por
+           `fotoUrl` la ilustración recibe el encuadre de retrato. Declarado,
+           no escondido — pero el encuadre de una cara correcta es mejor que
+           el encuadre perfecto de una inicial. */
+        /* `?? undefined`: la casa devuelve `null` (*null entra, null sale*) y
+           `FilaCita` pide `string | undefined`. La única traducción. */
+        fotoUrl:
+          caraDeMascota({
+            especie: cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined,
+            razaSlug: undefined,
+            fotoUri: fotoUrl,
+          }) ?? undefined,
         especie: cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined,
       }}
       /* El segundo piso primero, las acciones después (ver `bandaEstado`):
@@ -906,7 +944,7 @@ function FilaSalida({
         onPress={onToggle}
         accessibilityRole="button"
         titulo={titulo}
-        subtitulo={`${primera.tipo.nombre} · ${t('agenda.salidaDe', { n: citas.length })}`}
+        subtitulo={`${primera.tipo.nombre} · ${t('agenda.salidaDe', { count: citas.length })}`}
         inicio={
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {citas.slice(0, 3).map((c, i) => (
@@ -1249,7 +1287,7 @@ export default function Hoy() {
        midió (622 ms en cuatro viajes encadenados solo para resolver quién
        soy), y agregarle una espera serial habría sido pagar dos veces la
        deuda que esa ficha existe para no repetir. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rAbiertas, rAlta, rEst] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, ofGuarderia, cuentaR, perfilR, rCerrados, rPresup, rAbiertas, rAlta, rEst] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -1271,6 +1309,11 @@ export default function Hoy() {
       obtenerOfertaAdiestramientoPropia(prestador.data.id),
       // S69-B: el cuarto oficio para el filtro — vet activo = ≥1 servicio prendido.
       obtenerMundoVeterinariaPropio(prestador.data.id),
+      /* ⭐ C-C (S112-C) · EL QUINTO. Va EN ESTE MISMO `Promise.all`, no
+         encadenado: el costo de una pantalla es la cantidad de OLAS, no de
+         peticiones (L-223) — sumada acá, la lectura de guardería no agrega
+         un solo milisegundo de espera. */
+      obtenerOfertaGuarderiaPropia(prestador.data.id),
       // S70-B2-v2: la cuenta — para la bandeja "Por coordinar" (D-439).
       obtenerMiCuentaComercial(),
       // S71-B1: la persona del techo. ÚNICA query nueva del piloto — y
@@ -1523,6 +1566,10 @@ export default function Hoy() {
         adiestramiento:
           ofAdiestramiento.ok && (ofAdiestramiento.data.oferta?.activo ?? false),
         vet: ofVet.ok && ofVet.data.servicios.some((s) => s.activo),
+        /* `data === null` = «todavía no publicaste», que NO es un error y
+           tampoco es oferta activa — el wrapper los distingue a propósito y
+           acá se respeta la distinción: sin fila, sin chip. */
+        guarderia: ofGuarderia.ok && (ofGuarderia.data?.activo ?? false),
       },
     });
   }, []);
@@ -1618,10 +1665,29 @@ export default function Hoy() {
      si significara algo. */
   const conFiltro =
     oficiosActivos !== null &&
-    [oficiosActivos.paseo, oficiosActivos.grooming, oficiosActivos.adiestramiento, oficiosActivos.vet].filter(Boolean)
-      .length >= 2;
+    [
+      oficiosActivos.paseo,
+      oficiosActivos.grooming,
+      oficiosActivos.adiestramiento,
+      oficiosActivos.vet,
+      oficiosActivos.guarderia,
+    ].filter(Boolean).length >= 2;
+  /* 🔴 **C-C · GUARDERÍA NO TIENE CITAS, Y ESO NO ES UN HUECO.** Una estadía
+     vive en su propia tabla; `oficioDe` mapea CITAS y sus cinco ramas son
+     paseo/grooming/adiestramiento/vet — ninguna cita va a decir 'guarderia'
+     jamás. ⇒ con el filtro en guardería la lista de citas queda **vacía por
+     construcción**, y lo que el prestador quiere ver —quiénes están hoy—
+     está en el bloque de presencia, que se queda.
+
+     *Es la única opción del filtro cuyo contenido NO vive en la lista de
+     abajo. Escribirlo acá y no sólo en el acta, porque el próximo que lea
+     `citas.filter(...)` con un valor que nunca matchea va a leer un bug.* */
   const citasVisibles =
-    !conFiltro || filtroOficio === 'todos' ? citas : citas.filter((c) => oficioDe(c) === filtroOficio);
+    !conFiltro || filtroOficio === 'todos'
+      ? citas
+      : filtroOficio === 'guarderia'
+        ? []
+        : citas.filter((c) => oficioDe(c) === filtroOficio);
   /* S85-C7: la vista opera sobre EL DÍA ELEGIDO, no sobre el día base.
      El fetch ya trae el rango entero, así que elegir otro día es un FILTRO —
      cero viaje nuevo (la plata es la única excepción, y por gate de servidor).
@@ -1884,29 +1950,29 @@ export default function Hoy() {
     forma.clave === 'omitida'
       ? undefined
       : forma.clave === 'quedan'
-        ? t('agenda.datoQuedan', { n: forma.n, hora: forma.hora })
+        ? t('agenda.datoQuedan', { count: forma.n, hora: forma.hora })
         : forma.clave === 'queda1'
           ? t('agenda.datoQueda1', { hora: forma.hora })
           : forma.clave === 'quedanSinHora'
-            ? t('agenda.datoQuedanSinHora', { n: forma.n })
+            ? t('agenda.datoQuedanSinHora', { count: forma.n })
             : forma.clave === 'queda1SinHora'
               ? t('agenda.datoQueda1SinHora')
               : forma.clave === 'completa'
                 ? t('agenda.datoCompleta')
                 : forma.clave === 'porCoordinar'
-                  ? t('agenda.datoPorCoordinar', { n: forma.n })
+                  ? t('agenda.datoPorCoordinar', { count: forma.n })
                   : /* S86-C · las dos del pasado */
                     forma.clave === 'pasadoPendientes'
                     ? forma.n === 1
                       ? t('agenda.datoPasadoPendiente1')
-                      : t('agenda.datoPasadoPendientes', { n: forma.n })
+                      : t('agenda.datoPasadoPendientes', { count: forma.n })
                     : forma.clave === 'sinCitas'
                       ? t('agenda.datoSinCitas')
                       : forma.clave === 'pasadoCerrado'
                       ? forma.n === 1
                         ? t('agenda.datoPasadoCerrado1')
-                        : t('agenda.datoPasadoCerradoN', { n: forma.n })
-                      : t('agenda.datoLibreConSemana', { n: forma.n });
+                        : t('agenda.datoPasadoCerradoN', { count: forma.n })
+                      : t('agenda.datoLibreConSemana', { count: forma.n });
 
   /* E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
      nombre, el saludo va SOLO (jamás inventado).
@@ -1951,7 +2017,7 @@ export default function Hoy() {
       atencionItems.push({
         clave: 'coordinar',
         icono: 'mes',
-        titulo: a.coordinar === 1 ? t('atencion.coordinar1') : t('atencion.coordinarN', { n: a.coordinar }),
+        titulo: a.coordinar === 1 ? t('atencion.coordinar1') : t('atencion.coordinarN', { count: a.coordinar }),
         // La bandeja YA existe y vive más abajo en esta misma portada: el
         // bloque no la duplica, la ANUNCIA. Por eso lleva a la pantalla de
         // coordinar de la primera, que es lo que el prestador va a hacer.
@@ -1963,7 +2029,7 @@ export default function Hoy() {
       atencionItems.push({
         clave: 'presupuestos',
         icono: 'presupuesto',
-        titulo: a.presupuestos === 1 ? t('atencion.presupuesto1') : t('atencion.presupuestoN', { n: a.presupuestos }),
+        titulo: a.presupuestos === 1 ? t('atencion.presupuesto1') : t('atencion.presupuestoN', { count: a.presupuestos }),
         onPress: () => router.push('/veterinaria/movimiento'),
       });
     }
@@ -1976,7 +2042,7 @@ export default function Hoy() {
       atencionItems.push({
         clave: 'abiertas',
         icono: 'caso',
-        titulo: a.abiertas === 1 ? t('atencion.abierta1') : t('atencion.abiertaN', { n: a.abiertas }),
+        titulo: a.abiertas === 1 ? t('atencion.abierta1') : t('atencion.abiertaN', { count: a.abiertas }),
         /* Lleva a la MÁS VIEJA. Si su cita no viaja (atención suelta sin
            cita), la fila NO se monta: una celda con chevron que no navega
            es un final mudo (Ley 23). */
@@ -2019,7 +2085,18 @@ export default function Hoy() {
     // sabe si es cero o si no se pudo leer, y eso sí es una ausencia.
     if (pantalla.estado !== 'listo') return null;
     const u = unidadesDelTecho(pantalla.oficios);
-    const n = citasHoySin.length;
+    /* 🔴 **C-C (S112-C) · LA ESTADÍA CUENTA COMO CARGA, y sin esto el chip
+       nuevo habría sido cosmética.** El techo contaba SÓLO citas — y una
+       estadía de guardería **no es una cita**: vive en su propia tabla y en
+       su propio lector. ⇒ un negocio de sólo guardería leía **«0»** con
+       cinco animales en la casa. *Ese número no estaba vacío: estaba
+       equivocado, que es peor — un cero medido se lee como «hoy no hay
+       nadie», y el bloque de abajo listaba cinco.*
+
+       `estadiasHoy` ya está filtrado por el DÍA EN VISTA (no por hoy), así
+       que el número sigue al día elegido igual que las citas: pararse en el
+       jueves no arrastra las estadías de hoy. */
+    const n = citasHoySin.length + (pantalla.oficios.guarderia ? estadiasHoy.length : 0);
 
     /* ① CARGA — tiempo si hay paseo; conteo si no. KEYS LITERALES, jamás
        armadas por concatenación: el diccionario está tipado para que una key
@@ -2036,7 +2113,9 @@ export default function Hoy() {
                   ? n === 1 ? t('techo.cargaTurno1') : t('techo.cargaTurnos')
                   : u.carga === 'consultas'
                     ? n === 1 ? t('techo.cargaConsulta1') : t('techo.cargaConsultas')
-                    : n === 1 ? t('techo.cargaSesion1') : t('techo.cargaSesiones'),
+                    : u.carga === 'sesiones'
+                      ? n === 1 ? t('techo.cargaSesion1') : t('techo.cargaSesiones')
+                      : n === 1 ? t('techo.cargaEstadia1') : t('techo.cargaEstadias'),
           };
 
     /* ② PLATA — TRES estados que NO se colapsan. La forma del contrato de B
@@ -2125,7 +2204,7 @@ export default function Hoy() {
                    decía literal (`plataDelDia: 'today'`). */
                 rotulo:
                   (p.sinPrecio ?? 0) > 0
-                    ? t('techo.plataParcial', { n: p.sinPrecio ?? 0 })
+                    ? t('techo.plataParcial', { count: p.sinPrecio ?? 0 })
                     : vistaEsHoy || diaVista === null
                       ? t('techo.plataDelDia')
                       : t('techo.plataDelDiaOtro', {
@@ -2151,7 +2230,9 @@ export default function Hoy() {
             ? v === 1 ? t('techo.vidasPaciente1') : t('techo.vidasPacientes')
             : u.vidas === 'alumnos'
               ? v === 1 ? t('techo.vidasAlumno1') : t('techo.vidasAlumnos')
-              : v === 1 ? t('techo.vidasMascota1') : t('techo.vidasMascotas'),
+              : u.vidas === 'huespedes'
+                ? v === 1 ? t('techo.vidasHuesped1') : t('techo.vidasHuespedes')
+                : v === 1 ? t('techo.vidasMascota1') : t('techo.vidasMascotas'),
     };
 
     return [carga, plataCol, vidas];
@@ -2684,7 +2765,19 @@ export default function Hoy() {
 
             *Que la pieza correcta ya existiera es lo que hace que esto sea
             montar y no construir.* ── */}
-        {pantalla.estado === 'listo' && estadiasHoy.length > 0 && (
+        {/* 🔴 **C-C (S112-C) · EL BLOQUE RESPETA EL FILTRO.** Con el chip de
+            guardería vivo, este bloque tenía que entrar al filtro como todo
+            lo demás: filtrando por veterinaria, seguía mostrando quién está
+            en la guardería. *No es ruido — es el filtro mintiendo: el
+            prestador pidió ver un oficio y la pantalla le muestra otro.*
+
+            Y al revés vale igual: filtrando por guardería, la lista de citas
+            queda vacía **a propósito** (ver `citasVisibles`) y ESTE bloque es
+            todo el contenido. Es la única opción del filtro cuyo contenido no
+            vive en la línea de abajo. */}
+        {pantalla.estado === 'listo' &&
+          estadiasHoy.length > 0 &&
+          (!conFiltro || filtroOficio === 'todos' || filtroOficio === 'guarderia') && (
           <View style={{ gap: spacing[2] }}>
             <Texto variante="seccion">{t('agenda.presenciaTitulo')}</Texto>
             {/* 🔴 **LA CABECERA DICE LA VERDAD, POR ESTADO.** Antes decía «3
@@ -2712,8 +2805,28 @@ export default function Hoy() {
                      acá sería un segundo viaje por foto para la misma
                      pantalla.* Sin foto, `AvatarMascota` cae a la cara de la
                      casa por especie. */
+                  /* 🔴 **H2 · LA FOTO NO LLEGABA PORQUE NO HAY FOTO.** La ruta
+                     sí viaja y sí se firma — A lo midió: `mascota_foto_url` es
+                     **`null` en las cinco** del día. *No era la resolución
+                     (`D-308`): era que no hay nada que resolver.*
+
+                     ⇒ Sin foto propia cae **la cara de la casa**, con la
+                     escalera entera: ruta de raza si la declaró, genérico de
+                     especie si no. A midió que **tres de cinco no tienen raza**,
+                     así que la mayoría cae al genérico — *y eso es el escalón
+                     correcto, no un fallback pobre.*
+
+                     ⏳ **Va por `fotoUrl` y no por `fotoDeEspecie` porque
+                     `FilaCita` no tiene ese slot** (`AvatarMascota` sí). La
+                     consecuencia está declarada y es la misma de siempre: la
+                     ilustración recibe el encuadre de retrato. Pedido a B. */
                   fotoUrl:
-                    e.mascotaFotoUrl === null ? undefined : urlsFotos.get(e.mascotaFotoUrl),
+                    (e.mascotaFotoUrl === null ? undefined : urlsFotos.get(e.mascotaFotoUrl)) ??
+                    caraDeMascotaPorRuta({
+                      especie: e.mascotaEspecie,
+                      rutaImagen: e.razaRutaImagen,
+                    }) ??
+                    undefined,
                   especie: esEspecie(e.mascotaEspecie) ? e.mascotaEspecie : undefined,
                 }}
                 cara
@@ -2914,7 +3027,7 @@ export default function Hoy() {
             {porCoordinar.length > 3 && !verTodasCoord && (
               <Boton
                 variante="compacto"
-                etiqueta={t('agenda.verLasN', { n: porCoordinar.length })}
+                etiqueta={t('agenda.verLasN', { count: porCoordinar.length })}
                 onPress={() => setVerTodasCoord(true)}
               />
             )}
@@ -2960,7 +3073,7 @@ export default function Hoy() {
                 sección cerrada, el conteo ES el dato (§15b.3). */}
             <SeccionDesplegable
               titulo={t('agenda.yaAtendidasTitulo')}
-              resumen={t('agenda.yaAtendidasResumen', { n: resto.filter(esAtendida).length })}
+              resumen={t('agenda.yaAtendidasResumen', { count: resto.filter(esAtendida).length })}
               abierta={atendidasAbierto}
               onAlternar={() => setAtendidasAbierto((v) => !v)}
             >

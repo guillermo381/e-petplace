@@ -34,6 +34,7 @@ import { calcularMomentoVital, edadEnMeses, type MomentoVital } from '@epetplace
 import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 
 type Traductor = ReturnType<typeof useTraduccion>['t'];
 type Pregunta = 'edad' | 'carnet' | 'actividad';
@@ -135,7 +136,15 @@ export function CoachHoja({
       <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[2], gap: spacing[4] }}>
         {/* anclada: la conversación abre sabiendo de quién hablas */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-          <AvatarMascota nombre={mascota.nombre} tamano="sm" />
+          {/* C-B (S112-C) · la cara de su especie, jamás la inicial. El Coach
+              HABLA DE ESTA MASCOTA — una «J» sobre un círculo dice que falta
+              un dato; la cara de su especie dice de quién estamos hablando.
+              El dato ya venía en `MascotaResumen`: no faltaba, no se pedía. */}
+          <AvatarMascota
+            nombre={mascota.nombre}
+            fotoUrl={caraDeMascotaPorRuta({ especie: mascota.especie, rutaImagen: mascota.raza_ruta_imagen })}
+            tamano="sm"
+          />
           <Text
             accessibilityRole="header"
             style={{ flex: 1, fontFamily: typography.family.sans.light, fontSize: typography.size.lg, color: theme.text.primary }}

@@ -111,6 +111,15 @@ export type MiPrestador = Pick<
   | 'nombre_comercial'
   | 'tipo'
   | 'country_code'
+  /* 🔴 S112-A · LA ZONA CON LA QUE SE PIDE «HOY». **No es el reloj del
+     teléfono**: a las 23:01 de Guayaquil el UTC ya corrió el día, el lector
+     devuelve las filas del día siguiente **en otro estado y sin error**, y eso
+     se lee como defecto de la pantalla. *Cinco horas de cada veinticuatro la
+     app y la base hablan de días distintos.*
+
+     ⚠️ El MOTOR sigue calculando con la constante de la casa (`D-1007`): esta
+     columna es para la APP. */
+  | 'zona_horaria'
   | 'cuenta_comercial_id'
   | 'direccion'
   | 'ciudad'

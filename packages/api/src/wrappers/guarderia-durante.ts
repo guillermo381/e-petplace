@@ -492,3 +492,71 @@ export async function registrarBitacoraGuarderia(params: {
     },
   };
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA BITÁCORA DE UNA ESTADÍA — «SU DÍA», mientras dura (firma founder, 3-sep)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface ChipDeBitacora {
+  codigo: string;
+  /** Voz de familia, **resuelta en el motor**: el idioma sale de
+   *  `cat_conductas_bitacora` y esa tabla no la lee la app. */
+  nombreFamilia: string;
+  nombreFamiliaEn: string | null;
+}
+
+export interface AnotacionDeBitacora {
+  eventoId: string;
+  mascotaId: string;
+  texto: string | null;
+  anotadaEn: string;
+  /**
+   * 🔴 **QUIÉN ANOTÓ, y de acá sale la voz.** `null` = lo escribió la familia
+   * ⇒ «anotaste». Con valor = lo escribió el cuidador ⇒ «el cuidador anotó».
+   * *El tipo del evento es el mismo para las dos manos: si la voz se decidiera
+   * por el tipo, le diría «anotaste» a una familia sobre algo que no escribió.*
+   */
+  prestadorId: string | null;
+  /** El nombre del negocio que anotó, cuando fue el cuidador. */
+  autor: string | null;
+  chips: ChipDeBitacora[];
+}
+
+/**
+ * La bitácora del día de una estadía, **con sus chips adentro** — misma forma
+ * que la del timeline, a propósito: *la ficha del durante y el expediente
+ * pintan con la misma pieza y no hay dos maneras de mostrar lo mismo.*
+ *
+ * La puerta es **la misma que decide si esa persona puede ver a la mascota** —
+ * no una regla nueva. Rojos medidos: familia ajena → lista vacía · `anon` →
+ * `permission denied`.
+ */
+export async function obtenerBitacoraDeEstadia(
+  estadiaId: string,
+): Promise<ResultadoWrapper<AnotacionDeBitacora[], CodigoErrorGuarderiaDurante>> {
+  const { data, error } = await getClient().rpc('obtener_bitacora_de_estadia', {
+    p_estadia_id: estadiaId,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallaCodigo('datos_inconsistentes');
+  return {
+    ok: true,
+    data: (data as Record<string, unknown>[]).map((f) => ({
+      eventoId: String(f.evento_id),
+      mascotaId: String(f.mascota_id),
+      texto: typeof f.texto === 'string' ? f.texto : null,
+      anotadaEn: String(f.anotada_en),
+      prestadorId: typeof f.prestador_id === 'string' ? f.prestador_id : null,
+      autor: typeof f.autor === 'string' ? f.autor : null,
+      chips: Array.isArray(f.chips)
+        ? (f.chips as Record<string, unknown>[]).map((c) => ({
+            codigo: String(c.codigo),
+            nombreFamilia: String(c.nombreFamilia ?? c.codigo),
+            nombreFamiliaEn:
+              typeof c.nombreFamiliaEn === 'string' ? c.nombreFamiliaEn : null,
+          }))
+        : [],
+    })),
+  };
+}
