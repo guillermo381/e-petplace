@@ -5,24 +5,25 @@
  * pantalla, y las tres cosas que la contestan: **en qué momento del día está**,
  * **qué le pasó** (las fotos y los clips) y, mientras viaja, **dónde va**.
  *
- * ═══ 🔴 ESTADO REAL — leelo antes de tocarla ══════════════════════════════
+ * ═══ ESTADO REAL — leelo antes de tocarla ════════════════════════════════
+ * ⏪ **S112-C · ACÁ VIVÍA UN BLOQUE VENCIDO Y SE CONTRADECÍA CON SU PROPIO
+ * CUERPO.** Decía *«la estadía NO se puede leer»* y *«por eso NO se cableó la
+ * entrada desde el hub»* — las dos cosas dejaron de ser ciertas el 29-ago,
+ * cuando A publicó `obtenerMisEstadiasGuarderia`, y **dos lápidas de este mismo
+ * archivo ya lo decían treinta líneas más abajo**.
  *
- * **Está construida y todavía NO es alcanzable, y las dos mitades son
- * deliberadas** (molde literal de `pedidos/serie/[serieId].tsx`, S103-C):
+ * > ### Un encabezado que se contradice con su cuerpo es peor que uno vencido a secas: quien lee de arriba hacia abajo se lleva la versión falsa y deja de leer.
  *
- * · ✅ **LA MEDIA ES REAL.** `obtenerMediaDeMiMascota(mascotaId, fecha)` existe
- *   y se llama de verdad — la mitad que el motor sí sostiene funciona hoy.
- *   Y su recorte es del SERVER: *«los otros animales de la foto no viajan —
- *   ni el id, ni el nombre, ni el conteo»*. **Lo que no viaja no se filtra mal.**
- * · ❌ **LA ESTADÍA NO SE PUEDE LEER.** Medido el 29-ago: no existe lector de
- *   estadías del lado de la familia. `cargarEstadia` es **el enchufe pendiente
- *   con nombre**, y su contrato está en `lib/guarderia/estadia-en-curso.ts`.
+ * **Medido hoy: la pantalla es alcanzable desde DOS lugares** — `hogar/index`
+ * y el hub de guardería. La media es real (`obtenerMediaDeMiMascota`), con su
+ * recorte del SERVER: *los otros animales de la foto no viajan — ni el id, ni
+ * el nombre, ni el conteo.* **Lo que no viaja no se filtra mal.**
  *
- * 🔴 **Y POR ESO NO SE CABLEÓ LA ENTRADA DESDE EL HUB.** *Una fila que lleva a
- * una pantalla que no puede leer nada es un callejón con nombre bonito* — el
- * precedente es de esta casa y su frase es literal. **La entrada nace con el
- * lector, en la misma línea.** Hasta entonces la ruta se alcanza a mano, y así
- * se gatea.
+ * 🔴 **LO QUE SIGUE FALTANDO, y es lo único: LA BITÁCORA.** El prestador marca
+ * conductas (`registrarBitacoraGuarderia`) y **no hay lector de esas conductas
+ * del lado de la familia** — ni acotado a la estadía, ni con sus chips en el
+ * expediente. El evento sí nace y llega al expediente; lo que no llega es
+ * *qué le pasó a la mascota*. Pedido a A, por nombre.
  *
  * ── 🔴 EL PUNTO VIVO: UNA REGLA QUE NO SE NEGOCIA ────────────────────────
  *
@@ -56,21 +57,22 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   ActaDeEntrega,
   Boton,
-  type Conformidad,
+  Campo,
+  ClipSesion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Campo,
   Hoja,
   MapaRecorrido,
   MarcaDeMapa,
-  Tarjeta,
-  Texto,
-  VisorFoto,
   radius,
   spacing,
+  Tarjeta,
+  Texto,
+  type Conformidad,
   useTheme,
+  VisorFoto,
 } from '@epetplace/ui';
 import {
   confirmarActaGuarderia,
@@ -296,7 +298,21 @@ export default function DuranteGuarderia() {
     [acta, enviando, reserva],
   );
 
+  /* 🔴 **H4 (S112-C) · LOS CLIPS SE CAÍAN ACÁ, EN SILENCIO.** Este filtro
+     existía solo, sin nota, y `MediaGuarderia.tipo` es `'foto' | 'clip'` ⇒ todo
+     clip del durante **desaparecía** del lado de la familia.
+
+     Y no era «faltaba algo»: **el contador decía `media.lista.length`, que SÍ
+     cuenta los clips, y la grilla dibujaba sólo las fotos.** La familia leía
+     «5 momentos» y veía 3. *Un número que no coincide con lo que hay debajo es
+     peor que un número ausente: el primero se descubre contando, y para
+     entonces ya no se le cree a la pantalla.*
+
+     ⇒ La separación se queda —**una grilla de miniaturas no puede reproducir un
+     clip**— pero ahora las dos mitades se dibujan, y el contador vuelve a ser
+     cierto porque cuenta lo mismo que se muestra. */
   const fotos = media.fase === 'listo' ? media.lista.filter((m) => m.tipo === 'foto') : [];
+  const clips = media.fase === 'listo' ? media.lista.filter((m) => m.tipo === 'clip') : [];
 
   const vozDelEstado = useCallback(
     (e: EstadiaDeMiMascota): string =>
@@ -544,6 +560,16 @@ export default function DuranteGuarderia() {
                     </Pressable>
                   ))}
                 </View>
+                {/* LOS CLIPS, con la pieza de la casa (`ClipSesion`, S63): trae
+                    su póster, su duración y su reproductor. *La misma pieza que
+                    el parte de adiestramiento y el durante del prestador — un
+                    clip del mismo negocio no puede verse distinto según quién
+                    lo mire.* Van DESPUÉS de las fotos y no intercalados porque
+                    su tamaño es de tarjeta, no de miniatura: mezclarlos rompería
+                    la grilla sin ganar nada. */}
+                {clips.map((m) => (
+                  <ClipSesion key={m.mediaId} uri={m.archivoUrl} duracionSegundos={m.duracionS} />
+                ))}
               </>
             )}
           </View>

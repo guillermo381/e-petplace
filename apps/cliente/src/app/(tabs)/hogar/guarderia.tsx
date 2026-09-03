@@ -563,15 +563,16 @@ export default function LogGuarderia() {
 
             {/* 🔴 DOS VACÍOS DISTINTOS, Y LA DIFERENCIA NO ES DE ESTILO.
 
-                · **«Sin estadías agendadas»** (firma del founder) es la verdad
-                  cuando el lector respondió y no había ninguna.
-                · **«Todavía no podemos mostrarte»** es la verdad HOY: el lector
-                  **no existe**, así que no sabemos si hay o no.
+                ⏪ **S112-C · ACÁ VIVÍA EL RAZONAMIENTO DE LOS DOS VACÍOS, Y SE
+                CONTRADECÍA CON EL COMENTARIO DE ABAJO EN CINCO LÍNEAS**: éste
+                decía *«el lector NO existe»* y el siguiente *«el lector existe,
+                así que decir sin estadías ES la verdad»*. **Gana el de abajo,
+                que es el que describe el código.**
 
-                *Decir el primero sobre un lector que no existe sería mentir con
-                cara de dato — y el día que el lector llegue, nadie sabría que la
-                pantalla estuvo mintiendo.* **El de la firma está construido y se
-                enciende solo** cuando `cargarEstadias` devuelva una lista. */}
+                *El razonamiento sigue siendo correcto y por eso se conserva su
+                regla, no su diagnóstico:* decir «sin estadías» sobre un lector
+                que no existe sería mentir con cara de dato. Lo que venció es el
+                hecho, no la ley. */}
             {/* LA LISTA — el vacío de la firma del founder ya es el que se
                 pinta: **el lector existe, así que decir «sin estadías» ES la
                 verdad.** *El vacío honesto de «todavía no podemos mostrarte»
