@@ -292,6 +292,32 @@ export const prestadorEs = {
     despachoTitulo: 'Pedido {{orden}}',
   },
   agenda: {
+    /* G10 · La cabecera dice la verdad POR ESTADO. Un total («3 animales hoy»)
+       es cierto y esconde justo la diferencia que decide qué hace el cuidador
+       ahora. Las partes en cero no se dicen: «0 adentro» es ruido que hay que
+       leer para descartar. */
+    presenciaAdentro_one: '{{count}} adentro',
+    presenciaAdentro_other: '{{count}} adentro',
+    presenciaEnViaje_one: '{{count}} en viaje',
+    presenciaEnViaje_other: '{{count}} en viaje',
+    presenciaReservados_one: '{{count}} reservado',
+    presenciaReservados_other: '{{count}} reservados',
+    presenciaAdentro: '{{count}} adentro',
+    presenciaEnViaje: '{{count}} en viaje',
+    presenciaReservados: '{{count}} reservados',
+    /* El estado CON SU HORA, y la hora sale del sello de ESE estado. Sin sello
+       se dice el estado a secas: una hora inventada se lee como dato y miente. */
+    estadiaAdentroDesde: 'Adentro desde {{hora}}',
+    estadiaAdentro: 'Adentro',
+    estadiaEnCaminoDesde: 'En camino desde {{hora}}',
+    estadiaEnCamino: 'En camino',
+    estadiaDeVueltaDesde: 'De vuelta desde {{hora}}',
+    estadiaDeVuelta: 'De vuelta',
+    estadiaEntregadaA: 'Entregado a las {{hora}}',
+    estadiaEntregada: 'Entregado',
+    estadiaNoRecogida: 'No lo recogieron',
+    estadiaCancelada: 'Cancelada',
+    estadiaReservada: 'Reservado',
     presenciaTitulo: 'Quiénes están hoy',
     presenciaUno: '1 animal en guardería',
     presenciaN: '{{n}} animales en guardería',
@@ -4248,7 +4274,12 @@ export const prestadorEs = {
     comoSePorto: 'Cómo se portó',
     sacarFoto: 'Sacar una foto',
     fotoRazonViaje: 'Las fotos se toman en las instalaciones. Cuando vuelvas, vas a poder.',
-    fotoRazonNadieAdentro: 'Todavía no hay nadie adentro. En cuanto llegue el primero, vas a poder.',
+    /* ⏪ Reemplaza a `fotoRazonNadieAdentro`, que describía el ESTADO
+       («todavía no hay nadie adentro») en vez del ACTO. Letra del founder: una
+       razón que nombra lo que hay que hacer destraba; una que nombra lo que
+       falta sólo pide esperar. */
+    fotoRazonLlegadaDe: 'Se habilita cuando registres la llegada de {{nombre}}',
+    fotoRazonPrimeraLlegada: 'Se habilita cuando registres la primera llegada',
     subir: 'Subir',
     bajar: 'Bajar',
     salgoADevolver: 'Salgo a devolver',
@@ -4521,6 +4552,55 @@ export const prestadorEs = {
     reintentar: 'Probar de nuevo',
   },
   portalHilo: {
+    /* C6 · «Ver postulación». Las respuestas viven en SU pantalla y no en el
+       hilo: lo que se lee una vez para decidir no va en el mismo lugar que lo
+       que se lee todos los días. */
+    verPostulacion: 'Ver postulación',
+    postulacionTitulo: 'Su postulación',
+    postulacionSinDatos: 'Esta solicitud no trae formulario.',
+    postHogar: 'Quiénes viven en casa',
+    /* Los menores van POR RANGO, jamás por nombre ni edad exacta (§5.9): el
+       motor lo rechaza y la tabla tiene un CHECK que lo hace inexpresable. */
+    postAdultos_one: '{{count}} adulto',
+    postAdultos_other: '{{count}} adultos',
+    postAdultos: '{{count}} adultos',
+    postMenores05_one: '{{count}} de 0 a 5',
+    postMenores05_other: '{{count}} de 0 a 5',
+    postMenores05: '{{count}} de 0 a 5',
+    postMenores612_one: '{{count}} de 6 a 12',
+    postMenores612_other: '{{count}} de 6 a 12',
+    postMenores612: '{{count}} de 6 a 12',
+    postMenores1317_one: '{{count}} de 13 a 17',
+    postMenores1317_other: '{{count}} de 13 a 17',
+    postMenores1317: '{{count}} de 13 a 17',
+    postVivienda: 'Dónde vive',
+    vivienda_casa_con_patio: 'Casa con patio',
+    vivienda_casa_sin_patio: 'Casa sin patio',
+    vivienda_departamento: 'Departamento',
+    vivienda_otro: 'Otro',
+    postHorasSolo: 'Cuántas horas queda solo',
+    postHoras_one: '{{count}} hora al día',
+    postHoras_other: '{{count}} horas al día',
+    postHoras: '{{count}} horas al día',
+    postOtrosAnimales: 'Otros animales en casa',
+    postExperiencia: 'Su experiencia',
+    postMotivo: 'Por qué quiere adoptar',
+    /* §1 · las cinco etapas, en voz de REFUGIO. Mismos hechos, otro asiento:
+       la familia lee «Estás en», el refugio lee «La solicitud está en». */
+    etapaEnviada: 'Enviada',
+    etapaEnConversacion: 'En conversación',
+    etapaAceptada: 'Aceptada',
+    etapaActaFirmada: 'Acta firmada',
+    etapaUnaVidaNueva: 'Una vida nueva',
+    laSolicitudEstaEn: 'La solicitud está en: {{etapa}}',
+    escaleraAlternar: 'Ver los pasos de la solicitud',
+    hoy: 'Hoy',
+    ayer: 'Ayer',
+    noSeEnvio: 'No se envió · Reintentar',
+    escribirlePlaceholder: 'Escríbele a {{quien}}',
+    nuevos_one: '{{count}} mensaje nuevo',
+    nuevos_other: '{{count}} mensajes nuevos',
+    nuevos: '{{count}} mensajes nuevos',
     // El MISMO hecho que ve la familia, dicho desde acá: neutro y sin culpa
     // (§10.6). «Se bajó» nombra el acto; quién lo hizo ya está en la cabecera.
     estadoDesistida: 'La familia retiró su postulación',

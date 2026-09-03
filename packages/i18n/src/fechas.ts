@@ -81,3 +81,51 @@ export function fechaCortaMono(iso: string, idioma: IdiomaSoportado): string {
     .toLowerCase();
   return `${String(d).padStart(2, '0')} ${mes} ${a}`;
 }
+
+/**
+ * LA HORA CORTA DE UN MENSAJE — «14:32» (S112-C · §2.3).
+ *
+ * Va bajo el último mensaje de cada grupo. **Sin segundos y sin fecha**: la
+ * fecha ya la dice el separador de día, y repetirla en cada burbuja es el ruido
+ * con formato de dato que la Ley 16 saca.
+ */
+export function horaCortaDeMensaje(iso: string, idioma: IdiomaSoportado): string {
+  return new Date(iso).toLocaleTimeString(idioma === 'en' ? 'en-US' : 'es-EC', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+/**
+ * EL SEPARADOR DE DÍA — «Hoy» · «Ayer» · «12 sep» (S112-C · §2.3).
+ *
+ * 🔴 **Compara por DÍA LOCAL, no por diferencia de milisegundos.** Restar 24 h
+ * dice «ayer» sobre algo de anteayer a las 23:00 y «hoy» sobre algo de ayer a
+ * las 23:59. *La pregunta no es cuánto tiempo pasó: es en qué día del
+ * calendario de quien mira ocurrió.*
+ *
+ * Las voces de «Hoy» y «Ayer» llegan por parámetro: **este paquete no tiene
+ * diccionario de producto**, y la casa que lee escribe sus palabras.
+ */
+export function etiquetaDeDiaDeMensaje(
+  iso: string,
+  idioma: IdiomaSoportado,
+  voces: { hoy: string; ayer: string },
+): string {
+  const d = new Date(iso);
+  const hoy = new Date();
+  const aClave = (x: Date) => `${x.getFullYear()}-${x.getMonth()}-${x.getDate()}`;
+  if (aClave(d) === aClave(hoy)) return voces.hoy;
+  const ayer = new Date(hoy);
+  ayer.setDate(hoy.getDate() - 1);
+  if (aClave(d) === aClave(ayer)) return voces.ayer;
+  /* Con año sólo si NO es este año: «12 sep» dentro del año en curso, «12 sep
+     2025» fuera. *Un año repetido en cada separador de una conversación de esta
+     semana es dato que no discrimina nada.* */
+  const mismoAnio = d.getFullYear() === hoy.getFullYear();
+  return d.toLocaleDateString(idioma === 'en' ? 'en-US' : 'es-EC', {
+    day: 'numeric',
+    month: 'short',
+    ...(mismoAnio ? {} : { year: 'numeric' }),
+  });
+}

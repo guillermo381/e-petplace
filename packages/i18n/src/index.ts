@@ -13,6 +13,16 @@ export { idiomaDelDispositivo } from './deteccion';
 export { ProveedorI18n } from './ProveedorI18n';
 export { crearUseTraduccion, type TraductorTipado } from './useTraduccion';
 export type { ClaveDe, Diccionario, Espejo, RecursosPorIdioma } from './tipos';
-export { diaSemanaCorto, fechaCortaMono, fechaDiaSemanaHumana, fechaLargaHumana } from './fechas';
+export {
+  diaSemanaCorto,
+  /* S112-C · los dos formatos del hilo de chat. Viven acá y no en cada app
+     porque las DOS superficies los necesitan idénticos: si la familia y el
+     refugio formatearan la hora distinto, el mismo mensaje diría dos cosas. */
+  etiquetaDeDiaDeMensaje,
+  fechaCortaMono,
+  fechaDiaSemanaHumana,
+  fechaLargaHumana,
+  horaCortaDeMensaje,
+} from './fechas';
 // S82-A r15 — EL RIEL DE MONEDA (el país manda la moneda, el idioma el formato)
 export { monto, montoConCodigo, precioPorKg, MONEDA_FALLBACK, type ConfigMoneda } from './moneda';

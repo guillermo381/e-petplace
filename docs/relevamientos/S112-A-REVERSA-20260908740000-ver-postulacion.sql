@@ -1,0 +1,2 @@
+-- REVERSA de 20260908740000 · el refugio deja de recibir las respuestas del
+-- formulario en la lista. «Ver postulación» queda sin dato. Sin datos que perder.

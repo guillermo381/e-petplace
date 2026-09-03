@@ -106,7 +106,7 @@ import {
   type CitaAgendaPaseo,
   type CitaPorCoordinar,
 } from '@epetplace/api';
-import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
+import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado, horaCortaDeMensaje, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
 import { TarjetaVentas } from '@/components/tarjeta-ventas';
@@ -576,6 +576,95 @@ function agruparSalidas(citas: CitaAgendaPaseo[], sinAgrupar: Set<string>): Item
   }
   // Un bloque de UNA cita no es salida: vuelve a fila simple.
   return items.map((i) => (i.tipo === 'salida' && i.citas.length === 1 ? { tipo: 'cita', cita: i.citas[0]! } : i));
+}
+
+/** ⭐ **LA FILA «Conocer a X», UNA SOLA VEZ.** La consumen la cita y la estadía
+ *  de guardería: es el segundo piso de las dos cartas, con su separador y su
+ *  chevron. *Dos copias serían dos filas que se separan la primera vez que
+ *  alguien toque una — y `N3` ya cobró ese intento contando el separador de
+ *  más.* */
+function filaConocer(
+  mascotaId: string,
+  nombre: string,
+  t: (k: never, o?: Record<string, string | number>) => string,
+  nav: { push: (a: { pathname: '/mascota/[mascotaId]'; params: { mascotaId: string } }) => void },
+  detalle?: string,
+): React.ReactNode {
+  return (
+    <>
+      <Separador />
+      <CeldaNavegacion
+        icono="carnet"
+        registro="aa"
+        titulo={t('agenda.conocerMascota' as never, { nombre })}
+        detalle={detalle}
+        onPress={() => nav.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId } })}
+      />
+    </>
+  );
+}
+
+/* ═══ G10 · LAS DOS VOCES DE LA PRESENCIA ═══════════════════════════════════
+
+   Viven fuera del componente porque **no dependen de nada de él**: son
+   derivación pura sobre las estadías del día. */
+
+/** «2 adentro · 3 reservados» — y **sólo las partes que existen**.
+ *
+ *  🔴 Un total («3 animales hoy») es cierto y no sirve: *esconde justo la
+ *  diferencia que decide qué hace el cuidador ahora.* Y un «0 adentro» es ruido
+ *  que hay que leer para descartar, así que las partes en cero no se dicen. */
+function vozPresencia(
+  estadias: readonly EstadiaEnRango[],
+  t: (k: never, o?: Record<string, string | number>) => string,
+): string {
+  const adentro = estadias.filter((e) => e.estado === 'en_guarderia').length;
+  const reservados = estadias.filter((e) => e.estado === 'reservada').length;
+  const enViaje = estadias.filter(
+    (e) => e.estado === 'recogida_en_curso' || e.estado === 'retorno_en_curso',
+  ).length;
+  const partes: string[] = [];
+  if (adentro > 0) partes.push(t('agenda.presenciaAdentro' as never, { n: adentro }));
+  if (enViaje > 0) partes.push(t('agenda.presenciaEnViaje' as never, { n: enViaje }));
+  if (reservados > 0) partes.push(t('agenda.presenciaReservados' as never, { n: reservados }));
+  /* Si ninguna parte existe, el día tiene estadías en estados terminales
+     —entregadas, canceladas—: se dice el total en vez de una línea vacía. */
+  return partes.length > 0
+    ? partes.join(' · ')
+    : t('agenda.presenciaN' as never, { n: estadias.length });
+}
+
+/** «Adentro desde 08:12» · «En camino desde 07:40» · «Reservado».
+ *
+ *  🔴 **La hora sale del sello QUE CORRESPONDE A ESE ESTADO**, no de uno solo:
+ *  *una hora que no es la del estado que se nombra es peor que ninguna — se lee
+ *  como dato y miente.* Y sin sello se dice el estado a secas, en vez de
+ *  inventar una hora. */
+function vozEstadoEstadia(
+  e: EstadiaEnRango,
+  t: (k: never, o?: Record<string, string | number>) => string,
+  idioma: 'es' | 'en',
+): string {
+  const hora = (iso: string | null) => (iso === null ? null : horaCortaDeMensaje(iso, idioma));
+  if (e.estado === 'en_guarderia') {
+    const h = hora(e.llegadaEn);
+    return h === null ? t('agenda.estadiaAdentro' as never) : t('agenda.estadiaAdentroDesde' as never, { hora: h });
+  }
+  if (e.estado === 'recogida_en_curso') {
+    const h = hora(e.aBordoEn);
+    return h === null ? t('agenda.estadiaEnCamino' as never) : t('agenda.estadiaEnCaminoDesde' as never, { hora: h });
+  }
+  if (e.estado === 'retorno_en_curso') {
+    const h = hora(e.retornoEn);
+    return h === null ? t('agenda.estadiaDeVuelta' as never) : t('agenda.estadiaDeVueltaDesde' as never, { hora: h });
+  }
+  if (e.estado === 'entregada') {
+    const h = hora(e.entregadaEn);
+    return h === null ? t('agenda.estadiaEntregada' as never) : t('agenda.estadiaEntregadaA' as never, { hora: h });
+  }
+  if (e.estado === 'no_recogida') return t('agenda.estadiaNoRecogida' as never);
+  if (e.estado === 'cancelada') return t('agenda.estadiaCancelada' as never);
+  return t('agenda.estadiaReservada' as never);
 }
 
 function FilaCita({
@@ -1299,7 +1388,14 @@ export default function Hoy() {
     const paths = citas
       .map((c) => c.mascota?.foto_url)
       .filter((p): p is string => typeof p === 'string' && p.length > 0);
-    if (paths.length > 0) setUrlsFotos(await resolverUrlsFotos(paths));
+    /* ⭐ **G10 · LAS ESTADÍAS FIRMAN EN LA MISMA PASADA.** Sus caras entran a
+       este mismo mapa en vez de pedir otro viaje: la carta de guardería usa la
+       misma pieza que la cita, así que **usa la misma fuente de caras**. */
+    const pathsEstadias = (rEst.ok ? rEst.data : [])
+      .map((e) => e.mascotaFotoUrl)
+      .filter((x): x is string => typeof x === 'string' && x.length > 0);
+    const todas = [...paths, ...pathsEstadias];
+    if (todas.length > 0) setUrlsFotos(await resolverUrlsFotos(todas));
     // S70-B2-v2: la bandeja "Por coordinar" (D-439) — solo con cuenta; vacía si no.
     let porCoordinar: CitaPorCoordinar[] = [];
     if (cuentaR.ok && cuentaR.data) {
@@ -1485,19 +1581,12 @@ export default function Hoy() {
   const accionesDe = (c: CitaAgendaPaseo): React.ReactNode => {
     const m = c.mascota;
     if (!m) return undefined;
-    return (
-      <>
-        <Separador />
-        {m !== null && m !== undefined && (
-          <CeldaNavegacion
-            icono="carnet"
-            registro="aa"
-            titulo={t('agenda.conocerMascota', { nombre: m.nombre })}
-            detalle={esPrimera(m.id) ? t('agenda.primeraVez') : undefined}
-            onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
-          />
-        )}
-      </>
+    return filaConocer(
+      m.id,
+      m.nombre,
+      t,
+      router,
+      esPrimera(m.id) ? t('agenda.primeraVez') : undefined,
     );
   };
 
@@ -2576,23 +2665,71 @@ export default function Hoy() {
             Y el vocabulario es el de sus cuatro hermanas y el de la baldosa de
             ATENDER: la guardería cuenta **presencias, no actos** — «3 animales
             hoy», jamás «3 guarderías». */}
+        {/* ═══ G10 · CADA ANIMAL DEL DÍA, EN LA CARTA DE LAS CITAS ═════════
+
+            ⏪ **ACÁ HABÍA UN `CeldaNavegacion` POR MASCOTA**: un rótulo con su
+            glifo y un chevron, sobre el papel. Al lado de las citas —que son
+            cartas blancas con la cara del animal, su estado y su fila de
+            «Conocer»— **la guardería se leía como una lista de otra cosa**.
+
+            Voz del founder: *«cada animal del día se ve como se ven las citas en
+            el Home… **la misma pieza de carta que las citas, no otra**»*.
+
+            🔑 **Es `FilaCitaUi`, la misma de las cuatro hermanas.** No hay pieza
+            nueva y no hacía falta: `FilaAnimalDelDia` no existe —B la declaró
+            sin construir, con razón: *pedir una pieza con un contrato que uno
+            está adivinando es cómo nacen las piezas que nadie monta*— y **la
+            carta de cita ya tenía todos los slots**: la cara, el estado, y
+            `acciones` para el segundo piso.
+
+            *Que la pieza correcta ya existiera es lo que hace que esto sea
+            montar y no construir.* ── */}
         {pantalla.estado === 'listo' && estadiasHoy.length > 0 && (
           <View style={{ gap: spacing[2] }}>
             <Texto variante="seccion">{t('agenda.presenciaTitulo')}</Texto>
-            <Texto variante="apoyo">
-              {estadiasHoy.length === 1
-                ? t('agenda.presenciaUno')
-                : t('agenda.presenciaN', { n: estadiasHoy.length })}
-            </Texto>
+            {/* 🔴 **LA CABECERA DICE LA VERDAD, POR ESTADO.** Antes decía «3
+                animales hoy», que es cierto y **no sirve**: el cuidador necesita
+                saber cuántos ya llegaron y cuántos faltan, que es lo que decide
+                qué hace ahora. *Un total esconde justo la diferencia que
+                importa.*
+                Las partes se dicen **sólo si existen**: con nadie adentro, «0
+                adentro» es ruido que hay que leer para descartar. */}
+            <Texto variante="apoyo">{vozPresencia(estadiasHoy, t)}</Texto>
             {estadiasHoy.map((e) => (
-              <CeldaNavegacion
+              <FilaCitaUi
                 key={e.estadiaId}
-                icono="guarderia"
+                oficio="guarderia"
                 titulo={e.mascotaNombre}
+                /* El estado CON SU HORA: «adentro desde 08:12». La hora sale del
+                   sello que corresponde a ese estado —no de uno solo—, porque
+                   *una hora que no es la del estado que se nombra es peor que
+                   ninguna: se lee como dato y miente.* */
+                subtitulo={vozEstadoEstadia(e, t, obtenerIdiomaActual())}
+                mascota={{
+                  nombre: e.mascotaNombre,
+                  /* La cara sale del MISMO mapa que las citas: el Home ya
+                     firma sus rutas en una sola pasada. *Un segundo resolvedor
+                     acá sería un segundo viaje por foto para la misma
+                     pantalla.* Sin foto, `AvatarMascota` cae a la cara de la
+                     casa por especie. */
+                  fotoUrl:
+                    e.mascotaFotoUrl === null ? undefined : urlsFotos.get(e.mascotaFotoUrl),
+                  especie: esEspecie(e.mascotaEspecie) ? e.mascotaEspecie : undefined,
+                }}
+                cara
+                direccion="derecha"
                 /* «Toco una estadía y llego a donde ya llegaba» (firma): el día
-                   de guardería ya existe y se alcanza desde NEGOCIO. No se
-                   construye pantalla nueva. */
+                   de guardería ya existe. No se construye pantalla nueva. */
                 onPress={() => router.push('/guarderia/dia')}
+                /* El segundo piso, igual que en la cita: la fila «Conocer a X»
+                   con su chevron, detrás de su separador. */
+                /* La MISMA fila que la cita, por el MISMO helper. ⏪ Acá había
+                   una copia con su propio `<Separador />`, y `N3` la cazó: era
+                   el cuarto separador literal del archivo. *El rojo señaló el
+                   síntoma —un separador de más— y lo que había debajo era una
+                   duplicación: la fila «Conocer a X» escrita dos veces.* Se
+                   extrae y las dos la consumen. */
+                acciones={filaConocer(e.mascotaId, e.mascotaNombre, t, router)}
               />
             ))}
           </View>

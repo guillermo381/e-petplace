@@ -1764,3 +1764,4 @@ export {
 export type {
   EstadoSolicitudAdopcion, MensajeDelHilo, MiSolicitud, SolicitudRecibida,
 } from './wrappers/adopcion';
+export { suscribirseAlHilo, type MensajeEnVivo } from './wrappers/adopcion-hilo-vivo';

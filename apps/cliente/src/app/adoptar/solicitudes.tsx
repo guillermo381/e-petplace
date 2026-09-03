@@ -20,6 +20,7 @@ import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { leerEscalera } from '@epetplace/domain';
 import {
   AvatarMascota,
   Boton,
@@ -27,7 +28,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  EstadoSolicitudAdopcion as EscaleraSolicitud,
+  EscaleraSolicitud,
   Tarjeta,
   Texto,
   spacing,
@@ -169,21 +170,68 @@ export default function MisSolicitudes() {
                 {/* LA TIRA, debajo y en ancho completo: N24 — el control no
                     cambia el tamaño de lo que lo contiene, y una escalera
                     metida a la derecha del nombre le comería el renglón. */}
-                <View style={{ marginTop: spacing[3] }}>
-                  <EscaleraSolicitud
-                    estado={s.estado}
-                    registro="compacta"
-                    voces={{
-                      recibida: t('hiloAdopcion.estado_recibida'),
-                      enConversacion: t('hiloAdopcion.estado_en_conversacion'),
-                      aceptada: t('hiloAdopcion.estado_aceptada'),
-                    }}
-                    vozDeclinada={t('hiloAdopcion.estado_declinada')}
-                  vozDesistida={t('hiloAdopcion.estado_desistida')}
-                  vozNoConcretada={t('hiloAdopcion.estado_no_concretada', { nombre: s.mascotaNombre })}
-                  vozOtraFamilia={t('hiloAdopcion.estado_otra_familia', { nombre: s.mascotaNombre })}
-                  />
-                </View>
+                {/* ⏪ **LA ESCALERA CAMBIÓ DE CONTRATO** (B1): `estado` →
+                    `etapa` + `final`, porque son **dos hechos a la vez** — una
+                    declinada tiene la fila congelada donde llegó **y** su
+                    etiqueta. La derivación vive en `leerEscalera`
+                    (`packages/domain`) y no acá: *si esta lista y el hilo
+                    mostraran etapas distintas para la misma solicitud, una de
+                    las dos estaría mintiendo y no habría forma de saber cuál.*
+
+                    🔴 **Con memorial no se dibuja nada**, ni siquiera en la
+                    lista: es la misma decisión, y acá pesa igual. */}
+                {(() => {
+                  const esc = leerEscalera(s.estado, { huboMensajes: s.mensajes.length > 0 });
+                  if (esc.etapa === null) return null;
+                  return (
+                    <View style={{ marginTop: spacing[3] }}>
+                      <EscaleraSolicitud
+                        etapa={esc.etapa}
+                        final={
+                          esc.final === null
+                            ? undefined
+                            : {
+                                tipo: esc.final,
+                                etiqueta:
+                                  esc.final === 'declinada'
+                                    ? t('hiloAdopcion.estado_declinada')
+                                    : esc.final === 'desistida'
+                                      ? t('hiloAdopcion.estado_desistida')
+                                      : t('hiloAdopcion.estado_otra_familia', {
+                                          nombre: s.mascotaNombre,
+                                        }),
+                              }
+                        }
+                        voces={{
+                          enviada: t('hiloAdopcion.etapa_enviada'),
+                          en_conversacion: t('hiloAdopcion.etapa_en_conversacion'),
+                          aceptada: t('hiloAdopcion.etapa_aceptada'),
+                          acta_firmada: t('hiloAdopcion.etapa_acta_firmada'),
+                          una_vida_nueva: t('hiloAdopcion.etapa_una_vida_nueva'),
+                        }}
+                        vozEstado={t('hiloAdopcion.estasEn', {
+                          etapa: t(
+                            `hiloAdopcion.etapa_${esc.etapa}` as 'hiloAdopcion.etapa_enviada',
+                          ),
+                        })}
+                        /* 🔴 **EN LA LISTA VA SIEMPRE COLAPSADA Y NO SE ABRE.**
+                           Una tarjeta de lista es un resumen: desplegar cinco
+                           pasos ahí adentro le roba el renglón a la vista previa
+                           del último mensaje, que es lo que hace escaneable la
+                           lista. *El detalle vive en el hilo, a un toque.* */
+                        abierta={false}
+                        onAlternar={() =>
+                          router.push({
+                            pathname: '/adoptar/solicitud/[solicitudId]',
+                            params: { solicitudId: s.solicitudId },
+                          })
+                        }
+                        etiquetaAlternar={t('misSolicitudes.abrirHilo', { nombre: s.mascotaNombre })}
+                        acento="control"
+                      />
+                    </View>
+                  );
+                })()}
               </Tarjeta>
             );
           })

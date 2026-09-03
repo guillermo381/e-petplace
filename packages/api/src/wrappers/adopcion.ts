@@ -1062,6 +1062,14 @@ export interface SolicitudRecibida {
    * cuentan — *nadie tiene mensajes sin leer de sí mismo.*
    */
   sinLeer: number;
+  /**
+   * Las respuestas del formulario — **«Ver postulación»**. Sólo llegan al
+   * refugio del animal solicitado: la misma puerta que decide quién ve el hilo
+   * decide esto. *Un guard aparte sería una segunda regla que puede divergir
+   * de la que ya manda.* Esquema cerrado: **no admite nombres ni edades
+   * exactas de menores** (§5.9, CHECK en la tabla).
+   */
+  respuestas: Record<string, unknown> | null;
   mensajes: MensajeDelHilo[];
 }
 
@@ -1270,6 +1278,10 @@ export async function obtenerSolicitudesDeMisPublicaciones(
       mascotaEspecie: typeof f.mascota_especie === 'string' ? f.mascota_especie : null,
       mascotaFotoUrl: typeof f.mascota_foto_url === 'string' ? f.mascota_foto_url : null,
       sinLeer: Number(f.sin_leer ?? 0),
+      respuestas:
+        typeof f.respuestas === 'object' && f.respuestas !== null && !Array.isArray(f.respuestas)
+          ? (f.respuestas as Record<string, unknown>)
+          : null,
       mensajes: leerMensajes(f.mensajes),
     })),
   };
