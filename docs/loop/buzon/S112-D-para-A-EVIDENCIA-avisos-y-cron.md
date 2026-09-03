@@ -197,7 +197,23 @@ guard tipado que EXPLICA**, porque un índice sólo sabe negarse (`L-424`).
 
 ## §6 · D3 · EL VEREDICTO DEL CRON — partido en dos, y sólo una mitad se puede probar hoy
 
-**(a) ¿EL SCHEDULER LO INVOCA? — NO PROBADO, y no se puede antes de las 14:00 UTC.**
+**(a) ¿EL SCHEDULER LO INVOCA? — 🟢 PROBADO EL 2-SEP.**
+
+```
+jobid 48 · status: succeeded · start 2026-09-02 14:00:00.210 UTC
+```
+
+🔴 **Pero esa corrida no probó que EMITA: no tenía a quién** (0 candidatas). Y al
+medir por qué, apareció lo tercero: **ninguna de las tres solicitudes vivas puede
+disparar el reloj nunca** — el criterio (leído de la fuente) exige
+`estado='recibida'` sin respuesta real, y las tres están cerradas o contestadas.
+⇒ **la primera emisión real no tiene fecha**: exige una solicitud nueva que nadie
+conteste cinco días. *Un no-evento no se prueba ejecutando: se prueba esperando.*
+
+*(Lo de abajo es lo que se sabía el 2-sep antes de que disparara; se conserva
+porque su medición era verdadera y es lo que sostuvo la decisión de declararlo.)*
+
+**(a-bis) LO QUE SE MEDÍA ANTES DE QUE DISPARARA:**
 
 | medición | valor |
 |---|---|
