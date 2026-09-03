@@ -79,6 +79,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  marcarHiloLeido,
   resolverUrlGenericaEspecie,
   cerrarSolicitudAdopcion,
   obtenerSesion,
@@ -90,6 +91,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { marcarLeidoLocal } from '@/lib/pendientes-adopcion';
 
 /** Los borradores vivos, por hilo. Sólo en memoria. */
 const BORRADORES = new Map<string, string>();
@@ -435,6 +437,23 @@ export default function HiloDelPublicador() {
        veía la huella sobre el mismo animal que la familia veía con la cara de
        la casa — *la misma solicitud con dos caras según quién mira*. */
     const cara = firmada;
+    /* 🔴 **S112-C · EL REFUGIO NO MARCABA LEÍDO — NUNCA.** Medido: cero
+       llamadas a `marcarHiloLeido` en toda esta pantalla, mientras el lado
+       familia sí lo hacía desde C4. ⇒ el contador del refugio **sólo podía
+       subir**: abría la conversación, la leía entera, y su número seguía igual.
+
+       *No se veía porque no había burbuja que lo mostrara; con la burbuja
+       montada habría sido un número que crece y no baja nunca — el defecto que
+       hace que la gente deje de mirar el indicador.*
+
+       Va con `void` y fuera del `Promise.all`, igual que en el cliente: **su
+       resultado no lo dibuja nadie** y bloquear el hilo por un contador sería
+       cambiar lo importante por lo accesorio. */
+    void marcarHiloLeido(hilo.solicitudId);
+    /* Y el número baja AL INSTANTE sobre lo que el shell ya tiene (cero viaje).
+       ⚠️ En el refugio esto conserva las solicitudes POR REVISAR: abrir una
+       conversación no revisa una solicitud. */
+    marcarLeidoLocal(hilo.solicitudId);
     setEstado({
       fase: 'listo',
       hilo,

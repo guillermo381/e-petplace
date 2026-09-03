@@ -31,6 +31,23 @@ export const clienteEs = {
   },
   // S82-A r4 — la frontera del crash (espejo VERBATIM de las voces S79-B
   // del prestador, ya aprobadas allá; lote S82 igual las lista)
+  // ⭐ S112-C · LA BURBUJA DE PENDIENTES del shell. `etiqueta` es lo que se
+  // toca (accesibilidad + la opción del abanico); `titulo` es el rótulo corto
+  // DENTRO del abanico, al lado de su número.
+  // ⚠️ La voz del carrito CONSERVA la del flotante que murió — el disco cambió
+  // de pieza, no de idioma.
+  burbuja: {
+    carritoEtiqueta: 'Ir al carrito',
+    carritoTitulo: 'Carrito',
+    mensajesEtiqueta: 'Ver tus conversaciones',
+    mensajesTitulo: 'Mensajes',
+    solicitudesEtiqueta: 'Ver las solicitudes por revisar',
+    solicitudesTitulo: 'Solicitudes',
+    // Con dos clases el disco no lleva glifo: lleva el número, y esta voz es
+    // la que dice de qué es. No nombra las clases porque cambian según el
+    // caso — *decir «5 pendientes» es cierto en todos*.
+    abanico: 'Lo que te espera',
+  },
   caida: {
     titulo: 'Esta pantalla no se pudo mostrar',
     detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',

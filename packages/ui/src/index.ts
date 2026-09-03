@@ -67,17 +67,17 @@ export { PantallaConPie, type PantallaConPieProps } from './components/PantallaC
 // Un glifo con su número encima — pedido de D con su límite medido: no
 // podía hacer el contador sin inventar un color que la casa no expone.
 export { GlifoConContador, type GlifoConContadorProps } from './components/GlifoConContador'
-// CarritoFlotante — S100d-B (puntos 8·9·12 del gate): LA ÚNICA PUERTA al
-// carrito, abajo a la derecha, donde llega el pulgar. Se pasa como `pie` de
-// `PantallaConPie` para que su reserva sea DERIVADA y no tape la última
-// tarjeta (L-301). **Con el carrito vacío no se dibuja** — el primer `+` la
-// hace entrar, y eso ES «al agregar se abre el flotante».
-// ⚠️ Su montaje y el RETIRO de la canasta del encabezado van en el MISMO
-// commit: montarla sola deja dos puertas; retirar la otra sola deja cero.
+/* ☠️ **S112-C · ACÁ VIVÍA `CarritoFlotante`, Y SE FUE CON SU ALIAS.**
+   Superseído por `BurbujaPendientes` (B, S112-B). **El retiro va en el MISMO
+   commit que su montaje en el shell del cliente** — su disparo lo dejó escrito
+   B y el intervalo es la razón: *si se monta la nueva y queda la vieja hay DOS
+   DISCOS peleando el mismo píxel; si se retira la vieja sin montar la nueva, no
+   hay ninguna y la tienda no se puede pagar* (`L-395`).
+   `COLA_CARRITO_FLOTANTE` murió con él: **la burbuja puede existir sólo con
+   mensajes**, así que una constante llamada «carrito» reservaría espacio para
+   mensajes y *mentiría en el nombre, que es donde nadie la lee*. La reemplaza
+   `COLA_BURBUJA_PENDIENTES`. */
 export { BurbujaPendientes, COLA_BURBUJA_PENDIENTES, type BurbujaPendientesProps, type Pendiente, type ClasePendiente } from './components/BurbujaPendientes'
-// ☠️ CarritoFlotante — envoltorio delgado sobre BurbujaPendientes. Muere
-// cuando el shell monte la nueva (ver su cabecera: disparo nombrado).
-export { CarritoFlotante, COLA_CARRITO_FLOTANTE, type CarritoFlotanteProps } from './components/CarritoFlotante'
 // FichaRepartidor — S100d-B (punto 25): quién va a tocar el timbre. LA PLACA
 // MANDA (es lo único verificable desde la puerta) · sin placa el nombre
 // preside, y es 1 de 2 casos vivos · el hueco de la foto se DIBUJA, jamás se

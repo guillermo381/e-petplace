@@ -85,3 +85,12 @@ export {
   vozDePresencia,
   type PresenciaDelDia,
 } from './presenciaGuarderia';
+
+/* S112-C · el número de la burbuja de mensajes y su regla de navegación —
+   derivación compartida por las DOS apps (ver la cabecera del módulo). */
+export {
+  descontarHilo,
+  resumirPendientes,
+  type ContadorPendientes,
+  type ResumenPendientes,
+} from './pendientesAdopcion';

@@ -58,8 +58,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tabs, useRouter, useSegments } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ALTO_FILA_TABS, BarraTabs, CarritoFlotante, Icono, type BarraTabsItem } from '@epetplace/ui';
+import { ALTO_FILA_TABS, BarraTabs, BurbujaPendientes, Icono, type BarraTabsItem, type Pendiente } from '@epetplace/ui';
 import { useCarrito } from '@/lib/despensa/carrito';
+import { clasesVisibles, escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
 import { listarMisPedidos } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -98,69 +99,75 @@ import { useTraduccion } from '@/i18n';
 const CLAVE_YA_COMPRO = 'epp.cliente.tienePedidos.v1';
 
 
-/** El flotante del carrito, montado UNA vez sobre las cinco tabs.
+/**
+ * ⭐ **LA BURBUJA DE PENDIENTES — UNA puerta a lo que te espera** (S112-C,
+ * montaje; la pieza es de B, `BurbujaPendientes`).
  *
- *  **Existe por el CARRITO** (`cuenta > 0` — con cero, la pieza no se dibuja
- *  sola) y **se calla por SUPERFICIE**: en `carrito` y `checkout` el carrito no
- *  es un destino, es la pantalla en la que ya estás.
+ * ☠️ **ACÁ VIVÍA `FlotanteDelCarrito`, Y MURIÓ EN ESTE MISMO COMMIT.** Su
+ * lápida estaba escrita por B con su disparo: *el día que este archivo monte
+ * `BurbujaPendientes`, `CarritoFlotante` y `COLA_CARRITO_FLOTANTE` se borran
+ * en ese mismo commit.* **Y el intervalo es la razón:** *si se monta la nueva y
+ * queda la vieja hay DOS DISCOS peleando el mismo píxel; si se retira la vieja
+ * sin montar la nueva, no hay ninguna y la tienda no se puede pagar.* (`L-395`.)
  *
- *  **El aire sobre la barra se MIDE**: su alto cambia con el inset del aparato
- *  y con el largo de las etiquetas. */
-function FlotanteDelCarrito({ altoBarra }: { altoBarra: number }) {
+ * ── DOS CLASES, Y EL SILENCIO ES DE CADA UNA ────────────────────────────────
+ * **Carrito** existe por sus unidades y se calla en `carrito`/`checkout` (N25).
+ * **Mensajes** existe por sus conversaciones sin leer y se calla **en el
+ * hilo** — que es su destino **y** donde el disco caería justo sobre la barra
+ * de escribir (el rojo del founder).
+ *
+ * 🔴 **Y por eso el silencio es POR CLASE y no de la pieza:** *un mensaje
+ * pendiente en el checkout sigue estando pendiente.* Con dos burbujas había que
+ * apagar una entera; acá **la clase sale del arreglo y la otra sigue viva**.
+ * La lista y su razón viven en `lib/pendientes-adopcion.ts`, con arnés.
+ *
+ * ⚠️ **La clase en CERO no se filtra acá**: la pieza lo hace con `clasesVivas`
+ * — *una clase en cero no es una clase*, y decidirlo dos veces sería que dos
+ * lugares tengan que estar de acuerdo.
+ *
+ * ⚠️ **CRUCE DE TERRITORIO DECLARADO (76(d)):** este archivo es del shell del
+ * cliente, la pieza es de `packages/ui`, y el borrado de `CarritoFlotante`
+ * toca `packages/ui` **con autorización explícita de B**. *El montaje ES la
+ * decisión, no un detalle de implementación* (N28).
+ */
+function BurbujaDelShell({ altoBarra }: { altoBarra: number }) {
   const { t } = useTraduccion();
   const router = useRouter();
   const items = useCarrito();
-  /* 🔴 S101-C · EL GUARD ESTABA ESCRITO Y ERA LETRA MUERTA — orden ⑥ del
-     founder, y la causa se midió antes de tocar nada.
+  const pendientes = usePendientesAdopcion();
+  /* 🔴 `useSegments()` y NO `state.routes[state.index].name`: el guard viejo
+     comparaba contra `'checkout'` un valor que su fuente **nunca puede
+     producir** (devuelve el nombre del TAB). *Un guard así no falla: pasa
+     siempre — y su comentario lo empeora, porque el que lo lee cree que está
+     cubierto.* Vivió muerto por eso. */
+  const visibles = clasesVisibles(useSegments() as string[]);
 
-     Recibía `state.routes[state.index].name`, que es **el nombre del TAB**
-     (`despensa`, `explorar`, …). **Nunca vale `'checkout'`.** Su propio JSDoc
-     decía dónde tenía que callarse y la comparación miraba otra cosa.
+  const lista: Pendiente[] = [
+    {
+      clase: 'carrito',
+      cuenta: visibles.carrito ? items.reduce((n, i) => n + i.cantidad, 0) : 0,
+      onAbrir: () => router.push('/despensa/carrito'),
+      etiqueta: t('burbuja.carritoEtiqueta'),
+      titulo: t('burbuja.carritoTitulo'),
+    },
+    {
+      clase: 'mensajes',
+      cuenta: visibles.mensajes ? pendientes.conversaciones : 0,
+      /* LA REGLA DEL TOQUE, y la decide el DOMINIO: con UNA conversación va al
+         hilo; con varias, a la lista. `unica` ya trae el id **si y sólo si**
+         corresponde — *si cada shell lo resolviera, alcanzaría con escribir
+         `>= 1` en vez de `=== 1` para saltar al hilo equivocado.* */
+      onAbrir: () =>
+        pendientes.unica !== null
+          ? router.push({ pathname: '/adoptar/solicitud/[solicitudId]', params: { solicitudId: pendientes.unica } })
+          : router.push('/adoptar/solicitudes'),
+      etiqueta: t('burbuja.mensajesEtiqueta'),
+      titulo: t('burbuja.mensajesTitulo'),
+    },
+  ];
 
-     > *Un guard que compara contra un valor que su fuente no puede producir no
-     > falla: pasa siempre. Y su comentario lo hace peor, porque el que lo lee
-     > cree que está cubierto.*
-
-     `useSegments()` sí devuelve la ruta ANIDADA — el checkout de despensa y el
-     de reserva quedan cubiertos por el mismo predicado. */
-  const segmentos = useSegments() as string[];
-  const enCheckout = segmentos.some((s) => s === 'carrito' || s === 'checkout');
-  const unidades = items.reduce((n, i) => n + i.cantidad, 0);
-  if (unidades <= 0) return null;
-  if (enCheckout) return null;
   return (
-    <CarritoFlotante
-      cuenta={unidades}
-      /* 🔴 EL ALTO **ENTERO** DE LA BARRA, NO EL DE SU FILA — S100d·bis, relevo
-         de B, y es la mitad ② del defecto que el founder vio.
-
-         **Su literal:** *«el botón que quedó flotante quedó DEBAJO DEL MENÚ»*.
-         **Medido en el bundle `01a01807`:**
-
-             el flotante del shell …………………… y[670,9 · 727,1]
-             la barra de tabs arranca en …… y  699,0
-                                              ───────
-             invadía la barra ………………………………  28,1 dp
-
-         **La cuenta de dónde salió el 28:**
-         ```
-         lo que se le pasaba …… ALTO_FILA_TABS      = 85
-         lo que la barra ocupa … 85 + insets.bottom = 133
-                                 ─────
-             faltaban …………………………  48  (= el inset del aparato)
-         ```
-         ⚠️ **Y las dos piezas lo tenían escrito.** `BarraTabs`: *«**no incluye
-         `insets.bottom`**: el alto total es `ALTO_FILA + inset`»*.
-         `CarritoFlotante`: *«su alto lo mide el shell con un `onLayout` en vez
-         de teclearlo — un número tecleado ahí miente en el primer teléfono con
-         otra barra»*. **El shell tecleó la constante igual.** *Un contrato que
-         avisa en su propia línea y se incumple en la de al lado es la forma
-         barata de L-284: dos números que deben coincidir, saliendo de dos
-         lugares.* */
-      aireInferior={altoBarra}
-      onAbrir={() => router.push('/despensa/carrito')}
-      etiqueta={t('despensa.irAlCarritoCon', { n: unidades })}
-    />
+    <BurbujaPendientes pendientes={lista} etiquetaAbanico={t('burbuja.abanico')} aireInferior={altoBarra} />
   );
 }
 
@@ -195,6 +202,20 @@ export default function TabsLayout() {
    * carrera no cuesta nada; con el arranque malo, perderla es el defecto. */
   const insets = useSafeAreaInsets();
   const [altoBarra, setAltoBarra] = useState(ALTO_FILA_TABS + insets.bottom);
+
+  /* ⭐ **EL VIVO DE LA BURBUJA — UNA suscripción por SESIÓN, y vive acá.**
+     Va en el shell y no en una pantalla porque *su condición de existencia es
+     un dato, no una ruta* (N28): el número tiene que ser cierto en cualquier
+     pantalla, incluidas las que no saben que la burbuja existe.
+
+     ⭐ **Y NO hay un recuento de arranque aparte, a propósito.**
+     `suscribirseAMisHilos` emite `'reconectado'` **también en la primera
+     conexión** (contrato de A, escrito así para esto) ⇒ *la carga inicial y el
+     refresco son el MISMO camino*: «llegó algo, pedí el contador». Dos caminos
+     serían dos formas de estar de acuerdo, y una de las dos envejece.
+
+     ⚠️ Sin deps: se monta con el shell y se desmonta con él. */
+  useEffect(() => escucharPendientes(), []);
 
   useEffect(() => {
     let vive = true;
@@ -338,7 +359,7 @@ export default function TabsLayout() {
               del cliente y la pieza es de `packages/ui`. Se toca acá porque el
               montaje ES la firma —el flotante deja de ser de una pantalla— y
               se declara en vez de hacerse callado. */}
-          <FlotanteDelCarrito altoBarra={altoBarra} />
+          <BurbujaDelShell altoBarra={altoBarra} />
           <View
             onLayout={(e) => {
               const alto = e.nativeEvent.layout.height;
