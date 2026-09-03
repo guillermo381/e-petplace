@@ -254,6 +254,42 @@ export default function HiloDelPublicador() {
     [estado],
   );
 
+  /* 🔴 **ESTOS DOS `ref` VAN ARRIBA DEL `useMemo` QUE LOS LEE, Y NO ES ORDEN:
+     ES LA CURA DEL CRASH DEL HILO (S112-C).**
+
+     Vivían DEBAJO del `useMemo` de `filas`. Un `useMemo` **corre durante el
+     render**, o sea ANTES de que la línea del `useRef` se ejecute ⇒ el `const`
+     transpilado queda hoisteado como `undefined` y el cuerpo hace
+     `undefined.current`. **Literal del aparato (E, logcat):**
+
+       TypeError: Cannot read property 'current' of undefined
+         at HiloSolicitud       (cliente)
+         at HiloDelPublicador   (prestador)
+
+     ⚠️ **Y NINGÚN INSTRUMENTO LO VEÍA.** TypeScript no marca «usado antes de
+     declarar» cuando el uso está **adentro del cuerpo de una función**: no
+     puede saber que ese cuerpo corre inmediatamente. Salió con **4 typechecks
+     en 0, `verify:diseno` verde con 61 reglas y todos los trinquetes en su
+     número** — y la pantalla moría en el primer render.
+
+     > *Un `useRef` declarado después de su lector no está «mal ordenado»:
+     > está roto, y lo está SIEMPRE — no es un borde ni una carrera.*
+
+     **Estaba en las DOS apps porque la segunda pantalla se escribió desde la
+     primera**: el defecto se copió con el diseño. Los componentes son
+     distintos y el error era idéntico, que fue lo que lo delató.
+
+     ── POR QUÉ EXISTEN (A14) ──────────────────────────────────────────────
+     Cada recarga trae objetos nuevos aunque el contenido sea idéntico, y para
+     React eso es una lista distinta: **todas las filas se re-dibujan aunque
+     ninguna cambió**. La fusión devuelve los objetos anteriores —y el arreglo
+     anterior entero si nada cambió—, así que las filas quietas se quedan
+     quietas. **Y las FILAS también**: fusionar los mensajes no alcanza porque
+     `armarHilo` los envuelve en filas nuevas, y **la lista memoiza por la
+     FILA**. */
+  const mensajesRef = useRef<readonly MensajeParaHilo[]>([]);
+  const filasRef = useRef<readonly FilaDelHilo[]>([]);
+
   const filas = useMemo(() => {
     if (estado.fase !== 'listo') return [];
     const ahora = new Date().toISOString();
@@ -285,17 +321,6 @@ export default function HiloDelPublicador() {
     return armadas;
   }, [estado, enVuelo]);
 
-  /* ⭐ **A14 · LOS MENSAJES SE FUSIONAN POR ID, no se reemplazan.** Cada
-     recarga trae objetos nuevos aunque el contenido sea idéntico, y para React
-     eso es una lista distinta: **todas las filas se re-dibujan aunque ninguna
-     cambió**. La fusión devuelve los objetos anteriores —y el arreglo anterior
-     entero si nada cambió—, así que las filas quietas se quedan quietas. */
-  const mensajesRef = useRef<readonly MensajeParaHilo[]>([]);
-  /* 🔴 **Y las FILAS también**: fusionar los mensajes no alcanza porque
-     `armarHilo` los envuelve en filas nuevas, y **la lista memoiza por la
-     FILA**. Con mensajes fusionados y filas nuevas, el trabajo se hace y el
-     número no se mueve. */
-  const filasRef = useRef<readonly FilaDelHilo[]>([]);
 
   const ajenosVistos = useRef(0);
   useEffect(() => {

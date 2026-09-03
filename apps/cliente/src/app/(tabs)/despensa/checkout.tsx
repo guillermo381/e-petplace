@@ -693,6 +693,25 @@ export default function DespensaCheckout() {
   }
 
   /** Lo que SÍ compromete al motor, con la cadencia que la familia eligió. */
+  /* ⭐ **DECLARADOS ARRIBA DE SU LECTOR (S112-C).** Vivían DEBAJO de
+     `activarRecurrenciaCon`, que los lee. Hoy no rompía —esa función corre por
+     acción del usuario, mucho después del render— **pero es la misma trampa que
+     mató las dos pantallas del hilo**: allá el lector era un `useMemo`, que
+     corre DURANTE el render, y el `const` hoisteado daba `undefined.current`.
+     *El día que alguien mueva esta lectura a un `useMemo` o a un valor
+     derivado, este checkout muere en el primer render — y es la pantalla donde
+     se paga.* Ordenarlo cuesta nada y saca la trampa. Lo vigila
+     `verify:ref-antes-de-uso`. */
+  // El éxito vacía el carrito, pero la recurrencia necesita los ítems y la
+  // entrega del pedido que se acaba de comprar: se congelan al pagar.
+  const itemsCompradosRef = useRef<{ oferta_id: string; cantidad: number; mascota_id?: string; donacion?: boolean }[]>([]);
+  const entregaCompradaRef = useRef<{ nombre_receptor: string; telefono: string; direccion: string; ciudad: string; sector?: string; referencias?: string; instrucciones?: string; lat?: number; lon?: number }>({
+    nombre_receptor: '',
+    telefono: '',
+    direccion: '',
+    ciudad: '',
+  });
+
   async function activarRecurrenciaCon(dias: number) {
     if (activandoRec || recurrenciaId !== null) return;
     if (cuentaComercialId === null) return;
@@ -717,15 +736,6 @@ export default function DespensaCheckout() {
     mostrar({ texto: t('despensa.recurrenciaActiva'), variante: 'exito' });
   }
 
-  // El éxito vacía el carrito, pero la recurrencia necesita los ítems y la
-  // entrega del pedido que se acaba de comprar: se congelan al pagar.
-  const itemsCompradosRef = useRef<{ oferta_id: string; cantidad: number; mascota_id?: string; donacion?: boolean }[]>([]);
-  const entregaCompradaRef = useRef<{ nombre_receptor: string; telefono: string; direccion: string; ciudad: string; sector?: string; referencias?: string; instrucciones?: string; lat?: number; lon?: number }>({
-    nombre_receptor: '',
-    telefono: '',
-    direccion: '',
-    ciudad: '',
-  });
   useEffect(() => {
     if (fase !== 'resumen') return;
     const dir = direccion !== 'cargando' ? direccion : null;
