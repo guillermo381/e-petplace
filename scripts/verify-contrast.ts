@@ -604,6 +604,44 @@ todos.push(
   { nombre: 'GLOBAL · sobre video: anillo / video NEGRO (el anillo separa en oscuro)', fg: sobreVideo.anillo, bg: '#000000', surface: '#000000', noTextual: true },
 )
 
+/* ═══ S113-B · LA PRESENCIA DEL COACH ═══════════════════════════════════════
+   🔴 **ESTOS PARES NACEN PORQUE UNO DE ELLOS FALLÓ.** La voz «Preguntale a …»
+   se dibujaba en blanco sobre el velo al 42 % y daba **3,15:1 con papel claro
+   debajo**, contra un piso de 4,5. *El gate corría verde con 391 pares y no
+   decía nada, porque ninguno era mío* — un verde que no midió lo que acabás
+   de escribir no es una medición: es una casualidad tranquilizadora.
+   La cura fue darle superficie a la voz (pastilla de tinta), no subir el velo.
+   **Los pares quedan acá para que el defecto no se descubra dos veces.**
+
+   ⚠️ El velo se compone a mano: no es un color del tema, es tinta al 42 %
+   sobre lo que haya debajo. Se mide contra el PEOR caso, que es papel claro. */
+const veloSobre = (fondo: string): string => {
+  const t = [5, 5, 8]
+  const f = [1, 3, 5].map((i) => parseInt(fondo.slice(i, i + 2), 16))
+  const c = t.map((v, i) => Math.round(v * 0.42 + f[i] * 0.58))
+  return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('')
+}
+todos.push(
+  // La voz sobre su pastilla de tinta — lleva PROSA ⇒ 4.5:1.
+  { nombre: 'COACH · voz «Preguntale a …» / pastilla de tinta (sobre el velo)', fg: lightTheme.text.inverse, bg: lightTheme.bg.tinta, surface: veloSobre(lightTheme.bg.base) },
+  // Las pastillas de pendiente: número y palabra sobre color pleno.
+  { nombre: 'COACH · pastilla de chat: blanco / magenta TRABAJADOR', fg: lightTheme.text.inverse, bg: '#AE3785', surface: veloSobre(lightTheme.bg.base) },
+  { nombre: 'COACH · pastilla de pedidos: TINTA / ocre (el par de R56)', fg: lightTheme.text.primary, bg: lightTheme.status.warning, surface: veloSobre(lightTheme.bg.base) },
+  // El nombre de la cabecera, en sus dos casas.
+  { nombre: 'COACH · nombre en la cabecera (violeta profundo / papel claro)', fg: '#7C2DD4', bg: lightTheme.bg.card, surface: lightTheme.bg.base },
+  { nombre: 'COACH · nombre en la cabecera (violeta claro / papel oscuro)', fg: '#AE59FF', bg: darkTheme.bg.card, surface: darkTheme.bg.base },
+)
+/* 🔴 **EL CONTROL NEGATIVO, DECLARADO Y NO GATEADO.** Es el par que falló: se
+   deja escrito como informativo para que el número viva al lado de su cura.
+   *Un defecto curado y borrado vuelve; uno curado con su medición al lado, no.* */
+console.log(
+  `  (info) COACH · blanco sobre el velo DESNUDO (papel claro) → ${contrast(lightTheme.text.inverse, veloSobre(lightTheme.bg.base)).toFixed(2)}:1 — POR ESO la voz lleva pastilla`,
+)
+/* Los otros dos que fallaron al declararse, con su número al lado de su cura. */
+console.log(
+  `  (info) COACH · blanco / magenta PURO → ${contrast(lightTheme.text.inverse, lightTheme.capa.comunidad).toFixed(2)}:1 · blanco / ocre → ${contrast(lightTheme.text.inverse, lightTheme.status.warning).toFixed(2)}:1 — POR ESO la pastilla usa el registro trabajador y la letra tinta`,
+)
+
 // Informativa (no gatea): tab inactivo de BarraTabs — decisión B3.7
 for (const [n, t] of [['LIGHT', lightTheme], ['DARK', darkTheme], ['MEMORIAL', memorialTheme]] as const) {
   console.log(
