@@ -218,6 +218,37 @@ export default function TabsLayout() {
   const [intento, setIntento] = useState(0);
   const [saliendo, setSaliendo] = useState(false);
 
+  /* ⭐ **EL ALTO DE LA BARRA SE MIDE, NO SE TECLEA** — el prestador no lo medía
+     porque no tenía nada flotando encima. Su valor de ARRANQUE ya es correcto
+     (`ALTO_FILA_TABS + insets.bottom`, la fórmula propia de `BarraTabs`), y eso
+     es lo que hace segura la medición asincrónica: *perder la carrera del
+     `onLayout` con un arranque bueno no cuesta nada; con uno malo, perderla ES
+     el defecto* — que es cómo el flotante del cliente quedó 28,1 dp debajo del
+     menú.
+
+     ☠️ **D-1017 · ESTOS TRES HOOKS VIVÍAN DEBAJO DE SEIS RETURNS TEMPRANOS, Y
+     EL PRESTADOR NO ABRÍA.** El primer render es SIEMPRE `'verificando'` y sale
+     por el `return` de más abajo con N hooks; cuando la sesión resuelve, el
+     componente llega hasta acá y llama tres más ⇒ *«Rendered more hooks than
+     during the previous render»*, y el árbol entero cae en la frontera.
+
+     🔴 **No se movió ningún `return`: se subieron los HOOKS.** Un hook no puede
+     depender de una rama, y la regla no admite matices —*«el efecto puede
+     quedar condicionado por DENTRO, nunca por fuera»*—. `escucharPendientes`
+     ya era incondicional; los otros dos son lecturas puras que no cuestan nada
+     antes de tiempo. *La cura barata es subir el hook, jamás bajar el return.* */
+  const insetsBarra = useSafeAreaInsets();
+  const [altoBarra, setAltoBarra] = useState(ALTO_FILA_TABS + insetsBarra.bottom);
+
+  /* UNA suscripción por SESIÓN. Su `'reconectado'` llega también en la primera
+     conexión ⇒ la carga inicial y el refresco son el mismo camino.
+
+     ⚠️ **Corre desde el primer render, también mientras se verifica la sesión**,
+     y es correcto: el lector de adopción rebota solo sin sesión y el contador
+     queda en cero. *Condicionarlo por fuera sería reintroducir el defecto que
+     esta cura acaba de sacar.* */
+  useEffect(() => escucharPendientes(), []);
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
@@ -743,20 +774,6 @@ export default function TabsLayout() {
     adopcion: 'refugio',
     adoptables: 'familia',
   } as const satisfies Record<ClaveTabPrestador, IconoNombre>;
-
-  /* ⭐ **EL ALTO DE LA BARRA SE MIDE, NO SE TECLEA** — el prestador no lo medía
-     porque no tenía nada flotando encima. Su valor de ARRANQUE ya es correcto
-     (`ALTO_FILA_TABS + insets.bottom`, la fórmula propia de `BarraTabs`), y eso
-     es lo que hace segura la medición asincrónica: *perder la carrera del
-     `onLayout` con un arranque bueno no cuesta nada; con uno malo, perderla ES
-     el defecto* — que es cómo el flotante del cliente quedó 28,1 dp debajo del
-     menú. */
-  const insetsBarra = useSafeAreaInsets();
-  const [altoBarra, setAltoBarra] = useState(ALTO_FILA_TABS + insetsBarra.bottom);
-
-  /* UNA suscripción por SESIÓN. Su `'reconectado'` llega también en la primera
-     conexión ⇒ la carga inicial y el refresco son el mismo camino. */
-  useEffect(() => escucharPendientes(), []);
 
   const items: BarraTabsItem[] = ordenTabsPrestador({
     esRefugioPuro: sesion.esRefugioPuro,
