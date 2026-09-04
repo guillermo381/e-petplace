@@ -3125,6 +3125,42 @@ Origen: S86-A, medición para C.
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando `obtenerOfertaGroomingPublica` pase a RPC con el gate 7.13 (el molde del paseo ya existe: es copiar, no diseñar) **o** cuando se mida que un groomer activo sin cuenta cobrable es imposible por construcción — lo segundo cerraría la deuda sin escribir código, y es la primera pregunta que hay que hacerse antes de tocar nada. **Disparo natural:** el primer groomer real (§10.3 sigue vigente: los seeds son `es_seed_preliminar`). **Quién la retira:** la pista que toque el mundo grooming.
 
 
+### `D-1010` 🟠 — `verify:edge-deno` da VERDE con un import que no resuelve
+
+**Quién lo encontró.** S113-D, plantando una sonda: una edge que importaba
+`../../../packages/ia-prueba/mod.ts`. El gate salió **exit 0** y contó el
+`TS2307` en su bucket de «errores fuera de clase, declarados y NO gateados».
+
+**Por qué importa.** `TS2307` es literalmente *«Cannot find module»* — **la
+clase que ese gate dice cubrir**. Su cabecera declara que nació porque un
+`createHmac` usado y no importado tiró un 500 que mató los reintentos del
+proveedor *para siempre*; un import a `packages/*` es el mismo modo de falla
+por la otra puerta: **compila en el editor, resuelve en el monorepo, y revienta
+en el despliegue — con el gate en verde.** El aislamiento que el propio gate
+hace (copia sólo `supabase/functions` a un temp fuera del repo) es lo que crea
+la trampa: el `../../../` se escapa del árbol que viaja.
+
+**Por qué NO se ensancha por reflejo.** La cabecera de `verify-edge-deno.mjs`
+documenta que ensancharlo **ya fracasó una vez**: 20 rojos, casi todos falsos
+(los `TS2339` de `supabase-js` son ruido conocido). *Un gate que grita de más
+se apaga, y apagado no mide nada.*
+
+**La cura angosta, candidata.** Gatear **sólo `TS2307`** — no toda la clase
+«fuera de bucket». No tiene los falsos positivos de `TS2339`, y su rojo es
+exactamente el caso que este hallazgo produjo. **La escribe E**, con su propio
+rojo probado antes de cablearse (`L-459`: la primera prueba de un guard nuevo
+no es que dé verde, es que dé ROJO sobre el caso real).
+
+**Disparo.** El lote 0 de S113 no la necesita —D midió que la librería vive en
+`_shared/ia/` justo por esto— pero la próxima pieza que intente importar de
+`packages/*` desde una edge se va a encontrar el mismo verde. **Antes del
+próximo despliegue de edges que agregue un import nuevo.**
+
+**Dónde vive el hallazgo completo.** `docs/loop/S113-D.md` §5.4, con el literal
+del `TS2307` y el comando que lo reproduce.
+
+---
+
 ### `D-1009` 🟡 — el predicado de «sin leer» vive escrito TRES veces
 
 **Qué.** `autor_user_id IS DISTINCT FROM auth.uid() AND creado_en >
