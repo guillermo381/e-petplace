@@ -8872,8 +8872,10 @@ export type Database = {
           country_code: string
           created_at: string
           evento_id: string
+          foto_url: string | null
           id: string
           mascota_id: string
+          texto: string | null
           updated_at: string
         }
         Insert: {
@@ -8882,8 +8884,10 @@ export type Database = {
           country_code: string
           created_at?: string
           evento_id: string
+          foto_url?: string | null
           id?: string
           mascota_id: string
+          texto?: string | null
           updated_at?: string
         }
         Update: {
@@ -8892,8 +8896,10 @@ export type Database = {
           country_code?: string
           created_at?: string
           evento_id?: string
+          foto_url?: string | null
           id?: string
           mascota_id?: string
+          texto?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -9507,6 +9513,7 @@ export type Database = {
           created_at: string
           evento_id: string
           fecha_nota: string
+          foto_url: string | null
           id: string
           mascota_id: string
           updated_at: string
@@ -9519,6 +9526,7 @@ export type Database = {
           created_at?: string
           evento_id: string
           fecha_nota: string
+          foto_url?: string | null
           id?: string
           mascota_id: string
           updated_at?: string
@@ -9531,6 +9539,7 @@ export type Database = {
           created_at?: string
           evento_id?: string
           fecha_nota?: string
+          foto_url?: string | null
           id?: string
           mascota_id?: string
           updated_at?: string
@@ -12201,6 +12210,51 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      ia_uso: {
+        Row: {
+          costo_estimado_usd: number | null
+          created_at: string
+          edge: string
+          id: string
+          latencia_ms: number | null
+          modelo: string
+          pieza: string
+          resultado: string
+          tokens_cache_escritura: number | null
+          tokens_cache_lectura: number | null
+          tokens_entrada: number | null
+          tokens_salida: number | null
+        }
+        Insert: {
+          costo_estimado_usd?: number | null
+          created_at?: string
+          edge: string
+          id?: string
+          latencia_ms?: number | null
+          modelo: string
+          pieza: string
+          resultado: string
+          tokens_cache_escritura?: number | null
+          tokens_cache_lectura?: number | null
+          tokens_entrada?: number | null
+          tokens_salida?: number | null
+        }
+        Update: {
+          costo_estimado_usd?: number | null
+          created_at?: string
+          edge?: string
+          id?: string
+          latencia_ms?: number | null
+          modelo?: string
+          pieza?: string
+          resultado?: string
+          tokens_cache_escritura?: number | null
+          tokens_cache_lectura?: number | null
+          tokens_entrada?: number | null
+          tokens_salida?: number | null
+        }
+        Relationships: []
       }
       inventario_movimientos: {
         Row: {
@@ -21699,6 +21753,24 @@ export type Database = {
         }
         Relationships: []
       }
+      v_ia_costo_por_pieza_dia: {
+        Row: {
+          costo_promedio_por_llamada: number | null
+          costo_usd: number | null
+          dia: string | null
+          fallidas: number | null
+          latencia_peor_ms: number | null
+          latencia_promedio_ms: number | null
+          llamadas: number | null
+          modelo: string | null
+          pieza: string | null
+          tokens_cache_escritura: number | null
+          tokens_cache_lectura: number | null
+          tokens_entrada: number | null
+          tokens_salida: number | null
+        }
+        Relationships: []
+      }
       v_inventario_reservas_vigentes: {
         Row: {
           cantidad: number | null
@@ -22585,7 +22657,11 @@ export type Database = {
         }[]
       }
       _marcar_modo_captura_evento: {
-        Args: { p_evento_ids: string[]; p_modo: string }
+        Args: {
+          p_evento_ids: string[]
+          p_modo?: string
+          p_procedencia?: string
+        }
         Returns: number
       }
       _mascota_apta_paseo_grupal: {
@@ -25665,6 +25741,15 @@ export type Database = {
           p_titulo_corto: string
         }
         Returns: string
+      }
+      registrar_recuerdo_familia: {
+        Args: {
+          p_fecha?: string
+          p_foto_url?: string
+          p_mascota_id: string
+          p_texto?: string
+        }
+        Returns: Json
       }
       registrar_repartidor: {
         Args: {

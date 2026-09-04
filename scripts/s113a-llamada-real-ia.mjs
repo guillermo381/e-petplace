@@ -56,6 +56,12 @@ for (const [slug, cuerpo] of casos) {
 console.log('\n=== LATENCIAS DE PARED (ida y vuelta completa, incluye red) ===');
 for (const f of filas) console.log(`  ${f.slug.padEnd(28)} ${f.ms} ms`);
 
-// ¿existe ia_uso?
-const { error: eU } = await admin.from('ia_uso').select('id').limit(1);
-console.log('\nia_uso:', eU ? `NO EXISTE — ${eU.message.slice(0,80)}` : 'existe');
+// ── LAS FILAS QUE DEJÓ ia_uso — el verde de IA del lote ────────────────────
+const { data: filasU, error: eU } = await admin.from('ia_uso')
+  .select('pieza,modelo,edge,resultado,tokens_entrada,tokens_salida,tokens_cache_lectura,tokens_cache_escritura,latencia_ms,costo_estimado_usd,created_at')
+  .order('created_at', { ascending: false }).limit(8);
+if (eU) { console.log('\n🔴 ia_uso:', eU.message.slice(0,100)); }
+else {
+  console.log(`\n=== FILAS DE ia_uso (${filasU.length}) ===`);
+  for (const f of filasU) console.log('  ' + JSON.stringify(f));
+}

@@ -43,7 +43,11 @@
     "verify:vio-todo": "tsx scripts/verify-vio-todo.mjs",
     "verify:fila-memoizada": "tsx scripts/verify-fila-memoizada.mjs",
     "verify:abanico": "tsx scripts/verify-abanico.mjs",
-    "verify:linea-jornada": "tsx apps/prestador/scripts/verify-linea-jornada.mts"
+    "verify:linea-jornada": "tsx apps/prestador/scripts/verify-linea-jornada.mts",
+    "verify:puerta-unica": "node scripts/verify-puerta-unica.mjs",
+    "tipos:rutas": "node scripts/tipos-rutas.mjs",
+    "ia:medir": "tsx scripts/ia-conjuntos/medir-pieza.mjs",
+    "verify:nexo": "tsx apps/cliente/scripts/verify-nexo.mts"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",

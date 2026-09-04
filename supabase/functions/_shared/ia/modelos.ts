@@ -60,26 +60,26 @@ export const EDGES: Record<Pieza, string> = {
  *
  * ── EL MURO, citado y no recordado ────────────────────────────────────────
  * `supabase.com/docs/guides/functions/limits`: wall clock **150 s en Free**,
- * **400 s en planes pagos**, y **request idle timeout 150 s en TODOS**.
- * ⚠️ **El plan de este proyecto NO se pudo medir**: ni `supabase projects
- * list` ni `orgs list` lo exponen. **No se infiere** ⇒ rige el piso de 150 s,
- * que además es el idle timeout en todos los planes.
+ * **400 s en planes pagos**, y request idle timeout **150 s en TODOS**.
+ * ✅ **El proyecto está en plan Pro** (dato del founder, 3-sep) ⇒ **el muro es
+ * 400 s**. La primera versión de estos números se calculó contra el piso de
+ * 150 s porque el plan no se podía medir desde el CLI (ni `projects list` ni
+ * `orgs list` lo exponen) y **no se infirió**; con el plan confirmado, la
+ * regla original —el doble de la latencia medida— ya no colisiona con nada.
+ *
+ * ⚠️ Queda una nota, no un freno: el **idle timeout de 150 s rige en todos los
+ * planes**. Una espera de 85 s con la conexión abierta y sin datos fluyendo
+ * está holgadamente por debajo, así que hoy no muerde — pero si el p95 de
+ * `carnet` subiera de 150 s, cortaría por ahí antes que por este timeout.
  *
  * ── LO MEDIDO, y la regla aplicada (2× la latencia, subido a múltiplo de 10 s,
- *    siempre por debajo del muro) ──────────────────────────────────────────
+ *    siempre por debajo del muro de 400 s) ─────────────────────────────────
  *
  *   pieza          entrada real                    medido      2×      queda
- *   carnet         carnet de vacunas real, 320 kB  85.132 ms  170 s   140 s 🔴
- *   nota_clinica   dictado de consulta, 1.688 ch   15.564 ms   40 s    40 s
- *   presencia      2 hechos + 1 respuesta           3.038 ms   10 s    10 s
+ *   carnet         carnet de vacunas real, 320 kB  85.132 ms  170 s   170 s
+ *   nota_clinica   dictado de consulta, 1.688 ch   15.564 ms   31 s    40 s
+ *   presencia      2 hechos + 1 respuesta           3.038 ms    6 s    10 s
  *   documento      —                                    (ver abajo)     60 s
- *
- * 🔴 **`carnet` NO PUEDE cumplir la regla, y se dice:** su doble son 170 s y
- * el muro son 150 s. **Un timeout por encima del muro es ficción** — la
- * plataforma corta primero y el cliente nunca llega a ver el suyo. Se fija en
- * **140 s**, bajo el muro con 10 s de margen. *Y el número deja una
- * advertencia: 85 s de latencia real contra 150 s de muro es poco aire; si el
- * p95 sube, esa pieza empieza a morir por plataforma y no por timeout.*
  *
  * ⚠️ **`documento` NO tiene medición representativa y por eso NO se movió.**
  * La única imagen real disponible era un carnet de vacunas (`prestador_docu-
@@ -102,7 +102,7 @@ export const EDGES: Record<Pieza, string> = {
  * entonces, estos números no reemplazan a otros: reemplazan a *ninguno*.
  */
 export const TIMEOUT_MS: Record<Pieza, number> = {
-  carnet: 140_000,
+  carnet: 170_000,
   documento: 60_000,
   nota_clinica: 40_000,
   presencia: 10_000,

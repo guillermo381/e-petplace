@@ -3125,6 +3125,129 @@ Origen: S86-A, medición para C.
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando `obtenerOfertaGroomingPublica` pase a RPC con el gate 7.13 (el molde del paseo ya existe: es copiar, no diseñar) **o** cuando se mida que un groomer activo sin cuenta cobrable es imposible por construcción — lo segundo cerraría la deuda sin escribir código, y es la primera pregunta que hay que hacerse antes de tocar nada. **Disparo natural:** el primer groomer real (§10.3 sigue vigente: los seeds son `es_seed_preliminar`). **Quién la retira:** la pista que toque el mundo grooming.
 
 
+### `D-1011` 🔴 — no existe flujo para pasar una mascota a memorial
+
+**Qué.** El evento `fin_vida` está en `cat_tipos_evento` y **activo**; el trigger
+`_trg_propagar_estado_vida_desde_evento` existe, está cableado y habilitado. Y
+**`grep fin_vida` en `apps/` y `packages/` da CERO**, con `count(*) … where
+tipo='fin_vida'` también en cero (medido por S113-E). **El motor existe y la
+puerta no** (`L-318`) — en el momento más delicado del producto.
+
+**Por qué duele más que otra puerta ausente.** La app **sabe** comportarse
+distinto en memorial: `esMemorial` se lee en el Coach, en la ficha y en cuatro
+wrappers, y `MODELO_LOYALTY` §7.1 apaga el motor entero ahí. *Todo ese
+comportamiento está construido y es inalcanzable, porque una familia no tiene
+forma de decir que su animal murió.* Con 89/89 mascotas en `activa`, ese brazo
+**nunca se ejerció con datos vivos**.
+
+**La medida de lo que falta.** E insertó el evento a mano para su fixture y le
+costó **cuatro rebotes**: `titulo` no existe · `eje_jtbd` NOT NULL ·
+`country_code` NOT NULL · `chk_eventos_origen`. *Por una RPC esos cuatro los
+resuelve el servidor. Que una fixture tenga que saberlos es la forma en que la
+puerta ausente se hace visible.*
+
+**Qué NO es.** No es sólo una pantalla: es una RPC con su letra. Pasar una
+mascota a memorial es irreversible desde la vivencia de la familia, y la letra
+tiene que decir quién puede, si se puede deshacer y qué pasa con lo contratado.
+
+**Disparo.** Antes de que una familia real pierda a su animal — o sea, **antes
+del soft launch**. Fixture viva para probarlo: `Sombra`
+`93553b79-8b8b-4f66-821c-124244f1a2b9`, marcada
+`creado_por_sistema='fixture_s113e_memorial'`.
+
+---
+
+### `D-1012` 🔴 — la lectura del carnet: 83 s de espera, y un carnet de una vacuna que devolvió doce
+
+**Qué, con números medidos.** Línea base de `extract-vacuna` sobre 5 carnets
+reales (S113-E, 3-sep):
+· **83 s promedio, 114 s el peor.** La familia mira `EsperaDeMarca` todo ese
+  rato. *Es un número de producto, no de laboratorio.*
+· **Un carnet de UNA vacuna devolvió DOCE.** Once de más. **No es imprecisión
+  de un campo: es inventar filas enteras** — la clase que `L-139` nombra, y la
+  peor de todas porque cada fila inventada es plausible.
+· exactitud: `nombre_vacuna` 65,6 % · `fecha_aplicada` 62,5 % · `lote` 81,3 % ·
+  `veterinario` 42,1 % · `fecha_proxima` **sin muestra** (1 valor en 32).
+
+**Y el costo real, medido con `ia_uso` el 4-sep** (no estimado): **$0,0715 por
+carnet** — 4.036 tokens de entrada, **6.347 de salida**. E lo había estimado en
+$0,0075: **la estimación estaba ~9× por debajo**, y la razón es exactamente el
+hallazgo de arriba — *un modelo que inventa filas paga la salida de todas*.
+
+**Por qué no se cura con un prompt.** El pantallazo de S48 ya documenta que más
+prompt EMPEORÓ (truncado + fechas compartidas). Las dos palancas medibles son
+**otro modelo** (Haiku 4.5, que además tokeniza con el previo ⇒ el ahorro real
+es ≈2,6:1, no 2:1) y **la revisión humana**, que hoy existe y es la red.
+
+**Qué NO es.** No es un gate rojo: la pieza funciona y su salida se revisa. Es
+una deuda de **costo, espera y confianza**, con instrumento ya construido
+(`pnpm ia:medir`) para decidir con número.
+
+**Disparo.** El lote 1, que es donde se compara Haiku contra esta línea base.
+
+---
+
+### `D-1013` 🟠 — `supabase projects api-keys` imprime las claves en claro
+
+**Qué.** El comando escribe `anon` y `service_role` **en texto plano por
+stdout**. Lo corrió S113-E en una sesión cuyo transcript se guarda. **Ninguna
+clave se copió a archivo, log ni reporte**, y los scripts las resuelven en
+ejecución sin imprimirlas.
+
+**Por qué es ficha y no una nota.** Es un comando de lectura, de aspecto
+inofensivo, que **un agente puede correr por curiosidad** — y su salida queda en
+el transcript para siempre. *El riesgo no es el comando: es que nada avisa.*
+Precedente vivo: `D-712`, donde un token quedó commiteado por un artefacto de
+una auditoría de seguridad, y `R6` estaba escrita y no lo evitó.
+
+**La cura, en dos capas.** ① Queda escrita como **línea prohibida en
+`CLAUDE.md`**, donde viven las reglas operativas y las lee toda pista al abrir
+(no en un script, que sólo protege a quien lo abre). ② `lib-conjuntos.mjs`
+lleva la advertencia al lado del código que resuelve las claves.
+
+**Qué NO cierra.** No rota nada. Si alguien ya lo corrió, la clave estuvo en un
+transcript: **sacarlo del uso reduce la superficie futura; sólo la rotación
+cierra el pasado** (`L-409`).
+
+**Disparo.** Ya ejecutada la capa ①. La rotación es firma del founder.
+
+---
+
+### `D-1014` 🟠 — `microchip_asignado`: un tipo de evento que ningún catálogo conoce
+
+**Qué.** `_trg_microchip_crear_evento` escribe el tipo `microchip_asignado` y
+**no hay fila en `cat_tipos_evento` con ese código**. `eventos_mascota.tipo`
+tiene FK con `ON DELETE RESTRICT` ⇒ **todo INSERT en esa tabla falla**. Medido:
+0 eventos de ese tipo. **Es una puerta tapiada**, hermana exacta de la de
+`evento_nota_dueno` que S113-A curó — y apareció en el mismo censo, que es
+precisamente por lo que el censo se corre.
+
+**Por qué no se curó de paso.** Crear su fila exige **decidir dos cosas**, y
+ninguna es de una migración de otro frente: qué eje le corresponde y si es
+clínico. *Inventar un eje para destapar una puerta es cambiarle el significado
+al catálogo para que compile.*
+
+**Mi voto, escrito para que el founder firme en el lote 1: eje `identidad`, NO
+clínico.** Las razones: el microchip **es identidad** — es el número que
+identifica al animal ante un tercero, igual que `microchip` vive hoy en la ficha
+de identidad y no en la historia clínica; y `cat_tipos_evento` ya pone en
+`identidad` a `cambio_nombre` y `correccion_dato_identidad`, que son de la misma
+familia. **No clínico** porque `es_clinico` gobierna quién puede escribir
+(el gate de capacidad clínica) y quién ve el dato: implantar un chip es un acto
+administrativo del que queda constancia, no un diagnóstico — y marcarlo clínico
+metería el número de chip detrás del gate de escritura clínica, que es
+justamente lo contrario de lo que se quiere.
+
+**Consecuencia si se firma distinto.** Si el founder lo hiciera clínico, la
+procedencia pasaría a escribirse (`_crear_evento_padre_auto` sólo la estampa en
+tipos clínicos) y el evento quedaría bajo el gate clínico. Es una decisión con
+efecto real, por eso se firma y no se deduce.
+
+**Disparo.** El lote 1, o antes si alguna pantalla necesita registrar un
+microchip.
+
+---
+
 ### `D-1010` 🟠 — `verify:edge-deno` da VERDE con un import que no resuelve
 
 **Quién lo encontró.** S113-D, plantando una sonda: una edge que importaba

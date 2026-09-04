@@ -275,3 +275,82 @@ export async function obtenerSeriePeso(
     }),
   };
 }
+
+// ── EL RECUERDO DE LA FAMILIA (S113-A, lote 0) ──────────────────────────────
+
+export interface RecuerdoInput {
+  mascotaId: string;
+  /** PATH del bucket `mascotas` (jamás URL), tal como lo devuelve el subidor
+   *  de la app. La foto se sube ANTES, por la puerta única de Storage; acá
+   *  viaja sólo el puntero. */
+  fotoPath?: string;
+  texto?: string;
+  /** `YYYY-MM-DD`. Omitirla = hoy, resuelto en el SERVIDOR. */
+  fecha?: string;
+}
+
+const CODIGOS_RECUERDO = [
+  'acceso_denegado',
+  'sin_acceso_mascota',
+  'recuerdo_vacio',
+  'foto_invalida',
+  'fecha_futura',
+  'error_desconocido',
+] as const;
+export type CodigoErrorRecuerdo = (typeof CODIGOS_RECUERDO)[number];
+
+const MENSAJES_RECUERDO: Record<CodigoErrorRecuerdo, string> = {
+  acceso_denegado:    'Tu sesión no está activa. Inicia sesión de nuevo.',
+  sin_acceso_mascota: 'No tienes acceso a esta mascota.',
+  recuerdo_vacio:     'Escribe algo o agrega una foto.',
+  foto_invalida:      'No pudimos guardar la foto. Prueba de nuevo.',
+  fecha_futura:       'Esa fecha todavía no llegó.',
+  error_desconocido:  'No pudimos guardar el recuerdo. Prueba de nuevo.',
+};
+
+/**
+ * Guarda un recuerdo de la familia en el expediente.
+ *
+ * **Vive en `evento_hito_narrativo`, y eso es lo que lo hace visible.** Medido:
+ * `timeline.ts` discrimina `tipo === 'hito_narrativo' && datos.clave_hito`, y
+ * `nota_dueno` no lo lee ningún lector — *un recuerdo invisible en la Línea de
+ * Vida no es un recuerdo.* El evento nace con `clave_hito: 'recuerdo_familia'`.
+ *
+ * `texto` y `fotoPath` son los dos opcionales, pero **el servidor rebota si no
+ * viene ninguno**: un recuerdo sin nada es una fila vacía en la vida de una
+ * familia.
+ *
+ * La foto se sube ANTES por la puerta única de Storage (bucket `mascotas`,
+ * carpeta del dueño) y acá viaja el PATH — el servidor verifica que sea un
+ * path y que esté en la carpeta de quien escribe, no una URL ni una carpeta
+ * ajena.
+ *
+ * Procedencia `declarado_por_familia` y `modo_captura` `tecleado` los estampa
+ * el servidor: no son parámetros porque por esta puerta no entra nadie más.
+ */
+export async function registrarRecuerdoFamilia(
+  input: RecuerdoInput,
+): Promise<ResultadoWrapper<{ hitoId: string; eventoId: string }, CodigoErrorRecuerdo>> {
+  const { data, error } = await getClient().rpc('registrar_recuerdo_familia', {
+    p_mascota_id: input.mascotaId,
+    ...(input.texto !== undefined ? { p_texto: input.texto } : null),
+    ...(input.fecha !== undefined ? { p_fecha: input.fecha } : null),
+    ...(input.fotoPath !== undefined ? { p_foto_url: input.fotoPath } : null),
+  });
+
+  if (error) {
+    const raw = error.message;
+    // Normalización por PREFIJO: el motor manda 'foto_invalida: <por qué>'.
+    const codigo =
+      raw.startsWith('auth_required') ? 'acceso_denegado'
+      : (CODIGOS_RECUERDO.find((c) => raw.startsWith(c)) ?? 'error_desconocido');
+    return { ok: false, codigo, mensaje: MENSAJES_RECUERDO[codigo] };
+  }
+
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || o.ok !== true
+      || typeof o.hito_id !== 'string' || typeof o.evento_id !== 'string') {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_RECUERDO.error_desconocido };
+  }
+  return { ok: true, data: { hitoId: o.hito_id, eventoId: o.evento_id } };
+}

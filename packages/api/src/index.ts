@@ -332,6 +332,9 @@ export {
   registrarDesparasitacion,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
+  registrarRecuerdoFamilia,
+  type RecuerdoInput,
+  type CodigoErrorRecuerdo,
   // S91 (P2): la CURVA de peso, no el vigente.
   obtenerSeriePeso,
   type MedicionPeso,
