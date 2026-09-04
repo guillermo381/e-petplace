@@ -3391,6 +3391,30 @@ usuario**, y hoy la vi en el perfil de una mascota que se murió.
 *El instrumento es bueno y su lugar es el log, no la pantalla.* Un `__DEV__`
 alrededor cuesta una línea y no le quita nada a la medición.
 
+**ESTADO 4-sep (0.4): CURADA EN CÓDIGO, NO VERIFICADA EN EL BUNDLE — y la
+diferencia importa.** C la envolvió en `__DEV__` (`[mascotaId].tsx:2050`).
+
+⚠️ **En el emulador la seguí viendo, y eso NO es un defecto:** el aparato corre
+contra Metro, o sea un bundle de **desarrollo** —su propio marcador lo dice,
+`[update] id=ninguno (embedded/dev)`—, así que `__DEV__` es `true` y la sonda se
+dibuja **por diseño**. *Un guard de entorno es invisible al único aparato donde
+puedo mirar: ahí el ojo no distingue «curado» de «no curado».*
+
+🔴 **Y el bundle publicado tampoco lo contesta, porque mi instrumento falló su
+propio control.** Busqué en el `.hbc` de Android (8,9 MB) recién publicado, con
+**dos** instrumentos —`strings -a` y `grep -a` sobre los bytes— y **los dos
+fallan sobre cadenas que SÍ están**: «Su carnet» → 0, «Ponte al día» → 0,
+«guardamos sus vacunas» → 0, todas visibles en pantalla; mientras «Recuerdo» da
+**2 con uno y 4 con el otro**. *Hermes empaqueta su tabla de cadenas y ninguno de
+los dos la lee bien; dos instrumentos que se contradicen no confirman: se
+descalifican.* **Un `0` de ese instrumento no prueba ausencia** (`L-437`).
+
+⇒ **Lo que se puede afirmar hoy:** el guard está en el código y Metro reemplaza
+`__DEV__` por `false` al exportar, que es una propiedad de la herramienta. **Lo
+que NO se puede afirmar es haberlo medido.** Cierra el día que exista un lector
+de la tabla de cadenas de Hermes (`hbcdump`) **con su control positivo pasando**
+— y ése es el instrumento que le falta a toda la casa, no sólo a esta ficha.
+
 ### `D-1023` 🟠 P4 del censo se movió 2 → 3 en la BASE sin que ninguna migración tocara roles
 
 **Nace:** S113-A, 4-sep-2026, corriendo los gates del candidato 0.3. **Dueño: E**
