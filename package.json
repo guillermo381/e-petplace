@@ -48,7 +48,12 @@
     "tipos:rutas": "node scripts/tipos-rutas.mjs",
     "ia:medir": "tsx scripts/ia-conjuntos/medir-pieza.mjs",
     "verify:nexo": "tsx apps/cliente/scripts/verify-nexo.mts",
-    "verify:glifos": "tsx scripts/_arnes-glifos.mts"
+    "verify:glifos": "tsx scripts/_arnes-glifos.mts",
+    "verify:gates-existen": "node scripts/verify-gates-existen.mjs",
+    "verify:frenos-por-sujeto": "node scripts/verify-frenos-por-sujeto.mjs",
+    "verify:huellas-credenciales": "node scripts/verify-huellas-credenciales.mjs",
+    "verify:selectores-recurrentes": "node scripts/verify-selectores-recurrentes.mjs",
+    "verify:compuertas-por-sujeto": "node scripts/verify-compuertas-por-sujeto.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",

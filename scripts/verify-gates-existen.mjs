@@ -46,6 +46,37 @@ import { join } from 'node:path';
 const di = (s) => process.stdout.write(s + '\n');
 const PATRON = /verify:[a-z0-9-]+/g;
 
+/* ═══ LA TABLA DE JUBILACIONES — S113-A, firma del founder 4-sep-2026 ═══════
+   Precedente vivo de la casa: `R62` de `verify:diseno` es literalmente «la
+   tabla de jubilaciones», y `verify-edge-simbolos` quedó como lápida con
+   exit 2. **Un gate jubilado se DECLARA, no se borra.**
+
+   🔴 POR QUÉ HACE FALTA, y no es comodidad: estos tres nombres viven en
+   **actas FIRMADAS** (`S103-ACTA-CIERRE.md`) y en partes de pista cerrados.
+   *Reescribir un acta para que un gate se ponga verde es exactamente el modo
+   de falla que esta casa nombra: ajustar el mundo al instrumento.* La medición
+   de aquel día era verdadera para quien la escribió; lo que no existe es el
+   comando. **La medición NO se reescribe — se marca.**
+
+   ⚠️ ESTO NO ES UNA LISTA DE PERDÓN. Cada entrada trae su ficha y su razón, y
+   el gate **verifica que la tabla no mienta**: si un nombre jubilado llegara a
+   tener script o archivo, sale ROJO — porque entonces la jubilación sería
+   falsa y alguien estaría corriendo un gate que el canon da por muerto. */
+const JUBILADOS = new Map([
+  ['verify:borradores', {
+    ficha: 'D-1015',
+    razon: 'nunca existió en git; los tres números que CLAUDE.md le atribuía se RETIRARON (firma founder 4-sep-2026). Se re-mide el día que una decisión lo necesite, y el gate se construye ese día.',
+  }],
+  ['verify:legales', {
+    ficha: 'D-1015',
+    razon: 'nombrado sólo en el parte de S103-B, cerrado. Sin archivo en git. Mismo trato: se construye el día que una decisión lo necesite.',
+  }],
+  ['verify:huerfanas', {
+    ficha: 'D-1015',
+    razon: 'nombrado una vez en el parte de S103-B, cerrado. Sin archivo en git.',
+  }],
+]);
+
 /** Los .md donde el canon nombra gates. */
 function corpus() {
   const fuentes = [];
@@ -80,7 +111,19 @@ function censar() {
 
   const archivos = existsSync('scripts') ? readdirSync('scripts') : [];
   const faltan = [];
+  const jubiladosVivos = [];   // la tabla mintiendo: jubilado con script o archivo
   for (const [nombre, sitios] of donde) {
+    if (scripts.has(nombre) && !JUBILADOS.has(nombre)) continue;
+    const baseJ = nombre.slice('verify:'.length);
+    const archivoJ = archivos.find((a) => a === `verify-${baseJ}.mjs` || a === `verify-${baseJ}.ts`
+      || a === `_censo-${baseJ}.mjs`);
+    if (JUBILADOS.has(nombre)) {
+      // 🔴 EL CONTROL DE LA TABLA: un jubilado que existe es una jubilación falsa.
+      if (scripts.has(nombre) || archivoJ) {
+        jubiladosVivos.push({ nombre, script: scripts.has(nombre), archivo: archivoJ ?? null });
+      }
+      continue;
+    }
     if (scripts.has(nombre)) continue;
     // ¿Existe el archivo con ese nombre, aunque el package.json no lo exponga?
     const base = nombre.slice('verify:'.length);
@@ -88,14 +131,33 @@ function censar() {
       || a === `_censo-${base}.mjs`);
     faltan.push({ nombre, sitios, archivo: archivo ? join('scripts', archivo) : null });
   }
-  return { fuentes, donde, enScripts, faltan };
+  return { fuentes, donde, enScripts, faltan, jubiladosVivos };
 }
 
-function reportar({ fuentes, donde, enScripts, faltan }) {
+function reportar({ fuentes, donde, enScripts, faltan, jubiladosVivos }) {
   di(`gates-existen · ${donde.size} nombres en ${fuentes.length} archivo(s) · ` +
-     `${enScripts.length} verify:* en package.json`);
+     `${enScripts.length} verify:* en package.json · ${JUBILADOS.size} jubilado(s) declarado(s)`);
+
+  // 🔴 La tabla mintiendo es MÁS grave que un gate ausente: significa que el
+  //    canon da por muerto algo que alguien puede correr.
+  if (jubiladosVivos.length) {
+    di(`\n🔴 LA TABLA DE JUBILACIONES MIENTE (${jubiladosVivos.length}):`);
+    for (const j of jubiladosVivos) {
+      di(`   ${j.nombre} está declarado JUBILADO y ` +
+         `${j.script ? 'TIENE línea en package.json' : ''}${j.script && j.archivo ? ' y ' : ''}` +
+         `${j.archivo ? `existe ${j.archivo}` : ''}`);
+    }
+    di('   ⇒ o se saca de la tabla, o se saca del repo. No las dos cosas.');
+    return 1;
+  }
+
   if (faltan.length === 0) {
     di('\n✅ VERDE · todo gate nombrado en el canon existe como script invocable.');
+    if (JUBILADOS.size) {
+      di(`   (${JUBILADOS.size} jubilado(s) apartado(s) POR DECLARACIÓN, no por silencio:`);
+      for (const [n, j] of JUBILADOS) di(`      ${n} — ${j.ficha}`);
+      di('    viven en actas firmadas, que no se reescriben para poner un gate en verde.)');
+    }
     return 0;
   }
   const sinNada = faltan.filter((f) => !f.archivo);

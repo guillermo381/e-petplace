@@ -503,4 +503,55 @@ if [ -n "$VERIFICAR" ]; then
   rm -rf "$TMPTSC"
   echo "── tsc verde en:$VERIFICAR"
 fi
+# ── verify:gates-existen (S113-E2, cableado por A tras la firma del founder) ─
+# Un gate que el canon nombra y nadie puede correr NO FALLA: no corre. No hay
+# rojo, no hay excepción, no hay línea — el canon dice que algo se vigila,
+# nadie lo vigila, y el silencio se lee como salud. Ese es el peor modo de
+# falla de los tres que este gate distingue, y por eso vive en el hook: acá
+# corre en cada commit, que es donde un silencio se acumula.
+#
+# ⚠️ Entró al hook DESPUÉS de curar sus 7 hallazgos, no antes: los cuatro «sin
+#    línea» con su alias, y los tres «sin nada» por la tabla de jubilaciones
+#    (D-1015, firma del founder 4-sep-2026). Cablearlo con hallazgos vivos
+#    habría bloqueado todo commit — un gate que frena por deuda ajena no
+#    protege: estorba.
+#
+# Corre en milisegundos y NO necesita red (lee CLAUDE.md, docs/loop/*.md y el
+# package.json), que es la condición que verify:censo y verify:voz-por-tipo no
+# cumplen y por eso se quedan en el paso ⓪.
+#
+# El `if ... then ... else X=$?; fi` es la forma exenta de `set -e` (L-490):
+# un gate en exit 2 no puede matar el shell antes de decir «no concluyente».
+if [ ! -f scripts/verify-gates-existen.mjs ]; then
+  echo ""
+  echo "⚠️  verify:gates-existen NO CONCLUYENTE — el script no existe en este árbol."
+  echo "   (worktree anterior al gate; NO es un gate ausente. El commit SIGUE.)"
+  echo ""
+else
+  if node scripts/verify-gates-existen.mjs >/dev/null 2>&1; then
+    ESTADO_GATES=0
+  else
+    ESTADO_GATES=$?
+  fi
+  if [ "$ESTADO_GATES" = "2" ]; then
+    echo ""
+    echo "✗ EL CENSO DE GATES NO PUEDE MEDIR — el commit NO ocurre."
+    node scripts/verify-gates-existen.mjs 2>&1 | head -4
+    echo ""
+    echo "  No es que todos los gates existan: es que su cero no significaría nada."
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  elif [ "$ESTADO_GATES" != "0" ]; then
+    echo ""
+    echo "✗ EL CANON NOMBRA UN GATE QUE NADIE PUEDE CORRER — el commit NO ocurre."
+    node scripts/verify-gates-existen.mjs 2>&1 | tail -14
+    echo ""
+    echo "  Un gate nombrado y ausente no da rojo: NO CORRE. Su silencio se lee"
+    echo "  como salud, y esa lectura la hace el que confía en el canon."
+    echo "  curalo con su línea en el package.json, retirá la mención,"
+    echo "  o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+fi
+
 echo "✓ gate verde"

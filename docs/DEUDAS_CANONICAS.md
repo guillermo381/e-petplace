@@ -3213,6 +3213,47 @@ cierra el pasado** (`L-409`).
 
 ---
 
+### `D-1015` 🟡 — re-medir borradores, legales y huérfanas cuando una decisión lo necesite
+
+**Qué.** Tres gates que el canon nombra y **que nunca existieron en git**:
+`verify:borradores` · `verify:legales` · `verify:huerfanas`. Verificado por
+S113-E: cero archivo, cero commits que los hayan borrado.
+
+**El peor de los tres, y por qué esto es ficha y no limpieza.** `CLAUDE.md`
+publicaba *«26 de letra firmada · 10 medidas · 17 esperando (13 al abogado, 4 a
+una firma del founder)»* **atribuidos a `verify:borradores` como si fueran
+medidos**. *El canon publicaba un número que nadie podía reproducir — y nadie
+podía descubrir que no se podía, porque el gate ausente no falla: no corre.*
+
+**Decisión del founder (4-sep-2026): RETIRAR.** Los tres números salieron de
+`CLAUDE.md` y en su lugar quedó **«sin instrumento»**, con el porqué. *No se
+corrigen: no hay con qué corregirlos.*
+
+**Qué NO se hizo, y es deliberado.** Las menciones que viven en
+`S103-ACTA-CIERRE.md` y en el parte de `S103-B` **se quedan**. Son acta firmada
+y parte cerrado: *la medición de aquel día era verdadera para quien la escribió;
+lo que no existe es el comando.* **La medición no se reescribe — se marca.**
+Reescribir un acta para poner un gate en verde es ajustar el mundo al
+instrumento, que es justo lo que esta casa nombra como defecto.
+
+**Cómo se apartaron sin borrarlos.** `verify:gates-existen` gana una **tabla de
+jubilaciones** (precedente vivo: `R62` de `verify:diseno` es literalmente eso, y
+`verify-edge-simbolos` quedó como lápida con exit 2). **No es una lista de
+perdón:** cada entrada trae su ficha, y el gate **verifica que la tabla no
+mienta** — si un jubilado llegara a tener script o archivo, sale ROJO, porque
+entonces el canon estaría dando por muerto algo que alguien puede correr. Su
+rojo se produjo antes de cablearlo (`L-459`).
+
+**La regla que deja, ya depositada en `CLAUDE.md`:** *todo número medido nombra
+su comando y su SHA; sin comando en git, no se publica.*
+
+**Disparo.** El día que una decisión necesite alguno de los tres números. **El
+gate se construye ese día**, con su rojo probado — no antes: *construir un gate
+para un número que nadie está pidiendo es fabricar el instrumento equivocado
+con calma.*
+
+---
+
 ### `D-1014` 🟠 — `microchip_asignado`: un tipo de evento que ningún catálogo conoce
 
 **Qué.** `_trg_microchip_crear_evento` escribe el tipo `microchip_asignado` y

@@ -52,6 +52,32 @@ export interface ItemTimeline {
    *  `vacuna_nombre`. Una clave que el bundle no conozca cae al nodo
    *  genérico por eje, que es degradación honesta. */
   hito_clave: string | null;
+  /**
+   * 🔴 **EL TEXTO DEL RECUERDO — y viene por JOIN, no de `datos`.**
+   * `registrar_recuerdo_familia` (S113-A) escribe lo que la familia teclea en
+   * `evento_hito_narrativo.texto`. Hasta esta enmienda **ningún lector de
+   * `packages/api` lo leía**: el ítem llegaba sin él y los dos timelines caían
+   * a la voz genérica del hito — *el recuerdo se guardaba y no se veía, que es
+   * la misma ausencia que la mudanza a `hito_narrativo` vino a curar.*
+   *
+   * A diferencia de `hito_clave` y `vacuna_nombre`, que viajan en `datos`
+   * porque este lector no toca sus tablas tipadas, **acá sí se hace el join**:
+   * el texto es contenido de la familia y no tiene por qué estar duplicado en
+   * el jsonb del evento. Entra en el MISMO `Promise.all` ⇒ **cero olas de red
+   * nuevas** (L-223).
+   *
+   * `null` cuando el hito no tiene texto — incluido el recuerdo de **sólo
+   * foto**, que es un caso legítimo. **Jamás cadena vacía**: un `''` se
+   * renderiza como una línea en blanco y se lee como un defecto.
+   *
+   * ⚠️ **LO QUE NO TRAE, dicho por nombre:** `evento_hito_narrativo.foto_url`.
+   * Un recuerdo de sólo foto llega con `texto: null` **y `fotos_count: 0`**
+   * —porque la foto vive en esa columna y no en `evento_archivo_adjunto`—, así
+   * que la pantalla no tiene con qué dibujarlo. Es un campo más en este mismo
+   * select, sin viaje extra; **no se agregó porque el pedido acotó a `texto`**,
+   * y se declara para que la decisión sea de la mesa y no un olvido mío.
+   */
+  texto: string | null;
   /** Solo tipo=vacuna_aplicada: eventos_mascota.datos->>'vacuna' (lo
    *  escribe el trigger _trg_vacuna_crear_evento) — insumo de la voz
    *  "Recibió la vacuna {nombre}" de LineaDeVida (S47-B1.2 C). */
@@ -197,13 +223,15 @@ async function _timeline(
   /* Los padres de los que cuelgan los eventos clínicos: es por ahí que se
      alcanza la cita, y con ella la marca de §7 (ver `ItemTimeline.modalidad`). */
   const padreIds = [...new Set(eventos.map((e) => e.evento_padre_id).filter((p): p is string => p !== null))];
+  /* Los hitos narrativos: su texto vive en la tabla tipada, no en `datos`. */
+  const hitoIds = eventos.filter((e) => e.tipo === 'hito_narrativo').map((e) => e.id);
 
   /* 🔴 LA CUARTA CONSULTA ENTRA AL MISMO `Promise.all`, no después.
      La ley de performance de la casa (L-223) es *«no hay consultas que
      optimizar, hay VIAJES que eliminar»*: el peaje es ~150 ms por petición sin
      importar cuánto traiga, y encadenarla costaría una ola más de red en la
      pantalla que el dueño abre primero. En paralelo cuesta cero. */
-  const [atenciones, adjuntos, prestadores, citasPadre] = await Promise.all([
+  const [atenciones, adjuntos, prestadores, citasPadre, hitos] = await Promise.all([
     getClient()
       .from('evento_atencion')
       .select('id, evento_id, iniciada_en, terminada_en')
@@ -218,8 +246,14 @@ async function _timeline(
     padreIds.length > 0
       ? getClient().from('evento_cita_servicio').select('evento_id, modalidad').in('evento_id', padreIds)
       : Promise.resolve({ data: [] as Array<{ evento_id: string | null; modalidad: string | null }>, error: null }),
+    /* LA QUINTA, y entra al mismo `Promise.all` por la misma razón que la
+       cuarta: en paralelo cuesta cero, encadenada cuesta una ola de red en la
+       pantalla que el dueño abre primero. */
+    hitoIds.length > 0
+      ? getClient().from('evento_hito_narrativo').select('evento_id, texto').in('evento_id', hitoIds)
+      : Promise.resolve({ data: [] as Array<{ evento_id: string | null; texto: string | null }>, error: null }),
   ]);
-  if (atenciones.error || adjuntos.error || prestadores.error || citasPadre.error) {
+  if (atenciones.error || adjuntos.error || prestadores.error || citasPadre.error || hitos.error) {
     return fallo('error_desconocido');
   }
 
@@ -263,6 +297,15 @@ async function _timeline(
   }
 
   const nombrePrestador = new Map((prestadores.data ?? []).map((p) => [p.id, p.nombre_comercial]));
+  /* `''` no entra al mapa: el guard vive ACÁ y no en el consumidor, porque
+     una cadena vacía que llega a la pantalla se dibuja como una línea en
+     blanco y se lee como un defecto del producto. */
+  const textoPorHito = new Map<string, string>();
+  for (const h of hitos.data ?? []) {
+    if (h.evento_id !== null && typeof h.texto === 'string' && h.texto.length > 0) {
+      textoPorHito.set(h.evento_id, h.texto);
+    }
+  }
   const modalidadPorPadre = new Map<string, string | null>();
   for (const c of citasPadre.data ?? []) {
     if (c.evento_id !== null) modalidadPorPadre.set(c.evento_id, c.modalidad);
@@ -297,6 +340,11 @@ async function _timeline(
       prestador_id: e.prestador_id ?? null,
       chips: chipsPorEvento.get(e.id) ?? [],
       hito_clave: hito,
+      /* Del JOIN, no de `datos`. Hoy sólo `recuerdo_familia` escribe `texto`,
+         así que el efecto es idéntico a filtrar por la clave — pero filtrar
+         por ella reintroduciría la deducción desde `datos` que este join
+         existe para evitar, y taparía el día que otro hito gane texto. */
+      texto: textoPorHito.get(e.id) ?? null,
       modalidad: e.evento_padre_id !== null
         ? modalidadPorPadre.get(e.evento_padre_id) ?? null
         : null,
