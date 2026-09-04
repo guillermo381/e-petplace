@@ -9,8 +9,8 @@
    que no tenerlo (Ley 37 aplicada a los instrumentos). */
 import {
   AIRE_BORDE, ARCO_GRADOS, ARCO_SEPARACION, BRASA, DEDO, ORBE, ORBE_ABIERTO,
-  LIENZO, PASTILLA, SEPARACION, alturasDeLaFila, anclaOrbe, arcosDe, clasesConAlgo,
-  ORBE_MINI, ejeDeLaFila, violetaEncendido, movimientoCoach, nodosDeLaFila, pastillasDe,
+  BRASA, BRASA_ALFA, BRASA_MUERE, LIENZO, PASTILLA, SEPARACION, alturasDeLaFila, anclaOrbe, arcosDe, clasesConAlgo,
+  ORBE_MINI, ejeDeLaFila, violetaEncendido, vozDelOrbe, movimientoCoach, nodosDeLaFila, pastillasDe,
 } from '../packages/ui/src/components/coach-geometria.ts';
 import { readFileSync } from 'node:fs';
 
@@ -133,6 +133,23 @@ const FUENTE = readFileSync(new URL('../packages/ui/src/components/PresenciaCoac
 /* 🔴 **SE MIDE EL CÓDIGO, NO LA PROSA (`L-170`).** La primera versión leía el
    archivo entero y se cazó a sí misma con su propia cabecera. */
 const CODIGO = FUENTE.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1');
+/** Saca los comentarios: **se mide el CÓDIGO, no la prosa** (`L-170`). Una
+ *  versión vieja de este arnés leía el archivo entero y se cazó a sí misma
+ *  con su propia cabecera. */
+const sinComentarios = (src: string) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1')
+
+/* ⚠️ **LAS TRES FUENTES SE LEEN JUNTAS, ACÁ.** La primera versión declaraba
+   dos de ellas más abajo, donde se usaban, y el bloque nuevo las llamaba
+   antes ⇒ `Cannot access before initialization`. *Es el mismo defecto que
+   `verify:ref-antes-de-uso` vigila en la casa, cometido por quien escribe su
+   gate.* */
+const ORBE_SRC = sinComentarios(
+  readFileSync(new URL('../packages/ui/src/components/OrbeCoach.tsx', import.meta.url), 'utf8'),
+);
+const CAB_SRC = sinComentarios(
+  readFileSync(new URL('../packages/ui/src/components/CabeceraCoach.tsx', import.meta.url), 'utf8'),
+);
 
 console.log('\n── ⑦ LA PIEZA CONSUME LAS DECISIONES (si no, ⑥ mide funciones huérfanas) ──');
 t('llama a `movimientoCoach`', /movimientoCoach\(\{/.test(CODIGO), true);
@@ -145,20 +162,22 @@ t('no teclea el nombre del Coach', /Nexo/i.test(CODIGO), false);
 
 console.log('\n── ⑧ EL MATERIAL DEL ORBE, LEÍDO DEL SVG ──');
 /* La brasa se declara en el SVG como `r` = MITAD de su diámetro. */
-const rBrasa = CODIGO.match(/r=\{`\$\{\(BRASA\.diametro \/ 2\) \* 100\}%`\}/);
+const rBrasa = ORBE_SRC.match(/r=\{`\$\{\(BRASA\.diametro \/ 2\) \* 100\}%`\}/);
 t('la brasa toma su radio de `BRASA.diametro / 2`', rBrasa !== null, true);
 t('🔴 y ese diámetro es ≤ 40 % del cuerpo', BRASA.diametro <= 0.4, true);
 cerca('está corrida a 56/62 %, no centrada', BRASA.cx * 100, 56);
 cerca('…y en el eje vertical', BRASA.cy * 100, 62);
 t('CONTROL NEGATIVO · no está centrada (si lo estuviera, no sería una brasa)',
   BRASA.cx === 0.5 && BRASA.cy === 0.5, false);
-t('el cuerpo en reposo va de la perla al borde LILA, no a un ocre',
-  /coachPerla\b[\s\S]{0,240}coachClaro[^\n]*LILA_ALFA/.test(CODIGO), true);
-t('🔴 y el token con alpha embebido murió', /coachPerlaBorde/.test(CODIGO), false);
+t('el cuerpo en reposo va de la perla a un borde de identidad, no a un ocre',
+  /coachPerla\b[\s\S]{0,240}vivo[^\n]*LILA_ALFA/.test(ORBE_SRC), true);
+t('…y ese borde es el violeta SÓLO si nadie pasa otro color',
+  /const vivo = color \?\? palette\.coachMedio/.test(ORBE_SRC), true);
+t('🔴 y el token con alpha embebido murió', /coachPerlaBorde/.test(ORBE_SRC), false);
 t('el cuerpo despierto tiene sus tres paradas',
-  /coachClaro[\s\S]{0,200}coachMedio[\s\S]{0,200}coachProfundo/.test(CODIGO), true);
+  /coachClaro[\s\S]{0,200}coachMedio[\s\S]{0,200}coachProfundo/.test(ORBE_SRC), true);
 t('el cuerpo se dibuja en SVG, no con un color de fondo',
-  /<RadialGradient/.test(CODIGO) && /backgroundColor:\s*palette\.coachPerla/.test(CODIGO) === false, true);
+  /<RadialGradient/.test(ORBE_SRC) && /backgroundColor:\s*palette\.coachPerla/.test(ORBE_SRC) === false, true);
 
 console.log('\n── ⑨ EN REPOSO NO HAY LÍNEA BASE (§3) ──');
 t('🔴 el aro sólo se monta con arcos', /arcos\.length > 0 \? \(/.test(CODIGO), true);
@@ -201,9 +220,49 @@ console.log('\n── ⑪ EL ORBE ABRE Y CIERRA (decisión del founder, lote 0.2
    —perla cerrado, violeta abierto— y ese cambio es lo que enseña a tocarlo.** */
 t('🔴 abierta ⇒ su toque CIERRA', /abierta \? onCerrar : onAbrir/.test(CODIGO), true);
 t('y `onPreguntar` ya NO vive en el orbe', /abierta \? onPreguntar/.test(CODIGO), false);
-t('vive en la fila «Preguntale»', /onPreguntar\(\)/.test(CODIGO), true);
+t('vive en la fila «Preguntale»', /onPreguntar\?\.\(\)/.test(CODIGO), true);
 
-console.log('\n── ⑫ LA CAPA VIOLETA · 0 en reposo, 1 despierta (asertado) ──');
+console.log('\n── ⑫ D-1019 · LA ETIQUETA DEL ORBE DICE EL ESTADO ──');
+/* 🔴 **En web `accessibilityState` no llega ⇒ la ETIQUETA es el mecanismo.**
+   Por eso esto se asierta y no se confía al `expanded`. */
+{
+  const voz = { abrir: 'Abrir a X', cerrar: 'Cerrar' };
+  t('cerrado ⇒ dice cómo ABRIR', vozDelOrbe(false, voz), 'Abrir a X');
+  t('🔴 abierto ⇒ dice CERRAR', vozDelOrbe(true, voz), 'Cerrar');
+  t('🔴 y las dos son DISTINTAS (el rojo de D-1019)',
+    vozDelOrbe(false, voz) !== vozDelOrbe(true, voz), true);
+}
+t('la pieza la consume (si no, esto mide una función huérfana)',
+  /vozDelOrbe\(abierta, voz\)/.test(CODIGO), true);
+t('🔴 y NO quedó una etiqueta fija en el orbe',
+  /accessibilityLabel=\{voz\.orbe\}/.test(CODIGO), false);
+t('el velo comparte la voz de cerrar: es el mismo acto',
+  (CODIGO.match(/voz\.cerrar/g) ?? []).length >= 1, true);
+
+console.log('\n── ⑬ UN SOLO DIBUJO DEL ORBE (lote 0.3) ──');
+t('la pieza única existe', ORBE_SRC.length > 0, true);
+t('🔴 `PresenciaCoach` no dibuja su propio orbe', /<RadialGradient/.test(CODIGO), false);
+t('🔴 `CabeceraCoach` tampoco — era la copia que quedó rota',
+  /<RadialGradient/.test(CAB_SRC), false);
+t('las tres apariciones montan `OrbeCoach`',
+  (CODIGO.match(/<OrbeCoach/g) ?? []).length === 2 && /<OrbeCoach/.test(CAB_SRC), true);
+t('sólo el grande lleva resplandor',
+  (CODIGO.match(/conResplandor/g) ?? []).length === 1 && /conResplandor/.test(CAB_SRC) === false, true);
+t('cada instancia deriva sus `id` (son globales en react-native-svg)',
+  /useId\(\)/.test(ORBE_SRC), true);
+
+console.log('\n── ⑭ LA BRASA ES CALOR, NO UN PUNTO ──');
+/* ⏪ Con dos paradas se leía «un punto con borde»: una caída lineal termina
+   en un anillo donde el degradé se corta, y el ojo lee ese corte. */
+t('🔴 su opacidad tope es ≤ 0,70', BRASA_ALFA <= 0.7, true);
+t('🔴 muere ANTES del final del gradiente (sin corte visible)', BRASA_MUERE <= 0.6, true);
+t('el calor visible no pasa del 40 % del diámetro',
+  BRASA.diametro * BRASA_MUERE <= 0.4, true);
+t('tiene paradas INTERMEDIAS: sin ellas la caída es lineal y hace borde',
+  (ORBE_SRC.match(/offset/g) ?? []).length >= 5, true);
+t('ninguna parada usa rgba en el color', /stopColor=\{[^}]*rgba/.test(ORBE_SRC), false);
+
+console.log('\n── ⑮ LA CAPA VIOLETA · 0 en reposo, 1 despierta (asertado) ──');
 t('🔴 dormida ⇒ 0', violetaEncendido({ abierta: false, estado: 'dormida' }), 0);
 t('atenta y cerrada ⇒ 0 (tener pendientes no es estar despierto)',
   violetaEncendido({ abierta: false, estado: 'atenta' }), 0);
@@ -215,14 +274,46 @@ t('la pieza la consume (si no, esto mide una función huérfana)',
   /violetaEncendido\(\{/.test(CODIGO), true);
 t('…y el fundido es el de 250 ms de la casa', /motion\.coach\.fundidoMs/.test(CODIGO), true);
 
-console.log('\n── ⑬ EL MATERIAL, contra lo que Android SÍ dibuja ──');
+console.log('\n── ⑮bis LA PRESENCIA SIN COACH (lote 0.3) ──');
+/* 🔴 **Es la MISMA pieza haciendo el otro trabajo**, y así es como el
+   prestador y el cliente en memorial tienen su puerta sin que exista una
+   segunda. `BurbujaPendientes` queda derogada por esto. */
+t('🔴 sin Coach NO hay dedos', nodosDeLaFila(p(2, 1, null), 4, false).some((n) => n.tipo === 'dedo'), false);
+t('🔴 sin Coach NO hay «Preguntale»',
+  nodosDeLaFila(p(2, 1, null), 4, false).some((n) => n.tipo === 'preguntar'), false);
+t('la fila son SÓLO los pendientes',
+  nodosDeLaFila(p(2, 1, null), 4, false).map((n) => n.tipo), ['pastilla', 'pastilla']);
+t('CONTROL POSITIVO · con Coach sí están los dos',
+  nodosDeLaFila(p(2, 1, null), 4, true).filter((n) => n.tipo !== 'pastilla').map((n) => n.tipo),
+  ['preguntar', 'dedo', 'dedo', 'dedo', 'dedo']);
+t('sin pendientes y sin Coach ⇒ la fila está vacía', nodosDeLaFila(p(0, 0, null), 4, false), []);
+t('las alturas respetan el modo',
+  alturasDeLaFila(p(2, 1, null), 412, 0, 4, false).length, 2);
+t('las solicitudes del refugio son una clase más',
+  nodosDeLaFila({ chat: 0, pedidos: 0, avisos: null, solicitudes: 4 }, 4, false).map((n: any) => n.clase),
+  ['solicitudes']);
+t('y también tienen su arco', arcosDe({ chat: 0, pedidos: 0, avisos: null, solicitudes: 4 }).map((a) => a.clase), ['solicitudes']);
+t('🔴 el color de la presencia SIN Coach sale de `accent.cta`, no del violeta',
+  /const identidad = coach \? palette\.coachMedio : theme\.accent\.cta/.test(CODIGO), true);
+t('…y el orbe recibe ese color en vez del suyo',
+  /color=\{coach \? undefined : identidad\}/.test(CODIGO), true);
+t('🔴 en memorial la PUERTA sobrevive, el Coach no',
+  /if \(esMemorial && coach\) return null/.test(CODIGO), true);
+t('cada pastilla sin Coach lleva su círculo con glifo',
+  /coach \? null : \(/.test(CODIGO) && /pastilla\(n\.clase\)\.glifo/.test(CODIGO), true);
+
+console.log('\n── ⑯ EL MATERIAL, contra lo que Android SÍ dibuja ──');
+/* ⏪ Estos cinco medían sobre `PresenciaCoach`; el dibujo se mudó a
+   `OrbeCoach` en el lote 0.3 y **el gate lo dijo con cuatro rojos** en vez de
+   quedarse verde sobre un archivo que ya no dibuja nada. Se reapuntan, no se
+   relajan. */
 /* 🔴 Los dos defectos que sólo el emulador dijo, hechos gate. */
 t('🔴 ningún `stopColor` con rgba: Android le come el alpha',
-  /stopColor=\{[^}]*rgba/.test(CODIGO), false);
-t('las paradas translúcidas usan `stopOpacity`', /stopOpacity=/.test(CODIGO), true);
+  /stopColor=\{[^}]*rgba/.test(ORBE_SRC), false);
+t('las paradas translúcidas usan `stopOpacity`', /stopOpacity=/.test(ORBE_SRC), true);
 t('🔴 el resplandor NO es una sombra de RN (no existe en Android)',
-  /shadowColor|shadowRadius|shadowOpacity/.test(CODIGO), false);
-t('…es un círculo con su propio radial', /coachGlow/.test(CODIGO), true);
+  /shadowColor|shadowRadius|shadowOpacity/.test(CODIGO + ORBE_SRC + CAB_SRC), false);
+t('…es un círculo con su propio radial', /glow/.test(ORBE_SRC), true);
 t('el barrido tampoco es una capa de RN encimada',
   /expo-linear-gradient/.test(CODIGO), false);
 t('el lienzo le da lugar al resplandor', LIENZO >= 2, true);

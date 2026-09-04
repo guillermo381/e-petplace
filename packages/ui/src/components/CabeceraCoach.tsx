@@ -37,7 +37,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg'
+import { OrbeCoach } from './OrbeCoach'
 
 import { motion } from '../tokens/motion'
 import { palette } from '../tokens/palette'
@@ -45,7 +45,7 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
-import { BRASA } from './coach-geometria'
+
 
 /** El orbe de la cabecera. Más chico que el flotante: acá no es una puerta,
  *  es una firma. */
@@ -88,7 +88,6 @@ export function CabeceraCoach({ nombre, pulsos }: CabeceraCoachProps) {
 
   if (esMemorial) return null
 
-  const r = ORBE_CABECERA / 2
 
   return (
     <View accessibilityRole="header" accessibilityLabel={nombre} style={{ alignItems: 'center', gap: spacing[1] }}>
@@ -109,28 +108,14 @@ export function CabeceraCoach({ nombre, pulsos }: CabeceraCoachProps) {
           estilo,
         ]}
       >
-        <Svg width={ORBE_CABECERA} height={ORBE_CABECERA}>
-          <Defs>
-            {/* El mismo cuerpo despierto que el orbe grande, en chico:
-                radial Claro → Medio → Profundo, con su brasa encima. */}
-            <RadialGradient id="cuerpoCabeceraCoach" cx="50%" cy="50%" r="50%">
-              <Stop offset="0" stopColor={palette.coachClaro} />
-              <Stop offset="0.6" stopColor={palette.coachMedio} />
-              <Stop offset="1" stopColor={palette.coachProfundo} />
-            </RadialGradient>
-            <RadialGradient
-              id="brasaCabeceraCoach"
-              cx={`${BRASA.cx * 100}%`}
-              cy={`${BRASA.cy * 100}%`}
-              r={`${(BRASA.diametro / 2) * 100}%`}
-            >
-              <Stop offset="0" stopColor={palette.coachBrasa} />
-              <Stop offset="1" stopColor={palette.coachBrasaFin} />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={r} cy={r} r={r} fill="url(#cuerpoCabeceraCoach)" />
-          <Circle cx={r} cy={r} r={r} fill="url(#brasaCabeceraCoach)" />
-        </Svg>
+        {/* ☠️ **ACÁ HABÍA UN TERCER DIBUJO DEL ORBE, Y ERA EL QUE ESTABA
+            ROTO.** Sus paradas de brasa usaban `rgba(...)` en el `stopColor`
+            —la forma que **en Android pierde el alpha**— así que la cabecera
+            se veía un **disco durazno plano** con el violeta tapado debajo.
+            El lote 0.2 curó eso en las otras dos copias y ésta se quedó
+            atrás: *una cura aplicada en dos de tres copias no es una cura.*
+            Ahora las tres apariciones montan `OrbeCoach`. */}
+        <OrbeCoach tamano={ORBE_CABECERA} encendido={1} />
       </Animated.View>
       {/* 🔴 **`Texto` no puede decir este color y no debe:** su paleta es
           semántica (primary/secondary/danger…) y esto es la IDENTIDAD de una
