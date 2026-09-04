@@ -3213,6 +3213,61 @@ cierra el pasado** (`L-409`).
 
 ---
 
+### `D-1021` 🔴 — la ficha de una mascota fallecida se dibuja como si estuviera viva
+
+**Cómo apareció.** Recorriendo el 0.3 en **emulador Android** con
+`guillo381+8` y entrando a la ficha de **Sombra**, la fixture memorial que E
+sembró por el motor real (`estado_vida = 'fallecida'`, medido en la base).
+Captura: `docs/loop/capturas-s113-a03/04-memorial-sombra.png`.
+
+**Lo que la pantalla dice, literal:** techo con el gradiente de marca vivo ·
+chip *«Conociéndolo · 1 por resolver»* · sección *«Cómo está hoy»* con
+**«Registrar el de hoy»** · **«Cargar carnet»** para vacunas y desparasitación ·
+y **el orbe del Coach montado**.
+
+*A una familia que perdió a su animal, la app le pide que registre el peso de
+hoy.* **Es el peor lugar del producto para equivocarse**, y es exactamente el
+que `MODELO_LOYALTY` §7.1 manda apagar.
+
+### Son DOS defectos distintos, y hay que curar los dos
+
+**① El tema memorial no se enciende en ninguna pantalla de producto.** Medido:
+los únicos `ThemeProvider` del cliente están en `gallery.tsx`,
+`lamina-fusion.tsx`, `pantalla-caida.tsx` y el `_layout.tsx` raíz — **y el raíz
+monta `light`/`dark`, nunca `memorial`**. La ficha lee `theme.mode ===
+'memorial'` (`[mascotaId].tsx:389`) y **ese valor no puede llegar nunca**: es
+un guard correcto colgado de un interruptor que nadie aprieta. *El tema
+memorial existe en `packages/ui` desde S43 y jamás se usó.*
+
+**② `focoNexo` monta el Coach sobre una memorial, y contradice su propio
+comentario.** En `lib/nexo/atajos.ts:108-124`: excluye las memoriales de
+`activas`, **no encuentra la de la ruta ahí**, y *«sigue de largo y decide la
+regla general»* ⇒ con 12 mascotas vivas devuelve `{modo:'elegir'}` y el shell
+monta `PresenciaCoach`. Su propia cabecera dice lo contrario: *«Nexo **no
+aparece en memorial** —ni con la mascota en foco en memorial, ni con un hogar
+sin ninguna activa»*. **La segunda mitad funciona; la primera no.** El `return`
+de memorial sólo dispara con `activas.length === 0`, o sea **sólo en un hogar
+de una sola mascota** — que es justo el caso donde alguien lo habría probado.
+
+### 🔴 Por qué esto vivió tanto sin verse, y está medido
+
+**89 de 89 mascotas estaban `activa`** hasta que E sembró a Sombra **en este
+mismo lote**. *El brazo entero del memorial nunca se ejerció con datos vivos* —
+`D-1011` ya lo decía sobre el motor, y acá se ve la otra mitad: **también la
+superficie.** Ningún gate lo vio porque **ninguno pinta píxeles ni conoce el
+estado de vida**: `verify:diseno` mide reglas de composición, `verify:contrast`
+mide color sobre los tres temas *en abstracto*, y `verify:nexo` mide el orbe.
+
+**Es la primera cosecha de la línea que este lote depositó en `CLAUDE.md`:**
+*toda pieza con dibujo nuevo se captura en el emulador antes de entrar a un
+candidato*. **No la encontró un gate: la encontró mirar.**
+
+**Dueño: C** (`apps/cliente`). **Precondición del soft launch, no del 0.3:** la
+app no puede llegar a una familia real sin esto, y una familia real va a perder
+un animal.
+
+---
+
 ### `D-1019` 🟠 — el orbe de Nexo dice «Abrir» cuando el toque va a cerrar
 
 **Qué, medido por C en el DOM (S113-C-02).** Desde el 0.2 el orbe es un
