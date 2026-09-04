@@ -31,10 +31,10 @@ import { readFileSync } from 'node:fs';
 
 import {
   AIRE_BORDE,
-  ARCO_GROSOR,
+  LIENZO,
   ORBE,
   ORBE_ABIERTO,
-  RESPLANDOR,
+  RESPLANDOR_RADIO,
   anclaOrbe,
   clasesConAlgo,
   type PendientesCoach,
@@ -399,41 +399,41 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   const BARRA = Number(mAlto[1]) + 34; // fila + un inset típico
 
   const ancla = anclaOrbe(ANCHO, BARRA);
+  const radio = ORBE / 2;
+  const centro = ancla.abajo + radio;
 
-  /* ① EL CUERPO DEL ORBE — `anclaOrbe` promete la caja del ORBE, no la del
-        resplandor, así que su borde inferior es el ancla misma. */
+  /* ① EL CUERPO DEL ORBE — `anclaOrbe` promete su caja, y su borde inferior es
+        el ancla misma. */
   const holguraCuerpo = ancla.abajo - BARRA;
   ok('el cuerpo del orbe no entra en la banda de la barra', holguraCuerpo > 0, `holgura=${holguraCuerpo}`);
   ok('y la holgura es el aire del borde, no un sobrante casual', holguraCuerpo === AIRE_BORDE, String(holguraCuerpo));
 
-  /* ② LA CAJA DE LOS ARCOS — desborda `ARCO_GROSOR * 2` y la pieza lo compensa
-        para que el CUERPO caiga donde el ancla promete. La caja baja igual. */
-  const holguraCaja = ancla.abajo - ARCO_GROSOR * 2 - BARRA;
-  ok('la caja de los arcos tampoco entra en la barra', holguraCaja > 0, `holgura=${holguraCaja}`);
+  /* ② EL RESPLANDOR — ⏪ era una SOMBRA y ahora es un círculo dibujado
+        (`r * RESPLANDOR_RADIO`), porque `shadowRadius` no existe en Android y
+        **era la mitad de por qué el orbe no se veía encendido** (medido por B
+        en el lote 0.2). Al ser dibujo y no sombra, su borde se puede calcular. */
+  const holguraResplandor = centro - radio * RESPLANDOR_RADIO - BARRA;
+  ok('el resplandor tampoco entra en la banda', holguraResplandor > 0, `holgura=${holguraResplandor}`);
 
-  /* ③ EL ORBE ABIERTO — **crece y no viaja** (`scale`, centro fijo). Al escalar
-        alrededor del centro, la caja baja la mitad de lo que crece. */
-  const altoCaja = ORBE + ARCO_GROSOR * 4;
-  const crecimiento = altoCaja * (ORBE_ABIERTO / ORBE - 1);
-  const holguraAbierto = holguraCaja - crecimiento / 2;
-  ok('abierto tampoco entra en la barra', holguraAbierto > 0, `holgura=${holguraAbierto.toFixed(1)}`);
+  /* ③ EL LIENZO SÍ BAJA, Y ES TRANSPARENTE. La caja del Svg mide `ORBE ×
+        LIENZO` para que el degradé tenga dónde disolverse; ahí no hay tinta.
+        *Se mide igual: el día que el resplandor crezca hasta llenarlo, este
+        número deja de ser inofensivo y hay que enterarse acá.* */
+  const holguraLienzo = ancla.abajo - (ORBE * (LIENZO - 1)) / 2 - BARRA;
+  ok('el lienzo baja, y su desborde está acotado', holguraLienzo < 0 && holguraLienzo > -16, `${holguraLienzo}`);
+  ok('pero el resplandor visible queda MUY por encima del lienzo', holguraResplandor > holguraLienzo);
 
-  /* ④ EL RESPLANDOR SÍ ROZA, Y SE DECLARA EN VEZ DE ESCONDERSE. Es una SOMBRA
-        (`shadowRadius = RESPLANDOR`, `elevation` en Android), no cuerpo: su
-        borde exterior llega a `AIRE_BORDE - RESPLANDOR` de la banda. *El orbe
-        no queda tapado; lo que la barra recorta son los píxeles más tenues de
-        su brillo.* Se mide para que el día que alguien cambie uno de los dos
-        números, el cambio aparezca acá y no en un teléfono. */
-  const rocePorElBrillo = RESPLANDOR - AIRE_BORDE;
-  ok('el roce es SÓLO del resplandor y está acotado', rocePorElBrillo > 0 && rocePorElBrillo <= 8, `${rocePorElBrillo}px`);
+  /* ④ EL ORBE ABIERTO — crece y no viaja (`scale`, centro fijo). */
+  const crecimiento = ORBE * LIENZO * (ORBE_ABIERTO / ORBE - 1);
+  ok('abierto, el cuerpo tampoco entra', holguraCuerpo - (ORBE_ABIERTO - ORBE) / 2 > 0);
+  ok('y el lienzo abierto sigue acotado', holguraLienzo - crecimiento / 2 > -20, String(holguraLienzo - crecimiento / 2));
 
-  /* ⑤ EL BORDE DERECHO — que no se salga de la pantalla, ni al crecer. */
+  /* ⑤ EL BORDE DERECHO. */
   ok('el orbe no se sale por la derecha', ancla.izquierda + ORBE <= ANCHO);
-  ok('abierto tampoco', ancla.izquierda + ORBE + crecimiento / 2 <= ANCHO);
 
-  /* 🔴 EL CONTROL NEGATIVO, y nombra el modo de falla real: si el shell se
-        olvidara de pasar `aireInferior`, el orbe caería DENTRO de la barra —
-        y como la barra pinta después, quedaría tapado sin que nada falle. */
+  /* 🔴 EL CONTROL NEGATIVO: sin `aireInferior` el orbe caería DENTRO de la
+        barra — y como la barra pinta después, quedaría tapado sin que nada
+        falle. */
   const sinAire = anclaOrbe(ANCHO, 0);
   ok(
     'sin `aireInferior` el orbe QUEDARÍA dentro de la banda de la barra',
@@ -505,7 +505,19 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   const bloque = shell.slice(iP, shell.indexOf('/>', iP));
 
   ok('el orbe abre: `onAbrir` enciende la fila', /onAbrir=\{\(\) => setAbierta\(true\)\}/.test(bloque));
-  ok('el velo cierra: `onCerrar` la apaga', /onCerrar=\{\(\) => setAbierta\(false\)\}/.test(bloque));
+  ok('el orbe (y el velo) cierran: `onCerrar` la apaga', /onCerrar=\{\(\) => setAbierta\(false\)\}/.test(bloque));
+
+  /* 🔴 **CERRAR ES DE LA PIEZA, Y ACÁ NO SE REPITE** (lote 0.2). `PresenciaCoach`
+     llama a `onCerrar` antes de disparar el atajo (`:786`), la pastilla (`:677`)
+     y la fila «Pregúntale» (`:663`); si el shell cerrara además por su cuenta
+     serían **dos lugares cerrando la misma pata**, y ya hay un caso donde
+     difieren a propósito: **con un dedo apagado la pieza NO cierra**, para que
+     la razón se lea con la fila a la vista. */
+  ok(
+    '`tocar` NO cierra la pata: eso es de la pieza',
+    !/const tocar = \(atajo: AtajoNexo \| 'coach'\) => \{\s*setAbierta\(false\)/.test(shell),
+  );
+  ok('y `onPendiente` tampoco', !/onPendiente=\{\(clase\) => \{\s*setAbierta\(false\)/.test(bloque));
   ok('la fila «Pregúntale» abre la Hoja', /onPreguntar=\{\(\) => tocar\('coach'\)\}/.test(bloque));
   ok('`abierta` viaja a la pieza', /abierta=\{abierta\}/.test(bloque));
 

@@ -45,54 +45,64 @@ await page.getByText('Entrar', { exact: true }).click();
 await page.waitForTimeout(18000);
 
 const di = (s) => console.log(s);
+const marcasHoja = (t) =>
+  ['¿Qué edad tiene?', '¿Cómo va su carnet?', '¿Qué actividad tiene?', 'Soy Nexo'].filter((f) => t.includes(f));
+
 di('── ① ¿EL ORBE ESTÁ MONTADO? ───────────────────────────────');
-/* Cerrado, su nombre accesible es `voz.orbe` = «Abrir a Nexo». */
-const orbe = page.getByRole('button', { name: /Abrir a /i }).first();
-const hay = await orbe.count();
-di(`orbe en reposo: ${hay > 0 ? 'SÍ, montado' : 'NO montado'}`);
-if (hay === 0) {
-  di('(sin orbe no hay nada que medir — puede ser memorial, hogar sin mascotas o ruta silenciada)');
+/* 🔴 **EL ORBE SE LOCALIZA POR SU VOZ EXACTA, Y ESTO LO CORRIGIÓ SU PROPIO
+   ROJO.** La primera versión buscaba `/^Abrir a |^Pregúntale a /` y tomaba
+   `.first()`: con la fila abierta, el primero en el DOM **es la fila** —la
+   pieza la dibuja antes que el orbe— así que el segundo toque le pegaba a la
+   fila y abría la Hoja. El arnés reportó *«un toque hizo dos cosas»* y **la
+   que hacía dos cosas era la medición.**
+   Medido en la pieza: el orbe grande lleva `accessibilityLabel={voz.orbe}`
+   SIEMPRE (:729) y la fila lleva `voz.preguntar` — se distinguen por nombre,
+   y el estado se lee de `aria-expanded`, que el orbe sí publica. */
+const orbe = () => page.getByRole('button', { name: 'Abrir a Nexo', exact: true });
+if ((await orbe().count()) === 0) {
+  di('orbe en reposo: NO montado');
   di(`pantalla: ${(await texto()).split('\n').slice(0, 6).join(' · ')}`);
   await browser.close();
   process.exit(2);
 }
+const leer = async () => ({
+  nombre: await orbe().getAttribute('aria-label'),
+  expandido: await orbe().getAttribute('aria-expanded'),
+});
+di(`reposo · ${JSON.stringify(await leer())} · nodos con esa voz: ${await orbe().count()}`);
 
-const leer = async () => {
-  const b = page.getByRole('button', { name: /Abrir a |Pregúntale a /i }).first();
-  return {
-    nombre: await b.getAttribute('aria-label'),
-    expanded: await b.getAttribute('aria-expanded'),
-  };
-};
-
-const antes = await leer();
-di(`   antes  · aria-label="${antes.nombre}" · aria-expanded=${antes.expanded}`);
-
-di('\n── ② SE TOCA EL ORBE ──────────────────────────────────────');
-await orbe.click();
+di('\n── ② UN TOQUE: ABRE ───────────────────────────────────────');
+await orbe().click();
 await page.waitForTimeout(1500);
-const despues = await leer();
-di(`   después · aria-label="${despues.nombre}" · aria-expanded=${despues.expanded}`);
+const tras1 = JSON.stringify(await leer());
+const t1 = await texto();
+const dedos1 = ['Peso', 'Vacuna', 'Antiparasitario', 'Foto'].filter((d) => t1.includes(d));
+di(`orbe: ${tras1} · dedos a la vista: ${dedos1.join(' · ') || 'ninguno'}`);
+di(`abrió: ${dedos1.length === 4 ? 'SÍ' : 'NO'}`);
+di(`¿abrió TAMBIÉN la Hoja? ${marcasHoja(t1).length > 0 ? 'SÍ — dos cosas de un toque 🔴' : 'no ✓'}`);
 
-const abrio = despues.expanded === 'true' || /Pregúntale/i.test(despues.nombre ?? '');
-di(`\n⇒ ¿\`abierta\` LLEGÓ a la pieza? ${abrio ? 'SÍ' : 'NO'}`);
-di(abrio
-  ? '   ⇒ el montaje hizo su parte: `violeta = abierta || …` da true, así que si'
-  : '   ⇒ el montaje NO encendió `abierta`: la causa es del cableado.');
-if (abrio) di('      el orbe no se ve encendido, la causa está en el DIBUJO de la pieza.');
-
-di('\n── ③ LA FILA «Pregúntale» ─────────────────────────────────');
-const fila = page.getByRole('button', { name: /Pregúntale a /i });
-di(`nodos con esa voz: ${await fila.count()} (esperado 2: la etiqueta y el orbe abierto)`);
+di('\n── ③ OTRO TOQUE EN EL ORBE: CIERRA ────────────────────────');
+await orbe().click();
+await page.waitForTimeout(1500);
+const tras2 = JSON.stringify(await leer());
 const t2 = await texto();
-di(`dedos a la vista: ${['Peso', 'Vacuna', 'Antiparasitario', 'Foto'].filter((d) => t2.includes(d)).join(' · ') || 'ninguno'}`);
+const dedos2 = ['Peso', 'Antiparasitario'].filter((d) => t2.includes(d));
+di(`orbe: ${tras2} · dedos a la vista: ${dedos2.join(' · ') || 'ninguno'}`);
+di(`cerró: ${dedos2.length === 0 ? 'SÍ' : 'NO'}`);
+di(`¿abrió la Hoja al cerrar? ${marcasHoja(t2).length > 0 ? 'SÍ — dos cosas de un toque 🔴' : 'no ✓'}`);
 
-di('\n── ④ SE TOCA LA ETIQUETA: ¿abre la Hoja? ──────────────────');
+di('\n── ④ LA FILA «Pregúntale» ABRE LA HOJA ────────────────────');
+await orbe().click();
+await page.waitForTimeout(1500);
+/* La fila es el orbe CHICO, con la misma voz. El grande, ya abierto, se llama
+   «Abrir a …» otra vez (su onPress es onCerrar), así que se distinguen. */
+const fila = page.getByRole('button', { name: /^Pregúntale a /i });
+di(`nodos «Pregúntale»: ${await fila.count()} (esperado 1: sólo la fila — el orbe ya no lleva esa voz)`);
 await fila.first().click();
 await page.waitForTimeout(2500);
 const t3 = await texto();
-const hoja = ['¿Qué edad tiene?', '¿Cómo va su carnet?', '¿Qué actividad tiene?', 'Soy Nexo'].filter((f) => t3.includes(f));
-di(`marcas de la Hoja del Coach: ${hoja.length > 0 ? hoja.join(' · ') : 'NINGUNA'}`);
+di(`marcas de la Hoja: ${marcasHoja(t3).join(' · ') || 'NINGUNA'}`);
+di(`la fila cerró la pata: ${['Peso', 'Antiparasitario'].some((d) => t3.includes(d)) ? 'no' : 'sí'}`);
 
 di(`\nerrores de página: ${errores.length}${errores.length ? ' — ' + errores[0] : ''}`);
 await browser.close();
