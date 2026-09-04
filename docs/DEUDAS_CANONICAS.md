@@ -3213,6 +3213,43 @@ cierra el pasado** (`L-409`).
 
 ---
 
+### `D-1016` 🔴 — `verify:nexo` mide una geometría que B retiró
+
+**Qué.** `apps/cliente/scripts/verify-nexo.mts` importa `HALO` de
+`packages/ui/src/components/coach-geometria.ts`. En `edf9091a` («la huella
+muere, sube la fila») B **retiró `HALO` y `HALO_GROSOR`**. El gate ya no
+compila: `SyntaxError: does not provide an export named 'HALO'`, exit 1.
+
+**No es un rename, y por eso no se cura con una palabra.** `HALO = 66` era un
+**diámetro** —el aro de 1,5 px alrededor del orbe de 48—, y el gate calculaba
+con él el desborde del aro: `(HALO − ORBE) / 2` = 9. Hoy existe
+`RESPLANDOR = 24`, que **no es un diámetro**: se usa como `shadowRadius` en
+`PresenciaCoach` y `CabeceraCoach`. Con ese valor la misma cuenta da **−12**.
+*El número entra y la aritmética compila; lo que se pierde es el referente.*
+**Sustituir un nombre por otro pondría el gate en verde sobre una cuenta que
+ya no significa nada** — que es peor que el rojo de hoy.
+
+**Alcance, medido: el producto está sano.** El único consumidor de esa
+constante es el gate (los otros `HALO` del árbol son el halo de elevación de
+S82 y un `const` local de `PinMovible` — otro concepto). **Los seis typechecks
+dan 0.** *Lo roto es el instrumento, no la pantalla.*
+
+**Por qué es 🔴 igual.** Ese gate mide que el orbe y su halo **no queden
+tapados por la barra ni se salgan del ancho** — Ley 8 y el z-order que C acaba
+de firmar. Mientras no compile, **nadie está midiendo eso**, y su silencio se
+lee como salud: el modo de falla que `verify:gates-existen` existe para nombrar,
+en su otra forma (el gate existe, tiene línea, y no corre).
+
+**Quién lo cura.** **B y C, juntos.** B sabe hasta dónde llega visualmente un
+`shadowRadius: RESPLANDOR` —que es un difuminado, no un trazo— y C sabe qué
+tiene que garantizar la caja. **A no lo adivina:** elegir el número sería
+decidir diseño desde el gate.
+
+**Disparo.** El próximo lote de cualquiera de los dos. Hasta entonces
+`verify:nexo` va **declarado en rojo** en el candidato, nunca omitido.
+
+---
+
 ### `D-1015` 🟡 — re-medir borradores, legales y huérfanas cuando una decisión lo necesite
 
 **Qué.** Tres gates que el canon nombra y **que nunca existieron en git**:
