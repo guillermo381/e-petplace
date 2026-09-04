@@ -198,7 +198,8 @@ const ATAJOS_COACH_DEMO = [
 /* La voz la compone la pantalla (Ley 3): la pieza no arma frases. */
 const VOZ_COACH_DEMO = {
   preguntar: 'Preguntale al Coach',
-  orbe: 'Coach · tenés 3 pendientes',
+  /* D-1019: dos voces, porque el orbe hace dos cosas opuestas. */
+  abrir: 'Abrir al Coach',
   chat: 'Chat · 2',
   pedidos: 'Carrito · 1',
   cerrar: 'Cerrar',

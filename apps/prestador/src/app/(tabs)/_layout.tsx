@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ALTO_FILA_TABS,
   BarraTabs,
-  BurbujaPendientes,
+  PresenciaCoach,
   Boton,
   Esqueleto,
   EsqueletoGrupo,
@@ -32,7 +32,7 @@ import {
   spacing,
   useTheme,
   type BarraTabsItem,
-  type Pendiente,
+  type PendientesCoach,
   type IconoNombre,
 } from '@epetplace/ui';
 import {
@@ -50,8 +50,11 @@ import { apiLista } from '@/lib/api';
 import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { ReclamoVinculo } from '@/components/reclamo-vinculo';
+import { estadoPresencia } from '@/lib/estado-presencia';
+import { presenciaVisibleEn } from '@/lib/presencia-visible';
+
 import { useTraduccion } from '@/i18n';
-import { clasesVisibles, escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
+import { escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
 import { capacidadDesdeContexto } from '@/lib/barra-prestador-lectura';
 import type { EscalonAtender } from '@/lib/capacidad-atender';
 import {
@@ -159,55 +162,116 @@ let ceremoniaResueltaPara: string | null = null;
 
 
 /**
- * ⭐ **LA BURBUJA DE PENDIENTES DEL REFUGIO** (S112-C; la pieza es de B).
+ * ⭐ **LA PRESENCIA EN EL PRESTADOR — la misma pieza, sin Coach** (S113-C ·
+ * lote 0.3).
  *
- * **DOS CLASES, y por eso el refugio tiene abanico de verdad:** *mensajes* y
- * *solicitudes por revisar* son **dos clases de trabajo que llevan a dos
- * lugares distintos** — el hilo y la portada de Refugio. Meterlas en una sola
- * habría mostrado un glifo de mensaje para avisar de una solicitud que no lo
- * es. **El prestador no tiene carrito**: la despensa es de la familia.
+ * ☠️ **ACÁ VIVÍA `BurbujaPendientes`, Y MURIÓ EN ESTE MISMO COMMIT**, con su
+ * gemela del cliente. B la dejó derogada y exportada a propósito, con su razón
+ * escrita: *«si se retira antes de que las apps monten la nueva, no queda
+ * ninguna puerta; si se monta la nueva sin retirar ésta, hay dos discos
+ * peleando el mismo píxel»* (`L-395`). **El retiro y el montaje van en el
+ * mismo commit** — y éste es ese commit.
  *
- * Vive en el shell por N28 —*su condición de existencia es un DATO, no una
- * ruta*— y su silencio se decide en `lib/pendientes-adopcion.ts`, con arnés.
+ * 🔴 **`coach: false` NO ES UN MODO DEGRADADO: es la otra mitad del trabajo.**
+ * El prestador no tiene Coach, así que ofrecerle atajos de una IA que su app
+ * no tiene sería prometer. Con `coach: false` la pieza es **la puerta a lo que
+ * te espera y nada más**, y el compilador impide la mezcla: sin Coach no se
+ * pueden pasar `atajos` ni `onPreguntar`.
+ *
+ * ⚠️ **`nombre` SE PASA Y LA PIEZA NO LO DIBUJA** — lo recibe como `_nombre`,
+ * o sea que hoy es inerte con `coach: false`. Se le pasa la voz que ya nombra
+ * esta puerta en la casa (*«Lo que te espera»*) **en vez de inventarle un
+ * nombre al prestador**, y queda declarado para B: *si `atajos` y
+ * `onPreguntar` son imposibles sin Coach, `nombre` debería serlo también —
+ * una prop obligatoria que nadie usa es una pregunta que el consumidor tiene
+ * que contestar sin motivo.*
+ *
+ * Las dos clases del refugio y su destino son **los mismos que tenía la
+ * burbuja**: no se reinventó ninguno, se mudaron.
  */
-function BurbujaDelShell({ altoBarra }: { altoBarra: number }) {
+function PresenciaDelShell({ altoBarra }: { altoBarra: number }) {
   const { t } = useTraduccion();
   const router = useRouter();
-  const pendientes = usePendientesAdopcion();
+  const pendientesAdopcion = usePendientesAdopcion();
+  const segmentos = useSegments() as string[];
+  const [abierta, setAbierta] = useState(false);
+
   /* `useSegments()`, jamás el nombre del tab: ése devuelve `adopcion` y nunca
      puede valer `solicitud`. El guard del carrito del cliente vivió muerto por
      exactamente eso. */
-  const visibles = clasesVisibles(useSegments() as string[]);
+  if (!presenciaVisibleEn(segmentos)) return null;
 
-  const lista: Pendiente[] = [
-    {
-      clase: 'mensajes',
-      cuenta: visibles.mensajes ? pendientes.conversaciones : 0,
-      /* La regla del toque la decide el DOMINIO: `unica` trae el id **si y sólo
-         si** hay una conversación y nada más que atender. En el refugio, con
-         solicitudes por revisar encima, es `null` ⇒ a la lista. */
-      onAbrir: () =>
-        pendientes.unica !== null
-          ? router.push({ pathname: '/(tabs)/adopcion/solicitud/[solicitudId]', params: { solicitudId: pendientes.unica } })
-          : router.push('/(tabs)/adopcion'),
-      etiqueta: t('burbuja.mensajesEtiqueta'),
-      titulo: t('burbuja.mensajesTitulo'),
-    },
-    {
-      clase: 'solicitudes',
-      /* ⚠️ **`porRevisar` DERIVADO, jamás `total - conversaciones`.** El total
-         mezcla las dos clases y la pieza necesita cada una por separado — *el
-         disco suma, el abanico separa*. Restarlo acá serían **dos números que
-         deben coincidir saliendo de dos cuentas distintas**, que es la forma
-         que esta casa ya pagó. */
-      cuenta: visibles.solicitudes ? pendientes.porRevisar : 0,
-      onAbrir: () => router.push('/(tabs)/adopcion'),
-      etiqueta: t('burbuja.solicitudesEtiqueta'),
-      titulo: t('burbuja.solicitudesTitulo'),
-    },
-  ];
+  const pendientes: PendientesCoach = {
+    chat: pendientesAdopcion.conversaciones,
+    /* El prestador no tiene carrito. `0` es un hecho medido, no un hueco. */
+    pedidos: 0,
+    /* ⚠️ **`porRevisar` DERIVADO, jamás `total - conversaciones`.** El total
+       mezcla las dos clases y la pieza necesita cada una por separado — *el
+       disco suma, la fila separa*. Restarlo serían dos números que deben
+       coincidir saliendo de dos cuentas distintas. */
+    solicitudes: pendientesAdopcion.porRevisar,
+    /* Sin número por letra firmada (`MODELO_LOYALTY` §3: los no leídos son
+       PRESENCIA, jamás número). `null` = el motor no da número, y no es cero. */
+    avisos: null,
+  };
 
-  return <BurbujaPendientes pendientes={lista} etiquetaAbanico={t('burbuja.abanico')} aireInferior={altoBarra} />;
+  return (
+    <PresenciaCoach
+      coach={false}
+      estado={estadoPresencia({ pendientes, abierta })}
+      pendientes={pendientes}
+      nombre={t('burbuja.abanico')}
+      abierta={abierta}
+      onAbrir={() => setAbierta(true)}
+      onCerrar={() => setAbierta(false)}
+      onPendiente={(clase) => {
+        /* Cerrar es de la pieza: llama a `onCerrar` antes de disparar. */
+        /* 🔴 **`navigate` Y NO `push` PARA CAMBIAR DE PESTAÑA.** `push` apila
+           una entrada más sobre el mismo grupo de tabs; `navigate` cambia de
+           pestaña, que es lo que este toque significa.
+
+           ⏪ **ACÁ ESCRIBÍ QUE ESTO ESTABA «MEDIDO» Y NO LO ESTABA — se
+           corrige en el mismo acto.** Mi arnés reportó que tras el toque la
+           pantalla visible era el HOY del negocio, y de ahí saqué que `push`
+           re-entraba por la pantalla inicial del grupo. **Después medí que el
+           arnés no puede decidir eso**: en RN-web las pantallas de las otras
+           pestañas quedan MONTADAS y con caja real, y ni `innerText`, ni
+           `offsetParent`, ni `isVisible()` de playwright las descartan — las
+           dos casas dan «visible» a la vez. *El instrumento no distinguía, así
+           que la conclusión no era una medición: era una lectura.*
+           ⇒ el cambio se queda **por su propio mérito** —así se cambia de
+           pestaña— y **cuál pantalla queda arriba lo dirime el aparato**, no
+           este arnés. Declarado en el parte. */
+        if (clase === 'chat') {
+          /* LA REGLA DEL TOQUE LA DECIDE EL DOMINIO: `unica` trae el id **si y
+             sólo si** hay una conversación y nada más que atender. En el
+             refugio, con solicitudes por revisar encima, es `null` ⇒ a la
+             lista. *Copiado del montaje que reemplaza, no reinventado.* */
+          pendientesAdopcion.unica !== null
+            ? router.push({ pathname: '/(tabs)/adopcion/solicitud/[solicitudId]', params: { solicitudId: pendientesAdopcion.unica } })
+            : router.navigate('/(tabs)/adopcion');
+          return;
+        }
+        router.navigate('/(tabs)/adopcion');
+      }}
+      voz={{
+        abrir: t('nexo.abrir'),
+        cerrar: t('nexo.cerrar'),
+        /* ⚠️ **SIEMPRE, aunque la cuenta sea 0** — así un número no existe sin
+           su palabra y la pieza nunca inventa un plural. */
+        chat:
+          pendientesAdopcion.conversaciones === 1
+            ? t('nexo.chatUna')
+            : t('nexo.chat', { n: pendientesAdopcion.conversaciones }),
+        pedidos: t('nexo.pedidosCero'),
+        solicitudes:
+          pendientesAdopcion.porRevisar === 1
+            ? t('nexo.solicitudesUna')
+            : t('nexo.solicitudes', { n: pendientesAdopcion.porRevisar }),
+      }}
+      aireInferior={altoBarra}
+    />
+  );
 }
 
 export default function TabsLayout() {
@@ -845,7 +909,7 @@ export default function TabsLayout() {
       screenOptions={{ headerShown: false }}
       tabBar={({ state, navigation }) => (
         <>
-          <BurbujaDelShell altoBarra={altoBarra} />
+          <PresenciaDelShell altoBarra={altoBarra} />
           <View
             onLayout={(e) => {
               const alto = e.nativeEvent.layout.height;

@@ -61,9 +61,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import Svg, { Circle, ClipPath, Defs, G, LinearGradient as LinearGradientSvg, Path, RadialGradient, Rect, Stop } from 'react-native-svg'
+import Svg, { Circle, ClipPath, Defs, G, LinearGradient as LinearGradientSvg, Path, Rect, Stop } from 'react-native-svg'
 
 import { Icono, type IconoNombre } from './Icono'
+import { OrbeCoach } from './OrbeCoach'
 import { usePresionado } from './usePresionado'
 import { motion } from '../tokens/motion'
 import { palette } from '../tokens/palette'
@@ -73,16 +74,11 @@ import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import {
   ARCO_GROSOR,
-  BRASA,
   DEDO,
-  ANILLO,
   LIENZO,
-  LILA_ALFA,
   ORBE,
   ORBE_ABIERTO,
   ORBE_MINI,
-  RESPLANDOR_ALFA,
-  RESPLANDOR_RADIO,
   PASTILLA,
   alturasDeLaFila,
   anclaOrbe,
@@ -91,8 +87,10 @@ import {
   ejeDesdeDerecha,
   movimientoCoach,
   nodosDeLaFila,
+  vozDelOrbe,
   violetaEncendido,
   type ClaseCoach,
+  type ClasePastilla,
   type PendientesCoach,
 } from './coach-geometria'
 
@@ -126,30 +124,49 @@ export type AtajoCoach =
 export type AtajosCoach = readonly [AtajoCoach, AtajoCoach, AtajoCoach, AtajoCoach]
 
 export interface PresenciaCoachProps {
+  /** 🔴 **`false` = LA PRESENCIA SIN COACH.** Es la MISMA pieza haciendo el
+   *  otro trabajo —la puerta a lo que te espera— y así es como el prestador
+   *  y el cliente en memorial tienen su puerta sin que exista una segunda.
+   *  *Ofrecer atajos de una IA que esa app no tiene sería prometer.*
+   *
+   *  ⚠️ **El compilador impide la mezcla:** con `coach: false` no se pueden
+   *  pasar `atajos` ni `onPreguntar` ni `voz.preguntar` — el rojo no es un
+   *  chequeo que alguien corre, es que no se puede escribir. */
+  coach?: boolean
   estado: EstadoCoach
   pendientes: PendientesCoach
   /** De abajo hacia arriba, en el orden en que se pasan. */
-  atajos: AtajosCoach
+  /** **Sin Coach no van** — y el compilador lo impide (ver `coach`). */
+  atajos?: AtajosCoach
   /** El nombre, tal cual. **Sólo se DIBUJA** — nunca se concatena. */
   nombre: string
   abierta: boolean
   onAbrir: () => void
   onCerrar: () => void
   /** Tocar el orbe **ya abierto**: abre la Hoja. */
-  onPreguntar: () => void
-  onPendiente: (clase: 'chat' | 'pedidos') => void
+  onPreguntar?: () => void
+  onPendiente: (clase: ClasePastilla) => void
   /** Todo el texto, compuesto por la pantalla (Ley 3). */
   voz: {
-    /** *«Preguntale a …»* — la etiqueta del orbe abierto. */
-    preguntar: string
-    /** La etiqueta accesible del orbe, con nombre y estado. */
-    orbe: string
+    /** *«Preguntale a …»* — la primera fila. **Sin Coach no se usa.** */
+    preguntar?: string
+    /** 🔴 **D-1019 · el orbe se llama distinto según lo que va a hacer.**
+     *  ⏪ Acá había UNA sola `orbe: string`, y era el defecto: el mismo
+     *  nombre para abrir y para cerrar. **En web `accessibilityState` no
+     *  llega**, así que quien usa un lector de pantalla no tenía forma de
+     *  saber si la fila estaba desplegada.
+     *  *«Abrir a Nexo»* — cerrado. */
+    abrir: string
     /** *«Chat · 2»* — **obligatoria aunque `chat` sea 0**: así una cuenta no
      *  puede existir sin su voz, y la pieza nunca compone plural. */
     chat: string
     /** *«Carrito · 1»*. Mismo criterio. */
     pedidos: string
-    /** Lo que se lee al tocar afuera, para lectores de pantalla. */
+    /** *«Solicitudes · 4»* — del refugio. Obligatoria por el mismo motivo. */
+    solicitudes?: string
+    /** *«Cerrar»* — abierto. **Lo comparten el orbe y el velo**, que hacen
+     *  exactamente lo mismo: *dos nombres para el mismo acto serían dos actos
+     *  para quien sólo los oye.* */
     cerrar: string
   }
   /** Cuánto levantarlo del borde inferior. **Existe porque la pieza no sabe
@@ -194,136 +211,14 @@ function Etiqueta({ children }: { children: string }) {
   )
 }
 
-/* ── EL ORBE, ENTERO EN SVG ───────────────────────────────────────────────
- * 🔴 **ESTA PIEZA SE REESCRIBIÓ CONTRA EL EMULADOR, NO CONTRA LA CABEZA.** La
- * versión anterior se veía **un disco naranja plano** en Android: sin borde,
- * sin resplandor y sin violeta al abrir. Medido capa por capa, eran DOS causas
- * distintas y ninguna se veía leyendo el código:
- *
- * **① `stopColor` CON `rgba()` PIERDE EL ALPHA EN ANDROID.** Los dos stops de
- * la brasa —`rgba(255,214,150,.72)` y `rgba(255,214,150,0)`— colapsaban al
- * MISMO naranja opaco ⇒ **un círculo naranja pleno tapando el cuerpo entero**.
- * *El degradé no fallaba: el que fallaba era el color de sus paradas.* Y el
- * borde lila caía por lo mismo: `.35` se ignoraba y el orbe en reposo se veía
- * violeta saturado en vez de blanco.
- * ⚠️ **La casa ya tenía la forma correcta y no la usé:** `stopColor` y
- * `stopOpacity` POR SEPARADO, que es como lo hace la elevación oscura.
- *
- * **② `shadowColor` / `shadowRadius` / `shadowOpacity` NO EXISTEN EN
- * ANDROID.** Ahí sólo manda `elevation`, que dibuja una sombra GRIS del
- * sistema — no un resplandor de color. *El resplandor no estaba tenue: no
- * estaba.* Ahora es un círculo con su propio radial, adentro del SVG.
- *
- * ⇒ **Y de ahí sale el lienzo de 2,2×:** un resplandor que se disuelve
- * necesita lugar donde disolverse. Con el lienzo pegado al cuerpo, el
- * degradé se recorta justo donde empieza a existir.
- *
- * ── LAS CAPAS, de atrás hacia adelante ─────────────────────────────────
- * resplandor · cuerpo (perla, con su anillo) · brasa · cuerpo violeta.
- * El violeta es una CAPA APARTE con opacidad animada, no un cambio de
- * paradas: *cambiar los stops salta de un color al otro; el encargo pide un
- * fundido de 250 ms, y un fundido necesita dos cosas encimadas.* */
-function CuerpoOrbe({ lado, encendido }: { lado: number; encendido: SharedValue<number> }) {
-  const c = lado / 2
-  const r = lado / (2 * LIENZO)
-  const estiloVioleta = useAnimatedStyle(() => ({ opacity: encendido.value }))
-  return (
-    <>
-      <Svg width={lado} height={lado} style={{ position: 'absolute' }}>
-        <Defs>
-          {/* El resplandor: violeta al 42 % en el centro que MUERE en el
-              borde. `stopOpacity` y no un rgba: ver ① arriba. */}
-          <RadialGradient id="coachGlow" cx="50%" cy="50%" r="50%">
-            <Stop offset="0" stopColor={palette.coachMedio} stopOpacity={RESPLANDOR_ALFA} />
-            <Stop offset="1" stopColor={palette.coachMedio} stopOpacity={0} />
-          </RadialGradient>
-          {/* El cuerpo en reposo: blanco al centro, lila al borde. */}
-          <RadialGradient id="coachPerlaG" cx="38%" cy="34%" r="62%">
-            <Stop offset="0" stopColor={palette.coachPerla} stopOpacity={1} />
-            <Stop offset="1" stopColor={palette.coachClaro} stopOpacity={LILA_ALFA} />
-          </RadialGradient>
-          {/* La brasa: cálida, chica y descentrada. */}
-          <RadialGradient
-            id="coachBrasaG"
-            cx={`${BRASA.cx * 100}%`}
-            cy={`${BRASA.cy * 100}%`}
-            r={`${(BRASA.diametro / 2) * 100}%`}
-          >
-            <Stop offset="0" stopColor={palette.coachBrasa} stopOpacity={0.9} />
-            <Stop offset="1" stopColor={palette.coachBrasa} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Circle cx={c} cy={c} r={r * RESPLANDOR_RADIO} fill="url(#coachGlow)" />
-        <Circle
-          cx={c}
-          cy={c}
-          r={r}
-          fill="url(#coachPerlaG)"
-          /* El contorno: sin él, una esfera casi blanca sobre papel blanco
-             no tiene dónde terminar. */
-          stroke={palette.coachClaro}
-          strokeOpacity={LILA_ALFA}
-          strokeWidth={ANILLO}
-        />
-        <Circle cx={c} cy={c} r={r} fill="url(#coachBrasaG)" />
-      </Svg>
-      {/* La capa violeta, encimada y con su propio fundido. */}
-      <Animated.View style={[{ position: 'absolute', width: lado, height: lado }, estiloVioleta]}>
-        <Svg width={lado} height={lado}>
-          <Defs>
-            <RadialGradient id="coachVioG" cx="38%" cy="34%" r="62%">
-              <Stop offset="0" stopColor={palette.coachClaro} stopOpacity={1} />
-              <Stop offset="0.56" stopColor={palette.coachMedio} stopOpacity={1} />
-              <Stop offset="1" stopColor={palette.coachProfundo} stopOpacity={1} />
-            </RadialGradient>
-            <RadialGradient
-              id="coachBrasaVioG"
-              cx={`${BRASA.cx * 100}%`}
-              cy={`${BRASA.cy * 100}%`}
-              r={`${(BRASA.diametro / 2) * 100}%`}
-            >
-              <Stop offset="0" stopColor={palette.coachBrasa} stopOpacity={0.9} />
-              <Stop offset="1" stopColor={palette.coachBrasa} stopOpacity={0} />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={c} cy={c} r={r} fill="url(#coachVioG)" />
-          <Circle cx={c} cy={c} r={r} fill="url(#coachBrasaVioG)" />
-        </Svg>
-      </Animated.View>
-    </>
-  )
-}
-
-/** El orbe chico de «Preguntale a …»: **el mismo cuerpo despierto en chico**,
- *  con su brasa. No es un botón con un ícono: es la presencia, y por eso se
- *  reconoce sin leer la etiqueta. Sin resplandor —está dentro de la fila, no
- *  flotando sobre contenido— y sin respiración: *lo que respira es el orbe,
- *  no su atajo.* */
-function OrbeMini({ lado }: { lado: number }) {
-  const c = lado / 2
-  return (
-    <Svg width={lado} height={lado}>
-      <Defs>
-        <RadialGradient id="coachMiniG" cx="38%" cy="34%" r="62%">
-          <Stop offset="0" stopColor={palette.coachClaro} stopOpacity={1} />
-          <Stop offset="0.56" stopColor={palette.coachMedio} stopOpacity={1} />
-          <Stop offset="1" stopColor={palette.coachProfundo} stopOpacity={1} />
-        </RadialGradient>
-        <RadialGradient
-          id="coachMiniBrasaG"
-          cx={`${BRASA.cx * 100}%`}
-          cy={`${BRASA.cy * 100}%`}
-          r={`${(BRASA.diametro / 2) * 100}%`}
-        >
-          <Stop offset="0" stopColor={palette.coachBrasa} stopOpacity={0.9} />
-          <Stop offset="1" stopColor={palette.coachBrasa} stopOpacity={0} />
-        </RadialGradient>
-      </Defs>
-      <Circle cx={c} cy={c} r={c} fill="url(#coachMiniG)" />
-      <Circle cx={c} cy={c} r={c} fill="url(#coachMiniBrasaG)" />
-    </Svg>
-  )
-}
+/* ☠️ **ACÁ VIVÍA `CuerpoOrbe`, Y SE FUE CON SU GEMELO `OrbeMini`.**
+ * Los dos se mudaron a `OrbeCoach`, que es **el único dibujo del orbe de la
+ * casa**. No fue una limpieza: fue una cura. Había TRES copias del mismo
+ * objeto —éstas dos y la de `CabeceraCoach`— y **la tercera se quedó con el
+ * defecto que el lote 0.2 curó en las otras dos** (`rgba` en `stopColor`, que
+ * en Android pierde el alpha): la cabecera se veía un disco durazno plano.
+ * *Una cura aplicada en dos de tres copias no es una cura, es una
+ * coincidencia.* */
 
 /** Un arco entre dos ángulos, **0 = las 12 en punto**. La conversión al
  *  sistema de SVG vive acá y en un solo lugar: *si viviera en cada llamador,
@@ -347,8 +242,11 @@ function Orbe({
   respira,
   barre,
   colorDe,
+  color,
 }: {
   tamano: number
+  /** El color de la identidad encendida. `undefined` = el violeta del Coach. */
+  color?: string
   /** 0 en reposo, 1 despierto. Anima el fundido de la capa violeta. */
   encendido: SharedValue<number>
   arcos: ReturnType<typeof arcosDe>
@@ -431,7 +329,7 @@ function Orbe({
         </Svg>
       ) : null}
 
-      <CuerpoOrbe lado={lado} encendido={encendido} />
+      <OrbeCoach tamano={tamano} encendido={encendido} conResplandor color={color} />
 
       {/* ── EL BARRIDO DE LUZ, EN SVG ──────────────────────────────────
           🔴 **ACÁ HABÍA UN `LinearGradient` DE EXPO Y NO DIBUJABA NADA.**
@@ -550,6 +448,7 @@ function NodoDeFila({
 }
 
 export function PresenciaCoach({
+  coach = true,
   estado,
   pendientes,
   atajos,
@@ -593,11 +492,34 @@ export function PresenciaCoach({
     transform: [{ scale: 1 + (ORBE_ABIERTO / ORBE - 1) * encendido.value }],
   }))
 
-  /* ⛔ MEMORIAL: la presencia no existe. Ver la cabecera del archivo. */
-  if (esMemorial) return null
+  /* ⛔ **MEMORIAL: el COACH no existe — la PUERTA sí.**
+     ⏪ Acá la pieza devolvía `null` y punto, con su razón: *una presencia que
+     propone cosas no tiene lugar en un duelo* (`MODELO_LOYALTY` §7.1). **Esa
+     razón sigue entera y por eso el Coach sigue apagado.** Lo que cambió es
+     que la pieza aprendió a existir SIN él: en memorial el cliente la monta
+     con `coach: false` y conserva su puerta a los pendientes, que no propone
+     nada — sólo dice lo que ya está esperando. */
+  if (esMemorial && coach) return null
+
+  /* 🔴 **EL COLOR DE LA PRESENCIA SIN COACH SALE DE `accent.cta`, y no lo
+     elegí yo.** `DISEÑO_EXPERIENCIA` §15b.1: *«UN acento de oficio: tealDark
+     #0A7268 para TODO estado y control funcional»*, y F-OCRE (18-ago) dice
+     con todas las letras que **«la mitad del PRESTADOR queda INTACTA»**.
+     Ese slot **ya resuelve por casa**: tealDark en el prestador, el de la
+     casa en el cliente, y memorial tiene el suyo.
+     ⇒ **Nunca el violeta, que es del Coach; nunca el verde del header.**
+     *Tomarlo del tema en vez de teclear el hex es lo que hace que memorial
+     no tenga que acordarse de nada.* */
+  const identidad = coach ? palette.coachMedio : theme.accent.cta
 
   const colorDe = (c: ClaseCoach): string =>
-    c === 'chat' ? theme.capa.comunidad : c === 'pedidos' ? theme.status.warning : palette.coachMedio
+    c === 'chat'
+      ? theme.capa.comunidad
+      : c === 'pedidos'
+        ? theme.status.warning
+        : c === 'solicitudes'
+          ? theme.capa.comunidad
+          : identidad
 
   /* 🔴 **LA PASTILLA NO PUEDE USAR EL COLOR DEL ARCO, Y ESO LO DIJO EL GATE.**
      Con relleno pleno y letra blanca: magenta puro **3,58** · ocre **1,89**,
@@ -606,17 +528,22 @@ export function PresenciaCoach({
      Cada color trae su par legible **de la casa**: `magentaSerie` es el
      registro trabajador del magenta (blanco encima = 5,70) y el ocre va con
      letra TINTA (8,98), el par que `R56` ya tiene firmado. */
-  const pastilla = (c: 'chat' | 'pedidos'): { fondo: string; letra: string } =>
-    c === 'chat'
-      ? { fondo: palette.magentaSerie, letra: theme.text.inverse }
-      : { fondo: theme.status.warning, letra: theme.text.primary }
+  const ROPA: Record<ClasePastilla, { fondo: string; letra: string; glifo: IconoNombre }> = {
+    chat: { fondo: palette.magentaSerie, letra: theme.text.inverse, glifo: 'burbujas' },
+    pedidos: { fondo: theme.status.warning, letra: theme.text.primary, glifo: 'carrito' },
+    /* El sobre de la escalera de adopción, visto desde el otro lado. */
+    solicitudes: { fondo: palette.magentaSerie, letra: theme.text.inverse, glifo: 'sobre' },
+  }
+  const pastilla = (c: ClasePastilla) => ROPA[c]
+  const vozDe = (c: ClasePastilla): string =>
+    c === 'chat' ? voz.chat : c === 'pedidos' ? voz.pedidos : (voz.solicitudes ?? voz.chat)
 
   /* Los arcos son del estado ATENTO y de ningún otro: dormida no los tiene
      (§3) y abierta ya dice sus números en las pastillas. */
   const movimiento = movimientoCoach({ quieta, abierta })
   const arcos = estado === 'atenta' ? arcosDe(pendientes) : []
-  const nodos = nodosDeLaFila(pendientes, atajos.length)
-  const alturas = alturasDeLaFila(pendientes, width, aireInferior, atajos.length)
+  const nodos = nodosDeLaFila(pendientes, atajos?.length ?? 0, coach)
+  const alturas = alturasDeLaFila(pendientes, width, aireInferior, atajos?.length ?? 0, coach)
   const ancla = anclaOrbe(width, aireInferior)
   const eje = ejeDeLaFila(width, aireInferior)
   /* `right` del eje: **derivado, no tecleado** — si viviera acá, el día que
@@ -644,7 +571,7 @@ export function PresenciaCoach({
 
           {nodos.map((n, i) => (
             <NodoDeFila
-              key={n.tipo === 'preguntar' ? 'preguntar' : n.tipo === 'pastilla' ? `p-${n.clase}` : atajos[n.indice].id}
+              key={n.tipo === 'preguntar' ? 'preguntar' : n.tipo === 'pastilla' ? `p-${n.clase}` : atajos![n.indice].id}
               indice={i}
               abierta={abierta}
               escalona={movimiento.escalona}
@@ -653,7 +580,7 @@ export function PresenciaCoach({
             >
               {n.tipo === 'preguntar' ? (
                 <>
-                  <Etiqueta>{voz.preguntar}</Etiqueta>
+                  <Etiqueta>{voz.preguntar ?? ''}</Etiqueta>
                   {/* El orbe chico: **ya violeta y con su brasa**, para que se
                       lea como el mismo cuerpo en chico y no como otro botón. */}
                   <Pressable
@@ -661,17 +588,19 @@ export function PresenciaCoach({
                     accessibilityLabel={voz.preguntar}
                     onPress={() => {
                       onCerrar()
-                      onPreguntar()
+                      onPreguntar?.()
                     }}
                     style={{ width: ORBE_MINI, height: ORBE_MINI }}
                   >
-                    <OrbeMini lado={ORBE_MINI} />
+                    {/* Sin resplandor: dentro de la fila ensuciaría a su vecino. */}
+                    <OrbeCoach tamano={ORBE_MINI} encendido={1} />
                   </Pressable>
                 </>
               ) : n.tipo === 'pastilla' ? (
+                <>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={n.clase === 'chat' ? voz.chat : voz.pedidos}
+                  accessibilityLabel={vozDe(n.clase)}
                   onPress={() => {
                     onCerrar()
                     onPendiente(n.clase)
@@ -691,13 +620,33 @@ export function PresenciaCoach({
                       color: pastilla(n.clase).letra,
                     }}
                   >
-                    {n.clase === 'chat' ? voz.chat : voz.pedidos}
+                    {vozDe(n.clase)}
                   </Text>
                 </Pressable>
+                {/* 🔴 **SIN COACH la pastilla gana su círculo con glifo.** Con
+                    Coach no lo lleva: ahí el eje ya está ocupado por los dedos
+                    y un círculo más sería una fila de seis objetos iguales
+                    donde dos hacen otra cosa. *Sin Coach la fila son SÓLO
+                    pendientes, y ahí el círculo es lo que le da su forma.* */}
+                {coach ? null : (
+                  <View
+                    style={{
+                      width: PASTILLA,
+                      height: PASTILLA,
+                      borderRadius: radius.full,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: theme.bg.card,
+                    }}
+                  >
+                    <Icono nombre={pastilla(n.clase).glifo} tamano={22} registro="tinta" montaje="control" />
+                  </View>
+                )}
+                </>
               ) : (
                 <>
-                  <Etiqueta>{atajos[n.indice].etiqueta}</Etiqueta>
-                  <DedoDeLaFila atajo={atajos[n.indice]} onCerrar={onCerrar} onRazonApagado={onRazonApagado} />
+                  <Etiqueta>{atajos![n.indice].etiqueta}</Etiqueta>
+                  <DedoDeLaFila atajo={atajos![n.indice]} onCerrar={onCerrar} onRazonApagado={onRazonApagado} />
                 </>
               )}
             </NodoDeFila>
@@ -726,7 +675,7 @@ export function PresenciaCoach({
           <Pressable
             {...handlers}
             accessibilityRole="button"
-            accessibilityLabel={voz.orbe}
+            accessibilityLabel={vozDelOrbe(abierta, voz)}
             accessibilityState={{ expanded: abierta }}
             /* 🔴 **EL ORBE ABRE Y CIERRA — decisión del founder, y la mesa
                la hace suya (lote 0.2).**
@@ -746,6 +695,7 @@ export function PresenciaCoach({
               respira={movimiento.respira}
               barre={movimiento.barre}
               colorDe={colorDe}
+              color={coach ? undefined : identidad}
             />
           </Pressable>
         </Animated.View>

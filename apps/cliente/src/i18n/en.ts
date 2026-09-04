@@ -40,7 +40,10 @@ export const clienteEn = {
     // See the Spanish block: `{{nombre}}` is THE COACH here and THE PET in
     // `coach.*`. Two namespaces, each consistent inside.
     etiqueta: 'Open {{nombre}}',
-    cerrarOrbe: 'Close {{nombre}}',
+    /* ☠️ `cerrarOrbe` MURIÓ (lote 0.3): existía para mi condicional
+     * `orbe: abierta ? cerrarOrbe : etiqueta`, que el contrato de B reemplazó
+     * por dos props (`abrir` / `cerrar`). *Una key sin consumidor es una frase
+     * esperando que alguien la vuelva a montar creyendo que rige* (Ley 37). */
     cerrar: 'Close',
     almohadilla: 'Ask {{nombre}}',
     dedoPeso: 'Weight',

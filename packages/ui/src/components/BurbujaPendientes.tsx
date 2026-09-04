@@ -1,4 +1,13 @@
 /**
+ * ☠️ **DEROGADA (S113-B · lote 0.3, decisión del founder).** La reemplaza
+ * `PresenciaCoach` con `coach: false`: **la misma puerta, el mismo píxel y el
+ * mismo contrato de `aireInferior`**, con la ventaja de que la casa pasa a
+ * tener UNA sola pieza flotante en vez de dos que se turnan por tema.
+ *
+ * ⚠️ **Sigue viva hasta que las apps monten la nueva** — `L-395`: el retiro y
+ * el montaje van en el MISMO commit, y ese commit es de quien toca `apps/`.
+ * *Retirarla antes deja la casa sin ninguna puerta.*
+ *
  * BurbujaPendientes — LA PUERTA ÚNICA A LO QUE TE ESPERA, donde llega el pulgar.
  *
  * **Firma del founder (S112):** *«(a) qué glifo y qué número muestra según lo
