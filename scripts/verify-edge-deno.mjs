@@ -84,8 +84,30 @@ const PROBAR_CINTURON = process.argv.includes('--probar-cinturon')
  * instrumento y peor proporción: **89 a 1.**
  *
  * ⇒ Se juzga **la clase, no el typechecker entero**: «usar algo que no
- *   existe», que en TypeScript es `TS2304` (*Cannot find name*) y su
- *   hermano `TS2552` (*…did you mean?*).
+ *   existe», que en TypeScript es `TS2304` (*Cannot find name*), su
+ *   hermano `TS2552` (*…did you mean?*) y —desde S113-E— `TS2307`
+ *   (*Cannot find module*).
+ *
+ * ── 🔴 POR QUÉ ENTRA `TS2307` (S113-E, 3-sep-2026) ─────────────────────────
+ * **El gate daba VERDE con un import que no resuelve.** D plantó en una edge
+ * un `import` a `packages/*` —una ruta que el runtime de Deno **no puede
+ * resolver**— y el gate salió 0, porque `TS2307` caía en el bucket «fuera de
+ * clase» junto con los 89 artefactos de tipado.
+ *
+ * *Y es exactamente la misma clase que este gate existe para cubrir.* Un
+ * módulo que no resuelve ES «usar algo que no existe»: el símbolo importado
+ * no existe en runtime, igual que `createHmac` sin importar. La diferencia
+ * es sólo dónde falla —al resolver el módulo en vez de al resolver el
+ * nombre— y **el modo de falla en producción es idéntico**: la function
+ * revienta al arrancar, con 500, y el proveedor deja de reintentar.
+ *
+ * ⚠️ **La cura es ANGOSTA y sólo ésa, y por qué se puede:** ensanchar el gate
+ * a todo lo que dice `deno` ya fracasó (la cabecera de arriba lo documenta:
+ * 20 rojos, casi todos falsos). Antes de tocar nada se **midió el árbol
+ * sano**: los 89 fuera de clase son `TS2339`×77, `TS2345`×9 y `TS7006`×3 —
+ * **cero `TS2307`**. O sea que este código nuevo **no puede traer un solo
+ * rojo falso**: no hay ninguno que traer. *Un ensanche se mide contra el
+ * árbol antes de aplicarse, no se argumenta.*
  *
  * **Esto NO afloja el criterio del juez anterior: lo cumple mejor.** Su
  * regla era *«se cubre una clase, con cero falsos positivos»* y su límite
@@ -97,7 +119,7 @@ const PROBAR_CINTURON = process.argv.includes('--probar-cinturon')
  * **Los otros 89 no se tapan: se declaran** al pie del reporte y quedan
  * como deuda con dueño. *Callarlos sería el defecto de al lado.*
  */
-const CLASE = new Set(['TS2304', 'TS2552'])
+const CLASE = new Set(['TS2304', 'TS2552', 'TS2307'])
 
 /** ¿Está `deno`? Sin él no hay veredicto — y eso NO es verde. */
 function hayDeno() {
@@ -291,8 +313,14 @@ if (AUTOPRUEBA) {
    * anterior). No toca ninguna funcion real.
    */
   const SINTETICA =
+    // El import va ARRIBA, donde va un import de verdad. La primera version
+    // lo puso dentro del handler: error de sintaxis, y deno dejo de reportar
+    // las otras dos mitades -- un control roto que "probaba" que el gate
+    // estaba roto. El instrumento del control tambien se controla.
+    'import { loQueSea } from "../../../packages/no-resuelve/mod.ts";\n' +
     'Deno.serve(() => {\n' +
     '  const a = SECRETO_QUE_NADIE_DECLARO;\n' +
+    '  void loQueSea;\n' +
     '  const b = createHmac("sha256", "x");\n' +
     '  return new Response(String(a) + String(b));\n' +
     '});\n'
@@ -306,17 +334,22 @@ if (AUTOPRUEBA) {
   const errsMalo = errores(malo.salida).filter((x) => CLASE.has(x.codigo))
   const global = errsMalo.find((x) => x.mensaje.includes('SECRETO_QUE_NADIE_DECLARO'))
   const modulo = errsMalo.find((x) => x.mensaje.includes('createHmac'))
+  // S113-E - tercera mitad: un import que NO RESUELVE. El gate daba verde con
+  // uno vivo plantado por D, porque TS2307 caia fuera de clase.
+  const noResuelve = errsMalo.find((x) => x.codigo === 'TS2307')
 
-  if (!global || !modulo) {
-    console.error('ROJO EL JUEZ ESTA ROTO: no reporto las dos mitades de la clase.')
+  if (!global || !modulo || !noResuelve) {
+    console.error('ROJO EL JUEZ ESTA ROTO: no reporto las TRES mitades de la clase.')
     console.error(`  global no declarada  -> ${global ? 'vista' : 'NO VISTA'}`)
     console.error(`  simbolo sin importar -> ${modulo ? 'visto' : 'NO VISTO'}`)
+    console.error(`  import que no resuelve -> ${noResuelve ? 'visto' : 'NO VISTO'}`)
     console.error('  Un rojo por la razon equivocada esta tan roto como un verde por la equivocada.\n')
     process.exit(1)
   }
 
   console.log(`  OK mitad 1 - global nunca declarada -> ${global.codigo}: ${global.mensaje}`)
   console.log(`  OK mitad 2 - simbolo de modulo sin importar -> ${modulo.codigo}: ${modulo.mensaje}`)
+  console.log(`  OK mitad 3 - import que no resuelve -> ${noResuelve.fn}:${noResuelve.linea} - ${noResuelve.codigo}`)
 
   // CONTROL POSITIVO, medido con la MISMA vara que el gate. La primera
   // version preguntaba `sano.verde` -- el veredicto CRUDO de deno, que
@@ -333,7 +366,7 @@ if (AUTOPRUEBA) {
     console.log(`  OK control positivo - el arbol sin el defecto fabricado da VERDE (${sano.total} funciones)`)
   }
 
-  console.log('\nOK Autoprueba: el juez discrimina - rojo con el defecto, y ve las dos mitades.\n')
+  console.log('\nOK Autoprueba: el juez discrimina - rojo con el defecto, y ve las TRES mitades.\n')
   process.exit(0)
 }
 
@@ -404,8 +437,8 @@ function declararFuera() {
 
 if (!deLaClase.length) {
   console.log(`\nOK verify:edge-deno - ${r.total} edge functions - cero <<usa algo que no existe>>.`)
-  console.log('  Cubre las DOS mitades de la clase: simbolo de modulo sin importar')
-  console.log('  Y global nunca declarada. Lo dice un typechecker, no un regex.')
+  console.log('  Cubre las TRES mitades de la clase: simbolo de modulo sin importar,')
+  console.log('  global nunca declarada, e import que no resuelve. Lo dice un typechecker, no un regex.')
   declararFuera()
   console.log('')
   process.exit(0)

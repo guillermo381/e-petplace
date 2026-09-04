@@ -26,3 +26,7 @@ apps/*/build-*.apk
 
 # S106-C · el build/ del módulo nativo local (lo genera el gate en aislado)
 packages/*/android/build/
+
+# S113-E · conjuntos de prueba de IA — llevan rutas de carnets reales y
+# nombres de veterinarios: se GENERAN, jamás se commitean.
+.ia-conjuntos/
