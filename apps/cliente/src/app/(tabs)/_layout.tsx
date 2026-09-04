@@ -337,8 +337,17 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
     foto: 'ojo',
   };
 
+  /* 🔴 LA RAZÓN NOMBRA A LA MASCOTA, y cuando no puede lo dice con la palabra
+     que la casa ya usa. **Con UNA candidata hay a quién nombrar; con varias no**
+     —la razón vale para todas— y ahí entra `alta.tuMascota`, el mismo fallback
+     de `/carnet`. *Inventar una segunda frase para el caso sin nombre serían dos
+     voces que algún día divergen.* */
+  const nombreEnRazon = candidatas.length === 1 ? candidatas[0].nombre : t('alta.tuMascota');
+
   const vozRazon = (r: RazonApagado): string =>
-    r === 'acuario' ? t('nexo.razonAcuario') : t('nexo.razonSinPuerta');
+    r === 'acuario'
+      ? t('nexo.razonAcuario', { mascota: nombreEnRazon })
+      : t('nexo.razonSinPuerta', { mascota: nombreEnRazon });
 
   /* 🔴 **LA TUPLA ES DE CUATRO Y EL COMPILADOR LO EXIGE.** `ORDEN_DE_PATA` tiene
      cuatro y el `as` lo afirma; si alguien le agrega un quinto, **rompe acá**,

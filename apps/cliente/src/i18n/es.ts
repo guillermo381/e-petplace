@@ -77,9 +77,20 @@ export const clienteEs = {
     dedoVacuna: 'Vacuna',
     dedoAntiparasitario: 'Antiparasitario',
     dedoFoto: 'Foto',
-    // Un botón apagado sin razón a la vista es el defecto: acá está la razón.
-    razonAcuario: 'Un acuario no lleva vacunas ni antiparasitario.',
-    razonSinPuerta: 'Todavía no puedes guardar un recuerdo desde acá.',
+    /* 🔴 UN BOTÓN APAGADO SIN RAZÓN A LA VISTA ES EL DEFECTO — acá está la
+     * razón, y **dice el nombre**: una razón que nombra a la mascota es una
+     * frase sobre ELLA; una genérica es un cartel.
+     *
+     * ⚠️ **Ni «próximamente» ni «en construcción»** (firma de la mesa): las dos
+     * hablan del producto y no de la familia. *«Pronto vas a poder…» promete lo
+     * mismo y lo dice desde el lado de quien espera.*
+     *
+     * ⚠️ **{{mascota}} puede no tener nombre** —con varias activas y ninguna en
+     * foco no hay una a quién nombrar— y ahí entra `alta.tuMascota`, el
+     * fallback que la casa YA usa en `/carnet`. *Se reusa el que existe en vez
+     * de inventar una segunda forma de decir lo mismo* (L-175). */
+    razonAcuario: '{{mascota}} es un acuario: no lleva vacunas ni antiparasitario.',
+    razonSinPuerta: 'Pronto vas a poder guardar un recuerdo de {{mascota}} desde acá.',
     // La hoja corta de §2.5 — sólo con dos mascotas o más.
     elegirMascota: '¿De quién?',
     // 🔴 LAS VOCES DE LAS PASTILLAS — se pasan SIEMPRE, aunque la cuenta sea 0

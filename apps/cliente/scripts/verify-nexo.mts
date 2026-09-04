@@ -28,6 +28,8 @@ import i18next from '../../../node_modules/i18next/dist/esm/i18next.js';
 import { clienteEn } from '../src/i18n/en';
 import { clienteEs } from '../src/i18n/es';
 import { clasesConAlgo, type PendientesCoach } from '../../../packages/ui/src/components/coach-geometria';
+import { clasesVivas } from '../../../packages/ui/src/components/pendientes-vivos';
+import { clasesVisibles, silenciaCarrito } from '../src/lib/pendientes-adopcion';
 import {
   ORDEN_DE_PATA,
   esMemorial,
@@ -216,7 +218,61 @@ ok('perro + acuario · Peso las ofrece a las dos', mascotasParaAtajo('peso', MIX
 ok('sin candidatas todavía · el dedo NO se apaga por no saber', razonDelDedo('vacuna', []) === null);
 ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 'acuario') === 'acuario');
 
-/* ═══ ⑥ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
+
+/* ═══ ⑦ EL GUARD DEL CARRITO — la burbuja tampoco se dibuja donde no debe ════
+ *
+ * 🔴 **Vivía con `s === 'checkout'` y NO alcanzaba a `checkout-plan` ni a
+ * `checkout-paquete`.** Nexo ya comparaba por prefijo; la burbuja —que sigue
+ * viva en memorial y mientras el hogar carga— no. *La cura no basta con
+ * escribirla: el control es que en `checkout-plan` no quede NADA dibujado.*
+ */
+{
+  const CHECKOUTS: Array<[string, string[]]> = [
+    ['despensa', ['(tabs)', 'despensa', 'checkout']],
+    ['paseo', ['(tabs)', 'explorar', 'paseo', 'checkout']],
+    ['paseo · PLAN — el que la igualdad no alcanzaba', ['(tabs)', 'explorar', 'paseo', 'checkout-plan']],
+    ['paseo · PAQUETE — ídem', ['(tabs)', 'explorar', 'paseo', 'checkout-paquete']],
+    ['la caja del carrito', ['(tabs)', 'despensa', 'carrito']],
+  ];
+  for (const [nombre, segs] of CHECKOUTS) {
+    ok(`el carrito se calla en ${nombre}`, silenciaCarrito(segs) === true);
+    ok(`clasesVisibles apaga el carrito en ${nombre}`, clasesVisibles(segs).carrito === false);
+    /* 🔴 EL CONTROL QUE PIDIÓ LA MESA: con SÓLO carrito pendiente, ahí la
+       burbuja entera no se dibuja — la clase se calla, queda cero clases
+       vivas y la pieza devuelve null. */
+    const soloCarrito = [
+      { clase: 'carrito', cuenta: clasesVisibles(segs).carrito ? 3 : 0 },
+      { clase: 'mensajes', cuenta: clasesVisibles(segs).mensajes ? 0 : 0 },
+    ];
+    ok(`en ${nombre} la burbuja no se dibuja con sólo carrito`, clasesVivas(soloCarrito).length === 0);
+  }
+
+  /* Y el contra-caso, que es lo que hace que la cura sirva: **el prefijo no
+     apaga de más.** */
+  const VIVOS: Array<[string, string[]]> = [
+    ['la vitrina', ['(tabs)', 'despensa', 'index']],
+    ['el Hogar', ['(tabs)', 'hogar', 'index']],
+    ['la ficha de un producto', ['(tabs)', 'despensa', 'producto', '[productoId]']],
+  ];
+  for (const [nombre, segs] of VIVOS) {
+    ok(`el carrito SIGUE VIVO en ${nombre}`, silenciaCarrito(segs) === false);
+    ok(`y ahí la burbuja sí se dibuja`, clasesVivas([{ clase: 'carrito', cuenta: 3 }]).length === 1);
+  }
+
+  /* Los mensajes NO se callan en un checkout: *un mensaje pendiente en el
+     checkout sigue estando pendiente.* El silencio es POR CLASE. */
+  ok(
+    'los mensajes NO se callan en el checkout — el silencio es por clase',
+    clasesVisibles(['(tabs)', 'explorar', 'paseo', 'checkout-plan']).mensajes === true,
+  );
+  /* Y en el hilo se calla la pieza ENTERA, que es otra razón (el disco cae
+     sobre la barra de escribir). */
+  const enHilo = clasesVisibles(['adoptar', 'solicitud', '[solicitudId]']);
+  ok('en el hilo se callan LAS DOS clases', enHilo.carrito === false && enHilo.mensajes === false);
+  ok('en el ACTA no se calla nada: no tiene barra de escribir', clasesVisibles(['adoptar', 'acta', '[solicitudId]']).carrito === true);
+}
+
+/* ═══ ⑧ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
 
 const inst = (i18next as any).createInstance();
 await inst.init({
@@ -241,7 +297,14 @@ for (const idioma of ['es', 'en'] as const) {
     ok(`${idioma} · ${k} no deja una llave cruda`, !s.includes('{{'), s);
   }
 
-  const conMascota = ['antiparasitario.titulo', 'antiparasitario.anotado'];
+  const conMascota = [
+    'antiparasitario.titulo',
+    'antiparasitario.anotado',
+    /* 🔴 Las razones de los dedos atenuados NOMBRAN a la mascota (firma de la
+       mesa): ni «próximamente» ni «en construcción». */
+    'nexo.razonSinPuerta',
+    'nexo.razonAcuario',
+  ];
   for (const k of conMascota) {
     const s = t(k, { mascota: 'Thor' });
     ok(`${idioma} · ${k} interpola la mascota`, s.includes('Thor'), s);
@@ -260,7 +323,7 @@ for (const idioma of ['es', 'en'] as const) {
 
   const planas = [
     'nexo.dedoPeso', 'nexo.dedoVacuna', 'nexo.dedoAntiparasitario', 'nexo.dedoFoto',
-    'nexo.razonAcuario', 'nexo.razonSinPuerta', 'nexo.elegirMascota', 'nexo.cerrar',
+    'nexo.elegirMascota', 'nexo.cerrar', 'alta.tuMascota',
     'nexo.vozChatUna', 'nexo.vozCarritoUno',
     'antiparasitario.tipoInterna', 'antiparasitario.tipoExterna', 'antiparasitario.tipoMixta',
     'antiparasitario.guardar', 'antiparasitario.errProducto', 'antiparasitario.errFechaFutura',

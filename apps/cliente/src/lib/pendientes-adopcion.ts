@@ -156,11 +156,30 @@ export function silenciaMensajes(segmentos: readonly string[]): boolean {
   return silenciaTodo(segmentos);
 }
 
+/** Las superficies donde el carrito no es un destino sino el cuarto donde ya
+ *  estás. **Se comparan por PREFIJO** — ver el porqué abajo. */
+const PREFIJOS_SIN_CARRITO: readonly string[] = ['carrito', 'checkout'];
+
 export function silenciaCarrito(segmentos: readonly string[]): boolean {
   /* N25: en `carrito` y `checkout` el carrito no es un destino, es la pantalla
      en la que ya estás. **Cubre los DOS checkouts** —despensa y reserva—
-     porque `useSegments()` devuelve la ruta anidada. */
-  return segmentos.some((s) => s === 'carrito' || s === 'checkout');
+     porque `useSegments()` devuelve la ruta anidada.
+
+     🔴 **SE COMPARA POR PREFIJO, Y ESA IGUALDAD ERA UN AGUJERO MEDIDO
+     (S113-C).** Con `s === 'checkout'` este guard **no alcanzaba a
+     `checkout-plan` ni a `checkout-paquete`** —dos checkouts REALES del paseo,
+     `explorar/paseo/checkout-plan.tsx` y `…/checkout-paquete.tsx`—: el segmento
+     llega entero y la igualdad falla. *Un guard que pasa siempre no se
+     descubre: se descubre el disco encima del botón de pagar.*
+
+     ⚠️ **Y su comentario lo empeoraba**, que es el patrón que esta casa ya
+     cobró con el guard del tab: decía *«cubre los DOS checkouts»* y quien lo
+     leía se quedaba tranquilo. Ahora los cubre de verdad.
+
+     El prefijo se corta en `-` a propósito: alcanza a `checkout-loquesea` y
+     **no** a un futuro `checkoutear` — *un prefijo suelto apaga de más, y
+     apagar de más también es un defecto, sólo que más difícil de ver.* */
+  return segmentos.some((s) => PREFIJOS_SIN_CARRITO.some((p) => s === p || s.startsWith(`${p}-`)));
 }
 
 /** Las clases que sobreviven a la pantalla actual. La pieza filtra después las
