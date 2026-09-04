@@ -596,6 +596,58 @@ export const palette = {
    *  por eso el objeto parece apoyado EN él. */
   mapaSombra: 'rgba(20,16,14,.28)',
 
+  /* ══ EL VIOLETA DEL COACH (S113-B · lote 0) ══════════
+   * 🔴 **RESERVADO. Sólo `PresenciaCoach` y `CabeceraCoach` lo tocan.**
+   * Ninguna otra pieza de `packages/ui` puede referenciar `coach*`, y
+   * ninguna pantalla puede pedirlo por prop: *el color de una presencia
+   * es su identidad, y una identidad que el consumidor elige no es una
+   * identidad — es una sugerencia* (Ley 8: el valor vive en la pieza).
+   *
+   * ── DE DÓNDE SALEN LOS TRES VALORES, medido y no elegido ──────────
+   * El encargo traía un boceto (`#B9A6FF · #8B6CF6 · #5E45C9`) **con su
+   * propia condición**: *«si `DIRECCION_ARTE` tiene un violeta, se usa el
+   * de la casa»*. **Medido: lo tiene** — `violet` nació en B2.1 como Capa
+   * 3, con sus dos derivados AA ya calibrados. ⇒ **las tres paradas son
+   * alias de los tres violetas vivos**, no colores nuevos. *Traer tres
+   * hex del boceto habría metido una cuarta, quinta y sexta variante de
+   * violeta en una casa que ya tenía tres calibradas.*
+   *
+   * ── ⚠️ EL CHOQUE QUE ESTO TIENE, declarado y no absorbido ─────────
+   * `violet` **está tomado semánticamente**: es la Capa 3 · comunidad
+   * amplia (`theme.capa.comunidadAmplia`). el Coach lo reusa por dictado del
+   * founder. **No es una colisión de píxel** —una capa tiñe glifos y
+   * puntos de insignia; esto tiñe una presencia flotante— pero **sí es
+   * una de vocabulario**: el día que alguien pregunte *«¿de qué es el
+   * violeta?»* hay dos respuestas correctas. *Se declara acá para que la
+   * segunda no se descubra en un gate.*
+   *
+   * ── Y POR QUÉ ALIAS Y NO `theme.capa.comunidadAmplia` ─────────────
+   * Ese slot **se vuelve `rose` en memorial**. La presencia no se dibuja
+   * en memorial (§2.6), así que hoy es inocuo — pero colgar la identidad
+   * del Coach de un slot que cambia por otra razón deja una bomba con
+   * mecha: *el día que alguien decida dibujar algo del Coach en memorial,
+   * el Coach se volvería rosa sin que nadie tocara su color.* */
+  coachClaro:    '#AE59FF',  // = violetText · el barrido y el halo sobre oscuro
+  coachMedio:    '#9E3AFF',  // = violet · el cuerpo despierto y los arcos de aviso
+  coachProfundo: '#7C2DD4',  // = violetDark · la letra del nombre sobre papel (AA)
+
+  /** El halo del orbe dormido: 45 % del claro (§2.1). Fino, no un aura. */
+  coachHalo:        'rgba(174,89,255,.45)',
+  /** El resplandor que le da presencia sin agrandarla: 42 % (§2.1). */
+  coachResplandor:  'rgba(158,58,255,.42)',
+  /** La perla dormida. **No es `white`:** una esfera blanca pura sobre
+   *  papel blanco no es una esfera, es un agujero. Éste es el blanco de
+   *  la casa con el calor del papel adentro, que es lo que la deja leerse
+   *  como material y no como recorte. */
+  coachPerla:       '#FFFDFA',
+  /** La brasa de adentro — cálida, chica y quieta. El brillo interior de
+   *  §2.1 sale de interpolar esto hacia `coachPerla`. */
+  coachBrasa:       'rgba(255,214,150,.72)',
+  /** El velo de la huella: **el mismo tinte que `scrim`**, la dosis que
+   *  pidió el encargo (42 %). No es un gris nuevo: es la tinta de la casa
+   *  con otra cantidad. */
+  coachVelo:        'rgba(5,5,8,.42)',
+
 } as const
 
 /**

@@ -101,6 +101,84 @@ export const motion = {
     scrimEfectivo: 0.4,
   },
 
+  /* ══ LA FÍSICA DEL COACH (S113-B · lote 0) ═════════════════════════════
+   * 🔴 **RESERVADO a `PresenciaCoach` y `CabeceraCoach`.** Igual que
+   * `marca`, y por el mismo precedente: **el Coach ya tiene registro de
+   * motion propio desde S53** — `marca` NACIÓ siendo su excepción (340 ms
+   * cuando N10 dice 300). *Esto no funda una excepción: la continúa.*
+   *
+   * ── 🔴 EL CHOQUE CONTRA N10, MEDIDO NÚMERO POR NÚMERO ─────────────
+   * N10 es un vocabulario **CERRADO**: un bezier `(.32,.72,0,1)` y tres
+   * duraciones **150 · 300 · 520**. Estos valores los dictó el founder en
+   * el encargo del lote, con su literal —*«así lo quiero ver en el
+   * teléfono»*—, y **seis de los ocho caen fuera de la banda**:
+   *
+   * | acá | N10 más cercano | qué es |
+   * |---|---|---|
+   * | viaje **220** | 150 / 300 | el orbe hasta la almohadilla |
+   * | fundido **250** | 300 | perla → violeta |
+   * | cierre **160** | 150 | la huella se recoge |
+   * | barrido **130** | 150 | el destello de IA |
+   * | escalonado **40** | `stagger.fast` = 60 | los cuatro dedos |
+   * | respiración **4000** | *ninguna* | ciclo continuo, no un gesto |
+   * | latido **340** | 300 | = `marca.aperturaMs`, ya firmado |
+   * | curva `(.2,.9,.3,1.15)` | bezier de la casa · `spring` (1.56) | — |
+   *
+   * **La curva es el choque de fondo, y no es de grado:** N10 reparte DOS
+   * curvas —bezier para lo que entra, spring para lo que rebota al dedo—
+   * y ésta es una tercera: **un bezier CON overshoot** (1.15). *No es la
+   * de la casa, porque tiene rebote; no es `spring` (1.56), porque ese
+   * rebota tres veces más fuerte y acá el gesto es un empuje leve, no un
+   * pique.*
+   *
+   * ── LO QUE SE HIZO PARA QUE EL CHOQUE SEA REVERSIBLE Y NO PERMANENTE
+   * **Los ocho valores viven ACÁ y ninguno se expone como prop.** Es la
+   * mitad de N10 que sí se puede cumplir entera —*«el reparto es exigible
+   * porque las dos curvas viven adentro de las piezas; si vivieran en las
+   * pantallas, cerrado sería una intención»*—. ⇒ **el punto de reversión
+   * es este bloque**: si el founder mira el teléfono y prefiere la banda
+   * de N10, se cambian ocho números en un archivo y ninguna pantalla se
+   * entera.
+   *
+   * ⚠️ **No es una enmienda a N10 y no se escribe como tal.** Una ley
+   * firmada no la deroga una pista: *dos letras firmadas que se
+   * contradicen son peores que una equivocada.* Esto es un registro
+   * declarado con su choque a la vista, esperando el gate en el teléfono.
+   * Si el founder firma lo que ve, N10 gana una enmienda con su fecha —y
+   * la escribe quien la firma, no quien la construyó. */
+  coach: {
+    /** El ciclo de la respiración, ida y vuelta (§2.1). */
+    respiracionMs: 4000,
+    /** 1,00 → 1,06. **Un animal dormido, no un latido.** */
+    respiracionEscala: 1.06,
+    /** Cada cuánto cruza el barrido de luz. */
+    barridoCadaMs: 8000,
+    /** Lo que tarda en cruzar. */
+    barridoMs: 130,
+    /** La diagonal, en grados. */
+    barridoAngulo: 115,
+    /** El orbe hasta el centro inferior. */
+    viajeMs: 220,
+    /** El empuje leve: overshoot 1,15 — ver el choque arriba. */
+    viajeBezier: [0.2, 0.9, 0.3, 1.15] as const,
+    /** Perla dormida → violeta despierta. */
+    fundidoMs: 250,
+    /** Entre dedo y dedo. */
+    escalonadoMs: 40,
+    /** El cierre, **sin escalonado**: se abre en orden y se recoge de
+     *  golpe. *Escalonar la salida hace esperar a quien ya decidió irse.* */
+    cierreMs: 160,
+    /** El latido de la cabecera: 1 → 1,18 → 1, **por frase que llega de
+     *  verdad**. Coincide con `marca.aperturaMs` a propósito: es el mismo
+     *  cuerpo moviéndose en dos lugares. */
+    latidoMs: 340,
+    latidoEscala: 1.18,
+    /** El velo, en pantalla. `palette.coachVelo` ya lo trae; esto es para
+     *  quien anime la opacidad sobre `palette.scrim` (el mecanismo de la
+     *  Hoja) y necesite el cociente. */
+    veloEfectivo: 0.42,
+  },
+
   // React Native — useNativeDriver: true cuando sea posible (v3.1)
   rn: {
     springConfig: { tension: 180, friction: 12, useNativeDriver: true },
