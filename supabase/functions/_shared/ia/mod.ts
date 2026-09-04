@@ -78,6 +78,7 @@ export interface PedidoIa {
  */
 export type DetalleError =
   | 'sin_credencial'
+  | 'red'
   | 'no_ok'
   | 'respuesta_no_json'
   | 'sin_texto'
@@ -193,7 +194,7 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
       const abortado = abortador.signal.aborted
       clearTimeout(reloj)
       console.error('[ia] fetch falló:', String(e))
-      return await fallar(abortado ? 'timeout' : 'error_proveedor', 'no_ok', 0)
+      return await fallar(abortado ? 'timeout' : 'error_proveedor', 'red', 0)
     }
     clearTimeout(reloj)
 
