@@ -44,6 +44,13 @@ export function vozHecho(
     tipo: string;
     vacuna_nombre: string | null;
     hito_clave?: string | null;
+    /* 🔴 **S113-A · EL RECUERDO NO TIENE VOZ DE LA CASA.** Los otros cuatro
+       hitos los narra el sistema y por eso tienen frase firmada; **éste lo
+       escribe la familia**, y su texto ES la voz. *Poner acá «Un recuerdo» o
+       «Guardaste un momento» sería la casa hablando encima de alguien que ya
+       habló.* Por eso `''` cuando no hay texto: **si no hay texto, no hay
+       texto** — y la fila lo omite en vez de rellenarlo. */
+    texto?: string | null;
     /* 🔴 **S112-C · QUIÉN ANOTÓ, y de acá sale la voz de la bitácora.** El
        tipo `bitacora_familia` lo escriben DOS MANOS —la familia desde su app
        y el cuidador desde la guardería—, así que *decidir la voz por el TIPO
@@ -58,6 +65,11 @@ export function vozHecho(
   t: Traductor,
   nombreMascota: string,
 ): string {
+  /* El recuerdo va ANTES del diccionario a propósito: no está en `VOZ_HITO`
+     —ni debe estarlo— y caería al genérico «Momento de cuidado», que es
+     exactamente la frase de la casa que esta rama existe para no decir. */
+  if (item.hito_clave === 'recuerdo_familia') return item.texto ?? '';
+
   const claveHito = item.hito_clave ? VOZ_HITO[item.hito_clave] : undefined;
   if (claveHito !== undefined) return t(claveHito, { nombre: nombreMascota });
 

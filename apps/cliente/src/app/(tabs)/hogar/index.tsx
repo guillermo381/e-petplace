@@ -115,6 +115,7 @@ import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, capaDeHecho, etiquetasDeChips, vozHecho } from '@/lib/voz-hecho';
+import { useFotosDeRecuerdos } from '@/lib/recuerdo/fotos';
 import { contarPendientesDe, type FuentesDePendientes } from '@/lib/pendientes';
 import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { composicionDe } from '@/lib/composicion-sujeto';
@@ -485,6 +486,7 @@ function EventoVida({
   color,
   titulo,
   meta,
+  foto,
   marca,
   navega,
   expandido,
@@ -492,8 +494,15 @@ function EventoVida({
   children,
 }: {
   color: string | null;
+  /** 🔴 **`''` = SIN TÍTULO, y la fila lo omite en vez de rellenarlo.** Lo
+   *  necesita el recuerdo de sólo foto (S113-A): su voz es el texto de la
+   *  familia, y cuando no hay texto *no hay texto* — poner una frase de la
+   *  casa sería hablar encima de alguien que eligió no escribir. */
   titulo: string;
   meta: string;
+  /** URL YA FIRMADA de la foto del recuerdo, o `null`. Se resuelve arriba por
+   *  lote (`useFotosDeRecuerdos`): acá sólo se pinta. */
+  foto?: string | null;
   /**
    * S106-C t3 · LA MARCA DE §7 — hoy, la insignia de teleconsulta.
    *
@@ -519,7 +528,15 @@ function EventoVida({
     return (
       <CantoCurva color={color}>
         <View style={{ gap: spacing[1], padding: spacing[4], minHeight: 44, justifyContent: 'center' }}>
-          <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
+          {titulo !== '' ? <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto> : null}
+          {foto != null ? (
+            <Image
+              source={{ uri: foto }}
+              style={{ width: '100%', height: 160, borderRadius: radius.md }}
+              contentFit="cover"
+              transition={160}
+            />
+          ) : null}
           <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
           {marca}
         </View>
@@ -543,7 +560,15 @@ function EventoVida({
           ]}
         >
           <View style={{ flex: 1, minWidth: 0, gap: spacing[1] }}>
-            <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
+            {titulo !== '' ? <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto> : null}
+            {foto != null ? (
+              <Image
+                source={{ uri: foto }}
+                style={{ width: '100%', height: 160, borderRadius: radius.md }}
+                contentFit="cover"
+                transition={160}
+              />
+            ) : null}
             <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
             {marca}
           </View>
@@ -669,6 +694,10 @@ export default function Hogar() {
   // vista por-mascota vive en su perfil. Retiro declarado al gate.
   const [filtroVida, setFiltroVida] = useState<FiltroVidaCodigo>('todo');
   const [hechosAbiertos, setHechosAbiertos] = useState<Record<string, boolean>>({});
+  /* S113-A · las fotos de los recuerdos, firmadas POR LOTE. El estado del
+     timeline es `items` (null = cargando · 'error' = falló); el hook ignora
+     los ítems sin `foto_path`. */
+  const fotosRecuerdo = useFotosDeRecuerdos(items === null || items === 'error' ? [] : items);
   // S74-A (cura D-497): el cursor del timeline es GLOBAL — una sola
   // query hogar-wide reemplazó a las N páginas por mascota.
   const cursorRef = useRef<string | null>(null);
@@ -2343,6 +2372,9 @@ export default function Hogar() {
                               key={it.evento_id}
                               color={color}
                               titulo={vozHecho(it, t, nombrePorMascota.get(it.mascota_id) ?? '')}
+                              /* S113-A · sólo el recuerdo trae foto propia: el
+                                 resto de los hechos usa `fotos_count`. */
+                              foto={it.foto_path !== null ? (fotosRecuerdo.get(it.foto_path) ?? null) : null}
                               meta={metaHecho(it, idioma)}
                               /* §7 · LA MARCA DEL EXPEDIENTE. El wrapper trae
                                  el CÓDIGO DEL MOTOR (`'telemedicina'`) y la

@@ -3213,6 +3213,70 @@ cierra el pasado** (`L-409`).
 
 ---
 
+### `D-1017` ☠️ — el prestador NO ABRE: dos hooks después de un `return` temprano
+
+**Qué, con el stack literal.** El OTA del lote 0 (group `d921ba81`, ancla
+`9d19de78`) **rompe la app del prestador al abrir**: pantalla forense «Esta
+pantalla no se pudo mostrar». Reproducido en web contra ese SHA exacto, con
+sesión real de prestador (`guillo381+duenovet`):
+
+```
+React has detected a change in the order of Hooks called by
+  TabsLayout(./(tabs)/_layout.tsx)
+   Previous render            Next render
+   ...
+   28. undefined              useContext
+Error: Rendered more hooks than during the previous render.
+```
+
+**La causa, con línea.** En `apps/prestador/src/app/(tabs)/_layout.tsx`:
+· **510** — `if (sesion === 'verificando') { return (…) }`
+· **754** — `const insetsBarra = useSafeAreaInsets();`  ← **después**
+· **759** — `useEffect(() => escucharPendientes(), []);` ← **después**
+
+El primer render **siempre** es `verificando`, así que sale por el return y
+llama 27 hooks. Cuando la sesión resuelve, sigue de largo y llama **dos más**.
+`useSafeAreaInsets` es un `useContext` — exactamente el hook 28 que el stack
+nombra como `undefined` en el render anterior.
+
+**Por eso rompe AL ABRIR y no en un camino raro:** la transición
+`verificando → resuelto` es el arranque de toda sesión. *No hay forma de usar
+la app sin pasar por ahí.*
+
+**De quién es y por qué.** Los dos hooks llegaron con la **burbuja de
+pendientes del refugio** (S112-C), y el canon lo había anotado: *«LO CONSTRUIDO
+Y NO PUBLICADO — la burbuja de pendientes del refugio en el prestador,
+mergeada, **cero aparato**»*. **Este OTA fue la primera vez que ese código
+llegó a un teléfono.** ⇒ **la cura es de C**, dueña de `apps/prestador`.
+
+**Los otros tres sospechosos, descartados MIDIENDO:**
+· **B / `Icono` + `montaje`** — el stack nombra `TabsLayout`, no `Icono`; y la
+  pantalla de bienvenida, que dibuja `Icono`, **renderizó con 0 errores** en el
+  mismo SHA.
+· **el wrapper de A** — `contar_citas_semana_prestador` **existe en la base**
+  (1 fila en `pg_proc`), y su conteo vive en un `.then()` fuera del render: no
+  puede mover el orden de hooks.
+· **tipos regenerados** — **ningún export desapareció** de `packages/api` ni de
+  `packages/ui` entre `e29238a9` y `9d19de78` (diff de índices, conjunto vacío).
+
+**🔴 POR QUÉ NINGÚN GATE LO VIO, y es lo que hay que curar además del bug.**
+`tsc` **no ve el orden de los hooks** (los 6 typechecks daban 0);
+`verify:ref-antes-de-uso` mide *un ref leído antes de declararse*, que es otra
+clase; y `verify:linea-jornada` ejercita el texto, no el ciclo de vida.
+**Ningún instrumento de la casa mide «un hook después de un return temprano»** —
+y es una regla de React, verificable estáticamente, con un rojo trivial de
+producir. *La lección de S112 se repite con otra cara: lo que no tocó un
+aparato no está probado, y acá además no había gate que lo supliera.*
+
+**Alivio ya ejecutado.** El canal `preview` del prestador volvió al lote 7 de
+S112 por `update:republish`: group `101a5999-b7aa-4fb4-8910-723a93eb7ddc`,
+ancla `e29238a9`. **El cliente no se tocó.**
+
+**Sigue vivo en `main`** (medido en `1fced12e`: las tres líneas intactas).
+**Nada del prestador se publica hasta que C lo cure con su rojo reproducido.**
+
+---
+
 ### `D-1016` 🔴 — `verify:nexo` mide una geometría que B retiró
 
 **Qué.** `apps/cliente/scripts/verify-nexo.mts` importa `HALO` de

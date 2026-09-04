@@ -78,6 +78,23 @@ export interface ItemTimeline {
    * y se declara para que la decisión sea de la mesa y no un olvido mío.
    */
   texto: string | null;
+  /**
+   * 🔴 **LA FOTO DEL RECUERDO — el PATH del bucket `mascotas`, no una URL.**
+   * Compañera de `texto`, y por la misma razón: sin ella un recuerdo de sólo
+   * foto llegaba con `texto: null` **y `fotos_count: 0`** —la foto vive en
+   * `evento_hito_narrativo.foto_url` y NO en `evento_archivo_adjunto`— así que
+   * la pantalla no tenía con qué dibujarlo. *Se guardaba y no se veía.*
+   *
+   * Viaja en el MISMO select que `texto` ⇒ **cero viaje nuevo** (`L-223`).
+   *
+   * ⚠️ **Es un PATH y hay que firmarlo antes de pintarlo**: el bucket es
+   * PRIVADO desde S47-B0.2, así que la pantalla lo pasa por `resolverUrlFoto`.
+   * Se devuelve el path y no la URL a propósito: firmar acá costaría una
+   * petición por ítem, y `resolverUrlFoto` ya cachea y firma por lote.
+   *
+   * `null` cuando el hito no tiene foto — incluido el recuerdo de sólo texto.
+   */
+  foto_path: string | null;
   /** Solo tipo=vacuna_aplicada: eventos_mascota.datos->>'vacuna' (lo
    *  escribe el trigger _trg_vacuna_crear_evento) — insumo de la voz
    *  "Recibió la vacuna {nombre}" de LineaDeVida (S47-B1.2 C). */
@@ -250,8 +267,8 @@ async function _timeline(
        cuarta: en paralelo cuesta cero, encadenada cuesta una ola de red en la
        pantalla que el dueño abre primero. */
     hitoIds.length > 0
-      ? getClient().from('evento_hito_narrativo').select('evento_id, texto').in('evento_id', hitoIds)
-      : Promise.resolve({ data: [] as Array<{ evento_id: string | null; texto: string | null }>, error: null }),
+      ? getClient().from('evento_hito_narrativo').select('evento_id, texto, foto_url').in('evento_id', hitoIds)
+      : Promise.resolve({ data: [] as Array<{ evento_id: string | null; texto: string | null; foto_url: string | null }>, error: null }),
   ]);
   if (atenciones.error || adjuntos.error || prestadores.error || citasPadre.error || hitos.error) {
     return fallo('error_desconocido');
@@ -301,10 +318,11 @@ async function _timeline(
      una cadena vacía que llega a la pantalla se dibuja como una línea en
      blanco y se lee como un defecto del producto. */
   const textoPorHito = new Map<string, string>();
+  const fotoPorHito = new Map<string, string>();
   for (const h of hitos.data ?? []) {
-    if (h.evento_id !== null && typeof h.texto === 'string' && h.texto.length > 0) {
-      textoPorHito.set(h.evento_id, h.texto);
-    }
+    if (h.evento_id === null) continue;
+    if (typeof h.texto === 'string' && h.texto.length > 0) textoPorHito.set(h.evento_id, h.texto);
+    if (typeof h.foto_url === 'string' && h.foto_url.length > 0) fotoPorHito.set(h.evento_id, h.foto_url);
   }
   const modalidadPorPadre = new Map<string, string | null>();
   for (const c of citasPadre.data ?? []) {
@@ -345,6 +363,7 @@ async function _timeline(
          por ella reintroduciría la deducción desde `datos` que este join
          existe para evitar, y taparía el día que otro hito gane texto. */
       texto: textoPorHito.get(e.id) ?? null,
+      foto_path: fotoPorHito.get(e.id) ?? null,
       modalidad: e.evento_padre_id !== null
         ? modalidadPorPadre.get(e.evento_padre_id) ?? null
         : null,

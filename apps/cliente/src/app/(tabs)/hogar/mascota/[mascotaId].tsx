@@ -96,6 +96,7 @@ import {
   type VitalesPaseos,
 } from '@epetplace/domain';
 import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
+import { useFotosDeRecuerdos } from '@/lib/recuerdo/fotos';
 import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
 import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { CantoCurva } from '@/components/canto-curva';
@@ -397,6 +398,9 @@ export default function PerfilDeMascota() {
     }, [esMemorial, theme.mode]),
   );
   const [items, setItems] = useState<ItemTimeline[] | null | 'error'>(null);
+  /* S113-A · las fotos de los recuerdos, firmadas POR LOTE (mismo hook que el
+     Hogar: regla 37, el helper vive UNA vez). */
+  const fotosRecuerdo = useFotosDeRecuerdos(items === null || items === 'error' ? [] : items);
   const [cursor, setCursor] = useState<string | null>(null);
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
@@ -1740,7 +1744,19 @@ export default function PerfilDeMascota() {
                                 <Texto variante="dato">{mes}</Texto>
                               </View>
                               <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
-                                <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t, mascota.nombre)}</Texto>
+                                {/* S113-A · el recuerdo habla con el texto de la
+                                    familia; sin texto, la fila no inventa uno. */}
+                                {vozHecho(it, t, mascota.nombre) !== '' ? (
+                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t, mascota.nombre)}</Texto>
+                                ) : null}
+                                {it.foto_path !== null && fotosRecuerdo.get(it.foto_path) !== undefined ? (
+                                  <Image
+                                    source={{ uri: fotosRecuerdo.get(it.foto_path) }}
+                                    style={{ width: '100%', height: 140, borderRadius: radius.md }}
+                                    contentFit="cover"
+                                    transition={160}
+                                  />
+                                ) : null}
                                 {it.titulo_fuente !== null ? (
                                   <Texto variante="dato" numberOfLines={1}>{it.titulo_fuente.toLowerCase()}</Texto>
                                 ) : null}
