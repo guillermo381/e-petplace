@@ -1773,3 +1773,11 @@ export {
   type CambioEnMisHilos,
 } from './wrappers/adopcion-hilo-vivo';
 export type { AnotacionDeBitacora, ChipDeBitacora } from './wrappers/guarderia-durante';
+
+/* S113-A · el conteo de la semana del prestador — la puerta que S113-C dejó
+   declarada en el techo del HOY. El número lo cuenta el servidor. */
+export {
+  obtenerConteoSemanaPrestador,
+  type InputConteoSemanaPrestador,
+  type CodigoErrorConteoSemana,
+} from './wrappers/conteoSemanaPrestador';

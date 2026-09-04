@@ -1,0 +1,15 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260908940000_contar_citas_semana_prestador.sql
+-- ESCRITA ANTES DE APLICAR (regla de la casa).
+--
+-- Qué deshace: borra la función de conteo. Nada más.
+--
+-- QUÉ **NO** DESHACE, declarado:
+--   · Nada de datos — la función es STABLE y de sólo lectura: no escribe una
+--     fila, así que revertirla no puede perder nada.
+--   · El call site de apps/prestador: si esta función desaparece y el bundle
+--     vivo la llama, `obtenerConteoSemanaPrestador` devuelve su error tipado
+--     y el techo vuelve a dibujar «Hoy libre» sin número — que es EXACTAMENTE
+--     el estado previo (`semanaDelServidor: null`). Degrada, no rompe.
+-- ═══════════════════════════════════════════════════════════════════════════
+DROP FUNCTION IF EXISTS public.contar_citas_semana_prestador(uuid, date, date);

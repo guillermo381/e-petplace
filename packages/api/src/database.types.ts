@@ -23278,6 +23278,10 @@ export type Database = {
         Args: { p_empleado_id: string }
         Returns: number
       }
+      contar_citas_semana_prestador: {
+        Args: { p_desde: string; p_hasta: string; p_prestador_id: string }
+        Returns: number
+      }
       contar_pendientes: { Args: never; Returns: Json }
       contar_solicitudes_por_revisar: { Args: never; Returns: number }
       conteos_vitrina_por_eje: { Args: never; Returns: Json }
