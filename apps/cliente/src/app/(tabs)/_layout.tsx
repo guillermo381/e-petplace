@@ -312,8 +312,15 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
   const candidatasDe = (atajo: AtajoNexo | 'coach') =>
     atajo === 'coach' ? candidatas : mascotasParaAtajo(atajo, candidatas);
 
+  /* 🔴 **CERRAR LA FILA ES DE LA PIEZA, NO DE ACÁ** (lote 0.2). ⏪ Este método
+     abría con un `setAbierta(false)` propio, y **hoy sería el segundo lugar
+     que cierra la misma pata**: medido, `PresenciaCoach` ya llama a `onCerrar`
+     antes de disparar el atajo (`:786`), la pastilla (`:677`) y la fila
+     «Pregúntale» (`:663`). *Dos lugares que cierran lo mismo son dos que algún
+     día no van a estar de acuerdo* — y ya hay un caso donde difieren a
+     propósito: **con un dedo apagado la pieza NO cierra**, para que la razón
+     se lea con la fila a la vista. */
   const tocar = (atajo: AtajoNexo | 'coach') => {
-    setAbierta(false);
     const posibles = candidatasDe(atajo);
     /* 🔴 **UNA SOLA POSIBLE NO SE PREGUNTA**, aunque el hogar tenga varias: con
        un perro y un acuario, «Vacuna» ya sabe de quién habla. *Preguntar con una
@@ -386,8 +393,8 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
         onCerrar={() => setAbierta(false)}
         onPreguntar={() => tocar('coach')}
         onPendiente={(clase) => {
-          setAbierta(false);
-          /* LA REGLA DEL TOQUE LA DECIDE EL DOMINIO: con UNA conversación va al
+          /* Cerrar es de la pieza (ver `tocar`). Acá sólo se navega.
+             LA REGLA DEL TOQUE LA DECIDE EL DOMINIO: con UNA conversación va al
              hilo; con varias, a la lista. `unica` ya trae el id si y sólo si
              corresponde — copiado del montaje que reemplaza, no reinventado. */
           if (clase === 'chat') {
