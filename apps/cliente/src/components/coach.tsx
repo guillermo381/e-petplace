@@ -1,4 +1,23 @@
 /**
+ * ⭐ **S113-C · lote 0 — EL COACH GANA NOMBRE Y CABECERA: acá habla NEXO.**
+ *
+ * Tres cosas cambian y ninguna toca las respuestas: **la cabecera** (orbe
+ * violeta chico + el nombre, la misma receta de gradiente que el destello del
+ * Hogar que este lote retira) · **la presentación** (la primera vez que la
+ * Hoja se abre en este dispositivo preside sola; después vive abajo, chica,
+ * siempre — *es UNA key en dos lugares, no dos frases que algún día
+ * divergen*) · y **la mascota inicial la puede fijar quien abre**, porque
+ * ahora la puerta es la almohadilla de Nexo desde cualquier pestaña.
+ *
+ * 🔴 **NINGUNA PROMESA NUEVA.** Las tres preguntas del v0 y sus plantillas
+ * quedan tal cual; el pie que dice que el campo libre AÚN NO existe también.
+ * *Un nombre no es un cerebro* — lo que este lote agrega es presencia.
+ *
+ * ⚠️ **`{{nombre}}` significa DOS COSAS entre estos dos bloques de voz** y se
+ * declara acá porque ningún typecheck lo ve: en `coach.*` es LA MASCOTA (voz
+ * aprobada en S53, intacta); en `nexo.*` es EL COACH.
+ *
+ * ── lo de S53, íntegro ──────────────────────────────────────────────────────
  * EL COACH v0 — la Hoja anclada a mascota (S53-B2b, DISEÑO_EXPERIENCIA
  * §6 + DIRECCION_ARTE §5.2). La IA es la voz de la app; este es su
  * cuerpo invocable: SIEMPRE anclado a una mascota, jamás chat genérico.
@@ -16,9 +35,15 @@
 
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
+import Svg from 'react-native-svg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   AvatarMascota,
   Boton,
+  HUELLA_BOX,
+  Huella,
+  radius,
   Esqueleto,
   EsqueletoGrupo,
   Hoja,
@@ -92,23 +117,61 @@ function responder(pregunta: Pregunta, perfil: PerfilMascota, t: Traductor, idio
     : t('coach.rActividad', { n: paseos_total, fecha });
 }
 
+/** 🔴 LA MARCA DE «YA ME PRESENTÉ» — por DISPOSITIVO, igual que
+ *  `epp.cliente.tienePedidos`. Monótona a propósito: presentarse dos veces
+ *  se lee como que la app no se acuerda de vos. */
+const CLAVE_PRESENTADO = 'epp.cliente.nexo.presentado.v1';
+
 export function CoachHoja({
   visible,
   onCerrar,
   mascotas,
+  mascotaInicial,
 }: {
   visible: boolean;
   onCerrar: () => void;
   mascotas: MascotaResumen[];
+  /** Sobre quién abre la conversación. Lo fija quien la abre (la almohadilla
+   *  de Nexo ya resolvió el foco); `undefined` = la primera del hogar, que
+   *  es el comportamiento de S53. */
+  mascotaInicial?: string;
 }) {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
 
-  const [mascotaId, setMascotaId] = useState<string | null>(mascotas[0]?.id ?? null);
+  const [mascotaId, setMascotaId] = useState<string | null>(mascotaInicial ?? mascotas[0]?.id ?? null);
+  /* 🔴 TRES ESTADOS Y NO DOS: `null` es «todavía no leí la marca». Arrancar en
+     «no se presentó» pintaría la presentación por un frame a quien ya la vio;
+     arrancar en «ya» se la escondería para siempre a quien no. *Vacío por
+     carga y vacío por estado no comparten guard.* */
+  const [presentado, setPresentado] = useState<boolean | null>(null);
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
   const [respuesta, setRespuesta] = useState<string | null>(null);
 
   const mascota = mascotas.find((m) => m.id === mascotaId) ?? mascotas[0];
+
+  /* La marca se lee una vez por montaje del shell, no por apertura. */
+  useEffect(() => {
+    let vigente = true;
+    void AsyncStorage.getItem(CLAVE_PRESENTADO)
+      .then((v) => {
+        if (vigente) setPresentado(v === '1');
+      })
+      .catch(() => {
+        /* sin marca legible la presentación se muestra: es la opción que no
+           esconde la advertencia. */
+        if (vigente) setPresentado(false);
+      });
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  /* Quien abre decide de quién se habla. Sin esto, la Hoja se quedaría con la
+     mascota de la apertura anterior — y el atajo diría el nombre de otra. */
+  useEffect(() => {
+    if (visible && mascotaInicial !== undefined) setMascotaId(mascotaInicial);
+  }, [visible, mascotaInicial]);
 
   useEffect(() => {
     if (!visible || !mascota) return;
@@ -131,9 +194,81 @@ export function CoachHoja({
     { clave: 'actividad', texto: t('coach.pActividad') },
   ];
 
+  /* LA CABECERA (S113-C) — orbe violeta chico + el nombre. Los dos stops
+     violeta→azul del gradiente FIRMA: **la misma receta que el destello que
+     este lote retira del Hogar**, para que Nexo no cambie de color al mudarse
+     de esquina. */
+  const cabecera = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+      <LinearGradient
+        colors={[theme.accent.gradient.colors[1], theme.accent.gradient.colors[2]] as [string, string]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ width: 28, height: 28, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Svg width={16} height={16} viewBox={`0 0 ${HUELLA_BOX} ${HUELLA_BOX}`}>
+          <Huella color={theme.text.onGradient} />
+        </Svg>
+      </LinearGradient>
+      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+        {t('coach.nombre')}
+      </Text>
+    </View>
+  );
+
+  const frase = (
+    <Text
+      style={{
+        fontFamily: typography.family.sans.regular,
+        fontSize: typography.size.sm,
+        lineHeight: typography.size.sm * typography.leading.normal,
+        color: theme.text.tertiary,
+      }}
+    >
+      {t('nexo.presentacion', { nombre: t('coach.nombre') })}
+    </Text>
+  );
+
+  /* 🔴 LA PRIMERA VEZ PRESIDE SOLA. No es una pantalla de bienvenida: es la
+     advertencia que la casa le debe a quien habla con una IA por primera vez,
+     **antes** de que le conteste nada. Después vive abajo, chica, siempre —
+     la MISMA key, para que no haya dos frases que algún día divergen. */
+  if (presentado === false) {
+    return (
+      <Hoja visible={visible} onCerrar={onCerrar} apertura="marca" conCerrar>
+        <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[2], gap: spacing[4] }}>
+          {cabecera}
+          <Text
+            style={{
+              fontFamily: typography.family.sans.light,
+              fontSize: typography.size.lg,
+              lineHeight: typography.size.lg * typography.leading.normal,
+              color: theme.text.primary,
+            }}
+          >
+            {t('nexo.presentacion', { nombre: t('coach.nombre') })}
+          </Text>
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('coach.preguntaSobre', { nombre: mascota.nombre })}
+            onPress={() => {
+              setPresentado(true);
+              void AsyncStorage.setItem(CLAVE_PRESENTADO, '1').catch(() => {
+                /* sin marca, la próxima apertura la vuelve a mostrar: se
+                   repite la advertencia, jamás se pierde. */
+              });
+            }}
+          />
+        </View>
+      </Hoja>
+    );
+  }
+
   return (
     <Hoja visible={visible} onCerrar={onCerrar} apertura="marca" conCerrar>
       <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[2], gap: spacing[4] }}>
+        {cabecera}
         {/* anclada: la conversación abre sabiendo de quién hablas */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
           {/* C-B (S112-C) · la cara de su especie, jamás la inicial. El Coach
@@ -202,6 +337,8 @@ export function CoachHoja({
         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
           {t('coach.pie')}
         </Text>
+        {/* y la advertencia, SIEMPRE — la misma frase de la presentación */}
+        {frase}
       </View>
     </Hoja>
   );
