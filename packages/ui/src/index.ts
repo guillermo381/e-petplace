@@ -77,19 +77,22 @@ export { GlifoConContador, type GlifoConContadorProps } from './components/Glifo
    mensajes**, así que una constante llamada «carrito» reservaría espacio para
    mensajes y *mentiría en el nombre, que es donde nadie la lee*. La reemplaza
    `COLA_BURBUJA_PENDIENTES`. */
-/* ☠️ **`BurbujaPendientes` QUEDA DEROGADA — la reemplaza `PresenciaCoach`
-   con `coach: false`** (S113-B · lote 0.3, decisión del founder). Es la misma
-   puerta, el mismo píxel y el mismo contrato de `aireInferior`; lo que gana es
-   que **hay UNA sola pieza flotante en la casa** en vez de dos que se turnan.
-   En memorial el cliente monta ésta con `coach: false`.
+/* ☠️ **`BurbujaPendientes` SE RETIRÓ DEL ÍNDICE — S113, lote 0.3.**
+   La reemplazó `PresenciaCoach` con `coach: false`: la misma puerta, el mismo
+   píxel y el mismo contrato de `aireInferior`, y lo que se gana es que **hay
+   UNA sola pieza flotante en la casa** en vez de dos que se turnan.
 
-   ⚠️ **SIGUE EXPORTADA A PROPÓSITO, y esto no es tibieza: es `L-395`.**
-   *Si se retira antes de que las apps monten la nueva, no queda ninguna
-   puerta; si se monta la nueva sin retirar ésta, hay dos discos peleando el
-   mismo píxel.* **El retiro y el montaje van en el mismo commit, y ese commit
-   es de quien toca `apps/` — no mío.** Su borrado es de una línea el día que
-   eso pase. */
-export { BurbujaPendientes, COLA_BURBUJA_PENDIENTES, type BurbujaPendientesProps, type Pendiente, type ClasePendiente } from './components/BurbujaPendientes'
+   **El retiro y el montaje pasaron en el mismo acto**, que es lo que B pidió
+   al dejarla exportada a propósito (`L-395`): *retirarla antes habría dejado a
+   las apps sin puerta; montar la nueva sin retirarla habría puesto dos discos
+   peleando el mismo píxel.* Medido al borrar: **cero montajes en las dos
+   apps** —sus tres menciones restantes son lápidas— y **la galería la importa
+   directo de `./components/BurbujaPendientes`**, no de acá, así que sigue
+   pudiendo mostrarla sin que el índice la ofrezca.
+
+   ⚠️ **El archivo NO se borró**: la galería es su último lector y la pieza
+   sigue siendo la referencia de lo que se reemplazó. Lo que muere es su
+   condición de puerta pública. */
 // FichaRepartidor — S100d-B (punto 25): quién va a tocar el timbre. LA PLACA
 // MANDA (es lo único verificable desde la puerta) · sin placa el nombre
 // preside, y es 1 de 2 casos vivos · el hueco de la foto se DIBUJA, jamás se
