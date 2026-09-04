@@ -1878,6 +1878,16 @@ export interface Pendientes {
   hilosConSinLeer: string[];
   /** Sólo para quien publica: solicitudes en `recibida` o `en_conversacion`. */
   solicitudesPorRevisar: number;
+  /** S113-A · pedidos con algo por hacer o en camino. El predicado NO se
+   *  transcribe: es `NOT es_terminal` sobre `v_pedidos_narrativa`, y
+   *  `es_terminal` es DATO de `cat_narrativas_pedido` — el mismo que
+   *  `(tabs)/pedidos/index.tsx:451` usa para separar vivo de histórico. */
+  pedidos: number;
+  /** S113-A · `null` = **todavía no sé**, y es la verdad medida: la tabla
+   *  `notificaciones` existe y tiene filas sin leer, pero **cero productores**
+   *  (ni `pg_proc`, ni edges, ni el monorepo). Un número que ningún acto del
+   *  producto puede mover enseña a ignorar la burbuja. **Jamás 0.** */
+  avisos: number | null;
 }
 
 /**
@@ -1909,6 +1919,38 @@ export async function contarPendientes(): Promise<
       mensajesSinLeer: Number(r.mensajes_sin_leer ?? 0),
       hilosConSinLeer: hilos.filter((h): h is string => typeof h === 'string'),
       solicitudesPorRevisar: Number(r.solicitudes_por_revisar ?? 0),
+      pedidos: Number(r.pedidos ?? 0),
+      // `?? null` y NO `?? 0`: si el motor dejara de mandar la clave, el 0
+      // diría «no tenés avisos» sobre algo que no se midió.
+      avisos: typeof r.avisos === 'number' ? r.avisos : null,
+    },
+  };
+}
+
+/** Lo que B y C consumen por nombre en este lote. Forma pedida por la letra
+ *  del lote 0: `{ chat, pedidos, avisos }`.
+ *
+ *  🔴 **NO ES UN SEGUNDO CONTADOR.** Es una PROYECCIÓN de `contarPendientes`
+ *  —una sola llamada, una sola fuente—. La razón está escrita arriba y viene
+ *  de S112: *dos contadores distintos en la misma barra terminan discrepando
+ *  y nadie sabe cuál mirar.* Acá no hay dos: hay una cuenta y dos formas de
+ *  leerla, y la segunda no puede divergir porque no consulta nada.
+ *
+ *  · `chat`    = conversaciones con mensajes sin leer (CONVERSACIONES, no
+ *                mensajes: es lo que la burbuja muestra desde S112).
+ *  · `pedidos` = con algo por hacer o en camino.
+ *  · `avisos`  = `null` mientras no exista motor. */
+export async function obtenerPendientesHogar(): Promise<
+  ResultadoWrapper<{ chat: number; pedidos: number; avisos: number | null }, CodigoErrorAdopcion>
+> {
+  const r = await contarPendientes();
+  if (!r.ok) return r;
+  return {
+    ok: true,
+    data: {
+      chat: r.data.hilosConSinLeer.length,
+      pedidos: r.data.pedidos,
+      avisos: r.data.avisos,
     },
   };
 }

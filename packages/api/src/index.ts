@@ -970,6 +970,7 @@ export {
   type NotaConfirmada,
   type CasoRef,
   type SedimentarInput,
+  type ModoCapturaNota,
   type ResultadoSedimento,
   type AbrirCasoInput,
   type CodigoErrorSedimento,
@@ -1762,6 +1763,7 @@ export {
   type AceptacionRegistrada, responderSolicitudAdopcion, cerrarSolicitudAdopcion,
   obtenerMisSolicitudesAdopcion, obtenerSolicitudesDeMisPublicaciones,
   contarSolicitudesPorRevisar, contarPendientes,
+  obtenerPendientesHogar,
 } from './wrappers/adopcion';
 export type {
   EstadoSolicitudAdopcion, MensajeDelHilo, MiSolicitud, SolicitudRecibida, Pendientes,

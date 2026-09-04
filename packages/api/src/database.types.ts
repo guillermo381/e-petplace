@@ -22584,6 +22584,10 @@ export type Database = {
           hora: string
         }[]
       }
+      _marcar_modo_captura_evento: {
+        Args: { p_evento_ids: string[]; p_modo: string }
+        Returns: number
+      }
       _mascota_apta_paseo_grupal: {
         Args: { p_mascota_id: string }
         Returns: boolean
@@ -25887,6 +25891,7 @@ export type Database = {
           p_cuenta_comercial_id: string
           p_empleado_id: string
           p_mascota_id: string
+          p_modo_captura?: string
           p_nota: Json
         }
         Returns: Json

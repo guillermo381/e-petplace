@@ -170,6 +170,10 @@ const CODIGOS_SEDIMENTO = [
   'condicion_requerida',
   'no_es_tratante',
   'rol_sin_escritura_clinica',
+  // S113-A. El tipo del wrapper ya lo hace inexpresable desde TS, pero el
+  // rebote tiene NOMBRE igual: un código que existe en el motor y no en la
+  // puerta llega como 'datos_invalidos' y miente sobre qué pasó.
+  'modo_captura_invalido',
   'datos_invalidos',
 ] as const;
 export type CodigoErrorSedimento = (typeof CODIGOS_SEDIMENTO)[number];
@@ -191,6 +195,7 @@ const MENSAJES_SEDIMENTO: Record<CodigoErrorSedimento, string> = {
   condicion_requerida: 'El caso necesita una condición.',
   no_es_tratante: 'No eres la clínica tratante de este caso.',
   rol_sin_escritura_clinica: 'Solo un profesional del negocio puede firmar la consulta clínica.',
+  modo_captura_invalido: 'No pudimos registrar cómo se escribió la nota. Prueba de nuevo.',
   datos_invalidos: 'Revisa los datos de la nota.',
 };
 
@@ -270,6 +275,14 @@ export type CasoRef =
   | { modo: 'existente'; caso_id: string }
   | null;
 
+/** Cómo se capturó la nota. Vocabulario CERRADO, subconjunto del CHECK
+ *  `eventos_mascota_modo_captura_check` — el wrapper expone SÓLO los dos que
+ *  esta pantalla puede producir: `extraido_por_ia` es del carnet y
+ *  `automatico` lo escribe el sistema, ninguno de los dos sale de un vet
+ *  cerrando una consulta. Ampliar acá sin ampliar el motor sería ofrecer un
+ *  valor que la RPC rebota. */
+export type ModoCapturaNota = 'tecleado' | 'dictado';
+
 export interface SedimentarInput {
   citaId: string;
   cuentaComercialId: string;
@@ -278,6 +291,10 @@ export interface SedimentarInput {
   nota: NotaConfirmada;
   caso?: CasoRef;
   countryCode?: string;
+  /** Opcional. **Omitirlo es exactamente el comportamiento de siempre**: el
+   *  evento queda con `modo_captura` NULL. La pantalla del prestador lo manda
+   *  cuando sabe si el vet tecleó o dictó. */
+  modoCaptura?: ModoCapturaNota;
 }
 
 export interface ResultadoSedimento {
@@ -304,6 +321,9 @@ export async function sedimentarNotaClinica(
     p_nota: input.nota,
     p_caso: input.caso ?? undefined,
     p_country_code: input.countryCode ?? 'EC',
+    // Sin el campo NO se manda el parámetro: la RPC lo tiene con DEFAULT NULL
+    // y ese es el camino de hoy, byte por byte.
+    ...(input.modoCaptura ? { p_modo_captura: input.modoCaptura } : null),
   });
   if (error) return falloSedimento(error);
   if (!esObj(data) || data['ok'] !== true) {
