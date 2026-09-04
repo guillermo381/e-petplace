@@ -187,14 +187,17 @@ const ATAJOS_COACH_DEMO = [
   { id: 'peso', icono: 'peso', etiqueta: 'Peso', onPress: () => {} },
   { id: 'antiparasitario', icono: 'antiparasitario', etiqueta: 'Antipulgas', razonApagado: 'Thor todavía no tiene una fecha de desparasitación cargada' },
   { id: 'foto', icono: 'foto', etiqueta: 'Foto', onPress: () => {} },
-  /* ⚠️ **EL CUARTO ES DE CAPA Y SE VE:** `carnet` LLEVA HUELLA y los tres del
-     Coach no, así que dentro de la misma huella conviven dos tratamientos.
-     *No es un defecto de las piezas: es la consecuencia de N27 cuando un
-     atajo NOMBRA algo (el carnet) y los otros tres son actos.* Se deja a la
-     vista en el catálogo en vez de esconderse eligiendo un cuarto cómodo —
-     **si al founder le salta, la salida es que el cuarto también sea un acto,
-     no apagarle la huella al carnet.** */
-  { id: 'carnet', icono: 'carnet', etiqueta: 'Carnet', onPress: () => {} },
+  /* ✅ **ACÁ SE VE LA REGLA NUEVA, Y ES EL CASO QUE LA MESA NOMBRÓ.**
+     `vacuna` es un glifo de CAPA y lleva huella en toda la app — pero adentro
+     de un dedo es un ACTO, así que se dibuja como control. *El mismo glifo,
+     dos roles según dónde esté.*
+     ⏪ Acá vivía una advertencia: el cuarto atajo era `carnet`, llevaba su
+     huella entre tres que no la llevaban, y este comentario decía *«si al
+     founder le salta, la salida es que el cuarto también sea un acto»*. **Le
+     saltó, y la salida fue mejor que la prevista:** no hubo que cambiar el
+     cuarto atajo — el montaje pasó a decidir, y ahora cualquiera de los
+     cuatro puede ser un glifo de capa sin romper la fila. */
+  { id: 'vacuna', icono: 'vacuna', etiqueta: 'Vacuna', onPress: () => {} },
 ] as const
 /* La voz la compone la pantalla (Ley 3): la pieza no arma frases. */
 const VOZ_COACH_DEMO = {
@@ -1187,6 +1190,30 @@ function HojaDeContactoCoach() {
         <FilaDeContacto tamano={21} />
         <FilaDeContacto tamano={44} />
       </View>
+      {/* 🔴 EL CASO QUE LA MESA PIDIÓ: el MISMO glifo en sus dos roles. */}
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">
+          el mismo `vacuna`: en la app lleva su huella · dentro de un dedo es un acto
+        </Texto>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[6] }}>
+          {[21, 44].map((tam) => (
+            <View key={tam} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+              <Icono nombre="vacuna" tamano={tam} />
+              <Icono nombre="vacuna" tamano={tam} montaje="control" />
+            </View>
+          ))}
+        </View>
+        <Texto variante="apoyo">
+          Y el borde, que es lo que hay que mirar dos veces: `ia` NO se apaga
+          aunque se monte como control — ahí la huella ES el dibujo y apagarla
+          dejaría un hueco, no un glifo sobrio.
+        </Texto>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <Icono nombre="ia" tamano={44} />
+          <Icono nombre="ia" tamano={44} montaje="control" />
+        </View>
+      </View>
+
       {/* El mismo montaje en oscuro: un glifo que sólo funciona en un tema
           no funciona (§6b paso 4 pide los dos). */}
       <ThemeProvider defaultMode="dark">

@@ -22,6 +22,8 @@
 
 import Svg, { Circle, G, Path } from 'react-native-svg'
 
+import { resolverHuella, type MontajeIcono } from './icono-huella'
+
 import { useTheme } from '../ThemeProvider'
 import { Huella } from '../brand/Huella'
 
@@ -1909,6 +1911,7 @@ export function Icono({
   tinta,
   huella,
   activa,
+  montaje,
 }: {
   nombre: IconoNombre
   /** Tamaño de render; el diseño vive en la grilla 24 (gate también a 21 — §2.9). */
@@ -1929,6 +1932,14 @@ export function Icono({
    *  monta**: la de MARCA aparece al activarse, la de ESTRUCTURA
    *  recolorea. Ver `HUELLA_ES_ESTRUCTURA` arriba. */
   activa?: boolean
+  /** DÓNDE está montado (S113-B). `'control'` = adentro de un botón ⇒ **sin
+   *  huella**, por `N27`. Es una afirmación sobre el CONTEXTO, no una
+   *  preferencia: ver `icono-huella.ts`, donde vive la regla y su borde.
+   *
+   *  ⚠️ **No cambia el color ni el dibujo** — sólo apaga la huella. *Un
+   *  glifo montado en un botón sigue siendo de su capa; lo que pierde es la
+   *  marca de mascota, que es lo que `N27` nombra.* */
+  montaje?: MontajeIcono
 }) {
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
@@ -2131,18 +2142,16 @@ export function Icono({
           : porConcepto[nombre].pura)
 
   /* LEY 6 aplicada — y el registry es quien la contesta (ver arriba).
-   * `activa === undefined` ⇒ el glifo vive PRESENTE: es todo el producto
-   * fuera de una barra de tabs, y por eso es el default silencioso. */
-  const huellaFinal =
-    activa === undefined
-      ? colorHuella
-      : HUELLA_ES_ESTRUCTURA.has(nombre)
-        ? // ESTRUCTURA: nunca desaparece — en reposo toma el color del
-          // trazo, que es lo que hacía la pata a mano en la barra viva.
-          (activa ? colorHuella : colorTinta)
-        : // MARCA: aparece al activarse. 'none' y no un color de fondo:
-          // el glifo se sostiene solo sin ella (por eso es marca).
-          (activa ? colorHuella : 'none')
+   * 🔴 **La decisión se MUDÓ a `icono-huella.ts` sin cambiar una coma** (S113-B):
+   * vivía acá como una escalera de ternarios y no tenía gate. Ahí está su
+   * regla, su borde (la huella que ES el dibujo) y su porqué. */
+  const huellaFinal = resolverHuella({
+    montaje,
+    activa,
+    esEstructura: HUELLA_ES_ESTRUCTURA.has(nombre),
+    colorHuella,
+    colorTinta,
+  })
 
   return (
     <Svg width={tamano} height={tamano} viewBox="0 0 24 24">

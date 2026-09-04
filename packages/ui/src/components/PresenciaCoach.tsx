@@ -490,7 +490,16 @@ function Dedo({
             opacity: apagado ? 0.45 : 1,
           }}
         >
-          <Icono nombre={atajo.icono} tamano={24} registro="tinta" />
+          {/* 🔴 **`montaje="control"` VA SIEMPRE Y NO ES PROP DE NADIE.**
+              Los cuatro dedos son ACTOS, y `N27` es sobre el contexto: un
+              glifo adentro de un botón no lleva huella. Lo decide la pieza,
+              no la pantalla — *si el consumidor pudiera elegirlo, la ley
+              sería una sugerencia* (Ley 8).
+              ⚠️ Y esto **no toca cómo se dibuja el glifo en el resto de la
+              app**: `vacuna` sigue llevando su huella en el carnet, en la
+              línea de vida y en donde viva. Acá pierde la marca de mascota
+              porque acá es un acto, no un hecho. */}
+          <Icono nombre={atajo.icono} tamano={24} registro="tinta" montaje="control" />
         </Pressable>
       </Animated.View>
     </Animated.View>

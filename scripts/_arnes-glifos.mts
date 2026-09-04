@@ -106,5 +106,51 @@ t('`antiparasitario` es visiblemente más liviano que `seguros`',
 t('y por eso su colisión va DECLARADA en el dibujante', /seguros. YA ES UN ESCUDO/.test(SRC));
 t('la gota declara su distinción con el pin (orientación)', /apunta hacia ABAJO/.test(SRC));
 
+
+/* ═══ LA HUELLA DENTRO DE UN CONTROL (S113-B · orden de la mesa) ════════════
+   *«En la huella los cuatro dedos son actos: `vacuna` adentro de un dedo se
+   dibuja sin huella, sin tocar cómo se dibuja en el resto de la app.»*
+
+   🔴 **Se mide la FUNCIÓN, no el render.** La decisión salió de `Icono` a
+   `icono-huella.ts` justo para esto: sin extraerla habría que montar React
+   para saber si una huella se pinta, y «lo miré y no estaba» no es una
+   medición. */
+const { resolverHuella } = await import('../packages/ui/src/components/icono-huella.ts');
+const base = { colorHuella: '#MAGENTA', colorTinta: '#TINTA' };
+
+console.log('\n── ⑦ NO-REGRESIÓN · la Ley 6 hace lo mismo que antes ──');
+t('presente (fuera de una tab) ⇒ su color',
+  resolverHuella({ ...base, esEstructura: false }) === '#MAGENTA');
+t('tab de MARCA en reposo ⇒ no se pinta',
+  resolverHuella({ ...base, esEstructura: false, activa: false }) === 'none');
+t('tab de MARCA activa ⇒ su color',
+  resolverHuella({ ...base, esEstructura: false, activa: true }) === '#MAGENTA');
+t('tab de ESTRUCTURA en reposo ⇒ recolorea, jamás desaparece',
+  resolverHuella({ ...base, esEstructura: true, activa: false }) === '#TINTA');
+t('tab de ESTRUCTURA activa ⇒ su color',
+  resolverHuella({ ...base, esEstructura: true, activa: true }) === '#MAGENTA');
+
+console.log('\n── ⑧ EL MONTAJE EN UN CONTROL APAGA LA HUELLA ──');
+t('🔴 dentro de un control ⇒ NO se pinta',
+  resolverHuella({ ...base, esEstructura: false, montaje: 'control' }) === 'none');
+t('CONTROL NEGATIVO · el MISMO glifo sin montaje ⇒ SÍ se pinta',
+  resolverHuella({ ...base, esEstructura: false }) === '#MAGENTA');
+t('y en una tab activa, fuera de un control, sigue pintando',
+  resolverHuella({ ...base, esEstructura: false, activa: true }) === '#MAGENTA');
+
+console.log('\n── ⑨ EL BORDE: la huella que ES el dibujo GANA sobre el montaje ──');
+t('🔴 `esEstructura` dentro de un control ⇒ NO se apaga (dejaría un hueco)',
+  resolverHuella({ ...base, esEstructura: true, montaje: 'control' }) !== 'none');
+/* Y que ese borde alcance a los tres glifos reales, no a un booleano suelto. */
+for (const g of ['negocio', 'datos', 'ia'])
+  t(`\`${g}\` está declarado como estructura en el registry`,
+    new RegExp("HUELLA_ES_ESTRUCTURA[\\s\\S]{0,200}'" + g + "'").test(SRC));
+
+console.log('\n── ⑩ EL DEDO LO PASA SIEMPRE, Y NADIE MÁS PUEDE ELEGIRLO ──');
+const PIEZA = readFileSync(new URL('../packages/ui/src/components/PresenciaCoach.tsx', import.meta.url), 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, ' ');
+t('el dedo monta su glifo con `montaje="control"`', /montaje="control"/.test(PIEZA));
+t('🔴 y NO lo expone como prop de la pieza', /montaje\??:/.test(PIEZA) === false);
+
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);
