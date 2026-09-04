@@ -9,8 +9,8 @@
    que no tenerlo (Ley 37 aplicada a los instrumentos). */
 import {
   AIRE_BORDE, ARCO_GRADOS, ARCO_SEPARACION, BRASA, DEDO, ORBE, ORBE_ABIERTO,
-  PASTILLA, SEPARACION, alturasDeLaFila, anclaOrbe, arcosDe, clasesConAlgo,
-  ejeDeLaFila, movimientoCoach, nodosDeLaFila, pastillasDe,
+  LIENZO, PASTILLA, SEPARACION, alturasDeLaFila, anclaOrbe, arcosDe, clasesConAlgo,
+  ORBE_MINI, ejeDeLaFila, violetaEncendido, movimientoCoach, nodosDeLaFila, pastillasDe,
 } from '../packages/ui/src/components/coach-geometria.ts';
 import { readFileSync } from 'node:fs';
 
@@ -41,56 +41,61 @@ t('el eje no depende del aire inferior en X',
 cerca('pero SÍ sube con la barra de tabs', ejeDeLaFila(412, 96).abajo - ejeDeLaFila(412, 0).abajo, 96);
 
 console.log('\n── ② LA FILA · orden de abajo hacia arriba ──');
-t('sin pendientes ⇒ sólo los cuatro dedos',
-  nodosDeLaFila(p(0, 0, null)).map((n) => n.tipo), ['dedo', 'dedo', 'dedo', 'dedo']);
+/* ⏪ **Estos tests se reescribieron en el lote 0.2.** «Preguntale» dejó de ser
+   el toque del orbe abierto y bajó a la lista como PRIMER nodo. Los del orden
+   viejo no se conservan «por las dudas»: *un gate que sobrevive a la forma que
+   medía queda verde midiendo algo que ya no existe.* */
+t('sin pendientes ⇒ preguntar + los cuatro dedos',
+  nodosDeLaFila(p(0, 0, null)).map((n) => n.tipo), ['preguntar', 'dedo', 'dedo', 'dedo', 'dedo']);
+t('🔴 «Preguntale» es SIEMPRE el primero, pegado al orbe',
+  nodosDeLaFila(p(9, 9, 9))[0].tipo, 'preguntar');
 t('los dedos salen en el orden en que se pasan',
-  nodosDeLaFila(p(0, 0, null)).map((n) => (n.tipo === 'dedo' ? n.indice : -1)), [0, 1, 2, 3]);
-t('con pendientes, las pastillas van PRIMERO (pegadas al orbe)',
+  nodosDeLaFila(p(0, 0, null)).filter((n) => n.tipo === 'dedo').map((n: any) => n.indice), [0, 1, 2, 3]);
+t('el orden completo: orbe · preguntar · pendientes · los cuatro',
   nodosDeLaFila(p(2, 1, null)).map((n) => n.tipo),
-  ['pastilla', 'pastilla', 'dedo', 'dedo', 'dedo', 'dedo']);
-t('y en el orden estable chat → pedidos',
+  ['preguntar', 'pastilla', 'pastilla', 'dedo', 'dedo', 'dedo', 'dedo']);
+t('y las pastillas en el orden estable chat → pedidos',
   nodosDeLaFila(p(2, 1, null)).filter((n) => n.tipo === 'pastilla').map((n: any) => n.clase),
   ['chat', 'pedidos']);
 t('una clase en cero no ocupa lugar en la fila',
-  nodosDeLaFila(p(0, 1, null)).map((n) => n.tipo), ['pastilla', 'dedo', 'dedo', 'dedo', 'dedo']);
+  nodosDeLaFila(p(0, 1, null)).map((n) => n.tipo), ['preguntar', 'pastilla', 'dedo', 'dedo', 'dedo', 'dedo']);
+t('el orbe chico de «Preguntale» mide 36', ORBE_MINI, 36);
 
 console.log('\n── ③ LOS NÚMEROS DICTADOS, contra el LITERAL del encargo ──');
 /* 🔴 **ESTE BLOQUE NACIÓ DE UN ROJO QUE NO SALIÓ.** El control negativo movió
    `SEPARACION` de 12 a 16 y **el arnés siguió verde**: todo el bloque de
-   geometría comparaba contra la propia constante, así que cambiarla cambiaba
-   la vara junto con el objeto. *Un gate que se adapta a lo que mide no mide
-   nada* — es el discriminador tautológico, y sólo lo destapó intentar el rojo.
-   Las relaciones siguen usando las constantes (eso está bien: prueban la
-   FÓRMULA); esto ancla los VALORES al literal que dictó el founder. */
+   geometría comparaba contra la propia constante, así que cambiarla movía la
+   vara junto con el objeto. *Un gate que se adapta a lo que mide no mide
+   nada.* Las relaciones prueban la FÓRMULA; esto ancla los VALORES. */
 t('la separación es 12', SEPARACION, 12);
 t('el dedo mide 48', DEDO, 48);
 t('la pastilla mide 44', PASTILLA, 44);
 t('el aire desde el borde es 20', AIRE_BORDE, 20);
 t('el arco son 60° con 12° de separación', [ARCO_GRADOS, ARCO_SEPARACION], [60, 12]);
+t('el orbe abierto crece a 52 y NO viaja', ORBE_ABIERTO, 52);
 
 console.log('\n── ③bis GEOMETRÍA DE LA FILA · la fórmula (±1 px) ──');
 {
-  const sinP = alturasDeLaFila(p(0, 0, null), 412);
+  const alturas = alturasDeLaFila(p(0, 0, null), 412);
+  const nodos = nodosDeLaFila(p(0, 0, null));
   const eje = ejeDeLaFila(412);
-  cerca('el primer dedo queda a 12 del borde del orbe ABIERTO',
-    sinP[0] - DEDO / 2 - (eje.abajo + ORBE_ABIERTO / 2), SEPARACION);
-  for (let i = 1; i < sinP.length; i++)
-    cerca(`dedo ${i - 1}→${i} separados 12`, sinP[i] - DEDO / 2 - (sinP[i - 1] + DEDO / 2), SEPARACION);
-  cerca('centro a centro entre dedos = 48 + 12', sinP[1] - sinP[0], DEDO + SEPARACION);
+  cerca('el primer nodo queda a 12 del borde del orbe ABIERTO',
+    alturas[0] - nodos[0].alto / 2 - (eje.abajo + ORBE_ABIERTO / 2), SEPARACION);
+  for (let i = 1; i < alturas.length; i++)
+    cerca(`nodo ${i - 1}→${i} separados 12`,
+      alturas[i] - nodos[i].alto / 2 - (alturas[i - 1] + nodos[i - 1].alto / 2), SEPARACION);
 }
 {
-  /* 🔴 EL CASO QUE UNA FÓRMULA POR ÍNDICE ROMPERÍA: la pastilla mide 44 y el
-     dedo 48. Si las alturas se calcularan como `i * paso`, acá aparecerían
-     solapes de 4 px — y un solape de 4 px no se lee como error, se lee como
-     un espaciado descuidado. */
-  const conP = alturasDeLaFila(p(2, 1, null), 412);
-  const eje = ejeDeLaFila(412);
-  cerca('la primera pastilla queda a 12 del orbe abierto',
-    conP[0] - PASTILLA / 2 - (eje.abajo + ORBE_ABIERTO / 2), SEPARACION);
-  cerca('pastilla → pastilla, 12', conP[1] - PASTILLA / 2 - (conP[0] + PASTILLA / 2), SEPARACION);
-  cerca('🔴 pastilla(44) → dedo(48), TAMBIÉN 12',
-    conP[2] - DEDO / 2 - (conP[1] + PASTILLA / 2), SEPARACION);
-  cerca('dedo → dedo, 12', conP[3] - DEDO / 2 - (conP[2] + DEDO / 2), SEPARACION);
+  /* 🔴 EL CASO QUE UNA FÓRMULA POR ÍNDICE ROMPERÍA: acá conviven TRES altos
+     distintos —36 el orbe chico, 44 la pastilla, 48 el dedo—. Con `i * paso`
+     aparecen solapes que no se leen como error: se leen como un espaciado
+     descuidado. */
+  const alturas = alturasDeLaFila(p(2, 1, null), 412);
+  const nodos = nodosDeLaFila(p(2, 1, null));
+  t('la fila mezcla TRES altos distintos', [...new Set(nodos.map((n) => n.alto))].sort(), [36, 44, 48]);
+  for (let i = 1; i < alturas.length; i++)
+    cerca(`🔴 nodo(${nodos[i - 1].alto}) → nodo(${nodos[i].alto}), TAMBIÉN 12`,
+      alturas[i] - nodos[i].alto / 2 - (alturas[i - 1] + nodos[i - 1].alto / 2), SEPARACION);
 }
 t('la fila sube: cada nodo por encima del anterior',
   alturasDeLaFila(p(2, 1, null), 412).every((h, i, a) => i === 0 || h > a[i - 1]), true);
@@ -148,7 +153,8 @@ cerca('…y en el eje vertical', BRASA.cy * 100, 62);
 t('CONTROL NEGATIVO · no está centrada (si lo estuviera, no sería una brasa)',
   BRASA.cx === 0.5 && BRASA.cy === 0.5, false);
 t('el cuerpo en reposo va de la perla al borde LILA, no a un ocre',
-  /coachPerla\b[\s\S]{0,200}coachPerlaBorde/.test(CODIGO), true);
+  /coachPerla\b[\s\S]{0,240}coachClaro[^\n]*LILA_ALFA/.test(CODIGO), true);
+t('🔴 y el token con alpha embebido murió', /coachPerlaBorde/.test(CODIGO), false);
 t('el cuerpo despierto tiene sus tres paradas',
   /coachClaro[\s\S]{0,200}coachMedio[\s\S]{0,200}coachProfundo/.test(CODIGO), true);
 t('el cuerpo se dibuja en SVG, no con un color de fondo',
@@ -189,9 +195,37 @@ for (const w of ANCHOS) {
     anchoEtiqueta(20) <= disponible, true);
 }
 
-console.log('\n── ⑪ EL ORBE ABIERTO ABRE LA HOJA, no cierra la fila ──');
-t('abierta ⇒ su toque llama a `onPreguntar`', /abierta \? onPreguntar : onAbrir/.test(CODIGO), true);
-t('y cerrar sigue siendo el velo', /onPress=\{onCerrar\}/.test(CODIGO), true);
+console.log('\n── ⑪ EL ORBE ABRE Y CIERRA (decisión del founder, lote 0.2) ──');
+/* ⏪ Acá se medía lo contrario: *«abierta ⇒ su toque llama a onPreguntar»*.
+   El founder lo cambió y la mesa lo hizo suyo: **el orbe cambia de cara
+   —perla cerrado, violeta abierto— y ese cambio es lo que enseña a tocarlo.** */
+t('🔴 abierta ⇒ su toque CIERRA', /abierta \? onCerrar : onAbrir/.test(CODIGO), true);
+t('y `onPreguntar` ya NO vive en el orbe', /abierta \? onPreguntar/.test(CODIGO), false);
+t('vive en la fila «Preguntale»', /onPreguntar\(\)/.test(CODIGO), true);
+
+console.log('\n── ⑫ LA CAPA VIOLETA · 0 en reposo, 1 despierta (asertado) ──');
+t('🔴 dormida ⇒ 0', violetaEncendido({ abierta: false, estado: 'dormida' }), 0);
+t('atenta y cerrada ⇒ 0 (tener pendientes no es estar despierto)',
+  violetaEncendido({ abierta: false, estado: 'atenta' }), 0);
+t('🔴 abierta ⇒ 1', violetaEncendido({ abierta: true, estado: 'dormida' }), 1);
+t('hablando, aunque la fila esté cerrada ⇒ 1',
+  violetaEncendido({ abierta: false, estado: 'hablando' }), 1);
+t('despierta ⇒ 1', violetaEncendido({ abierta: false, estado: 'despierta' }), 1);
+t('la pieza la consume (si no, esto mide una función huérfana)',
+  /violetaEncendido\(\{/.test(CODIGO), true);
+t('…y el fundido es el de 250 ms de la casa', /motion\.coach\.fundidoMs/.test(CODIGO), true);
+
+console.log('\n── ⑬ EL MATERIAL, contra lo que Android SÍ dibuja ──');
+/* 🔴 Los dos defectos que sólo el emulador dijo, hechos gate. */
+t('🔴 ningún `stopColor` con rgba: Android le come el alpha',
+  /stopColor=\{[^}]*rgba/.test(CODIGO), false);
+t('las paradas translúcidas usan `stopOpacity`', /stopOpacity=/.test(CODIGO), true);
+t('🔴 el resplandor NO es una sombra de RN (no existe en Android)',
+  /shadowColor|shadowRadius|shadowOpacity/.test(CODIGO), false);
+t('…es un círculo con su propio radial', /coachGlow/.test(CODIGO), true);
+t('el barrido tampoco es una capa de RN encimada',
+  /expo-linear-gradient/.test(CODIGO), false);
+t('el lienzo le da lugar al resplandor', LIENZO >= 2, true);
 
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);

@@ -19,8 +19,20 @@ export const ORBE = 48
 /** El orbe abierto: **crece 4 px y NO se mueve.** *Un orbe que viaja obliga
  *  al ojo a buscarlo; uno que se enciende donde está ya se encontró.* */
 export const ORBE_ABIERTO = 52
-/** El resplandor violeta que da presencia. **Es el único halo en reposo.** */
-export const RESPLANDOR = 24
+/** El lienzo del orbe: **2,2 veces el cuerpo**, con el cuerpo en el centro.
+ *  🔴 **No es holgura: es dónde vive el resplandor.** Un lienzo del tamaño
+ *  del cuerpo recorta el degradé justo donde empieza a existir. */
+export const LIENZO = 2.2
+/** El resplandor: un círculo de **1,5 × el RADIO del cuerpo**, con un radial
+ *  violeta que se disuelve. **No es una sombra** — `shadowRadius` no existe
+ *  en Android y era la mitad de por qué esto no se veía. */
+export const RESPLANDOR_RADIO = 1.5
+/** Su opacidad en el centro. */
+export const RESPLANDOR_ALFA = 0.42
+/** El contorno de la esfera sobre papel blanco: 1 px del mismo lila. */
+export const ANILLO = 1
+/** El borde del cuerpo en reposo: el claro del Coach a esta opacidad. */
+export const LILA_ALFA = 0.35
 /** Cada dedo de la fila. ≥ 44 (Ley 8): el objetivo táctil es el círculo. */
 export const DEDO = 48
 /** La pastilla de un pendiente. **44 y no 36:** la altura visual ES el
@@ -124,13 +136,29 @@ export function anclaOrbe(ancho: number, aireInferior = 0): { izquierda: number;
   return { izquierda: ancho - AIRE_BORDE - ORBE, abajo: AIRE_BORDE + aireInferior }
 }
 
+/** Cuánto hay entre el eje de la fila y el BORDE DERECHO de la pantalla.
+ *  Los nodos se anclan con `right`, así que éste es su origen. */
+export function ejeDesdeDerecha(): number {
+  return AIRE_BORDE + ORBE / 2
+}
+
 /** El eje vertical por el que sube la fila: el centro del orbe. */
 export function ejeDeLaFila(ancho: number, aireInferior = 0): { x: number; abajo: number } {
   const a = anclaOrbe(ancho, aireInferior)
   return { x: a.izquierda + ORBE / 2, abajo: a.abajo + ORBE / 2 }
 }
 
-export type NodoFila = { tipo: 'pastilla'; clase: 'chat' | 'pedidos'; cuenta: number } | { tipo: 'dedo'; indice: number }
+/** El orbe chico de «Preguntale a …»: ya violeta, con su brasa. */
+export const ORBE_MINI = 36
+
+export type NodoFila =
+  /** 🔴 **La primera fila, pegada al orbe (lote 0.2).** Antes «Preguntale»
+   *  era el toque del orbe abierto; el founder lo bajó a la lista: *un mismo
+   *  toque que a veces abre y a veces pregunta enseña a no tocarlo.* Ahora el
+   *  orbe abre y cierra, y preguntar es una fila más. */
+  | { tipo: 'preguntar' }
+  | { tipo: 'pastilla'; clase: 'chat' | 'pedidos'; cuenta: number }
+  | { tipo: 'dedo'; indice: number }
 
 /**
  * Los nodos de la fila, **de abajo hacia arriba**: primero las pastillas de
@@ -144,6 +172,8 @@ export type NodoFila = { tipo: 'pastilla'; clase: 'chat' | 'pedidos'; cuenta: nu
  */
 export function nodosDeLaFila(p: PendientesCoach, cantidadDedos = 4): Array<NodoFila & { alto: number }> {
   const nodos: Array<NodoFila & { alto: number }> = []
+  /* Orden de abajo hacia arriba: orbe · Preguntale · pendientes · los cuatro. */
+  nodos.push({ tipo: 'preguntar', alto: ORBE_MINI })
   for (const q of pastillasDe(p)) nodos.push({ tipo: 'pastilla', clase: q.clase, cuenta: q.cuenta, alto: PASTILLA })
   for (let i = 0; i < cantidadDedos; i++) nodos.push({ tipo: 'dedo', indice: i, alto: DEDO })
   return nodos
@@ -187,6 +217,20 @@ export interface MovimientoCoach {
   barre: boolean
   /** Los nodos entran escalonados. Sin esto, aparecen de una. */
   escalona: boolean
+}
+
+/**
+ * La opacidad de la CAPA VIOLETA: **0 en reposo, 1 despierta.**
+ *
+ * 🔴 **Vive acá para que su gate la pueda asertar.** Adentro del componente
+ * era un ternario en un `useEffect` y la única forma de comprobarlo era
+ * mirar la pantalla — que es justo lo que este lote demostró que no alcanza:
+ * *el violeta ESTABA cableado y no se veía, porque lo tapaba otra capa.*
+ * Separar «¿debe estar encendida?» de «¿se dibuja bien?» hace que la próxima
+ * vez el gate diga cuál de las dos falló.
+ */
+export function violetaEncendido(e: { abierta: boolean; estado: 'dormida' | 'atenta' | 'despierta' | 'hablando' }): 0 | 1 {
+  return e.abierta || e.estado === 'despierta' || e.estado === 'hablando' ? 1 : 0
 }
 
 export function movimientoCoach({ quieta, abierta }: EntornoMovimiento): MovimientoCoach {

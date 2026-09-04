@@ -45,7 +45,7 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
-import { BRASA, RESPLANDOR } from './coach-geometria'
+import { BRASA } from './coach-geometria'
 
 /** El orbe de la cabecera. Más chico que el flotante: acá no es una puerta,
  *  es una firma. */
@@ -98,11 +98,13 @@ export function CabeceraCoach({ nombre, pulsos }: CabeceraCoachProps) {
             width: ORBE_CABECERA,
             height: ORBE_CABECERA,
             borderRadius: radius.full,
-            shadowColor: palette.coachResplandor,
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 1,
-            shadowRadius: RESPLANDOR / 2,
-            elevation: 6,
+            /* ⏪ Acá había `shadowColor` violeta con `shadowRadius`. **En
+               Android eso no existe** —sólo `elevation`, que da una sombra
+               gris— así que el resplandor no se veía tenue: no se veía. La
+               cabecera se queda SIN resplandor a propósito: es una firma
+               dentro de una Hoja, no una presencia flotante sobre contenido,
+               y ahí el glow no tiene trabajo que hacer. */
+            elevation: 0,
           },
           estilo,
         ]}
