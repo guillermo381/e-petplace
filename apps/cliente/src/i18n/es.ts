@@ -90,7 +90,10 @@ export const clienteEs = {
      * fallback que la casa YA usa en `/carnet`. *Se reusa el que existe en vez
      * de inventar una segunda forma de decir lo mismo* (L-175). */
     razonAcuario: '{{mascota}} es un acuario: no lleva vacunas ni antiparasitario.',
-    razonSinPuerta: 'Pronto vas a poder guardar un recuerdo de {{mascota}} desde acá.',
+    /* ☠️ `razonSinPuerta` MURIÓ (lote 0.1): era la razón del dedo «Foto»
+     * mientras no existía su puerta. A la construyó, el dedo se encendió y la
+     * frase se retira en el mismo acto. *Una key sin consumidor es una frase
+     * que alguien va a volver a montar creyendo que rige* (Ley 37). */
     // La hoja corta de §2.5 — sólo con dos mascotas o más.
     elegirMascota: '¿De quién?',
     // 🔴 LAS VOCES DE LAS PASTILLAS — se pasan SIEMPRE, aunque la cuenta sea 0
@@ -112,6 +115,31 @@ export const clienteEs = {
   /* LA PANTALLA DEL ANTIPARASITARIO (S113-C · lote 0). La plaga —pulgas,
    * garrapatas, mosquitos, internos— NO vive acá: llega en el lote 1 con su
    * columna. *Preguntar por algo que la base no guarda es inventar.* */
+  /* UN RECUERDO — lote 0.1 (S113-C). **Este hito NO tiene frase de la casa**:
+   * su voz en la línea de vida es el texto que escribió la familia (firma de
+   * la mesa). Acá viven sólo las voces de la PANTALLA. */
+  recuerdo: {
+    titulo: 'Un recuerdo de {{mascota}}',
+    agregarFoto: 'Agrega una foto',
+    cambiarFoto: 'Cambiar la foto',
+    textoLabel: 'Unas palabras',
+    // La sugerencia es una invitación abierta, no un formulario: quien no
+    // sepa qué escribir tiene que poder cerrar la app sin sentirse en falta.
+    textoPlaceholder: 'Qué pasó…',
+    fechaLabel: 'Cuándo fue',
+    fechaPlaceholder: 'Elige la fecha',
+    fechaFutura: 'Un recuerdo no puede ser de mañana.',
+    guardar: 'Guardar',
+    // La razón del freno: se puede guardar con sólo foto o sólo texto.
+    faltaAlgo: 'Una foto o unas palabras, al menos una.',
+    guardado: 'Guardado en la vida de {{mascota}}',
+    permisoDenegado: 'Necesitamos permiso para abrir la cámara o tus fotos.',
+    // Los rebotes del servidor, una línea cada uno, el formulario intacto.
+    errFoto: 'La foto no se pudo guardar; prueba de nuevo.',
+    errAcceso: 'No tienes acceso a esta mascota.',
+    errSesion: 'Tu sesión no está activa. Inicia sesión de nuevo.',
+    errGenerico: 'No pudimos guardar el recuerdo. Prueba de nuevo.',
+  },
   antiparasitario: {
     titulo: 'Antiparasitario de {{mascota}}',
     productoLabel: 'Producto',

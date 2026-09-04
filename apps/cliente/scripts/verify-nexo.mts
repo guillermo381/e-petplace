@@ -40,6 +40,7 @@ import {
   razonDelDedo,
 } from '../src/lib/nexo/atajos';
 import { avisosSinRespuesta, estadoNexo, hayAlgo, nexoVisibleEn } from '../src/lib/nexo/estado';
+import { cuerpoDelRecuerdo, frenoDelRecuerdo, keyDelRebote, puedeGuardar } from '../src/lib/recuerdo/decidir';
 
 const di = (s: string) => process.stdout.write(s + '\n');
 const CONTROL = process.argv.includes('--control');
@@ -65,6 +66,10 @@ if (clasesConAlgo({ chat: 0, pedidos: 0, avisos: null }).length !== 0) {
 }
 if (clasesConAlgo({ chat: 1, pedidos: 0, avisos: null }).length !== 1) {
   di('ROJO · auto-prueba: pierde una clase viva.');
+  process.exit(2);
+}
+if (typeof frenoDelRecuerdo !== 'function' || frenoDelRecuerdo({ hayFoto: true, texto: '', fecha: '2026-01-01', hoy: '2026-01-01' }) !== null) {
+  di('ROJO · auto-prueba: el freno del recuerdo no deja pasar un caso válido.');
   process.exit(2);
 }
 
@@ -197,12 +202,17 @@ const PERRO = [mascota('thor')];
 const ACUARIO = [mascota('nube', { sujeto: 'acuario', especie: 'pez' })];
 const MIXTO = [mascota('thor'), mascota('nube', { sujeto: 'acuario', especie: 'pez' })];
 
+/* ✅ LOTE 0.1 · **LOS CUATRO DEDOS ESTÁN VIVOS PARA UN INDIVIDUO.** ⏪ Este
+   bloque afirmaba que «Foto» estaba apagado por falta de puerta; A la construyó
+   y el gate se da vuelta en el mismo acto. *Un caso de prueba que sobrevive a
+   su premisa mide el mundo de ayer.* */
 const apagadosIndividuo = ORDEN_DE_PATA.filter((a) => razonDelDedo(a, PERRO) !== null);
-ok('individuo · sólo Foto está apagado, y por falta de puerta', apagadosIndividuo.join(',') === 'foto');
-ok('individuo · la razón de Foto es «sin puerta»', razonDelDedo('foto', PERRO) === 'sin_puerta');
+ok('individuo · NINGÚN dedo apagado', apagadosIndividuo.length === 0, apagadosIndividuo.join(','));
+ok('individuo · Foto está VIVO', razonDelDedo('foto', PERRO) === null);
+ok('acuario · Foto también, el recuerdo no depende del sujeto', razonDelDedo('foto', ACUARIO) === null);
 
 const apagadosAcuario = ORDEN_DE_PATA.filter((a) => razonDelDedo(a, ACUARIO) !== null);
-ok('acuario · DOS dedos atenuados por acuario + Foto', apagadosAcuario.join(',') === 'vacuna,antiparasitario,foto');
+ok('acuario · SÓLO los dos que no aplican', apagadosAcuario.join(',') === 'vacuna,antiparasitario');
 ok('acuario · Vacuna se apaga por acuario', razonDelDedo('vacuna', ACUARIO) === 'acuario');
 ok('acuario · Antiparasitario se apaga por acuario', razonDelDedo('antiparasitario', ACUARIO) === 'acuario');
 ok('acuario · Peso NO se apaga: el motor lo admite', razonDelDedo('peso', ACUARIO) === null);
@@ -272,7 +282,67 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   ok('en el ACTA no se calla nada: no tiene barra de escribir', clasesVisibles(['adoptar', 'acta', '[solicitudId]']).carrito === true);
 }
 
-/* ═══ ⑧ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
+
+/* ═══ ⑨ EL RECUERDO — las tres decisiones de la pantalla, sin React ══════════
+ *
+ * Se llaman **las mismas funciones que corren en pantalla** (`lib/recuerdo/
+ * decidir`), no una réplica. Y es lo que vuelve medible el «cero llamadas» del
+ * encargo: *que el botón no dispare nada sin foto ni texto se puede leer en el
+ * código, pero leer no es medir.*
+ */
+{
+  const HOY = '2026-09-04';
+  const base = { hayFoto: false, texto: '', fecha: HOY, hoy: HOY };
+
+  /* ① SIN FOTO NI TEXTO — razón en pantalla, y el guard dice que NO. */
+  ok('vacío · el freno es «falta algo»', frenoDelRecuerdo(base) === 'faltaAlgo');
+  ok('vacío · NO se puede guardar ⇒ cero llamadas', puedeGuardar(base) === false);
+  ok('vacío · el espacio en blanco no cuenta como texto', frenoDelRecuerdo({ ...base, texto: '   \n ' }) === 'faltaAlgo');
+
+  /* ② SÓLO TEXTO · SÓLO FOTO — las dos alcanzan, que es la firma de la mesa. */
+  ok('sólo texto alcanza', puedeGuardar({ ...base, texto: 'Su primer día en el mar' }) === true);
+  ok('sólo foto alcanza', puedeGuardar({ ...base, hayFoto: true }) === true);
+  ok('las dos juntas también', puedeGuardar({ ...base, hayFoto: true, texto: 'x' }) === true);
+
+  /* ③ FECHA FUTURA — rechazada EN PANTALLA. */
+  ok('mañana se rechaza', frenoDelRecuerdo({ ...base, texto: 'x', fecha: '2026-09-05' }) === 'fechaFutura');
+  ok('mañana NO se puede guardar', puedeGuardar({ ...base, texto: 'x', fecha: '2026-09-05' }) === false);
+  ok('hoy sí', puedeGuardar({ ...base, texto: 'x', fecha: HOY }) === true);
+  ok('ayer también: un recuerdo es del pasado', puedeGuardar({ ...base, texto: 'x', fecha: '2026-09-03' }) === true);
+
+  /* 🔴 EL ORDEN DE LAS DOS PREGUNTAS: con el formulario recién abierto —vacío y
+     con hoy— la razón tiene que ser la del primer paso que falta. */
+  ok(
+    'vacío Y con fecha futura ⇒ manda «falta algo», no la fecha',
+    frenoDelRecuerdo({ ...base, fecha: '2026-09-05' }) === 'faltaAlgo',
+  );
+
+  /* ④ EL CUERPO QUE VIAJA — un texto vacío NO viaja. */
+  const soloFoto = cuerpoDelRecuerdo({ mascotaId: 'm1', texto: '   ', fotoPath: 'u/f.jpg', fecha: HOY });
+  ok('sólo foto · el texto vacío NO viaja', !('texto' in soloFoto), JSON.stringify(soloFoto));
+  ok('sólo foto · el path sí', soloFoto.fotoPath === 'u/f.jpg');
+
+  const soloTexto = cuerpoDelRecuerdo({ mascotaId: 'm1', texto: '  Su primer día  ', fecha: HOY });
+  ok('sólo texto · no viaja fotoPath', !('fotoPath' in soloTexto), JSON.stringify(soloTexto));
+  ok('sólo texto · viaja recortado', soloTexto.texto === 'Su primer día');
+  ok('la fecha viaja siempre', soloTexto.fecha === HOY && soloFoto.fecha === HOY);
+  ok('la mascota viaja siempre', soloTexto.mascotaId === 'm1');
+
+  /* ⑤ LOS REBOTES — una línea cada uno, y el vacío comparte key con el freno. */
+  ok('recuerdo_vacio comparte key con el freno de pantalla', keyDelRebote('recuerdo_vacio') === 'recuerdo.faltaAlgo');
+  ok('foto_invalida tiene la suya', keyDelRebote('foto_invalida') === 'recuerdo.errFoto');
+  ok('fecha_futura comparte key con el freno de pantalla', keyDelRebote('fecha_futura') === 'recuerdo.fechaFutura');
+  ok('sin_acceso_mascota', keyDelRebote('sin_acceso_mascota') === 'recuerdo.errAcceso');
+  ok('acceso_denegado', keyDelRebote('acceso_denegado') === 'recuerdo.errAcceso');
+  ok('error_desconocido cae al genérico', keyDelRebote('error_desconocido') === 'recuerdo.errGenerico');
+  /* 🔴 Y el ensanche del ResultadoWrapper, que el compilador ya cobró una vez:
+     un código que el enum del wrapper no nombra tiene que caer al genérico y no
+     romper. */
+  ok('datos_inconsistentes cae al genérico', keyDelRebote('datos_inconsistentes') === 'recuerdo.errGenerico');
+  ok('un código inventado cae al genérico', keyDelRebote('lo_que_sea') === 'recuerdo.errGenerico');
+}
+
+/* ═══ ⑩ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
 
 const inst = (i18next as any).createInstance();
 await inst.init({
@@ -300,10 +370,12 @@ for (const idioma of ['es', 'en'] as const) {
   const conMascota = [
     'antiparasitario.titulo',
     'antiparasitario.anotado',
-    /* 🔴 Las razones de los dedos atenuados NOMBRAN a la mascota (firma de la
-       mesa): ni «próximamente» ni «en construcción». */
-    'nexo.razonSinPuerta',
+    /* 🔴 La razón del dedo atenuado NOMBRA a la mascota (firma de la mesa):
+       ni «próximamente» ni «en construcción». */
     'nexo.razonAcuario',
+    /* Lote 0.1 · las dos voces de la pantalla del recuerdo que llevan nombre. */
+    'recuerdo.titulo',
+    'recuerdo.guardado',
   ];
   for (const k of conMascota) {
     const s = t(k, { mascota: 'Thor' });
@@ -324,6 +396,16 @@ for (const idioma of ['es', 'en'] as const) {
   const planas = [
     'nexo.dedoPeso', 'nexo.dedoVacuna', 'nexo.dedoAntiparasitario', 'nexo.dedoFoto',
     'nexo.elegirMascota', 'nexo.cerrar', 'alta.tuMascota',
+    /* Lote 0.1 · la pantalla del recuerdo, entera. */
+    'recuerdo.agregarFoto', 'recuerdo.cambiarFoto', 'recuerdo.textoLabel',
+    'recuerdo.textoPlaceholder', 'recuerdo.fechaLabel', 'recuerdo.fechaPlaceholder',
+    'recuerdo.fechaFutura', 'recuerdo.guardar', 'recuerdo.faltaAlgo',
+    'recuerdo.permisoDenegado', 'recuerdo.errFoto', 'recuerdo.errAcceso',
+    'recuerdo.errSesion', 'recuerdo.errGenerico',
+    /* Y las cinco razones de la SUBIDA, que se reusan de `carnet.*`: si alguna
+       se retira de allá, este gate lo dice antes que una pantalla muda. */
+    'carnet.subidaLecturaLocal', 'carnet.subidaArchivoGrande', 'carnet.subidaMime',
+    'carnet.subidaPolicy', 'carnet.subidaRed',
     'nexo.vozChatUna', 'nexo.vozCarritoUno',
     'antiparasitario.tipoInterna', 'antiparasitario.tipoExterna', 'antiparasitario.tipoMixta',
     'antiparasitario.guardar', 'antiparasitario.errProducto', 'antiparasitario.errFechaFutura',
@@ -373,6 +455,7 @@ if (CONTROL) {
     ['una ruta cualquiera SÍ es visible (el guard no apaga todo)', nexoVisibleEn(['hogar']) === true],
     ['memorial NO monta presencia', montaPresencia({ modo: 'ninguna' }) === false],
     ['individuo NO apaga vacuna', razonDelDedo('vacuna', [mascota('t')]) === null],
+    ['Foto ya no se apaga por falta de puerta', razonDelDedo('foto', [mascota('t')]) === null],
     ['un i18next sin el valor DEJA la llave cruda — la premisa del gate sigue viva',
       String(inst.t('cliente:nexo.almohadilla')).includes('{{nombre}}')],
   ];
