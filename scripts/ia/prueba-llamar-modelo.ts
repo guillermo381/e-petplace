@@ -95,7 +95,23 @@ console.log('\n== 1 · VERDE json + control cruzado de tokens ==')
     cap.filas[0]?.tokens_entrada === 1234 && cap.filas[0]?.tokens_salida === 56,
     { e: cap.filas[0]?.tokens_entrada, s: cap.filas[0]?.tokens_salida })
   exigir('pieza y edge medidos', cap.filas[0]?.pieza === 'documento' && cap.filas[0]?.edge === 'extract-documento', cap.filas[0]?.edge)
-  exigir('costo NULL (E no entregó precios)', cap.filas[0]?.costo_estimado_usd === null, cap.filas[0]?.costo_estimado_usd)
+  /* 🔴 ESTE ASSERT SE DIO VUELTA, y la razón importa (S113-A).
+     D lo escribió como `costo === null` con el motivo entre paréntesis:
+     «E no entregó precios». **E los entregó**, así que el assert estaba
+     codificando un ESTADO TEMPORAL como si fuera un invariante — y el día
+     que el estado cambió, el gate se puso rojo sobre código correcto.
+     *Un assert que describe una ausencia caduca cuando la ausencia se llena.*
+
+     La versión nueva no dice «es un número»: exige **la aritmética exacta**,
+     que es lo que de verdad hay que proteger. Con el `usage` de esta sonda
+     (1234 entrada / 56 salida) y la tabla de E para `claude-sonnet-5`
+     ($2 y $10 por millón), el costo es
+       1234 × 2/1e6  +  56 × 10/1e6  =  0,002468 + 0,00056 = 0,003028
+     Si alguien mueve un precio o invierte entrada con salida, esto lo caza. */
+  const costoEsperado = (1234 * 2) / 1e6 + (56 * 10) / 1e6
+  exigir(`costo = ${costoEsperado} (usage × tabla de E)`,
+    Math.abs((cap.filas[0]?.costo_estimado_usd ?? -1) - costoEsperado) < 1e-9,
+    cap.filas[0]?.costo_estimado_usd)
   exigir('latencia es número', typeof cap.filas[0]?.latencia_ms === 'number')
   const claves = Object.keys(cap.filas[0] ?? {}).sort().join(',')
   exigir('CERO dato personal: sólo las columnas del contrato',
