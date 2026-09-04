@@ -1104,8 +1104,8 @@ export {
   type ClaseCoach,
 } from './components/PresenciaCoach'
 export { CabeceraCoach, type CabeceraCoachProps } from './components/CabeceraCoach'
-/* 🔴 **LA GEOMETRÍA NO SE EXPORTA, Y NO ES UN OLVIDO.** `ORBE`, `HALO`,
-   `DEDO`, `POSICIONES_DEDOS` y sus funciones son **la forma de la pieza**, y
+/* 🔴 **LA GEOMETRÍA NO SE EXPORTA, Y NO ES UN OLVIDO.** `ORBE`, `DEDO`,
+   `PASTILLA`, `SEPARACION` y sus funciones son **la forma de la pieza**, y
    la Ley 8 es literal: *el valor vive en la pieza; ningún consumidor la
    re-decide.* Una pantalla que pudiera leer `ORBE` para calcular su propio
    layout estaría fijando por su cuenta un número que el founder puede mover

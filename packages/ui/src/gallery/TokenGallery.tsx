@@ -184,27 +184,23 @@ import type { ThemeMode } from '../themes'
  * existe para hacer bien —*un botón apagado sin razón a la vista es el
  * defecto*— y el que hay que poder ver de un vistazo. */
 const ATAJOS_COACH_DEMO = [
+  /* De abajo hacia arriba, en el orden que dictó el founder sobre el
+     aparato: Peso · Vacuna · Antiparasitario · Foto. */
   { id: 'peso', icono: 'peso', etiqueta: 'Peso', onPress: () => {} },
-  { id: 'antiparasitario', icono: 'antiparasitario', etiqueta: 'Antipulgas', razonApagado: 'Thor todavía no tiene una fecha de desparasitación cargada' },
-  { id: 'foto', icono: 'foto', etiqueta: 'Foto', onPress: () => {} },
-  /* ✅ **ACÁ SE VE LA REGLA NUEVA, Y ES EL CASO QUE LA MESA NOMBRÓ.**
-     `vacuna` es un glifo de CAPA y lleva huella en toda la app — pero adentro
-     de un dedo es un ACTO, así que se dibuja como control. *El mismo glifo,
-     dos roles según dónde esté.*
-     ⏪ Acá vivía una advertencia: el cuarto atajo era `carnet`, llevaba su
-     huella entre tres que no la llevaban, y este comentario decía *«si al
-     founder le salta, la salida es que el cuarto también sea un acto»*. **Le
-     saltó, y la salida fue mejor que la prevista:** no hubo que cambiar el
-     cuarto atajo — el montaje pasó a decidir, y ahora cualquiera de los
-     cuatro puede ser un glifo de capa sin romper la fila. */
+  /* ✅ **`vacuna` es el caso que la mesa nombró:** glifo de CAPA, lleva su
+     huella en toda la app — y adentro de un nodo de la fila es un ACTO, así
+     que se dibuja como control. *El mismo glifo, dos roles según dónde
+     esté.* */
   { id: 'vacuna', icono: 'vacuna', etiqueta: 'Vacuna', onPress: () => {} },
+  { id: 'antiparasitario', icono: 'antiparasitario', etiqueta: 'Antiparasitario', razonApagado: 'Todavía no hay una fecha de desparasitación cargada' },
+  { id: 'foto', icono: 'foto', etiqueta: 'Foto', onPress: () => {} },
 ] as const
 /* La voz la compone la pantalla (Ley 3): la pieza no arma frases. */
 const VOZ_COACH_DEMO = {
   preguntar: 'Preguntale al Coach',
   orbe: 'Coach · tenés 3 pendientes',
   chat: 'Chat · 2',
-  pedidos: 'Pedido · 1',
+  pedidos: 'Carrito · 1',
   cerrar: 'Cerrar',
 }
 
@@ -4635,7 +4631,7 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        <Seccion titulo="PresenciaCoach (S113) — el Coach, dormido y atento">
+        <Seccion titulo="PresenciaCoach (S113 · lote 0.1) — el Coach, dormido y atento. La huella murió: ahora la fila sube por el eje del orbe, que NO se mueve">
           {/* ⚠️ **CATÁLOGO, NO GATE.** Las láminas de galería se abolieron como
               vara de aprobación (`L-478`): esta pieza **se valida en la app, por
               OTA**, sobre un teléfono. Lo que la sección hace es lo que `R17`

@@ -631,18 +631,39 @@ export const palette = {
   coachMedio:    '#9E3AFF',  // = violet · el cuerpo despierto y los arcos de aviso
   coachProfundo: '#7C2DD4',  // = violetDark · la letra del nombre sobre papel (AA)
 
-  /** El halo del orbe dormido: 45 % del claro (§2.1). Fino, no un aura. */
-  coachHalo:        'rgba(174,89,255,.45)',
+  /* ☠️ **ACÁ VIVÍA `coachHalo` — el aro fino del orbe dormido, al 45 %.**
+     Murió en el lote 0.1 con la línea base: *en reposo el halo es el
+     RESPLANDOR, y nada más.* Se retira en el mismo commit que su último
+     consumidor (Ley 37) — **un token sin consumidores no es inofensivo: es
+     una opción que el próximo va a creer vigente.** */
   /** El resplandor que le da presencia sin agrandarla: 42 % (§2.1). */
   coachResplandor:  'rgba(158,58,255,.42)',
-  /** La perla dormida. **No es `white`:** una esfera blanca pura sobre
-   *  papel blanco no es una esfera, es un agujero. Éste es el blanco de
-   *  la casa con el calor del papel adentro, que es lo que la deja leerse
-   *  como material y no como recorte. */
-  coachPerla:       '#FFFDFA',
-  /** La brasa de adentro — cálida, chica y quieta. El brillo interior de
-   *  §2.1 sale de interpolar esto hacia `coachPerla`. */
+  /* ── EL CUERPO EN REPOSO: BLANCO CON LILA ────────────────────────────
+   * ⏪ **Acá había un `#FFFDFA` con esta razón: *«no es `white`: una esfera
+   * blanca pura sobre papel blanco no es una esfera, es un agujero»*.
+   * 🔴 **La razón era correcta y la cura era la equivocada** — y el teléfono
+   * lo dijo: *el orbe se leía OCRE.* Dos causas, y la segunda es la que
+   * importa: (a) el blanco cálido separaba poco, y (b) **la brasa ocupaba
+   * el 54 % del radio**, o sea más de la mitad del cuerpo. *Un degradé que
+   * va de ocre a casi-blanco a lo largo de medio cuerpo no es una brasa
+   * adentro: es un orbe ocre.*
+   * **Lo que separa la esfera del papel ahora es el BORDE LILA y el
+   * resplandor**, no el tinte del centro — por eso el centro puede ser
+   * blanco puro y leerse como esfera igual. */
+
+  /** El centro del cuerpo en reposo. Blanco, sin calentar. */
+  coachPerla:       '#FFFFFF',
+  /** El borde del cuerpo: el claro del Coach al 35 %. **Esto es lo que
+   *  hace que sea una esfera y no un recorte** — el degradé del blanco a
+   *  este lila es la curvatura. */
+  coachPerlaBorde:  'rgba(174,89,255,.35)',
+  /** La brasa de adentro — cálida, **chica** y quieta: como mucho el 40 %
+   *  del diámetro (§2), corrida a 56/62 %. Su gate la mide en el SVG. */
   coachBrasa:       'rgba(255,214,150,.72)',
+  /** El fin del degradé de la brasa. **Transparente y no blanco:** con un
+   *  blanco opaco la brasa dejaría un halo claro con borde visible sobre
+   *  el lila; así se disuelve en lo que haya debajo. */
+  coachBrasaFin:    'rgba(255,214,150,0)',
   /** El velo de la huella: **el mismo tinte que `scrim`**, la dosis que
    *  pidió el encargo (42 %). No es un gris nuevo: es la tinta de la casa
    *  con otra cantidad. */

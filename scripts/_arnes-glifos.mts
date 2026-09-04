@@ -54,7 +54,14 @@ function glifo(nombre: string) {
   const largo = paths.reduce((a, d) => a + largoPath(d), 0) + circulos.reduce((a, r) => a + 2 * Math.PI * r, 0);
   return {
     largo,
-    trazos: (cuerpo.match(/<Path|<Circle/g) ?? []).length,
+    /* 🔴 **SUBPATHS, NO NODOS JSX.** Contar `<Path>` medía el ARCHIVO, no el
+       dibujo: dos trazos metidos en un mismo `d` bajaban el número sin
+       quitar una línea de la pantalla ⇒ **el conteo se podía «arreglar»
+       uniendo strings.** Un instrumento que se puede satisfacer sin tocar
+       el dibujo no está midiendo el dibujo. Cada `M` abre un trazo. */
+    trazos:
+      [...cuerpo.matchAll(/d="([^"]+)"/g)].reduce((a, m) => a + (m[1].match(/[Mm]/g) ?? []).length, 0) +
+      (cuerpo.match(/<Circle/g) ?? []).length,
     huella: /<Huella/.test(cuerpo),
     /** El aire que queda DENTRO del círculo más chico, a 21 px. Ley 9. */
     interiorMin: circulos.length ? Math.min(...circulos.map((r) => (2 * r - TRAZO) * (GATE / GRILLA))) : null,

@@ -1480,30 +1480,33 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
-  /* ── PESO · LA BALANZA DE PLATAFORMA, DE FRENTE (S113-B) ────────────────
-   *  Dictado del founder: *«una balanza de plataforma vista de frente, no
-   *  barras»*. **Las barras eran el préstamo de `datos`**, que dice
-   *  «estadística» — y el peso de una mascota no es una estadística: es una
-   *  medición del cuerpo, una sola, hoy.
+  /* ── PESO · LA BALANZA DE DOS PLATOS (S113-B, 2ª forma) ─────────────────
+   *  ⏪ **La primera forma era una balanza de PLATAFORMA de frente —dial,
+   *  columna, plataforma y dos patas— y el founder la vio en el teléfono:
+   *  *«no se entiende»*.** El riesgo estaba declarado en su propio
+   *  comentario (*«a 21 px un disco sobre una columna puede leerse como
+   *  termómetro o lámpara de pie»*) y se cobró. **Lo que falló no fue el
+   *  dibujo: fue la metáfora.** Una balanza de plataforma moderna es un
+   *  rectángulo con números — sin números no queda nada que la distinga; la
+   *  de dos platos **es reconocible por su SILUETA**, que es lo único que
+   *  sobrevive a 21 px. *Se declara porque la lección no es «quedó feo»: es
+   *  que el gate a 21 px mide la silueta, y una silueta que necesita su
+   *  esfera para leerse ya perdió.*
    *
-   *  Anatomía: dial + aguja + columna + plataforma + dos patas.
-   *  **Medido: 46,3 de trazo contra los 46,4 de `vacuna`** (largo total de
-   *  path sobre la grilla 24; instrumento en `_arnes-glifos.mts`).
-   *  **El dial a 21 px deja 4,64 px de interior** ⇒ Ley 9 holgada.
-   *
-   *  ⚠️ **RIESGO DECLARADO:** a 21 px un disco sobre una columna puede
-   *  leerse como **termómetro** o como **lámpara de pie**. Lo que lo salva
-   *  son las DOS PATAS abiertas —un termómetro no las tiene y una lámpara
-   *  tiene una— y la plataforma ancha, que es lo único donde se para algo.
-   *  *Si el gate lo lee mal, el ajuste es abrir más las patas, no agrandar
-   *  el dial: el problema sería la base, no la cabeza.* */
+   *  Anatomía: fiel · mástil · base · dos platos que bajan su propia cuerda.
+   *  **Medido: 46,1 de trazo y 5 trazos, contra los 46,4 y 5 de `vacuna`.**
+   *  Sin `<Circle>`: los platos son ARCOS, así que este glifo no tiene
+   *  interior redondo que medir — y su gate lo dice en vez de callarlo. */
   peso: ({ tinta }) => (
     <>
-      <Circle cx={12} cy={7.6} r={3.6} {...trazo(tinta)} />
-      <Path d="M12 7.6 13.9 5.9" {...trazo(tinta)} />
-      <Path d="M12 11.2v4" {...trazo(tinta)} />
-      <Path d="M6.8 15.2h10.4" {...trazo(tinta)} />
-      <Path d="M8.6 15.2 7.6 18.4M15.4 15.2l1 3.2" {...trazo(tinta)} />
+      {/* fiel · mástil · base */}
+      <Path d="M6 8h12" {...trazo(tinta)} />
+      <Path d="M12 8v9" {...trazo(tinta)} />
+      <Path d="M8.6 17h6.8" {...trazo(tinta)} />
+      {/* Cada plato baja su cuerda y abre el arco en UN SOLO trazo — dos
+          trazos por plato daban 7 y la casa vive en 5. */}
+      <Path d="M6 8v1.6a2.4 2.4 0 0 0 4.8 0" {...trazo(tinta)} />
+      <Path d="M18 8v1.6a2.4 2.4 0 0 0-4.8 0" {...trazo(tinta)} />
     </>
   ),
 
