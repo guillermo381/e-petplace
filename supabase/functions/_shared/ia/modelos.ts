@@ -48,30 +48,64 @@ export const EDGES: Record<Pieza, string> = {
 }
 
 /**
- * ⚠️ TIMEOUT POR PIEZA — **ESTOS NÚMEROS NO ESTÁN MEDIDOS Y SE DECLARA.**
+ * TIMEOUT POR PIEZA — **MEDIDOS CONTRA EL PROVEEDOR REAL (S113-A, 3-sep-2026).**
  *
- * Hoy las cuatro edges corren **sin timeout ninguno** (medido: cero
- * `AbortController`, cero `signal` en las cuatro). O sea que el número de
- * abajo no reemplaza a otro número: reemplaza a *no tener ninguno*.
+ * D los dejó estimados y lo declaró: no tenía credencial. La llave vive en los
+ * secrets del proyecto (`ANTHROPIC_API_KEY`) y sólo la ven las edges, así que
+ * la medición se hizo **llamando a las cuatro edges desplegadas** con entradas
+ * reales, y el número es la **latencia de pared de la ida y vuelta completa**
+ * (incluye red y el base64 subiendo) — o sea un TECHO del tiempo del modelo,
+ * no su tiempo exacto. El exacto lo va a decir `ia_uso.latencia_ms` cuando E
+ * cree la tabla.
  *
- * Por qué no pude medirlo: la latencia real sólo se conoce llamando al
- * proveedor, y **en esta pista no hay credencial de Anthropic** (medido:
- * `ANTHROPIC_API_KEY` no está en env, no está en keychain, y `ant` no está
- * instalado). Estimar una latencia sería justo el modo de falla que esta
- * sesión persigue.
+ * ── EL MURO, citado y no recordado ────────────────────────────────────────
+ * `supabase.com/docs/guides/functions/limits`: wall clock **150 s en Free**,
+ * **400 s en planes pagos**, y **request idle timeout 150 s en TODOS**.
+ * ⚠️ **El plan de este proyecto NO se pudo medir**: ni `supabase projects
+ * list` ni `orgs list` lo exponen. **No se infiere** ⇒ rige el piso de 150 s,
+ * que además es el idle timeout en todos los planes.
  *
- * Cómo se destraba, con su bloqueante nombrado: la columna `latencia_ms` de
- * `ia_uso` — que este mismo lote empieza a escribir — da la distribución real.
- * **E fija estos números con percentil en el lote 1.** Hasta entonces son un
- * techo deliberadamente holgado, elegido para que no corte nada que hoy
- * funciona: las dos piezas con `max_tokens` 16000 piensan más y llevan el
- * doble.
+ * ── LO MEDIDO, y la regla aplicada (2× la latencia, subido a múltiplo de 10 s,
+ *    siempre por debajo del muro) ──────────────────────────────────────────
+ *
+ *   pieza          entrada real                    medido      2×      queda
+ *   carnet         carnet de vacunas real, 320 kB  85.132 ms  170 s   140 s 🔴
+ *   nota_clinica   dictado de consulta, 1.688 ch   15.564 ms   40 s    40 s
+ *   presencia      2 hechos + 1 respuesta           3.038 ms   10 s    10 s
+ *   documento      —                                    (ver abajo)     60 s
+ *
+ * 🔴 **`carnet` NO PUEDE cumplir la regla, y se dice:** su doble son 170 s y
+ * el muro son 150 s. **Un timeout por encima del muro es ficción** — la
+ * plataforma corta primero y el cliente nunca llega a ver el suyo. Se fija en
+ * **140 s**, bajo el muro con 10 s de margen. *Y el número deja una
+ * advertencia: 85 s de latencia real contra 150 s de muro es poco aire; si el
+ * p95 sube, esa pieza empieza a morir por plataforma y no por timeout.*
+ *
+ * ⚠️ **`documento` NO tiene medición representativa y por eso NO se movió.**
+ * La única imagen real disponible era un carnet de vacunas (`prestador_docu-
+ * mentos` tiene 0 filas con archivo), y la edge —correctamente— devolvió los
+ * tres campos en null en 2.370 ms. *Ese número puede ser la lectura real de la
+ * imagen o un corto circuito del modelo al no encontrar un documento, y desde
+ * afuera no se distingue.* Aplicar la regla a una medición inválida da un
+ * número equivocado **con la autoridad de una medición**, así que se conserva
+ * el techo holgado de D: un timeout largo de más sólo cuesta espera; uno corto
+ * de más rompe algo que funciona.
+ *
+ * 🔴 **LA MEDICIÓN QUE SALVÓ UN NÚMERO MALO, registrada:** el primer dictado
+ * de prueba era un párrafo y dio 4.510 ms ⇒ la regla habría fijado **10 s**.
+ * Con un dictado realista de consulta completa dio **15.564 ms**: ese timeout
+ * habría cortado TODA consulta de verdad. *La regla estaba bien; la magnitud
+ * medida estaba mal, y una muestra no representativa se lee igual que una
+ * buena.*
+ *
+ * **E los reemplaza con percentil sobre `latencia_ms` en el lote 1.** Hasta
+ * entonces, estos números no reemplazan a otros: reemplazan a *ninguno*.
  */
 export const TIMEOUT_MS: Record<Pieza, number> = {
-  carnet: 120_000,
+  carnet: 140_000,
   documento: 60_000,
-  nota_clinica: 120_000,
-  presencia: 60_000,
+  nota_clinica: 40_000,
+  presencia: 10_000,
 }
 
 /**
