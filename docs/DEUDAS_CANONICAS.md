@@ -3263,6 +3263,134 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1028` 🟡 Mi discriminador de OTA no ve el `package.json` de la raíz
+
+**Nace:** S113-A, 4-sep-2026, corriendo el discriminador del candidato 0.3.
+**Dueño: A** (es mi instrumento).
+
+El discriminador pregunta *«¿tocó dependencias?»* con
+`git diff --name-only <ancla>..HEAD -- '**/package.json' 'pnpm-lock.yaml'`.
+**`**/package.json` no matchea `package.json` del tope** — matchea los de
+`apps/*` y `packages/*` y nada más. Este lote tocó el de la raíz (el script del
+gate de C) y **el discriminador devolvió `0`**.
+
+**El veredicto se sostuvo igual, pero por la razón equivocada:** abrí el diff a
+mano y la única línea es `"verify:pide-en-memorial": …` — **un script, no una
+dependencia**. *O sea que acerté porque miré, no porque el instrumento midiera.*
+
+⚠️ **Y su modo de falla es el peor:** un `0` **se lee como «no tocó nada»**. El
+día que alguien agregue una dependencia en la raíz, este discriminador va a
+decir que el candidato es OTA-elegible **y el bundle va a pedir un módulo que el
+binario no tiene** — que es exactamente `D-1017`, el crash del prestador de este
+mismo lote.
+
+**Cura:** agregar `'package.json'` al pathspec. **Su rojo antes de cablearse:**
+se prueba tocando la raíz y exigiendo que el conteo **suba**; hoy da `0` con la
+raíz tocada, y ése es su rojo actual, ya producido.
+
+### `D-1024` 🔴 `verify:pide-en-memorial` es ciego al imperativo con enclítico — o sea, a la voz de la casa
+
+**Nace:** S113-A, 4-sep-2026, probándole el rojo al gate nuevo de C. **Dueño: C.**
+
+**El hecho.** El gate da **verde** y la pantalla de una mascota fallecida dice
+**«Cárgalo con una foto y guardamos sus vacunas.»** (`perfil.carnetVacioDetalle`,
+montada en `[mascotaId].tsx:1423`).
+
+**Dos causas, y hacen falta las dos para que pase:**
+
+① **La frase no está guardada.** Cuelga de `monta.vacunas`, que sale de
+`composicionDe(mascota.sujeto)` — **del SUJETO, no del estado de vida**. Nunca
+vio un `esMemorial`.
+
+② **Y el gate no la ve.** Su regex es
+`\b(registr|carg[aá]|reserv|agend|agreg|cambi|cont[aá]nos|cu[eé]ntanos|sub[ií]|complet)`:
+acepta el acento en la **segunda** vocal. El imperativo español **con enclítico
+corre el acento a la primera** y se cae entero. Medido:
+
+| frase | el gate |
+|---|---|
+| `Cargá su carnet` · `Cargalo` · `Registralo` · `Subilo` | MATCH |
+| **`Cárgalo`** · `Regístralo` · `Súbelo` · `Anótalo` · `Compártelo` | **CIEGO** |
+
+**Lo que lo vuelve grave y no anecdótico:** las que matchean son **voseo**; las
+ciegas son **tuteo con enclítico** — *el registro que esta casa firmó como su
+voz* («es TUTEO NEUTRO», regla de la casa desde S51). **El gate ve el dialecto
+que no usamos y es ciego al que usamos.**
+
+⚠️ **Y el enclítico ya era candidata de lección desde S77.** Hoy se cobró
+adentro de un gate escrito para no dejar pasar exactamente esto. *Una candidata
+sin firmar no protege de nada: es un texto que alguien leyó una vez.*
+
+**Cura:** que el corpus de verbos se arme del **lema** y no de la grafía —o que
+la comparación normalice acentos antes de aplicar la regex—, y que
+`carnetVacioDetalle` cuelgue de `esMemorial` como el resto.
+
+**Su rojo antes de cablearse (`L-459`):** la cura se prueba dejando
+`Cárgalo…` **sin guardar** y exigiendo que el gate **la nombre**. *Curar sólo la
+frase y no la regex deja el próximo `Súbelo` entrando por la misma puerta* — es
+media cura, y la casa ya sabe cómo termina.
+
+### `D-1025` 🟠 El disco de una mascota fallecida abre sobre el vacío
+
+**Nace:** S113-A, 4-sep-2026, emulador Android, cuenta `guillo381+8`. **Dueño: C.**
+
+**Medido con dos instrumentos** (`text` y `content-desc` del árbol de
+accesibilidad), **con control positivo**:
+
+| | Zeus (vivo) | Bruma / Sombra (`fallecida`) |
+|---|---|---|
+| el abanico | **5 actos** (Foto · Antiparasitario · Vacuna · Peso · Pregúntale a Nexo) | **vacío** |
+| el orbe | violeta, con Coach | ámbar, sin Coach ✅ |
+| voz de reemplazo | — | **ninguna** |
+
+✅ Que **no haya verbos es correcto**. 🔴 Lo que falta es que **algo ocupe su
+lugar**: hoy se toca el orbe, la pantalla se atenúa y **no aparece nada**; el
+árbol trae `Cerrar` y ningún acto. *Un disco que abre sobre el vacío es peor que
+uno apagado: el apagado no promete nada, y éste promete y no cumple.*
+
+**La voz que se espera EXISTE y vive en otra pieza:** `burbuja.abanico` = «Lo
+que te espera», consumida en `(tabs)/_layout.tsx:165` por la **burbuja del
+shell** — no por el orbe del perfil. ⚠️ **Reusar la key sin más sería
+trasplantar un criterio correcto a otra pregunta** (`D-976`): la burbuja del
+shell cuenta pendientes de mensajería y carrito; el orbe del perfil habla de UNA
+mascota. **La voz de memorial se decide, no se copia.**
+
+### `D-1026` 🟠 Las dos mascotas fallecidas cuentan un pendiente que sus filas no tienen
+
+**Nace:** S113-A, 4-sep-2026. **Dueño: C** (la lib es suya). **Y lo dijo la app,
+no yo.**
+
+En el log de Metro, en cada carga del hogar:
+`[pendientes] Bruma: las filas dicen 0 y la lib 1. Nació una clase de fila que
+lib/pendientes.ts no conoce.` — **igual para Sombra.** En la tira del hogar
+**las dos llevan el globo ámbar «1»**.
+
+En el perfil de Sombra la fila es visible: **«Paseos en grupo · Sin responder»**
+(`identidad`, 5 filas contra las 4 de Bruma).
+
+**Lo bueno primero:** *el guard de divergencia existe, corrió y acertó.* Lo que
+falta no es el instrumento: es que alguien lea su salida. **Un `WARN` que nadie
+lee es un rojo apagado.**
+
+**Las dos preguntas, en orden:** ① ¿`lib/pendientes.ts` debe aprender esa clase
+de fila, o ② una mascota fallecida **no debería tener pendientes de ninguna
+clase**? *Son dos curas distintas y la segunda es de producto* — si es la
+segunda, el filtro va donde ya vive `esMemorial`, y el globo «1» de la tira se
+apaga solo.
+
+### `D-1027` 🟡 La sonda `p0c` se dibuja en producción, sin `__DEV__`
+
+**Nace:** S113-A, 4-sep-2026, viéndola en la pantalla de una mascota fallecida.
+**No es de este lote:** viene de `7f9819b9` (D-728). **Dueño: quien cierre D-728.**
+
+`[mascotaId].tsx:2033` renderiza `«p0c · esta pantalla pidió todo N vez/veces»`
+en el pie del perfil, en voz de dato y **sin ningún guard de entorno**. Su
+comentario dice *«se retira con D-726»* — pero mientras tanto **la ve el
+usuario**, y hoy la vi en el perfil de una mascota que se murió.
+
+*El instrumento es bueno y su lugar es el log, no la pantalla.* Un `__DEV__`
+alrededor cuesta una línea y no le quita nada a la medición.
+
 ### `D-1023` 🟠 P4 del censo se movió 2 → 3 en la BASE sin que ninguna migración tocara roles
 
 **Nace:** S113-A, 4-sep-2026, corriendo los gates del candidato 0.3. **Dueño: E**
