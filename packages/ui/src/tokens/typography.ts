@@ -71,6 +71,16 @@ export const typography = {
      N1 no los nombra, y mover lo que la letra no pide es inventar. */
   size: {
     xs:    11,
+    /** 🔴 **LA ETIQUETA DE UN CONTROL (S113-B, orden del founder).**
+     *  Nace porque **13 no estaba y se pidió dos veces**. La escala de
+     *  arriba es de PROSA —11 · 14 · 16 · 20…— y una etiqueta de control
+     *  no es prosa: es un rótulo que acompaña a un objeto tocable, donde
+     *  14 pesa de más y 11 se pierde al lado de un círculo de 48.
+     *  ⚠️ **Entra con nombre propio y no como un número más de la escala**,
+     *  para que nadie lo tome por el siguiente peldaño de la prosa. Su
+     *  compañera obligada es `family.sans.medium`, que es la fuente de los
+     *  controles de la casa (la misma de la barra de pestañas). */
+    control: 13,
     sm:    14,
     base:  16,
     md:    20,
