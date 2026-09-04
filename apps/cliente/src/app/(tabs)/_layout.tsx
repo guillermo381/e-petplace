@@ -407,11 +407,27 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
         }}
         voz={{
           preguntar: t('nexo.almohadilla', { nombre }),
-          /* D-1019 (S113-B · 0.3): la prop pasó de `orbe` a `abrir` porque el
-             orbe se llama distinto según lo que va a hacer. **La clave y su
-             texto son los de C y no se tocaron** —ya decía «Abrir a {{nombre}}»,
-             o sea que la voz estaba bien y la pieza no la usaba—: lo único que
-             cambia acá es el NOMBRE de la prop. */
+          /* 🔴 **D-1019 · EL ORBE DICE LO QUE EL TOQUE VA A HACER — y acá hubo
+             DOS CURAS EL MISMO DÍA, resueltas por el objeto y no por gusto.**
+
+             C lo curó desde el montaje: dejar la prop `orbe` y cambiarle el
+             VALOR según `abierta` —*«una prop que ya recibe una cadena no
+             necesita volverse dos para decir dos cosas»*—. B lo curó en la
+             pieza: **partió `voz.orbe` en `voz.abrir` y `voz.cerrar`**.
+
+             **Manda la pieza, y no por antigüedad: `voz.orbe` YA NO EXISTE**
+             en `PresenciaCoach` (medido en su tipo), así que la versión del
+             montaje ni siquiera compilaría. La clave y su texto son los de C
+             y no se tocaron —ya decía «Abrir a {{nombre}}»—: lo único que
+             cambia es el NOMBRE de la prop.
+
+             ⚠️ **Y queda dicho lo que la resolución descarta:** C sostenía que
+             el orbe y el velo son *«dos actos distintos que hoy coinciden en
+             la palabra»* y agregó `nexo.cerrarOrbe` para no atarlos. B decidió
+             lo contrario en la pieza —*«dos nombres para el mismo acto serían
+             dos actos para quien sólo los oye»*— y comparte un solo `cerrar`.
+             **`nexo.cerrarOrbe` queda huérfana**: se retira o se usa, y eso lo
+             decide quien reabra la voz. */
           abrir: t('nexo.etiqueta', { nombre }),
           /* ⚠️ **SIEMPRE, aunque la cuenta sea 0** — así un número no existe sin
              su palabra y la pieza nunca inventa un plural. */
