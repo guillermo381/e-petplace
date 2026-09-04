@@ -36,6 +36,51 @@ export const clienteEn = {
     solicitudesTitulo: 'Requests',
     abanico: 'Waiting for you',
   },
+  nexo: {
+    // See the Spanish block: `{{nombre}}` is THE COACH here and THE PET in
+    // `coach.*`. Two namespaces, each consistent inside.
+    etiqueta: 'Open {{nombre}}',
+    cerrar: 'Close',
+    almohadilla: 'Ask {{nombre}}',
+    dedoPeso: 'Weight',
+    dedoVacuna: 'Vaccine',
+    dedoAntiparasitario: 'Parasite control',
+    dedoFoto: 'Photo',
+    razonAcuario: '{{mascota}} is an aquarium: no vaccines, no parasite control.',
+    razonSinPuerta: 'Soon you will be able to save a memory of {{mascota}} from here.',
+    elegirMascota: 'Who is this about?',
+    vozChatUna: '1 message',
+    vozChat: '{{n}} messages',
+    vozCarritoUno: 'Cart · 1',
+    vozCarrito: 'Cart · {{n}}',
+    presentacion: 'I am {{nombre}}. I can be wrong; for anything important, your vet is there.',
+  },
+  antiparasitario: {
+    titulo: 'Parasite control for {{mascota}}',
+    productoLabel: 'Product',
+    productoPlaceholder: 'Brand or product name',
+    productoAyuda: 'Write it as it appears on the box.',
+    sugerencias: 'From the pantry',
+    tipoLabel: 'Type',
+    tipoInterna: 'Internal',
+    tipoExterna: 'External',
+    tipoMixta: 'Both',
+    fechaLabel: 'Date given',
+    fechaPlaceholder: 'Pick the date',
+    fechaFutura: 'You cannot record a future date yet.',
+    proximaLabel: 'Next dose',
+    proximaPlaceholder: 'If you already know it',
+    proximaAyuda: 'Optional. We do not work it out for you.',
+    guardar: 'Save',
+    faltaProducto: 'Write the product so you can save.',
+    anotado: 'Saved to {{mascota}}\u2019s record',
+    errProducto: 'The product is missing.',
+    errFechaFutura: 'The date given cannot be in the future.',
+    errOrden: 'The next dose cannot be earlier than the date given.',
+    errAcceso: 'You do not have access to this pet.',
+    errGenerico: 'We could not save it. Check your connection and try again.',
+  },
+
   caida: {
     titulo: 'This screen could not be shown',
     detalle: 'It is a problem on our side, not your setup — your data is safe. Try again.',
@@ -272,8 +317,16 @@ export const clienteEn = {
     adoptarCeldaDetalle: 'of your family',
   },
   coach: {
+    /* 🔴 EL NOMBRE DEL COACH, Y VIVE SOLO ACÁ (S113-C, firma provisional).
+     * Ningún literal «Nexo» en código ni en otra key: todo lo que lo nombra
+     * lo interpola desde ésta. *El día que el abogado diga que no, cambia
+     * esta línea y no hay barrido que hacer.* */
+    nombre: 'Nexo',
     // Voz del Coach APROBADA por founder (cierre S53):
-    abrir: 'Open the Coach',
+    /* ☠️ `abrir` MURIÓ (S113-C · lote 0): era la voz del destello del Hogar,
+     * que se retiró en el mismo commit. La puerta ahora es la almohadilla de
+     * Nexo y su voz es `nexo.almohadilla`. *Una key sin consumidor es una
+     * frase que alguien va a volver a montar creyendo que rige* (Ley 37). */
     preguntaSobre: 'Ask about {{nombre}}',
     pEdad: 'How old are they?',
     pCarnet: "How's the vaccine card?",

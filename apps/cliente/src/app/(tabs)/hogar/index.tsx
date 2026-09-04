@@ -109,7 +109,6 @@ import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
 import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
-import { CoachHoja } from '@/components/coach';
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
 import { useTraduccion } from '@/i18n';
@@ -611,9 +610,9 @@ function FilaCampanaTecho({
           <Icono nombre="campana" tamano={24} tinta={esMemorial ? theme.text.primary : palette.light0} />
         </Badge>
       </Pressable>
-      {/* El hueco del Coach — su espacio reservado (lámina); el destello
-          mismo no se mueve: sigue absoluto en su esquina (D-401). */}
-      <View style={{ width: 44, height: 44 }} />
+      {/* ☠️ El hueco que le guardaba el lugar al destello murió con él
+          (Ley 37): *un espacio reservado para una pieza que ya no existe es
+          aire que nadie puede explicar.* */}
     </View>
   );
 }
@@ -624,8 +623,6 @@ export default function Hogar() {
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
-  // D-401: pressed del destello del Coach (el único tocable artesanal del Hogar)
-  const pressedCoach = usePresionado(0.97);
 
   const [mascotas, setMascotas] = useState<EstadoMascotas>('cargando');
   /* La «i» del hogar sin mascotas (N22). Vive acá arriba y no junto a su
@@ -678,7 +675,6 @@ export default function Hogar() {
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
 
-  const [coachAbierto, setCoachAbierto] = useState(false);
   // D-338: la celda del Hogar es una de las DOS entradas al hub "Mis
   // paseos" — visible SOLO con planes (silencio digno). S58: se guarda
   // el primer plan ACTIVO para el subtítulo VIVO del grupo.
@@ -1022,11 +1018,19 @@ export default function Hogar() {
      control es la Ley 17.5 rota — *el vacío invita a ACTUAR, no termina en un
      estado de ánimo.* Ahora el mismo texto tiene su botón.
 
-     ✅ **Y EL COACH CALLA ACÁ POR CONSTRUCCIÓN, no por disciplina:** este
-     `return` corta antes de su destello (línea ~1566) y de `CoachHoja`
-     (~2249), así que **no hay forma de que salude a quien todavía no tiene de
-     quién hablarle.** *Un coach que saluda sin conocer a nadie enseña a
-     ignorarlo.* Verificado por posición, no supuesto.
+     ⏪ **S113-C · ESTE PÁRRAFO DECÍA QUE EL COACH CALLABA «POR POSICIÓN» — y
+     su mecanismo se mudó, así que se corrige acá y no en otro lado.** Decía
+     que este `return` corta antes del destello y de `CoachHoja`, de modo que
+     el Coach no podía saludar a quien todavía no tiene de quién hablarle.
+     **Las dos piezas se fueron al shell**, donde ningún `return` de esta
+     pantalla las alcanza.
+
+     ✅ **La garantía NO se perdió: cambió de mecanismo y ahora es más fuerte.**
+     La decide `focoNexo`: un hogar sin mascotas activas devuelve `'ninguna'`
+     y `montaPresencia` da `false` ⇒ **queda la burbuja de siempre, en las
+     cinco pestañas y no sólo acá**. *Un coach que saluda sin conocer a nadie
+     enseña a ignorarlo* — y antes eso lo sostenía la posición de un `return`,
+     que es la clase de garantía que se pierde al mover una línea.
 
      ✅ **EL SEGUNDO CAMINO ENTRÓ (S112-C), Y SU CONDICIÓN LA ESCRIBIÓ ESTE
      MISMO COMENTARIO.** Decía: *«no se dibuja porque no tiene a dónde ir:
@@ -1713,44 +1717,16 @@ export default function Hogar() {
             </LinearGradient>
           );
         })()}
-        {/* LA ENTRADA DEL COACH (S53-B2b) — intacta sobre el techo local */}
-        <Pressable
-          onPress={() => setCoachAbierto(true)}
-          {...pressedCoach.handlers}
-          accessibilityRole="button"
-          accessibilityLabel={t('coach.abrir')}
-          hitSlop={10}
-          style={{
-            position: 'absolute',
-            top: insets.top + spacing[3],
-            right: spacing[3],
-            width: 44,
-            height: 44,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Animated.View style={pressedCoach.estiloPresionado}>
-            {/* r6-1: el botón de IA se DEMARCA — relleno en degradado de
-                la familia del header (violeta→azul: los stops 2-3 del
-                gradiente FIRMA, que es la familia del techo; la rampa
-                del isotipo NO — A5 la reserva a marca). Memorial: plano. */}
-            {esMemorial ? (
-              <View style={{ width: 42, height: 42, borderRadius: radius.full, backgroundColor: theme.bg.overlay, alignItems: 'center', justifyContent: 'center' }}>
-                <Icono nombre="ia" tamano={22} registro="tinta" tinta={theme.text.secondary} />
-              </View>
-            ) : (
-              <LinearGradient
-                colors={[theme.accent.gradient.colors[1], theme.accent.gradient.colors[2]] as [string, string]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ width: 42, height: 42, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Icono nombre="ia" tamano={22} registro="tinta" tinta={theme.text.onGradient} />
-              </LinearGradient>
-            )}
-          </Animated.View>
-        </Pressable>
+        {/* ☠️ EL DESTELLO DEL COACH MURIÓ ACÁ (S113-C · lote 0). Vivió en esta
+            esquina desde S53-B2b y se retira en el MISMO acto en que Nexo se
+            monta en el shell: **Nexo es su única puerta**, y desde ahí la
+            almohadilla abre la misma `CoachHoja`, ahora en las cinco pestañas
+            y no sólo en el Hogar. *Dos puertas al mismo cuarto son dos
+            lugares donde aprender lo mismo* (N25 ②).
+
+            Censo antes de retirar: `coachAbierto` · `setCoachAbierto` ·
+            `pressedCoach` · `CoachHoja` · `coach.abrir` tenían **un solo
+            consumidor cada uno, y era éste**. Ninguno queda huérfano. */}
       </View>
 
       {/* @override-s82c — RECOMENDACIONES      {/* @override-s82c — RECOMENDACIONES (lámina, ítem 1): LA TARJETA
@@ -2490,7 +2466,6 @@ export default function Hogar() {
           la pregunta no existe (Ley 37). */}
 
 
-      <CoachHoja visible={coachAbierto} onCerrar={() => setCoachAbierto(false)} mascotas={mascotas} />
 
       {/* S89 — LA INVITACIÓN DE LA CASA (lámina firmada). Vive en el Hogar
           porque es la primera pantalla con sesión: el SO da UN SOLO TIRO y

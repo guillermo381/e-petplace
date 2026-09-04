@@ -55,13 +55,40 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Tabs, useRouter, useSegments } from 'expo-router';
+import { Tabs, useGlobalSearchParams, useRouter, useSegments } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ALTO_FILA_TABS, BarraTabs, BurbujaPendientes, Icono, type BarraTabsItem, type Pendiente } from '@epetplace/ui';
+import {
+  ALTO_FILA_TABS,
+  BarraTabs,
+  BurbujaPendientes,
+  Icono,
+  PresenciaCoach,
+  useAviso,
+  type AtajosCoach,
+  type BarraTabsItem,
+  type IconoNombre,
+  type PendientesCoach,
+  type Pendiente,
+} from '@epetplace/ui';
 import { useCarrito } from '@/lib/despensa/carrito';
 import { clasesVisibles, escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
 import { listarMisPedidos } from '@epetplace/api';
+
+import { CoachHoja } from '@/components/coach';
+import { ElegirMascotaHoja } from '@/components/nexo/elegir-mascota-hoja';
+import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
+import {
+  focoNexo,
+  mascotasParaAtajo,
+  razonDelDedo,
+  ORDEN_DE_PATA,
+  type AtajoNexo,
+  type RazonApagado,
+} from '@/lib/nexo/atajos';
+import { estadoNexo, nexoVisibleEn } from '@/lib/nexo/estado';
+import { recargarHogar, useHogarVivo } from '@/lib/nexo/hogar-vivo';
+import type { MascotaResumen } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
@@ -171,6 +198,260 @@ function BurbujaDelShell({ altoBarra }: { altoBarra: number }) {
   );
 }
 
+/**
+ * ⭐ **NEXO EN EL SHELL — la presencia del Coach, montada** (S113-C · lote 0).
+ *
+ * ── QUÉ REEMPLAZA Y QUÉ CONSERVA ────────────────────────────────────────────
+ * Reemplaza al disco de `BurbujaPendientes` **cuando hay hogar activo**, y
+ * conserva sus dos destinos como pastillas: *«las pastillas de pendientes abren
+ * lo mismo que abría la burbuja»* (§2.4).
+ *
+ * 🔴 **SE MONTA UNA DE LAS DOS, NUNCA LAS DOS** — es la regla que B dejó escrita
+ * en su pieza y la razón es física: **ocupan exactamente el mismo píxel**
+ * (`right: spacing[5] · bottom: spacing[5] + aireInferior`, medido en las dos
+ * fuentes). *Dos discos peleando el mismo píxel es el defecto que `L-395` dejó
+ * escrito.* En memorial manda la burbuja; en el resto, la presencia.
+ *
+ * 🔴 **Y MIENTRAS EL HOGAR NO CONTESTÓ TAMBIÉN QUEDA LA BURBUJA.** No es
+ * timidez: la puerta del carrito es **firma del founder** (N28 — visible en TODA
+ * la app) y **no puede parpadear**. Empezar por la burbuja y pasar a la
+ * presencia cuando el dato llega nunca la pierde; al revés habría un instante de
+ * pata sobre un hogar que resulta ser memorial. *Vacío por carga y vacío por
+ * estado son dos hechos y no comparten guard.*
+ *
+ * ── DE DÓNDE SALEN LOS NÚMEROS ──────────────────────────────────────────────
+ * **Del servidor, y del mismo lugar que ya los traía**: `contarPendientes` vía
+ * `usePendientesAdopcion` (conversaciones sin leer) y `useCarrito` (unidades).
+ * **No nació `obtenerPendientesHogar`** porque el conteo que hacía falta ya lo
+ * contaba el servidor — *pedir un wrapper nuevo para leer dos veces el mismo
+ * hecho es fabricar la divergencia.*
+ *
+ * ⚠️ **`avisos` VIAJA EN `null` Y ESO ES LETRA, NO HUECO:** el servidor expone
+ * `hayAvisosSinLeer` —un BOOLEANO— porque `MODELO_LOYALTY` §3 manda que los no
+ * leídos sean PRESENCIA y jamás número. El tipo de B ya distingue `null` de `0`,
+ * así que el dato **no se tira en la puerta**.
+ *
+ * ── LA VOZ ES DE ACÁ (Ley 3) ────────────────────────────────────────────────
+ * `voz.chat` y `voz.pedidos` **se pasan siempre, aunque la cuenta sea 0**: así
+ * un número no puede existir sin su palabra, y la pieza nunca tiene que inventar
+ * un plural. El singular y el plural salen de mis keys.
+ *
+ * ── EL AIRE LO MIDE LA BARRA ────────────────────────────────────────────────
+ * `aireInferior` es el alto REAL de la barra de pestañas, medido con `onLayout`
+ * en este mismo archivo. *Un número tecleado acá miente en el primer teléfono
+ * distinto* — y la geometría de la pieza no se importa a propósito: B la dejó
+ * sin exportar y lo único que la pantalla necesita es `COLA_PRESENCIA_COACH`.
+ *
+ * ── SOBRE QUÉ MASCOTA ACTÚA UN DEDO ─────────────────────────────────────────
+ * `useGlobalSearchParams` — **el dato ya viaja**: las cuatro rutas de mascota
+ * llevan `mascotaId` en la URL. *No hace falta inventar un estado de «mascota en
+ * foco» cuando la ruta ya lo dice.* Con una sola candidata no se pregunta; con
+ * varias, la hoja corta — y **la hoja ofrece sólo las que ese dedo puede tocar**,
+ * porque un camino que después habría que rebotar no es un camino.
+ */
+function NexoDelShell({ altoBarra }: { altoBarra: number }) {
+  const { t } = useTraduccion();
+  const router = useRouter();
+  const { mostrar } = useAviso();
+  const items = useCarrito();
+  const pendientesAdopcion = usePendientesAdopcion();
+  const mascotas = useHogarVivo();
+  const segmentos = useSegments() as string[];
+  const { mascotaId: mascotaIdEnRuta } = useGlobalSearchParams<{ mascotaId?: string }>();
+
+  const [abierta, setAbierta] = useState(false);
+  const [hojaCoach, setHojaCoach] = useState<MascotaResumen | null>(null);
+  const [hojaPeso, setHojaPeso] = useState<MascotaResumen | null>(null);
+  /** El dedo que espera saber de quién habla. `'coach'` es la almohadilla. */
+  const [esperandoElegir, setEsperandoElegir] = useState<AtajoNexo | 'coach' | null>(null);
+
+  const foco = focoNexo({ mascotaIdEnRuta, mascotas });
+
+  /* Nexo no existe en la cámara del carnet, en las llamadas, en los checkouts
+     ni en la caja: la lista y su razón viven en `lib/nexo/estado.ts`. */
+  if (!nexoVisibleEn(segmentos)) return null;
+
+  /* MEMORIAL o hogar que todavía no contestó ⇒ la burbuja de siempre, y NUNCA
+     las dos: ocupan el mismo píxel. */
+  if (foco.modo !== 'directa' && foco.modo !== 'elegir') {
+    return <BurbujaDelShell altoBarra={altoBarra} />;
+  }
+
+  /* Sobre quiénes puede actuar la pata acá: la del foco, o todas las activas. */
+  const candidatas: MascotaResumen[] = foco.modo === 'directa' ? [foco.mascota] : foco.entre;
+
+  const enCarrito = items.reduce((n, i) => n + i.cantidad, 0);
+  const pendientes: PendientesCoach = {
+    chat: pendientesAdopcion.conversaciones,
+    /* La clase se llama `pedidos` en la pieza; **lo que abre es el carrito**,
+       que es lo que abría la burbuja. Ver la cabecera de `lib/nexo/estado.ts`. */
+    pedidos: enCarrito,
+    avisos: null,
+  };
+
+  const ejecutar = (atajo: AtajoNexo | 'coach', m: MascotaResumen) => {
+    if (atajo === 'coach') return setHojaCoach(m);
+    if (atajo === 'peso') return setHojaPeso(m);
+    if (atajo === 'vacuna') {
+      router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } });
+      return;
+    }
+    if (atajo === 'antiparasitario') {
+      router.push({ pathname: '/antiparasitario', params: { mascotaId: m.id, nombre: m.nombre } });
+      return;
+    }
+    /* 'foto' no llega hasta acá: nace apagado con su razón — medido, no hay un
+       solo escritor de `evento_hito_narrativo` en `packages/api`. */
+  };
+
+  /* Las mascotas entre las que este dedo puede elegir. La almohadilla las
+     admite a todas: el Coach habla de cualquiera. */
+  const candidatasDe = (atajo: AtajoNexo | 'coach') =>
+    atajo === 'coach' ? candidatas : mascotasParaAtajo(atajo, candidatas);
+
+  const tocar = (atajo: AtajoNexo | 'coach') => {
+    setAbierta(false);
+    const posibles = candidatasDe(atajo);
+    /* 🔴 **UNA SOLA POSIBLE NO SE PREGUNTA**, aunque el hogar tenga varias: con
+       un perro y un acuario, «Vacuna» ya sabe de quién habla. *Preguntar con una
+       sola opción es un paso que no decide nada.* */
+    if (posibles.length === 1) return ejecutar(atajo, posibles[0]);
+    if (foco.modo === 'directa') return ejecutar(atajo, foco.mascota);
+    if (posibles.length > 1) return setEsperandoElegir(atajo);
+  };
+
+  const vozAtajo: Record<AtajoNexo, string> = {
+    peso: t('nexo.dedoPeso'),
+    vacuna: t('nexo.dedoVacuna'),
+    antiparasitario: t('nexo.dedoAntiparasitario'),
+    foto: t('nexo.dedoFoto'),
+  };
+
+  /* ✅ **LOS CUATRO GLIFOS SON PROPIOS** (S113-B, `5dbcc5e2`). ⏪ Acá vivieron
+     tres préstamos declarados —`datos`, `receta`, `ojo`— porque el registry no
+     tenía peso, antiparasitario ni foto; **murieron el día que existieron los
+     suyos**, que era el trato. *Un préstamo que sobrevive a su reemplazo deja
+     de ser un puente y pasa a ser el camino.*
+
+     ⚠️ **El id no cambia aunque el dibujo sí**: el gate por ícono todavía no
+     está firmado (B lo declara), así que el founder puede mover el trazo sin
+     que esta línea se toque. Y el `registro` no se pasa: el registry lo
+     resuelve solo —peso y antiparasitario visten IDENTIDAD como `vacuna`, foto
+     viste TINTA porque es un verbo—. */
+  const glifoAtajo: Record<AtajoNexo, IconoNombre> = {
+    peso: 'peso',
+    vacuna: 'vacuna',
+    antiparasitario: 'antiparasitario',
+    foto: 'foto',
+  };
+
+  /* 🔴 LA RAZÓN NOMBRA A LA MASCOTA, y cuando no puede lo dice con la palabra
+     que la casa ya usa. **Con UNA candidata hay a quién nombrar; con varias no**
+     —la razón vale para todas— y ahí entra `alta.tuMascota`, el mismo fallback
+     de `/carnet`. *Inventar una segunda frase para el caso sin nombre serían dos
+     voces que algún día divergen.* */
+  const nombreEnRazon = candidatas.length === 1 ? candidatas[0].nombre : t('alta.tuMascota');
+
+  const vozRazon = (r: RazonApagado): string =>
+    r === 'acuario'
+      ? t('nexo.razonAcuario', { mascota: nombreEnRazon })
+      : t('nexo.razonSinPuerta', { mascota: nombreEnRazon });
+
+  /* 🔴 **LA TUPLA ES DE CUATRO Y EL COMPILADOR LO EXIGE.** `ORDEN_DE_PATA` tiene
+     cuatro y el `as` lo afirma; si alguien le agrega un quinto, **rompe acá**,
+     que es donde tiene que romper. */
+  const atajos = ORDEN_DE_PATA.map((a) => {
+    const razon = razonDelDedo(a, candidatas);
+    const base = { id: a, icono: glifoAtajo[a], etiqueta: vozAtajo[a] };
+    /* Vivo o apagado-con-razón: los dos a la vez no compilan (contrato de B), y
+       un atajo apagado y mudo tampoco se puede escribir. */
+    return razon === null
+      ? { ...base, onPress: () => tocar(a) }
+      : { ...base, razonApagado: vozRazon(razon) };
+  }) as unknown as AtajosCoach;
+
+  const nombre = t('coach.nombre');
+
+  return (
+    <>
+      <PresenciaCoach
+        estado={estadoNexo({ pendientes, huellaAbierta: abierta, hojaAbierta: hojaCoach !== null })}
+        pendientes={pendientes}
+        atajos={atajos}
+        nombre={nombre}
+        abierta={abierta}
+        onAbrir={() => setAbierta(true)}
+        onCerrar={() => setAbierta(false)}
+        onPreguntar={() => tocar('coach')}
+        onPendiente={(clase) => {
+          setAbierta(false);
+          /* LA REGLA DEL TOQUE LA DECIDE EL DOMINIO: con UNA conversación va al
+             hilo; con varias, a la lista. `unica` ya trae el id si y sólo si
+             corresponde — copiado del montaje que reemplaza, no reinventado. */
+          if (clase === 'chat') {
+            pendientesAdopcion.unica !== null
+              ? router.push({ pathname: '/adoptar/solicitud/[solicitudId]', params: { solicitudId: pendientesAdopcion.unica } })
+              : router.push('/adoptar/solicitudes');
+            return;
+          }
+          router.push('/despensa/carrito');
+        }}
+        voz={{
+          preguntar: t('nexo.almohadilla', { nombre }),
+          orbe: t('nexo.etiqueta', { nombre }),
+          /* ⚠️ **SIEMPRE, aunque la cuenta sea 0** — así un número no existe sin
+             su palabra y la pieza nunca inventa un plural. */
+          chat:
+            pendientesAdopcion.conversaciones === 1
+              ? t('nexo.vozChatUna')
+              : t('nexo.vozChat', { n: pendientesAdopcion.conversaciones }),
+          pedidos: enCarrito === 1 ? t('nexo.vozCarritoUno') : t('nexo.vozCarrito', { n: enCarrito }),
+          cerrar: t('nexo.cerrar'),
+        }}
+        aireInferior={altoBarra}
+        /* La razón se muestra acá, en UNA línea. La pieza no elige el vehículo;
+           la casa ya tiene uno y es el aviso. */
+        onRazonApagado={(razon) => mostrar({ texto: razon })}
+      />
+
+      <ElegirMascotaHoja
+        visible={esperandoElegir !== null}
+        titulo={t('nexo.elegirMascota')}
+        /* Sólo las que este dedo puede tocar: **la hoja no ofrece un camino que
+           después habría que rebotar.** */
+        mascotas={esperandoElegir !== null ? candidatasDe(esperandoElegir) : []}
+        onElegir={(m) => {
+          const pendiente = esperandoElegir;
+          setEsperandoElegir(null);
+          if (pendiente !== null) ejecutar(pendiente, m);
+        }}
+        onCerrar={() => setEsperandoElegir(null)}
+      />
+
+      {hojaPeso !== null ? (
+        <RegistrarPesoHoja
+          visible
+          nombre={hojaPeso.nombre}
+          mascotaId={hojaPeso.id}
+          onCerrar={() => setHojaPeso(null)}
+          /* Desde el shell no hay perfil abierto que releer: la pantalla de la
+             mascota lee su serie al recuperar el foco. */
+          onRegistrado={() => setHojaPeso(null)}
+        />
+      ) : null}
+
+      {hojaCoach !== null ? (
+        <CoachHoja
+          visible
+          onCerrar={() => setHojaCoach(null)}
+          mascotas={mascotas ?? []}
+          mascotaInicial={hojaCoach.id}
+        />
+      ) : null}
+    </>
+  );
+}
+
 export default function TabsLayout() {
   const { t } = useTraduccion();
   /** `null` = todavía no sabemos (primer arranque, sin marca): la tab NO se
@@ -216,6 +497,13 @@ export default function TabsLayout() {
 
      ⚠️ Sin deps: se monta con el shell y se desmonta con él. */
   useEffect(() => escucharPendientes(), []);
+
+  /* ⭐ EL HOGAR QUE NEXO NECESITA — **una lectura por SESIÓN**, acá y no por
+     pantalla. Su condición de existencia es un dato (¿hay mascotas activas?),
+     no una ruta: tiene que ser cierto en cualquier pestaña. */
+  useEffect(() => {
+    void recargarHogar();
+  }, []);
 
   useEffect(() => {
     let vive = true;
@@ -359,7 +647,7 @@ export default function TabsLayout() {
               del cliente y la pieza es de `packages/ui`. Se toca acá porque el
               montaje ES la firma —el flotante deja de ser de una pantalla— y
               se declara en vez de hacerse callado. */}
-          <BurbujaDelShell altoBarra={altoBarra} />
+          <NexoDelShell altoBarra={altoBarra} />
           <View
             onLayout={(e) => {
               const alto = e.nativeEvent.layout.height;

@@ -48,6 +48,99 @@ export const clienteEs = {
     // caso — *decir «5 pendientes» es cierto en todos*.
     abanico: 'Lo que te espera',
   },
+  /* ⭐ NEXO — EL COACH GANA PRESENCIA, NOMBRE Y CUATRO ATAJOS (S113-C · lote 0).
+   *
+   * 🔴 **EL NOMBRE VIVE EN UNA SOLA KEY: `coach.nombre`** (abajo, en su
+   * bloque). Ningún «Nexo» literal en código ni en otra key — *el día que el
+   * abogado diga que no, cambia esa key y se acabó.* Por eso TODAS las voces
+   * de acá interpolan el nombre en vez de escribirlo.
+   *
+   * ⚠️ **LA CONVENCIÓN DE VARIABLES, Y NACE DE UNA COLISIÓN MEDIDA:** en este
+   * bloque **`{{nombre}}` es EL COACH** y **`{{mascota}}` es la mascota. En
+   * el bloque `coach.*` de más abajo —las tres respuestas del v0, voz
+   * APROBADA en S53— **`{{nombre}}` es la MASCOTA**. Son dos namespaces y
+   * cada uno es consistente adentro; **no se unificaron porque reescribir
+   * `coach.rEdad` tocaría voz firmada por una razón de prolijidad.**
+   * *Se declara acá porque una variable que significa dos cosas es
+   * exactamente la clase de defecto que ningún typecheck ve* (el riel exige
+   * que la KEY exista, jamás que los NOMBRES de las variables coincidan). */
+  nexo: {
+    // La presencia, cuando se toca.
+    etiqueta: 'Abrir a {{nombre}}',
+    cerrar: 'Cerrar',
+    // La almohadilla de la pata — el quinto tocable, el que abre la Hoja.
+    // Registro de la casa: tuteo neutro con su tilde (regla 27).
+    almohadilla: 'Pregúntale a {{nombre}}',
+    // Los cuatro dedos, en orden de pata. Sin glifo a propósito: tres de los
+    // cuatro no existen en el registry y un glifo se firma por gate (§6b).
+    dedoPeso: 'Peso',
+    dedoVacuna: 'Vacuna',
+    dedoAntiparasitario: 'Antiparasitario',
+    dedoFoto: 'Foto',
+    /* 🔴 UN BOTÓN APAGADO SIN RAZÓN A LA VISTA ES EL DEFECTO — acá está la
+     * razón, y **dice el nombre**: una razón que nombra a la mascota es una
+     * frase sobre ELLA; una genérica es un cartel.
+     *
+     * ⚠️ **Ni «próximamente» ni «en construcción»** (firma de la mesa): las dos
+     * hablan del producto y no de la familia. *«Pronto vas a poder…» promete lo
+     * mismo y lo dice desde el lado de quien espera.*
+     *
+     * ⚠️ **{{mascota}} puede no tener nombre** —con varias activas y ninguna en
+     * foco no hay una a quién nombrar— y ahí entra `alta.tuMascota`, el
+     * fallback que la casa YA usa en `/carnet`. *Se reusa el que existe en vez
+     * de inventar una segunda forma de decir lo mismo* (L-175). */
+    razonAcuario: '{{mascota}} es un acuario: no lleva vacunas ni antiparasitario.',
+    razonSinPuerta: 'Pronto vas a poder guardar un recuerdo de {{mascota}} desde acá.',
+    // La hoja corta de §2.5 — sólo con dos mascotas o más.
+    elegirMascota: '¿De quién?',
+    // 🔴 LAS VOCES DE LAS PASTILLAS — se pasan SIEMPRE, aunque la cuenta sea 0
+    // (contrato de la pieza): así **un número no puede existir sin su palabra**
+    // y la pieza nunca tiene que inventar un plural. Singular y plural viven
+    // acá, que es donde el idioma sabe conjugar.
+    // ⚠️ La segunda clase se llama `pedidos` en la pieza y **abre el CARRITO**
+    // — es lo que abría la burbuja (§2.4). La voz dice lo que la familia va a
+    // encontrar, no el nombre de la prop.
+    vozChatUna: '1 mensaje',
+    vozChat: '{{n}} mensajes',
+    vozCarritoUno: 'Carrito · 1',
+    vozCarrito: 'Carrito · {{n}}',
+    // 🔴 LA FRASE. La primera vez que la Hoja se abre en este dispositivo
+    // preside sola; después vive abajo, chica, SIEMPRE. **Es UNA key en dos
+    // lugares** — dos keys serían dos frases que algún día divergen.
+    presentacion: 'Soy {{nombre}}. Puedo equivocarme; para lo importante está tu vet.',
+  },
+  /* LA PANTALLA DEL ANTIPARASITARIO (S113-C · lote 0). La plaga —pulgas,
+   * garrapatas, mosquitos, internos— NO vive acá: llega en el lote 1 con su
+   * columna. *Preguntar por algo que la base no guarda es inventar.* */
+  antiparasitario: {
+    titulo: 'Antiparasitario de {{mascota}}',
+    productoLabel: 'Producto',
+    productoPlaceholder: 'Marca o nombre del producto',
+    productoAyuda: 'Escríbelo como venga en la caja.',
+    sugerencias: 'De la despensa',
+    tipoLabel: 'Tipo',
+    tipoInterna: 'Interno',
+    tipoExterna: 'Externo',
+    tipoMixta: 'Los dos',
+    fechaLabel: 'Fecha de aplicación',
+    fechaPlaceholder: 'Elige la fecha',
+    fechaFutura: 'Todavía no puedes registrar una fecha futura.',
+    proximaLabel: 'Próxima aplicación',
+    proximaPlaceholder: 'Si ya la sabes',
+    proximaAyuda: 'Opcional. No la calculamos por ti.',
+    guardar: 'Guardar',
+    // La razón del freno: sólo dos campos pueden trabarlo, así que se nombra
+    // el que falta en vez de un «revisá los datos» que no dice nada.
+    faltaProducto: 'Escribe el producto para poder guardar.',
+    anotado: 'Anotado en el expediente de {{mascota}}',
+    // Las razones del rebote, una línea cada una. El formulario queda intacto.
+    errProducto: 'Falta el producto.',
+    errFechaFutura: 'La fecha de aplicación no puede ser futura.',
+    errOrden: 'La próxima aplicación no puede ser anterior a la de hoy.',
+    errAcceso: 'No tienes acceso a esta mascota.',
+    errGenerico: 'No pudimos guardar. Revisa tu conexión y prueba de nuevo.',
+  },
+
   caida: {
     titulo: 'Esta pantalla no se pudo mostrar',
     detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',
@@ -356,10 +449,18 @@ export const clienteEs = {
     adoptarCeldaDetalle: 'para tu familia',
   },
   coach: {
+    /* 🔴 EL NOMBRE DEL COACH, Y VIVE SOLO ACÁ (S113-C, firma provisional).
+     * Ningún literal «Nexo» en código ni en otra key: todo lo que lo nombra
+     * lo interpola desde ésta. *El día que el abogado diga que no, cambia
+     * esta línea y no hay barrido que hacer.* */
+    nombre: 'Nexo',
     // ── El Coach v0 (S53-B2b) — voz APROBADA por founder (cierre S53).
     // v0 = plantillas sobre DATOS REALES del expediente (L-139: cero
     // generación, cero diagnóstico); el cerebro de verdad es A5.
-    abrir: 'Abrir el Coach',
+    /* ☠️ `abrir` MURIÓ (S113-C · lote 0): era la voz del destello del Hogar,
+     * que se retiró en el mismo commit. La puerta ahora es la almohadilla de
+     * Nexo y su voz es `nexo.almohadilla`. *Una key sin consumidor es una
+     * frase que alguien va a volver a montar creyendo que rige* (Ley 37). */
     preguntaSobre: 'Pregunta sobre {{nombre}}',
     // las tres preguntas sugeridas
     pEdad: '¿Qué edad tiene?',
