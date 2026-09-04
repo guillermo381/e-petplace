@@ -16,7 +16,7 @@
  *   error de red/config → detalle específico + reintentar (regla 36)
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Redirect, Tabs, useFocusEffect, useRouter, useSegments } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -248,6 +248,58 @@ export default function TabsLayout() {
      queda en cero. *Condicionarlo por fuera sería reintroducir el defecto que
      esta cura acaba de sacar.* */
   useEffect(() => escucharPendientes(), []);
+
+  /* ⭐ **D-1020 · EL REFUGIO ATERRIZA EN SU CASA, y no en el HOY del negocio.**
+   *
+   * ── EL SÍNTOMA, Y LA HIPÓTESIS QUE LO EXPLICABA MAL ─────────────────────
+   * El founder, con la cuenta del refugio recién logueado: *«el home es el de
+   * negocio (turnos, $ del día, prepara tu espacio), el glifo de la pestaña
+   * Refugio se dibuja como inactivo, y al navegar se corrige solo»*. La mesa
+   * lo leyó como **timing**: *«el tipo de cuenta llega después del primer
+   * render y el shell lo trata como negocio mientras no llega»*.
+   *
+   * 🔴 **MEDIDO EN WEB CON SESIÓN REAL DE REFUGIO, Y LA HIPÓTESIS ES FALSA:**
+   *   +1,0s  ruta `/` · esqueleto
+   *   +2,0s  ruta `/` · barra `Refugio · Peluditos · Cuenta`   ← el tipo YA llegó
+   *   +3,5s  ruta `/` · MISMA barra, y el contenido es el HOY del negocio
+   *          («Prepara tu espacio», la tira de días, «$ del día»)
+   * *El tipo de cuenta llega a los dos segundos y la barra lo refleja.* Lo que
+   * no pasa nunca es **mandarlo a su casa**.
+   *
+   * ── LA CAUSA, UNA SOLA Y ESTRUCTURAL ────────────────────────────────────
+   * `<Tabs>` arranca en la PRIMERA `Tabs.Screen`, que es `index` — el HOY. La
+   * barra del refugio es `['adopcion','adoptables','cuenta']` (`barra-prestador`)
+   * y **no contiene `index`**, así que:
+   *   ① se dibuja el HOY del negocio, porque ahí está parado;
+   *   ② **ninguna pestaña sale activa**, porque `activo` vale `'index'` y ese
+   *      nombre no está en los items — *el glifo «oscuro» no es un estado de
+   *      carga: es la ausencia de coincidencia*;
+   *   ③ al tocar «Refugio» se navega a `adopcion`, que sí está, y los dos se
+   *      arreglan juntos. **Eso es lo que el founder vio «corregirse solo».**
+   * ⇒ **no es que el dato llegue tarde: es que nadie lo lleva a su casa.**
+   *
+   * ── POR QUÉ UN EFECTO Y NO UN `<Redirect>` ──────────────────────────────
+   * Un `Redirect` acá reemplazaría el render del navegador entero y lo
+   * desmontaría; y adentro de la tab sería la RATONERA que este mismo archivo
+   * ya documenta (`L-251`: *«la tab no rebota: la barra apunta»*). Un
+   * `replace` mueve la pestaña sin desarmar nada.
+   *
+   * ⚠️ **UNA SOLA VEZ, y por eso el `ref`:** sin él, el efecto volvería a
+   * mandar a `adopcion` cada vez que `sesion` cambie de identidad —y la
+   * cambia cada refresco del resolvedor—, **arrastrando al refugio de vuelta
+   * desde cualquier pestaña donde estuviera parado**. *Un aterrizaje que se
+   * repite deja de ser aterrizaje y pasa a ser un secuestro.*
+   *
+   * ⚠️ **El hook vive ACÁ ARRIBA, con los otros**, no cerca de la rama que lo
+   * usa: es la ley que `D-1017` acaba de cobrar en este mismo archivo — *el
+   * efecto se condiciona por DENTRO, nunca por fuera.* */
+  const yaAterrizo = useRef(false);
+  useEffect(() => {
+    if (yaAterrizo.current) return;
+    if (typeof sesion !== 'object' || !('ok' in sesion) || !sesion.esRefugioPuro) return;
+    yaAterrizo.current = true;
+    router.replace('/(tabs)/adopcion');
+  }, [sesion, router]);
 
   useFocusEffect(
     useCallback(() => {
