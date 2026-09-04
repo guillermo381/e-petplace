@@ -3213,7 +3213,48 @@ cierra el pasado** (`L-409`).
 
 ---
 
-### `D-1017` ☠️ — el prestador NO ABRE: dos hooks después de un `return` temprano
+### `D-1018` 🟡 — 34 `eslint-disable` escritas para un linter que nunca corrió
+
+**Qué, con el número acotado.** El árbol tiene **58 directivas
+`eslint-disable`** (apps 40 · packages 16 · scripts 2). Por regla silenciada:
+
+| regla | n |
+|---|---|
+| `react-hooks/exhaustive-deps` | **34** (33 `-next-line` + 1 `-line`) |
+| `@typescript-eslint/no-require-imports` | 18 |
+| `@typescript-eslint/no-var-requires` | 4 |
+
+**Las 34 son las que importan, y el motivo es preciso:** `verify:hooks` (S113-E)
+enciende **una sola** regla —`react-hooks/rules-of-hooks`— y **`exhaustive-deps`
+NO es esa**. Hasta hoy no había ESLint en el repo (`pnpm lint` no existía, cero
+`eslint.config.*`), así que **esas 34 nunca silenciaron nada: silenciaron a
+nadie.**
+
+**Por qué es deuda y no basura.** Cada una es una **decisión que alguien tomó**
+—«acá el array de dependencias va incompleto a propósito»— y que **nunca fue
+verificada por la herramienta a la que se dirige**. El día que se encienda
+`exhaustive-deps`, esas 34 líneas **no se leen como avisos: se leen como
+permisos ya concedidos**, y el gate arranca con 34 excepciones que nadie
+revisó. *Una supresión escrita contra un linter apagado es una firma en blanco
+con fecha futura.*
+
+**Y la asimetría que la vuelve interesante:** `exhaustive-deps` es
+exactamente la regla que atrapa la familia de defectos que esta sesión pagó dos
+veces —el closure obsoleto del P0 del paseo (S80) y el TDZ del hilo (S112)—.
+*Las 34 supresiones están puestas justo donde más caro sale equivocarse.*
+
+**Qué NO se hizo, y por qué.** No se revisó ninguna. Revisarlas **exige la
+regla encendida**: sin ella no hay forma de saber cuáles siguen siendo
+correctas y cuáles quedaron viejas cuando su efecto cambió. *Auditarlas a ojo
+sería reemplazar 34 decisiones no verificadas por 34 opiniones no verificadas.*
+
+**Disparo.** **Se revisan cuando se encienda una segunda regla.** Y el orden
+correcto es el que S113-E ya usó para la primera: encender, mirar el rojo
+completo, y recién ahí decidir cuáles supresiones sobreviven — nunca al revés.
+
+---
+
+### `D-1017` ✅ CERRADA — el prestador NO ABRÍA: tres hooks bajo seis `return` tempranos
 
 **Qué, con el stack literal.** El OTA del lote 0 (group `d921ba81`, ancla
 `9d19de78`) **rompe la app del prestador al abrir**: pantalla forense «Esta
@@ -3272,8 +3313,20 @@ aparato no está probado, y acá además no había gate que lo supliera.*
 S112 por `update:republish`: group `101a5999-b7aa-4fb4-8910-723a93eb7ddc`,
 ancla `e29238a9`. **El cliente no se tocó.**
 
-**Sigue vivo en `main`** (medido en `1fced12e`: las tres líneas intactas).
-**Nada del prestador se publica hasta que C lo cure con su rojo reproducido.**
+**✅ CURADA POR C** en `6c728d38` (`pista/s113-c-02` @ `5be3fbb9`), y **C midió
+más hondo que este diagnóstico**: acá decía *dos hooks bajo UN return*; eran
+**TRES hooks bajo SEIS returns** — el `useState` de la línea 755 se le había
+pasado a la medición a mano y **lo encontró el gate de E**.
+
+**Verificado por el camino real, no por el gate solo:** `scripts/repro-d1017.mjs`
+—que C dejó— entra con `demo-prestador@epetplace.dev`, y la jornada renderiza
+con datos vivos (*«Te quedan 5 · terminas 18:00»*, `$44.13` del día, la barra de
+cinco pestañas). *«¿la frontera de caída se comió el árbol? **no**»*, exit 0.
+
+**Y quedó su gate, que es lo que impide que vuelva:** `verify:hooks` (E) y
+`verify:hooks-bajo-return` (C). El primero **nació y su primer rojo real fue
+este defecto** — la prueba de que un instrumento sirve no es que dé verde: es
+que dé rojo sobre el primer caso real (`L-459`).
 
 ---
 
