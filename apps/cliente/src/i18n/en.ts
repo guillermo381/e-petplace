@@ -40,6 +40,7 @@ export const clienteEn = {
     // See the Spanish block: `{{nombre}}` is THE COACH here and THE PET in
     // `coach.*`. Two namespaces, each consistent inside.
     etiqueta: 'Open {{nombre}}',
+    cerrarOrbe: 'Close {{nombre}}',
     cerrar: 'Close',
     almohadilla: 'Ask {{nombre}}',
     dedoPeso: 'Weight',

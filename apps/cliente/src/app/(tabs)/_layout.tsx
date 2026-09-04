@@ -407,7 +407,22 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
         }}
         voz={{
           preguntar: t('nexo.almohadilla', { nombre }),
-          orbe: t('nexo.etiqueta', { nombre }),
+          /* 🔴 **EL ORBE DICE LO QUE EL TOQUE VA A HACER, y eso se cablea
+             DESDE ACÁ sin que la pieza cambie una prop.** Su
+             `accessibilityLabel` es `voz.orbe` en los dos estados
+             (`PresenciaCoach.tsx`), y desde el lote 0.2 el orbe abierto
+             **cierra** ⇒ decía «Abrir» cuando el toque iba a cerrar.
+
+             ⚠️ **La cura no era pedirle a B una prop nueva:** `abierta` es
+             estado de ESTE shell, así que el VALOR de `voz.orbe` puede
+             cambiar con él. *Una prop que ya recibe una cadena no necesita
+             volverse dos para decir dos cosas.*
+
+             Y por eso no se reusa `voz.cerrar`, que ya existe: ésa es la voz
+             del VELO —lo que se lee al tocar afuera— y **son dos actos
+             distintos que hoy coinciden en la palabra**. Compartir la key
+             ataría el día que una de las dos cambie. */
+          orbe: abierta ? t('nexo.cerrarOrbe', { nombre }) : t('nexo.etiqueta', { nombre }),
           /* ⚠️ **SIEMPRE, aunque la cuenta sea 0** — así un número no existe sin
              su palabra y la pieza nunca inventa un plural. */
           chat:

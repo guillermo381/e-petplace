@@ -521,6 +521,20 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   ok('la fila «Pregúntale» abre la Hoja', /onPreguntar=\{\(\) => tocar\('coach'\)\}/.test(bloque));
   ok('`abierta` viaja a la pieza', /abierta=\{abierta\}/.test(bloque));
 
+  /* 🔴 **EL ORBE DICE LO QUE EL TOQUE VA A HACER** (lote 0.3). Su
+     `accessibilityLabel` es `voz.orbe` en los dos estados, y desde el 0.2 el
+     orbe abierto CIERRA ⇒ decía «Abrir» cuando iba a cerrar. **No hizo falta
+     una prop nueva:** `abierta` es estado de este shell, así que el VALOR
+     cambia con él. */
+  ok(
+    '`voz.orbe` cambia con el estado: abierta dice cerrar',
+    /orbe: abierta \? t\('nexo\.cerrarOrbe'/.test(bloque),
+  );
+  ok('y cerrada dice abrir', /: t\('nexo\.etiqueta', \{ nombre \}\),/.test(bloque));
+  /* ⚠️ Y NO se reusa `voz.cerrar`: ésa es la voz del VELO —lo que se lee al
+     tocar afuera— y son dos actos que hoy coinciden en la palabra. */
+  ok('la voz del velo sigue siendo la suya', /cerrar: t\('nexo\.cerrar'\)/.test(bloque));
+
   /* 🔴 LOS DOS ARGUMENTOS DEL ESTADO, y son los que la captura del founder
      puso en duda: `despierta` sale de la pata abierta y `hablando` de la Hoja.
      Se asertan por literal porque **el estado no se puede leer del DOM**: no
@@ -570,7 +584,7 @@ for (const idioma of ['es', 'en'] as const) {
   const nombre = t('coach.nombre');
   ok(`${idioma} · coach.nombre existe y no está vacío`, typeof nombre === 'string' && nombre.length > 0, nombre);
 
-  const conNombre = ['nexo.etiqueta', 'nexo.almohadilla', 'nexo.presentacion'];
+  const conNombre = ['nexo.etiqueta', 'nexo.cerrarOrbe', 'nexo.almohadilla', 'nexo.presentacion'];
   for (const k of conNombre) {
     const s = t(k, { nombre });
     ok(`${idioma} · ${k} interpola el nombre`, s.includes(nombre), s);
