@@ -94,7 +94,12 @@ if (await disco.count() > 0) {
   await page.waitForTimeout(1500);
 }
 const b2 = await page.evaluate(() => [...document.querySelectorAll('[role="button"]')].map((e) => (e.getAttribute('aria-label') ?? e.textContent ?? '').trim()));
-const dedosAbierta = b2.filter((n) => /^(Peso|Vacuna|Antiparasitario|Foto)$/.test(n));
+/* 🔴 **LOS ROTULOS SE LEEN DEL DICCIONARIO, no de mi memoria.** Estaban
+   tecleados y el dia que el cuarto dedo paso de «Foto» a «Recuerdo» el arnes
+   reporto TRES dedos — *un instrumento atado a un literal envejece con la voz
+   y su rojo culpa a la app.* */
+const ROTULOS = [...readFileSync('apps/cliente/src/i18n/es.ts', 'utf8').matchAll(/\bdedo\w+: '([^']+)'/g)].map((m) => m[1]);
+const dedosAbierta = b2.filter((n) => ROTULOS.includes(n));
 di(`— con la pata ABIERTA —`);
 di(`  dedos: ${dedosAbierta.join(' · ') || 'ninguno'}`);
 di(`  «Preguntale»: ${b2.some((n) => /^Preguntale/i.test(n)) ? 'sí' : 'no'}`);

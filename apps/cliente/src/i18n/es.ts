@@ -84,7 +84,7 @@ export const clienteEs = {
     dedoPeso: 'Peso',
     dedoVacuna: 'Vacuna',
     dedoAntiparasitario: 'Antiparasitario',
-    dedoFoto: 'Foto',
+    dedoFoto: 'Recuerdo',
     /* 🔴 UN BOTÓN APAGADO SIN RAZÓN A LA VISTA ES EL DEFECTO — acá está la
      * razón, y **dice el nombre**: una razón que nombra a la mascota es una
      * frase sobre ELLA; una genérica es un cartel.
