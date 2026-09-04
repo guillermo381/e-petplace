@@ -57,3 +57,22 @@ void cuatro
 // @ts-expect-error — 'orbe' no existe en el registry de la casa
 const inventado: AtajoCoach = { id: 'e', icono: 'orbe', etiqueta: 'x', onPress: ir }
 void inventado
+
+/* ── ⑤ LOS TRES DEL COACH SÍ ENTRAN, Y ES LA OTRA MITAD DEL ROJO ──────
+ * 🔴 **Un gate que sólo prueba que algo falla no prueba que lo correcto
+ * pase.** Si `IconoNombre` se rompiera entera, ④ seguiría verde —el error
+ * seguiría ocurriendo— y nadie se enteraría de que el registry quedó
+ * inservible. Estas tres líneas son su control positivo: **compilan si y
+ * sólo si los glifos existen de verdad en el registry.** */
+const conPeso: AtajoCoach = { id: 'p', icono: 'peso', etiqueta: 'Peso', onPress: ir }
+const conAnti: AtajoCoach = { id: 'a', icono: 'antiparasitario', etiqueta: 'Antipulgas', onPress: ir }
+const conFoto: AtajoCoach = { id: 'f', icono: 'foto', etiqueta: 'Foto', onPress: ir }
+void conPeso
+void conAnti
+void conFoto
+
+/* Y su vecino falso, para que el control positivo no pase por casualidad:
+   un nombre PARECIDO al nuevo tampoco entra. */
+// @ts-expect-error — 'pesos' (en plural) no existe: el registry no adivina
+const casiPeso: AtajoCoach = { id: 'g', icono: 'pesos', etiqueta: 'x', onPress: ir }
+void casiPeso

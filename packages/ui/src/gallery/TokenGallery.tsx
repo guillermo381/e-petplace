@@ -184,9 +184,16 @@ import type { ThemeMode } from '../themes'
  * existe para hacer bien —*un botón apagado sin razón a la vista es el
  * defecto*— y el que hay que poder ver de un vistazo. */
 const ATAJOS_COACH_DEMO = [
-  { id: 'paseo', icono: 'paseo', etiqueta: 'Paseo', onPress: () => {} },
-  { id: 'vet', icono: 'veterinaria', etiqueta: 'Vet', onPress: () => {} },
-  { id: 'despensa', icono: 'despensa', etiqueta: 'Despensa', razonApagado: 'Todavía no hay tiendas que lleguen a tu zona' },
+  { id: 'peso', icono: 'peso', etiqueta: 'Peso', onPress: () => {} },
+  { id: 'antiparasitario', icono: 'antiparasitario', etiqueta: 'Antipulgas', razonApagado: 'Thor todavía no tiene una fecha de desparasitación cargada' },
+  { id: 'foto', icono: 'foto', etiqueta: 'Foto', onPress: () => {} },
+  /* ⚠️ **EL CUARTO ES DE CAPA Y SE VE:** `carnet` LLEVA HUELLA y los tres del
+     Coach no, así que dentro de la misma huella conviven dos tratamientos.
+     *No es un defecto de las piezas: es la consecuencia de N27 cuando un
+     atajo NOMBRA algo (el carnet) y los otros tres son actos.* Se deja a la
+     vista en el catálogo en vez de esconderse eligiendo un cuarto cómodo —
+     **si al founder le salta, la salida es que el cuarto también sea un acto,
+     no apagarle la huella al carnet.** */
   { id: 'carnet', icono: 'carnet', etiqueta: 'Carnet', onPress: () => {} },
 ] as const
 /* La voz la compone la pantalla (Ley 3): la pieza no arma frases. */
@@ -1116,6 +1123,77 @@ function Seccion({ titulo, children }: { titulo: string; children: React.ReactNo
 
 function Fila({ children }: { children: React.ReactNode }) {
   return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>{children}</View>
+}
+
+/* ── §6b PASO 4 · LA HOJA DE CONTACTO DE LOS TRES DEL COACH ────────────────
+ * *«Montaje a 21 px Y 44 px, junto a 5 glifos del registry, en claro y
+ * oscuro. El glifo se juzga EN VECINDAD — un glifo que solo funciona solo,
+ * no funciona.»*
+ *
+ * **Los cinco vecinos no son cualquiera: son los que pueden confundirse.**
+ * `vacuna` es la VARA de peso visual · `seguros` es el escudo que ya existe
+ * y contra el que `antiparasitario` tiene que separarse · `ubicacion` es la
+ * gota que ya existe · `telemedicina` es la otra forma cerrada de la casa,
+ * el vecino real de `foto` · `carnet` cierra la familia de salud.
+ * *Poner cinco vecinos que no se parecen a nada haría una fila linda y una
+ * medición vacía.* */
+const NUEVOS_COACH = ['peso', 'antiparasitario', 'foto'] as const
+/* **Los cinco vecinos no son cualquiera: son los que pueden confundirse.** */
+const VECINOS_COACH = ['vacuna', 'seguros', 'ubicacion', 'telemedicina', 'carnet'] as const
+
+/** Una fila del contacto. Lee el tema DE SU PROVIDER, así que la misma pieza
+ *  sirve en claro y en oscuro sin un solo color a mano — que es justo lo que
+ *  la Ley 1 pide y lo que `verify:diseno` mordió cuando puse el hex. */
+function FilaDeContacto({ tamano }: { tamano: number }) {
+  const { theme } = useTheme()
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="dato">{`a ${tamano} px — los tres nuevos, y después sus cinco vecinos`}</Texto>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+        {NUEVOS_COACH.map((n) => (
+          <Icono key={n} nombre={n} tamano={tamano} />
+        ))}
+        {/* El corte se ve: a la izquierda lo que se juzga, a la derecha la casa. */}
+        <View style={{ width: 1, height: tamano, backgroundColor: theme.bg.border }} />
+        {VECINOS_COACH.map((n) => (
+          <Icono key={n} nombre={n} tamano={tamano} />
+        ))}
+      </View>
+    </View>
+  )
+}
+
+/** El panel oscuro. Vive adentro del provider para poder pintar su propio
+ *  papel con el slot del tema en vez de un hex. */
+function PanelOscuroCoach() {
+  const { theme } = useTheme()
+  return (
+    <View style={{ gap: spacing[4], padding: spacing[4], borderRadius: radius.lg, backgroundColor: theme.bg.base }}>
+      <FilaDeContacto tamano={21} />
+      <FilaDeContacto tamano={44} />
+    </View>
+  )
+}
+
+function HojaDeContactoCoach() {
+  return (
+    <View style={{ gap: spacing[5] }}>
+      <Texto variante="apoyo">
+        Medido y no adjetivado: peso 46,3 · antiparasitario 47,1 · foto 51,6 de
+        trazo, contra los 46,4 de vacuna. Los tres son GLIFOS DE CONTROL: sin
+        huella, porque viven dentro de los dedos de la huella del Coach.
+      </Texto>
+      <View style={{ gap: spacing[4] }}>
+        <FilaDeContacto tamano={21} />
+        <FilaDeContacto tamano={44} />
+      </View>
+      {/* El mismo montaje en oscuro: un glifo que sólo funciona en un tema
+          no funciona (§6b paso 4 pide los dos). */}
+      <ThemeProvider defaultMode="dark">
+        <PanelOscuroCoach />
+      </ThemeProvider>
+    </View>
+  )
 }
 
 // ── Panel por tema: se monta bajo un ThemeProvider anidado con el modo
@@ -3182,6 +3260,10 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — LOS TRES GLIFOS DEL COACH (§6b.5, POR ÍCONO) · qué decide, de a uno: (a) que `peso` se lea BALANZA y no termómetro ni lámpara; (b) que `antiparasitario` se distinga de `seguros`, que YA es un escudo — o que gane la pipeta; (c) que `foto` se lea CÁMARA y no pantalla-con-botón. Van a 21 y a 44 contra sus cinco vecinos, en claro y en oscuro">
+          <HojaDeContactoCoach />
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S112 — D-999 · EL BOTÓN DIBUJA SU RAZÓN · qué decide: (a) que la línea se lea como una EXPLICACIÓN de la casa —atenuada, jamás un error— y (b) que al encenderse el botón NADA salte. El control ③ prueba que un apagado sin razón sigue sin dibujar nada">
           <GateRazonDelBoton />
         </Seccion>
