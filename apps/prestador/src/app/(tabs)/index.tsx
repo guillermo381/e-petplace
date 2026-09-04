@@ -80,6 +80,7 @@ import {
   obtenerMiPerfil,
   obtenerChipsEmpleado,
   obtenerMiEmpleadoId,
+  obtenerConteoSemanaPrestador,
   obtenerMiPrestador,
   obtenerContextoArranque,
   obtenerTitularId,
@@ -1030,6 +1031,15 @@ export default function Hoy() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
+  /* ⭐ S113-A · EL CONTEO DE LA SEMANA, EN SU PROPIO ESTADO Y A PROPÓSITO.
+     Vive FUERA de `pantalla` porque no es contenido: es el número del techo.
+     Si `pantalla` fuera su casa, un fallo del conteo tendría que elegir entre
+     tumbar la jornada (Ley 13 al revés: un adorno matando el contenido) o
+     colarse como 0 — y **un 0 es un hecho** («no tenés nada esta semana»),
+     así que fabricarlo desde un fallo es la mentira más cara de esta pantalla.
+     Acá el fallo vuelve a `null`, que es exactamente lo que C dejó firmado:
+     «todavía no lo sé», y el techo dibuja «Hoy libre» sin número. */
+  const [semanaDelServidor, setSemanaDelServidor] = useState<number | null>(null);
   // ── S96-C · §0bis DE LA LÁMINA (firma de mesa): el no-gestor con
   // naturaleza vendedora MEDIDA tiene camino visible a SU panel desde el
   // arranque. Condición de la casa (S78-B/D-521): el predicado exige
@@ -1236,6 +1246,18 @@ export default function Hoy() {
     /* El resto del efecto habla `prestador.data.*` desde siempre — se le
        sirve el MISMO objeto desde el contexto, sin re-pedirlo. */
     const prestador = { ok: true as const, data: c.prestador };
+    /* ⭐ S113-A · EL CONTEO DE LA SEMANA — se pide APARTE y NO se espera.
+       No entra al `Promise.all` de la jornada a propósito: si el conteo
+       tarda o falla, las citas del día **no pueden** quedar esperándolo. El
+       techo es lo último que importa cuando lo que se viene a ver es a quién
+       hay que atender.
+       La ventana (hoy..hoy+6) y la ZONA las resuelve el wrapper con
+       `diaDelNegocio(prestadores.zona_horaria)` — esta pantalla ya no arma
+       ninguna fecha para contar. */
+    void obtenerConteoSemanaPrestador({ prestador_id: c.prestador.id }).then((rs) => {
+      /* El fallo vuelve a `null`, jamás a 0 — ver el estado, arriba. */
+      setSemanaDelServidor(rs.ok ? rs.data : null);
+    });
     /* ⭐ S88-C (LÁMINA_HOME_POR_ROL, punto 1) — EL ROL SE RESUELVE ACÁ,
        ANTES de pintar, y el desvío a AgendaRecepcion MUERE por firma:
        recepción ve LA CONSOLIDADA con su verbo. Costo declarado: los
@@ -1939,25 +1961,30 @@ export default function Hoy() {
     pantalla.estado === 'listo'
       ? formaDelDia({
           citasHoySin,
-          /* 🔴 PUERTA PENDIENTE — PEDIDO A LA PISTA A (S113-C).
-             El conteo de la semana del prestador NO EXISTE en @epetplace/api
-             (censo: cero coincidencias de "semana" en packages/api/src). Se
-             pide POR NOMBRE y con su forma; esta pantalla no lo calcula:
+          /* ✅ S113-A · LA PUERTA QUE C PIDIÓ, ABIERTA — `obtenerConteoSemanaPrestador`.
+             El número lo cuenta el servidor (`contar_citas_semana_prestador`,
+             migración `20260908940000`): acá no se recorre ninguna lista.
+             Estados y discriminador por oficio son COPIA LITERAL de los cuatro
+             lectores del día, medidos antes de escribir la RPC.
 
-               wrapper : obtenerConteoSemanaPrestador({ prestador_id })
-               tipo    : Promise<ResultadoWrapper<number, CodigoError…>>
-               consulta: citas FIRMES — los MISMOS cuatro estados que ya usan
-                         los lectores del día (confirmada · en_curso ·
-                         completada · no_show) — de los CUATRO oficios, en la
-                         ventana hoy..hoy+6
-               zona    : el día se resuelve en la ZONA DEL NEGOCIO
-                         (`prestadores.zona_horaria`, la misma que usa
-                         `hoy_local()` en la base), JAMÁS en la del aparato
+             🔴 **UNA CORRECCIÓN AL PEDIDO, y no es menor.** El pedido decía que
+             la zona sale de `prestadores.zona_horaria`, *«la misma que usa
+             `hoy_local()` en la base»*. **Esa segunda mitad es FALSA, medida:**
+             `hoy_local()` es `(now() AT TIME ZONE 'America/Guayaquil')::date` —
+             una CONSTANTE, no la zona del negocio. Es `D-1007`, y es justo el
+             defecto que este conteo no podía heredar.
+             ⇒ La ventana la arma el WRAPPER con `diaDelNegocio(zona_horaria)`
+             de `@epetplace/domain`, la misma aritmética `Intl` que `hoyEnZona`
+             (S112-C). La RPC recibe `desde`/`hasta` y **jamás llama a
+             `hoy_local()`**.
+             *La misma frase vive en `dia-local.ts`; se corrige acá, donde la
+             leí. Corregirla allá es del prestador y se declara, no se toca.*
 
-             Hasta que exista, `null` = «todavía no lo sé» y el techo dibuja
-             «Hoy libre» solo. El día que llegue, ESTA LÍNEA es lo único que
-             cambia acá. */
-          semanaDelServidor: null,
+             ⚠️ Y el pedido decía «ESTA LÍNEA es lo único que cambia acá»:
+             **no alcanzó.** El valor no existía en scope — hubo que agregar su
+             estado y su disparo (arriba, los dos con su porqué). *Una puerta no
+             se abre sólo donde se la nombra: también donde se la carga.* */
+          semanaDelServidor,
           esAtendida,
           porCoordinar: porCoordinar.length,
           esPasado: vistaEsPasado,
