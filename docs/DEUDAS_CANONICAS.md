@@ -3213,6 +3213,47 @@ cierra el pasado** (`L-409`).
 
 ---
 
+### `D-1018` 🟡 — 34 `eslint-disable` escritas para un linter que nunca corrió
+
+**Qué, con el número acotado.** El árbol tiene **58 directivas
+`eslint-disable`** (apps 40 · packages 16 · scripts 2). Por regla silenciada:
+
+| regla | n |
+|---|---|
+| `react-hooks/exhaustive-deps` | **34** (33 `-next-line` + 1 `-line`) |
+| `@typescript-eslint/no-require-imports` | 18 |
+| `@typescript-eslint/no-var-requires` | 4 |
+
+**Las 34 son las que importan, y el motivo es preciso:** `verify:hooks` (S113-E)
+enciende **una sola** regla —`react-hooks/rules-of-hooks`— y **`exhaustive-deps`
+NO es esa**. Hasta hoy no había ESLint en el repo (`pnpm lint` no existía, cero
+`eslint.config.*`), así que **esas 34 nunca silenciaron nada: silenciaron a
+nadie.**
+
+**Por qué es deuda y no basura.** Cada una es una **decisión que alguien tomó**
+—«acá el array de dependencias va incompleto a propósito»— y que **nunca fue
+verificada por la herramienta a la que se dirige**. El día que se encienda
+`exhaustive-deps`, esas 34 líneas **no se leen como avisos: se leen como
+permisos ya concedidos**, y el gate arranca con 34 excepciones que nadie
+revisó. *Una supresión escrita contra un linter apagado es una firma en blanco
+con fecha futura.*
+
+**Y la asimetría que la vuelve interesante:** `exhaustive-deps` es
+exactamente la regla que atrapa la familia de defectos que esta sesión pagó dos
+veces —el closure obsoleto del P0 del paseo (S80) y el TDZ del hilo (S112)—.
+*Las 34 supresiones están puestas justo donde más caro sale equivocarse.*
+
+**Qué NO se hizo, y por qué.** No se revisó ninguna. Revisarlas **exige la
+regla encendida**: sin ella no hay forma de saber cuáles siguen siendo
+correctas y cuáles quedaron viejas cuando su efecto cambió. *Auditarlas a ojo
+sería reemplazar 34 decisiones no verificadas por 34 opiniones no verificadas.*
+
+**Disparo.** **Se revisan cuando se encienda una segunda regla.** Y el orden
+correcto es el que S113-E ya usó para la primera: encender, mirar el rojo
+completo, y recién ahí decidir cuáles supresiones sobreviven — nunca al revés.
+
+---
+
 ### `D-1017` ☠️ — el prestador NO ABRE: dos hooks después de un `return` temprano
 
 **Qué, con el stack literal.** El OTA del lote 0 (group `d921ba81`, ancla

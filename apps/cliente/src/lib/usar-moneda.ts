@@ -1,5 +1,5 @@
 /**
- * usarMoneda — el puente entre el riel de moneda (`packages/i18n`) y la
+ * useMoneda — el puente entre el riel de moneda (`packages/i18n`) y la
  * config del país (`packages/api`), para que ninguna pantalla tenga que
  * cablear las dos piezas a mano (S82-A r16).
  *
@@ -27,7 +27,19 @@ import { useTraduccion } from '@/i18n';
  *  además el re-render por cada pantalla que pide el mismo país. */
 const _porPais = new Map<string, ConfigMoneda>();
 
-export function usarMoneda(countryCode: string | null | undefined) {
+/* 🔴 **S113-A · `usarMoneda` → `useMoneda`, y no es cosmética.**
+ * `react-hooks/rules-of-hooks` decide qué es un hook **por el NOMBRE**: sólo
+ * `use…` o mayúscula inicial. Con `usarMoneda` la regla no lo reconocía como
+ * hook y sus tres llamadas salían como *«llamado en una función que no es
+ * componente ni hook»* — o sea que **el gate no podía vigilar el archivo que
+ * más lo necesita**. Es la convención que `CLAUDE.md` fija hoy: **prefijo
+ * `use`, nombre en español.**
+ *
+ * ⚠️ **Y de paso, medido: tiene CERO consumidores** — el único lugar del
+ * monorepo que lo nombra es este archivo. No se borra acá (no me lo pidieron y
+ * borrar código ajeno de paso es cómo se pierde trabajo de alguien); queda
+ * declarado. */
+export function useMoneda(countryCode: string | null | undefined) {
   const { idioma } = useTraduccion();
   const [config, setConfig] = useState<ConfigMoneda | null>(
     countryCode != null ? (_porPais.get(countryCode) ?? null) : null,
