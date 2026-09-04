@@ -49,7 +49,7 @@ export const clienteEn = {
     dedoPeso: 'Weight',
     dedoVacuna: 'Vaccine',
     dedoAntiparasitario: 'Parasite control',
-    dedoFoto: 'Photo',
+    dedoFoto: 'Memory',
     razonAcuario: '{{mascota}} is an aquarium: no vaccines, no parasite control.',
     /* ☠️ `razonSinPuerta` MURIÓ (lote 0.1): era la razón del dedo «Foto»
      * mientras no existía su puerta. A la construyó, el dedo se encendió y la
