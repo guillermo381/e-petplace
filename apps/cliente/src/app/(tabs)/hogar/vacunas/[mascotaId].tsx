@@ -236,6 +236,13 @@ export default function PlanDeVacunas() {
 
   // la línea de identidad: SOLO lo cargado (raza · peso). La edad exigía
   // clonar la voz del perfil (de C) — se omite antes que duplicarla.
+  /* El mismo hecho que la ficha, derivado del PERFIL y no del tema: `theme.mode
+     === 'memorial'` no lo enciende nadie (`D-1021`), asi que el guard de abajo
+     estaba escrito y muerto. */
+  const esMemorial =
+    theme.mode === 'memorial' ||
+    (perfil.mascota.estado_vida !== null && perfil.mascota.estado_vida !== 'activa');
+
   const identidad = [
     perfil.mascota.raza,
     perfil.peso_clinico_kg !== null ? t('planVacunas.pesoKg', { kg: perfil.peso_clinico_kg }) : null,
@@ -268,7 +275,7 @@ export default function PlanDeVacunas() {
               paddingTop: spacing[2],
             }}
           >
-            <Isotipo size={32} variant={theme.mode === 'memorial' ? 'blanco' : 'gradiente'} />
+            <Isotipo size={32} variant={esMemorial ? 'blanco' : 'gradiente'} />
             <View style={{ flex: 1, gap: spacing[1] }}>
               <Texto variante="titulo">{t('planVacunas.titulo', { nombre })}</Texto>
               {identidad.length > 0 ? <Texto variante="dato">{identidad.join(' · ')}</Texto> : null}
@@ -283,15 +290,20 @@ export default function PlanDeVacunas() {
           // escalonado (Ley 13; el guard R8 de C cazó esto en su primera
           // corrida sobre este archivo — el lint no es decorativo).
           <View style={{ padding: spacing[5] }}>
+            {/* 🔴 En memorial queda el TITULO y nada mas: la ausencia se
+                declara, pero no se invita a llenarla. No se inventa una voz
+                nueva para el duelo — se retira la que pide. */}
             <EstadoVacio
               registro="seccion"
               titulo={t('planVacunas.vacioTitulo')}
-              descripcion={t('planVacunas.vacioDetalle')}
+              descripcion={!esMemorial ? t('planVacunas.vacioDetalle') : undefined}
               accion={
+                !esMemorial ? (
                 <Boton
                   etiqueta={t('planVacunas.cargarCarnet')}
                   onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: perfil.mascota.id, nombre } })}
                 />
+                ) : undefined
               }
             />
           </View>

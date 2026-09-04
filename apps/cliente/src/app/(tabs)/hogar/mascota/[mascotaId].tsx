@@ -503,7 +503,7 @@ export default function PerfilDeMascota() {
        * Cuenta VECES, no milisegundos: lo que se discute es cuántas. Se retira
        * con D-726, junto con el instrumento del paseo. */
       vecesFocoRef.current += 1;
-      console.log(`[p0c-transversal] perfil de mascota · entra al efecto por VEZ ${vecesFocoRef.current}`);
+      if (__DEV__) console.log(`[p0c-transversal] perfil de mascota · entra al efecto por VEZ ${vecesFocoRef.current}`);
       setVecesFoco(vecesFocoRef.current);
 
       let vigente = true;
@@ -696,6 +696,7 @@ export default function PerfilDeMascota() {
   const pendientes = esMemorial
     ? 0
     : contarPendientesDe(mascota.id, {
+        enMemoria: esMemorial,
         solicitudes,
         presupuestos,
         porCoordinar,
@@ -1412,16 +1413,27 @@ export default function PerfilDeMascota() {
         {/* ── ⑤ VACUNAS — el resumen en UNA fila con el canto de SALUD y
             el pie que revela. "Cargar carnet" ya NO vive acá (se mudó a
             la fila de la ausencia): un solo gesto por sección. */}
-        {monta.vacunas ? (
+        {/* 🔴 **`D-1024`** — `monta.vacunas` decide por SUJETO y este bloque
+            invitaba a «Cárgalo con una foto» en la ficha de quien ya no está.
+            **La sección NO muere en memorial: las vacunas que tuvo SE LEEN.**
+            Lo que se apaga es la invitación cuando no hay ninguna, y con ella
+            la sección entera —un rótulo «Vacunas 0» sin nada debajo es peor
+            que no estar—.
+            ⚠️ El guard va DOS veces a propósito: el de acá evita la sección
+            muda, y el de adentro es el que un lector —y el censo— puede
+            verificar sin tener que cruzar dos hechos en la cabeza. */}
+        {monta.vacunas && !(esMemorial && vacunas.length === 0) ? (
         <View style={{ marginTop: spacing[8] }}>
           <RotuloSeccion titulo={t('perfil.vacunas')} cuenta={String(vacunas.length)} />
           <View style={{ paddingHorizontal: spacing[5] }}>
             {vacunas.length === 0 ? (
+              !esMemorial ? (
               <EstadoVacio
                 registro="seccion"
                 titulo={t('perfil.carnetVacio')}
                 descripcion={t('perfil.carnetVacioDetalle')}
               />
+              ) : null
             ) : (
               <>
                 {/* r8 (la lámina lo pide y AHORA existe el destino): el
@@ -2028,10 +2040,18 @@ export default function PerfilDeMascota() {
         {/* 🔴 SONDA TRANSVERSAL DE P0-C (D-728) — se retira con D-726.
             Va al PIE y en voz de dato: no es contenido del expediente. Si este
             número sube al abrir una hoja, la pantalla recarga todo sin que se
-            note — la lentitud general del founder, medida. */}
+            note — la lentitud general del founder, medida.
+            ⚠️ **`D-1027` — BAJO `__DEV__`.** Se estaba dibujando en el binario
+            que usa el founder, y el día que lo vio fue en la ficha de una
+            mascota que murió: *un instrumento nuestro, con su jerga adentro,
+            en el peor lugar posible.* La sonda sigue viva porque su medición
+            sigue haciendo falta; lo que se corrige es a quién se la mostramos.
+            No se retira acá: su retiro es de `D-726`, que tiene dueño. */}
+        {__DEV__ ? (
         <Texto variante="dato">
           {`p0c · esta pantalla pidió todo ${vecesFoco} vez/veces`}
         </Texto>
+        ) : null}
 
       </ScrollView>
 
