@@ -31,8 +31,9 @@ import { readFileSync } from 'node:fs';
 
 import {
   AIRE_BORDE,
-  HALO,
+  ARCO_GROSOR,
   ORBE,
+  ORBE_ABIERTO,
   RESPLANDOR,
   anclaOrbe,
   clasesConAlgo,
@@ -355,11 +356,19 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
 
 /* ═══ ⑩ EL ORBE EN REPOSO NO QUEDA TAPADO — z-order y geometría ══════════════
  *
+ * ⏪ **ESTE BLOQUE SE REESCRIBIÓ CONTRA LA PIEZA NUEVA, y el gate lo exigió a
+ * los gritos:** B rehízo la presencia en el lote 0.1 —la huella murió en el
+ * teléfono y la reemplaza una FILA ASCENDENTE sobre el eje del orbe, que ya no
+ * viaja— y con ella murió `HALO`. El arnés **no arrancó**: *«does not provide
+ * an export named HALO»*. **Eso es exactamente lo que tiene que pasar**: un
+ * gate atado a la geometría real se rompe cuando la geometría cambia, en vez
+ * de seguir verde midiendo el mundo de ayer.
+ *
  * 🔴 **LA BARRA PINTA DESPUÉS DEL ORBE, y eso no se discute: se mide.** En el
  * `tabBar` del shell, `NexoDelShell` es el PRIMER hijo del fragmento y
  * `BarraTabs` el SEGUNDO — en React Native los hermanos posteriores pintan
- * encima. ⇒ **donde se toquen, gana la barra.** Por eso lo único que salva al
- * orbe es que NO se toquen, y eso es aritmética con los números de B.
+ * encima. ⇒ **donde se toquen, gana la barra.** Lo único que salva al orbe es
+ * que NO se toquen, y eso es aritmética con los números de B.
  *
  * ⚠️ **Y una tarjeta de pantalla no puede taparlo, por una razón distinta:**
  * el orbe vive en el subárbol del `tabBar`, que el navegador pinta DESPUÉS del
@@ -367,10 +376,6 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
  * ficha de la mascota (`[mascotaId].tsx:1092`) ordenan **entre hermanos de su
  * propio padre** y no cruzan de subárbol; medido además: **ninguna de las dos
  * pantallas usa `elevation`**, que es lo único que en Android podría cruzar.
- *
- * La geometría se importa de `coach-geometria` **acá y sólo acá**: B la dejó
- * sin exportar a propósito para que ninguna pantalla la re-decida, y su propio
- * gate la importa del módulo. *Un arnés que la copiara mediría su eco.*
  */
 {
   const ANCHO = 390; // un teléfono común; el ancla es lineal en el ancho
@@ -378,11 +383,10 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   /* 🔴 **EL ALTO DE LA FILA SE LEE DEL ARCHIVO, NO SE IMPORTA — y no es un
      atajo: es lo único que se puede.** `ALTO_FILA_TABS` se exporta desde
      `BarraTabs.tsx`, un componente, así que importarlo arrastra
-     `react-native` entero y el arnés no arranca (medido: *«Unexpected typeof»*
-     en `react-native/index.js`). *Ésa es exactamente la razón por la que B
-     puso su geometría en un módulo sin runtime.*
-     Se lee del objeto y **si no se puede leer, el gate NO da verde**: sale
-     NO CONCLUYENTE. Un número tecleado acá mediría un teléfono imaginario. */
+     `react-native` entero y el arnés no arranca (medido: «Unexpected typeof»
+     en `react-native/index.js`). *Ésa es la razón por la que B puso su
+     geometría en un módulo sin runtime.* Se lee del objeto y **si no se puede
+     leer, el gate NO da verde**: sale NO CONCLUYENTE. */
   const fuenteBarra = readFileSync(
     new URL('../../../packages/ui/src/components/BarraTabs.tsx', import.meta.url),
     'utf8',
@@ -396,17 +400,25 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
 
   const ancla = anclaOrbe(ANCHO, BARRA);
 
-  /* ① EL CUERPO DEL ORBE — su borde inferior contra el borde superior de la
-        barra. `AIRE_BORDE` es exactamente ese aire. */
+  /* ① EL CUERPO DEL ORBE — `anclaOrbe` promete la caja del ORBE, no la del
+        resplandor, así que su borde inferior es el ancla misma. */
   const holguraCuerpo = ancla.abajo - BARRA;
   ok('el cuerpo del orbe no entra en la banda de la barra', holguraCuerpo > 0, `holgura=${holguraCuerpo}`);
   ok('y la holgura es el aire del borde, no un sobrante casual', holguraCuerpo === AIRE_BORDE, String(holguraCuerpo));
 
-  /* ② LA CAJA DEL HALO — el aro tenue desborda parejo y la caja baja 9. */
-  const holguraHalo = ancla.abajo - (HALO - ORBE) / 2 - BARRA;
-  ok('la caja del halo tampoco entra en la barra', holguraHalo > 0, `holgura=${holguraHalo}`);
+  /* ② LA CAJA DE LOS ARCOS — desborda `ARCO_GROSOR * 2` y la pieza lo compensa
+        para que el CUERPO caiga donde el ancla promete. La caja baja igual. */
+  const holguraCaja = ancla.abajo - ARCO_GROSOR * 2 - BARRA;
+  ok('la caja de los arcos tampoco entra en la barra', holguraCaja > 0, `holgura=${holguraCaja}`);
 
-  /* ③ EL RESPLANDOR SÍ ROZA, Y SE DECLARA EN VEZ DE ESCONDERSE. Es una SOMBRA
+  /* ③ EL ORBE ABIERTO — **crece y no viaja** (`scale`, centro fijo). Al escalar
+        alrededor del centro, la caja baja la mitad de lo que crece. */
+  const altoCaja = ORBE + ARCO_GROSOR * 4;
+  const crecimiento = altoCaja * (ORBE_ABIERTO / ORBE - 1);
+  const holguraAbierto = holguraCaja - crecimiento / 2;
+  ok('abierto tampoco entra en la barra', holguraAbierto > 0, `holgura=${holguraAbierto.toFixed(1)}`);
+
+  /* ④ EL RESPLANDOR SÍ ROZA, Y SE DECLARA EN VEZ DE ESCONDERSE. Es una SOMBRA
         (`shadowRadius = RESPLANDOR`, `elevation` en Android), no cuerpo: su
         borde exterior llega a `AIRE_BORDE - RESPLANDOR` de la banda. *El orbe
         no queda tapado; lo que la barra recorta son los píxeles más tenues de
@@ -415,9 +427,9 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   const rocePorElBrillo = RESPLANDOR - AIRE_BORDE;
   ok('el roce es SÓLO del resplandor y está acotado', rocePorElBrillo > 0 && rocePorElBrillo <= 8, `${rocePorElBrillo}px`);
 
-  /* ④ EL BORDE DERECHO — que no se salga de la pantalla. */
+  /* ⑤ EL BORDE DERECHO — que no se salga de la pantalla, ni al crecer. */
   ok('el orbe no se sale por la derecha', ancla.izquierda + ORBE <= ANCHO);
-  ok('el halo tampoco', ancla.izquierda - (HALO - ORBE) / 2 + HALO <= ANCHO);
+  ok('abierto tampoco', ancla.izquierda + ORBE + crecimiento / 2 <= ANCHO);
 
   /* 🔴 EL CONTROL NEGATIVO, y nombra el modo de falla real: si el shell se
         olvidara de pasar `aireInferior`, el orbe caería DENTRO de la barra —
@@ -429,14 +441,13 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
     `holgura=${sinAire.abajo - BARRA}`,
   );
 
-  /* ⑤ Y QUE EL SHELL SE LO PASE MEDIDO, NO TECLEADO.
+  /* ⑥ Y QUE EL SHELL SE LO PASE MEDIDO, NO TECLEADO.
      🔴 **SE MIRA EL BLOQUE DE `PresenciaCoach`, NO EL ARCHIVO — y esto lo
      corrigió su propio rojo.** La primera versión buscaba
      `aireInferior={altoBarra}` en todo el archivo y **daba VERDE con la
      presencia en `0`**: encontraba el de `BurbujaPendientes`, que está tres
      líneas más arriba y también lo recibe. *Dos consumidores del mismo dato en
-     el mismo archivo, y el gate no distinguía cuál medía.* Es un verde por la
-     razón equivocada, cazado produciendo el rojo antes de confiar en él. */
+     el mismo archivo, y el gate no distinguía cuál medía.* */
   const shell = readFileSync(new URL('../src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8');
   const iPresencia = shell.indexOf('<PresenciaCoach');
   if (iPresencia < 0) {
@@ -451,11 +462,32 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
     'arranca en la fórmula de la barra, no en un número tecleado',
     /useState\(ALTO_FILA_TABS \+ insets\.bottom\)/.test(shell),
   );
-  /* El orden de hermanos: la presencia ANTES que la barra. Si alguien los da
-     vuelta, la barra dejaría de pintar encima — y este gate lo diría. */
   const iNexo = shell.indexOf('<NexoDelShell');
   const iBarra = shell.indexOf('<BarraTabs');
   ok('la presencia se monta ANTES que la barra (la barra pinta encima)', iNexo > 0 && iBarra > iNexo);
+
+  /* ⑦ 🔴 `onPreguntar` NO SE DISPARA DOS VECES — aviso de B: ahora lo tira el
+        orbe YA ABIERTO, no una línea aparte. Medido de los dos lados: en la
+        PIEZA son dos NODOS distintos (la pastilla de la voz y el orbe), así
+        que un toque enciende uno; en MI montaje `onPreguntar` aparece una sola
+        vez y `tocar('coach')` tiene un solo llamador. */
+  const veces = (re: RegExp) => (bloquePresencia.match(re) ?? []).length;
+  ok('`onPreguntar` se pasa UNA sola vez', veces(/onPreguntar=/g) === 1, String(veces(/onPreguntar=/g)));
+  ok(
+    "`tocar('coach')` tiene un solo llamador en el shell",
+    (shell.match(/tocar\('coach'\)/g) ?? []).length === 1,
+  );
+  ok('y `onAbrir` no lo llama: sólo enciende la fila', /onAbrir=\{\(\) => setAbierta\(true\)\}/.test(bloquePresencia));
+
+  /* ⑧ EL ORDEN DE LOS ATAJOS — B lo lee **de abajo hacia arriba**, en el orden
+        en que se pasan. El de la mesa es Peso · Vacuna · Antiparasitario ·
+        Foto, con Peso abajo (el más cerca del pulgar). */
+  ok(
+    'el orden de los atajos es el de la mesa, de abajo hacia arriba',
+    ORDEN_DE_PATA.join(',') === 'peso,vacuna,antiparasitario,foto',
+    ORDEN_DE_PATA.join(','),
+  );
+  ok('y son exactamente CUATRO, que es lo que la tupla exige', ORDEN_DE_PATA.length === 4);
 }
 
 /* ═══ ⑪ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
