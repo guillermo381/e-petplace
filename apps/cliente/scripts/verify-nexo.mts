@@ -27,7 +27,17 @@ import i18next from '../../../node_modules/i18next/dist/esm/i18next.js';
 
 import { clienteEn } from '../src/i18n/en';
 import { clienteEs } from '../src/i18n/es';
-import { clasesConAlgo, type PendientesCoach } from '../../../packages/ui/src/components/coach-geometria';
+import { readFileSync } from 'node:fs';
+
+import {
+  AIRE_BORDE,
+  HALO,
+  ORBE,
+  RESPLANDOR,
+  anclaOrbe,
+  clasesConAlgo,
+  type PendientesCoach,
+} from '../../../packages/ui/src/components/coach-geometria';
 import { clasesVivas } from '../../../packages/ui/src/components/pendientes-vivos';
 import { clasesVisibles, silenciaCarrito } from '../src/lib/pendientes-adopcion';
 import {
@@ -342,7 +352,113 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   ok('un código inventado cae al genérico', keyDelRebote('lo_que_sea') === 'recuerdo.errGenerico');
 }
 
-/* ═══ ⑩ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
+
+/* ═══ ⑩ EL ORBE EN REPOSO NO QUEDA TAPADO — z-order y geometría ══════════════
+ *
+ * 🔴 **LA BARRA PINTA DESPUÉS DEL ORBE, y eso no se discute: se mide.** En el
+ * `tabBar` del shell, `NexoDelShell` es el PRIMER hijo del fragmento y
+ * `BarraTabs` el SEGUNDO — en React Native los hermanos posteriores pintan
+ * encima. ⇒ **donde se toquen, gana la barra.** Por eso lo único que salva al
+ * orbe es que NO se toquen, y eso es aritmética con los números de B.
+ *
+ * ⚠️ **Y una tarjeta de pantalla no puede taparlo, por una razón distinta:**
+ * el orbe vive en el subárbol del `tabBar`, que el navegador pinta DESPUÉS del
+ * contenedor de pantallas. Los `zIndex: 2` de Hogar (`index.tsx:1749`) y de la
+ * ficha de la mascota (`[mascotaId].tsx:1092`) ordenan **entre hermanos de su
+ * propio padre** y no cruzan de subárbol; medido además: **ninguna de las dos
+ * pantallas usa `elevation`**, que es lo único que en Android podría cruzar.
+ *
+ * La geometría se importa de `coach-geometria` **acá y sólo acá**: B la dejó
+ * sin exportar a propósito para que ninguna pantalla la re-decida, y su propio
+ * gate la importa del módulo. *Un arnés que la copiara mediría su eco.*
+ */
+{
+  const ANCHO = 390; // un teléfono común; el ancla es lineal en el ancho
+
+  /* 🔴 **EL ALTO DE LA FILA SE LEE DEL ARCHIVO, NO SE IMPORTA — y no es un
+     atajo: es lo único que se puede.** `ALTO_FILA_TABS` se exporta desde
+     `BarraTabs.tsx`, un componente, así que importarlo arrastra
+     `react-native` entero y el arnés no arranca (medido: *«Unexpected typeof»*
+     en `react-native/index.js`). *Ésa es exactamente la razón por la que B
+     puso su geometría en un módulo sin runtime.*
+     Se lee del objeto y **si no se puede leer, el gate NO da verde**: sale
+     NO CONCLUYENTE. Un número tecleado acá mediría un teléfono imaginario. */
+  const fuenteBarra = readFileSync(
+    new URL('../../../packages/ui/src/components/BarraTabs.tsx', import.meta.url),
+    'utf8',
+  );
+  const mAlto = /const ALTO_FILA = (\d+)/.exec(fuenteBarra);
+  if (mAlto === null) {
+    di('ROJO · no pude leer ALTO_FILA de BarraTabs.tsx — no pude medir el z-order.');
+    process.exit(2);
+  }
+  const BARRA = Number(mAlto[1]) + 34; // fila + un inset típico
+
+  const ancla = anclaOrbe(ANCHO, BARRA);
+
+  /* ① EL CUERPO DEL ORBE — su borde inferior contra el borde superior de la
+        barra. `AIRE_BORDE` es exactamente ese aire. */
+  const holguraCuerpo = ancla.abajo - BARRA;
+  ok('el cuerpo del orbe no entra en la banda de la barra', holguraCuerpo > 0, `holgura=${holguraCuerpo}`);
+  ok('y la holgura es el aire del borde, no un sobrante casual', holguraCuerpo === AIRE_BORDE, String(holguraCuerpo));
+
+  /* ② LA CAJA DEL HALO — el aro tenue desborda parejo y la caja baja 9. */
+  const holguraHalo = ancla.abajo - (HALO - ORBE) / 2 - BARRA;
+  ok('la caja del halo tampoco entra en la barra', holguraHalo > 0, `holgura=${holguraHalo}`);
+
+  /* ③ EL RESPLANDOR SÍ ROZA, Y SE DECLARA EN VEZ DE ESCONDERSE. Es una SOMBRA
+        (`shadowRadius = RESPLANDOR`, `elevation` en Android), no cuerpo: su
+        borde exterior llega a `AIRE_BORDE - RESPLANDOR` de la banda. *El orbe
+        no queda tapado; lo que la barra recorta son los píxeles más tenues de
+        su brillo.* Se mide para que el día que alguien cambie uno de los dos
+        números, el cambio aparezca acá y no en un teléfono. */
+  const rocePorElBrillo = RESPLANDOR - AIRE_BORDE;
+  ok('el roce es SÓLO del resplandor y está acotado', rocePorElBrillo > 0 && rocePorElBrillo <= 8, `${rocePorElBrillo}px`);
+
+  /* ④ EL BORDE DERECHO — que no se salga de la pantalla. */
+  ok('el orbe no se sale por la derecha', ancla.izquierda + ORBE <= ANCHO);
+  ok('el halo tampoco', ancla.izquierda - (HALO - ORBE) / 2 + HALO <= ANCHO);
+
+  /* 🔴 EL CONTROL NEGATIVO, y nombra el modo de falla real: si el shell se
+        olvidara de pasar `aireInferior`, el orbe caería DENTRO de la barra —
+        y como la barra pinta después, quedaría tapado sin que nada falle. */
+  const sinAire = anclaOrbe(ANCHO, 0);
+  ok(
+    'sin `aireInferior` el orbe QUEDARÍA dentro de la banda de la barra',
+    sinAire.abajo - BARRA < 0,
+    `holgura=${sinAire.abajo - BARRA}`,
+  );
+
+  /* ⑤ Y QUE EL SHELL SE LO PASE MEDIDO, NO TECLEADO.
+     🔴 **SE MIRA EL BLOQUE DE `PresenciaCoach`, NO EL ARCHIVO — y esto lo
+     corrigió su propio rojo.** La primera versión buscaba
+     `aireInferior={altoBarra}` en todo el archivo y **daba VERDE con la
+     presencia en `0`**: encontraba el de `BurbujaPendientes`, que está tres
+     líneas más arriba y también lo recibe. *Dos consumidores del mismo dato en
+     el mismo archivo, y el gate no distinguía cuál medía.* Es un verde por la
+     razón equivocada, cazado produciendo el rojo antes de confiar en él. */
+  const shell = readFileSync(new URL('../src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8');
+  const iPresencia = shell.indexOf('<PresenciaCoach');
+  if (iPresencia < 0) {
+    di('ROJO · no encuentro el montaje de PresenciaCoach — no pude medir.');
+    process.exit(2);
+  }
+  const bloquePresencia = shell.slice(iPresencia, shell.indexOf('/>', iPresencia));
+  ok('la PRESENCIA recibe el aire medido', /aireInferior=\{altoBarra\}/.test(bloquePresencia), bloquePresencia.slice(-120));
+  ok('y la burbuja también, que ocupa el mismo píxel', /aireInferior=\{altoBarra\}/.test(shell.slice(0, iPresencia)));
+  ok('`altoBarra` se MIDE con onLayout', /onLayout=\{\(e\) =>/.test(shell) && /setAltoBarra/.test(shell));
+  ok(
+    'arranca en la fórmula de la barra, no en un número tecleado',
+    /useState\(ALTO_FILA_TABS \+ insets\.bottom\)/.test(shell),
+  );
+  /* El orden de hermanos: la presencia ANTES que la barra. Si alguien los da
+     vuelta, la barra dejaría de pintar encima — y este gate lo diría. */
+  const iNexo = shell.indexOf('<NexoDelShell');
+  const iBarra = shell.indexOf('<BarraTabs');
+  ok('la presencia se monta ANTES que la barra (la barra pinta encima)', iNexo > 0 && iBarra > iNexo);
+}
+
+/* ═══ ⑪ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
 
 const inst = (i18next as any).createInstance();
 await inst.init({
