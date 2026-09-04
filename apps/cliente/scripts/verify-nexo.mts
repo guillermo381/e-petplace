@@ -490,7 +490,57 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   ok('y son exactamente CUATRO, que es lo que la tupla exige', ORDEN_DE_PATA.length === 4);
 }
 
-/* ═══ ⑪ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
+
+/* ═══ ⑫ EL CABLEADO DEL ORBE — qué llega a la pieza y qué no ═════════════════
+ *
+ * Medido en web con sesión real (`scripts/medir-orbe-s113c.mjs`): al tocar el
+ * orbe su nombre accesible pasa de «Abrir a Nexo» a «Pregúntale a Nexo», que
+ * es literalmente `abierta ? voz.preguntar : voz.orbe` ⇒ **`abierta` LLEGA**.
+ * Acá se fija lo que ese camino necesita del montaje, para que el día que
+ * alguien lo desarme suene antes que un teléfono.
+ */
+{
+  const shell = readFileSync(new URL('../src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8');
+  const iP = shell.indexOf('<PresenciaCoach');
+  const bloque = shell.slice(iP, shell.indexOf('/>', iP));
+
+  ok('el orbe abre: `onAbrir` enciende la fila', /onAbrir=\{\(\) => setAbierta\(true\)\}/.test(bloque));
+  ok('el velo cierra: `onCerrar` la apaga', /onCerrar=\{\(\) => setAbierta\(false\)\}/.test(bloque));
+  ok('la fila «Pregúntale» abre la Hoja', /onPreguntar=\{\(\) => tocar\('coach'\)\}/.test(bloque));
+  ok('`abierta` viaja a la pieza', /abierta=\{abierta\}/.test(bloque));
+
+  /* 🔴 LOS DOS ARGUMENTOS DEL ESTADO, y son los que la captura del founder
+     puso en duda: `despierta` sale de la pata abierta y `hablando` de la Hoja.
+     Se asertan por literal porque **el estado no se puede leer del DOM**: no
+     es una prop de la pieza que se dibuje, es un cálculo del shell. */
+  ok(
+    '`estado` deriva la pata de `abierta`',
+    /estado=\{estadoNexo\(\{[^}]*huellaAbierta: abierta/.test(bloque),
+    bloque.slice(bloque.indexOf('estado='), bloque.indexOf('estado=') + 110),
+  );
+  ok('`estado` deriva la Hoja de `hojaCoach`', /hojaAbierta: hojaCoach !== null/.test(bloque));
+
+  /* Y la función, con los dos casos que el encargo pidió medir. */
+  const P = { chat: 0, pedidos: 0, avisos: null } as const;
+  ok(
+    'al abrir la pata ⇒ despierta',
+    estadoNexo({ pendientes: P, huellaAbierta: true, hojaAbierta: false }) === 'despierta',
+  );
+  ok(
+    'con la Hoja ⇒ hablando, aunque la pata ya se haya cerrado',
+    estadoNexo({ pendientes: P, huellaAbierta: false, hojaAbierta: true }) === 'hablando',
+  );
+  /* ⚠️ El caso REAL de esta app: `tocar('coach')` cierra la pata Y abre la
+     Hoja, así que el estado que la pieza recibe es `hablando` con
+     `huellaAbierta: false`. *Si el assert sólo mirara `true/true`, mediría un
+     caso que este montaje no produce.* */
+  ok(
+    'y con las dos ⇒ manda la Hoja',
+    estadoNexo({ pendientes: P, huellaAbierta: true, hojaAbierta: true }) === 'hablando',
+  );
+}
+
+/* ═══ ⑬ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
 
 const inst = (i18next as any).createInstance();
 await inst.init({
