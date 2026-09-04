@@ -147,6 +147,27 @@ export function pastillasDe(p: PendientesCoach): Array<{ clase: ClasePastilla; c
 
 /** Dónde vive el orbe: esquina inferior derecha. `izquierda` y `abajo` son la
  *  caja del ORBE en reposo, no la del resplandor. */
+/**
+ * ¿SE DIBUJA LA PIEZA? — **D-1025**.
+ *
+ * · **Con Coach: SIEMPRE.** Aunque no haya nada pendiente, sus atajos están y
+ *   el orbe siempre lleva a algún lado.
+ * · **Sin Coach y sin nada pendiente: NO.** *Un disco que atenúa la pantalla y
+ *   abre sobre el vacío es peor que uno apagado* — el apagado no promete nada;
+ *   éste promete y no cumple.
+ *
+ * 🔴 **ESTA REGLA YA EXISTÍA Y LA PERDÍ AL ABSORBER LA PIEZA.**
+ * `BurbujaPendientes` la traía escrita y citada: *«vacío o todo en cero ⇒ la
+ * pieza no se dibuja (19.9: el nulo no se pinta, y no hay nada que abrir)»*.
+ * Cuando `PresenciaCoach` la reemplazó **vino la forma y no vino la regla**.
+ * *Reemplazar una pieza no es copiar su dibujo: es hacerse cargo de todo lo
+ * que sabía* — y esto lo sabía en su PROSA, no en su geometría, así que
+ * ningún gate lo vio faltar. **Por eso nace como función, no como comentario.**
+ */
+export function sePinta({ coach, pendientes }: { coach: boolean; pendientes: PendientesCoach }): boolean {
+  return coach || clasesConAlgo(pendientes).length > 0
+}
+
 export function anclaOrbe(ancho: number, aireInferior = 0): { izquierda: number; abajo: number } {
   return { izquierda: ancho - AIRE_BORDE - ORBE, abajo: AIRE_BORDE + aireInferior }
 }
