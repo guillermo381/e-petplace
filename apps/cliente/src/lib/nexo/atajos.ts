@@ -11,26 +11,22 @@
  * —§2.2 de `DIRECCION_ARTE` lo prohíbe con todas las letras— : lo que se
  * abanica son cuatro pastillas, y el dibujo de marca queda intacto.
  *
- * ── LOS GLIFOS: TRES SON PRÉSTAMOS DECLARADOS ───────────────────────────────
- * `AtajoCoach` exige `icono`, así que los cuatro tienen dibujo. **Medido contra
- * el registry (`IconoNombre`, 55 nombres): existe `vacuna`; no existen peso,
- * antiparasitario ni foto.** Un glifo se firma con su estudio §6b y su gate por
- * ícono, así que **no se inventó ninguno**: se prestan los tres más cercanos,
- * con su costo escrito — mismo precedente que `pedido`, que montó `despensa`
- * durante un commit hasta que B le dibujó el suyo.
+ * ── LOS GLIFOS: LOS CUATRO SON PROPIOS ──────────────────────────────────────
+ * `AtajoCoach` exige `icono`, y los cuatro tienen el suyo: `peso` · `vacuna` ·
+ * `antiparasitario` · `foto`. ⏪ **Acá vivió la declaración de tres préstamos**
+ * —`datos`, `receta`, `ojo`— con su costo escrito, porque el registry no tenía
+ * los tres primeros. **B los dibujó (S113-B `5dbcc5e2`) y los préstamos
+ * murieron en el mismo acto**, que era el trato. *Un préstamo que sobrevive a
+ * su reemplazo deja de ser un puente y pasa a ser el camino.*
  *
- * · **peso → `datos`** — barras que suben. *No es un préstamo de comodidad: el
- *   peso ES una serie* («pesa 12 kg» sirve poco; «pasó de 9 a 12 en cuatro
- *   meses» es medicina), y ese glifo dibuja exactamente eso.
- * · **vacuna → `vacuna`** — la jeringa. Propio.
- * · **antiparasitario → `receta`** — el símbolo de prescripción. ⚠️ **Costo:
- *   también nombra recetas**, y las dos podrían convivir en una pantalla.
- * · **foto → `ojo`** — lo que viste. ⚠️ **Es el más flojo de los tres**, y hoy
- *   se dibuja atenuado igual (no hay puerta). *Se declara flojo en vez de
- *   defenderlo.*
- *
- * ⇒ **pedido por nombre a B: tres glifos propios** (peso · antiparasitario ·
- * foto) con su estudio §6b y su gate por ícono.
+ * ⚠️ **LO QUE SÍ QUEDA A OJO DEL FOUNDER, y lo produce ESTE montaje, no la
+ * pieza:** medido en los dibujantes, **`vacuna` lleva huella y los otros tres
+ * no** (`({ tinta, huella })` contra `({ tinta })`). B lo declaró al entregar:
+ * los suyos son **glifos de control** y un atajo que NOMBRA algo —una vacuna—
+ * la lleva. ⇒ **dentro de la misma pata conviven dos tratamientos.** No es un
+ * defecto: es `N27` con tres actos y un sustantivo. *Y si al founder le salta,
+ * la salida que B deja escrita es que el cuarto también sea un acto — jamás
+ * apagarle la huella a un glifo de capa.*
  *
  * ── UN BOTÓN APAGADO SIN RAZÓN A LA VISTA ES EL DEFECTO ─────────────────────
  * Por eso `razonDeApagado` devuelve un CÓDIGO y nunca un booleano: la pastilla

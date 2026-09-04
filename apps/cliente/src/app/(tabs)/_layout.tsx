@@ -327,14 +327,22 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
     foto: t('nexo.dedoFoto'),
   };
 
-  /* 🔴 LOS TRES GLIFOS PRESTADOS, con su costo escrito en `lib/nexo/atajos.ts`:
-     `datos` (barras que suben — el peso ES una serie) · `receta` · `ojo`. **No
-     se inventó ninguno**: un glifo se firma con su estudio §6b y su gate. */
+  /* ✅ **LOS CUATRO GLIFOS SON PROPIOS** (S113-B, `5dbcc5e2`). ⏪ Acá vivieron
+     tres préstamos declarados —`datos`, `receta`, `ojo`— porque el registry no
+     tenía peso, antiparasitario ni foto; **murieron el día que existieron los
+     suyos**, que era el trato. *Un préstamo que sobrevive a su reemplazo deja
+     de ser un puente y pasa a ser el camino.*
+
+     ⚠️ **El id no cambia aunque el dibujo sí**: el gate por ícono todavía no
+     está firmado (B lo declara), así que el founder puede mover el trazo sin
+     que esta línea se toque. Y el `registro` no se pasa: el registry lo
+     resuelve solo —peso y antiparasitario visten IDENTIDAD como `vacuna`, foto
+     viste TINTA porque es un verbo—. */
   const glifoAtajo: Record<AtajoNexo, IconoNombre> = {
-    peso: 'datos',
+    peso: 'peso',
     vacuna: 'vacuna',
-    antiparasitario: 'receta',
-    foto: 'ojo',
+    antiparasitario: 'antiparasitario',
+    foto: 'foto',
   };
 
   /* 🔴 LA RAZÓN NOMBRA A LA MASCOTA, y cuando no puede lo dice con la palabra
