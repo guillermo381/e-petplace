@@ -3263,7 +3263,7 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
-### `D-1021` 🔴 — la ficha de una mascota fallecida se dibuja como si estuviera viva
+### `D-1021` 🟠 PARCIAL — la ficha de una mascota fallecida: LEÍDA sí, NO PEDIDA todavía
 
 **Cómo apareció.** Recorriendo el 0.3 en **emulador Android** con
 `guillo381+8` y entrando a la ficha de **Sombra**, la fixture memorial que E
@@ -3315,6 +3315,38 @@ candidato*. **No la encontró un gate: la encontró mirar.**
 **Dueño: C** (`apps/cliente`). **Precondición del soft launch, no del 0.3:** la
 app no puede llegar a una familia real sin esto, y una familia real va a perder
 un animal.
+
+---
+
+**✅ CURADA A MEDIAS por C en `8d0cc55d`, y la mitad que falta está medida.**
+Verificado en **emulador Android** sobre **Bruma Y Sombra** (capturas
+`08-` y `09-` en `docs/loop/capturas-s113-a03/`), con **Zeus vivo como
+discriminador** (`07-`):
+
+| qué | antes | ahora |
+|---|---|---|
+| el techo | gradiente de marca vivo | 🟢 **sereno, tema memorial** |
+| el chip | «Conociéndolo · **1 por resolver**» | 🟢 «Conociéndolo», **sin pedido** |
+| el orbe | violeta, con Coach | 🟢 **ámbar, sin Coach** |
+| **«Registrar el de hoy»** | presente | 🔴 **sigue presente** |
+| **«Cargar carnet»** | presente | 🔴 **sigue presente** |
+
+**Y la causa de la mitad que falta está localizada:** el bloque *«Cómo está
+hoy»* (`[mascotaId].tsx:1206` y `:1303`) **no cuelga de `esMemorial`** — C
+cableó el guard en el techo, el chip, el orbe y cuatro sitios más, y **ese
+bloque quedó fuera del censo**. *Es la ley de la jornada otra vez: el censo casi
+siempre encuentra una segunda puerta al mismo defecto, y curar los sitios
+reportados sin censar la clase es media cura.*
+
+**Lo que C sí resolvió, y es lo difícil:** el guard `theme.mode === 'memorial'`
+**nunca fue verdadero** —nadie monta ese provider en ninguna app— así que
+**cuatro guards escritos estaban en cero encendidos**, letra muerta que se leía
+como protección. C lo derivó del PERFIL, y el dato **ya vivía doce líneas más
+abajo**: *no faltaba el dato, faltaba que decidiera algo.*
+
+**Queda abierto: los dos pedidos.** Sigue siendo de **C**, y sigue siendo
+precondición del soft launch — *«Registrar el de hoy» sobre un animal muerto no
+es menos grave por estar sobre fondo sereno.*
 
 ---
 
