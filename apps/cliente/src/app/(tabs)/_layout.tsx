@@ -67,7 +67,7 @@ import { CoachHoja } from '@/components/coach';
 import { ElegirMascotaHoja } from '@/components/nexo/elegir-mascota-hoja';
 import { PresenciaNexo, type AtajoDeLaPata, type PastillaPendiente } from '@/components/nexo/presencia-nexo';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
-import { focoNexo, razonDeApagado, ORDEN_DE_PATA, type AtajoNexo } from '@/lib/nexo/atajos';
+import { focoNexo, mascotasParaAtajo, razonDelDedo, ORDEN_DE_PATA, type AtajoNexo } from '@/lib/nexo/atajos';
 import { clasesVivasNexo, nexoVisibleEn, type ClaseNexo, type CuentasNexo } from '@/lib/nexo/estado';
 import { recargarHogar, useHogarVivo } from '@/lib/nexo/hogar-vivo';
 import type { MascotaResumen } from '@epetplace/api';
@@ -250,9 +250,19 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
        solo escritor de `evento_hito_narrativo` en `packages/api`. */
   };
 
+  /* Las mascotas entre las que este dedo puede elegir. La almohadilla las
+     admite a todas: el Coach habla de cualquiera. */
+  const candidatasDe = (atajo: AtajoNexo | 'coach') =>
+    atajo === 'coach' ? candidatas : mascotasParaAtajo(atajo, candidatas);
+
   const tocar = (atajo: AtajoNexo | 'coach') => {
+    const posibles = candidatasDe(atajo);
+    /* 🔴 **UNA SOLA POSIBLE NO SE PREGUNTA**, aunque el hogar tenga varias: con
+       un perro y un acuario, «Vacuna» ya sabe de quién habla. *Preguntar con
+       una sola opción es un paso que no decide nada.* */
+    if (posibles.length === 1) return ejecutar(atajo, posibles[0]);
     if (foco.modo === 'directa') return ejecutar(atajo, foco.mascota);
-    if (foco.modo === 'elegir') return setEsperandoElegir(atajo);
+    if (posibles.length > 1) return setEsperandoElegir(atajo);
   };
 
   if (!visible) return null;
@@ -262,7 +272,8 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
     return <BurbujaDelShell altoBarra={altoBarra} />;
   }
 
-  const sujeto = foco.modo === 'directa' ? foco.mascota.sujeto : 'individuo';
+  /* Sobre quiénes puede actuar la pata acá: la del foco, o todas las activas. */
+  const candidatas: MascotaResumen[] = foco.modo === 'directa' ? [foco.mascota] : foco.entre;
 
   const cuentas: CuentasNexo = {
     chat: pendientes.conversaciones,
@@ -304,7 +315,9 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
   };
 
   const atajos: AtajoDeLaPata[] = ORDEN_DE_PATA.map((a) => {
-    const razon = razonDeApagado(a, sujeto);
+    /* La razón mira AL HOGAR y no a una mascota: con varias, el dedo se apaga
+       sólo si NINGUNA lo admite. */
+    const razon = razonDelDedo(a, candidatas);
     return {
       clave: a,
       etiqueta: vozAtajo[a],
@@ -327,9 +340,11 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
       />
 
       <ElegirMascotaHoja
-        visible={esperandoElegir !== null && foco.modo === 'elegir'}
+        visible={esperandoElegir !== null}
         titulo={t('nexo.elegirMascota')}
-        mascotas={foco.modo === 'elegir' ? foco.entre : []}
+        /* Sólo las que este dedo puede tocar: **la hoja no ofrece un camino
+           que después habría que rebotar.** */
+        mascotas={esperandoElegir !== null ? candidatasDe(esperandoElegir) : []}
         onElegir={(m) => {
           const pendiente = esperandoElegir;
           setEsperandoElegir(null);

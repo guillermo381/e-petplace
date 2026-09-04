@@ -126,3 +126,42 @@ export function focoNexo(args: {
 export function montaPresencia(foco: FocoNexo): boolean {
   return foco.modo === 'directa' || foco.modo === 'elegir'
 }
+
+/* ═══ EL HUECO QUE APARECIÓ AL PROBAR EL SELECTOR ════════════════════════════
+ *
+ * 🔴 **CON VARIAS MASCOTAS, EL DEDO NO SABE SOBRE QUIÉN VA A ACTUAR — y por eso
+ * `razonDeApagado` SOLO NO ALCANZA.** Una familia con un perro y un acuario
+ * veía «Vacuna» encendido (correcto: el perro se vacuna), elegía el acuario en
+ * la hoja corta y **aterrizaba en el carnet de un acuario**. *El botón no
+ * mentía sobre sí mismo: mentía sobre el camino que abría.*
+ *
+ * La cura no es un chequeo más al final —eso sería rebotar después de haber
+ * prometido—: **es angostar la elección**. El dedo ofrece SÓLO las mascotas a
+ * las que se les aplica; si no queda ninguna, se apaga con su razón; y si queda
+ * UNA, **no pregunta**, que es la misma regla del hogar de una sola mascota.
+ */
+
+/** Las candidatas a las que este atajo SÍ se les aplica. */
+export function mascotasParaAtajo<T extends Pick<MascotaResumen, 'sujeto'>>(
+  atajo: AtajoNexo,
+  candidatas: readonly T[],
+): T[] {
+  return candidatas.filter((m) => razonDeApagado(atajo, m.sujeto) === null)
+}
+
+/**
+ * La razón del dedo mirando **a todo el hogar**, no a una mascota.
+ * `null` = vivo. `'sin_puerta'` = el destino no existe. `'acuario'` = ninguna
+ * de las mascotas elegibles admite este atajo.
+ */
+export function razonDelDedo<T extends Pick<MascotaResumen, 'sujeto'>>(
+  atajo: AtajoNexo,
+  candidatas: readonly T[],
+): RazonApagado | null {
+  if (atajo === 'foto') return 'sin_puerta'
+  /* Sin candidatas todavía no se sabe: el dedo no se apaga por no saber
+     —*vacío por carga y vacío por estado no comparten guard*— y el shell no lo
+     monta hasta tener el hogar. */
+  if (candidatas.length === 0) return null
+  return mascotasParaAtajo(atajo, candidatas).length === 0 ? 'acuario' : null
+}
