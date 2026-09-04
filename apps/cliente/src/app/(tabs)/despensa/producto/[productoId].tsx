@@ -57,7 +57,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import {
   AvisoAlergia,
   Boton,
-  COLA_BURBUJA_PENDIENTES,
+  COLA_PRESENCIA_COACH,
   /* ☠️ Ley 37 · S100d-C — entre `Boton` y `Chevron` vivía `Celda`, **sin un
      solo consumidor**: la tabla de presentaciones que la montaba murió en
      S96 y el import se quedó. No lo caza el typecheck (un import sin usar
@@ -835,7 +835,7 @@ export default function DespensaProducto() {
           // propia pieza exporta. *Un número tecleado que tenga que
           // coincidir con el tamaño de un disco de otro paquete es la
           // clase de deuda que `PantallaConPie` vino a matar.*
-          paddingBottom: spacing[8] + COLA_BURBUJA_PENDIENTES,
+          paddingBottom: spacing[8] + COLA_PRESENCIA_COACH,
           gap: spacing[5],
         }}
       >
@@ -1654,7 +1654,7 @@ export default function DespensaProducto() {
           (N28). Ver la lápida gemela en la vitrina: eran DOS discos vivos a la
           vez y el founder los vio.
 
-          ⚠️ **`COLA_BURBUJA_PENDIENTES` en el `paddingBottom` del scroll SE
+          ⚠️ **`COLA_PRESENCIA_COACH` en el `paddingBottom` del scroll SE
           QUEDA:** `PantallaConPie` reserva el alto de SU pie, no el del disco
           del shell, que sigue flotando encima de esta ficha.
 

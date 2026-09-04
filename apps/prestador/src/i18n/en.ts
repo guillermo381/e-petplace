@@ -2428,6 +2428,15 @@ export const prestadorEn = {
     radioGuardado: 'Radius saved: {{km}} km.',
   },
   // S79-B (cura de gate) · the crash boundary voice · LOTE S79
+  nexo: {
+    abrir: 'See what is waiting',
+    cerrar: 'Close',
+    chatUna: '1 message',
+    chat: '{{n}} messages',
+    solicitudesUna: '1 request',
+    solicitudes: '{{n}} requests',
+    pedidosCero: 'No orders',
+  },
   burbuja: {
     carritoEtiqueta: 'Go to cart',
     carritoTitulo: 'Cart',

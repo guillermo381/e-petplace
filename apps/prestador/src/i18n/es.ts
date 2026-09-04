@@ -3135,6 +3135,24 @@ export const prestadorEs = {
   // DENTRO del abanico, al lado de su número.
   // ⚠️ La voz del carrito CONSERVA la del flotante que murió — el disco cambió
   // de pieza, no de idioma.
+  /* ⭐ LA PRESENCIA DEL PRESTADOR (S113-C · lote 0.3) — la misma pieza del
+   * cliente con `coach: false`: **la puerta a lo que te espera y nada más**.
+   * El prestador no tiene Coach, así que acá no hay «Preguntale» ni dedos.
+   *
+   * ⚠️ Las voces de las clases se pasan SIEMPRE, aunque la cuenta sea 0: así
+   * un número no puede existir sin su palabra y la pieza nunca inventa un
+   * plural. Singular y plural viven acá, que es donde el idioma conjuga. */
+  nexo: {
+    abrir: 'Ver lo que te espera',
+    cerrar: 'Cerrar',
+    chatUna: '1 mensaje',
+    chat: '{{n}} mensajes',
+    solicitudesUna: '1 solicitud',
+    solicitudes: '{{n}} solicitudes',
+    /* El prestador no tiene carrito: su cuenta es 0 medido, no un hueco. La
+     * voz existe porque la pieza la exige, y dice la verdad. */
+    pedidosCero: 'Sin pedidos',
+  },
   burbuja: {
     carritoEtiqueta: 'Ir al carrito',
     carritoTitulo: 'Carrito',

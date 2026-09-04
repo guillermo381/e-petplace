@@ -61,7 +61,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   ALTO_FILA_TABS,
   BarraTabs,
-  BurbujaPendientes,
   Icono,
   PresenciaCoach,
   useAviso,
@@ -69,7 +68,6 @@ import {
   type BarraTabsItem,
   type IconoNombre,
   type PendientesCoach,
-  type Pendiente,
 } from '@epetplace/ui';
 import { useCarrito } from '@/lib/despensa/carrito';
 import { clasesVisibles, escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
@@ -127,74 +125,63 @@ const CLAVE_YA_COMPRO = 'epp.cliente.tienePedidos.v1';
 
 
 /**
- * ⭐ **LA BURBUJA DE PENDIENTES — UNA puerta a lo que te espera** (S112-C,
- * montaje; la pieza es de B, `BurbujaPendientes`).
+ * ⭐ **LA PRESENCIA SIN COACH — el memorial y el hogar que todavía no contestó**
+ * (S113-C · lote 0.3).
  *
- * ☠️ **ACÁ VIVÍA `FlotanteDelCarrito`, Y MURIÓ EN ESTE MISMO COMMIT.** Su
- * lápida estaba escrita por B con su disparo: *el día que este archivo monte
- * `BurbujaPendientes`, `CarritoFlotante` y `COLA_CARRITO_FLOTANTE` se borran
- * en ese mismo commit.* **Y el intervalo es la razón:** *si se monta la nueva y
- * queda la vieja hay DOS DISCOS peleando el mismo píxel; si se retira la vieja
- * sin montar la nueva, no hay ninguna y la tienda no se puede pagar.* (`L-395`.)
+ * ☠️ **ACÁ VIVÍA `BurbujaDelShell`, Y MURIÓ EN ESTE MISMO COMMIT**, con su
+ * gemela del prestador. B dejó `BurbujaPendientes` derogada y exportada a
+ * propósito, con su razón: *«si se retira antes de que las apps monten la
+ * nueva, no queda ninguna puerta; si se monta la nueva sin retirar ésta, hay
+ * dos discos peleando el mismo píxel»* (`L-395`). **El retiro y el montaje van
+ * en el mismo commit** — y éste es ese commit.
  *
- * ── DOS CLASES, Y EL SILENCIO ES DE CADA UNA ────────────────────────────────
- * **Carrito** existe por sus unidades y se calla en `carrito`/`checkout` (N25).
- * **Mensajes** existe por sus conversaciones sin leer y se calla **en el
- * hilo** — que es su destino **y** donde el disco caería justo sobre la barra
- * de escribir (el rojo del founder).
- *
- * 🔴 **Y por eso el silencio es POR CLASE y no de la pieza:** *un mensaje
- * pendiente en el checkout sigue estando pendiente.* Con dos burbujas había que
- * apagar una entera; acá **la clase sale del arreglo y la otra sigue viva**.
- * La lista y su razón viven en `lib/pendientes-adopcion.ts`, con arnés.
- *
- * ⚠️ **La clase en CERO no se filtra acá**: la pieza lo hace con `clasesVivas`
- * — *una clase en cero no es una clase*, y decidirlo dos veces sería que dos
- * lugares tengan que estar de acuerdo.
- *
- * ⚠️ **CRUCE DE TERRITORIO DECLARADO (76(d)):** este archivo es del shell del
- * cliente, la pieza es de `packages/ui`, y el borrado de `CarritoFlotante`
- * toca `packages/ui` **con autorización explícita de B**. *El montaje ES la
- * decisión, no un detalle de implementación* (N28).
+ * 🔴 **EN MEMORIAL NO SE APAGA LA PUERTA: SE APAGA EL COACH.** La razón vieja
+ * sigue entera —*una presencia que propone cosas no tiene lugar en un duelo*—
+ * y por eso no hay dedos ni «Pregúntale». Lo que cambió es que la pieza
+ * aprendió a existir sin él, así que **el carrito y los mensajes conservan su
+ * única puerta también acá**. *Antes había que elegir entre proponer y tener
+ * puerta; ahora no.*
  */
-function BurbujaDelShell({ altoBarra }: { altoBarra: number }) {
+function PresenciaSinCoach({ altoBarra }: { altoBarra: number }) {
   const { t } = useTraduccion();
   const router = useRouter();
   const items = useCarrito();
-  const pendientes = usePendientesAdopcion();
-  /* 🔴 `useSegments()` y NO `state.routes[state.index].name`: el guard viejo
-     comparaba contra `'checkout'` un valor que su fuente **nunca puede
-     producir** (devuelve el nombre del TAB). *Un guard así no falla: pasa
-     siempre — y su comentario lo empeora, porque el que lo lee cree que está
-     cubierto.* Vivió muerto por eso. */
-  const visibles = clasesVisibles(useSegments() as string[]);
+  const pendientesAdopcion = usePendientesAdopcion();
+  const segmentos = useSegments() as string[];
+  const [abierta, setAbierta] = useState(false);
 
-  const lista: Pendiente[] = [
-    {
-      clase: 'carrito',
-      cuenta: visibles.carrito ? items.reduce((n, i) => n + i.cantidad, 0) : 0,
-      onAbrir: () => router.push('/despensa/carrito'),
-      etiqueta: t('burbuja.carritoEtiqueta'),
-      titulo: t('burbuja.carritoTitulo'),
-    },
-    {
-      clase: 'mensajes',
-      cuenta: visibles.mensajes ? pendientes.conversaciones : 0,
-      /* LA REGLA DEL TOQUE, y la decide el DOMINIO: con UNA conversación va al
-         hilo; con varias, a la lista. `unica` ya trae el id **si y sólo si**
-         corresponde — *si cada shell lo resolviera, alcanzaría con escribir
-         `>= 1` en vez de `=== 1` para saltar al hilo equivocado.* */
-      onAbrir: () =>
-        pendientes.unica !== null
-          ? router.push({ pathname: '/adoptar/solicitud/[solicitudId]', params: { solicitudId: pendientes.unica } })
-          : router.push('/adoptar/solicitudes'),
-      etiqueta: t('burbuja.mensajesEtiqueta'),
-      titulo: t('burbuja.mensajesTitulo'),
-    },
-  ];
+  const visibles = clasesVisibles(segmentos);
+  const enCarrito = visibles.carrito ? items.reduce((n, i) => n + i.cantidad, 0) : 0;
+  const conversaciones = visibles.mensajes ? pendientesAdopcion.conversaciones : 0;
+
+  const pendientes: PendientesCoach = { chat: conversaciones, pedidos: enCarrito, avisos: null };
 
   return (
-    <BurbujaPendientes pendientes={lista} etiquetaAbanico={t('burbuja.abanico')} aireInferior={altoBarra} />
+    <PresenciaCoach
+      coach={false}
+      estado={estadoNexo({ pendientes, huellaAbierta: abierta, hojaAbierta: false })}
+      pendientes={pendientes}
+      nombre={t('burbuja.abanico')}
+      abierta={abierta}
+      onAbrir={() => setAbierta(true)}
+      onCerrar={() => setAbierta(false)}
+      onPendiente={(clase) => {
+        if (clase === 'chat') {
+          pendientesAdopcion.unica !== null
+            ? router.push({ pathname: '/adoptar/solicitud/[solicitudId]', params: { solicitudId: pendientesAdopcion.unica } })
+            : router.push('/adoptar/solicitudes');
+          return;
+        }
+        router.push('/despensa/carrito');
+      }}
+      voz={{
+        abrir: t('nexo.etiqueta', { nombre: t('coach.nombre') }),
+        cerrar: t('nexo.cerrar'),
+        chat: conversaciones === 1 ? t('nexo.vozChatUna') : t('nexo.vozChat', { n: conversaciones }),
+        pedidos: enCarrito === 1 ? t('nexo.vozCarritoUno') : t('nexo.vozCarrito', { n: enCarrito }),
+      }}
+      aireInferior={altoBarra}
+    />
   );
 }
 
@@ -274,7 +261,7 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
   /* MEMORIAL o hogar que todavía no contestó ⇒ la burbuja de siempre, y NUNCA
      las dos: ocupan el mismo píxel. */
   if (foco.modo !== 'directa' && foco.modo !== 'elegir') {
-    return <BurbujaDelShell altoBarra={altoBarra} />;
+    return <PresenciaSinCoach altoBarra={altoBarra} />;
   }
 
   /* Sobre quiénes puede actuar la pata acá: la del foco, o todas las activas. */
@@ -407,27 +394,17 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
         }}
         voz={{
           preguntar: t('nexo.almohadilla', { nombre }),
-          /* 🔴 **D-1019 · EL ORBE DICE LO QUE EL TOQUE VA A HACER — y acá hubo
-             DOS CURAS EL MISMO DÍA, resueltas por el objeto y no por gusto.**
-
-             C lo curó desde el montaje: dejar la prop `orbe` y cambiarle el
-             VALOR según `abierta` —*«una prop que ya recibe una cadena no
-             necesita volverse dos para decir dos cosas»*—. B lo curó en la
-             pieza: **partió `voz.orbe` en `voz.abrir` y `voz.cerrar`**.
-
-             **Manda la pieza, y no por antigüedad: `voz.orbe` YA NO EXISTE**
-             en `PresenciaCoach` (medido en su tipo), así que la versión del
-             montaje ni siquiera compilaría. La clave y su texto son los de C
-             y no se tocaron —ya decía «Abrir a {{nombre}}»—: lo único que
-             cambia es el NOMBRE de la prop.
-
-             ⚠️ **Y queda dicho lo que la resolución descarta:** C sostenía que
-             el orbe y el velo son *«dos actos distintos que hoy coinciden en
-             la palabra»* y agregó `nexo.cerrarOrbe` para no atarlos. B decidió
-             lo contrario en la pieza —*«dos nombres para el mismo acto serían
-             dos actos para quien sólo los oye»*— y comparte un solo `cerrar`.
-             **`nexo.cerrarOrbe` queda huérfana**: se retira o se usa, y eso lo
-             decide quien reabra la voz. */
+          /* ☠️ **MI CONDICIONAL MURIÓ, Y GANA EL CONTRATO DE B (D-1019).**
+             ⏪ En el lote 0.3 yo hacía `orbe: abierta ? cerrarOrbe : etiqueta`,
+             porque la pieza usaba UNA sola `voz.orbe` para los dos estados y
+             `abierta` es estado de este shell. **B partió la prop en dos** —
+             `abrir` y `cerrar`— y eso es mejor por una razón que yo no podía
+             ver desde acá: *en web `accessibilityState` no llega, así que la
+             ETIQUETA es el mecanismo*, y con la prop partida **la pieza no
+             depende de que el consumidor se acuerde de alternarla**.
+             ⇒ *cuando la pieza puede garantizar sola lo que el montaje
+             garantizaba por disciplina, gana la pieza.*
+             Las keys son las mías y no se tocaron: ya decían lo correcto. */
           abrir: t('nexo.etiqueta', { nombre }),
           /* ⚠️ **SIEMPRE, aunque la cuenta sea 0** — así un número no existe sin
              su palabra y la pieza nunca inventa un plural. */

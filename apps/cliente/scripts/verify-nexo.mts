@@ -449,14 +449,53 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
      líneas más arriba y también lo recibe. *Dos consumidores del mismo dato en
      el mismo archivo, y el gate no distinguía cuál medía.* */
   const shell = readFileSync(new URL('../src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8');
-  const iPresencia = shell.indexOf('<PresenciaCoach');
-  if (iPresencia < 0) {
-    di('ROJO · no encuentro el montaje de PresenciaCoach — no pude medir.');
+  /* 🔴 **HAY DOS MONTAJES DE LA MISMA PIEZA Y HAY QUE MEDIR EL CORRECTO**
+     (lote 0.3): `PresenciaSinCoach` (memorial y hogar sin contestar) y
+     `NexoDelShell` (el hogar activo). El primero en el archivo es el SIN
+     Coach, así que un `indexOf` pelado mediría el que no tiene ni atajos ni
+     `onPreguntar` — *y sus rojos hablarían de un montaje que nunca los tuvo.*
+     Se toma el que NO lleva `coach={false}`. */
+  const montajes = [...shell.matchAll(/<PresenciaCoach/g)].map((m) => m.index ?? 0);
+  const bloques = montajes.map((i) => shell.slice(i, shell.indexOf('/>', i)));
+  const bloquePresencia = bloques.find((b) => !b.includes('coach={false}'));
+  const bloqueSinCoach = bloques.find((b) => b.includes('coach={false}'));
+  if (bloquePresencia === undefined || bloqueSinCoach === undefined) {
+    di('ROJO · no encuentro los DOS montajes de PresenciaCoach — no pude medir.');
     process.exit(2);
   }
-  const bloquePresencia = shell.slice(iPresencia, shell.indexOf('/>', iPresencia));
+  const iPresencia = shell.indexOf(bloquePresencia);
   ok('la PRESENCIA recibe el aire medido', /aireInferior=\{altoBarra\}/.test(bloquePresencia), bloquePresencia.slice(-120));
-  ok('y la burbuja también, que ocupa el mismo píxel', /aireInferior=\{altoBarra\}/.test(shell.slice(0, iPresencia)));
+  /* ☠️ Decía «y la burbuja también, que ocupa el mismo píxel». La burbuja
+     murió en el lote 0.3; **la otra puerta es la MISMA pieza con
+     `coach: false`**, y también tiene que recibir el aire medido. */
+  ok('la presencia SIN Coach también recibe el aire medido', /aireInferior=\{altoBarra\}/.test(bloqueSinCoach));
+  ok('y es la misma pieza, no una segunda', bloques.length === 2, String(bloques.length));
+
+  /* ═══ EL MONTAJE SIN COACH (memorial y hogar sin contestar) ════════════════
+   *
+   * 🔴 **La prueba de que «no hay dedos ni Pregúntale» es del COMPILADOR, no
+   * de una pantalla** — y eso es más fuerte, no más débil: el contrato de B
+   * hace **imposible** pasar `atajos` u `onPreguntar` con `coach: false`. Acá
+   * se comprueba que el MONTAJE tampoco los produce, que es la mitad que el
+   * compilador no puede ver (podría pasarlos y no compilar, pero nadie lo
+   * sabría hasta compilar).
+   *
+   * ⚠️ **Lo que este gate NO prueba, y va declarado:** cómo se ve en pantalla
+   * con una mascota en memorial. *La cuenta demo del cliente tiene a Zeus y a
+   * Kira, las dos activas* — sin una mascota en memorial no hay forma de
+   * llegar a esa rama desde acá. Es del aparato o de una cuenta con memorial. */
+  ok('el montaje sin Coach existe', bloqueSinCoach.includes('coach={false}'));
+  ok('sin Coach NO se pasan atajos', !bloqueSinCoach.includes('atajos='));
+  ok('sin Coach NO se pasa onPreguntar', !bloqueSinCoach.includes('onPreguntar='));
+  ok('pero conserva su puerta: recibe los pendientes', /pendientes=\{pendientes\}/.test(bloqueSinCoach));
+  ok('y su destino sigue siendo el de la burbuja', /onPendiente=\{/.test(bloqueSinCoach));
+  /* ☠️ Y LA BURBUJA MURIÓ: cero montajes en las dos apps, medido acá y no en
+     el mensaje del commit. */
+  const censoBurbuja = [
+    readFileSync(new URL('../src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8'),
+    readFileSync(new URL('../../prestador/src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8'),
+  ].reduce((n, f) => n + (f.match(/<BurbujaPendientes/g) ?? []).length, 0);
+  ok('cero montajes de BurbujaPendientes en las dos apps', censoBurbuja === 0, String(censoBurbuja));
   ok('`altoBarra` se MIDE con onLayout', /onLayout=\{\(e\) =>/.test(shell) && /setAltoBarra/.test(shell));
   ok(
     'arranca en la fórmula de la barra, no en un número tecleado',
@@ -501,8 +540,17 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
  */
 {
   const shell = readFileSync(new URL('../src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8');
-  const iP = shell.indexOf('<PresenciaCoach');
-  const bloque = shell.slice(iP, shell.indexOf('/>', iP));
+  /* Mismo cuidado que el bloque de arriba: **dos montajes de la misma pieza**,
+     y éste mide el que tiene Coach. *Un `indexOf` pelado agarraba el sin Coach
+     y sus rojos hablaban de un montaje que nunca tuvo `onPreguntar`.* */
+  const bloque =
+    [...shell.matchAll(/<PresenciaCoach/g)]
+      .map((m) => shell.slice(m.index ?? 0, shell.indexOf('/>', m.index ?? 0)))
+      .find((b) => !b.includes('coach={false}')) ?? '';
+  if (bloque === '') {
+    di('ROJO · no encuentro el montaje CON Coach — no pude medir.');
+    process.exit(2);
+  }
 
   ok('el orbe abre: `onAbrir` enciende la fila', /onAbrir=\{\(\) => setAbierta\(true\)\}/.test(bloque));
   ok('el orbe (y el velo) cierran: `onCerrar` la apaga', /onCerrar=\{\(\) => setAbierta\(false\)\}/.test(bloque));
@@ -526,11 +574,13 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
      orbe abierto CIERRA ⇒ decía «Abrir» cuando iba a cerrar. **No hizo falta
      una prop nueva:** `abierta` es estado de este shell, así que el VALOR
      cambia con él. */
-  ok(
-    '`voz.orbe` cambia con el estado: abierta dice cerrar',
-    /orbe: abierta \? t\('nexo\.cerrarOrbe'/.test(bloque),
-  );
-  ok('y cerrada dice abrir', /: t\('nexo\.etiqueta', \{ nombre \}\),/.test(bloque));
+  /* ⏪ Acá se medía mi condicional `orbe: abierta ? cerrarOrbe : etiqueta`.
+     **B partió la prop en dos** (`abrir` / `cerrar`, D-1019) y eso es mejor:
+     *en web `accessibilityState` no llega, así que la etiqueta ES el
+     mecanismo*, y con la prop partida la pieza no depende de que el consumidor
+     se acuerde de alternarla. El assert se re-apunta, no se borra. */
+  ok('el orbe cerrado dice abrir', /abrir: t\('nexo\.etiqueta', \{ nombre \}\),/.test(bloque));
+  ok('y abierto dice cerrar', /cerrar: t\('nexo\.cerrar'\),/.test(bloque));
   /* ⚠️ Y NO se reusa `voz.cerrar`: ésa es la voz del VELO —lo que se lee al
      tocar afuera— y son dos actos que hoy coinciden en la palabra. */
   ok('la voz del velo sigue siendo la suya', /cerrar: t\('nexo\.cerrar'\)/.test(bloque));
@@ -584,7 +634,7 @@ for (const idioma of ['es', 'en'] as const) {
   const nombre = t('coach.nombre');
   ok(`${idioma} · coach.nombre existe y no está vacío`, typeof nombre === 'string' && nombre.length > 0, nombre);
 
-  const conNombre = ['nexo.etiqueta', 'nexo.cerrarOrbe', 'nexo.almohadilla', 'nexo.presentacion'];
+  const conNombre = ['nexo.etiqueta', 'nexo.almohadilla', 'nexo.presentacion'];
   for (const k of conNombre) {
     const s = t(k, { nombre });
     ok(`${idioma} · ${k} interpola el nombre`, s.includes(nombre), s);

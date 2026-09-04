@@ -71,7 +71,10 @@ export const clienteEs = {
      * cierra, y la voz tiene que decir lo que el toque va a hacer. No se
      * reusa `cerrar` —ésa es la del velo, otro acto que hoy coincide en la
      * palabra— porque compartir la key ata el día que una de las dos cambie. */
-    cerrarOrbe: 'Cerrar a {{nombre}}',
+    /* ☠️ `cerrarOrbe` MURIÓ (lote 0.3): existía para mi condicional
+     * `orbe: abierta ? cerrarOrbe : etiqueta`, que el contrato de B reemplazó
+     * por dos props (`abrir` / `cerrar`). *Una key sin consumidor es una frase
+     * esperando que alguien la vuelva a montar creyendo que rige* (Ley 37). */
     cerrar: 'Cerrar',
     // La almohadilla de la pata — el quinto tocable, el que abre la Hoja.
     // Registro de la casa: tuteo neutro con su tilde (regla 27).

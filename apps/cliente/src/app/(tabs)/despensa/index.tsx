@@ -50,7 +50,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Campo,
-  COLA_BURBUJA_PENDIENTES,
+  COLA_PRESENCIA_COACH,
   Encabezado,
   Entrada,
   Esqueleto,
@@ -905,7 +905,7 @@ export default function DespensaDescubrir() {
           // propio tamaño: *un número tecleado que tenga que coincidir con
           // el diámetro de un disco de otro paquete son dos cuentas que
           // tienen que dar igual.*
-          paddingBottom: spacing[8] + COLA_BURBUJA_PENDIENTES,
+          paddingBottom: spacing[8] + COLA_PRESENCIA_COACH,
           gap: spacing[5],
         }}
       >
@@ -1337,7 +1337,7 @@ export default function DespensaDescubrir() {
           no ve dos montajes de la misma pieza: los dos compilan.
 
           ⚠️ **LO QUE NO MURIÓ CON ÉL, y es la mitad que se olvida:
-          `COLA_BURBUJA_PENDIENTES` en el `paddingBottom` del scroll SE QUEDA.**
+          `COLA_PRESENCIA_COACH` en el `paddingBottom` del scroll SE QUEDA.**
           ⏪ S112-C: se llamaba `COLA_CARRITO_FLOTANTE`. *Una constante que dice
           «carrito» y reserva espacio para mensajes miente en el nombre, que
           es donde nadie la lee* (B).
