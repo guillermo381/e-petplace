@@ -211,6 +211,9 @@ export const prestadorEn = {
     datoPorCoordinar: 'Day done · {{n}} to schedule',
     // S86-C (gate) · a day with no appointments SAYS so.
     datoSinCitas: 'No appointments on record',
+    // S113-C · the three voices of a free day (count: absent · zero · number).
+    datoLibre: 'Free today',
+    datoLibreSinSemana: 'Free today · nothing this week',
     datoLibreConSemana: 'Free today · {{n}} this week',
     // S86-C · a past day speaks in the past — never promises a future.
     datoPasadoPendiente1: '1 left open',
