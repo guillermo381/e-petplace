@@ -47,7 +47,8 @@
     "verify:puerta-unica": "node scripts/verify-puerta-unica.mjs",
     "tipos:rutas": "node scripts/tipos-rutas.mjs",
     "ia:medir": "tsx scripts/ia-conjuntos/medir-pieza.mjs",
-    "verify:nexo": "tsx apps/cliente/scripts/verify-nexo.mts"
+    "verify:nexo": "tsx apps/cliente/scripts/verify-nexo.mts",
+    "verify:glifos": "tsx scripts/_arnes-glifos.mts"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",
