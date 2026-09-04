@@ -337,6 +337,22 @@ export const prestadorEs = {
     // ⭐ S86-C (gate) · el día sin citas DICE que no hubo — antes se
     // callaba y el header saltaba (L-201, escala chica).
     datoSinCitas: 'Sin citas registradas',
+    /* ⭐ S113-C · LAS TRES VOCES DEL DÍA LIBRE, y son TRES porque el conteo
+       de la semana tiene TRES estados y no dos: no llegó · llegó en cero ·
+       llegó con número. *Vacío por carga y vacío por estado son dos hechos
+       distintos y no comparten guard* — el mismo error que haría decir
+       «nada esta semana» mientras el dato todavía viaja.
+       🔴 El rojo que las parió: el caller pasaba `{ count }` y la key dice
+       `{{n}}` ⇒ i18next 25 (`skipOnVariables` default true) deja la LLAVE
+       CRUDA en pantalla: «Hoy libre · {{n}} esta semana». */
+    /** El conteo NO llegó: la línea existe igual (el alto no salta) y el
+     *  número se agrega DESPUÉS, sin mover «Hoy libre» de lugar. */
+    datoLibre: 'Hoy libre',
+    /** El conteo llegó y es CERO: jamás un «0», jamás una llave. */
+    datoLibreSinSemana: 'Hoy libre · nada esta semana',
+    /** El conteo llegó con número. Sirve al 1 y al N: en español el resto de
+     *  la frase no cambia con el número («1 esta semana» · «3 esta semana»),
+     *  así que NO hay singular aparte — medido, no supuesto. */
     datoLibreConSemana: 'Hoy libre · {{n}} esta semana',
     /* ⭐ S86-C · UN DÍA PASADO HABLA EN PASADO (cruce 2, firma de mesa).
        Con la rueda llegando a hoy-3, las voces de arriba prometían futuro

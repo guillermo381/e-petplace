@@ -123,6 +123,7 @@ import { hoyLocalISO } from '@/lib/ventas-formato';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio, type OficiosActivos } from '@/lib/voz-oficio';
 import { duracionCorta, montoCorto } from '@/lib/formato-techo';
+import { textoDeLaForma, type FormaDelDia } from '@/lib/texto-jornada';
 import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 // ⏪ S88-C: el import de AgendaRecepcion salió con el desvío por rol
 // (LÁMINA_HOME_POR_ROL). El archivo vive hasta el veredicto del censo.
@@ -378,25 +379,10 @@ function estadoEfectivo(cita: CitaAgendaPaseo): string | null {
 // Se computa de `citasHoySin` — el día SIN filtrar (guard estructural
 // S61-B12): el filtro por oficio JAMÁS miente el conteo del techo.
 //
-// Descriptor puro → la pantalla lo traduce. Así los 10 estados se leen
-// de un vistazo y el copy vive entero en el riel i18n.
-type FormaDelDia =
-  | { clave: 'omitida' }
-  /** S86-C · el día sin citas DICE que no hubo — jamás se calla. */
-  | { clave: 'sinCitas' }
-  | { clave: 'quedan'; n: number; hora: string }
-  | { clave: 'queda1'; hora: string }
-  | { clave: 'quedanSinHora'; n: number }
-  | { clave: 'queda1SinHora' }
-  | { clave: 'completa' }
-  | { clave: 'porCoordinar'; n: number }
-  | { clave: 'libreConSemana'; n: number }
-  /* ⭐ S86-C · LAS DOS VOCES DEL PASADO (cruce 2). Un día vencido no promete:
-     lo que quedó sin cerrar **es plata sin devengar** (el devengo nace al
-     cerrar con calidad), y cada una es puerta a su cita — las filas de la
-     Zona 2 ya navegan ahí, así que la voz nombra y la lista lleva. */
-  | { clave: 'pasadoPendientes'; n: number }
-  | { clave: 'pasadoCerrado'; n: number }
+// ⏪ S113-C · EL TIPO Y SU VOZ SE MUDARON a `@/lib/texto-jornada` — ahí no
+// hay un solo import de runtime, así que el arnés puede llamar a LA MISMA
+// función que corre en pantalla en vez de reimplementar su tabla. Acá queda
+// el productor del descriptor (`formaDelDia`), que sí necesita las citas.
 
 
 /**
@@ -426,19 +412,30 @@ function horaDeCierre(pendientes: CitaAgendaPaseo[]): string | null {
 function formaDelDia(args: {
   /** El día SIN filtrar (guard S61-B12). */
   citasHoySin: CitaAgendaPaseo[];
-  /** Todo el rango hoy..hoy+6, sin filtrar. */
-  citasRango: CitaAgendaPaseo[];
+  /* ⭐ S113-C · EL CONTEO DE LA SEMANA VIENE DEL SERVIDOR, O NO VIENE.
+     Hasta acá lo calculaba la pantalla con `citasRango.length`, y el número
+     era FALSO EN SU VENTANA: desde S86-C el fetch trae hoy−3..hoy+6 — DIEZ
+     días, TRES de ellos pasados — así que «3 esta semana» podían ser dos
+     citas de anteayer y una de mañana. *Un número plausible sobre la ventana
+     equivocada no da error: da un dato creíble y falso.*
+     ⚠️ Y la ventana no es lo único: el rango se arma con `hoyLocal()`, que usa
+     la zona del APARATO y no la del negocio (`hoyEnZona`, S112-C). La semana
+     del prestador se cuenta en SU zona.
+     ⇒ El conteo se PIDE (el pedido, con su forma, vive en el call site).
+     Mientras no exista, esta pantalla NO lo inventa: `null`. */
+  semanaDelServidor: number | null;
   esAtendida: (c: CitaAgendaPaseo) => boolean;
   /** D-439 — ya en memoria; "Jornada completa." lo exige en cero (E4). */
   porCoordinar: number;
   /** S86-C: ¿el día en vista ya pasó? Decide TIEMPO VERBAL, nada más. */
   esPasado: boolean;
+  /** S113-C: ¿el día en vista ES hoy? «Hoy libre» solo se dice sobre hoy. */
+  esHoy: boolean;
 }): FormaDelDia {
-  /* ⚠️ `citasRango` SOBREVIVE a la muerte de la vista Semana, y por poco
-     no lo hace: alimenta la voz `libreConSemana` del TECHO ("hoy libre,
-     pero la semana tiene N"), que es OTRA cosa que la vista. Retirarlo
-     con ella habría matado una voz viva por asociación de nombre. */
-  const { citasHoySin, citasRango, esAtendida, porCoordinar, esPasado } = args;
+  /* ⏪ S113-C · ACÁ VIVÍA `citasRango`, que S85-C salvó de morir con la vista
+     Semana porque "alimenta la voz del TECHO". **La voz sigue viva; lo que
+     murió es que la cuente ESTA PANTALLA** (ver `semanaDelServidor`). */
+  const { citasHoySin, semanaDelServidor, esAtendida, porCoordinar, esPasado, esHoy } = args;
 
   // E6(b), declarado: `en_curso` NO está en `esAtendida` — la cita que
   // corre SUMA a "Te quedan". No terminó.
@@ -472,9 +469,12 @@ function formaDelDia(args: {
     return porCoordinar > 0 ? { clave: 'porCoordinar', n: porCoordinar } : { clave: 'completa' };
   }
 
-  // Día sin citas: vacío ≠ negocio muerto (§15b) — si la semana tiene, se dice.
-  const semana = citasRango.length;
-  if (semana > 0) return { clave: 'libreConSemana', n: semana };
+  /* Día sin citas: vacío ≠ negocio muerto (§15b).
+     ⚠️ Y SOLO SOBRE HOY. Esta rama no miraba el día en vista, así que parado
+     en un jueves futuro sin citas el techo decía **«Hoy libre»** — la misma
+     clase que S86-C cazó para el pasado y no para el futuro. Un día futuro
+     sin citas cae abajo, a la voz que no conjuga tiempo. */
+  if (esHoy) return { clave: 'libre', semana: semanaDelServidor };
 
   /* ⭐ S86-C (gate) · ANTES DEVOLVÍA `omitida` Y EL HEADER SALTABA.
      Es L-201 en su versión chica: los días con citas dicen «Te quedan 3»
@@ -1939,40 +1939,35 @@ export default function Hoy() {
     pantalla.estado === 'listo'
       ? formaDelDia({
           citasHoySin,
-          citasRango: citas,
+          /* 🔴 PUERTA PENDIENTE — PEDIDO A LA PISTA A (S113-C).
+             El conteo de la semana del prestador NO EXISTE en @epetplace/api
+             (censo: cero coincidencias de "semana" en packages/api/src). Se
+             pide POR NOMBRE y con su forma; esta pantalla no lo calcula:
+
+               wrapper : obtenerConteoSemanaPrestador({ prestador_id })
+               tipo    : Promise<ResultadoWrapper<number, CodigoError…>>
+               consulta: citas FIRMES — los MISMOS cuatro estados que ya usan
+                         los lectores del día (confirmada · en_curso ·
+                         completada · no_show) — de los CUATRO oficios, en la
+                         ventana hoy..hoy+6
+               zona    : el día se resuelve en la ZONA DEL NEGOCIO
+                         (`prestadores.zona_horaria`, la misma que usa
+                         `hoy_local()` en la base), JAMÁS en la del aparato
+
+             Hasta que exista, `null` = «todavía no lo sé» y el techo dibuja
+             «Hoy libre» solo. El día que llegue, ESTA LÍNEA es lo único que
+             cambia acá. */
+          semanaDelServidor: null,
           esAtendida,
           porCoordinar: porCoordinar.length,
           esPasado: vistaEsPasado,
+          esHoy: vistaEsHoy,
         })
       : { clave: 'omitida' };
 
-  const textoJornada: string | undefined =
-    forma.clave === 'omitida'
-      ? undefined
-      : forma.clave === 'quedan'
-        ? t('agenda.datoQuedan', { count: forma.n, hora: forma.hora })
-        : forma.clave === 'queda1'
-          ? t('agenda.datoQueda1', { hora: forma.hora })
-          : forma.clave === 'quedanSinHora'
-            ? t('agenda.datoQuedanSinHora', { count: forma.n })
-            : forma.clave === 'queda1SinHora'
-              ? t('agenda.datoQueda1SinHora')
-              : forma.clave === 'completa'
-                ? t('agenda.datoCompleta')
-                : forma.clave === 'porCoordinar'
-                  ? t('agenda.datoPorCoordinar', { count: forma.n })
-                  : /* S86-C · las dos del pasado */
-                    forma.clave === 'pasadoPendientes'
-                    ? forma.n === 1
-                      ? t('agenda.datoPasadoPendiente1')
-                      : t('agenda.datoPasadoPendientes', { count: forma.n })
-                    : forma.clave === 'sinCitas'
-                      ? t('agenda.datoSinCitas')
-                      : forma.clave === 'pasadoCerrado'
-                      ? forma.n === 1
-                        ? t('agenda.datoPasadoCerrado1')
-                        : t('agenda.datoPasadoCerradoN', { count: forma.n })
-                      : t('agenda.datoLibreConSemana', { count: forma.n });
+  /* La voz de la línea vive en `@/lib/texto-jornada` (S113-C): la tabla
+     descriptor→copy es lo único que el arnés de los cuatro estados ejerce. */
+  const textoJornada: string | undefined = textoDeLaForma(forma, t);
 
   /* E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
      nombre, el saludo va SOLO (jamás inventado).
