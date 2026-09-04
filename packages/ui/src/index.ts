@@ -77,6 +77,18 @@ export { GlifoConContador, type GlifoConContadorProps } from './components/Glifo
    mensajes**, así que una constante llamada «carrito» reservaría espacio para
    mensajes y *mentiría en el nombre, que es donde nadie la lee*. La reemplaza
    `COLA_BURBUJA_PENDIENTES`. */
+/* ☠️ **`BurbujaPendientes` QUEDA DEROGADA — la reemplaza `PresenciaCoach`
+   con `coach: false`** (S113-B · lote 0.3, decisión del founder). Es la misma
+   puerta, el mismo píxel y el mismo contrato de `aireInferior`; lo que gana es
+   que **hay UNA sola pieza flotante en la casa** en vez de dos que se turnan.
+   En memorial el cliente monta ésta con `coach: false`.
+
+   ⚠️ **SIGUE EXPORTADA A PROPÓSITO, y esto no es tibieza: es `L-395`.**
+   *Si se retira antes de que las apps monten la nueva, no queda ninguna
+   puerta; si se monta la nueva sin retirar ésta, hay dos discos peleando el
+   mismo píxel.* **El retiro y el montaje van en el mismo commit, y ese commit
+   es de quien toca `apps/` — no mío.** Su borrado es de una línea el día que
+   eso pase. */
 export { BurbujaPendientes, COLA_BURBUJA_PENDIENTES, type BurbujaPendientesProps, type Pendiente, type ClasePendiente } from './components/BurbujaPendientes'
 // FichaRepartidor — S100d-B (punto 25): quién va a tocar el timbre. LA PLACA
 // MANDA (es lo único verificable desde la puerta) · sin placa el nombre

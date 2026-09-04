@@ -407,7 +407,12 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
         }}
         voz={{
           preguntar: t('nexo.almohadilla', { nombre }),
-          orbe: t('nexo.etiqueta', { nombre }),
+          /* D-1019 (S113-B · 0.3): la prop pasó de `orbe` a `abrir` porque el
+             orbe se llama distinto según lo que va a hacer. **La clave y su
+             texto son los de C y no se tocaron** —ya decía «Abrir a {{nombre}}»,
+             o sea que la voz estaba bien y la pieza no la usaba—: lo único que
+             cambia acá es el NOMBRE de la prop. */
+          abrir: t('nexo.etiqueta', { nombre }),
           /* ⚠️ **SIEMPRE, aunque la cuenta sea 0** — así un número no existe sin
              su palabra y la pieza nunca inventa un plural. */
           chat:
