@@ -1,0 +1,59 @@
+/**
+ * EL ROJO QUE VIVE EN EL COMPILADOR (S113-B · lote 0).
+ *
+ * 🔴 **No es un archivo de ejemplos: es un GATE.** Cada `@ts-expect-error` de
+ * acá **falla el typecheck si el error deja de ocurrir** — o sea, si alguien
+ * ablanda los tipos de `PresenciaCoach`, este archivo se pone rojo en el mismo
+ * `pnpm typecheck` de siempre. *Un rojo que hay que acordarse de correr no es
+ * un gate; éste corre en cada commit porque es parte de la compilación.*
+ *
+ * No se importa desde ninguna parte y no viaja en el bundle: sólo declara
+ * tipos y `void`ea las constantes. **Su valor entero está en los errores que
+ * NO ocurren cuando todo está bien.**
+ */
+import type { AtajoCoach, AtajosCoach } from './PresenciaCoach'
+
+const ir = () => {}
+
+/* ── LO QUE SÍ SE PUEDE ESCRIBIR ─────────────────────────────────────── */
+const vivo: AtajoCoach = { id: 'a', icono: 'paseo', etiqueta: 'Paseo', onPress: ir }
+const apagadoConRazon: AtajoCoach = {
+  id: 'b', icono: 'despensa', etiqueta: 'Despensa',
+  razonApagado: 'Todavía no hay tiendas cerca tuyo',
+}
+void vivo
+void apagadoConRazon
+
+/* ── ① UN BOTÓN APAGADO Y MUDO NO SE PUEDE ESCRIBIR ───────────────────
+ * Es el defecto que el encargo nombró: *«un botón apagado sin razón a la
+ * vista es el defecto»*. Sin `onPress` y sin `razonApagado` no compila. */
+// @ts-expect-error — apagado y mudo: falta `razonApagado`
+const mudo: AtajoCoach = { id: 'c', icono: 'carnet', etiqueta: 'Carnet' }
+void mudo
+
+/* ── ② NI VIVO NI APAGADO A LA VEZ ────────────────────────────────────
+ * Con los dos, no se sabe qué hace el toque: ¿ejecuta o explica? */
+// @ts-expect-error — `onPress` y `razonApagado` juntos son contradictorios
+const ambiguo: AtajoCoach = {
+  id: 'd', icono: 'ayuda', etiqueta: 'Ayuda', onPress: ir, razonApagado: 'no',
+}
+void ambiguo
+
+/* ── ③ SON CUATRO DEDOS. NI TRES NI CINCO ────────────────────────────
+ * *La pieza no inventa el quinto — y el compilador no la deja.* */
+// @ts-expect-error — tres no alcanzan
+const tres: AtajosCoach = [vivo, vivo, vivo]
+void tres
+
+// @ts-expect-error — cinco sobran
+const cinco: AtajosCoach = [vivo, vivo, vivo, vivo, vivo]
+void cinco
+
+const cuatro: AtajosCoach = [vivo, vivo, apagadoConRazon, vivo]
+void cuatro
+
+/* ── ④ EL ÍCONO SALE DEL REGISTRY ────────────────────────────────────
+ * Un glifo inventado acá se saltearía §6b y su gate por ícono. */
+// @ts-expect-error — 'orbe' no existe en el registry de la casa
+const inventado: AtajoCoach = { id: 'e', icono: 'orbe', etiqueta: 'x', onPress: ir }
+void inventado

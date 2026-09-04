@@ -91,6 +91,8 @@ import { PieRevelar } from '../components/PieRevelar'
 import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
+import { PresenciaCoach } from '../components/PresenciaCoach'
+import { CabeceraCoach } from '../components/CabeceraCoach'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
 import { GotaUbicacion } from '../components/GotaUbicacion'
@@ -176,6 +178,25 @@ const FOTO_MASCOTA_EJEMPLO = require('../../assets/gallery/mascota-ejemplo.png')
 import { AvisoProvider, useAviso } from '../components/Aviso'
 import { EstadoVacio } from '../components/EstadoVacio'
 import type { ThemeMode } from '../themes'
+
+/* ── Fixtures del catálogo del Coach (S113-B) ──────────────────────────
+ * El tercer atajo llega **apagado CON su razón**: es el caso que la pieza
+ * existe para hacer bien —*un botón apagado sin razón a la vista es el
+ * defecto*— y el que hay que poder ver de un vistazo. */
+const ATAJOS_COACH_DEMO = [
+  { id: 'paseo', icono: 'paseo', etiqueta: 'Paseo', onPress: () => {} },
+  { id: 'vet', icono: 'veterinaria', etiqueta: 'Vet', onPress: () => {} },
+  { id: 'despensa', icono: 'despensa', etiqueta: 'Despensa', razonApagado: 'Todavía no hay tiendas que lleguen a tu zona' },
+  { id: 'carnet', icono: 'carnet', etiqueta: 'Carnet', onPress: () => {} },
+] as const
+/* La voz la compone la pantalla (Ley 3): la pieza no arma frases. */
+const VOZ_COACH_DEMO = {
+  preguntar: 'Preguntale al Coach',
+  orbe: 'Coach · tenés 3 pendientes',
+  chat: 'Chat · 2',
+  pedidos: 'Pedido · 1',
+  cerrar: 'Cerrar',
+}
 
 const sans = typography.family.sans
 const mono = typography.family.mono
@@ -4503,6 +4524,84 @@ function GaleriaInterna() {
             marca una coordenada y por eso sube; fuera del mapa no marca nada, y alinear por la punta
             la dejaría visualmente alta al lado de una línea de texto.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="PresenciaCoach (S113) — el Coach, dormido y atento">
+          {/* ⚠️ **CATÁLOGO, NO GATE.** Las láminas de galería se abolieron como
+              vara de aprobación (`L-478`): esta pieza **se valida en la app, por
+              OTA**, sobre un teléfono. Lo que la sección hace es lo que `R17`
+              pide — *que una exportación no quede invisible* — y nada más.
+              ⚠️ **Acá se ve QUIETA:** la respiración, el barrido y el viaje de
+              la huella no se leen en una captura. */}
+          <View style={{ flexDirection: 'row', gap: spacing[7] }}>
+            <View style={{ width: 110, height: 110 }}>
+              <PresenciaCoach
+                estado="dormida"
+                pendientes={{ chat: 0, pedidos: 0, avisos: null }}
+                atajos={ATAJOS_COACH_DEMO}
+                nombre="Coach"
+                abierta={false}
+                onAbrir={() => {}}
+                onCerrar={() => {}}
+                onPreguntar={() => {}}
+                onPendiente={() => {}}
+                voz={VOZ_COACH_DEMO}
+              />
+            </View>
+            {/* Atenta: un arco por tipo con algo. `avisos: null` NO dibuja el
+                violeta — el motor no sabe, y lo que no sabe no se dibuja. */}
+            <View style={{ width: 110, height: 110 }}>
+              <PresenciaCoach
+                estado="atenta"
+                pendientes={{ chat: 2, pedidos: 1, avisos: null }}
+                atajos={ATAJOS_COACH_DEMO}
+                nombre="Coach"
+                abierta={false}
+                onAbrir={() => {}}
+                onCerrar={() => {}}
+                onPreguntar={() => {}}
+                onPendiente={() => {}}
+                voz={VOZ_COACH_DEMO}
+              />
+            </View>
+            {/* Los tres arcos: el bloque sigue centrado arriba. */}
+            <View style={{ width: 110, height: 110 }}>
+              <PresenciaCoach
+                estado="atenta"
+                pendientes={{ chat: 2, pedidos: 1, avisos: 3 }}
+                atajos={ATAJOS_COACH_DEMO}
+                nombre="Coach"
+                abierta={false}
+                onAbrir={() => {}}
+                onCerrar={() => {}}
+                onPreguntar={() => {}}
+                onPendiente={() => {}}
+                voz={VOZ_COACH_DEMO}
+              />
+            </View>
+            {/* Despierta: la perla se vuelve violeta. */}
+            <View style={{ width: 110, height: 110 }}>
+              <PresenciaCoach
+                estado="despierta"
+                pendientes={{ chat: 0, pedidos: 0, avisos: null }}
+                atajos={ATAJOS_COACH_DEMO}
+                nombre="Coach"
+                abierta={false}
+                onAbrir={() => {}}
+                onCerrar={() => {}}
+                onPreguntar={() => {}}
+                onPendiente={() => {}}
+                voz={VOZ_COACH_DEMO}
+              />
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="CabeceraCoach (S113) — quién está hablando">
+          {/* El latido lo dispara la pantalla con cada frase que llega de
+              verdad. Acá `pulsos` no se mueve ⇒ **no late**, que es la
+              conducta correcta cuando no llegó texto. */}
+          <CabeceraCoach nombre="Coach" pulsos={0} />
         </Seccion>
 
         <Seccion titulo="BurbujaPendientes (S112) — la puerta única a lo que te espera">

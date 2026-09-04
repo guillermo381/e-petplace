@@ -1085,3 +1085,32 @@ export {
 
 export { SeccionPlegable, type SeccionPlegableProps } from './components/SeccionPlegable'
 export { conIconos, GLIFOS_PEDIDO } from './components/EscaleraIconos'
+
+/* ══ NEXO — LA PRESENCIA DEL COACH (S113-B · lote 0) ═══════════════════════
+ * 🔴 **`PresenciaCoach` y `BurbujaPendientes` OCUPAN EL MISMO PÍXEL** —las
+ * dos anclan en `right: spacing[5] · bottom: spacing[5] + aireInferior`— y es
+ * a propósito: **es la misma puerta, no una segunda** (N25: una sola puerta,
+ * la que alcanza el pulgar). *El shell monta UNA, nunca las dos.*
+ * **En memorial la presencia devuelve `null` y ahí manda la burbuja**, que
+ * por eso sigue exportada intacta y no se retira en este lote. */
+export {
+  PresenciaCoach,
+  COLA_PRESENCIA_COACH,
+  type PresenciaCoachProps,
+  type EstadoCoach,
+  type AtajoCoach,
+  type AtajosCoach,
+  type PendientesCoach,
+  type ClaseCoach,
+} from './components/PresenciaCoach'
+export { CabeceraCoach, type CabeceraCoachProps } from './components/CabeceraCoach'
+/* 🔴 **LA GEOMETRÍA NO SE EXPORTA, Y NO ES UN OLVIDO.** `ORBE`, `HALO`,
+   `DEDO`, `POSICIONES_DEDOS` y sus funciones son **la forma de la pieza**, y
+   la Ley 8 es literal: *el valor vive en la pieza; ningún consumidor la
+   re-decide.* Una pantalla que pudiera leer `ORBE` para calcular su propio
+   layout estaría fijando por su cuenta un número que el founder puede mover
+   en el próximo gate.
+   **Su gate las importa del módulo directamente** (`coach-geometria.ts`, sin
+   `react-native` adentro), que es exactamente para lo que ese archivo existe.
+   Lo único que la pantalla necesita saber es cuánta cola le debe al scroll, y
+   eso ya sale por `COLA_PRESENCIA_COACH`. */
