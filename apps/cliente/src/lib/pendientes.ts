@@ -69,6 +69,20 @@ export interface FuentesDePendientes {
    *  agendada no se resuelve. Si vuelve, vuelve con su voz. */
   tieneAlertaDeVacuna: boolean;
   sinNingunaVacuna: boolean;
+  /**
+   * 🔴 **`D-1026` — LA LIB LEE EL MISMO HECHO QUE TODO LO DEMÁS.** El globo de
+   * la tira del Hogar seguía diciendo «1» sobre una mascota que ya no está, y
+   * **quien lo destapó fue el cotejo de dev de esta misma casa**: las filas ya
+   * filtraban por mascota y la lib no, así que la consola avisó *«las filas
+   * dicen 0 y la lib 1»*. Ese aviso existía para cazar una clase de fila
+   * nueva; cazó una asimetría entre dos curas.
+   *
+   * Va acá y no en el llamador porque **la lib es la pieza compartida**: curar
+   * al que llama deja al próximo consumidor contando de nuevo. Y es
+   * OBLIGATORIO a propósito — el compilador le pide el dato a cada superficie,
+   * que es la única forma de que ninguna se olvide.
+   */
+  enMemoria: boolean;
 }
 
 /**
@@ -80,6 +94,9 @@ export function pendientesDeMascota(
   mascotaId: string,
   fuentes: FuentesDePendientes,
 ): ClasePendiente[] {
+  /* Nada se le resuelve a quien ya no está: no es que las clases den cero, es
+     que la pregunta no aplica (`A3.9` · `MODELO_LOYALTY §7.1`). */
+  if (fuentes.enMemoria) return [];
   const clases: ClasePendiente[] = [];
   for (const s of fuentes.solicitudes) if (s.mascotaId === mascotaId) clases.push('solicitud');
   for (const p of fuentes.presupuestos) if (p.mascotaId === mascotaId) clases.push('presupuesto');

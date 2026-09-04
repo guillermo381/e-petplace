@@ -1215,6 +1215,21 @@ export default function Hogar() {
       hoy,
     );
   };
+  /* 🔴 **ARRIBA DE `filasReco`, Y NO DONDE VIVÍA `mascotaDe`.** Puesto abajo
+     compila igual y **crashea la pantalla entera**: `filasReco` es un IIFE que
+     corre al render, así que lee esto antes de que exista (TDZ). Lo destapó el
+     arnés —«Esta pantalla no se pudo mostrar»—, no el typecheck: *un `const`
+     usado antes de declararse es un error de TIEMPO, y el compilador mira
+     tipos.* `verify:ref-antes-de-uso` tampoco lo ve: su alcance escrito son
+     los `useRef`, y esto es una función. */
+  const mascotaDe = (id: string) => (Array.isArray(mascotas) ? mascotas.find((m) => m.id === id) : undefined);
+  /** El hecho, en UN solo lugar de esta pantalla: lo leen el filtro de las
+   *  filas y la lib de pendientes, que antes decían cosas distintas. */
+  const enMemoriaDe = (id: string): boolean => {
+    const m = mascotaDe(id);
+    return m !== undefined && m.estado_vida !== null && m.estado_vida !== 'activa';
+  };
+
   const filasReco: FilaReco_[] = (() => {
     /* ⚠️ Este `esMemorial` es el del TEMA, y **en el Hogar es el instrumento
        equivocado**: acá conviven las vivas y las que ya no están, así que un
@@ -1457,10 +1472,7 @@ export default function Hogar() {
        filtro que hay que acordarse de repetir se olvida en la sexta.* Cada fila
        ya declara de quién habla en `mascotaId`, así que el dato para callarla
        estaba y nadie lo miraba — el mismo hallazgo que la primera mitad. */
-    const enMemoria = new Set(
-      mascotas.filter((m) => m.estado_vida !== null && m.estado_vida !== 'activa').map((m) => m.id),
-    );
-    return filas.filter((f) => f.mascotaId === null || !enMemoria.has(f.mascotaId));
+    return filas.filter((f) => f.mascotaId === null || !enMemoriaDe(f.mascotaId));
   })();
   /**
    * A8 (S91-D) — EL CONTEO SALE DE LA LIB, NO DE LAS FILAS.
@@ -1472,7 +1484,6 @@ export default function Hogar() {
    * **La definición sube a `lib/pendientes.ts` y las dos superficies la
    * consumen** (letra de mesa, adoptada antes de que existiera el 2º consumidor).
    */
-  const mascotaDe = (id: string) => (Array.isArray(mascotas) ? mascotas.find((m) => m.id === id) : undefined);
   const fuentesDe = (id: string): FuentesDePendientes => {
     const s = senalesPorMascota.get(id);
     const voz = vozDe(id);
@@ -1489,13 +1500,19 @@ export default function Hogar() {
         voz.causa !== 'emergencia',
       sinNingunaVacuna:
         composicionDe(mascotaDe(id)?.sujeto).vacunas && s !== undefined && s.vacunas_total === 0,
+      enMemoria: enMemoriaDe(id),
     };
   };
-  /** ⚠️ El apagado de MEMORIAL vive acá y no en la lib, y es a propósito: la
-   *  lib es dato puro y memorial es un modo de la casa. Un memorial no tiene
-   *  pendientes —no se le agenda, no se le cobra, no se le vacuna— y ése es un
-   *  apagado ESTRUCTURAL, no un filtro. (Sin esto mi propio chequeo gritaría:
-   *  `filasReco` ya devuelve `[]` en memorial.) */
+  /** 🔴 **`D-1026` · ESTA LETRA SE ENMIENDA, Y LA RAZÓN VIEJA NO ERA MALA.**
+   *  Decía: *«el apagado de MEMORIAL vive acá y no en la lib: la lib es dato
+   *  puro y memorial es un modo de la casa»*. Correcto mientras memorial fuera
+   *  el TEMA — pero ese `esMemorial` es justo el que **nadie enciende**
+   *  (`D-1021`), así que el globo de la tira siguió diciendo «1» sobre quien ya
+   *  no está. Con `D-1021` memorial dejó de ser un modo de la casa y pasó a ser
+   *  **un hecho de la mascota** (`estado_vida`) — y un hecho de la mascota SÍ
+   *  es dato puro, así que ahora le corresponde a la lib.
+   *  El `esMemorial` del tema se conserva (la galería lo monta) pero ya no es
+   *  el que rige: rige `enMemoria`, adentro. */
   const pendientesDe = (id: string) => (esMemorial ? 0 : contarPendientesDe(id, fuentesDe(id)));
 
   /**

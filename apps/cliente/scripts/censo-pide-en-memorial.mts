@@ -27,8 +27,21 @@ import ts from 'typescript';
 import { readFileSync } from 'node:fs';
 import { clienteEs } from '../src/i18n/es.ts';
 
-const VERBOS =
-  /\b(registr|carg[aá]|reserv|agend|agreg|cambi|cont[aá]nos|cu[eé]ntanos|sub[ií]|complet)/i;
+/**
+ * 🔴 **EL ACENTO SE QUITA ANTES DE MIRAR, y esto lo pario `D-1024`.** La primera
+ * lista tenia `carg[aá]` — que ve «carga» y «cargá» y **es ciega a «Cárgalo»**,
+ * porque ahi la tilde cae en la PRIMERA vocal. *Un imperativo con enclitico
+ * mueve el acento de lugar, asi que una regex que lo espera en una vocal fija
+ * ve la mitad del idioma.* Y las dos voces de la casa lo mueven distinto: el
+ * voseo acentua la ultima («cargalo» sin tilde), el tuteo la primera
+ * («cárgalo»). Se **normaliza y se comparan raices sin tilde**: una sola lista
+ * cubre las dos voces, todos los encliticos y los que vengan.
+ */
+const sinTilde = (x: string): string => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+/** Las raices, SIN tildes. `sub[ei]` y no `sub` a secas: `sub` solo tambien
+ *  matchea «subtitulo», y un falso positivo cuesta una revision de mas. */
+const VERBOS = /\b(registr|carg|reserv|agend|agreg|cambi|contanos|cuentanos|sub[ei]|complet|anot|compart)/i;
 
 /** Aplana el diccionario a `namespace.camino.key` → frase. */
 function aplanar(o: unknown, pre: string[] = [], sal = new Map<string, string>()): Map<string, string> {
@@ -54,6 +67,7 @@ const NO_ES_PEDIR: Array<[RegExp, string]> = [
   [/^(Cargar m[aá]s|Ver completo)$/i, 'paginacion / revelar: actua sobre la LISTA, no sobre la mascota'],
   [/^Sin\b/i, 'declara una AUSENCIA («Sin registro»): es un valor, no un acto que se propone'],
   [/^Ver\b/i, 'LEER no es pedir — y el mandato dice que en memorial se lee'],
+  [/^Compartir$/i, 'es un acto de la familia sobre lo que YA existe, no una propuesta de completar nada. Su pariente que SÍ pide es «Compártelo…», y el control positivo prueba que el detector lo sigue viendo'],
 ];
 
 const frases = aplanar(clienteEs);
@@ -61,12 +75,18 @@ const frases = aplanar(clienteEs);
  *  puede llamarse `perfil.pesoRegistrar` y decir otra cosa, y al revés. */
 const pide = new Set(
   [...frases]
-    .filter(([, v]) => VERBOS.test(v) && !NO_ES_PEDIR.some(([r]) => r.test(v)))
+    .filter(([, v]) => VERBOS.test(sinTilde(v)) && !NO_ES_PEDIR.some(([r]) => r.test(sinTilde(v))))
     .map(([k]) => k),
 );
 
 const ARCHIVOS = [
   'src/app/(tabs)/hogar/mascota/[mascotaId].tsx',
+  /* La pantalla de vacunas entra por CLASE, no porque alguien la nombrara:
+     es otra pantalla DE UNA MASCOTA y monta la misma frase que `D-1024`
+     («Cárgalo con una foto…»), con el mismo guard muerto del tema. Censar el
+     caso reportado y no su clase deja la segunda puerta para la vuelta que
+     viene — y en este arco ya pasó. */
+  'src/app/(tabs)/hogar/vacunas/[mascotaId].tsx',
   'src/app/(tabs)/hogar/index.tsx',
 ];
 
@@ -213,6 +233,34 @@ for (const rel of ARCHIVOS) {
 }
 
 di('');
+/* 🔴 **EL CONTROL POSITIVO: SE LE PLANTAN FRASES QUE DEBE VER.** Es la mitad
+   que faltaba cuando `D-1024` paso por debajo: el censo daba VERDE y la razon
+   era que no sabia mirar. *La primera prueba de un detector no es que apruebe
+   lo bueno: es que marque lo malo.* Van las cinco del mandato en las DOS voces
+   de la casa — tuteo con enclitico (la tilde se corre a la primera vocal) y
+   voseo (sin tilde) — porque una lista que solo cubre una voz deja la otra
+   invisible. */
+const PLANTADAS = [
+  'Cárgalo con una foto y guardamos sus vacunas.',
+  'Regístralo para empezar su historia.',
+  'Súbelo cuando puedas.',
+  'Anótalo en su bitácora.',
+  'Compártelo con tu veterinario.',
+  'Cargalo con una foto y guardamos sus vacunas.',
+  'Registralo para empezar su historia.',
+  'Subilo cuando puedas.',
+  'Anotalo en su bitácora.',
+  'Compartilo con tu veterinario.',
+];
+const ciegas = PLANTADAS.filter((f) => !VERBOS.test(sinTilde(f)));
+di('── CONTROL POSITIVO ───────────────────────────────────────');
+di(`  frases plantadas: ${PLANTADAS.length} · las ve todas: ${ciegas.length === 0 ? 'sí ✓' : 'NO 🔴'}`);
+if (ciegas.length > 0) {
+  for (const f of ciegas) di(`  🔴 no la ve: «${f}»`);
+  di('ROJO · el detector es ciego a frases que DEBE ver: su verde no vale nada.');
+  process.exit(2);
+}
+
 /* 🔴 El control del propio censo: un 0 puede querer decir «no hay» o «no vi». */
 if (hallados < 5) {
   di(`ROJO · el censo halló sólo ${hallados} frases de acción: es un verde vacío, no un verde.`);

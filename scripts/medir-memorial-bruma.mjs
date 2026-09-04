@@ -40,6 +40,23 @@ await page.waitForTimeout(16000);
 
 di(`── EL HOGAR ───────────────────────────────────────────────`);
 const tH = await T();
+/* 🔴 **EL GLOBO DE LA TIRA (`D-1026`)** — se mide en el HOGAR, antes de entrar
+   a la ficha: la tira es donde el founder lo vio. Se lee del texto de la
+   tarjeta de cada una, no del documento entero, para no atribuirle a Bruma un
+   «1 por resolver» que es de Zeus. */
+const globos = await page.evaluate(() => {
+  const nombres = ['Zeus', 'Kira', 'Bruma', 'Thor', 'Sombra'];
+  const sal = [];
+  for (const e of document.querySelectorAll('[role="button"], [role="link"]')) {
+    const txt = (e.textContent ?? '').trim();
+    const quien = nombres.find((n) => new RegExp(`(^|\\W)${n}(\\W|$)`).test(txt));
+    if (quien !== undefined && /por resolver/i.test(txt)) sal.push(`${quien}: ${(txt.match(/\d+ por resolver/) ?? ['?'])[0]}`);
+  }
+  return [...new Set(sal)];
+});
+di(`globos «por resolver» en la tira: ${globos.join(' · ') || 'ninguno'}`);
+di(`🔴 alguna en memoria con globo: ${globos.some((g) => /^(Bruma|Sombra):/.test(g)) ? 'SÍ' : 'no ✓'}`);
+
 di(`mascotas a la vista: ${['Zeus', 'Kira', 'Bruma', 'Thor', 'Sombra'].filter((n) => tH.includes(n)).join(' · ')}`);
 const chip = page.getByRole('button', { name: QUIEN, exact: true });
 if ((await chip.count()) === 0) {
