@@ -28,6 +28,7 @@
 // una lectura probable en un dato firmado sin que nadie lo firme.*
 
 import { exigirSesion } from '../_shared/sesion.ts'
+import { llamarModelo } from '../_shared/ia/mod.ts'
 
 const corsHeaders = {
   // '*' a sabiendas, igual que `extract-vacuna`: los callers son apps nativas
@@ -143,80 +144,53 @@ Deno.serve(async (req) => {
       return error('imagen_invalida', 'La imagen supera el límite de 5 MB.')
     }
 
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
-    if (!apiKey) {
-      return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
-    }
-
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        // Contrato IDÉNTICO al de `extract-vacuna` (S48-B6.2/B8.2), y por las
-        // mismas razones medidas allá:
-        // - `temperature` FUERA: Sonnet 5 rechaza sampling params no-default
-        //   con 400.
-        // - `thinking` omitido = adaptive por default, y piensa ANTES de
-        //   responder — que es lo que la transcripción dígito-a-dígito
-        //   necesita.
-        // - `max_tokens` alto porque el thinking lo consume; el JSON de acá
-        //   sale en ~100 tokens, el resto es aire. Un documento es MUCHO más
-        //   simple que un carnet denso, así que 4000 alcanza de sobra y el
-        //   guard de `stop_reason` queda igual como red (regla 36).
-        model: 'claude-sonnet-5',
-        max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: media, data: imageBase64 } },
-            { type: 'text', text: PROMPT },
-          ],
-        }],
-      }),
+    // ── LA PUERTA ÚNICA (S113-D) ────────────────────────────────────────────
+    // El `fetch`, la key, el parseo y el guard de truncado viven ahora en
+    // `_shared/ia`. Cuerpo byte a byte el mismo (discriminador). Los códigos y
+    // los mensajes de abajo son los de siempre, incluida la rama propia de
+    // esta edge: **«no trae texto» sale como `error_modelo`, no como 422** —
+    // es la única de las cuatro que los separa, y se respeta.
+    const r = await llamarModelo({
+      pieza: 'documento',
+      mensajes: [{ rol: 'user', texto: PROMPT }],
+      imagenes: [{ mediaType: media, base64: imageBase64 }],
+      salida: 'json',
     })
 
-    const responseText = await anthropicRes.text()
-
-    if (!anthropicRes.ok) {
-      console.error('Anthropic non-ok:', anthropicRes.status, responseText)
-      if (anthropicRes.status === 400) {
-        return error('imagen_invalida', 'El modelo rechazó la imagen (formato o contenido inválido).')
+    if (!r.ok) {
+      if (r.error === 'error_proveedor') {
+        if (r.detalle === 'sin_credencial') {
+          return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
+        }
+        if (r.detalle === 'red') return error('error_modelo', 'No pudimos leer el documento.')
+        if (r.detalle === 'respuesta_no_json') {
+          return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
+        }
+        if (r.estadoHttp === 400) {
+          return error('imagen_invalida', 'El modelo rechazó la imagen (formato o contenido inválido).')
+        }
+        if (r.estadoHttp === 401) {
+          return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
+        }
+        return error('error_modelo', `Anthropic respondió ${r.estadoHttp}.`)
       }
-      if (anthropicRes.status === 401) {
-        return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
+      // Estado NUEVO: antes no había timeout, y una foto que nunca volvía se
+      // veía como un alta trabada.
+      if (r.error === 'timeout') {
+        return error('error_modelo', 'La lectura tardó demasiado. Probá de nuevo.')
       }
-      return error('error_modelo', `Anthropic respondió ${anthropicRes.status}.`)
-    }
-
-    let data: { content?: { type: string; text?: string }[]; stop_reason?: string }
-    try {
-      data = JSON.parse(responseText)
-    } catch {
-      return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
-    }
-
-    // Red de regla 36: un truncado devuelve JSON a medias que parece válido.
-    if (data.stop_reason === 'max_tokens') {
-      return error('extraccion_fallida', 'La lectura quedó incompleta. Probá con una foto más nítida.')
-    }
-
-    const texto = (data.content ?? []).find((b) => b.type === 'text')?.text
-    if (typeof texto !== 'string') {
-      return error('error_modelo', 'La respuesta del modelo no trae texto.')
-    }
-
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(texto.trim().replace(/^```json\s*/i, '').replace(/```$/, ''))
-    } catch {
+      if (r.detalle === 'truncado') {
+        return error('extraccion_fallida', 'La lectura quedó incompleta. Probá con una foto más nítida.')
+      }
+      // `sin_texto` y `rechazo` terminan los dos acá, que es exactamente donde
+      // terminan hoy: un rechazo del modelo llega sin bloque de texto.
+      if (r.detalle === 'sin_texto' || r.error === 'rechazo') {
+        return error('error_modelo', 'La respuesta del modelo no trae texto.')
+      }
       return error('extraccion_fallida', 'El modelo no devolvió JSON.')
     }
 
-    const doc = (parsed as { documento?: unknown })?.documento
+    const doc = (r.datos as { documento?: unknown })?.documento
     if (!esDocumentoExtraido(doc)) {
       return error('extraccion_fallida', 'La lectura no cumple el contrato esperado.')
     }

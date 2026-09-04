@@ -57,6 +57,7 @@
 //                                   ROMPIÓ UN MURO (ver `superlativos`)
 
 import { exigirSesion } from '../_shared/sesion.ts'
+import { llamarModelo } from '../_shared/ia/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -299,62 +300,55 @@ Deno.serve(async (req) => {
       return error('entrada_invalida', 'El material es demasiado largo.')
     }
 
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
-    if (!apiKey) {
-      return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
-    }
-
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-5',
-        max_tokens: 4000,
-        // LOS MUROS VAN ACÁ, separados del material del prestador (ver cabecera).
-        system: SISTEMA,
-        messages: [{ role: 'user', content: [{ type: 'text', text: entrada }] }],
-      }),
+    // ── LA PUERTA ÚNICA (S113-D) ────────────────────────────────────────────
+    // El `fetch`, la key, el parseo y el guard de truncado se fueron a
+    // `_shared/ia`. **LOS MUROS NO SE MOVIERON**: `SISTEMA` sigue viajando en
+    // el bloque `system`, separado del material del prestador, que es la
+    // diferencia de forma que esta function eligió a propósito (ver cabecera).
+    //
+    // ── ⚠️ ÉSTA ES LA ÚNICA DE LAS CUATRO QUE CACHEA, Y ES POR MEDICIÓN ─────
+    // `SISTEMA` es constante e idéntica en toda llamada (~9.950 caracteres ⇒
+    // del orden de 2.000-2.800 tokens, sobre el mínimo de 1024 de Sonnet 5), y
+    // esta pieza REGENERA: `TOPE_REGENERACIONES = 3` da ráfagas de hasta tres
+    // llamadas con el mismo `system` dentro de la ventana de 5 minutos, y el
+    // break-even son dos. *Por eso el cuerpo de esta edge es la única que el
+    // discriminador ve cambiar — y sólo en `cache_control`.*
+    const r = await llamarModelo({
+      pieza: 'presencia',
+      sistema: SISTEMA,
+      mensajes: [{ rol: 'user', texto: entrada }],
+      salida: 'json',
     })
 
-    const responseText = await anthropicRes.text()
-
-    if (!anthropicRes.ok) {
-      console.error('Anthropic non-ok:', anthropicRes.status, responseText)
-      if (anthropicRes.status === 400) return error('entrada_invalida', 'El modelo rechazó la entrada.')
-      if (anthropicRes.status === 401) return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
-      return error('error_modelo', `Anthropic respondió ${anthropicRes.status}.`)
-    }
-
-    let data: { content?: { type: string; text?: string }[]; stop_reason?: string }
-    try {
-      data = JSON.parse(responseText)
-    } catch {
-      console.error('Respuesta Anthropic no-JSON:', responseText)
-      return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
-    }
-
-    if (data.stop_reason === 'max_tokens') {
-      console.error('Respuesta truncada por max_tokens')
-      return error('redaccion_fallida', 'El borrador quedó truncado.')
-    }
-
-    const text = data.content?.find((b) => b.type === 'text')?.text ?? ''
-    const clean = text.replace(/```json|```/g, '').trim()
-
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(clean)
-    } catch {
-      console.error('Output del modelo no parseable:', clean)
+    if (!r.ok) {
+      if (r.error === 'error_proveedor') {
+        if (r.detalle === 'sin_credencial') {
+          return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
+        }
+        if (r.detalle === 'red') return error('error_modelo', 'Error inesperado escribiendo el borrador.')
+        if (r.detalle === 'respuesta_no_json') {
+          return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
+        }
+        if (r.estadoHttp === 400) return error('entrada_invalida', 'El modelo rechazó la entrada.')
+        if (r.estadoHttp === 401) {
+          return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
+        }
+        return error('error_modelo', `Anthropic respondió ${r.estadoHttp}.`)
+      }
+      // Estado NUEVO: antes no había timeout ninguno.
+      if (r.error === 'timeout') {
+        return error('error_modelo', 'La escritura tardó demasiado. Probá de nuevo.')
+      }
+      if (r.detalle === 'truncado') {
+        return error('redaccion_fallida', 'El borrador quedó truncado.')
+      }
+      // `rechazo` cae acá porque hoy cae acá.
       return error('redaccion_fallida', 'El modelo no devolvió el JSON del contrato.')
     }
 
-    if (!esBorradorValido(parsed)) {
-      console.error('Output fuera de contrato:', clean)
+    const borrador = r.datos
+    if (!esBorradorValido(borrador)) {
+      console.error('Output fuera de contrato:', JSON.stringify(borrador))
       return error('redaccion_fallida', 'El borrador no cumple el contrato.')
     }
 
@@ -363,7 +357,7 @@ Deno.serve(async (req) => {
     // modelo lo cruza, nadie se entera. Acá se comprueba, y si lo cruzó el
     // borrador NO SALE — se prefiere no entregar nada antes que entregar una
     // afirmación que el prestador no puede sostener.
-    for (const [lengua, txt] of [['es', parsed.es], ['en', parsed.en]] as const) {
+    for (const [lengua, txt] of [['es', borrador.es], ['en', borrador.en]] as const) {
       const roto = rompeMuroSuperlativo(txt)
       if (roto !== null) {
         console.error(`MURO ROTO (${lengua}): superlativo sin fuente "${roto}" · texto=${txt}`)
@@ -371,7 +365,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ borrador: parsed }), { status: 200, headers: JSON_HEADERS })
+    return new Response(JSON.stringify({ borrador }), { status: 200, headers: JSON_HEADERS })
   } catch (err) {
     console.error('Error:', String(err))
     return error('error_modelo', 'Error inesperado escribiendo el borrador.')

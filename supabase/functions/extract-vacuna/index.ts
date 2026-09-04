@@ -53,6 +53,7 @@
 //                                 contrato (parse/shape/truncada)
 
 import { exigirSesion } from '../_shared/sesion.ts'
+import { llamarModelo } from '../_shared/ia/mod.ts'
 
 const corsHeaders = {
   // '*' a sabiendas: los callers son apps nativas (fetch sin CORS) y no
@@ -182,86 +183,60 @@ Deno.serve(async (req) => {
       return error('imagen_invalida', `mediaType no soportado: ${media}.`)
     }
 
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
-    if (!apiKey) {
-      return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
-    }
-
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        // v20 (S48-B6.2): Haiku 4.5 topeó en la atribución espacial
-        // sticker↔campo FECHA (v18/v19 lo demostraron empíricamente:
-        // fechas de sticker, años fabricados, filas corridas). Delta de
-        // costo ≈ USD 0.01 por escaneo — decisión arquitecto regla 74,
-        // análisis de costo regla 61.
-        // Contrato de request para Sonnet 5 (skill claude-api, S48):
-        // - temperature FUERA: Sonnet 5 rechaza sampling params no-default
-        //   con 400 (el "temperature 0 queda" del arranque asumía Haiku).
-        // - thinking omitido = adaptive por DEFAULT en Sonnet 5, y piensa
-        //   ANTES de responder — exactamente lo que esta atribución
-        //   espacial necesita. El thinking consume max_tokens: 16000
-        //   (S48-B8.2: con 8000 el gate founder truncó honesto en el 1er
-        //   intento sobre carnet real denso — el retry curó pero no puede
-        //   ser peaje; el JSON sale en ~500, el resto es aire de thinking)
-        //   y el guard de stop_reason 'max_tokens' queda como red (regla 36).
-        model: 'claude-sonnet-5',
-        max_tokens: 16000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: media, data: imageBase64 } },
-            { type: 'text', text: PROMPT },
-          ],
-        }],
-      }),
+    // ── LA PUERTA ÚNICA (S113-D) ────────────────────────────────────────────
+    // El `fetch` crudo a Anthropic, la key, el parseo y el guard de truncado
+    // se fueron a `_shared/ia`. **El cuerpo que sale es byte a byte el mismo**
+    // (discriminador: `node scripts/verify-ia-discriminador.mjs <sha>`), y con
+    // él se fueron también el modelo y el `max_tokens` — que ahora viven en
+    // `modelos.ts` como CLASIFICACIÓN de lo que esta función ya hacía.
+    //
+    // Lo que NO se fue es la voz: cada código y cada mensaje de abajo son los
+    // de siempre, letra por letra. *Unificar la puerta no es unificar la voz.*
+    const r = await llamarModelo({
+      pieza: 'carnet',
+      mensajes: [{ rol: 'user', texto: PROMPT }],
+      imagenes: [{ mediaType: media, base64: imageBase64 }],
+      salida: 'json',
     })
 
-    const responseText = await anthropicRes.text()
-
-    if (!anthropicRes.ok) {
-      console.error('Anthropic non-ok:', anthropicRes.status, responseText)
-      if (anthropicRes.status === 400) {
-        return error('imagen_invalida', 'El modelo rechazó la imagen (formato o contenido inválido).')
+    if (!r.ok) {
+      if (r.error === 'error_proveedor') {
+        if (r.detalle === 'sin_credencial') {
+          return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
+        }
+        // Caída de red: hasta hoy la agarraba el catch de abajo con este mismo
+        // texto. Se conserva.
+        if (r.detalle === 'red') {
+          return error('error_modelo', 'Error inesperado procesando el carnet.')
+        }
+        if (r.detalle === 'respuesta_no_json') {
+          return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
+        }
+        if (r.estadoHttp === 400) {
+          return error('imagen_invalida', 'El modelo rechazó la imagen (formato o contenido inválido).')
+        }
+        if (r.estadoHttp === 401) {
+          return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
+        }
+        return error('error_modelo', `Anthropic respondió ${r.estadoHttp}.`)
       }
-      if (anthropicRes.status === 401) {
-        return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
+      // Estado NUEVO: antes esta function no tenía timeout ninguno, así que
+      // una espera eterna se veía como una app colgada. Ahora corta y lo dice.
+      if (r.error === 'timeout') {
+        return error('error_modelo', 'La lectura tardó demasiado. Probá de nuevo.')
       }
-      return error('error_modelo', `Anthropic respondió ${anthropicRes.status}.`)
-    }
-
-    let data: { content?: { type: string; text?: string }[]; stop_reason?: string }
-    try {
-      data = JSON.parse(responseText)
-    } catch {
-      console.error('Respuesta Anthropic no-JSON:', responseText)
-      return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
-    }
-
-    if (data.stop_reason === 'max_tokens') {
-      console.error('Respuesta truncada por max_tokens')
-      return error('extraccion_fallida', 'La respuesta del modelo quedó truncada (carnet demasiado denso).')
-    }
-
-    const text = data.content?.find((b) => b.type === 'text')?.text ?? ''
-    const clean = text.replace(/```json|```/g, '').trim()
-
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(clean)
-    } catch {
-      console.error('Output del modelo no parseable:', clean)
+      if (r.detalle === 'truncado') {
+        return error('extraccion_fallida', 'La respuesta del modelo quedó truncada (carnet demasiado denso).')
+      }
+      // `rechazo` cae acá a propósito: hoy un rechazo del modelo llega sin
+      // bloque de texto y termina exactamente en este mensaje. La fila de
+      // `ia_uso` sí lo nombra `rechazo` — que es lo que se venía a ganar.
       return error('extraccion_fallida', 'El modelo no devolvió el JSON del contrato.')
     }
 
-    const vacunasCrudas = (parsed as Record<string, unknown> | null)?.vacunas
+    const vacunasCrudas = (r.datos as Record<string, unknown> | null)?.vacunas
     if (!Array.isArray(vacunasCrudas)) {
-      console.error('Output sin array vacunas:', clean)
+      console.error('Output sin array vacunas:', JSON.stringify(r.datos))
       return error('extraccion_fallida', 'El JSON del modelo no trae el array vacunas.')
     }
     for (let i = 0; i < vacunasCrudas.length; i++) {

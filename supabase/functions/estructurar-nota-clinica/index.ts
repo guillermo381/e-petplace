@@ -32,6 +32,7 @@
 //     estructuracion_fallida  422 — la respuesta no cumple el contrato (parse/shape/truncada)
 
 import { exigirSesion } from '../_shared/sesion.ts'
+import { llamarModelo } from '../_shared/ia/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -187,75 +188,58 @@ Deno.serve(async (req) => {
     const especieStr = typeof especie === 'string' && especie.trim().length > 0 ? especie.trim() : null
     const motivoStr = typeof motivo === 'string' && motivo.trim().length > 0 ? motivo.trim() : null
 
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
-    if (!apiKey) {
-      return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
-    }
-
     const prompt = construirPrompt(especieStr, motivoStr) + texto + '\n"""'
 
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        // Sonnet 5 (patrón extract-vacuna S48): sin temperature (rechaza
-        // sampling no-default con 400), thinking adaptive por default —
-        // la asignación campo-a-campo se beneficia de pensar antes; el
-        // JSON sale corto, el resto es aire de thinking. Guard de
-        // stop_reason 'max_tokens' como red (regla 36).
-        model: 'claude-sonnet-5',
-        max_tokens: 16000,
-        messages: [{ role: 'user', content: [{ type: 'text', text: prompt }] }],
-      }),
+    // ── LA PUERTA ÚNICA (S113-D) ────────────────────────────────────────────
+    // El `fetch`, la key, el parseo y el guard de truncado se fueron a
+    // `_shared/ia`. **El prompt no se movió**: se sigue armando acá, con su
+    // `construirPrompt` y su cierre de comillas, y viaja igual — el
+    // discriminador lo prueba byte a byte.
+    //
+    // ⚠️ Esta pieza NO cachea, y es por medición: su prompt se arma con
+    // `especie` y `motivo` y viaja CONCATENADO con el dictado en un solo
+    // bloque, así que no hay prefijo estable que cachear (ver
+    // `_shared/ia/modelos.ts`).
+    const r = await llamarModelo({
+      pieza: 'nota_clinica',
+      mensajes: [{ rol: 'user', texto: prompt }],
+      salida: 'json',
     })
 
-    const responseText = await anthropicRes.text()
-
-    if (!anthropicRes.ok) {
-      console.error('Anthropic non-ok:', anthropicRes.status, responseText)
-      if (anthropicRes.status === 400) {
-        return error('entrada_invalida', 'El modelo rechazó la entrada.')
+    if (!r.ok) {
+      if (r.error === 'error_proveedor') {
+        if (r.detalle === 'sin_credencial') {
+          return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
+        }
+        if (r.detalle === 'red') return error('error_modelo', 'Error inesperado estructurando la nota.')
+        if (r.detalle === 'respuesta_no_json') {
+          return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
+        }
+        if (r.estadoHttp === 400) return error('entrada_invalida', 'El modelo rechazó la entrada.')
+        if (r.estadoHttp === 401) {
+          return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
+        }
+        return error('error_modelo', `Anthropic respondió ${r.estadoHttp}.`)
       }
-      if (anthropicRes.status === 401) {
-        return error('configuracion_faltante', 'La API key de Anthropic fue rechazada.')
+      // Estado NUEVO: hasta hoy un dictado que no volvía dejaba al vet
+      // esperando sin nada que decirle.
+      if (r.error === 'timeout') {
+        return error('error_modelo', 'La estructuración tardó demasiado. Probá de nuevo.')
       }
-      return error('error_modelo', `Anthropic respondió ${anthropicRes.status}.`)
-    }
-
-    let data: { content?: { type: string; text?: string }[]; stop_reason?: string }
-    try {
-      data = JSON.parse(responseText)
-    } catch {
-      console.error('Respuesta Anthropic no-JSON:', responseText)
-      return error('error_modelo', 'La respuesta de Anthropic no es JSON.')
-    }
-
-    if (data.stop_reason === 'max_tokens') {
-      console.error('Respuesta truncada por max_tokens')
-      return error('estructuracion_fallida', 'La respuesta del modelo quedó truncada.')
-    }
-
-    const text = data.content?.find((b) => b.type === 'text')?.text ?? ''
-    const clean = text.replace(/```json|```/g, '').trim()
-
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(clean)
-    } catch {
-      console.error('Output del modelo no parseable:', clean)
+      if (r.detalle === 'truncado') {
+        return error('estructuracion_fallida', 'La respuesta del modelo quedó truncada.')
+      }
+      // `rechazo` cae acá porque hoy cae acá: llega sin bloque de texto y el
+      // parseo falla. La fila de `ia_uso` sí lo nombra `rechazo`.
       return error('estructuracion_fallida', 'El modelo no devolvió el JSON del contrato.')
     }
 
-    if (!esNotaValida(parsed)) {
-      console.error('Output fuera de contrato:', clean)
+    if (!esNotaValida(r.datos)) {
+      console.error('Output fuera de contrato:', JSON.stringify(r.datos))
       return error('estructuracion_fallida', 'La nota estructurada no cumple el contrato.')
     }
 
-    return new Response(JSON.stringify({ nota: parsed }), { status: 200, headers: JSON_HEADERS })
+    return new Response(JSON.stringify({ nota: r.datos }), { status: 200, headers: JSON_HEADERS })
   } catch (err) {
     console.error('Error:', String(err))
     return error('error_modelo', 'Error inesperado estructurando la nota.')
