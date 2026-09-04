@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto · Nexo, el Coach de e-PetPlace</title>
+<style>
+:root{
+  --paper:#F2F4F1; --ink:#1E2A2B; --ink2:#5C6B6C; --line:#DDE3E0; --card:#FFFFFF;
+  --vio:#8B6CF6; --vio2:#B9A6FF; --vioDeep:#5E45C9; --ember:#FFB35A;
+  --chat:#5B8DEF; --pedido:#F08A5D;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#E9ECE8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:var(--ink)}
+.wrap{max-width:960px;margin:0 auto;padding:22px 14px 48px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.hint{font-size:13px;color:var(--ink2);margin:0;text-align:center}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--ink2);flex-wrap:wrap;justify-content:center}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+
+.phone{width:360px;height:740px;border-radius:44px;background:var(--paper);border:10px solid #101617;position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(16,22,23,.25);user-select:none}
+.screen{position:absolute;inset:0;padding:54px 18px 0}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#101617;border-radius:0 0 18px 18px}
+.top{display:flex;justify-content:space-between;align-items:baseline}
+.top h1{font-size:26px;font-weight:600;margin:0;letter-spacing:-.3px}
+.top span{font-size:13px;color:var(--ink2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:14px}
+.pet{display:flex;align-items:center;gap:12px}
+.avatar{width:46px;height:46px;border-radius:50%;background:#D9C4A8;flex:none;position:relative;overflow:hidden}
+.avatar::after{content:"";position:absolute;left:11px;top:13px;width:24px;height:22px;border-radius:50% 50% 45% 45%;background:#8C6B4A}
+.pet b{font-weight:600;font-size:16px;display:block}
+.pet small{font-size:13px;color:var(--ink2)}
+.voz{margin:10px 0 0;font-size:14px;color:var(--ink)}
+.hoy{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.cel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.cel small{font-size:12px;color:var(--ink2);display:block}
+.cel b{font-size:15px;font-weight:600;display:block;margin-top:2px}
+.tabs{position:absolute;left:0;right:0;bottom:0;height:78px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding-bottom:14px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--ink2)}
+.tab.on{color:var(--ink)}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.veil{position:absolute;inset:0;background:rgba(30,42,43,.42);opacity:0;pointer-events:none;transition:opacity .2s;z-index:5}
+.open .veil{opacity:1;pointer-events:auto}
+
+.orb{position:absolute;right:22px;bottom:100px;width:48px;height:48px;border-radius:50%;cursor:pointer;z-index:8;
+  background:radial-gradient(circle at 38% 34%,#FFFFFF 0%,#F6F3FF 34%,#E4DDFB 68%,#CFC5F2 100%);
+  box-shadow:0 0 0 5px rgba(139,108,246,.12),0 0 24px rgba(139,108,246,.42),0 8px 18px rgba(30,42,43,.14);
+  animation:breathe 4s ease-in-out infinite;
+  transition:right .22s cubic-bezier(.2,.9,.3,1.15),bottom .22s cubic-bezier(.2,.9,.3,1.15),width .22s,height .22s,box-shadow .25s}
+.orb .vio{position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .25s;
+  background:radial-gradient(circle at 38% 34%,#EDE8FF 0%,var(--vio2) 22%,var(--vio) 56%,var(--vioDeep) 100%)}
+.orb::before{content:"";position:absolute;inset:12%;border-radius:50%;z-index:2;mix-blend-mode:screen;animation:drift 9s ease-in-out infinite;
+  background:radial-gradient(circle at 56% 62%,rgba(255,179,90,.9),rgba(255,179,90,0) 54%)}
+.orb::after{content:"";position:absolute;inset:0;border-radius:50%;overflow:hidden;z-index:3;
+  background:linear-gradient(115deg,rgba(255,255,255,0) 42%,rgba(255,255,255,.9) 50%,rgba(255,255,255,0) 58%);
+  transform:translateX(-130%);animation:sweep 8s linear infinite}
+.open .orb .vio,.talk .orb .vio{opacity:1}
+.open .orb,.talk .orb{box-shadow:0 0 0 5px rgba(139,108,246,.16),0 0 26px rgba(139,108,246,.55),0 8px 18px rgba(30,42,43,.16)}
+.mini{background:radial-gradient(circle at 38% 34%,#EDE8FF 0%,var(--vio2) 22%,var(--vio) 56%,var(--vioDeep) 100%);
+  box-shadow:0 0 0 5px rgba(139,108,246,.14),0 0 22px rgba(139,108,246,.5)}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes sweep{0%,82%{transform:translateX(-130%)}92%,100%{transform:translateX(130%)}}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(-4px,-4px)}}
+.open .orb{right:141px;bottom:100px;width:58px;height:58px;animation:none}
+
+.ring{position:absolute;right:13px;bottom:91px;width:66px;height:66px;z-index:7;pointer-events:none;transition:opacity .3s}
+.ring circle{fill:none;stroke-width:3;stroke-linecap:round}
+.ring .base{stroke:var(--vio);opacity:.45;stroke-width:1.5}
+.ring .arc{opacity:0;transition:opacity .3s}
+.pend .ring .arc{opacity:1}
+.pend .ring .base{opacity:0}
+.open .ring{opacity:0}
+
+.toe{position:absolute;width:48px;height:48px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;
+  z-index:9;opacity:0;transform:translateY(22px) scale(.55);pointer-events:none;cursor:pointer;
+  box-shadow:0 8px 18px rgba(30,42,43,.22);transition:transform .24s cubic-bezier(.2,.9,.3,1.3),opacity .18s}
+.toe svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.toe em{position:absolute;top:-28px;left:50%;transform:translateX(-50%);white-space:nowrap;font-style:normal;font-size:12px;
+  background:#fff;color:var(--ink);padding:4px 9px;border-radius:999px;opacity:0;transition:opacity .2s .12s}
+.open .toe{opacity:1;transform:none;pointer-events:auto}
+.open .toe em{opacity:1}
+.t1{left:84px;bottom:164px;transition-delay:0s}
+.t2{left:122px;bottom:202px;transition-delay:.04s}
+.t3{left:170px;bottom:202px;transition-delay:.08s}
+.t4{left:208px;bottom:164px;transition-delay:.12s}
+
+.padlbl{position:absolute;left:0;right:0;bottom:70px;text-align:center;color:#fff;font-size:13px;opacity:0;transition:opacity .2s .15s;z-index:9;pointer-events:none}
+.open .padlbl{opacity:1}
+.pill{position:absolute;bottom:110px;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;z-index:9;opacity:0;transform:scale(.7);transition:all .22s .16s;pointer-events:none}
+.pill.chat{left:38px;background:var(--chat)}
+.pill.pedido{right:38px;background:var(--pedido)}
+.open.pend .pill{opacity:1;transform:none;pointer-events:auto}
+
+.hoja{position:absolute;left:0;right:0;bottom:0;height:80%;background:#fff;border-radius:28px 28px 0 0;z-index:12;
+  transform:translateY(102%);transition:transform .34s cubic-bezier(.2,.9,.3,1);padding:22px 22px 0;display:flex;flex-direction:column;align-items:center}
+.talk .hoja{transform:none}
+.mini{width:36px;height:36px;border-radius:50%;flex:none;position:relative}
+.mini.beat{animation:beat .34s ease-out}
+@keyframes beat{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+.hoja h2{font-size:13px;font-weight:600;color:var(--vioDeep);margin:10px 0 0;letter-spacing:.2px}
+.texto{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-size:18px;line-height:1.5;margin:18px 0 0;width:100%;min-height:150px;color:var(--ink)}
+.cursor{display:inline-block;width:9px;height:18px;background:var(--vio);vertical-align:-3px;margin-left:2px;animation:blink .9s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.replies{display:flex;gap:8px;flex-wrap:wrap;width:100%;opacity:0;transition:opacity .3s}
+.replies.on{opacity:1}
+.reply{border:1px solid var(--ink);border-radius:999px;padding:9px 14px;font-size:14px;cursor:pointer;background:#fff}
+.honesto{font-size:12px;color:var(--ink2);margin:auto 0 18px;text-align:center;width:100%}
+
+.plain{position:absolute;right:22px;bottom:100px;width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--line);
+  display:none;align-items:center;justify-content:center;z-index:8}
+.plain svg{width:22px;height:22px;stroke:var(--ink2);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.plain b{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:var(--chat);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+.mem .orb,.mem .ring{display:none}
+.mem .plain{display:flex}
+.mem .avatar{filter:grayscale(1);opacity:.85}
+.mem .voz{color:var(--ink2)}
+
+.toast{position:absolute;top:60px;left:50%;transform:translate(-50%,-20px);background:var(--ink);color:#fff;font-size:13px;padding:9px 14px;border-radius:999px;opacity:0;transition:all .25s;z-index:20;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.orb,.orb::before,.orb::after,.mini.beat{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="chips" id="chips">
+    <button class="chip on" data-s="reposo">En reposo</button>
+    <button class="chip" data-s="pend">Con pendientes</button>
+    <button class="chip" data-s="open">Abierta · huella</button>
+    <button class="chip" data-s="talk">Hablando</button>
+    <button class="chip" data-s="mem">Memorial</button>
+  </div>
+  <p class="hint">Perla dormida, violeta despierta. Tocá el orbe para abrir la huella. Tocá la almohadilla para que hable. Tocá fuera para cerrar.</p>
+
+  <div class="phone" id="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="top"><h1>Hogar</h1><span>jueves 3 de septiembre</span></div>
+      <div class="card">
+        <div class="pet">
+          <div class="avatar"></div>
+          <div><b>Thor</b><small id="petline">Bulldog inglés · 6 años · adulto</small></div>
+        </div>
+        <p class="voz" id="voz">Al día con sus vacunas. Su pipeta de junio no quedó anotada.</p>
+      </div>
+      <div class="hoy">
+        <div class="cel"><small>Próxima vacuna</small><b>Polivalente · 12 días</b></div>
+        <div class="cel"><small>Antiparasitario</small><b>Pulgas y garrapatas · vence</b></div>
+        <div class="cel"><small>Peso</small><b>23,0 kg · estable</b></div>
+        <div class="cel"><small>Próxima cita</small><b>Grooming · sábado</b></div>
+      </div>
+      <div class="card"><small style="font-size:12px;color:var(--ink2)">La vida</small><p class="voz" style="margin-top:6px">Ayer: paseo de 42 minutos con Andrés. Domingo: baño y corte.</p></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Hogar</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-4 0 2-6z"/></svg>Explorar</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Despensa</div>
+      <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Cuenta</div>
+    </div>
+
+    <div class="veil" id="veil"></div>
+
+    <svg class="ring" viewBox="0 0 66 66" aria-hidden="true">
+      <circle class="base" cx="33" cy="33" r="30"/>
+      <circle class="arc" cx="33" cy="33" r="30" stroke="var(--chat)" stroke-dasharray="31 158" transform="rotate(-100 33 33)"/>
+      <circle class="arc" cx="33" cy="33" r="30" stroke="var(--pedido)" stroke-dasharray="31 158" transform="rotate(-28 33 33)"/>
+      <circle class="arc" cx="33" cy="33" r="30" stroke="var(--vio)" stroke-dasharray="31 158" transform="rotate(44 33 33)"/>
+    </svg>
+
+    <div class="orb" id="orb" role="button" aria-label="Nexo"><span class="vio"></span></div>
+    <div class="padlbl">Preguntale a Nexo</div>
+
+    <div class="toe t1" data-n="Peso"><em>Peso</em><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 13a4 4 0 0 1 8 0"/><path d="M12 13l2-3"/></svg></div>
+    <div class="toe t2" data-n="Vacuna · foto del carnet"><em>Vacuna</em><svg viewBox="0 0 24 24"><path d="M14 4l6 6"/><path d="M17 7l-9 9-3 1 1-3 9-9z"/><path d="M4 20l3-3"/></svg></div>
+    <div class="toe t3" data-n="Antiparasitario"><em>Antiparasitario</em><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+    <div class="toe t4" data-n="Foto · recuerdo o papel"><em>Foto</em><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
+
+    <div class="pill chat" data-n="Chat con Andrés">Chat · 2</div>
+    <div class="pill pedido" data-n="Pedido en camino">Pedido · 1</div>
+
+    <div class="plain" aria-label="Pendientes"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg><b>2</b></div>
+
+    <div class="hoja" id="hoja">
+      <div class="mini" id="mini"></div>
+      <h2>Nexo</h2>
+      <p class="texto" id="texto"></p>
+      <div class="replies" id="replies">
+        <button class="reply">La puse yo</button>
+        <button class="reply">Fue el vet</button>
+        <button class="reply">No lo sé</button>
+      </div>
+      <p class="honesto">Puedo equivocarme; para lo importante está tu vet.</p>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--chat)"></i>chat pendiente</span>
+    <span><i style="background:var(--pedido)"></i>pedido</span>
+    <span><i style="background:var(--vio)"></i>aviso de Nexo</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var phone=document.getElementById('phone'),orb=document.getElementById('orb'),veil=document.getElementById('veil');
+  var chips=document.getElementById('chips'),toast=document.getElementById('toast'),texto=document.getElementById('texto');
+  var mini=document.getElementById('mini'),replies=document.getElementById('replies');
+  var petline=document.getElementById('petline'),voz=document.getElementById('voz');
+  var typing=null;
+
+  function setChip(s){[].forEach.call(chips.children,function(c){c.classList.toggle('on',c.dataset.s===s)})}
+  function say(m){toast.textContent=m;toast.classList.add('on');clearTimeout(say.t);say.t=setTimeout(function(){toast.classList.remove('on')},1500)}
+
+  function base(){
+    phone.classList.remove('open','talk','mem');
+    petline.textContent='Bulldog inglés · 6 años · adulto';
+    voz.textContent='Al día con sus vacunas. Su pipeta de junio no quedó anotada.';
+    if(typing){clearTimeout(typing);typing=null}
+  }
+  function state(s){
+    base();
+    if(s==='reposo'){phone.classList.remove('pend')}
+    if(s==='pend'){phone.classList.add('pend')}
+    if(s==='open'){phone.classList.add('pend','open')}
+    if(s==='talk'){phone.classList.add('pend','talk');speak()}
+    if(s==='mem'){phone.classList.add('mem');phone.classList.remove('pend');
+      petline.textContent='Bulldog inglés · en memoria';
+      voz.textContent='Su expediente sigue acá, para leerlo cuando quieras.'}
+    setChip(s);
+  }
+
+  var frases=['Thor está al día con la polivalente. ','Lo que no me cierra: la pipeta de junio no quedó anotada. ','¿La pusiste vos, o la puso el vet?'];
+  function speak(){
+    texto.innerHTML='<span class="cursor"></span>';replies.classList.remove('on');
+    var i=0,j=0,out='';
+    function tick(){
+      if(i>=frases.length){texto.textContent=out;replies.classList.add('on');typing=null;return}
+      if(j===0){mini.classList.remove('beat');void mini.offsetWidth;mini.classList.add('beat')}
+      out+=frases[i][j];j++;
+      texto.innerHTML=out+'<span class="cursor"></span>';
+      if(j>=frases[i].length){i++;j=0;typing=setTimeout(tick,380)}else{typing=setTimeout(tick,28)}
+    }
+    typing=setTimeout(tick,400);
+  }
+
+  chips.addEventListener('click',function(e){var b=e.target.closest('.chip');if(b)state(b.dataset.s)});
+  orb.addEventListener('click',function(){
+    if(phone.classList.contains('open')){phone.classList.remove('open');phone.classList.add('talk');setChip('talk');speak();return}
+    phone.classList.add('open');setChip('open');
+  });
+  veil.addEventListener('click',function(){phone.classList.remove('open');setChip(phone.classList.contains('pend')?'pend':'reposo')});
+  [].forEach.call(phone.querySelectorAll('.toe,.pill'),function(t){t.addEventListener('click',function(){say('Abre: '+t.dataset.n+' · Thor');phone.classList.remove('open');setChip('pend')})});
+  document.getElementById('hoja').addEventListener('click',function(e){
+    if(e.target.classList.contains('reply')){say('Se anota en el expediente, con tu firma');phone.classList.remove('talk');setChip('pend')}
+  });
+})();
+</script>
+</body>
+</html>

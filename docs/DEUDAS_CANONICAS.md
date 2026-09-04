@@ -3213,6 +3213,40 @@ cierra el pasado** (`L-409`).
 
 ---
 
+### `D-1019` 🟠 — el orbe de Nexo dice «Abrir» cuando el toque va a cerrar
+
+**Qué, medido por C en el DOM (S113-C-02).** Desde el 0.2 el orbe es un
+**interruptor**: `onPress={abierta ? onCerrar : onAbrir}`. Pero su
+`accessibilityLabel` **no cambia con el estado** — dice *«Abrir a Nexo»* en los
+dos. ⇒ **quien no ve la pantalla escucha «Abrir» y el toque cierra.**
+
+**Y el segundo hallazgo es peor, porque tapa al primero:** en web
+`aria-expanded` sale **`null`**. **RN-web no emite el `accessibilityState`**, así
+que *en esa superficie el estado abierto/cerrado no se anuncia por ningún lado*
+— ni por la etiqueta (que miente) ni por el atributo (que no existe). El lector
+de pantalla no tiene forma de saber si la pata está abierta.
+
+**Por qué no lo curó quien lo encontró.** C lo midió y lo declaró sin tocarlo:
+la pieza es `PresenciaCoach`, de **`packages/ui`** — territorio de B. *Cambiar
+una etiqueta de accesibilidad desde el montaje sería decidir la voz de una
+pieza desde afuera.*
+
+**Qué NO es.** No es un defecto de comportamiento: el orbe abre y cierra bien, y
+C lo midió con sesión real —*un toque abre, otro cierra, ningún toque hace dos
+cosas, 0 errores*—. **Es un defecto de lo que la pieza DICE de sí misma**, y por
+eso ningún gate lo vio: `verify:coach` mide geometría y dibujo,
+`verify:contrast` mide color, y **ninguno lee etiquetas**.
+
+**Las dos mitades de la cura, para que no se cure media:**
+① la etiqueta se resuelve por estado (*«Abrir a Nexo» / «Cerrar»*), y
+② el estado tiene que anunciarse **también donde `accessibilityState` no llega**
+— si RN-web no lo emite, la etiqueta es el único canal que queda, así que ①
+deja de ser cosmética y pasa a ser el mecanismo.
+
+**Dueño: B. Entra en el 0.3.**
+
+---
+
 ### `D-1018` 🟡 — 34 `eslint-disable` escritas para un linter que nunca corrió
 
 **Qué, con el número acotado.** El árbol tiene **58 directivas
