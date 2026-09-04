@@ -3254,7 +3254,7 @@ completo, y recién ahí decidir cuáles supresiones sobreviven — nunca al rev
 
 ---
 
-### `D-1017` ☠️ — el prestador NO ABRE: dos hooks después de un `return` temprano
+### `D-1017` ✅ CERRADA — el prestador NO ABRÍA: tres hooks bajo seis `return` tempranos
 
 **Qué, con el stack literal.** El OTA del lote 0 (group `d921ba81`, ancla
 `9d19de78`) **rompe la app del prestador al abrir**: pantalla forense «Esta
@@ -3313,8 +3313,20 @@ aparato no está probado, y acá además no había gate que lo supliera.*
 S112 por `update:republish`: group `101a5999-b7aa-4fb4-8910-723a93eb7ddc`,
 ancla `e29238a9`. **El cliente no se tocó.**
 
-**Sigue vivo en `main`** (medido en `1fced12e`: las tres líneas intactas).
-**Nada del prestador se publica hasta que C lo cure con su rojo reproducido.**
+**✅ CURADA POR C** en `6c728d38` (`pista/s113-c-02` @ `5be3fbb9`), y **C midió
+más hondo que este diagnóstico**: acá decía *dos hooks bajo UN return*; eran
+**TRES hooks bajo SEIS returns** — el `useState` de la línea 755 se le había
+pasado a la medición a mano y **lo encontró el gate de E**.
+
+**Verificado por el camino real, no por el gate solo:** `scripts/repro-d1017.mjs`
+—que C dejó— entra con `demo-prestador@epetplace.dev`, y la jornada renderiza
+con datos vivos (*«Te quedan 5 · terminas 18:00»*, `$44.13` del día, la barra de
+cinco pestañas). *«¿la frontera de caída se comió el árbol? **no**»*, exit 0.
+
+**Y quedó su gate, que es lo que impide que vuelva:** `verify:hooks` (E) y
+`verify:hooks-bajo-return` (C). El primero **nació y su primer rojo real fue
+este defecto** — la prueba de que un instrumento sirve no es que dé verde: es
+que dé rojo sobre el primer caso real (`L-459`).
 
 ---
 
