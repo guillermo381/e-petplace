@@ -67,6 +67,11 @@ export const clienteEs = {
   nexo: {
     // La presencia, cuando se toca.
     etiqueta: 'Abrir a {{nombre}}',
+    /* La MISMA puerta, del otro lado: desde el lote 0.2 el orbe abierto
+     * cierra, y la voz tiene que decir lo que el toque va a hacer. No se
+     * reusa `cerrar` —ésa es la del velo, otro acto que hoy coincide en la
+     * palabra— porque compartir la key ata el día que una de las dos cambie. */
+    cerrarOrbe: 'Cerrar a {{nombre}}',
     cerrar: 'Cerrar',
     // La almohadilla de la pata — el quinto tocable, el que abre la Hoja.
     // Registro de la casa: tuteo neutro con su tilde (regla 27).

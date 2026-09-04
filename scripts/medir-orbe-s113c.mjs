@@ -48,61 +48,65 @@ const di = (s) => console.log(s);
 const marcasHoja = (t) =>
   ['¿Qué edad tiene?', '¿Cómo va su carnet?', '¿Qué actividad tiene?', 'Soy Nexo'].filter((f) => t.includes(f));
 
-di('── ① ¿EL ORBE ESTÁ MONTADO? ───────────────────────────────');
-/* 🔴 **EL ORBE SE LOCALIZA POR SU VOZ EXACTA, Y ESTO LO CORRIGIÓ SU PROPIO
-   ROJO.** La primera versión buscaba `/^Abrir a |^Pregúntale a /` y tomaba
-   `.first()`: con la fila abierta, el primero en el DOM **es la fila** —la
-   pieza la dibuja antes que el orbe— así que el segundo toque le pegaba a la
-   fila y abría la Hoja. El arnés reportó *«un toque hizo dos cosas»* y **la
-   que hacía dos cosas era la medición.**
-   Medido en la pieza: el orbe grande lleva `accessibilityLabel={voz.orbe}`
-   SIEMPRE (:729) y la fila lleva `voz.preguntar` — se distinguen por nombre,
-   y el estado se lee de `aria-expanded`, que el orbe sí publica. */
-const orbe = () => page.getByRole('button', { name: 'Abrir a Nexo', exact: true });
+/* El orbe grande se localiza por su voz EXACTA. Desde el lote 0.3 esa voz
+   CAMBIA con el estado —«Abrir a Nexo» cerrado, «Cerrar a Nexo» abierto—, así
+   que se busca por cualquiera de las dos y se lee cuál salió. La fila lleva
+   «Pregúntale a Nexo» y no colisiona con ninguna. */
+const orbe = () => page.getByRole('button', { name: /^(Abrir|Cerrar) a Nexo$/ });
+const leer = async () => await orbe().getAttribute('aria-label');
+
+di('── ① EL ORBE EN REPOSO ────────────────────────────────────');
 if ((await orbe().count()) === 0) {
-  di('orbe en reposo: NO montado');
+  di('orbe: NO montado');
   di(`pantalla: ${(await texto()).split('\n').slice(0, 6).join(' · ')}`);
   await browser.close();
   process.exit(2);
 }
-const leer = async () => ({
-  nombre: await orbe().getAttribute('aria-label'),
-  expandido: await orbe().getAttribute('aria-expanded'),
-});
-di(`reposo · ${JSON.stringify(await leer())} · nodos con esa voz: ${await orbe().count()}`);
+di(`nodos: ${await orbe().count()} · aria-label="${await leer()}"`);
+di(`dice «Abrir»: ${/^Abrir/.test((await leer()) ?? '') ? 'SÍ ✓' : 'NO 🔴'}`);
 
-di('\n── ② UN TOQUE: ABRE ───────────────────────────────────────');
+di('\n── ② ABIERTO: ¿DICE «Cerrar»? ─────────────────────────────');
 await orbe().click();
 await page.waitForTimeout(1500);
-const tras1 = JSON.stringify(await leer());
-const t1 = await texto();
-const dedos1 = ['Peso', 'Vacuna', 'Antiparasitario', 'Foto'].filter((d) => t1.includes(d));
-di(`orbe: ${tras1} · dedos a la vista: ${dedos1.join(' · ') || 'ninguno'}`);
-di(`abrió: ${dedos1.length === 4 ? 'SÍ' : 'NO'}`);
-di(`¿abrió TAMBIÉN la Hoja? ${marcasHoja(t1).length > 0 ? 'SÍ — dos cosas de un toque 🔴' : 'no ✓'}`);
+const abierto = await leer();
+di(`aria-label="${abierto}"`);
+di(`dice «Cerrar»: ${/^Cerrar/.test(abierto ?? '') ? 'SÍ ✓' : 'NO 🔴'}`);
+const tAb = await texto();
+di(`dedos a la vista: ${['Peso', 'Vacuna', 'Antiparasitario', 'Foto'].filter((d) => tAb.includes(d)).join(' · ')}`);
 
-di('\n── ③ OTRO TOQUE EN EL ORBE: CIERRA ────────────────────────');
-await orbe().click();
-await page.waitForTimeout(1500);
-const tras2 = JSON.stringify(await leer());
-const t2 = await texto();
-const dedos2 = ['Peso', 'Antiparasitario'].filter((d) => t2.includes(d));
-di(`orbe: ${tras2} · dedos a la vista: ${dedos2.join(' · ') || 'ninguno'}`);
-di(`cerró: ${dedos2.length === 0 ? 'SÍ' : 'NO'}`);
-di(`¿abrió la Hoja al cerrar? ${marcasHoja(t2).length > 0 ? 'SÍ — dos cosas de un toque 🔴' : 'no ✓'}`);
-
-di('\n── ④ LA FILA «Pregúntale» ABRE LA HOJA ────────────────────');
-await orbe().click();
-await page.waitForTimeout(1500);
-/* La fila es el orbe CHICO, con la misma voz. El grande, ya abierto, se llama
-   «Abrir a …» otra vez (su onPress es onCerrar), así que se distinguen. */
-const fila = page.getByRole('button', { name: /^Pregúntale a /i });
-di(`nodos «Pregúntale»: ${await fila.count()} (esperado 1: sólo la fila — el orbe ya no lleva esa voz)`);
-await fila.first().click();
+di('\n── ③ LA HOJA: ¿MUESTRA EL ORBE VIOLETA? ───────────────────');
+await page.getByRole('button', { name: /^Pregúntale a /i }).first().click();
 await page.waitForTimeout(2500);
-const t3 = await texto();
-di(`marcas de la Hoja: ${marcasHoja(t3).join(' · ') || 'NINGUNA'}`);
-di(`la fila cerró la pata: ${['Peso', 'Antiparasitario'].some((d) => t3.includes(d)) ? 'no' : 'sí'}`);
+const tH = await texto();
+di(`marcas de la Hoja: ${marcasHoja(tH).join(' · ') || 'NINGUNA'}`);
+
+/* 🔴 **NO se mira un píxel: se mira el DIBUJO.** `CabeceraCoach` monta un
+   `<svg>` con un `radialGradient` cuyos tres stops son la paleta del Coach.
+   Si esos hex están en el DOM, el orbe violeta se dibujó. *Un screenshot
+   diría «se ve algo violeta» sin decir si es el orbe o el velo.* */
+const PALETA = ['#AE59FF', '#9E3AFF', '#7C2DD4'];
+const encontrados = await page.evaluate((hexes) => {
+  /* Se mide en TODO el documento y además dentro de la cabecera: si los stops
+     están en la página pero no bajo la cabecera, el problema es el selector y
+     no el dibujo — y eso hay que poder distinguirlo antes de acusar a nadie. */
+  const stopsDe = (raiz) =>
+    [...raiz.querySelectorAll('svg stop')].map((x) => (x.getAttribute('stop-color') ?? '').toUpperCase());
+  const doc = stopsDe(document.body);
+  const cab = document.querySelector('[aria-label="Nexo"]');
+  return {
+    svgsEnDoc: document.querySelectorAll('svg').length,
+    enDoc: hexes.filter((h) => doc.includes(h.toUpperCase())),
+    tieneCabecera: cab !== null,
+    svgsEnCabecera: cab === null ? 0 : cab.querySelectorAll('svg').length,
+    enCabecera: cab === null ? [] : hexes.filter((h) => stopsDe(cab).includes(h.toUpperCase())),
+    etiquetaCabecera: cab === null ? null : cab.getAttribute('aria-label'),
+  };
+}, PALETA);
+di(`svgs en el documento: ${encontrados.svgsEnDoc}`);
+di(`stops de la paleta EN EL DOCUMENTO: ${encontrados.enDoc.join(' · ') || 'NINGUNO'}`);
+di(`cabecera («Nexo»): ${encontrados.tieneCabecera ? 'hallada' : 'NO hallada'} · svgs adentro: ${encontrados.svgsEnCabecera}`);
+di(`stops de la paleta EN LA CABECERA: ${encontrados.enCabecera.join(' · ') || 'NINGUNO'}`);
+di(`⇒ el orbe violeta ${encontrados.enCabecera.length >= 2 ? 'SE DIBUJA EN LA HOJA ✓' : 'NO se dibuja en la Hoja 🔴'}`);
 
 di(`\nerrores de página: ${errores.length}${errores.length ? ' — ' + errores[0] : ''}`);
 await browser.close();
