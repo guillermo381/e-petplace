@@ -51,6 +51,7 @@
     "tipos:rutas": "node scripts/tipos-rutas.mjs",
     "ia:medir": "tsx scripts/ia-conjuntos/medir-pieza.mjs",
     "verify:nexo": "tsx apps/cliente/scripts/verify-nexo.mts",
+    "verify:pide-en-memorial": "tsx apps/cliente/scripts/censo-pide-en-memorial.mts",
     "verify:glifos": "tsx scripts/_arnes-glifos.mts",
     "verify:gates-existen": "node scripts/verify-gates-existen.mjs",
     "verify:frenos-por-sujeto": "node scripts/verify-frenos-por-sujeto.mjs",

@@ -519,6 +519,31 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
     readFileSync(new URL('../../prestador/src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8'),
   ].reduce((n, f) => n + (f.match(/<BurbujaPendientes/g) ?? []).length, 0);
   ok('cero montajes de BurbujaPendientes en las dos apps', censoBurbuja === 0, String(censoBurbuja));
+
+  /* ⑦ 🔴 **LA PRESENCIA SIN COACH NO NOMBRA AL COACH.** Lo destapó medir a
+     Bruma: el montaje de memorial heredó `voz.abrir = 'Abrir a {{nombre}}'`
+     con `coach.nombre` adentro, así que **el disco se anunciaba «Abrir a
+     Nexo» en una presencia que no lleva a Nexo** — y su peor caso es el
+     duelo, donde `A3.9` dice que no se le ofrece nada a nadie. *Que el
+     Coach no se dibuje no alcanza: si su nombre viaja en la etiqueta, el
+     lector de pantalla lo presenta igual.* El prestador ya lo hacía bien
+     (`nexo.abrir`, key propia); el que copió mal fui yo.
+     El assert mira el bloque del montaje SIN Coach, no el archivo entero:
+     el otro montaje SÍ debe nombrarlo. */
+  const bloqueSin = bloques.find((b) => b.includes('coach={false}')) ?? '';
+  ok(
+    'existe el montaje sin Coach (si no, el assert de abajo sería vacío)',
+    bloqueSin.length > 0,
+  );
+  ok(
+    'la presencia SIN Coach no nombra al Coach en su voz',
+    bloqueSin.length > 0 && !bloqueSin.includes('coach.nombre') && !/nexo\.etiqueta/.test(bloqueSin),
+  );
+  ok(
+    'y la que SÍ lleva Coach lo nombra (el control: el assert de arriba no pasa por vacío)',
+    (bloques.find((b) => !b.includes('coach={false}')) ?? '').includes('nexo.etiqueta'),
+  );
+
   ok('`altoBarra` se MIDE con onLayout', /onLayout=\{\(e\) =>/.test(shell) && /setAltoBarra/.test(shell));
   ok(
     'arranca en la fórmula de la barra, no en un número tecleado',
