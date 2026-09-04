@@ -22,6 +22,8 @@
 
 import Svg, { Circle, G, Path } from 'react-native-svg'
 
+import { resolverHuella, type MontajeIcono } from './icono-huella'
+
 import { useTheme } from '../ThemeProvider'
 import { Huella } from '../brand/Huella'
 
@@ -234,6 +236,15 @@ export type IconoNombre =
   //    Ley 12 prohíbe, y el mismo caso por el que lápiz y compartir se
   //    frenaron en r7. Gate por ícono a 21px PENDIENTE.
   | 'vacuna'
+  /* ── LOS TRES ATAJOS DEL COACH (S113-B · §6b, GATE POR ÍCONO PENDIENTE) ──
+   *  Nacen porque C los estaba PRESTANDO: `datos` por peso, `receta` por
+   *  antiparasitario y `ojo` por foto. **Un glifo prestado no es un glifo
+   *  barato: es uno que dice otra cosa** — y `ojo` por «foto» era el más
+   *  flojo de los tres, porque un ojo es MIRAR y una foto es GUARDAR.
+   *  Los tres son **GLIFOS DE CONTROL** (paso 6 de §6b, firma S98): viven
+   *  adentro de los dedos de la huella del Coach, que son botones, y por
+   *  `N27` *un glifo montado dentro de un control no lleva huella*. */
+  | 'peso' | 'antiparasitario' | 'foto'
   // S82-B r34: LA BITÁCORA gana su glifo — adiestramiento mostraba el de
   // VACUNA (sustitución genérica, Ley 12: el mismo caso de lápiz/compartir
   // en r7 y de la vacuna en r10). Gate por ícono a 21px PENDIENTE.
@@ -1469,6 +1480,96 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  /* ── PESO · LA BALANZA DE PLATAFORMA, DE FRENTE (S113-B) ────────────────
+   *  Dictado del founder: *«una balanza de plataforma vista de frente, no
+   *  barras»*. **Las barras eran el préstamo de `datos`**, que dice
+   *  «estadística» — y el peso de una mascota no es una estadística: es una
+   *  medición del cuerpo, una sola, hoy.
+   *
+   *  Anatomía: dial + aguja + columna + plataforma + dos patas.
+   *  **Medido: 46,3 de trazo contra los 46,4 de `vacuna`** (largo total de
+   *  path sobre la grilla 24; instrumento en `_arnes-glifos.mts`).
+   *  **El dial a 21 px deja 4,64 px de interior** ⇒ Ley 9 holgada.
+   *
+   *  ⚠️ **RIESGO DECLARADO:** a 21 px un disco sobre una columna puede
+   *  leerse como **termómetro** o como **lámpara de pie**. Lo que lo salva
+   *  son las DOS PATAS abiertas —un termómetro no las tiene y una lámpara
+   *  tiene una— y la plataforma ancha, que es lo único donde se para algo.
+   *  *Si el gate lo lee mal, el ajuste es abrir más las patas, no agrandar
+   *  el dial: el problema sería la base, no la cabeza.* */
+  peso: ({ tinta }) => (
+    <>
+      <Circle cx={12} cy={7.6} r={3.6} {...trazo(tinta)} />
+      <Path d="M12 7.6 13.9 5.9" {...trazo(tinta)} />
+      <Path d="M12 11.2v4" {...trazo(tinta)} />
+      <Path d="M6.8 15.2h10.4" {...trazo(tinta)} />
+      <Path d="M8.6 15.2 7.6 18.4M15.4 15.2l1 3.2" {...trazo(tinta)} />
+    </>
+  ),
+
+  /* ── ANTIPARASITARIO · EL ESCUDO CON LA GOTA (S113-B) ───────────────────
+   *  Dictado del founder: *«un escudo con una gota adentro, no una
+   *  receta»*. El préstamo de `receta` decía «lo que el vet te indica»;
+   *  esto dice **lo que protege**, que es otra cosa.
+   *  **Medido: 47,1 de trazo** contra 46,4 de `vacuna`.
+   *
+   *  🔴 **DOS METÁFORAS OCUPADAS, medidas antes de dibujar (paso 2 de §6b),
+   *  y las dos chocan. Van al gate declaradas, no disimuladas:**
+   *
+   *  ① **`seguros` YA ES UN ESCUDO** —y con algo adentro: su huella a
+   *     escala 0,4—. *Este glifo es el mismo objeto cambiando lo de
+   *     adentro, que a 21 px es justo lo que menos se ve.* Lo que los
+   *     separa está medido: el escudo de `seguros` pesa 52,3 y ocupa de
+   *     y=3,4 a y=21; éste pesa 47,1 y vive de y=6,4 a y=18,3 — **es
+   *     visiblemente más chico y más alto en el lienzo**. *Alcanza o no
+   *     alcanza: eso lo dice el ojo del founder en el gate, no yo.*
+   *     **Si no alcanza, la salida NO es retocar el escudo:** es cambiar
+   *     el objeto por la PIPETA spot-on, que es el antiparasitario real y
+   *     no colisiona con nada. Queda dicho para que el gate tenga la
+   *     segunda opción sin volver a estudiarla.
+   *  ② **LA GOTA ESTÁ TOMADA: es el pin de la casa** (`ubicacion`, F-PIN,
+   *     firmado). La distinción es de ORIENTACIÓN y se puede medir: *el pin
+   *     apunta hacia ABAJO —su punta señala el suelo— y una gota de líquido
+   *     apunta hacia ARRIBA, porque cae.* Ésta apunta arriba. Y va DENTRO
+   *     de un escudo, que ningún pin de la casa hace. */
+  antiparasitario: ({ tinta }) => (
+    <>
+      <Path d="M12 6.4 16.7 8.2v3.6c0 3-1.9 5.4-4.7 6.5-2.8-1.1-4.7-3.5-4.7-6.5V8.2Z" {...trazo(tinta)} />
+      <Path d="M12 10.2c1.1 1.3 1.6 2 1.6 2.6a1.6 1.6 0 0 1-3.2 0c0-.6.5-1.3 1.6-2.6Z" {...trazo(tinta)} />
+    </>
+  ),
+
+  /* ── FOTO · LA CÁMARA SENCILLA (S113-B) ─────────────────────────────────
+   *  Dictado del founder: *«una cámara sencilla con su lente redondo, no un
+   *  ojo»*, y su razón es la buena: **un ojo es MIRAR, una foto es
+   *  GUARDAR.** El préstamo invitaba a ver algo que ya existe; el atajo
+   *  sirve para dejar algo nuevo en el expediente.
+   *
+   *  **Medido: 51,6 de trazo** contra 46,4 de `vacuna` — **+11 %, y el
+   *  desvío se declara en vez de disimularse** (paso 1 de §6b). La causa
+   *  es de anatomía y no de descuido: `vacuna` son líneas abiertas y esto
+   *  es una **forma cerrada**, que paga su contorno entero. En esa familia
+   *  la casa vive más arriba: `seguros` 52,3 · `telemedicina` 59,6 ·
+   *  `pedido` 93,0. *Bajarlo a 46 exigía un lente de r=1,9, y a 21 px eso
+   *  deja **1,66 px de interior**: la Ley 9 lo llama borrón. Entre respetar
+   *  el número y que el lente se lea, manda que se lea.*
+   *
+   *  ⚠️ **EL PUNTO NO ES DECORACIÓN.** Sin él, un rectángulo con un círculo
+   *  centrado se lee como **pantalla con botón**. El punto cuesta CERO de
+   *  trazo —es un path de largo nulo con la punta redonda de la casa— y es
+   *  lo único que lo vuelve cámara. *El visor de verdad costaba 5 unidades
+   *  y decía lo mismo.* */
+  foto: ({ tinta }) => (
+    <>
+      <Path
+        d="M7.7 10.8h8.6a1.25 1.25 0 0 1 1.25 1.25v5.4a1.25 1.25 0 0 1-1.25 1.25H7.7a1.25 1.25 0 0 1-1.25-1.25v-5.4A1.25 1.25 0 0 1 7.7 10.8Z"
+        {...trazo(tinta)}
+      />
+      <Circle cx={12} cy={14.75} r={2.5} {...trazo(tinta)} />
+      <Path d="M9.1 12.4h0" {...trazo(tinta)} />
+    </>
+  ),
+
   // LA BITÁCORA (S82-B r34) — el cuaderno del progreso, con su huella:
   // la bitácora ES de una mascota (capa IDENTIDAD, familia carnet/caso).
   // Anatomía PARA 21px: cuerpo + lomo + DOS renglones (tres ya son ruido
@@ -1810,6 +1911,7 @@ export function Icono({
   tinta,
   huella,
   activa,
+  montaje,
 }: {
   nombre: IconoNombre
   /** Tamaño de render; el diseño vive en la grilla 24 (gate también a 21 — §2.9). */
@@ -1830,6 +1932,14 @@ export function Icono({
    *  monta**: la de MARCA aparece al activarse, la de ESTRUCTURA
    *  recolorea. Ver `HUELLA_ES_ESTRUCTURA` arriba. */
   activa?: boolean
+  /** DÓNDE está montado (S113-B). `'control'` = adentro de un botón ⇒ **sin
+   *  huella**, por `N27`. Es una afirmación sobre el CONTEXTO, no una
+   *  preferencia: ver `icono-huella.ts`, donde vive la regla y su borde.
+   *
+   *  ⚠️ **No cambia el color ni el dibujo** — sólo apaga la huella. *Un
+   *  glifo montado en un botón sigue siendo de su capa; lo que pierde es la
+   *  marca de mascota, que es lo que `N27` nombra.* */
+  montaje?: MontajeIcono
 }) {
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
@@ -1970,6 +2080,16 @@ export function Icono({
     // S82-B r10: la vacuna es PROTECCIÓN DE VIDA — capa identidad, la
     // misma que carnet/vet/seguros (§ Ley 10: la taxonomía manda).
     vacuna: identidad,
+    /* `peso` y `antiparasitario` son de la capa IDENTIDAD, como `vacuna`:
+       NOMBRAN un hecho del cuerpo de esta mascota. **Que no lleven huella
+       no los saca de su capa** — el precedente es `carrito`, que hereda el
+       ocre de su familia y tampoco la lleva. */
+    peso: identidad,
+    antiparasitario: identidad,
+    /* `foto` sí es un VERBO —capturar— y por eso se viste de TINTA, no de
+       capa. Mismo criterio que `papelera` y `lapiz`: *un control no
+       pertenece a un mundo, ejecuta una acción.* */
+    foto: { pura: colorTinta, aa: colorTinta },
     // La bitácora es del expediente de la mascota — capa identidad.
     bitacora: identidad,
     // S90-B: la receta es del expediente clínico — misma capa que
@@ -2022,18 +2142,16 @@ export function Icono({
           : porConcepto[nombre].pura)
 
   /* LEY 6 aplicada — y el registry es quien la contesta (ver arriba).
-   * `activa === undefined` ⇒ el glifo vive PRESENTE: es todo el producto
-   * fuera de una barra de tabs, y por eso es el default silencioso. */
-  const huellaFinal =
-    activa === undefined
-      ? colorHuella
-      : HUELLA_ES_ESTRUCTURA.has(nombre)
-        ? // ESTRUCTURA: nunca desaparece — en reposo toma el color del
-          // trazo, que es lo que hacía la pata a mano en la barra viva.
-          (activa ? colorHuella : colorTinta)
-        : // MARCA: aparece al activarse. 'none' y no un color de fondo:
-          // el glifo se sostiene solo sin ella (por eso es marca).
-          (activa ? colorHuella : 'none')
+   * 🔴 **La decisión se MUDÓ a `icono-huella.ts` sin cambiar una coma** (S113-B):
+   * vivía acá como una escalera de ternarios y no tenía gate. Ahí está su
+   * regla, su borde (la huella que ES el dibujo) y su porqué. */
+  const huellaFinal = resolverHuella({
+    montaje,
+    activa,
+    esEstructura: HUELLA_ES_ESTRUCTURA.has(nombre),
+    colorHuella,
+    colorTinta,
+  })
 
   return (
     <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
