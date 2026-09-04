@@ -52,6 +52,7 @@ import React, { useEffect } from 'react'
 import { Pressable, Text, useWindowDimensions, View } from 'react-native'
 import Animated, {
   Easing,
+  type SharedValue,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -60,8 +61,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import { LinearGradient } from 'expo-linear-gradient'
-import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg'
+import Svg, { Circle, ClipPath, Defs, G, LinearGradient as LinearGradientSvg, Path, RadialGradient, Rect, Stop } from 'react-native-svg'
 
 import { Icono, type IconoNombre } from './Icono'
 import { usePresionado } from './usePresionado'
@@ -72,21 +72,26 @@ import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import {
-  AIRE_BORDE,
   ARCO_GROSOR,
   BRASA,
   DEDO,
+  ANILLO,
+  LIENZO,
+  LILA_ALFA,
   ORBE,
   ORBE_ABIERTO,
+  ORBE_MINI,
+  RESPLANDOR_ALFA,
+  RESPLANDOR_RADIO,
   PASTILLA,
-  RESPLANDOR,
-  SEPARACION,
   alturasDeLaFila,
   anclaOrbe,
   arcosDe,
   ejeDeLaFila,
+  ejeDesdeDerecha,
   movimientoCoach,
   nodosDeLaFila,
+  violetaEncendido,
   type ClaseCoach,
   type PendientesCoach,
 } from './coach-geometria'
@@ -189,53 +194,133 @@ function Etiqueta({ children }: { children: string }) {
   )
 }
 
-/* ── EL CUERPO DEL ORBE, EN SVG ───────────────────────────────────────────
- * 🔴 **Dos capas, y la segunda es la que se hacía mal.** El cuerpo es un
- * radial de blanco al lila del borde —*eso* es lo que lo vuelve esfera y no
- * disco— y la brasa es un radial CHICO encima, descentrado.
+/* ── EL ORBE, ENTERO EN SVG ───────────────────────────────────────────────
+ * 🔴 **ESTA PIEZA SE REESCRIBIÓ CONTRA EL EMULADOR, NO CONTRA LA CABEZA.** La
+ * versión anterior se veía **un disco naranja plano** en Android: sin borde,
+ * sin resplandor y sin violeta al abrir. Medido capa por capa, eran DOS causas
+ * distintas y ninguna se veía leyendo el código:
  *
- * ⏪ Antes era UN solo radial de brasa a perla con `r=54%`: el ocre ocupaba
- * más de medio cuerpo y **el orbe se leía ocre en el teléfono**. *No era el
- * color: era el tamaño.* Ahora la brasa tiene su propio degradé que muere
- * transparente, y su tope está en la geometría con gate propio. */
-function CuerpoOrbe({ tamano, violeta }: { tamano: number; violeta: boolean }) {
-  const r = tamano / 2
-  const idCuerpo = violeta ? 'coachCuerpoVioleta' : 'coachCuerpoPerla'
+ * **① `stopColor` CON `rgba()` PIERDE EL ALPHA EN ANDROID.** Los dos stops de
+ * la brasa —`rgba(255,214,150,.72)` y `rgba(255,214,150,0)`— colapsaban al
+ * MISMO naranja opaco ⇒ **un círculo naranja pleno tapando el cuerpo entero**.
+ * *El degradé no fallaba: el que fallaba era el color de sus paradas.* Y el
+ * borde lila caía por lo mismo: `.35` se ignoraba y el orbe en reposo se veía
+ * violeta saturado en vez de blanco.
+ * ⚠️ **La casa ya tenía la forma correcta y no la usé:** `stopColor` y
+ * `stopOpacity` POR SEPARADO, que es como lo hace la elevación oscura.
+ *
+ * **② `shadowColor` / `shadowRadius` / `shadowOpacity` NO EXISTEN EN
+ * ANDROID.** Ahí sólo manda `elevation`, que dibuja una sombra GRIS del
+ * sistema — no un resplandor de color. *El resplandor no estaba tenue: no
+ * estaba.* Ahora es un círculo con su propio radial, adentro del SVG.
+ *
+ * ⇒ **Y de ahí sale el lienzo de 2,2×:** un resplandor que se disuelve
+ * necesita lugar donde disolverse. Con el lienzo pegado al cuerpo, el
+ * degradé se recorta justo donde empieza a existir.
+ *
+ * ── LAS CAPAS, de atrás hacia adelante ─────────────────────────────────
+ * resplandor · cuerpo (perla, con su anillo) · brasa · cuerpo violeta.
+ * El violeta es una CAPA APARTE con opacidad animada, no un cambio de
+ * paradas: *cambiar los stops salta de un color al otro; el encargo pide un
+ * fundido de 250 ms, y un fundido necesita dos cosas encimadas.* */
+function CuerpoOrbe({ lado, encendido }: { lado: number; encendido: SharedValue<number> }) {
+  const c = lado / 2
+  const r = lado / (2 * LIENZO)
+  const estiloVioleta = useAnimatedStyle(() => ({ opacity: encendido.value }))
   return (
-    <Svg width={tamano} height={tamano}>
+    <>
+      <Svg width={lado} height={lado} style={{ position: 'absolute' }}>
+        <Defs>
+          {/* El resplandor: violeta al 42 % en el centro que MUERE en el
+              borde. `stopOpacity` y no un rgba: ver ① arriba. */}
+          <RadialGradient id="coachGlow" cx="50%" cy="50%" r="50%">
+            <Stop offset="0" stopColor={palette.coachMedio} stopOpacity={RESPLANDOR_ALFA} />
+            <Stop offset="1" stopColor={palette.coachMedio} stopOpacity={0} />
+          </RadialGradient>
+          {/* El cuerpo en reposo: blanco al centro, lila al borde. */}
+          <RadialGradient id="coachPerlaG" cx="38%" cy="34%" r="62%">
+            <Stop offset="0" stopColor={palette.coachPerla} stopOpacity={1} />
+            <Stop offset="1" stopColor={palette.coachClaro} stopOpacity={LILA_ALFA} />
+          </RadialGradient>
+          {/* La brasa: cálida, chica y descentrada. */}
+          <RadialGradient
+            id="coachBrasaG"
+            cx={`${BRASA.cx * 100}%`}
+            cy={`${BRASA.cy * 100}%`}
+            r={`${(BRASA.diametro / 2) * 100}%`}
+          >
+            <Stop offset="0" stopColor={palette.coachBrasa} stopOpacity={0.9} />
+            <Stop offset="1" stopColor={palette.coachBrasa} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={c} cy={c} r={r * RESPLANDOR_RADIO} fill="url(#coachGlow)" />
+        <Circle
+          cx={c}
+          cy={c}
+          r={r}
+          fill="url(#coachPerlaG)"
+          /* El contorno: sin él, una esfera casi blanca sobre papel blanco
+             no tiene dónde terminar. */
+          stroke={palette.coachClaro}
+          strokeOpacity={LILA_ALFA}
+          strokeWidth={ANILLO}
+        />
+        <Circle cx={c} cy={c} r={r} fill="url(#coachBrasaG)" />
+      </Svg>
+      {/* La capa violeta, encimada y con su propio fundido. */}
+      <Animated.View style={[{ position: 'absolute', width: lado, height: lado }, estiloVioleta]}>
+        <Svg width={lado} height={lado}>
+          <Defs>
+            <RadialGradient id="coachVioG" cx="38%" cy="34%" r="62%">
+              <Stop offset="0" stopColor={palette.coachClaro} stopOpacity={1} />
+              <Stop offset="0.56" stopColor={palette.coachMedio} stopOpacity={1} />
+              <Stop offset="1" stopColor={palette.coachProfundo} stopOpacity={1} />
+            </RadialGradient>
+            <RadialGradient
+              id="coachBrasaVioG"
+              cx={`${BRASA.cx * 100}%`}
+              cy={`${BRASA.cy * 100}%`}
+              r={`${(BRASA.diametro / 2) * 100}%`}
+            >
+              <Stop offset="0" stopColor={palette.coachBrasa} stopOpacity={0.9} />
+              <Stop offset="1" stopColor={palette.coachBrasa} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Circle cx={c} cy={c} r={r} fill="url(#coachVioG)" />
+          <Circle cx={c} cy={c} r={r} fill="url(#coachBrasaVioG)" />
+        </Svg>
+      </Animated.View>
+    </>
+  )
+}
+
+/** El orbe chico de «Preguntale a …»: **el mismo cuerpo despierto en chico**,
+ *  con su brasa. No es un botón con un ícono: es la presencia, y por eso se
+ *  reconoce sin leer la etiqueta. Sin resplandor —está dentro de la fila, no
+ *  flotando sobre contenido— y sin respiración: *lo que respira es el orbe,
+ *  no su atajo.* */
+function OrbeMini({ lado }: { lado: number }) {
+  const c = lado / 2
+  return (
+    <Svg width={lado} height={lado}>
       <Defs>
-        {/* ⚠️ Las paradas van como ARRAY y no dentro de un fragmento:
-            `RadialGradient` tipa sus hijos como lista de `Stop`, y un `<>`
-            los envuelve en un solo nodo. El compilador lo dijo. */}
-        <RadialGradient id={idCuerpo} cx="50%" cy="50%" r="50%">
-          {(violeta
-            ? [
-                { o: '0', c: palette.coachClaro },
-                { o: '0.6', c: palette.coachMedio },
-                { o: '1', c: palette.coachProfundo },
-              ]
-            : [
-                { o: '0', c: palette.coachPerla },
-                { o: '1', c: palette.coachPerlaBorde },
-              ]
-          ).map((p) => (
-            <Stop key={p.o} offset={p.o} stopColor={p.c} />
-          ))}
+        <RadialGradient id="coachMiniG" cx="38%" cy="34%" r="62%">
+          <Stop offset="0" stopColor={palette.coachClaro} stopOpacity={1} />
+          <Stop offset="0.56" stopColor={palette.coachMedio} stopOpacity={1} />
+          <Stop offset="1" stopColor={palette.coachProfundo} stopOpacity={1} />
         </RadialGradient>
-        {/* `r` es la MITAD del diámetro de la brasa: r="20%" ⇒ 40 % del
-            cuerpo, que es el tope de §2. El gate lee este número del SVG. */}
         <RadialGradient
-          id="coachBrasa"
+          id="coachMiniBrasaG"
           cx={`${BRASA.cx * 100}%`}
           cy={`${BRASA.cy * 100}%`}
           r={`${(BRASA.diametro / 2) * 100}%`}
         >
-          <Stop offset="0" stopColor={palette.coachBrasa} />
-          <Stop offset="1" stopColor={palette.coachBrasaFin} />
+          <Stop offset="0" stopColor={palette.coachBrasa} stopOpacity={0.9} />
+          <Stop offset="1" stopColor={palette.coachBrasa} stopOpacity={0} />
         </RadialGradient>
       </Defs>
-      <Circle cx={r} cy={r} r={r} fill={`url(#${idCuerpo})`} />
-      <Circle cx={r} cy={r} r={r} fill="url(#coachBrasa)" />
+      <Circle cx={c} cy={c} r={c} fill="url(#coachMiniG)" />
+      <Circle cx={c} cy={c} r={c} fill="url(#coachMiniBrasaG)" />
     </Svg>
   )
 }
@@ -257,14 +342,15 @@ function arcoAPath(cx: number, cy: number, r: number, desde: number, hasta: numb
 /* ── EL ORBE ENTERO: cuerpo + arcos + barrido, con su respiración ───────── */
 function Orbe({
   tamano,
-  violeta,
+  encendido,
   arcos,
   respira,
   barre,
   colorDe,
 }: {
   tamano: number
-  violeta: boolean
+  /** 0 en reposo, 1 despierto. Anima el fundido de la capa violeta. */
+  encendido: SharedValue<number>
   arcos: ReturnType<typeof arcosDe>
   respira: boolean
   barre: boolean
@@ -313,34 +399,29 @@ function Orbe({
   }, [barre, barrido])
 
   const estiloRespiro = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }))
+  /* La banda ya nace rotada DENTRO del SVG; acá sólo VIAJA. Separar las dos
+     cosas saca del medio el orden de transforms, que es donde esto se rompía
+     antes sin decir nada. */
   const estiloBarrido = useAnimatedStyle(() => ({
     opacity: barrido.value > 0 && barrido.value < 1 ? 1 : 0,
-    transform: [
-      { rotate: `${motion.coach.barridoAngulo}deg` },
-      { translateY: (barrido.value * 2 - 1) * tamano },
-    ],
+    transform: [{ translateY: (barrido.value * 2 - 1) * tamano * 1.2 }],
   }))
 
-  /* La caja abraza al cuerpo. **Ya no hay caja de halo**: en reposo el halo es
-     el resplandor y nada más (§3). Los arcos, cuando existen, se dibujan
-     sobre un lienzo que desborda lo justo para su grosor. */
-  const lienzo = tamano + ARCO_GROSOR * 4
+  /* El lienzo es 2,2× el cuerpo: ahí vive el resplandor. */
+  const lado = tamano * LIENZO
 
   return (
     <Animated.View
-      style={[
-        { width: lienzo, height: lienzo, alignItems: 'center', justifyContent: 'center' },
-        estiloRespiro,
-      ]}
+      style={[{ width: lado, height: lado, alignItems: 'center', justifyContent: 'center' }, estiloRespiro]}
     >
       {/* ⛔ EN REPOSO NO HAY LÍNEA. Sin pendientes esto no se monta: *un aro
           fino permanente convierte una presencia en un widget.* */}
       {arcos.length > 0 ? (
-        <Svg width={lienzo} height={lienzo} style={{ position: 'absolute' }}>
+        <Svg width={lado} height={lado} style={{ position: 'absolute' }}>
           {arcos.map((a) => (
             <Path
               key={a.clase}
-              d={arcoAPath(lienzo / 2, lienzo / 2, lienzo / 2 - ARCO_GROSOR / 2, a.desde, a.hasta)}
+              d={arcoAPath(lado / 2, lado / 2, tamano / 2 + ARCO_GROSOR * 2, a.desde, a.hasta)}
               stroke={colorDe(a.clase)}
               strokeWidth={ARCO_GROSOR}
               strokeLinecap="round"
@@ -350,35 +431,50 @@ function Orbe({
         </Svg>
       ) : null}
 
-      <View
-        style={{
-          width: tamano,
-          height: tamano,
-          borderRadius: radius.full,
-          overflow: 'hidden',
-          shadowColor: palette.coachResplandor,
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 1,
-          shadowRadius: RESPLANDOR,
-          elevation: 10,
-        }}
+      <CuerpoOrbe lado={lado} encendido={encendido} />
+
+      {/* ── EL BARRIDO DE LUZ, EN SVG ──────────────────────────────────
+          🔴 **ACÁ HABÍA UN `LinearGradient` DE EXPO Y NO DIBUJABA NADA.**
+          Tres controles hicieron falta y cada uno descartó una sospecha:
+          ① con el barrido **siete veces más largo y lento** el brillo no
+          subía ⇒ no era la duración · ② **centrarlo en el lienzo** tampoco lo
+          trajo ⇒ no era la posición · ③ **congelado a mitad de recorrido**
+          —la banda plantada sobre el centro del cuerpo, opacidad 1— **en el
+          emulador no apareció ni una línea** ⇒ era el DIBUJO.
+          ⚠️ **Y antes de todo eso el instrumento mintió**, que es lo que más
+          conviene dejar escrito: medía el brillo MÁXIMO del cuerpo, y el
+          centro de la perla ya es blanco puro ⇒ **el máximo estaba saturado y
+          no podía subir aunque el barrido cruzara.** *Un instrumento que mide
+          contra un techo no mide nada.* Se pasó a la MEDIA.
+          Ahora vive dentro de un SVG con `ClipPath` circular — que además es
+          lo que el encargo pedía: todo en SVG, sin capas de RN encimadas. */}
+      <Animated.View
+        style={[{ position: 'absolute', width: lado, height: lado }, estiloBarrido]}
+        pointerEvents="none"
       >
-        <CuerpoOrbe tamano={tamano} violeta={violeta} />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            { position: 'absolute', left: -tamano / 2, width: tamano * 2, height: tamano / 3 },
-            estiloBarrido,
-          ]}
-        >
-          <LinearGradient
-            colors={['transparent', 'rgba(255,255,255,.85)', 'transparent']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{ flex: 1 }}
-          />
-        </Animated.View>
-      </View>
+        <Svg width={lado} height={lado}>
+          <Defs>
+            <ClipPath id="coachClip">
+              <Circle cx={lado / 2} cy={lado / 2} r={tamano / 2} />
+            </ClipPath>
+            <LinearGradientSvg id="coachSweep" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={palette.white} stopOpacity={0} />
+              <Stop offset="0.5" stopColor={palette.white} stopOpacity={0.85} />
+              <Stop offset="1" stopColor={palette.white} stopOpacity={0} />
+            </LinearGradientSvg>
+          </Defs>
+          <G clipPath="url(#coachClip)">
+            <Rect
+              x={-lado}
+              y={lado / 2 - tamano / 6}
+              width={lado * 3}
+              height={tamano / 3}
+              fill="url(#coachSweep)"
+              transform={`rotate(${motion.coach.barridoAngulo} ${lado / 2} ${lado / 2})`}
+            />
+          </G>
+        </Svg>
+      </Animated.View>
     </Animated.View>
   )
 }
@@ -483,8 +579,13 @@ export function PresenciaCoach({
 
   useEffect(() => {
     velo.value = withTiming(abierta ? 1 : 0, { duration: quieta ? 0 : motion.coach.fundidoMs })
-    encendido.value = withTiming(abierta ? 1 : 0, { duration: quieta ? 0 : motion.coach.fundidoMs })
-  }, [abierta, quieta, velo, encendido])
+    /* La capa violeta se enciende abierta **o** cuando el Coach habla. El
+       QUÉ lo decide `violetaEncendido`, que su gate asierta; acá vive sólo
+       el CÓMO —el fundido de 250 ms—. */
+    encendido.value = withTiming(violetaEncendido({ abierta, estado }), {
+      duration: quieta ? 0 : motion.coach.fundidoMs,
+    })
+  }, [abierta, estado, quieta, velo, encendido])
 
   const estiloVelo = useAnimatedStyle(() => ({ opacity: velo.value }))
   /* El orbe **NO VIAJA**: sólo crece. Su centro no se mueve un píxel. */
@@ -512,14 +613,16 @@ export function PresenciaCoach({
 
   /* Los arcos son del estado ATENTO y de ningún otro: dormida no los tiene
      (§3) y abierta ya dice sus números en las pastillas. */
+  const movimiento = movimientoCoach({ quieta, abierta })
   const arcos = estado === 'atenta' ? arcosDe(pendientes) : []
-  const eje = ejeDeLaFila(width, aireInferior)
   const nodos = nodosDeLaFila(pendientes, atajos.length)
   const alturas = alturasDeLaFila(pendientes, width, aireInferior, atajos.length)
   const ancla = anclaOrbe(width, aireInferior)
-  /* `right` del eje: lo que hay entre el eje y el borde derecho. */
-  const ejeDesdeDerecha = AIRE_BORDE + ORBE / 2
-  const violeta = abierta || estado === 'despierta' || estado === 'hablando'
+  const eje = ejeDeLaFila(width, aireInferior)
+  /* `right` del eje: **derivado, no tecleado** — si viviera acá, el día que
+     el aire del borde cambie la fila y el orbe se separarían sin que ningún
+     gate lo vea. */
+  const origenDerecha = ejeDesdeDerecha()
 
   return (
     <View
@@ -540,9 +643,32 @@ export function PresenciaCoach({
           </Animated.View>
 
           {nodos.map((n, i) => (
-            <React.Fragment key={n.tipo === 'pastilla' ? `p-${n.clase}` : atajos[n.indice].id}>
-            {n.tipo === 'pastilla' ? (
-              <NodoDeFila indice={i} abierta={abierta} escalona={movimientoCoach({ quieta, abierta }).escalona} centro={alturas[i]} ejeX={ejeDesdeDerecha - PASTILLA / 2}>
+            <NodoDeFila
+              key={n.tipo === 'preguntar' ? 'preguntar' : n.tipo === 'pastilla' ? `p-${n.clase}` : atajos[n.indice].id}
+              indice={i}
+              abierta={abierta}
+              escalona={movimiento.escalona}
+              centro={alturas[i]}
+              ejeX={origenDerecha - n.alto / 2}
+            >
+              {n.tipo === 'preguntar' ? (
+                <>
+                  <Etiqueta>{voz.preguntar}</Etiqueta>
+                  {/* El orbe chico: **ya violeta y con su brasa**, para que se
+                      lea como el mismo cuerpo en chico y no como otro botón. */}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={voz.preguntar}
+                    onPress={() => {
+                      onCerrar()
+                      onPreguntar()
+                    }}
+                    style={{ width: ORBE_MINI, height: ORBE_MINI }}
+                  >
+                    <OrbeMini lado={ORBE_MINI} />
+                  </Pressable>
+                </>
+              ) : n.tipo === 'pastilla' ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={n.clase === 'chat' ? voz.chat : voz.pedidos}
@@ -568,31 +694,15 @@ export function PresenciaCoach({
                     {n.clase === 'chat' ? voz.chat : voz.pedidos}
                   </Text>
                 </Pressable>
-              </NodoDeFila>
-            ) : (
-              <NodoDeFila indice={i} abierta={abierta} escalona={movimientoCoach({ quieta, abierta }).escalona} centro={alturas[i]} ejeX={ejeDesdeDerecha - DEDO / 2}>
-                <Etiqueta>{atajos[n.indice].etiqueta}</Etiqueta>
-                <DedoDeLaFila atajo={atajos[n.indice]} onCerrar={onCerrar} onRazonApagado={onRazonApagado} />
-              </NodoDeFila>
-            )}
-            </React.Fragment>
+              ) : (
+                <>
+                  <Etiqueta>{atajos[n.indice].etiqueta}</Etiqueta>
+                  <DedoDeLaFila atajo={atajos[n.indice]} onCerrar={onCerrar} onRazonApagado={onRazonApagado} />
+                </>
+              )}
+            </NodoDeFila>
           ))}
 
-          {/* La etiqueta del ORBE, a su izquierda y a su misma altura. */}
-          <Animated.View
-            style={[
-              {
-                position: 'absolute',
-                right: ejeDesdeDerecha + ORBE_ABIERTO / 2 + SEPARACION,
-                bottom: eje.abajo - 16,
-              },
-              estiloVelo,
-            ]}
-          >
-            <Pressable accessibilityRole="button" accessibilityLabel={voz.preguntar} onPress={onPreguntar}>
-              <Etiqueta>{voz.preguntar}</Etiqueta>
-            </Pressable>
-          </Animated.View>
         </>
       ) : null}
 
@@ -601,10 +711,13 @@ export function PresenciaCoach({
         style={[
           {
             position: 'absolute',
-            /* La caja de arcos desborda; se compensa para que el CUERPO caiga
-               donde `anclaOrbe` promete. */
-            left: ancla.izquierda - ARCO_GROSOR * 2,
-            bottom: ancla.abajo - ARCO_GROSOR * 2,
+            /* 🔴 **El lienzo mide 2,2× el cuerpo y desborda parejo**, así que
+               se resta la mitad de ese desborde para que el CUERPO caiga
+               donde `anclaOrbe` promete. Sin esto el orbe se corre 29 px
+               hacia adentro — y «un poco corrido» no se lee como error: se
+               lee como un diseño flojo. */
+            left: ancla.izquierda - (ORBE * (LIENZO - 1)) / 2,
+            bottom: eje.abajo - ORBE / 2 - (ORBE * (LIENZO - 1)) / 2,
           },
           estiloOrbe,
         ]}
@@ -613,19 +726,25 @@ export function PresenciaCoach({
           <Pressable
             {...handlers}
             accessibilityRole="button"
-            accessibilityLabel={abierta ? voz.preguntar : voz.orbe}
+            accessibilityLabel={voz.orbe}
             accessibilityState={{ expanded: abierta }}
-            /* 🔴 **Abierta, el orbe abre la HOJA — no cierra la fila.** Cerrar
-               es tocar afuera o el botón atrás. *Un mismo toque que a veces
-               abre y a veces cierra enseña a no tocarlo.* */
-            onPress={abierta ? onPreguntar : onAbrir}
+            /* 🔴 **EL ORBE ABRE Y CIERRA — decisión del founder, y la mesa
+               la hace suya (lote 0.2).**
+               ⏪ Acá estaba escrito lo contrario: *«un mismo toque que a
+               veces abre y a veces cierra enseña a no tocarlo»*. **La premisa
+               era que el toque no cambia nada visible, y es falsa:** el orbe
+               CAMBIA DE CARA —perla cerrado, violeta abierto— y **ese cambio
+               es lo que enseña a tocarlo.** Un interruptor con dos caras no
+               es ambiguo: es un interruptor.
+               `onPreguntar` vive SÓLO en la fila «Preguntale». */
+            onPress={abierta ? onCerrar : onAbrir}
           >
             <Orbe
               tamano={ORBE}
-              violeta={violeta}
+              encendido={encendido}
               arcos={arcos}
-              respira={movimientoCoach({ quieta, abierta }).respira}
-              barre={movimientoCoach({ quieta, abierta }).barre}
+              respira={movimiento.respira}
+              barre={movimiento.barre}
               colorDe={colorDe}
             />
           </Pressable>
