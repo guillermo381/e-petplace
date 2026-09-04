@@ -94,6 +94,12 @@ export type FocoNexo =
   | { modo: 'directa'; mascota: MascotaResumen }
   /** Varias y ninguna en pantalla: el dedo abre la hoja corta. */
   | { modo: 'elegir'; entre: MascotaResumen[] }
+  /** 🔴 **La pantalla abierta es la de una mascota que ya no está** (D-1021).
+   *  No es `'ninguna'` —la familia puede tener otras vivas— y no es
+   *  `'directa'` —no se le pide nada a quien ya no está—: es su propio modo,
+   *  y por eso existe. *Colapsarlo en cualquiera de los dos haría que los
+   *  atajos actuaran sobre OTRA mascota sin decirlo.* */
+  | { modo: 'memorial'; mascota: MascotaResumen }
   /** La familia no tiene ninguna mascota activa. */
   | { modo: 'ninguna' }
 
@@ -110,15 +116,23 @@ export function focoNexo(args: {
   mascotas: MascotaResumen[] | null
 }): FocoNexo {
   if (args.mascotas === null) return { modo: 'cargando' }
+
+  /* 🔴 **LA MASCOTA EN FOCO MANDA, Y MANDA PRIMERO** (D-1021). ⏪ Antes esta
+     rama sólo miraba entre las ACTIVAS: si la ruta nombraba a una mascota en
+     memoria, `find` no la encontraba y el foco caía a `'elegir'` entre las
+     vivas ⇒ **la presencia salía con Coach y sus cuatro atajos, parados en la
+     pantalla de quien ya no está, actuando sobre otra mascota.** *El silencio
+     no era una decisión: era un `find` que no la veía.*
+     ⇒ se busca entre TODAS y se mira su estado. */
+  if (args.mascotaIdEnRuta !== undefined) {
+    const enRuta = args.mascotas.find((m) => m.id === args.mascotaIdEnRuta)
+    if (enRuta !== undefined) {
+      return esMemorial(enRuta) ? { modo: 'memorial', mascota: enRuta } : { modo: 'directa', mascota: enRuta }
+    }
+  }
+
   const activas = args.mascotas.filter((m) => !esMemorial(m))
   if (activas.length === 0) return { modo: 'ninguna' }
-  if (args.mascotaIdEnRuta !== undefined) {
-    const enRuta = activas.find((m) => m.id === args.mascotaIdEnRuta)
-    /* ⚠️ Si la ruta nombra una mascota que NO está activa (un memorial
-       abierto), **no se cae a «la primera»**: eso actuaría sobre otra mascota
-       sin decirlo. Se sigue de largo y decide la regla general. */
-    if (enRuta !== undefined) return { modo: 'directa', mascota: enRuta }
-  }
   if (activas.length === 1) return { modo: 'directa', mascota: activas[0] }
   return { modo: 'elegir', entre: activas }
 }
@@ -138,6 +152,19 @@ export function focoNexo(args: {
  * pata sobre un hogar que resulta ser memorial.*
  */
 export function montaPresencia(foco: FocoNexo): boolean {
+  return foco.modo === 'directa' || foco.modo === 'elegir'
+}
+
+/**
+ * 🔴 **¿VA CON COACH?** (D-1021.) La presencia se monta igual —la puerta a lo
+ * que te espera no se le quita a nadie— pero **en la pantalla de una mascota
+ * que ya no está, el Coach se apaga**: *ahí se lee, no se pide nada* (`A3.9`).
+ *
+ * ⚠️ **Se decide por la mascota EN FOCO, jamás por el conteo de activas.** Un
+ * hogar con dos vivas y una en memoria tiene `activas.length === 2`, así que
+ * contar habría dejado el Coach encendido justo en la pantalla donde no va.
+ */
+export function vaConCoach(foco: FocoNexo): boolean {
   return foco.modo === 'directa' || foco.modo === 'elegir'
 }
 
