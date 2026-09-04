@@ -3213,6 +3213,56 @@ cierra el pasado** (`L-409`).
 
 ---
 
+### `D-1020` ☠️ CERRADA — el refugio aterrizaba en el HOY del negocio, no en su casa
+
+**Síntoma (founder, cuenta del refugio recién logueado):** el home es el de
+negocio (turnos, $ del día, «prepara tu espacio»), el glifo de la pestaña
+Refugio se dibuja como inactivo, y la burbuja al tocarla «va a Hogar». **Los
+tres se corrigen solos al navegar o recargar.**
+
+**Hipótesis de mesa, medida y FALSA:** *«el tipo de cuenta llega después del
+primer render y el shell lo trata como negocio mientras no llega»*. Medido en
+web con sesión real: **a los 2,0 s la barra ya es la del refugio** —o sea que
+el tipo llegó— y el contenido sigue siendo el HOY.
+
+**Causa, una sola y estructural:** `<Tabs>` arranca en la primera
+`Tabs.Screen`, que es `index`; la barra del refugio es
+`['adopcion','adoptables','cuenta']` (`barra-prestador.ts:96`) y **no contiene
+`index`**. De ahí los tres: está parado en el HOY · `activo === 'index'` no
+matchea ningún item ⇒ **ninguna pestaña activa** —*el glifo «oscuro» no es un
+estado de carga: es la ausencia de coincidencia*— · y tocar «Refugio» arregla
+los dos juntos. **No es que el dato llegue tarde: es que nadie lo lleva a su
+casa.**
+
+**El tercer síntoma era el primero con otra ropa.** La sospecha *«el destino
+pide un id que la lista de pendientes no trae»* también es falsa: el id viaja
+(`resumirPendientes` lo pone en `unica` cuando hay una conversación y cero
+solicitudes). Con el refugio hay 0 conversaciones y 1 solicitud ⇒ la clase viva
+es `solicitudes` y su destino es la lista, **que en el refugio ES su home**.
+
+**Cura:** un efecto con `ref` que hace `replace` a `/(tabs)/adopcion` una sola
+vez. **No un `<Redirect>`**: acá reemplazaría el render del navegador entero, y
+adentro de la tab sería la ratonera de `L-251`. **El `ref` no es prolijidad:**
+sin él el efecto volvería a mandar a `adopcion` en cada refresco del resolvedor
+—*un aterrizaje que se repite deja de ser aterrizaje y pasa a ser un
+secuestro*—.
+
+**Verde medido:** ruta `/adopcion` · `aria-selected` de «Refugio» en `true`,
+las otras dos en `false`, **sin recargar y sin navegar**.
+
+⚠️ **Ficha depositada tarde y se declara:** el número se tomó al curar y la
+ficha se escribió después, en `pista/s113-c-05`. En el medio **A usó `D-1021`**
+para otra cosa, así que no hubo colisión — *pero la hubo por suerte, no por
+método*: un número tomado sin ficha es exactamente lo que `D-1003` existe para
+impedir.
+
+**Censo del mismo dato:** `barra-prestador-lectura.ts:194` y
+`barra-prestador.ts:96` deciden la barra y ya eran correctos ·
+`(tabs)/cuenta/index.tsx:271,853` tiene **la misma forma con consecuencia
+distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
+fail-closed, **abierto, medido y descartado con su razón**.
+
+**Cerrada en** `pista/s113-c-03` `8ba48697`.
 ### `D-1021` 🔴 — la ficha de una mascota fallecida se dibuja como si estuviera viva
 
 **Cómo apareció.** Recorriendo el 0.3 en **emulador Android** con

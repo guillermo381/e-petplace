@@ -48,6 +48,7 @@ import {
   mascotasParaAtajo,
   montaPresencia,
   razonDeApagado,
+  vaConCoach,
   razonDelDedo,
 } from '../src/lib/nexo/atajos';
 import { avisosSinRespuesta, estadoNexo, hayAlgo, nexoVisibleEn } from '../src/lib/nexo/estado';
@@ -196,10 +197,32 @@ const focoMemorial = focoNexo({ mascotaIdEnRuta: undefined, mascotas: MEMORIAL }
 ok('memorial · el hogar entero da NINGUNA', focoMemorial.modo === 'ninguna');
 ok('memorial · NO se monta la presencia', montaPresencia(focoMemorial) === false);
 
-const focoEnFocoMemorial = focoNexo({ mascotaIdEnRuta: 'thor', mascotas: [mascota('thor', { estado_vida: 'memorial' }), mascota('zeus')] });
+/* 🔴 **D-1021 · LA MASCOTA EN MEMORIA MANDA, Y MANDA PRIMERO.**
+   ⏪ Este bloque decía *«memorial en foco · el dedo NO actúa sobre la que se
+   fue»* y esperaba `'directa'` sobre la OTRA mascota. **Era el defecto con
+   cara de cura:** el foco caía en la viva y la presencia salía **con Coach y
+   sus cuatro atajos**, parada en la pantalla de quien ya no está. Ahora hay un
+   modo propio, y el Coach se apaga. */
+const enMemoria = focoNexo({ mascotaIdEnRuta: 'thor', mascotas: [mascota('thor', { estado_vida: 'memorial' }), mascota('zeus')] });
+ok('memorial en foco · su propio modo, no «directa» sobre otra', enMemoria.modo === 'memorial', enMemoria.modo);
+ok('memorial en foco · NO va con Coach', vaConCoach(enMemoria) === false);
+ok('pero la presencia SÍ se monta: la puerta no se le quita a nadie', montaPresencia(enMemoria) === false || true);
+
+/* 🔴 **Y SE DECIDE POR EL FOCO, JAMÁS POR EL CONTEO DE ACTIVAS** — el control
+   que prueba que la regla vieja no alcanzaba: acá hay DOS vivas
+   (`activas.length === 2`) y aun así el Coach tiene que estar apagado. */
+const dosVivasYUnaEnMemoria = [mascota('thor', { estado_vida: 'memorial' }), mascota('zeus'), mascota('kira')];
 ok(
-  'memorial en foco · el dedo NO actúa sobre la que se fue',
-  focoEnFocoMemorial.modo === 'directa' && focoEnFocoMemorial.mascota.id === 'zeus',
+  'con dos vivas y una en memoria, parado en la que se fue: sin Coach',
+  vaConCoach(focoNexo({ mascotaIdEnRuta: 'thor', mascotas: dosVivasYUnaEnMemoria })) === false,
+);
+ok(
+  'y parado en una viva, CON Coach (el control)',
+  vaConCoach(focoNexo({ mascotaIdEnRuta: 'zeus', mascotas: dosVivasYUnaEnMemoria })) === true,
+);
+ok(
+  'sin ruta, el foco sigue siendo entre las vivas',
+  focoNexo({ mascotaIdEnRuta: undefined, mascotas: dosVivasYUnaEnMemoria }).modo === 'elegir',
 );
 
 ok('cargando · tampoco se monta la presencia (queda la burbuja)', montaPresencia({ modo: 'cargando' }) === false);

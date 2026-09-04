@@ -386,7 +386,29 @@ export default function PerfilDeMascota() {
   const [fotoFirmada, setFotoFirmada] = useState<string | undefined>(undefined);
   // S82: el avatar es la puerta a editar la foto (encuadre de la casa).
   const presionAvatar = usePresionado(0.99);
-  const esMemorial = theme.mode === 'memorial';
+  /* 🔴 **D-1021 · EL MODO MEMORIAL SE ENCIENDE POR LA MASCOTA EN FOCO, y hasta
+     hoy no se encendía por nada.**
+
+     ⏪ Acá decía sólo `theme.mode === 'memorial'`. **Medido: NADIE monta
+     `<ThemeProvider memorial>` en ninguna de las dos apps** —el único provider
+     vivo es el raíz, con `mode={light|dark}`— así que ese guard **era falso
+     siempre**, y con él los cuatro que cuelgan de la misma condición
+     (`hogar/index:769`, éste, `vacunas:271`, `celebracion-entrega:100`).
+     *Cuatro guards escritos, cero encendidos: letra muerta que se leía como
+     protección.*
+
+     ⚠️ **Y el dato correcto YA VIVÍA en esta pantalla**, doce líneas más
+     abajo, para calcular el momento vital: `mascota.estado_vida !== null &&
+     !== 'activa'`. *No faltaba el dato: faltaba que decidiera algo.*
+
+     ⇒ se deriva del PERFIL cargado. `theme.mode` se conserva en el OR porque
+     la galería sí puede montar el sub-tema, y ahí el guard tiene que seguir
+     valiendo. */
+  const esMemorial =
+    theme.mode === 'memorial' ||
+    (typeof perfil === 'object' &&
+      perfil.mascota.estado_vida !== null &&
+      perfil.mascota.estado_vida !== 'activa');
   // r10-1: el techo pinta bajo la barra de estado → íconos CLAROS
   // mientras la pantalla tiene foco; al salir se restaura la voz del
   // tema (patrón BarraTabs/Hogar — packages/ui no conoce el foco).

@@ -1195,6 +1195,13 @@ export default function Hogar() {
   /** A8: vive AFUERA del IIFE porque ahora tiene dos lectores — las filas y el
    *  conteo. Adentro, el conteo habría tenido que re-calcularla. */
   const vozDe = (id: string) => {
+    /* 🔴 **UNA MASCOTA EN MEMORIA NO LLEVA LÍNEA DE ESTADO** (D-1021, `A3.9`).
+       `calcularVozHogar` mira vacunas y atenciones y **no conoce el estado de
+       vida** —vive en `packages/domain` y no es mío—, así que le diría «Está
+       al día» o «Necesita tu atención» a quien ya no está. *El dato para
+       callarla estaba acá, en la lista de mascotas, y nadie lo miraba.* */
+    const m = Array.isArray(mascotas) ? mascotas.find((x) => x.id === id) : undefined;
+    if (m !== undefined && m.estado_vida !== null && m.estado_vida !== 'activa') return null;
     const s = senalesPorMascota.get(id);
     if (!s) return null;
     return calcularVozHogar(
@@ -1613,7 +1620,11 @@ export default function Hogar() {
                 contentContainerStyle={{ gap: spacing[4], alignItems: 'flex-start', paddingTop: spacing[5] }}
               >
                 {mascotas.map((m) => {
-                  const s = senalesPorMascota.get(m.id);
+                  /* Mismo criterio que `vozDe`: sin punto de estado para quien
+                     ya no está. *Dos lugares que dibujan el mismo hecho tienen
+                     que callarse por la misma razón.* */
+                  const enMemoria = m.estado_vida !== null && m.estado_vida !== 'activa';
+                  const s = enMemoria ? undefined : senalesPorMascota.get(m.id);
                   const v = s
                     ? calcularVozHogar(
                         {

@@ -80,6 +80,7 @@ import {
   focoNexo,
   mascotasParaAtajo,
   razonDelDedo,
+  vaConCoach,
   ORDEN_DE_PATA,
   type AtajoNexo,
   type RazonApagado,
@@ -258,14 +259,24 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
      ni en la caja: la lista y su razón viven en `lib/nexo/estado.ts`. */
   if (!nexoVisibleEn(segmentos)) return null;
 
-  /* MEMORIAL o hogar que todavía no contestó ⇒ la burbuja de siempre, y NUNCA
-     las dos: ocupan el mismo píxel. */
-  if (foco.modo !== 'directa' && foco.modo !== 'elegir') {
+  /* 🔴 **SIN COACH: memorial, hogar sin contestar, u hogar sin activas**
+     (D-1021). La puerta a lo que te espera **no se le quita a nadie**; lo que
+     se apaga es el Coach — *en la pantalla de quien ya no está se lee, no se
+     pide nada* (`A3.9`).
+     ⚠️ Lo decide **la mascota EN FOCO, jamás el conteo de activas**: un hogar
+     con dos vivas y una en memoria tiene `activas.length === 2`, así que
+     contar habría dejado el Coach encendido justo donde no va.
+     Y sigue siendo UNA de las dos, nunca las dos: ocupan el mismo píxel. */
+  if (!vaConCoach(foco)) {
     return <PresenciaSinCoach altoBarra={altoBarra} />;
   }
 
   /* Sobre quiénes puede actuar la pata acá: la del foco, o todas las activas. */
-  const candidatas: MascotaResumen[] = foco.modo === 'directa' ? [foco.mascota] : foco.entre;
+  /* El compilador ya no deja leer `foco.entre` sin discriminar: con el modo
+     `memorial` la unión creció, y ese rojo es la prueba de que el caso nuevo
+     no se puede olvidar. Acá sólo llegan los dos modos con Coach. */
+  const candidatas: MascotaResumen[] =
+    foco.modo === 'directa' ? [foco.mascota] : foco.modo === 'elegir' ? foco.entre : [];
 
   const enCarrito = items.reduce((n, i) => n + i.cantidad, 0);
   const pendientes: PendientesCoach = {
