@@ -3263,6 +3263,47 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1022` 🟡 P5 del censo atribuye a una tabla lo que un bucket y un `select('*')` escribieron
+
+**Nace:** S113-A, 4-sep-2026, corriendo los gates del candidato 0.3.
+
+**Qué pasa.** `verify:censo` P5 —*«ningún bundle servido consulta un objeto que
+el schema vivo ya no tiene»*— acusa **cinco pares**. Los cinco son ausencias
+**reales** en el catálogo (medido, con dos controles positivos que dan 1:
+`eventos_mascota.fecha_evento` y `v_pedidos_narrativa.es_terminal`). **Ninguno de
+los cinco es una consulta real:**
+
+| acusación | el sitio, abierto y citado |
+|---|---|
+| `entregas` · LA TABLA ENTERA | `packages/api/src/wrappers/despensa-repartidor.ts:165` → `getClient().storage.from('entregas')` — **es un BUCKET de Storage.** El gate lee `.from(` y busca una tabla |
+| `v_pedidos_narrativa` · `estado`, `especies_aplicables`, `razones` | los cuatro `from('v_pedidos_narrativa')` de `despensa-seguimiento.ts` y `despensa-vendedor.ts` **no nombran ninguno**; dos son `.select('*')` |
+| `eventos_mascota` · `fecha` | la columna real es `fecha_evento`; `'fecha'` es un literal que aparece suelto por todo el paquete |
+
+**La causa, nombrada:** el gate atribuye **literales sueltos** a la última tabla
+vista cuando el `select` no le da lista de columnas. `.select('*')` y
+`.storage.from()` son **dos formas que su alcance no declara** — declara fuera
+los *dinámicos* (2 contados) y los *embeds* (39), y éstas no son ninguna.
+
+**Por qué importa y por qué no es urgente.** *P5 existe para que una pantalla
+servida no reciba un 400 en silencio; con cinco falsos positivos permanentes, su
+rojo deja de leerse y el día que haya uno de verdad va a estar mezclado con
+éstos.* Un gate que siempre está en rojo por lo mismo enseña a ignorarlo — es
+`L-450` por el otro lado: no verde por ausencia, **rojo por ruido**.
+
+**Cura propuesta (no ejecutada, no es de A):** ① `.storage.from(` sale del
+corpus —es otra API—; ② un `from()` cuyo `select` sea `'*'` **no puede aportar
+pares**: se cuenta y se declara fuera, como ya se hace con dinámicos y embeds;
+③ un literal sólo se atribuye a la tabla **del mismo `select`**, jamás por
+cercanía.
+
+**Su rojo antes de cablearse (`L-459`):** cualquiera de las tres curas se prueba
+dejando **un caso real de verdad** —un `select` que sí nombre una columna
+muerta— y exigiendo que **siga apareciendo**. *Una cura que baja el número
+también «arregla» el gate apagándolo.*
+
+**Dueño:** la pista del censo. **Disparo:** la próxima vez que P5 se lea para
+decidir algo — o antes, si alguien va a curar un rojo de esta lista.
+
 ### `D-1021` 🟠 PARCIAL — la ficha de una mascota fallecida: LEÍDA sí, NO PEDIDA todavía
 
 **Cómo apareció.** Recorriendo el 0.3 en **emulador Android** con
