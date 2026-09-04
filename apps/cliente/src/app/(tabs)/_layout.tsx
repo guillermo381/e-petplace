@@ -300,8 +300,11 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
       router.push({ pathname: '/antiparasitario', params: { mascotaId: m.id, nombre: m.nombre } });
       return;
     }
-    /* 'foto' no llega hasta acá: nace apagado con su razón — medido, no hay un
-       solo escritor de `evento_hito_narrativo` en `packages/api`. */
+    /* ✅ **EL CUARTO DEDO SE ENCENDIÓ** (lote 0.1). ⏪ Acá decía que 'foto' no
+       llegaba hasta este punto porque nacía apagado: no había un solo escritor
+       de `evento_hito_narrativo` en `packages/api`. **A construyó la puerta**
+       y el comentario se corrige en el mismo acto en que deja de ser cierto. */
+    router.push({ pathname: '/recuerdo', params: { mascotaId: m.id, nombre: m.nombre } });
   };
 
   /* Las mascotas entre las que este dedo puede elegir. La almohadilla las
@@ -352,10 +355,9 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
      voces que algún día divergen.* */
   const nombreEnRazon = candidatas.length === 1 ? candidatas[0].nombre : t('alta.tuMascota');
 
-  const vozRazon = (r: RazonApagado): string =>
-    r === 'acuario'
-      ? t('nexo.razonAcuario', { mascota: nombreEnRazon })
-      : t('nexo.razonSinPuerta', { mascota: nombreEnRazon });
+  /* Una sola razón viva: el acuario. ⏪ La otra —«sin puerta», del dedo Foto—
+     murió con la puerta que A construyó. */
+  const vozRazon = (r: RazonApagado): string => t('nexo.razonAcuario', { mascota: nombreEnRazon });
 
   /* 🔴 **LA TUPLA ES DE CUATRO Y EL COMPILADOR LO EXIGE.** `ORDEN_DE_PATA` tiene
      cuatro y el `as` lo afirma; si alguien le agrega un quinto, **rompe acá**,

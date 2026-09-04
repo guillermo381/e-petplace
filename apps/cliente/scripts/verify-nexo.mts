@@ -27,7 +27,17 @@ import i18next from '../../../node_modules/i18next/dist/esm/i18next.js';
 
 import { clienteEn } from '../src/i18n/en';
 import { clienteEs } from '../src/i18n/es';
-import { clasesConAlgo, type PendientesCoach } from '../../../packages/ui/src/components/coach-geometria';
+import { readFileSync } from 'node:fs';
+
+import {
+  AIRE_BORDE,
+  HALO,
+  ORBE,
+  RESPLANDOR,
+  anclaOrbe,
+  clasesConAlgo,
+  type PendientesCoach,
+} from '../../../packages/ui/src/components/coach-geometria';
 import { clasesVivas } from '../../../packages/ui/src/components/pendientes-vivos';
 import { clasesVisibles, silenciaCarrito } from '../src/lib/pendientes-adopcion';
 import {
@@ -40,6 +50,7 @@ import {
   razonDelDedo,
 } from '../src/lib/nexo/atajos';
 import { avisosSinRespuesta, estadoNexo, hayAlgo, nexoVisibleEn } from '../src/lib/nexo/estado';
+import { cuerpoDelRecuerdo, frenoDelRecuerdo, keyDelRebote, puedeGuardar } from '../src/lib/recuerdo/decidir';
 
 const di = (s: string) => process.stdout.write(s + '\n');
 const CONTROL = process.argv.includes('--control');
@@ -65,6 +76,10 @@ if (clasesConAlgo({ chat: 0, pedidos: 0, avisos: null }).length !== 0) {
 }
 if (clasesConAlgo({ chat: 1, pedidos: 0, avisos: null }).length !== 1) {
   di('ROJO · auto-prueba: pierde una clase viva.');
+  process.exit(2);
+}
+if (typeof frenoDelRecuerdo !== 'function' || frenoDelRecuerdo({ hayFoto: true, texto: '', fecha: '2026-01-01', hoy: '2026-01-01' }) !== null) {
+  di('ROJO · auto-prueba: el freno del recuerdo no deja pasar un caso válido.');
   process.exit(2);
 }
 
@@ -197,12 +212,17 @@ const PERRO = [mascota('thor')];
 const ACUARIO = [mascota('nube', { sujeto: 'acuario', especie: 'pez' })];
 const MIXTO = [mascota('thor'), mascota('nube', { sujeto: 'acuario', especie: 'pez' })];
 
+/* ✅ LOTE 0.1 · **LOS CUATRO DEDOS ESTÁN VIVOS PARA UN INDIVIDUO.** ⏪ Este
+   bloque afirmaba que «Foto» estaba apagado por falta de puerta; A la construyó
+   y el gate se da vuelta en el mismo acto. *Un caso de prueba que sobrevive a
+   su premisa mide el mundo de ayer.* */
 const apagadosIndividuo = ORDEN_DE_PATA.filter((a) => razonDelDedo(a, PERRO) !== null);
-ok('individuo · sólo Foto está apagado, y por falta de puerta', apagadosIndividuo.join(',') === 'foto');
-ok('individuo · la razón de Foto es «sin puerta»', razonDelDedo('foto', PERRO) === 'sin_puerta');
+ok('individuo · NINGÚN dedo apagado', apagadosIndividuo.length === 0, apagadosIndividuo.join(','));
+ok('individuo · Foto está VIVO', razonDelDedo('foto', PERRO) === null);
+ok('acuario · Foto también, el recuerdo no depende del sujeto', razonDelDedo('foto', ACUARIO) === null);
 
 const apagadosAcuario = ORDEN_DE_PATA.filter((a) => razonDelDedo(a, ACUARIO) !== null);
-ok('acuario · DOS dedos atenuados por acuario + Foto', apagadosAcuario.join(',') === 'vacuna,antiparasitario,foto');
+ok('acuario · SÓLO los dos que no aplican', apagadosAcuario.join(',') === 'vacuna,antiparasitario');
 ok('acuario · Vacuna se apaga por acuario', razonDelDedo('vacuna', ACUARIO) === 'acuario');
 ok('acuario · Antiparasitario se apaga por acuario', razonDelDedo('antiparasitario', ACUARIO) === 'acuario');
 ok('acuario · Peso NO se apaga: el motor lo admite', razonDelDedo('peso', ACUARIO) === null);
@@ -272,7 +292,173 @@ ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 
   ok('en el ACTA no se calla nada: no tiene barra de escribir', clasesVisibles(['adoptar', 'acta', '[solicitudId]']).carrito === true);
 }
 
-/* ═══ ⑧ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
+
+/* ═══ ⑨ EL RECUERDO — las tres decisiones de la pantalla, sin React ══════════
+ *
+ * Se llaman **las mismas funciones que corren en pantalla** (`lib/recuerdo/
+ * decidir`), no una réplica. Y es lo que vuelve medible el «cero llamadas» del
+ * encargo: *que el botón no dispare nada sin foto ni texto se puede leer en el
+ * código, pero leer no es medir.*
+ */
+{
+  const HOY = '2026-09-04';
+  const base = { hayFoto: false, texto: '', fecha: HOY, hoy: HOY };
+
+  /* ① SIN FOTO NI TEXTO — razón en pantalla, y el guard dice que NO. */
+  ok('vacío · el freno es «falta algo»', frenoDelRecuerdo(base) === 'faltaAlgo');
+  ok('vacío · NO se puede guardar ⇒ cero llamadas', puedeGuardar(base) === false);
+  ok('vacío · el espacio en blanco no cuenta como texto', frenoDelRecuerdo({ ...base, texto: '   \n ' }) === 'faltaAlgo');
+
+  /* ② SÓLO TEXTO · SÓLO FOTO — las dos alcanzan, que es la firma de la mesa. */
+  ok('sólo texto alcanza', puedeGuardar({ ...base, texto: 'Su primer día en el mar' }) === true);
+  ok('sólo foto alcanza', puedeGuardar({ ...base, hayFoto: true }) === true);
+  ok('las dos juntas también', puedeGuardar({ ...base, hayFoto: true, texto: 'x' }) === true);
+
+  /* ③ FECHA FUTURA — rechazada EN PANTALLA. */
+  ok('mañana se rechaza', frenoDelRecuerdo({ ...base, texto: 'x', fecha: '2026-09-05' }) === 'fechaFutura');
+  ok('mañana NO se puede guardar', puedeGuardar({ ...base, texto: 'x', fecha: '2026-09-05' }) === false);
+  ok('hoy sí', puedeGuardar({ ...base, texto: 'x', fecha: HOY }) === true);
+  ok('ayer también: un recuerdo es del pasado', puedeGuardar({ ...base, texto: 'x', fecha: '2026-09-03' }) === true);
+
+  /* 🔴 EL ORDEN DE LAS DOS PREGUNTAS: con el formulario recién abierto —vacío y
+     con hoy— la razón tiene que ser la del primer paso que falta. */
+  ok(
+    'vacío Y con fecha futura ⇒ manda «falta algo», no la fecha',
+    frenoDelRecuerdo({ ...base, fecha: '2026-09-05' }) === 'faltaAlgo',
+  );
+
+  /* ④ EL CUERPO QUE VIAJA — un texto vacío NO viaja. */
+  const soloFoto = cuerpoDelRecuerdo({ mascotaId: 'm1', texto: '   ', fotoPath: 'u/f.jpg', fecha: HOY });
+  ok('sólo foto · el texto vacío NO viaja', !('texto' in soloFoto), JSON.stringify(soloFoto));
+  ok('sólo foto · el path sí', soloFoto.fotoPath === 'u/f.jpg');
+
+  const soloTexto = cuerpoDelRecuerdo({ mascotaId: 'm1', texto: '  Su primer día  ', fecha: HOY });
+  ok('sólo texto · no viaja fotoPath', !('fotoPath' in soloTexto), JSON.stringify(soloTexto));
+  ok('sólo texto · viaja recortado', soloTexto.texto === 'Su primer día');
+  ok('la fecha viaja siempre', soloTexto.fecha === HOY && soloFoto.fecha === HOY);
+  ok('la mascota viaja siempre', soloTexto.mascotaId === 'm1');
+
+  /* ⑤ LOS REBOTES — una línea cada uno, y el vacío comparte key con el freno. */
+  ok('recuerdo_vacio comparte key con el freno de pantalla', keyDelRebote('recuerdo_vacio') === 'recuerdo.faltaAlgo');
+  ok('foto_invalida tiene la suya', keyDelRebote('foto_invalida') === 'recuerdo.errFoto');
+  ok('fecha_futura comparte key con el freno de pantalla', keyDelRebote('fecha_futura') === 'recuerdo.fechaFutura');
+  ok('sin_acceso_mascota', keyDelRebote('sin_acceso_mascota') === 'recuerdo.errAcceso');
+  ok('acceso_denegado', keyDelRebote('acceso_denegado') === 'recuerdo.errAcceso');
+  ok('error_desconocido cae al genérico', keyDelRebote('error_desconocido') === 'recuerdo.errGenerico');
+  /* 🔴 Y el ensanche del ResultadoWrapper, que el compilador ya cobró una vez:
+     un código que el enum del wrapper no nombra tiene que caer al genérico y no
+     romper. */
+  ok('datos_inconsistentes cae al genérico', keyDelRebote('datos_inconsistentes') === 'recuerdo.errGenerico');
+  ok('un código inventado cae al genérico', keyDelRebote('lo_que_sea') === 'recuerdo.errGenerico');
+}
+
+
+/* ═══ ⑩ EL ORBE EN REPOSO NO QUEDA TAPADO — z-order y geometría ══════════════
+ *
+ * 🔴 **LA BARRA PINTA DESPUÉS DEL ORBE, y eso no se discute: se mide.** En el
+ * `tabBar` del shell, `NexoDelShell` es el PRIMER hijo del fragmento y
+ * `BarraTabs` el SEGUNDO — en React Native los hermanos posteriores pintan
+ * encima. ⇒ **donde se toquen, gana la barra.** Por eso lo único que salva al
+ * orbe es que NO se toquen, y eso es aritmética con los números de B.
+ *
+ * ⚠️ **Y una tarjeta de pantalla no puede taparlo, por una razón distinta:**
+ * el orbe vive en el subárbol del `tabBar`, que el navegador pinta DESPUÉS del
+ * contenedor de pantallas. Los `zIndex: 2` de Hogar (`index.tsx:1749`) y de la
+ * ficha de la mascota (`[mascotaId].tsx:1092`) ordenan **entre hermanos de su
+ * propio padre** y no cruzan de subárbol; medido además: **ninguna de las dos
+ * pantallas usa `elevation`**, que es lo único que en Android podría cruzar.
+ *
+ * La geometría se importa de `coach-geometria` **acá y sólo acá**: B la dejó
+ * sin exportar a propósito para que ninguna pantalla la re-decida, y su propio
+ * gate la importa del módulo. *Un arnés que la copiara mediría su eco.*
+ */
+{
+  const ANCHO = 390; // un teléfono común; el ancla es lineal en el ancho
+
+  /* 🔴 **EL ALTO DE LA FILA SE LEE DEL ARCHIVO, NO SE IMPORTA — y no es un
+     atajo: es lo único que se puede.** `ALTO_FILA_TABS` se exporta desde
+     `BarraTabs.tsx`, un componente, así que importarlo arrastra
+     `react-native` entero y el arnés no arranca (medido: *«Unexpected typeof»*
+     en `react-native/index.js`). *Ésa es exactamente la razón por la que B
+     puso su geometría en un módulo sin runtime.*
+     Se lee del objeto y **si no se puede leer, el gate NO da verde**: sale
+     NO CONCLUYENTE. Un número tecleado acá mediría un teléfono imaginario. */
+  const fuenteBarra = readFileSync(
+    new URL('../../../packages/ui/src/components/BarraTabs.tsx', import.meta.url),
+    'utf8',
+  );
+  const mAlto = /const ALTO_FILA = (\d+)/.exec(fuenteBarra);
+  if (mAlto === null) {
+    di('ROJO · no pude leer ALTO_FILA de BarraTabs.tsx — no pude medir el z-order.');
+    process.exit(2);
+  }
+  const BARRA = Number(mAlto[1]) + 34; // fila + un inset típico
+
+  const ancla = anclaOrbe(ANCHO, BARRA);
+
+  /* ① EL CUERPO DEL ORBE — su borde inferior contra el borde superior de la
+        barra. `AIRE_BORDE` es exactamente ese aire. */
+  const holguraCuerpo = ancla.abajo - BARRA;
+  ok('el cuerpo del orbe no entra en la banda de la barra', holguraCuerpo > 0, `holgura=${holguraCuerpo}`);
+  ok('y la holgura es el aire del borde, no un sobrante casual', holguraCuerpo === AIRE_BORDE, String(holguraCuerpo));
+
+  /* ② LA CAJA DEL HALO — el aro tenue desborda parejo y la caja baja 9. */
+  const holguraHalo = ancla.abajo - (HALO - ORBE) / 2 - BARRA;
+  ok('la caja del halo tampoco entra en la barra', holguraHalo > 0, `holgura=${holguraHalo}`);
+
+  /* ③ EL RESPLANDOR SÍ ROZA, Y SE DECLARA EN VEZ DE ESCONDERSE. Es una SOMBRA
+        (`shadowRadius = RESPLANDOR`, `elevation` en Android), no cuerpo: su
+        borde exterior llega a `AIRE_BORDE - RESPLANDOR` de la banda. *El orbe
+        no queda tapado; lo que la barra recorta son los píxeles más tenues de
+        su brillo.* Se mide para que el día que alguien cambie uno de los dos
+        números, el cambio aparezca acá y no en un teléfono. */
+  const rocePorElBrillo = RESPLANDOR - AIRE_BORDE;
+  ok('el roce es SÓLO del resplandor y está acotado', rocePorElBrillo > 0 && rocePorElBrillo <= 8, `${rocePorElBrillo}px`);
+
+  /* ④ EL BORDE DERECHO — que no se salga de la pantalla. */
+  ok('el orbe no se sale por la derecha', ancla.izquierda + ORBE <= ANCHO);
+  ok('el halo tampoco', ancla.izquierda - (HALO - ORBE) / 2 + HALO <= ANCHO);
+
+  /* 🔴 EL CONTROL NEGATIVO, y nombra el modo de falla real: si el shell se
+        olvidara de pasar `aireInferior`, el orbe caería DENTRO de la barra —
+        y como la barra pinta después, quedaría tapado sin que nada falle. */
+  const sinAire = anclaOrbe(ANCHO, 0);
+  ok(
+    'sin `aireInferior` el orbe QUEDARÍA dentro de la banda de la barra',
+    sinAire.abajo - BARRA < 0,
+    `holgura=${sinAire.abajo - BARRA}`,
+  );
+
+  /* ⑤ Y QUE EL SHELL SE LO PASE MEDIDO, NO TECLEADO.
+     🔴 **SE MIRA EL BLOQUE DE `PresenciaCoach`, NO EL ARCHIVO — y esto lo
+     corrigió su propio rojo.** La primera versión buscaba
+     `aireInferior={altoBarra}` en todo el archivo y **daba VERDE con la
+     presencia en `0`**: encontraba el de `BurbujaPendientes`, que está tres
+     líneas más arriba y también lo recibe. *Dos consumidores del mismo dato en
+     el mismo archivo, y el gate no distinguía cuál medía.* Es un verde por la
+     razón equivocada, cazado produciendo el rojo antes de confiar en él. */
+  const shell = readFileSync(new URL('../src/app/(tabs)/_layout.tsx', import.meta.url), 'utf8');
+  const iPresencia = shell.indexOf('<PresenciaCoach');
+  if (iPresencia < 0) {
+    di('ROJO · no encuentro el montaje de PresenciaCoach — no pude medir.');
+    process.exit(2);
+  }
+  const bloquePresencia = shell.slice(iPresencia, shell.indexOf('/>', iPresencia));
+  ok('la PRESENCIA recibe el aire medido', /aireInferior=\{altoBarra\}/.test(bloquePresencia), bloquePresencia.slice(-120));
+  ok('y la burbuja también, que ocupa el mismo píxel', /aireInferior=\{altoBarra\}/.test(shell.slice(0, iPresencia)));
+  ok('`altoBarra` se MIDE con onLayout', /onLayout=\{\(e\) =>/.test(shell) && /setAltoBarra/.test(shell));
+  ok(
+    'arranca en la fórmula de la barra, no en un número tecleado',
+    /useState\(ALTO_FILA_TABS \+ insets\.bottom\)/.test(shell),
+  );
+  /* El orden de hermanos: la presencia ANTES que la barra. Si alguien los da
+     vuelta, la barra dejaría de pintar encima — y este gate lo diría. */
+  const iNexo = shell.indexOf('<NexoDelShell');
+  const iBarra = shell.indexOf('<BarraTabs');
+  ok('la presencia se monta ANTES que la barra (la barra pinta encima)', iNexo > 0 && iBarra > iNexo);
+}
+
+/* ═══ ⑪ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
 
 const inst = (i18next as any).createInstance();
 await inst.init({
@@ -300,10 +486,12 @@ for (const idioma of ['es', 'en'] as const) {
   const conMascota = [
     'antiparasitario.titulo',
     'antiparasitario.anotado',
-    /* 🔴 Las razones de los dedos atenuados NOMBRAN a la mascota (firma de la
-       mesa): ni «próximamente» ni «en construcción». */
-    'nexo.razonSinPuerta',
+    /* 🔴 La razón del dedo atenuado NOMBRA a la mascota (firma de la mesa):
+       ni «próximamente» ni «en construcción». */
     'nexo.razonAcuario',
+    /* Lote 0.1 · las dos voces de la pantalla del recuerdo que llevan nombre. */
+    'recuerdo.titulo',
+    'recuerdo.guardado',
   ];
   for (const k of conMascota) {
     const s = t(k, { mascota: 'Thor' });
@@ -324,6 +512,16 @@ for (const idioma of ['es', 'en'] as const) {
   const planas = [
     'nexo.dedoPeso', 'nexo.dedoVacuna', 'nexo.dedoAntiparasitario', 'nexo.dedoFoto',
     'nexo.elegirMascota', 'nexo.cerrar', 'alta.tuMascota',
+    /* Lote 0.1 · la pantalla del recuerdo, entera. */
+    'recuerdo.agregarFoto', 'recuerdo.cambiarFoto', 'recuerdo.textoLabel',
+    'recuerdo.textoPlaceholder', 'recuerdo.fechaLabel', 'recuerdo.fechaPlaceholder',
+    'recuerdo.fechaFutura', 'recuerdo.guardar', 'recuerdo.faltaAlgo',
+    'recuerdo.permisoDenegado', 'recuerdo.errFoto', 'recuerdo.errAcceso',
+    'recuerdo.errSesion', 'recuerdo.errGenerico',
+    /* Y las cinco razones de la SUBIDA, que se reusan de `carnet.*`: si alguna
+       se retira de allá, este gate lo dice antes que una pantalla muda. */
+    'carnet.subidaLecturaLocal', 'carnet.subidaArchivoGrande', 'carnet.subidaMime',
+    'carnet.subidaPolicy', 'carnet.subidaRed',
     'nexo.vozChatUna', 'nexo.vozCarritoUno',
     'antiparasitario.tipoInterna', 'antiparasitario.tipoExterna', 'antiparasitario.tipoMixta',
     'antiparasitario.guardar', 'antiparasitario.errProducto', 'antiparasitario.errFechaFutura',
@@ -373,6 +571,7 @@ if (CONTROL) {
     ['una ruta cualquiera SÍ es visible (el guard no apaga todo)', nexoVisibleEn(['hogar']) === true],
     ['memorial NO monta presencia', montaPresencia({ modo: 'ninguna' }) === false],
     ['individuo NO apaga vacuna', razonDelDedo('vacuna', [mascota('t')]) === null],
+    ['Foto ya no se apaga por falta de puerta', razonDelDedo('foto', [mascota('t')]) === null],
     ['un i18next sin el valor DEJA la llave cruda — la premisa del gate sigue viva',
       String(inst.t('cliente:nexo.almohadilla')).includes('{{nombre}}')],
   ];

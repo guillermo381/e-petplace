@@ -30,20 +30,22 @@
  *
  * ── UN BOTÓN APAGADO SIN RAZÓN A LA VISTA ES EL DEFECTO ─────────────────────
  * Por eso `razonDeApagado` devuelve un CÓDIGO y nunca un booleano: la pastilla
- * apagada **muestra su razón en una línea**, en voz de la casa. Los dos casos
- * medidos hoy:
+ * apagada **muestra su razón en una línea**, en voz de la casa.
  *
- * ① **acuario** — `mascotas.sujeto = 'acuario'` (la cláusula del pez, S91: la
- *    fila registra el SISTEMA, no un individuo). Vacuna y antiparasitario no
- *    tienen sujeto al que aplicarse. **Se mira `sujeto`, jamás la especie** —
- *    que es el dato que la casa creó exactamente para esto.
+ * ☠️ **`'sin_puerta'` MURIÓ (lote 0.1).** Era la razón del dedo «Foto»:
+ * `evento_hito_narrativo` existía con cero filas y `packages/api` no tenía un
+ * solo escritor. **A construyó la puerta** (`registrarRecuerdoFamilia`) y el
+ * dedo se encendió, así que su razón se retira **en el mismo acto** — con ella
+ * se va `nexo.razonSinPuerta`, que se quedaba sin consumidor. *Una razón que
+ * sobrevive a su motivo es una frase esperando que alguien la vuelva a montar
+ * creyendo que rige* (Ley 37).
  *
- * ② **foto sin puerta** — 🔴 medido: `evento_hito_narrativo` **existe en la
- *    base con sus dos claves y CERO filas**, y **`packages/api` no tiene un
- *    solo escritor** (el alta lo dejó anotado y sin encender: *«la voz se
- *    firma en el gate de pantalla»*). *Un atajo que navega a ninguna parte es
- *    peor que uno apagado*, así que se dibuja apagado y lo dice. La puerta
- *    queda **pedida por nombre a A**.
+ * Queda **una sola**, y es de dominio, no de construcción:
+ *
+ * · **acuario** — `mascotas.sujeto = 'acuario'` (la cláusula del pez, S91: la
+ *   fila registra el SISTEMA, no un individuo). Vacuna y antiparasitario no
+ *   tienen sujeto al que aplicarse. **Se mira `sujeto`, jamás la especie** —
+ *   que es el dato que la casa creó exactamente para esto.
  */
 
 import type { MascotaResumen } from '@epetplace/api'
@@ -53,14 +55,17 @@ export type AtajoNexo = 'peso' | 'vacuna' | 'antiparasitario' | 'foto'
 /** El orden de la pata, de izquierda a derecha. UNA lista. */
 export const ORDEN_DE_PATA: readonly AtajoNexo[] = ['peso', 'vacuna', 'antiparasitario', 'foto'] as const
 
-export type RazonApagado = 'acuario' | 'sin_puerta'
+/** ☠️ Fue `'acuario' | 'sin_puerta'`. Queda una sola: la unión de un miembro
+ *  se conserva a propósito —el día que nazca otra razón entra sin cambiar la
+ *  forma de nadie— pero **no se conserva la muerta**: un código sin productor
+ *  se lee como un caso que puede ocurrir. */
+export type RazonApagado = 'acuario'
 
 /** `null` = el atajo está vivo. Un código = está apagado **y por qué**. */
 export function razonDeApagado(
   atajo: AtajoNexo,
   sujeto: MascotaResumen['sujeto'],
 ): RazonApagado | null {
-  if (atajo === 'foto') return 'sin_puerta'
   if (sujeto === 'acuario' && (atajo === 'vacuna' || atajo === 'antiparasitario')) return 'acuario'
   return null
 }
@@ -160,14 +165,13 @@ export function mascotasParaAtajo<T extends Pick<MascotaResumen, 'sujeto'>>(
 
 /**
  * La razón del dedo mirando **a todo el hogar**, no a una mascota.
- * `null` = vivo. `'sin_puerta'` = el destino no existe. `'acuario'` = ninguna
- * de las mascotas elegibles admite este atajo.
+ * `null` = vivo. `'acuario'` = ninguna de las mascotas elegibles admite este
+ * atajo.
  */
 export function razonDelDedo<T extends Pick<MascotaResumen, 'sujeto'>>(
   atajo: AtajoNexo,
   candidatas: readonly T[],
 ): RazonApagado | null {
-  if (atajo === 'foto') return 'sin_puerta'
   /* Sin candidatas todavía no se sabe: el dedo no se apaga por no saber
      —*vacío por carga y vacío por estado no comparten guard*— y el shell no lo
      monta hasta tener el hogar. */

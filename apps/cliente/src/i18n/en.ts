@@ -47,13 +47,34 @@ export const clienteEn = {
     dedoAntiparasitario: 'Parasite control',
     dedoFoto: 'Photo',
     razonAcuario: '{{mascota}} is an aquarium: no vaccines, no parasite control.',
-    razonSinPuerta: 'Soon you will be able to save a memory of {{mascota}} from here.',
+    /* ☠️ `razonSinPuerta` MURIÓ (lote 0.1): era la razón del dedo «Foto»
+     * mientras no existía su puerta. A la construyó, el dedo se encendió y la
+     * frase se retira en el mismo acto. *Una key sin consumidor es una frase
+     * que alguien va a volver a montar creyendo que rige* (Ley 37). */
     elegirMascota: 'Who is this about?',
     vozChatUna: '1 message',
     vozChat: '{{n}} messages',
     vozCarritoUno: 'Cart · 1',
     vozCarrito: 'Cart · {{n}}',
     presentacion: 'I am {{nombre}}. I can be wrong; for anything important, your vet is there.',
+  },
+  recuerdo: {
+    titulo: 'A memory of {{mascota}}',
+    agregarFoto: 'Add a photo',
+    cambiarFoto: 'Change the photo',
+    textoLabel: 'A few words',
+    textoPlaceholder: 'What happened…',
+    fechaLabel: 'When it was',
+    fechaPlaceholder: 'Pick the date',
+    fechaFutura: 'A memory cannot be from tomorrow.',
+    guardar: 'Save',
+    faltaAlgo: 'A photo or a few words — at least one.',
+    guardado: 'Saved to {{mascota}}’s life',
+    permisoDenegado: 'We need permission to open the camera or your photos.',
+    errFoto: 'The photo could not be saved; try again.',
+    errAcceso: 'You do not have access to this pet.',
+    errSesion: 'Your session is not active. Sign in again.',
+    errGenerico: 'We could not save the memory. Try again.',
   },
   antiparasitario: {
     titulo: 'Parasite control for {{mascota}}',
