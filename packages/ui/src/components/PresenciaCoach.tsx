@@ -87,6 +87,7 @@ import {
   ejeDesdeDerecha,
   movimientoCoach,
   nodosDeLaFila,
+  sePinta,
   vozDelOrbe,
   violetaEncendido,
   type ClaseCoach,
@@ -500,6 +501,13 @@ export function PresenciaCoach({
      con `coach: false` y conserva su puerta a los pendientes, que no propone
      nada — sólo dice lo que ya está esperando. */
   if (esMemorial && coach) return null
+
+  /* 🔴 **D-1025 · SIN COACH Y SIN NADA PENDIENTE, NO HAY PIEZA.** *Un disco
+     que atenúa la pantalla y abre sobre el vacío es peor que uno apagado.*
+     Con Coach se dibuja siempre: sus atajos están aunque no haya pendientes.
+     ⚠️ Va DESPUÉS de los hooks, igual que el guard de memorial: **salir antes
+     cambiaría el orden de hooks entre renders.** */
+  if (!sePinta({ coach, pendientes })) return null
 
   /* 🔴 **EL COLOR DE LA PRESENCIA SIN COACH SALE DE `accent.cta`, y no lo
      elegí yo.** `DISEÑO_EXPERIENCIA` §15b.1: *«UN acento de oficio: tealDark

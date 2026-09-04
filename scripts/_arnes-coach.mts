@@ -10,7 +10,7 @@
 import {
   AIRE_BORDE, ARCO_GRADOS, ARCO_SEPARACION, BRASA, DEDO, ORBE, ORBE_ABIERTO,
   BRASA, BRASA_ALFA, BRASA_MUERE, LIENZO, PASTILLA, SEPARACION, alturasDeLaFila, anclaOrbe, arcosDe, clasesConAlgo,
-  ORBE_MINI, ejeDeLaFila, violetaEncendido, vozDelOrbe, movimientoCoach, nodosDeLaFila, pastillasDe,
+  ORBE_MINI, ejeDeLaFila, sePinta, violetaEncendido, vozDelOrbe, movimientoCoach, nodosDeLaFila, pastillasDe,
 } from '../packages/ui/src/components/coach-geometria.ts';
 import { readFileSync } from 'node:fs';
 
@@ -273,6 +273,40 @@ t('despierta ⇒ 1', violetaEncendido({ abierta: false, estado: 'despierta' }), 
 t('la pieza la consume (si no, esto mide una función huérfana)',
   /violetaEncendido\(\{/.test(CODIGO), true);
 t('…y el fundido es el de 250 ms de la casa', /motion\.coach\.fundidoMs/.test(CODIGO), true);
+
+console.log('\n── ⑮ D-1025 · UN DISCO NO ABRE SOBRE EL VACÍO ──');
+/* 🔴 **Esta regla ya existía en `BurbujaPendientes` y se perdió al absorberla:
+   vino la forma y no vino la prosa.** Por eso ahora es una FUNCIÓN — lo que
+   vive en un comentario no lo hereda nadie. */
+t('🔴 sin Coach y sin nada ⇒ NO se dibuja',
+  sePinta({ coach: false, pendientes: p(0, 0, null) }), false);
+t('sin Coach y sin nada, con avisos en 0 ⇒ tampoco',
+  sePinta({ coach: false, pendientes: p(0, 0, 0) }), false);
+t('CONTROL POSITIVO · sin Coach pero CON un pendiente ⇒ sí',
+  sePinta({ coach: false, pendientes: p(1, 0, null) }), true);
+t('…y alcanza con las solicitudes del refugio',
+  sePinta({ coach: false, pendientes: { chat: 0, pedidos: 0, avisos: null, solicitudes: 2 } }), true);
+t('🔴 CON Coach se dibuja SIEMPRE, aunque no haya nada',
+  sePinta({ coach: true, pendientes: p(0, 0, null) }), true);
+t('un negativo no cuenta como pendiente',
+  sePinta({ coach: false, pendientes: p(-2, 0, null) }), false);
+t('la pieza la consume y sale por `null`',
+  /if \(!sePinta\(\{ coach, pendientes \}\)\) return null/.test(CODIGO), true);
+/* ⚠️ **ACOTADO AL CUERPO DE `PresenciaCoach`, y la primera versión no lo
+   estaba.** Comparaba posiciones en el ARCHIVO ENTERO, y `useAnimatedStyle`
+   aparece en `Orbe` y `NodoDeFila`, que viven más arriba ⇒ **el test daba
+   verde aunque el guard estuviera en la primera línea de la función.** Lo
+   destapó intentar el rojo: subí el guard antes de todos los hooks y el
+   arnés no se movió. *Es el mismo defecto de alcance que ya me cobró una vez
+   en este arnés — un gate que mide el archivo con el nombre de la función
+   mide otra cosa.* */
+{
+  const i = CODIGO.indexOf('export function PresenciaCoach');
+  const cuerpo = CODIGO.slice(i);
+  t('el gate encontró el cuerpo que dice medir', i > 0, true);
+  t('🔴 y el guard va DESPUÉS de los hooks (si no, cambia su orden entre renders)',
+    cuerpo.indexOf('useReducedMotion()') < cuerpo.indexOf('!sePinta'), true);
+}
 
 console.log('\n── ⑮bis LA PRESENCIA SIN COACH (lote 0.3) ──');
 /* 🔴 **Es la MISMA pieza haciendo el otro trabajo**, y así es como el
