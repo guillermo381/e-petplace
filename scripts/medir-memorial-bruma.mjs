@@ -23,8 +23,18 @@ const botones = async () =>
 
 await page.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 240000 });
 for (let i = 0; i < 60 && !(await T()).includes('Contraseña'); i++) await page.waitForTimeout(1000);
-await page.getByRole('textbox', { name: 'Email' }).fill(env.EXPO_PUBLIC_DEMO_EMAIL);
-await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
+/* 🔴 **LA CUENTA SE DECLARA, y esto lo pario un error mio.** `.env.local`
+   trae `demo-prestador@epetplace.dev`, que es OTRA familia — la de Zeus y
+   Kira— y con ella reporte «no pude medir a Bruma» como si la fixture no
+   existiera. *El saludo de la pantalla decia «Buenas tardes, demo-prestador»
+   en cada corrida y no lo lei.* La familia de Bruma es `ce057f90`, de
+   `guillo381+8@gmail.com` (medido por E). Se puede sobreescribir por entorno;
+   la clave sale del keychain y nunca del codigo. */
+const CORREO = process.env.CLIENTE_EMAIL ?? env.EXPO_PUBLIC_DEMO_EMAIL;
+const CLAVE = process.env.CLIENTE_PASSWORD ?? env.EXPO_PUBLIC_DEMO_PASSWORD;
+di(`cuenta: ${CORREO}`);
+await page.getByRole('textbox', { name: 'Email' }).fill(CORREO);
+await page.getByRole('textbox', { name: 'Contraseña' }).fill(CLAVE);
 await page.getByText('Entrar', { exact: true }).click();
 await page.waitForTimeout(16000);
 
@@ -35,7 +45,8 @@ const chip = page.getByRole('button', { name: QUIEN, exact: true });
 if ((await chip.count()) === 0) {
   di(`🔴 No encuentro a ${QUIEN} — no pude medir.`);
   di(tH.split('\n').filter((x) => x.trim()).slice(0, 10).join(' · '));
-  await browser.close(); process.exit(2);
+di(`captura: docs/loop/S113-C-${QUIEN}.png`);
+await browser.close(); process.exit(2);
 }
 
 di(`\n── LA FICHA DE ${QUIEN} ───────────────────────────────────`);
@@ -47,9 +58,34 @@ const PIDEN = ['Registrar', 'registrar', 'Cargar', 'cargar el carnet', 'Agendar'
 di(`ruta: ${page.url().replace('http://localhost:8082','')}`);
 di(`verbos que le PIDEN algo: ${[...new Set(PIDEN.filter((v) => t.includes(v)))].join(' · ') || 'NINGUNO ✓'}`);
 di(`botones que le piden: ${b.filter((n) => PIDEN.some((v) => n.includes(v))).join(' · ') || 'ninguno ✓'}`);
-di(`presencia CON Coach: ${b.filter((n) => /^Abrir a /i.test(n)).join(' · ') || 'no ✓'}`);
-di(`presencia SIN Coach: ${b.filter((n) => /Lo que te espera/i.test(n)).join(' · ') || 'no'}`);
-di(`dedos a la vista: ${b.filter((n) => /^(Peso|Vacuna|Antiparasitario|Foto)$/.test(n)).join(' · ') || 'ninguno ✓'}`);
+/* 🔴 **EL DISCRIMINADOR NO ES LA ETIQUETA DEL DISCO.** La primera version
+   leia «Abrir a Nexo» como «hay Coach» — y las DOS variantes compartian esa
+   voz, asi que reporto un rojo falso sobre una cura que funcionaba. Lo que
+   distingue una presencia con Coach de una sin el son **los dedos y la fila
+   «Preguntale»**: eso es lo que el contrato de B hace imposible con
+   `coach: false`. La etiqueta se sigue imprimiendo, pero como HECHO aparte. */
+di(`voz del disco (dato, no veredicto): ${b.filter((n) => /^Abrir a |Lo que te espera/i.test(n)).join(' · ') || 'ninguna'}`);
+di(`🔴 nombra al Coach en su voz: ${b.some((n) => /Nexo/i.test(n)) ? 'SI' : 'no ✓'}`);
+const dedos = b.filter((n) => /^(Peso|Vacuna|Antiparasitario|Foto)$/.test(n));
+/* 🔴 **LOS DEDOS SÓLO EXISTEN CON LA PATA ABIERTA**, asi que en reposo su
+   ausencia no prueba nada — con Zeus, que SI lleva Coach, el arnes tambien
+   decia «sin dedos». *Una ausencia que se da igual en los dos casos no es un
+   discriminador.* Se TOCA el disco y se vuelve a mirar. */
+const disco = page.getByRole('button', { name: /^Abrir a |^Lo que te espera$/ }).first();
+if (await disco.count() > 0) {
+  await disco.click().catch(() => {});
+  await page.waitForTimeout(1500);
+}
+const b2 = await page.evaluate(() => [...document.querySelectorAll('[role="button"]')].map((e) => (e.getAttribute('aria-label') ?? e.textContent ?? '').trim()));
+const dedosAbierta = b2.filter((n) => /^(Peso|Vacuna|Antiparasitario|Foto)$/.test(n));
+di(`— con la pata ABIERTA —`);
+di(`  dedos: ${dedosAbierta.join(' · ') || 'ninguno'}`);
+di(`  «Preguntale»: ${b2.some((n) => /^Preguntale/i.test(n)) ? 'sí' : 'no'}`);
+di(`  ⇒ presencia CON Coach: ${dedosAbierta.length > 0 || b2.some((n) => /^Preguntale/i.test(n)) ? 'SÍ' : 'NO'}`);
+di(`botones que nombran a ${QUIEN}: ${b.filter((n) => n.includes(QUIEN)).join(' · ') || 'ninguno ✓'}`);
+di(`dedos a la vista: ${dedos.join(' · ') || 'ninguno ✓'}`);
 di(`«por resolver» / pendientes: ${/por resolver|Ponte al día/i.test(t) ? 'SÍ 🔴' : 'no ✓'}`);
 di(`\nerrores de página: ${errores.length}${errores.length ? ' — ' + errores[0] : ''}`);
+await page.screenshot({ path: `docs/loop/S113-C-${QUIEN}.png` });
+di(`captura: docs/loop/S113-C-${QUIEN}.png`);
 await browser.close();

@@ -936,11 +936,20 @@ export default function PerfilDeMascota() {
                   retrato de la ficha es circular, no un avatar suelto;
                   por eso no pasa por AvatarMascota. */}
               <View style={{ alignItems: 'center', marginTop: spacing[5] }}>
+                {/* En memorial el retrato se MIRA: deja de ser boton y pasa a
+                    ser imagen con su nombre. No se apaga con `disabled` a
+                    secas porque un boton deshabilitado sigue anunciandose como
+                    boton —y sin razon visible seria el defecto que la casa
+                    persigue—: acá no hay accion apagada, hay una foto. */}
                 <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('fotoEncuadre.editarFotoA11y', { nombre: mascota.nombre })}
-                  onPress={() =>
-                    router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
+                  accessibilityRole={esMemorial ? 'image' : 'button'}
+                  accessibilityLabel={esMemorial ? mascota.nombre : t('fotoEncuadre.editarFotoA11y', { nombre: mascota.nombre })}
+                  disabled={esMemorial}
+                  onPress={
+                    esMemorial
+                      ? undefined
+                      : () =>
+                          router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
                   }
                   {...presionAvatar.handlers}
                 >
@@ -1141,7 +1150,17 @@ export default function PerfilDeMascota() {
             "cuatro tarjetas para la ausencia"). El rótulo lleva su
             CUENTA. "Cargar el carnet" vive ACÁ, en la fila de la falta
             — por eso muere el segundo CTA de Vacunas. */}
-        {monta.comoEstaHoy ? (() => {
+        {/* 🔴 **NO SE MONTA EN MEMORIAL** (`D-1021`, segunda mitad). `monta`
+            decide por SUJETO (individuo · acuario) y no sabe nada del estado de
+            vida, asi que este bloque seguia preguntando «¿como esta hoy?» sobre
+            quien ya no esta, con «Registrar el de hoy» y «Cargar carnet»
+            adentro. *La primera vuelta de D-1021 curo el Coach y los guards del
+            tema y dio la pantalla por cerrada sin censarla: el resto lo
+            encontro el founder en el aparato.* Mismo guard que la puerta de la
+            despensa doce lineas mas abajo — el apagado estructural de
+            `MODELO_LOYALTY §7.1`, que ya regia acá y a este bloque no lo
+            alcanzaba. */}
+        {monta.comoEstaHoy && !esMemorial ? (() => {
           // r10-2 · LOS TRES CASOS de vacunas (la celda medía mal y la
           // pantalla se contradecía: decía "sin registro" con 8 vacunas
           // en el carnet abajo). La celda mide si sabemos el ESTADO:
@@ -1697,6 +1716,10 @@ export default function PerfilDeMascota() {
                       de curar, y acá el objeto era la pantalla del founder.
                       Mismo `relleno`/`elevacion` que las filas vecinas: la
                       puerta pertenece a esa familia, no es una excepción. */}
+                  {/* La puerta de la bitacora PIDE escribir, asi que en
+                      memorial no se monta. Lo ya escrito sigue abajo y se lee:
+                      lo que se apaga es el pedido, no la historia. */}
+                  {!esMemorial ? (
                   <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[5] }}>
                     <Tarjeta relleno="ninguno" elevacion="reposo">
                       <CeldaNavegacion
@@ -1712,6 +1735,7 @@ export default function PerfilDeMascota() {
                       />
                     </Tarjeta>
                   </View>
+                  ) : null}
                   {presentes.length > 1 ? (
                     <FiltroPills
                       activo={filtroHistoria}
@@ -2082,6 +2106,11 @@ export default function PerfilDeMascota() {
           se alimenta, y UNA acción real que alimenta el expediente —
           la ley del ecosistema hablando. Apertura normal (la física de
           marca es del Coach; acá sobriedad). */}
+      {/* La Hoja educativa (peldaño 0) termina en «Cargar su carnet»: es una
+          invitacion, y en memorial no se invita. Se apaga ENTERA y no solo su
+          boton — asi el caso se vuelve inalcanzable en vez de quedar como una
+          Hoja que se puede abrir y no lleva a ningun lado. */}
+      {!esMemorial ? (
       <Hoja
         visible={indiceAbierto !== null}
         onCerrar={() => setIndiceAbierto(null)}
@@ -2110,6 +2139,7 @@ export default function PerfilDeMascota() {
           />
         </View>
       </Hoja>
+      ) : null}
 
       {/* S91-C · ¿DE QUÉ CONSULTA? — la receta se emite sobre UN acto y
           la familia elige cuál. Solo se monta con 2+ (con una se descarga

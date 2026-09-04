@@ -1216,6 +1216,10 @@ export default function Hogar() {
     );
   };
   const filasReco: FilaReco_[] = (() => {
+    /* ⚠️ Este `esMemorial` es el del TEMA, y **en el Hogar es el instrumento
+       equivocado**: acá conviven las vivas y las que ya no están, así que un
+       guard de PANTALLA no puede decidir. Se conserva porque la galería sí
+       monta el sub-tema, pero el que rige es el filtro por MASCOTA de abajo. */
     if (esMemorial) return [];
     const ahora = Date.now();
     const filas: FilaReco_[] = [
@@ -1447,7 +1451,16 @@ export default function Hogar() {
         ];
       }),
     ];
-    return filas;
+    /* 🔴 **NINGUNA RECOMENDACIÓN HABLA DE QUIEN YA NO ESTÁ** (`D-1021`). Va acá,
+       al final y una sola vez, y no como cinco guards repartidos en las cinco
+       fuentes (solicitudes · presupuestos · citas · vacunas · carnet): *un
+       filtro que hay que acordarse de repetir se olvida en la sexta.* Cada fila
+       ya declara de quién habla en `mascotaId`, así que el dato para callarla
+       estaba y nadie lo miraba — el mismo hallazgo que la primera mitad. */
+    const enMemoria = new Set(
+      mascotas.filter((m) => m.estado_vida !== null && m.estado_vida !== 'activa').map((m) => m.id),
+    );
+    return filas.filter((f) => f.mascotaId === null || !enMemoria.has(f.mascotaId));
   })();
   /**
    * A8 (S91-D) — EL CONTEO SALE DE LA LIB, NO DE LAS FILAS.

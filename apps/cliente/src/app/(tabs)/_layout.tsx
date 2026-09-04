@@ -176,7 +176,12 @@ function PresenciaSinCoach({ altoBarra }: { altoBarra: number }) {
         router.push('/despensa/carrito');
       }}
       voz={{
-        abrir: t('nexo.etiqueta', { nombre: t('coach.nombre') }),
+        /* 🔴 **NO se nombra al Coach acá.** Esta presencia no lo lleva, y en
+           memorial anunciarlo sería ofrecerle algo a quien está de duelo
+           (`A3.9`). Se reusa la voz que este mismo disco ya tenía cuando era
+           `BurbujaPendientes` —«Lo que te espera»— porque es el MISMO acto:
+           no se inventa una frase para algo que ya tenía la suya. */
+        abrir: t('burbuja.abanico'),
         cerrar: t('nexo.cerrar'),
         chat: conversaciones === 1 ? t('nexo.vozChatUna') : t('nexo.vozChat', { n: conversaciones }),
         pedidos: enCarrito === 1 ? t('nexo.vozCarritoUno') : t('nexo.vozCarrito', { n: enCarrito }),
