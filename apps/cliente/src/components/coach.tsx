@@ -35,15 +35,11 @@
 
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import Svg from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   AvatarMascota,
   Boton,
-  HUELLA_BOX,
-  Huella,
-  radius,
+  CabeceraCoach,
   Esqueleto,
   EsqueletoGrupo,
   Hoja,
@@ -145,6 +141,14 @@ export function CoachHoja({
      arrancar en «ya» se la escondería para siempre a quien no. *Vacío por
      carga y vacío por estado no comparten guard.* */
   const [presentado, setPresentado] = useState<boolean | null>(null);
+  /* 🔴 **LOS LATIDOS DE LA CABECERA SUBEN POR FRASE QUE LLEGA DE VERDAD, y
+     jamás por temporizador.** Contrato de `CabeceraCoach`: cada incremento es
+     un latido, quedarse quieto es no latir. Acá una frase que llega es **una
+     respuesta contestada**; la presentación no cuenta —no es algo que Nexo
+     averiguó, es la advertencia que la casa le debe a quien abre esto por
+     primera vez—. *Un latido por reloj sería la pieza fingiendo actividad, que
+     es exactamente lo que su propia cabecera prohíbe.* */
+  const [pulsos, setPulsos] = useState(0);
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
   const [respuesta, setRespuesta] = useState<string | null>(null);
 
@@ -194,27 +198,11 @@ export function CoachHoja({
     { clave: 'actividad', texto: t('coach.pActividad') },
   ];
 
-  /* LA CABECERA (S113-C) — orbe violeta chico + el nombre. Los dos stops
-     violeta→azul del gradiente FIRMA: **la misma receta que el destello que
-     este lote retira del Hogar**, para que Nexo no cambie de color al mudarse
-     de esquina. */
-  const cabecera = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-      <LinearGradient
-        colors={[theme.accent.gradient.colors[1], theme.accent.gradient.colors[2]] as [string, string]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ width: 28, height: 28, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' }}
-      >
-        <Svg width={16} height={16} viewBox={`0 0 ${HUELLA_BOX} ${HUELLA_BOX}`}>
-          <Huella color={theme.text.onGradient} />
-        </Svg>
-      </LinearGradient>
-      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
-        {t('coach.nombre')}
-      </Text>
-    </View>
-  );
+  /* LA CABECERA ES DE B (`CabeceraCoach`) — orbe chico + nombre, con su
+     latido. ⏪ Acá vivió una cabecera compuesta a mano mientras la pieza no
+     existía; **murió el día que existió**. *Dos dibujos del mismo orbe divergen
+     en cuanto alguien toca uno.* */
+  const cabecera = <CabeceraCoach nombre={t('coach.nombre')} pulsos={pulsos} />;
 
   const frase = (
     <Text
@@ -308,7 +296,10 @@ export function CoachHoja({
               bloque
               deshabilitado={perfil === 'cargando' || perfil === 'error'}
               onPress={() => {
-                if (perfil !== 'cargando' && perfil !== 'error') setRespuesta(responder(p.clave, perfil, t, idioma));
+                if (perfil === 'cargando' || perfil === 'error') return;
+                setRespuesta(responder(p.clave, perfil, t, idioma));
+                /* Una frase llegó de verdad ⇒ un latido. */
+                setPulsos((n) => n + 1);
               }}
             />
           ))}

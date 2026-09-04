@@ -11,13 +11,26 @@
  * —§2.2 de `DIRECCION_ARTE` lo prohíbe con todas las letras— : lo que se
  * abanica son cuatro pastillas, y el dibujo de marca queda intacto.
  *
- * ── POR QUÉ LAS PASTILLAS NO LLEVAN GLIFO ───────────────────────────────────
- * **Medido contra el registry (`IconoNombre`, 55 nombres): existe `vacuna`; no
- * existen peso, antiparasitario ni foto.** Un glifo se firma con su estudio
- * §6b y su gate por ícono — **inventar tres acá sería saltarse el gate**, y
- * poner glifo sólo en uno de los cuatro es peor que en ninguno. ⇒ los cuatro
- * dedos llevan **su palabra**, que es la información que hace falta, y los
- * tres glifos quedan **pedidos por nombre a B**.
+ * ── LOS GLIFOS: TRES SON PRÉSTAMOS DECLARADOS ───────────────────────────────
+ * `AtajoCoach` exige `icono`, así que los cuatro tienen dibujo. **Medido contra
+ * el registry (`IconoNombre`, 55 nombres): existe `vacuna`; no existen peso,
+ * antiparasitario ni foto.** Un glifo se firma con su estudio §6b y su gate por
+ * ícono, así que **no se inventó ninguno**: se prestan los tres más cercanos,
+ * con su costo escrito — mismo precedente que `pedido`, que montó `despensa`
+ * durante un commit hasta que B le dibujó el suyo.
+ *
+ * · **peso → `datos`** — barras que suben. *No es un préstamo de comodidad: el
+ *   peso ES una serie* («pesa 12 kg» sirve poco; «pasó de 9 a 12 en cuatro
+ *   meses» es medicina), y ese glifo dibuja exactamente eso.
+ * · **vacuna → `vacuna`** — la jeringa. Propio.
+ * · **antiparasitario → `receta`** — el símbolo de prescripción. ⚠️ **Costo:
+ *   también nombra recetas**, y las dos podrían convivir en una pantalla.
+ * · **foto → `ojo`** — lo que viste. ⚠️ **Es el más flojo de los tres**, y hoy
+ *   se dibuja atenuado igual (no hay puerta). *Se declara flojo en vez de
+ *   defenderlo.*
+ *
+ * ⇒ **pedido por nombre a B: tres glifos propios** (peso · antiparasitario ·
+ * foto) con su estudio §6b y su gate por ícono.
  *
  * ── UN BOTÓN APAGADO SIN RAZÓN A LA VISTA ES EL DEFECTO ─────────────────────
  * Por eso `razonDeApagado` devuelve un CÓDIGO y nunca un booleano: la pastilla

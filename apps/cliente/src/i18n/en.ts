@@ -49,6 +49,10 @@ export const clienteEn = {
     razonAcuario: 'An aquarium takes no vaccines or parasite control.',
     razonSinPuerta: 'You cannot save a memory from here yet.',
     elegirMascota: 'Who is this about?',
+    vozChatUna: '1 message',
+    vozChat: '{{n}} messages',
+    vozCarritoUno: 'Cart · 1',
+    vozCarrito: 'Cart · {{n}}',
     presentacion: 'I am {{nombre}}. I can be wrong; for anything important, your vet is there.',
   },
   antiparasitario: {

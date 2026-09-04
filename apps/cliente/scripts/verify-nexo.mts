@@ -27,24 +27,17 @@ import i18next from '../../../node_modules/i18next/dist/esm/i18next.js';
 
 import { clienteEn } from '../src/i18n/en';
 import { clienteEs } from '../src/i18n/es';
+import { clasesConAlgo, type PendientesCoach } from '../../../packages/ui/src/components/coach-geometria';
 import {
   ORDEN_DE_PATA,
   esMemorial,
   focoNexo,
+  mascotasParaAtajo,
   montaPresencia,
   razonDeApagado,
-  type AtajoNexo,
+  razonDelDedo,
 } from '../src/lib/nexo/atajos';
-import {
-  CLASES_NEXO,
-  CUENTAS_DESCONOCIDAS,
-  clasesVivasNexo,
-  estaCargando,
-  estadoNexo,
-  nexoVisibleEn,
-  type ClaseNexo,
-  type CuentasNexo,
-} from '../src/lib/nexo/estado';
+import { avisosSinRespuesta, estadoNexo, hayAlgo, nexoVisibleEn } from '../src/lib/nexo/estado';
 
 const di = (s: string) => process.stdout.write(s + '\n');
 const CONTROL = process.argv.includes('--control');
@@ -60,59 +53,59 @@ function ok(nombre: string, condicion: boolean, detalle = ''): void {
 
 /* ═══ AUTO-PRUEBA (L-459) — si el instrumento no distingue su rojo, no cuenta
    un verde. Preguntas que cualquier implementación sana contesta igual. ═══ */
-if (typeof clasesVivasNexo !== 'function' || typeof focoNexo !== 'function') {
+if (typeof focoNexo !== 'function' || typeof clasesConAlgo !== 'function') {
   di('ROJO · las funciones no son alcanzables — no pude medir.');
   process.exit(2);
 }
-if (clasesVivasNexo(CUENTAS_DESCONOCIDAS).length !== 0) {
-  di('ROJO · auto-prueba: todo en null da clases vivas.');
+if (clasesConAlgo({ chat: 0, pedidos: 0, avisos: null }).length !== 0) {
+  di('ROJO · auto-prueba: todo en cero da clases vivas.');
   process.exit(2);
 }
-if (clasesVivasNexo({ chat: 1, carrito: null, avisos: null }).length !== 1) {
+if (clasesConAlgo({ chat: 1, pedidos: 0, avisos: null }).length !== 1) {
   di('ROJO · auto-prueba: pierde una clase viva.');
   process.exit(2);
 }
 
 /* ═══ ① LOS PENDIENTES · los dos casos del encargo ═══════════════════════════ */
 
-const DORMIDA: CuentasNexo = { chat: 0, carrito: 0, avisos: null };
-const ATENTA: CuentasNexo = { chat: 2, carrito: 1, avisos: null };
+/* ⚠️ **El tipo es el de B (`PendientesCoach`), no uno mío**: el arnés mide el
+   contrato real que la pantalla le pasa a la pieza. */
+const DORMIDA: PendientesCoach = { chat: 0, pedidos: 0, avisos: null };
+const ATENTA: PendientesCoach = { chat: 2, pedidos: 1, avisos: null };
 
-ok('dormida · 0/0/null no tiene clases vivas', clasesVivasNexo(DORMIDA).length === 0);
+ok('dormida · 0/0/null no tiene clases vivas', clasesConAlgo(DORMIDA).length === 0);
+ok('dormida · no hay nada', hayAlgo(DORMIDA) === false);
 ok(
   'dormida · el estado es dormida',
-  estadoNexo({ cuentas: DORMIDA, huellaAbierta: false, hojaAbierta: false }) === 'dormida',
+  estadoNexo({ pendientes: DORMIDA, huellaAbierta: false, hojaAbierta: false }) === 'dormida',
 );
-ok('dormida · 0 NO es cargando', estaCargando(DORMIDA) === false);
-ok('sin respuesta · todo null SÍ es cargando', estaCargando(CUENTAS_DESCONOCIDAS) === true);
+ok('avisos en null · el motor NO sabe, y no es un cero', avisosSinRespuesta(DORMIDA) === true);
+ok('avisos en 0 · el motor miró y no hay', avisosSinRespuesta({ chat: 0, pedidos: 0, avisos: 0 }) === false);
 ok(
-  'sin respuesta · dibuja dormida igual, y es la otra mitad del guard doble',
-  estadoNexo({ cuentas: CUENTAS_DESCONOCIDAS, huellaAbierta: false, hojaAbierta: false }) === 'dormida',
+  'los dos callan el arco — por razones opuestas',
+  clasesConAlgo({ chat: 0, pedidos: 0, avisos: 0 }).length === 0 && clasesConAlgo(DORMIDA).length === 0,
 );
 
-const vivas = clasesVivasNexo(ATENTA);
+const vivas = clasesConAlgo(ATENTA);
 ok('atenta · DOS clases vivas ⇒ dos arcos y dos pastillas', vivas.length === 2, `dio ${vivas.length}`);
-ok('atenta · son chat y carrito, en ese orden', vivas.join(',') === 'chat,carrito', vivas.join(','));
+ok('atenta · son chat y pedidos, en ese orden', vivas.join(',') === 'chat,pedidos', vivas.join(','));
 ok('atenta · NINGUNA VIOLETA: avisos queda fuera', !vivas.includes('avisos'));
-ok('atenta · los números son los de las cuentas', ATENTA.chat === 2 && ATENTA.carrito === 1);
+ok('atenta · los números son los que se pasan', ATENTA.chat === 2 && ATENTA.pedidos === 1);
 ok(
   'atenta · el estado es atenta',
-  estadoNexo({ cuentas: ATENTA, huellaAbierta: false, hojaAbierta: false }) === 'atenta',
+  estadoNexo({ pendientes: ATENTA, huellaAbierta: false, hojaAbierta: false }) === 'atenta',
 );
 ok(
   'despierta · con la pata abierta manda la pata',
-  estadoNexo({ cuentas: ATENTA, huellaAbierta: true, hojaAbierta: false }) === 'despierta',
+  estadoNexo({ pendientes: ATENTA, huellaAbierta: true, hojaAbierta: false }) === 'despierta',
 );
 ok(
   'hablando · con la Hoja abierta manda la Hoja',
-  estadoNexo({ cuentas: DORMIDA, huellaAbierta: true, hojaAbierta: true }) === 'hablando',
+  estadoNexo({ pendientes: DORMIDA, huellaAbierta: true, hojaAbierta: true }) === 'hablando',
 );
-
-/* ⚠️ Un `avisos` con número NO se dibuja hoy, pero el día que exista tiene que
-   entrar como cualquier otra clase: se mide para que ese día no haya sorpresa. */
 ok(
   'avisos · el día que tenga número, cuenta como clase viva',
-  clasesVivasNexo({ chat: 0, carrito: 0, avisos: 3 }).join(',') === 'avisos',
+  clasesConAlgo({ chat: 0, pedidos: 0, avisos: 3 }).join(',') === 'avisos',
 );
 
 /* ═══ ② DÓNDE NEXO NO EXISTE (§1.6) ══════════════════════════════════════════ */
@@ -198,15 +191,30 @@ ok('hogar activo · SÍ se monta', montaPresencia(focoNexo({ mascotaIdEnRuta: un
 
 ok('el orden de la pata es Peso → Vacuna → Antiparasitario → Foto', ORDEN_DE_PATA.join(',') === 'peso,vacuna,antiparasitario,foto');
 
-const apagadosIndividuo = ORDEN_DE_PATA.filter((a) => razonDeApagado(a, 'individuo') !== null);
-ok('individuo · sólo Foto está apagado, y por falta de puerta', apagadosIndividuo.join(',') === 'foto');
-ok('individuo · la razón de Foto es «sin puerta»', razonDeApagado('foto', 'individuo') === 'sin_puerta');
+const PERRO = [mascota('thor')];
+const ACUARIO = [mascota('nube', { sujeto: 'acuario', especie: 'pez' })];
+const MIXTO = [mascota('thor'), mascota('nube', { sujeto: 'acuario', especie: 'pez' })];
 
-const apagadosAcuario = ORDEN_DE_PATA.filter((a) => razonDeApagado(a, 'acuario') !== null);
+const apagadosIndividuo = ORDEN_DE_PATA.filter((a) => razonDelDedo(a, PERRO) !== null);
+ok('individuo · sólo Foto está apagado, y por falta de puerta', apagadosIndividuo.join(',') === 'foto');
+ok('individuo · la razón de Foto es «sin puerta»', razonDelDedo('foto', PERRO) === 'sin_puerta');
+
+const apagadosAcuario = ORDEN_DE_PATA.filter((a) => razonDelDedo(a, ACUARIO) !== null);
 ok('acuario · DOS dedos atenuados por acuario + Foto', apagadosAcuario.join(',') === 'vacuna,antiparasitario,foto');
-ok('acuario · Vacuna se apaga por acuario', razonDeApagado('vacuna', 'acuario') === 'acuario');
-ok('acuario · Antiparasitario se apaga por acuario', razonDeApagado('antiparasitario', 'acuario') === 'acuario');
-ok('acuario · Peso NO se apaga: un acuario se pesa tan poco como un perro nada, pero el motor lo admite', razonDeApagado('peso', 'acuario') === null);
+ok('acuario · Vacuna se apaga por acuario', razonDelDedo('vacuna', ACUARIO) === 'acuario');
+ok('acuario · Antiparasitario se apaga por acuario', razonDelDedo('antiparasitario', ACUARIO) === 'acuario');
+ok('acuario · Peso NO se apaga: el motor lo admite', razonDelDedo('peso', ACUARIO) === null);
+
+/* 🔴 EL HUECO QUE APARECIÓ PROBANDO EL SELECTOR — el dedo no puede ofrecer un
+   camino que después habría que rebotar. */
+ok('perro + acuario · Vacuna sigue VIVA (el perro se vacuna)', razonDelDedo('vacuna', MIXTO) === null);
+ok(
+  'perro + acuario · pero la hoja ofrece SOLO al perro',
+  mascotasParaAtajo('vacuna', MIXTO).map((m) => m.id).join(',') === 'thor',
+);
+ok('perro + acuario · Peso las ofrece a las dos', mascotasParaAtajo('peso', MIXTO).length === 2);
+ok('sin candidatas todavía · el dedo NO se apaga por no saber', razonDelDedo('vacuna', []) === null);
+ok('razonDeApagado sigue siendo la regla por mascota', razonDeApagado('vacuna', 'acuario') === 'acuario');
 
 /* ═══ ⑥ LA VOZ — que el nombre ENTRE, y que no quede una llave cruda ═════════ */
 
@@ -242,9 +250,18 @@ for (const idioma of ['es', 'en'] as const) {
 
   /* Las voces sin variables tampoco pueden quedar con una llave: si alguien
      agrega una interpolación y se olvida del valor, acá suena. */
+  /* Las pastillas: **su voz se pasa aunque la cuenta sea 0**, así que las
+     cuatro tienen que existir y ninguna puede quedar con una llave cruda. */
+  for (const [k, v] of [['nexo.vozChat', { n: 3 }], ['nexo.vozCarrito', { n: 3 }]] as const) {
+    const s2 = t(k, v as Record<string, number>);
+    ok(`${idioma} · ${k} interpola el número`, s2.includes('3'), s2);
+    ok(`${idioma} · ${k} no deja una llave cruda`, !s2.includes('{{'), s2);
+  }
+
   const planas = [
     'nexo.dedoPeso', 'nexo.dedoVacuna', 'nexo.dedoAntiparasitario', 'nexo.dedoFoto',
     'nexo.razonAcuario', 'nexo.razonSinPuerta', 'nexo.elegirMascota', 'nexo.cerrar',
+    'nexo.vozChatUna', 'nexo.vozCarritoUno',
     'antiparasitario.tipoInterna', 'antiparasitario.tipoExterna', 'antiparasitario.tipoMixta',
     'antiparasitario.guardar', 'antiparasitario.errProducto', 'antiparasitario.errFechaFutura',
     'antiparasitario.errOrden', 'antiparasitario.errAcceso', 'antiparasitario.errGenerico',
@@ -286,12 +303,13 @@ if (CONTROL) {
   di('');
   di('── CONTROLES ──');
   const controles: Array<[string, boolean]> = [
-    ['una clase en 0 NO cuenta como viva', clasesVivasNexo({ chat: 0, carrito: 0, avisos: null }).length === 0],
-    ['`null` NO cuenta como viva', clasesVivasNexo({ chat: null, carrito: null, avisos: null }).length === 0],
+    ['una clase en 0 NO cuenta como viva', clasesConAlgo({ chat: 0, pedidos: 0, avisos: null }).length === 0],
+    ['`null` de avisos NO cuenta como viva', clasesConAlgo({ chat: 0, pedidos: 0, avisos: null }).length === 0],
+    ['un acuario solo SÍ apaga vacuna', razonDelDedo('vacuna', [mascota('n', { sujeto: 'acuario' })]) === 'acuario'],
     ['el checkout NO es visible (rojo del guard por igualdad)', nexoVisibleEn(['checkout-plan']) === false],
     ['una ruta cualquiera SÍ es visible (el guard no apaga todo)', nexoVisibleEn(['hogar']) === true],
     ['memorial NO monta presencia', montaPresencia({ modo: 'ninguna' }) === false],
-    ['individuo NO apaga vacuna', razonDeApagado('vacuna', 'individuo') === null],
+    ['individuo NO apaga vacuna', razonDelDedo('vacuna', [mascota('t')]) === null],
     ['un i18next sin el valor DEJA la llave cruda — la premisa del gate sigue viva',
       String(inst.t('cliente:nexo.almohadilla')).includes('{{nombre}}')],
   ];

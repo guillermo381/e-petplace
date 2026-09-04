@@ -82,6 +82,17 @@ export const clienteEs = {
     razonSinPuerta: 'Todavía no puedes guardar un recuerdo desde acá.',
     // La hoja corta de §2.5 — sólo con dos mascotas o más.
     elegirMascota: '¿De quién?',
+    // 🔴 LAS VOCES DE LAS PASTILLAS — se pasan SIEMPRE, aunque la cuenta sea 0
+    // (contrato de la pieza): así **un número no puede existir sin su palabra**
+    // y la pieza nunca tiene que inventar un plural. Singular y plural viven
+    // acá, que es donde el idioma sabe conjugar.
+    // ⚠️ La segunda clase se llama `pedidos` en la pieza y **abre el CARRITO**
+    // — es lo que abría la burbuja (§2.4). La voz dice lo que la familia va a
+    // encontrar, no el nombre de la prop.
+    vozChatUna: '1 mensaje',
+    vozChat: '{{n}} mensajes',
+    vozCarritoUno: 'Carrito · 1',
+    vozCarrito: 'Carrito · {{n}}',
     // 🔴 LA FRASE. La primera vez que la Hoja se abre en este dispositivo
     // preside sola; después vive abajo, chica, SIEMPRE. **Es UNA key en dos
     // lugares** — dos keys serían dos frases que algún día divergen.
