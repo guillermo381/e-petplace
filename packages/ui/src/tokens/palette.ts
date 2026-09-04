@@ -653,10 +653,14 @@ export const palette = {
 
   /** El centro del cuerpo en reposo. Blanco, sin calentar. */
   coachPerla:       '#FFFFFF',
-  /** El borde del cuerpo: el claro del Coach al 35 %. **Esto es lo que
-   *  hace que sea una esfera y no un recorte** — el degradé del blanco a
-   *  este lila es la curvatura. */
-  coachPerlaBorde:  'rgba(174,89,255,.35)',
+  /* ☠️ **ACÁ VIVÍA `coachPerlaBorde`, un `rgba(174,89,255,.35)`** — y su
+     muerte es la lección del lote 0.2: **ese alpha embebido en el color era
+     medio defecto.** `stopColor` con `rgba()` **pierde el alpha en Android**,
+     así que el borde salía violeta OPACO y la brasa —que usaba la misma
+     forma— colapsaba a un naranja pleno que tapaba el orbe entero.
+     Lo reemplaza el par `coachClaro` + `stopOpacity`, que es como la casa ya
+     lo hacía en la elevación oscura y yo no miré. *El token no era el
+     problema: era la forma de decir «translúcido».* */
   /** La brasa de adentro — cálida, **chica** y quieta: como mucho el 40 %
    *  del diámetro (§2), corrida a 56/62 %. Su gate la mide en el SVG. */
   coachBrasa:       'rgba(255,214,150,.72)',

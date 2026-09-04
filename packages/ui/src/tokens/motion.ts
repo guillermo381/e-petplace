@@ -153,8 +153,16 @@ export const motion = {
     respiracionEscala: 1.06,
     /** Cada cuánto cruza el barrido de luz. */
     barridoCadaMs: 8000,
-    /** Lo que tarda en cruzar. */
-    barridoMs: 130,
+    /** Lo que tarda en cruzar.
+     *  ⏪ **Eran 130 ms, y en el emulador NO SE VEÍA.** El mecanismo estaba
+     *  bien —congelado a mitad de recorrido la banda aparece— pero a 130 ms
+     *  es imperceptible: **en 18 s de grabación a 20 fps, con dos barridos
+     *  ocurriendo, ni un cuadro de 360 lo registró.**
+     *  🔴 **El número nuevo no lo inventé: lo mide el boceto que el founder
+     *  puso como referencia.** Ahí el barrido cruza entre el 82 % y el 92 %
+     *  de un ciclo de 8 s ⇒ **~800 ms**. *El 130 venía del encargo del lote
+     *  0, cuando todavía no había boceto contra el que medir.* */
+    barridoMs: 800,
     /** La diagonal, en grados. */
     barridoAngulo: 115,
     /** El orbe hasta el centro inferior. */
