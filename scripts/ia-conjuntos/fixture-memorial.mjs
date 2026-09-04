@@ -32,14 +32,28 @@
  *    el hueco que la puerta ausente deja.
  *
  * Uso:  node scripts/ia-conjuntos/fixture-memorial.mjs [--crear]
+ *       node scripts/ia-conjuntos/fixture-memorial.mjs --nombre=Bruma --especie=gato --crear
  *       (sin `--crear` sólo informa si ya existe; con `--crear` la crea)
+ *
+ * Las dos fixtures vivas, las dos en la familia `ce057f90` de
+ * `guillo381+8@gmail.com` — la única cuenta con Zeus y Kira, o sea la que usa C:
+ *   · **Sombra** · perro · S113-E lote 0
+ *   · **Bruma**  · gato  · S113-E, para que la clase no se pruebe con una sola
+ *     especie (el producto modula por especie, y un memorial de gato no es un
+ *     memorial de perro con otro nombre).
  */
 import { spawnSync } from 'node:child_process';
 import { consultar, URL_BASE, PROJECT_REF } from './lib-conjuntos.mjs';
 
 const di = (s) => process.stdout.write(s + '\n');
 const CUENTA = 'guillo381+8@gmail.com';
-const NOMBRE = 'Sombra';
+
+/* Parametrizado en S113-E: la segunda fixture («Bruma», gato) tiene que entrar
+   por EL MISMO camino que la primera, y eso sólo es verdad si lo corre el mismo
+   código. Duplicar el script haría que «el mismo camino» fuera una coincidencia
+   en vez de un hecho. */
+const NOMBRE = process.argv.find((a) => a.startsWith('--nombre='))?.slice(9) ?? 'Sombra';
+const ESPECIE = process.argv.find((a) => a.startsWith('--especie='))?.slice(10) ?? 'perro';
 
 const ya = consultar(`
   select left(m.id::text,8) id8, m.id::text id, m.estado_vida, m.estado_vida_desde::text desde
@@ -86,7 +100,7 @@ const r = await fetch(`${URL_BASE}/rest/v1/rpc/agregar_mascota_a_familia`, {
   },
   body: JSON.stringify({
     p_nombre_mascota: NOMBRE,
-    p_especie: 'perro',
+    p_especie: ESPECIE,
     p_fecha_nacimiento: '2015-06-01',
     p_precision_fecha: 'aproximada',
     p_sexo: 'macho',
