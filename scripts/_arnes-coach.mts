@@ -1,82 +1,118 @@
-/* Arnés de NEXO — la geometría, los estados y el movimiento (S113-B · lote 0).
-   Importa SÓLO módulos puros: `coach-geometria` no arrastra `react-native`, que
-   es la razón por la que vive fuera del componente. */
+/* Arnés de la PRESENCIA DEL COACH — la fila, los estados y el movimiento.
+   Importa sólo módulos puros: `coach-geometria` no arrastra `react-native`,
+   que es la razón por la que ese archivo existe.
+
+   ⏪ **ACÁ SE MEDÍA UNA HUELLA Y MURIÓ CON ELLA (lote 0.1).** Los tests de
+   las cuatro posiciones de pata, del viaje al centro y del ascenso se fueron
+   enteros: *un gate que sobrevive a la forma que medía no queda verde por
+   casualidad — queda verde midiendo algo que ya no existe*, y eso es peor
+   que no tenerlo (Ley 37 aplicada a los instrumentos). */
 import {
-  ALMOHADILLA, ALTO_VOZ, AIRE_BORDE, ARCO_GRADOS, ARCO_SEPARACION, DEDO, HALO, ORBE,
-  POSICIONES_DEDOS, anclaOrbe, arcosDe, ascensoAlDespertar, centroAlmohadilla, centroDedo,
-  clasesConAlgo, desplazamientoAlCentro, movimientoCoach, pastillasDe,
+  AIRE_BORDE, ARCO_GRADOS, ARCO_SEPARACION, BRASA, DEDO, ORBE, ORBE_ABIERTO,
+  PASTILLA, SEPARACION, alturasDeLaFila, anclaOrbe, arcosDe, clasesConAlgo,
+  ejeDeLaFila, movimientoCoach, nodosDeLaFila, pastillasDe,
 } from '../packages/ui/src/components/coach-geometria.ts';
 import { readFileSync } from 'node:fs';
 
 let ok = 0, mal = 0;
 const t = (n: string, real: unknown, esp: unknown) => {
   const a = JSON.stringify(real), b = JSON.stringify(esp);
-  if (a === b) { ok++; console.log(`  ✓ ${n}`); }
-  else { mal++; console.log(`  ✗ ${n}\n     esperado ${b}\n     real     ${a}`); }
+  if (a === b) { ok++; console.log(`  ✓ ${n}`); } else { mal++; console.log(`  ✗ ${n}\n     esperado ${b}\n     real     ${a}`); }
 };
 /** Tolerancia de 1 px, como pide el encargo. */
 const cerca = (n: string, real: number, esp: number) => {
   if (Math.abs(real - esp) <= 1) { ok++; console.log(`  ✓ ${n}`); }
   else { mal++; console.log(`  ✗ ${n}\n     esperado ${esp} ±1\n     real     ${real}`); }
 };
-
-console.log('\n── ① GEOMETRÍA (§2.1 · §2.3), contra los números del encargo ──');
-t('el orbe dormido mide 48', ORBE, 48);
-t('el halo mide 66', HALO, 66);
-t('la almohadilla mide 58', ALMOHADILLA, 58);
-t('el dedo mide 48', DEDO, 48);
-t('todo objetivo táctil ≥ 44 (Ley 8)', [ORBE >= 44, DEDO >= 44, ALMOHADILLA >= 44], [true, true, true]);
-t('las cuatro posiciones de pata, literales', POSICIONES_DEDOS.map((p) => [p.dx, p.dy]),
-  [[-62, 58], [-24, 96], [24, 96], [62, 58]]);
-t('son EXACTAMENTE cuatro dedos', POSICIONES_DEDOS.length, 4);
-t('las patas son simétricas respecto del eje', POSICIONES_DEDOS.map((p) => p.dx).reduce((a, b) => a + b, 0), 0);
-
-console.log('\n── ② EL ANCLAJE se DERIVA del ancho, jamás se teclea ──');
-/* 412 es el ancho de un teléfono corriente; 320 el más angosto que sigue vivo. */
-for (const ancho of [320, 412, 480]) {
-  const a = anclaOrbe(ancho);
-  cerca(`ancho ${ancho} · el orbe queda a ${AIRE_BORDE} del borde derecho`, ancho - (a.izquierda + ORBE), AIRE_BORDE);
-  cerca(`ancho ${ancho} · al viajar, su centro cae en el medio`, a.izquierda + ORBE / 2 - desplazamientoAlCentro(ancho), ancho / 2);
-}
-const c = centroAlmohadilla(412, 56);
-cerca('la almohadilla se centra horizontalmente', c.x, 206);
-cerca('y deja lugar a su voz debajo (no toca el piso)', c.abajo - ALMOHADILLA / 2 - 56 - AIRE_BORDE, ALTO_VOZ);
-cerca('el ascenso al despertar es la diferencia de alturas', ascensoAlDespertar(56), ALTO_VOZ + (ALMOHADILLA - ORBE) / 2);
-t('el dedo 0 sube y va a la izquierda', [centroDedo(0, 412, 0).x < c.x, centroDedo(0, 412, 0).abajo > centroAlmohadilla(412, 0).abajo], [true, true]);
-cerca('el dedo 3 espeja al 0', centroDedo(3, 412, 0).x - c.x, c.x - centroDedo(0, 412, 0).x);
-
-/* El halo desborda al orbe: quien monte tiene que compensar esa diferencia o
-   el cuerpo queda corrido. Se mide acá para que el número exista. */
-cerca('el halo desborda 9 px por lado', (HALO - ORBE) / 2, 9);
-t('la caja táctil es el HALO (≥44 con holgura)', HALO >= 44, true);
-
-console.log('\n── ③ ESTADOS · los arcos (§2.2) ──');
 const p = (chat: number, pedidos: number, avisos: number | null) => ({ chat, pedidos, avisos });
-t('sin nada ⇒ SIN arcos (el halo dormido queda entero)', arcosDe(p(0, 0, 0)), []);
-t('sólo chat ⇒ UN arco, y es de chat', arcosDe(p(2, 0, 0)).map((a) => a.clase), ['chat']);
-t('un arco solo va centrado arriba', arcosDe(p(2, 0, 0)).map((a) => [a.desde, a.hasta]), [[-30, 30]]);
-t('chat + pedidos ⇒ DOS arcos en orden', arcosDe(p(2, 1, 0)).map((a) => a.clase), ['chat', 'pedidos']);
+/* 412 es un teléfono corriente; 320 el más angosto que sigue vivo. */
+const ANCHOS = [320, 412, 480];
+
+console.log('\n── ① EL ORBE NO SE MUEVE, SÓLO CRECE ──');
+t('en reposo mide 48', ORBE, 48);
+t('abierto mide 52 — cuatro más, ni un píxel de viaje', ORBE_ABIERTO, 52);
+for (const w of ANCHOS) {
+  const a = anclaOrbe(w), e = ejeDeLaFila(w);
+  cerca(`ancho ${w} · queda a ${AIRE_BORDE} del borde derecho`, w - (a.izquierda + ORBE), AIRE_BORDE);
+  cerca(`ancho ${w} · el eje de la fila ES el centro del orbe`, e.x, a.izquierda + ORBE / 2);
+}
+t('el eje no depende del aire inferior en X',
+  ejeDeLaFila(412, 0).x === ejeDeLaFila(412, 96).x, true);
+cerca('pero SÍ sube con la barra de tabs', ejeDeLaFila(412, 96).abajo - ejeDeLaFila(412, 0).abajo, 96);
+
+console.log('\n── ② LA FILA · orden de abajo hacia arriba ──');
+t('sin pendientes ⇒ sólo los cuatro dedos',
+  nodosDeLaFila(p(0, 0, null)).map((n) => n.tipo), ['dedo', 'dedo', 'dedo', 'dedo']);
+t('los dedos salen en el orden en que se pasan',
+  nodosDeLaFila(p(0, 0, null)).map((n) => (n.tipo === 'dedo' ? n.indice : -1)), [0, 1, 2, 3]);
+t('con pendientes, las pastillas van PRIMERO (pegadas al orbe)',
+  nodosDeLaFila(p(2, 1, null)).map((n) => n.tipo),
+  ['pastilla', 'pastilla', 'dedo', 'dedo', 'dedo', 'dedo']);
+t('y en el orden estable chat → pedidos',
+  nodosDeLaFila(p(2, 1, null)).filter((n) => n.tipo === 'pastilla').map((n: any) => n.clase),
+  ['chat', 'pedidos']);
+t('una clase en cero no ocupa lugar en la fila',
+  nodosDeLaFila(p(0, 1, null)).map((n) => n.tipo), ['pastilla', 'dedo', 'dedo', 'dedo', 'dedo']);
+
+console.log('\n── ③ LOS NÚMEROS DICTADOS, contra el LITERAL del encargo ──');
+/* 🔴 **ESTE BLOQUE NACIÓ DE UN ROJO QUE NO SALIÓ.** El control negativo movió
+   `SEPARACION` de 12 a 16 y **el arnés siguió verde**: todo el bloque de
+   geometría comparaba contra la propia constante, así que cambiarla cambiaba
+   la vara junto con el objeto. *Un gate que se adapta a lo que mide no mide
+   nada* — es el discriminador tautológico, y sólo lo destapó intentar el rojo.
+   Las relaciones siguen usando las constantes (eso está bien: prueban la
+   FÓRMULA); esto ancla los VALORES al literal que dictó el founder. */
+t('la separación es 12', SEPARACION, 12);
+t('el dedo mide 48', DEDO, 48);
+t('la pastilla mide 44', PASTILLA, 44);
+t('el aire desde el borde es 20', AIRE_BORDE, 20);
+t('el arco son 60° con 12° de separación', [ARCO_GRADOS, ARCO_SEPARACION], [60, 12]);
+
+console.log('\n── ③bis GEOMETRÍA DE LA FILA · la fórmula (±1 px) ──');
+{
+  const sinP = alturasDeLaFila(p(0, 0, null), 412);
+  const eje = ejeDeLaFila(412);
+  cerca('el primer dedo queda a 12 del borde del orbe ABIERTO',
+    sinP[0] - DEDO / 2 - (eje.abajo + ORBE_ABIERTO / 2), SEPARACION);
+  for (let i = 1; i < sinP.length; i++)
+    cerca(`dedo ${i - 1}→${i} separados 12`, sinP[i] - DEDO / 2 - (sinP[i - 1] + DEDO / 2), SEPARACION);
+  cerca('centro a centro entre dedos = 48 + 12', sinP[1] - sinP[0], DEDO + SEPARACION);
+}
+{
+  /* 🔴 EL CASO QUE UNA FÓRMULA POR ÍNDICE ROMPERÍA: la pastilla mide 44 y el
+     dedo 48. Si las alturas se calcularan como `i * paso`, acá aparecerían
+     solapes de 4 px — y un solape de 4 px no se lee como error, se lee como
+     un espaciado descuidado. */
+  const conP = alturasDeLaFila(p(2, 1, null), 412);
+  const eje = ejeDeLaFila(412);
+  cerca('la primera pastilla queda a 12 del orbe abierto',
+    conP[0] - PASTILLA / 2 - (eje.abajo + ORBE_ABIERTO / 2), SEPARACION);
+  cerca('pastilla → pastilla, 12', conP[1] - PASTILLA / 2 - (conP[0] + PASTILLA / 2), SEPARACION);
+  cerca('🔴 pastilla(44) → dedo(48), TAMBIÉN 12',
+    conP[2] - DEDO / 2 - (conP[1] + PASTILLA / 2), SEPARACION);
+  cerca('dedo → dedo, 12', conP[3] - DEDO / 2 - (conP[2] + DEDO / 2), SEPARACION);
+}
+t('la fila sube: cada nodo por encima del anterior',
+  alturasDeLaFila(p(2, 1, null), 412).every((h, i, a) => i === 0 || h > a[i - 1]), true);
+t('el ancho de pantalla no mueve las alturas',
+  alturasDeLaFila(p(1, 0, null), 320).join() === alturasDeLaFila(p(1, 0, null), 480).join(), true);
+
+console.log('\n── ④ ESTADOS · los arcos ──');
+t('sin nada ⇒ SIN arcos (en reposo no hay línea)', arcosDe(p(0, 0, 0)), []);
+t('sólo chat ⇒ UN arco centrado arriba',
+  arcosDe(p(2, 0, 0)).map((a) => [a.clase, a.desde, a.hasta]), [['chat', -30, 30]]);
 t('dos arcos: 60° cada uno y 12° de separación',
   (() => { const [a, b] = arcosDe(p(2, 1, 0)); return [a.hasta - a.desde, b.hasta - b.desde, b.desde - a.hasta]; })(),
   [ARCO_GRADOS, ARCO_GRADOS, ARCO_SEPARACION]);
-t('dos arcos quedan centrados arriba',
-  (() => { const a = arcosDe(p(2, 1, 0)); return a[0].desde + a[a.length - 1].hasta; })(), 0);
-t('los tres ⇒ TRES arcos, y el bloque sigue centrado',
+t('los tres ⇒ tres arcos, y el bloque sigue centrado',
   (() => { const a = arcosDe(p(1, 1, 1)); return [a.length, a[0].desde + a[2].hasta]; })(), [3, 0]);
 
-console.log('\n── ④ `null` NO ES CERO — el control que el encargo pidió ──');
+console.log('\n── ⑤ `null` NO ES CERO — el control que el encargo pidió ──');
 t('avisos null ⇒ SIN arco violeta', arcosDe(p(1, 0, null)).map((a) => a.clase), ['chat']);
 t('CONTROL NEGATIVO · avisos 0 tampoco dibuja', arcosDe(p(1, 0, 0)).map((a) => a.clase), ['chat']);
 t('CONTROL POSITIVO · avisos 1 SÍ dibuja', arcosDe(p(1, 0, 1)).map((a) => a.clase), ['chat', 'avisos']);
-t('sólo avisos null ⇒ nada, sin romperse', arcosDe(p(0, 0, null)), []);
 t('un negativo no cuenta como algo', clasesConAlgo(p(-3, 0, null)), []);
-
-console.log('\n── ⑤ PASTILLAS: sólo las que tengan algo ──');
-t('nada ⇒ ninguna pastilla', pastillasDe(p(0, 0, 5)), []);
-t('chat a la izquierda', pastillasDe(p(2, 0, null)), [{ clase: 'chat', cuenta: 2, lado: 'izquierda' }]);
-t('pedidos a la derecha', pastillasDe(p(0, 1, null)), [{ clase: 'pedidos', cuenta: 1, lado: 'derecha' }]);
-t('las dos, cada una en su lado', pastillasDe(p(2, 1, 9)).map((x) => [x.clase, x.lado]),
-  [['chat', 'izquierda'], ['pedidos', 'derecha']]);
+t('los avisos NO tienen pastilla: se dicen en el halo', pastillasDe(p(0, 0, 9)), []);
 
 console.log('\n── ⑥ REDUCE-MOTION · medido, no supuesto ──');
 t('dormida y con movimiento ⇒ respira y barre', movimientoCoach({ quieta: false, abierta: false }),
@@ -85,26 +121,77 @@ t('🔴 quieta ⇒ NADA se monta', movimientoCoach({ quieta: true, abierta: fals
   { respira: false, barre: false, escalona: false });
 t('quieta Y abierta ⇒ tampoco', movimientoCoach({ quieta: true, abierta: true }),
   { respira: false, barre: false, escalona: false });
-t('abierta sin reduce-motion ⇒ no respira, pero SÍ escalona', movimientoCoach({ quieta: false, abierta: true }),
-  { respira: false, barre: false, escalona: true });
+t('abierta sin reduce-motion ⇒ no respira, pero SÍ escalona',
+  movimientoCoach({ quieta: false, abierta: true }), { respira: false, barre: false, escalona: true });
 
-console.log('\n── ⑦ LA PIEZA CONSUME LA DECISIÓN (si no, ⑥ mide una función huérfana) ──');
+const FUENTE = readFileSync(new URL('../packages/ui/src/components/PresenciaCoach.tsx', import.meta.url), 'utf8');
 /* 🔴 **SE MIDE EL CÓDIGO, NO LA PROSA (`L-170`).** La primera versión leía el
-   archivo entero y **se cazó a sí misma dos veces**: la cabecera dice «cero
-   `useState`» y el encargo se nombra en un comentario ⇒ dos rojos sobre una
-   pieza que estaba bien. *Un censo que lee comentarios mide lo que alguien
-   escribió sobre el código, no el código.* */
-const sinComentarios = (src: string) =>
-  src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1');
-const fuente = sinComentarios(
-  readFileSync(new URL('../packages/ui/src/components/PresenciaCoach.tsx', import.meta.url), 'utf8'),
-);
-t('`PresenciaCoach` llama a `movimientoCoach`', /movimientoCoach\(\{/.test(fuente), true);
-t('🔴 y NO re-deriva el guard a mano', /!quieta\s*&&/.test(fuente), false);
-t('cero `setInterval` / `setTimeout` (§2.8: nada despierta al hilo de JS)',
-  /set(Interval|Timeout)\(/.test(fuente), false);
-t('cero `useState` (§2.8: no re-renderiza mientras respira)', /useState/.test(fuente), false);
-t('la pieza no teclea el nombre del Coach', /Nexo/i.test(fuente), false);
+   archivo entero y se cazó a sí misma con su propia cabecera. */
+const CODIGO = FUENTE.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+console.log('\n── ⑦ LA PIEZA CONSUME LAS DECISIONES (si no, ⑥ mide funciones huérfanas) ──');
+t('llama a `movimientoCoach`', /movimientoCoach\(\{/.test(CODIGO), true);
+t('🔴 y NO re-deriva el guard a mano', /!quieta\s*&&/.test(CODIGO), false);
+t('las alturas salen de `alturasDeLaFila`', /alturasDeLaFila\(/.test(CODIGO), true);
+t('el eje sale de `ejeDeLaFila`', /ejeDeLaFila\(/.test(CODIGO), true);
+t('cero `setInterval` / `setTimeout`', /set(Interval|Timeout)\(/.test(CODIGO), false);
+t('cero `useState` (no re-renderiza mientras respira)', /useState/.test(CODIGO), false);
+t('no teclea el nombre del Coach', /Nexo/i.test(CODIGO), false);
+
+console.log('\n── ⑧ EL MATERIAL DEL ORBE, LEÍDO DEL SVG ──');
+/* La brasa se declara en el SVG como `r` = MITAD de su diámetro. */
+const rBrasa = CODIGO.match(/r=\{`\$\{\(BRASA\.diametro \/ 2\) \* 100\}%`\}/);
+t('la brasa toma su radio de `BRASA.diametro / 2`', rBrasa !== null, true);
+t('🔴 y ese diámetro es ≤ 40 % del cuerpo', BRASA.diametro <= 0.4, true);
+cerca('está corrida a 56/62 %, no centrada', BRASA.cx * 100, 56);
+cerca('…y en el eje vertical', BRASA.cy * 100, 62);
+t('CONTROL NEGATIVO · no está centrada (si lo estuviera, no sería una brasa)',
+  BRASA.cx === 0.5 && BRASA.cy === 0.5, false);
+t('el cuerpo en reposo va de la perla al borde LILA, no a un ocre',
+  /coachPerla\b[\s\S]{0,200}coachPerlaBorde/.test(CODIGO), true);
+t('el cuerpo despierto tiene sus tres paradas',
+  /coachClaro[\s\S]{0,200}coachMedio[\s\S]{0,200}coachProfundo/.test(CODIGO), true);
+t('el cuerpo se dibuja en SVG, no con un color de fondo',
+  /<RadialGradient/.test(CODIGO) && /backgroundColor:\s*palette\.coachPerla/.test(CODIGO) === false, true);
+
+console.log('\n── ⑨ EN REPOSO NO HAY LÍNEA BASE (§3) ──');
+t('🔴 el aro sólo se monta con arcos', /arcos\.length > 0 \? \(/.test(CODIGO), true);
+t('y no quedó ningún `<Circle` de halo con stroke',
+  /<Circle[^>]*stroke=\{palette\.coachHalo\}/.test(CODIGO), false);
+t('el token del halo ya no lo usa la pieza', /coachHalo/.test(CODIGO), false);
+
+console.log('\n── ⑩ LAS ETIQUETAS (§4) ──');
+t('fuente de CONTROLES de la casa (la de la barra de pestañas)',
+  /typography\.family\.sans\.medium/.test(CODIGO), true);
+t('tamaño de control (13), no un número tecleado',
+  /typography\.size\.control/.test(CODIGO) && /fontSize:\s*13\b/.test(CODIGO) === false, true);
+t('🔴 NUNCA se truncan: sin `numberOfLines` ni `ellipsizeMode`',
+  /numberOfLines|ellipsizeMode/.test(CODIGO), false);
+/* ⚠️ **ACOTADO AL COMPONENTE, y la primera versión no lo estaba.** Medía
+   `flex: 1` en TODO el archivo y daba rojo por el velo —que ocupa la pantalla
+   entera y es exactamente lo que tiene que hacer—. *Un gate que dice medir la
+   etiqueta y mide el archivo no está sobre-protegiendo: está midiendo otra
+   cosa y llamándola por el nombre de ésta.* */
+const ETIQUETA = (CODIGO.match(/function Etiqueta\([\s\S]*?\n\}/) ?? [''])[0];
+t('el gate encontró el componente que dice medir', ETIQUETA.length > 0, true);
+t('…y sin `flex` que las comprima', /flex:\s*1/.test(ETIQUETA), false);
+t('su caja se abraza al texto (sin ancho fijo)', /width:\s*\d/.test(ETIQUETA), false);
+t('nada de mono: la mono es para metadatos', /family\.mono/.test(CODIGO), false);
+/* Cuánto lugar tiene una etiqueta antes de tocar el borde izquierdo.
+   ⚠️ SUPUESTO DECLARADO: DM Sans medium promedia ~0,55 em de avance por
+   carácter. Es una estimación, y se dice que lo es — el ancho exacto lo mide
+   el aparato. Lo que esto prueba es que **el espacio disponible no es el
+   problema**, ni siquiera en el teléfono más angosto. */
+const anchoEtiqueta = (n: number) => n * 13 * 0.55 + 24;
+for (const w of ANCHOS) {
+  const disponible = w - (AIRE_BORDE + ORBE + SEPARACION) - AIRE_BORDE;
+  t(`ancho ${w} · una etiqueta de 20 caracteres entra (${Math.round(anchoEtiqueta(20))} de ${disponible})`,
+    anchoEtiqueta(20) <= disponible, true);
+}
+
+console.log('\n── ⑪ EL ORBE ABIERTO ABRE LA HOJA, no cierra la fila ──');
+t('abierta ⇒ su toque llama a `onPreguntar`', /abierta \? onPreguntar : onAbrir/.test(CODIGO), true);
+t('y cerrar sigue siendo el velo', /onPress=\{onCerrar\}/.test(CODIGO), true);
 
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);

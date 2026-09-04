@@ -45,7 +45,7 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
-import { BRILLO, RESPLANDOR } from './coach-geometria'
+import { BRASA, RESPLANDOR } from './coach-geometria'
 
 /** El orbe de la cabecera. Más chico que el flotante: acá no es una puerta,
  *  es una firma. */
@@ -109,17 +109,25 @@ export function CabeceraCoach({ nombre, pulsos }: CabeceraCoachProps) {
       >
         <Svg width={ORBE_CABECERA} height={ORBE_CABECERA}>
           <Defs>
-            <RadialGradient
-              id="cuerpoCabeceraCoach"
-              cx={`${BRILLO.cx * 100}%`}
-              cy={`${BRILLO.cy * 100}%`}
-              r={`${BRILLO.r * 100}%`}
-            >
+            {/* El mismo cuerpo despierto que el orbe grande, en chico:
+                radial Claro → Medio → Profundo, con su brasa encima. */}
+            <RadialGradient id="cuerpoCabeceraCoach" cx="50%" cy="50%" r="50%">
               <Stop offset="0" stopColor={palette.coachClaro} />
-              <Stop offset="1" stopColor={palette.coachMedio} />
+              <Stop offset="0.6" stopColor={palette.coachMedio} />
+              <Stop offset="1" stopColor={palette.coachProfundo} />
+            </RadialGradient>
+            <RadialGradient
+              id="brasaCabeceraCoach"
+              cx={`${BRASA.cx * 100}%`}
+              cy={`${BRASA.cy * 100}%`}
+              r={`${(BRASA.diametro / 2) * 100}%`}
+            >
+              <Stop offset="0" stopColor={palette.coachBrasa} />
+              <Stop offset="1" stopColor={palette.coachBrasaFin} />
             </RadialGradient>
           </Defs>
           <Circle cx={r} cy={r} r={r} fill="url(#cuerpoCabeceraCoach)" />
+          <Circle cx={r} cy={r} r={r} fill="url(#brasaCabeceraCoach)" />
         </Svg>
       </Animated.View>
       {/* 🔴 **`Texto` no puede decir este color y no debe:** su paleta es

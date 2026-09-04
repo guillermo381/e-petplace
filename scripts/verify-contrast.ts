@@ -622,8 +622,15 @@ const veloSobre = (fondo: string): string => {
   return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('')
 }
 todos.push(
-  // La voz sobre su pastilla de tinta — lleva PROSA ⇒ 4.5:1.
-  { nombre: 'COACH · voz «Preguntale a …» / pastilla de tinta (sobre el velo)', fg: lightTheme.text.inverse, bg: lightTheme.bg.tinta, surface: veloSobre(lightTheme.bg.base) },
+  /* ⏪ **LA VOZ YA NO VA SOBRE UNA PASTILLA DE TINTA (lote 0.1).** Pasó a ser
+     la etiqueta del orbe, con el MISMO tratamiento que las de los nodos:
+     tinta sobre blanco. *Lo que se conserva es el hallazgo: sobre el velo
+     desnudo no había contraste, y la cura sigue siendo darle superficie.* */
+  { nombre: 'COACH · etiqueta de un nodo: tinta / pastilla blanca (sobre el velo)', fg: lightTheme.text.primary, bg: lightTheme.bg.card, surface: veloSobre(lightTheme.bg.base) },
+  { nombre: 'COACH · etiqueta del orbe «Preguntale a …» (mismo tratamiento)', fg: lightTheme.text.primary, bg: lightTheme.bg.card, surface: veloSobre(lightTheme.bg.base) },
+  /* La misma etiqueta en la casa oscura: la pastilla es `bg.card` del tema,
+     así que ahí es una superficie oscura con su tinta clara encima. */
+  { nombre: 'COACH · etiqueta de un nodo, en oscuro', fg: darkTheme.text.primary, bg: darkTheme.bg.card, surface: veloSobre(darkTheme.bg.base) },
   // Las pastillas de pendiente: número y palabra sobre color pleno.
   { nombre: 'COACH · pastilla de chat: blanco / magenta TRABAJADOR', fg: lightTheme.text.inverse, bg: '#AE3785', surface: veloSobre(lightTheme.bg.base) },
   { nombre: 'COACH · pastilla de pedidos: TINTA / ocre (el par de R56)', fg: lightTheme.text.primary, bg: lightTheme.status.warning, surface: veloSobre(lightTheme.bg.base) },
