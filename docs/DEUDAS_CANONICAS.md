@@ -3263,6 +3263,45 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1023` 🟠 P4 del censo se movió 2 → 3 en la BASE sin que ninguna migración tocara roles
+
+**Nace:** S113-A, 4-sep-2026, corriendo los gates del candidato 0.3. **Dueño: E**
+(orden de mesa). **Se mide; no se asume.**
+
+**El hecho, y nada más que el hecho.** `verify:censo` P4 —*«el rol «profesional»
+y los chips están sincronizados»*— declara una **línea base CONOCIDA de 2**
+personas con chips y sin la fila `profesional` (Los Shyris ×1 chip · Paseos
+Andres ×6, medido el 5-ago). **Hoy da 3.** El alcance del gate excluye las
+cuentas `+s87` (hoy 1, con su fila: no mueve la base).
+
+**Lo único que A puede afirmar, y por qué:** **no salió de este lote.** Ninguna
+de las migraciones de S113-A tocó roles, chips ni `prestador_empleados` — se
+puede leer en las cinco. *Eso descarta una causa; no identifica ninguna.*
+
+**Lo que NO se sabe y no se va a suponer:** quién es la tercera persona, cuándo
+apareció, y **por cuál de los caminos**. La línea base misma dice que las dos
+primeras entraron *«por un camino silencioso»* — o sea que el productor **nunca
+se identificó**, y una tercera aparición es la segunda oportunidad de encontrarlo.
+
+⚠️ **Y la trampa que la ficha deja escrita antes de que alguien la pise:** al
+abrirla se puede sentir la tentación de **actualizar la línea base a 3** y
+volver el gate a verde. *Eso no cura nada: convierte un hallazgo en un dato de
+configuración.* La línea base se mueve **después** de explicar la fila nueva, y
+la explicación se escribe acá con su fecha — como el propio gate pide en su
+texto (*«si BAJÓ: alguien curó y la línea base quedó vieja — se actualiza acá,
+con su fecha»*; para arriba, primero se explica).
+
+**Lo que E tiene que medir, en orden:** ① **cuál** es la tercera fila (persona,
+prestador, cuántos chips, `asignado_en` de los chips) · ② si su `asignado_en` cae
+**después** del 5-ago, para saber si es nueva o si la base de 5-ago ya estaba
+mal contada — *son dos historias distintas y el número no las distingue* · ③ qué
+escritor pudo darle chips sin la fila: el censo de S91 dejó abierto que
+`prestador_empleados` se escribe desde DEFINERs que el trigger de `D-526` no ve
+(`D-528`), y **ése es el primer sospechoso, no la conclusión**.
+
+**Disparo:** el lote 0.4, junto con `D-1022`. *Las dos son lo mismo visto de dos
+lados — un gate que dice algo verdadero y no dice de quién.*
+
 ### `D-1022` 🟡 P5 del censo atribuye a una tabla lo que un bucket y un `select('*')` escribieron
 
 **Nace:** S113-A, 4-sep-2026, corriendo los gates del candidato 0.3.
@@ -3301,8 +3340,10 @@ dejando **un caso real de verdad** —un `select` que sí nombre una columna
 muerta— y exigiendo que **siga apareciendo**. *Una cura que baja el número
 también «arregla» el gate apagándolo.*
 
-**Dueño:** la pista del censo. **Disparo:** la próxima vez que P5 se lea para
-decidir algo — o antes, si alguien va a curar un rojo de esta lista.
+**Dueño: E** (orden de mesa, 4-sep-2026). **Entra en el lote 0.4, con la cura
+propuesta de arriba.** *Va a E y no a la pista del censo genérica porque E es
+quien mide instrumentos: la pregunta acá no es «cómo está el schema» sino «por
+qué el gate le cuelga a una tabla lo que escribió otra API».*
 
 ### `D-1021` 🟠 PARCIAL — la ficha de una mascota fallecida: LEÍDA sí, NO PEDIDA todavía
 
