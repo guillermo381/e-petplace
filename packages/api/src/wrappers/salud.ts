@@ -171,7 +171,11 @@ export type EstadoPlanVacuna =
   | 'sin_fecha'
   | 'nunca_aplicada'
   /** por edad todavía no toca: JAMÁS se muestra como falta. */
-  | 'aun_no_corresponde';
+  | 'aun_no_corresponde'
+  /** S113-A · A5 — vence dentro de la ventana (30 días por default).
+   *  ⚠️ El umbral es una ELECCIÓN, no una medición: no hay ninguno escrito
+   *  en la casa. Viaja como parámetro para poder moverlo. */
+  | 'vence_en';
 
 export interface VacunaDelPlan {
   vacuna_codigo: string;
@@ -185,9 +189,28 @@ export interface VacunaDelPlan {
    *  superficie puede decir la diferencia si quiere (L-139). */
   proxima_es_derivada: boolean;
   estado: EstadoPlanVacuna;
+  /** S113-A · A5 — la columna existía en `cat_plan_vacunal` y no viajaba. */
+  exigida_guarderia: boolean;
+  /** S113-A · A5 — cuántas vacunas de ESTA mascota no se pudieron atar al
+   *  plan porque no tienen `vacuna_codigo`. **Igual en todas las filas**: es
+   *  un dato de la mascota, no de la vacuna. *Sin él, una vacuna que la
+   *  familia SÍ puso se lee como «nunca_aplicada» y nadie se entera.* */
+  aplicadas_sin_clasificar: number;
 }
 
-const ESTADOS_PLAN: readonly string[] = ['al_dia', 'vencida', 'sin_fecha', 'nunca_aplicada', 'aun_no_corresponde'];
+/* 🔴 ESTA LISTA ES UN FILTRO, NO UNA DECLARACIÓN — y por eso agregar un estado
+   en el motor sin agregarlo acá es una PÉRDIDA SILENCIOSA: el guard de shape
+   descarta la fila entera (`continue`), el wrapper devuelve ok, y la vacuna
+   simplemente no aparece. Sin error, sin log, sin síntoma.
+   `vence_en` entra acá EN EL MISMO ACTO en que nació en la migración. */
+const ESTADOS_PLAN: readonly string[] = [
+  'al_dia',
+  'vencida',
+  'sin_fecha',
+  'nunca_aplicada',
+  'aun_no_corresponde',
+  'vence_en',
+];
 
 /** El plan vacunal de una mascota: UNA FILA POR VACUNA QUE SU ESPECIE
  *  NECESITA — aplicadas y faltantes. Es el lector que habilita el tablero
@@ -195,8 +218,20 @@ const ESTADOS_PLAN: readonly string[] = ['al_dia', 'vencida', 'sin_fecha', 'nunc
  *  Hogar (que hoy solo podía computar citas). */
 export async function obtenerPlanVacunal(
   mascotaId: string,
+  /** El día de la FAMILIA, en formato `YYYY-MM-DD`. Lo manda el aparato, que
+   *  es el único que lo sabe: **la casa no guarda la zona horaria de la
+   *  familia en ningún lado** (medido 9-sep — `hoy_local()` es Guayaquil fijo
+   *  y las cinco columnas `zona_horaria` que existen son del negocio).
+   *  Omitirlo cae a `hoy_local()`, y eso se dice en vez de disimularse. */
+  hoy?: string,
+  /** Días de anticipación para el estado `vence_en`. Elección, no medición. */
+  ventanaDias?: number,
 ): Promise<ResultadoWrapper<VacunaDelPlan[], CodigoErrorSalud>> {
-  const { data, error } = await getClient().rpc('obtener_plan_vacunal', { p_mascota_id: mascotaId });
+  const { data, error } = await getClient().rpc('obtener_plan_vacunal', {
+    p_mascota_id: mascotaId,
+    ...(hoy !== undefined ? { p_hoy: hoy } : {}),
+    ...(ventanaDias !== undefined ? { p_ventana_dias: ventanaDias } : {}),
+  });
   if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
   if (!Array.isArray(data)) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
 
@@ -222,6 +257,9 @@ export async function obtenerPlanVacunal(
       proxima: typeof f.proxima === 'string' ? f.proxima : null,
       proxima_es_derivada: f.proxima_es_derivada === true,
       estado: f.estado as EstadoPlanVacuna,
+      exigida_guarderia: f.exigida_guarderia === true,
+      aplicadas_sin_clasificar:
+        typeof f.aplicadas_sin_clasificar === 'number' ? f.aplicadas_sin_clasificar : 0,
     });
   }
   return { ok: true, data: filas };

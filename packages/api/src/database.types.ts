@@ -25154,9 +25154,11 @@ export type Database = {
         }[]
       }
       obtener_plan_vacunal: {
-        Args: { p_mascota_id: string }
+        Args: { p_hoy?: string; p_mascota_id: string; p_ventana_dias?: number }
         Returns: {
+          aplicadas_sin_clasificar: number
           estado: string
+          exigida_guarderia: boolean
           nombre: string
           obligatoria: boolean
           periodicidad_meses: number
