@@ -3570,10 +3570,32 @@ function GaleriaInterna() {
                 onDescartar={() => {}}
                 onNombre={() => {}}
               />
+              {/* 🔴 INCOMPLETA POR FECHA: el campo vacío se señala y DICE por
+                  qué, pegado al hueco. La fecha la declara la pantalla —la
+                  pieza no sabe cuál de los `campos` lo es— y es ella la que
+                  retira `incompleta` al completarse. */}
+              <FilaConfirmacionVacuna
+                nombre="Polivalente"
+                campos={[{ etiqueta: 'Lote', valor: 'B-2291' }, { etiqueta: 'Fecha', valor: null }]}
+                confianza="alta"
+                vozOrigen="lo prueba el sticker"
+                vozRevisar="Revisá esta"
+                vozConfirmar="Es correcta"
+                vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
+                incompleta="fecha"
+                vozIncompleta="Falta la fecha de aplicación"
+                tocada={false}
+                onConfirmar={() => {}}
+                onEditar={() => {}}
+                onDescartar={() => {}}
+              />
               <PieConfirmacionVacunas
-                filas={[{ tocada: true }, { tocada: false }, { tocada: false }, { tocada: false, descartada: true }, { tocada: true, sinNombre: true }]}
+                filas={[{ tocada: true }, { tocada: false }, { tocada: false }, { tocada: false, descartada: true }, { tocada: true, sinNombre: true }, { tocada: true, incompleta: true }]}
                 vozGuardar={(n) => `Guardar ${n} vacunas`}
                 vozFaltan={(n) => `faltan ${n} por revisar`}
+                vozIncompletas={(n) => `${n} por completar`}
                 vozNinguna="No queda ninguna para guardar"
                 onGuardar={() => {}}
               />
@@ -3585,6 +3607,7 @@ function GaleriaInterna() {
                 filas={[{ tocada: false, descartada: true }, { tocada: false, descartada: true }]}
                 vozGuardar={(n) => `Guardar ${n} vacunas`}
                 vozFaltan={(n) => `faltan ${n} por revisar`}
+                vozIncompletas={(n) => `${n} por completar`}
                 vozNinguna="No queda ninguna para guardar"
                 onGuardar={() => {}}
               />
