@@ -620,6 +620,7 @@ export const clienteEn = {
     errorTitulo: "We couldn't load their visits",
   },
   carnet: {
+    faltaFecha: 'I could not read the date; type it so we can save it',
     campoNombre: 'Vaccine name',
     sinNombre: 'I could not read which one it is; type it yourself',
     ningunaParaGuardar: 'None left to save',

@@ -66,6 +66,7 @@ import {
 
 import { borrarFotoMascota, leerBase64, subirFotoMascota } from '@/lib/subir-avatar';
 import { useTraduccion } from '@/i18n';
+import { faltaParaConfirmar } from '@/lib/carnet/confirmable';
 
 // 1600px: el texto del carnet tiene que seguir siendo legible para el
 // modelo (800 de avatar lo destruye); a calidad 0.7 queda en ~300-500KB.
@@ -116,7 +117,9 @@ const VOZ_SUBIDA = {
 } as const;
 
 // dudosa = SOLO fecha faltante (S48): tipo null se guarda tal cual.
-const esDudosa = (i: ItemRevision) => !i.fecha_aplicada;
+/* La misma regla que decide si una fila se puede confirmar, para que la cuenta
+   del texto y la del toque no puedan discrepar. */
+const esDudosa = (i: ItemRevision) => faltaParaConfirmar(i) !== null;
 
 function hoyIso(): string {
   const d = new Date();
@@ -304,6 +307,9 @@ function camposDe(
   const tanda = items.map((i) => ({ tocada: tocadas.has(i.key), descartada: i.descartada }));
   /** La PRIMERA sin nombre entre las que siguen vivas: es la única que puede
    *  llevar el foco sin pelearse con otra. `null` si no hay ninguna. */
+  /** La primera fila viva a la que le falta la fecha — el destino del texto
+   *  de arriba y del botón apagado. */
+  const primeraIncompleta = activas.find(esDudosa)?.key ?? null;
   const primeraSinNombre =
     activas.find((i) => i.nombre === null || i.nombre.trim() === '')?.key ?? null;
 
@@ -315,7 +321,22 @@ function camposDe(
        pedido sin volver a medir contra el árbol que ya tenía `b-1.1`. *Un
        pedido propio también envejece, y el mío se copió dos partes seguidas.*
        Ahora el guard y el botón derivan del MISMO `listo`. */
-    if (guardando || dudosas > 0 || !resumenDeLaTanda(tanda).listo) return;
+    if (guardando) return;
+    /* ④ 🔴 **NUNCA UN CORTE MUDO.** Acá había un `return` seco por `dudosas`, y
+       ése es el segundo mitad del defecto que el founder vio: el pie encendido
+       llamaba, la función cortaba y **la pantalla no decía nada**. *Un guard
+       que no habla es indistinguible de una app colgada.* Con la cura de
+       arriba este caso ya no debería alcanzarse —una fila sin fecha no puede
+       quedar revisada— así que si esta razón aparece, es que algo más la
+       produjo, y quiero verla. */
+    if (dudosas > 0) {
+      setErrorGuardar(dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas }));
+      return;
+    }
+    if (!resumenDeLaTanda(tanda).listo) {
+      setErrorGuardar(t('carnet.faltanTocar', { n: resumenDeLaTanda(tanda).faltan }));
+      return;
+    }
     setGuardando(true);
     setErrorGuardar(null);
     const r = await registrarVacunasDeCarnet({
@@ -498,13 +519,30 @@ function camposDe(
                    fila no sabe si es la primera; acá sí se sabe. */
                 enfocar={i.key === primeraSinNombre}
                 tocada={tocadas.has(i.key)}
-                onConfirmar={() =>
+                onConfirmar={() => {
+                  /* 🔴 **UNA FILA INCOMPLETA NO PUEDE QUEDAR «REVISADA», y ese
+                     era el defecto que el founder vio en su teléfono.** El pie
+                     de B se enciende con todas revisadas —sólo mira `tocada` y
+                     `descartada`— y `guardar()` cortaba aparte por `dudosas`,
+                     **sin decir nada**: botón encendido que al tocarlo no hacía
+                     nada. Dos cuentas otra vez, y esta vez la puse yo al montar
+                     el pie.
+                     Ahora hay UNA: si le falta la fecha, la fila **no se marca**
+                     —así el pie queda apagado y con su razón a la vista— y se
+                     abre su edición, que es donde se completa. *El toque no se
+                     traga: lleva al lugar donde se resuelve.* */
+                  const falta = faltaParaConfirmar(i);
+                  if (falta !== null) {
+                    mostrar({ texto: falta === 'nombre' ? t('carnet.sinNombre') : t('carnet.faltaFecha') });
+                    abrirEdicion(i.key);
+                    return;
+                  }
                   setTocadas((prev) => {
                     const s = new Set(prev);
                     s.add(i.key);
                     return s;
-                  })
-                }
+                  });
+                }}
                 onEditar={() => abrirEdicion(i.key)}
                 onDescartar={() => descartar(i.key)}
               />
@@ -519,10 +557,25 @@ function camposDe(
               {errorGuardar}
             </Text>
           )}
-          {dudosas > 0 && (
-            <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.text.secondary }}>
-              {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
-            </Text>
+          {/* ③ **EL TEXTO LLEVA A LA PRIMERA INCOMPLETA.** Decía cuántas faltan
+              y no ofrecía dónde: con cuatro filas y una pantalla larga, saber
+              que faltan cuatro no acerca a ninguna. Ahora se toca y lleva —
+              misma ley que la fila de ausencias del perfil: *la puerta tiene
+              que estar donde está la carencia.* */}
+          {dudosas > 0 && primeraIncompleta !== null && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
+              onPress={() => {
+                const y = posiciones.current.get(primeraIncompleta);
+                if (y !== undefined) scrollRef.current?.scrollTo({ y: Math.max(0, y - 24), animated: true });
+                abrirEdicion(primeraIncompleta);
+              }}
+            >
+              <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.text.secondary, textDecorationLine: 'underline' }}>
+                {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
+              </Text>
+            </Pressable>
           )}
           {/* ⭐ **EL PIE DE LA TANDA, de B** (adenda 2). Reemplaza al `Boton`
               que yo componía con su propia cuenta: *dos piezas contando lo
