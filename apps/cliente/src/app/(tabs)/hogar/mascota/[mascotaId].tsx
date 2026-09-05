@@ -65,6 +65,8 @@ import {
   type LineaDeVidaEstadoPie,
   FranjaSeguridad,
   CeldasHoy,
+  FiltrosLineaDeVida,
+  type TipoLineaDeVida,
   PiezaMedicacionActiva,
   ordenarSeguridad,
   tendenciaPeso,
@@ -110,6 +112,13 @@ import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
 import { contarPendientesDe } from '@/lib/pendientes';
 import { itemsDeSeguridad } from '@/lib/perfil/seguridad';
 import { coberturaDePlagas, medicacionDeLaCelda, proximaDesparasitacion } from '@/lib/perfil/hoy';
+import { tipoDeLineaDeVida } from '@/lib/perfil/tipo-linea-vida';
+
+/** El orden de los nueve, que es el que B reparte en filas. */
+const ORDEN_TIPOS: readonly TipoLineaDeVida[] = [
+  'salud', 'vacunas', 'antiparasitario', 'peso',
+  'paseos', 'estetica', 'adiestramiento', 'guarderia', 'recuerdos',
+];
 import { composicionDe } from '@/lib/composicion-sujeto';
 import { HabitantesAcuarioHoja } from '@/components/habitantes-acuario-hoja';
 import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
@@ -128,7 +137,6 @@ const SERIF_LOCAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 /** El eje del filtro de la historia DENTRO de la ficha: SOLO servicio
  *  (el tramo temporal vive en la pantalla completa — contrato de la
  *  lámina 02, contexto 2). */
-type FiltroHistoria = 'todo' | 'salud' | 'paseos' | 'estetica' | 'adiestramiento' | 'bitacora';
 
 /** r10-5 · el eje TEMPORAL de Vitales — el mismo que ya usa Su
  *  historia, con FiltroPills. NOTA DE API declarada: `calcularVitales`
@@ -452,7 +460,11 @@ export default function PerfilDeMascota() {
   const [razaHoja, setRazaHoja] = useState(false);
   /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
   const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
-  const [filtroHistoria, setFiltroHistoria] = useState<FiltroHistoria>('todo');
+  /* 🔴 **DE UNO A VARIOS** (1.1 cierre · ②). Era `FiltroHistoria` con un solo
+     activo y el vocabulario de OFICIOS; pasa a los NUEVE tipos de B, que se
+     pueden combinar. **Vacío = todos**, que es la regla de la pieza: no hay un
+     chip «Todo» que compita con los otros nueve. */
+  const [tiposElegidos, setTiposElegidos] = useState<readonly TipoLineaDeVida[]>([]);
   const [ventana, setVentana] = useState<VentanaVitales>('semana');
   // los paseos crudos: la ventana se computa acá (ver nota de API)
   const [paseosTrack, setPaseosTrack] = useState<PaseoConTrack[] | null>(null);
@@ -1769,20 +1781,24 @@ export default function PerfilDeMascota() {
               // el chip de un servicio SOLO se dibuja si existe en el
               // expediente (la lámina: SV_PRES) — Ley 23: la puerta no
               // ofrece lo que no tiene.
-              const FAMILIAS: { codigo: FiltroHistoria; etiqueta: string; icono: IconoNombre; capa: 'identidad' | 'cuidado' }[] = [
-                { codigo: 'salud', etiqueta: t('hogar.filtroSalud'), icono: 'veterinaria', capa: 'identidad' },
-                { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo', capa: 'cuidado' },
-                { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming', capa: 'cuidado' },
-                { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training', capa: 'cuidado' },
-                // P4 · LA BITÁCORA ENTRA POR SU HISTORIA. Su chip vive en la
-                // MISMA fila que los oficios y se dibuja con la misma regla
-                // (Ley 23: la puerta no ofrece lo que no tiene) — solo si hay
-                // entradas. Su capa es identidad y no cuidado: lo que la
-                // familia observa es del EXPEDIENTE, no de un servicio.
-                { codigo: 'bitacora', etiqueta: t('hogar.filtroBitacora'), icono: 'caso', capa: 'identidad' },
-              ];
-              const presentes = FAMILIAS.filter((f) => items.some((it) => FAMILIA_DE_TIPO[it.tipo] === f.codigo));
-              const filtrados = filtroHistoria === 'todo' ? items : items.filter((it) => FAMILIA_DE_TIPO[it.tipo] === filtroHistoria);
+              /* ☠️ Acá vivía `FAMILIAS`, la tabla de los cinco chips por OFICIO.
+                 Murió con el vocabulario nuevo: sus cinco códigos no existen en
+                 `TipoLineaDeVida` y su único consumidor era `presentes`, que se
+                 fue con ella. *Una tabla que ya no clasifica nada es una lista
+                 esperando que alguien la vuelva a creer* (Ley 37). El canto de
+                 la fila NO sale de acá y sigue vivo: lo da `FAMILIA_DE_TIPO`. */
+              /* Los tipos que ESTA mascota tiene, en el orden de los nueve: la
+                 puerta no ofrece lo que no tiene (Ley 23). */
+              const presentesTipo = ORDEN_TIPOS.filter((tp) =>
+                items.some((it) => tipoDeLineaDeVida(it.tipo) === tp),
+              );
+              const filtrados =
+                tiposElegidos.length === 0
+                  ? items
+                  : items.filter((it) => {
+                      const tp = tipoDeLineaDeVida(it.tipo);
+                      return tp !== null && tiposElegidos.includes(tp);
+                    });
               const visibles = historiaRevelada ? filtrados : filtrados.slice(0, 3);
               return (
                 <>
@@ -1835,15 +1851,19 @@ export default function PerfilDeMascota() {
                     </Tarjeta>
                   </View>
                   ) : null}
-                  {presentes.length > 1 ? (
-                    <FiltroPills
-                      activo={filtroHistoria}
-                      onCambio={(c) => setFiltroHistoria(c)}
-                      opciones={[
-                        { codigo: 'todo' as FiltroHistoria, etiqueta: t('hogar.filtroTodo'), icono: 'huella' as const, capa: null },
-                        ...presentes.map((f) => ({ codigo: f.codigo, etiqueta: f.etiqueta, icono: f.icono, capa: f.capa })),
-                      ]}
-                    />
+                  {presentesTipo.length > 1 ? (
+                    <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[2] }}>
+                      <FiltrosLineaDeVida
+                        tipos={presentesTipo}
+                        elegidos={tiposElegidos}
+                        voz={(tp) => t(`perfil.lv_${tp}` as 'perfil.lv_salud')}
+                        onAlternar={(tp) =>
+                          setTiposElegidos((prev) =>
+                            prev.includes(tp) ? prev.filter((x) => x !== tp) : [...prev, tp],
+                          )
+                        }
+                      />
+                    </View>
                   ) : null}
                   <View style={{ paddingHorizontal: spacing[5], gap: spacing[2.5], marginTop: spacing[3] }}>
                     {filtrados.length === 0 ? (

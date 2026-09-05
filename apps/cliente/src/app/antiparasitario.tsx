@@ -49,7 +49,6 @@ import {
   Encabezado,
   EvitaTeclado,
   SelectorOpcion,
-  type Plaga,
   Texto,
   radius,
   spacing,
@@ -60,6 +59,7 @@ import {
 import {
   listarProductosDespensa,
   registrarDesparasitacion,
+  type PlagaTratada,
   type TipoDesparasitacion,
 } from '@epetplace/api';
 
@@ -87,7 +87,7 @@ export default function RegistrarAntiparasitario() {
   const [fecha, setFecha] = useState<CampoFechaValor>({ fecha: hoyLocal(), precision: 'exacta' });
   const [proxima, setProxima] = useState<CampoFechaValor | undefined>(undefined);
   /** Contra qué protege. Varias a la vez; vacío = no se declaró. */
-  const [plagas, setPlagas] = useState<readonly Plaga[]>([]);
+  const [plagas, setPlagas] = useState<readonly PlagaTratada[]>([]);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   /** `null` = todavía no contestó la vitrina. `[]` = contestó y no hay.
@@ -144,16 +144,13 @@ export default function RegistrarAntiparasitario() {
       tipo,
       fecha_aplicada: fecha.fecha,
       ...(proxima !== undefined ? { fecha_proxima: proxima.fecha } : null),
-      /* 🔴 **VIAJA CUANDO EL WRAPPER LO ACEPTE.** Hoy `registrarDesparasitacion`
-         (`salud.ts:53`) toma producto, tipo, fechas y notas — **no `plagas`**—,
-         y medí la consecuencia: sembré una fila por esta misma puerta y quedó
-         con `plagas: null`, así que la señal del Hogar —que se arma abriendo
-         ese array— no puede aportar ninguna. La pantalla ya las junta; la
-         línea de abajo se descomenta el día que A abra la puerta, y con eso la
-         tira muestra la plaga sin tocar nada más.
-         *Se deja escrito acá y no en una nota aparte porque el que abra el
-         wrapper va a estar leyendo este archivo.* */
-      // ...(plagas.length > 0 ? { plagas: [...plagas] } : null),
+      /* ✅ **YA VIAJAN** (A, `67661707`). La línea estuvo escrita y comentada
+         una parte entera, con la medición al lado: yo había sembrado una fila
+         por esta misma puerta y quedaba con `plagas: null`.
+         🔴 **Vacío NO se manda**: el wrapper rebota `plagas_vacio` porque `{}`
+         diría «no trataba ninguna», que es distinto de «no se declaró». Sin
+         selección, la fila queda como antes y el motor lo sabe representar. */
+      ...(plagas.length > 0 ? { plagas: [...plagas] } : null),
     });
     setGuardando(false);
     if (!r.ok) {
@@ -257,7 +254,7 @@ export default function RegistrarAntiparasitario() {
             seleccionadas={[...plagas]}
             onSelect={(codigo) =>
               setPlagas((prev) =>
-                prev.includes(codigo as Plaga) ? prev.filter((x) => x !== codigo) : [...prev, codigo as Plaga],
+                prev.includes(codigo as PlagaTratada) ? prev.filter((x) => x !== codigo) : [...prev, codigo as PlagaTratada],
               )
             }
           />

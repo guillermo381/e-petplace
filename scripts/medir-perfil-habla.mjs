@@ -75,6 +75,28 @@ for (const c of CASOS) {
     (x, k) => /^Sin registro$/i.test(x) && /^(vacunas|desparasitación|alergias)/.test(lineas[k + 1] ?? ''),
   );
   di(`  fila de ausencias: ${iAus >= 0 ? lineas[iAus + 1] : '(no aparece)'}`);
+  /* ── LOS NUEVE FILTROS: que estén, y que FILTREN ─────────────────────── */
+  if (c.quien === 'Thor') {
+    const NUEVE = ['Salud', 'Vacunas', 'Antiparasitario', 'Peso', 'Paseos', 'Estética', 'Adiestramiento', 'Guardería', 'Recuerdos'];
+    const chips = await page.evaluate(() =>
+      [...document.querySelectorAll('[role="button"], [role="checkbox"]')].map((e) => (e.getAttribute('aria-label') ?? e.textContent ?? '').trim()),
+    );
+    const suyos = NUEVE.filter((n) => chips.includes(n));
+    di(`  filtros a la vista: ${suyos.join(' · ') || 'ninguno'}`);
+    /* Filtrar de verdad: se cuentan las filas antes y después de tocar uno. */
+    const filas = async () =>
+      await page.evaluate(() => document.body.innerText.split('\n').filter((x) => /^(Recibió|Sesión|Paseo|Estética|Momento|Aplicaron|Pesaron|Cargaron)/i.test(x.trim())).length);
+    const antes = await filas();
+    const uno = suyos[0];
+    if (uno !== undefined) {
+      await page.getByRole('checkbox', { name: uno, exact: true }).first().click().catch(async () => {
+        await page.getByText(uno, { exact: true }).first().click().catch(() => {});
+      });
+      await page.waitForTimeout(2000);
+      const despues = await filas();
+      di(`  al tocar «${uno}»: ${antes} filas → ${despues} ${despues < antes ? '✓ filtra' : despues === antes ? '(no cambió)' : '(subió)'}`);
+    }
+  }
   await page.screenshot({ path: `docs/loop/S113-C-perfil-${c.quien}.png` });
 }
 
