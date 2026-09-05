@@ -383,6 +383,30 @@ t('descartada sin nombre DICE cuál era, no queda muda',
    dos deja el foco en la última y la pantalla salta al fondo. */
 t('el foco entra por prop y su default NO enfoca', /enfocar = false/.test(CONF), true);
 
+console.log('\n── ⑳ ROJO · LA RAZÓN LLEVA, Y EL FOCO VA AL CAMPO QUE FALTA ──');
+/* 🔴 (b) *Decirle a la persona que le faltan cuatro y dejarla buscarlas es
+   darle el trabajo dos veces: la cuenta ya sabe cuáles son.* La pieza no
+   conoce la lista —no puede scrollear— así que avisa y la pantalla lleva. */
+t('la razón lleva SÓLO con destino y con a dónde',
+  /const llevaAIncompleta = faltan === 0 && incompletas > 0 && onIrAIncompleta !== undefined/.test(CONF), true);
+t('🔴 …y con «faltan N por revisar» NO lleva: son N destinos y ninguno primero',
+  /faltan === 0 && incompletas > 0/.test(CONF), true);
+t('se dibuja como control: label con chevron (19.7)',
+  /accessibilityRole="button"[\s\S]{0,200}onPress=\{onIrAIncompleta\}/.test(CONF), true);
+t('🔴 sin el callback la línea SIGUE diciendo la razón (se pierde el atajo, no el porqué)',
+  /onIrAIncompleta\?: \(\) => void/.test(CONF), true);
+/* 🔴 (c) `autoFocus` es de `TextInput`, y el campo de la fecha es un
+   `Pressable`. *La señal visual la ve quien mira; el que no mira se queda sin
+   ella si nadie lleva el foco.* */
+t('el foco de la fecha usa la API de accesibilidad, no `autoFocus`',
+  /AccessibilityInfo\.setAccessibilityFocus\(nodo\)/.test(CONF), true);
+t('🔴 …y sólo cuando la pantalla lo pide Y lo que falta es la fecha',
+  /if \(!enfocar \|\| falta !== 'fecha'\) return/.test(CONF), true);
+t('no poder enfocar NO tumba la fila: el campo igual está señalado',
+  /if \(nodo != null\) AccessibilityInfo/.test(CONF), true);
+t('🔴 la razón viaja en la etiqueta del campo: quien no ve el borde, la oye',
+  /`\$\{c\.etiqueta\} · \$\{vozIncompleta\}`/.test(CONF), true);
+
 console.log('\n── ⑮ ROJO · LOS CONSUMIDORES DE `main`, QUE ESTE ÁRBOL NO PUEDE VER ──');
 /* 🔴 **ESTE BRAZO NACE DE UN DAÑO, no de una precaución.**
  * La adenda cambió el contrato de dos piezas y **dejó `main` en rojo**: el

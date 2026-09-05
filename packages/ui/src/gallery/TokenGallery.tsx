@@ -3586,6 +3586,7 @@ function GaleriaInterna() {
                 vozSinNombre="No pude leer cuál es; escribila vos"
                 incompleta="fecha"
                 vozIncompleta="Falta la fecha de aplicación"
+                enfocar
                 tocada={false}
                 onConfirmar={() => {}}
                 onEditar={() => {}}
@@ -3596,6 +3597,7 @@ function GaleriaInterna() {
                 vozGuardar={(n) => `Guardar ${n} vacunas`}
                 vozFaltan={(n) => `faltan ${n} por revisar`}
                 vozIncompletas={(n) => `${n} por completar`}
+                onIrAIncompleta={() => {}}
                 vozNinguna="No queda ninguna para guardar"
                 onGuardar={() => {}}
               />
@@ -3608,6 +3610,7 @@ function GaleriaInterna() {
                 vozGuardar={(n) => `Guardar ${n} vacunas`}
                 vozFaltan={(n) => `faltan ${n} por revisar`}
                 vozIncompletas={(n) => `${n} por completar`}
+                onIrAIncompleta={() => {}}
                 vozNinguna="No queda ninguna para guardar"
                 onGuardar={() => {}}
               />

@@ -66,8 +66,8 @@
  * pieza —*«En el carnet también figuran…»*, en tinta y sin acción—.
  */
 
-import { useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { AccessibilityInfo, findNodeHandle, Pressable, View } from 'react-native'
 
 import { Campo } from './Campo'
 import { Texto } from './Texto'
@@ -218,6 +218,23 @@ export function FilaConfirmacionVacuna({
   const bloqueada = falta === 'nombre' ? !hayNombre : falta !== undefined
   /* Algo que falta no deja confianza que valga: **la duda es la fila entera.** */
   const revisar = pideRevision(confianza) || falta !== undefined
+  /* 🔴 **EL FOCO EN EL CAMPO QUE FALTA, y para la fecha no alcanza
+     `autoFocus`:** ése es de `TextInput`, y el campo de la fecha es un
+     `Pressable` que abre el editor. La API que la plataforma tiene para llevar
+     el foco a un control que no es input es ésta — **primera vez en la casa**,
+     y por eso queda declarado.
+     *Sin él, la persona llega desde el pie a una fila señalada y el lector de
+     pantalla sigue leyendo desde arriba: la señal visual la ve quien mira, y
+     el que no mira se queda sin ella.* */
+  const refFecha = useRef<View>(null)
+  useEffect(() => {
+    if (!enfocar || falta !== 'fecha') return
+    const nodo = findNodeHandle(refFecha.current)
+    /* Que no se pueda enfocar no puede tumbar la fila: **el campo igual está
+       señalado y dice por qué**. El foco es una ayuda, no la información. */
+    if (nodo != null) AccessibilityInfo.setAccessibilityFocus(nodo)
+  }, [enfocar, falta])
+
   const conValor = detalleVisible(campos)
   const vacios = campos.filter((c) => c.valor == null || c.valor.trim() === '')
 
@@ -303,11 +320,21 @@ export function FilaConfirmacionVacuna({
           Y si lo que falta es la fecha, **el campo se señala y dice por qué**
           — la razón pegada al hueco, no en un cartel arriba que obligue a
           buscar cuál. */}
-      {vacios.map((c) => (
+      {vacios.map((c, i) => (
         <View key={c.etiqueta} style={{ gap: spacing[1] }}>
           <Pressable
+            /* El foco va al PRIMER campo vacío cuando lo que falta es la
+               fecha: *con varios huecos, la pieza no sabe cuál es — pero el
+               primero es el que la persona ya está mirando.* */
+            ref={falta === 'fecha' && i === 0 ? refFecha : undefined}
             accessibilityRole="button"
-            accessibilityLabel={c.etiqueta}
+            /* Con la razón adentro de la etiqueta: quien no ve el borde la
+               oye. */
+            accessibilityLabel={
+              falta === 'fecha' && i === 0 && vozIncompleta !== undefined
+                ? `${c.etiqueta} · ${vozIncompleta}`
+                : c.etiqueta
+            }
             onPress={onEditar}
             style={{
               minHeight: 44,
@@ -400,6 +427,16 @@ export interface PieConfirmacionVacunasProps {
    *  a tocar una fila que ya tocó. Son dos trabajos distintos y por eso son
    *  dos cuentas con dos voces. */
   vozIncompletas: (n: number) => string
+  /** 🔴 **La razón LLEVA a la primera incompleta.** *Decirle a la persona que
+   *  le faltan cuatro y dejarla buscarlas es darle el trabajo dos veces: la
+   *  cuenta ya sabe cuáles son.* La pieza no conoce la lista —no puede
+   *  scrollear— así que **avisa y la pantalla lleva**.
+   *
+   *  ⚠️ Opcional a propósito: **sin ella la línea sigue diciendo la razón**, y
+   *  eso es lo que no puede faltar. *A diferencia de `onDescartar`, cuya
+   *  ausencia dejaba a la persona sin salida, acá lo que se pierde es un
+   *  atajo.* */
+  onIrAIncompleta?: () => void
   /** La otra razón, la que nació con el descarte: *«no queda ninguna para
    *  guardar»*. **Sin ella, una tanda toda descartada apagaría el botón en
    *  silencio** — el mismo defecto por la puerta de al lado.
@@ -412,9 +449,12 @@ export interface PieConfirmacionVacunasProps {
 /** El pie de la tanda. **Se enciende sólo con todas revisadas y al menos una
  *  que guardar, y apagado DICE cuál de las dos razones lo apaga** — *un botón
  *  apagado sin razón a la vista es el defecto.* */
-export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozIncompletas, vozNinguna, onGuardar }: PieConfirmacionVacunasProps) {
+export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozIncompletas, vozNinguna, onIrAIncompleta, onGuardar }: PieConfirmacionVacunasProps) {
   const { theme } = useTheme()
   const { faltan, incompletas, aGuardar, listo } = resumenDeLaTanda(filas)
+  /* Lleva SOLO cuando hay destino y hay a dónde: *«faltan 3 por revisar» son
+     tres destinos y ninguno primero; «4 por completar» tiene una primera.* */
+  const llevaAIncompleta = faltan === 0 && incompletas > 0 && onIrAIncompleta !== undefined
 
   /* 🔴 **TANDA VACÍA ⇒ EL PIE NO SE DIBUJA**, y no es lo mismo que la tanda
      toda descartada.
@@ -437,7 +477,20 @@ export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozIncomp
           por completar»), y al final la que no se arregla («no queda
           ninguna»). *Decir una cuando pasa otra manda a la persona a trabajar
           donde ya no hay nada que hacer.* */}
-      {listo ? null : (
+      {listo ? null : llevaAIncompleta ? (
+        /* 🔴 **La razón que lleva es un control, y se dibuja como uno.** Label
+           con chevron: *«información despliega, acción lleva»* (19.7) — y
+           llevar dentro de la misma pantalla sigue siendo llevar. */
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={vozIncompletas(incompletas)}
+          onPress={onIrAIncompleta}
+          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}
+        >
+          <Texto variante="apoyo">{vozIncompletas(incompletas)}</Texto>
+          <Texto variante="apoyo">›</Texto>
+        </Pressable>
+      ) : (
         <Texto variante="apoyo">
           {faltan > 0 ? vozFaltan(faltan) : incompletas > 0 ? vozIncompletas(incompletas) : vozNinguna}
         </Texto>
