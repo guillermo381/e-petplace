@@ -15,7 +15,9 @@
 // Un arnés que sólo prueba el camino feliz no está midiendo.
 
 import { llamarModelo } from '../_shared/ia/mod.ts'
-import { TIMEOUT_MS } from '../_shared/ia/modelos.ts'
+import {
+  CACHEAR_SISTEMA, EDGES, ESFUERZO, MAX_TOKENS, MODELOS, PENSAR, PIEZAS, TIMEOUT_MS,
+} from '../_shared/ia/modelos.ts'
 
 Deno.env.set('ANTHROPIC_API_KEY', 'sk-ant-FALSA-DE-PRUEBA')
 Deno.env.set('SUPABASE_URL', 'https://proyecto-falso.supabase.co')
@@ -78,6 +80,34 @@ let rojos = 0
 function exigir(nombre: string, condicion: boolean, visto?: unknown) {
   if (condicion) { verdes++; console.log(`  OK   ${nombre}`) }
   else { rojos++; console.log(`  ROJO ${nombre}${visto === undefined ? '' : ` — visto: ${JSON.stringify(visto)}`}`) }
+}
+
+console.log('\n== 0 · CENSO: toda pieza en las SIETE tablas ==')
+console.log('  (nace de un defecto real: al agregar `raza` quedaron DOS tablas')
+console.log('   incompletas. deno lo dijo con dos TS2741 y el gate de edges dio')
+console.log('   VERDE — TS2741 cae en su bucket «fuera de clase». Y TIMEOUT_MS en')
+console.log('   undefined hace setTimeout(fn, undefined), que dispara a los 0 ms:')
+console.log('   toda llamada de esa pieza se habria abortado al instante.)')
+{
+  // `ESFUERZO` admite `null` a proposito, asi que se pregunta por la CLAVE, no
+  // por el valor: `undefined` es el hueco, `null` es una decision.
+  const tablas: [string, Record<string, unknown>][] = [
+    ['MODELOS', MODELOS], ['MAX_TOKENS', MAX_TOKENS], ['EDGES', EDGES],
+    ['TIMEOUT_MS', TIMEOUT_MS], ['PENSAR', PENSAR], ['ESFUERZO', ESFUERZO],
+    ['CACHEAR_SISTEMA', CACHEAR_SISTEMA],
+  ]
+  for (const [nombre, tabla] of tablas) {
+    const faltan = PIEZAS.filter((p) => !Object.prototype.hasOwnProperty.call(tabla, p))
+    exigir(`${nombre} tiene las ${PIEZAS.length} piezas`, faltan.length === 0, faltan)
+  }
+  // Control positivo del censo: sabe encontrar un hueco cuando lo hay.
+  const conHueco = { ...MODELOS } as Record<string, unknown>
+  delete conHueco[PIEZAS[PIEZAS.length - 1]]
+  exigir('el censo SABE ver un hueco (control positivo)',
+    PIEZAS.filter((p) => !Object.prototype.hasOwnProperty.call(conHueco, p)).length === 1)
+  // Y que ningun timeout sea undefined/0: el modo de falla exacto de arriba.
+  exigir('ningun TIMEOUT_MS es 0 ni undefined',
+    PIEZAS.every((p) => typeof TIMEOUT_MS[p] === 'number' && TIMEOUT_MS[p] > 0))
 }
 
 const pedidoBase = { pieza: 'documento' as const, mensajes: [{ rol: 'user' as const, texto: 'hola' }], salida: 'json' as const }

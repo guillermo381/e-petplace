@@ -16,8 +16,25 @@
 // proveedor. El día que un modelo cambie, cambia UNA celda de esta tabla y
 // ninguna edge se entera. Ése es todo el punto de la puerta única.
 
-/** Vocabulario CERRADO. Una pieza = un trabajo del producto. */
-export type Pieza = 'carnet' | 'documento' | 'nota_clinica' | 'presencia'
+/**
+ * Vocabulario CERRADO. Una pieza = un trabajo del producto.
+ *
+ * 🔴 ES UN ARRAY EN RUNTIME, y el tipo se DERIVA de él — no al revés. La razón
+ * es un defecto real de S113-D-1.2: al agregar `raza` quedaron **dos tablas
+ * incompletas** (`TIMEOUT_MS` sin `raza`, `CACHEAR_SISTEMA` sin `presencia`).
+ * `deno check` lo dijo con dos `TS2741`… y **el gate de la casa dio VERDE**,
+ * porque `TS2741` cae en su bucket «fuera de clase».
+ *
+ * Y el daño no era cosmético: `TIMEOUT_MS.raza` en `undefined` hace
+ * `setTimeout(fn, undefined)`, **que dispara a los 0 ms** ⇒ toda sugerencia de
+ * raza se habría abortado al instante, en producción.
+ *
+ * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
+ * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
+ */
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza'] as const
+
+export type Pieza = typeof PIEZAS[number]
 
 /** El modelo por pieza. **Medido, no elegido** — ver cabecera. */
 export const MODELOS: Record<Pieza, string> = {
@@ -25,6 +42,12 @@ export const MODELOS: Record<Pieza, string> = {
   documento: 'claude-sonnet-5',
   nota_clinica: 'claude-sonnet-5',
   presencia: 'claude-sonnet-5',
+  // 🔴 NACE EN HAIKU, no en Sonnet, y es una decisión de la mesa que E
+  // confirma con número. La razón por la que es plausible: decir «esto se
+  // parece a un labrador» eligiendo de una lista de 44 nombres es una tarea de
+  // RECONOCIMIENTO, no de atribución espacial fina — que es justo donde S48
+  // midió que Haiku topaba. **No es lo mismo leer un carnet que mirar un perro.**
+  raza: 'claude-haiku-4-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -39,6 +62,9 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   documento: 4000,
   nota_clinica: 16000,
   presencia: 4000,
+  // La salida son 3 códigos y dos booleanos: ~100 tokens. 500 es aire de sobra
+  // y deja el truncado como red, no como peaje.
+  raza: 500,
 }
 
 /**
@@ -51,6 +77,7 @@ export const EDGES: Record<Pieza, string> = {
   documento: 'extract-documento',
   nota_clinica: 'estructurar-nota-clinica',
   presencia: 'escribir-presencia',
+  raza: 'sugerir-raza',
 }
 
 /**
@@ -112,6 +139,10 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   documento: 60_000,
   nota_clinica: 40_000,
   presencia: 10_000,
+  // ⚠️ NO MEDIDO — no hay credencial de Anthropic en esta pista. Una imagen
+  // chica con salida de ~100 tokens en Haiku debería estar muy por debajo,
+  // pero «debería» no es un número. Bloqueante nombrado: `ia_uso.latencia_ms`.
+  raza: 30_000,
 }
 
 /**
@@ -199,6 +230,11 @@ export const PENSAR: Record<Pieza, boolean> = {
   documento: true,
   nota_clinica: true,
   presencia: true,
+  // Haiku no piensa si no se le dice, así que esto NO cambia el cuerpo que le
+  // sale hoy. Está en `false` explícito para que, el día que E la corra contra
+  // Sonnet con el override, la comparación siga siendo justa: los dos sin
+  // pensar, una sola variable moviéndose.
+  raza: false,
 }
 
 /**
@@ -211,6 +247,7 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   documento: null,
   nota_clinica: null,
   presencia: null,
+  raza: null,
 }
 
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
@@ -218,4 +255,9 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   documento: false,
   nota_clinica: false,
   presencia: true,
+  // El catálogo de razas ES estable entre llamadas de la misma especie… pero
+  // viaja en el mensaje del usuario junto a la foto, y la foto va PRIMERA. No
+  // hay prefijo estable que cachear. Si algún día el catálogo se mueve al
+  // bloque `system`, esto se vuelve a mirar CON número.
+  raza: false,
 }
