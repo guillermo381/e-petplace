@@ -26,6 +26,9 @@
  *   --control    valida el arnés SIN gastar una llamada. Incluye el rojo
  *                pedido: una raza inventada tiene que volver vacía.
  *   --construir  lee `cat_razas` y escribe el .jsonl del Batch. Cero llamadas.
+ *   --s113       (con cualquiera de los otros) trabaja sobre las filas nuevas
+ *                de S113 en vez de sobre todas las activas, y escribe en
+ *                archivos con sufijo `-s113` para no pisar la primera tanda.
  *   --enviar     LO MANDA. Gasta plata. Exige ANTHROPIC_API_KEY.
  *   --recoger ID baja los resultados, los VALIDA y escribe el archivo que A
  *                carga. **A lo guarda con `activo=false` hasta revisión.**
@@ -41,6 +44,15 @@ import { join } from 'node:path';
 // *Un control que necesita credenciales para correr es un control que no se corre.*
 
 const DIR = '.ia-conjuntos';
+
+// ── LA SEGUNDA TANDA ────────────────────────────────────────────────────────
+// `--s113` cambia DOS cosas a la vez, y por eso es UNA bandera y no dos: el
+// filtro del catálogo (las filas nuevas, no las activas) y el nombre de los
+// archivos. Si sólo cambiara el filtro, escribiría encima del .jsonl y del
+// contenido de la primera tanda — que es trabajo pagado y ya recogido.
+const S113 = process.argv.includes('--s113');
+const SUF = S113 ? '-s113' : '';
+const FILTRO = S113 ? 'creado_en_s113=is.true' : 'activo=eq.true';
 const MODELO = 'claude-sonnet-5';
 const MAX_TOKENS = 1500;
 
@@ -161,7 +173,7 @@ if (tiene('--control')) {
 if (tiene('--construir')) {
   const { claveServicio, URL_BASE } = await import('../ia-conjuntos/lib-conjuntos.mjs');
   const k = claveServicio();
-  const res = await fetch(`${URL_BASE}/rest/v1/cat_razas?select=slug,nombre,especie&activo=eq.true&order=especie,slug`,
+  const res = await fetch(`${URL_BASE}/rest/v1/cat_razas?select=slug,nombre,especie&${FILTRO}&order=especie,slug`,
     { headers: { Authorization: `Bearer ${k}`, apikey: k } });
   if (!res.ok) throw new Error(`cat_razas ${res.status}`);
   const razas = await res.json();
@@ -179,16 +191,21 @@ if (tiene('--construir')) {
   }));
 
   mkdirSync(DIR, { recursive: true });
-  const ruta = join(DIR, 'batch-razas.jsonl');
+  const ruta = join(DIR, `batch-razas${SUF}.jsonl`);
   writeFileSync(ruta, peticiones.map((p) => JSON.stringify(p)).join('\n') + '\n');
 
-  const entrada = peticiones.reduce((a, p) => a + Math.ceil(p.params.messages[0].content[0].text.length / 4), 0);
-  const salidaEst = razas.length * 600;
+  // 🔴 Los dos divisores salen de MEDIR la primera tanda, no de la regla de
+  // pulgar: 100 fichas gastaron 95.047 de entrada y 85.761 de salida, o sea
+  // **950 y 858 por ficha**. La estimación vieja usaba `chars/4` (la regla del
+  // inglés) y 600 de salida, y quedó **49 % por debajo del costo real**.
+  // El español gasta ~3 caracteres por token, no 4.
+  const entrada = peticiones.reduce((a, p) => a + Math.ceil(p.params.messages[0].content[0].text.length / 3), 0);
+  const salidaEst = razas.length * 858;
   console.log(`\n${razas.length} razas → ${ruta}`);
   console.log(`  entrada ≈ ${entrada} tokens · salida estimada ≈ ${salidaEst} tokens`);
   console.log(`  costo estimado con Batch (mitad): ~$${((entrada / 1e6) * 2 * 0.5 + (salidaEst / 1e6) * 10 * 0.5).toFixed(3)}`);
-  console.log('  ⚠️ la salida es ESTIMADA (600 tok/ficha). El costo real sale del `usage` del batch.');
-  console.log('\n  para mandarlo:  node scripts/ia/contenido-razas.mjs --enviar\n');
+  console.log('  ⚠️ la salida es ESTIMADA (858 tok/ficha, medido en la 1ª tanda). El real sale del `usage`.');
+  console.log(`\n  para mandarlo:  node scripts/ia/contenido-razas.mjs --enviar${S113 ? ' --s113' : ''}\n`);
   process.exit(0);
 }
 
@@ -212,7 +229,7 @@ if (tiene('--enviar')) {
     console.error('  Este modo GASTA PLATA y no corre a ciegas.\n');
     process.exit(2);
   }
-  const ruta = join(DIR, 'batch-razas.jsonl');
+  const ruta = join(DIR, `batch-razas${SUF}.jsonl`);
   if (!existsSync(ruta)) { console.error(`\nPARA: no existe ${ruta}. Corré --construir primero.\n`); process.exit(2); }
   const requests = readFileSync(ruta, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
   const r = await fetch('https://api.anthropic.com/v1/messages/batches', {
@@ -223,7 +240,7 @@ if (tiene('--enviar')) {
   const j = await r.json();
   if (!r.ok) { console.error(`\nPARA: el batch rebotó ${r.status}: ${JSON.stringify(j).slice(0, 400)}\n`); process.exit(1); }
   console.log(`\nbatch creado: ${j.id} · ${requests.length} peticiones`);
-  console.log(`  seguí con:  node scripts/ia/contenido-razas.mjs --recoger ${j.id}\n`);
+  console.log(`  seguí con:  node scripts/ia/contenido-razas.mjs --recoger ${j.id}${S113 ? ' --s113' : ''}\n`);
   process.exit(0);
 }
 
@@ -307,7 +324,7 @@ if (iRec !== -1) {
   console.log(`  COSTO REAL (batch, mitad de precio): $${costoReal.toFixed(4)}`);
 
   mkdirSync(DIR, { recursive: true });
-  const salida = join(DIR, 'contenido-razas.json');
+  const salida = join(DIR, `contenido-razas${SUF}.json`);
   writeFileSync(salida, JSON.stringify({ generado_el, modelo: MODELO, fichas, rechazadas }, null, 2));
   const vacias = fichas.filter((f) => !f.conocida).length;
   console.log(`\n${fichas.length} fichas válidas (${vacias} vacías por raza no reconocida) · ${rechazadas.length} rechazadas`);
