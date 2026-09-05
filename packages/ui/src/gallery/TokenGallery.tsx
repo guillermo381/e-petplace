@@ -210,10 +210,11 @@ const VOZ_TIPO: Record<TipoLineaDeVida, string> = {
   paseos: 'Paseos',
   estetica: 'Estética',
   adiestramiento: 'Adiestramiento',
+  guarderia: 'Guardería',
   recuerdos: 'Recuerdos',
 }
 const TIPOS_VIDA: readonly TipoLineaDeVida[] = [
-  'salud', 'vacunas', 'antiparasitario', 'peso', 'paseos', 'estetica', 'adiestramiento', 'recuerdos',
+  'salud', 'vacunas', 'antiparasitario', 'peso', 'paseos', 'estetica', 'adiestramiento', 'guarderia', 'recuerdos',
 ]
 
 /** Los filtros necesitan estado para que la multi-selección se pueda tocar. */
