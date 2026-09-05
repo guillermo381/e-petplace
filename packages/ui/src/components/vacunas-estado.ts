@@ -209,21 +209,37 @@ export function revisada({ tocada, descartada }: FilaDeLaTanda): boolean {
  */
 export function resumenDeLaTanda(filas: readonly FilaDeLaTanda[]): {
   faltan: number
-  /** Revisadas, pero les falta un dato. **Cuenta aparte y voz aparte.** */
+  /** Les falta un dato, estén tocadas o no. **Cuenta aparte y voz aparte, y
+   *  DISJUNTA de `faltan`**: cada fila cae en exactamente una. */
   incompletas: number
   aGuardar: number
   listo: boolean
 } {
-  /* Una sola regla de conteo: la de `faltanPorTocar`, alimentada con
-     `revisada` (`L-175`: se ensancha lo que existe, no se copia). */
-  const faltan = faltanPorTocar(filas.map(revisada))
-  /* 🔴 Lo incompleto se cuenta SOLO si sobrevivió al descarte: *descartarla la
-     resuelve —ahí no se guarda nada—, así que pedir que se complete algo que
-     ya se tiró es mandar a trabajar sobre lo que nadie va a mirar.* */
-  const incompletas = filas.filter((f) => f.descartada !== true && estaIncompleta(f)).length
+  /* 🔴 **LAS DOS CUENTAS SON DISJUNTAS, Y ESO ES LA REGLA — NO UN DETALLE.**
+     ⏪ No lo eran: una fila incompleta caía en las DOS —`faltan` la contaba por
+     no estar tocada, `incompletas` por faltarle el dato— y la voz elegía la
+     primera. Con el carnet real del founder, **cuatro filas sin fecha decían
+     «faltan 4 por revisar»**.
+     ☠️ Y no era sólo la voz equivocada: **«por completar» era INALCANZABLE.**
+     El confirmar de una fila incompleta está `disabled`, así que **la persona
+     no puede tocarla nunca** ⇒ jamás sale de `faltan` ⇒ la otra voz no se
+     podía ver. *Dos piezas correctas por separado —el botón que protege y la
+     cuenta que nombra— muertas juntas.*
+     La cura es que cada fila caiga en **exactamente una** cuenta: *dos cuentas
+     que se solapan no son dos cuentas — son una contada dos veces con nombres
+     distintos.* */
+  const vivas = filas.filter((f) => f.descartada !== true)
+  /* Lo incompleto, entre TODAS las que sobrevivieron al descarte —tocadas o
+     no—: *descartarla la resuelve, así que pedir que se complete algo que ya
+     se tiró es mandar a trabajar sobre lo que nadie va a mirar.* */
+  const incompletas = vivas.filter(estaIncompleta).length
+  /* Y «por revisar» son **las restantes sin toque**. Sigue contándolas
+     `faltanPorTocar` —una sola regla de conteo, `L-175`— pero alimentada con
+     lo que de verdad le toca. */
+  const faltan = faltanPorTocar(vivas.filter((f) => !estaIncompleta(f)).map(revisada))
   /* Incompleta igual cuenta para guardar: **no está descartada, le falta el
      dato** — y lo que la frena es `incompletas`, no este número. */
-  const aGuardar = filas.filter((f) => f.descartada !== true).length
+  const aGuardar = vivas.length
   return { faltan, incompletas, aGuardar, listo: faltan === 0 && incompletas === 0 && aGuardar > 0 }
 }
 
