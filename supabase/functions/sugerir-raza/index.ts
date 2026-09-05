@@ -74,6 +74,8 @@ const MAX_BASE64_CHARS = Math.ceil((2 * 1024 * 1024) / 3) * 4
 const MODELOS_MEDIBLES = ['claude-haiku-4-5', 'claude-sonnet-5']
 
 const CONFIANZAS = ['alta', 'media', 'baja'] as const
+
+interface FilaRaza { slug: string; nombre: string }
 const TOPE_CANDIDATAS = 3
 
 interface Candidata {
@@ -86,18 +88,37 @@ interface Candidata {
  * no puede proponer nada que no esté escrito abajo, y lo que devuelva se
  * verifica contra esa misma lista antes de salir.
  */
-function construirPrompt(especie: string, codigos: string[]): string {
+/**
+ * 🔴 NORMALIZACION (S113-D-2.7, firma del founder): minusculas, sin acentos,
+ * espacios y guiones bajos a guion medio. **El modelo devolvio «American Bully»
+ * y el codigo del catalogo es `american-bully`** — la fila era CORRECTA y se
+ * rechazaba la respuesta entera por la forma del texto.
+ *
+ * *Exigir la forma exacta de un slug es exigirle al modelo que sepa una
+ * convencion de base de datos. Lo que importa es que la raza este en el
+ * catalogo, y eso se decide despues de normalizar.*
+ */
+function normalizarSlug(v: string): string {
+  return v
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+}
+
+function construirPrompt(especie: string, catalogo: FilaRaza[]): string {
   return `Mirás la foto de una mascota y proponés a qué raza se parece, eligiendo de una lista cerrada.
 
 La especie está DECLARADA por la persona: ${especie}.
 
 ═══ LOS ÚNICOS CÓDIGOS QUE PODÉS DEVOLVER ═══
-${codigos.join(' · ')}
+${catalogo.map((r) => `  "${r.slug}"  —  ${r.nombre}`).join('\n')}
 
-Copiá el código EXACTO de esa lista, carácter por carácter, aunque te parezca
-que está mal escrito. Un código que no esté en la lista invalida la respuesta
-entera. Si ninguno se parece, devolvés la lista de candidatas VACÍA — eso es
-una respuesta correcta, no una falla.
+Devolvé el CÓDIGO de la izquierda, no el nombre de la derecha. Copialo tal cual,
+aunque te parezca que está mal escrito: los tipeos del catálogo son el valor
+válido. Si ninguna raza se parece, devolvés la lista de candidatas VACÍA — eso
+es una respuesta correcta, no una falla.
 
 ═══ LAS TRES PREGUNTAS, EN ESTE ORDEN ═══
 
@@ -194,7 +215,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(url, clave)
     const { data: filas, error: errCat } = await supabase
       .from('cat_razas')
-      .select('slug')
+      .select('slug, nombre')
       .eq('especie', especie.trim())
       .eq('activo', true)
       .order('slug')
@@ -203,7 +224,18 @@ Deno.serve(async (req) => {
       console.error('[sugerir-raza] no pude leer cat_razas:', errCat.message)
       return error('error_modelo', 'No pudimos leer el catálogo de razas.')
     }
-    const codigos = (filas ?? []).map((f) => f.slug as string)
+    const catalogo = (filas ?? []) as FilaRaza[]
+    const codigos = catalogo.map((f) => f.slug)
+    // Índice por slug NORMALIZADO: así «American Bully» encuentra a
+    // `american-bully` sin que el modelo tenga que saber la convención.
+    // La lista blanca se indexa por su forma NORMALIZADA, así que el modelo
+    // puede escribir `Yorkshire_Terrier` y resolver a `yorkshire-terrier`.
+    // Si dos slugs del catálogo colapsaran al mismo normalizado, uno quedaría
+    // inalcanzable: no puede pasar en silencio.
+    const porNormalizado = new Map(codigos.map((c) => [normalizarSlug(c), c]))
+    if (porNormalizado.size !== codigos.length) {
+      console.error(`[sugerir-raza] COLISIÓN de slugs al normalizar: ${codigos.length} códigos → ${porNormalizado.size} claves`)
+    }
     if (codigos.length === 0) {
       // Especie sin razas activas: **no se llama al modelo**. Pedirle que elija
       // de una lista vacía es gastar una llamada para que devuelva nada.
@@ -212,7 +244,7 @@ Deno.serve(async (req) => {
 
     const r = await llamarModelo({
       pieza: 'raza',
-      mensajes: [{ rol: 'user', texto: construirPrompt(especie.trim(), codigos) }],
+      mensajes: [{ rol: 'user', texto: construirPrompt(especie.trim(), catalogo) }],
       imagenes: [{ mediaType: media, base64: imagenBase64 }],
       salida: 'json',
       modelo: modeloElegido,
@@ -250,33 +282,52 @@ Deno.serve(async (req) => {
       console.error('[sugerir-raza] candidatas no es lista')
       return error('sugerencia_fallida', 'La respuesta no cumple el contrato.')
     }
-    if (d.candidatas.length > TOPE_CANDIDATAS) {
-      console.error(`[sugerir-raza] ${d.candidatas.length} candidatas, tope ${TOPE_CANDIDATAS}`)
-      return error('sugerencia_fallida', 'La respuesta no cumple el contrato.')
-    }
+    // ── 🔴 UNA CANDIDATA QUE NO SIRVE SE DESCARTA; NO TUMBA LA RESPUESTA ────
+    // Firma del founder (S113-D-2.7) tras verlo en vivo: el modelo devolvio
+    // «American Bully» y el codigo es `american-bully`. **La raza estaba bien**
+    // y se rechazaba todo por la forma del texto. Ahora se normaliza primero, y
+    // lo que igual no encuentra su codigo **se descarta solo**.
+    //
+    // *Devolver dos candidatas buenas y decir que se descarto una es mas util
+    // que devolver un error: la persona elige entre lo que hay.* Si no queda
+    // ninguna, `candidatas: []` con 200 — que ya era una respuesta valida.
     const candidatas: Candidata[] = []
+    const descartadas: { valor: string; motivo: string }[] = []
     const vistos = new Set<string>()
     for (const c of d.candidatas) {
       if (typeof c !== 'object' || c === null) {
-        return error('sugerencia_fallida', 'La respuesta no cumple el contrato.')
+        descartadas.push({ valor: String(c), motivo: 'no es un objeto' })
+        continue
       }
       const o = c as Record<string, unknown>
-      if (typeof o.raza_codigo !== 'string' || !codigos.includes(o.raza_codigo)) {
-        // El caso que este validador existe para cazar: una raza inventada, o
-        // una de OTRA especie. Con el código fuera del catálogo no hay nada que
-        // rescatar — y devolver «las que sí estaban» sería datos parciales.
-        console.error(`[sugerir-raza] código fuera del catálogo: ${String(o.raza_codigo)}`)
-        return error('sugerencia_fallida', 'La respuesta trae una raza que no es del catálogo.')
+      if (typeof o.raza_codigo !== 'string') {
+        descartadas.push({ valor: String(o.raza_codigo), motivo: 'el codigo no es texto' })
+        continue
+      }
+      // Se busca por slug normalizado: «American Bully» → `american-bully`.
+      const resuelto = porNormalizado.get(normalizarSlug(o.raza_codigo))
+      if (resuelto === undefined) {
+        descartadas.push({ valor: o.raza_codigo, motivo: 'no esta en el catalogo' })
+        continue
       }
       if (typeof o.confianza !== 'string' || !(CONFIANZAS as readonly string[]).includes(o.confianza)) {
-        return error('sugerencia_fallida', 'La respuesta no cumple el contrato.')
+        descartadas.push({ valor: o.raza_codigo, motivo: 'confianza fuera del vocabulario' })
+        continue
       }
-      if (vistos.has(o.raza_codigo)) {
-        console.error(`[sugerir-raza] código repetido: ${o.raza_codigo}`)
-        return error('sugerencia_fallida', 'La respuesta repite una raza.')
+      if (vistos.has(resuelto)) {
+        descartadas.push({ valor: o.raza_codigo, motivo: 'repetida' })
+        continue
       }
-      vistos.add(o.raza_codigo)
-      candidatas.push({ raza_codigo: o.raza_codigo, confianza: o.confianza as Candidata['confianza'] })
+      if (candidatas.length >= TOPE_CANDIDATAS) {
+        descartadas.push({ valor: o.raza_codigo, motivo: `sobra del tope de ${TOPE_CANDIDATAS}` })
+        continue
+      }
+      vistos.add(resuelto)
+      candidatas.push({ raza_codigo: resuelto, confianza: o.confianza as Candidata['confianza'] })
+    }
+    if (descartadas.length) {
+      console.error('[sugerir-raza] candidatas descartadas: ' +
+        descartadas.map((x) => `"${x.valor}" (${x.motivo})`).join(' · '))
     }
 
     // Coherencia: sin animal no puede haber candidatas. Si el modelo dice las
@@ -288,7 +339,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ candidatas, mestizo: d.mestizo, sin_animal: d.sin_animal }),
+      JSON.stringify({ candidatas, mestizo: d.mestizo, sin_animal: d.sin_animal, descartadas }),
       { status: 200, headers: JSON_HEADERS },
     )
   } catch (err) {

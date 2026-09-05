@@ -38,6 +38,11 @@ export interface SugerenciaDeRaza {
   /** No hay ningún animal en la foto. Si es `true`, `candidatas` está vacío
    *  — la edge rebota la contradicción antes de que llegue acá. */
   sin_animal: boolean;
+  /** Lo que el modelo propuso y la edge NO pudo usar, con su razón. **Una
+   *  candidata que no sirve se descarta sola: no tumba la respuesta.** Es
+   *  diagnóstico —la pantalla no tiene por qué mostrarlo— pero viaja para que
+   *  se pueda medir cuánto se está descartando. */
+  descartadas: { valor: string; motivo: string }[];
 }
 
 export interface InputSugerirRaza {
@@ -108,7 +113,7 @@ export async function sugerirRaza(
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   }
 
-  if (!esObj(data) || !Array.isArray(data.candidatas) ||
+  if (!esObj(data) || !Array.isArray(data.candidatas) || !Array.isArray(data.descartadas) ||
       typeof data.mestizo !== 'boolean' || typeof data.sin_animal !== 'boolean') {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
   }
@@ -119,7 +124,15 @@ export async function sugerirRaza(
     }
     candidatas.push({ raza_codigo: c.raza_codigo, confianza: c.confianza });
   }
-  return { ok: true, data: { candidatas, mestizo: data.mestizo, sin_animal: data.sin_animal } };
+  return {
+    ok: true,
+    data: {
+      candidatas,
+      mestizo: data.mestizo,
+      sin_animal: data.sin_animal,
+      descartadas: data.descartadas as SugerenciaDeRaza['descartadas'],
+    },
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

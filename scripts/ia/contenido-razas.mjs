@@ -34,6 +34,7 @@
  * modelo y su fecha es un texto del que nadie puede decir de dónde salió.
  */
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 // Import PEREZOSO a propósito: `lib-conjuntos.mjs` lee `supabase/.temp/project-ref`
 // al cargarse, y `--control` NO debe depender de tener el proyecto linkeado.
@@ -191,10 +192,24 @@ if (tiene('--construir')) {
   process.exit(0);
 }
 
+/** La llave de medición, del llavero, al momento. Nunca a un archivo ni a un log. */
+function llaveAnthropic() {
+  try {
+    const k = execFileSync('security',
+      ['find-generic-password', '-a', 'medicion', '-s', 'anthropic-medicion', '-w'],
+      { encoding: 'utf8' }).trim();
+    if (k.startsWith('sk-ant-')) return k;
+  } catch { /* cae al env */ }
+  const e = process.env.ANTHROPIC_API_KEY;
+  if (e && e.startsWith('sk-ant-')) return e;
+  return null;
+}
+
 if (tiene('--enviar')) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = llaveAnthropic();
   if (!key) {
-    console.error('\nPARA: falta ANTHROPIC_API_KEY. Este modo GASTA PLATA y no corre a ciegas.\n');
+    console.error('\nPARA: no encontre la llave (llavero `medicion` ni ANTHROPIC_API_KEY).');
+    console.error('  Este modo GASTA PLATA y no corre a ciegas.\n');
     process.exit(2);
   }
   const ruta = join(DIR, 'batch-razas.jsonl');
@@ -214,9 +229,9 @@ if (tiene('--enviar')) {
 
 const iRec = args.indexOf('--recoger');
 if (iRec !== -1) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = llaveAnthropic();
   const id = args[iRec + 1];
-  if (!key || !id) { console.error('\nUso: ANTHROPIC_API_KEY=... --recoger <batch_id>\n'); process.exit(2); }
+  if (!key || !id) { console.error('\nUso: --recoger <batch_id> (la llave sale del llavero)\n'); process.exit(2); }
   const cab = { 'x-api-key': key, 'anthropic-version': '2023-06-01' };
   const est = await (await fetch(`https://api.anthropic.com/v1/messages/batches/${id}`, { headers: cab })).json();
   if (est.processing_status !== 'ended') {
@@ -240,6 +255,57 @@ if (iRec !== -1) {
     // puede decir con qué modelo se escribió ni cuándo.
     fichas.push({ especie, raza_codigo: slug, ...ficha, modelo: est.model ?? MODELO, generado_el });
   }
+  // ── ia_uso: lo que este batch COSTÓ, en el mismo ledger que todo lo demás ──
+  // 🔴 Este script NO pasa por `llamarModelo` —habla directo con la API de
+  // Batches, que la puerta no cubre— así que si no escribe acá, **el gasto no
+  // existe para la casa**. Una carga de 100 llamadas que no queda en el ledger
+  // es justo el agujero que `ia_uso` vino a tapar.
+  //
+  // ⚠️ El costo va a la MITAD: la tabla de precios de E es de precio estándar y
+  // el Batch cuesta la mitad. Se declara acá porque un costo de batch cargado a
+  // precio de lista infla el ledger al doble.
+  const { claveServicio, URL_BASE } = await import('../ia-conjuntos/lib-conjuntos.mjs');
+  const clave = claveServicio();
+  // Los precios salen de la tabla de E, no de una copia mia. Si el modelo no
+  // esta en su tabla, el costo va NULL -- no se estima con un numero de memoria.
+  const mP = readFileSync('supabase/functions/_shared/ia/precios.ts', 'utf8')
+    .match(new RegExp(`'${MODELO}':\\s*\\{ entrada: ([0-9.]+), salida: ([0-9.]+)`));
+  if (!mP) console.error(`  ADVERTENCIA: ${MODELO} no esta en la tabla de precios; el costo va NULL.`);
+  const pEntrada = mP ? Number(mP[1]) : null, pSalida = mP ? Number(mP[2]) : null;
+
+  const filasUso = [];
+  for (const linea of crudo.trim().split('\n')) {
+    const res = JSON.parse(linea);
+    const ok = res.result?.type === 'succeeded';
+    const u = ok ? (res.result.message.usage ?? {}) : {};
+    const entrada = u.input_tokens ?? null, salidaTok = u.output_tokens ?? null;
+    filasUso.push({
+      pieza: 'contenido_raza',
+      modelo: MODELO,
+      // No es una edge: es una carga por Batch. Se dice lo que es.
+      edge: 'batch:contenido-razas',
+      resultado: ok ? 'ok' : 'error_proveedor',
+      tokens_entrada: entrada,
+      tokens_salida: salidaTok,
+      tokens_cache_lectura: u.cache_read_input_tokens ?? null,
+      tokens_cache_escritura: u.cache_creation_input_tokens ?? null,
+      // NULL a propósito: un batch no tiene latencia por petición, y poner la
+      // del lote entero en cada fila mentiría 100 veces.
+      latencia_ms: null,
+      costo_estimado_usd: entrada === null || pEntrada === null ? null
+        : Math.round(((entrada / 1e6) * pEntrada + ((salidaTok ?? 0) / 1e6) * pSalida) * 0.5 * 1e6) / 1e6,
+    });
+  }
+  const resUso = await fetch(`${URL_BASE}/rest/v1/ia_uso`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${clave}`, apikey: clave, 'content-type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify(filasUso),
+  });
+  const costoReal = filasUso.reduce((a, f) => a + (f.costo_estimado_usd ?? 0), 0);
+  console.log(`\nia_uso: ${resUso.ok ? filasUso.length + ' filas escritas' : 'NO se pudo escribir (' + resUso.status + ')'}`);
+  console.log(`  tokens: ${filasUso.reduce((a, f) => a + (f.tokens_entrada ?? 0), 0)} entrada · ${filasUso.reduce((a, f) => a + (f.tokens_salida ?? 0), 0)} salida`);
+  console.log(`  COSTO REAL (batch, mitad de precio): $${costoReal.toFixed(4)}`);
+
   mkdirSync(DIR, { recursive: true });
   const salida = join(DIR, 'contenido-razas.json');
   writeFileSync(salida, JSON.stringify({ generado_el, modelo: MODELO, fichas, rechazadas }, null, 2));
