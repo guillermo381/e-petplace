@@ -3163,9 +3163,16 @@ del soft launch**. Fixture viva para probarlo: `Sombra`
 reales (S113-E, 3-sep):
 · **83 s promedio, 114 s el peor.** La familia mira `EsperaDeMarca` todo ese
   rato. *Es un número de producto, no de laboratorio.*
-· **Un carnet de UNA vacuna devolvió DOCE.** Once de más. **No es imprecisión
+· ~~**Un carnet de UNA vacuna devolvió DOCE.** Once de más. **No es imprecisión
   de un campo: es inventar filas enteras** — la clase que `L-139` nombra, y la
-  peor de todas porque cada fila inventada es plausible.
+  peor de todas porque cada fila inventada es plausible.~~
+  🔴 **DESMENTIDO POR EL OBJETO (S113-A, 5-sep-2026). LA PREMISA ERA FALSA.**
+  Abrí la imagen —`carnet-1783564367515.jpg`, la misma que se midió— y **no
+  tiene una vacuna: tiene DOS PÁGINAS de «PROGRAMA DE VACUNACIÓN» llenas**, con
+  **~15 aplicaciones reales**: ocho filas en la izquierda y siete en la derecha,
+  **cada una con su sticker pegado, su fecha manuscrita, su próxima aplicación y
+  la firma del MVZ**. ⇒ **el modelo devolvió 14–15 y estaba ACERTANDO.** No
+  inventaba once: *sub-extraía una.*
 · exactitud: `nombre_vacuna` 65,6 % · `fecha_aplicada` 62,5 % · `lote` 81,3 % ·
   `veterinario` 42,1 % · `fecha_proxima` **sin muestra** (1 valor en 32).
 
@@ -3184,6 +3191,30 @@ una deuda de **costo, espera y confianza**, con instrumento ya construido
 (`pnpm ia:medir`) para decidir con número.
 
 **Disparo.** El lote 1, que es donde se compara Haiku contra esta línea base.
+
+---
+
+## ☠️ CERRADA (S113-A, 5-sep-2026) — su hallazgo central era falso
+
+**Lo que queda vivo de esta ficha** (y no es poco): los **83 s de espera**, el
+**costo real de $0,0715 medido con `ia_uso`**, y la exactitud por campo. *Todo
+eso se midió bien y sigue siendo una deuda de producto.*
+
+**Lo que muere:** la invención de filas. **La premisa «un carnet de UNA vacuna»
+nunca se verificó contra la imagen** — se heredó de un reporte a otro y llegó a
+esta ficha con la autoridad de un dato medido. **El objeto la desmiente.**
+
+🔴 **Y el costo del error no fue académico, porque esta premisa viajó:**
+① fundó el diseño del `plan_impreso` de la v2 —*«el plan impreso deja de ser una
+vacuna»*, para un carnet que **no tiene plan impreso sin usar**—; ② fundó mi
+propia `D-1030`, donde leí «`plan_impreso: []` en seis corridas» como un fallo
+**cuando era la respuesta correcta**; ③ y explicaría el costo alto sin necesidad
+de invención: *un carnet con quince aplicaciones paga quince filas de salida.*
+
+**La lección, que es de método y no de IA:** *la fila «1 vacuna de verdad» se
+citó tres veces —el parte de E, el de D, el mío— y **ninguna de las tres abrió
+la imagen**. Un dato heredado se lee igual que uno medido y no trae etiqueta.*
+Abrirla costó **una lectura de archivo**.
 
 ---
 
@@ -3263,6 +3294,35 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1031` 🟡 En web, React avisa que una prop no es de un elemento del DOM
+
+**Nace:** S113-A, 5-sep-2026, por reporte de **E**, que lo vio como toast en la
+vista web. **Dueño: la pista dueña del componente que la pasa** — para nombrarlo
+hace falta el literal del toast, que **no tengo**.
+
+**Lo que se sabe, y hasta dónde llega.** React emite `Warning: React does not
+recognize the <X> prop on a DOM element` cuando una prop **en camelCase que no
+es un atributo del DOM** llega a un `<div>`/`<span>` nativo. En RN-web pasa por
+una vía muy concreta: **una prop de negocio que se filtra por un `{...props}`**
+hasta un `View`, que en web se compila a `<div>`.
+
+**Por qué NO lo escribo como diagnóstico:** *el toast dice qué prop y en qué
+elemento, y sin ese literal cualquier culpable que nombre acá es una
+suposición.* Un aviso de React de esta clase **no rompe nada visible** —el
+render sale igual— y por eso sobrevive: nadie lo persigue.
+
+**Lo que hace falta para cerrarla, en orden:** ① **el literal del toast** (E lo
+tiene delante) · ② el componente que la pasa, abierto y citado · ③ la cura, que
+casi siempre es **desestructurar la prop antes del spread** para que no viaje al
+DOM. *No es «filtrar props desconocidas» en la pieza receptora: eso tapa la
+clase entera y esconde la próxima.*
+
+**Por qué importa aunque sea amarilla:** una prop que llega al DOM **también
+llega al snapshot y al HTML servido**, y si su valor es un dato de negocio queda
+escrito en el markup. *El aviso es cosmético; lo que lo produce, no siempre.*
+
+**Disparo:** el próximo lote que toque la web, o antes si E pega el literal.
+
 ### `D-1030` 🔴 La v2 del carnet se midió con proveedor falso, y contra el modelo real no separa
 
 **Nace:** S113-A, candidato 1.0, 5-sep-2026, con la edge v2 desplegada y seis
@@ -3322,6 +3382,36 @@ es la única que sobrevive a la primera cita.*
 aplicación **(D)** — el prompt v2 no logró en seis corridas lo que su diseño
 promete; ② la exactitud sobre los 5 carnets **(E)**, que D ya le había asignado
 y sigue siendo lo que decide si la v2.1 sale.
+
+## 🔴 CORRECCIÓN (S113-A, 5-sep-2026) — la escribí sobre una premisa falsa
+
+**Abrí el carnet.** No tiene «1 vacuna de verdad y 11 renglones de plan
+impreso»: tiene **dos páginas llenas con ~15 aplicaciones REALES**, cada una con
+sticker, fecha manuscrita, próxima aplicación y firma del MVZ. **No hay ni un
+renglón de plan sin usar.**
+
+⇒ **`plan_impreso: []` en las seis corridas NO era un fallo: era la respuesta
+CORRECTA.** Y las 14–15 filas en `vacunas` tampoco eran invención — eran el
+carnet. *Mi conclusión —«la v2 no separa contra el modelo real»— no se sostiene:
+lo que medí fue una v2 acertando sobre un caso donde no había nada que separar.*
+
+**Lo que SÍ queda de esta ficha, medido y en pie:**
+· el **techo de 2000 trunca 1 de cada 3** (salida real 1945–2087) — sigue firme,
+  y es lo que motivó el 4000 que quedó en el repo;
+· **la lección de FORMA sobre el reporte** sigue firme y ahora vale doble: *una
+  fila de tabla viaja y su advertencia se queda* — sólo que el problema no era
+  la advertencia del proveedor falso, era que **«1 vacuna de verdad» nunca se
+  midió y las tres pistas la citamos como si sí**.
+
+**Lo que se retira:** el título de esta ficha y su tabla de seis corridas como
+prueba de que la v2 falla. **No prueban eso.** Si la v2 separa o no plan de
+aplicación **sigue sin medirse**, y hace falta un carnet que de verdad tenga
+renglones sin usar — *que es exactamente lo que E tiene que elegir del conjunto.*
+
+⚠️ **Y la parte incómoda: yo hice acá lo mismo que le señalé a D.** Le marqué
+que una fila de tabla suya se leía como un hecho sobre el modelo sin serlo, y
+**construí la mía sobre un número que nunca abrí.** *La diferencia entre los dos
+casos es que el suyo llevaba su advertencia al lado y el mío no.*
 
 **Disparo:** antes de desplegar la v2.1. **Hoy lo desplegado es la v1** — ver el
 parte del candidato para la divergencia declarada entre repo y desplegado.
