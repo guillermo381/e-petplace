@@ -121,13 +121,17 @@ export function puntuarCaso(caso, devueltas) {
    * Ahora se cuenta aparte: no es un error de lectura, es una fecha fabricada. */
   let fechasFabricadas = 0;
   for (const [v, d] of pares) {
-    if ((v.precision === 'parcial' || v.fecha_parcial) && aFecha(d.fecha_aplicada)) fechasFabricadas += 1;
+    // `sin_anio` (firma ③) y `parcial` (firma ④) nombran LO MISMO: día y mes
+    // escritos, año ausente. Se tratan igual, y por eso el guard nombra las dos
+    // — un vocabulario con dos palabras para una idea rompe el contador la
+    // primera vez que alguien usa la otra.
+    if ((v.precision === 'parcial' || v.precision === 'sin_anio' || v.fecha_parcial) && aFecha(d.fecha_aplicada)) fechasFabricadas += 1;
   }
 
   return {
     campos,
     n_fechas_fabricadas: fechasFabricadas,
-    n_filas_precision_parcial: caso.verdad.filter((v) => v.precision === 'parcial' || v.fecha_parcial).length,
+    n_filas_precision_parcial: caso.verdad.filter((v) => v.precision === 'parcial' || v.precision === 'sin_anio' || v.fecha_parcial).length,
     n_visibles: caso.verdad.length,
     n_devueltas: devueltas.length,
     n_emparejadas: pares.length,

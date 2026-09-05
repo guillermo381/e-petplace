@@ -86,6 +86,7 @@ for (const doc of ['A', 'B']) {
       fecha_parcial: f.fecha_parcial ?? null,
       fecha_literal: f.fecha_literal ?? null,
       precision: f.precision ?? 'dia',
+      vencimiento_biologico: f.vencimiento_biologico ?? null,
       fecha_proxima: f.fecha_proxima ?? null,
       lote: f.lote ?? null,
       veterinario_aceptado: [],
