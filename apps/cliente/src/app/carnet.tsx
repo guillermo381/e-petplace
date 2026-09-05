@@ -231,7 +231,9 @@ export default function CarnetDeVacunas() {
         fecha_aplicada: v.fecha_aplicada,
         fecha_precision: v.fecha_aplicada_precision,
         fecha_literal: v.fecha_literal,
-        dudosaPorFecha: v.dudosa === 'fecha',
+        // Cualquier marca de la edge frena el guardado: 'fecha' (el modelo
+        // completó algo) o 'incompleta' (algo faltaba y se anuló).
+        dudosaPorFecha: v.dudosa !== null,
         fecha_proxima: v.fecha_proxima,
         veterinario: v.veterinario,
         lote: v.lote,

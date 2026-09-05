@@ -77,7 +77,7 @@ export interface VacunaExtraida {
   /** DERIVADO por la edge, no por el modelo: `'fecha'` cuando el literal no
    *  sostiene la precisión declarada — o sea, cuando el modelo completó algo.
    *  La fila viene además con `confianza: 'baja'`. */
-  dudosa: 'fecha' | null;
+  dudosa: 'fecha' | 'incompleta' | null;
   /** Sólo si está ESCRITA; jamás calculada. Mismas tres formas. */
   fecha_proxima: string | null;
   lote: string | null;
@@ -116,6 +116,11 @@ export interface FilaPlanImpreso {
 export interface LecturaDeCarnet {
   vacunas: VacunaExtraida[];
   plan_impreso: FilaPlanImpreso[];
+  /** 🔴 Filas que la edge no pudo usar, con su índice y su motivo. **Lo que
+   *  falta se marca; sólo lo MALFORMADO se descarta — y descarta esa fila,
+   *  nunca el carnet.** *Catorce vacunas reales no se pierden porque una fila
+   *  vino rota.* */
+  filas_descartadas: { lista: 'vacunas' | 'plan_impreso'; indice: number; motivo: string }[];
 }
 
 export interface InputExtraerVacunas {
@@ -202,7 +207,7 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
       : v.fecha_proxima_precision === precisionDe(v.fecha_proxima as string)) &&
     campoTexto(v.fecha_literal) &&
     campoTexto(v.fecha_proxima_literal) &&
-    (v.dudosa === null || v.dudosa === 'fecha') &&
+    (v.dudosa === null || v.dudosa === 'fecha' || v.dudosa === 'incompleta') &&
     campoTexto(v.lote) &&
     campoTexto(v.laboratorio) &&
     campoTexto(v.veterinario) &&
@@ -254,7 +259,8 @@ export async function extraerVacunasDeCarnet(
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_EXTRACCION.error_desconocido };
   }
 
-  if (!esObj(data) || !Array.isArray(data.vacunas) || !Array.isArray(data.plan_impreso)) {
+  if (!esObj(data) || !Array.isArray(data.vacunas) || !Array.isArray(data.plan_impreso) ||
+      !Array.isArray(data.filas_descartadas)) {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
   }
   const vacunas: VacunaExtraida[] = [];
@@ -290,7 +296,14 @@ export async function extraerVacunasDeCarnet(
     }
     plan_impreso.push({ nombre: fila.nombre });
   }
-  return { ok: true, data: { vacunas, plan_impreso } };
+  return {
+    ok: true,
+    data: {
+      vacunas,
+      plan_impreso,
+      filas_descartadas: data.filas_descartadas as LecturaDeCarnet['filas_descartadas'],
+    },
+  };
 }
 
 // ── Escritura (RPC registrar_vacunas_de_carnet) ──────────────────────────────

@@ -1,0 +1,161 @@
+{
+  "vacunas": [
+    {
+      "nombre": "Procyon Dog Pv",
+      "fecha_aplicada": "2023-04-02",
+      "fecha_aplicada_precision": "dia",
+      "fecha_literal": "02-4 23",
+      "fecha_proxima": null,
+      "fecha_proxima_precision": null,
+      "fecha_proxima_literal": null,
+      "lote": "190LO-01",
+      "laboratorio": "MSD Salud Animal Colombia",
+      "via": null,
+      "veterinario": null,
+      "vencimiento_biologico": "2024-04-25",
+      "vacuna_codigo": null,
+      "cubre": [],
+      "confianza": "alta",
+      "evidencia": "sticker"
+    },
+    {
+      "nombre": "Vanguard",
+      "fecha_aplicada": "2023-04-19",
+      "fecha_aplicada_precision": "dia",
+      "fecha_literal": "19-4-23",
+      "fecha_proxima": null,
+      "fecha_proxima_precision": null,
+      "fecha_proxima_literal": null,
+      "lote": null,
+      "laboratorio": "Zoetis",
+      "via": null,
+      "veterinario": null,
+      "vencimiento_biologico": null,
+      "vacuna_codigo": null,
+      "cubre": [],
+      "confianza": "media",
+      "evidencia": "sticker"
+    },
+    {
+      "nombre": "Recombitek C7",
+      "fecha_aplicada": "2023-05-10",
+      "fecha_aplicada_precision": "dia",
+      "fecha_literal": "10-5-23",
+      "fecha_proxima": null,
+      "fecha_proxima_precision": null,
+      "fecha_proxima_literal": null,
+      "lote": "470878",
+      "laboratorio": null,
+      "via": null,
+      "veterinario": null,
+      "vencimiento_biologico": "2024-03-03",
+      "vacuna_codigo": "multiple",
+      "cubre": [
+        "multiple"
+      ],
+      "confianza": "alta",
+      "evidencia": "sticker"
+    },
+    {
+      "nombre": "Nobivac Lepto",
+      "fecha_aplicada": null,
+      "fecha_aplicada_precision": null,
+      "fecha_literal": null,
+      "fecha_proxima": "--06-05",
+      "fecha_proxima_precision": "sin_anio",
+      "fecha_proxima_literal": "5/JUN",
+      "lote": "A468A01",
+      "laboratorio": "MSD",
+      "via": null,
+      "veterinario": null,
+      "vencimiento_biologico": "2023-10",
+      "vacuna_codigo": "leptospirosis",
+      "cubre": [
+        "leptospirosis"
+      ],
+      "confianza": "alta",
+      "evidencia": "sticker"
+    },
+    {
+      "nombre": "Nobivac DHPPi",
+      "fecha_aplicada": null,
+      "fecha_aplicada_precision": null,
+      "fecha_literal": null,
+      "fecha_proxima": "--06-26",
+      "fecha_proxima_precision": "sin_anio",
+      "fecha_proxima_literal": "26 JUN",
+      "lote": "0129035B01",
+      "laboratorio": "MSD",
+      "via": null,
+      "veterinario": null,
+      "vencimiento_biologico": "2024-05",
+      "vacuna_codigo": "multiple",
+      "cubre": [
+        "multiple"
+      ],
+      "confianza": "alta",
+      "evidencia": "sticker"
+    },
+    {
+      "nombre": "Nobivac KC",
+      "fecha_aplicada": "--07-15",
+      "fecha_aplicada_precision": "sin_anio",
+      "fecha_literal": "15/JUL",
+      "fecha_proxima": "2023-08-13",
+      "fecha_proxima_precision": "dia",
+      "fecha_proxima_literal": "13 Ago 2023",
+      "lote": "A127G01",
+      "laboratorio": "MSD",
+      "via": null,
+      "veterinario": null,
+      "vencimiento_biologico": "2023-11",
+      "vacuna_codigo": "tos_perreras",
+      "cubre": [
+        "tos_perreras"
+      ],
+      "confianza": "media",
+      "evidencia": "sticker"
+    },
+    {
+      "nombre": "Canigen LR",
+      "fecha_aplicada": "2024-07-06",
+      "fecha_aplicada_precision": "dia",
+      "fecha_literal": "06 07 2024",
+      "fecha_proxima": null,
+      "fecha_proxima_precision": null,
+      "fecha_proxima_literal": null,
+      "lote": "9B2F",
+      "laboratorio": "Virbac",
+      "via": null,
+      "veterinario": "MVZ [nombre redactado]",
+      "vencimiento_biologico": "2025-02",
+      "vacuna_codigo": "antirrabica",
+      "cubre": [
+        "antirrabica"
+      ],
+      "confianza": "media",
+      "evidencia": "sticker"
+    },
+    {
+      "nombre": "Canigen MHA2PPi",
+      "fecha_aplicada": "2024-07-06",
+      "fecha_aplicada_precision": "dia",
+      "fecha_literal": "06 07 2024",
+      "fecha_proxima": null,
+      "fecha_proxima_precision": null,
+      "fecha_proxima_literal": null,
+      "lote": "9B2F",
+      "laboratorio": "Virbac",
+      "via": null,
+      "veterinario": "MVZ [nombre redactado]",
+      "vencimiento_biologico": "2025-02",
+      "vacuna_codigo": "multiple",
+      "cubre": [
+        "multiple"
+      ],
+      "confianza": "media",
+      "evidencia": "sticker"
+    }
+  ],
+  "plan_impreso": []
+}
