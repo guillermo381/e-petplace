@@ -3,7 +3,7 @@
    Importa sólo el módulo puro: `vacunas-estado` no arrastra `react-native`. */
 import {
   AVISO_DIAS, detalleVisible, diasEntre, estadoDeVacuna, faltanPorTocar, pideRevision,
-  marcaDeEstado, resumenDeLaTanda, revisada, estadoDelPlan,
+  marcaDeEstado, resumenDeLaTanda, revisada, estadoDelPlan, estaIncompleta,
   type EstadoVacuna, type EstadoPlanMotor,
 } from '../packages/ui/src/components/vacunas-estado.ts';
 import { readFileSync } from 'node:fs';
@@ -91,8 +91,8 @@ t('🔴 todas ⇒ cero', faltanPorTocar([true, true]), 0);
    **Se mudó entera a `resumenDeLaTanda`** cuando el descarte probó que esa
    forma encendía el botón para guardar cero. Se mide donde vive ahora — y su
    comportamiento, en ⑨. */
-t('el pie se enciende sólo con todas revisadas Y algo que guardar',
-  /listo: faltan === 0 && aGuardar > 0/.test(sinComentarios(readFileSync(
+t('el pie se enciende sólo con todo revisado, nada incompleto Y algo que guardar',
+  /listo: faltan === 0 && incompletas === 0 && aGuardar > 0/.test(sinComentarios(readFileSync(
     new URL('../packages/ui/src/components/vacunas-estado.ts', import.meta.url), 'utf8'))), true);
 t('🔴 y apagado DICE cuántas faltan (un apagado mudo es el defecto)',
   /vozFaltan\(faltan\)/.test(CONF), true);
@@ -160,10 +160,10 @@ t('descartar ES revisar', revisada({ tocada: false, descartada: true }), true);
 t('CONTROL NEGATIVO · sin tocar ni descartar, no está revisada', revisada({ tocada: false }), false);
 t('una descartada no bloquea la tanda',
   resumenDeLaTanda([{ tocada: true }, { tocada: false, descartada: true }]),
-  { faltan: 0, aGuardar: 1, listo: true });
+  { faltan: 0, incompletas: 0, aGuardar: 1, listo: true });
 t('🔴 TODAS descartadas ⇒ NO se enciende (guardaría CERO)',
   resumenDeLaTanda([{ tocada: false, descartada: true }, { tocada: false, descartada: true }]),
-  { faltan: 0, aGuardar: 0, listo: false });
+  { faltan: 0, incompletas: 0, aGuardar: 0, listo: false });
 t('sin revisar todo, tampoco', resumenDeLaTanda([{ tocada: true }, { tocada: false }]).listo, false);
 t('la tanda vacía no se guarda', resumenDeLaTanda([]).listo, false);
 t('🔴 el pie ya no puede recibir un arreglo de booleanos suelto',
@@ -172,8 +172,11 @@ t('…recibe el estado de las filas y deriva sus dos cuentas',
   /filas: readonly FilaDeLaTanda\[\]/.test(CONF) && /resumenDeLaTanda\(filas\)/.test(CONF), true);
 t('🔴 y la etiqueta se compone con el número que el pie deriva, no con otro',
   /vozGuardar\(aGuardar\)/.test(CONF), true);
-t('🔴 apagado por «no queda ninguna» DICE eso, no «faltan N»',
-  /faltan > 0 \? vozFaltan\(faltan\) : vozNinguna/.test(CONF), true);
+/* ⏪ Eran DOS ramas y hoy son TRES: entre «faltan N» y «no queda ninguna» se
+   metió «N por completar», que es un trabajo distinto. ⑰ mide el orden entero;
+   acá queda el caso que esta sección vigila. */
+t('🔴 apagado por «no queda ninguna» DICE eso, y es la ÚLTIMA rama',
+  /incompletas > 0 \? vozIncompletas\(incompletas\) : vozNinguna/.test(CONF), true);
 t('la salida existe y es obligatoria', /onDescartar: \(\) => void/.test(CONF), true);
 t('🔴 …y NO es opcional (una casa que la omita se queda sin salida, sin error)',
   /onDescartar\?:/.test(CONF), false);
@@ -202,11 +205,11 @@ console.log('\n── ⑫ ROJO · LA TANDA VACÍA NO ES LA TANDA DESCARTADA ─�
    que es cierto SÓLO si hubo alguna. Con cero nunca hubo nada, y esa frase le
    hace creer a la persona que descartó algo. */
 t('cero filas: no falta nadie y no hay nada que guardar',
-  resumenDeLaTanda([]), { faltan: 0, aGuardar: 0, listo: false });
+  resumenDeLaTanda([]), { faltan: 0, incompletas: 0, aGuardar: 0, listo: false });
 t('🔴 …y el pie NO SE DIBUJA (un control sobre el vacío)',
   /if \(filas\.length === 0\) return null/.test(CONF), true);
 t('CONTROL · con filas descartadas SÍ se dibuja, y ahí la voz es la correcta',
-  resumenDeLaTanda([{ tocada: false, descartada: true }]), { faltan: 0, aGuardar: 0, listo: false });
+  resumenDeLaTanda([{ tocada: false, descartada: true }]), { faltan: 0, incompletas: 0, aGuardar: 0, listo: false });
 t('el corte va ANTES de dibujar nada, no envuelto en el JSX',
   /resumenDeLaTanda\(filas\)[\s\S]{0,900}?if \(filas\.length === 0\) return null[\s\S]{0,120}?return \(/.test(CONF), true);
 
@@ -265,24 +268,69 @@ console.log('\n── ⑯ ROJO · UNA FILA SIN NOMBRE NO SE PUEDE CONFIRMAR ─�
    La regla del pie vive en `revisada()` y NO en la pantalla: si dependiera de
    que la pantalla se acuerde de no marcarla, el día que se olvide se guarda
    una vacuna sin nombre y nadie se entera. */
-t('🔴 tocada PERO sin nombre ⇒ NO revisada', revisada({ tocada: true, sinNombre: true }), false);
-t('CONTROL POSITIVO · tocada con nombre ⇒ revisada', revisada({ tocada: true }), true);
-t('🔴 …y el pie la cuenta PENDIENTE aunque la tanda diga que la tocaron',
+/* ⏪ «sin nombre no cuenta revisada» SE MUDÓ a su propia cuenta. No es que la
+   regla se aflojara —lo incompleto sigue bloqueando— es que **mirar una fila y
+   completarla son dos actos**, y meterlos en el mismo número obligaba a decir
+   «faltan N por revisar» sobre una fila que ya se había revisado. */
+t('tocada ⇒ revisada, aunque le falte un dato', revisada({ tocada: true, sinNombre: true }), true);
+t('🔴 …pero cuenta INCOMPLETA, y por eso el pie no se enciende',
   resumenDeLaTanda([{ tocada: true }, { tocada: true, sinNombre: true }]),
-  { faltan: 1, aGuardar: 2, listo: false });
+  { faltan: 0, incompletas: 1, aGuardar: 2, listo: false });
 t('descartarla SÍ la resuelve: ahí no se guarda nada',
   revisada({ tocada: false, descartada: true, sinNombre: true }), true);
+t('🔴 …y descartada NO se cuenta incompleta (pedir completar lo tirado es trabajo para nadie)',
+  resumenDeLaTanda([{ tocada: false, descartada: true, sinNombre: true }]).incompletas, 0);
+
+console.log('\n── ⑰ ROJO · «POR COMPLETAR» NO ES «POR REVISAR» ──');
+/* 🔴 Dos trabajos distintos, dos cuentas, dos voces: *«faltan 3 por revisar»
+   manda a tocar; «1 por completar» manda a escribir* — y decir la primera
+   cuando pasa la segunda manda a tocar una fila que ya se tocó. */
+t('la regla de «le falta un dato» es UNA, con sus dos entradas',
+  [estaIncompleta({ tocada: true, incompleta: true }), estaIncompleta({ tocada: true, sinNombre: true })],
+  [true, true]);
+t('CONTROL NEGATIVO · una fila completa no lo está', estaIncompleta({ tocada: true }), false);
+t('🔴 las dos cuentas son independientes',
+  resumenDeLaTanda([{ tocada: false }, { tocada: true, incompleta: true }]),
+  { faltan: 1, incompletas: 1, aGuardar: 2, listo: false });
+t('🔴 sin revisar NADA y sin incompletas, el pie enciende',
+  resumenDeLaTanda([{ tocada: true }, { tocada: true }]).listo, true);
+t('el pie dice las TRES razones en el orden en que se resuelven',
+  /faltan > 0 \? vozFaltan\(faltan\) : incompletas > 0 \? vozIncompletas\(incompletas\) : vozNinguna/.test(CONF), true);
+t('🔴 y `vozIncompletas` es OBLIGATORIA: sin ella el apagado sería mudo',
+  /vozIncompletas: \(n: number\) => string/.test(CONF), true);
+
+console.log('\n── ⑱ ROJO · LO INCOMPLETO SE SEÑALA EN SU CAMPO ──');
+t('la pieza recibe QUÉ falta', /incompleta\?: 'fecha' \| 'nombre'/.test(CONF), true);
+t('🔴 el campo de la fecha se señala, no un cartel arriba',
+  /borderColor: falta === 'fecha' \? theme\.status\.warningText/.test(CONF), true);
+t('…y la razón va PEGADA a ese campo', /falta === 'fecha' && vozIncompleta !== undefined/.test(CONF), true);
+t('🔴 algo que falta marca la fila entera, pase lo que pase con la confianza',
+  /pideRevision\(confianza\) \|\| falta !== undefined/.test(CONF), true);
+t('🔴 el confirmar se apaga por lo que falta, sea cual sea',
+  /disabled=\{bloqueada\}/.test(CONF), true);
+/* ⚠️ La asimetría es medida, no cómoda: la pieza TIENE el nombre como prop y
+   puede verificarlo; `campos` son etiqueta y valor genéricos y no sabe cuál es
+   la fecha. Señalar el campo equivocado es peor que no señalar. */
+t('🔴 el nombre se defiende SOLO aunque nadie lo declare',
+  /const falta: 'fecha' \| 'nombre' \| undefined = incompleta \?\? \(pedirNombre \? 'nombre' : undefined\)/.test(CONF), true);
+t('🔴 y la fecha NO se congela: la resuelve la pantalla retirando el aviso',
+  /const bloqueada = falta === 'nombre' \? !hayNombre : falta !== undefined/.test(CONF), true);
 t('el nombre puede llegar `null`', /nombre: string \| null/.test(CONF), true);
-t('🔴 sin nombre la fila se marca, pase lo que pase con la confianza',
-  /pideRevision\(confianza\) \|\| pedirNombre/.test(CONF), true);
+/* ⏪ Esta regla se GENERALIZÓ: era «sin nombre» y hoy es «algo que falta». Su
+   forma nueva la mide ⑱ —`pideRevision(confianza) || falta !== undefined`—;
+   acá queda su caso: el nombre nulo entra a `falta` sin que nadie lo declare. */
+t('🔴 el nombre nulo se marca solo, sin que la pantalla lo declare',
+  /useState\(!hayNombre \|\| incompleta === 'nombre'\)/.test(CONF), true);
 t('🔴 el campo se dibuja VACÍO y editable, no un hueco ni un «sin nombre»',
   /<Campo[\s\S]{0,300}value=\{nombre \?\? ''\}/.test(CONF), true);
 t('…con su razón bajo el campo, que es la del botón apagado',
   /ayuda=\{vozSinNombre\}/.test(CONF), true);
-t('🔴 «Es correcta» APAGADO hasta que haya nombre',
-  /disabled=\{pedirNombre && !hayNombre\}/.test(CONF), true);
+/* ⏪ Idem: el apagado dejó de ser sólo del nombre. ⑱ mide su forma nueva; acá
+   queda el COMPORTAMIENTO, que es lo que no puede cambiar. */
+t('🔴 «Es correcta» APAGADO mientras falte el nombre',
+  /const bloqueada = falta === 'nombre' \? !hayNombre/.test(CONF), true);
 t('🔴 y se fija AL MONTAR: el campo no se esfuma con la primera letra',
-  /useState\(!hayNombre\)/.test(CONF), true);
+  /useState\(!hayNombre \|\| incompleta === 'nombre'\)/.test(CONF), true);
 t('descartada sin nombre DICE cuál era, no queda muda',
   /hayNombre \? nombre : vozSinNombre/.test(CONF), true);
 /* ⚠️ El foco lo decide la LISTA: con dos filas sin nombre, `autoFocus` en las
@@ -346,17 +394,22 @@ for (const archivo of consumidores) {
    tampoco es verde — *un cambio de contrato que nadie nombra es exactamente
    cómo rompí `main` la vez pasada.* Se lista con nombre y archivo para que la
    deuda tenga dueño en vez de descubrirse en el merge. */
-const EN_TRANSITO = ['etiquetaNombre', 'vozSinNombre'] as const;
+const EN_TRANSITO = [
+  { pieza: 'FilaConfirmacionVacuna', props: ['etiquetaNombre', 'vozSinNombre'] },
+  { pieza: 'PieConfirmacionVacunas', props: ['vozIncompletas'] },
+] as const;
 for (const archivo of consumidores) {
   const texto = git('show', `${REFERENCIA}:${archivo}`);
-  const bloques = [...texto.matchAll(/<FilaConfirmacionVacuna\b[\s\S]*?\/>/g)].map((m) => m[0]);
-  if (bloques.length === 0) continue;
-  const debe = EN_TRANSITO.filter((x) => !bloques.every((b) => b.includes(x)));
-  if (debe.length > 0)
-    console.log(`   ⚠️ DEUDA CON EL CONSUMIDOR · ${archivo} todavía no le pasa ${debe.join(' ni ')} ` +
-      `a FilaConfirmacionVacuna.\n      Los volvió obligatorios ESTA rama; el archivo es de otra pista. ` +
-      `No se pinta de verde y no se cuenta como rojo: se nombra.`);
-  else console.log(`   ✓ ${archivo} ya pasa ${EN_TRANSITO.join(' y ')}`);
+  for (const { pieza, props } of EN_TRANSITO) {
+    const bloques = [...texto.matchAll(new RegExp(`<${pieza}\\b[\\s\\S]*?/>`, 'g'))].map((m) => m[0]);
+    if (bloques.length === 0) continue;
+    const debe = props.filter((x) => !bloques.every((b) => b.includes(x)));
+    if (debe.length > 0)
+      console.log(`   ⚠️ DEUDA CON EL CONSUMIDOR · ${archivo} todavía no le pasa ${debe.join(' ni ')} ` +
+        `a ${pieza}.\n      La volvió obligatoria ESTA rama; el archivo es de otra pista. ` +
+        `No se pinta de verde y no se cuenta como rojo: se nombra.`);
+    else console.log(`   ✓ ${archivo} ya pasa ${props.join(' y ')} a ${pieza}`);
+  }
 }
 
 if (consumidores.length === 0 && !NO_CONCLUYENTE.some((x) => x.includes(REFERENCIA)))
