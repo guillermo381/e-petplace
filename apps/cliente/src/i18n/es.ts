@@ -779,6 +779,7 @@ export const clienteEs = {
     errorTitulo: 'No pudimos traer sus visitas',
   },
   carnet: {
+    ningunaParaGuardar: 'No queda ninguna para guardar',
     filaOrigen: 'Leído del carnet',
     filaRevisar: 'Revísala',
     filaConfirmar: 'Es correcta',

@@ -91,6 +91,7 @@ import {
   usePresionado,
   useTheme,
   ListaPlanVacunal,
+  estadoDelPlan,
   type FilaPlanVacunal,
   diasEntre,
 } from '@epetplace/ui';
@@ -498,32 +499,53 @@ export default function PlanDeVacunas() {
 type Traductor = ReturnType<typeof useTraduccion>['t'];
 
 function filaDePlan(v: VacunaDelPlan, hoy: string, t: Traductor): FilaPlanVacunal {
-  const dias = v.proxima !== null ? Math.abs(diasEntre(hoy, v.proxima)) : 0;
-  const base = { id: v.vacuna_codigo, nombre: v.nombre, obligatoria: v.obligatoria };
-  /* `proxima_es_derivada` se dice, no se disimula: una fecha que calculó la
-     casa no vale lo mismo que una que estaba escrita en el carnet (L-139). */
+  /* 🔴 **LA CLASE LA DECIDE `estadoDelPlan`, NO ESTA PANTALLA.** Acá vivía un
+     `switch` que traducía los seis códigos del motor a las clases de la pieza,
+     y **el mapeo a mano era el defecto**: `aun_no_corresponde` terminaba
+     pintado como `sinRegistro` —la clase de la FALTA— justo sobre lo que el
+     motor dice que *jamás se muestra como falta*. La voz lo tapaba; el color
+     no. Ahora los códigos viajan **sin traducir** y la pieza tiene su clase
+     propia. *Un mapeo repetido en cada consumidor es un mapeo que en algún
+     consumidor va a estar mal.*
+     Lo que sigue siendo de la pantalla es LA VOZ (Ley 3), y su `default`
+     habla en vez de callar: `ESTADOS_PLAN` del wrapper es un filtro, así que
+     un estado nuevo del motor no puede quedar mudo acá. */
   const vozPlan =
     v.proxima !== null && v.proxima_es_derivada
       ? t('planVacunas.planDerivada', { fecha: v.proxima })
       : undefined;
 
-  switch (v.estado) {
-    case 'al_dia':
-      return { ...base, estado: { clase: 'alDia' }, vozEstado: t('planVacunas.estadoAlDia'), vozPlan };
-    case 'vence_en':
-      return { ...base, estado: { clase: 'porVencer', dias }, vozEstado: t('planVacunas.estadoVenceEn', { n: dias }), vozPlan };
-    case 'vencida':
-      return { ...base, estado: { clase: 'vencida', dias }, vozEstado: t('planVacunas.estadoVencida', { n: dias }), vozPlan };
-    case 'sin_fecha':
-      return { ...base, estado: { clase: 'sinRefuerzo' }, vozEstado: t('planVacunas.estadoSinFecha'), vozPlan };
-    case 'nunca_aplicada':
-      return { ...base, estado: { clase: 'sinRegistro' }, vozEstado: t('planVacunas.estadoNunca'), vozPlan };
-    case 'aun_no_corresponde':
-      return { ...base, estado: { clase: 'sinRegistro' }, vozEstado: t('planVacunas.estadoAunNo'), vozPlan };
-    default:
-      /* El estado que nadie conoce: se DIBUJA. */
-      return { ...base, estado: { clase: 'sinRefuerzo' }, vozEstado: t('planVacunas.estadoDesconocido'), vozPlan };
-  }
+  const voz = ((): string => {
+    switch (v.estado) {
+      case 'al_dia':
+        return t('planVacunas.estadoAlDia');
+      case 'vence_en':
+        return v.proxima !== null
+          ? t('planVacunas.estadoVenceEn', { n: Math.abs(diasEntre(hoy, v.proxima)) })
+          : t('planVacunas.estadoSinFecha');
+      case 'vencida':
+        return v.proxima !== null
+          ? t('planVacunas.estadoVencida', { n: Math.abs(diasEntre(hoy, v.proxima)) })
+          : t('planVacunas.estadoSinFecha');
+      case 'sin_fecha':
+        return t('planVacunas.estadoSinFecha');
+      case 'nunca_aplicada':
+        return t('planVacunas.estadoNunca');
+      case 'aun_no_corresponde':
+        return t('planVacunas.estadoAunNo');
+      default:
+        return t('planVacunas.estadoDesconocido');
+    }
+  })();
+
+  return {
+    id: v.vacuna_codigo,
+    nombre: v.nombre,
+    obligatoria: v.obligatoria,
+    estado: estadoDelPlan({ estado: v.estado, proxima: v.proxima }, hoy),
+    vozEstado: voz,
+    vozPlan,
+  };
 }
 
 // ── la fila: colapsada dice nombre y vigencia; desplegada suma el detalle ──

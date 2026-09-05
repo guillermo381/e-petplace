@@ -590,6 +590,7 @@ export const clienteEn = {
     errorTitulo: "We couldn't load their visits",
   },
   carnet: {
+    ningunaParaGuardar: 'None left to save',
     filaOrigen: 'Read from the card',
     filaRevisar: 'Check this one',
     filaConfirmar: 'Looks right',

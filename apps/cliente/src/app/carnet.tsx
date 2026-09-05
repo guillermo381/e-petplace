@@ -39,7 +39,7 @@ import {
   Encabezado,
   FichaVacuna,
   FilaConfirmacionVacuna,
-  faltanPorTocar,
+  PieConfirmacionVacunas,
   type CampoLeido,
   Hoja,
   HojaScroll,
@@ -289,12 +289,26 @@ function camposDe(
   const activas = items.filter((i) => !i.descartada);
   const dudosas = activas.filter(esDudosa).length;
   const n = activas.length;
-  /* La cuenta la hace la pieza de B, no esta pantalla: si el criterio de «ya
-     la miraron» cambia, cambia en un solo lugar. */
-  const sinTocar = faltanPorTocar(activas.map((i) => tocadas.has(i.key)));
+  /* 🔴 **UNA SOLA CUENTA, la del pie.** Acá había un `faltanPorTocar` propio
+     sobre las activas, y el descarte lo dejó atrás: para la pieza **descartar
+     ES revisar**, así que una tanda toda descartada le daba «cero por revisar»
+     a ella y otra cosa a mí. *Dos piezas contando lo mismo por separado
+     terminan discrepando el día que una de las dos aprenda algo* — y el
+     guardado se decide con la misma función que dibuja el botón. */
+  const tanda = items.map((i) => ({ tocada: tocadas.has(i.key), descartada: i.descartada }));
 
   async function guardar() {
-    if (guardando || n === 0 || dudosas > 0 || sinTocar > 0) return;
+    /* 🔴 **ACÁ NO SE CUENTAN TOQUES, y es la decisión.** Tenía un
+       `faltanPorTocar` propio y el descarte lo dejó atrás —para la pieza
+       **descartar ES revisar**—, así que una tanda toda descartada le daba una
+       cuenta a ella y otra a mí. La regla que las une, `resumenDeLaTanda`,
+       existe en el módulo de B **y no está exportada**, así que replicarla
+       sería volver a tener dos cuentas con distinto dueño. *La puerta es el
+       pie*: sólo llama a `onGuardar` cuando él mismo se pinta encendido. Acá
+       queda lo que es de esta pantalla —no guardar dos veces, no guardar con
+       fechas faltantes—. Pedido a B: exportar `resumenDeLaTanda`, y este guard
+       recupera su cinturón sin copiar la regla. */
+    if (guardando || n === 0 || dudosas > 0) return;
     setGuardando(true);
     setErrorGuardar(null);
     const r = await registrarVacunasDeCarnet({
@@ -424,31 +438,33 @@ function camposDe(
 
           {activas.map((i) => (
             <View key={i.key} onLayout={(e) => posiciones.current.set(i.key, e.nativeEvent.layout.y)}>
-              {/* ⭐ **LA CONFIRMACIÓN, FILA POR FILA** (C3). Reemplaza a
-                  `FichaVacuna` en la revisión: la diferencia no es estética —
-                  esta pieza **exige el toque**.
+              {/* ⭐ **LA CONFIRMACIÓN, FILA POR FILA** (C3), contra el contrato
+                  de la adenda de B.
 
-                  🔴 **`confianza: 'baja'` en TODAS, y es un dato honesto, no un
-                  relleno**: la extracción todavía no devuelve confianza por
-                  fila (pedido a A), así que **no la sabemos** — y la propia
-                  pieza dice que *una duda que no se muestra es una afirmación*.
-                  Fail-closed: mientras no llegue el dato, todas piden revisión.
-                  El día que A la mande, esta línea deja de ser una constante.
+                  🔴 **`vozOrigen` NO SE PASA, y ésa es la decisión.** Antes le
+                  mandaba «leído del carnet» porque `origen` era obligatoria y
+                  había que poner algo; ahora la pieza dice que **ausente ⇒ no
+                  dibuja ninguna línea de procedencia**. *De un carnet donde no
+                  se distingue si fue sello o lapicera no sale una procedencia
+                  por defecto: sale ninguna.* Cuando la extracción diga de dónde
+                  salió cada fila, esta prop aparece con su dato.
 
-                  ⚠️ `origen` lo exige el tipo y la pieza **no lo lee** (no está
-                  en su destructuring). Se pasa el valor menos afirmativo y la
-                  voz NO dice de dónde salió —«leído del carnet», que es lo
-                  único cierto—: *decir «de un sticker» sin saberlo sería
-                  inventar procedencia sobre un dato clínico.* Pedido a B:
-                  hacerlo opcional mientras la extracción no lo entregue. */}
+                  🔴 `confianza: 'baja'` en TODAS sigue siendo un dato honesto y
+                  no un relleno: la extracción no la devuelve, así que **no la
+                  sabemos**, y la propia pieza dice que una duda que no se
+                  muestra es una afirmación. Fail-closed hasta que A la mande.
+
+                  ☠️ **Murió mi botón «Esta no es» de abajo**: la pieza ahora
+                  trae descartar con su voz, y el retiro va en el MISMO acto que
+                  el montaje — dos caminos al mismo descarte es el defecto que
+                  `L-395` existe para evitar. */}
               <FilaConfirmacionVacuna
                 nombre={i.nombre}
                 campos={camposDe(i, t)}
                 confianza="baja"
-                origen="aMano"
-                vozOrigen={t('carnet.filaOrigen')}
                 vozRevisar={t('carnet.filaRevisar')}
                 vozConfirmar={t('carnet.filaConfirmar')}
+                vozDescartar={t('carnet.estaNoEs')}
                 tocada={tocadas.has(i.key)}
                 onConfirmar={() =>
                   setTocadas((prev) => {
@@ -458,19 +474,8 @@ function camposDe(
                   })
                 }
                 onEditar={() => abrirEdicion(i.key)}
+                onDescartar={() => descartar(i.key)}
               />
-              {/* 🔴 **«Esta no es» NO SE PIERDE.** La pieza de B trae confirmar
-                  y editar, y descartar no; sacarlo habría quitado una capacidad
-                  real —la fila que el modelo inventó— por un cambio de pieza.
-                  Va debajo, discreto, hasta que B sume `onDescartar`. */}
-              <View style={{ alignSelf: 'flex-start', marginTop: spacing[1] }}>
-                <Boton
-                  variante="sinCaja"
-                  tamaño="sm"
-                  etiqueta={t('carnet.estaNoEs')}
-                  onPress={() => descartar(i.key)}
-                />
-              </View>
             </View>
           ))}
 
@@ -487,24 +492,23 @@ function camposDe(
               {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
             </Text>
           )}
-          {/* 🔴 **EL BOTÓN DICE QUÉ FALTA.** Un «Guardar» apagado sin razón a la
-              vista es el defecto que la casa persigue: acá la etiqueta MISMA
-              cuenta cuántas quedan sin mirar. */}
-          <Boton
-            variante="primario"
-            bloque
-            etiqueta={
-              sinTocar > 0
-                ? sinTocar === 1
-                  ? t('carnet.faltaTocarUna')
-                  : t('carnet.faltanTocar', { n: sinTocar })
-                : n === 1
-                  ? t('carnet.guardarUna')
-                  : t('carnet.guardarN', { n })
-            }
-            deshabilitado={n === 0 || dudosas > 0 || sinTocar > 0}
-            cargando={guardando}
-            onPress={() => void guardar()}
+          {/* ⭐ **EL PIE DE LA TANDA, de B** (adenda 2). Reemplaza al `Boton`
+              que yo componía con su propia cuenta: *dos piezas contando lo
+              mismo por separado terminan discrepando el día que una de las dos
+              aprenda algo* — y acá ya pasó, porque el descarte cambió qué
+              significa «revisada» y mi cuenta no lo sabía.
+              Se le pasan **TODAS** las filas, no las activas: el pie distingue
+              «todas descartadas» de «no había ninguna», y con `activas` esas
+              dos se verían iguales.
+              Y **el número de «Guardar N» lo pone el pie, no la pantalla**: con
+              tres descartadas mi cuenta habría prometido «Guardar 5» sobre un
+              botón que guarda 2, y el número de un botón es una promesa. */}
+          <PieConfirmacionVacunas
+            filas={tanda}
+            vozGuardar={(k) => (k === 1 ? t('carnet.guardarUna') : t('carnet.guardarN', { n: k }))}
+            vozFaltan={(k) => (k === 1 ? t('carnet.faltaTocarUna') : t('carnet.faltanTocar', { n: k }))}
+            vozNinguna={t('carnet.ningunaParaGuardar')}
+            onGuardar={() => void guardar()}
           />
         </ScrollView>
       )}
