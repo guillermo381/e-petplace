@@ -49,6 +49,7 @@ import {
   Encabezado,
   EvitaTeclado,
   SelectorOpcion,
+  type Plaga,
   Texto,
   radius,
   spacing,
@@ -85,6 +86,8 @@ export default function RegistrarAntiparasitario() {
   const [tipo, setTipo] = useState<TipoDesparasitacion>('interna');
   const [fecha, setFecha] = useState<CampoFechaValor>({ fecha: hoyLocal(), precision: 'exacta' });
   const [proxima, setProxima] = useState<CampoFechaValor | undefined>(undefined);
+  /** Contra qué protege. Varias a la vez; vacío = no se declaró. */
+  const [plagas, setPlagas] = useState<readonly Plaga[]>([]);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   /** `null` = todavía no contestó la vitrina. `[]` = contestó y no hay.
@@ -141,6 +144,16 @@ export default function RegistrarAntiparasitario() {
       tipo,
       fecha_aplicada: fecha.fecha,
       ...(proxima !== undefined ? { fecha_proxima: proxima.fecha } : null),
+      /* 🔴 **VIAJA CUANDO EL WRAPPER LO ACEPTE.** Hoy `registrarDesparasitacion`
+         (`salud.ts:53`) toma producto, tipo, fechas y notas — **no `plagas`**—,
+         y medí la consecuencia: sembré una fila por esta misma puerta y quedó
+         con `plagas: null`, así que la señal del Hogar —que se arma abriendo
+         ese array— no puede aportar ninguna. La pantalla ya las junta; la
+         línea de abajo se descomenta el día que A abra la puerta, y con eso la
+         tira muestra la plaga sin tocar nada más.
+         *Se deja escrito acá y no en una nota aparte porque el que abra el
+         wrapper va a estar leyendo este archivo.* */
+      // ...(plagas.length > 0 ? { plagas: [...plagas] } : null),
     });
     setGuardando(false);
     if (!r.ok) {
@@ -215,6 +228,38 @@ export default function RegistrarAntiparasitario() {
             ]}
             seleccionada={tipo}
             onSelect={(codigo) => setTipo(codigo as TipoDesparasitacion)}
+          />
+
+          {/* ⭐ **CONTRA QUÉ** (S113-C · 1.1 cierre · ①). `tipo` dice DÓNDE actúa
+              el producto —«externa» no distingue pulgas de garrapatas—; esto
+              dice contra qué, que es lo que el Hogar necesita para avisar.
+              **Varias a la vez**: un antipulgas-garrapatas es una sola
+              aplicación con dos plagas, y obligar a elegir una haría que la
+              otra quedara muda.
+              🔴 **Nada se inventa si no se toca**: sin selección viajan CERO
+              plagas y la fila queda como hoy —con `plagas: null`—, que es
+              exactamente lo que el motor ya sabe representar. */}
+          {/* Se usa `SelectorOpcion` con `multiple` y no chips propios: la pieza
+              de la casa ya trae el rol de checkbox, el `checked` por chip y el
+              acento de control. *Fabricar chips al lado de la pieza que los
+              hace es la forma más silenciosa de que dos superficies de la
+              misma app se vean distinto.* */}
+          <SelectorOpcion
+            etiqueta={t('antiparasitario.plagasLabel')}
+            acento="control"
+            multiple
+            opciones={[
+              { codigo: 'pulgas', etiqueta: t('perfil.plaga_pulgas') },
+              { codigo: 'garrapatas', etiqueta: t('perfil.plaga_garrapatas') },
+              { codigo: 'mosquitos', etiqueta: t('perfil.plaga_mosquitos') },
+              { codigo: 'internos', etiqueta: t('perfil.plaga_internos') },
+            ]}
+            seleccionadas={[...plagas]}
+            onSelect={(codigo) =>
+              setPlagas((prev) =>
+                prev.includes(codigo as Plaga) ? prev.filter((x) => x !== codigo) : [...prev, codigo as Plaga],
+              )
+            }
           />
 
           <CampoFecha

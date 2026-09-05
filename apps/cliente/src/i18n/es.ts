@@ -149,6 +149,7 @@ export const clienteEs = {
     errGenerico: 'No pudimos guardar el recuerdo. Prueba de nuevo.',
   },
   antiparasitario: {
+    plagasLabel: 'Contra qué protege',
     titulo: 'Antiparasitario de {{mascota}}',
     productoLabel: 'Producto',
     productoPlaceholder: 'Marca o nombre del producto',
@@ -799,6 +800,11 @@ export const clienteEs = {
     errorTitulo: 'No pudimos traer sus visitas',
   },
   carnet: {
+    campoNombre: 'Nombre de la vacuna',
+    /* Sin «vos»: la casa habla TUTEO NEUTRO (R66). El literal de la pieza de B
+       venía en voseo y lo copié tal cual — *una voz ajena entra por la puerta
+       de una prop y nadie la mira*. */
+    sinNombre: 'No pude leer cuál es; escríbela',
     ningunaParaGuardar: 'No queda ninguna para guardar',
     filaOrigen: 'Leído del carnet',
     filaRevisar: 'Revísala',

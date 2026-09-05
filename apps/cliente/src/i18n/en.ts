@@ -81,6 +81,7 @@ export const clienteEn = {
     errGenerico: 'We could not save the memory. Try again.',
   },
   antiparasitario: {
+    plagasLabel: 'What it protects against',
     titulo: 'Parasite control for {{mascota}}',
     productoLabel: 'Product',
     productoPlaceholder: 'Brand or product name',
@@ -610,6 +611,8 @@ export const clienteEn = {
     errorTitulo: "We couldn't load their visits",
   },
   carnet: {
+    campoNombre: 'Vaccine name',
+    sinNombre: 'I could not read which one it is; type it yourself',
     ningunaParaGuardar: 'None left to save',
     filaOrigen: 'Read from the card',
     filaRevisar: 'Check this one',
