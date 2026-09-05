@@ -188,3 +188,73 @@ export function resumenDeLaTanda(filas: readonly FilaDeLaTanda[]): {
   const aGuardar = filas.filter((f) => f.descartada !== true).length
   return { faltan, aGuardar, listo: faltan === 0 && aGuardar > 0 }
 }
+
+/* ═══ EL MOTOR DECIDE, LA CASA DIBUJA ═══════════════════════════════════════
+ * Los seis códigos que `obtener_plan_vacunal` devuelve, tal como los declara
+ * `EstadoPlanVacuna` en `packages/api/src/wrappers/salud.ts`.
+ *
+ * ⚠️ **Se redeclaran acá y NO se importan, a propósito:** el design system no
+ * depende de la capa de datos. *El precio de esa independencia es que esta
+ * lista puede quedar vieja el día que el motor gane un séptimo estado* — y por
+ * eso no vive sola: `verify:carnet` compara las dos listas contra el archivo
+ * real y **sale ROJO si el motor tiene uno que acá no está**. Una copia
+ * vigilada es una copia; una copia y nada más es una bomba de tiempo.
+ */
+export type EstadoPlanMotor =
+  | 'al_dia'
+  | 'vencida'
+  /** Se aplicó, pero no se puede saber cuándo toca la próxima. */
+  | 'sin_fecha'
+  | 'nunca_aplicada'
+  /** Por EDAD todavía no toca. */
+  | 'aun_no_corresponde'
+  /** Vence dentro de la ventana del motor. */
+  | 'vence_en'
+
+/**
+ * EL MAPEO DE LOS SEIS — **del veredicto del motor a la clase visual.**
+ *
+ * ── 🔴 LAS TRES REGLAS QUE LO ORDENAN ──────────────────────────────────
+ * ① **`aun_no_corresponde` es el ARO, jamás la falta.** Es la razón de ser de
+ *    este mapeo: *un turno que no llegó no es un hueco, y pintarlo como
+ *    `sinRegistro` le inventa a la familia una tarea que no existe.*
+ * ② **El motor decide la CLASE; la fecha sólo aporta el NÚMERO.** No se
+ *    recalcula si está vencida o por vencer: *la ventana es del motor y es un
+ *    parámetro suyo; recomputarla acá haría que dos partes de la casa
+ *    contesten distinto sobre el mismo animal, y la que se ve gana.*
+ * ③ **No hay `default`.** Un séptimo estado no cae en una rama muda: **no
+ *    compila** —el `switch` cubre la unión entera y la función promete
+ *    devolver siempre—. *Un `default` acá dibujaría el estado nuevo idéntico
+ *    a otro, sin un solo error, que es exactamente cómo se pierde una
+ *    distinción.*
+ */
+export function estadoDelPlan(
+  fila: { estado: EstadoPlanMotor; proxima?: string | null },
+  hoy: string,
+): EstadoVacuna {
+  switch (fila.estado) {
+    case 'al_dia':
+      return { clase: 'alDia' }
+    case 'aun_no_corresponde':
+      return { clase: 'aunNoCorresponde' }
+    case 'nunca_aplicada':
+      return { clase: 'sinRegistro' }
+    case 'sin_fecha':
+      return { clase: 'sinRefuerzo' }
+    case 'vence_en':
+      /* ⚠️ `proxima` en `null` con este estado es **el motor contradiciéndose**
+         —el estado se computa DESDE esa fecha—, así que es un caso que su
+         construcción no produce. Si llegara igual, la casa **no pinta un
+         número**: dice lo único que sabe, que no sabe cuándo toca. *Poner un
+         `0` ahí sería «vence hoy», y eso es peor que no saber.* Es la misma
+         regla que `estadoDeVacuna` ya aplica sin fecha, no una rama de
+         escape. */
+      return fila.proxima == null
+        ? { clase: 'sinRefuerzo' }
+        : { clase: 'porVencer', dias: diasEntre(hoy, fila.proxima) }
+    case 'vencida':
+      return fila.proxima == null
+        ? { clase: 'sinRefuerzo' }
+        : { clase: 'vencida', dias: -diasEntre(hoy, fila.proxima) }
+  }
+}
