@@ -66,6 +66,7 @@ import {
 
 import { borrarFotoMascota, leerBase64, subirFotoMascota } from '@/lib/subir-avatar';
 import { useTraduccion } from '@/i18n';
+import { faltaParaConfirmar } from '@/lib/carnet/confirmable';
 
 // 1600px: el texto del carnet tiene que seguir siendo legible para el
 // modelo (800 de avatar lo destruye); a calidad 0.7 queda en ~300-500KB.
@@ -116,7 +117,9 @@ const VOZ_SUBIDA = {
 } as const;
 
 // dudosa = SOLO fecha faltante (S48): tipo null se guarda tal cual.
-const esDudosa = (i: ItemRevision) => !i.fecha_aplicada;
+/* La misma regla que decide si una fila se puede confirmar, para que la cuenta
+   del texto y la del toque no puedan discrepar. */
+const esDudosa = (i: ItemRevision) => faltaParaConfirmar(i) !== null;
 
 function hoyIso(): string {
   const d = new Date();
@@ -239,6 +242,22 @@ export default function CarnetDeVacunas() {
         rechazada: false,
       })));
       setFase({ t: 'revision' });
+      /* 🔴 **SI ALGUNA VINO SIN FECHA, LA REVISIÓN ABRE EN ELLA** (dato del
+         founder: a sus cuatro les faltaba la fecha). Sin esto, la pantalla
+         mostraba cuatro filas de aspecto normal y un texto que decía que algo
+         faltaba, **sin señalar cuál**: el que mira tiene que adivinar dónde
+         está el hueco. Se abre su edición, que trae el campo de fecha VACÍO
+         —`abrirEdicion` no inventa una fecha cuando no hay— y es donde se
+         completa.
+         ⚠️ Abre **una sola vez y sólo si hay**: una hoja que se abre sola cada
+         vez que volvés a la lista deja de ser una ayuda. */
+      const sinFecha = ext.data.vacunas.findIndex((v: VacunaExtraida) => v.fecha_aplicada === null);
+      if (sinFecha >= 0) {
+        setBNombre(ext.data.vacunas[sinFecha].nombre ?? '');
+        setBTipo(ext.data.vacunas[sinFecha].tipo_vacuna ?? '');
+        setBFecha(undefined);
+        setEditando(sinFecha);
+      }
     } finally {
       clearTimeout(timer);
       clearTimeout(timerLargo);
@@ -301,9 +320,22 @@ function camposDe(
      a ella y otra cosa a mí. *Dos piezas contando lo mismo por separado
      terminan discrepando el día que una de las dos aprenda algo* — y el
      guardado se decide con la misma función que dibuja el botón. */
-  const tanda = items.map((i) => ({ tocada: tocadas.has(i.key), descartada: i.descartada }));
+  /* La tanda lleva **el dato**, no la cuenta: el pie deriva sus dos números de
+     acá con `resumenDeLaTanda`, así que no hay forma de pasarle un total que
+     no se corresponda con las filas. */
+  const tanda = items.map((i) => ({
+    tocada: tocadas.has(i.key),
+    descartada: i.descartada,
+    /* En la TANDA es un booleano (al pie sólo le importa que falte algo); en
+       la FILA es qué falta, porque ahí sí hay que señalar el campo. Una regla,
+       dos formas de leerla. */
+    incompleta: faltaParaConfirmar(i) !== null,
+  }));
   /** La PRIMERA sin nombre entre las que siguen vivas: es la única que puede
    *  llevar el foco sin pelearse con otra. `null` si no hay ninguna. */
+  /** La primera fila viva a la que le falta la fecha — el destino del texto
+   *  de arriba y del botón apagado. */
+  const primeraIncompleta = activas.find(esDudosa)?.key ?? null;
   const primeraSinNombre =
     activas.find((i) => i.nombre === null || i.nombre.trim() === '')?.key ?? null;
 
@@ -315,7 +347,22 @@ function camposDe(
        pedido sin volver a medir contra el árbol que ya tenía `b-1.1`. *Un
        pedido propio también envejece, y el mío se copió dos partes seguidas.*
        Ahora el guard y el botón derivan del MISMO `listo`. */
-    if (guardando || dudosas > 0 || !resumenDeLaTanda(tanda).listo) return;
+    if (guardando) return;
+    /* ④ 🔴 **NUNCA UN CORTE MUDO.** Acá había un `return` seco por `dudosas`, y
+       ése es el segundo mitad del defecto que el founder vio: el pie encendido
+       llamaba, la función cortaba y **la pantalla no decía nada**. *Un guard
+       que no habla es indistinguible de una app colgada.* Con la cura de
+       arriba este caso ya no debería alcanzarse —una fila sin fecha no puede
+       quedar revisada— así que si esta razón aparece, es que algo más la
+       produjo, y quiero verla. */
+    if (dudosas > 0) {
+      setErrorGuardar(dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas }));
+      return;
+    }
+    if (!resumenDeLaTanda(tanda).listo) {
+      setErrorGuardar(t('carnet.faltanTocar', { n: resumenDeLaTanda(tanda).faltan }));
+      return;
+    }
     setGuardando(true);
     setErrorGuardar(null);
     const r = await registrarVacunasDeCarnet({
@@ -487,6 +534,14 @@ function camposDe(
                 vozRevisar={t('carnet.filaRevisar')}
                 vozConfirmar={t('carnet.filaConfirmar')}
                 vozDescartar={t('carnet.estaNoEs')}
+                /* ⭐ **LA FILA SE VE INCOMPLETA** (adenda 6). La regla es la
+                   misma de `confirmable.ts` que ya usan el texto y el toque, así
+                   que las tres no pueden discrepar. **El nombre lo resuelve la
+                   pieza** (tiene su campo adentro); la fecha la declara la
+                   pantalla y **se retira sola al completarse**, porque
+                   `faltaParaConfirmar` se recalcula con el item ya editado. */
+                incompleta={faltaParaConfirmar(i) === 'fecha' ? 'fecha' : undefined}
+                vozIncompleta={t('carnet.faltaFecha')}
                 etiquetaNombre={t('carnet.campoNombre')}
                 vozSinNombre={t('carnet.sinNombre')}
                 onNombre={(v) =>
@@ -498,13 +553,32 @@ function camposDe(
                    fila no sabe si es la primera; acá sí se sabe. */
                 enfocar={i.key === primeraSinNombre}
                 tocada={tocadas.has(i.key)}
-                onConfirmar={() =>
+                onConfirmar={() => {
+                  /* 🔴 **UNA FILA INCOMPLETA NO PUEDE QUEDAR «REVISADA», y ese
+                     era el defecto que el founder vio en su teléfono.** El pie
+                     de B se enciende con todas revisadas —sólo mira `tocada` y
+                     `descartada`— y `guardar()` cortaba aparte por `dudosas`,
+                     **sin decir nada**: botón encendido que al tocarlo no hacía
+                     nada. Dos cuentas otra vez, y esta vez la puse yo al montar
+                     el pie.
+                     Ahora hay UNA: si le falta la fecha, la fila **no se marca**
+                     —así el pie queda apagado y con su razón a la vista— y se
+                     abre su edición, que es donde se completa. *El toque no se
+                     traga: lleva al lugar donde se resuelve.* */
+                  /* ⏪ **ACÁ BLOQUEABA EL MARCADO, Y ESO TAPABA LA VOZ NUEVA.**
+                     Con la adenda 6 el pie cuenta APARTE las revisadas que
+                     están incompletas, así que una fila a medias **sí se
+                     marca**: si no, cae en «faltan por revisar» y la persona
+                     va a tocar una fila que ya tocó. Lo que se conserva es
+                     llevarla a completarla — *el toque no se traga: abre donde
+                     se resuelve.* */
+                  if (faltaParaConfirmar(i) !== null) abrirEdicion(i.key);
                   setTocadas((prev) => {
                     const s = new Set(prev);
                     s.add(i.key);
                     return s;
-                  })
-                }
+                  });
+                }}
                 onEditar={() => abrirEdicion(i.key)}
                 onDescartar={() => descartar(i.key)}
               />
@@ -519,11 +593,14 @@ function camposDe(
               {errorGuardar}
             </Text>
           )}
-          {dudosas > 0 && (
-            <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.text.secondary }}>
-              {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
-            </Text>
-          )}
+          {/* ☠️ Acá vivía mi línea «hay N por completar». **La dice el pie**
+              desde la adenda 6, con su cuenta propia y su voz propia — dos
+              líneas diciendo lo mismo con números que salen de dos lados es
+              justo lo que este bloqueante fue.
+              ⚠️ Lo que SÍ se pierde es su destino: el texto llevaba a la
+              primera incompleta y el del pie no. Queda pedido a B; mientras
+              tanto, el camino existe igual — confirmar una fila a medias abre
+              su edición. */}
           {/* ⭐ **EL PIE DE LA TANDA, de B** (adenda 2). Reemplaza al `Boton`
               que yo componía con su propia cuenta: *dos piezas contando lo
               mismo por separado terminan discrepando el día que una de las dos
@@ -540,6 +617,10 @@ function camposDe(
             vozGuardar={(k) => (k === 1 ? t('carnet.guardarUna') : t('carnet.guardarN', { n: k }))}
             vozFaltan={(k) => (k === 1 ? t('carnet.faltaTocarUna') : t('carnet.faltanTocar', { n: k }))}
             vozNinguna={t('carnet.ningunaParaGuardar')}
+            /* Las DOS cuentas del pie son distintas y se dicen distinto: una es
+               «no la miraste», la otra «le falta un dato». Antes yo decía la
+               segunda con la voz de la primera. */
+            vozIncompletas={(k) => (k === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: k }))}
             onGuardar={() => void guardar()}
           />
         </ScrollView>

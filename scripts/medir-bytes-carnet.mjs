@@ -134,8 +134,12 @@ await page.waitForTimeout(6000);
    miran las dos cosas: la línea y si el botón está apagado. */
 const estadoDelPie = async () =>
   await page.evaluate(() => {
+    /* 🔴 **El botón se reconoce por su voz EXACTA.** «…antes de guardar» es el
+       TEXTO de la razón y contiene «guardar»: con un `test` de «contiene», el
+       arnés tomaba la línea de aviso como si fuera el botón y reportaba
+       `apagado=null` sobre algo que no es un botón. */
     const b = [...document.querySelectorAll('[role="button"]')].find((e) =>
-      /Sumar|Guardar|Save/i.test((e.getAttribute('aria-label') ?? e.textContent ?? '').trim()),
+      /^(Sumar \d+ vacunas? a su historia|Save)/.test((e.getAttribute('aria-label') ?? e.textContent ?? '').trim()),
     );
     const txt = document.body.innerText;
     const razon = txt.split('\n').map((x) => x.trim()).find((x) => /^(Faltan|Falta|No queda|None left|\d+ left)/i.test(x));
@@ -157,12 +161,23 @@ const filas = await page.evaluate(() =>
     .filter((x) => /^Es correcta$|^Looks right$/.test(x)).length,
 );
 di(`filas con «Es correcta»: ${filas}`);
+/* ¿Alguna vino SIN FECHA? Es el estado del bloqueante: se mira si la revisión
+   abrió sola en una edición con el campo de fecha vacío. */
+const t0 = await T();
+di(`¿abrió una edición sola?: ${/Corregir|Editar|Guardar cambios/i.test(t0) ? 'sí' : 'no'}`);
+di(`  texto «por completar»: ${(t0.match(/[^\n]*por completar[^\n]*/i) ?? ['(no aparece)'])[0].trim().slice(0, 70)}`);
 di(`🔴 ROJO · el botón, sin tocar ninguna: «${await etiquetaGuardar()}»`);
 /* 🔴 **`.nth(k)`, NO `.first()`.** La pieza deja el botón puesto después de
    confirmar —confirmar no lo hace desaparecer—, así que tocar «el primero»
    tres veces le pega tres veces a la MISMA fila: el contador bajaba de 3 a 2 y
    parecía que la app no registraba. *Es la cuarta vez en este arco que
    `.first()` fabrica un rojo falso.* */
+/* 🔴 **LA EDICIÓN SE ABRE SOLA (y es la cura), así que hay que cerrarla antes
+   de tocar la lista**: mientras está abierta tapa las filas y los clicks no
+   llegan — el arnés reportaba «ninguna se marcó» cuando en realidad nunca
+   tocó. */
+await page.getByRole('button', { name: /^(Cerrar|Cancelar|Close)$/ }).first().click().catch(() => {});
+await page.waitForTimeout(1200);
 for (let k = 0; k < filas; k += 1) {
   const b = page.getByRole('button', { name: /^(Es correcta|Looks right)$/ }).nth(k);
   if ((await b.count()) === 0) break;

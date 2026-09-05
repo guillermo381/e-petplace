@@ -62,6 +62,8 @@
     "verify:nexo": "tsx apps/cliente/scripts/verify-nexo.mts",
     "verify:contrato-carnet": "tsx scripts/verify-contrato-carnet.mts",
     "verify:pide-en-memorial": "tsx apps/cliente/scripts/censo-pide-en-memorial.mts",
+    "_comentario_confirmable": "S113-C 1.1.2: la regla que decide si una fila del carnet se puede dar por revisada. Vive en un gate porque su caso NO se puede producir desde la UI —la extraccion no devuelve filas sin fecha con los carnets de prueba y la Hoja de edicion exige fecha—, y sin embargo es el estado exacto del bloqueante que el founder vio con su carnet real.",
+    "verify:confirmable": "tsx apps/cliente/scripts/verify-confirmable.mts",
     "verify:glifos": "tsx scripts/_arnes-glifos.mts",
     "_comentario_carnet": "S113-B: el arnes del carnet EXISTIA SIN PUERTA — vivia en scripts/ y ningun script lo invocaba, asi que solo corria cuando quien lo escribio se acordaba de correrlo a mano. Es L-318 (motor sin puerta) sobre un gate: un instrumento que nadie puede correr no mide nada, y su verde de ayer no dice nada de hoy. Importa solo el modulo puro vacunas-estado.ts: no levanta React ni toca red ni DB.",
     "verify:carnet": "tsx scripts/_arnes-carnet.mts",

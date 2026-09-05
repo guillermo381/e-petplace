@@ -809,6 +809,7 @@ export const clienteEs = {
     errorTitulo: 'No pudimos traer sus visitas',
   },
   carnet: {
+    faltaFecha: 'No pude leer la fecha; escríbela para poder guardarla',
     campoNombre: 'Nombre de la vacuna',
     /* Sin «vos»: la casa habla TUTEO NEUTRO (R66). El literal de la pieza de B
        venía en voseo y lo copié tal cual — *una voz ajena entra por la puerta
