@@ -21,6 +21,19 @@
  * dato inventado entra al expediente firmado por el dueño: *él ve algo
  * plausible, no lo toca, y queda como si lo hubiera confirmado.*
  *
+ * ── 🔴 UNA FILA SIN NOMBRE ES LA QUE MÁS PIDE MIRARSE ──────────────────
+ * Si la IA no pudo leer **cuál** vacuna es, no hay nada que confirmar: *«Es
+ * correcta» sobre una fila sin nombre es firmar un renglón en blanco.* Así que
+ * la fila llega marcada, con el campo del nombre **vacío y editable**, y el
+ * confirmar **apagado hasta que haya nombre** — con su razón a la vista, que
+ * es la misma frase que explica por qué el campo está ahí.
+ *
+ * ⚠️ **Y el pie la cuenta como pendiente**, pase lo que pase: la regla no vive
+ * en la pantalla sino en `revisada()`, así que **una fila sin nombre marcada
+ * como tocada sigue contando pendiente.** *Si dependiera de que la pantalla se
+ * acuerde, el día que se olvide se guarda una vacuna sin nombre y nadie se
+ * entera.*
+ *
  * ── 🔴 «ESTA NO ES» — LA SALIDA QUE HACE HONESTA A LA REVISIÓN ─────────
  * Editar corrige un dato; **descartar dice que la fila no debería existir**, y
  * son dos actos distintos. Sin la segunda, una revisión que sólo puede
@@ -41,8 +54,10 @@
  * pieza —*«En el carnet también figuran…»*, en tinta y sin acción—.
  */
 
+import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
+import { Campo } from './Campo'
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -79,7 +94,23 @@ export interface CampoLeido {
 }
 
 export interface FilaConfirmacionVacunaProps {
-  nombre: string
+  /** 🔴 `null` = **la IA no pudo leer cuál vacuna es.** No es un texto vacío
+   *  que se pueda dibujar: es la fila que más pide mirarse. */
+  nombre: string | null
+  /** El rótulo del campo del nombre. Sólo se usa cuando hay que pedirlo. */
+  etiquetaNombre: string
+  /** 🔴 *«No pude leer cuál es; escribila vos»* — **dice la causa Y el acto**.
+   *  Va bajo el campo, así que **es también la razón del confirmar apagado**:
+   *  el botón no repite el porqué, lo tiene arriba. */
+  vozSinNombre: string
+  /** Lo que la persona teclea. La pantalla es la que guarda el valor. */
+  onNombre?: (v: string) => void
+  /** ⚠️ **El foco lo decide la LISTA, no la fila, y por eso el default es
+   *  `false`.** Con dos filas sin nombre, `autoFocus` en las dos deja el foco
+   *  en **la última** —la que se montó al final— y ahí es peor que no tener
+   *  ninguno: la pantalla salta al fondo. *La fila no sabe si es la primera;
+   *  la lista sí.* **La lista se lo pasa a la primera sin nombre.** */
+  enfocar?: boolean
   campos: readonly CampoLeido[]
   confianza: ConfianzaIA
   /** 🔴 La voz de la evidencia, ya compuesta (Ley 3): *«lo prueba el sticker»*.
@@ -126,6 +157,10 @@ export interface FilaConfirmacionVacunaProps {
 
 export function FilaConfirmacionVacuna({
   nombre,
+  etiquetaNombre,
+  vozSinNombre,
+  onNombre,
+  enfocar = false,
   campos,
   confianza,
   vozOrigen,
@@ -142,7 +177,14 @@ export function FilaConfirmacionVacuna({
   onDescartar,
 }: FilaConfirmacionVacunaProps) {
   const { theme } = useTheme()
-  const revisar = pideRevision(confianza)
+  /* 🔴 **SE FIJA AL MONTAR, y no se recalcula.** *Si mirara el valor de ahora,
+     el campo desaparecería con la primera letra que la persona teclea* — y una
+     fila que la IA no pudo leer no deja de serlo a mitad de la palabra: sigue
+     siendo la fila que hay que mirar hasta que se guarde la tanda. */
+  const hayNombre = (nombre ?? '').trim() !== ''
+  const [pedirNombre] = useState(!hayNombre)
+  /* Sin nombre no hay confianza que valga: **la duda es la fila entera.** */
+  const revisar = pideRevision(confianza) || pedirNombre
   const conValor = detalleVisible(campos)
   const vacios = campos.filter((c) => c.valor == null || c.valor.trim() === '')
 
@@ -161,8 +203,11 @@ export function FilaConfirmacionVacuna({
           backgroundColor: theme.bg.hundido,
         }}
       >
+        {/* 🔴 Descartada SIN nombre: la tarjeta diría nada y la persona no
+            sabría cuál descartó. **Dice la causa en su lugar** — que además
+            es la identidad exacta de esa fila: la que no se pudo leer. */}
         <Texto variante="cuerpo" color="secondary" numberOfLines={1}>
-          {nombre}
+          {hayNombre ? nombre : vozSinNombre}
         </Texto>
         {vozDescartada !== undefined ? <Texto variante="apoyo">{vozDescartada}</Texto> : null}
         {onDeshacer !== undefined && vozDeshacer !== undefined ? (
@@ -194,9 +239,24 @@ export function FilaConfirmacionVacuna({
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[2] }}>
-        <Texto variante="cuerpo">{nombre}</Texto>
+        {/* 🔴 Sin nombre no se dibuja un hueco ni un «sin nombre»: se dibuja
+            EL CAMPO, que es lo único que resuelve la fila. La cabecera queda
+            con la marca sola, para que «Revisá esta» no pierda su lugar. */}
+        {pedirNombre ? <View style={{ flex: 1 }} /> : <Texto variante="cuerpo">{nombre}</Texto>}
         {revisar ? <Texto variante="apoyo" color="warning">{vozRevisar}</Texto> : null}
       </View>
+
+      {pedirNombre ? (
+        <Campo
+          label={etiquetaNombre}
+          value={nombre ?? ''}
+          onChangeText={onNombre}
+          /* La causa Y el acto en la misma frase, y es también la razón que
+             sostiene el confirmar apagado de abajo. */
+          ayuda={vozSinNombre}
+          autoFocus={enfocar}
+        />
+      ) : null}
 
       {/* Lo que el modelo SÍ leyó. */}
       {conValor.map((c) => (
@@ -230,20 +290,25 @@ export function FilaConfirmacionVacuna({
           🔴 **Sin procedencia no hay línea** — ninguna por defecto (19.9). */}
       {vozOrigen !== undefined ? <Texto variante="apoyo">{vozOrigen}</Texto> : null}
 
+      {/* 🔴 **APAGADO HASTA QUE HAYA NOMBRE.** *«Es correcta» sobre una fila
+          sin nombre es firmar un renglón en blanco.* Su razón no se repite
+          acá: está arriba, bajo el campo que la pide — *el botón dice qué
+          hace, y lo que falta lo dice el campo que falta.* */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={vozConfirmar}
-        accessibilityState={{ selected: tocada }}
+        accessibilityState={{ selected: tocada, disabled: pedirNombre && !hayNombre }}
+        disabled={pedirNombre && !hayNombre}
         onPress={onConfirmar}
         style={{
           minHeight: 44,
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: radius.full,
-          backgroundColor: tocada ? theme.bg.hundido : theme.accent.cta,
+          backgroundColor: pedirNombre && !hayNombre ? theme.bg.hundido : tocada ? theme.bg.hundido : theme.accent.cta,
         }}
       >
-        <Texto variante="enfasis" color={tocada ? 'secondary' : undefined}>
+        <Texto variante="enfasis" color={pedirNombre && !hayNombre ? 'tertiary' : tocada ? 'secondary' : undefined}>
           {vozConfirmar}
         </Texto>
       </Pressable>
