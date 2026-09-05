@@ -7,6 +7,7 @@ import {
   type EstadoVacuna, type EstadoPlanMotor,
 } from '../packages/ui/src/components/vacunas-estado.ts';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 let ok = 0, mal = 0;
 const t = (n: string, real: unknown, esp: unknown) => {
@@ -14,8 +15,26 @@ const t = (n: string, real: unknown, esp: unknown) => {
   if (a === b) { ok++; console.log(`  ✓ ${n}`); } else { mal++; console.log(`  ✗ ${n}\n     esperado ${b}\n     real     ${a}`); }
 };
 const sinComentarios = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1');
-const src = (f: string) =>
-  sinComentarios(readFileSync(new URL(`../packages/ui/src/components/${f}`, import.meta.url), 'utf8'));
+
+/* 🔴 **UN GATE QUE NO PUEDE MEDIR NO DICE QUE TODO ESTÁ BIEN — Y TAMPOCO SE
+   MUERE.** Medido: al faltar un archivo, este arnés reventaba con un `ENOENT`
+   y su rastro de pila. *Un stack trace no distingue «no hay defecto» de «no
+   corrí»*, y quien lo lea a través de un pipe se lleva el exit del pipe
+   (`L-191`). Ahora **sale 2 y NO CONCLUYENTE**, que es el código que la casa
+   reserva para «no pude medir» y que ningún verde puede imitar.
+   *Nació de un caso real: un archivo de este lote no está en toda rama que
+   corra el gate, y el gate no puede depender de un lote que no llegó.* */
+const NO_CONCLUYENTE: string[] = [];
+const src = (f: string) => {
+  try {
+    return sinComentarios(readFileSync(new URL(`../packages/ui/src/components/${f}`, import.meta.url), 'utf8'));
+  } catch {
+    NO_CONCLUYENTE.push(f);
+    /* Cadena vacía: los brazos que lo usen van a fallar, y por eso el reporte
+       final NO los cuenta como rojos — los tapa el NO CONCLUYENTE. */
+    return '';
+  }
+};
 const CARNET = src('FilaVacunaCarnet.tsx');
 const CONF = src('FilaConfirmacionVacuna.tsx');
 const PLAN = src('ListaPlanVacunal.tsx');
@@ -241,5 +260,67 @@ if (sobranMe.length > 0)
   console.log(`   ⚠️ NO CONCLUYENTE en el otro sentido: el mapeo cubre ${sobranMe.join(' · ')} y el archivo de este árbol no los declara.\n` +
     `      Es un árbol ATRASADO, no un mapeo de más: la lista viva está en \`origin/main\`. Se declara y no se pinta de verde.`);
 
+console.log('\n── ⑮ ROJO · LOS CONSUMIDORES DE `main`, QUE ESTE ÁRBOL NO PUEDE VER ──');
+/* 🔴 **ESTE BRAZO NACE DE UN DAÑO, no de una precaución.**
+ * La adenda cambió el contrato de dos piezas y **dejó `main` en rojo**: el
+ * typecheck de esta rama dio 0 y era cierto — *los consumidores que rompí
+ * viven en `apps/cliente`, en la rama de otra pista, y ningún gate de este
+ * árbol podía verlos.* Un verde sobre lo que uno alcanza a mirar no dice nada
+ * de lo que rompió afuera.
+ *
+ * **La cura es medir contra `origin/main`, que es donde el contrato se
+ * encuentra con sus consumidores.** Sin remoto no hay verde: NO CONCLUYENTE.
+ */
+const REFERENCIA = 'origin/main';
+const git = (...a: string[]) =>
+  execFileSync('git', a, { cwd: new URL('..', import.meta.url).pathname, encoding: 'utf8' });
+
+/* Cada pieza, con lo que su contrato EXIGE hoy y lo que RETIRÓ. */
+const CONTRATOS = [
+  { pieza: 'FilaConfirmacionVacuna', exige: ['onDescartar', 'vozDescartar'], retirado: ['origen='] },
+  { pieza: 'PieConfirmacionVacunas', exige: ['filas=', 'vozNinguna'], retirado: ['tocadas='] },
+] as const;
+
+let consumidores: string[] = [];
+try {
+  const nombres = CONTRATOS.map((c) => c.pieza).join('\\|');
+  consumidores = git('grep', '-l', nombres, REFERENCIA, '--', 'apps', 'packages/api')
+    .split('\n').filter(Boolean).map((l) => l.replace(`${REFERENCIA}:`, ''));
+} catch (e) {
+  /* `git grep -l` sale 1 sin coincidencias: eso es CERO consumidores, no un
+     fallo. Se distingue por el mensaje, no por el código. */
+  const msg = String((e as { stderr?: string }).stderr ?? e);
+  if (/unknown revision|not a git repository|ambiguous argument/i.test(msg)) NO_CONCLUYENTE.push(`${REFERENCIA} (no alcanzable)`);
+}
+console.log(`   consumidores en ${REFERENCIA}: ${consumidores.join(' · ') || '(ninguno)'}`);
+t('la referencia se pudo consultar', NO_CONCLUYENTE.some((x) => x.includes(REFERENCIA)), false);
+
+for (const archivo of consumidores) {
+  const texto = git('show', `${REFERENCIA}:${archivo}`);
+  for (const { pieza, exige, retirado } of CONTRATOS) {
+    /* El bloque de la etiqueta: desde `<Pieza` hasta su cierre. */
+    const bloques = [...texto.matchAll(new RegExp(`<${pieza}\\b[\\s\\S]*?/>`, 'g'))].map((m) => m[0]);
+    if (bloques.length === 0) continue;
+    const corto = archivo.split('/').pop();
+    /* 🔴 Lo RETIRADO no puede seguir viajando… */
+    for (const r of retirado)
+      t(`🔴 \`${corto}\` ya no le pasa \`${r.replace('=', '')}\` a \`${pieza}\``,
+        bloques.some((b) => b.includes(r)), false);
+    /* …y lo que ahora es OBLIGATORIO tiene que estar en cada montaje. */
+    for (const x of exige)
+      t(`🔴 \`${corto}\` le pasa \`${x.replace('=', '')}\` a \`${pieza}\` en TODOS sus montajes`,
+        bloques.every((b) => b.includes(x)), true);
+  }
+}
+if (consumidores.length === 0 && !NO_CONCLUYENTE.some((x) => x.includes(REFERENCIA)))
+  console.log('   ⚠️ CERO consumidores fuera de `packages/ui`: el brazo no midió nada.\n' +
+    '      No es un verde — es que no hay a quién romper todavía.');
+
+if (NO_CONCLUYENTE.length > 0) {
+  console.log(`\n⚠️ NO CONCLUYENTE · no se pudieron abrir: ${NO_CONCLUYENTE.join(' · ')}`);
+  console.log('   Este árbol no tiene todas las piezas que el gate mide. **No es verde ni rojo:');
+  console.log('   es que no se pudo medir**, y sale 2 para que ningún tablero lo lea como salud.');
+  process.exit(2);
+}
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);
