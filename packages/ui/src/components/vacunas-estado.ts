@@ -154,26 +154,43 @@ export interface FilaDeLaTanda {
   tocada: boolean
   /** *«Esta no es»*: la persona dijo que la IA leyó algo que no existe. */
   descartada?: boolean
-  /** 🔴 **La IA no pudo leer cuál vacuna es, y todavía no se escribió.**
-   *  *Una fila sin nombre no se puede guardar aunque alguien la haya tocado:
-   *  «Es correcta» sobre un renglón en blanco no confirma nada.* */
+  /** ⚰️ **`sinNombre` — el caso particular que llegó primero.**
+   *  Sigue vivo porque **`carnet.tsx` en `main` ya lo pasa**, y renombrarlo
+   *  rompería a su pista por tercera vez en la sesión. *La precisión de un
+   *  nombre no vale un revert.* Se lee como un caso de `incompleta`, por una
+   *  sola regla (`estaIncompleta`), y muere cuando esa pantalla migre. */
   sinNombre?: boolean
+  /** 🔴 **A la fila le falta un dato para poder guardarse** — el nombre o la
+   *  fecha. *Una fila incompleta no se puede guardar aunque alguien la haya
+   *  mirado: «Es correcta» sobre un renglón a medias no confirma nada.*
+   *
+   *  ⚠️ **No es lo mismo que «sin revisar», y por eso son dos cuentas.**
+   *  *«Faltan 3 por revisar» se resuelve tocando; «1 por completar» se
+   *  resuelve escribiendo* — decir la primera cuando pasa la segunda manda a
+   *  la persona a tocar una fila que ya tocó. */
+  incompleta?: boolean
 }
 
-/** 🔴 **DESCARTAR ES REVISAR; QUEDARSE SIN NOMBRE, NO.**
+/** La regla ÚNICA de «le falta un dato», con sus dos entradas: la nueva y la
+ *  que llegó primero. *Dos campos con una sola lectura no son dos fuentes de
+ *  verdad: son una fuente y un alias con fecha de muerte.* */
+export function estaIncompleta({ incompleta, sinNombre }: FilaDeLaTanda): boolean {
+  return incompleta === true || sinNombre === true
+}
+
+/** 🔴 **DESCARTAR ES REVISAR.** *Si una fila descartada no contara como
+ *  revisada, el pie quedaría apagado para siempre y sin forma de encenderlo*
+ *  — el defecto que el pie existe para no tener.
  *
- *  Lo primero: *si una fila descartada no contara como revisada, el pie
- *  quedaría apagado para siempre y sin forma de encenderlo* — el defecto que
- *  el pie existe para no tener.
- *
- *  Lo segundo tira en la dirección contraria y por eso va acá y no en la
- *  pantalla: **una fila sin nombre cuenta pendiente aunque esté tocada.**
- *  *Si la regla dependiera de que la pantalla se acuerde de no marcarla, el
- *  día que se olvide se guarda una vacuna sin nombre y nadie se entera.*
- *  Descartarla sí la resuelve — ahí no se guarda nada. */
-export function revisada({ tocada, descartada, sinNombre }: FilaDeLaTanda): boolean {
-  if (descartada === true) return true
-  return tocada && sinNombre !== true
+ *  ⏪ **Acá vivía también «sin nombre no cuenta revisada», y se fue a su
+ *  propia cuenta.** No es que la regla se aflojara —lo incompleto sigue
+ *  bloqueando el guardado, ahora por `incompletas`— es que **mirar una fila y
+ *  completarla son dos actos**, y meterlos en el mismo número obligaba a
+ *  decirle a la persona *«faltan N por revisar»* sobre una fila que ya había
+ *  revisado. *Una cuenta que junta dos trabajos distintos no puede nombrar
+ *  ninguno.* */
+export function revisada({ tocada, descartada }: FilaDeLaTanda): boolean {
+  return descartada === true || tocada
 }
 
 /**
@@ -192,16 +209,38 @@ export function revisada({ tocada, descartada, sinNombre }: FilaDeLaTanda): bool
  */
 export function resumenDeLaTanda(filas: readonly FilaDeLaTanda[]): {
   faltan: number
+  /** Les falta un dato, estén tocadas o no. **Cuenta aparte y voz aparte, y
+   *  DISJUNTA de `faltan`**: cada fila cae en exactamente una. */
+  incompletas: number
   aGuardar: number
   listo: boolean
 } {
-  /* Una sola regla de conteo: la de `faltanPorTocar`, alimentada con
-     `revisada` (`L-175`: se ensancha lo que existe, no se copia). */
-  const faltan = faltanPorTocar(filas.map(revisada))
-  /* Sin nombre igual cuenta para guardar: **no está descartada, le falta el
-     dato** — y lo que la frena es `faltan`, no este número. */
-  const aGuardar = filas.filter((f) => f.descartada !== true).length
-  return { faltan, aGuardar, listo: faltan === 0 && aGuardar > 0 }
+  /* 🔴 **LAS DOS CUENTAS SON DISJUNTAS, Y ESO ES LA REGLA — NO UN DETALLE.**
+     ⏪ No lo eran: una fila incompleta caía en las DOS —`faltan` la contaba por
+     no estar tocada, `incompletas` por faltarle el dato— y la voz elegía la
+     primera. Con el carnet real del founder, **cuatro filas sin fecha decían
+     «faltan 4 por revisar»**.
+     ☠️ Y no era sólo la voz equivocada: **«por completar» era INALCANZABLE.**
+     El confirmar de una fila incompleta está `disabled`, así que **la persona
+     no puede tocarla nunca** ⇒ jamás sale de `faltan` ⇒ la otra voz no se
+     podía ver. *Dos piezas correctas por separado —el botón que protege y la
+     cuenta que nombra— muertas juntas.*
+     La cura es que cada fila caiga en **exactamente una** cuenta: *dos cuentas
+     que se solapan no son dos cuentas — son una contada dos veces con nombres
+     distintos.* */
+  const vivas = filas.filter((f) => f.descartada !== true)
+  /* Lo incompleto, entre TODAS las que sobrevivieron al descarte —tocadas o
+     no—: *descartarla la resuelve, así que pedir que se complete algo que ya
+     se tiró es mandar a trabajar sobre lo que nadie va a mirar.* */
+  const incompletas = vivas.filter(estaIncompleta).length
+  /* Y «por revisar» son **las restantes sin toque**. Sigue contándolas
+     `faltanPorTocar` —una sola regla de conteo, `L-175`— pero alimentada con
+     lo que de verdad le toca. */
+  const faltan = faltanPorTocar(vivas.filter((f) => !estaIncompleta(f)).map(revisada))
+  /* Incompleta igual cuenta para guardar: **no está descartada, le falta el
+     dato** — y lo que la frena es `incompletas`, no este número. */
+  const aGuardar = vivas.length
+  return { faltan, incompletas, aGuardar, listo: faltan === 0 && incompletas === 0 && aGuardar > 0 }
 }
 
 /* ═══ EL MOTOR DECIDE, LA CASA DIBUJA ═══════════════════════════════════════

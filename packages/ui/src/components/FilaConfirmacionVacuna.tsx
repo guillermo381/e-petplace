@@ -21,6 +21,18 @@
  * dato inventado entra al expediente firmado por el dueño: *él ve algo
  * plausible, no lo toca, y queda como si lo hubiera confirmado.*
  *
+ * ── 🔴 LO INCOMPLETO SE SEÑALA EN SU CAMPO, NO EN UN CARTEL ────────────
+ * Una fila a la que le falta un dato —el nombre o la fecha— llega **marcada**,
+ * con **ese campo señalado y su razón al lado**, y el confirmar **apagado**.
+ * *Un aviso arriba diciendo «falta algo» obliga a buscar qué; la voz pegada al
+ * campo vacío ya lo dice y lo señala en el mismo gesto.*
+ *
+ * ⚠️ **La fecha la declara la pantalla; el nombre lo ve la pieza.** No es una
+ * asimetría cómoda: *la pieza tiene el nombre como prop y puede verificarlo,
+ * pero `campos` son etiqueta y valor genéricos — no sabe cuál de ellos es la
+ * fecha, y adivinarlo sería señalar el campo equivocado.* Por eso el nombre se
+ * defiende solo aunque nadie lo declare, y la fecha no.
+ *
  * ── 🔴 UNA FILA SIN NOMBRE ES LA QUE MÁS PIDE MIRARSE ──────────────────
  * Si la IA no pudo leer **cuál** vacuna es, no hay nada que confirmar: *«Es
  * correcta» sobre una fila sin nombre es firmar un renglón en blanco.* Así que
@@ -86,6 +98,17 @@ export interface FilaConfirmacionVacunaProps {
   vozSinNombre: string
   /** Lo que la persona teclea. La pantalla es la que guarda el valor. */
   onNombre?: (v: string) => void
+  /** 🔴 **Qué campo le falta a esta fila para poder guardarse.**
+   *  `'nombre'` la pieza además lo VE (el nombre es prop suyo) y se defiende
+   *  sola aunque nadie lo declare. `'fecha'` **sólo lo sabe la pantalla**, y
+   *  también es ella la que lo RETIRA al completarse: *la pieza no puede saber
+   *  cuál de los `campos` es la fecha, y si congelara el estado el botón
+   *  quedaría apagado para siempre.* */
+  incompleta?: 'fecha' | 'nombre'
+  /** *«Falta la fecha de aplicación»* — la razón, **pegada al campo que
+   *  falta**, no arriba. Sin ella el campo se señala igual pero no explica, y
+   *  un campo marcado sin razón es medio defecto. */
+  vozIncompleta?: string
   /** ⚠️ **El foco lo decide la LISTA, no la fila, y por eso el default es
    *  `false`.** Con dos filas sin nombre, `autoFocus` en las dos deja el foco
    *  en **la última** —la que se montó al final— y ahí es peor que no tener
@@ -134,6 +157,8 @@ export function FilaConfirmacionVacuna({
   etiquetaNombre,
   vozSinNombre,
   onNombre,
+  incompleta,
+  vozIncompleta,
   enfocar = false,
   campos,
   confianza,
@@ -156,9 +181,17 @@ export function FilaConfirmacionVacuna({
      fila que la IA no pudo leer no deja de serlo a mitad de la palabra: sigue
      siendo la fila que hay que mirar hasta que se guarde la tanda. */
   const hayNombre = (nombre ?? '').trim() !== ''
-  const [pedirNombre] = useState(!hayNombre)
-  /* Sin nombre no hay confianza que valga: **la duda es la fila entera.** */
-  const revisar = pideRevision(confianza) || pedirNombre
+  const [pedirNombre] = useState(!hayNombre || incompleta === 'nombre')
+  /* 🔴 QUÉ FALTA: lo declarado manda, y el nombre se defiende solo. *La pieza
+     ve el nombre y puede verificarlo; la fecha vive entre `campos` genéricos y
+     no sabe cuál es — señalar el campo equivocado es peor que no señalar.* */
+  const falta: 'fecha' | 'nombre' | undefined = incompleta ?? (pedirNombre ? 'nombre' : undefined)
+  /* 🔴 Y CUÁNDO SE RESUELVE, en vivo y no congelado: el nombre lo sabe la
+     pieza; la fecha la resuelve la pantalla retirando `incompleta`. *Congelar
+     lo segundo dejaría el botón apagado para siempre.* */
+  const bloqueada = falta === 'nombre' ? !hayNombre : falta !== undefined
+  /* Algo que falta no deja confianza que valga: **la duda es la fila entera.** */
+  const revisar = pideRevision(confianza) || falta !== undefined
   const conValor = detalleVisible(campos)
   const vacios = campos.filter((c) => c.valor == null || c.valor.trim() === '')
 
@@ -240,24 +273,33 @@ export function FilaConfirmacionVacuna({
         </View>
       ))}
 
-      {/* 🔴 Lo que NO leyó: **vacío y editable, jamás con un valor puesto.** */}
+      {/* 🔴 Lo que NO leyó: **vacío y editable, jamás con un valor puesto.**
+          Y si lo que falta es la fecha, **el campo se señala y dice por qué**
+          — la razón pegada al hueco, no en un cartel arriba que obligue a
+          buscar cuál. */}
       {vacios.map((c) => (
-        <Pressable
-          key={c.etiqueta}
-          accessibilityRole="button"
-          accessibilityLabel={c.etiqueta}
-          onPress={onEditar}
-          style={{
-            minHeight: 44,
-            justifyContent: 'center',
-            paddingHorizontal: spacing[3],
-            borderRadius: radius.sm,
-            borderWidth: 1,
-            borderColor: theme.bg.border,
-          }}
-        >
-          <Texto variante="apoyo">{c.etiqueta}</Texto>
-        </Pressable>
+        <View key={c.etiqueta} style={{ gap: spacing[1] }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={c.etiqueta}
+            onPress={onEditar}
+            style={{
+              minHeight: 44,
+              justifyContent: 'center',
+              paddingHorizontal: spacing[3],
+              borderRadius: radius.sm,
+              borderWidth: falta === 'fecha' ? 1.5 : 1,
+              borderColor: falta === 'fecha' ? theme.status.warningText : theme.bg.border,
+            }}
+          >
+            <Texto variante="apoyo">{c.etiqueta}</Texto>
+          </Pressable>
+          {falta === 'fecha' && vozIncompleta !== undefined ? (
+            <Texto variante="apoyo" color="warning">
+              {vozIncompleta}
+            </Texto>
+          ) : null}
+        </View>
       ))}
 
       {/* De dónde salió: un sello no vale lo mismo que un número a mano.
@@ -271,18 +313,18 @@ export function FilaConfirmacionVacuna({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={vozConfirmar}
-        accessibilityState={{ selected: tocada, disabled: pedirNombre && !hayNombre }}
-        disabled={pedirNombre && !hayNombre}
+        accessibilityState={{ selected: tocada, disabled: bloqueada }}
+        disabled={bloqueada}
         onPress={onConfirmar}
         style={{
           minHeight: 44,
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: radius.full,
-          backgroundColor: pedirNombre && !hayNombre ? theme.bg.hundido : tocada ? theme.bg.hundido : theme.accent.cta,
+          backgroundColor: bloqueada || tocada ? theme.bg.hundido : theme.accent.cta,
         }}
       >
-        <Texto variante="enfasis" color={pedirNombre && !hayNombre ? 'tertiary' : tocada ? 'secondary' : undefined}>
+        <Texto variante="enfasis" color={bloqueada ? 'tertiary' : tocada ? 'secondary' : undefined}>
           {vozConfirmar}
         </Texto>
       </Pressable>
@@ -326,6 +368,12 @@ export interface PieConfirmacionVacunasProps {
   /** 🔴 **LA RAZÓN DEL APAGADO, ya compuesta con su número**: *«faltan 2 por
    *  revisar»*. La pieza le pasa el número; la pantalla arma la frase. */
   vozFaltan: (n: number) => string
+  /** 🔴 *«1 por completar»* — **la razón que NO se resuelve tocando.**
+   *  *«Faltan 3 por revisar» manda a tocar; «1 por completar» manda a
+   *  escribir* — y decir la primera cuando pasa la segunda manda a la persona
+   *  a tocar una fila que ya tocó. Son dos trabajos distintos y por eso son
+   *  dos cuentas con dos voces. */
+  vozIncompletas: (n: number) => string
   /** La otra razón, la que nació con el descarte: *«no queda ninguna para
    *  guardar»*. **Sin ella, una tanda toda descartada apagaría el botón en
    *  silencio** — el mismo defecto por la puerta de al lado.
@@ -338,9 +386,9 @@ export interface PieConfirmacionVacunasProps {
 /** El pie de la tanda. **Se enciende sólo con todas revisadas y al menos una
  *  que guardar, y apagado DICE cuál de las dos razones lo apaga** — *un botón
  *  apagado sin razón a la vista es el defecto.* */
-export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozNinguna, onGuardar }: PieConfirmacionVacunasProps) {
+export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozIncompletas, vozNinguna, onGuardar }: PieConfirmacionVacunasProps) {
   const { theme } = useTheme()
-  const { faltan, aGuardar, listo } = resumenDeLaTanda(filas)
+  const { faltan, incompletas, aGuardar, listo } = resumenDeLaTanda(filas)
 
   /* 🔴 **TANDA VACÍA ⇒ EL PIE NO SE DIBUJA**, y no es lo mismo que la tanda
      toda descartada.
@@ -356,12 +404,18 @@ export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozNingun
 
   return (
     <View style={{ gap: spacing[2] }}>
-      {/* La razón va ARRIBA del botón y no adentro: el botón dice qué hace,
-          la línea dice por qué todavía no. **Y las dos razones son distintas:
-          «faltan 2» se resuelve tocando; «no queda ninguna» no se resuelve
-          tocando, y decir la primera cuando pasa la segunda manda a la
-          persona a buscar una fila que ya revisó.** */}
-      {listo ? null : <Texto variante="apoyo">{faltan > 0 ? vozFaltan(faltan) : vozNinguna}</Texto>}
+      {/* La razón va ARRIBA del botón y no adentro: el botón dice qué hace, la
+          línea dice por qué todavía no. **Y son TRES razones distintas, en el
+          orden en que se resuelven:** primero lo que se arregla tocando
+          («faltan 3 por revisar»), después lo que se arregla escribiendo («1
+          por completar»), y al final la que no se arregla («no queda
+          ninguna»). *Decir una cuando pasa otra manda a la persona a trabajar
+          donde ya no hay nada que hacer.* */}
+      {listo ? null : (
+        <Texto variante="apoyo">
+          {faltan > 0 ? vozFaltan(faltan) : incompletas > 0 ? vozIncompletas(incompletas) : vozNinguna}
+        </Texto>
+      )}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={vozGuardar(aGuardar)}
