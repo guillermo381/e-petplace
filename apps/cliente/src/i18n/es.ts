@@ -260,6 +260,12 @@ export const clienteEs = {
   //      (7-ago: el sujeto es el sistema, el campo dos es el tipo de agua) y
   //      dejó dicho que la voz se firma en el gate de pantalla.
   alta: {
+    sugEsUn: '¿Es un {{raza}}?',
+    sugConf_muyProbable: 'muy probable',
+    sugConf_probable: 'probable',
+    sugConf_puedeSer: 'puede ser',
+    sugSinAnimal: 'No pude ver a tu mascota en la foto',
+    sugOtra: 'Otra',
     // ── paso 1/4
     paso1Titulo: '¿Quién se suma a tu casa?',
     especieEtiqueta: '¿Qué especie es?',

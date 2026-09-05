@@ -36,12 +36,16 @@ import {
   SelectorOpcion,
   spacing,
   useTheme,
+  SugerenciaRaza,
+  leerBase64,
+  Texto,
 } from '@epetplace/ui';
 
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascota } from '@/lib/cara-mascota';
 import { CODIGO_NO_SE, SelectorDeRaza, type RazaElegida } from '@/components/selector-de-raza';
+import { obtenerRazasDeEspecie, sugerirRaza, type SugerenciaDeRaza } from '@epetplace/api';
 import { esAcuario, TIPOS_DE_AGUA, type BorradorAlta, type EspecieUi } from './tipos';
 
 /**
@@ -110,6 +114,54 @@ export function PasoRaza({
     elegido: borrador.razaSlug,
   });
 
+  /* ⭐ **LA SUGERENCIA DE RAZA** (S113-C · 1.2 · C9). La foto ya pasó (el paso
+     se corrió antes que éste), así que acá hay algo que mirar.
+     🔴 **Nada se guarda solo**: `elegida` arranca en `null` y la raza del
+     borrador no se toca hasta que un humano tope un chip. *Una IA que escribe
+     el dato y después te lo muestra no está sugiriendo: está decidiendo y
+     avisando.* */
+  const [sugerencia, setSugerencia] = useState<SugerenciaDeRaza | 'cargando' | 'error' | null>(null);
+  const [nombresRaza, setNombresRaza] = useState<Record<string, string>>({});
+  const [elegidaIA, setElegidaIA] = useState<string | null>(null);
+  const [selectorAbierto, setSelectorAbierto] = useState(false);
+
+  useEffect(() => {
+    let vivo = true;
+    void (async () => {
+      if (borrador.fotoUri === undefined || especieUi === undefined || acuario) return;
+      setSugerencia('cargando');
+      const b64 = await leerBase64(borrador.fotoUri).catch(() => null);
+      if (b64 === null) {
+        if (vivo) setSugerencia('error');
+        return;
+      }
+      const [r, cat] = await Promise.all([
+        sugerirRaza({ imagenBase64: b64, especie: borrador.especie ?? '' }),
+        obtenerRazasDeEspecie(borrador.especie ?? ''),
+      ]);
+      if (!vivo) return;
+      /* El catálogo da el NOMBRE del slug. Sin él la pregunta diría el código
+         («¿Es un jack-rusell?»), que es la voz de la base y no la de la casa. */
+      if (cat.ok) setNombresRaza(Object.fromEntries(cat.data.map((x) => [x.slug, x.nombre])));
+      setSugerencia(r.ok ? r.data : 'error');
+    })();
+    return () => {
+      vivo = false;
+    };
+  }, [borrador.fotoUri, borrador.especie, especieUi, acuario]);
+
+  const VOZ_CONFIANZA = {
+    alta: 'muyProbable',
+    media: 'probable',
+    baja: 'puedeSer',
+  } as const;
+
+  const datos = typeof sugerencia === 'object' && sugerencia !== null ? sugerencia : null;
+  /* Sin animal, o sin candidatas, o si tocó «mestizo/otra»: el selector de
+     siempre. **La sugerencia no reemplaza al selector, lo adelanta.** */
+  const mostrarSelector =
+    acuario || datos === null || datos.sin_animal || datos.candidatas.length === 0 || selectorAbierto;
+
   const titulo = t(especieUi ? CLAVE_TITULO[especieUi] : 'alta.paso2Raza', { nombre });
 
   /** Un solo lugar decide qué se guarda. Para el acuario el mismo slot lleva
@@ -171,11 +223,48 @@ export function PasoRaza({
                   pide «la gramática del alta» para el perfil, y eso se cumple
                   compartiendo, no copiando: dos selectores con las mismas
                   reglas se separan el día que alguien afina uno. */}
-              <SelectorDeRaza
-                especie={borrador.especie ?? ''}
-                valor={eleccion}
-                onCambio={setEleccion}
-              />
+              {/* ⭐ **LA SUGERENCIA, ARRIBA DEL SELECTOR** — lo adelanta, no lo
+                  reemplaza. Con `sin_animal` o sin candidatas no se dibuja y
+                  queda el camino de siempre. */}
+              {datos !== null && !datos.sin_animal && datos.candidatas.length > 0 ? (
+                <SugerenciaRaza
+                  candidatas={datos.candidatas.slice(0, 3).map((c) => ({
+                    id: c.raza_codigo,
+                    pregunta: t('alta.sugEsUn', { raza: nombresRaza[c.raza_codigo] ?? c.raza_codigo }),
+                    confianza: VOZ_CONFIANZA[c.confianza],
+                    vozConfianza: t(`alta.sugConf_${VOZ_CONFIANZA[c.confianza]}` as 'alta.sugConf_probable'),
+                  }))}
+                  vioAnimal
+                  vozSinAnimal={t('alta.sugSinAnimal')}
+                  vozMestizo={t('alta.razaMestizoValor')}
+                  vozOtra={t('alta.sugOtra')}
+                  elegida={elegidaIA}
+                  onElegir={(id) => {
+                    setElegidaIA(id);
+                    /* 🔴 Mestizo y «otra» NO escriben una raza: abren el
+                       selector. *Un chip que dice «otra» y guarda algo es el
+                       chip que menos se puede desandar.* */
+                    if (id === 'mestizo' || id === 'otra') {
+                      setSelectorAbierto(true);
+                      return;
+                    }
+                    /* El toque del humano ES la escritura. */
+                    setEleccion({ raza: nombresRaza[id] ?? id, slug: id, elegido: id });
+                  }}
+                />
+              ) : null}
+
+              {datos !== null && datos.sin_animal ? (
+                <Texto variante="apoyo">{t('alta.sugSinAnimal')}</Texto>
+              ) : null}
+
+              {mostrarSelector || elegidaIA === null ? (
+                <SelectorDeRaza
+                  especie={borrador.especie ?? ''}
+                  valor={eleccion}
+                  onCambio={setEleccion}
+                />
+              ) : null}
 
               <Boton
                 etiqueta={t('alta.continuar')}

@@ -155,7 +155,11 @@ const estadoDelPie = async () =>
       /^(Sumar \d+ vacunas? a su historia|Save)/.test((e.getAttribute('aria-label') ?? e.textContent ?? '').trim()),
     );
     const txt = document.body.innerText;
-    const razon = txt.split('\n').map((x) => x.trim()).find((x) => /^(Faltan|Falta|No queda|None left|\d+ left)/i.test(x));
+    /* La razón del pie tiene TRES formas y mi regex sólo conocía dos: «Faltan N
+       por revisar», «No queda ninguna» y —la que llegó con la adenda 6— «Hay N
+       vacunas por completar antes de guardar». *Un arnés que no conoce una voz
+       nueva reporta «sin razón» sobre un pie que sí la dice.* */
+    const razon = txt.split('\n').map((x) => x.trim()).find((x) => /^(Faltan|Falta|No queda|None left|Hay \d+|\d+ left)/i.test(x));
     return {
       etiqueta: b === undefined ? '(no hay pie)' : (b.getAttribute('aria-label') ?? b.textContent ?? '').trim(),
       apagado: b === undefined ? null : b.getAttribute('aria-disabled'),

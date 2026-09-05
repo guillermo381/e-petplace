@@ -164,6 +164,12 @@ export const clienteEn = {
   // why the two namespaces merged, and for the two voice calls the gate
   // still has to arbitrate). BATCH S91 · GATE PENDING.
   alta: {
+    sugEsUn: 'Is it a {{raza}}?',
+    sugConf_muyProbable: 'very likely',
+    sugConf_probable: 'likely',
+    sugConf_puedeSer: 'maybe',
+    sugSinAnimal: 'I could not see your pet in the photo',
+    sugOtra: 'Another',
     paso1Titulo: "Who's joining your home?",
     especieEtiqueta: 'What species are they?',
     especieAcuario: 'Aquarium',
