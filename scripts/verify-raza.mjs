@@ -14,17 +14,16 @@ const PKG = 'package.json'
 const huella = () => (existsSync(PKG) ? createHash('sha256').update(readFileSync(PKG)).digest('hex') : null)
 const antes = huella()
 try { execSync('deno --version', { stdio: 'pipe' }) } catch {
-  console.error('\nNO CONCLUYENTE verify:carnet-v2 — `deno` no está instalado.\n'); process.exit(2)
+  console.error('\nNO CONCLUYENTE verify:raza — `deno` no está instalado.\n'); process.exit(2)
 }
-const base = mkdtempSync(join(tmpdir(), 'epp-carnet-'))
+const base = mkdtempSync(join(tmpdir(), 'epp-raza-'))
 let codigo = 1
 try {
   cpSync('supabase/functions', join(base, 'functions'), { recursive: true })
-  mkdirSync(join(base, 'functions', '_prueba-carnet'), { recursive: true })
-  cpSync('scripts/ia/prueba-carnet-v2.ts', join(base, 'functions', '_prueba-carnet', 'prueba.ts'))
-  cpSync('scripts/ia/fixture-carnet-real-docA.json', join(base, 'functions', '_prueba-carnet', 'fixture-carnet-real-docA.json'))
+  mkdirSync(join(base, 'functions', '_prueba-raza'), { recursive: true })
+  cpSync('scripts/ia/prueba-raza.ts', join(base, 'functions', '_prueba-raza', 'prueba.ts'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
-  execFileSync('deno', ['run', '--allow-env', '--allow-net', '--allow-read', 'functions/_prueba-carnet/prueba.ts'],
+  execFileSync('deno', ['run', '--allow-env', '--allow-net', '--allow-read', 'functions/_prueba-raza/prueba.ts'],
     { cwd: base, stdio: 'inherit' })
   codigo = 0
 } catch { codigo = 1 } finally { rmSync(base, { recursive: true, force: true }) }

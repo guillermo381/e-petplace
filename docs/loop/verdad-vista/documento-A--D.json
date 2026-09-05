@@ -1,0 +1,213 @@
+{
+  "carnet": "carnet-1783564367515.jpg",
+  "leido_por": "S113-D, a ojo, sobre la imagen original 1079x767 y tres recortes ampliados",
+  "leido_el": "2026-09-04",
+  "advertencia": "Esto NO es la verdad del conjunto: es lo que el carnet DICE, transcrito mirandolo. La verdad del conjunto para este carnet tiene UNA fila. El carnet tiene QUINCE.",
+  "formato": "dos paginas enfrentadas, tabla impresa con cabecera FECHA | VACUNA | PROXIMA APLICACION | FIRMA MVZ. NO hay ningun plan de vacunacion preimpreso: la tabla nace vacia y cada renglon lleno tiene un sticker pegado.",
+  "n_filas_vistas": 15,
+  "filas": [
+    {
+      "pagina": "izq",
+      "n": 1,
+      "vacuna": "Rabimune",
+      "fecha_aplicada": "2020-08-29",
+      "fecha_proxima": "2021-08-29",
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    },
+    {
+      "pagina": "izq",
+      "n": 2,
+      "vacuna": "GiardiaVax",
+      "fecha_aplicada": "2020-08-29",
+      "fecha_proxima": "2021-08-29",
+      "lote": "014/19",
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    },
+    {
+      "pagina": "izq",
+      "n": 3,
+      "vacuna": "Bronchicine CAe",
+      "fecha_aplicada": "2021-02-12",
+      "fecha_proxima": "2022-02-12",
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "media"
+    },
+    {
+      "pagina": "izq",
+      "n": 4,
+      "vacuna": "Recombitek (Diluente + Mosquillo vector Viruela del canario, Adenovirus tipo 2, Coronavirus, Parainfluenza y Parvovirus)",
+      "fecha_aplicada": "2021-02-12",
+      "fecha_proxima": "2022-02-12",
+      "lote": "46559A",
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "media",
+      "nota": "DOS stickers de la misma dosis"
+    },
+    {
+      "pagina": "izq",
+      "n": 5,
+      "vacuna": "Rabimune",
+      "fecha_aplicada": "2021-10-29",
+      "fecha_proxima": "2022-10-29",
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    },
+    {
+      "pagina": "izq",
+      "n": 6,
+      "vacuna": "GiardiaVax",
+      "fecha_aplicada": "2021-11-13",
+      "fecha_proxima": "2022-11-13",
+      "lote": "013/21R",
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    },
+    {
+      "pagina": "izq",
+      "n": 7,
+      "vacuna": "Bronchicine CAe",
+      "fecha_aplicada": "2022-02-25",
+      "fecha_proxima": null,
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "media",
+      "proxima_manuscrita": "FEB 2023",
+      "nota": "la proxima no trae dia"
+    },
+    {
+      "pagina": "izq",
+      "n": 8,
+      "vacuna": "Peek'o",
+      "fecha_aplicada": "2022-02-25",
+      "fecha_proxima": null,
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "media",
+      "proxima_manuscrita": "FEB 2023",
+      "nota": "la proxima no trae dia"
+    },
+    {
+      "pagina": "der",
+      "n": 9,
+      "vacuna": "Peek N-RB",
+      "fecha_aplicada": "2022-10-28",
+      "fecha_proxima": "2023-10-28",
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    },
+    {
+      "pagina": "der",
+      "n": 10,
+      "vacuna": "Peek Puppy",
+      "fecha_aplicada": "2023-03-15",
+      "fecha_proxima": "2024-03-15",
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    },
+    {
+      "pagina": "der",
+      "n": 11,
+      "vacuna": "Recombitek (sticker beige)",
+      "fecha_aplicada": "2023-03-15",
+      "fecha_proxima": "2024-03-15",
+      "lote": "350918",
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "baja"
+    },
+    {
+      "pagina": "der",
+      "n": 12,
+      "vacuna": "Peek N-RB",
+      "fecha_aplicada": "2023-10-27",
+      "fecha_proxima": "2024-10-27",
+      "lote": null,
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    },
+    {
+      "pagina": "der",
+      "n": 13,
+      "vacuna": "Recombitek Oral Bordetella",
+      "fecha_aplicada": "2024-03-22",
+      "fecha_proxima": "2025-03-22",
+      "lote": "35099A",
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "media"
+    },
+    {
+      "pagina": "der",
+      "n": 14,
+      "vacuna": "Recombitek (Diluente + Mosquillo vector Viruela, Adenovirus tipo 2, Coronavirus, Parainfluenza y Parvovirus)",
+      "fecha_aplicada": "2024-03-22",
+      "fecha_proxima": "2025-03-22",
+      "lote": "46067A",
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "media",
+      "nota": "DOS stickers de la misma dosis"
+    },
+    {
+      "pagina": "der",
+      "n": 15,
+      "vacuna": "Imrab 3TF (antirrabica, virus inactivado)",
+      "fecha_aplicada": "2024-10-25",
+      "fecha_proxima": "2025-10-25",
+      "lote": "185191",
+      "vencimiento_biologico": null,
+      "veterinario": "MVZ Enrique Lopez Sanchez",
+      "evidencia": "sticker_con_fecha",
+      "confianza": "alta"
+    }
+  ],
+  "la_unica_fila_de_la_verdad_del_conjunto": {
+    "nombre_vacuna": "Peck NRB",
+    "fecha_aplicada": "2024-10-25",
+    "fecha_proxima": "2025-10-25",
+    "lote": "11536014",
+    "veterinario_nombre_externo": "MVZ Enrique Lopez Sanchez",
+    "que_esta_mal": [
+      "el nombre: el renglon del 25/OCT/2024 lleva Imrab 3TF, no Peek N-RB. 'Peek N-RB' es el renglon del 27/OCT/2023. El nombre y la fecha vienen de DOS renglones distintos.",
+      "el lote: 11536014 es la CEDULA PROFESIONAL DEL VETERINARIO, impresa en la columna FIRMA MVZ de TODAS las filas. El lote real de esa fila es 185191.",
+      "la cantidad: es 1 de 15."
+    ]
+  },
+  "esquema": "unificado con documento-B--D.json y con el contrato de la edge: el campo del numero de lote se llama `lote` (antes `lote_visible`, que el cotejo no comparaba y hacia pasar por acuerdo lo que era un hueco de esquema).",
+  "lo_que_NO_pude_leer": [
+    "Los VENCIMIENTOS de los biologicos de este documento: no los transcribi al mirarlo. Van null en las 15 filas, y es un hueco de MI lectura, no del carnet -- los stickers los traen. Si hacen falta, hay que volver a mirar."
+  ],
+  "confianza_nota": "La confianza es MI certeza al leer cada fila. Las medias de las filas 3 y 7 son el sticker azul que yo lei \"Bronchicine CAe\" y el modelo leyo \"Bronchi-Shield Ca\": lo marco dudoso porque lo es, no porque el modelo diga otra cosa."
+}

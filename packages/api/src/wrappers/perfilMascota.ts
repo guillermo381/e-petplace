@@ -741,3 +741,105 @@ export async function declararCensoDelAcuario(
     },
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// A9 · LA DESPEDIDA
+//
+// **El motor de esto ya existía entero y no tenía puerta.** El tipo `fin_vida`
+// está en el catálogo desde antes, un trigger ya lo traduce a
+// `estado_vida='fallecida'` y otros tres ya cierran planes, solicitudes y
+// avisos cuando eso pasa. Lo único que faltaba era por dónde decirlo. *El
+// sistema sabía qué hacer cuando una mascota se va; la familia no tenía cómo
+// contarlo.*
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface FinDeVidaRegistrado {
+  mascota_id: string;
+  evento_id: string | null;
+  /** El día que la familia declaró. */
+  fecha: string;
+  estado_vida: 'fallecida';
+  /** `true` si ya estaba registrado. **No es un error y no se dibuja como
+   *  tal**: si alguien vuelve a entrar —porque el toque no se sintió, porque
+   *  otro adulto de la casa ya lo hizo—, devolverle un rebote sería devolverle
+   *  el golpe. La pantalla simplemente muestra lo que ya está. */
+  ya_estaba: boolean;
+}
+
+export type CodigoErrorFinDeVida =
+  | 'sin_sesion'
+  | 'sin_acceso'
+  | 'fecha_futura'
+  | 'fecha_antes_de_nacer'
+  | 'desconocido';
+
+const MENSAJES_FIN_DE_VIDA: Record<CodigoErrorFinDeVida, string> = {
+  sin_sesion:           'Necesitas iniciar sesión.',
+  sin_acceso:           'No tienes acceso a esta mascota.',
+  fecha_futura:         'Esa fecha todavía no llegó.',
+  fecha_antes_de_nacer: 'Esa fecha es anterior a su nacimiento.',
+  desconocido:          'No pudimos guardarlo. Prueba de nuevo en un rato.',
+};
+
+function codigoFinDeVida(msg: string): CodigoErrorFinDeVida {
+  if (msg.includes('auth_required')) return 'sin_sesion';
+  if (msg.includes('no_access_to_mascota')) return 'sin_acceso';
+  if (msg.includes('fecha_futura')) return 'fecha_futura';
+  if (msg.includes('fecha_antes_de_nacer')) return 'fecha_antes_de_nacer';
+  return 'desconocido';
+}
+
+/**
+ * Registra que una mascota ya no está.
+ *
+ * 🔴 **`palabras` es OPCIONAL y se guarda tal cual.** No se resume, no se
+ * corrige, no se completa. *Si la familia escribe tres palabras, quedan tres
+ * palabras; si no escribe nada, no se le inventa un epitafio.*
+ *
+ * ⚠️ **A partir de acá el expediente queda de sólo lectura para lo que venga
+ * después.** Lo anterior sigue entrando —un veterinario cierra una atención
+ * días más tarde, y esa atención ocurrió cuando ella estaba viva—; lo que se
+ * feche después de la partida lo rebota el servidor con `mascota_en_memorial`.
+ */
+export async function registrarFinDeVida(input: {
+  mascotaId: string;
+  /** `YYYY-MM-DD`. */
+  fecha: string;
+  palabras?: string;
+}): Promise<ResultadoWrapper<FinDeVidaRegistrado, CodigoErrorFinDeVida>> {
+  const { data, error } = await getClient().rpc('registrar_fin_de_vida', {
+    p_mascota_id: input.mascotaId,
+    p_fecha: input.fecha,
+    ...(input.palabras !== undefined ? { p_palabras: input.palabras } : null),
+  });
+
+  if (error) {
+    const c = codigoFinDeVida(error.message);
+    return { ok: false, codigo: c, mensaje: MENSAJES_FIN_DE_VIDA[c] };
+  }
+
+  const o = data as Record<string, unknown> | null;
+  if (
+    o === null || typeof o !== 'object' || o.ok !== true ||
+    typeof o.mascota_id !== 'string' ||
+    typeof o.fecha !== 'string' ||
+    o.estado_vida !== 'fallecida' ||
+    typeof o.ya_estaba !== 'boolean'
+  ) {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJES_FIN_DE_VIDA.desconocido };
+  }
+
+  return {
+    ok: true,
+    data: {
+      mascota_id: o.mascota_id,
+      // Puede venir null si la despedida vieja fue borrada de forma blanda:
+      // **el estado es la verdad, el evento es su rastro** — y un rastro que
+      // falta no invalida el hecho.
+      evento_id: typeof o.evento_id === 'string' ? o.evento_id : null,
+      fecha: o.fecha,
+      estado_vida: 'fallecida',
+      ya_estaba: o.ya_estaba,
+    },
+  };
+}
