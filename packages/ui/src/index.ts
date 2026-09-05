@@ -1153,6 +1153,8 @@ export {
   faltanPorTocar,
   diasEntre,
   AVISO_DIAS,
+  estadoDelPlan,
   type EstadoVacuna,
+  type EstadoPlanMotor,
   type ConfianzaIA,
 } from './components/vacunas-estado'

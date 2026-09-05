@@ -3,6 +3,8 @@
    Importa sólo el módulo puro: `vacunas-estado` no arrastra `react-native`. */
 import {
   AVISO_DIAS, detalleVisible, diasEntre, estadoDeVacuna, faltanPorTocar, pideRevision,
+  marcaDeEstado, resumenDeLaTanda, revisada, estadoDelPlan,
+  type EstadoVacuna, type EstadoPlanMotor,
 } from '../packages/ui/src/components/vacunas-estado.ts';
 import { readFileSync } from 'node:fs';
 
@@ -17,7 +19,13 @@ const src = (f: string) =>
 const CARNET = src('FilaVacunaCarnet.tsx');
 const CONF = src('FilaConfirmacionVacuna.tsx');
 const PLAN = src('ListaPlanVacunal.tsx');
+const PUNTO = src('PuntoEstado.tsx');
+const INDICE = sinComentarios(readFileSync(new URL('../packages/ui/src/index.ts', import.meta.url), 'utf8'));
 const HOY = '2026-09-04';
+/* Colores de mentira a propósito: **lo que se mide es la CLASIFICACIÓN**, no
+   el tema. Si el gate usara los del tema, un cambio de paleta lo pondría rojo
+   sin que nada de la regla hubiera cambiado. */
+const C = { exito: 'E', aviso: 'A', peligro: 'P', tinta: 'T' };
 
 console.log('\n── ① ROJO · LO QUE ES `null` NO APARECE ──');
 t('un campo null se va entero',
@@ -60,7 +68,13 @@ console.log('\n── ④ ROJO · NO SE CONFIRMA EN BLOQUE ──');
 t('ninguna tocada ⇒ faltan todas', faltanPorTocar([false, false, false]), 3);
 t('una sí ⇒ faltan dos', faltanPorTocar([true, false, false]), 2);
 t('🔴 todas ⇒ cero', faltanPorTocar([true, true]), 0);
-t('el pie se enciende sólo con todas', /faltan === 0 && tocadas\.length > 0/.test(CONF), true);
+/* ⏪ La regla vivía tecleada en el pie (`faltan === 0 && tocadas.length > 0`).
+   **Se mudó entera a `resumenDeLaTanda`** cuando el descarte probó que esa
+   forma encendía el botón para guardar cero. Se mide donde vive ahora — y su
+   comportamiento, en ⑨. */
+t('el pie se enciende sólo con todas revisadas Y algo que guardar',
+  /listo: faltan === 0 && aGuardar > 0/.test(sinComentarios(readFileSync(
+    new URL('../packages/ui/src/components/vacunas-estado.ts', import.meta.url), 'utf8'))), true);
 t('🔴 y apagado DICE cuántas faltan (un apagado mudo es el defecto)',
   /vozFaltan\(faltan\)/.test(CONF), true);
 t('no existe un «confirmar todas» que saltee la revisión',
@@ -80,6 +94,152 @@ for (const [n, s] of [['carnet', CARNET], ['confirmación', CONF], ['plan', PLAN
   t(`\`${n}\` no arma frases con datos`, /`\$\{[a-z]+\} (de|en|para|hasta)/i.test(s), false);
 t('la fila del carnet recibe `hoy` por prop, no lo lee del reloj',
   /new Date\(\)/.test(CARNET), false);
+
+console.log('\n── ⑦ ROJO · «TODAVÍA NO LE TOCA» NO SE DIBUJA COMO «SIN REGISTRO» ──');
+/* 🔴 El pedido entero se juega acá: las dos comparten tinta a propósito
+   —ninguna es un problema— así que **si el color fuera lo único que las
+   separa, serían el mismo punto.** */
+t('las dos ausencias comparten tinta', 
+  [marcaDeEstado({ clase: 'sinRegistro' }, C).color, marcaDeEstado({ clase: 'aunNoCorresponde' }, C).color],
+  ['T', 'T']);
+t('🔴 …y el RELLENO las distingue: hueco sólo «todavía no le toca»',
+  [marcaDeEstado({ clase: 'sinRegistro' }, C).hueco, marcaDeEstado({ clase: 'aunNoCorresponde' }, C).hueco],
+  [false, true]);
+t('🔴 y NO son la misma marca (el rojo del pedido)',
+  JSON.stringify(marcaDeEstado({ clase: 'sinRegistro' }, C)) ===
+    JSON.stringify(marcaDeEstado({ clase: 'aunNoCorresponde' }, C)), false);
+t('CONTROL · `sinRefuerzo` sigue llena y en tinta, sin cambiar',
+  marcaDeEstado({ clase: 'sinRefuerzo' }, C), { color: 'T', hueco: false });
+t('los tres estados con semáforo no cambiaron',
+  (['alDia', 'porVencer', 'vencida'] as const).map((c) => marcaDeEstado({ clase: c, dias: 1 } as EstadoVacuna, C).color),
+  ['E', 'A', 'P']);
+t('🔴 ninguno de los seis se dibuja hueco por accidente',
+  (['alDia', 'porVencer', 'vencida', 'sinRefuerzo', 'sinRegistro'] as const)
+    .filter((c) => marcaDeEstado({ clase: c, dias: 1 } as EstadoVacuna, C).hueco).length, 0);
+t('el punto dibuja las DOS formas, no una', /borderWidth: hueco \?/.test(PUNTO) && /hueco \? 'transparent'/.test(PUNTO), true);
+t('🔴 y no se anuncia al lector: la palabra informa, la forma acompaña',
+  /accessibilityRole|accessibilityLabel/.test(PUNTO), false);
+
+console.log('\n── ⑧ ROJO · LA CLASIFICACIÓN ES UNA, Y SIN `default` ──');
+/* ⏪ Vivía COPIADA en las dos piezas, las dos con `default`. Con ese `default`
+   la clase nueva habría caído ahí **sin un solo error de tipos**, dibujándose
+   idéntica a `sinRegistro`: exactamente lo que se pidió distinguir. */
+t('🔴 la fila del carnet ya no tiene su propio switch de colores',
+  /function colorDe/.test(CARNET), false);
+t('🔴 …ni la lista del plan', /function colorDe/.test(PLAN), false);
+t('las dos consumen la misma marca',
+  /marcaDeEstado\(/.test(CARNET) && /marcaDeEstado\(/.test(PLAN), true);
+t('🔴 y la clasificación NO tiene rama `default` donde caerse en silencio',
+  /default:/.test(sinComentarios(readFileSync(
+    new URL('../packages/ui/src/components/vacunas-estado.ts', import.meta.url), 'utf8'))), false);
+t('🔴 `estadoDeVacuna` JAMÁS inventa «todavía no le toca»: sólo ve fechas',
+  [estadoDeVacuna({}, HOY).clase, estadoDeVacuna({ fechaAplicada: '2020-01-01', fechaProxima: null }, HOY).clase]
+    .includes('aunNoCorresponde' as never), false);
+
+console.log('\n── ⑨ ROJO · «ESTA NO ES», Y EL BOTÓN QUE GUARDABA NADA ──');
+t('descartar ES revisar', revisada({ tocada: false, descartada: true }), true);
+t('CONTROL NEGATIVO · sin tocar ni descartar, no está revisada', revisada({ tocada: false }), false);
+t('una descartada no bloquea la tanda',
+  resumenDeLaTanda([{ tocada: true }, { tocada: false, descartada: true }]),
+  { faltan: 0, aGuardar: 1, listo: true });
+t('🔴 TODAS descartadas ⇒ NO se enciende (guardaría CERO)',
+  resumenDeLaTanda([{ tocada: false, descartada: true }, { tocada: false, descartada: true }]),
+  { faltan: 0, aGuardar: 0, listo: false });
+t('sin revisar todo, tampoco', resumenDeLaTanda([{ tocada: true }, { tocada: false }]).listo, false);
+t('la tanda vacía no se guarda', resumenDeLaTanda([]).listo, false);
+t('🔴 el pie ya no puede recibir un arreglo de booleanos suelto',
+  /tocadas: readonly boolean\[\]/.test(CONF), false);
+t('…recibe el estado de las filas y deriva sus dos cuentas',
+  /filas: readonly FilaDeLaTanda\[\]/.test(CONF) && /resumenDeLaTanda\(filas\)/.test(CONF), true);
+t('🔴 y la etiqueta se compone con el número que el pie deriva, no con otro',
+  /vozGuardar\(aGuardar\)/.test(CONF), true);
+t('🔴 apagado por «no queda ninguna» DICE eso, no «faltan N»',
+  /faltan > 0 \? vozFaltan\(faltan\) : vozNinguna/.test(CONF), true);
+t('la salida existe y es obligatoria', /onDescartar: \(\) => void/.test(CONF), true);
+t('🔴 …y NO es opcional (una casa que la omita se queda sin salida, sin error)',
+  /onDescartar\?:/.test(CONF), false);
+t('descartada no ofrece confirmar: no se pide contradecirse',
+  /if \(descartada\) \{[\s\S]{0,1200}?vozConfirmar/.test(CONF), false);
+t('…y la fila queda a la vista, no se esfuma', /if \(descartada\)[\s\S]{0,200}return \(/.test(CONF), true);
+t('«Esta no es» no viste de peligro', /vozDescartar[\s\S]{0,600}color="danger"/.test(CONF), false);
+
+console.log('\n── ⑩ ROJO · SIN PROCEDENCIA NO SE DIBUJA PROCEDENCIA ──');
+t('🔴 la línea es condicional, no un valor por defecto',
+  /vozOrigen !== undefined \? <Texto/.test(CONF), true);
+t('la voz es opcional', /vozOrigen\?: string/.test(CONF), true);
+t('🔴 y `origen` ya no viaja: el contrato lo exigía y el dibujo lo ignoraba',
+  /^\s+origen: OrigenLectura/m.test(CONF), false);
+t('el tipo sigue exportado —es el vocabulario de la revisión—',
+  /type OrigenLectura/.test(INDICE), true);
+
+console.log('\n── ⑪ EL ORBE SE PUEDE IMPORTAR (o se copia una cuarta vez) ──');
+t('`OrbeCoach` sale del índice', /export \{ OrbeCoach, type OrbeCoachProps \}/.test(INDICE), true);
+t('CONTROL · la geometría sigue SIN salir (Ley 8)', /export \{[^}]*\bORBE\b/.test(INDICE), false);
+t('el punto de estado también sale', /export \{ PuntoEstado/.test(INDICE), true);
+
+console.log('\n── ⑫ ROJO · LA TANDA VACÍA NO ES LA TANDA DESCARTADA ──');
+/* ⏪ Con cero filas el pie decía «faltan 0 por revisar» —una razón imposible
+   de resolver—; con la primera cura pasó a «no queda ninguna para guardar»,
+   que es cierto SÓLO si hubo alguna. Con cero nunca hubo nada, y esa frase le
+   hace creer a la persona que descartó algo. */
+t('cero filas: no falta nadie y no hay nada que guardar',
+  resumenDeLaTanda([]), { faltan: 0, aGuardar: 0, listo: false });
+t('🔴 …y el pie NO SE DIBUJA (un control sobre el vacío)',
+  /if \(filas\.length === 0\) return null/.test(CONF), true);
+t('CONTROL · con filas descartadas SÍ se dibuja, y ahí la voz es la correcta',
+  resumenDeLaTanda([{ tocada: false, descartada: true }]), { faltan: 0, aGuardar: 0, listo: false });
+t('el corte va ANTES de dibujar nada, no envuelto en el JSX',
+  /resumenDeLaTanda\(filas\)[\s\S]{0,900}?if \(filas\.length === 0\) return null[\s\S]{0,120}?return \(/.test(CONF), true);
+
+console.log('\n── ⑬ ROJO · LOS SEIS DEL MOTOR, Y NINGUNO CAE EN UNA RAMA MUDA ──');
+const HOY13 = '2026-09-04';
+t('al_dia', estadoDelPlan({ estado: 'al_dia' }, HOY13), { clase: 'alDia' });
+t('nunca_aplicada ⇒ hueco del carnet', estadoDelPlan({ estado: 'nunca_aplicada' }, HOY13), { clase: 'sinRegistro' });
+t('sin_fecha ⇒ se aplicó y no sabemos la próxima', estadoDelPlan({ estado: 'sin_fecha' }, HOY13), { clase: 'sinRefuerzo' });
+t('🔴 aun_no_corresponde NO es una falta', estadoDelPlan({ estado: 'aun_no_corresponde' }, HOY13), { clase: 'aunNoCorresponde' });
+t('vence_en ⇒ por vencer, con su número', estadoDelPlan({ estado: 'vence_en', proxima: '2026-09-20' }, HOY13), { clase: 'porVencer', dias: 16 });
+t('vencida ⇒ vencida, con los días que lleva', estadoDelPlan({ estado: 'vencida', proxima: '2026-08-20' }, HOY13), { clase: 'vencida', dias: 15 });
+/* 🔴 EL PEDIDO, medido donde se ve: `aun_no_corresponde` es el ARO. */
+t('🔴 y en el dibujo es EL ARO, nunca la falta',
+  [marcaDeEstado(estadoDelPlan({ estado: 'aun_no_corresponde' }, HOY13), C).hueco,
+   marcaDeEstado(estadoDelPlan({ estado: 'nunca_aplicada' }, HOY13), C).hueco],
+  [true, false]);
+t('…y las dos NO son la misma marca',
+  JSON.stringify(marcaDeEstado(estadoDelPlan({ estado: 'aun_no_corresponde' }, HOY13), C)) ===
+    JSON.stringify(marcaDeEstado(estadoDelPlan({ estado: 'nunca_aplicada' }, HOY13), C)), false);
+/* ⚠️ El motor DECIDE la clase; la fecha sólo aporta el número. Si la casa
+   recomputara la ventana, dos partes contestarían distinto sobre el mismo
+   animal — y gana la que se ve. Discriminador: una fecha LEJOS que el motor
+   igual marcó `vence_en` sigue siendo «por vencer», no «al día». */
+t('🔴 el veredicto del motor NO se recalcula',
+  estadoDelPlan({ estado: 'vence_en', proxima: '2027-09-20' }, HOY13).clase, 'porVencer');
+t('…ni al revés: una fecha cercana que el motor llamó `al_dia` sigue al día',
+  estadoDelPlan({ estado: 'al_dia', proxima: '2026-09-05' }, HOY13).clase, 'alDia');
+t('sin fecha no se pinta un número (un 0 diría «vence hoy»)',
+  estadoDelPlan({ estado: 'vencida', proxima: null }, HOY13), { clase: 'sinRefuerzo' });
+const FUENTE = sinComentarios(readFileSync(
+  new URL('../packages/ui/src/components/vacunas-estado.ts', import.meta.url), 'utf8'));
+t('🔴 el mapeo NO tiene rama `default` donde caerse en silencio', /default:/.test(FUENTE), false);
+t('…y su exhaustividad la sostiene el compilador (TS2366 con un caso de menos)',
+  /switch \(fila\.estado\)/.test(FUENTE) && /\): EstadoVacuna \{/.test(FUENTE), true);
+
+console.log('\n── ⑭ LA COPIA DE LOS CÓDIGOS DEL MOTOR, VIGILADA ──');
+/* 🔴 `packages/ui` no importa `packages/api` a propósito. El precio es una
+   COPIA de la lista de estados, y una copia sin vigilancia es una bomba: el
+   día que el motor gane un séptimo, el mapeo lo ignora sin un solo error.
+   Este brazo lee el archivo REAL y compara. */
+const SALUD = readFileSync(new URL('../packages/api/src/wrappers/salud.ts', import.meta.url), 'utf8');
+const bloque = SALUD.match(/export type EstadoPlanVacuna =([\s\S]*?);/)?.[1] ?? '';
+const delMotor = [...bloque.matchAll(/\|\s*'([a-z_]+)'/g)].map((m) => m[1]).sort();
+const mios: EstadoPlanMotor[] = ['al_dia', 'aun_no_corresponde', 'nunca_aplicada', 'sin_fecha', 'vence_en', 'vencida'];
+const faltanMe = delMotor.filter((e) => !mios.includes(e as EstadoPlanMotor));
+const sobranMe = mios.filter((e) => !delMotor.includes(e));
+console.log(`   el motor declara: ${delMotor.join(' · ') || '(no se pudo leer)'}`);
+t('la lista del motor se pudo leer del archivo', delMotor.length > 0, true);
+t('🔴 el motor NO tiene ningún estado que este mapeo ignore', faltanMe, []);
+if (sobranMe.length > 0)
+  console.log(`   ⚠️ NO CONCLUYENTE en el otro sentido: el mapeo cubre ${sobranMe.join(' · ')} y el archivo de este árbol no los declara.\n` +
+    `      Es un árbol ATRASADO, no un mapeo de más: la lista viva está en \`origin/main\`. Se declara y no se pinta de verde.`);
 
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);
