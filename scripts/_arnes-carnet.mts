@@ -191,8 +191,25 @@ t('🔴 la línea es condicional, no un valor por defecto',
 t('la voz es opcional', /vozOrigen\?: string/.test(CONF), true);
 t('🔴 y `origen` ya no viaja: el contrato lo exigía y el dibujo lo ignoraba',
   /^\s+origen: OrigenLectura/m.test(CONF), false);
-t('el tipo sigue exportado —es el vocabulario de la revisión—',
-  /type OrigenLectura/.test(INDICE), true);
+t('el vocabulario sigue exportado —es el de esta revisión—',
+  /type EvidenciaAplicacion/.test(INDICE), true);
+
+console.log('\n── ⑯ ROJO · EL VOCABULARIO DE LA EVIDENCIA (v2.1) ──');
+/* ☠️ El viejo contestaba DÓNDE ESTÁ ESCRITA LA FECHA; éste, QUÉ PRUEBA LA
+   APLICACIÓN. **No es un renombre: es otra pregunta**, y la misma fila da
+   respuestas opuestas —sticker pegado con la fecha a mano al lado: el dato
+   salió a mano, la prueba es el sticker—. Por eso el viejo se leía distinto
+   dos veces: **dos manos lo clasificaron 4 a 0.** */
+t('🔴 son los CUATRO de la v2.1, en orden',
+  /export type EvidenciaAplicacion = 'sticker' \| 'sello' \| 'manuscrito' \| 'impreso'/.test(CONF), true);
+t('🔴 `aMano` MURIÓ: contestaba la pregunta vieja', /'aMano'/.test(CONF), false);
+t('☠️ y `OrigenLectura` no vuelve por la puerta de atrás',
+  /export type OrigenLectura/.test(CONF), false);
+t('la lápida queda: quien lo busque encuentra por qué se fue',
+  /OrigenLectura/.test(readFileSync(
+    new URL('../packages/ui/src/components/FilaConfirmacionVacuna.tsx', import.meta.url), 'utf8')), true);
+t('`impreso` es un DATO, no un hueco: entra al vocabulario',
+  /'impreso'/.test(CONF), true);
 
 console.log('\n── ⑪ EL ORBE SE PUEDE IMPORTAR (o se copia una cuarta vez) ──');
 t('`OrbeCoach` sale del índice', /export \{ OrbeCoach, type OrbeCoachProps \}/.test(INDICE), true);
