@@ -192,20 +192,22 @@ export default function CarnetDeVacunas() {
         setFase({ t: 'fallo_lectura', mensaje: ext.mensaje, reintentable: true });
         return;
       }
-      if (ext.data.length === 0) {
+      // S113-D-1.0: la lectura ahora trae DOS canastos. `plan_impreso` viaja
+      // hasta acá y todavía NO tiene pantalla — es de C, y está declarado.
+      if (ext.data.vacunas.length === 0) {
         await borrarFotoMascota(subida.path);
         setFase({ t: 'sin_vacunas' });
         return;
       }
 
       setPathCarnet(subida.path);
-      setItems(ext.data.map((v: VacunaExtraida, i: number) => ({
+      setItems(ext.data.vacunas.map((v: VacunaExtraida, i: number) => ({
         key: i,
         nombre: v.nombre,
         tipo_vacuna: v.tipo_vacuna,
         fecha_aplicada: v.fecha_aplicada,
         fecha_proxima: v.fecha_proxima,
-        veterinario: v.veterinario_nombre_externo,
+        veterinario: v.veterinario,
         lote: v.lote,
         descartada: false,
         rechazada: false,
