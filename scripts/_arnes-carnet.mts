@@ -316,6 +316,35 @@ t('el pie dice las TRES razones en el orden en que se resuelven',
 t('🔴 y `vozIncompletas` es OBLIGATORIA: sin ella el apagado sería mudo',
   /vozIncompletas: \(n: number\) => string/.test(CONF), true);
 
+console.log('\n── ⑲ ROJO · EL CARNET DEL FOUNDER: CUATRO SIN FECHA ──');
+/* ☠️ **«por completar» ERA INALCANZABLE, y las dos piezas eran correctas.**
+   El confirmar de una fila incompleta está `disabled` ⇒ la persona no puede
+   tocarla ⇒ nunca sale de `faltan` ⇒ la voz que se invento para ella no se
+   podía ver. *El botón que protege mató a la cuenta que nombra.*
+   Y de fondo: la fila caía en LAS DOS cuentas. **Dos cuentas que se solapan no
+   son dos cuentas: son una contada dos veces con nombres distintos.** */
+const CARNET_FOUNDER = [
+  { tocada: false, incompleta: true }, { tocada: false, incompleta: true },
+  { tocada: false, incompleta: true }, { tocada: false, incompleta: true },
+];
+t('🔴 cuatro sin fecha ⇒ CERO por revisar y CUATRO por completar',
+  resumenDeLaTanda(CARNET_FOUNDER), { faltan: 0, incompletas: 4, aGuardar: 4, listo: false });
+t('🔴 …y ninguna se cuenta dos veces: las cuentas son DISJUNTAS',
+  resumenDeLaTanda(CARNET_FOUNDER).faltan + resumenDeLaTanda(CARNET_FOUNDER).incompletas,
+  CARNET_FOUNDER.length);
+t('🔴 la voz que sale es «por completar», no «por revisar»',
+  (() => { const r = resumenDeLaTanda(CARNET_FOUNDER); return r.faltan > 0 ? 'revisar' : r.incompletas > 0 ? 'completar' : 'ninguna' })(),
+  'completar');
+/* CONTROL · mezclando las tres clases, cada fila cae en UNA sola. */
+t('CONTROL · sin tocar + incompleta + tocada + descartada, cada una en su cuenta',
+  resumenDeLaTanda([{ tocada: false }, { tocada: false, incompleta: true }, { tocada: true }, { tocada: false, descartada: true }]),
+  { faltan: 1, incompletas: 1, aGuardar: 3, listo: false });
+t('CONTROL NEGATIVO · una incompleta TOCADA tampoco se cuenta dos veces',
+  resumenDeLaTanda([{ tocada: true, incompleta: true }]), { faltan: 0, incompletas: 1, aGuardar: 1, listo: false });
+t('lo incompleto se cuenta entre TODAS las vivas, tocadas o no',
+  /const incompletas = vivas\.filter\(estaIncompleta\)\.length/.test(sinComentarios(readFileSync(
+    new URL('../packages/ui/src/components/vacunas-estado.ts', import.meta.url), 'utf8'))), true);
+
 console.log('\n── ⑱ ROJO · LO INCOMPLETO SE SEÑALA EN SU CAMPO ──');
 t('la pieza recibe QUÉ falta', /incompleta\?: 'fecha' \| 'nombre'/.test(CONF), true);
 t('🔴 el campo de la fecha se señala, no un cartel arriba',
