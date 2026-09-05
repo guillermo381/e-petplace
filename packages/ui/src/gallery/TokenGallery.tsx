@@ -96,6 +96,8 @@ import { FilaVacunaCarnet } from '../components/FilaVacunaCarnet'
 import { FilaConfirmacionVacuna, PieConfirmacionVacunas } from '../components/FilaConfirmacionVacuna'
 import { ListaPlanVacunal } from '../components/ListaPlanVacunal'
 import { CabeceraCoach } from '../components/CabeceraCoach'
+import { OrbeCoach } from '../components/OrbeCoach'
+import { PuntoEstado } from '../components/PuntoEstado'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
 import { GotaUbicacion } from '../components/GotaUbicacion'
@@ -3333,35 +3335,79 @@ function GaleriaInterna() {
             </View>
 
             <View style={{ gap: spacing[3] }}>
-              <Texto variante="apoyo">La confirmación tras la foto · una alta y una media</Texto>
+              <Texto variante="apoyo">La confirmación tras la foto · alta, media, SIN procedencia y descartada</Texto>
               <FilaConfirmacionVacuna
                 nombre="Polivalente"
                 campos={[{ etiqueta: 'Fecha', valor: '12 mar 2026' }, { etiqueta: 'Lote', valor: 'A-4471' }]}
                 confianza="alta"
-                origen="sello"
                 vozOrigen="leído de un sello"
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
+                vozDescartar="Esta no es"
                 tocada
                 onConfirmar={() => {}}
                 onEditar={() => {}}
+                onDescartar={() => {}}
               />
               <FilaConfirmacionVacuna
                 nombre="Antirrábica"
                 campos={[{ etiqueta: 'Fecha', valor: '02 ago 2026' }, { etiqueta: 'Lote', valor: null }]}
                 confianza="media"
-                origen="aMano"
                 vozOrigen="escrito a mano"
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
+                vozDescartar="Esta no es"
                 tocada={false}
                 onConfirmar={() => {}}
                 onEditar={() => {}}
+                onDescartar={() => {}}
+              />
+              {/* 🔴 SIN procedencia: **no hay línea**, ninguna por defecto. */}
+              <FilaConfirmacionVacuna
+                nombre="Kennel"
+                campos={[{ etiqueta: 'Fecha', valor: '15 ene 2026' }]}
+                confianza="baja"
+                vozRevisar="Revisá esta"
+                vozConfirmar="Es correcta"
+                vozDescartar="Esta no es"
+                tocada={false}
+                onConfirmar={() => {}}
+                onEditar={() => {}}
+                onDescartar={() => {}}
+              />
+              {/* Descartada, con su camino de vuelta. */}
+              <FilaConfirmacionVacuna
+                nombre="Leptospirosis"
+                campos={[{ etiqueta: 'Fecha', valor: '30 jun 2026' }]}
+                confianza="baja"
+                vozRevisar="Revisá esta"
+                vozConfirmar="Es correcta"
+                vozDescartar="Esta no es"
+                tocada={false}
+                descartada
+                vozDescartada="No se va a guardar"
+                vozDeshacer="Volver a incluirla"
+                onDeshacer={() => {}}
+                onConfirmar={() => {}}
+                onEditar={() => {}}
+                onDescartar={() => {}}
               />
               <PieConfirmacionVacunas
-                tocadas={[true, false]}
-                vozGuardar="Guardar 2 vacunas"
-                vozFaltan={(n) => `falta ${n} por revisar`}
+                filas={[{ tocada: true }, { tocada: false }, { tocada: false }, { tocada: false, descartada: true }]}
+                vozGuardar={(n) => `Guardar ${n} vacunas`}
+                vozFaltan={(n) => `faltan ${n} por revisar`}
+                vozNinguna="No queda ninguna para guardar"
+                onGuardar={() => {}}
+              />
+              {/* 🔴 EL CASO QUE NACIÓ CON EL DESCARTE: **todas descartadas.**
+                  El botón NO se enciende y la razón que dice es la otra —
+                  «no queda ninguna», no «faltan N» —, porque *mandar a revisar
+                  filas que ya se revisaron es mandar a buscar lo que no hay.* */}
+              <PieConfirmacionVacunas
+                filas={[{ tocada: false, descartada: true }, { tocada: false, descartada: true }]}
+                vozGuardar={(n) => `Guardar ${n} vacunas`}
+                vozFaltan={(n) => `faltan ${n} por revisar`}
+                vozNinguna="No queda ninguna para guardar"
                 onGuardar={() => {}}
               />
             </View>
@@ -3375,6 +3421,12 @@ function GaleriaInterna() {
                   { id: 'a', nombre: 'Antirrábica', obligatoria: true, estado: { clase: 'sinRefuerzo' }, vozEstado: 'aplicada el 02 ago 2026', vozPlan: 'según el plan, tocaría en agosto de 2027' },
                   { id: 'b', nombre: 'Polivalente', obligatoria: true, estado: { clase: 'porVencer', dias: 16 }, vozEstado: 'vence en 16 días' },
                   { id: 'c', nombre: 'Leptospirosis', obligatoria: false, estado: { clase: 'sinRegistro' }, vozEstado: 'sin registro', vozPlan: 'según el plan, tocaría en marzo' },
+                  /* 🔴 LAS DOS AUSENCIAS, UNA AL LADO DE LA OTRA. Comparten
+                     tinta —ninguna es un problema— y **el relleno es lo único
+                     que las separa**: hueco arriba es un hueco del carnet;
+                     hueco de verdad, el aro, es «todavía no le toca». Si esta
+                     fila se ve igual que la de arriba, el pedido no se hizo. */
+                  { id: 'd', nombre: 'Antirrábica (refuerzo)', obligatoria: true, estado: { clase: 'aunNoCorresponde' }, vozEstado: 'todavía no le toca', vozPlan: 'según el plan, desde los 4 meses' },
                 ]}
               />
             </View>
@@ -4805,6 +4857,50 @@ function GaleriaInterna() {
               verdad. Acá `pulsos` no se mueve ⇒ **no late**, que es la
               conducta correcta cuando no llegó texto. */}
           <CabeceraCoach nombre="Coach" pulsos={0} />
+        </Seccion>
+
+        <Seccion titulo="OrbeCoach (S113 · lote 0.3) — EL dibujo del orbe, el único, para sus tres apariciones">
+          {/* ☠️ Hubo TRES copias de este orbe, y **la tercera se quedó con el
+              defecto que las otras dos ya tenían curado** (la brasa con `rgba`
+              en el `stopColor`, que en Android pierde el alpha y colapsa a un
+              disco durazno plano). *Una cura aplicada en dos de tres copias no
+              es una cura: es una coincidencia.* Está en el catálogo y sale del
+              índice porque **lo que no se puede importar se copia.** */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[7], paddingVertical: spacing[6] }}>
+            <View style={{ width: 48 * 2.2, height: 48 * 2.2, alignItems: 'center', justifyContent: 'center' }}>
+              <OrbeCoach tamano={48} encendido={0} conResplandor />
+            </View>
+            <View style={{ width: 48 * 2.2, height: 48 * 2.2, alignItems: 'center', justifyContent: 'center' }}>
+              <OrbeCoach tamano={48} encendido={1} conResplandor />
+            </View>
+            <View style={{ width: 36, height: 36 }}>
+              <OrbeCoach tamano={36} encendido={1} />
+            </View>
+          </View>
+          <Texto variante="apoyo">
+            Dormido · despierto · el chico de la fila y la cabecera. La brasa se lee como calor, no como un punto con
+            borde: son cinco paradas y muere antes del final del radio, para que el corte caiga donde ya no queda nada
+            que cortar.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="PuntoEstado (S113 · 1.0 adenda) — 8 px con DOS formas, porque dos ausencias comparten tinta">
+          {/* 🔴 `sinRegistro` y «todavía no le toca» van las dos en tinta —
+              ninguna es un problema— así que **si el color fuera lo único que
+              las separa serían el mismo punto.** El relleno sigue a cuánto te
+              pide: lo que espera algo de vos se dibuja presente; lo que todavía
+              no empezó es apenas un contorno. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
+            <PuntoEstado color={theme.status.successText} hueco={false} />
+            <PuntoEstado color={theme.status.warningText} hueco={false} />
+            <PuntoEstado color={theme.status.dangerText} hueco={false} />
+            <PuntoEstado color={theme.text.secondary} hueco={false} />
+            <PuntoEstado color={theme.text.secondary} hueco />
+          </View>
+          <Texto variante="apoyo">
+            Al día · por vencer · vencida · sin registro · todavía no le toca. Los dos últimos comparten tinta y sólo
+            los separa el aro. No lleva rol ni etiqueta: la forma acompaña, la palabra informa.
+          </Texto>
         </Seccion>
 
         <Seccion titulo="BurbujaPendientes (S112) — la puerta única a lo que te espera">

@@ -638,6 +638,41 @@ todos.push(
   { nombre: 'COACH · nombre en la cabecera (violeta profundo / papel claro)', fg: '#7C2DD4', bg: lightTheme.bg.card, surface: lightTheme.bg.base },
   { nombre: 'COACH · nombre en la cabecera (violeta claro / papel oscuro)', fg: '#AE59FF', bg: darkTheme.bg.card, surface: darkTheme.bg.base },
 )
+/* ═══ S113-B · EL PUNTO DE ESTADO DEL CARNET (1.0 · adenda) ════════════════
+   🔴 **OTRO PAR QUE NACE PORQUE FALLÓ, y por la misma razón que los de arriba:
+   el gate corría verde sin haber mirado ni una vez este punto.**
+
+   El de las dos AUSENCIAS —el hueco del carnet y «todavía no le toca»— nació
+   en `text.tertiary`, la tinta de placeholder: **2,40:1 sobre papel claro**,
+   contra vecinos de 5,86–6,33 en la misma columna y un piso gráfico de 3:1.
+   *Menos de la mitad del contraste de cualquier otro punto de la lista* — y
+   encima de eso, la distinción que se pidió construir es un ARO de 1,5 px, o
+   sea la forma más frágil de todas. **Un aro invisible no distingue nada.**
+
+   La cura fue subirlo a `text.secondary`, que mide 5,50 · 7,42 · 6,15 y **sigue
+   siendo el punto más callado de la columna** (queda debajo del peligro).
+   *Legible no es ruidoso: lo que grita es el color, y éste sigue en tinta.*
+
+   Piso 3:1: son gráficas, no texto — y **el estado va SIEMPRE escrito al lado**
+   (`vozEstado` es obligatoria en las dos piezas que lo montan), así que el
+   punto acompaña y nunca es la única forma de saber. */
+todos.push(
+  { nombre: 'CARNET · punto de estado: al día / tarjeta', fg: lightTheme.status.successText, bg: lightTheme.bg.card, noTextual: true },
+  { nombre: 'CARNET · punto de estado: por vencer / tarjeta', fg: lightTheme.status.warningText, bg: lightTheme.bg.card, noTextual: true },
+  { nombre: 'CARNET · punto de estado: vencida / tarjeta', fg: lightTheme.status.dangerText, bg: lightTheme.bg.card, noTextual: true },
+  { nombre: 'CARNET · punto de las AUSENCIAS: tinta secundaria / tarjeta', fg: lightTheme.text.secondary, bg: lightTheme.bg.card, noTextual: true },
+  { nombre: 'CARNET · punto de las AUSENCIAS, en oscuro', fg: darkTheme.text.secondary, bg: darkTheme.bg.card, noTextual: true },
+  { nombre: 'CARNET · punto de las AUSENCIAS, en memorial', fg: memorialTheme.text.secondary, bg: memorialTheme.bg.card, noTextual: true },
+  /* El aro de «todavía no le toca» aparece también sobre la tarjeta hundida
+     de una fila descartada; se mide ahí porque es su peor fondo. */
+  { nombre: 'CARNET · punto de las AUSENCIAS / tarjeta hundida', fg: lightTheme.text.secondary, bg: lightTheme.bg.hundido, noTextual: true },
+)
+console.log(
+  '  (info) CARNET · el punto de las ausencias en text.tertiary medía ' +
+    `${contrast(lightTheme.text.tertiary, lightTheme.bg.card).toFixed(2)}:1 sobre tarjeta clara ` +
+    `(piso gráfico 3:1) — POR ESO subió a tinta secundaria`,
+)
+
 /* 🔴 **EL CONTROL NEGATIVO, DECLARADO Y NO GATEADO.** Es el par que falló: se
    deja escrito como informativo para que el número viva al lado de su cura.
    *Un defecto curado y borrado vuelve; uno curado con su medición al lado, no.* */
