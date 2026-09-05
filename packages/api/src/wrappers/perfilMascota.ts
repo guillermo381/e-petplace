@@ -15,6 +15,76 @@ export interface VacunaDeMascota {
   tipo_vacuna: string | null;
   fecha_aplicada: string | null;
   fecha_proxima: string | null;
+  /* ⭐ S113-A · lote 1.0 · A4 — LO QUE YA VIAJABA Y SE TIRABA EN EL MAPEO.
+     Estas seis columnas existen en `evento_vacuna_aplicada` (las cuatro
+     primeras desde antes; `laboratorio` y `vencimiento_biologico` desde
+     20260909060000) y el wrapper **no las pedía**: la pantalla no podía
+     mostrarlas porque nunca llegaban. *Un tipo que declara de menos no
+     documenta una limitación: esconde un dato que ya está en la base.* */
+  lote: string | null;
+  veterinario_nombre_externo: string | null;
+  laboratorio: string | null;
+  via_administracion: string | null;
+  /** ⚠️ El vencimiento IMPRESO del frasco. **No** es «cuándo toca la
+   *  próxima» — eso es `fecha_proxima`. Confundirlas es L-139. */
+  vencimiento_biologico: string | null;
+  /** Path del bucket `mascotas` del carnet que respalda la fila, si vino
+   *  por extracción. NULL = se tecleó, y se dice. */
+  archivo_url: string | null;
+}
+
+/** S113-A · A4 — LA CONDICIÓN CRÓNICA CON SU DETALLE.
+ *
+ * 🔴 **El shape NO se inventó: se leyó del productor.** `condiciones_cronicas`
+ * la escribe el trigger `_trg_condicion_propagar_perfil`, cuyo
+ * `jsonb_build_object` arma exactamente `{condicion, cie_codigo, estado,
+ * fecha_diagnostico, evento_id}` (leído de `pg_get_functiondef`, 9-sep).
+ * *Adivinar los nombres de clave habría compilado igual y devuelto `undefined`
+ * en cada campo — el modo de falla más silencioso que hay.*
+ *
+ * ⚠️ **Y no hay NI UNA fila con condiciones en toda la base** (medido: 0 de
+ * todas las mascotas). Así que este tipo **no se puede verificar contra dato
+ * real todavía**: se verifica contra su productor, que es la única fuente que
+ * existe. Se declara en vez de omitirse. */
+export interface CondicionCronicaDeMascota {
+  /** `condicion` en el jsonb — el nombre clínico. */
+  nombre: string | null;
+  /** `fecha_diagnostico` — desde cuándo. */
+  desde: string | null;
+  /** `evento_id` — la fuente en el expediente, para poder ir a leerla. */
+  fuente: string | null;
+  estado: string | null;
+  cie_codigo: string | null;
+}
+
+/** S113-A · A4 — LA MEDICACIÓN CON SU DETALLE. Shape leído de dato REAL
+ *  (Thor tiene cinco), no del nombre de la columna. */
+export interface MedicacionDeMascota {
+  /** `medicamento` en el jsonb. */
+  nombre: string | null;
+  dosis: string | null;
+  /** `fecha_fin_estimada`. ⚠️ **En las cinco filas reales es NULL**, y no se
+   *  deriva de `duracion_dias` porque `fecha_inicio` también es NULL: sumar
+   *  días a nada da una fecha inventada con cara de dato. NULL y se dice. */
+  hasta: string | null;
+  /** `evento_id` — de qué consulta salió. */
+  fuente: string | null;
+  frecuencia: string | null;
+  /** Viaja aunque `hasta` sea NULL: es el único dato de duración que existe
+   *  hoy, y tirarlo sería repetir el defecto que A4 vino a curar. */
+  duracion_dias: number | null;
+  via_administracion: string | null;
+  principio_activo: string | null;
+}
+
+/** S113-A · A4 — LAS RESTRICCIONES ACTIVAS, resumidas.
+ *  Fuente: tabla `restricciones_mascota_activas` (es TABLA, no vista — medido)
+ *  cruzada con `cat_restricciones_servicio` por su `descripcion`. */
+export interface RestriccionDeMascota {
+  familia_servicio: string;
+  severidad: string;
+  /** Del catálogo. NULL si la fila apunta a un catálogo sin texto. */
+  descripcion: string | null;
 }
 
 /** Espejo estructural de UmbralesMomentoVital de @epetplace/domain
@@ -74,6 +144,10 @@ export interface DesparasitacionDeMascota {
   tipo: 'interna' | 'externa' | 'mixta' | null;
   fecha_aplicada: string | null;
   fecha_proxima: string | null;
+  /** S113-A · A3 — contra QUÉ. Convive con `tipo`, que dice DÓNDE actúa el
+   *  producto: «externa» no distingue pulgas de garrapatas. */
+  plagas: string[] | null;
+  lote: string | null;
 }
 
 /** S82 r4 — LA DISTINCIÓN del mandato: "sin registro" y "ninguna
@@ -88,6 +162,14 @@ export interface PerfilMascota {
   paseos_total: number;
   ultimo_paseo_fecha: string | null;
   peso_clinico_kg: number | null;
+  /** ⚠️ **SOBREVIVE A PROPÓSITO aunque ahora viaje el detalle.**
+   *  Medido (grep abierto uno por uno, 9-sep): de este wrapper lo leen DOS
+   *  consumidores — `hogar/mascota/[mascotaId].tsx` y `components/coach.tsx`,
+   *  los dos para el momento vital. *El brief decía «tres»; son dos acá y
+   *  cuatro más que leen el MISMO nombre desde otros cuatro wrappers*
+   *  (`despensa-catalogo`, `mascotasPrestador`, `grooming-atencion`,
+   *  `adiestramiento-antes`) — **a ésos este cambio no los alcanza**, y se
+   *  dice para que nadie crea que los curó. */
   tiene_condicion_cronica: boolean;
   tiene_emergencia_activa: boolean;
   /** null honesto si el catálogo no trae umbrales parseables. */
@@ -98,6 +180,12 @@ export interface PerfilMascota {
    *  solo cuando estado = con_alergias; [] en los otros dos. */
   alergias_detalle: unknown[];
   alergias_ninguna_declarada_en: string | null;
+  /** S113-A · A4 — el DETALLE, además del booleano. Ver el porqué del
+   *  booleano que sobrevive en `tiene_condicion_cronica`. */
+  condiciones_cronicas: CondicionCronicaDeMascota[];
+  medicacion_actual: MedicacionDeMascota[];
+  /** Sólo las de estado 'activa'. Lista vacía = no hay, y eso es un hecho. */
+  restricciones: RestriccionDeMascota[];
   desparasitaciones: DesparasitacionDeMascota[];
   /** Conteo VERDADERO server-side (count exact de
    *  historia_clinica_registrada) — jamás desde páginas del timeline,
@@ -140,15 +228,19 @@ export async function obtenerPerfilMascota(
   }
   const especie = mascota.data.especie;
 
-  const [vacunas, perfil, paseos, catalogo, desparasitaciones, consultas] = await Promise.all([
+  const [vacunas, perfil, paseos, catalogo, desparasitaciones, consultas, restricciones] =
+    await Promise.all([
     cliente
       .from('evento_vacuna_aplicada')
-      .select('evento_id, nombre_vacuna, tipo_vacuna, fecha_aplicada, fecha_proxima')
+      // ⚠️ UNA SOLA LÍNEA A PROPÓSITO: `postgrest-js` infiere el tipo del
+      // LITERAL. Partirlo con `+` devuelve `GenericStringError` y toda
+      // propiedad se cae — la trampa que D-474 ya dejó escrita en S72.
+      .select('evento_id, nombre_vacuna, tipo_vacuna, fecha_aplicada, fecha_proxima, lote, veterinario_nombre_externo, laboratorio, via_administracion, vencimiento_biologico, archivo_url')
       .eq('mascota_id', mascotaId)
       .order('fecha_aplicada', { ascending: false, nullsFirst: false }),
     cliente
       .from('mascota_perfil_vigente')
-      .select('peso_clinico_kg, condiciones_cronicas, tiene_emergencia_activa, alergias, alergias_ninguna_declarada_en')
+      .select('peso_clinico_kg, condiciones_cronicas, medicacion_actual, tiene_emergencia_activa, alergias, alergias_ninguna_declarada_en')
       .eq('mascota_id', mascotaId)
       .maybeSingle(),
     cliente
@@ -166,7 +258,7 @@ export async function obtenerPerfilMascota(
       .maybeSingle(),
     cliente
       .from('evento_desparasitacion_aplicada')
-      .select('producto, tipo_desparasitacion, fecha_aplicada, fecha_proxima')
+      .select('producto, tipo_desparasitacion, fecha_aplicada, fecha_proxima, plagas, lote')
       .eq('mascota_id', mascotaId)
       .order('fecha_aplicada', { ascending: false, nullsFirst: false }),
     // el conteo VERDADERO (hallazgo de C: contar páginas del timeline subcuenta)
@@ -176,13 +268,62 @@ export async function obtenerPerfilMascota(
       .eq('mascota_id', mascotaId)
       .eq('tipo', 'historia_clinica_registrada')
       .eq('soft_delete', false),
+    /* ⭐ S113-A · A4 — LAS RESTRICCIONES ACTIVAS.
+       Va en el MISMO `Promise.all` y no en un viaje aparte: la lección de
+       S94-PERF es que el costo no está en los datos sino en la PETICIÓN
+       —peaje fijo de ~150 ms por viaje, encadenar los multiplica—, así que
+       una consulta más en paralelo es gratis y una en serie no.
+       El texto sale del catálogo por embed; `restriccion_catalogo_id` es
+       nullable, así que la descripción puede venir NULL y se dice. */
+    cliente
+      .from('restricciones_mascota_activas')
+      .select('familia_servicio, severidad, cat_restricciones_servicio(descripcion)')
+      .eq('mascota_id', mascotaId)
+      .eq('estado', 'activa'),
   ]);
 
-  if (vacunas.error || perfil.error || paseos.error || catalogo.error || desparasitaciones.error || consultas.error) {
+  if (
+    vacunas.error ||
+    perfil.error ||
+    paseos.error ||
+    catalogo.error ||
+    desparasitaciones.error ||
+    consultas.error ||
+    restricciones.error
+  ) {
     return { ok: false, codigo: 'error_perfil', mensaje: MENSAJE_ERROR };
   }
 
   const condiciones = perfil.data?.condiciones_cronicas;
+
+  /* S113-A · A4 — LOS GUARDS DE SHAPE. Estos jsonb los escriben triggers y
+     `sedimentar_nota_clinica`; el tipo generado los declara `Json`, así que
+     acá se leen CAMPO POR CAMPO con `typeof`, jamás con un cast. *Un cast
+     compila y devuelve `undefined` en producción; un guard devuelve NULL y lo
+     dice* (L-124). */
+  const texto = (v: unknown): string | null => (typeof v === 'string' && v.length > 0 ? v : null);
+  const numero = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  const objetos = (v: unknown): Record<string, unknown>[] =>
+    Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => typeof x === 'object' && x !== null) : [];
+
+  const condicionesDetalle: CondicionCronicaDeMascota[] = objetos(condiciones).map((c) => ({
+    nombre: texto(c.condicion),
+    desde: texto(c.fecha_diagnostico),
+    fuente: texto(c.evento_id),
+    estado: texto(c.estado),
+    cie_codigo: texto(c.cie_codigo),
+  }));
+
+  const medicacionDetalle: MedicacionDeMascota[] = objetos(perfil.data?.medicacion_actual).map((m) => ({
+    nombre: texto(m.medicamento),
+    dosis: texto(m.dosis),
+    hasta: texto(m.fecha_fin_estimada),
+    fuente: texto(m.evento_id),
+    frecuencia: texto(m.frecuencia),
+    duracion_dias: numero(m.duracion_dias),
+    via_administracion: texto(m.via_administracion),
+    principio_activo: texto(m.principio_activo),
+  }));
 
   // S82 r4 — la PRECEDENCIA de alergias (declarada en la migración):
   // lista no vacía GANA a la declaración; la declaración GANA al silencio.
@@ -238,11 +379,31 @@ export async function obtenerPerfilMascota(
         tipo_vacuna: v.tipo_vacuna,
         fecha_aplicada: v.fecha_aplicada,
         fecha_proxima: v.fecha_proxima,
+        lote: v.lote,
+        veterinario_nombre_externo: v.veterinario_nombre_externo,
+        laboratorio: v.laboratorio,
+        via_administracion: v.via_administracion,
+        vencimiento_biologico: v.vencimiento_biologico,
+        archivo_url: v.archivo_url,
       })),
       paseos_total: paseos.count ?? 0,
       ultimo_paseo_fecha: paseos.data[0]?.fecha_evento ?? null,
       peso_clinico_kg: perfil.data?.peso_clinico_kg ?? null,
       tiene_condicion_cronica: Array.isArray(condiciones) && condiciones.length > 0,
+      condiciones_cronicas: condicionesDetalle,
+      medicacion_actual: medicacionDetalle,
+      restricciones: (restricciones.data ?? []).map((r) => {
+        /* El embed de PostgREST puede llegar como objeto o como array según
+           la cardinalidad que infiera; se lee de las dos formas en vez de
+           asumir una. Sin catálogo → descripción NULL, y se dice. */
+        const cat = (r as { cat_restricciones_servicio?: unknown }).cat_restricciones_servicio;
+        const fila = Array.isArray(cat) ? cat[0] : cat;
+        return {
+          familia_servicio: r.familia_servicio,
+          severidad: r.severidad,
+          descripcion: texto((fila as Record<string, unknown> | null | undefined)?.descripcion),
+        };
+      }),
       tiene_emergencia_activa: perfil.data?.tiene_emergencia_activa ?? false,
       umbrales: parsearUmbrales(catalogo.data?.momentos_vitales_jsonb ?? null),
       alergias_estado: alergiasEstado,
@@ -256,6 +417,8 @@ export async function obtenerPerfilMascota(
             : null,
         fecha_aplicada: d.fecha_aplicada,
         fecha_proxima: d.fecha_proxima,
+        plagas: Array.isArray(d.plagas) ? d.plagas : null,
+        lote: d.lote,
       })),
       consultas_total: consultas.count ?? 0,
     },
