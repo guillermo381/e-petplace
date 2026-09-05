@@ -62,6 +62,12 @@ const VARIANTES = [
   { id: 'v1',      prompt: '/tmp/prompt-v1.txt', max_tokens: 16000, pensar: null,   modelos: ['claude-sonnet-5', 'claude-haiku-4-5'] },
   { id: 'v2',      prompt: '/tmp/prompt-v2.txt', max_tokens: 4000,  pensar: false,  modelos: ['claude-sonnet-5', 'claude-haiku-4-5'] },
   { id: 'v2-razon',prompt: '/tmp/prompt-v2.txt', max_tokens: 4000,  pensar: true,   modelos: ['claude-sonnet-5'] },
+  // 🔴 La celda de arriba salio TRUNCADA en las dos: con razonamiento
+  // encendido, 4000 tokens se los come el pensamiento y no queda JSON. Una
+  // hipotesis medida sobre una celda truncada no esta medida. Esta le da el
+  // mismo techo que v1 (16000) para que (a) tenga su medicion limpia: mismo
+  // prompt v2, misma imagen, UNA sola variable moviendose -- el razonamiento.
+  { id: 'v2-razon16k',prompt: '/tmp/prompt-v2.txt', max_tokens: 16000, pensar: true, modelos: ['claude-sonnet-5'] },
 ];
 
 const celdas = [];
