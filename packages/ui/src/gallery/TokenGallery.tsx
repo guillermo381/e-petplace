@@ -92,6 +92,9 @@ import { PantallaConPie } from '../components/PantallaConPie'
 import { GlifoConContador } from '../components/GlifoConContador'
 import { BurbujaPendientes } from '../components/BurbujaPendientes'
 import { PresenciaCoach } from '../components/PresenciaCoach'
+import { FilaVacunaCarnet } from '../components/FilaVacunaCarnet'
+import { FilaConfirmacionVacuna, PieConfirmacionVacunas } from '../components/FilaConfirmacionVacuna'
+import { ListaPlanVacunal } from '../components/ListaPlanVacunal'
 import { CabeceraCoach } from '../components/CabeceraCoach'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
@@ -183,6 +186,11 @@ import type { ThemeMode } from '../themes'
  * El tercer atajo llega **apagado CON su razón**: es el caso que la pieza
  * existe para hacer bien —*un botón apagado sin razón a la vista es el
  * defecto*— y el que hay que poder ver de un vistazo. */
+const ETIQ_VAC = {
+  lote: 'Lote', laboratorio: 'Laboratorio', via: 'Vía',
+  aplicadaPor: 'La aplicó', proximaDosis: 'Próxima dosis', venceBiologico: 'Vence el biológico',
+}
+
 const ATAJOS_COACH_DEMO = [
   /* De abajo hacia arriba, en el orden que dictó el founder sobre el
      aparato: Peso · Vacuna · Antiparasitario · Foto. */
@@ -3284,6 +3292,95 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — EL CARNET DICE LA VERDAD (lote 1.0) · qué decide: (a) que la fila cerrada se lea de un vistazo y el punto NO parezca semáforo; (b) que la grilla abierta muestre SÓLO lo que hay —la segunda fila tiene dos campos y no seis, a propósito—; (c) que «sin refuerzo» no se confunda con «al día»; (d) que la fila de confianza media se vea que pide revisión sin gritar">
+          <View style={{ gap: spacing[5] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">El carnet · tres filas, tres estados</Texto>
+              <FilaVacunaCarnet
+                nombre="Polivalente (DHPPi)"
+                fechaAplicadaTexto="12 mar 2026"
+                fechaAplicada="2026-03-12"
+                fechaProxima="2026-09-20"
+                hoy="2026-09-04"
+                detalle={{ lote: 'A-4471', laboratorio: 'Zoetis', via: 'Subcutánea', aplicadaPor: 'Dra. Salas', proximaDosis: '20 sep 2026', venceBiologico: '11/2027' }}
+                etiquetas={ETIQ_VAC}
+                vozEstado="vence en 16 días"
+                fotoUrl="https://ejemplo.invalid/carnet.jpg"
+                vozFoto="Ver el carnet"
+              />
+              {/* 🔴 EL CASO QUE HAY QUE MIRAR: sólo DOS campos. La grilla no
+                  rellena con guiones — lo que el carnet no traía, no está. */}
+              <FilaVacunaCarnet
+                nombre="Antirrábica"
+                fechaAplicadaTexto="02 ago 2026"
+                fechaAplicada="2026-08-02"
+                fechaProxima={null}
+                hoy="2026-09-04"
+                detalle={{ lote: 'R-9', laboratorio: null, via: null, aplicadaPor: 'Clínica Aurora', proximaDosis: null, venceBiologico: null }}
+                etiquetas={ETIQ_VAC}
+                vozEstado="sin fecha de refuerzo"
+              />
+              <FilaVacunaCarnet
+                nombre="Kennel (Bordetella)"
+                fechaAplicadaTexto="15 ene 2025"
+                fechaAplicada="2025-01-15"
+                fechaProxima="2026-01-15"
+                hoy="2026-09-04"
+                detalle={{ lote: null, laboratorio: null, via: null, aplicadaPor: null, proximaDosis: null, venceBiologico: null }}
+                etiquetas={ETIQ_VAC}
+                vozEstado="vencida hace 232 días"
+              />
+            </View>
+
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">La confirmación tras la foto · una alta y una media</Texto>
+              <FilaConfirmacionVacuna
+                nombre="Polivalente"
+                campos={[{ etiqueta: 'Fecha', valor: '12 mar 2026' }, { etiqueta: 'Lote', valor: 'A-4471' }]}
+                confianza="alta"
+                origen="sello"
+                vozOrigen="leído de un sello"
+                vozRevisar="Revisá esta"
+                vozConfirmar="Es correcta"
+                tocada
+                onConfirmar={() => {}}
+                onEditar={() => {}}
+              />
+              <FilaConfirmacionVacuna
+                nombre="Antirrábica"
+                campos={[{ etiqueta: 'Fecha', valor: '02 ago 2026' }, { etiqueta: 'Lote', valor: null }]}
+                confianza="media"
+                origen="aMano"
+                vozOrigen="escrito a mano"
+                vozRevisar="Revisá esta"
+                vozConfirmar="Es correcta"
+                tocada={false}
+                onConfirmar={() => {}}
+                onEditar={() => {}}
+              />
+              <PieConfirmacionVacunas
+                tocadas={[true, false]}
+                vozGuardar="Guardar 2 vacunas"
+                vozFaltan={(n) => `falta ${n} por revisar`}
+                onGuardar={() => {}}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">El plan de la especie · el cálculo se dice como cálculo</Texto>
+              <ListaPlanVacunal
+                vozObligatoria="Obligatoria"
+                vozOpcional="Opcional"
+                filas={[
+                  { id: 'a', nombre: 'Antirrábica', obligatoria: true, estado: { clase: 'sinRefuerzo' }, vozEstado: 'aplicada el 02 ago 2026', vozPlan: 'según el plan, tocaría en agosto de 2027' },
+                  { id: 'b', nombre: 'Polivalente', obligatoria: true, estado: { clase: 'porVencer', dias: 16 }, vozEstado: 'vence en 16 días' },
+                  { id: 'c', nombre: 'Leptospirosis', obligatoria: false, estado: { clase: 'sinRegistro' }, vozEstado: 'sin registro', vozPlan: 'según el plan, tocaría en marzo' },
+                ]}
+              />
+            </View>
+          </View>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — LOS TRES GLIFOS DEL COACH (§6b.5, POR ÍCONO) · qué decide, de a uno: (a) que `peso` se lea BALANZA y no termómetro ni lámpara; (b) que `antiparasitario` se distinga de `seguros`, que YA es un escudo — o que gane la pipeta; (c) que `foto` se lea CÁMARA y no pantalla-con-botón. Van a 21 y a 44 contra sus cinco vecinos, en claro y en oscuro">
           <HojaDeContactoCoach />
         </Seccion>
