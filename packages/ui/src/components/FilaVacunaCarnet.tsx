@@ -26,13 +26,12 @@ import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { Icono } from './Icono'
-import { PuntoEstado } from './PuntoEstado'
 import { Texto } from './Texto'
 import { VisorFoto } from './VisorFoto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
-import { detalleVisible, estadoDeVacuna, marcaDeEstado } from './vacunas-estado'
+import { detalleVisible, estadoDeVacuna, type EstadoVacuna } from './vacunas-estado'
 
 export interface FilaVacunaCarnetProps {
   nombre: string
@@ -70,6 +69,21 @@ export interface FilaVacunaCarnetProps {
   vozFoto?: string
 }
 
+/** El status de la casa por clase. **`sinRefuerzo` y `sinRegistro` van en
+ *  tinta secundaria**: no son un problema, son una ausencia. */
+function colorDe(estado: EstadoVacuna, theme: ReturnType<typeof useTheme>['theme']): string {
+  switch (estado.clase) {
+    case 'alDia':
+      return theme.status.successText
+    case 'porVencer':
+      return theme.status.warningText
+    case 'vencida':
+      return theme.status.dangerText
+    default:
+      return theme.text.tertiary
+  }
+}
+
 export function FilaVacunaCarnet({
   nombre,
   fechaAplicadaTexto,
@@ -86,16 +100,6 @@ export function FilaVacunaCarnet({
   const [abierta, setAbierta] = useState(false)
   const [verFoto, setVerFoto] = useState(false)
   const estado = estadoDeVacuna({ fechaAplicada, fechaProxima }, hoy)
-  /* ☠️ Acá vivía un `switch` de colores COPIADO del de `ListaPlanVacunal`,
-     los dos con una rama `default`. **La clasificación es UNA y vive en
-     `marcaDeEstado`**: con el `default`, una clase nueva se dibujaba idéntica
-     a otra sin que nada fallara. */
-  const marca = marcaDeEstado(estado, {
-    exito: theme.status.successText,
-    aviso: theme.status.warningText,
-    peligro: theme.status.dangerText,
-    tinta: theme.text.secondary,
-  })
 
   /* Los seis campos, filtrados. La pieza itera lo que salga: **no hay una
      rama por campo, así que no hay dónde olvidarse de uno.** */
@@ -119,7 +123,7 @@ export function FilaVacunaCarnet({
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
           {/* El punto: acompaña. **La palabra es la que informa.** */}
-          <PuntoEstado {...marca} />
+          <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: colorDe(estado, theme) }} />
           <Texto variante="cuerpo" numberOfLines={1}>
             {nombre}
           </Texto>
