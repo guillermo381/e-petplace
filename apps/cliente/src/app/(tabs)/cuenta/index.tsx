@@ -31,6 +31,19 @@ import { cerrarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
+/* S113-A — EL GROUP DEL UPDATE, leído del manifiesto con guarda.
+ * `expo-updates` no lo expone como constante: vive en
+ * `manifest.metadata.updateGroup`, y el tipo del manifiesto no lo declara — por
+ * eso se lee campo por campo con `typeof` y **jamás con un cast** (L-124).
+ * Si no está, el pie cae al `updateId` **diciendo que es un id**, para que nadie
+ * compare un id contra un group creyendo que son lo mismo. */
+function grupoDelUpdate(): string | null {
+  const m = Updates.manifest as { metadata?: unknown } | null | undefined;
+  const meta = m && typeof m === 'object' ? (m.metadata as { updateGroup?: unknown } | undefined) : undefined;
+  const g = meta && typeof meta === 'object' ? meta.updateGroup : undefined;
+  return typeof g === 'string' && g.length >= 8 ? g.slice(0, 8) : null;
+}
+
 function TituloBloque({ texto }: { texto: string }) {
   const { theme } = useTheme();
   return (
@@ -253,14 +266,41 @@ export default function Cuenta() {
             {/* S89 orden 7: EL SELLO — id corto + canal + FECHA del update.
                 Verificar un bundle = leer este código; ningún diagnóstico de
                 OTA vuelve a empezar por «¿qué bundle corre?». */}
+            {/* 🔴 S113-A — EL SELLO MUESTRA EL **GROUP** Y LA FECHA EN **UTC**,
+                y las dos cosas se cambiaron por una medición, no por gusto
+                (firma del founder, 5-sep-2026).
+
+                ⏪ Antes decía `updateId {8 chars} · canal · DD/MM HH:MM` con la
+                fecha en hora LOCAL, y **no podía distinguir dos updates
+                seguidos** — que es exactamente para lo que se lo mira:
+
+                  0.4    updateId 01a06e7b · preview · 04/09 17:13
+                  1.0.1  updateId 01a06f95 · preview · 04/09 22:21
+
+                **Los dos dicen «04/09».** Un update publicado de madrugada UTC
+                siempre se dibuja el día ANTERIOR en Guayaquil (−05), así que la
+                fecha del pie no separa un update nuevo de uno viejo. *El founder
+                leyó «04/09», dio el 1.0.1 por no recibido, y el aparato lo tenía
+                puesto* — el diagnóstico entero salió de un indicador que decía
+                la verdad de una forma que no se podía leer.
+
+                Y el id de 8 caracteres tampoco alcanza: son **UUIDv7 y comparten
+                prefijo POR DISEÑO** (`D-785`, S96). El **group** no: `2f236dd3`
+                contra `c4cd1963`.
+
+                ⇒ Ahora dice `2f236dd3 · preview · 04/09 22:13 UTC`. **UTC y no
+                el offset local** a propósito: es lo que imprime `update:list`, y
+                el pie existe para compararse contra eso. */}
             {!Updates.isEmbeddedLaunch && Updates.updateId !== null
-              ? `updateId ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}${
+              ? `${grupoDelUpdate() ?? `id ${Updates.updateId.slice(0, 8)}`} · ${
+                  Updates.channel ?? 'sin canal'
+                }${
                   Updates.createdAt
-                    ? ` · ${String(Updates.createdAt.getDate()).padStart(2, '0')}/${String(
-                        Updates.createdAt.getMonth() + 1,
-                      ).padStart(2, '0')} ${String(Updates.createdAt.getHours()).padStart(2, '0')}:${String(
-                        Updates.createdAt.getMinutes(),
-                      ).padStart(2, '0')}`
+                    ? ` · ${String(Updates.createdAt.getUTCDate()).padStart(2, '0')}/${String(
+                        Updates.createdAt.getUTCMonth() + 1,
+                      ).padStart(2, '0')} ${String(Updates.createdAt.getUTCHours()).padStart(2, '0')}:${String(
+                        Updates.createdAt.getUTCMinutes(),
+                      ).padStart(2, '0')} UTC`
                     : ''
                 }`
               /* 🔴 S103-C · LOS DOS CASOS SE SEPARAN — antes decían lo mismo.
