@@ -1,0 +1,37 @@
+{
+  "carnet": "carnet-1783564367515.jpg",
+  "leido_por": "S113-D, a ojo, sobre la imagen original 1079x767 y tres recortes ampliados",
+  "leido_el": "2026-09-04",
+  "advertencia": "Esto NO es la verdad del conjunto: es lo que el carnet DICE, transcrito mirandolo. La verdad del conjunto para este carnet tiene UNA fila. El carnet tiene QUINCE.",
+  "formato": "dos paginas enfrentadas, tabla impresa con cabecera FECHA | VACUNA | PROXIMA APLICACION | FIRMA MVZ. NO hay ningun plan de vacunacion preimpreso: la tabla nace vacia y cada renglon lleno tiene un sticker pegado.",
+  "n_filas_vistas": 15,
+  "filas": [
+    { "pagina": "izq", "n": 1,  "fecha_aplicada": "2020-08-29", "vacuna": "Rabimune", "fecha_proxima": "2021-08-29", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "izq", "n": 2,  "fecha_aplicada": "2020-08-29", "vacuna": "GiardiaVax", "lote_visible": "014/19", "fecha_proxima": "2021-08-29", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "izq", "n": 3,  "fecha_aplicada": "2021-02-12", "vacuna": "Bronchicine CAe", "fecha_proxima": "2022-02-12", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "izq", "n": 4,  "fecha_aplicada": "2021-02-12", "vacuna": "Recombitek (Diluente + Mosquillo vector Viruela del canario, Adenovirus tipo 2, Coronavirus, Parainfluenza y Parvovirus)", "lote_visible": "46559A", "fecha_proxima": "2022-02-12", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha", "nota": "DOS stickers de la misma dosis" },
+    { "pagina": "izq", "n": 5,  "fecha_aplicada": "2021-10-29", "vacuna": "Rabimune", "fecha_proxima": "2022-10-29", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "izq", "n": 6,  "fecha_aplicada": "2021-11-13", "vacuna": "GiardiaVax", "lote_visible": "013/21R", "fecha_proxima": "2022-11-13", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "izq", "n": 7,  "fecha_aplicada": "2022-02-25", "vacuna": "Bronchicine CAe", "fecha_proxima": null, "proxima_manuscrita": "FEB 2023", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha", "nota": "la proxima no trae dia" },
+    { "pagina": "izq", "n": 8,  "fecha_aplicada": "2022-02-25", "vacuna": "Peek'o", "fecha_proxima": null, "proxima_manuscrita": "FEB 2023", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha", "nota": "la proxima no trae dia" },
+    { "pagina": "der", "n": 9,  "fecha_aplicada": "2022-10-28", "vacuna": "Peek N-RB", "fecha_proxima": "2023-10-28", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "der", "n": 10, "fecha_aplicada": "2023-03-15", "vacuna": "Peek Puppy", "fecha_proxima": "2024-03-15", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "der", "n": 11, "fecha_aplicada": "2023-03-15", "vacuna": "Recombitek (sticker beige)", "lote_visible": "350918", "fecha_proxima": "2024-03-15", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "der", "n": 12, "fecha_aplicada": "2023-10-27", "vacuna": "Peek N-RB", "fecha_proxima": "2024-10-27", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "der", "n": 13, "fecha_aplicada": "2024-03-22", "vacuna": "Recombitek Oral Bordetella", "lote_visible": "35099A", "fecha_proxima": "2025-03-22", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" },
+    { "pagina": "der", "n": 14, "fecha_aplicada": "2024-03-22", "vacuna": "Recombitek (Diluente + Mosquillo vector Viruela, Adenovirus tipo 2, Coronavirus, Parainfluenza y Parvovirus)", "lote_visible": "46067A", "fecha_proxima": "2025-03-22", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha", "nota": "DOS stickers de la misma dosis" },
+    { "pagina": "der", "n": 15, "fecha_aplicada": "2024-10-25", "vacuna": "Imrab 3TF (antirrabica, virus inactivado)", "lote_visible": "185191", "fecha_proxima": "2025-10-25", "veterinario": "MVZ Enrique Lopez Sanchez", "evidencia": "sticker_con_fecha" }
+  ],
+  "la_unica_fila_de_la_verdad_del_conjunto": {
+    "nombre_vacuna": "Peck NRB",
+    "fecha_aplicada": "2024-10-25",
+    "fecha_proxima": "2025-10-25",
+    "lote": "11536014",
+    "veterinario_nombre_externo": "MVZ Enrique Lopez Sanchez",
+    "que_esta_mal": [
+      "el nombre: el renglon del 25/OCT/2024 lleva Imrab 3TF, no Peek N-RB. 'Peek N-RB' es el renglon del 27/OCT/2023. El nombre y la fecha vienen de DOS renglones distintos.",
+      "el lote: 11536014 es la CEDULA PROFESIONAL DEL VETERINARIO, impresa en la columna FIRMA MVZ de TODAS las filas. El lote real de esa fila es 185191.",
+      "la cantidad: es 1 de 15."
+    ]
+  }
+}
