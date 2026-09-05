@@ -35,6 +35,7 @@ export const uiEn = {
     aplicada: 'given',
     proxima: 'next',
     vacunaDelCarnet: 'vaccine from the card',
+    elCarnetDice: 'The card says: {{literal}}',
     tocaParaEditar: 'tap to edit',
     rechazadaVoz: "This one couldn't be saved. Tap it to review.",
     sinFechaVoz: "We couldn't read the date",

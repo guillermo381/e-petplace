@@ -3294,6 +3294,59 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1033` 🟡 Dos vocabularios de precisión de fecha conviviendo
+
+> 🔴 **RENUMERADA EN EL MERGE (S113-A, 5-sep-2026): D la depositó como `D-1029`
+> y ese número ya estaba tomado** — la ficha de la zona horaria de la familia
+> vive en `main` desde `e398d41f`. *No es un error de D: `proximo:ficha` lee el
+> archivo canónico, y una ficha sin mergear es invisible para él* — el punto
+> ciego que el propio comando declara al pie de su salida. **El que se mueve es
+> el que llega después al archivo canónico**, no el que tuvo la idea primero:
+> es el único criterio que un instrumento puede aplicar solo.
+
+**Nace:** S113-D-2.6, 5-sep-2026, por **orden del founder** al firmar las fechas
+con precisión de la extracción del carnet. **Dueño: B** (es su componente).
+
+**Qué.** La casa tiene **dos** vocabularios para decir cuán fina es una fecha,
+y hoy no se hablan:
+
+| dónde | valores | qué expresa |
+|---|---|---|
+| `mascotas` + `CampoFecha` | `exacta` · `aproximada` · `estimada` | día completo · mes/año · **etapa de vida** |
+| extracción del carnet (`extract-vacuna`) | `dia` · `mes` · **`sin_anio`** | día/mes/año · mes/año · **día y mes SIN año** |
+
+`CampoFecha` se declara *«espejo EXACTO del vocabulario de la DB
+(`chk_mascotas_fecha_nacimiento_precision`)»*, y lo es.
+
+**Por qué no lo reusé, medido.** **`sin_anio` no es expresable ahí.** Una fecha
+de nacimiento siempre tiene año; un carnet perfectamente trae **«26 JUN»** y
+nada más — está en el documento B del conjunto, dos veces, y las cuatro cargas
+humanas de ese documento **inventaron cuatro días distintos** justamente ahí.
+En la otra dirección, `estimada` (etapa de vida) no tiene sentido en un carnet.
+*No es que uno sea mejor: miden cosas que se solapan y no coinciden.*
+
+**Mapeo, para quien tenga que cruzarlos:** `dia`≈`exacta` · `mes`≈`aproximada` ·
+`sin_anio` **sin equivalente** · `estimada` **sin equivalente**.
+
+**Qué NO es.** No es un rojo: los dos vocabularios viven en superficies
+distintas y ninguna consume el otro. Es deuda de **coherencia**, y el costo de
+dejarla es que el día que la pantalla de revisión del carnet quiera usar
+`CampoFecha` para editar una fecha parcial, va a tener que traducir — y una
+traducción que pierde `sin_anio` **vuelve a poner un día que nadie escribió**,
+que es exactamente lo que esta firma vino a sacar.
+
+**Disparo.** *Cuando B toque `CampoFecha`.* Ahí se decide si el vocabulario de
+la casa se ensancha con `sin_anio` (y `mascotas` gana un CHECK más) o si la
+extracción traduce en su frontera declarando lo que pierde.
+
+⚠️ **Lo que hoy sostiene el hueco, y por eso no urge:** la pantalla del carnet
+**no usa `CampoFecha` para las fechas parciales** — con precisión distinta de
+`dia` el selector abre VACÍO a propósito, porque pre-llenarlo con un día
+elegido por nosotros sería meter por la pantalla el mismo día inventado que se
+sacó de la extracción.
+
+---
+
 ### `D-1032` 🟠 Los chips disponibles por mascota salen de la página cargada, no del servidor
 
 **Nace:** S113-A, candidato 1.1, 5-sep-2026, **por orden del founder para el

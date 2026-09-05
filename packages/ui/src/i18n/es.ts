@@ -46,6 +46,9 @@ export const uiEs = {
     aplicada: 'aplicada',
     proxima: 'próxima',
     vacunaDelCarnet: 'vacuna del carnet',
+    // S113-D-2.6 · el literal del carnet, al lado del campo: sin esto la
+    // persona tiene que ir a buscar el papel para saber de dónde salió la fecha.
+    elCarnetDice: 'El carnet dice: {{literal}}',
     tocaParaEditar: 'toca para editar',
     // S55-A A3 (D-315): voz de estado al riel (voseo→tuteo)
     rechazadaVoz: 'Esta no se pudo guardar. Tócala para revisarla.',

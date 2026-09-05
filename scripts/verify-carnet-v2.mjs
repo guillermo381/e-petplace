@@ -22,6 +22,7 @@ try {
   cpSync('supabase/functions', join(base, 'functions'), { recursive: true })
   mkdirSync(join(base, 'functions', '_prueba-carnet'), { recursive: true })
   cpSync('scripts/ia/prueba-carnet-v2.ts', join(base, 'functions', '_prueba-carnet', 'prueba.ts'))
+  cpSync('scripts/ia/fixture-carnet-real-docA.json', join(base, 'functions', '_prueba-carnet', 'fixture-carnet-real-docA.json'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
   execFileSync('deno', ['run', '--allow-env', '--allow-net', '--allow-read', 'functions/_prueba-carnet/prueba.ts'],
     { cwd: base, stdio: 'inherit' })

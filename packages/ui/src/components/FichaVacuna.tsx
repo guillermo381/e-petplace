@@ -55,6 +55,16 @@ export interface FichaVacunaProps {
   /** Secundarios: se muestran solo si la extracción los trajo. */
   veterinario?: string | null
   lote?: string | null
+  /**
+   * 🔴 ADITIVA · S113-D-2.6, por orden del founder (territorio de B, declarado).
+   *
+   * La transcripción EXACTA de lo que el carnet trae («FEB 2023», «26 JUN»).
+   * Se muestra al lado de la fecha. *Sin esto, cuando la fecha que proponemos
+   * salió de una lectura parcial, la persona tiene que ir a buscar el papel
+   * para saber de dónde salió — y lo que se le pide es justamente que la
+   * verifique.*
+   */
+  fechaLiteral?: string | null
   /** La RPC devolvió item_invalido para ESTE ítem: se resalta, nada se pierde. */
   rechazada?: boolean
   /** Tap en la ficha — la pantalla abre su Hoja de edición. */
@@ -85,6 +95,7 @@ export function FichaVacuna({
   fechaProxima,
   veterinario,
   lote,
+  fechaLiteral,
   rechazada = false,
   onEditar,
   onDescartar,
@@ -188,6 +199,21 @@ export function FichaVacuna({
             {[fechas.length > 0 ? fechas : null, lote ? `lote ${lote.toLowerCase()}` : null]
               .filter(Boolean)
               .join(' · ')}
+          </Text>
+        )}
+
+        {/* el literal del carnet — voz de máquina, como las fechas */}
+        {fechaLiteral && (
+          <Text
+            numberOfLines={1}
+            style={{
+              fontFamily: typography.family.mono.regular,
+              fontSize: typography.size.xs,
+              letterSpacing: typography.tracking.mono,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('fichaVacuna.elCarnetDice', { literal: fechaLiteral })}
           </Text>
         )}
 
