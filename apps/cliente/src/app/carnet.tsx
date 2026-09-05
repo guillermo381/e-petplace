@@ -242,6 +242,22 @@ export default function CarnetDeVacunas() {
         rechazada: false,
       })));
       setFase({ t: 'revision' });
+      /* 🔴 **SI ALGUNA VINO SIN FECHA, LA REVISIÓN ABRE EN ELLA** (dato del
+         founder: a sus cuatro les faltaba la fecha). Sin esto, la pantalla
+         mostraba cuatro filas de aspecto normal y un texto que decía que algo
+         faltaba, **sin señalar cuál**: el que mira tiene que adivinar dónde
+         está el hueco. Se abre su edición, que trae el campo de fecha VACÍO
+         —`abrirEdicion` no inventa una fecha cuando no hay— y es donde se
+         completa.
+         ⚠️ Abre **una sola vez y sólo si hay**: una hoja que se abre sola cada
+         vez que volvés a la lista deja de ser una ayuda. */
+      const sinFecha = ext.data.vacunas.findIndex((v: VacunaExtraida) => v.fecha_aplicada === null);
+      if (sinFecha >= 0) {
+        setBNombre(ext.data.vacunas[sinFecha].nombre ?? '');
+        setBTipo(ext.data.vacunas[sinFecha].tipo_vacuna ?? '');
+        setBFecha(undefined);
+        setEditando(sinFecha);
+      }
     } finally {
       clearTimeout(timer);
       clearTimeout(timerLargo);

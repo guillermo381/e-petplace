@@ -157,6 +157,11 @@ const filas = await page.evaluate(() =>
     .filter((x) => /^Es correcta$|^Looks right$/.test(x)).length,
 );
 di(`filas con «Es correcta»: ${filas}`);
+/* ¿Alguna vino SIN FECHA? Es el estado del bloqueante: se mira si la revisión
+   abrió sola en una edición con el campo de fecha vacío. */
+const t0 = await T();
+di(`¿abrió una edición sola?: ${/Corregir|Editar|Guardar cambios/i.test(t0) ? 'sí' : 'no'}`);
+di(`  texto «por completar»: ${(t0.match(/[^\n]*por completar[^\n]*/i) ?? ['(no aparece)'])[0].trim().slice(0, 70)}`);
 di(`🔴 ROJO · el botón, sin tocar ninguna: «${await etiquetaGuardar()}»`);
 /* 🔴 **`.nth(k)`, NO `.first()`.** La pieza deja el botón puesto después de
    confirmar —confirmar no lo hace desaparecer—, así que tocar «el primero»
