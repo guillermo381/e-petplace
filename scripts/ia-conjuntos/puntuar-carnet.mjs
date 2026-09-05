@@ -131,3 +131,50 @@ export function percentil(xs, p) {
   const lo = Math.floor(i), hi = Math.ceil(i);
   return lo === hi ? s[lo] : Math.round(s[lo] + (s[hi] - s[lo]) * (i - lo));
 }
+
+// ═══ S113-E, adenda 1.0 — LAS DOS FORMAS DE RESPUESTA ══════════════════════
+//
+// El prompt v1 devuelve `{vacunas:[{nombre, fecha_aplicada, fecha_proxima,
+// veterinario_nombre_externo, tipo_vacuna, lote}]}`. El v2 de D devuelve otra
+// cosa: renombra `veterinario`, suma `laboratorio`/`via`/`vencimiento_biologico`
+// /`confianza`/`evidencia`, y —lo que importa— **saca del array de vacunas los
+// renglones del PLAN IMPRESO** y los manda a `plan_impreso`.
+//
+// 🔴 **Eso cambia qué significa «invención» y hay que decirlo antes de comparar.**
+// En v1, un renglón del plan impreso devuelto como vacuna ES invención: el
+// carnet no registra esa aplicación. En v2 ese mismo renglón, puesto en
+// `plan_impreso`, es la respuesta CORRECTA. *Comparar los dos con la misma
+// cuenta le regalaría a v2 una mejora que en parte es sólo un cambio de
+// destino* — por eso el resumen reporta las dos columnas por separado y el
+// caso «1 → 12» se lee como «1 vacuna + 11 en plan impreso», no como «0%».
+
+/** Lleva la respuesta de cualquiera de los dos prompts a la forma del puntaje. */
+export function normalizarRespuesta(version, json) {
+  if (version === 'v1') {
+    return { vacunas: json?.vacunas ?? [], plan_impreso: [], crudo: json };
+  }
+  if (version === 'v2') {
+    const vs = (json?.vacunas ?? []).map((v) => ({
+      ...v,
+      // El único renombre real entre los dos contratos. Sin esto, el campo del
+      // veterinario mediría 0% en v2 por un nombre de clave, no por el modelo.
+      veterinario_nombre_externo: v.veterinario ?? v.veterinario_nombre_externo ?? null,
+    }));
+    return { vacunas: vs, plan_impreso: json?.plan_impreso ?? [], crudo: json };
+  }
+  throw new Error(`versión de prompt desconocida: ${version}`);
+}
+
+/** Reparto de la evidencia declarada por v2 — la señal de sticker↔fecha. */
+export function repartoEvidencia(vacunas) {
+  const r = {};
+  for (const v of vacunas) { const k = v.evidencia ?? 'sin_declarar'; r[k] = (r[k] ?? 0) + 1; }
+  return r;
+}
+
+/** Reparto de la confianza declarada por v2. */
+export function repartoConfianza(vacunas) {
+  const r = {};
+  for (const v of vacunas) { const k = v.confianza ?? 'sin_declarar'; r[k] = (r[k] ?? 0) + 1; }
+  return r;
+}

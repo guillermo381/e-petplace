@@ -27,6 +27,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { puntuarCaso, CAMPOS, percentil } from './puntuar-carnet.mjs';
 import { claveAnon } from './lib-conjuntos.mjs';
+import { normalizarRespuesta, repartoEvidencia, repartoConfianza } from './puntuar-carnet.mjs';
 
 const DIR = process.env.IA_CONJUNTOS_DIR ?? '.ia-conjuntos';
 const REF = readFileSync('supabase/.temp/project-ref', 'utf8').trim();
@@ -63,9 +64,10 @@ function usoDeLaVentana(desdeIso) {
 }
 
 const arg = (n, d) => { const a = process.argv.find((x) => x.startsWith(`--${n}=`)); return a ? Number(a.slice(n.length + 3)) : d; };
+const argT = (n, d) => { const a = process.argv.find((x) => x.startsWith(`--${n}=`)); return a ? a.slice(n.length + 3) : d; };
 
 async function main() {
-  const ruta = join(DIR, 'carnets-sinteticos.json');
+  const ruta = join(DIR, `${argT('conjunto', 'carnets-sinteticos')}.json`);
   if (!existsSync(ruta)) { di(`🔴 falta ${ruta}. Corré construir-carnets-sinteticos.mjs primero.`); process.exit(2); }
   const conj = JSON.parse(readFileSync(ruta, 'utf8'));
 
@@ -73,11 +75,22 @@ async function main() {
   const limite = arg('limite', conj.casos.length);
   const casos = conj.casos.slice(desde, desde + limite);
 
+  /* `--prompt=v2` sólo sirve DESPUÉS de que A despliegue la v2 de D: es esa
+     edge la que valida `modelo` contra `MODELOS_MEDIBLES` y devuelve
+     `plan_impreso`. Contra la v1 desplegada, el parámetro se ignora y la
+     respuesta no trae plan impreso — y el resumen lo dice, en vez de reportar
+     un plan_impreso de 0 que se leería como «v2 no separó nada». */
+  const version = argT('prompt', 'v1');
+  if (version !== 'v1' && version !== 'v2') { di(`🔴 --prompt debe ser v1 o v2, no "${version}".`); process.exit(2); }
+  const modelo = argT('modelo', null);
+  const conjNombre = argT('conjunto', 'carnets-sinteticos');
+
   const jwt = await jwtDePersona();
   const arranqueIso = new Date().toISOString();
 
-  di(`medir-carnet · ${casos.length} de ${conj.n_casos} carnets · conjunto ${conj.nombre}`);
-  di(`  el modelo lo decide la edge desplegada (MODELOS.carnet); acá NO se elige.`);
+  di(`medir-carnet · ${casos.length} de ${conj.n_casos} carnets · conjunto ${conj.nombre} · prompt ${version}`);
+  di(modelo ? `  modelo pedido a la edge: ${modelo} (la v2 lo valida contra MODELOS_MEDIBLES)`
+            : `  el modelo lo decide la edge desplegada; acá NO se elige.`);
   di(`  ⚠️ corrida SECUENCIAL a propósito: la latencia es uno de los números.\n`);
 
   const detalle = [];
@@ -92,7 +105,11 @@ async function main() {
       r = await fetch(`${URL_BASE}/functions/v1/extract-vacuna`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: img.toString('base64'), mediaType: 'image/jpeg' }),
+        body: JSON.stringify({
+          imageBase64: img.toString('base64'),
+          mediaType: 'image/jpeg',
+          ...(modelo ? { modelo } : {}),
+        }),
       });
     } catch (e) { err = String(e); }
     const ms = Date.now() - t0;
@@ -105,14 +122,17 @@ async function main() {
       continue;
     }
 
-    const { vacunas } = await r.json();
-    const p = puntuarCaso(caso, vacunas ?? []);
+    const bruto = await r.json();
+    const { vacunas, plan_impreso } = normalizarRespuesta(version, bruto);
+    const p = puntuarCaso(caso, vacunas);
     detalle.push({
       caso: caso.caso, plantilla: caso.plantilla, condicion: caso.condicion_captura,
       formato_fecha: caso.formato_fecha, relleno: caso.relleno,
-      ms_pared: ms, ...p,
+      ms_pared: ms, n_plan_impreso: plan_impreso.length,
+      evidencia: repartoEvidencia(vacunas), confianza: repartoConfianza(vacunas),
+      ...p,
     });
-    di(`   ${i + 1}/${casos.length} ${caso.caso.padEnd(40)} vis=${p.n_visibles} dev=${p.n_devueltas} emp=${p.n_emparejadas} inv=${p.n_inventadas} · ${(ms / 1000).toFixed(1)}s`);
+    di(`   ${i + 1}/${casos.length} ${caso.caso.padEnd(40)} vis=${p.n_visibles} dev=${p.n_devueltas} emp=${p.n_emparejadas} inv=${p.n_inventadas}${plan_impreso.length ? ` plan=${plan_impreso.length}` : ''} · ${(ms / 1000).toFixed(1)}s`);
     // Escritura incremental: una corrida de media hora no se pierde por un corte.
     writeFileSync(salida, JSON.stringify({ parcial: true, arranque: arranqueIso, detalle }, null, 2));
   }
@@ -121,11 +141,14 @@ async function main() {
   const vivos = detalle.filter((d) => !d.fallo);
   const total = {};
   for (const c of CAMPOS) total[c] = { aciertos: 0, evaluados: 0, sin_verdad: 0, excluidos: 0 };
-  let devueltas = 0, inventadas = 0, emparejadas = 0, visibles = 0, noDevueltas = 0;
+  let devueltas = 0, inventadas = 0, emparejadas = 0, visibles = 0, noDevueltas = 0, planImpreso = 0;
+  const evidencia = {}, confianza = {};
   for (const d of vivos) {
     for (const c of CAMPOS) for (const k of ['aciertos', 'evaluados', 'sin_verdad', 'excluidos']) total[c][k] += d.campos[c][k] ?? 0;
     devueltas += d.n_devueltas; inventadas += d.n_inventadas; emparejadas += d.n_emparejadas;
-    visibles += d.n_visibles; noDevueltas += d.n_no_devueltas;
+    visibles += d.n_visibles; noDevueltas += d.n_no_devueltas; planImpreso += d.n_plan_impreso ?? 0;
+    for (const [k, n] of Object.entries(d.evidencia ?? {})) evidencia[k] = (evidencia[k] ?? 0) + n;
+    for (const [k, n] of Object.entries(d.confianza ?? {})) confianza[k] = (confianza[k] ?? 0) + n;
   }
   const exactitud = {};
   for (const c of CAMPOS) exactitud[c] = total[c].evaluados ? +(total[c].aciertos / total[c].evaluados * 100).toFixed(1) : null;
@@ -138,13 +161,17 @@ async function main() {
 
   const resumen = {
     pieza: 'carnet',
+    prompt: version,
+    modelo_pedido: modelo,
     conjunto: conj.nombre,
     corrida_el: arranqueIso,
     n_casos: vivos.length,
     fallos: detalle.length - vivos.length,
     exactitud_pct: exactitud,
     detalle_campos: total,
-    filas: { visibles, devueltas, emparejadas, inventadas, no_devueltas: noDevueltas },
+    filas: { visibles, devueltas, emparejadas, inventadas, no_devueltas: noDevueltas, plan_impreso: planImpreso },
+    evidencia_declarada: Object.keys(evidencia).length ? evidencia : null,
+    confianza_declarada: Object.keys(confianza).length ? confianza : null,
     invencion_pct: devueltas ? +(inventadas / devueltas * 100).toFixed(1) : null,
     recall_pct: visibles ? +(emparejadas / visibles * 100).toFixed(1) : null,
     latencia_pared_ms: { p50: percentil(pared, 0.5), p95: percentil(pared, 0.95), max: Math.max(...pared) },
@@ -160,6 +187,12 @@ async function main() {
   for (const c of CAMPOS) di(`  ${c.padEnd(28)} ${String(exactitud[c] ?? '—').padStart(6)}%   (${total[c].aciertos}/${total[c].evaluados}${total[c].sin_verdad ? ` · ${total[c].sin_verdad} sin verdad` : ''}${total[c].excluidos ? ` · ${total[c].excluidos} excluidos` : ''})`);
   di(`  ${'INVENCIÓN'.padEnd(28)} ${String(resumen.invencion_pct).padStart(6)}%   (${inventadas}/${devueltas} filas devueltas)`);
   di(`  ${'recall de filas'.padEnd(28)} ${String(resumen.recall_pct).padStart(6)}%   (${emparejadas}/${visibles} visibles)`);
+  if (version === 'v2') {
+    di(`  ${'plan impreso (v2)'.padEnd(28)} ${String(planImpreso).padStart(6)}     filas separadas — NO cuentan como invención`);
+    if (resumen.evidencia_declarada) di(`  ${'evidencia declarada'.padEnd(28)} ${JSON.stringify(resumen.evidencia_declarada)}`);
+    if (resumen.confianza_declarada) di(`  ${'confianza declarada'.padEnd(28)} ${JSON.stringify(resumen.confianza_declarada)}`);
+    if (planImpreso === 0) di('  ⚠️ plan_impreso vino en 0: o el conjunto no tiene renglones de plan, o la edge desplegada NO es la v2.');
+  }
   di(`  ${'latencia pared'.padEnd(28)} p50 ${resumen.latencia_pared_ms.p50} ms · p95 ${resumen.latencia_pared_ms.p95} ms`);
   if (resumen.latencia_modelo_ms) di(`  ${'latencia modelo (ia_uso)'.padEnd(28)} p50 ${resumen.latencia_modelo_ms.p50} ms · p95 ${resumen.latencia_modelo_ms.p95} ms`);
   di(`  ${'costo'.padEnd(28)} $${resumen.costo_usd}  (${resumen.origen_costo}) · $${resumen.costo_por_carnet_usd}/carnet`);

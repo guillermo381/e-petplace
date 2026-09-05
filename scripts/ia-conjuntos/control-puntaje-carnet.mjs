@@ -108,3 +108,41 @@ ok(rNull.campos.fecha_proxima.evaluados === 0 && rNull.campos.fecha_proxima.sin_
 console.log();
 if (fallos) { console.log(`🔴 ${fallos} control(es) en rojo. El puntaje NO se usa.`); process.exit(1); }
 console.log('✅ el puntaje mide: baja con la verdad cambiada, y nombra la invención por su número.');
+
+// ═══ S113-E, adenda 1.0 — controles de las DOS formas de respuesta ═════════
+import { normalizarRespuesta, repartoEvidencia } from './puntuar-carnet.mjs';
+
+console.log('\n── las dos formas de respuesta (v1 / v2 de D) ──');
+let f2 = 0;
+const ok2 = (b, et, d = '') => { console.log(`${b ? '✅' : '🔴'} ${et}${d ? '  ' + d : ''}`); if (!b) f2 += 1; };
+
+// El renombre: sin él, `veterinario` mediría 0% en v2 por una clave, no por el modelo.
+const nv2 = normalizarRespuesta('v2', { vacunas: [{ nombre: 'Defensor 3', veterinario: 'Dr. X', evidencia: 'sticker_con_fecha', confianza: 'alta' }], plan_impreso: [{ nombre: 'Sextuple' }] });
+ok2(nv2.vacunas[0].veterinario_nombre_externo === 'Dr. X',
+  'v2        `veterinario` se mapea a `veterinario_nombre_externo`');
+ok2(nv2.plan_impreso.length === 1, 'v2        el plan impreso llega aparte, no mezclado con las vacunas');
+
+const nv1 = normalizarRespuesta('v1', { vacunas: [{ nombre: 'X', veterinario_nombre_externo: 'Dr. Y' }] });
+ok2(nv1.plan_impreso.length === 0 && nv1.vacunas[0].veterinario_nombre_externo === 'Dr. Y',
+  'v1        no inventa plan impreso donde el contrato no lo tiene');
+
+// 🔴 EL CASO «1 → 12», LEÍDO EN LAS DOS FORMAS. Es el número que decide si v2
+// mejoró de verdad o sólo cambió de destino los mismos 11 renglones.
+const verdadUna = [{ nombre_aceptado: ['Antirrabica', 'Defensor 3'], fecha_aplicada: '2026-06-28', fecha_proxima: null, lote: 'R6655C', veterinario_aceptado: [], tipo_vacuna: 'antirrábica', tipo_ambiguo: false }];
+const once = Array.from({ length: 11 }, (_, i) => ({ nombre: `Plan ${i + 1}` }));
+const enV1 = normalizarRespuesta('v1', { vacunas: [{ nombre: 'Defensor 3', fecha_aplicada: '2026-06-28', lote: 'R6655C', fecha_proxima: null, veterinario_nombre_externo: null, tipo_vacuna: 'antirrábica' }, ...once] });
+const enV2 = normalizarRespuesta('v2', { vacunas: [{ nombre: 'Defensor 3', fecha_aplicada: '2026-06-28', lote: 'R6655C', fecha_proxima: null, veterinario: null, tipo_vacuna: 'antirrábica', evidencia: 'sticker_con_fecha', confianza: 'alta' }], plan_impreso: once });
+const p1 = puntuarCaso({ caso: '1-a-12-v1', verdad: verdadUna }, enV1.vacunas);
+const p2 = puntuarCaso({ caso: '1-a-12-v2', verdad: verdadUna }, enV2.vacunas);
+ok2(p1.n_inventadas === 11 && p1.n_devueltas === 12,
+  'v1        «1 → 12» ⇒ invención 11/12', `(${(p1.n_inventadas / p1.n_devueltas * 100).toFixed(1)}%)`);
+ok2(p2.n_inventadas === 0 && p2.n_devueltas === 1 && enV2.plan_impreso.length === 11,
+  'v2        el mismo carnet ⇒ 1 vacuna + 11 en plan impreso, invención 0',
+  `(vacunas ${p2.n_devueltas} · plan ${enV2.plan_impreso.length} · inv ${p2.n_inventadas})`);
+
+ok2(JSON.stringify(repartoEvidencia(enV2.vacunas)) === '{"sticker_con_fecha":1}',
+  'v2        la evidencia declarada se cuenta (señal de sticker↔fecha)');
+
+console.log('');
+if (f2) { console.log(`🔴 ${f2} control(es) de forma en rojo.`); process.exit(1); }
+console.log('✅ las dos formas se leen, y el plan impreso NO se cuenta como invención.');
