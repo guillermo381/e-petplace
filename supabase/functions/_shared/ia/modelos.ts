@@ -47,7 +47,7 @@ export const MODELOS: Record<Pieza, string> = {
   // parece a un labrador» eligiendo de una lista de 44 nombres es una tarea de
   // RECONOCIMIENTO, no de atribución espacial fina — que es justo donde S48
   // midió que Haiku topaba. **No es lo mismo leer un carnet que mirar un perro.**
-  raza: 'claude-haiku-4-5',
+  raza: 'claude-sonnet-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -225,15 +225,51 @@ export const MODELOS_ADAPTIVOS = new Set<string>(['claude-sonnet-5'])
  *   (nombre 65,6 % · fecha 62,5 % · lote 81,3 %), la tercera variante ya está
  *   servida sin tocar código: `esfuerzo: 'low'` con `pensar: true`.
  */
+/**
+ * 🔴 EL TECHO A PARTIR DEL CUAL SE PUEDE DEJAR RAZONAR.
+ *
+ * **Regla de la casa (firma del founder, S113-D-2.2): toda pieza con
+ * `max_tokens` POR DEBAJO de este número manda `thinking: {type:'disabled'}`
+ * EXPLÍCITO.** Vigilada por `verify:ia-puerta`, con su rojo.
+ *
+ * El porqué, medido dos veces y desde dos lados:
+ * · **E**, en carnets reales: omitir `thinking` deja a Sonnet 5 razonar solo,
+ *   quemarse el techo y devolver **cero caracteres de salida**. *No falla
+ *   ruidosamente: devuelve nada.*
+ * · **D**, aislando la variable: el mismo prompt v2 con razonamiento a techo
+ *   16000 gastó **6.716 y 10.895** tokens de salida contra **2.015 y 1.248**
+ *   sin razonar — y devolvió **exactamente las mismas filas**.
+ *
+ * ⇒ *Un techo bajo y un razonamiento suelto no conviven: el pensamiento se come
+ *   el presupuesto y lo que se pierde es la respuesta, no el pensamiento.*
+ */
+export const TECHO_SIN_RAZONAR = 16000
+
 export const PENSAR: Record<Pieza, boolean> = {
   carnet: false,
-  documento: true,
+  // 🔴 CAMBIADAS EN S113-D-2.2 por el invariante de arriba: las dos tienen
+  // techo 4000, o sea por debajo de `TECHO_SIN_RAZONAR`.
+  //
+  // **Y el cambio es casi un no-op, medido:** en la corrida real de A (lote 0)
+  // estas dos piezas devolvieron **35 y 85 tokens de salida** con `thinking`
+  // omitido — o sea que el adaptive de Sonnet 5 ya había decidido no pensar
+  // para sus tareas. Apagarlo explícito no les quita un razonamiento que no
+  // estaban haciendo; **les saca el riesgo de que algún día lo hagan y se
+  // coman el techo**, que es el modo de falla que E midió en carnets.
+  //
+  // ⚠️ Esta rama (1.2) se cortó ANTES de esa firma, así que las dos llegaron
+  // acá todavía en `true` — corriendo Sonnet 5 con techo 4000. **Lo cazó el
+  // gate al portarlo, no una lectura**: el gate vivía en la otra rama y esta
+  // era justo la que estaba sin vigilar.
+  documento: false,
+  // `nota_clinica` es la ÚNICA que queda razonando, y es legítimo: su techo es
+  // 16000, o sea que NO está por debajo del invariante. Estructurar un dictado
+  // clínico campo por campo es exactamente donde el razonamiento paga.
   nota_clinica: true,
-  presencia: true,
-  // Haiku no piensa si no se le dice, así que esto NO cambia el cuerpo que le
-  // sale hoy. Está en `false` explícito para que, el día que E la corra contra
-  // Sonnet con el override, la comparación siga siendo justa: los dos sin
-  // pensar, una sola variable moviéndose.
+  presencia: false,
+  // Con Sonnet 5 por defecto esto YA NO es decorativo: omitirlo lo dejaría
+  // razonar solo, y con techo 500 se comería la respuesta entera. El `false`
+  // es lo que hace que la puerta escriba `thinking: disabled` en la request.
   raza: false,
 }
 

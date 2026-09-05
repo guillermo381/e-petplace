@@ -228,7 +228,14 @@ Deno.serve(async (req) => {
     const codigos = catalogo.map((f) => f.slug)
     // Índice por slug NORMALIZADO: así «American Bully» encuentra a
     // `american-bully` sin que el modelo tenga que saber la convención.
+    // La lista blanca se indexa por su forma NORMALIZADA, así que el modelo
+    // puede escribir `Yorkshire_Terrier` y resolver a `yorkshire-terrier`.
+    // Si dos slugs del catálogo colapsaran al mismo normalizado, uno quedaría
+    // inalcanzable: no puede pasar en silencio.
     const porNormalizado = new Map(codigos.map((c) => [normalizarSlug(c), c]))
+    if (porNormalizado.size !== codigos.length) {
+      console.error(`[sugerir-raza] COLISIÓN de slugs al normalizar: ${codigos.length} códigos → ${porNormalizado.size} claves`)
+    }
     if (codigos.length === 0) {
       // Especie sin razas activas: **no se llama al modelo**. Pedirle que elija
       // de una lista vacía es gastar una llamada para que devuelva nada.

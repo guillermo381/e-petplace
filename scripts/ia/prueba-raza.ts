@@ -22,7 +22,11 @@ const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQD
 // Los slugs son los REALES de `cat_razas`, tipos incluidos: `pitbul-terrier`
 // tiene una sola L y `jack-rusell` una sola S. **Se copian tal cual.** Si el
 // arnés los "corrigiera", estaría midiendo un catálogo que no existe.
-const CATALOGO_PERRO = ['american-bully', 'criollo', 'golden-retriever', 'jack-rusell', 'labrador-retriever', 'pitbul-terrier']
+// ⚠️ `yorkshire-terrier` entra por el mandato del founder, NO por una medición
+// mía contra `cat_razas`: la service_role del llavero está truncada (reportado
+// a E). Los otros seis SÍ los medí. Si ese slug no existiera en la tabla, el
+// caso 7 mediría un catálogo inventado — se declara para que se pueda corregir.
+const CATALOGO_PERRO = ['american-bully', 'criollo', 'golden-retriever', 'jack-rusell', 'labrador-retriever', 'pitbul-terrier', 'yorkshire-terrier']
 
 let cuerpoSalida: Record<string, unknown> | null = null
 let filasUso = 0
@@ -89,8 +93,12 @@ console.log('\n== 1 · VERDE: tres candidatas del catálogo ==')
   exigir('3 candidatas', (json.candidatas as unknown[])?.length === 3)
   exigir('escribe su fila en ia_uso', filasUso === 1, filasUso)
   exigir('el catálogo entró al prompt', String(cuerpoSalida?.messages ?? '').includes('labrador-retriever') || JSON.stringify(cuerpoSalida).includes('labrador-retriever'))
-  exigir('modelo por defecto haiku', cuerpoSalida?.model === 'claude-haiku-4-5', cuerpoSalida?.model)
-  exigir('haiku SIN campo thinking', cuerpoSalida?.thinking === undefined)
+  exigir('modelo por defecto sonnet-5', cuerpoSalida?.model === 'claude-sonnet-5', cuerpoSalida?.model)
+  // 🔴 Sonnet 5 razona SOLO si no se le dice lo contrario, y con 500 tokens de
+  // techo se los comería pensando: cero caracteres de salida. Haiku podía
+  // omitirlo; sonnet NO. Es el gate de la puerta, acá sobre la pieza.
+  exigir('sonnet-5 lleva thinking disabled ESCRITO',
+    JSON.stringify(cuerpoSalida?.thinking) === '{"type":"disabled"}', cuerpoSalida?.thinking)
 }
 
 console.log('\n== 2 · ROJO PEDIDO: foto sin animal ==')
@@ -117,6 +125,10 @@ console.log('   y el codigo es `american-bully`. La raza estaba BIEN y se rechaz
 for (const [nombre, entrada, esperadas, motivo] of [
   ['«American Bully» → se normaliza y ENTRA', [{ raza_codigo: 'American Bully', confianza: 'alta' }], ['american-bully'], null],
   ['«Golden Retriever» con mayusculas y espacio', [{ raza_codigo: 'Golden Retriever', confianza: 'media' }], ['golden-retriever'], null],
+  ['🔴 EL ROJO DEL FOUNDER: «yorkshire_terrier» → yorkshire-terrier', [{ raza_codigo: 'yorkshire_terrier', confianza: 'alta' }], ['yorkshire-terrier'], null],
+  ['guion bajo + mayusculas juntos', [{ raza_codigo: 'Golden_Retriever', confianza: 'media' }], ['golden-retriever'], null],
+  ['separador repetido y mezclado', [{ raza_codigo: 'american _ Bully', confianza: 'alta' }], ['american-bully'], null],
+  ['guion bajo sobre el slug con UNA L', [{ raza_codigo: 'Pitbul_Terrier', confianza: 'baja' }], ['pitbul-terrier'], null],
   ['«criollo » con espacio y acento raro', [{ raza_codigo: ' Crióllo ', confianza: 'baja' }], ['criollo'], null],
   ['raza inventada → se descarta, las buenas quedan',
     [{ raza_codigo: 'criollo', confianza: 'alta' }, { raza_codigo: 'labradoodle', confianza: 'alta' }], ['criollo'], 'no esta en el catalogo'],
