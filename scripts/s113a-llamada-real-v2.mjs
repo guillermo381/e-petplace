@@ -16,11 +16,11 @@ const admin = createClient(env.EXPO_PUBLIC_SUPABASE_URL, SERVICE, { auth:{persis
 const { data: ses } = await cli.auth.signInWithPassword({ email:'guillo381+8@gmail.com', password: CLAVE });
 if (!ses?.session) { console.error('🔴 sin sesión'); process.exit(2); }
 
-const CARNET = '889a72c5-8d55-4cfd-a48f-b427cf9e9305/carnet-1783564367515.jpg';
+const CARNET = process.env.CARNET ?? '889a72c5-8d55-4cfd-a48f-b427cf9e9305/carnet-1783564367515.jpg';
 const { data: blob, error: eB } = await admin.storage.from('mascotas').download(CARNET);
 if (eB) { console.error('🔴 no pude bajar el carnet:', eB.message); process.exit(2); }
 const b64 = Buffer.from(await blob.arrayBuffer()).toString('base64');
-console.log(`carnet «1 → 12» · ${CARNET.split('/')[1]} · ${(b64.length/1024).toFixed(0)} kB en base64\n`);
+console.log(`carnet · ${CARNET.split('/')[1]} · ${(b64.length/1024).toFixed(0)} kB en base64\n`);
 
 const antes = new Date().toISOString();
 const t0 = Date.now();
