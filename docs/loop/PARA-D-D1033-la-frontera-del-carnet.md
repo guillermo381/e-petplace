@@ -1,7 +1,10 @@
-# `D-1029` 🟠 La frontera del carnet es el CONJUNTO, no el prompt
+# `D-1033` 🟠 La frontera del carnet es el CONJUNTO, no el prompt
 
 **Nace:** S113-E, 5-sep-2026, midiendo la v2.1 contra la referencia firmada.
-**Dueño: D.** **Número pedido con `pnpm proximo:ficha`** (tope `D-1028`).
+**Dueño: D.** **Renumerada a `D-1033` por orden del founder** — nació como
+`D-1029` con `pnpm proximo:ficha` sobre el tope `D-1028`, y entre que se pidió
+el número y se depositó la ficha, otras pistas tomaron los suyos. *El número se
+pide y se usa en el mismo acto; si pasa tiempo en el medio, se vuelve a pedir.*
 *La ficha no está depositada en `DEUDAS_CANONICAS.md` — ese archivo es de A.*
 
 ## El número
