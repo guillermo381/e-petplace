@@ -263,7 +263,9 @@ export interface PieConfirmacionVacunasProps {
   vozFaltan: (n: number) => string
   /** La otra razón, la que nació con el descarte: *«no queda ninguna para
    *  guardar»*. **Sin ella, una tanda toda descartada apagaría el botón en
-   *  silencio** — el mismo defecto por la puerta de al lado. */
+   *  silencio** — el mismo defecto por la puerta de al lado.
+   *  ⚠️ Dice *«no queda»*, o sea que **hubo**: con la tanda vacía el pie no se
+   *  dibuja y esta voz no se usa. */
   vozNinguna: string
   onGuardar: () => void
 }
@@ -274,6 +276,18 @@ export interface PieConfirmacionVacunasProps {
 export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozNinguna, onGuardar }: PieConfirmacionVacunasProps) {
   const { theme } = useTheme()
   const { faltan, aGuardar, listo } = resumenDeLaTanda(filas)
+
+  /* 🔴 **TANDA VACÍA ⇒ EL PIE NO SE DIBUJA**, y no es lo mismo que la tanda
+     toda descartada.
+     ⏪ Antes decía *«faltan 0 por revisar»* —una razón imposible de resolver—
+     y con la primera cura pasó a decir *«no queda ninguna para guardar»*, que
+     **es cierto sólo si hubo alguna**: con cero filas nunca hubo nada, y esa
+     frase le hace creer a la persona que descartó algo.
+     *Un pie que gobierna una tanda que no existe es un control sobre el
+     vacío* (19.9, y el mismo criterio que `D-1025`). **Que la foto no haya
+     traído vacunas es historia de la PANTALLA** —ahí va su estado vacío, con
+     el camino para volver a intentar—, no de un botón apagado. */
+  if (filas.length === 0) return null
 
   return (
     <View style={{ gap: spacing[2] }}>

@@ -719,11 +719,26 @@ export function BarraTabs({
           }}
         >
           <Svg width={ancho} height={altoTotal + DISCO_ASOMA}>
+            {/* ⏪ **EL CORRIMIENTO VIAJABA POR `translateY` SUELTA, que la propia
+                librería marca `@deprecated`** —remite a usarla ADENTRO de
+                `transform`—. *Medido: en web NO se descartaba* —el `prepare`
+                de `react-native-svg` la lee y sintetiza `translate(0, 5.5)`,
+                y el dibujo baja de verdad— **pero dejaba un `translateY="5.5"`
+                crudo en el `<path>`, que no es un atributo de SVG**: quien
+                inspeccione ve una prop inválida al lado del efecto y lee que
+                está rota. Y su modo de falla el día que la prop se retire es
+                el peor: **la barra queda 5,5 px alta, el disco deja de asomar
+                y nada lanza, loguea ni deja de compilar.**
+                La forma de abajo es la que la librería nombra y la que las dos
+                plataformas resuelven igual. Su control vive en
+                `scripts/_arnes-barra-web.mts`, y **mide la BAJADA real del
+                dibujo, no la presencia del atributo** — un `transform` que el
+                navegador ignorara daría cero ahí. */}
             <AnimatedPath
               animatedProps={propsCuerpo}
               fill={colorBarra}
               fillRule="evenodd"
-              translateY={DISCO_ASOMA}
+              transform={[{ translateY: DISCO_ASOMA }]}
             />
           </Svg>
           {/* EL DISCO — viaja por TRANSFORM, no por `d`. Es la mitigación
