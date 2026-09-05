@@ -3185,6 +3185,55 @@ una deuda de **costo, espera y confianza**, con instrumento ya construido
 
 **Disparo.** El lote 1, que es donde se compara Haiku contra esta línea base.
 
+
+**🔴 ENMIENDA S113-D-2.1 (4-sep) — SE REEXAMINA: EL «1 → 12» ERA UN ERROR DE
+VERDAD, NO DE MODELO. Por orden del founder.**
+
+Abrí la foto del carnet y la miré. **Tiene QUINCE vacunas aplicadas**, no una:
+dos páginas enfrentadas, tabla `FECHA · VACUNA · PRÓXIMA APLICACIÓN · FIRMA
+MVZ`, y **cada renglón lleno lleva un sticker del frasco pegado**, la fecha
+manuscrita, la próxima manuscrita y la firma impresa del veterinario. Rabimune,
+GiardiaVax, Bronchicine, Recombitek, Peek N-RB, Peek Puppy, Peek'o, Imrab 3TF,
+entre 2020-08-29 y 2024-10-25. **No hay ningún plan preimpreso en ninguna de las
+dos páginas.** ⇒ *El modelo no inventó once filas: leyó un carnet lleno.*
+
+**La fila única de «verdad» está mal en dos de cuatro campos:** el nombre
+(`Peck NRB`) y la fecha (`2024-10-25`) **vienen de renglones distintos** —el del
+25/OCT/2024 lleva **Imrab 3TF**—, y **`lote: 11536014` es la CÉDULA PROFESIONAL
+DEL VETERINARIO**, impresa en la columna FIRMA de todas las filas. El lote real
+de esa fila es `185191`.
+
+**Y el corpus no es el que decía:** las cinco fotos son **DOS documentos**. El
+segundo está fotografiado y cargado **cuatro veces**, y sus cuatro cargas
+describen las mismas 8 vacunas **contradiciéndose en 6**: `Nobivac Lepto` tiene
+cuatro fechas distintas (el carnet dice «S/JUN», sin día — **las cuatro
+inventaron un día**), y el lote de Vanguard aparece como `56288`, `562887` y
+`56288.7` cuando el sticker dice `562887`. **31 de las 32 filas de verdad
+describen un solo documento.**
+
+⇒ **Las exactitudes de esta ficha (`nombre` 65,6 % · `fecha` 62,5 % · `lote`
+81,3 %) están medidas contra una referencia contaminada**, hecha de filas que la
+extracción creó y un humano editó sin ver el error. *Es `L-139` cobrada donde
+más duele: un valor verosímil y falso pasó la revisión **porque parecía bien**,
+y después ascendió a vara de medición.*
+
+**Lo que NO cambia:** los 83 s de espera y los $0,0715 por carnet son medidas
+reales y siguen siendo deuda de producto. **Lo que sí cambia** es su causa: no
+es *«un modelo que inventa filas paga la salida de todas»* — pagó la salida de
+quince vacunas que están ahí.
+
+**Lo que abre.** La referencia se rehace con **TRES FIRMAS** (D transcribe a
+ojo · E transcribe por separado sin ver la de D · el founder dirime mirando la
+foto) **antes de toda corrida** — protocolo, transcripciones de D y el
+instrumento de cotejo en `docs/loop/verdad-vista/`. Recién con esa vara se
+corre la matriz `v1 × v2 × Sonnet × Haiku`.
+
+**Y una consecuencia sobre trabajo propio, que se dice:** el `plan_impreso` que
+D construyó en el lote 1.0 se justificó con este titular. **En los documentos
+que miré no hay plan impreso.** No se retira —el corpus es de dos documentos y
+muchos carnets sí lo traen— pero **deja de citarse como la cura de `D-1012`**:
+es una capacidad sin caso medido.
+
 ---
 
 ### `D-1013` 🟠 — `supabase projects api-keys` imprime las claves en claro
