@@ -22,10 +22,10 @@
 import { View } from 'react-native'
 
 import { Texto } from './Texto'
-import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
-import type { EstadoVacuna } from './vacunas-estado'
+import { marcaDeEstado, type EstadoVacuna } from './vacunas-estado'
+import { PuntoEstado } from './PuntoEstado'
 
 export interface FilaPlanVacunal {
   id: string
@@ -48,21 +48,6 @@ export interface ListaPlanVacunalProps {
   vozOpcional: string
 }
 
-function colorDe(e: EstadoVacuna, theme: ReturnType<typeof useTheme>['theme']): string {
-  switch (e.clase) {
-    case 'alDia':
-      return theme.status.successText
-    case 'porVencer':
-      return theme.status.warningText
-    case 'vencida':
-      return theme.status.dangerText
-    default:
-      /* `sinRegistro` y `sinRefuerzo` en tinta: **no son un problema, son una
-         ausencia**, y pintarlas de rojo diría que alguien hizo algo mal. */
-      return theme.text.tertiary
-  }
-}
-
 export function ListaPlanVacunal({ filas, vozObligatoria, vozOpcional }: ListaPlanVacunalProps) {
   const { theme } = useTheme()
   return (
@@ -70,7 +55,14 @@ export function ListaPlanVacunal({ filas, vozObligatoria, vozOpcional }: ListaPl
       {filas.map((f) => (
         <View key={f.id} style={{ gap: spacing[1] }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-            <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: colorDe(f.estado, theme) }} />
+            <PuntoEstado
+              {...marcaDeEstado(f.estado, {
+                exito: theme.status.successText,
+                aviso: theme.status.warningText,
+                peligro: theme.status.dangerText,
+                tinta: theme.text.secondary,
+              })}
+            />
             <Texto variante="cuerpo" numberOfLines={1}>
               {f.nombre}
             </Texto>
