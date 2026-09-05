@@ -90,9 +90,18 @@ import {
   typography,
   usePresionado,
   useTheme,
+  ListaPlanVacunal,
+  type FilaPlanVacunal,
+  diasEntre,
 } from '@epetplace/ui';
 import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
-import { obtenerPerfilMascota, type PerfilMascota, type VacunaDeMascota } from '@epetplace/api';
+import {
+  obtenerPerfilMascota,
+  obtenerPlanVacunal,
+  type PerfilMascota,
+  type VacunaDeMascota,
+  type VacunaDelPlan,
+} from '@epetplace/api';
 
 import { CantoCurva } from '@/components/canto-curva';
 import { FiltroPills, type OpcionFiltro } from '@/components/filtro-pills';
@@ -137,11 +146,19 @@ export default function PlanDeVacunas() {
   const [eje, setEje] = useState<EjeEstado>('todo');
   const [abierta, setAbierta] = useState<number | null>(null);
   const [reveladas, setReveladas] = useState(false);
+  const [plan, setPlan] = useState<VacunaDelPlan[] | 'cargando' | 'error'>('cargando');
 
   const cargar = useCallback(async () => {
     if (typeof mascotaId !== 'string') return;
-    const r = await obtenerPerfilMascota(mascotaId);
+    /* Los dos lectores van JUNTOS y no encadenados: son dos preguntas
+       independientes sobre la misma mascota, y encadenarlas pagaría dos viajes
+       en serie donde alcanza con uno de ida y vuelta (`L-223`). */
+    const [r, rp] = await Promise.all([
+      obtenerPerfilMascota(mascotaId),
+      obtenerPlanVacunal(mascotaId, hoyIsoLocal()),
+    ]);
     setPerfil(r.ok ? r.data : 'error');
+    setPlan(rp.ok ? rp.data : 'error');
   }, [mascotaId]);
 
   useFocusEffect(
@@ -415,11 +432,98 @@ export default function PlanDeVacunas() {
 
             {/* una sola abierta a la vez: dos abiertas y el tablero deja de presidir */}
             <PieRevelar n={ocultas} revelado={reveladas} onPress={() => setReveladas(!reveladas)} />
+
+            {/* ── SU PLAN — lo que su especie necesita, esté aplicado o no.
+                Va DEBAJO del carnet a propósito: arriba está lo que pasó, acá
+                lo que corresponde. La sección no se monta si el plan está
+                vacío: una especie sin plan no tiene nada que decir, y un
+                rótulo con cero filas es ruido. */}
+            {Array.isArray(plan) && plan.length > 0 ? (
+              <View style={{ marginTop: spacing[6], gap: spacing[3] }}>
+                {/* Mismo rótulo que la sección de arriba: la pantalla ya tenía
+                    su anatomía y **no se le inventa una segunda** — dos formas
+                    de titular en una misma pantalla se leen como dos sistemas. */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'baseline',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: spacing[4],
+                  }}
+                >
+                  <Texto variante="seccion">{t('planVacunas.planTitulo')}</Texto>
+                  <Texto variante="dato">{plan.length}</Texto>
+                </View>
+                <View style={{ paddingHorizontal: spacing[4] }}>
+                  <ListaPlanVacunal
+                    filas={plan.map((v) => filaDePlan(v, hoy, t))}
+                    vozObligatoria={t('planVacunas.planObligatoria')}
+                    vozOpcional={t('planVacunas.planOpcional')}
+                  />
+                  {/* 🔴 Las que la familia SÍ puso y no se pudieron ubicar en el
+                      plan. Sin esta línea, una vacuna cargada se lee arriba como
+                      «nunca aplicada» y nadie se entera de por qué. */}
+                  {plan[0].aplicadas_sin_clasificar > 0 ? (
+                    <View style={{ marginTop: spacing[3] }}>
+                      <Texto variante="apoyo">
+                        {t('planVacunas.planSinClasificar', { n: plan[0].aplicadas_sin_clasificar })}
+                      </Texto>
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+            ) : null}
           </>
         )}
       </ScrollView>
     </View>
   );
+}
+
+/**
+ * ⭐ **«SU PLAN» — lo que su especie necesita, aplicado o no** (S113-C · 1.1 · C4).
+ *
+ * 🔴 **EL DEFAULT MUESTRA, NUNCA DESCARTA.** A midió que `ESTADOS_PLAN` en el
+ * wrapper es un **filtro** y no una declaración: un estado que el motor agregue
+ * y la lista no conozca **se cae en silencio**. Acá abajo pasa lo mismo con el
+ * mapeo, así que su rama por defecto **dibuja la fila** con una voz que admite
+ * que no sabe. *Perder una fila del plan es peor que mostrarla sin clasificar:
+ * lo segundo se ve y se corrige; lo primero no tiene síntoma.*
+ *
+ * Las clases son las de `EstadoVacuna` de B (color) y la VOZ la pone esta
+ * pantalla (Ley 3). `aun_no_corresponde` cae en `sinRegistro` —el registro
+ * todavía no existe— pero **su voz dice otra cosa**: no es una falta, es que
+ * todavía no le toca. *La clase pinta; la voz explica.*
+ */
+type Traductor = ReturnType<typeof useTraduccion>['t'];
+
+function filaDePlan(v: VacunaDelPlan, hoy: string, t: Traductor): FilaPlanVacunal {
+  const dias = v.proxima !== null ? Math.abs(diasEntre(hoy, v.proxima)) : 0;
+  const base = { id: v.vacuna_codigo, nombre: v.nombre, obligatoria: v.obligatoria };
+  /* `proxima_es_derivada` se dice, no se disimula: una fecha que calculó la
+     casa no vale lo mismo que una que estaba escrita en el carnet (L-139). */
+  const vozPlan =
+    v.proxima !== null && v.proxima_es_derivada
+      ? t('planVacunas.planDerivada', { fecha: v.proxima })
+      : undefined;
+
+  switch (v.estado) {
+    case 'al_dia':
+      return { ...base, estado: { clase: 'alDia' }, vozEstado: t('planVacunas.estadoAlDia'), vozPlan };
+    case 'vence_en':
+      return { ...base, estado: { clase: 'porVencer', dias }, vozEstado: t('planVacunas.estadoVenceEn', { n: dias }), vozPlan };
+    case 'vencida':
+      return { ...base, estado: { clase: 'vencida', dias }, vozEstado: t('planVacunas.estadoVencida', { n: dias }), vozPlan };
+    case 'sin_fecha':
+      return { ...base, estado: { clase: 'sinRefuerzo' }, vozEstado: t('planVacunas.estadoSinFecha'), vozPlan };
+    case 'nunca_aplicada':
+      return { ...base, estado: { clase: 'sinRegistro' }, vozEstado: t('planVacunas.estadoNunca'), vozPlan };
+    case 'aun_no_corresponde':
+      return { ...base, estado: { clase: 'sinRegistro' }, vozEstado: t('planVacunas.estadoAunNo'), vozPlan };
+    default:
+      /* El estado que nadie conoce: se DIBUJA. */
+      return { ...base, estado: { clase: 'sinRefuerzo' }, vozEstado: t('planVacunas.estadoDesconocido'), vozPlan };
+  }
 }
 
 // ── la fila: colapsada dice nombre y vigencia; desplegada suma el detalle ──
@@ -455,8 +559,11 @@ function FilaVacuna({
         ? t('planVacunas.vencio', { fecha: fechaCortaMono(vacuna.fecha_proxima, idioma) })
         : t('planVacunas.hasta', { fecha: fechaCortaMono(vacuna.fecha_proxima, idioma) });
 
-  // el detalle es lo que el contrato TRAE (lote y autoría: candidata
-  // declarada en la cabecera — el select no las expone todavía)
+  /* ⭐ **EL DETALLE FINO** (S113-C · lote 1.1 · C4). El comentario que estaba
+     acá decía *«lote y autoría: el select no las expone todavía»* — **ya las
+     expone**: `A4` dejó de tirar seis columnas que la base tenía desde antes.
+     Se agregan las cinco que faltaban, cada una **sólo si vino**: un rótulo con
+     el valor vacío no informa, ocupa. */
   const detalle: { etiqueta: string; valor: string }[] = [];
   if (vacuna.fecha_aplicada !== null) {
     detalle.push({ etiqueta: t('planVacunas.aplicada'), valor: fechaCortaMono(vacuna.fecha_aplicada, idioma) });
@@ -466,6 +573,28 @@ function FilaVacuna({
   }
   if (vacuna.fecha_proxima !== null) {
     detalle.push({ etiqueta: t('planVacunas.proximo'), valor: fechaCortaMono(vacuna.fecha_proxima, idioma) });
+  }
+  if (vacuna.lote !== null && vacuna.lote.length > 0) {
+    detalle.push({ etiqueta: t('planVacunas.lote'), valor: vacuna.lote });
+  }
+  if (vacuna.laboratorio !== null && vacuna.laboratorio.length > 0) {
+    detalle.push({ etiqueta: t('planVacunas.laboratorio'), valor: vacuna.laboratorio });
+  }
+  if (vacuna.via_administracion !== null && vacuna.via_administracion.length > 0) {
+    detalle.push({ etiqueta: t('planVacunas.via'), valor: vacuna.via_administracion });
+  }
+  /* ⚠️ **El vencimiento del FRASCO, no el de la protección.** Va con rótulo
+     propio y lejos de «Próximo refuerzo» a propósito: confundirlos es `L-139`
+     — uno dice hasta cuándo servía el biológico, el otro cuándo toca de
+     nuevo. */
+  if (vacuna.vencimiento_biologico !== null) {
+    detalle.push({
+      etiqueta: t('planVacunas.vencimientoBiologico'),
+      valor: fechaCortaMono(vacuna.vencimiento_biologico, idioma),
+    });
+  }
+  if (vacuna.veterinario_nombre_externo !== null && vacuna.veterinario_nombre_externo.length > 0) {
+    detalle.push({ etiqueta: t('planVacunas.aplicadaPor'), valor: vacuna.veterinario_nombre_externo });
   }
   const desplegable = detalle.length > 0;
 

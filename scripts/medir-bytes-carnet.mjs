@@ -118,6 +118,44 @@ if (bytesQueViajan === null) {
     di(`⇒ ${antes.toLocaleString('es')} → ${bytesImagen.toLocaleString('es')} · ${(bytesImagen / antes).toFixed(2)}× del original`);
   }
 }
+/* ── C3 · LA CONFIRMACIÓN FILA POR FILA ────────────────────────────────────
+   🔴 **NO SE GUARDA.** Se mide hasta el botón habilitado y ahí se para: tocar
+   «Guardar» escribiría eventos clínicos falsos —salidos de una captura de
+   pantalla, no de un carnet— en una mascota REAL de la cuenta, y **no hay
+   camino de borrado en el producto**. La mitad que falta (N confirmadas → N
+   filas en la base) la corre quien pueda hacerlo sobre una mascota
+   descartable. */
+await page.waitForTimeout(6000);
+const etiquetaGuardar = async () =>
+  await page.evaluate(() => {
+    const b = [...document.querySelectorAll('[role="button"]')]
+      .map((e) => (e.getAttribute('aria-label') ?? e.textContent ?? '').trim())
+      .filter((x) => /Sumar|Guardar|Faltan|left to check|Save/i.test(x));
+    return b[0] ?? '(no hay botón de guardar)';
+  });
+di('');
+di('── C3 · la revisión ───────────────────────────────────────');
+const filas = await page.evaluate(() =>
+  [...document.querySelectorAll('[role="button"]')]
+    .map((e) => (e.getAttribute('aria-label') ?? e.textContent ?? '').trim())
+    .filter((x) => /^Es correcta$|^Looks right$/.test(x)).length,
+);
+di(`filas con «Es correcta»: ${filas}`);
+di(`🔴 ROJO · el botón, sin tocar ninguna: «${await etiquetaGuardar()}»`);
+/* 🔴 **`.nth(k)`, NO `.first()`.** La pieza deja el botón puesto después de
+   confirmar —confirmar no lo hace desaparecer—, así que tocar «el primero»
+   tres veces le pega tres veces a la MISMA fila: el contador bajaba de 3 a 2 y
+   parecía que la app no registraba. *Es la cuarta vez en este arco que
+   `.first()` fabrica un rojo falso.* */
+for (let k = 0; k < filas; k += 1) {
+  const b = page.getByRole('button', { name: /^(Es correcta|Looks right)$/ }).nth(k);
+  if ((await b.count()) === 0) break;
+  await b.click().catch(() => {});
+  await page.waitForTimeout(700);
+}
+di(`✅ VERDE · tras confirmar las ${filas}: «${await etiquetaGuardar()}»`);
+di(`sigue habiendo «Es correcta» sin tocar: ${await page.getByRole('button', { name: /^(Es correcta|Looks right)$/ }).count()}`);
+
 di(`errores de página: ${errores.length}${errores.length ? ' — ' + errores[0] : ''}`);
 await page.screenshot({ path: 'docs/loop/S113-C-carnet-bytes.png' });
 await navegador.close();
