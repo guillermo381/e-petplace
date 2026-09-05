@@ -24,11 +24,19 @@ function esObj(v: unknown): v is Obj {
  *  de un doc): fuera de esta lista la RPC de escritura rebota `item_invalido`. */
 export type ViaAdministracion = 'subcutanea' | 'intramuscular' | 'intranasal' | 'oral';
 
-/** Proto-catálogo de S48 (enmienda `D-008`). Se CONSERVA: está poblado en 22
- *  de las 32 filas reales — quitarlo sería perder un dato ya confirmado. */
-export type TipoVacuna =
-  | 'antirrábica' | 'múltiple' | 'tos de las perreras' | 'leptospirosis'
-  | 'giardia' | 'triple felina' | 'leucemia felina';
+/**
+ * 🔴 `D-008` PAGADA (S113-D-2.2): el vocabulario de vacunas ya **no vive en el
+ * código**. Sale de `cat_vacunas` —hoy 7 filas: `antirrabica` · `giardia` ·
+ * `leptospirosis` · `leucemia_felina` · `multiple` · `tos_perreras` ·
+ * `triple_felina`— y **por eso los dos campos de abajo son `string`, no una
+ * unión cerrada.**
+ *
+ * *Codificar el vocabulario acá reintroduciría, un piso más afuera, la misma
+ * fragilidad que se acaba de sacar de la edge: el día que A agregue una vacuna
+ * al catálogo, una unión cerrada en el cliente rechazaría una fila válida.*
+ * El vocabulario se cierra donde vive el dato, no donde se dibuja.
+ */
+export type TipoVacuna = string;
 
 /** Cuánto se fía el modelo de ESA fila. **`baja` no es un descarte: es una
  *  fila que la familia tiene que mirar con atención.** */
@@ -60,6 +68,12 @@ export interface VacunaExtraida {
   /** La fecha del STICKER: vence el FRASCO, no la aplicación. `05-2025` sin
    *  día ⇒ null — el día no se inventa. */
   vencimiento_biologico: string | null;
+  /** Código de `cat_vacunas`, o `null` si el modelo no pudo mapear el nombre
+   *  comercial con certeza. **Un código «probable» no existe**: null se corrige
+   *  mirando el carnet, un código equivocado entra al plan vacunal como hecho. */
+  vacuna_codigo: string | null;
+  /** El NOMBRE del código, **derivado por la edge** desde `cat_vacunas` — el
+   *  modelo no lo escribe. Es el campo que la RPC de escritura ya guarda. */
   tipo_vacuna: TipoVacuna | null;
   confianza: ConfianzaExtraccion;
   evidencia: EvidenciaAplicacion;
@@ -117,10 +131,6 @@ function campoFecha(v: unknown): v is string | null {
 }
 
 const VIAS: readonly string[] = ['subcutanea', 'intramuscular', 'intranasal', 'oral'];
-const TIPOS: readonly string[] = [
-  'antirrábica', 'múltiple', 'tos de las perreras', 'leptospirosis',
-  'giardia', 'triple felina', 'leucemia felina',
-];
 const CONFIANZAS: readonly string[] = ['alta', 'media', 'baja'];
 const EVIDENCIAS: readonly string[] = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'];
 
@@ -140,7 +150,11 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     campoTexto(v.laboratorio) &&
     campoTexto(v.veterinario) &&
     enListaOnull(v.via, VIAS) &&
-    enListaOnull(v.tipo_vacuna, TIPOS) &&
+    // `vacuna_codigo` y `tipo_vacuna` NO se validan contra una lista de acá: su
+    // lista blanca es `cat_vacunas` y ya la exigió la edge contra la fuente.
+    // Repetirla en el cliente sería una segunda copia que envejece sola.
+    campoTexto(v.vacuna_codigo) &&
+    campoTexto(v.tipo_vacuna) &&
     typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza) &&
     typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia)
   );
@@ -199,6 +213,7 @@ export async function extraerVacunasDeCarnet(
       via: item.via,
       veterinario: item.veterinario,
       vencimiento_biologico: item.vencimiento_biologico,
+      vacuna_codigo: item.vacuna_codigo,
       tipo_vacuna: item.tipo_vacuna,
       confianza: item.confianza,
       evidencia: item.evidencia,

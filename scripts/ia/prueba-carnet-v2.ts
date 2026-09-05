@@ -6,7 +6,7 @@
 // es lo que le toca a esta pista:
 //   · que la edge ACEPTE la forma correcta y la devuelva intacta,
 //   · que RECHACE toda forma que no cumpla el esquema, sin datos parciales,
-//   · que el cuerpo que sale lleve `max_tokens` 2000 y el razonamiento apagado,
+//   · que el cuerpo que sale lleve `max_tokens` 4000 y el razonamiento apagado,
 //   · que el override de modelo sea inalcanzable desde el cliente.
 //
 // **Que el modelo de verdad separe plan de aplicación lo mide E**, con los 5
@@ -23,16 +23,33 @@ const b64url = (o: unknown) => btoa(JSON.stringify(o)).replace(/\+/g, '-').repla
 const tokenDe = (rol: string) => `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ role: rol })}.firma`
 const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
+// El catálogo real de `cat_vacunas`, medido: 7 códigos, sin tildes ni espacios.
+const CATALOGO = [
+  { codigo: 'antirrabica', nombre: 'antirrábica' },
+  { codigo: 'giardia', nombre: 'giardia' },
+  { codigo: 'leptospirosis', nombre: 'leptospirosis' },
+  { codigo: 'leucemia_felina', nombre: 'leucemia felina' },
+  { codigo: 'multiple', nombre: 'múltiple' },
+  { codigo: 'tos_perreras', nombre: 'tos de las perreras' },
+  { codigo: 'triple_felina', nombre: 'triple felina' },
+]
+let catalogoFalla = false
+
 const fila = (extra: Record<string, unknown> = {}) => ({
   nombre: 'Nobivac DHPPi', fecha_aplicada: '2023-04-19', fecha_proxima: null,
   lote: '56288', laboratorio: 'Zoetis', via: null, veterinario: 'CPA Teusaquillo',
-  vencimiento_biologico: null, tipo_vacuna: 'múltiple',
+  vencimiento_biologico: null, vacuna_codigo: 'multiple',
   confianza: 'alta', evidencia: 'sticker_con_fecha', ...extra,
 })
 
 let cuerpoSalida: Record<string, unknown> | null = null
 const fetchReal = globalThis.fetch
 function proveedorFalso(devuelve: () => unknown) {
+  // 🔴 Se RESETEA. Sin esto, `cuerpoSalida` arrastra el cuerpo del caso
+  // anterior, y una aserción de «no se llamó al modelo» pasa por el valor
+  // viejo. Lo cazó el caso 10 y el defecto era del arnés, no de la edge:
+  // *un instrumento con estado que no se limpia mide la corrida pasada.*
+  cuerpoSalida = null
   globalThis.fetch = ((entrada: string | URL | Request, init?: RequestInit) => {
     const url = String(entrada instanceof Request ? entrada.url : entrada)
     if (url.includes('api.anthropic.com')) {
@@ -41,6 +58,10 @@ function proveedorFalso(devuelve: () => unknown) {
         content: [{ type: 'text', text: JSON.stringify(devuelve()) }],
         stop_reason: 'end_turn', usage: { input_tokens: 10, output_tokens: 10 },
       }), { status: 200 }))
+    }
+    if (url.includes('/rest/v1/cat_vacunas')) {
+      if (catalogoFalla) return Promise.resolve(new Response('[]', { status: 200 }))
+      return Promise.resolve(new Response(JSON.stringify(CATALOGO), { status: 200, headers: { 'Content-Type': 'application/json' } }))
     }
     if (url.includes('/rest/v1/')) return Promise.resolve(new Response('[]', { status: 201 }))
     return fetchReal(entrada as string, init)
@@ -80,7 +101,10 @@ console.log('\n== 1 · EL CASO «1 → 12»: una aplicación, once del plan ==')
   exigir('200', status === 200, status)
   exigir('1 en vacunas', (json.vacunas as unknown[])?.length === 1, (json.vacunas as unknown[])?.length)
   exigir('11 en plan_impreso', (json.plan_impreso as unknown[])?.length === 11, (json.plan_impreso as unknown[])?.length)
-  exigir('la fila viaja entera (11 campos)', Object.keys((json.vacunas as Record<string,unknown>[])[0]).length === 11)
+  const f0 = (json.vacunas as Record<string, unknown>[])[0]
+  exigir('la fila viaja entera (11 del modelo + tipo_vacuna derivado)', Object.keys(f0).length === 12, Object.keys(f0).length)
+  exigir('tipo_vacuna DERIVADO del código (multiple → múltiple)', f0.tipo_vacuna === 'múltiple', f0.tipo_vacuna)
+  exigir('y el código viaja tal cual', f0.vacuna_codigo === 'multiple')
 }
 
 console.log('\n== 2 · CARNET SIN FECHAS: null + confianza baja pasan ==')
@@ -114,7 +138,8 @@ for (const [nombre, malo] of [
   ['via fuera del CHECK',     { vacunas: [fila({ via: 'endovenosa' })], plan_impreso: [] }],
   ['confianza inventada',     { vacunas: [fila({ confianza: 'altisima' })], plan_impreso: [] }],
   ['evidencia inventada',     { vacunas: [fila({ evidencia: 'intuicion' })], plan_impreso: [] }],
-  ['tipo_vacuna fuera del vocabulario', { vacunas: [fila({ tipo_vacuna: 'antigripal' })], plan_impreso: [] }],
+  ['vacuna_codigo fuera del catálogo', { vacunas: [fila({ vacuna_codigo: 'antigripal' })], plan_impreso: [] }],
+  ['código con tilde (el que el catálogo NO tiene)', { vacunas: [fila({ vacuna_codigo: 'antirrábica' })], plan_impreso: [] }],
   ['fecha con formato libre', { vacunas: [fila({ fecha_aplicada: '19/4/23' })], plan_impreso: [] }],
   ['cadena vacía en lote',    { vacunas: [fila({ lote: '' })], plan_impreso: [] }],
   ['fila de plan sin nombre', { vacunas: [], plan_impreso: [{ nombre: '' }] }],
@@ -124,11 +149,11 @@ for (const [nombre, malo] of [
   exigir(`${nombre} → 422 sin datos`, status === 422 && json.vacunas === undefined, { status, tieneDatos: json.vacunas !== undefined })
 }
 
-console.log('\n== 5 · EL CUERPO QUE SALE: 2000 tokens y sin razonamiento ==')
+console.log('\n== 5 · EL CUERPO QUE SALE: 4000 tokens y sin razonamiento ==')
 {
   proveedorFalso(() => ({ vacunas: [], plan_impreso: [] }))
   await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
-  exigir('max_tokens 2000 (era 16000)', cuerpoSalida?.max_tokens === 2000, cuerpoSalida?.max_tokens)
+  exigir('max_tokens 4000 (firma del founder; era 16000)', cuerpoSalida?.max_tokens === 4000, cuerpoSalida?.max_tokens)
   exigir('modelo por defecto sonnet-5', cuerpoSalida?.model === 'claude-sonnet-5', cuerpoSalida?.model)
   exigir("sonnet lleva thinking disabled", JSON.stringify(cuerpoSalida?.thinking) === '{"type":"disabled"}', cuerpoSalida?.thinking)
   exigir('sin output_config (nadie movió el esfuerzo)', cuerpoSalida?.output_config === undefined)
@@ -141,7 +166,7 @@ console.log('  (omitir `thinking` en haiku YA es no pensar; mandárselo sería e
   await llamar({ imageBase64: PIXEL, mediaType: 'image/png', modelo: 'claude-haiku-4-5' }, 'service_role')
   exigir('modelo cambiado a haiku', cuerpoSalida?.model === 'claude-haiku-4-5', cuerpoSalida?.model)
   exigir('haiku SIN campo thinking', cuerpoSalida?.thinking === undefined, cuerpoSalida?.thinking)
-  exigir('mismo max_tokens y mismo prompt', cuerpoSalida?.max_tokens === 2000)
+  exigir('mismo max_tokens y mismo prompt', cuerpoSalida?.max_tokens === 4000, cuerpoSalida?.max_tokens)
 }
 
 console.log('\n== 7 · LA PALANCA DE MEDICIÓN ES INALCANZABLE DESDE EL CLIENTE ==')
@@ -161,6 +186,30 @@ console.log('\n== 8 · EL TECHO DE 2 MB ==')
   exigir('> 2 MB rebota tipado', status === 400 && json.codigo === 'imagen_invalida', { status, c: json.codigo })
   const ok = await llamar({ imageBase64: 'A'.repeat(1_000_000), mediaType: 'image/png' })
   exigir('1 MB pasa (control positivo del techo)', ok.status === 200, ok.status)
+}
+
+console.log('\n== 9 · vacuna_codigo NULL es una respuesta, no una falla ==')
+{
+  proveedorFalso(() => ({ vacunas: [fila({ vacuna_codigo: null })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('200 con código null', status === 200, status)
+  exigir('tipo_vacuna derivado también null (no se inventa)', f?.tipo_vacuna === null, f?.tipo_vacuna)
+  console.log('  ↑ un nombre comercial que no mapea vuelve null. Un código «probable»')
+  console.log('    entra al plan vacunal como un hecho y nadie lo revisa.')
+}
+
+console.log('\n== 10 · CATÁLOGO CAÍDO: se falla, no se degrada en silencio ==')
+{
+  catalogoFalla = true
+  proveedorFalso(() => ({ vacunas: [fila()], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  catalogoFalla = false
+  exigir('502 error_modelo', status === 502 && json.codigo === 'error_modelo', { status, c: json.codigo })
+  exigir('CERO llamadas al modelo (no se gasta sin lista blanca)', cuerpoSalida === null)
+  console.log('  ↑ con el catálogo caído no hay lista blanca. Seguir devolvería')
+  console.log('    códigos sin acotar, o null en todas las filas sin que nadie sepa')
+  console.log('    que fue por una caída. Una degradación silenciosa es peor.')
 }
 
 console.log(`\n${r === 0 ? 'OK' : 'ROJO'} arnés carnet v2 — ${v} verdes · ${r} rojos\n`)

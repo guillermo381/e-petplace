@@ -49,6 +49,7 @@
 //     imagen_invalida        400 · configuracion_faltante 500
 //     error_modelo           502 · extraccion_fallida     422
 
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { exigirSesion, rolDeSesion } from '../_shared/sesion.ts'
 import { llamarModelo } from '../_shared/ia/mod.ts'
 
@@ -117,14 +118,23 @@ const MODELOS_MEDIBLES = ['claude-sonnet-5', 'claude-haiku-4-5']
  *  (medido, no copiado de un doc). Fuera de esta lista, la RPC rebota. */
 const VIAS = ['subcutanea', 'intramuscular', 'intranasal', 'oral'] as const
 
-/** Proto-catálogo de S48 (enmienda `D-008`: cuando `cat_vacunas` exista, sale
- *  de la DB y no del prompt). **Se CONSERVA a propósito**: está poblado en
- *  22 de las 32 filas reales — quitarlo sería pérdida silenciosa de un dato
- *  que un humano ya confirmó. */
-const TIPOS = [
-  'antirrábica', 'múltiple', 'tos de las perreras', 'leptospirosis',
-  'giardia', 'triple felina', 'leucemia felina',
-] as const
+/**
+ * 🔴 `D-008` PAGADA (S113-D-2.2): el vocabulario de vacunas **sale de
+ * `cat_vacunas`, no del prompt.** La enmienda decía literal *«cuando
+ * `cat_vacunas` exista, sale de la DB y no del prompt»*. Existe: **7 filas.**
+ *
+ * Y el cambio no es de prolijidad — **quita una fragilidad medida**. El
+ * proto-catálogo eran NOMBRES con tilde (`'antirrábica'`, `'múltiple'`) y el
+ * validador exigía la cadena exacta: **una sola emisión sin tilde rebotaba el
+ * carnet ENTERO con 422**. Los códigos no tienen tildes ni espacios
+ * (`antirrabica`, `tos_perreras`), así que esa clase de falla deja de existir.
+ *
+ * El modelo emite **el CÓDIGO**; `tipo_vacuna` lo DERIVA esta function desde el
+ * catálogo — **el mismo dato que la RPC ya escribe**, así que las 22 de 32
+ * filas pobladas se siguen poblando. *Un solo juicio del modelo, dos campos de
+ * salida, cero oportunidades de que se contradigan entre sí.*
+ */
+interface FilaCatalogo { codigo: string; nombre: string }
 
 const CONFIANZAS = ['alta', 'media', 'baja'] as const
 const EVIDENCIAS = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'] as const
@@ -138,7 +148,10 @@ interface VacunaExtraida {
   via: typeof VIAS[number] | null
   veterinario: string | null
   vencimiento_biologico: string | null
-  tipo_vacuna: typeof TIPOS[number] | null
+  /** Código de `cat_vacunas`, o `null` si el modelo no lo puede mapear. */
+  vacuna_codigo: string | null
+  /** DERIVADO del código por esta function — el modelo no lo escribe. */
+  tipo_vacuna: string | null
   confianza: typeof CONFIANZAS[number]
   evidencia: typeof EVIDENCIAS[number]
 }
@@ -154,7 +167,11 @@ const fechaOnull = (v: unknown): v is string | null =>
 const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
   v === null || (typeof v === 'string' && lista.includes(v))
 
-function esVacunaExtraida(v: unknown): v is VacunaExtraida {
+/** La lista blanca se exige contra el catálogo REAL, leído en esta llamada —
+ *  no contra una copia en el código. *Un vocabulario cerrado que vive en el
+ *  prompt es una sugerencia; el que vive en el validador es un vocabulario
+ *  cerrado* (mismo criterio que `sugerir-raza`). */
+function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
   if (typeof v !== 'object' || v === null) return false
   const o = v as Record<string, unknown>
   return (
@@ -166,7 +183,7 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     textoOnull(o.laboratorio) &&
     textoOnull(o.veterinario) &&
     enListaOnull(o.via, VIAS) &&
-    enListaOnull(o.tipo_vacuna, TIPOS) &&
+    enListaOnull(o.vacuna_codigo, codigos) &&
     typeof o.confianza === 'string' && (CONFIANZAS as readonly string[]).includes(o.confianza) &&
     typeof o.evidencia === 'string' && (EVIDENCIAS as readonly string[]).includes(o.evidencia)
   )
@@ -178,7 +195,7 @@ function esFilaPlan(v: unknown): v is { nombre: string } {
   return typeof o.nombre === 'string' && o.nombre.trim().length > 0
 }
 
-const PROMPT = `Sos un lector de carnets de vacunación veterinaria latinoamericanos.
+const PROMPT = (catalogo: FilaCatalogo[]) => `Sos un lector de carnets de vacunación veterinaria latinoamericanos.
 Devolvés DATOS. No explicás, no razonás por escrito, no agregás una sola palabra fuera del JSON.
 
 ═══ LO QUE HAY QUE DISTINGUIR — ES TODO EL TRABAJO ═══
@@ -235,14 +252,19 @@ Poner "2025-05-05" en fecha_aplicada sería el error más caro del carnet.
 - via: SOLO uno de estos, o null: "subcutanea" · "intramuscular" ·
   "intranasal" · "oral". Casi nunca está escrito. Si no lo dice, null.
 - veterinario: el nombre del veterinario o de la clínica de esa sección.
-- tipo_vacuna: SOLO uno de estos, o null: "antirrábica" · "múltiple" ·
-  "tos de las perreras" · "leptospirosis" · "giardia" · "triple felina" ·
-  "leucemia felina". Asignalo sólo con base real: el carnet lo rotula
-  (séxtuple/quíntuple/DHPP/polivalente = "múltiple") o reconocés la marca con
-  certeza (Nobivac DHPPi = "múltiple"; Defensor o Rabisin = "antirrábica";
-  Bronchi-Shield o KC = "tos de las perreras"; Felocell = "triple felina").
-  Si no ⇒ null. Prohibido deducirlo de la fecha, de la posición o de qué
-  vacuna es más común.
+- vacuna_codigo: contra qué protege esta vacuna. SOLO uno de estos códigos
+  EXACTOS, copiado carácter por carácter, o null:
+${catalogo.map((c) => `    "${c.codigo}"  (${c.nombre})`).join('\n')}
+  Se asigna sólo con base real: el carnet rotula el tipo
+  (séxtuple/quíntuple/DHPP/polivalente = "multiple") o reconocés la marca
+  comercial con certeza (Nobivac DHPPi = "multiple"; Defensor, Rabisin o
+  Imrab = "antirrabica"; Bronchi-Shield o KC = "tos_perreras"; Felocell =
+  "triple_felina"; GiardiaVax = "giardia").
+  🔴 Si el nombre comercial no lo reconocés con certeza ⇒ null. **Un código
+  "probable" es peor que null**: null se corrige mirando el carnet; un código
+  equivocado entra al plan vacunal como si fuera un hecho y nadie lo revisa.
+  PROHIBIDO deducirlo de la fecha, de la posición en el carnet o de qué vacuna
+  es estadísticamente más común.
 - evidencia: qué viste que prueba la aplicación.
   "sticker_con_fecha" · "sello" · "manuscrito" · "impreso"
   Usá "impreso" SÓLO si la clínica imprimió el registro ya aplicado con su
@@ -258,7 +280,7 @@ y no puede corregir lo que no sabe que está mal.
 ═══ LA SALIDA ═══
 
 Respondé SOLO con este JSON, sin texto adicional y sin backticks:
-{"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"tipo_vacuna":null,"confianza":"alta","evidencia":"sticker_con_fecha"}],"plan_impreso":[{"nombre":""}]}
+{"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"confianza":"alta","evidencia":"sticker_con_fecha"}],"plan_impreso":[{"nombre":""}]}
 
 Carnet sin ninguna aplicación ⇒ {"vacunas":[],"plan_impreso":[...]}.
 Carnet ilegible ⇒ {"vacunas":[],"plan_impreso":[]}.`
@@ -314,9 +336,34 @@ Deno.serve(async (req) => {
       modeloElegido = modelo
     }
 
+    // ── EL CATÁLOGO, DEL SERVIDOR ────────────────────────────────────────────
+    // Mismo criterio que `sugerir-raza`: la lista blanca de SALIDA se valida
+    // contra la MISMA fuente que la generó. Si viajara en el cuerpo, el cliente
+    // definiría su propia lista blanca y «sólo códigos del catálogo» dejaría de
+    // significar algo.
+    const url = Deno.env.get('SUPABASE_URL')
+    const claveServidor = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!url || !claveServidor) {
+      return error('configuracion_faltante', 'Falta la configuración del servidor.')
+    }
+    const { data: filasCat, error: errCat } = await createClient(url, claveServidor)
+      .from('cat_vacunas').select('codigo, nombre').order('codigo')
+
+    if (errCat || !filasCat || filasCat.length === 0) {
+      // 🔴 Se FALLA, no se sigue con la lista vacía. Con el catálogo caído no
+      // hay lista blanca, y sin lista blanca `vacuna_codigo` deja de estar
+      // acotado — o saldría null en todas las filas y nadie sabría que fue por
+      // una caída. *Una degradación silenciosa es peor que un error.* Va como
+      // `error_modelo`, que es transitorio y la superficie ya ofrece reintentar.
+      console.error('[extract-vacuna] no pude leer cat_vacunas:', errCat?.message ?? 'catálogo vacío')
+      return error('error_modelo', 'No pudimos leer el carnet ahora. Probá de nuevo en un rato.')
+    }
+    const catalogo = filasCat as FilaCatalogo[]
+    const codigos = catalogo.map((c) => c.codigo)
+
     const r = await llamarModelo({
       pieza: 'carnet',
-      mensajes: [{ rol: 'user', texto: PROMPT }],
+      mensajes: [{ rol: 'user', texto: PROMPT(catalogo) }],
       imagenes: [{ mediaType: media, base64: imageBase64 }],
       salida: 'json',
       modelo: modeloElegido,
@@ -364,7 +411,7 @@ Deno.serve(async (req) => {
       return error('extraccion_fallida', 'El JSON del modelo no trae el array plan_impreso.')
     }
     for (let i = 0; i < vacunasCrudas.length; i++) {
-      if (!esVacunaExtraida(vacunasCrudas[i])) {
+      if (!esVacunaExtraida(vacunasCrudas[i], codigos)) {
         console.error(`Ítem ${i} fuera de contrato:`, JSON.stringify(vacunasCrudas[i]))
         return error('extraccion_fallida', `El ítem ${i + 1} extraído no cumple el contrato.`)
       }
@@ -376,7 +423,17 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ vacunas: vacunasCrudas, plan_impreso: planCrudo }), {
+    // `tipo_vacuna` se DERIVA del código — el modelo no lo escribió. Es el
+    // campo que la RPC `registrar_vacunas_de_carnet` ya sabe guardar (22 de 32
+    // filas reales lo tienen), así que sale acompañando al código para que la
+    // escritura siga funcionando sin que A tenga que tocar nada.
+    const porCodigo = new Map(catalogo.map((c) => [c.codigo, c.nombre]))
+    const vacunas = (vacunasCrudas as Record<string, unknown>[]).map((v) => ({
+      ...v,
+      tipo_vacuna: v.vacuna_codigo === null ? null : (porCodigo.get(String(v.vacuna_codigo)) ?? null),
+    }))
+
+    return new Response(JSON.stringify({ vacunas, plan_impreso: planCrudo }), {
       status: 200,
       headers: JSON_HEADERS,
     })

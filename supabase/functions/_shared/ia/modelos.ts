@@ -29,13 +29,13 @@ export const MODELOS: Record<Pieza, string> = {
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
 export const MAX_TOKENS: Record<Pieza, number> = {
-  // 🔴 CAMBIADO EN S113-D-1.0, y **viaja atado a `PENSAR.carnet = false`**:
-  // con razonamiento encendido, 2000 trunca. Los dos se mueven juntos o
-  // ninguno. La salida real que este techo tiene que albergar se midió: el
-  // carnet más denso del conjunto de E tiene 8 vacunas ⇒ ~8 filas de 11
-  // campos + `plan_impreso`, del orden de 900-1200 tokens. 2000 deja aire
-  // sin dejar lugar a la prosa.
-  carnet: 2000,
+  // 🔴 4000 — FIRMA DEL FOUNDER (v2 definitiva, S113-D-2.2), y **viaja atado a
+  // `PENSAR.carnet = false`**. La medición que lo fija: el carnet más denso
+  // real devolvió **14 filas en 2.015 tokens de salida** sin razonar. 4000 es
+  // el doble de holgura. Con razonamiento ENCENDIDO la misma llamada gastó
+  // 6.716 y con techo 4000 salió **truncada** — por eso los dos números no se
+  // mueven por separado. Ver `TECHO_SIN_RAZONAR`.
+  carnet: 4000,
   documento: 4000,
   nota_clinica: 16000,
   presencia: 4000,
@@ -194,11 +194,43 @@ export const MODELOS_ADAPTIVOS = new Set<string>(['claude-sonnet-5'])
  *   (nombre 65,6 % · fecha 62,5 % · lote 81,3 %), la tercera variante ya está
  *   servida sin tocar código: `esfuerzo: 'low'` con `pensar: true`.
  */
+/**
+ * 🔴 EL TECHO A PARTIR DEL CUAL SE PUEDE DEJAR RAZONAR.
+ *
+ * **Regla de la casa (firma del founder, S113-D-2.2): toda pieza con
+ * `max_tokens` POR DEBAJO de este número manda `thinking: {type:'disabled'}`
+ * EXPLÍCITO.** Vigilada por `verify:ia-puerta`, con su rojo.
+ *
+ * El porqué, medido dos veces y desde dos lados:
+ * · **E**, en carnets reales: omitir `thinking` deja a Sonnet 5 razonar solo,
+ *   quemarse el techo y devolver **cero caracteres de salida**. *No falla
+ *   ruidosamente: devuelve nada.*
+ * · **D**, aislando la variable: el mismo prompt v2 con razonamiento a techo
+ *   16000 gastó **6.716 y 10.895** tokens de salida contra **2.015 y 1.248**
+ *   sin razonar — y devolvió **exactamente las mismas filas**.
+ *
+ * ⇒ *Un techo bajo y un razonamiento suelto no conviven: el pensamiento se come
+ *   el presupuesto y lo que se pierde es la respuesta, no el pensamiento.*
+ */
+export const TECHO_SIN_RAZONAR = 16000
+
 export const PENSAR: Record<Pieza, boolean> = {
   carnet: false,
-  documento: true,
+  // 🔴 CAMBIADAS EN S113-D-2.2 por el invariante de arriba: las dos tienen
+  // techo 4000, o sea por debajo de `TECHO_SIN_RAZONAR`.
+  //
+  // **Y el cambio es casi un no-op, medido:** en la corrida real de A (lote 0)
+  // estas dos piezas devolvieron **35 y 85 tokens de salida** con `thinking`
+  // omitido — o sea que el adaptive de Sonnet 5 ya había decidido no pensar
+  // para sus tareas. Apagarlo explícito no les quita un razonamiento que no
+  // estaban haciendo; **les saca el riesgo de que algún día lo hagan y se
+  // coman el techo**, que es el modo de falla que E midió en carnets.
+  documento: false,
+  // `nota_clinica` es la ÚNICA que queda razonando, y es legítimo: su techo es
+  // 16000, o sea que NO está por debajo del invariante. Estructurar un dictado
+  // clínico campo por campo es exactamente donde el razonamiento paga.
   nota_clinica: true,
-  presencia: true,
+  presencia: false,
 }
 
 /**
