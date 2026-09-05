@@ -56,3 +56,25 @@ export function exigirSesion(req: Request): RechazoSesion | null {
   }
   return null;
 }
+
+/**
+ * El claim `role` del token, o `null` si no se puede leer. **Aditivo (S113-D):
+ * no cambia el comportamiento de `exigirSesion` ni de ninguno de sus llamadores.**
+ *
+ * Existe para una sola cosa: distinguir a una PERSONA (`authenticated`) del
+ * SERVIDOR (`service_role`) cuando una function ofrece una palanca que la app
+ * no debe poder tocar — hoy, el override de modelo del arnés de medición.
+ * *Una palanca de medición que un cliente puede mover deja de ser una palanca
+ * de medición y pasa a ser una superficie.*
+ */
+export function rolDeSesion(req: Request): string | null {
+  const auth = req.headers.get('Authorization') ?? '';
+  const token = auth.replace(/^Bearer\s+/i, '').trim();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return typeof payload.role === 'string' ? payload.role : null;
+  } catch {
+    return null;
+  }
+}

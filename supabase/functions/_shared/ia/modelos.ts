@@ -29,7 +29,13 @@ export const MODELOS: Record<Pieza, string> = {
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
 export const MAX_TOKENS: Record<Pieza, number> = {
-  carnet: 16000,
+  // 🔴 CAMBIADO EN S113-D-1.0, y **viaja atado a `PENSAR.carnet = false`**:
+  // con razonamiento encendido, 2000 trunca. Los dos se mueven juntos o
+  // ninguno. La salida real que este techo tiene que albergar se midió: el
+  // carnet más denso del conjunto de E tiene 8 vacunas ⇒ ~8 filas de 11
+  // campos + `plan_impreso`, del orden de 900-1200 tokens. 2000 deja aire
+  // sin dejar lugar a la prosa.
+  carnet: 2000,
   documento: 4000,
   nota_clinica: 16000,
   presencia: 4000,
@@ -140,6 +146,73 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
  *   nadie lee nunca. Las columnas `tokens_cache_*` de `ia_uso` son las que
  *   dejan confirmar o revertir esto con número.
  */
+/** Niveles de `output_config.effort`. Sólo los modelos que lo soportan. */
+export type Esfuerzo = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
+
+/**
+ * 🔴 MODELOS QUE PIENSAN SI NO SE LES DICE NADA — y esto NO es trivia: es lo
+ * que hace que «el mismo cuerpo» signifique cosas distintas según el modelo.
+ *
+ * En `claude-sonnet-5`, **omitir `thinking` equivale a `adaptive`**: piensa, y
+ * ese pensamiento se cobra como tokens de SALIDA. En `claude-haiku-4-5`,
+ * omitirlo significa **no pensar**.
+ *
+ * ⇒ Mandar el MISMO cuerpo a los dos y comparar los números **no compara los
+ * modelos: compara un modelo pensando contra otro que no piensa.** Por eso
+ * `pensar` es explícito y esta tabla existe: para poder apagarlo donde hay que
+ * apagarlo y dejar la comparación limpia.
+ *
+ * Fuente: tabla de modelos de la skill `claude-api` (cacheada 2026-06-24).
+ * ⚠️ Un modelo que se agregue acá se agrega MIDIENDO, no por parecido de
+ * nombre — es exactamente la clase de dato que envejece sin avisar.
+ */
+export const MODELOS_ADAPTIVOS = new Set<string>(['claude-sonnet-5'])
+
+/**
+ * 🔴 SI LA PIEZA PIENSA — la palanca más cara de las cuatro, y la más riesgosa
+ * de este lote.
+ *
+ * `carnet` **false**, y la razón es de plata medida: la línea base de A dio
+ * **4.036 tokens de entrada y 6.347 de SALIDA** ($0,0715). El JSON de doce
+ * vacunas no llega a 1.000 tokens ⇒ **la mayor parte de esa salida no es la
+ * respuesta: es razonamiento.** A $10/MTok de salida contra $2 de entrada, ahí
+ * está el 89 % del costo.
+ *
+ * ⚠️ **PERO ESTO NO ESTÁ MEDIDO DIRECTAMENTE Y SE DICE:** la API no separa
+ * tokens de razonamiento de tokens de respuesta; lo de arriba es una
+ * INFERENCIA a partir del tamaño del JSON. **El experimento que la vuelve
+ * medición es de E y es de una línea:** el mismo carnet con `pensar` en true y
+ * en false. Si la salida no baja, la inferencia era falsa y hay que buscar en
+ * otro lado.
+ *
+ * ⚠️ **Y EL RIESGO EN LA OTRA DIRECCIÓN, que es el que de verdad importa:**
+ * S48 midió que Haiku 4.5 **topaba en la atribución espacial** sticker↔columna
+ * FECHA, y que Sonnet con razonamiento fue lo que la resolvió. Apagarlo puede
+ * reintroducir justo el defecto que aquella sesión cerró.
+ * ⇒ **E no mide sólo costo y latencia: mide EXACTITUD contra las 32 filas de
+ *   verdad del conjunto.** Si la exactitud cae bajo la línea base
+ *   (nombre 65,6 % · fecha 62,5 % · lote 81,3 %), la tercera variante ya está
+ *   servida sin tocar código: `esfuerzo: 'low'` con `pensar: true`.
+ */
+export const PENSAR: Record<Pieza, boolean> = {
+  carnet: false,
+  documento: true,
+  nota_clinica: true,
+  presencia: true,
+}
+
+/**
+ * `output_config.effort` por pieza. `null` = no se manda el campo (default del
+ * proveedor). Nace en `null` en las cuatro: **mover esto sin medir es cambiar
+ * el precio y la calidad a la vez y no saber cuál se movió.**
+ */
+export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
+  carnet: null,
+  documento: null,
+  nota_clinica: null,
+  presencia: null,
+}
+
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   carnet: false,
   documento: false,

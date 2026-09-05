@@ -32,11 +32,19 @@
 // eso el error trae `estadoHttp` y `detalle`. *Unificar la puerta no es
 // unificar la voz — la voz es de cada superficie.*
 
-import type { Pieza } from './modelos.ts'
-import { CACHEAR_SISTEMA, MAX_TOKENS, MODELOS, TIMEOUT_MS } from './modelos.ts'
+import type { Esfuerzo, Pieza } from './modelos.ts'
+import {
+  CACHEAR_SISTEMA,
+  ESFUERZO,
+  MAX_TOKENS,
+  MODELOS,
+  MODELOS_ADAPTIVOS,
+  PENSAR,
+  TIMEOUT_MS,
+} from './modelos.ts'
 import { registrarUso, type Uso, usoDesdeRespuesta, usoSinRespuesta } from './uso.ts'
 
-export type { Pieza } from './modelos.ts'
+export type { Esfuerzo, Pieza } from './modelos.ts'
 export type { Uso } from './uso.ts'
 
 const ENDPOINT = 'https://api.anthropic.com/v1/messages'
@@ -69,6 +77,20 @@ export interface PedidoIa {
   maxTokens?: number
   /** Sin esto manda `CACHEAR_SISTEMA[pieza]`, que es lo decidido con número. */
   cachearSistema?: boolean
+  /**
+   * 🔴 EL MODELO ES PARÁMETRO — para que E pueda comparar dos modelos con el
+   * MISMO prompt y sin dos despliegues. Sin esto manda `MODELOS[pieza]`.
+   * *Quien lo pasa se hace cargo de que esté en la lista blanca de su edge: la
+   * puerta no valida nombres de modelo, valida comportamiento.*
+   */
+  modelo?: string
+  /**
+   * Si la pieza razona. Sin esto manda `PENSAR[pieza]`. Ver la advertencia de
+   * `modelos.ts`: en `claude-sonnet-5` omitir `thinking` NO es apagarlo.
+   */
+  pensar?: boolean
+  /** `output_config.effort`. Sin esto manda `ESFUERZO[pieza]` (hoy `null`). */
+  esfuerzo?: Esfuerzo | null
 }
 
 /**
@@ -110,8 +132,14 @@ function parsearJson(texto: string): { ok: true; datos: unknown } | { ok: false 
   }
 }
 
-/** Arma el cuerpo. **Byte a byte el de hoy**, salvo el caché de `presencia`. */
-function construirCuerpo(p: PedidoIa, cachear: boolean): Record<string, unknown> {
+/** Arma el cuerpo que sale al proveedor. */
+function construirCuerpo(
+  p: PedidoIa,
+  modelo: string,
+  cachear: boolean,
+  pensar: boolean,
+  esfuerzo: Esfuerzo | null,
+): Record<string, unknown> {
   const contenidoImagenes = (p.imagenes ?? []).map((img) => ({
     type: 'image',
     source: { type: 'base64', media_type: img.mediaType, data: img.base64 },
@@ -127,8 +155,19 @@ function construirCuerpo(p: PedidoIa, cachear: boolean): Record<string, unknown>
   }))
 
   const cuerpo: Record<string, unknown> = {
-    model: MODELOS[p.pieza],
+    model: modelo,
     max_tokens: p.maxTokens ?? MAX_TOKENS[p.pieza],
+  }
+
+  // `thinking: {type:'disabled'}` se manda SÓLO a los modelos que piensan si no
+  // se les dice nada. A los demás no se les manda el campo: para ellos omitirlo
+  // YA significa no pensar, y mandarles una forma que quizá no aceptan sería
+  // estrenar un 400 para no cambiar nada. *Se apaga donde está encendido.*
+  if (!pensar && MODELOS_ADAPTIVOS.has(modelo)) {
+    cuerpo.thinking = { type: 'disabled' }
+  }
+  if (esfuerzo !== null) {
+    cuerpo.output_config = { effort: esfuerzo }
   }
 
   if (p.sistema !== undefined) {
@@ -151,8 +190,13 @@ function construirCuerpo(p: PedidoIa, cachear: boolean): Record<string, unknown>
  * y devuelve un resultado tipado.
  */
 export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
-  const modelo = MODELOS[p.pieza]
+  // El modelo REAL de esta llamada — el override si vino, si no el de la tabla.
+  // Es el que se registra en `ia_uso`: anotar el de la tabla cuando corrió otro
+  // haría que la medición de E dijera el nombre equivocado.
+  const modelo = p.modelo ?? MODELOS[p.pieza]
   const cachear = p.cachearSistema ?? CACHEAR_SISTEMA[p.pieza]
+  const pensar = p.pensar ?? PENSAR[p.pieza]
+  const esfuerzo = p.esfuerzo !== undefined ? p.esfuerzo : ESFUERZO[p.pieza]
   const arranque = Date.now()
 
   const fallar = async (
@@ -168,7 +212,7 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
   if (!apiKey) return await fallar('error_proveedor', 'sin_credencial', 0)
 
-  const cuerpo = JSON.stringify(construirCuerpo(p, cachear))
+  const cuerpo = JSON.stringify(construirCuerpo(p, modelo, cachear, pensar, esfuerzo))
 
   let respuesta: Response | null = null
   let textoRespuesta = ''

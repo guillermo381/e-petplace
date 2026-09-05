@@ -1,64 +1,60 @@
-// extract-vacuna (S46-B1.1; v17 S48-A4) — extracción de vacunas desde la
-// foto de un carnet físico. Re-target del monorepo: REEMPLAZA a la
-// heredada de v2 al desplegar (mismo slug; decisión regla 74 — el caller
-// de v2 escribe contra la tabla `vacunas`, que ya no existe: nada vivo
-// depende del contrato viejo). La versión v2 queda intacta en disco.
+// extract-vacuna — extracción de vacunas desde la foto de un carnet físico.
 //
-// v17 (decisión founder+arquitecto S48): tipo_vacuna se INFIERE desde el
-// nombre comercial reconocible, contra un vocabulario CERRADO que vive
-// en el prompt (PROTO-CATÁLOGO — enmienda D-008: cuando cat_vacunas
-// exista, esta function lo lee de DB, no del prompt). Sin base
-// suficiente → null, igual que siempre. JAMÁS inferir desde fecha,
-// orden en el carnet ni frecuencia estadística. El shape del contrato
-// NO cambia (tipo_vacuna ya era nullable).
+// ── HISTORIA CORTA HASTA v21 (S46 → S48) ────────────────────────────────────
+// v17 infirió `tipo_vacuna` de un vocabulario CERRADO. v18 y v19 pelearon la
+// ATRIBUCIÓN DE COLUMNA: el modelo tomaba las fechas IMPRESAS de los stickers
+// (lote/vencimiento de fábrica) como fecha de aplicación. v20 movió el modelo a
+// Sonnet 5 porque Haiku 4.5 topaba en esa atribución espacial. **v22 se ensayó
+// y se REVIRTIÓ: más reglas EMPEORARON** (truncado + fechas compartidas entre
+// filas vecinas). El prompt vigente hasta hoy era el de v21.
 //
-// v18 (S48-B6, gate 4 con carnet físico real): ATRIBUCIÓN DE COLUMNA de
-// fecha_aplicada — el gate encontró que el modelo tomaba las fechas
-// IMPRESAS de los stickers del producto (lote/vencimiento de fábrica:
-// "FEB 25", "11-2023") en vez de la columna FECHA manuscrita. La única
-// fuente válida es la columna FECHA; incompleta (sin año) → null, jamás
-// completar desde posición, vecinas o vencimientos. Fila con nombre
-// legible SE INCLUYE aunque su fecha quede null.
+// ── v2 (S113-D, lote 1.0) — LA LÍNEA BASE QUE LA OBLIGA ─────────────────────
+// Medido por E y A sobre 5 carnets reales (`D-1012`):
+//   · **83 s promedio, 114 s el peor.** La familia mira la espera todo ese rato.
+//   · **un carnet de UNA vacuna devolvió DOCE.** Once inventadas.
+//   · **$0,0715 por carnet** — 4.036 tokens de entrada, **6.347 de salida**.
+//   · exactitud: nombre 65,6 % · fecha 62,5 % · lote 81,3 % · vet 42,1 %.
 //
-// v19 (S48-B6.2, segunda iteración): la regla sola de v18 no movió el
-// output (idéntico a v17 en 3 corridas). El prompt pasa a describir la
-// ANATOMÍA del carnet (sticker impreso a un lado / campo FECHA
-// manuscrito con firma al otro) + procedimiento por fila: transcribir
-// el manuscrito ANTES de convertir. Dos stickers de una misma dosis
-// (vacuna + diluyente/fracción, p.ej. bacterina + Recombitek) = UNA fila.
+// ── 🔴 POR QUÉ ESTE PROMPT NO ES «MÁS PROMPT», QUE YA FRACASÓ ───────────────
+// `D-1012` dice, con razón, que *«no se cura con un prompt»*, y cita v22. Pero
+// v22 agregó una PROHIBICIÓN más («no compartas fechas»), y v2 hace lo
+// contrario: **le da un LUGAR a lo que sobra.**
 //
-// v22 (S48-B7.1): regla de fecha-NO-compartida (ensayada y REVERTIDA en
-// el timebox): el residuo de v21 era una fila sin año heredando la
-// fecha de la vecina en 1/3 corridas. La regla explícita EMPEORÓ:
-// 1 corrida truncada + 1 corrida con la fecha de KC corrida de fila y
-// compartida entre dos vecinas. El prompt vigente es el de v21 (la
-// revisión pre-guardado es la red del residuo — decisión founder B7).
+// El carnet trae impreso, de fábrica, el PLAN de vacunación: renglones con
+// nombres y espacios en blanco. El prompt viejo pedía «extraé las vacunas» y no
+// ofrecía ningún destino para esos renglones. *Un modelo que ve doce nombres y
+// tiene un solo canasto, los mete en el canasto.* No estaba desobedeciendo una
+// regla: estaba resolviendo una ambigüedad de la única forma que podía.
+//
+// `plan_impreso` es ese segundo canasto. **La diferencia entre v22 y v2 no es
+// cuántas reglas hay: es que ahora la respuesta correcta es expresable.**
+//
+// ── LO QUE TAMBIÉN CAMBIA, Y NO ES DEL PROMPT ──────────────────────────────
+// `max_tokens` 16000 → **2000** y **razonamiento APAGADO** para esta pieza
+// (`PENSAR.carnet = false`). Los 6.347 tokens de salida no son el JSON —el JSON
+// de doce vacunas no llega a 1.000—, así que la mayor parte era razonamiento, y
+// a $10/MTok de salida ahí está el 89 % del costo. **Es una inferencia, no una
+// medición** (la API no separa esos tokens): el experimento que la decide es de
+// E, y es correr el mismo carnet con `pensar` en true y en false.
+//
+// ⚠️ **Y el riesgo va en la otra dirección:** S48 midió que el razonamiento era
+// justo lo que resolvía la atribución sticker↔FECHA. **E mide EXACTITUD contra
+// las 32 filas de verdad, no sólo costo y latencia.** Si cae, la tercera
+// variante está servida sin tocar código: `esfuerzo: 'low'` con `pensar: true`.
 //
 // Contrato:
-//   POST { imageBase64: string, mediaType?: string }   (verify_jwt: true)
-//   200 → { vacunas: [{ nombre, fecha_aplicada, fecha_proxima,
-//           veterinario_nombre_externo, tipo_vacuna, lote }] }
-//     · claves = columnas reales de evento_vacuna_aplicada
-//     · dato ilegible = null — jamás '' ni inventado
-//     · fila sin nombre legible se OMITE (contrato explícito del prompt:
-//       una vacuna sin nombre no es registrable)
-//     · vacunas: [] con 200 es un resultado HONESTO (carnet sin filas
-//       legibles), no un fallback: los fallos de parseo son error abajo.
-//   error → { codigo, mensaje } con status de error (regla 36 — cero
-//   fallback silencioso):
-//     imagen_invalida       400 — falta/está mal la imagen (o Anthropic 400)
-//     configuracion_faltante 500 — sin ANTHROPIC_API_KEY (o Anthropic 401)
-//     error_modelo          502 — Anthropic no-ok (429/5xx/otros)
-//     extraccion_fallida    422 — la respuesta del modelo no cumple el
-//                                 contrato (parse/shape/truncada)
+//   POST { imageBase64: string, mediaType?: string, modelo?: string }
+//   200 → { vacunas: [...], plan_impreso: [{ nombre }] }   (ver TIPOS abajo)
+//   error → { codigo, mensaje }:
+//     imagen_invalida        400 · configuracion_faltante 500
+//     error_modelo           502 · extraccion_fallida     422
 
-import { exigirSesion } from '../_shared/sesion.ts'
+import { exigirSesion, rolDeSesion } from '../_shared/sesion.ts'
 import { llamarModelo } from '../_shared/ia/mod.ts'
 
 const corsHeaders = {
-  // '*' a sabiendas: los callers son apps nativas (fetch sin CORS) y no
-  // existe todavía dominio web canónico que fijar. El gate real es
-  // verify_jwt. Restringir cuando el web del dueño tenga dominio.
+  // '*' a sabiendas: los callers son apps nativas (fetch sin CORS) y no existe
+  // todavía dominio web canónico que fijar. El gate real es verify_jwt.
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -87,63 +83,185 @@ function error(codigo: CodigoError, mensaje: string): Response {
 }
 
 const MEDIA_TYPES_VALIDOS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-// Límite de imagen de la API de Anthropic: 5MB decodificados ≈ 6.7M chars base64.
-const MAX_BASE64_CHARS = 7_000_000
+
+/**
+ * 🔴 TECHO DE 2 MB, y no es un número de gusto — es una defensa MEDIDA.
+ *
+ * C achica el carnet a 1600 px de lado mayor en JPEG antes de mandarlo
+ * (`carnet.tsx`, `LADO_CARNET = 1600`), y los cinco carnets reales del conjunto
+ * de E pesan entre **107 kB y 246 kB**. O sea que 2 MB es ~8× el peor caso real.
+ *
+ * Pero el techo NO existe por el camino feliz: existe porque `capturaFoto.tsx`
+ * declara, literal, que **si el resize falla sigue con la ORIGINAL**. Una foto
+ * de 12 MP sin achicar puede llegar acá, y hoy pasaba —el techo viejo eran 5 MB—
+ * costando tokens de imagen y segundos de espera por una foto que nadie pidió
+ * en ese tamaño. *El límite viejo protegía a la API; éste protege a la familia.*
+ */
+const MAX_BYTES_IMAGEN = 2 * 1024 * 1024
+const MAX_BASE64_CHARS = Math.ceil(MAX_BYTES_IMAGEN / 3) * 4
+
+/**
+ * 🔒 LISTA BLANCA DEL OVERRIDE DE MODELO — la palanca de medición de E.
+ *
+ * Son exactamente los dos modelos que el lote 1 compara. Cualquier otro nombre
+ * rebota tipado. **Y sólo la honra un token `service_role`**: la app manda
+ * `authenticated`, así que desde el teléfono el modelo NO se puede mover.
+ * *Una palanca de medición que un cliente puede tocar deja de ser una palanca
+ * de medición y pasa a ser una superficie.*
+ */
+const MODELOS_MEDIBLES = ['claude-sonnet-5', 'claude-haiku-4-5']
+
+// ── EL CONTRATO DE SALIDA, TIPADO ───────────────────────────────────────────
+
+/** Cerrado por el CHECK real de `evento_vacuna_aplicada.via_administracion`
+ *  (medido, no copiado de un doc). Fuera de esta lista, la RPC rebota. */
+const VIAS = ['subcutanea', 'intramuscular', 'intranasal', 'oral'] as const
+
+/** Proto-catálogo de S48 (enmienda `D-008`: cuando `cat_vacunas` exista, sale
+ *  de la DB y no del prompt). **Se CONSERVA a propósito**: está poblado en
+ *  22 de las 32 filas reales — quitarlo sería pérdida silenciosa de un dato
+ *  que un humano ya confirmó. */
+const TIPOS = [
+  'antirrábica', 'múltiple', 'tos de las perreras', 'leptospirosis',
+  'giardia', 'triple felina', 'leucemia felina',
+] as const
+
+const CONFIANZAS = ['alta', 'media', 'baja'] as const
+const EVIDENCIAS = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'] as const
 
 interface VacunaExtraida {
   nombre: string
   fecha_aplicada: string | null
   fecha_proxima: string | null
-  veterinario_nombre_externo: string | null
-  tipo_vacuna: string | null
   lote: string | null
+  laboratorio: string | null
+  via: typeof VIAS[number] | null
+  veterinario: string | null
+  vencimiento_biologico: string | null
+  tipo_vacuna: typeof TIPOS[number] | null
+  confianza: typeof CONFIANZAS[number]
+  evidencia: typeof EVIDENCIAS[number]
 }
 
 const RE_FECHA = /^\d{4}-\d{2}-\d{2}$/
 
-function campoTextoValido(v: unknown): v is string | null {
-  return v === null || (typeof v === 'string' && v.trim().length > 0)
-}
+const textoOnull = (v: unknown): v is string | null =>
+  v === null || (typeof v === 'string' && v.trim().length > 0)
 
-function campoFechaValido(v: unknown): v is string | null {
-  return v === null || (typeof v === 'string' && RE_FECHA.test(v))
-}
+const fechaOnull = (v: unknown): v is string | null =>
+  v === null || (typeof v === 'string' && RE_FECHA.test(v))
+
+const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
+  v === null || (typeof v === 'string' && lista.includes(v))
 
 function esVacunaExtraida(v: unknown): v is VacunaExtraida {
   if (typeof v !== 'object' || v === null) return false
   const o = v as Record<string, unknown>
   return (
     typeof o.nombre === 'string' && o.nombre.trim().length > 0 &&
-    campoFechaValido(o.fecha_aplicada) &&
-    campoFechaValido(o.fecha_proxima) &&
-    campoTextoValido(o.veterinario_nombre_externo) &&
-    campoTextoValido(o.tipo_vacuna) &&
-    campoTextoValido(o.lote)
+    fechaOnull(o.fecha_aplicada) &&
+    fechaOnull(o.fecha_proxima) &&
+    fechaOnull(o.vencimiento_biologico) &&
+    textoOnull(o.lote) &&
+    textoOnull(o.laboratorio) &&
+    textoOnull(o.veterinario) &&
+    enListaOnull(o.via, VIAS) &&
+    enListaOnull(o.tipo_vacuna, TIPOS) &&
+    typeof o.confianza === 'string' && (CONFIANZAS as readonly string[]).includes(o.confianza) &&
+    typeof o.evidencia === 'string' && (EVIDENCIAS as readonly string[]).includes(o.evidencia)
   )
 }
 
-const PROMPT = `Eres un experto en carnets de vacunación veterinaria latinoamericanos.
-La imagen muestra un carnet de vacunas. Cada aplicación (fila) tiene DOS registros que NO debes mezclar:
-(a) el STICKER del producto, pegado e IMPRESO de fábrica: trae el nombre comercial, el número de lote y fechas impresas de elaboración/vencimiento (p.ej. "05-2022", "10-2023", "FEB 25"). Esas fechas son del FRASCO, no de la aplicación.
-(b) el campo FECHA del carnet (rotulado FECHA, usualmente al costado del sticker, junto a la FIRMA del veterinario): la fecha de APLICACIÓN, escrita A MANO o con sello fechador.
-Una misma dosis puede tener DOS stickers pegados juntos (vacuna + diluyente/fracción liofilizada): es UNA sola fila.
-Recorre el carnet COMPLETO, de arriba a abajo, incluidas las filas de la parte superior y las de secciones separadas. Extrae TODAS las filas cuyo nombre puedas leer.
+function esFilaPlan(v: unknown): v is { nombre: string } {
+  if (typeof v !== 'object' || v === null) return false
+  const o = v as Record<string, unknown>
+  return typeof o.nombre === 'string' && o.nombre.trim().length > 0
+}
 
-Responde SOLO con este JSON, sin texto adicional ni backticks:
-{"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"veterinario_nombre_externo":null,"tipo_vacuna":null,"lote":null}]}
+const PROMPT = `Sos un lector de carnets de vacunación veterinaria latinoamericanos.
+Devolvés DATOS. No explicás, no razonás por escrito, no agregás una sola palabra fuera del JSON.
 
-Reglas ESTRICTAS por campo:
-- nombre: nombre comercial o denominación de la vacuna tal como está escrita (ej: Rabisin, Nobivac DHPPi). Si el nombre de una fila es ilegible, OMITE esa fila completa — no la incluyas.
-- fecha_aplicada / fecha_proxima: la ÚNICA fuente es el campo FECHA manuscrito (registro b). Procedimiento OBLIGATORIO por fila: 1) ubica el campo FECHA de ESA fila; 2) transcribe EXACTAMENTE lo que está escrito a mano (p.ej. "02-4-23", "26 JUN", "3 Ago 2023"); 3) solo si la transcripción tiene día, mes Y año, conviértela a YYYY-MM-DD (meses en español: ENE=01, FEB=02, MAR=03, ABR=04, MAY=05, JUN=06, JUL=07, AGO=08, SEP=09, OCT=10, NOV=11, DIC=12). Si el manuscrito es ilegible o está incompleto (p.ej. "26 JUN" — día y mes SIN año) → null. PROHIBIDO usar las fechas impresas del sticker como fecha de aplicación, y PROHIBIDO completar el año desde la posición de la fila, las filas vecinas o los vencimientos. La próxima SOLO si está escrita: no la calcules tú.
-- Una fila con nombre legible SE INCLUYE aunque su fecha quede null — la fila solo se omite cuando el NOMBRE es ilegible.
-- veterinario_nombre_externo: veterinario o clínica de la cabecera de la sección (ej: CPA TEUSAQUILLO).
-- tipo_vacuna: SOLO uno de estos valores exactos (vocabulario cerrado), o null:
-  "antirrábica" · "múltiple" · "tos de las perreras" · "leptospirosis" · "giardia" · "triple felina" · "leucemia felina".
-  Asígnalo únicamente si tienes base real: el carnet rotula el tipo (séxtuple/quíntuple/DHPP/polivalente cuentan como "múltiple") o el nombre comercial es una marca que reconoces con certeza. Ejemplos: Nobivac DHPPi → "múltiple"; Defensor o Rabisin → "antirrábica"; Bronchi-Shield o KC → "tos de las perreras"; Felocell → "triple felina".
-  Sin base suficiente (nombre ilegible, marca que no reconoces) → null. PROHIBIDO deducir el tipo desde la fecha, la posición de la fila en el carnet o qué vacuna es estadísticamente más común.
-- lote: número de lote si aparece junto al nombre o en su columna.
-- Todo dato ilegible o ausente = null. JAMÁS inventes, completes ni uses cadena vacía.
-- Si el carnet no tiene ninguna fila legible, responde {"vacunas":[]}.`
+═══ LO QUE HAY QUE DISTINGUIR — ES TODO EL TRABAJO ═══
+
+Un carnet tiene DOS cosas que se parecen y NO son lo mismo:
+
+(A) EL PLAN IMPRESO. La lista que el carnet trae impresa de fábrica, como
+    formulario: renglones con el nombre de una vacuna y los espacios al lado
+    VACÍOS, esperando que alguien los llene. Es lo que la mascota DEBERÍA
+    recibir algún día. NO es una aplicación. Va a "plan_impreso".
+
+(B) LAS APLICACIONES. Los renglones que tienen una MARCA de que alguien
+    efectivamente aplicó algo:
+      · un STICKER del frasco pegado encima, o
+      · un SELLO de la clínica, o
+      · algo ESCRITO A MANO (fecha, firma, iniciales).
+    Es lo que la mascota SÍ recibió. Va a "vacunas".
+
+Cada nombre que leas va a UNO de los dos lados, nunca a los dos.
+Renglón con nombre impreso y todo lo demás en blanco ⇒ "plan_impreso", siempre.
+Si dudás si un renglón tiene marca o no ⇒ "plan_impreso". Es lo barato: una
+aplicación que quedó como plan la agrega la familia en diez segundos; una
+aplicación inventada queda en el expediente médico del animal.
+
+═══ LA FECHA DEL STICKER NO ES LA FECHA DE APLICACIÓN ═══
+
+El sticker es del FRASCO, impreso en la fábrica: trae el nombre comercial, el
+laboratorio, el LOTE y la fecha de VENCIMIENTO del biológico.
+La fecha de APLICACIÓN es la que escribió la clínica: a mano, o con sello.
+
+Ejemplo, un renglón real:
+  [sticker pegado]  Nobivac DHPPi · Zoetis · Lote 56288 · Vto 05-2025
+  [al lado, a mano] 19/4/23   [firma]
+Lo correcto es:
+  nombre "Nobivac DHPPi" · laboratorio "Zoetis" · lote "56288"
+  fecha_aplicada "2023-04-19"      <- lo manuscrito
+  vencimiento_biologico null       <- "05-2025" no tiene DÍA, ver abajo
+  evidencia "sticker_con_fecha" · confianza "alta"
+Poner "2025-05-05" en fecha_aplicada sería el error más caro del carnet.
+
+═══ LOS CAMPOS ═══
+
+- nombre: el nombre comercial tal como está escrito. Si no lo podés leer, la
+  fila NO va a ningún lado: se omite. Una vacuna sin nombre no es registrable.
+- fecha_aplicada / fecha_proxima / vencimiento_biologico: formato YYYY-MM-DD.
+  Sólo si podés leer DÍA, MES Y AÑO. Meses en español: ENE=01 FEB=02 MAR=03
+  ABR=04 MAY=05 JUN=06 JUL=07 AGO=08 SEP=09 OCT=10 NOV=11 DIC=12.
+  Si falta cualquiera de los tres ⇒ null. "26 JUN" sin año es null.
+  "05-2025" sin día es null. NUNCA completes el año desde la fila de arriba,
+  desde la de abajo, ni desde el orden del carnet. La próxima sólo si está
+  escrita: no la calcules.
+- lote: el número de lote del sticker.
+- laboratorio: el fabricante del sticker (Zoetis, MSD, Boehringer, Virbac...).
+- via: SOLO uno de estos, o null: "subcutanea" · "intramuscular" ·
+  "intranasal" · "oral". Casi nunca está escrito. Si no lo dice, null.
+- veterinario: el nombre del veterinario o de la clínica de esa sección.
+- tipo_vacuna: SOLO uno de estos, o null: "antirrábica" · "múltiple" ·
+  "tos de las perreras" · "leptospirosis" · "giardia" · "triple felina" ·
+  "leucemia felina". Asignalo sólo con base real: el carnet lo rotula
+  (séxtuple/quíntuple/DHPP/polivalente = "múltiple") o reconocés la marca con
+  certeza (Nobivac DHPPi = "múltiple"; Defensor o Rabisin = "antirrábica";
+  Bronchi-Shield o KC = "tos de las perreras"; Felocell = "triple felina").
+  Si no ⇒ null. Prohibido deducirlo de la fecha, de la posición o de qué
+  vacuna es más común.
+- evidencia: qué viste que prueba la aplicación.
+  "sticker_con_fecha" · "sello" · "manuscrito" · "impreso"
+  Usá "impreso" SÓLO si la clínica imprimió el registro ya aplicado con su
+  fecha. Un renglón impreso EN BLANCO no es esto: es plan_impreso.
+- confianza: "alta" si leíste nombre y fecha sin esfuerzo. "media" si algo
+  costó. "baja" si estás dudando. Una fila con confianza "baja" es útil: la
+  familia la revisa. Una fila inventada con confianza "alta" no.
+
+Todo campo que no leas con claridad = null. JAMÁS inventes, completes ni uses
+cadena vacía. Preferir null siempre: la familia va a CORREGIR lo que devuelvas,
+y no puede corregir lo que no sabe que está mal.
+
+═══ LA SALIDA ═══
+
+Respondé SOLO con este JSON, sin texto adicional y sin backticks:
+{"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"tipo_vacuna":null,"confianza":"alta","evidencia":"sticker_con_fecha"}],"plan_impreso":[{"nombre":""}]}
+
+Carnet sin ninguna aplicación ⇒ {"vacunas":[],"plan_impreso":[...]}.
+Carnet ilegible ⇒ {"vacunas":[],"plan_impreso":[]}.`
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -156,7 +274,7 @@ Deno.serve(async (req) => {
   if (sinSesion) {
     return new Response(JSON.stringify(sinSesion.body), {
       status: sinSesion.status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     })
   }
 
@@ -167,36 +285,41 @@ Deno.serve(async (req) => {
     } catch {
       return error('imagen_invalida', 'El body no es JSON válido.')
     }
-    const { imageBase64, mediaType } = (body ?? {}) as {
+    const { imageBase64, mediaType, modelo } = (body ?? {}) as {
       imageBase64?: unknown
       mediaType?: unknown
+      modelo?: unknown
     }
 
     if (typeof imageBase64 !== 'string' || imageBase64.length === 0) {
       return error('imagen_invalida', 'imageBase64 requerido (string base64 no vacío).')
     }
     if (imageBase64.length > MAX_BASE64_CHARS) {
-      return error('imagen_invalida', 'La imagen supera el máximo de 5MB. Reducila antes de enviar.')
+      return error('imagen_invalida', 'La foto es demasiado grande. Sacala de nuevo o elegí otra.')
     }
     const media = typeof mediaType === 'string' ? mediaType : 'image/jpeg'
     if (!MEDIA_TYPES_VALIDOS.includes(media)) {
       return error('imagen_invalida', `mediaType no soportado: ${media}.`)
     }
 
-    // ── LA PUERTA ÚNICA (S113-D) ────────────────────────────────────────────
-    // El `fetch` crudo a Anthropic, la key, el parseo y el guard de truncado
-    // se fueron a `_shared/ia`. **El cuerpo que sale es byte a byte el mismo**
-    // (discriminador: `node scripts/verify-ia-discriminador.mjs <sha>`), y con
-    // él se fueron también el modelo y el `max_tokens` — que ahora viven en
-    // `modelos.ts` como CLASIFICACIÓN de lo que esta función ya hacía.
-    //
-    // Lo que NO se fue es la voz: cada código y cada mensaje de abajo son los
-    // de siempre, letra por letra. *Unificar la puerta no es unificar la voz.*
+    // El override de modelo: sólo servidor, sólo la lista blanca (ver arriba).
+    let modeloElegido: string | undefined
+    if (modelo !== undefined) {
+      if (rolDeSesion(req) !== 'service_role') {
+        return error('imagen_invalida', 'El modelo no se elige desde el cliente.')
+      }
+      if (typeof modelo !== 'string' || !MODELOS_MEDIBLES.includes(modelo)) {
+        return error('imagen_invalida', `Modelo no medible: ${String(modelo)}.`)
+      }
+      modeloElegido = modelo
+    }
+
     const r = await llamarModelo({
       pieza: 'carnet',
       mensajes: [{ rol: 'user', texto: PROMPT }],
       imagenes: [{ mediaType: media, base64: imageBase64 }],
       salida: 'json',
+      modelo: modeloElegido,
     })
 
     if (!r.ok) {
@@ -204,8 +327,6 @@ Deno.serve(async (req) => {
         if (r.detalle === 'sin_credencial') {
           return error('configuracion_faltante', 'ANTHROPIC_API_KEY no configurada.')
         }
-        // Caída de red: hasta hoy la agarraba el catch de abajo con este mismo
-        // texto. Se conserva.
         if (r.detalle === 'red') {
           return error('error_modelo', 'Error inesperado procesando el carnet.')
         }
@@ -220,24 +341,27 @@ Deno.serve(async (req) => {
         }
         return error('error_modelo', `Anthropic respondió ${r.estadoHttp}.`)
       }
-      // Estado NUEVO: antes esta function no tenía timeout ninguno, así que
-      // una espera eterna se veía como una app colgada. Ahora corta y lo dice.
       if (r.error === 'timeout') {
         return error('error_modelo', 'La lectura tardó demasiado. Probá de nuevo.')
       }
       if (r.detalle === 'truncado') {
         return error('extraccion_fallida', 'La respuesta del modelo quedó truncada (carnet demasiado denso).')
       }
-      // `rechazo` cae acá a propósito: hoy un rechazo del modelo llega sin
-      // bloque de texto y termina exactamente en este mensaje. La fila de
-      // `ia_uso` sí lo nombra `rechazo` — que es lo que se venía a ganar.
       return error('extraccion_fallida', 'El modelo no devolvió el JSON del contrato.')
     }
 
-    const vacunasCrudas = (r.datos as Record<string, unknown> | null)?.vacunas
+    // ── EL ESQUEMA SE EXIGE ENTERO: o cumple, o es error. Nunca parcial. ─────
+    const datos = r.datos as Record<string, unknown> | null
+    const vacunasCrudas = datos?.vacunas
+    const planCrudo = datos?.plan_impreso
+
     if (!Array.isArray(vacunasCrudas)) {
-      console.error('Output sin array vacunas:', JSON.stringify(r.datos))
+      console.error('Output sin array vacunas')
       return error('extraccion_fallida', 'El JSON del modelo no trae el array vacunas.')
+    }
+    if (!Array.isArray(planCrudo)) {
+      console.error('Output sin array plan_impreso')
+      return error('extraccion_fallida', 'El JSON del modelo no trae el array plan_impreso.')
     }
     for (let i = 0; i < vacunasCrudas.length; i++) {
       if (!esVacunaExtraida(vacunasCrudas[i])) {
@@ -245,8 +369,14 @@ Deno.serve(async (req) => {
         return error('extraccion_fallida', `El ítem ${i + 1} extraído no cumple el contrato.`)
       }
     }
+    for (let i = 0; i < planCrudo.length; i++) {
+      if (!esFilaPlan(planCrudo[i])) {
+        console.error(`Fila ${i} de plan_impreso fuera de contrato`)
+        return error('extraccion_fallida', `La fila ${i + 1} del plan impreso no cumple el contrato.`)
+      }
+    }
 
-    return new Response(JSON.stringify({ vacunas: vacunasCrudas }), {
+    return new Response(JSON.stringify({ vacunas: vacunasCrudas, plan_impreso: planCrudo }), {
       status: 200,
       headers: JSON_HEADERS,
     })

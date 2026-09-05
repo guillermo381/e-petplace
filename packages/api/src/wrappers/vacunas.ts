@@ -19,17 +19,64 @@ function esObj(v: unknown): v is Obj {
 
 // ── Extracción (Edge Function extract-vacuna) ────────────────────────────────
 
-/** Ítem extraído del carnet — claves = columnas reales de
- *  evento_vacuna_aplicada. Ilegible = null, jamás '' (contrato S46). */
+/** Vía de administración. **Vocabulario CERRADO por el CHECK real de
+ *  `evento_vacuna_aplicada.via_administracion`** (medido S113-D, no copiado
+ *  de un doc): fuera de esta lista la RPC de escritura rebota `item_invalido`. */
+export type ViaAdministracion = 'subcutanea' | 'intramuscular' | 'intranasal' | 'oral';
+
+/** Proto-catálogo de S48 (enmienda `D-008`). Se CONSERVA: está poblado en 22
+ *  de las 32 filas reales — quitarlo sería perder un dato ya confirmado. */
+export type TipoVacuna =
+  | 'antirrábica' | 'múltiple' | 'tos de las perreras' | 'leptospirosis'
+  | 'giardia' | 'triple felina' | 'leucemia felina';
+
+/** Cuánto se fía el modelo de ESA fila. **`baja` no es un descarte: es una
+ *  fila que la familia tiene que mirar con atención.** */
+export type ConfianzaExtraccion = 'alta' | 'media' | 'baja';
+
+/** Qué vio el modelo que prueba que la vacuna se APLICÓ. `impreso` es el
+ *  registro que la clínica imprimió ya aplicado — un renglón impreso EN
+ *  BLANCO no es esto: eso es `plan_impreso`. */
+export type EvidenciaAplicacion = 'sticker_con_fecha' | 'sello' | 'manuscrito' | 'impreso';
+
+/** Una vacuna que el carnet dice que SE APLICÓ. Ilegible = null, jamás ''.
+ *
+ *  ⚠️ **`laboratorio` y `vencimiento_biologico` se extraen y NO se persisten
+ *  todavía**: las columnas existen en `evento_vacuna_aplicada`, pero la RPC
+ *  `registrar_vacunas_de_carnet` **no las acepta** (medido S113-D). Se muestran
+ *  en la confirmación; hasta que A ensanche la RPC, se pierden al guardar.
+ *  *Se dice acá para que nadie las dé por guardadas.* */
 export interface VacunaExtraida {
   nombre: string;
-  /** YYYY-MM-DD o null. */
+  /** YYYY-MM-DD o null. Sin día, mes Y año ⇒ null (L-139). */
   fecha_aplicada: string | null;
-  /** YYYY-MM-DD o null. */
+  /** YYYY-MM-DD o null. Sólo si está ESCRITA; jamás calculada. */
   fecha_proxima: string | null;
-  veterinario_nombre_externo: string | null;
-  tipo_vacuna: string | null;
   lote: string | null;
+  laboratorio: string | null;
+  via: ViaAdministracion | null;
+  /** Antes `veterinario_nombre_externo`. Mismo dato, nombre del contrato. */
+  veterinario: string | null;
+  /** La fecha del STICKER: vence el FRASCO, no la aplicación. `05-2025` sin
+   *  día ⇒ null — el día no se inventa. */
+  vencimiento_biologico: string | null;
+  tipo_vacuna: TipoVacuna | null;
+  confianza: ConfianzaExtraccion;
+  evidencia: EvidenciaAplicacion;
+}
+
+/** Un renglón del PLAN que el carnet trae impreso de fábrica, sin marca de
+ *  aplicación. **No es una vacuna: es el formulario.** */
+export interface FilaPlanImpreso {
+  nombre: string;
+}
+
+/** Lo que devuelve la lectura de un carnet: lo aplicado y lo que sólo estaba
+ *  impreso. **Los dos canastos existen justamente para que el segundo no se
+ *  cuele en el primero** (S113-D: un carnet de UNA vacuna devolvía DOCE). */
+export interface LecturaDeCarnet {
+  vacunas: VacunaExtraida[];
+  plan_impreso: FilaPlanImpreso[];
 }
 
 export interface InputExtraerVacunas {
@@ -69,24 +116,46 @@ function campoFecha(v: unknown): v is string | null {
   return v === null || (typeof v === 'string' && RE_FECHA.test(v));
 }
 
+const VIAS: readonly string[] = ['subcutanea', 'intramuscular', 'intranasal', 'oral'];
+const TIPOS: readonly string[] = [
+  'antirrábica', 'múltiple', 'tos de las perreras', 'leptospirosis',
+  'giardia', 'triple felina', 'leucemia felina',
+];
+const CONFIANZAS: readonly string[] = ['alta', 'media', 'baja'];
+const EVIDENCIAS: readonly string[] = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'];
+
+const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
+  v === null || (typeof v === 'string' && lista.includes(v));
+
+/** Espejo EXACTO del validador de la edge. Que las dos puntas exijan lo mismo
+ *  es lo que hace que «cumple el contrato» signifique una sola cosa. */
 function esVacunaExtraida(v: unknown): v is VacunaExtraida {
   if (!esObj(v)) return false;
   return (
     typeof v.nombre === 'string' && v.nombre.trim().length > 0 &&
     campoFecha(v.fecha_aplicada) &&
     campoFecha(v.fecha_proxima) &&
-    campoTexto(v.veterinario_nombre_externo) &&
-    campoTexto(v.tipo_vacuna) &&
-    campoTexto(v.lote)
+    campoFecha(v.vencimiento_biologico) &&
+    campoTexto(v.lote) &&
+    campoTexto(v.laboratorio) &&
+    campoTexto(v.veterinario) &&
+    enListaOnull(v.via, VIAS) &&
+    enListaOnull(v.tipo_vacuna, TIPOS) &&
+    typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza) &&
+    typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia)
   );
 }
 
-/** Extrae las vacunas de la foto de un carnet físico. `data: []` es un
- *  resultado honesto (carnet sin filas legibles) — los fallos llegan
- *  siempre como error tipado (regla 36, contrato de la function S46). */
+function esFilaPlan(v: unknown): v is FilaPlanImpreso {
+  return esObj(v) && typeof v.nombre === 'string' && v.nombre.trim().length > 0;
+}
+
+/** Lee el carnet. `vacunas: []` con `plan_impreso` poblado es un resultado
+ *  HONESTO y frecuente: un carnet nuevo, con su plan impreso y ninguna
+ *  aplicación todavía. Los fallos llegan siempre como error tipado (regla 36). */
 export async function extraerVacunasDeCarnet(
   input: InputExtraerVacunas,
-): Promise<ResultadoWrapper<VacunaExtraida[], CodigoErrorExtraccion>> {
+): Promise<ResultadoWrapper<LecturaDeCarnet, CodigoErrorExtraccion>> {
   const { data, error } = await getClient().functions.invoke('extract-vacuna', {
     body: { imageBase64: input.imageBase64, mediaType: input.mediaType },
   });
@@ -113,7 +182,7 @@ export async function extraerVacunasDeCarnet(
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_EXTRACCION.error_desconocido };
   }
 
-  if (!esObj(data) || !Array.isArray(data.vacunas)) {
+  if (!esObj(data) || !Array.isArray(data.vacunas) || !Array.isArray(data.plan_impreso)) {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
   }
   const vacunas: VacunaExtraida[] = [];
@@ -125,12 +194,24 @@ export async function extraerVacunasDeCarnet(
       nombre: item.nombre,
       fecha_aplicada: item.fecha_aplicada,
       fecha_proxima: item.fecha_proxima,
-      veterinario_nombre_externo: item.veterinario_nombre_externo,
-      tipo_vacuna: item.tipo_vacuna,
       lote: item.lote,
+      laboratorio: item.laboratorio,
+      via: item.via,
+      veterinario: item.veterinario,
+      vencimiento_biologico: item.vencimiento_biologico,
+      tipo_vacuna: item.tipo_vacuna,
+      confianza: item.confianza,
+      evidencia: item.evidencia,
     });
   }
-  return { ok: true, data: vacunas };
+  const plan_impreso: FilaPlanImpreso[] = [];
+  for (const fila of data.plan_impreso) {
+    if (!esFilaPlan(fila)) {
+      return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
+    }
+    plan_impreso.push({ nombre: fila.nombre });
+  }
+  return { ok: true, data: { vacunas, plan_impreso } };
 }
 
 // ── Escritura (RPC registrar_vacunas_de_carnet) ──────────────────────────────
