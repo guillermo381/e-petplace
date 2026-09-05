@@ -9,7 +9,20 @@ const t = (n: string, real: unknown, esp: unknown) => {
   if (a === b) { ok++; console.log(`  ✓ ${n}`); } else { mal++; console.log(`  ✗ ${n}\n     esperado ${b}\n     real     ${a}`); }
 };
 const sin = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1');
-const src = (f: string) => sin(readFileSync(new URL(`../packages/ui/src/components/${f}`, import.meta.url), 'utf8'));
+/* 🔴 **UN GATE QUE NO PUEDE MEDIR NO SE MUERE: LO DICE.** Tercero de la misma
+   clase —carnet, perfil y éste—: con un `readFileSync` pelado, un árbol sin
+   alguna de estas piezas reventaba con `ENOENT`. *Un stack trace no distingue
+   «no hay defecto» de «no corrí»*, y por un pipe se lleva el exit del pipe
+   (`L-191`). Sale **2 con NO CONCLUYENTE**. */
+const NO_CONCLUYENTE: string[] = [];
+const src = (f: string) => {
+  try {
+    return sin(readFileSync(new URL(`../packages/ui/src/components/${f}`, import.meta.url), 'utf8'));
+  } catch {
+    NO_CONCLUYENTE.push(f);
+    return '';
+  }
+};
 const RAZA = src('SugerenciaRaza.tsx'), FICHA = src('FichaRaza.tsx'), DESP = src('PantallaDespedida.tsx');
 
 console.log('\n── ① ROJO · NADA SE GUARDA SIN TOQUE ──');
@@ -51,5 +64,11 @@ console.log('\n── ⑤ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['raza', RAZA], ['ficha', FICHA], ['despedida', DESP]] as const)
   t(`\`${n}\` no arma frases`, /`\$\{[a-z]+\} (de|en|para|hasta)/i.test(s), false);
 
+if (NO_CONCLUYENTE.length > 0) {
+  console.log(`\n⚠️ NO CONCLUYENTE · no se pudieron abrir: ${NO_CONCLUYENTE.join(' · ')}`);
+  console.log('   Este árbol no tiene todas las piezas que el gate mide. **No es verde ni rojo:');
+  console.log('   es que no se pudo medir**, y sale 2 para que ningún tablero lo lea como salud.');
+  process.exit(2);
+}
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);
