@@ -68,6 +68,8 @@ const NO_ES_PEDIR: Array<[RegExp, string]> = [
   [/^Sin\b/i, 'declara una AUSENCIA («Sin registro»): es un valor, no un acto que se propone'],
   [/^Ver\b/i, 'LEER no es pedir — y el mandato dice que en memorial se lee'],
   [/^Compartir$/i, 'es un acto de la familia sobre lo que YA existe, no una propuesta de completar nada. Su pariente que SÍ pide es «Compártelo…», y el control positivo prueba que el detector lo sigue viendo'],
+  [/^(Lo|La|Los|Las) (registr|carg|anot|subi)[oó]\b/i, 'ATRIBUCIÓN EN PASADO, no propuesta: «Lo registró su familia» dice QUIÉN puso el dato, no le pide nada a nadie. Entró por la raíz `registr`, que es la misma del imperativo — y ahí está la diferencia que importa: el pretérito narra, el imperativo manda. El control positivo sigue viendo «Regístralo» y «Registralo»'],
+  [/^Logged by\b/i, 'la misma atribución en inglés'],
 ];
 
 const frases = aplanar(clienteEs);

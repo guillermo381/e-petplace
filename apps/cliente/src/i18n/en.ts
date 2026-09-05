@@ -227,6 +227,7 @@ export const clienteEn = {
     entradaDetalle: 'Each with their own story.',
   },
   hogar: {
+    proximaVacunaCorta: '{{nombre}} · {{fecha}}',
     falloServicios: "We couldn't load your {{servicio}} history",
     falloMascotas: "We couldn't load your pets",
     falloCatalogo: "We couldn't tell which pets apply to this service",
@@ -380,6 +381,15 @@ export const clienteEn = {
     vozQuieto: 'The record has been quiet — anything new?',
   },
   perfil: {
+    seguridadAlergiaA: 'Allergic to {{alergeno}}',
+    seguridadToma: 'Takes {{nombre}}',
+    seguridadTomaConDosis: 'Takes {{nombre}} {{dosis}}',
+    seguridadHasta: 'until {{fecha}}',
+    seguridadRestriccion: 'Cannot {{servicio}}',
+    seguridadLaFamilia: 'Logged by their family',
+    seguridadUnPrestador: 'Logged by a clinic',
+    seguridadVer: 'See {{n}}',
+    seguridadOcultar: 'Hide',
     momentoM1: 'First months',
     momentoM2: 'Growing up',
     momentoM3: 'Adult',

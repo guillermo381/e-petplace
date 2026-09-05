@@ -63,6 +63,8 @@ import {
   useTheme,
   type IconoNombre,
   type LineaDeVidaEstadoPie,
+  FranjaSeguridad,
+  ordenarSeguridad,
 } from '@epetplace/ui';
 import {
   leerTimelineMascota,
@@ -103,6 +105,7 @@ import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
 import { contarPendientesDe } from '@/lib/pendientes';
+import { itemsDeSeguridad } from '@/lib/perfil/seguridad';
 import { composicionDe } from '@/lib/composicion-sujeto';
 import { HabitantesAcuarioHoja } from '@/components/habitantes-acuario-hoja';
 import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
@@ -693,6 +696,33 @@ export default function PerfilDeMascota() {
    */
   const monta = composicionDe(mascota.sujeto);
 
+  /* ⭐ **LO QUE VA EN LA FRANJA** (1.1 · C6). La decisión de qué entra y con
+     qué nombre vive en `lib/perfil/seguridad.ts`, no acá: es criterio, no
+     render. La pantalla pone las voces (Ley 3) y nada más. */
+  const itemsSeguridad = itemsDeSeguridad(
+    {
+      alergiasDetalle: perfil.alergias_detalle,
+      medicacion: perfil.medicacion_actual,
+      condiciones: perfil.condiciones_cronicas,
+      restricciones: perfil.restricciones,
+    },
+    {
+      alergiaA: (a) => t('perfil.seguridadAlergiaA', { alergeno: a }),
+      toma: (n, d) => (d !== null ? t('perfil.seguridadTomaConDosis', { nombre: n, dosis: d }) : t('perfil.seguridadToma', { nombre: n })),
+      hasta: (f) => t('perfil.seguridadHasta', { fecha: fechaCortaMono(f.slice(0, 10), idioma) }),
+      restriccion: (serv) => t('perfil.seguridadRestriccion', { servicio: serv }),
+      laFamilia: t('perfil.seguridadLaFamilia'),
+      unPrestador: t('perfil.seguridadUnPrestador'),
+    },
+  );
+  /* El resumen es la primera línea de la franja cerrada: **las dos que más
+     pesan**, no todas — si dijera las cinco, cerrada y abierta dirían lo mismo
+     y abrirla no serviría de nada. */
+  const resumenSeguridad = ordenarSeguridad(itemsSeguridad)
+    .slice(0, 2)
+    .map((i) => i.texto)
+    .join(' · ');
+
   const pendientes = esMemorial
     ? 0
     : contarPendientesDe(mascota.id, {
@@ -1146,6 +1176,101 @@ export default function PerfilDeMascota() {
           </View>
         ) : null}
 
+
+        {/* ── ④ IDENTIDAD sin caja por dato (lámina: "hoy son seis
+            mini-tarjetas dentro de una tarjeta"): UNA superficie con
+            hairlines, rótulo mono a la izquierda, valor a la derecha.
+            A6: no se encierra en marco lo que ya está en un marco.
+            Talla/pelaje y paseos-en-grupo siguen EDITABLES (P19). */}
+        <View style={{ marginTop: spacing[8] }}>
+          <RotuloSeccion
+            titulo={t('perfil.identidad')}
+            cuenta={String(
+              datosIdentidad.length +
+                (mascota.especie === 'perro' ? 1 : 0) +
+                (mascota.especie === 'perro' || mascota.especie === 'gato' ? 1 : 0),
+            )}
+          />
+          <View style={{ paddingHorizontal: spacing[5] }}>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              {datosIdentidad.map((d, i) => (
+                <View key={d.etiqueta}>
+                  {i > 0 ? <Separador /> : null}
+                  {/* P3: la fila de raza LLEVA a su edición. Las demás son
+                      lectura — su productor vive en otro lado (el peso en P2,
+                      el microchip en la consulta). */}
+                  {d.editable === 'raza' ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`${d.etiqueta}, ${d.valor}`}
+                      onPress={() => setRazaHoja(true)}
+                    >
+                      <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} accion />
+                    </Pressable>
+                  ) : (
+                    <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                  )}
+                </View>
+              ))}
+              {mascota.especie === 'perro' ? (
+                <>
+                  <Separador />
+                  <Pressable accessibilityRole="button" onPress={() => setSocialHojaAbierta(true)}>
+                    <FilaIdentidad
+                      etiqueta={t('paseoSocial.celdaTitulo')}
+                      valor={
+                        mascota.paseo_social_ok === null
+                          ? t('paseoSocial.estadoSinResponder')
+                          : mascota.paseo_social_ok
+                            ? t('paseoSocial.estadoSi')
+                            : t('paseoSocial.estadoNo')
+                      }
+                      accion
+                    />
+                  </Pressable>
+                </>
+              ) : null}
+              {mascota.especie === 'perro' || mascota.especie === 'gato' ? (
+                <>
+                  <Separador />
+                  <Pressable accessibilityRole="button" onPress={() => setTallaHojaAbierta(true)}>
+                    <FilaIdentidad
+                      etiqueta={t('grooming.tallaCeldaTitulo')}
+                      valor={
+                        mascota.talla === null || mascota.pelaje === null
+                          ? t('grooming.tallaEstadoSinDeclarar')
+                          : `${t(mascota.talla === 'S' ? 'grooming.tallaS' : mascota.talla === 'M' ? 'grooming.tallaM' : 'grooming.tallaL')}${mascota.pelaje === 'largo' ? ` · ${t('grooming.pelajeLargoCorto')}` : ''}`
+                      }
+                      accion
+                    />
+                  </Pressable>
+                </>
+              ) : null}
+            </Tarjeta>
+          </View>
+        </View>
+
+        {/* ⭐ **LA FRANJA DE SEGURIDAD** (S113-C · 1.1 · C6) — lo que hay que
+            saber ANTES de tocar a esta mascota, arriba de todo lo demás.
+            🔴 **Sólo si hay algo**: la pieza devuelve `null` con la lista
+            vacía, así que una mascota sin alergias, sin medicación y sin
+            restricciones **no tiene franja** — *una franja de seguridad vacía
+            enseña a ignorar la franja de seguridad, y el día que diga algo ya
+            nadie la mira.*
+            Va DESPUÉS de la identidad y ANTES del hoy: primero quién es,
+            después qué cuidado necesita, y recién ahí cómo viene el día. */}
+        {!esMemorial ? (
+          <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
+            <FranjaSeguridad
+              items={itemsSeguridad}
+              resumen={resumenSeguridad}
+              vozAbrir={t('perfil.seguridadVer', { n: itemsSeguridad.length })}
+              vozCerrar={t('perfil.seguridadOcultar')}
+            />
+          </View>
+        ) : null}
+
+
         {/* ── ③ CÓMO ESTÁ HOY — la grilla con lo que SÍ hay + UNA fila
             que agrupa la ausencia (el defecto que la lámina nombra:
             "cuatro tarjetas para la ausencia"). El rótulo lleva su
@@ -1225,7 +1350,20 @@ export default function PerfilDeMascota() {
                   { key: 'peso', rotulo: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, detalle: null, estado: 'alDia' }
                 : { key: 'peso', rotulo: t('perfil.peso'), valor: t('perfil.hoySinRegistroCorto'), detalle: t('perfil.pesoRegistrar'), estado: 'sinSaber' },
           );
-          faltan.push(t('perfil.hoyDesparasitacion').toLowerCase(), t('perfil.hoyAlergias').toLowerCase());
+          /* 🔴 **LA FILA DE AUSENCIAS DEJA DE SER INCONDICIONAL** (1.1 · C6).
+             Acá se empujaban «desparasitación» y «alergias» SIEMPRE, existieran
+             o no: la ficha de una mascota con desparasitación al día y alergias
+             registradas igual decía que le faltaban las dos. *Una lista de
+             faltantes que nombra cosas que están enseña a no leerla* — y la de
+             al lado, que sí falta, se pierde entre las que no.
+             El dato para no decirlo estaba en el perfil y nadie lo miraba: es
+             el mismo hallazgo que el globo del Hogar en `D-1026`. */
+          if (perfil.desparasitaciones.length === 0) {
+            faltan.push(t('perfil.hoyDesparasitacion').toLowerCase());
+          }
+          if (perfil.alergias_estado === 'sin_registro') {
+            faltan.push(t('perfil.hoyAlergias').toLowerCase());
+          }
           return (
             <View style={{ marginTop: spacing[8] }}>
               {/* r10-3: la fracción "1 de 4" MURIÓ — no nombraba lo que
@@ -1336,79 +1474,6 @@ export default function PerfilDeMascota() {
             </View>
           );
         })() : null}
-
-        {/* ── ④ IDENTIDAD sin caja por dato (lámina: "hoy son seis
-            mini-tarjetas dentro de una tarjeta"): UNA superficie con
-            hairlines, rótulo mono a la izquierda, valor a la derecha.
-            A6: no se encierra en marco lo que ya está en un marco.
-            Talla/pelaje y paseos-en-grupo siguen EDITABLES (P19). */}
-        <View style={{ marginTop: spacing[8] }}>
-          <RotuloSeccion
-            titulo={t('perfil.identidad')}
-            cuenta={String(
-              datosIdentidad.length +
-                (mascota.especie === 'perro' ? 1 : 0) +
-                (mascota.especie === 'perro' || mascota.especie === 'gato' ? 1 : 0),
-            )}
-          />
-          <View style={{ paddingHorizontal: spacing[5] }}>
-            <Tarjeta relleno="ninguno" elevacion="reposo">
-              {datosIdentidad.map((d, i) => (
-                <View key={d.etiqueta}>
-                  {i > 0 ? <Separador /> : null}
-                  {/* P3: la fila de raza LLEVA a su edición. Las demás son
-                      lectura — su productor vive en otro lado (el peso en P2,
-                      el microchip en la consulta). */}
-                  {d.editable === 'raza' ? (
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={`${d.etiqueta}, ${d.valor}`}
-                      onPress={() => setRazaHoja(true)}
-                    >
-                      <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} accion />
-                    </Pressable>
-                  ) : (
-                    <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
-                  )}
-                </View>
-              ))}
-              {mascota.especie === 'perro' ? (
-                <>
-                  <Separador />
-                  <Pressable accessibilityRole="button" onPress={() => setSocialHojaAbierta(true)}>
-                    <FilaIdentidad
-                      etiqueta={t('paseoSocial.celdaTitulo')}
-                      valor={
-                        mascota.paseo_social_ok === null
-                          ? t('paseoSocial.estadoSinResponder')
-                          : mascota.paseo_social_ok
-                            ? t('paseoSocial.estadoSi')
-                            : t('paseoSocial.estadoNo')
-                      }
-                      accion
-                    />
-                  </Pressable>
-                </>
-              ) : null}
-              {mascota.especie === 'perro' || mascota.especie === 'gato' ? (
-                <>
-                  <Separador />
-                  <Pressable accessibilityRole="button" onPress={() => setTallaHojaAbierta(true)}>
-                    <FilaIdentidad
-                      etiqueta={t('grooming.tallaCeldaTitulo')}
-                      valor={
-                        mascota.talla === null || mascota.pelaje === null
-                          ? t('grooming.tallaEstadoSinDeclarar')
-                          : `${t(mascota.talla === 'S' ? 'grooming.tallaS' : mascota.talla === 'M' ? 'grooming.tallaM' : 'grooming.tallaL')}${mascota.pelaje === 'largo' ? ` · ${t('grooming.pelajeLargoCorto')}` : ''}`
-                      }
-                      accion
-                    />
-                  </Pressable>
-                </>
-              ) : null}
-            </Tarjeta>
-          </View>
-        </View>
 
         {/* ── ⑤ VACUNAS — el resumen en UNA fila con el canto de SALUD y
             el pie que revela. "Cargar carnet" ya NO vive acá (se mudó a

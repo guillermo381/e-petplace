@@ -334,6 +334,7 @@ export const clienteEs = {
     entradaDetalle: 'Cada quien con su propia historia.',
   },
   hogar: {
+    proximaVacunaCorta: '{{nombre}} · {{fecha}}',
     // S91-C · LAS VOCES POR RAMA (orden de mesa, hallazgo de D). Tres
     // lectores caían en UNA frase —«no pudimos cargar el grooming» con
     // Reintentar— y dos de ellos ni eso: hacían `return` y se callaban.
@@ -532,6 +533,15 @@ export const clienteEs = {
     vozQuieto: 'Su expediente quedó quieto — ¿hay novedades?',
   },
   perfil: {
+    seguridadAlergiaA: 'Alérgico a {{alergeno}}',
+    seguridadToma: 'Toma {{nombre}}',
+    seguridadTomaConDosis: 'Toma {{nombre}} {{dosis}}',
+    seguridadHasta: 'hasta el {{fecha}}',
+    seguridadRestriccion: 'No puede {{servicio}}',
+    seguridadLaFamilia: 'Lo registró su familia',
+    seguridadUnPrestador: 'Lo registró una clínica',
+    seguridadVer: 'Ver {{n}}',
+    seguridadOcultar: 'Ocultar',
     // ── momento vital (Ley 3: la VOZ, jamás M1..M7) ──
     // Bautizo APROBADO por founder (gate del lote S51).
     momentoM1: 'Primeros meses',
