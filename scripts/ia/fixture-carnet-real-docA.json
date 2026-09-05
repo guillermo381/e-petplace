@@ -3,6 +3,7 @@
     {
       "nombre": "Rabimune",
       "fecha_aplicada": "2020-08-29",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2021-08-29",
       "lote": null,
       "laboratorio": "MSD",
@@ -19,6 +20,7 @@
     {
       "nombre": "GiardiaVax",
       "fecha_aplicada": "2020-08-29",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2021-08-29",
       "lote": "014/19",
       "laboratorio": "Zoetis",
@@ -35,6 +37,7 @@
     {
       "nombre": "Bronchi-Shield Ca",
       "fecha_aplicada": "2021-02-12",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2022-02-12",
       "lote": null,
       "laboratorio": null,
@@ -51,6 +54,7 @@
     {
       "nombre": null,
       "fecha_aplicada": "2021-02-12",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2022-02-12",
       "lote": null,
       "laboratorio": null,
@@ -65,6 +69,7 @@
     {
       "nombre": "Rabimune",
       "fecha_aplicada": "2021-10-29",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2022-10-29",
       "lote": null,
       "laboratorio": "MSD",
@@ -81,6 +86,7 @@
     {
       "nombre": "GiardiaVax",
       "fecha_aplicada": "2021-11-13",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2022-11-13",
       "lote": "013/21",
       "laboratorio": "Zoetis",
@@ -97,6 +103,7 @@
     {
       "nombre": "Bronchi-Shield Ca",
       "fecha_aplicada": "2022-02-25",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2023-02-25",
       "lote": null,
       "laboratorio": null,
@@ -111,8 +118,9 @@
       "evidencia": "sticker"
     },
     {
-      "nombre": "Peek",
+      "nombre": "Peek N-RB",
       "fecha_aplicada": "2022-02-25",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2023-02-25",
       "lote": null,
       "laboratorio": null,
@@ -121,12 +129,13 @@
       "vencimiento_biologico": null,
       "vacuna_codigo": null,
       "cubre": [],
-      "confianza": "baja",
+      "confianza": "media",
       "evidencia": "sticker"
     },
     {
       "nombre": "Peek N-RB",
       "fecha_aplicada": "2022-10-28",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2023-10-28",
       "lote": null,
       "laboratorio": null,
@@ -141,6 +150,7 @@
     {
       "nombre": "Peek Puppy",
       "fecha_aplicada": "2023-03-15",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2024-03-15",
       "lote": null,
       "laboratorio": null,
@@ -155,6 +165,7 @@
     {
       "nombre": null,
       "fecha_aplicada": "2023-03-15",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2024-03-15",
       "lote": null,
       "laboratorio": null,
@@ -169,6 +180,7 @@
     {
       "nombre": "Peek N-RB",
       "fecha_aplicada": "2023-10-27",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2024-10-27",
       "lote": null,
       "laboratorio": null,
@@ -181,24 +193,24 @@
       "evidencia": "sticker"
     },
     {
-      "nombre": "Recombitek Oral Bordetella",
+      "nombre": "Recombitek",
       "fecha_aplicada": "2024-03-22",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2025-03-22",
       "lote": null,
       "laboratorio": null,
-      "via": "oral",
+      "via": null,
       "veterinario": "MVZ [nombre redactado]",
       "vencimiento_biologico": null,
-      "vacuna_codigo": "tos_perreras",
-      "cubre": [
-        "tos_perreras"
-      ],
+      "vacuna_codigo": null,
+      "cubre": [],
       "confianza": "media",
-      "evidencia": "manuscrito"
+      "evidencia": "sticker"
     },
     {
-      "nombre": "Bronchi-Shield Ca",
+      "nombre": "Bronchi-Shield",
       "fecha_aplicada": "2024-03-22",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2025-03-22",
       "lote": null,
       "laboratorio": null,
@@ -215,6 +227,7 @@
     {
       "nombre": "Imrab 3TF",
       "fecha_aplicada": "2024-10-25",
+      "fecha_aplicada_precision": "dia",
       "fecha_proxima": "2025-10-25",
       "lote": null,
       "laboratorio": null,

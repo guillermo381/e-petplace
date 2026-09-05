@@ -50,7 +50,7 @@ const CATALOGO = [
 let catalogoFalla = false
 
 const fila = (extra: Record<string, unknown> = {}) => ({
-  nombre: 'Nobivac DHPPi', fecha_aplicada: '2023-04-19', fecha_proxima: null,
+  nombre: 'Nobivac DHPPi', fecha_aplicada: '2023-04-19', fecha_aplicada_precision: 'dia', fecha_proxima: null,
   lote: '56288', laboratorio: 'Zoetis', via: null, veterinario: 'CPA Teusaquillo',
   vencimiento_biologico: null, vacuna_codigo: 'multiple', cubre: ['multiple'],
   confianza: 'alta', evidencia: 'sticker', ...extra,
@@ -116,7 +116,7 @@ console.log('\n== 1 · EL CASO «1 → 12»: una aplicación, once del plan ==')
   exigir('1 en vacunas', (json.vacunas as unknown[])?.length === 1, (json.vacunas as unknown[])?.length)
   exigir('11 en plan_impreso', (json.plan_impreso as unknown[])?.length === 11, (json.plan_impreso as unknown[])?.length)
   const f0 = (json.vacunas as Record<string, unknown>[])[0]
-  exigir('la fila viaja entera (12 del modelo + tipo_vacuna derivado)', Object.keys(f0).length === 13, Object.keys(f0).length)
+  exigir('la fila viaja entera (13 del modelo + tipo_vacuna derivado)', Object.keys(f0).length === 14, Object.keys(f0).length)
   exigir('tipo_vacuna DERIVADO del código (multiple → múltiple)', f0.tipo_vacuna === 'múltiple', f0.tipo_vacuna)
   exigir('y el código viaja tal cual', f0.vacuna_codigo === 'multiple')
 }
@@ -124,7 +124,7 @@ console.log('\n== 1 · EL CASO «1 → 12»: una aplicación, once del plan ==')
 console.log('\n== 2 · CARNET SIN FECHAS: null + confianza baja pasan ==')
 {
   proveedorFalso(() => ({
-    vacunas: [fila({ fecha_aplicada: null, lote: null, laboratorio: null, veterinario: null, tipo_vacuna: null, confianza: 'baja', evidencia: 'manuscrito' })],
+    vacunas: [fila({ fecha_aplicada: null, fecha_aplicada_precision: null, lote: null, laboratorio: null, veterinario: null, vacuna_codigo: null, cubre: [], confianza: 'baja', evidencia: 'manuscrito' })],
     plan_impreso: [],
   }))
   const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
@@ -157,6 +157,10 @@ for (const [nombre, malo] of [
   ['cubre con repetidos',     { vacunas: [fila({ cubre: ['multiple', 'multiple'] })], plan_impreso: [] }],
   ['cubre sin el código principal', { vacunas: [fila({ vacuna_codigo: 'antirrabica', cubre: ['multiple'] })], plan_impreso: [] }],
   ['cubre que no es lista',   { vacunas: [fila({ cubre: 'multiple' })], plan_impreso: [] }],
+  ['precisión que NO coincide con la forma', { vacunas: [fila({ fecha_aplicada: '2023-04', fecha_aplicada_precision: 'dia' })], plan_impreso: [] }],
+  ['fecha null con precisión puesta', { vacunas: [fila({ fecha_aplicada: null, fecha_aplicada_precision: 'dia' })], plan_impreso: [] }],
+  ['fecha con precisión en null', { vacunas: [fila({ fecha_aplicada_precision: null })], plan_impreso: [] }],
+  ['forma de fecha inventada', { vacunas: [fila({ fecha_aplicada: '2023-4-9', fecha_aplicada_precision: 'dia' })], plan_impreso: [] }],
   ['vacuna_codigo fuera del catálogo', { vacunas: [fila({ vacuna_codigo: 'antigripal' })], plan_impreso: [] }],
   ['código con tilde (el que el catálogo NO tiene)', { vacunas: [fila({ vacuna_codigo: 'antirrábica' })], plan_impreso: [] }],
   ['fecha con formato libre', { vacunas: [fila({ fecha_aplicada: '19/4/23' })], plan_impreso: [] }],
@@ -265,9 +269,30 @@ console.log('\n== 11 · LA FIRMA (b): el carnet REAL entra entero, con dos filas
   exigir('las 13 con nombre siguen intactas', filas?.filter((f) => typeof f.nombre === 'string').length === 13)
 }
 
+console.log('\n== 11bis · LAS TRES PRECISIONES, y el día que NO se inventa ==')
+console.log('  (el caso vivo: el doc A dice «FEB 2023» en PRÓXIMA y el modelo devolvía')
+console.log('   2023-02-25, copiándole el día 25 a la aplicación de esa misma fila.)')
+for (const [nombre, valor, prec] of [
+  ['día completo   "3 Ago 2023"', '2023-08-03', 'dia'],
+  ['mes y año      "FEB 2023"',   '2023-02',    'mes'],
+  ['sin año        "26 JUN"',     '--06-26',    'sin_anio'],
+] as const) {
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_aplicada: valor, fecha_aplicada_precision: prec })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir(`${nombre} → ${valor} · ${prec}`, status === 200 && f?.fecha_aplicada === valor && f?.fecha_aplicada_precision === prec,
+    { status, v: f?.fecha_aplicada, p: f?.fecha_aplicada_precision })
+}
+{
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_proxima: '2023-02' })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  exigir('la próxima también admite forma parcial (era donde se inventaba el día)',
+    (json.vacunas as Record<string, unknown>[])?.[0]?.fecha_proxima === '2023-02')
+}
+
 console.log('\n== 12 · EL ANCLA: sin nombre NI fecha NI lote, la fila no existe ==')
 for (const [nombre, malo] of [
-  ['sin nombre, sin fecha, sin lote', { vacunas: [fila({ nombre: null, fecha_aplicada: null, lote: null })], plan_impreso: [] }],
+  ['sin nombre, sin fecha, sin lote', { vacunas: [fila({ nombre: null, fecha_aplicada: null, fecha_aplicada_precision: null, lote: null })], plan_impreso: [] }],
   ['nombre en cadena vacía (no es lo mismo que null)', { vacunas: [fila({ nombre: '' })], plan_impreso: [] }],
 ] as const) {
   proveedorFalso(() => malo)
@@ -275,7 +300,7 @@ for (const [nombre, malo] of [
   exigir(`${nombre} → 422`, status === 422 && json.vacunas === undefined, { status })
 }
 {
-  proveedorFalso(() => ({ vacunas: [fila({ nombre: null, fecha_aplicada: null, lote: 'A468A01' })], plan_impreso: [] }))
+  proveedorFalso(() => ({ vacunas: [fila({ nombre: null, fecha_aplicada: null, fecha_aplicada_precision: null, lote: 'A468A01' })], plan_impreso: [] }))
   const a = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
   exigir('sin nombre y sin fecha PERO con lote → entra', a.status === 200, a.status)
 }

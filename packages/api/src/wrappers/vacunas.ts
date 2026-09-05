@@ -62,9 +62,11 @@ export interface VacunaExtraida {
    *  columna sigue `NOT NULL` en la base. *Una fila corregible vale más que
    *  una que desaparece en silencio.* */
   nombre: string | null;
-  /** YYYY-MM-DD o null. Sin día, mes Y año ⇒ null (L-139). */
+  /** `YYYY-MM-DD` · `YYYY-MM` · `--MM-DD` · null. **Lo que el carnet trae.** */
   fecha_aplicada: string | null;
-  /** YYYY-MM-DD o null. Sólo si está ESCRITA; jamás calculada. */
+  /** Cuál de las tres formas es `fecha_aplicada`. `null` ⟺ la fecha es null. */
+  fecha_aplicada_precision: PrecisionFecha | null;
+  /** Sólo si está ESCRITA; jamás calculada. Mismas tres formas. */
   fecha_proxima: string | null;
   lote: string | null;
   laboratorio: string | null;
@@ -131,14 +133,33 @@ const MENSAJES_EXTRACCION: Record<
   error_desconocido:      'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
-const RE_FECHA = /^\d{4}-\d{2}-\d{2}$/;
+/**
+ * 🔴 Formas de fecha que la extracción puede devolver — **el carnet trae lo que
+ * trae y el día no se inventa** (firma del founder, S113-D-2.5):
+ *   `YYYY-MM-DD` → 'dia'  ·  `YYYY-MM` → 'mes'  ·  `--MM-DD` → 'sin_anio'
+ *
+ * ⚠️ **No es el vocabulario de `mascotas`** (`exacta|aproximada|estimada`): ése
+ * no puede expresar `sin_anio`, y un carnet perfectamente trae «26 JUN» y nada
+ * más. Mapeo: `dia`≈`exacta` · `mes`≈`aproximada` · `sin_anio` **sin equivalente**.
+ */
+export type PrecisionFecha = 'dia' | 'mes' | 'sin_anio';
+
+const FORMAS_FECHA: Record<PrecisionFecha, RegExp> = {
+  dia: /^\d{4}-\d{2}-\d{2}$/,
+  mes: /^\d{4}-\d{2}$/,
+  sin_anio: /^--\d{2}-\d{2}$/,
+};
+
+const precisionDe = (v: string): PrecisionFecha | null =>
+  (Object.keys(FORMAS_FECHA) as PrecisionFecha[]).find((p) => FORMAS_FECHA[p].test(v)) ?? null;
 
 function campoTexto(v: unknown): v is string | null {
   return v === null || (typeof v === 'string' && v.trim().length > 0);
 }
 
-function campoFecha(v: unknown): v is string | null {
-  return v === null || (typeof v === 'string' && RE_FECHA.test(v));
+/** Fecha parcial o completa, o null. Nunca una forma libre. */
+function campoFechaParcial(v: unknown): v is string | null {
+  return v === null || (typeof v === 'string' && precisionDe(v) !== null);
 }
 
 const VIAS: readonly string[] = ['subcutanea', 'intramuscular', 'intranasal', 'oral'];
@@ -156,9 +177,14 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     campoTexto(v.nombre) &&
     // Espejo del ancla de la edge: sin nombre, hace falta fecha o lote.
     !(v.nombre === null && v.fecha_aplicada === null && v.lote === null) &&
-    campoFecha(v.fecha_aplicada) &&
-    campoFecha(v.fecha_proxima) &&
-    campoFecha(v.vencimiento_biologico) &&
+    campoFechaParcial(v.fecha_aplicada) &&
+    campoFechaParcial(v.fecha_proxima) &&
+    campoFechaParcial(v.vencimiento_biologico) &&
+    // Espejo del guard de la edge: la precisión coincide con la forma, y las
+    // dos son null juntas.
+    (v.fecha_aplicada === null
+      ? v.fecha_aplicada_precision === null
+      : v.fecha_aplicada_precision === precisionDe(v.fecha_aplicada as string)) &&
     campoTexto(v.lote) &&
     campoTexto(v.laboratorio) &&
     campoTexto(v.veterinario) &&
@@ -221,6 +247,7 @@ export async function extraerVacunasDeCarnet(
     vacunas.push({
       nombre: item.nombre,
       fecha_aplicada: item.fecha_aplicada,
+      fecha_aplicada_precision: item.fecha_aplicada_precision,
       fecha_proxima: item.fecha_proxima,
       lote: item.lote,
       laboratorio: item.laboratorio,

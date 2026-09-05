@@ -74,7 +74,10 @@ interface ItemRevision {
    *  complete. **Sin nombre no se guarda** — ver `esDudosa`. */
   nombre: string | null;
   tipo_vacuna: string | null;
+  /** Puede venir PARCIAL: `YYYY-MM` o `--MM-DD`. Sin día completo no se
+   *  guarda — la columna es `date`. Ver `esDudosa`. */
   fecha_aplicada: string | null;
+  fecha_precision: 'dia' | 'mes' | 'sin_anio' | null;
   fecha_proxima: string | null;
   veterinario: string | null;
   lote: string | null;
@@ -109,7 +112,12 @@ const VOZ_SUBIDA = {
 // `guardar()` se niega mientras haya dudosas. La columna sigue NOT NULL en la
 // base, así que sin este guard el guardado rebotaría con `item_invalido` recién
 // del lado del servidor, después de que la persona apretó.
-const esDudosa = (i: ItemRevision) => !i.fecha_aplicada || !i.nombre;
+// 🔴 S113-D-2.5 · una fecha PARCIAL también es dudosa. El carnet puede decir
+// «FEB 2023» y eso es todo lo que dice; la columna `fecha_aplicada` es `date` y
+// no admite un mes suelto. **La persona pone el día mirando el carnet** — y si
+// no está, descarta la fila. *Lo que no se hace es que el sistema elija un día.*
+const esDudosa = (i: ItemRevision) =>
+  !i.fecha_aplicada || !i.nombre || i.fecha_precision !== 'dia';
 
 function hoyIso(): string {
   const d = new Date();
@@ -215,6 +223,7 @@ export default function CarnetDeVacunas() {
         nombre: v.nombre,
         tipo_vacuna: v.tipo_vacuna,
         fecha_aplicada: v.fecha_aplicada,
+        fecha_precision: v.fecha_aplicada_precision,
         fecha_proxima: v.fecha_proxima,
         veterinario: v.veterinario,
         lote: v.lote,
@@ -236,7 +245,14 @@ export default function CarnetDeVacunas() {
     // Sin nombre, el campo abre VACÍO para que la persona lo escriba.
     setBNombre(item.nombre ?? '');
     setBTipo(item.tipo_vacuna ?? '');
-    setBFecha(item.fecha_aplicada ? { fecha: item.fecha_aplicada, precision: 'exacta' } : undefined);
+    // Sólo se pre-llena si la fecha está COMPLETA. Con «FEB 2023» el selector
+    // abre vacío: pre-llenarlo con un día elegido por nosotros sería meter por
+    // la pantalla el mismo día inventado que sacamos de la extracción.
+    setBFecha(
+      item.fecha_aplicada && item.fecha_precision === 'dia'
+        ? { fecha: item.fecha_aplicada, precision: 'exacta' }
+        : undefined,
+    );
     setEditando(key);
   }
 
@@ -273,7 +289,8 @@ export default function CarnetDeVacunas() {
     // antes que mandar un null que el servidor va a rebotar después de que la
     // persona apretó.**
     const conNombre = activas.filter(
-      (i): i is ItemRevision & { nombre: string } => typeof i.nombre === 'string' && i.nombre.length > 0,
+      (i): i is ItemRevision & { nombre: string } =>
+        typeof i.nombre === 'string' && i.nombre.length > 0 && i.fecha_precision === 'dia',
     );
     if (conNombre.length !== activas.length) {
       setGuardando(false);

@@ -171,6 +171,11 @@ interface VacunaExtraida {
   via: typeof VIAS[number] | null
   veterinario: string | null
   vencimiento_biologico: string | null
+  /**
+   * Qué tan fina es `fecha_aplicada`, y **siempre coincide con su forma**.
+   * `null` si y sólo si la fecha es `null`.
+   */
+  fecha_aplicada_precision: Precision | null
   /** Código de `cat_vacunas`, o `null` si el modelo no lo puede mapear. */
   vacuna_codigo: string | null
   /**
@@ -184,6 +189,47 @@ interface VacunaExtraida {
   tipo_vacuna: string | null
   confianza: typeof CONFIANZAS[number]
   evidencia: typeof EVIDENCIAS[number]
+}
+
+/**
+ * 🔴 FECHAS CON PRECISIÓN (S113-D-2.5, firma del founder): el carnet trae lo
+ * que trae, y **el día no se inventa**.
+ *
+ * El caso que lo motivó está MEDIDO y vivo: en el documento A, los renglones 7
+ * y 8 dicen **«FEB 2023»** en la columna PRÓXIMA — mes y año, sin día. El
+ * modelo devolvió **`2023-02-25`**, copiándole el día 25 a la fecha de
+ * aplicación de esa misma fila. *Nadie escribió un 25 en ese carnet.*
+ *
+ * La forma DETERMINA la precisión, así que las dos no se pueden contradecir:
+ *   `YYYY-MM-DD` → 'dia'   ·  `YYYY-MM` → 'mes'  ·  `--MM-DD` → 'sin_anio'
+ * (`--MM-DD` es la forma ISO 8601 para mes-y-día sin año: «15/JUL» del carnet.)
+ *
+ * ⚠️ **ESTE VOCABULARIO NO ES EL DE LA CASA, y se declara.** `mascotas` usa
+ * `chk_mascotas_fecha_nacimiento_precision` = **`exacta | aproximada |
+ * estimada`**, y `CampoFecha` lo espeja. **No lo reusé porque no puede expresar
+ * `sin_anio`**: una fecha de nacimiento siempre tiene año, y un carnet
+ * perfectamente puede traer «26 JUN» y nada más. El mapeo, para quien tenga que
+ * cruzarlos: `dia` ≈ `exacta` · `mes` ≈ `aproximada` · **`sin_anio` no tiene
+ * equivalente**.
+ */
+const PRECISIONES = ['dia', 'mes', 'sin_anio'] as const
+type Precision = typeof PRECISIONES[number]
+
+const FORMAS: Record<Precision, RegExp> = {
+  dia: /^\d{4}-\d{2}-\d{2}$/,
+  mes: /^\d{4}-\d{2}$/,
+  sin_anio: /^--\d{2}-\d{2}$/,
+}
+
+/** La precisión que la FORMA implica, o `null` si no es ninguna de las tres. */
+function precisionDe(v: string): Precision | null {
+  for (const p of PRECISIONES) if (FORMAS[p].test(v)) return p
+  return null
+}
+
+/** Fecha parcial o completa, o null. **Nunca una forma libre.** */
+function fechaParcialOnull(v: unknown): boolean {
+  return v === null || (typeof v === 'string' && precisionDe(v) !== null)
 }
 
 const RE_FECHA = /^\d{4}-\d{2}-\d{2}$/
@@ -216,9 +262,13 @@ function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
   // detrás**. Si la mesa quiso la otra lectura, es una línea.
   if (o.nombre === null && o.fecha_aplicada === null && o.lote === null) return false
   return (
-    fechaOnull(o.fecha_aplicada) &&
-    fechaOnull(o.fecha_proxima) &&
-    fechaOnull(o.vencimiento_biologico) &&
+    fechaParcialOnull(o.fecha_aplicada) &&
+    fechaParcialOnull(o.fecha_proxima) &&
+    fechaParcialOnull(o.vencimiento_biologico) &&
+    // La precisión declarada tiene que COINCIDIR con la forma del valor. Si no,
+    // el modelo se está contradiciendo, y adivinar cuál de las dos quiso decir
+    // sería inventar. Null con null, siempre juntas.
+    precisionCoherente(o.fecha_aplicada, o.fecha_aplicada_precision) &&
     textoOnull(o.lote) &&
     textoOnull(o.laboratorio) &&
     textoOnull(o.veterinario) &&
@@ -232,6 +282,15 @@ function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
 
 /** `cubre`: lista de códigos del catálogo, sin repetidos, y coherente con el
  *  código principal. **Vacía es válido** (el modelo no está seguro). */
+/** La precisión declarada coincide con la forma del valor, y las dos son null
+ *  juntas. *Una precisión que no se puede contradecir con su valor no está
+ *  midiendo nada; ésta sí.* */
+function precisionCoherente(fecha: unknown, precision: unknown): boolean {
+  if (fecha === null) return precision === null
+  if (typeof fecha !== 'string') return false
+  return precision === precisionDe(fecha)
+}
+
 function esCobertura(v: unknown, principal: unknown, codigos: readonly string[]): boolean {
   if (!Array.isArray(v)) return false
   if (!v.every((c) => typeof c === 'string' && codigos.includes(c))) return false
@@ -306,13 +365,22 @@ Poner "2025-05-05" en fecha_aplicada sería el error más caro del carnet.
   Una fila omitida no le dice nada: la vacuna desaparece y nadie se entera.
   La única fila que NO va es la que no tiene NI nombre NI fecha NI lote: ahí no
   hay nada que registrar ni que corregir.
-- fecha_aplicada / fecha_proxima / vencimiento_biologico: formato YYYY-MM-DD.
-  Sólo si podés leer DÍA, MES Y AÑO. Meses en español: ENE=01 FEB=02 MAR=03
-  ABR=04 MAY=05 JUN=06 JUL=07 AGO=08 SEP=09 OCT=10 NOV=11 DIC=12.
-  Si falta cualquiera de los tres ⇒ null. "26 JUN" sin año es null.
-  "05-2025" sin día es null. NUNCA completes el año desde la fila de arriba,
-  desde la de abajo, ni desde el orden del carnet. La próxima sólo si está
-  escrita: no la calcules.
+- fecha_aplicada / fecha_proxima / vencimiento_biologico: **devolvé EXACTAMENTE
+  lo que el carnet trae, ni un dígito más.** Tres formas, según lo que se lea:
+    día, mes y año  →  "YYYY-MM-DD"   (ej: "3 Ago 2023" → "2023-08-03")
+    mes y año       →  "YYYY-MM"      (ej: "FEB 2023"   → "2023-02")
+    día y mes, SIN año → "--MM-DD"    (ej: "26 JUN"     → "--06-26")
+    nada legible    →  null
+  Meses en español: ENE=01 FEB=02 MAR=03 ABR=04 MAY=05 JUN=06 JUL=07 AGO=08
+  SEP=09 OCT=10 NOV=11 DIC=12.
+  🔴 **PROHIBIDO COMPLETAR.** Si dice "FEB 2023", la respuesta es "2023-02" —
+  NO le pongas el día de la fila de arriba, ni el de la fecha de aplicación de
+  esa misma fila, ni ninguno. Si dice "26 JUN", la respuesta es "--06-26": el
+  año NO se saca del orden del carnet ni de las filas vecinas.
+  *Un día inventado se ve igual que uno leído, y por eso nadie lo corrige.*
+  La próxima sólo si está escrita: no la calcules.
+- fecha_aplicada_precision: "dia", "mes" o "sin_anio" — cuál de las tres formas
+  usaste arriba para fecha_aplicada. null si la fecha es null.
 - lote: el número de lote del sticker.
 - laboratorio: el fabricante del sticker (Zoetis, MSD, Boehringer, Virbac...).
 - via: SOLO uno de estos, o null: "subcutanea" · "intramuscular" ·
@@ -359,7 +427,7 @@ y no puede corregir lo que no sabe que está mal.
 ═══ LA SALIDA ═══
 
 Respondé SOLO con este JSON, sin texto adicional y sin backticks:
-{"vacunas":[{"nombre":null,"fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"cubre":[],"confianza":"alta","evidencia":"sticker"}],"plan_impreso":[{"nombre":""}]}
+{"vacunas":[{"nombre":null,"fecha_aplicada":null,"fecha_aplicada_precision":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"cubre":[],"confianza":"alta","evidencia":"sticker"}],"plan_impreso":[{"nombre":""}]}
 
 Carnet sin ninguna aplicación ⇒ {"vacunas":[],"plan_impreso":[...]}.
 Carnet ilegible ⇒ {"vacunas":[],"plan_impreso":[]}.`
