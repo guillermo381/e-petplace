@@ -57,15 +57,54 @@ function fusionar(d, e, disputas, doc, n) {
 
 const disputas = [];
 const docs = {};
+const MANOS_FIRMADAS = `${process.env.HOME}/.epetplace/ia-conjuntos/manos`;
+
+/* ── LA REFERENCIA FIRMADA MANDA SOBRE LAS DOS MANOS ───────────────────────
+ * Cuando existe `documento-X--FIRMADA.json`, lo que dice ahi PISA al cotejo:
+ * el founder miro la foto y cerro. Se aplica de dos formas distintas segun lo
+ * que el archivo traiga:
+ *  · con `filas` (doc B) ⇒ la referencia ES esa lista, entera.
+ *  · sin `filas`, solo `arbitrajes` (doc A) ⇒ se fusionan las dos manos como
+ *    siempre y **el arbitraje corrige el campo que nombra**. Doc A no necesito
+ *    mas: los dos contamos 15 y no hubo una sola contradiccion.
+ */
+function firmada(doc) {
+  const p = `${MANOS_FIRMADAS}/documento-${doc}--FIRMADA.json`;
+  return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : null;
+}
 for (const doc of ['A', 'B']) {
   const D = JSON.parse(readFileSync(`${VV}/documento-${doc}--D.json`, 'utf8'));
   const E = JSON.parse(readFileSync(`${VV}/documento-${doc}--E.json`, 'utf8'));
   const n = Math.min(D.filas.length, E.filas.length);
-  const filas = [];
-  for (let i = 0; i < n; i++) filas.push(fusionar(D.filas[i], E.filas[i], disputas, doc, i + 1));
-  const extra = Math.abs(D.filas.length - E.filas.length);
-  docs[doc] = { filas, n_D: D.filas.length, n_E: E.filas.length, filas_en_disputa: extra };
-  di(`documento ${doc}: D=${D.filas.length} E=${E.filas.length} ⇒ ${filas.length} filas de referencia${extra ? ` (+${extra} EN DISPUTA, fuera del puntaje)` : ''}`);
+  const fdo = firmada(doc);
+  let filas;
+  if (fdo?.filas) {
+    // El founder escribio la lista entera: esa es la referencia.
+    filas = fdo.filas.map((f) => ({
+      nombre_aceptado: [f.vacuna, f.variante].filter(Boolean),
+      fecha_aplicada: f.fecha_aplicada ?? null,
+      fecha_parcial: f.fecha_parcial ?? null,
+      fecha_literal: f.fecha_literal ?? null,
+      precision: f.precision ?? 'dia',
+      fecha_proxima: f.fecha_proxima ?? null,
+      lote: f.lote ?? null,
+      veterinario_aceptado: [],
+      cubre: f.cubre ?? null,
+      tipo_vacuna: null, tipo_ambiguo: true,
+      origen: { todo: 'FIRMADA' },
+    }));
+    di(`documento ${doc}: FIRMADA ⇒ ${filas.length} filas (D leia ${D.filas.length}, E ${E.filas.length})`);
+  } else {
+    filas = [];
+    for (let i = 0; i < n; i++) filas.push(fusionar(D.filas[i], E.filas[i], disputas, doc, i + 1));
+    for (const a of fdo?.arbitrajes ?? []) {
+      if (!a.fila || !a.FIRMADO) continue;
+      const f = filas[a.fila - 1];
+      if (a.campo === 'vacuna' && f) { f.nombre_aceptado = [a.FIRMADO]; f.origen.vacuna = 'FIRMADA'; }
+    }
+    di(`documento ${doc}: D=${D.filas.length} E=${E.filas.length} ⇒ ${filas.length} filas${fdo ? ` · ${(fdo.arbitrajes ?? []).filter((a) => a.fila).length} arbitraje(s) aplicado(s)` : ''}`);
+  }
+  docs[doc] = { filas, n_D: D.filas.length, n_E: E.filas.length, filas_en_disputa: 0 };
 }
 
 // Qué imagen pertenece a qué documento — medido abriendo las fotos.
@@ -92,8 +131,8 @@ const conjunto = {
   pieza: 'carnet',
   generado_el: new Date().toISOString(),
   fuente: 'DOS MANOS: docs/loop/verdad-vista/documento-{A,B}--{D,E}.json',
-  procedencia_verdad: 'DOS LECTORES INDEPENDIENTES. Lo coincidente NO es «verdad»: es que dos lectores leyeron igual, y dos lectores pueden equivocarse igual. Lo contradictorio se excluye del puntaje en vez de resolverlo por mi cuenta.',
-  advertencia: 'NO FIRMADA. Los puntos de DIFERENCIAS-AL-FOUNDER.md esperan arbitraje; mientras tanto los campos en disputa no se puntúan y la tabla es un PISO.',
+  procedencia_verdad: 'DOS LECTORES INDEPENDIENTES + ARBITRAJE DEL FOUNDER sobre los ocho puntos que no cerraban. Ya no es «lo que dos leyeron igual»: los desacuerdos los miró y los firmó.',
+  advertencia: 'FIRMADA el 5-sep-2026. `evidencia` sigue SIN puntuarse: el founder no lo arbitró, y dos lectores con la misma regla se partieron 4 a 0 — el vocabulario no distingue el caso.',
   nota_documento_B: 'sus 4 fotos son el MISMO documento bajo 4 capturas distintas. Como casos independientes valen UNO; acá sirven para medir robustez a la captura, y así se declara.',
   campos_verdad: ['nombre', 'fecha_aplicada', 'fecha_proxima', 'lote', 'veterinario_nombre_externo'],
   campos_no_puntuados: { tipo_vacuna: 'ninguna mano lo transcribió: sin referencia' },

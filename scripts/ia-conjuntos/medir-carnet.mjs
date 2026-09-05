@@ -142,11 +142,13 @@ async function main() {
   const total = {};
   for (const c of CAMPOS) total[c] = { aciertos: 0, evaluados: 0, sin_verdad: 0, excluidos: 0 };
   let devueltas = 0, inventadas = 0, emparejadas = 0, visibles = 0, noDevueltas = 0, planImpreso = 0;
+  let fabricadas = 0, parciales = 0;
   const evidencia = {}, confianza = {};
   for (const d of vivos) {
     for (const c of CAMPOS) for (const k of ['aciertos', 'evaluados', 'sin_verdad', 'excluidos']) total[c][k] += d.campos[c][k] ?? 0;
     devueltas += d.n_devueltas; inventadas += d.n_inventadas; emparejadas += d.n_emparejadas;
     visibles += d.n_visibles; noDevueltas += d.n_no_devueltas; planImpreso += d.n_plan_impreso ?? 0;
+    fabricadas += d.n_fechas_fabricadas ?? 0; parciales += d.n_filas_precision_parcial ?? 0;
     for (const [k, n] of Object.entries(d.evidencia ?? {})) evidencia[k] = (evidencia[k] ?? 0) + n;
     for (const [k, n] of Object.entries(d.confianza ?? {})) confianza[k] = (confianza[k] ?? 0) + n;
   }
@@ -155,7 +157,24 @@ async function main() {
 
   const pared = vivos.map((d) => d.ms_pared);
   const uso = usoDeLaVentana(arranqueIso);
-  const usoOk = (uso ?? []).filter((u) => u.resultado === 'ok');
+  /* 🔴 LA VENTANA DE TIEMPO NO ALCANZA: varias pistas pegan a la misma edge.
+     Medido en la corrida del 5-sep: 6 filas en `ia_uso` para 5 llamadas mías —
+     la sexta era de otra pista y me inflaba el costo y el p95 del modelo.
+     *Un filtro por tiempo no distingue «mi llamada» de «una llamada»*, y el
+     número salía con toda la autoridad de un dato real.
+     Cura: cada fila de `ia_uso` se EMPAREJA con una llamada mía por latencia
+     (la de pared siempre es mayor que la del modelo, por la red y el base64), y
+     lo que no engancha se descarta declarándolo. */
+  const mias = vivos.map((d) => d.ms_pared).sort((a, b) => a - b);
+  const candidatas = (uso ?? []).filter((u) => u.resultado === 'ok')
+    .map((u) => ({ ...u, ms: Number(u.latencia_ms) })).sort((a, b) => a.ms - b.ms);
+  const usoOk = [];
+  const sinDuenio = [];
+  for (const c of candidatas) {
+    const i = mias.findIndex((w) => w >= c.ms && w - c.ms < 4000);   // red + base64
+    if (i === -1) { sinDuenio.push(c); continue; }
+    mias.splice(i, 1); usoOk.push(c);
+  }
   const servidor = usoOk.map((u) => Number(u.latencia_ms));
   const costo = usoOk.reduce((s, u) => s + Number(u.costo_estimado_usd ?? 0), 0);
 
@@ -173,11 +192,13 @@ async function main() {
     evidencia_declarada: Object.keys(evidencia).length ? evidencia : null,
     confianza_declarada: Object.keys(confianza).length ? confianza : null,
     invencion_pct: devueltas ? +(inventadas / devueltas * 100).toFixed(1) : null,
+    fechas_fabricadas: { n: fabricadas, de_filas_parciales: parciales },
     recall_pct: visibles ? +(emparejadas / visibles * 100).toFixed(1) : null,
     latencia_pared_ms: { p50: percentil(pared, 0.5), p95: percentil(pared, 0.95), max: Math.max(...pared) },
     latencia_modelo_ms: servidor.length ? { p50: percentil(servidor, 0.5), p95: percentil(servidor, 0.95), n: servidor.length } : null,
     costo_usd: +costo.toFixed(5),
-    origen_costo: usoOk.length ? `REAL · ${usoOk.length} filas de ia_uso` : 'NO DISPONIBLE (ia_uso sin filas en la ventana)',
+    origen_costo: usoOk.length ? `REAL · ${usoOk.length} de ${(uso ?? []).length} filas de ia_uso (${sinDuenio.length} descartada(s): otra pista en la misma ventana)` : 'NO DISPONIBLE (ia_uso sin filas en la ventana)',
+    filas_ia_uso_ajenas: sinDuenio.length,
     costo_por_carnet_usd: usoOk.length ? +(costo / usoOk.length).toFixed(5) : null,
     detalle,
   };
@@ -187,6 +208,7 @@ async function main() {
   for (const c of CAMPOS) di(`  ${c.padEnd(28)} ${String(exactitud[c] ?? '—').padStart(6)}%   (${total[c].aciertos}/${total[c].evaluados}${total[c].sin_verdad ? ` · ${total[c].sin_verdad} sin verdad` : ''}${total[c].excluidos ? ` · ${total[c].excluidos} excluidos` : ''})`);
   di(`  ${'INVENCIÓN'.padEnd(28)} ${String(resumen.invencion_pct).padStart(6)}%   (${inventadas}/${devueltas} filas devueltas)`);
   di(`  ${'recall de filas'.padEnd(28)} ${String(resumen.recall_pct).padStart(6)}%   (${emparejadas}/${visibles} visibles)`);
+  if (parciales) di(`  ${'fechas FABRICADAS'.padEnd(28)} ${String(fabricadas).padStart(6)}     de ${parciales} fila(s) con precisión parcial — la respuesta correcta era null`);
   if (version === 'v2') {
     di(`  ${'plan impreso (v2)'.padEnd(28)} ${String(planImpreso).padStart(6)}     filas separadas — NO cuentan como invención`);
     if (resumen.evidencia_declarada) di(`  ${'evidencia declarada'.padEnd(28)} ${JSON.stringify(resumen.evidencia_declarada)}`);

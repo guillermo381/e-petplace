@@ -112,8 +112,22 @@ export function puntuarCaso(caso, devueltas) {
     }
   }
 
+  /* ── FABRICACIÓN DE FECHA — la mide la firma ④ del founder ───────────────
+   * Una fila cuya verdad tiene precisión PARCIAL (día y mes, sin año, «el año
+   * lo completa la familia») tiene UNA respuesta correcta del modelo: `null`.
+   * No puede saber el año, y el prompt le prohíbe deducirlo de la fila vecina.
+   * Antes esto era invisible: `fecha_aplicada` en null se contaba como «sin
+   * verdad» y no se puntuaba, así que **inventar el año no costaba nada**.
+   * Ahora se cuenta aparte: no es un error de lectura, es una fecha fabricada. */
+  let fechasFabricadas = 0;
+  for (const [v, d] of pares) {
+    if ((v.precision === 'parcial' || v.fecha_parcial) && aFecha(d.fecha_aplicada)) fechasFabricadas += 1;
+  }
+
   return {
     campos,
+    n_fechas_fabricadas: fechasFabricadas,
+    n_filas_precision_parcial: caso.verdad.filter((v) => v.precision === 'parcial' || v.fecha_parcial).length,
     n_visibles: caso.verdad.length,
     n_devueltas: devueltas.length,
     n_emparejadas: pares.length,

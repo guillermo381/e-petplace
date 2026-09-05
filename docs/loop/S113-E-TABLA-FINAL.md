@@ -159,3 +159,98 @@ igual.** Puede ser la próxima dosis de esa fila, una aplicación cuyo sticker n
 está pegado, o la fecha real de la fila 6. **No lo decidí, y no ajusté mi
 conteo a 8 para que cerrara con la base.** D lo marca en su `nota` como decisión
 de criterio, no de lectura — coincidimos en no resolverlo.
+
+---
+
+# La tabla con la REFERENCIA CERRADA (5-sep-2026)
+
+## Lo que la firma cambió, y no fue sólo destrabar el puntaje
+
+| # | firmado | qué se movió |
+|---|---|---|
+| ① | doc A fila 11 = **«Recombitek»** | esa fila entra al puntaje del campo `nombre` |
+| ② | la pareja del mismo lote y fecha es **UNA fila**, `cubre = [múltiple, leptospirosis, antirrábica]` | **el vocabulario gana una idea que no tenía**: una aplicación puede cubrir varias cosas. Antes había que elegir un `tipo_vacuna` y perder el resto |
+| ③ | una fecha sin día → **precisión de MES**, no se inventa el día | resuelve el desacuerdo de la fila 5 a favor de `2024-05` |
+| ④ | el `15/JUL` **es una aplicación**: «Nobivac», variante ilegible ⇒ null, fecha **parcial** (día y mes, sin año) | **nace una métrica que antes no existía** — abajo |
+
+**Documento B queda en 8 filas, pero por un camino distinto al de D:** la pareja
+va junta (como leía E) y el `15/JUL` suma una. *Los dos habíamos llegado a 8 y a
+7 por razones que la firma dio vuelta las dos.*
+
+🔴 **Una cosa que declaro en vez de corregir por mi cuenta:** ③ llama a
+`05-2024` «fecha de APLICACIÓN». Contra el objeto, ese valor está impreso en el
+sticker bajo el rótulo `Fv:` —al lado de `Lot:` y `FF:`— o sea que es el
+**vencimiento del frasco**; la fecha de aplicación de esa fila es el manuscrito
+«26 JUN», que no tiene año. **La regla firmada se aplica igual y resuelve el
+desacuerdo** (`2024-05`, no `2024-05-31`). Queda abierto si además querías decir
+algo sobre «26 JUN» — no lo elegí por vos.
+
+## La métrica que la firma ④ hizo posible: **fechas fabricadas**
+
+Una fila de precisión parcial tiene **una sola respuesta correcta del modelo:
+`null`.** No puede saber el año, y el prompt le prohíbe deducirlo de la fila
+vecina. **Antes esto era invisible**: `fecha_aplicada` en null se contaba como
+«sin verdad» y no se puntuaba ⇒ **inventar el año no costaba nada**.
+
+```
+fechas FABRICADAS   0   de 4 filas con precisión parcial
+```
+
+**Cero de cuatro.** La regla del prompt v2 sobre no completar el año **se
+sostiene en el objeto**, y ahora hay un número que lo dice.
+
+## LA TABLA — v2.1 por la edge desplegada, referencia firmada, 47 filas
+
+| | |
+|---|---|
+| **nombre** | **97,3%** · 36/37 |
+| **fecha aplicada** | **89,3%** · 25/28 |
+| **fecha próxima** | **100%** · 9/9 |
+| **lote** | **73,3%** · 22/30 |
+| **veterinario** | **100%** · 10/10 |
+| tipo de vacuna | no se puntúa — ninguna mano lo transcribió |
+| **INVENCIÓN** | **22,9%** · 11 de 48 devueltas |
+| **recall de filas** | **78,7%** · 37/47 |
+| **fechas fabricadas** | **0** de 4 parciales |
+| plan impreso | **0** — estos documentos no tienen renglones sin usar |
+| **latencia** | pared p50 10.238 · **p95 12.848 ms** · modelo **p95 12.225 ms** |
+| **costo** | **$0,02249 por carnet** · $0,11246 los cinco · REAL, de `ia_uso` |
+
+### Contra la tabla anterior (referencia sin cerrar)
+
+| | sin firmar | **firmada** |
+|---|---|---|
+| nombre | 97,1% | **97,3%** |
+| fecha aplicada | 88,9% | **89,3%** |
+| lote | 75,9% | **73,3%** |
+| veterinario | 92,3% | **100%** |
+| invención | 25,5% | **22,9%** |
+| recall | 81,4% | **78,7%** |
+
+**Se movió poco, y hacia los dos lados** — que es lo que se esperaba: la firma
+agregó 4 filas de referencia (43 → 47), así que `recall` baja por tener más que
+encontrar y `lote` baja porque las filas nuevas no tienen lote legible. *Ninguno
+de estos números cambia el veredicto de modelo: ése ya estaba decidido por una
+brecha de 80 puntos, no por décimas.*
+
+## 🔴 Un defecto de MI instrumento, encontrado al leer el costo
+
+El resumen decía **«6 filas de `ia_uso`» para 5 llamadas**. `usoDeLaVentana`
+filtraba **sólo por tiempo**, y varias pistas pegan hoy a la misma edge: **una
+llamada ajena cayó adentro de mi ventana** e infló el costo y el p95 del modelo.
+
+*Un filtro por tiempo no distingue «mi llamada» de «una llamada»* — y el número
+salía con toda la autoridad de un dato real.
+
+**Curado:** cada fila de `ia_uso` se empareja con una llamada mía **por
+latencia** (la de pared siempre es mayor que la del modelo, por la red y el
+base64), y lo que no engancha se descarta **declarándolo** en `origen_costo`.
+Emparejaron 5 de 6 con márgenes de 590 a 968 ms; la sobrante (8.187 ms,
+$0,02040) no era mía.
+
+| | con la fila ajena | **corregido** |
+|---|---|---|
+| costo por carnet | $0,02214 | **$0,02249** |
+| p95 del modelo | 12.065 ms | **12.225 ms** |
+
+*La diferencia es chica y por eso es peligrosa: nadie la habría ido a buscar.*
