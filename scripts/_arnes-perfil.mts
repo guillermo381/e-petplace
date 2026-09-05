@@ -91,22 +91,26 @@ t('el quinto oficio tiene su chip', declarados.includes('guarderia'), true);
 /* 🔴 EL GUARD Y LA FORMA SON LO MISMO: el reparto en dos filas es lo que hace
    IMPOSIBLE que un tipo nuevo se dibuje sin que alguien le elija su lugar. */
 const reparto = [...(FIL.match(/const FILA = \{([\s\S]*?)\} satisfies/)?.[1] ?? '')
-  .matchAll(/([a-z]+):\s*([01])/g)].map((m) => [m[1], Number(m[2])] as const);
+  .matchAll(/([a-z]+):\s*([012])/g)].map((m) => [m[1], Number(m[2])] as const);
 t('🔴 el reparto lo cierra el compilador (`satisfies Record<TipoLineaDeVida…>`)',
-  /\} satisfies Record<TipoLineaDeVida, 0 \| 1>/.test(FIL), true);
+  /\} satisfies Record<TipoLineaDeVida, 0 \| 1 \| 2>/.test(FIL), true);
 t('cada uno de los nueve tiene su fila', reparto.map(([t]) => t).sort(), [...TIPOS].sort());
-/* ⚠️ 4 y 5, y el desbalance es DEL CRITERIO: guardería es un oficio y los
-   oficios están todos abajo. Emparejarlas moviendo uno arriba pondría un
-   oficio entre lo clínico, que es lo que el corte existe para no hacer. */
-t('🔴 son DOS filas y quedan 4 y 5',
-  [reparto.filter(([, f]) => f === 0).length, reparto.filter(([, f]) => f === 1).length], [4, 5]);
-t('arriba lo que mira un veterinario', reparto.filter(([, f]) => f === 0).map(([t]) => t),
-  ['salud', 'vacunas', 'antiparasitario', 'peso']);
-t('abajo lo que vivió la familia, los cuatro oficios y después lo vivido',
-  reparto.filter(([, f]) => f === 1).map(([t]) => t),
-  ['paseos', 'estetica', 'adiestramiento', 'guarderia', 'recuerdos']);
-t('…y `recuerdos` cierra, porque NO es un oficio',
-  reparto.filter(([, f]) => f === 1).at(-1)?.[0], 'recuerdos');
+/* 🔴 TRES filas, y el criterio es EL ORIGEN DEL DATO — no «quién lo mira».
+   ⏪ Fueron dos de 4 y 5, y medidas en el aparato eran TRES dibujadas: a la
+   segunda le faltaban 114 px. Las tres de hoy no son ese desborde acomodado:
+   son un corte distinto, y el que sobraba resultó ser el que tenía su propia
+   naturaleza. */
+const fila = (n: number) => reparto.filter(([, f]) => f === n).map(([t]) => t);
+t('🔴 son TRES filas y quedan 4 · 4 · 1', [fila(0).length, fila(1).length, fila(2).length], [4, 4, 1]);
+t('① lo que produce un veterinario', fila(0), ['salud', 'vacunas', 'antiparasitario', 'peso']);
+t('② lo que produce un prestador — los cuatro oficios de la casa',
+  fila(1), ['paseos', 'estetica', 'adiestramiento', 'guarderia']);
+/* 🔴 `recuerdos` va solo y NO es que sobre: es el ÚNICO que la familia
+   produce. Los otros ocho entran por mano de alguien que cobra. */
+t('③ lo que produce la familia, y es el único', fila(2), ['recuerdos']);
+t('🔴 …y NO quedó pegado a los oficios, que es de donde vino',
+  fila(1).includes('recuerdos'), false);
+t('el render recorre las TRES', /\(\[0, 1, 2\] as const\)/.test(FIL), true);
 t('una fila sin chips no se monta (no deja una línea de aire)',
   /fila\.length === 0 \? null/.test(FIL), true);
 t('🔴 y el wrap se queda DENTRO de cada fila, para que nada se recorte',

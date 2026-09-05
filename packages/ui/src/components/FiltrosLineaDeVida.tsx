@@ -1,17 +1,22 @@
 /**
  * FILTROS DE LA LÍNEA DE VIDA — chips por tipo, multi-selección.
  *
- * 🔴 **SIN SCROLL HORIZONTAL: los ocho van en DOS FILAS DECLARADAS.**
+ * 🔴 **SIN SCROLL HORIZONTAL: los nueve van en TRES FILAS DECLARADAS.**
  * *Una tira que se desplaza esconde sus últimos chips y no avisa* — el que no
  * sabe que hay más, no arrastra. **Todo lo que existe está a la vista**, y el
  * alto que crece es el precio honesto de eso.
  *
- * ⏪ Antes eran ocho chips y **un `flexWrap` suelto**, o sea *dos filas si el
- * ancho alcanzaba y tres si no*. El reparto de abajo las fija — y de paso es
- * lo que hace **imposible** que un tipo nuevo se cuele sin chip: no es una
- * decoración, es el guard. `flexWrap` se queda **dentro de cada fila**, para
- * que un chip que no entre baje en vez de recortarse: *el reparto dice la
- * intención, el wrap protege del desborde.*
+ * ⏪ Fueron **un `flexWrap` suelto** —dos filas si el ancho alcanzaba y tres si
+ * no— y después **dos filas declaradas de 4 y 5**, que *midiendo en el aparato
+ * resultaron ser tres dibujadas*: a la segunda le faltaban 114 px y
+ * «Recuerdos» caía solo. **Las tres de hoy no son ese desborde acomodado: son
+ * un corte distinto**, y el que sobraba resultó ser el que tenía su propia
+ * naturaleza.
+ *
+ * El reparto de abajo las fija — y de paso es lo que hace **imposible** que un
+ * tipo nuevo se cuele sin chip: no es una decoración, es el guard. `flexWrap`
+ * se queda **dentro de cada fila**, para que un chip que no entre baje en vez
+ * de recortarse: *el reparto dice la intención, el wrap protege del desborde.*
  *
  * ⚠️ **Ninguno seleccionado = TODOS**, y no es un atajo: *un timeline vacío
  * porque nadie tocó un chip se lee como «no pasó nada», que es exactamente lo
@@ -60,27 +65,34 @@ export type TipoLineaDeVida =
  * *Sin esto, un tipo nuevo se dibujaría igual y nadie sabría que su lugar en
  * la grilla lo eligió el azar del ancho.*
  *
- * El criterio del corte: **arriba lo que mira un veterinario, abajo lo que
- * vivió la familia.** No es una jerarquía —los nueve pesan igual— es que
- * buscarlos agrupados por naturaleza es más rápido que por orden alfabético.
+ * ── EL CRITERIO ES EL ORIGEN DEL DATO ──────────────────────────────────
+ * ① **clínico** (4) — lo produce un veterinario · ② **oficios** (4) — lo
+ * produce un prestador en su trabajo · ③ **familia** (1) — lo produce la casa.
  *
- * ⚠️ **Quedan 4 y 5, no 4 y 4**, y el desbalance es del criterio: guardería es
- * un oficio y los oficios están todos abajo. *Emparejar las filas moviendo uno
- * arriba pondría un oficio entre lo clínico, que es justo lo que el corte
- * existe para no hacer.* Y `recuerdos` cierra la segunda porque **no es un
- * oficio**: va con lo vivido, pero al final.
+ * 🔴 **`recuerdos` va solo, y NO es que sobre: es el único que la familia
+ * produce.** Los otros ocho entran al expediente por mano de alguien que
+ * cobra; éste entra porque alguien quiso guardarlo. *Meterlo con los oficios
+ * lo haría parecer el resto de una división que no le corresponde* — y la fila
+ * de uno lo dice sin una palabra.
+ *
+ * No es una jerarquía: los nueve pesan igual. Es que **buscarlos agrupados por
+ * quién los escribió es más rápido que por orden alfabético**, y de paso
+ * enseña de dónde viene cada cosa.
  */
 const FILA = {
+  /* ① lo que produce un veterinario */
   salud: 0,
   vacunas: 0,
   antiparasitario: 0,
   peso: 0,
+  /* ② lo que produce un prestador en su oficio — los cuatro de la casa */
   paseos: 1,
   estetica: 1,
   adiestramiento: 1,
   guarderia: 1,
-  recuerdos: 1,
-} satisfies Record<TipoLineaDeVida, 0 | 1>
+  /* ③ lo que produce la familia, y es el único */
+  recuerdos: 2,
+} satisfies Record<TipoLineaDeVida, 0 | 1 | 2>
 
 export interface FiltrosLineaDeVidaProps {
   /** Los tipos que la pantalla ofrece, en su orden. */
@@ -98,7 +110,7 @@ export function FiltrosLineaDeVida({ tipos, elegidos, voz, onAlternar }: Filtros
      subconjunto: **cada fila dibuja lo que le tocó de lo que llegó**, y una
      fila que queda vacía no se monta —*una fila vacía es una línea de aire
      que no dice nada*—. */
-  const porFila = ([0, 1] as const).map((n) => tipos.filter((t) => FILA[t] === n))
+  const porFila = ([0, 1, 2] as const).map((n) => tipos.filter((t) => FILA[t] === n))
 
   return (
     <View style={{ gap: spacing[2] }}>
