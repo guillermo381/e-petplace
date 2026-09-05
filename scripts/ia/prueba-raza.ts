@@ -22,7 +22,7 @@ const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQD
 // Los slugs son los REALES de `cat_razas`, tipos incluidos: `pitbul-terrier`
 // tiene una sola L y `jack-rusell` una sola S. **Se copian tal cual.** Si el
 // arnés los "corrigiera", estaría midiendo un catálogo que no existe.
-const CATALOGO_PERRO = ['criollo', 'golden-retriever', 'jack-rusell', 'labrador-retriever', 'pitbul-terrier']
+const CATALOGO_PERRO = ['american-bully', 'criollo', 'golden-retriever', 'jack-rusell', 'labrador-retriever', 'pitbul-terrier']
 
 let cuerpoSalida: Record<string, unknown> | null = null
 let filasUso = 0
@@ -40,7 +40,7 @@ function proveedorFalso(devuelve: () => unknown, catalogo: string[] = CATALOGO_P
       }), { status: 200 }))
     }
     if (url.includes('/rest/v1/cat_razas')) {
-      return Promise.resolve(new Response(JSON.stringify(catalogo.map((slug) => ({ slug }))),
+      return Promise.resolve(new Response(JSON.stringify(catalogo.map((slug) => ({ slug, nombre: slug.replace(/-/g, ' ') }))),
         { status: 200, headers: { 'Content-Type': 'application/json' } }))
     }
     if (url.includes('/rest/v1/ia_uso')) { filasUso++; return Promise.resolve(new Response('[]', { status: 201 })) }
@@ -111,24 +111,50 @@ console.log('\n== 3 · ROJO PEDIDO: un gato con especie «perro» declarada ==')
   exigir('sin_animal FALSE (hay animal, no es de la especie)', json.sin_animal === false, json.sin_animal)
 }
 
-console.log('\n== 4 · LA LISTA BLANCA SE EXIGE EN EL VALIDADOR ==')
+console.log('\n== 4 · LA CANDIDATA QUE NO SIRVE SE DESCARTA; NO TUMBA LA RESPUESTA ==')
+console.log('  (firma del founder tras verlo en vivo: el modelo devolvio «American Bully»')
+console.log('   y el codigo es `american-bully`. La raza estaba BIEN y se rechazaba todo.)')
+for (const [nombre, entrada, esperadas, motivo] of [
+  ['«American Bully» → se normaliza y ENTRA', [{ raza_codigo: 'American Bully', confianza: 'alta' }], ['american-bully'], null],
+  ['«Golden Retriever» con mayusculas y espacio', [{ raza_codigo: 'Golden Retriever', confianza: 'media' }], ['golden-retriever'], null],
+  ['«criollo » con espacio y acento raro', [{ raza_codigo: ' Crióllo ', confianza: 'baja' }], ['criollo'], null],
+  ['raza inventada → se descarta, las buenas quedan',
+    [{ raza_codigo: 'criollo', confianza: 'alta' }, { raza_codigo: 'labradoodle', confianza: 'alta' }], ['criollo'], 'no esta en el catalogo'],
+  ['raza de OTRA especie → se descarta', [{ raza_codigo: 'siames', confianza: 'alta' }], [], 'no esta en el catalogo'],
+  ['confianza inventada → se descarta esa', [{ raza_codigo: 'criollo', confianza: 'segurisimo' }], [], 'confianza fuera del vocabulario'],
+  ['repetida → entra una', [{ raza_codigo: 'criollo', confianza: 'alta' }, { raza_codigo: 'Criollo', confianza: 'baja' }], ['criollo'], 'repetida'],
+  ['cuatro → entran tres', CATALOGO_PERRO.slice(0, 4).map((s) => ({ raza_codigo: s, confianza: 'alta' })), CATALOGO_PERRO.slice(0, 3), 'sobra del tope de 3'],
+] as const) {
+  proveedorFalso(() => ({ candidatas: entrada, mestizo: false, sin_animal: false }))
+  const { status, json } = await llamar(base)
+  const codigos = (json.candidatas as { raza_codigo: string }[] | undefined)?.map((c) => c.raza_codigo)
+  exigir(`${nombre} → 200`, status === 200, { status, codigo: json.codigo })
+  exigir(`  ...y quedan [${esperadas.join(', ')}]`, JSON.stringify(codigos) === JSON.stringify(esperadas), codigos)
+  if (motivo) {
+    const d = json.descartadas as { motivo: string }[] | undefined
+    exigir(`  ...y dice por que: ${motivo}`, d?.some((x) => x.motivo === motivo) === true, d)
+  }
+}
+console.log('\n  🔴 NUNCA 422 por una candidata: si no queda ninguna, `candidatas: []` con 200.')
+{
+  proveedorFalso(() => ({ candidatas: [{ raza_codigo: 'labradoodle', confianza: 'alta' }], mestizo: false, sin_animal: false }))
+  const { status, json } = await llamar(base)
+  exigir('ninguna sobrevive → 200 con lista vacia', status === 200 && (json.candidatas as unknown[]).length === 0, { status, n: (json.candidatas as unknown[])?.length })
+}
+console.log('\n  Lo que SI sigue tumbando la respuesta: la FORMA rota, no una candidata.')
 for (const [nombre, malo] of [
-  ['raza inventada',            { candidatas: [{ raza_codigo: 'labradoodle', confianza: 'alta' }], mestizo: false, sin_animal: false }],
-  ['raza de OTRA especie',      { candidatas: [{ raza_codigo: 'siames', confianza: 'alta' }], mestizo: false, sin_animal: false }],
-  ['slug "corregido"',          { candidatas: [{ raza_codigo: 'pitbull-terrier', confianza: 'alta' }], mestizo: false, sin_animal: false }],
-  ['cuatro candidatas',         { candidatas: CATALOGO_PERRO.slice(0, 4).map((s) => ({ raza_codigo: s, confianza: 'alta' })), mestizo: false, sin_animal: false }],
-  ['candidata repetida',        { candidatas: [{ raza_codigo: 'criollo', confianza: 'alta' }, { raza_codigo: 'criollo', confianza: 'baja' }], mestizo: true, sin_animal: false }],
-  ['confianza inventada',       { candidatas: [{ raza_codigo: 'criollo', confianza: 'segurisimo' }], mestizo: false, sin_animal: false }],
-  ['mestizo no booleano',       { candidatas: [], mestizo: 'si', sin_animal: false }],
-  ['se contradice',             { candidatas: [{ raza_codigo: 'criollo', confianza: 'alta' }], mestizo: false, sin_animal: true }],
+  ['mestizo no booleano', { candidatas: [], mestizo: 'si', sin_animal: false }],
+  ['candidatas no es lista', { candidatas: 'criollo', mestizo: false, sin_animal: false }],
+  ['se contradice (sin animal Y candidatas)', { candidatas: [{ raza_codigo: 'criollo', confianza: 'alta' }], mestizo: false, sin_animal: true }],
 ] as const) {
   proveedorFalso(() => malo)
   const { status, json } = await llamar(base)
-  exigir(`${nombre} → 422 sin datos`, status === 422 && json.candidatas === undefined, { status, datos: json.candidatas !== undefined })
+  exigir(`${nombre} → 422`, status === 422 && json.candidatas === undefined, { status })
 }
-console.log('  ↑ «slug corregido» es el caso fino: `pitbul-terrier` tiene UNA L en el')
-console.log('    catálogo real. Un modelo que lo escribe "bien" devuelve un código que')
-console.log('    no existe, y la fila no se podría guardar. El validador lo caza.')
+console.log('\n  ⚠️ Ojo con `pitbul-terrier`: tiene UNA L en el catalogo. Un modelo que lo')
+console.log('     escribe «pitbull-terrier» NO normaliza al mismo slug, y esa candidata')
+console.log('     se descarta. Es correcto -- ese codigo no existe -- pero es la clase')
+console.log('     de perdida que hay que MEDIR con `descartadas`, no suponer que no pasa.')
 
 console.log('\n== 5 · ESPECIE SIN RAZAS: no se llama al modelo ==')
 {
@@ -150,6 +176,31 @@ console.log('\n== 6 · LA PALANCA Y EL TECHO ==')
   proveedorFalso(() => ({ candidatas: [], mestizo: false, sin_animal: false }))
   const gr = await llamar({ ...base, imagenBase64: 'A'.repeat(2_800_000) })
   exigir('> 2 MB rebota', gr.status === 400 && gr.json.codigo === 'imagen_invalida', gr.status)
+}
+
+console.log('\n== 7 · LA SALIDA REAL DE LA FOTO DE ZEUS (American Bully) ==')
+console.log('  (corrida contra claude-haiku-4-5 el 5-sep: 1.555 ms, 76 tokens de salida.')
+console.log('   Con el catalogo mandado como `slug — nombre`, el modelo devuelve el SLUG')
+console.log('   exacto. El normalizador es el cinturon, no el mecanismo.)')
+{
+  const REAL_ZEUS = {
+    candidatas: [
+      { raza_codigo: 'american-bully', confianza: 'alta' },
+      { raza_codigo: 'pitbul-terrier', confianza: 'media' },
+      { raza_codigo: 'boxer', confianza: 'media' },
+    ],
+    mestizo: false, sin_animal: false,
+  }
+  proveedorFalso(() => REAL_ZEUS, [...CATALOGO_PERRO, 'boxer'])
+  const { status, json } = await llamar(base)
+  const codigos = (json.candidatas as { raza_codigo: string }[])?.map((c) => c.raza_codigo)
+  exigir('200', status === 200, status)
+  exigir('american-bully ENTRE las candidatas', codigos?.includes('american-bully'), codigos)
+  exigir('y es la primera, con confianza alta',
+    (json.candidatas as { raza_codigo: string; confianza: string }[])?.[0]?.raza_codigo === 'american-bully' &&
+    (json.candidatas as { confianza: string }[])?.[0]?.confianza === 'alta')
+  exigir('`pitbul-terrier` con UNA L sobrevive (es el slug real)', codigos?.includes('pitbul-terrier'))
+  exigir('cero descartadas', (json.descartadas as unknown[])?.length === 0, json.descartadas)
 }
 
 console.log(`\n${r === 0 ? 'OK' : 'ROJO'} arnés sugerir-raza — ${v} verdes · ${r} rojos\n`)
