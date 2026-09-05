@@ -48,6 +48,7 @@
     "verify:linea-jornada": "tsx apps/prestador/scripts/verify-linea-jornada.mts",
     "_comentario_hooks": "S113-E: un hook llamado despues de un early return compila, pasa el typecheck y arranca en dev; rompe en runtime y lejos de su causa. Ningun gate de la casa lo veia. Corre ESLint con UNA sola regla (react-hooks/rules-of-hooks) sobre apps/*/src y packages/ui/src. NO revive `pnpm lint`: cero eslint.config.* en el repo (la config vive dentro del gate) y una sola regla encendida, sin primera pasada roja que absorber. Las devDeps (eslint, eslint-plugin-react-hooks, typescript-eslint) NO tocan el binario: medido con `pnpm list --prod` en las dos apps, 0 paquetes con eslint contra 334/339 con react.",
   "verify:hooks": "node scripts/verify-hooks.mjs",
+  "verify:tdz": "node scripts/verify-tdz.mjs",
   "verify:hooks-bajo-return": "node scripts/verify-hooks-bajo-return.mjs",
   "verify:puerta-unica": "node scripts/verify-puerta-unica.mjs",
     "tipos:rutas": "node scripts/tipos-rutas.mjs",
