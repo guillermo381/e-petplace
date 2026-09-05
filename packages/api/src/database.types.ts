@@ -9954,6 +9954,7 @@ export type Database = {
         Row: {
           archivo_url: string | null
           cita_id: string | null
+          codigos_cubiertos: string[] | null
           country_code: string
           created_at: string
           dosis: string | null
@@ -9977,6 +9978,7 @@ export type Database = {
         Insert: {
           archivo_url?: string | null
           cita_id?: string | null
+          codigos_cubiertos?: string[] | null
           country_code?: string
           created_at?: string
           dosis?: string | null
@@ -10000,6 +10002,7 @@ export type Database = {
         Update: {
           archivo_url?: string | null
           cita_id?: string | null
+          codigos_cubiertos?: string[] | null
           country_code?: string
           created_at?: string
           dosis?: string | null
@@ -22485,6 +22488,15 @@ export type Database = {
           p_sujeto: string
         }
         Returns: string
+      }
+      _cobertura_vacunal: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          archivo_url: string
+          cod: string
+          fecha_aplicada: string
+          fecha_proxima: string
+        }[]
       }
       _columnas_solicitud_clasificadas: { Args: never; Returns: Json }
       _concepto_de_pago: { Args: { p_sujeto: string }; Returns: string }

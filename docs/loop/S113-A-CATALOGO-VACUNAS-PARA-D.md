@@ -60,3 +60,43 @@ declara en vez de darla por probada.*
 el FK** · el mismo shape con `giardia` **pasa** (discriminador: T2 rebotó por el
 valor, no por la forma) · sin código ⇒ **NULL honesto**. Las 8 vacunas reales de
 Thor intactas.
+
+---
+
+# ADENDA · `codigos_cubiertos` — la cobertura de una combinada
+
+`registrar_vacunas_de_carnet` acepta ahora, **por ítem**, un array
+`codigos_cubiertos` con **los mismos siete códigos**, validado igual (contra
+`cat_vacunas` **activo**; fuera del catálogo ⇒ `item_invalido` nombrando **cuáles**
+valores fallaron).
+
+**Para qué es:** una **séxtuple** es `vacuna_codigo: "multiple"` **y además**
+cubre `leptospirosis`. Sin esa lista, el plan marcaría la lepto como vencida
+aunque el perro la tenga puesta.
+
+```json
+{ "nombre": "Nobivac DHPPi + L",
+  "vacuna_codigo": "multiple",
+  "codigos_cubiertos": ["multiple", "leptospirosis"] }
+```
+
+**Tres cosas, y la primera es la que más importa:**
+
+**① Vale lo mismo que para `vacuna_codigo`: adivinar es peor que omitir.** Si el
+carnet no dice qué cubre la combinada, **no mandes la lista**. *Poner
+`leptospirosis` de más marca al día una vacuna que quizá nunca se aplicó — y el
+plan deja de avisar.* Omitir sólo deja la casilla como estaba.
+
+**② `[]` y ausente NO son lo mismo en el dato, aunque hoy signifiquen lo mismo
+para los lectores.** `[]` dice *«no cubre nada más»*; ausente dice *«no sé»*. La
+columna guarda las dos; se distinguen el día que alguien quiera saber quién
+contestó.
+
+**③ Incluir el propio código en la lista es inofensivo.** El motor une
+`vacuna_codigo` con `codigos_cubiertos` y toma la más reciente por casilla:
+`["multiple","leptospirosis"]` con `vacuna_codigo: "multiple"` **no duplica nada**.
+
+**Lo verificado (fixture in-txn, residuo 0):** con `cubre` → **las dos casillas
+al día**; **sin `cubre` → sólo la del código** (`leptospirosis` sigue `vencida`);
+un código inventado **rebota hablado**; y **guardería lee lo mismo** — con la
+combinada, `faltantes` deja de incluir `leptospirosis`.
