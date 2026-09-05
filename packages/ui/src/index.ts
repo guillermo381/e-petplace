@@ -1149,7 +1149,7 @@ export {
   type FilaConfirmacionVacunaProps,
   type PieConfirmacionVacunasProps,
   type CampoLeido,
-  type OrigenLectura,
+  type EvidenciaAplicacion,
 } from './components/FilaConfirmacionVacuna'
 export { ListaPlanVacunal, type ListaPlanVacunalProps, type FilaPlanVacunal } from './components/ListaPlanVacunal'
 /* El punto de estado, con sus DOS formas: el relleno separa las dos ausencias

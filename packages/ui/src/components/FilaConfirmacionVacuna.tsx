@@ -49,9 +49,28 @@ import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 import { detalleVisible, resumenDeLaTanda, pideRevision, type ConfianzaIA, type FilaDeLaTanda } from './vacunas-estado'
 
-/** De dónde salió el dato en el papel. **Se dice** porque no es lo mismo un
- *  sello del veterinario que un número escrito a mano en el margen. */
-export type OrigenLectura = 'sticker' | 'sello' | 'aMano'
+/**
+ * QUÉ PRUEBA LA APLICACIÓN — el vocabulario de la v2.1 del extractor.
+ *
+ * ── 🔴 NO ES UN RENOMBRE: ES OTRA PREGUNTA ─────────────────────────────
+ * ☠️ Acá vivía `OrigenLectura = 'sticker' | 'sello' | 'aMano'`, que contestaba
+ * **dónde está escrita la fecha**. Esto contesta **qué prueba que la vacuna se
+ * aplicó**, y son cosas distintas con respuestas distintas:
+ *
+ * > Un carnet con el sticker del producto pegado y la fecha escrita a mano al
+ * > lado. *¿De dónde salió el dato?* — a mano. *¿Qué prueba la aplicación?* —
+ * > el sticker. **La misma fila, dos respuestas opuestas.**
+ *
+ * Por eso el vocabulario viejo no se podía leer igual dos veces: **dos manos
+ * lo clasificaron 4 a 0** sobre las mismas filas. *Un vocabulario que dos
+ * lectores cuidadosos contestan distinto no está midiendo el papel: está
+ * midiendo quién lo lee.*
+ *
+ * `manuscrito` es **sin sticker y sin sello**; `impreso`, que no hay nada que
+ * lo pruebe — y ése es un dato, no un hueco: *saber que una fila no tiene
+ * respaldo vale exactamente igual que saber cuál tiene.*
+ */
+export type EvidenciaAplicacion = 'sticker' | 'sello' | 'manuscrito' | 'impreso'
 
 export interface CampoLeido {
   etiqueta: string
@@ -63,10 +82,17 @@ export interface FilaConfirmacionVacunaProps {
   nombre: string
   campos: readonly CampoLeido[]
   confianza: ConfianzaIA
-  /** 🔴 La voz de la procedencia, ya compuesta (Ley 3): *«leído de un
-   *  sticker»*. **Ausente ⇒ no se dibuja NINGUNA línea de procedencia**
-   *  (19.9): *de un carnet donde no se distingue si fue sello o lapicera no
-   *  sale una procedencia por defecto — sale ninguna.*
+  /** 🔴 La voz de la evidencia, ya compuesta (Ley 3): *«lo prueba el sticker»*.
+   *  **Ausente ⇒ no se dibuja NINGUNA línea** (19.9): *de un carnet donde no
+   *  se distingue qué prueba la aplicación no sale una respuesta por defecto —
+   *  sale ninguna.*
+   *
+   *  ⚠️ **El nombre `vozOrigen` es anterior al cambio de pregunta y SE QUEDA,
+   *  por decisión y no por olvido.** `EvidenciaAplicacion` habría pedido un
+   *  `vozEvidencia`, pero **renombrar una prop viva rompe a su consumidor**, y
+   *  esa lección ya se pagó esta sesión: un cambio de contrato mío dejó `main`
+   *  en rojo y lo curó otra pista. *La precisión de un nombre no vale un
+   *  revert.* El día que la prop se toque por otra razón, viaja con eso.
    *
    *  ☠️ Al lado vivía `origen: OrigenLectura`, **obligatoria y jamás leída
    *  por la pieza**: ni se desestructuraba. *Un prop que el contrato exige y
