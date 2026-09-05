@@ -243,8 +243,22 @@ function fechaParcialOnull(v: unknown): boolean {
 
 const RE_FECHA = /^\d{4}-\d{2}-\d{2}$/
 
-const textoOnull = (v: unknown): v is string | null =>
-  v === null || (typeof v === 'string' && v.trim().length > 0)
+/**
+ * 🔴 LO QUE FALTA NO TUMBA LA TANDA (S113-D-2.8, firma del founder).
+ *
+ * `undefined` y `''` se leen como `null`: **un campo ausente y un campo vacío
+ * son la misma cosa — «no está»** — y ninguno es razón para tirar una fila,
+ * mucho menos un carnet entero. *Catorce vacunas reales no se pierden porque el
+ * modelo se olvidó de escribir una clave.*
+ */
+const aTextoOnull = (v: unknown): string | null =>
+  v === undefined || v === null || (typeof v === 'string' && v.trim().length === 0)
+    ? null
+    : typeof v === 'string' ? v : undefined as unknown as string | null
+
+/** `true` si el valor es de un TIPO que no corresponde (no ausente: equivocado). */
+const tipoMalo = (v: unknown): boolean =>
+  v !== undefined && v !== null && typeof v !== 'string'
 
 const fechaOnull = (v: unknown): v is string | null =>
   v === null || (typeof v === 'string' && RE_FECHA.test(v))
@@ -256,64 +270,38 @@ const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
  *  no contra una copia en el código. *Un vocabulario cerrado que vive en el
  *  prompt es una sugerencia; el que vive en el validador es un vocabulario
  *  cerrado* (mismo criterio que `sugerir-raza`). */
-function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
-  if (typeof v !== 'object' || v === null) return false
-  const o = v as Record<string, unknown>
-  if (!textoOnull(o.nombre)) return false
-  // 🔴 EL ANCLA: sin nombre, la fila existe sólo si trae algo MATERIAL del
-  // carnet — la fecha de aplicación o el lote del sticker.
-  //
-  // Interpretación DECLARADA de la firma («exige fecha o marca de aplicación»):
-  // tomo por «marca» un **rastro leído del carnet**, no el campo `evidencia`.
-  // La razón es que `evidencia` es obligatorio y siempre viene lleno, así que
-  // exigirlo sería una regla vacua: aceptaría igual una fila sin nombre, sin
-  // fecha y sin lote, que es el modelo afirmando que hubo una vacuna **sin nada
-  // detrás**. Si la mesa quiso la otra lectura, es una línea.
-  if (o.nombre === null && o.fecha_aplicada === null && o.lote === null) return false
-  return (
-    fechaParcialOnull(o.fecha_aplicada) &&
-    fechaParcialOnull(o.fecha_proxima) &&
-    fechaParcialOnull(o.vencimiento_biologico) &&
-    // La precisión declarada tiene que COINCIDIR con la forma del valor. Si no,
-    // el modelo se está contradiciendo, y adivinar cuál de las dos quiso decir
-    // sería inventar. Null con null, siempre juntas.
-    precisionCoherente(o.fecha_aplicada, o.fecha_aplicada_precision) &&
-    precisionCoherente(o.fecha_proxima, o.fecha_proxima_precision) &&
-    textoOnull(o.fecha_literal) &&
-    textoOnull(o.fecha_proxima_literal) &&
-    textoOnull(o.lote) &&
-    textoOnull(o.laboratorio) &&
-    textoOnull(o.veterinario) &&
-    enListaOnull(o.via, VIAS) &&
-    enListaOnull(o.vacuna_codigo, codigos) &&
-    esCobertura(o.cubre, o.vacuna_codigo, codigos) &&
-    typeof o.confianza === 'string' && (CONFIANZAS as readonly string[]).includes(o.confianza) &&
-    typeof o.evidencia === 'string' && (EVIDENCIAS as readonly string[]).includes(o.evidencia)
-  )
-}
-
-/** `cubre`: lista de códigos del catálogo, sin repetidos, y coherente con el
- *  código principal. **Vacía es válido** (el modelo no está seguro). */
+/**
+ * 🔴 SANEA UNA FILA — y la ley es una sola: **lo que falta se marca; sólo lo
+ * MALFORMADO se descarta, y descarta ESA FILA diciendo cuál, nunca la tanda.**
+ *
+ * La distinción que lo ordena todo:
+ * · **ausente / vacío / ilegible** ⇒ `null` y la fila sale **marcada**. El
+ *   carnet no lo decía o el modelo no lo leyó: la persona lo completa mirando.
+ * · **TIPO equivocado** (un número donde va texto, un texto donde va lista)
+ *   ⇒ se descarta **esa fila**, con su motivo. Eso no es un dato faltante: es
+ *   una respuesta rota, y no hay nada que la persona pueda corregir ahí.
+ *
+ * *Antes, cualquiera de los dos rebotaba el carnet entero con 422. Un carnet de
+ * quince vacunas se perdía porque una fila venía sin una clave.*
+ */
 /**
  * 🔴 EL CONTROL DETERMINISTICO — no le creemos al `precision` del modelo: lo
  * verificamos contra **su propia transcripción**.
  *
- * El caso que lo obligó, medido dos veces: el carnet dice **«FEB 2023»** y el
- * modelo devuelve `2023-02-25` **declarando `precision: 'dia'`**. No es que se
- * olvide de declarar: *afirma con confianza que leyó un día que no existe.*
- * Pedirle el literal y contar sus componentes acá **saca la decisión del
- * modelo** — una fecha completa necesita tres cosas escritas, y eso se cuenta.
+ * El caso que lo obligó, medido dos veces: el carnet dice **«Feb/2023»** y el
+ * modelo devuelve `2023-02-25` **declarando `dia`**. No es que se olvide de
+ * declararlo: *afirma con confianza que leyó un día que no existe.* Pedirle el
+ * literal y contar sus componentes acá **saca la decisión del modelo** — una
+ * fecha completa necesita tres cosas escritas, y eso se cuenta.
  *
  * Un COMPONENTE es un grupo de dígitos o un nombre de mes:
  *   «3 Ago 2023» → 3   ·  «19-4-23» → 3   ·  «13/NOV 2022» → 3   ⇒ hay día
- *   «FEB 2023»   → 2   ·  «05-2024» → 2                          ⇒ NO hay día
+ *   «Feb/2023»   → 2   ·  «05-2024» → 2                          ⇒ NO hay día
  */
 const MESES_ES = /\b(ene|feb|mar|abr|may|jun|jul|ago|sep|set|oct|nov|dic)\w*/gi
 
 function componentesDe(literal: string): number {
-  const digitos = (literal.match(/\d+/g) ?? []).length
-  const meses = (literal.match(MESES_ES) ?? []).length
-  return digitos + meses
+  return (literal.match(/\d+/g) ?? []).length + (literal.match(MESES_ES) ?? []).length
 }
 
 /** Cuántos componentes EXIGE cada precisión para ser creíble. */
@@ -330,25 +318,108 @@ function literalNoSostiene(literal: unknown, precision: unknown): boolean {
   return componentesDe(literal) < COMPONENTES_MINIMOS[precision as Precision]
 }
 
-/** La precisión declarada coincide con la forma del valor, y las dos son null
- *  juntas. *Una precisión que no se puede contradecir con su valor no está
- *  midiendo nada; ésta sí.* */
-function precisionCoherente(fecha: unknown, precision: unknown): boolean {
-  if (fecha === null) return precision === null
-  if (typeof fecha !== 'string') return false
-  return precision === precisionDe(fecha)
-}
+type Saneo =
+  | { ok: true; fila: Record<string, unknown>; incompleta: boolean }
+  | { ok: false; motivo: string }
 
-function esCobertura(v: unknown, principal: unknown, codigos: readonly string[]): boolean {
-  if (!Array.isArray(v)) return false
-  if (!v.every((c) => typeof c === 'string' && codigos.includes(c))) return false
-  if (new Set(v).size !== v.length) return false
-  // Coherencia: si dice contra qué protege Y cuál es la principal, la principal
-  // tiene que estar adentro. Decir «esto es antirrábica» y que la cobertura no
-  // la incluya es contradecirse, y adivinar cuál de las dos quiso decir sería
-  // inventar. La lista VACÍA no se toca: es la forma de decir «no sé».
-  if (v.length > 0 && typeof principal === 'string' && !v.includes(principal)) return false
-  return true
+function sanearFila(v: unknown, codigos: readonly string[]): Saneo {
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) {
+    return { ok: false, motivo: 'no es un objeto' }
+  }
+  const o = v as Record<string, unknown>
+  let incompleta = false
+  const faltó = () => { incompleta = true; return null }
+
+  // ── tipos: lo único que descarta ────────────────────────────────────────
+  for (const k of ['nombre', 'fecha_aplicada', 'fecha_proxima', 'vencimiento_biologico',
+                   'fecha_literal', 'fecha_proxima_literal', 'lote', 'laboratorio',
+                   'veterinario', 'via', 'vacuna_codigo', 'confianza', 'evidencia',
+                   'fecha_aplicada_precision', 'fecha_proxima_precision']) {
+    if (tipoMalo(o[k])) return { ok: false, motivo: `\`${k}\` no es texto` }
+  }
+  if (o.cubre !== undefined && o.cubre !== null && !Array.isArray(o.cubre)) {
+    return { ok: false, motivo: '`cubre` no es una lista' }
+  }
+
+  // ── valores: lo que no sirve se anula y MARCA ───────────────────────────
+  const texto = (k: string): string | null => {
+    const t = aTextoOnull(o[k])
+    if (t === null && o[k] !== null && o[k] !== undefined) return faltó()
+    if (t === null) { if (o[k] === undefined) incompleta = true; return null }
+    return t
+  }
+  const fecha = (k: string): string | null => {
+    const t = texto(k)
+    if (t === null) return null
+    if (precisionDe(t) === null) return faltó()   // formato ilegible ⇒ null + marca
+    return t
+  }
+  const deLista = (k: string, lista: readonly string[]): string | null => {
+    const t = texto(k)
+    if (t === null) return null
+    return lista.includes(t) ? t : faltó()
+  }
+
+  const fechaAplicada = fecha('fecha_aplicada')
+  const fechaProxima = fecha('fecha_proxima')
+  const nombre = texto('nombre')
+  const lote = texto('lote')
+
+  // Precisión: se DERIVA de la forma, no se le cree al modelo. Si declaró otra,
+  // se marca — la forma manda porque es lo que se puede comprobar.
+  const precAplicada = fechaAplicada === null ? null : precisionDe(fechaAplicada)
+  const precProxima = fechaProxima === null ? null : precisionDe(fechaProxima)
+  if (fechaAplicada !== null && o.fecha_aplicada_precision !== precAplicada) incompleta = true
+  if (fechaAplicada === null && o.fecha_aplicada_precision != null) incompleta = true
+
+  // Cobertura: se filtra lo que no está en el catálogo, no se tira la fila.
+  const cubreCrudo = Array.isArray(o.cubre) ? o.cubre : []
+  const cubre = [...new Set(cubreCrudo.filter((c): c is string => typeof c === 'string' && codigos.includes(c)))]
+  if (cubre.length !== cubreCrudo.length) incompleta = true
+
+  const confianza = deLista('confianza', CONFIANZAS) ?? 'baja'
+  const evidencia = deLista('evidencia', EVIDENCIAS)
+  // 🔴 TODO campo se resuelve ACÁ, jamás dentro del objeto que se devuelve:
+  // `incompleta` se lee al armar ese objeto, así que un `faltó()` disparado
+  // adentro llegaría tarde y la marca se perdería en silencio. Lo cazó el
+  // arnés — `via` y `vacuna_codigo` anulaban el valor y NO marcaban la fila.
+  const fechaLiteral = texto('fecha_literal')
+  const fechaProximaLiteral = texto('fecha_proxima_literal')
+  const laboratorio = texto('laboratorio')
+  const veterinario = texto('veterinario')
+  const via = deLista('via', VIAS)
+  const vencimiento = fecha('vencimiento_biologico')
+  const vacunaCodigo = deLista('vacuna_codigo', codigos)
+
+  // 🔴 EL ANCLA sigue: sin nombre NI fecha NI lote no hay nada que registrar ni
+  // que corregir. Eso NO es un dato faltante: es una fila vacía.
+  if (nombre === null && fechaAplicada === null && lote === null) {
+    return { ok: false, motivo: 'sin nombre, sin fecha y sin lote: no hay nada que registrar' }
+  }
+  if (fechaAplicada === null) incompleta = true
+
+  return {
+    ok: true,
+    incompleta,
+    fila: {
+      nombre,
+      fecha_aplicada: fechaAplicada,
+      fecha_aplicada_precision: precAplicada,
+      fecha_literal: fechaLiteral,
+      fecha_proxima: fechaProxima,
+      fecha_proxima_precision: precProxima,
+      fecha_proxima_literal: fechaProximaLiteral,
+      lote,
+      laboratorio,
+      via,
+      veterinario,
+      vencimiento_biologico: vencimiento,
+      vacuna_codigo: vacunaCodigo,
+      cubre,
+      confianza,
+      evidencia,
+    },
+  }
 }
 
 function esFilaPlan(v: unknown): v is { nombre: string } {
@@ -613,43 +684,50 @@ Deno.serve(async (req) => {
       console.error('Output sin array plan_impreso')
       return error('extraccion_fallida', 'El JSON del modelo no trae el array plan_impreso.')
     }
-    for (let i = 0; i < vacunasCrudas.length; i++) {
-      if (!esVacunaExtraida(vacunasCrudas[i], codigos)) {
-        console.error(`Ítem ${i} fuera de contrato:`, JSON.stringify(vacunasCrudas[i]))
-        return error('extraccion_fallida', `El ítem ${i + 1} extraído no cumple el contrato.`)
-      }
-    }
-    for (let i = 0; i < planCrudo.length; i++) {
-      if (!esFilaPlan(planCrudo[i])) {
-        console.error(`Fila ${i} de plan_impreso fuera de contrato`)
-        return error('extraccion_fallida', `La fila ${i + 1} del plan impreso no cumple el contrato.`)
-      }
-    }
-
-    // `tipo_vacuna` se DERIVA del código — el modelo no lo escribió. Es el
-    // campo que la RPC `registrar_vacunas_de_carnet` ya sabe guardar (22 de 32
-    // filas reales lo tienen), así que sale acompañando al código para que la
-    // escritura siga funcionando sin que A tenga que tocar nada.
+    // ── SANEO FILA POR FILA · lo que falta se marca, sólo lo roto se descarta ──
     const porCodigo = new Map(catalogo.map((c) => [c.codigo, c.nombre]))
-    const vacunas = (vacunasCrudas as Record<string, unknown>[]).map((v) => {
-      // 🔴 EL CONTROL, ACÁ Y NO EN EL PROMPT. Si el literal no alcanza para
-      // sostener la precisión declarada, el modelo completó algo. **No se
-      // corrige la fecha** —no sabemos cuál es la buena— **se marca la fila y
-      // se le baja la confianza**, que es lo que hace que la pantalla la
-      // detenga. *Una regla que vive en el prompt es una sugerencia; ésta se
-      // cuenta con dígitos y no depende de que el modelo obedezca.*
-      const inventoAlgo =
-        literalNoSostiene(v.fecha_literal, v.fecha_aplicada_precision) ||
-        literalNoSostiene(v.fecha_proxima_literal, v.fecha_proxima_precision)
-      return {
-        ...v,
-        tipo_vacuna: v.vacuna_codigo === null ? null : (porCodigo.get(String(v.vacuna_codigo)) ?? null),
-        dudosa: inventoAlgo ? 'fecha' : null,
-        confianza: inventoAlgo ? 'baja' : v.confianza,
-      }
-    })
+    const vacunas: Record<string, unknown>[] = []
+    const filas_descartadas: { lista: 'vacunas' | 'plan_impreso'; indice: number; motivo: string }[] = []
 
-    return new Response(JSON.stringify({ vacunas, plan_impreso: planCrudo }), {
+    for (let i = 0; i < vacunasCrudas.length; i++) {
+      const r = sanearFila(vacunasCrudas[i], codigos)
+      if (!r.ok) {
+        // Se descarta ESTA fila y se DICE cuál. El resto del carnet sigue.
+        console.error(`[extract-vacuna] fila ${i + 1} descartada: ${r.motivo}`)
+        filas_descartadas.push({ lista: 'vacunas', indice: i + 1, motivo: r.motivo })
+        continue
+      }
+      const f = r.fila
+      // El control determinístico del literal, sobre la fila ya saneada.
+      const inventoAlgo =
+        literalNoSostiene(f.fecha_literal, f.fecha_aplicada_precision) ||
+        literalNoSostiene(f.fecha_proxima_literal, f.fecha_proxima_precision)
+      vacunas.push({
+        ...f,
+        tipo_vacuna: f.vacuna_codigo === null ? null : (porCodigo.get(String(f.vacuna_codigo)) ?? null),
+        // 'fecha' gana sobre 'incompleta': es la más específica y la que la
+        // pantalla puede explicar mostrando el literal.
+        dudosa: inventoAlgo ? 'fecha' : r.incompleta ? 'incompleta' : null,
+        confianza: inventoAlgo ? 'baja' : f.confianza,
+      })
+    }
+
+
+    // Misma ley en el otro canasto: una fila de plan sin nombre no tiene nada
+    // que mostrar, así que se cae ELLA. El plan es lo menos crítico del carnet:
+    // que tumbara la lectura entera de las aplicaciones sería absurdo.
+    const plan_impreso: { nombre: string }[] = []
+    for (let i = 0; i < planCrudo.length; i++) {
+      const f = planCrudo[i]
+      if (!esFilaPlan(f)) {
+        console.error(`[extract-vacuna] fila ${i + 1} de plan_impreso descartada: sin nombre`)
+        filas_descartadas.push({ lista: 'plan_impreso', indice: i + 1, motivo: 'fila de plan sin nombre' })
+        continue
+      }
+      plan_impreso.push({ nombre: f.nombre })
+    }
+
+    return new Response(JSON.stringify({ vacunas, plan_impreso, filas_descartadas }), {
       status: 200,
       headers: JSON_HEADERS,
     })
