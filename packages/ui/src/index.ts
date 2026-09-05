@@ -1156,3 +1156,34 @@ export {
   type EstadoVacuna,
   type ConfianzaIA,
 } from './components/vacunas-estado'
+
+/* ══ EL PERFIL HABLA PRIMERO (S113-B · lote 1.1) ═══════════════════════════
+ * La regla que las ordena: **lo que el dato no sabe, no se dibuja** — ni un
+ * cero, ni un guion, ni la medición de hace dos años como si fuera de hoy.
+ * *Un dato viejo mostrado como actual es peor que ninguno: el que lo lee toma
+ * una decisión con él.* */
+export { FranjaSeguridad, type FranjaSeguridadProps } from './components/FranjaSeguridad'
+export { CeldasHoy, type CeldasHoyProps } from './components/CeldasHoy'
+export { PiezaMedicacionActiva, type PiezaMedicacionActivaProps, type FilaMedicacion } from './components/PiezaMedicacionActiva'
+export { FiltrosLineaDeVida, type FiltrosLineaDeVidaProps, type TipoLineaDeVida } from './components/FiltrosLineaDeVida'
+export {
+  haySeguridad,
+  ordenarSeguridad,
+  tendenciaPeso,
+  hayCobertura,
+  type ItemSeguridad,
+  type ClaseSeguridad,
+  type ProcedenciaSeguridad,
+  type CoberturaPlaga,
+  type Plaga,
+  type Tendencia,
+} from './components/perfil-seguridad'
+
+/* ══ REGISTRAR Y DESPEDIRSE (S113-B · lote 1.2) ════════════════════════════
+ * Las dos puntas de la vida de una mascota en el producto. La regla común:
+ * **nada se guarda sin que la persona toque**, y lo que la casa no revisó no
+ * se muestra. */
+export { SugerenciaRaza, type SugerenciaRazaProps, type CandidataRaza, type ConfianzaRaza } from './components/SugerenciaRaza'
+export { FichaRaza, type FichaRazaProps, type CuidadoPorEtapa } from './components/FichaRaza'
+export { PantallaDespedida, type PantallaDespedidaProps } from './components/PantallaDespedida'
+export { fechaDespedidaValida } from './components/despedida-fecha'
