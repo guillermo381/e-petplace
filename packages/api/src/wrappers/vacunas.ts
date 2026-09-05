@@ -66,6 +66,18 @@ export interface VacunaExtraida {
   fecha_aplicada: string | null;
   /** Cuál de las tres formas es `fecha_aplicada`. `null` ⟺ la fecha es null. */
   fecha_aplicada_precision: PrecisionFecha | null;
+  /** 🔴 La transcripción EXACTA de lo que el carnet trae («FEB 2023»,
+   *  «26 JUN»). **La pantalla la muestra al lado del campo** — es lo que le
+   *  permite a la persona ver de dónde salió la fecha sin ir a buscar el
+   *  papel. Y es lo que la edge usa para comprobar la precisión sin creerle al
+   *  modelo. */
+  fecha_literal: string | null;
+  fecha_proxima_precision: PrecisionFecha | null;
+  fecha_proxima_literal: string | null;
+  /** DERIVADO por la edge, no por el modelo: `'fecha'` cuando el literal no
+   *  sostiene la precisión declarada — o sea, cuando el modelo completó algo.
+   *  La fila viene además con `confianza: 'baja'`. */
+  dudosa: 'fecha' | null;
   /** Sólo si está ESCRITA; jamás calculada. Mismas tres formas. */
   fecha_proxima: string | null;
   lote: string | null;
@@ -185,6 +197,12 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     (v.fecha_aplicada === null
       ? v.fecha_aplicada_precision === null
       : v.fecha_aplicada_precision === precisionDe(v.fecha_aplicada as string)) &&
+    (v.fecha_proxima === null
+      ? v.fecha_proxima_precision === null
+      : v.fecha_proxima_precision === precisionDe(v.fecha_proxima as string)) &&
+    campoTexto(v.fecha_literal) &&
+    campoTexto(v.fecha_proxima_literal) &&
+    (v.dudosa === null || v.dudosa === 'fecha') &&
     campoTexto(v.lote) &&
     campoTexto(v.laboratorio) &&
     campoTexto(v.veterinario) &&
@@ -248,6 +266,10 @@ export async function extraerVacunasDeCarnet(
       nombre: item.nombre,
       fecha_aplicada: item.fecha_aplicada,
       fecha_aplicada_precision: item.fecha_aplicada_precision,
+      fecha_literal: item.fecha_literal,
+      fecha_proxima_precision: item.fecha_proxima_precision,
+      fecha_proxima_literal: item.fecha_proxima_literal,
+      dudosa: item.dudosa,
       fecha_proxima: item.fecha_proxima,
       lote: item.lote,
       laboratorio: item.laboratorio,

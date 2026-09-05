@@ -176,6 +176,15 @@ interface VacunaExtraida {
    * `null` si y sólo si la fecha es `null`.
    */
   fecha_aplicada_precision: Precision | null
+  /** La transcripción EXACTA de lo que el carnet trae: «FEB 2023», «26 JUN».
+   *  Es lo que deja verificar la precisión sin creerle al modelo — y lo que la
+   *  pantalla le muestra a la persona al lado del campo. */
+  fecha_literal: string | null
+  fecha_proxima_precision: Precision | null
+  fecha_proxima_literal: string | null
+  /** DERIVADO por esta function, no por el modelo: por qué la fila hay que
+   *  mirarla. `null` = nada que señalar. */
+  dudosa: 'fecha' | null
   /** Código de `cat_vacunas`, o `null` si el modelo no lo puede mapear. */
   vacuna_codigo: string | null
   /**
@@ -269,6 +278,9 @@ function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
     // el modelo se está contradiciendo, y adivinar cuál de las dos quiso decir
     // sería inventar. Null con null, siempre juntas.
     precisionCoherente(o.fecha_aplicada, o.fecha_aplicada_precision) &&
+    precisionCoherente(o.fecha_proxima, o.fecha_proxima_precision) &&
+    textoOnull(o.fecha_literal) &&
+    textoOnull(o.fecha_proxima_literal) &&
     textoOnull(o.lote) &&
     textoOnull(o.laboratorio) &&
     textoOnull(o.veterinario) &&
@@ -282,6 +294,42 @@ function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
 
 /** `cubre`: lista de códigos del catálogo, sin repetidos, y coherente con el
  *  código principal. **Vacía es válido** (el modelo no está seguro). */
+/**
+ * 🔴 EL CONTROL DETERMINISTICO — no le creemos al `precision` del modelo: lo
+ * verificamos contra **su propia transcripción**.
+ *
+ * El caso que lo obligó, medido dos veces: el carnet dice **«FEB 2023»** y el
+ * modelo devuelve `2023-02-25` **declarando `precision: 'dia'`**. No es que se
+ * olvide de declarar: *afirma con confianza que leyó un día que no existe.*
+ * Pedirle el literal y contar sus componentes acá **saca la decisión del
+ * modelo** — una fecha completa necesita tres cosas escritas, y eso se cuenta.
+ *
+ * Un COMPONENTE es un grupo de dígitos o un nombre de mes:
+ *   «3 Ago 2023» → 3   ·  «19-4-23» → 3   ·  «13/NOV 2022» → 3   ⇒ hay día
+ *   «FEB 2023»   → 2   ·  «05-2024» → 2                          ⇒ NO hay día
+ */
+const MESES_ES = /\b(ene|feb|mar|abr|may|jun|jul|ago|sep|set|oct|nov|dic)\w*/gi
+
+function componentesDe(literal: string): number {
+  const digitos = (literal.match(/\d+/g) ?? []).length
+  const meses = (literal.match(MESES_ES) ?? []).length
+  return digitos + meses
+}
+
+/** Cuántos componentes EXIGE cada precisión para ser creíble. */
+const COMPONENTES_MINIMOS: Record<Precision, number> = { dia: 3, mes: 2, sin_anio: 2 }
+
+/**
+ * `true` si el literal NO alcanza para sostener la precisión declarada. Es la
+ * señal de que el modelo completó algo. **No corrige la fecha** —no sabemos
+ * cuál es la buena— **marca la fila** para que la persona la mire.
+ */
+function literalNoSostiene(literal: unknown, precision: unknown): boolean {
+  if (typeof literal !== 'string' || literal.trim().length === 0) return false
+  if (typeof precision !== 'string' || !(PRECISIONES as readonly string[]).includes(precision)) return false
+  return componentesDe(literal) < COMPONENTES_MINIMOS[precision as Precision]
+}
+
 /** La precisión declarada coincide con la forma del valor, y las dos son null
  *  juntas. *Una precisión que no se puede contradecir con su valor no está
  *  midiendo nada; ésta sí.* */
@@ -381,6 +429,14 @@ Poner "2025-05-05" en fecha_aplicada sería el error más caro del carnet.
   La próxima sólo si está escrita: no la calcules.
 - fecha_aplicada_precision: "dia", "mes" o "sin_anio" — cuál de las tres formas
   usaste arriba para fecha_aplicada. null si la fecha es null.
+- fecha_proxima_precision: lo mismo, para fecha_proxima.
+- fecha_literal / fecha_proxima_literal: 🔴 **la transcripción EXACTA de lo que
+  está escrito en el carnet**, antes de convertirla. Copiala tal cual la ves,
+  con su formato y su ortografía: "FEB 2023", "26 JUN", "3 Ago 2023",
+  "02-4 23", "13/NOV". No la normalices, no la completes, no la traduzcas.
+  null si no hay nada escrito.
+  *Esto es lo que deja comprobar tu propia lectura: si el literal dice
+  "FEB 2023" y arriba pusiste un día, algo no cierra.*
 - lote: el número de lote del sticker.
 - laboratorio: el fabricante del sticker (Zoetis, MSD, Boehringer, Virbac...).
 - via: SOLO uno de estos, o null: "subcutanea" · "intramuscular" ·
@@ -427,7 +483,7 @@ y no puede corregir lo que no sabe que está mal.
 ═══ LA SALIDA ═══
 
 Respondé SOLO con este JSON, sin texto adicional y sin backticks:
-{"vacunas":[{"nombre":null,"fecha_aplicada":null,"fecha_aplicada_precision":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"cubre":[],"confianza":"alta","evidencia":"sticker"}],"plan_impreso":[{"nombre":""}]}
+{"vacunas":[{"nombre":null,"fecha_aplicada":null,"fecha_aplicada_precision":null,"fecha_literal":null,"fecha_proxima":null,"fecha_proxima_precision":null,"fecha_proxima_literal":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"cubre":[],"confianza":"alta","evidencia":"sticker"}],"plan_impreso":[{"nombre":""}]}
 
 Carnet sin ninguna aplicación ⇒ {"vacunas":[],"plan_impreso":[...]}.
 Carnet ilegible ⇒ {"vacunas":[],"plan_impreso":[]}.`
@@ -575,10 +631,23 @@ Deno.serve(async (req) => {
     // filas reales lo tienen), así que sale acompañando al código para que la
     // escritura siga funcionando sin que A tenga que tocar nada.
     const porCodigo = new Map(catalogo.map((c) => [c.codigo, c.nombre]))
-    const vacunas = (vacunasCrudas as Record<string, unknown>[]).map((v) => ({
-      ...v,
-      tipo_vacuna: v.vacuna_codigo === null ? null : (porCodigo.get(String(v.vacuna_codigo)) ?? null),
-    }))
+    const vacunas = (vacunasCrudas as Record<string, unknown>[]).map((v) => {
+      // 🔴 EL CONTROL, ACÁ Y NO EN EL PROMPT. Si el literal no alcanza para
+      // sostener la precisión declarada, el modelo completó algo. **No se
+      // corrige la fecha** —no sabemos cuál es la buena— **se marca la fila y
+      // se le baja la confianza**, que es lo que hace que la pantalla la
+      // detenga. *Una regla que vive en el prompt es una sugerencia; ésta se
+      // cuenta con dígitos y no depende de que el modelo obedezca.*
+      const inventoAlgo =
+        literalNoSostiene(v.fecha_literal, v.fecha_aplicada_precision) ||
+        literalNoSostiene(v.fecha_proxima_literal, v.fecha_proxima_precision)
+      return {
+        ...v,
+        tipo_vacuna: v.vacuna_codigo === null ? null : (porCodigo.get(String(v.vacuna_codigo)) ?? null),
+        dudosa: inventoAlgo ? 'fecha' : null,
+        confianza: inventoAlgo ? 'baja' : v.confianza,
+      }
+    })
 
     return new Response(JSON.stringify({ vacunas, plan_impreso: planCrudo }), {
       status: 200,

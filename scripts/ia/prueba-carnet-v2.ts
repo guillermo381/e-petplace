@@ -50,7 +50,8 @@ const CATALOGO = [
 let catalogoFalla = false
 
 const fila = (extra: Record<string, unknown> = {}) => ({
-  nombre: 'Nobivac DHPPi', fecha_aplicada: '2023-04-19', fecha_aplicada_precision: 'dia', fecha_proxima: null,
+  nombre: 'Nobivac DHPPi', fecha_aplicada: '2023-04-19', fecha_aplicada_precision: 'dia',
+  fecha_literal: '19-4-23', fecha_proxima: null, fecha_proxima_precision: null, fecha_proxima_literal: null,
   lote: '56288', laboratorio: 'Zoetis', via: null, veterinario: 'CPA Teusaquillo',
   vencimiento_biologico: null, vacuna_codigo: 'multiple', cubre: ['multiple'],
   confianza: 'alta', evidencia: 'sticker', ...extra,
@@ -116,7 +117,7 @@ console.log('\n== 1 · EL CASO «1 → 12»: una aplicación, once del plan ==')
   exigir('1 en vacunas', (json.vacunas as unknown[])?.length === 1, (json.vacunas as unknown[])?.length)
   exigir('11 en plan_impreso', (json.plan_impreso as unknown[])?.length === 11, (json.plan_impreso as unknown[])?.length)
   const f0 = (json.vacunas as Record<string, unknown>[])[0]
-  exigir('la fila viaja entera (13 del modelo + tipo_vacuna derivado)', Object.keys(f0).length === 14, Object.keys(f0).length)
+  exigir('la fila viaja entera (16 del modelo + tipo_vacuna y dudosa derivados)', Object.keys(f0).length === 18, Object.keys(f0).length)
   exigir('tipo_vacuna DERIVADO del código (multiple → múltiple)', f0.tipo_vacuna === 'múltiple', f0.tipo_vacuna)
   exigir('y el código viaja tal cual', f0.vacuna_codigo === 'multiple')
 }
@@ -267,6 +268,16 @@ console.log('\n== 11 · LA FIRMA (b): el carnet REAL entra entero, con dos filas
   exigir('y las dos traen fecha (el ancla que las deja existir)',
     filas?.filter((f) => f.nombre === null).every((f) => f.fecha_aplicada !== null))
   exigir('las 13 con nombre siguen intactas', filas?.filter((f) => typeof f.nombre === 'string').length === 13)
+
+  // 🔴 EL ROJO DEL FOUNDER, sobre la salida REAL: los renglones 7 y 8 dicen
+  // «Feb/2023» en PRÓXIMA y el modelo declara `dia`. Los 1 y 2 dicen
+  // «29/08/2021», con día escrito. El control tiene que separarlos.
+  const dudosas = filas?.map((f, i) => ({ n: i + 1, d: f.dudosa, lit: f.fecha_proxima_literal })).filter((x) => x.d === 'fecha')
+  exigir('los renglones 7 y 8 salen DUDOSOS', JSON.stringify(dudosas?.map((x) => x.n)) === '[7,8]', dudosas)
+  exigir('y traen su literal para la pantalla', dudosas?.every((x) => x.lit === 'Feb/2023'), dudosas?.map((x) => x.lit))
+  exigir('los renglones 1 y 2 NO salen dudosos (día escrito)',
+    filas?.[0].dudosa === null && filas?.[1].dudosa === null, [filas?.[0].dudosa, filas?.[1].dudosa])
+  exigir('las dudosas bajan a confianza baja', dudosas !== undefined && filas!.filter((f) => f.dudosa === 'fecha').every((f) => f.confianza === 'baja'))
 }
 
 console.log('\n== 11bis · LAS TRES PRECISIONES, y el día que NO se inventa ==')
@@ -284,10 +295,46 @@ for (const [nombre, valor, prec] of [
     { status, v: f?.fecha_aplicada, p: f?.fecha_aplicada_precision })
 }
 {
-  proveedorFalso(() => ({ vacunas: [fila({ fecha_proxima: '2023-02' })], plan_impreso: [] }))
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_proxima: '2023-02', fecha_proxima_precision: 'mes', fecha_proxima_literal: 'FEB 2023' })], plan_impreso: [] }))
   const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
   exigir('la próxima también admite forma parcial (era donde se inventaba el día)',
     (json.vacunas as Record<string, unknown>[])?.[0]?.fecha_proxima === '2023-02')
+}
+
+console.log('\n== 11ter · EL CONTROL DETERMINISTICO: el literal desmiente al modelo ==')
+console.log('  (el modelo afirma `dia` sobre «FEB 2023». No le creemos: se cuentan los')
+console.log('   componentes del literal. Tres para un día; «FEB 2023» tiene dos.)')
+for (const [caso, literal, prec, esperaDudosa] of [
+  ['«3 Ago 2023» dice dia', '3 Ago 2023', 'dia', false],
+  ['«19-4-23» dice dia', '19-4-23', 'dia', false],
+  ['«13/NOV 2022» dice dia', '13/NOV 2022', 'dia', false],
+  ['🔴 «FEB 2023» dice dia', 'FEB 2023', 'dia', true],
+  ['🔴 «05-2024» dice dia', '05-2024', 'dia', true],
+  ['«FEB 2023» dice mes', 'FEB 2023', 'mes', false],
+  ['«26 JUN» dice sin_anio', '26 JUN', 'sin_anio', false],
+] as const) {
+  const valor = prec === 'dia' ? '2023-02-25' : prec === 'mes' ? '2023-02' : '--06-26'
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_aplicada: valor, fecha_aplicada_precision: prec, fecha_literal: literal })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir(`${caso} → ${esperaDudosa ? 'DUDOSA' : 'pasa'}`,
+    (f?.dudosa === 'fecha') === esperaDudosa && (esperaDudosa ? f?.confianza === 'baja' : true),
+    { dudosa: f?.dudosa, confianza: f?.confianza })
+}
+{
+  // la próxima recibe el mismo trato
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_proxima: '2023-02-25', fecha_proxima_precision: 'dia', fecha_proxima_literal: 'FEB 2023' })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('la PRÓXIMA con día inventado también marca la fila', f?.dudosa === 'fecha' && f?.confianza === 'baja', { d: f?.dudosa, c: f?.confianza })
+  exigir('y el literal viaja a la pantalla', f?.fecha_proxima_literal === 'FEB 2023')
+}
+{
+  // el literal NO se usa para corregir la fecha: sólo para marcar.
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_aplicada: '2023-02-25', fecha_aplicada_precision: 'dia', fecha_literal: 'FEB 2023' })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('la fecha NO se corrige sola (no sabemos cuál es la buena)', f?.fecha_aplicada === '2023-02-25')
 }
 
 console.log('\n== 12 · EL ANCLA: sin nombre NI fecha NI lote, la fila no existe ==')

@@ -78,6 +78,12 @@ interface ItemRevision {
    *  guarda — la columna es `date`. Ver `esDudosa`. */
   fecha_aplicada: string | null;
   fecha_precision: 'dia' | 'mes' | 'sin_anio' | null;
+  /** Lo que el carnet dice, tal cual. Se le MUESTRA a la persona al lado del
+   *  campo: sin esto tiene que ir a buscar el papel para saber de dónde salió
+   *  la fecha que le proponemos. */
+  fecha_literal: string | null;
+  /** La edge la marcó: el literal no sostiene la fecha que trae. */
+  dudosaPorFecha: boolean;
   fecha_proxima: string | null;
   veterinario: string | null;
   lote: string | null;
@@ -117,7 +123,7 @@ const VOZ_SUBIDA = {
 // no admite un mes suelto. **La persona pone el día mirando el carnet** — y si
 // no está, descarta la fila. *Lo que no se hace es que el sistema elija un día.*
 const esDudosa = (i: ItemRevision) =>
-  !i.fecha_aplicada || !i.nombre || i.fecha_precision !== 'dia';
+  !i.fecha_aplicada || !i.nombre || i.fecha_precision !== 'dia' || i.dudosaPorFecha;
 
 function hoyIso(): string {
   const d = new Date();
@@ -224,6 +230,8 @@ export default function CarnetDeVacunas() {
         tipo_vacuna: v.tipo_vacuna,
         fecha_aplicada: v.fecha_aplicada,
         fecha_precision: v.fecha_aplicada_precision,
+        fecha_literal: v.fecha_literal,
+        dudosaPorFecha: v.dudosa === 'fecha',
         fecha_proxima: v.fecha_proxima,
         veterinario: v.veterinario,
         lote: v.lote,
@@ -290,7 +298,8 @@ export default function CarnetDeVacunas() {
     // persona apretó.**
     const conNombre = activas.filter(
       (i): i is ItemRevision & { nombre: string } =>
-        typeof i.nombre === 'string' && i.nombre.length > 0 && i.fecha_precision === 'dia',
+        typeof i.nombre === 'string' && i.nombre.length > 0 &&
+        i.fecha_precision === 'dia' && !i.dudosaPorFecha,
     );
     if (conNombre.length !== activas.length) {
       setGuardando(false);
@@ -430,6 +439,7 @@ export default function CarnetDeVacunas() {
                 // el nombre no se lee es diseño tuyo**, con su copy y su gate.
                 // No lo invento acá.
                 nombre={i.nombre ?? ''}
+                fechaLiteral={i.fecha_literal}
                 tipoVacuna={i.tipo_vacuna}
                 fechaAplicada={i.fecha_aplicada}
                 fechaProxima={i.fecha_proxima}
