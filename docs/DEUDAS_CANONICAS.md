@@ -3294,6 +3294,41 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1032` 🟠 Los chips disponibles por mascota salen de la página cargada, no del servidor
+
+**Nace:** S113-A, candidato 1.1, 5-sep-2026, **por orden del founder para el
+1.1.1**. **Dueño: C** (la superficie) **con A** (si hace falta un lector nuevo).
+
+**El defecto, en una frase:** el conjunto de chips que se le ofrece a una mascota
+**se deriva de los eventos que esa página ya trajo** — o sea de **una página**,
+no del expediente. *Un filtro que se arma con lo que hay a la vista no filtra:
+describe la primera pantalla.*
+
+**Por qué importa, y es más grave que una lista incompleta:** el modo de falla es
+**silencioso y sesgado hacia el olvido**. Una mascota con veinte paseos recientes
+y **una** vacuna de hace tres años **no va a ofrecer el chip de vacunas**, porque
+la primera página se llenó de paseos. ⇒ *la familia concluye que no hay vacunas
+registradas — y el filtro que existía para ayudarla a encontrarlas es justo el
+que se las esconde.* **Y no hay error, ni vacío, ni aviso:** el chip
+sencillamente no está, que es indistinguible de «no aplica».
+
+**Y su cara peor: empeora con el uso.** Cuanto más activa la mascota, más
+empujan los eventos nuevos a los viejos fuera de la primera página, **así que el
+filtro se degrada solo con el tiempo** y justo para las mascotas mejor cuidadas.
+
+**Lo que hace falta, y es de servidor:** un lector que devuelva **los tipos de
+evento DISTINTOS que esa mascota tiene en todo su expediente** — un
+`select distinct tipo … where mascota_id = …`, que en la base es barato y no
+depende de ninguna paginación. *La lista de chips es una propiedad del
+expediente, no de la consulta que se acaba de hacer.*
+
+⚠️ **Antes de escribirlo rige la regla del censo** (`CLAUDE.md`): hay que
+listar qué funciones tocan ya `eventos_mascota` con esa intención — *este lote
+demostró dos veces que la puerta suele existir* (`registrar_desparasitacion` en
+el lote 0, `obtener_plan_vacunal` en el 1.0).
+
+**Disparo:** el 1.1.1.
+
 ### `D-1031` 🟡 En web, React avisa que una prop no es de un elemento del DOM
 
 **Nace:** S113-A, 5-sep-2026, por reporte de **E**, que lo vio como toast en la
