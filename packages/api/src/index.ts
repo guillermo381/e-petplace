@@ -312,6 +312,7 @@ export {
 // Perfil de mascota — S51-B2.3 (pila de módulos)
 export {
   obtenerPerfilMascota,
+  registrarFinDeVida,
   declararFotoMascota,
   // S91 (P3): la puerta de EDICIÓN de raza del perfil.
   actualizarRazaMascota,
@@ -321,6 +322,8 @@ export {
   type VacunaDeMascota,
   type CodigoErrorFotoMascota,
   type EncuadreFotoDeclarado,
+  type FinDeVidaRegistrado,
+  type CodigoErrorFinDeVida,
   // El censo del acuario (S91, enmienda firmada a D-685): especies y cuántos,
   // JAMÁS peces con identidad.
   obtenerCensoDelAcuario,
@@ -1806,9 +1809,13 @@ export {
 } from './wrappers/conteoSemanaPrestador';
 
 export {
+  obtenerContenidoDeRaza,
   sugerirRaza,
   type SugerenciaDeRaza,
   type CandidataRaza,
+  type ContenidoDeRaza,
+  type CuidadosPorEtapa,
+  type CodigoErrorContenidoRaza,
   type ConfianzaRaza,
   type InputSugerirRaza,
   type CodigoErrorRaza,

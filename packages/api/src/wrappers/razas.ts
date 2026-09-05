@@ -121,3 +121,102 @@ export async function sugerirRaza(
   }
   return { ok: true, data: { candidatas, mestizo: data.mestizo, sin_animal: data.sin_animal } };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// A8 · LA FICHA DE LA RAZA — lo que la familia lee sobre de dónde viene su
+//      mascota. **Contenido escrito por un modelo y publicado por una persona.**
+//
+// 🔴 NO HACE FALTA RPC: la política de `razas_contenido` sólo deja salir las
+// filas con `activo`, así que **este wrapper no puede leer un borrador aunque
+// se lo pida**. *La puerta es la RLS, y por eso el error de olvidar el filtro
+// es inexpresable acá arriba.*
+//
+// ⚠️ Y por eso el tipo no expone `conocida`: un CHECK impide publicar una ficha
+// de raza no conocida, así que **todo lo que llega acá es, por construcción, de
+// una raza que el modelo dijo conocer**. Exponerlo invitaría a preguntar algo
+// que ya está contestado.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface CuidadosPorEtapa {
+  cachorro: string | null;
+  adulto: string | null;
+  senior: string | null;
+}
+
+export interface ContenidoDeRaza {
+  especie: string;
+  raza_codigo: string;
+  origen: string | null;
+  temperamento: string | null;
+  talla_adulta: string | null;
+  esperanza_vida: string | null;
+  /** Hasta cinco. **Son temas para conversar con el veterinario, jamás
+   *  diagnósticos**: que la raza tenga una predisposición no significa que ESTE
+   *  animal la tenga, y la pantalla que las dibuje tiene que decirlo. */
+  predisposiciones: readonly string[];
+  cuidados_por_etapa: CuidadosPorEtapa;
+  /** De qué modelo salió y cuándo. Viaja para que el día que un texto salga
+   *  mal, la pregunta «¿cuántos más como éste hay?» tenga respuesta. */
+  modelo: string;
+  generado_el: string;
+}
+
+export type CodigoErrorContenidoRaza = 'datos_inconsistentes' | 'error_desconocido';
+
+const texto = (v: unknown): string | null =>
+  typeof v === 'string' && v.trim().length > 0 ? v : null;
+
+/**
+ * La ficha PUBLICADA de una raza, o `null` cuando no hay ninguna.
+ *
+ * ⚠️ **`null` es la respuesta normal, no un error.** Hoy hay 105 razas en el
+ * catálogo y cero fichas publicadas: lo esperable es que esto devuelva `null`
+ * casi siempre. *Una pantalla que trate el `null` como falla va a decirle a la
+ * familia que algo se rompió cuando lo único que pasa es que todavía no
+ * escribimos sobre su raza.*
+ */
+export async function obtenerContenidoDeRaza(
+  especie: string,
+  razaCodigo: string,
+): Promise<ResultadoWrapper<ContenidoDeRaza | null, CodigoErrorContenidoRaza>> {
+  const { data, error } = await getClient()
+    .from('razas_contenido')
+    .select('especie, raza_codigo, origen, temperamento, talla_adulta, esperanza_vida, predisposiciones, cuidados_por_etapa, modelo, generado_el')
+    .eq('especie', especie)
+    .eq('raza_codigo', razaCodigo)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  }
+  if (data === null) return { ok: true, data: null };
+
+  const o = data as unknown as Record<string, unknown>;
+  const c = esObj(o.cuidados_por_etapa) ? o.cuidados_por_etapa : {};
+  if (typeof o.especie !== 'string' || typeof o.raza_codigo !== 'string' ||
+      typeof o.modelo !== 'string' || typeof o.generado_el !== 'string') {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
+  }
+
+  return {
+    ok: true,
+    data: {
+      especie: o.especie,
+      raza_codigo: o.raza_codigo,
+      origen: texto(o.origen),
+      temperamento: texto(o.temperamento),
+      talla_adulta: texto(o.talla_adulta),
+      esperanza_vida: texto(o.esperanza_vida),
+      predisposiciones: Array.isArray(o.predisposiciones)
+        ? o.predisposiciones.filter((x): x is string => typeof x === 'string')
+        : [],
+      cuidados_por_etapa: {
+        cachorro: texto(c.cachorro),
+        adulto: texto(c.adulto),
+        senior: texto(c.senior),
+      },
+      modelo: o.modelo,
+      generado_el: o.generado_el,
+    },
+  };
+}

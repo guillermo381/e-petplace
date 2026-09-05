@@ -17685,6 +17685,71 @@ export type Database = {
           },
         ]
       }
+      razas_contenido: {
+        Row: {
+          activo: boolean
+          conocida: boolean
+          created_at: string
+          cuidados_por_etapa: Json
+          especie: string
+          esperanza_vida: string | null
+          generado_el: string
+          modelo: string
+          origen: string | null
+          predisposiciones: string[]
+          raza_codigo: string
+          revisado_en: string | null
+          revisado_por: string | null
+          talla_adulta: string | null
+          temperamento: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          conocida: boolean
+          created_at?: string
+          cuidados_por_etapa?: Json
+          especie: string
+          esperanza_vida?: string | null
+          generado_el: string
+          modelo: string
+          origen?: string | null
+          predisposiciones?: string[]
+          raza_codigo: string
+          revisado_en?: string | null
+          revisado_por?: string | null
+          talla_adulta?: string | null
+          temperamento?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          conocida?: boolean
+          created_at?: string
+          cuidados_por_etapa?: Json
+          especie?: string
+          esperanza_vida?: string | null
+          generado_el?: string
+          modelo?: string
+          origen?: string | null
+          predisposiciones?: string[]
+          raza_codigo?: string
+          revisado_en?: string | null
+          revisado_por?: string | null
+          talla_adulta?: string | null
+          temperamento?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "razas_contenido_especie_raza_codigo_fkey"
+            columns: ["especie", "raza_codigo"]
+            isOneToOne: true
+            referencedRelation: "cat_razas"
+            referencedColumns: ["especie", "slug"]
+          },
+        ]
+      }
       recurrencia_desglose: {
         Row: {
           congelado_en: string
@@ -25677,6 +25742,10 @@ export type Database = {
           p_pedido_id: string
           p_total?: number
         }
+        Returns: Json
+      }
+      registrar_fin_de_vida: {
+        Args: { p_fecha: string; p_mascota_id: string; p_palabras?: string }
         Returns: Json
       }
       registrar_hecho_de_sala: {
