@@ -26,23 +26,13 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { puntuarCaso, CAMPOS, percentil } from './puntuar-carnet.mjs';
+import { claveAnon } from './lib-conjuntos.mjs';
 
 const DIR = process.env.IA_CONJUNTOS_DIR ?? '.ia-conjuntos';
 const REF = readFileSync('supabase/.temp/project-ref', 'utf8').trim();
 const URL_BASE = `https://${REF}.supabase.co`;
 const CORREO = 'guillo381+8@gmail.com';
 const di = (s) => { console.log(s); };
-
-/** La `anon`, leída del repo (es pública) y VERIFICADA por su claim. */
-function claveAnon() {
-  const fuente = 'scripts/seg2/d713-cron.mjs';
-  const m = readFileSync(fuente, 'utf8').match(/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
-  if (!m) throw new Error(`no encontré la anon en ${fuente}. El arnés PARA.`);
-  const rol = JSON.parse(Buffer.from(m[0].split('.')[1], 'base64url').toString('utf8')).role;
-  // Correr con la clave equivocada es medir otra cosa con confianza.
-  if (rol !== 'anon') throw new Error(`la clave de ${fuente} tiene role=${rol}, no anon. El arnés PARA.`);
-  return m[0];
-}
 
 async function jwtDePersona() {
   const cl = spawnSync('security', ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'], { encoding: 'utf8' });

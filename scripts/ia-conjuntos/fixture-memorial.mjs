@@ -43,7 +43,7 @@
  *     memorial de perro con otro nombre).
  */
 import { spawnSync } from 'node:child_process';
-import { consultar, URL_BASE, PROJECT_REF } from './lib-conjuntos.mjs';
+import { consultar, URL_BASE, PROJECT_REF, claveAnon } from './lib-conjuntos.mjs';
 
 const di = (s) => process.stdout.write(s + '\n');
 const CUENTA = 'guillo381+8@gmail.com';
@@ -79,9 +79,9 @@ const pass = spawnSync('security',
   { encoding: 'utf8' }).stdout.trim();
 if (!pass) throw new Error('sin clave de siembra en el keychain. La fixture PARA.');
 
-const salida = spawnSync('npx', ['supabase', 'projects', 'api-keys', '--project-ref', PROJECT_REF],
-  { encoding: 'utf8' }).stdout;
-const anon = JSON.parse(salida.slice(salida.indexOf('{'))).keys.find((k) => k.id === 'anon').api_key;
+// La `anon` sale del repo (es pública), no del comando que también volcaba la
+// `service_role` por stdout — D-1013.
+const anon = claveAnon();
 
 const auth = await (await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
   method: 'POST',

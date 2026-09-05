@@ -88,6 +88,22 @@ const PROBAR_CINTURON = process.argv.includes('--probar-cinturon')
  *   hermano `TS2552` (*…did you mean?*) y —desde S113-E— `TS2307`
  *   (*Cannot find module*).
  *
+ * ── 🔴 POR QUÉ ENTRA `TS2741` (S113-E, adenda 1.0, 4-sep-2026) ─────────────
+ * D se comió uno en su 1.2: `TIMEOUT_MS` quedó sin la clave `raza` mientras el
+ * tipo la exigía. `setTimeout(fn, undefined)` **dispara a los 0 ms** ⇒ toda
+ * sugerencia de raza se habría abortado al instante, en producción. `deno
+ * check` lo dijo con **dos `TS2741`** y **este gate salió VERDE**, porque
+ * `TS2741` caía en el bucket «fuera de clase».
+ *
+ * *«Declara una tabla y no la completa» es la misma familia que «usa algo que
+ * no existe»: las dos compilan mal y revientan en runtime.*
+ *
+ * **Y ensancharlo no cuesta un solo falso rojo**, que es lo contrario de
+ * `TS2339` (77 de línea base, por eso se rechazó bien). Medido por D con su
+ * cura aplicada y **re-medido acá por separado**: `TS2741` en **CERO** sobre
+ * las 34 edges, con los 89 fuera de clase intactos (`TS2339`×77, `TS2345`×9,
+ * `TS7006`×3) — los dos censos coinciden.
+ *
  * ── 🔴 POR QUÉ ENTRA `TS2307` (S113-E, 3-sep-2026) ─────────────────────────
  * **El gate daba VERDE con un import que no resuelve.** D plantó en una edge
  * un `import` a `packages/*` —una ruta que el runtime de Deno **no puede
@@ -119,7 +135,7 @@ const PROBAR_CINTURON = process.argv.includes('--probar-cinturon')
  * **Los otros 89 no se tapan: se declaran** al pie del reporte y quedan
  * como deuda con dueño. *Callarlos sería el defecto de al lado.*
  */
-const CLASE = new Set(['TS2304', 'TS2552', 'TS2307'])
+const CLASE = new Set(['TS2304', 'TS2552', 'TS2307', 'TS2741'])
 
 /** ¿Está `deno`? Sin él no hay veredicto — y eso NO es verde. */
 function hayDeno() {
@@ -318,7 +334,16 @@ if (AUTOPRUEBA) {
     // las otras dos mitades -- un control roto que "probaba" que el gate
     // estaba roto. El instrumento del control tambien se controla.
     'import { loQueSea } from "../../../packages/no-resuelve/mod.ts";\n' +
+    // S113-E, adenda 1.0 - CUARTA mitad: una tabla que DECLARA una clave y no
+    // la completa. Es el defecto que D se comio en su 1.2: `TIMEOUT_MS` sin
+    // `raza` mientras el tipo la exigia, y `setTimeout(fn, undefined)` dispara
+    // a los 0 ms => toda sugerencia de raza abortada al instante, en
+    // produccion. `deno check` lo dijo con dos TS2741 y este gate salio VERDE,
+    // porque TS2741 caia en el bucket "fuera de clase".
+    'type PiezaSint = "a" | "b" | "c";\n' +
+    'const TABLA_SINT: Record<PiezaSint, number> = { a: 1, b: 2 };\n' +
     'Deno.serve(() => {\n' +
+    '  void TABLA_SINT;\n' +
     '  const a = SECRETO_QUE_NADIE_DECLARO;\n' +
     '  void loQueSea;\n' +
     '  const b = createHmac("sha256", "x");\n' +
@@ -337,12 +362,17 @@ if (AUTOPRUEBA) {
   // S113-E - tercera mitad: un import que NO RESUELVE. El gate daba verde con
   // uno vivo plantado por D, porque TS2307 caia fuera de clase.
   const noResuelve = errsMalo.find((x) => x.codigo === 'TS2307')
+  // S113-E - cuarta mitad: tabla incompleta. "Declara una tabla y no la
+  // completa" es la misma familia que "usa algo que no existe": las dos
+  // compilan mal y revientan en runtime.
+  const tablaIncompleta = errsMalo.find((x) => x.codigo === 'TS2741')
 
-  if (!global || !modulo || !noResuelve) {
-    console.error('ROJO EL JUEZ ESTA ROTO: no reporto las TRES mitades de la clase.')
+  if (!global || !modulo || !noResuelve || !tablaIncompleta) {
+    console.error('ROJO EL JUEZ ESTA ROTO: no reporto las CUATRO mitades de la clase.')
     console.error(`  global no declarada  -> ${global ? 'vista' : 'NO VISTA'}`)
     console.error(`  simbolo sin importar -> ${modulo ? 'visto' : 'NO VISTO'}`)
     console.error(`  import que no resuelve -> ${noResuelve ? 'visto' : 'NO VISTO'}`)
+    console.error(`  tabla incompleta       -> ${tablaIncompleta ? 'vista' : 'NO VISTA'}`)
     console.error('  Un rojo por la razon equivocada esta tan roto como un verde por la equivocada.\n')
     process.exit(1)
   }
@@ -350,6 +380,7 @@ if (AUTOPRUEBA) {
   console.log(`  OK mitad 1 - global nunca declarada -> ${global.codigo}: ${global.mensaje}`)
   console.log(`  OK mitad 2 - simbolo de modulo sin importar -> ${modulo.codigo}: ${modulo.mensaje}`)
   console.log(`  OK mitad 3 - import que no resuelve -> ${noResuelve.fn}:${noResuelve.linea} - ${noResuelve.codigo}`)
+  console.log(`  OK mitad 4 - tabla que declara y no completa -> ${tablaIncompleta.codigo}: ${tablaIncompleta.mensaje}`)
 
   // CONTROL POSITIVO, medido con la MISMA vara que el gate. La primera
   // version preguntaba `sano.verde` -- el veredicto CRUDO de deno, que
@@ -366,7 +397,7 @@ if (AUTOPRUEBA) {
     console.log(`  OK control positivo - el arbol sin el defecto fabricado da VERDE (${sano.total} funciones)`)
   }
 
-  console.log('\nOK Autoprueba: el juez discrimina - rojo con el defecto, y ve las TRES mitades.\n')
+  console.log('\nOK Autoprueba: el juez discrimina - rojo con el defecto, y ve las CUATRO mitades.\n')
   process.exit(0)
 }
 
