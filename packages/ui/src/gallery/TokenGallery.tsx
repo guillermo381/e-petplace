@@ -3407,6 +3407,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada
                 onConfirmar={() => {}}
                 onEditar={() => {}}
@@ -3420,6 +3422,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada={false}
                 onConfirmar={() => {}}
                 onEditar={() => {}}
@@ -3433,6 +3437,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada={false}
                 onConfirmar={() => {}}
                 onEditar={() => {}}
@@ -3446,6 +3452,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada={false}
                 descartada
                 vozDescartada="No se va a guardar"
@@ -3455,8 +3463,27 @@ function GaleriaInterna() {
                 onEditar={() => {}}
                 onDescartar={() => {}}
               />
+              {/* 🔴 SIN NOMBRE: llega marcada, con el campo vacío y en foco, y
+                  «Es correcta» apagado hasta que se escriba. *«Es correcta»
+                  sobre una fila sin nombre es firmar un renglón en blanco.* */}
+              <FilaConfirmacionVacuna
+                nombre={null}
+                campos={[{ etiqueta: 'Fecha', valor: '08 feb 2026' }]}
+                confianza="alta"
+                vozRevisar="Revisá esta"
+                vozConfirmar="Es correcta"
+                vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
+                enfocar
+                tocada={false}
+                onConfirmar={() => {}}
+                onEditar={() => {}}
+                onDescartar={() => {}}
+                onNombre={() => {}}
+              />
               <PieConfirmacionVacunas
-                filas={[{ tocada: true }, { tocada: false }, { tocada: false }, { tocada: false, descartada: true }]}
+                filas={[{ tocada: true }, { tocada: false }, { tocada: false }, { tocada: false, descartada: true }, { tocada: true, sinNombre: true }]}
                 vozGuardar={(n) => `Guardar ${n} vacunas`}
                 vozFaltan={(n) => `faltan ${n} por revisar`}
                 vozNinguna="No queda ninguna para guardar"
