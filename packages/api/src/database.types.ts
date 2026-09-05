@@ -7806,6 +7806,7 @@ export type Database = {
           lote: string | null
           mascota_id: string
           notas: string | null
+          plagas: string[] | null
           prestador_id: string | null
           producto: string
           tipo_desparasitacion: string | null
@@ -7823,6 +7824,7 @@ export type Database = {
           lote?: string | null
           mascota_id: string
           notas?: string | null
+          plagas?: string[] | null
           prestador_id?: string | null
           producto: string
           tipo_desparasitacion?: string | null
@@ -7840,6 +7842,7 @@ export type Database = {
           lote?: string | null
           mascota_id?: string
           notas?: string | null
+          plagas?: string[] | null
           prestador_id?: string | null
           producto?: string
           tipo_desparasitacion?: string | null
@@ -9959,6 +9962,7 @@ export type Database = {
           fecha_aplicada: string | null
           fecha_proxima: string | null
           id: string
+          laboratorio: string | null
           lote: string | null
           mascota_id: string
           nombre_vacuna: string
@@ -9966,6 +9970,7 @@ export type Database = {
           tipo_vacuna: string | null
           updated_at: string
           vacuna_codigo: string | null
+          vencimiento_biologico: string | null
           veterinario_nombre_externo: string | null
           via_administracion: string | null
         }
@@ -9980,6 +9985,7 @@ export type Database = {
           fecha_aplicada?: string | null
           fecha_proxima?: string | null
           id?: string
+          laboratorio?: string | null
           lote?: string | null
           mascota_id: string
           nombre_vacuna: string
@@ -9987,6 +9993,7 @@ export type Database = {
           tipo_vacuna?: string | null
           updated_at?: string
           vacuna_codigo?: string | null
+          vencimiento_biologico?: string | null
           veterinario_nombre_externo?: string | null
           via_administracion?: string | null
         }
@@ -10001,6 +10008,7 @@ export type Database = {
           fecha_aplicada?: string | null
           fecha_proxima?: string | null
           id?: string
+          laboratorio?: string | null
           lote?: string | null
           mascota_id?: string
           nombre_vacuna?: string
@@ -10008,6 +10016,7 @@ export type Database = {
           tipo_vacuna?: string | null
           updated_at?: string
           vacuna_codigo?: string | null
+          vencimiento_biologico?: string | null
           veterinario_nombre_externo?: string | null
           via_administracion?: string | null
         }
@@ -25606,6 +25615,7 @@ export type Database = {
           p_fecha_proxima?: string
           p_mascota_id: string
           p_notas?: string
+          p_plagas?: string[]
           p_producto: string
           p_tipo?: string
         }
