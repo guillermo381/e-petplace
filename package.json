@@ -49,6 +49,8 @@
     "_comentario_hooks": "S113-E: un hook llamado despues de un early return compila, pasa el typecheck y arranca en dev; rompe en runtime y lejos de su causa. Ningun gate de la casa lo veia. Corre ESLint con UNA sola regla (react-hooks/rules-of-hooks) sobre apps/*/src y packages/ui/src. NO revive `pnpm lint`: cero eslint.config.* en el repo (la config vive dentro del gate) y una sola regla encendida, sin primera pasada roja que absorber. Las devDeps (eslint, eslint-plugin-react-hooks, typescript-eslint) NO tocan el binario: medido con `pnpm list --prod` en las dos apps, 0 paquetes con eslint contra 334/339 con react.",
   "verify:hooks": "node scripts/verify-hooks.mjs",
   "verify:tdz": "node scripts/verify-tdz.mjs",
+  "_comentario_verify_cotejo": "Cotea las DOS manos de un documento (D y E) desde ~/.epetplace/ia-conjuntos/manos — fuera del repo porque ninguna pista ve la rama de la otra hasta un merge, y porque llevan datos de animales reales. Su ROJO es la firma: una mano editada despues de depositarse deja de ser la que se comparo. NO va al hook: necesita las dos manos y un --doc.",
+  "verify:cotejo": "node scripts/verify-cotejo.mjs",
   "_comentario_bundle_cadenas": "Lee cadenas del .hbc publicado en SUS DOS almacenes (ASCII y UTF-16). No es verify:*: no es gate de commit, se corre para verificar un guard de __DEV__ contra el bundle real. `strings` es ciego al almacén UTF-16, donde vive casi todo el espanol de la app.",
   "bundle:cadenas": "node scripts/leer-cadenas-bundle.mjs",
   "verify:hooks-bajo-return": "node scripts/verify-hooks-bajo-return.mjs",
