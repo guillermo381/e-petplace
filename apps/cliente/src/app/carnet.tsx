@@ -38,6 +38,9 @@ import {
   CampoFecha,
   Encabezado,
   FichaVacuna,
+  FilaConfirmacionVacuna,
+  faltanPorTocar,
+  type CampoLeido,
   Hoja,
   HojaScroll,
   Tarjeta,
@@ -66,6 +69,13 @@ import { useTraduccion } from '@/i18n';
 // modelo (800 de avatar lo destruye); a calidad 0.7 queda en ~300-500KB.
 const LADO_CARNET = 1600;
 const UMBRAL_SPINNER_MS = 150;
+/** 🔴 **A LOS 8 s LA ESPERA CAMBIA DE VOZ** (S113-C · lote 1.0 · C2). La primera
+ *  frase promete y explica; pasados ocho segundos ya no alcanza, porque el que
+ *  espera empieza a dudar de si algo se colgó. La segunda **da la razón** —los
+ *  carnets escritos a mano tardan más— que es lo único honesto que se puede
+ *  decir: *no hay porcentaje, porque no lo sabemos, y un porcentaje inventado
+ *  es peor que el silencio.* */
+const UMBRAL_ESPERA_LARGA_MS = 8000;
 
 interface ItemRevision {
   key: number;
@@ -125,8 +135,16 @@ export default function CarnetDeVacunas() {
   const [visorAbierto, setVisorAbierto] = useState(false);
   const [permisoDenegado, setPermisoDenegado] = useState(false);
   const [spinnerVisible, setSpinnerVisible] = useState(false);
+  const [esperaLarga, setEsperaLarga] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
+  /** 🔴 **NINGUNA FILA SE GUARDA SIN SU TOQUE** (S113-C · 1.1 · C3). Antes se
+   *  podía guardar la tanda entera sin mirar una sola: *un «guardar todo» sobre
+   *  filas que nadie revisó convierte la revisión en un trámite, y la revisión
+   *  es lo único que separa a la extracción de inventar datos clínicos.* Se
+   *  guarda por `key` y no por índice: descartar una fila corre los índices y
+   *  el toque terminaría puesto en otra. */
+  const [tocadas, setTocadas] = useState<ReadonlySet<number>>(new Set());
 
   // Hoja de edición (borrador aparte: la ficha no edita inline)
   const [editando, setEditando] = useState<number | null>(null);
@@ -159,7 +177,9 @@ export default function CarnetDeVacunas() {
     corriendo.current = true;
     setFase({ t: 'leyendo' });
     setSpinnerVisible(false);
+    setEsperaLarga(false);
     const timer = setTimeout(() => setSpinnerVisible(true), UMBRAL_SPINNER_MS);
+    const timerLargo = setTimeout(() => setEsperaLarga(true), UMBRAL_ESPERA_LARGA_MS);
 
     try {
       const sesion = await obtenerSesion();
@@ -215,6 +235,7 @@ export default function CarnetDeVacunas() {
       setFase({ t: 'revision' });
     } finally {
       clearTimeout(timer);
+      clearTimeout(timerLargo);
       corriendo.current = false;
     }
   }
@@ -247,14 +268,33 @@ export default function CarnetDeVacunas() {
     setItems((prev) => prev.map((i) => (i.key === key ? { ...i, descartada: true } : i)));
   }
 
-  // ── B4/B5 · guardar ────────────────────────────────────────────────────────
+  /** Los campos que la fila muestra. **`null` viaja como `null`**: la pieza lo
+ *  dibuja vacío y editable, que es lo que un dato que el modelo no leyó tiene
+ *  que parecer — nunca un guion ni un «—», que se leen como valor. */
+function camposDe(
+  i: { fecha_aplicada: string | null; fecha_proxima: string | null; tipo_vacuna: string | null; lote: string | null; veterinario: string | null },
+  t: ReturnType<typeof useTraduccion>['t'],
+): CampoLeido[] {
+  return [
+    { etiqueta: t('carnet.campoAplicada'), valor: i.fecha_aplicada },
+    { etiqueta: t('carnet.campoProxima'), valor: i.fecha_proxima },
+    { etiqueta: t('carnet.campoTipo'), valor: i.tipo_vacuna },
+    { etiqueta: t('carnet.campoLote'), valor: i.lote },
+    { etiqueta: t('carnet.campoVeterinario'), valor: i.veterinario },
+  ];
+}
+
+// ── B4/B5 · guardar ────────────────────────────────────────────────────────
 
   const activas = items.filter((i) => !i.descartada);
   const dudosas = activas.filter(esDudosa).length;
   const n = activas.length;
+  /* La cuenta la hace la pieza de B, no esta pantalla: si el criterio de «ya
+     la miraron» cambia, cambia en un solo lugar. */
+  const sinTocar = faltanPorTocar(activas.map((i) => tocadas.has(i.key)));
 
   async function guardar() {
-    if (guardando || n === 0 || dudosas > 0) return;
+    if (guardando || n === 0 || dudosas > 0 || sinTocar > 0) return;
     setGuardando(true);
     setErrorGuardar(null);
     const r = await registrarVacunasDeCarnet({
@@ -339,7 +379,7 @@ export default function CarnetDeVacunas() {
               VERBATIM. Mismo umbral de visibilidad (Ley 13). */}
           {spinnerVisible && <EsperaDeMarca tamano={64} />}
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary, textAlign: 'center' }}>
-            {t('carnet.espera')}
+            {esperaLarga ? t('carnet.esperaLarga') : t('carnet.espera')}
           </Text>
         </View>
       )}
@@ -384,17 +424,53 @@ export default function CarnetDeVacunas() {
 
           {activas.map((i) => (
             <View key={i.key} onLayout={(e) => posiciones.current.set(i.key, e.nativeEvent.layout.y)}>
-              <FichaVacuna
+              {/* ⭐ **LA CONFIRMACIÓN, FILA POR FILA** (C3). Reemplaza a
+                  `FichaVacuna` en la revisión: la diferencia no es estética —
+                  esta pieza **exige el toque**.
+
+                  🔴 **`confianza: 'baja'` en TODAS, y es un dato honesto, no un
+                  relleno**: la extracción todavía no devuelve confianza por
+                  fila (pedido a A), así que **no la sabemos** — y la propia
+                  pieza dice que *una duda que no se muestra es una afirmación*.
+                  Fail-closed: mientras no llegue el dato, todas piden revisión.
+                  El día que A la mande, esta línea deja de ser una constante.
+
+                  ⚠️ `origen` lo exige el tipo y la pieza **no lo lee** (no está
+                  en su destructuring). Se pasa el valor menos afirmativo y la
+                  voz NO dice de dónde salió —«leído del carnet», que es lo
+                  único cierto—: *decir «de un sticker» sin saberlo sería
+                  inventar procedencia sobre un dato clínico.* Pedido a B:
+                  hacerlo opcional mientras la extracción no lo entregue. */}
+              <FilaConfirmacionVacuna
                 nombre={i.nombre}
-                tipoVacuna={i.tipo_vacuna}
-                fechaAplicada={i.fecha_aplicada}
-                fechaProxima={i.fecha_proxima}
-                veterinario={i.veterinario}
-                lote={i.lote}
-                rechazada={i.rechazada}
+                campos={camposDe(i, t)}
+                confianza="baja"
+                origen="aMano"
+                vozOrigen={t('carnet.filaOrigen')}
+                vozRevisar={t('carnet.filaRevisar')}
+                vozConfirmar={t('carnet.filaConfirmar')}
+                tocada={tocadas.has(i.key)}
+                onConfirmar={() =>
+                  setTocadas((prev) => {
+                    const s = new Set(prev);
+                    s.add(i.key);
+                    return s;
+                  })
+                }
                 onEditar={() => abrirEdicion(i.key)}
-                onDescartar={() => descartar(i.key)}
               />
+              {/* 🔴 **«Esta no es» NO SE PIERDE.** La pieza de B trae confirmar
+                  y editar, y descartar no; sacarlo habría quitado una capacidad
+                  real —la fila que el modelo inventó— por un cambio de pieza.
+                  Va debajo, discreto, hasta que B sume `onDescartar`. */}
+              <View style={{ alignSelf: 'flex-start', marginTop: spacing[1] }}>
+                <Boton
+                  variante="sinCaja"
+                  tamaño="sm"
+                  etiqueta={t('carnet.estaNoEs')}
+                  onPress={() => descartar(i.key)}
+                />
+              </View>
             </View>
           ))}
 
@@ -411,11 +487,22 @@ export default function CarnetDeVacunas() {
               {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
             </Text>
           )}
+          {/* 🔴 **EL BOTÓN DICE QUÉ FALTA.** Un «Guardar» apagado sin razón a la
+              vista es el defecto que la casa persigue: acá la etiqueta MISMA
+              cuenta cuántas quedan sin mirar. */}
           <Boton
             variante="primario"
             bloque
-            etiqueta={n === 1 ? t('carnet.guardarUna') : t('carnet.guardarN', { n })}
-            deshabilitado={n === 0 || dudosas > 0}
+            etiqueta={
+              sinTocar > 0
+                ? sinTocar === 1
+                  ? t('carnet.faltaTocarUna')
+                  : t('carnet.faltanTocar', { n: sinTocar })
+                : n === 1
+                  ? t('carnet.guardarUna')
+                  : t('carnet.guardarN', { n })
+            }
+            deshabilitado={n === 0 || dudosas > 0 || sinTocar > 0}
             cargando={guardando}
             onPress={() => void guardar()}
           />
