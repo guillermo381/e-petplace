@@ -2995,28 +2995,31 @@ export type Database = {
       cat_razas: {
         Row: {
           activo: boolean
+          creado_en_s113: boolean
           created_at: string
           especie: string
           nombre: string
-          ruta_imagen: string
+          ruta_imagen: string | null
           slug: string
           updated_at: string
         }
         Insert: {
           activo?: boolean
+          creado_en_s113?: boolean
           created_at?: string
           especie: string
           nombre: string
-          ruta_imagen: string
+          ruta_imagen?: string | null
           slug: string
           updated_at?: string
         }
         Update: {
           activo?: boolean
+          creado_en_s113?: boolean
           created_at?: string
           especie?: string
           nombre?: string
-          ruta_imagen?: string
+          ruta_imagen?: string | null
           slug?: string
           updated_at?: string
         }

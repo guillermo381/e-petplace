@@ -80,7 +80,14 @@ export async function obtenerMascotasAtendidas(
       .from('cat_razas')
       .select('especie, nombre, ruta_imagen')
       .in('nombre', declaradas);
-    for (const r of razas ?? []) rutaPorRaza.set(`${r.especie}|${r.nombre}`, r.ruta_imagen);
+    /* Las razas sin dibujo propio (S113) NO entran al mapa: quien consulta
+       recibe `undefined` y **cae solo a la cara genérica de su especie**, que es
+       la escalera que este lector ya tenía escrita. *Meter un `null` en el mapa
+       obligaría a cada consumidor a distinguir «no está» de «está y es nada», y
+       las dos significan lo mismo acá.* */
+    for (const r of razas ?? []) {
+      if (r.ruta_imagen !== null) rutaPorRaza.set(`${r.especie}|${r.nombre}`, r.ruta_imagen);
+    }
   }
 
   const lista: MascotaAtendida[] = mascotas.data.map((m) => {

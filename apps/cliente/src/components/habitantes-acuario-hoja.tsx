@@ -205,7 +205,9 @@ export function HabitantesAcuarioHoja({
               style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}
             >
               {(catalogo ?? []).map((r) => {
-                const url = urlDeRutaGaleria(r.ruta_imagen);
+                /* S113 · sin dibujo propio, `undefined`: el ChipEntidad ya
+                   tiene su fallback y **no se le inventa una ruta**. */
+                const url = urlDeRutaGaleria(r.ruta_imagen ?? undefined);
                 return (
                   <View key={r.slug} style={{ flexBasis: '47%', flexGrow: 1 }}>
                     <ChipEntidad
