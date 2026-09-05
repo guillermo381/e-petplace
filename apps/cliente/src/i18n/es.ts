@@ -767,6 +767,7 @@ export const clienteEs = {
     capturaDetalle: 'Con buena luz y el carnet bien plano, mejor. Después vas a poder revisar y corregir todo antes de guardar.',
     multiPagina: '¿El carnet tiene varias páginas? Escanéalas de a una — cada tanda se suma a su historia.',
     espera: 'Estamos leyendo el carnet. Esto puede tardar un minuto — cada vacuna que encontremos se suma a su historia.',
+    esperaLarga: 'Seguimos leyendo. Los carnets escritos a mano tardan un poco más.',
     permisoCamara: 'Necesitamos permiso para usar la cámara. Puedes habilitarlo en los ajustes del teléfono, o elegir una foto de la galería.',
     sacarFoto: 'Sacarle una foto',
     masOpciones: 'Más opciones',

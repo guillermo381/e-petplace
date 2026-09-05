@@ -578,6 +578,7 @@ export const clienteEn = {
     capturaDetalle: "Good light and the card laid flat work best. You'll be able to review and correct everything before saving.",
     multiPagina: 'Does the card have several pages? Scan them one at a time — each batch adds to their story.',
     espera: 'We are reading the card. This can take a minute — every vaccine we find adds to their story.',
+    esperaLarga: 'Still reading. Handwritten records take a little longer.',
     permisoCamara: 'We need permission to use the camera. You can enable it in your phone settings, or pick a photo from the gallery.',
     sacarFoto: 'Take a photo',
     masOpciones: 'More options',

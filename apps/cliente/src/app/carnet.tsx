@@ -66,6 +66,13 @@ import { useTraduccion } from '@/i18n';
 // modelo (800 de avatar lo destruye); a calidad 0.7 queda en ~300-500KB.
 const LADO_CARNET = 1600;
 const UMBRAL_SPINNER_MS = 150;
+/** 🔴 **A LOS 8 s LA ESPERA CAMBIA DE VOZ** (S113-C · lote 1.0 · C2). La primera
+ *  frase promete y explica; pasados ocho segundos ya no alcanza, porque el que
+ *  espera empieza a dudar de si algo se colgó. La segunda **da la razón** —los
+ *  carnets escritos a mano tardan más— que es lo único honesto que se puede
+ *  decir: *no hay porcentaje, porque no lo sabemos, y un porcentaje inventado
+ *  es peor que el silencio.* */
+const UMBRAL_ESPERA_LARGA_MS = 8000;
 
 interface ItemRevision {
   key: number;
@@ -125,6 +132,7 @@ export default function CarnetDeVacunas() {
   const [visorAbierto, setVisorAbierto] = useState(false);
   const [permisoDenegado, setPermisoDenegado] = useState(false);
   const [spinnerVisible, setSpinnerVisible] = useState(false);
+  const [esperaLarga, setEsperaLarga] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
 
@@ -159,7 +167,9 @@ export default function CarnetDeVacunas() {
     corriendo.current = true;
     setFase({ t: 'leyendo' });
     setSpinnerVisible(false);
+    setEsperaLarga(false);
     const timer = setTimeout(() => setSpinnerVisible(true), UMBRAL_SPINNER_MS);
+    const timerLargo = setTimeout(() => setEsperaLarga(true), UMBRAL_ESPERA_LARGA_MS);
 
     try {
       const sesion = await obtenerSesion();
@@ -213,6 +223,7 @@ export default function CarnetDeVacunas() {
       setFase({ t: 'revision' });
     } finally {
       clearTimeout(timer);
+      clearTimeout(timerLargo);
       corriendo.current = false;
     }
   }
@@ -337,7 +348,7 @@ export default function CarnetDeVacunas() {
               VERBATIM. Mismo umbral de visibilidad (Ley 13). */}
           {spinnerVisible && <EsperaDeMarca tamano={64} />}
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary, textAlign: 'center' }}>
-            {t('carnet.espera')}
+            {esperaLarga ? t('carnet.esperaLarga') : t('carnet.espera')}
           </Text>
         </View>
       )}
