@@ -3263,6 +3263,46 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1029` 🟠 La casa no sabe en qué día está la familia — sólo en qué día está Guayaquil
+
+**Nace:** S113-A, lote 1.0 · A5, 9-sep-2026. **Pariente de `D-1007`, y más
+ancha que ella:** `D-1007` dice que `hoy_local()` está clavada en Guayaquil;
+ésta dice que **no hay con qué reemplazarla del lado de la familia**.
+
+**Lo medido, y dónde** (catálogos de Postgres, base viva):
+· `hoy_local()` = `(now() AT TIME ZONE 'America/Guayaquil')::date` — fija.
+· `zona_horaria` existe en **cinco** tablas: `prestadores`, `guarderia_franjas`,
+  `eventos`, `vendedor_bodegas`, `entrega_turnos`. **Las cinco son del lado del
+  NEGOCIO.**
+· `country_config` **no tiene columna de zona** (tiene moneda, IVA, prefijo
+  telefónico, formato de fecha — no zona).
+· `profiles` tampoco (`ciudad`, `pais`, `pais_codigo`, `country_code`: ninguna
+  es una zona horaria).
+· `user_preferencias` tampoco (`idioma`, medio de pago, tarjeta).
+
+**Por qué importa, con el caso que lo hizo aparecer.** El plan vacunal decide
+`vencida` / `vence_en` / `al_dia` **comparando contra un día**. Con `hoy_local()`
+una familia en México ve «vencida» según el calendario de Ecuador. *Hoy el
+desvío es de horas y el estado casi nunca cambia por eso — pero el día que
+cambie, cambia en silencio y del lado del que menos se mira: el borde.*
+
+**Lo que se hizo mientras tanto, y por qué NO es la cura:** `obtener_plan_vacunal`
+recibe `p_hoy` y el aparato lo manda, porque el aparato **sí** sabe el día de la
+familia. Es correcto ahí **porque esa función no escribe nada**: adelantar el
+reloj sólo cambia lo que uno ve. ⚠️ **Esa salida NO se generaliza a una función
+que escriba** — un `fecha_futura` que el cliente puede correr deja de ser un
+guard. *Cada puerta que necesite «hoy» y además escriba, necesita esta ficha
+resuelta primero.*
+
+**Las dos vías, sin elegir:** ① derivar la zona de `country_code` con una tabla
+país→zona **que no existe y habría que crear** (y que es aproximada: hay países
+con varias zonas); ② guardar la zona de la familia cuando la app la conoce, que
+es exacto y necesita una columna y un escritor. **Es decisión de producto y no
+de A.**
+
+**Disparo:** la primera puerta que ESCRIBA usando «hoy» y sea de la familia — o
+el primer usuario fuera de la zona de Guayaquil, lo que llegue antes.
+
 ### `D-1028` 🟡 Mi discriminador de OTA no ve el `package.json` de la raíz
 
 **Nace:** S113-A, 4-sep-2026, corriendo el discriminador del candidato 0.3.
@@ -28326,6 +28366,39 @@ movía su propio fixture**. E no lo esquivó: **lo convirtió en un brazo que
 prueba la cascada ajena**. *Un arnés no encontró un defecto: encontró que el
 mundo cambió debajo de su fixture — que es exactamente para lo que sirve volver
 a correrlo.*
+
+### `L-491` — Un arnés que limpia con el MISMO rol con el que escribió puede dejar residuo y reportar éxito
+
+**Origen:** S113-A, lote 1.0 · A2, 9-sep-2026, con dos filas quedando en
+producción.
+
+El fixture de `registrar_vacunas_de_carnet` corría con `set_config('role',
+'authenticated')` y las claims del dueño — correcto, porque eso es lo que hace
+la app. Al terminar, borraba lo que había insertado **con el mismo rol**. Y
+`evento_vacuna_aplicada` / `eventos_mascota` **no tienen policy de DELETE**: el
+`DELETE` afectó **cero filas, devolvió ok y no lanzó nada**. El arnés imprimió
+sus seis verdes y dejó dos filas vivas en la base.
+
+**Por qué no lo cazó nada:** un `DELETE` que no borra no es un error de SQL, es
+un resultado. Lo único que lo delató fue que el arnés **contaba el residuo
+después** — y esa cuenta la hacía **también** como `authenticated`, así que
+podría haber mentido en la otra dirección si la RLS de SELECT hubiera sido más
+angosta que la de DELETE.
+
+**La forma que funciona, y son dos cosas:**
+① **escribir con el rol de la app, limpiar con el rol que puede limpiar** — el
+   arnés cambia de sombrero a propósito y lo dice;
+② **verificar el residuo con una consulta que no dependa del rol del arnés**, y
+   acompañarla de un **control positivo** que pruebe que la consulta ve algo
+   cuando hay algo (acá: «las 8 vacunas reales de Thor siguen ahí»).
+
+*Sin ② el cero del residuo es indistinguible de un cero por ceguera* — que es
+`L-437` («un censo por patrón acota, no cierra») aplicada a la limpieza en vez
+de a la medición.
+
+**Corolario incómodo:** el mismo arnés que prueba que una puerta está bien
+cerrada **usa esa puerta cerrada para limpiar**, y ahí su cierre le juega en
+contra. Cuanto mejor la RLS, más silencioso el residuo.
 
 ### `L-490` — `core.hooksPath` es una ruta ABSOLUTA al árbol PRINCIPAL: no obedece a ninguna rama
 
