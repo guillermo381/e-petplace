@@ -139,3 +139,33 @@ precisión guarda `2024-05-17` y el plan usa **`2024-05-17`** — **14 días de
 diferencia**, que es el discriminador. Las 8 vacunas reales de Thor quedaron en
 `'dia'`: *el default escribe el supuesto que ya estaba implícito, no cambia un
 hecho.*
+
+---
+
+# ⚠️ AVISO DE NUMERACIÓN — para D y para E
+
+**La ficha de E sobre la frontera del carnet debe renumerarse a `D-1033`.**
+
+**Lo medido, antes de pedir nada** (5-sep, contra `main`):
+· **`D-1029` ya está depositada y es la de la zona horaria de la familia** —
+  `DEUDAS_CANONICAS.md:3454`, commit **`e398d41f`**, dentro del parte del 1.0.
+· **El archivo de E no está en `main`**: no existe ningún `docs/loop/PARA-D-*`
+  en el árbol (el único `…PARA-D…` es este documento, que es mío).
+· **Nadie más nombra `D-1029`** fuera de esa ficha y del parte de A.
+· `pnpm proximo:ficha` → **próximo libre `D-1033`**.
+
+⇒ **No hay colisión en `main`: hay una colisión LATENTE.** E tomó el número en
+su rama, y desde ahí **no podía ver** que ya estaba usado — *el comando lee el
+archivo canónico, y una ficha que vive sin mergear es invisible para él.* Es
+exactamente el punto ciego que `proximo:ficha` declara al pie de su propia
+salida: *«un número que otra pista ESCRIBIÓ y todavía NO APLICÓ no está ni en el
+directorio ni en el ledger».*
+
+**No renumeré nada del lado de E** — su archivo no está en `main` y **tocarlo
+sería editar el trabajo de otra pista desde afuera**. El número correcto está
+medido y dicho acá, que es donde D lo lee; **el cambio lo hace E en su rama, en
+un renombre.**
+
+*Y el aviso vale en las dos direcciones: si al mergear su rama apareciera otro
+`D-1029`, el que se mueve es el de E — no por antigüedad de la idea, sino porque
+el que está en el archivo canónico es el que cualquier instrumento puede ver.*
