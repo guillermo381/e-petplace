@@ -71,6 +71,36 @@ t('lo que la receta no decía, no se dibuja', /f\.dosis != null \?/.test(MED), t
 t('sin filas, no hay pieza', /filas\.length === 0\) return null/.test(MED), true);
 t('«activa» lo decide la pantalla: la pieza no mira el reloj', /new Date\(\)/.test(MED), false);
 t('🔴 los filtros NO tienen scroll horizontal', /horizontal/.test(FIL), false);
+
+console.log('\n── ROJO · LOS OCHO DEL VOCABULARIO, Y NINGUNO SE CUELA SIN CHIP ──');
+const TIPOS = ['salud', 'vacunas', 'antiparasitario', 'peso', 'paseos', 'estetica', 'adiestramiento', 'recuerdos'];
+const declarados = [...(FIL.match(/export type TipoLineaDeVida =([\s\S]*?)\n\n/)?.[1] ?? '')
+  .matchAll(/\|\s*'([a-z]+)'/g)].map((m) => m[1]);
+t('🔴 son los OCHO de la mesa', declarados, TIPOS);
+/* ☠️ `cuidado` era un BALDE: adentro caían paseos, estética y adiestramiento
+   —tres oficios con tres partes distintos— bajo una sola palabra. Un filtro
+   que junta tres cosas que la familia vivió por separado no filtra: agrupa lo
+   que ella quería separar. */
+t('☠️ `cuidado` murió y no vuelve', declarados.includes('cuidado'), false);
+t('los tres que lo reemplazan están',
+  ['paseos', 'estetica', 'adiestramiento'].every((x) => declarados.includes(x)), true);
+/* 🔴 EL GUARD Y LA FORMA SON LO MISMO: el reparto en dos filas es lo que hace
+   IMPOSIBLE que un tipo nuevo se dibuje sin que alguien le elija su lugar. */
+const reparto = [...(FIL.match(/const FILA = \{([\s\S]*?)\} satisfies/)?.[1] ?? '')
+  .matchAll(/([a-z]+):\s*([01])/g)].map((m) => [m[1], Number(m[2])] as const);
+t('🔴 el reparto lo cierra el compilador (`satisfies Record<TipoLineaDeVida…>`)',
+  /\} satisfies Record<TipoLineaDeVida, 0 \| 1>/.test(FIL), true);
+t('cada uno de los ocho tiene su fila', reparto.map(([t]) => t).sort(), [...TIPOS].sort());
+t('🔴 son DOS filas y quedan 4 y 4',
+  [reparto.filter(([, f]) => f === 0).length, reparto.filter(([, f]) => f === 1).length], [4, 4]);
+t('arriba lo que mira un veterinario', reparto.filter(([, f]) => f === 0).map(([t]) => t),
+  ['salud', 'vacunas', 'antiparasitario', 'peso']);
+t('abajo lo que vivió la familia', reparto.filter(([, f]) => f === 1).map(([t]) => t),
+  ['paseos', 'estetica', 'adiestramiento', 'recuerdos']);
+t('una fila sin chips no se monta (no deja una línea de aire)',
+  /fila\.length === 0 \? null/.test(FIL), true);
+t('🔴 y el wrap se queda DENTRO de cada fila, para que nada se recorte',
+  /flexDirection: 'row', flexWrap: 'wrap'/.test(FIL), true);
 t('…van con `flexWrap`: todo lo que existe está a la vista', /flexWrap/.test(FIL), true);
 t('multi-selección: alterna, no reemplaza', /onAlternar/.test(FIL), true);
 t('el blanco del chip sale de `text.inverse`, no de `sobreVideo`',
