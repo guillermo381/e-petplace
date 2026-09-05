@@ -47,7 +47,13 @@ export type EvidenciaAplicacion = 'sticker_con_fecha' | 'sello' | 'manuscrito' |
  *  en la confirmación; hasta que A ensanche la RPC, se pierden al guardar.
  *  *Se dice acá para que nadie las dé por guardadas.* */
 export interface VacunaExtraida {
-  nombre: string;
+  /** 🔴 **NULL es válido** (firma del founder, 5-sep-2026): un renglón real que
+   *  el modelo no supo nombrar sigue siendo una vacuna que la persona tiene
+   *  delante. **La pantalla la dibuja pidiendo que se complete** — es la ley de
+   *  la casa: *lo que falta lo completa la familia, y se dice dónde no pudimos.*
+   *  ⚠️ Y el tipo lo dice **a propósito**: si fuera `string`, el consumidor no
+   *  tendría cómo saber que puede faltar, y lo pintaría vacío sin pedirlo. */
+  nombre: string | null;
   /** YYYY-MM-DD o null. Sin día, mes Y año ⇒ null (L-139). */
   fecha_aplicada: string | null;
   /** YYYY-MM-DD o null. Sólo si está ESCRITA; jamás calculada. */
@@ -157,7 +163,14 @@ const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
  */
 function normalizarVacuna(v: unknown): VacunaExtraida | null {
   if (!esObj(v)) return null;
-  if (typeof v.nombre !== 'string' || v.nombre.trim().length === 0) return null;
+  /* 🔴 `nombre` NULL ES UNA FILA VÁLIDA (firma del founder, 5-sep-2026).
+     ⏪ Antes se descartaba, y eso era la ley de hoy al revés: *«hacemos lo mejor
+     que podamos; lo que falta lo completa la familia»*. Una fila sin nombre pero
+     con fecha o lote **es un renglón real del carnet** que el modelo no supo
+     nombrar — y la pieza de B ya la dibuja pidiendo que se complete. *Tirarla
+     no evitaba un dato malo: perdía una vacuna que la persona tiene delante.*
+     Lo único que se rechaza es lo MALFORMADO (abajo). */
+  if (v.nombre !== undefined && v.nombre !== null && typeof v.nombre !== 'string') return null;
 
   // MAL ⇒ se rechaza la fila (no se normaliza).
   if (!campoFecha(v.fecha_aplicada) || !campoFecha(v.fecha_proxima)) return null;
@@ -177,7 +190,7 @@ function normalizarVacuna(v: unknown): VacunaExtraida | null {
     : (typeof v.veterinario_nombre_externo === 'string' ? v.veterinario_nombre_externo : null);
 
   return {
-    nombre: v.nombre,
+    nombre: typeof v.nombre === 'string' && v.nombre.trim().length > 0 ? v.nombre : null,
     fecha_aplicada: (v.fecha_aplicada as string | null) ?? null,
     fecha_proxima: (v.fecha_proxima as string | null) ?? null,
     lote: (v.lote as string | null) ?? null,
@@ -239,13 +252,31 @@ export async function extraerVacunasDeCarnet(
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
   }
   const vacunas: VacunaExtraida[] = [];
+  let descartadas = 0;
   for (const item of data.vacunas) {
+    /* 🔴 EL DESCARTE ES **POR FILA**, no por lote (firma del founder).
+       ⏪ Antes un `return` cortaba acá y **una fila malformada tiraba las
+       ocho**. Medido el mismo día en la edge v2.3: el carnet del founder daba
+       422 por su ítem 4 y se perdían las otras siete. *Convertir un campo
+       faltante en un carnet ilegible es el peor cambio posible: la persona ve
+       un carnet lleno y la app le dice que no leyó nada.*
+       La fila mala **se descarta y se cuenta**; el resto llega. */
     const fila = normalizarVacuna(item);
     if (fila === null) {
-      return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
+      descartadas += 1;
+      continue;
     }
     vacunas.push(fila);
   }
+  /* ⚠️ El único caso que sigue siendo `datos_inconsistentes`: **vinieron filas y
+     no sobrevivió ninguna**. *Descartar todo en silencio devolvería «no hay
+     vacunas» sobre un carnet que sí traía renglones — la ausencia disfrazada de
+     hecho que la ley prohíbe.* Un array vacío de origen NO entra acá: ése es un
+     carnet sin aplicaciones, y es un resultado honesto. */
+  if (data.vacunas.length > 0 && vacunas.length === 0) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
+  }
+
   const plan_impreso: FilaPlanImpreso[] = [];
   /* La v1 no manda el canasto. `?? []` es el ÚNICO lugar donde la ausencia se
      vuelve lista vacía, y es correcto: *la v1 no es que tenga un plan impreso
