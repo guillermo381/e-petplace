@@ -146,7 +146,24 @@ const CONFIANZAS = ['alta', 'media', 'baja'] as const
 const EVIDENCIAS = ['sticker', 'sello', 'manuscrito', 'impreso'] as const
 
 interface VacunaExtraida {
-  nombre: string
+  /**
+   * 🔴 NULLABLE desde S113-D-2.4, por FIRMA DEL FOUNDER (opción (b)).
+   *
+   * El caso medido: el documento A tiene dos renglones —el par de Recombitek de
+   * 2021-02-12 y el sticker beige de 2023-03-15— **donde hay una vacuna y su
+   * nombre no se puede leer**. Con `nombre` obligatorio, el modelo devolvía
+   * `null` igual y **la edge rebotaba el carnet ENTERO con 422**: catorce filas
+   * buenas perdidas por dos que nadie puede nombrar.
+   *
+   * *Una fila que dice «acá hubo una vacuna el 15/03/23 y no pude leer cuál» es
+   * corregible; una que desaparece en silencio deja el expediente incompleto
+   * sin que nadie lo sepa.*
+   *
+   * ⚠️ **La base NO cambia:** `evento_vacuna_aplicada.nombre_vacuna` sigue
+   * `NOT NULL` y la RPC tampoco se toca. **Nada se guarda sin nombre** — la
+   * pantalla de confirmación obliga a completarlo antes de escribir.
+   */
+  nombre: string | null
   fecha_aplicada: string | null
   fecha_proxima: string | null
   lote: string | null
@@ -187,8 +204,18 @@ const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
 function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
   if (typeof v !== 'object' || v === null) return false
   const o = v as Record<string, unknown>
+  if (!textoOnull(o.nombre)) return false
+  // 🔴 EL ANCLA: sin nombre, la fila existe sólo si trae algo MATERIAL del
+  // carnet — la fecha de aplicación o el lote del sticker.
+  //
+  // Interpretación DECLARADA de la firma («exige fecha o marca de aplicación»):
+  // tomo por «marca» un **rastro leído del carnet**, no el campo `evidencia`.
+  // La razón es que `evidencia` es obligatorio y siempre viene lleno, así que
+  // exigirlo sería una regla vacua: aceptaría igual una fila sin nombre, sin
+  // fecha y sin lote, que es el modelo afirmando que hubo una vacuna **sin nada
+  // detrás**. Si la mesa quiso la otra lectura, es una línea.
+  if (o.nombre === null && o.fecha_aplicada === null && o.lote === null) return false
   return (
-    typeof o.nombre === 'string' && o.nombre.trim().length > 0 &&
     fechaOnull(o.fecha_aplicada) &&
     fechaOnull(o.fecha_proxima) &&
     fechaOnull(o.vencimiento_biologico) &&
@@ -272,8 +299,13 @@ Poner "2025-05-05" en fecha_aplicada sería el error más caro del carnet.
 
 ═══ LOS CAMPOS ═══
 
-- nombre: el nombre comercial tal como está escrito. Si no lo podés leer, la
-  fila NO va a ningún lado: se omite. Una vacuna sin nombre no es registrable.
+- nombre: el nombre comercial tal como está escrito.
+  🔴 Si NO lo podés leer, **poné null y DEJÁ LA FILA**. No la omitas.
+  Una fila con fecha y sin nombre le dice a la familia <<acá hubo una vacuna el
+  15/03/23 y no se lee cuál>>, y ella la completa mirando el carnet en la mano.
+  Una fila omitida no le dice nada: la vacuna desaparece y nadie se entera.
+  La única fila que NO va es la que no tiene NI nombre NI fecha NI lote: ahí no
+  hay nada que registrar ni que corregir.
 - fecha_aplicada / fecha_proxima / vencimiento_biologico: formato YYYY-MM-DD.
   Sólo si podés leer DÍA, MES Y AÑO. Meses en español: ENE=01 FEB=02 MAR=03
   ABR=04 MAY=05 JUN=06 JUL=07 AGO=08 SEP=09 OCT=10 NOV=11 DIC=12.
@@ -327,7 +359,7 @@ y no puede corregir lo que no sabe que está mal.
 ═══ LA SALIDA ═══
 
 Respondé SOLO con este JSON, sin texto adicional y sin backticks:
-{"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"cubre":[],"confianza":"alta","evidencia":"sticker"}],"plan_impreso":[{"nombre":""}]}
+{"vacunas":[{"nombre":null,"fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"cubre":[],"confianza":"alta","evidencia":"sticker"}],"plan_impreso":[{"nombre":""}]}
 
 Carnet sin ninguna aplicación ⇒ {"vacunas":[],"plan_impreso":[...]}.
 Carnet ilegible ⇒ {"vacunas":[],"plan_impreso":[]}.`

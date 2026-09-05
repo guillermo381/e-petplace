@@ -23,6 +23,20 @@ const b64url = (o: unknown) => btoa(JSON.stringify(o)).replace(/\+/g, '-').repla
 const tokenDe = (rol: string) => `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ role: rol })}.firma`
 const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
+/**
+ * 🔴 LA SALIDA REAL del modelo sobre el carnet del <<1 -> 12>>, guardada tal
+ * cual salió — **15 filas, DOS con `nombre: null`**. Es la fixture que prueba
+ * que la firma (b) funciona sobre el caso que la motivó, y no sobre uno que yo
+ * invente.
+ *
+ * ⚠️ **REDACTADA en un solo campo:** `veterinario` era el nombre de una PERSONA
+ * real. Por eso los conjuntos de E no se commitean, y por eso esta fixture sí
+ * puede: la estructura —cuántas filas, cuáles sin nombre, con qué fechas y
+ * códigos— es lo único que el arnés necesita.
+ */
+const REAL_DOC_A = JSON.parse(await Deno.readTextFile(
+  new URL('./fixture-carnet-real-docA.json', import.meta.url)))
+
 // El catálogo real de `cat_vacunas`, medido: 7 códigos, sin tildes ni espacios.
 const CATALOGO = [
   { codigo: 'antirrabica', nombre: 'antirrábica' },
@@ -236,6 +250,38 @@ console.log('\n== 10 · CATÁLOGO CAÍDO: se falla, no se degrada en silencio ==
   console.log('    códigos sin acotar, o null en todas las filas sin que nadie sepa')
   console.log('    que fue por una caída. Una degradación silenciosa es peor.')
 }
+
+console.log('\n== 11 · LA FIRMA (b): el carnet REAL entra entero, con dos filas sin nombre ==')
+{
+  proveedorFalso(() => REAL_DOC_A)
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const filas = json.vacunas as Record<string, unknown>[] | undefined
+  exigir('LA EDGE NO REBOTA (antes: 422 por las dos sin nombre)', status === 200, { status, codigo: json.codigo })
+  exigir('vuelven las 15 filas', filas?.length === 15, filas?.length)
+  exigir('dos con nombre null', filas?.filter((f) => f.nombre === null).length === 2,
+    filas?.filter((f) => f.nombre === null).length)
+  exigir('y las dos traen fecha (el ancla que las deja existir)',
+    filas?.filter((f) => f.nombre === null).every((f) => f.fecha_aplicada !== null))
+  exigir('las 13 con nombre siguen intactas', filas?.filter((f) => typeof f.nombre === 'string').length === 13)
+}
+
+console.log('\n== 12 · EL ANCLA: sin nombre NI fecha NI lote, la fila no existe ==')
+for (const [nombre, malo] of [
+  ['sin nombre, sin fecha, sin lote', { vacunas: [fila({ nombre: null, fecha_aplicada: null, lote: null })], plan_impreso: [] }],
+  ['nombre en cadena vacía (no es lo mismo que null)', { vacunas: [fila({ nombre: '' })], plan_impreso: [] }],
+] as const) {
+  proveedorFalso(() => malo)
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  exigir(`${nombre} → 422`, status === 422 && json.vacunas === undefined, { status })
+}
+{
+  proveedorFalso(() => ({ vacunas: [fila({ nombre: null, fecha_aplicada: null, lote: 'A468A01' })], plan_impreso: [] }))
+  const a = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  exigir('sin nombre y sin fecha PERO con lote → entra', a.status === 200, a.status)
+}
+console.log('  ↑ el ancla es un rastro MATERIAL del carnet (fecha o lote), no el campo')
+console.log('    `evidencia`: ése es obligatorio y siempre viene lleno, así que exigirlo')
+console.log('    sería una regla vacua. Interpretación declarada de la firma.')
 
 console.log(`\n${r === 0 ? 'OK' : 'ROJO'} arnés carnet v2 — ${v} verdes · ${r} rojos\n`)
 Deno.exit(r === 0 ? 0 : 1)

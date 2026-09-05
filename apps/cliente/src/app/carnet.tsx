@@ -69,7 +69,10 @@ const UMBRAL_SPINNER_MS = 150;
 
 interface ItemRevision {
   key: number;
-  nombre: string;
+  /** S113-D-2.4: nullable, por firma del founder. Hay renglones donde HAY una
+   *  vacuna y su nombre no se lee; la fila llega igual para que la persona la
+   *  complete. **Sin nombre no se guarda** — ver `esDudosa`. */
+  nombre: string | null;
   tipo_vacuna: string | null;
   fecha_aplicada: string | null;
   fecha_proxima: string | null;
@@ -100,7 +103,13 @@ const VOZ_SUBIDA = {
 } as const;
 
 // dudosa = SOLO fecha faltante (S48): tipo null se guarda tal cual.
-const esDudosa = (i: ItemRevision) => !i.fecha_aplicada;
+// 🔴 S113-D-2.4 · una fila SIN NOMBRE es dudosa, igual que una sin fecha.
+// Es lo que hace cumplir la firma del founder —«la pantalla obliga a completar
+// antes de guardar»— **reusando la máquina que esta pantalla ya tenía**:
+// `guardar()` se niega mientras haya dudosas. La columna sigue NOT NULL en la
+// base, así que sin este guard el guardado rebotaría con `item_invalido` recién
+// del lado del servidor, después de que la persona apretó.
+const esDudosa = (i: ItemRevision) => !i.fecha_aplicada || !i.nombre;
 
 function hoyIso(): string {
   const d = new Date();
@@ -224,7 +233,8 @@ export default function CarnetDeVacunas() {
   function abrirEdicion(key: number) {
     const item = items.find((i) => i.key === key);
     if (!item) return;
-    setBNombre(item.nombre);
+    // Sin nombre, el campo abre VACÍO para que la persona lo escriba.
+    setBNombre(item.nombre ?? '');
     setBTipo(item.tipo_vacuna ?? '');
     setBFecha(item.fecha_aplicada ? { fecha: item.fecha_aplicada, precision: 'exacta' } : undefined);
     setEditando(key);
@@ -257,9 +267,21 @@ export default function CarnetDeVacunas() {
     if (guardando || n === 0 || dudosas > 0) return;
     setGuardando(true);
     setErrorGuardar(null);
+    // Cinturón: `guardar()` ya se niega con `dudosas > 0`, y una fila sin
+    // nombre ES dudosa — así que acá no puede quedar ninguna. Se estrecha
+    // igual, porque la columna es NOT NULL y **preferimos no llamar a guardar
+    // antes que mandar un null que el servidor va a rebotar después de que la
+    // persona apretó.**
+    const conNombre = activas.filter(
+      (i): i is ItemRevision & { nombre: string } => typeof i.nombre === 'string' && i.nombre.length > 0,
+    );
+    if (conNombre.length !== activas.length) {
+      setGuardando(false);
+      return;
+    }
     const r = await registrarVacunasDeCarnet({
       mascota_id: mascotaId,
-      vacunas: activas.map((i) => ({
+      vacunas: conNombre.map((i) => ({
         nombre: i.nombre,
         tipo_vacuna: i.tipo_vacuna,
         fecha_aplicada: i.fecha_aplicada,
@@ -385,7 +407,12 @@ export default function CarnetDeVacunas() {
           {activas.map((i) => (
             <View key={i.key} onLayout={(e) => posiciones.current.set(i.key, e.nativeEvent.layout.y)}>
               <FichaVacuna
-                nombre={i.nombre}
+                // ⚠️ PARA C: sin nombre esto pinta un título VACÍO. La fila
+                // ya sale marcada como dudosa y no se puede guardar, así que
+                // no rompe nada — pero **qué se le muestra a la familia cuando
+                // el nombre no se lee es diseño tuyo**, con su copy y su gate.
+                // No lo invento acá.
+                nombre={i.nombre ?? ''}
                 tipoVacuna={i.tipo_vacuna}
                 fechaAplicada={i.fecha_aplicada}
                 fechaProxima={i.fecha_proxima}

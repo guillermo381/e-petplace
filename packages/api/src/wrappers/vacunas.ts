@@ -56,7 +56,12 @@ export type EvidenciaAplicacion = 'sticker' | 'sello' | 'manuscrito' | 'impreso'
  *  en la confirmación; hasta que A ensanche la RPC, se pierden al guardar.
  *  *Se dice acá para que nadie las dé por guardadas.* */
 export interface VacunaExtraida {
-  nombre: string;
+  /** 🔴 NULLABLE por firma del founder (S113-D-2.4): hay renglones donde HAY
+   *  una vacuna y su nombre no se lee. La fila viaja igual, con fecha y lote,
+   *  y **la pantalla obliga a completar el nombre antes de guardar** — la
+   *  columna sigue `NOT NULL` en la base. *Una fila corregible vale más que
+   *  una que desaparece en silencio.* */
+  nombre: string | null;
   /** YYYY-MM-DD o null. Sin día, mes Y año ⇒ null (L-139). */
   fecha_aplicada: string | null;
   /** YYYY-MM-DD o null. Sólo si está ESCRITA; jamás calculada. */
@@ -148,7 +153,9 @@ const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
 function esVacunaExtraida(v: unknown): v is VacunaExtraida {
   if (!esObj(v)) return false;
   return (
-    typeof v.nombre === 'string' && v.nombre.trim().length > 0 &&
+    campoTexto(v.nombre) &&
+    // Espejo del ancla de la edge: sin nombre, hace falta fecha o lote.
+    !(v.nombre === null && v.fecha_aplicada === null && v.lote === null) &&
     campoFecha(v.fecha_aplicada) &&
     campoFecha(v.fecha_proxima) &&
     campoFecha(v.vencimiento_biologico) &&
