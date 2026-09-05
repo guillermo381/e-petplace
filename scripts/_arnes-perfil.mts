@@ -8,7 +8,22 @@ const t = (n: string, real: unknown, esp: unknown) => {
   if (a === b) { ok++; console.log(`  ✓ ${n}`); } else { mal++; console.log(`  ✗ ${n}\n     esperado ${b}\n     real     ${a}`); }
 };
 const sin = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1');
-const src = (f: string) => sin(readFileSync(new URL(`../packages/ui/src/components/${f}`, import.meta.url), 'utf8'));
+/* 🔴 **UN GATE QUE NO PUEDE MEDIR NO SE MUERE: LO DICE.** Con un `readFileSync`
+   pelado, un árbol sin alguna de estas piezas reventaba con `ENOENT` y su
+   rastro de pila — *y un stack trace no distingue «no hay defecto» de «no
+   corrí»*, menos aún leído a través de un pipe (`L-191`). Sale **2 y NO
+   CONCLUYENTE**, el código que la casa reserva para «no pude medir».
+   Misma cura que en `_arnes-carnet.mts`: **la clase se cura en los dos lados o
+   no se cura.** */
+const NO_CONCLUYENTE: string[] = [];
+const src = (f: string) => {
+  try {
+    return sin(readFileSync(new URL(`../packages/ui/src/components/${f}`, import.meta.url), 'utf8'));
+  } catch {
+    NO_CONCLUYENTE.push(f);
+    return '';
+  }
+};
 const FRANJA = src('FranjaSeguridad.tsx'), CELDAS = src('CeldasHoy.tsx');
 const MED = src('PiezaMedicacionActiva.tsx'), FIL = src('FiltrosLineaDeVida.tsx');
 const it = (id: string, clase: any) => ({ id, clase, texto: 'x', procedencia: 'familia' as const, vozProcedencia: 'v' });
@@ -65,5 +80,11 @@ console.log('\n── ⑥ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['franja', FRANJA], ['celdas', CELDAS], ['medicación', MED], ['filtros', FIL]] as const)
   t(`\`${n}\` no arma frases`, /`\$\{[a-z]+\} (de|en|para|hasta|hace)/i.test(s), false);
 
+if (NO_CONCLUYENTE.length > 0) {
+  console.log(`\n⚠️ NO CONCLUYENTE · no se pudieron abrir: ${NO_CONCLUYENTE.join(' · ')}`);
+  console.log('   Este árbol no tiene todas las piezas que el gate mide. **No es verde ni rojo:');
+  console.log('   es que no se pudo medir**, y sale 2 para que ningún tablero lo lea como salud.');
+  process.exit(2);
+}
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);

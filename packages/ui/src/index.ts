@@ -1119,6 +1119,14 @@ export {
   type ClaseCoach,
 } from './components/PresenciaCoach'
 export { CabeceraCoach, type CabeceraCoachProps } from './components/CabeceraCoach'
+/* 🔴 **EL ORBE SÍ SE EXPORTA, y no contradice a la Ley 8 de acá abajo.**
+   La geometría son NÚMEROS —`ORBE`, `DEDO`, `SEPARACION`— y por eso no sale:
+   una pantalla que los leyera estaría re-decidiendo la forma de la pieza.
+   `OrbeCoach` es **el dibujo**, que es lo contrario: *lo que no se puede
+   importar se copia, y de eso ya hay medición* — hubo tres copias del orbe y
+   la tercera se quedó con el defecto que las otras dos ya tenían curado.
+   Cerrarle la puerta a una cuarta aparición no la evita: la fabrica. */
+export { OrbeCoach, type OrbeCoachProps } from './components/OrbeCoach'
 /* 🔴 **LA GEOMETRÍA NO SE EXPORTA, Y NO ES UN OLVIDO.** `ORBE`, `DEDO`,
    `PASTILLA`, `SEPARACION` y sus funciones son **la forma de la pieza**, y
    la Ley 8 es literal: *el valor vive en la pieza; ningún consumidor la
@@ -1144,6 +1152,10 @@ export {
   type OrigenLectura,
 } from './components/FilaConfirmacionVacuna'
 export { ListaPlanVacunal, type ListaPlanVacunalProps, type FilaPlanVacunal } from './components/ListaPlanVacunal'
+/* El punto de estado, con sus DOS formas: el relleno separa las dos ausencias
+   que comparten tinta —el hueco del carnet y «todavía no le toca»—, porque si
+   sólo las separara el color serían el mismo punto. */
+export { PuntoEstado, type PuntoEstadoProps } from './components/PuntoEstado'
 /* La lógica del estado vive aparte para que su gate no arrastre `react-native`
    — mismo motivo que `coach-geometria` (`L-175`). */
 export {
@@ -1151,10 +1163,17 @@ export {
   detalleVisible,
   pideRevision,
   faltanPorTocar,
+  revisada,
+  resumenDeLaTanda,
+  marcaDeEstado,
   diasEntre,
   AVISO_DIAS,
+  estadoDelPlan,
   type EstadoVacuna,
+  type EstadoPlanMotor,
   type ConfianzaIA,
+  type FilaDeLaTanda,
+  type ColoresDeEstado,
 } from './components/vacunas-estado'
 
 /* ══ EL PERFIL HABLA PRIMERO (S113-B · lote 1.1) ═══════════════════════════
