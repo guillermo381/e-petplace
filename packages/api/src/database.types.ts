@@ -7806,6 +7806,7 @@ export type Database = {
           lote: string | null
           mascota_id: string
           notas: string | null
+          plagas: string[] | null
           prestador_id: string | null
           producto: string
           tipo_desparasitacion: string | null
@@ -7823,6 +7824,7 @@ export type Database = {
           lote?: string | null
           mascota_id: string
           notas?: string | null
+          plagas?: string[] | null
           prestador_id?: string | null
           producto: string
           tipo_desparasitacion?: string | null
@@ -7840,6 +7842,7 @@ export type Database = {
           lote?: string | null
           mascota_id?: string
           notas?: string | null
+          plagas?: string[] | null
           prestador_id?: string | null
           producto?: string
           tipo_desparasitacion?: string | null
@@ -9951,6 +9954,7 @@ export type Database = {
         Row: {
           archivo_url: string | null
           cita_id: string | null
+          codigos_cubiertos: string[] | null
           country_code: string
           created_at: string
           dosis: string | null
@@ -9959,19 +9963,23 @@ export type Database = {
           fecha_aplicada: string | null
           fecha_proxima: string | null
           id: string
+          laboratorio: string | null
           lote: string | null
           mascota_id: string
           nombre_vacuna: string
+          precision_fecha: string
           prestador_id: string | null
           tipo_vacuna: string | null
           updated_at: string
           vacuna_codigo: string | null
+          vencimiento_biologico: string | null
           veterinario_nombre_externo: string | null
           via_administracion: string | null
         }
         Insert: {
           archivo_url?: string | null
           cita_id?: string | null
+          codigos_cubiertos?: string[] | null
           country_code?: string
           created_at?: string
           dosis?: string | null
@@ -9980,19 +9988,23 @@ export type Database = {
           fecha_aplicada?: string | null
           fecha_proxima?: string | null
           id?: string
+          laboratorio?: string | null
           lote?: string | null
           mascota_id: string
           nombre_vacuna: string
+          precision_fecha?: string
           prestador_id?: string | null
           tipo_vacuna?: string | null
           updated_at?: string
           vacuna_codigo?: string | null
+          vencimiento_biologico?: string | null
           veterinario_nombre_externo?: string | null
           via_administracion?: string | null
         }
         Update: {
           archivo_url?: string | null
           cita_id?: string | null
+          codigos_cubiertos?: string[] | null
           country_code?: string
           created_at?: string
           dosis?: string | null
@@ -10001,13 +10013,16 @@ export type Database = {
           fecha_aplicada?: string | null
           fecha_proxima?: string | null
           id?: string
+          laboratorio?: string | null
           lote?: string | null
           mascota_id?: string
           nombre_vacuna?: string
+          precision_fecha?: string
           prestador_id?: string | null
           tipo_vacuna?: string | null
           updated_at?: string
           vacuna_codigo?: string | null
+          vencimiento_biologico?: string | null
           veterinario_nombre_externo?: string | null
           via_administracion?: string | null
         }
@@ -22477,6 +22492,15 @@ export type Database = {
         }
         Returns: string
       }
+      _cobertura_vacunal: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          archivo_url: string
+          cod: string
+          fecha_aplicada: string
+          fecha_proxima: string
+        }[]
+      }
       _columnas_solicitud_clasificadas: { Args: never; Returns: Json }
       _concepto_de_pago: { Args: { p_sujeto: string }; Returns: string }
       _corte_matricula: { Args: never; Returns: string }
@@ -25145,9 +25169,11 @@ export type Database = {
         }[]
       }
       obtener_plan_vacunal: {
-        Args: { p_mascota_id: string }
+        Args: { p_hoy?: string; p_mascota_id: string; p_ventana_dias?: number }
         Returns: {
+          aplicadas_sin_clasificar: number
           estado: string
+          exigida_guarderia: boolean
           nombre: string
           obligatoria: boolean
           periodicidad_meses: number
@@ -25606,6 +25632,7 @@ export type Database = {
           p_fecha_proxima?: string
           p_mascota_id: string
           p_notas?: string
+          p_plagas?: string[]
           p_producto: string
           p_tipo?: string
         }

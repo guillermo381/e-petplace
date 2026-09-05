@@ -183,6 +183,12 @@ export {
   registrarVacunasDeCarnet,
   obtenerVacunaPorEvento,
   type VacunaExtraida,
+  type FilaPlanImpreso,
+  type LecturaDeCarnet,
+  type ConfianzaExtraccion,
+  type EvidenciaAplicacion,
+  type ViaAdministracion,
+  type TipoVacuna,
   type InputExtraerVacunas,
   type CodigoErrorExtraccion,
   type VacunaCarnetInput,
@@ -325,11 +331,23 @@ export {
   type CodigoCensoAcuario,
 } from './wrappers/perfilMascota';
 export type { IdentidadMascota, AlergiasEstado, DesparasitacionDeMascota } from './wrappers/perfilMascota';
+/* S113-A — el detalle del expediente, tipado. `alergias_detalle` dejó de ser
+   `unknown[]`: C puede retirar sus guardas propias. */
+export type {
+  AlergiaDeMascota,
+  SeveridadAlergia,
+  EstadoAlergia,
+  CategoriaAlergeno,
+  CondicionCronicaDeMascota,
+  MedicacionDeMascota,
+  RestriccionDeMascota,
+} from './wrappers/perfilMascota';
 
 // Salud del expediente — S82 r4: los productores del dueño (los tres
 // motores del gate) + el lector de la serie de peso
 export {
   registrarDesparasitacion,
+  type PlagaTratada,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
   registrarRecuerdoFamilia,
@@ -1786,3 +1804,12 @@ export {
   type InputConteoSemanaPrestador,
   type CodigoErrorConteoSemana,
 } from './wrappers/conteoSemanaPrestador';
+
+export {
+  sugerirRaza,
+  type SugerenciaDeRaza,
+  type CandidataRaza,
+  type ConfianzaRaza,
+  type InputSugerirRaza,
+  type CodigoErrorRaza,
+} from './wrappers/razas';

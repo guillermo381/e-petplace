@@ -19,6 +19,19 @@ export interface SenalesHogarMascota {
   /** Mínima fecha_proxima registrada con su vacuna, o null (hoy la
    *  extracción del carnet no llena fecha_proxima — null honesto). */
   proxima_vacuna: { nombre: string; fecha: string } | null;
+  /** ⭐ S113-A — LA PLAGA MÁS URGENTE, para que la tira del Hogar la dibuje
+   *  **sin un viaje por mascota**.
+   *
+   *  `plaga` es la del catálogo cerrado de `evento_desparasitacion_aplicada`
+   *  (`pulgas | garrapatas | mosquitos | internos`); `fecha` es su
+   *  `fecha_proxima`. **La más urgente = la fecha más temprana**, mirando sólo
+   *  lo vencido o por vencer.
+   *
+   *  ⚠️ **`null` NO significa «está al día»**: significa que **ninguna
+   *  desparasitación de esta mascota declaró su próxima fecha**. *Una tira que
+   *  lea `null` como «tranquilo» va a callar justo donde no sabe* — igual que
+   *  `proxima_vacuna`, que ya se comporta así. */
+  proxima_desparasitacion: { plaga: string; fecha: string } | null;
   /** Máxima cerrada_en de atenciones cerradas con calidad, o null. */
   ultima_atencion_cerrada: string | null;
 }
@@ -91,7 +104,7 @@ export async function obtenerEstadoHogar(
   }
 
   const cliente = getClient();
-  const [vacunas, perfiles, atenciones, citas] = await Promise.all([
+  const [vacunas, perfiles, atenciones, citas, desparasitaciones] = await Promise.all([
     cliente
       .from('evento_vacuna_aplicada')
       .select('mascota_id, nombre_vacuna, fecha_aplicada, fecha_proxima')
@@ -114,9 +127,19 @@ export async function obtenerEstadoHogar(
       .order('fecha', { ascending: true })
       .order('hora', { ascending: true, nullsFirst: false })
       .limit(10),
+      /* ⭐ La quinta consulta va en el MISMO `Promise.all`: **una sola por
+       FAMILIA, no una por mascota** — que es exactamente lo que C pidió. Es la
+       misma forma que ya tiene la vacuna, y por la razón de S94-PERF: el costo
+       está en la PETICIÓN (~150 ms de peaje fijo), así que una consulta más en
+       paralelo es gratis y una en serie no. */
+    cliente
+      .from('evento_desparasitacion_aplicada')
+      .select('mascota_id, plagas, fecha_proxima')
+      .in('mascota_id', mascotaIds)
+      .not('fecha_proxima', 'is', null),
   ]);
 
-  if (vacunas.error || perfiles.error || atenciones.error || citas.error) {
+  if (vacunas.error || perfiles.error || atenciones.error || citas.error || desparasitaciones.error) {
     return { ok: false, codigo: 'error_estado_hogar', mensaje: MENSAJE_ERROR };
   }
 
@@ -135,6 +158,26 @@ export async function obtenerEstadoHogar(
       }
     }
 
+    /* LA MÁS URGENTE POR PLAGA, con el mismo criterio que la vacuna: la fecha
+       más temprana gana. Una fila puede cubrir VARIAS plagas (`plagas` es un
+       array), así que se abre y compite plaga por plaga — si no, una fila con
+       dos plagas aportaría una sola candidata y la otra quedaría muda.
+
+       ⚠️ Filas SIN `plagas` (NULL) quedan afuera **a propósito y se dice**: la
+       columna nació en este mismo lote y todo lo anterior la tiene vacía. *Una
+       desparasitación que no declara contra qué fue no puede decir qué plaga
+       vence* — inventarle una sería peor que no mostrarla. */
+    let proximaPlaga: { plaga: string; fecha: string } | null = null;
+    for (const d of desparasitaciones.data) {
+      if (d.mascota_id !== id || d.fecha_proxima === null || !Array.isArray(d.plagas)) continue;
+      for (const plaga of d.plagas) {
+        if (typeof plaga !== 'string' || plaga.length === 0) continue;
+        if (proximaPlaga === null || d.fecha_proxima < proximaPlaga.fecha) {
+          proximaPlaga = { plaga, fecha: d.fecha_proxima };
+        }
+      }
+    }
+
     let ultimaCerrada: string | null = null;
     for (const a of atenciones.data) {
       if (a.mascota_id === id && a.estado === 'cerrada_con_calidad' && a.cerrada_en !== null) {
@@ -148,6 +191,7 @@ export async function obtenerEstadoHogar(
       vacunas_total: vs.length,
       ultima_vacuna_aplicada: ultimaAplicada,
       proxima_vacuna: proxima,
+      proxima_desparasitacion: proximaPlaga,
       ultima_atencion_cerrada: ultimaCerrada,
     };
   });

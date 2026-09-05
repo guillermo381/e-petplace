@@ -17,7 +17,13 @@
 // ninguna edge se entera. Ése es todo el punto de la puerta única.
 
 /** Vocabulario CERRADO. Una pieza = un trabajo del producto. */
-export type Pieza = 'carnet' | 'documento' | 'nota_clinica' | 'presencia'
+/* 🔴 `raza` ENTRA EN EL MERGE DE S113-D-1.2 (A, 5-sep-2026), y la resolución es
+   ADITIVA a propósito: el lado de D-1.2 traía la pieza pero con `carnet: 2000`
+   —el techo viejo, que la propia mesa subió a 4000 tras medir que truncaba una
+   de cada tres corridas—. *Elegir un lado entero habría perdido una medición o
+   la otra*, así que se conserva TODO main y se agregan las siete entradas de
+   `raza`, con los valores que D fijó. */
+export type Pieza = 'carnet' | 'documento' | 'nota_clinica' | 'presencia' | 'raza'
 
 /** El modelo por pieza. **Medido, no elegido** — ver cabecera. */
 export const MODELOS: Record<Pieza, string> = {
@@ -25,14 +31,22 @@ export const MODELOS: Record<Pieza, string> = {
   documento: 'claude-sonnet-5',
   nota_clinica: 'claude-sonnet-5',
   presencia: 'claude-sonnet-5',
+  raza: 'claude-haiku-4-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
 export const MAX_TOKENS: Record<Pieza, number> = {
-  carnet: 16000,
+  // 🔴 4000 — FIRMA DEL FOUNDER (v2 definitiva, S113-D-2.2), y **viaja atado a
+  // `PENSAR.carnet = false`**. La medición que lo fija: el carnet más denso
+  // real devolvió **14 filas en 2.015 tokens de salida** sin razonar. 4000 es
+  // el doble de holgura. Con razonamiento ENCENDIDO la misma llamada gastó
+  // 6.716 y con techo 4000 salió **truncada** — por eso los dos números no se
+  // mueven por separado. Ver `TECHO_SIN_RAZONAR`.
+  carnet: 4000,
   documento: 4000,
   nota_clinica: 16000,
   presencia: 4000,
+  raza: 500,
 }
 
 /**
@@ -45,6 +59,7 @@ export const EDGES: Record<Pieza, string> = {
   documento: 'extract-documento',
   nota_clinica: 'estructurar-nota-clinica',
   presencia: 'escribir-presencia',
+  raza: 'sugerir-raza',
 }
 
 /**
@@ -106,6 +121,7 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   documento: 60_000,
   nota_clinica: 40_000,
   presencia: 10_000,
+  raza: 30_000,
 }
 
 /**
@@ -140,9 +156,111 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
  *   nadie lee nunca. Las columnas `tokens_cache_*` de `ia_uso` son las que
  *   dejan confirmar o revertir esto con número.
  */
+/** Niveles de `output_config.effort`. Sólo los modelos que lo soportan. */
+export type Esfuerzo = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
+
+/**
+ * 🔴 MODELOS QUE PIENSAN SI NO SE LES DICE NADA — y esto NO es trivia: es lo
+ * que hace que «el mismo cuerpo» signifique cosas distintas según el modelo.
+ *
+ * En `claude-sonnet-5`, **omitir `thinking` equivale a `adaptive`**: piensa, y
+ * ese pensamiento se cobra como tokens de SALIDA. En `claude-haiku-4-5`,
+ * omitirlo significa **no pensar**.
+ *
+ * ⇒ Mandar el MISMO cuerpo a los dos y comparar los números **no compara los
+ * modelos: compara un modelo pensando contra otro que no piensa.** Por eso
+ * `pensar` es explícito y esta tabla existe: para poder apagarlo donde hay que
+ * apagarlo y dejar la comparación limpia.
+ *
+ * Fuente: tabla de modelos de la skill `claude-api` (cacheada 2026-06-24).
+ * ⚠️ Un modelo que se agregue acá se agrega MIDIENDO, no por parecido de
+ * nombre — es exactamente la clase de dato que envejece sin avisar.
+ */
+export const MODELOS_ADAPTIVOS = new Set<string>(['claude-sonnet-5'])
+
+/**
+ * 🔴 SI LA PIEZA PIENSA — la palanca más cara de las cuatro, y la más riesgosa
+ * de este lote.
+ *
+ * `carnet` **false**, y la razón es de plata medida: la línea base de A dio
+ * **4.036 tokens de entrada y 6.347 de SALIDA** ($0,0715). El JSON de doce
+ * vacunas no llega a 1.000 tokens ⇒ **la mayor parte de esa salida no es la
+ * respuesta: es razonamiento.** A $10/MTok de salida contra $2 de entrada, ahí
+ * está el 89 % del costo.
+ *
+ * ⚠️ **PERO ESTO NO ESTÁ MEDIDO DIRECTAMENTE Y SE DICE:** la API no separa
+ * tokens de razonamiento de tokens de respuesta; lo de arriba es una
+ * INFERENCIA a partir del tamaño del JSON. **El experimento que la vuelve
+ * medición es de E y es de una línea:** el mismo carnet con `pensar` en true y
+ * en false. Si la salida no baja, la inferencia era falsa y hay que buscar en
+ * otro lado.
+ *
+ * ⚠️ **Y EL RIESGO EN LA OTRA DIRECCIÓN, que es el que de verdad importa:**
+ * S48 midió que Haiku 4.5 **topaba en la atribución espacial** sticker↔columna
+ * FECHA, y que Sonnet con razonamiento fue lo que la resolvió. Apagarlo puede
+ * reintroducir justo el defecto que aquella sesión cerró.
+ * ⇒ **E no mide sólo costo y latencia: mide EXACTITUD contra las 32 filas de
+ *   verdad del conjunto.** Si la exactitud cae bajo la línea base
+ *   (nombre 65,6 % · fecha 62,5 % · lote 81,3 %), la tercera variante ya está
+ *   servida sin tocar código: `esfuerzo: 'low'` con `pensar: true`.
+ */
+/**
+ * 🔴 EL TECHO A PARTIR DEL CUAL SE PUEDE DEJAR RAZONAR.
+ *
+ * **Regla de la casa (firma del founder, S113-D-2.2): toda pieza con
+ * `max_tokens` POR DEBAJO de este número manda `thinking: {type:'disabled'}`
+ * EXPLÍCITO.** Vigilada por `verify:ia-puerta`, con su rojo.
+ *
+ * El porqué, medido dos veces y desde dos lados:
+ * · **E**, en carnets reales: omitir `thinking` deja a Sonnet 5 razonar solo,
+ *   quemarse el techo y devolver **cero caracteres de salida**. *No falla
+ *   ruidosamente: devuelve nada.*
+ * · **D**, aislando la variable: el mismo prompt v2 con razonamiento a techo
+ *   16000 gastó **6.716 y 10.895** tokens de salida contra **2.015 y 1.248**
+ *   sin razonar — y devolvió **exactamente las mismas filas**.
+ *
+ * ⇒ *Un techo bajo y un razonamiento suelto no conviven: el pensamiento se come
+ *   el presupuesto y lo que se pierde es la respuesta, no el pensamiento.*
+ */
+export const TECHO_SIN_RAZONAR = 16000
+
+export const PENSAR: Record<Pieza, boolean> = {
+  carnet: false,
+  // 🔴 CAMBIADAS EN S113-D-2.2 por el invariante de arriba: las dos tienen
+  // techo 4000, o sea por debajo de `TECHO_SIN_RAZONAR`.
+  //
+  // **Y el cambio es casi un no-op, medido:** en la corrida real de A (lote 0)
+  // estas dos piezas devolvieron **35 y 85 tokens de salida** con `thinking`
+  // omitido — o sea que el adaptive de Sonnet 5 ya había decidido no pensar
+  // para sus tareas. Apagarlo explícito no les quita un razonamiento que no
+  // estaban haciendo; **les saca el riesgo de que algún día lo hagan y se
+  // coman el techo**, que es el modo de falla que E midió en carnets.
+  documento: false,
+  // `nota_clinica` es la ÚNICA que queda razonando, y es legítimo: su techo es
+  // 16000, o sea que NO está por debajo del invariante. Estructurar un dictado
+  // clínico campo por campo es exactamente donde el razonamiento paga.
+  nota_clinica: true,
+  presencia: false,
+  raza: false,
+}
+
+/**
+ * `output_config.effort` por pieza. `null` = no se manda el campo (default del
+ * proveedor). Nace en `null` en las cuatro: **mover esto sin medir es cambiar
+ * el precio y la calidad a la vez y no saber cuál se movió.**
+ */
+export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
+  carnet: null,
+  documento: null,
+  nota_clinica: null,
+  presencia: null,
+  raza: null,
+}
+
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   carnet: false,
   documento: false,
   nota_clinica: false,
   presencia: true,
+  raza: false,
 }

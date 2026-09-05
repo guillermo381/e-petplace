@@ -407,6 +407,31 @@ t('no poder enfocar NO tumba la fila: el campo igual está señalado',
 t('🔴 la razón viaja en la etiqueta del campo: quien no ve el borde, la oye',
   /`\$\{c\.etiqueta\} · \$\{vozIncompleta\}`/.test(CONF), true);
 
+console.log('\n── ㉑ ROJO · UN GUARD `&&` SOBRE UN STRING DEJA UN HIJO DE TEXTO ──');
+/* 🔴 `{x && <Y/>}` con `x = ''` no dibuja `<Y>`: **deja `''` como hijo de la
+   `View`**, que es la forma en que React Native tira *«Text strings must be
+   rendered within a <Text>»*. ⚠️ **No se midió que se materializara** — y no
+   hace falta: `x ? … : null` **hace el estado inexpresable** y no cuesta nada.
+   *Una posibilidad que se puede cerrar gratis no se documenta: se cierra.*
+   Y se curó LA CLASE, no el caso: el pedido nombraba `fechaLiteral` y **el
+   censo encontró TRES en la misma pieza** —las otras dos ya estaban antes—.
+   *Curar el síntoma reportado y dejar las gemelas es media cura.* */
+const FICHA = sinComentarios(readFileSync(
+  new URL('../packages/ui/src/components/FichaVacuna.tsx', import.meta.url), 'utf8'));
+t('🔴 cero guards `&&` que abran JSX en la pieza', /&& \(/.test(FICHA), false);
+t('…y los tres cierran con `: null`', (FICHA.match(/\) : null\}/g) ?? []).length >= 3, true);
+/* 🔴 El literal es EL dato que se pide verificar: truncarlo deja a la persona
+   comparando contra media transcripción. */
+/* ⚠️ Se mide DESDE `fechaLiteral` y no desde la forma del guard: la primera
+   versión de este assert exigía `{fechaLiteral ? (`, así que con el guard roto
+   dejaba de medir el truncado y **daba verde por la razón equivocada**. */
+t('🔴 el literal del carnet NO se trunca',
+  /fechaLiteral[\s\S]{0,160}?numberOfLines/.test(FICHA), false);
+t('CONTROL · las otras dos líneas SÍ siguen truncando, que es correcto',
+  (FICHA.match(/numberOfLines=\{1\}/g) ?? []).length >= 2, true);
+t('el literal sigue en voz de máquina, como las fechas',
+  /\{fechaLiteral \? \([\s\S]{0,200}?typography\.family\.mono/.test(FICHA), true);
+
 console.log('\n── ⑮ ROJO · LOS CONSUMIDORES DE `main`, QUE ESTE ÁRBOL NO PUEDE VER ──');
 /* 🔴 **ESTE BRAZO NACE DE UN DAÑO, no de una precaución.**
  * La adenda cambió el contrato de dos piezas y **dejó `main` en rojo**: el

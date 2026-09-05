@@ -3163,9 +3163,16 @@ del soft launch**. Fixture viva para probarlo: `Sombra`
 reales (S113-E, 3-sep):
 · **83 s promedio, 114 s el peor.** La familia mira `EsperaDeMarca` todo ese
   rato. *Es un número de producto, no de laboratorio.*
-· **Un carnet de UNA vacuna devolvió DOCE.** Once de más. **No es imprecisión
+· ~~**Un carnet de UNA vacuna devolvió DOCE.** Once de más. **No es imprecisión
   de un campo: es inventar filas enteras** — la clase que `L-139` nombra, y la
-  peor de todas porque cada fila inventada es plausible.
+  peor de todas porque cada fila inventada es plausible.~~
+  🔴 **DESMENTIDO POR EL OBJETO (S113-A, 5-sep-2026). LA PREMISA ERA FALSA.**
+  Abrí la imagen —`carnet-1783564367515.jpg`, la misma que se midió— y **no
+  tiene una vacuna: tiene DOS PÁGINAS de «PROGRAMA DE VACUNACIÓN» llenas**, con
+  **~15 aplicaciones reales**: ocho filas en la izquierda y siete en la derecha,
+  **cada una con su sticker pegado, su fecha manuscrita, su próxima aplicación y
+  la firma del MVZ**. ⇒ **el modelo devolvió 14–15 y estaba ACERTANDO.** No
+  inventaba once: *sub-extraía una.*
 · exactitud: `nombre_vacuna` 65,6 % · `fecha_aplicada` 62,5 % · `lote` 81,3 % ·
   `veterinario` 42,1 % · `fecha_proxima` **sin muestra** (1 valor en 32).
 
@@ -3184,6 +3191,30 @@ una deuda de **costo, espera y confianza**, con instrumento ya construido
 (`pnpm ia:medir`) para decidir con número.
 
 **Disparo.** El lote 1, que es donde se compara Haiku contra esta línea base.
+
+---
+
+## ☠️ CERRADA (S113-A, 5-sep-2026) — su hallazgo central era falso
+
+**Lo que queda vivo de esta ficha** (y no es poco): los **83 s de espera**, el
+**costo real de $0,0715 medido con `ia_uso`**, y la exactitud por campo. *Todo
+eso se midió bien y sigue siendo una deuda de producto.*
+
+**Lo que muere:** la invención de filas. **La premisa «un carnet de UNA vacuna»
+nunca se verificó contra la imagen** — se heredó de un reporte a otro y llegó a
+esta ficha con la autoridad de un dato medido. **El objeto la desmiente.**
+
+🔴 **Y el costo del error no fue académico, porque esta premisa viajó:**
+① fundó el diseño del `plan_impreso` de la v2 —*«el plan impreso deja de ser una
+vacuna»*, para un carnet que **no tiene plan impreso sin usar**—; ② fundó mi
+propia `D-1030`, donde leí «`plan_impreso: []` en seis corridas» como un fallo
+**cuando era la respuesta correcta**; ③ y explicaría el costo alto sin necesidad
+de invención: *un carnet con quince aplicaciones paga quince filas de salida.*
+
+**La lección, que es de método y no de IA:** *la fila «1 vacuna de verdad» se
+citó tres veces —el parte de E, el de D, el mío— y **ninguna de las tres abrió
+la imagen**. Un dato heredado se lee igual que uno medido y no trae etiqueta.*
+Abrirla costó **una lectura de archivo**.
 
 ---
 
@@ -3263,6 +3294,256 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1033` 🟡 Dos vocabularios de precisión de fecha conviviendo
+
+> 🔴 **RENUMERADA EN EL MERGE (S113-A, 5-sep-2026): D la depositó como `D-1029`
+> y ese número ya estaba tomado** — la ficha de la zona horaria de la familia
+> vive en `main` desde `e398d41f`. *No es un error de D: `proximo:ficha` lee el
+> archivo canónico, y una ficha sin mergear es invisible para él* — el punto
+> ciego que el propio comando declara al pie de su salida. **El que se mueve es
+> el que llega después al archivo canónico**, no el que tuvo la idea primero:
+> es el único criterio que un instrumento puede aplicar solo.
+
+**Nace:** S113-D-2.6, 5-sep-2026, por **orden del founder** al firmar las fechas
+con precisión de la extracción del carnet. **Dueño: B** (es su componente).
+
+**Qué.** La casa tiene **dos** vocabularios para decir cuán fina es una fecha,
+y hoy no se hablan:
+
+| dónde | valores | qué expresa |
+|---|---|---|
+| `mascotas` + `CampoFecha` | `exacta` · `aproximada` · `estimada` | día completo · mes/año · **etapa de vida** |
+| extracción del carnet (`extract-vacuna`) | `dia` · `mes` · **`sin_anio`** | día/mes/año · mes/año · **día y mes SIN año** |
+
+`CampoFecha` se declara *«espejo EXACTO del vocabulario de la DB
+(`chk_mascotas_fecha_nacimiento_precision`)»*, y lo es.
+
+**Por qué no lo reusé, medido.** **`sin_anio` no es expresable ahí.** Una fecha
+de nacimiento siempre tiene año; un carnet perfectamente trae **«26 JUN»** y
+nada más — está en el documento B del conjunto, dos veces, y las cuatro cargas
+humanas de ese documento **inventaron cuatro días distintos** justamente ahí.
+En la otra dirección, `estimada` (etapa de vida) no tiene sentido en un carnet.
+*No es que uno sea mejor: miden cosas que se solapan y no coinciden.*
+
+**Mapeo, para quien tenga que cruzarlos:** `dia`≈`exacta` · `mes`≈`aproximada` ·
+`sin_anio` **sin equivalente** · `estimada` **sin equivalente**.
+
+**Qué NO es.** No es un rojo: los dos vocabularios viven en superficies
+distintas y ninguna consume el otro. Es deuda de **coherencia**, y el costo de
+dejarla es que el día que la pantalla de revisión del carnet quiera usar
+`CampoFecha` para editar una fecha parcial, va a tener que traducir — y una
+traducción que pierde `sin_anio` **vuelve a poner un día que nadie escribió**,
+que es exactamente lo que esta firma vino a sacar.
+
+**Disparo.** *Cuando B toque `CampoFecha`.* Ahí se decide si el vocabulario de
+la casa se ensancha con `sin_anio` (y `mascotas` gana un CHECK más) o si la
+extracción traduce en su frontera declarando lo que pierde.
+
+⚠️ **Lo que hoy sostiene el hueco, y por eso no urge:** la pantalla del carnet
+**no usa `CampoFecha` para las fechas parciales** — con precisión distinta de
+`dia` el selector abre VACÍO a propósito, porque pre-llenarlo con un día
+elegido por nosotros sería meter por la pantalla el mismo día inventado que se
+sacó de la extracción.
+
+---
+
+### `D-1032` 🟠 Los chips disponibles por mascota salen de la página cargada, no del servidor
+
+**Nace:** S113-A, candidato 1.1, 5-sep-2026, **por orden del founder para el
+1.1.1**. **Dueño: C** (la superficie) **con A** (si hace falta un lector nuevo).
+
+**El defecto, en una frase:** el conjunto de chips que se le ofrece a una mascota
+**se deriva de los eventos que esa página ya trajo** — o sea de **una página**,
+no del expediente. *Un filtro que se arma con lo que hay a la vista no filtra:
+describe la primera pantalla.*
+
+**Por qué importa, y es más grave que una lista incompleta:** el modo de falla es
+**silencioso y sesgado hacia el olvido**. Una mascota con veinte paseos recientes
+y **una** vacuna de hace tres años **no va a ofrecer el chip de vacunas**, porque
+la primera página se llenó de paseos. ⇒ *la familia concluye que no hay vacunas
+registradas — y el filtro que existía para ayudarla a encontrarlas es justo el
+que se las esconde.* **Y no hay error, ni vacío, ni aviso:** el chip
+sencillamente no está, que es indistinguible de «no aplica».
+
+**Y su cara peor: empeora con el uso.** Cuanto más activa la mascota, más
+empujan los eventos nuevos a los viejos fuera de la primera página, **así que el
+filtro se degrada solo con el tiempo** y justo para las mascotas mejor cuidadas.
+
+**Lo que hace falta, y es de servidor:** un lector que devuelva **los tipos de
+evento DISTINTOS que esa mascota tiene en todo su expediente** — un
+`select distinct tipo … where mascota_id = …`, que en la base es barato y no
+depende de ninguna paginación. *La lista de chips es una propiedad del
+expediente, no de la consulta que se acaba de hacer.*
+
+⚠️ **Antes de escribirlo rige la regla del censo** (`CLAUDE.md`): hay que
+listar qué funciones tocan ya `eventos_mascota` con esa intención — *este lote
+demostró dos veces que la puerta suele existir* (`registrar_desparasitacion` en
+el lote 0, `obtener_plan_vacunal` en el 1.0).
+
+**Disparo:** el 1.1.1.
+
+### `D-1031` 🟡 En web, React avisa que una prop no es de un elemento del DOM
+
+**Nace:** S113-A, 5-sep-2026, por reporte de **E**, que lo vio como toast en la
+vista web. **Dueño: la pista dueña del componente que la pasa** — para nombrarlo
+hace falta el literal del toast, que **no tengo**.
+
+**Lo que se sabe, y hasta dónde llega.** React emite `Warning: React does not
+recognize the <X> prop on a DOM element` cuando una prop **en camelCase que no
+es un atributo del DOM** llega a un `<div>`/`<span>` nativo. En RN-web pasa por
+una vía muy concreta: **una prop de negocio que se filtra por un `{...props}`**
+hasta un `View`, que en web se compila a `<div>`.
+
+**Por qué NO lo escribo como diagnóstico:** *el toast dice qué prop y en qué
+elemento, y sin ese literal cualquier culpable que nombre acá es una
+suposición.* Un aviso de React de esta clase **no rompe nada visible** —el
+render sale igual— y por eso sobrevive: nadie lo persigue.
+
+**Lo que hace falta para cerrarla, en orden:** ① **el literal del toast** (E lo
+tiene delante) · ② el componente que la pasa, abierto y citado · ③ la cura, que
+casi siempre es **desestructurar la prop antes del spread** para que no viaje al
+DOM. *No es «filtrar props desconocidas» en la pieza receptora: eso tapa la
+clase entera y esconde la próxima.*
+
+**Por qué importa aunque sea amarilla:** una prop que llega al DOM **también
+llega al snapshot y al HTML servido**, y si su valor es un dato de negocio queda
+escrito en el markup. *El aviso es cosmético; lo que lo produce, no siempre.*
+
+**Disparo:** el próximo lote que toque la web, o antes si E pega el literal.
+
+### `D-1030` 🔴 La v2 del carnet se midió con proveedor falso, y contra el modelo real no separa
+
+**Nace:** S113-A, candidato 1.0, 5-sep-2026, con la edge v2 desplegada y seis
+llamadas reales. **Dueño: D**, con E midiendo la exactitud.
+
+**El hecho, medido por la edge desplegada** (no por un arnés): el carnet «1 →
+12» —**1 vacuna de verdad y 11 renglones de plan impreso**, el caso que la v2
+existe para resolver— devolvió **`plan_impreso: []` en las SEIS corridas**, con
+14 o 15 filas en `vacunas`:
+
+| techo | corridas | vacunas | plan_impreso |
+|---|---|---|---|
+| 8000 | 4 | 14 · 14 · 15 · 14 | **0 · 0 · 0 · 0** |
+| 2000 | 2 (las que no truncaron) | 14 · 14 | **0 · 0** |
+
+**No es diferencia de método:** leí el arnés de D (`medir-carnet.mjs:102`) y
+llama a **la MISMA edge** con el **MISMO cuerpo** (`imageBase64` +
+`mediaType: 'image/jpeg'`). Mismo camino, misma imagen, resultado opuesto.
+
+⚠️ **Y ACÁ VA LA CORRECCIÓN QUE LE DEBO A D, porque el título de esta ficha es
+injusto con él si se lee solo: D NO lo reportó como verde.** Su parte lo dice
+en negrita, textual:
+
+> 🔴 **ADVERTENCIA DE LECTURA, y es la más importante de este parte:** este
+> arnés corre con **proveedor FALSO**. **No prueba que el modelo mande once
+> filas a `plan_impreso`** — manda lo que yo le diga. Prueba **el contrato**…
+> **La exactitud la mide E.**
+
+Y en otro punto: *«El control positivo contra el proveedor REAL no corrió … se
+midió con proveedor falso, que es correcto para los rojos.»*
+
+⇒ **D midió lo que dijo que medía y declaró lo que no medía.** Su arnés estaba
+bien y su honestidad también.
+
+**🔴 ENTONCES ¿DÓNDE ESTÁ EL DEFECTO? En la FORMA del reporte, y ésa es la
+lección.** Catorce líneas más arriba de esa advertencia hay una tabla de
+resultados cuya fila dice:
+
+> | **el «1 → 12»** | 1 en `vacunas`, **11 en `plan_impreso`**, la fila viaja con sus 11 campos |
+
+*Esa fila se lee como un hecho sobre el modelo. No lo es —es un hecho sobre el
+contrato, con un proveedor que devolvió lo que D le dictó— pero **nada en la
+fila lo dice**.* Y una fila de tabla **viaja**: se cita, se resume, se pega en
+otro parte. **La advertencia se queda.**
+
+*Lo que falló no fue la medición ni la honestidad de quien midió: fue que el
+resultado y su límite vivían en dos lugares distintos, y sólo uno de los dos
+tiene patas.*
+
+**La cura, que es de forma y cuesta nada:** cuando un resultado sale de un
+proveedor falso, **el límite va EN LA CELDA**, no en un párrafo aparte —
+`1 en vacunas, 11 en plan_impreso **(dictado por el proveedor falso: mide el
+contrato, no el modelo)**`. *Una advertencia que no se puede separar del dato
+es la única que sobrevive a la primera cita.*
+
+**Lo que queda abierto, con dueño:** ① por qué el modelo real no separa plan de
+aplicación **(D)** — el prompt v2 no logró en seis corridas lo que su diseño
+promete; ② la exactitud sobre los 5 carnets **(E)**, que D ya le había asignado
+y sigue siendo lo que decide si la v2.1 sale.
+
+## 🔴 CORRECCIÓN (S113-A, 5-sep-2026) — la escribí sobre una premisa falsa
+
+**Abrí el carnet.** No tiene «1 vacuna de verdad y 11 renglones de plan
+impreso»: tiene **dos páginas llenas con ~15 aplicaciones REALES**, cada una con
+sticker, fecha manuscrita, próxima aplicación y firma del MVZ. **No hay ni un
+renglón de plan sin usar.**
+
+⇒ **`plan_impreso: []` en las seis corridas NO era un fallo: era la respuesta
+CORRECTA.** Y las 14–15 filas en `vacunas` tampoco eran invención — eran el
+carnet. *Mi conclusión —«la v2 no separa contra el modelo real»— no se sostiene:
+lo que medí fue una v2 acertando sobre un caso donde no había nada que separar.*
+
+**Lo que SÍ queda de esta ficha, medido y en pie:**
+· el **techo de 2000 trunca 1 de cada 3** (salida real 1945–2087) — sigue firme,
+  y es lo que motivó el 4000 que quedó en el repo;
+· **la lección de FORMA sobre el reporte** sigue firme y ahora vale doble: *una
+  fila de tabla viaja y su advertencia se queda* — sólo que el problema no era
+  la advertencia del proveedor falso, era que **«1 vacuna de verdad» nunca se
+  midió y las tres pistas la citamos como si sí**.
+
+**Lo que se retira:** el título de esta ficha y su tabla de seis corridas como
+prueba de que la v2 falla. **No prueban eso.** Si la v2 separa o no plan de
+aplicación **sigue sin medirse**, y hace falta un carnet que de verdad tenga
+renglones sin usar — *que es exactamente lo que E tiene que elegir del conjunto.*
+
+⚠️ **Y la parte incómoda: yo hice acá lo mismo que le señalé a D.** Le marqué
+que una fila de tabla suya se leía como un hecho sobre el modelo sin serlo, y
+**construí la mía sobre un número que nunca abrí.** *La diferencia entre los dos
+casos es que el suyo llevaba su advertencia al lado y el mío no.*
+
+**Disparo:** antes de desplegar la v2.1. **Hoy lo desplegado es la v1** — ver el
+parte del candidato para la divergencia declarada entre repo y desplegado.
+
+### `D-1029` 🟠 La casa no sabe en qué día está la familia — sólo en qué día está Guayaquil
+
+**Nace:** S113-A, lote 1.0 · A5, 9-sep-2026. **Pariente de `D-1007`, y más
+ancha que ella:** `D-1007` dice que `hoy_local()` está clavada en Guayaquil;
+ésta dice que **no hay con qué reemplazarla del lado de la familia**.
+
+**Lo medido, y dónde** (catálogos de Postgres, base viva):
+· `hoy_local()` = `(now() AT TIME ZONE 'America/Guayaquil')::date` — fija.
+· `zona_horaria` existe en **cinco** tablas: `prestadores`, `guarderia_franjas`,
+  `eventos`, `vendedor_bodegas`, `entrega_turnos`. **Las cinco son del lado del
+  NEGOCIO.**
+· `country_config` **no tiene columna de zona** (tiene moneda, IVA, prefijo
+  telefónico, formato de fecha — no zona).
+· `profiles` tampoco (`ciudad`, `pais`, `pais_codigo`, `country_code`: ninguna
+  es una zona horaria).
+· `user_preferencias` tampoco (`idioma`, medio de pago, tarjeta).
+
+**Por qué importa, con el caso que lo hizo aparecer.** El plan vacunal decide
+`vencida` / `vence_en` / `al_dia` **comparando contra un día**. Con `hoy_local()`
+una familia en México ve «vencida» según el calendario de Ecuador. *Hoy el
+desvío es de horas y el estado casi nunca cambia por eso — pero el día que
+cambie, cambia en silencio y del lado del que menos se mira: el borde.*
+
+**Lo que se hizo mientras tanto, y por qué NO es la cura:** `obtener_plan_vacunal`
+recibe `p_hoy` y el aparato lo manda, porque el aparato **sí** sabe el día de la
+familia. Es correcto ahí **porque esa función no escribe nada**: adelantar el
+reloj sólo cambia lo que uno ve. ⚠️ **Esa salida NO se generaliza a una función
+que escriba** — un `fecha_futura` que el cliente puede correr deja de ser un
+guard. *Cada puerta que necesite «hoy» y además escriba, necesita esta ficha
+resuelta primero.*
+
+**Las dos vías, sin elegir:** ① derivar la zona de `country_code` con una tabla
+país→zona **que no existe y habría que crear** (y que es aproximada: hay países
+con varias zonas); ② guardar la zona de la familia cuando la app la conoce, que
+es exacto y necesita una columna y un escritor. **Es decisión de producto y no
+de A.**
+
+**Disparo:** la primera puerta que ESCRIBA usando «hoy» y sea de la familia — o
+el primer usuario fuera de la zona de Guayaquil, lo que llegue antes.
+
 ### `D-1028` 🟡 Mi discriminador de OTA no ve el `package.json` de la raíz
 
 **Nace:** S113-A, 4-sep-2026, corriendo el discriminador del candidato 0.3.
@@ -28326,6 +28607,39 @@ movía su propio fixture**. E no lo esquivó: **lo convirtió en un brazo que
 prueba la cascada ajena**. *Un arnés no encontró un defecto: encontró que el
 mundo cambió debajo de su fixture — que es exactamente para lo que sirve volver
 a correrlo.*
+
+### `L-491` — Un arnés que limpia con el MISMO rol con el que escribió puede dejar residuo y reportar éxito
+
+**Origen:** S113-A, lote 1.0 · A2, 9-sep-2026, con dos filas quedando en
+producción.
+
+El fixture de `registrar_vacunas_de_carnet` corría con `set_config('role',
+'authenticated')` y las claims del dueño — correcto, porque eso es lo que hace
+la app. Al terminar, borraba lo que había insertado **con el mismo rol**. Y
+`evento_vacuna_aplicada` / `eventos_mascota` **no tienen policy de DELETE**: el
+`DELETE` afectó **cero filas, devolvió ok y no lanzó nada**. El arnés imprimió
+sus seis verdes y dejó dos filas vivas en la base.
+
+**Por qué no lo cazó nada:** un `DELETE` que no borra no es un error de SQL, es
+un resultado. Lo único que lo delató fue que el arnés **contaba el residuo
+después** — y esa cuenta la hacía **también** como `authenticated`, así que
+podría haber mentido en la otra dirección si la RLS de SELECT hubiera sido más
+angosta que la de DELETE.
+
+**La forma que funciona, y son dos cosas:**
+① **escribir con el rol de la app, limpiar con el rol que puede limpiar** — el
+   arnés cambia de sombrero a propósito y lo dice;
+② **verificar el residuo con una consulta que no dependa del rol del arnés**, y
+   acompañarla de un **control positivo** que pruebe que la consulta ve algo
+   cuando hay algo (acá: «las 8 vacunas reales de Thor siguen ahí»).
+
+*Sin ② el cero del residuo es indistinguible de un cero por ceguera* — que es
+`L-437` («un censo por patrón acota, no cierra») aplicada a la limpieza en vez
+de a la medición.
+
+**Corolario incómodo:** el mismo arnés que prueba que una puerta está bien
+cerrada **usa esa puerta cerrada para limpiar**, y ahí su cierre le juega en
+contra. Cuanto mejor la RLS, más silencioso el residuo.
 
 ### `L-490` — `core.hooksPath` es una ruta ABSOLUTA al árbol PRINCIPAL: no obedece a ninguna rama
 

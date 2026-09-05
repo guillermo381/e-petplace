@@ -55,6 +55,16 @@ export interface FichaVacunaProps {
   /** Secundarios: se muestran solo si la extracción los trajo. */
   veterinario?: string | null
   lote?: string | null
+  /**
+   * 🔴 ADITIVA · S113-D-2.6, por orden del founder (territorio de B, declarado).
+   *
+   * La transcripción EXACTA de lo que el carnet trae («FEB 2023», «26 JUN»).
+   * Se muestra al lado de la fecha. *Sin esto, cuando la fecha que proponemos
+   * salió de una lectura parcial, la persona tiene que ir a buscar el papel
+   * para saber de dónde salió — y lo que se le pide es justamente que la
+   * verifique.*
+   */
+  fechaLiteral?: string | null
   /** La RPC devolvió item_invalido para ESTE ítem: se resalta, nada se pierde. */
   rechazada?: boolean
   /** Tap en la ficha — la pantalla abre su Hoja de edición. */
@@ -85,6 +95,7 @@ export function FichaVacuna({
   fechaProxima,
   veterinario,
   lote,
+  fechaLiteral,
   rechazada = false,
   onEditar,
   onDescartar,
@@ -161,7 +172,7 @@ export function FichaVacuna({
         </View>
 
         {/* tipo + veterinario — voz humana secundaria */}
-        {(tipoVacuna || veterinario) && (
+        {tipoVacuna || veterinario ? (
           <Text
             numberOfLines={1}
             style={{
@@ -172,10 +183,10 @@ export function FichaVacuna({
           >
             {[tipoVacuna, veterinario].filter(Boolean).join(' · ')}
           </Text>
-        )}
+        ) : null}
 
         {/* fechas + lote — voz de máquina: mono minúsculas */}
-        {(fechas.length > 0 || lote) && (
+        {fechas.length > 0 || lote ? (
           <Text
             numberOfLines={1}
             style={{
@@ -189,7 +200,26 @@ export function FichaVacuna({
               .filter(Boolean)
               .join(' · ')}
           </Text>
-        )}
+        ) : null}
+
+        {/* El literal del carnet — voz de máquina, como las fechas.
+            🔴 **SIN `numberOfLines`, y no es un olvido: es el dato que se pide
+            verificar.** *Truncar «26 JUN 2023» a «26 JUN…» deja a la persona
+            comparando contra media transcripción — y lo único que esta línea
+            hace es dejarle comparar.* Que envuelva en dos renglones es más
+            barato que perder el final. */}
+        {fechaLiteral ? (
+          <Text
+            style={{
+              fontFamily: typography.family.mono.regular,
+              fontSize: typography.size.xs,
+              letterSpacing: typography.tracking.mono,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('fichaVacuna.elCarnetDice', { literal: fechaLiteral })}
+          </Text>
+        ) : null}
 
         {/* estado con voz humana + "Esta no es" */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[2] }}>

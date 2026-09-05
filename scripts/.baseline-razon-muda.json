@@ -1,4 +1,5 @@
 {
-  "baseline": 140,
-  "firmado": "founder 2-sep-2026 \u00b7 adenda 8 \u00b7 opcion (b) por ocurrencia"
+  "baseline": 139,
+  "firmado": "founder 2-sep-2026 · adenda 8 · opcion (b) por ocurrencia",
+  "nota_s113c": "S113-C · 1.0.2 — baja de 140 a 139: murio MI boton «Esta no es» del carnet, que llevaba su razon. La pieza de B ahora trae el descarte adentro, asi que el boton se retiro en el mismo acto que el montaje (L-395) y con el se fue su ocurrencia. Se actualiza ACA, en el mismo commit que lo cura, como el gate pide: un baseline que baja y no se asienta convierte la proxima subida en invisible."
 }
