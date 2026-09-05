@@ -213,10 +213,11 @@ const VOZ_TIPO: Record<TipoLineaDeVida, string> = {
   paseos: 'Paseos',
   estetica: 'Estética',
   adiestramiento: 'Adiestramiento',
+  guarderia: 'Guardería',
   recuerdos: 'Recuerdos',
 }
 const TIPOS_VIDA: readonly TipoLineaDeVida[] = [
-  'salud', 'vacunas', 'antiparasitario', 'peso', 'paseos', 'estetica', 'adiestramiento', 'recuerdos',
+  'salud', 'vacunas', 'antiparasitario', 'peso', 'paseos', 'estetica', 'adiestramiento', 'guarderia', 'recuerdos',
 ]
 
 /** La sugerencia necesita estado: **nada viene preelegido**, y eso sólo se ve

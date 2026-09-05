@@ -35,9 +35,11 @@ import { useTheme } from '../ThemeProvider'
  * familia vivió por separado no filtra: agrupa lo que ella quería separar.*
  * Al darles nombre propio el balde quedó vacío, así que se va con ellos.
  *
- * ⚠️ **Guardería no está**, y se declara en vez de inventarse: la mesa dictó
- * estos tres y la cuenta cierra en ocho. *Agregar un noveno que nadie firmó
- * sería exactamente el balde otra vez, con otro nombre.*
+ * ⚠️ **Guardería entró como novena por firma del founder**, no por deducción:
+ * es el quinto oficio y tiene datos en la base —`foto_guarderia` y las
+ * estadías—. *Se declaró como hueco en vez de agregarse sola, y esa es la
+ * diferencia: un noveno que nadie firma es el balde otra vez con otro nombre;
+ * uno que alguien firma es vocabulario.*
  */
 export type TipoLineaDeVida =
   | 'salud'
@@ -47,6 +49,7 @@ export type TipoLineaDeVida =
   | 'paseos'
   | 'estetica'
   | 'adiestramiento'
+  | 'guarderia'
   | 'recuerdos'
 
 /**
@@ -58,8 +61,14 @@ export type TipoLineaDeVida =
  * la grilla lo eligió el azar del ancho.*
  *
  * El criterio del corte: **arriba lo que mira un veterinario, abajo lo que
- * vivió la familia.** No es una jerarquía —los ocho pesan igual— es que
+ * vivió la familia.** No es una jerarquía —los nueve pesan igual— es que
  * buscarlos agrupados por naturaleza es más rápido que por orden alfabético.
+ *
+ * ⚠️ **Quedan 4 y 5, no 4 y 4**, y el desbalance es del criterio: guardería es
+ * un oficio y los oficios están todos abajo. *Emparejar las filas moviendo uno
+ * arriba pondría un oficio entre lo clínico, que es justo lo que el corte
+ * existe para no hacer.* Y `recuerdos` cierra la segunda porque **no es un
+ * oficio**: va con lo vivido, pero al final.
  */
 const FILA = {
   salud: 0,
@@ -69,6 +78,7 @@ const FILA = {
   paseos: 1,
   estetica: 1,
   adiestramiento: 1,
+  guarderia: 1,
   recuerdos: 1,
 } satisfies Record<TipoLineaDeVida, 0 | 1>
 
