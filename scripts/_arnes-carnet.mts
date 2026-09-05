@@ -260,6 +260,35 @@ if (sobranMe.length > 0)
   console.log(`   ⚠️ NO CONCLUYENTE en el otro sentido: el mapeo cubre ${sobranMe.join(' · ')} y el archivo de este árbol no los declara.\n` +
     `      Es un árbol ATRASADO, no un mapeo de más: la lista viva está en \`origin/main\`. Se declara y no se pinta de verde.`);
 
+console.log('\n── ⑯ ROJO · UNA FILA SIN NOMBRE NO SE PUEDE CONFIRMAR ──');
+/* 🔴 *«Es correcta» sobre una fila sin nombre es firmar un renglón en blanco.*
+   La regla del pie vive en `revisada()` y NO en la pantalla: si dependiera de
+   que la pantalla se acuerde de no marcarla, el día que se olvide se guarda
+   una vacuna sin nombre y nadie se entera. */
+t('🔴 tocada PERO sin nombre ⇒ NO revisada', revisada({ tocada: true, sinNombre: true }), false);
+t('CONTROL POSITIVO · tocada con nombre ⇒ revisada', revisada({ tocada: true }), true);
+t('🔴 …y el pie la cuenta PENDIENTE aunque la tanda diga que la tocaron',
+  resumenDeLaTanda([{ tocada: true }, { tocada: true, sinNombre: true }]),
+  { faltan: 1, aGuardar: 2, listo: false });
+t('descartarla SÍ la resuelve: ahí no se guarda nada',
+  revisada({ tocada: false, descartada: true, sinNombre: true }), true);
+t('el nombre puede llegar `null`', /nombre: string \| null/.test(CONF), true);
+t('🔴 sin nombre la fila se marca, pase lo que pase con la confianza',
+  /pideRevision\(confianza\) \|\| pedirNombre/.test(CONF), true);
+t('🔴 el campo se dibuja VACÍO y editable, no un hueco ni un «sin nombre»',
+  /<Campo[\s\S]{0,300}value=\{nombre \?\? ''\}/.test(CONF), true);
+t('…con su razón bajo el campo, que es la del botón apagado',
+  /ayuda=\{vozSinNombre\}/.test(CONF), true);
+t('🔴 «Es correcta» APAGADO hasta que haya nombre',
+  /disabled=\{pedirNombre && !hayNombre\}/.test(CONF), true);
+t('🔴 y se fija AL MONTAR: el campo no se esfuma con la primera letra',
+  /useState\(!hayNombre\)/.test(CONF), true);
+t('descartada sin nombre DICE cuál era, no queda muda',
+  /hayNombre \? nombre : vozSinNombre/.test(CONF), true);
+/* ⚠️ El foco lo decide la LISTA: con dos filas sin nombre, `autoFocus` en las
+   dos deja el foco en la última y la pantalla salta al fondo. */
+t('el foco entra por prop y su default NO enfoca', /enfocar = false/.test(CONF), true);
+
 console.log('\n── ⑮ ROJO · LOS CONSUMIDORES DE `main`, QUE ESTE ÁRBOL NO PUEDE VER ──');
 /* 🔴 **ESTE BRAZO NACE DE UN DAÑO, no de una precaución.**
  * La adenda cambió el contrato de dos piezas y **dejó `main` en rojo**: el
@@ -312,6 +341,24 @@ for (const archivo of consumidores) {
         bloques.every((b) => b.includes(x)), true);
   }
 }
+/* ⚠️ **LO QUE ESTA RAMA ACABA DE VOLVER OBLIGATORIO Y `main` TODAVÍA NO TIENE.**
+   No es un rojo: es una TRANSICIÓN, y el consumidor es de otra pista. Pero
+   tampoco es verde — *un cambio de contrato que nadie nombra es exactamente
+   cómo rompí `main` la vez pasada.* Se lista con nombre y archivo para que la
+   deuda tenga dueño en vez de descubrirse en el merge. */
+const EN_TRANSITO = ['etiquetaNombre', 'vozSinNombre'] as const;
+for (const archivo of consumidores) {
+  const texto = git('show', `${REFERENCIA}:${archivo}`);
+  const bloques = [...texto.matchAll(/<FilaConfirmacionVacuna\b[\s\S]*?\/>/g)].map((m) => m[0]);
+  if (bloques.length === 0) continue;
+  const debe = EN_TRANSITO.filter((x) => !bloques.every((b) => b.includes(x)));
+  if (debe.length > 0)
+    console.log(`   ⚠️ DEUDA CON EL CONSUMIDOR · ${archivo} todavía no le pasa ${debe.join(' ni ')} ` +
+      `a FilaConfirmacionVacuna.\n      Los volvió obligatorios ESTA rama; el archivo es de otra pista. ` +
+      `No se pinta de verde y no se cuenta como rojo: se nombra.`);
+  else console.log(`   ✓ ${archivo} ya pasa ${EN_TRANSITO.join(' y ')}`);
+}
+
 if (consumidores.length === 0 && !NO_CONCLUYENTE.some((x) => x.includes(REFERENCIA)))
   console.log('   ⚠️ CERO consumidores fuera de `packages/ui`: el brazo no midió nada.\n' +
     '      No es un verde — es que no hay a quién romper todavía.');
