@@ -64,7 +64,10 @@ import {
   type IconoNombre,
   type LineaDeVidaEstadoPie,
   FranjaSeguridad,
+  CeldasHoy,
+  PiezaMedicacionActiva,
   ordenarSeguridad,
+  tendenciaPeso,
 } from '@epetplace/ui';
 import {
   leerTimelineMascota,
@@ -106,6 +109,7 @@ import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
 import { contarPendientesDe } from '@/lib/pendientes';
 import { itemsDeSeguridad } from '@/lib/perfil/seguridad';
+import { coberturaDePlagas, medicacionDeLaCelda, proximaDesparasitacion } from '@/lib/perfil/hoy';
 import { composicionDe } from '@/lib/composicion-sujeto';
 import { HabitantesAcuarioHoja } from '@/components/habitantes-acuario-hoja';
 import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
@@ -1271,206 +1275,118 @@ export default function PerfilDeMascota() {
         ) : null}
 
 
-        {/* ── ③ CÓMO ESTÁ HOY — la grilla con lo que SÍ hay + UNA fila
-            que agrupa la ausencia (el defecto que la lámina nombra:
-            "cuatro tarjetas para la ausencia"). El rótulo lleva su
-            CUENTA. "Cargar el carnet" vive ACÁ, en la fila de la falta
-            — por eso muere el segundo CTA de Vacunas. */}
-        {/* 🔴 **NO SE MONTA EN MEMORIAL** (`D-1021`, segunda mitad). `monta`
-            decide por SUJETO (individuo · acuario) y no sabe nada del estado de
-            vida, asi que este bloque seguia preguntando «¿como esta hoy?» sobre
-            quien ya no esta, con «Registrar el de hoy» y «Cargar carnet»
-            adentro. *La primera vuelta de D-1021 curo el Coach y los guards del
-            tema y dio la pantalla por cerrada sin censarla: el resto lo
-            encontro el founder en el aparato.* Mismo guard que la puerta de la
-            despensa doce lineas mas abajo — el apagado estructural de
-            `MODELO_LOYALTY §7.1`, que ya regia acá y a este bloque no lo
-            alcanzaba. */}
+        {/* ── ③ CÓMO ESTÁ HOY — **la grilla ahora es `CeldasHoy` de B**
+            (S113-C · 1.1 · C6). Antes vivía acá una grilla propia de dos
+            celdas (vacuna y peso) con la fila de ausencias y el botón de
+            carnet enganchados adentro del mismo IIFE.
+            🔴 **Las ausencias se DESENGANCHARON** y viven abajo, en su propio
+            bloque: eran parte del render de la grilla, así que cambiar la
+            grilla obligaba a tocarlas — *dos cosas que se editan juntas por
+            accidente de dónde viven no son una cosa*.
+            ⚠️ **Censo antes de mover**: `PieRevelar` NO estaba en este bloque
+            (0 ocurrencias entre sus 190 líneas), así que no hubo nada que
+            desenganchar de él; la mesa lo nombró y se mide en vez de
+            suponerse. */}
         {monta.comoEstaHoy && !esMemorial ? (() => {
-          // r10-2 · LOS TRES CASOS de vacunas (la celda medía mal y la
-          // pantalla se contradecía: decía "sin registro" con 8 vacunas
-          // en el carnet abajo). La celda mide si sabemos el ESTADO:
-          //   · sin NINGÚN registro   → no se monta; va a la ausencia
-          //   · con registros, SIN fecha_proxima → "Sin fecha de
-          //     refuerzo" en gris (no sabemos, y NO es que falten datos)
-          //   · con fecha → al día / falta una
-          type CeldaHoy = {
-            key: string;
-            rotulo: string;
-            valor: string;
-            detalle: string | null;
-            estado: 'atencion' | 'alDia' | 'sinSaber';
-          };
+          /* `senal` es estado de esta pantalla, no un campo del perfil; y el
+             hoy en ISO se deriva del mismo `Date` que ya usa el resto (misma
+             fuente, un solo día). */
           const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
           const pv = senal?.proxima_vacuna ?? null;
-          const celdas: CeldaHoy[] = [];
-          const faltan: string[] = [];
-          if (senal !== null && senal.vacunas_total > 0) {
-            if (pv === null) {
-              celdas.push({
-                key: 'vac',
-                rotulo: t('perfil.hechosVacunas'),
-                valor: t('perfil.hoySinFechaRefuerzo'),
-                detalle: t('perfil.hoyEnCarnet', { n: senal.vacunas_total }),
-                estado: 'sinSaber',
-              });
-            } else {
-              celdas.push(
-                pv.fecha < hoyIso
-                  ? { key: 'vac', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyFaltaUna'), detalle: t('perfil.hoyRefuerzoVencido'), estado: 'atencion' }
-                  : { key: 'vac', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyAlDia'), detalle: t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }), estado: 'alDia' },
-              );
-            }
-          } else {
-            faltan.push(t('perfil.hechosVacunas').toLowerCase());
-          }
-          // S91 · P2 — EL PESO GANA SU FECHA Y SU PUERTA.
-          //
-          // Y la celda existe SIEMPRE, también sin dato: antes, una mascota sin
-          // peso solo aparecía nombrada en la fila de «Sin registro», que dice
-          // qué falta y no ofrece dónde ponerlo. La puerta tiene que estar
-          // donde está la ausencia — si no, el dueño lee su carencia y no
-          // tiene qué hacer con ella.
           const ultimoPeso = pesos !== null && pesos.length > 0 ? pesos[0] : null;
-          celdas.push(
-            ultimoPeso !== null
-              ? {
-                  key: 'peso',
-                  rotulo: t('perfil.peso'),
-                  valor: `${ultimoPeso.peso_kg} kg`,
-                  detalle: t('perfil.pesoMedidoEl', {
-                    fecha: fechaCortaMono(ultimoPeso.fecha.slice(0, 10), idioma),
-                  }),
-                  estado: 'alDia',
-                }
-              : peso_clinico_kg !== null
-                ? // El snapshot sin serie: pasó por acá antes de que existiera
-                  // el lector, o la lectura falló. Se muestra el número y NO se
-                  // le inventa una fecha.
-                  { key: 'peso', rotulo: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, detalle: null, estado: 'alDia' }
-                : { key: 'peso', rotulo: t('perfil.peso'), valor: t('perfil.hoySinRegistroCorto'), detalle: t('perfil.pesoRegistrar'), estado: 'sinSaber' },
-          );
-          /* 🔴 **LA FILA DE AUSENCIAS DEJA DE SER INCONDICIONAL** (1.1 · C6).
-             Acá se empujaban «desparasitación» y «alergias» SIEMPRE, existieran
-             o no: la ficha de una mascota con desparasitación al día y alergias
-             registradas igual decía que le faltaban las dos. *Una lista de
-             faltantes que nombra cosas que están enseña a no leerla* — y la de
-             al lado, que sí falta, se pierde entre las que no.
-             El dato para no decirlo estaba en el perfil y nadie lo miraba: es
-             el mismo hallazgo que el globo del Hogar en `D-1026`. */
-          if (perfil.desparasitaciones.length === 0) {
-            faltan.push(t('perfil.hoyDesparasitacion').toLowerCase());
-          }
-          if (perfil.alergias_estado === 'sin_registro') {
-            faltan.push(t('perfil.hoyAlergias').toLowerCase());
-          }
+          const anterior = pesos !== null && pesos.length > 1 ? pesos[1] : null;
+          const med = medicacionDeLaCelda(perfil.medicacion_actual);
+          const cobertura = coberturaDePlagas(perfil.desparasitaciones, hoyIso);
+
+          /* Las ausencias: **sólo lo que de verdad falta** (1.1, primera
+             mitad). Se arma acá porque el dato es el mismo que alimenta las
+             celdas, y se DIBUJA abajo. */
+          const faltan: string[] = [];
+          if (senal === null || senal.vacunas_total === 0) faltan.push(t('perfil.hechosVacunas').toLowerCase());
+          if (perfil.desparasitaciones.length === 0) faltan.push(t('perfil.hoyDesparasitacion').toLowerCase());
+          if (perfil.alergias_estado === 'sin_registro') faltan.push(t('perfil.hoyAlergias').toLowerCase());
+
           return (
             <View style={{ marginTop: spacing[8] }}>
-              {/* r10-3: la fracción "1 de 4" MURIÓ — no nombraba lo que
-                  contaba (el founder preguntó cuáles eran los otros
-                  tres) y la fila de ausencia de abajo YA los nombra. */}
               <RotuloSeccion titulo={t('perfil.hoyTitulo')} cuenta={null} />
-              {celdas.length > 0 ? (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2.5], paddingHorizontal: spacing[5] }}>
-                  {celdas.map((c) => {
-                    const cuerpo = (
-                      <CantoCurva
-                        color={
-                          c.estado === 'atencion'
-                            ? theme.status.warning
-                            : c.estado === 'alDia'
-                              ? theme.status.success
-                              : theme.text.tertiary
-                        }
-                      >
-                        <View style={{ padding: spacing[3], gap: spacing[1.5], minHeight: 44 }}>
-                          {/* La flecha va en la línea del RÓTULO y no al pie:
-                              acompaña al nombre de la celda, que es lo que se
-                              lee primero, y no empuja el dato ni el detalle. */}
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
-                            <View style={{ flex: 1, minWidth: 0 }}>
-                              <Texto variante="apoyo" numberOfLines={1}>{c.rotulo}</Texto>
-                            </View>
-                            {c.key === 'vac' || c.key === 'peso' ? (
-                              <ChevronDerecha color={theme.text.tertiary} />
-                            ) : null}
-                          </View>
-                          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
-                            {c.valor}
-                          </Text>
-                          {c.detalle !== null ? <Texto variante="dato" numberOfLines={1}>{c.detalle}</Texto> : null}
-                        </View>
-                      </CantoCurva>
-                    );
-                    return (
-                      <View key={c.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
-                        {/* r8: la celda de VACUNAS navega al PLAN DE VACUNAS
-                            que A construyó (contexto 1 de la misma lámina) —
-                            estaba VIVA E INALCANZABLE: ninguna superficie la
-                            enlazaba. La de peso no navega (no tiene destino
-                            propio: su historia vive en el expediente). */}
-                        {/* S91 · P2 — LA MISMA GRAMÁTICA PARA LAS DOS: cada
-                            celda lleva a SU acto. La de vacunas al plan; la de
-                            peso a registrar el de hoy. El comentario de r8
-                            decía que el peso «no tiene destino propio» — lo
-                            tiene desde que existe la serie: su acto no es
-                            mirar, es SUMAR un punto. */}
-                        {c.key === 'vac' ? (
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={`${c.rotulo}, ${c.valor}`}
-                            onPress={() =>
-                              router.push({
-                                pathname: '/hogar/vacunas/[mascotaId]',
-                                params: { mascotaId: mascota.id, nombre: mascota.nombre },
-                              })
-                            }
-                          >
-                            {cuerpo}
-                          </Pressable>
-                        ) : c.key === 'peso' ? (
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={`${c.rotulo}, ${c.valor}. ${t('perfil.pesoRegistrar')}`}
-                            onPress={() => setPesoHoja(true)}
-                          >
-                            {cuerpo}
-                          </Pressable>
-                        ) : (
-                          cuerpo
-                        )}
-                      </View>
-                    );
-                  })}
-                </View>
-              ) : null}
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <CeldasHoy
+                  vacuna={{
+                    rotulo: t('perfil.hechosVacunas'),
+                    /* Sin ninguna vacuna, `null` ⇒ la celda dice que no hay.
+                       Con vacunas pero sin próxima, el nombre existe y el
+                       contexto NO se inventa. */
+                    nombre:
+                      senal === null || senal.vacunas_total === 0
+                        ? null
+                        : pv === null
+                          ? t('perfil.hoySinFechaRefuerzo')
+                          : pv.fecha < hoyIso
+                            ? t('perfil.hoyFaltaUna')
+                            : t('perfil.hoyAlDia'),
+                    contexto:
+                      pv === null
+                        ? senal !== null && senal.vacunas_total > 0
+                          ? t('perfil.hoyEnCarnet', { n: senal.vacunas_total })
+                          : undefined
+                        : pv.fecha < hoyIso
+                          ? t('perfil.hoyRefuerzoVencido')
+                          : t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }),
+                  }}
+                  antiparasitario={{
+                    rotulo: t('perfil.hoyDesparasitacion'),
+                    cobertura,
+                    vozPlaga: (p) => t(`perfil.plaga_${p}` as 'perfil.plaga_pulgas'),
+                  }}
+                  peso={{
+                    rotulo: t('perfil.peso'),
+                    valorTexto:
+                      ultimoPeso !== null
+                        ? `${ultimoPeso.peso_kg} kg`
+                        : peso_clinico_kg !== null
+                          ? `${peso_clinico_kg} kg`
+                          : null,
+                    tendencia: ultimoPeso !== null ? tendenciaPeso(ultimoPeso.peso_kg, anterior?.peso_kg) : null,
+                    contexto:
+                      ultimoPeso !== null
+                        ? t('perfil.pesoMedidoEl', { fecha: fechaCortaMono(ultimoPeso.fecha.slice(0, 10), idioma) })
+                        : undefined,
+                  }}
+                  medicacion={{
+                    rotulo: t('perfil.hoyMedicacion'),
+                    nombre: med?.nombre ?? null,
+                    contexto:
+                      med?.hasta != null
+                        ? t('perfil.seguridadHasta', { fecha: fechaCortaMono(med.hasta.slice(0, 10), idioma) })
+                        : undefined,
+                  }}
+                  vozSinDato={t('perfil.hoySinRegistroCorto')}
+                />
+              </View>
+
+              {/* LA FILA DE AUSENCIAS, desenganchada de la grilla: nombra lo
+                  que de verdad falta y ofrece la única puerta que corresponde
+                  —el carnet—, que es donde está la ausencia más común. */}
               {faltan.length > 0 ? (
-                <View style={{ paddingHorizontal: spacing[5], marginTop: celdas.length > 0 ? spacing[2.5] : 0 }}>
+                <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[2.5] }}>
                   <CantoCurva color={theme.text.tertiary}>
                     <View style={{ padding: spacing[3], gap: spacing[2] }}>
                       <Texto variante="cuerpo">{t('perfil.hoySinRegistro')}</Texto>
                       <Texto variante="dato">{faltan.join(' · ')}</Texto>
-                      <View style={{ alignSelf: 'flex-start', marginTop: spacing[1] }}>
-                        {/* r10-4: NO va en negro. Es acción SECUNDARIA
-                            dentro de una tarjeta → `sinCaja` de B (su
-                            relleno tenue) — este es su consumidor real
-                            en una pantalla que el founder SÍ mira. */}
-                        <Boton
-                          variante="sinCaja"
-                          tamaño="sm"
-                          etiqueta={t('perfil.cargarCarnet')}
-                          onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
-                        />
-                      </View>
+                      {monta.vacunas && (senal === null || senal.vacunas_total === 0) ? (
+                        <View style={{ alignSelf: 'flex-start', marginTop: spacing[1] }}>
+                          <Boton
+                            variante="sinCaja"
+                            tamaño="sm"
+                            etiqueta={t('perfil.cargarCarnet')}
+                            onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+                          />
+                        </View>
+                      ) : null}
                     </View>
                   </CantoCurva>
                 </View>
               ) : null}
-              {/* S91 · P5 — LA LÍNEA EDITORIAL SE MUDÓ. Vivía suelta acá y
-                  «Lo próximo» vivía abajo: DOS fragmentos del mismo vínculo,
-                  separados por media pantalla. La narrativa y su próximo paso
-                  son UNA cosa (MODELO_LOYALTY §2) y ahora viven juntos, al
-                  pie. Ley 37: acá no queda un hueco, queda nada. */}
             </View>
           );
         })() : null}
@@ -1547,6 +1463,112 @@ export default function PerfilDeMascota() {
         </View>
         ) : null}
 
+        {/* ── ANTIPARASITARIO (S113-C · 1.1 · C6) — los chips por plaga y la
+            próxima, con su puerta a registrar.
+            🔴 **No se monta en memorial** (`D-1021`) ni en un sujeto que no
+            lleva vacunas —un acuario no se desparasita—: reusa `monta.vacunas`
+            porque es la misma pregunta, «¿este sujeto tiene cuidado sanitario
+            individual?», y no una segunda lista que mantener.
+            ⚠️ **Sin ningún registro NO se dibuja la sección**: la celda de
+            arriba ya dice «sin registro», y repetirlo acá con cuatro chips
+            grises sería decir dos veces lo mismo con más tinta. La puerta a
+            registrar, en cambio, SÍ queda: es donde está la ausencia. */}
+        {monta.vacunas && !esMemorial ? (() => {
+          const cob = coberturaDePlagas(perfil.desparasitaciones, new Intl.DateTimeFormat('en-CA').format(hoy));
+          const prox = proximaDesparasitacion(perfil.desparasitaciones);
+          const hayAlgo = perfil.desparasitaciones.length > 0;
+          return (
+            <View style={{ marginTop: spacing[8] }}>
+              <RotuloSeccion titulo={t('perfil.hoyDesparasitacion')} cuenta={null} />
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <Tarjeta relleno="ninguno" elevacion="reposo">
+                  <View style={{ padding: spacing[4], gap: spacing[3] }}>
+                    {hayAlgo ? (
+                      <>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                          {cob.map((c) => (
+                            <View
+                              key={c.plaga}
+                              style={{
+                                paddingHorizontal: spacing[2.5],
+                                paddingVertical: spacing[1],
+                                borderRadius: radius.full,
+                                backgroundColor:
+                                  c.alDia === null
+                                    ? theme.bg.hundido
+                                    : c.alDia
+                                      ? theme.status.successBg
+                                      : theme.status.dangerBg,
+                              }}
+                            >
+                              <Texto
+                                variante="dato"
+                                color={c.alDia === null ? 'tertiary' : undefined}
+                              >
+                                {t(`perfil.plaga_${c.plaga}` as 'perfil.plaga_pulgas')}
+                              </Texto>
+                            </View>
+                          ))}
+                        </View>
+                        {prox !== null ? (
+                          <Texto variante="apoyo">
+                            {t('perfil.antiproxima', { fecha: fechaCortaMono(prox.slice(0, 10), idioma) })}
+                          </Texto>
+                        ) : null}
+                      </>
+                    ) : (
+                      <Texto variante="apoyo">{t('perfil.antiSinRegistro')}</Texto>
+                    )}
+                    <View style={{ alignSelf: 'flex-start' }}>
+                      <Boton
+                        variante="sinCaja"
+                        tamaño="sm"
+                        etiqueta={t('perfil.antiRegistrar')}
+                        onPress={() => router.push({ pathname: '/antiparasitario', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+                      />
+                    </View>
+                  </View>
+                </Tarjeta>
+              </View>
+            </View>
+          );
+        })() : null}
+
+        {/* ── MEDICACIÓN ACTIVA (S113-C · 1.1 · C6). **La franja dice lo
+            urgente; esta pieza lista todo.** No es repetir: arriba va lo que
+            alguien tiene que saber antes de tocarla, y acá está el detalle con
+            su dosis y su hasta. La pieza devuelve `null` sin filas, así que
+            una mascota sin medicación no tiene esta sección. */}
+        {!esMemorial && perfil.medicacion_actual.length > 0 ? (
+          <View style={{ marginTop: spacing[8] }}>
+            <RotuloSeccion titulo={t('perfil.hoyMedicacion')} cuenta={String(perfil.medicacion_actual.length)} />
+            <View style={{ paddingHorizontal: spacing[5] }}>
+              <Tarjeta relleno="ninguno" elevacion="reposo">
+                <View style={{ padding: spacing[4] }}>
+                  <PiezaMedicacionActiva
+                    filas={perfil.medicacion_actual.map((m, i) => ({
+                      id: `med-${i}`,
+                      nombre: m.nombre ?? t('perfil.medSinNombre'),
+                      dosis: m.dosis,
+                      hasta:
+                        m.hasta !== null
+                          ? t('perfil.seguridadHasta', { fecha: fechaCortaMono(m.hasta.slice(0, 10), idioma) })
+                          : null,
+                      /* La procedencia se dice, como en la franja: no es lo
+                         mismo que lo anote la familia a que lo recete una
+                         clínica. Mismo criterio, una sola lectura de `fuente`. */
+                      procedencia: m.fuente === null || m.fuente === 'familia' ? 'familia' : 'prestador',
+                      vozProcedencia:
+                        m.fuente === null || m.fuente === 'familia'
+                          ? t('perfil.seguridadLaFamilia')
+                          : t('perfil.seguridadUnPrestador'),
+                    }))}
+                  />
+                </View>
+              </Tarjeta>
+            </View>
+          </View>
+        ) : null}
         {/* ── S89 órdenes 8⑤/10① · LOS PAPELES DEL PRODUCTO ──────────────
             Los documentos viven JUNTOS: un solo lugar donde la familia sabe
             que están sus papeles. El botón del carnet salió de la sección

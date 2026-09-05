@@ -10,21 +10,21 @@
  * legible **no entra**: una fila que dice «alergia» y nada más ocupa el lugar
  * de la que sí dice algo.
  *
- * ⚠️ **`alergias_detalle` llega como `unknown[]`** — el wrapper lo declara así
- * a propósito («el jsonb del snapshot tal cual»). La forma se **midió** contra
- * la base (`mascota_perfil_vigente.alergias`, 5-sep):
- * `{ estado, alergeno, categoria, evento_id, severidad, fecha_diagnostico }`.
- * Se lee con guardas de runtime y **nada se asume**: sin `alergeno` legible, el
- * ítem no entra. *Pedido a A: tiparlo — mientras sea `unknown`, cada
- * consumidor va a inventarse su propia forma, y la primera que se equivoque lo
- * va a hacer en silencio.*
+ * ✅ **`alergias_detalle` YA ESTÁ TIPADO** (A, `31cfbdd7`): llegaba como
+ * `unknown[]` y este módulo lo leía con guardas de runtime sobre una forma que
+ * había medido contra la base. **Las guardas se retiran en el mismo acto que
+ * llega el tipo**: sostenerlas «por las dudas» dejaría dos verdades sobre la
+ * misma forma —la del compilador y la mía— y la mía envejecería sin avisar.
+ * Lo único que sobrevive es el descarte del `alergeno` vacío, que **no es una
+ * guarda de forma sino una decisión**: el tipo lo declara `string | null`.
  */
+import type { AlergiaDeMascota } from '@epetplace/api';
 import type { ItemSeguridad, ProcedenciaSeguridad } from '@epetplace/ui';
 
 /** Lo mínimo del perfil que esta pieza necesita. Se pide por forma y no por el
  *  tipo entero: así un campo nuevo en `PerfilMascota` no la toca. */
 export interface FuentesDeSeguridad {
-  alergiasDetalle: readonly unknown[];
+  alergiasDetalle: readonly AlergiaDeMascota[];
   medicacion: readonly { nombre: string | null; dosis: string | null; hasta: string | null; fuente: string | null }[];
   condiciones: readonly { nombre: string | null; estado: string | null; fuente: string | null }[];
   restricciones: readonly { familia_servicio: string; severidad: string; descripcion: string | null }[];
@@ -55,15 +55,13 @@ export function itemsDeSeguridad(f: FuentesDeSeguridad, voz: VocesDeSeguridad): 
   const items: ItemSeguridad[] = [];
   const vozDe = (p: ProcedenciaSeguridad): string => (p === 'familia' ? voz.laFamilia : voz.unPrestador);
 
-  f.alergiasDetalle.forEach((cruda, i) => {
-    if (cruda === null || typeof cruda !== 'object') return;
-    const o = cruda as Record<string, unknown>;
-    const alergeno = texto(o.alergeno);
+  f.alergiasDetalle.forEach((a, i) => {
+    const alergeno = texto(a.alergeno);
     /* Sin el alérgeno no hay nada que decir, y una franja que dice «alergia» a
        secas es justo la que este módulo existe para no producir. */
     if (alergeno === null) return;
     items.push({
-      id: texto(o.evento_id) ?? `alergia-${i}`,
+      id: a.evento_id ?? `alergia-${i}`,
       clase: 'alergia',
       texto: voz.alergiaA(alergeno),
       /* Una alergia del snapshot clínico la registró quien atendió. */

@@ -227,6 +227,7 @@ export const clienteEn = {
     entradaDetalle: 'Each with their own story.',
   },
   hogar: {
+    proximaPlagaCorta: '{{plaga}} · {{fecha}}',
     proximaVacunaCorta: '{{nombre}} · {{fecha}}',
     falloServicios: "We couldn't load your {{servicio}} history",
     falloMascotas: "We couldn't load your pets",
@@ -381,6 +382,15 @@ export const clienteEn = {
     vozQuieto: 'The record has been quiet — anything new?',
   },
   perfil: {
+    antiproxima: 'Next one due {{fecha}}',
+    antiSinRegistro: 'No dewormings logged yet.',
+    antiRegistrar: 'Log one',
+    medSinNombre: 'Unnamed',
+    hoyMedicacion: 'Medication',
+    plaga_pulgas: 'fleas',
+    plaga_garrapatas: 'ticks',
+    plaga_mosquitos: 'mosquitoes',
+    plaga_internos: 'internal',
     seguridadAlergiaA: 'Allergic to {{alergeno}}',
     seguridadToma: 'Takes {{nombre}}',
     seguridadTomaConDosis: 'Takes {{nombre}} {{dosis}}',

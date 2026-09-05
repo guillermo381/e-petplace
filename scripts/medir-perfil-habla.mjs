@@ -44,8 +44,8 @@ await page.waitForTimeout(8000);
 const tHogar = await T();
 di('');
 di('── C7 · LA TIRA DEL HOGAR ─────────────────────────────────');
-const conVacuna = tHogar.split('\n').map((x) => x.trim()).filter((x) => / · \d{1,2} [a-z]{3} \d{4}$/.test(x));
-di(`  tarjetas con «vacuna · fecha»: ${conVacuna.length ? conVacuna.join(' | ') : 'ninguna'}`);
+const conDato = tHogar.split('\n').map((x) => x.trim()).filter((x) => / · \d{1,2} [a-z]{3} \d{4}/.test(x));
+di(`  líneas «algo · fecha» en la tira: ${conDato.length ? conDato.join(' | ') : 'ninguna'}`);
 
 for (const c of CASOS) {
   await page.goto(`http://localhost:8082/hogar/mascota/${c.id}`, { waitUntil: 'networkidle', timeout: 120000 });
@@ -62,7 +62,19 @@ for (const c of CASOS) {
   di(`  medicación con NOMBRE: ${(t.match(/Toma [^\n·]+/g) ?? []).join(' · ') || 'ninguna'}`);
   di(`  verbos que le PIDEN algo: ${['Registrar', 'Cargar', 'Reservar', 'Agendar', 'Cuéntanos'].filter((v) => new RegExp(`(^|\\W)${v}`).test(t)).join(' · ') || 'NINGUNO'}`);
   di(`  botones que le piden: ${b.filter((x) => /^(Registrar|Cargar|Reservar|Cuéntanos)/.test(x)).join(' · ') || 'ninguno'}`);
-  di(`  fila de ausencias: ${(t.match(/^.*(desparasitación|alergias).*$/im) ?? ['(no aparece)'])[0].slice(0, 90)}`);
+  /* 🔴 **La fila se lee por su ANCLA, no por sus palabras.** Con la sección
+     «Desparasitación» montada, buscar la palabra encontraba el RÓTULO de la
+     sección y no la fila: *el arnés dejó de discriminar el día que apareció un
+     vecino con el mismo nombre.* Ahora se toma la línea que sigue al título de
+     la fila, que es donde viven los faltantes. */
+  const lineas = t.split('\n').map((x) => x.trim());
+  /* ⚠️ «Sin registro» es TAMBIÉN la voz de las celdas vacías, así que la
+     línea sola no alcanza: la de la FILA es la única seguida por la lista de
+     faltantes en minúscula. Ese es el discriminador. */
+  const iAus = lineas.findIndex(
+    (x, k) => /^Sin registro$/i.test(x) && /^(vacunas|desparasitación|alergias)/.test(lineas[k + 1] ?? ''),
+  );
+  di(`  fila de ausencias: ${iAus >= 0 ? lineas[iAus + 1] : '(no aparece)'}`);
   await page.screenshot({ path: `docs/loop/S113-C-perfil-${c.quien}.png` });
 }
 

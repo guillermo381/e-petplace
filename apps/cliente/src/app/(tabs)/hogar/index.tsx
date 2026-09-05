@@ -264,7 +264,7 @@ function FilaReco({
         <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
           <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
           {detalle !== null ? (
-            <Texto variante={detalleMono === true ? 'dato' : 'apoyo'} numberOfLines={1}>{detalle}</Texto>
+            <Texto variante={detalleMono === true ? 'dato' : 'apoyo'} numberOfLines={2}>{detalle}</Texto>
           ) : null}
         </View>
         <ChevronFila forma="navega" />
@@ -1761,8 +1761,22 @@ export default function Hogar() {
                           un viaje POR MASCOTA. Pedido a A, con su medición. */}
                       {(() => {
                         if (enMemoriaDe(m.id)) return null;
-                        const pv = senalesPorMascota.get(m.id)?.proxima_vacuna ?? null;
-                        if (pv === null) return null;
+                        const sen = senalesPorMascota.get(m.id);
+                        const pv = sen?.proxima_vacuna ?? null;
+                        const pd = sen?.proxima_desparasitacion ?? null;
+                        /* 🔴 **`null` NO ES «al día»**: quiere decir que ninguna
+                           fila declaró próxima (letra de A). *Dibujar «al día»
+                           sobre un silencio es afirmar lo que nadie midió*, así
+                           que sin dato no se dibuja la línea. */
+                        if (pv === null && pd === null) return null;
+                        const partes = [
+                          pv !== null
+                            ? t('hogar.proximaVacunaCorta', { nombre: pv.nombre, fecha: fechaCortaMono(pv.fecha.slice(0, 10), idioma) })
+                            : null,
+                          pd !== null
+                            ? t('hogar.proximaPlagaCorta', { plaga: pd.plaga, fecha: fechaCortaMono(pd.fecha.slice(0, 10), idioma) })
+                            : null,
+                        ].filter((x): x is string => x !== null);
                         return (
                           <Text
                             numberOfLines={1}
@@ -1775,10 +1789,7 @@ export default function Hogar() {
                               textAlign: 'center',
                             }}
                           >
-                            {t('hogar.proximaVacunaCorta', {
-                              nombre: pv.nombre,
-                              fecha: fechaCortaMono(pv.fecha.slice(0, 10), idioma),
-                            })}
+                            {partes.join(' · ')}
                           </Text>
                         );
                       })()}
