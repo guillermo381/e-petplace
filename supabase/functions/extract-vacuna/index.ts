@@ -137,7 +137,13 @@ const VIAS = ['subcutanea', 'intramuscular', 'intranasal', 'oral'] as const
 interface FilaCatalogo { codigo: string; nombre: string }
 
 const CONFIANZAS = ['alta', 'media', 'baja'] as const
-const EVIDENCIAS = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'] as const
+/**
+ * 🔴 QUÉ PRUEBA LA APLICACIÓN — y nada más. `sticker_con_fecha` se jubila
+ * (S113-D-2.1, firma del founder): mezclaba **qué se vio** con **dónde estaba
+ * la fecha**, que son dos preguntas. La fecha ya tiene su propio campo; este
+ * dice qué marca física prueba que la vacuna se aplicó.
+ */
+const EVIDENCIAS = ['sticker', 'sello', 'manuscrito', 'impreso'] as const
 
 interface VacunaExtraida {
   nombre: string
@@ -150,6 +156,13 @@ interface VacunaExtraida {
   vencimiento_biologico: string | null
   /** Código de `cat_vacunas`, o `null` si el modelo no lo puede mapear. */
   vacuna_codigo: string | null
+  /**
+   * TODOS los códigos que esta aplicación cubre — una combinada protege contra
+   * varias cosas a la vez. Lista blanca contra el mismo catálogo. **Vacía si el
+   * modelo no está seguro**: una cobertura inventada le dice al plan vacunal
+   * que la mascota está protegida contra algo que quizá no recibió.
+   */
+  cubre: string[]
   /** DERIVADO del código por esta function — el modelo no lo escribe. */
   tipo_vacuna: string | null
   confianza: typeof CONFIANZAS[number]
@@ -184,9 +197,24 @@ function esVacunaExtraida(v: unknown, codigos: readonly string[]): boolean {
     textoOnull(o.veterinario) &&
     enListaOnull(o.via, VIAS) &&
     enListaOnull(o.vacuna_codigo, codigos) &&
+    esCobertura(o.cubre, o.vacuna_codigo, codigos) &&
     typeof o.confianza === 'string' && (CONFIANZAS as readonly string[]).includes(o.confianza) &&
     typeof o.evidencia === 'string' && (EVIDENCIAS as readonly string[]).includes(o.evidencia)
   )
+}
+
+/** `cubre`: lista de códigos del catálogo, sin repetidos, y coherente con el
+ *  código principal. **Vacía es válido** (el modelo no está seguro). */
+function esCobertura(v: unknown, principal: unknown, codigos: readonly string[]): boolean {
+  if (!Array.isArray(v)) return false
+  if (!v.every((c) => typeof c === 'string' && codigos.includes(c))) return false
+  if (new Set(v).size !== v.length) return false
+  // Coherencia: si dice contra qué protege Y cuál es la principal, la principal
+  // tiene que estar adentro. Decir «esto es antirrábica» y que la cobertura no
+  // la incluya es contradecirse, y adivinar cuál de las dos quiso decir sería
+  // inventar. La lista VACÍA no se toca: es la forma de decir «no sé».
+  if (v.length > 0 && typeof principal === 'string' && !v.includes(principal)) return false
+  return true
 }
 
 function esFilaPlan(v: unknown): v is { nombre: string } {
@@ -213,6 +241,12 @@ Un carnet tiene DOS cosas que se parecen y NO son lo mismo:
       · un SELLO de la clínica, o
       · algo ESCRITO A MANO (fecha, firma, iniciales).
     Es lo que la mascota SÍ recibió. Va a "vacunas".
+
+🔴 UNA MISMA DOSIS PUEDE TENER DOS STICKERS PEGADOS JUNTOS (la vacuna + su
+diluyente o su fracción liofilizada): **es UNA SOLA FILA**, y se nombra con la
+VACUNA, nunca con el diluyente. "Diluyente", "Diluente", "Fracción liofilizada"
+NO son nombres de vacuna: son la mitad de un par. Si ves esos dos stickers
+juntos bajo una misma fecha, la fila lleva el nombre del biológico.
 
 Cada nombre que leas va a UNO de los dos lados, nunca a los dos.
 Renglón con nombre impreso y todo lo demás en blanco ⇒ "plan_impreso", siempre.
@@ -265,10 +299,23 @@ ${catalogo.map((c) => `    "${c.codigo}"  (${c.nombre})`).join('\n')}
   equivocado entra al plan vacunal como si fuera un hecho y nadie lo revisa.
   PROHIBIDO deducirlo de la fecha, de la posición en el carnet o de qué vacuna
   es estadísticamente más común.
-- evidencia: qué viste que prueba la aplicación.
-  "sticker_con_fecha" · "sello" · "manuscrito" · "impreso"
-  Usá "impreso" SÓLO si la clínica imprimió el registro ya aplicado con su
-  fecha. Un renglón impreso EN BLANCO no es esto: es plan_impreso.
+- cubre: la lista de TODOS los códigos contra los que protege esta aplicación,
+  del mismo catálogo de arriba. Una combinada cubre varias cosas: por ejemplo
+  una DHPPi + LR cubre "multiple", "leptospirosis" y "antirrabica" a la vez.
+  Si pusiste vacuna_codigo, ese código tiene que estar en la lista.
+  🔴 Lista VACÍA si no estás seguro de contra qué protege. **Una cobertura
+  inventada le dice al plan vacunal que la mascota está protegida contra algo
+  que quizá no recibió** — y eso no se corrige mirando: se descubre cuando el
+  animal se enferma.
+- evidencia: QUÉ MARCA FÍSICA prueba que se aplicó. Sólo eso — dónde está la
+  fecha no es asunto de este campo, la fecha ya tiene el suyo.
+  "sticker"     el sticker del frasco, pegado en el carnet.
+  "sello"       un sello de la clínica.
+  "manuscrito"  escritura a mano (fecha, firma, iniciales).
+  "impreso"     la clínica imprimió el registro ya aplicado.
+                Un renglón impreso EN BLANCO no es esto: es plan_impreso.
+  Si hay más de una marca, poné la más fuerte en ese orden: sticker, sello,
+  manuscrito, impreso.
 - confianza: "alta" si leíste nombre y fecha sin esfuerzo. "media" si algo
   costó. "baja" si estás dudando. Una fila con confianza "baja" es útil: la
   familia la revisa. Una fila inventada con confianza "alta" no.
@@ -280,7 +327,7 @@ y no puede corregir lo que no sabe que está mal.
 ═══ LA SALIDA ═══
 
 Respondé SOLO con este JSON, sin texto adicional y sin backticks:
-{"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"confianza":"alta","evidencia":"sticker_con_fecha"}],"plan_impreso":[{"nombre":""}]}
+{"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"lote":null,"laboratorio":null,"via":null,"veterinario":null,"vencimiento_biologico":null,"vacuna_codigo":null,"cubre":[],"confianza":"alta","evidencia":"sticker"}],"plan_impreso":[{"nombre":""}]}
 
 Carnet sin ninguna aplicación ⇒ {"vacunas":[],"plan_impreso":[...]}.
 Carnet ilegible ⇒ {"vacunas":[],"plan_impreso":[]}.`

@@ -38,8 +38,8 @@ let catalogoFalla = false
 const fila = (extra: Record<string, unknown> = {}) => ({
   nombre: 'Nobivac DHPPi', fecha_aplicada: '2023-04-19', fecha_proxima: null,
   lote: '56288', laboratorio: 'Zoetis', via: null, veterinario: 'CPA Teusaquillo',
-  vencimiento_biologico: null, vacuna_codigo: 'multiple',
-  confianza: 'alta', evidencia: 'sticker_con_fecha', ...extra,
+  vencimiento_biologico: null, vacuna_codigo: 'multiple', cubre: ['multiple'],
+  confianza: 'alta', evidencia: 'sticker', ...extra,
 })
 
 let cuerpoSalida: Record<string, unknown> | null = null
@@ -102,7 +102,7 @@ console.log('\n== 1 · EL CASO «1 → 12»: una aplicación, once del plan ==')
   exigir('1 en vacunas', (json.vacunas as unknown[])?.length === 1, (json.vacunas as unknown[])?.length)
   exigir('11 en plan_impreso', (json.plan_impreso as unknown[])?.length === 11, (json.plan_impreso as unknown[])?.length)
   const f0 = (json.vacunas as Record<string, unknown>[])[0]
-  exigir('la fila viaja entera (11 del modelo + tipo_vacuna derivado)', Object.keys(f0).length === 12, Object.keys(f0).length)
+  exigir('la fila viaja entera (12 del modelo + tipo_vacuna derivado)', Object.keys(f0).length === 13, Object.keys(f0).length)
   exigir('tipo_vacuna DERIVADO del código (multiple → múltiple)', f0.tipo_vacuna === 'múltiple', f0.tipo_vacuna)
   exigir('y el código viaja tal cual', f0.vacuna_codigo === 'multiple')
 }
@@ -138,6 +138,11 @@ for (const [nombre, malo] of [
   ['via fuera del CHECK',     { vacunas: [fila({ via: 'endovenosa' })], plan_impreso: [] }],
   ['confianza inventada',     { vacunas: [fila({ confianza: 'altisima' })], plan_impreso: [] }],
   ['evidencia inventada',     { vacunas: [fila({ evidencia: 'intuicion' })], plan_impreso: [] }],
+  ['evidencia con el nombre viejo', { vacunas: [fila({ evidencia: 'sticker_con_fecha' })], plan_impreso: [] }],
+  ['cubre con código fuera del catálogo', { vacunas: [fila({ cubre: ['multiple', 'antigripal'] })], plan_impreso: [] }],
+  ['cubre con repetidos',     { vacunas: [fila({ cubre: ['multiple', 'multiple'] })], plan_impreso: [] }],
+  ['cubre sin el código principal', { vacunas: [fila({ vacuna_codigo: 'antirrabica', cubre: ['multiple'] })], plan_impreso: [] }],
+  ['cubre que no es lista',   { vacunas: [fila({ cubre: 'multiple' })], plan_impreso: [] }],
   ['vacuna_codigo fuera del catálogo', { vacunas: [fila({ vacuna_codigo: 'antigripal' })], plan_impreso: [] }],
   ['código con tilde (el que el catálogo NO tiene)', { vacunas: [fila({ vacuna_codigo: 'antirrábica' })], plan_impreso: [] }],
   ['fecha con formato libre', { vacunas: [fila({ fecha_aplicada: '19/4/23' })], plan_impreso: [] }],
@@ -188,9 +193,29 @@ console.log('\n== 8 · EL TECHO DE 2 MB ==')
   exigir('1 MB pasa (control positivo del techo)', ok.status === 200, ok.status)
 }
 
+console.log('\n== 8bis · `cubre` VACÍO con código puesto es válido: es «no sé» ==')
+{
+  proveedorFalso(() => ({ vacunas: [fila({ vacuna_codigo: 'multiple', cubre: [] })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('200: lista vacía es una respuesta, no una contradicción', status === 200, status)
+  exigir('el código principal viaja igual', f?.vacuna_codigo === 'multiple')
+  console.log('  ↑ una cobertura inventada le dice al plan vacunal que la mascota está')
+  console.log('    protegida contra algo que quizá no recibió. Eso no se corrige mirando:')
+  console.log('    se descubre cuando el animal se enferma. Por eso vacío es legal.')
+}
+
+console.log('\n== 8ter · UNA COMBINADA CUBRE VARIAS ==')
+{
+  proveedorFalso(() => ({ vacunas: [fila({ vacuna_codigo: 'multiple', cubre: ['multiple', 'leptospirosis', 'antirrabica'] })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('las tres coberturas viajan', JSON.stringify(f?.cubre) === '["multiple","leptospirosis","antirrabica"]', f?.cubre)
+}
+
 console.log('\n== 9 · vacuna_codigo NULL es una respuesta, no una falla ==')
 {
-  proveedorFalso(() => ({ vacunas: [fila({ vacuna_codigo: null })], plan_impreso: [] }))
+  proveedorFalso(() => ({ vacunas: [fila({ vacuna_codigo: null, cubre: [] })], plan_impreso: [] }))
   const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
   const f = (json.vacunas as Record<string, unknown>[])?.[0]
   exigir('200 con código null', status === 200, status)

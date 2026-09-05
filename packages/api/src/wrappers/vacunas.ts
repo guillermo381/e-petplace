@@ -42,10 +42,11 @@ export type TipoVacuna = string;
  *  fila que la familia tiene que mirar con atención.** */
 export type ConfianzaExtraccion = 'alta' | 'media' | 'baja';
 
-/** Qué vio el modelo que prueba que la vacuna se APLICÓ. `impreso` es el
- *  registro que la clínica imprimió ya aplicado — un renglón impreso EN
- *  BLANCO no es esto: eso es `plan_impreso`. */
-export type EvidenciaAplicacion = 'sticker_con_fecha' | 'sello' | 'manuscrito' | 'impreso';
+/** QUÉ MARCA FÍSICA prueba que la vacuna se aplicó — y nada más. *Dónde estaba
+ *  la fecha es otra pregunta y tiene su propio campo.* `impreso` es el registro
+ *  que la clínica imprimió ya aplicado; un renglón impreso EN BLANCO no es
+ *  esto: eso es `plan_impreso`. */
+export type EvidenciaAplicacion = 'sticker' | 'sello' | 'manuscrito' | 'impreso';
 
 /** Una vacuna que el carnet dice que SE APLICÓ. Ilegible = null, jamás ''.
  *
@@ -72,6 +73,11 @@ export interface VacunaExtraida {
    *  comercial con certeza. **Un código «probable» no existe**: null se corrige
    *  mirando el carnet, un código equivocado entra al plan vacunal como hecho. */
   vacuna_codigo: string | null;
+  /** TODOS los códigos contra los que protege esta aplicación — una combinada
+   *  cubre varias. **Vacío es «no estoy seguro»**, y es una respuesta válida:
+   *  una cobertura inventada le dice al plan vacunal que la mascota está
+   *  protegida contra algo que quizá no recibió. */
+  cubre: string[];
   /** El NOMBRE del código, **derivado por la edge** desde `cat_vacunas` — el
    *  modelo no lo escribe. Es el campo que la RPC de escritura ya guarda. */
   tipo_vacuna: TipoVacuna | null;
@@ -154,6 +160,7 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     // lista blanca es `cat_vacunas` y ya la exigió la edge contra la fuente.
     // Repetirla en el cliente sería una segunda copia que envejece sola.
     campoTexto(v.vacuna_codigo) &&
+    Array.isArray(v.cubre) && v.cubre.every((c) => typeof c === 'string' && c.length > 0) &&
     campoTexto(v.tipo_vacuna) &&
     typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza) &&
     typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia)
@@ -214,6 +221,7 @@ export async function extraerVacunasDeCarnet(
       veterinario: item.veterinario,
       vencimiento_biologico: item.vencimiento_biologico,
       vacuna_codigo: item.vacuna_codigo,
+      cubre: item.cubre,
       tipo_vacuna: item.tipo_vacuna,
       confianza: item.confianza,
       evidencia: item.evidencia,
