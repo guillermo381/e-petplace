@@ -264,7 +264,7 @@ function FilaReco({
         <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
           <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
           {detalle !== null ? (
-            <Texto variante={detalleMono === true ? 'dato' : 'apoyo'} numberOfLines={1}>{detalle}</Texto>
+            <Texto variante={detalleMono === true ? 'dato' : 'apoyo'} numberOfLines={2}>{detalle}</Texto>
           ) : null}
         </View>
         <ChevronFila forma="navega" />
@@ -1749,6 +1749,50 @@ export default function Hogar() {
                       >
                         {m.nombre}
                       </Text>
+                      {/* ⭐ **LA VACUNA QUE VENCE ANTES** (1.1 · C7) — bajo el
+                          nombre, y **sólo si la hay**: sin próxima registrada
+                          no se dibuja nada. *Una línea que dice «sin datos»
+                          bajo cada nombre convierte la tira en un tablero de
+                          faltantes.* La señal ya trae `proxima_vacuna` con su
+                          nombre y su fecha; no hace falta pedir nada.
+                          🔴 **La plaga vencida NO ESTÁ**: la señal del Hogar
+                          no trae desparasitaciones (medido en
+                          `hogar.ts:14-24`), y el perfil —que sí las tiene— es
+                          un viaje POR MASCOTA. Pedido a A, con su medición. */}
+                      {(() => {
+                        if (enMemoriaDe(m.id)) return null;
+                        const sen = senalesPorMascota.get(m.id);
+                        const pv = sen?.proxima_vacuna ?? null;
+                        const pd = sen?.proxima_desparasitacion ?? null;
+                        /* 🔴 **`null` NO ES «al día»**: quiere decir que ninguna
+                           fila declaró próxima (letra de A). *Dibujar «al día»
+                           sobre un silencio es afirmar lo que nadie midió*, así
+                           que sin dato no se dibuja la línea. */
+                        if (pv === null && pd === null) return null;
+                        const partes = [
+                          pv !== null
+                            ? t('hogar.proximaVacunaCorta', { nombre: pv.nombre, fecha: fechaCortaMono(pv.fecha.slice(0, 10), idioma) })
+                            : null,
+                          pd !== null
+                            ? t('hogar.proximaPlagaCorta', { plaga: pd.plaga, fecha: fechaCortaMono(pd.fecha.slice(0, 10), idioma) })
+                            : null,
+                        ].filter((x): x is string => x !== null);
+                        return (
+                          <Text
+                            numberOfLines={1}
+                            style={{
+                              fontFamily: typography.family.sans.regular,
+                              fontSize: typography.size.xs,
+                              color: textoTecho,
+                              opacity: 0.75,
+                              maxWidth: 104,
+                              textAlign: 'center',
+                            }}
+                          >
+                            {partes.join(' · ')}
+                          </Text>
+                        );
+                      })()}
                     </Pressable>
                   );
                 })}

@@ -149,6 +149,7 @@ export const clienteEs = {
     errGenerico: 'No pudimos guardar el recuerdo. Prueba de nuevo.',
   },
   antiparasitario: {
+    plagasLabel: 'Contra qué protege',
     titulo: 'Antiparasitario de {{mascota}}',
     productoLabel: 'Producto',
     productoPlaceholder: 'Marca o nombre del producto',
@@ -334,6 +335,8 @@ export const clienteEs = {
     entradaDetalle: 'Cada quien con su propia historia.',
   },
   hogar: {
+    proximaPlagaCorta: '{{plaga}} · {{fecha}}',
+    proximaVacunaCorta: '{{nombre}} · {{fecha}}',
     // S91-C · LAS VOCES POR RAMA (orden de mesa, hallazgo de D). Tres
     // lectores caían en UNA frase —«no pudimos cargar el grooming» con
     // Reintentar— y dos de ellos ni eso: hacían `return` y se callaban.
@@ -532,6 +535,33 @@ export const clienteEs = {
     vozQuieto: 'Su expediente quedó quieto — ¿hay novedades?',
   },
   perfil: {
+    lv_salud: 'Salud',
+    lv_vacunas: 'Vacunas',
+    lv_antiparasitario: 'Antiparasitario',
+    lv_peso: 'Peso',
+    lv_paseos: 'Paseos',
+    lv_estetica: 'Estética',
+    lv_adiestramiento: 'Adiestramiento',
+    lv_guarderia: 'Guardería',
+    lv_recuerdos: 'Recuerdos',
+    antiproxima: 'La próxima toca el {{fecha}}',
+    antiSinRegistro: 'Todavía no hay desparasitaciones registradas.',
+    antiRegistrar: 'Registrar una',
+    medSinNombre: 'Sin nombre',
+    hoyMedicacion: 'Medicación',
+    plaga_pulgas: 'pulgas',
+    plaga_garrapatas: 'garrapatas',
+    plaga_mosquitos: 'mosquitos',
+    plaga_internos: 'internos',
+    seguridadAlergiaA: 'Alérgico a {{alergeno}}',
+    seguridadToma: 'Toma {{nombre}}',
+    seguridadTomaConDosis: 'Toma {{nombre}} {{dosis}}',
+    seguridadHasta: 'hasta el {{fecha}}',
+    seguridadRestriccion: 'No puede {{servicio}}',
+    seguridadLaFamilia: 'Lo registró su familia',
+    seguridadUnPrestador: 'Lo registró una clínica',
+    seguridadVer: 'Ver {{n}}',
+    seguridadOcultar: 'Ocultar',
     // ── momento vital (Ley 3: la VOZ, jamás M1..M7) ──
     // Bautizo APROBADO por founder (gate del lote S51).
     momentoM1: 'Primeros meses',
@@ -779,6 +809,11 @@ export const clienteEs = {
     errorTitulo: 'No pudimos traer sus visitas',
   },
   carnet: {
+    campoNombre: 'Nombre de la vacuna',
+    /* Sin «vos»: la casa habla TUTEO NEUTRO (R66). El literal de la pieza de B
+       venía en voseo y lo copié tal cual — *una voz ajena entra por la puerta
+       de una prop y nadie la mira*. */
+    sinNombre: 'No pude leer cuál es; escríbela',
     ningunaParaGuardar: 'No queda ninguna para guardar',
     filaOrigen: 'Leído del carnet',
     filaRevisar: 'Revísala',

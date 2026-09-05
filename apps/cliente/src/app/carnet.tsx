@@ -39,6 +39,8 @@ import {
   Encabezado,
   FichaVacuna,
   FilaConfirmacionVacuna,
+  OrbeCoach,
+  resumenDeLaTanda,
   PieConfirmacionVacunas,
   type CampoLeido,
   Hoja,
@@ -79,7 +81,11 @@ const UMBRAL_ESPERA_LARGA_MS = 8000;
 
 interface ItemRevision {
   key: number;
-  nombre: string;
+  /** 🔴 `null` = **la IA no pudo leer cuál vacuna es** (adenda 4 de B). Antes
+   *  era `string` y una lectura fallida entraba como cadena vacía, que se
+   *  dibuja igual que un nombre corto: *un vacío que parece un dato es peor
+   *  que un vacío que se declara.* */
+  nombre: string | null;
   tipo_vacuna: string | null;
   fecha_aplicada: string | null;
   fecha_proxima: string | null;
@@ -245,7 +251,7 @@ export default function CarnetDeVacunas() {
   function abrirEdicion(key: number) {
     const item = items.find((i) => i.key === key);
     if (!item) return;
-    setBNombre(item.nombre);
+    setBNombre(item.nombre ?? '');
     setBTipo(item.tipo_vacuna ?? '');
     setBFecha(item.fecha_aplicada ? { fecha: item.fecha_aplicada, precision: 'exacta' } : undefined);
     setEditando(key);
@@ -296,24 +302,36 @@ function camposDe(
      terminan discrepando el día que una de las dos aprenda algo* — y el
      guardado se decide con la misma función que dibuja el botón. */
   const tanda = items.map((i) => ({ tocada: tocadas.has(i.key), descartada: i.descartada }));
+  /** La PRIMERA sin nombre entre las que siguen vivas: es la única que puede
+   *  llevar el foco sin pelearse con otra. `null` si no hay ninguna. */
+  const primeraSinNombre =
+    activas.find((i) => i.nombre === null || i.nombre.trim() === '')?.key ?? null;
 
   async function guardar() {
-    /* 🔴 **ACÁ NO SE CUENTAN TOQUES, y es la decisión.** Tenía un
-       `faltanPorTocar` propio y el descarte lo dejó atrás —para la pieza
-       **descartar ES revisar**—, así que una tanda toda descartada le daba una
-       cuenta a ella y otra a mí. La regla que las une, `resumenDeLaTanda`,
-       existe en el módulo de B **y no está exportada**, así que replicarla
-       sería volver a tener dos cuentas con distinto dueño. *La puerta es el
-       pie*: sólo llama a `onGuardar` cuando él mismo se pinta encendido. Acá
-       queda lo que es de esta pantalla —no guardar dos veces, no guardar con
-       fechas faltantes—. Pedido a B: exportar `resumenDeLaTanda`, y este guard
-       recupera su cinturón sin copiar la regla. */
-    if (guardando || n === 0 || dudosas > 0) return;
+    /* 🔴 **EL CINTURÓN VUELVE, Y CON LA MISMA REGLA QUE EL PIE.** En el 1.0.2
+       saqué la cuenta de toques de acá porque `resumenDeLaTanda` no estaba
+       exportada y replicarla habría dejado dos cuentas con distinto dueño.
+       **Sí estaba** (`index.ts:1167`): yo medí eso contra `b-1.0` y repetí el
+       pedido sin volver a medir contra el árbol que ya tenía `b-1.1`. *Un
+       pedido propio también envejece, y el mío se copió dos partes seguidas.*
+       Ahora el guard y el botón derivan del MISMO `listo`. */
+    if (guardando || dudosas > 0 || !resumenDeLaTanda(tanda).listo) return;
     setGuardando(true);
     setErrorGuardar(null);
     const r = await registrarVacunasDeCarnet({
       mascota_id: mascotaId,
-      vacunas: activas.map((i) => ({
+      /* 🔴 **UNA FILA SIN NOMBRE NO VIAJA, y el filtro no debería quitar nunca
+         nada.** La RPC pide `nombre: string`, y acá el compilador obligó a
+         decidir qué pasa con el `null` de la adenda 4. Las tres salidas
+         posibles eran: mandar `''` —inventar una vacuna sin nombre—, cortar el
+         guardado entero por una fila, o esto: **la fila sin nombre no se puede
+         confirmar** (la pieza lo impide y el pie exige todas revisadas), así
+         que al llegar acá no puede quedar ninguna. El filtro es el cinturón de
+         esa afirmación: *si algún día quita algo, es un defecto que quiero ver
+         en el número, no un dato que se fue en silencio.* */
+      vacunas: activas
+        .filter((i): i is typeof i & { nombre: string } => i.nombre !== null && i.nombre.trim() !== '')
+        .map((i) => ({
         nombre: i.nombre,
         tipo_vacuna: i.tipo_vacuna,
         fecha_aplicada: i.fecha_aplicada,
@@ -391,7 +409,11 @@ function camposDe(
           {/* S53-B2d: la espera de marca (§5.3) — la huella respirando
               reemplaza al spinner; la voz honesta de abajo se conserva
               VERBATIM. Mismo umbral de visibilidad (Ley 13). */}
-          {spinnerVisible && <EsperaDeMarca tamano={64} />}
+          {/* ⭐ **EL ORBE DE NEXO EN LA ESPERA** (C2 del 1.0, que quedó pedido):
+              la lectura del carnet es lo que más se parece a que el Coach esté
+              trabajando, así que la espera lleva su cara y no una huella
+              genérica. Mismo umbral (Ley 13). */}
+          {spinnerVisible && <OrbeCoach tamano={36} encendido={1} />}
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary, textAlign: 'center' }}>
             {esperaLarga ? t('carnet.esperaLarga') : t('carnet.espera')}
           </Text>
@@ -465,6 +487,16 @@ function camposDe(
                 vozRevisar={t('carnet.filaRevisar')}
                 vozConfirmar={t('carnet.filaConfirmar')}
                 vozDescartar={t('carnet.estaNoEs')}
+                etiquetaNombre={t('carnet.campoNombre')}
+                vozSinNombre={t('carnet.sinNombre')}
+                onNombre={(v) =>
+                  setItems((prev) => prev.map((x) => (x.key === i.key ? { ...x, nombre: v } : x)))
+                }
+                /* 🔴 **EL FOCO LO DECIDE LA LISTA, no la fila.** Con dos sin
+                   nombre, `autoFocus` en las dos deja el foco en la ÚLTIMA
+                   —la que se montó al final— y la pantalla salta al fondo. La
+                   fila no sabe si es la primera; acá sí se sabe. */
+                enfocar={i.key === primeraSinNombre}
                 tocada={tocadas.has(i.key)}
                 onConfirmar={() =>
                   setTocadas((prev) => {
