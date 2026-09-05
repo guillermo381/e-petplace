@@ -62,7 +62,12 @@ export interface VacunaExtraida {
   vencimiento_biologico: string | null;
   tipo_vacuna: TipoVacuna | null;
   confianza: ConfianzaExtraccion;
-  evidencia: EvidenciaAplicacion;
+  /** ⚠️ **NULLABLE, y es una desviación DECLARADA del contrato de D.**
+   *  La v1 —la que las familias tienen hoy— no devuelve `evidencia`, y el
+   *  catálogo de D no tiene un valor para «no sé». *Mapearla a `'impreso'`
+   *  sería inventar la prueba de que algo se aplicó, que es exactamente el
+   *  defecto que este lote entero vino a curar (L-139).* NULL y se dice. */
+  evidencia: EvidenciaAplicacion | null;
 }
 
 /** Un renglón del PLAN que el carnet trae impreso de fábrica, sin marca de
@@ -129,22 +134,66 @@ const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
 
 /** Espejo EXACTO del validador de la edge. Que las dos puntas exijan lo mismo
  *  es lo que hace que «cumple el contrato» signifique una sola cosa. */
-function esVacunaExtraida(v: unknown): v is VacunaExtraida {
-  if (!esObj(v)) return false;
-  return (
-    typeof v.nombre === 'string' && v.nombre.trim().length > 0 &&
-    campoFecha(v.fecha_aplicada) &&
-    campoFecha(v.fecha_proxima) &&
-    campoFecha(v.vencimiento_biologico) &&
-    campoTexto(v.lote) &&
-    campoTexto(v.laboratorio) &&
-    campoTexto(v.veterinario) &&
-    enListaOnull(v.via, VIAS) &&
-    enListaOnull(v.tipo_vacuna, TIPOS) &&
-    typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza) &&
-    typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia)
-  );
+/* ══ DE GUARD A NORMALIZADOR — S113-A, forzado por la vuelta a la v1 ═════════
+ *
+ * 🔴 EL HECHO QUE LO OBLIGA, medido contra la edge DESPLEGADA (9-sep): la v1
+ * devuelve `{ vacunas: [...] }` y **nada más** — sin `plan_impreso`, y cada
+ * fila con `nombre, fecha_aplicada, fecha_proxima, veterinario_nombre_externo,
+ * tipo_vacuna, lote`. **No manda `confianza`, ni `evidencia`, ni `laboratorio`,
+ * ni `via`, ni `vencimiento_biologico`.**
+ *
+ * Con el guard tal cual estaba, **cada fila se rechazaba y todo carnet caía en
+ * `sin_vacunas`**: la lectura quedaba muerta en el aparato de las familias.
+ *
+ * ⚠️ LA DISTINCIÓN QUE HACE HONESTO ESTO — y es la única razón por la que un
+ * normalizador no es un relajamiento: se separa **AUSENTE** de **MAL**.
+ * · Ausente ⇒ el valor honesto (null, o `'baja'` para la confianza). *La v1
+ *   nunca separó plan de aplicación: nada de lo que devuelve merece más que
+ *   «baja», y eso no es un relleno, es el dato.*
+ * · Mal ⇒ **se sigue rechazando la fila entera**: una `via` fuera del catálogo
+ *   o una fecha que no es fecha no se «normalizan» a null, porque eso taparía
+ *   un modelo devolviendo basura. *Perdonar lo que falta no es perdonar lo que
+ *   está mal.*
+ */
+function normalizarVacuna(v: unknown): VacunaExtraida | null {
+  if (!esObj(v)) return null;
+  if (typeof v.nombre !== 'string' || v.nombre.trim().length === 0) return null;
+
+  // MAL ⇒ se rechaza la fila (no se normaliza).
+  if (!campoFecha(v.fecha_aplicada) || !campoFecha(v.fecha_proxima)) return null;
+  if (v.vencimiento_biologico !== undefined && !campoFecha(v.vencimiento_biologico)) return null;
+  if (v.lote !== undefined && !campoTexto(v.lote)) return null;
+  if (v.laboratorio !== undefined && !campoTexto(v.laboratorio)) return null;
+  if (v.via !== undefined && !enListaOnull(v.via, VIAS)) return null;
+  if (!enListaOnull(v.tipo_vacuna, TIPOS)) return null;
+  if (v.confianza !== undefined && !(typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza))) return null;
+  if (v.evidencia !== undefined && !(typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia))) return null;
+
+  /* `veterinario` en el contrato de D; `veterinario_nombre_externo` en la v1.
+     Se leen las dos y gana la del contrato: la v1 es la que se está dejando
+     atrás, no la que manda. */
+  const vet = campoTexto(v.veterinario) && typeof v.veterinario === 'string'
+    ? v.veterinario
+    : (typeof v.veterinario_nombre_externo === 'string' ? v.veterinario_nombre_externo : null);
+
+  return {
+    nombre: v.nombre,
+    fecha_aplicada: (v.fecha_aplicada as string | null) ?? null,
+    fecha_proxima: (v.fecha_proxima as string | null) ?? null,
+    lote: (v.lote as string | null) ?? null,
+    laboratorio: (v.laboratorio as string | null) ?? null,
+    via: (v.via as ViaAdministracion | null) ?? null,
+    veterinario: vet,
+    vencimiento_biologico: (v.vencimiento_biologico as string | null) ?? null,
+    tipo_vacuna: (v.tipo_vacuna as TipoVacuna | null) ?? null,
+    /* 🔴 AUSENTE ⇒ 'baja', y es el DATO, no un default cómodo: la v1 no
+       distingue una aplicación de un renglón del plan impreso, así que ninguna
+       de sus filas está probada. Firmar «baja» es decir la verdad. */
+    confianza: (v.confianza as ConfianzaExtraccion | undefined) ?? 'baja',
+    evidencia: (v.evidencia as EvidenciaAplicacion | undefined) ?? null,
+  };
 }
+
 
 function esFilaPlan(v: unknown): v is FilaPlanImpreso {
   return esObj(v) && typeof v.nombre === 'string' && v.nombre.trim().length > 0;
@@ -182,30 +231,27 @@ export async function extraerVacunasDeCarnet(
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_EXTRACCION.error_desconocido };
   }
 
-  if (!esObj(data) || !Array.isArray(data.vacunas) || !Array.isArray(data.plan_impreso)) {
+  /* `plan_impreso` AUSENTE ⇒ `[]`. Es la v1, que no lo tiene; exigirlo acá
+     dejaría la lectura muerta en el aparato de las familias (medido). Lo que
+     NO se perdona es que venga y no sea un array: eso es una respuesta rota. */
+  if (!esObj(data) || !Array.isArray(data.vacunas)
+      || (data.plan_impreso !== undefined && !Array.isArray(data.plan_impreso))) {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
   }
   const vacunas: VacunaExtraida[] = [];
   for (const item of data.vacunas) {
-    if (!esVacunaExtraida(item)) {
+    const fila = normalizarVacuna(item);
+    if (fila === null) {
       return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
     }
-    vacunas.push({
-      nombre: item.nombre,
-      fecha_aplicada: item.fecha_aplicada,
-      fecha_proxima: item.fecha_proxima,
-      lote: item.lote,
-      laboratorio: item.laboratorio,
-      via: item.via,
-      veterinario: item.veterinario,
-      vencimiento_biologico: item.vencimiento_biologico,
-      tipo_vacuna: item.tipo_vacuna,
-      confianza: item.confianza,
-      evidencia: item.evidencia,
-    });
+    vacunas.push(fila);
   }
   const plan_impreso: FilaPlanImpreso[] = [];
-  for (const fila of data.plan_impreso) {
+  /* La v1 no manda el canasto. `?? []` es el ÚNICO lugar donde la ausencia se
+     vuelve lista vacía, y es correcto: *la v1 no es que tenga un plan impreso
+     vacío — es que no sabe distinguirlo, y por eso todas sus filas llegan con
+     confianza «baja».* El día que la v2.1 lo mande, esta línea no cambia. */
+  for (const fila of (data.plan_impreso as unknown[] | undefined) ?? []) {
     if (!esFilaPlan(fila)) {
       return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
     }

@@ -3263,6 +3263,69 @@ distinta** (arranca en `false` y la celda «Mi vitrina» *aparece*): es
 fail-closed, **abierto, medido y descartado con su razón**.
 
 **Cerrada en** `pista/s113-c-03` `8ba48697`.
+### `D-1030` 🔴 La v2 del carnet se midió con proveedor falso, y contra el modelo real no separa
+
+**Nace:** S113-A, candidato 1.0, 5-sep-2026, con la edge v2 desplegada y seis
+llamadas reales. **Dueño: D**, con E midiendo la exactitud.
+
+**El hecho, medido por la edge desplegada** (no por un arnés): el carnet «1 →
+12» —**1 vacuna de verdad y 11 renglones de plan impreso**, el caso que la v2
+existe para resolver— devolvió **`plan_impreso: []` en las SEIS corridas**, con
+14 o 15 filas en `vacunas`:
+
+| techo | corridas | vacunas | plan_impreso |
+|---|---|---|---|
+| 8000 | 4 | 14 · 14 · 15 · 14 | **0 · 0 · 0 · 0** |
+| 2000 | 2 (las que no truncaron) | 14 · 14 | **0 · 0** |
+
+**No es diferencia de método:** leí el arnés de D (`medir-carnet.mjs:102`) y
+llama a **la MISMA edge** con el **MISMO cuerpo** (`imageBase64` +
+`mediaType: 'image/jpeg'`). Mismo camino, misma imagen, resultado opuesto.
+
+⚠️ **Y ACÁ VA LA CORRECCIÓN QUE LE DEBO A D, porque el título de esta ficha es
+injusto con él si se lee solo: D NO lo reportó como verde.** Su parte lo dice
+en negrita, textual:
+
+> 🔴 **ADVERTENCIA DE LECTURA, y es la más importante de este parte:** este
+> arnés corre con **proveedor FALSO**. **No prueba que el modelo mande once
+> filas a `plan_impreso`** — manda lo que yo le diga. Prueba **el contrato**…
+> **La exactitud la mide E.**
+
+Y en otro punto: *«El control positivo contra el proveedor REAL no corrió … se
+midió con proveedor falso, que es correcto para los rojos.»*
+
+⇒ **D midió lo que dijo que medía y declaró lo que no medía.** Su arnés estaba
+bien y su honestidad también.
+
+**🔴 ENTONCES ¿DÓNDE ESTÁ EL DEFECTO? En la FORMA del reporte, y ésa es la
+lección.** Catorce líneas más arriba de esa advertencia hay una tabla de
+resultados cuya fila dice:
+
+> | **el «1 → 12»** | 1 en `vacunas`, **11 en `plan_impreso`**, la fila viaja con sus 11 campos |
+
+*Esa fila se lee como un hecho sobre el modelo. No lo es —es un hecho sobre el
+contrato, con un proveedor que devolvió lo que D le dictó— pero **nada en la
+fila lo dice**.* Y una fila de tabla **viaja**: se cita, se resume, se pega en
+otro parte. **La advertencia se queda.**
+
+*Lo que falló no fue la medición ni la honestidad de quien midió: fue que el
+resultado y su límite vivían en dos lugares distintos, y sólo uno de los dos
+tiene patas.*
+
+**La cura, que es de forma y cuesta nada:** cuando un resultado sale de un
+proveedor falso, **el límite va EN LA CELDA**, no en un párrafo aparte —
+`1 en vacunas, 11 en plan_impreso **(dictado por el proveedor falso: mide el
+contrato, no el modelo)**`. *Una advertencia que no se puede separar del dato
+es la única que sobrevive a la primera cita.*
+
+**Lo que queda abierto, con dueño:** ① por qué el modelo real no separa plan de
+aplicación **(D)** — el prompt v2 no logró en seis corridas lo que su diseño
+promete; ② la exactitud sobre los 5 carnets **(E)**, que D ya le había asignado
+y sigue siendo lo que decide si la v2.1 sale.
+
+**Disparo:** antes de desplegar la v2.1. **Hoy lo desplegado es la v1** — ver el
+parte del candidato para la divergencia declarada entre repo y desplegado.
+
 ### `D-1029` 🟠 La casa no sabe en qué día está la familia — sólo en qué día está Guayaquil
 
 **Nace:** S113-A, lote 1.0 · A5, 9-sep-2026. **Pariente de `D-1007`, y más

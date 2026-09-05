@@ -35,7 +35,15 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   // carnet más denso del conjunto de E tiene 8 vacunas ⇒ ~8 filas de 11
   // campos + `plan_impreso`, del orden de 900-1200 tokens. 2000 deja aire
   // sin dejar lugar a la prosa.
-  carnet: 2000,
+  carnet: 4000,
+  /* 🔴 2000 → 4000 · DECISIÓN DE LA MESA (5-sep-2026), y queda en el repo
+     ESPERANDO a la v2.1 — hoy lo desplegado es la v1, que usa su propio techo.
+     La razón, medida por la edge con el carnet «1 → 12»: la salida real mide
+     **1945–2087 tokens**, así que con 2000 **una de cada tres corridas trunca**
+     (medido: 422 con `resultado: 'error_parseo'` y `tokens_salida: 2000`).
+     *Un techo que cae en la MEDIANA de lo que hace falta no es un techo chico:
+     es una moneda al aire, y falla según el carnet y según la corrida.* 4000
+     deja el doble de margen sobre el peor caso medido. */
   documento: 4000,
   nota_clinica: 16000,
   presencia: 4000,
