@@ -9,6 +9,15 @@ import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJE_ERROR = 'No pudimos cargar el perfil. Prueba de nuevo.';
 
+/* Los tres vocabularios, copiados de los CHECK de `evento_alergia_diagnosticada`
+   (medidos el 5-sep). Si un CHECK crece y esta lista no, el valor nuevo llega
+   `null` — degradación honesta, no un cast que mienta. */
+const SEVERIDADES = ['leve', 'moderada', 'severa', 'anafilactica'] as const;
+const ESTADOS_ALERGIA = ['confirmada', 'sospechada', 'resuelta', 'descartada'] as const;
+const CATEGORIAS = [
+  'alimentaria', 'ambiental', 'medicamentosa', 'picadura_insecto', 'contacto', 'otra',
+] as const;
+
 export interface VacunaDeMascota {
   evento_id: string | null;
   nombre_vacuna: string;
@@ -31,6 +40,34 @@ export interface VacunaDeMascota {
   /** Path del bucket `mascotas` del carnet que respalda la fila, si vino
    *  por extracción. NULL = se tecleó, y se dice. */
   archivo_url: string | null;
+}
+
+/** S113-A — LA ALERGIA, CON SU FORMA REAL.
+ *
+ * 🔴 **Leída del PRODUCTOR, no adivinada ni copiada de un dato de muestra:**
+ * `_trg_alergia_propagar_perfil` arma exactamente
+ * `{alergeno, severidad, categoria, estado, fecha_diagnostico, evento_id}`
+ * (`jsonb_build_object`, leído de `pg_get_functiondef` el 5-sep). ⚠️ Ojo con
+ * `categoria`: en el jsonb se llama así, pero **la columna de origen es
+ * `categoria_alergeno`** — quien tipe mirando la tabla en vez del trigger
+ * escribe una clave que nunca llega.
+ *
+ * Los dos vocabularios son CERRADOS y salen de los CHECK de
+ * `evento_alergia_diagnosticada`, no de una lista inventada. */
+export type SeveridadAlergia = 'leve' | 'moderada' | 'severa' | 'anafilactica';
+export type EstadoAlergia = 'confirmada' | 'sospechada' | 'resuelta' | 'descartada';
+export type CategoriaAlergeno =
+  | 'alimentaria' | 'ambiental' | 'medicamentosa' | 'picadura_insecto' | 'contacto' | 'otra';
+
+export interface AlergiaDeMascota {
+  alergeno: string | null;
+  /** Del CHECK. Un valor fuera del vocabulario llega `null`, jamás casteado. */
+  severidad: SeveridadAlergia | null;
+  categoria: CategoriaAlergeno | null;
+  estado: EstadoAlergia | null;
+  fecha_diagnostico: string | null;
+  /** La fuente en el expediente: permite ir a leer de dónde salió. */
+  evento_id: string | null;
 }
 
 /** S113-A · A4 — LA CONDICIÓN CRÓNICA CON SU DETALLE.
@@ -176,9 +213,10 @@ export interface PerfilMascota {
   umbrales: UmbralesEspecie | null;
   /** S82 r4 — los motores que el gate descubrió por ausencia: */
   alergias_estado: AlergiasEstado;
-  /** el jsonb del snapshot tal cual (shape del sedimento clínico) —
-   *  solo cuando estado = con_alergias; [] en los otros dos. */
-  alergias_detalle: unknown[];
+  /** ⭐ S113-A — **tipado**, ya no `unknown[]`. Sólo cuando
+   *  `estado = con_alergias`; `[]` en los otros dos. *C lo lee con guardas
+   *  propias hoy: con el tipo puesto, esas guardas se pueden retirar.* */
+  alergias_detalle: AlergiaDeMascota[];
   alergias_ninguna_declarada_en: string | null;
   /** S113-A · A4 — el DETALLE, además del booleano. Ver el porqué del
    *  booleano que sobrevive en `tiene_condicion_cronica`. */
@@ -303,6 +341,8 @@ export async function obtenerPerfilMascota(
      dice* (L-124). */
   const texto = (v: unknown): string | null => (typeof v === 'string' && v.length > 0 ? v : null);
   const numero = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  const enLista = <T extends string>(v: unknown, lista: readonly T[]): T | null =>
+    typeof v === 'string' && (lista as readonly string[]).includes(v) ? (v as T) : null;
   const objetos = (v: unknown): Record<string, unknown>[] =>
     Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => typeof x === 'object' && x !== null) : [];
 
@@ -407,7 +447,20 @@ export async function obtenerPerfilMascota(
       tiene_emergencia_activa: perfil.data?.tiene_emergencia_activa ?? false,
       umbrales: parsearUmbrales(catalogo.data?.momentos_vitales_jsonb ?? null),
       alergias_estado: alergiasEstado,
-      alergias_detalle: alergiasEstado === 'con_alergias' ? alergiasLista : [],
+      alergias_detalle:
+        alergiasEstado === 'con_alergias'
+          ? objetos(alergiasLista).map((a) => ({
+              alergeno: texto(a.alergeno),
+              /* Angostado VERIFICANDO contra el vocabulario del CHECK, jamás
+                 con un cast (regla 34): un valor que el CHECK ya no admita
+                 llega `null` en vez de mentir con el tipo. */
+              severidad: enLista(a.severidad, SEVERIDADES),
+              categoria: enLista(a.categoria, CATEGORIAS),
+              estado: enLista(a.estado, ESTADOS_ALERGIA),
+              fecha_diagnostico: texto(a.fecha_diagnostico),
+              evento_id: texto(a.evento_id),
+            }))
+          : [],
       alergias_ninguna_declarada_en: ningunaDeclaradaEn,
       desparasitaciones: desparasitaciones.data.map((d) => ({
         producto: d.producto,

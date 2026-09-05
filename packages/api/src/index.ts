@@ -331,6 +331,17 @@ export {
   type CodigoCensoAcuario,
 } from './wrappers/perfilMascota';
 export type { IdentidadMascota, AlergiasEstado, DesparasitacionDeMascota } from './wrappers/perfilMascota';
+/* S113-A — el detalle del expediente, tipado. `alergias_detalle` dejó de ser
+   `unknown[]`: C puede retirar sus guardas propias. */
+export type {
+  AlergiaDeMascota,
+  SeveridadAlergia,
+  EstadoAlergia,
+  CategoriaAlergeno,
+  CondicionCronicaDeMascota,
+  MedicacionDeMascota,
+  RestriccionDeMascota,
+} from './wrappers/perfilMascota';
 
 // Salud del expediente — S82 r4: los productores del dueño (los tres
 // motores del gate) + el lector de la serie de peso
