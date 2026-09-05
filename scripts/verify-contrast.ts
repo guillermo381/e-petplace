@@ -634,6 +634,12 @@ todos.push(
   // Las pastillas de pendiente: número y palabra sobre color pleno.
   { nombre: 'COACH · pastilla de chat: blanco / magenta TRABAJADOR', fg: lightTheme.text.inverse, bg: '#AE3785', surface: veloSobre(lightTheme.bg.base) },
   { nombre: 'COACH · pastilla de pedidos: TINTA / ocre (el par de R56)', fg: lightTheme.text.primary, bg: lightTheme.status.warning, surface: veloSobre(lightTheme.bg.base) },
+  /* S113-B · 1.1 — el chip de filtro elegido: blanco sobre el acento de
+     control. **Nace con la pieza, no después**: el gate mide pares
+     DECLARADOS, así que un color nuevo que nadie declara sale verde sin
+     haber sido mirado. */
+  { nombre: 'PERFIL · chip de filtro elegido: blanco / accent.control', fg: lightTheme.text.inverse, bg: lightTheme.accent.control, surface: lightTheme.bg.base },
+  { nombre: 'PERFIL · chip de filtro elegido, en oscuro', fg: darkTheme.text.inverse, bg: darkTheme.accent.control, surface: darkTheme.bg.base },
   // El nombre de la cabecera, en sus dos casas.
   { nombre: 'COACH · nombre en la cabecera (violeta profundo / papel claro)', fg: '#7C2DD4', bg: lightTheme.bg.card, surface: lightTheme.bg.base },
   { nombre: 'COACH · nombre en la cabecera (violeta claro / papel oscuro)', fg: '#AE59FF', bg: darkTheme.bg.card, surface: darkTheme.bg.base },

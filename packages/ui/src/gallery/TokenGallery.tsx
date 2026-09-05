@@ -95,6 +95,10 @@ import { PresenciaCoach } from '../components/PresenciaCoach'
 import { FilaVacunaCarnet } from '../components/FilaVacunaCarnet'
 import { FilaConfirmacionVacuna, PieConfirmacionVacunas } from '../components/FilaConfirmacionVacuna'
 import { ListaPlanVacunal } from '../components/ListaPlanVacunal'
+import { FranjaSeguridad } from '../components/FranjaSeguridad'
+import { CeldasHoy } from '../components/CeldasHoy'
+import { PiezaMedicacionActiva } from '../components/PiezaMedicacionActiva'
+import { FiltrosLineaDeVida, type TipoLineaDeVida } from '../components/FiltrosLineaDeVida'
 import { CabeceraCoach } from '../components/CabeceraCoach'
 import { OrbeCoach } from '../components/OrbeCoach'
 import { PuntoEstado } from '../components/PuntoEstado'
@@ -188,6 +192,44 @@ import type { ThemeMode } from '../themes'
  * El tercer atajo llega **apagado CON su razón**: es el caso que la pieza
  * existe para hacer bien —*un botón apagado sin razón a la vista es el
  * defecto*— y el que hay que poder ver de un vistazo. */
+const ITEMS_SEG = [
+  { id: '1', clase: 'alergia' as const, texto: 'Alérgico al pollo', procedencia: 'prestador' as const, vozProcedencia: 'lo registró Clínica Aurora' },
+  { id: '2', clase: 'medicacion' as const, texto: 'Toma omeprazol hasta el 20', procedencia: 'prestador' as const, vozProcedencia: 'lo recetó Dra. Salas' },
+  { id: '3', clase: 'restriccion' as const, texto: 'Sin baños con agua fría (dermatitis)', procedencia: 'familia' as const, vozProcedencia: 'lo dijo la familia' },
+]
+const VOZ_PLAGA: Record<string, string> = { pulgas: 'pulgas', garrapatas: 'garrapatas', mosquitos: 'mosquitos', internos: 'internos' }
+/* 🔴 `Record<TipoLineaDeVida, string>` y NO `Record<string, string>`: con el
+   segundo, un tipo nuevo sin voz devolvía `undefined` y el chip salía VACÍO —
+   sin un error, sin un aviso—. *Un mapa que acepta cualquier clave no es un
+   mapa: es un agujero con forma de objeto.* */
+const VOZ_TIPO: Record<TipoLineaDeVida, string> = {
+  salud: 'Salud',
+  vacunas: 'Vacunas',
+  antiparasitario: 'Antiparasitario',
+  peso: 'Peso',
+  paseos: 'Paseos',
+  estetica: 'Estética',
+  adiestramiento: 'Adiestramiento',
+  guarderia: 'Guardería',
+  recuerdos: 'Recuerdos',
+}
+const TIPOS_VIDA: readonly TipoLineaDeVida[] = [
+  'salud', 'vacunas', 'antiparasitario', 'peso', 'paseos', 'estetica', 'adiestramiento', 'guarderia', 'recuerdos',
+]
+
+/** Los filtros necesitan estado para que la multi-selección se pueda tocar. */
+function FiltrosLineaDeVidaDemo() {
+  const [elegidos, setElegidos] = useState<TipoLineaDeVida[]>(['vacunas'])
+  return (
+    <FiltrosLineaDeVida
+      tipos={TIPOS_VIDA}
+      elegidos={elegidos}
+      voz={(t) => VOZ_TIPO[t]}
+      onAlternar={(t) => setElegidos((v) => (v.includes(t) ? v.filter((x) => x !== t) : [...v, t]))}
+    />
+  )
+}
+
 const ETIQ_VAC = {
   lote: 'Lote', laboratorio: 'Laboratorio', via: 'Vía',
   aplicadaPor: 'La aplicó', proximaDosis: 'Próxima dosis', venceBiologico: 'Vence el biológico',
@@ -3294,6 +3336,44 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — EL PERFIL HABLA PRIMERO (lote 1.1) · qué decide: (a) que la franja se lea como AVISO y no como alarma —filete fino, no cartel—; (b) que las cuatro celdas se lean parejas y la que no tiene dato lo DIGA; (c) que la flecha del peso describa sin juzgar; (d) que los chips de filtro entren en dos filas sin esconder ninguno">
+          <View style={{ gap: spacing[5] }}>
+            <FranjaSeguridad
+              items={ITEMS_SEG}
+              resumen="Alérgico al pollo · Toma omeprazol hasta el 20 · Sin baños con agua fría (dermatitis)"
+              vozAbrir="Ver las 3"
+              vozCerrar="Ocultar"
+            />
+            {/* 🔴 EL CASO QUE HAY QUE MIRAR: «Medicación» sin dato NO inventa
+                —dice «sin registro»— y «mosquitos» no dibuja chip, porque no
+                hay registro de esa plaga: un chip gris diría «no cubierta». */}
+            <CeldasHoy
+              vozSinDato="sin registro"
+              vacuna={{ rotulo: 'Vacuna', nombre: 'Polivalente', contexto: 'vence en 16 días' }}
+              antiparasitario={{
+                rotulo: 'Antiparasitario',
+                vozPlaga: (p) => VOZ_PLAGA[p],
+                cobertura: [
+                  { plaga: 'pulgas', alDia: true },
+                  { plaga: 'garrapatas', alDia: true },
+                  { plaga: 'internos', alDia: false },
+                  { plaga: 'mosquitos', alDia: null },
+                ],
+              }}
+              peso={{ rotulo: 'Peso', valorTexto: '12,4 kg', tendencia: 'sube', contexto: 'hace 2 meses pesaba 11,8 kg' }}
+              medicacion={{ rotulo: 'Medicación', nombre: null }}
+            />
+            <PiezaMedicacionActiva
+              filas={[
+                { id: 'a', nombre: 'Omeprazol', dosis: '10 mg cada 12 h', hasta: 'hasta el 20 de septiembre', procedencia: 'prestador', vozProcedencia: 'lo recetó Dra. Salas' },
+                /* Sin dosis: la receta no la decía, y eso se calla. */
+                { id: 'b', nombre: 'Condroprotector', dosis: null, hasta: null, procedencia: 'familia', vozProcedencia: 'lo dijo la familia' },
+              ]}
+            />
+            <FiltrosLineaDeVidaDemo />
+          </View>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — EL CARNET DICE LA VERDAD (lote 1.0) · qué decide: (a) que la fila cerrada se lea de un vistazo y el punto NO parezca semáforo; (b) que la grilla abierta muestre SÓLO lo que hay —la segunda fila tiene dos campos y no seis, a propósito—; (c) que «sin refuerzo» no se confunda con «al día»; (d) que la fila de confianza media se vea que pide revisión sin gritar">
           <View style={{ gap: spacing[5] }}>
             <View style={{ gap: spacing[2] }}>
@@ -3344,6 +3424,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada
                 onConfirmar={() => {}}
                 onEditar={() => {}}
@@ -3357,6 +3439,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada={false}
                 onConfirmar={() => {}}
                 onEditar={() => {}}
@@ -3370,6 +3454,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada={false}
                 onConfirmar={() => {}}
                 onEditar={() => {}}
@@ -3383,6 +3469,8 @@ function GaleriaInterna() {
                 vozRevisar="Revisá esta"
                 vozConfirmar="Es correcta"
                 vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
                 tocada={false}
                 descartada
                 vozDescartada="No se va a guardar"
@@ -3392,8 +3480,27 @@ function GaleriaInterna() {
                 onEditar={() => {}}
                 onDescartar={() => {}}
               />
+              {/* 🔴 SIN NOMBRE: llega marcada, con el campo vacío y en foco, y
+                  «Es correcta» apagado hasta que se escriba. *«Es correcta»
+                  sobre una fila sin nombre es firmar un renglón en blanco.* */}
+              <FilaConfirmacionVacuna
+                nombre={null}
+                campos={[{ etiqueta: 'Fecha', valor: '08 feb 2026' }]}
+                confianza="alta"
+                vozRevisar="Revisá esta"
+                vozConfirmar="Es correcta"
+                vozDescartar="Esta no es"
+                etiquetaNombre="Nombre de la vacuna"
+                vozSinNombre="No pude leer cuál es; escribila vos"
+                enfocar
+                tocada={false}
+                onConfirmar={() => {}}
+                onEditar={() => {}}
+                onDescartar={() => {}}
+                onNombre={() => {}}
+              />
               <PieConfirmacionVacunas
-                filas={[{ tocada: true }, { tocada: false }, { tocada: false }, { tocada: false, descartada: true }]}
+                filas={[{ tocada: true }, { tocada: false }, { tocada: false }, { tocada: false, descartada: true }, { tocada: true, sinNombre: true }]}
                 vozGuardar={(n) => `Guardar ${n} vacunas`}
                 vozFaltan={(n) => `faltan ${n} por revisar`}
                 vozNinguna="No queda ninguna para guardar"

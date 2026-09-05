@@ -65,6 +65,8 @@
     "verify:glifos": "tsx scripts/_arnes-glifos.mts",
     "_comentario_carnet": "S113-B: el arnes del carnet EXISTIA SIN PUERTA — vivia en scripts/ y ningun script lo invocaba, asi que solo corria cuando quien lo escribio se acordaba de correrlo a mano. Es L-318 (motor sin puerta) sobre un gate: un instrumento que nadie puede correr no mide nada, y su verde de ayer no dice nada de hoy. Importa solo el modulo puro vacunas-estado.ts: no levanta React ni toca red ni DB.",
     "verify:carnet": "tsx scripts/_arnes-carnet.mts",
+    "_comentario_perfil": "S113-B lote 1.1: el arnes del perfil NACIO SIN PUERTA, igual que el del carnet — vivia en scripts/ y ningun script lo invocaba, asi que solo corria cuando quien lo escribio se acordaba. Lo cazo el merge de 1.0 a 1.1, corriendo los gates uno por uno en vez de confiar en que un merge sin conflictos deja todo sano. Importa solo modulos puros: no levanta React ni toca red ni DB.",
+    "verify:perfil": "tsx scripts/_arnes-perfil.mts",
     "_comentario_barra_web": "S113-B: mide el corrimiento del cuerpo de BarraTabs LEYENDO EL DOM, y la BAJADA real del dibujo — no la presencia del atributo: un transform que el navegador ignorara daria cero ahi. Nace porque el corrimiento viajaba en una prop @deprecated cuyo modo de falla es mudo (la barra queda 5,5px alta y el disco deja de asomar, sin lanzar ni loguear). NO VA AL HOOK: exige el dev server de apps/cliente levantado (npx expo start --port 8093) y maneja Chrome del sistema. Sin servidor no da verde: rompe.",
     "verify:barra-web": "tsx scripts/_arnes-barra-web.mts",
     "verify:gates-existen": "node scripts/verify-gates-existen.mjs",

@@ -154,13 +154,26 @@ export interface FilaDeLaTanda {
   tocada: boolean
   /** *«Esta no es»*: la persona dijo que la IA leyó algo que no existe. */
   descartada?: boolean
+  /** 🔴 **La IA no pudo leer cuál vacuna es, y todavía no se escribió.**
+   *  *Una fila sin nombre no se puede guardar aunque alguien la haya tocado:
+   *  «Es correcta» sobre un renglón en blanco no confirma nada.* */
+  sinNombre?: boolean
 }
 
-/** 🔴 **DESCARTAR ES REVISAR.** *Si una fila descartada no contara como
- *  revisada, el pie quedaría apagado para siempre y sin forma de encenderlo
- *  — que es exactamente el defecto que el pie existe para no tener.* */
-export function revisada({ tocada, descartada }: FilaDeLaTanda): boolean {
-  return tocada || descartada === true
+/** 🔴 **DESCARTAR ES REVISAR; QUEDARSE SIN NOMBRE, NO.**
+ *
+ *  Lo primero: *si una fila descartada no contara como revisada, el pie
+ *  quedaría apagado para siempre y sin forma de encenderlo* — el defecto que
+ *  el pie existe para no tener.
+ *
+ *  Lo segundo tira en la dirección contraria y por eso va acá y no en la
+ *  pantalla: **una fila sin nombre cuenta pendiente aunque esté tocada.**
+ *  *Si la regla dependiera de que la pantalla se acuerde de no marcarla, el
+ *  día que se olvide se guarda una vacuna sin nombre y nadie se entera.*
+ *  Descartarla sí la resuelve — ahí no se guarda nada. */
+export function revisada({ tocada, descartada, sinNombre }: FilaDeLaTanda): boolean {
+  if (descartada === true) return true
+  return tocada && sinNombre !== true
 }
 
 /**
@@ -185,6 +198,8 @@ export function resumenDeLaTanda(filas: readonly FilaDeLaTanda[]): {
   /* Una sola regla de conteo: la de `faltanPorTocar`, alimentada con
      `revisada` (`L-175`: se ensancha lo que existe, no se copia). */
   const faltan = faltanPorTocar(filas.map(revisada))
+  /* Sin nombre igual cuenta para guardar: **no está descartada, le falta el
+     dato** — y lo que la frena es `faltan`, no este número. */
   const aGuardar = filas.filter((f) => f.descartada !== true).length
   return { faltan, aGuardar, listo: faltan === 0 && aGuardar > 0 }
 }
