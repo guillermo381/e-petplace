@@ -300,13 +300,21 @@ function camposDe(
   i: { fecha_aplicada: string | null; fecha_proxima: string | null; tipo_vacuna: string | null; lote: string | null; veterinario: string | null },
   t: ReturnType<typeof useTraduccion>['t'],
 ): CampoLeido[] {
+  /* 🔴 **SÓLO LO QUE SE LEYÓ** (1.1.1 · a). Acá iban los cinco campos con su
+     valor o `null`, y la pieza dibuja los vacíos **como campos a completar**:
+     con una fila sin fecha eso daba TRES pedidos de fecha —«Aplicada» vacía,
+     «Próxima» vacía y el que la pieza pide por `incompleta`—. *Tres casillas
+     para un dato no piden tres veces: hacen dudar de cuál es la buena.*
+     El único campo que el guardado exige es la fecha aplicada, y ése lo pide
+     la pieza. Lo demás es opcional y se edita por la Hoja, así que un hueco
+     ahí no es una tarea: es un dato que no vino. */
   return [
     { etiqueta: t('carnet.campoAplicada'), valor: i.fecha_aplicada },
     { etiqueta: t('carnet.campoProxima'), valor: i.fecha_proxima },
     { etiqueta: t('carnet.campoTipo'), valor: i.tipo_vacuna },
     { etiqueta: t('carnet.campoLote'), valor: i.lote },
     { etiqueta: t('carnet.campoVeterinario'), valor: i.veterinario },
-  ];
+  ].filter((c) => c.valor !== null && c.valor.trim() !== '');
 }
 
 // ── B4/B5 · guardar ────────────────────────────────────────────────────────

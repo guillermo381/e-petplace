@@ -54,6 +54,19 @@ page.on('request', (r) => {
   }
 });
 
+/* 🔴 **LA RESPUESTA CRUDA DE LA EDGE.** Cuando la pantalla dice «no tiene la
+   forma esperada», el dato que hace falta no está en la pantalla: está en lo
+   que llegó. *Sin el cuerpo, el reporte es «rebotó» — que no es una medición.* */
+let respuesta = null;
+page.on('response', async (r) => {
+  if (!/extract-vacuna/.test(r.url())) return;
+  try {
+    respuesta = { estado: r.status(), cuerpo: (await r.text()).slice(0, 700) };
+  } catch {
+    respuesta = { estado: r.status(), cuerpo: '(no se pudo leer)' };
+  }
+});
+
 const T = async () => await page.evaluate(() => document.body.innerText).catch(() => '');
 
 await page.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 240000 });
@@ -165,6 +178,15 @@ di(`filas con «Es correcta»: ${filas}`);
    abrió sola en una edición con el campo de fecha vacío. */
 const t0 = await T();
 di(`¿abrió una edición sola?: ${/Corregir|Editar|Guardar cambios/i.test(t0) ? 'sí' : 'no'}`);
+/* 🔴 **1.1.1(a): ¿cuántos campos de FECHA dibuja una fila incompleta?** Se
+   cuentan los rótulos de fecha visibles: la pieza pide el suyo cuando falta, y
+   el detalle puede estar mandando además «Aplicada» y «Próxima» vacías. */
+const rotulos = await page.evaluate(() =>
+  document.body.innerText.split('\n').map((x) => x.trim()).filter((x) => /^(Aplicada|Próxima|Fecha)/i.test(x)),
+);
+di(`  la edge respondió: ${respuesta === null ? '(no la vi)' : `HTTP ${respuesta.estado} · ${respuesta.cuerpo}`}`);
+di(`  la pantalla dice: ${t0.split('\n').map((x) => x.trim()).filter(Boolean).slice(0, 6).join(' | ').slice(0, 220)}`);
+di(`  rótulos de fecha a la vista: ${rotulos.length} → ${[...new Set(rotulos)].join(' · ') || 'ninguno'}`);
 di(`  texto «por completar»: ${(t0.match(/[^\n]*por completar[^\n]*/i) ?? ['(no aparece)'])[0].trim().slice(0, 70)}`);
 di(`🔴 ROJO · el botón, sin tocar ninguna: «${await etiquetaGuardar()}»`);
 /* 🔴 **`.nth(k)`, NO `.first()`.** La pieza deja el botón puesto después de
