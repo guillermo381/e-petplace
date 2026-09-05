@@ -1178,3 +1178,12 @@ export {
   type Plaga,
   type Tendencia,
 } from './components/perfil-seguridad'
+
+/* ══ REGISTRAR Y DESPEDIRSE (S113-B · lote 1.2) ════════════════════════════
+ * Las dos puntas de la vida de una mascota en el producto. La regla común:
+ * **nada se guarda sin que la persona toque**, y lo que la casa no revisó no
+ * se muestra. */
+export { SugerenciaRaza, type SugerenciaRazaProps, type CandidataRaza, type ConfianzaRaza } from './components/SugerenciaRaza'
+export { FichaRaza, type FichaRazaProps, type CuidadoPorEtapa } from './components/FichaRaza'
+export { PantallaDespedida, type PantallaDespedidaProps } from './components/PantallaDespedida'
+export { fechaDespedidaValida } from './components/despedida-fecha'

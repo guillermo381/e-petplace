@@ -99,6 +99,9 @@ import { FranjaSeguridad } from '../components/FranjaSeguridad'
 import { CeldasHoy } from '../components/CeldasHoy'
 import { PiezaMedicacionActiva } from '../components/PiezaMedicacionActiva'
 import { FiltrosLineaDeVida } from '../components/FiltrosLineaDeVida'
+import { SugerenciaRaza } from '../components/SugerenciaRaza'
+import { FichaRaza } from '../components/FichaRaza'
+import { PantallaDespedida } from '../components/PantallaDespedida'
 import { CabeceraCoach } from '../components/CabeceraCoach'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
@@ -197,6 +200,27 @@ const ITEMS_SEG = [
 ]
 const VOZ_PLAGA: Record<string, string> = { pulgas: 'pulgas', garrapatas: 'garrapatas', mosquitos: 'mosquitos', internos: 'internos' }
 const VOZ_TIPO: Record<string, string> = { salud: 'Salud', vacunas: 'Vacunas', antiparasitario: 'Antiparasitario', peso: 'Peso', cuidado: 'Cuidado', recuerdos: 'Recuerdos' }
+
+/** La sugerencia necesita estado: **nada viene preelegido**, y eso sólo se ve
+ *  si se puede tocar. */
+function SugerenciaRazaDemo() {
+  const [elegida, setElegida] = useState<string | null>(null)
+  return (
+    <SugerenciaRaza
+      vioAnimal
+      elegida={elegida}
+      onElegir={(id) => setElegida(id)}
+      vozSinAnimal="No pude ver a tu mascota en la foto"
+      vozMestizo="Mestizo"
+      vozOtra="Otra"
+      candidatas={[
+        { id: 'beagle', pregunta: '¿Es un Beagle?', confianza: 'muyProbable', vozConfianza: 'muy probable' },
+        { id: 'boxer', pregunta: '¿Boxer?', confianza: 'probable', vozConfianza: 'probable' },
+        { id: 'bulldog', pregunta: '¿Bulldog?', confianza: 'puedeSer', vozConfianza: 'puede ser' },
+      ]}
+    />
+  )
+}
 
 /** Los filtros necesitan estado para que la multi-selección se pueda tocar. */
 function FiltrosLineaDeVidaDemo() {
@@ -3317,6 +3341,53 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — REGISTRAR Y DESPEDIRSE (lote 1.2) · qué decide: (a) que NINGÚN chip venga preelegido —la raza la dice la persona—; (b) que la confianza en palabras no suene a medición; (c) que la despedida se lea en TINTA, sin una gota de marca, y que el segundo toque alcance como seguridad">
+          <View style={{ gap: spacing[5] }}>
+            <SugerenciaRazaDemo />
+            <FichaRaza
+              nombre="Beagle"
+              revisado
+              historia="Criado en Inglaterra para cazar en jauría, el Beagle conserva el olfato y la resistencia de esa tarea. Es sociable por diseño: pasó siglos trabajando en grupo."
+              caracteristicas={[
+                { etiqueta: 'Origen', valor: 'Inglaterra' },
+                { etiqueta: 'Temperamento', valor: 'Sociable, curioso' },
+                { etiqueta: 'Talla adulta', valor: '10–11 kg' },
+                { etiqueta: 'Esperanza de vida', valor: '12–15 años' },
+                /* null: no aparece. */
+                { etiqueta: 'Predisposiciones', valor: null },
+              ]}
+              cuidados={[
+                { id: '1', etapa: 'Cachorro', texto: 'Socialización temprana y control de peso.', actual: false },
+                { id: '2', etapa: 'Adulto', texto: 'Ejercicio diario: el olfato lo lleva lejos si se aburre.', actual: true },
+                { id: '3', etapa: 'Años dorados', texto: 'Control de articulaciones y peso.', actual: false },
+              ]}
+              vozRevision="Contenido revisado por e-PetPlace · consultá a tu vet"
+              vozAbrir="Conocer la raza"
+              vozCerrar="Ocultar"
+            />
+            {/* ⚠️ La despedida ocupa la pantalla entera; acá va acotada para
+                que se pueda ver al lado de las otras. Lo que hay que juzgar es
+                el TONO, no el alto. */}
+            <View style={{ height: 420, borderRadius: 12, overflow: 'hidden' }}>
+              <PantallaDespedida
+                titulo="Despedirse de Thor"
+                nombre="Thor"
+                fecha="2026-09-04"
+                hoy="2026-09-04"
+                fechaTexto="Hoy, 4 de septiembre"
+                onCambiarFecha={() => {}}
+                palabras=""
+                onPalabras={() => {}}
+                campoPalabras={<Texto variante="apoyo">Unas palabras, si querés</Texto>}
+                vozBoton="Despedirse"
+                vozConfirmar="Tocá de nuevo para despedir a Thor"
+                vozFechaFutura="La fecha no puede ser futura"
+                onDespedir={() => {}}
+              />
+            </View>
+          </View>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — EL PERFIL HABLA PRIMERO (lote 1.1) · qué decide: (a) que la franja se lea como AVISO y no como alarma —filete fino, no cartel—; (b) que las cuatro celdas se lean parejas y la que no tiene dato lo DIGA; (c) que la flecha del peso describa sin juzgar; (d) que los chips de filtro entren en dos filas sin esconder ninguno">
           <View style={{ gap: spacing[5] }}>
             <FranjaSeguridad
