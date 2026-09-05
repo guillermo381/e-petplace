@@ -47,6 +47,15 @@ function codigoSalud(mensaje: string): CodigoErrorSalud {
 
 export type TipoDesparasitacion = 'interna' | 'externa' | 'mixta';
 
+/** S113-A — CONTRA QUÉ fue la desparasitación. Vocabulario cerrado, copiado del
+ *  CHECK `chk_desparasitacion_plagas` de `evento_desparasitacion_aplicada`.
+ *
+ *  ⚠️ **Convive con `TipoDesparasitacion` y no lo reemplaza:** `tipo` dice
+ *  DÓNDE actúa el producto (interna/externa/mixta) y `plagas` dice CONTRA QUÉ.
+ *  *«externa» no distingue pulgas de garrapatas — ésa es la razón por la que
+ *  la columna existe.* */
+export type PlagaTratada = 'pulgas' | 'garrapatas' | 'mosquitos' | 'internos';
+
 /** Registra una desparasitación declarada por la familia (evento del
  *  expediente con su próxima fecha — molde de vacunas). El padre nace
  *  por trigger con procedencia declarado_por_familia. */
@@ -58,6 +67,14 @@ export async function registrarDesparasitacion(
     fecha_aplicada?: string;
     fecha_proxima?: string;
     notas?: string;
+    /** ⭐ S113-A — la RPC lo acepta desde A3 y el wrapper **no lo exponía**:
+     *  el dato viajaba a la puerta y no había forma de mandarlo desde la app.
+     *  *Entregada ≠ montada.*
+     *
+     *  Omitirlo ⇒ `NULL` (*no se declaró*). Un array vacío es legal en el
+     *  motor pero **rebota** con `plagas_vacio`: `{}` diría «no trataba
+     *  ninguna plaga», que no es un hecho posible. */
+    plagas?: readonly PlagaTratada[];
   },
 ): Promise<ResultadoWrapper<{ id: string; mascota_id: string }, CodigoErrorSalud>> {
   const { data, error } = await getClient().rpc('registrar_desparasitacion', {
@@ -67,6 +84,13 @@ export async function registrarDesparasitacion(
     ...(datos.fecha_aplicada !== undefined ? { p_fecha_aplicada: datos.fecha_aplicada } : null),
     ...(datos.fecha_proxima !== undefined ? { p_fecha_proxima: datos.fecha_proxima } : null),
     ...(datos.notas !== undefined ? { p_notas: datos.notas } : null),
+    /* Se manda sólo si vino: la RPC tiene DEFAULT NULL y mandar `null`
+       explícito y omitir son lo mismo para ella — pero omitir deja el
+       parámetro fuera de la llamada, que es lo que hacen los otros cuatro. */
+    /* `[...]` a propósito: la firma pública es `readonly` —lo correcto para
+       quien llama, que no debería poder mutar lo que pasó— y el tipo generado
+       pide un array mutable. La copia vive sólo acá, en el borde. */
+    ...(datos.plagas !== undefined ? { p_plagas: [...datos.plagas] } : null),
   });
   if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
   const o = data as Record<string, unknown> | null;

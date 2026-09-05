@@ -347,6 +347,7 @@ export type {
 // motores del gate) + el lector de la serie de peso
 export {
   registrarDesparasitacion,
+  type PlagaTratada,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
   registrarRecuerdoFamilia,

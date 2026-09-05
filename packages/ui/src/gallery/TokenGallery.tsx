@@ -98,7 +98,7 @@ import { ListaPlanVacunal } from '../components/ListaPlanVacunal'
 import { FranjaSeguridad } from '../components/FranjaSeguridad'
 import { CeldasHoy } from '../components/CeldasHoy'
 import { PiezaMedicacionActiva } from '../components/PiezaMedicacionActiva'
-import { FiltrosLineaDeVida } from '../components/FiltrosLineaDeVida'
+import { FiltrosLineaDeVida, type TipoLineaDeVida } from '../components/FiltrosLineaDeVida'
 import { CabeceraCoach } from '../components/CabeceraCoach'
 import { OrbeCoach } from '../components/OrbeCoach'
 import { PuntoEstado } from '../components/PuntoEstado'
@@ -198,14 +198,31 @@ const ITEMS_SEG = [
   { id: '3', clase: 'restriccion' as const, texto: 'Sin baños con agua fría (dermatitis)', procedencia: 'familia' as const, vozProcedencia: 'lo dijo la familia' },
 ]
 const VOZ_PLAGA: Record<string, string> = { pulgas: 'pulgas', garrapatas: 'garrapatas', mosquitos: 'mosquitos', internos: 'internos' }
-const VOZ_TIPO: Record<string, string> = { salud: 'Salud', vacunas: 'Vacunas', antiparasitario: 'Antiparasitario', peso: 'Peso', cuidado: 'Cuidado', recuerdos: 'Recuerdos' }
+/* 🔴 `Record<TipoLineaDeVida, string>` y NO `Record<string, string>`: con el
+   segundo, un tipo nuevo sin voz devolvía `undefined` y el chip salía VACÍO —
+   sin un error, sin un aviso—. *Un mapa que acepta cualquier clave no es un
+   mapa: es un agujero con forma de objeto.* */
+const VOZ_TIPO: Record<TipoLineaDeVida, string> = {
+  salud: 'Salud',
+  vacunas: 'Vacunas',
+  antiparasitario: 'Antiparasitario',
+  peso: 'Peso',
+  paseos: 'Paseos',
+  estetica: 'Estética',
+  adiestramiento: 'Adiestramiento',
+  guarderia: 'Guardería',
+  recuerdos: 'Recuerdos',
+}
+const TIPOS_VIDA: readonly TipoLineaDeVida[] = [
+  'salud', 'vacunas', 'antiparasitario', 'peso', 'paseos', 'estetica', 'adiestramiento', 'guarderia', 'recuerdos',
+]
 
 /** Los filtros necesitan estado para que la multi-selección se pueda tocar. */
 function FiltrosLineaDeVidaDemo() {
-  const [elegidos, setElegidos] = useState<Array<'salud' | 'vacunas' | 'antiparasitario' | 'peso' | 'cuidado' | 'recuerdos'>>(['vacunas'])
+  const [elegidos, setElegidos] = useState<TipoLineaDeVida[]>(['vacunas'])
   return (
     <FiltrosLineaDeVida
-      tipos={['salud', 'vacunas', 'antiparasitario', 'peso', 'cuidado', 'recuerdos']}
+      tipos={TIPOS_VIDA}
       elegidos={elegidos}
       voz={(t) => VOZ_TIPO[t]}
       onAlternar={(t) => setElegidos((v) => (v.includes(t) ? v.filter((x) => x !== t) : [...v, t]))}
