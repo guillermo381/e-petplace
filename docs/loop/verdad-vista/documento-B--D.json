@@ -1,0 +1,67 @@
+{
+  "documento": "B",
+  "fotos": [
+    "carnet-1785354131272.jpg",
+    "carnet-1783694984605.jpg",
+    "carnet-1783632653859.jpg",
+    "carnet-1783633828265.jpg"
+  ],
+  "transcrito_por": "D",
+  "transcrito_el": "2026-09-04",
+  "metodo": "a ojo, sobre carnet-1783633828265.jpg (la mas nitida) en dos recortes ampliados; cotejado contra las otras tres fotos del mismo documento",
+  "formato": "carnet plegable vertical, 'CARNET DE VACUNACION'. Columna izquierda: stickers pegados. Columna derecha: bloques repetidos [etiqueta FECHA + campo] + linea de FIRMA VETERINARIO. El campo FECHA viene PREIMPRESO con el marcador 'DD MM AAAA'. NO hay lista preimpresa de nombres de vacuna.",
+  "n_filas_vistas": 8,
+  "filas": [
+    { "n": 1, "vacuna": "Procyon Dog Pv (Vacuna contra Parvovirosis Canina)", "fabricante": "Intervet / MSD Salud Animal Colombia",
+      "fecha_aplicada": "2023-04-02", "fecha_escrita": "02-4 23",
+      "lote": "02031203", "vencimiento_biologico": "2024-04-25", "vencimiento_escrito": "25APR24",
+      "veterinario": null, "evidencia": "sticker_con_fecha", "confianza": "alta" },
+
+    { "n": 2, "vacuna": "Vanguard DA2L (Diluente + Bacterina de Leptospira canicola-icterohaemorrhagiae)", "fabricante": "Zoetis",
+      "fecha_aplicada": "2023-04-19", "fecha_escrita": "19-4-23",
+      "lote": "562887", "vencimiento_biologico": "2024-09-04", "vencimiento_escrito": "F.Cad 04 SEP 24", "elaboracion_escrita": "F.Elab 10 MAR 22",
+      "veterinario": null, "evidencia": "sticker_con_fecha", "confianza": "alta",
+      "nota": "DOS stickers, UNA dosis. El lote es 562887 -- se lee entero en el sticker negro." },
+
+    { "n": 3, "vacuna": "Recombitek C7 (Bacterina contra Leptospira Canicola-Grippotyphosa-Icterohaemorrhagiae-Pomona + Fraccion liofilizada)", "fabricante": "Boehringer / Merial",
+      "fecha_aplicada": "2023-05-10", "fecha_escrita": "10-5-23",
+      "lote": "47087B", "vencimiento_biologico": "2024-03-03", "vencimiento_escrito": "03/MAR/24",
+      "veterinario": null, "evidencia": "sticker_con_fecha", "confianza": "alta",
+      "nota": "DOS stickers, UNA dosis." },
+
+    { "n": 4, "vacuna": "Nobivac Lepto", "fabricante": "MSD / Intervet",
+      "fecha_aplicada": null, "fecha_escrita": null,
+      "lote": "A468A01", "vencimiento_biologico": null, "vencimiento_escrito": "Validez 10-2023",
+      "veterinario": null, "evidencia": "sticker_con_fecha", "confianza": "baja",
+      "nota": "EL CAMPO FECHA ESTA SIN LLENAR: sigue mostrando el marcador preimpreso 'DD MM AAAA'. Hay un manuscrito en la zona de FIRMA que dice 'S/JUN' o '5/JUN' -- sin ano, y sin certeza de si es una fecha o una firma. => fecha_aplicada NULL. **Es el renglon donde las cuatro cargas humanas se contradicen: 04-jun, 05-jun, 10-may y 19-abr. Las cuatro inventaron un dia.**" },
+
+    { "n": 5, "vacuna": "Nobivac DHPPi", "fabricante": "MSD / Intervet",
+      "fecha_aplicada": null, "fecha_escrita": null,
+      "lote": "0129035B01", "vencimiento_biologico": "2024-05-31", "vencimiento_escrito": "Fv 05-2024",
+      "veterinario": null, "evidencia": "sticker_con_fecha", "confianza": "baja",
+      "nota": "EL CAMPO FECHA ESTA SIN LLENAR ('DD MM AAAA'). Manuscrito en la zona de FIRMA: '26 JUN', sin ano. Si se acepta que es la fecha y que el ano es 2023, da 2023-06-26 -- que es lo que dijeron dos de las cuatro cargas. Pero el ano NO ESTA ESCRITO. => NULL, y que lo dirima el founder.",
+      "vencimiento_nota": "'05-2024' no trae dia; lo puse como fin de mes SOLO como lectura, marcado. Si la casa no firma esa convencion, va null." },
+
+    { "n": 6, "vacuna": "Nobivac KC", "fabricante": "MSD / Intervet",
+      "fecha_aplicada": "2023-08-03", "fecha_escrita": "3 Ago 2023",
+      "lote": "A127G01", "vencimiento_biologico": null, "vencimiento_escrito": "Vence 11-2023",
+      "veterinario": null, "evidencia": "sticker_con_fecha", "confianza": "alta",
+      "nota": "Debajo de esta fecha hay otro manuscrito, '15/JUL', sin ano y sin sticker propio a su altura. NO se a que renglon pertenece. Lo dejo declarado, no lo asigno." },
+
+    { "n": 7, "vacuna": "Canigen LR", "fabricante": "Virbac",
+      "fecha_aplicada": "2024-07-06", "fecha_escrita": "06 07 2024",
+      "lote": "9B2F", "vencimiento_biologico": null, "vencimiento_escrito": "FEB 25",
+      "veterinario": "Clinica Protectora de Animales (sello)", "evidencia": "sello", "confianza": "alta" },
+
+    { "n": 8, "vacuna": "Canigen MHA2PPi", "fabricante": "Virbac",
+      "fecha_aplicada": "2024-07-06", "fecha_escrita": "06 07 2024",
+      "lote": "9B2F", "vencimiento_biologico": null, "vencimiento_escrito": "FEB 25",
+      "veterinario": "Clinica Protectora de Animales (sello)", "evidencia": "sello", "confianza": "media",
+      "nota": "Son DOS stickers distintos (LR y MHA2PPi) bajo UNA sola FECHA. Los conte como DOS vacunas porque son dos productos. Tres de las cuatro cargas humanas hicieron lo mismo; una los junto en una fila. **Es decision de criterio, no de lectura: que la firme el founder.**" }
+  ],
+  "lo_que_NO_pude_leer": [
+    "Ninguna FIRMA VETERINARIO esta llena en los renglones 1 a 6: las lineas estan vacias. El unico rastro de emisor es el sello de la Clinica Protectora de Animales al pie, sobre el renglon 8.",
+    "El dia de 'S/JUN' y el ano de '26 JUN' no estan escritos en ningun lado del carnet.",
+    "A que renglon pertenece el manuscrito '15/JUL'."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "documento": "A",
+  "mano": "E",
+  "archivo": "carnet-1783564367515.jpg",
+  "que_es": "PROGRAMA DE VACUNACION — tabla de DOS paginas, columnas FECHA / VACUNA / PROXIMA APLICACION / FIRMA MVZ. Stickers pegados en la columna VACUNA, fechas manuscritas.",
+  "clinica": "ANIMAL ... VET CENTER (marca de agua) · MVZ Enrique Lopez Sanchez, Ced. Prof. 11536014",
+  "sin_ver_la_de_D": true,
+  "anclaje_declarado": "Antes de escribir esto NO abri documento-A--D.json ni documento-B--D.json. Si lei el CONTROL de cotejar-verdad.mjs (la herramienta), que trae tres valores de ejemplo del documento B — y los tres coinciden con lo que yo ya habia transcripto ANTES de abrirlo, en la adenda anterior.",
+  "regla_de_fecha": "lo que no esta escrito va null. 'FEB 2023' tiene mes y anio pero NO dia ⇒ la proxima va null y el literal queda anotado.",
+  "🔴_hallazgo": "La base tiene UNA fila aceptada para este carnet y yo cuento QUINCE. Cuando el extractor devolvio 12, no estaba inventando: estaba acertando, y la verdad de aceptacion era la equivocada. El caso «1 → 12» NO es un caso de invencion.",
+  "nota_de_contaminacion": "En todas las filas la columna FIRMA MVZ dice 'MVZ Enrique Lopez Sanchez / Ced. Prof. 11536014'. 11536014 es la CEDULA PROFESIONAL del veterinario, no un lote.",
+  "filas": [
+    {"n":1,"vacuna":"Rabimune","fecha_aplicada":"2020-08-29","fecha_literal":"29/08 2020","fecha_proxima":"2021-08-29","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"alta","nota":"el lote del sticker no se lee a esta resolucion"},
+    {"n":2,"vacuna":"GiardiaVax","fecha_aplicada":"2020-08-29","fecha_literal":"29/08 2020","fecha_proxima":"2021-08-29","lote":"014/19","vencimiento_biologico":"OCT/21","veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media","nota":"Zoetis. El sticker muestra 014/19 · OCT/19 · OCT/21"},
+    {"n":3,"vacuna":"Bronchicine CAe","fecha_aplicada":"2021-02-12","fecha_literal":"12/Feb 2021","fecha_proxima":"2022-02-12","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media","nota":"sticker azul, texto vertical; leo '...cine CAe' con duda"},
+    {"n":4,"vacuna":"Recombitek (moquillo, adenovirus 2, coronavirus, parainfluenza, parvovirus)","fecha_aplicada":"2021-02-12","fecha_literal":"12/Feb 2021","fecha_proxima":"2022-02-12","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media","nota":"identifico el producto por su composicion impresa, no por marca visible"},
+    {"n":5,"vacuna":"Rabimune","fecha_aplicada":"2021-10-29","fecha_literal":"29/OCT 2021","fecha_proxima":"2022-10-29","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"alta"},
+    {"n":6,"vacuna":"GiardiaVax","fecha_aplicada":"2021-11-13","fecha_literal":"13/NOV 2021","fecha_proxima":"2022-11-13","lote":"013/21R","vencimiento_biologico":"MAY/23","veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media"},
+    {"n":7,"vacuna":"Bronchicine CAe","fecha_aplicada":"2022-02-25","fecha_literal":"25/Feb 2022","fecha_proxima":null,"fecha_proxima_literal":"FEB 2023","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media","nota":"la proxima dice 'FEB 2023' SIN DIA ⇒ null"},
+    {"n":8,"vacuna":"Peek","fecha_aplicada":"2022-02-25","fecha_literal":"25/Feb 2022","fecha_proxima":null,"fecha_proxima_literal":"FEB 2023","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media","nota":"la proxima dice 'FEB 2023' SIN DIA ⇒ null"},
+    {"n":9,"vacuna":"Peek N-RB","fecha_aplicada":"2022-10-28","fecha_literal":"28/OCT 2022","fecha_proxima":"2023-10-28","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"alta"},
+    {"n":10,"vacuna":"Peek Puppy","fecha_aplicada":"2023-03-15","fecha_literal":"15/03/23","fecha_proxima":"2024-03-15","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"alta"},
+    {"n":11,"vacuna":"(sticker no identificable)","fecha_aplicada":"2023-03-15","fecha_literal":"15/03/23","fecha_proxima":"2024-03-15","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"baja","nota":"la FILA existe y su fecha se lee; el NOMBRE del producto no. Lo dejo nombrado como ilegible en vez de adivinarlo."},
+    {"n":12,"vacuna":"Peek N-RB","fecha_aplicada":"2023-10-27","fecha_literal":"27/OCT 2023","fecha_proxima":"2024-10-27","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"alta"},
+    {"n":13,"vacuna":"Recombitek Oral Bordetella","fecha_aplicada":"2024-03-22","fecha_literal":"22/Marzo 2024","fecha_proxima":"2025-03-22","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media"},
+    {"n":14,"vacuna":"Recombitek (diluente + moquillo, adenovirus 2, coronavirus, parainfluenza, parvovirus)","fecha_aplicada":"2024-03-22","fecha_literal":"22/Marzo 2024","fecha_proxima":"2025-03-22","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"media","nota":"DUDA DECLARADA: 13 y 14 podrian ser UNA sola dosis (bordetella oral + polivalente el mismo dia) o dos productos distintos. Tienen la misma fecha y la misma proxima. NO lo decido."},
+    {"n":15,"vacuna":"Imrab 3TF","fecha_aplicada":"2024-10-25","fecha_literal":"25/OCT 2024","fecha_proxima":"2025-10-25","lote":null,"vencimiento_biologico":null,"veterinario":"MVZ Enrique Lopez Sanchez","evidencia":"sticker_con_fecha","confianza":"alta","nota":"el sticker dice 'Vacuna Antirrabica Trivalente Inactivada'"}
+  ],
+  "mi_conteo": 15,
+  "lo_que_NO_pude_leer": [
+    {"que":"los numeros de lote de casi todos los stickers","razon":"la foto es de las dos paginas completas: el texto de los stickers queda por debajo del limite de resolucion. Solo se leen los dos de GiardiaVax."},
+    {"que":"el nombre del producto de la fila 11","razon":"sticker pequeno, blanco, texto ilegible a esta resolucion"},
+    {"que":"si las filas 13 y 14 son una dosis o dos","razon":"misma fecha y misma proxima; no hay marca que lo diga"}
+  ]
+}
