@@ -156,6 +156,57 @@ for (let k = 0; k < filas; k += 1) {
 di(`✅ VERDE · tras confirmar las ${filas}: «${await etiquetaGuardar()}»`);
 di(`sigue habiendo «Es correcta» sin tocar: ${await page.getByRole('button', { name: /^(Es correcta|Looks right)$/ }).count()}`);
 
+/* 🔴 **GUARDAR SÓLO CON `GUARDAR=1`, y sólo sobre una mascota descartable.**
+   El default es NO guardar: este arnés corre sobre cuentas reales y escribir
+   eventos clínicos falsos no se deshace —el producto no tiene borrado—. El
+   flag existe para que guardar sea un ACTO, no un efecto de correr el arnés. */
+if (process.env.GUARDAR === '1') {
+  const btn = page.getByRole('button', { name: /Sumar .* a su historia|Save/i }).first();
+  if ((await btn.count()) > 0) {
+    /* Antes de tocar: ¿está habilitado? Un click sobre un botón apagado no
+       falla, no hace nada — y el arnés lo reportaría como «toqué y no guardó». */
+    /* Cuántos matchean y cómo está cada uno: si hay dos, `.first()` puede estar
+       tomando el de una pantalla montada detrás — ya pasó tres veces en este
+       arco. */
+    const candidatos = await page.evaluate(() =>
+      [...document.querySelectorAll('[role="button"]')]
+        .map((e) => ({ voz: (e.getAttribute('aria-label') ?? e.textContent ?? '').trim(), r: e.getBoundingClientRect(), dis: e.getAttribute('aria-disabled'), pe: getComputedStyle(e).pointerEvents }))
+        .filter((x) => /Sumar|Faltan/i.test(x.voz))
+        .map((x) => `«${x.voz}» ${Math.round(x.r.width)}x${Math.round(x.r.height)} en y=${Math.round(x.r.y)} · disabled=${x.dis} · pointer=${x.pe}`),
+    );
+    di(`candidatos a «Sumar»: ${candidatos.length}`);
+    for (const c of candidatos) di(`   ${c}`);
+    const apagado = await btn.getAttribute('aria-disabled');
+    const clases = await btn.evaluate((e) => (e).getAttribute('data-testid') ?? '');
+    di(`el botón antes de tocar: aria-disabled=${apagado ?? 'null'} ${clases}`);
+    /* 🔴 **PRIMERO A LA VISTA.** El botón vive al fondo de un ScrollView y el
+       click se quedaba esperando 30 s: el arnés reportaba «toqué y no guardó»
+       cuando en realidad NUNCA TOCÓ. *Un click que no llega no falla: expira,
+       y su silencio se lee como que la app no respondió.* */
+    await page.mouse.wheel(0, 1200);
+    await page.waitForTimeout(1200);
+    let toco = true;
+    await btn.click({ timeout: 8000 }).catch(() => { toco = false; });
+    if (!toco) {
+      /* 🔴 El click de playwright espera a que el elemento esté «estable», y en
+         un ScrollView de RN-web con inercia eso puede no pasar nunca. Se dispara
+         el click del DOM, que es por donde RN-web escucha igual. **Se declara**:
+         saltea la verificación de accionabilidad, así que la medición de arriba
+         —visible, habilitado, `pointer-events: auto`— es la que sostiene que el
+         botón era tocable de verdad. */
+      di('⚠️ el click normal expiró; se dispara el click del DOM (elemento medido visible y habilitado)');
+      await btn.evaluate((e) => (e).click()).catch((e) => di(`🔴 tampoco: ${String(e).slice(0, 70)}`));
+    }
+    await page.waitForTimeout(9000);
+    const t2 = await T();
+    di(`tras guardar, la pantalla dice: ${t2.split('\n').filter((x) => x.trim()).slice(0, 3).join(' | ')}`);
+    const rojo = t2.split('\n').find((x) => /no pudimos|error|inténtal|revisá|Revisa los datos/i.test(x));
+    di(`¿algún mensaje de error?: ${rojo ?? 'ninguno'}`);
+  } else {
+    di('🔴 no había botón para guardar.');
+  }
+}
+
 di(`errores de página: ${errores.length}${errores.length ? ' — ' + errores[0] : ''}`);
 await page.screenshot({ path: 'docs/loop/S113-C-carnet-bytes.png' });
 await navegador.close();
