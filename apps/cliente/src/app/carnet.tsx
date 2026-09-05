@@ -320,7 +320,17 @@ function camposDe(
      a ella y otra cosa a mí. *Dos piezas contando lo mismo por separado
      terminan discrepando el día que una de las dos aprenda algo* — y el
      guardado se decide con la misma función que dibuja el botón. */
-  const tanda = items.map((i) => ({ tocada: tocadas.has(i.key), descartada: i.descartada }));
+  /* La tanda lleva **el dato**, no la cuenta: el pie deriva sus dos números de
+     acá con `resumenDeLaTanda`, así que no hay forma de pasarle un total que
+     no se corresponda con las filas. */
+  const tanda = items.map((i) => ({
+    tocada: tocadas.has(i.key),
+    descartada: i.descartada,
+    /* En la TANDA es un booleano (al pie sólo le importa que falte algo); en
+       la FILA es qué falta, porque ahí sí hay que señalar el campo. Una regla,
+       dos formas de leerla. */
+    incompleta: faltaParaConfirmar(i) !== null,
+  }));
   /** La PRIMERA sin nombre entre las que siguen vivas: es la única que puede
    *  llevar el foco sin pelearse con otra. `null` si no hay ninguna. */
   /** La primera fila viva a la que le falta la fecha — el destino del texto
@@ -524,6 +534,14 @@ function camposDe(
                 vozRevisar={t('carnet.filaRevisar')}
                 vozConfirmar={t('carnet.filaConfirmar')}
                 vozDescartar={t('carnet.estaNoEs')}
+                /* ⭐ **LA FILA SE VE INCOMPLETA** (adenda 6). La regla es la
+                   misma de `confirmable.ts` que ya usan el texto y el toque, así
+                   que las tres no pueden discrepar. **El nombre lo resuelve la
+                   pieza** (tiene su campo adentro); la fecha la declara la
+                   pantalla y **se retira sola al completarse**, porque
+                   `faltaParaConfirmar` se recalcula con el item ya editado. */
+                incompleta={faltaParaConfirmar(i) === 'fecha' ? 'fecha' : undefined}
+                vozIncompleta={t('carnet.faltaFecha')}
                 etiquetaNombre={t('carnet.campoNombre')}
                 vozSinNombre={t('carnet.sinNombre')}
                 onNombre={(v) =>
@@ -547,12 +565,14 @@ function camposDe(
                      —así el pie queda apagado y con su razón a la vista— y se
                      abre su edición, que es donde se completa. *El toque no se
                      traga: lleva al lugar donde se resuelve.* */
-                  const falta = faltaParaConfirmar(i);
-                  if (falta !== null) {
-                    mostrar({ texto: falta === 'nombre' ? t('carnet.sinNombre') : t('carnet.faltaFecha') });
-                    abrirEdicion(i.key);
-                    return;
-                  }
+                  /* ⏪ **ACÁ BLOQUEABA EL MARCADO, Y ESO TAPABA LA VOZ NUEVA.**
+                     Con la adenda 6 el pie cuenta APARTE las revisadas que
+                     están incompletas, así que una fila a medias **sí se
+                     marca**: si no, cae en «faltan por revisar» y la persona
+                     va a tocar una fila que ya tocó. Lo que se conserva es
+                     llevarla a completarla — *el toque no se traga: abre donde
+                     se resuelve.* */
+                  if (faltaParaConfirmar(i) !== null) abrirEdicion(i.key);
                   setTocadas((prev) => {
                     const s = new Set(prev);
                     s.add(i.key);
@@ -573,26 +593,14 @@ function camposDe(
               {errorGuardar}
             </Text>
           )}
-          {/* ③ **EL TEXTO LLEVA A LA PRIMERA INCOMPLETA.** Decía cuántas faltan
-              y no ofrecía dónde: con cuatro filas y una pantalla larga, saber
-              que faltan cuatro no acerca a ninguna. Ahora se toca y lleva —
-              misma ley que la fila de ausencias del perfil: *la puerta tiene
-              que estar donde está la carencia.* */}
-          {dudosas > 0 && primeraIncompleta !== null && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
-              onPress={() => {
-                const y = posiciones.current.get(primeraIncompleta);
-                if (y !== undefined) scrollRef.current?.scrollTo({ y: Math.max(0, y - 24), animated: true });
-                abrirEdicion(primeraIncompleta);
-              }}
-            >
-              <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.text.secondary, textDecorationLine: 'underline' }}>
-                {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
-              </Text>
-            </Pressable>
-          )}
+          {/* ☠️ Acá vivía mi línea «hay N por completar». **La dice el pie**
+              desde la adenda 6, con su cuenta propia y su voz propia — dos
+              líneas diciendo lo mismo con números que salen de dos lados es
+              justo lo que este bloqueante fue.
+              ⚠️ Lo que SÍ se pierde es su destino: el texto llevaba a la
+              primera incompleta y el del pie no. Queda pedido a B; mientras
+              tanto, el camino existe igual — confirmar una fila a medias abre
+              su edición. */}
           {/* ⭐ **EL PIE DE LA TANDA, de B** (adenda 2). Reemplaza al `Boton`
               que yo componía con su propia cuenta: *dos piezas contando lo
               mismo por separado terminan discrepando el día que una de las dos
@@ -609,6 +617,10 @@ function camposDe(
             vozGuardar={(k) => (k === 1 ? t('carnet.guardarUna') : t('carnet.guardarN', { n: k }))}
             vozFaltan={(k) => (k === 1 ? t('carnet.faltaTocarUna') : t('carnet.faltanTocar', { n: k }))}
             vozNinguna={t('carnet.ningunaParaGuardar')}
+            /* Las DOS cuentas del pie son distintas y se dicen distinto: una es
+               «no la miraste», la otra «le falta un dato». Antes yo decía la
+               segunda con la voz de la primera. */
+            vozIncompletas={(k) => (k === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: k }))}
             onGuardar={() => void guardar()}
           />
         </ScrollView>
