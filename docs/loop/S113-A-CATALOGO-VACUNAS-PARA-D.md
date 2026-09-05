@@ -100,3 +100,42 @@ contestó.
 al día**; **sin `cubre` → sólo la del código** (`leptospirosis` sigue `vencida`);
 un código inventado **rebota hablado**; y **guardería lee lo mismo** — con la
 combinada, `faltantes` deja de incluir `leptospirosis`.
+
+---
+
+# ADENDA · `precision_fecha` — cuando el carnet sólo dice el mes
+
+`registrar_vacunas_de_carnet` acepta, **por ítem**, `precision_fecha` con dos
+valores: **`"dia"`** (default) y **`"mes"`**.
+
+```json
+{ "nombre": "Nobivac DHPPi", "fecha_aplicada": "2024-05-01", "precision_fecha": "mes" }
+```
+
+**Cuándo usar `"mes"`:** cuando el renglón dice **`05/2024`, `mayo 2024`,
+`05-24`** — mes y año, **sin día**. Hoy esa fila o se descartaba o se le
+inventaba un día.
+
+**Qué pasa con la fecha, y son dos cosas distintas a propósito:**
+· **se guarda el PRIMER día del mes** (`2024-05-01`) — el ancla que no inventa
+  nada más allá de lo que el carnet dice. Podés mandar cualquier día de ese mes:
+  el motor lo trunca solo;
+· **el plan cuenta desde el ÚLTIMO** (`2024-05-31`), que es **conservador**:
+  *contar desde el día 1 gritaría «vencida» hasta 30 días antes de tiempo, y una
+  alarma que se adelanta enseña a ignorar las alarmas.*
+· **la app dice «mayo 2024»**, no «1 de mayo».
+
+⚠️ **No lo uses para «no sé cuándo».** `precision_fecha` dice **granularidad**,
+no confianza: si el carnet no dice ni el mes, **`fecha_aplicada` va `null`** —
+que ya es legal y es el NULL honesto. *Poner `"mes"` con una fecha inventada
+convierte «no sé» en «sé el mes», y eso el plan se lo cree.*
+
+**Un valor fuera de los dos rebota** `item_invalido: N: precision_fecha X no es
+«dia» ni «mes»`, y **tira el lote entero** como el resto de las validaciones.
+
+**Verificado (fixture in-txn, residuo 0):** `"mes"` con `2024-05-17` guarda
+**`2024-05-01`** y el plan cuenta desde **`2024-05-31`**; la MISMA fecha sin
+precisión guarda `2024-05-17` y el plan usa **`2024-05-17`** — **14 días de
+diferencia**, que es el discriminador. Las 8 vacunas reales de Thor quedaron en
+`'dia'`: *el default escribe el supuesto que ya estaba implícito, no cambia un
+hecho.*

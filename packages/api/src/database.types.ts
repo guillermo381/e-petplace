@@ -9967,6 +9967,7 @@ export type Database = {
           lote: string | null
           mascota_id: string
           nombre_vacuna: string
+          precision_fecha: string
           prestador_id: string | null
           tipo_vacuna: string | null
           updated_at: string
@@ -9991,6 +9992,7 @@ export type Database = {
           lote?: string | null
           mascota_id: string
           nombre_vacuna: string
+          precision_fecha?: string
           prestador_id?: string | null
           tipo_vacuna?: string | null
           updated_at?: string
@@ -10015,6 +10017,7 @@ export type Database = {
           lote?: string | null
           mascota_id?: string
           nombre_vacuna?: string
+          precision_fecha?: string
           prestador_id?: string | null
           tipo_vacuna?: string | null
           updated_at?: string
