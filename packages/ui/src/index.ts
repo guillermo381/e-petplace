@@ -1129,3 +1129,30 @@ export { CabeceraCoach, type CabeceraCoachProps } from './components/CabeceraCoa
    `react-native` adentro), que es exactamente para lo que ese archivo existe.
    Lo único que la pantalla necesita saber es cuánta cola le debe al scroll, y
    eso ya sale por `COLA_PRESENCIA_COACH`. */
+
+/* ══ EL CARNET DICE LA VERDAD (S113-B · lote 1.0) ══════════════════════════
+ * Tres piezas y una regla que las ordena: **el carnet AFIRMA, el plan CALCULA,
+ * y la extracción PROPONE.** Cada una se dibuja distinto a propósito — si se
+ * leyeran igual, la app estaría afirmando cosas que ningún papel dice. */
+export { FilaVacunaCarnet, type FilaVacunaCarnetProps } from './components/FilaVacunaCarnet'
+export {
+  FilaConfirmacionVacuna,
+  PieConfirmacionVacunas,
+  type FilaConfirmacionVacunaProps,
+  type PieConfirmacionVacunasProps,
+  type CampoLeido,
+  type OrigenLectura,
+} from './components/FilaConfirmacionVacuna'
+export { ListaPlanVacunal, type ListaPlanVacunalProps, type FilaPlanVacunal } from './components/ListaPlanVacunal'
+/* La lógica del estado vive aparte para que su gate no arrastre `react-native`
+   — mismo motivo que `coach-geometria` (`L-175`). */
+export {
+  estadoDeVacuna,
+  detalleVisible,
+  pideRevision,
+  faltanPorTocar,
+  diasEntre,
+  AVISO_DIAS,
+  type EstadoVacuna,
+  type ConfianzaIA,
+} from './components/vacunas-estado'
