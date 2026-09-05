@@ -1804,3 +1804,12 @@ export {
   type InputConteoSemanaPrestador,
   type CodigoErrorConteoSemana,
 } from './wrappers/conteoSemanaPrestador';
+
+export {
+  sugerirRaza,
+  type SugerenciaDeRaza,
+  type CandidataRaza,
+  type ConfianzaRaza,
+  type InputSugerirRaza,
+  type CodigoErrorRaza,
+} from './wrappers/razas';

@@ -17,7 +17,13 @@
 // ninguna edge se entera. Ése es todo el punto de la puerta única.
 
 /** Vocabulario CERRADO. Una pieza = un trabajo del producto. */
-export type Pieza = 'carnet' | 'documento' | 'nota_clinica' | 'presencia'
+/* 🔴 `raza` ENTRA EN EL MERGE DE S113-D-1.2 (A, 5-sep-2026), y la resolución es
+   ADITIVA a propósito: el lado de D-1.2 traía la pieza pero con `carnet: 2000`
+   —el techo viejo, que la propia mesa subió a 4000 tras medir que truncaba una
+   de cada tres corridas—. *Elegir un lado entero habría perdido una medición o
+   la otra*, así que se conserva TODO main y se agregan las siete entradas de
+   `raza`, con los valores que D fijó. */
+export type Pieza = 'carnet' | 'documento' | 'nota_clinica' | 'presencia' | 'raza'
 
 /** El modelo por pieza. **Medido, no elegido** — ver cabecera. */
 export const MODELOS: Record<Pieza, string> = {
@@ -25,6 +31,7 @@ export const MODELOS: Record<Pieza, string> = {
   documento: 'claude-sonnet-5',
   nota_clinica: 'claude-sonnet-5',
   presencia: 'claude-sonnet-5',
+  raza: 'claude-haiku-4-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -39,6 +46,7 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   documento: 4000,
   nota_clinica: 16000,
   presencia: 4000,
+  raza: 500,
 }
 
 /**
@@ -51,6 +59,7 @@ export const EDGES: Record<Pieza, string> = {
   documento: 'extract-documento',
   nota_clinica: 'estructurar-nota-clinica',
   presencia: 'escribir-presencia',
+  raza: 'sugerir-raza',
 }
 
 /**
@@ -112,6 +121,7 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   documento: 60_000,
   nota_clinica: 40_000,
   presencia: 10_000,
+  raza: 30_000,
 }
 
 /**
@@ -231,6 +241,7 @@ export const PENSAR: Record<Pieza, boolean> = {
   // clínico campo por campo es exactamente donde el razonamiento paga.
   nota_clinica: true,
   presencia: false,
+  raza: false,
 }
 
 /**
@@ -243,6 +254,7 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   documento: null,
   nota_clinica: null,
   presencia: null,
+  raza: null,
 }
 
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
@@ -250,4 +262,5 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   documento: false,
   nota_clinica: false,
   presencia: true,
+  raza: false,
 }

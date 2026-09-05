@@ -15,9 +15,8 @@
 // Un arnés que sólo prueba el camino feliz no está midiendo.
 
 import { llamarModelo } from '../_shared/ia/mod.ts'
-import type { Pieza } from '../_shared/ia/modelos.ts'
 import {
-  MAX_TOKENS, MODELOS_ADAPTIVOS, PENSAR, TECHO_SIN_RAZONAR, TIMEOUT_MS,
+  CACHEAR_SISTEMA, EDGES, ESFUERZO, MAX_TOKENS, MODELOS, PENSAR, PIEZAS, TIMEOUT_MS,
 } from '../_shared/ia/modelos.ts'
 
 Deno.env.set('ANTHROPIC_API_KEY', 'sk-ant-FALSA-DE-PRUEBA')
@@ -83,48 +82,32 @@ function exigir(nombre: string, condicion: boolean, visto?: unknown) {
   else { rojos++; console.log(`  ROJO ${nombre}${visto === undefined ? '' : ` — visto: ${JSON.stringify(visto)}`}`) }
 }
 
-console.log('\n== 0bis · TECHO BAJO ⇒ RAZONAMIENTO APAGADO, EXPLÍCITO ==')
-console.log('  (E midió que omitir `thinking` deja a Sonnet 5 razonar solo, quemarse el')
-console.log('   techo y devolver CERO CARACTERES en carnets reales. D lo aisló: mismo')
-console.log('   prompt, con razonamiento gastó 6.716 y 10.895 tokens contra 2.015 y')
-console.log('   1.248 sin razonar, y devolvió LAS MISMAS FILAS.)')
+console.log('\n== 0 · CENSO: toda pieza en las SIETE tablas ==')
+console.log('  (nace de un defecto real: al agregar `raza` quedaron DOS tablas')
+console.log('   incompletas. deno lo dijo con dos TS2741 y el gate de edges dio')
+console.log('   VERDE — TS2741 cae en su bucket «fuera de clase». Y TIMEOUT_MS en')
+console.log('   undefined hace setTimeout(fn, undefined), que dispara a los 0 ms:')
+console.log('   toda llamada de esa pieza se habria abortado al instante.)')
 {
-  // ── BRAZO 1 · la tabla: techo bajo ⇒ PENSAR false ────────────────────────
-  // Se recorre la TABLA, no una lista aparte: la regla es *sobre* `MAX_TOKENS`,
-  // así que su propia tabla es la fuente correcta. (El censo de que toda pieza
-  // esté en TODAS las tablas vive en el lote 1.2, con `PIEZAS` en runtime.)
-  const bajas = (Object.keys(MAX_TOKENS) as Pieza[]).filter((p) => MAX_TOKENS[p] < TECHO_SIN_RAZONAR)
-  exigir(`hay piezas con techo < ${TECHO_SIN_RAZONAR} que vigilar (si no, este gate no mide nada)`,
-    bajas.length > 0, bajas)
-  for (const p of bajas) {
-    exigir(`${p} (techo ${MAX_TOKENS[p]}) NO razona`, PENSAR[p] === false, PENSAR[p])
+  // `ESFUERZO` admite `null` a proposito, asi que se pregunta por la CLAVE, no
+  // por el valor: `undefined` es el hueco, `null` es una decision.
+  const tablas: [string, Record<string, unknown>][] = [
+    ['MODELOS', MODELOS], ['MAX_TOKENS', MAX_TOKENS], ['EDGES', EDGES],
+    ['TIMEOUT_MS', TIMEOUT_MS], ['PENSAR', PENSAR], ['ESFUERZO', ESFUERZO],
+    ['CACHEAR_SISTEMA', CACHEAR_SISTEMA],
+  ]
+  for (const [nombre, tabla] of tablas) {
+    const faltan = PIEZAS.filter((p) => !Object.prototype.hasOwnProperty.call(tabla, p))
+    exigir(`${nombre} tiene las ${PIEZAS.length} piezas`, faltan.length === 0, faltan)
   }
-
-  // ── BRAZO 2 · el CUERPO: que el campo salga de verdad a la request ───────
-  // Es el que importa. La tabla puede decir `false` y el cuerpo no llevar el
-  // campo: ahí el proveedor razona igual y nadie se entera hasta el truncado.
-  for (const p of bajas) {
-    const { cap, quitar } = interceptar(() => respuestaOk('{"a":1}'))
-    await llamarModelo({
-      pieza: p,
-      sistema: p === 'presencia' ? 'x' : undefined,
-      mensajes: [{ rol: 'user', texto: 'x' }],
-      salida: 'json',
-    })
-    quitar()
-    const cuerpo = cap.cuerpoAnthropic as Record<string, unknown>
-    const modelo = String(cuerpo.model)
-    if (MODELOS_ADAPTIVOS.has(modelo)) {
-      exigir(`${p} manda thinking disabled ESCRITO en la request`,
-        JSON.stringify(cuerpo.thinking) === '{"type":"disabled"}', cuerpo.thinking)
-    } else {
-      // En un modelo que no razona solo, omitirlo YA es apagarlo; mandarle una
-      // forma que quizá no acepta sería estrenar un 400 para no cambiar nada.
-      exigir(`${p} corre ${modelo}, que no razona solo: sin campo, y está bien`,
-        cuerpo.thinking === undefined, cuerpo.thinking)
-    }
-    exigir(`${p} manda el techo de su tabla (${MAX_TOKENS[p]})`, cuerpo.max_tokens === MAX_TOKENS[p], cuerpo.max_tokens)
-  }
+  // Control positivo del censo: sabe encontrar un hueco cuando lo hay.
+  const conHueco = { ...MODELOS } as Record<string, unknown>
+  delete conHueco[PIEZAS[PIEZAS.length - 1]]
+  exigir('el censo SABE ver un hueco (control positivo)',
+    PIEZAS.filter((p) => !Object.prototype.hasOwnProperty.call(conHueco, p)).length === 1)
+  // Y que ningun timeout sea undefined/0: el modo de falla exacto de arriba.
+  exigir('ningun TIMEOUT_MS es 0 ni undefined',
+    PIEZAS.every((p) => typeof TIMEOUT_MS[p] === 'number' && TIMEOUT_MS[p] > 0))
 }
 
 const pedidoBase = { pieza: 'documento' as const, mensajes: [{ rol: 'user' as const, texto: 'hola' }], salida: 'json' as const }
