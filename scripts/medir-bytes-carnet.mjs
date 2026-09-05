@@ -126,13 +126,29 @@ if (bytesQueViajan === null) {
    filas en la base) la corre quien pueda hacerlo sobre una mascota
    descartable. */
 await page.waitForTimeout(6000);
-const etiquetaGuardar = async () =>
+/* 🔴 **LA RAZÓN YA NO VIVE EN LA ETIQUETA.** El pie de B pone la voz de
+   guardar en el botón SIEMPRE y la razón del apagado en una línea ARRIBA —«el
+   botón dice qué hace, la línea dice por qué todavía no»—. Mi arnés leía la
+   etiqueta y por eso vio «Sumar 3» donde antes veía «Faltan 3»: *el rojo no
+   desapareció, se mudó de lugar, y yo seguía mirando el lugar viejo.* Ahora se
+   miran las dos cosas: la línea y si el botón está apagado. */
+const estadoDelPie = async () =>
   await page.evaluate(() => {
-    const b = [...document.querySelectorAll('[role="button"]')]
-      .map((e) => (e.getAttribute('aria-label') ?? e.textContent ?? '').trim())
-      .filter((x) => /Sumar|Guardar|Faltan|left to check|Save/i.test(x));
-    return b[0] ?? '(no hay botón de guardar)';
+    const b = [...document.querySelectorAll('[role="button"]')].find((e) =>
+      /Sumar|Guardar|Save/i.test((e.getAttribute('aria-label') ?? e.textContent ?? '').trim()),
+    );
+    const txt = document.body.innerText;
+    const razon = txt.split('\n').map((x) => x.trim()).find((x) => /^(Faltan|Falta|No queda|None left|\d+ left)/i.test(x));
+    return {
+      etiqueta: b === undefined ? '(no hay pie)' : (b.getAttribute('aria-label') ?? b.textContent ?? '').trim(),
+      apagado: b === undefined ? null : b.getAttribute('aria-disabled'),
+      razon: razon ?? '(ninguna)',
+    };
   });
+const etiquetaGuardar = async () => {
+  const e = await estadoDelPie();
+  return `${e.etiqueta} · apagado=${e.apagado} · razón: «${e.razon}»`;
+};
 di('');
 di('── C3 · la revisión ───────────────────────────────────────');
 const filas = await page.evaluate(() =>
@@ -154,7 +170,55 @@ for (let k = 0; k < filas; k += 1) {
   await page.waitForTimeout(700);
 }
 di(`✅ VERDE · tras confirmar las ${filas}: «${await etiquetaGuardar()}»`);
+
+/* ── EL PIE CON LA TANDA ENTERA DESCARTADA ────────────────────────────────
+   Se descartan todas y se mira qué queda: la mesa espera que el pie NO se
+   dibuje; la pieza dice que sin dibujarse es sólo con CERO filas, y que con
+   todas descartadas dice «no queda ninguna». Se mide cuál de las dos pasa. */
+if (process.env.DESCARTAR === '1') {
+  const cuantas = await page.getByRole('button', { name: /^(Esta no es|This one is not)$/ }).count();
+  for (let k = 0; k < cuantas; k += 1) {
+    const b = page.getByRole('button', { name: /^(Esta no es|This one is not)$/ }).first();
+    if ((await b.count()) === 0) break;
+    await b.click().catch(() => {});
+    await page.waitForTimeout(700);
+  }
+  const t3 = await T();
+  di('');
+  di('── EL PIE CON TODO DESCARTADO ─────────────────────────────');
+  di(`  descarté ${cuantas} filas`);
+  di(`  ¿hay pie?: ${(await page.getByRole('button', { name: /Sumar|Guardar|Save/i }).count()) > 0 ? 'SÍ, se dibuja' : 'no, no se dibuja'}`);
+  di(`  ¿dice «no queda ninguna»?: ${/No queda ninguna|None left/i.test(t3) ? 'sí' : 'no'}`);
+  di(`  ¿dice «faltan 0»?: ${/[Ff]altan 0|0 left/.test(t3) ? '🔴 sí' : 'no ✓'}`);
+}
 di(`sigue habiendo «Es correcta» sin tocar: ${await page.getByRole('button', { name: /^(Es correcta|Looks right)$/ }).count()}`);
+
+/* 🔴 **GUARDAR SÓLO CON `GUARDAR=1`, y sólo sobre una mascota descartable.**
+   El default es NO guardar: escribir eventos clínicos falsos en una cuenta real
+   no se deshace.
+   ⚠️ Este bloque **se perdió en una edición mía y el arnés siguió dando verde
+   sin él**: reportaba el par rojo/verde y callaba que nunca había guardado. *Un
+   instrumento al que se le cae un paso no falla: mide de menos y lo llama
+   verde.* Queda al final, después de la línea de errores, para que su ausencia
+   se vea. */
+if (process.env.GUARDAR === '1') {
+  const btn = page.getByRole('button', { name: /Sumar .* a su historia|Save/i }).first();
+  if ((await btn.count()) === 0) {
+    di('🔴 no había pie para guardar.');
+  } else {
+    await page.mouse.wheel(0, 1200);
+    await page.waitForTimeout(1200);
+    let toco = true;
+    await btn.click({ timeout: 8000 }).catch(() => { toco = false; });
+    if (!toco) {
+      di('⚠️ el click normal expiró; se dispara el click del DOM');
+      await btn.evaluate((e) => (e).click()).catch((e) => di(`🔴 tampoco: ${String(e).slice(0, 70)}`));
+    }
+    await page.waitForTimeout(9000);
+    const t4 = await T();
+    di(`tras guardar, la pantalla dice: ${t4.split('\n').filter((x) => x.trim()).slice(0, 3).join(' | ')}`);
+  }
+}
 
 di(`errores de página: ${errores.length}${errores.length ? ' — ' + errores[0] : ''}`);
 await page.screenshot({ path: 'docs/loop/S113-C-carnet-bytes.png' });
