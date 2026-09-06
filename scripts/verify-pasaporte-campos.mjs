@@ -33,25 +33,40 @@ const di = (s) => console.log(s);
 
 /** Las claves que la RPC declara devolver, leídas de su firma en la base. */
 export function camposDeLaRpc(nombre) {
-  const sql = `select pg_get_function_result(p.oid) as res, pg_get_functiondef(p.oid) as def
-               from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-               where n.nspname='public' and p.proname='${nombre}'`;
-  const r = spawnSync('npx', ['supabase', '--experimental', 'db', 'query', '--linked', sql], { encoding: 'utf8', maxBuffer: 1 << 24 });
+  /* ☠️ ANTES SE LEÍA EL TEXTO DE LA FUNCIÓN CON UN REGEX, Y INFLABA.
+     `'([a-z0-9_]+)'\s*,` agarra **cualquier literal seguido de coma**: devolvía
+     **23 campos** —con `public`, `minute`, `limite`, `dosis`— donde el objeto
+     devuelve **11**. Metía el nombre del esquema, unidades de intervalo y las
+     claves de los objetos ANIDADOS. *Un gate de privacidad que infla la lista
+     es tan inútil como uno que la achica: no mide la superficie, mide su código.*
+     Ahora se le PREGUNTA a la RPC con un token vivo y se leen sus claves de
+     primer nivel. Sin token, **NO CONCLUYENTE** — no se inventa una lista. */
+  const q = `select (select string_agg(k, ',' order by k)
+                     from jsonb_object_keys(public.${nombre}(p.token)) k) as campos
+             from pasaporte p where p.revocado_en is null limit 1`;
+  const r = spawnSync('npx', ['supabase', '--experimental', 'db', 'query', '--linked', q],
+    { encoding: 'utf8', maxBuffer: 1 << 24 });
   const i = r.stdout.indexOf('{');
-  if (i === -1) return { existe: false, motivo: 'no pude consultar la base' };
-  let filas;
-  try { filas = JSON.parse(r.stdout.slice(i)).rows; } catch { return { existe: false, motivo: 'respuesta ilegible' }; }
-  if (!filas?.length) return { existe: false, motivo: `la RPC \`${nombre}\` no existe` };
-
-  const res = filas[0].res ?? '';
-  // Dos formas: `TABLE(a text, b int)` o un `jsonb` cuyo cuerpo arma las claves.
-  const tabla = res.match(/TABLE\(([\s\S]*)\)/i);
-  if (tabla) {
-    return { existe: true, forma: 'TABLE', campos: tabla[1].split(',').map((x) => x.trim().split(/\s+/)[0]).filter(Boolean) };
+  if (i === -1) {
+    const err = `${r.stdout}${r.stderr}`;
+    if (/does not exist|no existe/i.test(err)) return { existe: false, motivo: `la RPC \`${nombre}\` no existe` };
+    return { existe: false, motivo: 'no pude consultar la base' };
   }
-  const def = filas[0].def ?? '';
-  const claves = [...def.matchAll(/'([a-z0-9_]+)'\s*,/gi)].map((m) => m[1]);
-  return { existe: true, forma: 'jsonb (claves leídas del cuerpo)', campos: [...new Set(claves)] };
+  let j;
+  try { j = JSON.parse(r.stdout.slice(i)); } catch { return { existe: false, motivo: 'respuesta ilegible' }; }
+  /* 🔴 EL ERROR VIENE EN JSON Y `indexOf('{')` LO ENCUENTRA IGUAL. Sin esta rama,
+     `rows` quedaba `undefined` y el gate reportaba «no hay pasaporte vivo» sobre
+     una RPC que **no existe**: control en verde **por el motivo equivocado**. */
+  const err = j?.error?.message ?? j?.message ?? '';
+  if (err) {
+    if (/does not exist|no existe|42883/i.test(err)) return { existe: false, motivo: `la RPC \`${nombre}\` no existe` };
+    return { existe: false, motivo: `la base rechazó la consulta: ${String(err).slice(0, 90)}` };
+  }
+  const filas = j.rows;
+  if (!filas?.length) return { existe: false, motivo: 'no hay ningún pasaporte vivo con el que preguntarle a la RPC' };
+  const campos = (filas[0].campos ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  if (!campos.length) return { existe: false, motivo: 'la RPC no devolvió claves' };
+  return { existe: true, forma: 'claves REALES del objeto', campos };
 }
 
 // ═══ CONTROL ══════════════════════════════════════════════════════════════
@@ -92,17 +107,49 @@ if (!rpc.existe) {
   di('   distintos, y confundirlos es cómo un gate deja de mirarse.');
   process.exit(2);
 }
-if (!existsSync(FIRMADOS)) {
-  di(`🔴 la RPC \`${RPC}\` EXISTE y la lista firmada NO (${FIRMADOS}).`);
-  di('   Una superficie pública sin lista de campos firmada no se puede auditar.');
-  process.exit(1);
+/* ☠️ ANTES SE QUEDABA EN ROJO ESPERANDO UNA FIRMA, Y ASÍ NO MEDÍA NADA.
+   La firma decide si los campos de HOY están bien — eso es del founder y sigue
+   pendiente. Pero **hay una pregunta que no necesita firma y es la que se pierde
+   mientras se espera: ¿apareció un campo nuevo?** *Un gate detenido hasta que
+   alguien firme no protege el día que alguien agregue una columna al `select`.*
+   Sin lista firmada, el gate cae a una **LÍNEA BASE medida**, que:
+     · se siembra en la primera corrida y lo DICE;
+     · detecta cambios desde entonces y los nombra;
+     · **no autoriza nada** — su salida repite que nadie firmó. */
+const BASE = process.env.PASAPORTE_BASE ?? '.pasaporte-linea-base.json';
+let firmados;
+let modo;
+if (existsSync(FIRMADOS)) {
+  firmados = JSON.parse(readFileSync(FIRMADOS, 'utf8')).campos ?? [];
+  modo = 'FIRMADA';
+} else if (existsSync(BASE)) {
+  const b = JSON.parse(readFileSync(BASE, 'utf8'));
+  firmados = b.campos ?? [];
+  modo = `LÍNEA BASE del ${b.medida_el} — SIN FIRMA`;
+} else {
+  writeFileSync(BASE, JSON.stringify({
+    _que_es: 'Línea base MEDIDA, no firmada. No autoriza estos campos: sólo permite ver si mañana hay uno más.',
+    _la_firma_sigue_pendiente: FIRMADOS,
+    medida_el: new Date().toISOString().slice(0, 10),
+    rpc: RPC, campos: rpc.campos,
+  }, null, 2) + '\n');
+  di(`⚠️ SEMBRÉ LA LÍNEA BASE con los ${rpc.campos.length} campos que la RPC devuelve HOY (${BASE}).`);
+  di('   **Esto NO es una firma y no autoriza ningún campo** — la lista firmada sigue faltando');
+  di(`   en ${FIRMADOS}, y es del founder. Lo que esta línea base sí hace, desde ahora:`);
+  di('   **decir si aparece un campo nuevo en una página sin sesión.** Esa pregunta no');
+  di('   necesitaba firma, y mientras el gate la esperaba no se estaba haciendo.');
+  di(`\n   campos medidos: ${rpc.campos.join(', ')}`);
+  process.exit(0);
 }
-const firmados = JSON.parse(readFileSync(FIRMADOS, 'utf8')).campos ?? [];
 const deMas = rpc.campos.filter((c) => !firmados.includes(c));
-di(`verify:pasaporte-campos · RPC \`${RPC}\` (${rpc.forma}) · ${rpc.campos.length} campos · ${firmados.length} firmados`);
+di(`verify:pasaporte-campos · RPC \`${RPC}\` (${rpc.forma}) · ${rpc.campos.length} campos · contra ${modo}`);
 if (deMas.length) {
-  di(`\n🔴 ${deMas.length} campo(s) que NADIE firmó salen en una página sin sesión:`);
+  di(`\n🔴 ${deMas.length} campo(s) NUEVO(S) salen en una página sin sesión:`);
   for (const c of deMas) di(`   ${c}`);
   process.exit(1);
 }
-di(`✅ ningún campo fuera de la lista firmada.`);
+di(`✅ ningún campo fuera de la lista.`);
+if (modo !== 'FIRMADA') {
+  di('   ⚠️ Esto dice «no cambió desde que lo medí», NO «estos campos están bien».');
+  di(`   La firma de los ${rpc.campos.length} campos sigue pendiente y es del founder.`);
+}
