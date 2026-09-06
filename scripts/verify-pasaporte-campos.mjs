@@ -21,14 +21,9 @@
 import { readFileSync, existsSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { exigirArgumentos } from './lib-argumentos.mjs';
-
-/* Un instrumento tiene que poder decir «no»: cualquier argumento que no entienda
-   corta en 2 en vez de correr midiendo otra cosa. */
-exigirArgumentos(['--control'], 0);
 
 const FIRMADOS = process.env.PASAPORTE_CAMPOS ?? 'docs/loop/PASAPORTE-CAMPOS-FIRMADOS.json';
-const RPC = process.env.PASAPORTE_RPC ?? 'leer_pasaporte';
+const RPC = process.env.PASAPORTE_RPC ?? 'pasaporte_publico';
 const di = (s) => console.log(s);
 
 /** Las claves que la RPC declara devolver, leídas de su firma en la base. */
