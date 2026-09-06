@@ -3008,4 +3008,16 @@ export const clienteEn = {
     sinMascota: "I couldn't tell who you're saying goodbye to. Come back in from their profile.",
     noSePudo: "It couldn't be saved. Check your connection and try again.",
   },
+  medicacion: {
+    titulo: "A dose for {{nombre}}",
+    detalle: "Note what you gave them today. This doesn't change what was prescribed.",
+    cual: 'What did you give them?',
+    cualPlaceholder: 'Medication name',
+    dosis: 'How much?',
+    dosisPlaceholder: 'Half a pill, 5 ml…',
+    guardar: 'Note it',
+    faltaCual: 'The medication name is missing',
+    faltaDosis: 'The dose is missing',
+    noSePudo: "We couldn't note it. Try again in a bit.",
+  },
 } as const satisfies Espejo<typeof clienteEs>;

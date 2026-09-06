@@ -4201,4 +4201,17 @@ export const clienteEs = {
   },
   /** ⭐ **NEXO** (S113-C · 2.0). Tuteo, sin promesas y **sin diagnosticar**:
    *  la voz dice de dónde salió cada cosa y ofrece el vet cuando corresponde. */
+  /** ① la puerta de la medicación. **Anotar una dosis, no recetar.** */
+  medicacion: {
+    titulo: 'Una dosis de {{nombre}}',
+    detalle: 'Anota lo que le diste hoy. Esto no cambia lo que le recetaron.',
+    cual: '¿Qué le diste?',
+    cualPlaceholder: 'Nombre del medicamento',
+    dosis: '¿Cuánto?',
+    dosisPlaceholder: 'Media pastilla, 5 ml…',
+    guardar: 'Anotar',
+    faltaCual: 'Falta el nombre del medicamento',
+    faltaDosis: 'Falta la dosis',
+    noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
+  },
 } as const;
