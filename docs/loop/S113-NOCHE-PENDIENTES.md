@@ -157,3 +157,43 @@ trámite.
 todavía no es invocable acá. Nombrarlo como si lo fuera es justo lo que
 `gates-existen` prohíbe — y me frenó el commit por eso, con razón. Cuando la
 rama de E entre a `main`, se lo llama por su nombre completo.)*
+
+---
+
+## C · 2.0 ① y ② — dos pedidos, medidos
+
+### ⑧ 🔴 `InvitacionBio` NO EXISTE en ninguna rama de B
+
+Medido: `packages/ui/src/index.ts` de `b-1.2.1`, `b-1.3` y `b-2.0` — **cero
+ocurrencias**, y ningún archivo con ese nombre. El mandato la da por hecha.
+**Nada que montar.** Pedido a B por nombre.
+
+**Y le mido las cuatro entradas para que llegue con destino, no en blanco:**
+
+| entrada | puerta de familia | estado |
+|---|---|---|
+| rasgos | `registrarBitacoraFamilia` | ✓ existe |
+| recuerdo | `registrarRecuerdoFamilia` | ✓ existe |
+| **comportamiento** | — | 🔴 **no existe** |
+| **temas médicos** | — | 🔴 **no existe** |
+
+⚠️ Lo de «temas médicos» merece su matiz: existen `declararSinAlergiasConocidas`
+y `registrarEntendimientoAlergia`. **Ninguna de las dos declara una alergia.**
+*Decir que no hay ninguna, y entender una que ya está, no es declararla* — y
+usar cualquiera de ellas para eso escribiría un hecho clínico por la puerta de
+otro.
+
+⇒ **Cuando la pieza llegue, dos entradas se dibujan y dos no** (la ley de B para
+`CeldasHoy` ya es la correcta: *sin destino no se dibuja como botón*).
+
+### ⑨ PIDO A A, por nombre — dos puertas de familia
+
+1. **Observación de comportamiento.** El tipo de evento existe
+   (`observacion_comportamiento`, lo mapeé en el 1.1 a «recuerdos»), y **no hay
+   puerta de familia** para escribirlo.
+2. **Declarar una alergia o una condición.** Hoy la familia puede decir que **no
+   tiene** alergias y puede **entender** una ya declarada, pero no puede
+   declarar la que su vet le dijo por teléfono.
+
+*Las dos son entradas de `InvitacionBio`, así que sin ellas la pieza nace con la
+mitad de sus caminos apagados.*
