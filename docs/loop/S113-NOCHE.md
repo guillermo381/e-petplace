@@ -242,3 +242,73 @@ un techo de 60.000. *La original sola ya lo rompía.*
 ⏸️ **No publiqué.** El candidato espera la cura de C del arranque: *no sale un
 OTA con un crash conocido en el camino del QR.* Mi mitad (el canal) está
 curada y en `main`; falta la del shell.
+
+---
+
+## 10 · El pasaporte se sirve desde `www.epetplace.com`
+
+**El repo, medido y no supuesto:** `~/proyectos/ePetPlace/epetplace-web` ·
+**Astro 5.18** (no Next) · `output: 'static'` · enruta por `src/pages/` ·
+despliega en Vercel con `buildCommand: pnpm build`. Todo en la rama
+**`pasaporte-publico`**, nunca en `main`.
+
+### La causa, acotada con su control
+
+| content-type que la edge declara | lo que llega en GET |
+|---|---|
+| `text/html` (en cualquier forma) | **`text/plain`** |
+| `application/xhtml+xml` | **`text/plain`** |
+| `image/svg+xml` · `image/png` | **pasan intactos** |
+
+⇒ No es el gateway pisando todo —el QR conserva su tipo—: **Supabase degrada
+lo que pueda renderizar HTML**. 🔴 Y la trampa: **`curl -I` devuelve
+`text/html`**. La diferencia sólo aparece en GET, así que un HEAD da verde
+sobre una página rota.
+
+### Lo hecho
+
+- **① La edge expone `?formato=json`** con los campos de la lista, más las URLs
+  del SVG y el PNG. **1.468 bytes, sin ninguna credencial.** La foto viaja ya
+  firmada y transformada: el bucket es privado y el sitio no tiene —ni debe
+  tener— llaves. El 404, el 429 y la placa libre también hablan JSON.
+- **② `/p/[token]`** en el sitio, `prerender = false`. Cero JS · sin cookies ·
+  sin analítica · `noindex` · `tel:` y `wa.me` tocables · cache 60 s ·
+  revocado, placa libre y límite con voz propia.
+  Medido en local: **HTTP 200 `text/html`, 3.915 bytes**; con la foto, ~13 kB
+  contra el techo de 60.
+- **③ El QR y el NFC apuntan a `https://www.epetplace.com/p/<token>`**, y la
+  URL vive en **un solo lugar** porque *este texto se graba en metal*.
+  Verificado **decodificando**, no suponiendo: la matriz que sirve la edge es
+  la de la URL nueva.
+- **④ `D-1044`**: el dominio propio de Supabase deja de hacer falta; queda como
+  alternativa escrita, con su «no está medido» declarado.
+
+### Dos cosas que aparecieron al hacerlo
+
+- **`@astrojs/vercel@11` pide Astro 7** y pnpm la instaló sin frenar por el
+  peer; la serie 8.x es la de Astro 5. El build lo dijo, el instalador no.
+- 🔴 **El adapter movió el estático a `dist/client/` y SEIS gates del sitio
+  empezaron a medir el árbol equivocado** (reportaban huérfanas como
+  `/client/veterinaria/quito`). *Un gate atado a una ruta mide la convención
+  de ayer, no el hecho.* Curados con **detección**, no con una ruta nueva, así
+  funcionan con y sin adapter — y a `verify:sin-supabase` se le corrió su
+  **control positivo** (un JWT falso en lo publicado ⇒ rojo) para probar que
+  sigue viendo.
+- Y `vercel.json` perdió `outputDirectory: dist`: con el adapter, Vercel lee
+  `.vercel/output`. Forzarlo habría servido sólo lo estático y `/p/<token>`
+  daría **404 en silencio** — el sitio se ve entero y la ruta nueva no está.
+
+### 🔗 La vista previa
+
+```
+https://epetplace-r19ijtyp3-guillo381-8993s-projects.vercel.app/p/bNRqRhMOj7Bo_LELT97Swg
+```
+
+`status ● Ready`. ⚠️ **Pide sesión de Vercel**: el proyecto tiene *Deployment
+Protection* y devuelve 302 a `vercel.com/sso-api`. **Con tu cuenta abre**; en
+un teléfono sin sesión, no.
+
+⇒ **El rojo del brief —el QR abriendo desde un teléfono sin la app— NO se pudo
+ejercer**, y no por la página: por la protección del proyecto. Las dos salidas,
+y las dos son tuyas: **levantar la protección de previews** (ajuste del
+proyecto, no lo toco solo) o **autorizar el merge a `main`**.
