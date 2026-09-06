@@ -35,10 +35,40 @@ const URL_BASE = `https://${REF}.supabase.co`;
 const CORREO = 'guillo381+8@gmail.com';
 const di = (s) => { console.log(s); };
 
+/**
+ * La CUENTA DE PRUEBA entera — correo y clave — del llavero, servicio
+ * `epetplace-cuenta-prueba` (orden del founder, 5-sep). Se lee al momento de
+ * usarla y **nunca se imprime**.
+ *
+ * 🔴 EL CORREO TAMBIÉN SALE DE AHÍ, y eso me costó 146 llamadas fallidas: la
+ * primera versión leía la clave nueva del llavero y la mandaba contra el correo
+ * **cableado en el código**. La entrada trae la cuenta en su campo `acct`
+ * (`demo-prestador@epetplace.dev`), que NO es la que yo tenía escrita.
+ * *«La cuenta sale del llavero» incluye la cuenta, no sólo su clave — y una
+ * credencial a medias falla como si la clave estuviera mal.*
+ *
+ * 🔴 Si no está, PARA — **no cae al servicio viejo**. Un respaldo silencioso
+ * convertiría la orden en decoración: el día que el llavero no tenga la
+ * entrada, el arnés seguiría usando la credencial anterior y nadie se
+ * enteraría.
+ */
+function cuentaDePrueba() {
+  const S = 'epetplace-cuenta-prueba';
+  const clave = spawnSync('security', ['find-generic-password', '-s', S, '-w'], { encoding: 'utf8' }).stdout.trim();
+  // `-g` escribe los metadatos por stderr; de ahí sale la cuenta, no del valor.
+  const meta = spawnSync('security', ['find-generic-password', '-s', S], { encoding: 'utf8' }).stdout;
+  const correo = meta.match(/"acct"<blob>="([^"]+)"/)?.[1] ?? '';
+  if (!clave || !correo) {
+    throw new Error(
+      `sin \`${S}\` completo en el llavero (correo o clave). El arnés PARA — NO cae al servicio viejo.\n` +
+      '  Guardala UNA vez, con la cuenta en -a:\n' +
+      `    security add-generic-password -a '<correo>' -s ${S} -w '<clave>'`);
+  }
+  return { correo, clave };
+}
+
 async function jwtDePersona() {
-  const cl = spawnSync('security', ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'], { encoding: 'utf8' });
-  const pass = cl.stdout.trim();
-  if (!pass) throw new Error('sin clave de siembra en el keychain. El arnés PARA.');
+  const { correo: CORREO_PRUEBA, clave: pass } = cuentaDePrueba();
   const r = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: { apikey: claveAnon(), 'Content-Type': 'application/json' },

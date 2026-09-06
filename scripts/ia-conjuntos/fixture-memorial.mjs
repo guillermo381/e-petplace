@@ -74,9 +74,7 @@ if (!process.argv.includes('--crear')) {
 }
 
 // ── sesión de persona (camino real) ───────────────────────────────────────
-const pass = spawnSync('security',
-  ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'],
-  { encoding: 'utf8' }).stdout.trim();
+const pass = cuentaDePrueba();
 if (!pass) throw new Error('sin clave de siembra en el keychain. La fixture PARA.');
 
 // La `anon` sale del repo (es pública), no del comando que también volcaba la
@@ -86,7 +84,7 @@ const anon = claveAnon();
 const auth = await (await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
   method: 'POST',
   headers: { apikey: anon, 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: CUENTA, password: pass }),
+  body: JSON.stringify({ email: CORREO_PRUEBA, password: pass }),
 })).json();
 if (!auth.access_token) throw new Error('no pude abrir sesión. La fixture PARA.');
 

@@ -192,10 +192,7 @@ const clave = claveServicio();
 
 /** Sesión de persona: la edge exige `role: authenticated` (D-714). */
 async function jwtDePersona() {
-  const cl = spawnSync('security',
-    ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'], { encoding: 'utf8' });
-  const pass = cl.stdout.trim();
-  if (!pass) throw new Error('sin clave de siembra en el keychain. El arnés PARA.');
+  const { correo: CORREO_PRUEBA, clave: pass } = cuentaDePrueba();
   // D-1013: la `anon` sale del repo (es pública). La versión vieja de estas
   // líneas corría `projects api-keys` DOS VECES y ese comando volcaba también
   // la `service_role` por stdout.
@@ -203,7 +200,7 @@ async function jwtDePersona() {
   const r = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: { apikey: anon, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'guillo381+8@gmail.com', password: pass }),
+    body: JSON.stringify({ email: CORREO_PRUEBA, password: pass }),
   });
   if (!r.ok) throw new Error(`no pude abrir sesión de persona (${r.status}). El arnés PARA.`);
   const j = await r.json();
