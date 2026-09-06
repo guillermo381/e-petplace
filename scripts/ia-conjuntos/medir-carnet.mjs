@@ -26,6 +26,8 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { puntuarCaso, CAMPOS, percentil } from './puntuar-carnet.mjs';
+import { claveAnon } from './lib-conjuntos.mjs';
+import { normalizarRespuesta, repartoEvidencia, repartoConfianza } from './puntuar-carnet.mjs';
 
 const DIR = process.env.IA_CONJUNTOS_DIR ?? '.ia-conjuntos';
 const REF = readFileSync('supabase/.temp/project-ref', 'utf8').trim();
@@ -33,21 +35,40 @@ const URL_BASE = `https://${REF}.supabase.co`;
 const CORREO = 'guillo381+8@gmail.com';
 const di = (s) => { console.log(s); };
 
-/** La `anon`, leída del repo (es pública) y VERIFICADA por su claim. */
-function claveAnon() {
-  const fuente = 'scripts/seg2/d713-cron.mjs';
-  const m = readFileSync(fuente, 'utf8').match(/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
-  if (!m) throw new Error(`no encontré la anon en ${fuente}. El arnés PARA.`);
-  const rol = JSON.parse(Buffer.from(m[0].split('.')[1], 'base64url').toString('utf8')).role;
-  // Correr con la clave equivocada es medir otra cosa con confianza.
-  if (rol !== 'anon') throw new Error(`la clave de ${fuente} tiene role=${rol}, no anon. El arnés PARA.`);
-  return m[0];
+/**
+ * La CUENTA DE PRUEBA entera — correo y clave — del llavero, servicio
+ * `epetplace-cuenta-prueba` (orden del founder, 5-sep). Se lee al momento de
+ * usarla y **nunca se imprime**.
+ *
+ * 🔴 EL CORREO TAMBIÉN SALE DE AHÍ, y eso me costó 146 llamadas fallidas: la
+ * primera versión leía la clave nueva del llavero y la mandaba contra el correo
+ * **cableado en el código**. La entrada trae la cuenta en su campo `acct`
+ * (`demo-prestador@epetplace.dev`), que NO es la que yo tenía escrita.
+ * *«La cuenta sale del llavero» incluye la cuenta, no sólo su clave — y una
+ * credencial a medias falla como si la clave estuviera mal.*
+ *
+ * 🔴 Si no está, PARA — **no cae al servicio viejo**. Un respaldo silencioso
+ * convertiría la orden en decoración: el día que el llavero no tenga la
+ * entrada, el arnés seguiría usando la credencial anterior y nadie se
+ * enteraría.
+ */
+function cuentaDePrueba() {
+  const S = 'epetplace-cuenta-prueba';
+  const clave = spawnSync('security', ['find-generic-password', '-s', S, '-w'], { encoding: 'utf8' }).stdout.trim();
+  // `-g` escribe los metadatos por stderr; de ahí sale la cuenta, no del valor.
+  const meta = spawnSync('security', ['find-generic-password', '-s', S], { encoding: 'utf8' }).stdout;
+  const correo = meta.match(/"acct"<blob>="([^"]+)"/)?.[1] ?? '';
+  if (!clave || !correo) {
+    throw new Error(
+      `sin \`${S}\` completo en el llavero (correo o clave). El arnés PARA — NO cae al servicio viejo.\n` +
+      '  Guardala UNA vez, con la cuenta en -a:\n' +
+      `    security add-generic-password -a '<correo>' -s ${S} -w '<clave>'`);
+  }
+  return { correo, clave };
 }
 
 async function jwtDePersona() {
-  const cl = spawnSync('security', ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'], { encoding: 'utf8' });
-  const pass = cl.stdout.trim();
-  if (!pass) throw new Error('sin clave de siembra en el keychain. El arnés PARA.');
+  const { correo: CORREO_PRUEBA, clave: pass } = cuentaDePrueba();
   const r = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: { apikey: claveAnon(), 'Content-Type': 'application/json' },
@@ -73,9 +94,10 @@ function usoDeLaVentana(desdeIso) {
 }
 
 const arg = (n, d) => { const a = process.argv.find((x) => x.startsWith(`--${n}=`)); return a ? Number(a.slice(n.length + 3)) : d; };
+const argT = (n, d) => { const a = process.argv.find((x) => x.startsWith(`--${n}=`)); return a ? a.slice(n.length + 3) : d; };
 
 async function main() {
-  const ruta = join(DIR, 'carnets-sinteticos.json');
+  const ruta = join(DIR, `${argT('conjunto', 'carnets-sinteticos')}.json`);
   if (!existsSync(ruta)) { di(`🔴 falta ${ruta}. Corré construir-carnets-sinteticos.mjs primero.`); process.exit(2); }
   const conj = JSON.parse(readFileSync(ruta, 'utf8'));
 
@@ -83,11 +105,22 @@ async function main() {
   const limite = arg('limite', conj.casos.length);
   const casos = conj.casos.slice(desde, desde + limite);
 
+  /* `--prompt=v2` sólo sirve DESPUÉS de que A despliegue la v2 de D: es esa
+     edge la que valida `modelo` contra `MODELOS_MEDIBLES` y devuelve
+     `plan_impreso`. Contra la v1 desplegada, el parámetro se ignora y la
+     respuesta no trae plan impreso — y el resumen lo dice, en vez de reportar
+     un plan_impreso de 0 que se leería como «v2 no separó nada». */
+  const version = argT('prompt', 'v1');
+  if (version !== 'v1' && version !== 'v2') { di(`🔴 --prompt debe ser v1 o v2, no "${version}".`); process.exit(2); }
+  const modelo = argT('modelo', null);
+  const conjNombre = argT('conjunto', 'carnets-sinteticos');
+
   const jwt = await jwtDePersona();
   const arranqueIso = new Date().toISOString();
 
-  di(`medir-carnet · ${casos.length} de ${conj.n_casos} carnets · conjunto ${conj.nombre}`);
-  di(`  el modelo lo decide la edge desplegada (MODELOS.carnet); acá NO se elige.`);
+  di(`medir-carnet · ${casos.length} de ${conj.n_casos} carnets · conjunto ${conj.nombre} · prompt ${version}`);
+  di(modelo ? `  modelo pedido a la edge: ${modelo} (la v2 lo valida contra MODELOS_MEDIBLES)`
+            : `  el modelo lo decide la edge desplegada; acá NO se elige.`);
   di(`  ⚠️ corrida SECUENCIAL a propósito: la latencia es uno de los números.\n`);
 
   const detalle = [];
@@ -102,7 +135,11 @@ async function main() {
       r = await fetch(`${URL_BASE}/functions/v1/extract-vacuna`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: img.toString('base64'), mediaType: 'image/jpeg' }),
+        body: JSON.stringify({
+          imageBase64: img.toString('base64'),
+          mediaType: 'image/jpeg',
+          ...(modelo ? { modelo } : {}),
+        }),
       });
     } catch (e) { err = String(e); }
     const ms = Date.now() - t0;
@@ -115,14 +152,17 @@ async function main() {
       continue;
     }
 
-    const { vacunas } = await r.json();
-    const p = puntuarCaso(caso, vacunas ?? []);
+    const bruto = await r.json();
+    const { vacunas, plan_impreso } = normalizarRespuesta(version, bruto);
+    const p = puntuarCaso(caso, vacunas);
     detalle.push({
       caso: caso.caso, plantilla: caso.plantilla, condicion: caso.condicion_captura,
       formato_fecha: caso.formato_fecha, relleno: caso.relleno,
-      ms_pared: ms, ...p,
+      ms_pared: ms, n_plan_impreso: plan_impreso.length,
+      evidencia: repartoEvidencia(vacunas), confianza: repartoConfianza(vacunas),
+      ...p,
     });
-    di(`   ${i + 1}/${casos.length} ${caso.caso.padEnd(40)} vis=${p.n_visibles} dev=${p.n_devueltas} emp=${p.n_emparejadas} inv=${p.n_inventadas} · ${(ms / 1000).toFixed(1)}s`);
+    di(`   ${i + 1}/${casos.length} ${caso.caso.padEnd(40)} vis=${p.n_visibles} dev=${p.n_devueltas} emp=${p.n_emparejadas} inv=${p.n_inventadas}${plan_impreso.length ? ` plan=${plan_impreso.length}` : ''} · ${(ms / 1000).toFixed(1)}s`);
     // Escritura incremental: una corrida de media hora no se pierde por un corte.
     writeFileSync(salida, JSON.stringify({ parcial: true, arranque: arranqueIso, detalle }, null, 2));
   }
@@ -131,36 +171,64 @@ async function main() {
   const vivos = detalle.filter((d) => !d.fallo);
   const total = {};
   for (const c of CAMPOS) total[c] = { aciertos: 0, evaluados: 0, sin_verdad: 0, excluidos: 0 };
-  let devueltas = 0, inventadas = 0, emparejadas = 0, visibles = 0, noDevueltas = 0;
+  let devueltas = 0, inventadas = 0, emparejadas = 0, visibles = 0, noDevueltas = 0, planImpreso = 0;
+  let fabricadas = 0, parciales = 0;
+  const evidencia = {}, confianza = {};
   for (const d of vivos) {
     for (const c of CAMPOS) for (const k of ['aciertos', 'evaluados', 'sin_verdad', 'excluidos']) total[c][k] += d.campos[c][k] ?? 0;
     devueltas += d.n_devueltas; inventadas += d.n_inventadas; emparejadas += d.n_emparejadas;
-    visibles += d.n_visibles; noDevueltas += d.n_no_devueltas;
+    visibles += d.n_visibles; noDevueltas += d.n_no_devueltas; planImpreso += d.n_plan_impreso ?? 0;
+    fabricadas += d.n_fechas_fabricadas ?? 0; parciales += d.n_filas_precision_parcial ?? 0;
+    for (const [k, n] of Object.entries(d.evidencia ?? {})) evidencia[k] = (evidencia[k] ?? 0) + n;
+    for (const [k, n] of Object.entries(d.confianza ?? {})) confianza[k] = (confianza[k] ?? 0) + n;
   }
   const exactitud = {};
   for (const c of CAMPOS) exactitud[c] = total[c].evaluados ? +(total[c].aciertos / total[c].evaluados * 100).toFixed(1) : null;
 
   const pared = vivos.map((d) => d.ms_pared);
   const uso = usoDeLaVentana(arranqueIso);
-  const usoOk = (uso ?? []).filter((u) => u.resultado === 'ok');
+  /* 🔴 LA VENTANA DE TIEMPO NO ALCANZA: varias pistas pegan a la misma edge.
+     Medido en la corrida del 5-sep: 6 filas en `ia_uso` para 5 llamadas mías —
+     la sexta era de otra pista y me inflaba el costo y el p95 del modelo.
+     *Un filtro por tiempo no distingue «mi llamada» de «una llamada»*, y el
+     número salía con toda la autoridad de un dato real.
+     Cura: cada fila de `ia_uso` se EMPAREJA con una llamada mía por latencia
+     (la de pared siempre es mayor que la del modelo, por la red y el base64), y
+     lo que no engancha se descarta declarándolo. */
+  const mias = vivos.map((d) => d.ms_pared).sort((a, b) => a - b);
+  const candidatas = (uso ?? []).filter((u) => u.resultado === 'ok')
+    .map((u) => ({ ...u, ms: Number(u.latencia_ms) })).sort((a, b) => a.ms - b.ms);
+  const usoOk = [];
+  const sinDuenio = [];
+  for (const c of candidatas) {
+    const i = mias.findIndex((w) => w >= c.ms && w - c.ms < 4000);   // red + base64
+    if (i === -1) { sinDuenio.push(c); continue; }
+    mias.splice(i, 1); usoOk.push(c);
+  }
   const servidor = usoOk.map((u) => Number(u.latencia_ms));
   const costo = usoOk.reduce((s, u) => s + Number(u.costo_estimado_usd ?? 0), 0);
 
   const resumen = {
     pieza: 'carnet',
+    prompt: version,
+    modelo_pedido: modelo,
     conjunto: conj.nombre,
     corrida_el: arranqueIso,
     n_casos: vivos.length,
     fallos: detalle.length - vivos.length,
     exactitud_pct: exactitud,
     detalle_campos: total,
-    filas: { visibles, devueltas, emparejadas, inventadas, no_devueltas: noDevueltas },
+    filas: { visibles, devueltas, emparejadas, inventadas, no_devueltas: noDevueltas, plan_impreso: planImpreso },
+    evidencia_declarada: Object.keys(evidencia).length ? evidencia : null,
+    confianza_declarada: Object.keys(confianza).length ? confianza : null,
     invencion_pct: devueltas ? +(inventadas / devueltas * 100).toFixed(1) : null,
+    fechas_fabricadas: { n: fabricadas, de_filas_parciales: parciales },
     recall_pct: visibles ? +(emparejadas / visibles * 100).toFixed(1) : null,
     latencia_pared_ms: { p50: percentil(pared, 0.5), p95: percentil(pared, 0.95), max: Math.max(...pared) },
     latencia_modelo_ms: servidor.length ? { p50: percentil(servidor, 0.5), p95: percentil(servidor, 0.95), n: servidor.length } : null,
     costo_usd: +costo.toFixed(5),
-    origen_costo: usoOk.length ? `REAL · ${usoOk.length} filas de ia_uso` : 'NO DISPONIBLE (ia_uso sin filas en la ventana)',
+    origen_costo: usoOk.length ? `REAL · ${usoOk.length} de ${(uso ?? []).length} filas de ia_uso (${sinDuenio.length} descartada(s): otra pista en la misma ventana)` : 'NO DISPONIBLE (ia_uso sin filas en la ventana)',
+    filas_ia_uso_ajenas: sinDuenio.length,
     costo_por_carnet_usd: usoOk.length ? +(costo / usoOk.length).toFixed(5) : null,
     detalle,
   };
@@ -170,6 +238,13 @@ async function main() {
   for (const c of CAMPOS) di(`  ${c.padEnd(28)} ${String(exactitud[c] ?? '—').padStart(6)}%   (${total[c].aciertos}/${total[c].evaluados}${total[c].sin_verdad ? ` · ${total[c].sin_verdad} sin verdad` : ''}${total[c].excluidos ? ` · ${total[c].excluidos} excluidos` : ''})`);
   di(`  ${'INVENCIÓN'.padEnd(28)} ${String(resumen.invencion_pct).padStart(6)}%   (${inventadas}/${devueltas} filas devueltas)`);
   di(`  ${'recall de filas'.padEnd(28)} ${String(resumen.recall_pct).padStart(6)}%   (${emparejadas}/${visibles} visibles)`);
+  if (parciales) di(`  ${'fechas FABRICADAS'.padEnd(28)} ${String(fabricadas).padStart(6)}     de ${parciales} fila(s) con precisión parcial — la respuesta correcta era null`);
+  if (version === 'v2') {
+    di(`  ${'plan impreso (v2)'.padEnd(28)} ${String(planImpreso).padStart(6)}     filas separadas — NO cuentan como invención`);
+    if (resumen.evidencia_declarada) di(`  ${'evidencia declarada'.padEnd(28)} ${JSON.stringify(resumen.evidencia_declarada)}`);
+    if (resumen.confianza_declarada) di(`  ${'confianza declarada'.padEnd(28)} ${JSON.stringify(resumen.confianza_declarada)}`);
+    if (planImpreso === 0) di('  ⚠️ plan_impreso vino en 0: o el conjunto no tiene renglones de plan, o la edge desplegada NO es la v2.');
+  }
   di(`  ${'latencia pared'.padEnd(28)} p50 ${resumen.latencia_pared_ms.p50} ms · p95 ${resumen.latencia_pared_ms.p95} ms`);
   if (resumen.latencia_modelo_ms) di(`  ${'latencia modelo (ia_uso)'.padEnd(28)} p50 ${resumen.latencia_modelo_ms.p50} ms · p95 ${resumen.latencia_modelo_ms.p95} ms`);
   di(`  ${'costo'.padEnd(28)} $${resumen.costo_usd}  (${resumen.origen_costo}) · $${resumen.costo_por_carnet_usd}/carnet`);

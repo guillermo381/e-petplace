@@ -66,12 +66,20 @@ const MAPA = {
        c, `jack-rusell` con una l, `pitbul-terrier` con una l,
        `stanffordshire-bull-terrier` con una n de más. *Un censo contra la
        fuente equivocada da un cero perfectamente creíble.* */
-    'miniature schnauzer': 'shnauzer', 'giant schnauzer': 'shnauzer',
-    'american pit bull terrier': 'pitbul-terrier', pitbull: 'pitbul-terrier',
-    'staffordshire bull terrier': 'stanffordshire-bull-terrier',
-    'staffordshire bullterrier': 'stanffordshire-bull-terrier',
+    /* 🔴 ACTUALIZADO AL CATÁLOGO DE HOY (5-sep): las CUATRO erratas se curaron
+       —`shnauzer`→`schnauzer`, `jack-rusell`→`jack-russell`,
+       `pitbul-terrier`→`pit-bull-terrier`,
+       `stanffordshire-…`→`staffordshire-…`— y 12 de mis 143 casos apuntaban a
+       slugs que ya no existen. *Una verdad escrita contra un catálogo se rompe
+       cuando el catálogo se cura: no es un error del conjunto, es que la verdad
+       tiene fecha.* Además ahora hay TRES schnauzer, así que el gigante y el
+       miniatura mapean con precisión en vez de colapsar en uno. */
+    'miniature schnauzer': 'schnauzer-miniatura', 'giant schnauzer': 'schnauzer-gigante',
+    'american pit bull terrier': 'pit-bull-terrier', pitbull: 'pit-bull-terrier',
+    'staffordshire bull terrier': 'staffordshire-bull-terrier',
+    'staffordshire bullterrier': 'staffordshire-bull-terrier',
     dachshund: 'salchicha', shihtzu: 'shih-tzu', 'english springer': 'springer-spaniel',
-    'russell terrier': 'jack-rusell',
+    'russell terrier': 'jack-russell',
   },
   gato: {
     abyssinian: 'abisinio', bengal: 'bengali', birman: 'birmano', 'british shorthair': 'british-shorthair',

@@ -39,7 +39,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { claveServicio, bajarObjeto, consultar, DIR_CONJUNTOS, URL_BASE, PROJECT_REF } from './lib-conjuntos.mjs';
+import { claveServicio, bajarObjeto, consultar, DIR_CONJUNTOS, URL_BASE, PROJECT_REF, claveAnon } from './lib-conjuntos.mjs';
 // La tabla de precios vive en la costura de D — `supabase/functions/_shared/ia/`
 // —, no en `packages/`: es donde las edge functions la consumen, y tener dos
 // copias sería tener dos precios.
@@ -192,19 +192,15 @@ const clave = claveServicio();
 
 /** Sesión de persona: la edge exige `role: authenticated` (D-714). */
 async function jwtDePersona() {
-  const cl = spawnSync('security',
-    ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'], { encoding: 'utf8' });
-  const pass = cl.stdout.trim();
-  if (!pass) throw new Error('sin clave de siembra en el keychain. El arnés PARA.');
-  const anon = JSON.parse(spawnSync('npx',
-    ['supabase', 'projects', 'api-keys', '--project-ref', PROJECT_REF], { encoding: 'utf8' })
-    .stdout.slice(spawnSync('npx', ['supabase', 'projects', 'api-keys', '--project-ref', PROJECT_REF],
-      { encoding: 'utf8' }).stdout.indexOf('{')))
-    .keys.find((k) => k.id === 'anon').api_key;
+  const { correo: CORREO_PRUEBA, clave: pass } = cuentaDePrueba();
+  // D-1013: la `anon` sale del repo (es pública). La versión vieja de estas
+  // líneas corría `projects api-keys` DOS VECES y ese comando volcaba también
+  // la `service_role` por stdout.
+  const anon = claveAnon();
   const r = await fetch(`${URL_BASE}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: { apikey: anon, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'guillo381+8@gmail.com', password: pass }),
+    body: JSON.stringify({ email: CORREO_PRUEBA, password: pass }),
   });
   if (!r.ok) throw new Error(`no pude abrir sesión de persona (${r.status}). El arnés PARA.`);
   const j = await r.json();
