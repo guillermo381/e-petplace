@@ -384,3 +384,105 @@ export async function activarPlaca(
   }
   return { ok: true, data: { pasaporte_id: o.pasaporte_id, token: o.token } };
 }
+
+/* ─── 2.1 · NEXO ACOMPAÑA ───────────────────────────────────────────────── */
+
+/** Las cuatro clases del «contanos». Cada una tiene su puerta de familia. */
+export type ClaseDeHecho = 'comportamiento' | 'rasgo' | 'medico' | 'recuerdo';
+
+/**
+ * Guarda un hecho que la familia contó y Nexo clasificó.
+ *
+ * 🔴 **No escribe nada nuevo: despacha.** Cada clase entra por la puerta de
+ * familia que ya existe, con su procedencia y su `modo_captura` resueltos ahí.
+ * *Un INSERT directo por clase habría sido más corto y sería la tercera vez en
+ * la sesión que dos caminos escriben la misma tabla* — así, el día que la
+ * puerta de alergias gane un guard, lo gana también lo que entra por el chat.
+ *
+ * ⚠️ **`medico` NUNCA entra confirmado.** La familia observa; confirmar es del
+ * veterinario. Lo fuerza la puerta de destino, no quien llama.
+ *
+ * `campos` es opcional y depende de la clase: `alergeno`/`severidad` para una
+ * alergia, `condicion` para una condición, `fecha`/`foto_url` para un recuerdo.
+ */
+export async function guardarHechoClasificado(
+  datos: {
+    mascotaId: string;
+    clase: ClaseDeHecho;
+    texto: string;
+    campos?: Record<string, string>;
+  },
+): Promise<ResultadoWrapper<{ clase: ClaseDeHecho }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('guardar_hecho_clasificado', {
+    p_mascota_id: datos.mascotaId,
+    p_clase: datos.clase,
+    p_texto: datos.texto,
+    ...(datos.campos !== undefined ? { p_campos: datos.campos } : null),
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  return { ok: true, data: { clase: datos.clase } };
+}
+
+export type SugerenciaConociendolo = {
+  clase: 'nacimiento' | 'raza' | 'comportamiento' | 'peso' | 'rasgo' | 'recuerdo';
+  texto: string;
+  /** Por qué se pide. **Mostralo**: sin el porqué es un formulario. */
+  porque: string;
+};
+
+/**
+ * El próximo hito, **UNO SOLO** (LOYALTY §2). *Una lista de cinco huecos es
+ * una lista de deberes; uno solo es una invitación.*
+ *
+ * `null` cuando no hay nada que pedir **y también en memorial**: pedirle a
+ * alguien que complete el expediente de un animal que murió es la peor forma
+ * de acompañar.
+ *
+ * ⚠️ **No devuelve `por_resolver` a propósito.** Ese conteo ya existe y está
+ * firmado por la mesa en `apps/cliente/src/lib/pendientes.ts` —cinco clases,
+ * con `cita` afuera porque «lo que se nombra resolver no puede incluir algo
+ * que no se resuelve»—. Recalcularlo en SQL crearía **dos verdades** para el
+ * mismo número, y la divergencia aparecería recién cuando alguien cambiara
+ * una sola de las dos. Seguí usando esa lib.
+ */
+export async function obtenerSugerenciaConociendolo(
+  mascotaId: string,
+): Promise<ResultadoWrapper<SugerenciaConociendolo | null, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('obtener_sugerencia_conociendolo', {
+    p_mascota_id: mascotaId,
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  const s = o.sugerencia;
+  return { ok: true, data: (s === null || s === undefined ? null : s) as SugerenciaConociendolo | null };
+}
+
+/** Un sistema que una raza suele tener predispuesto. La voz sale del catálogo:
+ *  ninguna de estas frases afirma nada sobre UNA mascota. */
+export type Predisposicion = {
+  codigo: string;
+  nombre: string;
+  /** «suelen tener problemas de cadera» — se completa con la raza. */
+  descripcion_familia: string;
+  /** Siempre termina en el veterinario. */
+  chequeo_sugerido: string;
+  oficio: string;
+  etapas: string[];
+};
+
+/** Las predisposiciones de una raza, para la ficha. Sólo de fichas publicadas:
+ *  una regla salida de un texto que nadie leyó no debería llegar a una familia. */
+export async function obtenerPredisposicionesDeRaza(
+  razaCodigo: string,
+): Promise<ResultadoWrapper<Predisposicion[], CodigoErrorCoach>> {
+  const { data, error } = await getClient()
+    .from('raza_predisposicion')
+    .select('cat_predisposiciones(codigo, nombre, descripcion_familia, chequeo_sugerido, oficio, etapas)')
+    .eq('raza_codigo', razaCodigo);
+  if (error) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  const filas = (data ?? []) as { cat_predisposiciones: Predisposicion | null }[];
+  return { ok: true, data: filas.map((f) => f.cat_predisposiciones).filter((p): p is Predisposicion => p !== null) };
+}

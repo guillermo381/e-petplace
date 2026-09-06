@@ -1289,6 +1289,7 @@ export type Database = {
       }
       avisos_coach: {
         Row: {
+          clave: string | null
           creado_en: string
           detalle: Json
           fecha: string
@@ -1298,6 +1299,7 @@ export type Database = {
           tipo: string
         }
         Insert: {
+          clave?: string | null
           creado_en?: string
           detalle?: Json
           fecha?: string
@@ -1307,6 +1309,7 @@ export type Database = {
           tipo: string
         }
         Update: {
+          clave?: string | null
           creado_en?: string
           detalle?: Json
           fecha?: string
@@ -2987,6 +2990,36 @@ export type Database = {
             referencedColumns: ["codigo"]
           },
         ]
+      }
+      cat_predisposiciones: {
+        Row: {
+          activo: boolean
+          chequeo_sugerido: string
+          codigo: string
+          descripcion_familia: string
+          etapas: string[]
+          nombre: string
+          oficio: string
+        }
+        Insert: {
+          activo?: boolean
+          chequeo_sugerido: string
+          codigo: string
+          descripcion_familia: string
+          etapas: string[]
+          nombre: string
+          oficio?: string
+        }
+        Update: {
+          activo?: boolean
+          chequeo_sugerido?: string
+          codigo?: string
+          descripcion_familia?: string
+          etapas?: string[]
+          nombre?: string
+          oficio?: string
+        }
+        Relationships: []
       }
       cat_productos_oficio: {
         Row: {
@@ -18015,6 +18048,35 @@ export type Database = {
           },
         ]
       }
+      raza_predisposicion: {
+        Row: {
+          creado_en: string
+          fuente: string
+          predisposicion_codigo: string
+          raza_codigo: string
+        }
+        Insert: {
+          creado_en?: string
+          fuente: string
+          predisposicion_codigo: string
+          raza_codigo: string
+        }
+        Update: {
+          creado_en?: string
+          fuente?: string
+          predisposicion_codigo?: string
+          raza_codigo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raza_predisposicion_predisposicion_codigo_fkey"
+            columns: ["predisposicion_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_predisposiciones"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       raza_sin_casar: {
         Row: {
           especie: string
@@ -22951,12 +23013,10 @@ export type Database = {
         }
         Returns: string
       }
-      _coach_puerta:
-        | { Args: { p_mascota_id: string }; Returns: undefined }
-        | {
-            Args: { p_mascota_id: string; p_user_id?: string }
-            Returns: string
-          }
+      _coach_puerta: {
+        Args: { p_mascota_id: string; p_user_id?: string }
+        Returns: string
+      }
       _cobertura_vacunal: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -24702,6 +24762,15 @@ export type Database = {
         }
         Returns: Json
       }
+      guardar_hecho_clasificado: {
+        Args: {
+          p_campos?: Json
+          p_clase: string
+          p_mascota_id: string
+          p_texto: string
+        }
+        Returns: Json
+      }
       guardar_medio_pago_preferido: {
         Args: { p_medio?: string; p_tarjeta_id?: string }
         Returns: Json
@@ -25862,6 +25931,10 @@ export type Database = {
           solicitud_id: string
           tipo: string
         }[]
+      }
+      obtener_sugerencia_conociendolo: {
+        Args: { p_mascota_id: string }
+        Returns: Json
       }
       obtener_tramo_vivo_de_mi_mascota: {
         Args: { p_mascota_id: string }
