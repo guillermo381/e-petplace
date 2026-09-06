@@ -356,6 +356,12 @@ export {
   registrarMedicacionAdministrada,
   type ViaMedicacion,
   VIAS_MEDICACION,
+  // S113-A: lo que la familia sabe y no tenía dónde poner. Las tres entran
+  // como observación, no como diagnóstico.
+  registrarObservacionComportamiento,
+  declararAlergiaFamilia,
+  declararCondicionFamilia,
+  SEVERIDADES_ALERGIA,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
   registrarRecuerdoFamilia,

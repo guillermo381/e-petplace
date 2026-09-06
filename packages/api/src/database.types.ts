@@ -22968,6 +22968,10 @@ export type Database = {
       }
       _columnas_solicitud_clasificadas: { Args: never; Returns: Json }
       _concepto_de_pago: { Args: { p_sujeto: string }; Returns: string }
+      _contexto_coach_base: {
+        Args: { p_mascota_id: string; p_user_id?: string }
+        Returns: Json
+      }
       _corte_matricula: { Args: never; Returns: string }
       _crear_evento_padre_auto: {
         Args: {
@@ -24195,6 +24199,16 @@ export type Database = {
         }[]
       }
       debug_session: { Args: never; Returns: Json }
+      declarar_alergia_familia: {
+        Args: {
+          p_alergeno: string
+          p_desde?: string
+          p_mascota_id: string
+          p_reaccion?: string
+          p_severidad: string
+        }
+        Returns: Json
+      }
       declarar_composicion_acuario: {
         Args: {
           p_cantidad: number
@@ -24206,6 +24220,15 @@ export type Database = {
       }
       declarar_composicion_estado: {
         Args: { p_estado?: string; p_mercado?: string; p_producto_id: string }
+        Returns: Json
+      }
+      declarar_condicion_familia: {
+        Args: {
+          p_condicion: string
+          p_descripcion?: string
+          p_desde?: string
+          p_mascota_id: string
+        }
         Returns: Json
       }
       declarar_dia_cerrado: {
@@ -26272,6 +26295,10 @@ export type Database = {
           p_nota?: string
           p_objetivo_codigo: string
         }
+        Returns: Json
+      }
+      registrar_observacion_comportamiento: {
+        Args: { p_fecha?: string; p_mascota_id: string; p_texto: string }
         Returns: Json
       }
       registrar_peso_mascota: {
