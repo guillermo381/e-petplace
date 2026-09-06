@@ -244,7 +244,9 @@ export type IconoNombre =
    *  Los tres son **GLIFOS DE CONTROL** (paso 6 de §6b, firma S98): viven
    *  adentro de los dedos de la huella del Coach, que son botones, y por
    *  `N27` *un glifo montado dentro de un control no lleva huella*. */
-  | 'peso' | 'antiparasitario' | 'foto'
+  | 'peso'
+  /** S113-B · 1.2.3 — «cómo es»: la estrella de `InvitacionBio`. */
+  | 'personalidad' | 'antiparasitario' | 'foto'
   // S82-B r34: LA BITÁCORA gana su glifo — adiestramiento mostraba el de
   // VACUNA (sustitución genérica, Ley 12: el mismo caso de lápiz/compartir
   // en r7 y de la vacuna en r10). Gate por ícono a 21px PENDIENTE.
@@ -1480,6 +1482,42 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  /* ── PERSONALIDAD · LA ESTRELLA DE CINCO PUNTAS (S113-B, 1.2.3) ─────────
+   *  Dictado del founder: *«una estrella de cinco puntas sencilla, trazo de
+   *  la casa — lo que lo hace único»*. Nace porque **el registry no tenía
+   *  ninguno para «cómo es»** y la entrada de personalidad quedó sin glifo,
+   *  con su hueco reservado, en `InvitacionBio`. *Prestar un vecino era lo
+   *  único que no se podía hacer.*
+   *
+   *  🔴 **EL ÚNICO NÚMERO QUE SE ELIGIÓ ES `r/R = 0.5`, Y LO DECIDIÓ LOS
+   *  21 px, NO EL GUSTO.** La estrella «clásica» tiene `r/R = 0.382` y una
+   *  punta de **36°**: con el trazo de la casa (1,9 → **1,66 px a 21**), en
+   *  sus primeros 2 px esa punta mide **1,30 px de ancho**, o sea MENOS que
+   *  el trazo que la dibuja ⇒ *la punta se la come su propia línea y quedan
+   *  cinco bultos.* Con `0.5` la punta abre a **52,5°** y a esos mismos 2 px
+   *  mide **1,97 px**: tiene cuerpo propio. Su gate lo mide y no lo adjetiva.
+   *
+   *  El tamaño salió de la vara: **un solo subpath cerrado, 46,5 de trazo
+   *  contra los 46,4 de `vacuna`** (+0,2 %). No se buscó «que se vea
+   *  parecido»: se resolvió `R` para caer en la banda.
+   *
+   *  ⚠️ **Sin huella**, como los otros glifos de control (N27 · §6b paso 6):
+   *  acá no hay mascota, hay interfaz.
+   *
+   *  ⚠️ **Colisión declarada:** una estrella es la metáfora universal de
+   *  «favorito» y de «calificación». Acá NO es ninguna de las dos y la casa
+   *  no tiene todavía ninguna de las dos, así que el nombre queda libre —
+   *  *pero el día que exista un favorito, esto se revisa antes que aquello,
+   *  porque llegó primero y va a parecer que califica.* */
+  personalidad: ({ tinta }) => (
+    <>
+      <Path
+        d="M12.00 5.00L14.06 9.17L18.66 9.84L15.33 13.08L16.11 17.66L12.00 15.50L7.89 17.66L8.67 13.08L5.34 9.84L9.94 9.17Z"
+        {...trazo(tinta)}
+      />
+    </>
+  ),
+
   /* ── PESO · LA BALANZA DE DOS PLATOS (S113-B, 2ª forma) ─────────────────
    *  ⏪ **La primera forma era una balanza de PLATAFORMA de frente —dial,
    *  columna, plataforma y dos patas— y el founder la vio en el teléfono:
@@ -2089,6 +2127,13 @@ export function Icono({
        ocre de su familia y tampoco la lleva. */
     peso: identidad,
     antiparasitario: identidad,
+    /* 🔴 `personalidad` NO es identidad ni cuidado: **es la mascota como
+       individuo**, y de las capas de la casa la que habla de quién es alguien
+       es COMUNIDAD (magenta). *Ponerlo en identidad —la capa de lo clínico—
+       lo leería como un dato médico, que es justo lo que esa entrada NO es:
+       al lado tiene «Temas médicos», y dos entradas del mismo color en la
+       misma Hoja dicen que son lo mismo.* */
+    personalidad: comunidad,
     /* `foto` sí es un VERBO —capturar— y por eso se viste de TINTA, no de
        capa. Mismo criterio que `papelera` y `lapiz`: *un control no
        pertenece a un mundo, ejecuta una acción.* */

@@ -65,31 +65,25 @@ export type ClaseInvitacion = 'comportamiento' | 'personalidad' | 'medico' | 're
 /**
  * 🔴 **El glifo por clase, decidido acá.** Ver la cabecera.
  *
- * 🔴 **`personalidad` VA SIN GLIFO, Y NO ES UN OLVIDO.** Las otras tres lo
- * tienen propio —el adiestramiento ES el comportamiento, el caso clínico ES lo
- * médico, la bitácora ES «lo que hizo hoy»—; **para «cómo es» el registry no
- * tiene ninguno**, y lo midió el compilador: `huella`, que era mi candidato,
- * ni siquiera es un glifo (es la primitiva de marca).
+ * ⏪ **ACÁ `personalidad` NO TENÍA GLIFO, y el hueco duró un lote.** El
+ * registry no tenía ninguno para «cómo es» —lo midió el compilador: `huella`,
+ * mi candidato, ni siquiera es un glifo— y prestar un vecino es lo que la casa
+ * prohíbe. La fila iba **sin ícono y con su ancho reservado**, para que las
+ * cuatro quedaran alineadas.
  *
- * Prestar un vecino es lo que la casa prohíbe expresamente —*«un glifo con dos
- * significados es informar sin informar»*— y el más cercano del registry es el
- * ojo de mostrar/ocultar contraseña: *usarlo acá sería enseñar que ese ojo
- * significa dos cosas.*
- *
- * ⇒ La fila **reserva el ancho del glifo igual**, para que las cuatro queden
- * alineadas: *una lista donde tres tienen ícono y una arranca corrida se lee
- * como que a esa le falta algo, y lo que le falta es al registry.* Queda como
- * pedido de **§6b** (hoja de contacto, dos o tres variantes, gate POR ÍCONO).
+ * **Hoy existe** (`personalidad`, la estrella de cinco puntas, §6b) y el hueco
+ * murió con él. *Se deja escrito porque la forma de la estrella no salió del
+ * gusto: salió de que a 21 px la punta clásica de 36° la tapa su propio
+ * trazo* — el número vive en su dibujante y su gate lo mide con su control
+ * negativo.
  */
 const GLIFO = {
   comportamiento: 'training',
-  personalidad: null,
+  personalidad: 'personalidad',
   medico: 'caso',
   recuerdo: 'bitacora',
-} satisfies Record<ClaseInvitacion, IconoNombre | null>
+} satisfies Record<ClaseInvitacion, IconoNombre>
 
-/** El ancho que reserva la fila sin glifo. **Derivado del tamaño del ícono**,
- *  no tecleado: el día que el ícono cambie de talla, el hueco la sigue. */
 const GLIFO_TAMANO = 24
 
 export interface EntradaInvitacion {
@@ -113,15 +107,6 @@ export interface InvitacionBioProps {
    *  dibuja**: una invitación que abre una Hoja sin nada adentro es peor que
    *  no invitar. */
   entradas: readonly EntradaInvitacion[]
-}
-
-/* El glifo de una entrada, o su hueco. Componente aparte porque el
-   estrechamiento de `GLIFO[clase]` no sobrevive dentro del JSX de un `map`:
-   TypeScript no puede saber que el mismo índice da el mismo valor dos veces. */
-function GlifoDeEntrada({ clase }: { clase: ClaseInvitacion }) {
-  const g = GLIFO[clase]
-  if (g === null) return <View style={{ width: GLIFO_TAMANO, height: GLIFO_TAMANO }} />
-  return <Icono nombre={g} tamano={GLIFO_TAMANO} registro="capa" />
 }
 
 export function InvitacionBio({ texto, tituloHoja, entradas }: InvitacionBioProps) {
@@ -188,7 +173,7 @@ export function InvitacionBio({ texto, tituloHoja, entradas }: InvitacionBioProp
               }}
             >
               {/* 🔴 El hueco alineado cuando no hay glifo. Ver la cabecera. */}
-              <GlifoDeEntrada clase={e.clase} />
+              <Icono nombre={GLIFO[e.clase]} tamano={GLIFO_TAMANO} registro="capa" />
               <View style={{ flex: 1, gap: spacing[0.5] }}>
                 <Texto>{e.titulo}</Texto>
                 <Texto variante="apoyo">{e.detalle}</Texto>

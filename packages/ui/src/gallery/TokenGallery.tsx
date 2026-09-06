@@ -1214,7 +1214,7 @@ function Fila({ children }: { children: React.ReactNode }) {
  * el vecino real de `foto` · `carnet` cierra la familia de salud.
  * *Poner cinco vecinos que no se parecen a nada haría una fila linda y una
  * medición vacía.* */
-const NUEVOS_COACH = ['peso', 'antiparasitario', 'foto'] as const
+const NUEVOS_COACH = ['peso', 'antiparasitario', 'foto', 'personalidad'] as const
 /* **Los cinco vecinos no son cualquiera: son los que pueden confundirse.** */
 const VECINOS_COACH = ['vacuna', 'seguros', 'ubicacion', 'telemedicina', 'carnet'] as const
 

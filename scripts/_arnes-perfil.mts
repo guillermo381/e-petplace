@@ -164,14 +164,15 @@ t('🔴 …y sin entradas la tarjeta NO se dibuja', /entradas\.length === 0\) re
 t('🔴 en memorial no se invita a contar nada',
   /theme\.mode === 'memorial'\) return null/.test(INV), true);
 t('el glifo lo decide la PIEZA, exhaustivo por clase',
-  /satisfies Record<ClaseInvitacion, IconoNombre \| null>/.test(INV), true);
-/* ⚠️ `personalidad` VA SIN GLIFO A PROPÓSITO —el registry no tiene uno para
-   «cómo es» y prestar un vecino es lo que la casa prohíbe—, y la fila reserva
-   su ancho para que las cuatro queden alineadas. El assert fija las dos
-   mitades: que sea null Y que el hueco exista. */
-t('🔴 `personalidad` sin glifo, declarado', /personalidad: null/.test(INV), true);
-t('🔴 …y con su ancho reservado, no corrida',
-  /width: GLIFO_TAMANO, height: GLIFO_TAMANO/.test(INV), true);
+  /satisfies Record<ClaseInvitacion, IconoNombre>/.test(INV), true);
+/* ⏪ Acá se medía que `personalidad` fuera `null` y que su hueco existiera:
+   el registry no tenía glifo para «cómo es» y la fila iba sin ícono, con su
+   ancho reservado. **Hoy el glifo existe** y el hueco murió con él — su forma
+   la mide `verify:glifos`, con su control negativo. */
+t('🔴 las CUATRO tienen glifo, y ninguna queda corrida',
+  /personalidad: 'personalidad'/.test(INV) && /GLIFO\[e\.clase\]/.test(INV), true);
+t('🔴 …y ya no queda hueco reservado de cuando faltaba',
+  /width: GLIFO_TAMANO, height: GLIFO_TAMANO/.test(INV), false);
 t('la Hoja se cierra ANTES de llevar a otra pantalla',
   /setAbierta\(false\)\s*\n\s*e\.onPress\(\)/.test(INV), true);
 

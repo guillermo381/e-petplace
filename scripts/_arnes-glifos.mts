@@ -77,7 +77,7 @@ const VARA = glifo('vacuna')!;
 const BANDA = 0.15;
 console.log(`\n── LA VARA · \`vacuna\` = ${VARA.largo.toFixed(1)} de trazo · banda ±${BANDA * 100}% = ${(VARA.largo * (1 - BANDA)).toFixed(1)}–${(VARA.largo * (1 + BANDA)).toFixed(1)} ──`);
 
-const NUEVOS = ['peso', 'antiparasitario', 'foto'] as const;
+const NUEVOS = ['peso', 'antiparasitario', 'foto', 'personalidad'] as const;
 console.log('\n── ① EXISTEN Y ESTÁN DIBUJADOS ──');
 for (const g of NUEVOS) t(`\`${g}\` tiene dibujante`, glifo(g) !== null);
 
@@ -104,6 +104,50 @@ for (const g of NUEVOS) t(`\`${g}\` no lleva huella`, glifo(g)!.huella === false
 /* CONTROL POSITIVO: si el medidor no viera las huellas, ⑤ pasaría siempre. */
 t('CONTROL POSITIVO · el medidor SÍ ve la huella de `vacuna`', VARA.huella === true);
 
+console.log('\n── ④bis LEY 9 PARA LO PUNTIAGUDO · la punta sobrevive a 21 px ──');
+/* 🔴 **`interiorMin` mide lo REDONDO y no ve una estrella.** El modo de falla
+   de una punta es el opuesto al de un círculo: no se cierra, **se la come su
+   propio trazo**. A `d` px de la punta, su ancho es `2·d·tan(α/2)`; si eso es
+   menor que el trazo (1,9 → 1,66 px a 21), ahí no hay punta: hay bulto.
+   *Un glifo de cinco puntas cuyas cinco puntas son bultos es un pentágono
+   peludo, y eso no lo dice ningún assert de masa.* */
+function anchoDePuntaA(px: number, d: string): number {
+  /* El ángulo real se DERIVA del path dibujado, no se teclea: si mañana
+     alguien mueve un vértice, el número lo sigue. */
+  const n = [...d.matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map((m) => [+m[1], +m[2]] as const);
+  if (n.length < 3) return 0;
+  const ang = (a: readonly [number, number], b: readonly [number, number], c: readonly [number, number]) => {
+    const u = [a[0] - b[0], a[1] - b[1]], v = [c[0] - b[0], c[1] - b[1]];
+    const cos = (u[0] * v[0] + u[1] * v[1]) / (Math.hypot(...u) * Math.hypot(...v));
+    return Math.acos(Math.max(-1, Math.min(1, cos)));
+  };
+  /* La punta es el vértice MÁS CERRADO del contorno. */
+  let min = Math.PI;
+  for (let k = 0; k < n.length; k++) {
+    const a = n[(k - 1 + n.length) % n.length], b = n[k], c = n[(k + 1) % n.length];
+    min = Math.min(min, ang(a, b, c));
+  }
+  /* `px` en espacio de 21; se pasa a la grilla de 24 y se vuelve a 21. */
+  return 2 * px * Math.tan(min / 2);
+}
+{
+  const d = SRC.match(/personalidad: \(\{[\s\S]*?d="([^"]+)"/)![1];
+  const ancho = anchoDePuntaA(2, d);
+  const piso = TRAZO * (GATE / GRILLA);
+  t('🔴 `personalidad` · a 2 px de la punta es MÁS ancha que su propio trazo',
+    ancho > piso, ` · ${ancho.toFixed(2)} px vs trazo ${piso.toFixed(2)} px`);
+  /* CONTROL NEGATIVO: la estrella «clásica» (r/R = 0,382, punta de 36°) es la
+     que se descartó, y el gate tiene que poder decir que NO pasa — si no, su
+     verde no distingue la forma elegida de la que se rechazó. */
+  /* ⚠️ **ESTAS COORDENADAS SE GENERARON, NO SE TECLEARON, y la primera vez
+     las tecleé**: dieron 1,97 px —idéntico al de la estrella elegida— o sea
+     que *el control no controlaba nada y su rojo no podía existir.* Son la
+     estrella de `r/R = 0.382` con la misma masa, y su punta mide 36,0°. */
+  const clasica = 'M12.00 5.61L13.43 10.03L18.07 10.03L14.32 12.75L15.75 17.17L12.00 14.44L8.25 17.17L9.68 12.75L5.93 10.03L10.57 10.03Z';
+  t('CONTROL NEGATIVO · la estrella clásica (36°) NO pasaría',
+    anchoDePuntaA(2, clasica) <= piso, ` · ${anchoDePuntaA(2, clasica).toFixed(2)} px`);
+}
+
 console.log('\n── ⑥ NO SE PISAN CON UNA METÁFORA OCUPADA (paso 2) ──');
 /* `seguros` ya es un escudo: la separación es de TAMAÑO y se declara. */
 const seg = glifo('seguros')!;
@@ -112,6 +156,11 @@ t('`antiparasitario` es visiblemente más liviano que `seguros`',
   ` · ${glifo('antiparasitario')!.largo.toFixed(1)} vs ${seg.largo.toFixed(1)}`);
 t('y por eso su colisión va DECLARADA en el dibujante', /seguros. YA ES UN ESCUDO/.test(SRC));
 t('la gota declara su distinción con el pin (orientación)', /apunta hacia ABAJO/.test(SRC));
+/* Una estrella es la metáfora universal de «favorito» y de «calificación».
+   Ninguna de las dos existe todavía en la casa ⇒ el nombre está libre, pero
+   el que llegue después va a parecer que califica. Se declara ahora. */
+t('`personalidad` declara la colisión que le va a llegar (favorito · calificación)',
+  /va a parecer que califica/.test(SRC));
 
 
 /* ═══ LA HUELLA DENTRO DE UN CONTROL (S113-B · orden de la mesa) ════════════
