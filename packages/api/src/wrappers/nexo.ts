@@ -45,15 +45,31 @@ export interface RespuestaNexo {
   /** `null` SÓLO cuando `intencion === 'busqueda'`. */
   respuesta: string | null;
   fuente: 'plantilla' | 'modelo' | 'router' | 'router_caido';
-  plantilla?: string;
+  /** `null` cuando la respuesta no salió de una plantilla. */
+  plantilla: string | null;
   intencion: IntencionNexo;
   /** Con `busqueda`: lo que hay que buscar. Lo resuelve la pantalla. */
-  consulta?: string;
+  /** `null` salvo con `intencion === 'busqueda'`. */
+  consulta: string | null;
   semaforo: Semaforo | null;
   /** Se PROPONE. La guarda la familia confirmando, con `confirmado_de_ia`. */
   propuesta_memoria: { hecho: string } | null;
   /** `true` en el primer turno del hilo. */
   aviso_ia: boolean;
+
+  /* ── LOS MISMOS TRES, EN LA VOZ DE LA APP ─────────────────────────────────
+     La edge habla `snake_case` y el resto de `packages/api` expone
+     `camelCase`. **El wrapper es exactamente el lugar donde el contrato del
+     servidor se traduce al de la app**, y acá no se había hecho: la pantalla
+     los pedía así y el tipo no los tenía.
+     Se AGREGAN sin quitar los originales —aditivo, cero consumidor roto— y el
+     día que nadie use los `snake` se retiran. */
+  /** Alias de `aviso_ia`. */
+  avisoIa: boolean;
+  /** Alias de `propuesta_memoria`. */
+  propuestaMemoria: { hecho: string } | null;
+  /** Si la respuesta sugiere ver al veterinario. Lo dice el semáforo. */
+  escalarAVet: boolean;
 }
 
 export interface InputPreguntarANexo {
@@ -104,9 +120,28 @@ function esSemaforo(v: unknown): v is Semaforo {
 }
 
 /** Le pregunta a Nexo sobre UNA mascota. El contexto lo lee el servidor. */
+/**
+ * ⚠️ **DOS FORMAS DE LLAMARLA, UNA SOLA IMPLEMENTACIÓN** (reconciliado en el
+ * candidato 2.0). C y D escribieron la puerta a la edge `coach` en paralelo,
+ * cada una con su wrapper: `(mascotaId, texto)` posicional en el de C —que es
+ * como la pantalla ya la llama— y `(input)` en el de D, que además cubre el
+ * parte y el papel. *Dos puertas a la misma edge es la clase «una cosa, una
+ * puerta»: gana la que cubre las tres edges, y acepta la forma que ya está en
+ * uso para no romper la pantalla por una diferencia de sintaxis.*
+ */
 export async function preguntarANexo(
   input: InputPreguntarANexo,
+): Promise<ResultadoWrapper<RespuestaNexo, CodigoErrorNexo>>
+export async function preguntarANexo(
+  mascotaId: string,
+  texto: string,
+): Promise<ResultadoWrapper<RespuestaNexo, CodigoErrorNexo>>
+export async function preguntarANexo(
+  a: InputPreguntarANexo | string,
+  b?: string,
 ): Promise<ResultadoWrapper<RespuestaNexo, CodigoErrorNexo>> {
+  const input: InputPreguntarANexo =
+    typeof a === 'string' ? ({ mascotaId: a, texto: b ?? '' } as InputPreguntarANexo) : a
   const { data, error } = await getClient().functions.invoke('coach', {
     body: { mascotaId: input.mascotaId, texto: input.texto, hilo: input.hilo },
   });
@@ -128,14 +163,26 @@ export async function preguntarANexo(
     data: {
       respuesta: data.respuesta,
       fuente: data.fuente as RespuestaNexo['fuente'],
-      plantilla: typeof data.plantilla === 'string' ? data.plantilla : undefined,
+      plantilla: typeof data.plantilla === 'string' ? data.plantilla : null,
       intencion: data.intencion as IntencionNexo,
-      consulta: typeof data.consulta === 'string' ? data.consulta : undefined,
+      consulta: typeof data.consulta === 'string' ? data.consulta : null,
       // Un semáforo que no cumple la forma NO se degrada a un nivel: se anula.
       // Inventar la urgencia en cualquier dirección es peor que no mostrarla.
       semaforo: esSemaforo(data.semaforo) ? data.semaforo : null,
       propuesta_memoria: propuesta,
       aviso_ia: data.aviso_ia,
+      // los mismos, en la voz de la app
+      avisoIa: data.aviso_ia,
+      propuestaMemoria: propuesta,
+      /* `escalar_a_vet` lo manda la edge; si no viene, se DERIVA del semáforo
+         —un nivel que no es `bien` es justamente lo que hay que consultar—.
+         *Devolver `false` por ausencia diría «no hace falta ver al vet», que
+         es una afirmación que este wrapper no puede hacer.* */
+      escalarAVet: typeof data.escalar_a_vet === 'boolean'
+        ? data.escalar_a_vet
+        // `casa` es el único nivel que NO escala: los otros dos (`semana`,
+        // `ya`) son justamente «esto lo tiene que ver alguien».
+        : esSemaforo(data.semaforo) && data.semaforo.nivel !== 'casa',
     },
   };
 }
