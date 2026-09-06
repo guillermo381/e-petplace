@@ -26,6 +26,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  BurbujaMensaje,
   Campo,
   ChipsSugerencia,
   Encabezado,
@@ -248,9 +249,23 @@ export default function Nexo() {
 
           {lineas.map((l) =>
             l.rol === 'familia' ? (
-              <View key={l.id} style={{ alignSelf: 'flex-end', maxWidth: '85%' }}>
-                <Texto variante="cuerpo">{l.texto}</Texto>
-              </View>
+              /* ⭐ **LA MISMA BURBUJA DEL CHAT DE ADOPCIÓN**, no una nueva.
+                 Medido: `apps/cliente/src/app/adoptar/solicitud/[solicitudId]`
+                 monta `BurbujaMensaje` con `mio` · `texto` · `hora` ·
+                 `posicion` · `estado`. *Dibujar otra burbuja acá haría que dos
+                 conversaciones de la misma app se vieran distinto sin que nadie
+                 lo hubiera decidido* — y la pieza ya trae el radio que cierra
+                 el grupo y el color que marca de quién es.
+                 `posicion: 'solo'` porque el hilo de Nexo alterna familia y
+                 Nexo en cada turno: no hay grupos que cerrar. */
+              <BurbujaMensaje
+                key={l.id}
+                mio
+                texto={l.texto}
+                hora={l.hora}
+                posicion="solo"
+                estado="enviado"
+              />
             ) : l.primera === true ? (
               <RespuestaNexo
                 key={l.id}
