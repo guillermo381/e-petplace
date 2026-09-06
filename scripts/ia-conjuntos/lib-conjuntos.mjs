@@ -16,21 +16,71 @@ import { readFileSync } from 'node:fs';
 export const PROJECT_REF = readFileSync('supabase/.temp/project-ref', 'utf8').trim();
 export const URL_BASE = `https://${PROJECT_REF}.supabase.co`;
 
-/** La `service_role`, resuelta al momento. Se devuelve, jamás se imprime. */
+/**
+ * La `service_role`, resuelta al momento. Se devuelve, **jamás se imprime**.
+ *
+ * ── 🔴 LO QUE ESTA FUNCIÓN HACÍA Y POR QUÉ SE CURÓ (D-1013) ────────────────
+ * La primera versión —la escribí yo en el lote 0, antes de que la ficha
+ * existiera— corría `npx supabase projects api-keys`. Ese comando **imprime la
+ * `anon` Y la `service_role` en texto plano por stdout**. Acá la salida se
+ * capturaba, así que no llegaba al transcript; pero el riesgo no es teórico:
+ * **cualquier rama de error que imprimiera `r.stdout` para diagnosticar
+ * filtraba las dos claves**, y una función que sólo es segura mientras nadie
+ * agregue un `console.log` no es segura: es afortunada.
+ *
+ * Ahora la clave sale del **llavero**, donde ya viven las otras siete de esta
+ * casa (`epetplace-siembra-s97`, `epetplace-despacho-secret`, …), y **nunca
+ * transita por la salida de ningún proceso**.
+ *
+ * ── Y SI NO ESTÁ, PARA. No cae de vuelta al comando viejo ──────────────────
+ * *Un respaldo silencioso al camino inseguro convierte la cura en decoración:
+ * el día que el llavero no tenga la entrada, el arnés volvería solo a la línea
+ * prohibida y nadie se enteraría.* Por eso el mensaje trae el comando exacto.
+ */
 export function claveServicio() {
-  const r = spawnSync('npx', ['supabase', 'projects', 'api-keys', '--project-ref', PROJECT_REF], {
-    encoding: 'utf8',
-  });
-  const i = r.stdout.indexOf('{');
-  if (i === -1) throw new Error('no pude leer las api-keys del proyecto (¿CLI sin sesión?)');
-  const { keys } = JSON.parse(r.stdout.slice(i));
-  const k = keys.find((x) => x.id === 'service_role')?.api_key;
-  if (!k) throw new Error('no encontré la service_role. El arnés PARA.');
-  // Se verifica el claim, como hace claveAnonDeEnv: correr con la clave
-  // equivocada es medir otra cosa con confianza.
-  const rol = JSON.parse(Buffer.from(k.split('.')[1], 'base64url').toString('utf8')).role;
-  if (rol !== 'service_role') throw new Error(`la clave tiene claim role=${rol}. El arnés PARA.`);
-  return k;
+  const delLlavero = spawnSync('security',
+    ['find-generic-password', '-a', 'medicion', '-s', 'epetplace-service-role', '-w'],
+    { encoding: 'utf8' }).stdout.trim();
+  const clave = delLlavero || (process.env.EPETPLACE_SERVICE_ROLE ?? '').trim();
+
+  if (!clave) {
+    throw new Error(
+      'sin `service_role` en el llavero. El arnés PARA — NO cae al comando viejo.\n' +
+      '  Guardala UNA vez (la lee el llavero, no la escribe ningún archivo del repo):\n' +
+      '    security add-generic-password -a medicion -s epetplace-service-role -w \'<clave>\'\n' +
+      '  (o exportá EPETPLACE_SERVICE_ROLE para una corrida suelta).');
+  }
+
+  /* El claim se verifica SIEMPRE, venga de donde venga: correr con la clave
+     equivocada es medir otra cosa con confianza. Es el mismo control que tenía
+     la versión vieja — lo que cambió es de dónde sale la clave, no qué se
+     comprueba de ella. */
+  let rol;
+  try {
+    rol = JSON.parse(Buffer.from(clave.split('.')[1], 'base64url').toString('utf8')).role;
+  } catch {
+    throw new Error('la clave guardada no es un JWT legible. El arnés PARA.');
+  }
+  if (rol !== 'service_role') throw new Error(`la clave tiene claim role=${rol}, no service_role. El arnés PARA.`);
+  return clave;
+}
+
+/**
+ * La `anon`, leída del repo y **verificada por su claim**.
+ *
+ * Es PÚBLICA por diseño —viaja en cada bundle publicado y ya vive commiteada
+ * en migraciones y scripts de cron—, así que leerla de ahí no filtra nada. Lo
+ * que evita es el motivo real de D-1013: **el único comando que la entregaba
+ * también volcaba la `service_role` por stdout**. Se pedía una clave pública y
+ * salían las dos.
+ */
+export function claveAnon() {
+  const fuente = 'scripts/seg2/d713-cron.mjs';
+  const m = readFileSync(fuente, 'utf8').match(/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
+  if (!m) throw new Error(`no encontré la anon en ${fuente}. El arnés PARA.`);
+  const rol = JSON.parse(Buffer.from(m[0].split('.')[1], 'base64url').toString('utf8')).role;
+  if (rol !== 'anon') throw new Error(`la clave de ${fuente} tiene role=${rol}, no anon. El arnés PARA.`);
+  return m[0];
 }
 
 /** Una consulta de sólo lectura contra la base linkeada. */
