@@ -173,7 +173,17 @@ export function InvitacionBio({ texto, tituloHoja, entradas }: InvitacionBioProp
               }}
             >
               {/* 🔴 El hueco alineado cuando no hay glifo. Ver la cabecera. */}
-              <Icono nombre={GLIFO[e.clase]} tamano={GLIFO_TAMANO} registro="capa" />
+              {/* 🔴 **`montaje="control"` VA SIEMPRE Y NO ES PROP DE NADIE, y
+                  lo pidió el emulador.** Sin él, `training`, `caso` y
+                  `bitacora` dibujan su huella y la estrella no —es glifo de
+                  control y no tiene—: *tres filas con huella verde y una sin
+                  ella se leen como que la cuarta es de otra clase.* Con el
+                  montaje de control las cuatro quedan parejas, que es lo que
+                  son: cuatro actos de la misma lista.
+                  El precedente es literal (`PresenciaCoach`): *«los nodos de
+                  la fila son ACTOS»*, y lo decide la pieza — *si el consumidor
+                  pudiera elegirlo, la ley sería una sugerencia* (Ley 8). */}
+              <Icono nombre={GLIFO[e.clase]} tamano={GLIFO_TAMANO} registro="capa" montaje="control" />
               <View style={{ flex: 1, gap: spacing[0.5] }}>
                 <Texto>{e.titulo}</Texto>
                 <Texto variante="apoyo">{e.detalle}</Texto>

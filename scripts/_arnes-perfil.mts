@@ -169,6 +169,10 @@ t('el glifo lo decide la PIEZA, exhaustivo por clase',
    el registry no tenía glifo para «cómo es» y la fila iba sin ícono, con su
    ancho reservado. **Hoy el glifo existe** y el hueco murió con él — su forma
    la mide `verify:glifos`, con su control negativo. */
+/* 🔴 Lo pidió el aparato: sin `montaje="control"` tres de los cuatro dibujan
+   su huella y la estrella no, y la cuarta fila se lee de otra clase. */
+t('🔴 las cuatro filas montan en CONTROL: parejas, sin huella',
+  /montaje="control"/.test(INV), true);
 t('🔴 las CUATRO tienen glifo, y ninguna queda corrida',
   /personalidad: 'personalidad'/.test(INV) && /GLIFO\[e\.clase\]/.test(INV), true);
 t('🔴 …y ya no queda hueco reservado de cuando faltaba',

@@ -1,0 +1,10 @@
+modo=light · p=raza
+¿Es un Beagle?
+muy probable
+¿Boxer?
+probable
+Mestizo
+Otra
+Beagle
+Ver más sobre la raza
+›

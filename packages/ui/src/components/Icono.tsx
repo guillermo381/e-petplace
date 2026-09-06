@@ -2127,12 +2127,20 @@ export function Icono({
        ocre de su familia y tampoco la lleva. */
     peso: identidad,
     antiparasitario: identidad,
-    /* 🔴 `personalidad` NO es identidad ni cuidado: **es la mascota como
-       individuo**, y de las capas de la casa la que habla de quién es alguien
-       es COMUNIDAD (magenta). *Ponerlo en identidad —la capa de lo clínico—
-       lo leería como un dato médico, que es justo lo que esa entrada NO es:
-       al lado tiene «Temas médicos», y dos entradas del mismo color en la
-       misma Hoja dicen que son lo mismo.* */
+    /* ⚠️ **ESTA ENTRADA NO SE DIBUJA HOY, Y SE DECLARA PARA QUE NADIE LA
+       DEFIENDA CREYENDO QUE SÍ.** `porConcepto` resuelve **el color de la
+       HUELLA**, no el del trazo — y `personalidad` es glifo de CONTROL, o sea
+       **sin huella** (lo asierta ⑤ de su gate). ⇒ montado con `registro="capa"`
+       sale en tinta, igual que con `registro="tinta"`. **Medido en el
+       emulador, no supuesto:** las dos filas dieron el mismo `(29,26,46)`.
+       *Lo mismo vale para `peso`, `antiparasitario` y `foto`: sus entradas
+       existen porque el `Record` es exhaustivo, no porque alguien las lea.*
+
+       El valor igual es `comunidad` y no `identidad`, por si algún día lleva
+       huella: *la mascota como individuo no es un dato clínico — al lado tiene
+       «Temas médicos», y dos entradas del mismo color en la misma Hoja dicen
+       que son lo mismo.* Pero eso es una decisión para el futuro, no algo que
+       se vea hoy. */
     personalidad: comunidad,
     /* `foto` sí es un VERBO —capturar— y por eso se viste de TINTA, no de
        capa. Mismo criterio que `papelera` y `lapiz`: *un control no
