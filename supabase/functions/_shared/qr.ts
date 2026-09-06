@@ -41,10 +41,23 @@ export function matrizQr(texto: string): boolean[][] {
 /** El margen que el estándar pide. Sin él muchos lectores no enganchan. */
 export const QUIET = 4;
 
-/** La URL pública de un pasaporte. Vive acá para que los papeles y la edge
- *  del pasaporte no puedan escribirla distinto. */
+/**
+ * La URL pública de un pasaporte — **la que va grabada en el QR y en el NFC**.
+ *
+ * 🔴 Apunta a `www.epetplace.com/p/<token>` y NO a la edge, y no es cosmético:
+ * **Supabase degrada `text/html` a `text/plain` en GET** (medido el 6-sep-2026;
+ * `image/svg+xml` pasa, `application/xhtml+xml` no), así que una página servida
+ * desde `*.supabase.co` se ve como código fuente en el navegador. *La página
+ * existía y era inútil justo donde tenía que servir: en la calle.*
+ * La edge sigue siendo la única que sabe LEER un pasaporte (`?formato=json`);
+ * el sitio lo dibuja.
+ *
+ * ⚠️ Vive acá, en un solo lugar, porque este texto se **graba en metal**. Dos
+ * sitios escribiéndolo distinto significa un lote de chapitas apuntando a
+ * ninguna parte, y eso no se corrige con un deploy.
+ */
 export function urlPasaporte(token: string): string {
-  return `${Deno.env.get('SUPABASE_URL') ?? ''}/functions/v1/pasaporte?t=${token}`;
+  return `https://www.epetplace.com/p/${token}`;
 }
 
 /**

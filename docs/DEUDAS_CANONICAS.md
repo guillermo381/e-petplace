@@ -29132,6 +29132,37 @@ dejando las puertas.
 
 ---
 
+### `D-1044` 🟢 · El dominio personalizado de Supabase deja de hacer falta para el pasaporte — queda como alternativa escrita
+
+**Por qué existía la idea.** La página pública del pasaporte vivía en la edge
+`pasaporte`, y **medido el 6-sep-2026 no se puede servir desde ahí**: Supabase
+degrada `text/html` —y `application/xhtml+xml`— a `text/plain` en GET, mientras
+`image/svg+xml` y `image/png` pasan intactos. Es política de plataforma, para
+que nadie sirva páginas desde `*.supabase.co`. Con eso, un dominio propio de
+Supabase Functions figuraba como la salida.
+
+**Por qué ya no hace falta.** La página se mudó a
+`www.epetplace.com/p/<token>` (Astro, `prerender = false` sobre el sitio que ya
+existe y ya despliega en Vercel). La edge quedó como **la única que sabe leer
+un pasaporte** (`?formato=json`) y el sitio lo dibuja. *Se separó quién sabe el
+dato de quién lo muestra, que es lo que había que separar.*
+
+**La alternativa, escrita para no re-descubrirla:** un custom domain de
+Supabase Functions serviría desde un dominio propio y **podría** no aplicar la
+degradación — ⚠️ **eso NO está medido**, y medirlo cuesta configurar un dominio.
+Sólo tendría sentido si algún día hiciera falta servir HTML desde una edge sin
+tener sitio, que no es el caso.
+
+**Lo que sí queda vivo de esto**, y es el hallazgo que vale más que la ficha:
+*una edge de Supabase no puede servir una página web renderizable.* Cualquiera
+que lo intente va a ver `curl -I` en verde —**HEAD devuelve `text/html`**— y el
+navegador mostrando código fuente. **La diferencia sólo aparece en GET.**
+
+**Dueño:** A. **Disparo:** ninguno; se reabre sólo si alguien necesita HTML
+desde una edge.
+
+---
+
 ### `D-1043` 🟢 · `ota:deps` compara commits, no el árbol: con la dependencia sin commitear da verde
 
 **Medido (S113-A · A6, 6-sep-2026), y lo produjo su propio control.** El brief

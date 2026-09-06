@@ -27,9 +27,14 @@
  */
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { qrPng, qrSvg } from './qr.ts'
+import { urlPasaporte } from '../_shared/qr.ts'
 
 const URL_BASE = Deno.env.get('SUPABASE_URL') ?? ''
-const publica = (t: string) => `${URL_BASE}/functions/v1/pasaporte?t=${t}`
+/* 🔴 EL QR APUNTA AL SITIO, no a esta edge. Se importa de `_shared/qr.ts`
+   para que **un solo lugar** decida qué se graba en metal: dos sitios
+   escribiéndolo distinto es un lote de chapitas apuntando a ninguna parte, y
+   eso no se corrige con un deploy. */
+const publica = urlPasaporte
 
 const CABECERAS = {
   'X-Robots-Tag': 'noindex, nofollow',
@@ -45,6 +50,15 @@ const esc = (s: unknown): string =>
 /* La voz de la casa cuando no hay nada que mostrar. **No dice si el token
    existió o no**: distinguirlo le contaría a quien prueba tokens cuáles fueron
    reales alguna vez. */
+/** El 404 en JSON. **No dice si el token existió**: distinguirlo le contaría a
+ *  quien prueba tokens cuáles fueron reales alguna vez. */
+function json404(): Response {
+  return new Response(JSON.stringify({ estado: 'no_disponible' }), {
+    status: 404,
+    headers: { ...CABECERAS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+  })
+}
+
 function pagina404(): Response {
   const html = `<!doctype html><html lang="es"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -170,7 +184,15 @@ Deno.serve(async (req) => {
   const cola = url.pathname.split('/').filter(Boolean).pop() ?? ''
   const deRuta = /^[A-Za-z0-9_-]{22}(\.svg|\.png)?$/.test(cola) ? cola : ''
   const token = (url.searchParams.get('t') ?? deRuta).replace(/\.(svg|png)$/, '')
-  const formato = deRuta.endsWith('.svg') ? 'svg' : deRuta.endsWith('.png') ? 'png' : 'html'
+  /* `?formato=json` (S113-A · el sitio). La página pública dejó de servirse
+     desde acá —Supabase degrada `text/html` a `text/plain` en GET, medido— y
+     pasó a `www.epetplace.com/p/<token>`, que consume ESTE json.
+     *La edge sigue siendo la única que sabe leer un pasaporte; lo que cambió
+     es quién lo dibuja.* */
+  const pedidoJson = url.searchParams.get('formato') === 'json'
+  const formato = pedidoJson
+    ? 'json'
+    : deRuta.endsWith('.svg') ? 'svg' : deRuta.endsWith('.png') ? 'png' : 'html'
 
   if (!/^[A-Za-z0-9_-]{22}$/.test(token)) return pagina404()
 
@@ -188,38 +210,56 @@ Deno.serve(async (req) => {
       .is('activada_en', null)
       .maybeSingle()
     if (placa) {
+      if (formato === 'json') {
+        return new Response(JSON.stringify({ estado: 'placa_libre', token }), {
+          headers: { ...CABECERAS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+        })
+      }
       // el QR de una placa libre igual se sirve: es el mismo código grabado
       if (formato === 'svg') {
         return new Response(qrSvg(publica(token)), {
-          headers: { ...CABECERAS, 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
+          headers: { ...CABECERAS, 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
         })
       }
       if (formato === 'png') {
         const png = await qrPng(publica(token))
         return new Response(png.buffer as ArrayBuffer, {
-          headers: { ...CABECERAS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' },
+          headers: { ...CABECERAS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' },
         })
       }
       return paginaPlacaLibre(token)
     }
-    return pagina404()
+    return formato === 'json' ? json404() : pagina404()
   }
 
   /* Pasado el límite se contesta 429 con la misma voz. *No se dice «demasiadas
      lecturas de ESTE token», que confirmaría que el token existe.* */
   if ((data as Record<string, unknown>).limite === true) {
+    if (formato === 'json') {
+      return new Response(JSON.stringify({ estado: 'limite' }), {
+        status: 429,
+        headers: { ...CABECERAS, 'Content-Type': 'application/json; charset=utf-8', 'Retry-After': '60' },
+      })
+    }
     return new Response('Probá de nuevo en un minuto.', {
       status: 429,
       headers: { ...CABECERAS, 'Content-Type': 'text/plain; charset=utf-8', 'Retry-After': '60' },
     })
   }
 
-  // ── el QR ─────────────────────────────────────────────────────────────────
-  // Cache LARGA: el contenido del QR es la URL, y la URL no cambia mientras el
-  // token viva. Un token revocado ya cayó en el 404 de arriba.
+  /* ── el QR ────────────────────────────────────────────────────────────────
+     Cache de UNA HORA, y bajó de 24 h por una razón medida: al mover la URL de
+     la edge al sitio, el CDN siguió sirviendo **el QR viejo** durante horas.
+     Eso da igual para una imagen en una pantalla —se recarga— pero **este QR
+     se graba en metal**: una chapita impresa desde un SVG cacheado apunta para
+     siempre a una página que sale en texto plano, y eso no se corrige con un
+     deploy. *Lo único de esta cadena que no se puede volver a desplegar es el
+     objeto físico.*
+     Hoy el riesgo es cero —cero placas fabricadas, medido— y el techo baja
+     igual: cuesta nada y cubre la próxima vez que la URL se mueva. */
   if (formato === 'svg') {
     return new Response(qrSvg(publica(token)), {
-      headers: { ...CABECERAS, 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
+      headers: { ...CABECERAS, 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
     })
   }
   if (formato === 'png') {
@@ -228,12 +268,50 @@ Deno.serve(async (req) => {
        typechecker viendo lo que un `grep` no puede. */
     const png = await qrPng(publica(token))
     return new Response(png.buffer as ArrayBuffer, {
-      headers: { ...CABECERAS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' },
+      headers: { ...CABECERAS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' },
+    })
+  }
+
+  const d = data as Record<string, unknown>
+
+  /* ── EL JSON, que es lo que consume `www.epetplace.com/p/<token>` ────────
+     Se manda EXACTAMENTE lo que la mesa listó, ni un campo más: lo que no
+     entra acá no puede filtrarse por una página que no controlamos del todo.
+     La foto viaja ya FIRMADA y transformada (264 px, calidad 60) porque el
+     bucket es privado y el sitio no tiene —ni debe tener— credenciales. */
+  if (formato === 'json') {
+    let fotoJson: string | null = null
+    if (typeof d.foto_path === 'string' && d.foto_path.length > 0) {
+      const { data: f } = await sb.storage.from('mascotas').createSignedUrl(d.foto_path, 900, {
+        transform: { width: 264, height: 264, resize: 'cover', quality: 60 },
+      })
+      fotoJson = f?.signedUrl ?? null
+    }
+    return new Response(JSON.stringify({
+      estado: 'activo',
+      nombre: d.nombre ?? null,
+      raza: d.raza ?? null,
+      edad: d.edad ?? null,
+      sexo: d.sexo ?? null,
+      perdida: d.perdida === true,
+      foto: fotoJson,
+      contacto: d.contacto ?? null,
+      alergias: d.alergias ?? [],
+      medicacion: d.medicacion ?? [],
+      chip: d.chip ?? null,
+      qr_svg: `${URL_BASE}/functions/v1/pasaporte/${token}.svg`,
+      qr_png: `${URL_BASE}/functions/v1/pasaporte/${token}.png`,
+    }), {
+      headers: {
+        ...CABECERAS,
+        'Content-Type': 'application/json; charset=utf-8',
+        // corto: si la familia marca «perdida», la página tiene que decirlo ya
+        'Cache-Control': 'public, max-age=60',
+      },
     })
   }
 
   // ── la página ─────────────────────────────────────────────────────────────
-  const d = data as Record<string, unknown>
   let foto: string | null = null
   if (typeof d.foto_path === 'string' && d.foto_path.length > 0) {
     /* El bucket es privado (medido): se firma acá, corto.
