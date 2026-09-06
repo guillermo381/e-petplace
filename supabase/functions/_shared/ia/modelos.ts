@@ -32,7 +32,7 @@
  * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
  * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
  */
-export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza'] as const
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte'] as const
 
 export type Pieza = typeof PIEZAS[number]
 
@@ -48,6 +48,14 @@ export const MODELOS: Record<Pieza, string> = {
   // RECONOCIMIENTO, no de atribución espacial fina — que es justo donde S48
   // midió que Haiku topaba. **No es lo mismo leer un carnet que mirar un perro.**
   raza: 'claude-sonnet-5',
+  // 🔴 DOS PIEZAS PARA UNA EDGE, y es a propósito: son dos trabajos con dos
+  // precios. `coach_router` sólo CLASIFICA la intención en tres palabras —
+  // Haiku sobra— y `coach` REDACTA sobre el expediente, donde el modelo bueno
+  // se nota. Separarlas es lo que permite leer en `ia_uso` cuánto cuesta
+  // pensar y cuánto cuesta escribir, en vez de un promedio que no dice nada.
+  coach: 'claude-sonnet-5',
+  coach_router: 'claude-haiku-4-5',
+  coach_parte: 'claude-sonnet-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -71,6 +79,15 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   // La salida son 3 códigos y dos booleanos: ~100 tokens. 500 es aire de sobra
   // y deja el truncado como red, no como peaje.
   raza: 500,
+  // Una respuesta de Nexo son dos o tres frases: 800 es holgura, no techo
+  // apretado. Si algún día trunca, se sube con la medición al lado.
+  coach: 800,
+  // El router devuelve UNA palabra dentro de un JSON de un campo.
+  coach_router: 100,
+  // 120 palabras de techo (la ley del parte) ≈ 240 tokens en español. 400 da
+  // holgura sin dejar lugar a que se extienda: **el parte que se hace largo
+  // deja de leerse**, y ahí el techo es producto, no presupuesto.
+  coach_parte: 400,
 }
 
 /**
@@ -84,6 +101,9 @@ export const EDGES: Record<Pieza, string> = {
   nota_clinica: 'estructurar-nota-clinica',
   presencia: 'escribir-presencia',
   raza: 'sugerir-raza',
+  coach: 'coach',
+  coach_router: 'coach',
+  coach_parte: 'coach-parte',
 }
 
 /**
@@ -149,6 +169,13 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   // chica con salida de ~100 tokens en Haiku debería estar muy por debajo,
   // pero «debería» no es un número. Bloqueante nombrado: `ia_uso.latencia_ms`.
   raza: 30_000,
+  // La familia está mirando la pantalla: 25 s es lo que se tolera antes de que
+  // se sienta roto. El router es un clasificador de una palabra: 8 s.
+  coach: 25_000,
+  coach_router: 8_000,
+  // Nadie está mirando: el parte se arma para una notificación. 20 s alcanza y
+  // colgarse no le arruina la pantalla a nadie.
+  coach_parte: 20_000,
 }
 
 /**
@@ -277,6 +304,12 @@ export const PENSAR: Record<Pieza, boolean> = {
   // razonar solo, y con techo 500 se comería la respuesta entera. El `false`
   // es lo que hace que la puerta escriba `thinking: disabled` en la request.
   raza: false,
+  // Las dos por debajo de TECHO_SIN_RAZONAR ⇒ razonamiento apagado EXPLÍCITO.
+  // En `coach` no es formalidad: con 800 de techo, un Sonnet que se pone a
+  // pensar devuelve la respuesta vacía.
+  coach: false,
+  coach_router: false,
+  coach_parte: false,
 }
 
 /**
@@ -290,6 +323,9 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   nota_clinica: null,
   presencia: null,
   raza: null,
+  coach: null,
+  coach_router: null,
+  coach_parte: null,
 }
 
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
@@ -302,4 +338,13 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   // hay prefijo estable que cachear. Si algún día el catálogo se mueve al
   // bloque `system`, esto se vuelve a mirar CON número.
   raza: false,
+  // 🔴 SÍ, y es la única además de `presencia`: el system de `coach` es la LEY
+  // (no diagnostica, no otra familia, no menores, escala a telemedicina) y va
+  // IDÉNTICO en cada turno de cada conversación de cada familia. Es el caso
+  // exacto para el que existe el caché.
+  coach: true,
+  coach_router: false,
+  // NO: su system es corto y se manda una vez por mascota por día. El caché
+  // cobra 25% de más por escribir algo que nadie va a releer en la ventana.
+  coach_parte: false,
 }

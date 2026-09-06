@@ -236,8 +236,15 @@ Deno.serve(async (req) => {
   const d = data as Record<string, unknown>
   let foto: string | null = null
   if (typeof d.foto_path === 'string' && d.foto_path.length > 0) {
-    // el bucket es privado (medido): se firma acá, corto.
-    const { data: f } = await sb.storage.from('mascotas').createSignedUrl(d.foto_path, 300)
+    /* El bucket es privado (medido): se firma acá, corto.
+       ⚠️ **Y se pide TRANSFORMADA.** La foto original de una mascota ronda los
+       60-500 kB; esta página se abre en la calle, con una mano, en la red que
+       haya. Se sirve a 264 px (el doble de los 132 css que se dibujan, para
+       pantallas densas) y calidad 60. *Una página que tarda no se lee: quien
+       encontró al animal cierra y sigue caminando.* */
+    const { data: f } = await sb.storage.from('mascotas').createSignedUrl(d.foto_path, 300, {
+      transform: { width: 264, height: 264, resize: 'cover', quality: 60 },
+    })
     foto = f?.signedUrl ?? null
   }
 
