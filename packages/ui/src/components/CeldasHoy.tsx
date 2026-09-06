@@ -17,6 +17,7 @@
 
 import { Pressable, View } from 'react-native'
 
+import { Chevron } from './chevron'
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -62,7 +63,13 @@ function Celda({
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[1] }}>
         <Texto variante="apoyo">{rotulo}</Texto>
         {/* El chevron SÓLO con destino: es la afordance, no un adorno. */}
-        {onPress !== undefined ? <Texto variante="apoyo">›</Texto> : null}
+        {/* 🔴 LA PRIMITIVA, NO EL CARÁCTER. Acá había un «›» tipográfico y el
+            emulador lo mostró por lo que era: un chevron distinto del de
+            `CeldaNavegacion` y `PieRevelar`, que salen de la misma tabla.
+            *Dos chevrones en la misma app son dos afordancias, y la persona
+            no sabe cuál de las dos lleva a algún lado.* Su propia cabecera lo
+            dice: la pieza lo porta, la pantalla usa la pieza. */}
+        {onPress !== undefined ? <Chevron color={theme.text.tertiary} direccion="derecha" /> : null}
       </View>
       {dato !== undefined ? <Texto variante="seccion">{dato}</Texto> : null}
       {children}
