@@ -37,7 +37,7 @@ import {
   Campo,
   CampoFecha,
   Encabezado,
-  FichaVacuna,
+  FilaConfirmacionVacuna,
   Hoja,
   HojaScroll,
   Tarjeta,
@@ -60,6 +60,8 @@ import {
 } from '@epetplace/api';
 
 import { borrarFotoMascota, leerBase64, subirFotoMascota } from '@/lib/subir-avatar';
+import { faltaParaConfirmar } from '@/lib/carnet/confirmable';
+import type { ConfianzaExtraccion } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 
 // 1600px: el texto del carnet tiene que seguir siendo legible para el
@@ -82,8 +84,18 @@ interface ItemRevision {
    *  campo: sin esto tiene que ir a buscar el papel para saber de dónde salió
    *  la fecha que le proponemos. */
   fecha_literal: string | null;
-  /** La edge la marcó: el literal no sostiene la fecha que trae. */
-  dudosaPorFecha: boolean;
+  /** 🔴 **TAL CUAL LA MANDA LA EDGE**, no achatada a booleano: `'fecha'` (el
+   *  modelo completó algo) e `'incompleta'` (algo faltaba y se anuló) son
+   *  causas distintas. Antes se guardaba como `dudosaPorFecha: v.dudosa !==
+   *  null` y **la causa se perdía en la puerta** — la fila no podía decir por
+   *  qué la frenaban. */
+  dudosa: 'fecha' | 'incompleta' | null;
+  /** De la edge. La fila la muestra: una lectura de confianza baja se revisa
+   *  distinto que una alta, y esconderlo es decidir por la persona. */
+  confianza: ConfianzaExtraccion;
+  /** La persona la dio por buena. **Sin esto no se guarda ninguna**: revisar
+   *  es un acto, no un default. */
+  tocada: boolean;
   fecha_proxima: string | null;
   veterinario: string | null;
   lote: string | null;
@@ -111,19 +123,15 @@ const VOZ_SUBIDA = {
   red_o_desconocido:    { key: 'carnet.subidaRed', reintentable: true },
 } as const;
 
-// dudosa = SOLO fecha faltante (S48): tipo null se guarda tal cual.
-// 🔴 S113-D-2.4 · una fila SIN NOMBRE es dudosa, igual que una sin fecha.
-// Es lo que hace cumplir la firma del founder —«la pantalla obliga a completar
-// antes de guardar»— **reusando la máquina que esta pantalla ya tenía**:
-// `guardar()` se niega mientras haya dudosas. La columna sigue NOT NULL en la
-// base, así que sin este guard el guardado rebotaría con `item_invalido` recién
-// del lado del servidor, después de que la persona apretó.
-// 🔴 S113-D-2.5 · una fecha PARCIAL también es dudosa. El carnet puede decir
-// «FEB 2023» y eso es todo lo que dice; la columna `fecha_aplicada` es `date` y
-// no admite un mes suelto. **La persona pone el día mirando el carnet** — y si
-// no está, descarta la fila. *Lo que no se hace es que el sistema elija un día.*
-const esDudosa = (i: ItemRevision) =>
-  !i.fecha_aplicada || !i.nombre || i.fecha_precision !== 'dia' || i.dudosaPorFecha;
+/* ☠️ **`esDudosa` MURIÓ ACÁ** (reconciliación 1.2, orden de mesa). Recalculaba
+   en la pantalla lo que la edge ya decide (`dudosa`) y lo mezclaba con el hecho
+   de la columna `date`. Su contenido no se perdió: vive entero en
+   `lib/carnet/confirmable.ts`, que **lee la marca del servidor** en vez de
+   volver a deducirla. *Una regla, una pantalla* — y las razones de D (nombre
+   nulo, fecha parcial) siguen rigiendo, que eran correctas: lo que sobraba era
+   que vivieran en un tercer lugar.
+   Se conserva el nombre local para que el resto de la pantalla no cambie. */
+const esDudosa = (i: ItemRevision) => faltaParaConfirmar(i) !== null;
 
 function hoyIso(): string {
   const d = new Date();
@@ -231,9 +239,9 @@ export default function CarnetDeVacunas() {
         fecha_aplicada: v.fecha_aplicada,
         fecha_precision: v.fecha_aplicada_precision,
         fecha_literal: v.fecha_literal,
-        // Cualquier marca de la edge frena el guardado: 'fecha' (el modelo
-        // completó algo) o 'incompleta' (algo faltaba y se anuló).
-        dudosaPorFecha: v.dudosa !== null,
+        dudosa: v.dudosa,
+        confianza: v.confianza,
+        tocada: false,
         fecha_proxima: v.fecha_proxima,
         veterinario: v.veterinario,
         lote: v.lote,
@@ -283,14 +291,81 @@ export default function CarnetDeVacunas() {
     setItems((prev) => prev.map((i) => (i.key === key ? { ...i, descartada: true } : i)));
   }
 
-  // ── B4/B5 · guardar ────────────────────────────────────────────────────────
+
+/** Los campos que la fila muestra. 🔴 **Sólo los que se leyeron**: la pieza
+ *  dibuja un campo vacío **como algo a completar**, así que mandar los cinco
+ *  siempre daría, en una fila sin fecha, TRES pedidos de fecha —«Aplicada»
+ *  vacía, «Próxima» vacía y el que la pieza pide por `incompleta`—. *Tres
+ *  casillas para un dato no piden tres veces: hacen dudar de cuál es la buena.*
+ *  El único campo exigido es la fecha aplicada, y ése lo pide la pieza. */
+function camposDe(
+  i: ItemRevision,
+  t: ReturnType<typeof useTraduccion>['t'],
+): { etiqueta: string; valor: string | null }[] {
+  const todos = [
+    { etiqueta: t('carnet.campoAplicada'), valor: i.fecha_aplicada },
+    { etiqueta: t('carnet.campoProxima'), valor: i.fecha_proxima },
+    { etiqueta: t('carnet.campoTipo'), valor: i.tipo_vacuna },
+    { etiqueta: t('carnet.campoLote'), valor: i.lote },
+    { etiqueta: t('carnet.campoVeterinario'), valor: i.veterinario },
+  ];
+  const tiene = (c: { valor: string | null }) => c.valor !== null && c.valor.trim() !== '';
+  /* 🔴 **EL CAMPO QUE FALTA SE DEJA PASAR, Y SÓLO ÉSE.** Medido en pantalla con
+     el carnet real: la pieza cuelga su aviso **del campo vacío** —lo dibuja con
+     borde de atención y el texto debajo—, así que filtrar todos los vacíos
+     dejaba la fila **muda**: el pie decía «faltan 3» y ninguna fila lo decía.
+     *Mi filtro y la pieza se contradecían, y el resultado era el mismo síntoma
+     del bloqueante del founder: una cuenta que nadie podía ver.*
+     Pasa **uno**: la fecha aplicada cuando es lo que falta. Los otros cuatro
+     vacíos siguen fuera — con los cinco, una fila sin fecha mostraba **tres
+     casillas de fecha** y *tres casillas para un dato no piden tres veces:
+     hacen dudar de cuál es la buena.* */
+  const falta = faltaParaConfirmar(i) === 'fecha';
+  return todos.filter((c) => tiene(c) || (falta && c.etiqueta === t('carnet.campoAplicada')));
+}
+
+// ── B4/B5 · guardar ────────────────────────────────────────────────────────
 
   const activas = items.filter((i) => !i.descartada);
   const dudosas = activas.filter(esDudosa).length;
+  /** 🔴 **LAS QUE FALTAN TOCAR.** Con la pieza de B, confirmar es un ACTO: la
+   *  fila trae «Es correcta» y hasta que alguien la toque, nadie la revisó.
+   *  Sin esta cuenta `tocada` sería decorativo — *un botón que se dibuja y no
+   *  cambia nada enseña a ignorarlo*. Se cuenta **sólo entre las completas**:
+   *  pedirle a alguien que confirme una fila a la que le falta la fecha es
+   *  pedirle que dé por buena una fila que no puede guardarse. */
+  const sinTocar = activas.filter((i) => faltaParaConfirmar(i) === null && !i.tocada).length;
   const n = activas.length;
 
+  /** El nombre que la persona escribe cuando la IA no lo leyó. **Al escribirlo
+   *  la fila deja de estar incompleta sola**: no hay un segundo acto de
+   *  «guardar el nombre» — *pedir dos toques para un dato que ya se tecleó es
+   *  hacer trabajar dos veces por la misma cosa*. */
+  function editarNombre(key: number, v: string) {
+    setItems((xs) => xs.map((i) => (i.key === key ? { ...i, nombre: v } : i)));
+  }
+
+  /** 🔴 **CONFIRMAR NO PUEDE MARCAR UNA FILA QUE NO SE PUEDE GUARDAR.** Si le
+   *  falta algo, el toque **no se traga**: no marca, y la fila ya dice qué
+   *  falta con su voz al lado del campo. *Un acto que no hace nada y no explica
+   *  es indistinguible de una app colgada* — es el defecto que el founder vio
+   *  en su teléfono, y la cura fue que la cuenta sea una sola. */
+  function confirmar(key: number) {
+    setItems((xs) =>
+      xs.map((i) => (i.key === key && faltaParaConfirmar(i) === null ? { ...i, tocada: true } : i)),
+    );
+  }
+
+  /** La PRIMERA que falta, en el orden de la lista: es dónde va el foco. */
+  const primeraIncompleta = activas.find((i) => faltaParaConfirmar(i) !== null)?.key ?? -1;
+
   async function guardar() {
-    if (guardando || n === 0 || dudosas > 0) return;
+    if (guardando || n === 0 || dudosas > 0 || sinTocar > 0) {
+      /* Nunca un corte mudo: el pie ya dice la razón arriba del botón, y el
+         botón está apagado — pero si algo llegara acá con el pie desincronizado,
+         callarse sería el defecto del 1.1.2 otra vez. */
+      return;
+    }
     setGuardando(true);
     setErrorGuardar(null);
     // Cinturón: `guardar()` ya se niega con `dudosas > 0`, y una fila sin
@@ -301,7 +376,7 @@ export default function CarnetDeVacunas() {
     const conNombre = activas.filter(
       (i): i is ItemRevision & { nombre: string } =>
         typeof i.nombre === 'string' && i.nombre.length > 0 &&
-        i.fecha_precision === 'dia' && !i.dudosaPorFecha,
+        i.fecha_precision === 'dia' && i.dudosa === null,
     );
     if (conNombre.length !== activas.length) {
       setGuardando(false);
@@ -434,20 +509,39 @@ export default function CarnetDeVacunas() {
 
           {activas.map((i) => (
             <View key={i.key} onLayout={(e) => posiciones.current.set(i.key, e.nativeEvent.layout.y)}>
-              <FichaVacuna
-                // ⚠️ PARA C: sin nombre esto pinta un título VACÍO. La fila
-                // ya sale marcada como dudosa y no se puede guardar, así que
-                // no rompe nada — pero **qué se le muestra a la familia cuando
-                // el nombre no se lee es diseño tuyo**, con su copy y su gate.
-                // No lo invento acá.
-                nombre={i.nombre ?? ''}
-                fechaLiteral={i.fecha_literal}
-                tipoVacuna={i.tipo_vacuna}
-                fechaAplicada={i.fecha_aplicada}
-                fechaProxima={i.fecha_proxima}
-                veterinario={i.veterinario}
-                lote={i.lote}
-                rechazada={i.rechazada}
+              {/* ⭐ **LA PIEZA DE B, QUE ES LA QUE EL FOUNDER VALIDÓ.**
+                  Reemplaza a `FichaVacuna` por orden de mesa. Lo que trae y
+                  `FichaVacuna` no podía: **decir por qué una fila está
+                  frenada, pegado al campo que falta**, y **pedir el nombre
+                  cuando no se leyó** — que es exactamente la pregunta que D
+                  dejó abierta acá («qué se le muestra a la familia cuando el
+                  nombre no se lee es diseño tuyo»). */}
+              <FilaConfirmacionVacuna
+                nombre={i.nombre}
+                etiquetaNombre={t('carnet.campoNombre')}
+                vozSinNombre={t('carnet.sinNombre')}
+                onNombre={(v) => editarNombre(i.key, v)}
+                /* 🔴 **UNA SOLA CUENTA.** La misma función que decide si el pie
+                   se enciende decide qué marca esta fila: si discreparan, el
+                   botón volvería a mentir — que es el defecto que el founder
+                   vio en su teléfono. */
+                /* Sólo la FECHA viaja como `incompleta`: **el nombre lo
+                   resuelve la pieza sola** por `nombre === null`, con su
+                   `vozSinNombre`. Mandarlo por los dos caminos pondría dos
+                   avisos sobre el mismo hueco. */
+                incompleta={faltaParaConfirmar(i) === 'fecha' ? 'fecha' : undefined}
+                vozIncompleta={faltaParaConfirmar(i) === 'fecha' ? t('carnet.faltaFecha') : undefined}
+                /* El foco lo decide LA LISTA, no la fila: la primera que falte.
+                   Que cada fila decidiera enfocarse daría N focos peleando. */
+                enfocar={i.key === primeraIncompleta}
+                campos={camposDe(i, t)}
+                confianza={i.confianza}
+                vozOrigen={i.fecha_literal !== null ? t('carnet.filaOrigen', { literal: i.fecha_literal }) : undefined}
+                vozRevisar={t('carnet.filaRevisar')}
+                vozConfirmar={t('carnet.filaConfirmar')}
+                vozDescartar={t('carnet.estaNoEs')}
+                tocada={i.tocada}
+                onConfirmar={() => confirmar(i.key)}
                 onEditar={() => abrirEdicion(i.key)}
                 onDescartar={() => descartar(i.key)}
               />
@@ -467,11 +561,23 @@ export default function CarnetDeVacunas() {
               {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
             </Text>
           )}
+          {/* 🔴 **DOS RAZONES DISTINTAS, DOS VOCES DISTINTAS** — y en orden:
+              primero completar, después revisar. *«Faltan 3 por revisar» sobre
+              una fila a la que le falta la fecha manda a hacer lo segundo antes
+              que lo primero.* Sólo se dice cuando ya no falta completar nada. */}
+          {dudosas === 0 && sinTocar > 0 && (
+            <Text
+              accessibilityLiveRegion="polite"
+              style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.text.secondary }}
+            >
+              {sinTocar === 1 ? t('carnet.faltaTocarUna') : t('carnet.faltanTocar', { n: sinTocar })}
+            </Text>
+          )}
           <Boton
             variante="primario"
             bloque
             etiqueta={n === 1 ? t('carnet.guardarUna') : t('carnet.guardarN', { n })}
-            deshabilitado={n === 0 || dudosas > 0}
+            deshabilitado={n === 0 || dudosas > 0 || sinTocar > 0}
             cargando={guardando}
             onPress={() => void guardar()}
           />

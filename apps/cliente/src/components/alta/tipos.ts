@@ -20,7 +20,14 @@
 import type { AvatarMascotaEspecie } from '@epetplace/ui';
 
 /** Los cuatro pasos de la lámina + el cierre (que no es un paso: es el acto). */
-export const PASOS = ['especie', 'raza', 'historia', 'foto', 'cierre'] as const;
+/* 🔴 **LA FOTO SUBE ANTES QUE LA RAZA** (S113-C · 1.2 · C9), y el orden es la
+   condición de la sugerencia: *sin foto no hay nada que mirar*, así que
+   preguntar la raza antes obligaba a que la persona la escribiera sola y
+   después le mostráramos que podíamos haberla adivinado.
+   ⚠️ Cambia un orden que el founder ya conoce. Lo que NO cambia es que la
+   raza siga siendo opcional ni cómo se guarda: el paso es el mismo, se
+   corrió de lugar. */
+export const PASOS = ['especie', 'foto', 'raza', 'historia', 'cierre'] as const;
 export type Paso = (typeof PASOS)[number];
 
 export function esPaso(v: unknown): v is Paso {
