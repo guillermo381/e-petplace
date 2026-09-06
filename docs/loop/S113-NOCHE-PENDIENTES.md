@@ -196,3 +196,25 @@ credibilidad entera en una frase, y la recupera nunca.*
 (c) no muestra peso en el encabezado. **Voto: (a) con su fecha** — la familia quiere saber
 cuánto pesa hoy, y el que lo sabe es el que midió último. **Pero es firma**, porque elegir entre
 «lo que dijo el vet» y «lo que dijo la familia» es una decisión de producto, no de UI.
+
+---
+
+### E-10 · ⚪ Una nota en `main` describe un mundo que ya no existe, y manda a pedir lo que ya está
+
+**Medido en `origin/main`, las dos mitades:**
+- `apps/cliente/src/app/(tabs)/hogar/mascota/[mascotaId].tsx` dice: *«`FichaRazaProps` **no
+  tiene slot de cierre** (8 props, ninguna lo admite). **Pedido a B abajo**; el día que exista,
+  esto se muda adentro»*.
+- `packages/ui/src/components/FichaRaza.tsx` **tiene `cierre?: React.ReactNode`** (línea 59) **y
+  lo dibuja** (línea 155).
+
+**El slot existe desde `771220ef`**, y ahora además hay qué poner adentro (`InvitacionBio`).
+⇒ **la anatomía local de la pantalla puede morir y el pedido está cumplido.**
+
+**Por qué se anota aunque sea chico:** *un puente que sobrevive a su río manda al próximo a
+construir otro* (L-395). La nota no está equivocada por descuido — **era verdadera el día que se
+escribió**, y nadie la retiró en el mismo acto que la volvió falsa. Quien la lea mañana va a
+pedir un slot que tiene delante.
+
+**No es firma:** es una cura de una línea con dueño en `apps/cliente`. Se anota para que no se
+pierda entre tres pistas.
