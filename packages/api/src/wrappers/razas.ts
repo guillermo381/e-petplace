@@ -46,7 +46,10 @@ export interface SugerenciaDeRaza {
 }
 
 export interface InputSugerirRaza {
-  imagenBase64: string;
+  /** ⚰️ Era `imagenBase64`, en español. Unificado con `extract-vacuna`, que lo
+   *  pide en inglés desde S46 (S113-D lote 2.7). La edge acepta las dos
+   *  grafías un tiempo y avisa por log; este wrapper manda ya la vigente. */
+  imageBase64: string;
   /** La especie que la persona DECLARÓ. La edge lee de `cat_razas` las razas
    *  activas de esa especie y el modelo elige sólo de ahí. */
   especie: string;
@@ -91,7 +94,7 @@ export async function sugerirRaza(
 ): Promise<ResultadoWrapper<SugerenciaDeRaza, CodigoErrorRaza>> {
   const { data, error } = await getClient().functions.invoke('sugerir-raza', {
     body: {
-      imagenBase64: input.imagenBase64,
+      imageBase64: input.imageBase64,
       especie: input.especie,
       mediaType: input.mediaType,
     },

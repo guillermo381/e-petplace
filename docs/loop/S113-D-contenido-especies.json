@@ -1,0 +1,194 @@
+{
+  "generado_el": "2026-09-06T00:21:38.664Z",
+  "modelo": "claude-sonnet-5",
+  "fichas": [
+    {
+      "especie": "pez",
+      "raza_codigo": null,
+      "conocida": true,
+      "origen": null,
+      "temperamento": "Un pez no busca contacto ni compañía como lo hace un perro o un gato. Su bienestar depende casi todo del agua y del acuario, no del vínculo directo con la familia. Aun así cada especie de pez tiene su carácter: algunos son tranquilos y se mueven poco, otros son activos y curiosos, y algunos son territoriales con otros peces. Es una mascota para observar y cuidar con atención constante al ambiente, más que para interactuar físicamente. Los niños pueden participar en la alimentación y en la observación, pero el mantenimiento del acuario es tarea de un adulto.",
+      "talla_adulta": "El rango es enorme, desde pocos centímetros hasta más de treinta, según la especie y el tipo de pez. El tamaño adulto y el volumen de acuario que necesita hay que consultarlo puntualmente para ese pez en particular.",
+      "esperanza_vida": "También varía mucho según la especie, de dos o tres años a más de diez en algunos casos. Es un rango amplio y conviene informarse sobre la especie concreta que se tiene en casa.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En la etapa temprana lo más importante es la calidad del agua: temperatura estable, buena filtración y niveles controlados de amoníaco y nitritos. Los peces jóvenes son más sensibles a los cambios bruscos. La alimentación debe ser en porciones pequeñas y frecuentes, con alimento adecuado a su tamaño. Conviene evitar la sobrepoblación del acuario y observar si hay peces más grandes que puedan intimidarlos o lastimarlos. Cualquier cambio en el color, la natación o el apetito conviene consultarlo con el veterinario especializado en peces.",
+        "adulto": "En esta etapa se mantiene la rutina de cuidado del agua: cambios parciales periódicos, control de temperatura y filtración en buen estado. La alimentación debe ajustarse a la especie, sin excederse en cantidad, porque el exceso de comida ensucia el agua y afecta la salud del pez. Es importante observar el comportamiento habitual, para detectar cambios que indiquen malestar, como nadar de forma extraña, dejar de comer o quedarse en el fondo. El acuario necesita espacio suficiente para el tamaño y la cantidad de peces que conviven ahí.",
+        "senior": "Los peces mayores pueden volverse más lentos y comer menos que antes. Conviene mantener el agua en condiciones óptimas, porque en esta etapa son más sensibles a cualquier desequilibrio. Es recomendable observarlos con frecuencia para notar cambios en la piel, las aletas o la forma de nadar. Ante cualquier señal de deterioro visible o pérdida de apetito sostenida, lo indicado es consultar al veterinario especializado en peces."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": null,
+      "conocida": true,
+      "origen": null,
+      "temperamento": "Los roedores como mascota suelen ser animales activos, curiosos y con instinto de roer marcado, algo que necesitan hacer todos los días para desgastar los dientes. Muchas especies son sociales y disfrutan la compañía de otros de su misma especie, aunque esto varía mucho según el tipo de roedor. Son animales pequeños y sensibles al manejo brusco, por lo que conviene que el contacto con niños esté siempre supervisado por un adulto. Suelen ser más activos al atardecer y de noche. Con manejo tranquilo y constante, muchos se acostumbran a las manos de la familia y a que los tomen en brazos.",
+      "talla_adulta": "Entre los roedores hay muchísima variación de tamaño según la especie y el tipo: desde animales de pocos centímetros hasta otros considerablemente más grandes. El rango es muy amplio y depende del tipo de roedor que tengas en casa.",
+      "esperanza_vida": "También varía mucho según la especie: algunos roedores viven apenas uno o dos años, y otros pueden llegar a vivir varios años más. El rango es amplio y depende del tipo de roedor.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En la etapa temprana lo más importante es un espacio seguro, sin corrientes de aire ni cambios brustos de temperatura, y con acceso constante a agua limpia y alimento adecuado a su edad. El manejo tiene que ser suave y progresivo, para que se acostumbre a las manos de la familia sin asustarse. Es un buen momento para observar cómo se relaciona con otros de su especie si conviven varios, y para that toda la familia entienda que son animales delicados que no se deben apretar ni sostener con fuerza. Cualquier cría que se vea débil, que no coma o que esté separada del grupo sin motivo aparente hay que llevarla al veterinario.",
+        "adulto": "En esta etapa la base es un hábitat limpio, con espacio suficiente para moverse, y material adecuado para roer y desgastar los dientes, que en los roedores crecen de forma continua. La alimentación tiene que ser la indicada para la especie, evitando excesos de alimentos ricos en azúcar o grasa. La limpieza frecuente del espacio donde vive es clave para evitar olores y problemas de piel o respiratorios. Conviene ofrecerle estímulos, como elementos para explorar o esconderse, porque el aburrimiento afecta su bienestar. Si notás que dejó de comer, que respira con dificultad, que tiene los dientes muy largos o que el pelo se le cae en zonas raras, es momento de consultar al veterinario.",
+        "senior": "Con la edad muchos roedores empiezan a moverse menos y pueden necesitar que el acceso a la comida y el agua esté más cerca o sea más fácil de alcanzar. La piel, los dientes y las uñas conviene revisarlos con más frecuencia, porque en esta etapa aparecen más problemas de este tipo. Los cambios de peso, ya sea que suba o baje, son una señal para prestar atención. El manejo debe ser todavía más cuidadoso, porque los huesos y el cuerpo en general son más frágiles. Ante cualquier cambio de comportamiento, de apetito o de movilidad, la visita al veterinario no debería demorarse."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": null,
+      "conocida": true,
+      "origen": null,
+      "temperamento": "La cobaya es un animal social que necesita compañía de su misma especie, no le alcanza con la atención humana. Es tranquila, se asusta con facilidad y con manejo suave y constante llega a reconocer a su familia y a pedir atención con sonidos. No es un animal para tener solo en una jaula aislada: sufre con la soledad. Con niños convive bien si el trato es calmado y supervisado, porque es frágil y se estresa con movimientos brustos o ruidos fuertes.",
+      "talla_adulta": "El tamaño adulto varía bastante según el tipo, en general entre 20 y 40 centímetros de largo y entre 700 gramos y 1.5 kilos. Conviene mirar el tamaño esperado según el tipo de cobaya en particular.",
+      "esperanza_vida": "La esperanza de vida es amplia y depende del tipo y de los cuidados, en general entre 4 y 8 años, pudiendo llegar a más en algunos casos.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En las primeras semanas de vida la cobaya ya come sólido y necesita heno disponible todo el tiempo, además de verdura fresca y alimento balanceado específico para la especie. El espacio tiene que ser amplio, con piso firme, y siempre debe vivir con al menos otra cobaya. El manejo tiene que ser suave, sosteniéndola con las dos manos y sin dejarla caer, porque a esta edad es especialmente delicada. Cualquier bajón de peso o falta de apetito hay que consultarlo con el veterinario.",
+        "adulto": "En la etapa adulta la base de la alimentación sigue siendo el heno disponible todo el día, junto con verdura fresca variada y una porción de balanceado. La cobaya necesita vitamina C en la dieta porque no la produce por sí misma, y el veterinario puede orientar sobre la mejor forma de asegurarla. El espacio tiene que permitir moverse y esconderse, con buena limpieza para evitar humedad. Sigue necesitando compañía de su especie y rutina estable, los cambios bruscos de ambiente le generan estrés.",
+        "senior": "En la etapa senior conviene prestar atención a los dientes, las uñas y el peso, porque los problemas se hacen más frecuentes con la edad. Puede necesitar que la comida esté más accesible si se mueve con menos soltura. Los controles veterinarios periódicos ayudan a detectar cambios a tiempo. El ambiente tranquilo y la compañía siguen siendo importantes, y cualquier cambio en el apetito, el pelo o la forma de moverse conviene consultarlo con el veterinario sin demorar."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "gato-comun",
+      "conocida": true,
+      "origen": null,
+      "temperamento": "El gato es un animal independiente pero también cariñoso a su manera. Cada gato marca su propio ritmo de acercamiento y no conviene forzarlo. Le gusta tener rutinas estables y espacios propios donde sentirse seguro, como alturas para observar o rincones tranquilos para descansar. Es limpio por naturaleza y necesita su bandeja siempre disponible y en buen estado. Puede convivir con niños y otros animales si el encuentro se hace con paciencia, pero necesita siempre la posibilidad de retirarse si algo lo incomoda. No responde bien a los gritos ni al manejo brusco.",
+      "talla_adulta": "El tamaño adulto varía bastante según el tipo de gato, desde ejemplares pequeños y livianos hasta otros notablemente más grandes y robustos. Es un rango amplio y depende mucho de cada gato en particular.",
+      "esperanza_vida": "La esperanza de vida también es un rango amplio, que puede ir de unos diez años a bastante más de quince. Depende de la genética individual, del tipo de gato y sobre todo de los cuidados que recibe a lo largo de su vida.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En las primeras semanas el gatito necesita calor, calma y muy poca manipulación si todavía está con la madre. Cuando empieza a comer solo, se lo debe alimentar varias veces al día con una comida formulada para esa etapa. Es un momento clave para las primeras experiencias: presentarlo de forma tranquila a sonidos, personas y a la bandeja sanitaria ayuda mucho a que de adulto sea un gato seguro. Conviene empezar pronto la visita al veterinario para seguir su desarrollo y planificar la vacunación.",
+        "adulto": "En esta etapa lo principal es mantener rutinas estables: horarios de comida, acceso constante a agua fresca y una bandeja limpia. El gato adulto necesita estímulo físico y mental, con juegos, rascadores y algo de altura para trepar u observar. La alimentación debe ajustarse a su nivel de actividad para evitar el sobrepeso. Los controles veterinarios periódicos siguen siendo importantes aunque el gato se vea sano, porque suele disimular bien las molestias.",
+        "senior": "El gato mayor puede volverse menos ágil y dormir más horas. Es buen momento para facilitarle el acceso a sus lugares favoritos, con rampas o superficies más bajas si le cuesta saltar. La alimentación y la hidratación merecen atención especial, y cualquier cambio en el apetito, el peso o los hábitos de la bandeja conviene comentarlo con el veterinario sin demora. Los controles regulares ayudan a detectar a tiempo lo que en esta etapa suele aparecer con más frecuencia."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": null,
+      "conocida": true,
+      "origen": null,
+      "temperamento": "El conejo es un animal social y sensible, que necesita compañía y rutinas estables. Se apega a su familia pero no siempre disfruta que lo alcen: por instinto de presa, sentir el cuerpo en el aire le genera miedo, y muchos prefieren el contacto a nivel del suelo. Es un animal de horarios, más activo al amanecer y al atardecer. Es curioso y necesita explorar y masticar, así que hay que preparar la casa para eso. Con paciencia y manejo suave se puede volver muy confiado, pero los movimientos bruscos o los gritos lo estresan de verdad, y el estrés en esta especie afecta directamente su salud física.",
+      "talla_adulta": "Varía mucho según la raza o el tipo: hay conejos de poco más de un kilo y otros que superan los seis kilos. No hay un tamaño único para la especie, y conviene no guiarse por el tamaño de cachorro para imaginar el tamaño adulto.",
+      "esperanza_vida": "También es un rango amplio, que depende bastante de la raza, la alimentación y los cuidados: en general se habla de entre 6 y 12 años, aunque hay ejemplares que viven más.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En las primeras semanas el conejo depende totalmente de la madre y no debe separarse de ella antes de tiempo. Una vez en casa, la etapa temprana es clave para la socialización: hay que acostumbrarlo a que lo toquen las manos, a los sonidos de la casa, y a un manejo tranquilo desde chico para que no le tenga miedo a la gente. La alimentación en esta etapa necesita heno de buena calidad de forma constante y una introducción gradual de otros alimentos, siempre con la guía del veterinario. El espacio debe estar libre de cables y de plantas al alcance, porque el instinto de morder aparece temprano y con fuerza.",
+        "adulto": "El conejo adulto necesita un espacio amplio para moverse, no solo una jaula para dormir: correr, saltar y estirarse todos los días es parte de su bienestar. La dieta se basa en heno disponible todo el tiempo, verduras frescas variadas y una cantidad moderada de pellets, evitando el exceso de azúcares. Los dientes le crecen toda la vida, así que necesita masticar heno y materiales adecuados para desgastarlos. Conviene revisar el pelaje y las uñas con regularidad, y estar atento a la cantidad y forma de las heces, porque un conejo que deja de comer o no defeca es una urgencia que hay que llevar al veterinario sin demora.",
+        "senior": "Con la edad, el conejo puede volverse menos activo y hay que vigilar que no suba de peso, porque eso le complica la higiene y la movilidad. La artrosis es algo a tener en cuenta, así que conviene facilitarle el acceso a la comida y al lugar de descanso sin que tenga que saltar demasiado. Los dientes y las uñas necesitan revisiones más seguidas. Cualquier cambio en el apetito, en la forma de moverse o en las heces merece una consulta veterinaria pronta, porque en esta especie los problemas de salud pueden agravarse muy rápido si no se atienden a tiempo."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": null,
+      "conocida": true,
+      "origen": null,
+      "temperamento": "Convivir con un ave pide entender que es una especie de prey animal, alerta y sensible a los cambios. Muchas son sociables y forman vínculo fuerte con la familia, buscan atención y se aburren si están mucho tiempo solas. Otras son más independientes y toleran menos el manejo directo. El ruido, la rutina y el contacto diario influyen mucho en cómo se comporta. Necesita estímulo mental, de lo contrario puede desarrollar conductas como gritar, arrancarse plumas o morder. No es una mascota de bajo mantenimiento solo porque sea pequeña.",
+      "talla_adulta": "Va de unos pocos centímetros hasta más de un metro contando la cola, según el tipo de ave. El rango es enorme y depende totalmente de la raza o especie puntual, así que conviene guiarse por el ejemplar real y no por esta cifra general.",
+      "esperanza_vida": "Puede ir de unos 5 años hasta más de 50, con casos de aves grandes que superan esa edad. Es un rango muy amplio que depende del tipo de ave, así que hay que tomarlo como orientación y no como dato fijo.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En la etapa temprana el ave necesita calor constante, calma y muy poco manejo brusco. Si llega joven a la casa, el proceso de adaptación es lento: conviene dejar que se acostumbre al entorno antes de buscar contacto físico. La alimentación en esta fase suele requerir una dieta específica y a veces alguien con experiencia que asista, así que es mejor consultarlo con el veterinario antes de improvisar. La jaula o el espacio deben estar lejos de corrientes de aire y de ruidos fuertes repentinos.",
+        "adulto": "En la etapa adulta lo central es la rutina: horarios de luz, alimentación variada y tiempo fuera de la jaula si la especie lo permite. Necesita estímulo mental, juguetes que pueda destruir o manipular, y contacto social si es una especie que lo busca. La dieta cambia según el tipo de ave y conviene revisarla con el veterinario, evitando dar por sentado que las semillas solas alcanzan. Cualquier cambio en el canto, la postura, las plumas o el apetito es señal de alarma y hay que consultarlo pronto, porque las aves suelen esconder los signos de enfermedad hasta que están muy avanzados.",
+        "senior": "Un ave mayor puede volverse más quieta, dormir más y necesitar menos manipulación directa. Conviene facilitarle el acceso a la comida y al agua si baja su movilidad, y revisar con más frecuencia las patas, el pico y las plumas. Los cambios de temperatura le cuestan más, así que hay que cuidar el ambiente. Ante cualquier señal de dolor, dificultad para pararse en la percha o cambios de comportamiento, lo indicado es que lo evalúe el veterinario sin demora."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "criollo",
+      "conocida": true,
+      "origen": null,
+      "temperamento": "El perro es un animal social que busca el contacto con su familia y necesita sentirse parte del grupo. Es leal y se apega a sus personas de referencia. Cómo se comporta en el día a día depende mucho de la raza, la genética individual y la crianza, pero en general necesita rutina, ejercicio acorde a su energía y momentos de contacto con las personas. La falta de estímulo o de compañía puede generar ansiedad o conductas destructivas. Antes de tenerlo en casa conviene pensar en el tiempo diario que se le puede dedicar a paseos, juego y atención.",
+      "talla_adulta": "Varía enormemente según la raza o el tipo: desde poco más de un kilo hasta más de setenta. Este dato hay que mirarlo en la ficha de la mascota, no en la de la especie.",
+      "esperanza_vida": "El rango es muy amplio y depende del tamaño, la raza y la salud general: suele ir de los ocho a los diecisiete años, con las razas más pequeñas viviendo generalmente más que las grandes.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En las primeras semanas de vida el cachorro depende totalmente de la madre o de cuidados intensivos si está solo. Después del destete necesita varias comidas pequeñas al día con un alimento formulado para su etapa. Es el momento clave para la socialización: exponerlo de forma tranquila a personas, otros animales, sonidos y superficies distintas ayuda a que sea un adulto seguro. El plan de vacunación y desparasitación lo define el veterinario, y no conviene saltarlo. También es la etapa de empezar hábitos: dónde duerme, dónde hace sus necesidades, qué se puede morder y qué no. Cualquier decaimiento, falta de apetito o diarrea persistente hay que consultarlo enseguida, porque en esta etapa se descompensan rápido.",
+        "adulto": "El perro adulto necesita una rutina estable de alimentación, ejercicio y descanso. La cantidad de actividad física varía según el tamaño y el tipo, pero todos necesitan salir a moverse y estimularse mentalmente. La alimentación se ajusta a su peso y nivel de actividad, evitando sobrealimentar. Los controles veterinarios anuales, las vacunas de refuerzo y la prevención de parásitos externos e internos son parte de mantenerlo sano. Cambios de conducta como agresividad repentina, decaimiento o pérdida de apetito conviene consultarlos con el veterinario.",
+        "senior": "Con la edad el perro reduce su actividad y puede necesitar un alimento más liviano o adaptado a sus articulaciones y riñones. Conviene facilitarle el acceso a su cama, agua y comida, sobre todo si le cuesta moverse o subir escaleras. Los controles veterinarios se hacen más frecuentes para detectar a tiempo problemas de vista, oído, articulaciones o dientes. Cambios como más sed de lo habitual, desorientación, dificultad para pararse o pérdida de peso son señales para consultar sin demora."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "otro",
+      "raza_codigo": "otro",
+      "conocida": true,
+      "origen": null,
+      "temperamento": "Convivir con una mascota que no es perro ni gato pide informarse puntualmente sobre esa especie, porque las necesidades cambian mucho de un animal a otro. Algunas son sociables y buscan contacto, otras son más independientes o incluso se estresan con el manejo frecuente. Antes de traerla a casa conviene averiguar si es una especie que tolera bien la interacción con niños, cuánto tiempo de atención necesita por día y si puede convivir con otras mascotas de la casa. El veterinario que atienda a este animal en particular es la mejor fuente para entender su comportamiento específico.",
+      "talla_adulta": "Varía enormemente según la especie de que se trate, desde animales muy pequeños hasta ejemplares grandes. No hay un rango que sirva de referencia general: hay que guiarse por la especie y, si corresponde, por la raza o el tipo puntual del animal.",
+      "esperanza_vida": "También varía muchísimo: hay especies que viven pocos años y otras que pueden acompañar a la familia por décadas. El rango es demasiado amplio para dar un número general, así que conviene preguntarle al veterinario cuál es la expectativa de vida realista para este animal en particular.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En la etapa temprana de vida es cuando más cuidado hay que poner en el alojamiento, la temperatura, la alimentación y el manejo, porque cada especie tiene requerimientos distintos y a veces muy específicos. Es el momento clave para investigar bien qué necesita esta especie en particular antes de establecer una rutina, y para consultar con un veterinario con experiencia en ese tipo de animal. También es la etapa donde conviene ir acostumbrando al animal, con calma, al contacto humano si la especie lo tolera.",
+        "adulto": "Una vez que el animal está establecido, lo más importante es mantener una rutina estable de alimentación, limpieza del espacio donde vive y observación diaria. Cualquier cambio en el comportamiento, el apetito, el aspecto físico o la actividad habitual es una señal para consultar al veterinario, ya que en muchas especies los signos de enfermedad son sutiles y se notan tarde. Mantener el hábitat adecuado a la especie es tan importante como la alimentación misma.",
+        "senior": "En animales mayores conviene prestar más atención a cambios lentos: menos actividad, cambios en el peso, en el pelaje, el plumaje o la piel según corresponda, o en los hábitos de alimentación. Muchas especies no muestran signos evidentes de malestar hasta que el problema ya avanzó, así que los controles periódicos con el veterinario cobran más importancia en esta etapa. Ajustar el espacio donde vive para que le resulte más cómodo también suele ser necesario con el paso de los años."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "criollo",
+      "conocida": true,
+      "origen": null,
+      "temperamento": "El caballo es un animal social que necesita contacto con otros de su especie y con las personas que lo manejan. Es sensible y percibe el estado de ánimo de quien lo maneja, por eso responde mejor a la calma y la constancia que a los gritos o los apurones. Es un animal de huida por naturaleza, así que los ruidos fuertes o los movimientos bruscos lo pueden sobresaltar. Convivir con un caballo requiere tiempo diario, espacio adecuado y respeto por sus tiempos. No es una mascota de interior ni de patio chico: necesita moverse, pastar y estar con otros equinos siempre que sea posible.",
+      "talla_adulta": "La talla adulta varía mucho según el tipo o la raza, desde ponys que rondan el metro de alzada hasta caballos grandes que superan el metro setenta a la cruz. Es un rango amplio y conviene preguntar por el tamaño esperado del ejemplar en particular.",
+      "esperanza_vida": "La esperanza de vida también es amplia y depende del tipo, el manejo y la salud general del animal. En general se habla de veinticinco a treinta años, pero hay casos que viven menos y otros que llegan más lejos con buenos cuidados.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En la etapa temprana el potrillo necesita estar con la madre y con otros caballos para aprender a comportarse dentro del grupo. El destete y el primer manejo con personas deben ser progresivos y sin apuro, porque lo que aprende en estos meses le queda para toda la vida. Necesita espacio para moverse libremente, no estar encerrado, y una alimentación acorde a su crecimiento que conviene planificar con el veterinario. Los controles sanitarios y las primeras vacunas también se coordinan con él.",
+        "adulto": "El caballo adulto necesita movimiento diario, ya sea con trabajo, suelta a campo o ambas cosas. La alimentación se basa en forraje o pasto de buena calidad, con el agregado de balanceado si el trabajo o la condición del animal lo requieren, siempre evaluado por el veterinario. Los cascos necesitan revisión y mantenimiento periódico, con herraje o recorte según el caso. Las vacunas, la desparasitación y los controles dentales de rutina son parte del cuidado habitual. Cualquier cambio en el apetito, la forma de pararse o de moverse conviene consultarlo pronto, porque en esta especie los problemas pueden agravarse rápido.",
+        "senior": "El caballo mayor puede necesitar ajustes en la alimentación, con forraje más blando o de fácil digestión si empieza a perder piezas dentales. Conviene mantenerle el movimiento pero sin forzarlo, respetando lo que el cuerpo le permite. Los controles veterinarios se vuelven más frecuentes para seguir de cerca el estado de las articulaciones, el peso y la salud general. Hay que estar atento a que no pierda condición física de golpe, y cualquier señal de dolor, rigidez o cambio de comportamiento hay que consultarla con el veterinario."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "huron",
+      "raza_codigo": "huron",
+      "conocida": true,
+      "origen": null,
+      "temperamento": "El hurón es curioso, activo y juguetón, con ratos largos de sueño profundo entre medio. Necesita tiempo fuera de la jaula todos los días para explorar y gastar energía, siempre bajo supervisión porque tiende a meterse en huecos, cajones y agujeros pequeños. Muerde para explorar, sobre todo de joven, y hay que enseñarle límites con paciencia. Convive bien con la familia cuando se lo maneja con calma y constancia, y suele encariñarse mucho con las personas que lo cuidan. Tiene olor corporal natural, más allá de la higiene que se le dé. Es un animal que requiere dedicación diaria, no es de los que se arreglan solos en un rincón de la casa.",
+      "talla_adulta": "El tamaño varía bastante según el ejemplar: en general va de unos 20 a 40 centímetros de cuerpo, sin contar la cola, y entre 0,7 y 2 kilos de peso. Es un rango amplio porque depende del tipo de hurón y de cada individuo.",
+      "esperanza_vida": "Suele vivir entre 6 y 10 años, aunque también es un rango amplio que depende mucho del tipo de hurón, de su salud y de los cuidados que reciba a lo largo de la vida.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En la etapa temprana el hurón necesita un espacio seguro, con jaula amplia, escondites y una zona de descanso blanda. Es el momento de acostumbrarlo a las manos de la familia con manejo suave y frecuente, para que asocie el contacto humano con algo positivo. Muerde mucho mientras explora el mundo, y ahí es clave enseñarle con constancia que morder fuerte no está bien, sin gritos ni golpes. Conviene empezar pronto con el uso de una bandeja higiénica, porque aprenden rápido si se es constante. La alimentación tiene que ser la adecuada para su etapa de crecimiento, y ante cualquier duda sobre cantidades o tipo de alimento lo mejor es consultar al veterinario. También es el momento de programar la primera visita veterinaria para chequeo general y vacunas.",
+        "adulto": "El hurón adulto necesita salir de la jaula todos los días a explorar y jugar, con supervisión, porque su curiosidad lo lleva a meterse en lugares riesgosos. La casa tiene que estar a prueba de hurones: sin huecos abiertos, sin objetos pequeños que pueda tragar y sin productos de limpieza accesibles. La alimentación debe mantenerse estable y de calidad, y los cambios de dieta conviene hacerlos gradualmente. Hay que limpiar la jaula y la bandeja higiénica con regularidad para evitar olores fuertes. Es un animal sociable que agradece tiempo de juego e interacción diaria. Cualquier cambio en el apetito, el pelo, la energía o las heces conviene comentarlo con el veterinario sin demora.",
+        "senior": "Con la edad el hurón puede volverse menos activo y dormir más horas, aunque sigue disfrutando de ratos de juego suaves. Es buen momento para revisar que la jaula tenga accesos fáciles, sin escalones ni alturas que le compliquen el movimiento. La alimentación puede necesitar ajustes propios de la edad, y eso conviene definirlo con el veterinario. Los controles veterinarios periódicos son importantes en esta etapa, porque los problemas de salud se manejan mejor si se detectan a tiempo. Cualquier cambio notorio en el peso, la movilidad o el comportamiento merece una consulta veterinaria pronta."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": null,
+      "conocida": true,
+      "origen": null,
+      "temperamento": "Convivir con un reptil es distinto a convivir con un perro o un gato. No busca cariño ni compañía como esos animales, y no hay que esperar que lo haga. Es un animal de manejo tranquilo y observación más que de interacción constante. Muchas especies toleran algo de manipulación si se las acostumbra despacio, pero otras prefieren que no las toquen casi nunca. El vínculo con la familia se construye respetando sus tiempos, no forzando contacto. Los niños pueden disfrutar mucho observándolo, pero el manejo directo siempre necesita supervisión de un adulto, porque un reptil estresado puede morder o defenderse, y porque después de tocarlo hay que lavarse las manos siempre.",
+      "talla_adulta": "Va de unos pocos centímetros hasta más de un metro, según la especie y el tipo. Es un rango enorme y hay que informarse puntualmente sobre el ejemplar de la casa, porque el tamaño adulto define el terrario, el manejo y hasta la alimentación.",
+      "esperanza_vida": "También varía muchísimo: hay reptiles que viven unos pocos años y otros que acompañan a la familia por décadas. Depende del tipo y de la especie puntual, así que conviene averiguarlo antes de decidir tenerlo, pensando en un compromiso a largo plazo.",
+      "predisposiciones": [],
+      "cuidados_por_etapa": {
+        "cachorro": "En la etapa temprana el punto clave es la temperatura y la humedad del espacio donde vive. Un reptil joven necesita un terrario bien armado desde el principio, con una zona de calor y una de sombra, para poder regular su temperatura corporal moviéndose entre ambas. La alimentación en esta etapa suele ser más frecuente y hay que informarse bien sobre qué come esa especie en particular, porque hay herbívoros, carnívoros y omnívoros, y las diferencias son grandes. El manejo tiene que ser mínimo y calmo, para que se acostumbre a la presencia humana sin estresarse. Cualquier cambio de color en la piel, falta de apetito sostenida o letargo que no se explique por la muda hay que consultarlo con el veterinario.",
+        "adulto": "Ya con su tamaño y hábitos establecidos, lo esencial sigue siendo mantener el terrario con la temperatura, la humedad y la iluminación adecuadas para esa especie, porque de eso depende su digestión, su piel y su sistema inmune. La dieta se estabiliza pero hay que respetar la frecuencia y el tipo de alimento que le corresponde, evitando la sobrealimentación. La limpieza del espacio es central para evitar enfermedades, ya que muchos reptiles son sensibles a la humedad estancada o la falta de higiene. El manejo puede ser más frecuente si el animal lo tolera bien, pero siempre leyendo sus señales de incomodidad. Cambios en la piel, en el apetito, en las heces o en el comportamiento habitual son motivo de consulta veterinaria.",
+        "senior": "En la etapa avanzada muchos reptiles bajan su nivel de actividad y pueden necesitar ajustes en la temperatura o en la frecuencia de alimentación, siempre con guía veterinaria porque cada especie envejece distinto. Hay que estar más atento a la piel, a las articulaciones y a la facilidad para moverse dentro del terrario, adaptando el espacio si hace falta para que le resulte más accesible. Los controles veterinarios periódicos se vuelven más importantes en esta etapa, y cualquier señal de deterioro que no sea la normal del paso del tiempo conviene consultarla a tiempo."
+      },
+      "modelo": "claude-sonnet-5",
+      "generado_el": "2026-09-06T00:21:38.664Z"
+    }
+  ],
+  "rechazadas": []
+}

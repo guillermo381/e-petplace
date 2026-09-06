@@ -51,13 +51,67 @@ const DIR = '.ia-conjuntos';
 // archivos. Si sólo cambiara el filtro, escribiría encima del .jsonl y del
 // contenido de la primera tanda — que es trabajo pagado y ya recogido.
 const S113 = process.argv.includes('--s113');
-const SUF = S113 ? '-s113' : '';
+// ── LAS GENÉRICAS ───────────────────────────────────────────────────────────
+// `--especies` escribe sobre LA ESPECIE, no sobre una raza. Son las entradas
+// que no nombran una raza (`criollo`, `gato-comun`, `otro`, `huron`) y las seis
+// especies que **no tienen ninguna entrada genérica en `cat_razas`** — para
+// esas, la ficha se guarda con `raza_codigo: null`.
+// *No es el mismo prompt con otro nombre: pedirle «el origen del pez» a un
+// prompt escrito para razas devuelve una raza inventada, que es justo lo que
+// `conocida:false` existe para evitar.*
+const ESPECIES = process.argv.includes('--especies');
+const SUF = ESPECIES ? '-especies' : S113 ? '-s113' : '';
 const FILTRO = S113 ? 'creado_en_s113=is.true' : 'activo=eq.true';
 const MODELO = 'claude-sonnet-5';
 const MAX_TOKENS = 1500;
 
 // ── EL ESQUEMA CERRADO ──────────────────────────────────────────────────────
 const ETAPAS = ['cachorro', 'adulto', 'senior'];
+
+const PROMPT_ESPECIE = (especie, etiqueta) => `Escribís la ficha de una ESPECIE para la app de una familia que tiene una mascota.
+
+La especie es: ${especie}${etiqueta && etiqueta !== especie ? ` (la entrada del catálogo se llama "${etiqueta}")` : ''}.
+
+🔴 ESTO NO ES UNA RAZA. Escribís sobre la especie en general — la mascota de
+esta familia puede ser de cualquier raza, o de ninguna. Todo lo que digas tiene
+que ser cierto para CUALQUIER ejemplar de la especie.
+
+═══ QUÉ VA EN CADA CAMPO ═══
+
+"origen"          → **null, siempre.** Una especie no tiene un origen de
+                    criadero. No escribas historia natural ni país: null.
+"temperamento"    → cómo es convivir con esta especie en general. Lo que una
+                    familia necesita saber antes de tenerla en casa.
+"talla_adulta"    → un RANGO AMPLIO que cubra a la especie entera, diciendo que
+                    es amplio y que depende de la raza o el tipo.
+"esperanza_vida"  → un RANGO AMPLIO, con la misma advertencia.
+"predisposiciones"→ **[] SIEMPRE, vacío.** Las predisposiciones son de raza; una
+                    especie entera no las tiene. Si escribís algo acá, está mal.
+"cuidados_por_etapa" → los TRES completos (cachorro, adulto, senior). Acá sí hay
+                    mucho que decir y es lo más útil de la ficha: alojamiento,
+                    alimentación, manejo, socialización, señales de alarma.
+                    Si la palabra "cachorro" no aplica a esta especie, hablá de
+                    la etapa temprana sin usarla.
+"conocida"        → true.
+
+═══ LOS LÍMITES ═══
+No diagnosticás, no recetás, no das dosis. Hablás de cuidados GENERALES y donde
+el tema roce la salud, decí que lo vea el veterinario.
+
+═══ LA VOZ ═══
+Tuteo neutro, cálido y concreto. Le hablás a una familia, no a un criador ni a
+un colega. Sin signos de admiración, sin marketing, sin superlativos, sin
+listas dentro de los textos. Frases cortas.
+
+A las personas menores de edad se les dice **niños**, JAMÁS «chicos» ni
+«pibes» ni «críos»: la app se lee en Ecuador y ahí «chicos» quiere decir
+*pequeños de tamaño*, así que «se lleva bien con chicos» se entiende como que
+se lleva bien con animales chicos. **No es tono: cambia lo que la frase dice.**
+Para el tamaño, decí **pequeños**.
+
+═══ LA SALIDA ═══
+Respondé SOLO con este JSON, sin texto adicional y sin backticks:
+{"conocida":true,"origen":null,"temperamento":null,"talla_adulta":null,"esperanza_vida":null,"predisposiciones":[],"cuidados_por_etapa":{"cachorro":null,"adulto":null,"senior":null}}`;
 
 const PROMPT = (nombre, especie) => `Escribís la ficha de una raza para la app de una familia que tiene una mascota.
 
@@ -92,6 +146,12 @@ suena bien, así que nadie lo va a corregir.
 Tuteo neutro, cálido y concreto. Le hablás a una familia, no a un criador ni a
 un colega. Sin signos de admiración, sin marketing, sin superlativos, sin
 listas dentro de los textos. Frases cortas.
+
+A las personas menores de edad se les dice **niños**, JAMÁS «chicos» ni
+«pibes» ni «críos»: la app se lee en Ecuador y ahí «chicos» quiere decir
+*pequeños de tamaño*, así que «se lleva bien con chicos» se entiende como que
+se lleva bien con perros chicos. **No es tono: cambia lo que la frase dice.**
+(«Desde chico», hablando de la edad del ANIMAL, sí se usa y se deja.)
 
 ═══ LA SALIDA ═══
 Respondé SOLO con este JSON, sin texto adicional y sin backticks:
@@ -176,17 +236,31 @@ if (tiene('--construir')) {
   const res = await fetch(`${URL_BASE}/rest/v1/cat_razas?select=slug,nombre,especie&${FILTRO}&order=especie,slug`,
     { headers: { Authorization: `Bearer ${k}`, apikey: k } });
   if (!res.ok) throw new Error(`cat_razas ${res.status}`);
-  const razas = await res.json();
+  let razas = await res.json();
+
+  if (ESPECIES) {
+    // Las genéricas que SÍ son una fila del catálogo…
+    const gen = razas.filter((r) => ['criollo', 'gato-comun', 'otro', 'huron'].includes(r.slug));
+    // …y las especies que NO tienen ninguna. Su ficha va con `slug: null`:
+    // no describe una entrada del catálogo, describe la especie.
+    const conGenerica = new Set(gen.map((r) => r.especie));
+    const sinGenerica = [...new Set(razas.map((r) => r.especie))]
+      .filter((e) => !conGenerica.has(e))
+      .map((e) => ({ slug: null, nombre: e, especie: e }));
+    razas = [...gen, ...sinGenerica].sort((a, b) => a.especie.localeCompare(b.especie));
+    console.log(`\n${gen.length} genéricas del catálogo + ${sinGenerica.length} especies sin genérica`);
+    for (const r of razas) console.log(`  ${r.especie.padEnd(8)} ${String(r.slug ?? '(la especie)').padEnd(14)} ${r.nombre}`);
+  }
 
   const peticiones = razas.map((r) => ({
-    custom_id: `${r.especie}__${r.slug}`,
+    custom_id: `${r.especie}__${r.slug ?? '_especie'}`,
     params: {
       model: MODELO,
       max_tokens: MAX_TOKENS,
       // Sin razonamiento: la ficha es redacción con esquema, no atribución
       // espacial. Y en Sonnet 5 omitirlo NO lo apaga (ver _shared/ia/modelos.ts).
       thinking: { type: 'disabled' },
-      messages: [{ role: 'user', content: [{ type: 'text', text: PROMPT(r.nombre, r.especie) }] }],
+      messages: [{ role: 'user', content: [{ type: 'text', text: ESPECIES ? PROMPT_ESPECIE(r.especie, r.nombre) : PROMPT(r.nombre, r.especie) }] }],
     },
   }));
 
@@ -205,7 +279,7 @@ if (tiene('--construir')) {
   console.log(`  entrada ≈ ${entrada} tokens · salida estimada ≈ ${salidaEst} tokens`);
   console.log(`  costo estimado con Batch (mitad): ~$${((entrada / 1e6) * 2 * 0.5 + (salidaEst / 1e6) * 10 * 0.5).toFixed(3)}`);
   console.log('  ⚠️ la salida es ESTIMADA (858 tok/ficha, medido en la 1ª tanda). El real sale del `usage`.');
-  console.log(`\n  para mandarlo:  node scripts/ia/contenido-razas.mjs --enviar${S113 ? ' --s113' : ''}\n`);
+  console.log(`\n  para mandarlo:  node scripts/ia/contenido-razas.mjs --enviar${ESPECIES ? ' --especies' : S113 ? ' --s113' : ''}\n`);
   process.exit(0);
 }
 
@@ -240,7 +314,7 @@ if (tiene('--enviar')) {
   const j = await r.json();
   if (!r.ok) { console.error(`\nPARA: el batch rebotó ${r.status}: ${JSON.stringify(j).slice(0, 400)}\n`); process.exit(1); }
   console.log(`\nbatch creado: ${j.id} · ${requests.length} peticiones`);
-  console.log(`  seguí con:  node scripts/ia/contenido-razas.mjs --recoger ${j.id}${S113 ? ' --s113' : ''}\n`);
+  console.log(`  seguí con:  node scripts/ia/contenido-razas.mjs --recoger ${j.id}${ESPECIES ? ' --especies' : S113 ? ' --s113' : ''}\n`);
   process.exit(0);
 }
 
@@ -270,7 +344,11 @@ if (iRec !== -1) {
     if (mal) { rechazadas.push({ slug, motivo: mal }); continue; }
     // Cada texto declara de dónde salió. Sin esto, dentro de seis meses nadie
     // puede decir con qué modelo se escribió ni cuándo.
-    fichas.push({ especie, raza_codigo: slug, ...ficha, modelo: est.model ?? MODELO, generado_el });
+    // `_especie` es el relleno del `custom_id` (no puede llevar vacío). Acá se
+    // vuelve `null`, que es lo que la ficha significa: **no describe una fila
+    // del catálogo, describe la especie**. Dejarlo pasar como texto le daría a
+    // quien la carga una cadena con forma de slug que no existe en `cat_razas`.
+    fichas.push({ especie, raza_codigo: slug === '_especie' ? null : slug, ...ficha, modelo: est.model ?? MODELO, generado_el });
   }
   // ── ia_uso: lo que este batch COSTÓ, en el mismo ledger que todo lo demás ──
   // 🔴 Este script NO pasa por `llamarModelo` —habla directo con la API de
