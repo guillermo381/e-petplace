@@ -22,6 +22,11 @@
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { exigirArgumentos } from './lib-argumentos.mjs';
+
+/* Un instrumento tiene que poder decir «no»: cualquier argumento que no entienda
+   corta en 2 en vez de correr midiendo otra cosa. */
+exigirArgumentos(['--control'], 0);
 
 const JOB = process.env.NEXO_JOB ?? 'supabase/functions/nexo-avisos';
 const di = (s) => console.log(s);
