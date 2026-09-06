@@ -33,7 +33,16 @@ const nav = await chromium.launch({
 const page = await nav.newPage({ viewport: { width: 420, height: 900 }, locale: 'es-EC' });
 const errores = [];
 page.on('pageerror', (e) => errores.push(String(e).slice(0, 140)));
-page.on('console', (m) => { if (m.type() === 'error' && /despedida/.test(m.text())) errores.push('CONSOLA · ' + m.text().slice(0, 200)); });
+page.on('console', (m) => { if (/despedida|registrar_fin/.test(m.text())) errores.push('CONSOLA · ' + m.text().slice(0, 200)); });
+/* 🔴 **LA RESPUESTA CRUDA DE LA RPC.** El wrapper devuelve `desconocido`, que
+   es su cajón para «no reconozco esta forma» — y desde la pantalla no se
+   distingue un error tipado que no mapea de un objeto con otras claves. *Se le
+   pregunta al servidor, no al wrapper.* */
+page.on('response', async (r) => {
+  if (!/rpc\/registrar_fin_de_vida/.test(r.url())) return;
+  const cuerpo = await r.text().catch(() => '(no pude leerlo)');
+  errores.push(`RPC ${r.status()} · ${cuerpo.slice(0, 300)}`);
+});
 const T = async () => await page.evaluate(() => document.body.innerText).catch(() => '');
 
 await page.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 300000 });
@@ -128,9 +137,9 @@ di(`  · SIN TOCAR: los campos traen «${razaAntes === '' ? '(vacío)' : razaAnt
    de la SUGERENCIA no se pudo ejercer** —la única foto a mano es un carnet, y
    el modelo lo dijo en vez de inventar—; lo que sí se prueba es que **el campo
    sólo se llena con el toque**. */
-const raza = page.getByText('Akita Inu', { exact: true }).first();
-di(`  tocando «Akita Inu»: ${(await raza.count()) > 0 ? 'sí' : '🔴 no está'}`);
-await raza.click({ force: true }).catch(() => {});
+const raza = page.getByText('Beagle', { exact: true }).first();
+di(`  tocando «Beagle»: ${(await raza.count()) > 0 ? 'sí' : '🔴 no está'}`);
+await raza.click({ force: true }).catch(() => {}); /* Beagle: una de las 10 fichas PUBLICADAS ⇒ control POSITIVO de C10. */
 await page.waitForTimeout(2500);
 const razaDespues = await page.evaluate(() => {
   for (const e of document.querySelectorAll('input')) {
@@ -238,10 +247,15 @@ else {
   di('');
   di(`  DESPUÉS · en SU ficha, ¿sigue pidiendo?: ${/Cargar carnet|Registrar el de hoy|Reservar|Agendar/.test(tf) ? '🔴 SÍ — el memorial no apagó' : 'no ✓ — memorial'}`);
   di(`  ¿el lápiz sigue?: ${(await page.getByRole('button', { name: /^Editar$/ }).count()) > 0 ? '🔴 sí' : 'no ✓'}`);
-  di(`  C10 · ¿dibuja la ficha de raza?: ${/Ver más sobre la raza|Cómo suelen ser/.test(tf) ? '🔴 sí (no debería: 0 filas)' : 'no ✓ (control negativo)'}`);
+  /* 🔴 **C10 · CONTROL POSITIVO**: Beagle es una de las **10 fichas publicadas**
+     (medido: `razas_contenido` tiene 210 filas y 10 con `activo`). Si la ficha
+     NO aparece con una raza publicada, el montaje está mal — y con una no
+     publicada no debe aparecer, que es el negativo. */
+  di(`  C10 · ¿dibuja la ficha de raza (Beagle, PUBLICADA)?: ${/Ver más sobre la raza|Cómo suelen ser/.test(tf) ? 'sí ✓ (control positivo)' : '🔴 no'}`);
 }
 
 di('');
-di(`errores de página: ${errores.length}${errores.length ? ' — ' + errores[0] : ''}`);
+di(`errores de página: ${errores.length}`);
+for (const e of errores) di(`   · ${e}`);
 await page.screenshot({ path: 'docs/loop/S113-C-1.2-alta-despedida.png', fullPage: false });
 await nav.close();

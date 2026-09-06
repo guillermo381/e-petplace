@@ -1,4 +1,21 @@
 /**
+ * ☠️ **SIN CONSUMIDOR DESDE EL MERGE DE `f7405832` — Y LA MESA DECIDE, NO YO.**
+ *
+ * D resolvió el MISMO bloqueante en `main` (`05172ae9`, carnet v2.3) y su regla
+ * es **más ancha que ésta**: dudosa = sin fecha **o** sin nombre **o** fecha
+ * parcial (`FEB 2023` no es un día). La probó con el carnet real del founder y
+ * midió lo que la mía no vio: *con la ley vieja ese carnet perdía DOS filas en
+ * silencio.* Al mergear tomé su `carnet.tsx`, así que esta función quedó sin
+ * llamador.
+ *
+ * **No la borro y no la cableo**: dos implementaciones del mismo guard es
+ * exactamente el defecto que diagnostiqué en el 1.1.2 —*dos cuentas sobre lo
+ * mismo terminan discrepando*— y elegir cuál vive es de la mesa. Lo que sí es
+ * mío es declararlo: `verify:confirmable` sigue en verde **midiendo una regla
+ * que ya no rige en ninguna pantalla**, y un gate verde sobre código muerto se
+ * lee igual que uno que protege algo.
+ */
+/**
  * ⭐ **¿ESTA FILA SE PUEDE DAR POR REVISADA?** (S113-C · 1.1.2).
  *
  * Nace del bloqueante que el founder vio en su teléfono con su carnet real:

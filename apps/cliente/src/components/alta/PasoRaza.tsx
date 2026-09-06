@@ -136,7 +136,7 @@ export function PasoRaza({
         return;
       }
       const [r, cat] = await Promise.all([
-        sugerirRaza({ imagenBase64: b64, especie: borrador.especie ?? '' }),
+        sugerirRaza({ imageBase64: b64, especie: borrador.especie ?? '' }),
         obtenerRazasDeEspecie(borrador.especie ?? ''),
       ]);
       if (!vivo) return;

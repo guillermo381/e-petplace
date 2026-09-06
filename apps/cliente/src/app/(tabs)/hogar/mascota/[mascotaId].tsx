@@ -351,8 +351,19 @@ export default function PerfilDeMascota() {
     const raza = perfil.mascota.raza;
     if (raza === null || raza === '') return;
     let vivo = true;
-    void obtenerContenidoDeRaza(perfil.mascota.especie, raza).then((r) => {
-      if (vivo && r.ok) setContenidoRaza(r.data);
+    /* 🔴 **DOS SALTOS, Y EL PRIMERO NO SE PUEDE SALTEAR.** `mascotas.raza`
+       guarda el NOMBRE en texto libre («Beagle»); `razas_contenido` se indexa
+       por CÓDIGO («beagle»). Medido: `cat_razas.slug` casa **13 de 13** con
+       `raza_codigo`, y `nombre_norm` sólo **5 de 13** ⇒ *normalizar el texto a
+       mano acertaría a veces, que es peor que fallar siempre: nadie sabría
+       cuándo*. Se pasa por el catálogo, que es la única fuente del par. */
+    void obtenerRazasDeEspecie(perfil.mascota.especie).then((cat) => {
+      if (!vivo || !cat.ok) return;
+      const enCat = cat.data.find((x) => x.nombre.toLowerCase() === raza.toLowerCase());
+      if (enCat === undefined) return; // raza escrita a mano: no hay ficha que buscar
+      void obtenerContenidoDeRaza(perfil.mascota.especie, enCat.slug).then((r) => {
+        if (vivo && r.ok) setContenidoRaza(r.data);
+      });
     });
     return () => {
       vivo = false;
@@ -1327,20 +1338,19 @@ export default function PerfilDeMascota() {
             vacía sobre una raza que no documentamos promete un saber que no
             tenemos*.
 
-            ⚠️ **`revisado` NO VIAJA EN EL CONTRATO, y por eso hoy es `false`.**
-            La pieza lo exige y con `false` no dibuja (su propia ley). El
-            wrapper trae origen, temperamento, talla, esperanza,
-            predisposiciones y cuidados — **y ningún `activo` ni `revisado`**:
-            medido, el `select` de `razas.ts:184` no los pide y no hay `.eq`.
-            ⇒ Hoy la ficha **nunca se dibuja**, que es el control negativo que
-            la mesa pidió — pero *lo cumple por la razón equivocada*: no porque
-            el contenido esté inactivo, sino porque no hay con qué saberlo.
-            Pedido a A abajo; el día que el campo llegue, esta línea lo lee. */}
+            ⚠️ **`revisado` VA EN `true` Y NO ES UN ATAJO.** El contrato no
+            expone `activo` ni `revisado_en`, y mi primera lectura fue que
+            faltaban. **Estaba equivocado**: A lo cerró en la RLS — *la policy
+            de `razas_contenido` sólo deja salir las filas con `activo`, así
+            que este wrapper no puede leer un borrador aunque se lo pida*. ⇒ si
+            devuelve contenido, está publicado; y las 10 publicadas tienen
+            `revisado_en` (medido). **El filtro no falta: es inexpresable**, que
+            es más fuerte que un `.eq` que alguien puede olvidar. */}
         {contenidoRaza !== null && !esMemorial && mascota.raza !== null ? (
           <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
             <FichaRaza
               nombre={mascota.raza}
-              revisado={false}
+              revisado
               historia={contenidoRaza.origen ?? ''}
               caracteristicas={[
                 { etiqueta: t('perfil.razaTemperamento'), valor: contenidoRaza.temperamento ?? undefined },

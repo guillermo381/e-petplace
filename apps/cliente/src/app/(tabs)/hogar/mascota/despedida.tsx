@@ -74,6 +74,12 @@ export default function Despedida() {
     }).then((r) => {
       setEnviando(false);
       if (!r.ok) {
+        /* 🔴 **HOY ESTE CAMINO ES EL ÚNICO QUE SE RECORRE**, y no por la app:
+           `registrar_fin_de_vida` rebota con `23502` — el INSERT del evento
+           `fin_vida` deja `country_code` en NULL y la columna es NOT NULL.
+           Medido leyendo la respuesta cruda del servidor, porque el wrapper lo
+           traduce a `desconocido` y desde la pantalla no se distingue «error
+           que no mapeo» de «forma inesperada». Pedido a A en el parte. */
         aviso.mostrar({ variante: 'error', texto: t('despedida.noSePudo') });
         return;
       }
