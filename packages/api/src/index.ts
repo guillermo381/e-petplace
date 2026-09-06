@@ -1901,12 +1901,17 @@ export {
 // construidas, medidas y desplegadas, y ninguna app podía llamarlas (`L-318`).
 export {
   preguntarANexo,
+  presentacionDeNexo,
+  clasificarHecho,
   obtenerParteDelDia,
   leerPapel,
   type RespuestaNexo,
   type IntencionNexo,
   type Semaforo,
   type NivelSemaforo,
+  type PropuestaMemoria,
+  type ClaseMemoria,
+  type PresentacionNexo,
   type InputPreguntarANexo,
   type CodigoErrorNexo,
   type ParteDelDia,

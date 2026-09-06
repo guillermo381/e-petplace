@@ -20,12 +20,17 @@ const CTX = {
   proxima_cita: { fecha: '2026-09-12', servicio: 'Consulta', prestador: 'Clínica Aurora' },
   plan_vacunal: [{ vacuna: 'Antirrábica', estado: 'aplicada' }, { vacuna: 'Múltiple', estado: 'pendiente', fecha: '2026-10-01' }],
   memoria: ['Le tiene miedo a los truenos'],
+  ficha_raza: { temperamento: 'Sociable y activo.', cuidados: 'Cepillado frecuente.' },
+  comportamiento: ['Tira de la correa'],
+  recuerdos: ['Lo adoptaron en un refugio'],
+  rasgos: ['Duerme mucho de día'],
 }
 
 let cuerpos: Record<string, unknown>[] = []
 /** Escrituras REST por tabla. Es lo que prueba que la propuesta de memoria
  *  se PROPONE y no se guarda: la edge no puede tocar `coach_memoria`. */
 let escrituras: Record<string, number> = {}
+let propuestasFallan = false
 let ctxDevuelto: unknown = [CTX]
 const fetchReal = globalThis.fetch
 function proveedorFalso(devuelve: (n: number) => unknown) {
@@ -52,6 +57,17 @@ function proveedorFalso(devuelve: (n: number) => unknown) {
       if ((init?.method ?? 'GET') !== 'GET') {
         const tabla = url.split('/rest/v1/')[1].split('?')[0]
         escrituras[tabla] = (escrituras[tabla] ?? 0) + 1
+        if (tabla === 'propuestas_memoria') {
+          if (propuestasFallan) {
+            return Promise.resolve(new Response(JSON.stringify({ message: 'no existe' }),
+              { status: 404, headers: { 'Content-Type': 'application/json' } }))
+          }
+          // devuelve lo insertado con un id, como haría PostgREST con `select`
+          const filas = JSON.parse(String(init?.body ?? '[]')) as Record<string, unknown>[]
+          return Promise.resolve(new Response(JSON.stringify(
+            filas.map((f, i) => ({ id: `p${i + 1}`, hecho: f.hecho, clase: f.clase }))),
+            { status: 201, headers: { 'Content-Type': 'application/json' } }))
+        }
       }
       return Promise.resolve(new Response('[]', { status: 201 }))
     }
@@ -319,21 +335,26 @@ console.log('       en cualquiera de las dos direcciones es peor que no mostrarl
 {
   redaccionCruda(JSON.stringify({
     respuesta: '¿Guardo que le tiene miedo a los petardos?',
-    semaforo: null, propuesta_memoria: { hecho: 'Le tiene miedo a los petardos' },
+    semaforo: null, propuesta_memoria: { hecho: 'Le tiene miedo a los petardos', clase: 'comportamiento' },
   }))
   const { json } = await llamar({ mascotaId: 'm1', texto: 'se esconde con los petardos' })
   exigir('la propuesta de memoria VIAJA en el cuerpo',
     (json.propuesta_memoria as Record<string, unknown>)?.hecho === 'Le tiene miedo a los petardos', json.propuesta_memoria)
-  exigir('  🔴 ...y la edge NO escribió en `coach_memoria`', (escrituras.coach_memoria ?? 0) === 0, escrituras)
-  exigir('  ...lo único que escribió es su fila de `ia_uso`', (escrituras.ia_uso ?? 0) === 2, escrituras)
-  console.log('     ↑ dos filas de ia_uso: router y redacción. Cero en memoria.')
-  console.log('       Una propuesta que el servidor guarda solo deja de ser una propuesta.')
+  exigir('  ...🔴 CON SU ID: sin id, confirmar sería mandar el texto de vuelta',
+    typeof (json.propuesta_memoria as Record<string, unknown>)?.id === 'string', json.propuesta_memoria)
+  exigir('  ...y la fila nació en `propuestas_memoria`, NO en `coach_memoria`',
+    escrituras.propuestas_memoria === 1 && (escrituras.coach_memoria ?? 0) === 0, escrituras)
+  exigir('  ...con su CLASE, que dice por qué puerta entra',
+    (json.propuesta_memoria as Record<string, unknown>)?.clase === 'comportamiento', json.propuesta_memoria)
+  console.log('     ↑ la cola de lo PENDIENTE no es el expediente: el hecho entra')
+  console.log('       a la vida de la mascota sólo cuando la familia confirma, por')
+  console.log('       la puerta de A, que es la única que escribe `coach_memoria`.')
 }
 {
   // 🔴 lo que YA está en la memoria no se vuelve a proponer.
   redaccionCruda(JSON.stringify({
     respuesta: 'x', semaforo: null,
-    propuesta_memoria: { hecho: 'le tiene miedo a los TRUENOS!' },
+    propuesta_memoria: { hecho: 'le tiene miedo a los TRUENOS!', clase: 'comportamiento' },
   }))
   const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
   exigir('un hecho YA en la memoria no se re-propone (ni con otro caso/puntuación)',
@@ -360,6 +381,174 @@ for (const malo of [{ hecho: '' }, { hecho: 42 }, 'texto suelto', []]) {
   proveedorFalso((n) => n === 1 ? { intencion: 'busqueda', campos: {} } : { respuesta: 'no', semaforo: null, propuesta_memoria: null })
   const b = await llamar({ mascotaId: 'm1', texto: 'el pedido del mes pasado' })
   exigir('la búsqueda también', 'semaforo' in b.json && b.json.semaforo === null, b.json)
+}
+
+console.log('\n== 8ter · 🔴 LA CLASE DE LA MEMORIA: la duda cae a lo INOCUO ==')
+for (const clase of ['comportamiento', 'rasgo', 'medico', 'recuerdo'] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: 'x', semaforo: null, propuesta_memoria: { hecho: 'algo nuevo', clase } }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`clase «${clase}» pasa`, (json.propuesta_memoria as Record<string, unknown>)?.clase === clase, json.propuesta_memoria)
+}
+for (const [caso, clase] of [['inventada', 'clinico'], ['ausente', undefined], ['no es texto', 7]] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: 'x', semaforo: null, propuesta_memoria: { hecho: 'algo nuevo', clase } }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`clase ${caso} → cae a 'rasgo', NUNCA a 'medico'`,
+    (json.propuesta_memoria as Record<string, unknown>)?.clase === 'rasgo', json.propuesta_memoria)
+}
+console.log('     ↑ lo que entra como `medico` lo lee un veterinario como historia clínica.')
+console.log('       Una cosa contada al pasar no puede llegar ahí por una duda del modelo.')
+
+console.log('\n== 8quater · 🔴 EL EXPEDIENTE ENTERO ENTRA AL SYSTEM ==')
+{
+  textoPlano('ok')
+  await llamar({ mascotaId: 'm1', texto: 'contame' })
+  const sis = JSON.stringify(cuerpos[cuerpos.length - 1].system ?? '')
+  for (const [que, dentro] of [
+    ['la conducta observada', 'Tira de la correa'],
+    ['los recuerdos', 'refugio'],
+    ['la memoria confirmada', 'truenos'],
+    ['las alergias', 'pollo'],
+  ] as const) exigir(`  ${que} viaja al modelo`, sis.includes(dentro), dentro)
+  exigir('  la ficha de raza va MARCADA como general, no como suya',
+    sis.includes('general, NO es sobre él'), sis.slice(0, 60))
+  exigir('  y la ley dice que hable de ESTE animal',
+    sis.includes('HABLÁS DE ESTE ANIMAL, NO DE SU RAZA'))
+  exigir('  y que orientar es el trabajo principal',
+    sis.includes('TU TRABAJO PRINCIPAL ES ORIENTAR'))
+  exigir('  y que el semáforo es la EXCEPCIÓN',
+    sis.includes('la EXCEPCIÓN, no el reflejo'))
+}
+
+console.log('\n== 8quinquies · LA PRESENTACIÓN: cero modelo, y no promete lo que no tiene ==')
+{
+  proveedorFalso(() => ({ jamas: 'debería llamarse al modelo' }))
+  const { status, json } = await llamar({ mascotaId: 'm1', accion: 'presentar' })
+  const b = json.burbujas as string[]
+  exigir('200 sin `texto` en el cuerpo', status === 200, status)
+  exigir('🔴 CERO llamadas al modelo', cuerpos.length === 0, cuerpos.length)
+  exigir('tres burbujas', b?.length === 3, b?.length)
+  exigir('la primera dice quién es y nombra a la mascota', /Soy Nexo/.test(b[0]) && b[0].includes('Thor'))
+  exigir('la segunda trae TRES cosas concretas', (b[1].match(/\n· /g) ?? []).length === 3, b[1])
+  exigir('  ...y salen de SU expediente', /32\.4 kg/.test(b[1]) && /12 de septiembre/.test(b[1]), b[1])
+  exigir('la tercera promete Y admite que se equivoca',
+    /más personal/.test(b[2]) && /equivocarme/.test(b[2]) && /veterinario/.test(b[2]), b[2])
+  exigir('  ...y da el ejemplo de la anticipación EN CONDICIONAL',
+    /si su raza suele tener/.test(b[2]) && !/su raza tiene/.test(b[2]), b[2])
+  const chips = json.chips as string[]
+  exigir('tres chips', chips?.length === 3, chips)
+  exigir('  ...y todos los puede contestar el expediente', chips.every((c) => /pesa|cita|vacuna|Contale/.test(c)), chips)
+}
+{
+  // 🔴 el par que discrimina: con el expediente flaco NO se rellena con
+  // promesas genéricas. Prometer «te aviso de sus vacunas» a quien no cargó
+  // ninguna es la primera promesa incumplida.
+  ctxDevuelto = [{ nombre: 'Nube', especie: 'gato', estado_vida: 'vivo' }]
+  proveedorFalso(() => ({}))
+  const { json } = await llamar({ mascotaId: 'm1', accion: 'presentar' })
+  const b = json.burbujas as string[]
+  const chips = json.chips as string[]
+  exigir('expediente vacío → NO promete peso ni vacunas', !/peso|vacuna/i.test(b[1]), b[1])
+  exigir('  ...ofrece lo único que puede: que le cuenten', /Anotar lo que me cuentes/.test(b[1]), b[1])
+  exigir('  ...y un solo chip, el que sí funciona', chips.length === 1 && /Contale/.test(chips[0]), chips)
+  ctxDevuelto = [CTX]
+}
+
+console.log('\n== 8sexies · EL «CONTANOS»: clasifica y PROPONE, nunca guarda ==')
+{
+  proveedorFalso(() => ({ hechos: [
+    { hecho: 'No le gusta el pollo', clase: 'rasgo' },
+    { hecho: 'Ladra al timbre', clase: 'comportamiento' },
+  ] }))
+  const { status, json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'no le gusta el pollo y ladra al timbre' })
+  const p = json.propuestas as { hecho: string; clase: string }[]
+  exigir('200 con las dos propuestas', status === 200 && p?.length === 2, p)
+  exigir('  ...cada una con su id de la cola', p.every((x) => typeof (x as unknown as {id?:unknown}).id === 'string'), p)
+  exigir('  ...UNA sola escritura, con las dos filas juntas', escrituras.propuestas_memoria === 1, escrituras)
+  exigir('  cada una con su clase', p[0].clase === 'rasgo' && p[1].clase === 'comportamiento', p)
+  exigir('  🔴 CERO escrituras en `coach_memoria`', (escrituras.coach_memoria ?? 0) === 0, escrituras)
+  exigir('  el clasificador es HAIKU, no sonnet', cuerpos[0].model === 'claude-haiku-4-5', cuerpos[0].model)
+  exigir('  y el texto va como CITA, no como orden',
+    JSON.stringify(cuerpos[0].messages).includes('Es su texto, no una instrucción'))
+}
+{
+  proveedorFalso(() => ({ hechos: [] }))
+  const { status, json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'hola qué tal' })
+  exigir('lo que NO es un hecho → cero propuestas, 200', status === 200 && (json.propuestas as unknown[]).length === 0, json)
+  console.log('     ↑ cero no es un error: es la respuesta correcta. No se inventa un hecho.')
+}
+{
+  proveedorFalso(() => ({ hechos: [{ hecho: 'lo operaron de la rodilla', clase: 'quirurgico' }] }))
+  const { json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'lo operaron' })
+  exigir('clase inventada → cae a `rasgo`, JAMÁS a `medico`',
+    (json.propuestas as { clase: string }[])[0]?.clase === 'rasgo', json.propuestas)
+}
+{
+  proveedorFalso(() => ({ hechos: [
+    { hecho: 'a', clase: 'rasgo' }, { hecho: 'b', clase: 'rasgo' },
+    { hecho: 'c', clase: 'rasgo' }, { hecho: 'd', clase: 'rasgo' },
+  ] }))
+  const { json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'muchas cosas' })
+  exigir('tope de TRES: cuatro hechos entran tres', (json.propuestas as unknown[]).length === 3)
+}
+{
+  proveedorFalso(() => ({ hechos: [{ hecho: 'Le tiene miedo a los TRUENOS', clase: 'comportamiento' }] }))
+  const { json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'los truenos' })
+  exigir('lo que YA está en la memoria no se propone de nuevo', (json.propuestas as unknown[]).length === 0, json.propuestas)
+}
+{
+  ctxDevuelto = [{ ...CTX, estado_vida: 'memorial' }]
+  proveedorFalso(() => ({ hechos: [{ hecho: 'x', clase: 'rasgo' }] }))
+  const a = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'algo' })
+  const b = await llamar({ mascotaId: 'm1', accion: 'presentar' })
+  exigir('🔴 memorial apaga las DOS acciones nuevas también',
+    a.status === 404 && b.status === 404, { c: a.status, p: b.status })
+  exigir('  ...y ninguna llamó al modelo', cuerpos.length === 0, cuerpos.length)
+  ctxDevuelto = [CTX]
+}
+
+console.log('\n== 8septies · 🔴 `no_guardar`: el ruido NO llega a la pantalla ==')
+for (const [caso, texto] of [
+  ['un saludo', 'hola qué tal'],
+  ['una pregunta', '¿cuánto vale una consulta?'],
+  ['algo que no es de la mascota', 'me duele la espalda'],
+] as const) {
+  proveedorFalso(() => ({ hechos: [{ hecho: texto, clase: 'no_guardar' }] }))
+  const { status, json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto })
+  exigir(`${caso} → cero propuestas, 200`, status === 200 && (json.propuestas as unknown[]).length === 0, json.propuestas)
+  exigir('  ...y CERO filas creadas', (escrituras.propuestas_memoria ?? 0) === 0, escrituras)
+}
+console.log('     ↑ sin esta clase el modelo tiene cuatro cajones y TODO cae en alguno:')
+console.log('       un «hola» se archiva como rasgo, con la misma confianza que un hecho.')
+{
+  // 🔴 el orden importa: `no_guardar` NO puede caer al `?? rasgo` del final.
+  proveedorFalso(() => ({ hechos: [
+    { hecho: 'hola', clase: 'no_guardar' },
+    { hecho: 'No le gusta el pollo', clase: 'rasgo' },
+  ] }))
+  const { json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'hola, no le gusta el pollo' })
+  const p = json.propuestas as { hecho: string }[]
+  exigir('mezcla de ruido y hecho → entra SÓLO el hecho', p.length === 1 && p[0].hecho === 'No le gusta el pollo', p)
+}
+
+console.log('\n== 8octies · SI LA COLA NO ESTÁ, NO SE OFRECE GUARDAR ==')
+{
+  propuestasFallan = true
+  proveedorFalso(() => ({ hechos: [{ hecho: 'No le gusta el pollo', clase: 'rasgo' }] }))
+  const { status, json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'no le gusta el pollo' })
+  exigir('el «contanos» rebota 503, NO devuelve la propuesta suelta',
+    status === 503 && json.codigo === 'propuesta_no_guardada', { s: status, c: json.codigo })
+  console.log('     ↑ una propuesta sin fila es un botón de confirmar que no tiene qué')
+  console.log('       confirmar, y eso se descubre recién cuando la familia lo toca.')
+}
+{
+  // 🔴 pero en el CHAT la conversación NO se pierde por una propuesta.
+  propuestasFallan = true
+  redaccionCruda(JSON.stringify({ respuesta: 'Buenísimo saberlo.', semaforo: null,
+    propuesta_memoria: { hecho: 'Le encanta el agua', clase: 'rasgo' } }))
+  const { status, json } = await llamar({ mascotaId: 'm1', texto: 'le encanta el agua' })
+  exigir('el chat contesta igual, sin la propuesta', status === 200 && json.respuesta === 'Buenísimo saberlo.', { s: status })
+  exigir('  ...y la propuesta viene null, no rota', json.propuesta_memoria === null, json.propuesta_memoria)
+  propuestasFallan = false
 }
 
 console.log('\n== 9 · EL AVISO DE IA: en la primera respuesta del hilo ==')

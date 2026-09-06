@@ -65,6 +65,7 @@ type CodigoError =
   | 'memorial'
   | 'contexto_no_disponible'
   | 'texto_muy_largo'
+  | 'propuesta_no_guardada'
   | 'error_modelo'
 
 const ESTADO: Record<CodigoError, number> = {
@@ -77,6 +78,7 @@ const ESTADO: Record<CodigoError, number> = {
   memorial: 404,
   contexto_no_disponible: 503,
   texto_muy_largo: 400,
+  propuesta_no_guardada: 503,
   error_modelo: 502,
 }
 
@@ -114,6 +116,13 @@ interface Contexto {
   ultimos_eventos?: { tipo: string; fecha: string; detalle?: string | null }[] | null
   ficha_raza?: { temperamento?: string | null; cuidados?: string | null } | null
   memoria?: string[] | null
+  /** 🔴 EL BIO-EXPEDIENTE, que es lo que hace que Nexo hable de ESTE animal.
+   *  Sin esto contesta como un manual de la raza: correcto y de nadie.
+   *  Lo que la FAMILIA contó, con su procedencia: conductas observadas, rasgos,
+   *  y los recuerdos que sedimentó. */
+  comportamiento?: string[] | null
+  rasgos?: string[] | null
+  recuerdos?: string[] | null
   /** 🔴 Si esta familia puede abrir una consulta de telemedicina AHORA.
    *  Medido el 5-sep-2026: `telemedicina` es `reservable=true` con **2 ofertas
    *  activas** — o sea que el «de un toque» del brief se puede construir; ya no
@@ -253,18 +262,45 @@ Respondés SOLO este JSON, sin texto alrededor y sin backticks:
   contó la familia, nunca con un nombre de enfermedad.
 · "propuesta_memoria" lo llenás SÓLO si la familia contó un hecho NUEVO sobre
   su mascota que valga la pena recordar y que no esté ya en la memoria:
-  {"hecho":"Le tiene miedo a los truenos"}. Es una PROPUESTA: en "respuesta"
-  preguntás "¿Guardo que …?" y **nunca decís que lo guardaste**. Lo guarda la
-  familia confirmando. Si no hay nada nuevo, va null.
+  {"hecho":"No le gusta el pollo","clase":"rasgo"}. Es una PROPUESTA: en
+  "respuesta" preguntás "¿Guardo que …?" y **nunca decís que lo guardaste**.
+  Lo guarda la familia confirmando. Si no hay nada nuevo, va null.
+  La "clase" dice a qué parte del expediente va, y son cuatro:
+    "comportamiento" — cómo se porta: tira de la correa, ladra al timbre.
+    "rasgo"          — cómo es o qué le gusta: no le gusta el pollo, duerme mucho.
+    "medico"         — algo de salud que la familia CONTÓ: le dieron un
+                       antibiótico, tuvo una otitis el año pasado.
+    "recuerdo"       — un hecho de su vida: lo adoptaron, se mudó de casa.
+  🔴 Si dudás entre "medico" y las otras, elegí la otra. Lo médico entra al
+  expediente clínico y **lo que entra ahí lo lee un veterinario como si fuera
+  historia**: una cosa contada al pasar no puede llegar ahí por tu duda.
 
-═══ EL SEMÁFORO — es lo que reemplaza al diagnóstico ═══
-Ante síntoma, dolor, herida, cambio de conducta o algo que empeora, decís UNA
-de estas tres y nada más sobre qué puede ser:
+═══ 🔴 TU TRABAJO PRINCIPAL ES ORIENTAR ═══
+La mayoría de lo que te preguntan NO es de salud: comida, conducta, higiene,
+ejercicio, la etapa que está viviendo. **Ahí contestás de verdad**: qué hacer,
+en concreto, **con el porqué en una línea**, y terminás en el paso siguiente
+—qué probar esta semana, qué mirar, qué cambiar—.
+
+**NO mandás al veterinario en estas preguntas.** No pasa nada malo si contestás
+una duda de alimentación o de paseo: sos la app que conoce a este animal. *Un
+asistente que ante cada pregunta dice "consultá con tu veterinario" no está
+siendo prudente: está diciendo "no sé" con mejores modales, y a la décima vez la
+familia deja de preguntar.* **No diagnosticar no es no ayudar.**
+
+Reservás el veterinario para lo de abajo, y sólo para eso.
+
+═══ EL SEMÁFORO — la EXCEPCIÓN, no el reflejo ═══
+Se enciende SÓLO ante una señal CLÍNICA: síntoma, dolor, herida, sangrado,
+vómito o diarrea, algo que empeora, o un cambio de conducta **repentino y sin
+motivo**. *Que un perro tire de la correa o se suba al sillón no es una señal
+clínica: es la vida.* Ante una de ésas, decís UNA de estas tres y nada más
+sobre qué puede ser:
   · "esto se mira en casa" — qué observar y por cuánto tiempo.
   · "conviene una cita esta semana".
   · "esto es para ir ya" — sangrado, dificultad para respirar, convulsión,
     vómito repetido, no toma agua, dolor fuerte, algo que empeora rápido.
-Y ofrecés el paso siguiente, UNA sola vez por hilo:
+Y **sólo cuando el semáforo se encendió**, ofrecés el paso siguiente, UNA sola
+vez por hilo:
 ${c.telemedicina_disponible
   ? '"¿Querés que te abra una consulta con un veterinario ahora?" — esta familia\n  puede hacerlo desde la app, así que ofrecé eso y no sólo mirar un perfil.'
   : '"¿Querés que te muestre a tu veterinario?" — no ofrezcas abrir una consulta:\n  no sabemos si esta familia la tiene disponible.'}
@@ -284,14 +320,109 @@ afirmar que lo guardaste: lo guarda la familia confirmando.
 
 ═══ LO QUE SABÉS DE ESTA MASCOTA ═══
 Nombre: ${c.nombre}
-Especie: ${c.especie}${dato('Raza', c.raza)}${dato('Sexo', c.sexo)}${dato('Edad', c.edad_texto)}${dato('Etapa', c.etapa)}${dato('Peso', c.peso_kg && `${c.peso_kg} kg`)}${dato('Alergias', c.alergias)}${dato('Medicación', c.medicacion_actual)}${dato('Condiciones', c.condiciones_cronicas)}${dato('Próxima cita', c.proxima_cita)}${dato('Plan vacunal', c.plan_vacunal)}${dato('Últimos eventos', c.ultimos_eventos)}${dato('Sobre la raza', c.ficha_raza)}
+Especie: ${c.especie}${dato('Raza', c.raza)}${dato('Sexo', c.sexo)}${dato('Edad', c.edad_texto)}${dato('Etapa', c.etapa)}${dato('Peso', c.peso_kg && `${c.peso_kg} kg`)}${dato('Alergias', c.alergias)}${dato('Medicación', c.medicacion_actual)}${dato('Condiciones', c.condiciones_cronicas)}${dato('Próxima cita', c.proxima_cita)}${dato('Plan vacunal', c.plan_vacunal)}${dato('Últimos eventos', c.ultimos_eventos)}${dato('Sobre la raza (general, NO es sobre él)', c.ficha_raza)}${dato('Lo que la familia observó de su conducta', c.comportamiento)}${dato('Rasgos que la familia declaró', c.rasgos)}${dato('Recuerdos que la familia guardó', c.recuerdos)}
 
 ═══ LO QUE LA FAMILIA CONFIRMÓ (memoria) ═══
 ${c.memoria?.length ? c.memoria.map((m) => `· ${m}`).join('\n') : '(todavía nada)'}
 
-Todo lo de arriba es lo ÚNICO que sabés. Si algo no está, no lo sabés.
-Contestá en dos o tres frases.`
+🔴 HABLÁS DE ESTE ANIMAL, NO DE SU RAZA. Lo de "Sobre la raza" es el promedio
+de una raza; todo lo demás es ÉL. Cuando lo que sabés de él aplica a la
+pregunta, **usalo por nombre**: si sabés que le tiene miedo a los truenos, o
+que tira de la correa, o que no le gusta quedarse solo, eso cambia la respuesta
+y lo decís. *Una respuesta que sirve igual para cualquier golden retriever no
+usó el expediente.*
+
+Todo lo de arriba es lo ÚNICO que sabés. Si algo no está, no lo sabés.`
 }
+
+// ── LA PRESENTACIÓN · la primera conversación ──────────────────────────────
+// 🔴 CERO MODELO, y no por ahorrar: **es lo primero que Nexo dice de sí mismo,
+// y no puede salir distinto cada vez.** Una presentación generada puede
+// prometer de más un día y de menos otro, y la promesa de esta pantalla es
+// justamente lo que la familia va a recordar. Se arma con plantillas sobre el
+// expediente: lo que cambia por mascota son los EJEMPLOS, no las promesas.
+
+/** Las tres cosas concretas salen del expediente de ESTA mascota, en orden de
+ *  utilidad. Si el expediente está flaco, salen menos — **no se rellenan con
+ *  ejemplos genéricos**: prometer «te aviso de sus vacunas» a quien no cargó
+ *  ninguna es la primera promesa incumplida. */
+export function loQuePuedoHacer(c: Contexto): string[] {
+  const n = c.nombre
+  const puedo: string[] = []
+  if (c.proxima_cita) puedo.push(`Recordarte su próxima cita — la tiene el ${fecha(c.proxima_cita.fecha)}`)
+  if (c.plan_vacunal?.some((v) => v.estado !== 'aplicada')) puedo.push('Avisarte cuando le toque una vacuna')
+  if (c.peso_kg != null) puedo.push(`Seguirle el peso — el último que tengo es ${c.peso_kg} kg`)
+  if (c.alergias?.length) puedo.push(`Tener en cuenta que es alérgico a ${c.alergias.join(' y ')}`)
+  if (c.medicacion_actual?.length) puedo.push('Acordarme de su medicación cuando hablemos de su salud')
+  if (c.ficha_raza) puedo.push(`Contarte cosas de su raza y de la etapa que está viviendo`)
+  if (puedo.length < 3) puedo.push(`Anotar lo que me cuentes de ${n}, para no volver a preguntártelo`)
+  return puedo.slice(0, 3)
+}
+
+/** Los chips para empezar. Se ofrecen SÓLO los que el expediente puede
+ *  contestar: un chip que lleva a «no lo tengo» es peor que un chip menos. */
+export function chipsDeInicio(c: Contexto): string[] {
+  const chips: string[] = []
+  if (c.peso_kg != null) chips.push('¿Cuánto pesa?')
+  if (c.proxima_cita) chips.push('¿Cuándo es su próxima cita?')
+  if (c.plan_vacunal?.length) chips.push('¿Le toca alguna vacuna?')
+  chips.push(`Contale algo de ${c.nombre}`)
+  return chips.slice(0, 3)
+}
+
+export function presentacion(c: Contexto): { burbujas: string[]; chips: string[] } {
+  const puedo = loQuePuedoHacer(c)
+  return {
+    burbujas: [
+      `Soy Nexo. Me acuerdo de todo lo de ${c.nombre}: vacunas, pesos, citas, y lo que me cuentes.`,
+      `Puedo ayudarte con esto:\n${puedo.map((x) => `· ${x}`).join('\n')}`,
+      // 🔴 LA PROMESA HONESTA, y va TEXTUAL: dice lo que va a mejorar, da un
+      // ejemplo concreto, y **admite que se equivoca en la misma frase**. No se
+      // genera porque una promesa que cambia de redacción cada vez deja de ser
+      // una promesa.
+      `Cuanto más uses e-PetPlace, más personal es lo que te digo y antes me adelanto` +
+      // 🔴 El ejemplo va CONDICIONAL («si su raza…»), como lo escribió el
+      // founder, y por eso se puede decir siempre: **describe lo que el sistema
+      // hace, no algo sobre ESTA mascota.** Afirmarlo en indicativo —«su raza
+      // suele tener…»— sería una predisposición sin catálogo detrás, dicha en
+      // la primera pantalla, que es el peor lugar donde puede estar.
+      ` — por ejemplo, si su raza suele tener problemas de cadera, te lo voy a ` +
+      `recordar cuando entre a senior. Puedo equivocarme; para lo importante ` +
+      `está tu veterinario.`,
+    ],
+    chips: chipsDeInicio(c),
+  }
+}
+
+// ── EL «CONTANOS» · clasificar lo que la familia escribe ───────────────────
+const SISTEMA_CLASIFICA = `La familia te contó algo de su mascota en una caja de texto libre.
+Tu trabajo es DOS cosas y nada más:
+① recortarlo a UN hecho, en una línea, en las palabras de ellos;
+② decir a qué parte del expediente va.
+
+Las cuatro partes:
+"comportamiento" — cómo se porta: tira de la correa, ladra al timbre, se
+                   esconde con los truenos.
+"rasgo"          — cómo es o qué le gusta: no le gusta el pollo, duerme mucho,
+                   le encanta el agua.
+"medico"         — algo de SALUD que la familia cuenta: le dieron un
+                   antibiótico, tuvo una otitis, lo operaron.
+"recuerdo"       — un hecho de su vida: lo adoptaron, se mudó, cumplió años.
+"no_guardar"     — 🔴 acá NO hay nada que guardar: un saludo, una pregunta, un
+                   comentario sobre vos, algo ilegible, o algo que no es sobre
+                   la mascota. **Usala sin culpa.** Es mejor no guardar nada
+                   que guardar un "hola" como si fuera un rasgo suyo.
+
+🔴 Si dudás entre "medico" y otra, elegí la otra. Lo médico lo lee un
+veterinario como historia clínica y una cosa contada al pasar no puede llegar
+ahí por tu duda.
+
+Si lo que escribieron NO es un hecho sobre la mascota, devolvés ese texto con
+clase "no_guardar". **No inventes un hecho para no venir vacío**, y no lo metas
+a la fuerza en una de las otras cuatro.
+Si contaron VARIAS cosas, devolvés una por hecho, hasta tres.
+
+Respondé SOLO {"hechos":[{"hecho":"…","clase":"…"}]} y nada más.`
 
 // ── ③ EL ROUTER ────────────────────────────────────────────────────────────
 const SISTEMA_ROUTER = `Clasificás en UNA de cuatro, mirando SÓLO qué quiere la persona.
@@ -344,7 +475,23 @@ export function saneaSemaforo(v: unknown): { nivel: string; motivo: string | nul
  *  (A3). *Una propuesta que el servidor guarda solo deja de ser una propuesta.*
  *  Y se descarta si el hecho YA está en la memoria: proponer de nuevo lo que la
  *  familia ya confirmó es pedirle que confirme dos veces lo mismo. */
-export function saneaPropuesta(v: unknown, c: { memoria?: string[] | null }): { hecho: string } | null {
+/** Las cuatro puertas del expediente. Lista blanca EN LA EDGE: una clase
+ *  inventada **no se degrada a la más grave** — cae a `rasgo`, que es la más
+ *  inocua. *Un hecho contado al pasar que entra como `medico` lo lee un
+ *  veterinario como historia clínica.* */
+export const CLASES_MEMORIA = ['comportamiento', 'rasgo', 'medico', 'recuerdo', 'no_guardar'] as const
+
+/** 🔴 `no_guardar` NO es una clase del expediente: es la que dice que **acá no
+ *  hay nada que guardar**. Existe porque sin ella el modelo sólo tiene cuatro
+ *  cajones y **todo lo que entra cae en alguno** — un «hola» se archiva como
+ *  rasgo. *Un clasificador sin la opción de decir «esto no va» clasifica el
+ *  ruido igual que un hecho, y con la misma confianza.*
+ *  Lo que cae acá se descarta ANTES de proponer: nunca llega a la pantalla. */
+const CLASES_QUE_GUARDAN: readonly string[] = ['comportamiento', 'rasgo', 'medico', 'recuerdo']
+
+export function saneaPropuesta(
+  v: unknown, c: { memoria?: string[] | null },
+): { hecho: string; clase: string } | null {
   if (typeof v !== 'object' || v === null || Array.isArray(v)) return null
   const hecho = aTextoOnull((v as Record<string, unknown>).hecho)
   if (hecho === null) return null
@@ -353,7 +500,58 @@ export function saneaPropuesta(v: unknown, c: { memoria?: string[] | null }): { 
     console.error('[coach] propuesta descartada: ya está en la memoria')
     return null
   }
-  return { hecho }
+  const cruda = aTextoOnull((v as Record<string, unknown>).clase)
+  if (cruda !== null && !(CLASES_MEMORIA as readonly string[]).includes(cruda)) {
+    console.error('[coach] clase de memoria fuera de la lista:', cruda)
+  }
+  const clase = cruda !== null && (CLASES_MEMORIA as readonly string[]).includes(cruda) ? cruda : 'rasgo'
+  // El ruido no se propone. Y ojo con el orden: si `no_guardar` cayera al
+  // `?? 'rasgo'` de arriba, el ruido entraría como rasgo — que es exactamente
+  // lo que esta clase vino a evitar.
+  if (!CLASES_QUE_GUARDAN.includes(clase)) return null
+  return { hecho, clase }
+}
+
+/** 🔴 LA PROPUESTA SE PERSISTE, Y NO ES LO MISMO QUE GUARDARLA.
+ *  `propuestas_memoria` es la COLA DE LO PENDIENTE, no el expediente: la fila
+ *  nace `pendiente` y **el hecho no entra a la vida de la mascota hasta que la
+ *  familia confirma por la puerta de A**, que es la única que escribe
+ *  `coach_memoria`.
+ *
+ *  Tres razones para que viva en una tabla y no en la respuesta:
+ *  ① una propuesta suelta se pierde si cierran la app, y la familia perdió el
+ *     trabajo de habernos contado algo;
+ *  ② la confirmación necesita un `id` — sin él, confirmar sería mandar el texto
+ *     de vuelta y esperar que sea el mismo;
+ *  ③ deja MEDIBLE cuántas se proponen y cuántas se confirman, que es lo único
+ *     que va a decir si esto sirve.
+ *
+ *  ⚠️ CONTRATO CON A (no existe todavía; medido el 6-sep):
+ *    `propuestas_memoria(id, mascota_id, hecho, clase, origen, estado, creado_por, creado_en)`
+ *      origen ∈ 'contanos' | 'chat'   ·   estado ∈ 'pendiente'|'confirmada'|'descartada'
+ *    y su puerta `confirmar_propuesta_memoria(id)`, que escribe `coach_memoria`
+ *    con `fuente='confirmado_de_ia'`. **Esta edge NUNCA toca `coach_memoria`.**
+ */
+async function crearPropuestas(
+  // deno-lint-ignore no-explicit-any
+  sb: any, mascotaId: string, uid: string,
+  hechos: { hecho: string; clase: string }[], origen: 'contanos' | 'chat',
+): Promise<{ id: string; hecho: string; clase: string }[] | null> {
+  if (!hechos.length) return []
+  const { data, error: err } = await sb.from('propuestas_memoria').insert(
+    hechos.map((h) => ({
+      mascota_id: mascotaId, hecho: h.hecho, clase: h.clase,
+      origen, estado: 'pendiente', creado_por: uid,
+    })),
+  ).select('id, hecho, clase')
+  if (err) {
+    // 🔴 Se devuelve `null` y quien llama rebota. **No se cae a devolverlas
+    // sueltas**: una propuesta sin fila es un botón de confirmar que no tiene
+    // qué confirmar, y eso se descubre recién cuando la familia lo toca.
+    console.error('[coach] no pude crear la propuesta:', err.message)
+    return null
+  }
+  return (data ?? []) as { id: string; hecho: string; clase: string }[]
 }
 
 export function comoCita(texto: string): string {
@@ -369,12 +567,18 @@ Deno.serve(async (req) => {
 
     let body: unknown
     try { body = await req.json() } catch { return error('cuerpo_invalido', 'Cuerpo no es JSON.') }
-    const { mascotaId, texto, hilo } = (body ?? {}) as {
-      mascotaId?: unknown; texto?: unknown; hilo?: unknown
+    const { mascotaId, texto, hilo, accion } = (body ?? {}) as {
+      mascotaId?: unknown; texto?: unknown; hilo?: unknown; accion?: unknown
     }
     if (typeof mascotaId !== 'string' || !mascotaId) return error('cuerpo_invalido', 'mascotaId requerido.')
-    if (typeof texto !== 'string' || !texto.trim()) return error('cuerpo_invalido', 'texto requerido.')
-    if (texto.length > MAX_TEXTO) return error('texto_muy_largo', 'Escríbeme algo más corto.')
+    // `presentar` es lo único que no necesita texto: es Nexo hablando primero.
+    const acto = accion === 'presentar' || accion === 'clasificar' ? accion : 'preguntar'
+    if (acto !== 'presentar' && (typeof texto !== 'string' || !texto.trim())) {
+      return error('cuerpo_invalido', 'texto requerido.')
+    }
+    if (typeof texto === 'string' && texto.length > MAX_TEXTO) {
+      return error('texto_muy_largo', 'Escríbeme algo más corto.')
+    }
 
     // 🔴 EL CONTEXTO SALE DEL SERVIDOR, SIEMPRE. No hay rama que lo acepte del
     // cuerpo, ni siquiera para pruebas: esa rama es la que convierte «no habla
@@ -407,11 +611,45 @@ Deno.serve(async (req) => {
       }), { status: 404, headers: JSON_HEADERS })
     }
 
+    // ── PRESENTAR · cero modelo ──────────────────────────────────────────
+    if (acto === 'presentar') {
+      return new Response(JSON.stringify({
+        ...presentacion(c), fuente: 'plantilla', aviso_ia: true,
+      }), { status: 200, headers: JSON_HEADERS })
+    }
+
+    // ── CLASIFICAR · el «contanos» ───────────────────────────────────────
+    if (acto === 'clasificar') {
+      const rc = await llamarModelo({
+        pieza: 'coach_clasifica',
+        sistema: SISTEMA_CLASIFICA,
+        mensajes: [{ rol: 'user', texto: comoCita(String(texto)) }],
+        salida: 'json',
+      })
+      if (!rc.ok) {
+        console.error('[coach] clasificar falló:', rc.error, rc.detalle)
+        return error('error_modelo', 'No pude leer eso ahora. Prueba de nuevo en un momento.')
+      }
+      const crudos = (rc.datos as { hechos?: unknown })?.hechos
+      // 🔴 Cero hechos NO es un error: es la respuesta correcta cuando lo que
+      // escribieron no es un hecho. La pantalla lo dice y no guarda nada.
+      const hechos = (Array.isArray(crudos) ? crudos : [])
+        .map((h) => saneaPropuesta(h, c))
+        .filter((h): h is { hecho: string; clase: string } => h !== null)
+        .slice(0, 3)
+      if (!Array.isArray(crudos)) console.error('[coach] clasificar: salida sin array `hechos`')
+      const guardadas = await crearPropuestas(sb, mascotaId, uid, hechos, 'contanos')
+      if (guardadas === null) return error('propuesta_no_guardada', 'No pude anotar eso ahora. Prueba de nuevo.')
+      return new Response(JSON.stringify({
+        propuestas: guardadas, fuente: 'modelo', aviso_ia: false,
+      }), { status: 200, headers: JSON_HEADERS })
+    }
+
     // ── ③ router ─────────────────────────────────────────────────────────
     const rRouter = await llamarModelo({
       pieza: 'coach_router',
       sistema: SISTEMA_ROUTER,
-      mensajes: [{ rol: 'user', texto: comoCita(texto) }],
+      mensajes: [{ rol: 'user', texto: comoCita(String(texto)) }],
       salida: 'json',
     })
     let intencion: Intencion = 'narrativa'
@@ -443,7 +681,7 @@ Deno.serve(async (req) => {
     if (intencion === 'busqueda') {
       return new Response(JSON.stringify({
         respuesta: null, fuente: routerCaido ? 'router_caido' : 'router',
-        intencion: 'busqueda', consulta: texto.trim(), campos,
+        intencion: 'busqueda', consulta: String(texto).trim(), campos,
         semaforo: null, propuesta_memoria: null, aviso_ia: primerTurno,
       }), { status: 200, headers: JSON_HEADERS })
     }
@@ -453,7 +691,7 @@ Deno.serve(async (req) => {
     // ninguna plantilla tiene su dato, **NO se inventa una respuesta de dato**:
     // se cae a la redacción, que sí sabe decir «no lo tengo».
     if (intencion === 'dato') {
-      const p = responderConPlantilla(texto, c)
+      const p = responderConPlantilla(String(texto), c)
       if (p) {
         return new Response(JSON.stringify({
           respuesta: p.texto, fuente: 'plantilla', plantilla: p.nombre,
@@ -472,7 +710,7 @@ Deno.serve(async (req) => {
     const r = await llamarModelo({
       pieza: 'coach',
       sistema: sistemaDe(c),
-      mensajes: [...turnos, { rol: 'user', texto: comoCita(texto) }],
+      mensajes: [...turnos, { rol: 'user', texto: comoCita(String(texto)) }],
       salida: 'json',
     })
     if (!r.ok) {
@@ -488,10 +726,19 @@ Deno.serve(async (req) => {
       console.error('[coach] el modelo no devolvió `respuesta`')
       return error('error_modelo', 'No pude contestarte ahora. Prueba de nuevo en un momento.')
     }
+    // La propuesta del chat sigue el MISMO camino que la del «contanos»: fila
+    // pendiente, id, y la confirma la familia. Si no se pudo crear, la
+    // respuesta igual sale — **la conversación no se pierde por una propuesta**;
+    // lo que se pierde es el ofrecimiento de guardar, y eso se dice en el log.
+    const cruda = saneaPropuesta(d?.propuesta_memoria, c)
+    const guardadasChat = cruda ? await crearPropuestas(sb, mascotaId, uid, [cruda], 'chat') : []
+    const propuestaDelChat = guardadasChat && guardadasChat.length ? guardadasChat[0] : null
+    if (cruda && guardadasChat === null) console.error('[coach] la propuesta del chat no se pudo anotar')
+
     return new Response(JSON.stringify({
       respuesta, fuente: 'modelo', intencion,
       semaforo: saneaSemaforo(d?.semaforo),
-      propuesta_memoria: saneaPropuesta(d?.propuesta_memoria, c),
+      propuesta_memoria: propuestaDelChat,
       aviso_ia: primerTurno,
     }), { status: 200, headers: JSON_HEADERS })
   } catch (e) {

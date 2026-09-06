@@ -1,0 +1,5254 @@
+{
+  "generado_el": "2026-09-06T23:47:42.552Z",
+  "modelo": "claude-sonnet-5",
+  "filas": [
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-australiano",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-australiano",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene consultar sobre exámenes específicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-americana",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales relacionados con el desgaste de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-americana",
+      "codigo": "respiracion",
+      "evidencia": "Afecciones respiratorias, especialmente si hay cambios bruscos de temperatura",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-americana",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel u hongos, más frecuentes en ambientes húmedos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-abisinia",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales relacionados con el crecimiento continuo de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-abisinia",
+      "codigo": "piel",
+      "evidencia": "Afecciones de piel o irritaciones en las zonas donde se forman las rosetas del pelaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-abisinia",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, sobre todo si el ambiente tiene mucha humedad o corrientes de aire",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dogo-de-burdeos",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo a controlar con el veterinario por su tamaño y peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dogo-de-burdeos",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, conviene chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dogo-de-burdeos",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel en los pliegues faciales, requieren seguimiento veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dogo-de-burdeos",
+      "codigo": "respiracion",
+      "evidencia": "Sobrecalentamiento por dificultad respiratoria, algo a evaluar con el veterinario según la época del año",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "camaleon-velado",
+      "codigo": "respiracion",
+      "evidencia": "Infecciones respiratorias asociadas a humedad o temperatura inadecuada en el terrario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "papillon",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, por el tamaño reducido de la boca",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "papillon",
+      "codigo": "respiracion",
+      "evidencia": "Colapso traqueal, conviene mencionarlo si aparece tos o ruidos al respirar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "papillon",
+      "codigo": "ojos",
+      "evidencia": "Sensibilidad ocular, bueno chequearla en visitas periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "guacamayo-azul-y-amarillo",
+      "codigo": "respiracion",
+      "evidencia": "Enfermedades respiratorias, por lo que conviene consultar ante cambios en la respiración o el sonido al respirar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "ragdoll",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía hipertrófica, algo para chequear con el veterinario mediante controles cardíacos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "ragdoll",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, tema para conversar especialmente si hay antecedentes familiares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "ragdoll",
+      "codigo": "peso",
+      "evidencia": "Predisposición a la obesidad si no se controla la alimentación y el ejercicio",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-chino",
+      "codigo": "dientes",
+      "evidencia": "Vale la pena consultar sobre el cuidado dental, ya que como todo roedor tiene dientes de crecimiento continuo.",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-chino",
+      "codigo": "piel",
+      "evidencia": "Se puede preguntar por su piel y pelaje, sensibles a ambientes húmedos o mal ventilados.",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "briard",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "briard",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, vale la pena consultarlo en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "briard",
+      "codigo": "corazon",
+      "evidencia": "Estenosis pulmonar, un tema para preguntar en las visitas veterinarias",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "grifon-de-bruselas",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a su cara achatada, algo para conversar con el veterinario sobre todo en épocas de calor",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "grifon-de-bruselas",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, dado que sus ojos son grandes y prominentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "grifon-de-bruselas",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna o de discos intervertebrales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-de-agua-espanol",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-de-agua-espanol",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene consultarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-de-agua-espanol",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, tema para conversar si aparecen cambios de energía o peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pug",
+      "codigo": "respiracion",
+      "evidencia": "Dificultades respiratorias asociadas a su hocico corto",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pug",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel en los pliegues de la cara",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pug",
+      "codigo": "ojos",
+      "evidencia": "Sensibilidad ocular por la forma de sus ojos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pug",
+      "codigo": "peso",
+      "evidencia": "Tendencia al sobrepeso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pug",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna o cadera que en algunos casos se presentan en la raza",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pug",
+      "codigo": "cadera",
+      "evidencia": "Problemas de columna o cadera que en algunos casos se presentan en la raza",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "poodle",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, sobre todo en la variedad estándar, algo para chequear con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "poodle",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios como cataratas o atrofia progresiva de retina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "poodle",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, un tema para conversar si aparecen cambios de energía o peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basenji",
+      "codigo": "rinon",
+      "evidencia": "Problemas renales como la nefropatía familiar, para charlar con el veterinario sobre controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basenji",
+      "codigo": "tiroides",
+      "evidencia": "Cuestiones tiroideas que conviene evaluar con estudios de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basenji",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo bueno de conversar antes de definir el nivel de ejercicio",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basenji",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, para tener en cuenta en revisiones regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "salchicha",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna asociados a su cuerpo alargado",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "salchicha",
+      "codigo": "peso",
+      "evidencia": "Predisposición a sobrepeso, que puede agravar los problemas de espalda",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "salchicha",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera en algunos casos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "salchicha",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por el tamaño de su boca",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "salchicha",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares como cataratas en la etapa senior",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "border-collie",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para conversar con el veterinario sobre control y seguimiento",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "border-collie",
+      "codigo": "ojos",
+      "evidencia": "Atrofia progresiva de retina y otras condiciones oculares hereditarias · Anomalía del ojo de collie, un tema que suele evaluarse con exámenes oftalmológicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "gran-pirineo",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para chequear con el veterinario a medida que crece",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "gran-pirineo",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como entropión, conviene una revisión periódica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "gran-pirineo",
+      "codigo": "corazon",
+      "evidencia": "Enfermedades cardíacas congénitas en algunos ejemplares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "vizsla",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "vizsla",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, que conviene monitorear con estudios de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "vizsla",
+      "codigo": "piel",
+      "evidencia": "Alergias cutáneas, para consultar si hay picazón o irritaciones frecuentes",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "degu",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "degu",
+      "codigo": "ojos",
+      "evidencia": "Predisposición a cataratas, especialmente si hay antecedentes familiares o exposición a ciertos alimentos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "degu",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de la piel y la cola, que puede lastimarse con facilidad si se lo sujeta mal",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-napolitano",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para chequear con el veterinario dado su tamaño y ritmo de crecimiento",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-napolitano",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel y pliegues cutáneos, que requieren revisión veterinaria periódica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-napolitano",
+      "codigo": "ojos",
+      "evidencia": "Entropión o ectropión, alteraciones de los párpados que vale controlar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-napolitano",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, algo para monitorear en controles veterinarios regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basset-hound",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna, algo para conversar con el veterinario dado su cuerpo alargado y patas cortas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basset-hound",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basset-hound",
+      "codigo": "peso",
+      "evidencia": "Obesidad, si la alimentación y el ejercicio no se equilibran bien",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "basset-hound",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, como el ectropión o entropión",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pomerania",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por el tamaño reducido de la boca",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pomerania",
+      "codigo": "respiracion",
+      "evidencia": "Colapso de tráquea, tema para charlar con el veterinario si se nota tos o dificultad al respirar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pomerania",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, vale la pena un control periódico",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "pez-angel-de-agua-dulce",
+      "codigo": "piel",
+      "evidencia": "Se puede consultar sobre tendencia a infecciones de piel o aletas si el ambiente no está en buenas condiciones",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-sirio",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los incisivos, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-sirio",
+      "codigo": "peso",
+      "evidencia": "Tendencia a la obesidad si la dieta no está bien equilibrada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-sirio",
+      "codigo": "piel",
+      "evidencia": "Afecciones cutáneas o alergias, conviene consultar si se notan cambios en el pelaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-sirio",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a ambientes húmedos o con corrientes de aire",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bull-terrier",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel y alergias, algo para conversar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bull-terrier",
+      "codigo": "rinon",
+      "evidencia": "Problemas renales, vale la pena chequear en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bull-terrier",
+      "codigo": "corazon",
+      "evidencia": "Afecciones cardíacas, tema para revisar en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bull-terrier",
+      "codigo": "peso",
+      "evidencia": "cuidar el peso, ya que tiende a ganar kilos si no se mueve lo suficiente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "persa",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a la conformación achatada del hocico, para conversar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "persa",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, algo para consultar y eventualmente controlar con estudios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "persa",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares por la forma de la cara, vale la pena revisarlo en los controles",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "persa",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por la estructura del cráneo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "siames",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, algo para revisar con el veterinario en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "siames",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria o afecciones del tracto respiratorio superior, tema para conversar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "siames",
+      "codigo": "corazon",
+      "evidencia": "Ciertas condiciones cardíacas hereditarias, conviene consultarlo con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "siames",
+      "codigo": "ojos",
+      "evidencia": "Estrabismo o problemas oculares leves, que el veterinario puede evaluar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "siames",
+      "codigo": "rinon",
+      "evidencia": "Tendencia a la amiloidosis hepática o renal en algunos ejemplares, algo para charlar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-sin-pelo-del-peru",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de la piel ante el sol y el frío, algo para charlar con el veterinario sobre protección adecuada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-sin-pelo-del-peru",
+      "codigo": "dientes",
+      "evidencia": "Ausencia total o parcial de dientes en algunos ejemplares, bueno revisarlo con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-sin-pelo-del-peru",
+      "codigo": "ojos",
+      "evidencia": "Sensibilidad ocular ocasional, conviene que el veterinario la evalúe en los chequeos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "coton-de-tulear",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, conviene hacer revisiones periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "coton-de-tulear",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de piel, bueno conversarlo si aparecen irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "netherland-dwarf",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por malposición de dientes, algo para revisar con el veterinario periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "netherland-dwarf",
+      "codigo": "peso",
+      "evidencia": "Cierta tendencia a la obesidad si la dieta no está bien ajustada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "netherland-dwarf",
+      "codigo": "ojos",
+      "evidencia": "Malocclusiones o problemas oculares asociados a la conformación craneal, bueno chequearlo en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "gran-danes",
+      "codigo": "cadera",
+      "evidencia": "displasia de cadera",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "gran-danes",
+      "codigo": "corazon",
+      "evidencia": "problemas cardíacos · cardiomiopatía dilatada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "raton-domestico",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a la ventilación y limpieza del ambiente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "raton-domestico",
+      "codigo": "dientes",
+      "evidencia": "Afecciones dentales relacionadas con el desgaste de los incisivos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "raton-domestico",
+      "codigo": "piel",
+      "evidencia": "Tumores cutáneos y de piel, para chequear con el veterinario ante cualquier cambio visible",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-teddy",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales relacionados con el crecimiento continuo de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-teddy",
+      "codigo": "piel",
+      "evidencia": "Afecciones de piel vinculadas a la textura particular de su pelaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-teddy",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria ante cambios de temperatura o corrientes de aire",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-teddy",
+      "codigo": "peso",
+      "evidencia": "Predisposición a la obesidad si la alimentación no está bien balanceada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boxer",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, algo para chequear periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boxer",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, conviene conversarlo especialmente si es muy activo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boxer",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad al calor por su hocico corto, vale la pena preguntarle al veterinario cómo manejarlo",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boxer",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, buen tema para revisar en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "oriental-de-pelo-corto",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, algo para revisar con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "oriental-de-pelo-corto",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria o alergias, conviene comentarlo si aparecen signos",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "oriental-de-pelo-corto",
+      "codigo": "ojos",
+      "evidencia": "Estrabismo o alteraciones oculares leves, vale la pena que el veterinario lo evalúe",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "oriental-de-pelo-corto",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal o cardíaca hereditaria, tema para conversar en chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "oriental-de-pelo-corto",
+      "codigo": "corazon",
+      "evidencia": "Enfermedad renal o cardíaca hereditaria, tema para conversar en chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "borzoi",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, conviene mencionarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "borzoi",
+      "codigo": "ojos",
+      "evidencia": "Cuestiones oculares, vale la pena chequearlas periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "borzoi",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, aunque menos frecuente que en otras razas grandes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "canario",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, algo a tener en cuenta por su sensibilidad a corrientes de aire y cambios bruscos de temperatura",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shih-tzu",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados al hocico corto, algo para charlar con el veterinario sobre todo en días de calor",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shih-tzu",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, ya que sus ojos grandes y salientes pueden ser más sensibles",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shih-tzu",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por el tamaño reducido de la boca",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shih-tzu",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de la piel y el pelaje, que puede requerir seguimiento veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shih-tzu",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para monitorear en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "maltes",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por acumulación de sarro",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "maltes",
+      "codigo": "ojos",
+      "evidencia": "Lagrimeo y manchas alrededor de los ojos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "maltes",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de piel",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "labrador-retriever",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para charlar con el veterinario sobre todo si hace mucho ejercicio de impacto",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "labrador-retriever",
+      "codigo": "peso",
+      "evidencia": "Tendencia al sobrepeso, conviene hablar con el veterinario sobre el plan de alimentación y actividad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "labrador-retriever",
+      "codigo": "ojos",
+      "evidencia": "Ciertas condiciones oculares hereditarias, vale la pena consultar sobre controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bichon-frise",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, algo para charlar con el veterinario si se notan picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bichon-frise",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, vale consultar sobre el cuidado bucal habitual",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bichon-frise",
+      "codigo": "ojos",
+      "evidencia": "Cataratas u otras afecciones oculares, tema para revisar en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "rata-domestica",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios crónicos, tema para conversar si se notan estornudos o ruidos al respirar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "rata-domestica",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los incisivos, bueno consultarlo si hay dificultad para comer",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "rata-domestica",
+      "codigo": "peso",
+      "evidencia": "Cierta tendencia al sobrepeso en la vida adulta, algo para hablar con el veterinario al planificar la alimentación",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chihuahua",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por el tamaño reducido de la boca, algo para chequear con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chihuahua",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos que se pueden monitorear en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "setter-irlandes",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "setter-irlandes",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, conviene mencionarlo si se notan cambios de energía o peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "setter-irlandes",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, bueno consultarlo en revisiones periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "manx",
+      "codigo": "columna",
+      "evidencia": "Alteraciones de columna vertebral relacionadas con la ausencia de cola, tema para conversar con el veterinario especialmente en cachorros",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "manx",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, vale la pena chequearla en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "balines",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos hereditarios, algo para chequear con el veterinario de forma periódica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "balines",
+      "codigo": "ojos",
+      "evidencia": "Estrabismo o alteraciones oculares leves, típicas de la línea siamesa",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "balines",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria o asma felina, vale la pena conversarlo si aparecen síntomas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "holland-lop",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "holland-lop",
+      "codigo": "peso",
+      "evidencia": "Obesidad si no tiene suficiente actividad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "holland-lop",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna o patas si se lo manipula de forma inadecuada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "springer-spaniel",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "springer-spaniel",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene consultar revisiones periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "springer-spaniel",
+      "codigo": "piel",
+      "evidencia": "Enfermedades de la piel, vale la pena hablarlo si aparecen molestias frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "springer-spaniel",
+      "codigo": "corazon",
+      "evidencia": "Ciertas condiciones cardíacas, algo para tener en cuenta en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "american-shorthair",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía hipertrófica, algo para chequear con el veterinario de forma periódica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "american-shorthair",
+      "codigo": "peso",
+      "evidencia": "Obesidad, sobre todo si el gato es poco activo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "american-shorthair",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, como en la mayoría de los gatos domésticos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boyero-de-berna",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para chequear con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boyero-de-berna",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el entropión, conviene que el veterinario los revise periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boyero-de-berna",
+      "codigo": "corazon",
+      "evidencia": "Cuestiones cardíacas que pueden aparecer, bueno mencionarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "jack-rusell",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene mencionarlo en los chequeos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "jack-rusell",
+      "codigo": "cadera",
+      "evidencia": "Enfermedad de Legg-Calvé-Perthes en la cadera, bueno tenerlo presente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "jack-rusell",
+      "codigo": "columna",
+      "evidencia": "Luxación o inestabilidad en la zona lumbar, algo a monitorear con el profesional",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "collie",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para consultar con el veterinario en controles regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "collie",
+      "codigo": "ojos",
+      "evidencia": "Anomalía ocular del Collie, una condición hereditaria que conviene chequear con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "collie",
+      "codigo": "piel",
+      "evidencia": "Problemas dermatológicos relacionados con su pelaje denso, para revisar con el veterinario si aparecen molestias en la piel",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cavalier-king-charles-spaniel",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, algo para chequear con controles veterinarios periódicos a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cavalier-king-charles-spaniel",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, conviene conversarlo con el veterinario sobre todo si se nota cojera o dificultad para moverse",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cavalier-king-charles-spaniel",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, vale la pena consultar si hay lagrimeo excesivo o cambios visibles en los ojos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "guacamayo-escarlata",
+      "codigo": "respiracion",
+      "evidencia": "Infecciones respiratorias, especialmente en ambientes con mala ventilación",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-roborovski",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-roborovski",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria ante ambientes húmedos o con corrientes de aire",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-roborovski",
+      "codigo": "peso",
+      "evidencia": "Obesidad si el espacio para correr es insuficiente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "stanffordshire-bull-terrier",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "stanffordshire-bull-terrier",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, como cataratas, que conviene monitorear con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "stanffordshire-bull-terrier",
+      "codigo": "piel",
+      "evidencia": "Alergias o sensibilidad de piel, un tema para conversar si aparecen picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "stanffordshire-bull-terrier",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos congénitos, que el veterinario puede evaluar en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "stanffordshire-bull-terrier",
+      "codigo": "peso",
+      "evidencia": "Sobrepeso, ya que es una raza con tendencia a ganar peso si no se controla la alimentación y el ejercicio",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "huron",
+      "raza_codigo": "huron",
+      "codigo": "dientes",
+      "evidencia": "Enfermedades dentales, vale revisarlo en los controles veterinarios de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "huron",
+      "raza_codigo": "huron",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, un punto a conversar con el veterinario a partir de la edad adulta",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dogo-argentino",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, un tema para conversar con el veterinario sobre control articular",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dogo-argentino",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, conviene charlarlo si aparecen irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dogo-argentino",
+      "codigo": "ojos",
+      "evidencia": "Cuestiones oculares, como entropión, para revisar en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "rottweiler",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para revisar con el veterinario a medida que crece",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "rottweiler",
+      "codigo": "corazon",
+      "evidencia": "Ciertas afecciones cardíacas, conviene charlarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "rottweiler",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el entropión, bueno mencionarlo en las visitas de control",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bouvier-de-flandes",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para charlar con el veterinario en controles regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bouvier-de-flandes",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, como entropión, que se pueden chequear en visitas de rutina · Atrofia progresiva de retina, tema para conversar si hay antecedentes en la línea",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bouvier-de-flandes",
+      "codigo": "piel",
+      "evidencia": "Cuestiones de piel o pelaje por su doble capa densa, bueno mencionarlo en consultas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "barbo-tigre",
+      "codigo": "piel",
+      "evidencia": "aparición de manchas blancas o cambios en la piel, asociados a infecciones comunes en peces de acuario",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "platy",
+      "codigo": "piel",
+      "evidencia": "Es bueno consultar con el veterinario sobre la calidad del agua y su relación con enfermedades de la piel o las aletas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "holandes-enano",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, algo para revisar periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "holandes-enano",
+      "codigo": "peso",
+      "evidencia": "Predisposición a la obesidad si no tiene suficiente actividad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "holandes-enano",
+      "codigo": "ojos",
+      "evidencia": "Cuestiones oculares como buftalmia o glaucoma",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bull-terrier-miniatura",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel y alergias, algo para charlar con el veterinario si aparecen picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bull-terrier-miniatura",
+      "codigo": "rinon",
+      "evidencia": "Afecciones renales, conviene conversarlo con el veterinario para saber si conviene algún control periódico",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bull-terrier-miniatura",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos congénitos, vale la pena mencionarlo en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "iguana-verde",
+      "codigo": "rinon",
+      "evidencia": "Problemas renales asociados a dietas con exceso de proteína animal",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "iguana-verde",
+      "codigo": "respiracion",
+      "evidencia": "Infecciones respiratorias relacionadas con temperatura o humedad inadecuada del terrario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-staffordshire-terrier",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-staffordshire-terrier",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel y alergias, que conviene consultar si aparecen picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-staffordshire-terrier",
+      "codigo": "corazon",
+      "evidencia": "Afecciones cardíacas congénitas, un tema para hablar con el veterinario desde cachorro",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-staffordshire-terrier",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, que se pueden monitorear en las visitas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-staffordshire-terrier",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, una condición para tener en cuenta si aparecen cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bullmastiff",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para hablar con el veterinario sobre el crecimiento y el peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bullmastiff",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el entropión, vale la pena que el veterinario revise los ojos en los controles",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bullmastiff",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, algo para mencionar en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bullmastiff",
+      "codigo": "peso",
+      "evidencia": "Mantener un peso adecuado es importante para sus articulaciones, y eso conviene charlarlo con el veterinario",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bullmastiff",
+      "codigo": "piel",
+      "evidencia": "conviene revisar la piel con frecuencia por los pliegues",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shar-pei",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como entropión, vale la pena consultarlo desde cachorro",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shar-pei",
+      "codigo": "piel",
+      "evidencia": "Pliegues cutáneos que pueden acumular humedad o irritarse, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shar-pei",
+      "codigo": "piel",
+      "evidencia": "Alergias o sensibilidad de piel, un tema para conversar si aparecen picazón o rojeces",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shar-pei",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, conviene charlarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "periquito-australiano",
+      "codigo": "tiroides",
+      "evidencia": "Problemas en la glándula tiroidea, algo para chequear si se nota cambio de peso o de plumaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "periquito-australiano",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, vale la pena consultar si hay cambios en la respiración o el sonido al respirar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "periquito-australiano",
+      "codigo": "piel",
+      "evidencia": "Ácaros y afecciones de piel o pico, tema para revisar en controles periódicos",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-tibetano",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para conversar con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-tibetano",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-tibetano",
+      "codigo": "ojos",
+      "evidencia": "Entropión u otras alteraciones oculares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-tibetano",
+      "codigo": "corazon",
+      "evidencia": "Hipertensión pulmonar, descripta en algunos ejemplares de la raza",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-tibetano",
+      "codigo": "peso",
+      "evidencia": "Puede volverse más sedentario, por lo que hay que ajustar la alimentación para evitar sobrepeso",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-enano-de-campbell",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los incisivos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-enano-de-campbell",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de piel y posibles alergias a ciertos sustratos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "border-terrier",
+      "codigo": "cadera",
+      "evidencia": "Problemas de cadera, algo para chequear con el veterinario en controles regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "border-terrier",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, conviene consultarlo en revisiones periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "border-terrier",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, un tema para conversar si aparecen picazón o irritaciones",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "border-terrier",
+      "codigo": "peso",
+      "evidencia": "Tendencia a subir de peso si no tiene suficiente actividad, bueno charlarlo en los controles",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-skinny",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de la piel a golpes, rozaduras y quemaduras solares, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-skinny",
+      "codigo": "dientes",
+      "evidencia": "Predisposición a problemas dentales típica de la especie, para controlar en visitas periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-skinny",
+      "codigo": "respiracion",
+      "evidencia": "Tendencia a afecciones respiratorias si el ambiente no es el adecuado, para charlar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-peruana",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o pelaje relacionados con el largo del pelo, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-peruana",
+      "codigo": "ojos",
+      "evidencia": "Molestias oculares si el pelo de la cara no se mantiene despejado, para consultar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-peruana",
+      "codigo": "dientes",
+      "evidencia": "Malformaciones dentales típicas de la especie, un tema para chequear en controles veterinarios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "cobaya",
+      "raza_codigo": "cobaya-peruana",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria ante cambios bruscos de temperatura, para comentarlo con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "cacatua-ninfa-perlada",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, algo que conviene chequear con el veterinario si aparecen cambios en la respiración o el plumaje alrededor del pico",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "cacatua-ninfa-perlada",
+      "codigo": "tiroides",
+      "evidencia": "Tumores relacionados con la glándula tiroides o gonadales, algo a monitorear con controles veterinarios periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "cacatua-ninfa-perlada",
+      "codigo": "peso",
+      "evidencia": "Obesidad si el ave tiene poco espacio para volar, punto para discutir con el veterinario en cuanto a dieta y actividad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "pura-sangre-ingles",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios en vías altas y bajas, algo a monitorear con revisiones periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "conuro-mejillas-verdes",
+      "codigo": "respiracion",
+      "evidencia": "Enfermedades respiratorias, tema para revisar con el veterinario ante cualquier cambio en la respiración",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "xoloitzcuintle",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de la piel, especialmente en la variedad sin pelo, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "xoloitzcuintle",
+      "codigo": "dientes",
+      "evidencia": "Tendencia a problemas dentales, un tema para conversar en los controles veterinarios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "keeshond",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "keeshond",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, conviene hablarlo si notás cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "keeshond",
+      "codigo": "ojos",
+      "evidencia": "Ciertas condiciones oculares hereditarias, bueno consultarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "keeshond",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de piel o alergias, si aparecen picazón o irritación es tema de consulta",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "keeshond",
+      "codigo": "corazon",
+      "evidencia": "Insuficiencia cardíaca en casos puntuales, algo para monitorear con estudios veterinarios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "english-angora",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, como en la mayoría de los conejos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "english-angora",
+      "codigo": "respiracion",
+      "evidencia": "Golpe de calor por el exceso de pelaje en climas cálidos",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "english-angora",
+      "codigo": "piel",
+      "evidencia": "Enredos y nudos en el pelaje que pueden derivar en irritación de piel si no se atienden",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "english-angora",
+      "codigo": "peso",
+      "evidencia": "Puede volverse más sedentario, por lo que conviene vigilar el peso",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-miniatura",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como cataratas, algo para revisar con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-miniatura",
+      "codigo": "rinon",
+      "evidencia": "Cálculos urinarios, conviene comentarlo con el veterinario si hay antecedentes",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-miniatura",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, algo a tener en cuenta en chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-miniatura",
+      "codigo": "corazon",
+      "evidencia": "Afecciones cardíacas, para conversar con el veterinario en los controles anuales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "sphynx",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, algo para chequear periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "sphynx",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad y afecciones de la piel, dado que carece de la protección natural del pelaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "sphynx",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, algo para revisar en los controles veterinarios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "weimaraner",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "weimaraner",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "weimaraner",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "weimaraner",
+      "codigo": "piel",
+      "evidencia": "Ciertas sensibilidades cutáneas por su pelaje corto",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bombay",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios relacionados con la estructura corta del hocico",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bombay",
+      "codigo": "corazon",
+      "evidencia": "Enfermedades cardíacas como la cardiomiopatía hipertrófica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bombay",
+      "codigo": "peso",
+      "evidencia": "Tendencia al exceso de peso si no se controla la alimentación y el ejercicio",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bombay",
+      "codigo": "ojos",
+      "evidencia": "Sensibilidad ocular o lagrimeo por la conformación facial",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boston-terrier",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a su hocico corto",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boston-terrier",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, dado que sus ojos son grandes y prominentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boston-terrier",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, conviene monitorearla con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boston-terrier",
+      "codigo": "piel",
+      "evidencia": "Alergias en la piel, que pueden requerir seguimiento veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "west-highland-white-terrier",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel y alergias, algo para consultar con el veterinario si aparecen picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "west-highland-white-terrier",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, conviene charlarlo con el veterinario especialmente si se nota cojera o dificultad para moverse",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "west-highland-white-terrier",
+      "codigo": "respiracion",
+      "evidencia": "Ciertas afecciones respiratorias o de vías aéreas, bueno mencionarlo si hay tos o dificultad para respirar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "mini-lop",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "mini-lop",
+      "codigo": "peso",
+      "evidencia": "Sobrepeso si el ejercicio o la dieta no están equilibrados",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "mini-lop",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna o patas por manejo inadecuado",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "exotic-shorthair",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a la estructura achatada de la cara, algo para consultar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "exotic-shorthair",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, presente en algunos linajes derivados del Persa",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "exotic-shorthair",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares vinculadas a la conformación facial, como el lagrimeo excesivo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "exotic-shorthair",
+      "codigo": "piel",
+      "evidencia": "Predisposición a la formación de tapones de pelo o problemas dérmicos en los pliegues faciales",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "exotic-shorthair",
+      "codigo": "peso",
+      "evidencia": "Tendencia al sobrepeso si la actividad física es baja, un punto para charlar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boerboel",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para chequear con el veterinario a medida que crece",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boerboel",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, conviene consultarlo si aparecen molestias frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boerboel",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, bueno mencionarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "boerboel",
+      "codigo": "ojos",
+      "evidencia": "Entropión u otras afecciones oculares, para revisar en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "danio-cebra",
+      "codigo": "piel",
+      "evidencia": "Infecciones fúngicas o bacterianas en la piel o aletas, que conviene consultar si se notan cambios de color o textura",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "chinchilla",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "chinchilla",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria ante ambientes húmedos o mal ventilados",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "chinchilla",
+      "codigo": "piel",
+      "evidencia": "Afecciones de piel o pelaje relacionadas con la humedad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "greyhound",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, por lo que conviene consultar sobre el cuidado bucal",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "greyhound",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad cutánea o tendencia a lastimarse la piel fácilmente, dado su pelaje fino",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "greyhound",
+      "codigo": "corazon",
+      "evidencia": "Cardiopatías, algo que puede evaluarse en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chino-crestado",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, algo frecuente de conversar con el veterinario por la estructura de la boca",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chino-crestado",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de piel en la variedad sin pelo, incluyendo reacciones al sol o irritaciones",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chino-crestado",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, vale la pena consultarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shiba-inu",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shiba-inu",
+      "codigo": "piel",
+      "evidencia": "Alergias cutáneas, vale la pena consultarlo si hay picazón frecuente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shiba-inu",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el glaucoma, bueno revisarlo con controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "shiba-inu",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, un tema para conversar si hay cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-aleman",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para monitorear con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-aleman",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel y alergias, que conviene consultar si aparecen signos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como cataratas o glaucoma, conviene chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para conversar en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel",
+      "codigo": "piel",
+      "evidencia": "Afecciones cutáneas o alergias, vale la pena mencionarlo si hay picazón frecuente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel",
+      "codigo": "corazon",
+      "evidencia": "Cardiopatías, un tema para revisar en los chequeos generales con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "burmes",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, para chequear en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "maine-coon",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía hipertrófica, algo para chequear periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "maine-coon",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, sobre todo por su tamaño y peso corporal",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "maine-coon",
+      "codigo": "rinon",
+      "evidencia": "Poliquistosis renal, conviene preguntar si se recomienda algún control",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-ruso",
+      "codigo": "dientes",
+      "evidencia": "Se le asocian con cierta frecuencia problemas dentales, conviene que el veterinario los revise periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-ruso",
+      "codigo": "piel",
+      "evidencia": "La piel y el pelaje pueden mostrar sensibilidad o irritaciones, es un tema para conversar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "hamster-ruso",
+      "codigo": "ojos",
+      "evidencia": "Algunos ejemplares muestran predisposición a problemas oculares, algo que también conviene revisar con el profesional",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "devon-rex",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel, dado su pelaje fino y escaso, algo para consultar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "devon-rex",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos como la cardiomiopatía hipertrófica, algo para monitorear con estudios periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "cornish-rex",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de la piel, por lo que conviene consultar al veterinario ante irritaciones o alergias",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "cornish-rex",
+      "codigo": "corazon",
+      "evidencia": "Posibles problemas cardíacos, conviene hablarlo con el veterinario en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "cornish-rex",
+      "codigo": "dientes",
+      "evidencia": "Predisposición a ciertos problemas dentales, bueno consultarlo con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "lionhead",
+      "codigo": "dientes",
+      "evidencia": "Vale la pena hablar con el veterinario sobre el crecimiento dental, frecuente en conejos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "pleco-limpiavidrios",
+      "codigo": "piel",
+      "evidencia": "Infecciones fúngicas o bacterianas en la piel ante estrés o agua inadecuada, para evaluar con un profesional",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "ninfa",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, algo para conversar con el veterinario especialmente si hay cambios en la voz o la respiración",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "ninfa",
+      "codigo": "tiroides",
+      "evidencia": "Formación de quistes o tumores relacionados con la glándula tiroidea o gonadal en hembras",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-inu",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-inu",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, conviene hablarlo con el veterinario si hay cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-inu",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares como entropión, para conversar en las revisiones",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-inu",
+      "codigo": "piel",
+      "evidencia": "Enfermedades autoinmunes de la piel, un tema para consultar si aparecen lesiones o cambios en el pelaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "kerry-blue-terrier",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "kerry-blue-terrier",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como cataratas, conviene consultarlo en los chequeos anuales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "kerry-blue-terrier",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, tema para conversar si aparecen cambios de energía o de peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "kerry-blue-terrier",
+      "codigo": "piel",
+      "evidencia": "Ciertas afecciones de piel, vale la pena mencionarlo si hay picazón o irritación persistente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "terranova",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "terranova",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, como la estenosis subaórtica, que conviene monitorear",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "terranova",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, como entropión o ectropión",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "koi",
+      "codigo": "piel",
+      "evidencia": "Problemas de calidad de agua que pueden derivar en afecciones de piel o branquias",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "kuvasz",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para conversar con el veterinario sobre controles articulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "kuvasz",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-gigante",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-gigante",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene mencionarlo en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-gigante",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, algo que el veterinario puede evaluar con análisis de sangre",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "schnauzer-gigante",
+      "codigo": "piel",
+      "evidencia": "Ciertas afecciones de piel, para consultar si aparecen irritaciones o alergias recurrentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "munchkin",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna vertebral, algo para conversar con el veterinario dado la conformación corporal de la raza",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "munchkin",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía hipertrófica, vale la pena mencionarlo en los controles veterinarios de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher-miniatura",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, conviene consultarlo si aparecen picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher-miniatura",
+      "codigo": "dientes",
+      "evidencia": "Enfermedades dentales, buena idea hablar con el veterinario sobre el cuidado de los dientes desde joven",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher-miniatura",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, vale la pena mencionarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher-miniatura",
+      "codigo": "corazon",
+      "evidencia": "Cuestiones cardíacas, algo para tener en cuenta en los controles anuales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "british-shorthair",
+      "codigo": "corazon",
+      "evidencia": "Cardiopatía hipertrófica, un tema para conversar con el veterinario sobre controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "british-shorthair",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, conviene mencionarlo en los chequeos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "british-shorthair",
+      "codigo": "peso",
+      "evidencia": "Tendencia al sobrepeso, algo para charlar sobre alimentación y actividad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "british-shorthair",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, vale la pena revisarlo en las visitas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "british-shorthair",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, aunque es menos frecuente, se puede consultar si hay dudas de movilidad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "komondor",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "komondor",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel bajo el pelaje cordado, conviene comentarlo si aparecen molestias o cambios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "komondor",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como entropión, vale la pena mencionarlo en las visitas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "corydora",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios si el agua tiene poco oxígeno",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "puli",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "puli",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel relacionados con la humedad bajo el pelaje en cordones, conviene comentarlo con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "puli",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, es bueno mencionarlo en las visitas periódicas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-de-montana-de-los-pirineos",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para chequear con el veterinario dado su tamaño grande",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "perro-de-montana-de-los-pirineos",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como entropión, vale la pena una revisión periódica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "abisinio",
+      "codigo": "rinon",
+      "evidencia": "Problemas renales, algo para chequear con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "abisinio",
+      "codigo": "dientes",
+      "evidencia": "Gingivitis y enfermedad periodontal, conviene hablarlo con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "abisinio",
+      "codigo": "ojos",
+      "evidencia": "Atrofia progresiva de retina, una condición hereditaria para conversar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "jerbo-o-gerbil-mongol",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales relacionados con el crecimiento continuo de los incisivos, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "roedor",
+      "raza_codigo": "jerbo-o-gerbil-mongol",
+      "codigo": "peso",
+      "evidencia": "Tendencia a la obesidad si la dieta no está bien ajustada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "lhasa-apso",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como queratitis o cataratas, para chequear en controles regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "lhasa-apso",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para conversar con el veterinario según su actividad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "lhasa-apso",
+      "codigo": "rinon",
+      "evidencia": "Afecciones renales que pueden presentarse en algunos ejemplares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "lhasa-apso",
+      "codigo": "piel",
+      "evidencia": "Problemas dermatológicos vinculados al tipo de pelaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-ovejero-belga-malinois",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para chequear con el veterinario en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-ovejero-belga-malinois",
+      "codigo": "ojos",
+      "evidencia": "Ciertas sensibilidades oculares, conviene consultarlo si hay señales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-ovejero-belga-malinois",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, que el veterinario puede evaluar con análisis periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-ovejero-belga-malinois",
+      "codigo": "piel",
+      "evidencia": "Alergias cutáneas, buen tema para conversar si aparecen molestias en la piel",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pitbul-terrier",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pitbul-terrier",
+      "codigo": "piel",
+      "evidencia": "Alergias cutáneas, vale la pena consultar si aparecen picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pitbul-terrier",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, un tema para conversar si hay cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pitbul-terrier",
+      "codigo": "corazon",
+      "evidencia": "Cardiopatías congénitas, conviene mencionarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "eclectus",
+      "codigo": "peso",
+      "evidencia": "tendencia a la obesidad si el espacio o el ejercicio son limitados",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-suizo-blanco",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para conversar con el veterinario sobre controles según la edad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-suizo-blanco",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene charlarlo en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-suizo-blanco",
+      "codigo": "piel",
+      "evidencia": "Alergias cutáneas, un tema para revisar si aparecen picazón o irritaciones recurrentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pointer",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pointer",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, que conviene descartar si aparecen cambios de energía o peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pointer",
+      "codigo": "ojos",
+      "evidencia": "Sensibilidad ocular, vale comentarlo si se notan molestias o secreción",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel-americano",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como cataratas o glaucoma, conviene chequeos periódicos con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel-americano",
+      "codigo": "piel",
+      "evidencia": "Afecciones de piel y alergias, vale la pena consultarlo si hay picazón frecuente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel-americano",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para conversar en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "cocker-spaniel-americano",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, el veterinario puede orientar sobre controles según la edad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "charles-spaniel",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, algo para chequear con el veterinario con controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "charles-spaniel",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, conviene conversarlo especialmente si hace mucha actividad física",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "charles-spaniel",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, vale la pena consultarlo en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "charles-spaniel",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna o del disco vertebral, tema para tener en cuenta con la edad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "azul-ruso",
+      "codigo": "peso",
+      "evidencia": "Tendencia a la obesidad si no tiene suficiente actividad",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "azul-ruso",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, conviene que el veterinario revise la salud bucal periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "hotot-enano",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes, algo para revisar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "hotot-enano",
+      "codigo": "peso",
+      "evidencia": "Predisposición a la obesidad si no tiene suficiente espacio para moverse, conviene charlarlo con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "hotot-enano",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares dada la zona pigmentada alrededor de los ojos, vale la pena consultarlo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "turkish-angora",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía hipertrófica, una condición del corazón que conviene monitorear con controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "turkish-angora",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad cutánea o alergias, para consultar si aparecen signos de picazón o irritación persistente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-bully",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-bully",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a la conformación braquicéfala en algunos ejemplares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-bully",
+      "codigo": "piel",
+      "evidencia": "Alergias y afecciones de piel",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-bully",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "american-bully",
+      "codigo": "ojos",
+      "evidencia": "Cuestiones oculares como el entropión",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pekines",
+      "codigo": "respiracion",
+      "evidencia": "Dificultades respiratorias asociadas a su hocico corto, algo para charlar con el veterinario sobre todo en días de calor",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pekines",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares dada la forma y prominencia de sus ojos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pekines",
+      "codigo": "columna",
+      "evidencia": "Molestias o hernias de disco a nivel de columna",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pekines",
+      "codigo": "piel",
+      "evidencia": "Afecciones en la piel dentro de los pliegues faciales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "paso-fino-colombiano",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales relacionados con el desgaste irregular, bueno chequearlos periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "paso-fino-colombiano",
+      "codigo": "ojos",
+      "evidencia": "Sensibilidad ocular o cutánea en climas muy soleados, para consultar medidas de protección",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "paso-fino-colombiano",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad ocular o cutánea en climas muy soleados, para consultar medidas de protección",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "disco",
+      "codigo": "piel",
+      "evidencia": "Predisposición a hongos o infecciones en la piel cuando hay heridas o agua de baja calidad, bueno consultarlo ante manchas o cambios en la piel",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "disco",
+      "codigo": "respiracion",
+      "evidencia": "Tendencia a problemas en las branquias cuando el agua no está en buen estado, conviene comentarlo si respira de forma agitada",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "diamante-mandarin",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, algo para tener en cuenta si el ambiente tiene mucho polvo o humo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "rhodesian-ridgeback",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para chequear con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "rhodesian-ridgeback",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, conviene monitorearlo con controles veterinarios periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "rhodesian-ridgeback",
+      "codigo": "piel",
+      "evidencia": "Alergias cutáneas, que el veterinario puede ayudar a identificar y manejar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "gigante-de-flandes",
+      "codigo": "corazon",
+      "evidencia": "Afecciones cardíacas asociadas a razas grandes, vale la pena mencionarlo en los controles",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "gigante-de-flandes",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, como en la mayoría de los conejos, algo para revisar periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "gigante-de-flandes",
+      "codigo": "respiracion",
+      "evidencia": "Predisposición a golpe de calor por su tamaño y masa corporal",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chow-chow",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chow-chow",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como entropión, conviene consultarlo si se nota molestia en los ojos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chow-chow",
+      "codigo": "piel",
+      "evidencia": "Afecciones de piel y pliegues cutáneos, buen tema para revisar en las visitas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "chow-chow",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, que el veterinario puede evaluar con análisis de sangre",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "whippet",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o heridas por su pelaje corto y poca grasa corporal",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "whippet",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, conviene consultarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "whippet",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos que pueden monitorearse en chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "loro-yaco-africano",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, conviene consultarlo si aparecen signos como estornudos o secreciones",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dalmata",
+      "codigo": "rinon",
+      "evidencia": "Formación de cálculos urinarios, un tema para conversar con el veterinario sobre alimentación e hidratación",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dalmata",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, algo para consultar si aparecen picazón o irritaciones recurrentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "dalmata",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, una condición articular para chequear en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-retriever",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para hablar con el veterinario en los controles de crecimiento",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-retriever",
+      "codigo": "ojos",
+      "evidencia": "Ciertas afecciones oculares hereditarias, conviene consultarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-retriever",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, que el veterinario puede ayudar a identificar si aparecen signos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-retriever",
+      "codigo": "peso",
+      "evidencia": "Cierta tendencia al sobrepeso, algo para monitorear junto al veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-doodle",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para charlar con el veterinario sobre todo en ejemplares de mayor tamaño",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-doodle",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, vale la pena consultarlo en los controles regulares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-doodle",
+      "codigo": "piel",
+      "evidencia": "Alergias o sensibilidades en la piel, un tema para conversar si aparecen molestias frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "golden-doodle",
+      "codigo": "tiroides",
+      "evidencia": "Enfermedades hereditarias del Poodle, como ciertas condiciones tiroideas, que conviene preguntar en los chequeos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "galgo-espanol",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, por lo que conviene consultar sobre el cuidado bucal",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "galgo-espanol",
+      "codigo": "corazon",
+      "evidencia": "Cardiopatías, algo que puede evaluarse en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bengali",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos como la cardiomiopatía hipertrófica, algo para chequear con el veterinario de forma periódica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bengali",
+      "codigo": "ojos",
+      "evidencia": "Atrofia progresiva de retina en algunas líneas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bengali",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal en casos puntuales, conviene consultarlo en los controles",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bosque-de-noruega",
+      "codigo": "corazon",
+      "evidencia": "Predisposición a problemas cardíacos hereditarios, algo para chequear con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bosque-de-noruega",
+      "codigo": "rinon",
+      "evidencia": "Tendencia a la enfermedad renal poliquística, conviene consultarlo en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bosque-de-noruega",
+      "codigo": "cadera",
+      "evidencia": "Predisposición a la displasia de cadera en algunos ejemplares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "bosque-de-noruega",
+      "codigo": "peso",
+      "evidencia": "Cierta tendencia al sobrepeso si no se controla la alimentación",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "siberiano",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía hipertrófica, algo para chequear periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "siberiano",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, conviene consultarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "cuarto-de-milla",
+      "codigo": "ojos",
+      "evidencia": "Ciertas afecciones oculares hereditarias, algo para comentar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "doberman",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía dilatada, algo para conversar con el veterinario sobre controles cardíacos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "doberman",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "doberman",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "samoyedo",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "samoyedo",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como cataratas, conviene consultarlo en revisiones de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "samoyedo",
+      "codigo": "tiroides",
+      "evidencia": "Cuestiones tiroideas, que se pueden conversar con el veterinario si aparecen cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "samoyedo",
+      "codigo": "corazon",
+      "evidencia": "Estenosis pulmonar, una condición cardíaca para tener en cuenta según indique el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "samoyedo",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad cutánea o alérgica, un tema para charlar con el veterinario si hay picazón frecuente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-ingles",
+      "codigo": "respiracion",
+      "evidencia": "Dificultades respiratorias asociadas a su hocico corto, algo para hablar con el veterinario especialmente en días de calor",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-ingles",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel en los pliegues de la cara y el cuerpo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-ingles",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, conviene chequearla con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-ingles",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el prolapso de la glándula del tercer párpado",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "himalayo",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a la estructura facial achatada, algo para comentar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "himalayo",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, conviene conversar sobre estudios preventivos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "himalayo",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por la conformación de la mandíbula",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "himalayo",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares como lagrimeo excesivo, vale la pena consultarlo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "himalayo",
+      "codigo": "piel",
+      "evidencia": "Predisposición a la formación de nudos y bolas de pelo por su manto denso",
+      "confianza": "baja",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "pez",
+      "raza_codigo": "pez-dorado",
+      "codigo": "peso",
+      "evidencia": "Tendencia a la obesidad y problemas digestivos por sobrealimentación",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "beagle",
+      "codigo": "peso",
+      "evidencia": "Tendencia al sobrepeso, algo para conversar con el veterinario respecto a la alimentación",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "beagle",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo que puede evaluarse con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "beagle",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el glaucoma, conviene chequearlos en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "jersey-wooly",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, como en muchos conejos, conviene charlarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "jersey-wooly",
+      "codigo": "piel",
+      "evidencia": "Sarna u otros problemas de piel, para consultar si se nota picazón o pérdida de pelo excesiva",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "husky-siberiano",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "husky-siberiano",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, como cataratas o atrofia progresiva de retina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "husky-siberiano",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, una condición que conviene descartar si aparecen cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "husky-siberiano",
+      "codigo": "piel",
+      "evidencia": "Alergias o sensibilidad de piel, buen tema para conversar si hay picazón frecuente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-frances",
+      "codigo": "respiracion",
+      "evidencia": "Dificultades respiratorias asociadas a su hocico corto",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-frances",
+      "codigo": "columna",
+      "evidencia": "Problemas de columna, como la degeneración de discos vertebrales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-frances",
+      "codigo": "piel",
+      "evidencia": "Afecciones en la piel, especialmente en los pliegues de la cara",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-frances",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bulldog-frances",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, por la forma y posición de los ojos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "tortuga-de-orejas-rojas",
+      "codigo": "respiracion",
+      "evidencia": "Infecciones respiratorias asociadas a temperaturas de agua o ambiente inadecuadas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "tortuga-de-orejas-rojas",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o caparazón por calidad de agua deficiente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "tortuga-de-orejas-rojas",
+      "codigo": "peso",
+      "evidencia": "Obesidad o crecimiento irregular por dietas desbalanceadas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-americano",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-americano",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, conviene conversarlo si aparecen cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-americano",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares como entropión, bueno mencionarlo en las visitas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "akita-americano",
+      "codigo": "piel",
+      "evidencia": "Cuestiones dermatológicas o alergias, útil comentarlas si hay picazón o cambios en la piel",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "alaskan-malamute",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "alaskan-malamute",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene consultarlo en las revisiones de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "alaskan-malamute",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, es un tema para conversar si aparecen cambios de energía o peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "alaskan-malamute",
+      "codigo": "piel",
+      "evidencia": "Condiciones de piel relacionadas con el pelaje denso, bueno mencionarlo si hay picazón o irritación persistente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "alaskan-malamute",
+      "codigo": "corazon",
+      "evidencia": "Cuestiones cardíacas congénitas, vale la pena preguntarlo en los chequeos generales",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "setter-ingles",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario especialmente en perros grandes y activos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "setter-ingles",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, tema para conversar si se notan cambios de energía o peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "setter-ingles",
+      "codigo": "piel",
+      "evidencia": "Alergias cutáneas, vale la pena preguntar si aparecen picazones o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-de-shetland",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, algo para revisar con el veterinario desde cachorro",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-de-shetland",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-de-shetland",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides en la etapa adulta o senior",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-de-shetland",
+      "codigo": "piel",
+      "evidencia": "Dermatomiositis, una condición de piel que puede aparecer en cachorros de esta raza",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "cacatua-alba",
+      "codigo": "peso",
+      "evidencia": "Tendencia al sobrepeso si la dieta no está bien equilibrada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "cacatua-alba",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados al polvo de sus plumas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-espanol",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para hablar con el veterinario sobre todo por su tamaño y crecimiento rápido",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-espanol",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como entropión, conviene que el veterinario los revise periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "mastin-espanol",
+      "codigo": "corazon",
+      "evidencia": "Afecciones cardíacas, vale la pena mencionarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "cotorra-argentina",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, algo a conversar con el veterinario dado que son aves sensibles a cambios de temperatura y corrientes de aire",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "cotorra-argentina",
+      "codigo": "peso",
+      "evidencia": "Obesidad si la dieta no está bien equilibrada, tema para charlar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-belga",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para chequear con el veterinario a medida que crece",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-belga",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene consultarlo en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pastor-belga",
+      "codigo": "tiroides",
+      "evidencia": "Problemas de tiroides, algo que el veterinario puede evaluar con análisis periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "saluki",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, vale la pena chequear periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "saluki",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, aunque es menos común que en otras razas de su tamaño",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "saluki",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, conviene tenerlo en cuenta si aparecen cambios de energía o de peso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bobtail",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, un tema para charlar con el veterinario en los controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bobtail",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, como cataratas, que conviene revisar periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bobtail",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, que puede consultarse si hay cambios de peso o energía",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "san-bernardo",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para chequear con el veterinario dado su tamaño",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "san-bernardo",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el entropión o ectropión",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "san-bernardo",
+      "codigo": "corazon",
+      "evidencia": "Afecciones cardíacas, buenas de monitorear con controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "san-bernardo",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad al calor por su pelaje denso y tamaño corporal",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "yorkshire-terrier",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales, algo para revisar periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "yorkshire-terrier",
+      "codigo": "respiracion",
+      "evidencia": "Colapso de tráquea, tema para conversar especialmente si tose o hace ruido al respirar",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "yorkshire-terrier",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, conviene hacer controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "percheron",
+      "codigo": "respiracion",
+      "evidencia": "Cuestiones respiratorias, algo a monitorear con el veterinario especialmente en ambientes con polvo o encierro",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "percheron",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad cutánea en la zona de las crines y cuartillas, para revisar periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "tortuga-mordedora",
+      "codigo": "respiracion",
+      "evidencia": "Infecciones respiratorias asociadas a temperaturas inadecuadas del agua o el ambiente",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, conviene consultarlo en las visitas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher",
+      "codigo": "dientes",
+      "evidencia": "Sensibilidad dental, tema para hablar con el veterinario sobre limpieza",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher",
+      "codigo": "corazon",
+      "evidencia": "Cardiopatías, bueno mencionarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "pinscher",
+      "codigo": "piel",
+      "evidencia": "Reacciones alérgicas en la piel, algo para conversar si aparecen síntomas",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "labradoodle",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario según el linaje",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "labradoodle",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, conviene hacer controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "labradoodle",
+      "codigo": "piel",
+      "evidencia": "Alergias o sensibilidad de piel, vale la pena consultarlo si aparecen síntomas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "presa-canario",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para chequear con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "presa-canario",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias, que conviene consultar si aparecen picazón o irritaciones recurrentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "presa-canario",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como entropión, para revisar en controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "presa-canario",
+      "codigo": "peso",
+      "evidencia": "Cuestiones de peso y articulaciones, por su contextura grande y pesada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bernese",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y de codo, algo para chequear con el veterinario a lo largo de su vida",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bernese",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios, conviene consultarlo en los controles",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bernese",
+      "codigo": "peso",
+      "evidencia": "El peso conviene vigilarlo de cerca, porque el sobrepeso le pesa más a esta raza que a otras",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "braco-aleman",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para chequear con el veterinario sobre todo si es muy activo desde joven",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "braco-aleman",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, como entropión, que vale la pena revisar en las visitas de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "braco-aleman",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, una condición a tener en cuenta con análisis periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "fox-terrier",
+      "codigo": "cadera",
+      "evidencia": "Problemas de cadera, conviene hablarlo con el veterinario según la actividad del perro",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "fox-terrier",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares hereditarias, vale mencionarlo en los chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "fox-terrier",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad de piel en la variedad de pelo duro, un tema para consultar si aparecen irritaciones",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "boa-constrictora",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios asociados a condiciones de temperatura y humedad inadecuadas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "boa-constrictora",
+      "codigo": "piel",
+      "evidencia": "Problemas dérmicos o de muda incompleta, vinculados muchas veces a humedad insuficiente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "reptil",
+      "raza_codigo": "boa-constrictora",
+      "codigo": "peso",
+      "evidencia": "Obesidad por sobrealimentación en cautiverio",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "birmano",
+      "codigo": "corazon",
+      "evidencia": "Cardiomiopatía hipertrófica, algo para chequear con el veterinario mediante controles periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "birmano",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, conviene conversarlo en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "birmano",
+      "codigo": "peso",
+      "evidencia": "Predisposición a la obesidad si el ejercicio es escaso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "scottish-fold",
+      "codigo": "cadera",
+      "evidencia": "Problemas articulares y óseos relacionados con la mutación del cartílago",
+      "confianza": "media",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "scottish-fold",
+      "codigo": "rinon",
+      "evidencia": "Enfermedad renal poliquística, tema para charlar en los controles veterinarios",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "gato",
+      "raza_codigo": "scottish-fold",
+      "codigo": "corazon",
+      "evidencia": "Problemas cardíacos, conviene mencionarlo en los chequeos de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "mini-rex",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "mini-rex",
+      "codigo": "respiracion",
+      "evidencia": "Afecciones respiratorias, algo a tener en cuenta si aparecen signos como estornudos frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "mini-rex",
+      "codigo": "peso",
+      "evidencia": "Predisposición a la obesidad si el ejercicio es escaso",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "agapornis",
+      "codigo": "respiracion",
+      "evidencia": "Problemas respiratorios, algo para revisar con el veterinario si hay cambios en la respiración o el canto",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "arabe",
+      "codigo": "piel",
+      "evidencia": "Sensibilidad cutánea o alergias en algunos ejemplares",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "equino",
+      "raza_codigo": "arabe",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares hereditarios en ciertas líneas",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "fila-brasileno",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo, algo para conversar con el veterinario dado su tamaño grande",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "fila-brasileno",
+      "codigo": "piel",
+      "evidencia": "Problemas dermatológicos o de piel que conviene monitorear",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "fila-brasileno",
+      "codigo": "ojos",
+      "evidencia": "Entropión u otras afecciones oculares que puede revisar el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "fila-brasileno",
+      "codigo": "corazon",
+      "evidencia": "Cardiopatías que a veces se presentan en razas grandes, buen tema para chequeos periódicos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bloodhound",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera y codo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bloodhound",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares como el ectropión o entropión",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "bloodhound",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel en los pliegues de la cara",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "airedale-terrier",
+      "codigo": "cadera",
+      "evidencia": "Displasia de cadera, algo para conversar con el veterinario en controles de rutina",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "airedale-terrier",
+      "codigo": "piel",
+      "evidencia": "Problemas de piel o alergias cutáneas, conviene consultarlo si aparecen picazón o irritaciones frecuentes",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "airedale-terrier",
+      "codigo": "tiroides",
+      "evidencia": "Hipotiroidismo, un tema para chequear con análisis periódicos según indique el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "airedale-terrier",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares, vale la pena mencionarlo en las visitas veterinarias",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "belier-frances",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por el crecimiento continuo de los dientes, algo para revisar periódicamente con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "belier-frances",
+      "codigo": "peso",
+      "evidencia": "Sobrepeso, dado su tamaño grande y tendencia a la vida sedentaria, tema para conversar sobre alimentación con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "californian",
+      "codigo": "dientes",
+      "evidencia": "Problemas dentales por crecimiento continuo de los dientes, algo para chequear con el veterinario de forma periódica",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "californian",
+      "codigo": "peso",
+      "evidencia": "Tendencia al sobrepeso si la alimentación no está bien equilibrada",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "californian",
+      "codigo": "ojos",
+      "evidencia": "Afecciones oculares, vale la pena consultarlo si se notan cambios en los ojos",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "californian",
+      "codigo": "piel",
+      "evidencia": "Sarna u otros problemas de piel, conviene revisarlo si aparece picazón o pérdida de pelo",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "conejo",
+      "raza_codigo": "californian",
+      "codigo": "respiracion",
+      "evidencia": "Golpe de calor por su pelaje denso, algo a tener en cuenta en épocas de temperaturas altas",
+      "confianza": "baja",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "affenpinscher",
+      "codigo": "dientes",
+      "evidencia": "Enfermedades dentales, por lo que conviene hablar sobre el cuidado bucal",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "affenpinscher",
+      "codigo": "ojos",
+      "evidencia": "Problemas oculares que vale la pena controlar periódicamente",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "perro",
+      "raza_codigo": "affenpinscher",
+      "codigo": "respiracion",
+      "evidencia": "Sensibilidad respiratoria por su hocico corto, un tema para conversar con el veterinario",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "amazona-frentiazul",
+      "codigo": "respiracion",
+      "evidencia": "Enfermedades respiratorias, conviene consultar ante cualquier cambio en la respiración o el canto",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    },
+    {
+      "especie": "ave",
+      "raza_codigo": "amazona-frentiazul",
+      "codigo": "peso",
+      "evidencia": "Obesidad y problemas hepáticos asociados a dietas inadecuadas, tema para charlar con el veterinario sobre la alimentación",
+      "confianza": "alta",
+      "fuente": "ficha",
+      "modelo": "claude-sonnet-5"
+    }
+  ],
+  "descartadas": []
+}

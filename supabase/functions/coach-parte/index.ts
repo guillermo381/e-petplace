@@ -44,6 +44,45 @@ export interface Aviso {
   detalle?: string | null
   dias?: number | null
   severidad?: 'info' | 'pronto' | 'vencido' | null
+  /** 🔴 EL AVISO DE ANTICIPACIÓN (pieza 5). Lo dispara el MOTOR de A —raza ×
+   *  etapa × predisposición— y acá sólo se redacta. Los campos vienen
+   *  estructurados justamente para que la redacción **no tenga que inferir
+   *  nada**: sin ellos, escribir «suelen tener displasia» sería el modelo
+   *  hablando de patología por su cuenta. */
+  anticipacion?: {
+    /** «senior», «adulto»… */
+    etapa: string
+    /** «en marzo», «el mes que viene». Ya en voz de familia, lo arma el motor. */
+    cuando?: string | null
+    /** La raza en plural, tal como la nombra el catálogo: «Bulldog inglés». */
+    raza: string
+    /** 🔴 `cat_predisposiciones.descripcion_familia`, VERBATIM. Medido el
+     *  6-sep: A ya la escribió en voz de familia («suelen tener problemas de
+     *  cadera»), así que acá **se copia, no se compone**. Si esta edge la
+     *  redactara de nuevo, habría dos textos para la misma cosa y el que se
+     *  lee no sería el que se revisó. */
+    descripcion_familia: string
+    /** `cat_predisposiciones.chequeo_sugerido`, VERBATIM. Misma razón. */
+    chequeo_sugerido: string
+  } | null
+}
+
+/** 🔴 LA LEY DEL AVISO DE ANTICIPACIÓN, y por eso es PLANTILLA y no modelo.
+ *  Dice tres cosas y ninguna es un diagnóstico: **cuándo cambia de etapa**,
+ *  **qué suele pasarle a su raza** —una tendencia de la raza, no un hallazgo
+ *  sobre él— y **qué conviene hablar con el veterinario**. Un modelo redactando
+ *  esto libremente puede pasar de «suelen tener» a «puede tener», y esa palabra
+ *  convierte una estadística de raza en una sospecha sobre este animal.
+ *  *La forma fija es lo que impide ese deslizamiento.* */
+export function fraseAnticipacion(nombre: string, a: NonNullable<Aviso['anticipacion']>): string {
+  const cuando = a.cuando ? ` ${a.cuando}` : ''
+  // 🔴 LA FORMA ES FIJA Y ES LA LEY. Sujeto de la primera oración: la MASCOTA
+  // cambiando de etapa. Sujeto de la segunda: LA RAZA, en plural. **Nunca la
+  // mascota + la patología en la misma oración** — «los Bulldog inglés suelen
+  // tener problemas de cadera» es una estadística; «Thor tiene problemas de
+  // cadera» es un diagnóstico, y entre las dos hay una sola coma de distancia.
+  return `${nombre} entra a ${a.etapa}${cuando}. Los ${a.raza} ` +
+    `${a.descripcion_familia}: ${a.chequeo_sugerido}.`
 }
 
 /** 🔴 EL SILENCIO TIENE SU PROPIA RESPUESTA, y es 204 y no un 200 con texto
@@ -54,7 +93,10 @@ const silencio = () => new Response(null, { status: 204, headers: corsHeaders })
 /** La plantilla del aviso único. Cada tipo dice su frase; lo que no conoce
  *  cae al título tal cual, que es lo que A escribió y ya está en voz de familia.
  *  **Nunca inventa un motivo**: si no sabe los días, no los nombra. */
-export function frase(a: Aviso): string {
+export function frase(a: Aviso, nombre = 'Tu mascota'): string {
+  // La anticipación tiene su propia forma y NO pasa por la de los plazos:
+  // no es un vencimiento, es una etapa que llega.
+  if (a.anticipacion) return fraseAnticipacion(nombre, a.anticipacion)
   const d = typeof a.dias === 'number' ? a.dias : null
   const cuando = d === null ? ''
     : d < 0 ? ` — venció hace ${-d} ${-d === 1 ? 'día' : 'días'}`
@@ -120,6 +162,11 @@ Deno.serve(async (req) => {
     // respuesta sea la misma.
     if (err) { console.error('[coach-parte] obtener_avisos_coach:', err.message); return silencio() }
 
+    // El nombre lo trae el lector con los avisos: la edge no lo adivina ni lo
+    // pide al cliente. Si no viene, la frase dice «Tu mascota» y no un nombre
+    // inventado — que es peor que un genérico.
+    const nombre = (Array.isArray(filas) ? (filas[0] as { nombre?: unknown })?.nombre : null)
+    const nom = typeof nombre === 'string' && nombre.trim() ? nombre.trim() : 'Tu mascota'
     const avisos = (Array.isArray(filas) ? filas : []) as Aviso[]
     const validos = avisos.filter((a) => a && typeof a.titulo === 'string' && a.titulo.trim())
     if (validos.length !== avisos.length) {
@@ -132,12 +179,12 @@ Deno.serve(async (req) => {
     // ── uno: la plantilla YA es la frase ─────────────────────────────────
     if (validos.length === 1) {
       return new Response(JSON.stringify({
-        parte: frase(validos[0]), fuente: 'plantilla', avisos: validos.length,
+        parte: frase(validos[0], nom), fuente: 'plantilla', avisos: validos.length,
       }), { status: 200, headers: JSON_HEADERS })
     }
 
     // ── dos o más: hay que hilar, y eso sólo lo hace el modelo ───────────
-    const lista = validos.map((a) => `· ${frase(a)}`).join('\n')
+    const lista = validos.map((a) => `· ${frase(a, nom)}`).join('\n')
     const r = await llamarModelo({
       pieza: 'coach_parte',
       sistema: SISTEMA,

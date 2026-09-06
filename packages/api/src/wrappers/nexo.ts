@@ -41,6 +41,26 @@ export interface Semaforo {
   motivo: string | null;
 }
 
+/** Las cuatro puertas del expediente. **Cada una se guarda por su camino**, y
+ *  `medico` no es una etiqueta más: lo que entra ahí lo lee un veterinario como
+ *  historia clínica. Por eso la edge, ante una clase que no reconoce, **cae a
+ *  `rasgo`** —lo más inocuo— en vez de a la más grave. */
+/** Las cuatro que GUARDAN. `no_guardar` existe en la edge y **nunca llega
+ *  acá**: lo que el clasificador marca como ruido se descarta antes de
+ *  proponer. *Un clasificador sin la opción de decir «esto no va» clasifica el
+ *  ruido igual que un hecho, y con la misma confianza.* */
+export type ClaseMemoria = 'comportamiento' | 'rasgo' | 'medico' | 'recuerdo';
+
+export interface PropuestaMemoria {
+  /** 🔴 El id de su fila en `propuestas_memoria`. **Con esto se confirma**:
+   *  sin id, confirmar sería mandar el texto de vuelta y esperar que sea el
+   *  mismo. La confirmación va por la puerta de A, que es la única que escribe
+   *  el expediente. */
+  id: string;
+  hecho: string;
+  clase: ClaseMemoria;
+}
+
 export interface RespuestaNexo {
   /** `null` SÓLO cuando `intencion === 'busqueda'`. */
   respuesta: string | null;
@@ -52,8 +72,10 @@ export interface RespuestaNexo {
   /** `null` salvo con `intencion === 'busqueda'`. */
   consulta: string | null;
   semaforo: Semaforo | null;
-  /** Se PROPONE. La guarda la familia confirmando, con `confirmado_de_ia`. */
-  propuesta_memoria: { hecho: string } | null;
+  /** Se PROPONE. La guarda la familia confirmando, con `confirmado_de_ia`.
+   *  🔴 **Este wrapper NO la guarda**, y no es un olvido: guardarla acá la
+   *  volvería una afirmación del sistema sobre la mascota de alguien. */
+  propuesta_memoria: PropuestaMemoria | null;
   /** `true` en el primer turno del hilo. */
   aviso_ia: boolean;
 
@@ -80,7 +102,7 @@ export interface InputPreguntarANexo {
 
 const CODIGOS_NEXO = [
   'cuerpo_invalido', 'sin_sesion', 'sin_acceso', 'memorial',
-  'contexto_no_disponible', 'texto_muy_largo', 'error_modelo',
+  'contexto_no_disponible', 'texto_muy_largo', 'propuesta_no_guardada', 'error_modelo',
   'datos_inconsistentes', 'error_desconocido',
 ] as const;
 export type CodigoErrorNexo = (typeof CODIGOS_NEXO)[number];
@@ -94,6 +116,7 @@ const MENSAJES: Record<CodigoErrorNexo, string> = {
   memorial: 'Acá está su vida, entera.',
   contexto_no_disponible: 'No pudimos leer su expediente todavía.',
   texto_muy_largo: 'Escríbeme algo más corto.',
+  propuesta_no_guardada: 'No pude anotar eso ahora. Prueba de nuevo.',
   error_modelo: 'No pude contestarte ahora. Prueba de nuevo en un momento.',
   datos_inconsistentes: 'La respuesta llegó incompleta.',
   error_desconocido: 'Algo falló. Prueba de nuevo.',
@@ -155,9 +178,13 @@ export async function preguntarANexo(
       !(data.respuesta === null || typeof data.respuesta === 'string')) {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
   }
-  const propuesta = esObj(data.propuesta_memoria) && typeof data.propuesta_memoria.hecho === 'string'
-    ? { hecho: data.propuesta_memoria.hecho }
-    : null;
+  const CLASES: readonly string[] = ['comportamiento', 'rasgo', 'medico', 'recuerdo'];
+  const p = data.propuesta_memoria;
+  const propuesta: PropuestaMemoria | null =
+    esObj(p) && typeof p.id === 'string' && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
+    typeof p.clase === 'string' && CLASES.includes(p.clase)
+      ? { id: p.id, hecho: p.hecho, clase: p.clase as ClaseMemoria }
+      : null;
   return {
     ok: true,
     data: {
@@ -185,6 +212,73 @@ export async function preguntarANexo(
         : esSemaforo(data.semaforo) && data.semaforo.nivel !== 'casa',
     },
   };
+}
+
+// ── LA PRESENTACIÓN · el primer turno ──────────────────────────────────────
+
+export interface PresentacionNexo {
+  /** Tres bloques: quién es · qué puede hacer POR ESTA mascota · la promesa
+   *  honesta con el aviso de IA. **Salen de plantilla, no del modelo**: es lo
+   *  primero que Nexo dice de sí mismo y no puede salir distinto cada vez. */
+  burbujas: string[];
+  /** Chips para empezar. Sólo los que el expediente puede contestar — *un chip
+   *  que lleva a «no lo tengo» es peor que un chip menos.* */
+  chips: string[];
+}
+
+/** Lo que Nexo dice la PRIMERA vez, para esta mascota. */
+export async function presentacionDeNexo(
+  mascotaId: string,
+): Promise<ResultadoWrapper<PresentacionNexo, CodigoErrorNexo>> {
+  const { data, error } = await getClient().functions.invoke('coach', {
+    body: { mascotaId, accion: 'presentar' },
+  });
+  if (error) {
+    const c = await codigoDe<CodigoErrorNexo>(error, CODIGOS_NEXO);
+    return { ok: false, codigo: c ?? 'error_desconocido', mensaje: MENSAJES[c ?? 'error_desconocido'] };
+  }
+  if (!esObj(data) || !Array.isArray(data.burbujas) || !Array.isArray(data.chips) ||
+      !data.burbujas.every((b) => typeof b === 'string')) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
+  }
+  return { ok: true, data: { burbujas: data.burbujas as string[], chips: data.chips as string[] } };
+}
+
+// ── EL «CONTANOS» · la caja libre ──────────────────────────────────────────
+
+/** Clasifica lo que la familia escribió en la caja libre y **propone**.
+ *  🔴 `propuestas: []` NO es un error: es la respuesta correcta cuando lo que
+ *  escribieron no es un hecho sobre la mascota (un saludo, una pregunta) — el
+ *  clasificador lo marca `no_guardar` y **no llega a existir ninguna fila**.
+ *  **La pantalla lo dice y no guarda nada.**
+ *
+ *  Cada propuesta que SÍ vuelve ya tiene su fila `pendiente` en
+ *  `propuestas_memoria` con su `id`. **Confirmar es de A**; este wrapper no
+ *  escribe el expediente. */
+export async function clasificarHecho(
+  input: { mascotaId: string; texto: string },
+): Promise<ResultadoWrapper<{ propuestas: PropuestaMemoria[] }, CodigoErrorNexo>> {
+  const { data, error } = await getClient().functions.invoke('coach', {
+    body: { mascotaId: input.mascotaId, texto: input.texto, accion: 'clasificar' },
+  });
+  if (error) {
+    const c = await codigoDe<CodigoErrorNexo>(error, CODIGOS_NEXO);
+    return { ok: false, codigo: c ?? 'error_desconocido', mensaje: MENSAJES[c ?? 'error_desconocido'] };
+  }
+  if (!esObj(data) || !Array.isArray(data.propuestas)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
+  }
+  const CLASES: readonly string[] = ['comportamiento', 'rasgo', 'medico', 'recuerdo'];
+  const propuestas: PropuestaMemoria[] = [];
+  for (const p of data.propuestas) {
+    // Una propuesta malformada se descarta sola; las otras siguen. Es la misma
+    // ley del carnet: lo que falta no tumba la tanda.
+    if (esObj(p) && typeof p.id === 'string' && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
+        typeof p.clase === 'string' && CLASES.includes(p.clase)) {
+      propuestas.push({ id: p.id, hecho: p.hecho, clase: p.clase as ClaseMemoria });
+    }
+  }
+  return { ok: true, data: { propuestas } };
 }
 
 // ── EL PARTE DEL DÍA ───────────────────────────────────────────────────────

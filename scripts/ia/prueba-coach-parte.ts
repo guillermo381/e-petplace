@@ -174,6 +174,41 @@ console.log('\n== 6 · LA PUERTA, Y LA BASURA QUE NO TUMBA LA TANDA ==')
     a.json.fuente === 'plantilla' && cuerpos.length === 0, { f: a.json.fuente, n: cuerpos.length })
 }
 
+console.log('\n== 6bis · 🔴 EL AVISO DE ANTICIPACIÓN: estadística de raza, NO diagnóstico ==')
+{
+  const anticipacion = {
+    etapa: 'senior', cuando: 'en marzo', raza: 'Bulldog inglés',
+    descripcion_familia: 'suelen tener problemas de cadera',
+    chequeo_sugerido: 'vale la pena hablar con tu vet de un estudio de cadera en su próximo chequeo',
+  }
+  avisos = [{ tipo: 'anticipacion', titulo: 'Cambio de etapa', anticipacion, nombre: 'Thor' }]
+  falso()
+  const { status, json } = await llamar()
+  const t = String(json.parte)
+  exigir('200 por plantilla, CERO modelo', status === 200 && json.fuente === 'plantilla' && cuerpos.length === 0, { s: status, f: json.fuente, n: cuerpos.length })
+  exigir('  el sujeto de la patología es LA RAZA, en plural', /Los Bulldog inglés suelen tener/.test(t), t)
+  exigir('  🔴 y NUNCA «Thor tiene»', !/Thor (tiene|padece|sufre|puede tener)/i.test(t), t)
+  exigir('  🔴 ni «displasia» como hallazgo suyo', !/Thor.{0,40}(displasia|problemas de cadera)/i.test(t), t)
+  exigir('  la mascota aparece SÓLO cambiando de etapa', /Thor entra a senior en marzo/.test(t), t)
+  exigir('  y termina mandando a hablarlo con el vet', /hablar con tu vet/.test(t), t)
+  exigir('  cero palabras de alarma', !/urgente|grave|peligro|riesgo|alarma|ya mismo/i.test(t), t)
+  console.log('     ↑ «los Bulldog suelen tener» es una estadística; «Thor tiene» es un')
+  console.log('       diagnóstico, y entre las dos hay una sola coma de distancia.')
+  console.log('     «' + t + '»')
+}
+{
+  // los dos textos salen VERBATIM del catálogo de A: si esta edge los
+  // recompusiera, habría dos versiones y la que se lee no sería la revisada.
+  avisos = [{ tipo: 'anticipacion', titulo: 'x', nombre: 'Nube', anticipacion: {
+    etapa: 'adulto', cuando: null, raza: 'Gato Común',
+    descripcion_familia: 'TEXTO-EXACTO-DE-A', chequeo_sugerido: 'CHEQUEO-EXACTO-DE-A' } }]
+  falso()
+  const { json } = await llamar()
+  exigir('la descripción de A viaja VERBATIM', String(json.parte).includes('TEXTO-EXACTO-DE-A'), json.parte)
+  exigir('  y el chequeo de A también', String(json.parte).includes('CHEQUEO-EXACTO-DE-A'), json.parte)
+  exigir('  sin `cuando`, la frase no inventa una fecha', !/ en /.test(String(json.parte).split('.')[0]), json.parte)
+}
+
 console.log('\n== 7 · CONTROL de `frase` (la pieza pura, sin edge) ==')
 {
   exigir('el detalle se pega con punto', frase({ tipo: 'x', titulo: 'Algo', detalle: 'Y esto' } as never) === 'Algo. Y esto')
