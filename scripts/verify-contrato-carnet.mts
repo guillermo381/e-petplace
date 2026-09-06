@@ -14,30 +14,6 @@
 import { execFileSync } from 'node:child_process';
 import { writeFileSync, unlinkSync, readFileSync } from 'node:fs';
 
-function brazoEnums(): string[] {
-  const fallas: string[] = [];
-  const w = readFileSync('packages/api/src/wrappers/vacunas.ts', 'utf8');
-  const e = readFileSync('supabase/functions/extract-vacuna/index.ts', 'utf8');
-
-  const leer = (txt: string, nombre: string, pat: RegExp): string[] | null => {
-    const m = pat.exec(txt);
-    if (m === null) return null;
-    return m[1].split(',').map((x) => x.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
-  };
-
-  for (const nombre of ['EVIDENCIAS', 'CONFIANZAS']) {
-    const lw = leer(w, nombre, new RegExp(`const ${nombre}[^=]*=\\s*\\[([^\\]]*)\\]`));
-    const le = leer(e, nombre, new RegExp(`const ${nombre}\\s*=\\s*\\[([^\\]]*)\\]`));
-    if (lw === null) { fallas.push(`no se pudo leer ${nombre} del wrapper`); continue; }
-    if (le === null) { fallas.push(`no se pudo leer ${nombre} de la edge`); continue; }
-    const soloW = lw.filter((x) => !le.includes(x));
-    const soloE = le.filter((x) => !lw.includes(x));
-    if (soloW.length > 0 || soloE.length > 0) {
-      fallas.push(`${nombre} DIVERGE — sólo en el wrapper: [${soloW}] · sólo en la edge: [${soloE}]`);
-    }
-  }
-  return fallas;
-}
 
 const API = `${process.cwd()}/packages/api`;
 let fallas = 0;
@@ -96,15 +72,13 @@ di(/Array\.isArray\(\s*data\.plan_impreso\s*\)/.test(w),
    cuesta una llamada real al proveedor. *Un gate que declara su límite se puede
    confiar; uno que no lo declara se lee como si midiera más de lo que mide.* */
 
-// ── brazo 4 ─────────────────────────────────────────────────────────────────
-console.log('\n── ④ los enums se LEEN, no se copian ──');
-const fallasEnums = brazoEnums();
-if (fallasEnums.length === 0) {
-  di(true, "EVIDENCIAS y CONFIANZAS", "wrapper y edge dicen lo mismo");
-} else {
-  for (const f of fallasEnums) di(false, "enums", f);
-}
-
+/* ☠️ EL BRAZO 4 SE JUBILÓ EL DÍA QUE NACIÓ (A, 5-sep-2026). Comparaba las listas
+   de vocabulario entre el wrapper y la edge — y `verify:vocabularios` (D, lote
+   2.8) hace lo mismo **y una copia más: el PROMPT**, que es justo la que yo no
+   había visto. *Un ejemplo trabajado con un valor jubilado es la parte del prompt
+   que el modelo más copia.* Dos gates que miden lo mismo se desincronizan y
+   entonces hay que decidir a cuál creerle; se conserva el que mide más.
+   ⇒ el vocabulario lo vigila `pnpm verify:vocabularios`. */
 console.log(`\n${fallas === 0 ? '✅ CONTRATO EXIGIBLE' : `🔴 ${fallas} falla(s)`}`);
 process.exit(fallas === 0 ? 0 : 1);
 

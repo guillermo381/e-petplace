@@ -180,32 +180,28 @@ function campoFechaParcial(v: unknown): v is string | null {
 }
 
 const VIAS: readonly string[] = ['subcutanea', 'intramuscular', 'intranasal', 'oral'];
-/* Tipadas contra su propio tipo, no como `string[]`: así el compilador ve la
-   divergencia DENTRO del archivo. Era `readonly string[]`, y por eso el tipo
-   podía decir `'sticker'` mientras la lista decía `'sticker_con_fecha'` sin que
-   nada se quejara — *el tipo decía la verdad y el guard mentía, en el mismo
-   archivo, a treinta líneas de distancia.* El gate cubre la otra mitad: la
-   divergencia CONTRA LA EDGE, que ningún compilador puede ver. */
-/* ⚠️ Se ensancha EN EL USO (`as readonly string[]`) y no en la declaración: es
-   al revés de lo que uno escribiría de apuro. Declararlas anchas deja pasar un
-   valor inventado —fue el defecto— y declararlas angostas rompe `.includes`,
-   que espera el tipo estrecho. *El chequeo tiene que ser estricto donde se
-   escribe la lista y ancho donde se compara contra un `string` que viene de
-   afuera.* */
 const CONFIANZAS: readonly ConfianzaExtraccion[] = ['alta', 'media', 'baja'];
-/* 🔴 SE LEE DE LA EDGE, NO SE INVENTA. Decía `sticker_con_fecha` y la edge
-   devuelve `sticker`: como una evidencia fuera de lista **rechaza la fila
-   entera**, toda vacuna leída de un sticker se descartaba en silencio — y en un
-   carnet real los stickers son la mayoría. *No rompía nada: llegaban menos filas
-   de las que el modelo leyó, y nadie abre un ticket por vacunas que nunca vio.*
-   Lo vigila `verify:contrato-carnet` (brazo 4), que compara las dos listas. */
+/* 🔴 TIPADAS CONTRA SU PROPIO TIPO, no como `string[]` (A, en el merge): así el
+   compilador ve la divergencia DENTRO del archivo. Era `readonly string[]`, y por
+   eso el tipo podía decir `'sticker'` mientras la lista decía `'sticker_con_fecha'`
+   sin que nada se quejara — *el tipo decía la verdad y el guard mentía, en el
+   mismo archivo, a treinta líneas de distancia.* `verify:vocabularios` cubre la
+   otra mitad, que ningún compilador puede ver: las copias de la EDGE y del
+   PROMPT. Se ensancha en el USO y no en la declaración: estricto donde se escribe
+   la lista, ancho donde se compara contra un `string` que viene de afuera. */
 const EVIDENCIAS: readonly EvidenciaAplicacion[] = ['sticker', 'sello', 'manuscrito', 'impreso'];
 
 const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
   v === null || (typeof v === 'string' && lista.includes(v));
 
 /** Espejo EXACTO del validador de la edge. Que las dos puntas exijan lo mismo
- *  es lo que hace que «cumple el contrato» signifique una sola cosa. */
+ *  es lo que hace que «cumple el contrato» signifique una sola cosa.
+ *
+ *  🔴 Y **no alcanzaba con decirlo acá**: este comentario decía «espejo EXACTO»
+ *  mientras `EVIDENCIAS` tenía el valor jubilado (`sticker_con_fecha`) y la edge
+ *  el vigente (`sticker`), así que **cada fila del carnet rebotaba en el
+ *  cliente**. Un comentario no compara nada. Lo compara `verify:vocabularios`,
+ *  que lee las dos listas del código fuente y exige que sean la misma. */
 function esVacunaExtraida(v: unknown): v is VacunaExtraida {
   if (!esObj(v)) return false;
   return (
@@ -237,7 +233,12 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     Array.isArray(v.cubre) && v.cubre.every((c) => typeof c === 'string' && c.length > 0) &&
     campoTexto(v.tipo_vacuna) &&
     typeof v.confianza === 'string' && (CONFIANZAS as readonly string[]).includes(v.confianza) &&
-    typeof v.evidencia === 'string' && (EVIDENCIAS as readonly string[]).includes(v.evidencia)
+    // 🔴 `null` es legal desde el lote ①: si el modelo manda una evidencia que
+    // no está en el vocabulario, la edge la ANULA y marca la fila `incompleta`
+    // en vez de tirarla. Exigir string acá rechazaba justo las filas que la
+    // edge había decidido conservar — la mitad de la cura, deshecha un piso
+    // más arriba.
+    enListaOnull(v.evidencia, EVIDENCIAS)
   );
 }
 
