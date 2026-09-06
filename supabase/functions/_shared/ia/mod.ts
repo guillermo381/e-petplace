@@ -199,12 +199,23 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
   const esfuerzo = p.esfuerzo !== undefined ? p.esfuerzo : ESFUERZO[p.pieza]
   const arranque = Date.now()
 
+  /* 🔴 EL TAMAÑO SE MIDE ANTES DE LLAMAR, y por eso está también en los FALLOS.
+     La medición de D vivía después de la respuesta, así que un timeout o un 429
+     registraban `null` — **y un fallo es justamente cuando importa saber cuán
+     grande era el prompt**: un timeout sobre un prompt enorme dice una cosa y
+     sobre uno chico dice otra completamente distinta. *El dato existe antes de
+     salir; no había razón para perderlo salvo dónde estaba escrito el renglón.* */
+  const largoPrompt = p.mensajes.reduce((a, m) => a + m.texto.length, 0) + (p.sistema?.length ?? 0)
+  const largoImagen = p.imagenes?.reduce((a, i) => a + i.base64.length, 0) ?? null
+
   const fallar = async (
     error: 'timeout' | 'error_proveedor' | 'error_parseo' | 'rechazo',
     detalle?: DetalleError,
     estadoHttp?: number,
   ): Promise<RespuestaIa> => {
     const uso = usoSinRespuesta(Date.now() - arranque)
+    uso.prompt_chars = largoPrompt
+    uso.imagen_chars = largoImagen
     await registrarUso(p.pieza, modelo, error, uso)
     return { ok: false, error, detalle, estadoHttp, uso }
   }
@@ -274,7 +285,12 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
   // tokens pero nada dice de qué TAMAÑO tenía el prompt que los produjo, así
   // que un prompt que crece no se distingue de una imagen que crece.
   // Con las dos cifras juntas, la próxima divergencia se lee de un vistazo.
-  const largoPrompt = p.mensajes.reduce((a, m) => a + m.texto.length, 0) + (p.sistema?.length ?? 0)
+  /* 🔴 LA MEDICIÓN PASA DEL LOG AL OBJETO (A, S113). El renglón de arriba ya
+     existía y salía por `console.log` — pero *un dato que sólo vive en el log
+     de una edge no se puede consultar seis meses después*, que es justo cuando
+     alguien pregunta por qué subió el costo. Ahora viaja en `ia_uso`. */
+  uso.prompt_chars = largoPrompt
+  uso.imagen_chars = largoImagen
   console.log(`[ia] ${p.pieza} · modelo=${modelo} · prompt=${largoPrompt} chars` +
     `${p.imagenes?.length ? ` · imagenes=${p.imagenes.length} (${p.imagenes.reduce((a, i) => a + i.base64.length, 0)} chars b64)` : ''}` +
     ` · input_tokens=${uso.tokens_entrada ?? '?'} · output_tokens=${uso.tokens_salida ?? '?'}`)

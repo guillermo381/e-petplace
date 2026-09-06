@@ -28756,3 +28756,46 @@ Sólo miró `packages/ui/src`. **`apps/cliente` y `apps/prestador` no se
 censaron** — es territorio de C y de B, y el instrumento
 (`/tmp/censo-guards.mjs`, AST con `typescript`) se corre igual sobre ellos
 cambiando una ruta.
+
+---
+
+### `D-1035` 🟢 · La clave de la cuenta de prueba quedó impresa en el transcript de una pista
+
+**Nace y se cura el mismo día (S113, 5-sep-2026). Decisión del founder: NO se
+rota** — es una cuenta de prueba genérica, sin datos sensibles y sin acceso a
+nada de una familia real. *La ficha existe igual, porque lo que hay que
+conservar no es el susto: es la regla.*
+
+#### Qué pasó
+Un arnés de una pista escribió la clave de la cuenta de prueba **inline**, y con
+eso quedó en el transcript de la sesión. Un transcript no se puede editar
+después: *el momento de decidir que un valor no se imprime es antes de
+imprimirlo, porque después ya no hay dónde borrarlo.*
+
+#### Por qué pasa, y por qué es peor que la de las llaves de servicio
+`D-1013` es sobre un comando que **vuelca secretos sin que nadie se lo pida**.
+Éste es distinto y por eso engaña: **la cuenta de prueba se siente inofensiva**
+—es de prueba, es de mentira, es «la de siempre»— así que nadie la trata como un
+secreto y termina escrita al lado del código que la usa. **La categoría del dato
+no la decide su importancia: la decide que sea una credencial.**
+
+#### La regla que queda (firma del founder)
+1. **La cuenta de prueba vive en el llavero**, servicio `epetplace-cuenta-prueba`
+   — el correo en `acct`, la clave en el valor.
+2. **Se lee AL MOMENTO de usarla y no se imprime nunca**, ni siquiera
+   enmascarada: *un valor mostrado a medias sigue estando en el transcript.*
+3. **Ningún arnés la escribe inline ni la deja en una constante.** Si el llavero
+   no la tiene, el arnés **dice cómo ponerla y se detiene** — jamás cae en
+   silencio a un archivo: *un fallback callado convierte la regla en una
+   sugerencia.*
+
+#### Ya ejecutado
+- La cuenta está en el llavero.
+- `scripts/s113a-llamadas-reales.mjs` la lee de ahí, con el fallo hablado.
+- El `.env.local` la conserva **sólo para que la app arranque en la máquina del
+  founder**, y ese archivo no está trackeado (verificado).
+
+#### Lo que NO cierra esta ficha, declarado
+**No se censaron los demás arneses del repo.** Éste es el que yo escribí y el
+que se curó; si otro guarda una credencial de prueba inline, sigue ahí. El censo
+es `grep -rn "PASSWORD\|password:" scripts/` y **no lo corrí**.

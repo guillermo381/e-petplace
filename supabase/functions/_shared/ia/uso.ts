@@ -46,6 +46,14 @@ export type ResultadoUso =
  * casa quedaría diluido por llamadas que nunca respondieron.
  */
 export interface Uso {
+  /** 🔴 Caracteres del prompt (sistema + mensajes) y del base64 de las
+   *  imágenes. **Son caracteres y no tokens a propósito**: la API devuelve
+   *  `input_tokens` ya sumado y no hay forma de pedirle el desglose; contar
+   *  tokens aparte sería pagar una medición para explicar otra. Con
+   *  `tokens_entrada` al lado alcanzan para la única pregunta que importaba —
+   *  *cuando esto suba, ¿subió el prompt o subió la imagen?* */
+  prompt_chars: number | null
+  imagen_chars: number | null
   tokens_entrada: number | null
   tokens_salida: number | null
   tokens_cache_lectura: number | null
@@ -58,6 +66,8 @@ export function usoDesdeRespuesta(usage: unknown, latenciaMs: number): Uso {
   const u = (usage ?? {}) as Record<string, unknown>
   const num = (v: unknown): number | null => (typeof v === 'number' ? v : null)
   return {
+    prompt_chars: null,
+    imagen_chars: null,
     tokens_entrada: num(u.input_tokens),
     tokens_salida: num(u.output_tokens),
     tokens_cache_lectura: num(u.cache_read_input_tokens),
@@ -69,6 +79,8 @@ export function usoDesdeRespuesta(usage: unknown, latenciaMs: number): Uso {
 /** Uso de una llamada que no llegó a respuesta: sólo se sabe cuánto tardó. */
 export function usoSinRespuesta(latenciaMs: number): Uso {
   return {
+    prompt_chars: null,
+    imagen_chars: null,
     tokens_entrada: null,
     tokens_salida: null,
     tokens_cache_lectura: null,
@@ -110,6 +122,8 @@ export async function registrarUso(
       tokens_cache_lectura: uso.tokens_cache_lectura,
       tokens_cache_escritura: uso.tokens_cache_escritura,
       latencia_ms: uso.latencia_ms,
+      prompt_chars: uso.prompt_chars,
+      imagen_chars: uso.imagen_chars,
       costo_estimado_usd: costoEstimadoUsd(modelo, uso),
     })
     if (error) {
