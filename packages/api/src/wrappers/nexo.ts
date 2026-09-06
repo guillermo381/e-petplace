@@ -45,9 +45,18 @@ export interface Semaforo {
  *  `medico` no es una etiqueta más: lo que entra ahí lo lee un veterinario como
  *  historia clínica. Por eso la edge, ante una clase que no reconoce, **cae a
  *  `rasgo`** —lo más inocuo— en vez de a la más grave. */
+/** Las cuatro que GUARDAN. `no_guardar` existe en la edge y **nunca llega
+ *  acá**: lo que el clasificador marca como ruido se descarta antes de
+ *  proponer. *Un clasificador sin la opción de decir «esto no va» clasifica el
+ *  ruido igual que un hecho, y con la misma confianza.* */
 export type ClaseMemoria = 'comportamiento' | 'rasgo' | 'medico' | 'recuerdo';
 
 export interface PropuestaMemoria {
+  /** 🔴 El id de su fila en `propuestas_memoria`. **Con esto se confirma**:
+   *  sin id, confirmar sería mandar el texto de vuelta y esperar que sea el
+   *  mismo. La confirmación va por la puerta de A, que es la única que escribe
+   *  el expediente. */
+  id: string;
   hecho: string;
   clase: ClaseMemoria;
 }
@@ -77,7 +86,7 @@ export interface InputPreguntarANexo {
 
 const CODIGOS_NEXO = [
   'cuerpo_invalido', 'sin_sesion', 'sin_acceso', 'memorial',
-  'contexto_no_disponible', 'texto_muy_largo', 'error_modelo',
+  'contexto_no_disponible', 'texto_muy_largo', 'propuesta_no_guardada', 'error_modelo',
   'datos_inconsistentes', 'error_desconocido',
 ] as const;
 export type CodigoErrorNexo = (typeof CODIGOS_NEXO)[number];
@@ -91,6 +100,7 @@ const MENSAJES: Record<CodigoErrorNexo, string> = {
   memorial: 'Acá está su vida, entera.',
   contexto_no_disponible: 'No pudimos leer su expediente todavía.',
   texto_muy_largo: 'Escríbeme algo más corto.',
+  propuesta_no_guardada: 'No pude anotar eso ahora. Prueba de nuevo.',
   error_modelo: 'No pude contestarte ahora. Prueba de nuevo en un momento.',
   datos_inconsistentes: 'La respuesta llegó incompleta.',
   error_desconocido: 'Algo falló. Prueba de nuevo.',
@@ -136,9 +146,9 @@ export async function preguntarANexo(
   const CLASES: readonly string[] = ['comportamiento', 'rasgo', 'medico', 'recuerdo'];
   const p = data.propuesta_memoria;
   const propuesta: PropuestaMemoria | null =
-    esObj(p) && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
+    esObj(p) && typeof p.id === 'string' && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
     typeof p.clase === 'string' && CLASES.includes(p.clase)
-      ? { hecho: p.hecho, clase: p.clase as ClaseMemoria }
+      ? { id: p.id, hecho: p.hecho, clase: p.clase as ClaseMemoria }
       : null;
   return {
     ok: true,
@@ -191,8 +201,13 @@ export async function presentacionDeNexo(
 
 /** Clasifica lo que la familia escribió en la caja libre y **propone**.
  *  🔴 `propuestas: []` NO es un error: es la respuesta correcta cuando lo que
- *  escribieron no es un hecho sobre la mascota (un saludo, una pregunta).
- *  **La pantalla lo dice y no guarda nada.** */
+ *  escribieron no es un hecho sobre la mascota (un saludo, una pregunta) — el
+ *  clasificador lo marca `no_guardar` y **no llega a existir ninguna fila**.
+ *  **La pantalla lo dice y no guarda nada.**
+ *
+ *  Cada propuesta que SÍ vuelve ya tiene su fila `pendiente` en
+ *  `propuestas_memoria` con su `id`. **Confirmar es de A**; este wrapper no
+ *  escribe el expediente. */
 export async function clasificarHecho(
   input: { mascotaId: string; texto: string },
 ): Promise<ResultadoWrapper<{ propuestas: PropuestaMemoria[] }, CodigoErrorNexo>> {
@@ -211,9 +226,9 @@ export async function clasificarHecho(
   for (const p of data.propuestas) {
     // Una propuesta malformada se descarta sola; las otras siguen. Es la misma
     // ley del carnet: lo que falta no tumba la tanda.
-    if (esObj(p) && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
+    if (esObj(p) && typeof p.id === 'string' && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
         typeof p.clase === 'string' && CLASES.includes(p.clase)) {
-      propuestas.push({ hecho: p.hecho, clase: p.clase as ClaseMemoria });
+      propuestas.push({ id: p.id, hecho: p.hecho, clase: p.clase as ClaseMemoria });
     }
   }
   return { ok: true, data: { propuestas } };

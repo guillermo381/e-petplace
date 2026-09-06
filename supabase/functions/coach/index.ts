@@ -65,6 +65,7 @@ type CodigoError =
   | 'memorial'
   | 'contexto_no_disponible'
   | 'texto_muy_largo'
+  | 'propuesta_no_guardada'
   | 'error_modelo'
 
 const ESTADO: Record<CodigoError, number> = {
@@ -77,6 +78,7 @@ const ESTADO: Record<CodigoError, number> = {
   memorial: 404,
   contexto_no_disponible: 503,
   texto_muy_largo: 400,
+  propuesta_no_guardada: 503,
   error_modelo: 502,
 }
 
@@ -406,14 +408,18 @@ Las cuatro partes:
 "medico"         — algo de SALUD que la familia cuenta: le dieron un
                    antibiótico, tuvo una otitis, lo operaron.
 "recuerdo"       — un hecho de su vida: lo adoptaron, se mudó, cumplió años.
+"no_guardar"     — 🔴 acá NO hay nada que guardar: un saludo, una pregunta, un
+                   comentario sobre vos, algo ilegible, o algo que no es sobre
+                   la mascota. **Usala sin culpa.** Es mejor no guardar nada
+                   que guardar un "hola" como si fuera un rasgo suyo.
 
 🔴 Si dudás entre "medico" y otra, elegí la otra. Lo médico lo lee un
 veterinario como historia clínica y una cosa contada al pasar no puede llegar
 ahí por tu duda.
 
-Si lo que escribieron NO es un hecho sobre la mascota —una pregunta, un saludo,
-algo ilegible— devolvés {"hechos":[]}. **No inventes un hecho para no venir
-vacío.**
+Si lo que escribieron NO es un hecho sobre la mascota, devolvés ese texto con
+clase "no_guardar". **No inventes un hecho para no venir vacío**, y no lo metas
+a la fuerza en una de las otras cuatro.
 Si contaron VARIAS cosas, devolvés una por hecho, hasta tres.
 
 Respondé SOLO {"hechos":[{"hecho":"…","clase":"…"}]} y nada más.`
@@ -473,7 +479,15 @@ export function saneaSemaforo(v: unknown): { nivel: string; motivo: string | nul
  *  inventada **no se degrada a la más grave** — cae a `rasgo`, que es la más
  *  inocua. *Un hecho contado al pasar que entra como `medico` lo lee un
  *  veterinario como historia clínica.* */
-export const CLASES_MEMORIA = ['comportamiento', 'rasgo', 'medico', 'recuerdo'] as const
+export const CLASES_MEMORIA = ['comportamiento', 'rasgo', 'medico', 'recuerdo', 'no_guardar'] as const
+
+/** 🔴 `no_guardar` NO es una clase del expediente: es la que dice que **acá no
+ *  hay nada que guardar**. Existe porque sin ella el modelo sólo tiene cuatro
+ *  cajones y **todo lo que entra cae en alguno** — un «hola» se archiva como
+ *  rasgo. *Un clasificador sin la opción de decir «esto no va» clasifica el
+ *  ruido igual que un hecho, y con la misma confianza.*
+ *  Lo que cae acá se descarta ANTES de proponer: nunca llega a la pantalla. */
+const CLASES_QUE_GUARDAN: readonly string[] = ['comportamiento', 'rasgo', 'medico', 'recuerdo']
 
 export function saneaPropuesta(
   v: unknown, c: { memoria?: string[] | null },
@@ -491,7 +505,53 @@ export function saneaPropuesta(
     console.error('[coach] clase de memoria fuera de la lista:', cruda)
   }
   const clase = cruda !== null && (CLASES_MEMORIA as readonly string[]).includes(cruda) ? cruda : 'rasgo'
+  // El ruido no se propone. Y ojo con el orden: si `no_guardar` cayera al
+  // `?? 'rasgo'` de arriba, el ruido entraría como rasgo — que es exactamente
+  // lo que esta clase vino a evitar.
+  if (!CLASES_QUE_GUARDAN.includes(clase)) return null
   return { hecho, clase }
+}
+
+/** 🔴 LA PROPUESTA SE PERSISTE, Y NO ES LO MISMO QUE GUARDARLA.
+ *  `propuestas_memoria` es la COLA DE LO PENDIENTE, no el expediente: la fila
+ *  nace `pendiente` y **el hecho no entra a la vida de la mascota hasta que la
+ *  familia confirma por la puerta de A**, que es la única que escribe
+ *  `coach_memoria`.
+ *
+ *  Tres razones para que viva en una tabla y no en la respuesta:
+ *  ① una propuesta suelta se pierde si cierran la app, y la familia perdió el
+ *     trabajo de habernos contado algo;
+ *  ② la confirmación necesita un `id` — sin él, confirmar sería mandar el texto
+ *     de vuelta y esperar que sea el mismo;
+ *  ③ deja MEDIBLE cuántas se proponen y cuántas se confirman, que es lo único
+ *     que va a decir si esto sirve.
+ *
+ *  ⚠️ CONTRATO CON A (no existe todavía; medido el 6-sep):
+ *    `propuestas_memoria(id, mascota_id, hecho, clase, origen, estado, creado_por, creado_en)`
+ *      origen ∈ 'contanos' | 'chat'   ·   estado ∈ 'pendiente'|'confirmada'|'descartada'
+ *    y su puerta `confirmar_propuesta_memoria(id)`, que escribe `coach_memoria`
+ *    con `fuente='confirmado_de_ia'`. **Esta edge NUNCA toca `coach_memoria`.**
+ */
+async function crearPropuestas(
+  // deno-lint-ignore no-explicit-any
+  sb: any, mascotaId: string, uid: string,
+  hechos: { hecho: string; clase: string }[], origen: 'contanos' | 'chat',
+): Promise<{ id: string; hecho: string; clase: string }[] | null> {
+  if (!hechos.length) return []
+  const { data, error: err } = await sb.from('propuestas_memoria').insert(
+    hechos.map((h) => ({
+      mascota_id: mascotaId, hecho: h.hecho, clase: h.clase,
+      origen, estado: 'pendiente', creado_por: uid,
+    })),
+  ).select('id, hecho, clase')
+  if (err) {
+    // 🔴 Se devuelve `null` y quien llama rebota. **No se cae a devolverlas
+    // sueltas**: una propuesta sin fila es un botón de confirmar que no tiene
+    // qué confirmar, y eso se descubre recién cuando la familia lo toca.
+    console.error('[coach] no pude crear la propuesta:', err.message)
+    return null
+  }
+  return (data ?? []) as { id: string; hecho: string; clase: string }[]
 }
 
 export function comoCita(texto: string): string {
@@ -578,8 +638,10 @@ Deno.serve(async (req) => {
         .filter((h): h is { hecho: string; clase: string } => h !== null)
         .slice(0, 3)
       if (!Array.isArray(crudos)) console.error('[coach] clasificar: salida sin array `hechos`')
+      const guardadas = await crearPropuestas(sb, mascotaId, uid, hechos, 'contanos')
+      if (guardadas === null) return error('propuesta_no_guardada', 'No pude anotar eso ahora. Prueba de nuevo.')
       return new Response(JSON.stringify({
-        propuestas: hechos, fuente: 'modelo', aviso_ia: false,
+        propuestas: guardadas, fuente: 'modelo', aviso_ia: false,
       }), { status: 200, headers: JSON_HEADERS })
     }
 
@@ -664,10 +726,19 @@ Deno.serve(async (req) => {
       console.error('[coach] el modelo no devolvió `respuesta`')
       return error('error_modelo', 'No pude contestarte ahora. Prueba de nuevo en un momento.')
     }
+    // La propuesta del chat sigue el MISMO camino que la del «contanos»: fila
+    // pendiente, id, y la confirma la familia. Si no se pudo crear, la
+    // respuesta igual sale — **la conversación no se pierde por una propuesta**;
+    // lo que se pierde es el ofrecimiento de guardar, y eso se dice en el log.
+    const cruda = saneaPropuesta(d?.propuesta_memoria, c)
+    const guardadasChat = cruda ? await crearPropuestas(sb, mascotaId, uid, [cruda], 'chat') : []
+    const propuestaDelChat = guardadasChat && guardadasChat.length ? guardadasChat[0] : null
+    if (cruda && guardadasChat === null) console.error('[coach] la propuesta del chat no se pudo anotar')
+
     return new Response(JSON.stringify({
       respuesta, fuente: 'modelo', intencion,
       semaforo: saneaSemaforo(d?.semaforo),
-      propuesta_memoria: saneaPropuesta(d?.propuesta_memoria, c),
+      propuesta_memoria: propuestaDelChat,
       aviso_ia: primerTurno,
     }), { status: 200, headers: JSON_HEADERS })
   } catch (e) {

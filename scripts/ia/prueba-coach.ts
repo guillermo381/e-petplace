@@ -30,6 +30,7 @@ let cuerpos: Record<string, unknown>[] = []
 /** Escrituras REST por tabla. Es lo que prueba que la propuesta de memoria
  *  se PROPONE y no se guarda: la edge no puede tocar `coach_memoria`. */
 let escrituras: Record<string, number> = {}
+let propuestasFallan = false
 let ctxDevuelto: unknown = [CTX]
 const fetchReal = globalThis.fetch
 function proveedorFalso(devuelve: (n: number) => unknown) {
@@ -56,6 +57,17 @@ function proveedorFalso(devuelve: (n: number) => unknown) {
       if ((init?.method ?? 'GET') !== 'GET') {
         const tabla = url.split('/rest/v1/')[1].split('?')[0]
         escrituras[tabla] = (escrituras[tabla] ?? 0) + 1
+        if (tabla === 'propuestas_memoria') {
+          if (propuestasFallan) {
+            return Promise.resolve(new Response(JSON.stringify({ message: 'no existe' }),
+              { status: 404, headers: { 'Content-Type': 'application/json' } }))
+          }
+          // devuelve lo insertado con un id, como haría PostgREST con `select`
+          const filas = JSON.parse(String(init?.body ?? '[]')) as Record<string, unknown>[]
+          return Promise.resolve(new Response(JSON.stringify(
+            filas.map((f, i) => ({ id: `p${i + 1}`, hecho: f.hecho, clase: f.clase }))),
+            { status: 201, headers: { 'Content-Type': 'application/json' } }))
+        }
       }
       return Promise.resolve(new Response('[]', { status: 201 }))
     }
@@ -328,12 +340,15 @@ console.log('       en cualquiera de las dos direcciones es peor que no mostrarl
   const { json } = await llamar({ mascotaId: 'm1', texto: 'se esconde con los petardos' })
   exigir('la propuesta de memoria VIAJA en el cuerpo',
     (json.propuesta_memoria as Record<string, unknown>)?.hecho === 'Le tiene miedo a los petardos', json.propuesta_memoria)
+  exigir('  ...🔴 CON SU ID: sin id, confirmar sería mandar el texto de vuelta',
+    typeof (json.propuesta_memoria as Record<string, unknown>)?.id === 'string', json.propuesta_memoria)
+  exigir('  ...y la fila nació en `propuestas_memoria`, NO en `coach_memoria`',
+    escrituras.propuestas_memoria === 1 && (escrituras.coach_memoria ?? 0) === 0, escrituras)
   exigir('  ...con su CLASE, que dice por qué puerta entra',
     (json.propuesta_memoria as Record<string, unknown>)?.clase === 'comportamiento', json.propuesta_memoria)
-  exigir('  🔴 ...y la edge NO escribió en `coach_memoria`', (escrituras.coach_memoria ?? 0) === 0, escrituras)
-  exigir('  ...lo único que escribió es su fila de `ia_uso`', (escrituras.ia_uso ?? 0) === 2, escrituras)
-  console.log('     ↑ dos filas de ia_uso: router y redacción. Cero en memoria.')
-  console.log('       Una propuesta que el servidor guarda solo deja de ser una propuesta.')
+  console.log('     ↑ la cola de lo PENDIENTE no es el expediente: el hecho entra')
+  console.log('       a la vida de la mascota sólo cuando la familia confirma, por')
+  console.log('       la puerta de A, que es la única que escribe `coach_memoria`.')
 }
 {
   // 🔴 lo que YA está en la memoria no se vuelve a proponer.
@@ -447,6 +462,8 @@ console.log('\n== 8sexies · EL «CONTANOS»: clasifica y PROPONE, nunca guarda 
   const { status, json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'no le gusta el pollo y ladra al timbre' })
   const p = json.propuestas as { hecho: string; clase: string }[]
   exigir('200 con las dos propuestas', status === 200 && p?.length === 2, p)
+  exigir('  ...cada una con su id de la cola', p.every((x) => typeof (x as unknown as {id?:unknown}).id === 'string'), p)
+  exigir('  ...UNA sola escritura, con las dos filas juntas', escrituras.propuestas_memoria === 1, escrituras)
   exigir('  cada una con su clase', p[0].clase === 'rasgo' && p[1].clase === 'comportamiento', p)
   exigir('  🔴 CERO escrituras en `coach_memoria`', (escrituras.coach_memoria ?? 0) === 0, escrituras)
   exigir('  el clasificador es HAIKU, no sonnet', cuerpos[0].model === 'claude-haiku-4-5', cuerpos[0].model)
@@ -487,6 +504,51 @@ console.log('\n== 8sexies · EL «CONTANOS»: clasifica y PROPONE, nunca guarda 
     a.status === 404 && b.status === 404, { c: a.status, p: b.status })
   exigir('  ...y ninguna llamó al modelo', cuerpos.length === 0, cuerpos.length)
   ctxDevuelto = [CTX]
+}
+
+console.log('\n== 8septies · 🔴 `no_guardar`: el ruido NO llega a la pantalla ==')
+for (const [caso, texto] of [
+  ['un saludo', 'hola qué tal'],
+  ['una pregunta', '¿cuánto vale una consulta?'],
+  ['algo que no es de la mascota', 'me duele la espalda'],
+] as const) {
+  proveedorFalso(() => ({ hechos: [{ hecho: texto, clase: 'no_guardar' }] }))
+  const { status, json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto })
+  exigir(`${caso} → cero propuestas, 200`, status === 200 && (json.propuestas as unknown[]).length === 0, json.propuestas)
+  exigir('  ...y CERO filas creadas', (escrituras.propuestas_memoria ?? 0) === 0, escrituras)
+}
+console.log('     ↑ sin esta clase el modelo tiene cuatro cajones y TODO cae en alguno:')
+console.log('       un «hola» se archiva como rasgo, con la misma confianza que un hecho.')
+{
+  // 🔴 el orden importa: `no_guardar` NO puede caer al `?? rasgo` del final.
+  proveedorFalso(() => ({ hechos: [
+    { hecho: 'hola', clase: 'no_guardar' },
+    { hecho: 'No le gusta el pollo', clase: 'rasgo' },
+  ] }))
+  const { json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'hola, no le gusta el pollo' })
+  const p = json.propuestas as { hecho: string }[]
+  exigir('mezcla de ruido y hecho → entra SÓLO el hecho', p.length === 1 && p[0].hecho === 'No le gusta el pollo', p)
+}
+
+console.log('\n== 8octies · SI LA COLA NO ESTÁ, NO SE OFRECE GUARDAR ==')
+{
+  propuestasFallan = true
+  proveedorFalso(() => ({ hechos: [{ hecho: 'No le gusta el pollo', clase: 'rasgo' }] }))
+  const { status, json } = await llamar({ mascotaId: 'm1', accion: 'clasificar', texto: 'no le gusta el pollo' })
+  exigir('el «contanos» rebota 503, NO devuelve la propuesta suelta',
+    status === 503 && json.codigo === 'propuesta_no_guardada', { s: status, c: json.codigo })
+  console.log('     ↑ una propuesta sin fila es un botón de confirmar que no tiene qué')
+  console.log('       confirmar, y eso se descubre recién cuando la familia lo toca.')
+}
+{
+  // 🔴 pero en el CHAT la conversación NO se pierde por una propuesta.
+  propuestasFallan = true
+  redaccionCruda(JSON.stringify({ respuesta: 'Buenísimo saberlo.', semaforo: null,
+    propuesta_memoria: { hecho: 'Le encanta el agua', clase: 'rasgo' } }))
+  const { status, json } = await llamar({ mascotaId: 'm1', texto: 'le encanta el agua' })
+  exigir('el chat contesta igual, sin la propuesta', status === 200 && json.respuesta === 'Buenísimo saberlo.', { s: status })
+  exigir('  ...y la propuesta viene null, no rota', json.propuesta_memoria === null, json.propuesta_memoria)
+  propuestasFallan = false
 }
 
 console.log('\n== 9 · EL AVISO DE IA: en la primera respuesta del hilo ==')
