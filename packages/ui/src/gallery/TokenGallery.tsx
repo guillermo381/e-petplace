@@ -2302,6 +2302,15 @@ function EjemploFichaMascotaHogar() {
         accion={{ tipo: 'vivo', onPress: () => {} }}
         onPress={() => {}}
       />
+              {/* 🔴 LA MISMA FICHA, EN MEMORIA: degrada a tinta por MASCOTA,
+                  al lado de las vivas y sin cambiar el tema de la pantalla. */}
+              <FichaMascotaHogar
+                nombre="Kira"
+                voz="alDia"
+                textoEstado="Estuvo con vos 14 años."
+                enMemoria
+                onPress={() => {}}
+              />
       <FichaMascotaHogar
         nombre="Thor"
         voz="alDia"

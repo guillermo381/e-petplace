@@ -3,6 +3,7 @@
    se muestra. */
 import { fechaDespedidaValida } from '../packages/ui/src/components/despedida-fecha.ts';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 let ok = 0, mal = 0;
 const t = (n: string, real: unknown, esp: unknown) => {
   const a = JSON.stringify(real), b = JSON.stringify(esp);
@@ -55,7 +56,31 @@ t('🔴 el botón es tinta, no el acento', /backgroundColor: valida \? theme\.te
 t('🔴 ni una gota de marca', /accent\.|gradient|Gradient|HeroMarca|Isotipo/.test(DESP), false);
 t('sin ilustración', /Huella|Guijarro|Image|Svg/.test(DESP), false);
 t('el segundo toque ES la seguridad', /if \(!confirmando\)/.test(DESP), true);
-t('…y nombra a la mascota', /confirmando \? <Texto[^>]*>\{nombre\}|\{nombre\}<\/Texto>/.test(DESP), true);
+/* 🔴 **LA GARANTÍA SE MUDÓ, Y EL GATE SE MUDA CON ELLA.**
+   ⏪ Medía que la PIEZA dibujara `{nombre}` suelto debajo del botón. El founder
+   mandó ese nombre ADENTRO de la etiqueta del segundo toque, así que hoy lo
+   compone la pantalla (Ley 3) y **la pieza recibe un string opaco: ya no puede
+   verificarlo**.
+   *Una garantía que se muda de la pieza a la pantalla se lleva su gate, o
+   desaparece sin que nada avise* — y ésta es la que hace parar a alguien el
+   peor día de su vida. Por eso se mide en el CONSUMIDOR, contra `origin/main`,
+   igual que el brazo ⑮ del carnet. */
+{
+  const git = (...a: string[]) =>
+    execFileSync('git', a, { cwd: new URL('..', import.meta.url).pathname, encoding: 'utf8' });
+  let pantalla = '';
+  try {
+    pantalla = git('show', 'origin/main:apps/cliente/src/app/(tabs)/hogar/mascota/despedida.tsx');
+  } catch { /* sin remoto: NO CONCLUYENTE, abajo */ }
+  if (pantalla === '') {
+    NO_CONCLUYENTE.push('origin/main:…/despedida.tsx (no alcanzable)');
+  } else {
+    t('🔴 …y la PANTALLA nombra a la mascota en la voz del segundo toque',
+      /vozConfirmar=\{t\([^)]*\{ nombre/.test(pantalla), true);
+    t('CONTROL · y se la pasa desde su propio parámetro, no de un literal',
+      /nombre \?\? ''/.test(pantalla), true);
+  }
+}
 t('🔴 ningún «¿estás seguro?» con signos', /¿est[áa]s seguro|!!|¡/.test(DESP), false);
 t('el estado del segundo toque es LOCAL (una pantalla que se re-monta no llega confirmada)',
   /useState\(false\)/.test(DESP), true);
@@ -70,5 +95,53 @@ if (NO_CONCLUYENTE.length > 0) {
   console.log('   es que no se pudo medir**, y sale 2 para que ningún tablero lo lea como salud.');
   process.exit(2);
 }
+console.log('\n── ROJO · LOS CUATRO DEL TELÉFONO ──');
+/* ⚠️ Se reusan los de arriba: `RAZA` es SugerenciaRaza y `FICHA` es FichaRaza.
+   La primera versión de este bloque los redeclaró CRUZADOS —su `RAZA` era
+   FichaRaza— y **de haber compilado, cada assert habría medido el archivo
+   equivocado dando verdes por la razón equivocada.** Lo cazó el compilador. */
+const HOGAR = src('FichaMascotaHogar.tsx');
+
+/* ① El chip elegido cambiaba de relleno y la letra se quedaba con el contraste
+   del fondo que ya no estaba. `Texto` no expone el blanco y no debe: su paleta
+   es semántica. Acá el fondo lo pinta la casa. */
+/* ⚠️ Cuenta las DOS líneas del chip —el nombre y la confianza—: la primera
+   versión pedía UNA sola coincidencia y **daba verde con la mitad curada**,
+   porque matcheaba la otra. Segunda vez en el turno que un assert mide de
+   menos: *el que decide el número es el cuantificador, no el ojo.* */
+t('🔴 ① las DOS líneas del chip elegido llevan blanco, no la tinta por defecto',
+  (RAZA.match(/color: on \? theme\.text\.inverse/g) ?? []).length, 2);
+t('…y el no elegido sigue en tinta', /: theme\.text\.primary/.test(RAZA), true);
+t('el par sale de `text.inverse`, jamás de `sobreVideo`', /sobreVideo/.test(RAZA), false);
+
+/* ② Un texto que no se distingue de una descripción no se toca: la ficha
+   quedaba cerrada porque nadie sabía que abría. */
+t('🔴 ② «ver más» tiene afordance: label + chevron', /abierta \? '⌃' : '›'/.test(FICHA), true);
+/* Con tres datos —uno largo y dos cortos— las dos columnas partían el largo en
+   renglones angostos y dejaban un hueco al lado. */
+t('🔴 el cuerpo NO usa dos columnas al 50 %', /width: '50%'/.test(FICHA), false);
+t('…la primera va a todo el ancho', /visibles\[0\]\.etiqueta/.test(FICHA), true);
+t('…y el resto en una fila corta', /visibles\.slice\(1\)\.map/.test(FICHA), true);
+
+/* ③ En la pantalla del peor día, lo primero que se lee no puede estar peleando
+   con la barra de estado. */
+t('🔴 ③ el título respeta la zona segura', /paddingTop: spacing\[6\] \+ insets\.top/.test(DESP), true);
+t('🔴 el nombre ya NO cuelga suelto debajo del botón',
+  /confirmando \? <Texto variante="apoyo">\{nombre\}/.test(DESP), false);
+/* 🔴 El botón se pinta con `text.primary` de fondo y la letra usaba el default
+   de `Texto`, que es ESE MISMO TOKEN: tinta sobre tinta. Nadie lo pidió: salió
+   leyendo el archivo para mover el nombre adentro. */
+t('🔴 y su letra es BLANCA sobre la tinta, no el default',
+  /color: valida \? theme\.text\.inverse : theme\.text\.tertiary/.test(DESP), true);
+
+/* ④ En la tira conviven las vivas y la que se fue. Con un solo tema para
+   todas, la que se fue se dibujaba idéntica a las que están. */
+t('🔴 ④ el memorial es de la MASCOTA, no del tema',
+  /const esMemorial = enMemoria \|\| theme\.mode === 'memorial'/.test(HOGAR), true);
+t('…y viaja a la acción, o su pill de «en vivo» saldría en verde',
+  /<AccionFicha accion=\{accion\} enMemoria=\{esMemorial\} \/>/.test(HOGAR), true);
+t('CONTROL · el tema sigue mandando cuando la pantalla ENTERA es memorial',
+  (HOGAR.match(/theme\.mode === 'memorial'/g) ?? []).length, 2);
+
 console.log(`\n${mal === 0 ? '✓' : '✗'} ${ok} verdes · ${mal} rojos`);
 process.exit(mal === 0 ? 0 : 1);

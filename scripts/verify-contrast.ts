@@ -634,6 +634,21 @@ todos.push(
   // Las pastillas de pendiente: número y palabra sobre color pleno.
   { nombre: 'COACH · pastilla de chat: blanco / magenta TRABAJADOR', fg: lightTheme.text.inverse, bg: '#AE3785', surface: veloSobre(lightTheme.bg.base) },
   { nombre: 'COACH · pastilla de pedidos: TINTA / ocre (el par de R56)', fg: lightTheme.text.primary, bg: lightTheme.status.warning, surface: veloSobre(lightTheme.bg.base) },
+  /* 🔴 **EL CHIP DE RAZA ELEGIDO, y su par nace porque el chip estaba mal.**
+     Cambiaba de relleno a `accent.control` y **la letra se quedaba con el
+     color por defecto de `Texto`** — la tinta del fondo que ya no estaba. Es
+     el MISMO par que el chip de filtro, y aun así se declara aparte: *un par
+     medido en una pieza no cubre a la de al lado, porque el gate mide pares
+     DECLARADOS y no colores usados.* */
+  { nombre: 'RAZA · chip elegido: blanco / accent.control', fg: lightTheme.text.inverse, bg: lightTheme.accent.control, surface: lightTheme.bg.base },
+  { nombre: 'RAZA · chip elegido, en oscuro', fg: darkTheme.text.inverse, bg: darkTheme.accent.control, surface: darkTheme.bg.base },
+  /* 🔴 **LA DESPEDIDA: blanco sobre TINTA**, que es el fondo de su botón.
+     ⏪ La letra usaba el default de `Texto`, y ese default ES `text.primary` —
+     el mismo token del fondo. *Tinta sobre tinta: el botón del peor día decía
+     su texto en el color de su propio relleno, y no salió en ninguna captura
+     porque vive al fondo, después del espaciador.* */
+  { nombre: 'DESPEDIDA · botón de despedir: blanco / tinta', fg: lightTheme.text.inverse, bg: lightTheme.text.primary, surface: lightTheme.bg.base },
+  { nombre: 'DESPEDIDA · botón de despedir, en oscuro', fg: darkTheme.text.inverse, bg: darkTheme.text.primary, surface: darkTheme.bg.base },
   /* S113-B · 1.1 — el chip de filtro elegido: blanco sobre el acento de
      control. **Nace con la pieza, no después**: el gate mide pares
      DECLARADOS, así que un color nuevo que nadie declara sale verde sin

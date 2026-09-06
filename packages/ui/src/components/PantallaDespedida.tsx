@@ -20,18 +20,27 @@
  */
 
 import { useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
+import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 import { fechaDespedidaValida } from './despedida-fecha'
 
 export interface PantallaDespedidaProps {
   /** *«Despedirse de Thor»* — ya compuesta (Ley 3). */
   titulo: string
-  /** El nombre solo, para el segundo toque. */
+  /** ⚰️ **SIN CONSUMIDOR desde que el nombre se mudó ADENTRO del botón.**
+   *  Su único uso era el texto suelto debajo, que el founder mandó meter en
+   *  la etiqueta del segundo toque —hoy la pantalla compone `vozConfirmar`
+   *  con el nombre adentro (Ley 3)—.
+   *
+   *  **Se conserva porque `despedida.tsx` en `main` ya la pasa**, y sacarla
+   *  rompería a su pista. *La prolijidad de un contrato no vale un revert.*
+   *  Muere cuando esa pantalla se toque por otra razón. */
   nombre: string
   /** `YYYY-MM-DD`. Hoy por defecto; **el guard rechaza el futuro**. */
   fecha: string
@@ -52,7 +61,6 @@ export interface PantallaDespedidaProps {
 
 export function PantallaDespedida({
   titulo,
-  nombre,
   fecha,
   hoy,
   fechaTexto,
@@ -67,10 +75,23 @@ export function PantallaDespedida({
   /* El segundo toque. **Estado local a propósito**: si viviera afuera, una
      pantalla que se re-monta podría llegar con la confirmación ya puesta. */
   const [confirmando, setConfirmando] = useState(false)
+  const insets = useSafeAreaInsets()
   const valida = fechaDespedidaValida(fecha, hoy)
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[6], gap: spacing[6] }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.bg.base,
+        padding: spacing[6],
+        /* 🔴 **LA ZONA SEGURA, y acá no es un detalle:** la pieza ocupa la
+           pantalla entera, así que sin el inset **el título se le mete debajo
+           del reloj**. *En la pantalla del peor día, lo primero que se lee no
+           puede estar peleando con la barra de estado.* */
+        paddingTop: spacing[6] + insets.top,
+        gap: spacing[6],
+      }}
+    >
       {/* Sin ilustración y sin marca: ver la cabecera. */}
       <Texto variante="titulo">{titulo}</Texto>
 
@@ -117,12 +138,22 @@ export function PantallaDespedida({
           backgroundColor: valida ? theme.text.primary : theme.bg.hundido,
         }}
       >
-        <Texto variante="enfasis" color={valida ? undefined : 'tertiary'}>
+        {/* 🔴 **BLANCO SOBRE LA TINTA, no el color por defecto.**
+            ⏪ El botón se pinta con `text.primary` de fondo y la letra usaba el
+            default de `Texto`, que **es ese mismo token**: tinta sobre tinta.
+            *Nadie lo pidió y no salió en ninguna captura porque el botón vive
+            al fondo, después del espaciador* — apareció leyendo el archivo
+            para mover el nombre adentro. */}
+        <Text
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.base,
+            color: valida ? theme.text.inverse : theme.text.tertiary,
+          }}
+        >
           {confirmando ? vozConfirmar : vozBoton}
-        </Texto>
+        </Text>
       </Pressable>
-      {/* El nombre en el segundo toque: es lo que hace parar. */}
-      {confirmando ? <Texto variante="apoyo">{nombre}</Texto> : null}
     </View>
   )
 }
