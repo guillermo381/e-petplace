@@ -55,3 +55,28 @@ trámite.
 todavía no es invocable acá. Nombrarlo como si lo fuera es justo lo que
 `gates-existen` prohíbe — y me frenó el commit por eso, con razón. Cuando la
 rama de E entre a `main`, se lo llama por su nombre completo.)*
+
+## 🔴 S113 · LA APP DEL CLIENTE NO ABRE POR DEEP LINK — medido por E, dueño: `packages/api`
+
+**No es un overlay de dev: es `PantallaCaidaRaiz`.** Causa en
+`packages/api/src/wrappers/adopcion-hilo-vivo.ts`: canal de **nombre fijo**
+(`'mis-hilos'`) más `removeChannel` llamado con `void` ⇒ si el shell re-monta
+antes de que termine, `channel()` devuelve el canal **ya suscrito** y el `.on()`
+lanza.
+
+Medido por E: **arranque limpio 0/6 · arranque con una segunda navegación 3/4 ·
+volver atrás 0/3.**
+
+⚠️ **«Una segunda navegación durante el arranque» es exactamente abrir la app
+desde un QR** — o sea **el pasaporte y la placa que S113 acaba de agregar.**
+
+Cura barata: `await removeChannel`, o nombre único por montaje (lo segundo lo
+vuelve **inexpresable**). **No lo toco: no es mi territorio**, y lo levanto acá
+porque es lo más grave que quedó sobre la mesa esta noche.
+
+## 🟡 S113-D · la edge `coach` está desplegada y su fuente NO está en `main`
+
+Vive sólo en `pista/s113-d-2.0`. Es la clase de `chat-ayuda` (**`D-717`**: una
+function desplegada, facturable y **sin fuente en el repo**). No urge — la cura
+es el merge, que es de A. Se anota **para que no lo descubra otro el día del
+incidente.**
