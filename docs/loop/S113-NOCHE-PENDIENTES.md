@@ -147,3 +147,52 @@ de la casa. `verify:coach-ley` **da VERDE contra el SHA nuevo: las 8 cláusulas 
 
 *El ciclo completo en una noche: el gate se escribió antes que la superficie, corrió contra ella
 el mismo día, dio cuatro rojos —dos míos, que curé; dos reales, que curó D— y ahora está verde.*
+
+---
+
+### E-8 · 🔴 La raíz del cliente no abre cuando la app se abre por un deep link
+
+**Qué.** `PantallaCaidaRaiz` —la pantalla de caída **del producto**, no un overlay de dev— con
+`cannot add postgres_changes callbacks for realtime:mis-hilos after subscribe()`.
+**Cuando ocurre, la app no abre.**
+
+**Medido, con discriminador:** arranque limpio **0 de 6** · arranque **con una segunda
+navegación durante el arranque 3 de 4** · entrar a un perfil y volver **0 de 3**.
+
+**Causa, leída del código:** `adopcion-hilo-vivo.ts` crea el canal con **nombre fijo**
+(`'mis-hilos'`) y `supabase-js` devuelve el canal existente si ya hay uno. La limpieza está
+bien escrita, pero **`removeChannel` es asíncrono y se llama con `void`**: si el shell re-monta
+antes de que termine, `channel()` devuelve el canal **ya suscrito** y el `.on()` lanza.
+
+**Por qué no espera a mañana.** *«Una segunda navegación durante el arranque» es exactamente lo
+que hace abrir la app desde un QR* — y **el pasaporte con deep link y la placa con activación
+por escaneo nacieron esta misma sesión.** La superficie que estrena el disparo es la más nueva
+que hay.
+
+**Opciones.** (a) `await` en el `removeChannel` · (b) nombre de canal **único por montaje**, que
+vuelve el estado **inexpresable** · (c) dejarlo. **Voto: (b)** — la casa prefiere lo
+inexpresable a lo vigilado (L-439), y (a) sigue dependiendo de que nadie vuelva a poner el
+`void`. **No es decisión de founder: es una cura de dos líneas con dueño en `packages/api`.**
+Se anota acá para que no se pierda entre dos pistas.
+
+---
+
+### E-9 · 🟡 Dos pesos verdaderos de la misma mascota en la misma pantalla, y preside el peor
+
+**Qué.** En el perfil de Thor: encabezado **`11.4 kg`**, campo Peso **`24 kg · 04 sept 2026`**.
+Medido: `peso_clinico_kg = 11.4` del **21-jul** y `peso_reportado_kg = 24` del **4-sep**
+(`bascula_casa`). **Los dos son ciertos.**
+
+**El problema.** El encabezado **no dice cuál de los dos es ni de cuándo**, **gana en jerarquía**
+—va bajo el nombre, en grande— y es **el más viejo por mes y medio**. *Un bulldog inglés adulto
+de 11,4 kg es la mitad de lo normal: el número que preside es el que más se parece a un error.*
+
+**Y no es sólo cosmético: es de qué habla Nexo.** Si el contexto destilado toma el clínico, el
+asistente va a decir «Thor pesa 11,4 kg» cuando la familia anotó 24 anteayer. *Pierde la
+credibilidad entera en una frase, y la recupera nunca.*
+
+**Opciones.** (a) el encabezado muestra **el más reciente de los dos**, con su fecha ·
+(b) muestra el clínico y **lo dice** («11,4 kg · medido en la clínica, 21 jul») ·
+(c) no muestra peso en el encabezado. **Voto: (a) con su fecha** — la familia quiere saber
+cuánto pesa hoy, y el que lo sabe es el que midió último. **Pero es firma**, porque elegir entre
+«lo que dijo el vet» y «lo que dijo la familia» es una decisión de producto, no de UI.
