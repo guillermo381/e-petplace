@@ -14,6 +14,7 @@
 import { execFileSync } from 'node:child_process';
 import { writeFileSync, unlinkSync, readFileSync } from 'node:fs';
 
+
 const API = `${process.cwd()}/packages/api`;
 let fallas = 0;
 const di = (ok: boolean, q: string, v: string) => {
@@ -48,7 +49,7 @@ const tsc = (cuerpo: string): string => {
 const SIN = `import type { LecturaDeCarnet } from './src/wrappers/vacunas';
 export const r: LecturaDeCarnet = { vacunas: [] };`;
 const CON = `import type { LecturaDeCarnet } from './src/wrappers/vacunas';
-export const r: LecturaDeCarnet = { vacunas: [], plan_impreso: [] };`;
+export const r: LecturaDeCarnet = { vacunas: [], plan_impreso: [], filas_descartadas: [] };`;
 
 const salidaSin = tsc(SIN);
 di(/TS2741|TS2739/.test(salidaSin) && /plan_impreso/.test(salidaSin),
@@ -71,5 +72,30 @@ di(/Array\.isArray\(\s*data\.plan_impreso\s*\)/.test(w),
    cuesta una llamada real al proveedor. *Un gate que declara su límite se puede
    confiar; uno que no lo declara se lee como si midiera más de lo que mide.* */
 
+/* ☠️ EL BRAZO 4 SE JUBILÓ EL DÍA QUE NACIÓ (A, 5-sep-2026). Comparaba las listas
+   de vocabulario entre el wrapper y la edge — y `verify:vocabularios` (D, lote
+   2.8) hace lo mismo **y una copia más: el PROMPT**, que es justo la que yo no
+   había visto. *Un ejemplo trabajado con un valor jubilado es la parte del prompt
+   que el modelo más copia.* Dos gates que miden lo mismo se desincronizan y
+   entonces hay que decidir a cuál creerle; se conserva el que mide más.
+   ⇒ el vocabulario lo vigila `pnpm verify:vocabularios`. */
 console.log(`\n${fallas === 0 ? '✅ CONTRATO EXIGIBLE' : `🔴 ${fallas} falla(s)`}`);
 process.exit(fallas === 0 ? 0 : 1);
+
+/**
+ * ── BRAZO 4 · LOS ENUMS SE LEEN, NO SE COPIAN ──────────────────────────────
+ *
+ * 🔴 NACE DE UN DEFECTO VIVO, no de una precaución: el wrapper decía
+ * `sticker_con_fecha` y la edge devuelve `sticker`. Como el wrapper **rechaza la
+ * fila entera** cuando la evidencia no está en su lista, *toda vacuna leída de un
+ * sticker se descartaba en silencio* — y en un carnet real los stickers son la
+ * mayoría.
+ *
+ * ⚠️ Y el modo de falla es el peor: **no rompe nada**. El wrapper compila, la
+ * edge responde 200, y lo único que pasa es que llegan menos filas de las que el
+ * modelo leyó. *Nadie abre un ticket porque falten vacunas que nunca vio.*
+ *
+ * Por eso este brazo **lee las dos listas de sus archivos y las compara**. No
+ * declara cuál es la buena —la buena es la de la edge, que es quien produce— sino
+ * que **exige que sean la misma**.
+ */

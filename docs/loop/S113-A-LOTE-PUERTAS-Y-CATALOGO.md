@@ -362,3 +362,79 @@ devolverle el golpe.* Desde ese momento el expediente rechaza eventos fechados
 **después** de la partida (`mascota_en_memorial`); lo anterior sigue entrando,
 porque un veterinario cierra una atención días después y esa atención ocurrió
 cuando ella estaba viva.
+
+### Addendum para C — las fichas POR ESPECIE, y en qué se diferencian
+
+**Ya hay una publicada: `gato-comun`.** Es la primera del prompt por especie y la
+alcanzan **14 mascotas** — más que cualquiera de las once de raza. Van **doce
+publicadas** sobre 210.
+
+**Tres cosas que cambian respecto de una ficha de raza, las tres firmadas por el
+founder:**
+
+1. 🔴 **`origen` y `predisposiciones` vienen VACÍOS A PROPÓSITO.** Una especie no
+   tiene origen ni predisposiciones raciales: *«de dónde viene el gato» sería
+   historia de la domesticación —no algo que le sirva a esta familia— y listar
+   predisposiciones «del gato» sería listar todo lo que le puede pasar a un
+   gato.* **El prompt hizo lo correcto al callarse ahí.**
+   ⇒ **La pantalla no dibuja secciones vacías** — ya es tu regla, y acá es
+   exactamente la que hace falta. *Una ficha por especie va a mostrar dos
+   secciones menos, y eso no es un dato faltante: es la respuesta.*
+
+2. **La voz cambia de sujeto y es correcta así.** Las de raza dicen *«suele ser
+   cariñoso…»* sobre una raza; ésta dice *«el gato es un animal independiente…»*
+   sobre la especie. **Presente, no «suele».** Cambió el sujeto de la frase
+   porque cambió el sujeto de la pregunta. ⇒ **Desde hoy conviven las dos voces
+   en la misma pantalla** según la mascota tenga raza o no, y eso está bien.
+
+3. **Se piden con `obtenerContenidoDeRaza(especie, especie)`** cuando la mascota
+   no tiene raza declarada. Hay una ficha por cada una de las once especies;
+   **sólo `gato-comun` está publicada**, así que las otras diez todavía devuelven
+   `null` — y `null` sigue siendo la respuesta normal, no un error.
+
+### Addendum 2 para C — `obtenerContenidoDeRaza` cambió de forma
+
+🔴 **Ahora recibe la raza TAL CUAL la tecleó la familia, no un código.**
+
+```ts
+obtenerContenidoDeRaza(especie: string, razaDeclarada: string | null)
+```
+
+`mascotas.raza` es texto libre (D-379), así que **resolverla es el trabajo** — y
+son tres pasos, los tres en el servidor: casar por nombre, casar por **sinónimo**,
+y **caer a la ficha de la especie**. *Un viaje, una verdad.*
+
+**El resultado trae dos campos que la pantalla necesita**, y no son telemetría:
+
+| campo | para qué |
+|---|---|
+| `es_de_especie` | 🔴 `true` = **el texto habla del PERRO, no del bulldog de esta familia**. *Presentar «el perro es un animal social» como si fuera la descripción de SU perro es una promesa que el texto no cumple.* |
+| `via` | `nombre` · `sinonimo` · `especie_sin_raza` · `especie_por_descarte` |
+
+**Medido, con seis casos y su par discriminador:**
+
+```
+Mestizo (perro)        → via=sinonimo             → criollo      (ficha del perro)
+Mestizo (gato)         → via=especie_por_descarte → gato-comun   ← NO va al perro
+Thor «Bulldog inglés»  → via=nombre               → bulldog-ingles, es_de_especie=false
+Thor sin raza          → via=especie_sin_raza     → criollo
+«Braco de Weimar»      → via=especie_por_descarte → criollo, Y QUEDA REGISTRADO
+«Boxer» (casa, ficha sin publicar) → hay=false    ← NO cae a especie
+```
+
+⚠️ **El último es el que sorprende y es deliberado: si la raza CASA pero su ficha
+no está publicada, devuelve `null` y no cae a la especie.** *Decirle «el perro es
+un animal social» a quien tiene un Boxer sería peor que no decir nada.*
+
+**El efecto sobre las mascotas reales: de las que casaban, a 82 de 103.** Las 21
+que quedan son de especies cuya ficha todavía no se publicó.
+
+⚠️ Y **«Mestizo» es sinónimo SÓLO para perro**: son cuatro perros y un gato, y un
+sinónimo global habría mandado al gato a la ficha del perro. *El sinónimo es por
+especie, y eso no se deduce del vocabulario: se descubre mirando quién lo usa.*
+
+### Sobre el largo de las fichas (firma del founder)
+
+**La pantalla muestra las etapas PLEGADAS.** Si al verlo el founder siente que
+pesa, **se recorta con `pnpm corregir:ficha`, no se regenera** — regenerar
+devuelve un texto distinto en todo lo demás y pierde la lectura que ya se hizo.

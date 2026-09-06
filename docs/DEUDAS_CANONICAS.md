@@ -28799,3 +28799,161 @@ no la decide su importancia: la decide que sea una credencial.**
 **No se censaron los demás arneses del repo.** Éste es el que yo escribí y el
 que se curó; si otro guarda una credencial de prueba inline, sigue ahí. El censo
 es `grep -rn "PASSWORD\|password:" scripts/` y **no lo corrí**.
+
+---
+
+### `D-1036` 🟢 · `cat_razas` tiene una policy que dice «pública» y un GRANT que no la deja entrar
+
+**Nace S113-A (5-sep-2026), medida de paso. Decisión del founder: NO se toca
+hasta que una pantalla pública la pida.**
+
+#### Lo medido
+```
+policy   cat_razas_select_publica → public
+grants   authenticated:SELECT · service_role:… · postgres:…     ← anon NO está
+RLS      encendida
+```
+Un cliente con la clave `anon` recibe **`permission denied for table
+cat_razas`**. La policy autoriza y el grant no deja pasar: **es `L-216` en su
+forma limpia** — *todo rol hereda de `PUBLIC` en las policies, pero el GRANT es
+otra puerta, y sin ella la policy no alcanza nada.*
+
+#### Por qué hoy no rompe nada
+Toda superficie que lee razas —el selector del alta, la ficha del perfil, los
+lookups por lote— corre con sesión iniciada, o sea como `authenticated`, que sí
+tiene el grant. **El hueco es real y está fuera de todo camino vivo.**
+
+#### 🔴 Y la asimetría que lo vuelve digno de ficha
+`razas_contenido` **sí** le da SELECT a `anon` (lo concedí yo el mismo día, para
+que la ficha publicada se pueda leer sin sesión). Así que hoy conviven: *el
+contenido de una raza es legible sin sesión y el nombre de esa raza no.* Ninguna
+pantalla lo nota porque ninguna intenta las dos cosas sin sesión — **pero el día
+que alguien arme una página pública de razas, va a encontrar el contenido y no
+el catálogo, y el síntoma va a ser un error de permisos donde esperaba una
+lista.**
+
+#### Lo que NO se hace, y por qué
+No se agrega el grant. *Abrir un catálogo entero a `anon` es una decisión de
+superficie pública, no una prolijidad de permisos* — y hoy nadie la necesita.
+**El nombre de la policy es lo único que engaña**, y se deja como está para no
+tocar el objeto por un tema de forma.
+
+#### Disparo
+La primera pantalla que lea razas **sin sesión** — una landing, una página de
+compartir, un enlace público a la ficha de una raza. Ahí se decide si el grant
+entra o si esa pantalla pasa por una vista angosta.
+
+---
+
+### `D-1037` 🟡 · Los sinónimos de raza en español: 77 menciones sobre 58 nombres, medidos y sin usar
+
+**Dueño: C. Disparo: cuando el selector de raza del alta acepte texto libre.
+Sin cambio hoy.**
+
+#### De dónde sale
+E lo midió como subproducto de un experimento que **descartó**: `sugerir-raza`
+sin el catálogo en el prompt (`pista/s113-e-1.2 @ 4b08b570`,
+`docs/loop/CANDIDATO-raza-sin-catalogo.md`). El veredicto fue **NO va** —pierde
+14 puntos de top-1 por ahorrar $0,0038 la foto— *pero al mirar por qué perdía,
+apareció esto:*
+
+> **En español una raza no tiene UN nombre.** El modelo devolvía la raza
+> correcta con otro nombre: «Ruso azul» por «Azul Ruso», «Braco de Weimar» por
+> «Weimaraner», «Caniche» por «Poodle», «Británico de pelo corto» por «British
+> Shorthair».
+
+#### Lo re-medido por A (5-sep), y corrige el encuadre del número
+E reportó «77 de 255 nombres». Re-medido contra el catálogo de **hoy** (220
+razas, no las 137 de entonces) y con **su casamiento más generoso** —`nombre_norm`,
+sin paréntesis, orden de palabras indiferente—:
+
+```
+nombres distintos que el modelo devolvió   132   (255 menciones)
+🔴 NO CASAN                                 58 distintos · 77 menciones
+```
+
+**Los 77 son MENCIONES, no nombres distintos.** Son 58 sinónimos reales, algunos
+repetidos en varias fotos. *La cifra de E era correcta; lo que faltaba era decir
+de qué era el 77, porque «77 sinónimos» y «58 sinónimos vistos 77 veces» mandan
+a construir tablas de tamaños distintos.*
+
+#### 🔴 Y el rescate, que era lo urgente
+El JSON vivía **sólo en el worktree de E**: `.ia-conjuntos/` está en
+`.gitignore`. *Un `git worktree prune` y el censo desaparecía, y regenerarlo son
+146 llamadas al modelo.* **Rescatado y versionado** en
+`docs/loop/S113-sinonimos-de-raza-sin-casar.json`, con su procedencia y el
+casamiento con el que se midió escritos adentro. **Es L-217 otra vez: «está
+medido» y «está en el canon» son dos afirmaciones distintas.**
+
+#### Qué hacer cuando dispare, y las dos mitades son igual de importantes
+1. **Casar por sinónimo.** Si alguien teclea «Caniche» o «Braco de Weimar», el
+   selector le ofrece la raza del catálogo en vez de tratarlo como texto nuevo.
+   La lista ya está medida y no hay que inventarla.
+2. 🔴 **REGISTRAR LO DESCARTADO**, que es la advertencia literal de E: casar por
+   nombre y **descartar en silencio** significa que *lo que no casó desaparece
+   sin dejar rastro* — y la próxima vez que alguien mida exactitud **no va a
+   poder saber si el modelo falló o si el casamiento se comió la respuesta.**
+   *Un descarte silencioso no es una pérdida de datos: es una pérdida de la
+   capacidad de medir.*
+
+#### Lo que esta ficha NO decide
+Si la tabla de sinónimos vive en la base (una tabla `raza_sinonimos`) o en el
+cliente. **Depende de quién más la necesite**: hoy sólo el selector, y para un
+solo consumidor una constante alcanza. *El día que la edge también quiera casar
+por sinónimo, la constante se vuelve la segunda definición de «igual» — y esta
+casa ya pagó ese precio con `nombre_norm`.*
+
+---
+
+### `D-1038` 🟢 · Dos migraciones de S112 crearon una función cuyo INSERT nombraba cinco columnas inexistentes
+
+**Sin daño vivo. Se deposita por la LECCIÓN, que es de método y vale para toda
+migración que traiga una función.**
+
+#### Lo medido (5-sep-2026, contra la base — no contra los archivos)
+`20260908120000_s112a_acta_y_firma.sql` y `20260908240000_s112a_intentos_que_cuentan.sql`
+contienen:
+
+```sql
+INSERT INTO eventos_mascota (mascota_id, tipo_evento, fecha_evento, titulo,
+                             descripcion, procedencia, creado_por, metadata)
+```
+
+**Cinco de esos ocho nombres no existen en la tabla** — verificado contra
+`information_schema`: `tipo_evento`, `titulo`, `descripcion`, `creado_por` y
+`metadata` no están. Las reales son `tipo`, `datos` y `creado_por_user_id`.
+
+#### 🟢 Y por qué NO hay daño, también medido
+- **Ninguna función viva de la base contiene ese INSERT**: una migración
+  posterior reemplazó a `firmar_acta_adopcion`, que hoy escribe bien.
+- Hay **73 eventos `hito_narrativo`** y cuatro funciones vivas que los producen.
+- Una reconstrucción desde cero crearía la función rota y la reemplazaría
+  después, sin que nadie la llame en el medio.
+
+⇒ **Es código muerto en la historia, no un defecto abierto.** Se cierra 🟢.
+
+#### 🔴 LA LECCIÓN, que es lo que justifica la ficha
+**Postgres NO valida el cuerpo de una función PL/pgSQL al crearla.** Un
+`CREATE FUNCTION` cuyo INSERT nombra cinco columnas inventadas **se aplica sin
+una sola advertencia**; el error aparece recién cuando alguien la llama, con un
+`42703` en la cara de un usuario.
+
+*Una migración que crea una función no está probada porque haya aplicado
+limpiamente: aplicar y funcionar son dos cosas distintas, y la migración sólo
+demuestra la primera.* Es la misma familia que `L-402` —el actuador que estaba
+muerto y nadie lo notó porque nunca lo llamaron— y que `L-318`, motor sin puerta:
+**lo que no se ejerce no está probado, y en PL/pgSQL ni siquiera está
+compilado.**
+
+#### La cura barata, para quien escriba la próxima
+Toda migración que cree o reemplace una función que ESCRIBE **la ejerce en un
+fixture dentro de la misma transacción, con `ROLLBACK`**. Es lo que la casa ya
+hace en la mayoría de las migraciones y lo que estas dos no hicieron: *un
+`INSERT` de prueba habría dado `42703` en el acto, en la máquina de quien la
+escribió, en vez de quedar esperando.*
+
+#### Lo que esta ficha NO hizo
+**No censé el resto de las migraciones buscando la misma clase.** El comando es
+`grep -A8 "insert into" supabase/migrations/*.sql` cruzado contra
+`information_schema.columns`, y **no lo corrí**: encontré éstas dos mirando otra
+cosa.

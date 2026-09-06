@@ -107,7 +107,8 @@ if (arg === 'carnet') {
   for (const [i, v] of vs.entries()) {
     const marca = v.dudosa ? ` 🔸dudosa=${v.dudosa}` : '';
     console.log(`     ${i + 1}. ${v.nombre ?? '(sin nombre)'} · ${v.fecha_aplicada ?? 'SIN FECHA'}` +
-      `${v.fecha_literal ? ` «${v.fecha_literal}»` : ''}${marca}`);
+      `${v.fecha_literal ? ` «${v.fecha_literal}»` : ''}${marca}` +
+      ` · evidencia=${v.evidencia ?? '—'} · confianza=${v.confianza ?? '—'}`);
   }
   if (data?.plan_impreso) console.log(`     plan_impreso: ${JSON.stringify(data.plan_impreso).slice(0, 120)}`);
   for (const d of data?.filas_descartadas ?? []) {

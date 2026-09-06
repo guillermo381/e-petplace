@@ -159,16 +159,32 @@ export interface CuidadosPorEtapa {
   senior: string | null;
 }
 
+/** Por dónde se resolvió la ficha. **La pantalla lo necesita**, no es telemetría:
+ *  con `especie_*` el texto habla del PERRO, no del bulldog de esta familia — y
+ *  eso hay que poder decirlo. */
+export type ViaDeFicha =
+  | 'nombre'                // la raza declarada casó con el catálogo
+  | 'sinonimo'              // casó por otro nombre en español («Mestizo» → Criollo)
+  | 'especie_sin_raza'      // la mascota no declara raza
+  | 'especie_por_descarte'; // declara una que el catálogo no reconoce
+
 export interface ContenidoDeRaza {
   especie: string;
   raza_codigo: string;
+  /** 🔴 `true` = esto habla de la ESPECIE, no de su raza. La pantalla tiene que
+   *  poder decirlo: *presentar «el perro es un animal social» como si fuera la
+   *  descripción de SU perro es una promesa que el texto no cumple.* */
+  es_de_especie: boolean;
+  via: ViaDeFicha;
   origen: string | null;
   temperamento: string | null;
   talla_adulta: string | null;
   esperanza_vida: string | null;
   /** Hasta cinco. **Son temas para conversar con el veterinario, jamás
    *  diagnósticos**: que la raza tenga una predisposición no significa que ESTE
-   *  animal la tenga, y la pantalla que las dibuje tiene que decirlo. */
+   *  animal la tenga, y la pantalla que las dibuje tiene que decirlo.
+   *  ⚠️ Las fichas de ESPECIE vienen con esto vacío y con `origen` en null, a
+   *  propósito: una especie no tiene origen ni predisposiciones raciales. */
   predisposiciones: readonly string[];
   cuidados_por_etapa: CuidadosPorEtapa;
   /** De qué modelo salió y cuándo. Viaja para que el día que un texto salga
@@ -177,40 +193,62 @@ export interface ContenidoDeRaza {
   generado_el: string;
 }
 
-export type CodigoErrorContenidoRaza = 'datos_inconsistentes' | 'error_desconocido';
+export type CodigoErrorContenidoRaza = 'sin_sesion' | 'datos_inconsistentes' | 'error_desconocido';
 
 const texto = (v: unknown): string | null =>
   typeof v === 'string' && v.trim().length > 0 ? v : null;
 
 /**
- * La ficha PUBLICADA de una raza, o `null` cuando no hay ninguna.
+ * La ficha para una mascota, a partir de lo que su familia DECLARÓ.
  *
- * ⚠️ **`null` es la respuesta normal, no un error.** Hoy hay 105 razas en el
- * catálogo y cero fichas publicadas: lo esperable es que esto devuelva `null`
- * casi siempre. *Una pantalla que trate el `null` como falla va a decirle a la
- * familia que algo se rompió cuando lo único que pasa es que todavía no
- * escribimos sobre su raza.*
+ * 🔴 **Recibe la raza tal cual la tecleó la familia, no un código.** `mascotas.raza`
+ * es texto libre por diseño (D-379: el catálogo sugiere y jamás impone), así que
+ * resolverla es el trabajo — y son tres pasos: casar por nombre, casar por
+ * sinónimo, y caer a la ficha de la especie.
+ *
+ * ⚠️ **Los tres pasos viven en el SERVIDOR** (`resolver_ficha_de_raza`), y no por
+ * comodidad: el tercero **escribe** —registra lo que no casó, que es lo que
+ * D-1037 exige— y repartir la regla entre cliente y servidor sería la segunda
+ * definición de «igual», que es el precio que esta casa acaba de pagar con
+ * `nombre_norm`. *Un viaje, una verdad.*
+ *
+ * ⚠️ **`null` es la respuesta NORMAL, no un error.** Hay 210 fichas y trece
+ * publicadas. Y hay un caso que sorprende y es deliberado: **si la raza casa
+ * pero su ficha no está publicada, devuelve `null` y NO cae a la especie** —
+ * *decirle «el perro es un animal social» a quien tiene un Beagle sería peor que
+ * no decir nada.*
  */
 export async function obtenerContenidoDeRaza(
   especie: string,
-  razaCodigo: string,
+  razaDeclarada: string | null,
 ): Promise<ResultadoWrapper<ContenidoDeRaza | null, CodigoErrorContenidoRaza>> {
-  const { data, error } = await getClient()
-    .from('razas_contenido')
-    .select('especie, raza_codigo, origen, temperamento, talla_adulta, esperanza_vida, predisposiciones, cuidados_por_etapa, modelo, generado_el')
-    .eq('especie', especie)
-    .eq('raza_codigo', razaCodigo)
-    .maybeSingle();
+  const { data, error } = await getClient().rpc('resolver_ficha_de_raza', {
+    p_especie: especie,
+    /* La ausencia viaja como cadena vacía y no como null: el parámetro de la
+       RPC no tiene DEFAULT, así que el generador lo tipa no-nulo — y **la propia
+       función ya trata `''` como «sin raza»** (`coalesce(btrim(…), '')`).
+       *Se usa el valor que el servidor ya entiende en vez de agregarle un
+       DEFAULT sólo para contentar a un tipo generado.* */
+    p_raza_declarada: razaDeclarada ?? '',
+  });
 
   if (error) {
+    if (error.message.includes('auth_required')) {
+      return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.error_desconocido };
+    }
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   }
-  if (data === null) return { ok: true, data: null };
 
-  const o = data as unknown as Record<string, unknown>;
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || typeof o.hay !== 'boolean') {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
+  }
+  if (!o.hay) return { ok: true, data: null };
+
   const c = esObj(o.cuidados_por_etapa) ? o.cuidados_por_etapa : {};
   if (typeof o.especie !== 'string' || typeof o.raza_codigo !== 'string' ||
-      typeof o.modelo !== 'string' || typeof o.generado_el !== 'string') {
+      typeof o.modelo !== 'string' || typeof o.generado_el !== 'string' ||
+      typeof o.es_de_especie !== 'boolean' || typeof o.via !== 'string') {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
   }
 
@@ -219,6 +257,8 @@ export async function obtenerContenidoDeRaza(
     data: {
       especie: o.especie,
       raza_codigo: o.raza_codigo,
+      es_de_especie: o.es_de_especie,
+      via: o.via as ViaDeFicha,
       origen: texto(o.origen),
       temperamento: texto(o.temperamento),
       talla_adulta: texto(o.talla_adulta),
