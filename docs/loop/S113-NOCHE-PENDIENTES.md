@@ -91,3 +91,44 @@ siempre es una optimización que en el caso más frecuente cobra de más.*
 **3G real** (lo estimé del tamaño y el RTT, y lo digo) y **los tres aparatos** de E5 del
 sublote 1.3. No simulo dos teléfonos y los llamo tres aparatos. Cuando haya aparato, la
 medición está escrita y toma minutos.
+
+---
+
+### E-6 · 🔴 «Escalar a telemedicina» y «mostrarte tu veterinario» son dos productos, y el prompt hace el segundo
+
+**Qué.** El brief del lote 2 dice que Nexo **«escala a telemedicina de un toque»**. La edge
+`coach` de D (medida en `pista/s113-d-2.0`) implementa un **semáforo de tres** —*se mira en
+casa · conviene una cita esta semana · esto es para ir ya*— y ofrece **«¿Querés que te muestre
+a tu veterinario?»**.
+
+**Por qué no lo resuelvo yo.** *Mostrar el perfil del vet y abrir una consulta son dos cosas
+distintas, y la que la familia necesita a las once de la noche es la segunda.* El semáforo de
+D es bueno —es más honesto que un diagnóstico y más útil que un «andá al vet»— pero **termina
+en una ficha, no en una consulta**. Ninguno de los dos está mal; **están en desacuerdo**, y un
+desacuerdo entre la ley y el código se decide firmando, no ensanchando un gate.
+
+**Opciones.** (a) la ley adopta el semáforo y «de un toque» pasa a significar *mostrar al vet* ·
+(b) el prompt adopta la telemedicina y el ofrecimiento abre la consulta · (c) las dos, por
+gravedad: en «esto es para ir ya» se abre la consulta, en los otros dos se muestra el vet.
+**Voto: (c)** — es lo único que distingue los tres escalones en la ACCIÓN y no sólo en el texto.
+*Un semáforo cuyos tres colores terminan en la misma pantalla es un semáforo de un color.*
+
+`verify:coach-ley` queda **en rojo sobre esta cláusula a propósito**, hasta la firma.
+
+---
+
+### E-7 · 🔴 Nexo no dice en ningún lado que es una IA
+
+**Qué.** Leí el `system` entero de la edge `coach`: **no hay ninguna cláusula donde Nexo declare
+que es una inteligencia artificial**. El brief la pide («dice que es IA») y **D-405** pide el
+aviso legal de IA cuando Nexo hable.
+
+**El matiz que puede volverlo un no-problema.** Puede estar afuera **a propósito**, esperando el
+texto del abogado que D-405 nombra. *Escribir yo una frase legal provisoria sería peor que el
+hueco:* una vez que está en el prompt, nadie la vuelve a mirar, y queda un aviso legal escrito
+por quien no es abogado. **Le pregunté a D cuál de las dos es.**
+
+**Opciones.** (a) la voz honesta de la casa mientras tanto —una frase corta, marcada como
+provisoria en el código, con su ficha— · (b) esperar al abogado con el hueco declarado ·
+(c) dejarlo sin declarar. **Voto: (a)**, y **(c) es la única inaceptable**: hoy la familia no
+tiene forma de saber con qué está hablando, y eso no lo arregla el silencio.
