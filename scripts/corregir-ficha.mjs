@@ -25,7 +25,16 @@
  *   node scripts/corregir-ficha.mjs --raza <código|nombre> --campo <campo> \
  *        --cambio "el texto nuevo"          # reemplaza el campo entero
  *   node scripts/corregir-ficha.mjs --raza <…> --campo <…> \
+ *        --reemplazar "vieja" --por "nueva"  # sustituye UNA frase, deja el resto
+ *   node scripts/corregir-ficha.mjs --raza <…> --campo <…> \
  *        --quitar "la frase exacta"          # la saca, deja el resto intacto
+ *   node scripts/corregir-ficha.mjs --raza <…> --solo-publicar
+ *
+ * 🔴 `--reemplazar` nació del primer uso real: casi toda corrección del founder
+ * es una FRASE dentro de un campo —«prey animal» → «animal presa»—, y mandar el
+ * campo entero con `--cambio` obliga a retipear cien palabras para arreglar dos.
+ * *Un instrumento que exige retipear lo que está bien es un instrumento que
+ * introduce errores nuevos para arreglar uno viejo.*
  *   … --seco     → muestra el antes/después y el censo, y NO escribe nada.
  *
  * campos: origen · temperamento · talla_adulta · esperanza_vida ·
@@ -67,14 +76,18 @@ const raza = arg('raza');
 const campo = arg('campo');
 const cambio = arg('cambio');
 const quitar = arg('quitar');
+const vieja = arg('reemplazar');
+const nueva = arg('por');
+const soloPublicar = process.argv.includes('--solo-publicar');
 
-if (!raza || !campo || (!cambio && !quitar)) {
+if (soloPublicar && raza) { /* sigue: no necesita campo */ }
+else if (!raza || !campo || (!cambio && !quitar && !(vieja !== null && nueva !== null))) {
   console.log('  uso: --raza <código|nombre> --campo <campo> (--cambio "texto" | --quitar "frase") [--seco]');
   console.log('  campos: ' + PLANOS.join(' · ') + ' · predisposiciones · ' + ETAPAS.map((e) => 'cuidados.' + e).join(' · '));
   process.exit(1);
 }
-const etapa = campo.startsWith('cuidados.') ? campo.slice(9) : null;
-if (!PLANOS.includes(campo) && campo !== 'predisposiciones' && !ETAPAS.includes(etapa ?? '')) {
+const etapa = campo !== null && campo.startsWith('cuidados.') ? campo.slice(9) : null;
+if (!soloPublicar && !PLANOS.includes(campo) && campo !== 'predisposiciones' && !ETAPAS.includes(etapa ?? '')) {
   console.log(`  🔴 campo desconocido: ${campo}`);
   process.exit(1);
 }
@@ -100,18 +113,37 @@ if (!fila.conocida) {
   process.exit(1);
 }
 
+if (soloPublicar) {
+  const p = { revisado_por: FOUNDER, revisado_en: new Date().toISOString(), activo: true };
+  sql(`update razas_contenido set activo=true, revisado_por=${lit(FOUNDER)}::uuid,
+       revisado_en=${lit(p.revisado_en)}::timestamptz
+       where especie=${lit(especie)} and raza_codigo=${lit(slug)};`);
+  const [{ n }] = sql('select count(*) filter (where activo) as n from razas_contenido;');
+  console.log(`  ✅ ${especie}/${slug} («${nombre}») firmada y PUBLICADA. Van ${n}.`);
+  process.exit(0);
+}
+
 // ── El cambio ───────────────────────────────────────────────────────────────
 const antesTxt = etapa ? (fila.cuidados_por_etapa?.[etapa] ?? null)
   : campo === 'predisposiciones' ? (fila.predisposiciones ?? []).join('\n')
   : fila[campo];
 
-if (quitar && (antesTxt === null || !antesTxt.includes(quitar))) {
+const buscada = quitar ?? vieja;
+if (buscada !== null && buscada !== undefined && (antesTxt === null || !antesTxt.includes(buscada))) {
   console.log(`  🔴 la frase no está en ${campo}. No se toca nada.`);
-  console.log(`     buscada: «${quitar}»`);
+  console.log(`     buscada: «${buscada}»`);
+  process.exit(1);
+}
+/* Si aparece más de una vez, se frena: reemplazar «la primera» es una decisión
+   que el que escribió la corrección no tomó. */
+if (buscada && antesTxt.split(buscada).length > 2) {
+  console.log(`  🔴 la frase aparece ${antesTxt.split(buscada).length - 1} veces en ${campo}.`);
+  console.log('     Cambiar sólo la primera sería una decisión que nadie tomó. No se toca nada.');
   process.exit(1);
 }
 const despuesTxt = quitar
   ? antesTxt.replace(quitar, '').replace(/\s{2,}/g, ' ').replace(/\s+\./g, '.').trim()
+  : vieja !== null ? antesTxt.replace(vieja, nueva)
   : cambio;
 
 console.log(`  ficha: ${especie}/${slug} · «${nombre}»`);
@@ -142,9 +174,9 @@ if (quitar) {
 // ── EL CENSO, antes de escribir ─────────────────────────────────────────────
 // Se censa el TEXTO QUITADO, o —si es un reemplazo— las palabras que salieron
 // del texto viejo. Es lo que contesta «¿esto se repite?».
-const salieron = quitar ? [quitar]
+const salieron = quitar ? [quitar] : vieja ? [vieja]
   : (antesTxt ?? '').split(/\s+/).filter((w) => w.length > 4 && !despuesTxt.includes(w));
-const aguja = quitar ?? (salieron.length > 0 && salieron.length <= 3 ? salieron.join(' ') : null);
+const aguja = quitar ?? vieja ?? (salieron.length > 0 && salieron.length <= 3 ? salieron.join(' ') : null);
 
 if (aguja) {
   const todas = sql(`select especie, raza_codigo, origen, temperamento, talla_adulta,
