@@ -80,12 +80,20 @@ di(`  ${t.slice(0, 150).replace(/\n/g, ' · ')}`);
 /* ① las filas que DICEN qué les falta */
 const marcadas = await page.evaluate(() => {
   const txt = document.body.innerText;
-  return (txt.match(/No pude leer la fecha|Falta la fecha|No pude leer cuál/g) ?? []).length;
+  /* 🔴 **LAS VOCES SE LEEN DEL DICCIONARIO, NO SE ADIVINAN.** La corrida
+     anterior buscaba «Falta la fecha» y las voces reales son «No pude leer la
+     fecha; escríbela…» y «No pude leer cuál es; escríbela» ⇒ contó 1 donde
+     había 3 y cantó «dos cuentas» sobre un instrumento roto. */
+  return (txt.match(/No pude leer la fecha|No pude leer cuál es/g) ?? []).length;
 });
 /* ③ el número que dice el pie */
 const mPie = /Hay (\d+) vacunas? por completar|Hay (1) vacuna por completar/.exec(t);
 const dicePie = mPie === null ? (/Hay 1 vacuna por completar/.test(t) ? 1 : 0) : Number(mPie[1] ?? mPie[2]);
 di(`  ① filas que DICEN qué les falta: ${marcadas}`);
+/* ¿Está montada la pieza de B? Se busca un texto que SÓLO ella pinta. */
+const t2 = await T();
+di(`  ⓪ ¿está la pieza de B?: ${/Es correcta|Esta no es/.test(t2) ? 'sí ✓' : '🔴 no la veo — se montó otra cosa'}`);
+di(`     primeras 260 letras de la lista: ${t2.slice(180, 440).replace(/\n/g, ' · ')}`);
 di(`  ③ el pie dice que faltan:        ${dicePie}`);
 di(`  ⇒ ¿una sola cuenta?: ${marcadas === dicePie ? 'sí ✓' : `🔴 NO — la fila dice ${marcadas} y el pie ${dicePie}`}`);
 

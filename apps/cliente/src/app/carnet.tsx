@@ -302,13 +302,26 @@ function camposDe(
   i: ItemRevision,
   t: ReturnType<typeof useTraduccion>['t'],
 ): { etiqueta: string; valor: string | null }[] {
-  return [
+  const todos = [
     { etiqueta: t('carnet.campoAplicada'), valor: i.fecha_aplicada },
     { etiqueta: t('carnet.campoProxima'), valor: i.fecha_proxima },
     { etiqueta: t('carnet.campoTipo'), valor: i.tipo_vacuna },
     { etiqueta: t('carnet.campoLote'), valor: i.lote },
     { etiqueta: t('carnet.campoVeterinario'), valor: i.veterinario },
-  ].filter((c) => c.valor !== null && c.valor.trim() !== '');
+  ];
+  const tiene = (c: { valor: string | null }) => c.valor !== null && c.valor.trim() !== '';
+  /* 🔴 **EL CAMPO QUE FALTA SE DEJA PASAR, Y SÓLO ÉSE.** Medido en pantalla con
+     el carnet real: la pieza cuelga su aviso **del campo vacío** —lo dibuja con
+     borde de atención y el texto debajo—, así que filtrar todos los vacíos
+     dejaba la fila **muda**: el pie decía «faltan 3» y ninguna fila lo decía.
+     *Mi filtro y la pieza se contradecían, y el resultado era el mismo síntoma
+     del bloqueante del founder: una cuenta que nadie podía ver.*
+     Pasa **uno**: la fecha aplicada cuando es lo que falta. Los otros cuatro
+     vacíos siguen fuera — con los cinco, una fila sin fecha mostraba **tres
+     casillas de fecha** y *tres casillas para un dato no piden tres veces:
+     hacen dudar de cuál es la buena.* */
+  const falta = faltaParaConfirmar(i) === 'fecha';
+  return todos.filter((c) => tiene(c) || (falta && c.etiqueta === t('carnet.campoAplicada')));
 }
 
 // ── B4/B5 · guardar ────────────────────────────────────────────────────────

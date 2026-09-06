@@ -351,19 +351,16 @@ export default function PerfilDeMascota() {
     const raza = perfil.mascota.raza;
     if (raza === null || raza === '') return;
     let vivo = true;
-    /* 🔴 **DOS SALTOS, Y EL PRIMERO NO SE PUEDE SALTEAR.** `mascotas.raza`
-       guarda el NOMBRE en texto libre («Beagle»); `razas_contenido` se indexa
-       por CÓDIGO («beagle»). Medido: `cat_razas.slug` casa **13 de 13** con
-       `raza_codigo`, y `nombre_norm` sólo **5 de 13** ⇒ *normalizar el texto a
-       mano acertaría a veces, que es peor que fallar siempre: nadie sabría
-       cuándo*. Se pasa por el catálogo, que es la única fuente del par. */
-    void obtenerRazasDeEspecie(perfil.mascota.especie).then((cat) => {
-      if (!vivo || !cat.ok) return;
-      const enCat = cat.data.find((x) => x.nombre.toLowerCase() === raza.toLowerCase());
-      if (enCat === undefined) return; // raza escrita a mano: no hay ficha que buscar
-      void obtenerContenidoDeRaza(perfil.mascota.especie, enCat.slug).then((r) => {
-        if (vivo && r.ok) setContenidoRaza(r.data);
-      });
+    /* ☠️ **ACÁ VIVÍAN DOS SALTOS Y SE FUERON ENTEROS.** Yo resolvía el
+       nombre contra `cat_razas` para sacar el slug, porque `mascotas.raza` es
+       texto libre y `razas_contenido` se indexa por código. **A se lo llevó al
+       servidor** (`resolver_ficha_de_raza`): casa por nombre, por sinónimo, y
+       cae a la ficha de la especie — *y el tercer paso ESCRIBE*, así que
+       repartirlo entre cliente y servidor habría dejado la mitad sin registrar.
+       **Un viaje, una verdad**, que es la misma ley que hoy mató a `esDudosa`
+       en el carnet. Se le pasa lo que la familia tecleó y nada más. */
+    void obtenerContenidoDeRaza(perfil.mascota.especie, raza).then((r) => {
+      if (vivo && r.ok) setContenidoRaza(r.data);
     });
     return () => {
       vivo = false;
@@ -980,6 +977,16 @@ export default function PerfilDeMascota() {
                   </Svg>
                 </Pressable>
                 <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                  {/* 🔴 **EL LÁPIZ CUELGA DE `!esMemorial`, Y LO ENCONTRÉ
+                      CORRIENDO LA DESPEDIDA DE VERDAD.** La Hoja del menú ya
+                      estaba bajo el guard, pero **el botón que la abre no**:
+                      en memorial se dibujaba y al tocarlo **no pasaba nada**.
+                      *Un control que se ve, se toca y no hace nada es peor que
+                      uno ausente: el ausente no promete.* Ningún gate lo veía
+                      —`verify:pide-en-memorial` mide TEXTOS que piden algo, y
+                      «Editar» no pide nada— así que sólo apareció al ejercer
+                      el camino entero sobre una mascota real. */}
+                  {!esMemorial ? (
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('perfil.editar')}
@@ -1000,6 +1007,7 @@ export default function PerfilDeMascota() {
                         incompleta. */}
                     <Icono nombre="lapiz" tamano={20} tinta={sobreMarca} />
                   </Pressable>
+                  ) : null}
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('perfil.compartir')}

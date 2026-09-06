@@ -191,6 +191,11 @@ else {
   /* ── EL ROJO/VERDE DE C11: se despide de verdad ── */
   const antes = await T();
   di(`  ANTES · ¿le pide algo? (carnet/registrar/reservar): ${/Cargar carnet|Registrar|Reservar|Agendar/.test(antes) ? 'sí — está viva ✓' : 'no'}`);
+  /* 🔴 **C10 SE MIDE ACÁ, CON LA MASCOTA VIVA.** La corrida anterior lo medía
+     al final y daba rojo — pero la ficha de raza cuelga de `!esMemorial` a
+     propósito, así que después de despedir **no dibujar es lo correcto**. *Un
+     control positivo medido en el estado equivocado no falla: miente.* */
+  di(`  C10 · con Beagle VIVA, ¿dibuja la ficha de raza?: ${/Ver más sobre la raza|Cómo suelen ser/.test(antes) ? 'sí ✓ (positivo)' : '🔴 no'}`);
   /* 🔴 **GUARDA: no se despide a una mascota ajena.** Este arnés ejecuta un
      acto IRREVERSIBLE sobre datos reales del founder. Si la ficha abierta no es
      la mascota que este mismo arnés creó, se corta. *Un fixture que puede
@@ -251,7 +256,7 @@ else {
      (medido: `razas_contenido` tiene 210 filas y 10 con `activo`). Si la ficha
      NO aparece con una raza publicada, el montaje está mal — y con una no
      publicada no debe aparecer, que es el negativo. */
-  di(`  C10 · ¿dibuja la ficha de raza (Beagle, PUBLICADA)?: ${/Ver más sobre la raza|Cómo suelen ser/.test(tf) ? 'sí ✓ (control positivo)' : '🔴 no'}`);
+  di(`  C10 · en MEMORIAL la ficha de raza se apaga: ${/Ver más sobre la raza|Cómo suelen ser/.test(tf) ? '🔴 sigue dibujando' : 'sí ✓ (cuelga de !esMemorial)'}`);
 }
 
 di('');
