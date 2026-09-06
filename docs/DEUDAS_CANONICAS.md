@@ -28993,3 +28993,140 @@ atrás de `0429bbe4`**, que ya estaba en 140.
 No es del hook de pre-commit y **no frena el candidato 1.2**: el número es el
 mismo antes y después de los merges de hoy, así que *ningún trabajo de este lote
 lo movió*. Queda como deuda de higiene, no como bloqueante.
+
+---
+
+### `D-1040` 🔴→🟢 · Once vistas corrían como su dueño; seis se las leía `anon`
+
+**Curada el mismo día (S113-A, 5-sep-2026). Queda la REGLA y media cura
+declarada.**
+
+#### El rojo, producido antes de tocar nada, como `anon`
+```
+v_pitch_metrics            1 fila   ← usuarios_registrados_total, MRR, GMV
+v_mrr                      1 fila
+v_crecimiento_usuarios     6 filas
+v_metricas_tiempo_real     1 fila
+v_ia_costo_por_pieza_dia   9 filas
+v_gmv_mensual              0 filas  (vacía hoy, abierta igual)
+```
+Con **la llave `anon`, que viaja en el bundle de las dos apps**. *No es un dato
+interno que se filtra: `v_pitch_metrics` es el número que se dice en una reunión
+con inversores.*
+
+⚠️ **UNA ES MÍA Y DE ESE MISMO DÍA.** `v_ia_costo_por_pieza_dia` la creé horas
+antes sin `security_invoker` y sin revocar `anon`. **El costo de IA de la casa
+quedó público por mi mano**, y se dice acá y no en un pie de página.
+
+#### El censo corrigió el número
+El encargo hablaba de **cinco**. Medido en `pg_class.reloptions`: **once** sin
+`security_invoker`, **seis** legibles por `anon`.
+
+#### La cura, y por qué sola alcanza
+`ALTER VIEW … SET (security_invoker = on)` en las once. Sin la opción, una vista
+corre con los permisos de **quien la creó** —`postgres`— y atraviesa la RLS de
+todas sus tablas; con ella corre como quien consulta. **El verde es más fuerte
+que «0 filas»:** `anon` ahora recibe `42501 permission denied for table pedidos`
+— *la consulta ni siquiera llega a las tablas de abajo.*
+
+🟢 Control: la vitrina pública de adopción **sigue viva** (`obtener_adoptables`
+devuelve su adoptable como `anon`). `v_adoptables_publicos` se volteó igual
+porque se midió que sus tres consumidores son `SECURITY DEFINER`, y dentro de una
+DEFINER el usuario efectivo es el definidor.
+
+#### 🔴 LA MITAD QUE NO SE HIZO, declarada y no olvidada
+**El `REVOKE` a `anon` no se ejecutó.** El encargo dice que esas vistas «son de
+admin», pero **S95-F midió que el portal legado se conecta con la llave `anon`
+sobre esta misma base** (claim `role` decodificado). *Las dos cosas no pueden ser
+ciertas a la vez, y revocar sin resolverlo apagaría un tablero que no se puede
+probar desde este repo.* La fuga ya está cerrada por el `invoker`; el `REVOKE` es
+defensa en profundidad y necesita medir el panel, que vive afuera.
+
+#### 🔴 LA REGLA, y la parió el propio censo
+**Toda vista nueva declara `security_invoker`, y el gate lo mide en `pg_class` —
+jamás en el texto de la migración**, porque una vista puede recrearse después sin
+la opción y el archivo seguiría diciendo que la tiene.
+
+⚠️ **Y el gate mide EL HECHO, NO EL LITERAL.** Postgres guarda la opción como
+`security_invoker=on` o `=true` **según cómo se escribió el ALTER**, y las dos
+significan lo mismo. El primer censo comparaba sólo contra `=true` y **reportó
+como inseguras once vistas que acababa de curar**. *Un censo atado al literal de
+una opción mide cómo se escribió la migración, y su falso rojo manda a «arreglar»
+lo que ya está bien.*
+
+⇒ **`verify:vistas-invoker`**, con su control que prueba que reconoce las dos
+formas y rechaza `off`.
+
+---
+
+### `D-1041` 🟡 · PostgREST le sugiere a `anon` nombres reales del esquema
+
+**Medido S113-A (5-sep-2026). NO se cura desde el repo: es config de proyecto.**
+
+#### Lo medido, con la llave `anon` que viaja en el bundle
+```
+GET /rest/v1/tabla_que_no_existe
+  404 PGRST205 · hint: "Perhaps you meant the table 'public.cat_alergeno_relaciones'"
+GET /rest/v1/rpc/funcion_inventada
+  404 PGRST202 · details: "Searched for the function public.funcion_inventada …"
+                 hint: "Perhaps you meant to call …"
+```
+⇒ **cada intento fallido devuelve UN nombre real** del esquema. Con paciencia,
+eso mapea la base sin más credencial que la anon key.
+
+#### 🟢 Lo que SÍ está cerrado, y era el peor caso
+```
+GET /rest/v1/   →  401 · "Only the `service_role` API key can be used for this endpoint."
+```
+**La raíz OpenAPI no enumera.** *Si estuviera abierta, esto no sería una ficha
+🟡: sería el esquema entero en una sola petición.* Se mide y se dice, porque la
+diferencia entre «se puede adivinar de a uno» y «se descarga completo» es la
+diferencia entre una molestia y un incidente.
+
+#### Por qué no se cura acá
+La verbosidad de PostgREST es **configuración del proyecto Supabase**, no del
+repo: no hay archivo que la controle y el `config.toml` sólo rige el entorno
+local. Tocarla es entrar al dashboard de producción, que es del founder.
+
+#### El riesgo real, acotado y sin inflar
+Conocer el nombre de una tabla **no da acceso a ella**: la RLS sigue en el
+medio, y esta misma sesión midió que las tablas sensibles rebotan con `42501`.
+*Lo que un atacante gana es un mapa, no una llave.* Un mapa acelera la búsqueda
+de una policy mal escrita — como las dos que se curaron hoy — así que el valor
+de cerrarlo es proporcional a cuántas policies flojas queden.
+
+#### Disparo
+La revisión de seguridad previa al soft launch, junto con la rotación de llaves.
+Antes no: cerrar el hint sin haber cerrado las policies sería esconder el mapa
+dejando las puertas.
+
+---
+
+### `D-1042` 🟡 · El `REVOKE` a `anon` de las vistas de métricas espera que el portal legado use sesión
+
+**Firma del founder: no se toca hoy.**
+
+#### El estado
+`D-1040` cerró la fuga poniendo `security_invoker` en las once vistas: `anon`
+ahora rebota con `42501` antes de tocar las tablas. **El `GRANT SELECT` a `anon`
+sigue puesto** sobre `v_pitch_metrics`, `v_mrr`, `v_gmv_mensual`,
+`v_crecimiento_usuarios`, `v_metricas_tiempo_real` y `v_ia_costo_por_pieza_dia`.
+
+#### Por qué no se revoca
+**El portal legado de administración se conecta con la llave `anon`** sobre esta
+misma base — medido en S95-F, decodificando el claim `role`. *Revocar apagaría
+su tablero, y ese portal vive fuera de este repo: no se puede probar el efecto
+desde acá.*
+
+#### La cura, que es del portal y no de la base
+**Pasar el portal a sesión**: que entre con un usuario `authenticated` que sea
+admin, en vez de leer con la llave pública. Con eso el `REVOKE` a `anon` deja de
+tener costo y se hace en una línea.
+
+*Mientras tanto el grant es un permiso que ya no alcanza nada —el `invoker` lo
+neutralizó— pero sigue siendo un permiso escrito que alguien puede volver a
+hacer útil el día que agregue una policy.* Defensa en profundidad pendiente, no
+agujero abierto.
+
+#### Disparo
+El día que el portal tenga sesión. O antes, si alguien mide que ya la tiene.

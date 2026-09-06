@@ -85,7 +85,8 @@
     "verify:selectores-recurrentes": "node scripts/verify-selectores-recurrentes.mjs",
     "verify:compuertas-por-sujeto": "node scripts/verify-compuertas-por-sujeto.mjs",
     "verify:raza-norm": "node scripts/verify-raza-norm.mjs",
-    "corregir:ficha": "node scripts/corregir-ficha.mjs"
+    "corregir:ficha": "node scripts/corregir-ficha.mjs",
+    "verify:vistas-invoker": "node scripts/verify-vistas-invoker.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
