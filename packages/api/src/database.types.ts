@@ -12478,6 +12478,24 @@ export type Database = {
           },
         ]
       }
+      invitacion_acceso: {
+        Row: {
+          minuto: string
+          n: number
+          token_hash: string
+        }
+        Insert: {
+          minuto: string
+          n?: number
+          token_hash: string
+        }
+        Update: {
+          minuto?: string
+          n?: number
+          token_hash?: string
+        }
+        Relationships: []
+      }
       invitacion_correo_pendiente: {
         Row: {
           created_at: string
@@ -13482,6 +13500,7 @@ export type Database = {
       mascotas: {
         Row: {
           country_code: string
+          creado_por_sistema: string | null
           created_at: string
           criadero_id: string | null
           especie: string
@@ -13517,6 +13536,7 @@ export type Database = {
         }
         Insert: {
           country_code?: string
+          creado_por_sistema?: string | null
           created_at?: string
           criadero_id?: string | null
           especie?: string
@@ -13552,6 +13572,7 @@ export type Database = {
         }
         Update: {
           country_code?: string
+          creado_por_sistema?: string | null
           created_at?: string
           criadero_id?: string | null
           especie?: string
@@ -14582,6 +14603,117 @@ export type Database = {
             columns: ["suscripcion_servicio_id"]
             isOneToOne: false
             referencedRelation: "suscripciones_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte: {
+        Row: {
+          creado_en: string
+          emitido_por: string | null
+          id: string
+          mascota_id: string
+          revocado_en: string | null
+          token: string
+          ultima_vista_en: string | null
+          vistas: number
+        }
+        Insert: {
+          creado_en?: string
+          emitido_por?: string | null
+          id?: string
+          mascota_id: string
+          revocado_en?: string | null
+          token: string
+          ultima_vista_en?: string | null
+          vistas?: number
+        }
+        Update: {
+          creado_en?: string
+          emitido_por?: string | null
+          id?: string
+          mascota_id?: string
+          revocado_en?: string | null
+          token?: string
+          ultima_vista_en?: string | null
+          vistas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte_acceso: {
+        Row: {
+          minuto: string
+          n: number
+          pasaporte_id: string
+        }
+        Insert: {
+          minuto: string
+          n?: number
+          pasaporte_id: string
+        }
+        Update: {
+          minuto?: string
+          n?: number
+          pasaporte_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_acceso_pasaporte_id_fkey"
+            columns: ["pasaporte_id"]
+            isOneToOne: false
+            referencedRelation: "pasaporte"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte_config: {
+        Row: {
+          contacto_mensaje: string | null
+          contacto_nombre: string | null
+          contacto_telefono: string | null
+          mascota_id: string
+          mostrar_chip: boolean
+          mostrar_contacto: boolean
+          mostrar_salud: boolean
+          qr_en_papeles: boolean
+          updated_at: string
+        }
+        Insert: {
+          contacto_mensaje?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          mascota_id: string
+          mostrar_chip?: boolean
+          mostrar_contacto?: boolean
+          mostrar_salud?: boolean
+          qr_en_papeles?: boolean
+          updated_at?: string
+        }
+        Update: {
+          contacto_mensaje?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          mascota_id?: string
+          mostrar_chip?: boolean
+          mostrar_contacto?: boolean
+          mostrar_salud?: boolean
+          qr_en_papeles?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_config_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: true
+            referencedRelation: "mascotas"
             referencedColumns: ["id"]
           },
         ]
@@ -23445,6 +23577,18 @@ export type Database = {
         }
         Returns: Json
       }
+      configurar_pasaporte: {
+        Args: {
+          p_contacto_mensaje?: string
+          p_contacto_nombre?: string
+          p_contacto_telefono?: string
+          p_mascota_id: string
+          p_mostrar_chip: boolean
+          p_mostrar_contacto: boolean
+          p_mostrar_salud: boolean
+        }
+        Returns: Json
+      }
       configurar_recurrencia: {
         Args: {
           p_cuenta_comercial_id: string
@@ -24027,6 +24171,7 @@ export type Database = {
         Args: { p_periodo: string; p_sujeto: string; p_sujeto_id: string }
         Returns: Json
       }
+      emitir_pasaporte: { Args: { p_mascota_id: string }; Returns: Json }
       emitir_token_documento: {
         Args: { p_mascota_id: string; p_ref?: string; p_tipo?: string }
         Returns: Json
@@ -24373,6 +24518,7 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       leer_borrador_nota: { Args: { p_cita_id: string }; Returns: Json }
+      leer_pasaporte: { Args: { p_token: string }; Returns: Json }
       leer_sombra_notificaciones: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: {
@@ -24471,6 +24617,10 @@ export type Database = {
         Returns: Json
       }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
+      marcar_perdida: {
+        Args: { p_mascota_id: string; p_perdida: boolean }
+        Returns: Json
+      }
       marcar_retorno_guarderia: {
         Args: { p_estadias: string[]; p_ocurrido_en: string }
         Returns: Json
@@ -24491,6 +24641,7 @@ export type Database = {
           pais_emisor: string
         }[]
       }
+      mirar_invitacion: { Args: { p_token: string }; Returns: Json }
       mis_vinculos_repartidor_pendientes: { Args: never; Returns: Json }
       mover_estado_pedido: {
         Args: {
@@ -26132,6 +26283,7 @@ export type Database = {
         Returns: Json
       }
       revocar_invitacion_familia: { Args: { p_id: string }; Returns: undefined }
+      revocar_pasaporte: { Args: { p_mascota_id: string }; Returns: Json }
       revocar_rol_refugio: {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json

@@ -1821,3 +1821,17 @@ export {
   type InputSugerirRaza,
   type CodigoErrorRaza,
 } from './wrappers/razas';
+
+/* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
+   pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
+   por dónde llamarlo. Se abre acá copiando el molde, sin tocar nada de A. */
+export {
+  emitirPasaporte,
+  revocarPasaporte,
+  configurarPasaporte,
+  marcarPerdida,
+  CODIGOS_PASAPORTE,
+  type CodigoErrorPasaporte,
+  type PasaporteEmitido,
+  type ConfiguracionDePasaporte,
+} from './wrappers/pasaporte';
