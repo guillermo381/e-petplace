@@ -38,8 +38,9 @@
  */
 
 import type { ReactNode } from 'react'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
 
+import { AccionQueLleva } from './AccionQueLleva'
 import { Boton } from './Boton'
 import { BurbujaMensaje } from './BurbujaMensaje'
 import { Texto } from './Texto'
@@ -123,18 +124,18 @@ export function RespuestaNexo(props: RespuestaNexoProps) {
           *se lee cuando ya hay algo que calificar.* */}
       {props.primera === true ? <Texto variante="apoyo">{props.notaIA}</Texto> : null}
 
-      {/* 🔴 La fuente se toca. Ver la cabecera. */}
+      {/* 🔴 **LA FUENTE ES `AccionQueLleva`, Y ESO LO DECIDIÓ EL EMULADOR.**
+          ⏪ Acá había un `Pressable` con `Texto apoyo`: **el rol de enlace
+          estaba, y el ojo no lo veía.** En la captura quedaba con la misma
+          talla, el mismo color y el mismo peso que la nota de IA de arriba —
+          *dos líneas grises seguidas, y una de las dos llevaba a algún lado.*
+          Mi propia cabecera decía «la fuente es un ACTO, no una etiqueta» y
+          los píxeles decían lo contrario.
+          `AccionQueLleva` es la pieza que la casa ya tiene para esto —acción
+          SUELTA que navega, con la forma nombrada de la Ley 19.7: texto +
+          chevron + target 44— y su cabecera nombra justo este hueco. */}
       {fuente !== undefined ? (
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel={fuente.voz}
-          onPress={fuente.onPress}
-          hitSlop={spacing[2]}
-        >
-          <Texto variante="apoyo" color="secondary">
-            {fuente.voz}
-          </Texto>
-        </Pressable>
+        <AccionQueLleva etiqueta={fuente.voz} onPress={fuente.onPress} alineacion="inicio" />
       ) : null}
 
       {franja}

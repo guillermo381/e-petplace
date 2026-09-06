@@ -168,6 +168,13 @@ export function ResultadosBusqueda({ termino, grupos, vacio }: ResultadosBusqued
               paddingVertical: spacing[2],
               borderRadius: radius.full,
               backgroundColor: theme.bg.card,
+              /* 🔴 **EL MISMO BORDE QUE `ChipsSugerencia`, y lo pidió la
+                 captura.** Sin él, sobre papel claro `bg.card` es blanco
+                 contra #F6F6F6: el chip se leía como una tarjeta y no como
+                 algo tocable. *Dos anatomías de chip en la misma casa son dos
+                 afordancias, y la persona aprende la más débil.* */
+              borderWidth: theme.border.width,
+              borderColor: theme.border.subtle,
             }}
           >
             <Texto variante="apoyo" color="primary">

@@ -1,0 +1,5 @@
+Despedirse de Thor
+5 de septiembre de 2026
+Despedirse de Thor
+!
+Uncaught (in promise, id: 0) Error: getClient: initApi() no fue llamado. Inicializá la API en el entry de la app.

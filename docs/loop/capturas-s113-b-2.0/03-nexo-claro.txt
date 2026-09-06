@@ -1,0 +1,17 @@
+modo=light · p=nexo
+Nexo
+Le toca la antirrábica en agosto de 2027. La última se la aplicaron el 2 de agosto.
+14:32
+Soy Nexo. Puedo equivocarme; para lo importante está tu vet.
+de su carnet · 12 mar
+Ver a tu vet
+Nexo
+Sí, el omeprazol se le da con comida.
+14:33
+¿Guardo que le tiene miedo a los truenos?
+Sí, guardalo
+No
+¿Cuándo le toca la vacuna?
+¿Puede comer pollo?
+!
+Uncaught (in promise, id: 0) Error: getClient: initApi() no fue llamado. Inicializá la API en el entry de la app.

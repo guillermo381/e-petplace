@@ -91,7 +91,18 @@ console.log('\n── ⑤ ROJO · LA FUENTE SE TOCA, Y NO SE INVENTA ──');
 t('🔴 la voz y el destino viajan juntos',
   /voz: string\n\s+\/\*\*[\s\S]{0,200}?onPress: \(\) => void/.test(RESP.replace(/ +/g, ' ')) || /interface FuenteDeRespuesta \{[\s\S]*?onPress: \(\) => void[\s\S]*?\}/.test(RESP), true);
 t('🔴 sin fuente NO se dibuja ninguna', /fuente !== undefined \?/.test(RESP), true);
-t('…y es un enlace, no un texto muerto', /accessibilityRole="link"/.test(RESP), true);
+/* ⚠️ **ACÁ MEDÍA `accessibilityRole="link"` Y ESTUVO VERDE TODO EL TIEMPO EN
+   QUE LA FUENTE PARECÍA UNA ETIQUETA.** Ése es el punto ciego: *un rol de
+   accesibilidad es una promesa para quien NO ve la pantalla, y no dice nada
+   sobre lo que ve quien sí la ve.* El emulador mostró dos líneas grises
+   seguidas —la nota de IA y la fuente— con la misma talla, color y peso, y
+   una de las dos llevaba a algún lado. Hoy mide que monte la pieza de la casa
+   para una acción suelta que navega, que TRAE la forma visible (Ley 19.7:
+   texto + chevron + target 44). */
+t('🔴 …y lleva la forma VISIBLE de una acción, no sólo el rol',
+  /<AccionQueLleva etiqueta=\{fuente\.voz\}/.test(RESP), true);
+t('el mismo chip en las dos superficies: borde, no sólo relleno',
+  /borderColor: theme\.border\.subtle/.test(RES) && /borderColor: theme\.border\.subtle/.test(CHIPS), true);
 
 console.log('\n── ⑥ ROJO · SIN «ESTÁ ESCRIBIENDO» (N13) ──');
 /* La pieza no tiene con qué saberlo, y una actividad inventada es una promesa

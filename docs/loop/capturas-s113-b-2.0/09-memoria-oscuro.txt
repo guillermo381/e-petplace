@@ -1,0 +1,15 @@
+modo=dark · p=memoria
+Lo que sé de Thor
+Le tiene miedo a los truenos
+lo contaste vos
+Corregir
+Borrar
+Come dos veces por día
+lo confirmaste el 2 de septiembre
+Corregir
+Borrar
+Contame algo de él
+Lo que sé de Zeus
+Todavía no me contaste nada; lo que me cuentes lo uso para acompañarlo mejor
+!
+Uncaught (in promise, id: 0) Error: getClient: initApi() no fue llamado. Inicializá la API en el entry de la app.
