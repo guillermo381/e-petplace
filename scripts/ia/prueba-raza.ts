@@ -19,14 +19,24 @@ const b64url = (o: unknown) => btoa(JSON.stringify(o)).replace(/\+/g, '-').repla
 const tokenDe = (rol: string) => `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ role: rol })}.firma`
 const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
-// Los slugs son los REALES de `cat_razas`, tipos incluidos: `pitbul-terrier`
-// tiene una sola L y `jack-rusell` una sola S. **Se copian tal cual.** Si el
-// arnés los "corrigiera", estaría midiendo un catálogo que no existe.
+// 🔴 RE-ANCLADOS CONTRA `cat_razas` VIVO el 5-sep-2026 (`slug=eq.<x>`, uno por
+// uno). **Dos de los siete que este arnés daba por reales YA NO EXISTEN**:
+// `pitbul-terrier` (la de una L) y `jack-rusell` (la de una S) — el catálogo
+// creció a 215 filas en S113 y hoy la que vive es `pit-bull-terrier`.
+//
+// *No puedo decir si los copié mal o si cambiaron: sólo puedo decir el estado
+// de hoy, medido.* Lo que sí queda dicho es la clase — **el catálogo del arnés
+// envejece solo, y su comentario diciendo «son los reales» envejece con él sin
+// que nada lo avise**. Los siete de abajo están verificados contra la tabla.
+//
+// El caso del slug con typo se conserva con `bulldog-ingles`, porque lo que
+// prueba NO es el typo: es que la coincidencia sea EXACTA después de normalizar
+// y que nadie "corrija" el slug por parecido.
 // ⚠️ `yorkshire-terrier` entra por el mandato del founder, NO por una medición
 // mía contra `cat_razas`: la service_role del llavero está truncada (reportado
 // a E). Los otros seis SÍ los medí. Si ese slug no existiera en la tabla, el
 // caso 7 mediría un catálogo inventado — se declara para que se pueda corregir.
-const CATALOGO_PERRO = ['american-bully', 'criollo', 'golden-retriever', 'jack-rusell', 'labrador-retriever', 'pitbul-terrier', 'yorkshire-terrier']
+const CATALOGO_PERRO = ['american-bully', 'bulldog-ingles', 'criollo', 'golden-retriever', 'labrador-retriever', 'pit-bull-terrier', 'yorkshire-terrier']
 
 let cuerpoSalida: Record<string, unknown> | null = null
 let filasUso = 0
@@ -128,7 +138,7 @@ for (const [nombre, entrada, esperadas, motivo] of [
   ['🔴 EL ROJO DEL FOUNDER: «yorkshire_terrier» → yorkshire-terrier', [{ raza_codigo: 'yorkshire_terrier', confianza: 'alta' }], ['yorkshire-terrier'], null],
   ['guion bajo + mayusculas juntos', [{ raza_codigo: 'Golden_Retriever', confianza: 'media' }], ['golden-retriever'], null],
   ['separador repetido y mezclado', [{ raza_codigo: 'american _ Bully', confianza: 'alta' }], ['american-bully'], null],
-  ['guion bajo sobre el slug con UNA L', [{ raza_codigo: 'Pitbul_Terrier', confianza: 'baja' }], ['pitbul-terrier'], null],
+  ['guion bajo sobre un slug de tres partes', [{ raza_codigo: 'Pit_Bull_Terrier', confianza: 'baja' }], ['pit-bull-terrier'], null],
   ['«criollo » con espacio y acento raro', [{ raza_codigo: ' Crióllo ', confianza: 'baja' }], ['criollo'], null],
   ['raza inventada → se descarta, las buenas quedan',
     [{ raza_codigo: 'criollo', confianza: 'alta' }, { raza_codigo: 'labradoodle', confianza: 'alta' }], ['criollo'], 'no esta en el catalogo'],
@@ -163,10 +173,11 @@ for (const [nombre, malo] of [
   const { status, json } = await llamar(base)
   exigir(`${nombre} → 422`, status === 422 && json.candidatas === undefined, { status })
 }
-console.log('\n  ⚠️ Ojo con `pitbul-terrier`: tiene UNA L en el catalogo. Un modelo que lo')
-console.log('     escribe «pitbull-terrier» NO normaliza al mismo slug, y esa candidata')
-console.log('     se descarta. Es correcto -- ese codigo no existe -- pero es la clase')
-console.log('     de perdida que hay que MEDIR con `descartadas`, no suponer que no pasa.')
+console.log('\n  ⚠️ Un slug con typo en el catalogo (los hubo: `pitbul-terrier` con UNA L,')
+console.log('     `jack-rusell` con UNA S -- medidos el 5-sep, YA NO EXISTEN) no normaliza')
+console.log('     al que el modelo escribe bien, y esa candidata se descarta. Es correcto')
+console.log('     -- ese codigo no existe -- pero es la clase de perdida que hay que MEDIR')
+console.log('     con `descartadas`, no suponer que no pasa.')
 
 console.log('\n== 5 · ESPECIE SIN RAZAS: no se llama al modelo ==')
 {
@@ -195,15 +206,18 @@ console.log('  (corrida contra claude-haiku-4-5 el 5-sep: 1.555 ms, 76 tokens de
 console.log('   Con el catalogo mandado como `slug — nombre`, el modelo devuelve el SLUG')
 console.log('   exacto. El normalizador es el cinturon, no el mecanismo.)')
 {
+  // Salida REAL de claude-sonnet-5 sobre la foto de Zeus, 5-sep-2026, contra el
+  // catálogo vivo de 111 slugs de perro. **Reemplaza a la corrida de Haiku del
+  // lote ②**, que traía `pitbul-terrier` — un slug que ese día existía y hoy no.
   const REAL_ZEUS = {
     candidatas: [
       { raza_codigo: 'american-bully', confianza: 'alta' },
-      { raza_codigo: 'pitbul-terrier', confianza: 'media' },
-      { raza_codigo: 'boxer', confianza: 'media' },
+      { raza_codigo: 'pit-bull-terrier', confianza: 'media' },
+      { raza_codigo: 'american-staffordshire-terrier', confianza: 'media' },
     ],
     mestizo: false, sin_animal: false,
   }
-  proveedorFalso(() => REAL_ZEUS, [...CATALOGO_PERRO, 'boxer'])
+  proveedorFalso(() => REAL_ZEUS, [...CATALOGO_PERRO, 'american-staffordshire-terrier'])
   const { status, json } = await llamar(base)
   const codigos = (json.candidatas as { raza_codigo: string }[])?.map((c) => c.raza_codigo)
   exigir('200', status === 200, status)
@@ -211,7 +225,7 @@ console.log('   exacto. El normalizador es el cinturon, no el mecanismo.)')
   exigir('y es la primera, con confianza alta',
     (json.candidatas as { raza_codigo: string; confianza: string }[])?.[0]?.raza_codigo === 'american-bully' &&
     (json.candidatas as { confianza: string }[])?.[0]?.confianza === 'alta')
-  exigir('`pitbul-terrier` con UNA L sobrevive (es el slug real)', codigos?.includes('pitbul-terrier'))
+  exigir('las tres del modelo real sobreviven', codigos?.length === 3, codigos)
   exigir('cero descartadas', (json.descartadas as unknown[])?.length === 0, json.descartadas)
 }
 

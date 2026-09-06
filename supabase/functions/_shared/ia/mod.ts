@@ -267,6 +267,17 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
 
   // Desde acá SÍ hay `usage`: todo lo que siga se registra con tokens reales.
   const uso = usoDesdeRespuesta(data.usage, Date.now() - arranque)
+
+  // 🔴 LA LÍNEA QUE FALTABA (pedido del founder, S113 lote 2.7). E midió que la
+  // edge parecía mandar ~1.200 tokens de entrada MÁS que el mismo prompt por
+  // API, y **no se pudo cerrar por falta de este renglón**: `ia_uso` guarda los
+  // tokens pero nada dice de qué TAMAÑO tenía el prompt que los produjo, así
+  // que un prompt que crece no se distingue de una imagen que crece.
+  // Con las dos cifras juntas, la próxima divergencia se lee de un vistazo.
+  const largoPrompt = p.mensajes.reduce((a, m) => a + m.texto.length, 0) + (p.sistema?.length ?? 0)
+  console.log(`[ia] ${p.pieza} · modelo=${modelo} · prompt=${largoPrompt} chars` +
+    `${p.imagenes?.length ? ` · imagenes=${p.imagenes.length} (${p.imagenes.reduce((a, i) => a + i.base64.length, 0)} chars b64)` : ''}` +
+    ` · input_tokens=${uso.tokens_entrada ?? '?'} · output_tokens=${uso.tokens_salida ?? '?'}`)
   const fallarConUso = async (
     error: 'error_parseo' | 'rechazo',
     detalle?: DetalleError,

@@ -22,7 +22,8 @@
 // sugerencia que se guarda sola dejó de ser una sugerencia.
 //
 // Contrato:
-//   POST { imagenBase64: string, mediaType?: string, especie: string,
+//   POST { imageBase64: string, mediaType?: string, especie: string,
+//          (`imagenBase64`, en español, se acepta con lápida — ver abajo)
 //          modelo?: string }
 //   200 → { candidatas: [{ raza_codigo, confianza }],  // máx 3, del catálogo
 //           mestizo: boolean, sin_animal: boolean }
@@ -174,15 +175,31 @@ Deno.serve(async (req) => {
     } catch {
       return error('cuerpo_invalido', 'El body no es JSON válido.')
     }
-    const { imagenBase64, mediaType, especie, modelo } = (body ?? {}) as {
-      imagenBase64?: unknown
+    // ── ⚰️ LÁPIDA · `imagenBase64` (S113-D, lote 2.7) ───────────────────────
+    // Esta edge nació pidiendo el campo en ESPAÑOL y `extract-vacuna` lo pide
+    // en INGLÉS (`imageBase64`) desde S46. Dos grafías del mismo campo en dos
+    // edges de la misma casa: **el rebote es limpio y aun así lo paga quien
+    // escribe el segundo cliente, no quien escribió la inconsistencia** — a E le
+    // costó 143 llamadas rebotadas antes de darse cuenta.
+    //
+    // Gana el nombre VIEJO (`imageBase64`), que es el que ya tiene consumidores.
+    // El español se acepta **un tiempo** para no romper a nadie a mitad de
+    // camino, y se avisa por log en cada uso.
+    // ☠️ SE RETIRA cuando `sugerir-raza` no tenga ningún cliente mandando
+    //    `imagenBase64` — se mide en el log, no se supone.
+    const cuerpo = (body ?? {}) as Record<string, unknown>
+    if (cuerpo.imagenBase64 !== undefined && cuerpo.imageBase64 === undefined) {
+      console.warn('[sugerir-raza] ⚰️ un cliente todavía manda `imagenBase64`; el nombre vigente es `imageBase64`')
+    }
+    const imagenBase64 = cuerpo.imageBase64 ?? cuerpo.imagenBase64
+    const { mediaType, especie, modelo } = (body ?? {}) as {
       mediaType?: unknown
       especie?: unknown
       modelo?: unknown
     }
 
     if (typeof imagenBase64 !== 'string' || imagenBase64.length === 0) {
-      return error('cuerpo_invalido', 'imagenBase64 requerido.')
+      return error('cuerpo_invalido', 'imageBase64 requerido.')
     }
     if (imagenBase64.length > MAX_BASE64_CHARS) {
       return error('imagen_invalida', 'La foto es demasiado grande. Sacala de nuevo o elegí otra.')
