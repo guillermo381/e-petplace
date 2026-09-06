@@ -20,6 +20,10 @@ const CTX = {
   proxima_cita: { fecha: '2026-09-12', servicio: 'Consulta', prestador: 'Clínica Aurora' },
   plan_vacunal: [{ vacuna: 'Antirrábica', estado: 'aplicada' }, { vacuna: 'Múltiple', estado: 'pendiente', fecha: '2026-10-01' }],
   memoria: ['Le tiene miedo a los truenos'],
+  ficha_raza: { temperamento: 'Sociable y activo.', cuidados: 'Cepillado frecuente.' },
+  comportamiento: ['Tira de la correa'],
+  recuerdos: ['Lo adoptaron en un refugio'],
+  rasgos: ['Duerme mucho de día'],
 }
 
 let cuerpos: Record<string, unknown>[] = []
@@ -319,11 +323,13 @@ console.log('       en cualquiera de las dos direcciones es peor que no mostrarl
 {
   redaccionCruda(JSON.stringify({
     respuesta: '¿Guardo que le tiene miedo a los petardos?',
-    semaforo: null, propuesta_memoria: { hecho: 'Le tiene miedo a los petardos' },
+    semaforo: null, propuesta_memoria: { hecho: 'Le tiene miedo a los petardos', clase: 'comportamiento' },
   }))
   const { json } = await llamar({ mascotaId: 'm1', texto: 'se esconde con los petardos' })
   exigir('la propuesta de memoria VIAJA en el cuerpo',
     (json.propuesta_memoria as Record<string, unknown>)?.hecho === 'Le tiene miedo a los petardos', json.propuesta_memoria)
+  exigir('  ...con su CLASE, que dice por qué puerta entra',
+    (json.propuesta_memoria as Record<string, unknown>)?.clase === 'comportamiento', json.propuesta_memoria)
   exigir('  🔴 ...y la edge NO escribió en `coach_memoria`', (escrituras.coach_memoria ?? 0) === 0, escrituras)
   exigir('  ...lo único que escribió es su fila de `ia_uso`', (escrituras.ia_uso ?? 0) === 2, escrituras)
   console.log('     ↑ dos filas de ia_uso: router y redacción. Cero en memoria.')
@@ -333,7 +339,7 @@ console.log('       en cualquiera de las dos direcciones es peor que no mostrarl
   // 🔴 lo que YA está en la memoria no se vuelve a proponer.
   redaccionCruda(JSON.stringify({
     respuesta: 'x', semaforo: null,
-    propuesta_memoria: { hecho: 'le tiene miedo a los TRUENOS!' },
+    propuesta_memoria: { hecho: 'le tiene miedo a los TRUENOS!', clase: 'comportamiento' },
   }))
   const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
   exigir('un hecho YA en la memoria no se re-propone (ni con otro caso/puntuación)',
@@ -360,6 +366,42 @@ for (const malo of [{ hecho: '' }, { hecho: 42 }, 'texto suelto', []]) {
   proveedorFalso((n) => n === 1 ? { intencion: 'busqueda', campos: {} } : { respuesta: 'no', semaforo: null, propuesta_memoria: null })
   const b = await llamar({ mascotaId: 'm1', texto: 'el pedido del mes pasado' })
   exigir('la búsqueda también', 'semaforo' in b.json && b.json.semaforo === null, b.json)
+}
+
+console.log('\n== 8ter · 🔴 LA CLASE DE LA MEMORIA: la duda cae a lo INOCUO ==')
+for (const clase of ['comportamiento', 'rasgo', 'medico', 'recuerdo'] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: 'x', semaforo: null, propuesta_memoria: { hecho: 'algo nuevo', clase } }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`clase «${clase}» pasa`, (json.propuesta_memoria as Record<string, unknown>)?.clase === clase, json.propuesta_memoria)
+}
+for (const [caso, clase] of [['inventada', 'clinico'], ['ausente', undefined], ['no es texto', 7]] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: 'x', semaforo: null, propuesta_memoria: { hecho: 'algo nuevo', clase } }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`clase ${caso} → cae a 'rasgo', NUNCA a 'medico'`,
+    (json.propuesta_memoria as Record<string, unknown>)?.clase === 'rasgo', json.propuesta_memoria)
+}
+console.log('     ↑ lo que entra como `medico` lo lee un veterinario como historia clínica.')
+console.log('       Una cosa contada al pasar no puede llegar ahí por una duda del modelo.')
+
+console.log('\n== 8quater · 🔴 EL EXPEDIENTE ENTERO ENTRA AL SYSTEM ==')
+{
+  textoPlano('ok')
+  await llamar({ mascotaId: 'm1', texto: 'contame' })
+  const sis = JSON.stringify(cuerpos[cuerpos.length - 1].system ?? '')
+  for (const [que, dentro] of [
+    ['la conducta observada', 'Tira de la correa'],
+    ['los recuerdos', 'refugio'],
+    ['la memoria confirmada', 'truenos'],
+    ['las alergias', 'pollo'],
+  ] as const) exigir(`  ${que} viaja al modelo`, sis.includes(dentro), dentro)
+  exigir('  la ficha de raza va MARCADA como general, no como suya',
+    sis.includes('general, NO es sobre él'), sis.slice(0, 60))
+  exigir('  y la ley dice que hable de ESTE animal',
+    sis.includes('HABLÁS DE ESTE ANIMAL, NO DE SU RAZA'))
+  exigir('  y que orientar es el trabajo principal',
+    sis.includes('TU TRABAJO PRINCIPAL ES ORIENTAR'))
+  exigir('  y que el semáforo es la EXCEPCIÓN',
+    sis.includes('la EXCEPCIÓN, no el reflejo'))
 }
 
 console.log('\n== 9 · EL AVISO DE IA: en la primera respuesta del hilo ==')

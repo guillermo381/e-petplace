@@ -114,6 +114,13 @@ interface Contexto {
   ultimos_eventos?: { tipo: string; fecha: string; detalle?: string | null }[] | null
   ficha_raza?: { temperamento?: string | null; cuidados?: string | null } | null
   memoria?: string[] | null
+  /** 🔴 EL BIO-EXPEDIENTE, que es lo que hace que Nexo hable de ESTE animal.
+   *  Sin esto contesta como un manual de la raza: correcto y de nadie.
+   *  Lo que la FAMILIA contó, con su procedencia: conductas observadas, rasgos,
+   *  y los recuerdos que sedimentó. */
+  comportamiento?: string[] | null
+  rasgos?: string[] | null
+  recuerdos?: string[] | null
   /** 🔴 Si esta familia puede abrir una consulta de telemedicina AHORA.
    *  Medido el 5-sep-2026: `telemedicina` es `reservable=true` con **2 ofertas
    *  activas** — o sea que el «de un toque» del brief se puede construir; ya no
@@ -253,18 +260,45 @@ Respondés SOLO este JSON, sin texto alrededor y sin backticks:
   contó la familia, nunca con un nombre de enfermedad.
 · "propuesta_memoria" lo llenás SÓLO si la familia contó un hecho NUEVO sobre
   su mascota que valga la pena recordar y que no esté ya en la memoria:
-  {"hecho":"Le tiene miedo a los truenos"}. Es una PROPUESTA: en "respuesta"
-  preguntás "¿Guardo que …?" y **nunca decís que lo guardaste**. Lo guarda la
-  familia confirmando. Si no hay nada nuevo, va null.
+  {"hecho":"No le gusta el pollo","clase":"rasgo"}. Es una PROPUESTA: en
+  "respuesta" preguntás "¿Guardo que …?" y **nunca decís que lo guardaste**.
+  Lo guarda la familia confirmando. Si no hay nada nuevo, va null.
+  La "clase" dice a qué parte del expediente va, y son cuatro:
+    "comportamiento" — cómo se porta: tira de la correa, ladra al timbre.
+    "rasgo"          — cómo es o qué le gusta: no le gusta el pollo, duerme mucho.
+    "medico"         — algo de salud que la familia CONTÓ: le dieron un
+                       antibiótico, tuvo una otitis el año pasado.
+    "recuerdo"       — un hecho de su vida: lo adoptaron, se mudó de casa.
+  🔴 Si dudás entre "medico" y las otras, elegí la otra. Lo médico entra al
+  expediente clínico y **lo que entra ahí lo lee un veterinario como si fuera
+  historia**: una cosa contada al pasar no puede llegar ahí por tu duda.
 
-═══ EL SEMÁFORO — es lo que reemplaza al diagnóstico ═══
-Ante síntoma, dolor, herida, cambio de conducta o algo que empeora, decís UNA
-de estas tres y nada más sobre qué puede ser:
+═══ 🔴 TU TRABAJO PRINCIPAL ES ORIENTAR ═══
+La mayoría de lo que te preguntan NO es de salud: comida, conducta, higiene,
+ejercicio, la etapa que está viviendo. **Ahí contestás de verdad**: qué hacer,
+en concreto, **con el porqué en una línea**, y terminás en el paso siguiente
+—qué probar esta semana, qué mirar, qué cambiar—.
+
+**NO mandás al veterinario en estas preguntas.** No pasa nada malo si contestás
+una duda de alimentación o de paseo: sos la app que conoce a este animal. *Un
+asistente que ante cada pregunta dice "consultá con tu veterinario" no está
+siendo prudente: está diciendo "no sé" con mejores modales, y a la décima vez la
+familia deja de preguntar.* **No diagnosticar no es no ayudar.**
+
+Reservás el veterinario para lo de abajo, y sólo para eso.
+
+═══ EL SEMÁFORO — la EXCEPCIÓN, no el reflejo ═══
+Se enciende SÓLO ante una señal CLÍNICA: síntoma, dolor, herida, sangrado,
+vómito o diarrea, algo que empeora, o un cambio de conducta **repentino y sin
+motivo**. *Que un perro tire de la correa o se suba al sillón no es una señal
+clínica: es la vida.* Ante una de ésas, decís UNA de estas tres y nada más
+sobre qué puede ser:
   · "esto se mira en casa" — qué observar y por cuánto tiempo.
   · "conviene una cita esta semana".
   · "esto es para ir ya" — sangrado, dificultad para respirar, convulsión,
     vómito repetido, no toma agua, dolor fuerte, algo que empeora rápido.
-Y ofrecés el paso siguiente, UNA sola vez por hilo:
+Y **sólo cuando el semáforo se encendió**, ofrecés el paso siguiente, UNA sola
+vez por hilo:
 ${c.telemedicina_disponible
   ? '"¿Querés que te abra una consulta con un veterinario ahora?" — esta familia\n  puede hacerlo desde la app, así que ofrecé eso y no sólo mirar un perfil.'
   : '"¿Querés que te muestre a tu veterinario?" — no ofrezcas abrir una consulta:\n  no sabemos si esta familia la tiene disponible.'}
@@ -284,13 +318,19 @@ afirmar que lo guardaste: lo guarda la familia confirmando.
 
 ═══ LO QUE SABÉS DE ESTA MASCOTA ═══
 Nombre: ${c.nombre}
-Especie: ${c.especie}${dato('Raza', c.raza)}${dato('Sexo', c.sexo)}${dato('Edad', c.edad_texto)}${dato('Etapa', c.etapa)}${dato('Peso', c.peso_kg && `${c.peso_kg} kg`)}${dato('Alergias', c.alergias)}${dato('Medicación', c.medicacion_actual)}${dato('Condiciones', c.condiciones_cronicas)}${dato('Próxima cita', c.proxima_cita)}${dato('Plan vacunal', c.plan_vacunal)}${dato('Últimos eventos', c.ultimos_eventos)}${dato('Sobre la raza', c.ficha_raza)}
+Especie: ${c.especie}${dato('Raza', c.raza)}${dato('Sexo', c.sexo)}${dato('Edad', c.edad_texto)}${dato('Etapa', c.etapa)}${dato('Peso', c.peso_kg && `${c.peso_kg} kg`)}${dato('Alergias', c.alergias)}${dato('Medicación', c.medicacion_actual)}${dato('Condiciones', c.condiciones_cronicas)}${dato('Próxima cita', c.proxima_cita)}${dato('Plan vacunal', c.plan_vacunal)}${dato('Últimos eventos', c.ultimos_eventos)}${dato('Sobre la raza (general, NO es sobre él)', c.ficha_raza)}${dato('Lo que la familia observó de su conducta', c.comportamiento)}${dato('Rasgos que la familia declaró', c.rasgos)}${dato('Recuerdos que la familia guardó', c.recuerdos)}
 
 ═══ LO QUE LA FAMILIA CONFIRMÓ (memoria) ═══
 ${c.memoria?.length ? c.memoria.map((m) => `· ${m}`).join('\n') : '(todavía nada)'}
 
-Todo lo de arriba es lo ÚNICO que sabés. Si algo no está, no lo sabés.
-Contestá en dos o tres frases.`
+🔴 HABLÁS DE ESTE ANIMAL, NO DE SU RAZA. Lo de "Sobre la raza" es el promedio
+de una raza; todo lo demás es ÉL. Cuando lo que sabés de él aplica a la
+pregunta, **usalo por nombre**: si sabés que le tiene miedo a los truenos, o
+que tira de la correa, o que no le gusta quedarse solo, eso cambia la respuesta
+y lo decís. *Una respuesta que sirve igual para cualquier golden retriever no
+usó el expediente.*
+
+Todo lo de arriba es lo ÚNICO que sabés. Si algo no está, no lo sabés.`
 }
 
 // ── ③ EL ROUTER ────────────────────────────────────────────────────────────
@@ -344,7 +384,15 @@ export function saneaSemaforo(v: unknown): { nivel: string; motivo: string | nul
  *  (A3). *Una propuesta que el servidor guarda solo deja de ser una propuesta.*
  *  Y se descarta si el hecho YA está en la memoria: proponer de nuevo lo que la
  *  familia ya confirmó es pedirle que confirme dos veces lo mismo. */
-export function saneaPropuesta(v: unknown, c: { memoria?: string[] | null }): { hecho: string } | null {
+/** Las cuatro puertas del expediente. Lista blanca EN LA EDGE: una clase
+ *  inventada **no se degrada a la más grave** — cae a `rasgo`, que es la más
+ *  inocua. *Un hecho contado al pasar que entra como `medico` lo lee un
+ *  veterinario como historia clínica.* */
+export const CLASES_MEMORIA = ['comportamiento', 'rasgo', 'medico', 'recuerdo'] as const
+
+export function saneaPropuesta(
+  v: unknown, c: { memoria?: string[] | null },
+): { hecho: string; clase: string } | null {
   if (typeof v !== 'object' || v === null || Array.isArray(v)) return null
   const hecho = aTextoOnull((v as Record<string, unknown>).hecho)
   if (hecho === null) return null
@@ -353,7 +401,12 @@ export function saneaPropuesta(v: unknown, c: { memoria?: string[] | null }): { 
     console.error('[coach] propuesta descartada: ya está en la memoria')
     return null
   }
-  return { hecho }
+  const cruda = aTextoOnull((v as Record<string, unknown>).clase)
+  if (cruda !== null && !(CLASES_MEMORIA as readonly string[]).includes(cruda)) {
+    console.error('[coach] clase de memoria fuera de la lista:', cruda)
+  }
+  const clase = cruda !== null && (CLASES_MEMORIA as readonly string[]).includes(cruda) ? cruda : 'rasgo'
+  return { hecho, clase }
 }
 
 export function comoCita(texto: string): string {

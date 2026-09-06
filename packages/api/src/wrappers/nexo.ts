@@ -41,6 +41,17 @@ export interface Semaforo {
   motivo: string | null;
 }
 
+/** Las cuatro puertas del expediente. **Cada una se guarda por su camino**, y
+ *  `medico` no es una etiqueta más: lo que entra ahí lo lee un veterinario como
+ *  historia clínica. Por eso la edge, ante una clase que no reconoce, **cae a
+ *  `rasgo`** —lo más inocuo— en vez de a la más grave. */
+export type ClaseMemoria = 'comportamiento' | 'rasgo' | 'medico' | 'recuerdo';
+
+export interface PropuestaMemoria {
+  hecho: string;
+  clase: ClaseMemoria;
+}
+
 export interface RespuestaNexo {
   /** `null` SÓLO cuando `intencion === 'busqueda'`. */
   respuesta: string | null;
@@ -50,8 +61,10 @@ export interface RespuestaNexo {
   /** Con `busqueda`: lo que hay que buscar. Lo resuelve la pantalla. */
   consulta?: string;
   semaforo: Semaforo | null;
-  /** Se PROPONE. La guarda la familia confirmando, con `confirmado_de_ia`. */
-  propuesta_memoria: { hecho: string } | null;
+  /** Se PROPONE. La guarda la familia confirmando, con `confirmado_de_ia`.
+   *  🔴 **Este wrapper NO la guarda**, y no es un olvido: guardarla acá la
+   *  volvería una afirmación del sistema sobre la mascota de alguien. */
+  propuesta_memoria: PropuestaMemoria | null;
   /** `true` en el primer turno del hilo. */
   aviso_ia: boolean;
 }
@@ -120,9 +133,13 @@ export async function preguntarANexo(
       !(data.respuesta === null || typeof data.respuesta === 'string')) {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
   }
-  const propuesta = esObj(data.propuesta_memoria) && typeof data.propuesta_memoria.hecho === 'string'
-    ? { hecho: data.propuesta_memoria.hecho }
-    : null;
+  const CLASES: readonly string[] = ['comportamiento', 'rasgo', 'medico', 'recuerdo'];
+  const p = data.propuesta_memoria;
+  const propuesta: PropuestaMemoria | null =
+    esObj(p) && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
+    typeof p.clase === 'string' && CLASES.includes(p.clase)
+      ? { hecho: p.hecho, clase: p.clase as ClaseMemoria }
+      : null;
   return {
     ok: true,
     data: {

@@ -1832,6 +1832,8 @@ export {
   type IntencionNexo,
   type Semaforo,
   type NivelSemaforo,
+  type PropuestaMemoria,
+  type ClaseMemoria,
   type InputPreguntarANexo,
   type CodigoErrorNexo,
   type ParteDelDia,
