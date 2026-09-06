@@ -2995,28 +2995,34 @@ export type Database = {
       cat_razas: {
         Row: {
           activo: boolean
+          creado_en_s113: boolean
           created_at: string
           especie: string
           nombre: string
-          ruta_imagen: string
+          nombre_norm: string | null
+          ruta_imagen: string | null
           slug: string
           updated_at: string
         }
         Insert: {
           activo?: boolean
+          creado_en_s113?: boolean
           created_at?: string
           especie: string
           nombre: string
-          ruta_imagen: string
+          nombre_norm?: string | null
+          ruta_imagen?: string | null
           slug: string
           updated_at?: string
         }
         Update: {
           activo?: boolean
+          creado_en_s113?: boolean
           created_at?: string
           especie?: string
           nombre?: string
-          ruta_imagen?: string
+          nombre_norm?: string | null
+          ruta_imagen?: string | null
           slug?: string
           updated_at?: string
         }
@@ -12232,9 +12238,11 @@ export type Database = {
           created_at: string
           edge: string
           id: string
+          imagen_chars: number | null
           latencia_ms: number | null
           modelo: string
           pieza: string
+          prompt_chars: number | null
           resultado: string
           tokens_cache_escritura: number | null
           tokens_cache_lectura: number | null
@@ -12246,9 +12254,11 @@ export type Database = {
           created_at?: string
           edge: string
           id?: string
+          imagen_chars?: number | null
           latencia_ms?: number | null
           modelo: string
           pieza: string
+          prompt_chars?: number | null
           resultado: string
           tokens_cache_escritura?: number | null
           tokens_cache_lectura?: number | null
@@ -12260,9 +12270,11 @@ export type Database = {
           created_at?: string
           edge?: string
           id?: string
+          imagen_chars?: number | null
           latencia_ms?: number | null
           modelo?: string
           pieza?: string
+          prompt_chars?: number | null
           resultado?: string
           tokens_cache_escritura?: number | null
           tokens_cache_lectura?: number | null
@@ -21839,11 +21851,14 @@ export type Database = {
           costo_usd: number | null
           dia: string | null
           fallidas: number | null
+          imagen_chars_promedio: number | null
           latencia_peor_ms: number | null
           latencia_promedio_ms: number | null
           llamadas: number | null
+          llamadas_con_tamano: number | null
           modelo: string | null
           pieza: string | null
+          prompt_chars_promedio: number | null
           tokens_cache_escritura: number | null
           tokens_cache_lectura: number | null
           tokens_entrada: number | null

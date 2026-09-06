@@ -16,14 +16,25 @@
 // proveedor. El día que un modelo cambie, cambia UNA celda de esta tabla y
 // ninguna edge se entera. Ése es todo el punto de la puerta única.
 
-/** Vocabulario CERRADO. Una pieza = un trabajo del producto. */
-/* 🔴 `raza` ENTRA EN EL MERGE DE S113-D-1.2 (A, 5-sep-2026), y la resolución es
-   ADITIVA a propósito: el lado de D-1.2 traía la pieza pero con `carnet: 2000`
-   —el techo viejo, que la propia mesa subió a 4000 tras medir que truncaba una
-   de cada tres corridas—. *Elegir un lado entero habría perdido una medición o
-   la otra*, así que se conserva TODO main y se agregan las siete entradas de
-   `raza`, con los valores que D fijó. */
-export type Pieza = 'carnet' | 'documento' | 'nota_clinica' | 'presencia' | 'raza'
+/**
+ * Vocabulario CERRADO. Una pieza = un trabajo del producto.
+ *
+ * 🔴 ES UN ARRAY EN RUNTIME, y el tipo se DERIVA de él — no al revés. La razón
+ * es un defecto real de S113-D-1.2: al agregar `raza` quedaron **dos tablas
+ * incompletas** (`TIMEOUT_MS` sin `raza`, `CACHEAR_SISTEMA` sin `presencia`).
+ * `deno check` lo dijo con dos `TS2741`… y **el gate de la casa dio VERDE**,
+ * porque `TS2741` cae en su bucket «fuera de clase».
+ *
+ * Y el daño no era cosmético: `TIMEOUT_MS.raza` en `undefined` hace
+ * `setTimeout(fn, undefined)`, **que dispara a los 0 ms** ⇒ toda sugerencia de
+ * raza se habría abortado al instante, en producción.
+ *
+ * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
+ * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
+ */
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza'] as const
+
+export type Pieza = typeof PIEZAS[number]
 
 /** El modelo por pieza. **Medido, no elegido** — ver cabecera. */
 export const MODELOS: Record<Pieza, string> = {
@@ -31,21 +42,34 @@ export const MODELOS: Record<Pieza, string> = {
   documento: 'claude-sonnet-5',
   nota_clinica: 'claude-sonnet-5',
   presencia: 'claude-sonnet-5',
-  raza: 'claude-haiku-4-5',
+  // 🔴 NACE EN HAIKU, no en Sonnet, y es una decisión de la mesa que E
+  // confirma con número. La razón por la que es plausible: decir «esto se
+  // parece a un labrador» eligiendo de una lista de 44 nombres es una tarea de
+  // RECONOCIMIENTO, no de atribución espacial fina — que es justo donde S48
+  // midió que Haiku topaba. **No es lo mismo leer un carnet que mirar un perro.**
+  raza: 'claude-sonnet-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
 export const MAX_TOKENS: Record<Pieza, number> = {
-  // 🔴 4000 — FIRMA DEL FOUNDER (v2 definitiva, S113-D-2.2), y **viaja atado a
-  // `PENSAR.carnet = false`**. La medición que lo fija: el carnet más denso
-  // real devolvió **14 filas en 2.015 tokens de salida** sin razonar. 4000 es
-  // el doble de holgura. Con razonamiento ENCENDIDO la misma llamada gastó
-  // 6.716 y con techo 4000 salió **truncada** — por eso los dos números no se
-  // mueven por separado. Ver `TECHO_SIN_RAZONAR`.
+  // 🔴 CAMBIADO EN S113-D-1.0, y **viaja atado a `PENSAR.carnet = false`**:
+  // con razonamiento encendido, 2000 trunca. Los dos se mueven juntos o
+  // ninguno. La salida real que este techo tiene que albergar se midió: el
+  // carnet más denso del conjunto de E tiene 8 vacunas ⇒ ~8 filas de 11
+  // campos + `plan_impreso`, del orden de 900-1200 tokens. 2000 deja aire
+  // sin dejar lugar a la prosa.
+  //
+  // 🔴 **2000 → 4000 EN EL MERGE (A, 5-sep).** No es una preferencia: las dos
+  // ramas de D se contradicen y la fecha lo decide. `2000` es de `b6b42ca2`
+  // (4-sep 19:40) y esta rama salió antes de que D lo cambiara; `4000` es de su
+  // propia «v2 definitiva» `7bbd2f06` (22:17). *Un número heredado de una rama
+  // que salió antes se lee igual de firme que uno recién medido — y no lo es.*
   carnet: 4000,
   documento: 4000,
   nota_clinica: 16000,
   presencia: 4000,
+  // La salida son 3 códigos y dos booleanos: ~100 tokens. 500 es aire de sobra
+  // y deja el truncado como red, no como peaje.
   raza: 500,
 }
 
@@ -121,6 +145,9 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   documento: 60_000,
   nota_clinica: 40_000,
   presencia: 10_000,
+  // ⚠️ NO MEDIDO — no hay credencial de Anthropic en esta pista. Una imagen
+  // chica con salida de ~100 tokens en Haiku debería estar muy por debajo,
+  // pero «debería» no es un número. Bloqueante nombrado: `ia_uso.latencia_ms`.
   raza: 30_000,
 }
 
@@ -235,12 +262,20 @@ export const PENSAR: Record<Pieza, boolean> = {
   // para sus tareas. Apagarlo explícito no les quita un razonamiento que no
   // estaban haciendo; **les saca el riesgo de que algún día lo hagan y se
   // coman el techo**, que es el modo de falla que E midió en carnets.
+  //
+  // ⚠️ Esta rama (1.2) se cortó ANTES de esa firma, así que las dos llegaron
+  // acá todavía en `true` — corriendo Sonnet 5 con techo 4000. **Lo cazó el
+  // gate al portarlo, no una lectura**: el gate vivía en la otra rama y esta
+  // era justo la que estaba sin vigilar.
   documento: false,
   // `nota_clinica` es la ÚNICA que queda razonando, y es legítimo: su techo es
   // 16000, o sea que NO está por debajo del invariante. Estructurar un dictado
   // clínico campo por campo es exactamente donde el razonamiento paga.
   nota_clinica: true,
   presencia: false,
+  // Con Sonnet 5 por defecto esto YA NO es decorativo: omitirlo lo dejaría
+  // razonar solo, y con techo 500 se comería la respuesta entera. El `false`
+  // es lo que hace que la puerta escriba `thinking: disabled` en la request.
   raza: false,
 }
 
@@ -262,5 +297,9 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   documento: false,
   nota_clinica: false,
   presencia: true,
+  // El catálogo de razas ES estable entre llamadas de la misma especie… pero
+  // viaja en el mensaje del usuario junto a la foto, y la foto va PRIMERA. No
+  // hay prefijo estable que cachear. Si algún día el catálogo se mueve al
+  // bloque `system`, esto se vuelve a mirar CON número.
   raza: false,
 }

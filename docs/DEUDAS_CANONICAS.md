@@ -28694,3 +28694,108 @@ config`, no contra el mío— cuando mi explicación no le cerraba, y me lo
 corrigió con el comando y su salida, no con una afirmación. Es la misma
 disciplina que `L-489` pide: una corrección que llega con su propia
 evidencia se acepta; una que llega sin ella se mide antes.
+
+---
+
+### `D-1034` 🟡 · Los guards `{x && (…)}` de `packages/ui` que pueden dejar una cadena vacía como hijo de `View`
+
+**Dueño: B · gate: E · nace S113-A (5-sep-2026), del censo que pidió la mesa.**
+
+#### El defecto, en una línea
+En React Native, `'' && <X/>` **no devuelve `false`: devuelve `''`** — y una cadena
+suelta como hijo de `View` revienta con *«Text strings must be rendered within a
+`<Text>` component»*. `0` hace exactamente lo mismo. *El operador no está mal
+usado: está usado con un valor que no es booleano, y JavaScript devuelve el
+operando en vez de un `false`.*
+
+#### El número, medido por AST y no por `grep`
+La pregunta —*¿qué tipo tiene el lado izquierdo?*— **no está en la línea**, así
+que un `grep` no puede contestarla. Censado sobre los `.tsx` de
+`packages/ui/src`:
+
+| corte | cuántos | qué son |
+|---|---|---|
+| todos los `{x && …}` en JSX | **30** | el universo |
+| ya booleanos **por forma** | **23** | llevan `!`, una comparación, `Boolean(…)`, `??` — no pueden ser `''` |
+| **no probablemente seguros** | **7** | `secure` · `marcada` · `cortado` · `lleno` · `editable` + los dos de abajo |
+| 🔴 **genuinamente `string \| null`** | **2** | los dos en `FichaVacuna.tsx` |
+
+⚠️ **El «23» que llegó al encargo reconcilia con esto y no lo contradice**: son
+exactamente los 30 menos los 7. Se deja escrito porque *un número heredado se
+lee igual de firme que uno medido* — éste resultó ser el complemento del que
+importa.
+
+#### Los dos reales, y por qué hoy no explotan
+- `FichaVacuna.tsx:175` — `{(tipoVacuna || veterinario) && …}`, las dos
+  `string | null`
+- `FichaVacuna.tsx:206` — `{fechaLiteral && …}`, `string | null`
+
+Con `null` no pasa nada: `null && X` da `null` y React no dibuja nada. **El
+único valor que rompe es `''`**, y hoy no llega porque **todos los productores
+normalizan**: la RPC usa `nullif(btrim(…), '')` y el wrapper usa `campoTexto`.
+
+🔴 **Y ahí está la deuda: la seguridad de estos dos guards no vive en ellos —
+vive en que cada productor, del otro lado de una frontera, siga normalizando.**
+`fechaLiteral` viene de la edge de D. *Un invariante que se sostiene en la
+disciplina de un módulo ajeno es un invariante que nadie está vigilando.*
+
+#### La cura, y por qué no es «poner `Boolean()`»
+Envolver en `Boolean()` apaga el síntoma y **deja el mismo hueco** para el
+próximo campo de texto que alguien agregue. La forma que la casa ya usa en otros
+lados es que el guard **compare**, no que convierta: `{fechaLiteral !== null && …}`
+o, mejor, que el tipo lo haga inexpresable. La decisión es de B, que es quien
+conoce la pieza.
+
+#### Disparo
+La próxima vez que B toque `FichaVacuna`, **o** antes si E ve la excepción en el
+aparato. **No es 🔴 porque hoy ningún productor emite `''`** — y eso está medido,
+no supuesto.
+
+#### Lo que este censo NO cubre, declarado
+Sólo miró `packages/ui/src`. **`apps/cliente` y `apps/prestador` no se
+censaron** — es territorio de C y de B, y el instrumento
+(`/tmp/censo-guards.mjs`, AST con `typescript`) se corre igual sobre ellos
+cambiando una ruta.
+
+---
+
+### `D-1035` 🟢 · La clave de la cuenta de prueba quedó impresa en el transcript de una pista
+
+**Nace y se cura el mismo día (S113, 5-sep-2026). Decisión del founder: NO se
+rota** — es una cuenta de prueba genérica, sin datos sensibles y sin acceso a
+nada de una familia real. *La ficha existe igual, porque lo que hay que
+conservar no es el susto: es la regla.*
+
+#### Qué pasó
+Un arnés de una pista escribió la clave de la cuenta de prueba **inline**, y con
+eso quedó en el transcript de la sesión. Un transcript no se puede editar
+después: *el momento de decidir que un valor no se imprime es antes de
+imprimirlo, porque después ya no hay dónde borrarlo.*
+
+#### Por qué pasa, y por qué es peor que la de las llaves de servicio
+`D-1013` es sobre un comando que **vuelca secretos sin que nadie se lo pida**.
+Éste es distinto y por eso engaña: **la cuenta de prueba se siente inofensiva**
+—es de prueba, es de mentira, es «la de siempre»— así que nadie la trata como un
+secreto y termina escrita al lado del código que la usa. **La categoría del dato
+no la decide su importancia: la decide que sea una credencial.**
+
+#### La regla que queda (firma del founder)
+1. **La cuenta de prueba vive en el llavero**, servicio `epetplace-cuenta-prueba`
+   — el correo en `acct`, la clave en el valor.
+2. **Se lee AL MOMENTO de usarla y no se imprime nunca**, ni siquiera
+   enmascarada: *un valor mostrado a medias sigue estando en el transcript.*
+3. **Ningún arnés la escribe inline ni la deja en una constante.** Si el llavero
+   no la tiene, el arnés **dice cómo ponerla y se detiene** — jamás cae en
+   silencio a un archivo: *un fallback callado convierte la regla en una
+   sugerencia.*
+
+#### Ya ejecutado
+- La cuenta está en el llavero.
+- `scripts/s113a-llamadas-reales.mjs` la lee de ahí, con el fallo hablado.
+- El `.env.local` la conserva **sólo para que la app arranque en la máquina del
+  founder**, y ese archivo no está trackeado (verificado).
+
+#### Lo que NO cierra esta ficha, declarado
+**No se censaron los demás arneses del repo.** Éste es el que yo escribí y el
+que se curó; si otro guarda una credencial de prueba inline, sigue ahí. El censo
+es `grep -rn "PASSWORD\|password:" scripts/` y **no lo corrí**.

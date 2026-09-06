@@ -26,6 +26,9 @@
  *   --control    valida el arnés SIN gastar una llamada. Incluye el rojo
  *                pedido: una raza inventada tiene que volver vacía.
  *   --construir  lee `cat_razas` y escribe el .jsonl del Batch. Cero llamadas.
+ *   --s113       (con cualquiera de los otros) trabaja sobre las filas nuevas
+ *                de S113 en vez de sobre todas las activas, y escribe en
+ *                archivos con sufijo `-s113` para no pisar la primera tanda.
  *   --enviar     LO MANDA. Gasta plata. Exige ANTHROPIC_API_KEY.
  *   --recoger ID baja los resultados, los VALIDA y escribe el archivo que A
  *                carga. **A lo guarda con `activo=false` hasta revisión.**
@@ -34,17 +37,81 @@
  * modelo y su fecha es un texto del que nadie puede decir de dónde salió.
  */
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 // Import PEREZOSO a propósito: `lib-conjuntos.mjs` lee `supabase/.temp/project-ref`
 // al cargarse, y `--control` NO debe depender de tener el proyecto linkeado.
 // *Un control que necesita credenciales para correr es un control que no se corre.*
 
 const DIR = '.ia-conjuntos';
+
+// ── LA SEGUNDA TANDA ────────────────────────────────────────────────────────
+// `--s113` cambia DOS cosas a la vez, y por eso es UNA bandera y no dos: el
+// filtro del catálogo (las filas nuevas, no las activas) y el nombre de los
+// archivos. Si sólo cambiara el filtro, escribiría encima del .jsonl y del
+// contenido de la primera tanda — que es trabajo pagado y ya recogido.
+const S113 = process.argv.includes('--s113');
+// ── LAS GENÉRICAS ───────────────────────────────────────────────────────────
+// `--especies` escribe sobre LA ESPECIE, no sobre una raza. Son las entradas
+// que no nombran una raza (`criollo`, `gato-comun`, `otro`, `huron`) y las seis
+// especies que **no tienen ninguna entrada genérica en `cat_razas`** — para
+// esas, la ficha se guarda con `raza_codigo: null`.
+// *No es el mismo prompt con otro nombre: pedirle «el origen del pez» a un
+// prompt escrito para razas devuelve una raza inventada, que es justo lo que
+// `conocida:false` existe para evitar.*
+const ESPECIES = process.argv.includes('--especies');
+const SUF = ESPECIES ? '-especies' : S113 ? '-s113' : '';
+const FILTRO = S113 ? 'creado_en_s113=is.true' : 'activo=eq.true';
 const MODELO = 'claude-sonnet-5';
 const MAX_TOKENS = 1500;
 
 // ── EL ESQUEMA CERRADO ──────────────────────────────────────────────────────
 const ETAPAS = ['cachorro', 'adulto', 'senior'];
+
+const PROMPT_ESPECIE = (especie, etiqueta) => `Escribís la ficha de una ESPECIE para la app de una familia que tiene una mascota.
+
+La especie es: ${especie}${etiqueta && etiqueta !== especie ? ` (la entrada del catálogo se llama "${etiqueta}")` : ''}.
+
+🔴 ESTO NO ES UNA RAZA. Escribís sobre la especie en general — la mascota de
+esta familia puede ser de cualquier raza, o de ninguna. Todo lo que digas tiene
+que ser cierto para CUALQUIER ejemplar de la especie.
+
+═══ QUÉ VA EN CADA CAMPO ═══
+
+"origen"          → **null, siempre.** Una especie no tiene un origen de
+                    criadero. No escribas historia natural ni país: null.
+"temperamento"    → cómo es convivir con esta especie en general. Lo que una
+                    familia necesita saber antes de tenerla en casa.
+"talla_adulta"    → un RANGO AMPLIO que cubra a la especie entera, diciendo que
+                    es amplio y que depende de la raza o el tipo.
+"esperanza_vida"  → un RANGO AMPLIO, con la misma advertencia.
+"predisposiciones"→ **[] SIEMPRE, vacío.** Las predisposiciones son de raza; una
+                    especie entera no las tiene. Si escribís algo acá, está mal.
+"cuidados_por_etapa" → los TRES completos (cachorro, adulto, senior). Acá sí hay
+                    mucho que decir y es lo más útil de la ficha: alojamiento,
+                    alimentación, manejo, socialización, señales de alarma.
+                    Si la palabra "cachorro" no aplica a esta especie, hablá de
+                    la etapa temprana sin usarla.
+"conocida"        → true.
+
+═══ LOS LÍMITES ═══
+No diagnosticás, no recetás, no das dosis. Hablás de cuidados GENERALES y donde
+el tema roce la salud, decí que lo vea el veterinario.
+
+═══ LA VOZ ═══
+Tuteo neutro, cálido y concreto. Le hablás a una familia, no a un criador ni a
+un colega. Sin signos de admiración, sin marketing, sin superlativos, sin
+listas dentro de los textos. Frases cortas.
+
+A las personas menores de edad se les dice **niños**, JAMÁS «chicos» ni
+«pibes» ni «críos»: la app se lee en Ecuador y ahí «chicos» quiere decir
+*pequeños de tamaño*, así que «se lleva bien con chicos» se entiende como que
+se lleva bien con animales chicos. **No es tono: cambia lo que la frase dice.**
+Para el tamaño, decí **pequeños**.
+
+═══ LA SALIDA ═══
+Respondé SOLO con este JSON, sin texto adicional y sin backticks:
+{"conocida":true,"origen":null,"temperamento":null,"talla_adulta":null,"esperanza_vida":null,"predisposiciones":[],"cuidados_por_etapa":{"cachorro":null,"adulto":null,"senior":null}}`;
 
 const PROMPT = (nombre, especie) => `Escribís la ficha de una raza para la app de una familia que tiene una mascota.
 
@@ -79,6 +146,12 @@ suena bien, así que nadie lo va a corregir.
 Tuteo neutro, cálido y concreto. Le hablás a una familia, no a un criador ni a
 un colega. Sin signos de admiración, sin marketing, sin superlativos, sin
 listas dentro de los textos. Frases cortas.
+
+A las personas menores de edad se les dice **niños**, JAMÁS «chicos» ni
+«pibes» ni «críos»: la app se lee en Ecuador y ahí «chicos» quiere decir
+*pequeños de tamaño*, así que «se lleva bien con chicos» se entiende como que
+se lleva bien con perros chicos. **No es tono: cambia lo que la frase dice.**
+(«Desde chico», hablando de la edad del ANIMAL, sí se usa y se deja.)
 
 ═══ LA SALIDA ═══
 Respondé SOLO con este JSON, sin texto adicional y sin backticks:
@@ -160,44 +233,77 @@ if (tiene('--control')) {
 if (tiene('--construir')) {
   const { claveServicio, URL_BASE } = await import('../ia-conjuntos/lib-conjuntos.mjs');
   const k = claveServicio();
-  const res = await fetch(`${URL_BASE}/rest/v1/cat_razas?select=slug,nombre,especie&activo=eq.true&order=especie,slug`,
+  const res = await fetch(`${URL_BASE}/rest/v1/cat_razas?select=slug,nombre,especie&${FILTRO}&order=especie,slug`,
     { headers: { Authorization: `Bearer ${k}`, apikey: k } });
   if (!res.ok) throw new Error(`cat_razas ${res.status}`);
-  const razas = await res.json();
+  let razas = await res.json();
+
+  if (ESPECIES) {
+    // Las genéricas que SÍ son una fila del catálogo…
+    const gen = razas.filter((r) => ['criollo', 'gato-comun', 'otro', 'huron'].includes(r.slug));
+    // …y las especies que NO tienen ninguna. Su ficha va con `slug: null`:
+    // no describe una entrada del catálogo, describe la especie.
+    const conGenerica = new Set(gen.map((r) => r.especie));
+    const sinGenerica = [...new Set(razas.map((r) => r.especie))]
+      .filter((e) => !conGenerica.has(e))
+      .map((e) => ({ slug: null, nombre: e, especie: e }));
+    razas = [...gen, ...sinGenerica].sort((a, b) => a.especie.localeCompare(b.especie));
+    console.log(`\n${gen.length} genéricas del catálogo + ${sinGenerica.length} especies sin genérica`);
+    for (const r of razas) console.log(`  ${r.especie.padEnd(8)} ${String(r.slug ?? '(la especie)').padEnd(14)} ${r.nombre}`);
+  }
 
   const peticiones = razas.map((r) => ({
-    custom_id: `${r.especie}__${r.slug}`,
+    custom_id: `${r.especie}__${r.slug ?? '_especie'}`,
     params: {
       model: MODELO,
       max_tokens: MAX_TOKENS,
       // Sin razonamiento: la ficha es redacción con esquema, no atribución
       // espacial. Y en Sonnet 5 omitirlo NO lo apaga (ver _shared/ia/modelos.ts).
       thinking: { type: 'disabled' },
-      messages: [{ role: 'user', content: [{ type: 'text', text: PROMPT(r.nombre, r.especie) }] }],
+      messages: [{ role: 'user', content: [{ type: 'text', text: ESPECIES ? PROMPT_ESPECIE(r.especie, r.nombre) : PROMPT(r.nombre, r.especie) }] }],
     },
   }));
 
   mkdirSync(DIR, { recursive: true });
-  const ruta = join(DIR, 'batch-razas.jsonl');
+  const ruta = join(DIR, `batch-razas${SUF}.jsonl`);
   writeFileSync(ruta, peticiones.map((p) => JSON.stringify(p)).join('\n') + '\n');
 
-  const entrada = peticiones.reduce((a, p) => a + Math.ceil(p.params.messages[0].content[0].text.length / 4), 0);
-  const salidaEst = razas.length * 600;
+  // 🔴 Los dos divisores salen de MEDIR la primera tanda, no de la regla de
+  // pulgar: 100 fichas gastaron 95.047 de entrada y 85.761 de salida, o sea
+  // **950 y 858 por ficha**. La estimación vieja usaba `chars/4` (la regla del
+  // inglés) y 600 de salida, y quedó **49 % por debajo del costo real**.
+  // El español gasta ~3 caracteres por token, no 4.
+  const entrada = peticiones.reduce((a, p) => a + Math.ceil(p.params.messages[0].content[0].text.length / 3), 0);
+  const salidaEst = razas.length * 858;
   console.log(`\n${razas.length} razas → ${ruta}`);
   console.log(`  entrada ≈ ${entrada} tokens · salida estimada ≈ ${salidaEst} tokens`);
   console.log(`  costo estimado con Batch (mitad): ~$${((entrada / 1e6) * 2 * 0.5 + (salidaEst / 1e6) * 10 * 0.5).toFixed(3)}`);
-  console.log('  ⚠️ la salida es ESTIMADA (600 tok/ficha). El costo real sale del `usage` del batch.');
-  console.log('\n  para mandarlo:  node scripts/ia/contenido-razas.mjs --enviar\n');
+  console.log('  ⚠️ la salida es ESTIMADA (858 tok/ficha, medido en la 1ª tanda). El real sale del `usage`.');
+  console.log(`\n  para mandarlo:  node scripts/ia/contenido-razas.mjs --enviar${ESPECIES ? ' --especies' : S113 ? ' --s113' : ''}\n`);
   process.exit(0);
 }
 
+/** La llave de medición, del llavero, al momento. Nunca a un archivo ni a un log. */
+function llaveAnthropic() {
+  try {
+    const k = execFileSync('security',
+      ['find-generic-password', '-a', 'medicion', '-s', 'anthropic-medicion', '-w'],
+      { encoding: 'utf8' }).trim();
+    if (k.startsWith('sk-ant-')) return k;
+  } catch { /* cae al env */ }
+  const e = process.env.ANTHROPIC_API_KEY;
+  if (e && e.startsWith('sk-ant-')) return e;
+  return null;
+}
+
 if (tiene('--enviar')) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = llaveAnthropic();
   if (!key) {
-    console.error('\nPARA: falta ANTHROPIC_API_KEY. Este modo GASTA PLATA y no corre a ciegas.\n');
+    console.error('\nPARA: no encontre la llave (llavero `medicion` ni ANTHROPIC_API_KEY).');
+    console.error('  Este modo GASTA PLATA y no corre a ciegas.\n');
     process.exit(2);
   }
-  const ruta = join(DIR, 'batch-razas.jsonl');
+  const ruta = join(DIR, `batch-razas${SUF}.jsonl`);
   if (!existsSync(ruta)) { console.error(`\nPARA: no existe ${ruta}. Corré --construir primero.\n`); process.exit(2); }
   const requests = readFileSync(ruta, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
   const r = await fetch('https://api.anthropic.com/v1/messages/batches', {
@@ -208,15 +314,15 @@ if (tiene('--enviar')) {
   const j = await r.json();
   if (!r.ok) { console.error(`\nPARA: el batch rebotó ${r.status}: ${JSON.stringify(j).slice(0, 400)}\n`); process.exit(1); }
   console.log(`\nbatch creado: ${j.id} · ${requests.length} peticiones`);
-  console.log(`  seguí con:  node scripts/ia/contenido-razas.mjs --recoger ${j.id}\n`);
+  console.log(`  seguí con:  node scripts/ia/contenido-razas.mjs --recoger ${j.id}${ESPECIES ? ' --especies' : S113 ? ' --s113' : ''}\n`);
   process.exit(0);
 }
 
 const iRec = args.indexOf('--recoger');
 if (iRec !== -1) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = llaveAnthropic();
   const id = args[iRec + 1];
-  if (!key || !id) { console.error('\nUso: ANTHROPIC_API_KEY=... --recoger <batch_id>\n'); process.exit(2); }
+  if (!key || !id) { console.error('\nUso: --recoger <batch_id> (la llave sale del llavero)\n'); process.exit(2); }
   const cab = { 'x-api-key': key, 'anthropic-version': '2023-06-01' };
   const est = await (await fetch(`https://api.anthropic.com/v1/messages/batches/${id}`, { headers: cab })).json();
   if (est.processing_status !== 'ended') {
@@ -238,10 +344,65 @@ if (iRec !== -1) {
     if (mal) { rechazadas.push({ slug, motivo: mal }); continue; }
     // Cada texto declara de dónde salió. Sin esto, dentro de seis meses nadie
     // puede decir con qué modelo se escribió ni cuándo.
-    fichas.push({ especie, raza_codigo: slug, ...ficha, modelo: est.model ?? MODELO, generado_el });
+    // `_especie` es el relleno del `custom_id` (no puede llevar vacío). Acá se
+    // vuelve `null`, que es lo que la ficha significa: **no describe una fila
+    // del catálogo, describe la especie**. Dejarlo pasar como texto le daría a
+    // quien la carga una cadena con forma de slug que no existe en `cat_razas`.
+    fichas.push({ especie, raza_codigo: slug === '_especie' ? null : slug, ...ficha, modelo: est.model ?? MODELO, generado_el });
   }
+  // ── ia_uso: lo que este batch COSTÓ, en el mismo ledger que todo lo demás ──
+  // 🔴 Este script NO pasa por `llamarModelo` —habla directo con la API de
+  // Batches, que la puerta no cubre— así que si no escribe acá, **el gasto no
+  // existe para la casa**. Una carga de 100 llamadas que no queda en el ledger
+  // es justo el agujero que `ia_uso` vino a tapar.
+  //
+  // ⚠️ El costo va a la MITAD: la tabla de precios de E es de precio estándar y
+  // el Batch cuesta la mitad. Se declara acá porque un costo de batch cargado a
+  // precio de lista infla el ledger al doble.
+  const { claveServicio, URL_BASE } = await import('../ia-conjuntos/lib-conjuntos.mjs');
+  const clave = claveServicio();
+  // Los precios salen de la tabla de E, no de una copia mia. Si el modelo no
+  // esta en su tabla, el costo va NULL -- no se estima con un numero de memoria.
+  const mP = readFileSync('supabase/functions/_shared/ia/precios.ts', 'utf8')
+    .match(new RegExp(`'${MODELO}':\\s*\\{ entrada: ([0-9.]+), salida: ([0-9.]+)`));
+  if (!mP) console.error(`  ADVERTENCIA: ${MODELO} no esta en la tabla de precios; el costo va NULL.`);
+  const pEntrada = mP ? Number(mP[1]) : null, pSalida = mP ? Number(mP[2]) : null;
+
+  const filasUso = [];
+  for (const linea of crudo.trim().split('\n')) {
+    const res = JSON.parse(linea);
+    const ok = res.result?.type === 'succeeded';
+    const u = ok ? (res.result.message.usage ?? {}) : {};
+    const entrada = u.input_tokens ?? null, salidaTok = u.output_tokens ?? null;
+    filasUso.push({
+      pieza: 'contenido_raza',
+      modelo: MODELO,
+      // No es una edge: es una carga por Batch. Se dice lo que es.
+      edge: 'batch:contenido-razas',
+      resultado: ok ? 'ok' : 'error_proveedor',
+      tokens_entrada: entrada,
+      tokens_salida: salidaTok,
+      tokens_cache_lectura: u.cache_read_input_tokens ?? null,
+      tokens_cache_escritura: u.cache_creation_input_tokens ?? null,
+      // NULL a propósito: un batch no tiene latencia por petición, y poner la
+      // del lote entero en cada fila mentiría 100 veces.
+      latencia_ms: null,
+      costo_estimado_usd: entrada === null || pEntrada === null ? null
+        : Math.round(((entrada / 1e6) * pEntrada + ((salidaTok ?? 0) / 1e6) * pSalida) * 0.5 * 1e6) / 1e6,
+    });
+  }
+  const resUso = await fetch(`${URL_BASE}/rest/v1/ia_uso`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${clave}`, apikey: clave, 'content-type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify(filasUso),
+  });
+  const costoReal = filasUso.reduce((a, f) => a + (f.costo_estimado_usd ?? 0), 0);
+  console.log(`\nia_uso: ${resUso.ok ? filasUso.length + ' filas escritas' : 'NO se pudo escribir (' + resUso.status + ')'}`);
+  console.log(`  tokens: ${filasUso.reduce((a, f) => a + (f.tokens_entrada ?? 0), 0)} entrada · ${filasUso.reduce((a, f) => a + (f.tokens_salida ?? 0), 0)} salida`);
+  console.log(`  COSTO REAL (batch, mitad de precio): $${costoReal.toFixed(4)}`);
+
   mkdirSync(DIR, { recursive: true });
-  const salida = join(DIR, 'contenido-razas.json');
+  const salida = join(DIR, `contenido-razas${SUF}.json`);
   writeFileSync(salida, JSON.stringify({ generado_el, modelo: MODELO, fichas, rechazadas }, null, 2));
   const vacias = fichas.filter((f) => !f.conocida).length;
   console.log(`\n${fichas.length} fichas válidas (${vacias} vacías por raza no reconocida) · ${rechazadas.length} rechazadas`);

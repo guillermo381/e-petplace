@@ -34,6 +34,12 @@ const PIXEL = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQD
  * puede: la estructura —cuántas filas, cuáles sin nombre, con qué fechas y
  * códigos— es lo único que el arnés necesita.
  */
+/** El carnet del founder: 8 filas, y el ítem 4 (`Nobivac Lepto`) sin fecha
+ *  porque el campo FECHA del carnet **sigue mostrando el «DD MM AAAA»
+ *  preimpreso**. Salida REAL del modelo, con el veterinario redactado. */
+const REAL_DOC_B = JSON.parse(await Deno.readTextFile(
+  new URL('./fixture-carnet-real-docB.json', import.meta.url)))
+
 const REAL_DOC_A = JSON.parse(await Deno.readTextFile(
   new URL('./fixture-carnet-real-docA.json', import.meta.url)))
 
@@ -147,30 +153,75 @@ console.log('\n== 3 · EL STICKER: su fecha va a vencimiento, no a aplicación =
   console.log('  ⚠️ que el MODELO no los confunda lo mide E con el carnet real, no este arnés.')
 }
 
-console.log('\n== 4 · ROJOS DE ESQUEMA: 422 y CERO datos parciales ==')
+console.log('\n== 4 · 422 SÓLO CUANDO LA RESPUESTA ENTERA ESTÁ ROTA ==')
 for (const [nombre, malo] of [
-  ['sin plan_impreso',        { vacunas: [fila()] }],
-  ['via fuera del CHECK',     { vacunas: [fila({ via: 'endovenosa' })], plan_impreso: [] }],
-  ['confianza inventada',     { vacunas: [fila({ confianza: 'altisima' })], plan_impreso: [] }],
-  ['evidencia inventada',     { vacunas: [fila({ evidencia: 'intuicion' })], plan_impreso: [] }],
-  ['evidencia con el nombre viejo', { vacunas: [fila({ evidencia: 'sticker_con_fecha' })], plan_impreso: [] }],
-  ['cubre con código fuera del catálogo', { vacunas: [fila({ cubre: ['multiple', 'antigripal'] })], plan_impreso: [] }],
-  ['cubre con repetidos',     { vacunas: [fila({ cubre: ['multiple', 'multiple'] })], plan_impreso: [] }],
-  ['cubre sin el código principal', { vacunas: [fila({ vacuna_codigo: 'antirrabica', cubre: ['multiple'] })], plan_impreso: [] }],
-  ['cubre que no es lista',   { vacunas: [fila({ cubre: 'multiple' })], plan_impreso: [] }],
-  ['precisión que NO coincide con la forma', { vacunas: [fila({ fecha_aplicada: '2023-04', fecha_aplicada_precision: 'dia' })], plan_impreso: [] }],
-  ['fecha null con precisión puesta', { vacunas: [fila({ fecha_aplicada: null, fecha_aplicada_precision: 'dia' })], plan_impreso: [] }],
-  ['fecha con precisión en null', { vacunas: [fila({ fecha_aplicada_precision: null })], plan_impreso: [] }],
-  ['forma de fecha inventada', { vacunas: [fila({ fecha_aplicada: '2023-4-9', fecha_aplicada_precision: 'dia' })], plan_impreso: [] }],
-  ['vacuna_codigo fuera del catálogo', { vacunas: [fila({ vacuna_codigo: 'antigripal' })], plan_impreso: [] }],
-  ['código con tilde (el que el catálogo NO tiene)', { vacunas: [fila({ vacuna_codigo: 'antirrábica' })], plan_impreso: [] }],
-  ['fecha con formato libre', { vacunas: [fila({ fecha_aplicada: '19/4/23' })], plan_impreso: [] }],
-  ['cadena vacía en lote',    { vacunas: [fila({ lote: '' })], plan_impreso: [] }],
-  ['fila de plan sin nombre', { vacunas: [], plan_impreso: [{ nombre: '' }] }],
+  ['sin array vacunas',   { plan_impreso: [] }],
+  ['sin array plan_impreso', { vacunas: [fila()] }],
+  ['vacunas no es lista', { vacunas: fila(), plan_impreso: [] }],
 ] as const) {
   proveedorFalso(() => malo)
   const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
   exigir(`${nombre} → 422 sin datos`, status === 422 && json.vacunas === undefined, { status, tieneDatos: json.vacunas !== undefined })
+}
+console.log('  ↑ eso es una respuesta rota: no hay ninguna fila que salvar.')
+console.log('    Todo lo demás es de FILA, y una fila no tumba la tanda.')
+
+console.log('\n== 4bis · VALOR QUE NO SIRVE → NULL + MARCA, jamás 422 ==')
+for (const [nombre, malo, campo, esperado] of [
+  ['via fuera del CHECK',        fila({ via: 'endovenosa' }),                      'via', null],
+  ['confianza inventada',        fila({ confianza: 'altisima' }),                  'confianza', 'baja'],
+  ['evidencia inventada',        fila({ evidencia: 'intuicion' }),                 'evidencia', null],
+  ['evidencia con el nombre viejo', fila({ evidencia: 'sticker_con_fecha' }),      'evidencia', null],
+  ['vacuna_codigo fuera del catálogo', fila({ vacuna_codigo: 'antigripal' }),      'vacuna_codigo', null],
+  ['código con tilde (el que el catálogo NO tiene)', fila({ vacuna_codigo: 'antirrábica' }), 'vacuna_codigo', null],
+  ['fecha con formato libre',    fila({ fecha_aplicada: '19/4/23' }),              'fecha_aplicada', null],
+  ['forma de fecha inventada',   fila({ fecha_aplicada: '2023-4-9', fecha_aplicada_precision: 'dia' }), 'fecha_aplicada', null],
+  ['cadena vacía en lote',       fila({ lote: '' }),                               'lote', null],
+] as const) {
+  proveedorFalso(() => ({ vacunas: [malo, fila({ nombre: 'Rabimune' })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir(`${nombre} → 200, las DOS filas`, status === 200 && (json.vacunas as unknown[])?.length === 2, { status, n: (json.vacunas as unknown[])?.length })
+  exigir(`  ...\`${campo}\` anulado, el valor malo NO pasa`, f?.[campo] === esperado, f?.[campo])
+  exigir('  ...y la fila queda MARCADA', f?.dudosa === 'incompleta', f?.dudosa)
+}
+{
+  // control negativo: con el valor BUENO, ni se anula ni se marca
+  proveedorFalso(() => ({ vacunas: [fila({ via: 'subcutanea' })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('CONTROL: via válida pasa entera y sin marca', f?.via === 'subcutanea' && f?.dudosa === null, { via: f?.via, d: f?.dudosa })
+}
+
+console.log('\n== 4ter · COHERENCIA Y COBERTURA: se corrigen, no se rechazan ==')
+{
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_aplicada: '2023-04', fecha_aplicada_precision: 'dia' })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('precisión que miente → gana la FORMA', status === 200 && f?.fecha_aplicada_precision === 'mes', f?.fecha_aplicada_precision)
+  exigir('  ...y la fila queda marcada', f?.dudosa === 'incompleta', f?.dudosa)
+}
+{
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_aplicada: null, fecha_aplicada_precision: 'dia' })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('fecha null con precisión puesta → precisión null', f?.fecha_aplicada_precision === null, f?.fecha_aplicada_precision)
+}
+{
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_aplicada_precision: null })], plan_impreso: [] }))
+  const { json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('fecha con precisión ausente → se deriva de la forma', f?.fecha_aplicada_precision === 'dia', f?.fecha_aplicada_precision)
+}
+for (const [nombre, cubre, esperado] of [
+  ['cubre con código fuera del catálogo', ['multiple', 'antigripal'], ['multiple']],
+  ['cubre con repetidos',                 ['multiple', 'multiple'],   ['multiple']],
+] as const) {
+  proveedorFalso(() => ({ vacunas: [fila({ cubre })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir(`${nombre} → se filtra, 200`, status === 200 && JSON.stringify(f?.cubre) === JSON.stringify(esperado), f?.cubre)
+  exigir('  ...y la fila queda marcada', f?.dudosa === 'incompleta', f?.dudosa)
 }
 
 console.log('\n== 5 · EL CUERPO QUE SALE: 4000 tokens y sin razonamiento ==')
@@ -338,22 +389,98 @@ for (const [caso, literal, prec, esperaDudosa] of [
 }
 
 console.log('\n== 12 · EL ANCLA: sin nombre NI fecha NI lote, la fila no existe ==')
-for (const [nombre, malo] of [
-  ['sin nombre, sin fecha, sin lote', { vacunas: [fila({ nombre: null, fecha_aplicada: null, fecha_aplicada_precision: null, lote: null })], plan_impreso: [] }],
-  ['nombre en cadena vacía (no es lo mismo que null)', { vacunas: [fila({ nombre: '' })], plan_impreso: [] }],
+for (const [nombre, vacia] of [
+  ['sin nombre, sin fecha, sin lote', fila({ nombre: null, fecha_aplicada: null, fecha_aplicada_precision: null, lote: null })],
 ] as const) {
-  proveedorFalso(() => malo)
+  proveedorFalso(() => ({ vacunas: [vacia, fila({ nombre: 'Rabimune' })], plan_impreso: [] }))
   const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
-  exigir(`${nombre} → 422`, status === 422 && json.vacunas === undefined, { status })
+  const d = json.filas_descartadas as { indice: number; motivo: string }[] | undefined
+  exigir(`${nombre} → la fila se cae, la OTRA vive`, status === 200 && (json.vacunas as unknown[])?.length === 1, { status, n: (json.vacunas as unknown[])?.length })
+  exigir('  ...y dice cuál y por qué', d?.[0]?.indice === 1 && d?.[0]?.motivo.startsWith('sin nombre, sin fecha y sin lote'), d)
 }
 {
   proveedorFalso(() => ({ vacunas: [fila({ nombre: null, fecha_aplicada: null, fecha_aplicada_precision: null, lote: 'A468A01' })], plan_impreso: [] }))
   const a = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
   exigir('sin nombre y sin fecha PERO con lote → entra', a.status === 200, a.status)
 }
+{
+  // la fila del PLAN sin nombre tampoco tumba la tanda: se cae ella sola
+  proveedorFalso(() => ({ vacunas: [fila()], plan_impreso: [{ nombre: '' }, { nombre: 'Antirrábica' }] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const d = json.filas_descartadas as { lista: string; indice: number }[] | undefined
+  exigir('fila de plan sin nombre → se cae ella, 200', status === 200 && (json.plan_impreso as unknown[])?.length === 1, { status, n: (json.plan_impreso as unknown[])?.length })
+  exigir('  ...y se declara de qué lista se cayó', d?.[0]?.lista === 'plan_impreso' && d?.[0]?.indice === 1, d)
+  exigir('  ...y la vacuna sigue entera', (json.vacunas as unknown[])?.length === 1)
+}
+{
+  // `nombre: ''` con fecha viva NO es una fila vacía: es una fila SIN NOMBRE,
+  // que la firma (b) del founder declaró legal. Vive, y sale marcada.
+  proveedorFalso(() => ({ vacunas: [fila({ nombre: '' })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('nombre en cadena vacía PERO con fecha → vive', status === 200 && f?.nombre === null, { status, n: f?.nombre })
+  exigir('  ...marcada, para que la persona lo complete', f?.dudosa === 'incompleta', f?.dudosa)
+}
 console.log('  ↑ el ancla es un rastro MATERIAL del carnet (fecha o lote), no el campo')
 console.log('    `evidencia`: ése es obligatorio y siempre viene lleno, así que exigirlo')
 console.log('    sería una regla vacua. Interpretación declarada de la firma.')
+
+console.log('\n== 13 · EL CARNET DEL FOUNDER: 8 filas, el ítem 4 sin fecha MARCADO ==')
+{
+  proveedorFalso(() => REAL_DOC_B)
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const filas = json.vacunas as Record<string, unknown>[] | undefined
+  exigir('200', status === 200, { status, codigo: json.codigo })
+  exigir('vuelven las 8 filas', filas?.length === 8, filas?.length)
+  exigir('cero descartadas', (json.filas_descartadas as unknown[])?.length === 0, json.filas_descartadas)
+  exigir('el ítem 4 viene MARCADO', filas?.[3]?.dudosa === 'incompleta', filas?.[3]?.dudosa)
+  exigir('  ...y es el que no tiene fecha', filas?.[3]?.fecha_aplicada === null)
+  exigir('  ...y conserva su nombre', filas?.[3]?.nombre === 'Nobivac Lepto', filas?.[3]?.nombre)
+  exigir('las que sí tienen fecha NO se marcan', filas?.[0]?.dudosa === null && filas?.[6]?.dudosa === null)
+}
+
+console.log('\n== 14 · LO QUE FALTA NO TUMBA LA TANDA ==')
+{
+  // una fila a la que le faltan claves enteras, junto a dos buenas
+  const incompleta = { nombre: 'GiardiaVax', fecha_aplicada: '2021-11-13', evidencia: 'sticker' }
+  proveedorFalso(() => ({ vacunas: [fila(), incompleta, fila({ nombre: 'Rabimune' })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const filas = json.vacunas as Record<string, unknown>[] | undefined
+  exigir('200 con las TRES filas', status === 200 && filas?.length === 3, { status, n: filas?.length })
+  exigir('la incompleta viene marcada', filas?.[1]?.dudosa === 'incompleta', filas?.[1]?.dudosa)
+  exigir('  ...con sus campos en null, no ausentes', filas?.[1]?.lote === null && filas?.[1]?.cubre !== undefined)
+  exigir('  ...y conserva lo que SÍ traía', filas?.[1]?.nombre === 'GiardiaVax' && filas?.[1]?.fecha_aplicada === '2021-11-13')
+  exigir('las dos buenas pasan intactas', filas?.[0]?.dudosa === null && filas?.[2]?.dudosa === null)
+}
+{
+  // cadena vacía y undefined se leen igual que null
+  proveedorFalso(() => ({ vacunas: [fila({ lote: '', laboratorio: undefined })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('«» y undefined se leen como null', status === 200 && f?.lote === null && f?.laboratorio === null, { status, l: f?.lote })
+}
+
+console.log('\n== 15 · SÓLO EL TIPO EQUIVOCADO DESCARTA, Y DESCARTA ESA FILA ==')
+for (const [nombre, mala, motivo] of [
+  ['nombre es un número', { ...fila(), nombre: 42 }, '`nombre` no es texto'],
+  ['cubre es un texto', { ...fila(), cubre: 'multiple' }, '`cubre` no es una lista'],
+  ['la fila es un número', 7, 'no es un objeto'],
+] as const) {
+  proveedorFalso(() => ({ vacunas: [fila(), mala, fila({ nombre: 'Rabimune' })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const d = json.filas_descartadas as { indice: number; motivo: string }[] | undefined
+  exigir(`${nombre} → 200 con las OTRAS dos`, status === 200 && (json.vacunas as unknown[])?.length === 2, { status, n: (json.vacunas as unknown[])?.length })
+  exigir(`  ...y dice cuál: fila 2, «${motivo}»`, d?.[0]?.indice === 2 && d?.[0]?.motivo === motivo, d)
+}
+{
+  // formato de fecha ilegible: NO descarta, anula y marca
+  proveedorFalso(() => ({ vacunas: [fila({ fecha_aplicada: '19/4/23' })], plan_impreso: [] }))
+  const { status, json } = await llamar({ imageBase64: PIXEL, mediaType: 'image/png' })
+  const f = (json.vacunas as Record<string, unknown>[])?.[0]
+  exigir('formato ilegible → null + marca, NO descarte', status === 200 && f?.fecha_aplicada === null && f?.dudosa === 'incompleta', { status, f: f?.fecha_aplicada, d: f?.dudosa })
+}
+console.log('  ↑ tipo equivocado = respuesta rota, no hay nada que corregir.')
+console.log('    formato ilegible = dato que no se pudo leer: la persona lo completa.')
 
 console.log(`\n${r === 0 ? 'OK' : 'ROJO'} arnés carnet v2 — ${v} verdes · ${r} rojos\n`)
 Deno.exit(r === 0 ? 0 : 1)

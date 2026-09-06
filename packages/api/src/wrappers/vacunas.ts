@@ -24,20 +24,29 @@ function esObj(v: unknown): v is Obj {
  *  de un doc): fuera de esta lista la RPC de escritura rebota `item_invalido`. */
 export type ViaAdministracion = 'subcutanea' | 'intramuscular' | 'intranasal' | 'oral';
 
-/** Proto-catálogo de S48 (enmienda `D-008`). Se CONSERVA: está poblado en 22
- *  de las 32 filas reales — quitarlo sería perder un dato ya confirmado. */
-export type TipoVacuna =
-  | 'antirrábica' | 'múltiple' | 'tos de las perreras' | 'leptospirosis'
-  | 'giardia' | 'triple felina' | 'leucemia felina';
+/**
+ * 🔴 `D-008` PAGADA (S113-D-2.2): el vocabulario de vacunas ya **no vive en el
+ * código**. Sale de `cat_vacunas` —hoy 7 filas: `antirrabica` · `giardia` ·
+ * `leptospirosis` · `leucemia_felina` · `multiple` · `tos_perreras` ·
+ * `triple_felina`— y **por eso los dos campos de abajo son `string`, no una
+ * unión cerrada.**
+ *
+ * *Codificar el vocabulario acá reintroduciría, un piso más afuera, la misma
+ * fragilidad que se acaba de sacar de la edge: el día que A agregue una vacuna
+ * al catálogo, una unión cerrada en el cliente rechazaría una fila válida.*
+ * El vocabulario se cierra donde vive el dato, no donde se dibuja.
+ */
+export type TipoVacuna = string;
 
 /** Cuánto se fía el modelo de ESA fila. **`baja` no es un descarte: es una
  *  fila que la familia tiene que mirar con atención.** */
 export type ConfianzaExtraccion = 'alta' | 'media' | 'baja';
 
-/** Qué vio el modelo que prueba que la vacuna se APLICÓ. `impreso` es el
- *  registro que la clínica imprimió ya aplicado — un renglón impreso EN
- *  BLANCO no es esto: eso es `plan_impreso`. */
-export type EvidenciaAplicacion = 'sticker_con_fecha' | 'sello' | 'manuscrito' | 'impreso';
+/** QUÉ MARCA FÍSICA prueba que la vacuna se aplicó — y nada más. *Dónde estaba
+ *  la fecha es otra pregunta y tiene su propio campo.* `impreso` es el registro
+ *  que la clínica imprimió ya aplicado; un renglón impreso EN BLANCO no es
+ *  esto: eso es `plan_impreso`. */
+export type EvidenciaAplicacion = 'sticker' | 'sello' | 'manuscrito' | 'impreso';
 
 /** Una vacuna que el carnet dice que SE APLICÓ. Ilegible = null, jamás ''.
  *
@@ -47,16 +56,29 @@ export type EvidenciaAplicacion = 'sticker_con_fecha' | 'sello' | 'manuscrito' |
  *  en la confirmación; hasta que A ensanche la RPC, se pierden al guardar.
  *  *Se dice acá para que nadie las dé por guardadas.* */
 export interface VacunaExtraida {
-  /** 🔴 **NULL es válido** (firma del founder, 5-sep-2026): un renglón real que
-   *  el modelo no supo nombrar sigue siendo una vacuna que la persona tiene
-   *  delante. **La pantalla la dibuja pidiendo que se complete** — es la ley de
-   *  la casa: *lo que falta lo completa la familia, y se dice dónde no pudimos.*
-   *  ⚠️ Y el tipo lo dice **a propósito**: si fuera `string`, el consumidor no
-   *  tendría cómo saber que puede faltar, y lo pintaría vacío sin pedirlo. */
+  /** 🔴 NULLABLE por firma del founder (S113-D-2.4): hay renglones donde HAY
+   *  una vacuna y su nombre no se lee. La fila viaja igual, con fecha y lote,
+   *  y **la pantalla obliga a completar el nombre antes de guardar** — la
+   *  columna sigue `NOT NULL` en la base. *Una fila corregible vale más que
+   *  una que desaparece en silencio.* */
   nombre: string | null;
-  /** YYYY-MM-DD o null. Sin día, mes Y año ⇒ null (L-139). */
+  /** `YYYY-MM-DD` · `YYYY-MM` · `--MM-DD` · null. **Lo que el carnet trae.** */
   fecha_aplicada: string | null;
-  /** YYYY-MM-DD o null. Sólo si está ESCRITA; jamás calculada. */
+  /** Cuál de las tres formas es `fecha_aplicada`. `null` ⟺ la fecha es null. */
+  fecha_aplicada_precision: PrecisionFecha | null;
+  /** 🔴 La transcripción EXACTA de lo que el carnet trae («FEB 2023»,
+   *  «26 JUN»). **La pantalla la muestra al lado del campo** — es lo que le
+   *  permite a la persona ver de dónde salió la fecha sin ir a buscar el
+   *  papel. Y es lo que la edge usa para comprobar la precisión sin creerle al
+   *  modelo. */
+  fecha_literal: string | null;
+  fecha_proxima_precision: PrecisionFecha | null;
+  fecha_proxima_literal: string | null;
+  /** DERIVADO por la edge, no por el modelo: `'fecha'` cuando el literal no
+   *  sostiene la precisión declarada — o sea, cuando el modelo completó algo.
+   *  La fila viene además con `confianza: 'baja'`. */
+  dudosa: 'fecha' | 'incompleta' | null;
+  /** Sólo si está ESCRITA; jamás calculada. Mismas tres formas. */
   fecha_proxima: string | null;
   lote: string | null;
   laboratorio: string | null;
@@ -66,14 +88,20 @@ export interface VacunaExtraida {
   /** La fecha del STICKER: vence el FRASCO, no la aplicación. `05-2025` sin
    *  día ⇒ null — el día no se inventa. */
   vencimiento_biologico: string | null;
+  /** Código de `cat_vacunas`, o `null` si el modelo no pudo mapear el nombre
+   *  comercial con certeza. **Un código «probable» no existe**: null se corrige
+   *  mirando el carnet, un código equivocado entra al plan vacunal como hecho. */
+  vacuna_codigo: string | null;
+  /** TODOS los códigos contra los que protege esta aplicación — una combinada
+   *  cubre varias. **Vacío es «no estoy seguro»**, y es una respuesta válida:
+   *  una cobertura inventada le dice al plan vacunal que la mascota está
+   *  protegida contra algo que quizá no recibió. */
+  cubre: string[];
+  /** El NOMBRE del código, **derivado por la edge** desde `cat_vacunas` — el
+   *  modelo no lo escribe. Es el campo que la RPC de escritura ya guarda. */
   tipo_vacuna: TipoVacuna | null;
   confianza: ConfianzaExtraccion;
-  /** ⚠️ **NULLABLE, y es una desviación DECLARADA del contrato de D.**
-   *  La v1 —la que las familias tienen hoy— no devuelve `evidencia`, y el
-   *  catálogo de D no tiene un valor para «no sé». *Mapearla a `'impreso'`
-   *  sería inventar la prueba de que algo se aplicó, que es exactamente el
-   *  defecto que este lote entero vino a curar (L-139).* NULL y se dice. */
-  evidencia: EvidenciaAplicacion | null;
+  evidencia: EvidenciaAplicacion;
 }
 
 /** Un renglón del PLAN que el carnet trae impreso de fábrica, sin marca de
@@ -88,6 +116,11 @@ export interface FilaPlanImpreso {
 export interface LecturaDeCarnet {
   vacunas: VacunaExtraida[];
   plan_impreso: FilaPlanImpreso[];
+  /** 🔴 Filas que la edge no pudo usar, con su índice y su motivo. **Lo que
+   *  falta se marca; sólo lo MALFORMADO se descarta — y descarta esa fila,
+   *  nunca el carnet.** *Catorce vacunas reales no se pierden porque una fila
+   *  vino rota.* */
+  filas_descartadas: { lista: 'vacunas' | 'plan_impreso'; indice: number; motivo: string }[];
 }
 
 export interface InputExtraerVacunas {
@@ -117,21 +150,36 @@ const MENSAJES_EXTRACCION: Record<
   error_desconocido:      'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
-const RE_FECHA = /^\d{4}-\d{2}-\d{2}$/;
+/**
+ * 🔴 Formas de fecha que la extracción puede devolver — **el carnet trae lo que
+ * trae y el día no se inventa** (firma del founder, S113-D-2.5):
+ *   `YYYY-MM-DD` → 'dia'  ·  `YYYY-MM` → 'mes'  ·  `--MM-DD` → 'sin_anio'
+ *
+ * ⚠️ **No es el vocabulario de `mascotas`** (`exacta|aproximada|estimada`): ése
+ * no puede expresar `sin_anio`, y un carnet perfectamente trae «26 JUN» y nada
+ * más. Mapeo: `dia`≈`exacta` · `mes`≈`aproximada` · `sin_anio` **sin equivalente**.
+ */
+export type PrecisionFecha = 'dia' | 'mes' | 'sin_anio';
+
+const FORMAS_FECHA: Record<PrecisionFecha, RegExp> = {
+  dia: /^\d{4}-\d{2}-\d{2}$/,
+  mes: /^\d{4}-\d{2}$/,
+  sin_anio: /^--\d{2}-\d{2}$/,
+};
+
+const precisionDe = (v: string): PrecisionFecha | null =>
+  (Object.keys(FORMAS_FECHA) as PrecisionFecha[]).find((p) => FORMAS_FECHA[p].test(v)) ?? null;
 
 function campoTexto(v: unknown): v is string | null {
   return v === null || (typeof v === 'string' && v.trim().length > 0);
 }
 
-function campoFecha(v: unknown): v is string | null {
-  return v === null || (typeof v === 'string' && RE_FECHA.test(v));
+/** Fecha parcial o completa, o null. Nunca una forma libre. */
+function campoFechaParcial(v: unknown): v is string | null {
+  return v === null || (typeof v === 'string' && precisionDe(v) !== null);
 }
 
 const VIAS: readonly string[] = ['subcutanea', 'intramuscular', 'intranasal', 'oral'];
-const TIPOS: readonly string[] = [
-  'antirrábica', 'múltiple', 'tos de las perreras', 'leptospirosis',
-  'giardia', 'triple felina', 'leucemia felina',
-];
 const CONFIANZAS: readonly string[] = ['alta', 'media', 'baja'];
 const EVIDENCIAS: readonly string[] = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'];
 
@@ -140,73 +188,40 @@ const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
 
 /** Espejo EXACTO del validador de la edge. Que las dos puntas exijan lo mismo
  *  es lo que hace que «cumple el contrato» signifique una sola cosa. */
-/* ══ DE GUARD A NORMALIZADOR — S113-A, forzado por la vuelta a la v1 ═════════
- *
- * 🔴 EL HECHO QUE LO OBLIGA, medido contra la edge DESPLEGADA (9-sep): la v1
- * devuelve `{ vacunas: [...] }` y **nada más** — sin `plan_impreso`, y cada
- * fila con `nombre, fecha_aplicada, fecha_proxima, veterinario_nombre_externo,
- * tipo_vacuna, lote`. **No manda `confianza`, ni `evidencia`, ni `laboratorio`,
- * ni `via`, ni `vencimiento_biologico`.**
- *
- * Con el guard tal cual estaba, **cada fila se rechazaba y todo carnet caía en
- * `sin_vacunas`**: la lectura quedaba muerta en el aparato de las familias.
- *
- * ⚠️ LA DISTINCIÓN QUE HACE HONESTO ESTO — y es la única razón por la que un
- * normalizador no es un relajamiento: se separa **AUSENTE** de **MAL**.
- * · Ausente ⇒ el valor honesto (null, o `'baja'` para la confianza). *La v1
- *   nunca separó plan de aplicación: nada de lo que devuelve merece más que
- *   «baja», y eso no es un relleno, es el dato.*
- * · Mal ⇒ **se sigue rechazando la fila entera**: una `via` fuera del catálogo
- *   o una fecha que no es fecha no se «normalizan» a null, porque eso taparía
- *   un modelo devolviendo basura. *Perdonar lo que falta no es perdonar lo que
- *   está mal.*
- */
-function normalizarVacuna(v: unknown): VacunaExtraida | null {
-  if (!esObj(v)) return null;
-  /* 🔴 `nombre` NULL ES UNA FILA VÁLIDA (firma del founder, 5-sep-2026).
-     ⏪ Antes se descartaba, y eso era la ley de hoy al revés: *«hacemos lo mejor
-     que podamos; lo que falta lo completa la familia»*. Una fila sin nombre pero
-     con fecha o lote **es un renglón real del carnet** que el modelo no supo
-     nombrar — y la pieza de B ya la dibuja pidiendo que se complete. *Tirarla
-     no evitaba un dato malo: perdía una vacuna que la persona tiene delante.*
-     Lo único que se rechaza es lo MALFORMADO (abajo). */
-  if (v.nombre !== undefined && v.nombre !== null && typeof v.nombre !== 'string') return null;
-
-  // MAL ⇒ se rechaza la fila (no se normaliza).
-  if (!campoFecha(v.fecha_aplicada) || !campoFecha(v.fecha_proxima)) return null;
-  if (v.vencimiento_biologico !== undefined && !campoFecha(v.vencimiento_biologico)) return null;
-  if (v.lote !== undefined && !campoTexto(v.lote)) return null;
-  if (v.laboratorio !== undefined && !campoTexto(v.laboratorio)) return null;
-  if (v.via !== undefined && !enListaOnull(v.via, VIAS)) return null;
-  if (!enListaOnull(v.tipo_vacuna, TIPOS)) return null;
-  if (v.confianza !== undefined && !(typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza))) return null;
-  if (v.evidencia !== undefined && !(typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia))) return null;
-
-  /* `veterinario` en el contrato de D; `veterinario_nombre_externo` en la v1.
-     Se leen las dos y gana la del contrato: la v1 es la que se está dejando
-     atrás, no la que manda. */
-  const vet = campoTexto(v.veterinario) && typeof v.veterinario === 'string'
-    ? v.veterinario
-    : (typeof v.veterinario_nombre_externo === 'string' ? v.veterinario_nombre_externo : null);
-
-  return {
-    nombre: typeof v.nombre === 'string' && v.nombre.trim().length > 0 ? v.nombre : null,
-    fecha_aplicada: (v.fecha_aplicada as string | null) ?? null,
-    fecha_proxima: (v.fecha_proxima as string | null) ?? null,
-    lote: (v.lote as string | null) ?? null,
-    laboratorio: (v.laboratorio as string | null) ?? null,
-    via: (v.via as ViaAdministracion | null) ?? null,
-    veterinario: vet,
-    vencimiento_biologico: (v.vencimiento_biologico as string | null) ?? null,
-    tipo_vacuna: (v.tipo_vacuna as TipoVacuna | null) ?? null,
-    /* 🔴 AUSENTE ⇒ 'baja', y es el DATO, no un default cómodo: la v1 no
-       distingue una aplicación de un renglón del plan impreso, así que ninguna
-       de sus filas está probada. Firmar «baja» es decir la verdad. */
-    confianza: (v.confianza as ConfianzaExtraccion | undefined) ?? 'baja',
-    evidencia: (v.evidencia as EvidenciaAplicacion | undefined) ?? null,
-  };
+function esVacunaExtraida(v: unknown): v is VacunaExtraida {
+  if (!esObj(v)) return false;
+  return (
+    campoTexto(v.nombre) &&
+    // Espejo del ancla de la edge: sin nombre, hace falta fecha o lote.
+    !(v.nombre === null && v.fecha_aplicada === null && v.lote === null) &&
+    campoFechaParcial(v.fecha_aplicada) &&
+    campoFechaParcial(v.fecha_proxima) &&
+    campoFechaParcial(v.vencimiento_biologico) &&
+    // Espejo del guard de la edge: la precisión coincide con la forma, y las
+    // dos son null juntas.
+    (v.fecha_aplicada === null
+      ? v.fecha_aplicada_precision === null
+      : v.fecha_aplicada_precision === precisionDe(v.fecha_aplicada as string)) &&
+    (v.fecha_proxima === null
+      ? v.fecha_proxima_precision === null
+      : v.fecha_proxima_precision === precisionDe(v.fecha_proxima as string)) &&
+    campoTexto(v.fecha_literal) &&
+    campoTexto(v.fecha_proxima_literal) &&
+    (v.dudosa === null || v.dudosa === 'fecha' || v.dudosa === 'incompleta') &&
+    campoTexto(v.lote) &&
+    campoTexto(v.laboratorio) &&
+    campoTexto(v.veterinario) &&
+    enListaOnull(v.via, VIAS) &&
+    // `vacuna_codigo` y `tipo_vacuna` NO se validan contra una lista de acá: su
+    // lista blanca es `cat_vacunas` y ya la exigió la edge contra la fuente.
+    // Repetirla en el cliente sería una segunda copia que envejece sola.
+    campoTexto(v.vacuna_codigo) &&
+    Array.isArray(v.cubre) && v.cubre.every((c) => typeof c === 'string' && c.length > 0) &&
+    campoTexto(v.tipo_vacuna) &&
+    typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza) &&
+    typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia)
+  );
 }
-
 
 function esFilaPlan(v: unknown): v is FilaPlanImpreso {
   return esObj(v) && typeof v.nombre === 'string' && v.nombre.trim().length > 0;
@@ -244,51 +259,51 @@ export async function extraerVacunasDeCarnet(
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_EXTRACCION.error_desconocido };
   }
 
-  /* `plan_impreso` AUSENTE ⇒ `[]`. Es la v1, que no lo tiene; exigirlo acá
-     dejaría la lectura muerta en el aparato de las familias (medido). Lo que
-     NO se perdona es que venga y no sea un array: eso es una respuesta rota. */
-  if (!esObj(data) || !Array.isArray(data.vacunas)
-      || (data.plan_impreso !== undefined && !Array.isArray(data.plan_impreso))) {
+  if (!esObj(data) || !Array.isArray(data.vacunas) || !Array.isArray(data.plan_impreso) ||
+      !Array.isArray(data.filas_descartadas)) {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
   }
   const vacunas: VacunaExtraida[] = [];
-  let descartadas = 0;
   for (const item of data.vacunas) {
-    /* 🔴 EL DESCARTE ES **POR FILA**, no por lote (firma del founder).
-       ⏪ Antes un `return` cortaba acá y **una fila malformada tiraba las
-       ocho**. Medido el mismo día en la edge v2.3: el carnet del founder daba
-       422 por su ítem 4 y se perdían las otras siete. *Convertir un campo
-       faltante en un carnet ilegible es el peor cambio posible: la persona ve
-       un carnet lleno y la app le dice que no leyó nada.*
-       La fila mala **se descarta y se cuenta**; el resto llega. */
-    const fila = normalizarVacuna(item);
-    if (fila === null) {
-      descartadas += 1;
-      continue;
+    if (!esVacunaExtraida(item)) {
+      return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
     }
-    vacunas.push(fila);
+    vacunas.push({
+      nombre: item.nombre,
+      fecha_aplicada: item.fecha_aplicada,
+      fecha_aplicada_precision: item.fecha_aplicada_precision,
+      fecha_literal: item.fecha_literal,
+      fecha_proxima_precision: item.fecha_proxima_precision,
+      fecha_proxima_literal: item.fecha_proxima_literal,
+      dudosa: item.dudosa,
+      fecha_proxima: item.fecha_proxima,
+      lote: item.lote,
+      laboratorio: item.laboratorio,
+      via: item.via,
+      veterinario: item.veterinario,
+      vencimiento_biologico: item.vencimiento_biologico,
+      vacuna_codigo: item.vacuna_codigo,
+      cubre: item.cubre,
+      tipo_vacuna: item.tipo_vacuna,
+      confianza: item.confianza,
+      evidencia: item.evidencia,
+    });
   }
-  /* ⚠️ El único caso que sigue siendo `datos_inconsistentes`: **vinieron filas y
-     no sobrevivió ninguna**. *Descartar todo en silencio devolvería «no hay
-     vacunas» sobre un carnet que sí traía renglones — la ausencia disfrazada de
-     hecho que la ley prohíbe.* Un array vacío de origen NO entra acá: ése es un
-     carnet sin aplicaciones, y es un resultado honesto. */
-  if (data.vacunas.length > 0 && vacunas.length === 0) {
-    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
-  }
-
   const plan_impreso: FilaPlanImpreso[] = [];
-  /* La v1 no manda el canasto. `?? []` es el ÚNICO lugar donde la ausencia se
-     vuelve lista vacía, y es correcto: *la v1 no es que tenga un plan impreso
-     vacío — es que no sabe distinguirlo, y por eso todas sus filas llegan con
-     confianza «baja».* El día que la v2.1 lo mande, esta línea no cambia. */
-  for (const fila of (data.plan_impreso as unknown[] | undefined) ?? []) {
+  for (const fila of data.plan_impreso) {
     if (!esFilaPlan(fila)) {
       return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_EXTRACCION.datos_inconsistentes };
     }
     plan_impreso.push({ nombre: fila.nombre });
   }
-  return { ok: true, data: { vacunas, plan_impreso } };
+  return {
+    ok: true,
+    data: {
+      vacunas,
+      plan_impreso,
+      filas_descartadas: data.filas_descartadas as LecturaDeCarnet['filas_descartadas'],
+    },
+  };
 }
 
 // ── Escritura (RPC registrar_vacunas_de_carnet) ──────────────────────────────

@@ -92,7 +92,9 @@ export function SelectorDeRaza({
       ...sugerencias.map((r) => ({
         codigo: r.slug,
         etiqueta: r.nombre,
-        avatar: { nombre: r.nombre, fotoUrl: urlDeRutaGaleria(r.ruta_imagen) },
+        /* S113 · una raza puede existir antes que su dibujo. El genérico de la
+           especie ya está calculado un renglón más arriba: la escalera cae sola. */
+        avatar: { nombre: r.nombre, fotoUrl: urlDeRutaGaleria(r.ruta_imagen ?? undefined) ?? generico },
       })),
       // ⚠️ AL PIE, por enmienda del founder: arriba de una lista que se
       // angosta al teclear empujaban hacia abajo justo lo que se busca.

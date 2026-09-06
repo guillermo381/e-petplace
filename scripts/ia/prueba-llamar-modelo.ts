@@ -15,8 +15,10 @@
 // Un arnés que sólo prueba el camino feliz no está midiendo.
 
 import { llamarModelo } from '../_shared/ia/mod.ts'
+import type { Pieza } from '../_shared/ia/modelos.ts'
 import {
-  CACHEAR_SISTEMA, EDGES, ESFUERZO, MAX_TOKENS, MODELOS, PENSAR, PIEZAS, TIMEOUT_MS,
+  CACHEAR_SISTEMA, EDGES, ESFUERZO, MAX_TOKENS, MODELOS, MODELOS_ADAPTIVOS,
+  PENSAR, PIEZAS, TECHO_SIN_RAZONAR, TIMEOUT_MS,
 } from '../_shared/ia/modelos.ts'
 
 Deno.env.set('ANTHROPIC_API_KEY', 'sk-ant-FALSA-DE-PRUEBA')
@@ -108,6 +110,50 @@ console.log('   toda llamada de esa pieza se habria abortado al instante.)')
   // Y que ningun timeout sea undefined/0: el modo de falla exacto de arriba.
   exigir('ningun TIMEOUT_MS es 0 ni undefined',
     PIEZAS.every((p) => typeof TIMEOUT_MS[p] === 'number' && TIMEOUT_MS[p] > 0))
+}
+
+console.log('\n== 0bis · TECHO BAJO ⇒ RAZONAMIENTO APAGADO, EXPLÍCITO ==')
+console.log('  (E midió que omitir `thinking` deja a Sonnet 5 razonar solo, quemarse el')
+console.log('   techo y devolver CERO CARACTERES en carnets reales. D lo aisló: mismo')
+console.log('   prompt, con razonamiento gastó 6.716 y 10.895 tokens contra 2.015 y')
+console.log('   1.248 sin razonar, y devolvió LAS MISMAS FILAS.)')
+{
+  // ── BRAZO 1 · la tabla: techo bajo ⇒ PENSAR false ────────────────────────
+  // Se recorre la TABLA, no una lista aparte: la regla es *sobre* `MAX_TOKENS`,
+  // así que su propia tabla es la fuente correcta. (El censo de que toda pieza
+  // esté en TODAS las tablas vive en el lote 1.2, con `PIEZAS` en runtime.)
+  const bajas = (Object.keys(MAX_TOKENS) as Pieza[]).filter((p) => MAX_TOKENS[p] < TECHO_SIN_RAZONAR)
+  exigir(`hay piezas con techo < ${TECHO_SIN_RAZONAR} que vigilar (si no, este gate no mide nada)`,
+    bajas.length > 0, bajas)
+  for (const p of bajas) {
+    exigir(`${p} (techo ${MAX_TOKENS[p]}) NO razona`, PENSAR[p] === false, PENSAR[p])
+  }
+
+  // ── BRAZO 2 · el CUERPO: que el campo salga de verdad a la request ───────
+  // Es el que importa. La tabla puede decir `false` y el cuerpo no llevar el
+  // campo: ahí el proveedor razona igual y nadie se entera hasta el truncado.
+  for (const p of bajas) {
+    const { cap, quitar } = interceptar(() => respuestaOk('{"a":1}'))
+    await llamarModelo({
+      pieza: p,
+      sistema: p === 'presencia' ? 'x' : undefined,
+      mensajes: [{ rol: 'user', texto: 'x' }],
+      salida: 'json',
+    })
+    quitar()
+    const cuerpo = cap.cuerpoAnthropic as Record<string, unknown>
+    const modelo = String(cuerpo.model)
+    if (MODELOS_ADAPTIVOS.has(modelo)) {
+      exigir(`${p} manda thinking disabled ESCRITO en la request`,
+        JSON.stringify(cuerpo.thinking) === '{"type":"disabled"}', cuerpo.thinking)
+    } else {
+      // En un modelo que no razona solo, omitirlo YA es apagarlo; mandarle una
+      // forma que quizá no acepta sería estrenar un 400 para no cambiar nada.
+      exigir(`${p} corre ${modelo}, que no razona solo: sin campo, y está bien`,
+        cuerpo.thinking === undefined, cuerpo.thinking)
+    }
+    exigir(`${p} manda el techo de su tabla (${MAX_TOKENS[p]})`, cuerpo.max_tokens === MAX_TOKENS[p], cuerpo.max_tokens)
+  }
 }
 
 const pedidoBase = { pieza: 'documento' as const, mensajes: [{ rol: 'user' as const, texto: 'hola' }], salida: 'json' as const }
