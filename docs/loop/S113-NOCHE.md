@@ -107,3 +107,47 @@ respuesta · reemitir revoca la anterior · tokens únicos.
   único en Vercel es la página de pago, **sin rewrites**. La URL de arriba
   funciona hoy; una `epetplace.com/p/<token>` exige un dominio que no medí que
   exista.
+
+---
+
+## 5 · El recorrido en emulador que quedaba debiendo — HECHO
+
+Cuenta del founder del llavero (`epetplace-cuenta-founder`), Metro propio en
+8123 con **`Android Bundled 9913ms … (2968 modules)`** en el log antes de
+capturar. Capturas en `docs/loop/capturas-s113-a/`.
+
+⚠️ **Y empezó confirmando el binario, que es lo que la ley pide (`L-138`).**
+Casi camino sobre la app equivocada: en el emulador hay **tres** paquetes y
+`com.epetplace` (versionName **1.0**, ajena) no es ninguna de las mías. Además
+`com.epetplace.cliente` resultó ser la **dev build**, no la preview — la
+reemplazó al instalarse. *Y había un Metro ajeno vivo en `192.168.1.92:8082`,
+de otra pista: usarlo habría servido otro árbol con la pantalla viéndose
+perfecta.*
+
+| paso | resultado |
+|---|---|
+| Hogar con la cuenta real | ✅ 4 mascotas, «Ponte al día · 16 cosas», el orbe de Nexo |
+| **FichaRaza (A8)** en el perfil de Zor · Pug | ✅ «Ver más sobre la raza ›» despliega el texto que el founder firmó |
+| **Memorial** (Sombra) | ✅ sin gradiente, sin pendientes, sin CTAs — **y sin orbe**: el Coach apagado |
+| **Carnet** de Thor | ✅ 8 vacunas, «Su plan» con vencida y «No figura en su carnet» |
+
+### 🔴 Dos defectos que sólo aparecen caminando — para C
+
+1. **«Zor está en su etapa adulto»** (perfil). Es el código crudo del enum
+   metido en una frase: sin concordancia («adulta») y **contra la orden del
+   founder de rotular con el momento vital de la especie**
+   (`cat_especies_perfil`), no con el valor interno.
+2. **«Según su plan, tocaría el 2025-07-06»** (carnet). Fecha **ISO cruda** en
+   una frase de familia; toda la casa escribe «06 jul 2025».
+
+*Los dos son la misma clase —un valor de máquina que se filtró a una oración—
+y ninguno lo ve un typecheck: las dos frases compilan perfecto.*
+
+### Y una medición que corrige un número heredado
+
+El parte decía «dos mascotas de prueba quedan en memorial». **Son CINCO**
+(`PruebaC12896`, `PruebaC24772`, `PruebaC37493`, `PruebaC76663`,
+`PruebaC82896`), las cinco Beagle y las cinco **marcadas `real`** — la marca de
+fixture no se les aplicó, así que **hoy cuentan como mascotas reales en
+cualquier censo**. No se borran (firma del founder: sólo si él lo pide), pero
+la marca sí hace falta. Anotado en `S113-NOCHE-PENDIENTES.md`.
