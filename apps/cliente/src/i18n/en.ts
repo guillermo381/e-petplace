@@ -3016,7 +3016,7 @@ export const clienteEn = {
     entradaDetalle: 'Their tag and the page whoever finds them will see',
     vozQr: 'Code for {{nombre}}',
     compartir: 'Share the link',
-    descargarQr: 'Download the code',
+    compartirQr: 'Share the QR',
     sePerdio: 'They went missing',
     yaAparecio: 'They came back',
     confirmarPerdida: 'Tap again to mark them missing',

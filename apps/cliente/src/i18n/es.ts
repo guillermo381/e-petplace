@@ -4210,7 +4210,7 @@ export const clienteEs = {
     entradaDetalle: 'Su chapita y la página de quien la encuentre',
     vozQr: 'Código para {{nombre}}',
     compartir: 'Compartir el enlace',
-    descargarQr: 'Descargar el código',
+    compartirQr: 'Compartir el QR',
     sePerdio: 'Se perdió',
     yaAparecio: 'Ya apareció',
     confirmarPerdida: 'Toca otra vez para marcarlo perdido',
