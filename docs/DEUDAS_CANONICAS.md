@@ -28694,3 +28694,65 @@ config`, no contra el mío— cuando mi explicación no le cerraba, y me lo
 corrigió con el comando y su salida, no con una afirmación. Es la misma
 disciplina que `L-489` pide: una corrección que llega con su propia
 evidencia se acepta; una que llega sin ella se mide antes.
+
+---
+
+### `D-1034` 🟡 · Los guards `{x && (…)}` de `packages/ui` que pueden dejar una cadena vacía como hijo de `View`
+
+**Dueño: B · gate: E · nace S113-A (5-sep-2026), del censo que pidió la mesa.**
+
+#### El defecto, en una línea
+En React Native, `'' && <X/>` **no devuelve `false`: devuelve `''`** — y una cadena
+suelta como hijo de `View` revienta con *«Text strings must be rendered within a
+`<Text>` component»*. `0` hace exactamente lo mismo. *El operador no está mal
+usado: está usado con un valor que no es booleano, y JavaScript devuelve el
+operando en vez de un `false`.*
+
+#### El número, medido por AST y no por `grep`
+La pregunta —*¿qué tipo tiene el lado izquierdo?*— **no está en la línea**, así
+que un `grep` no puede contestarla. Censado sobre los `.tsx` de
+`packages/ui/src`:
+
+| corte | cuántos | qué son |
+|---|---|---|
+| todos los `{x && …}` en JSX | **30** | el universo |
+| ya booleanos **por forma** | **23** | llevan `!`, una comparación, `Boolean(…)`, `??` — no pueden ser `''` |
+| **no probablemente seguros** | **7** | `secure` · `marcada` · `cortado` · `lleno` · `editable` + los dos de abajo |
+| 🔴 **genuinamente `string \| null`** | **2** | los dos en `FichaVacuna.tsx` |
+
+⚠️ **El «23» que llegó al encargo reconcilia con esto y no lo contradice**: son
+exactamente los 30 menos los 7. Se deja escrito porque *un número heredado se
+lee igual de firme que uno medido* — éste resultó ser el complemento del que
+importa.
+
+#### Los dos reales, y por qué hoy no explotan
+- `FichaVacuna.tsx:175` — `{(tipoVacuna || veterinario) && …}`, las dos
+  `string | null`
+- `FichaVacuna.tsx:206` — `{fechaLiteral && …}`, `string | null`
+
+Con `null` no pasa nada: `null && X` da `null` y React no dibuja nada. **El
+único valor que rompe es `''`**, y hoy no llega porque **todos los productores
+normalizan**: la RPC usa `nullif(btrim(…), '')` y el wrapper usa `campoTexto`.
+
+🔴 **Y ahí está la deuda: la seguridad de estos dos guards no vive en ellos —
+vive en que cada productor, del otro lado de una frontera, siga normalizando.**
+`fechaLiteral` viene de la edge de D. *Un invariante que se sostiene en la
+disciplina de un módulo ajeno es un invariante que nadie está vigilando.*
+
+#### La cura, y por qué no es «poner `Boolean()`»
+Envolver en `Boolean()` apaga el síntoma y **deja el mismo hueco** para el
+próximo campo de texto que alguien agregue. La forma que la casa ya usa en otros
+lados es que el guard **compare**, no que convierta: `{fechaLiteral !== null && …}`
+o, mejor, que el tipo lo haga inexpresable. La decisión es de B, que es quien
+conoce la pieza.
+
+#### Disparo
+La próxima vez que B toque `FichaVacuna`, **o** antes si E ve la excepción en el
+aparato. **No es 🔴 porque hoy ningún productor emite `''`** — y eso está medido,
+no supuesto.
+
+#### Lo que este censo NO cubre, declarado
+Sólo miró `packages/ui/src`. **`apps/cliente` y `apps/prestador` no se
+censaron** — es territorio de C y de B, y el instrumento
+(`/tmp/censo-guards.mjs`, AST con `typescript`) se corre igual sobre ellos
+cambiando una ruta.

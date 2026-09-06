@@ -8,6 +8,7 @@
 // solo-miembro relevadas S51).
 
 import { getClient } from '../client';
+import { normalizarNombreDeRaza } from './_raza-nombre';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJE_ERROR = 'No pudimos cargar las mascotas. Prueba de nuevo.';
@@ -76,17 +77,19 @@ export async function obtenerMascotasAtendidas(
   const declaradas = [...new Set(mascotas.data.map((m) => m.raza).filter((r): r is string => !!r))];
   const rutaPorRaza = new Map<string, string>();
   if (declaradas.length > 0) {
+    /* S113-A · se casa por `nombre_norm`, no por `nombre`: `mascotas.raza` es
+       texto libre y una mayúscula o una tilde de diferencia dejaba a la mascota
+       sin su cara. La normalización del cliente es el espejo exacto de la
+       columna generada — ver `_raza-nombre.ts`. */
+    const norm = new Map(declaradas.map((d) => [normalizarNombreDeRaza(d), d]));
     const { data: razas } = await getClient()
       .from('cat_razas')
-      .select('especie, nombre, ruta_imagen')
-      .in('nombre', declaradas);
+      .select('especie, nombre_norm, ruta_imagen')
+      .in('nombre_norm', [...norm.keys()]);
     /* Las razas sin dibujo propio (S113) NO entran al mapa: quien consulta
-       recibe `undefined` y **cae solo a la cara genérica de su especie**, que es
-       la escalera que este lector ya tenía escrita. *Meter un `null` en el mapa
-       obligaría a cada consumidor a distinguir «no está» de «está y es nada», y
-       las dos significan lo mismo acá.* */
+       recibe `undefined` y cae solo a la cara genérica de su especie. */
     for (const r of razas ?? []) {
-      if (r.ruta_imagen !== null) rutaPorRaza.set(`${r.especie}|${r.nombre}`, r.ruta_imagen);
+      if (r.ruta_imagen !== null) rutaPorRaza.set(`${r.especie}|${r.nombre_norm}`, r.ruta_imagen);
     }
   }
 
@@ -97,7 +100,7 @@ export async function obtenerMascotasAtendidas(
       nombre: m.nombre,
       especie: m.especie,
       foto_url: m.foto_url,
-      raza_ruta_imagen: rutaPorRaza.get(`${m.especie}|${m.raza ?? ''}`) ?? null,
+      raza_ruta_imagen: rutaPorRaza.get(`${m.especie}|${normalizarNombreDeRaza(m.raza ?? '')}`) ?? null,
       atenciones_total: agg?.total ?? 0,
       ultima_atencion: agg?.ultima ?? null,
     };

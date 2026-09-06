@@ -2999,6 +2999,7 @@ export type Database = {
           created_at: string
           especie: string
           nombre: string
+          nombre_norm: string | null
           ruta_imagen: string | null
           slug: string
           updated_at: string
@@ -3009,6 +3010,7 @@ export type Database = {
           created_at?: string
           especie: string
           nombre: string
+          nombre_norm?: string | null
           ruta_imagen?: string | null
           slug: string
           updated_at?: string
@@ -3019,6 +3021,7 @@ export type Database = {
           created_at?: string
           especie?: string
           nombre?: string
+          nombre_norm?: string | null
           ruta_imagen?: string | null
           slug?: string
           updated_at?: string
