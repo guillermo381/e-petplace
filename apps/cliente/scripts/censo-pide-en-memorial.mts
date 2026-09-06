@@ -182,6 +182,21 @@ di(`   frases que piden algo en el diccionario: ${pide.size}`);
 for (const rel of ARCHIVOS) {
   const url = new URL(`../${rel}`, import.meta.url);
   const src = ts.createSourceFile(rel, readFileSync(url, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  /* 🔴 **UN ARCHIVO ROTO NO SE CENSA: SE DENUNCIA.** Medido en carne el 5-sep:
+     con el JSX mal cerrado, este censo siguió imprimiendo su tabla, sus líneas
+     y su veredicto — el parser de TS tolera errores y devuelve un árbol
+     PARCIAL, así que los guards que no alcanzó a ver salieron como «fuera del
+     guard». *Un instrumento que mide un árbol a medias no da un rojo: da un
+     rojo de otra cosa, y manda a curar lo que no está roto.* Sale con 2, que
+     es «no concluyente» y no «hay defectos». */
+  const rotos = (src as unknown as { parseDiagnostics?: readonly ts.Diagnostic[] }).parseDiagnostics ?? [];
+  if (rotos.length > 0) {
+    const d = rotos[0];
+    const ln = d.start === undefined ? '?' : String(ts.getLineAndCharacterOfPosition(src, d.start).line + 1);
+    di(`🔴 NO CONCLUYENTE · ${rel} no parsea (línea ${ln}): ${ts.flattenDiagnosticMessageText(d.messageText, ' ').slice(0, 90)}`);
+    di('   El censo no corre sobre un árbol parcial. Arreglá la sintaxis y volvé a medir.');
+    process.exit(2);
+  }
   di('');
   di(`── ${rel} ${'─'.repeat(Math.max(0, 56 - rel.length))}`);
   /* 🔴 **EL HOGAR NO SE JUZGA CON `esMemorial`, Y ES A PROPÓSITO.** Es la casa

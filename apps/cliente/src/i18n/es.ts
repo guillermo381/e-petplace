@@ -566,6 +566,22 @@ export const clienteEs = {
     seguridadRestriccion: 'No puede {{servicio}}',
     seguridadLaFamilia: 'Lo registró su familia',
     seguridadUnPrestador: 'Lo registró una clínica',
+    /* C10 · la ficha de la raza. «Sobre los {raza}» y no «Sobre Thor»: habla
+       de la raza, no del animal — lo que sigue abajo sí es de él. */
+    /* C11 · el menú de edición y la puerta de la despedida. */
+    menuTitulo: 'Editar',
+    menuFoto: 'Cambiar la foto',
+    menuRaza: 'Cambiar la raza',
+    menuDespedir: 'Despedirme de {{nombre}}',
+    razaTemperamento: 'Cómo suelen ser',
+    razaTalla: 'Tamaño de adulto',
+    razaVida: 'Cuánto suelen vivir',
+    razaCachorro: 'De cachorro',
+    razaAdulto: 'De adulto',
+    razaSenior: 'En sus años dorados',
+    razaRevision: 'Información general de la raza, revisada por un veterinario.',
+    razaVer: 'Ver más sobre la raza',
+    razaOcultar: 'Ocultar',
     seguridadVer: 'Ver {{n}}',
     seguridadOcultar: 'Ocultar',
     // ── momento vital (Ley 3: la VOZ, jamás M1..M7) ──
@@ -4122,5 +4138,20 @@ export const clienteEs = {
     errorTitulo: 'No pudimos traer el texto',
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Probar de nuevo',
+  },
+  /** C11 · la despedida. **Voz serena y en primera persona de la familia**:
+   *  «me despido», no «dar de baja». Nada de «eliminar», «cerrar» ni
+   *  «finalizar» — la mascota no es un registro. */
+  despedida: {
+    titulo: 'Despedirse',
+    cuando: '¿Cuándo fue?',
+    palabras: 'Unas palabras, si quieres escribirlas',
+    palabrasPlaceholder: 'Lo que quieras dejar dicho',
+    boton: 'Despedirme',
+    confirmar: 'Toca otra vez para despedirte de {{nombre}}',
+    enviando: 'Guardando…',
+    fechaFutura: 'Esa fecha todavía no llegó.',
+    sinMascota: 'No pude saber de quién te estás despidiendo. Vuelve a entrar desde su ficha.',
+    noSePudo: 'No se pudo guardar. Revisa tu conexión y prueba de nuevo.',
   },
 } as const;

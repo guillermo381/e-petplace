@@ -63,6 +63,7 @@ import {
   useTheme,
   type IconoNombre,
   type LineaDeVidaEstadoPie,
+  FichaRaza,
   FranjaSeguridad,
   CeldasHoy,
   FiltrosLineaDeVida,
@@ -92,6 +93,8 @@ import {
   obtenerPresupuestosFamilia,
   obtenerCitasActivasHogar,
   type PesoDeLaSerie,
+  obtenerContenidoDeRaza,
+  type ContenidoDeRaza,
 } from '@epetplace/api';
 import {
   calcularMomentoVital,
@@ -333,6 +336,28 @@ export default function PerfilDeMascota() {
   const [papeles, setPapeles] = useState(PAPELES_DE_MASCOTA);
   /** S91 · P2 — el disparador de la re-lectura de la serie de peso. */
   const [recargaPeso, setRecargaPeso] = useState(0);
+
+
+  /** ⭐ **C10 — el contenido de la raza.** Se pide sólo si la mascota declara
+   *  raza: sin raza no hay nada que preguntar. `null` = la raza no tiene ficha
+   *  (hoy **todas**: `razas_contenido` tiene 0 filas, medido el 5-sep), y ahí
+   *  no se dibuja nada. Un fallo deja `null` y la ficha simplemente no aparece
+   *  — degradar a ausencia es correcto acá: *no saber de una raza no es un
+   *  error que la familia tenga que atender*. */
+  const [menuEdicion, setMenuEdicion] = useState(false);
+  const [contenidoRaza, setContenidoRaza] = useState<ContenidoDeRaza | null>(null);
+  useEffect(() => {
+    if (typeof perfil !== 'object') return;
+    const raza = perfil.mascota.raza;
+    if (raza === null || raza === '') return;
+    let vivo = true;
+    void obtenerContenidoDeRaza(perfil.mascota.especie, raza).then((r) => {
+      if (vivo && r.ok) setContenidoRaza(r.data);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [perfil]);
 
   useEffect(() => {
     let vivo = true;
@@ -947,9 +972,13 @@ export default function PerfilDeMascota() {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('perfil.editar')}
-                    onPress={() =>
-                      router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
-                    }
+                    /* ⭐ **C11 · el lápiz abre el MENÚ DE EDICIÓN**, que
+                       antes no existía: iba derecho a la foto, y la raza se
+                       editaba desde otro lado. Agrupar lo que ya había es lo
+                       que le da casa a la despedida — *un acto grave no cuelga
+                       de un botón suelto en una ficha que se abre todos los
+                       días*. La foto sigue a un toque de distancia. */
+                    onPress={() => setMenuEdicion(true)}
                     style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {/* S86-B · del registry (D-645). Estaba dibujado a mano
@@ -1282,6 +1311,58 @@ export default function PerfilDeMascota() {
               resumen={resumenSeguridad}
               vozAbrir={t('perfil.seguridadVer', { n: itemsSeguridad.length })}
               vozCerrar={t('perfil.seguridadOcultar')}
+            />
+          </View>
+        ) : null}
+
+        {/* ⭐ **LA FICHA DE LA RAZA** (S113-C · 1.2 · C10).
+            Va **pegada a la identidad**, que es de lo que habla — pero
+            **debajo de la franja de seguridad**, por decisión declarada: una
+            alerta de alergia o medicación tiene que verse sin scroll, y meter
+            una tarjeta de lectura por encima la empuja. *La identidad se lee;
+            la seguridad se atiende.*
+
+            🔴 **Sólo con contenido.** `obtenerContenidoDeRaza` devuelve `null`
+            cuando la raza no tiene ficha y ahí no se monta nada — *una tarjeta
+            vacía sobre una raza que no documentamos promete un saber que no
+            tenemos*.
+
+            ⚠️ **`revisado` NO VIAJA EN EL CONTRATO, y por eso hoy es `false`.**
+            La pieza lo exige y con `false` no dibuja (su propia ley). El
+            wrapper trae origen, temperamento, talla, esperanza,
+            predisposiciones y cuidados — **y ningún `activo` ni `revisado`**:
+            medido, el `select` de `razas.ts:184` no los pide y no hay `.eq`.
+            ⇒ Hoy la ficha **nunca se dibuja**, que es el control negativo que
+            la mesa pidió — pero *lo cumple por la razón equivocada*: no porque
+            el contenido esté inactivo, sino porque no hay con qué saberlo.
+            Pedido a A abajo; el día que el campo llegue, esta línea lo lee. */}
+        {contenidoRaza !== null && !esMemorial && mascota.raza !== null ? (
+          <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
+            <FichaRaza
+              nombre={mascota.raza}
+              revisado={false}
+              historia={contenidoRaza.origen ?? ''}
+              caracteristicas={[
+                { etiqueta: t('perfil.razaTemperamento'), valor: contenidoRaza.temperamento ?? undefined },
+                { etiqueta: t('perfil.razaTalla'), valor: contenidoRaza.talla_adulta ?? undefined },
+                { etiqueta: t('perfil.razaVida'), valor: contenidoRaza.esperanza_vida ?? undefined },
+              ]}
+              /* La etapa ACTUAL sale del momento vital que la ficha YA calcula:
+                 no se recalcula acá — *dos cuentas de lo mismo terminan
+                 discrepando* (lo aprendí en el 1.1.2, con el botón del carnet).
+                 🔴 **M4 no marca ninguna etapa, y es a propósito**: el motor lo
+                 devuelve por CONDICIÓN CRÓNICA antes de mirar la edad
+                 (`momentoVital.ts:34`), así que un senior con una condición sale
+                 M4 — marcarlo «adulto» sería afirmar una edad que el dato no
+                 dice. Sin etapa actual la ficha se lee entera, que es honesto. */
+              cuidados={[
+                { id: 'cachorro', etapa: t('perfil.razaCachorro'), texto: contenidoRaza.cuidados_por_etapa.cachorro ?? '', actual: momento === 'M1' || momento === 'M2' },
+                { id: 'adulto', etapa: t('perfil.razaAdulto'), texto: contenidoRaza.cuidados_por_etapa.adulto ?? '', actual: momento === 'M3' },
+                { id: 'senior', etapa: t('perfil.razaSenior'), texto: contenidoRaza.cuidados_por_etapa.senior ?? '', actual: momento === 'M5' },
+              ].filter((c) => c.texto.length > 0)}
+              vozRevision={t('perfil.razaRevision')}
+              vozAbrir={t('perfil.razaVer')}
+              vozCerrar={t('perfil.razaOcultar')}
             />
           </View>
         ) : null}
@@ -2188,6 +2269,54 @@ export default function PerfilDeMascota() {
       {/* P3 · la MISMA pieza del paso 2 del alta (§6: se comparte, no se
           clona). No valida lo escrito: `mascotas.raza` es texto libre por la
           letra de S59 y la RPC la respeta. */}
+      {/* ⭐ **EL MENÚ DE EDICIÓN** (S113-C · 1.2 · C11).
+          Junta lo que ya existía disperso —la foto y la raza se editaban desde
+          dos lados distintos— y con eso le da casa a la despedida: *un acto
+          grave no cuelga de un botón suelto en una ficha que se abre todos los
+          días*.
+
+          🔴 **LA HOJA ENTERA CUELGA DE `!esMemorial`, no sólo su ítem grave.**
+          El lápiz que la abre ya estaba bajo el guard (:1022), así que en
+          memorial era **inalcanzable** — y aun así mi propio censo la marcó en
+          rojo por «Cambiar la foto» y «Cambiar la raza». *Tiene razón: un texto
+          inalcanzable hoy es alcanzable mañana, en cuanto alguien le abra otro
+          camino, y nadie va a acordarse de este guard.* No se monta y punto. */}
+      {!esMemorial ? (
+        <Hoja visible={menuEdicion} onCerrar={() => setMenuEdicion(false)} titulo={t('perfil.menuTitulo')}>
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfil.menuFoto')}
+            onPress={() => {
+              setMenuEdicion(false);
+              router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } });
+            }}
+          />
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfil.menuRaza')}
+            onPress={() => {
+              setMenuEdicion(false);
+              setRazaHoja(true);
+            }}
+          />
+          <Separador />
+          {/* Sola, al final y después del separador. **Sin color de alarma**:
+              el memorial es sereno, y pintar la despedida de rojo la trata como
+              un borrado. No lo es: es el expediente que sigue, en otra clave. */}
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfil.menuDespedir', { nombre: mascota.nombre })}
+            onPress={() => {
+              setMenuEdicion(false);
+              router.push({ pathname: '/hogar/mascota/despedida', params: { mascotaId: mascota.id, nombre: mascota.nombre } });
+            }}
+          />
+        </Hoja>
+      ) : null}
+
       <EditarRazaHoja
         visible={razaHoja}
         mascotaId={mascota.id}
