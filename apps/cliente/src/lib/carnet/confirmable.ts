@@ -1,57 +1,54 @@
 /**
- * ☠️ **SIN CONSUMIDOR DESDE EL MERGE DE `f7405832` — Y LA MESA DECIDE, NO YO.**
+ * ⭐ **¿ESTA FILA SE PUEDE DAR POR REVISADA?** — **UNA REGLA, UNA PANTALLA.**
  *
- * D resolvió el MISMO bloqueante en `main` (`05172ae9`, carnet v2.3) y su regla
- * es **más ancha que ésta**: dudosa = sin fecha **o** sin nombre **o** fecha
- * parcial (`FEB 2023` no es un día). La probó con el carnet real del founder y
- * midió lo que la mía no vio: *con la ley vieja ese carnet perdía DOS filas en
- * silencio.* Al mergear tomé su `carnet.tsx`, así que esta función quedó sin
- * llamador.
+ * ── POR QUÉ EXISTE ESTE ARCHIVO Y POR QUÉ CASI NO DECIDE NADA ──────────────
+ * La pregunta llegó a tener **TRES respuestas** al mismo tiempo: la de la edge
+ * (`dudosa`), la de `esDudosa` en la pantalla, y la mía del 1.1.2. *Tres cuentas
+ * sobre lo mismo terminan discrepando* — y ya discreparon una vez, con el botón
+ * encendido que no hacía nada.
  *
- * **No la borro y no la cableo**: dos implementaciones del mismo guard es
- * exactamente el defecto que diagnostiqué en el 1.1.2 —*dos cuentas sobre lo
- * mismo terminan discrepando*— y elegir cuál vive es de la mesa. Lo que sí es
- * mío es declararlo: `verify:confirmable` sigue en verde **midiendo una regla
- * que ya no rige en ninguna pantalla**, y un gate verde sobre código muerto se
- * lee igual que uno que protege algo.
+ * Ahora **la fuente es el servidor**: `dudosa` la deriva la edge, que es la
+ * única que vio el papel. Acá **no se recalcula**: se traduce a lo que la fila
+ * necesita mostrar, y se agrega **sólo lo que el servidor no evalúa**.
+ *
+ * ── LO ÚNICO QUE SE AGREGA, Y NO ES «NADA» ────────────────────────────────
+ * 🔴 **Una fecha sin día.** El carnet dice «FEB 2023» y la edge la lee bien:
+ * `fecha_aplicada_precision = 'mes'`, sin invento, `dudosa: null`. *Para el
+ * servidor la fila es correcta* — y lo es. Pero `eventos_vacuna.fecha_aplicada`
+ * es `date` y **un mes suelto no entra**. Eso no es una duda de lectura: es un
+ * hecho de la columna, y la extracción no tiene por qué conocerlo.
+ *
+ * *No es «lo que el servidor no puede saber»: es lo que no le toca decidir.*
+ * Si algún día la columna admitiera precisión, esta línea se borra sola y la
+ * regla queda entera en la edge, que es donde debería estar.
  */
-/**
- * ⭐ **¿ESTA FILA SE PUEDE DAR POR REVISADA?** (S113-C · 1.1.2).
- *
- * Nace del bloqueante que el founder vio en su teléfono con su carnet real:
- * *«hay 4 vacunas por completar», ninguna fila marcada, el botón encendido y al
- * tocarlo no pasa nada.* La cadena, medida en el código:
- *
- *   ① `esDudosa` era **`!fecha_aplicada`**, y vivía sólo en la pantalla;
- *   ② la fila no podía pintarlo: la pieza **no recibe ninguna prop de
- *      «incompleta»**, así que la pantalla contaba algo que la fila no sabía;
- *   ③ el pie se enciende con `resumenDeLaTanda`, que sólo mira `tocada` y
- *      `descartada` ⇒ **encendido**, mientras `guardar()` cortaba aparte por
- *      `dudosas` **en silencio**. Dos cuentas — y la segunda la puse yo al
- *      montar el pie.
- *
- * La regla vive acá, pura, **porque el caso no se puede producir desde la UI**:
- * la extracción no devuelve filas sin fecha con los carnets de prueba (medido:
- * de uno con 4 filas, 2 sin fecha, devolvió 2) y la Hoja de edición **exige**
- * fecha, así que tampoco se puede vaciar. *Una regla que no se puede ejercer
- * desde la pantalla se prueba donde sí se puede.*
- */
+import type { VacunaExtraida } from '@epetplace/api';
 
 export interface FilaConfirmable {
-  fecha_aplicada: string | null;
   nombre: string | null;
+  fecha_aplicada: string | null;
+  fecha_precision: VacunaExtraida['fecha_aplicada_precision'];
+  /** **Tal cual la manda la edge.** No se achata a booleano: `'fecha'` y
+   *  `'incompleta'` son causas distintas y la fila las va a querer decir. */
+  dudosa: 'fecha' | 'incompleta' | null;
 }
 
 /**
- * `null` = se puede confirmar. Si no, **el código de lo que falta** — la
+ * `null` = se puede confirmar. Si no, **el código del campo que falta** — la
  * pantalla pone la voz (Ley 3).
  *
- * 🔴 El orden importa: primero el nombre, que es lo que identifica la vacuna.
- * *Pedir la fecha de algo que todavía no sabemos qué es pone los pasos al
- * revés.*
+ * 🔴 El orden importa: **primero el nombre**, que es lo que identifica la
+ * vacuna. *Pedir la fecha de algo que todavía no sabemos qué es pone los pasos
+ * al revés.*
  */
 export function faltaParaConfirmar(f: FilaConfirmable): 'nombre' | 'fecha' | null {
   if (f.nombre === null || f.nombre.trim() === '') return 'nombre';
+  /* La marca del servidor manda. `'incompleta'` con nombre y fecha presentes
+     igual frena: la edge anuló algo, y confirmar a ciegas lo que ella misma
+     desconfió sería darle por bueno un dato que nadie miró. */
+  if (f.dudosa !== null) return 'fecha';
   if (f.fecha_aplicada === null || f.fecha_aplicada.trim() === '') return 'fecha';
+  /* El hecho de la columna, arriba explicado. */
+  if (f.fecha_precision !== 'dia') return 'fecha';
   return null;
 }
