@@ -1,0 +1,20 @@
+/* ②④ sobre THOR, que sí tiene peso y raza publicada. */
+import { chromium } from 'playwright-core';
+const nav = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });
+const page = await nav.newPage({ viewport: { width: 420, height: 900 }, locale: 'es-EC' });
+await page.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 300000 });
+for (let i = 0; i < 240 && (await page.locator('input[type="password"]').count()) === 0; i += 1) await page.waitForTimeout(1000);
+await page.locator('input[type="email"]').fill(process.env.CLIENTE_EMAIL);
+await page.locator('input[type="password"]').fill(process.env.CLIENTE_PASSWORD);
+await page.getByText(/^(Entrar|Sign in)$/).first().click();
+await page.waitForTimeout(16000);
+await page.goto('http://localhost:8082/hogar', { waitUntil: 'networkidle', timeout: 120000 });
+await page.waitForTimeout(9000);
+await page.getByRole('button', { name: /^Thor$/ }).first().click().catch(() => {});
+await page.waitForTimeout(11000);
+const t = await page.evaluate(() => document.body.innerText);
+const m = /(\d+(?:[.,]\d+)?) kg · (\d{2} \w+)/.exec(t);
+console.log(`② invitación: ${/qué (lo )?hace único/.test(t) ? 'sí ✓' : '🔴 no'}`);
+console.log(`④ peso con fecha: ${m !== null ? `«${m[0]}» ✓` : (/\d+(?:[.,]\d+)? kg/.test(t) ? `🔴 sin fecha — ${/(\d+(?:[.,]\d+)? kg)/.exec(t)?.[1]}` : 'no hay peso')}`);
+console.log(`   ficha de raza: ${/Ver más sobre la raza/.test(t) ? 'sí ✓' : 'no'}`);
+await nav.close();

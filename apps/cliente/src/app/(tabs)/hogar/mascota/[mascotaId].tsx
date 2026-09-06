@@ -697,6 +697,23 @@ export default function PerfilDeMascota() {
   }
 
   const { mascota, vacunas, peso_clinico_kg, tiene_condicion_cronica, umbrales } = perfil;
+
+  /** ⭐ **EL PESO VIGENTE — UNA SOLA DERIVACIÓN** (S113-C · 1.2.1 · ④).
+   *  🔴 Medido: identidad mostraba `peso_clinico_kg`, que es **el de la ficha
+   *  clínica** y no se mueve cuando la familia pesa en casa. La celda de HOY ya
+   *  usaba la serie (`pesos[0]`, ordenada `fecha_medicion desc` por el propio
+   *  wrapper) y caía al clínico — o sea que **las dos superficies de la misma
+   *  pantalla podían decir kilos distintos**, la de arriba el primero y la de
+   *  abajo el último.
+   *  *No es un bug de una de las dos: es que la regla vivía dos veces.* Se
+   *  deriva acá una vez y la usan las dos. La FECHA viaja con el número: un
+   *  peso sin cuándo no dice si es de hoy o de hace dos años. */
+  const pesoVigente: { kg: number; fecha: string | null } | null =
+    pesos !== null && pesos.length > 0
+      ? { kg: pesos[0].peso_kg, fecha: pesos[0].fecha }
+      : peso_clinico_kg !== null
+        ? { kg: peso_clinico_kg, fecha: null }
+        : null;
   const hoy = new Date();
   const meses = mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento, hoy) : null;
   // r3: la voz del hogar (una sola verdad) — pastilla + celda de vacunas
@@ -888,8 +905,18 @@ export default function PerfilDeMascota() {
         mono: true,
       });
     }
-    if (peso_clinico_kg !== null) {
-      datosIdentidad.push({ etiqueta: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, mono: true });
+    if (pesoVigente !== null) {
+      datosIdentidad.push({
+        etiqueta: t('perfil.peso'),
+        /* La fecha va pegada al número, no en otra fila: *un peso sin cuándo
+           no dice si es de hoy o de hace dos años*, y en identidad —donde se
+           lee de un vistazo— esa duda no se resuelve mirando más abajo. */
+        valor:
+          pesoVigente.fecha !== null
+            ? `${pesoVigente.kg} kg · ${fechaCortaMono(pesoVigente.fecha, idioma)}`
+            : `${pesoVigente.kg} kg`,
+        mono: true,
+      });
     }
     if (mascota.microchip !== null && mascota.microchip.length > 0) {
       datosIdentidad.push({ etiqueta: t('perfil.microchip'), valor: mascota.microchip, mono: true });
@@ -1382,6 +1409,41 @@ export default function PerfilDeMascota() {
               vozAbrir={t('perfil.razaVer')}
               vozCerrar={t('perfil.razaOcultar')}
             />
+            {/* ⭐ **LA INVITACIÓN QUE CIERRA LA FICHA** (S113-C · 1.2.1 · ②).
+                La ficha habla de **la raza**; esto devuelve la conversación a
+                **este animal**: *lo general se lee, lo propio se cuenta.*
+
+                ⚠️ **Va pegada abajo y NO dentro de la pieza**, por medición:
+                `FichaRazaProps` no tiene slot de cierre (8 props, ninguna lo
+                admite). Pedido a B abajo; el día que exista, esto se muda
+                adentro y la pantalla queda igual.
+
+                🔴 **La voz va en TUTEO aunque la orden llegó en voseo.** La
+                casa habla tuteo neutro y `R66` lo vigila — *un dictado no
+                cambia la voz del producto, y escribirlo como llegó habría dado
+                rojo en el gate*. La idea del founder, corta: cuanto mejor lo
+                conocemos, mejor lo acompañamos. */}
+            {/* 🔴 **DOS VOCES, PORQUE LA ETAPA PUEDE NO EXISTIR.** Colgarla de
+                `momento !== null` la escondía entera para toda mascota sin
+                fecha de nacimiento — medido en web con una recién dada de alta,
+                donde el nacimiento se puede dejar para después. *La invitación
+                no es sobre la etapa: es sobre esta mascota.* Con etapa se la
+                nombra porque ancla el momento; sin etapa se invita igual. */}
+            <View style={{ marginTop: spacing[3] }}>
+                <Celda
+                  interactiva
+                  accessibilityRole="button"
+                  titulo={
+                    momento !== null && vozMomento(momento, t) !== null
+                      ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
+                      : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
+                  }
+                  subtitulo={t('perfil.razaInvitacionDetalle')}
+                  onPress={() =>
+                    router.push({ pathname: '/hogar/bitacora', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+                  }
+                />
+            </View>
           </View>
         ) : null}
 
@@ -1451,12 +1513,10 @@ export default function PerfilDeMascota() {
                   }}
                   peso={{
                     rotulo: t('perfil.peso'),
-                    valorTexto:
-                      ultimoPeso !== null
-                        ? `${ultimoPeso.peso_kg} kg`
-                        : peso_clinico_kg !== null
-                          ? `${peso_clinico_kg} kg`
-                          : null,
+                    /* La MISMA derivación que identidad (④): si discreparan,
+                       la pantalla diría dos pesos distintos de la misma
+                       mascota, que es justo lo que esto vino a curar. */
+                    valorTexto: pesoVigente !== null ? `${pesoVigente.kg} kg` : null,
                     tendencia: ultimoPeso !== null ? tendenciaPeso(ultimoPeso.peso_kg, anterior?.peso_kg) : null,
                     contexto:
                       ultimoPeso !== null
