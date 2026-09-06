@@ -28608,6 +28608,36 @@ prueba la cascada ajena**. *Un arnés no encontró un defecto: encontró que el
 mundo cambió debajo de su fixture — que es exactamente para lo que sirve volver
 a correrlo.*
 
+### `L-492` — Un gate que mide UNA dirección deja la otra sin vigilancia, y su silencio se lee como salud
+
+**El caso (S113-A · lote 2, 6-sep-2026).** Censando para escribir la puerta de
+medicación apareció algo que no venía a buscar: `cat_tipos_evento` tenía
+`medicacion_administrada` **activo con `tabla_tipada` NULL**, mientras la tabla
+`evento_medicacion_administrada` existía desde S66.
+
+Lo interesante es **por qué nadie lo había visto**. Existe un gate para
+exactamente esta clase —`verificar_coherencia_tablas_tipadas()`, nacido en S67
+con `D-415`— y **corre en toda migración que toca el catálogo**. Pero mide una
+sola dirección: *el catálogo apunta a una tabla que no existe*. El caso inverso
+—*la tabla existe y el catálogo no la nombra*— **le es invisible**, y su verde
+se lee cada vez como «el catálogo está sano».
+
+**La ley.** Un invariante entre dos cosas tiene **dos incumplimientos**, y un
+gate que sólo conoce uno no está midiendo el invariante: está midiendo la mitad
+que a alguien se le ocurrió primero. *Y la mitad que falta es peor que no tener
+gate, porque el gate produce un verde que nadie va a volver a cuestionar.*
+
+**El correctivo, exigible:** al escribir un gate sobre una relación entre A y B,
+se enumeran **las dos** formas de romperla y se prueba el rojo de cada una. Si
+sólo se cubre una, el gate **lo declara en su cabecera** — lo mismo que
+`verify:edge-deno` hace con sus 89 errores fuera de clase (`D-870`).
+
+**Su hermana práctica del mismo día:** `ota:deps` compara **commits**, no el
+árbol. Con una dependencia nativa instalada y sin commitear dio **verde**
+(`D-1043`). Otra vez: la mitad no medida existía y su silencio parecía salud.
+
+---
+
 ### `L-491` — Un arnés que limpia con el MISMO rol con el que escribió puede dejar residuo y reportar éxito
 
 **Origen:** S113-A, lote 1.0 · A2, 9-sep-2026, con dos filas quedando en
@@ -29099,6 +29129,40 @@ de cerrarlo es proporcional a cuántas policies flojas queden.
 La revisión de seguridad previa al soft launch, junto con la rotación de llaves.
 Antes no: cerrar el hint sin haber cerrado las policies sería esconder el mapa
 dejando las puertas.
+
+---
+
+### `D-1043` 🟢 · `ota:deps` compara commits, no el árbol: con la dependencia sin commitear da verde
+
+**Medido (S113-A · A6, 6-sep-2026), y lo produjo su propio control.** El brief
+pedía que `ota:deps` diera **rojo** sobre la rama `pista/s113-a-nfc` como
+control de que distingue. Con `react-native-nfc-manager` ya instalado pero
+**sin commitear**, dio:
+
+```
+✅ CERO cambios de dependencia de runtime ⇒ por esta pregunta, candidato a OTA.
+exit 0
+```
+
+Después del commit, el mismo comando: `🔴 1 cambio(s) … ALTA
+react-native-nfc-manager → 3.17.2` · **exit 1**.
+
+**Por qué no es grave hoy:** la regla 82 exige medir el árbol antes de
+bundlear, y un árbol sucio saca el ancla con asterisco. La ventana existe sólo
+para quien instale, no commitee, y publique igual.
+
+**Por qué igual es deuda:** *el gate no dice que no mide eso*. Su verde se lee
+como «no hay cambios de dependencia», cuando lo que afirma es «no hay cambios
+**commiteados**». Es `L-492` en su forma chica.
+
+**Cura, barata:** que el script mire también `git status --porcelain` sobre los
+`package.json` y, si alguno está sucio, salga **NO CONCLUYENTE (exit 2)** en vez
+de verde. *Un gate que no puede ver el estado real dice que no puede, jamás que
+está todo bien.*
+
+**Dueño:** A. **Disparo:** la próxima vez que se toque `discriminador-ota.mjs`,
+o antes del primer build nativo (donde el costo de un falso verde es una app
+que crashea al abrir).
 
 ---
 
