@@ -25,6 +25,9 @@ export type CodigoErrorSalud =
   | 'orden_fechas_invalido'
   | 'peso_invalido'
   | 'metodo_invalido'
+  | 'medicamento_requerido'
+  | 'dosis_requerida'
+  | 'via_invalida'
   | 'error_lectura'
   | 'desconocido';
 
@@ -42,6 +45,9 @@ function codigoSalud(mensaje: string): CodigoErrorSalud {
   if (mensaje.startsWith('orden_fechas_invalido')) return 'orden_fechas_invalido';
   if (mensaje.startsWith('peso_invalido')) return 'peso_invalido';
   if (mensaje.startsWith('metodo_invalido')) return 'metodo_invalido';
+  if (mensaje.startsWith('medicamento_requerido')) return 'medicamento_requerido';
+  if (mensaje.startsWith('dosis_requerida')) return 'dosis_requerida';
+  if (mensaje.startsWith('via_invalida')) return 'via_invalida';
   return 'desconocido';
 }
 
@@ -98,6 +104,73 @@ export async function registrarDesparasitacion(
     return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
   }
   return { ok: true, data: { id: o.id, mascota_id: o.mascota_id } };
+}
+
+/**
+ * Las vías del CHECK `evento_medicacion_administrada.via_administracion`,
+ * copiadas de la tabla y no inventadas.
+ *
+ * ⚠️ **No es `ViaAdministracion` de `vacunas.ts`, y no se reusa ni se
+ * ensancha.** Aquél tiene CUATRO valores (los de una vacuna: subcutánea,
+ * intramuscular, intranasal, oral) y éste NUEVE. *Dos vocabularios distintos
+ * que se llaman igual no son el mismo vocabulario* — unificarlos dejaría
+ * ofrecer «oftálmica» en una vacuna, que su propio CHECK rechaza. El nombre
+ * dice de qué es, justamente para que nadie los funda.
+ */
+export type ViaMedicacion =
+  | 'oral' | 'subcutanea' | 'intramuscular' | 'intravenosa'
+  | 'intranasal' | 'topica' | 'oftalmica' | 'auricular' | 'otra';
+
+export const VIAS_MEDICACION: readonly ViaMedicacion[] = [
+  'oral', 'subcutanea', 'intramuscular', 'intravenosa',
+  'intranasal', 'topica', 'oftalmica', 'auricular', 'otra',
+];
+
+/**
+ * Anota una DOSIS que la familia le dio a la mascota (S113-A · lote 2).
+ *
+ * La tabla `evento_medicacion_administrada` existía desde S66 **con cero
+ * filas y su trigger listo**: escritor preparado, puerta ausente — la clase
+ * `L-318`. Hasta hoy la medicación sólo podía entrar por el veterinario, así
+ * que el expediente mostraba lo prescrito sin lo que de verdad pasó.
+ *
+ * ⚠️ **No cambia `medicacion_actual` del perfil, y es a propósito.** Ese campo
+ * dice qué está tomando la mascota, y lo escribe la PRESCRIPCIÓN. Una dosis es
+ * un hecho puntual: sumarla ahí dejaría a un perro «tomando antibiótico» para
+ * siempre por una sola pastilla — y ése es justo el dato que lee el pasaporte
+ * en una urgencia. *Administrar no es prescribir.*
+ *
+ * `fecha` omitida ⇒ ahora. Una fecha futura rebota: una dosis es un hecho
+ * pasado. `via` por defecto `'oral'`, que es la que la familia usa en casa.
+ */
+export async function registrarMedicacionAdministrada(
+  mascotaId: string,
+  datos: {
+    medicamento: string;
+    dosis: string;
+    via?: ViaMedicacion;
+    /** ISO. Omitida ⇒ ahora. */
+    fecha?: string;
+    principio_activo?: string;
+    notas?: string;
+  },
+): Promise<ResultadoWrapper<{ id: string; evento_id: string; mascota_id: string }, CodigoErrorSalud>> {
+  const { data, error } = await getClient().rpc('registrar_medicacion_administrada', {
+    p_mascota_id: mascotaId,
+    p_medicamento: datos.medicamento,
+    p_dosis: datos.dosis,
+    ...(datos.via !== undefined ? { p_via: datos.via } : null),
+    ...(datos.fecha !== undefined ? { p_fecha: datos.fecha } : null),
+    ...(datos.principio_activo !== undefined ? { p_principio_activo: datos.principio_activo } : null),
+    ...(datos.notas !== undefined ? { p_notas: datos.notas } : null),
+  });
+  if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || o.ok !== true ||
+      typeof o.id !== 'string' || typeof o.evento_id !== 'string' || typeof o.mascota_id !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { id: o.id, evento_id: o.evento_id, mascota_id: o.mascota_id } };
 }
 
 /** Declara el hecho clínico "NINGUNA alergia conocida" (S82: distinto de

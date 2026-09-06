@@ -351,6 +351,11 @@ export type {
 export {
   registrarDesparasitacion,
   type PlagaTratada,
+  // S113-A lote 2: la familia puede anotar una dosis (la tabla existía con
+  // cero filas y su trigger listo — escritor sin puerta).
+  registrarMedicacionAdministrada,
+  type ViaMedicacion,
+  VIAS_MEDICACION,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
   registrarRecuerdoFamilia,
