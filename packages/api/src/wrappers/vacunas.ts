@@ -180,8 +180,26 @@ function campoFechaParcial(v: unknown): v is string | null {
 }
 
 const VIAS: readonly string[] = ['subcutanea', 'intramuscular', 'intranasal', 'oral'];
-const CONFIANZAS: readonly string[] = ['alta', 'media', 'baja'];
-const EVIDENCIAS: readonly string[] = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'];
+/* Tipadas contra su propio tipo, no como `string[]`: así el compilador ve la
+   divergencia DENTRO del archivo. Era `readonly string[]`, y por eso el tipo
+   podía decir `'sticker'` mientras la lista decía `'sticker_con_fecha'` sin que
+   nada se quejara — *el tipo decía la verdad y el guard mentía, en el mismo
+   archivo, a treinta líneas de distancia.* El gate cubre la otra mitad: la
+   divergencia CONTRA LA EDGE, que ningún compilador puede ver. */
+/* ⚠️ Se ensancha EN EL USO (`as readonly string[]`) y no en la declaración: es
+   al revés de lo que uno escribiría de apuro. Declararlas anchas deja pasar un
+   valor inventado —fue el defecto— y declararlas angostas rompe `.includes`,
+   que espera el tipo estrecho. *El chequeo tiene que ser estricto donde se
+   escribe la lista y ancho donde se compara contra un `string` que viene de
+   afuera.* */
+const CONFIANZAS: readonly ConfianzaExtraccion[] = ['alta', 'media', 'baja'];
+/* 🔴 SE LEE DE LA EDGE, NO SE INVENTA. Decía `sticker_con_fecha` y la edge
+   devuelve `sticker`: como una evidencia fuera de lista **rechaza la fila
+   entera**, toda vacuna leída de un sticker se descartaba en silencio — y en un
+   carnet real los stickers son la mayoría. *No rompía nada: llegaban menos filas
+   de las que el modelo leyó, y nadie abre un ticket por vacunas que nunca vio.*
+   Lo vigila `verify:contrato-carnet` (brazo 4), que compara las dos listas. */
+const EVIDENCIAS: readonly EvidenciaAplicacion[] = ['sticker', 'sello', 'manuscrito', 'impreso'];
 
 const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
   v === null || (typeof v === 'string' && lista.includes(v));
@@ -218,8 +236,8 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     campoTexto(v.vacuna_codigo) &&
     Array.isArray(v.cubre) && v.cubre.every((c) => typeof c === 'string' && c.length > 0) &&
     campoTexto(v.tipo_vacuna) &&
-    typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza) &&
-    typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia)
+    typeof v.confianza === 'string' && (CONFIANZAS as readonly string[]).includes(v.confianza) &&
+    typeof v.evidencia === 'string' && (EVIDENCIAS as readonly string[]).includes(v.evidencia)
   );
 }
 
