@@ -17697,12 +17697,72 @@ export type Database = {
           },
         ]
       }
+      raza_sin_casar: {
+        Row: {
+          especie: string
+          primera_vez: string
+          texto: string
+          ultima_vez: string
+          veces: number
+        }
+        Insert: {
+          especie: string
+          primera_vez?: string
+          texto: string
+          ultima_vez?: string
+          veces?: number
+        }
+        Update: {
+          especie?: string
+          primera_vez?: string
+          texto?: string
+          ultima_vez?: string
+          veces?: number
+        }
+        Relationships: []
+      }
+      raza_sinonimo: {
+        Row: {
+          created_at: string
+          especie: string
+          nota: string | null
+          sinonimo: string
+          sinonimo_norm: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          especie: string
+          nota?: string | null
+          sinonimo: string
+          sinonimo_norm?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          especie?: string
+          nota?: string | null
+          sinonimo?: string
+          sinonimo_norm?: string | null
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raza_sinonimo_especie_slug_fkey"
+            columns: ["especie", "slug"]
+            isOneToOne: false
+            referencedRelation: "cat_razas"
+            referencedColumns: ["especie", "slug"]
+          },
+        ]
+      }
       razas_contenido: {
         Row: {
           activo: boolean
           conocida: boolean
           created_at: string
           cuidados_por_etapa: Json
+          es_de_especie: boolean
           especie: string
           esperanza_vida: string | null
           generado_el: string
@@ -17721,6 +17781,7 @@ export type Database = {
           conocida: boolean
           created_at?: string
           cuidados_por_etapa?: Json
+          es_de_especie?: boolean
           especie: string
           esperanza_vida?: string | null
           generado_el: string
@@ -17739,6 +17800,7 @@ export type Database = {
           conocida?: boolean
           created_at?: string
           cuidados_por_etapa?: Json
+          es_de_especie?: boolean
           especie?: string
           esperanza_vida?: string | null
           generado_el?: string
@@ -21851,7 +21913,6 @@ export type Database = {
           costo_usd: number | null
           dia: string | null
           fallidas: number | null
-          imagen_chars_promedio: number | null
           latencia_peor_ms: number | null
           latencia_promedio_ms: number | null
           llamadas: number | null
@@ -26031,6 +26092,10 @@ export type Database = {
           parametros: Json
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
+      }
+      resolver_ficha_de_raza: {
+        Args: { p_especie: string; p_raza_declarada: string }
+        Returns: Json
       }
       responder_socializacion_paseo: {
         Args: { p_mascota_id: string; p_ok: boolean }

@@ -1814,6 +1814,7 @@ export {
   type SugerenciaDeRaza,
   type CandidataRaza,
   type ContenidoDeRaza,
+  type ViaDeFicha,
   type CuidadosPorEtapa,
   type CodigoErrorContenidoRaza,
   type ConfianzaRaza,
