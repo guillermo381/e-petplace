@@ -81,7 +81,8 @@
     "verify:huellas-credenciales": "node scripts/verify-huellas-credenciales.mjs",
     "verify:selectores-recurrentes": "node scripts/verify-selectores-recurrentes.mjs",
     "verify:compuertas-por-sujeto": "node scripts/verify-compuertas-por-sujeto.mjs",
-    "verify:raza-norm": "node scripts/verify-raza-norm.mjs"
+    "verify:raza-norm": "node scripts/verify-raza-norm.mjs",
+    "corregir:ficha": "node scripts/corregir-ficha.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
