@@ -25,6 +25,7 @@ import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestr
 import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
+import { GrabarTagNfc, type EstadoTag } from '../components/GrabarTagNfc'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
@@ -3274,6 +3275,39 @@ const ICONOS_TABS: BarraTabsItem[] = [
 ]
 
 // ── galería ───────────────────────────────────────────────────────────────────
+
+/* Los cinco finales de `GrabarTagNfc`, uno por botón: el gate se camina sin
+   NFC, que es justamente lo que la pieza permite. */
+function GateNfc() {
+  const [estado, setEstado] = useState<EstadoTag>({ fase: 'acercar' })
+  const [abierta, setAbierta] = useState(false)
+  const abrir = (e: EstadoTag) => { setEstado(e); setAbierta(true) }
+  return (
+    <>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+        <Boton tamaño="sm" etiqueta="Acercá" onPress={() => abrir({ fase: 'acercar' })} />
+        <Boton tamaño="sm" etiqueta="Escribiendo" onPress={() => abrir({ fase: 'escribiendo' })} />
+        <Boton tamaño="sm" etiqueta="Lista" onPress={() => abrir({ fase: 'lista', voz: 'Quedó activada para Thor' })} />
+        <Boton tamaño="sm" etiqueta="Ya estaba" onPress={() => abrir({ fase: 'ya_estaba', voz: 'Esta placa ya está activada para otra mascota', onVerla: () => {} })} />
+        <Boton tamaño="sm" etiqueta="Ajena" onPress={() => abrir({ fase: 'ajena', voz: 'Esta no es una placa de e-PetPlace' })} />
+        <Boton tamaño="sm" etiqueta="Fallo" onPress={() => abrir({ fase: 'fallo', voz: 'No se pudo escribir. Probá sin funda.', onReintentar: () => {} })} />
+      </View>
+      <GrabarTagNfc
+        visible={abierta}
+        onCerrar={() => setAbierta(false)}
+        titulo="Activar la placa de Thor"
+        estado={estado}
+        vozAcercar="Acercá la placa a la parte de atrás del teléfono"
+        vozEscribiendo="Escribiendo…"
+        vozVerla="Ver la placa"
+        vozReintentar="Probar de nuevo"
+        vozCerrar="Listo"
+        enMemoria={false}
+      />
+    </>
+  )
+}
+
 export function TokenGallery() {
   // Provider PROPIO (S48/D-305): el provider raíz del app está controlado
   // por el tema del sistema, y el selector manual de esta galería
@@ -8563,6 +8597,16 @@ function GaleriaInterna() {
           tema activo: {mode} · gradiente ui: {gradients.firmaUILight.angle}deg
         </Text>
       </View>
+
+        <Seccion titulo="⭐ GATE S113 — GRABAR LA PLACA (1.3 · B6) · qué decide: (a) que «ya estaba activada» y «no es de e-PetPlace» NO se lean como errores —son hechos del mundo, no fallas de quien acercó la placa—; (b) que el fallo se distinga de esos dos y tenga su salida a la vista; (c) que mientras escribe no haya forma de cerrar de un toque al costado">
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="apoyo">
+              Los cinco finales, de a uno. La pieza NO toca NFC: escribir un tag exige
+              módulo nativo y lo nativo no viaja por OTA — acá llega el estado.
+            </Texto>
+            <GateNfc />
+          </View>
+        </Seccion>
     </ScrollView>
   )
 }

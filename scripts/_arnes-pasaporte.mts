@@ -22,6 +22,8 @@ const src = (p: string) => {
 const TARJETA = src('packages/ui/src/components/TarjetaPasaporte.tsx');
 const ACCIONES = src('packages/ui/src/components/AccionesPasaporte.tsx');
 const CONFIG = src('packages/ui/src/components/ConfiguracionPasaporte.tsx');
+const NFC = src('packages/ui/src/components/GrabarTagNfc.tsx');
+const TAG = src('packages/ui/src/components/tag-nfc.ts');
 
 const VOZ: VozPasaportePublico = {
   tituloPerdida: 'Thor está perdido', llamar: 'Llamar', whatsapp: 'WhatsApp',
@@ -133,6 +135,45 @@ t('el segundo toque nombra a la mascota (la voz la trae compuesta)',
 t('🔴 cada interruptor dibuja su CONSECUENCIA', /\{o\.consecuencia\}/.test(CONFIG), true);
 t('sin «mostrar contacto» no se pide configurar un teléfono que no se verá',
   /visibilidad\.contacto && contacto !== undefined \?/.test(CONFIG), true);
+
+console.log('\n── ⑨ ROJO · GRABAR LA PLACA (B6) ──');
+/* 🔴 Escribir un tag exige módulo NATIVO y lo nativo no viaja por OTA: si esta
+   pieza lo importara, `packages/ui` entero dejaría de poder publicarse sin una
+   build. La escritura la hace quien tiene la capacidad; acá llega el estado. */
+/* ⚠️ **ESTE ASSERT MEDÍA EL NOMBRE DEL ARCHIVO Y NO EL HECHO**, y dio rojo
+   sobre una pieza sana: matcheaba `./tag-nfc`, que es MI módulo de estados y
+   no una librería nativa. *Un gate atado a un nombre mide la convención, no
+   la cosa* — es la tercera vez en la noche que me pasa. Lo que hay que medir
+   es que no entre NADA de fuera del paquete que hable con el hardware. */
+t('🔴 la pieza NO importa ninguna librería nativa de NFC',
+  /react-native-nfc|NfcManager|expo-nfc|NdefRecord/i.test(NFC), false);
+t('…y lo único que importa con «nfc» en el nombre es su propio módulo puro',
+  [...new Set([...NFC.matchAll(/from '([^']*nfc[^']*)'/gi)].map((m) => m[1]))], ['./tag-nfc']);
+/* Un fallo sin salida deja a la persona con una placa a medio escribir y sin
+   saber si sirve. El tipo lo hace inexpresable. */
+t('🔴 `fallo` exige su salida en el TIPO',
+  /fase: 'fallo'; voz: string; onReintentar: \(\) => void/.test(TAG), true);
+/* «Ya estaba activada» y «no es de e-PetPlace» son hechos del mundo, no
+   fallas de quien acercó la placa. */
+const { esAlarma, enCurso, termino } = await import('../packages/ui/src/components/tag-nfc.ts');
+t('🔴 el ÚNICO rojo es el fallo',
+  [esAlarma({ fase: 'fallo', voz: 'x', onReintentar: () => {} }),
+   esAlarma({ fase: 'ya_estaba', voz: 'x' }),
+   esAlarma({ fase: 'ajena', voz: 'x' }),
+   esAlarma({ fase: 'lista', voz: 'x' })], [true, false, false, false]);
+t('🔴 mientras escribe no hay cierre de un toque al costado',
+  [enCurso({ fase: 'acercar' }), enCurso({ fase: 'escribiendo' }), enCurso({ fase: 'lista', voz: 'x' })],
+  [true, true, false]);
+t('…y la Hoja lo obedece: sin cierre en curso',
+  /conCerrar=\{!vivo\}/.test(NFC), true);
+/* «Ya estaba» cuenta como TERMINADO: la placa funciona, sólo que no es de esta
+   mascota. Tratarla como error dejaría a la persona esperando que pase algo. */
+t('🔴 `ya_estaba` cuenta como terminado, no como error',
+  termino({ fase: 'ya_estaba', voz: 'x' }), true);
+t('🔴 en memorial la placa no existe — y lee la regla del pasaporte',
+  /sePintaPasaporte\(\{ enMemoria \}\)/.test(NFC), true);
+t('la espera es la de la casa, no un spinner genérico',
+  /<EsperaDeMarca \/>/.test(NFC) && /ActivityIndicator/.test(NFC) === false, true);
 
 if (NO_CONCLUYENTE.length > 0) {
   console.log(`\n⚠️ NO CONCLUYENTE · no se pudieron abrir: ${NO_CONCLUYENTE.join(' · ')}`);

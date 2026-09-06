@@ -1229,3 +1229,19 @@ export { SugerenciaRaza, type SugerenciaRazaProps, type CandidataRaza, type Conf
 export { FichaRaza, type FichaRazaProps, type CuidadoPorEtapa } from './components/FichaRaza'
 export { PantallaDespedida, type PantallaDespedidaProps } from './components/PantallaDespedida'
 export { fechaDespedidaValida } from './components/despedida-fecha'
+
+// GrabarTagNfc (S113-B · 1.3 · B6) — la Hoja que acompaña el gesto de activar
+// la placa.
+// 🔴 NO TOCA NFC, y es una decisión: escribir un tag exige módulo NATIVO, y lo
+// nativo no viaja por OTA — si `packages/ui` lo importara, el design system
+// entero dejaría de poder publicarse sin una build. La escritura la hace quien
+// tiene la capacidad; acá llega el `estado`.
+// 🔴 Y `fallo` SIN `onReintentar` no compila: es el estado más caro de la
+// pantalla —una placa a medio escribir y nadie sabe si sirve—. «Ya estaba
+// activada» y «no es de e-PetPlace» NO son errores y no se pintan de alarma.
+export {
+  GrabarTagNfc,
+  type GrabarTagNfcProps,
+  type EstadoTag,
+} from './components/GrabarTagNfc'
+export { enCurso, termino, esAlarma } from './components/tag-nfc'
