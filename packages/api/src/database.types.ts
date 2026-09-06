@@ -17945,6 +17945,50 @@ export type Database = {
           },
         ]
       }
+      propuestas_memoria: {
+        Row: {
+          clase: string | null
+          creada_en: string
+          estado: string
+          hecho: string
+          id: string
+          mascota_id: string
+          resuelta_en: string | null
+          resuelta_por: string | null
+          turno_id: string | null
+        }
+        Insert: {
+          clase?: string | null
+          creada_en?: string
+          estado?: string
+          hecho: string
+          id?: string
+          mascota_id: string
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+          turno_id?: string | null
+        }
+        Update: {
+          clase?: string | null
+          creada_en?: string
+          estado?: string
+          hecho?: string
+          id?: string
+          mascota_id?: string
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+          turno_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "propuestas_memoria_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       puntos_usuario: {
         Row: {
           created_at: string
@@ -23585,7 +23629,7 @@ export type Database = {
         Returns: Json
       }
       agregar_memoria_coach: {
-        Args: { p_fuente?: string; p_hecho: string; p_mascota_id: string }
+        Args: { p_hecho: string; p_mascota_id: string }
         Returns: Json
       }
       agregar_nota_atencion: {
@@ -23933,6 +23977,7 @@ export type Database = {
         Args: { p_programa_contratado_id: string }
         Returns: Json
       }
+      confirmar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       congelar_desglose_mensualidad_guarderia: {
         Args: { p_periodo: string; p_suscripcion_id: string }
         Returns: Json
@@ -24871,6 +24916,10 @@ export type Database = {
       }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
+      listar_propuestas_memoria: {
+        Args: { p_mascota_id: string }
+        Returns: Json
+      }
       log_admin_action: {
         Args: {
           p_accion: string
@@ -26053,6 +26102,15 @@ export type Database = {
         Args: { p_cuentas: string[]; p_fecha_programada?: string }
         Returns: Json
       }
+      proponer_memoria_coach: {
+        Args: {
+          p_clase?: string
+          p_hecho: string
+          p_mascota_id: string
+          p_turno_id?: string
+        }
+        Returns: Json
+      }
       proponer_producto_canonico: {
         Args: { p_producto: Json; p_variante: Json }
         Returns: Json
@@ -26170,6 +26228,7 @@ export type Database = {
         Args: { p_motivo?: string; p_presupuesto_id: string }
         Returns: undefined
       }
+      rechazar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       reclamar_compra_mostrador: {
         Args: { p_codigo: string; p_mascota_id: string }
         Returns: Json

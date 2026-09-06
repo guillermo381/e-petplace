@@ -172,18 +172,26 @@ export async function listarMemoriaCoach(
   return { ok: true, data: o.memoria as HechoDeMemoria[] };
 }
 
-/** Agrega un hecho. Techo de 30 por mascota — no es límite técnico: la memoria
- *  entera viaja en cada pregunta, así que sin techo el costo crece sin que
- *  nadie lo decida y una lista de cien hechos deja de ser memoria. */
+/**
+ * Agrega un hecho **que escribió la familia**. Techo de 30 por mascota — no es
+ * límite técnico: la memoria entera viaja en cada pregunta, así que sin techo
+ * el costo crece sin que nadie lo decida.
+ *
+ * 🔴 **Ya no recibe `fuente`, y eso es la cura, no una simplificación.** Antes
+ * aceptaba `'confirmado_de_ia'` desde el cliente: el CHECK verificaba que la
+ * palabra estuviera en la lista, no quién podía decirla, así que la procedencia
+ * era **una afirmación de quien llamaba**. *Un vocabulario cerrado que sólo
+ * vive en un parámetro no cierra nada.*
+ * Lo que la IA propuso entra por `confirmarPropuestaMemoria`, que es otra
+ * puerta y otro acto — y ahí la fuente la pone la RPC.
+ */
 export async function agregarMemoriaCoach(
   mascotaId: string,
   hecho: string,
-  fuente: FuenteMemoria = 'familia',
 ): Promise<ResultadoWrapper<{ id: string }, CodigoErrorCoach>> {
   const { data, error } = await getClient().rpc('agregar_memoria_coach', {
     p_mascota_id: mascotaId,
     p_hecho: hecho,
-    p_fuente: fuente,
   });
   if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
   const o = data as Record<string, unknown> | null;
@@ -485,4 +493,62 @@ export async function obtenerPredisposicionesDeRaza(
   if (error) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
   const filas = (data ?? []) as { cat_predisposiciones: Predisposicion | null }[];
   return { ok: true, data: filas.map((f) => f.cat_predisposiciones).filter((p): p is Predisposicion => p !== null) };
+}
+
+/* ─── LAS PROPUESTAS DE NEXO ────────────────────────────────────────────── */
+
+export type PropuestaMemoria = {
+  id: string;
+  hecho: string;
+  /** La clase que el modelo propuso. Se guarda para poder medir después si
+   *  clasifica bien — sin esto, su exactitud no es auditable. */
+  clase: string | null;
+  creada_en: string;
+};
+
+/** Lo que Nexo propone recordar y la familia todavía no resolvió. */
+export async function listarPropuestasMemoria(
+  mascotaId: string,
+): Promise<ResultadoWrapper<PropuestaMemoria[], CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('listar_propuestas_memoria', {
+    p_mascota_id: mascotaId,
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || !Array.isArray(o.propuestas)) {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: o.propuestas as PropuestaMemoria[] };
+}
+
+/**
+ * La familia acepta lo que Nexo propuso.
+ *
+ * 🔴 **`'confirmado_de_ia'` nace acá dentro y sólo acá.** No viaja en ningún
+ * parámetro: lo escribe la función que sabe que hubo una propuesta y que
+ * alguien de la familia la aceptó. *La procedencia deja de ser lo que alguien
+ * dice y pasa a ser lo que ocurrió.*
+ */
+export async function confirmarPropuestaMemoria(
+  id: string,
+): Promise<ResultadoWrapper<{ id: string }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('confirmar_propuesta_memoria', { p_id: id });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.id !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { id: o.id } };
+}
+
+/** La familia dice que no. **Se marca, no se borra**: saber qué propuso el
+ *  modelo y la familia NO quiso es la única forma de medir si clasifica bien. */
+export async function rechazarPropuestaMemoria(
+  id: string,
+): Promise<ResultadoWrapper<{ id: string }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('rechazar_propuesta_memoria', { p_id: id });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  return { ok: true, data: { id } };
 }
