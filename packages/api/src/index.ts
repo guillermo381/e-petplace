@@ -356,6 +356,12 @@ export {
   registrarMedicacionAdministrada,
   type ViaMedicacion,
   VIAS_MEDICACION,
+  // S113-A: lo que la familia sabe y no tenía dónde poner. Las tres entran
+  // como observación, no como diagnóstico.
+  registrarObservacionComportamiento,
+  declararAlergiaFamilia,
+  declararCondicionFamilia,
+  SEVERIDADES_ALERGIA,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
   registrarRecuerdoFamilia,
@@ -1856,6 +1862,19 @@ export {
   activarPlaca,
   type CodigoErrorPlaca,
 } from './wrappers/coach';
+/* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
+   pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
+   por dónde llamarlo. Se abre acá copiando el molde, sin tocar nada de A. */
+export {
+  emitirPasaporte,
+  revocarPasaporte,
+  configurarPasaporte,
+  marcarPerdida,
+  CODIGOS_PASAPORTE,
+  type CodigoErrorPasaporte,
+  type PasaporteEmitido,
+  type ConfiguracionDePasaporte,
+} from './wrappers/pasaporte';
 
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d)) — la puerta a la edge `coach`.** A hizo el
    motor y sus wrappers, D hizo la edge, y **nadie escribió la puerta entre las

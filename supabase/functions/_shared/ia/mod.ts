@@ -140,10 +140,15 @@ function construirCuerpo(
   pensar: boolean,
   esfuerzo: Esfuerzo | null,
 ): Record<string, unknown> {
-  const contenidoImagenes = (p.imagenes ?? []).map((img) => ({
-    type: 'image',
-    source: { type: 'base64', media_type: img.mediaType, data: img.base64 },
-  }))
+  // 🔴 UN PDF NO ES UNA IMAGEN, y mandarlo como `type: 'image'` con
+  // `media_type: application/pdf` **no da error: da una lectura basura**. El
+  // proveedor tiene un bloque propio (`type: 'document'`), y la diferencia la
+  // decide el mediaType, no quien llama — así ninguna edge se olvida.
+  // Lo abre la bóveda (lote 2.2): los exámenes de laboratorio llegan en PDF.
+  const contenidoImagenes = (p.imagenes ?? []).map((img) =>
+    img.mediaType === 'application/pdf'
+      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.base64 } }
+      : { type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } })
 
   const messages = p.mensajes.map((m, i) => ({
     role: m.rol,

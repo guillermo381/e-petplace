@@ -1398,6 +1398,28 @@ export default function PerfilDeMascota() {
           </View>
         ) : null}
 
+        {/* ⭐ **LA ENTRADA AL PASAPORTE** (S113-C · 1.3 · C1). Va en el
+            bloque de IDENTIDAD porque **es identidad**: la chapita dice
+            quién es y de quién es. *Ponerla entre las acciones de cuidado
+            la habría dejado al lado de «registrar peso», que es otra
+            conversación.*
+            🔴 **No se dibuja en memorial**: `sePintaPasaporte` de B lo dice
+            y la pantalla lo respeta desde acá — *un pasaporte es para
+            encontrar a alguien que se perdió.* */}
+        {!esMemorial ? (
+          <View style={{ marginTop: spacing[3] }}>
+            <Celda
+              interactiva
+              accessibilityRole="button"
+              titulo={t('pasaporte.entrada')}
+              subtitulo={t('pasaporte.entradaDetalle')}
+              onPress={() =>
+                router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } })
+              }
+            />
+          </View>
+        ) : null}
+
         {/* ⭐ **LA FICHA DE LA RAZA** (S113-C · 1.2 · C10).
             Va **pegada a la identidad**, que es de lo que habla — pero
             **debajo de la franja de seguridad**, por decisión declarada: una

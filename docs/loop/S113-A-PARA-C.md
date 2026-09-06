@@ -71,6 +71,24 @@ por el lector**, no sólo por el purgador. `borrarHiloCoach` borra de verdad.
 - `obtenerContenidoDeRaza(especie, raza)` · `registrarFinDeVida(...)` ·
   `sugerirRaza(...)` — ya estaban.
 
+## Lo que la familia sabe y no tenía dónde poner (nuevo)
+
+- `registrarObservacionComportamiento(mascotaId, { texto, fecha? })` — «le
+  tiene miedo a los truenos». Entra como `observacion_comportamiento`.
+- `declararAlergiaFamilia(mascotaId, { alergeno, severidad, reaccion?, desde? })`
+- `declararCondicionFamilia(mascotaId, { condicion, descripcion?, desde? })`
+
+🔴 **Las dos últimas entran como `'sospechada'`, nunca confirmada, y la
+pantalla tiene que decirlo.** La franja de seguridad **sí las muestra**
+(verificado: llegan al perfil vigente), y el plan y guardería **no las tratan
+como diagnóstico**. *La procedencia sola no alcanzaba: un lector que filtra por
+«tiene alergia» no mira quién lo dijo — el estado sí lo mira todo el mundo.*
+
+La severidad se elige entre `SEVERIDADES_ALERGIA` (leve · moderada · severa ·
+anafiláctica) y **no tiene default a propósito**: poner «leve» por comodidad
+sería inventar un dato clínico en el único campo que decide si alguien corre a
+una clínica.
+
 ## Lo que NO existe y no lo pidas
 
 - **Puerta de familia para adjuntar un papel a la mascota** (la bóveda, 2.2).

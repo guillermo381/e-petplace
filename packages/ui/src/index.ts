@@ -1156,6 +1156,29 @@ export { ListaPlanVacunal, type ListaPlanVacunalProps, type FilaPlanVacunal } fr
    que comparten tinta —el hueco del carnet y «todavía no le toca»—, porque si
    sólo las separara el color serían el mismo punto. */
 export { PuntoEstado, type PuntoEstadoProps } from './components/PuntoEstado'
+
+/* ══ EL PASAPORTE (S113-B · 1.3) ═══════════════════════════════════════════
+ * 🔴 **Ninguna pieza genera el QR: lo reciben dibujado.** Generarlo exige una
+ * librería que este grafo no tiene, y una dependencia nueva no viaja por OTA.
+ * La página pública NO vive acá: es HTML y vive junto a los papeles, en
+ * `supabase/functions/_shared/pasaporte-html.ts` — *su lector no es la app,
+ * es un desconocido en la calle.* */
+export { TarjetaPasaporte, type TarjetaPasaporteProps } from './components/TarjetaPasaporte'
+export { PlacaQR, type PlacaQRProps } from './components/PlacaQR'
+export { AccionesPasaporte, type AccionesPasaporteProps } from './components/AccionesPasaporte'
+export {
+  ConfiguracionPasaporte,
+  type ConfiguracionPasaporteProps,
+  type OpcionPasaporte,
+} from './components/ConfiguracionPasaporte'
+export {
+  sePintaPasaporte,
+  filtrarPorVisibilidad,
+  type QrPasaporte,
+  type EstadoPasaporte,
+  type VisibilidadPasaporte,
+} from './components/pasaporte-qr'
+export { svgDeLaPlaca, ladoQrMm, LADO_MM, MARGEN_MM, type PlacaQrDatos } from './components/placa-qr'
 /* La lógica del estado vive aparte para que su gate no arrastre `react-native`
    — mismo motivo que `coach-geometria` (`L-175`). */
 export {

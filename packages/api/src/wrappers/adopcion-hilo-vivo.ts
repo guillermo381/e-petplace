@@ -21,6 +21,38 @@
 
 import { getClient } from '../client';
 
+/**
+ * 🔴 EL ARRANQUE SE CAÍA POR ACÁ, y el defecto tiene dos mitades que se
+ * necesitan (S113-A · noche, medido por E con un deep link durante el
+ * arranque: 3 de 4 caídas).
+ *
+ * ① **El canal se llamaba `'mis-hilos'`, fijo.** `supabase-js` indexa los
+ *    canales POR NOMBRE: con dos montajes —y durante un arranque con deep link
+ *    hay dos— el segundo `.channel(nombreDeCanal('mis-hilos'))` no crea uno nuevo, **toca el
+ *    mismo objeto que el primero todavía tiene suscrito**. Suscribirse dos
+ *    veces al mismo canal es un error de estado, y en el arranque se ve como
+ *    una raíz que se cae.
+ * ② **`void supabase.removeChannel(canal)`.** Es asíncrono, y con `void` nadie
+ *    lo espera: el montaje nuevo se suscribe mientras el viejo todavía se está
+ *    yendo. *Una limpieza que no se espera no es una limpieza: es una carrera.*
+ *
+ * La cura vuelve el estado **inexpresable**, no lo esquiva: el nombre es único
+ * por montaje (dos montajes NO pueden compartir canal aunque quieran) y todo
+ * subscribe/remove pasa por UNA cadena de promesas del módulo, así que el
+ * siguiente empieza cuando el anterior terminó — **en orden y sin solaparse**.
+ *
+ * ⚠️ La función de limpieza sigue siendo SÍNCRONA porque es lo que `useEffect`
+ * exige. Lo que se encadena es el trabajo, no la firma.
+ */
+let _serie = 0;
+let _cadena: Promise<unknown> = Promise.resolve();
+
+/** Un nombre que dos montajes no pueden compartir ni por accidente. */
+function nombreDeCanal(base: string): string {
+  _serie += 1;
+  return `${base}-${_serie}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export interface MensajeEnVivo {
   id: string;
   solicitudId: string;
@@ -50,7 +82,7 @@ export function suscribirseAlHilo(
   });
 
   const canal = supabase
-    .channel(`hilo-adopcion-${solicitudId}`)
+    .channel(nombreDeCanal(`hilo-adopcion-${solicitudId}`))
     .on(
       'postgres_changes',
       {
@@ -73,10 +105,12 @@ export function suscribirseAlHilo(
       },
     );
 
-  void canal.subscribe();
+  // misma cadena que el canal de la lista: dos hilos abiertos a la vez —o el
+  // mismo hilo reabierto— no pueden solaparse.
+  _cadena = _cadena.then(() => canal.subscribe());
 
   return () => {
-    void supabase.removeChannel(canal);
+    _cadena = _cadena.then(() => supabase.removeChannel(canal)).catch(() => {});
   };
 }
 
@@ -126,10 +160,6 @@ export type CambioEnMisHilos =
  * @returns la función de desuscripción. **Se llama al cerrar sesión**, no al
  *   salir de una pantalla: esta suscripción es de la sesión.
  */
-/** Sube en cada montaje. **Local al módulo y sin persistir**: sólo tiene que
- *  distinguir dos suscripciones vivas en el mismo proceso. */
-let secuenciaCanal = 0;
-
 export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): () => void {
   const supabase = getClient();
   let miUid: string | null = null;
@@ -150,23 +180,8 @@ export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): (
     if (sesion?.access_token) supabase.realtime.setAuth(sesion.access_token);
   });
 
-  /* 🔴 **EL NOMBRE ES ÚNICO POR MONTAJE, Y ESO CURA UN CRASH DE ARRANQUE.**
-     E lo midió: la raíz se caía **3 de cada 4 veces** con una segunda
-     navegación durante el arranque — *que es exactamente lo que hace abrir la
-     app desde un QR*.
-     La cadena: `supabase.channel(nombre)` **devuelve el canal que ya existe**
-     si el nombre coincide, y `.on()` sobre uno ya suscrito **lanza**. Con un
-     nombre fijo, dos montajes rápidos son el mismo canal; y el `removeChannel`
-     del cleanup **no se esperaba**, así que el primero seguía registrado
-     cuando el segundo pedía el suyo.
-     ⚠️ *No alcanzaba con esperar el `removeChannel`*: el cleanup de React es
-     síncrono y no puede `await`. **Con nombre único el problema deja de ser
-     expresable** — dos montajes nunca piden el mismo canal — y la limpieza del
-     viejo puede terminar cuando quiera sin pisar a nadie.
-     ⚠️ El nombre **no es un identificador de negocio**: nadie lo lee del otro
-     lado. Es la llave de un registro local de sockets. */
   const canal = supabase
-    .channel(`mis-hilos-${++secuenciaCanal}-${Date.now().toString(36)}`)
+    .channel(nombreDeCanal('mis-hilos'))
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'adopcion_mensaje' },
@@ -194,19 +209,15 @@ export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): (
       },
     );
 
-  void canal.subscribe((estado) => {
+  /* El subscribe entra a la cadena: si otro montaje todavía se está yendo,
+     éste espera. *Sin la cadena, «limpiar» y «suscribir» corren a la vez.* */
+  _cadena = _cadena.then(() => canal.subscribe((estado) => {
     if (estado === 'SUBSCRIBED') onCambio({ tipo: 'reconectado' });
-  });
+  }));
 
   return () => {
     sub?.subscription?.unsubscribe();
-    /* Se sigue sin `await` **porque el cleanup de React no puede esperarlo** —
-       y ya no hace falta: con el nombre único, que este canal tarde en morir no
-       impide que el siguiente nazca. *La promesa se encadena igual para que un
-       rechazo no quede sin dueño.* */
-    void supabase.removeChannel(canal).catch(() => {
-      /* Un socket que no se pudo cerrar no es algo que la familia deba ver:
-         se cierra solo cuando el transporte cae. Silencio deliberado. */
-    });
+    // se ENCADENA (no se descarta): el próximo subscribe arranca después
+    _cadena = _cadena.then(() => supabase.removeChannel(canal)).catch(() => {});
   };
 }

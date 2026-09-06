@@ -23,10 +23,13 @@ const CTX = {
 }
 
 let cuerpos: Record<string, unknown>[] = []
+/** Escrituras REST por tabla. Es lo que prueba que la propuesta de memoria
+ *  se PROPONE y no se guarda: la edge no puede tocar `coach_memoria`. */
+let escrituras: Record<string, number> = {}
 let ctxDevuelto: unknown = [CTX]
 const fetchReal = globalThis.fetch
 function proveedorFalso(devuelve: (n: number) => unknown) {
-  cuerpos = []
+  cuerpos = []; escrituras = {}
   globalThis.fetch = ((entrada: string | URL | Request, init?: RequestInit) => {
     const url = String(entrada instanceof Request ? entrada.url : entrada)
     if (url.includes('api.anthropic.com')) {
@@ -45,34 +48,32 @@ function proveedorFalso(devuelve: (n: number) => unknown) {
       return Promise.resolve(new Response(JSON.stringify(ctxDevuelto),
         { status: 200, headers: { 'Content-Type': 'application/json' } }))
     }
-    if (url.includes('/rest/v1/ia_uso')) return Promise.resolve(new Response('[]', { status: 201 }))
-    if (url.includes('/rest/v1/')) return Promise.resolve(new Response('[]', { status: 200 }))
+    if (url.includes('/rest/v1/')) {
+      if ((init?.method ?? 'GET') !== 'GET') {
+        const tabla = url.split('/rest/v1/')[1].split('?')[0]
+        escrituras[tabla] = (escrituras[tabla] ?? 0) + 1
+      }
+      return Promise.resolve(new Response('[]', { status: 201 }))
+    }
     return fetchReal(entrada as string, init)
   }) as typeof fetch
 }
+/** 🔴 UN SOLO proveedor falso, y esto NO es prolijidad.
+ *  Antes había DOS: `proveedorFalso` y una copia adentro de `textoPlano` con su
+ *  propio `fetch`. Esa copia ya me costó dos defectos —detectaba el router
+ *  buscando `"intencion"` en el cuerpo, donde va escapada, y no contaba las
+ *  escrituras REST— y los dos se leían como problemas de la edge.
+ *  *Dos dobles del mismo mundo divergen, y el que diverge es siempre el que no
+ *  estás mirando.*
+ *
+ *  `textoPlano(t)` es azúcar: envuelve la prosa en el JSON que la redacción
+ *  devuelve desde el lote 2.0b. `redaccionCruda(json)` manda el cuerpo tal cual.
+ */
 function textoPlano(t: string) {
-  proveedorFalso(() => t)
-  globalThis.fetch = ((e: string | URL | Request, i?: RequestInit) => {
-    const url = String(e instanceof Request ? e.url : e)
-    if (url.includes('api.anthropic.com')) {
-      // 🔴 Se detecta por MODELO, no por el texto del cuerpo. La primera
-      // versión buscaba la cadena `"intencion"` y **nunca la encontraba**: en
-      // el cuerpo serializado va escapada (`\"intencion\"`), así que TODAS las
-      // llamadas se atendían como redacción, el router recibía texto plano,
-      // fallaba a `busqueda` y la redacción no ocurría nunca. *El arnés daba
-      // rojos que parecían de la edge y eran suyos.*
-      const cuerpoLlamada = JSON.parse(String(i?.body ?? '{}'))
-      const esRouter = cuerpoLlamada.model === 'claude-haiku-4-5'
-      cuerpos.push(cuerpoLlamada)
-      return Promise.resolve(new Response(JSON.stringify({
-        content: [{ type: 'text', text: esRouter ? '{"intencion":"narrativa","campos":{}}' : t }],
-        stop_reason: 'end_turn', usage: { input_tokens: 10, output_tokens: 5 },
-      }), { status: 200 }))
-    }
-    if (url.includes('/auth/v1/user')) return Promise.resolve(new Response(JSON.stringify({ id: 'u1' }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
-    if (url.includes('/rest/v1/rpc/obtener_contexto_coach')) return Promise.resolve(new Response(JSON.stringify(ctxDevuelto), { status: 200, headers: { 'Content-Type': 'application/json' } }))
-    return Promise.resolve(new Response('[]', { status: 201 }))
-  }) as typeof fetch
+  redaccionCruda(JSON.stringify({ respuesta: t, semaforo: null, propuesta_memoria: null }))
+}
+function redaccionCruda(json: string) {
+  proveedorFalso((n) => n === 1 ? { intencion: 'narrativa', campos: {} } : JSON.parse(json))
 }
 
 let manejador: ((r: Request) => Response | Promise<Response>) | null = null
@@ -152,7 +153,7 @@ for (const [pregunta, plantilla, dentro] of [
   ['\u00bfle toca alguna vacuna?', 'plan_vacunal', 'M\u00faltiple'],
   ['\u00bfes al\u00e9rgico a algo?', 'alergias', 'pollo'],
 ] as const) {
-  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : 'NO DEBERIA REDACTARSE')
+  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : { respuesta: 'NO DEBERIA REDACTARSE', semaforo: null, propuesta_memoria: null })
   const { status, json } = await llamar({ mascotaId: 'm1', texto: pregunta })
   exigir(`\u00ab${pregunta}\u00bb \u2192 plantilla ${plantilla}`, status === 200 && json.plantilla === plantilla, json)
   exigir(`  ...con el dato adentro (${dentro})`, String(json.respuesta).includes(dentro), json.respuesta)
@@ -163,7 +164,7 @@ for (const [pregunta, plantilla, dentro] of [
   // \ud83d\udd34 su rojo: sin el dato, la plantilla NO contesta. Es lo que separa
   // \u00abno lo tengo\u00bb de un n\u00famero inventado con cara de certeza.
   ctxDevuelto = [{ ...CTX, peso_kg: null, peso_fecha: null }]
-  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : 'no tengo su peso anotado')
+  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : { respuesta: 'no tengo su peso anotado', semaforo: null, propuesta_memoria: null })
   const { json } = await llamar({ mascotaId: 'm1', texto: '\u00bfcu\u00e1nto pesa?' })
   exigir('sin peso, la plantilla SE CALLA y cae a la redacci\u00f3n', json.fuente === 'modelo', json.fuente)
   exigir('  ...o sea DOS llamadas, y la respuesta la escribe el modelo', cuerpos.length === 2, cuerpos.length)
@@ -171,7 +172,7 @@ for (const [pregunta, plantilla, dentro] of [
 }
 {
   ctxDevuelto = [{ ...CTX, proxima_cita: null }]
-  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : 'x')
+  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : { respuesta: 'x', semaforo: null, propuesta_memoria: null })
   const { json } = await llamar({ mascotaId: 'm1', texto: '\u00bfcu\u00e1ndo es la pr\u00f3xima cita?' })
   exigir('sin cita, la plantilla dice que NO HAY (no calla ni inventa)',
     json.fuente === 'plantilla' && /No tengo ninguna cita/.test(String(json.respuesta)), json.respuesta)
@@ -209,14 +210,14 @@ for (const ataque of [
 
 console.log('\n== 6 · EL ROUTER: lista blanca, y degrada hacia la rama PROTEGIDA ==')
 {
-  proveedorFalso((n) => n === 1 ? { intencion: 'busqueda' } : 'no debería')
+  proveedorFalso((n) => n === 1 ? { intencion: 'busqueda' } : { respuesta: 'no debería', semaforo: null, propuesta_memoria: null })
   const { json } = await llamar({ mascotaId: 'm1', texto: 'el pedido de croquetas de la semana pasada' })
   exigir('búsqueda → devuelve la consulta y NO redacta', json.intencion === 'busqueda' && json.respuesta === null, json)
   exigir('  ...una sola llamada (el router), no dos', cuerpos.length === 1, cuerpos.length)
   exigir('  ...y la consulta viaja limpia', json.consulta === 'el pedido de croquetas de la semana pasada', json.consulta)
 }
 {
-  proveedorFalso((n) => n === 1 ? { intencion: 'inventada' } : 'respondo igual')
+  proveedorFalso((n) => n === 1 ? { intencion: 'inventada' } : { respuesta: 'respondo igual', semaforo: null, propuesta_memoria: null })
   const { json } = await llamar({ mascotaId: 'm1', texto: 'contame algo' })
   exigir('intención fuera de la lista → cae a `narrativa` (la rama CON la ley)',
     json.intencion === 'narrativa', json.intencion)
@@ -275,6 +276,90 @@ console.log('\n== 8 · EL CUERPO QUE SALE ==')
   for (const ley of ['NO DIAGNOSTIC', 'otra mascota o algo de la app', 'un menor', 'LO DECÍS', 'veterinario'])
     exigir(`  la ley dice «${ley}»`, sis.includes(ley))
   exigir('la memoria de la familia entra como bloque', sis.includes('truenos'))
+}
+
+console.log('\n== 8bis · 🔴 SEMÁFORO Y PROPUESTA EN EL CUERPO (pedido de C) ==')
+{
+  redaccionCruda(JSON.stringify({
+    respuesta: 'Eso conviene verlo esta semana. Fijate si sigue cojeando.',
+    semaforo: { nivel: 'semana', motivo: 'cojea desde ayer' },
+    propuesta_memoria: null,
+  }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'Thor cojea desde ayer' })
+  exigir('el semáforo VIAJA en el cuerpo, no en la prosa',
+    (json.semaforo as Record<string, unknown>)?.nivel === 'semana', json.semaforo)
+  exigir('  ...con su motivo, en palabras de la familia',
+    (json.semaforo as Record<string, unknown>)?.motivo === 'cojea desde ayer', json.semaforo)
+}
+{
+  // el par que discrimina: pregunta SIN síntoma ⇒ semáforo null.
+  textoPlano('Los golden suelen pesar entre 25 y 34 kg.')
+  const { json } = await llamar({ mascotaId: 'm1', texto: '¿cuánto suele pesar un golden?' })
+  exigir('CONTROL: sin síntoma, semáforo null', json.semaforo === null, json.semaforo)
+  console.log('     ↑ un semáforo donde no hay síntoma le enseña a la familia a ignorarlos.')
+}
+for (const nivel of ['casa', 'semana', 'ya'] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: 'x', semaforo: { nivel, motivo: 'm' }, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`nivel «${nivel}» pasa`, (json.semaforo as Record<string, unknown>)?.nivel === nivel, json.semaforo)
+}
+for (const [caso, malo] of [
+  ['nivel inventado', { nivel: 'urgentisimo', motivo: 'm' }],
+  ['nivel que no es texto', { nivel: 3, motivo: 'm' }],
+  ['semáforo que es una cadena', 'ya'],
+  ['semáforo que es lista', ['ya']],
+] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: 'x', semaforo: malo, propuesta_memoria: null }))
+  const { status, json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`${caso} → se ANULA entero, y la respuesta sale igual`,
+    status === 200 && json.semaforo === null && json.respuesta === 'x', { s: status, sem: json.semaforo })
+}
+console.log('     ↑ NO se degrada al más grave ni al más leve: inventar la urgencia')
+console.log('       en cualquiera de las dos direcciones es peor que no mostrarla.')
+{
+  redaccionCruda(JSON.stringify({
+    respuesta: '¿Guardo que le tiene miedo a los petardos?',
+    semaforo: null, propuesta_memoria: { hecho: 'Le tiene miedo a los petardos' },
+  }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'se esconde con los petardos' })
+  exigir('la propuesta de memoria VIAJA en el cuerpo',
+    (json.propuesta_memoria as Record<string, unknown>)?.hecho === 'Le tiene miedo a los petardos', json.propuesta_memoria)
+  exigir('  🔴 ...y la edge NO escribió en `coach_memoria`', (escrituras.coach_memoria ?? 0) === 0, escrituras)
+  exigir('  ...lo único que escribió es su fila de `ia_uso`', (escrituras.ia_uso ?? 0) === 2, escrituras)
+  console.log('     ↑ dos filas de ia_uso: router y redacción. Cero en memoria.')
+  console.log('       Una propuesta que el servidor guarda solo deja de ser una propuesta.')
+}
+{
+  // 🔴 lo que YA está en la memoria no se vuelve a proponer.
+  redaccionCruda(JSON.stringify({
+    respuesta: 'x', semaforo: null,
+    propuesta_memoria: { hecho: 'le tiene miedo a los TRUENOS!' },
+  }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir('un hecho YA en la memoria no se re-propone (ni con otro caso/puntuación)',
+    json.propuesta_memoria === null, json.propuesta_memoria)
+  console.log('     ↑ pedirle a la familia que confirme dos veces lo mismo gasta su confianza.')
+}
+for (const malo of [{ hecho: '' }, { hecho: 42 }, 'texto suelto', []]) {
+  redaccionCruda(JSON.stringify({ respuesta: 'x', semaforo: null, propuesta_memoria: malo }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`propuesta malformada (${JSON.stringify(malo).slice(0, 18)}) → null`, json.propuesta_memoria === null, json.propuesta_memoria)
+}
+{
+  // sin `respuesta` no hay burbuja que pintar: eso SÍ rebota.
+  redaccionCruda(JSON.stringify({ semaforo: { nivel: 'ya', motivo: 'm' } }))
+  const { status, json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir('sin `respuesta` → 502, no una burbuja en blanco', status === 502, { s: status, j: json.codigo })
+}
+{
+  // los caminos que no pasan por el modelo declaran los campos igual
+  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : { respuesta: 'no', semaforo: null, propuesta_memoria: null })
+  const a = await llamar({ mascotaId: 'm1', texto: '¿cuánto pesa?' })
+  exigir('la plantilla también trae los campos, en null',
+    a.json.semaforo === null && a.json.propuesta_memoria === null && 'semaforo' in a.json, a.json)
+  proveedorFalso((n) => n === 1 ? { intencion: 'busqueda', campos: {} } : { respuesta: 'no', semaforo: null, propuesta_memoria: null })
+  const b = await llamar({ mascotaId: 'm1', texto: 'el pedido del mes pasado' })
+  exigir('la búsqueda también', 'semaforo' in b.json && b.json.semaforo === null, b.json)
 }
 
 console.log('\n== 9 · EL AVISO DE IA: en la primera respuesta del hilo ==')

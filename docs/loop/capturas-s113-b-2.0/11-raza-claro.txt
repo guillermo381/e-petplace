@@ -1,0 +1,12 @@
+modo=light · p=raza
+¿Es un Beagle?
+muy probable
+¿Boxer?
+probable
+Mestizo
+Otra
+Beagle
+Ver más sobre la raza
+›
+!
+Uncaught (in promise, id: 0) Error: getClient: initApi() no fue llamado. Inicializá la API en el entry de la app.
