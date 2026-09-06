@@ -1826,3 +1826,25 @@ export {
   type InputSugerirRaza,
   type CodigoErrorRaza,
 } from './wrappers/razas';
+
+// ── NEXO · S113-A lote 2.0 ────────────────────────────────────────────────
+// El contexto de una mascota en UN viaje, la búsqueda de la familia, la
+// memoria editable y el hilo. Ninguna existe en memorial: lo rebota el motor.
+export {
+  obtenerContextoCoach,
+  type ContextoCoach,
+  buscarEnMiFamilia,
+  type ResultadoBusqueda,
+  type TipoResultado,
+  listarMemoriaCoach,
+  agregarMemoriaCoach,
+  editarMemoriaCoach,
+  borrarMemoriaCoach,
+  type HechoDeMemoria,
+  type FuenteMemoria,
+  leerHiloCoach,
+  guardarTurnoCoach,
+  borrarHiloCoach,
+  type TurnoCoach,
+  type CodigoErrorCoach,
+} from './wrappers/coach';
