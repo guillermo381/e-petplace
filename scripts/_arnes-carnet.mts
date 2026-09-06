@@ -191,8 +191,25 @@ t('🔴 la línea es condicional, no un valor por defecto',
 t('la voz es opcional', /vozOrigen\?: string/.test(CONF), true);
 t('🔴 y `origen` ya no viaja: el contrato lo exigía y el dibujo lo ignoraba',
   /^\s+origen: OrigenLectura/m.test(CONF), false);
-t('el tipo sigue exportado —es el vocabulario de la revisión—',
-  /type OrigenLectura/.test(INDICE), true);
+t('el vocabulario sigue exportado —es el de esta revisión—',
+  /type EvidenciaAplicacion/.test(INDICE), true);
+
+console.log('\n── ⑯ ROJO · EL VOCABULARIO DE LA EVIDENCIA (v2.1) ──');
+/* ☠️ El viejo contestaba DÓNDE ESTÁ ESCRITA LA FECHA; éste, QUÉ PRUEBA LA
+   APLICACIÓN. **No es un renombre: es otra pregunta**, y la misma fila da
+   respuestas opuestas —sticker pegado con la fecha a mano al lado: el dato
+   salió a mano, la prueba es el sticker—. Por eso el viejo se leía distinto
+   dos veces: **dos manos lo clasificaron 4 a 0.** */
+t('🔴 son los CUATRO de la v2.1, en orden',
+  /export type EvidenciaAplicacion = 'sticker' \| 'sello' \| 'manuscrito' \| 'impreso'/.test(CONF), true);
+t('🔴 `aMano` MURIÓ: contestaba la pregunta vieja', /'aMano'/.test(CONF), false);
+t('☠️ y `OrigenLectura` no vuelve por la puerta de atrás',
+  /export type OrigenLectura/.test(CONF), false);
+t('la lápida queda: quien lo busque encuentra por qué se fue',
+  /OrigenLectura/.test(readFileSync(
+    new URL('../packages/ui/src/components/FilaConfirmacionVacuna.tsx', import.meta.url), 'utf8')), true);
+t('`impreso` es un DATO, no un hueco: entra al vocabulario',
+  /'impreso'/.test(CONF), true);
 
 console.log('\n── ⑪ EL ORBE SE PUEDE IMPORTAR (o se copia una cuarta vez) ──');
 t('`OrbeCoach` sale del índice', /export \{ OrbeCoach, type OrbeCoachProps \}/.test(INDICE), true);
@@ -365,6 +382,55 @@ t('descartada sin nombre DICE cuál era, no queda muda',
 /* ⚠️ El foco lo decide la LISTA: con dos filas sin nombre, `autoFocus` en las
    dos deja el foco en la última y la pantalla salta al fondo. */
 t('el foco entra por prop y su default NO enfoca', /enfocar = false/.test(CONF), true);
+
+console.log('\n── ⑳ ROJO · LA RAZÓN LLEVA, Y EL FOCO VA AL CAMPO QUE FALTA ──');
+/* 🔴 (b) *Decirle a la persona que le faltan cuatro y dejarla buscarlas es
+   darle el trabajo dos veces: la cuenta ya sabe cuáles son.* La pieza no
+   conoce la lista —no puede scrollear— así que avisa y la pantalla lleva. */
+t('la razón lleva SÓLO con destino y con a dónde',
+  /const llevaAIncompleta = faltan === 0 && incompletas > 0 && onIrAIncompleta !== undefined/.test(CONF), true);
+t('🔴 …y con «faltan N por revisar» NO lleva: son N destinos y ninguno primero',
+  /faltan === 0 && incompletas > 0/.test(CONF), true);
+t('se dibuja como control: label con chevron (19.7)',
+  /accessibilityRole="button"[\s\S]{0,200}onPress=\{onIrAIncompleta\}/.test(CONF), true);
+t('🔴 sin el callback la línea SIGUE diciendo la razón (se pierde el atajo, no el porqué)',
+  /onIrAIncompleta\?: \(\) => void/.test(CONF), true);
+/* 🔴 (c) `autoFocus` es de `TextInput`, y el campo de la fecha es un
+   `Pressable`. *La señal visual la ve quien mira; el que no mira se queda sin
+   ella si nadie lleva el foco.* */
+t('el foco de la fecha usa la API de accesibilidad, no `autoFocus`',
+  /AccessibilityInfo\.setAccessibilityFocus\(nodo\)/.test(CONF), true);
+t('🔴 …y sólo cuando la pantalla lo pide Y lo que falta es la fecha',
+  /if \(!enfocar \|\| falta !== 'fecha'\) return/.test(CONF), true);
+t('no poder enfocar NO tumba la fila: el campo igual está señalado',
+  /if \(nodo != null\) AccessibilityInfo/.test(CONF), true);
+t('🔴 la razón viaja en la etiqueta del campo: quien no ve el borde, la oye',
+  /`\$\{c\.etiqueta\} · \$\{vozIncompleta\}`/.test(CONF), true);
+
+console.log('\n── ㉑ ROJO · UN GUARD `&&` SOBRE UN STRING DEJA UN HIJO DE TEXTO ──');
+/* 🔴 `{x && <Y/>}` con `x = ''` no dibuja `<Y>`: **deja `''` como hijo de la
+   `View`**, que es la forma en que React Native tira *«Text strings must be
+   rendered within a <Text>»*. ⚠️ **No se midió que se materializara** — y no
+   hace falta: `x ? … : null` **hace el estado inexpresable** y no cuesta nada.
+   *Una posibilidad que se puede cerrar gratis no se documenta: se cierra.*
+   Y se curó LA CLASE, no el caso: el pedido nombraba `fechaLiteral` y **el
+   censo encontró TRES en la misma pieza** —las otras dos ya estaban antes—.
+   *Curar el síntoma reportado y dejar las gemelas es media cura.* */
+const FICHA = sinComentarios(readFileSync(
+  new URL('../packages/ui/src/components/FichaVacuna.tsx', import.meta.url), 'utf8'));
+t('🔴 cero guards `&&` que abran JSX en la pieza', /&& \(/.test(FICHA), false);
+t('…y los tres cierran con `: null`', (FICHA.match(/\) : null\}/g) ?? []).length >= 3, true);
+/* 🔴 El literal es EL dato que se pide verificar: truncarlo deja a la persona
+   comparando contra media transcripción. */
+/* ⚠️ Se mide DESDE `fechaLiteral` y no desde la forma del guard: la primera
+   versión de este assert exigía `{fechaLiteral ? (`, así que con el guard roto
+   dejaba de medir el truncado y **daba verde por la razón equivocada**. */
+t('🔴 el literal del carnet NO se trunca',
+  /fechaLiteral[\s\S]{0,160}?numberOfLines/.test(FICHA), false);
+t('CONTROL · las otras dos líneas SÍ siguen truncando, que es correcto',
+  (FICHA.match(/numberOfLines=\{1\}/g) ?? []).length >= 2, true);
+t('el literal sigue en voz de máquina, como las fechas',
+  /\{fechaLiteral \? \([\s\S]{0,200}?typography\.family\.mono/.test(FICHA), true);
 
 console.log('\n── ⑮ ROJO · LOS CONSUMIDORES DE `main`, QUE ESTE ÁRBOL NO PUEDE VER ──');
 /* 🔴 **ESTE BRAZO NACE DE UN DAÑO, no de una precaución.**

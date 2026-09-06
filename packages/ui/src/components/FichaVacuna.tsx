@@ -172,7 +172,7 @@ export function FichaVacuna({
         </View>
 
         {/* tipo + veterinario — voz humana secundaria */}
-        {(tipoVacuna || veterinario) && (
+        {tipoVacuna || veterinario ? (
           <Text
             numberOfLines={1}
             style={{
@@ -183,10 +183,10 @@ export function FichaVacuna({
           >
             {[tipoVacuna, veterinario].filter(Boolean).join(' · ')}
           </Text>
-        )}
+        ) : null}
 
         {/* fechas + lote — voz de máquina: mono minúsculas */}
-        {(fechas.length > 0 || lote) && (
+        {fechas.length > 0 || lote ? (
           <Text
             numberOfLines={1}
             style={{
@@ -200,12 +200,16 @@ export function FichaVacuna({
               .filter(Boolean)
               .join(' · ')}
           </Text>
-        )}
+        ) : null}
 
-        {/* el literal del carnet — voz de máquina, como las fechas */}
-        {fechaLiteral && (
+        {/* El literal del carnet — voz de máquina, como las fechas.
+            🔴 **SIN `numberOfLines`, y no es un olvido: es el dato que se pide
+            verificar.** *Truncar «26 JUN 2023» a «26 JUN…» deja a la persona
+            comparando contra media transcripción — y lo único que esta línea
+            hace es dejarle comparar.* Que envuelva en dos renglones es más
+            barato que perder el final. */}
+        {fechaLiteral ? (
           <Text
-            numberOfLines={1}
             style={{
               fontFamily: typography.family.mono.regular,
               fontSize: typography.size.xs,
@@ -215,7 +219,7 @@ export function FichaVacuna({
           >
             {t('fichaVacuna.elCarnetDice', { literal: fechaLiteral })}
           </Text>
-        )}
+        ) : null}
 
         {/* estado con voz humana + "Esta no es" */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[2] }}>
