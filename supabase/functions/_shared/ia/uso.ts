@@ -46,12 +46,19 @@ export type ResultadoUso =
  * casa quedaría diluido por llamadas que nunca respondieron.
  */
 export interface Uso {
-  /** 🔴 Caracteres del prompt (sistema + mensajes) y del base64 de las
-   *  imágenes. **Son caracteres y no tokens a propósito**: la API devuelve
-   *  `input_tokens` ya sumado y no hay forma de pedirle el desglose; contar
-   *  tokens aparte sería pagar una medición para explicar otra. Con
-   *  `tokens_entrada` al lado alcanzan para la única pregunta que importaba —
-   *  *cuando esto suba, ¿subió el prompt o subió la imagen?* */
+  /** Caracteres del prompt (sistema + mensajes) y del base64 de las imágenes.
+   *
+   *  🔴 **SIRVEN PARA VER CRECER UN PROMPT EN EL TIEMPO, Y PARA NADA MÁS.** No
+   *  reparten el costo de una llamada entre texto e imagen: **los tokens de una
+   *  imagen se calculan por sus PÍXELES** (del orden de 1.500 fijos para las
+   *  fotos de esta app), así que su base64 no dice cuánto pesó. *Dividir
+   *  caracteres de texto por caracteres de base64 da un número, y un número que
+   *  sale de comparar dos magnitudes distintas se lee igual de firme que uno
+   *  correcto.*
+   *
+   *  El instrumento para el reparto es `count_tokens`, y cuesta una llamada.
+   *  Con él D midió lo que estas columnas no podían decir: 3.175 tokens del
+   *  prompt nuevo contra 1.718 del viejo. */
   prompt_chars: number | null
   imagen_chars: number | null
   tokens_entrada: number | null

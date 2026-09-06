@@ -319,3 +319,46 @@ Hoy: **105 de antes · 110 nuevas** · 97 con ficha cargada, **0 publicadas**.
 | raza | | raza | |
 |---|---|---|---|
 | Otra especie | ·nueva | | |
+---
+
+## Para C — el candidato 1.2 espera tu SHA de cierre
+
+**Las puertas están en `main`.** Lo que necesitás para `FichaRaza` en el perfil y
+para la despedida:
+
+| puerta | dónde | qué devuelve |
+|---|---|---|
+| `obtenerContenidoDeRaza(especie, razaCodigo)` | `packages/api` | la ficha **publicada**, o `null` |
+| `registrarFinDeVida({ mascotaId, fecha, palabras? })` | `packages/api` | idempotente; `ya_estaba` cuando ya se registró |
+| `sugerirRaza({ imagenBase64, especie, mediaType })` | `packages/api` | hasta 3 candidatas del catálogo |
+
+**Tres cosas que conviene saber antes de dibujarlas:**
+
+1. 🔴 **`null` es la respuesta NORMAL de `obtenerContenidoDeRaza`, no un error.**
+   Hay **210 fichas y sólo 10 publicadas**: lo esperable hoy es que la mayoría de
+   las mascotas no tengan contenido. *Una pantalla que trate el `null` como falla
+   le va a decir a la familia que algo se rompió cuando lo único que pasa es que
+   todavía no escribimos sobre su raza.* Las diez vivas: `labrador-retriever` ·
+   `beagle` · `pug` · `loro-yaco-africano` · `persa` · `californian` ·
+   `chinchilla` · `bulldog-ingles` · `american-bully` · `maine-coon`.
+
+2. **Convención nueva para la mascota sin raza:** el contenido de una especie se
+   pide con **`obtenerContenidoDeRaza(especie, especie)`** — hay una ficha por
+   cada una de las once. *Ninguna está publicada todavía, así que hoy también
+   devuelve `null`.*
+
+3. ⚠️ **Las predisposiciones son temas para conversar con el veterinario, jamás
+   diagnósticos.** El prompt lo exige y las fichas lo cumplen —«algo para hablar
+   con el veterinario»—, así que **la pantalla no puede presentarlas como una
+   lista de enfermedades que ese animal tiene.** Que la raza tenga una
+   predisposición no significa que Thor la tenga, y eso tiene que leerse en la
+   pantalla y no sólo en el texto.
+
+**Y para la despedida:** `registrarFinDeVida` es **idempotente a propósito**. Si
+alguien vuelve a entrar —porque el toque no se sintió, porque otro adulto de la
+casa ya lo hizo— devuelve `ya_estaba: true` y **eso no se dibuja como error**.
+*Contestarle con un rebote a quien está registrando que su mascota murió sería
+devolverle el golpe.* Desde ese momento el expediente rechaza eventos fechados
+**después** de la partida (`mascota_en_memorial`); lo anterior sigue entrando,
+porque un veterinario cierra una atención días después y esa atención ocurrió
+cuando ella estaba viva.

@@ -1,4 +1,12 @@
 -- ═══════════════════════════════════════════════════════════════════════════
+-- ⚠️ SU PORQUÉ QUEDÓ CORREGIDO POR `20260909320000` — se MARCA y no se
+-- reescribe, porque este archivo dice lo que CORRIÓ. Lo que estaba mal no es la
+-- columna sino su justificación: acá abajo se afirma que con `imagen_chars` al
+-- lado se distingue «un prompt que crece de una imagen que crece», y eso es
+-- FALSO — los tokens de una imagen salen de sus PÍXELES, no de su base64. El
+-- reparto real lo midió D con `count_tokens`: 3.175 del prompt nuevo contra
+-- 1.718 del viejo, y la divergencia ERA el prompt. Leer la corrección primero.
+--
 -- S113-A — `ia_uso` guarda EL TAMAÑO DEL PROMPT, no sólo lo que costó
 --
 -- ── EL HUECO QUE ESTO CIERRA, con su caso ───────────────────────────────────

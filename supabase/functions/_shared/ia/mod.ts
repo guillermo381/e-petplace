@@ -282,9 +282,14 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
   // 🔴 LA LÍNEA QUE FALTABA (pedido del founder, S113 lote 2.7). E midió que la
   // edge parecía mandar ~1.200 tokens de entrada MÁS que el mismo prompt por
   // API, y **no se pudo cerrar por falta de este renglón**: `ia_uso` guarda los
-  // tokens pero nada dice de qué TAMAÑO tenía el prompt que los produjo, así
-  // que un prompt que crece no se distingue de una imagen que crece.
-  // Con las dos cifras juntas, la próxima divergencia se lee de un vistazo.
+  // tokens pero nada dice de qué TAMAÑO tenía el prompt que los produjo.
+  //
+  // ⚠️ ENMENDADO (A, 5-sep): el renglón decía que con las dos cifras juntas se
+  // distingue «un prompt que crece de una imagen que crece», y eso es FALSO —
+  // los tokens de una imagen salen de sus PÍXELES, no de su base64. Lo que esto
+  // sí contesta es si el PROMPT creció entre dos fechas, que es una pregunta
+  // real y no necesita tokenizador. El reparto lo dio `count_tokens`: 3.175 del
+  // prompt nuevo contra 1.718 del viejo, y la divergencia era el prompt.
   /* 🔴 LA MEDICIÓN PASA DEL LOG AL OBJETO (A, S113). El renglón de arriba ya
      existía y salía por `console.log` — pero *un dato que sólo vive en el log
      de una edge no se puede consultar seis meses después*, que es justo cuando
