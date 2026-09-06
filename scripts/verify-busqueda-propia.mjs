@@ -23,6 +23,11 @@
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
+import { exigirArgumentos } from './lib-argumentos.mjs';
+
+/* Un instrumento tiene que poder decir «no»: cualquier argumento que no entienda
+   corta en 2 en vez de correr midiendo otra cosa. */
+exigirArgumentos(['--control'], 0);
 
 const RPC = process.env.BUSQUEDA_RPC ?? 'buscar_en_mi_familia';
 const P95_MS = Number(process.env.BUSQUEDA_P95 ?? 200);

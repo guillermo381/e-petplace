@@ -1,0 +1,4 @@
+modo=light · p=glifo
+a 21 px — la estrella primero, después sus vecinos
+a 44 px
+en capa · su color es comunidad, no identidad

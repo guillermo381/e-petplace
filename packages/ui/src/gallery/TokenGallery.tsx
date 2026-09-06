@@ -28,6 +28,7 @@ import { Atmosfera } from '../brand/Atmosfera'
 import { RespuestaNexo } from '../components/RespuestaNexo'
 import { ResultadosBusqueda } from '../components/ResultadosBusqueda'
 import { PanelMemoria } from '../components/PanelMemoria'
+import { InvitacionBio } from '../components/InvitacionBio'
 import { ChipsSugerencia } from '../components/ChipsSugerencia'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
@@ -8677,6 +8678,25 @@ function GaleriaInterna() {
               hechos={[]}
               vozVacia="Todavía no me contaste nada; lo que me cuentes lo uso para acompañarlo mejor"
               voz={{ editar: 'Corregir', borrar: 'Borrar', guardar: 'Guardar', cancelar: 'Cancelar', campo: 'El hecho' }}
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S113 — LA INVITACIÓN AL BIO (lote 1.2.2) · qué decide: (a) que el texto se lea ENTERO y la segunda frase —la que invita— no se corte; (b) que la tarjeta se vea tocable sobre papel claro, donde `bg.card` es blanco contra casi blanco; (c) que las cuatro entradas queden ALINEADAS aunque «Rasgos de personalidad» no tenga glifo en el registry">
+          <View style={{ gap: spacing[4] }}>
+            <Texto variante="apoyo">
+              Al cierre de la ficha de raza, y también sola en el perfil cuando la
+              mascota no tiene ficha. Tocarla abre la Hoja con las cuatro.
+            </Texto>
+            <InvitacionBio
+              texto="Thor está en su etapa adulta. Contanos lo que lo hace único: cuanto mejor lo conozcamos, mejor lo acompañamos."
+              tituloHoja="Contanos de Thor"
+              entradas={[
+                { clase: 'comportamiento', titulo: 'Comportamiento', detalle: 'miedos, manías, cómo se lleva con otros', onPress: () => {} },
+                { clase: 'personalidad', titulo: 'Rasgos de personalidad', detalle: 'cómo es: tímido, glotón, mandón', onPress: () => {} },
+                { clase: 'medico', titulo: 'Temas médicos', detalle: 'alergias, condiciones, lo que el vet te dijo', onPress: () => {} },
+                { clase: 'recuerdo', titulo: 'Recuerdo', detalle: 'lo que hizo hoy', onPress: () => {} },
+              ]}
             />
           </View>
         </Seccion>

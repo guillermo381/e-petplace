@@ -129,8 +129,12 @@ interface Contexto {
 // decir: **no se llama al modelo**. Una respuesta generada sobre el expediente
 // de una mascota que murió es la peor cosa que esta pieza puede hacer, y no se
 // evita con una instrucción en el prompt: se evita no llegando al prompt.
+// 🔴 TUTEO, y esto lo destapó `R66` mordiendo mi wrapper: la regla mide
+// `packages/api` y las apps, **NO mide `supabase/functions/`** — así que una
+// voz en voseo que la edge devuelve y la pantalla PINTA pasa sin que nadie la
+// vea. Ésta es de las que se leen en el peor momento.
 const VOZ_MEMORIAL = (nombre: string) =>
-  `Acá está la vida de ${nombre}, entera. Podés mirarla cuando quieras.`
+  `Aquí está la vida de ${nombre}, entera. Puedes mirarla cuando quieras.`
 
 // ── ② LAS PLANTILLAS ───────────────────────────────────────────────────────
 // Cada una declara **qué patrón la despierta y qué dato necesita**. Si el dato
@@ -361,7 +365,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
     const auth = req.headers.get('Authorization') ?? ''
-    if (!auth.startsWith('Bearer ')) return error('sin_sesion', 'Iniciá sesión para hablar con Nexo.')
+    if (!auth.startsWith('Bearer ')) return error('sin_sesion', 'Inicia sesión para hablar con Nexo.')
 
     let body: unknown
     try { body = await req.json() } catch { return error('cuerpo_invalido', 'Cuerpo no es JSON.') }
@@ -370,7 +374,7 @@ Deno.serve(async (req) => {
     }
     if (typeof mascotaId !== 'string' || !mascotaId) return error('cuerpo_invalido', 'mascotaId requerido.')
     if (typeof texto !== 'string' || !texto.trim()) return error('cuerpo_invalido', 'texto requerido.')
-    if (texto.length > MAX_TEXTO) return error('texto_muy_largo', 'Escribime algo más corto.')
+    if (texto.length > MAX_TEXTO) return error('texto_muy_largo', 'Escríbeme algo más corto.')
 
     // 🔴 EL CONTEXTO SALE DEL SERVIDOR, SIEMPRE. No hay rama que lo acepte del
     // cuerpo, ni siquiera para pruebas: esa rama es la que convierte «no habla
@@ -382,7 +386,7 @@ Deno.serve(async (req) => {
 
     const { data: usuario } = await sb.auth.getUser(auth.replace('Bearer ', ''))
     const uid = usuario?.user?.id
-    if (!uid) return error('sin_sesion', 'Iniciá sesión para hablar con Nexo.')
+    if (!uid) return error('sin_sesion', 'Inicia sesión para hablar con Nexo.')
 
     const { data: filas, error: errCtx } = await sb
       .rpc('obtener_contexto_coach', { p_mascota_id: mascotaId, p_user_id: uid })
@@ -473,7 +477,7 @@ Deno.serve(async (req) => {
     })
     if (!r.ok) {
       console.error('[coach] el modelo falló:', r.error, r.detalle)
-      return error('error_modelo', 'No pude contestarte ahora. Probá de nuevo en un momento.')
+      return error('error_modelo', 'No pude contestarte ahora. Prueba de nuevo en un momento.')
     }
     const d = r.datos as Record<string, unknown>
     const respuesta = aTextoOnull(d?.respuesta)
@@ -482,7 +486,7 @@ Deno.serve(async (req) => {
     // pintar — y pintar la burbuja en blanco sería peor que decir que falló.
     if (respuesta === null) {
       console.error('[coach] el modelo no devolvió `respuesta`')
-      return error('error_modelo', 'No pude contestarte ahora. Probá de nuevo en un momento.')
+      return error('error_modelo', 'No pude contestarte ahora. Prueba de nuevo en un momento.')
     }
     return new Response(JSON.stringify({
       respuesta, fuente: 'modelo', intencion,

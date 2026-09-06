@@ -27,6 +27,11 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { exigirArgumentos } from './lib-argumentos.mjs';
+
+/* Un instrumento tiene que poder decir «no»: cualquier argumento que no entienda
+   corta en 2 en vez de correr midiendo otra cosa. */
+exigirArgumentos(['--control'], 0);
 
 const EDGE = process.env.COACH_EDGE ?? 'supabase/functions/coach/index.ts';
 const LEY = process.env.COACH_LEY ?? 'scripts/nexo/ley.json';

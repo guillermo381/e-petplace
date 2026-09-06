@@ -51,13 +51,17 @@ débil.*
 casa — o sea un chevron distinto del de `CeldaNavegacion` y `PieRevelar`.
 Curado en la rama del 1.2.1, que es donde vive esa pieza.
 
-## ⚠️ Lo que NO está capturado, declarado
+## El antes y el después, los dos en el repo
 
-Las capturas `03/04/06/07` son **anteriores a las tres curas de arriba**: son
-la evidencia del defecto, no del estado final. **La captura del después está
-pendiente** — el emulador se le pasó a la pista E, que lo necesitaba para
-caminar el 1.2.1, y estábamos los dos pisándonos sin poder notarlo desde
-adentro (tres `adb reverse` sobre el mismo aparato).
+Las capturas `03/04/06/07` son **anteriores a las tres curas**: son la
+evidencia del defecto. Las `despues-*` son el estado final, tomadas en una
+segunda pasada (`ARRANQUE4 11:14:06` → `Bundled` 11:14:33).
+
+**Se conservan las dos**, y no por prolijidad: *una cura sin su antes es una
+afirmación sobre algo que ya nadie puede ver.* En `despues-nexo-claro` la
+fuente «de su carnet · 12 mar ›» sale en tinta con su chevron, separada de la
+nota de IA gris — contra `03`, donde eran dos líneas grises iguales y una de
+las dos llevaba a algún lado.
 
 ## El índice
 
@@ -71,3 +75,6 @@ adentro (tres `adb reverse` sobre el mismo aparato).
 | `10-memoria-memorial` | **el panel no se dibuja** |
 | `11/12-raza` | el chip elegido y la ficha en una columna con su afordancia (1.2.1) |
 | `13/14-despedida` | el texto **dentro** del botón y el título respetando la zona segura (1.2.1) |
+| `despues-nexo` | la fuente como ACCIÓN, con su chevron, separada de la nota de IA |
+| `despues-busqueda` | el chip del vacío con el mismo borde que los de sugerencia |
+| `despues-memoria` | el panel con sus hechos, su fuente y sus actos |

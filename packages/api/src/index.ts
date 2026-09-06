@@ -1876,14 +1876,31 @@ export {
   type ConfiguracionDePasaporte,
 } from './wrappers/pasaporte';
 
-/* ⚠️ **ENMIENDA ADITIVA DE C (76(d)) — la puerta a la edge `coach`.** A hizo el
-   motor y sus wrappers, D hizo la edge, y **nadie escribió la puerta entre las
-   dos**. Sin ella la app no puede preguntar. */
+/* ☠️ LÁPIDA — `wrappers/nexo-preguntar` (de C) NO se exporta.
+   C y D escribieron la puerta a la edge `coach` en paralelo, cada una con su
+   wrapper. Gana el de D porque cubre **las tres** edges (coach, parte, papel)
+   y es de la dueña de las edges; el de D acepta además la forma posicional de
+   C, así que la pantalla no cambia. Medido antes de decidir: **cero
+   consumidores** del de C fuera de este índice.
+   *Dos puertas a la misma edge no es redundancia: es que la próxima corrección
+   se hace en una sola de las dos y nadie se entera.*
+   El archivo queda para que C lo retire (regla 37); sin export, no es puerta. */
+// S113-D · NEXO: la puerta de las tres edges del lote 2. Sin esto estaban
+// construidas, medidas y desplegadas, y ninguna app podía llamarlas (`L-318`).
 export {
   preguntarANexo,
-  CODIGOS_NEXO,
-  type CodigoErrorNexo,
-  type RespuestaDeNexo,
+  obtenerParteDelDia,
+  leerPapel,
+  type RespuestaNexo,
   type IntencionNexo,
-  type FuenteRespuestaNexo,
-} from './wrappers/nexo-preguntar';
+  type Semaforo,
+  type NivelSemaforo,
+  type InputPreguntarANexo,
+  type CodigoErrorNexo,
+  type ParteDelDia,
+  type LecturaDePapel,
+  type FilaPapel,
+  type ClasePapel,
+  type InputLeerPapel,
+  type CodigoErrorPapel,
+} from './wrappers/nexo';

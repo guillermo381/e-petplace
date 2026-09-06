@@ -25,6 +25,11 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
+import { exigirArgumentos } from '../lib-argumentos.mjs';
+
+/* Un instrumento tiene que poder decir «no»: cualquier argumento que no entienda
+   corta en 2 en vez de correr midiendo otra cosa. */
+exigirArgumentos(['--rama', '--telemedicina'], 1);
 
 const RAIZ = fileURLToPath(new URL('../..', import.meta.url));
 const JUEZ = join(RAIZ, 'scripts/verify-nexo-rojos.mjs');
