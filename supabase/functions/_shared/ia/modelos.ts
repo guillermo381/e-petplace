@@ -32,7 +32,7 @@
  * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
  * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
  */
-export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte', 'papel'] as const
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte', 'coach_clasifica', 'papel'] as const
 
 export type Pieza = typeof PIEZAS[number]
 
@@ -57,6 +57,10 @@ export const MODELOS: Record<Pieza, string> = {
   coach_router: 'claude-haiku-4-5',
   coach_parte: 'claude-sonnet-5',
   papel: 'claude-sonnet-5',
+  // Clasificar un hecho en cuatro clases y recortarlo a una línea es el mismo
+  // trabajo que el router: Haiku sobra. **Y su error es barato** — la clase
+  // que no se reconoce cae a `rasgo`, y de todos modos la familia confirma.
+  coach_clasifica: 'claude-haiku-4-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -94,6 +98,7 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   // acá las filas son más chicas pero pueden ser el doble. 4000, igual que el
   // carnet, y por debajo de `TECHO_SIN_RAZONAR`.
   papel: 4000,
+  coach_clasifica: 300,
 }
 
 /**
@@ -111,6 +116,7 @@ export const EDGES: Record<Pieza, string> = {
   coach_router: 'coach',
   coach_parte: 'coach-parte',
   papel: 'extract-papel',
+  coach_clasifica: 'coach',
 }
 
 /**
@@ -186,6 +192,7 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   // Un PDF de laboratorio es lo más pesado que entra por acá; el carnet tiene
   // 170 s por la misma razón y este puede traer varias páginas.
   papel: 170_000,
+  coach_clasifica: 10_000,
 }
 
 /**
@@ -321,6 +328,7 @@ export const PENSAR: Record<Pieza, boolean> = {
   coach_router: false,
   coach_parte: false,
   papel: false,
+  coach_clasifica: false,
 }
 
 /**
@@ -338,6 +346,7 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   coach_router: null,
   coach_parte: null,
   papel: null,
+  coach_clasifica: null,
 }
 
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
@@ -360,4 +369,5 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   // cobra 25% de más por escribir algo que nadie va a releer en la ventana.
   coach_parte: false,
   papel: false,
+  coach_clasifica: false,
 }

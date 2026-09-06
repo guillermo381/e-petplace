@@ -157,6 +157,68 @@ export async function preguntarANexo(
   };
 }
 
+// ── LA PRESENTACIÓN · el primer turno ──────────────────────────────────────
+
+export interface PresentacionNexo {
+  /** Tres bloques: quién es · qué puede hacer POR ESTA mascota · la promesa
+   *  honesta con el aviso de IA. **Salen de plantilla, no del modelo**: es lo
+   *  primero que Nexo dice de sí mismo y no puede salir distinto cada vez. */
+  burbujas: string[];
+  /** Chips para empezar. Sólo los que el expediente puede contestar — *un chip
+   *  que lleva a «no lo tengo» es peor que un chip menos.* */
+  chips: string[];
+}
+
+/** Lo que Nexo dice la PRIMERA vez, para esta mascota. */
+export async function presentacionDeNexo(
+  mascotaId: string,
+): Promise<ResultadoWrapper<PresentacionNexo, CodigoErrorNexo>> {
+  const { data, error } = await getClient().functions.invoke('coach', {
+    body: { mascotaId, accion: 'presentar' },
+  });
+  if (error) {
+    const c = await codigoDe<CodigoErrorNexo>(error, CODIGOS_NEXO);
+    return { ok: false, codigo: c ?? 'error_desconocido', mensaje: MENSAJES[c ?? 'error_desconocido'] };
+  }
+  if (!esObj(data) || !Array.isArray(data.burbujas) || !Array.isArray(data.chips) ||
+      !data.burbujas.every((b) => typeof b === 'string')) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
+  }
+  return { ok: true, data: { burbujas: data.burbujas as string[], chips: data.chips as string[] } };
+}
+
+// ── EL «CONTANOS» · la caja libre ──────────────────────────────────────────
+
+/** Clasifica lo que la familia escribió en la caja libre y **propone**.
+ *  🔴 `propuestas: []` NO es un error: es la respuesta correcta cuando lo que
+ *  escribieron no es un hecho sobre la mascota (un saludo, una pregunta).
+ *  **La pantalla lo dice y no guarda nada.** */
+export async function clasificarHecho(
+  input: { mascotaId: string; texto: string },
+): Promise<ResultadoWrapper<{ propuestas: PropuestaMemoria[] }, CodigoErrorNexo>> {
+  const { data, error } = await getClient().functions.invoke('coach', {
+    body: { mascotaId: input.mascotaId, texto: input.texto, accion: 'clasificar' },
+  });
+  if (error) {
+    const c = await codigoDe<CodigoErrorNexo>(error, CODIGOS_NEXO);
+    return { ok: false, codigo: c ?? 'error_desconocido', mensaje: MENSAJES[c ?? 'error_desconocido'] };
+  }
+  if (!esObj(data) || !Array.isArray(data.propuestas)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES.datos_inconsistentes };
+  }
+  const CLASES: readonly string[] = ['comportamiento', 'rasgo', 'medico', 'recuerdo'];
+  const propuestas: PropuestaMemoria[] = [];
+  for (const p of data.propuestas) {
+    // Una propuesta malformada se descarta sola; las otras siguen. Es la misma
+    // ley del carnet: lo que falta no tumba la tanda.
+    if (esObj(p) && typeof p.hecho === 'string' && p.hecho.trim() !== '' &&
+        typeof p.clase === 'string' && CLASES.includes(p.clase)) {
+      propuestas.push({ hecho: p.hecho, clase: p.clase as ClaseMemoria });
+    }
+  }
+  return { ok: true, data: { propuestas } };
+}
+
 // ── EL PARTE DEL DÍA ───────────────────────────────────────────────────────
 
 export interface ParteDelDia {

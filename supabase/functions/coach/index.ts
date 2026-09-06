@@ -333,6 +333,91 @@ usó el expediente.*
 Todo lo de arriba es lo ÚNICO que sabés. Si algo no está, no lo sabés.`
 }
 
+// ── LA PRESENTACIÓN · la primera conversación ──────────────────────────────
+// 🔴 CERO MODELO, y no por ahorrar: **es lo primero que Nexo dice de sí mismo,
+// y no puede salir distinto cada vez.** Una presentación generada puede
+// prometer de más un día y de menos otro, y la promesa de esta pantalla es
+// justamente lo que la familia va a recordar. Se arma con plantillas sobre el
+// expediente: lo que cambia por mascota son los EJEMPLOS, no las promesas.
+
+/** Las tres cosas concretas salen del expediente de ESTA mascota, en orden de
+ *  utilidad. Si el expediente está flaco, salen menos — **no se rellenan con
+ *  ejemplos genéricos**: prometer «te aviso de sus vacunas» a quien no cargó
+ *  ninguna es la primera promesa incumplida. */
+export function loQuePuedoHacer(c: Contexto): string[] {
+  const n = c.nombre
+  const puedo: string[] = []
+  if (c.proxima_cita) puedo.push(`Recordarte su próxima cita — la tiene el ${fecha(c.proxima_cita.fecha)}`)
+  if (c.plan_vacunal?.some((v) => v.estado !== 'aplicada')) puedo.push('Avisarte cuando le toque una vacuna')
+  if (c.peso_kg != null) puedo.push(`Seguirle el peso — el último que tengo es ${c.peso_kg} kg`)
+  if (c.alergias?.length) puedo.push(`Tener en cuenta que es alérgico a ${c.alergias.join(' y ')}`)
+  if (c.medicacion_actual?.length) puedo.push('Acordarme de su medicación cuando hablemos de su salud')
+  if (c.ficha_raza) puedo.push(`Contarte cosas de su raza y de la etapa que está viviendo`)
+  if (puedo.length < 3) puedo.push(`Anotar lo que me cuentes de ${n}, para no volver a preguntártelo`)
+  return puedo.slice(0, 3)
+}
+
+/** Los chips para empezar. Se ofrecen SÓLO los que el expediente puede
+ *  contestar: un chip que lleva a «no lo tengo» es peor que un chip menos. */
+export function chipsDeInicio(c: Contexto): string[] {
+  const chips: string[] = []
+  if (c.peso_kg != null) chips.push('¿Cuánto pesa?')
+  if (c.proxima_cita) chips.push('¿Cuándo es su próxima cita?')
+  if (c.plan_vacunal?.length) chips.push('¿Le toca alguna vacuna?')
+  chips.push(`Contale algo de ${c.nombre}`)
+  return chips.slice(0, 3)
+}
+
+export function presentacion(c: Contexto): { burbujas: string[]; chips: string[] } {
+  const puedo = loQuePuedoHacer(c)
+  return {
+    burbujas: [
+      `Soy Nexo. Me acuerdo de todo lo de ${c.nombre}: vacunas, pesos, citas, y lo que me cuentes.`,
+      `Puedo ayudarte con esto:\n${puedo.map((x) => `· ${x}`).join('\n')}`,
+      // 🔴 LA PROMESA HONESTA, y va TEXTUAL: dice lo que va a mejorar, da un
+      // ejemplo concreto, y **admite que se equivoca en la misma frase**. No se
+      // genera porque una promesa que cambia de redacción cada vez deja de ser
+      // una promesa.
+      `Cuanto más uses e-PetPlace, más personal es lo que te digo y antes me adelanto` +
+      // 🔴 El ejemplo va CONDICIONAL («si su raza…»), como lo escribió el
+      // founder, y por eso se puede decir siempre: **describe lo que el sistema
+      // hace, no algo sobre ESTA mascota.** Afirmarlo en indicativo —«su raza
+      // suele tener…»— sería una predisposición sin catálogo detrás, dicha en
+      // la primera pantalla, que es el peor lugar donde puede estar.
+      ` — por ejemplo, si su raza suele tener problemas de cadera, te lo voy a ` +
+      `recordar cuando entre a senior. Puedo equivocarme; para lo importante ` +
+      `está tu veterinario.`,
+    ],
+    chips: chipsDeInicio(c),
+  }
+}
+
+// ── EL «CONTANOS» · clasificar lo que la familia escribe ───────────────────
+const SISTEMA_CLASIFICA = `La familia te contó algo de su mascota en una caja de texto libre.
+Tu trabajo es DOS cosas y nada más:
+① recortarlo a UN hecho, en una línea, en las palabras de ellos;
+② decir a qué parte del expediente va.
+
+Las cuatro partes:
+"comportamiento" — cómo se porta: tira de la correa, ladra al timbre, se
+                   esconde con los truenos.
+"rasgo"          — cómo es o qué le gusta: no le gusta el pollo, duerme mucho,
+                   le encanta el agua.
+"medico"         — algo de SALUD que la familia cuenta: le dieron un
+                   antibiótico, tuvo una otitis, lo operaron.
+"recuerdo"       — un hecho de su vida: lo adoptaron, se mudó, cumplió años.
+
+🔴 Si dudás entre "medico" y otra, elegí la otra. Lo médico lo lee un
+veterinario como historia clínica y una cosa contada al pasar no puede llegar
+ahí por tu duda.
+
+Si lo que escribieron NO es un hecho sobre la mascota —una pregunta, un saludo,
+algo ilegible— devolvés {"hechos":[]}. **No inventes un hecho para no venir
+vacío.**
+Si contaron VARIAS cosas, devolvés una por hecho, hasta tres.
+
+Respondé SOLO {"hechos":[{"hecho":"…","clase":"…"}]} y nada más.`
+
 // ── ③ EL ROUTER ────────────────────────────────────────────────────────────
 const SISTEMA_ROUTER = `Clasificás en UNA de cuatro, mirando SÓLO qué quiere la persona.
 "busqueda"   quiere ENCONTRAR algo que ya existe en su cuenta: una cita, un
@@ -422,12 +507,18 @@ Deno.serve(async (req) => {
 
     let body: unknown
     try { body = await req.json() } catch { return error('cuerpo_invalido', 'Cuerpo no es JSON.') }
-    const { mascotaId, texto, hilo } = (body ?? {}) as {
-      mascotaId?: unknown; texto?: unknown; hilo?: unknown
+    const { mascotaId, texto, hilo, accion } = (body ?? {}) as {
+      mascotaId?: unknown; texto?: unknown; hilo?: unknown; accion?: unknown
     }
     if (typeof mascotaId !== 'string' || !mascotaId) return error('cuerpo_invalido', 'mascotaId requerido.')
-    if (typeof texto !== 'string' || !texto.trim()) return error('cuerpo_invalido', 'texto requerido.')
-    if (texto.length > MAX_TEXTO) return error('texto_muy_largo', 'Escríbeme algo más corto.')
+    // `presentar` es lo único que no necesita texto: es Nexo hablando primero.
+    const acto = accion === 'presentar' || accion === 'clasificar' ? accion : 'preguntar'
+    if (acto !== 'presentar' && (typeof texto !== 'string' || !texto.trim())) {
+      return error('cuerpo_invalido', 'texto requerido.')
+    }
+    if (typeof texto === 'string' && texto.length > MAX_TEXTO) {
+      return error('texto_muy_largo', 'Escríbeme algo más corto.')
+    }
 
     // 🔴 EL CONTEXTO SALE DEL SERVIDOR, SIEMPRE. No hay rama que lo acepte del
     // cuerpo, ni siquiera para pruebas: esa rama es la que convierte «no habla
@@ -460,11 +551,43 @@ Deno.serve(async (req) => {
       }), { status: 404, headers: JSON_HEADERS })
     }
 
+    // ── PRESENTAR · cero modelo ──────────────────────────────────────────
+    if (acto === 'presentar') {
+      return new Response(JSON.stringify({
+        ...presentacion(c), fuente: 'plantilla', aviso_ia: true,
+      }), { status: 200, headers: JSON_HEADERS })
+    }
+
+    // ── CLASIFICAR · el «contanos» ───────────────────────────────────────
+    if (acto === 'clasificar') {
+      const rc = await llamarModelo({
+        pieza: 'coach_clasifica',
+        sistema: SISTEMA_CLASIFICA,
+        mensajes: [{ rol: 'user', texto: comoCita(String(texto)) }],
+        salida: 'json',
+      })
+      if (!rc.ok) {
+        console.error('[coach] clasificar falló:', rc.error, rc.detalle)
+        return error('error_modelo', 'No pude leer eso ahora. Prueba de nuevo en un momento.')
+      }
+      const crudos = (rc.datos as { hechos?: unknown })?.hechos
+      // 🔴 Cero hechos NO es un error: es la respuesta correcta cuando lo que
+      // escribieron no es un hecho. La pantalla lo dice y no guarda nada.
+      const hechos = (Array.isArray(crudos) ? crudos : [])
+        .map((h) => saneaPropuesta(h, c))
+        .filter((h): h is { hecho: string; clase: string } => h !== null)
+        .slice(0, 3)
+      if (!Array.isArray(crudos)) console.error('[coach] clasificar: salida sin array `hechos`')
+      return new Response(JSON.stringify({
+        propuestas: hechos, fuente: 'modelo', aviso_ia: false,
+      }), { status: 200, headers: JSON_HEADERS })
+    }
+
     // ── ③ router ─────────────────────────────────────────────────────────
     const rRouter = await llamarModelo({
       pieza: 'coach_router',
       sistema: SISTEMA_ROUTER,
-      mensajes: [{ rol: 'user', texto: comoCita(texto) }],
+      mensajes: [{ rol: 'user', texto: comoCita(String(texto)) }],
       salida: 'json',
     })
     let intencion: Intencion = 'narrativa'
@@ -496,7 +619,7 @@ Deno.serve(async (req) => {
     if (intencion === 'busqueda') {
       return new Response(JSON.stringify({
         respuesta: null, fuente: routerCaido ? 'router_caido' : 'router',
-        intencion: 'busqueda', consulta: texto.trim(), campos,
+        intencion: 'busqueda', consulta: String(texto).trim(), campos,
         semaforo: null, propuesta_memoria: null, aviso_ia: primerTurno,
       }), { status: 200, headers: JSON_HEADERS })
     }
@@ -506,7 +629,7 @@ Deno.serve(async (req) => {
     // ninguna plantilla tiene su dato, **NO se inventa una respuesta de dato**:
     // se cae a la redacción, que sí sabe decir «no lo tengo».
     if (intencion === 'dato') {
-      const p = responderConPlantilla(texto, c)
+      const p = responderConPlantilla(String(texto), c)
       if (p) {
         return new Response(JSON.stringify({
           respuesta: p.texto, fuente: 'plantilla', plantilla: p.nombre,
@@ -525,7 +648,7 @@ Deno.serve(async (req) => {
     const r = await llamarModelo({
       pieza: 'coach',
       sistema: sistemaDe(c),
-      mensajes: [...turnos, { rol: 'user', texto: comoCita(texto) }],
+      mensajes: [...turnos, { rol: 'user', texto: comoCita(String(texto)) }],
       salida: 'json',
     })
     if (!r.ok) {
