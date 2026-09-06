@@ -156,6 +156,29 @@ console.log('   1.248 sin razonar, y devolvió LAS MISMAS FILAS.)')
   }
 }
 
+console.log('\n== 0ter · UN PDF VIAJA COMO `document`, NO COMO `image` ==')
+console.log('  (mandar un PDF como `type: image` NO da error: da una lectura basura,')
+console.log('   que es peor. La decide el mediaType, no quien llama.)')
+{
+  const { cap, quitar } = interceptar(() => respuestaOk('{"a":1}'))
+  await llamarModelo({
+    pieza: 'documento',
+    mensajes: [{ rol: 'user', texto: 'x' }],
+    imagenes: [
+      { mediaType: 'application/pdf', base64: 'JVBERi0x' },
+      { mediaType: 'image/jpeg', base64: 'AAAA' },
+    ],
+    salida: 'json',
+  })
+  quitar()
+  const cuerpo = cap.cuerpoAnthropic as { messages: { content: { type: string; source?: { media_type?: string } }[] }[] }
+  const bloques = cuerpo.messages[0].content
+  exigir('el PDF va como `document`', bloques[0]?.type === 'document', bloques[0])
+  exigir('  ...con su media_type', bloques[0]?.source?.media_type === 'application/pdf', bloques[0]?.source)
+  exigir('el JPEG SIGUE yendo como `image`', bloques[1]?.type === 'image', bloques[1])
+  exigir('  ...y el texto va último, como siempre', bloques[2]?.type === 'text', bloques[2]?.type)
+}
+
 const pedidoBase = { pieza: 'documento' as const, mensajes: [{ rol: 'user' as const, texto: 'hola' }], salida: 'json' as const }
 
 console.log('\n== 1 · VERDE json + control cruzado de tokens ==')
