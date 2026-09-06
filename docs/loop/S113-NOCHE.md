@@ -312,3 +312,61 @@ un teléfono sin sesión, no.
 ejercer**, y no por la página: por la protección del proyecto. Las dos salidas,
 y las dos son tuyas: **levantar la protección de previews** (ajuste del
 proyecto, no lo toco solo) o **autorizar el merge a `main`**.
+
+---
+
+## 11 · Candidato 2.0 — PUBLICADO
+
+**`main @ 0fead49d`** · E (×4) + B (2.0 y 1.2.3) + C @ `ce304c5a` + D @ `12e4ec58`.
+
+| app | group | ancla | runtime | canal | árbol |
+|---|---|---|---|---|---|
+| cliente | `2b9d96c9` | `0fead49d8841` | 1.0.7 | preview | `dirty=None` |
+| prestador | `66b2e509` | `0fead49d8841` | 1.0.7 | preview | `dirty=None` |
+
+**Mismo ancla, cero asteriscos**, leídos del objeto con `update:view --json`.
+
+### Los gates, contra la línea base de antes de mergear
+
+**49 verdes** (eran 47) · 4 rojos · 6 no concluyentes · **cero empeoraron**.
+4 typechecks en 0 · `ota:deps` verde · censo ② con sólo las cuatro ramas que
+quedan fuera a propósito · árbol en 0 sucios.
+
+**Cambió de veredicto:**
+- 🟢 **`verify:mis-hilos-realtime` 1 → 0** — el instrumento de E confirma que la
+  cura del canal realtime funcionó. *No lo digo yo: lo dice el gate que E
+  escribió para eso.*
+- `verify:pasaporte-campos` 1 → 2 (de rojo a no concluyente: gate nuevo de E).
+
+⚠️ **Y uno se puso rojo en el camino: `verify:diseno` 0 → 1.** No publiqué:
+`R17` cazó que `InvitacionBio` quedaba exportada **sin entrada en la galería**,
+porque mi resolución de un conflicto entre dos ramas de B había cortado la
+sección. Yo lo había declarado como «pérdida acotada» — *el gate demostró que
+declararla no alcanzaba.* Curado, y recién ahí publiqué.
+
+### Dos gates de E declaran ausente algo que ya existe
+
+`verify:nexo-antispam` dice «el job de avisos todavía no existe» y
+`verify:pasaporte-campos`, «la RPC no existe». **Las dos existen.** No están
+rotos: E los escribió antes de que se construyera, y su NO CONCLUYENTE era
+honesto entonces. Hoy **miden de menos**. Para E.
+
+### El recorrido en emulador (cuenta del founder, `adb -s emulator-5554`)
+
+`Android Bundled 3152ms (2982 modules)` y **el pie diciendo `metro · dev`** —
+o sea contra mi árbol, no contra un OTA.
+
+- **Nexo contesta con datos reales**: «un paseo con Paseos Andrés para el 7 de
+  septiembre de 2026», con el **aviso de IA** debajo.
+- **La búsqueda distingue**: «pipeta» → *no encontré nada*, con «Preguntárselo
+  a Nexo» como salida; «Andres» → el prestador real de la cita de Thor.
+- El panel **«Lo que sé de»** está, vacío y con voz.
+
+🔴 **Un defecto para C: «Pregúntame algo de ,» y «Lo que sé de» sin el nombre.**
+El `mascotaId` sí llega —Nexo habla de Thor— así que lo que falta es `nombre`.
+
+### Y un dato heredado que la medición contradijo
+
+El brief decía que **B @ `d8d0eea1` traía 1.2.2 y 1.2.3**. Medido: **no las
+trae** — 271 y 471 líneas de diferencia. Sin mergear `25476c1c` el candidato
+salía sin `InvitacionBio` ni la estrella de personalidad.
