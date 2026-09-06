@@ -505,6 +505,8 @@ export const clienteEn = {
     pesoMedidoEl: 'measured {{fecha}}',
     pesoRegistrar: "Record today's",
     hoySinRegistroCorto: 'Not recorded',
+    pesoDeClinica: 'weighed at the clinic',
+    pesoDeVos: 'you weighed them',
     pesoHojaTitulo: "{{nombre}}'s weight",
     pesoHojaPorQue:
       "Every weight is saved with its date and the previous ones are kept: that's how you see it change, which is what helps at a check-up.",

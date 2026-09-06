@@ -710,11 +710,21 @@ export default function PerfilDeMascota() {
    *  *No es un bug de una de las dos: es que la regla vivía dos veces.* Se
    *  deriva acá una vez y la usan las dos. La FECHA viaja con el número: un
    *  peso sin cuándo no dice si es de hoy o de hace dos años. */
-  const pesoVigente: { kg: number; fecha: string | null } | null =
+  const pesoVigente: { kg: number; fecha: string | null; deClinica: boolean | null } | null =
+    /* 🔴 **LA SERIE YA TRAE LOS DOS, y por eso `[0]` es la respuesta.** Medido
+       en Thor: `evento_peso_medicion` guarda los del prestador y los de la
+       familia en la misma tabla, ordenada por fecha —24 kg de la familia el
+       4-sep, 11,4 de la clínica el 21-jul—. *No hay que comparar dos fuentes:
+       hay que dejar de leer el snapshot.* Eso explica el «11,4 kg» que la
+       identidad mostraba: era `peso_clinico_kg`, congelado en julio, mientras
+       la familia ya lo había pesado en septiembre.
+       El fallback al snapshot queda **para la mascota sin serie**: ahí es lo
+       único que hay, y no sabemos quién lo pesó ⇒ `deClinica: null`, que se
+       dibuja sin atribución en vez de inventarla. */
     pesos !== null && pesos.length > 0
-      ? { kg: pesos[0].peso_kg, fecha: pesos[0].fecha }
+      ? { kg: pesos[0].peso_kg, fecha: pesos[0].fecha, deClinica: pesos[0].de_prestador }
       : peso_clinico_kg !== null
-        ? { kg: peso_clinico_kg, fecha: null }
+        ? { kg: peso_clinico_kg, fecha: null, deClinica: null }
         : null;
   const hoy = new Date();
   const meses = mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento, hoy) : null;
@@ -913,10 +923,25 @@ export default function PerfilDeMascota() {
         /* La fecha va pegada al número, no en otra fila: *un peso sin cuándo
            no dice si es de hoy o de hace dos años*, y en identidad —donde se
            lee de un vistazo— esa duda no se resuelve mirando más abajo. */
-        valor:
-          pesoVigente.fecha !== null
-            ? `${pesoVigente.kg} kg · ${fechaCortaMono(pesoVigente.fecha, idioma)}`
-            : `${pesoVigente.kg} kg`,
+        /* La fecha y **quién lo pesó** viajan con el número: *«24 kg» no dice
+           si es de hoy o de hace dos años, y tampoco si lo midió una báscula de
+           clínica o la de casa* — y esas dos cosas cambian cuánto se le cree. */
+        /* ⚠️ **Los tres datos van en el MISMO valor y no en un pie**, porque la
+           fila de identidad no tiene pie: agregárselo obligaba a tocar su
+           render para las nueve filas. *Un cambio de forma para una sola fila
+           no vale lo que cuesta en las otras ocho.* */
+        valor: [
+          `${pesoVigente.kg} kg`,
+          pesoVigente.fecha !== null ? fechaCortaMono(pesoVigente.fecha, idioma) : null,
+          pesoVigente.deClinica === null
+            ? null
+            : pesoVigente.deClinica
+              ? t('perfil.pesoDeClinica')
+              : t('perfil.pesoDeVos'),
+        ]
+          .filter((x) => x !== null)
+          .join(' · '),
+
         mono: true,
       });
     }
@@ -1221,7 +1246,17 @@ export default function PerfilDeMascota() {
                         t,
                       )
                       : null,
-                  esAcuario ? null : peso_clinico_kg !== null ? `${peso_clinico_kg} kg` : null,
+                  /* 🔴 **EL ENCABEZADO TAMBIÉN LEÍA EL SNAPSHOT.** Curé
+                     identidad y dejé éste — y era el que estaba a la vista:
+                     medido en Thor, el retrato decía «11,4 kg» (clínica,
+                     21-jul) mientras identidad ya decía 24 (familia, 4-sep).
+                     *Dos números de la misma mascota en la misma pantalla, y el
+                     más viejo arriba de todo.* Ahora los dos salen de
+                     `pesoVigente` — **una derivación, tres superficies**.
+                     Acá va SOLO el número: el encabezado es una línea de
+                     identidad de un vistazo, y la fecha y el «quién» viven en
+                     su fila, donde hay lugar para leerlos. */
+                  esAcuario || pesoVigente === null ? null : `${pesoVigente.kg} kg`,
                 ]
                   .filter((x): x is string => x !== null && x !== '')
                   .join(' · ')

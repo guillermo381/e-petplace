@@ -126,6 +126,10 @@ export type CambioEnMisHilos =
  * @returns la función de desuscripción. **Se llama al cerrar sesión**, no al
  *   salir de una pantalla: esta suscripción es de la sesión.
  */
+/** Sube en cada montaje. **Local al módulo y sin persistir**: sólo tiene que
+ *  distinguir dos suscripciones vivas en el mismo proceso. */
+let secuenciaCanal = 0;
+
 export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): () => void {
   const supabase = getClient();
   let miUid: string | null = null;
@@ -146,8 +150,23 @@ export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): (
     if (sesion?.access_token) supabase.realtime.setAuth(sesion.access_token);
   });
 
+  /* 🔴 **EL NOMBRE ES ÚNICO POR MONTAJE, Y ESO CURA UN CRASH DE ARRANQUE.**
+     E lo midió: la raíz se caía **3 de cada 4 veces** con una segunda
+     navegación durante el arranque — *que es exactamente lo que hace abrir la
+     app desde un QR*.
+     La cadena: `supabase.channel(nombre)` **devuelve el canal que ya existe**
+     si el nombre coincide, y `.on()` sobre uno ya suscrito **lanza**. Con un
+     nombre fijo, dos montajes rápidos son el mismo canal; y el `removeChannel`
+     del cleanup **no se esperaba**, así que el primero seguía registrado
+     cuando el segundo pedía el suyo.
+     ⚠️ *No alcanzaba con esperar el `removeChannel`*: el cleanup de React es
+     síncrono y no puede `await`. **Con nombre único el problema deja de ser
+     expresable** — dos montajes nunca piden el mismo canal — y la limpieza del
+     viejo puede terminar cuando quiera sin pisar a nadie.
+     ⚠️ El nombre **no es un identificador de negocio**: nadie lo lee del otro
+     lado. Es la llave de un registro local de sockets. */
   const canal = supabase
-    .channel('mis-hilos')
+    .channel(`mis-hilos-${++secuenciaCanal}-${Date.now().toString(36)}`)
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'adopcion_mensaje' },
@@ -181,6 +200,13 @@ export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): (
 
   return () => {
     sub?.subscription?.unsubscribe();
-    void supabase.removeChannel(canal);
+    /* Se sigue sin `await` **porque el cleanup de React no puede esperarlo** —
+       y ya no hace falta: con el nombre único, que este canal tarde en morir no
+       impide que el siguiente nazca. *La promesa se encadena igual para que un
+       rechazo no quede sin dueño.* */
+    void supabase.removeChannel(canal).catch(() => {
+      /* Un socket que no se pudo cerrar no es algo que la familia deba ver:
+         se cierra solo cuando el transporte cae. Silencio deliberado. */
+    });
   };
 }
