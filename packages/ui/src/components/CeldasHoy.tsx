@@ -15,7 +15,7 @@
  * además agenda es dos piezas peleando por el mismo toque.*
  */
 
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
@@ -24,24 +24,63 @@ import { useTheme } from '../ThemeProvider'
 import { hayCobertura, type CoberturaPlaga, type Tendencia } from './perfil-seguridad'
 
 /** Una celda cualquiera: la anatomía es una sola. */
-function Celda({ rotulo, dato, contexto, children }: { rotulo: string; dato?: string; contexto?: string; children?: React.ReactNode }) {
+/**
+ * 🔴 **UNA CELDA SIN `onPress` NO SE DIBUJA COMO BOTÓN.**
+ * No es un detalle de estilo: *un chevron sobre algo que no lleva a ningún
+ * lado enseña a desconfiar de todos los chevrones de la app.* Con destino, la
+ * celda es un `Pressable` con su rol y su chevron; sin destino es una `View`
+ * plana — **la misma pieza y dos naturalezas, decididas por el dato y no por
+ * una prop de apariencia.**
+ *
+ * ⚠️ **La pantalla decide a dónde**, no la celda: cada una tiene su propio
+ * destino y sólo la pantalla los conoce.
+ */
+function Celda({
+  rotulo,
+  dato,
+  contexto,
+  children,
+  onPress,
+}: {
+  rotulo: string
+  dato?: string
+  contexto?: string
+  children?: React.ReactNode
+  onPress?: () => void
+}) {
   const { theme } = useTheme()
-  return (
-    <View
-      style={{
-        flex: 1,
-        minWidth: '45%',
-        gap: spacing[1],
-        padding: spacing[3],
-        borderRadius: radius.md,
-        backgroundColor: theme.bg.card,
-      }}
-    >
-      <Texto variante="apoyo">{rotulo}</Texto>
+  const estilo = {
+    flex: 1,
+    minWidth: '45%' as const,
+    gap: spacing[1],
+    padding: spacing[3],
+    borderRadius: radius.md,
+    backgroundColor: theme.bg.card,
+  }
+  const cuerpo = (
+    <>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[1] }}>
+        <Texto variante="apoyo">{rotulo}</Texto>
+        {/* El chevron SÓLO con destino: es la afordance, no un adorno. */}
+        {onPress !== undefined ? <Texto variante="apoyo">›</Texto> : null}
+      </View>
       {dato !== undefined ? <Texto variante="seccion">{dato}</Texto> : null}
       {children}
       {contexto !== undefined ? <Texto variante="apoyo">{contexto}</Texto> : null}
-    </View>
+    </>
+  )
+  if (onPress === undefined) return <View style={estilo}>{cuerpo}</View>
+  return (
+    <Pressable
+      accessibilityRole="button"
+      /* El rótulo y el dato juntos: quien no ve la celda necesita las dos
+         cosas para saber a dónde va. */
+      accessibilityLabel={dato === undefined ? rotulo : `${rotulo} · ${dato}`}
+      onPress={onPress}
+      style={estilo}
+    >
+      {cuerpo}
+    </Pressable>
   )
 }
 
@@ -52,12 +91,20 @@ export interface CeldasHoyProps {
     nombre: string | null
     /** *«vence en 12 días»* — ya compuesta. */
     contexto?: string
+    /** 🔴 **El destino lo decide la PANTALLA.** Sin él la celda se dibuja
+     *  plana: *un chevron sobre algo que no lleva a ningún lado enseña a
+     *  desconfiar de todos los chevrones de la app.* */
+    onPress?: () => void
   }
   antiparasitario: {
     rotulo: string
     cobertura: readonly CoberturaPlaga[]
     /** El nombre de cada plaga, en la voz de la pantalla. */
     vozPlaga: (p: CoberturaPlaga['plaga']) => string
+    /** 🔴 **El destino lo decide la PANTALLA.** Sin él la celda se dibuja
+     *  plana: *un chevron sobre algo que no lleva a ningún lado enseña a
+     *  desconfiar de todos los chevrones de la app.* */
+    onPress?: () => void
   }
   peso: {
     rotulo: string
@@ -66,6 +113,10 @@ export interface CeldasHoyProps {
     tendencia: Tendencia
     /** *«hace 2 meses pesaba 11,8 kg»* — sin adjetivos. */
     contexto?: string
+    /** 🔴 **El destino lo decide la PANTALLA.** Sin él la celda se dibuja
+     *  plana: *un chevron sobre algo que no lleva a ningún lado enseña a
+     *  desconfiar de todos los chevrones de la app.* */
+    onPress?: () => void
   }
   medicacion: {
     rotulo: string
@@ -73,6 +124,10 @@ export interface CeldasHoyProps {
     nombre: string | null
     /** *«hasta el 20 de septiembre»*. */
     contexto?: string
+    /** 🔴 **El destino lo decide la PANTALLA.** Sin él la celda se dibuja
+     *  plana: *un chevron sobre algo que no lleva a ningún lado enseña a
+     *  desconfiar de todos los chevrones de la app.* */
+    onPress?: () => void
   }
   /** *«sin registro»* — una sola voz para las cuatro. */
   vozSinDato: string
@@ -93,9 +148,10 @@ export function CeldasHoy({ vacuna, antiparasitario, peso, medicacion, vozSinDat
         rotulo={vacuna.rotulo}
         dato={vacuna.nombre ?? vozSinDato}
         contexto={vacuna.nombre === null ? undefined : vacuna.contexto}
+        onPress={vacuna.onPress}
       />
 
-      <Celda rotulo={antiparasitario.rotulo} dato={conCobertura ? undefined : vozSinDato}>
+      <Celda rotulo={antiparasitario.rotulo} dato={conCobertura ? undefined : vozSinDato} onPress={antiparasitario.onPress}>
         {conCobertura ? (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1] }}>
             {antiparasitario.cobertura.map((c) =>
@@ -129,12 +185,14 @@ export function CeldasHoy({ vacuna, antiparasitario, peso, medicacion, vozSinDat
             : `${peso.valorTexto}${peso.tendencia !== null ? ` ${FLECHA[peso.tendencia]}` : ''}`
         }
         contexto={peso.valorTexto === null ? undefined : peso.contexto}
+        onPress={peso.onPress}
       />
 
       <Celda
         rotulo={medicacion.rotulo}
         dato={medicacion.nombre ?? vozSinDato}
         contexto={medicacion.nombre === null ? undefined : medicacion.contexto}
+        onPress={medicacion.onPress}
       />
     </View>
   )

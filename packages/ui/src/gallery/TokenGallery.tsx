@@ -3427,11 +3427,16 @@ function GaleriaInterna() {
             {/* 🔴 EL CASO QUE HAY QUE MIRAR: «Medicación» sin dato NO inventa
                 —dice «sin registro»— y «mosquitos» no dibuja chip, porque no
                 hay registro de esa plaga: un chip gris diría «no cubierta». */}
+            {/* 🔴 LAS DOS NATURALEZAS EN UNA CAPTURA: arriba con destino
+                (chevron y rol de botón), abajo sin él (planas). *Un chevron
+                sobre algo que no lleva a ningún lado enseña a desconfiar de
+                todos los chevrones de la app.* */}
             <CeldasHoy
               vozSinDato="sin registro"
-              vacuna={{ rotulo: 'Vacuna', nombre: 'Polivalente', contexto: 'vence en 16 días' }}
+              vacuna={{ rotulo: 'Vacuna', nombre: 'Polivalente', contexto: 'vence en 16 días', onPress: () => {} }}
               antiparasitario={{
                 rotulo: 'Antiparasitario',
+                onPress: () => {},
                 vozPlaga: (p) => VOZ_PLAGA[p],
                 cobertura: [
                   { plaga: 'pulgas', alDia: true },

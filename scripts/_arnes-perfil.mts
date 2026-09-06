@@ -26,6 +26,7 @@ const src = (f: string) => {
 };
 const FRANJA = src('FranjaSeguridad.tsx'), CELDAS = src('CeldasHoy.tsx');
 const MED = src('PiezaMedicacionActiva.tsx'), FIL = src('FiltrosLineaDeVida.tsx');
+const FICHA = src('FichaRaza.tsx');
 const it = (id: string, clase: any) => ({ id, clase, texto: 'x', procedencia: 'familia' as const, vozProcedencia: 'v' });
 
 console.log('\n── ① ROJO · SIN NADA, LA FRANJA NO EXISTE ──');
@@ -64,7 +65,12 @@ t('🔴 una plaga sin registro NO dibuja chip', /c\.alDia === null \? null :/.te
 t('las cuatro celdas caen a `vozSinDato`', (CELDAS.match(/vozSinDato/g) ?? []).length >= 4, true);
 t('🔴 y sin dato NO se dibuja el contexto (sería de un dato que no está)',
   (CELDAS.match(/=== null \? undefined :/g) ?? []).length >= 3, true);
-t('la celda no trae acción: la pone la pantalla', /onPress|Pressable/.test(CELDAS), false);
+/* ⚠️ Este assert decía DOS cosas y sólo una murió con el pedido de C. Medía
+   «no trae acción» como «no hay Pressable» — hoy la celda SÍ puede llevar
+   toque. Lo que sigue rigiendo es la otra mitad: **puede tocarse, y no puede
+   decidir a dónde.** Un `router` acá volvería a atar la pieza a una ruta. */
+t('🔴 la celda no compone su destino: lo recibe',
+  /router|useRouter|navigate\(/.test(CELDAS), false);
 
 console.log('\n── ⑤ MEDICACIÓN Y FILTROS ──');
 t('lo que la receta no decía, no se dibuja', /f\.dosis != null \?/.test(MED), true);
@@ -119,6 +125,28 @@ t('…van con `flexWrap`: todo lo que existe está a la vista', /flexWrap/.test(
 t('multi-selección: alterna, no reemplaza', /onAlternar/.test(FIL), true);
 t('el blanco del chip sale de `text.inverse`, no de `sobreVideo`',
   /theme\.text\.inverse/.test(FIL) && /sobreVideo/.test(FIL) === false, true);
+
+console.log('\n── ROJO · UNA CELDA SIN DESTINO NO SE DIBUJA COMO BOTÓN ──');
+/* 🔴 *Un chevron sobre algo que no lleva a ningún lado enseña a desconfiar de
+   todos los chevrones de la app.* La misma pieza, dos naturalezas, decididas
+   por el DATO y no por una prop de apariencia. */
+t('🔴 sin `onPress` la celda es una `View`, no un `Pressable`',
+  /if \(onPress === undefined\) return <View style=\{estilo\}>/.test(CELDAS), true);
+t('🔴 …y el chevron sólo aparece con destino',
+  /onPress !== undefined \? <Texto variante="apoyo">›<\/Texto> : null/.test(CELDAS), true);
+t('con destino lleva su rol de botón', /accessibilityRole="button"/.test(CELDAS), true);
+t('…y su etiqueta junta rótulo y dato: quien no la ve necesita los dos',
+  /`\$\{rotulo\} · \$\{dato\}`/.test(CELDAS), true);
+t('🔴 las CUATRO celdas pueden llevar destino',
+  (CELDAS.match(/onPress=\{(vacuna|antiparasitario|peso|medicacion)\.onPress\}/g) ?? []).length, 4);
+
+console.log('\n── ROJO · EL CIERRE DE LA FICHA DE RAZA ──');
+/* Sin slot no se dibuja NADA: una ficha sin invitación está completa, no le
+   falta algo. Y es un SLOT y no un texto porque lo que va ahí lleva a algún
+   lado, y componerlo acá obligaría a la pieza a saber a dónde. */
+t('el cierre es un slot, no una prop de texto', /cierre\?: React\.ReactNode/.test(FICHA), true);
+t('🔴 y sin él NO se dibuja ni un separador',
+  /\{cierre\}/.test(FICHA) && /cierre !== undefined \?/.test(FICHA) === false, true);
 
 console.log('\n── ⑥ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['franja', FRANJA], ['celdas', CELDAS], ['medicación', MED], ['filtros', FIL]] as const)
