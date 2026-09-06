@@ -27,6 +27,7 @@ const src = (f: string) => {
 const FRANJA = src('FranjaSeguridad.tsx'), CELDAS = src('CeldasHoy.tsx');
 const MED = src('PiezaMedicacionActiva.tsx'), FIL = src('FiltrosLineaDeVida.tsx');
 const FICHA = src('FichaRaza.tsx');
+const INV = src('InvitacionBio.tsx');
 const it = (id: string, clase: any) => ({ id, clase, texto: 'x', procedencia: 'familia' as const, vozProcedencia: 'v' });
 
 console.log('\n── ① ROJO · SIN NADA, LA FRANJA NO EXISTE ──');
@@ -132,8 +133,12 @@ console.log('\n── ROJO · UNA CELDA SIN DESTINO NO SE DIBUJA COMO BOTÓN ─
    por el DATO y no por una prop de apariencia. */
 t('🔴 sin `onPress` la celda es una `View`, no un `Pressable`',
   /if \(onPress === undefined\) return <View style=\{estilo\}>/.test(CELDAS), true);
-t('🔴 …y el chevron sólo aparece con destino',
-  /onPress !== undefined \? <Texto variante="apoyo">›<\/Texto> : null/.test(CELDAS), true);
+/* ⚠️ Este assert medía el CARÁCTER «›». Se cambió cuando el emulador mostró
+   que eso era un chevron distinto del de `CeldaNavegacion` y `PieRevelar` —
+   *dos chevrones en la misma app son dos afordancias*— y hoy mide la
+   primitiva, que es lo que la casa manda usar. */
+t('🔴 …y el chevron sólo aparece con destino, y es LA PRIMITIVA',
+  /onPress !== undefined \? <Chevron color=\{theme\.text\.tertiary\} direccion="derecha" \/> : null/.test(CELDAS), true);
 t('con destino lleva su rol de botón', /accessibilityRole="button"/.test(CELDAS), true);
 t('…y su etiqueta junta rótulo y dato: quien no la ve necesita los dos',
   /`\$\{rotulo\} · \$\{dato\}`/.test(CELDAS), true);
@@ -147,6 +152,28 @@ console.log('\n── ROJO · EL CIERRE DE LA FICHA DE RAZA ──');
 t('el cierre es un slot, no una prop de texto', /cierre\?: React\.ReactNode/.test(FICHA), true);
 t('🔴 y sin él NO se dibuja ni un separador',
   /\{cierre\}/.test(FICHA) && /cierre !== undefined \?/.test(FICHA) === false, true);
+
+console.log('\n── ROJO · LA INVITACIÓN AL BIO ──');
+/* 🔴 Es una PREGUNTA, no un dato: cortarla la deja sin signo de
+   interrogación, y una pregunta a medias no invita a nada. */
+t('🔴 la pregunta NO se trunca', /numberOfLines/.test(INV), false);
+/* Una entrada sin destino no existe: ofrecer «Temas médicos» y que no lleve a
+   ningún lado enseña a desconfiar de las otras tres. */
+t('🔴 `onPress` es obligatorio en cada entrada', /onPress: \(\) => void/.test(INV), true);
+t('🔴 …y sin entradas la tarjeta NO se dibuja', /entradas\.length === 0\) return null/.test(INV), true);
+t('🔴 en memorial no se invita a contar nada',
+  /theme\.mode === 'memorial'\) return null/.test(INV), true);
+t('el glifo lo decide la PIEZA, exhaustivo por clase',
+  /satisfies Record<ClaseInvitacion, IconoNombre \| null>/.test(INV), true);
+/* ⚠️ `personalidad` VA SIN GLIFO A PROPÓSITO —el registry no tiene uno para
+   «cómo es» y prestar un vecino es lo que la casa prohíbe—, y la fila reserva
+   su ancho para que las cuatro queden alineadas. El assert fija las dos
+   mitades: que sea null Y que el hueco exista. */
+t('🔴 `personalidad` sin glifo, declarado', /personalidad: null/.test(INV), true);
+t('🔴 …y con su ancho reservado, no corrida',
+  /width: GLIFO_TAMANO, height: GLIFO_TAMANO/.test(INV), true);
+t('la Hoja se cierra ANTES de llevar a otra pantalla',
+  /setAbierta\(false\)\s*\n\s*e\.onPress\(\)/.test(INV), true);
 
 console.log('\n── ⑥ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['franja', FRANJA], ['celdas', CELDAS], ['medicación', MED], ['filtros', FIL]] as const)
