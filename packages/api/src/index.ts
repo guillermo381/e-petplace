@@ -1847,4 +1847,12 @@ export {
   borrarHiloCoach,
   type TurnoCoach,
   type CodigoErrorCoach,
+  // 2.1 · avisos y placas
+  obtenerAvisosCoach,
+  marcarAvisoCoachLeido,
+  activarAvisosNexo,
+  type AvisoCoach,
+  type TipoAviso,
+  activarPlaca,
+  type CodigoErrorPlaca,
 } from './wrappers/coach';

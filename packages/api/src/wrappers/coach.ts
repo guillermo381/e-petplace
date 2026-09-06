@@ -278,3 +278,109 @@ export async function borrarHiloCoach(
   }
   return { ok: true, data: { borrados: o.borrados } };
 }
+
+/* ─── A6 · los avisos ───────────────────────────────────────────────────── */
+
+export type TipoAviso = 'vacuna_vence' | 'antiparasitario_vence' | 'cita_manana';
+
+export type AvisoCoach = {
+  id: string;
+  mascota_id: string;
+  mascota: string;
+  tipo: TipoAviso;
+  fecha: string;
+  detalle: Record<string, unknown>;
+};
+
+/**
+ * Los avisos sin leer de las mascotas de la familia.
+ *
+ * 🔴 **Ninguno lo decide un modelo**: los tres salen de fechas que el
+ * expediente ya tiene. *Un aviso generativo puede equivocarse de fecha y nadie
+ * lo notaría hasta que una familia llegue tarde a una vacuna.*
+ *
+ * Nunca trae mascotas en memorial, y **sólo existen si la familia los
+ * encendió** (`activarAvisosNexo`): la ausencia de decisión no habilita nada.
+ */
+export async function obtenerAvisosCoach(): Promise<
+  ResultadoWrapper<AvisoCoach[], CodigoErrorCoach>
+> {
+  const { data, error } = await getClient().rpc('obtener_avisos_coach');
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || !Array.isArray(o.avisos)) {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: o.avisos as AvisoCoach[] };
+}
+
+export async function marcarAvisoCoachLeido(
+  id: string,
+): Promise<ResultadoWrapper<{ id: string }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('marcar_aviso_coach_leido', { p_id: id });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  return { ok: true, data: { id } };
+}
+
+/** El opt-in. Guarda **cuándo** la familia dijo que sí, no sólo que dijo. */
+export async function activarAvisosNexo(
+  familiaId: string,
+  activar = true,
+): Promise<ResultadoWrapper<{ activos: boolean }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('activar_avisos_nexo', {
+    p_familia_id: familiaId,
+    p_activar: activar,
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  return { ok: true, data: { activos: activar } };
+}
+
+/* ─── A5 · las placas ───────────────────────────────────────────────────── */
+
+export type CodigoErrorPlaca =
+  | 'sin_sesion' | 'sin_acceso' | 'en_memorial'
+  | 'placa_no_existe' | 'placa_ya_activada' | 'solo_admin' | 'desconocido';
+
+function codigoPlaca(mensaje: string): CodigoErrorPlaca {
+  if (mensaje.startsWith('auth_required')) return 'sin_sesion';
+  if (mensaje.startsWith('no_access_to_mascota')) return 'sin_acceso';
+  if (mensaje.startsWith('mascota_en_memorial')) return 'en_memorial';
+  if (mensaje.startsWith('placa_no_existe')) return 'placa_no_existe';
+  if (mensaje.startsWith('placa_ya_activada')) return 'placa_ya_activada';
+  if (mensaje.startsWith('solo_admin')) return 'solo_admin';
+  return 'desconocido';
+}
+
+/**
+ * Ata una chapita ya fabricada a una mascota.
+ *
+ * ⚠️ **El pasaporte nace con EL TOKEN DE LA PLACA**, no con uno nuevo: el
+ * código ya está grabado en metal colgando de un collar. *Cualquier diseño en
+ * el que el token cambie al activar convierte la chapita en un adorno el mismo
+ * día que la familia la usa.*
+ *
+ * Si la mascota ya tenía pasaporte, el anterior queda revocado en el mismo
+ * acto — una viva por mascota, y es lo que la familia está pidiendo.
+ *
+ * `placa_ya_activada` **no dice de quién es**: quien tiene una placa ajena en
+ * la mano no tiene por qué enterarse de nada de esa familia.
+ */
+export async function activarPlaca(
+  token: string,
+  mascotaId: string,
+): Promise<ResultadoWrapper<{ pasaporte_id: string; token: string }, CodigoErrorPlaca>> {
+  const { data, error } = await getClient().rpc('activar_placa', {
+    p_token: token,
+    p_mascota_id: mascotaId,
+  });
+  if (error) return { ok: false, codigo: codigoPlaca(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.pasaporte_id !== 'string' || typeof o.token !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { pasaporte_id: o.pasaporte_id, token: o.token } };
+}

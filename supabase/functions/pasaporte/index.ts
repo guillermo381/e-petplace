@@ -61,6 +61,30 @@ Si tenés al animal con vos, revisá si la chapita tiene otro código.</p>
   })
 }
 
+
+/* LA PLACA QUE TODAVÍA NO TIENE DUEÑO (S113-A · 2.1 · A5).
+   Alguien acaba de comprar la chapita y la escanea antes de activarla. Un 404
+   acá le diría que le vendieron algo roto. */
+function paginaPlacaLibre(token: string): Response {
+  const html = `<!doctype html><html lang="es"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Esta placa espera a su mascota</title>
+<meta name="robots" content="noindex,nofollow">
+<style>${CSS}</style>
+<main class="p"><div class="c">
+<h1>Esta placa espera a su mascota</h1>
+<p class="q">Todavía nadie la activó. Si es tuya, abrí e-PetPlace y escaneá el
+código para asociarla a tu mascota: desde ese momento, cualquiera que la
+encuentre va a poder llamarte.</p>
+<a class="cta" href="cliente:///hogar?placa=${esc(token)}">Activarla en la app</a>
+<p class="msg">¿Todavía no tenés la app? Buscá <strong>e-PetPlace</strong> en tu tienda.</p>
+<p class="pie">e-PetPlace · placa <code>${esc(token.slice(0, 6))}…</code></p>
+</div></main></html>`
+  return new Response(html, {
+    headers: { ...CABECERAS, 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  })
+}
+
 /* El papel de la casa: tinta #221E19 sobre papel algodón #FAF9F7, la misma
    pareja de los PDF. Todo inline — una hoja externa sería un pedido más que
    puede fallar en una calle con mala señal. */
@@ -152,7 +176,34 @@ Deno.serve(async (req) => {
 
   const sb = createClient(URL_BASE, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')
   const { data, error } = await sb.rpc('leer_pasaporte', { p_token: token })
-  if (error || data === null) return pagina404()
+
+  /* Si el pasaporte no resuelve, puede ser una PLACA fabricada y todavía sin
+     activar. Se pregunta en ese orden y no al revés: una placa activada tiene
+     pasaporte, así que la primera consulta ya la cubre. */
+  if (error || data === null) {
+    const { data: placa } = await sb
+      .from('pasaporte_placa')
+      .select('token')
+      .eq('token', token)
+      .is('activada_en', null)
+      .maybeSingle()
+    if (placa) {
+      // el QR de una placa libre igual se sirve: es el mismo código grabado
+      if (formato === 'svg') {
+        return new Response(qrSvg(publica(token)), {
+          headers: { ...CABECERAS, 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
+        })
+      }
+      if (formato === 'png') {
+        const png = await qrPng(publica(token))
+        return new Response(png.buffer as ArrayBuffer, {
+          headers: { ...CABECERAS, 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' },
+        })
+      }
+      return paginaPlacaLibre(token)
+    }
+    return pagina404()
+  }
 
   /* Pasado el límite se contesta 429 con la misma voz. *No se dice «demasiadas
      lecturas de ESTE token», que confirmaría que el token existe.* */

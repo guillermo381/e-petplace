@@ -1287,6 +1287,44 @@ export type Database = {
           },
         ]
       }
+      avisos_coach: {
+        Row: {
+          creado_en: string
+          detalle: Json
+          fecha: string
+          id: string
+          leido_en: string | null
+          mascota_id: string
+          tipo: string
+        }
+        Insert: {
+          creado_en?: string
+          detalle?: Json
+          fecha?: string
+          id?: string
+          leido_en?: string | null
+          mascota_id: string
+          tipo: string
+        }
+        Update: {
+          creado_en?: string
+          detalle?: Json
+          fecha?: string
+          id?: string
+          leido_en?: string | null
+          mascota_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avisos_coach_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beta_users: {
         Row: {
           country_code: string
@@ -11077,6 +11115,7 @@ export type Database = {
       }
       familia: {
         Row: {
+          avisos_nexo_desde: string | null
           country_code: string
           created_at: string
           created_by_sistema: string | null
@@ -11089,6 +11128,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avisos_nexo_desde?: string | null
           country_code?: string
           created_at?: string
           created_by_sistema?: string | null
@@ -11101,6 +11141,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avisos_nexo_desde?: string | null
           country_code?: string
           created_at?: string
           created_by_sistema?: string | null
@@ -14792,6 +14833,72 @@ export type Database = {
             foreignKeyName: "pasaporte_config_mascota_id_fkey"
             columns: ["mascota_id"]
             isOneToOne: true
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte_lote: {
+        Row: {
+          cantidad: number
+          creado_en: string
+          creado_por: string | null
+          id: string
+          nombre: string
+          proveedor: string | null
+        }
+        Insert: {
+          cantidad: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          nombre: string
+          proveedor?: string | null
+        }
+        Update: {
+          cantidad?: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          nombre?: string
+          proveedor?: string | null
+        }
+        Relationships: []
+      }
+      pasaporte_placa: {
+        Row: {
+          activada_en: string | null
+          lote_id: string
+          mascota_id: string | null
+          serie: number
+          token: string
+        }
+        Insert: {
+          activada_en?: string | null
+          lote_id: string
+          mascota_id?: string | null
+          serie: number
+          token: string
+        }
+        Update: {
+          activada_en?: string | null
+          lote_id?: string
+          mascota_id?: string | null
+          serie?: number
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_placa_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "pasaporte_lote"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pasaporte_placa_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
             referencedRelation: "mascotas"
             referencedColumns: ["id"]
           },
@@ -23292,6 +23399,14 @@ export type Database = {
         Returns: Json
       }
       aceptar_vinculo_repartidor: { Args: never; Returns: Json }
+      activar_avisos_nexo: {
+        Args: { p_activar?: boolean; p_familia_id: string }
+        Returns: Json
+      }
+      activar_placa: {
+        Args: { p_mascota_id: string; p_token: string }
+        Returns: Json
+      }
       activar_prestador: {
         Args: { p_motivo?: string; p_prestador_id: string; p_veredicto: string }
         Returns: Json
@@ -23949,6 +24064,10 @@ export type Database = {
         Args: { p_compra_id: string; p_metodo?: string }
         Returns: Json
       }
+      crear_lote_placas: {
+        Args: { p_cantidad: number; p_nombre: string; p_proveedor?: string }
+        Returns: Json
+      }
       crear_mascota_walkin: {
         Args: {
           p_country_code?: string
@@ -24388,6 +24507,7 @@ export type Database = {
         }
         Returns: Json
       }
+      generar_avisos_coach: { Args: never; Returns: number }
       generar_eventos_diferidos: {
         Args: { p_fecha_corte?: string }
         Returns: {
@@ -24653,6 +24773,7 @@ export type Database = {
         Returns: Json
       }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
+      listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
       log_admin_action: {
         Args: {
           p_accion: string
@@ -24686,6 +24807,7 @@ export type Database = {
         }
         Returns: Json
       }
+      marcar_aviso_coach_leido: { Args: { p_id: string }; Returns: Json }
       marcar_aviso_leido: { Args: { p_aviso_id: string }; Returns: Json }
       marcar_en_camino_a_destino: {
         Args: { p_envio_id: string }
@@ -24838,6 +24960,7 @@ export type Database = {
           urgencia_tope_monto: number
         }[]
       }
+      obtener_avisos_coach: { Args: never; Returns: Json }
       obtener_bitacora_de_estadia: {
         Args: { p_estadia_id: string }
         Returns: {
