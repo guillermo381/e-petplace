@@ -1868,6 +1868,11 @@ export {
   type SugerenciaConociendolo,
   obtenerPredisposicionesDeRaza,
   type Predisposicion,
+  // las propuestas: 'confirmado_de_ia' dejó de ser un valor que se pasa
+  listarPropuestasMemoria,
+  confirmarPropuestaMemoria,
+  rechazarPropuestaMemoria,
+  type PropuestaMemoria,
 } from './wrappers/coach';
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
