@@ -3995,6 +3995,85 @@ export type Database = {
           },
         ]
       }
+      coach_conversacion: {
+        Row: {
+          creado_en: string
+          id: string
+          mascota_id: string
+          rol: string
+          texto: string
+          tokens: number | null
+          turno: number
+        }
+        Insert: {
+          creado_en?: string
+          id?: string
+          mascota_id: string
+          rol: string
+          texto: string
+          tokens?: number | null
+          turno: number
+        }
+        Update: {
+          creado_en?: string
+          id?: string
+          mascota_id?: string
+          rol?: string
+          texto?: string
+          tokens?: number | null
+          turno?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_conversacion_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_memoria: {
+        Row: {
+          activo: boolean
+          creado_en: string
+          creado_por: string | null
+          editado_en: string | null
+          fuente: string
+          hecho: string
+          id: string
+          mascota_id: string
+        }
+        Insert: {
+          activo?: boolean
+          creado_en?: string
+          creado_por?: string | null
+          editado_en?: string | null
+          fuente?: string
+          hecho: string
+          id?: string
+          mascota_id: string
+        }
+        Update: {
+          activo?: boolean
+          creado_en?: string
+          creado_por?: string | null
+          editado_en?: string | null
+          fuente?: string
+          hecho?: string
+          id?: string
+          mascota_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_memoria_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cobro_link_mensual: {
         Row: {
           emitido_en: string
@@ -22765,6 +22844,7 @@ export type Database = {
         }
         Returns: string
       }
+      _coach_puerta: { Args: { p_mascota_id: string }; Returns: undefined }
       _cobertura_vacunal: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -23320,6 +23400,10 @@ export type Database = {
         }
         Returns: Json
       }
+      agregar_memoria_coach: {
+        Args: { p_fuente?: string; p_hecho: string; p_mascota_id: string }
+        Returns: Json
+      }
       agregar_nota_atencion: {
         Args: {
           p_atencion_id: string
@@ -23423,9 +23507,15 @@ export type Database = {
       barrer_adopcion_diario: { Args: never; Returns: Json }
       barrer_solicitudes_expiradas: { Args: never; Returns: Json }
       borrar_foto_adoptable: { Args: { p_foto_id: string }; Returns: Json }
+      borrar_hilo_coach: { Args: { p_mascota_id: string }; Returns: Json }
+      borrar_memoria_coach: { Args: { p_id: string }; Returns: Json }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
       buscar_cliente_por_telefono: {
         Args: { p_country_code?: string; p_telefono: string }
+        Returns: Json
+      }
+      buscar_en_mi_familia: {
+        Args: { p_limite?: number; p_q: string }
         Returns: Json
       }
       buscar_refugios: {
@@ -24141,6 +24231,10 @@ export type Database = {
         Returns: Json
       }
       deuna_nueva_referencia: { Args: never; Returns: string }
+      editar_memoria_coach: {
+        Args: { p_hecho: string; p_id: string }
+        Returns: Json
+      }
       eje_de_tipo_servicio: {
         Args: { p_tipo_servicio: string }
         Returns: string
@@ -24464,6 +24558,15 @@ export type Database = {
         Args: { p_medio?: string; p_tarjeta_id?: string }
         Returns: Json
       }
+      guardar_turno_coach: {
+        Args: {
+          p_mascota_id: string
+          p_rol: string
+          p_texto: string
+          p_tokens?: number
+        }
+        Returns: Json
+      }
       guarderia_recurrente_vivo: { Args: never; Returns: boolean }
       hay_avisos_sin_leer: { Args: never; Returns: boolean }
       hay_novedades: { Args: { p_app: string }; Returns: boolean }
@@ -24518,6 +24621,10 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       leer_borrador_nota: { Args: { p_cita_id: string }; Returns: Json }
+      leer_hilo_coach: {
+        Args: { p_limite?: number; p_mascota_id: string }
+        Returns: Json
+      }
       leer_pasaporte: { Args: { p_token: string }; Returns: Json }
       leer_sombra_notificaciones: {
         Args: { p_desde?: string; p_hasta?: string }
@@ -24545,6 +24652,7 @@ export type Database = {
         }
         Returns: Json
       }
+      listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       log_admin_action: {
         Args: {
           p_accion: string
@@ -24823,6 +24931,7 @@ export type Database = {
         }[]
       }
       obtener_contexto_arranque: { Args: never; Returns: Json }
+      obtener_contexto_coach: { Args: { p_mascota_id: string }; Returns: Json }
       obtener_datos_negocio: {
         Args: { p_hasta?: string; p_prestador_id: string }
         Returns: Json
@@ -25781,6 +25890,7 @@ export type Database = {
       }
       puede_reversar_deuna: { Args: { p_intento_id: string }; Returns: Json }
       puede_reversar_nuvei: { Args: { p_intento_id: string }; Returns: Json }
+      purgar_conversacion_coach: { Args: never; Returns: number }
       purgar_documentos_vencidos: {
         Args: never
         Returns: {

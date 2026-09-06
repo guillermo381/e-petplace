@@ -1,0 +1,280 @@
+/**
+ * NEXO — el contexto, la memoria, el hilo y la búsqueda (S113-A · lote 2.0).
+ *
+ * Cuatro puertas para que Nexo pueda hablar de UNA mascota con lo que la casa
+ * ya sabe, y para que la misma caja de texto encuentre cualquier cosa de la
+ * familia.
+ *
+ * ⚠️ **Nada de esto existe en memorial.** No es una regla de pantalla: las
+ * cuatro puertas del motor lo rebotan (`mascota_en_memorial`). *Un apagado que
+ * vive sólo en la UI se enciende solo el día que alguien agrega una ruta.*
+ */
+import { getClient } from '../client';
+import type { ResultadoWrapper } from '../resultado';
+
+const MENSAJE_ERROR = 'No pudimos cargar esto. Revisa tu conexión y prueba de nuevo.';
+
+export type CodigoErrorCoach =
+  | 'sin_sesion'
+  | 'sin_acceso'
+  | 'en_memorial'
+  | 'hecho_requerido'
+  | 'hecho_muy_largo'
+  | 'memoria_llena'
+  | 'memoria_no_encontrada'
+  | 'fuente_invalida'
+  | 'rol_invalido'
+  | 'texto_requerido'
+  | 'desconocido';
+
+// L-115: la RPC levanta 'codigo: detalle' — se normaliza por startsWith.
+function codigoCoach(mensaje: string): CodigoErrorCoach {
+  if (mensaje.startsWith('auth_required')) return 'sin_sesion';
+  if (mensaje.startsWith('no_access_to_mascota')) return 'sin_acceso';
+  if (mensaje.startsWith('mascota_en_memorial')) return 'en_memorial';
+  if (mensaje.startsWith('hecho_requerido')) return 'hecho_requerido';
+  if (mensaje.startsWith('hecho_muy_largo')) return 'hecho_muy_largo';
+  if (mensaje.startsWith('memoria_llena')) return 'memoria_llena';
+  if (mensaje.startsWith('memoria_no_encontrada')) return 'memoria_no_encontrada';
+  if (mensaje.startsWith('fuente_invalida')) return 'fuente_invalida';
+  if (mensaje.startsWith('rol_invalido')) return 'rol_invalido';
+  if (mensaje.startsWith('texto_requerido')) return 'texto_requerido';
+  return 'desconocido';
+}
+
+/* ─── A1 · el contexto ──────────────────────────────────────────────────── */
+
+/** De dónde salió un hecho de la memoria. **No es decoración**: separa lo que
+ *  la familia afirmó de lo que sólo dejó pasar cuando lo propuso el modelo, y
+ *  los dos no pesan igual cuando Nexo habla de la salud de un animal. */
+export type FuenteMemoria = 'familia' | 'confirmado_de_ia';
+
+export type HechoDeMemoria = {
+  id: string;
+  hecho: string;
+  fuente: FuenteMemoria;
+  creado_en: string;
+};
+
+/**
+ * Todo lo que Nexo sabe de una mascota, en **un solo viaje**.
+ *
+ * No es estilo: la tesis medida de S94 dice que en esta base no hay consultas
+ * lentas — lo que cuesta es la petición, ~150 ms fijos. Once lecturas
+ * encadenadas serían ~1,6 s antes de que el modelo empiece a pensar.
+ *
+ * El tipo es **deliberadamente laxo en las partes de datos** (`unknown[]`,
+ * `Record`): lo que viaja es el expediente crudo, y tiparlo campo por campo
+ * acá obligaría a esta puerta a conocer la forma de once tablas y a romperse
+ * cada vez que una cambia. *La edge que lo consume lo trata como contexto, no
+ * como modelo de dominio.* Lo que SÍ está tipado es lo que la app dibuja.
+ */
+export type ContextoCoach = {
+  mascota: {
+    id: string;
+    nombre: string;
+    especie: string;
+    /** `null` = no se declaró. Viaja el null: no se inventa una raza. */
+    raza: string | null;
+    sexo: string | null;
+    sujeto: string | null;
+    fecha_nacimiento: string | null;
+    precision_nacimiento: string | null;
+    momento_vital: string | null;
+  };
+  /** `null` cuando la raza no tiene ficha publicada. La ausencia se dice. */
+  ficha_raza: Record<string, unknown> | null;
+  salud: Record<string, unknown>;
+  plan_vacunal: unknown[];
+  proxima_cita: Record<string, unknown> | null;
+  eventos: unknown[];
+  pedidos_en_curso: number;
+  memoria: HechoDeMemoria[];
+};
+
+export async function obtenerContextoCoach(
+  mascotaId: string,
+): Promise<ResultadoWrapper<ContextoCoach, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('obtener_contexto_coach', {
+    p_mascota_id: mascotaId,
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || o.ok !== true || typeof o.mascota !== 'object') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: o as unknown as ContextoCoach };
+}
+
+/* ─── A2 · la búsqueda ──────────────────────────────────────────────────── */
+
+export type TipoResultado =
+  | 'mascota' | 'cita' | 'pedido' | 'recuerdo' | 'producto' | 'prestador';
+
+export type ResultadoBusqueda = {
+  tipo: TipoResultado;
+  id: string;
+  titulo: string;
+  subtitulo: string | null;
+  fecha: string | null;
+  /** Ruta de expo-router lista para `router.push`. La arma el servidor para
+   *  que la app no tenga que saber dónde vive cada cosa. */
+  ruta: string;
+};
+
+/**
+ * La misma caja encuentra mascotas, citas, pedidos, recuerdos, productos y
+ * prestadores. **Lo privado, sólo de la familia de quien pregunta** — y su
+ * rojo con otra cuenta está en el cinturón de la migración.
+ *
+ * Con menos de dos caracteres devuelve vacío **sin error**: rebotar a quien
+ * todavía está escribiendo es castigarlo por escribir.
+ *
+ * ⚠️ Límite medido y declarado: el diccionario español ignora los acentos en
+ * las dos direcciones («ingles» encuentra «inglés»), pero **conserva la ñ** —
+ * buscar «muneca» no encuentra «Muñeca». La ñ es una letra, no un acento.
+ */
+export async function buscarEnMiFamilia(
+  consulta: string,
+  limite?: number,
+): Promise<ResultadoWrapper<{ consulta: string; resultados: ResultadoBusqueda[] }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('buscar_en_mi_familia', {
+    p_q: consulta,
+    ...(limite !== undefined ? { p_limite: limite } : null),
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || o.ok !== true || !Array.isArray(o.resultados)) {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return {
+    ok: true,
+    data: {
+      consulta: typeof o.consulta === 'string' ? o.consulta : consulta,
+      resultados: o.resultados as ResultadoBusqueda[],
+    },
+  };
+}
+
+/* ─── A3 · la memoria ───────────────────────────────────────────────────── */
+
+export async function listarMemoriaCoach(
+  mascotaId: string,
+): Promise<ResultadoWrapper<HechoDeMemoria[], CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('listar_memoria_coach', {
+    p_mascota_id: mascotaId,
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || !Array.isArray(o.memoria)) {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: o.memoria as HechoDeMemoria[] };
+}
+
+/** Agrega un hecho. Techo de 30 por mascota — no es límite técnico: la memoria
+ *  entera viaja en cada pregunta, así que sin techo el costo crece sin que
+ *  nadie lo decida y una lista de cien hechos deja de ser memoria. */
+export async function agregarMemoriaCoach(
+  mascotaId: string,
+  hecho: string,
+  fuente: FuenteMemoria = 'familia',
+): Promise<ResultadoWrapper<{ id: string }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('agregar_memoria_coach', {
+    p_mascota_id: mascotaId,
+    p_hecho: hecho,
+    p_fuente: fuente,
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.id !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { id: o.id } };
+}
+
+/** Editar un hecho que propuso la IA **lo vuelve de la familia**: quien lo
+ *  reescribió se hizo cargo de lo que dice. */
+export async function editarMemoriaCoach(
+  id: string,
+  hecho: string,
+): Promise<ResultadoWrapper<{ id: string }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('editar_memoria_coach', { p_id: id, p_hecho: hecho });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  return { ok: true, data: { id } };
+}
+
+export async function borrarMemoriaCoach(
+  id: string,
+): Promise<ResultadoWrapper<{ id: string }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('borrar_memoria_coach', { p_id: id });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  return { ok: true, data: { id } };
+}
+
+/* ─── A4 · el hilo ──────────────────────────────────────────────────────── */
+
+export type TurnoCoach = {
+  turno: number;
+  rol: 'familia' | 'nexo';
+  texto: string;
+  creado_en: string;
+};
+
+/** Los últimos turnos. **La retención de 30 días la aplica el LECTOR**, no
+ *  sólo el purgador: si el cron no corre, el hilo viejo igual no vuelve. Una
+ *  retención que depende de que un reloj ande es una promesa, no una regla. */
+export async function leerHiloCoach(
+  mascotaId: string,
+  limite?: number,
+): Promise<ResultadoWrapper<TurnoCoach[], CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('leer_hilo_coach', {
+    p_mascota_id: mascotaId,
+    ...(limite !== undefined ? { p_limite: limite } : null),
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || !Array.isArray(o.hilo)) {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: o.hilo as TurnoCoach[] };
+}
+
+export async function guardarTurnoCoach(
+  mascotaId: string,
+  rol: 'familia' | 'nexo',
+  texto: string,
+  tokens?: number,
+): Promise<ResultadoWrapper<{ turno: number }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('guardar_turno_coach', {
+    p_mascota_id: mascotaId,
+    p_rol: rol,
+    p_texto: texto,
+    ...(tokens !== undefined ? { p_tokens: tokens } : null),
+  });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.turno !== 'number') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { turno: o.turno } };
+}
+
+/** Borra el hilo entero. Acá **sí** es un DELETE de verdad: la familia pidió
+ *  que la charla no exista más, y un borrado blando sería decirle que sí y
+ *  guardarla igual. */
+export async function borrarHiloCoach(
+  mascotaId: string,
+): Promise<ResultadoWrapper<{ borrados: number }, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('borrar_hilo_coach', { p_mascota_id: mascotaId });
+  if (error) return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.borrados !== 'number') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { borrados: o.borrados } };
+}
