@@ -29056,3 +29056,77 @@ lo que ya está bien.*
 
 ⇒ **`verify:vistas-invoker`**, con su control que prueba que reconoce las dos
 formas y rechaza `off`.
+
+---
+
+### `D-1041` 🟡 · PostgREST le sugiere a `anon` nombres reales del esquema
+
+**Medido S113-A (5-sep-2026). NO se cura desde el repo: es config de proyecto.**
+
+#### Lo medido, con la llave `anon` que viaja en el bundle
+```
+GET /rest/v1/tabla_que_no_existe
+  404 PGRST205 · hint: "Perhaps you meant the table 'public.cat_alergeno_relaciones'"
+GET /rest/v1/rpc/funcion_inventada
+  404 PGRST202 · details: "Searched for the function public.funcion_inventada …"
+                 hint: "Perhaps you meant to call …"
+```
+⇒ **cada intento fallido devuelve UN nombre real** del esquema. Con paciencia,
+eso mapea la base sin más credencial que la anon key.
+
+#### 🟢 Lo que SÍ está cerrado, y era el peor caso
+```
+GET /rest/v1/   →  401 · "Only the `service_role` API key can be used for this endpoint."
+```
+**La raíz OpenAPI no enumera.** *Si estuviera abierta, esto no sería una ficha
+🟡: sería el esquema entero en una sola petición.* Se mide y se dice, porque la
+diferencia entre «se puede adivinar de a uno» y «se descarga completo» es la
+diferencia entre una molestia y un incidente.
+
+#### Por qué no se cura acá
+La verbosidad de PostgREST es **configuración del proyecto Supabase**, no del
+repo: no hay archivo que la controle y el `config.toml` sólo rige el entorno
+local. Tocarla es entrar al dashboard de producción, que es del founder.
+
+#### El riesgo real, acotado y sin inflar
+Conocer el nombre de una tabla **no da acceso a ella**: la RLS sigue en el
+medio, y esta misma sesión midió que las tablas sensibles rebotan con `42501`.
+*Lo que un atacante gana es un mapa, no una llave.* Un mapa acelera la búsqueda
+de una policy mal escrita — como las dos que se curaron hoy — así que el valor
+de cerrarlo es proporcional a cuántas policies flojas queden.
+
+#### Disparo
+La revisión de seguridad previa al soft launch, junto con la rotación de llaves.
+Antes no: cerrar el hint sin haber cerrado las policies sería esconder el mapa
+dejando las puertas.
+
+---
+
+### `D-1042` 🟡 · El `REVOKE` a `anon` de las vistas de métricas espera que el portal legado use sesión
+
+**Firma del founder: no se toca hoy.**
+
+#### El estado
+`D-1040` cerró la fuga poniendo `security_invoker` en las once vistas: `anon`
+ahora rebota con `42501` antes de tocar las tablas. **El `GRANT SELECT` a `anon`
+sigue puesto** sobre `v_pitch_metrics`, `v_mrr`, `v_gmv_mensual`,
+`v_crecimiento_usuarios`, `v_metricas_tiempo_real` y `v_ia_costo_por_pieza_dia`.
+
+#### Por qué no se revoca
+**El portal legado de administración se conecta con la llave `anon`** sobre esta
+misma base — medido en S95-F, decodificando el claim `role`. *Revocar apagaría
+su tablero, y ese portal vive fuera de este repo: no se puede probar el efecto
+desde acá.*
+
+#### La cura, que es del portal y no de la base
+**Pasar el portal a sesión**: que entre con un usuario `authenticated` que sea
+admin, en vez de leer con la llave pública. Con eso el `REVOKE` a `anon` deja de
+tener costo y se hace en una línea.
+
+*Mientras tanto el grant es un permiso que ya no alcanza nada —el `invoker` lo
+neutralizó— pero sigue siendo un permiso escrito que alguien puede volver a
+hacer útil el día que agregue una policy.* Defensa en profundidad pendiente, no
+agujero abierto.
+
+#### Disparo
+El día que el portal tenga sesión. O antes, si alguien mide que ya la tiene.
