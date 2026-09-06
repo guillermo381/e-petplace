@@ -43,6 +43,18 @@ export type FichaMascotaHogarVoz = 'alDia' | 'pideAtencion' | 'conociendolo'
 
 export type FichaMascotaHogarProps = {
   nombre: string
+  /** 🔴 **Esta mascota está en memoria** (`A3.9`) — y es una propiedad de LA
+   *  MASCOTA, no de la pantalla.
+   *
+   *  ⏪ La ficha lo deducía de `theme.mode === 'memorial'`, o sea del tema de
+   *  toda la casa. **En la tira del Hogar conviven las vivas y la que se fue**,
+   *  y con un solo tema para todas *la que se fue se dibujaba idéntica a las
+   *  que están*: su punto verde, su voz de estado, su urgencia.
+   *
+   *  ⚠️ El tema sigue mandando cuando la pantalla entera es un memorial —ahí
+   *  todas lo son—, así que **se leen los dos**: la casa por tema, la ficha
+   *  por mascota. */
+  enMemoria?: boolean
   /** URL firmada (la pantalla resuelve el path — patrón S47). */
   fotoUrl?: string
   /** La voz decide punto y color; el texto ya viene traducido y SIN nombre. */
@@ -74,10 +86,12 @@ export type FichaMascotaHogarAccion =
   | { tipo: 'accion'; etiqueta: string; onPress: () => void }
 
 // S61-A12: la acción viste su naturaleza (cero Boton — gate A11).
-function AccionFicha({ accion }: { accion: FichaMascotaHogarAccion }) {
+function AccionFicha({ accion, enMemoria }: { accion: FichaMascotaHogarAccion; enMemoria: boolean }) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
-  const esMemorial = theme.mode === 'memorial'
+  /* La misma regla, y por eso viaja: **si la acción no supiera de la mascota,
+     una ficha en memoria mostraría su pill de «en vivo» en verde.** */
+  const esMemorial = enMemoria || theme.mode === 'memorial'
   // D-401: la acción es un control — responde al dedo (0.97)
   const { handlers, estiloPresionado } = usePresionado(0.97)
 
@@ -169,9 +183,17 @@ function AccionFicha({ accion }: { accion: FichaMascotaHogarAccion }) {
   )
 }
 
-export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, proximaCitaMono, onPress, accion }: FichaMascotaHogarProps) {
+export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, proximaCitaMono, onPress, accion, enMemoria = false }: FichaMascotaHogarProps) {
   const { theme } = useTheme()
-  const esMemorial = theme.mode === 'memorial'
+  /* 🔴 **POR MASCOTA, NO POR TEMA.**
+     ⏪ Era `theme.mode === 'memorial'` y nada más — o sea **el tema de TODA la
+     pantalla**. En la tira del Hogar conviven las vivas y la que está en
+     memoria, y con un solo tema para todas *la que se fue se dibujaba idéntica
+     a las que están*: su punto verde, su voz de estado, su urgencia.
+     La degradación de `A3.9` es de la MASCOTA. El tema sigue mandando cuando
+     la pantalla entera es un memorial —ahí todas lo son— así que se leen los
+     dos: **la casa por tema, la ficha por mascota.** */
+  const esMemorial = enMemoria || theme.mode === 'memorial'
 
   const punto = esMemorial
     ? null
@@ -250,7 +272,7 @@ export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, proximaCi
             </Text>
           ) : null}
 
-          {accion ? <AccionFicha accion={accion} /> : null}
+          {accion ? <AccionFicha accion={accion} enMemoria={esMemorial} /> : null}
         </View>
       </View>
     </Tarjeta>

@@ -20,11 +20,12 @@
  * inventada con cara de resultado.
  */
 
-import { Pressable, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
+import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 
 /** En palabras, nunca en porcentaje (ver cabecera). */
@@ -90,11 +91,37 @@ export function SugerenciaRaza({
           borderColor: theme.bg.border,
         }}
       >
-        <Texto variante="apoyo" color={on ? undefined : 'primary'}>
+        {/* 🔴 **ELEGIDO: BLANCO SOBRE EL MAGENTA, no la tinta por defecto.**
+            ⏪ El chip elegido usaba el color por defecto de `Texto`, o sea
+            tinta sobre `accent.control` — *el relleno cambiaba y la letra se
+            quedaba con el contraste del fondo que ya no estaba.*
+            ⚠️ **`Texto` no expone el blanco y no debe:** su paleta es
+            semántica y `sobreVideo` —el único que tiene— dice en su nota que
+            se usa SOLO sobre video. Acá el fondo lo pinta la casa, así que el
+            par es `text.inverse` sobre `accent.control`, **medido en
+            `verify:contrast`**. Misma forma que `FiltrosLineaDeVida`: se copia
+            al vecino, no se inventa. */}
+        <Text
+          style={{
+            fontFamily: typography.family.sans.regular,
+            fontSize: typography.size.base,
+            color: on ? theme.text.inverse : theme.text.primary,
+          }}
+        >
           {texto}
-        </Texto>
+        </Text>
         {/* La confianza, en palabras y debajo: acompaña, no titula. */}
-        {voz !== undefined ? <Texto variante="apoyo">{voz}</Texto> : null}
+        {voz !== undefined ? (
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.sm,
+              color: on ? theme.text.inverse : theme.text.secondary,
+            }}
+          >
+            {voz}
+          </Text>
+        ) : null}
       </Pressable>
     )
   }

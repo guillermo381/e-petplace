@@ -78,21 +78,45 @@ export function FichaRaza({
         style={{ minHeight: 44, justifyContent: 'center', gap: spacing[1] }}
       >
         <Texto variante="seccion">{nombre}</Texto>
-        <Texto variante="apoyo">{abierta ? vozCerrar : vozAbrir}</Texto>
+        {/* 🔴 **CON AFORDANCE: label + chevron** (19.7). ⏪ Era texto suelto, y
+            *un texto que no se distingue de una descripción no se toca: la
+            ficha quedaba cerrada porque nadie sabía que abría.* El chevron
+            gira, que es lo que dice si va a abrir o a cerrar. */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
+          <Texto variante="apoyo">{abierta ? vozCerrar : vozAbrir}</Texto>
+          <Texto variante="apoyo">{abierta ? '⌃' : '›'}</Texto>
+        </View>
       </Pressable>
 
       {abierta ? (
         <View style={{ gap: spacing[4] }}>
           <Texto variante="cuerpo">{historia}</Texto>
 
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-            {visibles.map((c) => (
-              <View key={c.etiqueta} style={{ width: '50%', paddingRight: spacing[3], paddingBottom: spacing[3] }}>
-                <Texto variante="apoyo">{c.etiqueta}</Texto>
-                <Texto variante="cuerpo">{c.valor as string}</Texto>
+          {/* 🔴 **UNA COLUMNA: la primera a todo el ancho, el resto en fila.**
+              ⏪ Eran dos columnas al 50 %, y con tres datos —uno largo y dos
+              cortos— *el largo se partía en dos renglones angostos y al lado
+              quedaba un hueco*. El criterio no es el nombre del campo sino su
+              papel: **la primera DESCRIBE —temperamento— y las demás son
+              DATOS** (talla, esperanza de vida). La pantalla las ordena; la
+              pieza respeta ese orden. */}
+          {visibles.length > 0 ? (
+            <View style={{ gap: spacing[3] }}>
+              <View>
+                <Texto variante="apoyo">{visibles[0].etiqueta}</Texto>
+                <Texto variante="cuerpo">{visibles[0].valor as string}</Texto>
               </View>
-            ))}
-          </View>
+              {visibles.length > 1 ? (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[5] }}>
+                  {visibles.slice(1).map((c) => (
+                    <View key={c.etiqueta}>
+                      <Texto variante="apoyo">{c.etiqueta}</Texto>
+                      <Texto variante="cuerpo">{c.valor as string}</Texto>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          ) : null}
 
           <View style={{ gap: spacing[2] }}>
             {cuidados.map((c) => (
