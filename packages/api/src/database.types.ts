@@ -22951,7 +22951,12 @@ export type Database = {
         }
         Returns: string
       }
-      _coach_puerta: { Args: { p_mascota_id: string }; Returns: undefined }
+      _coach_puerta:
+        | { Args: { p_mascota_id: string }; Returns: undefined }
+        | {
+            Args: { p_mascota_id: string; p_user_id?: string }
+            Returns: string
+          }
       _cobertura_vacunal: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -24960,7 +24965,9 @@ export type Database = {
           urgencia_tope_monto: number
         }[]
       }
-      obtener_avisos_coach: { Args: never; Returns: Json }
+      obtener_avisos_coach:
+        | { Args: never; Returns: Json }
+        | { Args: { p_mascota_id: string; p_user_id?: string }; Returns: Json }
       obtener_bitacora_de_estadia: {
         Args: { p_estadia_id: string }
         Returns: {
@@ -25054,7 +25061,10 @@ export type Database = {
         }[]
       }
       obtener_contexto_arranque: { Args: never; Returns: Json }
-      obtener_contexto_coach: { Args: { p_mascota_id: string }; Returns: Json }
+      obtener_contexto_coach: {
+        Args: { p_mascota_id: string; p_user_id?: string }
+        Returns: Json
+      }
       obtener_datos_negocio: {
         Args: { p_hasta?: string; p_prestador_id: string }
         Returns: Json
