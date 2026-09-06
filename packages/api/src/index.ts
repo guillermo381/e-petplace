@@ -1856,3 +1856,15 @@ export {
   activarPlaca,
   type CodigoErrorPlaca,
 } from './wrappers/coach';
+
+/* ⚠️ **ENMIENDA ADITIVA DE C (76(d)) — la puerta a la edge `coach`.** A hizo el
+   motor y sus wrappers, D hizo la edge, y **nadie escribió la puerta entre las
+   dos**. Sin ella la app no puede preguntar. */
+export {
+  preguntarANexo,
+  CODIGOS_NEXO,
+  type CodigoErrorNexo,
+  type RespuestaDeNexo,
+  type IntencionNexo,
+  type FuenteRespuestaNexo,
+} from './wrappers/nexo-preguntar';
