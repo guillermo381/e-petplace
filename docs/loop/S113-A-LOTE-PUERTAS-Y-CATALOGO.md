@@ -362,3 +362,32 @@ devolverle el golpe.* Desde ese momento el expediente rechaza eventos fechados
 **después** de la partida (`mascota_en_memorial`); lo anterior sigue entrando,
 porque un veterinario cierra una atención días después y esa atención ocurrió
 cuando ella estaba viva.
+
+### Addendum para C — las fichas POR ESPECIE, y en qué se diferencian
+
+**Ya hay una publicada: `gato-comun`.** Es la primera del prompt por especie y la
+alcanzan **14 mascotas** — más que cualquiera de las once de raza. Van **doce
+publicadas** sobre 210.
+
+**Tres cosas que cambian respecto de una ficha de raza, las tres firmadas por el
+founder:**
+
+1. 🔴 **`origen` y `predisposiciones` vienen VACÍOS A PROPÓSITO.** Una especie no
+   tiene origen ni predisposiciones raciales: *«de dónde viene el gato» sería
+   historia de la domesticación —no algo que le sirva a esta familia— y listar
+   predisposiciones «del gato» sería listar todo lo que le puede pasar a un
+   gato.* **El prompt hizo lo correcto al callarse ahí.**
+   ⇒ **La pantalla no dibuja secciones vacías** — ya es tu regla, y acá es
+   exactamente la que hace falta. *Una ficha por especie va a mostrar dos
+   secciones menos, y eso no es un dato faltante: es la respuesta.*
+
+2. **La voz cambia de sujeto y es correcta así.** Las de raza dicen *«suele ser
+   cariñoso…»* sobre una raza; ésta dice *«el gato es un animal independiente…»*
+   sobre la especie. **Presente, no «suele».** Cambió el sujeto de la frase
+   porque cambió el sujeto de la pregunta. ⇒ **Desde hoy conviven las dos voces
+   en la misma pantalla** según la mascota tenga raza o no, y eso está bien.
+
+3. **Se piden con `obtenerContenidoDeRaza(especie, especie)`** cuando la mascota
+   no tiene raza declarada. Hay una ficha por cada una de las once especies;
+   **sólo `gato-comun` está publicada**, así que las otras diez todavía devuelven
+   `null` — y `null` sigue siendo la respuesta normal, no un error.
