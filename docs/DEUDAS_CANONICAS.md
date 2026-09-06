@@ -28799,3 +28799,46 @@ no la decide su importancia: la decide que sea una credencial.**
 **No se censaron los demás arneses del repo.** Éste es el que yo escribí y el
 que se curó; si otro guarda una credencial de prueba inline, sigue ahí. El censo
 es `grep -rn "PASSWORD\|password:" scripts/` y **no lo corrí**.
+
+---
+
+### `D-1036` 🟢 · `cat_razas` tiene una policy que dice «pública» y un GRANT que no la deja entrar
+
+**Nace S113-A (5-sep-2026), medida de paso. Decisión del founder: NO se toca
+hasta que una pantalla pública la pida.**
+
+#### Lo medido
+```
+policy   cat_razas_select_publica → public
+grants   authenticated:SELECT · service_role:… · postgres:…     ← anon NO está
+RLS      encendida
+```
+Un cliente con la clave `anon` recibe **`permission denied for table
+cat_razas`**. La policy autoriza y el grant no deja pasar: **es `L-216` en su
+forma limpia** — *todo rol hereda de `PUBLIC` en las policies, pero el GRANT es
+otra puerta, y sin ella la policy no alcanza nada.*
+
+#### Por qué hoy no rompe nada
+Toda superficie que lee razas —el selector del alta, la ficha del perfil, los
+lookups por lote— corre con sesión iniciada, o sea como `authenticated`, que sí
+tiene el grant. **El hueco es real y está fuera de todo camino vivo.**
+
+#### 🔴 Y la asimetría que lo vuelve digno de ficha
+`razas_contenido` **sí** le da SELECT a `anon` (lo concedí yo el mismo día, para
+que la ficha publicada se pueda leer sin sesión). Así que hoy conviven: *el
+contenido de una raza es legible sin sesión y el nombre de esa raza no.* Ninguna
+pantalla lo nota porque ninguna intenta las dos cosas sin sesión — **pero el día
+que alguien arme una página pública de razas, va a encontrar el contenido y no
+el catálogo, y el síntoma va a ser un error de permisos donde esperaba una
+lista.**
+
+#### Lo que NO se hace, y por qué
+No se agrega el grant. *Abrir un catálogo entero a `anon` es una decisión de
+superficie pública, no una prolijidad de permisos* — y hoy nadie la necesita.
+**El nombre de la policy es lo único que engaña**, y se deja como está para no
+tocar el objeto por un tema de forma.
+
+#### Disparo
+La primera pantalla que lea razas **sin sesión** — una landing, una página de
+compartir, un enlace público a la ficha de una raza. Ahí se decide si el grant
+entra o si esa pantalla pasa por una vista angosta.
