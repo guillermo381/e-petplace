@@ -186,16 +186,33 @@ if (process.argv.includes('--control')) {
 }
 
 // ═══ CORRIDA NORMAL ═══════════════════════════════════════════════════════
-const ancla = process.argv[2];
+/* 🔴 ACEPTABA UN SEGUNDO ARGUMENTO Y LO TIRABA EN SILENCIO.
+   Medido el 6-sep: le pasé `<ancla> origin/pista/s113-a-nfc` y midió `<ancla>..HEAD`
+   —o sea MI rama— y dio VERDE; después con la otra rama dio **el mismo verde**,
+   porque **midió lo mismo dos veces**. *Un instrumento que acepta un argumento que
+   no usa no falla: contesta sobre otra cosa, y su verde se lee igual.*
+   Cura en dos mitades, y la segunda es la que importa:
+     ① el extremo `hasta` existe de verdad (default `HEAD`);
+     ② **cualquier argumento de más PARA** en vez de seguir. */
+const libres = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const [ancla, hasta = 'HEAD', ...sobran] = libres;
 if (!ancla) {
-  di('🔴 NO CONCLUYENTE: falta el ancla.  uso: node scripts/discriminador-ota.mjs <ancla>');
+  di('🔴 NO CONCLUYENTE: falta el ancla.  uso: node scripts/discriminador-ota.mjs <ancla> [hasta]');
   process.exit(2);
 }
-try { git(['rev-parse', '--verify', `${ancla}^{commit}`]); }
-catch { di(`🔴 NO CONCLUYENTE: "${ancla}" no es un commit de este repo.`); process.exit(2); }
+if (sobran.length) {
+  di(`🔴 NO CONCLUYENTE: no sé qué hacer con ${sobran.length} argumento(s) de más: ${sobran.join(' ')}`);
+  di('   uso: node scripts/discriminador-ota.mjs <ancla> [hasta]');
+  di('   *Antes esto se descartaba en silencio y el gate medía otro rango dando verde.*');
+  process.exit(2);
+}
+for (const [rot, ref] of [['ancla', ancla], ['hasta', hasta]]) {
+  try { git(['rev-parse', '--verify', `${ref}^{commit}`]); }
+  catch { di(`🔴 NO CONCLUYENTE: el ${rot} "${ref}" no es un commit de este repo.`); process.exit(2); }
+}
 
-const { runtime, dev, otros, archivos } = comparar(ancla, 'HEAD');
-di(`discriminador OTA · ${ancla}..HEAD · ${archivos} package.json comparados (raíz incluida)`);
+const { runtime, dev, otros, archivos } = comparar(ancla, hasta);
+di(`discriminador OTA · ${ancla}..${hasta} · ${archivos} package.json comparados (raíz incluida)`);
 
 if (otros.length) {
   di(`\n·  tocados SIN mover dependencias (${otros.length}): ${otros.join(' · ')}`);
