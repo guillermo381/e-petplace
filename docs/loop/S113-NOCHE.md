@@ -151,3 +151,94 @@ El parte decía «dos mascotas de prueba quedan en memorial». **Son CINCO**
 fixture no se les aplicó, así que **hoy cuentan como mascotas reales en
 cualquier censo**. No se borran (firma del founder: sólo si él lo pide), pero
 la marca sí hace falta. Anotado en `S113-NOCHE-PENDIENTES.md`.
+
+---
+
+## 6 · Lote 2 · el motor de Nexo (`main @ a8820c26`)
+
+**A1 contexto · A2 búsqueda · A3 memoria · A4 hilo · A5 placas · A6 avisos** —
+los seis con su cinturón y sus rojos reales. Declarados por nombre para C en
+`docs/loop/S113-A-PARA-C.md`.
+
+**Medido, no supuesto:** el contexto de Thor son **4.650 bytes** en un viaje ·
+la búsqueda tarda **7,6–59,7 ms** (techo 200) · el filtro de menores se ejerce
+sembrando un menor real y su evento · «con el opt-in apagado el generador
+produce CERO».
+
+### 🔴 Tres desajustes de contrato con las edges de D, hallados LLAMANDO
+
+Las edges estaban desplegadas y devolvían 403 y 204 sobre datos que mi RPC
+entregaba perfecto. **Ninguno lo ve un typecheck: las dos mitades compilan.**
+
+1. La edge corre con `service_role` y resuelve el uid ella misma ⇒ `auth.uid()`
+   es NULL adentro. Las puertas aceptan `p_user_id` **con el guard que impide
+   que un logueado se haga pasar por otro**: *un parámetro de identidad que el
+   llamador elige no es identidad, es un formulario de suplantación.*
+2. La edge lee el contexto **plano**; el mío agrupaba. Se sirven las dos formas.
+3. `coach-parte` hace `Array.isArray` y filtra por `titulo`; yo devolvía un
+   objeto ⇒ **204 SIEMPRE con seis avisos reales en la tabla**. Y ése es el peor
+   modo de falla: *el silencio de esa pieza es indistinguible de «hoy no hay
+   nada que decir». No se descubre: se hereda.*
+
+### Y dos reconciliaciones que no son cosméticas
+
+- **El memorial deja de rebotar en la LECTURA del contexto.** D ya había
+  escrito la respuesta correcta —voz serena, **sin llamar al modelo**— y mi
+  rebote la volvía inalcanzable: la familia recibía «no pudimos leer el
+  expediente». *Leer el expediente de una mascota que murió es lo que hace la
+  app entera; lo prohibido es hablar sobre él.*
+- **`estado_vida` viaja como `'memorial'`, no `'fallecida'`.** La edge compara
+  contra esa palabra: con el valor crudo su guard no dispararía y **el modelo
+  hablaría de una mascota muerta**.
+
+### Las tres llamadas reales, con la cuenta del founder
+
+| | resultado |
+|---|---|
+| «¿cuándo le toca la vacuna?» | 200 · **`fuente: plantilla`** · el modelo de redacción **no se llamó** |
+| «¿cómo lo ves por su etapa?» | 200 · **`fuente: modelo`** · con su medicación real · Sonnet 1×, 50 in / 175 out, **USD 0,006045** |
+| parte del día, **dos avisos** | 200 · hilado y **sin inventar**: la leptospirosis vencida y el paseo de mañana 17:30, los dos reales |
+
+Router (Haiku) 2× · **USD 0,001050**. Una pregunta de dato paga sólo el router.
+
+---
+
+## 7 · La caída del arranque era mía
+
+Medido por E con un deep link durante el arranque: **3 caídas de 4**. La causa
+vivía en `adopcion-hilo-vivo.ts`, con dos mitades que se necesitan: el canal se
+llamaba **`'mis-hilos'`, fijo** —y `supabase-js` indexa por nombre, así que dos
+montajes tocan el MISMO objeto— y `void removeChannel` **no espera a nadie**.
+*Una limpieza que no se espera no es una limpieza: es una carrera.*
+
+Curado volviendo el estado **inexpresable**: nombre único por montaje y una
+cadena de promesas del módulo. Aplicado a **los dos** canales del archivo, no
+sólo al que falló.
+
+## 8 · El pasaporte en la calle — 🔴 BLOQUEADO POR PLATAFORMA
+
+C midió que la página llega como `text/plain`. **Reproducido y acotado:**
+
+| | GET |
+|---|---|
+| `text/html` (en cualquier forma) | → **`text/plain`** |
+| `application/xhtml+xml` | → **`text/plain`** |
+| `image/svg+xml` · `image/png` | → **pasan intactos** |
+
+⇒ **Supabase degrada todo lo que pueda renderizar HTML**; no es un bug mío ni
+el gateway pisando todo (el QR conserva su tipo). Es política de plataforma
+para que nadie sirva páginas desde `*.supabase.co`. **La cura es un dominio
+propio** y eso es del founder — anotado.
+
+**Lo que sí se curó:** la foto va transformada a 264 px / calidad 60 →
+**62.582 bytes → 9.362 (−85 %)**. La página entera pesa **12.669 bytes** contra
+un techo de 60.000. *La original sola ya lo rompía.*
+
+## 9 · Estado para el candidato 2.0
+
+`main @ a8820c26` con **B-2.0, C-1.3, C-2.0, D-2.0 y E-2.0** mergeados.
+4 typechecks **0** · `verify:diseno` **0** · `verify:puerta-unica` **0**.
+
+⏸️ **No publiqué.** El candidato espera la cura de C del arranque: *no sale un
+OTA con un crash conocido en el camino del QR.* Mi mitad (el canal) está
+curada y en `main`; falta la del shell.
