@@ -28842,3 +28842,63 @@ tocar el objeto por un tema de forma.
 La primera pantalla que lea razas **sin sesión** — una landing, una página de
 compartir, un enlace público a la ficha de una raza. Ahí se decide si el grant
 entra o si esa pantalla pasa por una vista angosta.
+
+---
+
+### `D-1037` 🟡 · Los sinónimos de raza en español: 77 menciones sobre 58 nombres, medidos y sin usar
+
+**Dueño: C. Disparo: cuando el selector de raza del alta acepte texto libre.
+Sin cambio hoy.**
+
+#### De dónde sale
+E lo midió como subproducto de un experimento que **descartó**: `sugerir-raza`
+sin el catálogo en el prompt (`pista/s113-e-1.2 @ 4b08b570`,
+`docs/loop/CANDIDATO-raza-sin-catalogo.md`). El veredicto fue **NO va** —pierde
+14 puntos de top-1 por ahorrar $0,0038 la foto— *pero al mirar por qué perdía,
+apareció esto:*
+
+> **En español una raza no tiene UN nombre.** El modelo devolvía la raza
+> correcta con otro nombre: «Ruso azul» por «Azul Ruso», «Braco de Weimar» por
+> «Weimaraner», «Caniche» por «Poodle», «Británico de pelo corto» por «British
+> Shorthair».
+
+#### Lo re-medido por A (5-sep), y corrige el encuadre del número
+E reportó «77 de 255 nombres». Re-medido contra el catálogo de **hoy** (220
+razas, no las 137 de entonces) y con **su casamiento más generoso** —`nombre_norm`,
+sin paréntesis, orden de palabras indiferente—:
+
+```
+nombres distintos que el modelo devolvió   132   (255 menciones)
+🔴 NO CASAN                                 58 distintos · 77 menciones
+```
+
+**Los 77 son MENCIONES, no nombres distintos.** Son 58 sinónimos reales, algunos
+repetidos en varias fotos. *La cifra de E era correcta; lo que faltaba era decir
+de qué era el 77, porque «77 sinónimos» y «58 sinónimos vistos 77 veces» mandan
+a construir tablas de tamaños distintos.*
+
+#### 🔴 Y el rescate, que era lo urgente
+El JSON vivía **sólo en el worktree de E**: `.ia-conjuntos/` está en
+`.gitignore`. *Un `git worktree prune` y el censo desaparecía, y regenerarlo son
+146 llamadas al modelo.* **Rescatado y versionado** en
+`docs/loop/S113-sinonimos-de-raza-sin-casar.json`, con su procedencia y el
+casamiento con el que se midió escritos adentro. **Es L-217 otra vez: «está
+medido» y «está en el canon» son dos afirmaciones distintas.**
+
+#### Qué hacer cuando dispare, y las dos mitades son igual de importantes
+1. **Casar por sinónimo.** Si alguien teclea «Caniche» o «Braco de Weimar», el
+   selector le ofrece la raza del catálogo en vez de tratarlo como texto nuevo.
+   La lista ya está medida y no hay que inventarla.
+2. 🔴 **REGISTRAR LO DESCARTADO**, que es la advertencia literal de E: casar por
+   nombre y **descartar en silencio** significa que *lo que no casó desaparece
+   sin dejar rastro* — y la próxima vez que alguien mida exactitud **no va a
+   poder saber si el modelo falló o si el casamiento se comió la respuesta.**
+   *Un descarte silencioso no es una pérdida de datos: es una pérdida de la
+   capacidad de medir.*
+
+#### Lo que esta ficha NO decide
+Si la tabla de sinónimos vive en la base (una tabla `raza_sinonimos`) o en el
+cliente. **Depende de quién más la necesite**: hoy sólo el selector, y para un
+solo consumidor una constante alcanza. *El día que la edge también quiera casar
+por sinónimo, la constante se vuelve la segunda definición de «igual» — y esta
+casa ya pagó ese precio con `nombre_norm`.*
