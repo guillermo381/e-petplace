@@ -28957,3 +28957,39 @@ escribió, en vez de quedar esperando.*
 `grep -A8 "insert into" supabase/migrations/*.sql` cruzado contra
 `information_schema.columns`, y **no lo corrí**: encontré éstas dos mirando otra
 cosa.
+
+---
+
+### `D-1039` 🟡 · `verify:razon-muda` da 140 contra baseline 139 — heredado, sin asentar
+
+**Nace S113-A (5-sep-2026). No lo introdujo este lote.**
+
+#### Lo medido
+```
+main hoy              140 · baseline 139 · exit 1
+main @ 25aabd5c       140   (antes de mergear B-1.2 y C-1.2b)
+pista/s113-a-1.0 @ 0429bbe4   140   ← el punto más temprano de S113 que medí
+```
+⇒ **el +1 entró ANTES de este lote**, y C lo reporta igual en su cierre. *No lo
+trajeron los merges de hoy: eso está medido en los tres puntos.*
+
+#### 🔴 Por qué NO subí el baseline
+El propio gate lo dice: *«si el caso nuevo es legítimo, se declara y se sube el
+baseline A MANO, con su razón»*. **Y no puedo declarar la razón de un caso que no
+puedo nombrar**: el gate imprime los cinco archivos con más casos y trunca el
+resto («… y 71 archivo(s) más»), así que **el +1 no aparece en su salida**.
+
+*Subir un baseline sin poder decir qué caso se está aceptando es exactamente lo
+que el trinquete existe para impedir — y hacerlo «para que el gate pase» convierte
+una medición en un trámite.*
+
+#### El paso que lo cierra, escrito para que no haya que redescubrirlo
+El gate necesita **un modo que imprima la lista COMPLETA** (`--todos`). Con eso:
+corrérselo en dos puntos —uno con 139 y otro con 140— y `comm -13` sobre las dos
+listas nombra el caso en una línea. **El punto con 139 hay que buscarlo hacia
+atrás de `0429bbe4`**, que ya estaba en 140.
+
+#### Lo que este rojo NO bloquea
+No es del hook de pre-commit y **no frena el candidato 1.2**: el número es el
+mismo antes y después de los merges de hoy, así que *ningún trabajo de este lote
+lo movió*. Queda como deuda de higiene, no como bloqueante.
