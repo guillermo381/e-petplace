@@ -88,7 +88,12 @@
     "verify:compuertas-por-sujeto": "node scripts/verify-compuertas-por-sujeto.mjs",
     "verify:raza-norm": "node scripts/verify-raza-norm.mjs",
     "corregir:ficha": "node scripts/corregir-ficha.mjs",
-    "verify:vistas-invoker": "node scripts/verify-vistas-invoker.mjs"
+    "verify:vistas-invoker": "node scripts/verify-vistas-invoker.mjs",
+    "verify:coach-ley": "node scripts/verify-coach-ley.mjs",
+    "verify:nexo-rojos": "node scripts/verify-nexo-rojos.mjs",
+    "verify:busqueda-propia": "node scripts/verify-busqueda-propia.mjs",
+    "verify:nexo-antispam": "node scripts/verify-nexo-antispam.mjs",
+    "verify:pasaporte-campos": "node scripts/verify-pasaporte-campos.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
