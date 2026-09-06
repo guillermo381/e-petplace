@@ -191,7 +191,16 @@ console.log('\n== 1 · VERDE json + control cruzado de tokens ==')
   exigir('latencia es número', typeof cap.filas[0]?.latencia_ms === 'number')
   const claves = Object.keys(cap.filas[0] ?? {}).sort().join(',')
   exigir('CERO dato personal: sólo las columnas del contrato',
-    claves === 'costo_estimado_usd,edge,latencia_ms,modelo,pieza,resultado,tokens_cache_escritura,tokens_cache_lectura,tokens_entrada,tokens_salida', claves)
+    claves === 'costo_estimado_usd,edge,imagen_chars,latencia_ms,modelo,pieza,prompt_chars,resultado,tokens_cache_escritura,tokens_cache_lectura,tokens_entrada,tokens_salida', claves)
+  // ⚠️ `prompt_chars` e `imagen_chars` las agregó A (`f9d67979`) llevando más
+  // lejos el log que pedí en el lote 2.7: en vez de un `console.log`, columnas.
+  // **Este brazo quedó rojo en `main` porque la lista de acá no se movió con
+  // ellas** — que es exactamente lo que un contrato de columnas tiene que
+  // hacer: gritar cuando alguien agrega una. Son LARGOS, no contenido: cero PII.
+  exigir('las dos columnas nuevas son LARGOS, no texto',
+    typeof cap.filas[0]?.prompt_chars === 'number' &&
+    (cap.filas[0]?.imagen_chars === null || typeof cap.filas[0]?.imagen_chars === 'number'),
+    { p: cap.filas[0]?.prompt_chars, i: cap.filas[0]?.imagen_chars })
 }
 
 console.log('\n== 2 · VERDE texto (la rama que nadie usa todavía) ==')
