@@ -1207,13 +1207,26 @@ export { FichaRaza, type FichaRazaProps, type CuidadoPorEtapa } from './componen
 export { PantallaDespedida, type PantallaDespedidaProps } from './components/PantallaDespedida'
 export { fechaDespedidaValida } from './components/despedida-fecha'
 
-// InvitacionBio (S113-B · 1.2.2) — «¿Querés contarnos qué lo hace único?»
-// 🔴 Una entrada SIN destino no se puede escribir: `onPress` es obligatorio,
-// y con cero entradas la tarjeta no se dibuja. Vive al cierre de `FichaRaza`
-// y también SOLA en el perfil, cuando la mascota no tiene ficha de raza.
+// ☠️ `InvitacionBio` MURIÓ (S113-B · 2.1) — y no fue una limpieza: era
+// TARJETA Y HOJA en la misma pieza, y el encargo abre esa Hoja desde CUATRO
+// lugares. *Una pieza que trae su propio botón obliga a cada acceso a montar
+// el botón entero o a clonar la Hoja.* Se partió en dos:
+//   · `HojaContanos`  — el contenido, con un solo `visible`
+//   · `BotonContanos` — uno de los cuatro accesos
+// La caja libre y la propuesta de Nexo son NUEVAS; el resto viajó igual.
+//
+// 🔴 La Hoja no clasifica lo que le escriben: entrega el texto y la clase la
+// propone Nexo, que vuelve por `propuesta` con sus DOS salidas. *Si la pieza
+// adivinara la clase, el sí de la familia dejaría de ser una decisión.*
 export {
-  InvitacionBio,
-  type InvitacionBioProps,
-  type EntradaInvitacion,
-  type ClaseInvitacion,
-} from './components/InvitacionBio'
+  HojaContanos,
+  type HojaContanosProps,
+  type EntradaContanos,
+  type ClaseContanos,
+  type PropuestaContanos,
+} from './components/HojaContanos'
+export { BotonContanos, type BotonContanosProps } from './components/BotonContanos'
+export {
+  PastillaConociendolo,
+  type PastillaConociendoloProps,
+} from './components/PastillaConociendolo'
