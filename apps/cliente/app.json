@@ -2,7 +2,7 @@
   "expo": {
     "name": "e-PetPlace",
     "slug": "cliente",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cliente",
@@ -27,7 +27,8 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_CAMERA",
         "android.permission.FOREGROUND_SERVICE_MICROPHONE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.NFC"
       ]
     },
     "web": {
@@ -62,6 +63,12 @@
         {
           "cameraPermission": "Para la foto de tu mascota y para tus videoconsultas con el veterinario.",
           "photosPermission": "La app accede a tus fotos solo cuando eliges una imagen para tu mascota."
+        }
+      ],
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "e-PetPlace lee la chapita de tu mascota para abrir su pasaporte."
         }
       ]
     ],

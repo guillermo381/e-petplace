@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@epetplace/api": "workspace:*",
+    "@epetplace/cuadro-video": "workspace:*",
     "@epetplace/domain": "workspace:*",
     "@epetplace/i18n": "workspace:*",
     "@epetplace/ui": "workspace:*",
@@ -42,14 +43,14 @@
     "react-native": "0.86.0",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-maps": "1.27.2",
+    "react-native-nfc-manager": "3.17.2",
     "react-native-reanimated": "4.5.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.2",
     "react-native-svg": "15.15.4",
     "react-native-web": "~0.21.0",
     "react-native-webview": "13.16.1",
-    "react-native-worklets": "0.10.0",
-    "@epetplace/cuadro-video": "workspace:*"
+    "react-native-worklets": "0.10.0"
   },
   "devDependencies": {
     "@livekit/react-native-expo-plugin": "1.0.2",
