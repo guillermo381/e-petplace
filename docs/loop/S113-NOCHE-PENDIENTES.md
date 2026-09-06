@@ -76,13 +76,25 @@ nota. **Voto: (b)** — la casa ya prefiere volver inexpresable antes que vigila
 
 ---
 
-### E-4 · 🟢 Para D, no para el founder: cachear conviene desde el SEGUNDO turno de narrativa
+### E-4 · 🟢 CORREGIDA POR D — la elección no es «desde cuándo cachear», es «siempre o nunca»
 
-Aritmética sobre precios verificados y tokens medidos, con contexto de 1.290 tokens:
-**un solo turno con caché cuesta 25 % MÁS** ($0,003225 contra $0,00258); **dos turnos cuestan
-32,5 % menos** ($0,003483 contra $0,00516). **El punto de equilibrio son exactamente 2** — y una
-conversación de un solo turno de narrativa es el caso común, no el raro. *Encender el caché
-siempre es una optimización que en el caso más frecuente cobra de más.*
+**Lo que escribí primero:** *«cachear conviene desde el SEGUNDO turno de narrativa y en el
+primero pierde»*. La aritmética era correcta **y la conclusión inducía a hacer algo peor que
+las dos opciones reales.**
+
+**Lo que D midió llevándola hasta el final, y verifiqué:** *«cachear desde el segundo»* es una
+tercera estrategia **dominada** — empata en n=1 y en n=2 cuesta **$0,005805** contra los
+**$0,003483** de siempre-cachear, porque paga la escritura un turno más tarde **sin haberse
+ahorrado nada**. La elección real es **siempre** contra **nunca**: penalidad si n=1 **$0,000645**,
+ahorro si n=2 **$0,001677** ⇒ **siempre-cachear conviene si más del 28 % de las conversaciones
+tienen 2+ turnos de narrativa.**
+
+**Y ese número no es del modelo: es sobre cómo hablan las familias**, y hoy no lo tiene nadie.
+`ia_uso` ya guarda lo necesario para contarlo cuando haya tráfico. D deja la perilla en `true`
+y la cuenta escrita. **Nada que firmar: queda como medición pendiente de tráfico real.**
+
+*La lección para mí: una aritmética correcta puede recomendar algo peor que las dos opciones
+que compara, si la tercera opción que sugiere nunca estuvo sobre la mesa.*
 
 ---
 
@@ -94,41 +106,42 @@ medición está escrita y toma minutos.
 
 ---
 
-### E-6 · 🔴 «Escalar a telemedicina» y «mostrarte tu veterinario» son dos productos, y el prompt hace el segundo
+### E-6 · ☠️ RETIRADA — la premisa era canon viejo, y la medición la desmiente
 
-**Qué.** El brief del lote 2 dice que Nexo **«escala a telemedicina de un toque»**. La edge
-`coach` de D (medida en `pista/s113-d-2.0`) implementa un **semáforo de tres** —*se mira en
-casa · conviene una cita esta semana · esto es para ir ya*— y ofrece **«¿Querés que te muestre
-a tu veterinario?»**.
+**Lo que escribí:** que «escalar a telemedicina» y «mostrarte tu veterinario» eran dos productos
+en desacuerdo y que la elección era **firma del founder**.
 
-**Por qué no lo resuelvo yo.** *Mostrar el perfil del vet y abrir una consulta son dos cosas
-distintas, y la que la familia necesita a las once de la noche es la segunda.* El semáforo de
-D es bueno —es más honesto que un diagnóstico y más útil que un «andá al vet»— pero **termina
-en una ficha, no en una consulta**. Ninguno de los dos está mal; **están en desacuerdo**, y un
-desacuerdo entre la ley y el código se decide firmando, no ensanchando un gate.
+**🔴 Lo que no medí:** me apoyé en el canon (S68 firmó `telemedicina · reservable=false` de
+plataforma, camino (c) del founder) **sin preguntarle a la base**. D lo midió y lo verifiqué por
+mi cuenta: **`telemedicina · reservable=true · activo=true · 2 ofertas activas`.** *El canon está
+viejo y «de un toque» se puede construir hoy.*
 
-**Opciones.** (a) la ley adopta el semáforo y «de un toque» pasa a significar *mostrar al vet* ·
-(b) el prompt adopta la telemedicina y el ofrecimiento abre la consulta · (c) las dos, por
-gravedad: en «esto es para ir ya» se abre la consulta, en los otros dos se muestra el vet.
-**Voto: (c)** — es lo único que distingue los tres escalones en la ACCIÓN y no sólo en el texto.
-*Un semáforo cuyos tres colores terminan en la misma pantalla es un semáforo de un color.*
+**Por qué lo dejo escrito en vez de borrarlo:** casi le pido al founder que firme una decisión
+**sobre un mundo que no existe**. Es la clase de error que no tiene síntoma — un dato heredado
+del canon se lee igual que uno medido y trae su autoridad, y **ningún gate lo caza porque no hay
+instrumento**. *Si la firma hubiera salido, habría quedado ratificando un `reservable=false` que
+ya nadie cumple.*
 
-`verify:coach-ley` queda **en rojo sobre esta cláusula a propósito**, hasta la firma.
+**Resuelto sin firma, y bien:** D no lo decidió solo — lo **condicionó al dato**. El contrato
+gana `telemedicina_disponible`: con el dato ofrece la consulta, sin él ofrece ver al vet.
+*Prometer un botón que no existe es peor que ofrecer el que sí existe, y sin el dato no se sabe
+cuál de los dos es.* Par discriminador corrido con el modelo real.
+
+**Queda una cosa para el founder, mucho más chica: el canon de S68 dice lo contrario de lo que
+la base hace.** No es una decisión, es una línea que corregir.
 
 ---
 
-### E-7 · 🔴 Nexo no dice en ningún lado que es una IA
+### E-7 · 🟢 CERRADA — era omisión, no espera del abogado, y D la curó
 
-**Qué.** Leí el `system` entero de la edge `coach`: **no hay ninguna cláusula donde Nexo declare
-que es una inteligencia artificial**. El brief la pide («dice que es IA») y **D-405** pide el
-aviso legal de IA cuando Nexo hable.
+Pregunté antes de llamarlo olvido y **era omisión**. La distinción que D hizo al medirlo vale más
+que el hallazgo: él tenía `aviso_ia: true` para que **la pantalla** lo dijera en el primer turno,
+y mandó el texto legal a D-405. **Eso cubre el primer turno y nada más.** Si a mitad de
+conversación preguntan *«¿sos una persona? ¿vos atendiste a Thor?»*, **nada en el system hacía
+que contestara honestamente.** Son dos cosas y había una.
 
-**El matiz que puede volverlo un no-problema.** Puede estar afuera **a propósito**, esperando el
-texto del abogado que D-405 nombra. *Escribir yo una frase legal provisoria sería peor que el
-hueco:* una vez que está en el prompt, nadie la vuelve a mirar, y queda un aviso legal escrito
-por quien no es abogado. **Le pregunté a D cuál de las dos es.**
+Y la cláusula nueva **no es el texto legal** —eso sigue siendo del abogado (D-405)—: es honestidad
+de la casa. `verify:coach-ley` **da VERDE contra el SHA nuevo: las 8 cláusulas están.**
 
-**Opciones.** (a) la voz honesta de la casa mientras tanto —una frase corta, marcada como
-provisoria en el código, con su ficha— · (b) esperar al abogado con el hueco declarado ·
-(c) dejarlo sin declarar. **Voto: (a)**, y **(c) es la única inaceptable**: hoy la familia no
-tiene forma de saber con qué está hablando, y eso no lo arregla el silencio.
+*El ciclo completo en una noche: el gate se escribió antes que la superficie, corrió contra ella
+el mismo día, dio cuatro rojos —dos míos, que curé; dos reales, que curó D— y ahora está verde.*
