@@ -33,6 +33,7 @@ import {
   Boton,
   Encabezado,
   EvitaTeclado,
+  FichaRaza,
   SelectorOpcion,
   spacing,
   useTheme,
@@ -45,7 +46,10 @@ import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
 import { caraDeMascota } from '@/lib/cara-mascota';
 import { CODIGO_NO_SE, SelectorDeRaza, type RazaElegida } from '@/components/selector-de-raza';
-import { obtenerRazasDeEspecie, sugerirRaza, type SugerenciaDeRaza } from '@epetplace/api';
+import { obtenerRazasDeEspecie, sugerirRaza, type SugerenciaDeRaza,
+  obtenerContenidoDeRaza,
+  type ContenidoDeRaza,
+} from '@epetplace/api';
 import { esAcuario, TIPOS_DE_AGUA, type BorradorAlta, type EspecieUi } from './tipos';
 
 /**
@@ -124,6 +128,33 @@ export function PasoRaza({
   const [nombresRaza, setNombresRaza] = useState<Record<string, string>>({});
   const [elegidaIA, setElegidaIA] = useState<string | null>(null);
   const [selectorAbierto, setSelectorAbierto] = useState(false);
+  /** ⭐ **EL MOMENTO DE LA RAZA** (S113-C · 1.2.1 · ①). `null` = no hay nada
+   *  que contar: la ficha no está publicada, o la raza no casó. **Y ahí no se
+   *  muestra nada** — *inventar dos líneas sobre una raza que no documentamos
+   *  es exactamente lo que la ficha existe para no hacer.* */
+  const [fichaRaza, setFichaRaza] = useState<ContenidoDeRaza | null>(null);
+  /* 🔴 **EL DISPARO CUELGA DE LA RAZA ELEGIDA, NO DEL CHIP DE LA SUGERENCIA.**
+     Primero lo colgué del `onElegir` de `SugerenciaRaza` y **no apareció nunca**:
+     medido en web, el toque real había sido en el SELECTOR —la sugerencia no
+     acertó la raza— y ese camino no pasaba por ahí. *Un disparo atado a una de
+     las dos puertas se ve funcionar en la que uno probó.*
+     Se pide con el NOMBRE, no con el slug: el servidor resuelve nombre,
+     sinónimo y caída a la especie (`resolver_ficha_de_raza`) — un viaje, una
+     verdad. */
+  useEffect(() => {
+    const nom = eleccion.raza;
+    if (nom === undefined || nom === null || nom.trim() === '') {
+      setFichaRaza(null);
+      return;
+    }
+    let vivo = true;
+    void obtenerContenidoDeRaza(borrador.especie ?? '', nom).then((r) => {
+      if (vivo && r.ok) setFichaRaza(r.data);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [eleccion.raza, borrador.especie]);
 
   useEffect(() => {
     let vivo = true;
@@ -256,6 +287,39 @@ export function PasoRaza({
 
               {datos !== null && datos.sin_animal ? (
                 <Texto variante="apoyo">{t('alta.sugSinAnimal')}</Texto>
+              ) : null}
+
+              {/* ⭐ **CONOCE AL {raza}** — la misma `FichaRaza` del perfil, no
+                  una copia. Su modo cerrado **ya es** «dos líneas y ver más»
+                  (L-175: se reusa, jamás se clona), y así lo que la familia lee
+                  acá es literalmente lo que va a volver a encontrar en la
+                  ficha. */}
+              {fichaRaza !== null ? (
+                <View style={{ gap: spacing[2] }}>
+                  <Texto variante="enfasis">{t('alta.conoceAl', { raza: eleccion.raza ?? '' })}</Texto>
+                  <FichaRaza
+                    nombre={eleccion.raza ?? ''}
+                    revisado
+                    historia={fichaRaza.origen ?? ''}
+                    caracteristicas={[
+                      { etiqueta: t('perfil.razaTemperamento'), valor: fichaRaza.temperamento ?? undefined },
+                      { etiqueta: t('perfil.razaTalla'), valor: fichaRaza.talla_adulta ?? undefined },
+                      { etiqueta: t('perfil.razaVida'), valor: fichaRaza.esperanza_vida ?? undefined },
+                    ]}
+                    /* En el alta **no se marca etapa actual**: la fecha de
+                       nacimiento se pregunta DESPUÉS, así que acá no sabemos en
+                       cuál está. *Marcar una sería afirmar una edad que la
+                       familia todavía no dijo.* */
+                    cuidados={[
+                      { id: 'cachorro', etapa: t('perfil.razaCachorro'), texto: fichaRaza.cuidados_por_etapa.cachorro ?? '', actual: false },
+                      { id: 'adulto', etapa: t('perfil.razaAdulto'), texto: fichaRaza.cuidados_por_etapa.adulto ?? '', actual: false },
+                      { id: 'senior', etapa: t('perfil.razaSenior'), texto: fichaRaza.cuidados_por_etapa.senior ?? '', actual: false },
+                    ].filter((c) => c.texto.length > 0)}
+                    vozRevision={t('perfil.razaRevision')}
+                    vozAbrir={t('perfil.razaVer')}
+                    vozCerrar={t('perfil.razaOcultar')}
+                  />
+                </View>
               ) : null}
 
               {mostrarSelector || elegidaIA === null ? (

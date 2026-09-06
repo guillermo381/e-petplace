@@ -148,6 +148,12 @@ const razaDespues = await page.evaluate(() => {
   }
   return '(no hallé el campo)';
 });
+/* ① el momento de la raza: aparece tras el toque, no antes. */
+await page.waitForTimeout(6000);
+const tMom = await T();
+di(`  ① ¿aparece «Conoce al …»?: ${/Conoce al /.test(tMom) ? 'sí ✓' : '🔴 no'}`);
+di(`  ① ¿trae el «ver más» plegable?: ${/Ver más sobre la raza/.test(tMom) ? 'sí ✓' : '🔴 no'}`);
+di(`  ① ¿el alta sigue (botón de avanzar presente)?: ${(await page.getByText(/^Continuar$/).count()) > 0 ? 'sí ✓' : '🔴 no'}`);
 di(`  · TRAS EL TOQUE: «${razaDespues}» ⇒ ${razaDespues.length > 0 && !razaDespues.startsWith('(no') ? 'la eligió el toque ✓' : 'ojo'}`);
 /* Se avanza tocando **el último botón de la pantalla que no sea «Volver» ni el
    Nexo**: los nombres cambian paso a paso («Presentar a X», «Continuar», …) y
@@ -196,6 +202,9 @@ else {
      propósito, así que después de despedir **no dibujar es lo correcto**. *Un
      control positivo medido en el estado equivocado no falla: miente.* */
   di(`  C10 · con Beagle VIVA, ¿dibuja la ficha de raza?: ${/Ver más sobre la raza|Cómo suelen ser/.test(antes) ? 'sí ✓ (positivo)' : '🔴 no'}`);
+  di(`  ② ¿cierra con la invitación?: ${/¿Quieres contarnos qué lo hace único\?/.test(antes) ? 'sí ✓' : '🔴 no'}`);
+  const mPeso = /(\d+(?:[.,]\d+)?) kg · (\d{2} \w+)/.exec(antes);
+  di(`  ④ identidad muestra el peso con su fecha: ${mPeso !== null ? `«${mPeso[0]}» ✓` : (/\d+(?:[.,]\d+)? kg/.test(antes) ? '🔴 sin fecha' : 'sin peso (no lo declaró)')}`);
   /* 🔴 **GUARDA: no se despide a una mascota ajena.** Este arnés ejecuta un
      acto IRREVERSIBLE sobre datos reales del founder. Si la ficha abierta no es
      la mascota que este mismo arnés creó, se corta. *Un fixture que puede

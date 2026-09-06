@@ -264,6 +264,8 @@ export const clienteEs = {
     sugConf_muyProbable: 'muy probable',
     sugConf_probable: 'probable',
     sugConf_puedeSer: 'puede ser',
+    /* ① el momento tras el toque en la raza. */
+    conoceAl: 'Conoce al {{raza}}',
     sugSinAnimal: 'No pude ver a tu mascota en la foto',
     sugOtra: 'Otra',
     // ── paso 1/4
@@ -573,6 +575,13 @@ export const clienteEs = {
     menuFoto: 'Cambiar la foto',
     menuRaza: 'Cambiar la raza',
     menuDespedir: 'Despedirme de {{nombre}}',
+    /* ② la invitación que cierra la ficha de raza. En TUTEO: la orden llegó
+       en voseo y la casa habla tuteo neutro (R66). Corta, y sin prometer un
+       beneficio que no podemos medir: «mejor lo acompañamos» es lo que el
+       founder dijo, y es verdad — no «mejor su salud». */
+    razaInvitacion: '{{mascota}} está en su etapa {{etapa}}. ¿Quieres contarnos qué lo hace único?',
+    razaInvitacionSinEtapa: '¿Quieres contarnos qué hace único a {{mascota}}?',
+    razaInvitacionDetalle: 'Cuanto mejor lo conocemos, mejor lo acompañamos.',
     razaTemperamento: 'Cómo suelen ser',
     razaTalla: 'Tamaño de adulto',
     razaVida: 'Cuánto suelen vivir',
