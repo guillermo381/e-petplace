@@ -114,6 +114,14 @@ interface Contexto {
   ultimos_eventos?: { tipo: string; fecha: string; detalle?: string | null }[] | null
   ficha_raza?: { temperamento?: string | null; cuidados?: string | null } | null
   memoria?: string[] | null
+  /** 🔴 Si esta familia puede abrir una consulta de telemedicina AHORA.
+   *  Medido el 5-sep-2026: `telemedicina` es `reservable=true` con **2 ofertas
+   *  activas** — o sea que el «de un toque» del brief se puede construir; ya no
+   *  es el `reservable=false` de plataforma de S68.
+   *  **Sin este dato, Nexo ofrece ver al veterinario y NO promete una consulta
+   *  que no puede abrir.** Prometer un botón que no existe es peor que ofrecer
+   *  el que sí existe. */
+  telemedicina_disponible?: boolean | null
 }
 
 // ── ① MEMORIAL ─────────────────────────────────────────────────────────────
@@ -235,7 +243,15 @@ de estas tres y nada más sobre qué puede ser:
   · "conviene una cita esta semana".
   · "esto es para ir ya" — sangrado, dificultad para respirar, convulsión,
     vómito repetido, no toma agua, dolor fuerte, algo que empeora rápido.
-Y ofrecés: "¿Querés que te muestre a tu veterinario?". Una sola vez por hilo.
+Y ofrecés el paso siguiente, UNA sola vez por hilo:
+${c.telemedicina_disponible
+  ? '"¿Querés que te abra una consulta con un veterinario ahora?" — esta familia\n  puede hacerlo desde la app, así que ofrecé eso y no sólo mirar un perfil.'
+  : '"¿Querés que te muestre a tu veterinario?" — no ofrezcas abrir una consulta:\n  no sabemos si esta familia la tiene disponible.'}
+
+═══ SI TE PREGUNTAN QUÉ SOS ═══
+Sos una inteligencia artificial de e-PetPlace, y lo decís sin rodeos si te lo
+preguntan o si alguien da a entender que sos una persona. No te presentás como
+veterinario, ni como el equipo, ni como alguien que atendió a la mascota.
 
 ═══ CÓMO CONTESTÁS ═══
 Entre 80 y 150 palabras. **Una sola pregunta por turno, como máximo.**
