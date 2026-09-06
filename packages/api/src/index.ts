@@ -1821,3 +1821,23 @@ export {
   type InputSugerirRaza,
   type CodigoErrorRaza,
 } from './wrappers/razas';
+
+// S113-D · NEXO: la puerta de las tres edges del lote 2. Sin esto estaban
+// construidas, medidas y desplegadas, y ninguna app podía llamarlas (`L-318`).
+export {
+  preguntarANexo,
+  obtenerParteDelDia,
+  leerPapel,
+  type RespuestaNexo,
+  type IntencionNexo,
+  type Semaforo,
+  type NivelSemaforo,
+  type InputPreguntarANexo,
+  type CodigoErrorNexo,
+  type ParteDelDia,
+  type LecturaDePapel,
+  type FilaPapel,
+  type ClasePapel,
+  type InputLeerPapel,
+  type CodigoErrorPapel,
+} from './wrappers/nexo';
