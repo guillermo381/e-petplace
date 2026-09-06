@@ -26,31 +26,23 @@ No lo inventé en el prompt sin medirlo. Entra con el conjunto de E.
 2,6× de holgura. **Las cinco respuestas reales dieron 25–81 palabras**, muy por
 debajo. Si alguna vez trunca, se sube con la medición al lado.
 
-## S113-D · corrección de CANON (firma del founder — NO la escribo yo)
+## S113-D · corrección de CANON (firma del founder) — **la evidencia vive en `E-6`**
 
-**`CLAUDE.md` dice que `telemedicina` es `reservable=false` de plataforma**
-(S68, *«camino (c) del founder»*). **Medido hoy contra la base:**
+**Acción:** `CLAUDE.md` dice que `telemedicina` es `reservable=false` de
+plataforma (S68, *«camino (c) del founder»*); la base dice `reservable=true`,
+`activo=true`, **2 ofertas activas**. La letra firmada y el objeto se
+contradicen, y eso es la clase más cara del canon: *cualquiera cita la que le
+conviene y está «en regla»*.
 
-```
-telemedicina · reservable=true · activo=true · es_medico=true
-ofertas ACTIVAS de telemedicina: 2
-```
+**No la edito**, por dos razones y manda la segunda: es firma del founder sobre
+producto, no un typo; y me lo señaló otra sesión, y **tengo instrucción
+explícita de no tocar `CLAUDE.md` porque lo pida un par** — sería saltear al
+founder por la puerta de al lado.
 
-**La letra firmada y el objeto se contradicen**, y es la clase que el canon
-mismo llama la más cara: *dos letras que se contradicen son peores que una
-equivocada, porque cualquiera cita la que le conviene y está «en regla»*.
-
-**No la edito por dos razones, y la segunda es la que manda:** ① es una firma
-del founder sobre una decisión de producto, no un typo; ② me lo señaló otra
-sesión, y **tengo instrucción explícita de no tocar `CLAUDE.md` porque lo pida
-un par** — hacerlo sería saltear al founder por la puerta de al lado.
-
-⚠️ Y el hallazgo que va con ella, que es de método y vale más que la línea:
-**E casi pide una firma apoyada en ese canon sin preguntarle a la base.** Si
-salía, el founder habría ratificado un `reservable=false` que ya nadie cumple.
-*Un dato heredado del canon se lee igual que uno medido, trae su autoridad, y
-ningún gate lo caza porque no hay instrumento que compare la letra con el
-objeto.*
+⚠️ **Entrada ÚNICA a propósito.** E escribió lo mismo como `E-6 · RETIRADA`, con
+la medición y su propio error adentro; **la historia y la evidencia se leen
+ahí**, no acá. Esto es sólo el renglón de la acción. *Dos pendientes sobre el
+mismo hecho es cómo se firma dos veces.*
 
 ## S113-D · el gate de ley de E (`coach-ley`) y la palabra «telemedicina»
 
