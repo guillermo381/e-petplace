@@ -105,6 +105,10 @@ import { PantallaDespedida } from '../components/PantallaDespedida'
 import { CabeceraCoach } from '../components/CabeceraCoach'
 import { OrbeCoach } from '../components/OrbeCoach'
 import { PuntoEstado } from '../components/PuntoEstado'
+import { TarjetaPasaporte } from '../components/TarjetaPasaporte'
+import { PlacaQR } from '../components/PlacaQR'
+import { AccionesPasaporte } from '../components/AccionesPasaporte'
+import { ConfiguracionPasaporte } from '../components/ConfiguracionPasaporte'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
 import { GotaUbicacion } from '../components/GotaUbicacion'
@@ -205,6 +209,9 @@ const VOZ_PLAGA: Record<string, string> = { pulgas: 'pulgas', garrapatas: 'garra
    segundo, un tipo nuevo sin voz devolvía `undefined` y el chip salía VACÍO —
    sin un error, sin un aviso—. *Un mapa que acepta cualquier clave no es un
    mapa: es un agujero con forma de objeto.* */
+/* Un QR de mentira para la galería: la casa no los genera. */
+const QR_DEMO = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#fff"/><rect x="10" y="10" width="30" height="30"/><rect x="60" y="10" width="30" height="30"/><rect x="10" y="60" width="30" height="30"/><rect x="50" y="50" width="12" height="12"/><rect x="70" y="70" width="12" height="12"/></svg>'
+
 const VOZ_TIPO: Record<TipoLineaDeVida, string> = {
   salud: 'Salud',
   vacunas: 'Vacunas',
@@ -5095,6 +5102,48 @@ function GaleriaInterna() {
             borde: son cinco paradas y muere antes del final del radio, para que el corte caiga donde ya no queda nada
             que cortar.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="Pasaporte (S113 · 1.3) — la tarjeta, la placa, las acciones y qué ve un desconocido">
+          {/* Un QR de mentira: la casa NO los genera —eso exige una librería
+              que este grafo no tiene— y por eso llegan dibujados. */}
+          <TarjetaPasaporte
+            nombre="Thor" especieYRaza="Perro · Labrador" sexoYEdad="Macho · 4 años"
+            chip="985112004123456" etiquetaChip="Chip"
+            qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
+            estado={{ estado: 'activo' }}
+          />
+          {/* 🔴 PERDIDA: la franja preside y DICE DESDE CUÁNDO — entre ayer y
+              hace tres meses cambia lo que hace quien la encuentra. */}
+          <TarjetaPasaporte
+            nombre="Thor" especieYRaza="Perro · Labrador" sexoYEdad="Macho · 4 años"
+            qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
+            estado={{ estado: 'perdida', desde: '2026-09-05' }}
+            vozPerdida="Perdida desde el 5 de septiembre"
+          />
+          <Texto variante="apoyo">↓ en memoria la tarjeta NO EXISTE: abajo de esta línea no hay nada</Texto>
+          <TarjetaPasaporte
+            nombre="Kira" especieYRaza="Perro · Mestizo" sexoYEdad="Hembra · 14 años"
+            qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="" estado={{ estado: 'activo' }} enMemoria
+          />
+          <PlacaQR svgQr={QR_DEMO} nombre="Thor" marca="e-PetPlace" vozPrevia="Así se va a ver la placa" />
+          {/* 🔴 SIN NFC el botón no está: ausente, jamás apagado. */}
+          <AccionesPasaporte
+            vozCompartir="Compartir" onCompartir={() => {}}
+            vozDescargarQr="Descargar QR" onDescargarQr={() => {}}
+            perdida={false} vozPerdida="Se perdió"
+            vozConfirmarPerdida="Sí, publicar el pasaporte de Thor"
+            onCambiarPerdida={() => {}}
+          />
+          <ConfiguracionPasaporte
+            visibilidad={{ contacto: true, salud: true, chip: false }}
+            onCambiar={() => {}}
+            opciones={{
+              contacto: { etiqueta: 'Mostrar contacto', consecuencia: 'Quien encuentre a Thor va a ver tu teléfono.' },
+              salud: { etiqueta: 'Mostrar alergias y medicación', consecuencia: 'Para que no le den algo que le hace mal.' },
+              chip: { etiqueta: 'Mostrar chip', consecuencia: 'Un veterinario puede confirmar que es Thor.' },
+            }}
+          />
         </Seccion>
 
         <Seccion titulo="PuntoEstado (S113 · 1.0 adenda) — 8 px con DOS formas, porque dos ausencias comparten tinta">

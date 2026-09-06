@@ -634,6 +634,25 @@ todos.push(
   // Las pastillas de pendiente: número y palabra sobre color pleno.
   { nombre: 'COACH · pastilla de chat: blanco / magenta TRABAJADOR', fg: lightTheme.text.inverse, bg: '#AE3785', surface: veloSobre(lightTheme.bg.base) },
   { nombre: 'COACH · pastilla de pedidos: TINTA / ocre (el par de R56)', fg: lightTheme.text.primary, bg: lightTheme.status.warning, surface: veloSobre(lightTheme.bg.base) },
+  /* ═══ EL PASAPORTE (S113-B · 1.3) ═══════════════════════════════════════
+     🔴 **El aviso de perdida es el par que más importa de la casa**: lo lee un
+     desconocido, en la calle, con el animal en brazos y probablemente al sol.
+     Va en OCRE con TINTA encima — *sobre el ocre el blanco da 1,89 (`R56`), y
+     ése es exactamente el error que un aviso de emergencia no puede tener.* */
+  /* ⏪ La franja iba en ocre PLENO y `R20` la frenó: *la familia alerta vive
+     como TINTE, porque rellenarla colapsa con el CTA de oro —están a 4,2° y el
+     matiz no los separa—*. Hoy es el tinte de la casa con su texto AA. */
+  { nombre: 'PASAPORTE · aviso de perdida: warningText / warningBg', fg: lightTheme.status.warningText, bg: lightTheme.status.warningBg, surface: lightTheme.bg.card },
+  { nombre: 'PASAPORTE · aviso de perdida, en oscuro', fg: darkTheme.status.warningText, bg: darkTheme.status.warningBg, surface: darkTheme.bg.card },
+  /* ⚠️ La PÁGINA PÚBLICA no usa el tema: sus colores van escritos en el HTML
+     porque la abre un navegador que no conoce la casa. **Se declaran con sus
+     literales**, que son los mismos de `pasaporte-html.ts` — *un color copiado
+     a mano en otro archivo no lo mide ningún gate salvo que se declare.* */
+  { nombre: 'PÁGINA · tinta sobre papel', fg: '#221E19', bg: '#FAF9F7' },
+  { nombre: 'PÁGINA · aviso de perdida: tinta sobre ocre', fg: '#221E19', bg: '#F0A92A' },
+  { nombre: 'PÁGINA · botón de llamar del aviso: papel sobre tinta', fg: '#FAF9F7', bg: '#221E19' },
+  { nombre: 'PÁGINA · botón de llamar: blanco sobre verde', fg: '#FFFFFF', bg: '#0A7268' },
+  { nombre: 'PÁGINA · metadata sobre papel', fg: '#6F6D6A', bg: '#FAF9F7' },
   /* 🔴 **EL CHIP DE RAZA ELEGIDO, y su par nace porque el chip estaba mal.**
      Cambiaba de relleno a `accent.control` y **la letra se quedaba con el
      color por defecto de `Texto`** — la tinta del fondo que ya no estaba. Es
