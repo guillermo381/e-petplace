@@ -127,6 +127,7 @@ import { HabitantesAcuarioHoja } from '@/components/habitantes-acuario-hoja';
 import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import { EditarRazaHoja } from '@/components/editar-raza-hoja';
+import { RegistrarMedicacionHoja } from '@/components/registrar-medicacion-hoja';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -490,6 +491,7 @@ export default function PerfilDeMascota() {
    *  de hace dos años. */
   const [pesos, setPesos] = useState<PesoDeLaSerie[] | null>(null);
   const [pesoHoja, setPesoHoja] = useState(false);
+  const [medicacionHoja, setMedicacionHoja] = useState(false);
   const [razaHoja, setRazaHoja] = useState(false);
   /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
   const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
@@ -1507,6 +1509,11 @@ export default function PerfilDeMascota() {
               <View style={{ paddingHorizontal: spacing[5] }}>
                 <CeldasHoy
                   vacuna={{
+                    /* ⭐ **CADA CELDA ABRE SU REGISTRO** (S113-C · 2.0 · ①).
+                       Antes mostraban el dato y no dejaban tocarlo — el mismo
+                       hueco que el peso tuvo hasta S91: *el motor completo y
+                       sin puerta.* */
+                    onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } }),
                     rotulo: t('perfil.hechosVacunas'),
                     /* Sin ninguna vacuna, `null` ⇒ la celda dice que no hay.
                        Con vacunas pero sin próxima, el nombre existe y el
@@ -1529,11 +1536,13 @@ export default function PerfilDeMascota() {
                           : t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }),
                   }}
                   antiparasitario={{
+                    onPress: () => router.push({ pathname: '/antiparasitario', params: { mascotaId: mascota.id, nombre: mascota.nombre } }),
                     rotulo: t('perfil.hoyDesparasitacion'),
                     cobertura,
                     vozPlaga: (p) => t(`perfil.plaga_${p}` as 'perfil.plaga_pulgas'),
                   }}
                   peso={{
+                    onPress: () => setPesoHoja(true),
                     rotulo: t('perfil.peso'),
                     /* La MISMA derivación que identidad (④): si discreparan,
                        la pantalla diría dos pesos distintos de la misma
@@ -1546,6 +1555,10 @@ export default function PerfilDeMascota() {
                         : undefined,
                   }}
                   medicacion={{
+                    /* 🔴 **La puerta existe, así que la celda ES botón.** Si no
+                       existiera, `onPress` iría ausente y B ya la dibuja sin
+                       chevron: *una celda sin destino no se disfraza de acto.* */
+                    onPress: () => setMedicacionHoja(true),
                     rotulo: t('perfil.hoyMedicacion'),
                     nombre: med?.nombre ?? null,
                     contexto:
@@ -2416,6 +2429,16 @@ export default function PerfilDeMascota() {
           />
         </Hoja>
       ) : null}
+
+      <RegistrarMedicacionHoja
+        visible={medicacionHoja}
+        nombre={mascota.nombre}
+        mascotaId={mascota.id}
+        onCerrar={() => setMedicacionHoja(false)}
+        /* El perfil re-lee: una dosis que se anota y no aparece hasta salir y
+           volver se lee como que no se guardó. */
+        onRegistrado={() => setRecargaPeso((n) => n + 1)}
+      />
 
       <EditarRazaHoja
         visible={razaHoja}

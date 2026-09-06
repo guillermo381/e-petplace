@@ -65,6 +65,42 @@ export const clienteEs = {
    * exactamente la clase de defecto que ningún typecheck ve* (el riel exige
    * que la KEY exista, jamás que los NOMBRES de las variables coincidan). */
   nexo: {
+    titulo: 'Nexo',
+    autor: 'Nexo',
+    caja: 'Escribe tu pregunta',
+    cajaPlaceholder: 'Pregunta o busca algo…',
+    invitacion: 'Pregúntame algo de {{nombre}}, o busca cualquier cosa de tu familia.',
+    /* El aviso de IA de la PRIMERA respuesta. Voz honesta de la casa mientras
+       el texto legal espera al abogado (D-405): **no promete que sea correcto y
+       no se disculpa por existir.** */
+    avisoIa: 'Esto lo redacta una IA con el expediente de tu mascota. No reemplaza a tu veterinario.',
+    verVet: 'Ver a tu vet',
+    deSuCarnet: 'de su carnet',
+    deSuPeso: 'de su historial de peso',
+    sinRespuesta: 'No supe qué contestarte. Prueba preguntándolo de otra forma.',
+    sinContexto: 'No pudimos leer su expediente',
+    sinContextoDetalle: 'Sin eso prefiero no contestarte nada.',
+    sugVacuna: '¿Cuándo le toca la vacuna?',
+    sugPeso: '¿Cómo va su peso?',
+    sugEtapa: '¿Qué cuidados necesita por su etapa?',
+    sinResultados: 'No encontré nada con «{{termino}}».',
+    preguntarIgual: 'Preguntárselo a Nexo',
+    grupo_citas: 'Citas',
+    grupo_pedidos: 'Pedidos',
+    grupo_recuerdos: 'Recuerdos',
+    grupo_despensa: 'Despensa',
+    grupo_prestadores: 'Quienes la cuidan',
+    memoriaTitulo: 'Lo que sé de {{nombre}}',
+    memoriaVacia: 'Todavía no me contaste nada de él.',
+    memoriaComoSeAgrega: 'Cuéntamelo en el chat y te pregunto si lo guardo.',
+    memoriaAgregar: 'Agregar',
+    origenContado: 'me lo contaste',
+    origenConfirmado: 'lo confirmaste',
+    memoriaCampo: 'El hecho',
+    memoriaEditar: 'Editar',
+    memoriaBorrar: 'Borrar',
+    memoriaGuardar: 'Guardar',
+    memoriaCancelar: 'Cancelar',
     // La presencia, cuando se toca.
     etiqueta: 'Abrir a {{nombre}}',
     /* La MISMA puerta, del otro lado: desde el lote 0.2 el orbe abierto
@@ -4193,5 +4229,20 @@ export const clienteEs = {
     noSePudo: 'No pudimos abrir el pasaporte',
     noSePudoDetalle: 'Revisa tu conexión y prueba de nuevo.',
     enMemoria: 'El pasaporte de {{nombre}} ya no hace falta.',
+  },
+  /** ⭐ **NEXO** (S113-C · 2.0). Tuteo, sin promesas y **sin diagnosticar**:
+   *  la voz dice de dónde salió cada cosa y ofrece el vet cuando corresponde. */
+  /** ① la puerta de la medicación. **Anotar una dosis, no recetar.** */
+  medicacion: {
+    titulo: 'Una dosis de {{nombre}}',
+    detalle: 'Anota lo que le diste hoy. Esto no cambia lo que le recetaron.',
+    cual: '¿Qué le diste?',
+    cualPlaceholder: 'Nombre del medicamento',
+    dosis: '¿Cuánto?',
+    dosisPlaceholder: 'Media pastilla, 5 ml…',
+    guardar: 'Anotar',
+    faltaCual: 'Falta el nombre del medicamento',
+    faltaDosis: 'Falta la dosis',
+    noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
 } as const;

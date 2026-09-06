@@ -73,7 +73,6 @@ import { useCarrito } from '@/lib/despensa/carrito';
 import { clasesVisibles, escucharPendientes, usePendientesAdopcion } from '@/lib/pendientes-adopcion';
 import { listarMisPedidos } from '@epetplace/api';
 
-import { CoachHoja } from '@/components/coach';
 import { ElegirMascotaHoja } from '@/components/nexo/elegir-mascota-hoja';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import {
@@ -253,7 +252,6 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
   const { mascotaId: mascotaIdEnRuta } = useGlobalSearchParams<{ mascotaId?: string }>();
 
   const [abierta, setAbierta] = useState(false);
-  const [hojaCoach, setHojaCoach] = useState<MascotaResumen | null>(null);
   const [hojaPeso, setHojaPeso] = useState<MascotaResumen | null>(null);
   /** El dedo que espera saber de quién habla. `'coach'` es la almohadilla. */
   const [esperandoElegir, setEsperandoElegir] = useState<AtajoNexo | 'coach' | null>(null);
@@ -293,7 +291,18 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
   };
 
   const ejecutar = (atajo: AtajoNexo | 'coach', m: MascotaResumen) => {
-    if (atajo === 'coach') return setHojaCoach(m);
+    /* ⭐ **EL COACH ABRE SU PANTALLA** (S113-C · 2.0). Antes abría `CoachHoja`,
+       tres preguntas con plantillas y cero generación. **Se retira en este
+       mismo acto** (L-395: no se deja una puerta vieja al lado de la nueva) y
+       lo suyo lo cubre la edge de D, cuya rama `dato` responde con plantilla y
+       cero modelo — la misma promesa, con una caja de texto delante.
+       🔴 **Es pantalla y no Hoja, por medición vieja de la casa**: un hilo con
+       teclado y scroll dentro de una Hoja pelea con su gesto de cierre
+       (`HojaScroll`, S45). *Una conversación necesita el alto entero.* */
+    if (atajo === 'coach') {
+      router.push({ pathname: '/nexo', params: { mascotaId: m.id, nombre: m.nombre } });
+      return;
+    }
     if (atajo === 'peso') return setHojaPeso(m);
     if (atajo === 'vacuna') {
       router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } });
@@ -387,7 +396,7 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
   return (
     <>
       <PresenciaCoach
-        estado={estadoNexo({ pendientes, huellaAbierta: abierta, hojaAbierta: hojaCoach !== null })}
+        estado={estadoNexo({ pendientes, huellaAbierta: abierta, hojaAbierta: false })}
         pendientes={pendientes}
         atajos={atajos}
         nombre={nombre}
@@ -463,14 +472,6 @@ function NexoDelShell({ altoBarra }: { altoBarra: number }) {
         />
       ) : null}
 
-      {hojaCoach !== null ? (
-        <CoachHoja
-          visible
-          onCerrar={() => setHojaCoach(null)}
-          mascotas={mascotas ?? []}
-          mascotaInicial={hojaCoach.id}
-        />
-      ) : null}
     </>
   );
 }

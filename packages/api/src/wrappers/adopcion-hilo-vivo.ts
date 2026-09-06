@@ -21,6 +21,38 @@
 
 import { getClient } from '../client';
 
+/**
+ * 🔴 EL ARRANQUE SE CAÍA POR ACÁ, y el defecto tiene dos mitades que se
+ * necesitan (S113-A · noche, medido por E con un deep link durante el
+ * arranque: 3 de 4 caídas).
+ *
+ * ① **El canal se llamaba `'mis-hilos'`, fijo.** `supabase-js` indexa los
+ *    canales POR NOMBRE: con dos montajes —y durante un arranque con deep link
+ *    hay dos— el segundo `.channel(nombreDeCanal('mis-hilos'))` no crea uno nuevo, **toca el
+ *    mismo objeto que el primero todavía tiene suscrito**. Suscribirse dos
+ *    veces al mismo canal es un error de estado, y en el arranque se ve como
+ *    una raíz que se cae.
+ * ② **`void supabase.removeChannel(canal)`.** Es asíncrono, y con `void` nadie
+ *    lo espera: el montaje nuevo se suscribe mientras el viejo todavía se está
+ *    yendo. *Una limpieza que no se espera no es una limpieza: es una carrera.*
+ *
+ * La cura vuelve el estado **inexpresable**, no lo esquiva: el nombre es único
+ * por montaje (dos montajes NO pueden compartir canal aunque quieran) y todo
+ * subscribe/remove pasa por UNA cadena de promesas del módulo, así que el
+ * siguiente empieza cuando el anterior terminó — **en orden y sin solaparse**.
+ *
+ * ⚠️ La función de limpieza sigue siendo SÍNCRONA porque es lo que `useEffect`
+ * exige. Lo que se encadena es el trabajo, no la firma.
+ */
+let _serie = 0;
+let _cadena: Promise<unknown> = Promise.resolve();
+
+/** Un nombre que dos montajes no pueden compartir ni por accidente. */
+function nombreDeCanal(base: string): string {
+  _serie += 1;
+  return `${base}-${_serie}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export interface MensajeEnVivo {
   id: string;
   solicitudId: string;
@@ -50,7 +82,7 @@ export function suscribirseAlHilo(
   });
 
   const canal = supabase
-    .channel(`hilo-adopcion-${solicitudId}`)
+    .channel(nombreDeCanal(`hilo-adopcion-${solicitudId}`))
     .on(
       'postgres_changes',
       {
@@ -73,10 +105,12 @@ export function suscribirseAlHilo(
       },
     );
 
-  void canal.subscribe();
+  // misma cadena que el canal de la lista: dos hilos abiertos a la vez —o el
+  // mismo hilo reabierto— no pueden solaparse.
+  _cadena = _cadena.then(() => canal.subscribe());
 
   return () => {
-    void supabase.removeChannel(canal);
+    _cadena = _cadena.then(() => supabase.removeChannel(canal)).catch(() => {});
   };
 }
 
@@ -147,7 +181,7 @@ export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): (
   });
 
   const canal = supabase
-    .channel('mis-hilos')
+    .channel(nombreDeCanal('mis-hilos'))
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'adopcion_mensaje' },
@@ -175,12 +209,15 @@ export function suscribirseAMisHilos(onCambio: (c: CambioEnMisHilos) => void): (
       },
     );
 
-  void canal.subscribe((estado) => {
+  /* El subscribe entra a la cadena: si otro montaje todavía se está yendo,
+     éste espera. *Sin la cadena, «limpiar» y «suscribir» corren a la vez.* */
+  _cadena = _cadena.then(() => canal.subscribe((estado) => {
     if (estado === 'SUBSCRIBED') onCambio({ tipo: 'reconectado' });
-  });
+  }));
 
   return () => {
     sub?.subscription?.unsubscribe();
-    void supabase.removeChannel(canal);
+    // se ENCADENA (no se descarta): el próximo subscribe arranca después
+    _cadena = _cadena.then(() => supabase.removeChannel(canal)).catch(() => {});
   };
 }
