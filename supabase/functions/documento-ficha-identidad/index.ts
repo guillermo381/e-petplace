@@ -24,6 +24,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { A4, MX, Papel, TINTA_65, fechaLarga } from '../_shared/papel.ts';
+import { tokenDePasaporteParaPapel, urlPasaporte } from '../_shared/qr.ts';
 
 const NO_REGISTRADO = 'No registrado en e-PetPlace';
 
@@ -284,13 +285,34 @@ Deno.serve(async (req) => {
   // La foto, encima de todo lo que le pase por debajo
   if (dibujarFoto) dibujarFoto();
 
+  /* EL QR DEL PASAPORTE (A5). Sale **sólo si la familia emitió un pasaporte y
+     no apagó `qr_en_papeles`** — nunca aparece por defecto en un papel de una
+     familia que no abrió esa puerta.
+     ⚠️ Su leyenda dice qué hace, y por eso NO se parece a la del folio: el
+     folio identifica la emisión y no se verifica en línea; el QR lleva a la
+     página de la mascota. *Dos cosas distintas a diez centímetros una de otra
+     necesitan decir cuál es cuál, o el lector las funde.* */
+  const tokenPas = await tokenDePasaporteParaPapel(supabase, fila.mascota_id);
+  if (tokenPas) {
+    papel.qr(urlPasaporte(tokenPas), [
+      `Si encontrás a ${m.nombre ?? 'esta mascota'}, escaneá este código.`,
+      'Abre la página pública de su pasaporte: quién es, con qué hay que tener',
+      'cuidado y a quién llamar. No hace falta tener la app ni una cuenta.',
+      'Este código no verifica el documento — lleva al pasaporte.',
+    ]);
+  }
+
   // Pie con las DOS fechas: emisión + el último movimiento del expediente
   papel.pie(
     `Emitido por e-PetPlace (hola@epetplace.com) · folio ${fila.folio ?? '—'} · emisión ${fechaLarga(new Date().toISOString())} · los datos reflejan el expediente al momento de la emisión`,
   );
 
   const bytes = await papel.bytes();
-  return new Response(bytes, {
+  /* `.buffer` y no el Uint8Array: el `BodyInit` de Deno no acepta un
+     `Uint8Array<ArrayBufferLike>` genérico. En runtime es el mismo byte —
+     por eso este papel funcionó meses con el tipo mal y **ningún gate lo vio**
+     (`D-870`: `verify:edge-deno` mide sólo «usa algo que no existe»). */
+  return new Response(bytes.buffer as ArrayBuffer, {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `inline; filename="ficha-${(m.nombre ?? 'mascota').toLowerCase()}.pdf"`,

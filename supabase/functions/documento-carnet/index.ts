@@ -22,6 +22,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { MX, Papel, TINTA_65, fechaLarga } from '../_shared/papel.ts';
+import { tokenDePasaporteParaPapel, urlPasaporte } from '../_shared/qr.ts';
 
 const VOZ_PROCEDENCIA: Record<string, string> = {
   declarado_por_familia: 'Declarada por la familia',
@@ -145,6 +146,19 @@ Deno.serve(async (req) => {
     papel.y -= 20;
   }
 
+  /* EL QR DEL PASAPORTE (A5). Va ANTES del pie porque el pie reposiciona la
+     página, y ANTES del anexo del carnet escaneado, que abre página propia.
+     Sólo sale si hay pasaporte vivo y la familia no lo apagó. */
+  const tokenPas = await tokenDePasaporteParaPapel(supabase, fila.mascota_id);
+  if (tokenPas) {
+    papel.qr(urlPasaporte(tokenPas), [
+      `Si encontrás a ${mascota?.nombre ?? 'esta mascota'}, escaneá este código.`,
+      'Abre la página pública de su pasaporte: quién es, con qué hay que tener',
+      'cuidado y a quién llamar. No hace falta tener la app ni una cuenta.',
+      'Este código no verifica el documento — lleva al pasaporte.',
+    ]);
+  }
+
   // Pie: emisor + LAS DOS FECHAS (emisión · último registro) + el folio.
   papel.pie(
     `Emitido por e-PetPlace (hola@epetplace.com) · folio ${fila.folio ?? '—'} · emisión ${fechaLarga(new Date().toISOString())} · último registro ${ultima ?? '—'} · ${filas.length} vacuna(s)`,
@@ -190,7 +204,11 @@ Deno.serve(async (req) => {
   }
 
   const bytes = await papel.bytes();
-  return new Response(bytes, {
+  /* `.buffer` y no el Uint8Array: el `BodyInit` de Deno no acepta un
+     `Uint8Array<ArrayBufferLike>` genérico. En runtime es el mismo byte —
+     por eso este papel funcionó meses con el tipo mal y **ningún gate lo vio**
+     (`D-870`: `verify:edge-deno` mide sólo «usa algo que no existe»). */
+  return new Response(bytes.buffer as ArrayBuffer, {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `inline; filename="carnet-${(mascota.nombre ?? 'mascota').toLowerCase()}.pdf"`,

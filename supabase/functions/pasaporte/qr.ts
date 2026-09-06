@@ -20,24 +20,17 @@
  * que **viene en Deno** — cero dependencias otra vez. Son cuarenta líneas
  * contra un paquete entero.
  */
-import qrcode from 'npm:qrcode-generator@2.0.4'
+import { matrizQr, QUIET } from '../_shared/qr.ts'
 
-/** La matriz del QR: `true` = módulo oscuro. Corrección M — un QR en una chapita
- *  se raya, y M tolera ~15 % de daño sin dejar de leerse. */
-function matriz(texto: string): boolean[][] {
-  const qr = qrcode(0, 'M')
-  qr.addData(texto)
-  qr.make()
-  const n = qr.getModuleCount()
-  return Array.from({ length: n }, (_, f) =>
-    Array.from({ length: n }, (_, c) => qr.isDark(f, c)))
-}
+/* La matriz vive en `../_shared/qr.ts` desde que tuvo su segundo consumidor
+   (los PDF). *Lo que se comparte es la matriz; el dibujo es de cada uno.* */
+const matriz = matrizQr
 
 /** SVG: un solo `<path>`, sin fuentes ni imágenes. Pesa ~1-2 kB. */
 export function qrSvg(texto: string, lado = 512): string {
   const m = matriz(texto)
   const n = m.length
-  const q = 4 // el margen que el estándar pide; sin él muchos lectores fallan
+  const q = QUIET
   const total = n + q * 2
   let d = ''
   for (let f = 0; f < n; f++) {
@@ -77,7 +70,7 @@ function chunk(tipo: string, datos: Uint8Array): Uint8Array {
 export async function qrPng(texto: string, escala = 12): Promise<Uint8Array> {
   const m = matriz(texto)
   const n = m.length
-  const q = 4
+  const q = QUIET
   const lado = (n + q * 2) * escala
 
   // filas RGB→gris: cada fila lleva su byte de filtro (0 = ninguno)
