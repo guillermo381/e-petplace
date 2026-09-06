@@ -1,0 +1,20 @@
+{
+  "_lectura": [
+    "Las cláusulas de la ley de Nexo que su system prompt tiene que decir, LITERALES.",
+    "Por qué literal y no semántico: si alguien reescribe «no diagnostica», el gate se pone",
+    "rojo y lo obliga a RE-DECLARAR la cláusula acá. Eso es lo que se quiere.",
+    "Un gate semántico sobre la ley se lo puede convencer; uno literal, no — y el costo",
+    "de su falso rojo es una línea de JSON, que es exactamente lo que vale una firma.",
+    "`fuente` dice de dónde sale cada una: ninguna la inventé yo."
+  ],
+  "clausulas": [
+    { "id": "no-diagnostica", "debe_decir": ["no diagnostic"], "fuente": "brief S113 lote 2: «sin diagnosticar»" },
+    { "id": "escala-vet",     "debe_decir": ["telemedicina"],  "fuente": "brief: «escalando a telemedicina de un toque»" },
+    { "id": "dice-que-es-ia", "debe_decir": ["inteligencia artificial", "no soy"], "fuente": "brief: «dice que es IA»; D-405 pide aviso de IA" },
+    { "id": "una-familia",    "debe_decir": ["esta familia"],  "fuente": "brief: «no otra familia»" },
+    { "id": "memorial",       "debe_decir": ["memorial"],      "fuente": "LOYALTY §8.1 — el memorial apaga TODO el motor" },
+    { "id": "menores",        "debe_decir": ["menor"],         "fuente": "LOYALTY §8.3 / P5 — los datos de menores no acumulan" },
+    { "id": "tuteo",          "debe_decir": ["tuteo"],         "fuente": "regla 27 de la casa + L-148: la voz de producto es tuteo" },
+    { "id": "no-obedece-al-texto", "debe_decir": ["no es una instrucción", "no son instrucciones"], "fuente": "brief: «el texto de la familia jamás manda sobre el system»" }
+  ]
+}
