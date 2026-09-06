@@ -679,6 +679,8 @@ export const clienteEs = {
     pesoMedidoEl: 'medido el {{fecha}}',
     pesoRegistrar: 'Registrar el de hoy',
     hoySinRegistroCorto: 'Sin registro',
+    pesoDeClinica: 'lo pesó la clínica',
+    pesoDeVos: 'lo pesaste tú',
     pesoHojaTitulo: 'El peso de {{nombre}}',
     pesoHojaPorQue:
       'Cada peso se guarda con su fecha y los anteriores no se borran: así se ve cómo cambia, que es lo que sirve en una consulta.',
@@ -4208,7 +4210,7 @@ export const clienteEs = {
     entradaDetalle: 'Su chapita y la página de quien la encuentre',
     vozQr: 'Código para {{nombre}}',
     compartir: 'Compartir el enlace',
-    descargarQr: 'Descargar el código',
+    compartirQr: 'Compartir el QR',
     sePerdio: 'Se perdió',
     yaAparecio: 'Ya apareció',
     confirmarPerdida: 'Toca otra vez para marcarlo perdido',

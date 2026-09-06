@@ -505,6 +505,8 @@ export const clienteEn = {
     pesoMedidoEl: 'measured {{fecha}}',
     pesoRegistrar: "Record today's",
     hoySinRegistroCorto: 'Not recorded',
+    pesoDeClinica: 'weighed at the clinic',
+    pesoDeVos: 'you weighed them',
     pesoHojaTitulo: "{{nombre}}'s weight",
     pesoHojaPorQue:
       "Every weight is saved with its date and the previous ones are kept: that's how you see it change, which is what helps at a check-up.",
@@ -3014,7 +3016,7 @@ export const clienteEn = {
     entradaDetalle: 'Their tag and the page whoever finds them will see',
     vozQr: 'Code for {{nombre}}',
     compartir: 'Share the link',
-    descargarQr: 'Download the code',
+    compartirQr: 'Share the QR',
     sePerdio: 'They went missing',
     yaAparecio: 'They came back',
     confirmarPerdida: 'Tap again to mark them missing',

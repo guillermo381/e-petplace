@@ -480,6 +480,31 @@ otro.
 *Las dos son entradas de `InvitacionBio`, así que sin ellas la pieza nace con la
 mitad de sus caminos apagados.*
 
+---
+
+## C · ⑩ 🔴 `InvitacionBio` Y SUS TRES PUERTAS: EL MANDATO LAS NOMBRA, NO EXISTEN
+
+El mandato pide montarla con `registrarObservacionComportamiento`,
+`declararAlergiaFamilia` y `declararCondicionFamilia`. **Medido ahora, contra el
+objeto y no contra mi memoria de hace dos horas:**
+
+| qué | dónde busqué | resultado |
+|---|---|---|
+| las tres funciones | `pg_proc` (la base) | **cero** |
+| las tres | `packages/api` en `main`, `a-2.0 @ d79cb597`, `a-2.1 @ d4918410` | **cero** |
+| `InvitacionBio` | `packages/ui` en `main` y `b-2.0 @ b3ef42a0` | **cero** |
+
+**Nada que montar.** Las dos que sí existen —`registrarBitacoraFamilia` y
+`registrarRecuerdoFamilia`— ya las tenía medidas.
+
+⚠️ **Es la tercera vez en esta sesión que un mandato da por hecha una pieza que
+no está** (`extract-documento` con otro alcance, `InvitacionBio` la primera vez,
+y ahora sus tres puertas). *No es un reproche: es un patrón, y sale barato
+decirlo — la pista que lo recibe pierde una hora buscando algo que nadie
+construyó, y la que lo escribió no se entera.* **Voto: que el mandato marque qué
+existe y qué hay que pedir**, como hizo A en su parte para C, que decía
+explícitamente «lo que NO existe y no lo pidas».
+
 ## ## S113-D · lote 2.0 (edge `coach`)
 
 **1 · El texto del aviso de IA — para el abogado, no para mí.**

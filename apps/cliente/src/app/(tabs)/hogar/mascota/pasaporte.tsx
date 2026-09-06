@@ -188,13 +188,28 @@ export default function Pasaporte() {
             <AccionesPasaporte
               vozCompartir={t('pasaporte.compartir')}
               onCompartir={() => void Share.share({ message: urlPublica(token) })}
-              vozDescargarQr={t('pasaporte.descargarQr')}
-              /* ⚠️ **La descarga abre la imagen del servidor**, no la guarda en
-                 la galería: guardar exige un permiso nativo que esta app no
-                 tiene, y el brief dice que **si no existe, se pide a la mesa
-                 antes de agregar nada nativo**. Anotado; esto entrega el
-                 archivo igual, por el navegador. */
-              onDescargarQr={() => void Share.share({ message: urlQrPng(token) })}
+              vozDescargarQr={t('pasaporte.compartirQr')}
+              /* ⭐ **«COMPARTIR EL QR», no «descargar»** (firma del founder).
+                 Se manda **la imagen del servidor** al share del sistema, que
+                 es lo que ya ofrece WhatsApp, Gmail y guardar en Archivos **sin
+                 pedir un solo permiso**.
+
+                 ⚠️ **Y lo que este share NO hace, medido:** `Share` de RN sólo
+                 lleva texto y `url`; **`url` la respeta iOS y Android la
+                 ignora**. Para poner el ARCHIVO en la hoja del sistema —y que
+                 aparezca «Fotos»— hace falta `expo-sharing`, que **no está
+                 instalado** (medido) y **es nativo: no viaja por OTA**.
+                 ⇒ Hoy se comparte el enlace a la imagen, que abre y se guarda
+                 desde el navegador. *El archivo entra con la build, junto al
+                 permiso de galería y NFC* — anotado en `S113-NFC-BUILD.md`.
+
+                 🔴 **«Guardar en galería» no se dibuja**, y es la misma razón:
+                 sin el permiso nativo el botón existiría para fallar. *Un
+                 control que promete guardar y no puede es peor que su
+                 ausencia.* */
+              onDescargarQr={() =>
+                void Share.share({ message: urlQrPng(token), url: urlQrPng(token) })
+              }
               perdida={perdida}
               vozPerdida={perdida ? t('pasaporte.yaAparecio') : t('pasaporte.sePerdio')}
               vozConfirmarPerdida={perdida ? t('pasaporte.confirmarAparecio') : t('pasaporte.confirmarPerdida')}
