@@ -91,6 +91,21 @@ export default function Nexo() {
   const [termino, setTermino] = useState('');
   const scroll = useRef<ScrollView | null>(null);
 
+  /** ⭐ **EL NOMBRE SALE DEL CONTEXTO, Y EL PARÁMETRO ES SÓLO UN ADELANTO.**
+   *  🔴 A lo vio en aparato: «Pregúntame algo de ,» y «Lo que sé de» **sin
+   *  nombre**. El `mascotaId` sí llegaba —Nexo hablaba de Thor— y el `nombre`
+   *  no, porque viaja aparte en la URL y hay caminos que no lo ponen.
+   *  Y la culpa no era del que no lo pasó: era mía, del `nombre ?? ''` que
+   *  **rellenaba el hueco con vacío** en vez de buscar el dato donde ya estaba.
+   *  *Un `?? ''` sobre una interpolación no es un default: es una frase rota
+   *  que compila.*
+   *  El contexto trae `mascota.nombre` y es la fuente buena: viene del
+   *  servidor, para ESA mascota, y no depende de cómo se llegó a la pantalla.
+   *  El parámetro se conserva **sólo** para pintar el encabezado en los
+   *  milisegundos antes de que el contexto llegue. */
+  const nombreVivo =
+    contexto !== null && contexto !== 'error' ? contexto.mascota.nombre : (nombre ?? null);
+
   /* Contexto + hilo + memoria al abrir. **El hilo se lee**, no se empieza en
      blanco: una conversación que se olvida cada vez no es una conversación. */
   useEffect(() => {
@@ -218,14 +233,17 @@ export default function Nexo() {
   return (
     <EvitaTeclado>
       <View style={{ flex: 1 }}>
-        <Encabezado variante="navegacion" titulo={nombre ?? t('nexo.titulo')} />
+        <Encabezado variante="navegacion" titulo={nombreVivo ?? t('nexo.titulo')} />
         <ScrollView
           ref={scroll}
           onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}
           contentContainerStyle={{ padding: spacing[5], gap: spacing[4] }}
         >
-          {lineas.length === 0 && grupos === null ? (
-            <Texto variante="apoyo">{t('nexo.invitacion', { nombre: nombre ?? '' })}</Texto>
+          {/* 🔴 Sin nombre **no se dibuja la invitación**: «Pregúntame algo de
+              ,» es peor que no decir nada. Cuando el contexto llega, la frase
+              aparece entera. */}
+          {lineas.length === 0 && grupos === null && nombreVivo !== null ? (
+            <Texto variante="apoyo">{t('nexo.invitacion', { nombre: nombreVivo })}</Texto>
           ) : null}
 
           {lineas.map((l) =>
@@ -286,7 +304,13 @@ export default function Nexo() {
               familia**: lo que no puede corregirse deja de ser memoria y pasa a
               ser una afirmación nuestra sobre su mascota. */}
           <PanelMemoria
-            titulo={t('nexo.memoriaTitulo', { nombre: nombre ?? '' })}
+            titulo={
+              nombreVivo !== null
+                ? t('nexo.memoriaTitulo', { nombre: nombreVivo })
+                : /* Sin nombre, el panel se titula sin él en vez de dejar el
+                     hueco: «Lo que sé de» a secas está roto; «Lo que sé» no. */
+                  t('nexo.memoriaTituloSinNombre')
+            }
             /* 🔴 **Cada hecho trae sus propias salidas.** La pieza las pide por
                hecho y no en el panel, y tiene razón: *editar «le tiene miedo a
                los truenos» y editar «come dos veces al día» son dos actos, y un
