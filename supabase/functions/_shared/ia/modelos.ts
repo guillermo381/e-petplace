@@ -32,7 +32,7 @@
  * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
  * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
  */
-export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte'] as const
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte', 'papel'] as const
 
 export type Pieza = typeof PIEZAS[number]
 
@@ -56,6 +56,7 @@ export const MODELOS: Record<Pieza, string> = {
   coach: 'claude-sonnet-5',
   coach_router: 'claude-haiku-4-5',
   coach_parte: 'claude-sonnet-5',
+  papel: 'claude-sonnet-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -88,6 +89,11 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   // holgura sin dejar lugar a que se extienda: **el parte que se hace largo
   // deja de leerse**, y ahí el techo es producto, no presupuesto.
   coach_parte: 400,
+  // Un examen de laboratorio trae 20-40 analitos con valor, unidad y rango.
+  // El carnet más denso real gastó 2.015 tokens con 15 filas de 16 campos;
+  // acá las filas son más chicas pero pueden ser el doble. 4000, igual que el
+  // carnet, y por debajo de `TECHO_SIN_RAZONAR`.
+  papel: 4000,
 }
 
 /**
@@ -104,6 +110,7 @@ export const EDGES: Record<Pieza, string> = {
   coach: 'coach',
   coach_router: 'coach',
   coach_parte: 'coach-parte',
+  papel: 'extract-papel',
 }
 
 /**
@@ -176,6 +183,9 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   // Nadie está mirando: el parte se arma para una notificación. 20 s alcanza y
   // colgarse no le arruina la pantalla a nadie.
   coach_parte: 20_000,
+  // Un PDF de laboratorio es lo más pesado que entra por acá; el carnet tiene
+  // 170 s por la misma razón y este puede traer varias páginas.
+  papel: 170_000,
 }
 
 /**
@@ -310,6 +320,7 @@ export const PENSAR: Record<Pieza, boolean> = {
   coach: false,
   coach_router: false,
   coach_parte: false,
+  papel: false,
 }
 
 /**
@@ -326,6 +337,7 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   coach: null,
   coach_router: null,
   coach_parte: null,
+  papel: null,
 }
 
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
@@ -347,4 +359,5 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   // NO: su system es corto y se manda una vez por mascota por día. El caché
   // cobra 25% de más por escribir algo que nadie va a releer en la ventana.
   coach_parte: false,
+  papel: false,
 }
