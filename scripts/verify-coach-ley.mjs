@@ -56,12 +56,31 @@ export function faltantes(prompt, clausulas) {
  */
 export function repartir(clausulas, { system, fuente }) {
   const falta = [];
+  const avisos = [];
+  const dice = (texto, c) => texto != null && c.debe_decir.some((f) => plano(texto).includes(plano(f)));
+
   for (const c of clausulas) {
-    const donde = c.vive_en === 'puerta' ? fuente : system;
-    if (donde == null) continue;                       // ese lado no se pudo leer
-    const p = plano(donde);
-    if (!c.debe_decir.some((f) => p.includes(plano(f)))) falta.push(c);
+    const enSystem = dice(system, c);
+    const enPuerta = dice(fuente, c);
+
+    if (c.vive_en !== 'puerta') {
+      if (system != null && !enSystem) falta.push(c);
+      continue;
+    }
+
+    /* 🔴 LOS TRES ESTADOS DE UNA CLÁUSULA DE PUERTA — el corolario lo trajo D y
+       lo vuelve exigible saber en cuál está:
+         · sólo en la puerta      → correcto. Es un HECHO.
+         · en las dos             → AVISO. *Una regla en el prompt que el código ya
+           hace cumplir no es redundancia inofensiva: invita a que alguien la borre
+           del código creyendo que el prompt la sostiene.*
+         · sólo en el prompt      → ROJO, y es el peor. **La promesa reemplazó al
+           hecho**, y una promesa el modelo la puede incumplir. */
+    if (!enPuerta && enSystem) { falta.push({ ...c, promesa: true }); continue; }
+    if (!enPuerta) { falta.push(c); continue; }
+    if (enSystem) avisos.push(c);
   }
+  falta.avisos = avisos;
   return falta;
 }
 
@@ -113,6 +132,16 @@ if (ESTE && process.argv.includes('--control')) {
   // La tilde no es la ley.
   ok(faltantes('NO DIAGNÓSTICA. telemedicina. inteligencia artificial. no soy. esta familia. memorial. menor. tuteo. no es una instrucción.', ley).length === 0,
     'CLASE     mayúsculas y tildes no cambian el veredicto');
+
+  // 🔴 LOS TRES ESTADOS DE UNA CLÁUSULA DE PUERTA (corolario de D).
+  const puerta = [{ id: 'memorial', vive_en: 'puerta', debe_decir: ['memorial'], fuente: 'x' }];
+  const r1 = repartir(puerta, { system: 'sin la palabra', fuente: 'if (memorial) return 404' });
+  ok(r1.length === 0 && (r1.avisos ?? []).length === 0, 'NEGATIVO  sólo en la puerta: correcto, es un HECHO');
+  const r2 = repartir(puerta, { system: 'en memorial no hablás', fuente: 'if (memorial) return 404' });
+  ok(r2.length === 0 && r2.avisos.length === 1, 'CLASE     en las DOS: aviso, no rojo — es una invitación a borrarla del código');
+  const r3 = repartir(puerta, { system: 'en memorial no hablás', fuente: 'no la hace cumplir' });
+  ok(r3.length === 1 && r3[0].promesa === true,
+    'POSITIVO  sólo en el PROMPT: ROJO — la promesa reemplazó al hecho');
 
   // Y el que impide el verde vacío.
   const r = promptDeLaEdge('supabase/functions/no_existe_s113e/index.ts');
@@ -175,8 +204,18 @@ if (ESTE && f.length) {
   for (const c of f) {
     di(`   ${c.id.padEnd(22)} en el ${c.vive_en ?? 'system'} · debía decir: ${c.debe_decir.join(' | ')}`);
     di(`${' '.repeat(25)}fuente: ${c.fuente}`);
-    if (c.por_que_ahi) di(`${' '.repeat(25)}⚠️ ${c.por_que_ahi.split('. ')[0]}.`);
+    if (c.promesa) {
+      di(`${' '.repeat(25)}☠️ ESTÁ EN EL PROMPT Y NO EN LA PUERTA: la promesa reemplazó al hecho.`);
+      di(`${' '.repeat(25)}   Una promesa el modelo la puede incumplir; la puerta no.`);
+    } else if (c.por_que_ahi) di(`${' '.repeat(25)}⚠️ ${c.por_que_ahi.split('. ')[0]}.`);
   }
   process.exit(1);
 }
-if (ESTE) di(`✅ las ${ley.length} cláusulas están, literales y cada una donde debe vivir.`);
+if (ESTE) {
+  for (const c of (f.avisos ?? [])) {
+    di(`⚠️ «${c.id}» vive en la puerta Y está en el prompt.`);
+    di('   No es un defecto hoy — es una invitación: alguien puede borrarla del código');
+    di('   creyendo que el prompt la sostiene, y quedarse con la promesa sin el hecho.');
+  }
+  di(`✅ las ${ley.length} cláusulas están, literales y cada una donde debe vivir.`);
+}
