@@ -1229,3 +1229,44 @@ export { SugerenciaRaza, type SugerenciaRazaProps, type CandidataRaza, type Conf
 export { FichaRaza, type FichaRazaProps, type CuidadoPorEtapa } from './components/FichaRaza'
 export { PantallaDespedida, type PantallaDespedidaProps } from './components/PantallaDespedida'
 export { fechaDespedidaValida } from './components/despedida-fecha'
+
+// ═══════════════════════════════════════════════════════════════════════
+// NEXO HABLA (S113-B · lote 2.0) — la Hoja, la búsqueda y la memoria.
+//
+// 🔴 LAS TRES LEYES QUE ATRAVIESAN ESTAS PIEZAS, y viven en los TIPOS:
+//  · la PRIMERA respuesta no compila sin decir que es IA (`RespuestaNexo`)
+//  · en la memoria NO HAY hechos sin confirmar: lo propuesto vive en el
+//    hilo y muere ahí (`nexo-memoria` no tiene ese estado)
+//  · un resultado SIN destino no se puede escribir (`Resultado.onPress`)
+//
+// ⚠️ NO HAY MICRÓFONO, y está medido: `expo-speech-recognition` vive sólo
+// en `apps/prestador` y `SpeechRecognition` da CERO en el cliente. Traerlo
+// es dependencia NATIVA ⇒ no viaja por OTA. Se declara para que nadie lo
+// busque creyendo que se olvidó.
+// ═══════════════════════════════════════════════════════════════════════
+export {
+  RespuestaNexo,
+  type RespuestaNexoProps,
+  type FuenteDeRespuesta,
+  type PropuestaDeMemoria,
+} from './components/RespuestaNexo'
+export {
+  ResultadosBusqueda,
+  type ResultadosBusquedaProps,
+  type GrupoResultados,
+  type Resultado,
+  type TipoResultado,
+} from './components/ResultadosBusqueda'
+export { tramosResaltados, gruposConAlgo, sinResultados } from './components/nexo-busqueda'
+export {
+  PanelMemoria,
+  type PanelMemoriaProps,
+  type HechoDeMemoria,
+  type OrigenMemoria,
+} from './components/PanelMemoria'
+export { memoriaVacia, saneadoParaGuardar } from './components/nexo-memoria'
+export {
+  ChipsSugerencia,
+  type ChipsSugerenciaProps,
+  type SugerenciaNexo,
+} from './components/ChipsSugerencia'

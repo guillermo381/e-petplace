@@ -25,6 +25,10 @@ import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestr
 import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
+import { RespuestaNexo } from '../components/RespuestaNexo'
+import { ResultadosBusqueda } from '../components/ResultadosBusqueda'
+import { PanelMemoria } from '../components/PanelMemoria'
+import { ChipsSugerencia } from '../components/ChipsSugerencia'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
@@ -8563,6 +8567,114 @@ function GaleriaInterna() {
           tema activo: {mode} · gradiente ui: {gradients.firmaUILight.angle}deg
         </Text>
       </View>
+
+        <Seccion titulo="⭐ GATE S113 — NEXO HABLA (lote 2.0) · qué decide: (a) que la respuesta se lea como la casa hablando y no como un chat de soporte; (b) que «de su carnet · 12 mar» se vea TOCABLE y no como una firma decorativa; (c) que la propuesta de guardar tenga su sí y su no al mismo peso; (d) que el resultado resaltado siga siendo el dato y no un cartel">
+          <View style={{ gap: spacing[6] }}>
+            <Texto variante="apoyo">
+              La primera respuesta: con su nota de IA, su fuente tocable, el semáforo
+              en su slot y el acto. Las siguientes NO repiten la nota.
+            </Texto>
+            <RespuestaNexo
+              primera
+              texto="Le toca la antirrábica en agosto de 2027. La última se la aplicaron el 2 de agosto."
+              hora="14:32"
+              autor="Nexo"
+              notaIA="Soy Nexo. Puedo equivocarme; para lo importante está tu vet."
+              fuente={{ voz: 'de su carnet · 12 mar', onPress: () => {} }}
+              onVerVet={() => {}}
+              vozVerVet="Ver a tu vet"
+            />
+            <RespuestaNexo
+              texto="Sí, el omeprazol se le da con comida."
+              hora="14:33"
+              autor="Nexo"
+              propuesta={{
+                voz: '¿Guardo que le tiene miedo a los truenos?',
+                vozSi: 'Sí, guardalo',
+                vozNo: 'No',
+                onGuardar: () => {},
+                onDescartar: () => {},
+              }}
+            />
+
+            <Texto variante="apoyo">
+              Los chips de sugerencia: son ACTOS. Tocar uno manda la pregunta — no
+              queda elegido, y no existe prop para que lo quede.
+            </Texto>
+            <ChipsSugerencia
+              sugerencias={[
+                { id: 'a', texto: '¿Cuándo le toca la vacuna?', onPress: () => {} },
+                { id: 'b', texto: '¿Puede comer pollo?', onPress: () => {} },
+                { id: 'c', texto: '¿Cuánto pesaba en junio?', onPress: () => {} },
+              ]}
+            />
+
+            <Texto variante="apoyo">
+              La búsqueda: el término resaltado por PESO, agrupada por dónde vive la
+              cosa, con su fecha en mono y su chevron.
+            </Texto>
+            <ResultadosBusqueda
+              termino="pipeta"
+              grupos={[
+                {
+                  tipo: 'despensa',
+                  rotulo: 'Despensa',
+                  resultados: [
+                    { id: 'd1', tipo: 'despensa', titulo: 'Pipeta antipulgas 10-20 kg', subtitulo: 'Bravecto', fecha: '12 mar', onPress: () => {} },
+                  ],
+                },
+                {
+                  tipo: 'citas',
+                  rotulo: 'Citas',
+                  resultados: [
+                    { id: 'c1', tipo: 'citas', titulo: 'Aplicación de pipeta', subtitulo: 'Clínica Aurora', fecha: '02 ago', onPress: () => {} },
+                  ],
+                },
+              ]}
+              vacio={{ voz: 'x', vozChip: 'x', onPreguntar: () => {} }}
+            />
+
+            <Texto variante="apoyo">
+              Sin resultados: lo dice Y ofrece salida. Las dos cosas — la primera sola
+              deja a la persona en un callejón.
+            </Texto>
+            <ResultadosBusqueda
+              termino="pipeta"
+              grupos={[]}
+              vacio={{
+                voz: 'No encontré nada con “pipeta”',
+                vozChip: 'Preguntale a Nexo',
+                onPreguntar: () => {},
+              }}
+            />
+
+            <Texto variante="apoyo">
+              «Lo que sé de Thor»: cada hecho con su fuente, corregible en línea y
+              borrable. Acá NO hay hechos sin confirmar — eso vive en el hilo.
+            </Texto>
+            <PanelMemoria
+              titulo="Lo que sé de Thor"
+              vozVacia="x"
+              onAgregar={() => {}}
+              voz={{ agregar: 'Contame algo de él', editar: 'Corregir', borrar: 'Borrar', guardar: 'Guardar', cancelar: 'Cancelar', campo: 'El hecho' }}
+              hechos={[
+                { id: 'h1', texto: 'Le tiene miedo a los truenos', origen: 'contado', vozOrigen: 'lo contaste vos', onEditar: () => {}, onBorrar: () => {} },
+                { id: 'h2', texto: 'Come dos veces por día', origen: 'confirmado', vozOrigen: 'lo confirmaste el 2 de septiembre', onEditar: () => {}, onBorrar: () => {} },
+              ]}
+            />
+
+            <Texto variante="apoyo">
+              Y vacío: se dibuja igual y lo dice. Es la excepción declarada a
+              `haySeguridad` — este panel lo abre la familia.
+            </Texto>
+            <PanelMemoria
+              titulo="Lo que sé de Zeus"
+              hechos={[]}
+              vozVacia="Todavía no me contaste nada; lo que me cuentes lo uso para acompañarlo mejor"
+              voz={{ editar: 'Corregir', borrar: 'Borrar', guardar: 'Guardar', cancelar: 'Cancelar', campo: 'El hecho' }}
+            />
+          </View>
+        </Seccion>
     </ScrollView>
   )
 }
