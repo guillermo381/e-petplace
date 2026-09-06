@@ -181,13 +181,19 @@ function campoFechaParcial(v: unknown): v is string | null {
 
 const VIAS: readonly string[] = ['subcutanea', 'intramuscular', 'intranasal', 'oral'];
 const CONFIANZAS: readonly string[] = ['alta', 'media', 'baja'];
-const EVIDENCIAS: readonly string[] = ['sticker_con_fecha', 'sello', 'manuscrito', 'impreso'];
+const EVIDENCIAS: readonly string[] = ['sticker', 'sello', 'manuscrito', 'impreso'];
 
 const enListaOnull = (v: unknown, lista: readonly string[]): boolean =>
   v === null || (typeof v === 'string' && lista.includes(v));
 
 /** Espejo EXACTO del validador de la edge. Que las dos puntas exijan lo mismo
- *  es lo que hace que «cumple el contrato» signifique una sola cosa. */
+ *  es lo que hace que «cumple el contrato» signifique una sola cosa.
+ *
+ *  🔴 Y **no alcanzaba con decirlo acá**: este comentario decía «espejo EXACTO»
+ *  mientras `EVIDENCIAS` tenía el valor jubilado (`sticker_con_fecha`) y la edge
+ *  el vigente (`sticker`), así que **cada fila del carnet rebotaba en el
+ *  cliente**. Un comentario no compara nada. Lo compara `verify:vocabularios`,
+ *  que lee las dos listas del código fuente y exige que sean la misma. */
 function esVacunaExtraida(v: unknown): v is VacunaExtraida {
   if (!esObj(v)) return false;
   return (
@@ -219,7 +225,12 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
     Array.isArray(v.cubre) && v.cubre.every((c) => typeof c === 'string' && c.length > 0) &&
     campoTexto(v.tipo_vacuna) &&
     typeof v.confianza === 'string' && CONFIANZAS.includes(v.confianza) &&
-    typeof v.evidencia === 'string' && EVIDENCIAS.includes(v.evidencia)
+    // 🔴 `null` es legal desde el lote ①: si el modelo manda una evidencia que
+    // no está en el vocabulario, la edge la ANULA y marca la fila `incompleta`
+    // en vez de tirarla. Exigir string acá rechazaba justo las filas que la
+    // edge había decidido conservar — la mitad de la cura, deshecha un piso
+    // más arriba.
+    enListaOnull(v.evidencia, EVIDENCIAS)
   );
 }
 

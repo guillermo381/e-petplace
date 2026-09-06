@@ -472,7 +472,7 @@ Lo correcto es:
   nombre "Nobivac DHPPi" · laboratorio "Zoetis" · lote "56288"
   fecha_aplicada "2023-04-19"      <- lo manuscrito
   vencimiento_biologico null       <- "05-2025" no tiene DÍA, ver abajo
-  evidencia "sticker_con_fecha" · confianza "alta"
+  evidencia "sticker" · confianza "alta"
 Poner "2025-05-05" en fecha_aplicada sería el error más caro del carnet.
 
 ═══ LOS CAMPOS ═══
