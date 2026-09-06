@@ -28902,3 +28902,58 @@ cliente. **Depende de quién más la necesite**: hoy sólo el selector, y para u
 solo consumidor una constante alcanza. *El día que la edge también quiera casar
 por sinónimo, la constante se vuelve la segunda definición de «igual» — y esta
 casa ya pagó ese precio con `nombre_norm`.*
+
+---
+
+### `D-1038` 🟢 · Dos migraciones de S112 crearon una función cuyo INSERT nombraba cinco columnas inexistentes
+
+**Sin daño vivo. Se deposita por la LECCIÓN, que es de método y vale para toda
+migración que traiga una función.**
+
+#### Lo medido (5-sep-2026, contra la base — no contra los archivos)
+`20260908120000_s112a_acta_y_firma.sql` y `20260908240000_s112a_intentos_que_cuentan.sql`
+contienen:
+
+```sql
+INSERT INTO eventos_mascota (mascota_id, tipo_evento, fecha_evento, titulo,
+                             descripcion, procedencia, creado_por, metadata)
+```
+
+**Cinco de esos ocho nombres no existen en la tabla** — verificado contra
+`information_schema`: `tipo_evento`, `titulo`, `descripcion`, `creado_por` y
+`metadata` no están. Las reales son `tipo`, `datos` y `creado_por_user_id`.
+
+#### 🟢 Y por qué NO hay daño, también medido
+- **Ninguna función viva de la base contiene ese INSERT**: una migración
+  posterior reemplazó a `firmar_acta_adopcion`, que hoy escribe bien.
+- Hay **73 eventos `hito_narrativo`** y cuatro funciones vivas que los producen.
+- Una reconstrucción desde cero crearía la función rota y la reemplazaría
+  después, sin que nadie la llame en el medio.
+
+⇒ **Es código muerto en la historia, no un defecto abierto.** Se cierra 🟢.
+
+#### 🔴 LA LECCIÓN, que es lo que justifica la ficha
+**Postgres NO valida el cuerpo de una función PL/pgSQL al crearla.** Un
+`CREATE FUNCTION` cuyo INSERT nombra cinco columnas inventadas **se aplica sin
+una sola advertencia**; el error aparece recién cuando alguien la llama, con un
+`42703` en la cara de un usuario.
+
+*Una migración que crea una función no está probada porque haya aplicado
+limpiamente: aplicar y funcionar son dos cosas distintas, y la migración sólo
+demuestra la primera.* Es la misma familia que `L-402` —el actuador que estaba
+muerto y nadie lo notó porque nunca lo llamaron— y que `L-318`, motor sin puerta:
+**lo que no se ejerce no está probado, y en PL/pgSQL ni siquiera está
+compilado.**
+
+#### La cura barata, para quien escriba la próxima
+Toda migración que cree o reemplace una función que ESCRIBE **la ejerce en un
+fixture dentro de la misma transacción, con `ROLLBACK`**. Es lo que la casa ya
+hace en la mayoría de las migraciones y lo que estas dos no hicieron: *un
+`INSERT` de prueba habría dado `42703` en el acto, en la máquina de quien la
+escribió, en vez de quedar esperando.*
+
+#### Lo que esta ficha NO hizo
+**No censé el resto de las migraciones buscando la misma clase.** El comando es
+`grep -A8 "insert into" supabase/migrations/*.sql` cruzado contra
+`information_schema.columns`, y **no lo corrí**: encontré éstas dos mirando otra
+cosa.
