@@ -106,29 +106,31 @@ medición está escrita y toma minutos.
 
 ---
 
-### E-6 · ☠️ RETIRADA — la premisa era canon viejo, y la medición la desmiente
+### E-6 · ☠️ RETIRADA DOS VECES — la premisa era canon viejo, y encima la palabra era mía
 
 **Lo que escribí:** que «escalar a telemedicina» y «mostrarte tu veterinario» eran dos productos
-en desacuerdo y que la elección era **firma del founder**.
+en desacuerdo, y que la elección era **firma del founder**.
 
-**🔴 Lo que no medí:** me apoyé en el canon (S68 firmó `telemedicina · reservable=false` de
-plataforma, camino (c) del founder) **sin preguntarle a la base**. D lo midió y lo verifiqué por
-mi cuenta: **`telemedicina · reservable=true · activo=true · 2 ofertas activas`.** *El canon está
-viejo y «de un toque» se puede construir hoy.*
+**🔴 Primer error — no medí la premisa.** Me apoyé en el canon (S68 firmó
+`telemedicina · reservable=false` de plataforma) **sin preguntarle a la base**. Medido:
+**`reservable=true · activo=true · 2 ofertas activas`.** *Casi le pido al founder que firme
+sobre un mundo que no existe* — y si la firma salía, quedaba ratificando un `reservable=false`
+que ya nadie cumple.
 
-**Por qué lo dejo escrito en vez de borrarlo:** casi le pido al founder que firme una decisión
-**sobre un mundo que no existe**. Es la clase de error que no tiene síntoma — un dato heredado
-del canon se lee igual que uno medido y trae su autoridad, y **ningún gate lo caza porque no hay
-instrumento**. *Si la firma hubiera salido, habría quedado ratificando un `reservable=false` que
-ya nadie cumple.*
+**🔴 Segundo error — sostuve el rojo por una palabra.** Con el system **exacto** (llamando al
+constructor de la edge, no aproximándolo) se vio que el prompt dice **«¿Querés que te abra una
+consulta con un veterinario ahora?»** y **jamás la palabra «telemedicina»**. O sea que **la
+función estaba y sólo faltaba el nombre del catálogo** — y la edge hace bien: *«telemedicina» es
+jerga nuestra; una familia entiende «una consulta con un veterinario ahora».* **Mi cláusula le
+pedía a un texto dirigido a familias que hablara como el catálogo interno.**
 
-**Resuelto sin firma, y bien:** D no lo decidió solo — lo **condicionó al dato**. El contrato
-gana `telemedicina_disponible`: con el dato ofrece la consulta, sin él ofrece ver al vet.
-*Prometer un botón que no existe es peor que ofrecer el que sí existe, y sin el dato no se sabe
-cuál de los dos es.* Par discriminador corrido con el modelo real.
+Ensanchada y declarada. `verify:coach-ley` **da VERDE por el camino exacto: las 8 cláusulas,
+cada una donde debe vivir.**
 
-**Queda una cosa para el founder, mucho más chica: el canon de S68 dice lo contrario de lo que
-la base hace.** No es una decisión, es una línea que corregir.
+**Queda UNA sola cosa para el founder, y es chica: el canon de S68 dice lo contrario de lo que
+la base hace** (`reservable=false` contra `true` con 2 ofertas). No es una decisión — es una
+línea que corregir. *Se deja escrita porque un dato del canon se lee igual que uno medido y
+trae su autoridad, y ningún gate lo caza.*
 
 ---
 

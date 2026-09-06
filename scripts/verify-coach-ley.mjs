@@ -22,7 +22,11 @@
  *   node scripts/verify-coach-ley.mjs
  *   node scripts/verify-coach-ley.mjs --control
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, mkdtempSync, rmSync, copyFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const EDGE = process.env.COACH_EDGE ?? 'supabase/functions/coach/index.ts';
 const LEY = process.env.COACH_LEY ?? 'scripts/nexo/ley.json';
@@ -43,7 +47,33 @@ export function faltantes(prompt, clausulas) {
   return clausulas.filter((c) => !c.debe_decir.some((f) => p.includes(plano(f))));
 }
 
-/** El system prompt: todo literal de texto largo del archivo de la edge. */
+/**
+ * 🔴 CADA CLÁUSULA SE BUSCA DONDE DEBE VIVIR, y para algunas el otro lugar es PEOR.
+ * `memorial` en el prompt sería una PROMESA del modelo; en la puerta es un HECHO
+ * (LOYALTY §8.1 pide apagado estructural). Un gate que sólo pregunta «¿está la ley?»
+ * se conforma con la promesa.
+ * `solo_en_rama` marca las condicionales: se exigen en la rama que las enciende.
+ */
+export function repartir(clausulas, { system, fuente }) {
+  const falta = [];
+  for (const c of clausulas) {
+    const donde = c.vive_en === 'puerta' ? fuente : system;
+    if (donde == null) continue;                       // ese lado no se pudo leer
+    const p = plano(donde);
+    if (!c.debe_decir.some((f) => p.includes(plano(f)))) falta.push(c);
+  }
+  return falta;
+}
+
+/**
+ * ⚠️ EL CAMINO APROXIMADO, y ahora está declarado como tal.
+ * Junta los literales de **80 chars o más** — o sea que **descarta en silencio los
+ * cortos**: hoy ninguna cláusula vive sólo en uno (medido: 36 literales cortos en la
+ * edge, cero cláusulas exclusivas), pero *el día que alguien escriba una ley en una
+ * línea de 60 caracteres, este gate le va a dar verde por no haberla visto.* Es la
+ * misma clase que me hizo perder el 17 % de un prompt en S113 y retirar un número.
+ * Por eso se usa **sólo como respaldo**, y la salida lo DICE.
+ */
 export function promptDeLaEdge(ruta) {
   if (!existsSync(ruta)) return { existe: false, motivo: `no existe \`${ruta}\`` };
   const src = readFileSync(ruta, 'utf8');
@@ -59,8 +89,12 @@ export function promptDeLaEdge(ruta) {
   return { existe: true, texto: trozos.join('\n'), trozos: trozos.length };
 }
 
+/* Corre sólo si lo invocan a él: importarlo no puede disparar un process.exit()
+   por la espalda. Ya me pasó con el juez de los rojos. */
+const ESTE = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
 // ═══ CONTROL ═══════════════════════════════════════════════════════════════
-if (process.argv.includes('--control')) {
+if (ESTE && process.argv.includes('--control')) {
   let fallos = 0;
   const ok = (b, et, d = '') => { di(`${b ? '✅' : '🔴'} ${et}${d ? '  ' + d : ''}`); if (!b) fallos += 1; };
   const ley = JSON.parse(readFileSync(LEY, 'utf8')).clausulas;
@@ -90,21 +124,59 @@ if (process.argv.includes('--control')) {
   process.exit(0);
 }
 
+/**
+ * EL CAMINO EXACTO: le pide el system a la edge llamando a su propio constructor.
+ * ⚠️ `deno` corre sobre una copia **fuera del repo** — adentro escribe `workspaces`
+ * en `package.json` (canon de la casa).
+ */
+export function promptExacto(origen) {
+  if (spawnSync('which', ['deno']).status !== 0) return null;
+  const raiz = fileURLToPath(new URL('..', import.meta.url));
+  const helper = join(raiz, 'scripts/nexo/system-exacto.ts');
+  if (!existsSync(helper)) return null;
+  const dir = mkdtempSync(join(tmpdir(), 'coachley-'));
+  try {
+    const tar = spawnSync('sh', ['-c', `git -C '${raiz}' archive ${origen} supabase/functions | tar -x -C '${dir}'`]);
+    if (tar.status !== 0 || !existsSync(join(dir, 'supabase/functions/coach/index.ts'))) return null;
+    copyFileSync(helper, join(dir, 'system-exacto.ts'));
+    /* Las dos ramas del condicional se concatenan: la ley tiene que estar en AMBAS. */
+    const partes = [[], ['--telemedicina']].map((f) =>
+      spawnSync('deno', ['run', '-A', '--quiet', 'system-exacto.ts', 'supabase/functions/coach/index.ts', ...f],
+        { cwd: dir, encoding: 'utf8', maxBuffer: 1 << 24 }));
+    if (partes.some((r) => r.status !== 0 || !r.stdout.trim())) return null;
+    return partes.map((r) => r.stdout).join('\n');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}
+
 // ═══ GATE ══════════════════════════════════════════════════════════════════
 const ley = JSON.parse(readFileSync(LEY, 'utf8')).clausulas;
-const p = promptDeLaEdge(EDGE);
-if (!p.existe) {
+const ORIGEN = process.env.COACH_ORIGEN ?? null;
+const exacto = ORIGEN ? promptExacto(ORIGEN) : null;
+if (!ESTE) { /* importado: no se corre el gate */ }
+const p = ESTE ? (exacto
+  ? { existe: true, texto: exacto, trozos: 'EXACTO (las dos ramas)' }
+  : promptDeLaEdge(EDGE)) : { existe: true, texto: '', trozos: 0 };
+if (ESTE && !exacto && ORIGEN) di('⚠️ pedí el system EXACTO y no pude — caigo al aproximado, que descarta literales de <80 chars.');
+if (ESTE && !p.existe) {
   di(`⚠️ NO CONCLUYENTE — ${p.motivo}.`);
   di(`   La edge \`coach\` todavía no existe. El gate queda escrito y se pone en`);
   di(`   verde/rojo el día que exista. NO es verde: «la ley está» y «no hay prompt`);
   di(`   que mirar» son distintos, y confundirlos es cómo un gate deja de mirarse.`);
   process.exit(2);
 }
-const f = faltantes(p.texto, ley);
-di(`verify:coach-ley · ${EDGE} · ${p.trozos} literal(es) · ${ley.length} cláusulas`);
-if (f.length) {
-  di(`\n🔴 ${f.length} cláusula(s) de la ley NO están en el system prompt:`);
-  for (const c of f) di(`   ${c.id.padEnd(22)} debía decir: ${c.debe_decir.join(' | ')}\n${' '.repeat(25)}fuente: ${c.fuente}`);
+/* La fuente de la edge se lee aparte: ahí viven las cláusulas de PUERTA. */
+const fuenteEdge = ORIGEN
+  ? (spawnSync('git', ['show', `${ORIGEN}:supabase/functions/coach/index.ts`], { encoding: 'utf8', cwd: fileURLToPath(new URL('..', import.meta.url)) }).stdout ?? '')
+  : (existsSync(EDGE) ? readFileSync(EDGE, 'utf8') : '');
+const f = !ESTE ? [] : exacto ? repartir(ley, { system: p.texto, fuente: fuenteEdge }) : faltantes(p.texto, ley);
+if (ESTE) di(`verify:coach-ley · ${exacto ? ORIGEN : EDGE} · ${exacto ? p.trozos : `${p.trozos} literal(es) — APROXIMADO`} · ${ley.length} cláusulas`);
+if (ESTE && f.length) {
+  di(`\n🔴 ${f.length} cláusula(s) de la ley NO están donde deben:`);
+  for (const c of f) {
+    di(`   ${c.id.padEnd(22)} en el ${c.vive_en ?? 'system'} · debía decir: ${c.debe_decir.join(' | ')}`);
+    di(`${' '.repeat(25)}fuente: ${c.fuente}`);
+    if (c.por_que_ahi) di(`${' '.repeat(25)}⚠️ ${c.por_que_ahi.split('. ')[0]}.`);
+  }
   process.exit(1);
 }
-di('✅ las 8 cláusulas están, literales.');
+if (ESTE) di(`✅ las ${ley.length} cláusulas están, literales y cada una donde debe vivir.`);
