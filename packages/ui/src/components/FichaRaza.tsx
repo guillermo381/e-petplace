@@ -48,6 +48,15 @@ export interface FichaRazaProps {
   vozRevision: string
   vozAbrir: string
   vozCerrar: string
+  /** 🔴 **El cierre de la ficha, que lo monta la pantalla.** Nace para la
+   *  invitación *«¿Querés contarnos qué lo hace único?»*, y es un SLOT y no
+   *  una prop de texto por una razón: *lo que va ahí es una invitación con su
+   *  acción, y componerla acá obligaría a la pieza a saber a dónde lleva.*
+   *
+   *  ⚠️ **Sin slot no se dibuja NADA** — ni un separador ni un hueco. Una
+   *  ficha de raza sin invitación es una ficha de raza completa, no una a la
+   *  que le falta algo. */
+  cierre?: React.ReactNode
 }
 
 export function FichaRaza({
@@ -59,6 +68,7 @@ export function FichaRaza({
   vozRevision,
   vozAbrir,
   vozCerrar,
+  cierre,
 }: FichaRazaProps) {
   const { theme } = useTheme()
   const [abierta, setAbierta] = useState(false)
@@ -138,6 +148,11 @@ export function FichaRaza({
 
           {/* De dónde sale y dónde termina. Ver la cabecera. */}
           <Texto variante="apoyo">{vozRevision}</Texto>
+
+          {/* 🔴 El cierre: **sin slot no se dibuja NADA**, ni un separador ni
+              un hueco. Una ficha sin invitación está completa, no le falta
+              algo. */}
+          {cierre}
         </View>
       ) : null}
     </View>
