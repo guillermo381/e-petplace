@@ -31,15 +31,33 @@ function llave() {
   return k;
 }
 /** El prompt de D, leído de su rama. Si no se puede leer, PARA. */
-function construirPrompt(especie, codigos) {
+function construirPrompt(especie, razas) {
   const src = spawnSync('git', ['show', 'origin/pista/s113-d-1.2:supabase/functions/sugerir-raza/index.ts'], { encoding: 'utf8', maxBuffer: 1 << 24 }).stdout;
   const m = src.match(/function construirPrompt\([^)]*\): string \{\s*return `([\s\S]*?)`\n\}/);
   if (!m) throw new Error('no pude extraer construirPrompt de la rama de D. PARA.');
-  return m[1].replace(/\$\{especie\}/g, especie).replace(/\$\{codigos\.join\(' · '\)\}/g, codigos.join(' · '));
+  /* 🔴 EL PROMPT CAMBIÓ ENTRE MI PRIMERA CORRIDA Y EL DESPLIEGUE, y no lo vi
+     porque mi reemplazo sólo conocía la forma vieja. La vieja listaba los
+     códigos con `codigos.join(' · ')`; la desplegada lista PARES
+     `"slug"  —  Nombre`, uno por línea — más del doble de tokens de entrada.
+     *Leer el prompt de la rama en cada corrida no alcanza si el reemplazo está
+     atado a UNA forma del template: el gate se vuelve mudo justo cuando el
+     template cambia, que es cuando más falta hace.* Por eso ahora se prueban
+     las dos formas y **si ninguna coincide, PARA** en vez de mandar un prompt
+     con `${...}` sin reemplazar. */
+  const cat = razas.map((r) => `  "${r.slug}"  —  ${r.nombre}`).join('\n');
+  let t = m[1].replace(/\$\{especie\}/g, especie);
+  const antes = t;
+  t = t.replace(/\$\{catalogo\.map\(\(r\) => `  "\$\{r\.slug\}"  —  \$\{r\.nombre\}`\)\.join\('\\n'\)\}/g, cat)
+       .replace(/\$\{codigos\.join\(' · '\)\}/g, razas.map((r) => r.slug).join(' · '));
+  if (t === antes || /\$\{/.test(t)) {
+    throw new Error('el template del prompt cambió de forma y mi reemplazo no lo cubre. PARA — mandar un prompt sin reemplazar mediría otra cosa.');
+  }
+  return t;
 }
 
 const cat = JSON.parse(readFileSync(join(DIR, 'cat_razas_slugs.json'), 'utf8'));
-const codigos = { perro: cat.filter((r) => r.especie === 'perro').map((r) => r.slug), gato: cat.filter((r) => r.especie === 'gato').map((r) => r.slug) };
+const razasDe = { perro: cat.filter((r) => r.especie === 'perro'), gato: cat.filter((r) => r.especie === 'gato') };
+const codigos = { perro: razasDe.perro.map((r) => r.slug), gato: razasDe.gato.map((r) => r.slug) };
 const conj = JSON.parse(readFileSync(join(DIR, 'razas.json'), 'utf8'));
 
 /** Casos SIN ANIMAL, prestados del conjunto de carnets. */
@@ -60,7 +78,7 @@ for (const modelo of modelos) {
   let aciertoSinAnimal = 0, falsoAnimal = 0, costo = 0;
   const ms = [], detalle = [];
   for (const [i, c] of casos.entries()) {
-    const prompt = construirPrompt(c.especie, codigos[c.especie]);
+    const prompt = construirPrompt(c.especie, razasDe[c.especie]);
     const b64 = readFileSync(c.ruta).toString('base64');
     const t0 = Date.now();
     const r = await fetch('https://api.anthropic.com/v1/messages', {
