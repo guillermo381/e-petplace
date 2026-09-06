@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
     if (!(req.headers.get('Authorization') ?? '').startsWith('Bearer ')) {
-      return error('sin_sesion', 'Iniciá sesión para traer papeles.')
+      return error('sin_sesion', 'Inicia sesión para traer papeles.')
     }
     let body: unknown
     try { body = await req.json() } catch { return error('cuerpo_invalido', 'Cuerpo no es JSON.') }
@@ -230,7 +230,7 @@ Deno.serve(async (req) => {
     if (!r.ok) {
       console.error('[extract-papel] el modelo falló:', r.error, r.detalle)
       return error(r.error === 'timeout' ? 'error_modelo' : 'extraccion_fallida',
-        'No pudimos leer el papel. Probá con otra foto.')
+        'No pudimos leer el papel. Prueba con otra foto.')
     }
     const d = r.datos as Record<string, unknown>
     const filasCrudas = d?.filas

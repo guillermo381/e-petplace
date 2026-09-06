@@ -139,6 +139,7 @@ const CLASIFICACION = {
   obtenerEstadiasPorRango: 'guarderia',
   obtenerPlataDelDia: null,
   obtenerMediaDelDia: null,
+  obtenerParteDelDia: null,
 };
 
 /** Por qué los `null` no cuentan. Se escribe aparte para que un exento sin
@@ -146,6 +147,11 @@ const CLASIFICACION = {
 const RAZON_EXENTO = {
   obtenerPlataDelDia: 'suma por FECHA y es agnóstico al oficio — es justo el que SÍ veía la estadía cuando la lista no',
   obtenerMediaDelDia: 'media de guardería (fotos/clip del día), no la jornada del prestador',
+  // S113-D · el parte del día de Nexo. Es de la FAMILIA y de UNA mascota:
+  // vencimientos y la cita de mañana. No enumera oficios, no es del prestador
+  // y no tiene día que completar — si algún día se le pidiera «la jornada»,
+  // sería otra función, no ésta.
+  obtenerParteDelDia: 'el parte de Nexo para la familia sobre UNA mascota (vencimientos, cita de mañana), no la jornada del prestador por oficio',
 };
 
 /** Superficies rojas conocidas, con su bloqueante. NO son exenciones: son deuda
