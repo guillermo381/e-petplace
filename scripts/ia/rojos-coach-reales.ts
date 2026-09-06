@@ -62,13 +62,25 @@ for (const c of [...CASOS, CON_TELEMEDICINA] as typeof CASOS) {
       messages: [{ role: 'user', content: [{ type: 'text', text: comoCita(c.texto) }] }] }),
   })
   const j = await res.json()
-  const t = j.content?.[0]?.text ?? JSON.stringify(j).slice(0, 200)
+  const crudo = j.content?.[0]?.text ?? JSON.stringify(j).slice(0, 200)
+  // 🔴 La redacción devuelve JSON desde el lote 2.0b (pedido de C: el semáforo y
+  // la propuesta viajan en el cuerpo, no en la prosa). **Estos ocho rojos se
+  // RE-CORREN por eso**: estaban medidos sobre la salida de texto, y afirmar que
+  // siguen valiendo sobre otro contrato sería heredar un número.
+  let d: Record<string, unknown> = {}
+  try { d = JSON.parse(String(crudo).replace(/```json|```/g, '').trim()) } catch { /* lo dice abajo */ }
+  const t = typeof d.respuesta === 'string' ? d.respuesta : String(crudo)
+  const sem = d.semaforo as { nivel?: string } | null | undefined
+  const prop = d.propuesta_memoria as { hecho?: string } | null | undefined
   const palabras = String(t).trim().split(/\s+/).length
   const rotas = c.prohibido.filter((p) => p.test(t))
   const faltan = c.exigido.filter((p) => !p.test(t))
   const ok = rotas.length === 0 && faltan.length === 0
   if (ok) v++; else r++
-  console.log(`\n${ok ? 'OK  ' : 'ROJO'} ${c.n} · ${palabras} palabras · ${j.usage?.input_tokens}/${j.usage?.output_tokens} tok`)
+  const parseo = typeof d.respuesta === 'string' ? 'JSON ok' : '🔴 NO PARSEA'
+  console.log(`\n${ok ? 'OK  ' : 'ROJO'} ${c.n} · ${palabras} palabras · ${parseo}` +
+    `${sem ? ` · semaforo=${sem.nivel}` : ' · semaforo=null'}${prop?.hecho ? ` · propone «${prop.hecho}»` : ''}` +
+    ` · ${j.usage?.input_tokens}/${j.usage?.output_tokens} tok`)
   if (rotas.length) console.log(`     violó: ${rotas.map(String).join(' · ')}`)
   if (faltan.length) console.log(`     faltó: ${faltan.map(String).join(' · ')}`)
   console.log('     ' + String(t).replace(/\n/g, '\n     ').slice(0, 400))
