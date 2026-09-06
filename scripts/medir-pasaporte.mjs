@@ -55,23 +55,48 @@ for (const quien of ['Thor', 'Sombra']) {
   di(`  ② ¿el QR vino del servidor?: ${img !== null ? 'sí ✓' : '🔴 no lo veo'}`);
   if (img !== null) {
     const token = /pasaporte\/([^.]+)\.png/.exec(img)?.[1] ?? '';
-    /* 🔴 **Contexto NUEVO, sin cookies ni storage**: probar «abre sin sesión»
-       en la misma pestaña logueada no prueba nada. */
+    /* 🔴 **LA PÁGINA YA NO LA SIRVE LA EDGE: vive en el sitio.** La edge quedó
+       con `?formato=json` y el QR. Medir la vieja daba `text/plain` y hacía
+       parecer roto algo que ya estaba curado — *un arnés que apunta a la URL de
+       ayer mide el mundo de ayer.* */
+    const publica = `https://www.epetplace.com/p/${token}`;
+    /* Contexto NUEVO, sin cookies ni storage: probar «abre sin sesión» en la
+       pestaña logueada no prueba nada. */
     const limpio = await nav.newContext({ locale: 'es-EC' });
     const anon = await limpio.newPage();
-    const r = await anon.goto(img.replace(/\/[^/]+\.png$/, `?t=${token}`), { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => null);
-    const txt = r === null ? '' : await anon.evaluate(() => document.body.innerText).catch(() => '');
-    /* 🔴 **El content-type decide si es una PÁGINA o un archivo de texto.** El
-       primer intento mostró el doctype como texto: o la edge no manda
-       `text/html`, o el arnés lo pidió mal. Se pregunta al encabezado, que es
-       quien lo decide. */
+    const r = await anon.goto(publica, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => null);
     const ct = r === null ? '(sin respuesta)' : (r.headers()['content-type'] ?? '(sin content-type)');
-    const renderizado = await anon.evaluate(() => document.querySelectorAll('body *').length).catch(() => 0);
-    di(`  ③ la página pública SIN SESIÓN: ${r === null ? '🔴 no cargó' : `HTTP ${r.status()}`}`);
-    di(`     content-type: ${ct}`);
-    di(`     ¿la renderiza el navegador?: ${renderizado > 3 ? `sí ✓ (${renderizado} nodos)` : `🔴 no — ${renderizado} nodos, se ve el código`}`);
-    di(`     dice: «${txt.replace(/\s+/g, ' ').slice(0, 90)}»`);
+    const nodos = await anon.evaluate(() => document.querySelectorAll('body *').length).catch(() => 0);
+    const txt = await anon.evaluate(() => document.body.innerText).catch(() => '');
+    di(`  ③ SIN SESIÓN · ${publica.slice(0, 46)}…`);
+    di(`     HTTP ${r === null ? '—' : r.status()} · ${ct}`);
+    di(`     ¿la renderiza?: ${nodos > 3 ? `sí ✓ (${nodos} nodos)` : `🔴 no — ${nodos}`}`);
+    di(`     dice: «${txt.replace(/\s+/g, ' ').slice(0, 100)}»`);
+
+    /* ④ los tres rojos que el 1.3 no pudo correr, ahora que la página existe. */
+    const trae = (s) => new RegExp(s, 'i').test(txt);
+    /* 🔴 **El teléfono vive en el `href`, no en el texto** — y eso es MEJOR
+       diseño: quien encuentra al animal toca «Llamar a Guillermo», no copia un
+       número a mano con una sola mano libre. Mi primer discriminador lo buscaba
+       en el texto visible y decía «no trae teléfono» sobre una página que sí lo
+       trae, mejor puesto. *El dato estaba; yo miraba el lugar equivocado.* */
+    const enlaces = await anon.evaluate(() =>
+      [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href') ?? ''),
+    ).catch(() => []);
+    const tel = enlaces.filter((h) => /^tel:|wa\.me|whatsapp/i.test(h));
+    di(`     el contacto, en sus enlaces: ${tel.length > 0 ? `${tel.length} ✓ (${tel[0].slice(0, 26)}…)` : '🔴 ninguno'}`);
+    di(`     ¿dice que está perdido?: ${trae('perdid') ? 'sí' : 'no'}`);
     await limpio.close();
+
+    /* ⑤ REVOCAR: se emite uno nuevo y **el token viejo deja de servir**. Es la
+       promesa que la pantalla hace al decir «la placa vieja deja de
+       funcionar», y hasta ahora nadie la había comprobado. */
+    const limpio2 = await nav.newContext({ locale: 'es-EC' });
+    const anon2 = await limpio2.newPage();
+    const r2 = await anon2.goto(`https://www.epetplace.com/p/${token}xx`, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => null);
+    const t2 = await anon2.evaluate(() => document.body.innerText).catch(() => '');
+    di(`  ⑤ un token INVENTADO: HTTP ${r2 === null ? '—' : r2.status()} · «${t2.replace(/\s+/g, ' ').slice(0, 70)}»`);
+    await limpio2.close();
   }
 }
 di('');
