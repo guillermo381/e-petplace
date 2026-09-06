@@ -32,7 +32,7 @@
  * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
  * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
  */
-export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router'] as const
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte'] as const
 
 export type Pieza = typeof PIEZAS[number]
 
@@ -55,6 +55,7 @@ export const MODELOS: Record<Pieza, string> = {
   // pensar y cuánto cuesta escribir, en vez de un promedio que no dice nada.
   coach: 'claude-sonnet-5',
   coach_router: 'claude-haiku-4-5',
+  coach_parte: 'claude-sonnet-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -83,6 +84,10 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   coach: 800,
   // El router devuelve UNA palabra dentro de un JSON de un campo.
   coach_router: 100,
+  // 120 palabras de techo (la ley del parte) ≈ 240 tokens en español. 400 da
+  // holgura sin dejar lugar a que se extienda: **el parte que se hace largo
+  // deja de leerse**, y ahí el techo es producto, no presupuesto.
+  coach_parte: 400,
 }
 
 /**
@@ -98,6 +103,7 @@ export const EDGES: Record<Pieza, string> = {
   raza: 'sugerir-raza',
   coach: 'coach',
   coach_router: 'coach',
+  coach_parte: 'coach-parte',
 }
 
 /**
@@ -167,6 +173,9 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   // se sienta roto. El router es un clasificador de una palabra: 8 s.
   coach: 25_000,
   coach_router: 8_000,
+  // Nadie está mirando: el parte se arma para una notificación. 20 s alcanza y
+  // colgarse no le arruina la pantalla a nadie.
+  coach_parte: 20_000,
 }
 
 /**
@@ -300,6 +309,7 @@ export const PENSAR: Record<Pieza, boolean> = {
   // pensar devuelve la respuesta vacía.
   coach: false,
   coach_router: false,
+  coach_parte: false,
 }
 
 /**
@@ -315,6 +325,7 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   raza: null,
   coach: null,
   coach_router: null,
+  coach_parte: null,
 }
 
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
@@ -333,4 +344,7 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   // exacto para el que existe el caché.
   coach: true,
   coach_router: false,
+  // NO: su system es corto y se manda una vez por mascota por día. El caché
+  // cobra 25% de más por escribir algo que nadie va a releer en la ventana.
+  coach_parte: false,
 }
