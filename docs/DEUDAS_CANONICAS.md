@@ -29132,6 +29132,43 @@ dejando las puertas.
 
 ---
 
+### `D-1045` 🟡 · Ninguna alergia dice quién la registró — el único discriminador es un proxy
+
+**El síntoma (C, 6-sep-2026):** la franja de seguridad decía **«Lo registró una
+clínica» para una alergia que declaró la familia**.
+
+**La causa inmediata:** `apps/cliente/src/lib/perfil/seguridad.ts` tenía la
+procedencia **hardcodeada** en `'prestador'`, con el comentario *«una alergia
+del snapshot clínico la registró quien atendió»*. **Eso era cierto cuando se
+escribió** —la única forma de crear una alergia era `sedimentar_nota_clinica`—
+y dejó de serlo el 5-sep, cuando se abrió `declarar_alergia_familia`.
+*Un comentario que explica un supuesto no protege del día en que el supuesto
+cambia.*
+
+🔴 **Y lo medido es peor que el síntoma: NINGÚN campo distinguía.**
+- `evento_alergia_diagnosticada.prestador_id` → **NULL también en la del
+  veterinario** (`pollo`, confirmada, sin prestador).
+- `eventos_mascota.procedencia` → **`declarado_por_familia` en las dos**.
+⇒ Si la pantalla hubiera leído la procedencia «bien», habría dicho *«lo dijo la
+familia»* sobre **todas** — igual de falso, en la otra dirección.
+
+**Lo que se curó hoy:** el wrapper expone `la_declaro_la_familia`, derivado de
+`metodo_diagnostico = 'observacion_de_la_familia'` — el campo que la puerta de
+familia estampa. Medido: `polen` → familia, `pollo` → clínica. ✅
+
+**Lo que queda, y por eso hay ficha:** eso es un **PROXY**, y se declara como
+tal. Distingue **hacia adelante** y **por ausencia** del lado del veterinario:
+el día que una nota clínica llene `metodo_diagnostico`, deja de discriminar y
+**no falla ruidoso** — la franja simplemente vuelve a mentir.
+
+**La cura de raíz:** que `sedimentar_nota_clinica` estampe `prestador_id` (y/o
+`empleado_id`) en la alergia que registra. Ahí el dato existe y el proxy sobra.
+
+**Dueño:** A (el motor) · **Disparo:** la próxima vez que se toque
+`sedimentar_nota_clinica`, o antes de que un veterinario real cargue alergias.
+
+---
+
 ### `D-1044` 🟢 · El dominio personalizado de Supabase deja de hacer falta para el pasaporte — queda como alternativa escrita
 
 **Por qué existía la idea.** La página pública del pasaporte vivía en la edge

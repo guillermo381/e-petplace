@@ -68,6 +68,26 @@ export interface AlergiaDeMascota {
   fecha_diagnostico: string | null;
   /** La fuente en el expediente: permite ir a leer de dónde salió. */
   evento_id: string | null;
+  /**
+   * 🔴 **QUIÉN LO REGISTRÓ, y no se puede deducir del resto.**
+   *
+   * La franja de seguridad decía «lo registró una clínica» para TODAS las
+   * alergias — hardcodeado, con el comentario «una alergia del snapshot
+   * clínico la registró quien atendió». *Eso era cierto hasta que se abrió la
+   * puerta de familia (`declararAlergiaFamilia`), y la línea quedó atrás.*
+   *
+   * ⚠️ Y lo medido es peor que el síntoma: **ningún campo distinguía**.
+   * `prestador_id` es NULL también en la del veterinario, y
+   * `eventos_mascota.procedencia` dice `declarado_por_familia` en las dos.
+   * El único discriminador vivo es `metodo_diagnostico`, que la puerta de
+   * familia estampa como `observacion_de_la_familia`.
+   *
+   * **Es un PROXY y se dice que lo es:** distingue hacia adelante, y por
+   * AUSENCIA del lado del veterinario — el día que una nota clínica llene ese
+   * campo, deja de discriminar. La cura de raíz es que
+   * `sedimentar_nota_clinica` estampe el prestador en la alergia (`D-1046`).
+   */
+  la_declaro_la_familia: boolean;
 }
 
 /** S113-A · A4 — LA CONDICIÓN CRÓNICA CON SU DETALLE.
@@ -367,6 +387,22 @@ export async function obtenerPerfilMascota(
 
   // S82 r4 — la PRECEDENCIA de alergias (declarada en la migración):
   // lista no vacía GANA a la declaración; la declaración GANA al silencio.
+  /* Quién registró cada alergia. Va en una consulta aparte y no en el
+     snapshot porque `mascota_perfil_vigente` es una TABLA mantenida por
+     triggers (medido: `relkind='r'`), no una vista: ampliarla exigiría tocar
+     el trigger de otra pista y un backfill. *Un dato que se puede leer al lado
+     no justifica migrar un snapshot.* */
+  const declarantes = new Map<string, boolean>();
+  {
+    const { data: filas } = await getClient()
+      .from('evento_alergia_diagnosticada')
+      .select('evento_id, metodo_diagnostico')
+      .eq('mascota_id', mascotaId);
+    for (const f of (filas ?? []) as { evento_id: string | null; metodo_diagnostico: string | null }[]) {
+      if (f.evento_id) declarantes.set(f.evento_id, f.metodo_diagnostico === 'observacion_de_la_familia');
+    }
+  }
+
   const alergiasJson = perfil.data?.alergias;
   const alergiasLista = Array.isArray(alergiasJson) ? alergiasJson : [];
   const ningunaDeclaradaEn = perfil.data?.alergias_ninguna_declarada_en ?? null;
@@ -459,6 +495,11 @@ export async function obtenerPerfilMascota(
               estado: enLista(a.estado, ESTADOS_ALERGIA),
               fecha_diagnostico: texto(a.fecha_diagnostico),
               evento_id: texto(a.evento_id),
+              /* `false` ante la duda: si no se sabe quién la registró, la
+                 franja la trata como clínica. *Ante la duda el dato pesa más,
+                 no menos* — decir «lo dijo la familia» sobre algo que dijo un
+                 veterinario le quita peso a una advertencia de salud. */
+              la_declaro_la_familia: declarantes.get(texto(a.evento_id) ?? '') === true,
             }))
           : [],
       alergias_ninguna_declarada_en: ningunaDeclaradaEn,

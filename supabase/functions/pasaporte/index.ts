@@ -67,7 +67,7 @@ function pagina404(): Response {
 <main class="p"><div class="c">
 <h1>Este pasaporte ya no está activo</h1>
 <p class="q">Puede que la familia lo haya dado de baja o que el código esté incompleto.
-Si tenés al animal con vos, revisá si la chapita tiene otro código.</p>
+Si tienes al animal contigo, revisa si la chapita tiene otro código.</p>
 </div></main></html>`
   return new Response(html, {
     status: 404,
@@ -87,11 +87,11 @@ function paginaPlacaLibre(token: string): Response {
 <style>${CSS}</style>
 <main class="p"><div class="c">
 <h1>Esta placa espera a su mascota</h1>
-<p class="q">Todavía nadie la activó. Si es tuya, abrí e-PetPlace y escaneá el
+<p class="q">Todavía nadie la activó. Si es tuya, abre e-PetPlace y escanea el
 código para asociarla a tu mascota: desde ese momento, cualquiera que la
 encuentre va a poder llamarte.</p>
 <a class="cta" href="cliente:///hogar?placa=${esc(token)}">Activarla en la app</a>
-<p class="msg">¿Todavía no tenés la app? Buscá <strong>e-PetPlace</strong> en tu tienda.</p>
+<p class="msg">¿Todavía no tienes la app? Busca <strong>e-PetPlace</strong> en tu tienda.</p>
 <p class="pie">e-PetPlace · placa <code>${esc(token.slice(0, 6))}…</code></p>
 </div></main></html>`
   return new Response(html, {
