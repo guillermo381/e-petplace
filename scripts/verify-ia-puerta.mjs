@@ -43,6 +43,8 @@ try {
   // El arnés se copia DENTRO de functions/ para que su `../_shared/ia/mod.ts`
   // resuelva igual que resuelve desde una edge real.
   cpSync('scripts/ia/prueba-llamar-modelo.ts', join(base, 'functions', '_prueba-ia', 'prueba.ts'))
+  // el helper viaja al lado del arnés: declara contra qué objeto mide
+  cpSync('scripts/ia/declarar-objeto.ts', join(base, 'functions', '_prueba-ia', 'declarar-objeto.ts'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
 
   execFileSync('deno', ['run', '--allow-env', '--allow-net', '--allow-read', 'functions/_prueba-ia/prueba.ts'], {

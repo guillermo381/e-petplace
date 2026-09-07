@@ -1,3 +1,4 @@
+import { declararObjeto } from './declarar-objeto.ts'
 // ARNÉS DE `llamarModelo` — S113-D, lote 0.
 //
 // Corre con `node scripts/verify-ia-puerta.mjs`, que lo copia a un temp FUERA
@@ -20,6 +21,14 @@ import {
   CACHEAR_SISTEMA, EDGES, ESFUERZO, MAX_TOKENS, MODELOS, MODELOS_ADAPTIVOS,
   PENSAR, PIEZAS, TECHO_SIN_RAZONAR, TIMEOUT_MS,
 } from '../_shared/ia/modelos.ts'
+
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/_shared/ia/mod.ts', 'supabase/functions/_shared/ia/modelos.ts', 'supabase/functions/_shared/ia/uso.ts'],
+  modeloReal: false,
+  noCubre: 'que los precios de la tabla sean los que cobra el proveedor: eso sólo lo dice una factura.',
+})
 
 Deno.env.set('ANTHROPIC_API_KEY', 'sk-ant-FALSA-DE-PRUEBA')
 Deno.env.set('SUPABASE_URL', 'https://proyecto-falso.supabase.co')

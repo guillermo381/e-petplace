@@ -22,6 +22,8 @@ try {
   cpSync('supabase/functions', join(base, 'functions'), { recursive: true })
   mkdirSync(join(base, 'functions', '_prueba-carnet'), { recursive: true })
   cpSync('scripts/ia/prueba-carnet-v2.ts', join(base, 'functions', '_prueba-carnet', 'prueba.ts'))
+  // el helper viaja al lado del arnés: declara contra qué objeto mide
+  cpSync('scripts/ia/declarar-objeto.ts', join(base, 'functions', '_prueba-carnet', 'declarar-objeto.ts'))
   cpSync('scripts/ia/fixture-carnet-real-docA.json', join(base, 'functions', '_prueba-carnet', 'fixture-carnet-real-docA.json'))
   cpSync('scripts/ia/fixture-carnet-real-docB.json', join(base, 'functions', '_prueba-carnet', 'fixture-carnet-real-docB.json'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))

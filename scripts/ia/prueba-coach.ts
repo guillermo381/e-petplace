@@ -1,4 +1,13 @@
-// ARNÉS · la edge `coach` (S113-D, lote 2.0).
+import { declararObjeto } from './declarar-objeto.ts'
+
+
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/coach/index.ts', 'supabase/functions/_shared/ia/mod.ts', 'supabase/functions/_shared/voz/voseo.json'],
+  modeloReal: false,
+  noCubre: 'el CABLEADO, no la ley: con proveedor falso ningún verde dice que el modelo obedezca. Eso lo miden los rojos reales (`rojos-coach-reales.ts`) y el gate de voz de E.',
+})// ARNÉS · la edge `coach` (S113-D, lote 2.0).
 // Proveedor falso: cero llamadas reales. Cada guard con SU rojo producido.
 //
 // 🔴 EL BRAZO QUE MÁS IMPORTA NO ES «CONTESTA BIEN»: es **cuántas veces llamó
@@ -536,6 +545,7 @@ console.log('\n== 8quinquies-quater · 🔴 GENERAL: la aclaración y la invitac
   exigir('sin aclaración, la edge la PONE', /Todavía no tengo lo suyo cargado/.test(t), t)
   exigir('  ...y nombra la especie y la etapa', /para un perro/.test(t), t)
   exigir('sin invitación, la edge la PONE', /Si me cuentas más de Thor/.test(t), t)
+  exigir('🔴 y  VIAJA en el cuerpo, no sólo se consume', json.general === true, json.general)
   console.log('     ↑ sin la aclaración, una orientación general de la especie se lee')
   console.log('       como si fuera sobre ESA mascota. No es adorno.')
 }
@@ -554,6 +564,7 @@ console.log('\n== 8quinquies-quater · 🔴 GENERAL: la aclaración y la invitac
   redaccionCruda(JSON.stringify({ respuesta: 'Thor pesa 32.4 kg, así que le corresponden 400 g al día.',
     general: false, semaforo: null, propuesta_memoria: null }))
   const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  exigir('CONTROL: general:false viaja como false', json.general === false, json.general)
   exigir('CONTROL: general:false pasa intacta',
     json.respuesta === 'Thor pesa 32.4 kg, así que le corresponden 400 g al día.', json.respuesta)
 }

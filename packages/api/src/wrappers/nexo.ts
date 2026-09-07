@@ -74,6 +74,10 @@ export interface RespuestaNexo {
    *  🔴 **Este wrapper NO la guarda**, y no es un olvido: guardarla acá la
    *  volvería una afirmación del sistema sobre la mascota de alguien. */
   propuesta_memoria: PropuestaMemoria | null;
+  /** 🔴 La respuesta salió de lo GENERAL de la especie y la etapa porque
+   *  faltaban datos de esta mascota. **La pantalla lo puede marcar**: sin eso,
+   *  una orientación general se lee como si fuera sobre ESA mascota. */
+  general: boolean;
   /** `true` en el primer turno del hilo. */
   aviso_ia: boolean;
 }
@@ -162,6 +166,7 @@ export async function preguntarANexo(
       // Inventar la urgencia en cualquier dirección es peor que no mostrarla.
       semaforo: esSemaforo(data.semaforo) ? data.semaforo : null,
       propuesta_memoria: propuesta,
+      general: data.general === true,
       aviso_ia: data.aviso_ia,
     },
   };

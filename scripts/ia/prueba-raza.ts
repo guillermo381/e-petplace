@@ -1,3 +1,4 @@
+import { declararObjeto } from './declarar-objeto.ts'
 // ARNÉS DE CONTRATO DE `sugerir-raza` — S113-D, lote 1.2.
 //
 // ⚠️ MISMA ADVERTENCIA QUE EL CARNET: corre con PROVEEDOR FALSO. No prueba que
@@ -9,6 +10,14 @@
 // la llamada al modelo y el insert a `ia_uso`.
 
 import { llamarModelo as _ } from '../_shared/ia/mod.ts'
+
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/sugerir-raza/index.ts', 'supabase/functions/_shared/ia/mod.ts'],
+  modeloReal: false,
+  noCubre: 'si el modelo acierta la raza: eso es la matriz de E sobre fotos etiquetadas.',
+})
 void _
 
 Deno.env.set('ANTHROPIC_API_KEY', 'sk-ant-FALSA-DE-PRUEBA')

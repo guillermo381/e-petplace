@@ -22,6 +22,8 @@ try {
   cpSync('supabase/functions', join(base, 'functions'), { recursive: true })
   mkdirSync(join(base, 'functions', '_prueba-coach'), { recursive: true })
   cpSync('scripts/ia/prueba-coach.ts', join(base, 'functions', '_prueba-coach', 'prueba.ts'))
+  // el helper viaja al lado del arnés: declara contra qué objeto mide
+  cpSync('scripts/ia/declarar-objeto.ts', join(base, 'functions', '_prueba-coach', 'declarar-objeto.ts'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
   execFileSync('deno', ['run', '--allow-env', '--allow-net', '--allow-read', 'functions/_prueba-coach/prueba.ts'],
     { cwd: base, stdio: 'inherit' })
