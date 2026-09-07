@@ -29132,6 +29132,39 @@ dejando las puertas.
 
 ---
 
+### `D-1047` 🟡 · `extract-papel` sólo está medido contra papeles SINTÉTICOS: el número que hay es un piso, no una exactitud
+
+**Firma del founder (7-sep-2026):** *los 38 de `documentos_clinicos_muestra` son
+sintéticos y **no hay más**; deja de pedirse un papel real, porque hoy no existe.*
+
+**Qué mide y qué no.** El conjunto mide **LA LEY** —que no interpreta, que
+transcribe con su unidad y su referencia, que **no inventa marcas**— y sirve como
+**tablero de regresión**: 173 analitos, 25 fuera de rango y sólo 16 con bandera
+impresa, así que los 9 sin marca son la trampa exacta que delata interpretación.
+**No mide la variedad del papel real**: manuscrito, stickers, papel arrugado, una
+foto torcida de una clínica de verdad.
+
+⇒ **Ningún porcentaje suyo se cita como exactitud sobre papeles reales.** El
+número que exista es **un piso**, y se dice así cada vez que se publica.
+
+**Disparo.** Medir `extract-papel` con papeles reales **cuando lleguen las
+primeras familias**. Hasta entonces la deuda no se puede pagar y no es un atraso:
+es que el objeto no existe.
+
+**Y una cosa que NO se le cobra al modelo.** La vara tiene un defecto medido por
+dos pistas por separado: **las fuentes del generador no dibujan `⁶` (U+2076) ni
+`⁹` (U+2079)** —son subconjuntos latinos de `@fontsource`, y sí llevan `³`
+(U+00B3, Latin-1)—, así que esas unidades salen como un cuadro vacío en el papel
+mientras el `ground_truth` dice `x10⁶/µL`. **8 de 173 filas en el lote de E, 11
+de 190 en el de D.** *Un modelo que transcribe fielmente el tofu queda contado
+como error.* **Se corrige en la vara, no en el sujeto.**
+
+⚠️ **Y el borde que hay que mirar al corregirla:** un fallo de unidad contra el
+tofu **no distingue** «copió el cuadro vacío» de «se comió el glifo y escribió
+`x10/µL`». Lo segundo es una unidad equivocada por un factor de un millón y se
+lee perfectamente plausible. **Se inspecciona qué escribió, no sólo que difirió.**
+
+
 ### `D-1046` 🔴 · `pista/s113-a-nfc` da de alta un módulo NATIVO: el día que entre a `main`, el primer OTA sin build crashea en el aparato
 
 **Qué pasa.** Esa rama instala `react-native-nfc-manager` en `apps/cliente` para
