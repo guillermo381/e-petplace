@@ -112,3 +112,36 @@ export async function declararObjeto(o: Objeto): Promise<void> {
   console.log(`[mide] proveedor: ${o.modeloReal ? '🔴 MODELO REAL (gasta)' : 'falso (cero llamadas)'}`)
   console.log(`[mide] NO cubre: ${o.noCubre}`)
 }
+
+
+/**
+ * 🔴 UN RESUMEN SOBRE CERO CASOS NO ES UN APROBADO: ES LA AUSENCIA DE LA PRUEBA.
+ *
+ * Se llama ANTES de imprimir cualquier resumen. Si el arnés no midió nada, lo
+ * dice y sale con 2 — nunca con 0.
+ *
+ * ── DE DÓNDE SALE, y no de una idea ────────────────────────────────────────
+ * La clave de medición se quedó sin crédito a mitad de una corrida y el arnés
+ * de papeles imprimió, prolijito:
+ *     🔴 MARCAS INVENTADAS   0 sobre 0 filas sin marca
+ *     🔴 ADJETIVOS DE JUICIO 0
+ * **Las dos líneas se leen como un verde**, y la corrida no había llamado al
+ * modelo ni una vez.
+ *
+ * ── Y EL CENSO DEJÓ ALGO PEOR QUE EL CASO ──────────────────────────────────
+ * Corridos los ocho arneses de modelo real SIN crédito: **uno** lo dice, y los
+ * otros siete **revientan antes de llegar al resumen**. Parece que estuvieran
+ * a salvo y es al revés: *están a salvo por frágiles*. El que llegó a imprimir
+ * el falso verde fue justamente el que manejaba bien el error por documento —
+ * o sea que **la mejora normal (no morirse ante un 400) es lo que introduce el
+ * defecto**. La falla no está en el manejo del error: está en un resumen que
+ * no mira su propio denominador.
+ * ⇒ Por eso la cura NO es por arnés: es una sola pieza, acá, y la exige el
+ *   mismo gate que ya exige `declararObjeto`.
+ */
+export function exigirCasos(n: number, queMide: string): void {
+  if (n > 0) return
+  console.error(`\n🔴 NO CONCLUYENTE — cero casos de «${queMide}»: este arnés NO MIDIÓ.`)
+  console.error('   Un resumen sobre cero no es un aprobado. Revisá el log: ¿la clave, la red, el conjunto?')
+  salir(2)
+}

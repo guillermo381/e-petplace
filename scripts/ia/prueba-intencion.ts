@@ -8,7 +8,7 @@
  *
  * La clave se lee del llavero EN EL MOMENTO y no se escribe ni se imprime.
  */
-import { declararObjeto } from './declarar-objeto.ts'
+import { declararObjeto, exigirCasos } from './declarar-objeto.ts'
 import { SISTEMA, comoCita, saneaIntencion, fechasDe } from '../../supabase/functions/buscar-intencion/index.ts'
 import { costoEstimadoUsd } from '../../supabase/functions/_shared/ia/precios.ts'
 import { podarConsulta } from '../../packages/domain/src/busquedaPoda.ts'
@@ -128,6 +128,10 @@ async function unaFrase([frase, eTipo, eVent, eMes, eTerm]: typeof CASOS[number]
 for (let i = 0; i < CASOS.length; i += 6) await Promise.all(CASOS.slice(i, i + 6).map(unaFrase))
 
 const n = CASOS.length
+/* Sin una sola frase medida, los `0/24` de abajo se leen como «no falló nada».
+   *Un resumen sobre cero no es un aprobado: es la ausencia de la prueba.* */
+exigirCasos(acierto.tipo + acierto.tiempo + acierto.termino + fallos.length, 'frases clasificadas')
+
 console.log('\n── FALLOS ──')
 console.log(fallos.length ? fallos.join('\n') : '  (ninguno)')
 console.log(`\nEXACTITUD POR CAMPO (${n} frases, UNA corrida)`)

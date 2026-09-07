@@ -33,7 +33,7 @@
  * Su número es un PISO. Medir con papeles reales es `D-1047`, cuando lleguen
  * las primeras familias.
  */
-import { declararObjeto } from './declarar-objeto.ts'
+import { declararObjeto, exigirCasos } from './declarar-objeto.ts'
 import { PROMPT, sanearFila, CLASES } from '../extract-papel/index.ts'
 import { costoEstimadoUsd } from '../_shared/ia/precios.ts'
 
@@ -210,15 +210,7 @@ for (let i = 0; i < conAnalitos.length; i += 3) {
 
 const pc = (n: number, d: number) => d === 0 ? '—' : `${n}/${d} (${Math.round(n * 100 / d)}%)`
 
-/* 🔴 SIN FILAS NO HAY MEDICIÓN, Y SE DICE. Una corrida que no pudo llamar al
-   proveedor —clave sin crédito, red caída— imprimía `MARCAS INVENTADAS 0 sobre
-   0` y `ADJETIVOS 0`, que **se leen como un verde**. *Un cero sobre cero no es
-   un aprobado: es la ausencia de la prueba.* */
-if (cuenta.emparejadas === 0) {
-  console.log('\n🔴 NO CONCLUYENTE — cero filas emparejadas: el arnés NO MIDIÓ.')
-  console.log('   Revisá el log de arriba: si dice `credit balance is too low`, es la clave.')
-  Deno.exit(2)
-}
+exigirCasos(cuenta.emparejadas, 'filas de examen emparejadas')
 console.log(`\n── EXACTITUD POR CAMPO, sobre las filas emparejadas ──`)
 console.log(`  filas          ${pc(cuenta.emparejadas, cuenta.filas_esperadas)} emparejadas · devolvió ${cuenta.filas_devueltas}`)
 console.log(`  valor          ${pc(cuenta.valor, cuenta.emparejadas)}`)
