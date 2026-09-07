@@ -28,8 +28,13 @@ import { Atmosfera } from '../brand/Atmosfera'
 import { RespuestaNexo } from '../components/RespuestaNexo'
 import { ResultadosBusqueda } from '../components/ResultadosBusqueda'
 import { PanelMemoria } from '../components/PanelMemoria'
-import { InvitacionBio } from '../components/InvitacionBio'
 import { ChipsSugerencia } from '../components/ChipsSugerencia'
+/* ☠️ `InvitacionBio` salió: B la partió en `HojaContanos` + `BotonContanos`
+   porque era tarjeta Y hoja en la misma pieza, y la hoja se abre desde cuatro
+   lugares. */
+import { HojaContanos } from '../components/HojaContanos'
+import { BotonContanos } from '../components/BotonContanos'
+import { PastillaConociendolo } from '../components/PastillaConociendolo'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
@@ -3279,6 +3284,47 @@ const ICONOS_TABS: BarraTabsItem[] = [
 ]
 
 // ── galería ───────────────────────────────────────────────────────────────────
+
+/* Los accesos y la Hoja, para caminarlos juntos: el gate mira que los tres
+   abran LA MISMA, y que la propuesta reemplace a la caja. */
+function ContanosDemo() {
+  const [abierta, setAbierta] = useState(false)
+  const [propuesta, setPropuesta] = useState(false)
+  const ENTRADAS = [
+    { clase: 'comportamiento' as const, titulo: 'Comportamiento', detalle: 'miedos, manías, cómo se lleva con otros', onPress: () => {} },
+    { clase: 'personalidad' as const, titulo: 'Rasgos de personalidad', detalle: 'cómo es: tímido, glotón, mandón', onPress: () => {} },
+    { clase: 'medico' as const, titulo: 'Temas médicos', detalle: 'alergias, condiciones, lo que el vet te dijo', onPress: () => {} },
+    { clase: 'recuerdo' as const, titulo: 'Recuerdo', detalle: 'lo que hizo hoy', onPress: () => {} },
+  ]
+  return (
+    <>
+      <PastillaConociendolo n={3} voz="Conociéndolo · 3 por resolver" onPress={() => setAbierta(true)} />
+      <BotonContanos etiqueta="Contanos lo que hace único a Thor" onPress={() => setAbierta(true)} />
+      <Texto variante="apoyo">Con cero pendientes la pastilla no se dibuja:</Texto>
+      <PastillaConociendolo n={0} voz="Conociéndolo · 0 por resolver" onPress={() => {}} />
+      <HojaContanos
+        visible={abierta}
+        onCerrar={() => { setAbierta(false); setPropuesta(false) }}
+        titulo="Contanos lo que hace único a Thor"
+        entradas={ENTRADAS}
+        libre={{
+          etiqueta: 'O contanos lo que quieras de Thor',
+          placeholder: 'Le tiene miedo a los truenos…',
+          vozEnviar: 'Contame',
+          onLibre: () => setPropuesta(true),
+        }}
+        propuesta={propuesta ? {
+          voz: '¿Lo guardo como rasgo de personalidad?',
+          vozSi: 'Sí, guardalo',
+          vozNo: 'No',
+          onGuardar: () => setPropuesta(false),
+          onDescartar: () => setPropuesta(false),
+        } : undefined}
+      />
+    </>
+  )
+}
+
 export function TokenGallery() {
   // Provider PROPIO (S48/D-305): el provider raíz del app está controlado
   // por el tema del sistema, y el selector manual de esta galería
@@ -8682,22 +8728,18 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        <Seccion titulo="⭐ GATE S113 — LA INVITACIÓN AL BIO (lote 1.2.2) · qué decide: (a) que el texto se lea ENTERO y la segunda frase —la que invita— no se corte; (b) que la tarjeta se vea tocable sobre papel claro, donde `bg.card` es blanco contra casi blanco; (c) que las cuatro entradas queden ALINEADAS aunque «Rasgos de personalidad» no tenga glifo en el registry">
+        {/* ☠️ **LA SECCIÓN DE `InvitacionBio` SE FUE CON SU PIEZA.** El merge
+            la dejó abierta sin cuerpo: B retiró el componente y su demo, y su
+            `<Seccion>` quedó huérfana —sin cierre y sin nada adentro—.
+            *Un gate que sobrevive a lo que miraba no mide nada: ocupa el lugar
+            del que sí.* La reemplaza la del «contanos», que es su heredera. */}
+        <Seccion titulo="⭐ GATE S113 — EL «CONTANOS» (2.1) · qué decide: (a) que el acceso se lea como la pieza más INVITANTE del perfil y no como la más discreta; (b) que la caja libre se vea antes que las cuatro entradas; (c) que la propuesta de Nexo reemplace a la caja en vez de apilarse; (d) que ninguna voz con el nombre adentro quede cortada">
           <View style={{ gap: spacing[4] }}>
             <Texto variante="apoyo">
-              Al cierre de la ficha de raza, y también sola en el perfil cuando la
-              mascota no tiene ficha. Tocarla abre la Hoja con las cuatro.
+              Los tres accesos, y la MISMA Hoja detrás. La pastilla desaparece con
+              cero pendientes — su firma es su desaparición.
             </Texto>
-            <InvitacionBio
-              texto="Thor está en su etapa adulta. Contanos lo que lo hace único: cuanto mejor lo conozcamos, mejor lo acompañamos."
-              tituloHoja="Contanos de Thor"
-              entradas={[
-                { clase: 'comportamiento', titulo: 'Comportamiento', detalle: 'miedos, manías, cómo se lleva con otros', onPress: () => {} },
-                { clase: 'personalidad', titulo: 'Rasgos de personalidad', detalle: 'cómo es: tímido, glotón, mandón', onPress: () => {} },
-                { clase: 'medico', titulo: 'Temas médicos', detalle: 'alergias, condiciones, lo que el vet te dijo', onPress: () => {} },
-                { clase: 'recuerdo', titulo: 'Recuerdo', detalle: 'lo que hizo hoy', onPress: () => {} },
-              ]}
-            />
+            <ContanosDemo />
           </View>
         </Seccion>
     </ScrollView>
