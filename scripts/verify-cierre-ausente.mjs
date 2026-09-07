@@ -29,14 +29,21 @@
  * a escribir una migración. **Un instrumento que no puede distinguir sus dos
  * rojos no reporta ninguno: dice qué le falta y sale 2.**
  *
- * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ─────────────────────────────
- * **Sí, y es la tolerancia más cara de este arnés, declarada:** una cita
- * `confirmada` y pasada **puede ser un incumplimiento o un servicio prestado
- * que nadie cerró en la app**, y *nada en la base separa una cosa de la otra*
- * (lo midió A, §3). Este arnés cuenta las dos juntas. **No mide
- * incumplimiento: mide AUSENCIA DE CIERRE**, que es exactamente lo que §2
- * castiga — pero quien lea su número como «prestadores que fallaron» va a
- * leer de más.
+ * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? — NO, Y HAY QUE DECIR POR QUÉ ─
+ * Una versión anterior de esta cabecera declaraba como *tolerancia* que el
+ * arnés «no distingue un incumplimiento de un servicio prestado que nadie
+ * cerró». **Era una mala lectura de F1, y se retira.**
+ *
+ * **F1 hace la causa deliberadamente irrelevante.** Su tabla no tiene una fila
+ * para «el prestador incumplió»: tiene tres actos —`cierre_con_calidad`,
+ * `cierre_no_show`, y **nada marcado**— y es el tercero el que dispara. *El
+ * prestador cobra sólo si marca uno.* Un servicio prestado y no cerrado **no
+ * devenga igual**, y eso no es un hueco de medición: es la firma.
+ *
+ * ⇒ **el sujeto de este arnés y el de F1 son el mismo objeto**, y no hay nada
+ * que perdonar. Lo único que hay que cuidar es el NOMBRE del número: es
+ * *ausencia de cierre*, que es lo que F1 castiga — **no** un índice de
+ * prestadores que fallaron. *Esa distinción es de lectura, no de alcance.*
  *
  * ── LO QUE NO MIDE ────────────────────────────────────────────────────────
  * · **No mide que el AVISO de 24 h haya salido.** Eso es un contador de
@@ -124,6 +131,8 @@ const sinMarcar = total48 - marcados;
 if (sinMarcar > 0) {
   console.error(`\n🔴 ROJO · ${sinMarcar} objetos pasaron las 48 h y NO están en \`no_ejecutado\`.`);
   console.error('   El reloj de §2 no corrió sobre ellos: siguen pudiendo devengar.');
+  console.error('   (F1: dispara «nada marcado», cualquiera sea la causa — es ausencia');
+  console.error('   de cierre, no un índice de prestadores que fallaron.)');
   process.exit(1);
 }
 console.log('\n🟢 VERDE · todo objeto pasado de 48 h sin cierre quedó en `no_ejecutado`.');

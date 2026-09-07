@@ -38,12 +38,23 @@
  * en la base, ni siquiera dentro de una transacción.
  *
  * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ─────────────────────────────
- * **Sí, una cosa, y se declara:** para la estadía acepta el evento anclado
- * **a la estadía O a su cita**, porque la letra todavía no fijó el ancla
- * (`origen_tipo` hoy sólo tiene el valor `cita`, medido). Hardcodear uno de
- * los dos produciría un rojo falso el día que el motor elija el otro.
- * **El día que la letra fije el ancla, esta tolerancia se cierra** — y hasta
- * entonces el gate lo dice en su salida, no en un comentario.
+ * **La tolerancia grande SE CERRÓ.** Una versión anterior aceptaba, para la
+ * estadía, el evento anclado **a la estadía O a su cita**, porque la letra no
+ * había fijado el ancla. **La mesa la fijó: el ancla del evento de guardería
+ * es la ESTADÍA** (decisión del 7-sep; A deposita la enmienda a §8 —al
+ * escribir esto, la versión de §8 en `main` todavía dice «el acta de
+ * `entregar`» sin nombrar el ancla, y se cita la mesa, no el documento).
+ * ⇒ **un evento anclado a la cita de una estadía ya NO cuenta**, y el arnés
+ * es más estricto que ayer, no menos.
+ *
+ * **Queda una tolerancia chica y es de VOCABULARIO, no de ancla:** el literal
+ * de `origen_tipo` no está fijado —medido: **no hay CHECK sobre esa columna** y
+ * el único valor vivo es `cita`—, así que se aceptan `estadia` y
+ * `guarderia_estadia`. *Las dos apuntan al mismo objeto; lo que se decidió es
+ * cuál es el objeto, no cómo se escribe su nombre.* El día que exista el
+ * CHECK, esta lista sale de acá y se lee de él.
+ *
+ * **Y sigue sin mirar el MONTO**, sólo la existencia del evento.
  *
  * ── LO QUE NO MIDE, DECLARADO ─────────────────────────────────────────────
  * · **No mide el MONTO** del evento, sólo su existencia. Un evento por el
@@ -69,7 +80,7 @@ const SQL = `
 with objetos as (
   -- Cita ejecutada y pagada. Se excluyen las que tienen estadía: ésas se
   -- miden por su estadía, que es donde vive su cierre real (el acta).
-  select 'cita'::text as obj, c.id as id, null::uuid as id_alterno,
+  select 'cita'::text as obj, c.id as id,
          coalesce(c.tipo_servicio,'(cita sin oficio)') as via,
          c.estado::text as estado, false as sintetico
     from evento_cita_servicio c
@@ -77,18 +88,19 @@ with objetos as (
      and c.estado_reserva = 'pagada'
      and not exists (select 1 from guarderia_estadias g where g.cita_id = c.id)
   union all
-  -- Estadia entregada. id_alterno = su cita: la tolerancia declarada.
-  select 'estadia', e.id, e.cita_id, 'guarderia', e.estado::text, false
+  -- Estadía entregada. EL ANCLA ES LA ESTADÍA (mesa, 7-sep): su cita ya NO
+  -- sirve de rebote. Un evento colgado de la cita de una guardería no cuenta.
+  select 'estadia', e.id, 'guarderia', e.estado::text, false
     from guarderia_estadias e
    where e.estado = 'entregada'
   union all
-  select 'pedido', p.id, null::uuid, 'despensa', p.estado::text, false
+  select 'pedido', p.id, 'despensa', p.estado::text, false
     from pedidos p
    where p.estado = 'entregado'
   union all
-  select 'cita', '${NEG}'::uuid, null::uuid, '__control_negativo__', 'completada', true
+  select 'cita', '${NEG}'::uuid, '__control_negativo__', 'completada', true
   union all
-  select 'cita', '${POS}'::uuid, null::uuid, '__control_positivo__', 'completada', true
+  select 'cita', '${POS}'::uuid, '__control_positivo__', 'completada', true
 ),
 eventos as (
   select origen_tipo, origen_id from eventos_economicos
@@ -99,9 +111,9 @@ marcados as (
   select o.*,
          not exists (
            select 1 from eventos ee
-            where (ee.origen_id = o.id or (o.id_alterno is not null and ee.origen_id = o.id_alterno))
+            where ee.origen_id = o.id
               and ( ee.origen_tipo = o.obj
-                 or (o.obj = 'estadia' and ee.origen_tipo in ('estadia','guarderia_estadia','cita'))
+                 or (o.obj = 'estadia' and ee.origen_tipo in ('estadia','guarderia_estadia'))
                  or (o.obj = 'pedido'  and ee.origen_tipo in ('pedido','compra')) )
          ) as sin_evento
     from objetos o
@@ -164,8 +176,9 @@ if (conEvento === 0) {
 
 console.log('verify:devengo-por-sujeto · §8 de LETRA_POSTVENTA');
 console.log('  controles: negativo produjo su rojo ✅ · positivo no marcó ✅');
-console.log('  tolerancia declarada: para la estadía se acepta el evento anclado');
-console.log('  a la estadía O a su cita (la letra todavía no fijó el ancla).\n');
+console.log('  ancla de guardería: LA ESTADÍA (mesa 7-sep) — un evento colgado de');
+console.log('  su cita ya no cuenta. Sólo queda abierto el literal de `origen_tipo`,');
+console.log('  que no tiene CHECK: se aceptan `estadia` y `guarderia_estadia`.\n');
 console.log('  obj      vía                        estado       n   sin evento');
 for (const f of reales) {
   const marca = f.sin_evento > 0 ? '🔴' : '  ';

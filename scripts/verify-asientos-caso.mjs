@@ -151,15 +151,95 @@ if (existentes.length) {
   }
 }
 
-// ══ ③ LOS TRES ASIENTOS (§9.3) ═══════════════════════════════════════════
-console.log('\n  ── ② LOS TRES ASIENTOS (§9.3) ──');
+// ══ ③ LOS ASIENTOS (§9.3) ════════════════════════════════════════════════
+//
+// §9.3 pide CINCO lecturas: familia · prestador dueño · casa · tercero · anon.
+// La tabla del caso no existe todavía, así que **el asiento se ejerce sobre el
+// objeto que sí existe** (`evento_cita_servicio`, que tiene RLS por prestador):
+// eso prueba que la maquinaria del asiento DISCRIMINA, y el día que exista
+// `casos_postventa` las mismas sesiones corren contra ella.
+//
+// 🔴 **EL ASIENTO QUE IMPORTA ES EL SEGUNDO: un prestador que NO es dueño del
+// objeto.** El primero —el dueño viendo lo suyo— no puede fallar de la forma
+// peligrosa; el rojo que hace daño es **ver el caso de otro**. Y sin el
+// primero, el cero del segundo no significa nada: *una consulta rota devuelve
+// cero igual que una RLS bien puesta.* Los dos van juntos o no va ninguno.
+console.log('\n  ── ② LOS ASIENTOS (§9.3) ──');
+{
+  const env = Object.fromEntries(
+    readFileSync(`${RAIZ}/apps/cliente/.env.local`, 'utf8').split('\n')
+      .filter((l) => l.includes('=')).map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
+  );
+  const URL = env.EXPO_PUBLIC_SUPABASE_URL;
+  const ANON = env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Un prestador con objetos y otro SIN objetos de ese primero: los dos salen
+  // del dato, no de una lista escrita a mano.
+  const DUENO = dbQuery(`
+    select p.id, p.nombre_comercial, u.email,
+           (select count(*)::int from evento_cita_servicio c where c.prestador_id = p.id) as citas
+      from prestadores p join auth.users u on u.id = p.user_id
+     where p.estado = 'activo' and u.email = 'demo-prestador@epetplace.dev' limit 1`)[0];
+  const OTRO = dbQuery(`
+    select p.id, p.nombre_comercial, u.email
+      from prestadores p join auth.users u on u.id = p.user_id
+     where p.estado = 'activo' and u.email = 'guillo381+paseo1@gmail.com' limit 1`)[0];
+
+  if (!DUENO || !OTRO || DUENO.citas === 0) {
+    console.log('   🟠 sin las dos cuentas de prestador (o el dueño no tiene objetos):');
+    console.log(`      dueño: ${DUENO?.email ?? 'falta'} (${DUENO?.citas ?? 0} citas) · otro: ${OTRO?.email ?? 'falta'}`);
+    notas.push('los asientos no se pudieron ejercer: faltan las dos cuentas de prestador');
+  } else {
+    const claveDueno = execFileSync('security',
+      ['find-generic-password', '-s', 'epetplace-cuenta-prueba', '-w'], { encoding: 'utf8' }).trim();
+    const claveOtro = execFileSync('security',
+      ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'], { encoding: 'utf8' }).trim();
+
+    const sesion = async (email, clave) => {
+      const c = createClient(URL, ANON, { auth: { persistSession: false } });
+      const { error } = await c.auth.signInWithPassword({ email, password: clave });
+      if (error) throw new Error(`${email}: ${error.message}`);
+      return c;
+    };
+    const cuenta = async (cli) => {
+      const { count, error } = await cli.from('evento_cita_servicio')
+        .select('id', { count: 'exact', head: true }).eq('prestador_id', DUENO.id);
+      if (error) throw new Error(error.message);
+      return count ?? 0;
+    };
+
+    try {
+      const vistoDueno = await cuenta(await sesion(DUENO.email, claveDueno));
+      const vistoOtro  = await cuenta(await sesion(OTRO.email, claveOtro));
+      const vistoAnon  = await cuenta(createClient(URL, ANON, { auth: { persistSession: false } }));
+
+      console.log(`   objeto de prueba: citas de \`${DUENO.nombre_comercial}\` (${DUENO.citas} en la base)`);
+      console.log(`   ${vistoDueno > 0 ? '✅' : '🔴'} asiento DUEÑO      (${DUENO.email}) ve ${vistoDueno}`);
+      console.log(`   ${vistoOtro === 0 ? '✅' : '🔴'} asiento NO DUEÑO   (${OTRO.email}) ve ${vistoOtro}`);
+      console.log(`   ${vistoAnon === 0 ? '✅' : '🔴'} asiento ANON       ve ${vistoAnon}`);
+
+      if (vistoDueno === 0) {
+        // Control positivo caído: sin él, el cero del segundo no dice nada.
+        console.error('   🟠 el dueño ve CERO de sus propios objetos ⇒ la consulta no mide.');
+        notas.push('control positivo del asiento caído: el dueño no ve lo suyo');
+        process.exitCode = 2;
+      }
+      if (vistoOtro !== 0) {
+        fallos.push(`asiento NO DUEÑO: ${OTRO.email} ve ${vistoOtro} objetos de ${DUENO.nombre_comercial}`);
+      }
+      if (vistoAnon !== 0) fallos.push(`asiento ANON ve ${vistoAnon} objetos ajenos`);
+    } catch (e) {
+      console.error(`   🟠 los asientos no se pudieron ejercer: ${e.message.slice(0, 140)}`);
+      notas.push('los asientos rebotaron');
+    }
+  }
+}
+
 if (faltanCaso) {
-  console.log('   🟠 sin sujeto: no existe la tabla del caso.');
+  console.log(`   🟠 sobre el CASO todavía no se pueden correr: no existe la tabla.`);
   console.log(`      buscadas: ${DEL_CASO.join(' · ')}`);
-  notas.push('los tres asientos no se pudieron medir: falta la tabla del caso');
-} else {
-  console.log('   (la tabla del caso existe: falta cablear las cinco sesiones)');
-  notas.push('la tabla del caso ya existe — este bloque hay que completarlo');
+  console.log('      (faltan además los asientos FAMILIA y CASA, que son del caso)');
+  notas.push('los asientos del caso no se pudieron medir: falta la tabla');
 }
 
 // ══ VEREDICTO ════════════════════════════════════════════════════════════
