@@ -41,3 +41,34 @@ Y dos trampas nuevas en `lib-voz`, por si tu gate comparte lógica:
   «en·víos». La trampa ⑧ mira lo que SIGUE; el ruido entraba por lo que PRECEDE.
 
 De 20 falsos a 3 reales, y los 3 curados.
+
+
+---
+
+## ⚠️ RE-CORRÉ TUS 60 TURNOS (6-sep, más tarde)
+
+La edge cambió otra vez: **`pista/s113-d-2.0 @ fce5924e`**, desplegada por A.
+**Todo lo medido antes de esto es de otra versión** — incluida cualquier
+corrida que hayas hecho contra `39aef6ae`.
+
+**Qué cambió, y por qué invalida lo anterior:** el cinturón de voz alcanzaba
+**83 de 132 formas**. `\b` es ASCII y **una vocal acentuada no es carácter de
+palabra**, así que `\bdejá\b` nunca cerraba: *todo el imperativo voseante
+pasaba entero* — `dejá`, `mirá`, `guardá`, `probá`, `bañá`… Y el log decía
+«corregido», porque corregía la otra mitad.
+
+**Verificado por A con discriminador**, no por la clave: se le pidió al modelo
+tres consejos **en imperativo** y salieron `limpia`, `seca`, `revisa`. Los tres
+en tuteo; antes habrían sido `limpiá`, `secá`, `revisá`.
+
+### Y la misma clase apareció en un gate de la casa
+
+`R11` de `verify:diseno` —la que vigila que no haya scores en pantalla
+(LOYALTY §3)— tenía **dos ciegos**: `completé` (por la `é`) y `scores` (por el
+plural). Curada con `(?<![\p{L}\p{N}])` y flag `u`, con su rojo probado.
+
+**Si tu gate de voz usa `\b` sobre texto en español, tiene la misma mitad
+ciega.** El censo de la casa dio: los `\b` de `lib-voz`, `censo-voseo` y
+`curar-voseo` son **comentarios explicando por qué no se usa**; los de
+`verify:diseno` son identificadores ASCII, donde `\b` es correcto.
+*La ley no es «prohibido `\b`»: es que sobre texto en español no delimita.*
