@@ -1860,6 +1860,8 @@ export {
   type AvisoCoach,
   type TipoAviso,
   activarPlaca,
+  estadoDePlaca,
+  type EstadoDePlaca,
   type CodigoErrorPlaca,
   // 2.1 · Nexo acompaña
   guardarHechoClasificado,
@@ -1916,6 +1918,19 @@ export {
   MINIMO_PARA_SERIE,
   type Tendencia,
 } from './series';
+
+// LA BÓVEDA DE PAPELES (S113 · fase 3) — transcribe, jamás interpreta.
+export {
+  registrarPapelExtraido,
+  confirmarPapel,
+  obtenerPapelesDeMascota,
+  pathDePapel,
+  BUCKET_PAPELES,
+  type ClaseEnBoveda,
+  type ValorDePapel,
+  type PapelDeMascota,
+  type CodigoErrorBoveda,
+} from './wrappers/boveda';
 
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía

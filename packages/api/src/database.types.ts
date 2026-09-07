@@ -14796,6 +14796,112 @@ export type Database = {
           },
         ]
       }
+      papel_valor: {
+        Row: {
+          analito: string
+          id: string
+          literal: string | null
+          orden: number
+          papel_id: string
+          ref_max: string | null
+          ref_min: string | null
+          referencia: string | null
+          unidad: string | null
+          valor: string
+        }
+        Insert: {
+          analito: string
+          id?: string
+          literal?: string | null
+          orden?: number
+          papel_id: string
+          ref_max?: string | null
+          ref_min?: string | null
+          referencia?: string | null
+          unidad?: string | null
+          valor: string
+        }
+        Update: {
+          analito?: string
+          id?: string
+          literal?: string | null
+          orden?: number
+          papel_id?: string
+          ref_max?: string | null
+          ref_min?: string | null
+          referencia?: string | null
+          unidad?: string | null
+          valor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "papel_valor_papel_id_fkey"
+            columns: ["papel_id"]
+            isOneToOne: false
+            referencedRelation: "papeles_familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      papeles_familia: {
+        Row: {
+          archivo_path: string
+          clase: string
+          confirmado_en: string | null
+          confirmado_por: string | null
+          country_code: string | null
+          creado_en: string
+          estado: string
+          fecha_papel: string | null
+          id: string
+          mascota_id: string
+          modo_captura: string
+          origen: string | null
+          subido_por: string
+          titulo: string | null
+        }
+        Insert: {
+          archivo_path: string
+          clase: string
+          confirmado_en?: string | null
+          confirmado_por?: string | null
+          country_code?: string | null
+          creado_en?: string
+          estado?: string
+          fecha_papel?: string | null
+          id?: string
+          mascota_id: string
+          modo_captura?: string
+          origen?: string | null
+          subido_por: string
+          titulo?: string | null
+        }
+        Update: {
+          archivo_path?: string
+          clase?: string
+          confirmado_en?: string | null
+          confirmado_por?: string | null
+          country_code?: string | null
+          creado_en?: string
+          estado?: string
+          fecha_papel?: string | null
+          id?: string
+          mascota_id?: string
+          modo_captura?: string
+          origen?: string | null
+          subido_por?: string
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "papeles_familia_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pasaporte: {
         Row: {
           creado_en: string
@@ -15733,6 +15839,24 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      placa_consulta: {
+        Row: {
+          minuto: string
+          n: number
+          user_id: string
+        }
+        Insert: {
+          minuto: string
+          n?: number
+          user_id: string
+        }
+        Update: {
+          minuto?: string
+          n?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       planes_prime: {
         Row: {
@@ -24028,6 +24152,10 @@ export type Database = {
         Args: { p_programa_contratado_id: string }
         Returns: Json
       }
+      confirmar_papel: {
+        Args: { p_papel_id: string; p_valores?: Json }
+        Returns: Json
+      }
       confirmar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       congelar_desglose_mensualidad_guarderia: {
         Args: { p_periodo: string; p_suscripcion_id: string }
@@ -24634,6 +24762,7 @@ export type Database = {
         Args: { p_invitacion_id: string }
         Returns: Json
       }
+      estado_de_placa: { Args: { p_token: string }; Returns: string }
       evaluar_documentos_guarderia: {
         Args: { p_familia_id: string }
         Returns: Json
@@ -26492,6 +26621,18 @@ export type Database = {
           p_fecha?: string
           p_mascota_id: string
           p_texto?: string
+        }
+        Returns: Json
+      }
+      registrar_papel_extraido: {
+        Args: {
+          p_archivo_path: string
+          p_clase: string
+          p_fecha_papel?: string
+          p_mascota_id: string
+          p_origen?: string
+          p_titulo?: string
+          p_valores?: Json
         }
         Returns: Json
       }
