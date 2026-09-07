@@ -22,6 +22,7 @@
  * Salidas: 0 verde · 1 un caso falló · 2 la auto-prueba falló.
  */
 import { mismaFila } from '../packages/ui/src/components/misma-fila.ts';
+import { mismoCaso } from '../packages/ui/src/components/mismo-caso.ts';
 
 // ══ AUTO-PRUEBA — y acá NO puede ser sobre el COMPORTAMIENTO ══════════════
 //
@@ -40,6 +41,14 @@ import { mismaFila } from '../packages/ui/src/components/misma-fila.ts';
 // puerta.
 if (typeof mismaFila !== 'function') {
   console.error('✗ verify:fila-memoizada — NO PUDE MEDIR: `mismaFila` no es una función.');
+  console.error('  (el módulo no cargó, o el export cambió de nombre)');
+  process.exit(2);
+}
+/* S114-B · El comparador de la BANDEJA DE CASOS entra al mismo gate y no a uno
+   nuevo: es la misma pregunta —¿esta fila se redibuja?— sobre otra lista. Un
+   gate por comparador sería el clon que la casa caza. */
+if (typeof mismoCaso !== 'function') {
+  console.error('✗ verify:fila-memoizada — NO PUDE MEDIR: `mismoCaso` no es una función.');
   console.error('  (el módulo no cargó, o el export cambió de nombre)');
   process.exit(2);
 }
@@ -70,6 +79,48 @@ const casos = [
       'aunque la memoización esté puesta — la otra mitad vive en la pantalla',
   },
 ];
+
+/* ══ S114-B · `mismoCaso` — LA BANDEJA DE CASOS ═══════════════════════════
+   🔴 **COMPARA DOS COSAS Y NO UNA, y por eso sus casos no son los de arriba:**
+   la bandeja entrega un `onPress` POR FILA (navega a ese caso), así que un
+   comparador que mirara sólo el item **dejaría la fila llamando a la función
+   de ayer** — el caso ④, que es el que justifica el segundo término. */
+const c1 = { clave: 'c1', motivo: 'llegó tarde' };
+const c2 = { clave: 'c2', motivo: 'no vino' };
+const irA1 = () => {};
+const irA2 = () => {};
+
+casos.push(
+  {
+    n: '① (caso) refresco sin novedades: MISMA referencia y MISMO callback',
+    da: mismoCaso({ caso: c1, onPress: irA1 }, { caso: c1, onPress: irA1 }),
+    esperado: true,
+    porque: 'si esto es false, cada sondeo de la bandeja redibuja todas las filas',
+  },
+  {
+    n: '② (caso) el caso cambió: su fila se redibuja',
+    da: mismoCaso({ caso: c1, onPress: irA1 }, { caso: c2, onPress: irA1 }),
+    esperado: false,
+    porque: 'una fila que no se entera de su propio cambio muestra datos viejos',
+  },
+  {
+    n: '③ 🔴 (caso) LA TERCERA PATA · mismo contenido, objeto NUEVO',
+    da: mismoCaso({ caso: c1, onPress: irA1 }, { caso: { ...c1 }, onPress: irA1 }),
+    esperado: false,
+    porque:
+      'ES CORRECTO que dé false: la pieza no puede saber que son «iguales». ' +
+      'Quien reconstruye la lista en cada refresco paga el redibujado entero',
+  },
+  {
+    n: '④ 🔴 (caso) EL QUE JUSTIFICA EL SEGUNDO TÉRMINO · mismo caso, OTRO destino',
+    da: mismoCaso({ caso: c1, onPress: irA1 }, { caso: c1, onPress: irA2 }),
+    esperado: false,
+    porque:
+      'si esto diera true, la fila se quedaría con el callback viejo y llevaría ' +
+      'al caso equivocado. Un comparador que ignora un callback que cambia no es ' +
+      'una optimización: es una fila que llama a la función de ayer',
+  },
+);
 
 let fallos = 0;
 console.log('── verify:fila-memoizada · el comparador REAL, importado');

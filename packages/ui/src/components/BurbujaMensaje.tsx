@@ -41,6 +41,34 @@
  * grupo»* viviría repetida en cada consumidor, y basta que uno la escriba al
  * revés para que un grupo tenga cuatro horas.
  *
+ * ── 🔴 EL TERCER ASIENTO — LA CASA (S114-B, B7) ──────────────────────────
+ * `DIRECCION_POSTVENTA` §3.3: *«Tres asientos. Los míos a la derecha; el
+ * prestador y la casa a la izquierda, **cada uno con su cara y su nombre** —
+ * "e-PetPlace" con el logo, el paseador con su foto.»*
+ *
+ * ⇒ la rama AJENA gana **`cara`**, un slot que se dibuja **junto al primer
+ * mensaje del grupo** y cuya columna queda reservada para el resto, para que
+ * las burbujas del grupo no se escalonen. La variante «casa» es montar ahí
+ * `LogoNegocio` en vez de la foto de una persona.
+ *
+ * 🔴 **`cara` VIVE SÓLO EN LA RAMA AJENA, y eso cierra un invariante:** la
+ * casa **no puede hablar desde la derecha**. `mio: true` + `cara` no compila.
+ * *Un asiento se define por dónde se sienta; si la pieza dejara poner la cara
+ * de e-PetPlace a la derecha, el color dejaría de marcar de quién es.*
+ *
+ * ── ⚠️ Y LA SUPERFICIE DE LA CASA **NO** ES UN TERCER COLOR, POR MEDICIÓN ─
+ * La salida obvia era darle a la casa su propio fondo. **Se midió en los tres
+ * temas antes de decidir, y no se puede:**
+ * ```
+ *   memorial → bg.card, bg.elevated, bg.overlay y bg.hundido son EL MISMO
+ *              color (`memorialDark1`).
+ * ```
+ * ⇒ **cualquier tercera superficie colapsa contra la del prestador en
+ * memorial.** Una distinción que existe en dos temas de tres no es una
+ * distinción: es un defecto que aparece en el tema donde menos se lo mira.
+ * *Lo que separa los tres asientos es la CARA y el NOMBRE —que es literal lo
+ * que §3.3 pide— y el color sigue diciendo sólo míos/ajenos.*
+ *
  * ── SIN «VER MÁS» ────────────────────────────────────────────────────────
  * *«Un mensaje largo se lee entero»* (§2.3). No hay `numberOfLines`: plegar
  * un mensaje de una conversación de adopción esconde justo lo que alguien se
@@ -51,6 +79,7 @@
  * ── PUERTA ───────────────────────────────────────────────────────────────
  * El hilo en las dos apps (C3). **Entregada y no montada.**
  */
+import type { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -97,6 +126,24 @@ type Mio = Comun & {
 
 type Ajeno = Comun & {
   mio: false
+  /**
+   * 🔴 LA CARA DEL QUE HABLA — sólo del lado ajeno (ver la cabecera). Se
+   * dibuja en el PRIMERO del grupo y su columna queda reservada en el resto.
+   *
+   * Entra por slot y no por `fotoUrl`: del otro lado puede haber **una
+   * persona** (`AvatarMascota` / su foto) o **la casa** (`LogoNegocio` con su
+   * monograma), y son dos piezas distintas con dos fallbacks distintos. *Una
+   * prop de URL obligaría a esta pieza a elegir cuál de las dos monta, y a
+   * saber cuándo el que habla es una organización.*
+   *
+   * **El tamaño sale de `CARA_EN_HILO`**, que se exporta justo para eso: dos
+   * números que deben coincidir —el ancho de la columna y el de la cara— no
+   * salen de dos cuentas distintas (L-284).
+   *
+   * Ausente = la burbuja se dibuja como siempre, sin columna. *Por eso los
+   * dos hilos de adopción no cambian un píxel.*
+   */
+  cara?: ReactNode
   estado?: never
   onReintentar?: never
   vozReintentar?: never
@@ -110,6 +157,15 @@ export type BurbujaMensajeProps =
   | Ajeno
   | (Mio & { estado: 'enviando' | 'enviado'; onReintentar?: never; vozReintentar?: never })
   | (Mio & { estado: 'no_se_envio'; onReintentar: () => void; vozReintentar: string })
+
+/**
+ * EL ANCHO DE LA COLUMNA DE LA CARA. Se exporta para que quien monte el
+ * avatar o el logo lo pida acá en vez de teclear un 28 que después se separa
+ * de esta columna (L-284). Es el mismo que usa `CabeceraHilo` para la
+ * contraparte: la casa ya había resuelto «qué tamaño tiene una cara que
+ * acompaña, no que presenta».
+ */
+export const CARA_EN_HILO = 28
 
 /** El radio que cierra el grupo: pleno salvo del lado que sigue pegado. */
 function radiosDe(mio: boolean, posicion: PosicionEnGrupo) {
@@ -132,16 +188,19 @@ export function BurbujaMensaje(props: BurbujaMensajeProps) {
   const abreGrupo = posicion === 'solo' || posicion === 'primero'
   const cierraGrupo = posicion === 'solo' || posicion === 'ultimo'
   const fallo = mio && props.estado === 'no_se_envio'
+  /* La columna existe SÓLO si este hilo tiene caras: sin ella, el layout es
+     byte por byte el de antes y los dos hilos de adopción no se mueven. */
+  const cara = mio ? undefined : props.cara
+  const conColumna = cara !== undefined
 
-  return (
+  const cuerpo = (
     <View
-      style={{
-        alignItems: mio ? 'flex-end' : 'flex-start',
-        // El aire ENTRE grupos es mayor que el aire dentro: es lo que
-        // agrupa, y por eso el agrupado no necesita ninguna caja.
-        marginTop: abreGrupo ? spacing[3] : spacing[0.5],
-        paddingHorizontal: spacing[4],
-      }}
+      /* `flex: 1` SIEMPRE, y no sólo cuando hay columna: sin él, dentro de
+         una fila el cuerpo se encoge al ancho de su contenido y `flex-end`
+         deja de empujar los míos a la derecha. **Ese era el precio escondido
+         de envolver en una fila** — se vio midiendo el caso sin cara, que es
+         el de los dos hilos vivos de adopción. */
+      style={{ flex: 1, alignItems: mio ? 'flex-end' : 'flex-start' }}
     >
       {/* El nombre, sólo al abrir el grupo y sólo del otro lado: sobre los
           míos sería decirme cómo me llamo en cada mensaje. */}
@@ -210,6 +269,32 @@ export function BurbujaMensaje(props: BurbujaMensajeProps) {
           </Texto>
         </Pressable>
       ) : null}
+    </View>
+  )
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        // La cara acompaña al PRIMERO del grupo, así que la fila se alinea
+        // arriba: alinearla abajo la pegaría al último, que es de otro
+        // momento de la conversación.
+        alignItems: 'flex-start',
+        // El aire ENTRE grupos es mayor que el aire dentro: es lo que
+        // agrupa, y por eso el agrupado no necesita ninguna caja.
+        marginTop: abreGrupo ? spacing[3] : spacing[0.5],
+        paddingHorizontal: spacing[4],
+      }}
+    >
+      {/* LA COLUMNA DE LA CARA — reservada para TODO el grupo, con la cara
+          sólo en el primero. Si sólo existiera donde hay cara, las burbujas
+          del mismo grupo arrancarían en dos x distintas. */}
+      {conColumna ? (
+        <View style={{ width: CARA_EN_HILO, marginRight: spacing[2] }}>
+          {abreGrupo ? cara : null}
+        </View>
+      ) : null}
+      {cuerpo}
     </View>
   )
 }

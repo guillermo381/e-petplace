@@ -2112,6 +2112,40 @@ const FIXTURES = {
      un wrapper que exporta una función y un index que no la nombra. Con uno
      solo la regla saldría por «corpus incompleto», que no es verde pero
      tampoco prueba que sepa decir que no. */
+  /* ══ S114-B · LOS CINCO FIXTURES DE LA POSTVENTA — cada uno es EL CASO
+        que su guard existe para cazar, escrito ANTES de cablear la regla.
+        ⚠️ El `path` importa: los cinco guards buscan SU pieza y sin ella
+        salen por «ancla rota», que es otro rojo — un fixture que enrojece
+        por el ancla no prueba el brazo que dice probar. ══════════════════ */
+  /* R72 · la etapa que existe en la unión y falta en el orden: compila, no
+     falla, y el paso desaparece de la escalera. */
+  R72: [{
+    path: 'packages/ui/src/components/EscaleraCaso.tsx',
+    src:
+      "export type EtapaCaso =\n  | 'recibido'\n  | 'con_prestador'\n  | 'cerrado'\n\n" +
+      "export const ORDEN_CASO: readonly EtapaCaso[] = ['recibido', 'con_prestador']\n" +
+      "const GLIFO: Record<EtapaCaso, IconoNombre> = {\n  recibido: 'sobre',\n  con_prestador: 'atender',\n  cerrado: 'candado',\n}\n",
+  }],
+  /* R73 · la rama por destino: la puerta de toda asimetría. */
+  R73: [{
+    path: 'packages/ui/src/components/TarjetaDestinoPlata.tsx',
+    src: "const opciones = ['banco', 'saldo']\nconst borde = destino === 'banco' ? theme.accent.cta : theme.border.default\n",
+  }],
+  /* R74 · el monto en la cabecera, con el nombre puesto. */
+  R74: [{
+    path: 'packages/ui/src/components/CabeceraCaso.tsx',
+    src: "export type CabeceraCasoProps = { contraparte: { nombre: string }; monto: string }\n",
+  }],
+  /* R75 · el cajón con su nombre: exactamente lo que §2 prohíbe. */
+  R75: [{
+    path: 'packages/ui/src/components/SelectorMotivo.tsx',
+    src: "export const MOTIVO_CONTAME = '__contame__'\nconst extra = { clave: 'otro', etiqueta: 'Otro' }\n",
+  }],
+  /* R76 · el countdown que late. */
+  R76: [{
+    path: 'packages/ui/src/components/BannerPlazo.tsx',
+    src: "export function BannerPlazo({ voz }) {\n  setInterval(() => {}, 1000)\n  return null\n}\n",
+  }],
   R71: [
     { path: 'packages/api/src/index.ts', src: "export { otraCosa } from './wrappers/otra';" },
     { path: 'packages/api/src/wrappers/fixture-r71.ts', src: 'export async function puertaQueNadieAbre() { return 1 }' },
@@ -6319,6 +6353,243 @@ function r68(archivos) {
  * que nadie puede abrir.** *Su verde dice «todo wrapper es alcanzable», jamás
  * «todo wrapper anda».*
  */
+/* ══════════════════════════════════════════════════════════════════════════
+   S114-B · LOS CUATRO GUARDS DE LA POSTVENTA (`docs/DIRECCION_POSTVENTA.md`)
+   Los cuatro nacieron ROJO PRIMERO: se escribió el caso que tienen que cazar,
+   se corrió, salió rojo, y recién ahí se cablearon. *La primera prueba de un
+   guard nuevo no es que dé verde: es que dé rojo sobre el primer caso real.*
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/** Devuelve el archivo del corpus, o `null`. Los cuatro guards de abajo miran
+ *  UNA pieza, y sin ella su silencio diría «no miré» — por eso todos empiezan
+ *  con su ancla (L-192, tercera capa). */
+function piezaDe(archivos, nombre) {
+  const re = new RegExp(`components/${nombre}\\.tsx$`)
+  return archivos.find((a) => re.test(a.path)) ?? null
+}
+
+/** R72 · NINGUNA ETAPA DEL CASO SE PIERDE DEL ORDEN (S114-B · §3.1).
+ *
+ *  🔴 QUÉ MIDE, Y ES LO QUE EL TIPO **NO** PUEDE: `GLIFO` es un
+ *  `Record<EtapaCaso, IconoNombre>`, así que **una etapa sin glifo no
+ *  compila** — ése rojo ya está cerrado y este guard no lo necesita. Pero
+ *  `ORDEN_CASO` es un `readonly EtapaCaso[]`, y **un array de un tipo compila
+ *  con MENOS miembros que el tipo**: una etapa que exista en la unión y falte
+ *  en el orden **desaparece de la escalera y nada falla**.
+ *
+ *  *Es la clase más cara de la casa: no rompe, no avisa, y la pantalla se ve
+ *  perfectamente normal con un paso menos.*
+ *
+ *  Mide los TRES conjuntos —unión, orden y glifos— y exige que coincidan.
+ *  ⚠️ Su verde dice «las cinco etapas están las tres veces», jamás «la
+ *  escalera cuenta bien la historia». */
+function r72(archivos) {
+  const f = piezaDe(archivos, 'EscaleraCaso')
+  if (f === null) {
+    return {
+      fallos: ['R72: ANCLA ROTA — `EscaleraCaso.tsx` no está en el corpus. Un cero acá diría «no miré», no «está bien».'],
+      info: 'corpus incompleto',
+    }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const bloqueUnion = src.match(/export type EtapaCaso\s*=((?:\s*\|\s*'[a-z_]+')+)/)
+  const bloqueOrden = src.match(/ORDEN_CASO[^=]*=\s*\[([^\]]*)\]/)
+  const bloqueGlifo = src.match(/const GLIFO\s*:\s*Record<EtapaCaso[^>]*>\s*=\s*\{([^}]*)\}/)
+  const literales = (t) => [...(t ?? '').matchAll(/'([a-z_]+)'/g)].map((m) => m[1])
+  const union = literales(bloqueUnion?.[1])
+  const orden = literales(bloqueOrden?.[1])
+  const glifos = [...(bloqueGlifo?.[1] ?? '').matchAll(/^\s*([a-z_]+)\s*:/gm)].map((m) => m[1])
+
+  const fallos = [...ancla('R72', union.length, 2, 'etapa(s) en la unión `EtapaCaso`')]
+  fallos.push(...ancla('R72', orden.length, 2, 'entrada(s) en `ORDEN_CASO`'))
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const etapa of union) {
+    if (!orden.includes(etapa)) {
+      fallos.push(
+        `R72 **la etapa \`${etapa}\` existe en \`EtapaCaso\` y NO está en \`ORDEN_CASO\`.** ` +
+        `El tipo no lo ve —un array de un tipo compila con menos miembros que el tipo— así que ` +
+        `**el paso desaparece de la escalera y nada falla**. *La familia ve cuatro escalones donde hay cinco.*`,
+      )
+    }
+    if (glifos.length > 0 && !glifos.includes(etapa)) {
+      fallos.push(`R72 **la etapa \`${etapa}\` no tiene glifo en \`GLIFO\`** — §3.1 pide «un glifo por etapa».`)
+    }
+  }
+  for (const paso of orden) {
+    if (!union.includes(paso)) {
+      fallos.push(`R72 **\`ORDEN_CASO\` nombra \`${paso}\`, que no existe en \`EtapaCaso\`.**`)
+    }
+  }
+  return {
+    fallos,
+    info: `${union.length} etapa(s) en la unión · ${orden.length} en el orden · ${glifos.length} con glifo · su verde dice «las tres listas coinciden», jamás «la escalera cuenta bien»`,
+  }
+}
+
+/** R73 · LAS DOS TARJETAS DEL DINERO SON PAREJAS (S114-B · §4).
+ *
+ *  🔴 **ES LA PIEZA DONDE UN DARK PATTERN ENTRA SIN QUE NADIE LO NOTE**, y por
+ *  eso tiene guard propio. §4: *«las dos parejas, con sus tiempos declarados…
+ *  cero default oscuro, cero botón más grande, cero "recomendado"»*.
+ *
+ *  TRES BRAZOS, y el primero es el que importa:
+ *  ① **ninguna rama por destino** — un `=== 'banco'` o `=== 'saldo'` en la
+ *     pieza es por donde entraría cualquier asimetría de peso, tamaño o
+ *     acento. Sin comparación no hay rama, y sin rama las dos salen iguales.
+ *  ② **ningún default de elección** — `elegido` no puede nacer puesto.
+ *  ③ **la palabra «recomendado» no existe** en la pieza.
+ *
+ *  ⚠️ Su verde dice «la pieza no puede hacerlas distintas», **jamás «se ven
+ *  parejas en el aparato»**: el alto lo iguala `alignItems: 'stretch'` y eso
+ *  se mira, no se grepea. */
+function r73(archivos) {
+  const f = piezaDe(archivos, 'TarjetaDestinoPlata')
+  if (f === null) {
+    return {
+      fallos: ['R73: ANCLA ROTA — `TarjetaDestinoPlata.tsx` no está en el corpus.'],
+      info: 'corpus incompleto',
+    }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const menciones = [...src.matchAll(/'(banco|saldo)'/g)].length
+  const fallos = [...ancla('R73', menciones, 2, "mención(es) de 'banco'/'saldo' (sin ellas la pieza no es la que creo)")]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/(===|!==)\s*'(banco|saldo)'|'(banco|saldo)'\s*(===|!==)/g)) {
+    fallos.push(
+      `R73 **la pieza compara contra un destino (\`${m[0].trim()}\`, línea ${lineaDe(src, m.index)}).** ` +
+      `Es la puerta por la que entra la asimetría: basta que una rama dé un borde, un peso o un acento distinto ` +
+      `y §4 se rompe sin que nadie lo vea. *Las dos se dibujan con UNA receta; lo único que puede diferir es cuál está elegida.*`,
+    )
+  }
+  if (/\belegido\s*=\s*['"]/.test(src)) {
+    fallos.push('R73 **`elegido` tiene un default.** §4: *«ninguna está preseleccionada»* — el arranque es `null` y lo declara quien monta.')
+  }
+  if (/recomend/i.test(src)) {
+    fallos.push('R73 **aparece «recomendado» en la pieza.** §4 lo prohíbe con esa palabra.')
+  }
+  return {
+    fallos,
+    info: `${menciones} mención(es) de destino · 0 rama(s) por destino · su verde dice «la pieza no puede hacerlas distintas», jamás «se ven parejas» (el alto lo iguala \`stretch\`, y eso se mira)`,
+  }
+}
+
+/** R74 · LA CABECERA DEL CASO NO DICE EL MONTO (S114-B · §3.2).
+ *
+ *  §3.2, literal: *«la cabecera nunca dice el monto: la plata se habla en su
+ *  carta, no en el título»*.
+ *
+ *  🔴 **Y el segundo brazo es el que de verdad cierra la puerta: NINGÚN SLOT
+ *  `ReactNode`.** `CabeceraHilo` —su hermana— tiene uno (`acciones`), y por
+ *  ahí el monto entra igual sin que ninguna prop se llame «monto». *Una ley
+ *  que se puede saltear por un slot no está puesta.*
+ *
+ *  ⚠️ Los comentarios se despojan antes de medir (L-170): la cabecera del
+ *  archivo NOMBRA el monto para explicar por qué no está, y un censo que
+ *  leyera prosa se acusaría a sí mismo. */
+function r74(archivos) {
+  const f = piezaDe(archivos, 'CabeceraCaso')
+  if (f === null) {
+    return { fallos: ['R74: ANCLA ROTA — `CabeceraCaso.tsx` no está en el corpus.'], info: 'corpus incompleto' }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const fallos = [...ancla('R74', /contraparte/.test(src) ? 1 : 0, 1, 'mención de `contraparte` (sin ella la pieza no es la que creo)')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/\b(monto|precio|total|importe|PrecioText)\b/gi)) {
+    fallos.push(
+      `R74 **la cabecera nombra \`${m[1]}\` (línea ${lineaDe(src, m.index)}).** §3.2: *«la cabecera nunca dice el monto»*.`,
+    )
+  }
+  if (/\bReactNode\b/.test(src)) {
+    fallos.push(
+      'R74 **la cabecera tiene un slot `ReactNode`.** Es la puerta por la que el monto entra sin llamarse monto — ' +
+      'por eso esta pieza NO copió el `acciones` de `CabeceraHilo`. *Una ley que se puede saltear por un slot no está puesta.*',
+    )
+  }
+  return { fallos, info: '0 mención(es) de plata · 0 slot(s) abiertos · su verde dice «el monto es inexpresable acá», jamás «la plata se cuenta bien»' }
+}
+
+/** R75 · «OTRO» NO ES UN MOTIVO, Y LA LISTA NO SCROLLEA (S114-B · §2).
+ *
+ *  §2, literal: *«Sin "Otro" al final de la lista: si ninguno encaja, el
+ *  último dice "Es otra cosa · contame" y abre el campo. "Otro" es un cajón
+ *  donde va a parar todo lo que no supimos nombrar; "contame" es una
+ *  invitación.»* Y: *«se leen en una pantalla, **sin scroll interno**»*.
+ *
+ *  DOS BRAZOS:
+ *  ① ningún motivo se llama `otro`/`other` — ni por clave ni por etiqueta.
+ *  ② la pieza no monta ningún contenedor desplazable. *Un scroll interno
+ *     convierte «la lista es larga» en un problema invisible.*
+ *
+ *  ⚠️ **Mide la PIEZA, no los catálogos de las apps.** El catch-all lo pone
+ *  la pieza (`MOTIVO_CONTAME`), así que un catálogo no puede traer el suyo —
+ *  pero si alguien agregara un motivo llamado «Otro» desde una pantalla, este
+ *  guard no lo ve. *Se declara para que su verde no se lea de más.* */
+function r75(archivos) {
+  const f = piezaDe(archivos, 'SelectorMotivo')
+  if (f === null) {
+    return { fallos: ['R75: ANCLA ROTA — `SelectorMotivo.tsx` no está en el corpus.'], info: 'corpus incompleto' }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const fallos = [...ancla('R75', /MOTIVO_CONTAME/.test(src) ? 1 : 0, 1, 'mención de `MOTIVO_CONTAME` (sin ella la pieza no es la que creo)')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/(clave|etiqueta)\s*:\s*['"]\s*(otro|other|otros)\s*['"]/gi)) {
+    fallos.push(
+      `R75 **la pieza tiene un motivo «${m[2]}» (línea ${lineaDe(src, m.index)}).** §2 lo prohíbe por su nombre: ` +
+      `*«"Otro" es un cajón donde va a parar todo lo que no supimos nombrar; "contame" es una invitación»*.`,
+    )
+  }
+  for (const m of src.matchAll(/\b(ScrollView|FlatList|SectionList|VirtualizedList)\b/g)) {
+    fallos.push(
+      `R75 **la pieza monta \`${m[1]}\` (línea ${lineaDe(src, m.index)}).** §2 pide la lista **sin scroll interno**: ` +
+      `si el catálogo creciera hasta no entrar, el defecto tiene que verse en la pantalla y no esconderse adentro de un scroll.`,
+    )
+  }
+  return { fallos, info: '0 cajón(es) «otro» · 0 contenedor(es) desplazable(s) · mide LA PIEZA, jamás los catálogos de las apps' }
+}
+
+/** R76 · EL PLAZO NO ES UNA ALARMA NI UN CONTADOR (S114-B · §5).
+ *
+ *  §5, literal: *«El reloj se ve, y **no es rojo**»* y *«sin countdown que
+ *  lata»*.
+ *
+ *  DOS BRAZOS, y los dos son sobre lo que la pieza NO puede tener:
+ *  ① **ningún color de alarma** — `danger` ni `warning`. El rojo dice que
+ *     algo salió mal, y a un prestador al que le llegó un caso **todavía no le
+ *     salió nada mal**: le pidieron que conteste.
+ *  ② **ningún reloj adentro** — ni temporizador, ni efecto, ni estado propio.
+ *     *Un contador que corre en pantalla mete apuro donde la letra pidió que
+ *     no lo hubiera, y el apuro es una presión que no se ve como presión.*
+ *
+ *  ⚠️ Su verde dice «la pieza no puede latir ni gritar», jamás «el plazo está
+ *  bien calculado»: la cuenta es del motor y la frase llega redactada. */
+function r76(archivos) {
+  const f = piezaDe(archivos, 'BannerPlazo')
+  if (f === null) {
+    return { fallos: ['R76: ANCLA ROTA — `BannerPlazo.tsx` no está en el corpus.'], info: 'corpus incompleto' }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const fallos = [...ancla('R76', /\bvoz\b/.test(src) ? 1 : 0, 1, 'mención de `voz` (sin ella la pieza no es la que creo)')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/status\.(danger|warning)|color\s*=\s*["']\s*(danger|warning)\s*["']/g)) {
+    fallos.push(
+      `R76 **el plazo se pinta de alarma (\`${m[0]}\`, línea ${lineaDe(src, m.index)}).** §5: *«el reloj se ve, y no es rojo»* — ` +
+      `no pasó nada malo todavía, y teñirlo convierte «hay algo que resolver» en «estás en falta».`,
+    )
+  }
+  for (const m of src.matchAll(/\b(setInterval|setTimeout|requestAnimationFrame|withRepeat|useEffect|useState|Animated)\b/g)) {
+    fallos.push(
+      `R76 **la pieza tiene un reloj adentro (\`${m[1]}\`, línea ${lineaDe(src, m.index)}).** §5: *«sin countdown que lata»*. ` +
+      `El número baja cuando la persona vuelve, no mientras mira.`,
+    )
+  }
+  return { fallos, info: '0 color(es) de alarma · 0 reloj(es) adentro · su verde dice «no puede latir ni gritar», jamás «el plazo está bien calculado»' }
+}
+
 function r71(archivos) {
   const fallos = []
   let sinPuerta = 0
@@ -6447,7 +6718,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6524,6 +6795,43 @@ const EXTRAS_R16 = [
  *  declarados y cobertura exigida) queda CANDIDATO con su costo medido:
  *  21 funciones, ~42 sitios, más el runner. Esto es la vía incremental. */
 const EXTRAS_BRAZOS = [
+  /* ══ S114-B · LOS SEIS BRAZOS DE LA POSTVENTA QUE EL FIXTURE ÚNICO NO
+        ENCIENDE. El genérico de cada regla ya sale rojo por SU brazo, así que
+        sin esto los demás **podrían dejar de andar sin que la auto-prueba se
+        entere** — seguiría roja por la otra razón.
+
+        ⚠️ Los once brazos se probaron ADEMÁS en rojo contra los archivos
+        REALES, mutándolos de a uno (11/11). *Esa medición es de una vez;
+        estos fixtures son los que la sostienen en cada corrida* — y son dos
+        pruebas distintas: la de acá dice que el brazo sabe decir que no, la
+        del objeto real dice que sabe encontrarlo donde de verdad vive. ══ */
+  ['R72·la etapa sin glifo (el orden está completo)', r72, [{
+    path: 'packages/ui/src/components/EscaleraCaso.tsx',
+    src:
+      "export type EtapaCaso =\n  | 'recibido'\n  | 'cerrado'\n\n" +
+      "export const ORDEN_CASO: readonly EtapaCaso[] = ['recibido', 'cerrado']\n" +
+      "const GLIFO: Record<EtapaCaso, IconoNombre> = {\n  recibido: 'sobre',\n}\n",
+  }]],
+  ['R73·el default de elección (sin rama por destino)', r73, [{
+    path: 'packages/ui/src/components/TarjetaDestinoPlata.tsx',
+    src: "const orden = ['banco', 'saldo']\nfunction T({ elegido = 'saldo' }) { return elegido }\n",
+  }]],
+  ['R73·la palabra «recomendado» (sin rama ni default)', r73, [{
+    path: 'packages/ui/src/components/TarjetaDestinoPlata.tsx',
+    src: "const orden = ['banco', 'saldo']\nconst nota = 'recomendado'\n",
+  }]],
+  ['R74·el slot ReactNode (sin nombrar el monto)', r74, [{
+    path: 'packages/ui/src/components/CabeceraCaso.tsx',
+    src: "import type { ReactNode } from 'react'\nexport type P = { contraparte: string; acciones?: ReactNode }\n",
+  }]],
+  ['R75·el scroll interno (sin cajón «otro»)', r75, [{
+    path: 'packages/ui/src/components/SelectorMotivo.tsx',
+    src: "export const MOTIVO_CONTAME = '__contame__'\nimport { ScrollView } from 'react-native'\n",
+  }]],
+  ['R76·el rojo de alarma (sin reloj adentro)', r76, [{
+    path: 'packages/ui/src/components/BannerPlazo.tsx',
+    src: "export function B({ voz }) {\n  return <Texto color=\"danger\">{voz}</Texto>\n}\n",
+  }]],
   /* S103-B · EL BRAZO `ui` DE R62, aislado. El fixture principal supera el
      baseline de `apps/` (15) y por eso saldría rojo igual con este brazo
      apagado: un brazo que nunca se ejecuta no está probado aunque la regla
@@ -6841,6 +7149,14 @@ corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAIC
 /* 🔴 R71 NO recibe corpus: lee `packages/api` del disco. Su pregunta no es
    sobre el contenido de un archivo sino sobre la RELACIÓN entre dos —los
    wrappers y su index—, y esa relación no se ve mirando uno solo. */
+/* S114-B · LAS CINCO DE LA POSTVENTA. Corren sobre `packages/ui/src` entero:
+   cada guard busca SU pieza y sale por «ancla rota» si no la encuentra — así
+   un rename de archivo no las deja mudas. */
+corridas.push(['R72 (ninguna etapa del caso se pierde del orden)', r72(ui)])
+corridas.push(['R73 (las dos tarjetas del dinero son parejas)', r73(ui)])
+corridas.push(['R74 (la cabecera del caso no dice el monto)', r74(ui)])
+corridas.push(['R75 («otro» no es un motivo, y la lista no scrollea)', r75(ui)])
+corridas.push(['R76 (el plazo no es una alarma ni un contador)', r76(ui)])
 corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);

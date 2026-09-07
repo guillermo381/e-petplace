@@ -20,7 +20,7 @@
  * Ley §2.9: todo ícono se gatea a su tamaño de diseño Y a 21px.
  */
 
-import Svg, { Circle, G, Path } from 'react-native-svg'
+import Svg, { Circle, G, Path, Rect } from 'react-native-svg'
 
 import { resolverHuella, type MontajeIcono } from './icono-huella'
 
@@ -88,6 +88,38 @@ export type IconoNombre =
      un segundo sería fabricar la deuda que la regla de economía de §6b nombra.
      Se declara para que el gate sepa que son CINCO y no seis, y por qué. */
   | 'sobre' | 'burbujas' | 'checkEnCirculo' | 'pluma' | 'enviar'
+  /* ══ S114-B · EL CANDADO — la quinta etapa del caso de postventa ══════
+     **GLIFO DE CONTROL: sin huella**, por la Ley 9 en su alcance S98 —
+     *«en un glifo de control no hay mascota, hay interfaz»*. Lo que dice
+     no es un momento de un animal: es que **esta conversación quedó en
+     lectura** (`DIRECCION_POSTVENTA` §3.3, literal).
+
+     🔴 **EL CENSO DE METÁFORAS (§6b paso 2) — por qué se dibuja uno nuevo,
+     que es la pregunta cara.** La casa NO tiene ninguna palabra para
+     «cerrado»: se recorrieron los 70 nombres del registry y los candidatos
+     eran dos, los dos rechazados con su razón:
+
+     · **`caso`** (la carpeta con huella) — dice *«el caso»*, no *«cerrado»*.
+       Además es la carpeta CLÍNICA: prestarla a la postventa sería
+       trasplantar un criterio correcto a otra pregunta (`D-976`), que es
+       más peligroso que inventar porque **viene con la autoridad de haber
+       funcionado en otro lado**.
+     · **`nodoEntregado`** (el visto suelto) — es el candidato fuerte y cae
+       por VECINDAD, no por significado: la etapa de al lado es
+       `checkEnCirculo`, y **dos checks seguidos en una escalera de cinco no
+       dejan distinguir «se decidió» de «se terminó»**. *Su propia entrada ya
+       escribió el criterio que los separa; ponerlos juntos lo borra.*
+
+     LA FORMA: cuerpo rectangular + arco cerrado. **El arco va CERRADO y
+     apoyado sobre el cuerpo** — un arco abierto es *«se puede abrir»*, y acá
+     el hecho es que el hilo ya no acepta escritura.
+     Riesgo declarado, y es el primero que hay que mirar en el gate: a 21 px
+     el ojo de la cerradura se llena. **Por eso no lo lleva**: el cuerpo va
+     liso, y lo que hace leer «candado» es la proporción del arco contra el
+     cuerpo, no el detalle interior.
+     ⚠️ **GATE POR ÍCONO PENDIENTE** (§2.9: se juzga a su tamaño de diseño Y
+     a 21 px, montado junto a cinco del registry). */
+  | 'candado'
   // ── LOS DOS PRIMEROS GLIFOS DE CONTROL (S82-B r7, importados del
   //    archivo de referencia que el founder entregó: `ficha-mascota`).
   //    GATE POR ÍCONO A 21px PENDIENTE (§2.9) · su LETRA NO SE ESCRIBE
@@ -1196,6 +1228,18 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Path d="M20.4 3.6 9.4 13" {...trazo(tinta)} />
     </>
   ),
+
+  /* EL CANDADO — «cerrado». Ver su entrada en la unión para el censo de
+     metáforas que lo justifica y el riesgo declarado del gate.
+     Sin huella: es control, no un momento de una mascota (Ley 9 · S98). */
+  candado: ({ tinta }) => (
+    <>
+      {/* el arco, CERRADO y apoyado: no se puede abrir */}
+      <Path d="M8.2 10.4V7.8a3.8 3.8 0 0 1 7.6 0v2.6" {...trazo(tinta)} />
+      {/* el cuerpo, liso — el ojo de la cerradura se llena a 21px */}
+      <Rect x={4.6} y={10.4} width={14.8} height={9.4} rx={2.2} {...trazo(tinta)} />
+    </>
+  ),
   ayuda: ({ tinta, huella }) => (
     <>
       <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
@@ -2251,6 +2295,13 @@ export function Icono({
        `aa`/`tinta`, jamás `capa`.** */
     sobre: comunidad, burbujas: comunidad, checkEnCirculo: comunidad,
     pluma: comunidad, enviar: comunidad,
+    /* S114-B · `candado` va a CUIDADO, con la misma lógica que `info` y los
+       cuatro nodos: **es CONTROL, y el control de esta casa vive en
+       `cuidado`.** En la escalera este mapa casi no se usa —el slot recibe
+       el color del nodo por `tinta`—, pero un glifo sin entrada acá no
+       compila, y dejarlo resuelto evita que el próximo que lo monte fuera
+       de la escalera herede un color por descarte. */
+    candado: cuidado,
     // ATENDER va a CUIDADO y la elección es de taxonomía (Ley 10: se
     // reparte por lo que la cosa ES, no por dónde aparece). Atender a
     // quien llegó por la puerta es EL TRABAJO DEL DÍA — la misma capa
