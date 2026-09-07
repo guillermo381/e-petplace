@@ -59,6 +59,7 @@
     "verify:coach-parte": "node scripts/verify-coach-parte.mjs",
     "verify:compuertas-por-sujeto": "node scripts/verify-compuertas-por-sujeto.mjs",
     "verify:confirmable": "tsx apps/cliente/scripts/verify-confirmable.mts",
+    "verify:contador-piezas": "node scripts/verify-contador-piezas.mjs",
     "verify:contrast": "tsx scripts/verify-contrast.ts",
     "verify:contrato-carnet": "tsx scripts/verify-contrato-carnet.mts",
     "verify:cotejo": "node scripts/ia/cotejar-verdad.mjs",
