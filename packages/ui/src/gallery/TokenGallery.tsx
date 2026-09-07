@@ -8795,11 +8795,24 @@ function GaleriaInterna() {
                 { id: 'c', clase: 'condicion', texto: 'Displasia leve de cadera', procedencia: 'prestador', vozProcedencia: 'lo registró Clínica Aurora' },
               ]}
             />
+            <Texto variante="apoyo">
+              Las acciones: CUATRO. La segunda va apagada y dice su razón al tocarla.
+            </Texto>
             <FilaAcciones
-              citas={{ etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} }}
-              pasaporte={{ etiqueta: 'Pasaporte', glifo: 'carnet', razonApagado: 'Todavía no activaste su placa' }}
-              nexo={{ etiqueta: 'Nexo', onPress: () => {} }}
-              contanos={{ etiqueta: 'Contanos', glifo: 'bitacora', onPress: () => {} }}
+              acciones={[
+                { etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} },
+                { etiqueta: 'Pasaporte y QR', glifo: 'carnet', razonApagado: 'Todavía no activaste su placa' },
+                { etiqueta: 'Documentos', glifo: 'documentos', onPress: () => {} },
+                { etiqueta: 'Cuéntanos', glifo: 'bitacora', onPress: () => {} },
+              ]}
+            />
+            <Texto variante="apoyo">Y con TRES, que también es legal — la quinta no compila.</Texto>
+            <FilaAcciones
+              acciones={[
+                { etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} },
+                { etiqueta: 'Pasaporte y QR', glifo: 'carnet', onPress: () => {} },
+                { etiqueta: 'Documentos', glifo: 'documentos', onPress: () => {} },
+              ]}
             />
             <TarjetaHoy
               clase="anticipacion"
