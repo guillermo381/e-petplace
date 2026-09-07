@@ -1,0 +1,13 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260910140000_s113a_busqueda_rojos_E.sql      (ESCRITA ANTES)
+--
+-- Devuelve `buscar_en_mi_familia` al filtro `productos.estado='publicado'` y al
+-- techo por relevancia global.
+--
+-- 🔴 QUÉ VUELVE A ROMPERSE, dicho con su número: los productos vuelven a dar
+-- CERO —ningún producto tiene ese estado— y los prestadores vuelven a quedar
+-- tapados por 161 citas. *Esta reversa no restaura un estado bueno: restaura
+-- dos defectos medidos.* Existe porque toda migración tiene la suya, no porque
+-- convenga aplicarla.
+-- ═══════════════════════════════════════════════════════════════════════════
+select 'reversa 20260910140000 · restaura dos defectos medidos, ver cabecera' as nota;

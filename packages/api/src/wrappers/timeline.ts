@@ -242,13 +242,19 @@ async function _timeline(
   const padreIds = [...new Set(eventos.map((e) => e.evento_padre_id).filter((p): p is string => p !== null))];
   /* Los hitos narrativos: su texto vive en la tabla tipada, no en `datos`. */
   const hitoIds = eventos.filter((e) => e.tipo === 'hito_narrativo').map((e) => e.id);
+  /* 🔴 EL TEXTO DE LA BITÁCORA VIVE EN SU TABLA, igual que el del hito — y
+     hasta acá NADIE lo traía: el timeline mostraba «Anotaste cómo estuvo»,
+     que es voz de MOTOR, en lugar de lo que la familia escribió.
+     *Una voz de relleno no se lee como un hueco: se lee como si eso fuera todo
+     lo que hay*, y por eso nadie iba a ir a buscar el texto que sí existía. */
+  const bitacoraIds = eventos.filter((e) => e.tipo === 'bitacora_familia').map((e) => e.id);
 
   /* 🔴 LA CUARTA CONSULTA ENTRA AL MISMO `Promise.all`, no después.
      La ley de performance de la casa (L-223) es *«no hay consultas que
      optimizar, hay VIAJES que eliminar»*: el peaje es ~150 ms por petición sin
      importar cuánto traiga, y encadenarla costaría una ola más de red en la
      pantalla que el dueño abre primero. En paralelo cuesta cero. */
-  const [atenciones, adjuntos, prestadores, citasPadre, hitos] = await Promise.all([
+  const [atenciones, adjuntos, prestadores, citasPadre, hitos, bitacoras] = await Promise.all([
     getClient()
       .from('evento_atencion')
       .select('id, evento_id, iniciada_en, terminada_en')
@@ -269,8 +275,13 @@ async function _timeline(
     hitoIds.length > 0
       ? getClient().from('evento_hito_narrativo').select('evento_id, texto, foto_url').in('evento_id', hitoIds)
       : Promise.resolve({ data: [] as Array<{ evento_id: string | null; texto: string | null; foto_url: string | null }>, error: null }),
+    /* En el MISMO `Promise.all` y no después, por la misma razón que el hito:
+       el peaje es la PETICIÓN (~150 ms), y en paralelo cuesta cero. */
+    bitacoraIds.length > 0
+      ? getClient().from('evento_bitacora_familia').select('evento_id, texto').in('evento_id', bitacoraIds)
+      : Promise.resolve({ data: [] as Array<{ evento_id: string | null; texto: string | null }>, error: null }),
   ]);
-  if (atenciones.error || adjuntos.error || prestadores.error || citasPadre.error || hitos.error) {
+  if (atenciones.error || adjuntos.error || prestadores.error || citasPadre.error || hitos.error || bitacoras.error) {
     return fallo('error_desconocido');
   }
 
@@ -323,6 +334,17 @@ async function _timeline(
     if (h.evento_id === null) continue;
     if (typeof h.texto === 'string' && h.texto.length > 0) textoPorHito.set(h.evento_id, h.texto);
     if (typeof h.foto_url === 'string' && h.foto_url.length > 0) fotoPorHito.set(h.evento_id, h.foto_url);
+  }
+  /* El texto de la bitácora entra al MISMO mapa que el del hito: para la
+     pantalla es la misma pregunta —«¿esta fila tiene texto de la familia?»— y
+     dos mapas obligarían a cada consumidor a preguntar dos veces y a acordarse
+     de cuál corresponde a cada tipo. *Un mapa por tipo es la forma de que el
+     tercer tipo se olvide.*
+     El mismo guard de `''`: una cadena vacía que llega a la pantalla se dibuja
+     como una línea en blanco y se lee como un defecto del producto. */
+  for (const b of bitacoras.data ?? []) {
+    if (b.evento_id === null) continue;
+    if (typeof b.texto === 'string' && b.texto.length > 0) textoPorHito.set(b.evento_id, b.texto);
   }
   const modalidadPorPadre = new Map<string, string | null>();
   for (const c of citasPadre.data ?? []) {
