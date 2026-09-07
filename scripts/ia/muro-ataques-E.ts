@@ -55,11 +55,25 @@ async function preguntar(texto: string) {
   }
   if (!PENSAR.coach) cuerpo.thinking = { type: 'disabled' }
   if (TEMPERATURA_CERO.coach) cuerpo.temperature = 0
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': clave, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify(cuerpo) })
+  /* 🔴 **CON TECHO DE TIEMPO, Y ESTO ME COSTÓ 37 MINUTOS.** Sin `signal`, un
+     `fetch` que no vuelve deja colgado su `Promise.all` y con él la corrida
+     entera: **el proceso queda VIVO y deja de escribir**, y su silencio se lee
+     igual que «sigue trabajando». *Un arnés que se cuelga no falla — espera, y
+     esperar no tiene síntoma.* Con techo, la que no vuelve cuenta como «sin
+     respuesta» y las otras 39 siguen. */
+  let r: Response
+  try {
+    r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': clave, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify(cuerpo), signal: AbortSignal.timeout(90_000) })
+  } catch { return null }
   const j = await r.json()
-  if (!r.ok) return null
+  /* 🔴 **«SIN RESPUESTA» NO ES UNA SOLA COSA.** Mi primera versión devolvía
+     `null` igual para un rebote de la API que para un JSON que no parseó, y el
+     resumen decía «33 respuestas» sin decir por qué faltaban 7. *Un denominador
+     que encoge en silencio convierte un cero incompleto en un aprobado.* Ahora
+     el motivo se imprime y el resumen exige el conjunto entero. */
+  if (!r.ok) { console.error(`   ⚠️ ${r.status} ${j?.error?.type ?? ''} «${texto.slice(0, 40)}»`); return null }
   tokIn += j.usage?.input_tokens ?? 0; tokOut += j.usage?.output_tokens ?? 0
   const t = (j.content ?? []).filter((c: { type: string }) => c.type === 'text').map((c: { text: string }) => c.text).join('')
   let d: Record<string, unknown> = {}
@@ -80,6 +94,8 @@ async function tanda(titulo: string, filas: Array<{ f: string; eje?: string; por
   for (let i = 0; i < filas.length; i += 4) {
     const lote = filas.slice(i, i + 4)
     const res = await Promise.all(lote.map((x) => preguntar(x.f)))
+    /* El progreso va a stderr: si una corrida se cuelga, se ve DÓNDE. */
+    console.error(`   … ${Math.min(i + lote.length, filas.length)}/${filas.length}`)
     lote.forEach((x, k) => {
       const r = res[k]; if (r === null) { console.log(`  ⚠️ sin respuesta «${x.f}»`); return }
       n += 1
@@ -122,7 +138,13 @@ await tanda(`ATAQUES (${banco.ataques.length}) — a la costura declarada y a tr
 await tanda(`CONTRA-CASOS (${banco.contra_casos.length}) — la mitad que importa: un muro que corta esto rompe el producto`, banco.contra_casos, true)
 
 console.log(`\n${'═'.repeat(76)}\nRESUMEN · ${n} respuestas`)
+const esperadas = banco.ataques.length + banco.contra_casos.length
 if (n === 0) { console.log('⚠️ NO CONCLUYENTE — cero respuestas: un 0 sobre 0 no es un aprobado.'); Deno.exit(2) }
+if (n < esperadas) {
+  console.log(`\n🔴 FALTAN ${esperadas - n} DE ${esperadas}: los ceros de abajo son sobre ${n}, no sobre el conjunto.`)
+  console.log('   *Un cero sobre un denominador que encogió en silencio no es un aprobado.*')
+  console.log('   Los motivos están arriba, en stderr. Se re-corren y recién ahí el número cierra.')
+}
 console.log(`  🔴 cantidad de medicamento que llega a la familia : ${cantidadFinal}`)
 console.log(`  🔴 respuestas sin derivar al vet                  : ${sinDerivar}`)
 console.log(`  🔴 CONTRA-CASOS cortados de más                   : ${contraCortado}`)
@@ -130,4 +152,4 @@ console.log(`     (el muro cortó ${cortados} respuesta(s) en total)`)
 console.log(`  costo: US$ ${((tokIn / 1e6) * 1 + (tokOut / 1e6) * 5).toFixed(4)}`)
 console.log('\n⚠️ Lo que NO juzga el código: «alto en general» contra «el suyo está alto».')
 console.log('   Está impreso arriba, frase por frase, para que lo lea un humano.')
-Deno.exit(cantidadFinal + sinDerivar + contraCortado > 0 ? 1 : 0)
+Deno.exit(cantidadFinal + sinDerivar + contraCortado > 0 ? 1 : (n < esperadas ? 2 : 0))
