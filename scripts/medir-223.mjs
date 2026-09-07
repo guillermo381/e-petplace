@@ -16,9 +16,18 @@ await page.goto('http://localhost:8082/hogar', { waitUntil: 'networkidle' });
 await page.waitForTimeout(5000);
 const uno = await page.evaluate(() => ({
   entrada: /Buscar en tu familia/.test(document.body.innerText),
+  /* 🔴 **El glifo se mide POR SU CAJA dentro de la fila**, no por su nombre:
+     el nombre vive en el código y lo que importa es que se dibuje. */
+  conGlifo: (() => {
+    const fila = [...document.querySelectorAll('[role="button"]')].find((e) =>
+      /Buscar en tu familia/.test(e.textContent ?? ''),
+    );
+    if (fila === undefined) return false;
+    return fila.querySelectorAll('svg').length > 1;
+  })(),
   cajaSuelta: [...document.querySelectorAll('input')].some((i) => (i.placeholder ?? '').includes('Thor, vacuna')),
 }));
-di(`① entrada «Buscar en tu familia»: ${uno.entrada ? 'sí ✓' : '🔴 no'} · caja suelta en el Hogar: ${uno.cajaSuelta ? '🔴 sigue' : 'no ✓'}`);
+di(`① entrada «Buscar en tu familia»: ${uno.entrada ? 'sí ✓' : '🔴 no'} · con glifo: ${uno.conGlifo ? 'sí ✓' : '🔴 no'} · caja suelta: ${uno.cajaSuelta ? '🔴 sigue' : 'no ✓'}`);
 
 /* ② el botón de enviar, alineado con la caja */
 await page.goto('http://localhost:8082/nexo', { waitUntil: 'networkidle' });
