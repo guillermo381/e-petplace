@@ -14800,30 +14800,36 @@ export type Database = {
         Row: {
           analito: string
           id: string
+          literal: string | null
           orden: number
           papel_id: string
           ref_max: string | null
           ref_min: string | null
+          referencia: string | null
           unidad: string | null
           valor: string
         }
         Insert: {
           analito: string
           id?: string
+          literal?: string | null
           orden?: number
           papel_id: string
           ref_max?: string | null
           ref_min?: string | null
+          referencia?: string | null
           unidad?: string | null
           valor: string
         }
         Update: {
           analito?: string
           id?: string
+          literal?: string | null
           orden?: number
           papel_id?: string
           ref_max?: string | null
           ref_min?: string | null
+          referencia?: string | null
           unidad?: string | null
           valor?: string
         }
@@ -14841,10 +14847,11 @@ export type Database = {
         Row: {
           archivo_path: string
           clase: string
-          confirmado_en: string
-          confirmado_por: string
+          confirmado_en: string | null
+          confirmado_por: string | null
           country_code: string | null
           creado_en: string
+          estado: string
           fecha_papel: string | null
           id: string
           mascota_id: string
@@ -14856,10 +14863,11 @@ export type Database = {
         Insert: {
           archivo_path: string
           clase: string
-          confirmado_en?: string
-          confirmado_por: string
+          confirmado_en?: string | null
+          confirmado_por?: string | null
           country_code?: string | null
           creado_en?: string
+          estado?: string
           fecha_papel?: string | null
           id?: string
           mascota_id: string
@@ -14871,10 +14879,11 @@ export type Database = {
         Update: {
           archivo_path?: string
           clase?: string
-          confirmado_en?: string
-          confirmado_por?: string
+          confirmado_en?: string | null
+          confirmado_por?: string | null
           country_code?: string | null
           creado_en?: string
+          estado?: string
           fecha_papel?: string | null
           id?: string
           mascota_id?: string
@@ -24143,6 +24152,10 @@ export type Database = {
         Args: { p_programa_contratado_id: string }
         Returns: Json
       }
+      confirmar_papel: {
+        Args: { p_papel_id: string; p_valores?: Json }
+        Returns: Json
+      }
       confirmar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       congelar_desglose_mensualidad_guarderia: {
         Args: { p_periodo: string; p_suscripcion_id: string }
@@ -26611,7 +26624,7 @@ export type Database = {
         }
         Returns: Json
       }
-      registrar_papel_de_familia: {
+      registrar_papel_extraido: {
         Args: {
           p_archivo_path: string
           p_clase: string

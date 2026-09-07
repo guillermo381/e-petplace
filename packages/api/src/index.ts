@@ -1921,7 +1921,8 @@ export {
 
 // LA BÓVEDA DE PAPELES (S113 · fase 3) — transcribe, jamás interpreta.
 export {
-  registrarPapelDeFamilia,
+  registrarPapelExtraido,
+  confirmarPapel,
   obtenerPapelesDeMascota,
   pathDePapel,
   BUCKET_PAPELES,

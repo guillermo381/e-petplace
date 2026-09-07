@@ -22,6 +22,8 @@ export type CodigoErrorBoveda =
   | 'archivo_fuera_de_carpeta'
   /** Se llamó a la puerta antes de que la subida terminara. */
   | 'archivo_no_subido'
+  | 'papel_no_existe'
+  | 'papel_ya_confirmado'
   | 'desconocido';
 
 /**
@@ -58,6 +60,12 @@ export type ValorDePapel = {
   /** 🔴 Sólo si estaban impresas. `null` = el papel no las traía. */
   ref_min?: string | null;
   ref_max?: string | null;
+  /** El rango impreso como UN texto, aunque no se haya podido partir. */
+  referencia?: string | null;
+  /** 🔴 Lo que el papel DICE, tal cual lo leyó el extractor. **La única red
+   *  cuando el parseo sale mal**: sin él, un valor mal leído es indistinguible
+   *  de uno bien leído. */
+  literal?: string | null;
 };
 
 function codigo(msg: string): CodigoErrorBoveda {
@@ -65,6 +73,8 @@ function codigo(msg: string): CodigoErrorBoveda {
   if (msg.includes('sin_acceso')) return 'sin_acceso';
   if (msg.includes('archivo_fuera_de_carpeta')) return 'archivo_fuera_de_carpeta';
   if (msg.includes('archivo_no_subido')) return 'archivo_no_subido';
+  if (msg.includes('papel_ya_confirmado')) return 'papel_ya_confirmado';
+  if (msg.includes('papel_no_existe')) return 'papel_no_existe';
   return 'desconocido';
 }
 
@@ -80,24 +90,22 @@ export function pathDePapel(mascotaId: string, nombreArchivo: string): string {
   return `${mascotaId}/${Date.now()}-${limpio}`;
 }
 
-export async function registrarPapelDeFamilia(input: {
+/**
+ * ① EL PRIMER ACTO · lo que el extractor propuso. Nace `por_confirmar` y **no
+ *    entra al expediente**: en la vida de la mascota todavía no pasó nada.
+ */
+export async function registrarPapelExtraido(input: {
   mascotaId: string;
   clase: ClaseEnBoveda;
-  /** El de `pathDePapel`, ya subido al bucket. */
   archivoPath: string;
-  /** El nombre impreso, tal cual. */
   titulo?: string;
-  /** La del PAPEL, no la de la subida. Sin ella el examen no se puede ordenar
-   *  en el tiempo, y por eso se pide aunque sea opcional. */
   fechaPapel?: string;
-  /** De dónde viene, como lo escribió la familia. */
   origen?: string;
-  /** Ya CONFIRMADOS fila por fila por una persona. */
   valores?: ValorDePapel[];
 }): Promise<ResultadoWrapper<
-  { papel_id: string; evento_id: string; valores: number }, CodigoErrorBoveda
+  { papel_id: string; estado: 'por_confirmar'; valores: number }, CodigoErrorBoveda
 >> {
-  const { data, error } = await getClient().rpc('registrar_papel_de_familia', {
+  const { data, error } = await getClient().rpc('registrar_papel_extraido', {
     p_mascota_id: input.mascotaId,
     p_clase: input.clase,
     p_archivo_path: input.archivoPath,
@@ -108,12 +116,38 @@ export async function registrarPapelDeFamilia(input: {
   });
   if (error) return { ok: false, codigo: codigo(error.message), mensaje: MENSAJE_ERROR };
   const o = data as Record<string, unknown> | null;
-  if (o === null || o.ok !== true) {
-    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
-  }
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
   return { ok: true, data: {
-    papel_id: String(o.papel_id), evento_id: String(o.evento_id),
-    valores: Number(o.valores),
+    papel_id: String(o.papel_id), estado: 'por_confirmar', valores: Number(o.valores),
+  } };
+}
+
+/**
+ * ② EL SEGUNDO ACTO · una persona lo miró.
+ *
+ * 🔴 **Es lo que vuelve la confirmación inevitable**: el evento del expediente
+ * nace SÓLO acá. No hay otro camino que deposite en la vida de una mascota —
+ * *un guard se puede saltear con otra llamada; una pieza que no existe en el
+ * primer acto, no.*
+ *
+ * `valores` REEMPLAZA lo extraído: es lo que pasa cuando alguien arregla una
+ * fila mal leída. Sin él, se confirma lo que vino.
+ */
+export async function confirmarPapel(
+  papelId: string,
+  valores?: ValorDePapel[],
+): Promise<ResultadoWrapper<
+  { papel_id: string; evento_id: string; valores: number }, CodigoErrorBoveda
+>> {
+  const { data, error } = await getClient().rpc('confirmar_papel', {
+    p_papel_id: papelId,
+    p_valores: (valores ?? undefined) as unknown as never,
+  });
+  if (error) return { ok: false, codigo: codigo(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  return { ok: true, data: {
+    papel_id: String(o.papel_id), evento_id: String(o.evento_id), valores: Number(o.valores),
   } };
 }
 
