@@ -26,6 +26,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  AvisoAnticipacion,
   BurbujaMensaje,
   Campo,
   ChipsSugerencia,
@@ -33,6 +34,7 @@ import {
   EstadoVacio,
   EvitaTeclado,
   PanelMemoria,
+  PresentacionNexo,
   RespuestaNexo,
   ResultadosBusqueda,
   Texto,
@@ -50,8 +52,11 @@ import {
   guardarTurnoCoach,
   leerHiloCoach,
   listarMemoriaCoach,
+  marcarAvisoCoachLeido,
+  obtenerAvisosCoach,
   obtenerContextoCoach,
   preguntarANexo,
+  type AvisoCoach,
   type ContextoCoach,
   type HechoDeMemoria,
   type ResultadoBusqueda,
@@ -91,6 +96,8 @@ export default function Nexo() {
   const [grupos, setGrupos] = useState<readonly GrupoResultados[] | null>(null);
   const [termino, setTermino] = useState('');
   const scroll = useRef<ScrollView | null>(null);
+  /** Los avisos de anticipación de ESTA mascota, para la Hoja (C4). */
+  const [avisos, setAvisos] = useState<readonly AvisoCoach[]>([]);
 
   /** ⭐ **EL NOMBRE SALE DEL CONTEXTO, Y EL PARÁMETRO ES SÓLO UN ADELANTO.**
    *  🔴 A lo vio en aparato: «Pregúntame algo de ,» y «Lo que sé de» **sin
@@ -113,11 +120,32 @@ export default function Nexo() {
     if (mascotaId === undefined) return;
     let vivo = true;
     void (async () => {
-      const [c, h, m] = await Promise.all([
+      const [c, h, m, av] = await Promise.all([
         obtenerContextoCoach(mascotaId),
         leerHiloCoach(mascotaId),
         listarMemoriaCoach(mascotaId),
+        obtenerAvisosCoach(),
       ]);
+      /* 🔴 **`'anticipacion'` NO está en `TipoAviso`, y aun así llega.** El
+         lector hace `o.avisos as AvisoCoach[]` —un cast, sin angostar— así que
+         el tipo dice tres y la base tiene cuatro (18 filas de anticipación,
+         medidas). *Un `switch` exhaustivo acá compilaría diciendo que cubrí
+         todo y en runtime caería sin rama.* Se compara la cadena y se filtra
+         por mascota. Pedido a A: que el tipo diga lo que la tabla tiene. */
+      if (av.ok) {
+        /* 🔴 **UNO, EL MÁS RECIENTE — no todos los no leídos.** Medido en
+           pantalla: llegaban CUATRO y se apilaban encima de la presentación,
+           cuatro tarjetas idénticas con el mismo botón. *Cuatro avisos juntos
+           no informan cuatro veces mejor: informan como una alarma*, y el brief
+           dice «nunca como alarma».
+           El motor ya dosifica —A los limita a uno por mascota cada 7 días—,
+           pero lo NO LEÍDO se acumula: la dosis del que nace no es la dosis del
+           que se muestra. */
+        const suyos = av.data
+          .filter((a) => a.mascota_id === mascotaId && String(a.tipo) === 'anticipacion')
+          .sort((x, y) => (x.fecha < y.fecha ? 1 : -1));
+        setAvisos(suyos.slice(0, 1));
+      }
       if (!vivo) return;
       setContexto(c.ok ? c.data : 'error');
       if (h.ok) {
@@ -243,6 +271,42 @@ export default function Nexo() {
           {/* 🔴 Sin nombre **no se dibuja la invitación**: «Pregúntame algo de
               ,» es peor que no decir nada. Cuando el contexto llega, la frase
               aparece entera. */}
+          {/* ⭐ **C4 · LOS AVISOS, EN LA HOJA CON SU ACTO A LA VISTA.** Forma
+              `tarjeta` y no `fila`: acá ya se entró a leer, y esconder el paso
+              siguiente detrás de otro toque es hacer que la familia lo busque
+              (la pieza lo dice y tiene razón). */}
+          {avisos.map((a) => (
+            <AvisoAnticipacion
+              key={a.id}
+              forma="tarjeta"
+              contexto={String(a.detalle.contexto ?? '')}
+              sugerencia={String(a.detalle.sugerencia ?? '')}
+              vozVerVet={t('nexo.hablarloConMiVet')}
+              onVerVet={() => {
+                /* Marcar leído AL ACTUAR, no al mostrar: *un aviso que se
+                   apaga por haber pasado por delante no se leyó.* */
+                void marcarAvisoCoachLeido(a.id);
+                router.push('/explorar/veterinaria' as never);
+              }}
+            />
+          ))}
+
+          {/* ⭐ **C3 · LA PRESENTACIÓN, UNA VEZ POR MASCOTA.** Se muestra
+              cuando el hilo está vacío: *el hilo ES la memoria de que ya nos
+              presentamos* — un flag aparte se desincroniza del hilo el día que
+              alguien borra la conversación. */}
+          {lineas.length === 0 && grupos === null && typeof contexto === 'object' ? (
+            <PresentacionNexo
+              autor={t('nexo.autor')}
+              hora={hora()}
+              burbujas={[
+                t('nexo.presenta1', { nombre: nombreVivo ?? '' }),
+                t('nexo.presenta2', { nombre: nombreVivo ?? '' }),
+                t('nexo.presenta3'),
+              ]}
+            />
+          ) : null}
+
           {lineas.length === 0 && grupos === null && nombreVivo !== null ? (
             <Texto variante="apoyo">{t('nexo.invitacion', { nombre: nombreVivo })}</Texto>
           ) : null}

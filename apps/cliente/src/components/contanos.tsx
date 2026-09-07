@@ -136,12 +136,13 @@ export function entradasContanos(
 ): readonly EntradaContanos[] {
   return [
     { clase: 'comportamiento', titulo: t('bio.enComportamiento'), detalle: t('bio.enComportamientoDet'), onPress: () => abrirClase('comportamiento') },
-    /* 🔴 **LA PIEZA DICE `personalidad` Y EL MOTOR DICE `rasgo`.** Son dos
-       vocabularios para lo mismo y **no se castean**: el `clase` de la entrada
-       es de la PIEZA —decide su glifo— y el que viaja a `guardarHechoClasificado`
-       es del MOTOR. *Un cast acá compila y rompe al guardar, que es el peor
-       momento para enterarse.* El mapeo vive en esta línea, a la vista. */
-    { clase: 'personalidad', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => abrirClase('rasgo') },
+    /* ⏪ **ACÁ VIVÍA UN MAPEO `personalidad` ⇄ `rasgo`** — la pieza y el motor
+       usaban dos palabras para lo mismo y yo lo traducía en esta línea. **B
+       alineó el vocabulario** en `a3e6bc4c`: ahora los dos dicen `rasgo`.
+       *Curarlo en la fuente vale más que mi mapeo: el mapeo había que
+       acordarse de mirarlo cada vez que alguien tocara cualquiera de los dos
+       lados.* */
+    { clase: 'rasgo', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => abrirClase('rasgo') },
     { clase: 'medico', titulo: t('bio.enMedico'), detalle: t('bio.enMedicoDet'), onPress: () => abrirClase('medico') },
     { clase: 'recuerdo', titulo: t('bio.enRecuerdo'), detalle: t('bio.enRecuerdoDet'), onPress: () => abrirClase('recuerdo') },
   ];

@@ -2467,7 +2467,7 @@ export default function PerfilDeMascota() {
         titulo={t('contanos.titulo', { nombre: mascota.nombre })}
         entradas={entradasContanos(t, (c) => {
           contanos.cerrar();
-          setHojaBio(c === 'rasgo' ? 'personalidad' : c);
+          setHojaBio(c === 'rasgo' ? 'personalidad' : c); /* la Hoja vieja aún usa `personalidad` */
         })}
         libre={{
           etiqueta: t('contanos.libreEtiqueta', { nombre: mascota.nombre }),

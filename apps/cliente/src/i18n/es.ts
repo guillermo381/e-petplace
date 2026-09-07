@@ -74,6 +74,14 @@ export const clienteEs = {
        el texto legal espera al abogado (D-405): **no promete que sea correcto y
        no se disculpa por existir.** */
     avisoIa: 'Esto lo redacta una IA con el expediente de tu mascota. No reemplaza a tu veterinario.',
+    hablarloConMiVet: 'Hablarlo con mi vet',
+    /* ⭐ C3 · las tres burbujas de la presentación. **Tercera: la promesa
+       honesta.** Dice lo que puede hacer Y que puede equivocarse — *una
+       presentación que sólo promete deja a la familia sin con qué juzgar lo que
+       venga después.* */
+    presenta1: 'Soy Nexo. Me acuerdo de todo lo de {{nombre}}: vacunas, pesos, citas y lo que me cuentes.',
+    presenta2: 'Puedes preguntarme cuándo le toca algo, cómo va su peso, o qué cuidados necesita por su etapa.',
+    presenta3: 'Cuanto más uses e-PetPlace, más personal es lo que te digo y antes me adelanto. Puedo equivocarme; para lo importante está tu vet.',
     verVet: 'Ver a tu vet',
     deSuCarnet: 'de su carnet',
     deSuPeso: 'de su historial de peso',
