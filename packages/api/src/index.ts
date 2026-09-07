@@ -44,6 +44,7 @@ export {
   obtenerEspeciesActivas,
   obtenerCatalogoNovedadesPaseo,
   obtenerEspeciesElegibles,
+  obtenerCodigosMedicos,
   // S91 · D-379: el catálogo que SUGIERE razas (el dueño confirma).
   obtenerRazasDeEspecie,
   // S91 · la galería especies-razas: DOS pretendientes (el chip del alta de D

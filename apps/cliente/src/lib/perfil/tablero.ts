@@ -38,7 +38,8 @@ export type VozTablero = {
   actividad: string;
   kg: (n: number) => string;
   medidoEl: (f: string) => string;
-  delPlan: (n: number, total: number) => string;
+  delPlanAlDia: (n: number, total: number) => string;
+  vencidaHace: (f: string) => string;
   activas: (n: number) => string;
   paseosSemana: (n: number) => string;
   proxima: (f: string) => string;
@@ -46,7 +47,13 @@ export type VozTablero = {
   estimada: string;
 };
 
-export function tarjetasDelTablero(t: TableroMascota, voz: VozTablero): TarjetaDelTablero[] {
+export function tarjetasDelTablero(
+  t: TableroMascota,
+  voz: VozTablero,
+  /** La próxima cita **médica**, resuelta con el catálogo `es_medico`.
+   *  `null` = no hay ninguna, y la tarjeta lo dice — *no cae al paseo.* */
+  medica: { fecha: string; servicio: string } | null,
+): TarjetaDelTablero[] {
   const out: TarjetaDelTablero[] = [];
 
   /* ① PESO — **el servidor dice si hay línea**, no esta función. */
@@ -68,12 +75,22 @@ export function tarjetasDelTablero(t: TableroMascota, voz: VozTablero): TarjetaD
   out.push({
     id: 'vacunas',
     rotulo: voz.vacunas,
-    valor: v !== null ? voz.delPlan(v.aplicadas_del_plan, v.total_plan) : null,
-    /* 🔴 `derivada` ⇒ **«estimada»**: *una fecha que calculamos nosotros no es
-       una que alguien escribió en un carnet* (nota de A). */
+    /* 🔴 **«0 de 5» con ocho vacunas aplicadas no es un error de cuenta: es
+       una voz que miente por omisión.** El motor cuenta las del plan que están
+       AL DÍA —y cero es correcto si todas vencieron—, pero la pantalla decía
+       sólo el número y se leía «no tiene ninguna». *Un numerador sin su unidad
+       obliga a la familia a adivinar qué se está contando.* Ahora la voz dice
+       «al día», y las vencidas van al contexto. */
+    valor: v !== null ? voz.delPlanAlDia(v.aplicadas_del_plan, v.total_plan) : null,
+    /* 🔴 **UNA FECHA PASADA NO SE DICE «PRÓXIMA»** (ojo del founder). Decía
+       «próxima el 19 abr 2024 · estimada» sobre una fecha de hace dieciséis
+       meses. *El motor mandaba bien el `estado` —lo trae en el mismo objeto— y
+       yo lo tiraba: la voz no era una interpretación, era un campo sin leer.*
+       Con `vencida` la voz cuenta desde entonces; con el resto, cuenta hacia
+       adelante. `derivada` ⇒ «estimada» en los dos casos. */
     contexto:
       v?.proxima != null
-        ? `${voz.proxima(v.proxima.fecha)}${v.proxima.derivada ? ` · ${voz.estimada}` : ''}`
+        ? `${v.proxima.estado === 'vencida' ? voz.vencidaHace(v.proxima.fecha) : voz.proxima(v.proxima.fecha)}${v.proxima.derivada ? ` · ${voz.estimada}` : ''}`
         : undefined,
     dibujo:
       v !== null && v.total_plan > 0
@@ -124,13 +141,17 @@ export function tarjetasDelTablero(t: TableroMascota, voz: VozTablero): TarjetaD
     contexto: undefined,
   });
 
-  /* ⑤ CITAS — la próxima. */
-  const c = t.citas;
+  /* ⑤ CITAS — **la próxima MÉDICA** (ojo del founder, 2.2.2 · ③).
+     🔴 `t.citas.proxima` trae *la próxima cita*, sin distinguir oficio, y en
+     Thor eso era un paseo. *La tarjeta vive en «Su salud»: un paseo ahí
+     responde otra pregunta, y los paseos ya tienen su lugar en Actividad.*
+     La resuelve la pantalla con el catálogo de `es_medico` —el mismo filtro
+     que el motor usa para atar avisos— y la pasa por `medica`. */
   out.push({
     id: 'citas',
     rotulo: voz.citas,
-    valor: c.proxima !== null ? voz.proxima(c.proxima.fecha) : null,
-    contexto: c.proxima?.servicio ?? undefined,
+    valor: medica !== null ? voz.proxima(medica.fecha) : null,
+    contexto: medica?.servicio ?? undefined,
   });
 
   /* ⑥ ACTIVIDAD — barras de la semana. */

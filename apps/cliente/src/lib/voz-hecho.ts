@@ -70,6 +70,18 @@ export function vozHecho(
      exactamente la frase de la casa que esta rama existe para no decir. */
   if (item.hito_clave === 'recuerdo_familia') return item.texto ?? '';
 
+  /* ⭐ **QUÉ PASÓ, NO QUÉ ES** (ojo del founder, S113 · 2.2.2 · ⑧).
+     La historia decía «Anotaste cómo estuvo» y «Momento de cuidado»: *voz de
+     motor — nombran la CATEGORÍA del hecho, no el hecho.* Y el texto de la
+     familia **ya viajaba en el item**: la rama del recuerdo lo usaba desde
+     S113-A y las demás lo tiraban.
+     🔴 **Si hay texto, el texto manda, sea cual sea el tipo.** *Cuando alguien
+     escribió qué pasó, la casa no tiene nada mejor que decir* — y ponerle un
+     rótulo encima es hablar arriba de quien ya habló. Sin texto, siguen las
+     voces de abajo, que nombran lo que sí saben (la vacuna, el oficio). */
+  const suyo = item.texto?.trim();
+  if (suyo !== undefined && suyo !== '') return suyo;
+
   const claveHito = item.hito_clave ? VOZ_HITO[item.hito_clave] : undefined;
   if (claveHito !== undefined) return t(claveHito, { nombre: nombreMascota });
 
@@ -90,6 +102,27 @@ export function vozHecho(
       return item.prestador_id != null
         ? t('hogar.hechoBitacoraCuidador')
         : t('hogar.hechoBitacoraFamilia');
+    /* ⭐ **LOS NUEVE QUE CAÍAN AL GENÉRICO** (ojo del founder, 2.2.2 · ⑧).
+       Salen de censar los tipos vivos de Thor, Lolo y Sombra —no de listar los
+       que parecían—: `peso_medicion` (4) · `alergia_diagnosticada` (7) ·
+       `observacion_comportamiento` (6) · `medicacion_prescrita` (5) ·
+       `caso_clinico_abierto` (3) · `desparasitacion_aplicada` (2) ·
+       `producto_asignacion` (2) · `examen_diagnostico` (1) · `fin_vida` (1).
+       *Nueve tipos distintos diciendo la misma frase no es una historia: es
+       una lista de veces que pasó algo.* */
+    case 'peso_medicion': return t('hogar.hechoPeso');
+    case 'alergia_diagnosticada': return t('hogar.hechoAlergia');
+    case 'observacion_comportamiento': return t('hogar.hechoComportamiento');
+    case 'medicacion_prescrita': return t('hogar.hechoMedicacion');
+    case 'caso_clinico_abierto': return t('hogar.hechoCaso');
+    case 'desparasitacion_aplicada': return t('hogar.hechoDesparasitacion');
+    case 'producto_asignacion': return t('hogar.hechoProducto');
+    case 'examen_diagnostico': return t('hogar.hechoExamen');
+    case 'fin_vida': return t('hogar.hechoFinVida', { nombre: nombreMascota });
+    /* ⚠️ El genérico queda **sólo para lo que no trae texto NI tipo
+       conocido**: sin él, un tipo nuevo dibujaría una fila muda. *Es un
+       fallback, no una voz* — y su presencia en pantalla es la señal de que
+       apareció un tipo que nadie censó. */
     default: return t('hogar.hechoMomento');
   }
 }

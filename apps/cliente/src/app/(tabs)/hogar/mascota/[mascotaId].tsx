@@ -101,6 +101,8 @@ import {
   type PesoDeLaSerie,
   obtenerTableroMascota,
   obtenerHoyMascota,
+  obtenerCitasDeMascota,
+  obtenerCodigosMedicos,
   type TableroMascota,
   type TableroMemorial,
   type HoyDeMascota,
@@ -368,6 +370,14 @@ export default function PerfilDeMascota() {
    *  a propósito: *si la superficie recibiera las cinco y eligiera, cada
    *  superficie elegiría distinto* (nota de A, `cf976fa8`). */
   const [hoyMascota, setHoyMascota] = useState<HoyDeMascota | null>(null);
+  /** ⭐ **LA PRÓXIMA CITA MÉDICA** (ojo del founder, 2.2.2 · ③). La tarjeta
+   *  Citas vive en «Su salud» y mostraba un paseo: el motor trae *la próxima
+   *  cita*, sin distinguir oficio. *Un paseo en la sección de salud responde
+   *  otra pregunta.*
+   *  🔴 Los códigos médicos se LEEN del catálogo (`obtenerCodigosMedicos`,
+   *  15 hoy) — **no se copian**: el día que el motor agregue el decimosexto,
+   *  una lista escrita acá diría que un acto clínico no lo es. */
+  const [citaMedica, setCitaMedica] = useState<{ fecha: string; servicio: string } | null>(null);
   const [contenidoRaza, setContenidoRaza] = useState<ContenidoDeRaza | null>(null);
   useEffect(() => {
     if (typeof perfil !== 'object') return;
@@ -404,6 +414,15 @@ export default function PerfilDeMascota() {
        tendría algo mañana. */
     void obtenerHoyMascota(mascotaId).then((r) => {
       if (vivo && r.ok) setHoyMascota(r.data.hoy);
+    });
+    void Promise.all([obtenerCitasDeMascota(mascotaId), obtenerCodigosMedicos()]).then(([rc, rm]) => {
+      if (!vivo || !rc.ok || !rm.ok) return;
+      const medicos = new Set(rm.data);
+      /* `futuras` ya viene ordenada por el motor: la primera que sea médica es
+         la próxima. Si no hay ninguna, la tarjeta dice «sin registro» — que es
+         la verdad, y no el paseo del jueves. */
+      const p = rc.data.futuras.find((c) => medicos.has(c.servicio));
+      setCitaMedica(p === undefined ? null : { fecha: p.fecha, servicio: p.servicio });
     });
     return () => {
       vivo = false;
@@ -1365,30 +1384,19 @@ export default function PerfilDeMascota() {
           );
         })()}
 
-        {/* ── ② LA TARJETA QUE MONTA EL BORDE (patrón 1 — el solape que
-            r3 dejó declarado esperando la imagen). DOS hechos reales:
-            "dos hechos reales valen más que tres con uno inventado". */}
-        {monta.hechos && (perfil.paseos_total > 0 || vacunas.length > 0) ? (
-          <View style={{ paddingHorizontal: spacing[5], marginTop: -spacing[8], zIndex: 2 }}>
-            <Tarjeta elevacion="elevada">
-              <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
-                <View style={{ flex: 1, alignItems: 'center', gap: spacing[1] }}>
-                  <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size.xl, fontVariant: ['tabular-nums'], color: theme.text.primary }}>
-                    {perfil.paseos_total}
-                  </Text>
-                  <Texto variante="apoyo">{t('perfil.hechosPaseos')}</Texto>
-                </View>
-                <View style={{ width: 1, backgroundColor: theme.border.default, marginVertical: spacing[1] }} />
-                <View style={{ flex: 1, alignItems: 'center', gap: spacing[1] }}>
-                  <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size.xl, fontVariant: ['tabular-nums'], color: theme.text.primary }}>
-                    {vacunas.length}
-                  </Text>
-                  <Texto variante="apoyo">{t('perfil.hechosVacunas')}</Texto>
-                </View>
-              </View>
-            </Tarjeta>
-          </View>
-        ) : null}
+        {/* ☠️ **EL BLOQUE «18 PASEOS · 8 VACUNAS» MURIÓ** (ojo del founder,
+            2.2.2 · ⑩). Era el solape que montaba el borde bajo el hero, con dos
+            números de la vida entera.
+
+            🔴 **Lo mata el tablero, no el gusto.** «Su salud» dice las vacunas
+            —y mejor: cuántas del plan están al día, no cuántas se pusieron
+            alguna vez— y «Actividad» dice los paseos, con su semana. *Dos
+            números que ya están dos pantallazos abajo, en su contexto, no
+            informan arriba: compiten con lo que sí es de hoy.*
+
+            ⚠️ Su `marginTop` negativo era lo que ataba el solape al degradado;
+            al morir, el hero cierra contra las acciones. Ley 37: se retira
+            entero, no se comenta. */}
 
         {/* ⭐ **C3 · LAS CUATRO ACCIONES, bajo el hero** (S113-C · 2.2).
             El brief las pone segundas y tiene razón: *son lo que la familia
@@ -1586,14 +1594,15 @@ export default function PerfilDeMascota() {
                 citas: t('perfil.accionCitas'),
                 actividad: t('perfil.tableroActividad'),
                 medidoEl: (f) => t('perfil.tableroMedidoEl', { fecha: fechaCortaMono(f, idioma) }),
-                delPlan: (n, total) => t('perfil.tableroDelPlan', { n, total }),
+                delPlanAlDia: (n, total) => t('perfil.tableroDelPlanAlDia', { n, total }),
+                vencidaHace: (f) => t('perfil.tableroVencidaHace', { fecha: fechaCortaMono(f, idioma) }),
                 activas: (n) => t('perfil.tableroActivas', { n }),
                 paseosSemana: (n) => t('perfil.tableroPaseosSemana', { n }),
                 proxima: (f) => t('perfil.tableroProxima', { fecha: fechaCortaMono(f, idioma) }),
                 kg: (n) => t('perfil.tableroKg', { n }),
                 plagasAlDia: (n, total) => t('perfil.tableroPlagas', { n, total }),
                 estimada: t('perfil.tableroEstimada'),
-              }).map((tar) => (
+              }, citaMedica).map((tar) => (
                 <TarjetaMetrica
                   key={tar.id}
                   rotulo={tar.rotulo}
@@ -1633,32 +1642,38 @@ export default function PerfilDeMascota() {
           return (
             <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5], gap: spacing[3] }}>
               <Texto variante="seccion">{t('perfil.conociendoloTitulo')}</Texto>
-              <TarjetaConociendolo
-                fraccion={hechas / casillas.length}
-                voz={t('perfil.conociendoloVoz', { n: hechas, total: casillas.length, nombre: mascota.nombre })}
-                /* 🔴 **DOS CURAS DE VOZ, LAS DOS MEDIDAS Y LAS DOS MÍAS.**
-                   ① Decía «Conociéndolo» —la misma palabra que el rótulo de su
-                   sección, dos centímetros más arriba—: *un botón que repite el
-                   título que tiene encima no dice qué pasa si lo tocás.*
-                   ② Mi primer reemplazo fue «Cuéntanos algo de Thor» **y esa
-                   cadena YA EXISTÍA**, palabra por palabra, en la puerta de la
-                   bitácora (`perfil.bitacoraEntrada`, escrita mucho antes). El
-                   arnés lo cazó contando DOS invitaciones y yo busqué el segundo
-                   montaje en tres archivos antes de mirar el diccionario.
-                   *Dos actos distintos con la misma voz no son una repetición
-                   de estilo: la familia lee lo mismo dos veces y tiene que
-                   tocar para saber cuál es cuál.*
-                   Ahora cada una dice SU acto: acá se completa lo que falta,
-                   allá se escribe el día a día. `contanos.pastilla` sigue
-                   siendo «Conociéndolo» donde eso es correcto: la etiqueta
-                   corta de la cuarta acción del hero. */
-                invitacion={
-                  <BotonContanos
-                    etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
-                    onPress={contanos.abrir}
-                  />
-                }
-              />
+              {/* ⭐ **EL ESTADO COMPLETO LLEGA** (ojo del founder, 2.2.2 · ⑤).
+                  Con 6 de 6 la tarjeta decía «Completa lo que falta»: *pedirle
+                  a la familia que complete algo que ya completó le enseña que
+                  lo que cuenta no se registra.* B construyó los dos estados y
+                  su tipo los separa; lo que faltaba era que la pantalla dijera
+                  en cuál está. */}
+              {hechas === casillas.length ? (
+                <TarjetaConociendolo
+                  fraccion={1}
+                  voz={t('perfil.conociendoloVoz', { n: hechas, total: casillas.length, nombre: mascota.nombre })}
+                  completo
+                  vozFelicitacion={t('perfil.conociendoloCompleto', { nombre: mascota.nombre })}
+                  /* Sin urgencia: la puerta queda, el pedido no. */
+                  masSobre={
+                    <BotonContanos
+                      etiqueta={t('perfil.conociendoloMas', { nombre: mascota.nombre })}
+                      onPress={contanos.abrir}
+                    />
+                  }
+                />
+              ) : (
+                <TarjetaConociendolo
+                  fraccion={hechas / casillas.length}
+                  voz={t('perfil.conociendoloVoz', { n: hechas, total: casillas.length, nombre: mascota.nombre })}
+                  invitacion={
+                    <BotonContanos
+                      etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
+                      onPress={contanos.abrir}
+                    />
+                  }
+                />
+              )}
 
               {/* ⭐ **LA FICHA DE LA RAZA VA DEBAJO, NO ADENTRO** (2.2.1 · ②,
                   firma del founder). Vivía en un slot de `TarjetaConociendolo`;
@@ -1800,10 +1815,15 @@ export default function PerfilDeMascota() {
                   })()}
                 </Texto>
 
-                <Boton
-                  variante="marca"
-                  bloque
-                  etiqueta={t('perfil.reservarServicioDe', { nombre: mascota.nombre })}
+                {/* ⭐ **BAJA A FILA DISCRETA** (ojo del founder, 2.2.2 · ⑥).
+                    Era un `Boton variante="marca" bloque` —**lo más pesado de la
+                    pantalla**— tercero en una fila de tres invitaciones seguidas.
+                    *No es lo que la familia vino a hacer acá: entró a ver cómo
+                    está su animal.* No se saca —reservar sigue a un toque— pero
+                    deja de competir con lo que la sección vino a decir. */}
+                <CeldaNavegacion
+                  titulo={t('perfil.reservarServicioDe', { nombre: mascota.nombre })}
+                  registro="tinta"
                   onPress={() => router.navigate('/explorar')}
                 />
               </View>
@@ -1931,8 +1951,15 @@ export default function PerfilDeMascota() {
                     </Tarjeta>
                   </View>
                   ) : null}
+                  {/* ⭐ **LOS CHIPS ENTRAN A LA TARJETA** (ojo del founder,
+                      2.2.2 · ⑦). Vivían en un `View` hermano, con su propio
+                      padding y su propio margen: *un filtro que flota sobre una
+                      lista no se lee como el filtro DE esa lista — se lee como
+                      otra cosa que quedó ahí.* Ahora comparten contenedor y el
+                      padding es uno solo. */}
+                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2.5], marginTop: spacing[3] }}>
                   {presentesTipo.length > 1 ? (
-                    <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[2] }}>
+                    <View style={{ marginBottom: spacing[1] }}>
                       <FiltrosLineaDeVida
                         tipos={presentesTipo}
                         elegidos={tiposElegidos}
@@ -1945,7 +1972,6 @@ export default function PerfilDeMascota() {
                       />
                     </View>
                   ) : null}
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2.5], marginTop: spacing[3] }}>
                     {filtrados.length === 0 ? (
                       <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
                     ) : (
@@ -2291,17 +2317,26 @@ export default function PerfilDeMascota() {
             🔴 **No se dibuja en memorial**: `sePintaPasaporte` de B lo dice
             y la pantalla lo respeta desde acá — *un pasaporte es para
             encontrar a alguien que se perdió.* */}
+        {/* ⭐ **UNA FILA MÁS DE LA SECCIÓN** (ojo del founder, 2.2.2 · ⑨).
+            Era una `Celda` con título y subtítulo, y al lado de las demás filas
+            plegables se leía como **un rótulo suelto**: más alta, con otra
+            forma, sin la tarjeta que llevan sus vecinas. *Seis filas iguales y
+            una distinta hacen que la distinta parezca de otra sección.*
+            Navega en vez de plegarse porque su destino **es una pantalla**, y
+            eso lo dice el chevron. */}
         {!esMemorial ? (
-          <View style={{ marginTop: spacing[3] }}>
-            <Celda
-              interactiva
-              accessibilityRole="button"
-              titulo={t('pasaporte.entrada')}
-              subtitulo={t('pasaporte.entradaDetalle')}
-              onPress={() =>
-                router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } })
-              }
-            />
+          <View style={{ marginTop: spacing[3], paddingHorizontal: spacing[5] }}>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="carnet"
+                titulo={t('pasaporte.entrada')}
+                detalle={t('pasaporte.entradaDetalle')}
+                registro="tinta"
+                onPress={() =>
+                  router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } })
+                }
+              />
+            </Tarjeta>
           </View>
         ) : null}
 
