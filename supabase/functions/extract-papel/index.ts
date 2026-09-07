@@ -203,6 +203,32 @@ Un INFORME da UNA sola fila:
 Respondé SOLO este JSON, sin texto alrededor y sin backticks:
 {"clase":null,"fecha_documento":null,"emisor":null,"filas":[]}`
 
+/**
+ * El tipo real, leído de los primeros bytes del base64. `null` si no es ninguno
+ * de los cuatro que esta edge sabe leer.
+ *
+ * No hace falta decodificar: los primeros bytes viven en los primeros
+ * caracteres del base64, y cada 3 bytes son 4 caracteres. Se compara el prefijo
+ * y listo — **cero costo y cero dependencia**.
+ *   `%PDF-`  → "JVBERi0"      · PNG  `\x89PNG` → "iVBORw0KGgo"
+ *   JPEG `\xFF\xD8\xFF` → "/9j/"    · WebP `RIFF` → "UklGR"
+ */
+export function tipoPorBytes(base64: string): string | null {
+  const cabeza = base64.slice(0, 16)
+  if (cabeza.startsWith('JVBERi0')) return 'application/pdf'
+  if (cabeza.startsWith('iVBORw0KGgo')) return 'image/png'
+  if (cabeza.startsWith('/9j/')) return 'image/jpeg'
+  /* WebP: `RIFF` + 4 bytes de tamaño + `WEBP`. El prefijo `UklGR` sólo dice
+     RIFF —que también es WAV y AVI—, así que hay que confirmar el `WEBP`.
+     🔴 Y su posición se DERIVA, no se estima: base64 agrupa de a 3 bytes en 4
+     caracteres, los bytes 9-11 son `EBP` = el grupo 3 = los caracteres 12..15,
+     y `btoa('EBP')` es `RUJQ`. *Mi primer intento buscaba en 15..23 y no
+     casaba con ningún WebP real; lo cazó el control con un encabezado de
+     verdad, no la revisión del código.* */
+  if (cabeza.startsWith('UklGR') && base64.slice(12, 16) === 'RUJQ') return 'image/webp'
+  return null
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
@@ -218,8 +244,29 @@ Deno.serve(async (req) => {
     const mediaType = cuerpo.mediaType
     if (typeof base64 !== 'string' || !base64) return error('cuerpo_invalido', 'imageBase64 requerido.')
     if (base64.length > MAX_BASE64_CHARS) return error('archivo_invalido', 'El archivo es muy grande.')
-    const media = typeof mediaType === 'string' && (MEDIA_OK as readonly string[]).includes(mediaType)
-      ? mediaType : 'image/jpeg'
+    /* 🔴 EL TIPO SE LEE DE LOS BYTES, NO DE LO QUE DICE QUIEN LLAMA.
+       Antes: si `mediaType` no venía o no estaba en la lista, **caía a
+       `image/jpeg`** — así que **un PDF mandado como imagen viajaba en un
+       bloque `image`** y el proveedor devolvía basura o un error opaco. *No
+       fallaba en la puerta: fallaba adentro, y el mensaje que le llegaba a la
+       familia era «no pudimos leer el papel».*
+       Los cuatro formatos se declaran a sí mismos en sus primeros bytes; el
+       `mediaType` del cliente es una afirmación. *Cuando el objeto puede
+       contestar, no se le pregunta a quien llama.* */
+    const real = tipoPorBytes(base64)
+    if (real === null) {
+      return error('archivo_invalido',
+        'Ese archivo no es una foto ni un PDF. Prueba con la foto del papel o con el PDF.')
+    }
+    const media = real
+    const declarado = typeof mediaType === 'string' ? mediaType : null
+    /* Se CORRIGE en vez de rechazar —el papel es legible y la familia no tiene
+       la culpa de una etiqueta mal puesta— pero se DICE, para que quien llama
+       pueda arreglar su lado en vez de descubrirlo el día que el archivo se
+       guarde con la extensión equivocada. */
+    if (declarado !== null && declarado !== real) {
+      console.error(`[extract-papel] mediaType declarado "${declarado}" y los bytes dicen "${real}" — se usó el de los bytes`)
+    }
 
     const r = await llamarModelo({
       pieza: 'papel',

@@ -43,6 +43,11 @@ try {
   // El arnés se copia DENTRO de functions/ para que su `../_shared/ia/mod.ts`
   // resuelva igual que resuelve desde una edge real.
   cpSync('scripts/ia/prueba-llamar-modelo.ts', join(base, 'functions', '_prueba-ia', 'prueba.ts'))
+  /* 🔴 EL HELPER VIAJA CON EL ARNÉS. Los arneses declaran su objeto
+     (`declararObjeto`) desde el lote 3, y estos runners copiaban SÓLO el
+     arnés: el import moría con `Module not found` en la copia temporal.
+     *Una ley que se cumple en el archivo y se rompe al correrlo no rige.* */
+  cpSync('scripts/ia/declarar-objeto.ts', join(base, 'functions', '_prueba-ia', 'declarar-objeto.ts'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
 
   execFileSync('deno', ['run', '--allow-env', '--allow-net', '--allow-read', 'functions/_prueba-ia/prueba.ts'], {

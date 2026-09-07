@@ -22,6 +22,11 @@ try {
   cpSync('supabase/functions', join(base, 'functions'), { recursive: true })
   mkdirSync(join(base, 'functions', '_prueba-carnet'), { recursive: true })
   cpSync('scripts/ia/prueba-carnet-v2.ts', join(base, 'functions', '_prueba-carnet', 'prueba.ts'))
+  /* 🔴 EL HELPER VIAJA CON EL ARNÉS. Los arneses declaran su objeto
+     (`declararObjeto`) desde el lote 3, y estos runners copiaban SÓLO el
+     arnés: el import moría con `Module not found` en la copia temporal.
+     *Una ley que se cumple en el archivo y se rompe al correrlo no rige.* */
+  cpSync('scripts/ia/declarar-objeto.ts', join(base, 'functions', '_prueba-carnet', 'declarar-objeto.ts'))
   cpSync('scripts/ia/fixture-carnet-real-docA.json', join(base, 'functions', '_prueba-carnet', 'fixture-carnet-real-docA.json'))
   cpSync('scripts/ia/fixture-carnet-real-docB.json', join(base, 'functions', '_prueba-carnet', 'fixture-carnet-real-docB.json'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
