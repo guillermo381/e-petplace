@@ -2,13 +2,13 @@
 
 > **Cerrada por firma del founder, 7-sep-2026.** No se abre fase 4.
 > **PUBLICACIÓN FINAL DE LA SESIÓN:**
-> **cliente `f811a1d7` · prestador `dc07095b` · ancla `8d00707f` · `dirty: None`
+> **cliente `59d481af` · prestador `974c83cb` · ancla `3dadffbb` · `dirty: None`
 > · runtime 1.0.7** — las dos anclas leídas del OBJETO con `update:view --json`,
 > jamás del texto del publish.
 >
 > *Las anteriores quedan superseded, y se anotan porque un canal compartido no
-> dice cuál venía antes:* `2dfe00cc` (el pulido de C) · `f4fbe740` (el cierre de
-> la fase 3, antes del pulido).
+> dice cuál venía antes:* `8d00707f` (la entrada sobre el papel) · `2dfe00cc`
+> (el pulido de C) · `f4fbe740` (el cierre de la fase 3, antes del pulido).
 > `main @ 75412d58` · 4 typechecks en 0 · gates en 0 salvo el rojo declarado.
 
 ---
@@ -89,6 +89,7 @@ lado.* Hasta entonces, la medición de la costura **medía un vacío**.
 | 🔴 | **`crear_lote_placas` nunca corrió** (0 lotes, 0 placas) | founder | **ROJO DECLARADO** por firma: espera proveedor. `D-1049`. **No se fuerza ni se corre con `service_role`** — esa credencial saltea el gate de admin, que es la única parte sin estrenar, y daría el mismo verde sin probar nada |
 | 🟡 | **el barredor que verifica el archivo de un papel** | A | `D-1048`. La columna existe; Postgres no puede preguntarle a Storage |
 | 🟡 | **el contador de la skill dice 81, son 171** | B | las dos filas del canon ya declaran el comando; falta la skill y `packages/ui/CLAUDE.md` |
+| ✅ | **la búsqueda BUSCA** — abre `/buscar` con el campo enfocado, ya no el chat | C | corrección de mesa, publicada en `3dadffbb`. *La caja de búsqueda que abre una conversación no está mal dibujada: está contestando otra pregunta* |
 | ✅ | **el pulido de C** — la entrada de búsqueda destapada («Ponte al día» subía y le tapaba el lugar) y después **decidida sobre el papel y medida en aparato**, las fechas crudas de la lista de Nexo, y el censo de voces **desde la pantalla**: 44 filas, **0 genéricas** | C | **publicado** en `8d00707f`. ⚠️ *Su censo mide desde la pantalla y por eso vale: el mío, hecho contra el motor, midió contra un quinto del corpus y devolvió un número creíble y falso* |
 | 🟢 | **las cuatro del Hogar de B** | B | fuera de esta publicación |
 | ⏸ | **el NFC de iPhone** | Apple | **fuera de alcance**: el founder espera el DUNS. Android se corta igual |
