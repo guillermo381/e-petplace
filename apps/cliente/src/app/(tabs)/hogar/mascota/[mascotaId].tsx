@@ -1811,8 +1811,13 @@ export default function PerfilDeMascota() {
                    ANTES en vez de taparlo con un default. */}
               {contenidoRaza !== null && razaVigente !== null ? (
                   <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
+                    {/* ⭐ **EL RÓTULO DICE EL ACTO** (firma del founder). Decía
+                        sólo «Bulldog inglés» —el nombre de la raza, que ya está
+                        en el encabezado— y la pregunta suelta de abajo era la
+                        que invitaba. *Con la pregunta retirada, el título tiene
+                        que decir qué pasa si se toca.* */}
                     <FichaRaza
-                      nombre={razaVigente}
+                      nombre={t('perfil.razaMasSobre', { raza: razaVigente })}
                       revisado
                       historia={contenidoRaza.origen ?? ''}
                       caracteristicas={[
@@ -1837,43 +1842,17 @@ export default function PerfilDeMascota() {
                       vozAbrir={t('perfil.razaVer')}
                       vozCerrar={t('perfil.razaOcultar')}
                     />
-                    {/* ⭐ **UNA SOLA INVITACIÓN** (2.2.1 · ②, firma del founder).
-                        Acá vivía un segundo `BotonContanos` — el mismo acto que
-                        la tarjeta de arriba ya ofrece. **Dos invitaciones a lo
-                        mismo, a media pantalla de distancia, no invitan el doble:
-                        reparten la atención y ninguna se lee como la principal.**
-                        Queda la de `TarjetaConociendolo` y esta ficha cierra con
-                        lo suyo: **una pregunta sobre la RAZA**, que es otra cosa
-                        —no pide que la familia cuente, ofrece que pregunte— y su
-                        destino es Nexo con el tema puesto. */}
-                    <View style={{ marginTop: spacing[3] }}>
-                      {/* 🔴 **`BotonContanos` y no `CeldaNavegacion`, y lo
-                          decidió una medición.** La celda fuerza
-                          `numberOfLines={1}` y la pregunta se cortaba —medido:
-                          entra en 252 px y necesita 349—. *La voz la firmó el
-                          founder, así que lo que cambia es la pieza, no el
-                          texto.* `BotonContanos` existe para esto: su propia
-                          cabecera dice «no se trunca, y por eso no hay
-                          numberOfLines».
-                          ⚠️ Es la PIEZA, no el acto: acá invita a **preguntar
-                          sobre la raza**, no a contarnos algo. La única
-                          invitación al «cuéntanos» sigue siendo la de la
-                          tarjeta de arriba. */}
-                      <BotonContanos
-                        etiqueta={t('perfil.razaPregunta', { raza: razaVigente })}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/nexo',
-                            params: {
-                              mascotaId: mascota.id,
-                              nombre: mascota.nombre,
-                              semilla: t('perfil.razaPregunta', { raza: razaVigente }),
-                            },
-                          })
-                        }
-                      />
-                    </View>
-                  </View>
+                  {/* ☠️ **LA PREGUNTA SUELTA SE FUE** (firma del founder).
+                      Acá cerraba la ficha con «¿Quieres conocer más sobre el
+                      Bulldog inglés?» — *una segunda puerta al mismo lugar, a
+                      dos centímetros del título que ya lo dice.* **Un solo
+                      acceso**: el rótulo de la tarjeta, que ahora dice «Más
+                      sobre el {raza}» y lleva su chevron.
+                      ⚠️ Antes acá vivía un `BotonContanos` con esa pregunta, y
+                      antes de él un segundo «cuéntanos». *La ficha tuvo tres
+                      cierres distintos en tres tandas: el que queda es
+                      ninguno.* */}
+                </View>
               ) : null}
             </View>
           );

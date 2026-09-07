@@ -167,7 +167,17 @@ export default function Pasaporte() {
   if (enMemoria) {
     return (
       <View style={{ flex: 1 }}>
-        <Encabezado variante="navegacion" titulo={t('pasaporte.titulo')} />
+        {/* 🔴 **SIN ATRÁS, LA PANTALLA NO TENÍA SALIDA** (ojo del founder). Los
+            DOS encabezados de esta ruta lo habían perdido —el de memorial y el
+            normal—; el tercero, el del QR a pantalla completa, sí lo tenía.
+            *Un callejón no se ve como defecto: se ve como que la app se
+            colgó.* */}
+      <Encabezado
+        variante="navegacion"
+        titulo={t('pasaporte.titulo')}
+        atras
+        onAtras={() => router.back()}
+      />
         <EstadoVacio titulo={t('pasaporte.enMemoria', { nombre: m.nombre })} />
       </View>
     );
@@ -175,7 +185,17 @@ export default function Pasaporte() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Encabezado variante="navegacion" titulo={t('pasaporte.titulo')} />
+      {/* 🔴 **SIN ATRÁS, LA PANTALLA NO TENÍA SALIDA** (ojo del founder). Los
+            DOS encabezados de esta ruta lo habían perdido —el de memorial y el
+            normal—; el tercero, el del QR a pantalla completa, sí lo tenía.
+            *Un callejón no se ve como defecto: se ve como que la app se
+            colgó.* */}
+      <Encabezado
+        variante="navegacion"
+        titulo={t('pasaporte.titulo')}
+        atras
+        onAtras={() => router.back()}
+      />
       <View style={{ padding: spacing[5], gap: spacing[5] }}>
         {token === null ? (
           <EsperaDeMarca />

@@ -165,8 +165,20 @@ function Accion({
         <Icono nombre={accion.glifo} tamano={24} registro="tinta" montaje="control" />
       </View>
       {/* Dos palabras como «Pasaporte y QR» no se cortan: envuelven y se
-          centran. *Una etiqueta cortada obliga a tocar para saber qué era.* */}
-      <Texto variante="apoyo" centrado>{accion.etiqueta}</Texto>
+          centran. *Una etiqueta cortada obliga a tocar para saber qué era.*
+
+          🔴 **PERO UNA SOLA PALABRA NO SE PARTE** (ojo del founder, S113 ·
+          C 2.2.3 — enmienda aditiva declarada a esta pieza, 76(d)).
+          «Documentos» entraba en el mismo envoltorio y se cortaba a la mitad:
+          «Documento» arriba, «s» sola abajo. *Una palabra partida no se lee
+          como una etiqueta larga: se lee como un defecto de la app.*
+          `adjustsFontSizeToFit` achica el rótulo hasta que entre — que es lo
+          que el founder pidió: **se achica el rótulo, no la palabra**. Las de
+          dos palabras siguen envolviendo, porque `numberOfLines={2}` les deja
+          su segunda línea. */}
+      <Texto variante="apoyo" centrado numberOfLines={2} ajustaParaEntrar>
+        {accion.etiqueta}
+      </Texto>
     </Pressable>
   )
 }

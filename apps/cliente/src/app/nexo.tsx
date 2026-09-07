@@ -34,6 +34,7 @@ import {
   EstadoVacio,
   EvitaTeclado,
   Icono,
+  PieDeCampo,
   PanelMemoria,
   PresentacionNexo,
   RespuestaNexo,
@@ -436,13 +437,26 @@ export default function Nexo() {
         <View
           style={{
             flexDirection: 'row',
-            alignItems: 'flex-end',
+            /* 🔴 **`center` + `sinPie`, y la segunda es la que cura de verdad**
+               (ojo del founder: *«el botón quedó un renglón más abajo»*).
+               Primero probé sólo `center` y quedó Δ13px: **`Campo` RESERVA el
+               renglón de su pie aunque esté vacío**, así que la caja mide más
+               de lo que se ve y centrarse contra ella deja el botón bajo.
+               Su propia cabecera lo dice: *«el pie crece y el delta con él; por
+               eso la cura correcta es `sinPie`»*. */
+            alignItems: 'center',
             gap: spacing[2],
             paddingHorizontal: spacing[5],
             paddingBottom: spacing[6],
           }}
         >
           <View style={{ flex: 1 }}>
+            {/* 🔴 **`sinPie` NO VIAJA SOLO** (R29, y el gate lo frenó acá): el
+                compuesto que le quita el pie a su hijo tiene que montarlo él,
+                *o el borde de error queda sin su mensaje y la caja se pone roja
+                sin decir por qué.* Acá el pie está siempre vacío —una búsqueda
+                no valida nada— pero se monta igual: **el día que esta caja
+                tenga un error, su mensaje ya tiene dónde ir.** */}
             <Campo
               label={t('nexo.caja')}
               etiquetaVisible={false}
@@ -450,8 +464,12 @@ export default function Nexo() {
               onChangeText={setTexto}
               placeholder={t('nexo.cajaPlaceholder')}
               onSubmitEditing={() => void enviar(texto)}
-              returnKeyType="send"
+              /* 🔴 **«buscar», no «enviar»** (ojo del founder): la caja de
+                 Nexo es también el buscador, y *el teclado tiene que decir qué
+                 va a pasar al tocar su tecla.* */
+              returnKeyType="search"
               deshabilitado={pensando}
+              sinPie
             />
           </View>
           <Pressable
@@ -459,10 +477,23 @@ export default function Nexo() {
             accessibilityLabel={t('nexo.enviar')}
             disabled={texto.trim() === '' || pensando}
             onPress={() => void enviar(texto)}
-            style={{ paddingBottom: spacing[2], opacity: texto.trim() === '' || pensando ? 0.4 : 1 }}
+            /* ⚠️ Y con él se va su `paddingBottom`, que existía para compensar
+               el desalineo de arriba. *Un ajuste que corrige un síntoma
+               sobrevive a su causa y desalinea al revés.* */
+            style={{ opacity: texto.trim() === '' || pensando ? 0.4 : 1 }}
           >
             <Icono nombre="enviar" tamano={24} />
           </Pressable>
+        </View>
+        {/* 🔴 **EL PIE VA FUERA DE LA FILA, y esto lo enseñó medir.** Montado
+            adentro del `View flex:1` del campo, ese View pasaba a medir caja +
+            pie, y `alignItems: center` centraba el botón contra ESA suma:
+            13px abajo, que es exactamente `(50 − 24) / 2`. *El arreglo estaba
+            causando el defecto que venía a arreglar.*
+            Afuera, la fila mide lo que mide la caja y el pie conserva su lugar
+            para el día que haya un error que decir (R29). */}
+        <View style={{ paddingHorizontal: spacing[5] }}>
+          <PieDeCampo />
         </View>
       </View>
     </EvitaTeclado>

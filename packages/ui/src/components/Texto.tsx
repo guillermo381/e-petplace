@@ -136,6 +136,20 @@ export type TextoProps = {
   /** S81 (pedido de mesa): el texto se puede seleccionar/copiar (ids,
    *  códigos, el pie de identidad). Passthrough a react-native. */
   seleccionable?: boolean
+  /**
+   * ⭐ **ACHICA EL RÓTULO ANTES DE PARTIR LA PALABRA** (S113-C · enmienda
+   * aditiva declarada, 76(d)). Firma del founder: *«si no entra, se achica el
+   * rótulo, no la palabra»* — lo pidió viendo «Documentos» cortado en
+   * «Documento» + «s» en la fila de acciones.
+   *
+   * 🔴 **Exige `numberOfLines`**: sin un techo de líneas, react-native no
+   * tiene contra qué ajustar y la prop no hace nada. *Una prop que se puede
+   * poner sin efecto es una prop que alguien va a creer que puso.*
+   *
+   * ⚠️ Es para ETIQUETAS, no para prosa: achicar un párrafo lo vuelve
+   * ilegible. Su lugar son los rótulos cortos que comparten ancho fijo.
+   */
+  ajustaParaEntrar?: boolean
 }
 
 const RECETA: Record<
@@ -244,7 +258,7 @@ const RECETA: Record<
   voz:     { fontFamily: typography.family.sans.light, fontSize: typography.size.md, color: 'secondary', leading: typography.size.md * typography.leading.relaxed },
 }
 
-export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable }: TextoProps) {
+export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable, ajustaParaEntrar }: TextoProps) {
   const { theme } = useTheme()
   const receta = RECETA[variante]
   const c = color ?? receta.color
@@ -264,6 +278,9 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
       accessibilityRole={receta.header === true ? 'header' : undefined}
       numberOfLines={numberOfLines}
       selectable={seleccionable}
+      /* Sin `numberOfLines` la prop no tiene contra qué ajustar: se ignora
+         en vez de prometer. */
+      adjustsFontSizeToFit={ajustaParaEntrar === true && numberOfLines !== undefined}
       style={{
         fontFamily: receta.fontFamily,
         fontSize: receta.fontSize,
