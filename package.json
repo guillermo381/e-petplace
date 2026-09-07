@@ -93,7 +93,8 @@
     "verify:nexo-antispam": "node scripts/verify-nexo-antispam.mjs",
     "verify:pasaporte-campos": "node scripts/verify-pasaporte-campos.mjs",
     "verify:nexo-anticipa": "node scripts/verify-nexo-anticipa.mjs",
-    "verify:nexo-alimenta": "node scripts/verify-nexo-alimenta.mjs"
+    "verify:nexo-alimenta": "node scripts/verify-nexo-alimenta.mjs",
+    "verify:voz-nexo": "node scripts/verify-voz-nexo.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
