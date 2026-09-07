@@ -386,7 +386,16 @@ function Chip({
           <View style={mostrarSpinner ? { opacity: 0 } : null}>{opcion.adorno}</View>
         ) : null}
         <Text
-          numberOfLines={columna ? undefined : 1}
+          /* 🔴 **SÓLO TRUNCA EL QUE TIENE TOPE DURO DE ANCHO**, y hoy ése es
+             uno solo: el chip de `entidad`, con su `maxWidth: 240` — ahí un
+             nombre largo tiene que cortar porque la caja no puede crecer.
+
+             ⏪ Antes truncaba **todo lo que no fuera `columnas`**, y con la
+             fila en `nowrap` eso cortaba la escala de gravedad («muy grav…»).
+             *Un chip que la familia no puede leer entero antes de elegirlo no
+             es un chip apretado: es una opción que no está.* Con la fila
+             envolviendo, el corte ya no protege de nada. */
+          numberOfLines={entidad ? 1 : undefined}
           style={{
             textAlign: 'center',
             fontFamily: typography.family.sans.medium,
@@ -519,7 +528,22 @@ export function SelectorOpcion({
             // entidad ENVUELVE siempre (lectura de mesa N>=5: ver-todo
             // sobre compacto — pendiente firma founder vs la letra
             // 'tira' del selector §3)
-            flexWrap: entidad || disposicion === 'grilla' || disposicion === 'columnas' ? 'wrap' : 'nowrap',
+            /* 🔴 **'fila' ENVUELVE (S113-B · 2.2.1, orden del founder).**
+               ⏪ Iba en `nowrap` con los chips en `flexGrow: 1` y la etiqueta a
+               `numberOfLines={1}`: con cuatro opciones de palabra larga —la
+               escala de gravedad, *«leve · moderado · severo · muy grave»*— no
+               entraban, y **el texto se cortaba**. *Un chip que dice «muy
+               grav…» no es un chip apretado: es una opción que la familia no
+               puede leer antes de elegirla.*
+
+               La cura es envolver, **no scrollear**: una tira horizontal
+               esconde opciones detrás de un gesto que nadie sabe que existe, y
+               en una escala de gravedad la que queda escondida es la última,
+               que es justo la que más importa ver. */
+            flexWrap:
+              entidad || disposicion === 'fila' || disposicion === 'grilla' || disposicion === 'columnas'
+                ? 'wrap'
+                : 'nowrap',
             gap: spacing[2],
             ...(entidad
               ? {

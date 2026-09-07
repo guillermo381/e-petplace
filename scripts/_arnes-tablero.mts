@@ -8,7 +8,9 @@
 import { readFileSync } from 'node:fs';
 import {
   hayLineaQueDibujar, puntosDeLinea, fraccionDelAnillo, trazoDeProgreso, elDeHoy,
+  margenDeTrazo, trazosFueraDeCaja, radioDeAnillo,
 } from '../packages/ui/src/components/tablero-metrica.ts';
+import { fechaCortaHumana } from '../packages/i18n/src/fechas.ts';
 
 let ok = 0, mal = 0;
 const t = (n: string, real: unknown, esp: unknown) => {
@@ -191,17 +193,124 @@ for (const [n, s] of [['franja', FRANJA], ['métrica', MET], ['hoy', HOY], ['acc
     !/theme\.text\.secondary|registro="tinta"/.test(s), true);
 }
 
+console.log('\n── ⑮ ROJO · NINGÚN TRAZO SE SALE DE SU CAJA (2.2.1 ①) ──');
+/* 🔴 **El trazo se dibuja CENTRADO en su camino**: la mitad del grosor queda
+   afuera, y `strokeLinecap="round"` estira otro medio grosor en cada punta.
+   *Una caja calculada sobre la línea IDEAL siempre queda chica por el grosor
+   entero, y el recorte no se ve como defecto: se ve como una línea que toca el
+   borde — que es justo lo que uno esperaría de un mínimo.* */
+t('el margen se DERIVA del grosor, no se elige', margenDeTrazo(2), 1);
+
+const GROSOR = 2, AIRE = 2, M = margenDeTrazo(GROSOR) + AIRE;
+/* Los TRES casos donde la línea se pega a un borde: la que sube, la plana y
+   la de rango cero. */
+for (const [nombre, serie] of [
+  ['una que sube', [70, 72, 71, 75]],
+  ['una plana', [24, 24, 24]],
+  ['dos puntos, mínimo y máximo', [0, 100]],
+] as const) {
+  const pts = puntosDeLinea(serie, 96, 28, M);
+  t(`🔴 ${nombre}: cero trazos fuera de la caja`, trazosFueraDeCaja(pts, 96, 28, GROSOR), []);
+}
+/* 🔴 EL CONTROL QUE PRUEBA QUE EL INSTRUMENTO VE: sin margen, la que toca el
+   piso SÍ se sale. Sin esto, los tres verdes de arriba no dicen nada. */
+t('CONTROL · sin margen, el mínimo SÍ se sale',
+  trazosFueraDeCaja(puntosDeLinea([0, 100], 96, 28, 0), 96, 28, GROSOR).length > 0, true);
+
+/* El anillo: `r = (lado - grosor)/2` deja el borde EXTERNO justo sobre el
+   borde de la caja — no se sale, pero queda sin aire. */
+t('🔴 el anillo deja aire: su borde externo NO toca la caja',
+  radioDeAnillo(40, 4, AIRE) + 4 / 2 + AIRE <= 40 / 2, true);
+t('CONTROL · sin aire, el borde externo cae EXACTO sobre la caja',
+  radioDeAnillo(40, 4, 0) + 4 / 2, 40 / 2);
+
+/* 🔴 Y LO QUE LO CAUSABA DE VERDAD ERA EL ANCHO FIJO: el SVG medía 96 px y en
+   la columna angosta el número más el gráfico no entraban. Hoy es un viewBox
+   dentro de una caja que ENCOGE. */
+/* 🔴 **EL ESLABÓN QUE FALTABA, y lo destapó ejercer el rojo.** Los tres
+   asserts de arriba calculan los puntos ELLOS MISMOS: prueban que la función
+   sabe dejar margen, **no que la pieza se lo pida**. Bajar el margen de la
+   pieza a `0` los dejaba a los tres en verde. *Un arnés que arma su propio
+   caso mide la función y no el producto* — y el defecto que se vio en el
+   aparato vivía justo en el eslabón que nadie medía. */
+t('🔴 …y la PIEZA se lo pide: el margen derivado llega a `puntosDeLinea`',
+  /const margen = margenDeTrazo\(LIENZO\.grosor\) \+ AIRE/.test(MET) &&
+  /puntosDeLinea\(dibujo\.serie, LIENZO\.ancho, LIENZO\.alto, margen\)/.test(MET), true);
+t('🔴 …y el anillo pide su radio con aire',
+  /radioDeAnillo\(ANILLO\.lado, ANILLO\.grosor, AIRE\)/.test(MET), true);
+
+t('🔴 el sparkline va por viewBox, no por ancho fijo', /viewBox=\{`0 0 \$\{LIENZO\.ancho\}/.test(MET), true);
+t('…dentro de una caja que ENCOGE', /flexShrink: 1[^}]*maxWidth: LIENZO\.ancho/.test(MET), true);
+t('🔴 …y el NÚMERO nunca cede: es el contenido', /flexShrink: 0/.test(MET), true);
+
+console.log('\n── ⑯ ROJO · EL DATO A 18, EL CONTEXTO A 11, Y NADA CORTADO (2.2.1 ②) ──');
+t('el dato grande usa el token de métrica (18), no `lg` (22)',
+  /fontSize: typography\.size\.metrica/.test(MET) && !/typography\.size\.lg/.test(MET), true);
+t('la línea de contexto va a 11 (`xs`)', /fontSize: typography\.size\.xs/.test(MET), true);
+/* 🔴 Ninguna tarjeta trunca: el número no, el contexto tampoco. */
+t('🔴 la tarjeta de métrica NO trunca en ningún lado', /numberOfLines/.test(MET), false);
+/* La fecha corta: «lun 7 sept», no «7 de septiembre de 2026». */
+t('🔴 la fecha de cita se escribe corta', fechaCortaHumana('2026-09-07', 'es'), 'lun 7 sept');
+t('…y en inglés', fechaCortaHumana('2026-09-07', 'en'), 'Mon Sep 7');
+/* Degrada al dato crudo, JAMÁS a una fecha inventada (L-197). */
+t('🔴 una fecha rota NO se inventa', fechaCortaHumana('no-es-fecha', 'es'), 'no-es-fech');
+
+console.log('\n── ⑰ ROJO · EL «HOY» NO PUEDE SER GENÉRICO (2.2.1 ③) ──');
+/* *El «hoy» es el lugar más caro de la pantalla: una tarjeta genérica ahí
+   enseña que ese lugar no vale la pena mirarlo.* */
+t('🔴 sin título, la tarjeta NO se dibuja', /titulo\.trim\(\)\.length === 0/.test(HOY), true);
+t('🔴 …ni sin voz del acto', /vozActo\.trim\(\)\.length === 0/.test(HOY), true);
+t('se mide `.trim()`: un espacio no es un texto', /\.trim\(\)\.length === 0 \|\| /.test(HOY), true);
+/* La pieza no tiene un texto de reserva: no puede inventar de qué habla. */
+t('🔴 la pieza no trae ninguna voz propia de reserva',
+  (HOY.match(/(titulo|vozActo)\s*(\?\?|\|\|)\s*'/g) ?? []), []);
+
+console.log('\n── ⑱ ROJO · CONOCIÉNDOLO: DOS ESTADOS, UNA SOLA INVITACIÓN (2.2.1 ④) ──');
+/* *Dos pedidos pegados no se leen como dos oportunidades: se leen como una
+   lista de deberes* — y en una tarjeta que celebra, eso la vuelve un reclamo. */
+t('🔴 el incompleto pide UNA invitación', /invitacion: ReactNode/.test(CON), true);
+t('🔴 …y el tipo le prohíbe la otra vía', /vozFelicitacion\?: never/.test(CON), true);
+t('🔴 el completo NO admite invitación', /invitacion\?: never/.test(CON), true);
+t('el completo felicita en UNA línea', /vozFelicitacion: string/.test(CON), true);
+t('…y su «más sobre» es opcional: sin urgencia', /masSobre\?: ReactNode/.test(CON), true);
+/* 🔴 Y la prueba de que la unión es lo que lo impide, no la disciplina: los
+   campos viejos, que se podían mandar juntos, ya no existen. */
+t('🔴 murieron los dos opcionales que se podían mandar juntos',
+  /contanos: ReactNode|raza\?: ReactNode/.test(CON), false);
+
+console.log('\n── ⑲ ROJO · UNA FILA DE CHIPS ENVUELVE, NO CORTA (2.2.1 ⑤) ──');
+const SEL = src('SelectorOpcion.tsx');
+t("🔴 'fila' envuelve", /flexWrap:\s*\n?\s*entidad \|\| disposicion === 'fila'/.test(SEL), true);
+t('🔴 sólo trunca el que tiene tope duro de ancho (`entidad`)',
+  /numberOfLines=\{entidad \? 1 : undefined\}/.test(SEL), true);
+/* La cura NO es scrollear: *una tira esconde la última opción detrás de un
+   gesto que nadie sabe que existe, y en una escala de gravedad la última es
+   justo la que más importa ver.* */
+t("'tira' sigue siendo la ÚNICA con scroll horizontal",
+  (SEL.match(/<ScrollView\s+horizontal/g) ?? []).length, 1);
+
 console.log('\n── ⑪ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {
-  /* ⚠️ **ESTE ASSERT MIDE UN PROXY, y su primer rojo fue por eso.** Buscar
-     plantillas encuentra la FORMA de componer, no la composición de VOZ: marcó
-     `` `${p.x},${p.y}` ``, que son coordenadas de un `points` de SVG y no las
-     lee nadie. *Un template no es voz por ser un template.*
-     Se exceptúa lo que provablemente no llega a un `Texto`: las coordenadas y
-     la geometría, y los `accessibilityLabel`, que UNEN datos ya redactados. */
-  const plantillas = (s.match(/`[^`]*\$\{[^`]*`/g) ?? []).filter(
-    (x) => !/rotulo|etiqueta|titulo|ANILLO|hecho|vuelta|p\.x|p\.y|lado/.test(x),
-  );
+  /* ⚠️ **ESTE ASSERT MEDÍA UN PROXY, y se cobró CUATRO veces por eso** — las
+     cuatro marcando geometría: `${p.x},${p.y}` (un `points`), un `viewBox`, y
+     dos `rotate(...)` de un `transform`. *Un template no es voz por ser un
+     template.*
+
+     🔴 **Y las curas fallidas enseñan más que el defecto.** Primero fue una
+     LISTA DE PALABRAS (`p.x`, `lado`, `ANILLO`…) — *un filtro por nombres mide
+     el vocabulario de ayer y crece con cada geometría nueva*. Después una
+     lista de ATRIBUTOS — *no vio el `points` porque venía de un `.map().join()`
+     y no de un atributo directo*. Después «tiene letras» — *y `rotate` tiene
+     letras*. **Tres intentos, y los tres seguían midiendo la FORMA.**
+
+     🔴 **EL HECHO ES OTRO, y se distingue por UN CARÁCTER:** componer voz es
+     poner un template **como HIJO de JSX**; la geometría va como **VALOR DE UN
+     ATRIBUTO**. Uno viene después de `>`, el otro después de `=`. *Eso no es
+     un proxy del vocabulario: es literalmente la diferencia entre algo que un
+     humano lee y algo que consume el motor de dibujo.* Y no crece: una
+     geometría nueva entra por `=` como todas las demás. */
+  const hijosDeJsx = [...s.matchAll(/>\s*\{(`[^`]*\$\{[^`]*`)\}/g)].map((m) => m[1] ?? '');
+  const plantillas = hijosDeJsx.filter((x) => !/rotulo|etiqueta|titulo/.test(x));
   t(`${n}: sin plantillas de texto`, plantillas, []);
 }
 
