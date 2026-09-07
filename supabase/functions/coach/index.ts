@@ -50,6 +50,7 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { llamarModelo } from '../_shared/ia/mod.ts'
+import PARES_VOSEO from '../_shared/voz/voseo.json' with { type: 'json' }
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -602,35 +603,20 @@ async function crearPropuestas(
  *  ⚠️ **No es un traductor** y no pretende serlo: cubre las que se midieron.
  *  Lo que arregla, lo arregla siempre; lo que no cubre, lo dice el gate de voz.
  */
-const VOSEO_A_TUTEO: readonly (readonly [RegExp, string])[] = [
-  [/\bquerés\b/g, 'quieres'], [/\bQuerés\b/g, 'Quieres'],
-  [/\btenés\b/g, 'tienes'], [/\bTenés\b/g, 'Tienes'],
-  [/\bpodés\b/g, 'puedes'], [/\bPodés\b/g, 'Puedes'],
-  [/\bsabés\b/g, 'sabes'], [/\bSabés\b/g, 'Sabes'],
-  [/\bfijate\b/g, 'fíjate'], [/\bFijate\b/g, 'Fíjate'],
-  [/\bcontame\b/g, 'cuéntame'], [/\bContame\b/g, 'Cuéntame'],
-  [/\bdecime\b/g, 'dime'], [/\bDecime\b/g, 'Dime'],
-  [/\bcontale\b/g, 'cuéntale'], [/\bContale\b/g, 'Cuéntale'],
-  [/\bhacés\b/g, 'haces'], [/\bvivís\b/g, 'vives'],
-  [/\bnecesitás\b/g, 'necesitas'], [/\bnotás\b/g, 'notas'],
-  [/\bllevás\b/g, 'llevas'], [/\bcargás\b/g, 'cargas'],
-  [/\bdale\b/g, 'listo'], [/\bDale\b/g, 'Listo'],
-  // ⚠️ Las que E midió que su lista NO caza — imperativo con enclítico, que es
-  // lo que un modelo dice todo el tiempo y un desarrollador casi nunca escribe
-  // en un literal. Por eso ningún gate del repo las estaba viendo.
-  [/\bmostrame\b/g, 'muéstrame'], [/\bMostrame\b/g, 'Muéstrame'],
-  [/\bavisame\b/g, 'avísame'], [/\bAvisame\b/g, 'Avísame'],
-  [/\bmandame\b/g, 'mándame'], [/\bpasame\b/g, 'pásame'],
-  [/\bbañalo\b/g, 'báñalo'], [/\bBañalo\b/g, 'Báñalo'],
-  [/\bbañala\b/g, 'báñala'], [/\bllevalo\b/g, 'llévalo'], [/\bllevala\b/g, 'llévala'],
-  [/\bdejalo\b/g, 'déjalo'], [/\bdejala\b/g, 'déjala'],
-  [/\bsacalo\b/g, 'sácalo'], [/\bsacala\b/g, 'sácala'],
-  [/\bdaselo\b/g, 'dáselo'], [/\bponelo\b/g, 'ponlo'], [/\bponela\b/g, 'ponla'],
-  [/\banotalo\b/g, 'anótalo'], [/\bcepillalo\b/g, 'cepíllalo'],
-  [/\bmirá\b/g, 'mira'], [/\bMirá\b/g, 'Mira'],
-  [/\bnotá\b/g, 'nota'], [/\bproba\b/g, 'prueba'], [/\bprobá\b/g, 'prueba'],
-  [/\bvos\b/g, 'tú'], [/\bVos\b/g, 'Tú'],
-]
+// 🔴 UNA SOLA LISTA, EN DATOS, QUE LEEMOS LOS DOS. Antes eran TRES enumeradas
+// —mi cinturón, el gate de voz de E y la de `lib-voz`— y **ninguna cubría a las
+// otras**: había formas que yo curaba y su gate no veía, formas que su gate veía
+// y yo no curaba, y formas que ni se curaban ni se veían. *Con tres copias, un
+// verde puede ser falso por coincidencia de huecos, y un rojo también al revés.*
+// Quien agregue una forma la agrega en `_shared/voz/voseo.json`.
+const VOSEO_A_TUTEO: readonly (readonly [RegExp, string])[] = PARES_VOSEO.pares
+  // Largas primero: si una forma es prefijo de otra, la corta la mutilaría.
+  .slice().sort((a, b) => b[0].length - a[0].length)
+  .flatMap(([vos, tu]) => [
+    [new RegExp(`\\b${vos}\\b`, 'g'), tu] as const,
+    [new RegExp(`\\b${vos[0].toUpperCase()}${vos.slice(1)}\\b`, 'g'),
+      tu[0].toUpperCase() + tu.slice(1)] as const,
+  ])
 
 export function aTuteo(texto: string): string {
   let t = texto

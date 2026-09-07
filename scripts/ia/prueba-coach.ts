@@ -502,6 +502,26 @@ for (const [crudo, esperado] of [
   exigir('CONTROL: lo que ya está en tuteo pasa intacto',
     json.respuesta === 'Puedes fijarte si toma agua. Cuéntame cómo sigue.', json.respuesta)
 }
+for (const [crudo, palabra] of [
+  ['Y vos tenés que estar atento.', 'vos'],
+  ['Bañalo cada 4 semanas y mostrame cómo queda.', 'enclítico'],
+  ['Avisame y guardá la receta.', 'la que su gate ve y yo no curaba'],
+  ['Contanos qué le pasó y probalo de a poco.', 'contanos/probalo'],
+] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: crudo, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  const t = String(json.respuesta)
+  const VOSEO = /\b(vos|tenés|bañalo|mostrame|avisame|guardá|contanos|probalo)\b/
+  exigir(`la lista ÚNICA cubre «${palabra}»`, !VOSEO.test(t), t)
+}
+{
+  // controles: que no muerda palabras que CONTIENEN una forma
+  redaccionCruda(JSON.stringify({ respuesta: 'Los nuevos archivos y vosotros. Un dálmata.',
+    semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  exigir('CONTROL: no toca «nuevos», «vosotros» ni «dálmata»',
+    json.respuesta === 'Los nuevos archivos y vosotros. Un dálmata.', json.respuesta)
+}
 console.log('     ↑ medido: con el system en voseo se escapaba seguido; pasado a tuteo')
 console.log('       bajó a ~1 de cada 10; y al nombrarle «dale» apareció «querés».')
 console.log('       Enumerar formas prohibidas es jugar al topo: la última milla')
