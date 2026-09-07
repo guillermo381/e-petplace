@@ -87,7 +87,20 @@ export const CON_TILDE = ['probá','tocá','elegí','escribí','andá','mirá','
      `llevás`. **Los dos estaban ausentes y el §3 de LETRA_TELEMEDICINA los
      usaba literalmente** — ver la nota ⑫ al pie. */
   'notá','llevá'];
-export const ENCL = ['contanos','escribila','escribilo','corregilo','corregila','ingresalo','ingresala','probalo','probala','tocalo','tocala','elegilo','elegila','agregalo','agregala','revisalo','revisala','guardalo','guardala','avisanos','contactanos','compartile','compartilo','compartila',
+/* ⭐ **LAS SIETE QUE E MIDIÓ COMO PASADAS** (S113, pedido de mesa). Todas son
+   enclíticos —verbo voseante + pronombre pegado— y **se distinguen de su tuteo
+   por la TILDE que el tuteo sí lleva**: `contame`/`cuéntame` · `bañalo`/`báñalo`
+   · `mostrame`/`muéstrame` · `decime`/`dime` · `avisame`/`avísame` ·
+   `fijate`/`fíjate`. Por eso su rojo es inequívoco.
+
+   ⚠️ **`dale` ES LA EXCEPCIÓN, y va con su advertencia.** En tuteo también se
+   dice `dale` («dale la pastilla» = dar → da + le), así que **es la única de
+   las siete cuyo rojo puede ser correcto**. Medido antes de agregarla: **cero
+   ocurrencias en el corpus** —`apps` y `packages`— así que hoy no rompe nada.
+   *Su rojo se mira antes de curarlo: puede estar señalando una voz que está
+   bien.* */
+export const ENCL = ['contame','bañalo','mostrame','decime','avisame','fijate','dale',
+  'contanos','escribila','escribilo','corregilo','corregila','ingresalo','ingresala','probalo','probala','tocalo','tocala','elegilo','elegila','agregalo','agregala','revisalo','revisala','guardalo','guardala','avisanos','contactanos','compartile','compartilo','compartila',
   /* ⑫ · `llevá` NO caza a `llevala`: la frontera derecha descarta con `l`.
      Los enclíticos se listan enteros, como los demás. */
   'llevalo','llevala','llevanos','llevame','llevate'];
