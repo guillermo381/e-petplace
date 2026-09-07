@@ -289,7 +289,16 @@ export async function borrarHiloCoach(
 
 /* ─── A6 · los avisos ───────────────────────────────────────────────────── */
 
-export type TipoAviso = 'vacuna_vence' | 'antiparasitario_vence' | 'cita_manana';
+/** 🔴 **Espeja el CHECK de `avisos_coach.tipo`, y lo vigila `verify:union-vs-check`.**
+ *  `'anticipacion'` vivía en la base y NO acá: un `switch` sobre este tipo
+ *  compilaba como exhaustivo y en el aparato llegaba una fila sin `case`.
+ *  *No era un error de tipos: era un tipo que mentía y un compilador que le
+ *  creía.* Lo midió B en `main`. */
+export type TipoAviso =
+  | 'vacuna_vence'
+  | 'antiparasitario_vence'
+  | 'cita_manana'
+  | 'anticipacion';
 
 export type AvisoCoach = {
   id: string;

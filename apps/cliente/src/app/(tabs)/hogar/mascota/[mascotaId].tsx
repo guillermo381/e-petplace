@@ -65,7 +65,8 @@ import {
   type LineaDeVidaEstadoPie,
   FichaRaza,
   FranjaSeguridad,
-  InvitacionBio,
+  BotonContanos,
+  HojaContanos,
   CeldasHoy,
   FiltrosLineaDeVida,
   type TipoLineaDeVida,
@@ -495,6 +496,12 @@ export default function PerfilDeMascota() {
   const [pesoHoja, setPesoHoja] = useState(false);
   const [medicacionHoja, setMedicacionHoja] = useState(false);
   const [hojaBio, setHojaBio] = useState<ClaseBio | null>(null);
+  /* ☠️ `InvitacionBio` murió en S113-B · 2.1: era TARJETA Y HOJA en una pieza.
+     Acá se parte igual que en la pieza — el botón abre, la Hoja contiene.
+     ⚠️ CURA DE COMPILACIÓN de la pista A, del lado consumidor: mantiene las
+     cuatro entradas y NADA MÁS. La caja libre y la propuesta de Nexo son de
+     C en su 2.1 — no se inventan acá. */
+  const [contanosAbierto, setContanosAbierto] = useState(false);
   const [razaHoja, setRazaHoja] = useState(false);
   /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
   const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
@@ -1478,23 +1485,13 @@ export default function PerfilDeMascota() {
                 La ficha habla de la raza; esto devuelve la conversación a este
                 animal: **lo general se lee, lo propio se cuenta.** */}
             <View style={{ marginTop: spacing[3] }}>
-              <InvitacionBio
-                texto={
+              <BotonContanos
+                etiqueta={
                   momento !== null && vozMomento(momento, t) !== null
                     ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
                     : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
                 }
-                tituloHoja={t('bio.titulo', { nombre: mascota.nombre })}
-                /* Las cuatro **tienen destino**, y por eso las cuatro se
-                   dibujan: la pieza exige `onPress` en cada entrada porque *sin
-                   destino la entrada no existe*. Hace unas horas dos de éstas
-                   no tenían puerta y las habría dejado afuera. */
-                entradas={[
-                  { clase: 'comportamiento', titulo: t('bio.enComportamiento'), detalle: t('bio.enComportamientoDet'), onPress: () => setHojaBio('comportamiento') },
-                  { clase: 'personalidad', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => setHojaBio('personalidad') },
-                  { clase: 'medico', titulo: t('bio.enMedico'), detalle: t('bio.enMedicoDet'), onPress: () => setHojaBio('medico') },
-                  { clase: 'recuerdo', titulo: t('bio.enRecuerdo'), detalle: t('bio.enRecuerdoDet'), onPress: () => setHojaBio('recuerdo') },
-                ]}
+                onPress={() => setContanosAbierto(true)}
               />
             </View>
           </View>
@@ -2458,6 +2455,18 @@ export default function PerfilDeMascota() {
           />
         </Hoja>
       ) : null}
+
+      <HojaContanos
+        visible={contanosAbierto}
+        onCerrar={() => setContanosAbierto(false)}
+        titulo={t('bio.titulo', { nombre: mascota.nombre })}
+        entradas={[
+                  { clase: 'comportamiento', titulo: t('bio.enComportamiento'), detalle: t('bio.enComportamientoDet'), onPress: () => { setContanosAbierto(false); setHojaBio('comportamiento') } },
+                  { clase: 'personalidad', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => { setContanosAbierto(false); setHojaBio('personalidad') } },
+                  { clase: 'medico', titulo: t('bio.enMedico'), detalle: t('bio.enMedicoDet'), onPress: () => { setContanosAbierto(false); setHojaBio('medico') } },
+                  { clase: 'recuerdo', titulo: t('bio.enRecuerdo'), detalle: t('bio.enRecuerdoDet'), onPress: () => { setContanosAbierto(false); setHojaBio('recuerdo') } },
+                ]}
+      />
 
       <HojaInvitacionBio
         clase={hojaBio}

@@ -62,6 +62,41 @@ const PATRON = /verify:[a-z0-9-]+/g;
    el gate **verifica que la tabla no mienta**: si un nombre jubilado llegara a
    tener script o archivo, sale ROJO — porque entonces la jubilación sería
    falsa y alguien estaría corriendo un gate que el canon da por muerto. */
+/* ── GATES QUE VIVEN EN OTRO REPO ────────────────────────────────────────────
+   El canon de esta casa nombra gates del sitio (`epetplace-web`), que es un
+   repo aparte con su propio `package.json`. Este instrumento mide contra el
+   `package.json` de ACÁ, así que sin esta tabla los daba por inexistentes —
+   y la cura obvia (borrar la mención) es la peor: *un gate que existe y corre
+   dejaría de poder nombrarse en el canon para que un instrumento no se queje.*
+
+   ⚠️ MISMA DISCIPLINA QUE `JUBILADOS`, y por la misma razón: cada entrada trae
+   su repo y su ruta, y **el gate verifica que la tabla no mienta** — si el
+   archivo apareciera acá, la entrada sería falsa y sale ROJO. */
+const OTRO_REPO = new Map([
+  ['verify:sin-supabase', {
+    repo: 'epetplace-web',
+    ruta: 'scripts/verify-sin-supabase.mjs',
+    razon: 'vigila que lo PUBLICADO del sitio no lleve credenciales de Supabase. Vive donde vive lo que mide.',
+  }],
+])
+
+/* ── NOMBRES CITADOS, NO INVOCADOS ──────────────────────────────────────────
+   Un parte de lote **cerrado** puede nombrar un gate para decir que NO existe
+   —«gates-existen dio rojo por verify:todo»— y este instrumento lo lee igual
+   que una invocación. *Un gate que se dispara con la frase que lo describe se
+   vuelve imposible de documentar: para que calle habría que dejar de contar
+   por qué estuvo rojo.*
+
+   ⚠️ MISMA DISCIPLINA que las otras dos tablas: cada entrada dice dónde se cita
+   y por qué, y **el control verifica que no mienta** — si el nombre llegara a
+   existir, la entrada es falsa y sale ROJO. No se aparta nada por silencio. */
+const CITADOS = new Map([
+  ['verify:todo', {
+    donde: 'docs/loop/S113-C-2.0.md — parte cerrado de C',
+    razon: 'C documenta ahí un rojo de este mismo gate. La nota de B que lo originó ya no existe; lo que queda es el relato. Los partes de lote cerrado son REGISTRO, no instrucción viva.',
+  }],
+])
+
 const JUBILADOS = new Map([
   ['verify:borradores', {
     ficha: 'D-1015',
@@ -113,6 +148,22 @@ function censar() {
   const faltan = [];
   const jubiladosVivos = [];   // la tabla mintiendo: jubilado con script o archivo
   for (const [nombre, sitios] of donde) {
+    if (CITADOS.has(nombre)) {
+      const baseC = nombre.slice('verify:'.length);
+      if (scripts.has(nombre) || archivos.some((a) => a === `verify-${baseC}.mjs`)) {
+        jubiladosVivos.push({ nombre, script: scripts.has(nombre), archivo: `verify-${baseC}.mjs` });
+      }
+      continue;
+    }
+    if (OTRO_REPO.has(nombre)) {
+      /* 🔴 EL CONTROL DE ESTA TABLA, igual que el de los jubilados: si el gate
+         apareciera ACÁ, la entrada sería falsa y hay que retirarla. */
+      const baseR = nombre.slice('verify:'.length);
+      if (scripts.has(nombre) || archivos.some((a) => a === `verify-${baseR}.mjs`)) {
+        jubiladosVivos.push({ nombre, script: scripts.has(nombre), archivo: `verify-${baseR}.mjs`, otroRepo: true });
+      }
+      continue;
+    }
     if (scripts.has(nombre) && !JUBILADOS.has(nombre)) continue;
     const baseJ = nombre.slice('verify:'.length);
     const archivoJ = archivos.find((a) => a === `verify-${baseJ}.mjs` || a === `verify-${baseJ}.ts`
@@ -153,6 +204,16 @@ function reportar({ fuentes, donde, enScripts, faltan, jubiladosVivos }) {
 
   if (faltan.length === 0) {
     di('\n✅ VERDE · todo gate nombrado en el canon existe como script invocable.');
+    if (CITADOS.size) {
+      di(`   (${CITADOS.size} CITADO(S) en partes cerrados, apartado(s) POR DECLARACIÓN:`);
+      for (const [n, c] of CITADOS) di(`      ${n} — ${c.donde}`);
+      di('    ⚠️ se nombran para relatar un rojo, no para correrse.)');
+    }
+    if (OTRO_REPO.size) {
+      di(`   (${OTRO_REPO.size} en OTRO REPO, apartado(s) POR DECLARACIÓN:`);
+      for (const [n, o] of OTRO_REPO) di(`      ${n} — ${o.repo}/${o.ruta}`);
+      di('    ⚠️ este gate no los corre: mide que existan donde se declaró que viven.)');
+    }
     if (JUBILADOS.size) {
       di(`   (${JUBILADOS.size} jubilado(s) apartado(s) POR DECLARACIÓN, no por silencio:`);
       for (const [n, j] of JUBILADOS) di(`      ${n} — ${j.ficha}`);
