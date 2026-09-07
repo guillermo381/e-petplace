@@ -813,6 +813,7 @@ export const clienteEs = {
     sexoMacho: 'Macho',
     sexoHembra: 'Hembra',
     nacimiento: 'Nacimiento',
+    accionCitas: 'Citas',
     peso: 'Peso',
     microchip: 'Microchip',
     identidadInvitacion: 'Su identidad se completa de a poco — cada dato nos ayuda a cuidarlo mejor.',

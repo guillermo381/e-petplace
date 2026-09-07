@@ -64,6 +64,7 @@ import {
   type IconoNombre,
   type LineaDeVidaEstadoPie,
   FichaRaza,
+  FilaAcciones,
   FranjaSeguridad,
   BotonContanos,
   PastillaConociendolo,
@@ -1293,6 +1294,40 @@ export default function PerfilDeMascota() {
             </LinearGradient>
           );
         })()}
+
+        {/* ⭐ **C3 · LAS CUATRO ACCIONES, bajo el hero** (S113-C · 2.2).
+            El brief las pone segundas y tiene razón: *son lo que la familia
+            viene a hacer, y hasta hoy estaban repartidas entre el fondo de la
+            pantalla y tres secciones distintas.*
+            🔴 **En memorial no se dibujan**: las cuatro piden o llevan a pedir
+            (`A3.9`). La historia y la identidad siguen leyéndose abajo. */}
+        {!esMemorial ? (
+          <View style={{ marginTop: spacing[4], paddingHorizontal: spacing[5] }}>
+            <FilaAcciones
+              citas={{
+                etiqueta: t('perfil.accionCitas'),
+                glifo: 'hoy',
+                onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } }),
+              }}
+              pasaporte={{
+                etiqueta: t('pasaporte.entrada'),
+                glifo: 'carnet',
+                onPress: () => router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } }),
+              }}
+              /* Nexo no lleva glifo: **su acción es el orbe**, que la pieza
+                 dibuja sola. Pasarle uno sería taparlo con un ícono. */
+              nexo={{
+                etiqueta: t('nexo.titulo'),
+                onPress: () => router.push({ pathname: '/nexo', params: { mascotaId: mascota.id, nombre: mascota.nombre } }),
+              }}
+              contanos={{
+                etiqueta: t('contanos.pastilla'),
+                glifo: 'pluma',
+                onPress: contanos.abrir,
+              }}
+            />
+          </View>
+        ) : null}
 
         {/* ── ② LA TARJETA QUE MONTA EL BORDE (patrón 1 — el solape que
             r3 dejó declarado esperando la imagen). DOS hechos reales:

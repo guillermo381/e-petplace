@@ -1292,30 +1292,39 @@ export type Database = {
           clave: string | null
           creado_en: string
           detalle: Json
+          entregado_en: string | null
+          estado: string
           fecha: string
           id: string
           leido_en: string | null
           mascota_id: string
+          prioridad: number | null
           tipo: string
         }
         Insert: {
           clave?: string | null
           creado_en?: string
           detalle?: Json
+          entregado_en?: string | null
+          estado?: string
           fecha?: string
           id?: string
           leido_en?: string | null
           mascota_id: string
+          prioridad?: number | null
           tipo: string
         }
         Update: {
           clave?: string | null
           creado_en?: string
           detalle?: Json
+          entregado_en?: string | null
+          estado?: string
           fecha?: string
           id?: string
           leido_en?: string | null
           mascota_id?: string
+          prioridad?: number | null
           tipo?: string
         }
         Relationships: [
@@ -3060,6 +3069,33 @@ export type Database = {
           orden_display?: number
           pais_codigo?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      cat_rasgos: {
+        Row: {
+          activo: boolean
+          codigo: string
+          especies: string[] | null
+          etiqueta: string
+          familia: string
+          orden: number
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          especies?: string[] | null
+          etiqueta: string
+          familia: string
+          orden?: number
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          especies?: string[] | null
+          etiqueta?: string
+          familia?: string
+          orden?: number
         }
         Relationships: []
       }
@@ -18094,22 +18130,37 @@ export type Database = {
       }
       raza_predisposicion: {
         Row: {
+          confianza: string | null
           creado_en: string
+          estado: string
+          evidencia: string | null
           fuente: string
           predisposicion_codigo: string
           raza_codigo: string
+          revisado_en: string | null
+          revisado_por: string | null
         }
         Insert: {
+          confianza?: string | null
           creado_en?: string
+          estado?: string
+          evidencia?: string | null
           fuente: string
           predisposicion_codigo: string
           raza_codigo: string
+          revisado_en?: string | null
+          revisado_por?: string | null
         }
         Update: {
+          confianza?: string | null
           creado_en?: string
+          estado?: string
+          evidencia?: string | null
           fuente?: string
           predisposicion_codigo?: string
           raza_codigo?: string
+          revisado_en?: string | null
+          revisado_por?: string | null
         }
         Relationships: [
           {
@@ -25151,6 +25202,10 @@ export type Database = {
         Returns: Json
       }
       obtener_cita_resuelta: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_citas_de_mascota: {
+        Args: { p_mascota_id: string }
+        Returns: Json
+      }
       obtener_citas_por_coordinar: {
         Args: { p_cuenta: string }
         Returns: {
@@ -25449,6 +25504,7 @@ export type Database = {
           negocio_nombre: string
         }[]
       }
+      obtener_hoy_mascota: { Args: { p_mascota_id: string }; Returns: Json }
       obtener_inicios_adiestramiento_disponibles: {
         Args: { p_comprable?: string; p_fecha: string; p_mascota_id: string }
         Returns: {
@@ -25985,6 +26041,7 @@ export type Database = {
         Args: { p_mascota_id: string }
         Returns: Json
       }
+      obtener_tablero_mascota: { Args: { p_mascota_id: string }; Returns: Json }
       obtener_tramo_vivo_de_mi_mascota: {
         Args: { p_mascota_id: string }
         Returns: Json
@@ -26430,7 +26487,12 @@ export type Database = {
         Returns: Json
       }
       registrar_observacion_comportamiento: {
-        Args: { p_fecha?: string; p_mascota_id: string; p_texto: string }
+        Args: {
+          p_codigos?: string[]
+          p_fecha?: string
+          p_mascota_id: string
+          p_texto?: string
+        }
         Returns: Json
       }
       registrar_peso_mascota: {

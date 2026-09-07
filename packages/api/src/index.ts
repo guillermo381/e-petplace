@@ -1874,6 +1874,21 @@ export {
   rechazarPropuestaMemoria,
   type PropuestaEnCola,
 } from './wrappers/coach';
+
+/* ⚠️ **ENMIENDA ADITIVA DE C (76(d)) — la TERCERA de la sesión.** A entregó las
+   tres RPC del tablero y ninguna puerta. Se abren acá con el molde. */
+export {
+  obtenerTableroMascota,
+  obtenerCitasDeMascota,
+  obtenerHoyMascota,
+  CODIGOS_TABLERO,
+  type CodigoErrorTablero,
+  type TableroMascota,
+  type TableroVivo,
+  type PuntoPeso,
+  type CitaDeMascota,
+  type HoyMascota,
+} from './wrappers/tablero';
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
    por dónde llamarlo. Se abre acá copiando el molde, sin tocar nada de A. */

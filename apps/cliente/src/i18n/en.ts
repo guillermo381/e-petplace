@@ -615,6 +615,7 @@ export const clienteEn = {
     sexoMacho: 'Male',
     sexoHembra: 'Female',
     nacimiento: 'Born',
+    accionCitas: 'Appointments',
     peso: 'Weight',
     microchip: 'Microchip',
     identidadInvitacion: 'Their identity fills in little by little — every detail helps us care better.',
