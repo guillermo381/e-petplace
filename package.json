@@ -105,7 +105,8 @@
     "_comentario_verify_pasaporte_campos": "A3.5 sobre la superficie PUBLICA del pasaporte: compara los campos que la RPC devuelve contra la lista firmada por la mesa. NO va al hook hasta que la superficie exista — hoy sale 2 (NO CONCLUYENTE) porque ni la RPC ni la lista existen, y eso es distinto de verde.",
     "verify:nexo-anticipa": "node scripts/verify-nexo-anticipa.mjs",
     "verify:nexo-alimenta": "node scripts/verify-nexo-alimenta.mjs",
-    "verify:union-vs-check": "node scripts/verify-union-vs-check.mjs"
+    "verify:union-vs-check": "node scripts/verify-union-vs-check.mjs",
+    "verify:lista-voseo": "node scripts/verify-lista-voseo.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
