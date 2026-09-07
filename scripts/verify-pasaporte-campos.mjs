@@ -21,6 +21,7 @@
 import { readFileSync, existsSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { exigirArgumentos } from './lib-argumentos.mjs';
 
 /* Un instrumento tiene que poder decir «no»: cualquier argumento que no entienda
@@ -69,8 +70,12 @@ export function camposDeLaRpc(nombre) {
   return { existe: true, forma: 'claves REALES del objeto', campos };
 }
 
+/* Corre sólo si lo invocan a él: importarlo para reusar su juez no puede
+   disparar el gate ni su `process.exit()`. Ya me pasó tres veces. */
+const ESTE = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
 // ═══ CONTROL ══════════════════════════════════════════════════════════════
-if (process.argv.includes('--control')) {
+if (ESTE && process.argv.includes('--control')) {
   let fallos = 0;
   const ok = (b, et, d = '') => { di(`${b ? '✅' : '🔴'} ${et}${d ? '  ' + d : ''}`); if (!b) fallos += 1; };
   const tmp = '.control-pasaporte-campos';
@@ -99,6 +104,7 @@ if (process.argv.includes('--control')) {
 
 // ═══ GATE ══════════════════════════════════════════════════════════════════
 const rpc = camposDeLaRpc(RPC);
+if (ESTE) {
 if (!rpc.existe) {
   di(`⚠️ NO CONCLUYENTE — ${rpc.motivo}.`);
   di('   La superficie del pasaporte todavía no existe. El gate queda escrito y');
@@ -152,4 +158,6 @@ di(`✅ ningún campo fuera de la lista.`);
 if (modo !== 'FIRMADA') {
   di('   ⚠️ Esto dice «no cambió desde que lo medí», NO «estos campos están bien».');
   di(`   La firma de los ${rpc.campos.length} campos sigue pendiente y es del founder.`);
+}
+
 }

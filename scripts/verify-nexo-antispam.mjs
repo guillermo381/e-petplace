@@ -7,6 +7,14 @@
  *   ② **cero en memorial** — LOYALTY §8.1: el silencio es parte del respeto
  *   ③ **cero sin opt-in**
  *   ④ **el job NO manda push**: escribe la fila y prende los arcos del orbe
+ *   ⑤ **anticipación**: como máximo **una VIVA por mascota cada 7 días**, y **nunca
+ *      dos el mismo día**
+ *
+ * ── ⑤ SE MIDE SOBRE LAS ENTREGADAS, NO SOBRE TODAS ──────────────────────────
+ * El motor produce varias por mascota y las pone **en cola**; sale una. *Contar las
+ * filas de la tabla daría rojo sobre un diseño que funciona bien:* las que están en
+ * cola **no le llegaron a nadie**, y ésa es toda la diferencia entre anticipar y
+ * atosigar. Medido en Thor: 4 avisos, **1 entregada y 3 en cola**.
  *
  * ── ☠️ APUNTABA A UNA EDGE QUE NUNCA EXISTIÓ ────────────────────────────────
  * La primera versión buscaba `supabase/functions/nexo-avisos/`. **Ese directorio
@@ -28,6 +36,7 @@
  *   node scripts/verify-nexo-antispam.mjs
  */
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { exigirArgumentos } from './lib-argumentos.mjs';
 
 exigirArgumentos(['--control'], 0);
@@ -63,6 +72,35 @@ export function buscaPush(nombre) {
 }
 
 /**
+ * ⑤ — el brazo de la anticipación, sobre las ENTREGADAS.
+ * `avisos`: [{ mascota_id, dia, estado }]
+ */
+export function juzgarAnticipacion(avisos, { ventanaDias = 7 } = {}) {
+  const rojos = [];
+  const vivas = avisos.filter((a) => a.estado === 'entregado');
+  const porMascota = new Map();
+  for (const a of vivas) {
+    if (!porMascota.has(a.mascota_id)) porMascota.set(a.mascota_id, []);
+    porMascota.get(a.mascota_id).push(a.dia);
+  }
+  for (const [m, dias] of porMascota) {
+    const orden = [...dias].sort();
+    /* «dos el mismo día» se nombra aparte aunque la ventana lo cubra: es el caso
+       que la familia SIENTE, y decir «dos en 7 días» cuando fueron el mismo día
+       describe el hecho de menos. */
+    const mismoDia = orden.filter((d, i) => i > 0 && d === orden[i - 1]);
+    if (mismoDia.length) rojos.push({ regla: '⑤ dos el mismo día', detalle: `${mismoDia.length + 1} anticipaciones VIVAS el ${mismoDia[0]} a la misma mascota` });
+    for (let i = 1; i < orden.length; i += 1) {
+      const dif = (Date.parse(orden[i]) - Date.parse(orden[i - 1])) / 86400000;
+      if (dif > 0 && dif < ventanaDias) {
+        rojos.push({ regla: '⑤ ventana de 7 días', detalle: `dos anticipaciones VIVAS a ${dif} día(s) (${orden[i - 1]} → ${orden[i]})` });
+      }
+    }
+  }
+  return rojos;
+}
+
+/**
  * ①②③ — el juez sobre los avisos que el job produjo.
  * `avisos`: [{ mascota_id, tipo, dia, memorial, opt_in }]
  */
@@ -85,7 +123,8 @@ export function juzgarAvisos(avisos) {
 /** Los avisos REALES, con su memorial y su opt-in resueltos en la misma consulta. */
 function avisosReales() {
   return sql(`select a.mascota_id::text as mascota_id, a.tipo,
-                     to_char(a.creado_en,'YYYY-MM-DD') as dia,
+                     coalesce(a.estado,'entregado') as estado,
+                     to_char(coalesce(a.entregado_en, a.creado_en),'YYYY-MM-DD') as dia,
                      (m.estado_vida <> 'activa') as memorial,
                      (f.avisos_nexo_desde is not null) as opt_in
               from ${TABLA} a
@@ -93,8 +132,12 @@ function avisosReales() {
               join familia f on f.id = m.familia_id`);
 }
 
+/* Corre sólo si lo invocan a él: importarlo para reusar su juez no puede
+   disparar el gate ni su `process.exit()`. Ya me pasó tres veces. */
+const ESTE = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
 // ═══ CONTROL ═══════════════════════════════════════════════════════════════
-if (process.argv.includes('--control')) {
+if (ESTE && process.argv.includes('--control')) {
   let fallos = 0;
   const ok = (b, et, d = '') => { di(`${b ? '✅' : '🔴'} ${et}${d ? '  ' + d : ''}`); if (!b) fallos += 1; };
   const base = { mascota_id: 'm1', dia: '2026-09-06', memorial: false, opt_in: true };
@@ -112,6 +155,30 @@ if (process.argv.includes('--control')) {
   ok(juzgarAvisos([{ ...base, tipo: 'v', mascota_id: 'm1' }, { ...base, tipo: 'v', mascota_id: 'm2' }]).length === 0,
     'CLASE     el mismo tipo a DOS mascotas el mismo día no es spam — el techo es por mascota');
 
+  /* ⑤ EL BRAZO DE LA ANTICIPACIÓN, con el caso REAL de Thor: 4 producidas, 1 viva. */
+  const thor = [
+    { mascota_id: 'thor', dia: '2026-09-07', estado: 'entregado' },
+    { mascota_id: 'thor', dia: '2026-09-07', estado: 'en_cola' },
+    { mascota_id: 'thor', dia: '2026-09-07', estado: 'en_cola' },
+    { mascota_id: 'thor', dia: '2026-09-07', estado: 'en_cola' },
+  ];
+  ok(juzgarAnticipacion(thor).length === 0,
+    'NEGATIVO  ⑤ Thor: 4 producidas y 1 VIVA no es spam — las 3 en cola no le llegaron a nadie');
+  ok(juzgarAnticipacion(thor.map((a) => ({ ...a, estado: 'entregado' }))).some((r) => r.regla.includes('mismo día')),
+    'POSITIVO  ⑤ si las CUATRO salieran vivas el mismo día, ROJO y se dice cuántas');
+  ok(juzgarAnticipacion([
+    { mascota_id: 'm', dia: '2026-09-01', estado: 'entregado' },
+    { mascota_id: 'm', dia: '2026-09-04', estado: 'entregado' }]).some((r) => r.regla.includes('ventana')),
+    'POSITIVO  ⑤ dos vivas a 3 días caen en la ventana de 7');
+  ok(juzgarAnticipacion([
+    { mascota_id: 'm', dia: '2026-09-01', estado: 'entregado' },
+    { mascota_id: 'm', dia: '2026-09-08', estado: 'entregado' }]).length === 0,
+    'CLASE     ⑤ dos vivas a 7 días exactos NO es rojo — la ventana es abierta');
+  ok(juzgarAnticipacion([
+    { mascota_id: 'a', dia: '2026-09-07', estado: 'entregado' },
+    { mascota_id: 'b', dia: '2026-09-07', estado: 'entregado' }]).length === 0,
+    'CLASE     ⑤ una viva a CADA mascota el mismo día no es spam — el techo es por mascota');
+
   /* ④ contra objetos REALES de la base: uno que sí despacha y uno que no.
      Un detector probado sólo contra un fixture no probó nada (L-459). */
   const conPush = buscaPush('despachar_notificaciones');
@@ -125,12 +192,13 @@ if (process.argv.includes('--control')) {
 
   di('');
   if (fallos) { di(`🔴 ${fallos} control(es) en rojo.`); process.exit(1); }
-  di('✅ caza las cuatro y no acusa a quien se porta bien.');
+  di('✅ caza las cinco y no acusa a quien se porta bien.');
   process.exit(0);
 }
 
 // ═══ GATE ══════════════════════════════════════════════════════════════════
 const j = buscaPush(JOB);
+if (ESTE) {
 if (!j.existe) {
   di(`⚠️ NO CONCLUYENTE — ${j.motivo}.`);
   di('   Las cuatro reglas y su juez quedan escritos y probados (--control).');
@@ -140,7 +208,11 @@ const filas = avisosReales();
 if (filas === null) { di('⚠️ NO CONCLUYENTE — no pude leer los avisos de la base.'); process.exit(2); }
 
 di(`verify:nexo-antispam · job \`${JOB}\` · tabla \`${TABLA}\` · ${filas.length} aviso(s) producido(s)`);
-const rojos = juzgarAvisos(filas);
+const rojos = juzgarAvisos(filas.filter((a) => a.estado === 'entregado'));
+const anticipa = filas.filter((a) => a.tipo === (process.env.NEXO_TIPO_ANTICIPA ?? 'anticipacion'));
+rojos.push(...juzgarAnticipacion(anticipa));
+const vivas = anticipa.filter((a) => a.estado === 'entregado').length;
+di(`   anticipación: ${anticipa.length} producida(s) · ${vivas} viva(s) · ${anticipa.length - vivas} en cola`);
 if (j.tocaPush) rojos.push({ regla: '④ el job no manda push', detalle: 'el cuerpo del job toca el camino del push' });
 
 if (rojos.length) {
@@ -149,5 +221,7 @@ if (rojos.length) {
   if (j.tocaPush) di('   Un aviso de Nexo prende un arco y escribe una fila. No vibra un teléfono.');
   process.exit(1);
 }
-di(`✅ ① uno por tipo/mascota/día · ② cero en memorial · ③ cero sin opt-in · ④ el job no toca el push.`);
+di(`✅ ① uno por tipo/mascota/día · ② cero en memorial · ③ cero sin opt-in · ④ el job no toca el push · ⑤ una anticipación viva por mascota cada 7 días.`);
 if (!filas.length) di('   ⚠️ con CERO avisos producidos, ①②③ pasan por vacío: el verde dice «no hay spam», no «el job funciona».');
+
+}
