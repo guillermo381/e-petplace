@@ -2117,6 +2117,21 @@ const FIXTURES = {
         ⚠️ El `path` importa: los cinco guards buscan SU pieza y sin ella
         salen por «ancla rota», que es otro rojo — un fixture que enrojece
         por el ancla no prueba el brazo que dice probar. ══════════════════ */
+  /* R77 · el sitio DECLARADO exhaustivo al que le falta un miembro. El corpus
+     trae 20 archivos y 10 uniones para pasar las dos anclas — sin eso el
+     fixture enrojecería por «no pude medir», que es otro rojo. */
+  R77: [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
+    })),
+    {
+      path: 'packages/ui/src/components/EscaleraCaso.tsx',
+      src:
+        "export type EtapaCaso = 'recibido' | 'con_prestador' | 'cerrado'\n" +
+        "const ORDEN_CASO: readonly EtapaCaso[] = ['recibido', 'con_prestador']\n",
+    },
+  ],
   /* R72 · la etapa que existe en la unión y falta en el orden: compila, no
      falla, y el paso desaparece de la escalera. */
   R72: [{
@@ -6383,6 +6398,179 @@ function piezaDe(archivos, nombre) {
  *  Mide los TRES conjuntos —unión, orden y glifos— y exige que coincidan.
  *  ⚠️ Su verde dice «las cinco etapas están las tres veces», jamás «la
  *  escalera cuenta bien la historia». */
+/** R77 · LO QUE ENUMERA UNA UNIÓN A MANO SE DECLARA (S114-B · adenda).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **LA CLASE NO ERA DE MI PIEZA.** `R72` cazó que `ORDEN_CASO` puede quedar
+ * corto porque **un array de un tipo compila con MENOS miembros que el tipo**.
+ * Eso vale para **todo array que hace de orden o de registro sobre una
+ * unión** — y el censo por FORMA de `packages/ui` encontró **once**.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ── 🔴 POR QUÉ ES **UN** GUARD Y NO CUATRO ──────────────────────────────
+ * `R72` mide UNA pieza y por eso pudo ser específica. Cuatro reglas gemelas
+ * serían el clon que la Ley 19 caza un piso más arriba: *lo que se copia,
+ * diverge* — y la quinta escalera que nazca no tendría la suya.
+ *
+ * ── 🔴 Y POR QUÉ ES POR **DECLARACIÓN** Y NO POR DERIVACIÓN ─────────────
+ * **Porque la forma NO distingue el defecto, y eso se midió.** De los once
+ * sitios, **cuatro están incompletos A PROPÓSITO**: los lotes de íconos de la
+ * galería (`LOTE`, `LOTE3`, `NUEVOS_COACH`, `VECINOS_COACH`) son subconjuntos
+ * curados para un gate por ícono, y **uno nace vacío por diseño** (`vivas`, un
+ * acumulador). Un guard que midiera «¿está completo?» sobre la forma sola
+ * saldría rojo cinco veces sobre cinco sitios correctos.
+ *
+ * ⇒ **la tabla es una CLASIFICACIÓN de lo que el objeto ya contiene**, no una
+ * lista de deseos. Mismo precedente que `verify:jornada-completa`, y por la
+ * misma razón.
+ *
+ * ── LOS TRES ROJOS ──────────────────────────────────────────────────────
+ * ① un sitio `exhaustivo` al que le falta un miembro de su unión;
+ * ② **un sitio que la tabla no clasifica** — *no dice «está mal»: dice «no
+ *    puedo decir si está bien», y en un lint que sólo sabe rojo y verde eso
+ *    es rojo.* Un requisito no se pierde en silencio;
+ * ③ una entrada de la tabla cuyo sitio **desapareció** — un lector que se fue
+ *    deja la tabla afirmando algo sobre nada.
+ *
+ * ── 🔴 LA SEGUNDA PUERTA, que apareció midiendo y no leyendo ────────────
+ * El primer censo miraba arrays **con anotación de tipo**. Al cerrar sus dos
+ * ciegos aparecieron **dos formas más del MISMO defecto**:
+ * · arrays **sin anotación** (`= [...] as const`) que enumeran la unión igual;
+ * · **cadenas de `push()`** que la enumeran sin ser un array — `clasesConAlgo`
+ *   arma las cuatro `ClaseCoach` con cuatro `if`, y **si mañana nace una
+ *   quinta, el orbe del Coach dibuja tres arcos donde hay cuatro**: compila,
+ *   no falla, y se ve normal.
+ * *Un censo por la forma que uno tiene en la cabeza acota; no cierra.*
+ *
+ * ⚠️ **LO QUE NO VE, declarado:** `switch` sin `never` exhaustivo · arrays
+ * armados por `map`/`filter` · el mismo defecto en `apps/` (esta regla mira
+ * SÓLO `packages/ui`, que es su territorio). Su verde dice «lo que enumera a
+ * mano en `packages/ui` está declarado y completo», **jamás «nadie enumera a
+ * mano en ningún lado»**. */
+const TABLA_R77 = new Map([
+  // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
+  ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
+  ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],
+  ['EscaleraSolicitud.tsx::ORDEN', 'exhaustivo'],
+  ['HojaFiltros.tsx::ORDEN_CONVIVENCIA', 'exhaustivo'],
+  ['ModalDosAlturas.tsx::candidatas', 'exhaustivo'],
+  ['TokenGallery.tsx::TIPOS_VIDA', 'exhaustivo'],
+  // La cadena de `if` del orbe: enumera las cuatro clases a mano.
+  ['coach-geometria.ts::push:ClaseCoach', 'exhaustivo'],
+  ['coach-geometria.ts::push:ClasePastilla', 'exhaustivo'],
+  // ── SUBCONJUNTOS CURADOS: incompletos a propósito. Son los LOTES del gate
+  //    por ícono — mostrar los 72 de una vez no es un gate, es una pared ──
+  ['TokenGallery.tsx::LOTE', 'subconjunto'],
+  ['TokenGallery.tsx::LOTE3', 'subconjunto'],
+  ['TokenGallery.tsx::NUEVOS_COACH', 'subconjunto'],
+  ['TokenGallery.tsx::VECINOS_COACH', 'subconjunto'],
+  // ── ACUMULADOR: nace vacío y se llena. Su exhaustividad la sostiene el
+  //    `push:ClaseCoach` de arriba, que es donde de verdad se decide ──
+  ['coach-geometria.ts::vivas', 'acumulador'],
+])
+
+function r77(archivos) {
+  /* 🔴 SE DEDUPLICA POR RUTA, y no es prolijidad: la corrida arma su corpus
+     con `ui` (los `.tsx`) MÁS `archivosCodigo('packages/ui/src')` (los `.ts` **y
+     los `.tsx`**), así que **cada componente entra dos veces** y cada fallo se
+     imprimía duplicado. *Lo vi en el rojo, no leyendo el código* — y un guard
+     que reporta dos veces el mismo defecto enseña a leer sus números al
+     descuido. */
+  const porRuta = new Map()
+  for (const a of archivos) if (/packages\/ui\/src\/.*\.tsx?$/.test(a.path)) porRuta.set(a.path, a)
+  const uis = [...porRuta.values()]
+  const fallos = [...ancla('R77', uis.length, 20, 'archivo(s) de `packages/ui/src` en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  // ① las uniones de literales del paquete (≥3 miembros: con dos, un array de
+  //    uno se lee como una elección y no como un orden incompleto)
+  const uniones = new Map()
+  for (const { src } of uis) {
+    for (const m of sinComentarios(src ?? '').matchAll(
+      /(?:export\s+)?type\s+([A-Z][A-Za-z0-9]*)\s*=\s*((?:\s*\|?\s*'[^']+')+)\s*(?:\n|$)/g,
+    )) {
+      const ms = [...m[2].matchAll(/'([^']+)'/g)].map((x) => x[1])
+      if (ms.length >= 3) uniones.set(m[1], ms)
+    }
+  }
+  fallos.push(...ancla('R77', uniones.size, 10, 'unión(es) de literales (sin ellas no hay contra qué medir)'))
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  const vistos = new Set()
+  const anota = (archivo, nombre, miembros, presentes) => {
+    const base = archivo.split('/').pop()
+    const clave = `${base}::${nombre}`
+    vistos.add(clave)
+    const clase = TABLA_R77.get(clave)
+    if (clase === undefined) {
+      fallos.push(
+        `R77 **\`${clave}\` enumera a mano los miembros de una unión y la tabla no lo clasifica.** ` +
+        `No digo que esté mal: **digo que no puedo decir si está bien**, y en un lint eso es rojo. ` +
+        `*Un orden incompleto compila y la pantalla se ve normal con un paso menos.* ` +
+        `Clasificalo en \`TABLA_R77\`: \`exhaustivo\` · \`subconjunto\` (incompleto a propósito) · \`acumulador\`.`,
+      )
+      return
+    }
+    if (clase !== 'exhaustivo') return
+    const faltan = miembros.filter((x) => !presentes.includes(x))
+    if (faltan.length > 0) {
+      fallos.push(
+        `R77 **\`${clave}\` está declarado EXHAUSTIVO y le faltan ${faltan.length}: ${faltan.join(', ')}.** ` +
+        `El tipo no lo ve —un array de un tipo compila con menos miembros que el tipo— así que ` +
+        `**el miembro que falta desaparece y nada falla**.`,
+      )
+    }
+  }
+
+  for (const { path, src } of uis) {
+    const t = sinComentarios(src ?? '')
+    // ② arrays CON anotación sobre la unión
+    for (const m of t.matchAll(
+      /const\s+([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(?:readonly\s+)?([A-Z][A-Za-z0-9]*)\[\]\s*=\s*\[([^\]]*)\]/g,
+    )) {
+      const ms = uniones.get(m[2])
+      if (ms === undefined) continue
+      anota(path, m[1], ms, [...m[3].matchAll(/'([^']+)'/g)].map((x) => x[1]))
+    }
+    // ③ arrays SIN anotación cuyos miembros caen todos en UNA unión
+    for (const m of t.matchAll(/const\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\[([^\]]*)\]/g)) {
+      const vals = [...m[2].matchAll(/'([^']+)'/g)].map((x) => x[1])
+      if (vals.length < 2) continue
+      // sólo literales sueltos: un array con expresiones adentro no es un orden
+      if (/[^\s',]/.test(m[2].replace(/'[^']*'/g, '').replace(/,/g, ''))) continue
+      for (const [, ms] of uniones) {
+        if (!vals.every((v) => ms.includes(v))) continue
+        anota(path, m[1], ms, vals)
+        break
+      }
+    }
+    // ④ LA SEGUNDA PUERTA: el enumerado a mano que NO es un array
+    for (const [tipo, ms] of uniones) {
+      const p = [...new Set([...t.matchAll(/\.push\(\s*'([^']+)'\s*\)/g)].map((x) => x[1]).filter((v) => ms.includes(v)))]
+      if (p.length < 2) continue
+      anota(path, `push:${tipo}`, ms, p)
+    }
+  }
+
+  for (const clave of TABLA_R77.keys()) {
+    if (!vistos.has(clave)) {
+      fallos.push(
+        `R77 **\`${clave}\` está en la tabla y NO EXISTE en el corpus.** Un lector que se fue deja la tabla ` +
+        `afirmando algo sobre nada — y el próximo censo la lee como si siguiera cubriendo ese sitio.`,
+      )
+    }
+  }
+
+  const exh = [...TABLA_R77.values()].filter((v) => v === 'exhaustivo').length
+  return {
+    fallos,
+    info:
+      `${vistos.size} sitio(s) que enumeran una unión a mano · ${exh} declarados EXHAUSTIVOS · ` +
+      `${TABLA_R77.size - exh} incompletos a propósito (lotes de la galería + 1 acumulador) · ` +
+      `${uniones.size} unión(es) en el corpus · ⚠️ NO ve \`switch\` sin \`never\`, ni arrays armados por \`map\`, ni \`apps/\``,
+  }
+}
+
 function r72(archivos) {
   const f = piezaDe(archivos, 'EscaleraCaso')
   if (f === null) {
@@ -6718,7 +6906,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6805,6 +6993,30 @@ const EXTRAS_BRAZOS = [
         estos fixtures son los que la sostienen en cada corrida* — y son dos
         pruebas distintas: la de acá dice que el brazo sabe decir que no, la
         del objeto real dice que sabe encontrarlo donde de verdad vive. ══ */
+  /* ══ S114-B · LOS DOS BRAZOS DE R77 QUE SU FIXTURE ÚNICO NO ENCIENDE.
+        El genérico prueba ① (el exhaustivo incompleto). Estos prueban los
+        otros dos, y **los tres se probaron ADEMÁS en rojo contra los archivos
+        REALES** —mutando el ORDEN de adopción, la cadena de `push` del orbe,
+        y borrando un array de la tabla—. *El fixture dice que el brazo sabe
+        decir que no; la mutación dice que sabe encontrarlo donde vive.* ══ */
+  ['R77·el sitio SIN CLASIFICAR (no digo que esté mal: digo que no sé)', r77, [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
+    })),
+    {
+      path: 'packages/ui/src/components/PiezaNueva.tsx',
+      src:
+        "export type EstadoX = 'a' | 'b' | 'c'\n" +
+        "const ORDEN_X: readonly EstadoX[] = ['a', 'b', 'c']\n",
+    },
+  ]],
+  ['R77·la entrada de la tabla cuyo sitio DESAPARECIÓ', r77, [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
+    })),
+  ]],
   ['R72·la etapa sin glifo (el orden está completo)', r72, [{
     path: 'packages/ui/src/components/EscaleraCaso.tsx',
     src:
@@ -7152,6 +7364,7 @@ corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAIC
 /* S114-B · LAS CINCO DE LA POSTVENTA. Corren sobre `packages/ui/src` entero:
    cada guard busca SU pieza y sale por «ancla rota» si no la encuentra — así
    un rename de archivo no las deja mudas. */
+corridas.push(['R77 (lo que enumera una unión a mano se declara)', r77([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
 corridas.push(['R72 (ninguna etapa del caso se pierde del orden)', r72(ui)])
 corridas.push(['R73 (las dos tarjetas del dinero son parejas)', r73(ui)])
 corridas.push(['R74 (la cabecera del caso no dice el monto)', r74(ui)])
