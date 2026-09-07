@@ -21,8 +21,17 @@
  * documento. Así que para las marcas de flecha el `ground_truth` dice `↓` y el
  * papel muestra `□`. *Medir «¿transcribió la marca?» contra una verdad que el
  * artefacto no lleva haría ver mal a un modelo que está bien.*
- * ⇒ Las marcas se miden en DOS baldes: **ASCII (`H` `L` `*`), que sí se
- * dibujan**, y flecha, que se declara NO MEDIBLE con su razón.
+ * ⇒ **La vara se corrigió** (firma del founder: *las filas con unidades que la
+ * fuente no dibuja se corrigen en la vara, no se le cobran al modelo*): la
+ * celda de la marca usa una fuente que tiene la flecha, y los superíndices
+ * pasaron a `^n` — que además es lo que imprime un laboratorio que no puede
+ * componerlos. Verificado **contra la imagen**, no contra el código.
+ *
+ * 🔴 Y EL CONJUNTO NO SE CITA COMO EXACTITUD SOBRE PAPELES DE VERDAD. Son
+ * sintéticos y **no hay otros**: mide LA LEY —no interpreta, transcribe con su
+ * unidad y su referencia, no inventa marcas— y es **tablero de regresión**.
+ * Su número es un PISO. Medir con papeles reales es `D-1047`, cuando lleguen
+ * las primeras familias.
  */
 import { declararObjeto } from './declarar-objeto.ts'
 import { PROMPT, sanearFila, CLASES } from '../extract-papel/index.ts'
@@ -34,8 +43,9 @@ await declararObjeto({
   noCubre:
     'papeles de verdad: son sintéticos, generados por código. Prueban la LEY y las trampas ' +
     '—coma decimal, unidades que cambian, fuera de rango con y sin marca— pero no la variedad ' +
-    'de un papel arrugado de una clínica real. Y NO mide las marcas de flecha: la fuente no ' +
-    'las dibuja (34 de 46 sin U+2193), así que el papel no las lleva.',
+    'de un papel arrugado de una clínica real. 🔴 **El conjunto NO SE CITA como exactitud sobre ' +
+    'papeles de verdad** (firma del founder): mide la LEY y es tablero de regresión. Medir con ' +
+    'papeles reales es `D-1047`, cuando lleguen las primeras familias; hasta entonces es un PISO.',
 })
 
 const RAIZ = Deno.env.get('LOTE_D') ?? ''
@@ -49,9 +59,21 @@ const clave = new TextDecoder().decode(
 if (!clave.startsWith('sk-ant-')) { console.error('🔴 NO CONCLUYENTE — sin clave'); Deno.exit(2) }
 
 const MODELO = 'claude-sonnet-5'
+const SUPERINDICES: Record<string, string> = {
+  '\u2070': '0', '\u00b9': '1', '\u00b2': '2', '\u00b3': '3', '\u2074': '4',
+  '\u2075': '5', '\u2076': '6', '\u2077': '7', '\u2078': '8', '\u2079': '9',
+}
+/** 🔴 `x10³/µL` y `x10^3/µL` son LA MISMA unidad escrita de dos formas, y
+ *  compararlas como texto crudo contaba 32 diferencias que no lo son. Esto
+ *  compara **unidades, no tipografía** — no es indulgencia: un veterinario lee
+ *  las dos igual, y ningún laboratorio elige entre ellas por significado.
+ *  Lo destapó pedir QUÉ escribió el modelo en vez de contar cuántas difieren:
+ *  las 32 eran una sola cosa. */
 const norm = (s: unknown) =>
-  String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, ' ').replace(/[.,]/g, (m) => (m === ',' ? '.' : '.')).trim()
+  String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]/g, (c) => `^${SUPERINDICES[c]}`)
+    .replace(/\^\^+/g, '^').replace(/\^(\d)\^(\d)/g, '^$1$2')
+    .replace(/\s+/g, ' ').replace(/[.,]/g, () => '.').trim()
 /** Un valor «7,61» y «7.61» son el MISMO número escrito por dos laboratorios.
  *  Comparar como texto crudo contaría como error una diferencia de coma. */
 const mismoNum = (a: unknown, b: unknown) => {
@@ -72,12 +94,13 @@ const cuenta = {
   filas_esperadas: 0, filas_devueltas: 0, emparejadas: 0,
   valor: 0, unidad: 0, referencia: 0,
   marca_ascii_ok: 0, marca_ascii_total: 0,
-  marca_flecha_total: 0,
+  marca_flecha_total: 0, marca_flecha_ok: 0,
   /** 🔴 EL NÚMERO QUE IMPORTA: una marca donde el papel no tiene ninguna. */
   marcas_inventadas: 0, sin_marca_total: 0,
   juicios: 0,
 }
 const inventadas: string[] = []
+const difUnidad: string[] = []
 const juicios: string[] = []
 const JUICIOS = ['alto', 'alta', 'bajo', 'baja', 'elevad', 'disminu', 'anormal', 'aumentad',
   'preocupa', 'grave', 'severo', 'insuficien', 'critico', 'crítico', 'normal']
@@ -146,6 +169,14 @@ async function unDoc(g: Record<string, unknown>) {
     cuenta.emparejadas++
     if (mismoNum(f.valor, e.valor_texto)) cuenta.valor++
     if (norm(f.unidad) === norm(e.unidad)) cuenta.unidad++
+    else if (difUnidad.length < 40) {
+      /* 🔴 QUÉ ESCRIBIÓ, no sólo que difirió (pedido de E). Un fallo de unidad
+         puede ser cosmético («UI/L» vs «U/L») o puede ser **una unidad comida**
+         —`x10/µL` donde el papel dice `x10^6/µL`— que es un error de un factor
+         de un millón y se lee perfectamente plausible. *Un contador que no
+         distingue las dos no puede decir si el papel es seguro.* */
+      difUnidad.push(`${e.parametro}: papel «${e.unidad}» · modelo «${f.unidad}»`)
+    }
     if (norm(f.referencia).replace(/\s/g, '') === norm(e.rango_texto).replace(/\s/g, '')) cuenta.referencia++
 
     /* 🔴 LA INVENCIÓN. `literal` es la línea tal cual; si el papel NO tiene
@@ -158,7 +189,9 @@ async function unDoc(g: Record<string, unknown>) {
       cuenta.marcas_inventadas++
       if (inventadas.length < 8) inventadas.push(`${nombre} · ${e.parametro}: «${lit}»`)
     }
-    if (!esFlecha && e.marca_impresa !== null && lit.includes(e.marca_impresa)) cuenta.marca_ascii_ok++
+    if (e.marca_impresa !== null && lit.includes(e.marca_impresa)) {
+      if (esFlecha) cuenta.marca_flecha_ok++; else cuenta.marca_ascii_ok++
+    }
 
     // Ningún adjetivo de juicio, en ningún campo de la fila.
     const texto = norm(JSON.stringify(f)).replace(/"confianza":"[a-z]+"/g, '')
@@ -176,14 +209,30 @@ for (let i = 0; i < conAnalitos.length; i += 3) {
 }
 
 const pc = (n: number, d: number) => d === 0 ? '—' : `${n}/${d} (${Math.round(n * 100 / d)}%)`
+
+/* 🔴 SIN FILAS NO HAY MEDICIÓN, Y SE DICE. Una corrida que no pudo llamar al
+   proveedor —clave sin crédito, red caída— imprimía `MARCAS INVENTADAS 0 sobre
+   0` y `ADJETIVOS 0`, que **se leen como un verde**. *Un cero sobre cero no es
+   un aprobado: es la ausencia de la prueba.* */
+if (cuenta.emparejadas === 0) {
+  console.log('\n🔴 NO CONCLUYENTE — cero filas emparejadas: el arnés NO MIDIÓ.')
+  console.log('   Revisá el log de arriba: si dice `credit balance is too low`, es la clave.')
+  Deno.exit(2)
+}
 console.log(`\n── EXACTITUD POR CAMPO, sobre las filas emparejadas ──`)
 console.log(`  filas          ${pc(cuenta.emparejadas, cuenta.filas_esperadas)} emparejadas · devolvió ${cuenta.filas_devueltas}`)
 console.log(`  valor          ${pc(cuenta.valor, cuenta.emparejadas)}`)
 console.log(`  unidad         ${pc(cuenta.unidad, cuenta.emparejadas)}`)
 console.log(`  referencia     ${pc(cuenta.referencia, cuenta.emparejadas)}`)
+if (difUnidad.length) {
+  console.log(`\n  ── las ${difUnidad.length} unidades que difieren, LITERALES ──`)
+  const cuentaDif = new Map<string, number>()
+  for (const d of difUnidad) cuentaDif.set(d.split(': ')[1], (cuentaDif.get(d.split(': ')[1]) ?? 0) + 1)
+  for (const [k, n] of [...cuentaDif].sort((a, b) => b[1] - a[1])) console.log(`     ×${n}  ${k}`)
+}
 console.log(`\n── LA LEY: TRANSCRIBIR SIN INTERPRETAR ──`)
 console.log(`  marca ASCII (H·L·*) transcrita   ${pc(cuenta.marca_ascii_ok, cuenta.marca_ascii_total)}`)
-console.log(`  marca de FLECHA                  ${cuenta.marca_flecha_total} — 🔴 NO MEDIBLE: la fuente no la dibuja`)
+console.log(`  marca de FLECHA (↑·↓) transcrita ${pc(cuenta.marca_flecha_ok, cuenta.marca_flecha_total)}`)
 console.log(`  🔴 MARCAS INVENTADAS             ${cuenta.marcas_inventadas} sobre ${cuenta.sin_marca_total} filas sin marca`)
 if (inventadas.length) console.log(inventadas.map((s) => `     ${s}`).join('\n'))
 console.log(`  🔴 ADJETIVOS DE JUICIO           ${cuenta.juicios}`)

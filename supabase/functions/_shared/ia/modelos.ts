@@ -381,3 +381,28 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   papel: false,
   coach_clasifica: false,
 }
+
+
+/**
+ * 🔴 LAS PIEZAS QUE EXIGEN DETERMINISMO — `temperature: 0`.
+ *
+ * No es una preferencia de estilo: es lo que separa un clasificador que se
+ * puede medir con UNA corrida de uno que exige N y frecuencia por caso.
+ *
+ * Salió de una medición y de una corrección de E. Su prompt viejo daba **0
+ * casos variables en 3 corridas de 40 frases**, y los dos concluimos que el
+ * razonamiento apagado más la salida cerrada lo volvían determinista. Al
+ * agregarle un campo, **3 de 20 casos pasaron a variar** — o sea que *la
+ * determinación nunca fue una propiedad: era una coincidencia no medida*, y un
+ * prompt nuevo es un sujeto nuevo. Con `temperature: 0`: **0 de 20 en 3
+ * corridas, con la misma exactitud** (preguntas 8/8, búsquedas 11/12).
+ *
+ * ⚠️ Sólo para salida CERRADA. En prosa, temperatura 0 empobrece el texto — y
+ * la prosa de Nexo no se mide por igualdad entre corridas, así que no gana nada.
+ */
+export const TEMPERATURA_CERO: Record<Pieza, boolean> = {
+  carnet: false, documento: false, nota_clinica: false, presencia: false,
+  raza: false, coach: false, coach_parte: false, papel: false,
+  // Los tres clasificadores de salida cerrada.
+  coach_router: true, coach_clasifica: true, busqueda: true,
+}

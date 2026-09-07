@@ -40,6 +40,7 @@ import {
   MODELOS,
   MODELOS_ADAPTIVOS,
   PENSAR,
+  TEMPERATURA_CERO,
   TIMEOUT_MS,
 } from './modelos.ts'
 import { registrarUso, type Uso, usoDesdeRespuesta, usoSinRespuesta } from './uso.ts'
@@ -163,6 +164,11 @@ function construirCuerpo(
     model: modelo,
     max_tokens: p.maxTokens ?? MAX_TOKENS[p.pieza],
   }
+  /* 🔴 `temperature: 0` en las piezas de salida CERRADA. Ver `TEMPERATURA_CERO`
+     en `modelos.ts`: es lo que vuelve el determinismo una propiedad medible en
+     vez de una coincidencia. **No se manda a las que escriben prosa** — ahí no
+     gana nada y empobrece el texto. */
+  if (TEMPERATURA_CERO[p.pieza]) cuerpo.temperature = 0
 
   // `thinking: {type:'disabled'}` se manda SÓLO a los modelos que piensan si no
   // se les dice nada. A los demás no se les manda el campo: para ellos omitirlo
