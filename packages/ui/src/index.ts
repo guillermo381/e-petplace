@@ -1312,3 +1312,36 @@ export {
   AvisoAnticipacion,
   type AvisoAnticipacionProps,
 } from './components/AvisoAnticipacion'
+
+// EL PERFIL COMO TABLERO (S113-B · 2.2) — las piezas del tablero.
+// 🔴 SIN DATO NO HAY GRÁFICO: un sparkline de un punto dibuja una recta, y esa
+// recta dice «estuvo estable» — una afirmación que nadie hizo. Y un dato
+// ausente NO se agranda: va en apoyo, no en display (19.9).
+// 🔴 EL «HOY» ES UNA COSA SOLA: la pieza recibe un candidato ya elegido, no una
+// lista. *Una lista de dos es la forma más rápida de que no se haga ninguna.*
+// 🔴 Y EL PROGRESO DE «CONOCIÉNDOLO» NO TIENE NÚMERO EN PANTALLA
+// (`MODELO_LOYALTY` §3): la fracción entra SÓLO como geometría y la voz llega
+// redactada — *si la pieza recibiera el número y la voz por separado, alguien
+// lo va a imprimir al lado el día que quiera «ser más claro».*
+export {
+  TarjetaMetrica,
+  type TarjetaMetricaProps,
+  type DibujoMetrica,
+} from './components/TarjetaMetrica'
+export { TarjetaHoy, type TarjetaHoyProps, type ClaseHoy, elDeHoy } from './components/TarjetaHoy'
+export { FilaAcciones, type FilaAccionesProps, type AccionPerfil } from './components/FilaAcciones'
+export {
+  TarjetaConociendolo,
+  type TarjetaConociendoloProps,
+} from './components/TarjetaConociendolo'
+export {
+  DetallePeso,
+  type DetallePesoProps,
+  type PuntoDePeso,
+} from './components/DetallePeso'
+export {
+  hayLineaQueDibujar,
+  puntosDeLinea,
+  fraccionDelAnillo,
+  trazoDeProgreso,
+} from './components/tablero-metrica'

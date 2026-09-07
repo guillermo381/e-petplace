@@ -25,6 +25,11 @@ import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestr
 import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
+import { TarjetaMetrica } from '../components/TarjetaMetrica'
+import { TarjetaHoy } from '../components/TarjetaHoy'
+import { FilaAcciones } from '../components/FilaAcciones'
+import { TarjetaConociendolo } from '../components/TarjetaConociendolo'
+import { DetallePeso } from '../components/DetallePeso'
 import { PresentacionNexo } from '../components/PresentacionNexo'
 import { AvisoAnticipacion } from '../components/AvisoAnticipacion'
 import { HojaContanos } from '../components/HojaContanos'
@@ -8766,6 +8771,82 @@ function GaleriaInterna() {
               sugerencia="Los Bulldog inglés suelen tener displasia de cadera: vale la pena hablar de un estudio de cadera en su próximo chequeo."
               onVerVet={() => {}}
               vozVerVet="Hablarlo con mi vet"
+            />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S113 — EL PERFIL COMO TABLERO (2.2) · qué decide: (a) que el dato grande y su mini gráfico se lean de un vistazo sin parecer un dashboard; (b) que la tarjeta SIN dato no dibuje nada y se note que no sabemos, en vez de un cero; (c) que la v2 punteada anuncie sin prometer; (d) que el anillo de Conociéndolo no pida un número">
+          <View style={{ gap: spacing[4] }}>
+            <FilaAcciones
+              citas={{ etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} }}
+              pasaporte={{ etiqueta: 'Pasaporte', glifo: 'carnet', razonApagado: 'Todavía no activaste su placa' }}
+              nexo={{ etiqueta: 'Nexo', onPress: () => {} }}
+              contanos={{ etiqueta: 'Contanos', glifo: 'bitacora', onPress: () => {} }}
+            />
+            <TarjetaHoy
+              clase="anticipacion"
+              titulo="Thor entra a senior en marzo"
+              detalle="Los Bulldog inglés suelen tener displasia de cadera"
+              vozActo="Ver"
+              onActo={() => {}}
+            />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+              <TarjetaMetrica
+                rotulo="Peso" valor="24 kg" vozSinDato="Sin registro"
+                contexto="medido el 04 sept" onPress={() => {}}
+                dibujo={{ tipo: 'sparkline', serie: [22.1, 22.8, 23.4, 23.2, 24] }}
+              />
+              <TarjetaMetrica
+                rotulo="Vacunas" valor="6 de 8" vozSinDato="Sin registro"
+                contexto="la próxima en marzo" onPress={() => {}}
+                dibujo={{ tipo: 'anillo', hechos: 6, total: 8 }}
+              />
+              <TarjetaMetrica
+                rotulo="Antiparasitario" valor="Al día" vozSinDato="Sin registro"
+                onPress={() => {}}
+                dibujo={{ tipo: 'chips', chips: [
+                  { id: 'p', texto: 'pulgas', alDia: true },
+                  { id: 'g', texto: 'garrapatas', alDia: true },
+                  { id: 'i', texto: 'internos', alDia: false },
+                  { id: 'm', texto: 'mosquitos', alDia: null },
+                ] }}
+              />
+              <TarjetaMetrica
+                rotulo="Actividad" valor="3 paseos" vozSinDato="Sin registro"
+                contexto="esta semana" onPress={() => {}}
+                dibujo={{ tipo: 'barras', valores: [0, 2.1, 0, 0, 1.8, 0, 2.4], etiqueta: '3 paseos esta semana' }}
+              />
+              <TarjetaMetrica
+                rotulo="Medicación" valor={null} vozSinDato="Sin registro" onPress={() => {}}
+              />
+              <TarjetaMetrica
+                rotulo="Citas" valor="7 sept" vozSinDato="Sin registro"
+                contexto="control anual" onPress={() => {}}
+                dibujo={{ tipo: 'sparkline', serie: [1] }}
+              />
+            </View>
+            <Texto variante="apoyo">La v2, punteada y sin toque — anuncia sin prometer fecha:</Texto>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+              <TarjetaMetrica v2 rotulo="Descanso" valor="Con su collar" vozSinDato="Sin registro" />
+              <TarjetaMetrica v2 rotulo="Corazón" valor="Con su collar" vozSinDato="Sin registro" />
+            </View>
+            <TarjetaConociendolo
+              fraccion={0.8}
+              voz="Ya conocemos a Thor casi como vos"
+              contanos={<BotonContanos etiqueta="Contanos lo que hace único a Thor" onPress={() => {}} />}
+              raza={<BotonContanos etiqueta="¿Querés conocer más sobre el Bulldog inglés?" onPress={() => {}} />}
+            />
+            <Texto variante="apoyo">El detalle del peso: punto lleno = la clínica, hueco = en casa.</Texto>
+            <DetallePeso
+              vozSinDatos="Todavía no le tomaste el peso"
+              vozClinica="● lo pesó la clínica"
+              vozCasa="○ lo pesaste vos"
+              serie={[
+                { id: '1', kg: 22.1, valor: '22,1 kg', fecha: '02 may 2026', origen: 'clinica' },
+                { id: '2', kg: 22.8, valor: '22,8 kg', fecha: '14 jun 2026', origen: 'casa' },
+                { id: '3', kg: 23.4, valor: '23,4 kg', fecha: '21 jul 2026', origen: 'clinica' },
+                { id: '4', kg: 24, valor: '24 kg', fecha: '04 sept 2026', origen: 'casa' },
+              ]}
             />
           </View>
         </Seccion>
