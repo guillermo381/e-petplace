@@ -1789,9 +1789,22 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    * Lleva huella: es un papel **de la mascota**, familia de `carnet` y
    * `certificaciones`.
    *
-   * ⚠️ **GATE POR ÍCONO PENDIENTE** (§6b.5). Su riesgo declarado: a 21 px una
-   * hoja con renglones **puede leerse como «lista»**; el vecino que lo prueba
-   * es `documentos`, y por eso van juntos en la hoja de contacto.
+   * ── ✅ GATE POR ÍCONO **CERRADO** — firma del founder (7-sep-2026) ──────
+   * **Y el riesgo declarado se resolvió con su vecindad REAL, no con una
+   * opinión:** en la bóveda, a 21 px y en la MISMA pantalla, `papel`
+   * (Exámenes) contra `documentos` (Papeles de e-PetPlace) — una hoja vertical
+   * con renglones contra dos rectángulos apilados. **Se distinguen.**
+   * *La vara no fue una fila de contacto: fue la pantalla donde viven juntos.*
+   *
+   * 🔴 **Y LO QUE EVITA QUE SE LEA «LISTA» ES EL MARCO**, que es justo lo que
+   * el riesgo señalaba: *sin el rectángulo, los renglones quedan sueltos — y
+   * renglones sueltos SON una lista.* El marco no es decoración: es lo que
+   * hace que esto sea una hoja.
+   *
+   * ⚠️ **Y la tentación de sacarlo es real y está medida:** la masa quedó en
+   * **53,0 (+14 %)**, casi contra el techo de la banda, y el marco es la mitad
+   * de ese número. *El día que alguien necesite bajar la masa, lo primero que
+   * va a mirar es el rectángulo* — por eso su gate lo mide y sale rojo.
    */
   papel: ({ tinta, huella }) => (
     <>

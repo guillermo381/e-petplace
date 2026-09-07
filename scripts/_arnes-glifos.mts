@@ -269,10 +269,22 @@ console.log('\n── ⑫ EL GLIFO DE PAPEL (S113-B · fase 3 · B6) ──');
     t('🔴 lleva huella: es un papel DE LA MASCOTA', P.huella === true);
     /* 🔴 **SIN DOBLEZ, y no es estilo: `certificaciones` y `presupuesto` ya la
        usan.** *Dos glifos con la misma esquina doblada se leen como el mismo
-       objeto, y acá el objeto es otro.* La marca de éste son sus renglones. */
+       objeto, y acá el objeto es otro.* La marca de éste son sus renglones.
+
+       ✅ **GATE CERRADO (7-sep-2026), y su riesgo declarado —«a 21 px puede
+       leerse lista»— se resolvió con la vecindad REAL**: en la bóveda, misma
+       pantalla, `papel` contra `documentos` a 21 px se distinguen. */
     const CERT = glifo('certificaciones')!;
     t('🔴 no copia la esquina doblada de `certificaciones`',
       CERT.trazos > P.trazos || P.largo !== CERT.largo);
+    /* 🔴 **EL MARCO ES LO QUE LO SALVA DEL RIESGO, y por eso se mide.**
+       *Sin el rectángulo, los renglones quedan sueltos — y renglones sueltos
+       SON una lista*, que era exactamente lo que el gate tenía que mirar.
+       ⚠️ Y la tentación de sacarlo está MEDIDA: la masa quedó en +14 %, casi
+       contra el techo, **y el marco es la mitad de ese número**. El día que
+       alguien necesite bajarla, lo primero que va a mirar es el rectángulo. */
+    t('🔴 conserva su MARCO de hoja (sin él se lee «lista»)',
+      P.interiorCuadrado !== null && P.interiorCuadrado > 4, ` · ${P.interiorCuadrado?.toFixed(2) ?? 'SIN MARCO'} px`);
   }
 }
 
