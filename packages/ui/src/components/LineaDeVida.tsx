@@ -109,6 +109,13 @@ function vozDe(item: LineaDeVidaItem, t: TraductorUi): { titulo: string; capa: C
     }
   }
   const voz = DICCIONARIO[item.tipo] ?? POR_EJE[item.eje_jtbd ?? ''] ?? GENERICO
+  /* 🔴 La voz de la pantalla GANA. Ver `voz_titulo`: es la única que sabe si
+     hace falta nombrar la mascota, y es la que puede decirlo mejor que un
+     fallback genérico. La CAPA sigue saliendo del tipo — *el color dice de qué
+     eje es el hecho, y eso no cambia porque el texto se redacte mejor.* */
+  if (item.voz_titulo != null && item.voz_titulo.trim().length > 0) {
+    return { titulo: item.voz_titulo, capa: voz.capa }
+  }
   return { titulo: t(voz.clave), capa: voz.capa }
 }
 
@@ -166,6 +173,25 @@ export interface LineaDeVidaItem {
   evento_id: string
   /** Código crudo de eventos_mascota.tipo — la voz la pone el diccionario. */
   tipo: string
+  /**
+   * 🔴 **LA VOZ YA COMPUESTA, cuando la pantalla puede decirlo mejor
+   * (S113-B · 3.1 ⑩).** Presente ⇒ **gana sobre el diccionario**.
+   *
+   * ⏪ Nace de un defecto medido en el Hogar del founder: **tres filas seguidas
+   * decían «Momento de cuidado»** —el fallback genérico del diccionario— **y
+   * ninguna nombraba la mascota**. Y la pieza no podía arreglarlo: *el item no
+   * traía el nombre, así que la fila no decía de quién era porque no lo sabía.*
+   *
+   * 🔴 **Y la cura NO fue que la pieza componga** (Ley 3): la pantalla es la
+   * única que sabe si hace falta el nombre. **En el Hogar sí** —están todas las
+   * mascotas mezcladas y «Momento de cuidado» sin sujeto no informa— **y en el
+   * perfil no**, donde repetir «Zeus» en cada fila de la vida de Zeus es ruido.
+   * *Una pieza que decidiera eso sola se equivocaría en una de las dos.*
+   *
+   * ⚠️ Ausente = el diccionario, exactamente como antes. **Ensanche aditivo:
+   * ningún consumidor cambia.**
+   */
+  voz_titulo?: string | null
   eje_jtbd?: string | null
   /** ISO timestamp. */
   fecha_evento: string

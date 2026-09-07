@@ -11,6 +11,7 @@ import {
   margenDeTrazo, trazosFueraDeCaja, radioDeAnillo,
 } from '../packages/ui/src/components/tablero-metrica.ts';
 import { fechaCortaHumana } from '../packages/i18n/src/fechas.ts';
+import { respiroDelOrbe, ORBE, AIRE_BORDE, RESPLANDOR_RADIO } from '../packages/ui/src/components/coach-geometria.ts';
 
 let ok = 0, mal = 0;
 const t = (n: string, real: unknown, esp: unknown) => {
@@ -365,6 +366,40 @@ t('…y ninguna se dibuja distinto', (ACC.match(/<Icono /g) ?? []).length, 1);
 t('la clave es la etiqueta, no el índice', /key=\{a\.etiqueta\}/.test(ACC), true);
 /* «Pasaporte y QR» son dos palabras: envuelven, no se cortan. */
 t('🔴 la etiqueta larga NO se trunca', /numberOfLines/.test(ACC), false);
+
+console.log('\n── ㉒ «TUS SERVICIOS» USA LA ANATOMÍA DEL TABLERO (3.1 ⑦) ──');
+/* ⏪ Ese rail se dibujaba INLINE y **truncaba tres de cuatro tarjetas**
+   —«Adiestramien…», «07 sept 20…», «Ve…»— con **una unidad distinta en cada una
+   y sin decir cuál**. 🔴 **No nació una pieza nueva: se ensanchó ésta**
+   (`L-175`) — *dos piezas con la misma anatomía divergen al primer cambio, y la
+   que se queda vieja es siempre la que nadie está mirando.* */
+t('🔴 el ensanche es ADITIVO: el glifo es opcional', /glifo\?: IconoNombre/.test(MET), true);
+t('…y el ancho también', /ancho\?: number/.test(MET), true);
+/* 🔴 DOS ANCHOS, UNA ANATOMÍA: *un `flex: 1` dentro de un scroll horizontal no
+   falla — colapsa, y se ve como una tarjeta que se olvidó de su contenido.* */
+t('🔴 con `ancho` NO usa el flex de la grilla',
+  /props\.ancho === undefined\s*\?\s*\{ flex: 1/.test(MET), true);
+/* 🔴 EL RÓTULO NO TRUNCA: es el que dice de qué es la tarjeta. */
+t('🔴 la tarjeta sigue sin truncar en ningún lado', /numberOfLines/.test(MET), false);
+/* La huella del glifo se apaga: *cuatro rótulos con cuatro patitas al lado
+   convierten una fila de estado en una fila de mascotas.* */
+t('el glifo del oficio va con su huella apagada',
+  /nombre=\{props\.glifo\}[\s\S]{0,80}montaje="control"/.test(MET), true);
+
+console.log('\n── ㉓ EL ORBE RESERVA SU LUGAR (3.1 ⑪) ──');
+/* ⏪ En el Hogar del founder el orbe se dibujó **encima de «Ver cómo va» y de
+   «Ver 164 más»**, dos veces en la misma pantalla. *No es que esté mal puesto:
+   flota, y una lista que scrollea no tiene cómo saber cuánto apartarse.* */
+t('🔴 el respiro incluye el RESPLANDOR, no sólo el disco',
+  respiroDelOrbe(0) > ORBE, true, );
+t('…y su cuenta es la del alcance visible',
+  respiroDelOrbe(0), AIRE_BORDE + (ORBE * RESPLANDOR_RADIO) / 2 + ORBE / 2);
+/* El `insets.bottom` entra sumando: *el orbe se ancla desde abajo, así que la
+   barra del sistema lo empuja hacia el contenido.* */
+t('🔴 el inset del sistema SUMA', respiroDelOrbe(34) - respiroDelOrbe(0), 34);
+/* 🔴 CONTROL · reservar sólo el disco deja el halo encima del texto — que es
+   exactamente lo que se vio en la captura. */
+t('CONTROL · sólo el disco NO alcanza', respiroDelOrbe(0) > AIRE_BORDE + ORBE, true);
 
 console.log('\n── ⑪ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {
