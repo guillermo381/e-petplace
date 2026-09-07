@@ -507,6 +507,37 @@ console.log('       bajó a ~1 de cada 10; y al nombrarle «dale» apareció «q
 console.log('       Enumerar formas prohibidas es jugar al topo: la última milla')
 console.log('       no es del prompt, es determinística.')
 
+console.log('\n== 8quinquies-quater · 🔴 GENERAL: la aclaración y la invitación se GARANTIZAN ==')
+{
+  redaccionCruda(JSON.stringify({ respuesta: 'Un baño cada 4 a 6 semanas suele estar bien.',
+    general: true, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: '¿cada cuánto lo baño?' })
+  const t = String(json.respuesta)
+  exigir('sin aclaración, la edge la PONE', /Todavía no tengo lo suyo cargado/.test(t), t)
+  exigir('  ...y nombra la especie y la etapa', /para un perro/.test(t), t)
+  exigir('sin invitación, la edge la PONE', /Si me cuentas más de Thor/.test(t), t)
+  console.log('     ↑ sin la aclaración, una orientación general de la especie se lee')
+  console.log('       como si fuera sobre ESA mascota. No es adorno.')
+}
+{
+  // control: si la prosa ya las trae, NO se duplican.
+  redaccionCruda(JSON.stringify({
+    respuesta: 'En general un perro adulto se baña cada 4 a 6 semanas. Si me cuentas su tipo de pelo, te lo afino.',
+    general: true, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  const t = String(json.respuesta)
+  exigir('CONTROL: si ya lo dice, no se duplica', !/Todavía no tengo lo suyo/.test(t) && !/te lo puedo afinar/.test(t), t)
+}
+{
+  // control: `general:false` NO se toca. La aclaración en una respuesta que SÍ
+  // usó el expediente sería mentir al revés.
+  redaccionCruda(JSON.stringify({ respuesta: 'Thor pesa 32.4 kg, así que le corresponden 400 g al día.',
+    general: false, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  exigir('CONTROL: general:false pasa intacta',
+    json.respuesta === 'Thor pesa 32.4 kg, así que le corresponden 400 g al día.', json.respuesta)
+}
+
 console.log('\n== 8sexies · EL «CONTANOS»: clasifica y PROPONE, nunca guarda ==')
 {
   proveedorFalso(() => ({ hechos: [

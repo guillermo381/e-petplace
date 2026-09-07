@@ -1,7 +1,7 @@
 // D1 · LAS DIEZ CON LA MASCOTA VACÍA. Ninguna con señal clínica.
 // deno-lint-ignore no-explicit-any
 ;(Deno as any).serve = () => ({ finished: Promise.resolve(), shutdown: () => Promise.resolve(), addr: { hostname:'', port:0 } })
-const { presentacion, sistemaDe, comoCita } = await import('../../supabase/functions/coach/index.ts')
+const { presentacion, sistemaDe, comoCita, aTuteo, conAclaracionSiEsGeneral } = await import('../../supabase/functions/coach/index.ts')
 const clave = new TextDecoder().decode((await new Deno.Command('security',
   { args:['find-generic-password','-a','medicion','-s','anthropic-medicion','-w'] }).output()).stdout).trim()
 const VACIO = { nombre:'Lolo', especie:'perro', estado_vida:'vivo', etapa:'adulto' }
@@ -24,7 +24,11 @@ for (const q of DIEZ) {
   const j = await r.json()
   let d: Record<string,unknown> = {}
   try { d = JSON.parse(String(j.content[0].text).replace(/```json|```/g,'').trim()) } catch { /* */ }
-  const t = String(d.respuesta ?? '')
+  // 🔴 Se mide LO QUE SALE DE LA EDGE, no lo que devuelve el modelo: el
+  // cinturón del tuteo y la garantía de la aclaración son parte de la pieza.
+  // Medir el crudo mediría media edge.
+  const crudo = String(d.respuesta ?? '')
+  const t = crudo === '' ? '' : conAclaracionSiEsGeneral(aTuteo(crudo), d.general === true, VACIO as never)
   // Se rinde = no da NADA útil, sólo manda al vet o dice que no tiene datos.
   const rinde = t.trim().length < 90 || /^(no tengo|todav[ií]a no tengo)[^.]*\.\s*(habla|consulta|lo mejor)/i.test(t.trim())
   const general = /general|todav[ií]a no|en general|referencia/i.test(t)

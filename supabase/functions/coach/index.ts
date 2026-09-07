@@ -256,9 +256,12 @@ voseo, el ejemplo más largo que tendrías sería el contrario de la regla.
 
 ═══ CÓMO DEVUELVES LA RESPUESTA ═══
 Respondés SOLO este JSON, sin texto alrededor y sin backticks:
-{"respuesta":"…","semaforo":null,"propuesta_memoria":null}
+{"respuesta":"…","general":false,"semaforo":null,"propuesta_memoria":null}
 
 · "respuesta" es lo que la familia lee. Todo lo de abajo va ahí, en prosa.
+· "general" es true cuando la respuesta salió de lo GENERAL de la especie y la
+  etapa porque te faltaban datos de esta mascota, y false cuando usaste su
+  expediente. **Lo declaras vos: el sistema no puede adivinarlo.**
 · "semaforo" lo llenas SÓLO si hay un síntoma, dolor, herida, cambio de
   conducta o algo que empeora. Si la pregunta no es de salud, va null —
   **poner un semáforo donde no hay síntoma le enseña a la familia a
@@ -612,12 +615,58 @@ const VOSEO_A_TUTEO: readonly (readonly [RegExp, string])[] = [
   [/\bnecesitás\b/g, 'necesitas'], [/\bnotás\b/g, 'notas'],
   [/\bllevás\b/g, 'llevas'], [/\bcargás\b/g, 'cargas'],
   [/\bdale\b/g, 'listo'], [/\bDale\b/g, 'Listo'],
+  // ⚠️ Las que E midió que su lista NO caza — imperativo con enclítico, que es
+  // lo que un modelo dice todo el tiempo y un desarrollador casi nunca escribe
+  // en un literal. Por eso ningún gate del repo las estaba viendo.
+  [/\bmostrame\b/g, 'muéstrame'], [/\bMostrame\b/g, 'Muéstrame'],
+  [/\bavisame\b/g, 'avísame'], [/\bAvisame\b/g, 'Avísame'],
+  [/\bmandame\b/g, 'mándame'], [/\bpasame\b/g, 'pásame'],
+  [/\bbañalo\b/g, 'báñalo'], [/\bBañalo\b/g, 'Báñalo'],
+  [/\bbañala\b/g, 'báñala'], [/\bllevalo\b/g, 'llévalo'], [/\bllevala\b/g, 'llévala'],
+  [/\bdejalo\b/g, 'déjalo'], [/\bdejala\b/g, 'déjala'],
+  [/\bsacalo\b/g, 'sácalo'], [/\bsacala\b/g, 'sácala'],
+  [/\bdaselo\b/g, 'dáselo'], [/\bponelo\b/g, 'ponlo'], [/\bponela\b/g, 'ponla'],
+  [/\banotalo\b/g, 'anótalo'], [/\bcepillalo\b/g, 'cepíllalo'],
+  [/\bmirá\b/g, 'mira'], [/\bMirá\b/g, 'Mira'],
+  [/\bnotá\b/g, 'nota'], [/\bproba\b/g, 'prueba'], [/\bprobá\b/g, 'prueba'],
+  [/\bvos\b/g, 'tú'], [/\bVos\b/g, 'Tú'],
 ]
 
 export function aTuteo(texto: string): string {
   let t = texto
   for (const [re, a] of VOSEO_A_TUTEO) t = t.replace(re, a)
   if (t !== texto) console.error('[coach] el modelo devolvió voseo; corregido por el cinturón')
+  return t
+}
+
+/** 🔴 SI LA RESPUESTA ES GENERAL, LO DICE — Y NO DEPENDE DE QUE EL MODELO SE
+ *  ACUERDE. Medido: pidiéndoselo en el prompt salía en 7-8 de 10.
+ *
+ *  **No es adorno.** Sin la aclaración, una orientación general de la especie
+ *  **se lee como si fuera sobre ESA mascota** — la familia no tiene cómo saber
+ *  que le estamos hablando del perro adulto promedio y no del suyo. Y sin la
+ *  invitación, la conversación termina en un dato que no le sirve del todo, sin
+ *  decirle qué hacer para que le sirva.
+ *
+ *  El modelo DECLARA `general` —eso no lo puede adivinar el código— y la edge
+ *  GARANTIZA las dos piezas. Misma forma que `semaforo`: el modelo declara, la
+ *  edge hace cumplir. Si la prosa ya las trae, no se toca nada. */
+const DICE_QUE_ES_GENERAL = /\b(en general|lo general|referencia general|gu[ií]a general|todav[ií]a no tengo|a[uú]n no tengo|no tengo cargado)\b/i
+const INVITA = /\b(si me (dices|cuentas|cargas)|cuando (cargues|me digas|me cuentes)|cu[eé]ntame|dime|c[aá]rgalo|puedes cargar)\b/i
+
+export function conAclaracionSiEsGeneral(texto: string, general: boolean, c: Contexto): string {
+  if (!general) return texto
+  let t = texto
+  if (!DICE_QUE_ES_GENERAL.test(t)) {
+    const etapa = c.etapa ? ` ${c.etapa}` : ''
+    t = `Todavía no tengo lo suyo cargado, así que te doy la referencia general ` +
+      `para un ${c.especie}${etapa}. ` + t
+    console.error('[coach] la respuesta era general y no lo decía; se agregó la aclaración')
+  }
+  if (!INVITA.test(t)) {
+    t = `${t} Si me cuentas más de ${c.nombre}, te lo puedo afinar.`
+    console.error('[coach] la respuesta era general y no invitaba; se agregó la invitación')
+  }
   return t
 }
 
@@ -785,7 +834,10 @@ Deno.serve(async (req) => {
       return error('error_modelo', 'No pude contestarte ahora. Prueba de nuevo en un momento.')
     }
     const d = r.datos as Record<string, unknown>
-    const respuesta = aTextoOnull(d?.respuesta) === null ? null : aTuteo(String(aTextoOnull(d?.respuesta)))
+    const textoCrudo = aTextoOnull(d?.respuesta)
+    const respuesta = textoCrudo === null
+      ? null
+      : conAclaracionSiEsGeneral(aTuteo(textoCrudo), d?.general === true, c)
     // Sin texto no hay respuesta que dar. Es lo único de esta rama que rebota:
     // un `semaforo` malformado se anula, pero una respuesta vacía no se puede
     // pintar — y pintar la burbuja en blanco sería peor que decir que falló.
