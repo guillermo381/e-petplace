@@ -26,6 +26,7 @@ import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
 import { HeroMascota } from '../components/HeroMascota'
+import { HuellaDelVinculo } from '../components/HuellaDelVinculo'
 import { TarjetaMetrica } from '../components/TarjetaMetrica'
 import { TarjetaHoy } from '../components/TarjetaHoy'
 import { FilaAcciones } from '../components/FilaAcciones'
@@ -8802,11 +8803,24 @@ function GaleriaInterna() {
                 { id: 'c', clase: 'condicion', texto: 'Displasia leve de cadera', procedencia: 'prestador', vozProcedencia: 'lo registró Clínica Aurora' },
               ]}
             />
+            <Texto variante="apoyo">
+              Las acciones: CUATRO. La segunda va apagada y dice su razón al tocarla.
+            </Texto>
             <FilaAcciones
-              citas={{ etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} }}
-              pasaporte={{ etiqueta: 'Pasaporte', glifo: 'carnet', razonApagado: 'Todavía no activaste su placa' }}
-              nexo={{ etiqueta: 'Nexo', onPress: () => {} }}
-              contanos={{ etiqueta: 'Contanos', glifo: 'bitacora', onPress: () => {} }}
+              acciones={[
+                { etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} },
+                { etiqueta: 'Pasaporte y QR', glifo: 'carnet', razonApagado: 'Todavía no activaste su placa' },
+                { etiqueta: 'Documentos', glifo: 'documentos', onPress: () => {} },
+                { etiqueta: 'Cuéntanos', glifo: 'bitacora', onPress: () => {} },
+              ]}
+            />
+            <Texto variante="apoyo">Y con TRES, que también es legal — la quinta no compila.</Texto>
+            <FilaAcciones
+              acciones={[
+                { etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} },
+                { etiqueta: 'Pasaporte y QR', glifo: 'carnet', onPress: () => {} },
+                { etiqueta: 'Documentos', glifo: 'documentos', onPress: () => {} },
+              ]}
             />
             <TarjetaHoy
               clase="anticipacion"
@@ -8855,10 +8869,19 @@ function GaleriaInterna() {
               <TarjetaMetrica v2 rotulo="Descanso" valor="Con su collar" vozSinDato="Sin registro" />
               <TarjetaMetrica v2 rotulo="Corazón" valor="Con su collar" vozSinDato="Sin registro" />
             </View>
-            <Texto variante="apoyo">Conociéndolo, INCOMPLETO: el anillo, la voz y UNA invitación.</Texto>
+            <Texto variante="apoyo">
+              La huella del vínculo: cinco almohadillas, una por dimensión. Sin anillo y sin número —
+              identidad es la grande; los dedos son salud, cuerpo, carácter y día a día.
+            </Texto>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
+              <HuellaDelVinculo dimensiones={{ identidad: false, salud: false, cuerpo: false, caracter: false, diaADia: false }} />
+              <HuellaDelVinculo dimensiones={{ identidad: true, salud: true, cuerpo: true, caracter: false, diaADia: false }} />
+              <HuellaDelVinculo dimensiones={{ identidad: true, salud: true, cuerpo: true, caracter: true, diaADia: true }} />
+            </View>
+            <Texto variante="apoyo">Conociéndolo, INCOMPLETO: la huella, la voz y UNA invitación.</Texto>
             <TarjetaConociendolo
-              fraccion={0.8}
-              voz="Ya conocemos a Thor casi como vos"
+              dimensiones={{ identidad: true, salud: true, cuerpo: true, caracter: false, diaADia: false }}
+              voz="Sabemos quién es Thor, cómo está de salud y cómo es su cuerpo. Nos falta conocer su carácter y su día a día."
               invitacion={<BotonContanos etiqueta="Contanos lo que hace único a Thor" onPress={() => {}} />}
             />
             <Texto variante="apoyo">
@@ -8866,8 +8889,8 @@ function GaleriaInterna() {
             </Texto>
             <TarjetaConociendolo
               completo
-              fraccion={1}
-              voz="Conocemos a Thor tan bien como vos"
+              dimensiones={{ identidad: true, salud: true, cuerpo: true, caracter: true, diaADia: true }}
+              voz="Conocemos a Thor tan bien como vos: quién es, su salud, su cuerpo, su carácter y su día a día."
               vozFelicitacion="No falta nada por contarnos."
               masSobre={<BotonContanos etiqueta="Cuéntanos más de Thor" onPress={() => {}} />}
             />

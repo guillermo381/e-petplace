@@ -1345,6 +1345,7 @@ export {
 // lado.* Y en memorial el hero SÍ se dibuja: es quién fue, y eso no se apaga —
 // lo que desaparece es la pastilla de estado.
 export { HeroMascota, type HeroMascotaProps } from './components/HeroMascota'
+export { HuellaDelVinculo, type HuellaDelVinculoProps, type DimensionesDelVinculo } from './components/HuellaDelVinculo'
 export {
   DetallePeso,
   type DetallePesoProps,
