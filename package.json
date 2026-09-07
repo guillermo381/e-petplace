@@ -49,6 +49,7 @@
     "verify:cierre-ausente": "node scripts/verify-cierre-ausente.mjs",
     "verify:devengo-por-sujeto": "node scripts/verify-devengo-por-sujeto.mjs",
     "verify:postventa-plata": "node scripts/verify-postventa-plata.mjs",
+    "verify:plantillas-categoria": "node scripts/verify-plantillas-categoria.mjs",
     "verify:abanico": "tsx scripts/verify-abanico.mjs",
     "verify:arneses-declaran": "node scripts/verify-arneses-declaran.mjs",
     "verify:barra-web": "tsx scripts/_arnes-barra-web.mts",

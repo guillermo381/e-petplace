@@ -116,13 +116,34 @@ medir(12, 'casos por familia',
   `select familia_id, count(*) from <tabla_caso> group by 1`, () => null, sinCaso);
 
 medir(13, 'costo de WhatsApp por caso',
-  "select count(*) from notificacion_intencion where resuelto_como->>'canal_elegido'='whatsapp' and estado='entregada'",
+  "2 mensajes × tarifa utility EC × familias con opt-in — ver el desglose en la salida",
   () => {
-    const n = dbQuery(`select count(*)::int as n from notificacion_intencion
-                        where resuelto_como->>'canal_elegido'='whatsapp'`)[0].n;
-    return `${n} mensajes por WhatsApp · costo NULL — \`MODELO_FINANCIERO\` §11bis no publica ` +
-           'tarifa absoluta a propósito (sólo la relación ~17× Colombia): sin volumen real, ' +
-           'estimar es fabricar el número que esa sección existe para no tener';
+    const c = dbQuery(`select
+        (select count(*)::int from notificacion_intencion
+          where resuelto_como->>'canal_elegido' = 'whatsapp') as enviados,
+        (select count(*)::int from user_notificacion_prefs
+          where canal = 'whatsapp' and habilitada) as optin_si,
+        (select count(*)::int from user_notificacion_prefs
+          where canal = 'whatsapp' and not habilitada) as optin_no,
+        (select exige_evidencia from cat_notificacion_canales where codigo='whatsapp') as exige_evidencia,
+        (select transporte_vivo from cat_notificacion_canales where codigo='whatsapp') as transporte_vivo`)[0];
+    /* 🔴 EL «fila ausente = habilitada» de la casa (S54-B4) NO puede aplicar a
+       WhatsApp: el canal tiene `exige_evidencia = true`, y **la ausencia de una
+       fila no es evidencia de nada**. Por eso el opt-in se cuenta por filas
+       `habilitada = true` y no por descarte. */
+    const optin = c.exige_evidencia ? c.optin_si : null;
+    return [
+      `mensajes por caso: 2 (§10 — sólo actuar y plata movida)`,
+      `tarifa utility EC: NULL — ver nota`,
+      `familias con opt-in: ${optin} (filas whatsapp: ${c.optin_si} sí / ${c.optin_no} no · exige_evidencia=${c.exige_evidencia})`,
+      `⇒ TECHO HOY: 2 × tarifa × ${optin} = US$ 0,00 — exacto, no estimado`,
+      `canal transporte_vivo=${c.transporte_vivo} · mensajes enviados: ${c.enviados}`,
+      `NOTA de la tarifa: Ecuador NO tiene línea propia en el rate card de Meta —`,
+      `  el código 593 cae en «Rest of Latin America»; los rate cards rigen desde`,
+      `  el 1-jul-2026 y son archivos descargables que este arnés no abre. No se`,
+      `  publica cifra: §11bis existe para no tener un número inventado.`,
+      `NO se estima el volumen (casos por familia): ese dato no existe.`,
+    ].join('\n      ');
   });
 
 medir(14, '«¿Quedó resuelto?» (un toque al cerrar)',
