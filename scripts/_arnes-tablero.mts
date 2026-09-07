@@ -30,6 +30,7 @@ const CON = src('TarjetaConociendolo.tsx');
 const PESO = src('DetallePeso.tsx');
 const HERO = src('HeroMascota.tsx');
 const FRANJA = src('FranjaSeguridad.tsx');
+const HUE = src('HuellaDelVinculo.tsx');
 
 console.log('\n── ① ROJO · SIN DATO NO HAY GRÁFICO ──');
 /* Un sparkline de UN punto dibuja una recta horizontal, y esa recta dice
@@ -91,9 +92,15 @@ console.log('\n── ⑥ ROJO · EL PROGRESO NO TIENE NÚMERO EN PANTALLA ─�
    imprimir al lado el día que quiera «ser más claro».* */
 t('🔴 cero `%`, cero `toFixed`, cero `Math.round`',
   /%|toFixed|Math\.round/.test(CON), false);
-t('🔴 la fracción NO toca un `Texto`',
-  /<Texto[^>]*>\{[^}]*fraccion/.test(CON), false);
-t('…entra sólo como geometría, al trazo', /trazoDeProgreso\(fraccion\)/.test(CON), true);
+/* ☠️ **LÁPIDA (S113-B · 2.2.2).** Acá vivían dos asserts sobre `fraccion`: que
+   no tocara un `Texto` y que entrara «sólo como geometría, al trazo». **Eran
+   verdaderos y hoy no tienen objeto**: el founder sacó el anillo y la fracción
+   no entra a la tarjeta. *Un assert que se queda sin sujeto no se borra en
+   silencio —el próximo lo escribe de nuevo creyendo que falta— y tampoco se
+   deja: daría rojo sobre algo que se quitó a propósito.* Su trabajo lo hace
+   hoy el ⑳, que mide algo más fuerte: **que no haya número que imprimir.** */
+t('☠️ la fracción ya no existe en la tarjeta (la mide el ⑳)',
+  /fraccion/.test(CON), false);
 t('y la voz llega redactada', /voz: string/.test(CON), true);
 t('CONTROL · el trazo acota igual que el anillo',
   [trazoDeProgreso(-1), trazoDeProgreso(2), trazoDeProgreso(0.4)], [0, 1, 0.4]);
@@ -288,6 +295,33 @@ t('🔴 sólo trunca el que tiene tope duro de ancho (`entidad`)',
    justo la que más importa ver.* */
 t("'tira' sigue siendo la ÚNICA con scroll horizontal",
   (SEL.match(/<ScrollView\s+horizontal/g) ?? []).length, 1);
+
+console.log('\n── ⑳ ROJO · LA HUELLA DEL VÍNCULO: NINGÚN NÚMERO PUEDE LLEGAR (2.2.2) ──');
+/* 🔴 **El anillo murió, y con él la última forma de contar.** Un arco que se
+   llena ES un número con otra ropa: se lee «voy por la mitad», y el día que
+   retroceda la familia siente que perdió algo. */
+t('🔴 la tarjeta ya NO recibe una fracción', /fraccion/.test(CON), false);
+t('🔴 …ni queda un anillo que la dibuje', /Circle|strokeDasharray/.test(CON), false);
+t('🔴 la huella recibe CINCO booleanos con nombre',
+  ['identidad', 'salud', 'cuerpo', 'caracter', 'diaADia'].every((d) => new RegExp(`${d}: boolean`).test(HUE)), true);
+/* Y no hay forma de contarlos adentro de la pieza. */
+t('🔴 la pieza no cuenta: sin `.length`, sin `filter`, sin sumas',
+  /\.length|\.filter\(|\breduce\(|\+\s*1|Math\./.test(HUE), false);
+t('🔴 …y no dibuja NINGÚN texto', /<Texto|<Text\b/.test(HUE), false);
+/* 🔴 EL LABEL TAMBIÉN CUENTA COMO PANTALLA: *un «tres de cinco» en un
+   accessibilityLabel es el número entrando por el único lugar donde nadie lo
+   estaba mirando.* La voz de al lado es la que lee quien no ve. */
+t('🔴 …ni lleva un label que cuente', /accessibilityLabel/.test(HUE), false);
+
+/* Cada dimensión con SU almohadilla, siempre la misma: si las llenas se
+   acomodaran desde la izquierda, la huella diría CUÁNTAS y no CUÁLES. */
+t('cinco almohadillas, ni una más', (HUE.match(/<Ellipse/g) ?? []).length, 5);
+t('🔴 cada una atada a su dimensión por NOMBRE',
+  ['identidad', 'salud', 'cuerpo', 'caracter', 'diaADia'].every((d) => new RegExp(`pintado\\(dimensiones\\.${d}\\)`).test(HUE)), true);
+/* Lleno = pleno · vacío = CONTORNO, no gris: *un contorno gris se lee como
+   «no disponible», y esto no está apagado: está esperando.* */
+t("🔴 lo que falta va en CONTORNO del mismo acento, no en gris",
+  /fill: 'none'[^}]*stroke: theme\.accent\.control/.test(HUE), true);
 
 console.log('\n── ⑪ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {

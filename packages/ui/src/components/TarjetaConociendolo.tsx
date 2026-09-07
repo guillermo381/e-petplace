@@ -1,20 +1,24 @@
 /**
- * CONOCIÉNDOLO — el anillo que avanza y no cuenta (S113-B · 2.2).
+ * CONOCIÉNDOLO — la huella que dice QUÉ SABEMOS (S113-B · 2.2.2).
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * 🔴 **EL PORCENTAJE NO LLEGA A LA PANTALLA, Y NO PUEDE.**
+ * 🔴 **SE FUE EL ANILLO, Y CON ÉL EL ÚLTIMO NÚMERO.** (Decisión del founder.)
  * ═══════════════════════════════════════════════════════════════════════════
- * `MODELO_LOYALTY` §3: **nada de scores**. El anillo dibuja el avance y **la
- * voz** dice qué significa —*«Ya conocemos a Thor casi como vos»*—.
+ * Hasta el 2.2 esto era un anillo que avanzaba, con la fracción entrando
+ * «sólo como geometría». Era mejor que un porcentaje y **seguía siendo un
+ * número**: *un arco que se llena se lee «voy por la mitad», y el día que
+ * retroceda —porque una dimensión deja de tener dato— la familia va a sentir
+ * que perdió algo.*
  *
- * **Y no alcanza con no dibujarlo: la pieza no lo recibe como texto.** El
- * avance entra **sólo como geometría** (`fraccion`, que va al trazo) y la voz
- * entra **ya redactada**. *Si la pieza recibiera el número y la voz por
- * separado, el día que alguien quiera «ser más claro» lo va a imprimir al
- * lado — y ahí una familia pasa a ser una barra de progreso que puede bajar.*
+ * Hoy la marca es `HuellaDelVinculo`: **cinco almohadillas, una por
+ * dimensión**, pintadas o en contorno. Una huella con tres llenas no es
+ * «60 %»: es una huella a la que le faltan dos cosas, **y cuáles**.
  *
- * ⚠️ Su gate lo mide así: **cero `%`, cero `toFixed`, cero `Math.round` sobre
- * la fracción**, y la fracción no toca ningún `Texto`.
+ * 🔴 **Y LO QUE LO VUELVE EXIGIBLE ES QUE LA TARJETA YA NO RECIBE UN NÚMERO.**
+ * ⏪ Mientras entrara `fraccion: number`, la regla dependía de que nadie lo
+ * imprimiera. *Una regla que depende de que el que llama se acuerde no es una
+ * regla: es una costumbre.* Ahora entran cinco booleanos y **no hay ninguna
+ * cantidad que imprimir**. (`MODELO_LOYALTY` §3.)
  *
  * ── 🔴 DOS ESTADOS, Y **UNA SOLA INVITACIÓN** (S113-B · 2.2.1) ──────────
  * · **Incompleto** — el anillo, la voz, y **UNA** invitación.
@@ -41,24 +45,27 @@
 
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
-import Svg, { Circle } from 'react-native-svg'
 
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
-import { trazoDeProgreso } from './tablero-metrica'
+import { HuellaDelVinculo, type DimensionesDelVinculo } from './HuellaDelVinculo'
 
-const ANILLO = { lado: 56, grosor: 5 }
+const HUELLA = 56
 
 interface ConociendoloBase {
   /**
-   * 🔴 **GEOMETRÍA, NO DATO.** Va al trazo del anillo y a ningún otro lado.
-   * La pieza no la formatea, no la redondea y no la muestra.
+   * 🔴 **CINCO BOOLEANOS, CERO NÚMEROS.** Van a las cinco almohadillas y a
+   * ningún otro lado. La pieza no los cuenta, no los suma y no los muestra.
    */
-  fraccion: number
-  /** *«Ya conocemos a Thor casi como vos»* — ya redactada, **sin número**
-   *  (Ley 3 y `MODELO_LOYALTY` §3). Lo que el anillo dibuja, esto lo dice. */
+  dimensiones: DimensionesDelVinculo
+  /**
+   * *«Sabemos quién es y cómo está de salud; nos falta conocer su carácter»* —
+   * **narrativa**, ya redactada por la pantalla (Ley 3), diciendo **qué
+   * sabemos y qué falta**. *La huella muestra la forma; la voz es la que
+   * nombra las piezas — y es también lo que lee quien no ve la pantalla.*
+   */
   voz: string
 }
 
@@ -70,6 +77,8 @@ interface ConociendoloBase {
  * que llama se acuerde no es una regla: es una costumbre.* Acá el tipo sólo
  * deja escribir una.
  */
+export type { DimensionesDelVinculo }
+
 export type TarjetaConociendoloProps =
   | (ConociendoloBase & {
       completo?: false
@@ -92,7 +101,7 @@ export type TarjetaConociendoloProps =
     })
 
 export function TarjetaConociendolo(props: TarjetaConociendoloProps) {
-  const { fraccion, voz } = props
+  const { dimensiones, voz } = props
   const { theme } = useTheme()
 
   /* ⛔ Un anillo de progreso sobre una vida que terminó mide algo que ya no
@@ -100,10 +109,6 @@ export function TarjetaConociendolo(props: TarjetaConociendoloProps) {
   if (theme.mode === 'memorial') return null
 
   const completo = props.completo === true
-
-  const r = (ANILLO.lado - ANILLO.grosor) / 2
-  const vuelta = 2 * Math.PI * r
-  const hecho = trazoDeProgreso(fraccion) * vuelta
 
   return (
     <View
@@ -115,34 +120,16 @@ export function TarjetaConociendolo(props: TarjetaConociendoloProps) {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
-        <Svg width={ANILLO.lado} height={ANILLO.lado}>
-          <Circle
-            cx={ANILLO.lado / 2}
-            cy={ANILLO.lado / 2}
-            r={r}
-            stroke={theme.bg.hundido}
-            strokeWidth={ANILLO.grosor}
-            fill="none"
-          />
-          <Circle
-            cx={ANILLO.lado / 2}
-            cy={ANILLO.lado / 2}
-            r={r}
-            stroke={theme.accent.control}
-            strokeWidth={ANILLO.grosor}
-            strokeLinecap="round"
-            fill="none"
-            strokeDasharray={`${hecho} ${vuelta}`}
-            transform={`rotate(-90 ${ANILLO.lado / 2} ${ANILLO.lado / 2})`}
-          />
-        </Svg>
-        {/* 🔴 La voz, y NADA más. Acá no entra un número. */}
+        <HuellaDelVinculo dimensiones={dimensiones} tamano={HUELLA} />
+        {/* 🔴 La voz, y NADA más — y acá ya no HAY un número que entrar.
+            Dice **qué sabemos y qué falta**, en narrativa: la huella muestra
+            la forma, la voz nombra las piezas. */}
         <View style={{ flex: 1 }}>
           <Texto>{voz}</Texto>
         </View>
       </View>
 
-      {/* 🔴 **UNA SOLA COSA DEBAJO DEL ANILLO, EN CUALQUIERA DE LOS DOS
+      {/* 🔴 **UNA SOLA COSA DEBAJO DE LA HUELLA, EN CUALQUIERA DE LOS DOS
           ESTADOS.** Completo: la felicitación en una línea y, si hay algo más
           que contar, su puerta sin urgencia. Incompleto: la invitación, y una
           sola. */}
