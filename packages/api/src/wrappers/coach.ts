@@ -293,18 +293,34 @@ export async function borrarHiloCoach(
  *  `'anticipacion'` vivía en la base y NO acá: un `switch` sobre este tipo
  *  compilaba como exhaustivo y en el aparato llegaba una fila sin `case`.
  *  *No era un error de tipos: era un tipo que mentía y un compilador que le
- *  creía.* Lo midió B en `main`. */
-export type TipoAviso =
-  | 'vacuna_vence'
-  | 'antiparasitario_vence'
-  | 'cita_manana'
-  | 'anticipacion';
+ *  creía.* Lo midió B en `main`.
+ *
+ *  ⚠️ Y el tipo solo no alcanzaba: el lector hacía `as AvisoCoach[]`, **un cast
+ *  que no angosta nada**. Con él, cualquier tipo nuevo de la base entra igual y
+ *  el problema vuelve la próxima vez que alguien agregue uno. Por eso el lector
+ *  AHORA VALIDA fila por fila (ver `obtenerAvisosCoach`). */
+export const TIPOS_AVISO = [
+  'vacuna_vence',
+  'antiparasitario_vence',
+  'cita_manana',
+  'anticipacion',
+] as const;
+
+/** 🔴 `'desconocido'` NO existe en la base: es del CLIENTE, y está a propósito.
+ *  Un tipo que la base gane mañana llega igual, y con este valor **el
+ *  compilador obliga a contemplarlo** en vez de dejarlo caer por un `switch`
+ *  que se cree exhaustivo. *Nada se descarta en silencio: lo que no se
+ *  reconoce se dice* (ley del founder, 5-sep). El `tipo` original viaja en
+ *  `tipo_crudo` para que se pueda diagnosticar sin volver a la base. */
+export type TipoAviso = (typeof TIPOS_AVISO)[number] | 'desconocido';
 
 export type AvisoCoach = {
   id: string;
   mascota_id: string;
   mascota: string;
   tipo: TipoAviso;
+  /** Sólo cuando `tipo === 'desconocido'`: lo que la base dijo de verdad. */
+  tipo_crudo?: string;
   fecha: string;
   detalle: Record<string, unknown>;
 };
@@ -332,7 +348,7 @@ export type AvisoCoach = {
  * Nunca trae mascotas en memorial, y **sólo existen si la familia los
  * encendió** (`activarAvisosNexo`): la ausencia de decisión no habilita nada.
  */
-export async function obtenerAvisosCoach(): Promise<
+export async function obtenerAvisosCoach(tope?: number): Promise<
   ResultadoWrapper<AvisoCoach[], CodigoErrorCoach>
 > {
   const { data, error } = await getClient().rpc('obtener_avisos_coach');
@@ -341,7 +357,31 @@ export async function obtenerAvisosCoach(): Promise<
   if (o === null || o.ok !== true || !Array.isArray(o.avisos)) {
     return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
   }
-  return { ok: true, data: o.avisos as AvisoCoach[] };
+  /* 🔴 **TOPE DE PRESENTACIÓN, DECLARADO** (ley del founder, 6-sep): la dosis
+     del que NACE no es la del que SE MUESTRA. `generar_avisos_coach` entrega
+     UNA anticipación por mascota por semana y encola el resto — pero este
+     lector devuelve **todos los avisos vivos**, así que una familia que no abre
+     la app en diez días encuentra la pila junta. *El motor cumple y la
+     experiencia no.*
+
+     LO DECIDIDO HOY, y es una decisión, no un olvido: **se devuelven todos**,
+     con `tope` opcional para que la superficie recorte sin pedirle nada a la
+     base. Medido al escribir esto: Thor 3 avisos vivos, el resto 1 — todavía
+     no duele, y por eso se declara ahora en vez de cuando duela.
+     ⇒ **La superficie decide el corte y el «ver los anteriores»**: es de B/C,
+        va en el parte con este número. */
+
+  /* 🔴 SE ANGOSTA DE VERDAD. El `as AvisoCoach[]` de antes no verificaba nada:
+     el tipo decía tres valores, la base tenía cuatro, y las 18 filas de
+     `'anticipacion'` entraban igual — a un `switch` que compilaba exhaustivo. */
+  const conocidos = new Set<string>(TIPOS_AVISO);
+  const avisos = (o.avisos as Record<string, unknown>[]).map((a) => {
+    const crudo = String(a.tipo);
+    return conocidos.has(crudo)
+      ? (a as unknown as AvisoCoach)
+      : ({ ...a, tipo: 'desconocido', tipo_crudo: crudo } as unknown as AvisoCoach);
+  });
+  return { ok: true, data: tope === undefined ? avisos : avisos.slice(0, tope) };
 }
 
 export async function marcarAvisoCoachLeido(

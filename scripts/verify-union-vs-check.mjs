@@ -28,13 +28,30 @@ import { execFileSync } from 'node:child_process'
 /** Cada par: el union del wrapper y el CHECK que tiene que espejar. */
 const PARES = [
   { tipo: 'TipoAviso', archivo: 'packages/api/src/wrappers/coach.ts',
-    tabla: 'public.avisos_coach', columna: 'tipo' },
+    tabla: 'public.avisos_coach', columna: 'tipo',
+    /* Valores que el CLIENTE agrega y la base no tiene. Se declaran uno por uno
+       con su razón — *si se admitiera cualquier extra, el brazo que caza «el
+       código ofrece un valor que la base rechaza» dejaría de vigilar.* */
+    delCliente: {
+      desconocido: 'escape del lector: un tipo que la base gane mañana llega con este valor y el compilador obliga a contemplarlo, en vez de caer por un switch que se cree exhaustivo',
+    } },
 ]
 
+/* 🔴 LEE LAS DOS FORMAS, y la segunda la trajo su propio rojo: al pasar el
+   tipo a `(typeof TIPOS_AVISO)[number] | 'desconocido'` el gate encontró UN
+   valor donde había cinco. *Un gate atado a una forma mide la convención, no
+   el hecho* — y la convención se rompe justo cuando alguien mejora el código. */
 function unionDelWrapper(src, nombre) {
   const m = src.match(new RegExp(`export type ${nombre}\\s*=\\s*([^;]+);`))
   if (!m) return null                     // ausente ≠ vacío, y se distingue
-  const vs = [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1])
+  let cuerpo = m[1]
+  // forma 2: `(typeof LISTA)[number]` — se resuelve leyendo la lista
+  for (const r of cuerpo.matchAll(/\(typeof\s+(\w+)\)\[number\]/g)) {
+    const l = src.match(new RegExp(`const ${r[1]}\\s*=\\s*\\[([^\\]]*)\\]`))
+    if (!l) return null                   // referencia a una lista que no está
+    cuerpo += ' | ' + l[1]
+  }
+  const vs = [...cuerpo.matchAll(/'([^']+)'/g)].map((x) => x[1])
   return vs.length ? vs : null
 }
 
@@ -83,7 +100,8 @@ for (const p of PARES) {
     process.exit(2)
   }
   const faltan = c.filter((v) => !u.includes(v))
-  const sobran = u.filter((v) => !c.includes(v))
+  const declarados = Object.keys(p.delCliente ?? {})
+  const sobran = u.filter((v) => !c.includes(v) && !declarados.includes(v))
   console.log(`union-vs-check · ${p.tipo} (${u.length}) ↔ ${p.tabla}.${p.columna} (${c.length})`)
   if (faltan.length) {
     rojo++
@@ -93,6 +111,11 @@ for (const p of PARES) {
   if (sobran.length) {
     rojo++
     console.log(`  ✗ el tipo ofrece ${sobran.length} valor(es) que la base RECHAZA: ${sobran.join(', ')}`)
+  }
+  for (const d of declarados) {
+    if (!u.includes(d)) { rojo++; console.log(`  ✗ '${d}' está declarado como valor del cliente y el tipo NO lo tiene: la tabla miente.`) }
+    else if (c.includes(d)) { rojo++; console.log(`  ✗ '${d}' se declaró como del cliente y la base SÍ lo acepta: retirá la declaración.`) }
+    else console.log(`  · '${d}' del CLIENTE, por declaración — ${p.delCliente[d]}`)
   }
   if (!faltan.length && !sobran.length) console.log('  ✅ dicen lo mismo')
 }
