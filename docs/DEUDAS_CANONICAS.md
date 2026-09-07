@@ -29327,3 +29327,29 @@ agujero abierto.
 
 #### Disparo
 El día que el portal tenga sesión. O antes, si alguien mide que ya la tiene.
+
+### `D-1048` 🟡 · El barredor que verifica si el archivo de un papel existe de verdad
+
+**Qué falta.** `papeles_familia.archivo_estado` nace en S113 con tres valores
+—`pendiente` · `presente` · `ausente`— y **nadie lo mueve a `ausente`**.
+Postgres no puede preguntarle a Storage si el objeto está; hace falta un
+barredor (edge function o cron con `service_role`) que recorra los papeles y
+marque los que perdieron su blob.
+
+**Por qué la columna nace igual, sin su barredor.** *Hoy el estado no tiene
+DÓNDE decirse* — y un barredor que no tiene dónde escribir su resultado no se
+puede escribir. Primero el lugar, después quien lo llena. La columna sola ya
+sirve: la puerta declara `presente` al confirmar, así que un papel que quede en
+`pendiente` **ya es una señal**, aunque nadie haya verificado nada.
+
+**Cómo se llegó acá, y por qué no es hipotético.** `archivo_path` es `NOT NULL`,
+así que la fila **siempre** tiene un path — lo que no se podía decir es si el
+blob existe. En esta misma sesión aparecieron **dos filas fantasma** que ni la
+Storage API (404) ni el SQL (`storage.protect_delete`) podían borrar. *No es un
+dato faltante: es un dato que se lee como presente.*
+
+**Disparo.** La primera subida que falle en producción, o el primer barrido de
+Storage que alguien tenga que hacer a mano. **Hasta entonces el estado es
+declarado, no verificado — y la columna lo dice en su `COMMENT`.**
+
+**Bloqueante.** Ninguno: la credencial de servicio existe. Es trabajo, no espera.
