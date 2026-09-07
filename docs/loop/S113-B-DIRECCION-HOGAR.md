@@ -102,3 +102,38 @@ necesita su respiro inferior, como el `insets.bottom` que la casa ya aplica.
 
 ⚠️ **Lo que NO toca esta dirección:** qué secciones hay ni en qué orden. Eso lo
 firma la mesa; acá sólo está cómo se ven las que hay.
+
+---
+
+# El ORDEN de la pantalla (pedido de la mesa, 7-sep-2026)
+
+**Hoy:** techo · Ponte al día · En vivo · ¿Compraste en el local? · Tus
+servicios · Agregar/Adoptar · Tu vida.
+
+## 🔴 La que cambia algo de verdad: EN VIVO va ARRIBA de PONTE AL DÍA
+
+Hoy **una lista de 17 pendientes tapa un paseo que está ocurriendo**. Eso no es
+una preferencia de orden: *lo que está pasando AHORA es lo único de la pantalla
+que caduca — un pendiente sigue ahí en diez minutos; un paseo en curso, no.* Y
+la familia que abre la app mientras su perro está afuera abre por eso.
+
+## El orden propuesto, con su porqué en una línea
+
+1. **Techo corto** — saludo y fecha en una línea. Identidad, no media pantalla.
+2. **Las mascotas** — *el sujeto del producto es la mascota*: es lo primero que
+   la familia busca, y sobre papel las fotos dejan de pelear con el gradiente.
+3. **🔴 EN VIVO** — lo único que caduca. Ver arriba.
+4. **Ponte al día** — lo que pide acción, después de lo que ya está pasando.
+5. **Tus servicios** — lo que ya tenés contratado: estado, no acción.
+6. **Tu vida** — el sedimento. *Es para mirar, no para hacer*, y por eso va
+   después de todo lo que se hace.
+7. **Agregar mascota · Adoptar** — al pie: **es crecimiento, no operación.**
+   *Ponerlo entre medio interrumpe a quien vino a resolver algo de la mascota
+   que ya tiene.*
+
+**«¿Compraste en el local?» sale del medio**: hoy corta la pantalla entre las
+tarjetas en vivo y los servicios. Su casa es Pedidos, o el pie junto a
+Agregar/Adoptar — *es una puerta de entrada de datos, no una novedad del día.*
+
+⚠️ **Lo que este orden NO decide:** si alguna sección se retira o nace. Sólo
+ordena las que hay.

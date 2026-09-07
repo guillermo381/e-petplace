@@ -366,6 +366,25 @@ t('la clave es la etiqueta, no el índice', /key=\{a\.etiqueta\}/.test(ACC), tru
 /* «Pasaporte y QR» son dos palabras: envuelven, no se cortan. */
 t('🔴 la etiqueta larga NO se trunca', /numberOfLines/.test(ACC), false);
 
+console.log('\n── ㉒ «TUS SERVICIOS» USA LA ANATOMÍA DEL TABLERO (3.1 ⑦) ──');
+/* ⏪ Ese rail se dibujaba INLINE y **truncaba tres de cuatro tarjetas**
+   —«Adiestramien…», «07 sept 20…», «Ve…»— con **una unidad distinta en cada una
+   y sin decir cuál**. 🔴 **No nació una pieza nueva: se ensanchó ésta**
+   (`L-175`) — *dos piezas con la misma anatomía divergen al primer cambio, y la
+   que se queda vieja es siempre la que nadie está mirando.* */
+t('🔴 el ensanche es ADITIVO: el glifo es opcional', /glifo\?: IconoNombre/.test(MET), true);
+t('…y el ancho también', /ancho\?: number/.test(MET), true);
+/* 🔴 DOS ANCHOS, UNA ANATOMÍA: *un `flex: 1` dentro de un scroll horizontal no
+   falla — colapsa, y se ve como una tarjeta que se olvidó de su contenido.* */
+t('🔴 con `ancho` NO usa el flex de la grilla',
+  /props\.ancho === undefined\s*\?\s*\{ flex: 1/.test(MET), true);
+/* 🔴 EL RÓTULO NO TRUNCA: es el que dice de qué es la tarjeta. */
+t('🔴 la tarjeta sigue sin truncar en ningún lado', /numberOfLines/.test(MET), false);
+/* La huella del glifo se apaga: *cuatro rótulos con cuatro patitas al lado
+   convierten una fila de estado en una fila de mascotas.* */
+t('el glifo del oficio va con su huella apagada',
+  /nombre=\{props\.glifo\}[\s\S]{0,80}montaje="control"/.test(MET), true);
+
 console.log('\n── ⑪ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {
   /* ⚠️ **ESTE ASSERT MEDÍA UN PROXY, y se cobró CUATRO veces por eso** — las
