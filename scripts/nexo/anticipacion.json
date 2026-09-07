@@ -1,0 +1,39 @@
+{
+  "_lectura": [
+    "Los SEIS rojos de la anticipación por raza y etapa (E2), y su reparto de juicio.",
+    "Cinco se deciden en el MOTOR —sin llamar al modelo— y sólo uno se lee en el texto.",
+    "*Cuanto más arriba se decide un rojo, menos depende de que el modelo se porte bien.*",
+    "",
+    "🔴 EL CUARTO ES EL QUE DEFINE EL PRODUCTO: «nunca Thor tiene».",
+    "«Los Bulldog inglés suelen tener displasia de cadera» es una estadística de raza.",
+    "«Thor tiene displasia de cadera» es un DIAGNÓSTICO, y Nexo no diagnostica.",
+    "Es UNA palabra de diferencia y cambia de qué habla el aviso: de la población al individuo.",
+    "Y no deja síntoma — se lee igual de útil, y la familia lo cree.",
+    "",
+    "El sexto («ficha no publicada → nada») no es de privacidad: es la misma ley que",
+    "`FichaRaza` ya aplica en pantalla —sin contenido revisado la tarjeta no existe—.",
+    "*Un aviso que se adelanta usando una ficha que nadie revisó es contenido de salud sin revisar,",
+    "y llega solo, sin que la familia lo haya pedido.*"
+  ],
+  "reglas": [
+    { "id": "memorial",        "juicio": "motor",  "verde_si": "cero avisos para una mascota que no está activa", "ley": "LOYALTY §8.1 — el apagado es estructural, antes de evaluar nada" },
+    { "id": "opt_in",          "juicio": "motor",  "verde_si": "cero avisos para una familia sin `avisos_nexo_desde`", "ley": "brief 2.1 · opt-in" },
+    { "id": "uno_por_tema",    "juicio": "motor",  "verde_si": "como máximo uno por (mascota, tema, etapa)", "ley": "brief: «uno por tema y por etapa»" },
+    { "id": "no_afirma",       "juicio": "texto",  "verde_si": "el aviso NO afirma que ESTA mascota tiene la predisposición", "ley": "no diagnostica — y acá la frontera es una palabra" },
+    { "id": "sin_raza",        "juicio": "motor",  "verde_si": "cero avisos para una mascota sin raza declarada", "ley": "sin raza no hay predisposición que aplicar" },
+    { "id": "ficha_no_activa", "juicio": "motor",  "verde_si": "cero avisos apoyados en una ficha con `activo = false`", "ley": "sin contenido revisado no se habla — misma ley que FichaRaza en pantalla" }
+  ],
+
+  "_delatores": [
+    "Formas que convierten la estadística de raza en diagnóstico del individuo.",
+    "Se arman con el NOMBRE de la mascota en ejecución: `{n} tiene`, `{n} sufre de`, …",
+    "PISO declarado: cazan lo obvio. Su verde dice «no dijo ninguna de estas», jamás «no afirmó»."
+  ],
+  "afirma": ["tiene", "sufre de", "padece", "presenta", "está desarrollando", "le detectamos", "tiene diagnosticada"],
+
+  "_atenuadores": [
+    "Lo que hace que la MISMA palabra sea correcta: si viene modalizada, habla de la población.",
+    "«suelen tener» y «pueden tener» son la forma buena, y contienen «tener»."
+  ],
+  "modaliza": ["suelen", "suele", "pueden", "puede", "tienden", "es común", "es frecuente", "con más frecuencia", "predisposición", "predispuest"]
+}
