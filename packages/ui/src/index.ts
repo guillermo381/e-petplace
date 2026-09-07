@@ -1270,6 +1270,11 @@ export {
   type ChipsSugerenciaProps,
   type SugerenciaNexo,
 } from './components/ChipsSugerencia'
+// InvitacionBio (S113-B · 1.2.2) — «¿Querés contarnos qué lo hace único?»
+// 🔴 Una entrada SIN destino no se puede escribir: `onPress` es obligatorio,
+// y con cero entradas la tarjeta no se dibuja. Vive al cierre de `FichaRaza`
+// y también SOLA en el perfil, cuando la mascota no tiene ficha de raza.
+
 // ☠️ `InvitacionBio` MURIÓ (S113-B · 2.1) — y no fue una limpieza: era
 // TARJETA Y HOJA en la misma pieza, y el encargo abre esa Hoja desde CUATRO
 // lugares. *Una pieza que trae su propio botón obliga a cada acceso a montar

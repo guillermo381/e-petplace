@@ -67,6 +67,7 @@ export const clienteEs = {
   nexo: {
     titulo: 'Nexo',
     autor: 'Nexo',
+    enviar: 'Enviar',
     caja: 'Escribe tu pregunta',
     cajaPlaceholder: 'Pregunta o busca algo…',
     invitacion: 'Pregúntame algo de {{nombre}}, o busca cualquier cosa de tu familia.',
@@ -74,6 +75,14 @@ export const clienteEs = {
        el texto legal espera al abogado (D-405): **no promete que sea correcto y
        no se disculpa por existir.** */
     avisoIa: 'Esto lo redacta una IA con el expediente de tu mascota. No reemplaza a tu veterinario.',
+    hablarloConMiVet: 'Hablarlo con mi vet',
+    /* ⭐ C3 · las tres burbujas de la presentación. **Tercera: la promesa
+       honesta.** Dice lo que puede hacer Y que puede equivocarse — *una
+       presentación que sólo promete deja a la familia sin con qué juzgar lo que
+       venga después.* */
+    presenta1: 'Soy Nexo. Me acuerdo de todo lo de {{nombre}}: vacunas, pesos, citas y lo que me cuentes.',
+    presenta2: 'Puedes preguntarme cuándo le toca algo, cómo va su peso, o qué cuidados necesita por su etapa.',
+    presenta3: 'Cuanto más uses e-PetPlace, más personal es lo que te digo y antes me adelanto. Puedo equivocarme; para lo importante está tu vet.',
     verVet: 'Ver a tu vet',
     deSuCarnet: 'de su carnet',
     deSuPeso: 'de su historial de peso',
@@ -804,6 +813,38 @@ export const clienteEs = {
     sexoMacho: 'Macho',
     sexoHembra: 'Hembra',
     nacimiento: 'Nacimiento',
+    /* ⭐ EL TABLERO (2.2). «Sin registro» es obligatoria en cada tarjeta: el
+       hueco se dice, no se deja en blanco ni se rellena con un cero. */
+    suSalud: 'Su salud',
+    tableroActividad: 'Actividad',
+    tableroSinRegistro: 'Sin registro',
+    tableroMedidoEl: 'medido el {{fecha}}',
+    tableroDelPlan: '{{n}} de {{total}}',
+    tableroActivas: '{{n}} activas',
+    tableroPaseosSemana: '{{n}} paseos esta semana',
+    tableroProxima: 'próxima el {{fecha}}',
+    tableroKg: '{{n}} kg',
+    tableroPlagas: '{{n}} de {{total}} al día',
+    tableroEstimada: 'estimada',
+    /* ⭐ HOY — la tarjeta única. **El servidor elige QUÉ**; acá sólo se dice. */
+    hoyAviso: 'Algo para mirar',
+    hoyCita: 'Su próxima cita',
+    hoyVacuna: 'Una vacuna que se acerca',
+    hoyAntiparasitario: 'Toca desparasitar',
+    hoyTip: 'Para conocerlo mejor',
+    hoyVerAviso: 'Verlo',
+    hoyVerCita: 'Ver la cita',
+    hoyVerVacuna: 'Ver sus vacunas',
+    hoyVerAntiparasitario: 'Registrarlo',
+    hoyVerTip: 'Contarnos',
+    hoyFaltanDias: 'en {{n}} días',
+    hoyEsHoy: 'hoy',
+    hoyEsManana: 'mañana',
+    /* ⭐ CONOCIÉNDOLO — la fracción del expediente. */
+    conociendoloTitulo: 'Conociéndolo',
+    conociendoloVoz: 'Sabemos {{n}} de {{total}} cosas de {{nombre}}.',
+    historiaVerTodo: 'Ver toda su historia',
+    accionCitas: 'Citas',
     peso: 'Peso',
     microchip: 'Microchip',
     identidadInvitacion: 'Su identidad se completa de a poco — cada dato nos ayuda a cuidarlo mejor.',
@@ -4252,10 +4293,27 @@ export const clienteEs = {
     faltaDosis: 'Falta la dosis',
     noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
-  /** ⭐ **LA INVITACIÓN AL BIO-EXPEDIENTE** (S113-C · 2.0). Voz de familia:
-   *  se cuenta, no se clasifica. */
+  /** ⭐ **EL «CONTANOS»** — la puerta del Bio-expediente familiar
+   *  (S113-C · 2.0 → 2.1). Voz de familia: **se cuenta, no se clasifica** — la
+   *  clase la propone Nexo y la confirma ella. */
   bio: {
     titulo: 'Cuéntanos de {{nombre}}',
+    queEs: '¿Qué quieres contarnos?',
+    esAlergia: 'Una alergia',
+    esCondicion: 'Una condición',
+    severidad: '¿Qué tan fuerte le pega?',
+    leve: 'Leve',
+    moderada: 'Moderada',
+    severa: 'Severa',
+    anafilactica: 'Muy grave',
+    avisoSospechada: 'Lo guardamos como algo que nos contaste. Si tu veterinario lo confirma, queda como diagnóstico.',
+    campoComportamiento: '¿Qué viste?',
+    campoPersonalidad: '¿Cómo es?',
+    campoRecuerdo: '¿Qué pasó?',
+    campoAlergia: '¿A qué es alérgico?',
+    campoCondicion: '¿Qué condición?',
+    guardar: 'Anotar',
+    faltaTexto: 'Escribe algo para poder anotarlo',
     enComportamiento: 'Comportamiento',
     enComportamientoDet: 'miedos, manías, cómo se lleva con otros',
     enPersonalidad: 'Cómo es',
@@ -4264,6 +4322,29 @@ export const clienteEs = {
     enMedicoDet: 'una alergia o una condición que ya sabes',
     enRecuerdo: 'Un recuerdo',
     enRecuerdoDet: 'algo que pasó y quieres guardar',
+    /* 🔴 Dice DÓNDE quedó: es la pregunta que se hace quien acaba de escribir,
+       y «Guardado» a secas no la contesta. */
+    anotado: 'Anotado en la vida de {{nombre}}',
+    noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
+  },
+  contanos: {
+    titulo: 'Cuéntanos de {{nombre}}',
+    boton: 'Cuéntanos lo que hace único a {{nombre}}',
+    libreEtiqueta: 'O cuéntanos lo que quieras de {{nombre}}',
+    librePlaceholder: 'Escríbelo como se te ocurra',
+    libreEnviar: 'Contárselo a Nexo',
+    /* La propuesta dice el hecho Y dónde lo va a guardar: *«¿lo guardo?» sin
+       decir dónde le pide a la familia un sí a ciegas.* */
+    propuesta: '¿Guardo «{{hecho}}» en {{donde}}?',
+    si: 'Sí, guárdalo',
+    no: 'No',
+    dondeComportamiento: 'su comportamiento',
+    dondeRasgo: 'cómo es',
+    dondeMedico: 'sus temas de salud',
+    dondeRecuerdo: 'sus recuerdos',
+    noSupeClasificar: 'No supe dónde guardarlo. Prueba con una de las cuatro de abajo.',
+    pastilla: 'Conociéndolo',
+    chipNexo: 'Cuéntame algo de {{nombre}}',
     queEs: '¿Qué quieres contarnos?',
     esAlergia: 'Una alergia',
     esCondicion: 'Una condición',

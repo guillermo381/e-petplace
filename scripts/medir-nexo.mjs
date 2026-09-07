@@ -76,6 +76,13 @@ di(`   nombran a Thor: invitación=${/Pregúntame algo de Thor/.test(t) ? 'sí �
 for (const c of ['¿Cuándo le toca la vacuna?', '¿Cómo va su peso?', '¿Qué cuidados necesita por su etapa?']) {
   di(`③ chip «${c.slice(0, 28)}…»: ${t.includes(c) ? 'sí' : 'no'}`);
 }
+/* C3 · la presentación, y C4 · los avisos de anticipación. */
+di(`C3 ¿Nexo se presenta?: ${/Soy Nexo\. Me acuerdo/.test(t) ? 'sí ✓' : '🔴 no'}`);
+di(`C3 ¿dice que puede equivocarse?: ${/Puedo equivocarme/.test(t) ? 'sí ✓' : '🔴 no'}`);
+/* Los tres arreglos de la pasada del founder. */
+const env = await page.getByRole('button', { name: /^Enviar$/ }).count();
+di(`✎ botón de enviar a la vista: ${env > 0 ? 'sí ✓' : '🔴 no'}`);
+di(`C4 ¿hay aviso de anticipación?: ${/Hablarlo con mi vet/.test(t) ? 'sí ✓' : 'no'}`);
 
 /* ④ enviar sin edge: tiene que HABLAR, no colgarse */
 const caja = page.locator('input, textarea').first();

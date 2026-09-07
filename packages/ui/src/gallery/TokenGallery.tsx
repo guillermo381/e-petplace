@@ -40,6 +40,9 @@ import { RespuestaNexo } from '../components/RespuestaNexo'
 import { ResultadosBusqueda } from '../components/ResultadosBusqueda'
 import { PanelMemoria } from '../components/PanelMemoria'
 import { ChipsSugerencia } from '../components/ChipsSugerencia'
+/* ☠️ `InvitacionBio` salió: B la partió en `HojaContanos` + `BotonContanos`
+   porque era tarjeta Y hoja en la misma pieza, y la hoja se abre desde cuatro
+   lugares. */
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
@@ -8733,6 +8736,11 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        {/* ☠️ **LA SECCIÓN DE `InvitacionBio` SE FUE CON SU PIEZA.** El merge
+            la dejó abierta sin cuerpo: B retiró el componente y su demo, y su
+            `<Seccion>` quedó huérfana —sin cierre y sin nada adentro—.
+            *Un gate que sobrevive a lo que miraba no mide nada: ocupa el lugar
+            del que sí.* La reemplaza la del «contanos», que es su heredera. */}
         <Seccion titulo="⭐ GATE S113 — EL «CONTANOS» (2.1) · qué decide: (a) que el acceso se lea como la pieza más INVITANTE del perfil y no como la más discreta; (b) que la caja libre se vea antes que las cuatro entradas; (c) que la propuesta de Nexo reemplace a la caja en vez de apilarse; (d) que ninguna voz con el nombre adentro quede cortada">
           <View style={{ gap: spacing[4] }}>
             <Texto variante="apoyo">

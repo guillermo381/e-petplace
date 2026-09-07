@@ -300,14 +300,16 @@ export default function Pasaporte() {
       {viendo && token !== null ? (
         <Modal visible animationType="slide" onRequestClose={() => setViendo(false)}>
           <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+            {/* 🔴 **CIERRA CON EL CHEVRON DE LA CASA, no con la palabra.** El
+                founder lo vio en aparato: «Cerrar» como texto **se corta**.
+                `atras` dibuja el chevron que esta app ya usa en todas sus
+                pantallas — *un control que la persona reconoce de memoria no
+                necesita que le expliquen qué hace, y no hay texto que recortar.* */}
             <Encabezado
               variante="navegacion"
               titulo={t('pasaporte.verPasaporte')}
-              accionDer={
-                <Pressable accessibilityRole="button" accessibilityLabel={t('pasaporte.cerrar')} onPress={() => setViendo(false)}>
-                  <Texto variante="enfasis">{t('pasaporte.cerrar')}</Texto>
-                </Pressable>
-              }
+              atras
+              onAtras={() => setViendo(false)}
             />
             <WebView source={{ uri: urlPublica(token) }} style={{ flex: 1 }} />
           </View>
