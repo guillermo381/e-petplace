@@ -18,8 +18,12 @@ await page.locator('input[type="email"]').fill(process.env.CLIENTE_EMAIL ?? '');
 await page.locator('input[type="password"]').fill(process.env.CLIENTE_PASSWORD ?? '');
 await page.getByText(/^(Entrar|Sign in)$/).first().click();
 await page.waitForTimeout(18000);
-await page.goto('http://localhost:8082/hogar', { waitUntil: 'networkidle' });
-await page.waitForTimeout(5000);
+/* ⏪ **LA CAJA SE MUDÓ AL ORBE** (2.2.3 · ①, firma del founder): en el Hogar
+   quedó una entrada con lupa y la caja vive en la Hoja de Nexo. El arnés
+   apuntaba al Hogar y cantó «no encontré la caja» — *tenía razón: no está.*
+   Se mide donde vive. */
+await page.goto('http://localhost:8082/nexo', { waitUntil: 'networkidle' });
+await page.waitForTimeout(7000);
 
 const caja = page.locator('input[type="text"], input:not([type])').first();
 if ((await caja.count()) === 0) { di('🔴 no encontré la caja de búsqueda'); await nav.close(); process.exit(2); }
@@ -36,6 +40,8 @@ for (const q of ['alimento', 'clinica', 'thor', 'qwertzxcv']) {
     return {
       grupos: gs.filter((g) => new RegExp(`^${g}$`, 'm').test(t)),
       sinResultados: /No encontramos nada/.test(t),
+      /* 🔴 **Fechas crudas**: un ISO asomando en la lista. */
+      isoCrudo: (t.match(/\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?/g) ?? []).length,
       ofreceNexo: /Preguntarle a Nexo/.test(t),
       /* Cuántas filas de resultado hay a la vista. */
       filas: [...document.querySelectorAll('[role="button"]')].filter((e) => {
@@ -46,6 +52,7 @@ for (const q of ['alimento', 'clinica', 'thor', 'qwertzxcv']) {
   }, GRUPOS);
   di(`«${q}»`);
   di(`   grupos      : ${r.grupos.join(' · ') || '(ninguno)'}`);
+  di(`   fechas crudas ISO: ${r.isoCrudo} ${r.isoCrudo === 0 ? '✓' : '🔴'}`);
   di(`   sin resultados: ${r.sinResultados ? 'sí' : 'no'}${r.sinResultados ? ` · ofrece Nexo: ${r.ofreceNexo ? 'sí ✓' : '🔴 no'}` : ''}`);
   di('');
 }

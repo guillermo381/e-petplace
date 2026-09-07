@@ -64,6 +64,7 @@ import {
   type ResultadoBusqueda,
   type TurnoCoach,
 } from '@epetplace/api';
+import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 
 /** Un turno dibujado. El hilo mezcla **lo que se guardó** (viene del servidor)
@@ -85,7 +86,7 @@ const hora = () =>
   new Date().toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' });
 
 export default function Nexo() {
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const router = useRouter();
   const aviso = useAviso();
   const { mascotaId, nombre } = useLocalSearchParams<{ mascotaId: string; nombre?: string }>();
@@ -199,7 +200,7 @@ export default function Nexo() {
           aviso.mostrar({ variante: 'error', texto: b.mensaje });
           return;
         }
-        setGrupos(agrupar(b.data.resultados, router, t));
+        setGrupos(agrupar(b.data.resultados, router, t, idioma));
         return;
       }
 
@@ -507,6 +508,10 @@ function agrupar(
   rs: readonly ResultadoBusqueda[],
   router: ReturnType<typeof useRouter>,
   t: ReturnType<typeof useTraduccion>['t'],
+  /** 🔴 **Para decir la fecha, no volcarla** (ojo del founder). Entra el
+   *  idioma porque el formato es suyo: *un `2026-09-07T17:30` en una lista de
+   *  resultados no es un dato, es el interior de la app asomando.* */
+  idioma: IdiomaSoportado,
 ): GrupoResultados[] {
   const orden: TipoResultado[] = ['citas', 'pedidos', 'recuerdos', 'despensa', 'prestadores'];
   const mapa: Record<string, TipoResultado> = {
@@ -528,7 +533,9 @@ function agrupar(
       tipo,
       titulo: r.titulo,
       subtitulo: r.subtitulo ?? undefined,
-      fecha: r.fecha ?? undefined,
+      /* ⚠️ Se recorta a 10 antes: el helper espera una FECHA, no un instante,
+         y con la hora pegada devuelve la cadena entera. */
+      fecha: r.fecha === null ? undefined : fechaCortaMono(r.fecha.slice(0, 10), idioma),
       onPress: () => router.push(r.ruta as never),
     });
     por.set(tipo, lista);

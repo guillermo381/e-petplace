@@ -23,6 +23,7 @@ import { useRouter } from 'expo-router';
 import { gruposConAlgo, type GrupoResultados, type TipoResultado } from '@epetplace/ui';
 import { buscarEnMiFamilia } from '@epetplace/api';
 
+import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 
 /** El orden de los cajones en pantalla. **Es una decisión, no el orden en que
@@ -65,7 +66,7 @@ const A_GRUPO: Record<string, TipoResultado | null> = {
 };
 
 export function useBusqueda() {
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const router = useRouter();
   const [termino, setTermino] = useState('');
   const [grupos, setGrupos] = useState<readonly GrupoResultados[]>([]);
@@ -115,7 +116,14 @@ export function useBusqueda() {
             tipo: grupo,
             titulo: x.titulo,
             subtitulo: x.subtitulo ?? undefined,
-            fecha: x.fecha ?? undefined,
+            /* 🔴 **LA FECHA SE DICE, NO SE VUELCA** (ojo del founder). El motor
+               manda ISO —`2026-09-07T17:30:00`— y la pieza la dibuja tal cual:
+               *un timestamp crudo en una lista de resultados no es un dato, es
+               el interior de la app asomando.* `fechaCortaMono` es el formato
+               que la casa ya usa en toda su metadata.
+               ⚠️ Se recorta a 10 antes: el helper espera una fecha, no un
+               instante, y con la hora pegada devolvía la cadena entera. */
+            fecha: x.fecha === null ? undefined : fechaCortaMono(x.fecha.slice(0, 10), idioma),
             /* 🔴 **La ruta la manda el MOTOR**, no la arma la pantalla: A la
                resuelve por tipo y ya curó la de los papeles. *Componerla acá
                sería una segunda verdad sobre dónde vive cada cosa.* */
@@ -137,7 +145,7 @@ export function useBusqueda() {
         );
       });
     },
-    [router, t],
+    [router, t, idioma],
   );
 
   const limpiar = useCallback(() => {
