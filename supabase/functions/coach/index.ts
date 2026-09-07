@@ -784,7 +784,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         respuesta: null, fuente: routerCaido ? 'router_caido' : 'router',
         intencion: 'busqueda', consulta: String(texto).trim(), campos,
-        semaforo: null, propuesta_memoria: null, aviso_ia: primerTurno,
+        semaforo: null, propuesta_memoria: null, general: false, aviso_ia: primerTurno,
       }), { status: 200, headers: JSON_HEADERS })
     }
 
@@ -797,7 +797,11 @@ Deno.serve(async (req) => {
       if (p) {
         return new Response(JSON.stringify({
           respuesta: p.texto, fuente: 'plantilla', plantilla: p.nombre,
-          intencion, semaforo: null, propuesta_memoria: null, aviso_ia: primerTurno,
+          intencion, semaforo: null, propuesta_memoria: null,
+          // Una plantilla contesta CON el dato de esta mascota: por definición
+          // no es general. Va explícito y no ausente: una clave que a veces
+          // falta obliga a la pantalla a distinguir «no hay» de «no vino».
+          general: false, aviso_ia: primerTurno,
         }), { status: 200, headers: JSON_HEADERS })
       }
     }
@@ -844,6 +848,12 @@ Deno.serve(async (req) => {
       respuesta, fuente: 'modelo', intencion,
       semaforo: saneaSemaforo(d?.semaforo),
       propuesta_memoria: propuestaDelChat,
+      // 🔴 SE EMITE, y no sólo se consume. Lo tenía adentro para decidir si
+      // agregaba la aclaración **y no lo publicaba**: la pantalla no podía
+      // marcar la respuesta como general, y el gate de voz de E no podía
+      // medirla. *Lo destapó verificar el despliegue en vez de darlo por hecho
+      // — no era que faltara desplegar: era que yo nunca lo devolví.*
+      general: d?.general === true,
       aviso_ia: primerTurno,
     }), { status: 200, headers: JSON_HEADERS })
   } catch (e) {
