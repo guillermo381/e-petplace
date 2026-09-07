@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto · el perfil de la mascota como tablero</title>
+<style>
+:root{--paper:#F4F3F7;--ink:#1E1B2E;--ink2:#6B6580;--line:#E6E2EE;--card:#fff;
+--vio:#8B6CF6;--vio2:#B9A6FF;--vioDeep:#5E45C9;--warm:#FFB35A;--ok:#2E9E6B;--aten:#E58A2E;--chat:#5B8DEF}
+*{box-sizing:border-box}
+body{margin:0;background:#E9E7EE;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:var(--ink)}
+.wrap{max-width:1000px;margin:0 auto;padding:22px 14px 48px;display:flex;flex-wrap:wrap;gap:22px;justify-content:center;align-items:flex-start}
+.phone{width:360px;height:780px;border-radius:44px;background:var(--paper);border:10px solid #101617;position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(16,22,23,.25)}
+.scr{position:absolute;inset:0;overflow-y:auto;padding:0 0 90px;scrollbar-width:none}
+.scr::-webkit-scrollbar{display:none}
+.notch{position:sticky;top:0;z-index:3;height:28px;background:linear-gradient(#101617 0,#101617 100%);width:120px;margin:0 auto;border-radius:0 0 18px 18px}
+.hero{background:linear-gradient(160deg,#7A3FB8 0%,#4E3FA8 55%,#2A6E80 100%);color:#fff;padding:46px 18px 18px;border-radius:0 0 30px 30px;margin-top:-28px}
+.hero .top{display:flex;justify-content:space-between;align-items:center;font-size:12px;opacity:.9}
+.hero .ic{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.18);display:inline-flex;align-items:center;justify-content:center}
+.hero .row{display:flex;gap:14px;align-items:center;margin-top:12px}
+.ava{width:76px;height:76px;border-radius:50%;background:#D9C4A8;flex:none;position:relative;overflow:hidden;border:3px solid rgba(255,255,255,.6)}
+.ava::after{content:"";position:absolute;left:18px;top:20px;width:40px;height:36px;border-radius:50% 50% 45% 45%;background:#8C6B4A}
+.hero h1{font-size:28px;margin:0;font-weight:600;letter-spacing:-.4px}
+.hero .meta{font-size:13px;opacity:.9;margin-top:2px}
+.estado{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border-radius:999px;padding:5px 10px;font-size:12px;margin-top:8px}
+.estado i{width:8px;height:8px;border-radius:50%;background:#7EE2A8;display:inline-block}
+.acciones{display:flex;justify-content:space-between;margin:14px 18px 0}
+.acc{width:74px;text-align:center;font-size:11px;color:var(--ink)}
+.acc b{display:flex;width:52px;height:52px;border-radius:18px;background:var(--card);margin:0 auto 6px;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(30,27,46,.08)}
+.acc b svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.acc.nexo b{background:radial-gradient(circle at 38% 34%,#FFF 0%,#F6F3FF 34%,#E4DDFB 68%,#CFC5F2 100%);box-shadow:0 0 0 4px rgba(139,108,246,.12),0 0 18px rgba(139,108,246,.35)}
+.franja{margin:14px 18px 0;background:#FFF4E3;border:1px solid #F5D9A8;border-radius:14px;padding:10px 12px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.franja i{width:18px;height:18px;border-radius:50%;background:var(--aten);flex:none;margin-top:1px}
+.franja b{font-weight:600}
+.sec{margin:18px 18px 0;display:flex;justify-content:space-between;align-items:baseline}
+.sec h2{font-size:16px;margin:0;font-weight:600}
+.sec span{font-size:12px;color:var(--ink2)}
+.hoy{margin:10px 18px 0;background:var(--card);border-radius:18px;padding:14px;box-shadow:0 6px 16px rgba(30,27,46,.06);display:flex;gap:12px;align-items:center}
+.hoy .orb{width:34px;height:34px;border-radius:50%;flex:none;background:radial-gradient(circle at 38% 34%,#EDE8FF 0%,var(--vio2) 22%,var(--vio) 56%,var(--vioDeep) 100%);box-shadow:0 0 14px rgba(139,108,246,.45)}
+.hoy p{margin:0;font-size:13px;line-height:1.35}
+.hoy p b{font-weight:600}
+.hoy .cta{font-size:12px;color:var(--vioDeep);font-weight:600;white-space:nowrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 18px 0}
+.card{background:var(--card);border-radius:18px;padding:12px 12px 10px;box-shadow:0 6px 16px rgba(30,27,46,.06);position:relative;min-height:112px}
+.card small{font-size:11px;color:var(--ink2);display:flex;justify-content:space-between}
+.card .n{font-size:22px;font-weight:600;margin-top:4px;letter-spacing:-.3px}
+.card .n em{font-style:normal;font-size:12px;color:var(--ink2);font-weight:400;margin-left:4px}
+.card .ctx{font-size:11px;color:var(--ink2);margin-top:2px}
+.card svg{position:absolute;right:10px;bottom:10px}
+.card.wide{grid-column:1/3;min-height:auto}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{font-size:11px;padding:3px 8px;border-radius:999px;background:#EFEBFA;color:var(--ink)}
+.chip.ok{background:#E3F5EB;color:#1F6B47}
+.chip.at{background:#FFF1DE;color:#8A4B00}
+.card.v2{border:1px dashed var(--line);background:transparent;box-shadow:none;color:var(--ink2)}
+.card.v2 .n{color:var(--ink2);font-size:14px}
+.cono{margin:10px 18px 0;background:linear-gradient(135deg,#F6F3FF,#EFEBFA);border-radius:18px;padding:14px;display:flex;gap:12px;align-items:center}
+.cono .ring{width:54px;height:54px;flex:none}
+.cono p{margin:0;font-size:13px;line-height:1.35}
+.cono .cta{font-size:12px;color:var(--vioDeep);font-weight:600}
+.list{margin:10px 18px 0;background:var(--card);border-radius:18px;box-shadow:0 6px 16px rgba(30,27,46,.06)}
+.li{display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
+.li:last-child{border-bottom:0}
+.li span{color:var(--ink2);font-size:13px}
+.tabs{position:absolute;left:0;right:0;bottom:0;height:78px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding-bottom:14px;font-size:11px;color:var(--ink2)}
+.legend{max-width:300px;font-size:13px;color:var(--ink2);line-height:1.5}
+.legend h3{color:var(--ink);font-size:14px;margin:0 0 6px}
+.legend ol{padding-left:18px;margin:0}
+.legend li{margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="phone"><div class="scr">
+  <div class="notch"></div>
+  <div class="hero">
+    <div class="top"><span>‹</span><span><span class="ic">✎</span> <span class="ic">⇪</span></span></div>
+    <div class="row">
+      <div class="ava"></div>
+      <div><h1>Thor</h1><div class="meta">Bulldog inglés · 6 años · 24 kg</div>
+      <div class="estado"><i></i>Cuidado al día</div></div>
+    </div>
+  </div>
+
+  <div class="acciones">
+    <div class="acc"><b><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></b>Citas</div>
+    <div class="acc"><b><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM19 19h2"/></svg></b>Pasaporte</div>
+    <div class="acc nexo"><b></b>Nexo</div>
+    <div class="acc"><b><svg viewBox="0 0 24 24"><path d="M4 20l4-1 10-10-3-3L5 16z"/><path d="M13 7l3 3"/></svg></b>Contanos</div>
+  </div>
+
+  <div class="franja"><i></i><div><b>Alérgico a pollo</b> · Alérgico a polen · Toma Enzimax<br><span style="color:var(--ink2)">Ver 13 ›</span></div></div>
+
+  <div class="sec"><h2>Hoy</h2><span>lunes 7</span></div>
+  <div class="hoy"><div class="orb"></div><p>Los Bulldog inglés suelen tener problemas de cadera: <b>vale la pena hablarlo con tu vet</b> en su chequeo del 12.</p><span class="cta">Hablarlo ›</span></div>
+
+  <div class="sec"><h2>Su salud</h2><span>tocá para ver más</span></div>
+  <div class="grid">
+    <div class="card"><small>Peso <span>↑</span></small><div class="n">24 kg</div><div class="ctx">+0,6 kg desde julio</div>
+      <svg width="86" height="34" viewBox="0 0 86 34"><polyline fill="none" stroke="#8B6CF6" stroke-width="2" points="2,26 16,24 30,22 44,23 58,18 72,15 84,12"/><circle cx="84" cy="12" r="3" fill="#8B6CF6"/></svg></div>
+    <div class="card"><small>Vacunas</small><div class="n">8<em>de 9</em></div><div class="ctx">polivalente vence en 12 días</div>
+      <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" stroke="#EFEBFA" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" stroke="#2E9E6B" stroke-width="5" stroke-dasharray="100 113" stroke-linecap="round" transform="rotate(-90 22 22)"/></svg></div>
+    <div class="card"><small>Antiparasitario</small><div class="chips"><span class="chip ok">pulgas</span><span class="chip at">garrapatas</span><span class="chip">internos</span></div><div class="ctx" style="margin-top:8px">la próxima toca el 25 sept</div></div>
+    <div class="card"><small>Medicación</small><div class="n">5<em>activas</em></div><div class="ctx">Enzimax · 1 tableta hoy</div></div>
+    <div class="card"><small>Citas</small><div class="n">jue 12<em>10:30</em></div><div class="ctx">Chequeo · Clínica Aurora</div></div>
+    <div class="card"><small>Actividad</small><div class="n">4<em>paseos esta semana</em></div>
+      <svg width="86" height="30" viewBox="0 0 86 30"><rect x="2" y="18" width="8" height="12" rx="2" fill="#B9A6FF"/><rect x="14" y="8" width="8" height="22" rx="2" fill="#8B6CF6"/><rect x="26" y="22" width="8" height="8" rx="2" fill="#B9A6FF"/><rect x="38" y="4" width="8" height="26" rx="2" fill="#8B6CF6"/><rect x="50" y="26" width="8" height="4" rx="2" fill="#EFEBFA"/><rect x="62" y="26" width="8" height="4" rx="2" fill="#EFEBFA"/><rect x="74" y="26" width="8" height="4" rx="2" fill="#EFEBFA"/></svg></div>
+    <div class="card v2"><small>Descanso · V2</small><div class="n">con su collar</div></div>
+    <div class="card v2"><small>Corazón · V2</small><div class="n">con su collar</div></div>
+  </div>
+
+  <div class="sec"><h2>Conociéndolo</h2><span>3 por resolver</span></div>
+  <div class="cono"><svg class="ring" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" fill="none" stroke="#E4DDFB" stroke-width="6"/><circle cx="27" cy="27" r="22" fill="none" stroke="#8B6CF6" stroke-width="6" stroke-dasharray="110 138" stroke-linecap="round" transform="rotate(-90 27 27)"/><!-- 🔴 ESTE NUMERO NO SE DIBUJA. MODELO_LOYALTY §3 prohibe scores en
+     pantalla. El anillo dibuja el progreso SIN numero; el porcentaje vive como
+     VOZ: «Ya conocemos a Thor casi como vos». Queda en el boceto porque el
+     boceto se guarda como llego, con esta marca al lado — *un boceto que se
+     corrige en silencio deja de ser evidencia de lo que se decidio.* -->
+   <!-- <text x="27" y="31" text-anchor="middle" font-size="12" fill="#5E45C9" font-weight="600">80%</text> --></svg>
+    <p>Ya conocemos a Thor casi como vos. <b>Contanos lo que lo hace único</b> — cuanto mejor lo conozcamos, mejor lo acompañamos.<br><span class="cta">¿Querés conocer más sobre el Bulldog inglés? ›</span></p></div>
+
+  <div class="sec"><h2>Su historia</h2><span>28 · ver todo ›</span></div>
+  <div class="list">
+    <div class="li">Paseo con Andrés · 42 min<span>ayer</span></div>
+    <div class="li">Pipeta pulgas · Frontline<span>4 sept</span></div>
+    <div class="li">Recuerdo: «primer día de lluvia»<span>1 sept</span></div>
+  </div>
+
+  <div class="sec"><h2>Identidad y papeles</h2><span>›</span></div>
+  <div class="list">
+    <div class="li">Identidad<span>macho · 29 oct 2019 · chip ›</span></div>
+    <div class="li">Documentos<span>4 ›</span></div>
+    <div class="li">Su alimento<span>Royal Canin ›</span></div>
+  </div>
+</div>
+<div class="tabs"><span>Hogar</span><span>Explorar</span><span>Despensa</span><span>Pedidos</span><span>Cuenta</span></div>
+</div>
+
+<div class="legend">
+<h3>Lo que cambia</h3>
+<ol>
+<li><b>Cuatro acciones a la vista</b> bajo el retrato: Citas, Pasaporte, Nexo, Contanos. Lo que hoy es una fila perdida pasa a ser un botón.</li>
+<li><b>La franja</b> sigue presidiendo, ahora compacta.</li>
+<li><b>Hoy</b>: una sola cosa, la más importante (el aviso o la próxima cita), con Nexo detrás.</li>
+<li><b>Su salud como tablero</b>: cada tarjeta un dato grande, un contexto y un mini gráfico; tocarla abre el detalle con su curva e historia. Los wearables de la V2 son dos tarjetas más, en el mismo lenguaje.</li>
+<li><b>Conociéndolo</b>: el progreso del vínculo como anillo, con el «contanos» y la raza dentro — no como filas.</li>
+<li><b>Su historia</b> resumida, con «ver todo». Identidad y papeles al final, plegados.</li>
+</ol>
+</div>
+</div>
+</body>
+</html>
