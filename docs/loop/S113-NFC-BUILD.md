@@ -10,7 +10,16 @@
 > typecheck no ve módulos nativos ausentes. *La única defensa es este documento
 > y la disciplina de no mergear.* Ficha: **`D-1046`**.
 
-## Lo que espera, medido (7-sep-2026)
+## Lo que espera, RE-MEDIDO (7-sep-2026, segundo repaso)
+
+**Nada cambió desde el primero**, y eso se dice: los cuatro siguen fuera y el
+micrófono sigue viviendo sólo en el prestador. *Un «sigue igual» medido vale lo
+mismo que un cambio; lo que no vale es suponerlo.*
+
+Comando: `grep '"<dep>"' apps/*/package.json` · las ramas, con
+`git diff --name-only main...origin/pista/s113-{a,b}-nfc`.
+
+## Lo que espera, medido
 
 | qué | dónde vive | estado hoy |
 |---|---|---|

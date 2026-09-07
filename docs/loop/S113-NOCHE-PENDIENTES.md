@@ -1,12 +1,33 @@
 # S113 · lo que espera al founder
 
+> **Repaso del 7-sep** (A). Lo cerrado se marca **con su medición al lado** y su
+> texto queda plegado: *una deuda cerrada sin la medición que la cerró se vuelve
+> a abrir en el próximo censo.*
+>
+> **EN UNA LÍNEA, lo que de verdad espera tu firma:** el **proveedor y precio de
+> la placa** (§2), el **entitlement de NFC en iOS** (§3), el **aviso legal de
+> IA** (§4) y la **lectura de fichas de raza** al ritmo ya firmado (§5) —
+> más los **11 campos del pasaporte** (E-1), que su gate declara sin firmar.
+>
+> Cerrados desde el repaso anterior: las cinco mascotas de prueba (§1, medido
+> `0`) y la página pública en `text/plain` (C-⑤, medido `text/html`).
+
+
 Nadie se frenó por ninguno de estos. Cada uno dice **qué**, **por qué es del
 founder**, **las opciones** y **el voto de la pista** — para que decidir sea
 leer un párrafo, no reconstruir el problema.
 
 ---
 
-## 1 · Las cinco mascotas de prueba marcadas como reales
+## 1 · ☠️ CERRADO (medido 7-sep) — las cinco mascotas de prueba
+
+**Medición: `0` mascotas `PruebaC*` con `creado_por_sistema = 'real'`.** Se
+marcaron. Se deja el texto porque *una deuda cerrada sin su medición al lado se
+vuelve a abrir en el próximo censo.*
+
+<details><summary>el problema original</summary>
+
+### Las cinco mascotas de prueba marcadas como reales
 
 **Qué.** En la familia `guillo381+8` hay cinco `PruebaC*` (todas Beagle, todas
 en memorial) que quedaron con `creado_por_sistema = 'real'`: `PruebaC12896`,
@@ -25,7 +46,9 @@ descubrió que el 80 % de las familias eran sonda.
 borrarlas no rompe un test, lo vuelve irreproducible, y eso no se nota. La
 marca cuesta un UPDATE y arregla el censo.
 
-## 2 · La placa: proveedor y precio
+</details>
+
+## 2 · 🔴 VIVO · La placa: proveedor y precio
 
 **Qué.** El motor del pasaporte está vivo y la página pública también. Falta
 decidir con quién se fabrican las chapitas y a cuánto.
@@ -35,7 +58,13 @@ decidir con quién se fabrican las chapitas y a cuánto.
 **Sin bloquear nada:** la rama `pista/s113-a-nfc` ya deja la build lista y
 `docs/loop/S113-NFC-BUILD.md` tiene el procedimiento del día que se decida.
 
-## 3 · NFC en iOS
+**Al 7-sep:** el método de impresión ya está escrito en
+`docs/loop/S113-PLACAS-IMPRESION.md` —material, tamaño mínimo del QR,
+corrección de error, muestra de cinco— y **el circuito de activación se probó
+entero** (crear lote · activar · los tres rojos). Lo único que falta sigue
+siendo la decisión comercial. **Dueño: founder.**
+
+## 3 · 🔴 VIVO · NFC en iOS — **dueño: founder**
 
 **Qué.** Leer un tag NFC en iPhone exige un *entitlement* propio en la cuenta
 de Apple. **No está medido si la cuenta lo tiene.**
@@ -43,7 +72,7 @@ de Apple. **No está medido si la cuenta lo tiene.**
 **Voto de la pista:** arrancar sólo con Android y con el QR, que ya funciona en
 los dos sistemas sin pedir nada. *El QR no necesita permiso de nadie.*
 
-## 4 · El aviso legal de IA (`D-405`)
+## 4 · 🔴 VIVO · El aviso legal de IA (`D-405`) — **dueño: founder + abogado**
 
 **Qué.** Cuando Nexo hable, la app tiene que decir que es IA y qué no hace.
 La letra la escribe un abogado; hasta entonces rige la voz honesta de la casa.
@@ -51,7 +80,15 @@ La letra la escribe un abogado; hasta entonces rige la voz honesta de la casa.
 **Por qué ahora.** El lote 2 pone a Nexo a contestar. El texto no bloquea la
 construcción, pero **sí bloquea que se encienda para gente real**.
 
-## 5 · Las fichas de raza que faltan
+## 5 · 🟡 AVANZANDO · Las fichas de raza — **dueño: founder (firma)**
+
+**Medido el 7-sep: 17 publicadas** (eran 10) · **193 cargadas esperando
+lectura** · **22 predisposiciones revisadas** y **560 en revisión**.
+El ritmo firmado se está cumpliendo.
+
+<details><summary>el detalle original</summary>
+
+### Las fichas de raza que faltan
 
 **Qué.** Publicadas con firma: **10** (labrador, loro yaco, beagle,
 californian, persa, pug, chinchilla, schnauzer miniatura, gato común, criollo).
@@ -60,6 +97,8 @@ ampliado todavía sin ficha.
 
 **Ritmo firmado:** tandas de cinco por semana, perro primero, y en el día
 cuando una mascota nueva declara una raza cuya ficha existe sin publicar.
+
+</details>
 
 ## 6 · Lo que NO es del founder pero conviene que sepa
 
@@ -355,7 +394,15 @@ para no reportar vacío es una pista que después hay que revisar dos veces.*
 
 ## C · 1.3 pasaporte — dos para A, medidos
 
-### ⑤ 🔴 LA PÁGINA PÚBLICA SALE EN `text/plain` — el QR muestra código fuente
+### ⑤ ☠️ CERRADO (medido 7-sep) — la página pública sale en `text/html`
+
+**`curl` contra `www.epetplace.com/p/<token>`: `text/html`.** Se curó moviendo
+la página al sitio Astro: Supabase degrada `text/html` a `text/plain` en GET por
+política de plataforma, así que no era algo que se pudiera arreglar en la edge.
+
+<details><summary>el problema original</summary>
+
+### 🔴 LA PÁGINA PÚBLICA SALE EN `text/plain` — el QR muestra código fuente
 
 Medido con `curl`, **en las dos rutas**:
 
