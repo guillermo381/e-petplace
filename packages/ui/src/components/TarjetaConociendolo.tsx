@@ -16,11 +16,20 @@
  * ⚠️ Su gate lo mide así: **cero `%`, cero `toFixed`, cero `Math.round` sobre
  * la fracción**, y la fracción no toca ningún `Texto`.
  *
- * ── LO QUE VIVE ADENTRO ─────────────────────────────────────────────────
- * El anillo con su voz, **el «Contanos…»** y **«¿Querés conocer más sobre la
- * raza?»**. Los dos entran como slots: *la tarjeta agrupa, no decide a dónde
- * lleva cada cosa.* Sin ficha publicada, la pantalla no pasa el segundo y
- * queda sólo el primero — que es la regla del encargo.
+ * ── 🔴 DOS ESTADOS, Y **UNA SOLA INVITACIÓN** (S113-B · 2.2.1) ──────────
+ * · **Incompleto** — el anillo, la voz, y **UNA** invitación.
+ * · **Completo** (no queda nada por resolver) — **felicita en una línea** y
+ *   ofrece *«Cuéntanos más de Thor»* **sin urgencia**.
+ *
+ * 🔴 **NUNCA DOS INVITACIONES PEGADAS**, y no es de estética: *dos pedidos
+ * juntos no se leen como dos oportunidades, se leen como una lista de
+ * deberes* — y en una tarjeta que celebra lo que ya sabemos, eso la convierte
+ * en un reclamo. El tipo lo vuelve **inexpresable**: el estado completo no
+ * admite `contanos` ni `raza`, y el incompleto pide **exactamente una**.
+ *
+ * 🔴 **Y EL COMPLETO NO PIDE LO QUE YA ESTÁ.** *Volver a ofrecer «contanos de
+ * su raza» cuando la familia ya lo contó le enseña que lo que cuenta no se
+ * registra.*
  *
  * ── ⛔ MEMORIAL: NO SE DIBUJA ───────────────────────────────────────────
  * *Un anillo de progreso sobre una vida que terminó mide algo que ya no va a
@@ -42,7 +51,7 @@ import { trazoDeProgreso } from './tablero-metrica'
 
 const ANILLO = { lado: 56, grosor: 5 }
 
-export interface TarjetaConociendoloProps {
+interface ConociendoloBase {
   /**
    * 🔴 **GEOMETRÍA, NO DATO.** Va al trazo del anillo y a ningún otro lado.
    * La pieza no la formatea, no la redondea y no la muestra.
@@ -51,19 +60,46 @@ export interface TarjetaConociendoloProps {
   /** *«Ya conocemos a Thor casi como vos»* — ya redactada, **sin número**
    *  (Ley 3 y `MODELO_LOYALTY` §3). Lo que el anillo dibuja, esto lo dice. */
   voz: string
-  /** El «Contanos lo que lo hace único». */
-  contanos: ReactNode
-  /** «¿Querés conocer más sobre el Bulldog inglés?». **Ausente sin ficha
-   *  publicada** — y entonces queda sólo el «Contanos», que es la regla. */
-  raza?: ReactNode
 }
 
-export function TarjetaConociendolo({ fraccion, voz, contanos, raza }: TarjetaConociendoloProps) {
+/**
+ * 🔴 **LOS DOS ESTADOS, Y LA UNIÓN ES LA QUE IMPIDE EL DEFECTO.**
+ *
+ * Con `contanos?` y `raza?` opcionales se podían mandar **las dos**, y ahí
+ * alguien tenía que acordarse de no hacerlo. *Una regla que depende de que el
+ * que llama se acuerde no es una regla: es una costumbre.* Acá el tipo sólo
+ * deja escribir una.
+ */
+export type TarjetaConociendoloProps =
+  | (ConociendoloBase & {
+      completo?: false
+      /** **La única invitación.** O el «Contanos», o la de la raza — jamás las
+       *  dos. La pantalla elige cuál toca según lo que falte. */
+      invitacion: ReactNode
+      vozFelicitacion?: never
+      masSobre?: never
+    })
+  | (ConociendoloBase & {
+      /** No queda nada por resolver. */
+      completo: true
+      /** *«Ya sabemos todo lo importante de Thor»* — **una línea**, ya
+       *  redactada, y **sin pedir nada**. */
+      vozFelicitacion: string
+      /** *«Cuéntanos más de Thor»* — **sin urgencia**: la puerta queda
+       *  abierta, no se golpea. Opcional: si no hay más que contar, no va. */
+      masSobre?: ReactNode
+      invitacion?: never
+    })
+
+export function TarjetaConociendolo(props: TarjetaConociendoloProps) {
+  const { fraccion, voz } = props
   const { theme } = useTheme()
 
   /* ⛔ Un anillo de progreso sobre una vida que terminó mide algo que ya no
      va a cambiar. */
   if (theme.mode === 'memorial') return null
+
+  const completo = props.completo === true
 
   const r = (ANILLO.lado - ANILLO.grosor) / 2
   const vuelta = 2 * Math.PI * r
@@ -106,8 +142,18 @@ export function TarjetaConociendolo({ fraccion, voz, contanos, raza }: TarjetaCo
         </View>
       </View>
 
-      {contanos}
-      {raza}
+      {/* 🔴 **UNA SOLA COSA DEBAJO DEL ANILLO, EN CUALQUIERA DE LOS DOS
+          ESTADOS.** Completo: la felicitación en una línea y, si hay algo más
+          que contar, su puerta sin urgencia. Incompleto: la invitación, y una
+          sola. */}
+      {completo ? (
+        <>
+          <Texto variante="apoyo">{props.vozFelicitacion}</Texto>
+          {props.masSobre}
+        </>
+      ) : (
+        props.invitacion
+      )}
     </View>
   )
 }

@@ -8855,11 +8855,21 @@ function GaleriaInterna() {
               <TarjetaMetrica v2 rotulo="Descanso" valor="Con su collar" vozSinDato="Sin registro" />
               <TarjetaMetrica v2 rotulo="Corazón" valor="Con su collar" vozSinDato="Sin registro" />
             </View>
+            <Texto variante="apoyo">Conociéndolo, INCOMPLETO: el anillo, la voz y UNA invitación.</Texto>
             <TarjetaConociendolo
               fraccion={0.8}
               voz="Ya conocemos a Thor casi como vos"
-              contanos={<BotonContanos etiqueta="Contanos lo que hace único a Thor" onPress={() => {}} />}
-              raza={<BotonContanos etiqueta="¿Querés conocer más sobre el Bulldog inglés?" onPress={() => {}} />}
+              invitacion={<BotonContanos etiqueta="Contanos lo que hace único a Thor" onPress={() => {}} />}
+            />
+            <Texto variante="apoyo">
+              COMPLETO: felicita en una línea y ofrece más sin urgencia. Nunca pide lo que ya está.
+            </Texto>
+            <TarjetaConociendolo
+              completo
+              fraccion={1}
+              voz="Conocemos a Thor tan bien como vos"
+              vozFelicitacion="No falta nada por contarnos."
+              masSobre={<BotonContanos etiqueta="Cuéntanos más de Thor" onPress={() => {}} />}
             />
             <Texto variante="apoyo">El detalle del peso: punto lleno = la clínica, hueco = en casa.</Texto>
             <DetallePeso
