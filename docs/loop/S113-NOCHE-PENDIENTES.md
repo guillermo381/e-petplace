@@ -22,6 +22,9 @@ verdad y el verde la esconde.*
 
 ### ② La fase 3 está **CERRADA**. No se abre fase 4.
 
+**Su acta: `docs/loop/S113-FASE-3-CIERRE.md`** — qué se construyó, qué quedó
+abierto con dueño, y las seis leyes nuevas de la sesión.
+
 Lo publicado: cliente `d668fae0` · prestador `c81479b3` · **ancla `f4fbe740`** ·
 `dirty: None` · rt 1.0.7.
 
@@ -30,7 +33,7 @@ Lo publicado: cliente `d668fae0` · prestador `c81479b3` · **ancla `f4fbe740`**
 | | qué | dueño · estado |
 |---|---|---|
 | **1º** | **EL REDISEÑO** — dos sesiones | C · B |
-| **2º** | **LA BUILD NATIVA, UNA SOLA, con el NFC adentro** — se corta **después** del rediseño | **`S113-NFC-BUILD.md` es LA LISTA VIVA**: cinco capacidades anotadas (NFC · galería · compartir · micrófono de Nexo · selector de PDF). ⚠️ **Nada nativo se instala: se ANOTA ahí.** `s113-a-nfc` y `s113-b-nfc` quedan fuera de `main` **a propósito**. Hasta ese día **todo sale por OTA** y **`ota:deps` es el discriminador de cada candidato** |
+| **2º** | **LA BUILD NATIVA de ANDROID, UNA SOLA, con el NFC adentro.** 🔴 **iPhone queda FUERA: el founder espera el DUNS de Apple.** El entitlement de NFC se pide desde una cuenta que todavía no existe — *quien planifique ese día contando con iPhone lo descubre al final, cuando no hay margen* — se corta **después** del rediseño | **`S113-NFC-BUILD.md` es LA LISTA VIVA**: cinco capacidades anotadas (NFC · galería · compartir · micrófono de Nexo · selector de PDF). ⚠️ **Nada nativo se instala: se ANOTA ahí.** `s113-a-nfc` y `s113-b-nfc` quedan fuera de `main` **a propósito**. Hasta ese día **todo sale por OTA** y **`ota:deps` es el discriminador de cada candidato** |
 | **3º** | **EL PULIDO** — las **tres de C** del último OTA · las **cuatro del Hogar** de B · los **128 eventos sin voz**, con `fin_vida` a la cabeza · las **fechas crudas de la búsqueda** | C y B. **Cuando cierren, el candidato** |
 | **4º** | **LO LEGAL** | **no depende de nosotros** — es espera, no trabajo |
 

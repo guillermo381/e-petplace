@@ -25,6 +25,31 @@ diciéndolo en pantalla si la familia lo va a notar.
 para evitar: pnpm resuelve el peer, funciona en dev, nadie lo declara en ninguna
 app, y el gate queda partido en dos mitades que por separado dan verde.*
 
+### 🔴 EL NFC DE iPHONE QUEDA FUERA DEL ALCANCE — firma del founder, 7-sep-2026
+
+**No es una decisión de producto: no hay con qué.** El founder **todavía no
+tiene cuenta de desarrollador de Apple** — espera el **DUNS**, que es trámite de
+un tercero y **no tiene fecha que dependa de nosotros**.
+
+**Lo que esto significa el día de la build, para que nadie lo dé por hecho:**
+
+- **La build de Android se corta igual.** No espera a Apple. El NFC funciona ahí.
+- **Lo de iPhone viaja cuando Apple habilite la cuenta**, en su propia build.
+- **El entitlement de NFC se pide ENTONCES**, no antes: *es un permiso que se
+  solicita desde una cuenta que todavía no existe.*
+
+⚠️ **La trampa concreta:** el entitlement de NFC en iOS **no es una casilla que
+se marca al compilar** — es una capacidad que Apple concede, y llega después de
+pedirla. Quien planifique el día de la build contando con iPhone va a descubrirlo
+**al final**, cuando ya no hay margen. *Por eso está escrito acá arriba y no en
+una nota al pie: la fila 1 de la lista dice «iOS queda FUERA» y este bloque dice
+por qué.*
+
+**Lo que sí se puede adelantar sin la cuenta:** todo el código NFC vive en
+`pista/s113-a-nfc` y `pista/s113-b-nfc`, sin mergear. *No se pierde nada
+esperando: se pierde si alguien lo mergea antes de la build.*
+
+
 ---
 
 ## LA LISTA VIVA — lo que viaja el día de la build
@@ -35,7 +60,7 @@ app, y el gate queda partido en dos mitades que por separado dan verde.*
 
 | # | capacidad | paquete / permiso | pidió | qué se rompe si falta |
 |---|---|---|---|---|
-| 1 | **Leer y escribir NFC** (la placa) | `react-native-nfc-manager` + entitlement iOS | A · B | La placa sólo funciona por QR. **El entitlement de iOS es trámite con Apple y no se resuelve el mismo día** — ver §3 |
+| 1 | **Leer y escribir NFC** (la placa) | `react-native-nfc-manager` | A · B | La placa sólo funciona por QR. 🔴 **iOS queda FUERA — ver el bloque de abajo** |
 | 2 | **Guardar en la galería** | `expo-media-library` (permiso de escritura) | A | La descarga del QR **abre** la imagen en vez de guardarla. Hoy sale por ahí, y se nota |
 | 3 | **Compartir archivos** | `expo-sharing` | A | El pasaporte y el QR no se pueden mandar por WhatsApp desde la app |
 | 4 | **Micrófono de Nexo** (dictar) | `expo-audio` / permiso de micrófono | D | Nexo sólo se escribe. *El dictado es lo que lo vuelve usable con el perro en brazos* |
