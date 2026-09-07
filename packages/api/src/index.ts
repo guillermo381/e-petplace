@@ -1909,6 +1909,14 @@ export {
   type CodigoErrorRasgos,
 } from './wrappers/tablero';
 
+// El criterio de una serie, en UN solo lugar (ley de los tres estados).
+export {
+  esSerieDibujable,
+  tendenciaDeSerie,
+  MINIMO_PARA_SERIE,
+  type Tendencia,
+} from './series';
+
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
    por dónde llamarlo. Se abre acá copiando el molde, sin tocar nada de A. */
