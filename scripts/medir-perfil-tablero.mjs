@@ -212,6 +212,20 @@ async function verPerfil(nombre) {
         }
         return out;
       })(),
+      /* ⭐ **LAS CUATRO ACCIONES** (2.2.4). Se miden por su CAJA dentro de la
+         fila, no por el texto: los nombres («Documentos», «Cuéntanos») viven
+         también en otras partes de la pantalla. */
+      acciones: (() => {
+        const cajas = [];
+        for (const e of document.querySelectorAll('[role="button"]')) {
+          const t2 = (e.getAttribute('aria-label') ?? e.textContent ?? '').trim();
+          if (!/^(Citas|Pasaporte y QR|Documentos|Cuéntanos|Nexo)$/.test(t2)) continue;
+          const r = e.getBoundingClientRect();
+          if (r.height === 0 || r.y > 700) continue;
+          if (!cajas.some((c) => c.t === t2)) cajas.push({ t: t2, x: Math.round(r.x) });
+        }
+        return cajas.sort((a, b) => a.x - b.x).map((c) => c.t);
+      })(),
       /* ⭐ **LOS DIEZ DEL OJO DEL FOUNDER** (2.2.2). */
       vacunasDice: (txt.match(/\d+ de \d+ al día/) ?? [''])[0],
       diceProximaPasada: /próxima el \d+ \w+ 202[0-4]/.test(txt),
@@ -283,6 +297,7 @@ for (const n of ['Thor', 'Lolo', 'Sombra']) {
     for (const d of r.truncados.slice(0, 4))
       di(`      · «${d.t}» ${d.w}→${d.necesita}px · hijos=${d.hijos}${d.culpable ? ` · el ancho lo pone «${d.culpable.t}» (llega a ${d.culpable.der})` : ''}`);
   }
+  di(`  acciones: ${r.acciones.length ? r.acciones.join(' · ') : '(ninguna)'}`);
   di('  ── los diez ──');
   di(`  ① vacunas «${r.vacunasDice}» · próxima pasada=${r.diceProximaPasada ? '🔴 sí' : 'no ✓'} · dice vencida=${r.diceVencida ? 'sí ✓' : 'no'}`);
   di(`  ② alérgenos: ${r.alergenos.total} dichos, ${r.alergenos.distintos} distintos ${r.alergenos.total === r.alergenos.distintos ? '✓' : '🔴 repite'}`);

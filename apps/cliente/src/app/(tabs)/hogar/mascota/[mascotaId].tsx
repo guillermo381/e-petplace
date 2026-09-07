@@ -1431,39 +1431,69 @@ export default function PerfilDeMascota() {
             al morir, el hero cierra contra las acciones. Ley 37: se retira
             entero, no se comenta. */}
 
-        {/* ⭐ **C3 · LAS CUATRO ACCIONES, bajo el hero** (S113-C · 2.2).
-            El brief las pone segundas y tiene razón: *son lo que la familia
-            viene a hacer, y hasta hoy estaban repartidas entre el fondo de la
-            pantalla y tres secciones distintas.*
-            🔴 **En memorial no se dibujan**: las cuatro piden o llevan a pedir
-            (`A3.9`). La historia y la identidad siguen leyéndose abajo. */}
-        {!esMemorial ? (
-          <View style={{ marginTop: spacing[4], paddingHorizontal: spacing[5] }}>
-            <FilaAcciones
-              citas={{
-                etiqueta: t('perfil.accionCitas'),
-                glifo: 'hoy',
-                onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } }),
-              }}
-              pasaporte={{
-                etiqueta: t('pasaporte.entrada'),
-                glifo: 'carnet',
-                onPress: () => router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } }),
-              }}
-              /* Nexo no lleva glifo: **su acción es el orbe**, que la pieza
-                 dibuja sola. Pasarle uno sería taparlo con un ícono. */
-              nexo={{
-                etiqueta: t('nexo.titulo'),
-                onPress: () => router.push({ pathname: '/nexo', params: { mascotaId: mascota.id, nombre: mascota.nombre } }),
-              }}
-              contanos={{
-                etiqueta: t('contanos.pastilla'),
-                glifo: 'pluma',
-                onPress: contanos.abrir,
-              }}
-            />
-          </View>
-        ) : null}
+        {/* ⭐ **LAS CUATRO ACCIONES, bajo el hero** (S113-C · 2.2 → 2.2.4).
+            *Son lo que la familia viene a hacer, y hasta 2.2 estaban repartidas
+            entre el fondo de la pantalla y tres secciones distintas.*
+
+            ── QUÉ CAMBIÓ, Y POR QUÉ CADA COSA ─────────────────────────────
+            ☠️ **Nexo salió** (orden del founder): *ya está flotante en toda la
+            app, y acá ocupaba un lugar que no necesita.*
+            ⭐ **Entró Documentos**, y su destino es `irADocumentos` — el
+            plegable de «Identidad y papeles», con scroll y desplegado. **Con
+            la bóveda de la fase 3 gana pantalla propia y esta línea cambia**;
+            por eso el destino vive en una función y no acá.
+
+            ── 🔴 EN MEMORIAL VAN DOS, Y ES FIRMA DEL FOUNDER ──────────────
+            *De quien ya no está se siguen leyendo sus papeles y se sigue
+            pudiendo guardar un recuerdo; Citas y Pasaporte no.* Las dos que
+            salen son las que miran hacia adelante —agendar, encontrar a
+            alguien que se perdió—; las dos que quedan miran lo que hubo.
+
+            ⚠️ Antes acá no se dibujaba **ninguna**, con la razón «las cuatro
+            piden o llevan a pedir». Era cierto de las cuatro de entonces: con
+            Nexo adentro y sin Documentos, ninguna sobrevivía el filtro. *La
+            regla no cambió: cambió el conjunto al que se le aplica.* */}
+        <View style={{ marginTop: spacing[4], paddingHorizontal: spacing[5] }}>
+          <FilaAcciones
+            acciones={
+              esMemorial
+                ? [
+                    {
+                      etiqueta: t('perfil.documentos'),
+                      glifo: 'documentos',
+                      onPress: irADocumentos,
+                    },
+                    {
+                      etiqueta: t('contanos.pastilla'),
+                      glifo: 'pluma',
+                      onPress: contanos.abrir,
+                    },
+                  ]
+                : [
+                    {
+                      etiqueta: t('perfil.accionCitas'),
+                      glifo: 'hoy',
+                      onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } }),
+                    },
+                    {
+                      etiqueta: t('pasaporte.entrada'),
+                      glifo: 'carnet',
+                      onPress: () => router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } }),
+                    },
+                    {
+                      etiqueta: t('perfil.documentos'),
+                      glifo: 'documentos',
+                      onPress: irADocumentos,
+                    },
+                    {
+                      etiqueta: t('contanos.pastilla'),
+                      glifo: 'pluma',
+                      onPress: contanos.abrir,
+                    },
+                  ]
+            }
+          />
+        </View>
 
         {/* ⭐ **LA FRANJA DE SEGURIDAD** (S113-C · 1.1 · C6) — lo que hay que
             saber ANTES de tocar a esta mascota, arriba de todo lo demás.
@@ -1663,31 +1693,46 @@ export default function PerfilDeMascota() {
 
             ⛔ En memorial no se monta: pide (`A3.9`). */}
         {!esMemorial ? (() => {
-          const casillas = [
-            senal !== null && senal.vacunas_total > 0,
-            perfil.desparasitaciones.length > 0,
-            perfil.alergias_estado !== 'sin_registro',
-            pesoVigente !== null,
-            mascota.raza !== null,
-            perfil.medicacion_actual.length > 0,
-          ];
-          const hechas = casillas.filter(Boolean).length;
+          /* ⭐ **LAS CINCO DIMENSIONES DEL VÍNCULO** (S113-B · 2.2.3 → C 2.2.4).
+             B cambió `fraccion: number` por **cinco booleanos** —*cero
+             números, van a las almohadillas y a ningún otro lado*— y acá se
+             mapea lo que la pantalla YA sabe.
+
+             🔴 **`caracter` sale de la LÍNEA DE VIDA, no del perfil.** Medido:
+             `obtenerPerfilMascota` no trae rasgos ni observaciones de
+             comportamiento; lo que sí llega son sus eventos
+             (`observacion_comportamiento`, 6 en Thor). *Poner `false` porque el
+             lector no lo trae sería afirmar que no tiene carácter registrado
+             cuando lo que pasa es que no lo estoy mirando.*
+             ⚠️ Su límite, declarado: si la familia carga rasgos y el timeline
+             todavía no los trajo, esta dimensión se ve apagada un momento. Se
+             cierra el día que el perfil lea `cat_rasgos` — pedido a A. */
+          const dimensiones = {
+            identidad: mascota.raza !== null,
+            salud: senal !== null && senal.vacunas_total > 0,
+            cuerpo: pesoVigente !== null,
+            /* `items` puede ser `'error'`: **un fallo de carga no es una
+               ausencia de carácter**, así que se lee como «todavía no sé» —
+               que en un booleano es `false`, y la almohadilla apagada dice
+               justo eso: falta, no que no exista. */
+            caracter:
+              Array.isArray(items) &&
+              items.some((it) => it.tipo === 'observacion_comportamiento' || it.tipo === 'bitacora_familia'),
+            diaADia: perfil.desparasitaciones.length > 0 || perfil.medicacion_actual.length > 0,
+          };
+          const cuantas = Object.values(dimensiones).filter(Boolean).length;
+          const total = Object.keys(dimensiones).length;
           return (
             <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5], gap: spacing[3] }}>
               <Texto variante="seccion">{t('perfil.conociendoloTitulo')}</Texto>
-              {/* ⭐ **EL ESTADO COMPLETO LLEGA** (ojo del founder, 2.2.2 · ⑤).
-                  Con 6 de 6 la tarjeta decía «Completa lo que falta»: *pedirle
-                  a la familia que complete algo que ya completó le enseña que
-                  lo que cuenta no se registra.* B construyó los dos estados y
-                  su tipo los separa; lo que faltaba era que la pantalla dijera
-                  en cuál está. */}
-              {hechas === casillas.length ? (
+              {/* El estado completo llega cuando las CINCO están: la pieza
+                  felicita en vez de pedir (ojo del founder, 2.2.2 · ⑤). */}
+              {cuantas === total ? (
                 <TarjetaConociendolo
-                  fraccion={1}
-                  voz={t('perfil.conociendoloVoz', { n: hechas, total: casillas.length, nombre: mascota.nombre })}
+                  dimensiones={dimensiones}
+                  voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   completo
                   vozFelicitacion={t('perfil.conociendoloCompleto', { nombre: mascota.nombre })}
-                  /* Sin urgencia: la puerta queda, el pedido no. */
                   masSobre={
                     <BotonContanos
                       etiqueta={t('perfil.conociendoloMas', { nombre: mascota.nombre })}
@@ -1697,8 +1742,8 @@ export default function PerfilDeMascota() {
                 />
               ) : (
                 <TarjetaConociendolo
-                  fraccion={hechas / casillas.length}
-                  voz={t('perfil.conociendoloVoz', { n: hechas, total: casillas.length, nombre: mascota.nombre })}
+                  dimensiones={dimensiones}
+                  voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   invitacion={
                     <BotonContanos
                       etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
