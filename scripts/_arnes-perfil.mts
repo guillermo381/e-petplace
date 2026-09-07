@@ -27,7 +27,9 @@ const src = (f: string) => {
 const FRANJA = src('FranjaSeguridad.tsx'), CELDAS = src('CeldasHoy.tsx');
 const MED = src('PiezaMedicacionActiva.tsx'), FIL = src('FiltrosLineaDeVida.tsx');
 const FICHA = src('FichaRaza.tsx');
-const INV = src('InvitacionBio.tsx');
+const HC = src('HojaContanos.tsx');
+const BC = src('BotonContanos.tsx');
+const PC = src('PastillaConociendolo.tsx');
 const it = (id: string, clase: any) => ({ id, clase, texto: 'x', procedencia: 'familia' as const, vozProcedencia: 'v' });
 
 console.log('\n── ① ROJO · SIN NADA, LA FRANJA NO EXISTE ──');
@@ -153,32 +155,56 @@ t('el cierre es un slot, no una prop de texto', /cierre\?: React\.ReactNode/.tes
 t('🔴 y sin él NO se dibuja ni un separador',
   /\{cierre\}/.test(FICHA) && /cierre !== undefined \?/.test(FICHA) === false, true);
 
-console.log('\n── ROJO · LA INVITACIÓN AL BIO ──');
-/* 🔴 Es una PREGUNTA, no un dato: cortarla la deja sin signo de
-   interrogación, y una pregunta a medias no invita a nada. */
-t('🔴 la pregunta NO se trunca', /numberOfLines/.test(INV), false);
-/* Una entrada sin destino no existe: ofrecer «Temas médicos» y que no lleve a
-   ningún lado enseña a desconfiar de las otras tres. */
-t('🔴 `onPress` es obligatorio en cada entrada', /onPress: \(\) => void/.test(INV), true);
-t('🔴 …y sin entradas la tarjeta NO se dibuja', /entradas\.length === 0\) return null/.test(INV), true);
-t('🔴 en memorial no se invita a contar nada',
-  /theme\.mode === 'memorial'\) return null/.test(INV), true);
-t('el glifo lo decide la PIEZA, exhaustivo por clase',
-  /satisfies Record<ClaseInvitacion, IconoNombre>/.test(INV), true);
-/* ⏪ Acá se medía que `personalidad` fuera `null` y que su hueco existiera:
-   el registry no tenía glifo para «cómo es» y la fila iba sin ícono, con su
-   ancho reservado. **Hoy el glifo existe** y el hueco murió con él — su forma
-   la mide `verify:glifos`, con su control negativo. */
-/* 🔴 Lo pidió el aparato: sin `montaje="control"` tres de los cuatro dibujan
-   su huella y la estrella no, y la cuarta fila se lee de otra clase. */
+console.log('\n── ROJO · EL «CONTANOS» (2.1) ──');
+/* 🔴 UNA SOLA HOJA, CUATRO ACCESOS. Por eso la Hoja NO trae su botón: una
+   pieza que lo trae obliga a cada acceso a montarlo entero o a clonarla. */
+t('🔴 la Hoja no trae su propio acceso', /BotonContanos|Pressable[\s\S]{0,80}abrir/.test(HC), false);
+t('…y su apertura la manda quien la monta', /visible: boolean/.test(HC), true);
+/* La caja va ARRIBA: las entradas son para quien ya sabe qué contar; la caja,
+   para quien no sabe en cuál va — y ésa es la mayoría. */
+t('🔴 la caja libre va ARRIBA de las cuatro',
+  HC.indexOf('libre !== undefined') < HC.indexOf('entradas.map'), true);
+/* La propuesta REEMPLAZA a la caja: pedir otra cosa antes de contestar la
+   primera es perder las dos. */
+t('🔴 la propuesta reemplaza a la caja, no se apila',
+  /propuesta !== undefined \? \([\s\S]{0,900}?\) : libre !== undefined \?/.test(HC), true);
+t('🔴 …y exige sus DOS salidas',
+  /onGuardar: \(\) => void/.test(HC) && /onDescartar: \(\) => void/.test(HC), true);
+/* La pieza entrega el texto y NO la clase: si la adivinara, el sí de la
+   familia dejaría de ser una decisión. */
+t('🔴 la Hoja no clasifica lo que le escriben',
+  /ClaseContanos/.test(HC.slice(HC.indexOf('libre !== undefined'), HC.indexOf('entradas.map'))), false);
+t('cada entrada exige su destino', /onPress: \(\) => void/.test(HC), true);
+t('el glifo lo decide la PIEZA, exhaustivo',
+  /satisfies Record<ClaseContanos, IconoNombre>/.test(HC), true);
 t('🔴 las cuatro filas montan en CONTROL: parejas, sin huella',
-  /montaje="control"/.test(INV), true);
-t('🔴 las CUATRO tienen glifo, y ninguna queda corrida',
-  /personalidad: 'personalidad'/.test(INV) && /GLIFO\[e\.clase\]/.test(INV), true);
-t('🔴 …y ya no queda hueco reservado de cuando faltaba',
-  /width: GLIFO_TAMANO, height: GLIFO_TAMANO/.test(INV), false);
-t('la Hoja se cierra ANTES de llevar a otra pantalla',
-  /setAbierta\(false\)\s*\n\s*e\.onPress\(\)/.test(INV), true);
+  /montaje="control"/.test(HC), true);
+/* 🔴 NINGUNA VOZ SE TRUNCA, y las tres llevan el nombre de la mascota adentro:
+   «Contanos lo que hace único a Constan… ›» le dice a la familia que la app no
+   supo con quién estaba hablando. */
+for (const [n, x] of [['la Hoja', HC], ['el botón', BC], ['la pastilla', PC]] as const) {
+  t(`🔴 ${n}: cero \`numberOfLines\``, /numberOfLines/.test(x), false);
+}
+/* La firma de la pastilla es su DESAPARICIÓN: «0 por resolver» ocupa lugar
+   para decir que no hay nada que hacer. */
+t('🔴 con cero pendientes la pastilla NO se dibuja', /n <= 0\) return null/.test(PC), true);
+/* ⚠️ **ACÁ HABÍA UN ASSERT QUE NO PODÍA DAR VERDE NUNCA**, y su rojo era del
+   instrumento: medía la frase «Lo que FALTA» de un JSDoc, y `src()` **borra
+   los comentarios antes de leer**. Es el espejo de medir el nombre en vez del
+   hecho: *ahí medía una convención; acá medía prosa que el lector no puede
+   ver.* Lo que ese assert quería fijar —que el número sea lo que falta y no lo
+   que se sabe— **ya lo fija el guard de arriba**: con `n <= 0` la pieza
+   desaparece, y un contador de progreso jamás desaparecería al llegar a su
+   tope. Se retira en vez de reescribirse: *dos asserts para el mismo hecho
+   envejecen por separado.* */
+/* En memorial no se pide terminar de contar nada. */
+for (const [n, x] of [['la Hoja', HC], ['el botón', BC], ['la pastilla', PC]] as const) {
+  t(`🔴 ${n} no se dibuja en memorial`, /theme\.mode === 'memorial'\) return null/.test(x), true);
+}
+/* Los chevrones son la PRIMITIVA, no caracteres: el censo por la clase
+   encontró tres piezas con el carácter, y se curaron las tres. */
+t('🔴 cero chevrones dibujados como carácter en el paquete',
+  /['"]›['"]|['"]⌃['"]/.test(HC + BC + PC + FICHA + src('FilaConfirmacionVacuna.tsx') + CELDAS), false);
 
 console.log('\n── ⑥ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['franja', FRANJA], ['celdas', CELDAS], ['medicación', MED], ['filtros', FIL]] as const)

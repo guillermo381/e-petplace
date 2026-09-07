@@ -70,6 +70,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AccessibilityInfo, findNodeHandle, Pressable, View } from 'react-native'
 
 import { Campo } from './Campo'
+import { Chevron } from './chevron'
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -488,7 +489,9 @@ export function PieConfirmacionVacunas({ filas, vozGuardar, vozFaltan, vozIncomp
           style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}
         >
           <Texto variante="apoyo">{vozIncompletas(incompletas)}</Texto>
-          <Texto variante="apoyo">›</Texto>
+          {/* La primitiva de la casa, no el carácter — ver la nota gemela en
+              `FichaRaza`: el mismo defecto vivía en tres piezas. */}
+          <Chevron color={theme.text.secondary} direccion="derecha" />
         </Pressable>
       ) : (
         <Texto variante="apoyo">

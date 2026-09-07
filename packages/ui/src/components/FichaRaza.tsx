@@ -20,6 +20,7 @@
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
+import { Chevron } from './chevron'
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -56,6 +57,19 @@ export interface FichaRazaProps {
    *  ⚠️ **Sin slot no se dibuja NADA** — ni un separador ni un hueco. Una
    *  ficha de raza sin invitación es una ficha de raza completa, no una a la
    *  que le falta algo. */
+  /**
+   * 🔴 **VIVE DENTRO DE LO ABIERTO, y hay que saberlo antes de montarlo.**
+   * Con la ficha cerrada —que es su estado por defecto— **el cierre no se
+   * dibuja**. Medido en el emulador: la tarjeta cerrada muestra el nombre, la
+   * pregunta y el chevron, y nada más.
+   *
+   * *Es correcto como anatomía —el pie pertenece al contenido— pero tiene una
+   * consecuencia de producto: si el «Contanos» viviera SÓLO acá, la pieza más
+   * invitante del perfil quedaría detrás de un toque.* Por eso el perfil monta
+   * además su propio acceso (`BotonContanos` o la pastilla), y **sin ficha
+   * publicada monta el botón solo**: son cuatro puertas a la misma Hoja, no
+   * una escondida.
+   */
   cierre?: React.ReactNode
 }
 
@@ -94,7 +108,13 @@ export function FichaRaza({
             gira, que es lo que dice si va a abrir o a cerrar. */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
           <Texto variante="apoyo">{abierta ? vozCerrar : vozAbrir}</Texto>
-          <Texto variante="apoyo">{abierta ? '⌃' : '›'}</Texto>
+          {/* 🔴 **LA PRIMITIVA, NO EL CARÁCTER — y lo encontró censar la
+              CLASE.** Curé este mismo defecto en `CeldasHoy` dos lotes atrás
+              y **acá seguía**, en una pieza mía, con el chevron dibujado como
+              texto: *una regla duplicada por copia se cura dos veces o no se
+              cura.* El censo por la clase encontró además la gemela en
+              `FilaConfirmacionVacuna`. */}
+          <Chevron color={theme.text.secondary} direccion={abierta ? 'arriba' : 'derecha'} />
         </View>
       </Pressable>
 
