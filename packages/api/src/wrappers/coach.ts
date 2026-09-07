@@ -108,8 +108,16 @@ export async function obtenerContextoCoach(
 
 /* ─── A2 · la búsqueda ──────────────────────────────────────────────────── */
 
-export type TipoResultado =
-  | 'mascota' | 'cita' | 'pedido' | 'recuerdo' | 'producto' | 'prestador';
+/** 🔴 **Los tipos que la RPC emite de verdad, y lo vigila `verify:union-vs-check`.**
+ *  Faltaba `papel` desde que la bóveda entró (fase 3): la RPC emitía SIETE y
+ *  este union declaraba SEIS, y **compilaba igual** porque el wrapper castea.
+ *  *Un tipo es una promesa, no una validación* (hallazgo de C) — y la promesa
+ *  rota no falla: hace que un `switch` sobre esto se crea exhaustivo. */
+export const TIPOS_RESULTADO = [
+  'mascota', 'cita', 'pedido', 'recuerdo', 'producto', 'prestador', 'papel',
+] as const;
+
+export type TipoResultado = (typeof TIPOS_RESULTADO)[number];
 
 export type ResultadoBusqueda = {
   tipo: TipoResultado;
