@@ -64,9 +64,18 @@ export function itemsDeSeguridad(f: FuentesDeSeguridad, voz: VocesDeSeguridad): 
       id: a.evento_id ?? `alergia-${i}`,
       clase: 'alergia',
       texto: voz.alergiaA(alergeno),
-      /* Una alergia del snapshot clínico la registró quien atendió. */
-      procedencia: 'prestador',
-      vozProcedencia: voz.unPrestador,
+      /* ⏪ **ACÁ DECÍA «la registró quien atendió», y era cierto el día que lo
+         escribí**: la única forma de que una alergia existiera era que un
+         prestador la cargara. Desde que la familia puede declararla
+         (`declararAlergiaFamilia`, S113-A), forzar «prestador» le pondría a lo
+         que ella contó la autoridad de un diagnóstico.
+         🔴 **El discriminador es `estado`**, no la fuente: lo que declara la
+         familia nace **`sospechada`** y lo del prestador nace `confirmada`.
+         *Una alergia sospechada mostrada como confirmada es peor que no
+         mostrarla: alguien deja de darle un alimento por una certeza que
+         nadie tiene* — y al revés, una confirmada como sospecha se ignora. */
+      procedencia: a.estado === 'sospechada' ? 'familia' : 'prestador',
+      vozProcedencia: a.estado === 'sospechada' ? voz.laFamilia : voz.unPrestador,
     });
   });
 

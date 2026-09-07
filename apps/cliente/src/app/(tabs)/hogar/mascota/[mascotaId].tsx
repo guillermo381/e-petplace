@@ -65,6 +65,7 @@ import {
   type LineaDeVidaEstadoPie,
   FichaRaza,
   FranjaSeguridad,
+  InvitacionBio,
   CeldasHoy,
   FiltrosLineaDeVida,
   type TipoLineaDeVida,
@@ -128,6 +129,7 @@ import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import { EditarRazaHoja } from '@/components/editar-raza-hoja';
 import { RegistrarMedicacionHoja } from '@/components/registrar-medicacion-hoja';
+import { HojaInvitacionBio, type ClaseBio } from '@/components/invitacion-bio-hojas';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -492,6 +494,7 @@ export default function PerfilDeMascota() {
   const [pesos, setPesos] = useState<PesoDeLaSerie[] | null>(null);
   const [pesoHoja, setPesoHoja] = useState(false);
   const [medicacionHoja, setMedicacionHoja] = useState(false);
+  const [hojaBio, setHojaBio] = useState<ClaseBio | null>(null);
   const [razaHoja, setRazaHoja] = useState(false);
   /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
   const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
@@ -1468,40 +1471,31 @@ export default function PerfilDeMascota() {
               vozAbrir={t('perfil.razaVer')}
               vozCerrar={t('perfil.razaOcultar')}
             />
-            {/* ⭐ **LA INVITACIÓN QUE CIERRA LA FICHA** (S113-C · 1.2.1 · ②).
-                La ficha habla de **la raza**; esto devuelve la conversación a
-                **este animal**: *lo general se lee, lo propio se cuenta.*
-
-                ⚠️ **Va pegada abajo y NO dentro de la pieza**, por medición:
-                `FichaRazaProps` no tiene slot de cierre (8 props, ninguna lo
-                admite). Pedido a B abajo; el día que exista, esto se muda
-                adentro y la pantalla queda igual.
-
-                🔴 **La voz va en TUTEO aunque la orden llegó en voseo.** La
-                casa habla tuteo neutro y `R66` lo vigila — *un dictado no
-                cambia la voz del producto, y escribirlo como llegó habría dado
-                rojo en el gate*. La idea del founder, corta: cuanto mejor lo
-                conocemos, mejor lo acompañamos. */}
-            {/* 🔴 **DOS VOCES, PORQUE LA ETAPA PUEDE NO EXISTIR.** Colgarla de
-                `momento !== null` la escondía entera para toda mascota sin
-                fecha de nacimiento — medido en web con una recién dada de alta,
-                donde el nacimiento se puede dejar para después. *La invitación
-                no es sobre la etapa: es sobre esta mascota.* Con etapa se la
-                nombra porque ancla el momento; sin etapa se invita igual. */}
+            {/* ⭐ **LA INVITACIÓN, ahora con la pieza de B y sus CUATRO
+                destinos** (S113-C · 2.0 · ②). Reemplaza a la `Celda` que la
+                sostuvo mientras la pieza no existía — *un andamio se retira
+                cuando llega lo que sostenía, no cuando alguien se acuerda.*
+                La ficha habla de la raza; esto devuelve la conversación a este
+                animal: **lo general se lee, lo propio se cuenta.** */}
             <View style={{ marginTop: spacing[3] }}>
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  titulo={
-                    momento !== null && vozMomento(momento, t) !== null
-                      ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
-                      : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
-                  }
-                  subtitulo={t('perfil.razaInvitacionDetalle')}
-                  onPress={() =>
-                    router.push({ pathname: '/hogar/bitacora', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
-                  }
-                />
+              <InvitacionBio
+                texto={
+                  momento !== null && vozMomento(momento, t) !== null
+                    ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
+                    : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
+                }
+                tituloHoja={t('bio.titulo', { nombre: mascota.nombre })}
+                /* Las cuatro **tienen destino**, y por eso las cuatro se
+                   dibujan: la pieza exige `onPress` en cada entrada porque *sin
+                   destino la entrada no existe*. Hace unas horas dos de éstas
+                   no tenían puerta y las habría dejado afuera. */
+                entradas={[
+                  { clase: 'comportamiento', titulo: t('bio.enComportamiento'), detalle: t('bio.enComportamientoDet'), onPress: () => setHojaBio('comportamiento') },
+                  { clase: 'personalidad', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => setHojaBio('personalidad') },
+                  { clase: 'medico', titulo: t('bio.enMedico'), detalle: t('bio.enMedicoDet'), onPress: () => setHojaBio('medico') },
+                  { clase: 'recuerdo', titulo: t('bio.enRecuerdo'), detalle: t('bio.enRecuerdoDet'), onPress: () => setHojaBio('recuerdo') },
+                ]}
+              />
             </View>
           </View>
         ) : null}
@@ -2464,6 +2458,17 @@ export default function PerfilDeMascota() {
           />
         </Hoja>
       ) : null}
+
+      <HojaInvitacionBio
+        clase={hojaBio}
+        nombre={mascota.nombre}
+        mascotaId={mascota.id}
+        onCerrar={() => setHojaBio(null)}
+        /* 🔴 **La línea de vida al volver.** Sin esto el aviso dice «anotado en
+           la vida de Thor» y la vida de Thor sigue igual — *decir dónde quedó y
+           que no se vea ahí es peor que no decirlo.* */
+        onGuardado={() => setRecargaPeso((n) => n + 1)}
+      />
 
       <RegistrarMedicacionHoja
         visible={medicacionHoja}

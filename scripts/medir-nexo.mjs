@@ -63,6 +63,14 @@ di(`② la pantalla: ${t.slice(0, 150).replace(/\n/g, ' · ')}`);
 const cajas = await page.evaluate(() => [...document.querySelectorAll('input, textarea')].map((e) => e.getAttribute('placeholder') ?? `(${e.tagName.toLowerCase()} sin placeholder)`));
 di(`② cajas en la pantalla: ${cajas.length ? cajas.join(' | ') : '🔴 ninguna'}`);
 di(`② ¿el panel de memoria?: ${/Lo que sé de/.test(t) ? 'sí ✓' : '🔴 no'}`);
+/* 🔴 **EL HUECO QUE A VIO EN APARATO.** Se busca la frase ROTA, no la sana: un
+   arnés que confirma que la buena está no descarta que la rota también. */
+const rotas = [
+  ['la invitación', /Pregúntame algo de\s*[,.]/],
+  ['el panel', /Lo que sé de\s*$|Lo que sé de\s*\n/m],
+].filter(([, re]) => re.test(t)).map(([q]) => q);
+di(`② ¿alguna voz sale con el hueco vacío?: ${rotas.length === 0 ? 'no ✓' : `🔴 ${rotas.join(' y ')}`}`);
+di(`   nombran a Thor: invitación=${/Pregúntame algo de Thor/.test(t) ? 'sí ✓' : 'no'} · panel=${/Lo que sé de Thor/.test(t) ? 'sí ✓' : 'no'}`);
 
 /* ③ los chips salen del contexto */
 for (const c of ['¿Cuándo le toca la vacuna?', '¿Cómo va su peso?', '¿Qué cuidados necesita por su etapa?']) {
