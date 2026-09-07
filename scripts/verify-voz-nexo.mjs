@@ -51,7 +51,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { exigirArgumentos } from './lib-argumentos.mjs';
 
-exigirArgumentos(['--control', '--limite'], 0);
+exigirArgumentos(['--control', '--limite', '--veces'], 0);
 
 const RAIZ = fileURLToPath(new URL('..', import.meta.url));
 const di = (s) => console.log(s);
@@ -250,8 +250,16 @@ di(`verify:voz-nexo · ${preguntas.length} pregunta(s) de cuidado contra la edge
 di(`matcher: lib-voz + ${LISTA_D.formas.size} formas de ${LISTA_D.de ?? '🔴 la lista compartida NO se encontró — se mide sólo con lib-voz'}`);
 di(`(${preguntas.filter((q) => !q.escala).length} no deben escalar · ${preguntas.filter((q) => q.escala).length} sí, como control)\n`);
 
+/* 🔴 N CORRIDAS, PORQUE UNA NO ES UNA MEDICIÓN. Medido en esta misma sesión: tres
+   corridas de los mismos 20 turnos contra la misma edge dieron 2·0 voseo y 0·2
+   escaladas, y la que vio MENOS usaba el detector MÁS ancho. *La diferencia fue el
+   modelo.* Se reporta la FRECUENCIA por pregunta, no el conteo de una vuelta. */
+const VECES = Math.max(1, Number((process.argv.find((a) => a.startsWith('--veces=')) ?? '').split('=')[1] || 1));
+const frec = new Map();   // id → { voseo, sobra, falta, rinde, formas:Set }
 let voseo = 0, sobra = 0, falta = 0, rinde = 0;
-for (const q of preguntas) {
+for (let vuelta = 1; vuelta <= VECES; vuelta += 1) {
+ if (VECES > 1) di(`\n── vuelta ${vuelta}/${VECES} ──`);
+ for (const q of preguntas) {
   const r = await fetch(`https://${REF}.supabase.co/functions/v1/coach`, {
     method: 'POST', headers: { apikey: ANON, Authorization: `Bearer ${auth.access_token}`, 'content-type': 'application/json' },
     body: JSON.stringify({ mascotaId: mascota, texto: q.texto }),
@@ -272,8 +280,17 @@ for (const q of preguntas) {
   else if (!q.escala && menciona(texto)) marcas.push('· menciona al vet (no es rojo: contestó)');
   if (q.escala && !e) { falta += 1; marcas.push('🔴 NO escaló y debía'); }
   if (sr.length) { rinde += 1; marcas.push(`🔴 se rinde: «${sr[0]}»`); }
-  di(`${marcas.length ? '🔴' : '✅'} ${q.id} ${q.escala ? '(debe escalar)' : '             '} ${marcas.join(' · ') || 'bien'}`);
-  if (marcas.length) di(`     «${texto.slice(0, 96).replace(/\n/g, ' ')}…»`);
+  if (!frec.has(q.id)) frec.set(q.id, { voseo: 0, sobra: 0, falta: 0, rinde: 0, formas: new Set() });
+  const f = frec.get(q.id);
+  if (v.length) { f.voseo += 1; v.forEach((h) => f.formas.add(h.t)); }
+  if (!q.escala && e) f.sobra += 1;
+  if (q.escala && !e) f.falta += 1;
+  if (sr.length) f.rinde += 1;
+  if (VECES === 1 || marcas.length) {
+    di(`${marcas.length ? '🔴' : '✅'} ${q.id} ${q.escala ? '(debe escalar)' : '             '} ${marcas.join(' · ') || 'bien'}`);
+    if (marcas.length) di(`     «${texto.slice(0, 96).replace(/\n/g, ' ')}…»`);
+  }
+ }
 }
 
 const rojos = voseo + sobra + falta + rinde;
@@ -284,6 +301,23 @@ di(`\n═══ ${voseo} con voseo · ${sobra} escalaron de más · ${falta} no 
    (91 formas contra 39). *La diferencia no fue una cura: fue el modelo.*
    ⇒ **un rojo de una sola corrida puede mandar a curar ruido**, y un verde puede
    ser suerte. Lo que se lee es la TENDENCIA entre corridas, no el conteo de una. */
+if (VECES > 1) {
+  di(`\n── TENDENCIA sobre ${VECES} vueltas (frecuencia, no conteo) ──`);
+  const inest = [...frec.entries()].filter(([, f]) => f.voseo + f.sobra + f.falta + f.rinde > 0);
+  if (!inest.length) di(`   ✅ ninguna pregunta falló en ninguna de las ${VECES} vueltas.`);
+  for (const [id, f] of inest.sort((a, b) => (b[1].voseo + b[1].sobra + b[1].falta + b[1].rinde) - (a[1].voseo + a[1].sobra + a[1].falta + a[1].rinde))) {
+    const partes = [];
+    if (f.voseo) partes.push(`voseo ${f.voseo}/${VECES}${f.formas.size ? ` (${[...f.formas].join(',')})` : ''}`);
+    if (f.sobra) partes.push(`escaló de más ${f.sobra}/${VECES}`);
+    if (f.falta) partes.push(`no escaló ${f.falta}/${VECES}`);
+    if (f.rinde) partes.push(`se rindió ${f.rinde}/${VECES}`);
+    const cada = f.voseo === VECES || f.sobra === VECES || f.falta === VECES || f.rinde === VECES;
+    di(`   ${cada ? '🔴 SIEMPRE' : '🟡 a veces '} ${id}  ${partes.join(' · ')}`);
+  }
+  di(`\n   🔴 SIEMPRE = reproducible, es del producto y se cura.`);
+  di(`   🟡 a veces  = **variación del modelo**: curarlo puede ser perseguir ruido.`);
+  process.exit(inest.some(([, f]) => f.voseo === VECES || f.sobra === VECES || f.falta === VECES || f.rinde === VECES) ? 1 : 0);
+}
 di(`⚠️ ESTO ES UNA MUESTRA DE UNA CORRIDA, no una medición estable: el sujeto es un`);
 di(`   modelo y sus salidas varían. Medido: tres corridas de los mismos 20 turnos`);
 di(`   contra la misma edge dieron 2·0 voseo y 0·2 escaladas. **Un rojo suelto puede`);
