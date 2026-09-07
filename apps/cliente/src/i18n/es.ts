@@ -627,6 +627,8 @@ export const clienteEs = {
        founder dijo, y es verdad — no «mejor su salud». */
     razaInvitacion: '{{mascota}} está en su etapa {{etapa}}. ¿Quieres contarnos qué lo hace único?',
     razaInvitacionSinEtapa: '¿Quieres contarnos qué hace único a {{mascota}}?',
+    razaPregunta: '¿Quieres conocer más sobre el {{raza}}?',
+    identidadYPapeles: 'Identidad y papeles',
     razaInvitacionDetalle: 'Cuanto mejor lo conocemos, mejor lo acompañamos.',
     razaTemperamento: 'Cómo suelen ser',
     razaTalla: 'Tamaño de adulto',
@@ -847,6 +849,7 @@ export const clienteEs = {
     /* ⭐ CONOCIÉNDOLO — la fracción del expediente. */
     conociendoloTitulo: 'Conociéndolo',
     conociendoloVoz: 'Sabemos {{n}} de {{total}} cosas de {{nombre}}.',
+    conociendoloInvita: 'Completa lo que falta de {{nombre}}',
     historiaVerTodo: 'Ver toda su historia',
     accionCitas: 'Citas',
     peso: 'Peso',
@@ -4330,6 +4333,19 @@ export const clienteEs = {
        y «Guardado» a secas no la contesta. */
     anotado: 'Anotado en la vida de {{nombre}}',
     noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
+  },
+  rasgos: {
+    /* ⭐ RASGOS — los chips del «cuéntanos» (S113-C · 2.2.1 · ④). */
+    titulo: 'Cuéntanos de {{nombre}}',
+    cargando: 'Buscando de qué podemos hablar…',
+    familia_miedos: '¿A qué le tiene miedo?',
+    familia_manias: 'Sus manías',
+    familia_con_animales: 'Con otros animales',
+    familia_con_ninos: 'Con los niños',
+    contaMas: '¿Quieres contarnos algo más?',
+    contaMasEjemplo: 'Con los truenos se mete abajo de la cama y no sale hasta la mañana.',
+    guardar: 'Guardar',
+    elegiAlgo: 'Elige alguno o cuéntanos algo — lo que sea nos sirve.',
   },
   contanos: {
     titulo: 'Cuéntanos de {{nombre}}',

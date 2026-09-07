@@ -74,6 +74,146 @@ async function verPerfil(nombre) {
       conociendolo: /Sabemos \d+ de \d+/.test(txt),
       tablero: /Su salud/.test(txt),
       identidadPlegada: /Ver \d+ más/.test(txt),
+      /* ⭐ **2.2.1** — lo que este pulido vino a cerrar. */
+      seccionPapeles: /Identidad y papeles/.test(txt),
+      /* Las invitaciones al «cuéntanos»: **tiene que haber UNA**. Se cuentan
+         por su etiqueta exacta, y se mide sobre la pantalla entera. */
+      /* 🔴 **Se cuenta la INVITACIÓN, no la palabra.** La primera versión
+         buscaba «cuéntanos» y daba 0 en Thor: la invitación decía
+         «Conociéndolo». *Un arnés que busca una palabra mide el diccionario,
+         no la pantalla.* Ahora busca el acto: cualquier texto que invite a
+         contar. */
+      invitaciones: (txt.match(/Cuéntanos algo de|Tell us something about/g) ?? []).length,
+      /* Dónde están, por su Y: para saber cuál sobra sin adivinar. */
+      dondeInvita: (() => {
+        const out = [];
+        for (const e of document.querySelectorAll('div,span')) {
+          const t = (e.textContent ?? '').trim();
+          if (!/^Cuéntanos algo de/.test(t) || t.length > 60) continue;
+          const r = e.getBoundingClientRect();
+          if (r.height === 0) continue;
+          const y = Math.round(r.y + window.scrollY);
+          if (!out.some((o) => Math.abs(o.y - y) < 4)) {
+            /* La cadena de ancestros con role, para saber DE QUIÉN cuelga. */
+            const cadena = [];
+            let n = e;
+            for (let i = 0; i < 12 && n !== null; i += 1) {
+              const rol = n.getAttribute?.('role') ?? '';
+              const al = (n.getAttribute?.('aria-label') ?? '').slice(0, 24);
+              if (rol !== '') cadena.push(`${rol}${al ? '(' + al + ')' : ''}`);
+              n = n.parentElement;
+            }
+            out.push({ y, t: t.slice(0, 34), cadena: cadena.join(' < ') });
+          }
+        }
+        return out.sort((a, b) => a.y - b.y);
+      })(),
+      preguntaRaza: /conocer más sobre el/.test(txt),
+      /* 🔴 **Fuera de caja y truncado.** Un `…` en un texto NO es truncado del
+         layout: RN lo pone a propósito. Lo que se mide es la CAJA: un nodo cuyo
+         ancho de contenido supera el de su contenedor. */
+      desbordes: (() => {
+        const out = [];
+        for (const e of document.querySelectorAll('div,span')) {
+          const r = e.getBoundingClientRect();
+          if (r.width === 0) continue;
+          /* 🔴 **Sólo lo que TIENE TEXTO.** La primera versión contaba
+             cualquier `div` y daba 7 rojos en las tres mascotas —incluida la
+             memorial, que casi no tiene contenido—: eran capas de fondo y
+             gradientes, que desbordan a propósito porque son pintura.
+             *«Nada fuera de caja» es una pregunta sobre lo que se lee, no sobre
+             la superficie que lo pinta.* */
+          const txtN = (e.textContent ?? '').trim();
+          if (txtN === '') continue;
+          if (r.right > 421 || r.left < -1) {
+            out.push({
+              t: (e.textContent ?? '').trim().slice(0, 40),
+              x: Math.round(r.left),
+              der: Math.round(r.right),
+              w: Math.round(r.width),
+              /* ¿scrollea a propósito? Una tira horizontal DEBE desbordar. */
+              scroll: getComputedStyle(e).overflowX,
+              padre: getComputedStyle(e.parentElement ?? e).overflowX,
+            });
+          }
+        }
+        return out;
+      })(),
+      /* 🔴 **TRUNCADO REAL**: un nodo cuyo contenido no entra en su caja. El
+         `…` del texto no sirve —RN lo pone a propósito—; lo que lo dice es
+         `scrollWidth > clientWidth` sobre un nodo que además lo esconde. */
+      truncados: (() => {
+        const out = [];
+        for (const e of document.querySelectorAll('div,span')) {
+          const st = getComputedStyle(e);
+          if (st.textOverflow !== 'ellipsis' && st.overflow !== 'hidden') continue;
+          if (e.scrollWidth <= e.clientWidth + 1) continue;
+          /* 🔴 **UN TEXTO TRUNCADO CON SU REVELADOR AL LADO NO ES UN DEFECTO.**
+             La franja de seguridad de Thor daba rojo —«Alérgico a pollo ·
+             Alérgico a pole…» 245→298— y **la captura lo desmintió**: al lado
+             dice «Ver 13 ⌄». *La pieza trunca a propósito y ofrece abrir.*
+             Y de paso: el «94062» que mi reporte leía en esa cadena **no está
+             en la pantalla** — era `textContent` pegando nodos vecinos.
+             ⇒ Se descarta el nodo cuyo hermano ofrece revelarlo. */
+          {
+            /* El revelador puede vivir dos o tres niveles arriba —la franja
+               lo tiene fuera de la caja del texto—, así que se sube hasta
+               encontrarlo o hasta salir de la tarjeta. */
+            let n2 = e.parentElement;
+            let tieneRevelador = false;
+            for (let i = 0; i < 4 && n2 !== null; i += 1) {
+              if (/Ver \d+|Ver todo|See \d+/.test(n2.textContent ?? '')) { tieneRevelador = true; break; }
+              n2 = n2.parentElement;
+            }
+            if (tieneRevelador) continue;
+          }
+          const t = (e.textContent ?? '').trim();
+          if (t === '') continue;
+          /* 🔴 **Un contenedor cuyo desborde lo pone un nodo SIN TEXTO no es un
+             truncado de contenido.** Daba rojo en Thor y Lolo con 420→490: el
+             culpable era la capa del degradado del techo, que va **a sangre a
+             propósito** y su `overflow:hidden` es justamente lo que la recorta.
+             *Medir «algo desborda» sin mirar QUÉ desborda convierte una
+             decisión de diseño en un defecto.* */
+          {
+            const cajaE = e.getBoundingClientRect();
+            let hijoAncho = null;
+            for (const h of e.children) {
+              const rh = h.getBoundingClientRect();
+              if (hijoAncho === null || rh.right > hijoAncho.right) hijoAncho = rh, (hijoAncho.txt = (h.textContent ?? '').trim());
+            }
+            if (hijoAncho !== null && hijoAncho.txt === '' && hijoAncho.right - cajaE.left > e.clientWidth) continue;
+          }
+          /* De quién cuelga, y si él o su padre scrollean: **un contenedor
+             que scrollea a propósito no es un truncado**. */
+          const st2 = getComputedStyle(e);
+          const pa = e.parentElement;
+          out.push({
+            t: t.slice(0, 46),
+            w: e.clientWidth,
+            necesita: e.scrollWidth,
+            ox: st2.overflowX,
+            hijos: e.children.length,
+            padreOx: pa === null ? '' : getComputedStyle(pa).overflowX,
+            /* 🔴 **Qué hijo lo desborda.** Sin esto el reporte dice «algo mide
+               490» y manda a buscar a ciegas; con esto nombra la pieza. */
+            culpable: (() => {
+              let peor = null;
+              for (const h of e.children) {
+                const rh = h.getBoundingClientRect();
+                const anchoR = rh.right - e.getBoundingClientRect().left;
+                if (peor === null || anchoR > peor.der) {
+                  peor = { der: Math.round(anchoR), t: (h.textContent ?? '').trim().slice(0, 34) };
+                }
+              }
+              return peor;
+            })(),
+          });
+        }
+        return out;
+      })(),
+      /* Lo que queda al PIE, después del último rótulo de sección. */
+      pie: txt.slice(-140).replace(/\n+/g, ' · ').trim(),
     };
   }, ROTULOS);
 }
@@ -90,7 +230,23 @@ for (const n of ['Thor', 'Lolo', 'Sombra']) {
   di(`  «Sin registro»     : ${r.sinRegistro}`);
   di(`  svg (gráficos+chevrons): ${r.svg}`);
   di(`  «Conociéndolo» con fracción: ${r.conociendolo ? 'sí' : 'no'}`);
-  di(`  identidad plegada  : ${r.identidadPlegada ? 'sí' : 'no'}\n`);
+  di(`  «Identidad y papeles»: ${r.seccionPapeles ? 'sí' : 'no'}`);
+  di(`  invitaciones «cuéntanos»: ${r.invitaciones}  ${r.invitaciones <= 1 ? '✓' : '🔴 más de una'}`);
+  di(`  pregunta de la raza: ${r.preguntaRaza ? 'sí' : 'no'}`);
+  for (const d of r.dondeInvita) di(`      · invita en y=${d.y}: «${d.t}»  ← ${d.cadena}`);
+  {
+    /* 🔴 **Un desborde dentro de algo que scrollea a propósito NO es un
+       desborde**: una tira horizontal tiene que ser más ancha que su ventana.
+       Se descuentan por su `overflowX`, no por su aspecto. */
+    const reales = r.desbordes.filter((d) => d.scroll !== 'scroll' && d.scroll !== 'auto' && d.padre !== 'scroll' && d.padre !== 'auto');
+    di(`  fuera de caja      : ${reales.length} de ${r.desbordes.length} nodos anchos ${reales.length === 0 ? '✓ (el resto scrollea a propósito)' : '🔴'}`);
+    for (const d of reales.slice(0, 4)) di(`      · x=${d.x} der=${d.der} w=${d.w}  «${d.t}»`);
+    di(`  truncados          : ${r.truncados.length} ${r.truncados.length === 0 ? '✓' : '🔴'}`);
+    for (const d of r.truncados.slice(0, 4))
+      di(`      · «${d.t}» ${d.w}→${d.necesita}px · hijos=${d.hijos}${d.culpable ? ` · el ancho lo pone «${d.culpable.t}» (llega a ${d.culpable.der})` : ''}`);
+  }
+  di(`  al pie             : …${r.pie.slice(-70)}\n`);
+  await page.screenshot({ path: `docs/loop/capturas-s113-c-2.2.1/${n}.png`, fullPage: true });
 }
 
 di('── EL ORDEN FIRMADO ────────────────────────────');
