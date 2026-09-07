@@ -872,7 +872,31 @@ export default function PerfilDeMascota() {
           hoy,
         )
       : null;
-  const pastilla = vozEstadoHogar?.voz ?? null;
+  /** ⭐ **EL HERO Y EL TABLERO DICEN LO MISMO** (E, S113 · fase 3).
+   *
+   * 🔴 **Eran DOS CUENTAS sobre la misma pregunta.** El hero decía «Cuidado al
+   * día» mientras el tablero, a un pantallazo, decía «Vacunas 0 de 5 · vencida
+   * desde abr 2024». Las dos estaban bien **para su fuente**: `calcularVozHogar`
+   * mira `senal.proxima_vacuna` y cae a «al día» por actividad reciente; el
+   * tablero mira `obtener_plan_vacunal`, que **sí ve las vencidas**.
+   *
+   * *Dos superficies con distinta fuente no discrepan por un error de cálculo:
+   * discrepan porque nadie decidió cuál manda.* Acá manda **el tablero**: es el
+   * que cuenta el plan entero, y es el que la familia lee al lado.
+   *
+   * ⚠️ La voz de `senal` **no se retira**: sigue decidiendo `pideAtencion` por
+   * emergencia y `conociendolo` por expediente ralo, que el tablero no sabe.
+   * Lo único que se corrige es **el «al día» que el tablero desmiente**. */
+  const pastilla: typeof vozEstadoHogar extends null ? null : 'alDia' | 'pideAtencion' | 'conociendolo' | null =
+    vozEstadoHogar === null
+      ? null
+      : vozEstadoHogar.voz === 'alDia' &&
+          tablero !== null &&
+          tablero.memorial === false &&
+          tablero.vacunas !== null &&
+          tablero.vacunas.vencidas > 0
+        ? 'pideAtencion'
+        : vozEstadoHogar.voz;
 
   /**
    * A8 — LA CUENTA DE PENDIENTES, JUNTO A LA PASTILLA.
@@ -1278,13 +1302,22 @@ export default function PerfilDeMascota() {
                         boxShadow: theme.elevacion.elevada,
                       }}
                     >
-                      {pastilla === 'alDia' ? (
+                      {pastilla === 'alDia' && !esMemorial ? (
                         <Svg width={14} height={14} viewBox="0 0 24 24">
                           <Path d="m5 12.6 4.6 4.6L19 7.8" stroke={theme.status.successText} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" fill="none" />
                         </Svg>
                       ) : null}
-                      <Texto variante="dato" color={pastilla === 'pideAtencion' ? 'danger' : 'primary'}>
-                        {pastilla === 'alDia'
+                      <Texto variante="dato" color={pastilla === 'pideAtencion' && !esMemorial ? 'danger' : 'primary'}>
+                        {/* ⭐ **EN MEMORIAL EL CHIP NO EMPUJA** (E, S113 · fase 3).
+                            Decía «Conociéndolo» sobre Sombra: *una invitación a
+                            seguir conociendo a quien ya no está.* Y «Necesita
+                            atención» sería peor.
+                            🔴 El chip **no se borra**: dice lo que es. *Quitarlo
+                            dejaría el retrato sin su línea y la composición
+                            cambia; decir la verdad cuesta lo mismo.* */}
+                        {esMemorial
+                          ? t('perfil.pastillaEnMemoria')
+                          : pastilla === 'alDia'
                           ? t('perfil.pastillaAlDia')
                           : pastilla === 'pideAtencion'
                             ? t('perfil.pastillaAtencion')
@@ -1367,7 +1400,24 @@ export default function PerfilDeMascota() {
                   esAcuario || meses === null
                     ? null
                     : meses !== null
-                    ? vozEdad(
+                    ? /* ⭐ **EN MEMORIAL LA EDAD VA EN PASADO** (E, S113 · fase 3).
+                         Decía «~11 años» en la pantalla de quien ya no está —
+                         *el presente afirma que sigue teniendo esa edad, y eso
+                         no es un detalle de estilo: es la pantalla hablando
+                         como si nada hubiera pasado.* La cifra no cambia; lo
+                         que cambia es el tiempo del verbo. */
+                      esMemorial
+                      ? t('perfil.edadTenia', {
+                          edad: vozEdad(
+                            meses,
+                            mascota.fecha_nacimiento_precision,
+                            mascota.fecha_nacimiento !== null
+                              ? Number(mascota.fecha_nacimiento.slice(0, 4))
+                              : null,
+                            t,
+                          ),
+                        })
+                      : vozEdad(
                         meses,
                         mascota.fecha_nacimiento_precision,
                         mascota.fecha_nacimiento !== null
