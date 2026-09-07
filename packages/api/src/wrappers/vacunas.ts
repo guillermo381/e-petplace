@@ -384,7 +384,7 @@ const MENSAJES_REGISTRO: Record<
   CodigoErrorRegistroVacunas | 'error_desconocido' | 'datos_inconsistentes',
   string
 > = {
-  acceso_denegado:      'Tu sesión no está activa. Iniciá sesión de nuevo.',
+  acceso_denegado:      'Tu sesión no está activa. Inicia sesión de nuevo.',
   sin_acceso_mascota:   'No tienes acceso a esta mascota.',
   vacunas_vacias:       'No hay vacunas para registrar.',
   item_invalido:        'Una de las vacunas del carnet no es válida. Revisa los datos e intenta de nuevo.',

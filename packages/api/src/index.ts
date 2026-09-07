@@ -1875,20 +1875,40 @@ export {
   type PropuestaEnCola,
 } from './wrappers/coach';
 
-/* ⚠️ **ENMIENDA ADITIVA DE C (76(d)) — la TERCERA de la sesión.** A entregó las
-   tres RPC del tablero y ninguna puerta. Se abren acá con el molde. */
+// ═══════════════════════════════════════════════════════════════════════════
+// EL TABLERO DEL PERFIL (S113-A · 2.2)
+//
+// 🔴 **ENTREGADA ≠ MONTADA, del lado del motor.** Tres RPC de esta sesión
+// salieron sin wrapper —pasaporte, Nexo, el tablero— y otra pista tuvo que
+// abrirlas. *Una función que la puerta única no exporta no existe para las
+// apps.* Hoy es parte del cierre de toda RPC.
+// ═══════════════════════════════════════════════════════════════════════════
 export {
   obtenerTableroMascota,
   obtenerCitasDeMascota,
   obtenerHoyMascota,
-  CODIGOS_TABLERO,
-  type CodigoErrorTablero,
+  obtenerCatalogoRasgos,
+  registrarRasgos,
   type TableroMascota,
-  type TableroVivo,
+  type TableroMemorial,
+  type BloquePeso,
   type PuntoPeso,
+  type BloqueVacunas,
+  type BloqueAntiparasitario,
+  type EstadoPlaga,
+  type BloqueMedicacion,
+  type BloqueCitas,
+  type BloqueActividad,
   type CitaDeMascota,
-  type HoyMascota,
+  type CitasDeMascota,
+  type HoyDeMascota,
+  type RespuestaHoy,
+  type Rasgo,
+  type FamiliaRasgo,
+  type CodigoErrorTablero,
+  type CodigoErrorRasgos,
 } from './wrappers/tablero';
+
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
    por dónde llamarlo. Se abre acá copiando el molde, sin tocar nada de A. */

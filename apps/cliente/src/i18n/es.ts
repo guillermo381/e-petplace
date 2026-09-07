@@ -2759,11 +2759,11 @@ export const clienteEs = {
   // aceptarInvitacionFamilia). Tres láminas cortas + aceptar.
   invitacionFamilia: {
     titulo: 'Te invitaron a una familia',
-    lamina1Titulo: 'Sos parte de una familia',
+    lamina1Titulo: 'Eres parte de una familia',
     lamina1Cuerpo: 'Alguien te sumó a su familia en e-PetPlace para cuidar juntos a sus mascotas.',
     lamina2Titulo: 'Vas a ver su expediente',
     lamina2Cuerpo: 'La vida de cada mascota, documentada: vacunas, paseos, visitas al veterinario y más.',
-    lamina3Titulo: 'Cuidá con ellos',
+    lamina3Titulo: 'Cuida con ellos',
     lamina3Cuerpo: 'Vas a estar al día con lo que cada mascota necesita, y seguir sus cuidados.',
     siguiente: 'Siguiente',
     unirme: 'Unirme a la familia',
@@ -2774,7 +2774,7 @@ export const clienteEs = {
     crearCuenta: 'Crear mi cuenta',
     otraCuenta: 'Entrar con otra cuenta',
     sinToken: 'Este enlace no es válido o ya venció. Pedile a quien te invitó que te mande uno nuevo.',
-    listo: 'Listo, ya sos parte de la familia.',
+    listo: 'Listo, ya eres parte de la familia.',
   },
   seguridad: {
     tituloPantalla: 'Seguridad',
