@@ -14796,6 +14796,103 @@ export type Database = {
           },
         ]
       }
+      papel_valor: {
+        Row: {
+          analito: string
+          id: string
+          orden: number
+          papel_id: string
+          ref_max: string | null
+          ref_min: string | null
+          unidad: string | null
+          valor: string
+        }
+        Insert: {
+          analito: string
+          id?: string
+          orden?: number
+          papel_id: string
+          ref_max?: string | null
+          ref_min?: string | null
+          unidad?: string | null
+          valor: string
+        }
+        Update: {
+          analito?: string
+          id?: string
+          orden?: number
+          papel_id?: string
+          ref_max?: string | null
+          ref_min?: string | null
+          unidad?: string | null
+          valor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "papel_valor_papel_id_fkey"
+            columns: ["papel_id"]
+            isOneToOne: false
+            referencedRelation: "papeles_familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      papeles_familia: {
+        Row: {
+          archivo_path: string
+          clase: string
+          confirmado_en: string
+          confirmado_por: string
+          country_code: string | null
+          creado_en: string
+          fecha_papel: string | null
+          id: string
+          mascota_id: string
+          modo_captura: string
+          origen: string | null
+          subido_por: string
+          titulo: string | null
+        }
+        Insert: {
+          archivo_path: string
+          clase: string
+          confirmado_en?: string
+          confirmado_por: string
+          country_code?: string | null
+          creado_en?: string
+          fecha_papel?: string | null
+          id?: string
+          mascota_id: string
+          modo_captura?: string
+          origen?: string | null
+          subido_por: string
+          titulo?: string | null
+        }
+        Update: {
+          archivo_path?: string
+          clase?: string
+          confirmado_en?: string
+          confirmado_por?: string
+          country_code?: string | null
+          creado_en?: string
+          fecha_papel?: string | null
+          id?: string
+          mascota_id?: string
+          modo_captura?: string
+          origen?: string | null
+          subido_por?: string
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "papeles_familia_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pasaporte: {
         Row: {
           creado_en: string
@@ -26492,6 +26589,18 @@ export type Database = {
           p_fecha?: string
           p_mascota_id: string
           p_texto?: string
+        }
+        Returns: Json
+      }
+      registrar_papel_de_familia: {
+        Args: {
+          p_archivo_path: string
+          p_clase: string
+          p_fecha_papel?: string
+          p_mascota_id: string
+          p_origen?: string
+          p_titulo?: string
+          p_valores?: Json
         }
         Returns: Json
       }

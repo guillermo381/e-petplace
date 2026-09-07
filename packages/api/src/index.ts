@@ -1917,6 +1917,18 @@ export {
   type Tendencia,
 } from './series';
 
+// LA BÓVEDA DE PAPELES (S113 · fase 3) — transcribe, jamás interpreta.
+export {
+  registrarPapelDeFamilia,
+  obtenerPapelesDeMascota,
+  pathDePapel,
+  BUCKET_PAPELES,
+  type ClaseEnBoveda,
+  type ValorDePapel,
+  type PapelDeMascota,
+  type CodigoErrorBoveda,
+} from './wrappers/boveda';
+
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
    por dónde llamarlo. Se abre acá copiando el molde, sin tocar nada de A. */
