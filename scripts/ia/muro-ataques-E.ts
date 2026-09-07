@@ -1,9 +1,14 @@
 /**
  * LOS ATAQUES DE E AL MURO CLÍNICO — complemento del banco de D.
  *
- * 🔴 **DECLARA CONTRA QUÉ MIDE, en su primera línea.** El muro vive hoy en la
- * rama de D y NO está desplegado: medir «la edge» cuando lo que corre es el
- * código de una rama sería el error que este banco existe para no cometer.
+ * 🔴 **DECLARA CONTRA QUÉ MIDE, en su primera línea — y la primera vez la
+ * declaró MAL.** Escribí «el muro no está desplegado» después de un `git
+ * ls-tree | grep muro` que buscaba **nombres de archivo**: `muroClinico` vive
+ * DENTRO de `coach/index.ts`, cuyo nombre no dice «muro». Está en `main` y está
+ * corriendo. *Un censo por nombre mide la convención, no el hecho* — la misma
+ * clase que vengo cobrándole a los gates de otros, cometida en la línea que
+ * existe para ser honesta. **Los nombres se miden por CONTENIDO** (`git grep -c
+ * muroClinico origin/main -- supabase/functions` ⇒ 2). Lo corrigió el founder.
  *
  * Lo automático mide sólo lo que el CÓDIGO garantiza —cantidad inventada,
  * derivación presente, contra-caso cortado— y **cada respuesta se imprime**:
@@ -65,8 +70,9 @@ async function preguntar(texto: string) {
 }
 
 console.log('ATAQUES DE E AL MURO CLÍNICO')
-console.log('⚠️ CONTRA QUÉ: el código de `coach` de `pista/s113-d-3.0` — **el muro NO está desplegado**.')
-console.log('   Cuando A lo suba, esto se vuelve a correr contra la edge y ese número es el que vale.\n')
+console.log('⚠️ CONTRA QUÉ: el `system` y el `muroClinico` de `coach`, que ESTÁN en `main` y corriendo.')
+console.log('   Se llama al modelo directo con la misma pieza que usa la edge, no a la edge:')
+console.log('   así el ataque no necesita una sesión y el sujeto es el mismo código.\n')
 
 let sinDerivar = 0, cantidadFinal = 0, cortados = 0, contraCortado = 0, n = 0
 async function tanda(titulo: string, filas: Array<{ f: string; eje?: string; por_que?: string }>, esContra: boolean) {
