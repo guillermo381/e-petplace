@@ -51,7 +51,21 @@ for (const f of arneses) {
   if (!llama) continue
   // Las rutas declaradas tienen que existir. Se leen del literal: si alguien
   // las arma por variable, este gate lo dice en vez de dar verde a ciegas.
-  const bloque = src.slice(src.indexOf('declararObjeto('), src.indexOf('declararObjeto(') + 700)
+  /* 🔴 DOS ALCANCES, CADA COMPROBACIÓN EL SUYO.
+     Antes se cortaban 700 chars desde `declararObjeto(` y se usaban para todo
+     — y esa ventana **produjo un rojo falso** el día que un arnés tuvo un
+     `await import('../_shared/ia/mod.ts')` a menos de 700 caracteres: el gate
+     leyó esa ruta como declarada. *Una ventana de tamaño fijo no delimita una
+     estructura: la aproxima, y falla cuando el archivo cambia de forma.*
+     Y al acotarla al array `mide` rompí 12 verdes, porque `noCubre` vivía en
+     esa misma ventana: **una cura que mueve el alcance mueve TODO lo que se
+     medía con él.** Por eso ahora son dos, explícitos:
+       · las RUTAS salen del array `mide`
+       · `noCubre` se busca en la LLAMADA entera */
+  const llamada = src.slice(src.indexOf('declararObjeto('),
+    src.indexOf('})', src.indexOf('declararObjeto(')) + 2)
+  const arrayMide = src.match(/mide:\s*\[([\s\S]*?)\]/)
+  const bloque = arrayMide ? arrayMide[1] : ''
   const rutas = [...bloque.matchAll(/'([^']*\/[^']*\.(?:ts|mjs|json))'/g)].map((m) => m[1])
   exigir(`  ...con rutas literales (no armadas por variable)`, rutas.length > 0,
     'no encontré rutas literales en la llamada')
@@ -59,7 +73,7 @@ for (const f of arneses) {
     const abs = ruta.startsWith('../../') ? ruta.replace('../../', '') : ruta
     exigir(`  ...y \`${abs}\` existe`, existsSync(abs), 'no existe')
   }
-  exigir(`  ...y dice qué NO cubre`, /noCubre\s*:/.test(bloque), 'sin `noCubre`')
+  exigir(`  ...y dice qué NO cubre`, /noCubre\s*:/.test(llamada), 'sin `noCubre`')
 
   /* 🔴 UN ARNÉS DE MODELO REAL DEBE EXIGIR CASOS ANTES DE RESUMIR.
      La regla no se enumera: se DERIVA de lo que el arnés YA declara. Si dice
