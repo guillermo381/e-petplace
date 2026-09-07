@@ -166,6 +166,23 @@ export function hitsDeVoseo(src) {
     if (l.includes('/*')) { l = l.slice(0, l.indexOf('/*')); enBloque = true; }
     l = l.replace(/\/\/.*$/, '');
 
+    /* ── ⑨ LA TRAMPA QUE AGREGA B (S113), y es de la misma clase que la ⑦ ──
+       **Una RUTA DE IMPORT no es voz de producto: nadie la ve nunca.**
+       `from './components/HojaContanos'` contaba como `contanos`, y el nombre
+       de esa pieza lo dictó el founder. *Arreglar eso renombrando la pieza
+       sería arreglar el instrumento tocando el nombre en vez del hecho* — y
+       con el nombre correcto el gate seguiría rojo para siempre.
+
+       Se descarta la LÍNEA entera cuando **empieza el import** o cuando **lo
+       cierra** —`} from '…'`, que es la forma multilínea de la casa—. La
+       primera versión sólo miraba la línea que arranca con `import`/`export` y
+       **bajó de 2 a 1**: el que quedó era justamente un cierre. *Lo dijo el
+       número, no yo: por eso el control imprime el conteo y no un booleano.*
+
+       ⚠️ **No puede esconder voseo real**: una frase de producto no vive en un
+       `from '…'`, y si alguien la pusiera ahí el problema sería otro. */
+    if (/\bfrom\s*['"][^'"]*['"]\s*;?\s*$/.test(linea) || /^\s*import\s*\(/.test(linea)) return;
+
     for (const m of l.matchAll(/'([^'\\]{4,})'|"([^"\\]{4,})"/g)) {
       const v = m[1] ?? m[2];
       /* ⑩ — UN IDENTIFICADOR NO ES UNA FRASE. `no_sos_del_equipo` es un código

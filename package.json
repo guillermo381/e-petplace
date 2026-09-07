@@ -69,6 +69,7 @@
     "tipos:rutas": "node scripts/tipos-rutas.mjs",
     "ia:medir": "tsx scripts/ia-conjuntos/medir-pieza.mjs",
     "verify:nexo": "tsx scripts/_arnes-nexo.mts",
+    "verify:tablero": "tsx scripts/_arnes-tablero.mts",
     "verify:contrato-carnet": "tsx scripts/verify-contrato-carnet.mts",
     "verify:pide-en-memorial": "tsx apps/cliente/scripts/censo-pide-en-memorial.mts",
     "_comentario_confirmable": "S113-C 1.1.2: la regla que decide si una fila del carnet se puede dar por revisada. Vive en un gate porque su caso NO se puede producir desde la UI —la extraccion no devuelve filas sin fecha con los carnets de prueba y la Hoja de edicion exige fecha—, y sin embargo es el estado exacto del bloqueante que el founder vio con su carnet real.",
