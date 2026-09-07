@@ -24,6 +24,7 @@ import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { Icono, type IconoNombre } from './Icono'
+import { Chevron } from './chevron'
 import { Texto } from './Texto'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -65,6 +66,12 @@ export function FranjaSeguridad({ items, resumen, vozAbrir, vozCerrar }: FranjaS
         /* Franja FINA: la marca es el filete de la izquierda, no un relleno. */
         borderLeftWidth: 3,
         borderLeftColor: theme.status.warningText,
+        /* 🔴 `bg.warm` viene EN PAR con `text.warm`, y la pieza usa el par
+           ENTERO. ⏪ Pintaba este fondo y escribía con la tinta default: en
+           memorial el papel es cálido CLARO y la tinta del tema es CLARA, y el
+           resumen quedaba en **1.25:1** —medido en el emulador, no estimado—
+           mientras en claro daba 15.66:1. *Ningún typecheck ve medio par, y en
+           dos de los tres temas se ve perfecto.* (S113-B · 2.2 · B6.) */
         backgroundColor: theme.bg.warm,
         paddingVertical: spacing[3],
         paddingHorizontal: spacing[4],
@@ -76,29 +83,41 @@ export function FranjaSeguridad({ items, resumen, vozAbrir, vozCerrar }: FranjaS
         accessibilityState={{ expanded: abierta }}
         accessibilityLabel={resumen}
         onPress={() => setAbierta((v) => !v)}
-        style={{ minHeight: 44, justifyContent: 'center', gap: spacing[1] }}
+        style={{ minHeight: 44, justifyContent: 'center' }}
       >
+        {/* 🔴 **UNA SOLA FILA, y el «ver N» a la derecha con su chevron.**
+            ⏪ Antes eran DOS líneas de resumen y el «ver N» en un renglón
+            aparte: la franja ocupaba cuatro líneas para decir una cosa, y en
+            el perfil real quedaba entre la identidad y el pasaporte pesando
+            como una sección.
+
+            ⚠️ **Acá el truncado a UNA línea SÍ va, y es lo contrario de lo que
+            rige en el «Contanos».** La diferencia no es de gusto: *este texto
+            es un RESUMEN y su contenido completo está a un toque, en el mismo
+            lugar; aquél era una invitación cuyo verbo se comía el corte y no
+            había otra forma de leerlo.* Un resumen cortado sigue resumiendo. */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-          <Icono nombre={GLIFO[orden[0].clase]} tamano={18} registro="tinta" montaje="control" />
+          <Icono nombre={GLIFO[orden[0].clase]} tamano={18} tinta={theme.text.warm} montaje="control" />
           <View style={{ flex: 1 }}>
-            <Texto variante="cuerpo" numberOfLines={abierta ? undefined : 2}>
+            <Texto variante="cuerpo" color="warm" numberOfLines={abierta ? undefined : 1}>
               {resumen}
             </Texto>
           </View>
+          <Texto variante="apoyo" color="warm">{abierta ? vozCerrar : vozAbrir}</Texto>
+          <Chevron color={theme.text.warm} direccion={abierta ? 'arriba' : 'abajo'} />
         </View>
-        <Texto variante="apoyo">{abierta ? vozCerrar : vozAbrir}</Texto>
       </Pressable>
 
       {abierta ? (
         <View style={{ gap: spacing[3] }}>
           {orden.map((i) => (
             <View key={i.id} style={{ flexDirection: 'row', gap: spacing[2] }}>
-              <Icono nombre={GLIFO[i.clase]} tamano={18} registro="tinta" montaje="control" />
+              <Icono nombre={GLIFO[i.clase]} tamano={18} tinta={theme.text.warm} montaje="control" />
               <View style={{ flex: 1, gap: spacing[0.5] }}>
-                <Texto variante="cuerpo">{i.texto}</Texto>
+                <Texto variante="cuerpo" color="warm">{i.texto}</Texto>
                 {/* La procedencia: **lo que le permite al vet decidir cuánto
                     pesa el dato.** */}
-                <Texto variante="apoyo">{i.vozProcedencia}</Texto>
+                <Texto variante="apoyo" color="warm">{i.vozProcedencia}</Texto>
               </View>
             </View>
           ))}

@@ -71,6 +71,11 @@ const JUBILADOS = new Map([
     ficha: 'D-1015',
     razon: 'nombrado sólo en el parte de S103-B, cerrado. Sin archivo en git. Mismo trato: se construye el día que una decisión lo necesite.',
   }],
+  ['verify:todo', {
+    ficha: 'D-1015',
+    razon:
+      'NUNCA fue un gate: era la abreviatura de B para «todos los gates», escrita en el archivo compartido de pendientes de S113. La nota de B ya se curó — hoy el nombre sobrevive SÓLO citado dentro del parte cerrado de C (`docs/loop/S113-C-2.0.md`), donde C lo transcribe justamente para reportar este rojo. Reescribir el parte de otra pista para que un gate se ponga verde es ajustar el mundo al instrumento: la medición de C era verdadera y se MARCA, no se borra.',
+  }],
   ['verify:huerfanas', {
     ficha: 'D-1015',
     razon: 'nombrado una vez en el parte de S103-B, cerrado. Sin archivo en git.',
@@ -107,17 +112,60 @@ function censar() {
   const fuentes = corpus();
   const donde = nombrados(fuentes);
   const scripts = new Set(Object.keys(JSON.parse(readFileSync('package.json', 'utf8')).scripts ?? {}));
+
+  /* ═══ 🔴 LOS REPOS HERMANOS DE LA CASA — S113-B, y es una CURA DE ROJO FALSO ═
+     ⏪ Este gate leía SÓLO el `package.json` de este monorepo, y el canon nombra
+     gates del SITIO, que vive en `../epetplace-web`. Resultado medido:
+     `verify:sin-supabase` salió como *«nadie puede correrlo»* estando **vivo,
+     con línea propia y con su control positivo corrido el mismo día** — lo dice
+     `docs/loop/S113-NOCHE.md:294`.
+
+     *Un rojo falso es más caro que un hueco: el hueco se ve, y el rojo falso
+     enseña a saltear el gate.* Y su cura no es una jubilación —el gate no está
+     jubilado, está en otro lado— sino ensanchar al lector.
+
+     ⚠️ **Descartable y anunciado**: si el repo hermano no está en disco, esto
+     no hace nada y el gate mide exactamente lo que medía antes. El reporte dice
+     cuántos entraron por acá, para que su silencio no se lea como que no había. */
+  const HERMANOS = ['../epetplace-web', '../e-petplace-admin'];
+  const deHermanos = new Map();
+  for (const repo of HERMANOS) {
+    const pj = join(repo, 'package.json');
+    if (!existsSync(pj)) continue;
+    for (const k of Object.keys(JSON.parse(readFileSync(pj, 'utf8')).scripts ?? {})) {
+      if (!k.startsWith('verify:') || scripts.has(k)) continue;
+      deHermanos.set(k, repo);
+    }
+  }
+
   const enScripts = [...scripts].filter((s) => s.startsWith('verify:'));
 
   const archivos = existsSync('scripts') ? readdirSync('scripts') : [];
   const faltan = [];
   const jubiladosVivos = [];   // la tabla mintiendo: jubilado con script o archivo
+  const homonimosHermanos = []; // jubilado acá, vivo en un repo de la casa: se AVISA
+  const archivoDe = (n) => {
+    const f = `verify-${n.slice('verify:'.length)}.mjs`;
+    return existsSync(join('scripts', f)) ? f : null;
+  };
   for (const [nombre, sitios] of donde) {
-    if (scripts.has(nombre) && !JUBILADOS.has(nombre)) continue;
+    /* 🔴 DOS CORPUS, A PROPÓSITO — y confundirlos rompe el control de la tabla.
+       La pregunta *«¿alguien puede correr esto?»* se contesta con la CASA
+       entera (este repo + los hermanos): si el gate vive en el sitio, existe.
+       La pregunta *«¿la tabla de jubilaciones miente?»* se contesta con ESTE
+       repo, que es sobre lo que la tabla habla. *Mezclarlos haría que un
+       homónimo del sitio declare falsa una jubilación de acá.* */
+    if ((scripts.has(nombre) || deHermanos.has(nombre)) && !JUBILADOS.has(nombre)) continue;
     const baseJ = nombre.slice('verify:'.length);
     const archivoJ = archivos.find((a) => a === `verify-${baseJ}.mjs` || a === `verify-${baseJ}.ts`
       || a === `_censo-${baseJ}.mjs`);
     if (JUBILADOS.has(nombre)) {
+      /* El jubilado que vive en un repo hermano NO es la tabla mintiendo: es un
+         dato que su dueño necesita. Se AVISA y no se falla. */
+      if (deHermanos.has(nombre) && !scripts.has(nombre) && !archivoDe(nombre)) {
+        homonimosHermanos.push({ nombre, repo: deHermanos.get(nombre) });
+        continue;
+      }
       // 🔴 EL CONTROL DE LA TABLA: un jubilado que existe es una jubilación falsa.
       if (scripts.has(nombre) || archivoJ) {
         jubiladosVivos.push({ nombre, script: scripts.has(nombre), archivo: archivoJ ?? null });
@@ -131,15 +179,25 @@ function censar() {
       || a === `_censo-${base}.mjs`);
     faltan.push({ nombre, sitios, archivo: archivo ? join('scripts', archivo) : null });
   }
-  return { fuentes, donde, enScripts, faltan, jubiladosVivos };
+  return { fuentes, donde, enScripts, faltan, jubiladosVivos, deHermanos, homonimosHermanos };
 }
 
-function reportar({ fuentes, donde, enScripts, faltan, jubiladosVivos }) {
+function reportar({ fuentes, donde, enScripts, faltan, jubiladosVivos, deHermanos, homonimosHermanos }) {
   di(`gates-existen · ${donde.size} nombres en ${fuentes.length} archivo(s) · ` +
-     `${enScripts.length} verify:* en package.json · ${JUBILADOS.size} jubilado(s) declarado(s)`);
+     `${enScripts.length} verify:* en package.json · ${JUBILADOS.size} jubilado(s) declarado(s)` +
+     (deHermanos.size
+       ? ` · ${deHermanos.size} en repo hermano (${[...new Set(deHermanos.values())].join(' · ')})`
+       : ' · repos hermanos NO en disco: los gates del sitio no se pudieron medir'));
 
   // 🔴 La tabla mintiendo es MÁS grave que un gate ausente: significa que el
   //    canon da por muerto algo que alguien puede correr.
+  if (homonimosHermanos.length) {
+    di(`\n⚠️ JUBILADO ACÁ, VIVO EN UN REPO DE LA CASA (${homonimosHermanos.length}) — no es la tabla mintiendo, es un dato para su dueño:`);
+    for (const h of homonimosHermanos) di(`   ${h.nombre} → tiene línea en ${h.repo}/package.json`);
+    di('   ⇒ la ficha de su jubilación se midió contra ESTE repo. Si es el MISMO gate,');
+    di('     la jubilación se revisa; si es un homónimo, se declara en la razón.');
+  }
+
   if (jubiladosVivos.length) {
     di(`\n🔴 LA TABLA DE JUBILACIONES MIENTE (${jubiladosVivos.length}):`);
     for (const j of jubiladosVivos) {
