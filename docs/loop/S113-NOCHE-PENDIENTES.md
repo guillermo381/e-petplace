@@ -702,3 +702,16 @@ es el que después nadie puede consultar desde el motor ni desde Nexo.
 **Recuerdo abre `/recuerdo`**, la pantalla que ya existe con **foto y texto** —no
 una caja—. *Una caja de texto sería una segunda forma, peor, de hacer lo que la
 casa ya hace bien; y la foto es media parte de un recuerdo.*
+
+## C · se puede guardar una bitácora vacía (S113, cierre de fase 2)
+
+Medido: `chips_de_bitacora` devuelve **cero** para las 8 bitácoras de Thor —
+se guardaron **sin conductas marcadas y sin texto**. La línea de vida las
+dibuja con su voz de fallback («Anotaste cómo estuvo») porque *no hay nada que
+decir*, y el founder lo leyó como voz de motor. **No lo es: es una fila sin
+contenido.**
+
+**Decisión de producto:** ¿la puerta debe rebotar una bitácora sin nada, como
+hace la Hoja de rasgos («Elige alguno o cuéntanos algo»)? Si sí, el guard va
+en el motor (A), no en la pantalla — *una puerta que acepta el vacío deja
+filas que después hay que explicar.*

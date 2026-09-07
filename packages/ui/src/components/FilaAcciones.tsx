@@ -26,6 +26,17 @@
  * pieza ya producía —memorial dejaba tres al esconder a Nexo—. *Un tipo que
  * sólo admitiera cuatro habría vuelto inexpresable un estado que existía.*
  *
+ * ⭐ **DOS TAMBIÉN, y es el MISMO argumento** (enmienda aditiva de la pista C,
+ * 76(d), S113 · 2.2.4). El hueco que esta cabecera declaraba —*¿«Cuéntanos»
+ * corresponde en memorial? Es del founder, no mía*— **lo contestó el founder**:
+ * en memorial van **DOS**, Documentos y Cuéntanos. *De quien ya no está se
+ * siguen leyendo sus papeles y se sigue pudiendo guardar un recuerdo; Citas y
+ * Pasaporte no.*
+ * El piso de tres venía del caso «memorial esconde a Nexo», que esa firma
+ * acaba de retirar — así que sostenerlo hoy volvería inexpresable el estado
+ * que la firma creó. **El techo de cuatro NO se toca**: la razón de arriba
+ * sigue entera.
+ *
  * ── ☠️ LA EXCEPCIÓN DE MEMORIAL MURIÓ CON SU SUJETO ─────────────────────
  * Acá la pieza escondía **la acción de Nexo** en memorial (`MODELO_LOYALTY`
  * §7.1). Esa regla no era sobre la POSICIÓN: era sobre el Coach — *una acción
@@ -89,7 +100,9 @@ export interface FilaAccionesProps {
    * 🔴 **TRES O CUATRO — el compilador no deja escribir la quinta.** Ver la
    * cabecera. El orden es el que se dibuja: la pieza no reordena.
    */
-  acciones: readonly [AccionPerfil, AccionPerfil, AccionPerfil]
+  acciones:
+    | readonly [AccionPerfil, AccionPerfil]
+    | readonly [AccionPerfil, AccionPerfil, AccionPerfil]
     | readonly [AccionPerfil, AccionPerfil, AccionPerfil, AccionPerfil]
   /** Qué hacer al tocar una apagada: la pantalla dice la razón **en una
    *  línea**. La pieza no elige el vehículo. */

@@ -55,11 +55,24 @@ export function itemsDeSeguridad(f: FuentesDeSeguridad, voz: VocesDeSeguridad): 
   const items: ItemSeguridad[] = [];
   const vozDe = (p: ProcedenciaSeguridad): string => (p === 'familia' ? voz.laFamilia : voz.unPrestador);
 
+  /* 🔴 **UN ALÉRGENO SE DICE UNA VEZ** (ojo del founder, S113 · 2.2.2). La
+     franja de Thor decía «Alérgico a pollo · Alérgico a pollo · …»: hay VARIAS
+     filas del mismo alérgeno —lo declaró la familia y lo confirmó una clínica,
+     o se registró dos veces— y cada una entraba como un ítem.
+     *La franja existe para que alguien que va a darle de comer lea rápido qué
+     no puede: repetir el mismo nombre no refuerza, gasta el renglón que
+     necesitaba el segundo alérgeno.*
+     Se deduplica por el NOMBRE normalizado, no por `evento_id`: dos filas
+     distintas del mismo alérgeno son exactamente el caso. */
+  const alergenosDichos = new Set<string>();
   f.alergiasDetalle.forEach((a, i) => {
     const alergeno = texto(a.alergeno);
     /* Sin el alérgeno no hay nada que decir, y una franja que dice «alergia» a
        secas es justo la que este módulo existe para no producir. */
     if (alergeno === null) return;
+    const llave = alergeno.trim().toLocaleLowerCase('es');
+    if (alergenosDichos.has(llave)) return;
+    alergenosDichos.add(llave);
     items.push({
       id: a.evento_id ?? `alergia-${i}`,
       clase: 'alergia',

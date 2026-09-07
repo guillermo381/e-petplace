@@ -72,12 +72,36 @@ const NO_ES_PEDIR: Array<[RegExp, string]> = [
   [/^Logged by\b/i, 'la misma atribución en inglés'],
 ];
 
+/* ⭐ **LO QUE EL FOUNDER FIRMÓ QUE SÍ VA EN MEMORIAL** (S113 · fase 3).
+   🔴 **Es una lista DISTINTA de `NO_ES_PEDIR`, y la diferencia importa.**
+   Aquéllas no piden nada —un gerundio de carga, un error, una atribución en
+   pasado—; **éstas PIDEN, y van igual porque alguien lo decidió.** *Meterlas
+   en la lista de arriba sería mentir sobre qué son para que el número baje.*
+
+   Firma del founder, 7-sep-2026, sobre las cuatro acciones del perfil:
+   *«en memorial van sólo dos: Documentos y Cuéntanos — de quien ya no está se
+   siguen leyendo sus papeles y se sigue pudiendo guardar un recuerdo.»*
+
+   ⚠️ Cada entrada lleva SU firma. Una excepción sin quién la firmó es una
+   excepción que nadie puede revisar. */
+const FIRMADAS_EN_MEMORIAL: Array<[string, string]> = [
+  [
+    'contanos.pastilla',
+    'founder 7-sep-2026: guardar un recuerdo de quien ya no está es lo más valioso que la familia puede hacer ahí. Lo que se apaga en memorial son los actos que miran hacia adelante —agendar, encontrar a alguien que se perdió—, no los que miran lo que hubo',
+  ],
+];
+
 const frases = aplanar(clienteEs);
 /** Las keys que PIDEN. Se juzga la FRASE, no el nombre de la key: una key
  *  puede llamarse `perfil.pesoRegistrar` y decir otra cosa, y al revés. */
 const pide = new Set(
   [...frases]
-    .filter(([, v]) => VERBOS.test(sinTilde(v)) && !NO_ES_PEDIR.some(([r]) => r.test(sinTilde(v))))
+    .filter(
+      ([k, v]) =>
+        VERBOS.test(sinTilde(v)) &&
+        !NO_ES_PEDIR.some(([r]) => r.test(sinTilde(v))) &&
+        !FIRMADAS_EN_MEMORIAL.some(([clave]) => clave === k),
+    )
     .map(([k]) => k),
 );
 
