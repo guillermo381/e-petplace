@@ -323,7 +323,7 @@ export default function Cierre() {
                 multilinea={3}
                 // VOZ EMOCIONAL — patrón D-300: hardcodeada es hasta el
                 // lote de gate del founder (mezcla honesta en modo en).
-                placeholder="Contale a la familia cómo la pasó en el paseo…"
+                placeholder="Cuéntale a la familia cómo la pasó en el paseo…"
               />
             ) : resumen.mensaje_familia ? (
               <Tarjeta relleno="amplio">

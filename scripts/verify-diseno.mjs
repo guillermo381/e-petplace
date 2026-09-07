@@ -684,7 +684,18 @@ function r10(archivos) {
  *  (keys vozCardM*): se escanean las líneas de esas keys en los
  *  diccionarios del cliente contra el vocabulario de score. DURA EN 0. */
 const RE_VOZCARD = /vozCardM\d\s*:/;
-const RE_SCORE = /%|\bnivel\b|\bprogres\w*|\bpunt(?:os|aje)\b|\brachas?\b|\bcomplet(?:aste|ado|é)\b|\bva bien\b|\blevel\b|\bstreak\b|\bscore\b/i;
+/* 🔴 `\b` NO DELIMITA PALABRAS EN ESPAÑOL, y esta regla —la que vigila que no
+   haya scores en pantalla (LOYALTY §3)— tenía DOS ciegos por eso:
+     · `completé` — la `é` no es `\w` en ASCII, así que `\b` después de ella
+       nunca cierra ⇒ **la forma en primera persona nunca se detectaba**
+     · `scores` — `\bscore\b` no ve el plural
+   Lo destapó D en su cinturón de voz (`fce5924e`): de 132 formas, `\b` sólo
+   alcanzaba 83, y su log decía «corregido» al corregir la otra mitad.
+   *Un matcher que no ve media clase no falla: reporta menos, y en un lint un
+   número más chico se lee como progreso.*
+   Cura: `(?<![\p{L}\p{N}])` … `(?![\p{L}\p{N}])` con el flag `u`. Verificado
+   que sigue SIN marcar `nivelador` ni `puntual`, que no son scores. */
+const RE_SCORE = /%|(?<![\p{L}\p{N}])(?:nivel|progres\w*|punt(?:os|aje)|rachas?|complet(?:aste|ado|é)|va bien|level|streaks?|scores?)(?![\p{L}\p{N}])/iu;
 function r11(archivosDic) {
   const fallos = [];
   let vigiladas = 0;

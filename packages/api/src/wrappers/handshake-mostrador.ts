@@ -52,7 +52,7 @@ const CODIGOS_SOLICITUD = [
 export type CodigoErrorSolicitud = (typeof CODIGOS_SOLICITUD)[number];
 
 const MENSAJES_SOLICITUD: Record<CodigoErrorSolicitud, string> = {
-  acceso_denegado: 'Tu sesión no está activa. Iniciá sesión de nuevo.',
+  acceso_denegado: 'Tu sesión no está activa. Inicia sesión de nuevo.',
   no_opera_cuenta: 'No operás este negocio.',
   cuenta_no_activa: 'El negocio todavía no está activo.',
   tipo_invalido: 'Tipo de solicitud inválido.',

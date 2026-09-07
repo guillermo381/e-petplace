@@ -304,6 +304,10 @@ export const TIPOS_AVISO = [
   'antiparasitario_vence',
   'cita_manana',
   'anticipacion',
+  /* El tip del día (S113 2.2): cuarto nivel de `obtenerHoyMascota`. Lo agregué
+     al CHECK y no acá — y lo cazó `verify:union-vs-check`, el gate que escribí
+     ayer para exactamente esto. */
+  'tip_del_dia',
 ] as const;
 
 /** 🔴 `'desconocido'` NO existe en la base: es del CLIENTE, y está a propósito.

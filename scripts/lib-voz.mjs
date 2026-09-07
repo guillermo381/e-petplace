@@ -77,26 +77,50 @@
 
 import { readFileSync } from 'node:fs';
 
-export const CON_TILDE = ['probá','tocá','elegí','escribí','andá','mirá','poné','hacé','agregá','volvé','ingresá','revisá','buscá','cargá','seleccioná','confirmá','guardá','contactá','abrí','activá','compartí','enviá','esperá','intentá','verificá','completá','aceptá','corregí','contá','pedí','sacá','cerrá','dejá','sumá','usá','pagá','entrás','vení',
-  /* ⑨ · los SEIS huecos que encontró el censo de segundo orden (B, S105) —
-     ver la nota al pie. Van como IMPERATIVO porque la frontera de la `s` caza
-     con ellos el presente voseante gratis: `cancelá` ⇒ `cancelás`. */
-  'cancelá','atendé','decí','subí','trabajá','vendé',
-  /* ⑫ · EL HUECO DEL AVISO CLÍNICO (S106, hallazgo de B, curado por A).
-     `notá` ⇒ caza `notás` gratis por la frontera de la `s`; `llevá` ⇒
-     `llevás`. **Los dos estaban ausentes y el §3 de LETRA_TELEMEDICINA los
-     usaba literalmente** — ver la nota ⑫ al pie. */
-  'notá','llevá'];
-export const ENCL = ['contanos','escribila','escribilo','corregilo','corregila','ingresalo','ingresala','probalo','probala','tocalo','tocala','elegilo','elegila','agregalo','agregala','revisalo','revisala','guardalo','guardala','avisanos','contactanos','compartile','compartilo','compartila',
-  /* ⑫ · `llevá` NO caza a `llevala`: la frontera derecha descarta con `l`.
-     Los enclíticos se listan enteros, como los demás. */
-  'llevalo','llevala','llevanos','llevame','llevate'];
-export const PRON = ['tenés','podés','querés','sabés','debés','necesitás','hacés','ponés','compartís',
-  /* ⑫ · `creés` va ENTERO y NO como `creé`: **`creé` es tuteo perfectamente
-     válido** («creé una cuenta», pretérito de *crear*). Agregar la raíz
-     habría fabricado falsos positivos — la misma trampa que `estás` y
-     `podrás`, ya documentada arriba. */
-  'creés'];
+/* 🔴 LAS TRES LISTAS VIVEN EN `scripts/lib-voseo.json`, NO ACÁ (firma founder,
+   6-sep-2026). Había TRES copias de la misma lista —ésta, el cinturón de D en
+   `supabase/functions` y el gate de voz de E— y las tres divergían: a ésta le
+   faltaban 16 formas, entre ellas `bañalo`, `mostrame` y `avisame`, que E midió
+   saliendo a una familia. *Tres copias de un vocabulario no son redundancia:
+   son tres verdades distintas, y la que falla es siempre la que nadie miró.*
+
+   La API NO cambia: `CON_TILDE`, `ENCL` y `PRON` siguen exportándose igual, así
+   que ningún consumidor se entera. Lo vigila `verify:lista-voseo`. */
+import { readFileSync as _leerVoseo } from 'node:fs'
+/* 🔴 LA LISTA VIVE EN `supabase/functions/_shared/voz/voseo.json` — la de D — y
+   NO en `scripts/`. Medido: `scripts/` y `supabase/` **sí pueden compartir un
+   JSON** (mismo repo, ruta relativa; los dos lo leen con `readFileSync`), así
+   que no hacía falta un tercer lugar. Y el formato de D es mejor que el que yo
+   había hecho: son PARES voseo→tuteo, o sea que sirven para CURAR y no sólo
+   para detectar.
+
+   Las dos listas eran complementarias —72 formas sólo en la mía, 24 sólo en la
+   suya— y ninguna de las dos estaba mal: *cada una había medido su propio
+   territorio, y ese es exactamente el modo en que tres copias divergen sin que
+   ninguna sea la equivocada.* Hoy son 138 pares, en un solo archivo.
+
+   ⚠️ Un `null` en la segunda columna significa DETECTA PERO NO CURA: la raíz
+   puede diptongar (`mostrá`→`muestra`) y derivarlo a ciegas metería un tuteo
+   inventado en una tabla que después alguien aplica sin leer. */
+const _VOSEO = JSON.parse(_leerVoseo(
+  new URL('../supabase/functions/_shared/voz/voseo.json', import.meta.url), 'utf8'))
+const _FORMAS = _VOSEO.pares.map((p) => p[0])
+
+/* La API no cambia: las tres siguen exportándose. Pero el reparto NO puede ser
+   por tilde, y esto lo cobró el primer intento: `vos` y `sos` no llevan tilde,
+   cayeron en ENCL —que se busca con `includes`, sin frontera— y R66 marcó
+   **veinte falsos**: «avi·sos», «pa·sos», «ca·sos», «archi·vos», «en·víos».
+   *Un reparto por ortografía agrupa cosas que la gramática separa.*
+
+   Lo que de verdad define a un enclítico es que TERMINA EN PRONOMBRE (-lo, -la,
+   -le, -me, -te, -nos, -se). Ésos sí pueden buscarse sin frontera derecha,
+   porque ya la traen. Todo lo demás va a las listas con frontera. */
+const _esEnclitico = (f) => /(lo|la|le|me|te|nos|se)$/.test(f) && f.length > 4
+const _tieneTilde = (s) => /[áéíóú]/.test(s)
+export const ENCL = _FORMAS.filter(_esEnclitico)
+export const CON_TILDE = _FORMAS.filter((f) => !_esEnclitico(f) && !/[sn]$/.test(f))
+export const PRON = _FORMAS.filter((f) => !_esEnclitico(f) && /[sn]$/.test(f))
+
 /** ⑪ · `sos` (voseo de «eres»). Va aparte porque, como `vos`, es CORTO y
  *  necesita frontera de vecino: «esos», «presos», «sospecha», «nosotros» lo
  *  contienen y no son voz. Control corrido: 0 falsos positivos en los siete
@@ -105,6 +129,17 @@ const SOS = /(^|[^a-záéíóúñ])sos([^a-záéíóúñ]|$)/i;
 
 /** Los que exigen frontera derecha (trampa ⑧). Los enclíticos NO: son palabras enteras. */
 const CON_FRONTERA = [...CON_TILDE, ...PRON];
+
+/* ⑬ — **LAS PALABRAS CORTAS EXIGEN LAS DOS FRONTERAS, y esto lo cobró ampliar
+   la lista.** `vos` y `sos` entraron con la lista unificada y R66 marcó VEINTE
+   falsos en un solo archivo: «avi·sos», «pa·sos», «ca·sos», «archi·vos»,
+   «en·víos», «nue·vos». La trampa ⑧ mira lo que SIGUE al término; acá el ruido
+   entra por lo que lo PRECEDE.
+   *Una forma de tres letras no es una palabra rara: es una sílaba común, y
+   buscarla sin frontera izquierda encuentra el idioma entero.* */
+const CORTAS = new Set(CON_FRONTERA.filter((f) => f.length <= 3));
+const _dosFronteras = (linea, x) =>
+  new RegExp(`(^|[^a-záéíóúñü])${x}([^a-záéíóúñü]|$)`, 'i').test(linea);
 /** Letra que, si sigue al término, lo descarta por no ser voz.
  *  🔴 **La `s` está EXCLUIDA a propósito**: `elegí` + `s` = `elegís`, que SÍ es
  *  voseo. Sin esta excepción el censo callaba tres cadenas reales del prestador
@@ -150,6 +185,16 @@ export function hitsDeVoseo(src) {
          línea sigue cayendo. */
       if (/^(\.{1,2}\/|@[\w-]+\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
 
+      /* ⑫ — **UNA CLAVE DE i18n NO ES VOZ**, y esto lo destapó ampliar la lista
+         a 114 formas: `'checkoutGuarderia.esperaMensual'` daba rojo por
+         «esperame» —«espera» + «Me»— porque los enclíticos se buscan sin
+         frontera derecha. *La clave la lee `t()`, no una familia; el texto que
+         una familia lee es el VALOR del diccionario, y ése se mide igual.*
+         Misma forma que ⑩ y ⑪: se descarta la CADENA que parece identificador
+         —sin espacios, con punto o camelCase—, jamás la línea. */
+      if (!/\s/.test(v) && (/^[a-z][A-Za-z0-9]*(\.[a-zA-Z0-9_]+)+$/.test(v)
+          || /^[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*$/.test(v))) continue;
+
       const b = v.toLowerCase();
 
       /* Enclíticos: palabra entera, sin frontera derecha (ya la traen). */
@@ -158,6 +203,7 @@ export function hitsDeVoseo(src) {
       /* trampa ⑧ — imperativo/pronombre seguido de letra NO es voz. */
       if (!t) {
         t = CON_FRONTERA.find((x) => {
+          /* ⑬ */ if (CORTAS.has(x)) return _dosFronteras(v, x);
           let desde = 0;
           for (;;) {
             const k = b.indexOf(x, desde);
