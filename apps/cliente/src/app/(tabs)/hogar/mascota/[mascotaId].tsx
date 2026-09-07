@@ -345,6 +345,38 @@ export default function PerfilDeMascota() {
   /** S89-D ①: la sección de papeles nace PLEGADA — el perfil es de la
    *  mascota; sus documentos se piden, no presiden. */
   const [docsAbiertos, setDocsAbiertos] = useState(false);
+  /** ⭐ **IR A LOS DOCUMENTOS** (orden del founder, S113 · 2.2.3).
+   *
+   *  La cuarta acción del perfil va a ser **Documentos**, y *por ahora* su
+   *  destino es el plegable que ya existe en «Identidad y papeles»: **scroll
+   *  hasta él, desplegado**. Con la bóveda de la fase 3 gana pantalla propia
+   *  y la acción apunta ahí — por eso el destino vive en UNA función y no
+   *  desperdigado en el `onPress`: *ese día se cambia una línea, no se busca
+   *  dónde estaba.*
+   *
+   *  🔴 **PREPARADO Y NO CABLEADO, y se dice cuál es el bloqueante:**
+   *  `FilaAcciones` tiene `nexo` como slot fijo y **dibuja el orbe en él**, así
+   *  que no acepta un glifo. Medido en `pista/s113-b-2.2.2`: el slot sigue
+   *  igual. *Un mecanismo listo que espera su puerta no es trabajo perdido: es
+   *  la mitad que no depende de nadie, hecha y probada.* Cuando B entregue el
+   *  cuarto slot, esto se enchufa en una línea. */
+  const irADocumentos = useCallback(() => {
+    /* Desplegar PRIMERO: si el scroll llega antes, la fila está cerrada y la
+       familia aterriza sobre un renglón que no dice nada. */
+    setDocsAbiertos(true);
+    /* El `y` se mide del layout REAL —no se estima— y el scroll espera a que
+       el despliegue haya cambiado la altura. Sin la espera, se scrollea a la
+       posición de la pantalla plegada. */
+    setTimeout(() => {
+      const y = yDocumentosRef.current;
+      if (y === null) return;
+      scrollRef.current?.scrollTo({ y: Math.max(0, y - 12), animated: true });
+    }, 120);
+  }, []);
+  const scrollRef = useRef<ScrollView>(null);
+  /** La `y` del bloque de documentos, tomada de su `onLayout`. `null` = todavía
+   *  no se midió, y entonces **no se scrollea a ciegas**. */
+  const yDocumentosRef = useRef<number | null>(null);
   /** S91-D · «Quiénes viven acá» — el censo del acuario, del motor de A.
    *  `null` = todavía no se pudo leer, y NO es «cero habitantes» (L-178). */
   const [censo, setCenso] = useState<CensoDelAcuario | null>(null);
@@ -1088,6 +1120,7 @@ export default function PerfilDeMascota() {
           papel y tinta propios, gradiente de 4 stops). NADA de eso se
           porta: la composición viaja con NUESTROS tokens. */}
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
         showsVerticalScrollIndicator={false}
       >
@@ -2431,7 +2464,12 @@ export default function PerfilDeMascota() {
         ) : null}
 
         {monta.documentos ? (
-        <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
+        <View
+          style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}
+          onLayout={(e) => {
+            yDocumentosRef.current = e.nativeEvent.layout.y;
+          }}
+        >
           <Tarjeta relleno="ninguno" elevacion="reposo">
             <CeldaNavegacion
               icono="documentos"
