@@ -1722,8 +1722,26 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    * leería como de otra clase*, que es exactamente el defecto que la casa ya
    * pagó en `HojaContanos`.
    *
-   * ⚠️ **GATE POR ÍCONO PENDIENTE** (§6b.5): la firma es del founder y es de
-   * a uno. Su hoja de contacto está montada en la galería, a 21 y 44 px.
+   * ── ✅ GATE POR ÍCONO **CERRADO** — firma del founder (7-sep-2026) ──────
+   * *«Va la V1 (dos esquinas + la pata en el tercer vértice)»*, y la firma
+   * llegó **con su límite escrito, no a pesar de él**:
+   *
+   * 🔴 **NO LEE «QR» DE FORMA INEQUÍVOCA A 21 PX, Y NO PUEDE.** Las esquinas
+   * de un QR real son cuadrados **anidados**, y un anidado no entra en el
+   * trazo de la casa a ese tamaño — es la misma pared que volvió
+   * **inconstruible** el de tres esquinas. **Lo que lo hace legible es su
+   * CONTEXTO: la etiqueta «Pasaporte y QR» al lado.**
+   *
+   * ⚠️ **Y eso es una condición de uso, no una nota de color.** *Este glifo
+   * NO se puede usar solo* —sin etiqueta, en una barra o en un botón mudo—
+   * porque ahí lo único que quedaría es «dos cuadrados y una pata». Si alguna
+   * vez hace falta uno que se sostenga solo, **es un glifo nuevo con su
+   * propio gate**, no un ajuste de éste.
+   *
+   * ☠️ El andamio del gate murió con la firma (Ley 37): la candidata V2
+   * «maciza» y su hoja de contacto salieron de la galería. **El estudio con
+   * sus números queda en `docs/loop/capturas-s113-b-2.2.4/`** — *el papel se
+   * conserva; el andamio no.*
    */
   pasaporte: ({ tinta, huella }) => (
     <>

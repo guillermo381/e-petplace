@@ -9,7 +9,22 @@
    —comandos RELATIVOS leídos como absolutos—: *un instrumento que devuelve
    coordenadas negativas sobre una grilla de 0 a 24 está midiendo otra cosa.*
    Éste recorre el path de verdad. */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+
+/** Todos los `.tsx` de un árbol. Sin dependencias: el arnés no instala nada. */
+function listarTsx(raiz: string): string[] {
+  const salida: string[] = [];
+  const caminar = (d: string) => {
+    for (const e of readdirSync(d)) {
+      const f = join(d, e);
+      if (statSync(f).isDirectory()) caminar(f);
+      else if (f.endsWith('.tsx')) salida.push(f);
+    }
+  };
+  caminar(raiz);
+  return salida;
+}
 
 /** Largo de trazo de un path. Rectas exactas; arcos por su cuerda circular y
  *  curvas por la cuerda con holgura — alcanza para comparar MASA entre
@@ -183,6 +198,52 @@ console.log('\n── ⑪ EL GLIFO DE PASAPORTE (S113-B · 2.2.4) ──');
   const DOC = glifo('documentos')!;
   t('CONTROL POSITIVO · el medidor SÍ ve un cuadrado ajeno',
     DOC.interiorCuadrado !== null, ` · documentos ${DOC.interiorCuadrado?.toFixed(2) ?? 'null'} px`);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ✅ GATE CERRADO (firma del founder, 7-sep-2026) · Y SU LÍMITE, MEDIDO
+     ═══════════════════════════════════════════════════════════════════════
+     La firma vino **con su límite**: el glifo *no lee «QR» de forma inequívoca
+     a 21 px y no puede bajo el trazo de la casa* —las esquinas de un QR real
+     son cuadrados ANIDADOS—; **lo que lo hace legible es su CONTEXTO**, la
+     etiqueta al lado.
+
+     🔴 **Eso es una CONDICIÓN DE USO, y una condición que sólo vive en prosa
+     no frena a nadie.** *El día que alguien lo monte solo —en una barra, en un
+     botón mudo— lo único que va a quedar es «dos cuadrados y una pata», y no
+     va a fallar nada: se va a ver raro y nadie va a saber por qué.*
+
+     🔴 **Y SE MIDE POR ESTRUCTURA, NO POR VECINDAD — la primera versión no
+     disparaba.** Buscaba un `etiqueta` a ±160 caracteres, y en un archivo denso
+     como la galería `etiqueta` está por todos lados: *una ventana de texto
+     encuentra la palabra de otro y da verde.* Lo cazó su propio rojo, que no
+     salió.
+
+     La regla buena sale de mirar QUIÉN puede montarlo:
+     · `glifo: 'pasaporte'` **ya está cubierto por el TIPO** — `AccionPerfil`
+       exige `etiqueta` en el mismo objeto, así que no hay forma de montarlo
+       ahí sin su texto.
+     · `<Icono nombre="pasaporte">` **es SIEMPRE suelto**: `Icono` no dibuja
+       una sola letra. *Ése es exactamente el uso que la firma prohíbe.*
+     ⇒ el guard mide **el `Icono` desnudo**, que es el único hueco real. */
+  const USOS = ['packages/ui/src', 'apps/cliente/src', 'apps/prestador/src'];
+  const sueltos: string[] = [];
+  for (const dir of USOS) {
+    let archivos: string[] = [];
+    try { archivos = listarTsx(new URL(`../${dir}`, import.meta.url).pathname); } catch { continue; }
+    for (const f of archivos) {
+      const txt = readFileSync(f, 'utf8');
+      for (const m of txt.matchAll(/nombre=['"]pasaporte['"]/g)) {
+        sueltos.push(`${f.split('/').slice(-2).join('/')}:${txt.slice(0, m.index ?? 0).split('\n').length}`);
+      }
+    }
+  }
+  t('🔴 `pasaporte` nunca se monta como `Icono` desnudo (condición de la firma)',
+    sueltos.length === 0, sueltos.length ? ` · suelto en ${sueltos.join(' · ')}` : ' · 0 sueltos');
+
+  /* ☠️ Y el andamio del gate murió con la firma (Ley 37). */
+  const GAL = readFileSync(new URL('../packages/ui/src/gallery/TokenGallery.tsx', import.meta.url), 'utf8');
+  t('☠️ el andamio del gate se retiró', !/CandidataMaciza|FilaPasaporte/.test(GAL));
+  t('…y el glifo firmado se mira DONDE VIVE', /glifo: 'pasaporte'/.test(GAL));
 }
 
 console.log('\n── ④bis LEY 9 PARA LO PUNTIAGUDO · la punta sobrevive a 21 px ──');

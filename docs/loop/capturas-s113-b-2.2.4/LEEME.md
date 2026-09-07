@@ -1,4 +1,21 @@
-# Capturas S113-B · 2.2.4 «El glifo de Pasaporte y QR» — GATE PENDIENTE
+# Capturas S113-B · 2.2.4 «El glifo de Pasaporte y QR» — ✅ GATE CERRADO
+
+> **Firma del founder, 7-sep-2026:** *«Va la V1 (dos esquinas + la pata en el
+> tercer vértice)»* — y **con su límite escrito, no a pesar de él**.
+>
+> 🔴 **NO lee «QR» de forma inequívoca a 21 px y no puede** bajo el trazo de la
+> casa. **Lo que lo hace legible es su CONTEXTO: la etiqueta al lado.**
+>
+> ⚠️ **Y eso es una condición de uso, no una nota de color:** *este glifo no se
+> puede montar solo.* Hoy lo mide `verify:glifos` — un `<Icono nombre="pasaporte">`
+> desnudo sale ROJO con su archivo y su línea, porque `Icono` no dibuja una sola
+> letra y ése es el único hueco real (el `glifo:` ya lo cubre el tipo, que exige
+> `etiqueta` en el mismo objeto).
+>
+> ☠️ **El andamio murió con la firma** (Ley 37): la candidata V2 y la hoja de
+> contacto salieron de la galería. **Este estudio se conserva** — *el papel
+> queda; el andamio no.* El glifo se mira ahora **donde vive**: en la fila de
+> acciones del perfil.
 
 Receta: Metro en el puerto propio de B (**8092**), `Android Bundled … (2995
 modules)`, emulador `5554` (el `5556` es `s113_A`, intacto). Sonda retirada,
