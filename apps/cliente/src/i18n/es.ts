@@ -813,6 +813,16 @@ export const clienteEs = {
     sexoMacho: 'Macho',
     sexoHembra: 'Hembra',
     nacimiento: 'Nacimiento',
+    /* ⭐ EL TABLERO (2.2). «Sin registro» es obligatoria en cada tarjeta: el
+       hueco se dice, no se deja en blanco ni se rellena con un cero. */
+    suSalud: 'Su salud',
+    tableroActividad: 'Actividad',
+    tableroSinRegistro: 'Sin registro',
+    tableroMedidoEl: 'medido el {{fecha}}',
+    tableroDelPlan: '{{n}} de {{total}}',
+    tableroActivas: '{{n}} activas',
+    tableroPaseosSemana: '{{n}} paseos esta semana',
+    tableroProxima: 'próxima el {{fecha}}',
     accionCitas: 'Citas',
     peso: 'Peso',
     microchip: 'Microchip',

@@ -65,6 +65,7 @@ import {
   type LineaDeVidaEstadoPie,
   FichaRaza,
   FilaAcciones,
+  TarjetaMetrica,
   FranjaSeguridad,
   BotonContanos,
   PastillaConociendolo,
@@ -96,6 +97,8 @@ import {
   obtenerPresupuestosFamilia,
   obtenerCitasActivasHogar,
   type PesoDeLaSerie,
+  obtenerTableroMascota,
+  type TableroMascota,
   obtenerContenidoDeRaza,
   type ContenidoDeRaza,
 } from '@epetplace/api';
@@ -119,6 +122,7 @@ import { contarPendientesDe } from '@/lib/pendientes';
 import { itemsDeSeguridad } from '@/lib/perfil/seguridad';
 import { coberturaDePlagas, medicacionDeLaCelda, proximaDesparasitacion } from '@/lib/perfil/hoy';
 import { tipoDeLineaDeVida } from '@/lib/perfil/tipo-linea-vida';
+import { tarjetasDelTablero } from '@/lib/perfil/tablero';
 
 /** El orden de los nueve, que es el que B reparte en filas. */
 const ORDEN_TIPOS: readonly TipoLineaDeVida[] = [
@@ -351,6 +355,8 @@ export default function PerfilDeMascota() {
    *  — degradar a ausencia es correcto acá: *no saber de una raza no es un
    *  error que la familia tenga que atender*. */
   const [menuEdicion, setMenuEdicion] = useState(false);
+  /** El tablero: **una ida** para las seis tarjetas. */
+  const [tablero, setTablero] = useState<TableroMascota | null>(null);
   const [contenidoRaza, setContenidoRaza] = useState<ContenidoDeRaza | null>(null);
   useEffect(() => {
     if (typeof perfil !== 'object') return;
@@ -372,6 +378,20 @@ export default function PerfilDeMascota() {
       vivo = false;
     };
   }, [perfil]);
+
+  useEffect(() => {
+    if (mascotaId === undefined) return;
+    let vivo = true;
+    void obtenerTableroMascota(mascotaId).then((r) => {
+      /* Un fallo deja `null` y **las tarjetas no se montan**: media sección con
+         datos y media sin es peor que ninguna — *la que falta se lee como «no
+         tiene», no como «no cargó»*. */
+      if (vivo && r.ok) setTablero(r.data);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [mascotaId, recargaPeso]);
 
   useEffect(() => {
     let vivo = true;
@@ -498,6 +518,31 @@ export default function PerfilDeMascota() {
   const [pesoHoja, setPesoHoja] = useState(false);
   const [medicacionHoja, setMedicacionHoja] = useState(false);
   /** El estado de la Hoja, **uno solo para los cuatro accesos**. */
+  /** ⭐ **C2 · CADA TARJETA ABRE SU DETALLE.** Cuatro destinos ya existían y se
+   *  reusan; peso y medicación abren su Hoja. *Ninguna tarjeta es decorativa:
+   *  si no llevara a ningún lado, el tablero sería un póster.* */
+  const abrirDetalle = (id: string) => {
+    if (mascotaId === undefined) return;
+    const nom = typeof perfil === 'object' ? perfil.mascota.nombre : '';
+    switch (id) {
+      case 'vacunas':
+        return router.push({ pathname: '/hogar/vacunas/[mascotaId]', params: { mascotaId } });
+      case 'antiparasitario':
+        return router.push({ pathname: '/antiparasitario', params: { mascotaId, nombre: nom } });
+      case 'citas':
+        return router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId } });
+      case 'peso':
+        return setPesoHoja(true);
+      case 'medicacion':
+        return setMedicacionHoja(true);
+      default:
+        /* Actividad todavía no tiene destino propio: **no se inventa uno**. La
+           tarjeta se dibuja igual porque su dato informa; el día que exista su
+           pantalla, entra por esta línea. */
+        return;
+    }
+  };
+
   const contanos = useContanos(mascotaId ?? '', typeof perfil === 'object' ? perfil.mascota.nombre : '', () =>
     setRecargaPeso((n) => n + 1),
   );
@@ -1543,6 +1588,50 @@ export default function PerfilDeMascota() {
           </View>
         ) : null}
 
+
+        {/* ⭐ **5 · SU SALUD — EL TABLERO** (S113-C · 2.2 · C1).
+            Seis tarjetas en dos columnas, en el orden firmado. Reemplaza a la
+            lectura de secciones apiladas: *no faltaban cosas, sobraba lista.*
+
+            🔴 **SIN DATO NO HAY DIBUJO, Y NO HAY CERO.** Cada tarjeta dice «sin
+            registro» cuando no hay nada, y su gráfico simplemente no se monta:
+            *un sparkline chato no dice «no sé», dice «no cambió»* — y un anillo
+            vacío se lee como «cero de algo», que es una afirmación que nadie
+            midió.
+
+            ⚠️ **En memorial no se monta**: el tablero proyecta (próxima dosis,
+            próxima cita) y en la pantalla de quien ya no está no hay próxima
+            (`LOYALTY §8`). La historia y la identidad siguen abajo. */}
+        {!esMemorial && tablero !== null && tablero.memorial === false ? (
+          <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5], gap: spacing[3] }}>
+            <Texto variante="seccion">{t('perfil.suSalud')}</Texto>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+              {tarjetasDelTablero(tablero, {
+                peso: t('perfil.peso'),
+                vacunas: t('perfil.hechosVacunas'),
+                antiparasitario: t('perfil.hoyDesparasitacion'),
+                medicacion: t('perfil.hoyMedicacion'),
+                citas: t('perfil.accionCitas'),
+                actividad: t('perfil.tableroActividad'),
+                medidoEl: (f) => t('perfil.tableroMedidoEl', { fecha: fechaCortaMono(f, idioma) }),
+                delPlan: (n, total) => t('perfil.tableroDelPlan', { n, total }),
+                activas: (n) => t('perfil.tableroActivas', { n }),
+                paseosSemana: (n) => t('perfil.tableroPaseosSemana', { n }),
+                proxima: (f) => t('perfil.tableroProxima', { fecha: fechaCortaMono(f, idioma) }),
+              }).map((tar) => (
+                <TarjetaMetrica
+                  key={tar.id}
+                  rotulo={tar.rotulo}
+                  valor={tar.valor}
+                  vozSinDato={t('perfil.tableroSinRegistro')}
+                  contexto={tar.contexto}
+                  dibujo={tar.dibujo}
+                  onPress={() => abrirDetalle(tar.id)}
+                />
+              ))}
+            </View>
+          </View>
+        ) : null}
 
         {/* ── ③ CÓMO ESTÁ HOY — **la grilla ahora es `CeldasHoy` de B**
             (S113-C · 1.1 · C6). Antes vivía acá una grilla propia de dos
