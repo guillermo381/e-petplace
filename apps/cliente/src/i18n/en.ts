@@ -39,6 +39,7 @@ export const clienteEn = {
   nexo: {
     titulo: 'Nexo',
     autor: 'Nexo',
+    enviar: 'Send',
     caja: 'Type your question',
     cajaPlaceholder: 'Ask or search for something…',
     invitacion: 'Ask me anything about {{nombre}}, or search across your family.',

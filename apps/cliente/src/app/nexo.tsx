@@ -23,7 +23,7 @@
  * casa (`A3.9`).
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AvisoAnticipacion,
@@ -33,6 +33,7 @@ import {
   Encabezado,
   EstadoVacio,
   EvitaTeclado,
+  Icono,
   PanelMemoria,
   PresentacionNexo,
   RespuestaNexo,
@@ -426,17 +427,42 @@ export default function Nexo() {
           />
         </ScrollView>
 
-        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[4] }}>
-          <Campo
-            label={t('nexo.caja')}
-            etiquetaVisible={false}
-            value={texto}
-            onChangeText={setTexto}
-            placeholder={t('nexo.cajaPlaceholder')}
-            onSubmitEditing={() => void enviar(texto)}
-            returnKeyType="send"
-            deshabilitado={pensando}
-          />
+        {/* 🔴 **EL BOTÓN DE ENVIAR, A LA VISTA** (pasada del founder). Antes
+            sólo se enviaba con la tecla del teclado: *en un teclado sin «enviar»
+            visible —o con el teclado cerrado— no había forma de mandar el
+            mensaje, y la caja se leía como un campo que no hace nada.*
+            ⚠️ Y el **aire de abajo sube a `spacing[6]`**: con el teclado cerrado
+            la caja quedaba pegada al borde inferior. */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            gap: spacing[2],
+            paddingHorizontal: spacing[5],
+            paddingBottom: spacing[6],
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <Campo
+              label={t('nexo.caja')}
+              etiquetaVisible={false}
+              value={texto}
+              onChangeText={setTexto}
+              placeholder={t('nexo.cajaPlaceholder')}
+              onSubmitEditing={() => void enviar(texto)}
+              returnKeyType="send"
+              deshabilitado={pensando}
+            />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('nexo.enviar')}
+            disabled={texto.trim() === '' || pensando}
+            onPress={() => void enviar(texto)}
+            style={{ paddingBottom: spacing[2], opacity: texto.trim() === '' || pensando ? 0.4 : 1 }}
+          >
+            <Icono nombre="enviar" tamano={24} />
+          </Pressable>
         </View>
       </View>
     </EvitaTeclado>
