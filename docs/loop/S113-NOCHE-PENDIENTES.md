@@ -37,6 +37,25 @@ Lo publicado: cliente `d668fae0` · prestador `c81479b3` · **ancla `f4fbe740`**
 | **3º** | **EL PULIDO** — las **tres de C** del último OTA · las **cuatro del Hogar** de B · los **128 eventos sin voz**, con `fin_vida` a la cabeza · las **fechas crudas de la búsqueda** | C y B. **Cuando cierren, el candidato** |
 | **4º** | **LO LEGAL** | **no depende de nosotros** — es espera, no trabajo |
 
+### ✅ SESIÓN CERRADA — 7-sep-2026
+
+**Última publicación: cliente `59d481af` · prestador `974c83cb` · ancla
+`3dadffbb` · `dirty: None` · rt 1.0.7.** El parte final de A:
+`docs/loop/S113-A-PARTE-FINAL.md`.
+
+⚠️ **Lo que NADIE debe dar por hecho al abrir la próxima:**
+
+- **El rediseño va en S116/117.** El Hogar y la composición **quedan parados**
+  hasta entonces.
+- **Después, la build de Android**, una sola, con lo nativo acumulado. **El NFC
+  de iPhone queda fuera: no hay cuenta de desarrollador todavía** (espera el
+  DUNS) — *el entitlement se pide desde una cuenta que no existe.*
+- **Ninguna rama `*-nfc` se mergea antes de la build.**
+- **La veda de producción sigue entera: todo va a preview.**
+- **Lo nativo se ANOTA en `S113-NFC-BUILD.md`, no se instala.**
+
+---
+
 **El candidato del pulido lo armo cuando C y B cierren.** Hasta entonces no hay
 nada que publicar: *un candidato armado a mitad de un pulido publica media cura,
 y media cura de voz se lee como una voz que cambió de idea.*

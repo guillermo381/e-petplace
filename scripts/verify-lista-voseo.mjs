@@ -38,8 +38,13 @@ const CONSUMIDORES = [
 ]
 
 if (process.argv.includes('--control')) {
+  /* 🔴 El fixture del control usaba `lib-voseo.json` —la ruta VIEJA— mientras
+     el detector busca `voz/voseo.json`, adonde se mudó la lista. **El gate medía
+     bien y su control no podía producir su verde**, o sea que este gate estuvo
+     corriendo sin nadie que probara que discrimina. *Un fixture apunta a donde
+     el archivo estaba el día que se escribió, y no se entera de la mudanza.* */
   const c = CONSUMIDORES[0]
-  const ok = c.lee("JSON.parse(leer(new URL('./lib-voseo.json', import.meta.url)))")
+  const ok = c.lee("JSON.parse(leer(new URL('../supabase/functions/_shared/voz/voseo.json', import.meta.url)))")
     && !c.lee('const X = 1')
     && c.propia("export const CON_TILDE = ['probá','tocá']")
     && !c.propia('export const CON_TILDE = _VOSEO.con_tilde')
