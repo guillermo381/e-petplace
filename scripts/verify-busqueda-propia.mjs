@@ -23,6 +23,7 @@
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { exigirArgumentos } from './lib-argumentos.mjs';
 
 /* Un instrumento tiene que poder decir «no»: cualquier argumento que no entienda
@@ -80,8 +81,12 @@ export function p95(ms) {
   return s[Math.min(s.length - 1, Math.ceil(0.95 * s.length) - 1)];
 }
 
+/* Corre sólo si lo invocan a él: importarlo para reusar su juez no puede
+   disparar el gate ni su `process.exit()`. Ya me pasó tres veces. */
+const ESTE = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
 // ═══ CONTROL ═══════════════════════════════════════════════════════════════
-if (process.argv.includes('--control')) {
+if (ESTE && process.argv.includes('--control')) {
   let fallos = 0;
   const ok = (b, et, d = '') => { di(`${b ? '✅' : '🔴'} ${et}${d ? '  ' + d : ''}`); if (!b) fallos += 1; };
 
@@ -108,6 +113,7 @@ if (process.argv.includes('--control')) {
 
 // ═══ GATE ══════════════════════════════════════════════════════════════════
 const r = rpcExiste(RPC);
+if (ESTE) {
 if (!r.existe) {
   di(`⚠️ NO CONCLUYENTE — ${r.motivo}.`);
   di(`   La búsqueda de Nexo todavía no existe. El gate, su juez y los`);
@@ -223,4 +229,6 @@ di(`${malos ? '🔴' : '✅'} ③ inyección · ${TERMINOS_HOSTILES.length} tér
 di('');
 if (rojos) { di(`🔴 ${rojos} de las tres preguntas en rojo.`); process.exit(1); }
 di('✅ no cruza familias · responde a tiempo · no rompe ni enumera.');
-process.exit(0);
+  process.exit(0);
+
+}

@@ -35,7 +35,7 @@ exigirArgumentos(['--control'], 0);
 const RAIZ = fileURLToPath(new URL('..', import.meta.url));
 const REGLAS = JSON.parse(readFileSync(new URL('./nexo/anticipacion.json', import.meta.url), 'utf8'));
 const TABLA = process.env.NEXO_TABLA ?? 'avisos_coach';
-const TIPO = process.env.NEXO_TIPO_ANTICIPA ?? 'predisposicion';
+const TIPO = process.env.NEXO_TIPO_ANTICIPA ?? 'anticipacion';
 const di = (s) => console.log(s);
 const plano = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
@@ -131,9 +131,18 @@ if (process.argv.includes('--control')) {
 }
 
 // ═══ GATE ══════════════════════════════════════════════════════════════════
+/* 🔴 EL TEMA VIVE EN `clave`, NO EN `detalle`. Mi primera versión lo sacaba de
+   `detalle->>'tema'` —que no existe— y caía al `tipo`, así que agrupaba TODO bajo
+   «anticipacion» y daba 4 rojos de `uno_por_tema` sobre un motor que estaba bien.
+   *Un fallback silencioso convierte «no encontré el campo» en «todos son el mismo».*
+   La clave tiene la forma  anticipacion:<tema>:<etapa>.
+   ⚠️ Y este comentario va ACÁ AFUERA a propósito: adentro del template literal sus
+   backticks cerraban la cadena y el archivo no compilaba. */
 const filas = sql(`select a.mascota_id::text as mascota_id, a.tipo, a.detalle,
-                          coalesce(a.detalle->>'tema', a.tipo) as tema,
-                          coalesce(a.detalle->>'etapa', '') as etapa,
+                          
+                          coalesce(split_part(a.clave, ':', 2), a.tipo) as tema,
+                          coalesce(split_part(a.clave, ':', 3), '') as etapa,
+                          coalesce(a.estado, 'entregado') as estado,
                           m.nombre, m.raza,
                           (m.estado_vida <> 'activa') as memorial,
                           (f.avisos_nexo_desde is not null) as opt_in,
@@ -161,7 +170,13 @@ if (!filas.length) {
   process.exit(2);
 }
 
-const rojos = juzgarMotor(filas);
+/* 🔴 Y SE JUZGAN LAS ENTREGADAS, NO TODAS. El motor produce varias por mascota y
+   pone en cola las que no salen: **las de la cola no le llegaron a nadie**. Contarlas
+   daría rojo sobre el diseño funcionando. Las reglas de contenido —afirmar sobre el
+   individuo— sí se miran en TODAS: una que hoy está en cola puede salir mañana. */
+const vivas = filas.filter((a) => a.estado === 'entregado');
+di(`   ${vivas.length} viva(s) · ${filas.length - vivas.length} en cola`);
+const rojos = juzgarMotor(vivas);
 const V = { afirma: REGLAS.afirma, modaliza: REGLAS.modaliza };
 for (const a of filas) {
   const texto = typeof a.detalle === 'string' ? a.detalle : JSON.stringify(a.detalle ?? '');
