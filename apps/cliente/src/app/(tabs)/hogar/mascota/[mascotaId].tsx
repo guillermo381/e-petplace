@@ -345,40 +345,33 @@ export default function PerfilDeMascota() {
   /** S89-D ①: la sección de papeles nace PLEGADA — el perfil es de la
    *  mascota; sus documentos se piden, no presiden. */
   const [docsAbiertos, setDocsAbiertos] = useState(false);
-  /** ⭐ **IR A LOS DOCUMENTOS** (orden del founder, S113 · 2.2.3).
-   *
-   *  La cuarta acción del perfil va a ser **Documentos**, y *por ahora* su
-   *  destino es el plegable que ya existe en «Identidad y papeles»: **scroll
-   *  hasta él, desplegado**. Con la bóveda de la fase 3 gana pantalla propia
-   *  y la acción apunta ahí — por eso el destino vive en UNA función y no
-   *  desperdigado en el `onPress`: *ese día se cambia una línea, no se busca
-   *  dónde estaba.*
-   *
-   *  🔴 **PREPARADO Y NO CABLEADO, y se dice cuál es el bloqueante:**
-   *  `FilaAcciones` tiene `nexo` como slot fijo y **dibuja el orbe en él**, así
-   *  que no acepta un glifo. Medido en `pista/s113-b-2.2.2`: el slot sigue
-   *  igual. *Un mecanismo listo que espera su puerta no es trabajo perdido: es
-   *  la mitad que no depende de nadie, hecha y probada.* Cuando B entregue el
-   *  cuarto slot, esto se enchufa en una línea. */
-  const irADocumentos = useCallback(() => {
-    /* Desplegar PRIMERO: si el scroll llega antes, la fila está cerrada y la
-       familia aterriza sobre un renglón que no dice nada. */
-    setDocsAbiertos(true);
-    /* El `y` se mide del layout REAL —no se estima— y el scroll espera a que
-       el despliegue haya cambiado la altura. Sin la espera, se scrollea a la
-       posición de la pantalla plegada. */
-    setTimeout(() => {
-      const y = yDocumentosRef.current;
-      if (y === null) return;
-      scrollRef.current?.scrollTo({ y: Math.max(0, y - 12), animated: true });
-    }, 120);
-  }, []);
-  const scrollRef = useRef<ScrollView>(null);
-  /** La `y` del bloque de documentos, tomada de su `onLayout`. `null` = todavía
-   *  no se midió, y entonces **no se scrollea a ciegas**. */
-  const yDocumentosRef = useRef<number | null>(null);
-  /** S91-D · «Quiénes viven acá» — el censo del acuario, del motor de A.
-   *  `null` = todavía no se pudo leer, y NO es «cero habitantes» (L-178). */
+  /** ⭐ **A LA BÓVEDA** (fase 3 · C1). Antes era `irADocumentos`: scroll hasta
+   *  el plegable y desplegarlo. **Documentos ganó pantalla propia**, así que el
+   *  destino dejó de ser una posición y pasó a ser una ruta.
+   *  ☠️ Con eso murieron el `scrollRef`, el `yDocumentosRef` y el `setTimeout`
+   *  que esperaba al despliegue — *lo que sobrevive a su razón es basura que
+   *  nadie se anima a tocar* (Ley 37). El `memorial` viaja para que la pantalla
+   *  no ofrezca traer papeles a quien está en duelo. */
+  const abrirDocumentos = useCallback(() => {
+    if (mascotaId === undefined) return;
+    router.push({
+      pathname: '/hogar/mascota/documentos',
+      params: {
+        mascotaId,
+        nombre: typeof perfil === 'object' ? perfil.mascota.nombre : '',
+        /* 🔴 Se deriva del PERFIL y no de `esMemorial`, que se calcula más
+           abajo: *un callback declarado antes que su dato no puede leerlo, y
+           acá el compilador lo dice — en otros lados no.* Misma regla, misma
+           fuente (`estado_vida`), sin el brazo del tema, que acá no aplica. */
+        memorial:
+          typeof perfil === 'object' &&
+          perfil.mascota.estado_vida !== null &&
+          perfil.mascota.estado_vida !== 'activa'
+            ? '1'
+            : '0',
+      },
+    });
+  }, [mascotaId, perfil, router]);
   const [censo, setCenso] = useState<CensoDelAcuario | null>(null);
   const [habitantesHoja, setHabitantesHoja] = useState(false);
   // S90 (firma founder): la lista deriva del CATÁLOGO VIVO; arranca con el
@@ -1120,7 +1113,6 @@ export default function PerfilDeMascota() {
           papel y tinta propios, gradiente de 4 stops). NADA de eso se
           porta: la composición viaja con NUESTROS tokens. */}
       <ScrollView
-        ref={scrollRef}
         contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
         showsVerticalScrollIndicator={false}
       >
@@ -1461,7 +1453,7 @@ export default function PerfilDeMascota() {
                     {
                       etiqueta: t('perfil.documentos'),
                       glifo: 'documentos',
-                      onPress: irADocumentos,
+                      onPress: abrirDocumentos,
                     },
                     {
                       etiqueta: t('contanos.pastilla'),
@@ -1483,7 +1475,7 @@ export default function PerfilDeMascota() {
                     {
                       etiqueta: t('perfil.documentos'),
                       glifo: 'documentos',
-                      onPress: irADocumentos,
+                      onPress: abrirDocumentos,
                     },
                     {
                       etiqueta: t('contanos.pastilla'),
@@ -2454,100 +2446,25 @@ export default function PerfilDeMascota() {
             puso: lo que la familia observa es historia, no una sección aparte.
             Ley 37: acá no queda un hueco, queda nada. */}
 
-        {/* ── «QUIÉNES VIVEN ACÁ» — LA COMPOSICIÓN DEL SISTEMA (firma founder).
-            Monta SOLO para el acuario, por la misma constante que gobierna al
-            resto de P7: la composición va ARRIBA, jamás un `if` suelto acá
-            abajo (§6). Es un CENSO POR ESPECIE — nunca peces individuales:
-            «el pez se mira; el sistema se cuida». */}
-        {monta.habitantes ? (
-          <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5], gap: spacing[3] }}>
-            <Texto variante="seccion">{t('perfil.habitantes')}</Texto>
-            {censo === null ? (
-              /* Ley 13 + L-178: «todavía no puedo preguntar» NO se disfraza de
-                 «no hay habitantes». Un vacío fingido acá haría creer al dueño
-                 que su censo se borró. */
-              <Texto variante="apoyo">{t('perfil.habitantesSinLeer')}</Texto>
-            ) : censo.habitantes.length === 0 ? (
-              <Texto variante="apoyo">{t('perfil.habitantesVacio')}</Texto>
-            ) : (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                {censo.habitantes.map((h) => {
-                  // La cara solo si el motor da ruta. `esDelCatalogo` NO se
-                  // infiere de acá (aviso literal de A): una raza del catálogo
-                  // puede no tener imagen todavía y sigue siendo del catálogo.
-                  const url = urlDeRutaGaleria(h.rutaImagen ?? undefined);
-                  return (
-                    <View key={h.razaSlug ?? h.nombre} style={{ flexBasis: '47%', flexGrow: 1 }}>
-                      <ChipEntidad
-                        nombre={`${h.nombre} · ${h.cantidad}`}
-                        {...(url !== undefined ? { fotoUrl: url } : null)}
-                        sujeto="cosa"
-                        tamano="general"
-                        elegido={false}
-                        onPress={() => setHabitantesHoja(true)}
-                      />
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-            {/* ✅ SU PARED, igual que la puerta de la bitácora. Es la MISMA
-                familia —una puerta del perfil— y por eso lleva el mismo
-                `relleno` y la misma `elevacion` que sus vecinas: la coherencia
-                no es que se parezcan, es que se resuelvan igual.
-                Censo de la tanda: el perfil tiene TRES puertas —bitácora,
-                Documentos y ésta— y ésta era la ÚNICA sin superficie. No hay
-                una cuarta pelada. */}
-            <Tarjeta relleno="ninguno" elevacion="reposo">
-              <CeldaNavegacion
-                titulo={t('perfil.habitantesDeclarar')}
-                registro="tinta"
-                onPress={() => setHabitantesHoja(true)}
-              />
-            </Tarjeta>
-          </View>
-        ) : null}
+        {/* ☠️ **EL PLEGABLE DE DOCUMENTOS MURIÓ — GANÓ PANTALLA PROPIA**
+            (corrección del founder, S113 · fase 3 · C1).
 
-        {monta.documentos ? (
-        <View
-          style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}
-          onLayout={(e) => {
-            yDocumentosRef.current = e.nativeEvent.layout.y;
-          }}
-        >
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            <CeldaNavegacion
-              icono="documentos"
-              titulo={t('perfil.documentos')}
-              registro="tinta"
-              direccion={docsAbiertos ? 'arriba' : 'abajo'}
-              onPress={() => setDocsAbiertos((v) => !v)}
-            />
-            {docsAbiertos
-              ? papeles.map((papel) => (
-                  <View key={papel.tipo}>
-                    <Separador />
-                    <FilaDocumento
-                      icono={papel.icono}
-                      nombre={t(`documentos.nombre${papel.claveVoz}`)}
-                      apoyo={t('documentos.descargar')}
-                      cargando={bajandoDoc === papel.tipo}
-                      onPress={() => {
-                        void bajarDocumento(papel.tipo);
-                      }}
-                    />
-                  </View>
-                ))
-              : null}
-          </Tarjeta>
-          {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
-          {fallaCarnet !== null ? (
-            <View style={{ paddingTop: spacing[2] }}>
-              <Texto variante="dato" color="danger">{fallaCarnet}</Texto>
-            </View>
-          ) : null}
-        </View>
-        ) : null}
+            Acá vivían los cinco papeles de la casa desplegándose bajo una
+            fila. *Un plegable tenía sitio para cinco y ninguna más* — y la
+            bóveda va a recibir papeles traídos de otras clínicas, que crecen
+            sin techo, se agrupan por tipo y necesitan decir de dónde vinieron.
+
+            🔴 **EL CENSO, ANTES DE RETIRAR — nada perdió destino:**
+            · los cinco papeles con su descarga → la pantalla, igual;
+            · la Hoja de «¿de qué consulta?» de la receta → la pantalla, igual;
+            · el estado de carga por fila → igual;
+            · la voz del fallo y la neutra de «todavía no hay recetas» → igual,
+              y la segunda sigue **fuera de la línea roja**: *una ausencia no es
+              un error del que disculparse*;
+            · el destino de la acción del perfil → deja de ser scroll+desplegar
+              y pasa a ser la ruta.
+            ☠️ Con él mueren `irADocumentos`, `docsAbiertos` y `yDocumentosRef`,
+            que existían para llegar acá (Ley 37). */}
 
         {/* ── S96-D · LA PUERTA DE LA DESPENSA — la entrada PRINCIPAL del
             frente de productos es el expediente ("el alimento de Thor",

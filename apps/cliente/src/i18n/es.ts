@@ -2184,6 +2184,11 @@ export const clienteEs = {
      *  que exista el glifo de descarga (pedido a B — Ley 12: no se
      *  presta un glifo que significa otra cosa). */
     descargar: 'Descargar PDF',
+    deLaCasa: 'Papeles de e-PetPlace',
+    deOtrasClinicas: 'Papeles de otras clínicas',
+    vacio: 'Todavía no hay papeles de {{nombre}}. Si ya tiene historia en otra clínica, tráela: la leemos por vos.',
+    vacioMemorial: 'No hay papeles de otras clínicas.',
+    quéReceta: '¿De qué consulta?',
     // S91-C — EL SELECTOR DE LA RECETA. La receta se emite sobre UNA
     // consulta: la superficie pregunta cuál en vez de rebotar, y jamás
     // adivina (Thor tiene dos, y «la última» habría entregado la
@@ -2196,6 +2201,7 @@ export const clienteEs = {
      *  porque la familia no emite recetas: dice qué la hace aparecer,
      *  que es lo más cerca de un camino que esta verdad admite. */
     recetaSinConsultas: 'Todavía no hay ninguna receta. Aparece acá cuando un veterinario prescriba medicación.',
+    recetaMedicamentos: '{{n}} medicamentos',
     vacioTitulo: 'Todavía no hay papeles',
     vacioDetalle: 'Cuando agregues una mascota, sus documentos van a vivir acá.',
     errorTitulo: 'No pudimos cargar tus documentos',
