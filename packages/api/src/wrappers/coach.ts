@@ -510,7 +510,17 @@ export async function obtenerPredisposicionesDeRaza(
 
 /* ─── LAS PROPUESTAS DE NEXO ────────────────────────────────────────────── */
 
-export type PropuestaMemoria = {
+/**
+ * Una fila de la COLA de propuestas.
+ *
+ * ⚠️ **No es `PropuestaMemoria` de `nexo.ts`, y por eso se llama distinto.**
+ * Aquélla es lo que la edge devuelve **en un turno** —con `clase` tipada
+ * contra un vocabulario cerrado—; ésta es la **fila que quedó esperando**, con
+ * su fecha y con `clase` que puede faltar porque la tabla la guarda libre.
+ * *Se reusa cuando son el mismo vocabulario en dos archivos; se renombra
+ * cuando son dos cosas parecidas con el mismo nombre.*
+ */
+export type PropuestaEnCola = {
   id: string;
   hecho: string;
   /** La clase que el modelo propuso. Se guarda para poder medir después si
@@ -522,7 +532,7 @@ export type PropuestaMemoria = {
 /** Lo que Nexo propone recordar y la familia todavía no resolvió. */
 export async function listarPropuestasMemoria(
   mascotaId: string,
-): Promise<ResultadoWrapper<PropuestaMemoria[], CodigoErrorCoach>> {
+): Promise<ResultadoWrapper<PropuestaEnCola[], CodigoErrorCoach>> {
   const { data, error } = await getClient().rpc('listar_propuestas_memoria', {
     p_mascota_id: mascotaId,
   });
@@ -531,7 +541,7 @@ export async function listarPropuestasMemoria(
   if (o === null || o.ok !== true || !Array.isArray(o.propuestas)) {
     return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
   }
-  return { ok: true, data: o.propuestas as PropuestaMemoria[] };
+  return { ok: true, data: o.propuestas as PropuestaEnCola[] };
 }
 
 /**

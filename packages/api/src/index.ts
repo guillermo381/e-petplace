@@ -1872,7 +1872,7 @@ export {
   listarPropuestasMemoria,
   confirmarPropuestaMemoria,
   rechazarPropuestaMemoria,
-  type PropuestaMemoria,
+  type PropuestaEnCola,
 } from './wrappers/coach';
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
