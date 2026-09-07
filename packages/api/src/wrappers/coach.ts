@@ -303,6 +303,19 @@ export type AvisoCoach = {
 /**
  * Los avisos sin leer de las mascotas de la familia.
  *
+ * ⚠️ **La anticipación llega DOSIFICADA: una por mascota cada 7 días.** Las
+ * demás quedan en cola (`estado='en_cola'`) y no se muestran. Nació de una
+ * medición: al firmarse las 22 reglas, Thor recibió 4 avisos el mismo día y
+ * Zeus 5 — la regla «uno por tema y por etapa» se cumplía, pero nadie había
+ * limitado cuántos temas por día. *Cinco avisos juntos no son cinco veces más
+ * útiles que uno: son la razón por la que alguien apaga los avisos* (LOYALTY §8).
+ *
+ * La cola se ordena por: ① la que tiene chequeo **y cita médica en 30 días**
+ * —el aviso llega cuando se puede hacer algo con él— ② la que entra a una
+ * etapa nueva, que **salta la cola** ③ el resto, en el orden del catálogo.
+ * Y si hay cita próxima, el aviso trae su fecha para atarse a ella en vez de
+ * inventar una gestión nueva.
+ *
  * 🔴 **Ninguno lo decide un modelo**: los tres salen de fechas que el
  * expediente ya tiene. *Un aviso generativo puede equivocarse de fecha y nadie
  * lo notaría hasta que una familia llegue tarde a una vacuna.*
