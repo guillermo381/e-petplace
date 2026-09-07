@@ -105,7 +105,18 @@ begin
       -- punto con SU fuente — el detalle pinta distinto lo clínico y lo de casa.
       'serie',   (select coalesce(jsonb_agg(jsonb_build_object(
                     'fecha', fecha, 'kg', peso_kg, 'fuente', origen) order by fecha), '[]'::jsonb)
-                    from s)
+                    from s),
+      -- 🔴 CON UN SOLO PUNTO NO HAY LÍNEA, y esa decisión no puede vivir en la
+      -- pantalla: *si cada superficie decide cuántos puntos alcanzan, alcanza
+      -- una que decida distinto para que el mismo animal se vea de dos formas.*
+      -- Medido con Lolo, que tiene exactamente 1 medición.
+      'serie_dibujable', ((select count(*) from s) >= 2),
+      -- La tendencia también: sin dos puntos NO es 'estable', es que no se sabe.
+      'tendencia', (select case
+                      when count(*) < 2 then null
+                      when (select peso_kg from s where n=1) > (select peso_kg from s where n=2) then 'sube'
+                      when (select peso_kg from s where n=1) < (select peso_kg from s where n=2) then 'baja'
+                      else 'igual' end from s)
     ) end
     into v_peso;
 

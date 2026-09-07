@@ -36,6 +36,13 @@ export type BloquePeso = {
   fuente: 'prestador' | 'familia';
   /** Los 12 últimos, cronológicos. `[]` nunca: sin peso el bloque es `null`. */
   serie: PuntoPeso[];
+  /** 🔴 `false` con UN solo punto: **no hay línea que dibujar**. La decisión no
+   *  vive en la pantalla — *si cada superficie decide cuántos puntos alcanzan,
+   *  alcanza una que decida distinto para que el mismo animal se vea de dos
+   *  formas.* Medido con Lolo, que tiene exactamente una medición. */
+  serie_dibujable: boolean;
+  /** `null` con menos de dos puntos, y eso NO es 'igual': es que no se sabe. */
+  tendencia: 'sube' | 'baja' | 'igual' | null;
 };
 
 export type BloqueVacunas = {

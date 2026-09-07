@@ -29132,6 +29132,31 @@ dejando las puertas.
 
 ---
 
+### `D-1046` 🔴 · `pista/s113-a-nfc` da de alta un módulo NATIVO: el día que entre a `main`, el primer OTA sin build crashea en el aparato
+
+**Qué pasa.** Esa rama instala `react-native-nfc-manager` en `apps/cliente` para
+leer la placa del pasaporte. **Es dependencia nativa**, así que **no viaja por
+OTA**: el JS del bundle la importa, el binario instalado no la tiene, y la app
+revienta en hilo nativo — *fuera de toda `ErrorBoundary`*, que es la clase de
+caída que no deja stack trace en JS.
+
+**Por qué no lo caza el gate de hoy.** `ota:deps` compara **commits**, no el
+árbol: mientras la rama no esté mergeada da VERDE con la dependencia instalada
+en disco (`D-1043`). Y el typecheck no ve módulos nativos ausentes. *Nada del
+tren normal dice que este OTA no se puede publicar.*
+
+**La regla, mientras tanto:** **ninguna rama `*-nfc` se mergea antes de la
+build.** El procedimiento del día de la build vive en `docs/loop/S113-NFC-BUILD.md`
+y es de una línea: subir `version` en `app.json`, `eas build`, reinstalar el
+APK, y **recién entonces** mergear.
+
+**Disparo:** la próxima build nativa, sea cual sea su motivo. El NFC viaja en
+ese tren — *jamás un build sólo por él* (precedente D-456: el micrófono esperó
+cinco sesiones apagado y viajó cuando otra cosa obligó el build).
+
+**Dueño:** A. **Nace:** S113 (6-sep-2026).
+
+
 ### `D-1045` 🟡 · Ninguna alergia dice quién la registró — el único discriminador es un proxy
 
 **El síntoma (C, 6-sep-2026):** la franja de seguridad decía **«Lo registró una
