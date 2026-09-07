@@ -150,6 +150,30 @@ export type TextoProps = {
    * ilegible. Su lugar son los rótulos cortos que comparten ancho fijo.
    */
   ajustaParaEntrar?: boolean
+  /**
+   * ⭐ **CIFRAS DE ANCHO FIJO EN UNA FRASE SANS** (S114-B · enmienda aditiva
+   * declarada, 76(d)).
+   *
+   * **Para qué:** una frase que lleva un número **que cambia** — *«Te quedan
+   * 14 horas para responder»* (`DIRECCION_POSTVENTA` §5). Sin ancho fijo, al
+   * pasar de `14` a `13` la línea entera se corre unos píxeles en cada
+   * refresco: un temblor que nadie pidió y que **se lee como si la pantalla
+   * estuviera contando**, que es justo lo que esa letra prohíbe («sin
+   * countdown que lata»).
+   *
+   * 🔴 **NO es «poner el número en mono».** La Ley 3 reserva la mono para
+   * METADATA de máquina —fechas, horas, IDs—, y esto es una FRASE en voz
+   * humana con una cifra adentro. Su MATIZ ya resolvió el caso hermano: *a
+   * escala display el dato viste DM Sans con `tabular-nums`*; acá es la misma
+   * operación un registro más abajo. **La familia tipográfica no cambia: sólo
+   * el ancho de los dígitos.**
+   *
+   * ⚠️ **`dato` y `datoMd` ya son tabulares por receta** — poner esto ahí no
+   * hace nada y no hace falta. Su lugar son las variantes SANS.
+   *
+   * Default `false`: cero cambio para los consumidores vivos.
+   */
+  tabular?: boolean
 }
 
 const RECETA: Record<
@@ -258,7 +282,7 @@ const RECETA: Record<
   voz:     { fontFamily: typography.family.sans.light, fontSize: typography.size.md, color: 'secondary', leading: typography.size.md * typography.leading.relaxed },
 }
 
-export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable, ajustaParaEntrar }: TextoProps) {
+export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable, ajustaParaEntrar, tabular }: TextoProps) {
   const { theme } = useTheme()
   const receta = RECETA[variante]
   const c = color ?? receta.color
@@ -287,7 +311,7 @@ export function Texto({ children, variante = 'cuerpo', color, numberOfLines, cen
         color: colorResuelto,
         ...(centrado ? { textAlign: 'center' as const } : null),
         ...(receta.leading !== undefined ? { lineHeight: receta.leading } : null),
-        ...(receta.tabular ? { fontVariant: ['tabular-nums' as const] } : null),
+        ...(receta.tabular || tabular ? { fontVariant: ['tabular-nums' as const] } : null),
       }}
     >
       {children}
