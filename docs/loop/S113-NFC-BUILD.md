@@ -74,3 +74,18 @@ decir **1.0.8** antes de mirar nada más.
 
 La **impresión de placas** (`S113-PLACAS-IMPRESION.md`): no necesita build.
 Se decidió aparte y sigue afuera.
+
+## Pista C · tres dependencias nativas, ninguna instalada (S113, cierre)
+
+| dependencia | para qué | qué hace la app mientras tanto |
+|---|---|---|
+| `expo-document-picker` | el **PDF** en «Traer papeles» | el selector de archivo **lo dice con su voz**; la foto alcanza — un examen fotografiado se lee igual |
+| `expo-camera` | el **escaneo de placa** desde el pasaporte | la pantalla del deep link **no la necesita**: se llega por el link del QR, que es como llega quien encuentra al animal |
+| micrófono de Nexo | dictar en el chat | heredado de tandas anteriores |
+
+🔴 **Ninguna se instaló, y es la decisión correcta**: *una dependencia nativa no
+viaja por OTA (`L-134`), así que instalarla hoy dejaría rota la app que ya está
+en la calle* — peor que no ofrecer la función.
+
+⚠️ **El día de la build**, cada una tiene su camino ya escrito y apagado con su
+voz: se enchufan sin diseñar nada nuevo.
