@@ -266,7 +266,7 @@ export type IconoNombre =
   //    EL OBJETO NO ES «un papel»: es DÓNDE VIVEN LOS PAPELES, y el plural
   //    es lo que lo distingue de `documento` (que es UNA cédula con
   //    retrato). Gate por ícono a 21px PENDIENTE (§2.9).
-  | 'documentos'
+  | 'documentos' | 'pasaporte' | 'papel'
   // ── S91-B · `correo` — NACIÓ COMO CANDIDATO B DE «Documentos» Y PERDIÓ
   //    SU GATE, y NO muere: el founder lo pasó a RESERVA DECLARADA.
   //    Su riesgo era que a 21px se lee «correo» antes que «documentos» —
@@ -1676,6 +1676,131 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   // eso el ojo lee dos planos en vez de dos marcos. Rasterizado a 21px y
   // mirado antes de dejarlo, no supuesto.
   // Densidad 2 + huella; grilla 24 · trazo 1.9 · aire 3.5 arriba.
+  /**
+   * 🔴 **PASAPORTE Y QR (S113-B · 2.2.4) — y su forma la decidió la
+   * ARITMÉTICA, no el gusto.**
+   *
+   * ── §6b.2 · METÁFORAS OCUPADAS ──────────────────────────────────────
+   * El **rectángulo-página está lleno**: `documentos` (dos apilados) ·
+   * `certificaciones` y `presupuesto` (hoja con esquina doblada) ·
+   * `documento`. Y `carnet` **es un lápiz**, que al lado de «Pasaporte y QR»
+   * lee *editar*. **La marca QR no la usa nadie** — es el único activo libre.
+   *
+   * ── §6b.3 · LAS DOS VARIANTES, Y POR QUÉ GANÓ ÉSTA ──────────────────
+   * · **«tarjeta con QR adentro»** — ✗ **descartada por número, dos veces**:
+   *   la tarjeta sola ya pesa **64 (+38 %)** contra la vara de `vacuna`
+   *   (46,4 · banda 39,4–53,4); achicada a 15×10,5 pesa 51 y **no queda
+   *   presupuesto para el QR**, cuyas esquinas caerían a ~2,2 y su interior a
+   *   **0,26 px** — se cierran enteras (Ley 9).
+   * · **«QR de TRES esquinas»** — ☠️ **INCONSTRUIBLE**, y esto es lo que hay
+   *   que no volver a intentar: la masa exige `s ≤ 4,45` y la Ley 9 exige
+   *   `s ≥ 4,76`. **El intervalo es vacío.** *No es que los números estén mal
+   *   calibrados: es que la forma no admite las dos leyes a la vez* (`L-283`,
+   *   la anatomía incapaz). Se descubrió con una cuenta ANTES de dibujar, no
+   *   con tres calibraciones fallidas.
+   * · **✅ «dos esquinas + módulos», con la HUELLA en el tercer vértice.**
+   *
+   * ── 🔴 Y LA HUELLA NO ES ADORNO: ES EL TERCER CUADRADO ──────────────
+   * Un QR tiene tres esquinas y acá **la de abajo a la izquierda es la pata**.
+   * *La forma dice quién es el dueño del código sin escribirlo.* Va a escala
+   * 0.30 —la misma de `documentos`— y no a la del cuadrado que reemplaza:
+   * a 0.22 quedaría en **4,55 px** a 21, por debajo de todo lo que la casa
+   * usa, y la Ley 9 dice que a 21 px la huella sobrevive **o es ruido**.
+   *
+   * ── §6b.1 · LOS NÚMEROS ─────────────────────────────────────────────
+   * Grilla 24 · trazo 1.9 round · esquinas **s = 5.0** ⇒ interior **2,71 px**
+   * a 21 (piso 2,5) · dos módulos **rellenos** de 1.5 —*rellenos y no
+   * trazados a propósito: un cuadrado trazado de 1.5 tiene interior negativo,
+   * o sea que es un borrón*— · masa **52,0 (+12 %)**, dentro de la banda ·
+   * **4 trazos** (§6b: 2–4).
+   *
+   * ── §6b.6 · NO ES GLIFO DE CONTROL ──────────────────────────────────
+   * **Lleva huella, y es obligatorio que la lleve.** No es interfaz: es un
+   * documento **de la mascota**, familia de `carnet`, `documentos` y
+   * `certificaciones`, que la llevan las tres. Y medido en su vecindad real:
+   * **los cuatro glifos de `FilaAcciones` tienen huella** — *uno sin ella se
+   * leería como de otra clase*, que es exactamente el defecto que la casa ya
+   * pagó en `HojaContanos`.
+   *
+   * ── ✅ GATE POR ÍCONO **CERRADO** — firma del founder (7-sep-2026) ──────
+   * *«Va la V1 (dos esquinas + la pata en el tercer vértice)»*, y la firma
+   * llegó **con su límite escrito, no a pesar de él**:
+   *
+   * 🔴 **NO LEE «QR» DE FORMA INEQUÍVOCA A 21 PX, Y NO PUEDE.** Las esquinas
+   * de un QR real son cuadrados **anidados**, y un anidado no entra en el
+   * trazo de la casa a ese tamaño — es la misma pared que volvió
+   * **inconstruible** el de tres esquinas. **Lo que lo hace legible es su
+   * CONTEXTO: la etiqueta «Pasaporte y QR» al lado.**
+   *
+   * ⚠️ **Y eso es una condición de uso, no una nota de color.** *Este glifo
+   * NO se puede usar solo* —sin etiqueta, en una barra o en un botón mudo—
+   * porque ahí lo único que quedaría es «dos cuadrados y una pata». Si alguna
+   * vez hace falta uno que se sostenga solo, **es un glifo nuevo con su
+   * propio gate**, no un ajuste de éste.
+   *
+   * ☠️ El andamio del gate murió con la firma (Ley 37): la candidata V2
+   * «maciza» y su hoja de contacto salieron de la galería. **El estudio con
+   * sus números queda en `docs/loop/capturas-s113-b-2.2.4/`** — *el papel se
+   * conserva; el andamio no.*
+   */
+  pasaporte: ({ tinta, huella }) => (
+    <>
+      {/* Las dos esquinas de arriba: s = 5.2, interior 2,89 px a 21.
+          Centros en (6.2, 6.2) y (17.8, 6.2). */}
+      <Path d="M3.6 3.6h5.2v5.2h-5.2Z" {...trazo(tinta)} />
+      <Path d="M15.2 3.6h5.2v5.2h-5.2Z" {...trazo(tinta)} />
+      {/* 🔴 LA TERCERA ESQUINA ES LA PATA, y para que se LEA así tiene que
+          caer donde caería el cuadrado: centro en (6.2, 17.0), o sea en la
+          misma columna que la de arriba. *Un QR tiene TRES esquinas y ninguna
+          más — la cuarta vacía es parte de la forma.* */}
+      <Huella color={huella} x={2.6} y={13.4} escala={0.3} />
+    </>
+  ),
+
+  /**
+   * 🔴 **PAPEL — la hoja que la familia TRAE (S113-B · fase 3 · B6).**
+   *
+   * ── §6b.2 · METÁFORAS OCUPADAS, y el censo cambió el dibujo ──────────
+   * · **`documento` NO es una hoja: es una CREDENCIAL apaisada** con su
+   *   círculo de retrato y sus dos líneas. *Reusarlo diría «carnet», que es
+   *   otra cosa.* (Y su cabecera lo dice: la huella va chica y al costado
+   *   porque el documento **no es del animal**.)
+   * · **La hoja con ESQUINA DOBLADA está tomada dos veces**: `certificaciones`
+   *   y `presupuesto`. ⇒ acá la hoja va **sin doblez**, y lo que la nombra son
+   *   sus renglones.
+   * · `documentos` son dos rectángulos apilados: la SECCIÓN, no una hoja.
+   *
+   * ── §6b · ECONOMÍA: UNO, NO TRES ────────────────────────────────────
+   * El encargo nombraba `papel`, `examen` y `receta`. **`receta` ya existe y
+   * está firmado** (S90-B), y **examen e informe comparten éste a propósito**:
+   * *el rótulo del grupo ya dice «Exámenes» o «Informes» — tres dibujos para
+   * una distinción que la palabra de al lado ya hace es un glifo que nadie
+   * necesita* (§6b: un glifo que nadie va a montar no se pide).
+   *
+   * ── §6b.1 · LOS NÚMEROS ─────────────────────────────────────────────
+   * Hoja **9 × 12,5** (perímetro 43) + **dos renglones de 5** ⇒ masa **53,0
+   * (+14 %)**, dentro de la banda 39,4–53,4 · **3 trazos** · interior de la
+   * hoja **6,2 px** a 21, holgado sobre el piso de 2,5.
+   * ⚠️ **Está cerca del techo de la banda y se declara**: una hoja es cara en
+   * trazo, y bajarla más la volvía un rectángulo sin renglones — o sea,
+   * `documentos` otra vez.
+   *
+   * ── §6b.6 · NO ES GLIFO DE CONTROL ──────────────────────────────────
+   * Lleva huella: es un papel **de la mascota**, familia de `carnet` y
+   * `certificaciones`.
+   *
+   * ⚠️ **GATE POR ÍCONO PENDIENTE** (§6b.5). Su riesgo declarado: a 21 px una
+   * hoja con renglones **puede leerse como «lista»**; el vecino que lo prueba
+   * es `documentos`, y por eso van juntos en la hoja de contacto.
+   */
+  papel: ({ tinta, huella }) => (
+    <>
+      <Path d="M8.5 3.2h9v12.5h-9Z" {...trazo(tinta)} />
+      <Path d="M10.5 7.4h5M10.5 10.4h5" {...trazo(tinta)} />
+      <Huella color={huella} x={2.2} y={13.6} escala={0.32} />
+    </>
+  ),
+
   documentos: ({ tinta, huella }) => (
     <>
       <Path d="M11 3.5H21.5V14" {...trazo(tinta)} />
@@ -2041,7 +2166,7 @@ export function Icono({
     // ── LOTE 3 (S58, D-361): capas por concepto — el founder poda/ajusta en gate ──
     hogar: comunidad, familia: comunidad, equipo: comunidad,
     explorar: comunidadAmplia,
-    cuenta: identidad, carnet: identidad, seguros: identidad, telemedicina: identidad,
+    cuenta: identidad, carnet: identidad, pasaporte: identidad, papel: identidad, seguros: identidad, telemedicina: identidad,
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
     // INFO comparte capa con `ayuda` PROVISIONALMENTE: los dos explican.
     // ⚠️ Si el gate de S79 firma la categoría «glifo de control», este
