@@ -102,7 +102,8 @@
     "verify:pasaporte-campos": "node scripts/verify-pasaporte-campos.mjs",
     "_comentario_verify_cotejo": "Cotea las DOS manos de un documento (D y E) desde ~/.epetplace/ia-conjuntos/manos — fuera del repo porque ninguna pista ve la rama de la otra hasta un merge, y porque llevan datos de animales reales. Su ROJO es la firma: una mano editada despues de depositarse deja de ser la que se comparo. NO va al hook: necesita las dos manos y un --doc.",
     "_comentario_verify_pasaporte_campos": "A3.5 sobre la superficie PUBLICA del pasaporte: compara los campos que la RPC devuelve contra la lista firmada por la mesa. NO va al hook hasta que la superficie exista — hoy sale 2 (NO CONCLUYENTE) porque ni la RPC ni la lista existen, y eso es distinto de verde.",
-    "verify:boveda": "tsx scripts/_arnes-boveda.mts"
+    "verify:boveda": "tsx scripts/_arnes-boveda.mts",
+    "verify:sin-montar": "node scripts/verify-sin-montar.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",
