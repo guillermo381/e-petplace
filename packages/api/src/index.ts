@@ -1860,6 +1860,8 @@ export {
   type AvisoCoach,
   type TipoAviso,
   activarPlaca,
+  estadoDePlaca,
+  type EstadoDePlaca,
   type CodigoErrorPlaca,
   // 2.1 · Nexo acompaña
   guardarHechoClasificado,

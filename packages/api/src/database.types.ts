@@ -15831,6 +15831,24 @@ export type Database = {
           },
         ]
       }
+      placa_consulta: {
+        Row: {
+          minuto: string
+          n: number
+          user_id: string
+        }
+        Insert: {
+          minuto: string
+          n?: number
+          user_id: string
+        }
+        Update: {
+          minuto?: string
+          n?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       planes_prime: {
         Row: {
           activo: boolean
@@ -24731,6 +24749,7 @@ export type Database = {
         Args: { p_invitacion_id: string }
         Returns: Json
       }
+      estado_de_placa: { Args: { p_token: string }; Returns: string }
       evaluar_documentos_guarderia: {
         Args: { p_familia_id: string }
         Returns: Json

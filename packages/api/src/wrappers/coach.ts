@@ -443,6 +443,28 @@ function codigoPlaca(mensaje: string): CodigoErrorPlaca {
  * `placa_ya_activada` **no dice de quién es**: quien tiene una placa ajena en
  * la mano no tiene por qué enterarse de nada de esa familia.
  */
+/** `libre` | `activada`, y **nada más**: ni de quién, ni cuándo, ni qué mascota.
+ *
+ *  🔴 **UN TOKEN INVENTADO DEVUELVE `libre`.** No es un hueco: si dijera «no
+ *  existe» sería un oráculo de enumeración —se probarían tokens hasta dar con
+ *  los válidos—. *La respuesta que no distingue es la que protege.*
+ *
+ *  Sirve para avisar ANTES de intentar, en vez de que la familia descubra que
+ *  su placa ya estaba activada después de elegir la mascota. */
+export type EstadoDePlaca = 'libre' | 'activada';
+
+export async function estadoDePlaca(
+  token: string,
+): Promise<ResultadoWrapper<EstadoDePlaca, CodigoErrorCoach>> {
+  const { data, error } = await getClient().rpc('estado_de_placa', { p_token: token });
+  if (error) {
+    /* El límite se dice como límite. *«Algo salió mal» manda a reintentar justo
+       lo que el límite existe para frenar.* */
+    return { ok: false, codigo: codigoCoach(error.message), mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: (data === 'activada' ? 'activada' : 'libre') };
+}
+
 export async function activarPlaca(
   token: string,
   mascotaId: string,
