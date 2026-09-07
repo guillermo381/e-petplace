@@ -531,6 +531,32 @@ for (const [crudo, palabra] of [
   exigir('CONTROL: no toca «nuevos», «vosotros» ni «dálmata»',
     json.respuesta === 'Los nuevos archivos y vosotros. Un dálmata.', json.respuesta)
 }
+{
+  // 🔴 EL ROJO DEL FOUNDER: `dejá` llegó a una familia estando en la lista.
+  // Causa: `\b` no es un límite después de una vocal acentuada, porque `á` no
+  // está en `\w`. Medido: 49 de 132 formas NUNCA se aplicaron.
+  redaccionCruda(JSON.stringify({ respuesta: 'Dejá que se calme y mirá cómo sigue. Después contá qué pasó.',
+    semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir('🔴 «dejá · mirá · contá» — el imperativo acentuado ahora SÍ se corrige',
+    json.respuesta === 'Deja que se calme y mira cómo sigue. Después cuenta qué pasó.', json.respuesta)
+}
+{
+  // el cinturón va ÚLTIMO: cubre lo que la edge agrega DESPUÉS del modelo.
+  redaccionCruda(JSON.stringify({ respuesta: 'Un baño cada 4 semanas.', general: true,
+    semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  const VOSEO = /\b(dejá|mirá|contá|fijate|querés)\b/
+  exigir('lo que la edge agrega después TAMBIÉN pasa por el cinturón',
+    !VOSEO.test(String(json.respuesta)), json.respuesta)
+}
+{
+  // y las plantillas, que escribe la casa: no-op hoy, red mañana.
+  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : { respuesta: 'no' })
+  const { json } = await llamar({ mascotaId: 'm1', texto: '¿es alérgico a algo?' })
+  exigir('la plantilla también sale por el cinturón',
+    !/\bsabés\b|\bcontámela\b/.test(String(json.respuesta)), json.respuesta)
+}
 console.log('     ↑ medido: con el system en voseo se escapaba seguido; pasado a tuteo')
 console.log('       bajó a ~1 de cada 10; y al nombrarle «dale» apareció «querés».')
 console.log('       Enumerar formas prohibidas es jugar al topo: la última milla')

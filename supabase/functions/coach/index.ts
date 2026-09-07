@@ -609,13 +609,30 @@ async function crearPropuestas(
 // y yo no curaba, y formas que ni se curaban ni se veían. *Con tres copias, un
 // verde puede ser falso por coincidencia de huecos, y un rojo también al revés.*
 // Quien agregue una forma la agrega en `_shared/voz/voseo.json`.
+/** 🔴 `\b` NO SIRVE PARA EL ESPAÑOL, y esto costó que `dejá` llegara a una
+ *  familia con el cinturón puesto.
+ *
+ *  `\b` es el límite entre `\w` y no-`\w`, y **`á` no está en `\w`**. En
+ *  «entonces dejá eso», después de la `á` viene un espacio: los dos son
+ *  no-`\w`, **no hay límite ahí, y `\bdejá\b` nunca matchea**.
+ *
+ *  Medido: **49 de las 132 formas nunca se aplicaron** — TODO el imperativo
+ *  terminado en vocal acentuada (`dejá · mirá · guardá · probá · escribí ·
+ *  hacé · abrí · pedí · contá · decí` …). *El cinturón no fallaba: cubría la
+ *  mitad, y su log decía «corregido» cada vez que corregía la otra.*
+ *
+ *  La cura es mirar los caracteres de al lado por lo que SON —letra o número,
+ *  con `\p{L}`/`\p{N}` y el flag `u`— en vez de por si el motor los considera
+ *  «de palabra». */
+const limite = (forma: string) =>
+  new RegExp(`(?<![\\p{L}\\p{N}])${forma}(?![\\p{L}\\p{N}])`, 'gu')
+
 const VOSEO_A_TUTEO: readonly (readonly [RegExp, string])[] = PARES_VOSEO.pares
   // Largas primero: si una forma es prefijo de otra, la corta la mutilaría.
   .slice().sort((a, b) => b[0].length - a[0].length)
   .flatMap(([vos, tu]) => [
-    [new RegExp(`\\b${vos}\\b`, 'g'), tu] as const,
-    [new RegExp(`\\b${vos[0].toUpperCase()}${vos.slice(1)}\\b`, 'g'),
-      tu[0].toUpperCase() + tu.slice(1)] as const,
+    [limite(vos), tu] as const,
+    [limite(`${vos[0].toUpperCase()}${vos.slice(1)}`), tu[0].toUpperCase() + tu.slice(1)] as const,
   ])
 
 export function aTuteo(texto: string): string {
@@ -709,7 +726,7 @@ Deno.serve(async (req) => {
     // ── ① memorial ───────────────────────────────────────────────────────
     if (c.estado_vida === 'memorial') {
       return new Response(JSON.stringify({
-        codigo: 'memorial', mensaje: VOZ_MEMORIAL(c.nombre),
+        codigo: 'memorial', mensaje: aTuteo(VOZ_MEMORIAL(c.nombre)),
       }), { status: 404, headers: JSON_HEADERS })
     }
 
@@ -796,7 +813,11 @@ Deno.serve(async (req) => {
       const p = responderConPlantilla(String(texto), c)
       if (p) {
         return new Response(JSON.stringify({
-          respuesta: p.texto, fuente: 'plantilla', plantilla: p.nombre,
+          // Las plantillas las escribe la casa, así que esto debería ser un
+          // no-op — **y por eso mismo va**: el día que alguien edite una y se
+          // le escape un «fijate», el cinturón lo agarra. *La garantía es
+          // «de esta edge no sale voseo», no «el modelo no dice voseo».*
+          respuesta: aTuteo(p.texto), fuente: 'plantilla', plantilla: p.nombre,
           intencion, semaforo: null, propuesta_memoria: null,
           // Una plantilla contesta CON el dato de esta mascota: por definición
           // no es general. Va explícito y no ausente: una clave que a veces
@@ -824,10 +845,14 @@ Deno.serve(async (req) => {
       return error('error_modelo', 'No pude contestarte ahora. Prueba de nuevo en un momento.')
     }
     const d = r.datos as Record<string, unknown>
+    // 🔴 EL CINTURÓN VA ÚLTIMO, sobre el texto YA COMPUESTO. Antes corría
+    // ANTES de agregar la aclaración: si esa aclaración hubiera tenido voseo,
+    // el cinturón no la habría visto. *Un filtro que corre antes del último
+    // que escribe no filtra lo último que se escribió.*
     const textoCrudo = aTextoOnull(d?.respuesta)
     const respuesta = textoCrudo === null
       ? null
-      : conAclaracionSiEsGeneral(aTuteo(textoCrudo), d?.general === true, c)
+      : aTuteo(conAclaracionSiEsGeneral(textoCrudo, d?.general === true, c))
     // Sin texto no hay respuesta que dar. Es lo único de esta rama que rebota:
     // un `semaforo` malformado se anula, pero una respuesta vacía no se puede
     // pintar — y pintar la burbuja en blanco sería peor que decir que falló.
