@@ -105,6 +105,18 @@ export function escrituraSinPolicy(grants, policies) {
   return escribir.filter((c) => grants.includes(c) && !abierta && !conPolicy.has(c));
 }
 
+/**
+ * ⑦ **Un papel cuyo archivo ya no está.** La ley dice que borrar el adjunto NO
+ * borra el evento, y eso está bien: la familia trajo su historia y no la pierde
+ * porque limpió un archivo. Pero **nada marca ese papel como sin respaldo**, y
+ * con el `literal` descartado (③) queda una afirmación sobre un valor de
+ * laboratorio que ya no se puede cotejar contra nada. *La ley se cumple y la
+ * consecuencia no se dice.*
+ */
+export function papelesSinRespaldo(filas) {
+  return filas.filter((f) => Number(f.archivo_vivo) === 0);
+}
+
 // ═══ CONTROL ═══════════════════════════════════════════════════════════════
 if (ESTE && process.argv.includes('--control')) {
   let fallos = 0;
@@ -146,6 +158,11 @@ if (ESTE && process.argv.includes('--control')) {
     'NEGATIVO ⑤ conceder sólo SELECT no produce hallazgo');
   ok(escrituraSinPolicy(['SELECT', 'INSERT'], ['ALL']).length === 0,
     'CLASE    ⑤ una policy ALL cubre el INSERT: eso es una decisión, no un permiso huérfano');
+
+  ok(papelesSinRespaldo([{ archivo_vivo: 0 }, { archivo_vivo: 1 }]).length === 1,
+    'POSITIVO ⑦ un papel cuyo archivo ya no está se nombra');
+  ok(papelesSinRespaldo([{ archivo_vivo: 1 }]).length === 0,
+    'NEGATIVO ⑦ un papel con su archivo no produce hallazgo');
 
   di('');
   if (fallos) { di(`🔴 ${fallos} control(es) en rojo.`); process.exit(1); }
@@ -226,6 +243,36 @@ if (ESTE) {
     if (huerfanos.length) {
       rojos.push({ regla: '⑤ permiso huérfano',
         detalle: `\`${t}\`: ${huerfanos.join('/')} concedido(s) a authenticated y ninguna policy los cubre — hoy los frena la AUSENCIA de policy, no la ausencia de permiso` });
+    }
+  }
+
+  /* ⑦ Papeles sin respaldo, y las policies de Storage que los gobiernan. */
+  const pol = sql(`select policyname, cmd from pg_policies where schemaname='storage' and tablename='objects'
+                     and (coalesce(qual,'')||coalesce(with_check,'')) ilike '%${BUCKET}%'`) ?? [];
+  const cmds = new Set(pol.map((x) => String(x.cmd).toUpperCase()));
+  const faltan = ['SELECT', 'INSERT', 'DELETE'].filter((c) => !cmds.has(c) && !cmds.has('ALL'));
+  if (!pol.length) rojos.push({ regla: '⑦ storage sin policy', detalle: `ninguna policy de \`storage.objects\` nombra \`${BUCKET}\`` });
+  else {
+    di(`   ⑦ storage: ${pol.length} policy(s) sobre \`${BUCKET}\` (${[...cmds].join('/')})`);
+    if (faltan.length) rojos.push({ regla: '⑦ storage incompleto', detalle: `sin policy de ${faltan.join('/')} sobre \`${BUCKET}\`` });
+    const porCarpeta = sql(`select count(*) as n from pg_policies where schemaname='storage' and tablename='objects'
+                              and (coalesce(qual,'')||coalesce(with_check,'')) ilike '%${BUCKET}%'
+                              and (coalesce(qual,'')||coalesce(with_check,'')) ilike '%foldername%'`)?.[0]?.n ?? 0;
+    if (Number(porCarpeta) !== pol.length) {
+      rojos.push({ regla: '⑦ carpeta libre', detalle: `${pol.length - Number(porCarpeta)} policy(s) de \`${BUCKET}\` no atan el objeto a la carpeta de su mascota` });
+    }
+  }
+
+  const conArchivo = sql(`select p.id::text as id, p.clase,
+      (select count(*) from storage.objects o where o.bucket_id='${BUCKET}' and o.name=p.archivo_path) as archivo_vivo
+      from ${TABLA} p`) ?? [];
+  const huerfanos = papelesSinRespaldo(conArchivo);
+  if (!conArchivo.length) notas.push('⑦ no hay ningún papel guardado: la regla del respaldo NO se midió');
+  else {
+    di(`   ⑦ ${conArchivo.length} papel(es) · ${huerfanos.length} sin su archivo`);
+    if (huerfanos.length) {
+      rojos.push({ regla: '⑦ sin respaldo mudo',
+        detalle: `${huerfanos.length}/${conArchivo.length} papel(es) apuntan a un archivo que ya no está, y ninguna columna lo dice — con el \`literal\` descartado, esa transcripción no se puede cotejar contra nada` });
     }
   }
 

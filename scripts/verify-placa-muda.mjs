@@ -75,6 +75,34 @@ export function distinguibles(casos) {
   return pares;
 }
 
+/**
+ * ④ **Entropía del código.** Un token que se puede adivinar no lo salva ningún
+ * rate limit: quien enumera pega contra códigos DISTINTOS, y un contador por
+ * pasaporte cuenta cada uno por separado. *El límite protege a un pasaporte
+ * conocido del raspado; no protege al espacio de tokens de la enumeración.*
+ * Por eso lo que decide acá son los bits, y se leen del generador.
+ */
+export function bitsDelToken(cuerpo) {
+  const m = String(cuerpo ?? '').match(/gen_random_bytes\(\s*(\d+)\s*\)/);
+  if (!m) return { bits: null, por: 'no encontré el generador' };
+  return { bits: Number(m[1]) * 8, por: `gen_random_bytes(${m[1]})` };
+}
+
+/**
+ * ⑤ **El orden de los rebotes también informa.** Si `activar_placa` mirara
+ * primero el token y después el acceso, un desconocido con una placa ajena
+ * sabría si ese código existe antes de que le digan que no puede. Lo correcto es
+ * lo que hace hoy: **el acceso primero**, y entonces el rebote habla de QUIEN
+ * pregunta y nunca de la placa.
+ */
+export function accesoAntesQueToken(cuerpo) {
+  const c = String(cuerpo ?? '').toLowerCase();
+  const iAcceso = c.search(/user_es_familiar_adulto_de_mascota|no_access_to_mascota/);
+  const iToken = c.search(/from pasaporte_placa|placa_no_existe/);
+  if (iAcceso === -1 || iToken === -1) return { ok: null, por: 'no encontré los dos guards' };
+  return { ok: iAcceso < iToken, por: iAcceso < iToken ? 'el acceso se mira primero' : 'el TOKEN se mira antes que el acceso' };
+}
+
 // ═══ CONTROL ═══════════════════════════════════════════════════════════════
 if (ESTE && process.argv.includes('--control')) {
   let fallos = 0;
@@ -100,6 +128,20 @@ if (ESTE && process.argv.includes('--control')) {
 
   ok(H(200, { a: 1, b: 2 }) === H(200, { b: 9, a: 8 }),
     'CLASE    la huella mira las CLAVES, no los valores: dos pasaportes distintos no se distinguen entre sí');
+
+  ok(bitsDelToken("v_tok := encode(extensions.gen_random_bytes(16),'base64')").bits === 128,
+    'POSITIVO ④ los bits se leen del generador, no se suponen');
+  ok(bitsDelToken('sin generador').bits === null,
+    'NEGATIVO ④ sin generador se devuelve null, no un número inventado');
+  ok(bitsDelToken("gen_random_bytes(4)").bits === 32,
+    'CLASE    ④ un generador más chico da menos bits — el juez no está clavado en 128');
+
+  ok(accesoAntesQueToken('if not user_es_familiar_adulto_de_mascota(x) then raise; end if; select * from pasaporte_placa').ok === true,
+    'NEGATIVO ⑤ el orden correcto no produce hallazgo');
+  ok(accesoAntesQueToken('select * from pasaporte_placa where token=t; if not user_es_familiar_adulto_de_mascota(x) then raise; end if;').ok === false,
+    'POSITIVO ⑤ mirar el token primero se delata');
+  ok(accesoAntesQueToken('nada').ok === null,
+    'CLASE    ⑤ sin los dos guards se devuelve null, no un verde');
 
   di('');
   if (fallos) { di(`🔴 ${fallos} control(es) en rojo.`); process.exit(1); }
@@ -143,6 +185,32 @@ if (ESTE) {
      contra «revocado» y salir VERDE **sin haber mirado nunca lo que vino a
      mirar**. *Un gate que pasa por vacío sobre su propio sujeto es peor que no
      tenerlo: su verde se lee como que la placa está probada.* */
+  /* ④⑤ se miden SIEMPRE: no dependen de que exista una placa acuñada. */
+  const cuerpos = sql(`select p.proname, pg_get_functiondef(p.oid) as d from pg_proc p
+                       join pg_namespace n on n.oid=p.pronamespace
+                       where n.nspname='public' and p.proname in ('crear_lote_placas','activar_placa')`) ?? [];
+  const crear = cuerpos.find((x) => x.proname === 'crear_lote_placas')?.d ?? '';
+  const activar = cuerpos.find((x) => x.proname === 'activar_placa')?.d ?? '';
+  const previos = [];
+
+  const B = bitsDelToken(crear);
+  if (B.bits === null) previos.push({ regla: '④ entropía', detalle: `no pude leer el generador del token (${B.por}): NO medida` });
+  else {
+    di(`   ④ entropía del código: ${B.bits} bits (${B.por})`);
+    if (B.bits < 96) previos.push({ regla: '④ entropía', detalle: `${B.bits} bits: un espacio así se enumera, y el rate limit NO lo cubre — cuenta por pasaporte, y quien enumera pega contra códigos distintos` });
+  }
+
+  const O = accesoAntesQueToken(activar);
+  if (O.ok === null) previos.push({ regla: '⑤ orden de guards', detalle: `no encontré los dos guards en \`activar_placa\`: NO medido` });
+  else if (!O.ok) previos.push({ regla: '⑤ orden de guards', detalle: `${O.por}: un desconocido con una placa ajena sabría si ese código existe antes de que le digan que no puede` });
+  else di(`   ⑤ activar_placa: ${O.por} — el rebote habla de quien pregunta, nunca de la placa`);
+
+  if (previos.length) {
+    di(`\n🔴 ${previos.length} incumplimiento(s) que NO dependen de que haya placas:`);
+    for (const r of previos) di(`   ${r.regla.padEnd(20)} ${r.detalle}`);
+    process.exit(1);
+  }
+
   if (!sinActivar) {
     di('\n⚠️ NO CONCLUYENTE — no hay ninguna placa acuñada y sin activar.');
     di('   `crear_lote_placas` existe y no se corrió nunca: 0 lotes, 0 placas.');
