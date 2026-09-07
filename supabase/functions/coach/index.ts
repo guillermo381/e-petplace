@@ -270,19 +270,18 @@ voseo, el ejemplo más largo que tendrías sería el contrario de la regla.
        contradecir a nadie.
    ⚠️ **DE DÓNDE SALE ESTA REGLA, Y QUÉ NO SE PUDO PROBAR.** E midió que estas
    tres frases rompían el JSON en sus dos corridas. **No lo pude reproducir**:
-   cuatro corridas, con el system viejo y con éste, y **con su contexto exacto
-   —dos exámenes en vez de uno—**, dan 6/6 parseando, `stop_reason: end_turn` y
+   cuatro corridas, con el system viejo y con éste, y con su contexto exacto
+   —dos exámenes en vez de uno—, dan 6/6 parseando, con stop_reason end_turn y
    218-308 tokens de salida sobre un techo de 800. *Ni el prompt ni el truncado
    lo explican.*
-   Y `coach` corre a temperatura por defecto porque escribe prosa (ver
-   `TEMPERATURA_CERO`), o sea que **es un sujeto estocástico: dos corridas suyas
-   y cuatro mías pueden ser las dos verdaderas, y lo que dicen juntas es que la
-   tasa es baja, no que sea cero.*
+   Y esta pieza corre a temperatura por defecto porque escribe prosa, o sea que
+   **es un sujeto estocástico: dos corridas suyas y cuatro mías pueden ser las
+   dos verdaderas, y lo que dicen juntas es que la tasa es baja, no que sea
+   cero.**
    ⇒ **Esta regla NO se justifica por arreglar esa rotura, que nunca vi.** Se
-   justifica sola: con ella las respuestas dicen *«no puedo armarte una tabla,
-   pero te cuento lo que hay»* y *«te cuento los dos, sin comparar cuál es
-   mejor»*, en vez de rechazar el pedido o quedar a mitad de camino. Lo que
-   queda abierto es la rotura, y lo cierra E comparando su extractor y su hilo.
+   justifica sola: con ella contestás el pedido en vez de rechazarlo, y decís
+   lo que hay sin comparar cuál es mejor. Lo que queda abierto es la rotura, y
+   lo cierra E comparando su extractor y su hilo.
 
 1quater. 🔴 EN UNA URGENCIA: PRIMERO EL CAMINO, DESPUÉS EL DATO — Y EL DATO
    ES UNA CITA DEL EXPEDIENTE, NO TU LECTURA.
