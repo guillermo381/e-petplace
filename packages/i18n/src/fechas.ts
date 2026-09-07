@@ -70,6 +70,34 @@ export function diaSemanaCorto(iso: string, idioma: IdiomaSoportado): string {
     .replace('.', '');
 }
 
+/**
+ * 🔴 **«dom 7 sep» / «sun sep 7» — LA FECHA CORTA CON SU DÍA (S113-B · 2.2.1).**
+ *
+ * Nace por orden del founder: en el tablero, *«7 de septiembre de 2026»* ocupa
+ * dos líneas debajo de un dato de 18 px y la tarjeta se lee como un párrafo.
+ * *Para una cita, el año casi nunca informa —es este— y el día de semana
+ * informa muchísimo: la familia decide por «es domingo», no por «es el 7».*
+ *
+ * ⚠️ **NACE TARDE, y su censo lo dice**: cuando se fue a escribir había ya
+ * **cinco sitios armando esta misma forma a mano** con `Intl` —guardería,
+ * paseo, grooming y el Hogar, que además concatena `diaSemanaCorto` con el
+ * número de día—. Es la historia de `diaSemanaCorto` repetida: *la condición
+ * de promoción se cumplió hace rato y nadie la contaba.* Los cinco quedan
+ * declarados para su dueño; migrarlos no es de esta pista.
+ *
+ * Fecha-sola por partes literales, jamás `new Date(iso)` (D-312), y **degrada
+ * al día suelto, nunca a una fecha inventada** (L-197).
+ */
+export function fechaCortaHumana(iso: string, idioma: IdiomaSoportado): string {
+  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+  if (!a || !m || m < 1 || m > 12 || !d) return iso.slice(0, 10);
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC';
+  return new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short' })
+    .format(new Date(a, m - 1, d))
+    .replace(/\./g, '')
+    .replace(/,/g, '');
+}
+
 /** dd mon yyyy en mono-voz (minúsculas), para metadata chica. */
 export function fechaCortaMono(iso: string, idioma: IdiomaSoportado): string {
   const [a, m, d] = iso.slice(0, 10).split('-').map(Number);

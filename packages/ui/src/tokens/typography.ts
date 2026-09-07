@@ -81,6 +81,16 @@ export const typography = {
      *  compañera obligada es `family.sans.medium`, que es la fuente de los
      *  controles de la casa (la misma de la barra de pestañas). */
     control: 13,
+    /** 🔴 **EL DATO GRANDE DE UNA TARJETA DE TABLERO (S113-B · 2.2.1).**
+     *  Nace por orden del founder —*«el dato grande baja de 22 a 18»*— y
+     *  **entra con nombre propio, no como peldaño de la escala**, por la misma
+     *  razón que `control: 13`: la escala de arriba es de PROSA (11 · 14 · 16 ·
+     *  20 · 22) y esto es una CIFRA, que se lee de un vistazo y compite con un
+     *  gráfico al lado. *A 22 el número empujaba al dibujo fuera de la
+     *  tarjeta en la columna angosta; a 18 conviven.* Su compañera obligada es
+     *  `family.sans.medium` con cifras tabulares — sin eso, dos tarjetas
+     *  vecinas mueven su punto decimal. */
+    metrica: 18,
     sm:    14,
     base:  16,
     md:    20,

@@ -46,10 +46,21 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
-import { fraccionDelAnillo, hayLineaQueDibujar, puntosDeLinea } from './tablero-metrica'
+import { fraccionDelAnillo, hayLineaQueDibujar, margenDeTrazo, puntosDeLinea, radioDeAnillo } from './tablero-metrica'
 
-const LIENZO = { ancho: 96, alto: 28 }
+/* ⚠️ **EL LIENZO ES UN `viewBox`, NO PÍXELES**, y ésa es la diferencia entre
+   una tarjeta que aguanta y una que se rompe. ⏪ El SVG medía 96 de ancho
+   FIJO: en la columna angosta —dos tarjetas por fila— el número grande y el
+   gráfico sumaban más que el ancho útil y **el dibujo salía de la tarjeta**.
+   Medido en el emulador a dos densidades, no supuesto.
+   Hoy el `Svg` va a `width="100%"` dentro de una caja que **encoge**, y el
+   viewBox mantiene la proporción: *el dibujo se adapta al lugar que sobra en
+   vez de exigir el suyo.* */
+const LIENZO = { ancho: 96, alto: 28, grosor: 2 }
 const ANILLO = { lado: 40, grosor: 4 }
+/* El aire visible entre el trazo y el borde de su caja, ADEMÁS del medio
+   grosor que el trazo se lleva por estar centrado en su camino. */
+const AIRE = 2
 
 /**
  * 🔴 **CADA DIBUJO TRAE LO QUE NECESITA Y NADA MÁS.** Una interfaz con
@@ -159,17 +170,27 @@ export function TarjetaMetrica(props: TarjetaMetricaProps) {
         {valor === null ? (
           <Texto variante="apoyo">{vozSinDato}</Texto>
         ) : (
-          /* 22 px con cifras tabulares, dibujado con el token y no con una
+          /* 18 px con cifras tabulares, dibujado con el token y no con una
              quinta variante de `Texto` — precedente `TresNumeros`, y su
              propia cabecera argumenta contra la variante nueva. Tabular
              porque es un número: sin eso, dos tarjetas con distinta cifra
-             mueven su punto decimal. */
+             mueven su punto decimal.
+
+             ⏪ **Bajó de 22 a 18 (orden del founder), y no era sólo peso
+             visual: a 22 el número más el gráfico no entraban en la columna
+             angosta y el dibujo salía de la tarjeta.**
+
+             🔴 `flexShrink: 0` — **el número JAMÁS se achica ni se corta.**
+             *La cifra es el contenido; el dibujo es la señal.* Cuando no
+             entran los dos, el que cede es el dibujo, y por eso el que
+             encoge es su caja y no ésta. */
           <Text
             style={{
               fontFamily: typography.family.sans.medium,
-              fontSize: typography.size.lg,
+              fontSize: typography.size.metrica,
               color: theme.text.primary,
               fontVariant: ['tabular-nums'],
+              flexShrink: 0,
             }}
           >
             {valor}
@@ -179,7 +200,24 @@ export function TarjetaMetrica(props: TarjetaMetricaProps) {
         {dibujo === undefined || esMemorial ? null : <Dibujo dibujo={dibujo} />}
       </View>
 
-      {contexto !== undefined ? <Texto variante="apoyo">{contexto}</Texto> : null}
+      {/* 🔴 La línea de contexto a **11** (orden del founder), con el token
+          `xs` y un `<Text>` propio — es el patrón que la casa ya usa para 11
+          (`BarraTabs`, `ClipSesion`, `CitaEnVivo`, `BurbujaPendientes`), no
+          una variante nueva. *Es metadata: acompaña al dato, no compite.*
+          A 14 la segunda línea pesaba lo mismo que el rótulo y la tarjeta se
+          leía como tres cosas en vez de una. */}
+      {contexto !== undefined ? (
+        <Text
+          style={{
+            fontFamily: typography.family.sans.regular,
+            fontSize: typography.size.xs,
+            lineHeight: 15,
+            color: theme.text.secondary,
+          }}
+        >
+          {contexto}
+        </Text>
+      ) : null}
     </>
   )
 
@@ -205,27 +243,46 @@ function Dibujo({ dibujo }: { dibujo: DibujoMetrica }) {
   if (dibujo.tipo === 'sparkline') {
     /* 🔴 Menos de dos puntos NO se dibuja. Ver la cabecera. */
     if (!hayLineaQueDibujar(dibujo.serie)) return null
-    const puntos = puntosDeLinea(dibujo.serie, LIENZO.ancho, LIENZO.alto)
+    /* 🔴 El margen se DERIVA del grosor (`margenDeTrazo`) y no se elige: un
+       número a ojo se queda viejo el día que el trazo engorde. */
+    const margen = margenDeTrazo(LIENZO.grosor) + AIRE
+    const puntos = puntosDeLinea(dibujo.serie, LIENZO.ancho, LIENZO.alto, margen)
     return (
-      <Svg width={LIENZO.ancho} height={LIENZO.alto}>
-        <Polyline
-          points={puntos.map((p) => `${p.x},${p.y}`).join(' ')}
-          fill="none"
-          stroke={theme.accent.control}
-          strokeWidth={2}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-      </Svg>
+      /* 🔴 **LA CAJA QUE CEDE.** `flexShrink: 1` con `maxWidth` = el lienzo:
+         nunca crece más que su medida natural y **encoge todo lo que haga
+         falta** para que el número entre entero. El `minWidth` es el piso
+         donde una línea todavía dice algo — más chico que eso no es un
+         gráfico, es un guión, y entonces vale más el aire. */
+      <View style={{ flexShrink: 1, flexGrow: 1, maxWidth: LIENZO.ancho, minWidth: 36 }}>
+        <Svg
+          width="100%"
+          height={LIENZO.alto}
+          viewBox={`0 0 ${LIENZO.ancho} ${LIENZO.alto}`}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <Polyline
+            points={puntos.map((p) => `${p.x},${p.y}`).join(' ')}
+            fill="none"
+            stroke={theme.accent.control}
+            strokeWidth={LIENZO.grosor}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        </Svg>
+      </View>
     )
   }
 
   if (dibujo.tipo === 'anillo') {
-    const r = (ANILLO.lado - ANILLO.grosor) / 2
+    const r = radioDeAnillo(ANILLO.lado, ANILLO.grosor, AIRE)
     const vuelta = 2 * Math.PI * r
     const hecho = fraccionDelAnillo(dibujo.hechos, dibujo.total) * vuelta
     return (
-      <Svg width={ANILLO.lado} height={ANILLO.lado}>
+      <Svg
+        width={ANILLO.lado}
+        height={ANILLO.lado}
+        viewBox={`0 0 ${ANILLO.lado} ${ANILLO.lado}`}
+      >
         {/* El aro de fondo dice cuánto es el total: sin él, un anillo a medias
             no se distingue de uno chico. */}
         <Circle

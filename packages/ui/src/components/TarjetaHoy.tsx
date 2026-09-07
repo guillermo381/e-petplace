@@ -46,11 +46,24 @@ export { elDeHoy } from './tablero-metrica'
 export interface TarjetaHoyProps {
   /** Qué clase de cosa es. Decide el tinte, **no la importancia**. */
   clase: ClaseHoy
-  /** *«Thor entra a senior en marzo»* — ya redactada. */
+  /**
+   * 🔴 **TIENE QUE DECIR QUÉ ES.** *«Thor entra a senior en marzo»* — la
+   * compone la pantalla, que es la única que sabe de qué está hablando.
+   *
+   * **Vacío o en blanco ⇒ la tarjeta NO SE DIBUJA.** No es validación de
+   * formulario: es que *el «hoy» del perfil es el lugar más caro de la
+   * pantalla, y una tarjeta genérica ahí —«Algo para mirar», «Tenés
+   * novedades»— enseña que ese lugar no vale la pena mirarlo.* Un hueco
+   * ausente no cuesta nada; un hueco lleno de nada cuesta el lugar.
+   */
   titulo: string
   /** Una línea más, ya redactada. */
   detalle?: string
-  /** 🔴 **Obligatorios.** Ver la cabecera. */
+  /**
+   * 🔴 **UN ACTO CON DESTINO, y los dos obligatorios.** `vozActo` en blanco
+   * apaga la tarjeta igual que el título: *un botón sin nombre es un botón que
+   * no se sabe a dónde va, y el que lo toca descubre a dónde iba después.*
+   */
   onActo: () => void
   vozActo: string
 }
@@ -60,6 +73,12 @@ export function TarjetaHoy({ clase, titulo, detalle, onActo, vozActo }: TarjetaH
 
   /* ⛔ No hay un «hoy» que resolver. */
   if (theme.mode === 'memorial') return null
+
+  /* 🔴 **SIN TEXTO NO HAY TARJETA.** Ver la cabecera de `titulo`. Se mide
+     `.trim()` y no `.length`, porque *un espacio no es un texto*: una plantilla
+     a la que le faltó la variable devuelve `' '` con la misma cara que un
+     título. */
+  if (titulo.trim().length === 0 || vozActo.trim().length === 0) return null
 
   /* 🔴 TINTE, NUNCA RELLENO DE ALARMA (`R20`). Lo que se adelanta y lo que
      vence llevan el ocre; una cita no lleva nada — *pintar de atención algo

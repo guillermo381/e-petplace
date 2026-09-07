@@ -15,6 +15,7 @@ export { crearUseTraduccion, type TraductorTipado } from './useTraduccion';
 export type { ClaveDe, Diccionario, Espejo, RecursosPorIdioma } from './tipos';
 export {
   diaSemanaCorto,
+  fechaCortaHumana,
   /* S112-C · los dos formatos del hilo de chat. Viven acá y no en cada app
      porque las DOS superficies los necesitan idénticos: si la familia y el
      refugio formatearan la hora distinto, el mismo mensaje diría dos cosas. */
