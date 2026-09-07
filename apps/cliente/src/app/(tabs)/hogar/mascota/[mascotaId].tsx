@@ -2462,7 +2462,10 @@ export default function PerfilDeMascota() {
         titulo={t('bio.titulo', { nombre: mascota.nombre })}
         entradas={[
                   { clase: 'comportamiento', titulo: t('bio.enComportamiento'), detalle: t('bio.enComportamientoDet'), onPress: () => { setContanosAbierto(false); setHojaBio('comportamiento') } },
-                  { clase: 'personalidad', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => { setContanosAbierto(false); setHojaBio('personalidad') } },
+                  /* ⚠️ DOS VOCABULARIOS, y no son el mismo: la pieza de B dice `rasgo`
+                     donde la Hoja de C dice `personalidad`. Se TRADUCE en el borde —
+                     *unificarlos acá sería decidir por las dos pistas desde el medio.* */
+                  { clase: 'rasgo', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => { setContanosAbierto(false); setHojaBio('personalidad') } },
                   { clase: 'medico', titulo: t('bio.enMedico'), detalle: t('bio.enMedicoDet'), onPress: () => { setContanosAbierto(false); setHojaBio('medico') } },
                   { clase: 'recuerdo', titulo: t('bio.enRecuerdo'), detalle: t('bio.enRecuerdoDet'), onPress: () => { setContanosAbierto(false); setHojaBio('recuerdo') } },
                 ]}

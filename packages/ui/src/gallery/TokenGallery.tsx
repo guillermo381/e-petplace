@@ -25,13 +25,15 @@ import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestr
 import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
+import { PresentacionNexo } from '../components/PresentacionNexo'
+import { AvisoAnticipacion } from '../components/AvisoAnticipacion'
+import { HojaContanos } from '../components/HojaContanos'
+import { BotonContanos } from '../components/BotonContanos'
+import { PastillaConociendolo } from '../components/PastillaConociendolo'
 import { RespuestaNexo } from '../components/RespuestaNexo'
 import { ResultadosBusqueda } from '../components/ResultadosBusqueda'
 import { PanelMemoria } from '../components/PanelMemoria'
 import { ChipsSugerencia } from '../components/ChipsSugerencia'
-import { HojaContanos } from '../components/HojaContanos'
-import { BotonContanos } from '../components/BotonContanos'
-import { PastillaConociendolo } from '../components/PastillaConociendolo'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
@@ -3289,7 +3291,7 @@ function ContanosDemo() {
   const [propuesta, setPropuesta] = useState(false)
   const ENTRADAS = [
     { clase: 'comportamiento' as const, titulo: 'Comportamiento', detalle: 'miedos, manías, cómo se lleva con otros', onPress: () => {} },
-    { clase: 'personalidad' as const, titulo: 'Rasgos de personalidad', detalle: 'cómo es: tímido, glotón, mandón', onPress: () => {} },
+    { clase: 'rasgo' as const, titulo: 'Rasgos de personalidad', detalle: 'cómo es: tímido, glotón, mandón', onPress: () => {} },
     { clase: 'medico' as const, titulo: 'Temas médicos', detalle: 'alergias, condiciones, lo que el vet te dijo', onPress: () => {} },
     { clase: 'recuerdo' as const, titulo: 'Recuerdo', detalle: 'lo que hizo hoy', onPress: () => {} },
   ]
@@ -8732,6 +8734,39 @@ function GaleriaInterna() {
               cero pendientes — su firma es su desaparición.
             </Texto>
             <ContanosDemo />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S113 — NEXO ACOMPAÑA (2.1) · qué decide: (a) que las tres burbujas de la presentación se lean como UNA voz y no como tres mensajes sueltos; (b) que el aviso que se adelanta se distinga sin gritar —no pasó nada malo, todavía no pasó nada— y (c) que su acto lleve a alguien, no a una conclusión">
+          <View style={{ gap: spacing[5] }}>
+            <Texto variante="apoyo">
+              La primera vez: tres burbujas seguidas, con el nombre en la primera y la
+              hora en la última. Las piezas son las del chat, sin variante nueva.
+            </Texto>
+            <PresentacionNexo
+              autor="Nexo"
+              hora="14:32"
+              burbujas={[
+                'Me acuerdo de todo lo de Thor: vacunas, pesos, citas, y lo que me cuentes.',
+                'Puedo decirte cuándo le toca la antirrábica, cuánto pesaba en junio y qué comió esta semana.',
+                'Cuanto más uses e-PetPlace, más personal es lo que te digo y antes me adelanto. Puedo equivocarme; para lo importante está tu vet.',
+              ]}
+            />
+
+            <Texto variante="apoyo">El aviso, en sus dos formas. Nunca en color de alarma:</Texto>
+            <AvisoAnticipacion
+              forma="fila"
+              contexto="Thor entra a senior en marzo"
+              sugerencia="Los Bulldog inglés suelen tener displasia de cadera"
+              onAbrir={() => {}}
+            />
+            <AvisoAnticipacion
+              forma="tarjeta"
+              contexto="Thor entra a senior en marzo"
+              sugerencia="Los Bulldog inglés suelen tener displasia de cadera: vale la pena hablar de un estudio de cadera en su próximo chequeo."
+              onVerVet={() => {}}
+              vozVerVet="Hablarlo con mi vet"
+            />
           </View>
         </Seccion>
     </ScrollView>

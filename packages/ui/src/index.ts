@@ -1270,11 +1270,6 @@ export {
   type ChipsSugerenciaProps,
   type SugerenciaNexo,
 } from './components/ChipsSugerencia'
-// InvitacionBio (S113-B · 1.2.2) — «¿Querés contarnos qué lo hace único?»
-// 🔴 Una entrada SIN destino no se puede escribir: `onPress` es obligatorio,
-// y con cero entradas la tarjeta no se dibuja. Vive al cierre de `FichaRaza`
-// y también SOLA en el perfil, cuando la mascota no tiene ficha de raza.
-
 // ☠️ `InvitacionBio` MURIÓ (S113-B · 2.1) — y no fue una limpieza: era
 // TARJETA Y HOJA en la misma pieza, y el encargo abre esa Hoja desde CUATRO
 // lugares. *Una pieza que trae su propio botón obliga a cada acceso a montar
@@ -1298,3 +1293,22 @@ export {
   PastillaConociendolo,
   type PastillaConociendoloProps,
 } from './components/PastillaConociendolo'
+
+// NEXO ACOMPAÑA (S113-B · 2.1) — la presentación y el aviso que se adelanta.
+// 🔴 La presentación son TRES y es una TUPLA: la tercera —«puedo equivocarme;
+// para lo importante está tu vet»— NO es opcional. *Una presentación que puede
+// omitirla es una que alguien va a omitir el día que moleste.*
+// 🔴 El aviso NUNCA es alarma: no pasó nada malo, todavía no pasó nada — y el
+// costo de gritar no es el susto, es que la próxima alarma ya no se distinga.
+// Y sus dos formas son una UNIÓN: la fila exige su destino, la tarjeta exige
+// el acto. *Una prop obligatoria que en la mitad de los casos se ignora enseña
+// a pasar cualquier cosa con tal de que compile.*
+export {
+  PresentacionNexo,
+  type PresentacionNexoProps,
+  type TresBurbujas,
+} from './components/PresentacionNexo'
+export {
+  AvisoAnticipacion,
+  type AvisoAnticipacionProps,
+} from './components/AvisoAnticipacion'
