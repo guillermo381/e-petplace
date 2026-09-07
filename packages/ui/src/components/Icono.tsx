@@ -266,7 +266,7 @@ export type IconoNombre =
   //    EL OBJETO NO ES «un papel»: es DÓNDE VIVEN LOS PAPELES, y el plural
   //    es lo que lo distingue de `documento` (que es UNA cédula con
   //    retrato). Gate por ícono a 21px PENDIENTE (§2.9).
-  | 'documentos' | 'pasaporte' | 'papel'
+  | 'documentos' | 'pasaporte' | 'papel' | 'lupa'
   // ── S91-B · `correo` — NACIÓ COMO CANDIDATO B DE «Documentos» Y PERDIÓ
   //    SU GATE, y NO muere: el founder lo pasó a RESERVA DECLARADA.
   //    Su riesgo era que a 21px se lee «correo» antes que «documentos» —
@@ -1806,6 +1806,54 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
    * de ese número. *El día que alguien necesite bajar la masa, lo primero que
    * va a mirar es el rectángulo* — por eso su gate lo mide y sale rojo.
    */
+  /**
+   * 🔴 **LUPA — la entrada de búsqueda (S113-B · fase 3).**
+   *
+   * Nace porque **no existía**, y C lo midió: la entrada usaba `explorar`, que
+   * **es una BRÚJULA**. *Un glifo que significa otra cosa es peor que ninguno:
+   * el que no está deja a la persona leyendo la etiqueta; el que miente la
+   * manda al lugar equivocado con confianza.*
+   *
+   * ── §6b.2 · METÁFORAS OCUPADAS, y el censo cambió la GEOMETRÍA ───────
+   * **`info`, `checkEnCirculo` y `explorar` son los TRES un círculo de
+   * `r ≈ 8.4–8.6` centrado en `(12,12)`.** Ésa es la colisión real, y no es de
+   * concepto: es de forma. Un cuarto círculo del mismo tamaño y en el mismo
+   * centro **entra a esa familia** y a 21 px se pierde adentro.
+   *
+   * ── §6b.3 · LAS DOS VARIANTES, Y LA SEGUNDA CAYÓ POR NÚMERO ─────────
+   * · **V2 «del tamaño de la familia»** (`r = 8.4`, para ser coherente con sus
+   *   tres vecinos) — ✗ **no entra en banda con mango**: 57,8 (**+25 %**) con
+   *   un mango corto, 59,8 (+29 %) con el diagonal. *La coherencia con la
+   *   familia circular es imposible en cuanto le agregás el mango* — y el mango
+   *   es lo único que la distingue de sus tres vecinos. **El número dice lo
+   *   mismo que el ojo: no puede ser una más de esa familia.**
+   * · **✅ V1 «lente chica y descentrada»**: `r = 6.0` —**29 % más chica**— y
+   *   centrada en `(9.8, 9.8)` en vez de `(12,12)`. *Se sale de la familia por
+   *   tamaño Y por posición, no sólo por el mango.*
+   *
+   * ── §6b.1 · LOS NÚMEROS ─────────────────────────────────────────────
+   * Masa **44,8 (−4 %)** contra la vara de `vacuna` (46,4 · banda 39,4–53,4) ·
+   * **2 trazos** (§6b pide 2–4) · interior de la lente **8,8 px** a 21, muy
+   * holgado sobre el piso de 2,5.
+   *
+   * ── §6b.6 · ES GLIFO DE CONTROL ⇒ SIN HUELLA ────────────────────────
+   * **Declarado en el pedido, no descubierto en el gate.** *Buscar es un acto
+   * de la interfaz, no de la mascota* — y una huella adentro de una lente se
+   * leería como un animal atrapado en un aumento. (Ley 9, alcance S98: *«en un
+   * glifo de control no hay mascota, hay interfaz»*.)
+   *
+   * ⚠️ **GATE POR ÍCONO PENDIENTE** (§6b.5). Su riesgo declarado: **a 21 px,
+   * junto a `info` y `checkEnCirculo`, sigue siendo un círculo** — lo que lo
+   * salva es el mango, igual que al `papel` lo salva su marco. Por eso los tres
+   * van juntos en la hoja de contacto.
+   */
+  lupa: ({ tinta }) => (
+    <>
+      <Circle cx={9.8} cy={9.8} r={6} {...trazo(tinta)} />
+      <Path d="M14.04 14.04 19.04 19.04" {...trazo(tinta)} />
+    </>
+  ),
+
   papel: ({ tinta, huella }) => (
     <>
       <Path d="M8.5 3.2h9v12.5h-9Z" {...trazo(tinta)} />
@@ -2179,7 +2227,7 @@ export function Icono({
     // ── LOTE 3 (S58, D-361): capas por concepto — el founder poda/ajusta en gate ──
     hogar: comunidad, familia: comunidad, equipo: comunidad,
     explorar: comunidadAmplia,
-    cuenta: identidad, carnet: identidad, pasaporte: identidad, papel: identidad, seguros: identidad, telemedicina: identidad,
+    cuenta: identidad, carnet: identidad, pasaporte: identidad, papel: identidad, lupa: cuidado, seguros: identidad, telemedicina: identidad,
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
     // INFO comparte capa con `ayuda` PROVISIONALMENTE: los dos explican.
     // ⚠️ Si el gate de S79 firma la categoría «glifo de control», este

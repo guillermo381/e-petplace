@@ -288,6 +288,42 @@ console.log('\n── ⑫ EL GLIFO DE PAPEL (S113-B · fase 3 · B6) ──');
   }
 }
 
+console.log('\n── ⑬ EL GLIFO DE LUPA (S113-B · fase 3) ──');
+/* Nace porque NO EXISTÍA y la entrada de búsqueda usaba `explorar`, que es una
+   BRÚJULA. *Un glifo que significa otra cosa es peor que ninguno: el que no
+   está deja a la persona leyendo la etiqueta; el que miente la manda al lugar
+   equivocado con confianza.* */
+{
+  const L = glifo('lupa');
+  t('`lupa` tiene dibujante', L !== null);
+  if (L) {
+    const d = (L.largo / VARA.largo - 1) * 100;
+    t('masa en banda', Math.abs(L.largo / VARA.largo - 1) <= BANDA, ` · ${L.largo.toFixed(1)} (${d >= 0 ? '+' : ''}${d.toFixed(0)} %)`);
+    t(`≤ ${VARA.trazos} trazos`, L.trazos <= VARA.trazos, ` · ${L.trazos}`);
+    t('🔴 la lente deja aire a 21 px', L.interiorMin !== null && L.interiorMin >= 2.5, ` · ${L.interiorMin?.toFixed(2) ?? 'null'} px`);
+    /* 🔴 ES GLIFO DE CONTROL: *buscar es un acto de la interfaz, no de la
+       mascota* — y una huella adentro de una lente se leería como un animal
+       atrapado en un aumento (Ley 9, alcance S98). */
+    t('🔴 NO lleva huella: es glifo de control (§6b.6)', L.huella === false);
+
+    /* 🔴 **LO QUE LA SALVA DE LA FAMILIA CIRCULAR, Y ES LO QUE HAY QUE MEDIR.**
+       `info`, `checkEnCirculo` y `explorar` son los TRES un círculo de r≈8.5
+       centrado en (12,12). *Un cuarto círculo del mismo tamaño y en el mismo
+       centro entra a esa familia y a 21 px se pierde adentro.* Ésta se sale
+       **por tamaño Y por posición**, no sólo por el mango. */
+    const SRC_LUPA = SRC.match(/^  lupa: \(\{[\s\S]*?\n  \),/m)?.[0] ?? '';
+    const rLupa = Number(SRC_LUPA.match(/r=\{([\d.]+)\}/)?.[1] ?? 0);
+    const rFamilia = Number((SRC.match(/^  info: \(\{[\s\S]*?\n  \),/m)?.[0] ?? '').match(/r=\{([\d.]+)\}/)?.[1] ?? 0);
+    t('🔴 su lente es MÁS CHICA que la de la familia circular',
+      rLupa > 0 && rFamilia > 0 && rLupa < rFamilia * 0.85,
+      ` · ${rLupa} contra ${rFamilia} (${((1 - rLupa / rFamilia) * 100).toFixed(0)} % más chica)`);
+    t('🔴 …y NO está centrada en (12,12) como las tres',
+      !/cx=\{12\}\s*cy=\{12\}/.test(SRC_LUPA));
+    /* Y el mango: sin él es un círculo más. */
+    t('🔴 conserva su MANGO (sin él es un círculo más)', /<Path d="M[\d.]+ [\d.]+ [\d.]+ [\d.]+"/.test(SRC_LUPA));
+  }
+}
+
 console.log('\n── ④bis LEY 9 PARA LO PUNTIAGUDO · la punta sobrevive a 21 px ──');
 /* 🔴 **`interiorMin` mide lo REDONDO y no ve una estrella.** El modo de falla
    de una punta es el opuesto al de un círculo: no se cierra, **se la come su

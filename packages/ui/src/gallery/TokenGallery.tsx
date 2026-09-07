@@ -3499,6 +3499,35 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — EL GLIFO DE LUPA (fase 3) · qué decide: que a 21 px NO se pierda dentro de la familia circular — `info`, `checkEnCirculo` y `explorar` son los tres un círculo de r≈8.5 centrado en (12,12), y ésta tiene que leerse como OTRA cosa">
+          <Texto variante="apoyo">
+            🔴 Nace porque no existía: la entrada de búsqueda usaba `explorar`, que es una BRÚJULA.
+            Un glifo que significa otra cosa es peor que ninguno — el que no está deja a la persona
+            leyendo la etiqueta; el que miente la manda al lugar equivocado con confianza.
+          </Texto>
+          <Texto variante="apoyo">
+            El censo cambió la geometría, no el concepto: sus tres vecinos son el MISMO círculo. La
+            variante «del tamaño de la familia» (r=8.4, para ser coherente con ellos) NO ENTRA EN
+            BANDA con mango: 57,8 (+25 %) — y el mango es lo único que la distingue. Gana la lente
+            29 % más chica y descentrada: se sale de la familia por tamaño Y por posición.
+            Medido: masa 44,8 (−4 %) · 2 trazos · interior 8,8 px. Sin huella: buscar es un acto de
+            la interfaz, no de la mascota.
+          </Texto>
+          {[21, 44].map((tam) => (
+            <View key={tam} style={{ gap: spacing[2] }}>
+              <Texto variante="dato">{`a ${tam} px — la lupa, y después los tres círculos + la vara`}</Texto>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+                <Icono nombre="lupa" tamano={tam} />
+                <Icono nombre="info" tamano={tam} />
+                <Icono nombre="checkEnCirculo" tamano={tam} />
+                <Icono nombre="explorar" tamano={tam} />
+                <Icono nombre="ubicacion" tamano={tam} />
+                <Icono nombre="vacuna" tamano={tam} />
+              </View>
+            </View>
+          ))}
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — EL TURNO DOBLE DE `documento`, RESUELTO (fase 3, firma de la mesa) · qué decide: que a 21 px la CREDENCIAL (ficha de identidad) y la HOJA (historia clínica) no se confundan — antes las dos usaban el mismo dibujo">
           <Texto variante="apoyo">
             La mesa eligió una tercera salida, mejor que las dos que la nota daba: no hacía falta un
