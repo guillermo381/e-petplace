@@ -106,3 +106,43 @@ porque la edge corre con credencial de servicio.
 Dos salidas, ninguna elegida: que el rebote alcance (es hablado y llega rápido),
 o una RPC `estado_de_placa(token)` que devuelva sólo `libre | activada` **sin
 decir de quién**. La segunda cuesta diez líneas; la primera cuesta cero.
+
+---
+
+## ⑤ EL ESTRENO DE `crear_lote_placas` — bloqueado por credencial, no por trabajo
+
+**Medido:** `pasaporte_placa` tiene **0 filas**, `crear_lote_placas` **nunca
+corrió**. El gate `verify:placas-lote` da su rojo con ese número.
+
+🔴 **No lo corrí yo, y la razón es la ley y no la comodidad.** La única cuenta
+admin de la base es `guillo381@` (medido: 1 admin, del founder); la que tengo en
+el llavero es `guillo381+8@`, que **no es admin** (`is_admin` → `false`), y su
+clave no abre la otra.
+
+**Correrlo con `service_role` habría dado el mismo verde y no habría probado
+nada**: esa credencial saltea el gate de admin, que es justamente la parte sin
+estrenar. *Un gate se verifica por el camino de la pantalla, jamás por la
+defensa que uno supone* (L-167). **Un verde flojo acá es peor que el rojo
+honesto**, porque el rojo dice la verdad y el verde la esconde.
+
+### Los tres pasos, para que sea un minuto
+
+```
+cd ../e-petplace-admin && pnpm dev        # el portal, en local
+```
+
+1. entrar con la cuenta **`guillo381@`** (la admin)
+2. **Placas** → nombre del lote, cantidad (**20 alcanza para el estreno**),
+   proveedor
+3. **Crear** · después, «Descargar CSV» — es lo que va a la imprenta
+
+Y para dejar constancia de que fue por el camino real:
+
+```
+node scripts/verify-placas-lote.mjs      # tiene que pasar a verde
+```
+
+⚠️ **El gate no puede distinguir un lote hecho por el portal de uno hecho con
+`service_role`**: `pasaporte_placa` no guarda quién creó el lote. *Se declara en
+vez de fingir que se mide* — la constancia de que fue por la pantalla la deja
+quien lo hace, acá, con la fecha.
