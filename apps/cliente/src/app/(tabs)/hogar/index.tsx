@@ -1856,13 +1856,15 @@ export default function Hogar() {
           Lo que queda es **una entrada discreta que dice qué hace** y lleva
           allá.
 
-          🔴 **Sin glifo, y es una decisión.** El founder pidió una lupa y
-          **no existe en el registry** —medido: `explorar` es una BRÚJULA
-          (círculo + aguja), no una lupa—. *Un glifo que significa otra cosa es
-          peor que ninguno: enseña mal el vocabulario y después hay que
-          desenseñarlo.* **Pedida a B por §6b**; entra en una línea. */}
+          ⭐ **Y ya tiene su glifo.** Esta entrada nació sin uno: la lupa **no
+          existía en el registry** —medido: `explorar` es una BRÚJULA (círculo +
+          aguja)— y *un glifo que significa otra cosa es peor que ninguno:
+          enseña mal el vocabulario y después hay que desenseñarlo.* Se pidió a
+          B por §6b y llegó en `cb3e34c9`. **La entrada estuvo una tanda sin
+          glifo a propósito**, que es lo que la hizo pedible. */}
       <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[4] }}>
         <CeldaNavegacion
+          icono="lupa"
           titulo={t('busqueda.entrada')}
           registro="tinta"
           onPress={() => router.push('/nexo')}
