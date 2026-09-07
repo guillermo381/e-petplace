@@ -1,0 +1,40 @@
+{
+  "_": "LOS ONCE CAMPOS DEL PASAPORTE PÚBLICO · FIRMA DEL FOUNDER, 7-sep-2026.",
+  "_ley": "🔴 UN CAMPO NUEVO PIDE FIRMA NUEVA. Esta lista no crece por conveniencia de una pantalla: cada cosa que se agregue acá la ve CUALQUIERA que tenga el token en la mano, y un token puede estar en el suelo. Agregar un campo sin firma es ensanchar en silencio lo que una familia aceptó mostrar.",
+  "_como_se_agrega": "Se pide la firma, se agrega acá con la fecha, y recién entonces al motor. Al revés, el gate sale ROJO — que es lo correcto: el motor no decide qué se publica.",
+  "firmado_por": "founder",
+  "firmado_el": "2026-09-07",
+  "campos": [
+    "foto_path",
+    "nombre",
+    "especie",
+    "raza",
+    "sexo",
+    "edad",
+    "chip",
+    "contacto",
+    "alergias",
+    "medicacion",
+    "perdida"
+  ],
+  "_jamas": [
+    "🔴 LA LISTA NEGATIVA ES PARTE DE LA FIRMA, y vale tanto como la positiva:",
+    "apellido — el de la familia. El nombre de la mascota alcanza para devolverla.",
+    "direccion — quien encuentra un animal no necesita saber dónde vive.",
+    "otras_mascotas — un token de una revela a las demás. Cada placa habla de UNA.",
+    "prestadores — con quién se atiende es de la familia, no de quien la encuentra.",
+    "historia_clinica — el pasaporte dice lo que salva una vida en la calle, no el expediente."
+  ],
+  "_apagables": {
+    "_": "Los tres que la familia puede apagar desde `pasaporte_config`. Que estén firmados NO los vuelve obligatorios: firmados son los que PUEDEN mostrarse.",
+    "campos": ["contacto", "alergias", "medicacion", "chip"],
+    "nota": "salud = alergias + medicacion, un solo interruptor."
+  },
+  "_correspondencia": {
+    "_": "Cómo se dijeron en la firma y cómo se llaman en el objeto — se anota porque un nombre distinto es la forma más fácil de creer que falta un campo o que sobra:",
+    "foto": "foto_path",
+    "microchip": "chip",
+    "medicacion vigente": "medicacion",
+    "estado de perdida": "perdida"
+  }
+}

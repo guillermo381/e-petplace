@@ -7,7 +7,7 @@
 > **EN UNA LÍNEA, lo que de verdad espera tu firma:** el **proveedor y precio de
 > la placa** (§2), el **entitlement de NFC en iOS** (§3), el **aviso legal de
 > IA** (§4) y la **lectura de fichas de raza** al ritmo ya firmado (§5) —
-> más los **11 campos del pasaporte** (E-1), que su gate declara sin firmar.
+> (E-1, los 11 campos del pasaporte, quedó **FIRMADO el 7-sep**.)
 >
 > Cerrados desde el repaso anterior: las cinco mascotas de prueba (§1, medido
 > `0`) y la página pública en `text/plain` (C-⑤, medido `text/html`).
@@ -181,7 +181,30 @@ pista**. Nadie se frenó por ninguna de éstas.
 
 ## Pista E
 
-### E-1 · 🔴 La lista de campos del pasaporte no está firmada, y el gate está en rojo por eso
+### E-1 · ☠️ CERRADO — FIRMADO POR EL FOUNDER, 7-sep-2026
+
+**Los once quedan como están**: foto · nombre · especie · raza · sexo · edad ·
+microchip · contacto · alergias · medicación vigente · estado de perdida.
+**Nunca**: apellido, dirección, otras mascotas, prestadores, historia clínica.
+La familia puede apagar contacto, salud y chip.
+
+Verificado antes de estampar que los once firmados **fueran los once que la RPC
+devuelve** —once por once, con su correspondencia de nombres anotada— *porque
+una firma sobre una lista que no es la del objeto no firma nada.*
+
+`docs/loop/PASAPORTE-CAMPOS-FIRMADOS.json` · `verify:pasaporte-campos` pasó de
+«LÍNEA BASE — SIN FIRMA» a **«contra FIRMADA»**, con su rojo probado: quitando
+`chip` de la firma, el gate dice **«1 campo NUEVO sale en una página sin
+sesión»**.
+
+🔴 **Un campo nuevo pide firma nueva.** No es burocracia: *cada cosa que se
+agregue a esa lista la ve cualquiera que tenga el token en la mano, y un token
+puede estar en el suelo.* El orden es firma → archivo → motor; al revés el gate
+sale rojo, que es lo correcto — **el motor no decide qué se publica**.
+
+<details><summary>el problema original</summary>
+
+### La lista de campos del pasaporte no está firmada
 
 **Qué.** `leer_pasaporte` devuelve **11 campos a alguien sin sesión**: `alergias, chip,
 contacto, edad, especie, foto_path, medicacion, nombre, perdida, raza, sexo`.
@@ -208,6 +231,8 @@ con `mostrar_chip` naciendo en `false`. **Voto: (c)** — no pierde la función 
 quiera, y cambia el default hacia el lado que no se puede deshacer.
 
 ---
+
+</details>
 
 ### E-2 · 🔴 La foto del pasaporte pesa 19× la página y rompe el techo de 60 kB
 
