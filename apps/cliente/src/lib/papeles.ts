@@ -43,7 +43,16 @@ export interface Papel {
 /** EXHAUSTIVO POR CONSTRUCCIÓN: un tipo nuevo sin entrada = tsc rojo. */
 const PAPELES: Record<TipoDocumentoExpediente, Omit<Papel, 'tipo'>> = {
   carnet_vacunas: { claveVoz: 'CarnetVacunas', icono: 'carnet' },
-  historia_clinica: { claveVoz: 'HistoriaClinica', icono: 'documento' },
+  // ✅ RESUELTA LA TENSIÓN DEL TURNO DOBLE — firma de la mesa (7-sep-2026).
+  // La nota de abajo daba DOS salidas («o nace un cuarto dibujo (B), o la mesa
+  // firma que comparten glifo a propósito») y la mesa eligió una TERCERA, que
+  // es mejor que las dos: **no hacía falta un dibujo nuevo, hacía falta el que
+  // ya existía en el lugar correcto.** `papel` nació en la fase 3 para la
+  // bóveda, y una historia clínica ES una hoja — mientras que `documento` es
+  // una CREDENCIAL apaisada, con su círculo de retrato, que es exactamente lo
+  // que la ficha de identidad tiene y esto no.
+  // ⇒ `documento` deja de hacer turno doble: se queda SÓLO en `ficha_identidad`.
+  historia_clinica: { claveVoz: 'HistoriaClinica', icono: 'papel' },
   // ✅ EL PRÉSTAMO DE LA RECETA SE RETIRA (firma del founder, 7-ago-2026:
   // «GLIFO RECETA FIRMADO — el préstamo receta→'caso' se retira»).
   // *Nota de la fusión (A, conductora): C y B retiraron este préstamo por
@@ -71,12 +80,12 @@ const PAPELES: Record<TipoDocumentoExpediente, Omit<Papel, 'tipo'>> = {
   // cero — y escribir «resuelto» acá haría que el próximo lector no vuelva
   // a mirar:
   //   · ficha_identidad → 'documento': el objeto EXACTO del registry
-  //     («identificación», cédula con RETRATO — y la ficha lleva foto). Que
-  //     quede VECINA de historia_clinica con el mismo dibujo es Ley 12 en su
-  //     forma vecina: PROVISIONAL A PROPÓSITO, la alternativa era mentir el
-  //     objeto. Sigue esperando decisión, y son DOS salidas distintas: o
-  //     nace un cuarto dibujo (B), o la mesa firma que estas dos filas
-  //     comparten glifo a propósito.
+  //     («identificación», cédula con RETRATO — y la ficha lleva foto).
+  //     ✅ **CERRADA (7-sep-2026).** Ya NO es vecina de historia_clinica con el
+  //     mismo dibujo: aquélla se mudó a `papel`. `documento` queda con UN solo
+  //     turno acá y su significado se afila — es la credencial, y nada más.
+  //     ⚠️ Su gate por ícono (los dos, uno al lado del otro) vive en la
+  //     galería: lo que decide es que a 21 px NO se confundan.
   receta: { claveVoz: 'Receta', icono: 'receta' },
   ficha_identidad: { claveVoz: 'FichaIdentidad', icono: 'documento' },
 };
