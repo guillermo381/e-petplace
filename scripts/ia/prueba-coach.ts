@@ -289,7 +289,7 @@ console.log('\n== 8 · EL CUERPO QUE SALE ==')
   exigir('el system va CACHEADO (idéntico en cada turno de cada familia)',
     JSON.stringify(redaccion.system).includes('cache_control'), JSON.stringify(redaccion.system).slice(0, 120))
   const sis = String(JSON.stringify(redaccion.system))
-  for (const ley of ['NO DIAGNOSTIC', 'otra mascota o algo de la app', 'un menor', 'LO DECÍS', 'veterinario'])
+  for (const ley of ['NO DIAGNOSTIC', 'otra mascota o algo de la app', 'un menor', 'LO DICES', 'veterinario'])
     exigir(`  la ley dice «${ley}»`, sis.includes(ley))
   exigir('la memoria de la familia entra como bloque', sis.includes('truenos'))
 }
@@ -412,7 +412,7 @@ console.log('\n== 8quater · 🔴 EL EXPEDIENTE ENTERO ENTRA AL SYSTEM ==')
   exigir('  la ficha de raza va MARCADA como general, no como suya',
     sis.includes('general, NO es sobre él'), sis.slice(0, 60))
   exigir('  y la ley dice que hable de ESTE animal',
-    sis.includes('HABLÁS DE ESTE ANIMAL, NO DE SU RAZA'))
+    sis.includes('HABLAS DE ESTE ANIMAL, NO DE SU RAZA'))
   exigir('  y que orientar es el trabajo principal',
     sis.includes('TU TRABAJO PRINCIPAL ES ORIENTAR'))
   exigir('  y que el semáforo es la EXCEPCIÓN',
@@ -447,10 +447,42 @@ console.log('\n== 8quinquies · LA PRESENTACIÓN: cero modelo, y no promete lo q
   const { json } = await llamar({ mascotaId: 'm1', accion: 'presentar' })
   const b = json.burbujas as string[]
   const chips = json.chips as string[]
-  exigir('expediente vacío → NO promete peso ni vacunas', !/peso|vacuna/i.test(b[1]), b[1])
-  exigir('  ...ofrece lo único que puede: que le cuenten', /Anotar lo que me cuentes/.test(b[1]), b[1])
-  exigir('  ...y un solo chip, el que sí funciona', chips.length === 1 && /Contale/.test(chips[0]), chips)
+  // 🔴 La aserción vieja pedía que NO nombrara peso ni vacunas, y medía la ley
+  // vieja —callarse—. La ley nueva sí los nombra, **en condicional**, que es lo
+  // que separa una invitación de una promesa. Lo que se mide ahora es el MODO,
+  // no la ausencia de la palabra.
+  const lineas = b[1].split('\n').slice(1)
+  exigir('expediente vacío → las tres líneas son CONDICIONALES',
+    lineas.length === 3 && lineas.every((l) => /^· Si /.test(l)), lineas)
+  exigir('  🔴 ...y ninguna promete en indicativo',
+    !lineas.some((l) => /^· (Te aviso|Recordarte|Seguirle)/.test(l)), lineas)
+  exigir('  ...y cada una dice QUÉ FALTA para poder cumplirla',
+    lineas.every((l) => /cargas|me dices|agendas/.test(l)), lineas)
+  exigir('  ...tres chips igual, que invitan', chips.length === 3, chips)
+  exigir('  🔴 ...y ninguno en voseo', !chips.some((x) => /Contale|querés|tenés|fijate/i.test(x)), chips)
   ctxDevuelto = [CTX]
+}
+
+console.log('\n== 8quinquies-bis · 🔴 EL SYSTEM ESTÁ EN TUTEO, no sólo lo pide ==')
+{
+  textoPlano('ok')
+  await llamar({ mascotaId: 'm1', texto: 'contame' })
+  const sis = JSON.stringify(cuerpos[cuerpos.length - 1].system ?? '')
+  const VOSEO = /\b(sos|contestás|decís|ofrecés|hablás|devolvés|tenés|podés|sabés|completás|reservás|fijate|elegí)\b/gi
+  // 🔴 Se quitan las formas ENTRECOMILLADAS antes de medir. La regla del tuteo
+  // cita el voseo para prohibirlo (`"quieres" y no "querés"`), y un contador que
+  // no distingue una MENCIÓN de un USO marca la regla como si la violara.
+  // Filtrar por número de línea sería atarlo a la redacción de hoy: lo que
+  // define una mención acá son las comillas, así que se quitan ésas.
+  const sinCitas = sis.replace(/\\"[^"\\\\]{1,20}\\"/g, ' ').replace(/"[^"]{1,20}"/g, ' ')
+  const hits = sinCitas.match(VOSEO) ?? []
+  exigir('cero verbos en voseo fuera de las citas de la propia regla', hits.length === 0, hits)
+  exigir('  y la regla del tuteo está escrita', sis.includes('TUTEO, NO VOSEO'))
+  exigir('  con su porqué: el ejemplo más largo no puede contradecir la regla',
+    sis.includes('el ejemplo más largo que tendrías sería el contrario'))
+  exigir('la ley del expediente vacío está', sis.includes('TAMPOCO TE RINDES'))
+  exigir('  ...y dice que rendirse NO es una respuesta',
+    sis.includes('NO\\nes una respuesta') || sis.includes('NO es una respuesta'), sis.slice(0, 40))
 }
 
 console.log('\n== 8sexies · EL «CONTANOS»: clasifica y PROPONE, nunca guarda ==')
