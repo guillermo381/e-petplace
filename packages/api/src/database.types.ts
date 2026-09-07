@@ -1287,6 +1287,47 @@ export type Database = {
           },
         ]
       }
+      avisos_coach: {
+        Row: {
+          clave: string | null
+          creado_en: string
+          detalle: Json
+          fecha: string
+          id: string
+          leido_en: string | null
+          mascota_id: string
+          tipo: string
+        }
+        Insert: {
+          clave?: string | null
+          creado_en?: string
+          detalle?: Json
+          fecha?: string
+          id?: string
+          leido_en?: string | null
+          mascota_id: string
+          tipo: string
+        }
+        Update: {
+          clave?: string | null
+          creado_en?: string
+          detalle?: Json
+          fecha?: string
+          id?: string
+          leido_en?: string | null
+          mascota_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avisos_coach_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       beta_users: {
         Row: {
           country_code: string
@@ -2950,6 +2991,36 @@ export type Database = {
           },
         ]
       }
+      cat_predisposiciones: {
+        Row: {
+          activo: boolean
+          chequeo_sugerido: string
+          codigo: string
+          descripcion_familia: string
+          etapas: string[]
+          nombre: string
+          oficio: string
+        }
+        Insert: {
+          activo?: boolean
+          chequeo_sugerido: string
+          codigo: string
+          descripcion_familia: string
+          etapas: string[]
+          nombre: string
+          oficio?: string
+        }
+        Update: {
+          activo?: boolean
+          chequeo_sugerido?: string
+          codigo?: string
+          descripcion_familia?: string
+          etapas?: string[]
+          nombre?: string
+          oficio?: string
+        }
+        Relationships: []
+      }
       cat_productos_oficio: {
         Row: {
           activo: boolean
@@ -2995,28 +3066,34 @@ export type Database = {
       cat_razas: {
         Row: {
           activo: boolean
+          creado_en_s113: boolean
           created_at: string
           especie: string
           nombre: string
-          ruta_imagen: string
+          nombre_norm: string | null
+          ruta_imagen: string | null
           slug: string
           updated_at: string
         }
         Insert: {
           activo?: boolean
+          creado_en_s113?: boolean
           created_at?: string
           especie: string
           nombre: string
-          ruta_imagen: string
+          nombre_norm?: string | null
+          ruta_imagen?: string | null
           slug: string
           updated_at?: string
         }
         Update: {
           activo?: boolean
+          creado_en_s113?: boolean
           created_at?: string
           especie?: string
           nombre?: string
-          ruta_imagen?: string
+          nombre_norm?: string | null
+          ruta_imagen?: string | null
           slug?: string
           updated_at?: string
         }
@@ -3985,6 +4062,85 @@ export type Database = {
             columns: ["familia_id_placeholder"]
             isOneToOne: true
             referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_conversacion: {
+        Row: {
+          creado_en: string
+          id: string
+          mascota_id: string
+          rol: string
+          texto: string
+          tokens: number | null
+          turno: number
+        }
+        Insert: {
+          creado_en?: string
+          id?: string
+          mascota_id: string
+          rol: string
+          texto: string
+          tokens?: number | null
+          turno: number
+        }
+        Update: {
+          creado_en?: string
+          id?: string
+          mascota_id?: string
+          rol?: string
+          texto?: string
+          tokens?: number | null
+          turno?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_conversacion_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_memoria: {
+        Row: {
+          activo: boolean
+          creado_en: string
+          creado_por: string | null
+          editado_en: string | null
+          fuente: string
+          hecho: string
+          id: string
+          mascota_id: string
+        }
+        Insert: {
+          activo?: boolean
+          creado_en?: string
+          creado_por?: string | null
+          editado_en?: string | null
+          fuente?: string
+          hecho: string
+          id?: string
+          mascota_id: string
+        }
+        Update: {
+          activo?: boolean
+          creado_en?: string
+          creado_por?: string | null
+          editado_en?: string | null
+          fuente?: string
+          hecho?: string
+          id?: string
+          mascota_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_memoria_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
             referencedColumns: ["id"]
           },
         ]
@@ -10992,6 +11148,7 @@ export type Database = {
       }
       familia: {
         Row: {
+          avisos_nexo_desde: string | null
           country_code: string
           created_at: string
           created_by_sistema: string | null
@@ -11004,6 +11161,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avisos_nexo_desde?: string | null
           country_code?: string
           created_at?: string
           created_by_sistema?: string | null
@@ -11016,6 +11174,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avisos_nexo_desde?: string | null
           country_code?: string
           created_at?: string
           created_by_sistema?: string | null
@@ -12232,9 +12391,11 @@ export type Database = {
           created_at: string
           edge: string
           id: string
+          imagen_chars: number | null
           latencia_ms: number | null
           modelo: string
           pieza: string
+          prompt_chars: number | null
           resultado: string
           tokens_cache_escritura: number | null
           tokens_cache_lectura: number | null
@@ -12246,9 +12407,11 @@ export type Database = {
           created_at?: string
           edge: string
           id?: string
+          imagen_chars?: number | null
           latencia_ms?: number | null
           modelo: string
           pieza: string
+          prompt_chars?: number | null
           resultado: string
           tokens_cache_escritura?: number | null
           tokens_cache_lectura?: number | null
@@ -12260,9 +12423,11 @@ export type Database = {
           created_at?: string
           edge?: string
           id?: string
+          imagen_chars?: number | null
           latencia_ms?: number | null
           modelo?: string
           pieza?: string
+          prompt_chars?: number | null
           resultado?: string
           tokens_cache_escritura?: number | null
           tokens_cache_lectura?: number | null
@@ -12465,6 +12630,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      invitacion_acceso: {
+        Row: {
+          minuto: string
+          n: number
+          token_hash: string
+        }
+        Insert: {
+          minuto: string
+          n?: number
+          token_hash: string
+        }
+        Update: {
+          minuto?: string
+          n?: number
+          token_hash?: string
+        }
+        Relationships: []
       }
       invitacion_correo_pendiente: {
         Row: {
@@ -13470,6 +13653,7 @@ export type Database = {
       mascotas: {
         Row: {
           country_code: string
+          creado_por_sistema: string | null
           created_at: string
           criadero_id: string | null
           especie: string
@@ -13505,6 +13689,7 @@ export type Database = {
         }
         Insert: {
           country_code?: string
+          creado_por_sistema?: string | null
           created_at?: string
           criadero_id?: string | null
           especie?: string
@@ -13540,6 +13725,7 @@ export type Database = {
         }
         Update: {
           country_code?: string
+          creado_por_sistema?: string | null
           created_at?: string
           criadero_id?: string | null
           especie?: string
@@ -14570,6 +14756,183 @@ export type Database = {
             columns: ["suscripcion_servicio_id"]
             isOneToOne: false
             referencedRelation: "suscripciones_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte: {
+        Row: {
+          creado_en: string
+          emitido_por: string | null
+          id: string
+          mascota_id: string
+          revocado_en: string | null
+          token: string
+          ultima_vista_en: string | null
+          vistas: number
+        }
+        Insert: {
+          creado_en?: string
+          emitido_por?: string | null
+          id?: string
+          mascota_id: string
+          revocado_en?: string | null
+          token: string
+          ultima_vista_en?: string | null
+          vistas?: number
+        }
+        Update: {
+          creado_en?: string
+          emitido_por?: string | null
+          id?: string
+          mascota_id?: string
+          revocado_en?: string | null
+          token?: string
+          ultima_vista_en?: string | null
+          vistas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte_acceso: {
+        Row: {
+          minuto: string
+          n: number
+          pasaporte_id: string
+        }
+        Insert: {
+          minuto: string
+          n?: number
+          pasaporte_id: string
+        }
+        Update: {
+          minuto?: string
+          n?: number
+          pasaporte_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_acceso_pasaporte_id_fkey"
+            columns: ["pasaporte_id"]
+            isOneToOne: false
+            referencedRelation: "pasaporte"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte_config: {
+        Row: {
+          contacto_mensaje: string | null
+          contacto_nombre: string | null
+          contacto_telefono: string | null
+          mascota_id: string
+          mostrar_chip: boolean
+          mostrar_contacto: boolean
+          mostrar_salud: boolean
+          qr_en_papeles: boolean
+          updated_at: string
+        }
+        Insert: {
+          contacto_mensaje?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          mascota_id: string
+          mostrar_chip?: boolean
+          mostrar_contacto?: boolean
+          mostrar_salud?: boolean
+          qr_en_papeles?: boolean
+          updated_at?: string
+        }
+        Update: {
+          contacto_mensaje?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          mascota_id?: string
+          mostrar_chip?: boolean
+          mostrar_contacto?: boolean
+          mostrar_salud?: boolean
+          qr_en_papeles?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_config_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: true
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pasaporte_lote: {
+        Row: {
+          cantidad: number
+          creado_en: string
+          creado_por: string | null
+          id: string
+          nombre: string
+          proveedor: string | null
+        }
+        Insert: {
+          cantidad: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          nombre: string
+          proveedor?: string | null
+        }
+        Update: {
+          cantidad?: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          nombre?: string
+          proveedor?: string | null
+        }
+        Relationships: []
+      }
+      pasaporte_placa: {
+        Row: {
+          activada_en: string | null
+          lote_id: string
+          mascota_id: string | null
+          serie: number
+          token: string
+        }
+        Insert: {
+          activada_en?: string | null
+          lote_id: string
+          mascota_id?: string | null
+          serie: number
+          token: string
+        }
+        Update: {
+          activada_en?: string | null
+          lote_id?: string
+          mascota_id?: string | null
+          serie?: number
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pasaporte_placa_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "pasaporte_lote"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pasaporte_placa_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
             referencedColumns: ["id"]
           },
         ]
@@ -17582,6 +17945,50 @@ export type Database = {
           },
         ]
       }
+      propuestas_memoria: {
+        Row: {
+          clase: string | null
+          creada_en: string
+          estado: string
+          hecho: string
+          id: string
+          mascota_id: string
+          resuelta_en: string | null
+          resuelta_por: string | null
+          turno_id: string | null
+        }
+        Insert: {
+          clase?: string | null
+          creada_en?: string
+          estado?: string
+          hecho: string
+          id?: string
+          mascota_id: string
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+          turno_id?: string | null
+        }
+        Update: {
+          clase?: string | null
+          creada_en?: string
+          estado?: string
+          hecho?: string
+          id?: string
+          mascota_id?: string
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+          turno_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "propuestas_memoria_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       puntos_usuario: {
         Row: {
           created_at: string
@@ -17682,6 +18089,162 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_daas_eligible_users"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      raza_predisposicion: {
+        Row: {
+          creado_en: string
+          fuente: string
+          predisposicion_codigo: string
+          raza_codigo: string
+        }
+        Insert: {
+          creado_en?: string
+          fuente: string
+          predisposicion_codigo: string
+          raza_codigo: string
+        }
+        Update: {
+          creado_en?: string
+          fuente?: string
+          predisposicion_codigo?: string
+          raza_codigo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raza_predisposicion_predisposicion_codigo_fkey"
+            columns: ["predisposicion_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_predisposiciones"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      raza_sin_casar: {
+        Row: {
+          especie: string
+          primera_vez: string
+          texto: string
+          ultima_vez: string
+          veces: number
+        }
+        Insert: {
+          especie: string
+          primera_vez?: string
+          texto: string
+          ultima_vez?: string
+          veces?: number
+        }
+        Update: {
+          especie?: string
+          primera_vez?: string
+          texto?: string
+          ultima_vez?: string
+          veces?: number
+        }
+        Relationships: []
+      }
+      raza_sinonimo: {
+        Row: {
+          created_at: string
+          especie: string
+          nota: string | null
+          sinonimo: string
+          sinonimo_norm: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          especie: string
+          nota?: string | null
+          sinonimo: string
+          sinonimo_norm?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          especie?: string
+          nota?: string | null
+          sinonimo?: string
+          sinonimo_norm?: string | null
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raza_sinonimo_especie_slug_fkey"
+            columns: ["especie", "slug"]
+            isOneToOne: false
+            referencedRelation: "cat_razas"
+            referencedColumns: ["especie", "slug"]
+          },
+        ]
+      }
+      razas_contenido: {
+        Row: {
+          activo: boolean
+          conocida: boolean
+          created_at: string
+          cuidados_por_etapa: Json
+          es_de_especie: boolean
+          especie: string
+          esperanza_vida: string | null
+          generado_el: string
+          modelo: string
+          origen: string | null
+          predisposiciones: string[]
+          raza_codigo: string
+          revisado_en: string | null
+          revisado_por: string | null
+          talla_adulta: string | null
+          temperamento: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          conocida: boolean
+          created_at?: string
+          cuidados_por_etapa?: Json
+          es_de_especie?: boolean
+          especie: string
+          esperanza_vida?: string | null
+          generado_el: string
+          modelo: string
+          origen?: string | null
+          predisposiciones?: string[]
+          raza_codigo: string
+          revisado_en?: string | null
+          revisado_por?: string | null
+          talla_adulta?: string | null
+          temperamento?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          conocida?: boolean
+          created_at?: string
+          cuidados_por_etapa?: Json
+          es_de_especie?: boolean
+          especie?: string
+          esperanza_vida?: string | null
+          generado_el?: string
+          modelo?: string
+          origen?: string | null
+          predisposiciones?: string[]
+          raza_codigo?: string
+          revisado_en?: string | null
+          revisado_por?: string | null
+          talla_adulta?: string | null
+          temperamento?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "razas_contenido_especie_raza_codigo_fkey"
+            columns: ["especie", "raza_codigo"]
+            isOneToOne: true
+            referencedRelation: "cat_razas"
+            referencedColumns: ["especie", "slug"]
           },
         ]
       }
@@ -21777,8 +22340,10 @@ export type Database = {
           latencia_peor_ms: number | null
           latencia_promedio_ms: number | null
           llamadas: number | null
+          llamadas_con_tamano: number | null
           modelo: string | null
           pieza: string | null
+          prompt_chars_promedio: number | null
           tokens_cache_escritura: number | null
           tokens_cache_lectura: number | null
           tokens_entrada: number | null
@@ -22492,6 +23057,10 @@ export type Database = {
         }
         Returns: string
       }
+      _coach_puerta: {
+        Args: { p_mascota_id: string; p_user_id?: string }
+        Returns: string
+      }
       _cobertura_vacunal: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -22503,6 +23072,10 @@ export type Database = {
       }
       _columnas_solicitud_clasificadas: { Args: never; Returns: Json }
       _concepto_de_pago: { Args: { p_sujeto: string }; Returns: string }
+      _contexto_coach_base: {
+        Args: { p_mascota_id: string; p_user_id?: string }
+        Returns: Json
+      }
       _corte_matricula: { Args: never; Returns: string }
       _crear_evento_padre_auto: {
         Args: {
@@ -22939,6 +23512,14 @@ export type Database = {
         Returns: Json
       }
       aceptar_vinculo_repartidor: { Args: never; Returns: Json }
+      activar_avisos_nexo: {
+        Args: { p_activar?: boolean; p_familia_id: string }
+        Returns: Json
+      }
+      activar_placa: {
+        Args: { p_mascota_id: string; p_token: string }
+        Returns: Json
+      }
       activar_prestador: {
         Args: { p_motivo?: string; p_prestador_id: string; p_veredicto: string }
         Returns: Json
@@ -23047,6 +23628,10 @@ export type Database = {
         }
         Returns: Json
       }
+      agregar_memoria_coach: {
+        Args: { p_hecho: string; p_mascota_id: string }
+        Returns: Json
+      }
       agregar_nota_atencion: {
         Args: {
           p_atencion_id: string
@@ -23150,9 +23735,15 @@ export type Database = {
       barrer_adopcion_diario: { Args: never; Returns: Json }
       barrer_solicitudes_expiradas: { Args: never; Returns: Json }
       borrar_foto_adoptable: { Args: { p_foto_id: string }; Returns: Json }
+      borrar_hilo_coach: { Args: { p_mascota_id: string }; Returns: Json }
+      borrar_memoria_coach: { Args: { p_id: string }; Returns: Json }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
       buscar_cliente_por_telefono: {
         Args: { p_country_code?: string; p_telefono: string }
+        Returns: Json
+      }
+      buscar_en_mi_familia: {
+        Args: { p_limite?: number; p_q: string }
         Returns: Json
       }
       buscar_refugios: {
@@ -23304,6 +23895,18 @@ export type Database = {
         }
         Returns: Json
       }
+      configurar_pasaporte: {
+        Args: {
+          p_contacto_mensaje?: string
+          p_contacto_nombre?: string
+          p_contacto_telefono?: string
+          p_mascota_id: string
+          p_mostrar_chip: boolean
+          p_mostrar_contacto: boolean
+          p_mostrar_salud: boolean
+        }
+        Returns: Json
+      }
       configurar_recurrencia: {
         Args: {
           p_cuenta_comercial_id: string
@@ -23374,6 +23977,7 @@ export type Database = {
         Args: { p_programa_contratado_id: string }
         Returns: Json
       }
+      confirmar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       congelar_desglose_mensualidad_guarderia: {
         Args: { p_periodo: string; p_suscripcion_id: string }
         Returns: Json
@@ -23574,6 +24178,10 @@ export type Database = {
         Args: { p_compra_id: string; p_metodo?: string }
         Returns: Json
       }
+      crear_lote_placas: {
+        Args: { p_cantidad: number; p_nombre: string; p_proveedor?: string }
+        Returns: Json
+      }
       crear_mascota_walkin: {
         Args: {
           p_country_code?: string
@@ -23696,6 +24304,16 @@ export type Database = {
         }[]
       }
       debug_session: { Args: never; Returns: Json }
+      declarar_alergia_familia: {
+        Args: {
+          p_alergeno: string
+          p_desde?: string
+          p_mascota_id: string
+          p_reaccion?: string
+          p_severidad: string
+        }
+        Returns: Json
+      }
       declarar_composicion_acuario: {
         Args: {
           p_cantidad: number
@@ -23707,6 +24325,15 @@ export type Database = {
       }
       declarar_composicion_estado: {
         Args: { p_estado?: string; p_mercado?: string; p_producto_id: string }
+        Returns: Json
+      }
+      declarar_condicion_familia: {
+        Args: {
+          p_condicion: string
+          p_descripcion?: string
+          p_desde?: string
+          p_mascota_id: string
+        }
         Returns: Json
       }
       declarar_dia_cerrado: {
@@ -23856,6 +24483,10 @@ export type Database = {
         Returns: Json
       }
       deuna_nueva_referencia: { Args: never; Returns: string }
+      editar_memoria_coach: {
+        Args: { p_hecho: string; p_id: string }
+        Returns: Json
+      }
       eje_de_tipo_servicio: {
         Args: { p_tipo_servicio: string }
         Returns: string
@@ -23886,6 +24517,7 @@ export type Database = {
         Args: { p_periodo: string; p_sujeto: string; p_sujeto_id: string }
         Returns: Json
       }
+      emitir_pasaporte: { Args: { p_mascota_id: string }; Returns: Json }
       emitir_token_documento: {
         Args: { p_mascota_id: string; p_ref?: string; p_tipo?: string }
         Returns: Json
@@ -24008,6 +24640,7 @@ export type Database = {
         }
         Returns: Json
       }
+      generar_avisos_coach: { Args: never; Returns: number }
       generar_eventos_diferidos: {
         Args: { p_fecha_corte?: string }
         Returns: {
@@ -24174,8 +24807,26 @@ export type Database = {
         }
         Returns: Json
       }
+      guardar_hecho_clasificado: {
+        Args: {
+          p_campos?: Json
+          p_clase: string
+          p_mascota_id: string
+          p_texto: string
+        }
+        Returns: Json
+      }
       guardar_medio_pago_preferido: {
         Args: { p_medio?: string; p_tarjeta_id?: string }
+        Returns: Json
+      }
+      guardar_turno_coach: {
+        Args: {
+          p_mascota_id: string
+          p_rol: string
+          p_texto: string
+          p_tokens?: number
+        }
         Returns: Json
       }
       guarderia_recurrente_vivo: { Args: never; Returns: boolean }
@@ -24232,6 +24883,11 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       leer_borrador_nota: { Args: { p_cita_id: string }; Returns: Json }
+      leer_hilo_coach: {
+        Args: { p_limite?: number; p_mascota_id: string }
+        Returns: Json
+      }
+      leer_pasaporte: { Args: { p_token: string }; Returns: Json }
       leer_sombra_notificaciones: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: {
@@ -24256,6 +24912,12 @@ export type Database = {
           p_objetos?: string
           p_observaciones?: string
         }
+        Returns: Json
+      }
+      listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
+      listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
+      listar_propuestas_memoria: {
+        Args: { p_mascota_id: string }
         Returns: Json
       }
       log_admin_action: {
@@ -24291,6 +24953,7 @@ export type Database = {
         }
         Returns: Json
       }
+      marcar_aviso_coach_leido: { Args: { p_id: string }; Returns: Json }
       marcar_aviso_leido: { Args: { p_aviso_id: string }; Returns: Json }
       marcar_en_camino_a_destino: {
         Args: { p_envio_id: string }
@@ -24330,6 +24993,10 @@ export type Database = {
         Returns: Json
       }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
+      marcar_perdida: {
+        Args: { p_mascota_id: string; p_perdida: boolean }
+        Returns: Json
+      }
       marcar_retorno_guarderia: {
         Args: { p_estadias: string[]; p_ocurrido_en: string }
         Returns: Json
@@ -24350,6 +25017,7 @@ export type Database = {
           pais_emisor: string
         }[]
       }
+      mirar_invitacion: { Args: { p_token: string }; Returns: Json }
       mis_vinculos_repartidor_pendientes: { Args: never; Returns: Json }
       mover_estado_pedido: {
         Args: {
@@ -24438,6 +25106,9 @@ export type Database = {
           urgencia_tope_monto: number
         }[]
       }
+      obtener_avisos_coach:
+        | { Args: never; Returns: Json }
+        | { Args: { p_mascota_id: string; p_user_id?: string }; Returns: Json }
       obtener_bitacora_de_estadia: {
         Args: { p_estadia_id: string }
         Returns: {
@@ -24531,6 +25202,10 @@ export type Database = {
         }[]
       }
       obtener_contexto_arranque: { Args: never; Returns: Json }
+      obtener_contexto_coach: {
+        Args: { p_mascota_id: string; p_user_id?: string }
+        Returns: Json
+      }
       obtener_datos_negocio: {
         Args: { p_hasta?: string; p_prestador_id: string }
         Returns: Json
@@ -25306,6 +25981,10 @@ export type Database = {
           tipo: string
         }[]
       }
+      obtener_sugerencia_conociendolo: {
+        Args: { p_mascota_id: string }
+        Returns: Json
+      }
       obtener_tramo_vivo_de_mi_mascota: {
         Args: { p_mascota_id: string }
         Returns: Json
@@ -25423,6 +26102,15 @@ export type Database = {
         Args: { p_cuentas: string[]; p_fecha_programada?: string }
         Returns: Json
       }
+      proponer_memoria_coach: {
+        Args: {
+          p_clase?: string
+          p_hecho: string
+          p_mascota_id: string
+          p_turno_id?: string
+        }
+        Returns: Json
+      }
       proponer_producto_canonico: {
         Args: { p_producto: Json; p_variante: Json }
         Returns: Json
@@ -25489,6 +26177,7 @@ export type Database = {
       }
       puede_reversar_deuna: { Args: { p_intento_id: string }; Returns: Json }
       puede_reversar_nuvei: { Args: { p_intento_id: string }; Returns: Json }
+      purgar_conversacion_coach: { Args: never; Returns: number }
       purgar_documentos_vencidos: {
         Args: never
         Returns: {
@@ -25539,6 +26228,7 @@ export type Database = {
         Args: { p_motivo?: string; p_presupuesto_id: string }
         Returns: undefined
       }
+      rechazar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       reclamar_compra_mostrador: {
         Args: { p_codigo: string; p_mascota_id: string }
         Returns: Json
@@ -25679,6 +26369,10 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_fin_de_vida: {
+        Args: { p_fecha: string; p_mascota_id: string; p_palabras?: string }
+        Returns: Json
+      }
       registrar_hecho_de_sala: {
         Args: {
           p_crudo: Json
@@ -25706,6 +26400,18 @@ export type Database = {
         Returns: boolean
       }
       registrar_llegada: { Args: { p_cita_id: string }; Returns: string }
+      registrar_medicacion_administrada: {
+        Args: {
+          p_dosis: string
+          p_fecha?: string
+          p_mascota_id: string
+          p_medicamento: string
+          p_notas?: string
+          p_principio_activo?: string
+          p_via?: string
+        }
+        Returns: Json
+      }
       registrar_nota_adiestramiento: {
         Args: {
           p_adiestramiento_id: string
@@ -25721,6 +26427,10 @@ export type Database = {
           p_nota?: string
           p_objetivo_codigo: string
         }
+        Returns: Json
+      }
+      registrar_observacion_comportamiento: {
+        Args: { p_fecha?: string; p_mascota_id: string; p_texto: string }
         Returns: Json
       }
       registrar_peso_mascota: {
@@ -25948,6 +26658,10 @@ export type Database = {
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
       }
+      resolver_ficha_de_raza: {
+        Args: { p_especie: string; p_raza_declarada: string }
+        Returns: Json
+      }
       responder_socializacion_paseo: {
         Args: { p_mascota_id: string; p_ok: boolean }
         Returns: Json
@@ -25983,6 +26697,7 @@ export type Database = {
         Returns: Json
       }
       revocar_invitacion_familia: { Args: { p_id: string }; Returns: undefined }
+      revocar_pasaporte: { Args: { p_mascota_id: string }; Returns: Json }
       revocar_rol_refugio: {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json

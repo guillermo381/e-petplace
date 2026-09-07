@@ -46,6 +46,21 @@ export type ResultadoUso =
  * casa quedaría diluido por llamadas que nunca respondieron.
  */
 export interface Uso {
+  /** Caracteres del prompt (sistema + mensajes) y del base64 de las imágenes.
+   *
+   *  🔴 **SIRVEN PARA VER CRECER UN PROMPT EN EL TIEMPO, Y PARA NADA MÁS.** No
+   *  reparten el costo de una llamada entre texto e imagen: **los tokens de una
+   *  imagen se calculan por sus PÍXELES** (del orden de 1.500 fijos para las
+   *  fotos de esta app), así que su base64 no dice cuánto pesó. *Dividir
+   *  caracteres de texto por caracteres de base64 da un número, y un número que
+   *  sale de comparar dos magnitudes distintas se lee igual de firme que uno
+   *  correcto.*
+   *
+   *  El instrumento para el reparto es `count_tokens`, y cuesta una llamada.
+   *  Con él D midió lo que estas columnas no podían decir: 3.175 tokens del
+   *  prompt nuevo contra 1.718 del viejo. */
+  prompt_chars: number | null
+  imagen_chars: number | null
   tokens_entrada: number | null
   tokens_salida: number | null
   tokens_cache_lectura: number | null
@@ -58,6 +73,8 @@ export function usoDesdeRespuesta(usage: unknown, latenciaMs: number): Uso {
   const u = (usage ?? {}) as Record<string, unknown>
   const num = (v: unknown): number | null => (typeof v === 'number' ? v : null)
   return {
+    prompt_chars: null,
+    imagen_chars: null,
     tokens_entrada: num(u.input_tokens),
     tokens_salida: num(u.output_tokens),
     tokens_cache_lectura: num(u.cache_read_input_tokens),
@@ -69,6 +86,8 @@ export function usoDesdeRespuesta(usage: unknown, latenciaMs: number): Uso {
 /** Uso de una llamada que no llegó a respuesta: sólo se sabe cuánto tardó. */
 export function usoSinRespuesta(latenciaMs: number): Uso {
   return {
+    prompt_chars: null,
+    imagen_chars: null,
     tokens_entrada: null,
     tokens_salida: null,
     tokens_cache_lectura: null,
@@ -110,6 +129,8 @@ export async function registrarUso(
       tokens_cache_lectura: uso.tokens_cache_lectura,
       tokens_cache_escritura: uso.tokens_cache_escritura,
       latencia_ms: uso.latencia_ms,
+      prompt_chars: uso.prompt_chars,
+      imagen_chars: uso.imagen_chars,
       costo_estimado_usd: costoEstimadoUsd(modelo, uso),
     })
     if (error) {

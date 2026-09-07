@@ -25,6 +25,9 @@ export type CodigoErrorSalud =
   | 'orden_fechas_invalido'
   | 'peso_invalido'
   | 'metodo_invalido'
+  | 'medicamento_requerido'
+  | 'dosis_requerida'
+  | 'via_invalida'
   | 'error_lectura'
   | 'desconocido';
 
@@ -42,6 +45,9 @@ function codigoSalud(mensaje: string): CodigoErrorSalud {
   if (mensaje.startsWith('orden_fechas_invalido')) return 'orden_fechas_invalido';
   if (mensaje.startsWith('peso_invalido')) return 'peso_invalido';
   if (mensaje.startsWith('metodo_invalido')) return 'metodo_invalido';
+  if (mensaje.startsWith('medicamento_requerido')) return 'medicamento_requerido';
+  if (mensaje.startsWith('dosis_requerida')) return 'dosis_requerida';
+  if (mensaje.startsWith('via_invalida')) return 'via_invalida';
   return 'desconocido';
 }
 
@@ -98,6 +104,73 @@ export async function registrarDesparasitacion(
     return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
   }
   return { ok: true, data: { id: o.id, mascota_id: o.mascota_id } };
+}
+
+/**
+ * Las vías del CHECK `evento_medicacion_administrada.via_administracion`,
+ * copiadas de la tabla y no inventadas.
+ *
+ * ⚠️ **No es `ViaAdministracion` de `vacunas.ts`, y no se reusa ni se
+ * ensancha.** Aquél tiene CUATRO valores (los de una vacuna: subcutánea,
+ * intramuscular, intranasal, oral) y éste NUEVE. *Dos vocabularios distintos
+ * que se llaman igual no son el mismo vocabulario* — unificarlos dejaría
+ * ofrecer «oftálmica» en una vacuna, que su propio CHECK rechaza. El nombre
+ * dice de qué es, justamente para que nadie los funda.
+ */
+export type ViaMedicacion =
+  | 'oral' | 'subcutanea' | 'intramuscular' | 'intravenosa'
+  | 'intranasal' | 'topica' | 'oftalmica' | 'auricular' | 'otra';
+
+export const VIAS_MEDICACION: readonly ViaMedicacion[] = [
+  'oral', 'subcutanea', 'intramuscular', 'intravenosa',
+  'intranasal', 'topica', 'oftalmica', 'auricular', 'otra',
+];
+
+/**
+ * Anota una DOSIS que la familia le dio a la mascota (S113-A · lote 2).
+ *
+ * La tabla `evento_medicacion_administrada` existía desde S66 **con cero
+ * filas y su trigger listo**: escritor preparado, puerta ausente — la clase
+ * `L-318`. Hasta hoy la medicación sólo podía entrar por el veterinario, así
+ * que el expediente mostraba lo prescrito sin lo que de verdad pasó.
+ *
+ * ⚠️ **No cambia `medicacion_actual` del perfil, y es a propósito.** Ese campo
+ * dice qué está tomando la mascota, y lo escribe la PRESCRIPCIÓN. Una dosis es
+ * un hecho puntual: sumarla ahí dejaría a un perro «tomando antibiótico» para
+ * siempre por una sola pastilla — y ése es justo el dato que lee el pasaporte
+ * en una urgencia. *Administrar no es prescribir.*
+ *
+ * `fecha` omitida ⇒ ahora. Una fecha futura rebota: una dosis es un hecho
+ * pasado. `via` por defecto `'oral'`, que es la que la familia usa en casa.
+ */
+export async function registrarMedicacionAdministrada(
+  mascotaId: string,
+  datos: {
+    medicamento: string;
+    dosis: string;
+    via?: ViaMedicacion;
+    /** ISO. Omitida ⇒ ahora. */
+    fecha?: string;
+    principio_activo?: string;
+    notas?: string;
+  },
+): Promise<ResultadoWrapper<{ id: string; evento_id: string; mascota_id: string }, CodigoErrorSalud>> {
+  const { data, error } = await getClient().rpc('registrar_medicacion_administrada', {
+    p_mascota_id: mascotaId,
+    p_medicamento: datos.medicamento,
+    p_dosis: datos.dosis,
+    ...(datos.via !== undefined ? { p_via: datos.via } : null),
+    ...(datos.fecha !== undefined ? { p_fecha: datos.fecha } : null),
+    ...(datos.principio_activo !== undefined ? { p_principio_activo: datos.principio_activo } : null),
+    ...(datos.notas !== undefined ? { p_notas: datos.notas } : null),
+  });
+  if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || o.ok !== true ||
+      typeof o.id !== 'string' || typeof o.evento_id !== 'string' || typeof o.mascota_id !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { id: o.id, evento_id: o.evento_id, mascota_id: o.mascota_id } };
 }
 
 /** Declara el hecho clínico "NINGUNA alergia conocida" (S82: distinto de
@@ -415,4 +488,96 @@ export async function registrarRecuerdoFamilia(
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_RECUERDO.error_desconocido };
   }
   return { ok: true, data: { hitoId: o.hito_id, eventoId: o.evento_id } };
+}
+
+/* ─── LO QUE LA FAMILIA SABE Y NO TENÍA DÓNDE PONER (S113-A) ────────────── */
+
+/**
+ * La lista para elegir, **sin default**: poner «leve» por comodidad sería
+ * inventar un dato clínico en el único campo que decide si alguien corre a una
+ * clínica.
+ *
+ * ⚠️ El TIPO se **reusa** de `perfilMascota` en vez de redefinirse — y ésa es
+ * la mitad que faltaba de la regla del censo de duplicados: acá los dos
+ * conjuntos son idénticos (las mismas cuatro palabras, el mismo CHECK), o sea
+ * **el mismo hecho**. *Se renombra cuando son vocabularios distintos con el
+ * mismo nombre; se reusa cuando son el mismo vocabulario en dos archivos.*
+ */
+export type { SeveridadAlergia } from './perfilMascota';
+export const SEVERIDADES_ALERGIA = ['leve', 'moderada', 'severa', 'anafilactica'] as const;
+
+/**
+ * Una observación de comportamiento de la familia («le tiene miedo a los
+ * truenos»). Entra al expediente como `observacion_comportamiento`, con
+ * procedencia `declarado_por_familia` y `modo_captura: 'tecleado'`.
+ */
+export async function registrarObservacionComportamiento(
+  mascotaId: string,
+  datos: { texto: string; fecha?: string },
+): Promise<ResultadoWrapper<{ evento_id: string }, CodigoErrorSalud>> {
+  const { data, error } = await getClient().rpc('registrar_observacion_comportamiento', {
+    p_mascota_id: mascotaId,
+    p_texto: datos.texto,
+    ...(datos.fecha !== undefined ? { p_fecha: datos.fecha } : null),
+  });
+  if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.evento_id !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { evento_id: o.evento_id } };
+}
+
+/**
+ * La familia declara una alergia que observó.
+ *
+ * 🔴 **Entra como `'sospechada'`, nunca `'confirmada'`, y hay que mostrarlo
+ * así.** Que a un perro se le hinche la cara con pollo es un hecho que la
+ * familia vio y que tiene que estar en el expediente; llamarlo diagnóstico
+ * sería otra cosa. Con ese estado, la franja de seguridad **la muestra** —
+ * verificado: llega al perfil vigente— y el plan y guardería **no la tratan
+ * como diagnóstico**.
+ *
+ * *La procedencia sola no alcanzaba: un lector que filtra por «tiene alergia»
+ * no mira quién lo dijo. El estado sí lo mira todo el mundo.*
+ */
+export async function declararAlergiaFamilia(
+  mascotaId: string,
+  datos: { alergeno: string; severidad: (typeof SEVERIDADES_ALERGIA)[number]; reaccion?: string; desde?: string },
+): Promise<ResultadoWrapper<{ id: string; estado: 'sospechada' }, CodigoErrorSalud>> {
+  const { data, error } = await getClient().rpc('declarar_alergia_familia', {
+    p_mascota_id: mascotaId,
+    p_alergeno: datos.alergeno,
+    p_severidad: datos.severidad,
+    ...(datos.reaccion !== undefined ? { p_reaccion: datos.reaccion } : null),
+    ...(datos.desde !== undefined ? { p_desde: datos.desde } : null),
+  });
+  if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.id !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { id: o.id, estado: 'sospechada' } };
+}
+
+/** Lo mismo para una condición («le cuesta subir escaleras»). También entra
+ *  `'sospechada'` — el estado nació en esta misma migración porque la tabla no
+ *  lo tenía, y sin él la familia sólo podía marcarla «activa», que es
+ *  declararla diagnóstico. */
+export async function declararCondicionFamilia(
+  mascotaId: string,
+  datos: { condicion: string; descripcion?: string; desde?: string },
+): Promise<ResultadoWrapper<{ id: string; estado: 'sospechada' }, CodigoErrorSalud>> {
+  const { data, error } = await getClient().rpc('declarar_condicion_familia', {
+    p_mascota_id: mascotaId,
+    p_condicion: datos.condicion,
+    ...(datos.descripcion !== undefined ? { p_descripcion: datos.descripcion } : null),
+    ...(datos.desde !== undefined ? { p_desde: datos.desde } : null),
+  });
+  if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.id !== 'string') {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: { id: o.id, estado: 'sospechada' } };
 }

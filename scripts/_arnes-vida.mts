@@ -116,7 +116,15 @@ t('el par sale de `text.inverse`, jamás de `sobreVideo`', /sobreVideo/.test(RAZ
 
 /* ② Un texto que no se distingue de una descripción no se toca: la ficha
    quedaba cerrada porque nadie sabía que abría. */
-t('🔴 ② «ver más» tiene afordance: label + chevron', /abierta \? '⌃' : '›'/.test(FICHA), true);
+/* ⚠️ **ESTE ASSERT MEDÍA EL CARÁCTER, y se puso ROJO CUANDO LA PIEZA MEJORÓ.**
+   Buscaba `abierta ? '⌃' : '›'`, o sea el chevron dibujado como texto — y el
+   día que pasó a la primitiva de la casa, el assert leyó la cura como una
+   regresión. *Un gate atado a la FORMA de escribir algo castiga a quien lo
+   escribe mejor.* Hoy mide lo que la ley pide (19.7): que haya label Y
+   chevron, y que el chevron DIGA si va a abrir o a cerrar. */
+t('🔴 ② «ver más» tiene afordance: label + chevron',
+  /\{abierta \? vozCerrar : vozAbrir\}/.test(FICHA) &&
+  /<Chevron[^>]*direccion=\{abierta \? 'arriba' : 'derecha'\}/.test(FICHA), true);
 /* Con tres datos —uno largo y dos cortos— las dos columnas partían el largo en
    renglones angostos y dejaban un hueco al lado. */
 t('🔴 el cuerpo NO usa dos columnas al 50 %', /width: '50%'/.test(FICHA), false);

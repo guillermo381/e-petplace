@@ -63,6 +63,7 @@ import {
   useTheme,
   type IconoNombre,
   type LineaDeVidaEstadoPie,
+  FichaRaza,
   FranjaSeguridad,
   CeldasHoy,
   FiltrosLineaDeVida,
@@ -92,6 +93,8 @@ import {
   obtenerPresupuestosFamilia,
   obtenerCitasActivasHogar,
   type PesoDeLaSerie,
+  obtenerContenidoDeRaza,
+  type ContenidoDeRaza,
 } from '@epetplace/api';
 import {
   calcularMomentoVital,
@@ -124,6 +127,7 @@ import { HabitantesAcuarioHoja } from '@/components/habitantes-acuario-hoja';
 import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import { EditarRazaHoja } from '@/components/editar-raza-hoja';
+import { RegistrarMedicacionHoja } from '@/components/registrar-medicacion-hoja';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -334,6 +338,36 @@ export default function PerfilDeMascota() {
   /** S91 · P2 — el disparador de la re-lectura de la serie de peso. */
   const [recargaPeso, setRecargaPeso] = useState(0);
 
+
+  /** ⭐ **C10 — el contenido de la raza.** Se pide sólo si la mascota declara
+   *  raza: sin raza no hay nada que preguntar. `null` = la raza no tiene ficha
+   *  (hoy **todas**: `razas_contenido` tiene 0 filas, medido el 5-sep), y ahí
+   *  no se dibuja nada. Un fallo deja `null` y la ficha simplemente no aparece
+   *  — degradar a ausencia es correcto acá: *no saber de una raza no es un
+   *  error que la familia tenga que atender*. */
+  const [menuEdicion, setMenuEdicion] = useState(false);
+  const [contenidoRaza, setContenidoRaza] = useState<ContenidoDeRaza | null>(null);
+  useEffect(() => {
+    if (typeof perfil !== 'object') return;
+    const raza = perfil.mascota.raza;
+    if (raza === null || raza === '') return;
+    let vivo = true;
+    /* ☠️ **ACÁ VIVÍAN DOS SALTOS Y SE FUERON ENTEROS.** Yo resolvía el
+       nombre contra `cat_razas` para sacar el slug, porque `mascotas.raza` es
+       texto libre y `razas_contenido` se indexa por código. **A se lo llevó al
+       servidor** (`resolver_ficha_de_raza`): casa por nombre, por sinónimo, y
+       cae a la ficha de la especie — *y el tercer paso ESCRIBE*, así que
+       repartirlo entre cliente y servidor habría dejado la mitad sin registrar.
+       **Un viaje, una verdad**, que es la misma ley que hoy mató a `esDudosa`
+       en el carnet. Se le pasa lo que la familia tecleó y nada más. */
+    void obtenerContenidoDeRaza(perfil.mascota.especie, raza).then((r) => {
+      if (vivo && r.ok) setContenidoRaza(r.data);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [perfil]);
+
   useEffect(() => {
     let vivo = true;
     void listarPapelesDeMascota().then((r) => {
@@ -457,6 +491,7 @@ export default function PerfilDeMascota() {
    *  de hace dos años. */
   const [pesos, setPesos] = useState<PesoDeLaSerie[] | null>(null);
   const [pesoHoja, setPesoHoja] = useState(false);
+  const [medicacionHoja, setMedicacionHoja] = useState(false);
   const [razaHoja, setRazaHoja] = useState(false);
   /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
   const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
@@ -664,6 +699,33 @@ export default function PerfilDeMascota() {
   }
 
   const { mascota, vacunas, peso_clinico_kg, tiene_condicion_cronica, umbrales } = perfil;
+
+  /** ⭐ **EL PESO VIGENTE — UNA SOLA DERIVACIÓN** (S113-C · 1.2.1 · ④).
+   *  🔴 Medido: identidad mostraba `peso_clinico_kg`, que es **el de la ficha
+   *  clínica** y no se mueve cuando la familia pesa en casa. La celda de HOY ya
+   *  usaba la serie (`pesos[0]`, ordenada `fecha_medicion desc` por el propio
+   *  wrapper) y caía al clínico — o sea que **las dos superficies de la misma
+   *  pantalla podían decir kilos distintos**, la de arriba el primero y la de
+   *  abajo el último.
+   *  *No es un bug de una de las dos: es que la regla vivía dos veces.* Se
+   *  deriva acá una vez y la usan las dos. La FECHA viaja con el número: un
+   *  peso sin cuándo no dice si es de hoy o de hace dos años. */
+  const pesoVigente: { kg: number; fecha: string | null; deClinica: boolean | null } | null =
+    /* 🔴 **LA SERIE YA TRAE LOS DOS, y por eso `[0]` es la respuesta.** Medido
+       en Thor: `evento_peso_medicion` guarda los del prestador y los de la
+       familia en la misma tabla, ordenada por fecha —24 kg de la familia el
+       4-sep, 11,4 de la clínica el 21-jul—. *No hay que comparar dos fuentes:
+       hay que dejar de leer el snapshot.* Eso explica el «11,4 kg» que la
+       identidad mostraba: era `peso_clinico_kg`, congelado en julio, mientras
+       la familia ya lo había pesado en septiembre.
+       El fallback al snapshot queda **para la mascota sin serie**: ahí es lo
+       único que hay, y no sabemos quién lo pesó ⇒ `deClinica: null`, que se
+       dibuja sin atribución en vez de inventarla. */
+    pesos !== null && pesos.length > 0
+      ? { kg: pesos[0].peso_kg, fecha: pesos[0].fecha, deClinica: pesos[0].de_prestador }
+      : peso_clinico_kg !== null
+        ? { kg: peso_clinico_kg, fecha: null, deClinica: null }
+        : null;
   const hoy = new Date();
   const meses = mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento, hoy) : null;
   // r3: la voz del hogar (una sola verdad) — pastilla + celda de vacunas
@@ -855,8 +917,33 @@ export default function PerfilDeMascota() {
         mono: true,
       });
     }
-    if (peso_clinico_kg !== null) {
-      datosIdentidad.push({ etiqueta: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, mono: true });
+    if (pesoVigente !== null) {
+      datosIdentidad.push({
+        etiqueta: t('perfil.peso'),
+        /* La fecha va pegada al número, no en otra fila: *un peso sin cuándo
+           no dice si es de hoy o de hace dos años*, y en identidad —donde se
+           lee de un vistazo— esa duda no se resuelve mirando más abajo. */
+        /* La fecha y **quién lo pesó** viajan con el número: *«24 kg» no dice
+           si es de hoy o de hace dos años, y tampoco si lo midió una báscula de
+           clínica o la de casa* — y esas dos cosas cambian cuánto se le cree. */
+        /* ⚠️ **Los tres datos van en el MISMO valor y no en un pie**, porque la
+           fila de identidad no tiene pie: agregárselo obligaba a tocar su
+           render para las nueve filas. *Un cambio de forma para una sola fila
+           no vale lo que cuesta en las otras ocho.* */
+        valor: [
+          `${pesoVigente.kg} kg`,
+          pesoVigente.fecha !== null ? fechaCortaMono(pesoVigente.fecha, idioma) : null,
+          pesoVigente.deClinica === null
+            ? null
+            : pesoVigente.deClinica
+              ? t('perfil.pesoDeClinica')
+              : t('perfil.pesoDeVos'),
+        ]
+          .filter((x) => x !== null)
+          .join(' · '),
+
+        mono: true,
+      });
     }
     if (mascota.microchip !== null && mascota.microchip.length > 0) {
       datosIdentidad.push({ etiqueta: t('perfil.microchip'), valor: mascota.microchip, mono: true });
@@ -944,12 +1031,26 @@ export default function PerfilDeMascota() {
                   </Svg>
                 </Pressable>
                 <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                  {/* 🔴 **EL LÁPIZ CUELGA DE `!esMemorial`, Y LO ENCONTRÉ
+                      CORRIENDO LA DESPEDIDA DE VERDAD.** La Hoja del menú ya
+                      estaba bajo el guard, pero **el botón que la abre no**:
+                      en memorial se dibujaba y al tocarlo **no pasaba nada**.
+                      *Un control que se ve, se toca y no hace nada es peor que
+                      uno ausente: el ausente no promete.* Ningún gate lo veía
+                      —`verify:pide-en-memorial` mide TEXTOS que piden algo, y
+                      «Editar» no pide nada— así que sólo apareció al ejercer
+                      el camino entero sobre una mascota real. */}
+                  {!esMemorial ? (
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('perfil.editar')}
-                    onPress={() =>
-                      router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } })
-                    }
+                    /* ⭐ **C11 · el lápiz abre el MENÚ DE EDICIÓN**, que
+                       antes no existía: iba derecho a la foto, y la raza se
+                       editaba desde otro lado. Agrupar lo que ya había es lo
+                       que le da casa a la despedida — *un acto grave no cuelga
+                       de un botón suelto en una ficha que se abre todos los
+                       días*. La foto sigue a un toque de distancia. */
+                    onPress={() => setMenuEdicion(true)}
                     style={{ width: 38, height: 38, borderRadius: radius.full, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                   >
                     {/* S86-B · del registry (D-645). Estaba dibujado a mano
@@ -960,6 +1061,7 @@ export default function PerfilDeMascota() {
                         incompleta. */}
                     <Icono nombre="lapiz" tamano={20} tinta={sobreMarca} />
                   </Pressable>
+                  ) : null}
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t('perfil.compartir')}
@@ -1144,7 +1246,17 @@ export default function PerfilDeMascota() {
                         t,
                       )
                       : null,
-                  esAcuario ? null : peso_clinico_kg !== null ? `${peso_clinico_kg} kg` : null,
+                  /* 🔴 **EL ENCABEZADO TAMBIÉN LEÍA EL SNAPSHOT.** Curé
+                     identidad y dejé éste — y era el que estaba a la vista:
+                     medido en Thor, el retrato decía «11,4 kg» (clínica,
+                     21-jul) mientras identidad ya decía 24 (familia, 4-sep).
+                     *Dos números de la misma mascota en la misma pantalla, y el
+                     más viejo arriba de todo.* Ahora los dos salen de
+                     `pesoVigente` — **una derivación, tres superficies**.
+                     Acá va SOLO el número: el encabezado es una línea de
+                     identidad de un vistazo, y la fecha y el «quién» viven en
+                     su fila, donde hay lugar para leerlos. */
+                  esAcuario || pesoVigente === null ? null : `${pesoVigente.kg} kg`,
                 ]
                   .filter((x): x is string => x !== null && x !== '')
                   .join(' · ')
@@ -1286,6 +1398,114 @@ export default function PerfilDeMascota() {
           </View>
         ) : null}
 
+        {/* ⭐ **LA ENTRADA AL PASAPORTE** (S113-C · 1.3 · C1). Va en el
+            bloque de IDENTIDAD porque **es identidad**: la chapita dice
+            quién es y de quién es. *Ponerla entre las acciones de cuidado
+            la habría dejado al lado de «registrar peso», que es otra
+            conversación.*
+            🔴 **No se dibuja en memorial**: `sePintaPasaporte` de B lo dice
+            y la pantalla lo respeta desde acá — *un pasaporte es para
+            encontrar a alguien que se perdió.* */}
+        {!esMemorial ? (
+          <View style={{ marginTop: spacing[3] }}>
+            <Celda
+              interactiva
+              accessibilityRole="button"
+              titulo={t('pasaporte.entrada')}
+              subtitulo={t('pasaporte.entradaDetalle')}
+              onPress={() =>
+                router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } })
+              }
+            />
+          </View>
+        ) : null}
+
+        {/* ⭐ **LA FICHA DE LA RAZA** (S113-C · 1.2 · C10).
+            Va **pegada a la identidad**, que es de lo que habla — pero
+            **debajo de la franja de seguridad**, por decisión declarada: una
+            alerta de alergia o medicación tiene que verse sin scroll, y meter
+            una tarjeta de lectura por encima la empuja. *La identidad se lee;
+            la seguridad se atiende.*
+
+            🔴 **Sólo con contenido.** `obtenerContenidoDeRaza` devuelve `null`
+            cuando la raza no tiene ficha y ahí no se monta nada — *una tarjeta
+            vacía sobre una raza que no documentamos promete un saber que no
+            tenemos*.
+
+            ⚠️ **`revisado` VA EN `true` Y NO ES UN ATAJO.** El contrato no
+            expone `activo` ni `revisado_en`, y mi primera lectura fue que
+            faltaban. **Estaba equivocado**: A lo cerró en la RLS — *la policy
+            de `razas_contenido` sólo deja salir las filas con `activo`, así
+            que este wrapper no puede leer un borrador aunque se lo pida*. ⇒ si
+            devuelve contenido, está publicado; y las 10 publicadas tienen
+            `revisado_en` (medido). **El filtro no falta: es inexpresable**, que
+            es más fuerte que un `.eq` que alguien puede olvidar. */}
+        {contenidoRaza !== null && !esMemorial && mascota.raza !== null ? (
+          <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
+            <FichaRaza
+              nombre={mascota.raza}
+              revisado
+              historia={contenidoRaza.origen ?? ''}
+              caracteristicas={[
+                { etiqueta: t('perfil.razaTemperamento'), valor: contenidoRaza.temperamento ?? undefined },
+                { etiqueta: t('perfil.razaTalla'), valor: contenidoRaza.talla_adulta ?? undefined },
+                { etiqueta: t('perfil.razaVida'), valor: contenidoRaza.esperanza_vida ?? undefined },
+              ]}
+              /* La etapa ACTUAL sale del momento vital que la ficha YA calcula:
+                 no se recalcula acá — *dos cuentas de lo mismo terminan
+                 discrepando* (lo aprendí en el 1.1.2, con el botón del carnet).
+                 🔴 **M4 no marca ninguna etapa, y es a propósito**: el motor lo
+                 devuelve por CONDICIÓN CRÓNICA antes de mirar la edad
+                 (`momentoVital.ts:34`), así que un senior con una condición sale
+                 M4 — marcarlo «adulto» sería afirmar una edad que el dato no
+                 dice. Sin etapa actual la ficha se lee entera, que es honesto. */
+              cuidados={[
+                { id: 'cachorro', etapa: t('perfil.razaCachorro'), texto: contenidoRaza.cuidados_por_etapa.cachorro ?? '', actual: momento === 'M1' || momento === 'M2' },
+                { id: 'adulto', etapa: t('perfil.razaAdulto'), texto: contenidoRaza.cuidados_por_etapa.adulto ?? '', actual: momento === 'M3' },
+                { id: 'senior', etapa: t('perfil.razaSenior'), texto: contenidoRaza.cuidados_por_etapa.senior ?? '', actual: momento === 'M5' },
+              ].filter((c) => c.texto.length > 0)}
+              vozRevision={t('perfil.razaRevision')}
+              vozAbrir={t('perfil.razaVer')}
+              vozCerrar={t('perfil.razaOcultar')}
+            />
+            {/* ⭐ **LA INVITACIÓN QUE CIERRA LA FICHA** (S113-C · 1.2.1 · ②).
+                La ficha habla de **la raza**; esto devuelve la conversación a
+                **este animal**: *lo general se lee, lo propio se cuenta.*
+
+                ⚠️ **Va pegada abajo y NO dentro de la pieza**, por medición:
+                `FichaRazaProps` no tiene slot de cierre (8 props, ninguna lo
+                admite). Pedido a B abajo; el día que exista, esto se muda
+                adentro y la pantalla queda igual.
+
+                🔴 **La voz va en TUTEO aunque la orden llegó en voseo.** La
+                casa habla tuteo neutro y `R66` lo vigila — *un dictado no
+                cambia la voz del producto, y escribirlo como llegó habría dado
+                rojo en el gate*. La idea del founder, corta: cuanto mejor lo
+                conocemos, mejor lo acompañamos. */}
+            {/* 🔴 **DOS VOCES, PORQUE LA ETAPA PUEDE NO EXISTIR.** Colgarla de
+                `momento !== null` la escondía entera para toda mascota sin
+                fecha de nacimiento — medido en web con una recién dada de alta,
+                donde el nacimiento se puede dejar para después. *La invitación
+                no es sobre la etapa: es sobre esta mascota.* Con etapa se la
+                nombra porque ancla el momento; sin etapa se invita igual. */}
+            <View style={{ marginTop: spacing[3] }}>
+                <Celda
+                  interactiva
+                  accessibilityRole="button"
+                  titulo={
+                    momento !== null && vozMomento(momento, t) !== null
+                      ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
+                      : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
+                  }
+                  subtitulo={t('perfil.razaInvitacionDetalle')}
+                  onPress={() =>
+                    router.push({ pathname: '/hogar/bitacora', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+                  }
+                />
+            </View>
+          </View>
+        ) : null}
+
 
         {/* ── ③ CÓMO ESTÁ HOY — **la grilla ahora es `CeldasHoy` de B**
             (S113-C · 1.1 · C6). Antes vivía acá una grilla propia de dos
@@ -1324,6 +1544,11 @@ export default function PerfilDeMascota() {
               <View style={{ paddingHorizontal: spacing[5] }}>
                 <CeldasHoy
                   vacuna={{
+                    /* ⭐ **CADA CELDA ABRE SU REGISTRO** (S113-C · 2.0 · ①).
+                       Antes mostraban el dato y no dejaban tocarlo — el mismo
+                       hueco que el peso tuvo hasta S91: *el motor completo y
+                       sin puerta.* */
+                    onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } }),
                     rotulo: t('perfil.hechosVacunas'),
                     /* Sin ninguna vacuna, `null` ⇒ la celda dice que no hay.
                        Con vacunas pero sin próxima, el nombre existe y el
@@ -1346,18 +1571,18 @@ export default function PerfilDeMascota() {
                           : t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }),
                   }}
                   antiparasitario={{
+                    onPress: () => router.push({ pathname: '/antiparasitario', params: { mascotaId: mascota.id, nombre: mascota.nombre } }),
                     rotulo: t('perfil.hoyDesparasitacion'),
                     cobertura,
                     vozPlaga: (p) => t(`perfil.plaga_${p}` as 'perfil.plaga_pulgas'),
                   }}
                   peso={{
+                    onPress: () => setPesoHoja(true),
                     rotulo: t('perfil.peso'),
-                    valorTexto:
-                      ultimoPeso !== null
-                        ? `${ultimoPeso.peso_kg} kg`
-                        : peso_clinico_kg !== null
-                          ? `${peso_clinico_kg} kg`
-                          : null,
+                    /* La MISMA derivación que identidad (④): si discreparan,
+                       la pantalla diría dos pesos distintos de la misma
+                       mascota, que es justo lo que esto vino a curar. */
+                    valorTexto: pesoVigente !== null ? `${pesoVigente.kg} kg` : null,
                     tendencia: ultimoPeso !== null ? tendenciaPeso(ultimoPeso.peso_kg, anterior?.peso_kg) : null,
                     contexto:
                       ultimoPeso !== null
@@ -1365,6 +1590,10 @@ export default function PerfilDeMascota() {
                         : undefined,
                   }}
                   medicacion={{
+                    /* 🔴 **La puerta existe, así que la celda ES botón.** Si no
+                       existiera, `onPress` iría ausente y B ya la dibuja sin
+                       chevron: *una celda sin destino no se disfraza de acto.* */
+                    onPress: () => setMedicacionHoja(true),
                     rotulo: t('perfil.hoyMedicacion'),
                     nombre: med?.nombre ?? null,
                     contexto:
@@ -2188,6 +2417,64 @@ export default function PerfilDeMascota() {
       {/* P3 · la MISMA pieza del paso 2 del alta (§6: se comparte, no se
           clona). No valida lo escrito: `mascotas.raza` es texto libre por la
           letra de S59 y la RPC la respeta. */}
+      {/* ⭐ **EL MENÚ DE EDICIÓN** (S113-C · 1.2 · C11).
+          Junta lo que ya existía disperso —la foto y la raza se editaban desde
+          dos lados distintos— y con eso le da casa a la despedida: *un acto
+          grave no cuelga de un botón suelto en una ficha que se abre todos los
+          días*.
+
+          🔴 **LA HOJA ENTERA CUELGA DE `!esMemorial`, no sólo su ítem grave.**
+          El lápiz que la abre ya estaba bajo el guard (:1022), así que en
+          memorial era **inalcanzable** — y aun así mi propio censo la marcó en
+          rojo por «Cambiar la foto» y «Cambiar la raza». *Tiene razón: un texto
+          inalcanzable hoy es alcanzable mañana, en cuanto alguien le abra otro
+          camino, y nadie va a acordarse de este guard.* No se monta y punto. */}
+      {!esMemorial ? (
+        <Hoja visible={menuEdicion} onCerrar={() => setMenuEdicion(false)} titulo={t('perfil.menuTitulo')}>
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfil.menuFoto')}
+            onPress={() => {
+              setMenuEdicion(false);
+              router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre, especie: mascota.especie } });
+            }}
+          />
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfil.menuRaza')}
+            onPress={() => {
+              setMenuEdicion(false);
+              setRazaHoja(true);
+            }}
+          />
+          <Separador />
+          {/* Sola, al final y después del separador. **Sin color de alarma**:
+              el memorial es sereno, y pintar la despedida de rojo la trata como
+              un borrado. No lo es: es el expediente que sigue, en otra clave. */}
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfil.menuDespedir', { nombre: mascota.nombre })}
+            onPress={() => {
+              setMenuEdicion(false);
+              router.push({ pathname: '/hogar/mascota/despedida', params: { mascotaId: mascota.id, nombre: mascota.nombre } });
+            }}
+          />
+        </Hoja>
+      ) : null}
+
+      <RegistrarMedicacionHoja
+        visible={medicacionHoja}
+        nombre={mascota.nombre}
+        mascotaId={mascota.id}
+        onCerrar={() => setMedicacionHoja(false)}
+        /* El perfil re-lee: una dosis que se anota y no aparece hasta salir y
+           volver se lee como que no se guardó. */
+        onRegistrado={() => setRecargaPeso((n) => n + 1)}
+      />
+
       <EditarRazaHoja
         visible={razaHoja}
         mascotaId={mascota.id}

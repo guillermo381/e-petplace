@@ -312,6 +312,7 @@ export {
 // Perfil de mascota — S51-B2.3 (pila de módulos)
 export {
   obtenerPerfilMascota,
+  registrarFinDeVida,
   declararFotoMascota,
   // S91 (P3): la puerta de EDICIÓN de raza del perfil.
   actualizarRazaMascota,
@@ -321,6 +322,8 @@ export {
   type VacunaDeMascota,
   type CodigoErrorFotoMascota,
   type EncuadreFotoDeclarado,
+  type FinDeVidaRegistrado,
+  type CodigoErrorFinDeVida,
   // El censo del acuario (S91, enmienda firmada a D-685): especies y cuántos,
   // JAMÁS peces con identidad.
   obtenerCensoDelAcuario,
@@ -348,6 +351,17 @@ export type {
 export {
   registrarDesparasitacion,
   type PlagaTratada,
+  // S113-A lote 2: la familia puede anotar una dosis (la tabla existía con
+  // cero filas y su trigger listo — escritor sin puerta).
+  registrarMedicacionAdministrada,
+  type ViaMedicacion,
+  VIAS_MEDICACION,
+  // S113-A: lo que la familia sabe y no tenía dónde poner. Las tres entran
+  // como observación, no como diagnóstico.
+  registrarObservacionComportamiento,
+  declararAlergiaFamilia,
+  declararCondicionFamilia,
+  SEVERIDADES_ALERGIA,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
   registrarRecuerdoFamilia,
@@ -1806,10 +1820,104 @@ export {
 } from './wrappers/conteoSemanaPrestador';
 
 export {
+  obtenerContenidoDeRaza,
   sugerirRaza,
   type SugerenciaDeRaza,
   type CandidataRaza,
+  type ContenidoDeRaza,
+  type ViaDeFicha,
+  type CuidadosPorEtapa,
+  type CodigoErrorContenidoRaza,
   type ConfianzaRaza,
   type InputSugerirRaza,
   type CodigoErrorRaza,
 } from './wrappers/razas';
+
+// ── NEXO · S113-A lote 2.0 ────────────────────────────────────────────────
+// El contexto de una mascota en UN viaje, la búsqueda de la familia, la
+// memoria editable y el hilo. Ninguna existe en memorial: lo rebota el motor.
+export {
+  obtenerContextoCoach,
+  type ContextoCoach,
+  buscarEnMiFamilia,
+  type ResultadoBusqueda,
+  type TipoResultado,
+  listarMemoriaCoach,
+  agregarMemoriaCoach,
+  editarMemoriaCoach,
+  borrarMemoriaCoach,
+  type HechoDeMemoria,
+  type FuenteMemoria,
+  leerHiloCoach,
+  guardarTurnoCoach,
+  borrarHiloCoach,
+  type TurnoCoach,
+  type CodigoErrorCoach,
+  // 2.1 · avisos y placas
+  obtenerAvisosCoach,
+  marcarAvisoCoachLeido,
+  activarAvisosNexo,
+  type AvisoCoach,
+  type TipoAviso,
+  activarPlaca,
+  type CodigoErrorPlaca,
+  // 2.1 · Nexo acompaña
+  guardarHechoClasificado,
+  type ClaseDeHecho,
+  obtenerSugerenciaConociendolo,
+  type SugerenciaConociendolo,
+  obtenerPredisposicionesDeRaza,
+  type Predisposicion,
+  // las propuestas: 'confirmado_de_ia' dejó de ser un valor que se pasa
+  listarPropuestasMemoria,
+  confirmarPropuestaMemoria,
+  rechazarPropuestaMemoria,
+  type PropuestaEnCola,
+} from './wrappers/coach';
+/* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
+   pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía
+   por dónde llamarlo. Se abre acá copiando el molde, sin tocar nada de A. */
+export {
+  emitirPasaporte,
+  revocarPasaporte,
+  configurarPasaporte,
+  marcarPerdida,
+  CODIGOS_PASAPORTE,
+  type CodigoErrorPasaporte,
+  type PasaporteEmitido,
+  type ConfiguracionDePasaporte,
+} from './wrappers/pasaporte';
+
+/* ☠️ LÁPIDA — `wrappers/nexo-preguntar` (de C) NO se exporta.
+   C y D escribieron la puerta a la edge `coach` en paralelo, cada una con su
+   wrapper. Gana el de D porque cubre **las tres** edges (coach, parte, papel)
+   y es de la dueña de las edges; el de D acepta además la forma posicional de
+   C, así que la pantalla no cambia. Medido antes de decidir: **cero
+   consumidores** del de C fuera de este índice.
+   *Dos puertas a la misma edge no es redundancia: es que la próxima corrección
+   se hace en una sola de las dos y nadie se entera.*
+   El archivo queda para que C lo retire (regla 37); sin export, no es puerta. */
+// S113-D · NEXO: la puerta de las tres edges del lote 2. Sin esto estaban
+// construidas, medidas y desplegadas, y ninguna app podía llamarlas (`L-318`).
+export {
+  preguntarANexo,
+  presentacionDeNexo,
+  clasificarHecho,
+  obtenerParteDelDia,
+  leerPapel,
+  type RespuestaNexo,
+  type IntencionNexo,
+  type Semaforo,
+  type NivelSemaforo,
+  type PropuestaMemoria,
+  type ClaseMemoria,
+  type PresentacionNexo,
+  type InputPreguntarANexo,
+  type CodigoErrorNexo,
+  type ParteDelDia,
+  type LecturaDePapel,
+  type FilaPapel,
+  type ClasePapel,
+  type InputLeerPapel,
+  type CodigoErrorPapel,
+} from './wrappers/nexo';

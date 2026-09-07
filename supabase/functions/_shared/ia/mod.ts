@@ -140,10 +140,15 @@ function construirCuerpo(
   pensar: boolean,
   esfuerzo: Esfuerzo | null,
 ): Record<string, unknown> {
-  const contenidoImagenes = (p.imagenes ?? []).map((img) => ({
-    type: 'image',
-    source: { type: 'base64', media_type: img.mediaType, data: img.base64 },
-  }))
+  // 🔴 UN PDF NO ES UNA IMAGEN, y mandarlo como `type: 'image'` con
+  // `media_type: application/pdf` **no da error: da una lectura basura**. El
+  // proveedor tiene un bloque propio (`type: 'document'`), y la diferencia la
+  // decide el mediaType, no quien llama — así ninguna edge se olvida.
+  // Lo abre la bóveda (lote 2.2): los exámenes de laboratorio llegan en PDF.
+  const contenidoImagenes = (p.imagenes ?? []).map((img) =>
+    img.mediaType === 'application/pdf'
+      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.base64 } }
+      : { type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } })
 
   const messages = p.mensajes.map((m, i) => ({
     role: m.rol,
@@ -199,12 +204,23 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
   const esfuerzo = p.esfuerzo !== undefined ? p.esfuerzo : ESFUERZO[p.pieza]
   const arranque = Date.now()
 
+  /* 🔴 EL TAMAÑO SE MIDE ANTES DE LLAMAR, y por eso está también en los FALLOS.
+     La medición de D vivía después de la respuesta, así que un timeout o un 429
+     registraban `null` — **y un fallo es justamente cuando importa saber cuán
+     grande era el prompt**: un timeout sobre un prompt enorme dice una cosa y
+     sobre uno chico dice otra completamente distinta. *El dato existe antes de
+     salir; no había razón para perderlo salvo dónde estaba escrito el renglón.* */
+  const largoPrompt = p.mensajes.reduce((a, m) => a + m.texto.length, 0) + (p.sistema?.length ?? 0)
+  const largoImagen = p.imagenes?.reduce((a, i) => a + i.base64.length, 0) ?? null
+
   const fallar = async (
     error: 'timeout' | 'error_proveedor' | 'error_parseo' | 'rechazo',
     detalle?: DetalleError,
     estadoHttp?: number,
   ): Promise<RespuestaIa> => {
     const uso = usoSinRespuesta(Date.now() - arranque)
+    uso.prompt_chars = largoPrompt
+    uso.imagen_chars = largoImagen
     await registrarUso(p.pieza, modelo, error, uso)
     return { ok: false, error, detalle, estadoHttp, uso }
   }
@@ -267,6 +283,27 @@ export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
 
   // Desde acá SÍ hay `usage`: todo lo que siga se registra con tokens reales.
   const uso = usoDesdeRespuesta(data.usage, Date.now() - arranque)
+
+  // 🔴 LA LÍNEA QUE FALTABA (pedido del founder, S113 lote 2.7). E midió que la
+  // edge parecía mandar ~1.200 tokens de entrada MÁS que el mismo prompt por
+  // API, y **no se pudo cerrar por falta de este renglón**: `ia_uso` guarda los
+  // tokens pero nada dice de qué TAMAÑO tenía el prompt que los produjo.
+  //
+  // ⚠️ ENMENDADO (A, 5-sep): el renglón decía que con las dos cifras juntas se
+  // distingue «un prompt que crece de una imagen que crece», y eso es FALSO —
+  // los tokens de una imagen salen de sus PÍXELES, no de su base64. Lo que esto
+  // sí contesta es si el PROMPT creció entre dos fechas, que es una pregunta
+  // real y no necesita tokenizador. El reparto lo dio `count_tokens`: 3.175 del
+  // prompt nuevo contra 1.718 del viejo, y la divergencia era el prompt.
+  /* 🔴 LA MEDICIÓN PASA DEL LOG AL OBJETO (A, S113). El renglón de arriba ya
+     existía y salía por `console.log` — pero *un dato que sólo vive en el log
+     de una edge no se puede consultar seis meses después*, que es justo cuando
+     alguien pregunta por qué subió el costo. Ahora viaja en `ia_uso`. */
+  uso.prompt_chars = largoPrompt
+  uso.imagen_chars = largoImagen
+  console.log(`[ia] ${p.pieza} · modelo=${modelo} · prompt=${largoPrompt} chars` +
+    `${p.imagenes?.length ? ` · imagenes=${p.imagenes.length} (${p.imagenes.reduce((a, i) => a + i.base64.length, 0)} chars b64)` : ''}` +
+    ` · input_tokens=${uso.tokens_entrada ?? '?'} · output_tokens=${uso.tokens_salida ?? '?'}`)
   const fallarConUso = async (
     error: 'error_parseo' | 'rechazo',
     detalle?: DetalleError,

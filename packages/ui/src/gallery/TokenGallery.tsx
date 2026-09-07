@@ -25,9 +25,15 @@ import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestr
 import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
+import { PresentacionNexo } from '../components/PresentacionNexo'
+import { AvisoAnticipacion } from '../components/AvisoAnticipacion'
 import { HojaContanos } from '../components/HojaContanos'
 import { BotonContanos } from '../components/BotonContanos'
 import { PastillaConociendolo } from '../components/PastillaConociendolo'
+import { RespuestaNexo } from '../components/RespuestaNexo'
+import { ResultadosBusqueda } from '../components/ResultadosBusqueda'
+import { PanelMemoria } from '../components/PanelMemoria'
+import { ChipsSugerencia } from '../components/ChipsSugerencia'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
@@ -108,6 +114,10 @@ import { PantallaDespedida } from '../components/PantallaDespedida'
 import { CabeceraCoach } from '../components/CabeceraCoach'
 import { OrbeCoach } from '../components/OrbeCoach'
 import { PuntoEstado } from '../components/PuntoEstado'
+import { TarjetaPasaporte } from '../components/TarjetaPasaporte'
+import { PlacaQR } from '../components/PlacaQR'
+import { AccionesPasaporte } from '../components/AccionesPasaporte'
+import { ConfiguracionPasaporte } from '../components/ConfiguracionPasaporte'
 import { FichaRepartidor } from '../components/FichaRepartidor'
 import { Salida } from '../components/Salida'
 import { GotaUbicacion } from '../components/GotaUbicacion'
@@ -208,6 +218,9 @@ const VOZ_PLAGA: Record<string, string> = { pulgas: 'pulgas', garrapatas: 'garra
    segundo, un tipo nuevo sin voz devolvía `undefined` y el chip salía VACÍO —
    sin un error, sin un aviso—. *Un mapa que acepta cualquier clave no es un
    mapa: es un agujero con forma de objeto.* */
+/* Un QR de mentira para la galería: la casa no los genera. */
+const QR_DEMO = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#fff"/><rect x="10" y="10" width="30" height="30"/><rect x="60" y="10" width="30" height="30"/><rect x="10" y="60" width="30" height="30"/><rect x="50" y="50" width="12" height="12"/><rect x="70" y="70" width="12" height="12"/></svg>'
+
 const VOZ_TIPO: Record<TipoLineaDeVida, string> = {
   salud: 'Salud',
   vacunas: 'Vacunas',
@@ -1216,7 +1229,7 @@ function Fila({ children }: { children: React.ReactNode }) {
  * el vecino real de `foto` · `carnet` cierra la familia de salud.
  * *Poner cinco vecinos que no se parecen a nada haría una fila linda y una
  * medición vacía.* */
-const NUEVOS_COACH = ['peso', 'antiparasitario', 'foto', 'personalidad'] as const
+const NUEVOS_COACH = ['peso', 'antiparasitario', 'foto'] as const
 /* **Los cinco vecinos no son cualquiera: son los que pueden confundirse.** */
 const VECINOS_COACH = ['vacuna', 'seguros', 'ubicacion', 'telemedicina', 'carnet'] as const
 
@@ -3278,7 +3291,7 @@ function ContanosDemo() {
   const [propuesta, setPropuesta] = useState(false)
   const ENTRADAS = [
     { clase: 'comportamiento' as const, titulo: 'Comportamiento', detalle: 'miedos, manías, cómo se lleva con otros', onPress: () => {} },
-    { clase: 'personalidad' as const, titulo: 'Rasgos de personalidad', detalle: 'cómo es: tímido, glotón, mandón', onPress: () => {} },
+    { clase: 'rasgo' as const, titulo: 'Rasgos de personalidad', detalle: 'cómo es: tímido, glotón, mandón', onPress: () => {} },
     { clase: 'medico' as const, titulo: 'Temas médicos', detalle: 'alergias, condiciones, lo que el vet te dijo', onPress: () => {} },
     { clase: 'recuerdo' as const, titulo: 'Recuerdo', detalle: 'lo que hizo hoy', onPress: () => {} },
   ]
@@ -5144,6 +5157,48 @@ function GaleriaInterna() {
             borde: son cinco paradas y muere antes del final del radio, para que el corte caiga donde ya no queda nada
             que cortar.
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="Pasaporte (S113 · 1.3) — la tarjeta, la placa, las acciones y qué ve un desconocido">
+          {/* Un QR de mentira: la casa NO los genera —eso exige una librería
+              que este grafo no tiene— y por eso llegan dibujados. */}
+          <TarjetaPasaporte
+            nombre="Thor" especieYRaza="Perro · Labrador" sexoYEdad="Macho · 4 años"
+            chip="985112004123456" etiquetaChip="Chip"
+            qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
+            estado={{ estado: 'activo' }}
+          />
+          {/* 🔴 PERDIDA: la franja preside y DICE DESDE CUÁNDO — entre ayer y
+              hace tres meses cambia lo que hace quien la encuentra. */}
+          <TarjetaPasaporte
+            nombre="Thor" especieYRaza="Perro · Labrador" sexoYEdad="Macho · 4 años"
+            qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
+            estado={{ estado: 'perdida', desde: '2026-09-05' }}
+            vozPerdida="Perdida desde el 5 de septiembre"
+          />
+          <Texto variante="apoyo">↓ en memoria la tarjeta NO EXISTE: abajo de esta línea no hay nada</Texto>
+          <TarjetaPasaporte
+            nombre="Kira" especieYRaza="Perro · Mestizo" sexoYEdad="Hembra · 14 años"
+            qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="" estado={{ estado: 'activo' }} enMemoria
+          />
+          <PlacaQR svgQr={QR_DEMO} nombre="Thor" marca="e-PetPlace" vozPrevia="Así se va a ver la placa" />
+          {/* 🔴 SIN NFC el botón no está: ausente, jamás apagado. */}
+          <AccionesPasaporte
+            vozCompartir="Compartir" onCompartir={() => {}}
+            vozDescargarQr="Descargar QR" onDescargarQr={() => {}}
+            perdida={false} vozPerdida="Se perdió"
+            vozConfirmarPerdida="Sí, publicar el pasaporte de Thor"
+            onCambiarPerdida={() => {}}
+          />
+          <ConfiguracionPasaporte
+            visibilidad={{ contacto: true, salud: true, chip: false }}
+            onCambiar={() => {}}
+            opciones={{
+              contacto: { etiqueta: 'Mostrar contacto', consecuencia: 'Quien encuentre a Thor va a ver tu teléfono.' },
+              salud: { etiqueta: 'Mostrar alergias y medicación', consecuencia: 'Para que no le den algo que le hace mal.' },
+              chip: { etiqueta: 'Mostrar chip', consecuencia: 'Un veterinario puede confirmar que es Thor.' },
+            }}
+          />
         </Seccion>
 
         <Seccion titulo="PuntoEstado (S113 · 1.0 adenda) — 8 px con DOS formas, porque dos ausencias comparten tinta">
@@ -8564,6 +8619,114 @@ function GaleriaInterna() {
         </Text>
       </View>
 
+        <Seccion titulo="⭐ GATE S113 — NEXO HABLA (lote 2.0) · qué decide: (a) que la respuesta se lea como la casa hablando y no como un chat de soporte; (b) que «de su carnet · 12 mar» se vea TOCABLE y no como una firma decorativa; (c) que la propuesta de guardar tenga su sí y su no al mismo peso; (d) que el resultado resaltado siga siendo el dato y no un cartel">
+          <View style={{ gap: spacing[6] }}>
+            <Texto variante="apoyo">
+              La primera respuesta: con su nota de IA, su fuente tocable, el semáforo
+              en su slot y el acto. Las siguientes NO repiten la nota.
+            </Texto>
+            <RespuestaNexo
+              primera
+              texto="Le toca la antirrábica en agosto de 2027. La última se la aplicaron el 2 de agosto."
+              hora="14:32"
+              autor="Nexo"
+              notaIA="Soy Nexo. Puedo equivocarme; para lo importante está tu vet."
+              fuente={{ voz: 'de su carnet · 12 mar', onPress: () => {} }}
+              onVerVet={() => {}}
+              vozVerVet="Ver a tu vet"
+            />
+            <RespuestaNexo
+              texto="Sí, el omeprazol se le da con comida."
+              hora="14:33"
+              autor="Nexo"
+              propuesta={{
+                voz: '¿Guardo que le tiene miedo a los truenos?',
+                vozSi: 'Sí, guardalo',
+                vozNo: 'No',
+                onGuardar: () => {},
+                onDescartar: () => {},
+              }}
+            />
+
+            <Texto variante="apoyo">
+              Los chips de sugerencia: son ACTOS. Tocar uno manda la pregunta — no
+              queda elegido, y no existe prop para que lo quede.
+            </Texto>
+            <ChipsSugerencia
+              sugerencias={[
+                { id: 'a', texto: '¿Cuándo le toca la vacuna?', onPress: () => {} },
+                { id: 'b', texto: '¿Puede comer pollo?', onPress: () => {} },
+                { id: 'c', texto: '¿Cuánto pesaba en junio?', onPress: () => {} },
+              ]}
+            />
+
+            <Texto variante="apoyo">
+              La búsqueda: el término resaltado por PESO, agrupada por dónde vive la
+              cosa, con su fecha en mono y su chevron.
+            </Texto>
+            <ResultadosBusqueda
+              termino="pipeta"
+              grupos={[
+                {
+                  tipo: 'despensa',
+                  rotulo: 'Despensa',
+                  resultados: [
+                    { id: 'd1', tipo: 'despensa', titulo: 'Pipeta antipulgas 10-20 kg', subtitulo: 'Bravecto', fecha: '12 mar', onPress: () => {} },
+                  ],
+                },
+                {
+                  tipo: 'citas',
+                  rotulo: 'Citas',
+                  resultados: [
+                    { id: 'c1', tipo: 'citas', titulo: 'Aplicación de pipeta', subtitulo: 'Clínica Aurora', fecha: '02 ago', onPress: () => {} },
+                  ],
+                },
+              ]}
+              vacio={{ voz: 'x', vozChip: 'x', onPreguntar: () => {} }}
+            />
+
+            <Texto variante="apoyo">
+              Sin resultados: lo dice Y ofrece salida. Las dos cosas — la primera sola
+              deja a la persona en un callejón.
+            </Texto>
+            <ResultadosBusqueda
+              termino="pipeta"
+              grupos={[]}
+              vacio={{
+                voz: 'No encontré nada con “pipeta”',
+                vozChip: 'Preguntale a Nexo',
+                onPreguntar: () => {},
+              }}
+            />
+
+            <Texto variante="apoyo">
+              «Lo que sé de Thor»: cada hecho con su fuente, corregible en línea y
+              borrable. Acá NO hay hechos sin confirmar — eso vive en el hilo.
+            </Texto>
+            <PanelMemoria
+              titulo="Lo que sé de Thor"
+              vozVacia="x"
+              onAgregar={() => {}}
+              voz={{ agregar: 'Contame algo de él', editar: 'Corregir', borrar: 'Borrar', guardar: 'Guardar', cancelar: 'Cancelar', campo: 'El hecho' }}
+              hechos={[
+                { id: 'h1', texto: 'Le tiene miedo a los truenos', origen: 'contado', vozOrigen: 'lo contaste vos', onEditar: () => {}, onBorrar: () => {} },
+                { id: 'h2', texto: 'Come dos veces por día', origen: 'confirmado', vozOrigen: 'lo confirmaste el 2 de septiembre', onEditar: () => {}, onBorrar: () => {} },
+              ]}
+            />
+
+            <Texto variante="apoyo">
+              Y vacío: se dibuja igual y lo dice. Es la excepción declarada a
+              `haySeguridad` — este panel lo abre la familia.
+            </Texto>
+            <PanelMemoria
+              titulo="Lo que sé de Zeus"
+              hechos={[]}
+              vozVacia="Todavía no me contaste nada; lo que me cuentes lo uso para acompañarlo mejor"
+              voz={{ editar: 'Corregir', borrar: 'Borrar', guardar: 'Guardar', cancelar: 'Cancelar', campo: 'El hecho' }}
+            />
+          </View>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — EL «CONTANOS» (2.1) · qué decide: (a) que el acceso se lea como la pieza más INVITANTE del perfil y no como la más discreta; (b) que la caja libre se vea antes que las cuatro entradas; (c) que la propuesta de Nexo reemplace a la caja en vez de apilarse; (d) que ninguna voz con el nombre adentro quede cortada">
           <View style={{ gap: spacing[4] }}>
             <Texto variante="apoyo">
@@ -8571,6 +8734,39 @@ function GaleriaInterna() {
               cero pendientes — su firma es su desaparición.
             </Texto>
             <ContanosDemo />
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S113 — NEXO ACOMPAÑA (2.1) · qué decide: (a) que las tres burbujas de la presentación se lean como UNA voz y no como tres mensajes sueltos; (b) que el aviso que se adelanta se distinga sin gritar —no pasó nada malo, todavía no pasó nada— y (c) que su acto lleve a alguien, no a una conclusión">
+          <View style={{ gap: spacing[5] }}>
+            <Texto variante="apoyo">
+              La primera vez: tres burbujas seguidas, con el nombre en la primera y la
+              hora en la última. Las piezas son las del chat, sin variante nueva.
+            </Texto>
+            <PresentacionNexo
+              autor="Nexo"
+              hora="14:32"
+              burbujas={[
+                'Me acuerdo de todo lo de Thor: vacunas, pesos, citas, y lo que me cuentes.',
+                'Puedo decirte cuándo le toca la antirrábica, cuánto pesaba en junio y qué comió esta semana.',
+                'Cuanto más uses e-PetPlace, más personal es lo que te digo y antes me adelanto. Puedo equivocarme; para lo importante está tu vet.',
+              ]}
+            />
+
+            <Texto variante="apoyo">El aviso, en sus dos formas. Nunca en color de alarma:</Texto>
+            <AvisoAnticipacion
+              forma="fila"
+              contexto="Thor entra a senior en marzo"
+              sugerencia="Los Bulldog inglés suelen tener displasia de cadera"
+              onAbrir={() => {}}
+            />
+            <AvisoAnticipacion
+              forma="tarjeta"
+              contexto="Thor entra a senior en marzo"
+              sugerencia="Los Bulldog inglés suelen tener displasia de cadera: vale la pena hablar de un estudio de cadera en su próximo chequeo."
+              onVerVet={() => {}}
+              vozVerVet="Hablarlo con mi vet"
+            />
           </View>
         </Seccion>
     </ScrollView>

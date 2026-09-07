@@ -1156,6 +1156,29 @@ export { ListaPlanVacunal, type ListaPlanVacunalProps, type FilaPlanVacunal } fr
    que comparten tinta —el hueco del carnet y «todavía no le toca»—, porque si
    sólo las separara el color serían el mismo punto. */
 export { PuntoEstado, type PuntoEstadoProps } from './components/PuntoEstado'
+
+/* ══ EL PASAPORTE (S113-B · 1.3) ═══════════════════════════════════════════
+ * 🔴 **Ninguna pieza genera el QR: lo reciben dibujado.** Generarlo exige una
+ * librería que este grafo no tiene, y una dependencia nueva no viaja por OTA.
+ * La página pública NO vive acá: es HTML y vive junto a los papeles, en
+ * `supabase/functions/_shared/pasaporte-html.ts` — *su lector no es la app,
+ * es un desconocido en la calle.* */
+export { TarjetaPasaporte, type TarjetaPasaporteProps } from './components/TarjetaPasaporte'
+export { PlacaQR, type PlacaQRProps } from './components/PlacaQR'
+export { AccionesPasaporte, type AccionesPasaporteProps } from './components/AccionesPasaporte'
+export {
+  ConfiguracionPasaporte,
+  type ConfiguracionPasaporteProps,
+  type OpcionPasaporte,
+} from './components/ConfiguracionPasaporte'
+export {
+  sePintaPasaporte,
+  filtrarPorVisibilidad,
+  type QrPasaporte,
+  type EstadoPasaporte,
+  type VisibilidadPasaporte,
+} from './components/pasaporte-qr'
+export { svgDeLaPlaca, ladoQrMm, LADO_MM, MARGEN_MM, type PlacaQrDatos } from './components/placa-qr'
 /* La lógica del estado vive aparte para que su gate no arrastre `react-native`
    — mismo motivo que `coach-geometria` (`L-175`). */
 export {
@@ -1207,6 +1230,46 @@ export { FichaRaza, type FichaRazaProps, type CuidadoPorEtapa } from './componen
 export { PantallaDespedida, type PantallaDespedidaProps } from './components/PantallaDespedida'
 export { fechaDespedidaValida } from './components/despedida-fecha'
 
+// ═══════════════════════════════════════════════════════════════════════
+// NEXO HABLA (S113-B · lote 2.0) — la Hoja, la búsqueda y la memoria.
+//
+// 🔴 LAS TRES LEYES QUE ATRAVIESAN ESTAS PIEZAS, y viven en los TIPOS:
+//  · la PRIMERA respuesta no compila sin decir que es IA (`RespuestaNexo`)
+//  · en la memoria NO HAY hechos sin confirmar: lo propuesto vive en el
+//    hilo y muere ahí (`nexo-memoria` no tiene ese estado)
+//  · un resultado SIN destino no se puede escribir (`Resultado.onPress`)
+//
+// ⚠️ NO HAY MICRÓFONO, y está medido: `expo-speech-recognition` vive sólo
+// en `apps/prestador` y `SpeechRecognition` da CERO en el cliente. Traerlo
+// es dependencia NATIVA ⇒ no viaja por OTA. Se declara para que nadie lo
+// busque creyendo que se olvidó.
+// ═══════════════════════════════════════════════════════════════════════
+export {
+  RespuestaNexo,
+  type RespuestaNexoProps,
+  type FuenteDeRespuesta,
+  type PropuestaDeMemoria,
+} from './components/RespuestaNexo'
+export {
+  ResultadosBusqueda,
+  type ResultadosBusquedaProps,
+  type GrupoResultados,
+  type Resultado,
+  type TipoResultado,
+} from './components/ResultadosBusqueda'
+export { tramosResaltados, gruposConAlgo, sinResultados } from './components/nexo-busqueda'
+export {
+  PanelMemoria,
+  type PanelMemoriaProps,
+  type HechoDeMemoria,
+  type OrigenMemoria,
+} from './components/PanelMemoria'
+export { memoriaVacia, saneadoParaGuardar } from './components/nexo-memoria'
+export {
+  ChipsSugerencia,
+  type ChipsSugerenciaProps,
+  type SugerenciaNexo,
+} from './components/ChipsSugerencia'
 // ☠️ `InvitacionBio` MURIÓ (S113-B · 2.1) — y no fue una limpieza: era
 // TARJETA Y HOJA en la misma pieza, y el encargo abre esa Hoja desde CUATRO
 // lugares. *Una pieza que trae su propio botón obliga a cada acceso a montar
@@ -1230,3 +1293,22 @@ export {
   PastillaConociendolo,
   type PastillaConociendoloProps,
 } from './components/PastillaConociendolo'
+
+// NEXO ACOMPAÑA (S113-B · 2.1) — la presentación y el aviso que se adelanta.
+// 🔴 La presentación son TRES y es una TUPLA: la tercera —«puedo equivocarme;
+// para lo importante está tu vet»— NO es opcional. *Una presentación que puede
+// omitirla es una que alguien va a omitir el día que moleste.*
+// 🔴 El aviso NUNCA es alarma: no pasó nada malo, todavía no pasó nada — y el
+// costo de gritar no es el susto, es que la próxima alarma ya no se distinga.
+// Y sus dos formas son una UNIÓN: la fila exige su destino, la tarjeta exige
+// el acto. *Una prop obligatoria que en la mitad de los casos se ignora enseña
+// a pasar cualquier cosa con tal de que compile.*
+export {
+  PresentacionNexo,
+  type PresentacionNexoProps,
+  type TresBurbujas,
+} from './components/PresentacionNexo'
+export {
+  AvisoAnticipacion,
+  type AvisoAnticipacionProps,
+} from './components/AvisoAnticipacion'

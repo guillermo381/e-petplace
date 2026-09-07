@@ -65,6 +65,42 @@ export const clienteEs = {
    * exactamente la clase de defecto que ningún typecheck ve* (el riel exige
    * que la KEY exista, jamás que los NOMBRES de las variables coincidan). */
   nexo: {
+    titulo: 'Nexo',
+    autor: 'Nexo',
+    caja: 'Escribe tu pregunta',
+    cajaPlaceholder: 'Pregunta o busca algo…',
+    invitacion: 'Pregúntame algo de {{nombre}}, o busca cualquier cosa de tu familia.',
+    /* El aviso de IA de la PRIMERA respuesta. Voz honesta de la casa mientras
+       el texto legal espera al abogado (D-405): **no promete que sea correcto y
+       no se disculpa por existir.** */
+    avisoIa: 'Esto lo redacta una IA con el expediente de tu mascota. No reemplaza a tu veterinario.',
+    verVet: 'Ver a tu vet',
+    deSuCarnet: 'de su carnet',
+    deSuPeso: 'de su historial de peso',
+    sinRespuesta: 'No supe qué contestarte. Prueba preguntándolo de otra forma.',
+    sinContexto: 'No pudimos leer su expediente',
+    sinContextoDetalle: 'Sin eso prefiero no contestarte nada.',
+    sugVacuna: '¿Cuándo le toca la vacuna?',
+    sugPeso: '¿Cómo va su peso?',
+    sugEtapa: '¿Qué cuidados necesita por su etapa?',
+    sinResultados: 'No encontré nada con «{{termino}}».',
+    preguntarIgual: 'Preguntárselo a Nexo',
+    grupo_citas: 'Citas',
+    grupo_pedidos: 'Pedidos',
+    grupo_recuerdos: 'Recuerdos',
+    grupo_despensa: 'Despensa',
+    grupo_prestadores: 'Quienes la cuidan',
+    memoriaTitulo: 'Lo que sé de {{nombre}}',
+    memoriaVacia: 'Todavía no me contaste nada de él.',
+    memoriaComoSeAgrega: 'Cuéntamelo en el chat y te pregunto si lo guardo.',
+    memoriaAgregar: 'Agregar',
+    origenContado: 'me lo contaste',
+    origenConfirmado: 'lo confirmaste',
+    memoriaCampo: 'El hecho',
+    memoriaEditar: 'Editar',
+    memoriaBorrar: 'Borrar',
+    memoriaGuardar: 'Guardar',
+    memoriaCancelar: 'Cancelar',
     // La presencia, cuando se toca.
     etiqueta: 'Abrir a {{nombre}}',
     /* La MISMA puerta, del otro lado: desde el lote 0.2 el orbe abierto
@@ -260,6 +296,14 @@ export const clienteEs = {
   //      (7-ago: el sujeto es el sistema, el campo dos es el tipo de agua) y
   //      dejó dicho que la voz se firma en el gate de pantalla.
   alta: {
+    sugEsUn: '¿Es un {{raza}}?',
+    sugConf_muyProbable: 'muy probable',
+    sugConf_probable: 'probable',
+    sugConf_puedeSer: 'puede ser',
+    /* ① el momento tras el toque en la raza. */
+    conoceAl: 'Conoce al {{raza}}',
+    sugSinAnimal: 'No pude ver a tu mascota en la foto',
+    sugOtra: 'Otra',
     // ── paso 1/4
     paso1Titulo: '¿Quién se suma a tu casa?',
     especieEtiqueta: '¿Qué especie es?',
@@ -560,6 +604,29 @@ export const clienteEs = {
     seguridadRestriccion: 'No puede {{servicio}}',
     seguridadLaFamilia: 'Lo registró su familia',
     seguridadUnPrestador: 'Lo registró una clínica',
+    /* C10 · la ficha de la raza. «Sobre los {raza}» y no «Sobre Thor»: habla
+       de la raza, no del animal — lo que sigue abajo sí es de él. */
+    /* C11 · el menú de edición y la puerta de la despedida. */
+    menuTitulo: 'Editar',
+    menuFoto: 'Cambiar la foto',
+    menuRaza: 'Cambiar la raza',
+    menuDespedir: 'Despedirme de {{nombre}}',
+    /* ② la invitación que cierra la ficha de raza. En TUTEO: la orden llegó
+       en voseo y la casa habla tuteo neutro (R66). Corta, y sin prometer un
+       beneficio que no podemos medir: «mejor lo acompañamos» es lo que el
+       founder dijo, y es verdad — no «mejor su salud». */
+    razaInvitacion: '{{mascota}} está en su etapa {{etapa}}. ¿Quieres contarnos qué lo hace único?',
+    razaInvitacionSinEtapa: '¿Quieres contarnos qué hace único a {{mascota}}?',
+    razaInvitacionDetalle: 'Cuanto mejor lo conocemos, mejor lo acompañamos.',
+    razaTemperamento: 'Cómo suelen ser',
+    razaTalla: 'Tamaño de adulto',
+    razaVida: 'Cuánto suelen vivir',
+    razaCachorro: 'De cachorro',
+    razaAdulto: 'De adulto',
+    razaSenior: 'En sus años dorados',
+    razaRevision: 'Información general de la raza, revisada por un veterinario.',
+    razaVer: 'Ver más sobre la raza',
+    razaOcultar: 'Ocultar',
     seguridadVer: 'Ver {{n}}',
     seguridadOcultar: 'Ocultar',
     // ── momento vital (Ley 3: la VOZ, jamás M1..M7) ──
@@ -612,6 +679,8 @@ export const clienteEs = {
     pesoMedidoEl: 'medido el {{fecha}}',
     pesoRegistrar: 'Registrar el de hoy',
     hoySinRegistroCorto: 'Sin registro',
+    pesoDeClinica: 'lo pesó la clínica',
+    pesoDeVos: 'lo pesaste tú',
     pesoHojaTitulo: 'El peso de {{nombre}}',
     pesoHojaPorQue:
       'Cada peso se guarda con su fecha y los anteriores no se borran: así se ve cómo cambia, que es lo que sirve en una consulta.',
@@ -4116,5 +4185,66 @@ export const clienteEs = {
     errorTitulo: 'No pudimos traer el texto',
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Probar de nuevo',
+  },
+  /** C11 · la despedida. **Voz serena y en primera persona de la familia**:
+   *  «me despido», no «dar de baja». Nada de «eliminar», «cerrar» ni
+   *  «finalizar» — la mascota no es un registro. */
+  despedida: {
+    titulo: 'Despedirse',
+    cuando: '¿Cuándo fue?',
+    palabras: 'Unas palabras, si quieres escribirlas',
+    palabrasPlaceholder: 'Lo que quieras dejar dicho',
+    boton: 'Despedirme',
+    confirmar: 'Toca otra vez para despedirte de {{nombre}}',
+    enviando: 'Guardando…',
+    fechaFutura: 'Esa fecha todavía no llegó.',
+    sinMascota: 'No pude saber de quién te estás despidiendo. Vuelve a entrar desde su ficha.',
+    noSePudo: 'No se pudo guardar. Revisa tu conexión y prueba de nuevo.',
+  },
+  /** ⭐ **EL PASAPORTE** (S113-C · 1.3). Voz de la casa: **sin dramatismo**.
+   *  «Se perdió» y «Ya apareció» son hechos, no alarmas — *quien marca esto ya
+   *  está bastante mal como para que la app se lo grite*. */
+  pasaporte: {
+    titulo: 'Pasaporte y QR',
+    entrada: 'Pasaporte y QR',
+    entradaDetalle: 'Su chapita y la página de quien la encuentre',
+    vozQr: 'Código para {{nombre}}',
+    compartir: 'Compartir el enlace',
+    compartirQr: 'Compartir el QR',
+    sePerdio: 'Se perdió',
+    yaAparecio: 'Ya apareció',
+    confirmarPerdida: 'Toca otra vez para marcarlo perdido',
+    confirmarAparecio: 'Toca otra vez para decir que apareció',
+    perdidaEnTarjeta: 'Está perdido',
+    desdeHoy: 'hoy',
+    yaEstaba: 'Ya estaba así.',
+    optContacto: 'Mostrar tu contacto',
+    optContactoDetalle: 'Quien encuentre a {{nombre}} va a ver tu teléfono.',
+    optSalud: 'Mostrar alergias y medicación',
+    optSaludDetalle: 'Van a ver sus alergias y su medicación antes de darle nada.',
+    optChip: 'Mostrar el microchip',
+    optChipDetalle: 'Una clínica o un refugio van a poder leer su microchip.',
+    verComoLoVen: 'Ver como lo ven',
+    emitirNuevo: 'Emitir uno nuevo',
+    revocarAviso: 'Si emites uno nuevo, la placa vieja deja de funcionar.',
+    emitido: 'Listo. La placa vieja ya no funciona.',
+    noSePudo: 'No pudimos abrir el pasaporte',
+    noSePudoDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    enMemoria: 'El pasaporte de {{nombre}} ya no hace falta.',
+  },
+  /** ⭐ **NEXO** (S113-C · 2.0). Tuteo, sin promesas y **sin diagnosticar**:
+   *  la voz dice de dónde salió cada cosa y ofrece el vet cuando corresponde. */
+  /** ① la puerta de la medicación. **Anotar una dosis, no recetar.** */
+  medicacion: {
+    titulo: 'Una dosis de {{nombre}}',
+    detalle: 'Anota lo que le diste hoy. Esto no cambia lo que le recetaron.',
+    cual: '¿Qué le diste?',
+    cualPlaceholder: 'Nombre del medicamento',
+    dosis: '¿Cuánto?',
+    dosisPlaceholder: 'Media pastilla, 5 ml…',
+    guardar: 'Anotar',
+    faltaCual: 'Falta el nombre del medicamento',
+    faltaDosis: 'Falta la dosis',
+    noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
 } as const;

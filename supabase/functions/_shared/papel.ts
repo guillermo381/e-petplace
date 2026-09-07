@@ -32,6 +32,7 @@
 // ============================================================================
 
 import { PDFDocument, StandardFonts, rgb } from 'npm:pdf-lib@1.17.1';
+import { QUIET, matrizQr } from './qr.ts';
 import type { PDFFont, PDFPage } from 'npm:pdf-lib@1.17.1';
 
 export const TINTA = rgb(0.133, 0.118, 0.098); // #221E19 — 16.56 sobre blanco
@@ -238,6 +239,74 @@ export class Papel {
       this.texto(l, MX, size, { color: TINTA_65 });
       this.y -= 11;
     }
+  }
+
+  /**
+   * EL QR DEL PASAPORTE — S113-A · 1.3 · A5.
+   *
+   * 🔴 **VECTORIAL, no una imagen.** Un PNG de QR embebido se imprime borroso
+   * si la impresora escala, y `pdf-lib` tendría que parsearlo; dibujado con
+   * rectángulos sale NÍTIDO a cualquier tamaño y no depende de ningún
+   * decodificador. *Un QR mal impreso no se lee a medias: no se lee.*
+   *
+   * ⚠️ **NO verifica el documento y por eso su leyenda no lo insinúa.** El
+   * folio sigue sin mecanismo público de verificación; este QR lleva a la
+   * página de la mascota. *Poner un QR al lado de un folio sin decir qué hace
+   * cada uno invita a leer el QR como un sello de autenticidad — y no lo es.*
+   *
+   * Va abajo a la derecha, sobre el pie: no interrumpe la lectura y queda a
+   * mano si el papel se dobla. Se llama ANTES de `pie()`.
+   */
+  qr(texto: string, leyenda: string[], lado = 92): void {
+    // Alto del bloque + el pie que viene después. Si no entra, página nueva.
+    this.asegura(lado + 120);
+
+    const m = matrizQr(texto);
+    const n = m.length;
+    const total = n + QUIET * 2;
+    const mod = lado / total;          // lado de un módulo, en puntos
+    const x0 = A4[0] - MX - lado;
+    const y0 = 128;                    // apoyado sobre la zona del pie
+
+    // Fondo blanco explícito bajo la zona tranquila: la marca de agua del
+    // isotipo cruza la página, y un QR sobre una trama gris pierde contraste.
+    this.page.drawRectangle({
+      x: x0, y: y0, width: lado, height: lado, color: rgb(1, 1, 1),
+    });
+
+    /* Por RUNS horizontales: un QR de 45×45 tiene ~1.000 módulos oscuros, y
+       un rectángulo por módulo engorda el PDF sin cambiar el dibujo. Agrupar
+       los contiguos deja ~250. *El resultado es idéntico; el archivo, un
+       cuarto.* */
+    for (let f = 0; f < n; f++) {
+      let c = 0;
+      while (c < n) {
+        if (!m[f][c]) { c++; continue; }
+        let fin = c;
+        while (fin + 1 < n && m[f][fin + 1]) fin++;
+        this.page.drawRectangle({
+          x: x0 + (c + QUIET) * mod,
+          // el PDF cuenta el eje Y desde abajo; la matriz, desde arriba
+          y: y0 + lado - (f + QUIET + 1) * mod,
+          width: (fin - c + 1) * mod,
+          height: mod,
+          color: TINTA,
+        });
+        c = fin + 1;
+      }
+    }
+
+    // La leyenda, a la izquierda del código. La primera línea en tinta plena
+    // (es la instrucción); las de abajo en tinta al 65 % (son la aclaración).
+    let yy = y0 + lado - 10;
+    let primera = true;
+    for (const l of leyenda) {
+      this.y = yy;
+      this.texto(l, MX, 9.5, { color: primera ? TINTA : TINTA_65 });
+      primera = false;
+      yy -= 13;
+    }
+    this.y = y0 - 6;
   }
 
   bytes(): Promise<Uint8Array> {

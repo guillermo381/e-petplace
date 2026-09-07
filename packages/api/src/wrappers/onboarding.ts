@@ -6,6 +6,7 @@
 // test imperativo con JWT + ROLLBACK del 7-Jul) — L-124, nunca calcado.
 
 import { getClient } from '../client';
+import { normalizarNombreDeRaza } from './_raza-nombre';
 import type { ResultadoWrapper } from '../resultado';
 import type { EstadoVidaMascota } from './_mascotas-elegibles';
 
@@ -311,11 +312,20 @@ export async function obtenerMascotasDeFamilia(
   ];
   const rutaPorRaza = new Map<string, string>();
   if (declaradas.length > 0) {
+    /* S113-A · se casa por `nombre_norm`, no por `nombre`: `mascotas.raza` es
+       texto libre y una mayúscula o una tilde de diferencia dejaba a la mascota
+       sin su cara. La normalización del cliente es el espejo exacto de la
+       columna generada — ver `_raza-nombre.ts`. */
+    const norm = new Map(declaradas.map((d) => [normalizarNombreDeRaza(d), d]));
     const { data: razas } = await getClient()
       .from('cat_razas')
-      .select('especie, nombre, ruta_imagen')
-      .in('nombre', declaradas);
-    for (const r of razas ?? []) rutaPorRaza.set(`${r.especie}|${r.nombre}`, r.ruta_imagen);
+      .select('especie, nombre_norm, ruta_imagen')
+      .in('nombre_norm', [...norm.keys()]);
+    /* Las razas sin dibujo propio (S113) NO entran al mapa: quien consulta
+       recibe `undefined` y cae solo a la cara genérica de su especie. */
+    for (const r of razas ?? []) {
+      if (r.ruta_imagen !== null) rutaPorRaza.set(`${r.especie}|${r.nombre_norm}`, r.ruta_imagen);
+    }
   }
 
   return {
@@ -338,7 +348,7 @@ export async function obtenerMascotasDeFamilia(
       sujeto: m.sujeto === 'acuario' ? 'acuario' : 'individuo',
       tipo_agua: m.tipo_agua === 'dulce' || m.tipo_agua === 'marino' ? m.tipo_agua : null,
       raza: m.raza ?? null,
-      raza_ruta_imagen: rutaPorRaza.get(`${m.especie}|${m.raza ?? ''}`) ?? null,
+      raza_ruta_imagen: rutaPorRaza.get(`${m.especie}|${normalizarNombreDeRaza(m.raza ?? '')}`) ?? null,
     })),
   };
 }

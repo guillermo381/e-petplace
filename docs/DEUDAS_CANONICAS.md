@@ -28608,6 +28608,36 @@ prueba la cascada ajena**. *Un arnés no encontró un defecto: encontró que el
 mundo cambió debajo de su fixture — que es exactamente para lo que sirve volver
 a correrlo.*
 
+### `L-492` — Un gate que mide UNA dirección deja la otra sin vigilancia, y su silencio se lee como salud
+
+**El caso (S113-A · lote 2, 6-sep-2026).** Censando para escribir la puerta de
+medicación apareció algo que no venía a buscar: `cat_tipos_evento` tenía
+`medicacion_administrada` **activo con `tabla_tipada` NULL**, mientras la tabla
+`evento_medicacion_administrada` existía desde S66.
+
+Lo interesante es **por qué nadie lo había visto**. Existe un gate para
+exactamente esta clase —`verificar_coherencia_tablas_tipadas()`, nacido en S67
+con `D-415`— y **corre en toda migración que toca el catálogo**. Pero mide una
+sola dirección: *el catálogo apunta a una tabla que no existe*. El caso inverso
+—*la tabla existe y el catálogo no la nombra*— **le es invisible**, y su verde
+se lee cada vez como «el catálogo está sano».
+
+**La ley.** Un invariante entre dos cosas tiene **dos incumplimientos**, y un
+gate que sólo conoce uno no está midiendo el invariante: está midiendo la mitad
+que a alguien se le ocurrió primero. *Y la mitad que falta es peor que no tener
+gate, porque el gate produce un verde que nadie va a volver a cuestionar.*
+
+**El correctivo, exigible:** al escribir un gate sobre una relación entre A y B,
+se enumeran **las dos** formas de romperla y se prueba el rojo de cada una. Si
+sólo se cubre una, el gate **lo declara en su cabecera** — lo mismo que
+`verify:edge-deno` hace con sus 89 errores fuera de clase (`D-870`).
+
+**Su hermana práctica del mismo día:** `ota:deps` compara **commits**, no el
+árbol. Con una dependencia nativa instalada y sin commitear dio **verde**
+(`D-1043`). Otra vez: la mitad no medida existía y su silencio parecía salud.
+
+---
+
 ### `L-491` — Un arnés que limpia con el MISMO rol con el que escribió puede dejar residuo y reportar éxito
 
 **Origen:** S113-A, lote 1.0 · A2, 9-sep-2026, con dos filas quedando en
@@ -28694,3 +28724,541 @@ config`, no contra el mío— cuando mi explicación no le cerraba, y me lo
 corrigió con el comando y su salida, no con una afirmación. Es la misma
 disciplina que `L-489` pide: una corrección que llega con su propia
 evidencia se acepta; una que llega sin ella se mide antes.
+
+---
+
+### `D-1034` 🟡 · Los guards `{x && (…)}` de `packages/ui` que pueden dejar una cadena vacía como hijo de `View`
+
+**Dueño: B · gate: E · nace S113-A (5-sep-2026), del censo que pidió la mesa.**
+
+#### El defecto, en una línea
+En React Native, `'' && <X/>` **no devuelve `false`: devuelve `''`** — y una cadena
+suelta como hijo de `View` revienta con *«Text strings must be rendered within a
+`<Text>` component»*. `0` hace exactamente lo mismo. *El operador no está mal
+usado: está usado con un valor que no es booleano, y JavaScript devuelve el
+operando en vez de un `false`.*
+
+#### El número, medido por AST y no por `grep`
+La pregunta —*¿qué tipo tiene el lado izquierdo?*— **no está en la línea**, así
+que un `grep` no puede contestarla. Censado sobre los `.tsx` de
+`packages/ui/src`:
+
+| corte | cuántos | qué son |
+|---|---|---|
+| todos los `{x && …}` en JSX | **30** | el universo |
+| ya booleanos **por forma** | **23** | llevan `!`, una comparación, `Boolean(…)`, `??` — no pueden ser `''` |
+| **no probablemente seguros** | **7** | `secure` · `marcada` · `cortado` · `lleno` · `editable` + los dos de abajo |
+| 🔴 **genuinamente `string \| null`** | **2** | los dos en `FichaVacuna.tsx` |
+
+⚠️ **El «23» que llegó al encargo reconcilia con esto y no lo contradice**: son
+exactamente los 30 menos los 7. Se deja escrito porque *un número heredado se
+lee igual de firme que uno medido* — éste resultó ser el complemento del que
+importa.
+
+#### Los dos reales, y por qué hoy no explotan
+- `FichaVacuna.tsx:175` — `{(tipoVacuna || veterinario) && …}`, las dos
+  `string | null`
+- `FichaVacuna.tsx:206` — `{fechaLiteral && …}`, `string | null`
+
+Con `null` no pasa nada: `null && X` da `null` y React no dibuja nada. **El
+único valor que rompe es `''`**, y hoy no llega porque **todos los productores
+normalizan**: la RPC usa `nullif(btrim(…), '')` y el wrapper usa `campoTexto`.
+
+🔴 **Y ahí está la deuda: la seguridad de estos dos guards no vive en ellos —
+vive en que cada productor, del otro lado de una frontera, siga normalizando.**
+`fechaLiteral` viene de la edge de D. *Un invariante que se sostiene en la
+disciplina de un módulo ajeno es un invariante que nadie está vigilando.*
+
+#### La cura, y por qué no es «poner `Boolean()`»
+Envolver en `Boolean()` apaga el síntoma y **deja el mismo hueco** para el
+próximo campo de texto que alguien agregue. La forma que la casa ya usa en otros
+lados es que el guard **compare**, no que convierta: `{fechaLiteral !== null && …}`
+o, mejor, que el tipo lo haga inexpresable. La decisión es de B, que es quien
+conoce la pieza.
+
+#### Disparo
+La próxima vez que B toque `FichaVacuna`, **o** antes si E ve la excepción en el
+aparato. **No es 🔴 porque hoy ningún productor emite `''`** — y eso está medido,
+no supuesto.
+
+#### Lo que este censo NO cubre, declarado
+Sólo miró `packages/ui/src`. **`apps/cliente` y `apps/prestador` no se
+censaron** — es territorio de C y de B, y el instrumento
+(`/tmp/censo-guards.mjs`, AST con `typescript`) se corre igual sobre ellos
+cambiando una ruta.
+
+---
+
+### `D-1035` 🟢 · La clave de la cuenta de prueba quedó impresa en el transcript de una pista
+
+**Nace y se cura el mismo día (S113, 5-sep-2026). Decisión del founder: NO se
+rota** — es una cuenta de prueba genérica, sin datos sensibles y sin acceso a
+nada de una familia real. *La ficha existe igual, porque lo que hay que
+conservar no es el susto: es la regla.*
+
+#### Qué pasó
+Un arnés de una pista escribió la clave de la cuenta de prueba **inline**, y con
+eso quedó en el transcript de la sesión. Un transcript no se puede editar
+después: *el momento de decidir que un valor no se imprime es antes de
+imprimirlo, porque después ya no hay dónde borrarlo.*
+
+#### Por qué pasa, y por qué es peor que la de las llaves de servicio
+`D-1013` es sobre un comando que **vuelca secretos sin que nadie se lo pida**.
+Éste es distinto y por eso engaña: **la cuenta de prueba se siente inofensiva**
+—es de prueba, es de mentira, es «la de siempre»— así que nadie la trata como un
+secreto y termina escrita al lado del código que la usa. **La categoría del dato
+no la decide su importancia: la decide que sea una credencial.**
+
+#### La regla que queda (firma del founder)
+1. **La cuenta de prueba vive en el llavero**, servicio `epetplace-cuenta-prueba`
+   — el correo en `acct`, la clave en el valor.
+2. **Se lee AL MOMENTO de usarla y no se imprime nunca**, ni siquiera
+   enmascarada: *un valor mostrado a medias sigue estando en el transcript.*
+3. **Ningún arnés la escribe inline ni la deja en una constante.** Si el llavero
+   no la tiene, el arnés **dice cómo ponerla y se detiene** — jamás cae en
+   silencio a un archivo: *un fallback callado convierte la regla en una
+   sugerencia.*
+
+#### Ya ejecutado
+- La cuenta está en el llavero.
+- `scripts/s113a-llamadas-reales.mjs` la lee de ahí, con el fallo hablado.
+- El `.env.local` la conserva **sólo para que la app arranque en la máquina del
+  founder**, y ese archivo no está trackeado (verificado).
+
+#### Lo que NO cierra esta ficha, declarado
+**No se censaron los demás arneses del repo.** Éste es el que yo escribí y el
+que se curó; si otro guarda una credencial de prueba inline, sigue ahí. El censo
+es `grep -rn "PASSWORD\|password:" scripts/` y **no lo corrí**.
+
+---
+
+### `D-1036` 🟢 · `cat_razas` tiene una policy que dice «pública» y un GRANT que no la deja entrar
+
+**Nace S113-A (5-sep-2026), medida de paso. Decisión del founder: NO se toca
+hasta que una pantalla pública la pida.**
+
+#### Lo medido
+```
+policy   cat_razas_select_publica → public
+grants   authenticated:SELECT · service_role:… · postgres:…     ← anon NO está
+RLS      encendida
+```
+Un cliente con la clave `anon` recibe **`permission denied for table
+cat_razas`**. La policy autoriza y el grant no deja pasar: **es `L-216` en su
+forma limpia** — *todo rol hereda de `PUBLIC` en las policies, pero el GRANT es
+otra puerta, y sin ella la policy no alcanza nada.*
+
+#### Por qué hoy no rompe nada
+Toda superficie que lee razas —el selector del alta, la ficha del perfil, los
+lookups por lote— corre con sesión iniciada, o sea como `authenticated`, que sí
+tiene el grant. **El hueco es real y está fuera de todo camino vivo.**
+
+#### 🔴 Y la asimetría que lo vuelve digno de ficha
+`razas_contenido` **sí** le da SELECT a `anon` (lo concedí yo el mismo día, para
+que la ficha publicada se pueda leer sin sesión). Así que hoy conviven: *el
+contenido de una raza es legible sin sesión y el nombre de esa raza no.* Ninguna
+pantalla lo nota porque ninguna intenta las dos cosas sin sesión — **pero el día
+que alguien arme una página pública de razas, va a encontrar el contenido y no
+el catálogo, y el síntoma va a ser un error de permisos donde esperaba una
+lista.**
+
+#### Lo que NO se hace, y por qué
+No se agrega el grant. *Abrir un catálogo entero a `anon` es una decisión de
+superficie pública, no una prolijidad de permisos* — y hoy nadie la necesita.
+**El nombre de la policy es lo único que engaña**, y se deja como está para no
+tocar el objeto por un tema de forma.
+
+#### Disparo
+La primera pantalla que lea razas **sin sesión** — una landing, una página de
+compartir, un enlace público a la ficha de una raza. Ahí se decide si el grant
+entra o si esa pantalla pasa por una vista angosta.
+
+---
+
+### `D-1037` 🟡 · Los sinónimos de raza en español: 77 menciones sobre 58 nombres, medidos y sin usar
+
+**Dueño: C. Disparo: cuando el selector de raza del alta acepte texto libre.
+Sin cambio hoy.**
+
+#### De dónde sale
+E lo midió como subproducto de un experimento que **descartó**: `sugerir-raza`
+sin el catálogo en el prompt (`pista/s113-e-1.2 @ 4b08b570`,
+`docs/loop/CANDIDATO-raza-sin-catalogo.md`). El veredicto fue **NO va** —pierde
+14 puntos de top-1 por ahorrar $0,0038 la foto— *pero al mirar por qué perdía,
+apareció esto:*
+
+> **En español una raza no tiene UN nombre.** El modelo devolvía la raza
+> correcta con otro nombre: «Ruso azul» por «Azul Ruso», «Braco de Weimar» por
+> «Weimaraner», «Caniche» por «Poodle», «Británico de pelo corto» por «British
+> Shorthair».
+
+#### Lo re-medido por A (5-sep), y corrige el encuadre del número
+E reportó «77 de 255 nombres». Re-medido contra el catálogo de **hoy** (220
+razas, no las 137 de entonces) y con **su casamiento más generoso** —`nombre_norm`,
+sin paréntesis, orden de palabras indiferente—:
+
+```
+nombres distintos que el modelo devolvió   132   (255 menciones)
+🔴 NO CASAN                                 58 distintos · 77 menciones
+```
+
+**Los 77 son MENCIONES, no nombres distintos.** Son 58 sinónimos reales, algunos
+repetidos en varias fotos. *La cifra de E era correcta; lo que faltaba era decir
+de qué era el 77, porque «77 sinónimos» y «58 sinónimos vistos 77 veces» mandan
+a construir tablas de tamaños distintos.*
+
+#### 🔴 Y el rescate, que era lo urgente
+El JSON vivía **sólo en el worktree de E**: `.ia-conjuntos/` está en
+`.gitignore`. *Un `git worktree prune` y el censo desaparecía, y regenerarlo son
+146 llamadas al modelo.* **Rescatado y versionado** en
+`docs/loop/S113-sinonimos-de-raza-sin-casar.json`, con su procedencia y el
+casamiento con el que se midió escritos adentro. **Es L-217 otra vez: «está
+medido» y «está en el canon» son dos afirmaciones distintas.**
+
+#### Qué hacer cuando dispare, y las dos mitades son igual de importantes
+1. **Casar por sinónimo.** Si alguien teclea «Caniche» o «Braco de Weimar», el
+   selector le ofrece la raza del catálogo en vez de tratarlo como texto nuevo.
+   La lista ya está medida y no hay que inventarla.
+2. 🔴 **REGISTRAR LO DESCARTADO**, que es la advertencia literal de E: casar por
+   nombre y **descartar en silencio** significa que *lo que no casó desaparece
+   sin dejar rastro* — y la próxima vez que alguien mida exactitud **no va a
+   poder saber si el modelo falló o si el casamiento se comió la respuesta.**
+   *Un descarte silencioso no es una pérdida de datos: es una pérdida de la
+   capacidad de medir.*
+
+#### Lo que esta ficha NO decide
+Si la tabla de sinónimos vive en la base (una tabla `raza_sinonimos`) o en el
+cliente. **Depende de quién más la necesite**: hoy sólo el selector, y para un
+solo consumidor una constante alcanza. *El día que la edge también quiera casar
+por sinónimo, la constante se vuelve la segunda definición de «igual» — y esta
+casa ya pagó ese precio con `nombre_norm`.*
+
+---
+
+### `D-1038` 🟢 · Dos migraciones de S112 crearon una función cuyo INSERT nombraba cinco columnas inexistentes
+
+**Sin daño vivo. Se deposita por la LECCIÓN, que es de método y vale para toda
+migración que traiga una función.**
+
+#### Lo medido (5-sep-2026, contra la base — no contra los archivos)
+`20260908120000_s112a_acta_y_firma.sql` y `20260908240000_s112a_intentos_que_cuentan.sql`
+contienen:
+
+```sql
+INSERT INTO eventos_mascota (mascota_id, tipo_evento, fecha_evento, titulo,
+                             descripcion, procedencia, creado_por, metadata)
+```
+
+**Cinco de esos ocho nombres no existen en la tabla** — verificado contra
+`information_schema`: `tipo_evento`, `titulo`, `descripcion`, `creado_por` y
+`metadata` no están. Las reales son `tipo`, `datos` y `creado_por_user_id`.
+
+#### 🟢 Y por qué NO hay daño, también medido
+- **Ninguna función viva de la base contiene ese INSERT**: una migración
+  posterior reemplazó a `firmar_acta_adopcion`, que hoy escribe bien.
+- Hay **73 eventos `hito_narrativo`** y cuatro funciones vivas que los producen.
+- Una reconstrucción desde cero crearía la función rota y la reemplazaría
+  después, sin que nadie la llame en el medio.
+
+⇒ **Es código muerto en la historia, no un defecto abierto.** Se cierra 🟢.
+
+#### 🔴 LA LECCIÓN, que es lo que justifica la ficha
+**Postgres NO valida el cuerpo de una función PL/pgSQL al crearla.** Un
+`CREATE FUNCTION` cuyo INSERT nombra cinco columnas inventadas **se aplica sin
+una sola advertencia**; el error aparece recién cuando alguien la llama, con un
+`42703` en la cara de un usuario.
+
+*Una migración que crea una función no está probada porque haya aplicado
+limpiamente: aplicar y funcionar son dos cosas distintas, y la migración sólo
+demuestra la primera.* Es la misma familia que `L-402` —el actuador que estaba
+muerto y nadie lo notó porque nunca lo llamaron— y que `L-318`, motor sin puerta:
+**lo que no se ejerce no está probado, y en PL/pgSQL ni siquiera está
+compilado.**
+
+#### La cura barata, para quien escriba la próxima
+Toda migración que cree o reemplace una función que ESCRIBE **la ejerce en un
+fixture dentro de la misma transacción, con `ROLLBACK`**. Es lo que la casa ya
+hace en la mayoría de las migraciones y lo que estas dos no hicieron: *un
+`INSERT` de prueba habría dado `42703` en el acto, en la máquina de quien la
+escribió, en vez de quedar esperando.*
+
+#### Lo que esta ficha NO hizo
+**No censé el resto de las migraciones buscando la misma clase.** El comando es
+`grep -A8 "insert into" supabase/migrations/*.sql` cruzado contra
+`information_schema.columns`, y **no lo corrí**: encontré éstas dos mirando otra
+cosa.
+
+---
+
+### `D-1039` 🟡 · `verify:razon-muda` da 140 contra baseline 139 — heredado, sin asentar
+
+**Nace S113-A (5-sep-2026). No lo introdujo este lote.**
+
+#### Lo medido
+```
+main hoy              140 · baseline 139 · exit 1
+main @ 25aabd5c       140   (antes de mergear B-1.2 y C-1.2b)
+pista/s113-a-1.0 @ 0429bbe4   140   ← el punto más temprano de S113 que medí
+```
+⇒ **el +1 entró ANTES de este lote**, y C lo reporta igual en su cierre. *No lo
+trajeron los merges de hoy: eso está medido en los tres puntos.*
+
+#### 🔴 Por qué NO subí el baseline
+El propio gate lo dice: *«si el caso nuevo es legítimo, se declara y se sube el
+baseline A MANO, con su razón»*. **Y no puedo declarar la razón de un caso que no
+puedo nombrar**: el gate imprime los cinco archivos con más casos y trunca el
+resto («… y 71 archivo(s) más»), así que **el +1 no aparece en su salida**.
+
+*Subir un baseline sin poder decir qué caso se está aceptando es exactamente lo
+que el trinquete existe para impedir — y hacerlo «para que el gate pase» convierte
+una medición en un trámite.*
+
+#### El paso que lo cierra, escrito para que no haya que redescubrirlo
+El gate necesita **un modo que imprima la lista COMPLETA** (`--todos`). Con eso:
+corrérselo en dos puntos —uno con 139 y otro con 140— y `comm -13` sobre las dos
+listas nombra el caso en una línea. **El punto con 139 hay que buscarlo hacia
+atrás de `0429bbe4`**, que ya estaba en 140.
+
+#### Lo que este rojo NO bloquea
+No es del hook de pre-commit y **no frena el candidato 1.2**: el número es el
+mismo antes y después de los merges de hoy, así que *ningún trabajo de este lote
+lo movió*. Queda como deuda de higiene, no como bloqueante.
+
+---
+
+### `D-1040` 🔴→🟢 · Once vistas corrían como su dueño; seis se las leía `anon`
+
+**Curada el mismo día (S113-A, 5-sep-2026). Queda la REGLA y media cura
+declarada.**
+
+#### El rojo, producido antes de tocar nada, como `anon`
+```
+v_pitch_metrics            1 fila   ← usuarios_registrados_total, MRR, GMV
+v_mrr                      1 fila
+v_crecimiento_usuarios     6 filas
+v_metricas_tiempo_real     1 fila
+v_ia_costo_por_pieza_dia   9 filas
+v_gmv_mensual              0 filas  (vacía hoy, abierta igual)
+```
+Con **la llave `anon`, que viaja en el bundle de las dos apps**. *No es un dato
+interno que se filtra: `v_pitch_metrics` es el número que se dice en una reunión
+con inversores.*
+
+⚠️ **UNA ES MÍA Y DE ESE MISMO DÍA.** `v_ia_costo_por_pieza_dia` la creé horas
+antes sin `security_invoker` y sin revocar `anon`. **El costo de IA de la casa
+quedó público por mi mano**, y se dice acá y no en un pie de página.
+
+#### El censo corrigió el número
+El encargo hablaba de **cinco**. Medido en `pg_class.reloptions`: **once** sin
+`security_invoker`, **seis** legibles por `anon`.
+
+#### La cura, y por qué sola alcanza
+`ALTER VIEW … SET (security_invoker = on)` en las once. Sin la opción, una vista
+corre con los permisos de **quien la creó** —`postgres`— y atraviesa la RLS de
+todas sus tablas; con ella corre como quien consulta. **El verde es más fuerte
+que «0 filas»:** `anon` ahora recibe `42501 permission denied for table pedidos`
+— *la consulta ni siquiera llega a las tablas de abajo.*
+
+🟢 Control: la vitrina pública de adopción **sigue viva** (`obtener_adoptables`
+devuelve su adoptable como `anon`). `v_adoptables_publicos` se volteó igual
+porque se midió que sus tres consumidores son `SECURITY DEFINER`, y dentro de una
+DEFINER el usuario efectivo es el definidor.
+
+#### 🔴 LA MITAD QUE NO SE HIZO, declarada y no olvidada
+**El `REVOKE` a `anon` no se ejecutó.** El encargo dice que esas vistas «son de
+admin», pero **S95-F midió que el portal legado se conecta con la llave `anon`
+sobre esta misma base** (claim `role` decodificado). *Las dos cosas no pueden ser
+ciertas a la vez, y revocar sin resolverlo apagaría un tablero que no se puede
+probar desde este repo.* La fuga ya está cerrada por el `invoker`; el `REVOKE` es
+defensa en profundidad y necesita medir el panel, que vive afuera.
+
+#### 🔴 LA REGLA, y la parió el propio censo
+**Toda vista nueva declara `security_invoker`, y el gate lo mide en `pg_class` —
+jamás en el texto de la migración**, porque una vista puede recrearse después sin
+la opción y el archivo seguiría diciendo que la tiene.
+
+⚠️ **Y el gate mide EL HECHO, NO EL LITERAL.** Postgres guarda la opción como
+`security_invoker=on` o `=true` **según cómo se escribió el ALTER**, y las dos
+significan lo mismo. El primer censo comparaba sólo contra `=true` y **reportó
+como inseguras once vistas que acababa de curar**. *Un censo atado al literal de
+una opción mide cómo se escribió la migración, y su falso rojo manda a «arreglar»
+lo que ya está bien.*
+
+⇒ **`verify:vistas-invoker`**, con su control que prueba que reconoce las dos
+formas y rechaza `off`.
+
+---
+
+### `D-1041` 🟡 · PostgREST le sugiere a `anon` nombres reales del esquema
+
+**Medido S113-A (5-sep-2026). NO se cura desde el repo: es config de proyecto.**
+
+#### Lo medido, con la llave `anon` que viaja en el bundle
+```
+GET /rest/v1/tabla_que_no_existe
+  404 PGRST205 · hint: "Perhaps you meant the table 'public.cat_alergeno_relaciones'"
+GET /rest/v1/rpc/funcion_inventada
+  404 PGRST202 · details: "Searched for the function public.funcion_inventada …"
+                 hint: "Perhaps you meant to call …"
+```
+⇒ **cada intento fallido devuelve UN nombre real** del esquema. Con paciencia,
+eso mapea la base sin más credencial que la anon key.
+
+#### 🟢 Lo que SÍ está cerrado, y era el peor caso
+```
+GET /rest/v1/   →  401 · "Only the `service_role` API key can be used for this endpoint."
+```
+**La raíz OpenAPI no enumera.** *Si estuviera abierta, esto no sería una ficha
+🟡: sería el esquema entero en una sola petición.* Se mide y se dice, porque la
+diferencia entre «se puede adivinar de a uno» y «se descarga completo» es la
+diferencia entre una molestia y un incidente.
+
+#### Por qué no se cura acá
+La verbosidad de PostgREST es **configuración del proyecto Supabase**, no del
+repo: no hay archivo que la controle y el `config.toml` sólo rige el entorno
+local. Tocarla es entrar al dashboard de producción, que es del founder.
+
+#### El riesgo real, acotado y sin inflar
+Conocer el nombre de una tabla **no da acceso a ella**: la RLS sigue en el
+medio, y esta misma sesión midió que las tablas sensibles rebotan con `42501`.
+*Lo que un atacante gana es un mapa, no una llave.* Un mapa acelera la búsqueda
+de una policy mal escrita — como las dos que se curaron hoy — así que el valor
+de cerrarlo es proporcional a cuántas policies flojas queden.
+
+#### Disparo
+La revisión de seguridad previa al soft launch, junto con la rotación de llaves.
+Antes no: cerrar el hint sin haber cerrado las policies sería esconder el mapa
+dejando las puertas.
+
+---
+
+### `D-1045` 🟡 · Ninguna alergia dice quién la registró — el único discriminador es un proxy
+
+**El síntoma (C, 6-sep-2026):** la franja de seguridad decía **«Lo registró una
+clínica» para una alergia que declaró la familia**.
+
+**La causa inmediata:** `apps/cliente/src/lib/perfil/seguridad.ts` tenía la
+procedencia **hardcodeada** en `'prestador'`, con el comentario *«una alergia
+del snapshot clínico la registró quien atendió»*. **Eso era cierto cuando se
+escribió** —la única forma de crear una alergia era `sedimentar_nota_clinica`—
+y dejó de serlo el 5-sep, cuando se abrió `declarar_alergia_familia`.
+*Un comentario que explica un supuesto no protege del día en que el supuesto
+cambia.*
+
+🔴 **Y lo medido es peor que el síntoma: NINGÚN campo distinguía.**
+- `evento_alergia_diagnosticada.prestador_id` → **NULL también en la del
+  veterinario** (`pollo`, confirmada, sin prestador).
+- `eventos_mascota.procedencia` → **`declarado_por_familia` en las dos**.
+⇒ Si la pantalla hubiera leído la procedencia «bien», habría dicho *«lo dijo la
+familia»* sobre **todas** — igual de falso, en la otra dirección.
+
+**Lo que se curó hoy:** el wrapper expone `la_declaro_la_familia`, derivado de
+`metodo_diagnostico = 'observacion_de_la_familia'` — el campo que la puerta de
+familia estampa. Medido: `polen` → familia, `pollo` → clínica. ✅
+
+**Lo que queda, y por eso hay ficha:** eso es un **PROXY**, y se declara como
+tal. Distingue **hacia adelante** y **por ausencia** del lado del veterinario:
+el día que una nota clínica llene `metodo_diagnostico`, deja de discriminar y
+**no falla ruidoso** — la franja simplemente vuelve a mentir.
+
+**La cura de raíz:** que `sedimentar_nota_clinica` estampe `prestador_id` (y/o
+`empleado_id`) en la alergia que registra. Ahí el dato existe y el proxy sobra.
+
+**Dueño:** A (el motor) · **Disparo:** la próxima vez que se toque
+`sedimentar_nota_clinica`, o antes de que un veterinario real cargue alergias.
+
+---
+
+### `D-1044` 🟢 · El dominio personalizado de Supabase deja de hacer falta para el pasaporte — queda como alternativa escrita
+
+**Por qué existía la idea.** La página pública del pasaporte vivía en la edge
+`pasaporte`, y **medido el 6-sep-2026 no se puede servir desde ahí**: Supabase
+degrada `text/html` —y `application/xhtml+xml`— a `text/plain` en GET, mientras
+`image/svg+xml` y `image/png` pasan intactos. Es política de plataforma, para
+que nadie sirva páginas desde `*.supabase.co`. Con eso, un dominio propio de
+Supabase Functions figuraba como la salida.
+
+**Por qué ya no hace falta.** La página se mudó a
+`www.epetplace.com/p/<token>` (Astro, `prerender = false` sobre el sitio que ya
+existe y ya despliega en Vercel). La edge quedó como **la única que sabe leer
+un pasaporte** (`?formato=json`) y el sitio lo dibuja. *Se separó quién sabe el
+dato de quién lo muestra, que es lo que había que separar.*
+
+**La alternativa, escrita para no re-descubrirla:** un custom domain de
+Supabase Functions serviría desde un dominio propio y **podría** no aplicar la
+degradación — ⚠️ **eso NO está medido**, y medirlo cuesta configurar un dominio.
+Sólo tendría sentido si algún día hiciera falta servir HTML desde una edge sin
+tener sitio, que no es el caso.
+
+**Lo que sí queda vivo de esto**, y es el hallazgo que vale más que la ficha:
+*una edge de Supabase no puede servir una página web renderizable.* Cualquiera
+que lo intente va a ver `curl -I` en verde —**HEAD devuelve `text/html`**— y el
+navegador mostrando código fuente. **La diferencia sólo aparece en GET.**
+
+**Dueño:** A. **Disparo:** ninguno; se reabre sólo si alguien necesita HTML
+desde una edge.
+
+---
+
+### `D-1043` 🟢 · `ota:deps` compara commits, no el árbol: con la dependencia sin commitear da verde
+
+**Medido (S113-A · A6, 6-sep-2026), y lo produjo su propio control.** El brief
+pedía que `ota:deps` diera **rojo** sobre la rama `pista/s113-a-nfc` como
+control de que distingue. Con `react-native-nfc-manager` ya instalado pero
+**sin commitear**, dio:
+
+```
+✅ CERO cambios de dependencia de runtime ⇒ por esta pregunta, candidato a OTA.
+exit 0
+```
+
+Después del commit, el mismo comando: `🔴 1 cambio(s) … ALTA
+react-native-nfc-manager → 3.17.2` · **exit 1**.
+
+**Por qué no es grave hoy:** la regla 82 exige medir el árbol antes de
+bundlear, y un árbol sucio saca el ancla con asterisco. La ventana existe sólo
+para quien instale, no commitee, y publique igual.
+
+**Por qué igual es deuda:** *el gate no dice que no mide eso*. Su verde se lee
+como «no hay cambios de dependencia», cuando lo que afirma es «no hay cambios
+**commiteados**». Es `L-492` en su forma chica.
+
+**Cura, barata:** que el script mire también `git status --porcelain` sobre los
+`package.json` y, si alguno está sucio, salga **NO CONCLUYENTE (exit 2)** en vez
+de verde. *Un gate que no puede ver el estado real dice que no puede, jamás que
+está todo bien.*
+
+**Dueño:** A. **Disparo:** la próxima vez que se toque `discriminador-ota.mjs`,
+o antes del primer build nativo (donde el costo de un falso verde es una app
+que crashea al abrir).
+
+---
+
+### `D-1042` 🟡 · El `REVOKE` a `anon` de las vistas de métricas espera que el portal legado use sesión
+
+**Firma del founder: no se toca hoy.**
+
+#### El estado
+`D-1040` cerró la fuga poniendo `security_invoker` en las once vistas: `anon`
+ahora rebota con `42501` antes de tocar las tablas. **El `GRANT SELECT` a `anon`
+sigue puesto** sobre `v_pitch_metrics`, `v_mrr`, `v_gmv_mensual`,
+`v_crecimiento_usuarios`, `v_metricas_tiempo_real` y `v_ia_costo_por_pieza_dia`.
+
+#### Por qué no se revoca
+**El portal legado de administración se conecta con la llave `anon`** sobre esta
+misma base — medido en S95-F, decodificando el claim `role`. *Revocar apagaría
+su tablero, y ese portal vive fuera de este repo: no se puede probar el efecto
+desde acá.*
+
+#### La cura, que es del portal y no de la base
+**Pasar el portal a sesión**: que entre con un usuario `authenticated` que sea
+admin, en vez de leer con la llave pública. Con eso el `REVOKE` a `anon` deja de
+tener costo y se hace en una línea.
+
+*Mientras tanto el grant es un permiso que ya no alcanza nada —el `invoker` lo
+neutralizó— pero sigue siendo un permiso escrito que alguien puede volver a
+hacer útil el día que agregue una policy.* Defensa en profundidad pendiente, no
+agujero abierto.
+
+#### Disparo
+El día que el portal tenga sesión. O antes, si alguien mide que ya la tiene.

@@ -1,0 +1,25 @@
+{
+  "documento": "B",
+  "mano": "E",
+  "archivos": ["carnet-1785354131272.jpg","carnet-1783694984605.jpg","carnet-1783632653859.jpg","carnet-1783633828265.jpg"],
+  "fotos_que_mire": 7,
+  "nota_de_fotos": "D lista CUATRO fotos de este documento. Yo encontre TRES MAS en la carpeta de la cuenta demo (carnet-1788209128516, -1788209158892, -1788209208184, -1788209282743, -1788209339932). Son el MISMO documento con otra luz y otro angulo. Transcribi mirando siete, y una de ellas me corrigio un dato propio: el lote del Recombitek es 47087B, no 470878 — el ultimo caracter es una B.",
+  "que_es": "carnet PLEGABLE VERTICAL con stickers de laboratorio pegados en la columna izquierda y campo FECHA manuscrito + FIRMA VETERINARIO en la derecha.",
+  "clinica": "Clinica Protectora de Animales (sello, Carrera 75 No. 23A)",
+  "sin_ver_la_de_D": true,
+  "regla_de_fecha": "lo que no esta escrito va null. Dia y mes SIN anio ⇒ null, y NO se completa desde la fila vecina.",
+  "filas": [
+    {"n":1,"vacuna":"Procyon Dog Pv","fecha_aplicada":"2023-04-02","fecha_literal":"02-4 23","fecha_proxima":null,"lote":"02031203","vencimiento_biologico":"25APR24","veterinario":null,"evidencia":"sticker_con_fecha","confianza":"alta","nota":"denominacion impresa: 'Vacuna contra Parvovirosis Canina'. Importado por MSD Salud Animal Colombia."},
+    {"n":2,"vacuna":"Vanguard DA2L","fecha_aplicada":"2023-04-19","fecha_literal":"19-4 23","fecha_proxima":null,"lote":"562887","vencimiento_biologico":"04 SEP 24","veterinario":null,"evidencia":"sticker_con_fecha","confianza":"alta","nota":"Zoetis. El sticker dice N.Lote 562887 · F.Elab 10 MAR 22 · F.Cad 04 SEP 24."},
+    {"n":3,"vacuna":"Recombitek C7","fecha_aplicada":"2023-05-10","fecha_literal":"10-5 23","fecha_proxima":null,"lote":"47087B","vencimiento_biologico":"03/MAR/24","veterinario":null,"evidencia":"sticker_con_fecha","confianza":"alta","nota":"DOS stickers pegados juntos (bacterina contra Leptospira + fraccion liofilizada) = UNA sola aplicacion."},
+    {"n":4,"vacuna":"Nobivac Lepto","fecha_aplicada":null,"fecha_literal":"S/JUN","fecha_proxima":null,"lote":"A468A01","vencimiento_biologico":"10-2023","veterinario":null,"evidencia":"manuscrito","confianza":"baja","nota":"el rotulo FECHA quedo en blanco ('DD MM AAAA') y el valor se escribio debajo. Leo 'S/JUN' o '5/JUN': SIN ANIO ⇒ null."},
+    {"n":5,"vacuna":"Nobivac DHPPi","fecha_aplicada":null,"fecha_literal":"26 JUN","fecha_proxima":null,"lote":"0129035B01","vencimiento_biologico":"05-2024","veterinario":null,"evidencia":"manuscrito","confianza":"media","nota":"dia y mes SIN anio ⇒ null. Sus vecinas son de 2023 y completar desde ahi es lo que la regla prohibe."},
+    {"n":6,"vacuna":"Nobivac KC","fecha_aplicada":"2023-08-03","fecha_literal":"3 Ago 2023","fecha_proxima":null,"lote":"A127G01","vencimiento_biologico":"11-2023","veterinario":null,"evidencia":"manuscrito","confianza":"alta"},
+    {"n":7,"vacuna":"Canigen LR + Canigen MHA2PPi","fecha_aplicada":"2024-07-06","fecha_literal":"06 07 2024","fecha_proxima":null,"lote":"9B2F","vencimiento_biologico":"FEB 25","veterinario":null,"evidencia":"manuscrito","confianza":"alta","nota":"DOS stickers Virbac con el MISMO lote 9B2F. Los cuento como UNA aplicacion; si D los conto como dos, es un desacuerdo real y hay que verlo."}
+  ],
+  "mi_conteo": 7,
+  "lo_que_NO_pude_leer": [
+    {"que":"a que fila pertenece el valor manuscrito '15/JUL'","razon":"cuento SIETE rotulos FECHA y SIETE grupos de stickers, pero OCHO valores manuscritos. '15/JUL' esta escrito debajo de '3 Ago 2023', en la misma posicion en que las filas 4 y 5 escriben su valor. Este carnet NO tiene columna PROXIMA, asi que puede ser (a) la proxima dosis de la fila 6, (b) una octava aplicacion cuyo sticker no esta pegado, o (c) la fecha real de la fila 6 con '3 Ago 2023' siendo otra cosa. Verificado en las SIETE fotos: en todas se ve igual. NO lo decido y NO ajusto mi conteo a 8 para que cierre con las 8 filas de la base."},
+    {"que":"el veterinario por fila","razon":"el carnet no tiene columna de veterinario por fila: hay UN sello de la clinica al pie. Lo dejo null en todas en vez de repetir el sello como si fuera dato de la fila."}
+  ]
+}

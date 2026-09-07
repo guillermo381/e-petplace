@@ -70,9 +70,15 @@ export interface RazaCatalogo {
   /** Nombre VERBATIM del mapeo, con sus acentos y ñ. Jamás
    *  des-slugificado: es «Cacatúa Alba», no «Cacatua Alba». */
   nombre: string;
-  /** Path en el bucket público `especies-razas`:
-   *  '<especie>/<slug>.webp'. La URL la compone la superficie. */
-  ruta_imagen: string;
+  /** Path en el bucket público `especies-razas`: '<especie>/<slug>.webp'. La
+   *  URL la compone la superficie.
+   *
+   *  🔴 **`null` desde S113, y es una respuesta legítima:** una raza puede
+   *  existir antes que su dibujo. La superficie cae a
+   *  `urlGenericaDeEspecie(especie)` — la escalera ya existía; lo que faltaba
+   *  era que el tipo dijera que el escalón puede hacer falta. *Un `string` que
+   *  a veces no está no protege a nadie: sólo esconde la decisión.* */
+  ruta_imagen: string | null;
 }
 
 /** Razas activas de UNA especie, alfabéticas por nombre.

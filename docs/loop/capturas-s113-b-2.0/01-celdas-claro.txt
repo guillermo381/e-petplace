@@ -1,0 +1,16 @@
+modo=light · p=celdas
+Arriba CON destino (chevron + rol de botón) · abajo SIN él, planas.
+Vacuna
+Polivalente
+vence en 16 días
+Antiparasitario
+pulgas
+garrapatas
+internos
+Peso
+12,4 kg ↑
+hace 2 meses pesaba 11,8 kg
+Medicación
+sin registro
+!
+Uncaught (in promise, id: 0) Error: getClient: initApi() no fue llamado. Inicializá la API en el entry de la app.
