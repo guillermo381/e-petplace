@@ -246,6 +246,31 @@ console.log('\n── ⑪ EL GLIFO DE PASAPORTE (S113-B · 2.2.4) ──');
   t('…y el glifo firmado se mira DONDE VIVE', /glifo: 'pasaporte'/.test(GAL));
 }
 
+console.log('\n── ⑫ EL GLIFO DE PAPEL (S113-B · fase 3 · B6) ──');
+/* La hoja que la familia TRAE. **Uno y no tres**: `receta` ya existe firmado,
+   y examen/informe comparten éste porque *el rótulo del grupo ya dice cuál es
+   — tres dibujos para una distinción que la palabra de al lado ya hace es un
+   glifo que nadie necesita* (§6b, economía). */
+{
+  const P = glifo('papel');
+  t('`papel` tiene dibujante', P !== null);
+  if (P) {
+    const d = (P.largo / VARA.largo - 1) * 100;
+    t('masa en banda', Math.abs(P.largo / VARA.largo - 1) <= BANDA,
+      ` · ${P.largo.toFixed(1)} (${d >= 0 ? '+' : ''}${d.toFixed(0)} %) — cerca del techo, declarado`);
+    t(`≤ ${VARA.trazos} trazos`, P.trazos <= VARA.trazos, ` · ${P.trazos}`);
+    t('🔴 la hoja deja aire a 21 px', P.interiorCuadrado !== null && P.interiorCuadrado >= 2.5,
+      ` · ${P.interiorCuadrado?.toFixed(2) ?? 'sin cuadrado'} px`);
+    t('🔴 lleva huella: es un papel DE LA MASCOTA', P.huella === true);
+    /* 🔴 **SIN DOBLEZ, y no es estilo: `certificaciones` y `presupuesto` ya la
+       usan.** *Dos glifos con la misma esquina doblada se leen como el mismo
+       objeto, y acá el objeto es otro.* La marca de éste son sus renglones. */
+    const CERT = glifo('certificaciones')!;
+    t('🔴 no copia la esquina doblada de `certificaciones`',
+      CERT.trazos > P.trazos || P.largo !== CERT.largo);
+  }
+}
+
 console.log('\n── ④bis LEY 9 PARA LO PUNTIAGUDO · la punta sobrevive a 21 px ──');
 /* 🔴 **`interiorMin` mide lo REDONDO y no ve una estrella.** El modo de falla
    de una punta es el opuesto al de un círculo: no se cierra, **se la come su

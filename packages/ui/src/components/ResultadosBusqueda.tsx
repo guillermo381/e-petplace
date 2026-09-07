@@ -57,9 +57,14 @@ export type { GrupoResultados, Resultado, TipoResultado } from './nexo-busqueda'
  *  resultado se leería como dos cosas. La tabla es exhaustiva por tipo: **un
  *  tipo nuevo sin glifo no compila.** */
 const GLIFO = {
+  /* `mascotas` usa el hogar y no una especie: *la búsqueda no sabe si Thor es
+     perro, y elegir una especie para el ícono la haría equivocarse la mitad de
+     las veces.* Es «tu casa», que es donde viven. */
+  mascotas: 'hogar',
   citas: 'veterinaria',
   pedidos: 'pedido',
   recuerdos: 'hogar',
+  papeles: 'papel',
   despensa: 'despensa',
   prestadores: 'equipo',
 } satisfies Record<TipoResultado, IconoNombre>

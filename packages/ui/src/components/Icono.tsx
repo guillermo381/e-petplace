@@ -266,7 +266,7 @@ export type IconoNombre =
   //    EL OBJETO NO ES «un papel»: es DÓNDE VIVEN LOS PAPELES, y el plural
   //    es lo que lo distingue de `documento` (que es UNA cédula con
   //    retrato). Gate por ícono a 21px PENDIENTE (§2.9).
-  | 'documentos' | 'pasaporte'
+  | 'documentos' | 'pasaporte' | 'papel'
   // ── S91-B · `correo` — NACIÓ COMO CANDIDATO B DE «Documentos» Y PERDIÓ
   //    SU GATE, y NO muere: el founder lo pasó a RESERVA DECLARADA.
   //    Su riesgo era que a 21px se lee «correo» antes que «documentos» —
@@ -1757,6 +1757,50 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  /**
+   * 🔴 **PAPEL — la hoja que la familia TRAE (S113-B · fase 3 · B6).**
+   *
+   * ── §6b.2 · METÁFORAS OCUPADAS, y el censo cambió el dibujo ──────────
+   * · **`documento` NO es una hoja: es una CREDENCIAL apaisada** con su
+   *   círculo de retrato y sus dos líneas. *Reusarlo diría «carnet», que es
+   *   otra cosa.* (Y su cabecera lo dice: la huella va chica y al costado
+   *   porque el documento **no es del animal**.)
+   * · **La hoja con ESQUINA DOBLADA está tomada dos veces**: `certificaciones`
+   *   y `presupuesto`. ⇒ acá la hoja va **sin doblez**, y lo que la nombra son
+   *   sus renglones.
+   * · `documentos` son dos rectángulos apilados: la SECCIÓN, no una hoja.
+   *
+   * ── §6b · ECONOMÍA: UNO, NO TRES ────────────────────────────────────
+   * El encargo nombraba `papel`, `examen` y `receta`. **`receta` ya existe y
+   * está firmado** (S90-B), y **examen e informe comparten éste a propósito**:
+   * *el rótulo del grupo ya dice «Exámenes» o «Informes» — tres dibujos para
+   * una distinción que la palabra de al lado ya hace es un glifo que nadie
+   * necesita* (§6b: un glifo que nadie va a montar no se pide).
+   *
+   * ── §6b.1 · LOS NÚMEROS ─────────────────────────────────────────────
+   * Hoja **9 × 12,5** (perímetro 43) + **dos renglones de 5** ⇒ masa **53,0
+   * (+14 %)**, dentro de la banda 39,4–53,4 · **3 trazos** · interior de la
+   * hoja **6,2 px** a 21, holgado sobre el piso de 2,5.
+   * ⚠️ **Está cerca del techo de la banda y se declara**: una hoja es cara en
+   * trazo, y bajarla más la volvía un rectángulo sin renglones — o sea,
+   * `documentos` otra vez.
+   *
+   * ── §6b.6 · NO ES GLIFO DE CONTROL ──────────────────────────────────
+   * Lleva huella: es un papel **de la mascota**, familia de `carnet` y
+   * `certificaciones`.
+   *
+   * ⚠️ **GATE POR ÍCONO PENDIENTE** (§6b.5). Su riesgo declarado: a 21 px una
+   * hoja con renglones **puede leerse como «lista»**; el vecino que lo prueba
+   * es `documentos`, y por eso van juntos en la hoja de contacto.
+   */
+  papel: ({ tinta, huella }) => (
+    <>
+      <Path d="M8.5 3.2h9v12.5h-9Z" {...trazo(tinta)} />
+      <Path d="M10.5 7.4h5M10.5 10.4h5" {...trazo(tinta)} />
+      <Huella color={huella} x={2.2} y={13.6} escala={0.32} />
+    </>
+  ),
+
   documentos: ({ tinta, huella }) => (
     <>
       <Path d="M11 3.5H21.5V14" {...trazo(tinta)} />
@@ -2122,7 +2166,7 @@ export function Icono({
     // ── LOTE 3 (S58, D-361): capas por concepto — el founder poda/ajusta en gate ──
     hogar: comunidad, familia: comunidad, equipo: comunidad,
     explorar: comunidadAmplia,
-    cuenta: identidad, carnet: identidad, pasaporte: identidad, seguros: identidad, telemedicina: identidad,
+    cuenta: identidad, carnet: identidad, pasaporte: identidad, papel: identidad, seguros: identidad, telemedicina: identidad,
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
     // INFO comparte capa con `ayuda` PROVISIONALMENTE: los dos explican.
     // ⚠️ Si el gate de S79 firma la categoría «glifo de control», este
