@@ -1989,3 +1989,13 @@ export {
   type IntencionDeBusqueda,
   type TipoBuscado,
 } from './wrappers/busqueda-intencion';
+
+// S114 · postventa — LA única puerta a los motivos (A10). Nadie escribe su
+// propio SELECT sobre `cat_motivos_postventa`.
+export {
+  obtenerMotivosDeObjeto,
+  motivoPerteneceAlObjeto,
+  type MotivoPostventa,
+  type ObjetoPostventa,
+  type ProcedenciaMotivo,
+} from './wrappers/postventa-motivos';

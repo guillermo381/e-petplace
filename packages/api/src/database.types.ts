@@ -2673,6 +2673,51 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_motivos_herencia: {
+        Row: {
+          hereda_de: string
+          objeto: string
+        }
+        Insert: {
+          hereda_de: string
+          objeto: string
+        }
+        Update: {
+          hereda_de?: string
+          objeto?: string
+        }
+        Relationships: []
+      }
+      cat_motivos_postventa: {
+        Row: {
+          activo: boolean
+          clase: number
+          codigo: string
+          objeto: string
+          pide_foto: boolean
+          urgente: boolean
+          voz: string
+        }
+        Insert: {
+          activo?: boolean
+          clase: number
+          codigo: string
+          objeto: string
+          pide_foto?: boolean
+          urgente?: boolean
+          voz: string
+        }
+        Update: {
+          activo?: boolean
+          clase?: number
+          codigo?: string
+          objeto?: string
+          pide_foto?: boolean
+          urgente?: boolean
+          voz?: string
+        }
+        Relationships: []
+      }
       cat_narrativas_pedido: {
         Row: {
           codigo: string
@@ -14845,6 +14890,7 @@ export type Database = {
       }
       papeles_familia: {
         Row: {
+          archivo_estado: string
           archivo_path: string
           clase: string
           confirmado_en: string | null
@@ -14861,6 +14907,7 @@ export type Database = {
           titulo: string | null
         }
         Insert: {
+          archivo_estado?: string
           archivo_path: string
           clase: string
           confirmado_en?: string | null
@@ -14877,6 +14924,7 @@ export type Database = {
           titulo?: string | null
         }
         Update: {
+          archivo_estado?: string
           archivo_path?: string
           clase?: string
           confirmado_en?: string | null
@@ -22722,6 +22770,19 @@ export type Database = {
         }
         Relationships: []
       }
+      v_motivos_resueltos: {
+        Row: {
+          clase: number | null
+          codigo: string | null
+          objeto_origen: string | null
+          objeto_resuelto: string | null
+          pide_foto: boolean | null
+          procedencia: string | null
+          urgente: boolean | null
+          voz: string | null
+        }
+        Relationships: []
+      }
       v_mrr: {
         Row: {
           cancelaciones_mes: number | null
@@ -23454,6 +23515,10 @@ export type Database = {
           fecha: string
           opera: boolean
         }[]
+      }
+      _motivo_pertenece_al_objeto: {
+        Args: { p_codigo: string; p_objeto: string }
+        Returns: boolean
       }
       _mover_estado_pedido: {
         Args: {
