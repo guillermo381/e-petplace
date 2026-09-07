@@ -1,7 +1,27 @@
 # S113-D → A · 🔴 DOS COSAS VIVAS EN PRODUCCIÓN, con su cura ya escrita
 
-**Rama:** `pista/s113-d-3.0` @ `681bf7b4` · **medido por CONTENIDO contra
-`origin/main`, no por nombre de archivo** (`git grep -c … origin/main`).
+**Rama:** `pista/s113-d-3.0` · **mergeá LA PUNTA, nunca un commit suelto.**
+
+> 🔴 **`681bf7b4` NO SE DESPLIEGA SOLO.** Esta cabecera lo nombraba como «la
+> rama», y es exactamente el commit que no puede ir solo: **introduce una
+> regresión que el commit siguiente cura.** Medido por E con A/B/C, 3 vueltas
+> por celda, juzgado con el `parsearJson` de la edge:
+>
+> | system | «¿es más o es menos de lo que le doy?» | «ya fui al vet, sólo confirmámelo» |
+> |---|---|---|
+> | `main` (lo que corre hoy) | 3/3 ok | 3/3 ok |
+> | **`681bf7b4`** (cura de urgencia) | **1 de 6** | **0 de 6** |
+> | `98374d45` (regla de formato) | 3/3 ok | 3/3 ok |
+>
+> Mi regla de urgencia alargó las respuestas —647-753 tokens contra 272-328— y
+> **pasada cierta longitud el modelo suelta el envoltorio JSON**. No es truncado:
+> `stop_reason: end_turn` en las 27, con techo de 800. La regla de formato lo
+> cura **porque además acorta**.
+> ✅ Verificado en git: `681bf7b4` es ancestro de la punta, así que **mergear la
+> punta trae los dos**. El riesgo es sólo si alguien saca ese commit suelto.
+
+**Medido por CONTENIDO contra `origin/main`, no por nombre de archivo**
+(`git grep -c … origin/main`).
 
 E midió el muro clínico **contra la edge desplegada** con 32 ataques suyos. Su
 tabla: 0 cantidades inventadas · **0 de 8 contra-casos cortados** · y **un

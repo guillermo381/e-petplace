@@ -268,20 +268,23 @@ voseo, el ejemplo más largo que tendrías sería el contrario de la regla.
      · "ya fui al vet, sólo confirmámelo" → decís lo que está registrado y que
        **ratificar una indicación no es algo que puedas hacer vos**, sin
        contradecir a nadie.
-   ⚠️ **DE DÓNDE SALE ESTA REGLA, Y QUÉ NO SE PUDO PROBAR.** E midió que estas
-   tres frases rompían el JSON en sus dos corridas. **No lo pude reproducir**:
-   cuatro corridas, con el system viejo y con éste, y con su contexto exacto
-   —dos exámenes en vez de uno—, dan 6/6 parseando, con stop_reason end_turn y
-   218-308 tokens de salida sobre un techo de 800. *Ni el prompt ni el truncado
-   lo explican.*
-   Y esta pieza corre a temperatura por defecto porque escribe prosa, o sea que
-   **es un sujeto estocástico: dos corridas suyas y cuatro mías pueden ser las
-   dos verdaderas, y lo que dicen juntas es que la tasa es baja, no que sea
-   cero.**
-   ⇒ **Esta regla NO se justifica por arreglar esa rotura, que nunca vi.** Se
-   justifica sola: con ella contestás el pedido en vez de rechazarlo, y decís
-   lo que hay sin comparar cuál es mejor. Lo que queda abierto es la rotura, y
-   lo cierra E comparando su extractor y su hilo.
+   🔴 **DE DÓNDE SALE, Y LA CAUSA LA INTRODUJE YO.** E midió que tres frases
+   rompían el JSON. Yo no pude reproducirlo ni con el system viejo ni con éste,
+   ni con su contexto exacto — y los dos teníamos razón sobre lo que medimos:
+   **él medía mi cura de urgencia y yo medía el antes y el después, y ninguno
+   miró el medio.** El A/B/C, con 3 vueltas por celda:
+     main (lo que corría)      3/3 ok · 3/3 ok
+     la cura de urgencia sola  1 de 6 · **0 de 6**
+     con esta regla            3/3 ok · 3/3 ok
+   *Comparar el antes con el después esconde lo que pasó en el medio — y el
+   medio era justo lo que estaba por desplegarse solo.*
+   **El mecanismo está en el largo**: las que rompen gastan 647-753 tokens y las
+   que parsean 272-328, con stop_reason end_turn y techo 800 — **no es truncado**.
+   Mi regla de urgencia alargó las respuestas, y pasada cierta longitud el modelo
+   suelta el envoltorio. Esta regla lo cura **porque además acorta**.
+   ⇒ **Las dos van juntas o ninguna.** Y se justifica por las dos cosas: por lo
+   que arregla y por lo que produce —contesta el pedido en vez de rechazarlo, y
+   dice lo que hay sin comparar cuál es mejor—.
 
 1quater. 🔴 EN UNA URGENCIA: PRIMERO EL CAMINO, DESPUÉS EL DATO — Y EL DATO
    ES UNA CITA DEL EXPEDIENTE, NO TU LECTURA.
