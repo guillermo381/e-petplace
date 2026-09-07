@@ -65,7 +65,8 @@ import {
   type LineaDeVidaEstadoPie,
   FichaRaza,
   FranjaSeguridad,
-  InvitacionBio,
+  BotonContanos,
+  PastillaConociendolo,
   CeldasHoy,
   FiltrosLineaDeVida,
   type TipoLineaDeVida,
@@ -130,6 +131,7 @@ import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import { EditarRazaHoja } from '@/components/editar-raza-hoja';
 import { RegistrarMedicacionHoja } from '@/components/registrar-medicacion-hoja';
 import { HojaInvitacionBio, type ClaseBio } from '@/components/invitacion-bio-hojas';
+import { HojaContanos, entradasContanos, useContanos } from '@/components/contanos';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -494,6 +496,10 @@ export default function PerfilDeMascota() {
   const [pesos, setPesos] = useState<PesoDeLaSerie[] | null>(null);
   const [pesoHoja, setPesoHoja] = useState(false);
   const [medicacionHoja, setMedicacionHoja] = useState(false);
+  /** El estado de la Hoja, **uno solo para los cuatro accesos**. */
+  const contanos = useContanos(mascotaId ?? '', typeof perfil === 'object' ? perfil.mascota.nombre : '', () =>
+    setRecargaPeso((n) => n + 1),
+  );
   const [hojaBio, setHojaBio] = useState<ClaseBio | null>(null);
   const [razaHoja, setRazaHoja] = useState(false);
   /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
@@ -1471,30 +1477,16 @@ export default function PerfilDeMascota() {
               vozAbrir={t('perfil.razaVer')}
               vozCerrar={t('perfil.razaOcultar')}
             />
-            {/* ⭐ **LA INVITACIÓN, ahora con la pieza de B y sus CUATRO
-                destinos** (S113-C · 2.0 · ②). Reemplaza a la `Celda` que la
-                sostuvo mientras la pieza no existía — *un andamio se retira
-                cuando llega lo que sostenía, no cuando alguien se acuerda.*
-                La ficha habla de la raza; esto devuelve la conversación a este
-                animal: **lo general se lee, lo propio se cuenta.** */}
+            {/* ⭐ **EL «CONTANOS» — ACCESO 1 de 4: el pie de la ficha**
+                (S113-C · 2.1 · C1). Antes acá vivía `InvitacionBio`, que era
+                **tarjeta Y hoja en la misma pieza**; B la partió porque la Hoja
+                se abre desde cuatro lugares y *una pieza que trae su propio
+                botón obliga a cada acceso a montar el botón entero o a clonar
+                la Hoja.* Acá queda sólo el botón; la Hoja vive una vez, abajo. */}
             <View style={{ marginTop: spacing[3] }}>
-              <InvitacionBio
-                texto={
-                  momento !== null && vozMomento(momento, t) !== null
-                    ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
-                    : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
-                }
-                tituloHoja={t('bio.titulo', { nombre: mascota.nombre })}
-                /* Las cuatro **tienen destino**, y por eso las cuatro se
-                   dibujan: la pieza exige `onPress` en cada entrada porque *sin
-                   destino la entrada no existe*. Hace unas horas dos de éstas
-                   no tenían puerta y las habría dejado afuera. */
-                entradas={[
-                  { clase: 'comportamiento', titulo: t('bio.enComportamiento'), detalle: t('bio.enComportamientoDet'), onPress: () => setHojaBio('comportamiento') },
-                  { clase: 'personalidad', titulo: t('bio.enPersonalidad'), detalle: t('bio.enPersonalidadDet'), onPress: () => setHojaBio('personalidad') },
-                  { clase: 'medico', titulo: t('bio.enMedico'), detalle: t('bio.enMedicoDet'), onPress: () => setHojaBio('medico') },
-                  { clase: 'recuerdo', titulo: t('bio.enRecuerdo'), detalle: t('bio.enRecuerdoDet'), onPress: () => setHojaBio('recuerdo') },
-                ]}
+              <BotonContanos
+                etiqueta={t('contanos.boton', { nombre: mascota.nombre })}
+                onPress={contanos.abrir}
               />
             </View>
           </View>
@@ -2457,6 +2449,34 @@ export default function PerfilDeMascota() {
             }}
           />
         </Hoja>
+      ) : null}
+
+      {/* 🔴 **LA HOJA, UNA SOLA.** Los cuatro accesos la abren; ninguno la
+          clona. Y la caja libre está ARRIBA de las cuatro entradas porque *es
+          la forma más barata de contar algo: escribirlo* — las cuatro son para
+          quien ya sabe dónde va. */}
+      {/* 🔴 **NO SE MONTA EN MEMORIAL**, y lo cazó mi propio censo. La Hoja
+          PIDE —«cuéntanos», «escríbelo como se te ocurra»— y en la pantalla de
+          quien ya no está se lee, no se pide nada (`A3.9`). El botón que la
+          abre ya cuelga del guard; la Hoja también, porque *un texto
+          inalcanzable hoy es alcanzable mañana*. */}
+      {!esMemorial ? (
+      <HojaContanos
+        visible={contanos.visible}
+        onCerrar={contanos.cerrar}
+        titulo={t('contanos.titulo', { nombre: mascota.nombre })}
+        entradas={entradasContanos(t, (c) => {
+          contanos.cerrar();
+          setHojaBio(c === 'rasgo' ? 'personalidad' : c);
+        })}
+        libre={{
+          etiqueta: t('contanos.libreEtiqueta', { nombre: mascota.nombre }),
+          placeholder: t('contanos.librePlaceholder'),
+          vozEnviar: t('contanos.libreEnviar'),
+          onLibre: contanos.enviarLibre,
+        }}
+        propuesta={contanos.propuestaUi}
+      />
       ) : null}
 
       <HojaInvitacionBio

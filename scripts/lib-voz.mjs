@@ -148,7 +148,21 @@ export function hitsDeVoseo(src) {
          paquete desnudo con `/`. *No se descarta «la línea del import» sino la
          CADENA que parece ruta* — así una voz en voseo escrita en la misma
          línea sigue cayendo. */
-      if (/^(\.{1,2}\/|@[\w-]+\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
+      /* ⚠️ `@/` es el ALIAS de la casa y no un scope de npm: sin él, el
+         `'@/components/contanos'` seguía en rojo. *Una excepción que cubre
+         cuatro de las cinco formas de escribir una ruta no cubre ninguna.* */
+      if (/^(\.{1,2}\/|@\/|@[\w-]+\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
+
+      /* ⑫ — **UNA KEY DE i18n TAMPOCO ES VOZ**, y lo cobró el «contanos». La
+         pieza de B se llama así y su namespace también, así que
+         `'contanos.noSupeClasificar'` daba rojo por el imperativo voseante de
+         «contar» — cuando el TEXTO que esa key devuelve dice «Cuéntanos», en
+         tuteo. *El guard estaba mirando el nombre del cajón en vez de lo que
+         hay adentro.*
+         Se descarta por FORMA: `namespace.clave` en camelCase, **sin espacios
+         ni acentos**. Una voz real con punto —«Ya llegó. Contanos cómo fue»—
+         tiene espacios y sigue cayendo. */
+      if (/^[a-z][\w-]*(\.[a-zA-Z][\w-]*)+$/.test(v)) continue;
 
       const b = v.toLowerCase();
 

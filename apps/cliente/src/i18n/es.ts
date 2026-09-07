@@ -4252,15 +4252,27 @@ export const clienteEs = {
     faltaDosis: 'Falta la dosis',
     noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
-  /** ⭐ **EL «CONTANOS»** (S113-C · 2.1). Voz de familia: se cuenta, no se
-   *  clasifica — la clase la propone Nexo y la confirma ella. */
-  bio: {
-    anotado: 'Anotado en la vida de {{nombre}}',
-    noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
-  /** ⭐ **LA INVITACIÓN AL BIO-EXPEDIENTE** (S113-C · 2.0). Voz de familia:
-   *  se cuenta, no se clasifica. */
+  /** ⭐ **EL «CONTANOS»** — la puerta del Bio-expediente familiar
+   *  (S113-C · 2.0 → 2.1). Voz de familia: **se cuenta, no se clasifica** — la
+   *  clase la propone Nexo y la confirma ella. */
   bio: {
     titulo: 'Cuéntanos de {{nombre}}',
+    queEs: '¿Qué quieres contarnos?',
+    esAlergia: 'Una alergia',
+    esCondicion: 'Una condición',
+    severidad: '¿Qué tan fuerte le pega?',
+    leve: 'Leve',
+    moderada: 'Moderada',
+    severa: 'Severa',
+    anafilactica: 'Muy grave',
+    avisoSospechada: 'Lo guardamos como algo que nos contaste. Si tu veterinario lo confirma, queda como diagnóstico.',
+    campoComportamiento: '¿Qué viste?',
+    campoPersonalidad: '¿Cómo es?',
+    campoRecuerdo: '¿Qué pasó?',
+    campoAlergia: '¿A qué es alérgico?',
+    campoCondicion: '¿Qué condición?',
+    guardar: 'Anotar',
+    faltaTexto: 'Escribe algo para poder anotarlo',
     enComportamiento: 'Comportamiento',
     enComportamientoDet: 'miedos, manías, cómo se lleva con otros',
     enPersonalidad: 'Cómo es',
@@ -4269,6 +4281,10 @@ export const clienteEs = {
     enMedicoDet: 'una alergia o una condición que ya sabes',
     enRecuerdo: 'Un recuerdo',
     enRecuerdoDet: 'algo que pasó y quieres guardar',
+    /* 🔴 Dice DÓNDE quedó: es la pregunta que se hace quien acaba de escribir,
+       y «Guardado» a secas no la contesta. */
+    anotado: 'Anotado en la vida de {{nombre}}',
+    noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
   contanos: {
     titulo: 'Cuéntanos de {{nombre}}',
