@@ -402,7 +402,17 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
  */
 export const TEMPERATURA_CERO: Record<Pieza, boolean> = {
   carnet: false, documento: false, nota_clinica: false, presencia: false,
-  raza: false, coach: false, coach_parte: false, papel: false,
+  coach: false, coach_parte: false, papel: false,
+  /* 🔴 `raza` entra por DECISIÓN DE E, que es de quien es la línea de base
+     (7-sep-2026). Su razón es la mía dada vuelta, y es mejor: yo no la movía
+     para no correrle la vara de su matriz de 1.759 fotos; E contestó que **una
+     línea de base que no es reproducible no es una línea de base** — si mañana
+     re-corre y da 82 %, sin temperatura fija no puede distinguir una regresión
+     de la varianza. *Prefiere perder una comparación que nunca fue comparable
+     a conservarla sin poder usarla.* Re-corre y ése pasa a ser el piso.
+     Su salida es enteramente cerrada: un código de lista blanca y una confianza
+     de tres valores, cero texto libre. Misma clase que los otros tres. */
+  raza: true,
   // Los tres clasificadores de salida cerrada.
   coach_router: true, coach_clasifica: true, busqueda: true,
 }
