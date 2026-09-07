@@ -56,3 +56,24 @@ convincente y es exactamente igual de falso.*
 `por_confirmar` | `confirmado`. Si tu lista los muestra todos, conviene que el
 primero se vea distinto: es un papel que está guardado y que **nadie miró
 todavía**.
+
+
+---
+
+## El papel sintético para la caminata ya está cargado
+
+En **Thor** (`d2e31d70`), un PDF real subido al bucket y su papel confirmado:
+
+| | |
+|---|---|
+| título | Hemograma completo · Clinica San Rafael · 20-nov-2024 |
+| valores | `Hematocrito=41 % [37-55]` · `Leucocitos=8.9 10^3/uL [6,0 - 17,0]` · `Ehrlichia canis=Negativo [sin ref]` |
+
+Los tres casos que la ley separa, a propósito:
+- **rango partido** en `ref_min`/`ref_max` (el que se pudo parsear)
+- **rango crudo** en `referencia` (el que no)
+- **sin rango**, y se dice `[sin ref]` en vez de inventar uno
+
+Y el circuito verificado de punta a punta: extraído → **0 eventos sin
+confirmar** → confirmado → 1 evento → la búsqueda lo encuentra por «hemograma»
+**y por «leucocitos»**, con la ruta que lleva a tu pantalla.
