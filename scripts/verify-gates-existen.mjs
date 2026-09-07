@@ -106,6 +106,26 @@ export function lineasSinArchivo(scripts, existe) {
   return rotas;
 }
 
+/**
+ * 🔴 **DOS LÍNEAS CON EL MISMO NOMBRE: LA ÚLTIMA GANA Y LA OTRA DESAPARECE.**
+ * `package.json` es JSON: una clave repetida no es un error, es un reemplazo
+ * silencioso. Encontrado al CERRAR S113 — mi `verify:boveda` y el arnés de B
+ * compartían nombre, **el mío quedó inalcanzable**, y ni `pnpm` ni este gate
+ * dijeron nada: los dos archivos existen, así que el brazo de
+ * `package.json → archivo` daba verde. *Un gate que no corre porque otro le tapó
+ * el nombre no da rojo: no corre, y su silencio se lee como salud.*
+ * ⚠️ Y nació de un MERGE, no de un descuido: el de B llegó por `main` DESPUÉS de
+ * que yo registrara el mío. *Nadie escribió el duplicado; lo escribió juntar dos
+ * ramas, que es cuando nadie está mirando el archivo.*
+ */
+export function nombresDuplicados(texto) {
+  const vistos = new Map();
+  for (const m of String(texto ?? '').matchAll(/^\s*"(verify:[\w:.-]+)"\s*:/gm)) {
+    vistos.set(m[1], (vistos.get(m[1]) ?? 0) + 1);
+  }
+  return [...vistos.entries()].filter(([, n]) => n > 1).map(([nombre, n]) => ({ nombre, n }));
+}
+
 function corpus() {
   const fuentes = [];
   if (existsSync('CLAUDE.md')) fuentes.push('CLAUDE.md');
@@ -232,6 +252,14 @@ function reportar({ fuentes, donde, enScripts, faltan, jubiladosVivos, deHermano
     return 1;
   }
 
+  const dup = nombresDuplicados(readFileSync('package.json', 'utf8'));
+  if (dup.length) {
+    di(`\n🔴 NOMBRES REPETIDOS EN package.json (${dup.length}) — la última línea gana`);
+    di('   y la otra queda inalcanzable, sin que nada falle:');
+    for (const d of dup) di(`   ${d.nombre} × ${d.n}`);
+    return 1;
+  }
+
   const rotas = lineasSinArchivo(
     JSON.parse(readFileSync('package.json', 'utf8')).scripts ?? {},
     (r) => existsSync(r));
@@ -312,6 +340,12 @@ if (process.argv.includes('--control')) {
     [!R.some((x) => x.nombre === 'build'), 'CLASE     sólo se juzgan las `verify:*` — el resto del package.json no es de este gate'],
     [lineasSinArchivo({ 'verify:x': 'pnpm -r typecheck' }, () => false).length === 0,
       'CLASE     una línea sin ninguna ruta de archivo no se inventa un hallazgo'],
+    [nombresDuplicados('  "verify:a": "x"\n  "verify:a": "y"\n  "verify:b": "z"\n').length === 1,
+      'POSITIVO  dos líneas con el MISMO nombre se delatan — en JSON la última gana'],
+    [nombresDuplicados('  "verify:a": "x"\n  "verify:b": "y"\n').length === 0,
+      'NEGATIVO  nombres distintos no producen hallazgo'],
+    [nombresDuplicados('  "build": "x"\n  "build": "y"\n').length === 0,
+      'CLASE     sólo se juzgan las `verify:*`'],
   ];
   let rojo2 = false;
   for (const [b, et] of dosDir) { di(`${b ? '✅' : '🔴'} ${et}`); if (!b) rojo2 = true; }

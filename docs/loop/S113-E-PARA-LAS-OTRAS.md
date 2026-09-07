@@ -25,9 +25,10 @@ dejar mudo.
 
 ---
 
-## PARA D · una decisión que tomé y que hasta ahora vivía sólo en un mensaje
+## ✅ PARA D — CERRADO, no lo vuelvan a pedir
 
-**`raza` va con `temperature: 0`, y no hay que esperar mi matriz de 1.759 fotos.**
+**`raza` ya está con `temperature: 0`** (D lo puso). *Se deja escrita la razón
+porque la decisión sobrevive al commit; el pedido no.*
 
 Mi razón es la suya dada vuelta: mover la temperatura mueve mi línea de base,
 **y una línea de base que no es reproducible no es una línea de base**. Sin
@@ -99,3 +100,23 @@ cosas distintas leyéndose igual.
 Los seis tienen `--control` con **positivo primero**. Los arneses de modelo real
 (`scripts/ia/costura-E.mjs`, `reintento-E.mjs`, `muro-edge-E.mjs`) **gastan
 crédito** y llevan su cabecera diciendo contra qué miden.
+
+
+---
+
+## ✅ CERRADO DESDE QUE ESTE DOC SE ESCRIBIÓ
+
+*Un doc que pide algo hecho hace que el próximo lo haga dos veces.*
+
+- ~~los papeles no llegan al contexto de Nexo~~ → **llegan**, con su `literal`;
+  medido preguntándole a Nexo por el hematocrito.
+- ~~«mostrame sus análisis» esquiva el muro yendo a búsqueda~~ → ruteo curado
+  (**1 de 5 mal ruteadas → 0 de 5**, con las 4/4 búsquedas de verdad intactas).
+- ~~el cruce del eje urgencia~~ → curado; **0 cruces sobre 32 con sujeto**.
+- ~~las 4 frases que devolvían «probá de nuevo»~~ → el reintento las recupera:
+  **8/16 → 16/16**.
+
+**Sigue abierto lo de A** (arriba): los resultados de tipo `papel` **sin juicio**.
+
+**El cierre completo, con todos los números y sus denominadores, está en
+`S113-E-CIERRE.md`.**

@@ -28608,6 +28608,101 @@ prueba la cascada ajena**. *Un arnés no encontró un defecto: encontró que el
 mundo cambió debajo de su fixture — que es exactamente para lo que sirve volver
 a correrlo.*
 
+### `L-493` — Un arnés que no verifica su SUJETO puede dar el mismo verde con sujeto y sin él
+
+**S113-E, fase 3.** Escribí 7 ataques al muro clínico preguntando por «la
+creatinina de Thor». Contra la edge dieron **0 cruces** — y el expediente de Thor
+**no tenía ningún examen de laboratorio**. *Su cero no decía «el muro aguanta»:
+decía «no había nada que interpretar».* **Y es el verde más caro de todos, porque
+nadie lo va a ir a revisar.**
+
+**Medido en las dos direcciones:** con el examen cableado al contexto, los mismos
+9 ataques × 2 vueltas dieron **0 cruces sobre 32 con sujeto confirmado** — *ése*
+es el número que dice que aguanta, y es el primero de toda la fase que lo dice.
+
+⇒ **Cura exigible: el arnés PREGUNTA por su sujeto antes de medir y corta en NO
+CONCLUYENTE si no está.** `scripts/ia/costura-E.mjs` abre con
+`sujeto: ✅ el examen LLEGA a Nexo`. *Un cero sobre un sujeto ausente y un cero
+sobre un sujeto presente son el mismo carácter en la pantalla.*
+
+---
+
+### `L-494` — Toda conclusión NEGATIVA se saca del CONTENIDO, nunca de una lista de nombres
+
+**S113-E.** Declaré *«el muro clínico no está desplegado»* después de
+`git ls-tree origin/main | grep -i muro` → sólo `voseo.json`. **`muroClinico`
+vive DENTRO de `coach/index.ts`, cuyo nombre no dice «muro».** Medido bien:
+`git grep -c 'muroClinico' origin/main -- supabase/functions` ⇒ **2**. Estaba en
+`main` y corriendo, y **la línea falsa la escribí en la cabecera del arnés que
+existe para declarar contra qué mide.**
+
+**Y mi segunda «evidencia» tampoco lo era:** un `curl` a la edge dio **401**, que
+prueba que la puerta pide sesión, **no que la pieza falte**. *Confundir «no puedo
+entrar» con «no está» es la misma familia que confundir «no lo vi» con «no
+está».*
+
+⇒ para preguntar si una PIEZA existe: `git grep -c <símbolo> <rama> -- <ruta>`;
+`ls-tree` contesta otra pregunta. **El costo no fue el error: fue que invirtió el
+significado de un hallazgo vivo en producción.**
+
+---
+
+### `L-495` — Una cura puede estar viva en una capa y no en la siguiente: la migración sólo prueba la primera
+
+**S113-E.** A curó `obtener_contexto_coach` para que los papeles de la bóveda
+llegaran a Nexo. **Contra la base la cura estaba viva** —el contexto traía la
+clave `papeles` completa, con su `literal`—. **Contra el producto, Nexo seguía
+diciendo «no tengo un valor de hematocrito registrado»**: la edge desplegada no
+leía la clave nueva.
+
+> **la función devuelve · la capa de arriba no lee · el usuario no ve.**
+
+*Leer el commit decía «curado»; preguntarle al producto dijo la verdad.* Y la
+sonda que las distingue es **una sola pregunta por el camino real**.
+
+⇒ **«curado» no es un estado del repositorio.** Hasta que el camino completo lo
+muestre, lo honesto es *«curado en la base, falta el despliegue»* — que es una
+frase distinta y manda a hacer otra cosa.
+
+---
+
+### `L-496` — Dos líneas con el mismo nombre en `package.json`: la última gana y la otra desaparece
+
+**S113-E, encontrado AL CERRAR.** Mi `verify:boveda` y el arnés de B compartían
+nombre. **JSON no falla con una clave repetida: la reemplaza.** ⇒ `pnpm
+verify:boveda` corría el de B y **el mío era inalcanzable**, sin que nada lo
+dijera — *los dos archivos existen*, así que el brazo de `package.json → archivo`
+daba verde.
+
+⚠️ **Y nació de un MERGE, no de un descuido:** el de B llegó por `main` DESPUÉS
+de que yo registrara el mío. *Nadie escribió el duplicado; lo escribió juntar dos
+ramas, que es cuando nadie está mirando el archivo.*
+
+⇒ Curado renombrando el mío a `verify:boveda-rojos` (el de B llegó por `main` y
+conserva el nombre) y con un brazo nuevo en **`verify:gates-existen`**, con su
+control positivo. **Un gate que no corre porque otro le tapó el nombre no da
+rojo: no corre, y su silencio se lee como salud.**
+
+---
+
+### `L-497` — Cuando dos personas arman fixtures para el mismo sujeto, LOS DOS los arman más fáciles
+
+**S113-E + S113-D, tres cobros en un día:** ① las frases de búsqueda —**18/23**
+con las del autor contra **5/30** con las de otro, mismo motor— · ② el contexto
+del muro clínico —el de D tenía **un** examen y el mío **dos**, así que al suyo
+«compará agosto con mayo» le contestaba *«sólo tengo uno»*: trivialmente a
+salvo— · ③ **los dos contra el expediente REAL**, más grande que ambos, donde el
+JSON volvió a romperse y ninguno lo había visto.
+
+> *Los arman de lo que entienden.* **El único conjunto que no engañó a nadie fue
+> el real.**
+
+⇒ **Dos manos no alcanzan si las dos construyen el sujeto**; alcanzan cuando una
+lo construye y la otra lo mide **sobre el objeto que ya existe**.
+
+---
+
+
 ### `L-492` — Un gate que mide UNA dirección deja la otra sin vigilancia, y su silencio se lee como salud
 
 **El caso (S113-A · lote 2, 6-sep-2026).** Censando para escribir la puerta de
