@@ -47,7 +47,7 @@ export interface PresupuestoFamilia {
 const COD = ['sin_sesion', 'error_lectura'] as const;
 export type CodigoErrorPresupuestosLeidos = (typeof COD)[number];
 const MSG: Record<CodigoErrorPresupuestosLeidos, string> = {
-  sin_sesion: 'Iniciá sesión para ver tus presupuestos.',
+  sin_sesion: 'Inicia sesión para ver tus presupuestos.',
   error_lectura: 'No pudimos cargar tus presupuestos.',
 };
 
