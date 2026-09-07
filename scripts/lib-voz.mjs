@@ -138,6 +138,18 @@ export function hitsDeVoseo(src) {
          nadie. Se descarta por FORMA (snake_case puro), que es inequívoco —
          ninguna voz de producto se escribe así. */
       if (/^[a-z0-9_]+$/.test(v)) continue;
+
+      /* ⑪ — **UNA RUTA DE IMPORT NO ES VOZ, y esto lo cobró B.** Su
+         `'./components/HojaContanos'` daba rojo por «contanos»: un
+         especificador de módulo **no lo ve ningún usuario**, y renombrar un
+         archivo para que un guard de voz calle es cambiar el código para
+         contentar al instrumento.
+         Se descarta por FORMA, como el ⑩: empieza con `./`, `../`, `@` o es un
+         paquete desnudo con `/`. *No se descarta «la línea del import» sino la
+         CADENA que parece ruta* — así una voz en voseo escrita en la misma
+         línea sigue cayendo. */
+      if (/^(\.{1,2}\/|@[\w-]+\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
+
       const b = v.toLowerCase();
 
       /* Enclíticos: palabra entera, sin frontera derecha (ya la traen). */

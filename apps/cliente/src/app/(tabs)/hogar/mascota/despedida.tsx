@@ -123,7 +123,14 @@ export default function Despedida() {
           />
         }
         vozBoton={enviando ? t('despedida.enviando') : t('despedida.boton')}
-        vozConfirmar={t('despedida.confirmar', { nombre: nombre ?? '' })}
+        /* 🔴 **Sin nombre, la confirmación NO nombra a nadie en vez de nombrar
+           el vacío.** «Toca otra vez para despedirte de » es una frase rota en
+           la pantalla donde una familia registra que su mascota murió. */
+        vozConfirmar={
+          nombre !== undefined && nombre !== ''
+            ? t('despedida.confirmar', { nombre })
+            : t('despedida.confirmarSinNombre')
+        }
         vozFechaFutura={t('despedida.fechaFutura')}
         onDespedir={despedir}
       />

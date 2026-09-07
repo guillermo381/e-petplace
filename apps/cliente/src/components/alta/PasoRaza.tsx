@@ -296,7 +296,13 @@ export function PasoRaza({
                   ficha. */}
               {fichaRaza !== null ? (
                 <View style={{ gap: spacing[2] }}>
-                  <Texto variante="enfasis">{t('alta.conoceAl', { raza: eleccion.raza ?? '' })}</Texto>
+                  {/* La raza SIEMPRE está acá —el bloque cuelga de que la ficha
+                      haya llegado, y la ficha se pide con el nombre elegido—
+                      pero el tipo la deja opcional. Se cierra en el guard, no
+                      con un `?? ''` que dibujaría «Conoce al ». */}
+                  {eleccion.raza !== undefined && eleccion.raza !== '' ? (
+                    <Texto variante="enfasis">{t('alta.conoceAl', { raza: eleccion.raza })}</Texto>
+                  ) : null}
                   <FichaRaza
                     nombre={eleccion.raza ?? ''}
                     revisado

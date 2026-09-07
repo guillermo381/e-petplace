@@ -21,7 +21,9 @@
  * dársela no está protegiendo nada.* Emitir es idempotente del lado del motor.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, Share, View } from 'react-native';
+import { Modal, Pressable, Share, View } from 'react-native';
+import { Image } from 'expo-image';
+import { WebView } from 'react-native-webview';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AccionesPasaporte,
@@ -31,6 +33,8 @@ import {
   EstadoVacio,
   TarjetaPasaporte,
   Texto,
+  useTheme,
+  sobreVideo,
   spacing,
   useAviso,
   type VisibilidadPasaporte,
@@ -47,11 +51,15 @@ import {
 import { useTraduccion } from '@/i18n';
 
 const BASE = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
-const urlPublica = (token: string) => `${BASE}/functions/v1/pasaporte?t=${token}`;
+/** 🔴 **LA PÁGINA VIVE EN EL SITIO, no en la edge.** La edge quedó con
+ *  `?formato=json` y el QR. Medido por GET: `text/html`, `noindex`, y el
+ *  navegador la renderiza — el `text/plain` que reporté se fue con la mudanza. */
+const urlPublica = (token: string) => `https://www.epetplace.com/p/${token}`;
 const urlQrPng = (token: string) => `${BASE}/functions/v1/pasaporte/${token}.png`;
 
 export default function Pasaporte() {
   const { t } = useTraduccion();
+  const { theme } = useTheme();
   const router = useRouter();
   const aviso = useAviso();
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
@@ -62,6 +70,9 @@ export default function Pasaporte() {
   const [perdida, setPerdida] = useState(false);
   const [vis, setVis] = useState<VisibilidadPasaporte>({ contacto: true, salud: true, chip: true });
   const [trabajando, setTrabajando] = useState(false);
+  /** La vista previa de lo que ve un extraño, y el QR a pantalla completa. */
+  const [viendo, setViendo] = useState(false);
+  const [qrGrande, setQrGrande] = useState(false);
 
   /* Perfil + emisión, en el mismo efecto: la tarjeta necesita las dos cosas y
      mostrar media tarjeta mientras llega la otra es peor que esperar. */
@@ -170,6 +181,15 @@ export default function Pasaporte() {
           <EsperaDeMarca />
         ) : (
           <>
+            {/* 🔴 **EL QR SE TOCA Y SE AGRANDA.** Es lo que hace que OTRO
+                teléfono lo lea: un código chico, en una pantalla a medio
+                brillo, no escanea. *La acción no es decorativa — es la única
+                forma de que la chapita funcione antes de existir en metal.* */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('pasaporte.ampliarQr')}
+              onPress={() => setQrGrande(true)}
+            >
             <TarjetaPasaporte
               nombre={m.nombre}
               fotoUrl={foto}
@@ -184,10 +204,17 @@ export default function Pasaporte() {
               estado={perdida ? { estado: 'perdida', desde: t('pasaporte.desdeHoy') } : { estado: 'activo' }}
               vozPerdida={t('pasaporte.perdidaEnTarjeta')}
             />
+            </Pressable>
 
             <AccionesPasaporte
-              vozCompartir={t('pasaporte.compartir')}
-              onCompartir={() => void Share.share({ message: urlPublica(token) })}
+              /* ⭐ **«VER EL PASAPORTE», no «compartir enlace».** Compartir el
+                 enlace y compartir el QR eran **la misma cosa dos veces** —el
+                 QR *es* el enlace—, y ninguna de las dos dejaba a la familia
+                 ver lo que un extraño va a leer. *Configurar qué se muestra sin
+                 poder mirarlo es firmar a ciegas.* Abre la página real, la
+                 misma que sale del QR, dentro de la app. */
+              vozCompartir={t('pasaporte.verPasaporte')}
+              onCompartir={() => setViendo(true)}
               vozDescargarQr={t('pasaporte.compartirQr')}
               /* ⭐ **«COMPARTIR EL QR», no «descargar»** (firma del founder).
                  Se manda **la imagen del servidor** al share del sistema, que
@@ -237,7 +264,7 @@ export default function Pasaporte() {
               <Texto variante="apoyo">{t('pasaporte.revocarAviso')}</Texto>
               <AccionesPasaporte
                 vozCompartir={t('pasaporte.verComoLoVen')}
-                onCompartir={() => void Share.share({ message: urlPublica(token) })}
+                onCompartir={() => setViendo(true)}
                 vozDescargarQr={t('pasaporte.emitirNuevo')}
                 onDescargarQr={() => {
                   if (mascotaId === undefined || trabajando) return;
@@ -265,6 +292,57 @@ export default function Pasaporte() {
           </>
         )}
       </View>
+
+      {/* ⭐ **LA VISTA PREVIA: lo que ve un extraño, sin salir de la app.**
+          Es la MISMA página que sale del QR —no una maqueta— porque *una vista
+          previa que no es la cosa real deja de servir justo cuando cambia algo:
+          se sigue viendo linda y ya no dice la verdad.* */}
+      {viendo && token !== null ? (
+        <Modal visible animationType="slide" onRequestClose={() => setViendo(false)}>
+          <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+            <Encabezado
+              variante="navegacion"
+              titulo={t('pasaporte.verPasaporte')}
+              accionDer={
+                <Pressable accessibilityRole="button" accessibilityLabel={t('pasaporte.cerrar')} onPress={() => setViendo(false)}>
+                  <Texto variante="enfasis">{t('pasaporte.cerrar')}</Texto>
+                </Pressable>
+              }
+            />
+            <WebView source={{ uri: urlPublica(token) }} style={{ flex: 1 }} />
+          </View>
+        </Modal>
+      ) : null}
+
+      {/* ⭐ **EL QR A PANTALLA COMPLETA.** Sobre blanco puro y con el mayor lado
+          posible: un lector necesita contraste y tamaño, no un rectángulo
+          bonito. ⚠️ **El brillo NO se sube**, y no por olvido: `expo-brightness`
+          **no está instalado en ninguna app** (medido) y es nativo — no viaja
+          por OTA. Entra con la build; queda en `S113-NFC-BUILD.md`. */}
+      {qrGrande && token !== null ? (
+        <Modal visible animationType="fade" onRequestClose={() => setQrGrande(false)}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('pasaporte.cerrar')}
+            onPress={() => setQrGrande(false)}
+            /* 🔴 **El blanco sale del token, no de un hex.** R35 lo cazó y
+               tiene razón: un `#FFFFFF` a mano no resuelve por tema. Se usa
+               `sobreVideo.contenido` —el papel PLENO de la casa— porque acá el
+               fondo **tiene que ser blanco en los tres temas**: un lector de QR
+               necesita contraste, y en oscuro un fondo que se adapta lo
+               apagaría. *Es el mismo token que la casa ya usa para contenido
+               que no puede ceder ante el tema.* */
+            style={{ flex: 1, backgroundColor: sobreVideo.contenido, alignItems: 'center', justifyContent: 'center', padding: spacing[5], gap: spacing[4] }}
+          >
+            <Image
+              source={{ uri: urlQrPng(token) }}
+              contentFit="contain"
+              style={{ width: '100%', aspectRatio: 1, maxWidth: 420 }}
+            />
+            <Texto variante="apoyo">{t('pasaporte.qrGrandeAyuda')}</Texto>
+          </Pressable>
+        </Modal>
+      ) : null}
     </View>
   );
 }
