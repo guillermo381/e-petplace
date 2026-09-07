@@ -3,7 +3,12 @@
 > **UN SOLO ASUNTO:** el censo de productores de aviso ya está medido y
 > corrido. **Que no se escriba dos veces.**
 >
-> **Rama:** `pista/s114-e-1.0` · **instrumento:** `pnpm censo:productores-de-aviso`
+> **Rama:** `pista/s114-e-1.0` — **SHA completos del trabajo:**
+> `26d42c0d5958b94b4a78cd549b45cf50976bdf06` (el censo y los cuatro gates)
+> `36f9bddef8f69a49f6749919523a5b4b9d0043f6` (la adenda de mesa y este archivo)
+> *La punta de la rama es un tercer commit que sólo agrega estas tres líneas.*
+>
+> **Instrumento:** `pnpm censo:productores-de-aviso`
 > (`scripts/censo-productores-de-aviso.mjs`, corre los DOS métodos en la misma
 > pasada). **Alcance:** sólo lectura — no toca motor, no toca docs de letra.
 > **Medido el 7-sep-2026** contra la base linkeada.
