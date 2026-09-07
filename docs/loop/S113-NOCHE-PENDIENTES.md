@@ -29,9 +29,10 @@ Lo publicado: cliente `d668fae0` · prestador `c81479b3` · **ancla `f4fbe740`**
 
 | | qué | dueño · estado |
 |---|---|---|
-| **1º** | **LA BUILD NATIVA** — NFC · permiso de galería · compartir archivos · micrófono de Nexo | procedimiento completo en **`S113-NFC-BUILD.md`**. ⚠️ **Nada nativo entra a `main` antes de la build** (prohibición vigente): las ramas `s113-a-nfc` y `s113-b-nfc` quedan **fuera de `main` a propósito**, no por olvido |
-| **2º** | **EL PULIDO** — las **tres de C** del último OTA · las **cuatro del Hogar** de B · los **128 eventos sin voz**, con `fin_vida` a la cabeza · las **fechas crudas de la búsqueda** | C y B. **Cuando cierren, el candidato** |
-| **3º** | **LO LEGAL** | **no depende de nosotros** — es espera, no trabajo |
+| **1º** | **EL REDISEÑO** — dos sesiones | C · B |
+| **2º** | **LA BUILD NATIVA, UNA SOLA, con el NFC adentro** — se corta **después** del rediseño | **`S113-NFC-BUILD.md` es LA LISTA VIVA**: cinco capacidades anotadas (NFC · galería · compartir · micrófono de Nexo · selector de PDF). ⚠️ **Nada nativo se instala: se ANOTA ahí.** `s113-a-nfc` y `s113-b-nfc` quedan fuera de `main` **a propósito**. Hasta ese día **todo sale por OTA** y **`ota:deps` es el discriminador de cada candidato** |
+| **3º** | **EL PULIDO** — las **tres de C** del último OTA · las **cuatro del Hogar** de B · los **128 eventos sin voz**, con `fin_vida` a la cabeza · las **fechas crudas de la búsqueda** | C y B. **Cuando cierren, el candidato** |
+| **4º** | **LO LEGAL** | **no depende de nosotros** — es espera, no trabajo |
 
 **El candidato del pulido lo armo cuando C y B cierren.** Hasta entonces no hay
 nada que publicar: *un candidato armado a mitad de un pulido publica media cura,
