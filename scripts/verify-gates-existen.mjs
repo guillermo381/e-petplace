@@ -83,6 +83,29 @@ const JUBILADOS = new Map([
 ]);
 
 /** Los .md donde el canon nombra gates. */
+/**
+ * 🔴 **LA MITAD QUE FALTABA: `package.json` → ARCHIVO.**
+ * Este gate medía **canon → script** y daba VERDE con `verify:pide-en-memorial`
+ * registrado en `package.json` y **sin archivo en ningún lado**. *Una línea en
+ * `package.json` es una promesa de que se puede correr*, y cuando no se puede el
+ * fallo es `MODULE_NOT_FOUND` — que en una tanda se lee como un script roto, no
+ * como un gate ausente. **Encontrado caminando una pantalla**: el código citaba
+ * ese gate como la razón por la que el caso estaba cubierto.
+ */
+export function lineasSinArchivo(scripts, existe) {
+  const rotas = [];
+  for (const [nombre, linea] of Object.entries(scripts ?? {})) {
+    if (!nombre.startsWith('verify:')) continue;
+    /* Se toma el PRIMER argumento que parece una ruta de archivo. Un comando
+       compuesto (`a && b`) declara varias; alcanza con que alguna no exista. */
+    for (const tok of String(linea).split(/\s+/)) {
+      if (!/^[\w./-]+\.(mjs|mts|ts|js|cjs)$/.test(tok)) continue;
+      if (!existe(tok)) rotas.push({ nombre, ruta: tok });
+    }
+  }
+  return rotas;
+}
+
 function corpus() {
   const fuentes = [];
   if (existsSync('CLAUDE.md')) fuentes.push('CLAUDE.md');
@@ -209,6 +232,17 @@ function reportar({ fuentes, donde, enScripts, faltan, jubiladosVivos, deHermano
     return 1;
   }
 
+  const rotas = lineasSinArchivo(
+    JSON.parse(readFileSync('package.json', 'utf8')).scripts ?? {},
+    (r) => existsSync(r));
+  if (rotas.length) {
+    di(`\n🔴 LÍNEAS DE package.json QUE APUNTAN A UN ARCHIVO QUE NO EXISTE (${rotas.length}):`);
+    for (const r of rotas) di(`   ${r.nombre} → ${r.ruta}`);
+    di('   ⇒ correrlas da MODULE_NOT_FOUND, que en una tanda se lee como un script');
+    di('     roto y no como un gate ausente. O existe el archivo, o se saca la línea.');
+    return 1;
+  }
+
   if (faltan.length === 0) {
     di('\n✅ VERDE · todo gate nombrado en el canon existe como script invocable.');
     if (JUBILADOS.size) {
@@ -266,7 +300,23 @@ if (process.argv.includes('--control')) {
   if (!yaNo) rojo = true;
   di(`   (el árbol tiene ${r.faltan.length} hallazgo(s) propios — el control no los juzga)`);
 
-  di(rojo ? '\n🔴 EL GATE NO MIDE.' : '\n✅ el gate mide: caza el nombre plantado y lo suelta al quitarlo.');
+  /* 🔴 EL BRAZO NUEVO TAMBIÉN SE PRUEBA, y su positivo va primero: sin esto
+     tendría un brazo que nunca produjo su rojo — que es lo mismo que no medir. */
+  const R = lineasSinArchivo(
+    { 'verify:fantasma': 'tsx apps/x/no-existe.mts', 'verify:vivo': 'node scripts/si-existe.mjs',
+      'build': 'node scripts/tampoco-existe.mjs' },
+    (r) => r === 'scripts/si-existe.mjs');
+  const dosDir = [
+    [R.length === 1 && R[0].nombre === 'verify:fantasma', 'POSITIVO  una línea que apunta a un archivo inexistente se delata'],
+    [!R.some((x) => x.nombre === 'verify:vivo'), 'NEGATIVO  una línea cuyo archivo existe no produce hallazgo'],
+    [!R.some((x) => x.nombre === 'build'), 'CLASE     sólo se juzgan las `verify:*` — el resto del package.json no es de este gate'],
+    [lineasSinArchivo({ 'verify:x': 'pnpm -r typecheck' }, () => false).length === 0,
+      'CLASE     una línea sin ninguna ruta de archivo no se inventa un hallazgo'],
+  ];
+  let rojo2 = false;
+  for (const [b, et] of dosDir) { di(`${b ? '✅' : '🔴'} ${et}`); if (!b) rojo2 = true; }
+
+  di((rojo || rojo2) ? '\n🔴 EL GATE NO MIDE.' : '\n✅ el gate mide: las DOS direcciones — canon→script y package.json→archivo.');
   process.exit(rojo ? 1 : 0);
 }
 
