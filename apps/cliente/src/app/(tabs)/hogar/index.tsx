@@ -1862,7 +1862,21 @@ export default function Hogar() {
           enseña mal el vocabulario y después hay que desenseñarlo.* Se pidió a
           B por §6b y llegó en `cb3e34c9`. **La entrada estuvo una tanda sin
           glifo a propósito**, que es lo que la hizo pedible. */}
-      <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[4] }}>
+      {/* 🔴 **LA ENTRADA TOMA EL SOLAPE** (ojo del founder: *«quedó tapada,
+          se ve asomar Buscar en tu famili… detrás de Ponte al día»*).
+          Reproducido en el emulador: la entrada quedaba **entre el techo y una
+          tarjeta que sube `-SOLAPE_RECO` para pegarse a la banda**, así que la
+          tarjeta se le montaba encima. *No era un margen chico: era que otra
+          pieza sube a propósito y nadie le avisó que ahora hay algo abajo.*
+          Ahora **la que se monta sobre la banda es la entrada** —queda entera,
+          bajo la tira de mascotas— y «Ponte al día» baja con su aire. */}
+      <View
+        style={{
+          paddingHorizontal: spacing[4],
+          marginTop: -SOLAPE_RECO,
+          zIndex: 3,
+        }}
+      >
         <CeldaNavegacion
           icono="lupa"
           titulo={t('busqueda.entrada')}
@@ -1888,8 +1902,11 @@ export default function Hogar() {
         const filas = filasReco;
         if (filas.length === 0) return null;
         const visibles = ponteRevelado ? filas : filas.slice(0, 3);
+        /* ⏪ Subía `-SOLAPE_RECO` para pegarse a la banda del techo. **Ese
+           lugar es ahora de la entrada de búsqueda**, y esta tarjeta baja con
+           su aire: dos piezas no pueden ocupar el mismo solape. */
         return (
-          <View style={{ paddingHorizontal: spacing[4], marginTop: -SOLAPE_RECO, zIndex: 2 }}>
+          <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[4], zIndex: 2 }}>
             <Tarjeta elevacion="elevada" relleno="ninguno">
               <View
                 style={{
