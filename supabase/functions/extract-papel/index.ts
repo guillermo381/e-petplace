@@ -161,7 +161,7 @@ export function sanearFila(v: unknown, clase: string): Saneo {
   return { ok: true, incompleta, fila }
 }
 
-const PROMPT = `Leés un papel de la salud de una mascota y lo TRANSCRIBÍS. No lo interpretás.
+export const PROMPT = `Leés un papel de la salud de una mascota y lo TRANSCRIBÍS. No lo interpretás.
 
 ═══ 🔴 LA ÚNICA LEY QUE NO SE NEGOCIA ═══
 NO DECÍS SI UN RESULTADO ESTÁ BIEN O MAL. Ni "alto", ni "bajo", ni "elevado",

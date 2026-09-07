@@ -49,7 +49,10 @@ const CORS = {
  *  desde hoy aunque la bóveda todavía no se busque: **el día que exista, esta
  *  edge ya la nombra** y no hay que re-medir el clasificador. Lo que no está en
  *  la lista cae a `cualquiera` — que es la respuesta segura: buscar en todo. */
-const TIPOS = ['cita', 'pedido', 'mascota', 'papel', 'producto', 'prestador', 'cualquiera'] as const
+/* 🔴 `recuerdo` ESTABA FALTANDO, y lo midió E: `buscar_en_mi_familia` lo
+   DEVUELVE como tipo de resultado y acá no se podía pedir. *Dos vocabularios
+   para la misma cosa, y el hueco sólo se ve cuando alguien los cruza.* */
+const TIPOS = ['cita', 'pedido', 'mascota', 'recuerdo', 'papel', 'producto', 'prestador', 'cualquiera'] as const
 type Tipo = typeof TIPOS[number]
 
 /** Descriptores de tiempo. Cerrado a propósito: cada uno tiene una cuenta
@@ -63,11 +66,19 @@ type Ventana = typeof VENTANAS[number]
 export const SISTEMA = `Extraés QUÉ está buscando alguien en la app de su mascota. No buscás: sólo separás la frase en sus partes.
 
 Devolvés SOLO este JSON y nada más:
-{"tipo":"...","ventana":"...","mes":null,"termino":"..."}
+{"es_pregunta":false,"tipo":"...","ventana":"...","mes":null,"termino":"..."}
 
-"tipo" — una de: cita, pedido, mascota, papel, producto, prestador, cualquiera.
+"es_pregunta" — true si la persona PREGUNTA algo sobre el cuidado de su mascota
+  en vez de querer encontrar una cosa suya. "cuándo le toca la pipeta",
+  "cuánto pesa Zeus", "está al día con las vacunas", "cuánto gasté este mes"
+  son PREGUNTAS aunque nombren una cosa. Si dudás, mirá el verbo: "cuándo",
+  "cuánto", "por qué", "cada cuánto", "está" preguntan; un sustantivo suelto
+  o "el pedido de X" busca.
+
+"tipo" — una de: cita, pedido, mascota, recuerdo, papel, producto, prestador, cualquiera.
   Es la CLASE de cosa que quiere encontrar. Si no lo dice, "cualquiera".
   papel = un examen, una receta, un informe, un documento de la clínica.
+  recuerdo = una nota o una foto que la familia guardó.
 
 "ventana" — una de: hoy, ayer, esta_semana, semana_pasada, este_mes, mes_pasado,
   este_ano, ano_pasado, ultimos_7, ultimos_30, ultimos_90, o null si no menciona tiempo.
@@ -80,8 +91,7 @@ Devolvés SOLO este JSON y nada más:
   sin artículos. De "el pedido de croquetas del mes pasado" el término es
   "croquetas". De "la cita de Thor en marzo", "Thor". Si no queda nada, "".
 
-Si la frase es una PREGUNTA sobre cuidado y no una búsqueda ("cada cuánto se
-baña", "es normal que tome tanta agua"), devolvés tipo "cualquiera", termino "".`
+Con "es_pregunta" en true, "tipo" y "termino" no importan: los ignora quien lee.`
 
 /** El texto de quien pregunta va como mensaje `user`, envuelto y anunciado como
  *  cita: la envoltura convierte «ignorá tus reglas» en algo que el modelo LEE
@@ -146,13 +156,34 @@ export function fechasDe(ventana: Ventana | null, mes: number | null, ahora = ne
  *  —`cualquiera`, sin ventana—, jamás a lo más angosto: *un filtro inventado
  *  esconde resultados que existen, y eso se lee como «no lo tengo».* */
 export function saneaIntencion(d: unknown): {
-  tipo: Tipo; ventana: Ventana | null; mes: number | null; termino: string
+  tipo: Tipo; ventana: Ventana | null; mes: number | null; termino: string; es_pregunta: boolean
 } {
   const o = (d ?? {}) as Record<string, unknown>
   const mesCrudo = typeof o.mes === 'number' ? Math.trunc(o.mes) : null
   const mes = mesCrudo !== null && mesCrudo >= 1 && mesCrudo <= 12 ? mesCrudo : null
   const t = typeof o.termino === 'string' ? o.termino.trim() : ''
+  /* 🔴 LA CONSECUENCIA LA APLICA EL CÓDIGO, NO LA MEMORIA DEL MODELO.
+     E midió que **6 de 10 preguntas de cuidado NO salían `cualquiera`**, aunque
+     el prompt lo pedía con todas las letras — y el patrón era exacto: falla en
+     las que traen un sustantivo agarrable («pipeta», «Zeus», «vacuna»,
+     «gasté»), y acierta en las que no tienen nada que agarrar. *No es que no
+     entienda la pregunta: encuentra algo que parece un término y lo devuelve.*
+     Pedírselo más fuerte al prompt es el juego del topo —ya lo pagamos con el
+     voseo—. Así que el modelo contesta una pregunta más fácil (`es_pregunta`) y
+     **el código fuerza el resto**.
+     Por qué importa: hoy termina en la salida honesta porque FTS da cero. Con
+     la intención cableada, «cuándo le toca la pipeta» entraría como
+     `producto`/`pipeta` — y el día que la Despensa tenga una pipeta, una
+     pregunta de cuidado devuelve un producto. *Un «no encontré» honesto se
+     vuelve un acierto falso.* */
+  const es_pregunta = o.es_pregunta === true
+  if (es_pregunta) {
+    // La ventana SÍ sobrevive: «cuánto gasté este mes» es una pregunta y su
+    // mes es un dato real que Nexo puede usar.
+    return { tipo: 'cualquiera', ventana: mes !== null ? null : deLista(o.ventana, VENTANAS, null), mes, termino: '', es_pregunta }
+  }
   return {
+    es_pregunta,
     tipo: deLista(o.tipo, TIPOS, 'cualquiera') as Tipo,
     // Con `mes` la ventana sobra: dos filtros de tiempo a la vez no se pueden cumplir.
     ventana: mes !== null ? null : deLista(o.ventana, VENTANAS, null),
@@ -186,7 +217,7 @@ Deno.serve(async (req: Request) => {
          cara de alguien que sólo quería buscar.* */
       console.error('[buscar-intencion] el modelo falló:', r.error, r.detalle)
       return new Response(JSON.stringify({
-        tipo: 'cualquiera', ventana: null, mes: null, termino: '',
+        tipo: 'cualquiera', ventana: null, mes: null, termino: '', es_pregunta: false,
         desde: null, hasta: null, fuente: 'modelo_caido',
       }), { status: 200, headers })
     }
@@ -195,12 +226,14 @@ Deno.serve(async (req: Request) => {
     const rango = fechasDe(i.ventana, i.mes)
     return new Response(JSON.stringify({
       tipo: i.tipo, ventana: i.ventana, mes: i.mes, termino: i.termino,
+      es_pregunta: i.es_pregunta,
       desde: rango?.desde ?? null, hasta: rango?.hasta ?? null, fuente: 'modelo',
     }), { status: 200, headers })
   } catch (e) {
     console.error('[buscar-intencion] excepción:', e)
     return new Response(JSON.stringify({
-      tipo: 'cualquiera', ventana: null, mes: null, termino: '', desde: null, hasta: null, fuente: 'excepcion',
+      tipo: 'cualquiera', ventana: null, mes: null, termino: '', es_pregunta: false,
+      desde: null, hasta: null, fuente: 'excepcion',
     }), { status: 200, headers })
   }
 })

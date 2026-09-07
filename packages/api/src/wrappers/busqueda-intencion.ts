@@ -47,7 +47,7 @@ import type { ResultadoWrapper } from '../resultado';
 /** Las clases de cosa que la edge sabe nombrar. `papel` está desde ya aunque la
  *  bóveda todavía no se busque: el día que exista, ya tiene nombre acá. */
 export type TipoBuscado =
-  | 'cita' | 'pedido' | 'mascota' | 'papel' | 'producto' | 'prestador' | 'cualquiera';
+  | 'cita' | 'pedido' | 'mascota' | 'recuerdo' | 'papel' | 'producto' | 'prestador' | 'cualquiera';
 
 export type IntencionDeBusqueda = {
   tipo: TipoBuscado;
@@ -56,6 +56,10 @@ export type IntencionDeBusqueda = {
   hasta: string | null;
   /** Lo que identifica la cosa, sin las palabras de tipo ni de tiempo. */
   termino: string;
+  /** 🔴 `true` cuando la frase es una PREGUNTA de cuidado y no una búsqueda.
+   *  Con esto en `true`, `tipo` es `cualquiera` y `termino` está vacío **porque
+   *  lo fuerza la edge**, no porque el modelo se haya acordado. */
+  es_pregunta: boolean;
   fuente: 'modelo' | 'modelo_caido' | 'excepcion';
 };
 
@@ -102,7 +106,7 @@ async function leerIntencion(texto: string): Promise<IntencionDeBusqueda | null>
   const { data, error } = await getClient().functions.invoke('buscar-intencion', { body: { texto } });
   if (error || data === null || typeof data !== 'object') return null;
   const d = data as Record<string, unknown>;
-  const TIPOS: readonly string[] = ['cita', 'pedido', 'mascota', 'papel', 'producto', 'prestador', 'cualquiera'];
+  const TIPOS: readonly string[] = ['cita', 'pedido', 'mascota', 'recuerdo', 'papel', 'producto', 'prestador', 'cualquiera'];
   return {
     // Espejo de la lista blanca de la edge: la edge ya saneó, y esto evita que
     // un valor nuevo del servidor entre a un `switch` que se cree exhaustivo.
@@ -110,6 +114,7 @@ async function leerIntencion(texto: string): Promise<IntencionDeBusqueda | null>
     desde: typeof d.desde === 'string' ? d.desde : null,
     hasta: typeof d.hasta === 'string' ? d.hasta : null,
     termino: typeof d.termino === 'string' ? d.termino : '',
+    es_pregunta: d.es_pregunta === true,
     fuente: (d.fuente === 'modelo' || d.fuente === 'modelo_caido' ? d.fuente : 'excepcion'),
   };
 }
