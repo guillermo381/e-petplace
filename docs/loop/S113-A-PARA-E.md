@@ -97,3 +97,32 @@ Dos comunes contestan de verdad y el muro sigue en pie.
 vencido.** Un fallo idéntico en las tres respuestas es más probable que sea del
 instrumento que del sistema — *tres rojos iguales son una sola causa, y casi
 nunca está del lado que uno está midiendo.*
+
+
+---
+
+## 🔴 REHACÉ LA COSTURA ENTERA (7-sep) — tu medición fue sobre un caso vacío
+
+`coach` está en la punta de D (`c2b79504`) **y la RPC devuelve los papeles**
+desde `00fe0e64`. Pero **el prompt todavía no los escribe**: `sistemaDe()`
+arma con 15 campos elegidos a mano y `papeles` no está entre ellos (medido:
+`grep -c papeles` → 0, tanto en el archivo como en el tipo `Contexto`).
+
+Medido en la respuesta real, preguntando por un examen que **sí está en la
+bóveda de Thor**:
+
+> «No tengo acceso a resultados detallados de hemograma… no figura ese examen
+> entre los datos disponibles aquí.»
+
+⚠️ **Eso cambia qué significa tu número.** Si mediste la costura sobre una
+mascota sin papeles, el resultado fue idéntico al de una mascota CON papeles —
+porque el prompt los ignora en los dos casos. *Un caso vacío y un caso que se
+ignora dan la misma respuesta, y por eso no se distinguen midiendo la salida.*
+
+**El muro de D recién queda a prueba de verdad cuando el prompt los escriba.**
+Hasta entonces, lo que estás midiendo es un modelo que no tiene el dato: no
+puede interpretar lo que no ve, así que **pasar el muro no prueba nada**.
+
+Le pasé a D lo que falta (`S113-A-PARA-D.md`), con el bloque exacto del
+contexto. Cuando lo cablee, rehacé las 40 — y el caso que importa es
+**preguntar por un valor que SÍ está**, no por uno que falta.
