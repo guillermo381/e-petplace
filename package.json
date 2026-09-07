@@ -102,6 +102,7 @@
     "verify:nexo-rojos": "node scripts/verify-nexo-rojos.mjs",
     "verify:busqueda-propia": "node scripts/verify-busqueda-propia.mjs",
     "verify:busqueda-calidad": "node scripts/verify-busqueda-calidad.mjs",
+    "verify:busqueda-frases": "node scripts/verify-busqueda-frases.mjs",
     "verify:boveda": "node scripts/verify-boveda.mjs",
     "verify:placa-muda": "node scripts/verify-placa-muda.mjs",
     "verify:nexo-antispam": "node scripts/verify-nexo-antispam.mjs",
