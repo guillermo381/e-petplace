@@ -177,6 +177,41 @@ t('🔴 la Hoja no clasifica lo que le escriben',
 t('cada entrada exige su destino', /onPress: \(\) => void/.test(HC), true);
 t('el glifo lo decide la PIEZA, exhaustivo',
   /satisfies Record<ClaseContanos, IconoNombre>/.test(HC), true);
+/* ═══ 🔴 EL VOCABULARIO ES EL DEL MOTOR, MIEMBRO POR MIEMBRO ═══════════════
+   `ClaseContanos` tiene que ser IDÉNTICO a `ClaseDeHecho` del contrato: así un
+   valor que viene del motor entra en la pieza **sin un solo cast**.
+   ⚠️ **No se importa** porque `packages/ui` no depende de `packages/api` y
+   hacerlo invertiría la dirección de la casa — *el design system pasaría a
+   depender de la capa de datos.* ⇒ la igualdad la sostiene ESTE gate, que lee
+   los dos archivos y compara. *Dos listas que tienen que ser iguales y nadie
+   compara son dos listas que van a divergir.* */
+{
+  /* ⚠️ **SE EXTRAE CON UN REGEX LITERAL Y NO CON `new RegExp` INTERPOLADO.**
+     La primera versión armaba el patrón con un template y su control positivo
+     salió ROJO: *el extractor no veía nada y el assert de arriba comparaba
+     `null` con `null`, que pasa sin medir.* Por eso el control existe.
+     ⚠️ Y la segunda cortaba en `;` — **la casa no usa punto y coma**, así que
+     el patrón se comió el código de abajo y contó DOCE miembros. Lo dijo el
+     control, no yo: `[12, 4]`. Corta por fin de línea. */
+  const miembrosDe = (texto: string, re: RegExp) => {
+    const m = texto.match(re);
+    return m === null ? null : [...m[1].matchAll(/'([a-z_]+)'/g)].map((x) => x[1]).sort();
+  };
+  const CONTRATO = (() => {
+    try {
+      return readFileSync(new URL('../packages/api/src/wrappers/coach.ts', import.meta.url), 'utf8');
+    } catch { NO_CONCLUYENTE.push('packages/api/src/wrappers/coach.ts'); return ''; }
+  })();
+  const deLaPieza = miembrosDe(HC, /export type ClaseContanos =(.*)/);
+  const delMotor = miembrosDe(CONTRATO, /export type ClaseDeHecho =(.*)/);
+  t('🔴 la clase de la pieza es la del motor, miembro por miembro', deLaPieza, delMotor);
+  /* CONTROL POSITIVO: sin él, dos `null` compararían iguales y el assert de
+     arriba sería verde sin haber leído una sola línea. */
+  t('CONTROL POSITIVO · el extractor SÍ ve los cuatro de cada lado',
+    [deLaPieza?.length ?? 0, delMotor?.length ?? 0], [4, 4]);
+  t('…y `rasgo` es el nombre del motor, no `personalidad`',
+    deLaPieza?.includes('rasgo') === true && deLaPieza?.includes('personalidad') === false, true);
+}
 t('🔴 las cuatro filas montan en CONTROL: parejas, sin huella',
   /montaje="control"/.test(HC), true);
 /* 🔴 NINGUNA VOZ SE TRUNCA, y las tres llevan el nombre de la mascota adentro:

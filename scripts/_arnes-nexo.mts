@@ -23,6 +23,8 @@ const PANEL = src('packages/ui/src/components/PanelMemoria.tsx');
 const CHIPS = src('packages/ui/src/components/ChipsSugerencia.tsx');
 const RES = src('packages/ui/src/components/ResultadosBusqueda.tsx');
 const MEM = src('packages/ui/src/components/nexo-memoria.ts');
+const PRES = src('packages/ui/src/components/PresentacionNexo.tsx');
+const AVISO = src('packages/ui/src/components/AvisoAnticipacion.tsx');
 
 console.log('\n── ① ROJO · EL RESALTADO NO PIERDE NI AGREGA UNA LETRA ──');
 /* 🔴 Un resaltado que se come un carácter cambia el dato JUSTO en el lugar
@@ -163,6 +165,49 @@ for (const [n, s] of [['respuesta', RESP], ['panel', PANEL], ['chips', CHIPS], [
   const plantillas = (s.match(/`[^`]*\$\{[^`]*`/g) ?? []).filter((x) => !x.includes('r.titulo'));
   t(`${n}: sin plantillas de texto`, plantillas, []);
 }
+
+console.log('\n── ⑫ ROJO · LA PRESENTACIÓN (2.1 · B4) ──');
+/* 🔴 Tres frases se leen; cinco se saltean, y la que se saltea es siempre la
+   última — que acá es la que dice que puede equivocarse. */
+t('🔴 son EXACTAMENTE tres, por tupla',
+  /readonly \[string, string, string\]/.test(PRES), true);
+/* Reusa la pieza del chat en vez de una «burbuja de presentación» propia:
+   dos dibujos iguales con nombres distintos divergen al primer cambio. */
+t('🔴 monta `BurbujaMensaje`, no una burbuja propia',
+  /<BurbujaMensaje/.test(PRES) && /borderRadius/.test(PRES) === false, true);
+t('…y agrupa: nombre en la primera, hora en la última',
+  /posicion=\{i === 0 \? 'primero'/.test(PRES), true);
+/* Sin temporizador y sin «está escribiendo»: simular que las escribe es actuar
+   una conversación que no está pasando. */
+t('🔴 llegan juntas: cero temporizador, cero «escribiendo»',
+  /setTimeout|setInterval|escribiendo|typing/i.test(PRES), false);
+/* 🔴 EL «MISMO RITMO» ES MEDIBLE: la burbuja trae su `marginTop` propio
+   —spacing[3] al abrir grupo, spacing[0.5] adentro— y un `gap` en el
+   contenedor SE SUMA. *Cuando la pieza ya porta su espaciado, el contenedor
+   que agrega el suyo no lo ajusta: lo rompe.* */
+t('🔴 el contenedor NO agrega aire: el ritmo lo manda la burbuja',
+  /gap: spacing/.test(PRES), false);
+t('🔴 en memorial no se presenta', /theme\.mode === 'memorial'\) return null/.test(PRES), true);
+
+console.log('\n── ⑬ ROJO · EL AVISO QUE SE ADELANTA (2.1 · B5) ──');
+/* 🔴 No pasó nada malo: todavía no pasó nada. Y el costo de gritar no es el
+   susto — es que la próxima alarma ya no se distinga. */
+t('🔴 NUNCA en color de alarma', /status\.danger|dangerText|color="danger"/.test(AVISO), false);
+t('…vive como TINTE, no como relleno (R20)',
+  /borderColor: theme\.status\.warningText/.test(AVISO) &&
+  /backgroundColor: theme\.status\.warning\b/.test(AVISO) === false, true);
+/* Un aviso que nombra una predisposición y no ofrece a quién preguntarle deja
+   a la familia con una palabra médica y sin nadie. */
+t('🔴 la tarjeta EXIGE el acto y su palabra',
+  /forma: 'tarjeta'; onVerVet: \(\) => void; vozVerVet: string/.test(AVISO), true);
+t('🔴 …y la fila EXIGE su destino',
+  /forma: 'fila'; onAbrir: \(\) => void/.test(AVISO), true);
+/* La pieza no compone: si supiera de razas, sería donde nace el diagnóstico
+   accidental. */
+t('🔴 no compone la voz: la recibe hecha',
+  /predisposici|displasia|senior/i.test(AVISO.replace(/\/\*[\s\S]*?\*\//g, '')), false);
+t('🔴 en memorial no se adelanta nada',
+  /theme\.mode === 'memorial'\) return null/.test(AVISO), true);
 
 if (NO_CONCLUYENTE.length > 0) {
   console.log(`\n⚠️ NO CONCLUYENTE · no se pudieron abrir: ${NO_CONCLUYENTE.join(' · ')}`);

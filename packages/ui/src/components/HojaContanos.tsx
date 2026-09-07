@@ -53,18 +53,47 @@ import { Chevron } from './chevron'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 
-/** Las cuatro cosas que una familia puede contar. **Cerrado a propósito:** una
- *  quinta sin glifo ni lugar no compila, en vez de caer a un «otros» que nadie
- *  sabría dónde guardar. */
-export type ClaseContanos = 'comportamiento' | 'personalidad' | 'medico' | 'recuerdo'
+/**
+ * Las cuatro cosas que una familia puede contar. **Cerrado a propósito:** una
+ * quinta sin glifo ni lugar no compila, en vez de caer a un «otros» que nadie
+ * sabría dónde guardar.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **ES EL VOCABULARIO DEL MOTOR, MIEMBRO POR MIEMBRO.**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * `'rasgo'` y no `'personalidad'`: así lo llaman `clasificarHecho` y
+ * `guardarHechoClasificado`. **Idéntico al `ClaseDeHecho` del contrato** ⇒ un
+ * valor que viene del motor entra acá **sin un solo cast**, que es la
+ * condición del encargo.
+ *
+ * ⚠️ **Y NO SE IMPORTA DE `@epetplace/api`, con su razón medida:** `packages/ui`
+ * **no depende** de `packages/api` (verificado en su `package.json`), y hacerlo
+ * invertiría la dirección de la casa — *el design system pasaría a depender de
+ * la capa de datos, y una pieza de dibujo arrastraría los tipos generados de la
+ * base.* Eso es una decisión de arquitectura y no la tomo yo de costado.
+ *
+ * ⇒ **La igualdad se sostiene con un GATE, no con disciplina:** su arnés lee
+ * los dos archivos y compara los miembros; si alguno agrega o renombra uno,
+ * sale rojo. *Dos listas que tienen que ser iguales y nadie compara son dos
+ * listas que van a divergir.*
+ *
+ * ⚠️ **La VOZ no cambia:** en pantalla sigue diciendo «Rasgos de
+ * personalidad» — la trae la pantalla (Ley 3). *El motor y la familia no
+ * tienen por qué llamar a las cosas igual.*
+ */
+export type ClaseContanos = 'comportamiento' | 'rasgo' | 'medico' | 'recuerdo'
 
 /** 🔴 **El glifo por clase lo decide la PIEZA** (Ley 12): si entrara por prop,
  *  dos pantallas podrían darle a «Comportamiento» dos íconos y la misma
  *  entrada se leería como dos cosas. Exhaustivo: una clase nueva sin glifo no
  *  compila. */
+/* ⚠️ La CLASE se llama `rasgo` (vocabulario del motor) y el GLIFO se llama
+   `personalidad` (nombre del registry). **Son dos namespaces distintos y no se
+   tocan**: renombrar el glifo para que «haga juego» rompería a sus otros
+   consumidores por una coincidencia de lectura. */
 const GLIFO = {
   comportamiento: 'training',
-  personalidad: 'personalidad',
+  rasgo: 'personalidad',
   medico: 'caso',
   recuerdo: 'bitacora',
 } satisfies Record<ClaseContanos, IconoNombre>
