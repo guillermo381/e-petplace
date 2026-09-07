@@ -110,7 +110,7 @@ console.log('\n== 3 · DOS O MÁS: recién ahí hay que hilar ==')
     JSON.stringify(cuerpos[0].messages).includes('es mañana'),
     JSON.stringify(cuerpos[0].messages).slice(0, 200))
   const sis = JSON.stringify(cuerpos[0].system ?? '')
-  for (const ley of ['120 palabras', 'Sólo decís lo que está en la lista', 'No diagnostic', 'niños', 'sin pregunta'])
+  for (const ley of ['120 palabras', 'Sólo dices lo que está en la lista', 'No diagnostic', 'niños', 'sin pregunta'])
     exigir(`  la ley dice «${ley}»`, sis.includes(ley))
   exigir('  sonnet, 400 tokens, thinking disabled ESCRITO',
     cuerpos[0].model === 'claude-sonnet-5' && cuerpos[0].max_tokens === 400 &&

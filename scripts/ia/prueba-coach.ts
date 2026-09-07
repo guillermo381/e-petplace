@@ -485,6 +485,28 @@ console.log('\n== 8quinquies-bis · 🔴 EL SYSTEM ESTÁ EN TUTEO, no sólo lo p
     sis.includes('NO\\nes una respuesta') || sis.includes('NO es una respuesta'), sis.slice(0, 40))
 }
 
+console.log('\n== 8quinquies-ter · 🔴 EL CINTURÓN: el prompt NO alcanzó ==')
+for (const [crudo, esperado] of [
+  ['¿Querés que te abra una consulta?', '¿Quieres que te abra una consulta?'],
+  ['Dale, fijate si toma agua.', 'Listo, fíjate si toma agua.'],
+  ['Contame más y tenés mi ayuda.', 'Cuéntame más y tienes mi ayuda.'],
+] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: crudo, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`«${crudo.slice(0, 26)}…» sale en tuteo`, json.respuesta === esperado, json.respuesta)
+}
+{
+  // control: un texto que ya está en tuteo NO se toca.
+  textoPlano('Puedes fijarte si toma agua. Cuéntame cómo sigue.')
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir('CONTROL: lo que ya está en tuteo pasa intacto',
+    json.respuesta === 'Puedes fijarte si toma agua. Cuéntame cómo sigue.', json.respuesta)
+}
+console.log('     ↑ medido: con el system en voseo se escapaba seguido; pasado a tuteo')
+console.log('       bajó a ~1 de cada 10; y al nombrarle «dale» apareció «querés».')
+console.log('       Enumerar formas prohibidas es jugar al topo: la última milla')
+console.log('       no es del prompt, es determinística.')
+
 console.log('\n== 8sexies · EL «CONTANOS»: clasifica y PROPONE, nunca guarda ==')
 {
   proveedorFalso(() => ({ hechos: [
