@@ -182,8 +182,15 @@ export function hitsDeVoseo(src) {
          Se descarta por FORMA, como el ⑩: empieza con `./`, `../`, `@` o es un
          paquete desnudo con `/`. *No se descarta «la línea del import» sino la
          CADENA que parece ruta* — así una voz en voseo escrita en la misma
-         línea sigue cayendo. */
-      if (/^(\.{1,2}\/|@[\w-]+\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
+         línea sigue cayendo.
+
+         🔴 **`@[\w-]+/` dejaba afuera el alias de la casa.** Exigía al menos
+         una letra entre `@` y `/`, así que atrapaba `@epetplace/ui` y **no**
+         `@/components/contanos` — que es como importa media app del cliente.
+         Lo cobró mi propio perfil el día que sumé «contanos» a la lista: *la
+         exclusión existía, la escribí yo, y no cubría el caso más frecuente
+         del repo.* `*` en vez de `+`, y el control lo fija. */
+      if (/^(\.{1,2}\/|@[\w-]*\/|[\w-]+\/)/.test(v) && !/\s/.test(v)) continue;
 
       /* ⑫ — **UNA CLAVE DE i18n NO ES VOZ**, y esto lo destapó ampliar la lista
          a 114 formas: `'checkoutGuarderia.esperaMensual'` daba rojo por
