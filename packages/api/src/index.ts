@@ -1970,4 +1970,6 @@ export {
   buscarConIntencion,
   type BusquedaConIntencion,
   type PaseDeBusqueda,
+  type IntencionDeBusqueda,
+  type TipoBuscado,
 } from './wrappers/busqueda-intencion';

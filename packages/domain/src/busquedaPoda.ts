@@ -47,10 +47,40 @@
  * rompería.
  */
 export const PALABRAS_ESTRUCTURALES: readonly string[] = [
+  // ── lo que había, medido en la fase 3 contra la familia del founder ──
   'pedido', 'pedidos', 'orden', 'ordenes', 'órdenes',
   'compra', 'compras', 'cita', 'citas', 'turno', 'turnos',
   'recuerdo', 'recuerdos', 'nota', 'notas',
+  /* ── LO QUE FALTABA, Y LO MIDIÓ E ────────────────────────────────────────
+     Mis 23 frases daban 18/23 con FTS solo; **las 30 de E dieron 5/30**, y
+     18 de sus 40 traían una palabra de estructura que esta lista no tenía.
+     *Mi conjunto no tenía poder de resolución: una lista escrita por el mismo
+     que escribió la poda mide la facilidad de sus propios ejemplos.*
+     Y no es que la lista estuviera mal: **es ANTERIOR a la bóveda**. Nueve de
+     estas palabras son vocabulario que se inventó esta semana. */
+  // la bóveda — cómo le dice la gente a sus papeles («libreta» es el carnet)
+  'examen', 'examenes', 'exámenes', 'receta', 'recetas', 'informe', 'informes',
+  'analisis', 'análisis', 'estudio', 'estudios', 'resultados', 'papel', 'papeles',
+  'libreta', 'documento', 'documentos',
+  // la agenda
+  'reserva', 'reservas', 'visita', 'visitas', 'chequeo', 'chequeos',
+  // los comprables
+  'plan', 'planes', 'bono', 'bonos',
+  // el comercio
+  'factura', 'facturas', 'comprobante', 'comprobantes',
 ];
+
+/* 🔴 LAS QUE E PROPUSO Y **NO** ENTRAN, con su razón medida. No las descarté
+   yo: las descartó el brazo derivado del gate, preguntándole al catálogo vivo.
+     · `control`  → es un PRODUCTO («ADULTO CONTROL PH FELINE»)
+     · `paquete`  → es un SERVICIO
+     · `consulta` → es un SERVICIO («Consulta General», «Consulta especializada»),
+       y lo avisó E antes de que yo lo probara.
+   *Las tres se sienten estructurales y las tres son contenido.* Ésta es la
+   razón por la que el gate le pregunta al catálogo en vez de confiar en la
+   intuición de quien escribe la lista — y por la que crece sola: el día que
+   nazca un servicio llamado «Chequeo», el gate se pone rojo sin que nadie
+   se acuerde de venir a mirar acá. */
 
 /** Artículos, posesivos y preposiciones. `to_tsquery` en español ya los
  *  descarta —por eso «la de thor» encuentra igual—, pero se sacan para que
