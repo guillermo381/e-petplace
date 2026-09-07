@@ -142,6 +142,7 @@ import { EditarRazaHoja } from '@/components/editar-raza-hoja';
 import { RegistrarMedicacionHoja } from '@/components/registrar-medicacion-hoja';
 import { HojaInvitacionBio, type ClaseBio } from '@/components/invitacion-bio-hojas';
 import { HojaContanos, entradasContanos, useContanos } from '@/components/contanos';
+import { useChipsRasgos } from '@/components/chips-rasgos';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -528,6 +529,7 @@ export default function PerfilDeMascota() {
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
   const [identidadAbierta, setIdentidadAbierta] = useState(false);
+  const [vitalesAbiertos, setVitalesAbiertos] = useState(false);
   /** S91 · P2 — la SERIE de peso. El perfil mostraba el número del snapshot y
    *  no su fecha: «12 kg» sin cuándo no distingue una medición de hoy de una
    *  de hace dos años. */
@@ -564,6 +566,9 @@ export default function PerfilDeMascota() {
     setRecargaPeso((n) => n + 1),
   );
   const [hojaBio, setHojaBio] = useState<ClaseBio | null>(null);
+  const chips = useChipsRasgos(mascotaId ?? '', typeof perfil === 'object' ? perfil.mascota.nombre : '', () =>
+    setRecargaPeso((n) => n + 1),
+  );
   /* ☠️ `InvitacionBio` murió en S113-B · 2.1: era TARJETA Y HOJA en una pieza.
      Acá se parte igual que en la pieza — el botón abre, la Hoja contiene.
      ⚠️ CURA DE COMPILACIÓN de la pista A, del lado consumidor: mantiene las
@@ -788,6 +793,9 @@ export default function PerfilDeMascota() {
    *  *No es un bug de una de las dos: es que la regla vivía dos veces.* Se
    *  deriva acá una vez y la usan las dos. La FECHA viaja con el número: un
    *  peso sin cuándo no dice si es de hoy o de hace dos años. */
+  /** La raza, ya estrechada: el guard de la ficha la exige y el callback la usa. */
+  const razaVigente: string | null = mascota.raza;
+
   const pesoVigente: { kg: number; fecha: string | null; deClinica: boolean | null } | null =
     /* 🔴 **LA SERIE YA TRAE LOS DOS, y por eso `[0]` es la respuesta.** Medido
        en Thor: `evento_peso_medicion` guarda los del prestador y los de la
@@ -1454,16 +1462,47 @@ export default function PerfilDeMascota() {
               const enDias = (n: number) =>
                 n <= 0 ? t('perfil.hoyEsHoy') : n === 1 ? t('perfil.hoyEsManana') : t('perfil.hoyFaltanDias', { n });
               switch (hoyMascota.tipo) {
-                case 'aviso':
+                case 'aviso': {
+                  /* 🔴 **EL TEXTO REAL DEL AVISO, no su fecha.** Medido en
+                     `avisos_coach`: los tres tipos vivos traen su contenido en
+                     `detalle` — `descripcion_familia` en las 18 anticipaciones
+                     («suelen tener problemas de cadera»), `servicio` en las 5
+                     citas de mañana, `vacuna` en la que vence. *Una tarjeta que
+                     dice «Algo para mirar · 04 sep» obliga a tocarla para saber
+                     si vale la pena, y eso la vuelve ruido.*
+                     El fallback es la fecha porque **es lo único que siempre
+                     está**: un tipo nuevo no deja la tarjeta muda. */
+                  const d = hoyMascota.detalle;
+                  const str = (k: string) => (typeof d[k] === 'string' ? (d[k] as string) : null);
+                  const texto =
+                    str('descripcion_familia') ??
+                    str('servicio') ??
+                    str('vacuna') ??
+                    str('nombre') ??
+                    fechaCortaMono(hoyMascota.fecha, idioma);
                   return (
                     <TarjetaHoy
                       clase="anticipacion"
                       titulo={t('perfil.hoyAviso')}
-                      detalle={fechaCortaMono(hoyMascota.fecha, idioma)}
+                      detalle={texto}
                       vozActo={t('perfil.hoyVerAviso')}
-                      onActo={() => router.push({ pathname: '/nexo', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+                      onActo={() =>
+                        router.push({
+                          pathname: '/nexo',
+                          params: {
+                            mascotaId: mascota.id,
+                            nombre: mascota.nombre,
+                            /* Llega a Nexo **con el tema puesto**: el aviso es
+                               la pregunta, y hacérsela escribir de nuevo es
+                               pedirle a la familia que repita lo que la
+                               pantalla acaba de decirle. */
+                            semilla: str('chequeo_sugerido') ?? texto,
+                          },
+                        })
+                      }
                     />
                   );
+                }
                 case 'cita':
                   return (
                     <TarjetaHoy
@@ -1584,62 +1623,110 @@ export default function PerfilDeMascota() {
               <TarjetaConociendolo
                 fraccion={hechas / casillas.length}
                 voz={t('perfil.conociendoloVoz', { n: hechas, total: casillas.length, nombre: mascota.nombre })}
-                contanos={<BotonContanos etiqueta={t('contanos.pastilla')} onPress={contanos.abrir} />}
-                raza={
-                  contenidoRaza !== null && mascota.raza !== null ? (
-                    <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
-                      <FichaRaza
-                        nombre={mascota.raza}
-                        revisado
-                        historia={contenidoRaza.origen ?? ''}
-                        caracteristicas={[
-                          { etiqueta: t('perfil.razaTemperamento'), valor: contenidoRaza.temperamento ?? undefined },
-                          { etiqueta: t('perfil.razaTalla'), valor: contenidoRaza.talla_adulta ?? undefined },
-                          { etiqueta: t('perfil.razaVida'), valor: contenidoRaza.esperanza_vida ?? undefined },
-                        ]}
-                        /* La etapa ACTUAL sale del momento vital que la ficha YA calcula:
-                           no se recalcula acá — *dos cuentas de lo mismo terminan
-                           discrepando* (lo aprendí en el 1.1.2, con el botón del carnet).
-                           🔴 **M4 no marca ninguna etapa, y es a propósito**: el motor lo
-                           devuelve por CONDICIÓN CRÓNICA antes de mirar la edad
-                           (`momentoVital.ts:34`), así que un senior con una condición sale
-                           M4 — marcarlo «adulto» sería afirmar una edad que el dato no
-                           dice. Sin etapa actual la ficha se lee entera, que es honesto. */
-                        cuidados={[
-                          { id: 'cachorro', etapa: t('perfil.razaCachorro'), texto: contenidoRaza.cuidados_por_etapa.cachorro ?? '', actual: momento === 'M1' || momento === 'M2' },
-                          { id: 'adulto', etapa: t('perfil.razaAdulto'), texto: contenidoRaza.cuidados_por_etapa.adulto ?? '', actual: momento === 'M3' },
-                          { id: 'senior', etapa: t('perfil.razaSenior'), texto: contenidoRaza.cuidados_por_etapa.senior ?? '', actual: momento === 'M5' },
-                        ].filter((c) => c.texto.length > 0)}
-                        vozRevision={t('perfil.razaRevision')}
-                        vozAbrir={t('perfil.razaVer')}
-                        vozCerrar={t('perfil.razaOcultar')}
-                      />
-                      {/* ⭐ **EL «CONTANOS» — ACCESO 1 de 4: el pie de la ficha**
-                          (S113-C · 2.1 · C1). Antes acá vivía `InvitacionBio`, que era
-                          **tarjeta Y hoja en la misma pieza**; B la partió porque la Hoja
-                          se abre desde cuatro lugares y *una pieza que trae su propio
-                          botón obliga a cada acceso a montar el botón entero o a clonar
-                          la Hoja.* Acá queda sólo el botón; la Hoja vive una vez, abajo. */}
-                      <View style={{ marginTop: spacing[3] }}>
-                        <BotonContanos
-                          /* ⚠️ **Los dos montamos este botón a la vez** —main y yo— y me
-                             quedo con SU voz: la invitación nombra la etapa («Thor está
-                             en su etapa adulta…»), que ancla el momento, y la mía sólo
-                             decía «cuéntanos». *Entre dos textos correctos gana el que
-                             dice más.* El `onPress` es el mío porque lleva al hook con la
-                             caja libre y la propuesta. */
-                          etiqueta={
-                            momento !== null && vozMomento(momento, t) !== null
-                              ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
-                              : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
-                          }
-                          onPress={contanos.abrir}
-                        />
-                      </View>
-                    </View>
-                  ) : undefined
+                /* 🔴 **DOS CURAS DE VOZ, LAS DOS MEDIDAS Y LAS DOS MÍAS.**
+                   ① Decía «Conociéndolo» —la misma palabra que el rótulo de su
+                   sección, dos centímetros más arriba—: *un botón que repite el
+                   título que tiene encima no dice qué pasa si lo tocás.*
+                   ② Mi primer reemplazo fue «Cuéntanos algo de Thor» **y esa
+                   cadena YA EXISTÍA**, palabra por palabra, en la puerta de la
+                   bitácora (`perfil.bitacoraEntrada`, escrita mucho antes). El
+                   arnés lo cazó contando DOS invitaciones y yo busqué el segundo
+                   montaje en tres archivos antes de mirar el diccionario.
+                   *Dos actos distintos con la misma voz no son una repetición
+                   de estilo: la familia lee lo mismo dos veces y tiene que
+                   tocar para saber cuál es cuál.*
+                   Ahora cada una dice SU acto: acá se completa lo que falta,
+                   allá se escribe el día a día. `contanos.pastilla` sigue
+                   siendo «Conociéndolo» donde eso es correcto: la etiqueta
+                   corta de la cuarta acción del hero. */
+                invitacion={
+                  <BotonContanos
+                    etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
+                    onPress={contanos.abrir}
+                  />
                 }
               />
+
+              {/* ⭐ **LA FICHA DE LA RAZA VA DEBAJO, NO ADENTRO** (2.2.1 · ②,
+                  firma del founder). Vivía en un slot de `TarjetaConociendolo`;
+                  B rehizo esa pieza con **dos estados y una sola invitación**, y
+                  su tipo volvió inexpresable el slot: *el estado completo no
+                  admite `raza`, y el incompleto pide exactamente una
+                  invitación.* **Su diseño y la orden del founder dicen lo mismo
+                  por dos caminos**, así que la ficha sale de la tarjeta y queda
+                  debajo, con su pregunta. */}
+                {/* 🔴 `razaVigente` y no `mascota.raza ?? ''`: **un `?? ''` en
+                   una interpolación produce «¿Quieres conocer más sobre el ?»**
+                   — es el defecto exacto que A me encontró en aparato, y
+                   `verify:voz-sin-hueco` existe por eso. Acá el estrechamiento
+                   del guard se pierde dentro del callback, así que se captura
+                   ANTES en vez de taparlo con un default. */}
+              {contenidoRaza !== null && razaVigente !== null ? (
+                  <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
+                    <FichaRaza
+                      nombre={razaVigente}
+                      revisado
+                      historia={contenidoRaza.origen ?? ''}
+                      caracteristicas={[
+                        { etiqueta: t('perfil.razaTemperamento'), valor: contenidoRaza.temperamento ?? undefined },
+                        { etiqueta: t('perfil.razaTalla'), valor: contenidoRaza.talla_adulta ?? undefined },
+                        { etiqueta: t('perfil.razaVida'), valor: contenidoRaza.esperanza_vida ?? undefined },
+                      ]}
+                      /* La etapa ACTUAL sale del momento vital que la ficha YA calcula:
+                         no se recalcula acá — *dos cuentas de lo mismo terminan
+                         discrepando* (lo aprendí en el 1.1.2, con el botón del carnet).
+                         🔴 **M4 no marca ninguna etapa, y es a propósito**: el motor lo
+                         devuelve por CONDICIÓN CRÓNICA antes de mirar la edad
+                         (`momentoVital.ts:34`), así que un senior con una condición sale
+                         M4 — marcarlo «adulto» sería afirmar una edad que el dato no
+                         dice. Sin etapa actual la ficha se lee entera, que es honesto. */
+                      cuidados={[
+                        { id: 'cachorro', etapa: t('perfil.razaCachorro'), texto: contenidoRaza.cuidados_por_etapa.cachorro ?? '', actual: momento === 'M1' || momento === 'M2' },
+                        { id: 'adulto', etapa: t('perfil.razaAdulto'), texto: contenidoRaza.cuidados_por_etapa.adulto ?? '', actual: momento === 'M3' },
+                        { id: 'senior', etapa: t('perfil.razaSenior'), texto: contenidoRaza.cuidados_por_etapa.senior ?? '', actual: momento === 'M5' },
+                      ].filter((c) => c.texto.length > 0)}
+                      vozRevision={t('perfil.razaRevision')}
+                      vozAbrir={t('perfil.razaVer')}
+                      vozCerrar={t('perfil.razaOcultar')}
+                    />
+                    {/* ⭐ **UNA SOLA INVITACIÓN** (2.2.1 · ②, firma del founder).
+                        Acá vivía un segundo `BotonContanos` — el mismo acto que
+                        la tarjeta de arriba ya ofrece. **Dos invitaciones a lo
+                        mismo, a media pantalla de distancia, no invitan el doble:
+                        reparten la atención y ninguna se lee como la principal.**
+                        Queda la de `TarjetaConociendolo` y esta ficha cierra con
+                        lo suyo: **una pregunta sobre la RAZA**, que es otra cosa
+                        —no pide que la familia cuente, ofrece que pregunte— y su
+                        destino es Nexo con el tema puesto. */}
+                    <View style={{ marginTop: spacing[3] }}>
+                      {/* 🔴 **`BotonContanos` y no `CeldaNavegacion`, y lo
+                          decidió una medición.** La celda fuerza
+                          `numberOfLines={1}` y la pregunta se cortaba —medido:
+                          entra en 252 px y necesita 349—. *La voz la firmó el
+                          founder, así que lo que cambia es la pieza, no el
+                          texto.* `BotonContanos` existe para esto: su propia
+                          cabecera dice «no se trunca, y por eso no hay
+                          numberOfLines».
+                          ⚠️ Es la PIEZA, no el acto: acá invita a **preguntar
+                          sobre la raza**, no a contarnos algo. La única
+                          invitación al «cuéntanos» sigue siendo la de la
+                          tarjeta de arriba. */}
+                      <BotonContanos
+                        etiqueta={t('perfil.razaPregunta', { raza: razaVigente })}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/nexo',
+                            params: {
+                              mascotaId: mascota.id,
+                              nombre: mascota.nombre,
+                              semilla: t('perfil.razaPregunta', { raza: razaVigente }),
+                            },
+                          })
+                        }
+                      />
+                    </View>
+                  </View>
+              ) : null}
             </View>
           );
         })() : null}
@@ -1957,6 +2044,23 @@ export default function PerfilDeMascota() {
           )}
         </View>
 
+        {/* ⭐ **8 · IDENTIDAD Y PAPELES** (S113-C · 2.2.1 · ①) — el pie
+            recompuesto. Acá abajo vivían SEIS bloques sueltos uno tras otro,
+            cada uno con su rótulo y su altura: vitales abierto, identidad,
+            pasaporte, documentos, quiénes viven acá y alimento.
+
+            🔴 **Un rótulo, y adentro una fila por cosa.** *Seis secciones
+            seguidas al pie no se leen como seis cosas: se leen como que la
+            pantalla no terminó nunca* — y la última, que es la que la familia
+            sí busca (su alimento), quedaba a un scroll de distancia de todo lo
+            demás.
+
+            **Nada se saca y nada cambia de destino**: cada una conserva su
+            despliegue o su ruta, y lo único nuevo es que ahora se sabe dónde
+            están sin recorrer la pantalla entera. */}
+        <View style={{ marginTop: spacing[8] }}>
+          <RotuloSeccion titulo={t('perfil.identidadYPapeles')} cuenta={null} />
+        </View>
         {/* ── ⑦ VITALES — SIN NINGÚN ÍNDICE. La lámina CIERRA el choque
             que r5 mandó al gate: los dos guijarros de "Índice de salud"
             y "Descanso y actividad" MUEREN (eran un puntaje en potencia,
@@ -1977,8 +2081,25 @@ export default function PerfilDeMascota() {
             const min = enVentana.reduce((s, p) => s + (p.duracionMin ?? 0), 0);
             const salidas = enVentana.length;
             return (
-              <View style={{ marginTop: spacing[8] }}>
-                <RotuloSeccion titulo={t('perfil.vitales')} cuenta={null} />
+              <View style={{ marginTop: spacing[3] }}>
+                {/* ⭐ **PLEGADO** (2.2.1 · ①). Era una sección abierta al pie con
+                    su rótulo, sus pills y su gráfico. *Lo que se lee de vez en
+                    cuando no ocupa media pantalla siempre* — y sobre todo: era
+                    lo único suelto debajo de «Su historia», que es lo que este
+                    punto vino a cerrar. Se abre entero, no se recorta. */}
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  <Tarjeta relleno="ninguno" elevacion="reposo">
+                    <CeldaNavegacion
+                      icono="paseo"
+                      titulo={t('perfil.vitales')}
+                      registro="tinta"
+                      direccion={vitalesAbiertos ? 'arriba' : 'abajo'}
+                      onPress={() => setVitalesAbiertos((v) => !v)}
+                    />
+                  </Tarjeta>
+                </View>
+                {!vitalesAbiertos ? null : (
+                <>
                 <FiltroPills
                   activo={ventana}
                   onCambio={(v) => setVentana(v)}
@@ -2052,6 +2173,8 @@ export default function PerfilDeMascota() {
                     <Texto variante="dato">{t('perfil.indicesTodavia')}</Texto>
                   </View>
                 </View>
+                </>
+                )}
               </View>
             );
           })()
@@ -2069,15 +2192,21 @@ export default function PerfilDeMascota() {
             microchip lo busca el día que lo necesita. **Nada se saca**: el
             mismo `PieRevelar` de la historia la abre entera.
             Talla/pelaje y paseos-en-grupo siguen EDITABLES. */}
-        <View style={{ marginTop: spacing[8] }}>
-          <RotuloSeccion
-            titulo={t('perfil.identidad')}
-            cuenta={String(
-              datosIdentidad.length +
-                (mascota.especie === 'perro' ? 1 : 0) +
-                (mascota.especie === 'perro' || mascota.especie === 'gato' ? 1 : 0),
-            )}
-          />
+        <View style={{ marginTop: spacing[3] }}>
+          {/* La fila, igual que las otras cinco de la sección: **el rótulo
+              propio murió** — con «Identidad y papeles» arriba, un segundo
+              rótulo «Identidad» dice dos veces lo mismo con dos alturas. */}
+          <View style={{ paddingHorizontal: spacing[5] }}>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="carnet"
+                titulo={t('perfil.identidad')}
+                registro="tinta"
+                direccion={identidadAbierta ? 'arriba' : 'abajo'}
+                onPress={() => setIdentidadAbierta((v) => !v)}
+              />
+            </Tarjeta>
+          </View>
           {identidadAbierta ? (
             <>
             <View style={{ paddingHorizontal: spacing[5] }}>
@@ -2139,13 +2268,6 @@ export default function PerfilDeMascota() {
             </View>
             </>
           ) : null}
-          <View style={{ paddingHorizontal: spacing[5] }}>
-            <PieRevelar
-              n={datosIdentidad.length}
-              revelado={identidadAbierta}
-              onPress={() => setIdentidadAbierta((v) => !v)}
-            />
-          </View>
         </View>
 
         {/* ⭐ **LA ENTRADA AL PASAPORTE** (S113-C · 1.3 · C1). Va en el
@@ -2435,7 +2557,17 @@ export default function PerfilDeMascota() {
             router.push({ pathname: '/recuerdo', params: { mascotaId: mascota.id, nombre: mascota.nombre } });
             return;
           }
-          setHojaBio(c === 'rasgo' ? 'personalidad' : c); /* la Hoja vieja aún usa `personalidad` */
+          /* ⭐ **COMPORTAMIENTO Y RASGOS SON CHIPS** (2.2.1 · ④, firma del
+             founder: *«Comportamiento no es una caja: son los chips»*). Los
+             dos abren la MISMA Hoja: `cat_rasgos` los reparte en sus cuatro
+             familias —miedos · manías · con otros animales · con niños— y el
+             texto va debajo, acompañando. *Una caja libre delante de alguien
+             que no sabe qué contar produce una caja vacía.* */
+          if (c === 'comportamiento' || c === 'rasgo') {
+            chips.abrir();
+            return;
+          }
+          setHojaBio(c);
         })}
         libre={{
           etiqueta: t('contanos.libreEtiqueta', { nombre: mascota.nombre }),
@@ -2446,6 +2578,9 @@ export default function PerfilDeMascota() {
         propuesta={contanos.propuestaUi}
       />
       ) : null}
+
+      {/* ⛔ Bajo el mismo guard que el resto del «cuéntanos»: pide. */}
+      {!esMemorial ? chips.hoja : null}
 
       <HojaInvitacionBio
         clase={hojaBio}
