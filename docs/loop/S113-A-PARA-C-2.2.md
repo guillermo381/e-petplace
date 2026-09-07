@@ -33,6 +33,11 @@ superficie elegiría distinto.*
 
 - `vacunas.proxima.derivada` → si es `true`, decí **«estimada»**: una fecha que
   calculamos nosotros no es una que alguien escribió en un carnet.
+- `peso.serie_dibujable` → **`false` con un solo punto**: no hay línea. Y
+  `peso.tendencia` es `null`, que no es «igual» sino «no se sabe». Medido con
+  **Lolo**, que tiene una sola medición: *si cada superficie decidiera cuántos
+  puntos alcanzan, alcanzaría una que decida distinto para que el mismo animal
+  se vea de dos formas.*
 - `peso.serie[].fuente` → `'prestador'` o `'familia'`, para pintar distinto lo
   clínico y lo de casa. Thor tiene los dos.
 - `antiparasitario.plagas[]` → estado por **tipo** (interna/externa). No hay
@@ -64,3 +69,16 @@ guarda es `'casa'`, que es lo que el CHECK acepta.
 ⚠️ **Ojo con el boceto**: `docs/loop/S113-BOCETO-PERFIL.html` tiene un `80%`
 dibujado en el anillo. **No se dibuja** — LOYALTY §3 prohíbe scores. Está
 comentado en el archivo con su razón. El porcentaje va como voz.
+
+
+## Los tres sujetos del gate en emulador, ya medidos
+
+| | tablero | peso | antiparasitario | hoy |
+|---|---|---|---|---|
+| **Thor** `d2e31d70` | completo | 24 kg · 4 pts · **dibujable** · sube | `al_dia` | aviso |
+| **Lolo** `155c5130` | completo | 6 kg · 1 pt · **NO dibujable** · tendencia `null` | **`sin_registro`** | `sin_novedades` |
+| **Sombra** `93553b79` | **`null`** | — | — | `no_activa` |
+
+Lolo es el caso de «sin registro y sin gráficos»: **actividad `null`**, una sola
+medición de peso, cero desparasitaciones. Si algo de eso se dibuja como un cero
+o como una línea plana, es un defecto.
