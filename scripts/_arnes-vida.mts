@@ -75,8 +75,18 @@ t('el segundo toque ES la seguridad', /if \(!confirmando\)/.test(DESP), true);
   if (pantalla === '') {
     NO_CONCLUYENTE.push('origin/main:…/despedida.tsx (no alcanzable)');
   } else {
+    /* ⚠️ **ESTE ASSERT MEDÍA UNA SOLA LÍNEA Y DIO ROJO SOBRE UNA PANTALLA
+       CORRECTA.** El patrón exigía `vozConfirmar={t(… { nombre` seguido, y la
+       pantalla lo escribe como un ternario en TRES líneas — el nombre está,
+       pero partido. *Un rojo falso es peor que un verde falso acá: manda a
+       «arreglar» algo que está bien.* Se mide el BLOQUE de la prop, sin
+       importar dónde caiga el salto de línea. */
+    const bloqueConfirmar = pantalla.slice(
+      pantalla.indexOf('vozConfirmar='),
+      pantalla.indexOf('vozConfirmar=') + 260,
+    );
     t('🔴 …y la PANTALLA nombra a la mascota en la voz del segundo toque',
-      /vozConfirmar=\{t\([^)]*\{ nombre/.test(pantalla), true);
+      /\{ nombre \}/.test(bloqueConfirmar), true);
     t('CONTROL · y se la pasa desde su propio parámetro, no de un literal',
       /nombre \?\? ''/.test(pantalla), true);
   }
