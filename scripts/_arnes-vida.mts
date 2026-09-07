@@ -99,6 +99,28 @@ console.log('\n── ⑤ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['raza', RAZA], ['ficha', FICHA], ['despedida', DESP]] as const)
   t(`\`${n}\` no arma frases`, /`\$\{[a-z]+\} (de|en|para|hasta)/i.test(s), false);
 
+console.log('\n── LA VOZ DE LA PANTALLA GANA SOBRE EL GENÉRICO (3.1 ⑩) ──');
+/* ⏪ En el Hogar del founder, **tres filas seguidas decían «Momento de
+   cuidado»** —el fallback del diccionario— **y ninguna nombraba la mascota**.
+   La pieza no podía arreglarlo: *el item no traía el nombre, así que la fila no
+   decía de quién era porque no lo sabía.* */
+{
+  const VIDA = readFileSync(new URL('../packages/ui/src/components/LineaDeVida.tsx', import.meta.url), 'utf8');
+  t('🔴 el item puede traer su voz ya compuesta', /voz_titulo\?: string \| null/.test(VIDA), true);
+  t('🔴 …y GANA sobre el diccionario', /item\.voz_titulo != null[\s\S]{0,140}return \{ titulo: item\.voz_titulo/.test(VIDA), true);
+  /* 🔴 Y NO la compone la pieza (Ley 3): *la pantalla es la única que sabe si
+     hace falta el nombre — en el Hogar sí, en el perfil de Zeus no.* */
+  t('🔴 la pieza NO arma esa voz: la recibe',
+    /voz_titulo[^\n]*\+|`[^`]*\$\{item\.voz_titulo/.test(VIDA), false);
+  /* La CAPA sigue saliendo del tipo: *el color dice de qué eje es el hecho, y
+     eso no cambia porque el texto se redacte mejor.* */
+  t('la capa sigue viniendo del TIPO, no de la voz',
+    /return \{ titulo: item\.voz_titulo, capa: voz\.capa \}/.test(VIDA), true);
+  /* Vacía o en blanco ⇒ el diccionario, como antes. *Una plantilla a la que le
+     faltó la variable devuelve `' '` con la misma cara que un título.* */
+  t('🔴 en blanco NO gana: vuelve el diccionario', /trim\(\)\.length > 0/.test(VIDA), true);
+}
+
 if (NO_CONCLUYENTE.length > 0) {
   console.log(`\n⚠️ NO CONCLUYENTE · no se pudieron abrir: ${NO_CONCLUYENTE.join(' · ')}`);
   console.log('   Este árbol no tiene todas las piezas que el gate mide. **No es verde ni rojo:');

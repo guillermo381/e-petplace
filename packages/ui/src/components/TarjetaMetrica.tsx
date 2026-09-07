@@ -40,6 +40,7 @@ import { Pressable, Text, View } from 'react-native'
 import Svg, { Circle, Polyline } from 'react-native-svg'
 
 import { BarrasSemana } from './BarrasSemana'
+import { Icono, type IconoNombre } from './Icono'
 import { Texto } from './Texto'
 import { Chevron } from './chevron'
 import { radius } from '../tokens/radius'
@@ -89,6 +90,21 @@ interface MetricaBase {
   /** *«Peso»* — el rótulo, ya redactado. */
   rotulo: string
   /**
+   * 🔴 **EL GLIFO DEL OFICIO, para «Tus servicios» (S113-B · 3.1).**
+   *
+   * ⏪ Ese rail se dibujaba **inline**, con su propia anatomía: rótulo grande
+   * arriba y un dato en mono debajo que **truncaba tres de cuatro tarjetas**
+   * («Adiestramien…», «07 sept 20…», «Ve…») y mostraba **una unidad distinta
+   * en cada una sin decir cuál** — una fecha, «63 salidas», «28…».
+   *
+   * **No nació una pieza nueva: se ensanchó ésta** (`L-175`, se ensancha jamás
+   * se copia). *Dos piezas con la misma anatomía divergen al primer cambio, y
+   * la que se queda vieja es siempre la que nadie está mirando.*
+   *
+   * Ausente = la tarjeta del tablero de siempre, sin un píxel de diferencia.
+   */
+  glifo?: IconoNombre
+  /**
    * El dato grande. **`null` = no lo sabemos**, y entonces se dibuja `vozSinDato`
    * en apoyo: *un dato ausente no se agranda.*
    */
@@ -114,9 +130,14 @@ interface MetricaBase {
  * ⚠️ La v2 **tampoco lleva dibujo**: no hay serie que mostrar. Su `valor` es
  * la voz de lo que va a medir, no un número.
  */
-export type TarjetaMetricaProps =
-  | (MetricaBase & { onPress: () => void; v2?: never })
-  | (MetricaBase & { v2: true; onPress?: never; dibujo?: never })
+export type TarjetaMetricaProps = (MetricaBase & {
+  /** 🔴 Ancho FIJO para un rail horizontal. Ausente = grilla. Ver `piel`. */
+  ancho?: number
+}) &
+  (
+    | { onPress: () => void; v2?: never }
+    | { v2: true; onPress?: never; dibujo?: never }
+  )
 
 export function TarjetaMetrica(props: TarjetaMetricaProps) {
   const { theme } = useTheme()
@@ -126,8 +147,14 @@ export function TarjetaMetrica(props: TarjetaMetricaProps) {
   const dibujo = esV2 ? undefined : props.dibujo
 
   const piel = {
-    flex: 1,
-    minWidth: '45%' as const,
+    /* 🔴 **DOS ANCHOS, UNA ANATOMÍA.** En la grilla del tablero la tarjeta
+       crece y comparte fila (`flex: 1` + media columna); en un rail horizontal
+       eso no significa nada —no hay fila que repartir— y hace falta una medida.
+       *Un `flex: 1` dentro de un scroll horizontal no falla: colapsa, y se ve
+       como una tarjeta que se olvidó de su contenido.* */
+    ...(props.ancho === undefined
+      ? { flex: 1, minWidth: '45%' as const }
+      : { width: props.ancho }),
     gap: spacing[1],
     padding: spacing[4],
     borderRadius: radius.md,
@@ -147,7 +174,17 @@ export function TarjetaMetrica(props: TarjetaMetricaProps) {
   const cuerpo = (
     <>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[1] }}>
-        <Texto variante="apoyo">{rotulo}</Texto>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexShrink: 1 }}>
+          {/* El glifo del oficio, cuando lo hay. `montaje="control"` apaga su
+              huella: *cuatro rótulos con cuatro patitas al lado convierten una
+              fila de estado en una fila de mascotas.* */}
+          {props.glifo === undefined ? null : (
+            <Icono nombre={props.glifo} tamano={18} registro="tinta" montaje="control" />
+          )}
+          {/* 🔴 El rótulo NO trunca: es el que dice de qué es la tarjeta.
+              *Un «Adiestramien…» obliga a tocar para saber qué se contrató.* */}
+          <Texto variante="apoyo">{rotulo}</Texto>
+        </View>
         {esV2 ? null : <Chevron color={theme.text.tertiary} direccion="derecha" />}
       </View>
 
