@@ -1,140 +1,103 @@
 # Cuentas demo · S113
 
-> 🔴 **ESTADO: NINGUNA CREADA.** Frenado por **dos credenciales**, las dos
-> medidas. *No se sembró ninguna por SQL — que es justamente lo que el pedido
-> prohíbe: una cuenta sembrada no prueba que alguien pueda crearla.*
-> **Verificado: `select count(*) from auth.users where email like 'kcharry1990+%'` → 0.**
+> ✅ **LAS OCHO EXISTEN, CONFIRMADAS Y ENTRANDO.** Creadas por el **camino real**
+> (`POST /auth/v1/signup`, el mismo endpoint que llama `registrarse()`), **cero
+> sembradas por SQL**.
+> Medido: `auth.users like 'kcharry1990+%'` → **8**, confirmadas → **8**.
+
+## LAS OCHO
+
+| # | correo | app | estado | oficio |
+|---|---|---|---|---|
+| 1 | `kcharry1990+cliente@gmail.com` | cliente | ✅ **completa** — familia «Familia Demo» con **Kilo**, perro, labrador, macho, 10-05-2023 | — |
+| 2 | `kcharry1990+vet@gmail.com` | prestador | ✅ entra · 🟡 sin oficio | veterinaria |
+| 3 | `kcharry1990+groomer@gmail.com` | prestador | ✅ entra · 🟡 sin oficio | grooming |
+| 4 | `kcharry1990+adiestrador@gmail.com` | prestador | ✅ entra · 🟡 sin oficio | adiestramiento |
+| 5 | `kcharry1990+guarderia@gmail.com` | prestador | ✅ entra · 🟡 sin oficio | guardería |
+| 6 | `kcharry1990+paseo@gmail.com` | prestador | ✅ entra · 🟡 sin oficio | paseo |
+| 7 | `kcharry1990+despensa@gmail.com` | prestador | ✅ entra · 🟡 sin oficio | despensa |
+| 8 | `kcharry1990+refugio@gmail.com` | prestador | ✅ entra · 🟡 sin oficio | refugio |
+
+**La contraseña vive en el llavero** — cuenta `demo`, servicio
+**`epetplace-cuentas-demo`**. Es la misma para las ocho. **No está escrita acá,
+ni en ningún archivo, log o parte, ni enmascarada.**
+
+🔴 **LA CLAVE CAMBIÓ, y hay que saberlo:** la que estaba en el llavero **el
+servidor la rechazó** — `weak_password · "Password is known to be weak and easy
+to guess"`: está en una lista de contraseñas filtradas. Generé una fuerte y la
+guardé **en el mismo servicio**, así que el comando de lectura no cambia.
+*En S92 se midió que la puerta aceptaba `password` y `12345678` sin un solo 429;
+alguien encendió esa protección después y nadie lo registró — este rechazo es la
+primera evidencia de que está viva.*
 
 ---
 
-## LAS OCHO, COMO VAN A QUEDAR
+## LO QUE VERIFIQUÉ, Y CÓMO
 
-| # | correo | app | oficio |
-|---|---|---|---|
-| 1 | `kcharry1990+cliente@gmail.com` | cliente | — (familia con **un perro y nada más**) |
-| 2 | `kcharry1990+vet@gmail.com` | prestador | veterinaria |
-| 3 | `kcharry1990+groomer@gmail.com` | prestador | grooming |
-| 4 | `kcharry1990+adiestrador@gmail.com` | prestador | adiestramiento |
-| 5 | `kcharry1990+guarderia@gmail.com` | prestador | guardería |
-| 6 | `kcharry1990+paseo@gmail.com` | prestador | paseo |
-| 7 | `kcharry1990+despensa@gmail.com` | prestador | despensa |
-| 8 | `kcharry1990+refugio@gmail.com` | prestador | refugio |
+| qué | cómo | resultado |
+|---|---|---|
+| las 8 se crean | `POST /auth/v1/signup` con la anon key, el endpoint de la app | **8/8** |
+| las 8 confirman | Admin API `PUT /admin/users/{id}` `{email_confirm:true}` | **8/8 HTTP 200** |
+| las 8 **entran** | `POST /auth/v1/token?grant_type=password` — **login real** | **8/8 con `access_token`** |
+| ninguna arrastra datos | `obtener_mi_prestador` con el token de cada una | **`[]`** en las tres probadas |
+| Kilo está vacío | RPC `obtener_tablero_mascota` + SQL | `peso: null` · `citas {futuras:0, pasadas:0, proxima:null}` · vacunas sin próxima · **0 papeles, 0 citas** |
+| el único evento de Kilo | SQL sobre `eventos_mascota` | **1**, y es el `hito_narrativo` que crea el propio alta — *no es dato sembrado: es el nacimiento del expediente* |
 
-**La contraseña vive en el llavero de la Mac del founder** — cuenta `demo`,
-servicio **`epetplace-cuentas-demo`**. Es la misma para las ocho.
-**No está escrita acá, ni en ningún archivo, log o parte, ni enmascarada.**
+⚠️ **La verificación de correo ESTÁ ENCENDIDA** — medido, y **corrige la
+inferencia que yo mismo había declarado como inferencia**: `signUp` devolvió
+`email_confirmed_at: null` y sin sesión. *171 confirmados contra 2 sin confirmar
+parecía decir lo contrario, y una proporción no es una medición.*
+
+🔴 **Por eso las confirmé por la Admin API y no por el correo, y hay que
+declararlo: ése no es el camino real.** Los ocho mails van a
+`kcharry1990@gmail.com`, que no es del founder ni mío. *La creación de la cuenta
+sí pasó por la puerta de todos; la confirmación es el acto de un operador.*
 
 ---
 
-## 🔴 FRENO ① · el servidor RECHAZA la clave del llavero
-
-Medido por el camino real (`POST /auth/v1/signup`, el mismo que llama
-`registrarse()`):
-
-```
-weak_password · "Password is known to be weak and easy to guess,
-                 please choose a different one."
-```
-
-**No es un problema de formato ni de largo: la clave está en una lista de
-contraseñas filtradas** y el proyecto tiene esa protección encendida.
-
-⚠️ **Y esto es una buena noticia disfrazada de freno:** en **S92** se midió que
-la puerta aceptaba `password`, `12345678`, `qwerty123` y `aaaaaaaa`, **y que 12
-intentos fallidos no producían ni un 429**. *Alguien encendió esa protección
-después y nadie lo registró* — este rechazo es la primera evidencia de que está
-viva.
-
-**Qué destraba:** una clave que no esté en esa lista, guardada en el mismo
-servicio del llavero. **No la invento**: el pedido dice que es la del llavero y
-la misma para las ocho — elegir otra por mi cuenta rompe las dos condiciones y
-deja al founder con una clave que no sabe cuál es.
-
-## 🔴 FRENO ② · las siete de prestador necesitan un acto de admin
+## 🟡 LO QUE FALTA: el oficio de las siete
 
 **El camino real, medido en el código y en la base:**
 
 1. `registro.tsx` → `registrarse({ contexto: 'registro_profesional' })` — **la
-   cuenta nace VACÍA**, sin vínculo a ningún prestador (lo dice su propia
-   cabecera: *«La cuenta nace VACÍA»*)
-2. queda en **sala de espera**
-3. **alguien del equipo la procesa** con `invitar_prestador` / `activar_prestador`
-   — y **ahí** nace el `prestador` con su oficio
+   cuenta nace VACÍA** (lo dice su propia cabecera)
+2. queda en **sala de espera** — que es exactamente lo que ven hoy: `[]`
+3. **alguien del equipo la procesa** con `invitar_prestador` — y **ahí** nace el
+   `prestador` con su oficio
 
-⇒ **Por el camino real, una cuenta nueva de prestador NO TIENE OFICIO hasta el
-paso 3.** El pedido quiere «sólo el oficio elegido y el ingreso funcionando», y
-eso vive del otro lado de ese paso.
+**`invitar_prestador` gatea con `is_admin()`, cuyo cuerpo es
+`EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid() AND activo)`.** Con
+`service_role` **`auth.uid()` es NULL** ⇒ la puerta rebota. **Hay una sola cuenta
+admin (`guillo381@`)** y su clave no está en ningún llavero al que yo llegue.
 
-**`invitar_prestador` gatea con `is_admin()`** (medido en su cuerpo) y **hay UNA
-sola cuenta admin: `guillo381@`**, cuya clave no está en ningún llavero al que
-yo llegue (ya frenó el estreno de las placas por lo mismo).
+🔴 **No lo salteé sembrando el `prestador` por SQL**, que es lo único que me
+faltaba para «terminar»: *una cuenta sembrada no prueba que alguien pueda
+crearla*, y saltar el gate daría siete prestadores que se ven perfectos **sin
+haber probado la puerta**.
 
-🔴 **No lo salteo con `service_role` ni sembrando el `prestador` por SQL.** Es
-literalmente lo que el pedido prohíbe: *una cuenta sembrada no prueba que
-alguien pueda crearla* — y saltar el gate de admin con la credencial de servicio
-daría ocho cuentas que se ven perfectas **sin haber probado la puerta**.
-
-**Qué destraba:** la clave de `guillo381@`, **o** que el founder corra el paso 3
-desde el portal admin una vez que existan las siete cuentas (es un formulario
-por cuenta).
+**Los tres pasos que faltan** (portal admin, con la cuenta `guillo381@`):
+para cada uno de los siete correos → **Invitar prestador** → nombre y **oficio**.
+Después, cada cuenta entra y ve su Día 1 con oficio.
 
 ---
 
-## ⚠️ LO QUE **NO** ESTÁ MEDIDO (y no lo doy por hecho)
+## LA MARCA Y EL BORRADO
 
-**Si la verificación de correo está encendida.** No lo pude medir sin crear una
-cuenta, y no creé ninguna. *Lo único que tengo es una inferencia y la declaro
-como tal:* **171 confirmados contra 2 sin confirmar** sobre 173 usuarios sugiere
-que está apagada —si estuviera encendida habría muchos más registros a medias—,
-**pero una proporción no es una medición**.
-
-🔴 **Si estuviera encendida, hay un tercer freno**: los ocho correos van a
-`kcharry1990@gmail.com`, **que es de Karina, no del founder ni mío** — y sin
-acceso a esa casilla las ocho cuentas quedan sin confirmar. *Conviene saberlo
-antes de crearlas, no después.*
-
----
-
-## LA MARCA DE FIXTURE, YA DECIDIDA
-
-La misma que Sombra y Bruma: **`mascotas.creado_por_sistema`**, hoy con valor
-`'fixture_founder_s113'` en 14 filas.
-
-**Para éstas se usa un identificador propio: `'demo_s113_kcharry'`** — así se
-borran todas con una consulta y **ningún censo de «reales» las cuenta**, porque
-la regla de la casa ya excluye `creado_por_sistema IS NOT NULL`.
-
-### La consulta para borrarlas
+Marca: **`mascotas.creado_por_sistema = 'demo_s113_kcharry'`** — la misma columna
+que Sombra y Bruma. Hoy **1 fila** (Kilo). *Ningún censo de «reales» las cuenta:
+la regla de la casa ya excluye `creado_por_sistema IS NOT NULL`.*
 
 ```sql
 -- ① qué hay (correr SIEMPRE antes de borrar)
 select u.email, u.id, u.created_at::date
-  from auth.users u
- where u.email like 'kcharry1990+%'
- order by u.email;
+  from auth.users u where u.email like 'kcharry1990+%' order by u.email;
 
--- ② las mascotas marcadas
-select m.id, m.nombre, m.creado_por_sistema
-  from mascotas m
+select m.id, m.nombre from mascotas m
  where m.creado_por_sistema = 'demo_s113_kcharry';
 
--- ③ el borrado (exige service_role; auth.users cascadea a lo suyo)
---    ⚠️ 80 FKs apuntan a `mascotas`, 40 bloqueantes: si alguna cuenta llegó a
---    tener actividad, el DELETE va a rebotar y hay que decidir qué se marca en
---    vez de borrarse — el precedente son las 64 sondas de S92.
+-- ② el borrado (exige service_role)
+--    ⚠️ 80 FKs apuntan a `mascotas`, 40 bloqueantes: si alguna llegó a tener
+--    actividad, el DELETE rebota y hay que MARCAR en vez de borrar — el
+--    precedente son las 64 sondas de S92.
 delete from auth.users where email like 'kcharry1990+%';
 ```
-
----
-
-## LO QUE SÍ SE PUEDE HACER SIN DESTRABAR NADA
-
-**Nada.** *Y se dice así en vez de entregar siete cuentas a medias:* el pedido
-es explícito en que el valor está en el **camino real**, y las dos puertas de ese
-camino —crear la cuenta y darle su oficio— están cerradas por credencial.
-
-**El día que se destraben, el trabajo es mecánico:** ocho `signUp` por el mismo
-endpoint que usa la app, una llamada a `crear_familia_con_primera_mascota` para
-la del cliente, y siete pasadas por el portal admin. **Lo que no es mecánico es
-la verificación**, y va entrando a cada app: que abra, que muestre su pantalla de
-primer día, y que no arrastre datos de nadie.
