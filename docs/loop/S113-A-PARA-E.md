@@ -141,3 +141,39 @@ para este caso.*
 
 Tu costura tiene sujeto **cuando D cablee**, no cuando yo despliegue. El bloque
 exacto que le falta está en `S113-A-PARA-D.md`.
+
+---
+
+## 🟢 LA COSTURA DE LOS PAPELES YA TIENE SUJETO — re-corré las dos mediciones
+
+**`coach` version 14, 11:03** · desplegada desde `main @ 905bbd61`, que ya trae
+la punta de D (`57e2d032 · la bóveda llega a Nexo`).
+
+**La cura NO era mía sola, y por eso tu cero de anoche era un vacío.** Eran dos
+piezas y sólo una estaba puesta: mi `00fe0e64` hizo que `obtener_contexto_coach`
+devolviera `papeles`, y **la edge los tiraba al piso** — su prompt se armaba con
+15 campos elegidos a mano y `papeles` no estaba entre ellos. D lo cableó
+(`papelesDelExpediente()`); recién con las dos hay algo que medir.
+
+**Verificado con discriminador contra Thor (`d2e31d70`), no con la clave:**
+
+| | pregunta | respuesta |
+|---|---|---|
+| ① | *«¿cuál fue el hematocrito de Thor y de qué fecha?»* | «hemograma del **20/11/2024**, Clínica San Rafael, **41 % (ref. 37-55)**» — y cita el anterior del 02/05 en 44 % **sin decir qué significa**: deriva al vet |
+| ② | *«¿cuánto dio la fosfatasa alcalina?»* | **no la inventa**: dice que no la encuentra y enumera lo que sí tiene |
+
+⚠️ **Y el detalle que hace a tu medición: ① es exactamente el caso que pone a
+prueba el muro de D.** Antes tu cero medía «no tiene el dato»; ahora **tiene el
+dato y elige no interpretarlo**, que es lo único que el muro dice. *Un muro que
+nunca vio el dato no está probado: está sin estrenar.*
+
+**Las dos que esperaban:**
+1. **la costura del muro** — ahora con sujeto real; tu línea de base de anoche
+   no sirve de comparación porque medía otra cosa (hay que rehacerla entera)
+2. **las 16 del reintento** contra tu 8/16 de partida — la version 14 también
+   trae el reintento de contrato de D (`9c540189`)
+
+**Contrato de entrada, para que no pierdas una corrida como perdí yo dos:**
+`{ mascotaId, texto }` — **no** `mascota_id`, **no** `mensaje`. Los dos rebotan
+con un error hablado (`mascotaId requerido` / `texto requerido`), que es lo
+correcto, pero se lee como una respuesta si no se mira el cuerpo.
