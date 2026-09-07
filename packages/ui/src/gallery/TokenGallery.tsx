@@ -26,7 +26,9 @@ import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
 import { HeroMascota } from '../components/HeroMascota'
+import { FichaPapel } from '../components/FichaPapel'
 import { HuellaDelVinculo } from '../components/HuellaDelVinculo'
+import { PantallaDocumentos } from '../components/PantallaDocumentos'
 import { TarjetaMetrica } from '../components/TarjetaMetrica'
 import { TarjetaHoy } from '../components/TarjetaHoy'
 import { FilaAcciones } from '../components/FilaAcciones'
@@ -3452,6 +3454,53 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — LA BÓVEDA DE PAPELES (fase 3) · qué decide: (a) que la lista NO se lea como una bandeja de alertas —ninguna fila lleva color, ni la que trae un valor fuera de rango—; (b) que un examen se lea TRANSCRITO: analito, valor con su unidad, la referencia si estaba impresa, y la marca del laboratorio como TEXTO; (c) que el vacío invite sin disculparse">
+          <Texto variante="apoyo">
+            🔴 Se transcribe, no se interpreta — y no está apagado: es INEXPRESABLE. `ValorDePapel` no
+            tiene un `alto | bajo`, así que nadie puede mandarlo «para que se entienda mejor». Lo único
+            que viaja es la marca que el propio laboratorio imprimió, como texto.
+          </Texto>
+          <PantallaDocumentos
+            vozVacio="Todavía no hay papeles de Thor. Si ya tiene historia en otra clínica, traela: la leemos por vos."
+            traer={{ voz: 'Traer papeles de otra clínica', onPress: () => {} }}
+            grupos={[
+              { grupo: 'examenes', rotulo: 'Exámenes', papeles: [
+                { id: 'e1', grupo: 'examenes', titulo: 'Hemograma completo', origen: 'Clínica San Roque', fecha: '12 mar 2025', onPress: () => {} },
+                { id: 'e2', grupo: 'examenes', titulo: 'Perfil renal', fecha: '03 ago 2025', onPress: () => {} },
+              ] },
+              { grupo: 'recetas', rotulo: 'Recetas', papeles: [
+                { id: 'r1', grupo: 'recetas', titulo: 'Enrofloxacina', origen: 'Clínica San Roque', fecha: '12 mar 2025', onPress: () => {} },
+              ] },
+              /* 🔴 Un grupo VACÍO: no se monta, ni con su rótulo. */
+              { grupo: 'informes', rotulo: 'Informes', papeles: [] },
+              { grupo: 'propios', rotulo: 'Papeles de e-PetPlace', papeles: [
+                { id: 'p1', grupo: 'propios', titulo: 'Carnet de vacunas', fecha: '04 sept 2026', onPress: () => {} },
+              ] },
+            ]}
+          />
+          <Texto variante="apoyo">Y la bóveda VACÍA: la invitación sola, sin un solo rótulo.</Texto>
+          <PantallaDocumentos
+            vozVacio="Todavía no hay papeles de Thor. Si ya tiene historia en otra clínica, traela: la leemos por vos."
+            traer={{ voz: 'Traer papeles de otra clínica', onPress: () => {} }}
+            grupos={[{ grupo: 'examenes', rotulo: 'Exámenes', papeles: [] }]}
+          />
+          <Texto variante="apoyo">
+            La ficha de un examen. El tercer valor trae la marca del laboratorio — como texto, sin color.
+          </Texto>
+          <FichaPapel
+            titulo="Hemograma completo"
+            origen="Clínica San Roque"
+            fecha="12 mar 2025"
+            documento={{ voz: 'Ver el documento', onPress: () => {} }}
+            borrar={{ voz: 'Borrar el papel', vozAdvertencia: 'Los datos que ya entraron al expediente de Thor se quedan.', onPress: () => {} }}
+            contenido={{ tipo: 'examen', valores: [
+              { id: 'v1', analito: 'Hematocrito', valor: '42', unidad: '%', referencia: '37–55' },
+              { id: 'v2', analito: 'Plaquetas', valor: '180', unidad: 'K/µL' },
+              { id: 'v3', analito: 'Creatinina', valor: '2,1', unidad: 'mg/dL', referencia: '0,5–1,8', marcaImpresa: 'H' },
+            ] }}
+          />
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — REGISTRAR Y DESPEDIRSE (lote 1.2) · qué decide: (a) que NINGÚN chip venga preelegido —la raza la dice la persona—; (b) que la confianza en palabras no suene a medición; (c) que la despedida se lea en TINTA, sin una gota de marca, y que el segundo toque alcance como seguridad">
           <View style={{ gap: spacing[5] }}>
             <SugerenciaRazaDemo />

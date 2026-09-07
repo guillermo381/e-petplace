@@ -1340,6 +1340,9 @@ export {
 // lado.* Y en memorial el hero SÍ se dibuja: es quién fue, y eso no se apaga —
 // lo que desaparece es la pastilla de estado.
 export { HeroMascota, type HeroMascotaProps } from './components/HeroMascota'
+export { PantallaDocumentos, type PantallaDocumentosProps, type GrupoDePapeles } from './components/PantallaDocumentos'
+export { FichaPapel, type FichaPapelProps, type ContenidoDePapel } from './components/FichaPapel'
+export type { GrupoPapel, PapelEnLista, ValorDePapel, MedicacionDePapel } from './components/papeles-boveda'
 export { HuellaDelVinculo, type HuellaDelVinculoProps, type DimensionesDelVinculo } from './components/HuellaDelVinculo'
 export {
   DetallePeso,
