@@ -99,3 +99,39 @@ export function gruposConPapeles<T extends { papeles: readonly unknown[] }>(
 export function bovedaVacia(grupos: readonly { papeles: readonly unknown[] }[]): boolean {
   return grupos.every((g) => g.papeles.length === 0)
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LO QUE LA HOJA DE «TRAER PAPELES» NECESITA SABER, Y VIVE ACÁ
+   ═══════════════════════════════════════════════════════════════════════════
+   ⏪ Esto nació dentro de `HojaTraerPapeles.tsx` y **su arnés no lo pudo
+   importar**: un `.tsx` arrastra React Native entero y el arnés sólo levanta
+   módulos puros. *La cura no fue enseñarle al arnés a levantar React: fue que
+   la lógica esté donde se puede medir sin pantalla* — que además es donde
+   corresponde, al lado del contrato que gobierna. */
+
+/** A los 8 s la espera cambia de voz. Ver la cabecera de `HojaTraerPapeles`. */
+export const SEGUNDA_VOZ_MS = 8000
+
+/** Una fila leída: lo que se sacó, más lo que la lectura NO supo. */
+export interface FilaLeida {
+  id: string
+  /** Marca la fila entera como «revisá esto». */
+  confianza: 'alta' | 'media' | 'baja'
+  /** El nombre del campo que la lectura no pudo sacar. *Lo que falta se pide,
+   *  no se rellena.* Su presencia hace la fila **no guardable**. */
+  falta?: string
+}
+
+export type ContenidoLeido =
+  | { tipo: 'examen'; valores: readonly (ValorDePapel & FilaLeida)[] }
+  | { tipo: 'receta'; medicacion: readonly (MedicacionDePapel & FilaLeida)[] }
+
+/**
+ * 🔴 **¿Queda algo por completar?** Si sí, **no se guarda** — mismo criterio
+ * que el carnet. *Un extractor que guarda solo convierte «la casa lee tus
+ * papeles» en «la casa escribe en el expediente lo que le pareció».*
+ */
+export function hayQueCompletar(c: ContenidoLeido): boolean {
+  const filas: readonly FilaLeida[] = c.tipo === 'examen' ? c.valores : c.medicacion
+  return filas.some((f) => f.falta !== undefined)
+}

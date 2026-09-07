@@ -232,7 +232,12 @@ console.log('\n── ⑪ EL GLIFO DE PASAPORTE (S113-B · 2.2.4) ──');
     try { archivos = listarTsx(new URL(`../${dir}`, import.meta.url).pathname); } catch { continue; }
     for (const f of archivos) {
       const txt = readFileSync(f, 'utf8');
-      for (const m of txt.matchAll(/nombre=['"]pasaporte['"]/g)) {
+      /* 🔴 **MIDE `nombre={…}` ENTERO, no sólo el literal — y lo obligó un
+         caso REAL: yo mismo lo monté con `nombre={fase === 'ajena' ? 'info' :
+         'pasaporte'}` y el guard no lo vio.** *Un guard que reconoce una sola
+         forma de escribir lo mismo protege del descuido y no del apuro, que es
+         cuando hace falta.* Fue el aparato el que mostró el defecto, no él. */
+      for (const m of txt.matchAll(/nombre=(?:['"]pasaporte['"]|\{[^}]*['"]pasaporte['"][^}]*\})/g)) {
         sueltos.push(`${f.split('/').slice(-2).join('/')}:${txt.slice(0, m.index ?? 0).split('\n').length}`);
       }
     }

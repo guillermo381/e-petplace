@@ -26,7 +26,9 @@ import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
 import { HeroMascota } from '../components/HeroMascota'
+import { ActivarPlaca } from '../components/ActivarPlaca'
 import { FichaPapel } from '../components/FichaPapel'
+import { HojaTraerPapeles } from '../components/HojaTraerPapeles'
 import { HuellaDelVinculo } from '../components/HuellaDelVinculo'
 import { PantallaDocumentos } from '../components/PantallaDocumentos'
 import { TarjetaMetrica } from '../components/TarjetaMetrica'
@@ -1284,6 +1286,49 @@ function FilaDeContacto({ tamano }: { tamano: number }) {
  *
  * El glifo firmado se mira **donde vive**: en la fila de acciones del perfil,
  * más abajo en esta misma galería. */
+
+/** La Hoja de traer papeles: se abre de verdad, con sus tres fases. */
+function MuestraTraerPapeles() {
+  const [fase, setFase] = useState<'cerrada' | 'elegir' | 'leyendo' | 'confirmar'>('cerrada')
+  const comun = {
+    visible: fase !== 'cerrada',
+    onCerrar: () => setFase('cerrada' as const),
+    titulo: 'Traer papeles',
+    vozFoto: 'Sacar una foto',
+    vozArchivo: 'Elegir un PDF',
+    vozLeyendo: 'Leyendo el papel…',
+    vozLeyendoLarga: 'Sigue leyendo. Los exámenes con muchas filas tardan un poco más.',
+    vozGuardar: 'Guardar en el expediente de Thor',
+  }
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+        {(['elegir', 'leyendo', 'confirmar'] as const).map((f) => (
+          <Boton key={f} variante="secundario" tamaño="sm" etiqueta={f} onPress={() => setFase(f)} />
+        ))}
+      </View>
+      {fase === 'confirmar' ? (
+        <HojaTraerPapeles
+          {...comun}
+          estado={{
+            fase: 'confirmar',
+            vozIncompleto: 'Falta completar la unidad para poder guardar el examen.',
+            onGuardar: () => setFase('cerrada'),
+            contenido: { tipo: 'examen', valores: [
+              { id: 'v1', analito: 'Hematocrito', valor: '42', unidad: '%', referencia: '37–55', confianza: 'alta' },
+              { id: 'v2', analito: 'Creatinina', valor: '2,1', unidad: 'mg/dL', marcaImpresa: 'H', confianza: 'media' },
+              { id: 'v3', analito: 'Urea', valor: '38', confianza: 'baja', falta: 'la unidad' },
+            ] },
+          }}
+        />
+      ) : fase === 'leyendo' ? (
+        <HojaTraerPapeles {...comun} estado={{ fase: 'leyendo' }} />
+      ) : fase === 'elegir' ? (
+        <HojaTraerPapeles {...comun} estado={{ fase: 'elegir', onFoto: () => setFase('leyendo'), onArchivo: () => setFase('leyendo') }} />
+      ) : null}
+    </View>
+  )
+}
 
 function PanelOscuroCoach() {
   const { theme } = useTheme()
@@ -3454,6 +3499,42 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — EL TURNO DOBLE DE `documento`, RESUELTO (fase 3, firma de la mesa) · qué decide: que a 21 px la CREDENCIAL (ficha de identidad) y la HOJA (historia clínica) no se confundan — antes las dos usaban el mismo dibujo">
+          <Texto variante="apoyo">
+            La mesa eligió una tercera salida, mejor que las dos que la nota daba: no hacía falta un
+            dibujo nuevo, hacía falta el que ya existía en el lugar correcto. `documento` es una
+            credencial apaisada con su círculo de retrato — que es lo que la ficha de identidad tiene
+            y una historia clínica no.
+          </Texto>
+          {[21, 44].map((tam) => (
+            <View key={tam} style={{ gap: spacing[2] }}>
+              <Texto variante="dato">{`a ${tam} px — ficha de identidad (documento) · historia clínica (papel)`}</Texto>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
+                <Icono nombre="documento" tamano={tam} />
+                <Icono nombre="papel" tamano={tam} />
+              </View>
+            </View>
+          ))}
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S113 — ACTIVAR LA PLACA (fase 3) · qué decide: que «ya estaba activada» NO se lea como un error — la placa funciona y la persona sólo repitió el gesto">
+          <ActivarPlaca
+            visor={<View />}
+            vozApuntando="Apuntá al código de la placa"
+            estado={{ fase: 'activada', voz: 'Listo: esta placa ahora es de Thor.', vozSeguir: 'Ver su pasaporte', onSeguir: () => {} }}
+          />
+          <ActivarPlaca
+            visor={<View />}
+            vozApuntando="Apuntá al código de la placa"
+            estado={{ fase: 'yaEstaba', voz: 'Esta placa ya es de Thor. No hace falta hacer nada.', vozVerPlaca: 'Ver su pasaporte', onVerPlaca: () => {} }}
+          />
+          <ActivarPlaca
+            visor={<View />}
+            vozApuntando="Apuntá al código de la placa"
+            estado={{ fase: 'ajena', voz: 'Ese código no es de una placa de e-PetPlace.', vozReintentar: 'Probar con otra', onReintentar: () => {} }}
+          />
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — LA BÓVEDA DE PAPELES (fase 3) · qué decide: (a) que la lista NO se lea como una bandeja de alertas —ninguna fila lleva color, ni la que trae un valor fuera de rango—; (b) que un examen se lea TRANSCRITO: analito, valor con su unidad, la referencia si estaba impresa, y la marca del laboratorio como TEXTO; (c) que el vacío invite sin disculparse">
           <Texto variante="apoyo">
             🔴 Se transcribe, no se interpreta — y no está apagado: es INEXPRESABLE. `ValorDePapel` no
@@ -3478,6 +3559,11 @@ function GaleriaInterna() {
               ] },
             ]}
           />
+          <Texto variante="apoyo">
+            Traer papeles: las tres fases. En «confirmar», la tercera fila NO tiene unidad — se pide,
+            y hasta que no esté NO se dibuja el botón de guardar.
+          </Texto>
+          <MuestraTraerPapeles />
           <Texto variante="apoyo">Y la bóveda VACÍA: la invitación sola, sin un solo rótulo.</Texto>
           <PantallaDocumentos
             vozVacio="Todavía no hay papeles de Thor. Si ya tiene historia en otra clínica, traela: la leemos por vos."

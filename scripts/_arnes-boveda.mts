@@ -6,7 +6,8 @@
    que un tipo permite alguien lo escribe el día que tiene apuro, y el que lee
    esto después es un veterinario decidiendo un tratamiento. */
 import { readFileSync } from 'node:fs';
-import { bovedaVacia, gruposConPapeles } from '../packages/ui/src/components/papeles-boveda.ts';
+import { bovedaVacia, gruposConPapeles, hayQueCompletar, SEGUNDA_VOZ_MS } from '../packages/ui/src/components/papeles-boveda.ts';
+
 
 let ok = 0, mal = 0;
 const t = (n: string, real: unknown, esp: unknown) => {
@@ -75,8 +76,61 @@ console.log('\n── ⑥ ⛔ MEMORIAL: SE LEE ENTERA, NO SE PIDE NADA ──');
 t('🔴 la pantalla NO devuelve null en memorial', /mode === 'memorial'\) return null/.test(DOCS), false);
 t('🔴 …y «traer papeles» no se ofrece', /esMemorial \? null :/.test(DOCS), true);
 
+const TRAER = src('HojaTraerPapeles.tsx');
+const PLACA = src('ActivarPlaca.tsx');
+
+console.log('\n── ⑧ 🔴 NADA SE GUARDA SIN UN TOQUE (B2) ──');
+/* *Un extractor que guarda solo convierte «la casa lee tus papeles» en «la casa
+   escribe en el expediente de tu mascota lo que le pareció».* */
+const fila = (falta?: string) => ({ id: 'x', confianza: 'alta' as const, falta });
+t('🔴 con algo por completar, NO se puede guardar',
+  hayQueCompletar({ tipo: 'examen', valores: [{ analito: 'a', valor: '1', ...fila('la fecha') }] }), true);
+t('CONTROL · sin nada que completar, sí', 
+  hayQueCompletar({ tipo: 'examen', valores: [{ analito: 'a', valor: '1', ...fila() }] }), false);
+t('…y también mide una receta',
+  hayQueCompletar({ tipo: 'receta', medicacion: [{ nombre: 'n', ...fila('la dosis') }] }), true);
+t('🔴 y la pieza NO dibuja guardar cuando falta algo',
+  /falta \?[\s\S]{0,120}vozIncompleto[\s\S]{0,200}etiqueta=\{vozGuardar\}/.test(TRAER), true);
+/* La duda es la fila ENTERA — el mismo criterio del carnet. */
+t('lo dudoso se marca con TINTE, no con relleno de alarma',
+  /borderLeftWidth: revisar/.test(TRAER) && !/backgroundColor: theme\.status/.test(TRAER), true);
+t('🔴 y lo que falta se PIDE con su nombre, no se rellena', /\{fila\.falta\}/.test(TRAER), true);
+/* La ley de la bóveda rige también acá. */
+t('🔴 el examen se confirma SIN color', /color="(danger|success)"/.test(TRAER), false);
+/* La espera tiene dos voces, y la segunda a los 8 s. */
+t('la segunda voz existe y llega a los 8 s', SEGUNDA_VOZ_MS, 8000);
+t('…y las dos son obligatorias', /vozLeyendo: string/.test(TRAER) && /vozLeyendoLarga: string/.test(TRAER), true);
+/* 🔴 Tres fases, una unión: *con banderas se puede escribir «leyendo y además
+   listo», y ahí alguien decide cuál gana.* */
+t('🔴 las fases son una UNIÓN, no banderas',
+  /fase: 'elegir'/.test(TRAER) && /fase: 'leyendo'/.test(TRAER) && /fase: 'confirmar'/.test(TRAER), true);
+
+console.log('\n── ⑨ 🔴 LA PLACA: TRES ESTADOS Y SÓLO UNO ES ERROR (B5) ──');
+/* *«Ya estaba activada» NO es un error: la placa funciona, está puesta, y lo
+   único que pasa es que la persona ya hizo esto. Una pantalla roja acá le dice
+   que rompió algo.* */
+t('🔴 `yaEstaba` NO tiene reintento', /fase: 'yaEstaba'[^}]*onReintentar/.test(PLACA), false);
+t('…y su salida es OPCIONAL: si no hay a dónde ir, no hay botón',
+  /onVerPlaca\?: \(\) => void/.test(PLACA), true);
+/* 🔴 **Sólo `ajena` lleva el aviso; las otras dos llevan el CHECK.** Y «ya
+   estaba» lo lleva con razón: *la placa está activa, que es exactamente lo que
+   un check significa* — no es un consuelo.
+   ⏪ Acá decía `'info' : 'pasaporte'`, y **el assert cazó mi propio cambio**
+   cuando el emulador me obligó a sacar el `pasaporte`: a 44 px, solo y sin
+   etiqueta, eran dos cuadraditos que no decían nada — la condición de uso que
+   su propia firma dejó escrita, atravesada por mí con un ternario. */
+t('🔴 sólo `ajena` lleva el glifo de aviso',
+  /fase === 'ajena' \? 'info' : 'checkEnCirculo'/.test(PLACA), true);
+t('…y el `pasaporte` NO se monta solo acá', /'pasaporte'/.test(PLACA), false);
+/* 🔴 Un código sin activar no dice nada de nadie: el nombre SÓLO en `activada`. */
+t('🔴 el nombre de la mascota vive SÓLO en `activada`',
+  /fase: 'activada'; voz: string/.test(PLACA), true);
+t('🔴 la pieza NO abre la cámara: el visor es un slot', /visor: ReactNode/.test(PLACA), true);
+t('…y el visor se apaga cuando hay resultado',
+  /estado\.fase === 'apuntando' \?/.test(PLACA), true);
+
 console.log('\n── ⑦ NINGUNA COMPONE VOZ (Ley 3) ──');
-for (const [n, s] of [['documentos', DOCS], ['ficha', FICHA]] as const) {
+for (const [n, s] of [['documentos', DOCS], ['ficha', FICHA], ['traer', TRAER], ['placa', PLACA]] as const) {
   /* Voz es un template HIJO de JSX (`>`); la geometría va como atributo (`=`).
      Es la regla que el arnés del tablero pagó cuatro veces. */
   const hijos = [...s.matchAll(/>\s*\{(`[^`]*\$\{[^`]*`)\}/g)].map((m) => m[1] ?? '');
