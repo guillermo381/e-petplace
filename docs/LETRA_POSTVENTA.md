@@ -8,6 +8,13 @@
 > **Regla de unicidad: dos sistemas de postventa en la misma base está prohibido. Este documento
 > es EL sistema** — y por eso F9 retira la pantalla de devoluciones del admin legado con lápida.
 >
+> ### 📌 ENMIENDA ①, mesa del 7-sep-2026 — **§14 · `D-888` ya no queda en NULL**
+> **La plata de los tres reversos fuera de ventana ($87,65) salió de tarjeta de PRUEBAS**
+> (dato del founder). ⇒ **no vuelve a nadie: es deuda de motor**, y se cierra construyendo
+> el reverso fuera de ventana como acto humano registrado (§6). *La letra vieja queda
+> TACHADA en §14 y no borrada — se marca acá arriba para que nadie tenga que leer la
+> sección entera para saber que ese dato ya se firmó.*
+
 > ⚠️ **Contexto que ninguna pista debe olvidar:** al escribirse esta letra **ningún dato de
 > servicio en la base es real** — todo es prueba de construcción, y producción es **octubre**.
 > **Ningún número del relevamiento sirve como línea base** y ningún umbral se calibra contra ellos.
@@ -296,9 +303,13 @@ consecuencias por acumulación · plazos y textos por país.
   poder hacer el asiento y bajo qué candado (§9).
 - **La contabilidad fina de la comisión devuelta** en un reembolso parcial: la fórmula la dice
   `MODELO_FINANCIERO`.
-- **Qué pasa con `D-888`** (los tres reversos fuera de ventana): si la plata salió de una tarjeta
-  real vuelve por el camino manual de §6; si fue tarjeta de pruebas es deuda de motor. **Dato
-  pendiente del founder — queda NULL hasta que lo diga.**
+- **`D-888`** (los tres reversos fuera de ventana, $87,65): ~~si la plata salió de una
+  tarjeta real vuelve por el camino manual de §6; si fue tarjeta de pruebas es deuda de
+  motor — dato pendiente del founder, queda NULL hasta que lo diga~~ **la plata salió de
+  tarjeta de PRUEBAS (founder, 7-sep) ⇒ no vuelve a nadie: es deuda de motor.** Se cierra
+  construyendo el reverso fuera de ventana como acto humano registrado (§6), no
+  devolviendo esos tres. *Se escribe para que nadie los lea como plata de una familia
+  esperando.*
 - **El encendido de WhatsApp.** La llave es del founder y va última (§9 de `NOTIFICACIONES`:
   lector → pieza → gate → flip).
 
@@ -306,6 +317,10 @@ consecuencias por acumulación · plazos y textos por país.
 
 ## Historial
 
+- **v1.0 · enmienda ① (S114, 7-sep-2026, mesa):** `D-888` sale de NULL. **La plata era de
+  tarjeta de pruebas** ⇒ deuda de motor, no plata de una familia. §14 con la letra vieja
+  **tachada y no borrada**, y la marca repetida en la puerta del documento. *Depositar
+  verbatim y enmendar en su lugar son dos actos distintos, y el segundo tiene que verse.*
 - **v1.0 (S114, 7-sep-2026):** redacción inicial sobre el relevamiento `S114-A-RELEVAMIENTO.md`
   (899 líneas, main en `e516a089`). Firmas del founder F1–F10 y D8. F5 firmada en el admin con
   MVP propio antes de octubre. Contexto declarado: ningún dato de servicio es real.
