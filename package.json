@@ -105,6 +105,7 @@
     "verify:rutas-de-aviso": "node scripts/verify-rutas-de-aviso.mjs",
     "verify:selectores-recurrentes": "node scripts/verify-selectores-recurrentes.mjs",
     "verify:sin-byte-nul": "node scripts/verify-sin-byte-nul.mjs",
+    "verify:sin-montar": "node scripts/verify-sin-montar.mjs",
     "verify:tablero": "tsx scripts/_arnes-tablero.mts",
     "verify:tdz": "node scripts/verify-tdz.mjs",
     "verify:titulo-dice-que": "node scripts/verify-titulo-dice-que.mjs",
@@ -114,8 +115,7 @@
     "verify:vistas-invoker": "node scripts/verify-vistas-invoker.mjs",
     "verify:vocabularios": "node scripts/verify-vocabularios.mjs",
     "verify:voz-por-tipo": "node scripts/verify-voz-por-tipo.mjs",
-    "verify:voz-sin-hueco": "tsx apps/cliente/scripts/verify-voz-sin-hueco.mts"
-  },
+    "verify:voz-sin-hueco": "tsx apps/cliente/scripts/verify-voz-sin-hueco.mts"  },
   "devDependencies": {
     "eslint": "^10.9.1",
     "eslint-plugin-react-hooks": "^7.1.1",
