@@ -4247,4 +4247,37 @@ export const clienteEs = {
     faltaDosis: 'Falta la dosis',
     noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
+  /** ⭐ **EL «CONTANOS»** (S113-C · 2.1). Voz de familia: se cuenta, no se
+   *  clasifica — la clase la propone Nexo y la confirma ella. */
+  bio: {
+    anotado: 'Anotado en la vida de {{nombre}}',
+    noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
+    enComportamiento: 'Comportamiento',
+    enComportamientoDet: 'miedos, manías, cómo se lleva con otros',
+    enPersonalidad: 'Cómo es',
+    enPersonalidadDet: 'lo que lo hace único',
+    enMedico: 'Algo de salud',
+    enMedicoDet: 'una alergia o una condición que ya sabes',
+    enRecuerdo: 'Un recuerdo',
+    enRecuerdoDet: 'algo que pasó y quieres guardar',
+  },
+  contanos: {
+    titulo: 'Cuéntanos de {{nombre}}',
+    boton: 'Cuéntanos lo que hace único a {{nombre}}',
+    libreEtiqueta: 'O cuéntanos lo que quieras de {{nombre}}',
+    librePlaceholder: 'Escríbelo como se te ocurra',
+    libreEnviar: 'Contárselo a Nexo',
+    /* La propuesta dice el hecho Y dónde lo va a guardar: *«¿lo guardo?» sin
+       decir dónde le pide a la familia un sí a ciegas.* */
+    propuesta: '¿Guardo «{{hecho}}» en {{donde}}?',
+    si: 'Sí, guárdalo',
+    no: 'No',
+    dondeComportamiento: 'su comportamiento',
+    dondeRasgo: 'cómo es',
+    dondeMedico: 'sus temas de salud',
+    dondeRecuerdo: 'sus recuerdos',
+    noSupeClasificar: 'No supe dónde guardarlo. Prueba con una de las cuatro de abajo.',
+    pastilla: 'Conociéndolo',
+    chipNexo: 'Cuéntame algo de {{nombre}}',
+  },
 } as const;
