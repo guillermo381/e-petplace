@@ -249,7 +249,27 @@ export interface PerfilMascota {
    *  historia_clinica_registrada) — jamás desde páginas del timeline,
    *  que subcuenta (hallazgo de C, S82). */
   consultas_total: number;
+  /** 🔴 **LO QUE LA FAMILIA CONTÓ DEL CARÁCTER** (S113 · fase 3).
+   *
+   *  Hasta acá NADIE los traía y la superficie derivaba «carácter» del
+   *  timeline, que es un PROXY: *un proxy no dice que no sabe — dice otra cosa
+   *  con la misma cara de dato*, y una Huella que se llena sola no distingue
+   *  «me contaron» de «lo deduje».
+   *
+   *  Lista vacía = **nadie contó nada**, y eso es un hecho que la pantalla
+   *  puede decir. No se deriva de conductas ni del timeline. */
+  rasgos: RasgoDeMascota[];
 }
+
+/** Un rasgo declarado por la familia, con su fecha. */
+export type RasgoDeMascota = {
+  /** Del catálogo `cat_rasgos`. */
+  codigo: string;
+  familia: 'miedos' | 'manias' | 'con_animales' | 'con_ninos';
+  /** Ya redactada y en tuteo: la pantalla la pinta tal cual. */
+  etiqueta: string;
+  fecha: string;
+};
 
 // Guard de shape del jsonb del catálogo (L-124: contra el dato real,
 // jamás cast): si falta un umbral numérico, null honesto.
@@ -286,7 +306,7 @@ export async function obtenerPerfilMascota(
   }
   const especie = mascota.data.especie;
 
-  const [vacunas, perfil, paseos, catalogo, desparasitaciones, consultas, restricciones] =
+  const [vacunas, perfil, paseos, catalogo, desparasitaciones, consultas, restricciones, rasgos] =
     await Promise.all([
     cliente
       .from('evento_vacuna_aplicada')
@@ -338,6 +358,18 @@ export async function obtenerPerfilMascota(
       .select('familia_servicio, severidad, cat_restricciones_servicio(descripcion)')
       .eq('mascota_id', mascotaId)
       .eq('estado', 'activa'),
+    /* 🔴 LOS RASGOS, en el MISMO `Promise.all` por la misma razón que todo lo
+       de arriba: el peaje es la PETICIÓN. Y `contexto = 'casa'` con
+       `prestador_id IS NULL` es lo que separa **lo que contó la familia** de lo
+       que observó una clínica — la distinción entera de la procedencia.
+       *Traer las dos juntas convertiría «me lo contaron» en «lo sabemos», que
+       es exactamente lo que la Huella tiene que poder distinguir.* */
+    cliente
+      .from('evento_temperamento_observacion')
+      .select('rasgos, fecha_observacion')
+      .eq('mascota_id', mascotaId)
+      .is('prestador_id', null)
+      .order('fecha_observacion', { ascending: false }),
   ]);
 
   if (
@@ -515,6 +547,32 @@ export async function obtenerPerfilMascota(
         lote: d.lote,
       })),
       consultas_total: consultas.count ?? 0,
+      /* Se aplanan las observaciones en rasgos sueltos, y se DEDUPLICAN por
+         código quedándose con la más reciente: la familia puede haber contado
+         «le asustan los truenos» dos veces con meses de diferencia, y son el
+         mismo rasgo. *Contarlo dos veces infla una Huella que existe para
+         decir cuánto sabemos de verdad.* */
+      rasgos: (() => {
+        const vistos = new Map<string, RasgoDeMascota>();
+        for (const o of (rasgos.data ?? []) as { rasgos: unknown; fecha_observacion: string }[]) {
+          if (!Array.isArray(o.rasgos)) continue;   // shape del jsonb, jamás cast (L-124)
+          for (const r of o.rasgos as Record<string, unknown>[]) {
+            const codigo = typeof r?.codigo === 'string' ? r.codigo : null;
+            const familia = typeof r?.familia === 'string' ? r.familia : null;
+            if (codigo === null || familia === null) continue;
+            if (vistos.has(codigo)) continue;       // ya vino una más reciente
+            vistos.set(codigo, {
+              codigo, familia: familia as RasgoDeMascota['familia'],
+              /* La etiqueta se resuelve contra `cat_rasgos` en la superficie
+                 —que ya lo pide para dibujar el «contanos»— y no acá: traerla
+                 sería un séptimo viaje para un texto que la pantalla ya tiene. */
+              etiqueta: codigo,
+              fecha: o.fecha_observacion,
+            });
+          }
+        }
+        return [...vistos.values()];
+      })(),
     },
   };
 }

@@ -81,6 +81,25 @@ t('🔴 sin resultados exige VOZ y SALIDA (las dos)',
 t('el label de a11y lleva el título ENTERO, sin resaltar',
   /accessibilityLabel=\{r\.subtitulo === undefined \? r\.titulo/.test(RES), true);
 
+console.log('\n── ③bis LA BÚSQUEDA ALCANZA A TODA LA FAMILIA (fase 3 · B4) ──');
+/* 🔴 **Faltaban `mascotas` y `papeles`, y los dos son el caso obvio.**
+   `mascotas`: *buscar «Thor» y que la única cosa que no aparezca sea Thor.*
+   `papeles`: *un examen de hace dos años es justo lo que alguien busca en el
+   pasillo de una veterinaria — si no está acá, no está en ningún lado.* */
+const NB = src('packages/ui/src/components/nexo-busqueda.ts');
+for (const tipo of ['mascotas', 'citas', 'pedidos', 'papeles', 'recuerdos', 'despensa', 'prestadores']) {
+  t(`\`${tipo}\` se puede buscar`, new RegExp(`'${tipo}'`).test(NB), true);
+}
+/* 🔴 EL TIPO OBLIGA AL GLIFO, y por eso el ensanche no pudo quedar a medias:
+   la tabla es `satisfies Record<TipoResultado, …>` ⇒ **un tipo nuevo sin glifo
+   no compila**. *No es disciplina: es que no se puede olvidar.* */
+for (const tipo of ['mascotas', 'papeles']) {
+  t(`…y \`${tipo}\` tiene su glifo en la pieza`, new RegExp(`${tipo}: '`).test(RES), true);
+}
+/* `mascotas` usa el hogar y no una especie: *la búsqueda no sabe si Thor es
+   perro, y elegir una especie haría que se equivoque la mitad de las veces.* */
+t("🔴 `mascotas` NO se dibuja con una especie", /mascotas: 'hogar'/.test(RES), true);
+
 console.log('\n── ④ ROJO · LA PRIMERA RESPUESTA DICE QUE ES IA ──');
 /* No es un chequeo que alguien corre: es una unión discriminada. */
 t('🔴 con `primera: true` la nota es OBLIGATORIA',

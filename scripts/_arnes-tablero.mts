@@ -30,6 +30,7 @@ const CON = src('TarjetaConociendolo.tsx');
 const PESO = src('DetallePeso.tsx');
 const HERO = src('HeroMascota.tsx');
 const FRANJA = src('FranjaSeguridad.tsx');
+const HUE = src('HuellaDelVinculo.tsx');
 
 console.log('\n── ① ROJO · SIN DATO NO HAY GRÁFICO ──');
 /* Un sparkline de UN punto dibuja una recta horizontal, y esa recta dice
@@ -91,9 +92,15 @@ console.log('\n── ⑥ ROJO · EL PROGRESO NO TIENE NÚMERO EN PANTALLA ─�
    imprimir al lado el día que quiera «ser más claro».* */
 t('🔴 cero `%`, cero `toFixed`, cero `Math.round`',
   /%|toFixed|Math\.round/.test(CON), false);
-t('🔴 la fracción NO toca un `Texto`',
-  /<Texto[^>]*>\{[^}]*fraccion/.test(CON), false);
-t('…entra sólo como geometría, al trazo', /trazoDeProgreso\(fraccion\)/.test(CON), true);
+/* ☠️ **LÁPIDA (S113-B · 2.2.2).** Acá vivían dos asserts sobre `fraccion`: que
+   no tocara un `Texto` y que entrara «sólo como geometría, al trazo». **Eran
+   verdaderos y hoy no tienen objeto**: el founder sacó el anillo y la fracción
+   no entra a la tarjeta. *Un assert que se queda sin sujeto no se borra en
+   silencio —el próximo lo escribe de nuevo creyendo que falta— y tampoco se
+   deja: daría rojo sobre algo que se quitó a propósito.* Su trabajo lo hace
+   hoy el ⑳, que mide algo más fuerte: **que no haya número que imprimir.** */
+t('☠️ la fracción ya no existe en la tarjeta (la mide el ⑳)',
+  /fraccion/.test(CON), false);
 t('y la voz llega redactada', /voz: string/.test(CON), true);
 t('CONTROL · el trazo acota igual que el anillo',
   [trazoDeProgreso(-1), trazoDeProgreso(2), trazoDeProgreso(0.4)], [0, 1, 0.4]);
@@ -104,7 +111,14 @@ t('🔴 o `onPress`, o `razonApagado` — nunca las dos',
   /onPress\?: never; razonApagado: string/.test(ACC), true);
 t('…y el apagado DICE su razón al tocarlo', /onRazonApagado\?\.\(accion\.razonApagado\)/.test(ACC), true);
 t('atenuado, no ausente', /opacity: apagado \? 0\.45 : 1/.test(ACC), true);
-t('🔴 Nexo entra con el ORBE, no con un glifo', /<OrbeCoach/.test(ACC), true);
+/* ☠️ **LÁPIDA (S113-B · 2.2.3).** Acá vivía *«Nexo entra con el ORBE, no con
+   un glifo»*. **Era verdadero y se quedó sin sujeto:** Nexo salió de la fila
+   —ya flota en toda la app— y con él el único miembro que se dibujaba distinto.
+   *Un assert sin sujeto no se borra en silencio —el próximo lo escribe de nuevo
+   creyendo que falta— ni se deja, porque daría rojo sobre algo que se quitó a
+   propósito.* Lo reemplaza el ㉑, que mide algo más fuerte: **que ya no haya
+   ningún miembro especial.** */
+t('☠️ el orbe ya no vive en la fila (lo mide el ㉑)', /OrbeCoach/.test(ACC), false);
 
 console.log('\n── ⑧ ROJO · MEMORIAL ──');
 /* La tarjeta de dato QUEDA —el dato de una vida que terminó sigue siendo
@@ -115,8 +129,19 @@ t('…y NO devuelve null entera', /theme\.mode === 'memorial'\) return null/.tes
 for (const [n, s] of [['el hoy', HOY], ['conociéndolo', CON]] as const) {
   t(`🔴 ${n} no se dibuja en memorial`, /theme\.mode === 'memorial'\) return null/.test(s), true);
 }
-t('🔴 …y la fila queda con TRES: sin la acción de Nexo',
-  /esMemorial \? null : <Accion accion=\{nexo\}/.test(ACC), true);
+/* ☠️ **LÁPIDA (S113-B · 2.2.3).** Acá vivía *«la fila queda con TRES: sin la
+   acción de Nexo»*. **La regla no era sobre la POSICIÓN: era sobre el Coach**
+   —*una acción que abre a Nexo en un duelo es lo que §7.1 apaga*— y con Nexo
+   fuera se quedó sin sujeto. **Aplicarla a «la cuarta cualquiera» escondería
+   algo que nadie decidió esconder.**
+   🔴 Lo que queda es una pregunta de PRODUCTO que la pieza no contesta:
+   *¿«Cuéntanos» corresponde en memorial?* Es del founder. Hoy la pieza dibuja
+   lo que le den, y por eso **tres sigue siendo legal**: si en memorial van
+   tres, la pantalla manda tres. */
+t('☠️ la fila ya no esconde nada por su cuenta en memorial',
+  /esMemorial|theme\.mode === 'memorial'/.test(ACC), false);
+t('🔴 …y por eso TRES sigue siendo expresable',
+  /readonly \[AccionPerfil, AccionPerfil, AccionPerfil\]/.test(ACC), true);
 
 console.log('\n── ⑨ ROJO · LA VARIANTE v2 NO SE TOCA ──');
 /* El punteado dice «esto todavía no es» sin escribir una fecha, y el tipo
@@ -288,6 +313,58 @@ t('🔴 sólo trunca el que tiene tope duro de ancho (`entidad`)',
    justo la que más importa ver.* */
 t("'tira' sigue siendo la ÚNICA con scroll horizontal",
   (SEL.match(/<ScrollView\s+horizontal/g) ?? []).length, 1);
+
+console.log('\n── ⑳ ROJO · LA HUELLA DEL VÍNCULO: NINGÚN NÚMERO PUEDE LLEGAR (2.2.2) ──');
+/* 🔴 **El anillo murió, y con él la última forma de contar.** Un arco que se
+   llena ES un número con otra ropa: se lee «voy por la mitad», y el día que
+   retroceda la familia siente que perdió algo. */
+t('🔴 la tarjeta ya NO recibe una fracción', /fraccion/.test(CON), false);
+t('🔴 …ni queda un anillo que la dibuje', /Circle|strokeDasharray/.test(CON), false);
+t('🔴 la huella recibe CINCO booleanos con nombre',
+  ['identidad', 'salud', 'cuerpo', 'caracter', 'diaADia'].every((d) => new RegExp(`${d}: boolean`).test(HUE)), true);
+/* Y no hay forma de contarlos adentro de la pieza. */
+t('🔴 la pieza no cuenta: sin `.length`, sin `filter`, sin sumas',
+  /\.length|\.filter\(|\breduce\(|\+\s*1|Math\./.test(HUE), false);
+t('🔴 …y no dibuja NINGÚN texto', /<Texto|<Text\b/.test(HUE), false);
+/* 🔴 EL LABEL TAMBIÉN CUENTA COMO PANTALLA: *un «tres de cinco» en un
+   accessibilityLabel es el número entrando por el único lugar donde nadie lo
+   estaba mirando.* La voz de al lado es la que lee quien no ve. */
+t('🔴 …ni lleva un label que cuente', /accessibilityLabel/.test(HUE), false);
+
+/* Cada dimensión con SU almohadilla, siempre la misma: si las llenas se
+   acomodaran desde la izquierda, la huella diría CUÁNTAS y no CUÁLES. */
+t('cinco almohadillas, ni una más', (HUE.match(/<Ellipse/g) ?? []).length, 5);
+t('🔴 cada una atada a su dimensión por NOMBRE',
+  ['identidad', 'salud', 'cuerpo', 'caracter', 'diaADia'].every((d) => new RegExp(`pintado\\(dimensiones\\.${d}\\)`).test(HUE)), true);
+/* Lleno = pleno · vacío = CONTORNO, no gris: *un contorno gris se lee como
+   «no disponible», y esto no está apagado: está esperando.* */
+t("🔴 lo que falta va en CONTORNO del mismo acento, no en gris",
+  /fill: 'none'[^}]*stroke: theme\.accent\.control/.test(HUE), true);
+
+console.log('\n── ㉑ ROJO · LAS ACCIONES SON UNA LISTA, NO SLOTS CON NOMBRE (2.2.3) ──');
+/* ⏪ Eran `citas`, `pasaporte`, `nexo` y `contanos` por nombre, y el tercero
+   era especial. **Nexo salió, y con él el único motivo que tenían para
+   llamarse por su nombre.** Sin miembro especial, nombrarlos sólo compra que
+   cambiar el juego de acciones sea cambiar el TIPO — y acaba de cambiar por
+   segunda vez. *La pieza sabe cuántas y cómo se dibuja una; cuáles lo sabe la
+   pantalla.* */
+t('🔴 murieron los slots con nombre',
+  /citas: AccionPerfil|pasaporte: AccionPerfil|nexo: AccionPerfil|contanos: AccionPerfil/.test(ACC), false);
+t('🔴 entra una lista', /acciones: readonly \[/.test(ACC), true);
+/* 🔴 EL TECHO SIGUE SIENDO LEY: tres o cuatro, jamás cinco. *Con cinco la fila
+   deja de ser «lo que puedo hacer con Thor» y pasa a ser un menú.* */
+t('🔴 el techo lo sostiene el COMPILADOR: no hay quinta',
+  /AccionPerfil, AccionPerfil, AccionPerfil, AccionPerfil, AccionPerfil/.test(ACC), false);
+t('…y la tupla de CUATRO existe',
+  /readonly \[AccionPerfil, AccionPerfil, AccionPerfil, AccionPerfil\]/.test(ACC), true);
+/* Sin miembro especial, el glifo deja de ser opcional. */
+t('🔴 el glifo es obligatorio para todas', /glifo: IconoNombre\n/.test(ACC.replace(/\r/g, '')), true);
+t('…y ninguna se dibuja distinto', (ACC.match(/<Icono /g) ?? []).length, 1);
+/* La clave por etiqueta y no por índice: *reordenar entre dos renders reusaría
+   el nodo de otra, y el día que una guarde estado se notaría mal.* */
+t('la clave es la etiqueta, no el índice', /key=\{a\.etiqueta\}/.test(ACC), true);
+/* «Pasaporte y QR» son dos palabras: envuelven, no se cortan. */
+t('🔴 la etiqueta larga NO se trunca', /numberOfLines/.test(ACC), false);
 
 console.log('\n── ⑪ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {

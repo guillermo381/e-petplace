@@ -105,3 +105,33 @@ export async function borrarFotoMascota(path: string): Promise<void> {
   const { error } = await getClient().storage.from(BUCKET).remove([path]);
   if (error) console.error('[subir-avatar] delete falló', path, '=', error.message);
 }
+
+/**
+ * ⭐ **UN PAPEL AL BUCKET DE LA BÓVEDA** (S113-C · fase 3 · C2).
+ *
+ * Vive acá y no en `packages/api` porque **la subida es del cliente**: el
+ * wrapper de A guarda la FILA, el archivo lo pone la app. Mismo molde que
+ * `subirFotoMascota`, con dos diferencias que importan:
+ * · entra **base64**, no un `uri` — el papel ya se leyó para mandárselo a la
+ *   extracción, y *leerlo dos veces es un viaje de más sobre un archivo que ya
+ *   está en memoria*;
+ * · el `contentType` viaja, porque un PDF y un JPG no se sirven igual.
+ */
+export async function subirPapel(input: {
+  base64: string;
+  path: string;
+  mediaType: string;
+}): Promise<{ ok: true } | { ok: false; mensaje: string }> {
+  const bytes = Uint8Array.from(atob(input.base64), (c) => c.charCodeAt(0));
+  if (bytes.byteLength > MAX_BYTES) {
+    return { ok: false, mensaje: 'El papel supera el máximo de 5MB.' };
+  }
+  const { error } = await getClient()
+    .storage.from('papeles')
+    .upload(input.path, bytes, { contentType: input.mediaType, upsert: false });
+  if (error !== null) {
+    console.error('[subir-papel] subida=', error.message);
+    return { ok: false, mensaje: 'No pudimos guardar el papel. Prueba de nuevo.' };
+  }
+  return { ok: true };
+}

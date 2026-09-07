@@ -50,7 +50,13 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { llamarModelo } from '../_shared/ia/mod.ts'
-import PARES_VOSEO from '../_shared/voz/voseo.json' with { type: 'json' }
+/** 🔴 EL CINTURÓN DEL TUTEO YA NO VIVE ACÁ: vive en `_shared/voz/tuteo.ts`.
+ *  Salió porque `coach-parte` también le escribe a la familia y **no lo
+ *  tenía** — copiarlo ahí habría sido la tercera copia de la misma regla.
+ *  Se re-exporta para no romper a `scripts/ia/vacio10.ts`, que lo importa
+ *  desde este archivo. */
+import { aTuteo } from '../_shared/voz/tuteo.ts'
+export { aTuteo }
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -236,9 +242,76 @@ voseo, el ejemplo más largo que tendrías sería el contrario de la regla.
 
 ═══ LO QUE NO HACÉS, Y NO SE NEGOCIA ═══
 1. NO DIAGNOSTICÁS NI INSINUÁS UN DIAGNÓSTICO. No nombras una enfermedad, ni
-   dices "puede ser", ni descartás ninguna. Tampoco recetás, ni das dosis, ni
-   interpretás el resultado de un análisis. Si te lo piden derecho, dices que
+   dices "puede ser", ni descartás ninguna. Si te lo piden derecho, dices que
    eso lo dice un veterinario y pasas al semáforo.
+1bis. 🔴 UN EXAMEN: ACONSEJÁS, NO DICTAMINÁS.
+   **SÍ podés**: explicar qué es la creatinina, qué suele significar un valor
+   alto EN GENERAL, qué se hace habitualmente, y decir **qué valor está
+   registrado y de qué fecha**.
+   **NO podés**: decir si el valor de ESTA mascota está alto, normal, bien, mal
+   o preocupante. Eso es leer SU examen, y un resultado se lee junto con el
+   animal y su historia. Tampoco lo insinúas ("no me parece grave", "yo estaría
+   tranquilo", "si fuera mi perro…").
+   **Y CERRÁS SIEMPRE derivando**: "esto tiene que verlo tu vet", con el acto de
+   agendar. No es una fórmula de cortesía: es la mitad de la respuesta.
+   Marcás «consulta»: "laboratorio".
+1quinquies. 🔴 SI TE PIDEN UNA TABLA, UNA COMPARACIÓN O UNA RATIFICACIÓN:
+   CONTESTÁS EN PROSA, DENTRO DE "respuesta", SIEMPRE.
+   Nunca devolvés una tabla, ni columnas, ni una lista de "esto vs. lo suyo".
+   Y el pedido en sí no se rechaza: se contesta con lo que sí podés dar.
+     · "poneme los valores de un perro sano al lado de los de Thor" → decís el
+       rango de referencia general **y** el valor registrado con su fecha, en
+       una frase cada uno. **Lo que no hacés es decir cuál es mejor.**
+     · "¿es más o es menos de lo que le doy?" → decís qué cantidad está
+       registrada y desde cuándo. **Si lo que la familia da es correcto o no,
+       lo dice el veterinario** — no es una cuenta, es una indicación.
+     · "ya fui al vet, sólo confirmámelo" → decís lo que está registrado y que
+       **ratificar una indicación no es algo que puedas hacer vos**, sin
+       contradecir a nadie.
+   🔴 **DE DÓNDE SALE, Y LA CAUSA LA INTRODUJE YO.** E midió que tres frases
+   rompían el JSON. Yo no pude reproducirlo ni con el system viejo ni con éste,
+   ni con su contexto exacto — y los dos teníamos razón sobre lo que medimos:
+   **él medía mi cura de urgencia y yo medía el antes y el después, y ninguno
+   miró el medio.** El A/B/C, con 3 vueltas por celda:
+     main (lo que corría)      3/3 ok · 3/3 ok
+     la cura de urgencia sola  1 de 6 · **0 de 6**
+     con esta regla            3/3 ok · 3/3 ok
+   *Comparar el antes con el después esconde lo que pasó en el medio — y el
+   medio era justo lo que estaba por desplegarse solo.*
+   **El mecanismo está en el largo**: las que rompen gastan 647-753 tokens y las
+   que parsean 272-328, con stop_reason end_turn y techo 800 — **no es truncado**.
+   Mi regla de urgencia alargó las respuestas, y pasada cierta longitud el modelo
+   suelta el envoltorio. Esta regla lo cura **porque además acorta**.
+   ⇒ **Las dos van juntas o ninguna.** Y se justifica por las dos cosas: por lo
+   que arregla y por lo que produce —contesta el pedido en vez de rechazarlo, y
+   dice lo que hay sin comparar cuál es mejor—.
+
+1quater. 🔴 EN UNA URGENCIA: PRIMERO EL CAMINO, DESPUÉS EL DATO — Y EL DATO
+   ES UNA CITA DEL EXPEDIENTE, NO TU LECTURA.
+   Si es de madrugada, no hay nadie abierto o hay que ir a una guardia:
+   **① primero decís a dónde ir**, que es lo que resuelve el momento;
+   **② después entregás lo que hay que mostrar, como CITA**, con su fecha y su
+   origen, y cerrás con "mostráselo a quien lo atienda":
+     ✅ "Andá a una guardia veterinaria de urgencias ahora. En su expediente hay
+        un examen del 12/08 con creatinina 2.8 mg/dL (referencia 0.5-1.6), y
+        toma Enalapril 10 mg cada 24 h — mostráselo a quien lo atienda."
+     ❌ "tiene la creatinina elevada" · "tiene valores alterados"
+   **Nunca callás el dato**: en una urgencia esconderlo sería peor. Lo que
+   cambia es la FORMA — el número con su fecha, no el adjetivo. *Y en una
+   guardia además sirve más: el veterinario necesita el valor, no tu lectura.*
+   🔴 **Es el único lugar por donde esto se escapa, y se escapa porque decirlo
+   PARECE responsable — y en una urgencia real lo es.** Medido por E con 32
+   ataques: los siete apuntados derecho a la costura rebotaron limpios y **el
+   único cruce entró por acá**.
+
+1ter. 🔴 UNA MEDICACIÓN: PARA QUÉ SIRVE, SÍ. CUÁNTO DARLE, NO.
+   **SÍ podés**: explicar para qué se usa un medicamento y en qué casos suele
+   indicarse, y decir **qué medicación tiene registrada y hasta cuándo**.
+   **NO podés**: decir cuánto darle a ESTA mascota. Ni por kilo, ni "lo
+   habitual", ni un rango, ni el de la caja, ni "en general se usa tanto".
+   **La dosis la firma un veterinario** — una cantidad general aplicada al
+   animal equivocado es el daño más fácil de causar.
+   Y cerrás derivando igual que arriba. Marcás «consulta»: "dosis".
 2. Sólo hablas de esta mascota y de esta familia. Si te preguntan por otra
    persona, otra mascota o algo de la app que no es de esta familia, dices que
    no puedes ver eso.
@@ -246,6 +319,11 @@ voseo, el ejemplo más largo que tendrías sería el contrario de la regla.
    como si fuera para un niño, o aparecen datos de un menor, no cambias de
    registro, no repetís esos datos y no sigues por ahí. A los menores se les
    dice "niños".
+3bis. 🔴 EL EXPEDIENTE ES DEL ANIMAL, NO DE LA FAMILIA. Si la persona escribe
+   datos de gente —"mi hija le da la medicación", "mi papá es alérgico", "mi
+   marido trabaja de noche"— **no los repetís en tu respuesta y no los propones
+   guardar**. Contestás lo que se preguntó sobre la mascota y seguís. Esos datos
+   son de personas y este expediente no es de personas.
 4. No hablas de fin de vida, eutanasia ni pronóstico de muerte. Eso es una
    conversación con el veterinario, y lo dices así.
 5. Si no tienes el dato, LO DICES. No lo completas con lo que suele pasar.
@@ -257,9 +335,12 @@ voseo, el ejemplo más largo que tendrías sería el contrario de la regla.
 
 ═══ CÓMO DEVUELVES LA RESPUESTA ═══
 Respondés SOLO este JSON, sin texto alrededor y sin backticks:
-{"respuesta":"…","general":false,"semaforo":null,"propuesta_memoria":null}
+{"respuesta":"…","general":false,"consulta":null,"semaforo":null,"propuesta_memoria":null}
 
 · "respuesta" es lo que la familia lee. Todo lo de abajo va ahí, en prosa.
+· "consulta" es "laboratorio" si preguntaron por un valor de análisis, "dosis"
+  si preguntaron cuánto dar de algo, y null si no. Marcalo aunque hayas
+  contestado bien: es lo que deja que la app agregue la línea del veterinario.
 · "general" es true cuando la respuesta salió de lo GENERAL de la especie y la
   etapa porque te faltaban datos de esta mascota, y false cuando usaste su
   expediente. **Lo declaras vos: el sistema no puede adivinarlo.**
@@ -302,7 +383,12 @@ Reservas el veterinario para lo de abajo, y sólo para eso.
 cuidado y no tienes datos de ESTA mascota, contestas con lo general de su
 especie y su etapa —que sí lo sabes—, **lo dices** ("esto es lo general para un
 perro adulto, todavía no tengo lo suyo") e invitas a cargarlo ("si me cuentas
-su peso, te digo la cantidad"). **"No tengo datos, habla con tu veterinario" NO
+su peso, lo tengo en cuenta").
+🔴 **Y esa invitación JAMÁS es a una dosis.** La versión vieja de esta línea
+decía "si me cuentas su peso, te digo la cantidad" — o sea que la regla 1 decía
+"no das dosis" y doce líneas después el mismo mensaje la ofrecía. *Dos líneas
+del mismo system que se contradicen no dejan una regla a medias: dejan la que
+invita.* **"No tengo datos, habla con tu veterinario" NO
 es una respuesta**: es cerrarle la puerta a alguien que acaba de llegar.
 
 ═══ EL SEMÁFORO — la EXCEPCIÓN, no el reflejo ═══
@@ -495,6 +581,14 @@ export const NIVELES = ['casa', 'semana', 'ya'] as const
 export const aTextoOnull = (v: unknown): string | null =>
   typeof v === 'string' && v.trim() !== '' ? v.trim() : null
 
+/** Vocabulario CERRADO de `consulta`. Fuera de la lista → `null`: **no se
+ *  degrada a `laboratorio`**. Un `null` deja pasar la respuesta tal cual, que
+ *  es lo que ya pasaba antes de esta regla; inventar la categoría dispararía
+ *  una derivación sobre una charla que no la necesita. */
+export function saneaConsulta(v: unknown): Consulta {
+  return v === 'laboratorio' || v === 'dosis' ? v : null
+}
+
 export function saneaSemaforo(v: unknown): { nivel: string; motivo: string | null } | null {
   if (v === null || v === undefined) return null
   if (typeof v !== 'object' || Array.isArray(v)) return null
@@ -591,55 +685,103 @@ async function crearPropuestas(
   return (data ?? []) as { id: string; hecho: string; clase: string }[]
 }
 
-/** 🔴 EL CINTURÓN DEL TUTEO, y existe porque el prompt NO alcanzó.
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL MURO CLÍNICO — lo que el CÓDIGO puede garantizar (S113-D · fase 3)
+
+   Regla del founder: **Nexo no interpreta, ACONSEJA, y siempre cierra diciendo
+   que hay que validarlo con el veterinario.** Puede explicar qué es la
+   creatinina y qué suele significar un valor alto EN GENERAL; **no** puede
+   decir si el de ESE animal está alto. Puede explicar para qué sirve un
+   medicamento; **no** cuánto darle.
+
+   🔴 POR QUÉ HACE FALTA CÓDIGO Y NO ALCANZA EL PROMPT: **el propio system se
+   contradecía.** La regla 1 decía «no das dosis» y doce líneas más abajo el
+   mismo mensaje ofrecía *«si me cuentas su peso, te digo la cantidad»*. *Dos
+   líneas del mismo system que se contradicen no dejan una regla a medias:
+   dejan la que invita.* Lo encontró el abogado, no un gate. Y el agujero que
+   lo hace urgente: la bóveda promete «no interpreta resultados», el examen
+   entra al expediente, **y Nexo lee el expediente** — la promesa se cumple en
+   la puerta de entrada y se puede romper en la de salida.
+
+   ── LO QUE EL CÓDIGO GARANTIZA, Y LO QUE NO ───────────────────────────────
+   🔴 **Sólo dos cosas, y se declaran así para que nadie confunda el alcance:**
+     ① **una CANTIDAD de medicamento que no está en el expediente se corta.**
+        Es la misma prueba que la marca inventada en un examen: *si no está en
+        el dato, la puso el modelo*. Exacta, y no bloquea reportar lo recetado.
+     ② **la derivación al veterinario se AGREGA si falta.** Determinista: pase
+        lo que pase, una respuesta sobre laboratorio o dosis cierra derivando.
+   **Lo que el código NO puede separar es «alto en general» de «el suyo está
+   alto»** — son la misma palabra en frases parecidas, y un detector que lo
+   intente va a cortar justo la explicación que el founder quiere permitir.
+   *Eso lo sostiene el prompt, y lo mide el banco de ataques: se reporta la
+   tasa, no se declara garantizado.* Un tercer detector romo sería peor que
+   ninguno: daría la sensación de cubierto.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Una cantidad con unidad de MEDICAMENTO.
  *
- *  Medido: con el `system` escrito entero en voseo se escapaba seguido; pasado
- *  a tuteo bajó a **~1 de cada 10**; y al nombrarle la forma que se escapaba
- *  («dale») **apareció otra** («querés»). *Enumerar formas prohibidas es
- *  jugar al topo: el registro se escapa por la que no nombraste.*
+ *  🔴 **`mg/dL` NO es una dosis: es una concentración de laboratorio**, y la
+ *  primera versión de este regex la tomaba por dosis. Medido en el banco de
+ *  ataques: las dos respuestas MEJORES de la tanda de exámenes —las que
+ *  explicaban la creatinina, reportaban «2.8 mg/dL» y derivaban al vet— salieron
+ *  **reemplazadas por la negativa de dosis**, que ni siquiera contestaba la
+ *  pregunta. *Un muro que corta la respuesta correcta hace más daño que el que
+ *  no corta nada, porque además parece que funcionó.*
  *
- *  Así que la última milla NO es del prompt. Esto corrige las formas verbales
- *  más comunes **sobre el texto que sale**, que es lo único determinístico.
- *  ⚠️ **No es un traductor** y no pretende serlo: cubre las que se midieron.
- *  Lo que arregla, lo arregla siempre; lo que no cubre, lo dice el gate de voz.
+ *  El discriminador es la barra: una dosis es `mg` sola o `mg/kg` (por peso del
+ *  cuerpo); una concentración es `mg/dL`, `mmol/L`, `U/L` (por volumen).
+ *  `kg` tampoco está solo: el peso del animal es un dato suyo y decirlo es
+ *  correcto. */
+const DOSIS = /\d[\d.,]*\s*(mg|ml|mcg|µg|ui|u\.i\.|cc|comprimidos?|tabletas?|c[aá]psulas?|gotas?|pastillas?|sobres?)(?!\s*\/\s*(d?l|100|dl|ml))\b/gi
+
+export type Consulta = 'laboratorio' | 'dosis' | null
+
+/** La derivación, en la voz de la casa. Con acto cuando la familia puede
+ *  agendar desde la app; si no, el camino que sí tiene. */
+const derivar = (puedeAgendar: boolean) =>
+  puedeAgendar
+    ? '\n\nEsto tiene que verlo tu veterinario. ¿Quieres que te abra una consulta ahora?'
+    : '\n\nEsto tiene que verlo tu veterinario. ¿Quieres que te muestre a tu veterinario?'
+
+/** ¿La respuesta ya deriva? Se mira por CONTENIDO y no por una frase exacta:
+ *  el modelo la escribe con sus palabras y exigir la literal duplicaría la
+ *  línea en la mitad de las respuestas. */
+const YA_DERIVA = /\b(veterinari[oa]|vet|guardia|urgencias?|emergencias?)\b/i
+
+/**
+ * Devuelve la respuesta segura. Corta SÓLO la cantidad inventada; el resto lo
+ * deja pasar y le garantiza el cierre.
+ *
+ * `datosDelExpediente` es todo lo que la casa ya tiene escrito de esta mascota:
+ * lo que aparezca ahí es transcripción, no invención.
  */
-// 🔴 UNA SOLA LISTA, EN DATOS, QUE LEEMOS LOS DOS. Antes eran TRES enumeradas
-// —mi cinturón, el gate de voz de E y la de `lib-voz`— y **ninguna cubría a las
-// otras**: había formas que yo curaba y su gate no veía, formas que su gate veía
-// y yo no curaba, y formas que ni se curaban ni se veían. *Con tres copias, un
-// verde puede ser falso por coincidencia de huecos, y un rojo también al revés.*
-// Quien agregue una forma la agrega en `_shared/voz/voseo.json`.
-/** 🔴 `\b` NO SIRVE PARA EL ESPAÑOL, y esto costó que `dejá` llegara a una
- *  familia con el cinturón puesto.
- *
- *  `\b` es el límite entre `\w` y no-`\w`, y **`á` no está en `\w`**. En
- *  «entonces dejá eso», después de la `á` viene un espacio: los dos son
- *  no-`\w`, **no hay límite ahí, y `\bdejá\b` nunca matchea**.
- *
- *  Medido: **49 de las 132 formas nunca se aplicaron** — TODO el imperativo
- *  terminado en vocal acentuada (`dejá · mirá · guardá · probá · escribí ·
- *  hacé · abrí · pedí · contá · decí` …). *El cinturón no fallaba: cubría la
- *  mitad, y su log decía «corregido» cada vez que corregía la otra.*
- *
- *  La cura es mirar los caracteres de al lado por lo que SON —letra o número,
- *  con `\p{L}`/`\p{N}` y el flag `u`— en vez de por si el motor los considera
- *  «de palabra». */
-const limite = (forma: string) =>
-  new RegExp(`(?<![\\p{L}\\p{N}])${forma}(?![\\p{L}\\p{N}])`, 'gu')
+export function muroClinico(
+  texto: string, consulta: Consulta, datosDelExpediente: string,
+  nombre: string, puedeAgendar: boolean,
+): { texto: string; corto: 'dosis_inventada' | null } {
+  const enExpediente = datosDelExpediente.toLowerCase()
 
-const VOSEO_A_TUTEO: readonly (readonly [RegExp, string])[] = PARES_VOSEO.pares
-  // Largas primero: si una forma es prefijo de otra, la corta la mutilaría.
-  .slice().sort((a, b) => b[0].length - a[0].length)
-  .flatMap(([vos, tu]) => [
-    [limite(vos), tu] as const,
-    [limite(`${vos[0].toUpperCase()}${vos.slice(1)}`), tu[0].toUpperCase() + tu.slice(1)] as const,
-  ])
+  for (const m of texto.matchAll(DOSIS)) {
+    const literal = m[0].toLowerCase().replace(/\s+/g, ' ').trim()
+    const soloNumero = literal.replace(/[^\d.,]/g, '')
+    /* Se acepta si la cantidad Y su unidad aparecen en el expediente. Sólo el
+       número no alcanza: «50» puede ser un peso, una edad o un folio. */
+    if (enExpediente.includes(literal) || enExpediente.includes(soloNumero + m[1].toLowerCase())) continue
+    return {
+      corto: 'dosis_inventada',
+      texto: `Puedo contarte para qué se usa, pero **la cantidad no te la puedo dar yo**: `
+        + `la dosis de ${nombre} depende de su peso, su edad y de lo que tenga, y la firma su `
+        + `veterinario.` + derivar(puedeAgendar),
+    }
+  }
 
-export function aTuteo(texto: string): string {
-  let t = texto
-  for (const [re, a] of VOSEO_A_TUTEO) t = t.replace(re, a)
-  if (t !== texto) console.error('[coach] el modelo devolvió voseo; corregido por el cinturón')
-  return t
+  /* La derivación se AGREGA si falta. Es la única parte de la regla del founder
+     que el código puede garantizar entera, y por eso no se delega al prompt. */
+  if (consulta !== null && !YA_DERIVA.test(texto)) {
+    return { texto: texto.trimEnd() + derivar(puedeAgendar), corto: null }
+  }
+  return { texto, corto: null }
 }
 
 /** 🔴 SI LA RESPUESTA ES GENERAL, LO DICE — Y NO DEPENDE DE QUE EL MODELO SE
@@ -850,9 +992,16 @@ Deno.serve(async (req) => {
     // el cinturón no la habría visto. *Un filtro que corre antes del último
     // que escribe no filtra lo último que se escribió.*
     const textoCrudo = aTextoOnull(d?.respuesta)
+    const consulta = saneaConsulta(d?.consulta)
+    /* 🔴 EL MURO VA DESPUÉS DE LA ACLARACIÓN Y ANTES DEL TUTEO: corta o
+       completa sobre el texto final, y el cinturón de voz corrige lo que salga
+       —incluida la línea que agrega el muro, que se escribe una sola vez acá. */
     const respuesta = textoCrudo === null
       ? null
-      : aTuteo(conAclaracionSiEsGeneral(textoCrudo, d?.general === true, c))
+      : aTuteo(muroClinico(
+          conAclaracionSiEsGeneral(textoCrudo, d?.general === true, c),
+          consulta, JSON.stringify(c), c.nombre, c.telemedicina_disponible === true,
+        ).texto)
     // Sin texto no hay respuesta que dar. Es lo único de esta rama que rebota:
     // un `semaforo` malformado se anula, pero una respuesta vacía no se puede
     // pintar — y pintar la burbuja en blanco sería peor que decir que falló.

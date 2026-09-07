@@ -35,6 +35,13 @@ const PARES = [
     delCliente: {
       desconocido: 'escape del lector: un tipo que la base gane mañana llega con este valor y el compilador obliga a contemplarlo, en vez de caer por un switch que se cree exhaustivo',
     } },
+  /* 🔴 SEGUNDA FUENTE DE VERDAD, y hacía falta: no todo vocabulario vive en un
+     CHECK. Los tipos de resultado de la búsqueda salen de LITERALES adentro de
+     una función (`'papel' as tipo`), y ahí no hay constraint que comparar.
+     *Un gate que sólo sabe leer CHECKs deja fuera todo vocabulario que se
+     escribe en el cuerpo* — y ése es justamente el que nadie mira. */
+  { tipo: 'TipoResultado', archivo: 'packages/api/src/wrappers/coach.ts',
+    funcion: 'buscar_en_mi_familia', patronLiteral: "'([a-z_]+)' as tipo" },
 ]
 
 /* 🔴 LEE LAS DOS FORMAS, y la segunda la trajo su propio rojo: al pasar el
@@ -53,6 +60,24 @@ function unionDelWrapper(src, nombre) {
   }
   const vs = [...cuerpo.matchAll(/'([^']+)'/g)].map((x) => x[1])
   return vs.length ? vs : null
+}
+
+/** Los literales que una función EMITE. La otra forma de que un vocabulario
+ *  exista: escrito en el cuerpo, sin constraint que lo declare. */
+function literalesDeLaFuncion(nombre, patron) {
+  const sql = `select pg_get_functiondef(p.oid) as def from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname='public' and p.proname='${nombre}';`
+  const salida = execFileSync('npx',
+    ['--yes', 'supabase', '--experimental', 'db', 'query', '--linked', '--file', '/dev/stdin'],
+    { input: sql, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] })
+  const m = /\{[\s\S]*\}/.exec(salida)
+  if (!m) throw new Error('la base no devolvió JSON')
+  const d = JSON.parse(m[0])
+  if (d._tag === 'Error') throw new Error(d.error?.message ?? 'error de la base')
+  const filas = d.rows ?? []
+  if (!filas.length) return null
+  return [...new Set([...filas[0].def.matchAll(new RegExp(patron, 'g'))].map((x) => x[1]))]
 }
 
 function checkDeLaBase(tabla, columna) {
@@ -91,18 +116,25 @@ for (const p of PARES) {
     process.exit(2)
   }
   let c
-  try { c = checkDeLaBase(p.tabla, p.columna) } catch (e) {
+  try {
+    c = p.funcion
+      ? literalesDeLaFuncion(p.funcion, p.patronLiteral)
+      : checkDeLaBase(p.tabla, p.columna)
+  } catch (e) {
     console.log('🔴 NO CONCLUYENTE: no se pudo leer el CHECK — ' + e.message)
     process.exit(2)
   }
   if (c === null) {
-    console.log(`🔴 NO CONCLUYENTE: ${p.tabla}.${p.columna} no tiene CHECK de lista — el gate no mide nada`)
+    console.log(p.funcion
+      ? `🔴 NO CONCLUYENTE: no encontré literales \`${p.patronLiteral}\` en ${p.funcion}`
+      : `🔴 NO CONCLUYENTE: ${p.tabla}.${p.columna} no tiene CHECK de lista — el gate no mide nada`)
     process.exit(2)
   }
   const faltan = c.filter((v) => !u.includes(v))
   const declarados = Object.keys(p.delCliente ?? {})
   const sobran = u.filter((v) => !c.includes(v) && !declarados.includes(v))
-  console.log(`union-vs-check · ${p.tipo} (${u.length}) ↔ ${p.tabla}.${p.columna} (${c.length})`)
+  const fuente = p.funcion ? `${p.funcion}() literales` : `${p.tabla}.${p.columna}`
+  console.log(`union-vs-check · ${p.tipo} (${u.length}) ↔ ${fuente} (${c.length})`)
   if (faltan.length) {
     rojo++
     console.log(`  ✗ el CHECK acepta ${faltan.length} valor(es) que el tipo NO nombra: ${faltan.join(', ')}`)

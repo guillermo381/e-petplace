@@ -1,57 +1,85 @@
-# S113 · LO QUE ENTRA CON LA BUILD NATIVA
+# El día de la build · qué entra, en qué orden y qué se rompe si se saltea
 
-Todo lo de acá comparte una sola razón: **es una dependencia o un permiso
-nativo, y eso no viaja por OTA**. Se junta en un archivo para que no haya que
-pedir una build por cada cosa — *y para que el día que se pida, no falte
-ninguna*.
+> **Nada nativo entra a `main` antes de la build.** Un módulo nativo **no viaja
+> por OTA**: el JS del bundle lo importa, el binario instalado no lo tiene, y la
+> app revienta **en hilo nativo — fuera de toda `ErrorBoundary`**, sin stack
+> trace en JS.
+>
+> 🔴 Y lo peor: **ningún gate del tren normal lo avisa.** `ota:deps` compara
+> COMMITS y da verde con la dependencia instalada en disco (`D-1043`); el
+> typecheck no ve módulos nativos ausentes. *La única defensa es este documento
+> y la disciplina de no mergear.* Ficha: **`D-1046`**.
 
-⚠️ **Nada de esto se dibuja hoy.** Un control que promete algo que la app no
-puede hacer es peor que su ausencia: el ausente no promete.
+## Lo que espera, RE-MEDIDO (7-sep-2026, segundo repaso)
 
----
+**Nada cambió desde el primero**, y eso se dice: los cuatro siguen fuera y el
+micrófono sigue viviendo sólo en el prestador. *Un «sigue igual» medido vale lo
+mismo que un cambio; lo que no vale es suponerlo.*
 
-## ① NFC · grabar la chapita (C6 del 1.3)
+Comando: `grep '"<dep>"' apps/*/package.json` · las ramas, con
+`git diff --name-only main...origin/pista/s113-{a,b}-nfc`.
 
-**No arrancado.** Vive en `pista/s113-c-nfc`, que **no se mergea a `main`** por
-diseño — y `ota:deps` tiene que dar **rojo** en esa rama: es el control de que
-no se mezcló.
+## Lo que espera, medido
 
-Lo que pide: el módulo nativo, detección de capacidad **en runtime** (el módulo
-existe **y** el aparato tiene NFC), y si no, **el botón no se monta**. iOS sólo
-escribe con la app en primer plano, y **eso se dice en la voz**.
-
-## ② Guardar el QR en la galería (C2 del 1.3)
-
-**Medido: no existe permiso de escritura a galería en la app.** Por eso el botón
-**no se dibuja** — no está apagado ni con un cartel: no está.
-
-Hoy la acción se llama **«Compartir el QR»** (firma del founder) y manda la
-imagen al share del sistema, que ya ofrece WhatsApp, Gmail y Archivos **sin
-pedir un solo permiso**.
-
-## ③ Compartir el ARCHIVO del QR, no su enlace
-
-Y acá está el matiz que hay que saber antes de la build, porque **cambia lo que
-la gente ve en la hoja de compartir**:
-
-| | hoy (sin build) | con la build |
+| qué | dónde vive | estado hoy |
 |---|---|---|
-| qué se comparte | **el enlace** a la imagen | **el archivo** |
-| aparece «Fotos» | no | sí |
-| WhatsApp / Gmail | sí, con el enlace | sí, con la imagen |
+| **NFC** · `react-native-nfc-manager@3.17.2` | `pista/s113-a-nfc` (dep + `app.json`) · `pista/s113-b-nfc` (`GrabarTagNfc`, `tag-nfc.ts`) | **fuera de main** |
+| **Permiso de galería** · `expo-media-library` | sin instalar | **falta instalarlo** |
+| **Compartir** · `expo-sharing` | sin instalar | **falta instalarlo** |
+| **Micrófono de Nexo** · `expo-speech-recognition@56.0.1` | ya está en **`apps/prestador`**, NO en `apps/cliente` | **falta en el cliente** |
 
-**Medido:** `Share` de React Native lleva `message` y `url`, y **`url` la
-respeta iOS mientras Android la ignora**. Para poner el archivo en la hoja del
-sistema hace falta **`expo-sharing`**, que **no está instalado** (verificado en
-`node_modules`) y es nativo.
+⚠️ El micrófono es el caso interesante: **el paquete ya vive en el prestador**,
+así que en un monorepo pnpm `resolve` lo encuentra desde el cliente y **compila
+en dev**. *Compila, corre en dev, y el APK no lo tiene* — es exactamente el
+defecto que `verify:hoisting-nativo` nació para cazar (S112).
 
-⇒ Con la build: instalar `expo-sharing`, bajar el PNG con `expo-file-system`
-—que **sí** está— y compartir el archivo local.
+## El orden exacto, y por qué cada paso va donde va
 
----
+**1 · Mergear las ramas `*-nfc` a `main`.**
+Primero A (la dep y el `app.json`), después B (las piezas que la usan). Al
+revés, `main` queda con un componente que importa un módulo que nadie declaró.
 
-## Cómo se cierra esto
+**2 · Instalar lo que falta, en `apps/cliente`:**
+```
+pnpm --filter @epetplace/cliente add expo-media-library expo-sharing expo-speech-recognition
+```
+Los tres son nativos. `expo-speech-recognition` se instala **aunque ya esté en
+el prestador**: cada app declara lo suyo, y heredarlo por hoisting es la trampa
+de arriba.
 
-Una sola build las lleva a las tres. **El orden importa**: `expo-sharing` y el
-permiso de galería son de la misma pantalla (el pasaporte), así que salen
-juntos; NFC es su propia rama y se mergea **sólo cuando esa build exista**.
+**3 · Subir `version` en `app.json` de las DOS apps: `1.0.7` → `1.0.8`.**
+El `runtimeVersion` sale de `appVersion` por policy, así que subir la versión
+**es** cambiar el runtime.
+
+🔴 **Y acá está lo que hay que entender antes de tocarlo: los OTAs publicados
+contra `1.0.7` quedan pegados a `1.0.7` para siempre.** No se pierden y no
+molestan — les siguen llegando a los binarios viejos —, pero **el APK nuevo no
+los ve**: arranca con su bundle embebido y espera updates de `1.0.8`. *Un
+teléfono que no recibe un update no muestra un error: muestra la app de antes,
+y eso se lee como «no pasó nada».*
+
+**4 · Build de las dos apps:**
+```
+cd apps/cliente   && npx eas-cli build -p android --profile preview
+cd apps/prestador && npx eas-cli build -p android --profile preview
+```
+
+**5 · Reinstalar los APK.** Un update no arregla un binario sin el módulo: el
+módulo viaja en el binario. Y **el gate empieza confirmando el binario**
+(`L-138`): `adb shell dumpsys package <paquete> | grep versionName` tiene que
+decir **1.0.8** antes de mirar nada más.
+
+**6 · Recién ahí, el primer OTA contra `1.0.8`.**
+
+## Lo que hay que probar en ese aparato, y no antes
+
+- **NFC**: grabar un tag y leerlo. Es lo único que no se puede simular.
+- **Galería**: el permiso se pide **cuando la familia toca «traer papeles»**, no
+  al arrancar. *Un permiso que se pide sin que nadie lo haya pedido se deniega.*
+- **Compartir**: el pasaporte sale por la hoja del sistema.
+- **Micrófono**: Nexo escucha en el cliente, que es donde no estaba.
+
+## Lo que NO entra en ese tren
+
+La **impresión de placas** (`S113-PLACAS-IMPRESION.md`): no necesita build.
+Se decidió aparte y sigue afuera.

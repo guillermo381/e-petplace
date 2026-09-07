@@ -44,6 +44,7 @@ export {
   obtenerEspeciesActivas,
   obtenerCatalogoNovedadesPaseo,
   obtenerEspeciesElegibles,
+  obtenerCodigosMedicos,
   // S91 · D-379: el catálogo que SUGIERE razas (el dueño confirma).
   obtenerRazasDeEspecie,
   // S91 · la galería especies-razas: DOS pretendientes (el chip del alta de D
@@ -1860,6 +1861,8 @@ export {
   type AvisoCoach,
   type TipoAviso,
   activarPlaca,
+  estadoDePlaca,
+  type EstadoDePlaca,
   type CodigoErrorPlaca,
   // 2.1 · Nexo acompaña
   guardarHechoClasificado,
@@ -1916,6 +1919,19 @@ export {
   MINIMO_PARA_SERIE,
   type Tendencia,
 } from './series';
+
+// LA BÓVEDA DE PAPELES (S113 · fase 3) — transcribe, jamás interpreta.
+export {
+  registrarPapelExtraido,
+  confirmarPapel,
+  obtenerPapelesDeMascota,
+  pathDePapel,
+  BUCKET_PAPELES,
+  type ClaseEnBoveda,
+  type ValorDePapel,
+  type PapelDeMascota,
+  type CodigoErrorBoveda,
+} from './wrappers/boveda';
 
 /* ⚠️ **ENMIENDA ADITIVA DE C (76(d) declarada) — S113, lote 1.3.** El motor del
    pasaporte entró a `main` con sus cinco RPC y **sin puerta**: la app no tenía

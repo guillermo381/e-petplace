@@ -68,6 +68,15 @@ const PREFIJOS_NO_SUPABASE = new Set([
   'Array',    // Array.from(...)
   'Buffer',   // Buffer.from(...)
   'Object',   // Object.from no existe, pero el prefijo es inequívoco si aparece
+  /* Los TypedArray: `Uint8Array.from(atob(...))` es la forma de la casa para
+     decodificar base64 antes de subir un archivo, y apareció en cuanto la
+     bóveda empezó a subir papeles (S113-C · C2). *Un prefijo que termina en
+     `Array` no puede ser una tabla* — pero se listan uno por uno igual, porque
+     la lista es CERRADA a propósito: una regla («todo lo que termine en
+     Array») volvería a ser una lista abierta con otro nombre. */
+  'Uint8Array', 'Int8Array', 'Uint8ClampedArray',
+  'Uint16Array', 'Int16Array', 'Uint32Array', 'Int32Array',
+  'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array',
 ]);
 
 /**

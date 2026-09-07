@@ -65,6 +65,8 @@ import {
   motion,
   radius,
   spacing,
+  ResultadosBusqueda,
+  Campo,
   typography,
   useAviso,
   useEtiquetaBadge,
@@ -111,6 +113,7 @@ import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18
 
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
+import { useBusqueda } from '@/components/busqueda';
 import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -420,6 +423,7 @@ function DetalleNodoHogar({
 function DetalleVacunaVida({ eventoId, onVerCarnet }: { eventoId: string; onVerCarnet: (path: string) => void }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const busqueda = useBusqueda();
   const idioma = useTraduccion().idioma;
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
 
@@ -644,6 +648,7 @@ function FilaCampanaTecho({
 
 export default function Hogar() {
   const router = useRouter();
+  const busqueda = useBusqueda();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -1842,6 +1847,53 @@ export default function Hogar() {
             `pressedCoach` · `CoachHoja` · `coach.abrir` tenían **un solo
             consumidor cada uno, y era éste**. Ninguno queda huérfano. */}
       </View>
+      {/* ⭐ **LA BÚSQUEDA** (S113-C · fase 3 · C3). Una sola caja encuentra
+          cualquier cosa de la familia: mascotas, citas, papeles, recuerdos,
+          pedidos, productos y prestadores.
+
+          🔴 **Va bajo el techo y sobre todo lo demás.** *Quien viene a buscar
+          algo concreto no quiere recorrer su hogar para encontrar la caja* — y
+          quien no viene a buscar la ignora sin costo, porque no ocupa más que
+          una fila.
+
+          ⚠️ Mientras hay término escrito **los resultados reemplazan al
+          contenido del Hogar**, no se apilan debajo: *una lista de resultados
+          bajo el hogar entero obliga a hacer scroll para ver lo que uno
+          acaba de pedir.* */}
+      <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[4] }}>
+        {/* 🔴 **Dos correcciones que dio `verify:diseno`, las dos suyas:**
+            ① `sinPie` exige montar `PieDeCampo` —el borde de error sin su
+            mensaje es un campo rojo que no dice por qué—, y **una búsqueda no
+            tiene error**: se retira la prop en vez de montar un pie vacío;
+            ② el placeholder repetía la etiqueta. *El placeholder es el ejemplo
+            del formato, no el eco del rótulo* — acá el ejemplo es lo que la
+            familia podría escribir. */}
+        <Campo
+          label={t('busqueda.placeholder')}
+          etiquetaVisible={false}
+          placeholder={t('busqueda.ejemplo')}
+          value={busqueda.termino}
+          onChangeText={busqueda.buscar}
+        />
+      </View>
+      {busqueda.termino.trim().length >= 2 ? (
+        <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[4] }}>
+          <ResultadosBusqueda
+            termino={busqueda.termino}
+            grupos={busqueda.grupos}
+            vacio={{
+              voz: t('busqueda.sinResultados', { q: busqueda.termino.trim() }),
+              vozChip: t('busqueda.preguntarANexo'),
+              /* 🔴 **Lo que el texto no encuentra va a Nexo CON la pregunta
+                 puesta.** *Hacer que la familia la escriba de nuevo es pedirle
+                 que repita lo que la pantalla acaba de leer.* */
+              onPreguntar: () =>
+                router.push({ pathname: '/nexo', params: { semilla: busqueda.termino.trim() } }),
+            }}
+          />
+        </View>
+      ) : null}
+
 
       {/* @override-s82c — RECOMENDACIONES      {/* @override-s82c — RECOMENDACIONES (lámina, ítem 1): LA TARJETA
           SOBRE LA BANDA. Ponte al día pasa a FILAS compactas — glifo en

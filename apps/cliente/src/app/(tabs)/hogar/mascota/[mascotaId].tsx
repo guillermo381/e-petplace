@@ -101,6 +101,8 @@ import {
   type PesoDeLaSerie,
   obtenerTableroMascota,
   obtenerHoyMascota,
+  obtenerCitasDeMascota,
+  obtenerCodigosMedicos,
   type TableroMascota,
   type TableroMemorial,
   type HoyDeMascota,
@@ -343,8 +345,33 @@ export default function PerfilDeMascota() {
   /** S89-D ①: la sección de papeles nace PLEGADA — el perfil es de la
    *  mascota; sus documentos se piden, no presiden. */
   const [docsAbiertos, setDocsAbiertos] = useState(false);
-  /** S91-D · «Quiénes viven acá» — el censo del acuario, del motor de A.
-   *  `null` = todavía no se pudo leer, y NO es «cero habitantes» (L-178). */
+  /** ⭐ **A LA BÓVEDA** (fase 3 · C1). Antes era `irADocumentos`: scroll hasta
+   *  el plegable y desplegarlo. **Documentos ganó pantalla propia**, así que el
+   *  destino dejó de ser una posición y pasó a ser una ruta.
+   *  ☠️ Con eso murieron el `scrollRef`, el `yDocumentosRef` y el `setTimeout`
+   *  que esperaba al despliegue — *lo que sobrevive a su razón es basura que
+   *  nadie se anima a tocar* (Ley 37). El `memorial` viaja para que la pantalla
+   *  no ofrezca traer papeles a quien está en duelo. */
+  const abrirDocumentos = useCallback(() => {
+    if (mascotaId === undefined) return;
+    router.push({
+      pathname: '/hogar/mascota/documentos',
+      params: {
+        mascotaId,
+        nombre: typeof perfil === 'object' ? perfil.mascota.nombre : '',
+        /* 🔴 Se deriva del PERFIL y no de `esMemorial`, que se calcula más
+           abajo: *un callback declarado antes que su dato no puede leerlo, y
+           acá el compilador lo dice — en otros lados no.* Misma regla, misma
+           fuente (`estado_vida`), sin el brazo del tema, que acá no aplica. */
+        memorial:
+          typeof perfil === 'object' &&
+          perfil.mascota.estado_vida !== null &&
+          perfil.mascota.estado_vida !== 'activa'
+            ? '1'
+            : '0',
+      },
+    });
+  }, [mascotaId, perfil, router]);
   const [censo, setCenso] = useState<CensoDelAcuario | null>(null);
   const [habitantesHoja, setHabitantesHoja] = useState(false);
   // S90 (firma founder): la lista deriva del CATÁLOGO VIVO; arranca con el
@@ -368,6 +395,14 @@ export default function PerfilDeMascota() {
    *  a propósito: *si la superficie recibiera las cinco y eligiera, cada
    *  superficie elegiría distinto* (nota de A, `cf976fa8`). */
   const [hoyMascota, setHoyMascota] = useState<HoyDeMascota | null>(null);
+  /** ⭐ **LA PRÓXIMA CITA MÉDICA** (ojo del founder, 2.2.2 · ③). La tarjeta
+   *  Citas vive en «Su salud» y mostraba un paseo: el motor trae *la próxima
+   *  cita*, sin distinguir oficio. *Un paseo en la sección de salud responde
+   *  otra pregunta.*
+   *  🔴 Los códigos médicos se LEEN del catálogo (`obtenerCodigosMedicos`,
+   *  15 hoy) — **no se copian**: el día que el motor agregue el decimosexto,
+   *  una lista escrita acá diría que un acto clínico no lo es. */
+  const [citaMedica, setCitaMedica] = useState<{ fecha: string; servicio: string } | null>(null);
   const [contenidoRaza, setContenidoRaza] = useState<ContenidoDeRaza | null>(null);
   useEffect(() => {
     if (typeof perfil !== 'object') return;
@@ -404,6 +439,15 @@ export default function PerfilDeMascota() {
        tendría algo mañana. */
     void obtenerHoyMascota(mascotaId).then((r) => {
       if (vivo && r.ok) setHoyMascota(r.data.hoy);
+    });
+    void Promise.all([obtenerCitasDeMascota(mascotaId), obtenerCodigosMedicos()]).then(([rc, rm]) => {
+      if (!vivo || !rc.ok || !rm.ok) return;
+      const medicos = new Set(rm.data);
+      /* `futuras` ya viene ordenada por el motor: la primera que sea médica es
+         la próxima. Si no hay ninguna, la tarjeta dice «sin registro» — que es
+         la verdad, y no el paseo del jueves. */
+      const p = rc.data.futuras.find((c) => medicos.has(c.servicio));
+      setCitaMedica(p === undefined ? null : { fecha: p.fecha, servicio: p.servicio });
     });
     return () => {
       vivo = false;
@@ -828,7 +872,31 @@ export default function PerfilDeMascota() {
           hoy,
         )
       : null;
-  const pastilla = vozEstadoHogar?.voz ?? null;
+  /** ⭐ **EL HERO Y EL TABLERO DICEN LO MISMO** (E, S113 · fase 3).
+   *
+   * 🔴 **Eran DOS CUENTAS sobre la misma pregunta.** El hero decía «Cuidado al
+   * día» mientras el tablero, a un pantallazo, decía «Vacunas 0 de 5 · vencida
+   * desde abr 2024». Las dos estaban bien **para su fuente**: `calcularVozHogar`
+   * mira `senal.proxima_vacuna` y cae a «al día» por actividad reciente; el
+   * tablero mira `obtener_plan_vacunal`, que **sí ve las vencidas**.
+   *
+   * *Dos superficies con distinta fuente no discrepan por un error de cálculo:
+   * discrepan porque nadie decidió cuál manda.* Acá manda **el tablero**: es el
+   * que cuenta el plan entero, y es el que la familia lee al lado.
+   *
+   * ⚠️ La voz de `senal` **no se retira**: sigue decidiendo `pideAtencion` por
+   * emergencia y `conociendolo` por expediente ralo, que el tablero no sabe.
+   * Lo único que se corrige es **el «al día» que el tablero desmiente**. */
+  const pastilla: typeof vozEstadoHogar extends null ? null : 'alDia' | 'pideAtencion' | 'conociendolo' | null =
+    vozEstadoHogar === null
+      ? null
+      : vozEstadoHogar.voz === 'alDia' &&
+          tablero !== null &&
+          tablero.memorial === false &&
+          tablero.vacunas !== null &&
+          tablero.vacunas.vencidas > 0
+        ? 'pideAtencion'
+        : vozEstadoHogar.voz;
 
   /**
    * A8 — LA CUENTA DE PENDIENTES, JUNTO A LA PASTILLA.
@@ -1234,13 +1302,22 @@ export default function PerfilDeMascota() {
                         boxShadow: theme.elevacion.elevada,
                       }}
                     >
-                      {pastilla === 'alDia' ? (
+                      {pastilla === 'alDia' && !esMemorial ? (
                         <Svg width={14} height={14} viewBox="0 0 24 24">
                           <Path d="m5 12.6 4.6 4.6L19 7.8" stroke={theme.status.successText} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" fill="none" />
                         </Svg>
                       ) : null}
-                      <Texto variante="dato" color={pastilla === 'pideAtencion' ? 'danger' : 'primary'}>
-                        {pastilla === 'alDia'
+                      <Texto variante="dato" color={pastilla === 'pideAtencion' && !esMemorial ? 'danger' : 'primary'}>
+                        {/* ⭐ **EN MEMORIAL EL CHIP NO EMPUJA** (E, S113 · fase 3).
+                            Decía «Conociéndolo» sobre Sombra: *una invitación a
+                            seguir conociendo a quien ya no está.* Y «Necesita
+                            atención» sería peor.
+                            🔴 El chip **no se borra**: dice lo que es. *Quitarlo
+                            dejaría el retrato sin su línea y la composición
+                            cambia; decir la verdad cuesta lo mismo.* */}
+                        {esMemorial
+                          ? t('perfil.pastillaEnMemoria')
+                          : pastilla === 'alDia'
                           ? t('perfil.pastillaAlDia')
                           : pastilla === 'pideAtencion'
                             ? t('perfil.pastillaAtencion')
@@ -1323,7 +1400,24 @@ export default function PerfilDeMascota() {
                   esAcuario || meses === null
                     ? null
                     : meses !== null
-                    ? vozEdad(
+                    ? /* ⭐ **EN MEMORIAL LA EDAD VA EN PASADO** (E, S113 · fase 3).
+                         Decía «~11 años» en la pantalla de quien ya no está —
+                         *el presente afirma que sigue teniendo esa edad, y eso
+                         no es un detalle de estilo: es la pantalla hablando
+                         como si nada hubiera pasado.* La cifra no cambia; lo
+                         que cambia es el tiempo del verbo. */
+                      esMemorial
+                      ? t('perfil.edadTenia', {
+                          edad: vozEdad(
+                            meses,
+                            mascota.fecha_nacimiento_precision,
+                            mascota.fecha_nacimiento !== null
+                              ? Number(mascota.fecha_nacimiento.slice(0, 4))
+                              : null,
+                            t,
+                          ),
+                        })
+                      : vozEdad(
                         meses,
                         mascota.fecha_nacimiento_precision,
                         mascota.fecha_nacimiento !== null
@@ -1365,64 +1459,83 @@ export default function PerfilDeMascota() {
           );
         })()}
 
-        {/* ── ② LA TARJETA QUE MONTA EL BORDE (patrón 1 — el solape que
-            r3 dejó declarado esperando la imagen). DOS hechos reales:
-            "dos hechos reales valen más que tres con uno inventado". */}
-        {monta.hechos && (perfil.paseos_total > 0 || vacunas.length > 0) ? (
-          <View style={{ paddingHorizontal: spacing[5], marginTop: -spacing[8], zIndex: 2 }}>
-            <Tarjeta elevacion="elevada">
-              <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
-                <View style={{ flex: 1, alignItems: 'center', gap: spacing[1] }}>
-                  <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size.xl, fontVariant: ['tabular-nums'], color: theme.text.primary }}>
-                    {perfil.paseos_total}
-                  </Text>
-                  <Texto variante="apoyo">{t('perfil.hechosPaseos')}</Texto>
-                </View>
-                <View style={{ width: 1, backgroundColor: theme.border.default, marginVertical: spacing[1] }} />
-                <View style={{ flex: 1, alignItems: 'center', gap: spacing[1] }}>
-                  <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size.xl, fontVariant: ['tabular-nums'], color: theme.text.primary }}>
-                    {vacunas.length}
-                  </Text>
-                  <Texto variante="apoyo">{t('perfil.hechosVacunas')}</Texto>
-                </View>
-              </View>
-            </Tarjeta>
-          </View>
-        ) : null}
+        {/* ☠️ **EL BLOQUE «18 PASEOS · 8 VACUNAS» MURIÓ** (ojo del founder,
+            2.2.2 · ⑩). Era el solape que montaba el borde bajo el hero, con dos
+            números de la vida entera.
 
-        {/* ⭐ **C3 · LAS CUATRO ACCIONES, bajo el hero** (S113-C · 2.2).
-            El brief las pone segundas y tiene razón: *son lo que la familia
-            viene a hacer, y hasta hoy estaban repartidas entre el fondo de la
-            pantalla y tres secciones distintas.*
-            🔴 **En memorial no se dibujan**: las cuatro piden o llevan a pedir
-            (`A3.9`). La historia y la identidad siguen leyéndose abajo. */}
-        {!esMemorial ? (
-          <View style={{ marginTop: spacing[4], paddingHorizontal: spacing[5] }}>
-            <FilaAcciones
-              citas={{
-                etiqueta: t('perfil.accionCitas'),
-                glifo: 'hoy',
-                onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } }),
-              }}
-              pasaporte={{
-                etiqueta: t('pasaporte.entrada'),
-                glifo: 'carnet',
-                onPress: () => router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } }),
-              }}
-              /* Nexo no lleva glifo: **su acción es el orbe**, que la pieza
-                 dibuja sola. Pasarle uno sería taparlo con un ícono. */
-              nexo={{
-                etiqueta: t('nexo.titulo'),
-                onPress: () => router.push({ pathname: '/nexo', params: { mascotaId: mascota.id, nombre: mascota.nombre } }),
-              }}
-              contanos={{
-                etiqueta: t('contanos.pastilla'),
-                glifo: 'pluma',
-                onPress: contanos.abrir,
-              }}
-            />
-          </View>
-        ) : null}
+            🔴 **Lo mata el tablero, no el gusto.** «Su salud» dice las vacunas
+            —y mejor: cuántas del plan están al día, no cuántas se pusieron
+            alguna vez— y «Actividad» dice los paseos, con su semana. *Dos
+            números que ya están dos pantallazos abajo, en su contexto, no
+            informan arriba: compiten con lo que sí es de hoy.*
+
+            ⚠️ Su `marginTop` negativo era lo que ataba el solape al degradado;
+            al morir, el hero cierra contra las acciones. Ley 37: se retira
+            entero, no se comenta. */}
+
+        {/* ⭐ **LAS CUATRO ACCIONES, bajo el hero** (S113-C · 2.2 → 2.2.4).
+            *Son lo que la familia viene a hacer, y hasta 2.2 estaban repartidas
+            entre el fondo de la pantalla y tres secciones distintas.*
+
+            ── QUÉ CAMBIÓ, Y POR QUÉ CADA COSA ─────────────────────────────
+            ☠️ **Nexo salió** (orden del founder): *ya está flotante en toda la
+            app, y acá ocupaba un lugar que no necesita.*
+            ⭐ **Entró Documentos**, y su destino es `irADocumentos` — el
+            plegable de «Identidad y papeles», con scroll y desplegado. **Con
+            la bóveda de la fase 3 gana pantalla propia y esta línea cambia**;
+            por eso el destino vive en una función y no acá.
+
+            ── 🔴 EN MEMORIAL VAN DOS, Y ES FIRMA DEL FOUNDER ──────────────
+            *De quien ya no está se siguen leyendo sus papeles y se sigue
+            pudiendo guardar un recuerdo; Citas y Pasaporte no.* Las dos que
+            salen son las que miran hacia adelante —agendar, encontrar a
+            alguien que se perdió—; las dos que quedan miran lo que hubo.
+
+            ⚠️ Antes acá no se dibujaba **ninguna**, con la razón «las cuatro
+            piden o llevan a pedir». Era cierto de las cuatro de entonces: con
+            Nexo adentro y sin Documentos, ninguna sobrevivía el filtro. *La
+            regla no cambió: cambió el conjunto al que se le aplica.* */}
+        <View style={{ marginTop: spacing[4], paddingHorizontal: spacing[5] }}>
+          <FilaAcciones
+            acciones={
+              esMemorial
+                ? [
+                    {
+                      etiqueta: t('perfil.documentos'),
+                      glifo: 'documentos',
+                      onPress: abrirDocumentos,
+                    },
+                    {
+                      etiqueta: t('contanos.pastilla'),
+                      glifo: 'pluma',
+                      onPress: contanos.abrir,
+                    },
+                  ]
+                : [
+                    {
+                      etiqueta: t('perfil.accionCitas'),
+                      glifo: 'hoy',
+                      onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } }),
+                    },
+                    {
+                      etiqueta: t('pasaporte.entrada'),
+                      glifo: 'carnet',
+                      onPress: () => router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } }),
+                    },
+                    {
+                      etiqueta: t('perfil.documentos'),
+                      glifo: 'documentos',
+                      onPress: abrirDocumentos,
+                    },
+                    {
+                      etiqueta: t('contanos.pastilla'),
+                      glifo: 'pluma',
+                      onPress: contanos.abrir,
+                    },
+                  ]
+            }
+          />
+        </View>
 
         {/* ⭐ **LA FRANJA DE SEGURIDAD** (S113-C · 1.1 · C6) — lo que hay que
             saber ANTES de tocar a esta mascota, arriba de todo lo demás.
@@ -1586,14 +1699,15 @@ export default function PerfilDeMascota() {
                 citas: t('perfil.accionCitas'),
                 actividad: t('perfil.tableroActividad'),
                 medidoEl: (f) => t('perfil.tableroMedidoEl', { fecha: fechaCortaMono(f, idioma) }),
-                delPlan: (n, total) => t('perfil.tableroDelPlan', { n, total }),
+                delPlanAlDia: (n, total) => t('perfil.tableroDelPlanAlDia', { n, total }),
+                vencidaHace: (f) => t('perfil.tableroVencidaHace', { fecha: fechaCortaMono(f, idioma) }),
                 activas: (n) => t('perfil.tableroActivas', { n }),
                 paseosSemana: (n) => t('perfil.tableroPaseosSemana', { n }),
                 proxima: (f) => t('perfil.tableroProxima', { fecha: fechaCortaMono(f, idioma) }),
                 kg: (n) => t('perfil.tableroKg', { n }),
                 plagasAlDia: (n, total) => t('perfil.tableroPlagas', { n, total }),
                 estimada: t('perfil.tableroEstimada'),
-              }).map((tar) => (
+              }, citaMedica).map((tar) => (
                 <TarjetaMetrica
                   key={tar.id}
                   rotulo={tar.rotulo}
@@ -1621,44 +1735,65 @@ export default function PerfilDeMascota() {
 
             ⛔ En memorial no se monta: pide (`A3.9`). */}
         {!esMemorial ? (() => {
-          const casillas = [
-            senal !== null && senal.vacunas_total > 0,
-            perfil.desparasitaciones.length > 0,
-            perfil.alergias_estado !== 'sin_registro',
-            pesoVigente !== null,
-            mascota.raza !== null,
-            perfil.medicacion_actual.length > 0,
-          ];
-          const hechas = casillas.filter(Boolean).length;
+          /* ⭐ **LAS CINCO DIMENSIONES DEL VÍNCULO** (S113-B · 2.2.3 → C 2.2.4).
+             B cambió `fraccion: number` por **cinco booleanos** —*cero
+             números, van a las almohadillas y a ningún otro lado*— y acá se
+             mapea lo que la pantalla YA sabe.
+
+             🔴 **`caracter` sale de la LÍNEA DE VIDA, no del perfil.** Medido:
+             `obtenerPerfilMascota` no trae rasgos ni observaciones de
+             comportamiento; lo que sí llega son sus eventos
+             (`observacion_comportamiento`, 6 en Thor). *Poner `false` porque el
+             lector no lo trae sería afirmar que no tiene carácter registrado
+             cuando lo que pasa es que no lo estoy mirando.*
+             ⚠️ Su límite, declarado: si la familia carga rasgos y el timeline
+             todavía no los trajo, esta dimensión se ve apagada un momento. Se
+             cierra el día que el perfil lea `cat_rasgos` — pedido a A. */
+          const dimensiones = {
+            identidad: mascota.raza !== null,
+            salud: senal !== null && senal.vacunas_total > 0,
+            cuerpo: pesoVigente !== null,
+            /* `items` puede ser `'error'`: **un fallo de carga no es una
+               ausencia de carácter**, así que se lee como «todavía no sé» —
+               que en un booleano es `false`, y la almohadilla apagada dice
+               justo eso: falta, no que no exista. */
+            caracter:
+              Array.isArray(items) &&
+              items.some((it) => it.tipo === 'observacion_comportamiento' || it.tipo === 'bitacora_familia'),
+            diaADia: perfil.desparasitaciones.length > 0 || perfil.medicacion_actual.length > 0,
+          };
+          const cuantas = Object.values(dimensiones).filter(Boolean).length;
+          const total = Object.keys(dimensiones).length;
           return (
             <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5], gap: spacing[3] }}>
               <Texto variante="seccion">{t('perfil.conociendoloTitulo')}</Texto>
-              <TarjetaConociendolo
-                fraccion={hechas / casillas.length}
-                voz={t('perfil.conociendoloVoz', { n: hechas, total: casillas.length, nombre: mascota.nombre })}
-                /* 🔴 **DOS CURAS DE VOZ, LAS DOS MEDIDAS Y LAS DOS MÍAS.**
-                   ① Decía «Conociéndolo» —la misma palabra que el rótulo de su
-                   sección, dos centímetros más arriba—: *un botón que repite el
-                   título que tiene encima no dice qué pasa si lo tocás.*
-                   ② Mi primer reemplazo fue «Cuéntanos algo de Thor» **y esa
-                   cadena YA EXISTÍA**, palabra por palabra, en la puerta de la
-                   bitácora (`perfil.bitacoraEntrada`, escrita mucho antes). El
-                   arnés lo cazó contando DOS invitaciones y yo busqué el segundo
-                   montaje en tres archivos antes de mirar el diccionario.
-                   *Dos actos distintos con la misma voz no son una repetición
-                   de estilo: la familia lee lo mismo dos veces y tiene que
-                   tocar para saber cuál es cuál.*
-                   Ahora cada una dice SU acto: acá se completa lo que falta,
-                   allá se escribe el día a día. `contanos.pastilla` sigue
-                   siendo «Conociéndolo» donde eso es correcto: la etiqueta
-                   corta de la cuarta acción del hero. */
-                invitacion={
-                  <BotonContanos
-                    etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
-                    onPress={contanos.abrir}
-                  />
-                }
-              />
+              {/* El estado completo llega cuando las CINCO están: la pieza
+                  felicita en vez de pedir (ojo del founder, 2.2.2 · ⑤). */}
+              {cuantas === total ? (
+                <TarjetaConociendolo
+                  dimensiones={dimensiones}
+                  voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
+                  completo
+                  vozFelicitacion={t('perfil.conociendoloCompleto', { nombre: mascota.nombre })}
+                  masSobre={
+                    <BotonContanos
+                      etiqueta={t('perfil.conociendoloMas', { nombre: mascota.nombre })}
+                      onPress={contanos.abrir}
+                    />
+                  }
+                />
+              ) : (
+                <TarjetaConociendolo
+                  dimensiones={dimensiones}
+                  voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
+                  invitacion={
+                    <BotonContanos
+                      etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
+                      onPress={contanos.abrir}
+                    />
+                  }
+                />
+              )}
 
               {/* ⭐ **LA FICHA DE LA RAZA VA DEBAJO, NO ADENTRO** (2.2.1 · ②,
                   firma del founder). Vivía en un slot de `TarjetaConociendolo`;
@@ -1800,10 +1935,15 @@ export default function PerfilDeMascota() {
                   })()}
                 </Texto>
 
-                <Boton
-                  variante="marca"
-                  bloque
-                  etiqueta={t('perfil.reservarServicioDe', { nombre: mascota.nombre })}
+                {/* ⭐ **BAJA A FILA DISCRETA** (ojo del founder, 2.2.2 · ⑥).
+                    Era un `Boton variante="marca" bloque` —**lo más pesado de la
+                    pantalla**— tercero en una fila de tres invitaciones seguidas.
+                    *No es lo que la familia vino a hacer acá: entró a ver cómo
+                    está su animal.* No se saca —reservar sigue a un toque— pero
+                    deja de competir con lo que la sección vino a decir. */}
+                <CeldaNavegacion
+                  titulo={t('perfil.reservarServicioDe', { nombre: mascota.nombre })}
+                  registro="tinta"
                   onPress={() => router.navigate('/explorar')}
                 />
               </View>
@@ -1931,8 +2071,15 @@ export default function PerfilDeMascota() {
                     </Tarjeta>
                   </View>
                   ) : null}
+                  {/* ⭐ **LOS CHIPS ENTRAN A LA TARJETA** (ojo del founder,
+                      2.2.2 · ⑦). Vivían en un `View` hermano, con su propio
+                      padding y su propio margen: *un filtro que flota sobre una
+                      lista no se lee como el filtro DE esa lista — se lee como
+                      otra cosa que quedó ahí.* Ahora comparten contenedor y el
+                      padding es uno solo. */}
+                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2.5], marginTop: spacing[3] }}>
                   {presentesTipo.length > 1 ? (
-                    <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[2] }}>
+                    <View style={{ marginBottom: spacing[1] }}>
                       <FiltrosLineaDeVida
                         tipos={presentesTipo}
                         elegidos={tiposElegidos}
@@ -1945,7 +2092,6 @@ export default function PerfilDeMascota() {
                       />
                     </View>
                   ) : null}
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[2.5], marginTop: spacing[3] }}>
                     {filtrados.length === 0 ? (
                       <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
                     ) : (
@@ -1991,8 +2137,8 @@ export default function PerfilDeMascota() {
                               <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
                                 {/* S113-A · el recuerdo habla con el texto de la
                                     familia; sin texto, la fila no inventa uno. */}
-                                {vozHecho(it, t, mascota.nombre) !== '' ? (
-                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t, mascota.nombre)}</Texto>
+                                {vozHecho(it, t, mascota.nombre, idioma) !== '' ? (
+                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t, mascota.nombre, idioma)}</Texto>
                                 ) : null}
                                 {it.foto_path !== null && fotosRecuerdo.get(it.foto_path) !== undefined ? (
                                   <Image
@@ -2291,17 +2437,26 @@ export default function PerfilDeMascota() {
             🔴 **No se dibuja en memorial**: `sePintaPasaporte` de B lo dice
             y la pantalla lo respeta desde acá — *un pasaporte es para
             encontrar a alguien que se perdió.* */}
+        {/* ⭐ **UNA FILA MÁS DE LA SECCIÓN** (ojo del founder, 2.2.2 · ⑨).
+            Era una `Celda` con título y subtítulo, y al lado de las demás filas
+            plegables se leía como **un rótulo suelto**: más alta, con otra
+            forma, sin la tarjeta que llevan sus vecinas. *Seis filas iguales y
+            una distinta hacen que la distinta parezca de otra sección.*
+            Navega en vez de plegarse porque su destino **es una pantalla**, y
+            eso lo dice el chevron. */}
         {!esMemorial ? (
-          <View style={{ marginTop: spacing[3] }}>
-            <Celda
-              interactiva
-              accessibilityRole="button"
-              titulo={t('pasaporte.entrada')}
-              subtitulo={t('pasaporte.entradaDetalle')}
-              onPress={() =>
-                router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } })
-              }
-            />
+          <View style={{ marginTop: spacing[3], paddingHorizontal: spacing[5] }}>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="carnet"
+                titulo={t('pasaporte.entrada')}
+                detalle={t('pasaporte.entradaDetalle')}
+                registro="tinta"
+                onPress={() =>
+                  router.push({ pathname: '/hogar/mascota/pasaporte', params: { mascotaId: mascota.id } })
+                }
+              />
+            </Tarjeta>
           </View>
         ) : null}
 
@@ -2341,95 +2496,25 @@ export default function PerfilDeMascota() {
             puso: lo que la familia observa es historia, no una sección aparte.
             Ley 37: acá no queda un hueco, queda nada. */}
 
-        {/* ── «QUIÉNES VIVEN ACÁ» — LA COMPOSICIÓN DEL SISTEMA (firma founder).
-            Monta SOLO para el acuario, por la misma constante que gobierna al
-            resto de P7: la composición va ARRIBA, jamás un `if` suelto acá
-            abajo (§6). Es un CENSO POR ESPECIE — nunca peces individuales:
-            «el pez se mira; el sistema se cuida». */}
-        {monta.habitantes ? (
-          <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5], gap: spacing[3] }}>
-            <Texto variante="seccion">{t('perfil.habitantes')}</Texto>
-            {censo === null ? (
-              /* Ley 13 + L-178: «todavía no puedo preguntar» NO se disfraza de
-                 «no hay habitantes». Un vacío fingido acá haría creer al dueño
-                 que su censo se borró. */
-              <Texto variante="apoyo">{t('perfil.habitantesSinLeer')}</Texto>
-            ) : censo.habitantes.length === 0 ? (
-              <Texto variante="apoyo">{t('perfil.habitantesVacio')}</Texto>
-            ) : (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                {censo.habitantes.map((h) => {
-                  // La cara solo si el motor da ruta. `esDelCatalogo` NO se
-                  // infiere de acá (aviso literal de A): una raza del catálogo
-                  // puede no tener imagen todavía y sigue siendo del catálogo.
-                  const url = urlDeRutaGaleria(h.rutaImagen ?? undefined);
-                  return (
-                    <View key={h.razaSlug ?? h.nombre} style={{ flexBasis: '47%', flexGrow: 1 }}>
-                      <ChipEntidad
-                        nombre={`${h.nombre} · ${h.cantidad}`}
-                        {...(url !== undefined ? { fotoUrl: url } : null)}
-                        sujeto="cosa"
-                        tamano="general"
-                        elegido={false}
-                        onPress={() => setHabitantesHoja(true)}
-                      />
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-            {/* ✅ SU PARED, igual que la puerta de la bitácora. Es la MISMA
-                familia —una puerta del perfil— y por eso lleva el mismo
-                `relleno` y la misma `elevacion` que sus vecinas: la coherencia
-                no es que se parezcan, es que se resuelvan igual.
-                Censo de la tanda: el perfil tiene TRES puertas —bitácora,
-                Documentos y ésta— y ésta era la ÚNICA sin superficie. No hay
-                una cuarta pelada. */}
-            <Tarjeta relleno="ninguno" elevacion="reposo">
-              <CeldaNavegacion
-                titulo={t('perfil.habitantesDeclarar')}
-                registro="tinta"
-                onPress={() => setHabitantesHoja(true)}
-              />
-            </Tarjeta>
-          </View>
-        ) : null}
+        {/* ☠️ **EL PLEGABLE DE DOCUMENTOS MURIÓ — GANÓ PANTALLA PROPIA**
+            (corrección del founder, S113 · fase 3 · C1).
 
-        {monta.documentos ? (
-        <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            <CeldaNavegacion
-              icono="documentos"
-              titulo={t('perfil.documentos')}
-              registro="tinta"
-              direccion={docsAbiertos ? 'arriba' : 'abajo'}
-              onPress={() => setDocsAbiertos((v) => !v)}
-            />
-            {docsAbiertos
-              ? papeles.map((papel) => (
-                  <View key={papel.tipo}>
-                    <Separador />
-                    <FilaDocumento
-                      icono={papel.icono}
-                      nombre={t(`documentos.nombre${papel.claveVoz}`)}
-                      apoyo={t('documentos.descargar')}
-                      cargando={bajandoDoc === papel.tipo}
-                      onPress={() => {
-                        void bajarDocumento(papel.tipo);
-                      }}
-                    />
-                  </View>
-                ))
-              : null}
-          </Tarjeta>
-          {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
-          {fallaCarnet !== null ? (
-            <View style={{ paddingTop: spacing[2] }}>
-              <Texto variante="dato" color="danger">{fallaCarnet}</Texto>
-            </View>
-          ) : null}
-        </View>
-        ) : null}
+            Acá vivían los cinco papeles de la casa desplegándose bajo una
+            fila. *Un plegable tenía sitio para cinco y ninguna más* — y la
+            bóveda va a recibir papeles traídos de otras clínicas, que crecen
+            sin techo, se agrupan por tipo y necesitan decir de dónde vinieron.
+
+            🔴 **EL CENSO, ANTES DE RETIRAR — nada perdió destino:**
+            · los cinco papeles con su descarga → la pantalla, igual;
+            · la Hoja de «¿de qué consulta?» de la receta → la pantalla, igual;
+            · el estado de carga por fila → igual;
+            · la voz del fallo y la neutra de «todavía no hay recetas» → igual,
+              y la segunda sigue **fuera de la línea roja**: *una ausencia no es
+              un error del que disculparse*;
+            · el destino de la acción del perfil → deja de ser scroll+desplegar
+              y pasa a ser la ruta.
+            ☠️ Con él mueren `irADocumentos`, `docsAbiertos` y `yDocumentosRef`,
+            que existían para llegar acá (Ley 37). */}
 
         {/* ── S96-D · LA PUERTA DE LA DESPENSA — la entrada PRINCIPAL del
             frente de productos es el expediente ("el alimento de Thor",
