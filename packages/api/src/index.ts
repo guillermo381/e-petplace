@@ -1964,3 +1964,10 @@ export {
   type InputLeerPapel,
   type CodigoErrorPapel,
 } from './wrappers/nexo';
+
+/* ─── S113-D · fase 3 — la caja que encuentra, con su segundo pase ───────── */
+export {
+  buscarConIntencion,
+  type BusquedaConIntencion,
+  type PaseDeBusqueda,
+} from './wrappers/busqueda-intencion';

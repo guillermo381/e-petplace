@@ -108,6 +108,7 @@
     "verify:nexo-anticipa": "node scripts/verify-nexo-anticipa.mjs",
     "verify:nexo-alimenta": "node scripts/verify-nexo-alimenta.mjs",
     "verify:arneses-declaran": "node scripts/verify-arneses-declaran.mjs",
+    "verify:busqueda-poda": "tsx scripts/verify-busqueda-poda.mts",
     "verify:union-vs-check": "node scripts/verify-union-vs-check.mjs",
     "verify:titulo-dice-que": "node scripts/verify-titulo-dice-que.mjs"
   },

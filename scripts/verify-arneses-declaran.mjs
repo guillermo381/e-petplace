@@ -5,7 +5,7 @@
  * sobre otra cosa **sin fallar** (la lista, con sus casos, en
  * `scripts/ia/declarar-objeto.ts`).
  *
- * Exige dos cosas de cada arnés de `scripts/ia/prueba-*.ts`:
+ * Exige dos cosas de cada arnés de `scripts/ia/prueba-*.{ts,mts}`:
  *   ① que llame a `declararObjeto`;
  *   ② que lo que declara medir EXISTA — si no, el arnés no está midiendo mal:
  *      no está midiendo, y su verde no dice nada.
@@ -25,7 +25,12 @@ const exigir = (n, ok, visto) => {
   else { r++; console.log(`  ROJO ${n}${visto === undefined ? '' : ` — ${visto}`}`) }
 }
 
-const arneses = readdirSync(DIR).filter((f) => f.startsWith('prueba-') && f.endsWith('.ts'))
+/* 🔴 `.ts` Y `.mts`. El filtro decía sólo `.endsWith('.ts')`, y `.mts` NO
+   termina en `.ts` — un arnés en ESM se le escapaba entero y el gate seguía
+   diciendo un número verde. *Un gate atado a una extensión mide la convención
+   de nombre, no el hecho* — misma clase que el gate atado a un campo. Lo
+   destapó el primer arnés que necesitó `await` de nivel superior. */
+const arneses = readdirSync(DIR).filter((f) => f.startsWith('prueba-') && /\.m?ts$/.test(f))
 console.log(`\narneses-declaran · ${arneses.length} arnés(es) en ${DIR}\n`)
 // Un gate que no encuentra sujetos no está midiendo: lo dice antes que nada.
 exigir(`hay arneses que vigilar (si no, este gate no mide nada)`, arneses.length > 0, arneses.length)
