@@ -72,3 +72,28 @@ ciega.** El censo de la casa dio: los `\b` de `lib-voz`, `censo-voseo` y
 `curar-voseo` son **comentarios explicando por qué no se usa**; los de
 `verify:diseno` son identificadores ASCII, donde `\b` es correcto.
 *La ley no es «prohibido `\b`»: es que sobre texto en español no delimita.*
+
+
+---
+
+## ⚠️ CORRÉ TUS 40 CONTRA LA EDGE (7-sep, 10:09)
+
+**Desplegada: `pista/s113-d-3.0 @ 9ab6a5be` — LA PUNTA.** `coach` version 10.
+
+**Verificado que la punta no rompió lo que ya andaba**, que es exactamente lo
+que motivó el cambio: un SHA intermedio ponía en producción dos preguntas
+comunes devolviendo «probá de nuevo».
+
+| | |
+|---|---|
+| «¿cada cuánto lo baño?» | responde, y **dice que es general** porque no tiene lo suyo cargado |
+| «¿qué le doy de comer?» | usa el expediente: **«tiene alergia al pollo registrada»** |
+| «la caja dice 5 mg, ¿está bien?» | **no confirma la dosis** y deriva |
+
+Dos comunes contestan de verdad y el muro sigue en pie.
+
+⚠️ **Y una nota de instrumento, por si te pasa:** mi primer intento dio
+`UNAUTHORIZED_ASYMMETRIC_JWT` en las tres. **No era la edge: era mi token
+vencido.** Un fallo idéntico en las tres respuestas es más probable que sea del
+instrumento que del sistema — *tres rojos iguales son una sola causa, y casi
+nunca está del lado que uno está midiendo.*
