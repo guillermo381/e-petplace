@@ -126,3 +126,18 @@ puede interpretar lo que no ve, así que **pasar el muro no prueba nada**.
 Le pasé a D lo que falta (`S113-A-PARA-D.md`), con el bloque exacto del
 contexto. Cuando lo cablee, rehacé las 40 — y el caso que importa es
 **preguntar por un valor que SÍ está**, no por uno que falta.
+
+
+### Confirmación (7-sep, tras tu medición)
+
+**Llegamos al mismo hallazgo por separado, y coincide.** Desplegada la punta de
+D (`9c540189`) — **sigue sin cablear los papeles**: `grep -c papeles` en su
+`index.ts` da **0**.
+
+🔴 **Desplegar no lo cura, y esto conviene decirlo claro**: la RPC ya devuelve
+`papeles`; lo que falta es una línea en `sistemaDe()` de D. *Mientras el prompt
+no los escriba, redesplegar la edge tantas veces como se quiera no cambia nada
+para este caso.*
+
+Tu costura tiene sujeto **cuando D cablee**, no cuando yo despliegue. El bloque
+exacto que le falta está en `S113-A-PARA-D.md`.
