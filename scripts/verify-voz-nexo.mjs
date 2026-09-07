@@ -44,6 +44,8 @@
  *   node scripts/verify-voz-nexo.mjs            (gasta ~20 llamadas)
  */
 import { readFileSync, existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join } from 'node:path';
@@ -75,6 +77,42 @@ const { hitsDeVoseo: hitsEnCodigo } = await import(pathToFileURL(LIB).href);
  * definiciones de la voz): se le da al matcher **la forma que espera**. Cada
  * oración entra como un literal entrecomillado.
  */
+/**
+ * 🔴 LA UNIÓN DE LAS DOS LISTAS, Y NO ES CAPRICHO: **ninguna cubre a la otra.**
+ * Medido: `lib-voz` lista 39 formas y la de D 66, y hay **25 en `lib-voz` que la de
+ * D no tiene** (`escribila`, `corregilo`, `ingresalo`, `tocala`, `guardala`,
+ * `avisanos`, `contactanos`, `compartile`, `llevame`, `debés`, `ponés`, `creés`…)
+ * y 52 al revés. **La unión son 91.**
+ *
+ * ⇒ **Este gate mide lo que la FAMILIA RECIBE, no lo que el cinturón promete cubrir.**
+ * Si el modelo dice `guardala` y el cinturón no la corrige, la familia la ve: el rojo
+ * es del producto, no de quien escribió el cinturón. *Medir sólo su lista sería
+ * preguntarle al cinturón si se cumplió a sí mismo.*
+ *
+ * Y se dice **cuál** de las dos cazó cada forma: si sólo la caza `lib-voz`, la cura
+ * es ampliar el cinturón; si sólo la de D, es que `lib-voz` tiene el hueco.
+ */
+const LISTA_D = (() => {
+  const rutas = [
+    process.env.VOSEO_JSON,
+    join(RAIZ, 'supabase/functions/_shared/voz/voseo.json'),
+  ].filter(Boolean);
+  for (const r of rutas) {
+    try { return { formas: new Set(JSON.parse(readFileSync(r, 'utf8')).pares.map((x) => x[0].toLowerCase())), de: r }; } catch {}
+  }
+  /* Vive en la rama de D todavía. Se intenta leerla de ahí, y si no, se DICE. */
+  try {
+    const { execFileSync } = require('node:child_process');
+    const j = execFileSync('git', ['-C', RAIZ, 'show', 'origin/pista/s113-d-2.0:supabase/functions/_shared/voz/voseo.json'], { encoding: 'utf8' });
+    return { formas: new Set(JSON.parse(j).pares.map((x) => x[0].toLowerCase())), de: 'origin/pista/s113-d-2.0 (aún no está en main)' };
+  } catch { return { formas: new Set(), de: null }; }
+})();
+
+function hitsDeLaListaD(frase) {
+  const f = ` ${frase.toLowerCase().normalize('NFC')} `;
+  return [...LISTA_D.formas].filter((v) => new RegExp(`(?<![a-záéíóúñ])${v}(?![a-záéíóúñ])`, 'i').test(f)).map((t) => ({ t, de: 'lista-D' }));
+}
+
 function hitsDeVoseo(texto) {
   const hits = [];
   for (const frase of String(texto ?? '').split(/[.;!?\n]/)) {
@@ -82,9 +120,18 @@ function hitsDeVoseo(texto) {
        que el matcher vea media frase. */
     const limpia = frase.replace(/["'\\]/g, ' ').trim();
     if (limpia.length < 4) continue;
-    hits.push(...hitsEnCodigo(`"${limpia}"`));
+    hits.push(...hitsEnCodigo(`"${limpia}"`).map((h) => ({ ...h, de: 'lib-voz' })));
+    hits.push(...hitsDeLaListaD(limpia));
   }
-  return hits;
+  /* Sin duplicar: la misma forma cazada por las dos cuenta una vez, y se acredita
+     a las dos para que el rojo diga dónde curar. */
+  const por = new Map();
+  for (const h of hits) {
+    const k = String(h.t).toLowerCase();
+    if (!por.has(k)) por.set(k, { t: k, de: new Set() });
+    por.get(k).de.add(h.de);
+  }
+  return [...por.values()].map((x) => ({ t: x.t, de: [...x.de].join('+') }));
 }
 
 /**
@@ -143,10 +190,16 @@ if (process.argv.includes('--control')) {
     'NEGATIVO  la forma correcta en tuteo no produce falso rojo');
   ok(hitsDeVoseo('Contanos cómo le fue').length > 0, 'CLASE     un imperativo con enclítico QUE ESTÁ EN LA LISTA se caza');
   ok(hitsDeVoseo('Cuéntanos cómo le fue').length === 0, 'NEGATIVO  su forma en tuteo, limpia');
-  /* 🔴 EL PISO, MEDIDO Y DECLARADO — no es un fallo de mi gate, es el alcance de
-     la lista de la casa, y el control lo dice en vez de esconderlo. */
-  ok(hitsDeVoseo('Contame cómo le fue').length === 0,
-    'DECLARADO «contame» NO se caza: la lista tiene `contanos` y no `contame`');
+  /* ⚰️ ESTE CONTROL DECÍA QUE «contame» NO SE CAZABA — y era cierto mientras la
+     única lista era la de la casa. **Se retira en el mismo acto que cambia lo que
+     describe**: con la unión sí se caza, y lo aporta la lista de D. Dejarlo como
+     estaba habría hecho fallar el control por una mejora. */
+  const cm = hitsDeVoseo('Contame cómo le fue');
+  ok(cm.length > 0 && cm[0].de.includes('lista-D'),
+    'POSITIVO  «contame» ahora SÍ se caza, y lo aporta la lista de D', `(${cm[0]?.de})`);
+  const gd = hitsDeVoseo('Guardala en el expediente');
+  ok(gd.length > 0 && gd[0].de.includes('lib-voz'),
+    'POSITIVO  «guardala» la caza lib-voz y NO la lista de D — por eso se mide la UNIÓN', `(${gd[0]?.de})`);
 
   ok(escalo('x', { semaforo: 'cita_esta_semana' }).escalo, 'POSITIVO  semaforo con cita es escalada');
   ok(!escalo('x', { semaforo: 'se_mira_en_casa' }).escalo,
@@ -194,6 +247,7 @@ if (!mascota) { di('⚠️ NO CONCLUYENTE — no encontré la mascota con la que
 const lim = Number((process.argv.find((a) => a.startsWith('--limite=')) ?? '').split('=')[1] || 0);
 const preguntas = lim ? BANCO.cuidado.slice(0, lim) : BANCO.cuidado;
 di(`verify:voz-nexo · ${preguntas.length} pregunta(s) de cuidado contra la edge desplegada`);
+di(`matcher: lib-voz + ${LISTA_D.formas.size} formas de ${LISTA_D.de ?? '🔴 la lista compartida NO se encontró — se mide sólo con lib-voz'}`);
 di(`(${preguntas.filter((q) => !q.escala).length} no deben escalar · ${preguntas.filter((q) => q.escala).length} sí, como control)\n`);
 
 let voseo = 0, sobra = 0, falta = 0, rinde = 0;
@@ -211,7 +265,7 @@ for (const q of preguntas) {
   const marcas = [];
   /* 🔴 IMPRIMÍA `[object Object]`: los hits son `{n,t,v}`, no cadenas. Sin ver QUÉ
      forma cazó, un «17 con voseo» no se puede juzgar — ni por mí ni por nadie. */
-  if (v.length) { voseo += 1; marcas.push(`🔴 voseo: ${[...new Set(v.map((h) => h.t))].slice(0, 3).join(', ')}`); }
+  if (v.length) { voseo += 1; marcas.push(`🔴 voseo: ${v.slice(0, 3).map((h) => `${h.t} (${h.de})`).join(', ')}`); }
   /* Se guarda QUÉ señal disparó la escalada: «un veterinario» dentro de una
      orientación general no es lo mismo que mandar al vet en vez de contestar. */
   if (!q.escala && e) { sobra += 1; marcas.push(`🔴 escaló de más · ${ev.por}`); }
@@ -224,5 +278,16 @@ for (const q of preguntas) {
 
 const rojos = voseo + sobra + falta + rinde;
 di(`\n═══ ${voseo} con voseo · ${sobra} escalaron de más · ${falta} no escalaron y debían · ${rinde} se rindieron ═══`);
+/* 🔴 EL NÚMERO DE UNA CORRIDA NO ES REPRODUCIBLE, Y HAY QUE DECIRLO.
+   Medido: tres corridas de los mismos 20 turnos contra la MISMA edge dieron
+   2 · 0 voseo y 0 · 2 escaladas — y la que vio MENOS usaba un detector MÁS ancho
+   (91 formas contra 39). *La diferencia no fue una cura: fue el modelo.*
+   ⇒ **un rojo de una sola corrida puede mandar a curar ruido**, y un verde puede
+   ser suerte. Lo que se lee es la TENDENCIA entre corridas, no el conteo de una. */
+di(`⚠️ ESTO ES UNA MUESTRA DE UNA CORRIDA, no una medición estable: el sujeto es un`);
+di(`   modelo y sus salidas varían. Medido: tres corridas de los mismos 20 turnos`);
+di(`   contra la misma edge dieron 2·0 voseo y 0·2 escaladas. **Un rojo suelto puede`);
+di(`   ser ruido y un verde puede ser suerte** — para decidir, correr N veces y mirar`);
+di(`   la frecuencia. Lo que SÍ es estable es un 17 de 20 contra un 0 de 20.`);
 if (rojos) { di(`🔴 ${rojos} rojo(s) sobre ${preguntas.length} salidas reales.`); process.exit(1); }
 di('✅ tuteo en todas · orienta sin escalar de más · escala donde debe · no se rinde.');
