@@ -94,3 +94,9 @@ export {
   type ContadorPendientes,
   type ResumenPendientes,
 } from './pendientesAdopcion';
+
+export {
+  podarConsulta,
+  PALABRAS_ESTRUCTURALES,
+  type Poda,
+} from './busquedaPoda';

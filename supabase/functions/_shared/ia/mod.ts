@@ -40,6 +40,7 @@ import {
   MODELOS,
   MODELOS_ADAPTIVOS,
   PENSAR,
+  TEMPERATURA_CERO,
   TIMEOUT_MS,
 } from './modelos.ts'
 import { registrarUso, type Uso, usoDesdeRespuesta, usoSinRespuesta } from './uso.ts'
@@ -163,6 +164,11 @@ function construirCuerpo(
     model: modelo,
     max_tokens: p.maxTokens ?? MAX_TOKENS[p.pieza],
   }
+  /* 🔴 `temperature: 0` en las piezas de salida CERRADA. Ver `TEMPERATURA_CERO`
+     en `modelos.ts`: es lo que vuelve el determinismo una propiedad medible en
+     vez de una coincidencia. **No se manda a las que escriben prosa** — ahí no
+     gana nada y empobrece el texto. */
+  if (TEMPERATURA_CERO[p.pieza]) cuerpo.temperature = 0
 
   // `thinking: {type:'disabled'}` se manda SÓLO a los modelos que piensan si no
   // se les dice nada. A los demás no se les manda el campo: para ellos omitirlo
@@ -194,7 +200,49 @@ function construirCuerpo(
  * La puerta. Llama al modelo de la pieza, **registra el uso pase lo que pase**
  * y devuelve un resultado tipado.
  */
+/**
+ * 🔴 UN SOLO REINTENTO CUANDO EL MODELO CONTESTA EN PROSA EN VEZ DE JSON.
+ *
+ * ── QUÉ FALLA, MEDIDO Y NO SUPUESTO ────────────────────────────────────────
+ * Con `salida: 'json'`, a veces **el modelo no devuelve JSON roto: devuelve
+ * prosa desde el primer carácter** — un envoltorio que nunca salió. Verificado
+ * sobre el objeto: `Unexpected token 'L', "La pregunt"…`, con
+ * `stop_reason: end_turn` y lejos del techo. *No hay nada que reparar en el
+ * texto*, y por eso la cura no es un parser más tolerante: es pedirlo de nuevo.
+ *
+ * ── POR QUÉ NO ALCANZA EL REINTENTO DE HTTP QUE YA EXISTE ──────────────────
+ * Ése cubre 429 y 5xx: acá la petición **salió perfecta y respondió 200**. El
+ * fallo aparece un piso más arriba, al parsear, y hasta hoy terminaba en un
+ * error hablado para la familia.
+ *
+ * ── EL COSTO Y POR QUÉ UNO SOLO ────────────────────────────────────────────
+ * Un reintento paga otra llamada, así que va **sólo ante `json_invalido`** —no
+ * ante truncado, que es otra cosa y se cura con el techo— y **una sola vez**:
+ * si el segundo también sale en prosa, el problema no es el azar.
+ *
+ * ── LO QUE ESTO NO ARREGLA ─────────────────────────────────────────────────
+ * ⚠️ **No prueba que el modelo se recupere**, sólo que se le vuelve a pedir.
+ * La tasa de recuperación la mide E contra la edge con las cuatro frases que
+ * hoy devuelven «probá de nuevo» en producción. *Un reintento cuya eficacia no
+ * se midió es una esperanza con reintento.*
+ */
 export async function llamarModelo(p: PedidoIa): Promise<RespuestaIa> {
+  const r = await unaLlamada(p)
+  if (r.ok || r.error !== 'error_parseo' || r.detalle !== 'json_invalido') return r
+  console.error(`[ia] ${p.pieza} contestó fuera del contrato (prosa, no JSON) — se pide de nuevo`)
+  /* El recordatorio va como mensaje `user` al final, NO en el `system`: el
+     `system` va cacheado y cambiarlo tiraría el caché de todas las llamadas.
+     *Y es la misma razón por la que el texto de la familia tampoco va ahí.* */
+  return await unaLlamada({
+    ...p,
+    mensajes: [...p.mensajes, {
+      rol: 'user',
+      texto: 'Tu respuesta anterior no vino en el formato pedido. Respondé EXACTAMENTE el JSON que pide el sistema, sin texto alrededor y sin backticks.',
+    }],
+  })
+}
+
+async function unaLlamada(p: PedidoIa): Promise<RespuestaIa> {
   // El modelo REAL de esta llamada — el override si vino, si no el de la tabla.
   // Es el que se registra en `ia_uso`: anotar el de la tabla cuando corrió otro
   // haría que la medición de E dijera el nombre equivocado.

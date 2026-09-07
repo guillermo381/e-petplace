@@ -32,7 +32,7 @@
  * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
  * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
  */
-export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte', 'coach_clasifica', 'papel'] as const
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte', 'coach_clasifica', 'papel', 'busqueda'] as const
 
 export type Pieza = typeof PIEZAS[number]
 
@@ -55,6 +55,9 @@ export const MODELOS: Record<Pieza, string> = {
   // pensar y cuánto cuesta escribir, en vez de un promedio que no dice nada.
   coach: 'claude-sonnet-5',
   coach_router: 'claude-haiku-4-5',
+  /* Misma familia que `coach_router`: clasificar y extraer en pocas palabras,
+     salida cerrada. Haiku alcanza y es el que hace que esto cueste centavos. */
+  busqueda: 'claude-haiku-4-5',
   coach_parte: 'claude-sonnet-5',
   papel: 'claude-sonnet-5',
   // Clasificar un hecho en cuatro clases y recortarlo a una línea es el mismo
@@ -89,6 +92,7 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   coach: 800,
   // El router devuelve UNA palabra dentro de un JSON de un campo.
   coach_router: 100,
+  busqueda: 150,
   // 120 palabras de techo (la ley del parte) ≈ 240 tokens en español. 400 da
   // holgura sin dejar lugar a que se extienda: **el parte que se hace largo
   // deja de leerse**, y ahí el techo es producto, no presupuesto.
@@ -114,6 +118,7 @@ export const EDGES: Record<Pieza, string> = {
   raza: 'sugerir-raza',
   coach: 'coach',
   coach_router: 'coach',
+  busqueda: 'coach',
   coach_parte: 'coach-parte',
   papel: 'extract-papel',
   coach_clasifica: 'coach',
@@ -186,6 +191,7 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   // se sienta roto. El router es un clasificador de una palabra: 8 s.
   coach: 25_000,
   coach_router: 8_000,
+  busqueda: 8_000,
   // Nadie está mirando: el parte se arma para una notificación. 20 s alcanza y
   // colgarse no le arruina la pantalla a nadie.
   coach_parte: 20_000,
@@ -326,6 +332,7 @@ export const PENSAR: Record<Pieza, boolean> = {
   // pensar devuelve la respuesta vacía.
   coach: false,
   coach_router: false,
+  busqueda: false,
   coach_parte: false,
   papel: false,
   coach_clasifica: false,
@@ -344,6 +351,7 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   raza: null,
   coach: null,
   coach_router: null,
+  busqueda: null,
   coach_parte: null,
   papel: null,
   coach_clasifica: null,
@@ -365,9 +373,46 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   // exacto para el que existe el caché.
   coach: true,
   coach_router: false,
+  /* El `system` es idéntico en cada consulta de cada familia. */
+  busqueda: true,
   // NO: su system es corto y se manda una vez por mascota por día. El caché
   // cobra 25% de más por escribir algo que nadie va a releer en la ventana.
   coach_parte: false,
   papel: false,
   coach_clasifica: false,
+}
+
+
+/**
+ * 🔴 LAS PIEZAS QUE EXIGEN DETERMINISMO — `temperature: 0`.
+ *
+ * No es una preferencia de estilo: es lo que separa un clasificador que se
+ * puede medir con UNA corrida de uno que exige N y frecuencia por caso.
+ *
+ * Salió de una medición y de una corrección de E. Su prompt viejo daba **0
+ * casos variables en 3 corridas de 40 frases**, y los dos concluimos que el
+ * razonamiento apagado más la salida cerrada lo volvían determinista. Al
+ * agregarle un campo, **3 de 20 casos pasaron a variar** — o sea que *la
+ * determinación nunca fue una propiedad: era una coincidencia no medida*, y un
+ * prompt nuevo es un sujeto nuevo. Con `temperature: 0`: **0 de 20 en 3
+ * corridas, con la misma exactitud** (preguntas 8/8, búsquedas 11/12).
+ *
+ * ⚠️ Sólo para salida CERRADA. En prosa, temperatura 0 empobrece el texto — y
+ * la prosa de Nexo no se mide por igualdad entre corridas, así que no gana nada.
+ */
+export const TEMPERATURA_CERO: Record<Pieza, boolean> = {
+  carnet: false, documento: false, nota_clinica: false, presencia: false,
+  coach: false, coach_parte: false, papel: false,
+  /* 🔴 `raza` entra por DECISIÓN DE E, que es de quien es la línea de base
+     (7-sep-2026). Su razón es la mía dada vuelta, y es mejor: yo no la movía
+     para no correrle la vara de su matriz de 1.759 fotos; E contestó que **una
+     línea de base que no es reproducible no es una línea de base** — si mañana
+     re-corre y da 82 %, sin temperatura fija no puede distinguir una regresión
+     de la varianza. *Prefiere perder una comparación que nunca fue comparable
+     a conservarla sin poder usarla.* Re-corre y ése pasa a ser el piso.
+     Su salida es enteramente cerrada: un código de lista blanca y una confianza
+     de tres valores, cero texto libre. Misma clase que los otros tres. */
+  raza: true,
+  // Los tres clasificadores de salida cerrada.
+  coach_router: true, coach_clasifica: true, busqueda: true,
 }

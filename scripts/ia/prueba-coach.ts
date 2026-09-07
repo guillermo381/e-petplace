@@ -1,4 +1,13 @@
-// ARNÉS · la edge `coach` (S113-D, lote 2.0).
+import { declararObjeto } from './declarar-objeto.ts'
+
+
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/coach/index.ts', 'supabase/functions/_shared/ia/mod.ts', 'supabase/functions/_shared/voz/voseo.json'],
+  modeloReal: false,
+  noCubre: 'el CABLEADO, no la ley: con proveedor falso ningún verde dice que el modelo obedezca. Eso lo miden los rojos reales (`rojos-coach-reales.ts`) y el gate de voz de E.',
+})// ARNÉS · la edge `coach` (S113-D, lote 2.0).
 // Proveedor falso: cero llamadas reales. Cada guard con SU rojo producido.
 //
 // 🔴 EL BRAZO QUE MÁS IMPORTA NO ES «CONTESTA BIEN»: es **cuántas veces llamó
@@ -289,7 +298,7 @@ console.log('\n== 8 · EL CUERPO QUE SALE ==')
   exigir('el system va CACHEADO (idéntico en cada turno de cada familia)',
     JSON.stringify(redaccion.system).includes('cache_control'), JSON.stringify(redaccion.system).slice(0, 120))
   const sis = String(JSON.stringify(redaccion.system))
-  for (const ley of ['NO DIAGNOSTIC', 'otra mascota o algo de la app', 'un menor', 'LO DECÍS', 'veterinario'])
+  for (const ley of ['NO DIAGNOSTIC', 'otra mascota o algo de la app', 'un menor', 'LO DICES', 'veterinario'])
     exigir(`  la ley dice «${ley}»`, sis.includes(ley))
   exigir('la memoria de la familia entra como bloque', sis.includes('truenos'))
 }
@@ -412,7 +421,7 @@ console.log('\n== 8quater · 🔴 EL EXPEDIENTE ENTERO ENTRA AL SYSTEM ==')
   exigir('  la ficha de raza va MARCADA como general, no como suya',
     sis.includes('general, NO es sobre él'), sis.slice(0, 60))
   exigir('  y la ley dice que hable de ESTE animal',
-    sis.includes('HABLÁS DE ESTE ANIMAL, NO DE SU RAZA'))
+    sis.includes('HABLAS DE ESTE ANIMAL, NO DE SU RAZA'))
   exigir('  y que orientar es el trabajo principal',
     sis.includes('TU TRABAJO PRINCIPAL ES ORIENTAR'))
   exigir('  y que el semáforo es la EXCEPCIÓN',
@@ -447,10 +456,143 @@ console.log('\n== 8quinquies · LA PRESENTACIÓN: cero modelo, y no promete lo q
   const { json } = await llamar({ mascotaId: 'm1', accion: 'presentar' })
   const b = json.burbujas as string[]
   const chips = json.chips as string[]
-  exigir('expediente vacío → NO promete peso ni vacunas', !/peso|vacuna/i.test(b[1]), b[1])
-  exigir('  ...ofrece lo único que puede: que le cuenten', /Anotar lo que me cuentes/.test(b[1]), b[1])
-  exigir('  ...y un solo chip, el que sí funciona', chips.length === 1 && /Contale/.test(chips[0]), chips)
+  // 🔴 La aserción vieja pedía que NO nombrara peso ni vacunas, y medía la ley
+  // vieja —callarse—. La ley nueva sí los nombra, **en condicional**, que es lo
+  // que separa una invitación de una promesa. Lo que se mide ahora es el MODO,
+  // no la ausencia de la palabra.
+  const lineas = b[1].split('\n').slice(1)
+  exigir('expediente vacío → las tres líneas son CONDICIONALES',
+    lineas.length === 3 && lineas.every((l) => /^· Si /.test(l)), lineas)
+  exigir('  🔴 ...y ninguna promete en indicativo',
+    !lineas.some((l) => /^· (Te aviso|Recordarte|Seguirle)/.test(l)), lineas)
+  exigir('  ...y cada una dice QUÉ FALTA para poder cumplirla',
+    lineas.every((l) => /cargas|me dices|agendas/.test(l)), lineas)
+  exigir('  ...tres chips igual, que invitan', chips.length === 3, chips)
+  exigir('  🔴 ...y ninguno en voseo', !chips.some((x) => /Contale|querés|tenés|fijate/i.test(x)), chips)
   ctxDevuelto = [CTX]
+}
+
+console.log('\n== 8quinquies-bis · 🔴 EL SYSTEM ESTÁ EN TUTEO, no sólo lo pide ==')
+{
+  textoPlano('ok')
+  await llamar({ mascotaId: 'm1', texto: 'contame' })
+  const sis = JSON.stringify(cuerpos[cuerpos.length - 1].system ?? '')
+  const VOSEO = /\b(sos|contestás|decís|ofrecés|hablás|devolvés|tenés|podés|sabés|completás|reservás|fijate|elegí)\b/gi
+  // 🔴 Se quitan las formas ENTRECOMILLADAS antes de medir. La regla del tuteo
+  // cita el voseo para prohibirlo (`"quieres" y no "querés"`), y un contador que
+  // no distingue una MENCIÓN de un USO marca la regla como si la violara.
+  // Filtrar por número de línea sería atarlo a la redacción de hoy: lo que
+  // define una mención acá son las comillas, así que se quitan ésas.
+  const sinCitas = sis.replace(/\\"[^"\\\\]{1,20}\\"/g, ' ').replace(/"[^"]{1,20}"/g, ' ')
+  const hits = sinCitas.match(VOSEO) ?? []
+  exigir('cero verbos en voseo fuera de las citas de la propia regla', hits.length === 0, hits)
+  exigir('  y la regla del tuteo está escrita', sis.includes('TUTEO, NO VOSEO'))
+  exigir('  con su porqué: el ejemplo más largo no puede contradecir la regla',
+    sis.includes('el ejemplo más largo que tendrías sería el contrario'))
+  exigir('la ley del expediente vacío está', sis.includes('TAMPOCO TE RINDES'))
+  exigir('  ...y dice que rendirse NO es una respuesta',
+    sis.includes('NO\\nes una respuesta') || sis.includes('NO es una respuesta'), sis.slice(0, 40))
+}
+
+console.log('\n== 8quinquies-ter · 🔴 EL CINTURÓN: el prompt NO alcanzó ==')
+for (const [crudo, esperado] of [
+  ['¿Querés que te abra una consulta?', '¿Quieres que te abra una consulta?'],
+  ['Dale, fijate si toma agua.', 'Listo, fíjate si toma agua.'],
+  ['Contame más y tenés mi ayuda.', 'Cuéntame más y tienes mi ayuda.'],
+] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: crudo, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir(`«${crudo.slice(0, 26)}…» sale en tuteo`, json.respuesta === esperado, json.respuesta)
+}
+{
+  // control: un texto que ya está en tuteo NO se toca.
+  textoPlano('Puedes fijarte si toma agua. Cuéntame cómo sigue.')
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir('CONTROL: lo que ya está en tuteo pasa intacto',
+    json.respuesta === 'Puedes fijarte si toma agua. Cuéntame cómo sigue.', json.respuesta)
+}
+for (const [crudo, palabra] of [
+  ['Y vos tenés que estar atento.', 'vos'],
+  ['Bañalo cada 4 semanas y mostrame cómo queda.', 'enclítico'],
+  ['Avisame y guardá la receta.', 'la que su gate ve y yo no curaba'],
+  ['Contanos qué le pasó y probalo de a poco.', 'contanos/probalo'],
+] as const) {
+  redaccionCruda(JSON.stringify({ respuesta: crudo, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  const t = String(json.respuesta)
+  const VOSEO = /\b(vos|tenés|bañalo|mostrame|avisame|guardá|contanos|probalo)\b/
+  exigir(`la lista ÚNICA cubre «${palabra}»`, !VOSEO.test(t), t)
+}
+{
+  // controles: que no muerda palabras que CONTIENEN una forma
+  redaccionCruda(JSON.stringify({ respuesta: 'Los nuevos archivos y vosotros. Un dálmata.',
+    semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  exigir('CONTROL: no toca «nuevos», «vosotros» ni «dálmata»',
+    json.respuesta === 'Los nuevos archivos y vosotros. Un dálmata.', json.respuesta)
+}
+{
+  // 🔴 EL ROJO DEL FOUNDER: `dejá` llegó a una familia estando en la lista.
+  // Causa: `\b` no es un límite después de una vocal acentuada, porque `á` no
+  // está en `\w`. Medido: 49 de 132 formas NUNCA se aplicaron.
+  redaccionCruda(JSON.stringify({ respuesta: 'Dejá que se calme y mirá cómo sigue. Después contá qué pasó.',
+    semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'algo' })
+  exigir('🔴 «dejá · mirá · contá» — el imperativo acentuado ahora SÍ se corrige',
+    json.respuesta === 'Deja que se calme y mira cómo sigue. Después cuenta qué pasó.', json.respuesta)
+}
+{
+  // el cinturón va ÚLTIMO: cubre lo que la edge agrega DESPUÉS del modelo.
+  redaccionCruda(JSON.stringify({ respuesta: 'Un baño cada 4 semanas.', general: true,
+    semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  const VOSEO = /\b(dejá|mirá|contá|fijate|querés)\b/
+  exigir('lo que la edge agrega después TAMBIÉN pasa por el cinturón',
+    !VOSEO.test(String(json.respuesta)), json.respuesta)
+}
+{
+  // y las plantillas, que escribe la casa: no-op hoy, red mañana.
+  proveedorFalso((n) => n === 1 ? { intencion: 'dato', campos: {} } : { respuesta: 'no' })
+  const { json } = await llamar({ mascotaId: 'm1', texto: '¿es alérgico a algo?' })
+  exigir('la plantilla también sale por el cinturón',
+    !/\bsabés\b|\bcontámela\b/.test(String(json.respuesta)), json.respuesta)
+}
+console.log('     ↑ medido: con el system en voseo se escapaba seguido; pasado a tuteo')
+console.log('       bajó a ~1 de cada 10; y al nombrarle «dale» apareció «querés».')
+console.log('       Enumerar formas prohibidas es jugar al topo: la última milla')
+console.log('       no es del prompt, es determinística.')
+
+console.log('\n== 8quinquies-quater · 🔴 GENERAL: la aclaración y la invitación se GARANTIZAN ==')
+{
+  redaccionCruda(JSON.stringify({ respuesta: 'Un baño cada 4 a 6 semanas suele estar bien.',
+    general: true, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: '¿cada cuánto lo baño?' })
+  const t = String(json.respuesta)
+  exigir('sin aclaración, la edge la PONE', /Todavía no tengo lo suyo cargado/.test(t), t)
+  exigir('  ...y nombra la especie y la etapa', /para un perro/.test(t), t)
+  exigir('sin invitación, la edge la PONE', /Si me cuentas más de Thor/.test(t), t)
+  exigir('🔴 y  VIAJA en el cuerpo, no sólo se consume', json.general === true, json.general)
+  console.log('     ↑ sin la aclaración, una orientación general de la especie se lee')
+  console.log('       como si fuera sobre ESA mascota. No es adorno.')
+}
+{
+  // control: si la prosa ya las trae, NO se duplican.
+  redaccionCruda(JSON.stringify({
+    respuesta: 'En general un perro adulto se baña cada 4 a 6 semanas. Si me cuentas su tipo de pelo, te lo afino.',
+    general: true, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  const t = String(json.respuesta)
+  exigir('CONTROL: si ya lo dice, no se duplica', !/Todavía no tengo lo suyo/.test(t) && !/te lo puedo afinar/.test(t), t)
+}
+{
+  // control: `general:false` NO se toca. La aclaración en una respuesta que SÍ
+  // usó el expediente sería mentir al revés.
+  redaccionCruda(JSON.stringify({ respuesta: 'Thor pesa 32.4 kg, así que le corresponden 400 g al día.',
+    general: false, semaforo: null, propuesta_memoria: null }))
+  const { json } = await llamar({ mascotaId: 'm1', texto: 'x' })
+  exigir('CONTROL: general:false viaja como false', json.general === false, json.general)
+  exigir('CONTROL: general:false pasa intacta',
+    json.respuesta === 'Thor pesa 32.4 kg, así que le corresponden 400 g al día.', json.respuesta)
 }
 
 console.log('\n== 8sexies · EL «CONTANOS»: clasifica y PROPONE, nunca guarda ==')

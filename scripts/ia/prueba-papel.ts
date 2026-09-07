@@ -1,3 +1,4 @@
+import { declararObjeto } from './declarar-objeto.ts'
 // ARNÉS · `extract-papel` (S113-D, lote 2.2). Proveedor falso, cero llamadas.
 // La ley —transcribe, no interpreta— la mide el modelo real (`papel-real.ts`);
 // acá se mide el CABLEADO: qué entra, qué se anula, qué se descarta.
@@ -36,6 +37,14 @@ let manejador: ((r: Request) => Response | Promise<Response>) | null = null
 }
 const { sanearFila, precisionDe } = await import('../extract-papel/index.ts')
 
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/extract-papel/index.ts', 'supabase/functions/_shared/ia/mod.ts'],
+  modeloReal: false,
+  noCubre: 'la LEY de no interpretar, que es comportamiento del modelo y la mide `papel-real.ts` sobre un PDF.',
+})
+
 async function llamar(cuerpo: Record<string, unknown>, conSesion = true) {
   const res = await manejador!(new Request('http://local/', {
     method: 'POST',
@@ -46,6 +55,8 @@ async function llamar(cuerpo: Record<string, unknown>, conSesion = true) {
   try { json = await res.json() } catch { /* */ }
   return { status: res.status, json }
 }
+const { tipoPorBytes } = await import('../extract-papel/index.ts')
+
 const analito = (o: Record<string, unknown> = {}) => ({
   nombre: 'Creatinina', valor: '1.8', unidad: 'mg/dL', referencia: '0.5 - 1.6',
   literal: 'Creatinina 1.8 mg/dL (0.5 - 1.6) H', fecha: '2026-08-12',
@@ -77,13 +88,26 @@ console.log('\n== 2 · 🔴 UN PDF VIAJA COMO DOCUMENTO, UNA FOTO COMO IMAGEN ==
   exigir('el PDF sale como `document`', c[0].type === 'document', c[0])
   exigir('  ...y `modo_captura` se DERIVA del archivo, no del cliente', a.json.modo_captura === 'pdf', a.json.modo_captura)
   falso(() => salida([analito()]))
+  /* `PIXEL` son bytes PNG y acá se declaran `image/jpeg`: el tipo real gana
+     (`image/png`) y el modo sigue siendo `foto` — que es lo que este caso mide. */
   const b = await llamar({ imageBase64: PIXEL, mediaType: 'image/jpeg' })
   const c2 = (cuerpos[0].messages as { content: { type: string }[] }[])[0].content
   exigir('la foto sale como `image`', c2[0].type === 'image', c2[0])
   exigir('  ...y su modo es `foto`', b.json.modo_captura === 'foto', b.json.modo_captura)
+  /* 🔴 ESTE CASO ERA UN VERDE FALSO Y SE DESTAPÓ EN LA FASE 3. Mandaba
+     `PIXEL` —que son bytes **PNG**— diciendo `mediaType: 'application/pdf'`, y
+     exigía que el modo saliera `pdf`. Pasaba… **porque el código le creía a la
+     etiqueta del cliente**, que es exactamente lo que este caso dice impedir.
+     *El nombre del test era correcto y su fixture no podía distinguir.*
+     Ahora el modo sale de los BYTES, así que la mentira se prueba de verdad:
+     bytes de PDF con `modo_captura: 'foto'` → `pdf`, y su ESPEJO, que es la
+     dirección que el código viejo tenía mal y nadie medía. */
   falso(() => salida([analito()]))
-  const d = await llamar({ imageBase64: PIXEL, mediaType: 'application/pdf', modo_captura: 'foto' })
-  exigir('🔴 el cliente NO puede mentir el modo', d.json.modo_captura === 'pdf', d.json.modo_captura)
+  const d = await llamar({ imageBase64: 'JVBERi0xLjQKMSAw', mediaType: 'image/png', modo_captura: 'foto' })
+  exigir('🔴 el cliente NO puede mentir el modo — bytes de PDF ⇒ pdf', d.json.modo_captura === 'pdf', d.json.modo_captura)
+  falso(() => salida([analito()]))
+  const e2 = await llamar({ imageBase64: PIXEL, mediaType: 'application/pdf', modo_captura: 'pdf' })
+  exigir('  ...y EL ESPEJO: bytes de PNG declarados PDF ⇒ foto', e2.json.modo_captura === 'foto', e2.json.modo_captura)
 }
 
 console.log('\n== 3 · EL CUERPO, Y LA LEY EN EL PROMPT ==')
@@ -186,6 +210,53 @@ console.log('\n== 8 · 🔴 NULL PORQUE NO APLICA ≠ NULL PORQUE NO SE PUDO LEE
   exigir('CONTROL: examen SIN valor → SÍ marcado', sinValor.ok === true && sinValor.incompleta === true, sinValor.ok && sinValor.incompleta)
   const sinDosis = sanearFila({ nombre: 'X', literal: 'X', fecha: '2026-08-12', evidencia: 'impreso', confianza: 'alta' }, 'receta')
   exigir('CONTROL: receta SIN dosis → SÍ marcada', sinDosis.ok === true && sinDosis.incompleta === true, sinDosis.ok && sinDosis.incompleta)
+}
+
+console.log('\n== 6 · LOS DOS ROJOS DE LA FASE 3 (dictado del founder) ==')
+{
+  /* 🔴 ① UN VALOR FUERA DE RANGO VUELVE CON SU MARCA Y SIN ADJETIVO.
+     La Creatinina del fixture es 1.8 sobre un rango 0.5-1.6 —fuera de rango— y
+     el papel trae la `H`. Lo que tiene que pasar: la `H` VIAJA (la escribió el
+     laboratorio: copiarla es leer, no interpretar) y **ninguna palabra de
+     juicio aparece en ningún campo**. */
+  const fila = sanearFila(analito(), 'examen')
+  const texto = JSON.stringify(fila).toLowerCase()
+  const JUICIOS = ['alto', 'alta', 'bajo', 'baja', 'elevad', 'normal', 'anormal',
+                   'preocupa', 'grave', 'leve', 'severo', 'insuficien']
+  /* `confianza: 'alta'` es un campo del contrato, no un juicio sobre el valor:
+     se saca antes de buscar. *Si no, el gate daría rojo sobre su propio
+     vocabulario y su rojo dejaría de significar algo.* */
+  const sinConfianza = texto.replace(/"confianza":"[a-z]+"/g, '')
+  const cuela = JUICIOS.filter((j) => sinConfianza.includes(j))
+  exigir('valor fuera de rango: la marca `H` viaja en el literal',
+    fila.ok === true && String((fila as any).fila?.literal ?? '').includes('H'))
+  exigir('  ...y NINGÚN adjetivo de juicio en la fila', cuela.length === 0, cuela)
+
+  /* 🔴 ② UN PDF MANDADO COMO IMAGEN SE RECHAZA POR BLOQUE, NO DA LECTURA BASURA.
+     Antes, un `mediaType` que no estuviera en la lista **caía a `image/jpeg`**,
+     así que un PDF viajaba en un bloque `image` y el proveedor devolvía basura
+     o un error opaco. *No fallaba en la puerta: fallaba adentro, y a la familia
+     le llegaba «no pudimos leer el papel».* Ahora el tipo se lee de los BYTES.
+     Encabezados reales, no inventados. */
+  const B64 = {
+    pdf: 'JVBERi0xLjQKMSAwIG9iago8',            // %PDF-1.4
+    png: 'iVBORw0KGgoAAAANSUhEUg==',            // \x89PNG\r\n\x1a\n
+    jpeg: '/9j/4AAQSkZJRgABAQEAYABg',           // \xFF\xD8\xFF
+    webp: 'UklGRmQAAABXRUJQVlA4IA==',           // RIFF....WEBP
+    basura: 'ZXN0byBubyBlcyBuaSB1bmEg',         // texto plano
+  }
+  exigir('PDF por sus bytes', tipoPorBytes(B64.pdf) === 'application/pdf', tipoPorBytes(B64.pdf))
+  exigir('PNG por sus bytes', tipoPorBytes(B64.png) === 'image/png', tipoPorBytes(B64.png))
+  exigir('JPEG por sus bytes', tipoPorBytes(B64.jpeg) === 'image/jpeg', tipoPorBytes(B64.jpeg))
+  exigir('WebP por sus bytes', tipoPorBytes(B64.webp) === 'image/webp', tipoPorBytes(B64.webp))
+  exigir('CONTROL: lo que no es ninguno → null (se rechaza)', tipoPorBytes(B64.basura) === null, tipoPorBytes(B64.basura))
+  exigir('EL ROJO: un PDF declarado "image/png" NO viaja como imagen',
+    tipoPorBytes(B64.pdf) === 'application/pdf')
+
+  falso(() => salida([analito()]))
+  const rBasura = await llamar({ imageBase64: B64.basura, mediaType: 'image/png' })
+  exigir('  ...y un archivo que no es foto ni PDF rebota 400', rBasura.status === 400, rBasura.status)
+  exigir('  ...sin haber tocado el modelo', cuerpos.length === 0, cuerpos.length)
 }
 
 console.log(`\n${r === 0 ? 'OK' : 'ROJO'} arnés extract-papel — ${v} verdes · ${r} rojos\n`)

@@ -117,6 +117,17 @@ interface Contexto {
   peso_fecha?: string | null
   alergias?: string[] | null
   medicacion_actual?: string[] | null
+  /** 🔴 LA BÓVEDA. Espejo exacto de lo que devuelve `obtener_contexto_coach`,
+   *  medido contra la función viva. **El `literal` es el testigo**: es lo que
+   *  el papel dice en esa línea, y es lo único que Nexo puede citar sin leer. */
+  papeles?: {
+    clase?: string | null
+    fecha?: string | null
+    origen?: string | null
+    titulo?: string | null
+    valores?: { analito?: string | null; valor?: string | null; unidad?: string | null
+                referencia?: string | null; literal?: string | null }[] | null
+  }[] | null
   condiciones_cronicas?: string[] | null
   proxima_cita?: { fecha: string; servicio?: string | null; prestador?: string | null } | null
   plan_vacunal?: { vacuna: string; estado: string; fecha?: string | null }[] | null
@@ -227,6 +238,44 @@ export function responderConPlantilla(texto: string, c: Contexto): { nombre: str
 }
 
 // ── LA LEY, que vive en el `system` y en ningún otro lado ───────────────────
+/**
+ * 🔴 LOS PAPELES DE LA BÓVEDA, EN FORMA DE CITA.
+ *
+ * **Por qué existe:** la bóveda escribía en el expediente, `obtener_contexto_coach`
+ * ya devolvía la clave `papeles` **y esta edge la tiraba al piso** — sus 15
+ * campos no la incluían. Medido por E preguntándole al producto: *«No tengo un
+ * valor de hematocrito registrado en el expediente de Thor»*, con el papel
+ * cargado y confirmado. *Son tres capas —la función devuelve, la edge lee, el
+ * modelo ve— y la migración sólo prueba la primera.*
+ *
+ * **Va con el `literal` adelante, y eso no es estilo.** El literal es lo que el
+ * papel dice en esa línea; es lo único que se puede pasar sin leer. Las reglas
+ * 1bis y 1quater dicen qué hacer con esto: **citarlo con su fecha y su origen,
+ * jamás juzgarlo.** Acá entra el dato; el muro decide qué se puede decir de él.
+ *
+ * ⚠️ **Y esto vuelve medible al muro.** Hasta hoy sus ataques a la costura
+ * corrían sobre un expediente sin exámenes: *su cero no decía «aguanta», decía
+ * «no había nada que interpretar»*. Con esta clave el muro pasa a tener sujeto,
+ * y toda esa medición hay que rehacerla.
+ */
+function papelesDelExpediente(c: Contexto): string {
+  const ps = Array.isArray(c.papeles) ? c.papeles : []
+  if (ps.length === 0) return ''
+  const filas = ps.map((p) => {
+    const cab = [p.titulo, p.fecha && `del ${p.fecha}`, p.origen].filter(Boolean).join(' ')
+    /* Se manda el LITERAL, y sólo se arma una línea a mano cuando el papel no
+       lo trajo. *Reescribir un literal que existe es transcribir dos veces, y
+       la segunda la escribe quien no vio el papel.* */
+    const vals = (p.valores ?? []).map((v) =>
+      v.literal ?? [v.analito, v.valor, v.unidad, v.referencia && `(ref ${v.referencia})`]
+        .filter(Boolean).join(' ')).filter(Boolean)
+    return vals.length ? `  · ${cab}: ${vals.join(' · ')}` : null
+  }).filter(Boolean)
+  return filas.length
+    ? `\nPapeles cargados en su expediente (para CITAR con su fecha, nunca para leer):\n${filas.join('\n')}`
+    : ''
+}
+
 export function sistemaDe(c: Contexto): string {
   const dato = (etiqueta: string, v: unknown) =>
     v === null || v === undefined || (Array.isArray(v) && !v.length) ? '' : `\n${etiqueta}: ${
@@ -422,7 +471,7 @@ afirmar que lo guardaste: lo guarda la familia confirmando.
 
 ═══ LO QUE SABES DE ESTA MASCOTA ═══
 Nombre: ${c.nombre}
-Especie: ${c.especie}${dato('Raza', c.raza)}${dato('Sexo', c.sexo)}${dato('Edad', c.edad_texto)}${dato('Etapa', c.etapa)}${dato('Peso', c.peso_kg && `${c.peso_kg} kg`)}${dato('Alergias', c.alergias)}${dato('Medicación', c.medicacion_actual)}${dato('Condiciones', c.condiciones_cronicas)}${dato('Próxima cita', c.proxima_cita)}${dato('Plan vacunal', c.plan_vacunal)}${dato('Últimos eventos', c.ultimos_eventos)}${dato('Sobre la raza (general, NO es sobre él)', c.ficha_raza)}${dato('Lo que la familia observó de su conducta', c.comportamiento)}${dato('Rasgos que la familia declaró', c.rasgos)}${dato('Recuerdos que la familia guardó', c.recuerdos)}
+Especie: ${c.especie}${dato('Raza', c.raza)}${dato('Sexo', c.sexo)}${dato('Edad', c.edad_texto)}${dato('Etapa', c.etapa)}${dato('Peso', c.peso_kg && `${c.peso_kg} kg`)}${dato('Alergias', c.alergias)}${dato('Medicación', c.medicacion_actual)}${dato('Condiciones', c.condiciones_cronicas)}${dato('Próxima cita', c.proxima_cita)}${dato('Plan vacunal', c.plan_vacunal)}${dato('Últimos eventos', c.ultimos_eventos)}${papelesDelExpediente(c)}${dato('Sobre la raza (general, NO es sobre él)', c.ficha_raza)}${dato('Lo que la familia observó de su conducta', c.comportamiento)}${dato('Rasgos que la familia declaró', c.rasgos)}${dato('Recuerdos que la familia guardó', c.recuerdos)}
 
 ═══ LO QUE LA FAMILIA CONFIRMÓ (memoria) ═══
 ${c.memoria?.length ? c.memoria.map((m) => `· ${m}`).join('\n') : '(todavía nada)'}
@@ -552,6 +601,13 @@ const SISTEMA_ROUTER = `Clasificás en UNA de cuatro, mirando SÓLO qué quiere 
 "busqueda"   quiere ENCONTRAR algo que ya existe en su cuenta: una cita, un
              pedido, una mascota, un recuerdo, un producto, un prestador.
              Ej: "el pedido de croquetas del mes pasado".
+             🔴 NUNCA es "busqueda" una pregunta sobre el CONTENIDO CLÍNICO de
+             su expediente, aunque nombre algo buscable: "mostrame sus
+             análisis", "¿qué exámenes tiene?", "¿tiene algún examen raro?",
+             "¿qué dice su hemograma?" son "dato". *Un examen no se entrega
+             como fila de una lista: se cita con su fecha y su origen, y eso
+             sólo pasa por acá.* Sí es búsqueda "papeles de Thor" cuando lo que
+             quiere es llegar al documento, no saber qué dice.
 "dato"       pregunta por UN dato puntual del expediente, que se contesta con
              el dato y nada más. Ej: "cuánto pesa", "cuándo le toca la vacuna",
              "cuándo es la cita", "qué le puse en junio".

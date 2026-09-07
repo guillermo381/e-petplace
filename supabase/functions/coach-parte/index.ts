@@ -30,6 +30,11 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { llamarModelo } from '../_shared/ia/mod.ts'
+/** 🔴 EL MISMO CINTURÓN QUE `coach`, Y NO UNA COPIA. Esta edge le escribe a la
+ *  familia igual que la otra y **no lo tenía**: su salida salía cruda del
+ *  modelo. *La misma regla en dos lugares se cura dos veces o no se cura* — así
+ *  que la implementación se mudó a `_shared/voz/tuteo.ts` y acá se importa. */
+import { aTuteo } from '../_shared/voz/tuteo.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -107,21 +112,25 @@ export function frase(a: Aviso, nombre = 'Tu mascota'): string {
 }
 
 const SISTEMA = `Escribís el parte del día de una mascota para su familia, en la app
-de e-PetPlace. Te doy una lista de cosas que pasan hoy y las hilás en un texto
+de e-PetPlace. Te doy una lista de cosas que pasan hoy y las hilas en un texto
 corto.
 
-🔴 TU TRABAJO ES HILAR, NO LISTAR. Si devolvés un título y una línea por cosa,
-no hiciste nada que la app no pudiera hacer sola. Escribí UN párrafo corrido
+🔴 TU TRABAJO ES HILAR, NO LISTAR. Si devuelves un título y una línea por cosa,
+no hiciste nada que la app no pudiera hacer sola. Escribe UN párrafo corrido
 donde las cosas se conecten: qué es lo urgente, qué puede esperar, y si dos
 cosas se resuelven en la misma visita, decilo.
 
 REGLAS
+· 🔴 TUTEO, no voseo: "puedes" y no "podés". Y nada de "dale" — es el que se escapa
+  más seguido, medido: 1 de cada 10 respuestas. Este mensaje está en tuteo a
+  propósito: si estuviera en voseo, el ejemplo más largo que tendrías sería el
+  contrario de la regla.
 · Máximo 120 palabras. Frases cortas, tuteo neutro, sin signos de admiración.
-· SIN título, sin encabezado, sin viñetas: empezás por el contenido.
-· **Sólo decís lo que está en la lista.** No agregás consejos, no explicás qué
+· SIN título, sin encabezado, sin viñetas: empiezas por el contenido.
+· **Sólo dices lo que está en la lista.** No agregas consejos, no explicas qué
   es cada vacuna, no supones nada que no esté escrito ahí.
-· 🔴 HILAR NO ES INFERIR. Podés ordenar por urgencia y sugerir resolver dos
-  cosas en una misma visita. **NO podés decir que dos fechas coinciden, ni
+· 🔴 HILAR NO ES INFERIR. Puedes ordenar por urgencia y sugerir resolver dos
+  cosas en una misma visita. **NO puedes decir que dos fechas coinciden, ni
   cuánto falta entre una y otra, ni que algo "cae en la misma semana"**: eso
   no está en la lista y suena verdadero igual. Medido: pedirte que hiles te
   hizo escribir "como coincide en fecha" sobre dos avisos con 8 días de
@@ -130,7 +139,7 @@ REGLAS
 · No diagnosticás y no hablás de enfermedades.
 · Si algo está vencido, se dice primero.
 · A las personas menores de edad se les dice "niños".
-· Terminás sin pregunta: esto es un aviso, no una conversación.`
+· Terminas sin pregunta: esto es un aviso, no una conversación.`
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -179,7 +188,7 @@ Deno.serve(async (req) => {
     // ── uno: la plantilla YA es la frase ─────────────────────────────────
     if (validos.length === 1) {
       return new Response(JSON.stringify({
-        parte: frase(validos[0], nom), fuente: 'plantilla', avisos: validos.length,
+        parte: aTuteo(frase(validos[0], nom)), fuente: 'plantilla', avisos: validos.length,
       }), { status: 200, headers: JSON_HEADERS })
     }
 
@@ -197,11 +206,11 @@ Deno.serve(async (req) => {
       // sale porque el redactor se cayó es un vencimiento que nadie vio.*
       console.error('[coach-parte] el modelo falló:', r.error, r.detalle)
       return new Response(JSON.stringify({
-        parte: lista, fuente: 'plantilla_de_respaldo', avisos: validos.length,
+        parte: aTuteo(lista), fuente: 'plantilla_de_respaldo', avisos: validos.length,
       }), { status: 200, headers: JSON_HEADERS })
     }
     return new Response(JSON.stringify({
-      parte: String(r.datos).trim(), fuente: 'modelo', avisos: validos.length,
+      parte: aTuteo(String(r.datos).trim()), fuente: 'modelo', avisos: validos.length,
     }), { status: 200, headers: JSON_HEADERS })
   } catch (e) {
     console.error('[coach-parte] excepción:', e)

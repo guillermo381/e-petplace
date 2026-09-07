@@ -22,6 +22,11 @@ try {
   cpSync('supabase/functions', join(base, 'functions'), { recursive: true })
   mkdirSync(join(base, 'functions', '_prueba-coach-parte'), { recursive: true })
   cpSync('scripts/ia/prueba-coach-parte.ts', join(base, 'functions', '_prueba-coach-parte', 'prueba.ts'))
+  /* 🔴 EL HELPER VIAJA CON EL ARNÉS. Los arneses declaran su objeto
+     (`declararObjeto`) desde el lote 3, y estos runners copiaban SÓLO el
+     arnés: el import moría con `Module not found` en la copia temporal.
+     *Una ley que se cumple en el archivo y se rompe al correrlo no rige.* */
+  cpSync('scripts/ia/declarar-objeto.ts', join(base, 'functions', '_prueba-coach-parte', 'declarar-objeto.ts'))
   writeFileSync(join(base, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
   execFileSync('deno', ['run', '--allow-env', '--allow-net', '--allow-read', 'functions/_prueba-coach-parte/prueba.ts'],
     { cwd: base, stdio: 'inherit' })

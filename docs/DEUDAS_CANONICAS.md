@@ -29157,6 +29157,46 @@ cinco sesiones apagado y viajó cuando otra cosa obligó el build).
 **Dueño:** A. **Nace:** S113 (6-sep-2026).
 
 
+
+### `D-1047` 🟡 · El conjunto de papeles clínicos es SINTÉTICO: mide la ley, no la variedad — su número es un PISO
+
+**Firma del founder (7-sep-2026), verbatim en lo que decide:** *los 38 de
+`documentos_clinicos_muestra` son SINTÉTICOS y no hay más. Deja de pedirse un
+papel real: no existe hoy.* ⇒ **nadie vuelve a poner «faltan papeles reales»
+como bloqueo**: no es una deuda de trabajo, es una deuda de MUNDO, y su disparo
+son las primeras familias.
+
+**Qué mide el conjunto, y es mucho:** **LA LEY** — que no interpreta, que
+transcribe con su unidad y su referencia, y que **no inventa marcas**. Su
+trampa central es exactamente la nuestra: valores fuera de rango **con y sin
+bandera impresa**, y los que no la llevan son los que delatan interpretación.
+Es, además, **tablero de regresión**: el día que alguien toque el prompt de
+`extract-papel`, este conjunto dice si se rompió algo.
+
+**Qué NO mide:** la variedad del papel real — manuscrito, stickers, papel
+arrugado, una foto torcida sacada en un mostrador. 🔴 **Ningún porcentaje suyo
+se cita como exactitud sobre papeles de verdad.** Se dice «piso», y se dice
+cada vez.
+
+**La medición que queda como piso** (S113-D, 15 exámenes · 190 analitos, Sonnet,
+una corrida, $0,024 por papel): filas **190/190** · valor **190/190** ·
+unidad **190/190** · referencia **190/190** · marca ASCII **6/6** ·
+**marcas inventadas 0 sobre 178 filas sin marca** · **adjetivos de juicio 0**.
+
+**Y la regla que sale de acá, que vale para cualquier conjunto de referencia:**
+**las filas cuya vara el artefacto no puede llevar se corrigen en la VARA, no
+se le cobran al modelo.** Medido: `⁶` y `⁹` (bloque Superíndices) están en **0
+de las 46 fuentes** del generador y `³` (Latin-1) en **46 de 46** — el papel
+mostraba un cuadro vacío donde el `ground_truth` decía la unidad. *Medir contra
+una verdad que el artefacto no lleva le cobra al modelo un error del generador.*
+Curado en el generador (superíndices a `^n`, y la celda de la marca con una
+fuente que tiene la flecha), **verificado contra la imagen y no contra el
+código**. Lo encontraron D y E por separado, en dos glifos distintos.
+
+**Disparo:** las primeras familias reales cargando un papel suyo. Ahí se re-mide
+con papeles de verdad y este número deja de ser el piso para ser una línea de
+comparación.
+
 ### `D-1045` 🟡 · Ninguna alergia dice quién la registró — el único discriminador es un proxy
 
 **El síntoma (C, 6-sep-2026):** la franja de seguridad decía **«Lo registró una
