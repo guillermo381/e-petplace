@@ -117,6 +117,20 @@ export function promptDeLaEdge(ruta) {
    por la espalda. Ya me pasó con el juez de los rojos. */
 const ESTE = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 
+/** ¿La edge existe en el servidor aunque no esté en este árbol? Son dos mundos
+    distintos y el segundo es el que le llega a la familia: decir sólo «no existe»
+    cuando está corriendo en producción es la mitad de la verdad. */
+function desplegada(nombre) {
+  try {
+    const ref = readFileSync('supabase/.temp/project-ref', 'utf8').trim();
+    const r = spawnSync('curl', ['-s', '-o', '/dev/null', '-w', '%{http_code}', '-m', '8',
+      '-X', 'POST', `https://${ref}.supabase.co/functions/v1/${nombre}`,
+      '-H', 'content-type: application/json', '-d', '{}'], { encoding: 'utf8' });
+    const c = Number((r.stdout || '').trim());
+    return c && c !== 404 ? c : null;
+  } catch { return null; }
+}
+
 // ═══ CONTROL ═══════════════════════════════════════════════════════════════
 if (ESTE && process.argv.includes('--control')) {
   let fallos = 0;
@@ -192,10 +206,15 @@ const p = ESTE ? (exacto
   : promptDeLaEdge(EDGE)) : { existe: true, texto: '', trozos: 0 };
 if (ESTE && !exacto && ORIGEN) di('⚠️ pedí el system EXACTO y no pude — caigo al aproximado, que descarta literales de <80 chars.');
 if (ESTE && !p.existe) {
+  const cod = desplegada('coach');
   di(`⚠️ NO CONCLUYENTE — ${p.motivo}.`);
-  di(`   La edge \`coach\` todavía no existe. El gate queda escrito y se pone en`);
-  di(`   verde/rojo el día que exista. NO es verde: «la ley está» y «no hay prompt`);
-  di(`   que mirar» son distintos, y confundirlos es cómo un gate deja de mirarse.`);
+  if (cod) {
+    di(`   🔴 PERO LA EDGE ESTÁ DESPLEGADA (HTTP ${cod}) — su fuente vive en otra rama.`);
+    di('   *«No está acá» y «no existe» son distintos, y el segundo es falso.*');
+    di('   Medila donde vive:  COACH_ORIGEN=<rama> node scripts/verify-coach-ley.mjs');
+  }
+  di('   NO es verde: «la ley está» y «no hay prompt que mirar» son distintos, y');
+  di('   confundirlos es cómo un gate deja de mirarse.');
   process.exit(2);
 }
 /* La fuente de la edge se lee aparte: ahí viven las cláusulas de PUERTA. */

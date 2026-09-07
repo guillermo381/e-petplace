@@ -26,6 +26,7 @@
  *   node scripts/verify-nexo-rojos.mjs --control
  *   node scripts/verify-nexo-rojos.mjs                 (contra la edge real)
  */
+import { spawnSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { exigirArgumentos } from './lib-argumentos.mjs';
@@ -167,6 +168,20 @@ export function coachCorrecto(caso) {
    me pasó con `atacar-system.mjs` a los dos minutos de escribirlo. */
 const ESTE = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 
+/** ¿La edge existe en el servidor aunque no esté en este árbol? Son dos mundos
+    distintos y el segundo es el que le llega a la familia: decir sólo «no existe»
+    cuando está corriendo en producción es la mitad de la verdad. */
+function desplegada(nombre) {
+  try {
+    const ref = readFileSync('supabase/.temp/project-ref', 'utf8').trim();
+    const r = spawnSync('curl', ['-s', '-o', '/dev/null', '-w', '%{http_code}', '-m', '8',
+      '-X', 'POST', `https://${ref}.supabase.co/functions/v1/${nombre}`,
+      '-H', 'content-type: application/json', '-d', '{}'], { encoding: 'utf8' });
+    const c = Number((r.stdout || '').trim());
+    return c && c !== 404 ? c : null;
+  } catch { return null; }
+}
+
 // ═══ CONTROL ═══════════════════════════════════════════════════════════════
 if (ESTE && process.argv.includes('--control')) {
   const banco = JSON.parse(readFileSync(BANCO, 'utf8'));
@@ -225,10 +240,20 @@ if (ESTE && process.argv.includes('--control')) {
 
 // ═══ GATE ══════════════════════════════════════════════════════════════════
 if (ESTE && !existsSync(EDGE)) {
-  di(`⚠️ NO CONCLUYENTE — no existe \`${EDGE}\`.`);
-  di('   La edge `coach` todavía no existe: el banco y el juez quedan escritos y');
-  di('   PROBADOS contra un coach de mentira (--control). NO es verde: «pasó los');
-  di('   rojos» y «no hay contra qué correrlos» son distintos.');
+  const cod = desplegada('coach');
+  di(`⚠️ NO CONCLUYENTE — \`${EDGE}\` no está en este árbol.`);
+  if (cod) {
+    di(`   🔴 PERO LA EDGE ESTÁ DESPLEGADA (HTTP ${cod}) — su fuente vive en otra rama.`);
+    di('   *«No está acá» y «no existe» son distintos, y el segundo es falso:* los 11');
+    di('   ataques SÍ se pueden correr, con `node scripts/nexo/atacar-edge.mjs`, por la');
+    di('   puerta real y con la cuenta del founder. No corren en este gate porque gastan');
+    di('   ~11 llamadas al modelo: esto es un gate de commit, no una corrida de medición.');
+  } else {
+    di('   Y tampoco responde en el servidor: no hay contra qué correr los ataques.');
+  }
+  di('   El banco y el juez quedan escritos y PROBADOS contra un coach de mentira');
+  di('   (--control). NO es verde: «pasó los rojos» y «no hay contra qué correrlos»');
+  di('   son distintos.');
   process.exit(2);
 }
 if (ESTE) {

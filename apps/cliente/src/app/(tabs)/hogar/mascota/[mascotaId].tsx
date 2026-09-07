@@ -501,6 +501,12 @@ export default function PerfilDeMascota() {
     setRecargaPeso((n) => n + 1),
   );
   const [hojaBio, setHojaBio] = useState<ClaseBio | null>(null);
+  /* ☠️ `InvitacionBio` murió en S113-B · 2.1: era TARJETA Y HOJA en una pieza.
+     Acá se parte igual que en la pieza — el botón abre, la Hoja contiene.
+     ⚠️ CURA DE COMPILACIÓN de la pista A, del lado consumidor: mantiene las
+     cuatro entradas y NADA MÁS. La caja libre y la propuesta de Nexo son de
+     C en su 2.1 — no se inventan acá. */
+  const [contanosAbierto, setContanosAbierto] = useState(false);
   const [razaHoja, setRazaHoja] = useState(false);
   /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
   const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
@@ -1485,7 +1491,17 @@ export default function PerfilDeMascota() {
                 la Hoja.* Acá queda sólo el botón; la Hoja vive una vez, abajo. */}
             <View style={{ marginTop: spacing[3] }}>
               <BotonContanos
-                etiqueta={t('contanos.boton', { nombre: mascota.nombre })}
+                /* ⚠️ **Los dos montamos este botón a la vez** —main y yo— y me
+                   quedo con SU voz: la invitación nombra la etapa («Thor está
+                   en su etapa adulta…»), que ancla el momento, y la mía sólo
+                   decía «cuéntanos». *Entre dos textos correctos gana el que
+                   dice más.* El `onPress` es el mío porque lleva al hook con la
+                   caja libre y la propuesta. */
+                etiqueta={
+                  momento !== null && vozMomento(momento, t) !== null
+                    ? t('perfil.razaInvitacion', { mascota: mascota.nombre, etapa: (vozMomento(momento, t) ?? '').toLowerCase() })
+                    : t('perfil.razaInvitacionSinEtapa', { mascota: mascota.nombre })
+                }
                 onPress={contanos.abrir}
               />
             </View>

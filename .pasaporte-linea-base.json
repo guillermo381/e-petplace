@@ -1,0 +1,19 @@
+{
+  "_que_es": "L\u00ednea base MEDIDA, no firmada. No autoriza estos campos: s\u00f3lo permite ver si ma\u00f1ana hay uno m\u00e1s.",
+  "_la_firma_sigue_pendiente": "docs/loop/PASAPORTE-CAMPOS-FIRMADOS.json",
+  "medida_el": "2026-09-06",
+  "rpc": "leer_pasaporte",
+  "campos": [
+    "alergias",
+    "chip",
+    "contacto",
+    "edad",
+    "especie",
+    "foto_path",
+    "medicacion",
+    "nombre",
+    "perdida",
+    "raza",
+    "sexo"
+  ]
+}
