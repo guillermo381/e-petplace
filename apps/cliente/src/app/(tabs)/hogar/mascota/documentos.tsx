@@ -32,21 +32,28 @@
  * puerta exista, entra la lista y **el botón de traer se enciende**.
  * *Prefiero una pantalla que declara su mitad faltante a una que la simula.*
  */
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Linking } from 'react-native';
 import {
   Encabezado,
-  EstadoVacio,
+  HojaTraerPapeles,
   Hoja,
+  PantallaDocumentos,
   Separador,
   Tarjeta,
-  Texto,
   spacing,
+  Texto,
+  type GrupoDePapeles,
 } from '@epetplace/ui';
-import type { ConsultaConReceta, TipoDocumentoExpediente } from '@epetplace/api';
+import {
+  obtenerPapelesDeMascota,
+  type ConsultaConReceta,
+  type PapelDeMascota,
+  type TipoDocumentoExpediente,
+} from '@epetplace/api';
 
 /* La fila vive en el cliente, no en `ui` — es la misma que usaba el plegable. */
 import { FilaDocumento } from '@/components/fila-documento';
@@ -56,9 +63,10 @@ import {
   type Papel,
 } from '@/lib/papeles';
 import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
+import { useTraerPapeles } from '@/components/traer-papeles';
 import { useTraduccion } from '@/i18n';
 
-export default function PantallaDocumentos() {
+export default function RutaDocumentos() {
   const { mascotaId, nombre, memorial } = useLocalSearchParams<{
     mascotaId: string;
     nombre?: string;
@@ -72,6 +80,7 @@ export default function PantallaDocumentos() {
   const [falla, setFalla] = useState<string | null>(null);
   const [neutro, setNeutro] = useState<string | null>(null);
   const [eligiendoReceta, setEligiendoReceta] = useState<ConsultaConReceta[] | null>(null);
+  const [viendo, setViendo] = useState<PapelDeMascota | null>(null);
 
   /* ⛔ El «traer» se apaga en memorial. La lista NO: se lee entera. */
   const esMemorial = memorial === '1';
@@ -111,6 +120,82 @@ export default function PantallaDocumentos() {
 
   const deLaCasa: readonly Papel[] = PAPELES_DE_MASCOTA;
 
+  /* ⭐ **LOS PAPELES TRAÍDOS** (fase 3 · C2). Su sección dejó de ser un lugar
+     reservado: la puerta de A existe y la bóveda se lee. */
+  const [traidos, setTraidos] = useState<PapelDeMascota[] | null>(null);
+  const recargar = useCallback(() => {
+    void obtenerPapelesDeMascota(mascotaId).then((r) => {
+      /* Un fallo deja `null` y **la lista no se monta**: *media bóveda con
+         papeles y media sin es peor que ninguna — la que falta se lee como «no
+         tiene», no como «no cargó»*. */
+      if (r.ok) setTraidos(r.data);
+    });
+  }, [mascotaId]);
+  useEffect(recargar, [recargar]);
+
+  const traer = useTraerPapeles(mascotaId, recargar);
+
+  /* 🔴 **Los cuatro grupos de la pieza, y el mapa es del DATO al GRUPO.** La
+     bóveda guarda seis clases y la pantalla muestra cuatro cajones: *un cajón
+     por clase haría que «certificado» y «otro» tuvieran su propio rótulo con
+     una fila cada uno.* Lo que la casa emite va aparte, en «propios». */
+  const grupos: readonly GrupoDePapeles[] = [
+    {
+      grupo: 'examenes' as const,
+      rotulo: t('documentos.grupoExamenes'),
+      papeles: (traidos ?? [])
+        .filter((p) => p.clase === 'laboratorio' || p.clase === 'imagen')
+        .map((p) => ({
+          id: p.id,
+          grupo: 'examenes' as const,
+          titulo: p.titulo ?? t('documentos.examenSinTitulo'),
+          origen: p.origen ?? undefined,
+          fecha: p.fecha_papel ?? undefined,
+          onPress: () => setViendo(p),
+        })),
+    },
+    {
+      grupo: 'recetas' as const,
+      rotulo: t('documentos.grupoRecetas'),
+      papeles: (traidos ?? [])
+        .filter((p) => p.clase === 'receta')
+        .map((p) => ({
+          id: p.id,
+          grupo: 'recetas' as const,
+          titulo: p.titulo ?? t('documentos.recetaSinTitulo'),
+          origen: p.origen ?? undefined,
+          fecha: p.fecha_papel ?? undefined,
+          onPress: () => setViendo(p),
+        })),
+    },
+    {
+      grupo: 'informes' as const,
+      rotulo: t('documentos.grupoInformes'),
+      papeles: (traidos ?? [])
+        .filter((p) => p.clase === 'informe' || p.clase === 'certificado' || p.clase === 'otro')
+        .map((p) => ({
+          id: p.id,
+          grupo: 'informes' as const,
+          titulo: p.titulo ?? t('documentos.informeSinTitulo'),
+          origen: p.origen ?? undefined,
+          fecha: p.fecha_papel ?? undefined,
+          onPress: () => setViendo(p),
+        })),
+    },
+    {
+      grupo: 'propios' as const,
+      rotulo: t('documentos.deLaCasa'),
+      papeles: deLaCasa.map((papel) => ({
+        id: papel.tipo,
+        grupo: 'propios' as const,
+        titulo: t(`documentos.nombre${papel.claveVoz}` as 'documentos.nombreCarnetVacunas'),
+        onPress: () => {
+          void bajar(papel.tipo);
+        },
+      })),
+    },
+  ];
+
   return (
     <View style={{ flex: 1 }}>
       <Encabezado
@@ -119,58 +204,41 @@ export default function PantallaDocumentos() {
         atras
         onAtras={() => router.back()}
       />
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}
-      >
-        {/* 🔴 **EL «TRAER» VA ARRIBA Y HOY NO SE DIBUJA.** Su puerta
-            (`papeles_familia`, A) todavía no existe: *un botón que no puede
-            guardar nada no es una promesa, es una mentira con un toque de
-            distancia* (`L-318` — motor sin puerta, del lado de la superficie).
-            Entra en C2, en el mismo acto que su flujo. */}
+      {/* ⭐ **LA PIEZA DE B, con la bóveda viva** (fase 3 · C2).
+          Acá vivía una composición propia con dos secciones a mano. *La pieza
+          hace lo mismo y además agrupa, oculta los grupos vacíos y trae su
+          vacío* — mantener la mía sería una segunda forma de lo mismo que
+          alguien tendría que mantener sincronizada.
 
-        <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-          <Texto variante="seccion">{t('documentos.deLaCasa')}</Texto>
-          {/* Los cinco que e-PetPlace emite. **Marcados como propios** para
-              distinguirlos de los traídos el día que convivan: *un informe de
-              otra clínica y un carnet que emitimos nosotros no tienen la misma
-              autoridad, y la fila tiene que dejarlo ver.* */}
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            {deLaCasa.map((papel, i) => (
-              <View key={papel.tipo}>
-                {i > 0 ? <Separador /> : null}
-                <FilaDocumento
-                  icono={papel.icono}
-                  nombre={t(`documentos.nombre${papel.claveVoz}` as 'documentos.nombreCarnetVacunas')}
-                  apoyo={t('documentos.descargar')}
-                  cargando={bajando === papel.tipo}
-                  onPress={() => {
-                    void bajar(papel.tipo);
-                  }}
-                />
-              </View>
-            ))}
-          </Tarjeta>
-          {/* Ley 13: el fallo DICE que es fallo, jamás silencio. */}
-          {falla !== null ? <Texto variante="dato" color="danger">{falla}</Texto> : null}
-          {neutro !== null ? <Texto variante="apoyo">{neutro}</Texto> : null}
-        </View>
+          ⛔ **En memorial el «traer» no se ofrece**: `A3.9` apaga los pedidos,
+          no las lecturas. La pieza exige el slot, así que se le pasa con su
+          voz de memorial y sin acto — *un botón que no hace nada es peor que
+          no tenerlo*, y por eso la voz lo dice en vez de fingir. */}
+      <PantallaDocumentos
+        grupos={grupos}
+        traer={{
+          voz: esMemorial ? t('documentos.traerMemorial') : t('traerPapeles.titulo'),
+          onPress: esMemorial ? () => undefined : traer.abrir,
+        }}
+        vozVacio={
+          esMemorial
+            ? t('documentos.vacioMemorial')
+            : t('documentos.vacio', { nombre: nombre ?? '' })
+        }
+      />
 
-        {/* ⭐ **EL LUGAR DE LOS PAPELES TRAÍDOS, con su vacío ya escrito.**
-            Hoy dice la verdad —no hay ninguno, y no hay cómo traerlos— y el
-            día que la puerta de A exista, la lista entra acá agrupada por tipo.
-            ⛔ En memorial el vacío **no invita**: sería pedir una gestión. */}
-        <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-          <Texto variante="seccion">{t('documentos.deOtrasClinicas')}</Texto>
-          <EstadoVacio
-            registro="seccion"
-            titulo={
-              esMemorial
-                ? t('documentos.vacioMemorial')
-                : t('documentos.vacio', { nombre: nombre ?? '' })
-            }
-          />
-        </View>
-      </ScrollView>
+      {/* El flujo de traer: **la misma Hoja desde las dos puertas** (C2). */}
+      <HojaTraerPapeles
+        visible={traer.visible}
+        onCerrar={traer.cerrar}
+        titulo={t('traerPapeles.titulo')}
+        estado={traer.estado}
+        vozFoto={t('traerPapeles.foto')}
+        vozArchivo={t('traerPapeles.archivo')}
+        vozLeyendo={t('traerPapeles.leyendo')}
+        vozLeyendoLarga={t('traerPapeles.leyendoLarga')}
+        vozGuardar={t('traerPapeles.guardar')}
+      />
 
       {/* La Hoja de la receta: N consultas, la familia elige cuál. */}
       <Hoja

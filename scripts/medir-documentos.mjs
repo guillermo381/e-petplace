@@ -19,7 +19,7 @@ await page.getByText(/^(Entrar|Sign in)$/).first().click();
 await page.waitForTimeout(18000);
 di(`cuenta: ${process.env.CLIENTE_EMAIL}\n`);
 
-for (const n of ['Thor', 'Sombra']) {
+for (const n of ['Thor', 'Lolo', 'Sombra']) {
   await page.goto('http://localhost:8082/hogar', { waitUntil: 'networkidle' });
   await page.waitForTimeout(4000);
   await page.getByRole('button', { name: new RegExp(`^(Ver a )?${n}`) }).first().click();
@@ -35,11 +35,17 @@ for (const n of ['Thor', 'Sombra']) {
   const r = await page.evaluate(() => {
     const t = document.body.innerText;
     return {
+      /* ⏪ **ACÁ MEDÍA MI COMPOSICIÓN VIEJA** y por eso daba tres rojos falsos:
+         buscaba «Descargar PDF» —que la pieza de B ya no escribe—, mis dos
+         rótulos de sección y mi texto de vacío. *Un arnés escrito contra una
+         composición no mide la pantalla: mide la composición, y sobrevive a
+         ella dando rojos sobre algo que funciona.* Ahora mide lo que la PIEZA
+         dibuja: sus grupos, su invitación y su vacío. */
       llegó: /Papeles de e-PetPlace/.test(t),
-      papeles: (t.match(/Descargar PDF/g) ?? []).length,
-      seccionTraidos: /Papeles de otras clínicas/.test(t),
-      vacio: /Todavía no hay papeles de|No hay papeles de otras/.test(t),
-      invita: /tráela: la leemos por vos/.test(t),
+      vacio: /Todavía no hay papeles de|No hay papeles de otras|papeles quedan acá/.test(t),
+      invita: /Traer papeles de otra clínica/.test(t),
+      /* Los cuatro grupos de la pieza: sólo se dibujan los que tienen algo. */
+      grupos: ['Exámenes', 'Recetas', 'Informes', 'Papeles de e-PetPlace'].filter((g) => t.includes(g)),
       /* Ningún color de alarma en una fila de papel. */
       alarma: [...document.querySelectorAll('div,span')].filter((e) => {
         const c = getComputedStyle(e).color;
@@ -48,10 +54,9 @@ for (const n of ['Thor', 'Sombra']) {
     };
   });
   di(`  llegó a la bóveda      : ${r.llegó ? 'sí ✓' : '🔴 no'}`);
-  di(`  papeles de la casa     : ${r.papeles}`);
-  di(`  sección «otras clínicas»: ${r.seccionTraidos ? 'sí ✓' : '🔴 no'}`);
-  di(`  su vacío dice           : ${r.vacio ? 'sí ✓' : '🔴 no'}`);
-  di(`  invita a traer          : ${r.invita ? 'sí' : 'no'}  ${n === 'Sombra' ? (r.invita ? '🔴 NO debe invitar en memorial' : '✓ memorial no pide') : ''}`);
+  di(`  la bóveda vacía habla  : ${r.vacio ? 'sí' : 'no (tiene papeles)'}`);
+  di(`  grupos con algo        : ${r.grupos.join(' · ') || '(ninguno)'}`);
+  di(`  invita a traer         : ${r.invita ? 'sí' : 'no'}  ${n === 'Sombra' ? (r.invita ? '🔴 NO debe invitar en memorial' : '✓ memorial no pide') : ''}`);
   di(`  filas con color de alarma: ${r.alarma} ${r.alarma === 0 ? '✓' : '🔴'}`);
   await page.screenshot({ path: `docs/loop/capturas-s113-c-f3/documentos-${n}.png`, fullPage: true });
   di('');

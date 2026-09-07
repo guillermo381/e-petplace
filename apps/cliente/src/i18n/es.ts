@@ -2172,6 +2172,19 @@ export const clienteEs = {
     cohortePionero: 'Pionero desde {{anio}}',
     citas: '{{n}} citas completadas',
   },
+  traerPapeles: {
+    nadaQueLeer: 'No encontramos datos en ese papel. Prueba con otra foto.',
+    noPudeAbrir: 'No pudimos abrir ese archivo.',
+    pdfEspera: 'Por ahora traemos papeles por foto. El PDF llega en la próxima actualización.',
+    guardado: 'Guardado en sus papeles.',
+    faltaAlgo: 'Revisa lo que falta',
+    titulo: 'Traer papeles de otra clínica',
+    foto: 'Elegir una foto',
+    archivo: 'Elegir un PDF',
+    leyendo: 'Leyendo el papel…',
+    leyendoLarga: 'Sigue leyendo. Los papeles con muchas filas tardan un poco más.',
+    guardar: 'Guardar en sus papeles',
+  },
   documentos: {
     titulo: 'Documentos',
     ley: 'Los papeles de tu familia, todos acá.',
@@ -2185,9 +2198,16 @@ export const clienteEs = {
      *  presta un glifo que significa otra cosa). */
     descargar: 'Descargar PDF',
     deLaCasa: 'Papeles de e-PetPlace',
+    grupoExamenes: 'Exámenes',
+    grupoRecetas: 'Recetas',
+    grupoInformes: 'Informes',
+    examenSinTitulo: 'Examen',
+    recetaSinTitulo: 'Receta',
+    informeSinTitulo: 'Informe',
     deOtrasClinicas: 'Papeles de otras clínicas',
     vacio: 'Todavía no hay papeles de {{nombre}}. Si ya tiene historia en otra clínica, tráela: la leemos por vos.',
     vacioMemorial: 'No hay papeles de otras clínicas.',
+    traerMemorial: 'Sus papeles quedan acá',
     quéReceta: '¿De qué consulta?',
     // S91-C — EL SELECTOR DE LA RECETA. La receta se emite sobre UNA
     // consulta: la superficie pregunta cuál en vez de rebotar, y jamás
