@@ -220,10 +220,17 @@ export default function RutaDocumentos() {
           voz: esMemorial ? t('documentos.traerMemorial') : t('traerPapeles.titulo'),
           onPress: esMemorial ? () => undefined : traer.abrir,
         }}
+        /* 🔴 **SIN NOMBRE, LA VOZ NO LO NOMBRA** (`verify:voz-sin-hueco`, y el
+           gate lo cazó en el cierre). `nombre` viene por parámetro de ruta y
+           puede faltar: con `?? ''` la pantalla decía *«Todavía no hay papeles
+           de .»* — *es el defecto exacto que A me encontró en aparato con «Lo
+           que sé de » y por el que existe este gate.*
+           Sin nombre se usa la voz sin sujeto, que es correcta igual: la
+           mascota ya está en el encabezado. */
         vozVacio={
-          esMemorial
+          esMemorial || nombre === undefined || nombre.trim() === ''
             ? t('documentos.vacioMemorial')
-            : t('documentos.vacio', { nombre: nombre ?? '' })
+            : t('documentos.vacio', { nombre })
         }
       />
 
