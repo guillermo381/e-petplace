@@ -128,6 +128,27 @@ no está confirmado sería exactamente la mentira que toda la letra prohíbe.*
 
 ---
 
+## 0quater-bis. 🔴 ENMIENDA S114 (7-sep-2026) — **EL BLOQUEO DE ESTE § YA NO ES EL QUE DICE**
+
+**Medido corriendo `?verificar=1` contra la edge desplegada, no leído:**
+
+- ~~la credencial NO es un token de Meta (largo 23, sin `EAA`)~~ → 🟢 **el token es
+  VÁLIDO**: 196 caracteres, empieza con `EAA`, sin espacios ni comillas, y con
+  **los dos permisos** (`whatsapp_business_messaging` **y** `..._management`).
+  Los tres secrets se recargaron el **25-ago-2026**.
+- ~~las plantillas están en MARKETING y la re-categorización es crítica~~ →
+  🟢 **las 8 están en UTILITY y APROBADAS. Cero en MARKETING.** *Esa deuda está
+  pagada y el canon no se había enterado.*
+
+> ### 🔴 **EL BLOQUEO VIVO ES OTRO: `code_verification_status: EXPIRED` en el número** (`+593 98 733 0099`, `verified_name: E-PetPlace`).
+> Es una acción del founder en la consola de Meta, **y no la cubre ningún
+> permiso ni ninguna plantilla.** Se suma el cuarto (§9bis): nadie podía
+> nombrar una plantilla desde la base — construido en S114.
+
+*La letra de abajo se conserva ENTERA y sin retocar: describe con precisión el
+estado del 8-ago y es la historia de cómo se llegó acá. Lo que cambió es cuál
+de sus frenos sigue siendo el freno.*
+
 ## 0quater. S91 (8-ago-2026) — CAE UNA ESPERA, NO TRES → y AL CIERRE DEL DÍA LA LÍNEA SE CONGELA *(medición de C + decisión founder, ambas verbatim)*
 
 > ⚠️ **Este § tiene DOS momentos del MISMO día y hay que leer los dos.** Abre con
@@ -961,6 +982,45 @@ canal tiene tren.
 **① el lector · ② la pieza y la pantalla · ③ el gate del founder · ④ recién ahí
 el `UPDATE` de transporte.** *Encender antes hace que el motor entregue a un
 buzón que nadie puede abrir — sin fallar, sin rebotar y sin rastro rojo.*
+
+### §9bis · EL CUARTO BLOQUEO DE WHATSAPP, y por qué va ANTES del flip *(S114-A, 7-sep-2026)*
+
+**Medido contra el objeto:** `notificacion_intencion` tiene **410 filas** y
+**CERO** con una plantilla nombrada —ni en `datos` ni en `resuelto_como`—;
+**cero columnas** de plantilla en el subsistema de avisos y **cero funciones**
+que escriban una. *Control positivo del instrumento: esas mismas 410 filas
+**sí** tienen `canal_elegido`, así que el cero es una medición.*
+
+> ### **Meta no acepta un mensaje sin `template.name`, y hasta hoy nadie podía nombrar una plantilla desde la base.**
+
+🔴 **Y no producía un solo síntoma.** Con `transporte_vivo = false` el
+despachador corre entero, cuenta `habria_entregado` y no manda nada — *el hueco
+se habría descubierto el día del flip, con mensajes fallando de a lotes y con
+costo por intento.* **Por eso esta pieza es del paso ① de la ley de arriba, no
+del ④.**
+
+**Lo construido:** `cat_notificacion_tipos.plantilla_whatsapp` +
+`plantilla_idioma`, y `resolver_plantilla_whatsapp(p_tipo)`, que **distingue
+`tipo_desconocido` (un bug) de `sin_plantilla` (una decisión de mesa
+pendiente)** — dos huecos con dueños distintos, y un resolvedor que devolviera
+NULL para los dos mandaría a reintentar algo que no va a funcionar nunca.
+
+⚠️ **Se sembró UN mapeo, no ocho, y es decisión declarada:** de las 8 plantillas
+aprobadas sólo `pedido_confirmado` coincide **exacto** con un tipo. Tres más
+coinciden **sólo si se asume que `_u` y `_v` son sufijos ignorables**, y son
+**dos sufijos distintos** cuyo significado no está escrito en ningún lado.
+*Adivinar acá no falla hoy: falla el día del flip, mandándole a una familia el
+texto de otro aviso — y cobrado por intento.* **Los siete restantes son de la
+mesa**, y la tabla es su lugar.
+
+**Los cuatro bloqueos, para que se lean juntos:**
+
+| # | bloqueo | estado al 7-sep-2026 |
+|---|---|---|
+| ① | el token no era de Meta | ✅ **resuelto** — 196 chars, `EAA`, los dos permisos |
+| ② | las 8 plantillas en MARKETING | ✅ **resuelto** — las 8 en UTILITY y aprobadas |
+| ③ | `code_verification_status: EXPIRED` en el número | 🔴 **ABIERTO — del founder, en la consola de Meta** |
+| ④ | nadie podía nombrar una plantilla | ✅ el mecanismo existe · **7 mapeos esperan a la mesa** |
 
 ## §10 · LA REGLA QUE GOBIERNA TODA SALIDA DE SOMBRA
 

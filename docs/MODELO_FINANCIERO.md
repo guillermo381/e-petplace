@@ -918,6 +918,47 @@ Dos eventos económicos separados, ambos sin payout (revenue puro plataforma).
 - Cron mensual crea hijos: `monto_plataforma=4.50`, `cohorte_periodo='mes_N'`.
 - Cancelación en mes 5: `cancelar_eventos_diferidos_pendientes()` reversa hijos pendientes.
 
+### 8.4bis 🔴 EL LEDGER NO SE ESCRIBE DESDE EL 9-AGO-2026 *(S114-A, medido 7-sep-2026)*
+
+**El comando, para que el número sea reproducible y no una afirmación:**
+
+```sql
+select to_char(created_at,'YYYY-MM'), count(*), sum(monto_bruto)
+  from eventos_economicos group by 1;
+select to_char(cerrado_en,'YYYY-MM'), count(*), sum(monto)
+  from pagos_intentos where estado='aprobado' and cerrado_en is not null group by 1;
+select proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+ where n.nspname='public' and pg_get_functiondef(p.oid) ~* 'crear_evento_economico'
+   and proname <> 'crear_evento_economico';
+```
+
+| | |
+|---|---|
+| eventos económicos · julio | 19 · $225,50 |
+| eventos económicos · agosto | 17 · $162,75 — **el último es del 9-ago** |
+| eventos económicos · septiembre | **CERO** |
+| pagos **aprobados** · agosto | **91 · $3.945,89** |
+| pagos **aprobados** · septiembre | **12 · $387,86** |
+| liquidaciones | **0 filas** |
+
+**La causa está medida y es de diseño, no un defecto suelto.** El evento nace
+**al cerrar con calidad** (variante (b)), y los únicos productores son
+`cerrar_paseo_con_calidad` · `cerrar_grooming_con_calidad` ·
+`cerrar_atencion_adiestramiento` · `marcar_no_show_cita` ·
+`vencer_paquetes_salidas`.
+
+> ### **`origen_tipo` es `'cita'` en los 36 eventos, sin una sola excepción. Veterinaria, telemedicina, guardería y despensa cobran y no devengan.**
+
+Y la otra mitad de la cadena: **132 citas pasadas y pagadas siguen sin cerrar**
+contra 51 completadas — **el 72 % de lo cobrado y ya ocurrido nunca devengó.**
+
+**Lo que esto le hace a §8.5 y a 7.3:** `aplicar_reembolso()` reversa
+**eventos económicos**. Para casi toda la plata cobrada desde el 9-ago **no hay
+evento que reversar**, y la herramienta contable de la postventa queda operando
+sobre un ledger que dejó de escribirse. *No es que la pieza esté rota: su
+insumo no existe.* ⇒ los cuatro productores que faltan están firmados en
+`LETRA_POSTVENTA` §8 (F10).
+
 ### 8.5 Reembolso de pedido ya liquidado
 - `aplicar_reembolso()` crea evento inverso con montos negativos.
 - Original cambia a `estado='reversado'`.
@@ -1146,7 +1187,7 @@ factura, que es el peor lugar.
 |---|---|---|
 | ① | **Meta empieza a cobrar los mensajes `utility`** | **desde el 1-oct-2026** |
 | ② | **Ecuador cuesta ~17× lo que cuesta Colombia** por mensaje | ya |
-| ③ | Las 6 plantillas están categorizadas **MARKETING** y deben ser **UTILITY** | tarea del founder |
+| ③ | ~~Las 6 plantillas están categorizadas **MARKETING** y deben ser **UTILITY**~~ 🔴 **VENCIDO (S114, 7-sep-2026 — medido en Meta): son 8, todas UTILITY y todas APROBADAS. Cero en MARKETING.** El multiplicador que este ③ le ponía al ① **no existe**: el canal va a arrancar en la tarifa barata. *El ① y el ② siguen enteros — la fecha del 1-oct y la banda de Ecuador no se movieron.* | ~~tarea del founder~~ **hecha** |
 
 **El ② es el que cambia decisiones y el que nadie esperaba.** El precio de
 WhatsApp es **por país de destino**, y Ecuador —nuestro primer mercado— está
