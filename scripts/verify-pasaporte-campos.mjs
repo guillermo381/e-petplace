@@ -29,7 +29,12 @@ import { exigirArgumentos } from './lib-argumentos.mjs';
 exigirArgumentos(['--control'], 0);
 
 const FIRMADOS = process.env.PASAPORTE_CAMPOS ?? 'docs/loop/PASAPORTE-CAMPOS-FIRMADOS.json';
-const RPC = process.env.PASAPORTE_RPC ?? 'pasaporte_publico';
+/* ⚠️ El default era `pasaporte_publico` y esa RPC NUNCA existió: la real es
+   `leer_pasaporte(p_token text)` (medida en pg_proc por A, 6-sep). El gate
+   quedaba en NO CONCLUYENTE — honesto, pero sin medir nada. E ya lo había
+   dejado parametrizable; esto sólo corrige el nombre por defecto.
+   *Un gate atado a un nombre mide la convención, no el hecho.* */
+const RPC = process.env.PASAPORTE_RPC ?? 'leer_pasaporte';
 const di = (s) => console.log(s);
 
 /** Las claves que la RPC declara devolver, leídas de su firma en la base. */
