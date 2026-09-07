@@ -117,6 +117,19 @@ devuelve vacío por diseño, y está bien que así sea.
 
 ---
 
+## 🔴 ④ Un tipo nuevo trajo un destino que no existe (lo midió E)
+
+`papel` apunta a **`/hogar/mascota/<id>/papeles`**, que no está en las 97 rutas
+de `apps/cliente` — ni en `main`, ni en ninguna rama de B o C. *El resultado se
+ve impecable —título, subtítulo, fecha— y el toque no lleva a ninguna parte.*
+No lo ve el typecheck, ni `gen:types`, ni el router: la ruta la arma el SQL como
+texto. **El tipo lo produzco yo; la ruta la armás vos**, así que lo dejo acá:
+o la pantalla existe antes de que `papel` entre a la búsqueda, o ese brazo
+devuelve la ruta de la mascota hasta que exista.
+Lo ve el gate de calidad de búsqueda **de E** —vive en `pista/s113-e-3.0`, no en
+esta rama, así que acá se nombra y no se invoca (`D-1015`: un comando que este
+árbol no tiene no se escribe como si se pudiera correr)—.
+
 ## Lo que YA está de mi lado, para que no lo dupliques
 
 * `podarConsulta` (`packages/domain`) — **46 palabras estructurales**, con las de
