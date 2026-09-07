@@ -1,0 +1,70 @@
+{
+  "que_es": "40 frases como las tipea una familia, para medir la caja de búsqueda.",
+  "por_que_las_escribi_yo_y_no_D": [
+    "D midió su poda con 43 frases que escribió el mismo que escribió la poda, y",
+    "lo declaró: una separación perfecta sobre un conjunto propio mide la",
+    "facilidad del conjunto, no la capacidad del instrumento. Este conjunto se",
+    "escribió A PROPÓSITO contra su lista de 15 palabras estructurales",
+    "(pedido/orden/compra/cita/turno/recuerdo/nota y sus plurales): 22 de las 40",
+    "traen una palabra de estructura que esa lista NO tiene, y casi todas son",
+    "del vocabulario que la fase 3 acaba de inventar — examen, receta, informe,",
+    "análisis, papel. La lista es anterior a la bóveda."
+  ],
+  "reparto_declarado": {
+    "busqueda": 30,
+    "pregunta": 10,
+    "nota": "El reparto se DECLARA acá y el instrumento lo VERIFICA contra el archivo: un conjunto cuyo reparto sólo vive en la prosa deja de ser el que se describe en cuanto alguien agrega una fila."
+  },
+  "vocabulario": {
+    "intencion": ["busqueda", "pregunta"],
+    "tipo_esperado": ["mascota", "cita", "pedido", "recuerdo", "producto", "prestador", "papel", "ninguno"],
+    "nota_papel": "`papel` todavía no es un tipo que la búsqueda devuelva: es lo que la fase 3 le va a sumar. Se declara ahora para que el día que exista se mida contra algo escrito antes, y no contra lo que salga."
+  },
+  "frases": [
+    { "f": "el examen de sangre de Thor", "intencion": "busqueda", "tipo": "papel", "estresa": "vocabulario de bóveda: «examen» no está en las 15" },
+    { "f": "los exámenes de Zeus", "intencion": "busqueda", "tipo": "papel", "estresa": "plural con tilde + vocabulario de bóveda" },
+    { "f": "la receta del veterinario", "intencion": "busqueda", "tipo": "papel", "estresa": "«receta» es estructura y no está en las 15" },
+    { "f": "el informe de la ecografía", "intencion": "busqueda", "tipo": "papel", "estresa": "«informe» es estructura; «ecografía» es contenido" },
+    { "f": "análisis de orina", "intencion": "busqueda", "tipo": "papel", "estresa": "dos palabras, las dos fuera de las 15" },
+    { "f": "el estudio que le hicieron", "intencion": "busqueda", "tipo": "papel", "estresa": "voz de persona, sin nombre propio" },
+    { "f": "resultados del laboratorio", "intencion": "busqueda", "tipo": "papel", "estresa": "«resultados» suena a contenido y es estructura" },
+    { "f": "papeles de Thor", "intencion": "busqueda", "tipo": "papel", "estresa": "la palabra que la fase 3 usa para todo el frente" },
+
+    { "f": "la factura del pedido", "intencion": "busqueda", "tipo": "pedido", "estresa": "«factura» fuera de las 15 acompañando a «pedido», que sí está" },
+    { "f": "el comprobante de la compra", "intencion": "busqueda", "tipo": "pedido", "estresa": "«comprobante» fuera; «compra» dentro" },
+    { "f": "la reserva del sábado", "intencion": "busqueda", "tipo": "cita", "estresa": "«reserva» es como la familia llama a una cita" },
+    { "f": "la visita al veterinario", "intencion": "busqueda", "tipo": "cita", "estresa": "«visita» fuera de las 15; es la palabra natural" },
+    { "f": "el control de Zeus", "intencion": "busqueda", "tipo": "cita", "estresa": "«control» fuera; y es ambiguo con contenido" },
+    { "f": "el chequeo anual", "intencion": "busqueda", "tipo": "cita", "estresa": "palabra que ningún catálogo usa" },
+    { "f": "la consulta de la semana pasada", "intencion": "busqueda", "tipo": "cita", "estresa": "«consulta» ES el nombre de un servicio: contenido disfrazado de estructura" },
+    { "f": "el plan de paseos", "intencion": "busqueda", "tipo": "cita", "estresa": "«plan» es un comprable y no un tipo de la búsqueda" },
+    { "f": "mi bono de guardería", "intencion": "busqueda", "tipo": "ninguno", "estresa": "un comprable que la búsqueda NO indexa: tiene que decir que no encontró" },
+    { "f": "el paquete que compré", "intencion": "busqueda", "tipo": "ninguno", "estresa": "otro comprable sin fuente en la caja" },
+
+    { "f": "Thor", "intencion": "busqueda", "tipo": "mascota", "estresa": "control negativo: contenido puro, tiene que andar con FTS solo" },
+    { "f": "Zeus", "intencion": "busqueda", "tipo": "mascota", "estresa": "control negativo" },
+    { "f": "Clínica Los Shyris", "intencion": "busqueda", "tipo": "prestador", "estresa": "control negativo con tilde y nombre compuesto" },
+    { "f": "paseo", "intencion": "busqueda", "tipo": "cita", "estresa": "control negativo: «paseo» es contenido, no estructura — el caso que D midió andando" },
+
+    { "f": "cuándo le toca la pipeta", "intencion": "pregunta", "tipo": "ninguno", "estresa": "pregunta de cuidado: no es búsqueda, va a Nexo" },
+    { "f": "cuánto pesa Zeus", "intencion": "pregunta", "tipo": "ninguno", "estresa": "pregunta con nombre propio adentro: el nombre NO la vuelve búsqueda" },
+    { "f": "qué come Thor", "intencion": "pregunta", "tipo": "ninguno", "estresa": "igual, y además casaría con productos si los hubiera" },
+    { "f": "cuándo fue la última vacuna", "intencion": "pregunta", "tipo": "ninguno", "estresa": "pregunta sobre un dato del expediente" },
+    { "f": "está al día con las vacunas", "intencion": "pregunta", "tipo": "ninguno", "estresa": "pregunta de estado, sin nombre" },
+    { "f": "cuánto gasté este mes", "intencion": "pregunta", "tipo": "ninguno", "estresa": "pregunta que exige agregar, no encontrar" },
+    { "f": "por qué tose", "intencion": "pregunta", "tipo": "ninguno", "estresa": "pregunta clínica: Nexo tiene que escalar, no buscar" },
+    { "f": "cada cuánto hay que desparasitar", "intencion": "pregunta", "tipo": "ninguno", "estresa": "pregunta general, sin sujeto" },
+
+    { "f": "thorr", "intencion": "busqueda", "tipo": "mascota", "estresa": "tipeo: una letra de más sobre un nombre que existe" },
+    { "f": "zeuz", "intencion": "busqueda", "tipo": "mascota", "estresa": "tipeo: una letra cambiada" },
+    { "f": "muneca", "intencion": "busqueda", "tipo": "mascota", "estresa": "la ñ escrita como n — el límite que la migración DECLARA y nadie mide" },
+    { "f": "veterinario", "intencion": "busqueda", "tipo": "cita", "estresa": "género distinto al del catálogo («veterinaria»): lo resuelve el diccionario o no" },
+
+    { "f": "la del mes pasado", "intencion": "pregunta", "tipo": "ninguno", "estresa": "referencia temporal sin sujeto: no hay nada que buscar" },
+    { "f": "lo de ayer", "intencion": "pregunta", "tipo": "ninguno", "estresa": "todo palabras vacías: el motor devuelve vacío HABLANDO, no error" },
+    { "f": "el último paseo de Zeus", "intencion": "busqueda", "tipo": "cita", "estresa": "búsqueda con orden implícito que la caja no puede honrar" },
+    { "f": "todo lo de Thor", "intencion": "busqueda", "tipo": "mascota", "estresa": "voz de persona pidiendo TODO: el techo decide qué ve" },
+    { "f": "dónde está la libreta", "intencion": "busqueda", "tipo": "papel", "estresa": "«libreta» es como se llama al carnet en la calle" },
+    { "f": "la vacuna de la rabia", "intencion": "busqueda", "tipo": "recuerdo", "estresa": "un evento del expediente, con su nombre real" }
+  ]
+}

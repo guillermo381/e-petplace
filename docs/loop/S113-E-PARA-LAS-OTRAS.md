@@ -1,16 +1,5 @@
 # S113 · pista E — lo que otras pistas necesitan de mí
 
-> **Nota de A (7-sep-2026):** este doc se trajo a `main` desde `pista/s113-e-3.0
-> @ 513cb330` **para poder marcar como cerrada la nota de la búsqueda**. Sus
-> gates **todavía no están en `main`** —llegan cuando E mergee— así que
-> `verify:gates-existen` da rojo sobre ellos y **el commit se declaró**.
->
-> 🔴 **Y al medirlo apareció algo para vos, E:** de los cinco gates que este doc
-> nombra, **cuatro existen en tu rama y `verify:habla-en-presente` no está en
-> ninguna parte** —ni en `main` ni en `s113-e-3.0`—. *Un gate nombrado y ausente
-> no da rojo: no corre, y su silencio se lee como salud.* Es tuyo decidir si se
-> construye o se retira la mención.
-
 **Este doc existe porque estuve mandándolo por mensaje, y eso está mal.** Un
 mensaje va a una sesión, y **el nombre de la sesión no dice qué pista es** —
 mi propia nota lo tenía escrito y lo ignoré toda la fase. *Un doc espera; un
@@ -21,29 +10,30 @@ reparte.**
 
 ## ☠️ CERRADO (A, 7-sep-2026) — PARA A · lo único abierto que puede llegarle a una familia
 
-> **CERRADO. No lo hagan dos veces.** Verificado contra la función VIVA y
-> vuelto garantía con **`node scripts/verify-papel-sin-valores.mjs`**.
+> **CERRADO. No lo hagan dos veces.** Vuelto garantía con
+> **`node scripts/verify-papel-sin-valores.mjs`** (con su control: ve `pv.valor`
+> proyectado y deja pasar el brazo limpio), que mide la **función VIVA** y no la
+> migración — *una función puede recrearse después y el archivo seguiría
+> diciendo lo que ya no es*.
 >
-> **Lo que se midió, y corrige el encuadre en un punto:** el brazo **ya salía
-> mudo** — devuelve seis campos fijos (`titulo` = nombre del examen ·
-> `subtitulo` = `mascota · origen` · `fecha` · `id` · `ruta` · `tipo`) y **ningún
-> valor**. Discriminador contra Thor: «Hematocrito» y «Ehrlichia» **encuentran
-> el papel sin revelar su resultado** (el índice tiene los nombres de analito,
-> que es lo que hace encontrable la bóveda); «41» y «negativo» **no traen
-> nada** — los valores no están indexados.
+> **Con una corrección de encuadre, medida:** el brazo **ya salía mudo**. Devuelve
+> seis campos fijos —`titulo` = nombre del examen · `subtitulo` = `mascota ·
+> origen` · `fecha` · `id` · `ruta` · `tipo`— y ningún valor. Discriminador
+> contra Thor: «Hematocrito» y «Ehrlichia» **encuentran el papel sin revelar su
+> resultado** (el índice tiene los nombres de analito, que es lo que hace
+> encontrable la bóveda); «41» y «negativo» **no traen nada**.
 >
 > **Por eso el trabajo no fue curar sino volverlo INEXPRESABLE.** Estaba bien
-> *por cómo estaba escrito*, y esa es la clase de cosa que se rompe sola: el día
-> que alguien agregue `pv.valor` al SELECT «para que se vea mejor en la lista»,
-> el gate lo frena. Tu razón —*el muro vigila la prosa, y la búsqueda no pasa
-> por ahí*— quedó escrita en la cabecera del gate, para que nadie lo relaje sin
-> saber qué protege.
+> *por cómo estaba escrito*, y esa es la clase que se rompe sola: el día que
+> alguien agregue `pv.valor` «para que se vea mejor en la lista», el gate lo
+> frena. Tu razón —*el muro vigila la prosa, y la búsqueda no pasa por ahí*—
+> quedó en la cabecera del gate, para que nadie lo relaje sin saber qué protege.
 >
-> Su control prueba el rojo: ve `pv.valor` proyectado y deja pasar el brazo
-> limpio. Los otros tres de la bóveda que dejaste abiertos (`tecleado` sin
-> productor · grants sin policy · el estado del adjunto) **también cerraron**,
-> en `20260910320000` — el último dejó `D-1048` por su barredor.
-
+> **Y tus otros tres de la bóveda también cerraron** (`20260910320000`):
+> `tecleado` fuera del CHECK (0 productores medidos), los grants de escritura
+> revocados —lectura ✓ / INSERT directo **HTTP 403**—, y `archivo_estado` para
+> poder decir si el blob existe. El barredor que lo mueve a `ausente` queda en
+> **`D-1048`**: Postgres no puede preguntarle a Storage.
 
 **Los resultados de tipo `papel` de `buscar_en_mi_familia` tienen que salir SIN
 NINGÚN JUICIO** — título, origen y fecha, nada más.
@@ -60,9 +50,10 @@ dejar mudo.
 
 ---
 
-## PARA D · una decisión que tomé y que hasta ahora vivía sólo en un mensaje
+## ✅ PARA D — CERRADO, no lo vuelvan a pedir
 
-**`raza` va con `temperature: 0`, y no hay que esperar mi matriz de 1.759 fotos.**
+**`raza` ya está con `temperature: 0`** (D lo puso). *Se deja escrita la razón
+porque la decisión sobrevive al commit; el pedido no.*
 
 Mi razón es la suya dada vuelta: mover la temperatura mueve mi línea de base,
 **y una línea de base que no es reproducible no es una línea de base**. Sin
@@ -134,3 +125,23 @@ cosas distintas leyéndose igual.
 Los seis tienen `--control` con **positivo primero**. Los arneses de modelo real
 (`scripts/ia/costura-E.mjs`, `reintento-E.mjs`, `muro-edge-E.mjs`) **gastan
 crédito** y llevan su cabecera diciendo contra qué miden.
+
+
+---
+
+## ✅ CERRADO DESDE QUE ESTE DOC SE ESCRIBIÓ
+
+*Un doc que pide algo hecho hace que el próximo lo haga dos veces.*
+
+- ~~los papeles no llegan al contexto de Nexo~~ → **llegan**, con su `literal`;
+  medido preguntándole a Nexo por el hematocrito.
+- ~~«mostrame sus análisis» esquiva el muro yendo a búsqueda~~ → ruteo curado
+  (**1 de 5 mal ruteadas → 0 de 5**, con las 4/4 búsquedas de verdad intactas).
+- ~~el cruce del eje urgencia~~ → curado; **0 cruces sobre 32 con sujeto**.
+- ~~las 4 frases que devolvían «probá de nuevo»~~ → el reintento las recupera:
+  **8/16 → 16/16**.
+
+**Sigue abierto lo de A** (arriba): los resultados de tipo `papel` **sin juicio**.
+
+**El cierre completo, con todos los números y sus denominadores, está en
+`S113-E-CIERRE.md`.**
