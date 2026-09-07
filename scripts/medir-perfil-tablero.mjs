@@ -212,6 +212,58 @@ async function verPerfil(nombre) {
         }
         return out;
       })(),
+      /* ⭐ **LAS CUATRO ACCIONES** (2.2.4). Se miden por su CAJA dentro de la
+         fila, no por el texto: los nombres («Documentos», «Cuéntanos») viven
+         también en otras partes de la pantalla. */
+      acciones: (() => {
+        const cajas = [];
+        for (const e of document.querySelectorAll('[role="button"]')) {
+          const t2 = (e.getAttribute('aria-label') ?? e.textContent ?? '').trim();
+          if (!/^(Citas|Pasaporte y QR|Documentos|Cuéntanos|Nexo)$/.test(t2)) continue;
+          const r = e.getBoundingClientRect();
+          if (r.height === 0 || r.y > 700) continue;
+          if (!cajas.some((c) => c.t === t2)) cajas.push({ t: t2, x: Math.round(r.x) });
+        }
+        return cajas.sort((a, b) => a.x - b.x).map((c) => c.t);
+      })(),
+      /* ⭐ **LOS DIEZ DEL OJO DEL FOUNDER** (2.2.2). */
+      vacunasDice: (txt.match(/\d+ de \d+ al día/) ?? [''])[0],
+      diceProximaPasada: /próxima el \d+ \w+ 202[0-4]/.test(txt),
+      diceVencida: /vencida desde/.test(txt),
+      /* Alérgenos repetidos: se cuentan los nombres, no las apariciones. */
+      alergenos: (() => {
+        const m = txt.match(/Alérgico a ([^·\n]+)/g) ?? [];
+        const nombres = m.map((x) => x.replace(/^Alérgico a /, '').trim().toLowerCase());
+        return { total: nombres.length, distintos: new Set(nombres).size };
+      })(),
+      /* La tarjeta Citas: qué servicio nombra. */
+      citaServicio: (() => {
+        for (const e of document.querySelectorAll('div,span')) {
+          if ((e.textContent ?? '').trim() !== 'Citas') continue;
+          const caja = e.closest('div')?.parentElement;
+          const t2 = (caja?.textContent ?? '').replace('Citas', '').trim();
+          if (t2 !== '') return t2.slice(0, 44);
+        }
+        return '(no la hallé)';
+      })(),
+      diceConociendolo: (txt.match(/Conociéndolo/g) ?? []).length,
+      diceCuentanos: (txt.match(/^Cuéntanos$/m) ?? []).length,
+      completoDice: /casi como tú|almost as well/.test(txt),
+      pideCompletar: /Completa lo que falta|Fill in what/.test(txt),
+      /* El bloque que murió y el CTA que bajó. */
+      bloqueHechos: /\d+\s*Paseos/.test(txt) && /\d+\s*Vacunas/.test(txt),
+      reservarEsBoton: (() => {
+        for (const e of document.querySelectorAll('[role="button"]')) {
+          const t2 = (e.getAttribute('aria-label') ?? e.textContent ?? '').trim();
+          if (!/^Reservar un servicio/.test(t2)) continue;
+          const r = e.getBoundingClientRect();
+          return { alto: Math.round(r.height), ancho: Math.round(r.width) };
+        }
+        return null;
+      })(),
+      /* Voz de motor en la historia. */
+      vozDeMotor: (txt.match(/Anotaste cómo estuvo|Momento de cuidado|Lo anotó quien lo cuidó/g) ?? []).length,
+      vozDeMotorCuales: (txt.match(/Anotaste cómo estuvo|Momento de cuidado|Lo anotó quien lo cuidó/g) ?? []),
       /* Lo que queda al PIE, después del último rótulo de sección. */
       pie: txt.slice(-140).replace(/\n+/g, ' · ').trim(),
     };
@@ -245,6 +297,16 @@ for (const n of ['Thor', 'Lolo', 'Sombra']) {
     for (const d of r.truncados.slice(0, 4))
       di(`      · «${d.t}» ${d.w}→${d.necesita}px · hijos=${d.hijos}${d.culpable ? ` · el ancho lo pone «${d.culpable.t}» (llega a ${d.culpable.der})` : ''}`);
   }
+  di(`  acciones: ${r.acciones.length ? r.acciones.join(' · ') : '(ninguna)'}`);
+  di('  ── los diez ──');
+  di(`  ① vacunas «${r.vacunasDice}» · próxima pasada=${r.diceProximaPasada ? '🔴 sí' : 'no ✓'} · dice vencida=${r.diceVencida ? 'sí ✓' : 'no'}`);
+  di(`  ② alérgenos: ${r.alergenos.total} dichos, ${r.alergenos.distintos} distintos ${r.alergenos.total === r.alergenos.distintos ? '✓' : '🔴 repite'}`);
+  di(`  ③ Citas dice: «${r.citaServicio}»`);
+  di(`  ④ «Conociéndolo» aparece ${r.diceConociendolo}× · acción «Cuéntanos»=${r.diceCuentanos}`);
+  di(`  ⑤ completo=${r.completoDice ? 'sí' : 'no'} · pide completar=${r.pideCompletar ? 'sí' : 'no'}`);
+  di(`  ⑥ «Reservar» ${r.reservarEsBoton === null ? 'no está' : `${r.reservarEsBoton.ancho}×${r.reservarEsBoton.alto}`}`);
+  di(`  ⑧ voz de motor en la historia: ${r.vozDeMotor} ${r.vozDeMotor === 0 ? '✓' : '🔴'}${r.vozDeMotor ? ' — ' + [...new Set(r.vozDeMotorCuales)].join(' · ') : ''}`);
+  di(`  ⑩ bloque «paseos·vacunas»: ${r.bloqueHechos ? '🔴 sigue' : 'muerto ✓'}`);
   di(`  al pie             : …${r.pie.slice(-70)}\n`);
   await page.screenshot({ path: `docs/loop/capturas-s113-c-2.2.1/${n}.png`, fullPage: true });
 }

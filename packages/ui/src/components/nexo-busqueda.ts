@@ -9,7 +9,23 @@
 /** Los cinco lugares donde la familia tiene cosas. **Cerrado a propósito**:
  *  un tipo nuevo sin rótulo ni glifo no compila, en vez de caer a un grupo
  *  «otros» que nadie sabría abrir. */
-export type TipoResultado = 'citas' | 'pedidos' | 'recuerdos' | 'despensa' | 'prestadores'
+/**
+ * 🔴 **ENTRAN `mascotas` Y `papeles` (S113-B · fase 3 · B4).**
+ *
+ * `mascotas` faltaba y es el caso más obvio de todos: *buscar «Thor» y que la
+ * única cosa que no aparezca sea Thor.*
+ *
+ * `papeles` es la bóveda — lo que la familia trae de otra clínica. **Y es el
+ * que más importa que esté**: *un examen de hace dos años es exactamente lo
+ * que alguien busca en el pasillo de una veterinaria, y si no está acá, no
+ * está en ningún lado.*
+ *
+ * ⚠️ El orden de esta unión NO decide el orden en pantalla —eso lo arma la
+ * pantalla con sus grupos— pero **sí obliga**: la tabla de glifos es
+ * exhaustiva, así que **un tipo nuevo sin glifo no compila**.
+ */
+export type TipoResultado =
+  | 'mascotas' | 'citas' | 'pedidos' | 'papeles' | 'recuerdos' | 'despensa' | 'prestadores'
 
 export interface Resultado {
   id: string

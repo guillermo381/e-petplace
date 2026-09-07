@@ -1,0 +1,14 @@
+-- ═══════════════════════════════════════════════════════════════════════════
+-- REVERSA de 20260910080000_s113a_busqueda_papeles.sql      (ESCRITA ANTES)
+--
+-- Devuelve `buscar_en_mi_familia` a sus SEIS fuentes, sin el brazo de papeles.
+--
+-- 🔴 QUÉ **NO** DESHACE: los papeles siguen existiendo y siendo legibles por
+-- su pantalla. Lo único que se pierde es que la búsqueda los encuentre — que
+-- es peor de lo que suena: *un papel que existe y que la búsqueda no ve se lee
+-- como un papel que no se subió, y la familia lo vuelve a subir.*
+--
+-- El cuerpo previo vive en la migración que la creó (lote 2, `buscar_en_mi_
+-- familia`). No se transcribe acá para no dejar una tercera copia divergiendo.
+-- ═══════════════════════════════════════════════════════════════════════════
+select 'reversa 20260910080000 · restaurar desde la migración del lote 2' as nota;

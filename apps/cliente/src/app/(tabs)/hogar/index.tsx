@@ -65,6 +65,8 @@ import {
   motion,
   radius,
   spacing,
+  ResultadosBusqueda,
+  Campo,
   typography,
   useAviso,
   useEtiquetaBadge,
@@ -111,6 +113,7 @@ import { diaSemanaCorto, fechaCortaMono, fechaLargaHumana } from '@epetplace/i18
 
 import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { ventanaVencida } from '@/lib/despensa/ventana';
+import { useBusqueda } from '@/components/busqueda';
 import { useTraduccion } from '@/i18n';
 import { ADOPCION_ALCANZABLE } from '@/lib/gate-adopcion';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -420,6 +423,7 @@ function DetalleNodoHogar({
 function DetalleVacunaVida({ eventoId, onVerCarnet }: { eventoId: string; onVerCarnet: (path: string) => void }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const busqueda = useBusqueda();
   const idioma = useTraduccion().idioma;
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
 
@@ -644,6 +648,7 @@ function FilaCampanaTecho({
 
 export default function Hogar() {
   const router = useRouter();
+  const busqueda = useBusqueda();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -1842,6 +1847,28 @@ export default function Hogar() {
             `pressedCoach` · `CoachHoja` · `coach.abrir` tenían **un solo
             consumidor cada uno, y era éste**. Ninguno queda huérfano. */}
       </View>
+      {/* ⭐ **LA BÚSQUEDA VIVE EN EL ORBE** (firma del founder, 2.2.3 · ①).
+          Acá había una caja de texto y **no se entendía que era un buscador**:
+          un campo sin rótulo en medio del Hogar se lee como cualquier otra
+          cosa. *Y su lugar natural es el orbe de Nexo, que ya está en toda la
+          app y cuya Hoja ya busca* — dos cajas para lo mismo eran dos.
+
+          Lo que queda es **una entrada discreta que dice qué hace** y lleva
+          allá.
+
+          🔴 **Sin glifo, y es una decisión.** El founder pidió una lupa y
+          **no existe en el registry** —medido: `explorar` es una BRÚJULA
+          (círculo + aguja), no una lupa—. *Un glifo que significa otra cosa es
+          peor que ninguno: enseña mal el vocabulario y después hay que
+          desenseñarlo.* **Pedida a B por §6b**; entra en una línea. */}
+      <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[4] }}>
+        <CeldaNavegacion
+          titulo={t('busqueda.entrada')}
+          registro="tinta"
+          onPress={() => router.push('/nexo')}
+        />
+      </View>
+
 
       {/* @override-s82c — RECOMENDACIONES      {/* @override-s82c — RECOMENDACIONES (lámina, ítem 1): LA TARJETA
           SOBRE LA BANDA. Ponte al día pasa a FILAS compactas — glifo en

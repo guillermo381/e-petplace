@@ -110,7 +110,8 @@
     "verify:arneses-declaran": "node scripts/verify-arneses-declaran.mjs",
     "verify:busqueda-poda": "tsx scripts/verify-busqueda-poda.mts",
     "verify:union-vs-check": "node scripts/verify-union-vs-check.mjs",
-    "verify:titulo-dice-que": "node scripts/verify-titulo-dice-que.mjs"
+    "verify:titulo-dice-que": "node scripts/verify-titulo-dice-que.mjs",
+    "verify:boveda": "tsx scripts/_arnes-boveda.mts"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

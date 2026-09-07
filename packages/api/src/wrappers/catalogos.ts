@@ -210,3 +210,34 @@ export async function obtenerUmbralesMomentoVital(
   }
   return { ok: true, data: { m2InicioMeses: m2, m3InicioMeses: m3, m5InicioMeses: m5 } };
 }
+
+/**
+ * ⭐ **QUÉ SERVICIOS SON MÉDICOS** — los códigos con `es_medico = true`.
+ *
+ * 🔴 **Existe para que nadie copie la lista.** Son **15 códigos** hoy
+ * (consulta, vacunación, urgencias, telemedicina, imágenes, cirugía,
+ * certificados…) y *una copia local de ese vocabulario sería una quinta
+ * verdad*: el día que el motor agregue el decimosexto, la pantalla que lo
+ * tenga escrito va a decir que un acto clínico no lo es.
+ *
+ * Su primer consumidor: la tarjeta **Citas** del tablero del perfil, que vive
+ * en «Su salud» y por eso muestra la próxima cita **médica** — un paseo ahí
+ * responde otra pregunta (ojo del founder, S113 · 2.2.2).
+ *
+ * ⚠️ **ENMIENDA ADITIVA de la pista C a `packages/api`** (76(d), declarada):
+ * cero firmas tocadas, cero comportamiento cambiado. Es el molde exacto de
+ * `obtenerEspeciesElegibles`, dos funciones más arriba.
+ */
+export async function obtenerCodigosMedicos(): Promise<
+  ResultadoWrapper<string[], 'error_catalogo'>
+> {
+  const { data, error } = await getClient()
+    .from('tipos_servicio')
+    .select('codigo')
+    .eq('es_medico', true)
+    .eq('activo', true);
+  if (error) {
+    return { ok: false, codigo: 'error_catalogo', mensaje: MENSAJE_ERROR };
+  }
+  return { ok: true, data: (data ?? []).map((f) => String(f.codigo)) };
+}

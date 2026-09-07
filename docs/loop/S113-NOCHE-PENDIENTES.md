@@ -1,12 +1,33 @@
 # S113 · lo que espera al founder
 
+> **Repaso del 7-sep** (A). Lo cerrado se marca **con su medición al lado** y su
+> texto queda plegado: *una deuda cerrada sin la medición que la cerró se vuelve
+> a abrir en el próximo censo.*
+>
+> **EN UNA LÍNEA, lo que de verdad espera tu firma:** el **proveedor y precio de
+> la placa** (§2), el **entitlement de NFC en iOS** (§3), el **aviso legal de
+> IA** (§4) y la **lectura de fichas de raza** al ritmo ya firmado (§5) —
+> (E-1, los 11 campos del pasaporte, quedó **FIRMADO el 7-sep**.)
+>
+> Cerrados desde el repaso anterior: las cinco mascotas de prueba (§1, medido
+> `0`) y la página pública en `text/plain` (C-⑤, medido `text/html`).
+
+
 Nadie se frenó por ninguno de estos. Cada uno dice **qué**, **por qué es del
 founder**, **las opciones** y **el voto de la pista** — para que decidir sea
 leer un párrafo, no reconstruir el problema.
 
 ---
 
-## 1 · Las cinco mascotas de prueba marcadas como reales
+## 1 · ☠️ CERRADO (medido 7-sep) — las cinco mascotas de prueba
+
+**Medición: `0` mascotas `PruebaC*` con `creado_por_sistema = 'real'`.** Se
+marcaron. Se deja el texto porque *una deuda cerrada sin su medición al lado se
+vuelve a abrir en el próximo censo.*
+
+<details><summary>el problema original</summary>
+
+### Las cinco mascotas de prueba marcadas como reales
 
 **Qué.** En la familia `guillo381+8` hay cinco `PruebaC*` (todas Beagle, todas
 en memorial) que quedaron con `creado_por_sistema = 'real'`: `PruebaC12896`,
@@ -25,7 +46,9 @@ descubrió que el 80 % de las familias eran sonda.
 borrarlas no rompe un test, lo vuelve irreproducible, y eso no se nota. La
 marca cuesta un UPDATE y arregla el censo.
 
-## 2 · La placa: proveedor y precio
+</details>
+
+## 2 · 🔴 VIVO · La placa: proveedor y precio
 
 **Qué.** El motor del pasaporte está vivo y la página pública también. Falta
 decidir con quién se fabrican las chapitas y a cuánto.
@@ -35,7 +58,13 @@ decidir con quién se fabrican las chapitas y a cuánto.
 **Sin bloquear nada:** la rama `pista/s113-a-nfc` ya deja la build lista y
 `docs/loop/S113-NFC-BUILD.md` tiene el procedimiento del día que se decida.
 
-## 3 · NFC en iOS
+**Al 7-sep:** el método de impresión ya está escrito en
+`docs/loop/S113-PLACAS-IMPRESION.md` —material, tamaño mínimo del QR,
+corrección de error, muestra de cinco— y **el circuito de activación se probó
+entero** (crear lote · activar · los tres rojos). Lo único que falta sigue
+siendo la decisión comercial. **Dueño: founder.**
+
+## 3 · 🔴 VIVO · NFC en iOS — **dueño: founder**
 
 **Qué.** Leer un tag NFC en iPhone exige un *entitlement* propio en la cuenta
 de Apple. **No está medido si la cuenta lo tiene.**
@@ -43,7 +72,7 @@ de Apple. **No está medido si la cuenta lo tiene.**
 **Voto de la pista:** arrancar sólo con Android y con el QR, que ya funciona en
 los dos sistemas sin pedir nada. *El QR no necesita permiso de nadie.*
 
-## 4 · El aviso legal de IA (`D-405`)
+## 4 · 🔴 VIVO · El aviso legal de IA (`D-405`) — **dueño: founder + abogado**
 
 **Qué.** Cuando Nexo hable, la app tiene que decir que es IA y qué no hace.
 La letra la escribe un abogado; hasta entonces rige la voz honesta de la casa.
@@ -51,7 +80,15 @@ La letra la escribe un abogado; hasta entonces rige la voz honesta de la casa.
 **Por qué ahora.** El lote 2 pone a Nexo a contestar. El texto no bloquea la
 construcción, pero **sí bloquea que se encienda para gente real**.
 
-## 5 · Las fichas de raza que faltan
+## 5 · 🟡 AVANZANDO · Las fichas de raza — **dueño: founder (firma)**
+
+**Medido el 7-sep: 17 publicadas** (eran 10) · **193 cargadas esperando
+lectura** · **22 predisposiciones revisadas** y **560 en revisión**.
+El ritmo firmado se está cumpliendo.
+
+<details><summary>el detalle original</summary>
+
+### Las fichas de raza que faltan
 
 **Qué.** Publicadas con firma: **10** (labrador, loro yaco, beagle,
 californian, persa, pug, chinchilla, schnauzer miniatura, gato común, criollo).
@@ -60,6 +97,8 @@ ampliado todavía sin ficha.
 
 **Ritmo firmado:** tandas de cinco por semana, perro primero, y en el día
 cuando una mascota nueva declara una raza cuya ficha existe sin publicar.
+
+</details>
 
 ## 6 · Lo que NO es del founder pero conviene que sepa
 
@@ -142,7 +181,30 @@ pista**. Nadie se frenó por ninguna de éstas.
 
 ## Pista E
 
-### E-1 · 🔴 La lista de campos del pasaporte no está firmada, y el gate está en rojo por eso
+### E-1 · ☠️ CERRADO — FIRMADO POR EL FOUNDER, 7-sep-2026
+
+**Los once quedan como están**: foto · nombre · especie · raza · sexo · edad ·
+microchip · contacto · alergias · medicación vigente · estado de perdida.
+**Nunca**: apellido, dirección, otras mascotas, prestadores, historia clínica.
+La familia puede apagar contacto, salud y chip.
+
+Verificado antes de estampar que los once firmados **fueran los once que la RPC
+devuelve** —once por once, con su correspondencia de nombres anotada— *porque
+una firma sobre una lista que no es la del objeto no firma nada.*
+
+`docs/loop/PASAPORTE-CAMPOS-FIRMADOS.json` · `verify:pasaporte-campos` pasó de
+«LÍNEA BASE — SIN FIRMA» a **«contra FIRMADA»**, con su rojo probado: quitando
+`chip` de la firma, el gate dice **«1 campo NUEVO sale en una página sin
+sesión»**.
+
+🔴 **Un campo nuevo pide firma nueva.** No es burocracia: *cada cosa que se
+agregue a esa lista la ve cualquiera que tenga el token en la mano, y un token
+puede estar en el suelo.* El orden es firma → archivo → motor; al revés el gate
+sale rojo, que es lo correcto — **el motor no decide qué se publica**.
+
+<details><summary>el problema original</summary>
+
+### La lista de campos del pasaporte no está firmada
 
 **Qué.** `leer_pasaporte` devuelve **11 campos a alguien sin sesión**: `alergias, chip,
 contacto, edad, especie, foto_path, medicacion, nombre, perdida, raza, sexo`.
@@ -169,6 +231,8 @@ con `mostrar_chip` naciendo en `false`. **Voto: (c)** — no pierde la función 
 quiera, y cambia el default hacia el lado que no se puede deshacer.
 
 ---
+
+</details>
 
 ### E-2 · 🔴 La foto del pasaporte pesa 19× la página y rompe el techo de 60 kB
 
@@ -355,7 +419,15 @@ para no reportar vacío es una pista que después hay que revisar dos veces.*
 
 ## C · 1.3 pasaporte — dos para A, medidos
 
-### ⑤ 🔴 LA PÁGINA PÚBLICA SALE EN `text/plain` — el QR muestra código fuente
+### ⑤ ☠️ CERRADO (medido 7-sep) — la página pública sale en `text/html`
+
+**`curl` contra `www.epetplace.com/p/<token>`: `text/html`.** Se curó moviendo
+la página al sitio Astro: Supabase degrada `text/html` a `text/plain` en GET por
+política de plataforma, así que no era algo que se pudiera arreglar en la edge.
+
+<details><summary>el problema original</summary>
+
+### 🔴 LA PÁGINA PÚBLICA SALE EN `text/plain` — el QR muestra código fuente
 
 Medido con `curl`, **en las dos rutas**:
 
@@ -630,3 +702,16 @@ es el que después nadie puede consultar desde el motor ni desde Nexo.
 **Recuerdo abre `/recuerdo`**, la pantalla que ya existe con **foto y texto** —no
 una caja—. *Una caja de texto sería una segunda forma, peor, de hacer lo que la
 casa ya hace bien; y la foto es media parte de un recuerdo.*
+
+## C · se puede guardar una bitácora vacía (S113, cierre de fase 2)
+
+Medido: `chips_de_bitacora` devuelve **cero** para las 8 bitácoras de Thor —
+se guardaron **sin conductas marcadas y sin texto**. La línea de vida las
+dibuja con su voz de fallback («Anotaste cómo estuvo») porque *no hay nada que
+decir*, y el founder lo leyó como voz de motor. **No lo es: es una fila sin
+contenido.**
+
+**Decisión de producto:** ¿la puerta debe rebotar una bitácora sin nada, como
+hace la Hoja de rasgos («Elige alguno o cuéntanos algo»)? Si sí, el guard va
+en el motor (A), no en la pantalla — *una puerta que acepta el vacío deja
+filas que después hay que explicar.*

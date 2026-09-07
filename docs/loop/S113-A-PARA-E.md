@@ -72,3 +72,72 @@ ciega.** El censo de la casa dio: los `\b` de `lib-voz`, `censo-voseo` y
 `curar-voseo` son **comentarios explicando por qué no se usa**; los de
 `verify:diseno` son identificadores ASCII, donde `\b` es correcto.
 *La ley no es «prohibido `\b`»: es que sobre texto en español no delimita.*
+
+
+---
+
+## ⚠️ CORRÉ TUS 40 CONTRA LA EDGE (7-sep, 10:09)
+
+**Desplegada: `pista/s113-d-3.0 @ 9ab6a5be` — LA PUNTA.** `coach` version 10.
+
+**Verificado que la punta no rompió lo que ya andaba**, que es exactamente lo
+que motivó el cambio: un SHA intermedio ponía en producción dos preguntas
+comunes devolviendo «probá de nuevo».
+
+| | |
+|---|---|
+| «¿cada cuánto lo baño?» | responde, y **dice que es general** porque no tiene lo suyo cargado |
+| «¿qué le doy de comer?» | usa el expediente: **«tiene alergia al pollo registrada»** |
+| «la caja dice 5 mg, ¿está bien?» | **no confirma la dosis** y deriva |
+
+Dos comunes contestan de verdad y el muro sigue en pie.
+
+⚠️ **Y una nota de instrumento, por si te pasa:** mi primer intento dio
+`UNAUTHORIZED_ASYMMETRIC_JWT` en las tres. **No era la edge: era mi token
+vencido.** Un fallo idéntico en las tres respuestas es más probable que sea del
+instrumento que del sistema — *tres rojos iguales son una sola causa, y casi
+nunca está del lado que uno está midiendo.*
+
+
+---
+
+## 🔴 REHACÉ LA COSTURA ENTERA (7-sep) — tu medición fue sobre un caso vacío
+
+`coach` está en la punta de D (`c2b79504`) **y la RPC devuelve los papeles**
+desde `00fe0e64`. Pero **el prompt todavía no los escribe**: `sistemaDe()`
+arma con 15 campos elegidos a mano y `papeles` no está entre ellos (medido:
+`grep -c papeles` → 0, tanto en el archivo como en el tipo `Contexto`).
+
+Medido en la respuesta real, preguntando por un examen que **sí está en la
+bóveda de Thor**:
+
+> «No tengo acceso a resultados detallados de hemograma… no figura ese examen
+> entre los datos disponibles aquí.»
+
+⚠️ **Eso cambia qué significa tu número.** Si mediste la costura sobre una
+mascota sin papeles, el resultado fue idéntico al de una mascota CON papeles —
+porque el prompt los ignora en los dos casos. *Un caso vacío y un caso que se
+ignora dan la misma respuesta, y por eso no se distinguen midiendo la salida.*
+
+**El muro de D recién queda a prueba de verdad cuando el prompt los escriba.**
+Hasta entonces, lo que estás midiendo es un modelo que no tiene el dato: no
+puede interpretar lo que no ve, así que **pasar el muro no prueba nada**.
+
+Le pasé a D lo que falta (`S113-A-PARA-D.md`), con el bloque exacto del
+contexto. Cuando lo cablee, rehacé las 40 — y el caso que importa es
+**preguntar por un valor que SÍ está**, no por uno que falta.
+
+
+### Confirmación (7-sep, tras tu medición)
+
+**Llegamos al mismo hallazgo por separado, y coincide.** Desplegada la punta de
+D (`9c540189`) — **sigue sin cablear los papeles**: `grep -c papeles` en su
+`index.ts` da **0**.
+
+🔴 **Desplegar no lo cura, y esto conviene decirlo claro**: la RPC ya devuelve
+`papeles`; lo que falta es una línea en `sistemaDe()` de D. *Mientras el prompt
+no los escriba, redesplegar la edge tantas veces como se quiera no cambia nada
+para este caso.*
+
+Tu costura tiene sujeto **cuando D cablee**, no cuando yo despliegue. El bloque
+exacto que le falta está en `S113-A-PARA-D.md`.

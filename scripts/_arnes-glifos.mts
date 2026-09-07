@@ -9,7 +9,22 @@
    —comandos RELATIVOS leídos como absolutos—: *un instrumento que devuelve
    coordenadas negativas sobre una grilla de 0 a 24 está midiendo otra cosa.*
    Éste recorre el path de verdad. */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+
+/** Todos los `.tsx` de un árbol. Sin dependencias: el arnés no instala nada. */
+function listarTsx(raiz: string): string[] {
+  const salida: string[] = [];
+  const caminar = (d: string) => {
+    for (const e of readdirSync(d)) {
+      const f = join(d, e);
+      if (statSync(f).isDirectory()) caminar(f);
+      else if (f.endsWith('.tsx')) salida.push(f);
+    }
+  };
+  caminar(raiz);
+  return salida;
+}
 
 /** Largo de trazo de un path. Rectas exactas; arcos por su cuerda circular y
  *  curvas por la cuerda con holgura — alcanza para comparar MASA entre
@@ -65,6 +80,58 @@ function glifo(nombre: string) {
     huella: /<Huella/.test(cuerpo),
     /** El aire que queda DENTRO del círculo más chico, a 21 px. Ley 9. */
     interiorMin: circulos.length ? Math.min(...circulos.map((r) => (2 * r - TRAZO) * (GATE / GRILLA))) : null,
+    /**
+     * 🔴 **EL MISMO AIRE, PERO PARA CUADRADOS (S113-B · 2.2.4).**
+     *
+     * ⏪ `interiorMin` sólo miraba `<Circle>`, así que **este arnés no podía
+     * ver el modo de falla de un glifo hecho de cuadrados** — y el de
+     * `pasaporte` son las esquinas de un QR. *Un instrumento que no puede
+     * producir el rojo de la pieza que va a medir no está midiendo: está
+     * acompañando* (`L-459`).
+     *
+     * El umbral es el MISMO 2,5 px y eso se declara: el interior de un
+     * cuadrado de lado `s` trazado a 1.9 es un cuadrado de `s − 1.9`, cuyo
+     * círculo inscrito tiene ese mismo diámetro ⇒ **la vara de lo redondo
+     * aplica sin aflojarse.**
+     *
+     * 🔴 **Y MIDE GEOMETRÍA, NO LETRAS — su control positivo lo obligó.** La
+     * primera versión reconocía `M… h… v… h-… Z`, que es **la sintaxis que yo
+     * había escrito**: daba verde en mi glifo y **`null` en `documentos`**,
+     * que dibuja el mismo rectángulo con `H`/`V` absolutos. *Un medidor que
+     * reconoce exactamente la forma en que uno escribe pasa siempre y no ve a
+     * nadie más.* Hoy camina el path y saca su caja: le da igual cómo se
+     * escribió.
+     *
+     * ⚠️ **Sólo los TRAZADOS.** Uno relleno no tiene interior que cerrarse: su
+     * modo de falla es desaparecer, no empastarse, y ése lo mide la masa.
+     */
+    interiorCuadrado: (() => {
+      const cajas = [...cuerpo.matchAll(/d="([^"]+)"([^\n]*)/g)]
+        .filter((m) => !/fill=/.test(m[2] ?? '') && /[Zz]\s*$/.test(m[1] ?? ''))
+        .map((m) => {
+          /* Camina M/L/H/V y sus relativos; junta los puntos y devuelve la
+             caja. No intenta ser un parser de SVG: sólo de rectángulos
+             axis-aligned, que es lo que la casa dibuja. */
+          const d = m[1] ?? '';
+          if (/[CcSsQqTtAa]/.test(d)) return null;
+          let x = 0, y = 0;
+          const xs: number[] = [], ys: number[] = [];
+          for (const tk of d.matchAll(/([MLHVmlhv])\s*(-?[\d.]+)(?:[\s,]+(-?[\d.]+))?/g)) {
+            const c = tk[1] ?? '', a = +(tk[2] ?? 0), b = +(tk[3] ?? 0);
+            if (c === 'M' || c === 'L') { x = a; y = b; }
+            else if (c === 'm' || c === 'l') { x += a; y += b; }
+            else if (c === 'H') x = a;
+            else if (c === 'h') x += a;
+            else if (c === 'V') y = a;
+            else if (c === 'v') y += a;
+            xs.push(x); ys.push(y);
+          }
+          if (xs.length < 4) return null;
+          return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+        })
+        .filter((v): v is number => v !== null && v > 0);
+      return cajas.length ? Math.min(...cajas.map((l) => (l - TRAZO) * (GATE / GRILLA))) : null;
+    })(),
   };
 }
 
@@ -103,6 +170,111 @@ console.log('\n── ⑤ SON GLIFOS DE CONTROL ⇒ SIN HUELLA (N27 · §6b paso
 for (const g of NUEVOS) t(`\`${g}\` no lleva huella`, glifo(g)!.huella === false);
 /* CONTROL POSITIVO: si el medidor no viera las huellas, ⑤ pasaría siempre. */
 t('CONTROL POSITIVO · el medidor SÍ ve la huella de `vacuna`', VARA.huella === true);
+
+console.log('\n── ⑪ EL GLIFO DE PASAPORTE (S113-B · 2.2.4) ──');
+/* 🔴 **La forma la decidió la ARITMÉTICA y queda escrita acá para que nadie
+   la reabra sin volver a hacerla.** Un QR de TRES esquinas es
+   **INCONSTRUIBLE** bajo las dos leyes de la casa: la masa exige `s ≤ 4,45`
+   y la Ley 9 exige `s ≥ 4,76` — *el intervalo es vacío* (`L-283`, la anatomía
+   incapaz). Y la «tarjeta con QR» pesa 64 sola (+38 %). Gana **dos esquinas +
+   módulos + la huella en el tercer vértice**. */
+{
+  const P = glifo('pasaporte');
+  t('`pasaporte` tiene dibujante', P !== null);
+  if (P) {
+    const d = (P.largo / VARA.largo - 1) * 100;
+    t('masa en banda', Math.abs(P.largo / VARA.largo - 1) <= BANDA, ` · ${P.largo.toFixed(1)} (${d >= 0 ? '+' : ''}${d.toFixed(0)} %)`);
+    t(`≤ ${VARA.trazos} trazos`, P.trazos <= VARA.trazos, ` · ${P.trazos}`);
+    /* 🔴 Ley 9 sobre CUADRADOS — la medida que este arnés no tenía. */
+    t('🔴 las esquinas dejan aire a 21 px (piso 2,5)',
+      P.interiorCuadrado !== null && P.interiorCuadrado >= 2.5,
+      ` · ${P.interiorCuadrado?.toFixed(2) ?? 'sin cuadrado trazado'} px`);
+    /* 🔴 NO es glifo de control: es un documento DE LA MASCOTA, y los cuatro
+       de su fila llevan huella. *Uno sin ella se leería de otra clase.* */
+    t('🔴 lleva huella: no es glifo de control (§6b.6)', P.huella === true);
+  }
+  /* CONTROL POSITIVO del medidor nuevo: si no viera los cuadrados trazados,
+     el assert de arriba pasaría siempre. `documentos` tiene dos. */
+  const DOC = glifo('documentos')!;
+  t('CONTROL POSITIVO · el medidor SÍ ve un cuadrado ajeno',
+    DOC.interiorCuadrado !== null, ` · documentos ${DOC.interiorCuadrado?.toFixed(2) ?? 'null'} px`);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ✅ GATE CERRADO (firma del founder, 7-sep-2026) · Y SU LÍMITE, MEDIDO
+     ═══════════════════════════════════════════════════════════════════════
+     La firma vino **con su límite**: el glifo *no lee «QR» de forma inequívoca
+     a 21 px y no puede bajo el trazo de la casa* —las esquinas de un QR real
+     son cuadrados ANIDADOS—; **lo que lo hace legible es su CONTEXTO**, la
+     etiqueta al lado.
+
+     🔴 **Eso es una CONDICIÓN DE USO, y una condición que sólo vive en prosa
+     no frena a nadie.** *El día que alguien lo monte solo —en una barra, en un
+     botón mudo— lo único que va a quedar es «dos cuadrados y una pata», y no
+     va a fallar nada: se va a ver raro y nadie va a saber por qué.*
+
+     🔴 **Y SE MIDE POR ESTRUCTURA, NO POR VECINDAD — la primera versión no
+     disparaba.** Buscaba un `etiqueta` a ±160 caracteres, y en un archivo denso
+     como la galería `etiqueta` está por todos lados: *una ventana de texto
+     encuentra la palabra de otro y da verde.* Lo cazó su propio rojo, que no
+     salió.
+
+     La regla buena sale de mirar QUIÉN puede montarlo:
+     · `glifo: 'pasaporte'` **ya está cubierto por el TIPO** — `AccionPerfil`
+       exige `etiqueta` en el mismo objeto, así que no hay forma de montarlo
+       ahí sin su texto.
+     · `<Icono nombre="pasaporte">` **es SIEMPRE suelto**: `Icono` no dibuja
+       una sola letra. *Ése es exactamente el uso que la firma prohíbe.*
+     ⇒ el guard mide **el `Icono` desnudo**, que es el único hueco real. */
+  const USOS = ['packages/ui/src', 'apps/cliente/src', 'apps/prestador/src'];
+  const sueltos: string[] = [];
+  for (const dir of USOS) {
+    let archivos: string[] = [];
+    try { archivos = listarTsx(new URL(`../${dir}`, import.meta.url).pathname); } catch { continue; }
+    for (const f of archivos) {
+      const txt = readFileSync(f, 'utf8');
+      /* 🔴 **MIDE `nombre={…}` ENTERO, no sólo el literal — y lo obligó un
+         caso REAL: yo mismo lo monté con `nombre={fase === 'ajena' ? 'info' :
+         'pasaporte'}` y el guard no lo vio.** *Un guard que reconoce una sola
+         forma de escribir lo mismo protege del descuido y no del apuro, que es
+         cuando hace falta.* Fue el aparato el que mostró el defecto, no él. */
+      for (const m of txt.matchAll(/nombre=(?:['"]pasaporte['"]|\{[^}]*['"]pasaporte['"][^}]*\})/g)) {
+        sueltos.push(`${f.split('/').slice(-2).join('/')}:${txt.slice(0, m.index ?? 0).split('\n').length}`);
+      }
+    }
+  }
+  t('🔴 `pasaporte` nunca se monta como `Icono` desnudo (condición de la firma)',
+    sueltos.length === 0, sueltos.length ? ` · suelto en ${sueltos.join(' · ')}` : ' · 0 sueltos');
+
+  /* ☠️ Y el andamio del gate murió con la firma (Ley 37). */
+  const GAL = readFileSync(new URL('../packages/ui/src/gallery/TokenGallery.tsx', import.meta.url), 'utf8');
+  t('☠️ el andamio del gate se retiró', !/CandidataMaciza|FilaPasaporte/.test(GAL));
+  t('…y el glifo firmado se mira DONDE VIVE', /glifo: 'pasaporte'/.test(GAL));
+}
+
+console.log('\n── ⑫ EL GLIFO DE PAPEL (S113-B · fase 3 · B6) ──');
+/* La hoja que la familia TRAE. **Uno y no tres**: `receta` ya existe firmado,
+   y examen/informe comparten éste porque *el rótulo del grupo ya dice cuál es
+   — tres dibujos para una distinción que la palabra de al lado ya hace es un
+   glifo que nadie necesita* (§6b, economía). */
+{
+  const P = glifo('papel');
+  t('`papel` tiene dibujante', P !== null);
+  if (P) {
+    const d = (P.largo / VARA.largo - 1) * 100;
+    t('masa en banda', Math.abs(P.largo / VARA.largo - 1) <= BANDA,
+      ` · ${P.largo.toFixed(1)} (${d >= 0 ? '+' : ''}${d.toFixed(0)} %) — cerca del techo, declarado`);
+    t(`≤ ${VARA.trazos} trazos`, P.trazos <= VARA.trazos, ` · ${P.trazos}`);
+    t('🔴 la hoja deja aire a 21 px', P.interiorCuadrado !== null && P.interiorCuadrado >= 2.5,
+      ` · ${P.interiorCuadrado?.toFixed(2) ?? 'sin cuadrado'} px`);
+    t('🔴 lleva huella: es un papel DE LA MASCOTA', P.huella === true);
+    /* 🔴 **SIN DOBLEZ, y no es estilo: `certificaciones` y `presupuesto` ya la
+       usan.** *Dos glifos con la misma esquina doblada se leen como el mismo
+       objeto, y acá el objeto es otro.* La marca de éste son sus renglones. */
+    const CERT = glifo('certificaciones')!;
+    t('🔴 no copia la esquina doblada de `certificaciones`',
+      CERT.trazos > P.trazos || P.largo !== CERT.largo);
+  }
+}
 
 console.log('\n── ④bis LEY 9 PARA LO PUNTIAGUDO · la punta sobrevive a 21 px ──');
 /* 🔴 **`interiorMin` mide lo REDONDO y no ve una estrella.** El modo de falla
