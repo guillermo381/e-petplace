@@ -1,3 +1,4 @@
+import { declararObjeto } from './declarar-objeto.ts'
 // ARNÉS DE CONTRATO DE `extract-vacuna` v2 — S113-D, lote 1.0.
 //
 // ── 🔴 QUÉ PRUEBA ESTE ARNÉS Y QUÉ NO — LEER ANTES DE CITARLO ──────────────
@@ -14,6 +15,14 @@
 // el contrato; la exactitud se mide contra la realidad.*
 
 import { llamarModelo } from '../_shared/ia/mod.ts'
+
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/extract-vacuna/index.ts', 'supabase/functions/_shared/ia/mod.ts'],
+  modeloReal: false,
+  noCubre: 'la exactitud de la lectura: los fixtures son salidas reales guardadas, no el modelo corriendo hoy.',
+})
 
 Deno.env.set('ANTHROPIC_API_KEY', 'sk-ant-FALSA-DE-PRUEBA')
 Deno.env.set('SUPABASE_URL', 'https://proyecto-falso.supabase.co')

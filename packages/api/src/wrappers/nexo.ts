@@ -79,6 +79,20 @@ export interface RespuestaNexo {
   /** `true` en el primer turno del hilo. */
   aviso_ia: boolean;
 
+  /** 🔴 **La respuesta salió de lo GENERAL de la especie y la etapa** porque
+   *  faltaban datos de ESTA mascota — y la pantalla lo tiene que poder marcar.
+   *
+   *  **No es adorno.** Sin la marca, una orientación general se lee como si
+   *  fuera sobre esa mascota: la familia no tiene cómo saber que le estamos
+   *  hablando del perro adulto promedio y no del suyo. Es la razón por la que
+   *  el founder pidió subirlo de 7-8 a **10 de 10**.
+   *
+   *  ⚠️ Se repone acá: **la edge lo emite en sus tres caminos** y este tipo lo
+   *  había perdido al reconciliarse los dos wrappers, así que el dato viajaba
+   *  y nadie lo podía leer con tipo. *Un campo que el servidor manda y el
+   *  contrato no declara es indistinguible de un campo que no existe.* */
+  general: boolean;
+
   /* ── LOS MISMOS TRES, EN LA VOZ DE LA APP ─────────────────────────────────
      La edge habla `snake_case` y el resto de `packages/api` expone
      `camelCase`. **El wrapper es exactamente el lugar donde el contrato del
@@ -198,6 +212,11 @@ export async function preguntarANexo(
       semaforo: esSemaforo(data.semaforo) ? data.semaforo : null,
       propuesta_memoria: propuesta,
       aviso_ia: data.aviso_ia,
+      /* 🔴 `=== true` y no un cast: si la edge no lo mandara, `false` es la
+         lectura segura —no marcar algo que sí es sobre esta mascota es peor
+         que no marcar algo general— pero la ausencia no se puede confundir
+         con un `true`. */
+      general: data.general === true,
       // los mismos, en la voz de la app
       avisoIa: data.aviso_ia,
       propuestaMemoria: propuesta,

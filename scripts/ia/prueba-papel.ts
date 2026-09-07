@@ -1,3 +1,4 @@
+import { declararObjeto } from './declarar-objeto.ts'
 // ARNÉS · `extract-papel` (S113-D, lote 2.2). Proveedor falso, cero llamadas.
 // La ley —transcribe, no interpreta— la mide el modelo real (`papel-real.ts`);
 // acá se mide el CABLEADO: qué entra, qué se anula, qué se descarta.
@@ -35,6 +36,14 @@ let manejador: ((r: Request) => Response | Promise<Response>) | null = null
   return { finished: Promise.resolve(), shutdown: () => Promise.resolve(), addr: { hostname: '', port: 0 } }
 }
 const { sanearFila, precisionDe } = await import('../extract-papel/index.ts')
+
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/extract-papel/index.ts', 'supabase/functions/_shared/ia/mod.ts'],
+  modeloReal: false,
+  noCubre: 'la LEY de no interpretar, que es comportamiento del modelo y la mide `papel-real.ts` sobre un PDF.',
+})
 
 async function llamar(cuerpo: Record<string, unknown>, conSesion = true) {
   const res = await manejador!(new Request('http://local/', {

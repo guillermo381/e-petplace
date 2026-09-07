@@ -1,3 +1,4 @@
+import { declararObjeto } from './declarar-objeto.ts'
 // ARNÉS · `coach-parte` (S113-D, lote 2.1). Proveedor falso: cero llamadas reales.
 // El brazo que decide es **cuántas veces llamó al modelo**: silencio y aviso
 // único se apagan NO llegando al modelo, y eso no se ve en la respuesta.
@@ -45,6 +46,14 @@ let manejador: ((r: Request) => Response | Promise<Response>) | null = null
   return { finished: Promise.resolve(), shutdown: () => Promise.resolve(), addr: { hostname: '', port: 0 } }
 }
 const { frase } = await import('../coach-parte/index.ts')
+
+// 🔴 CONTRA QUÉ MIDE ESTE ARNÉS. La huella se calcula al momento: una
+// escrita a mano es justo el problema que esto viene a evitar.
+await declararObjeto({
+  mide: ['supabase/functions/coach-parte/index.ts', 'supabase/functions/_shared/ia/mod.ts'],
+  modeloReal: false,
+  noCubre: 'que el parte se LEA bien: la prosa del modelo la mide `parte-real.ts` contra la llave.',
+})
 
 async function llamar(cuerpo: Record<string, unknown> = { mascotaId: 'm1' }, conSesion = true) {
   const res = await manejador!(new Request('http://local/', {
@@ -110,7 +119,7 @@ console.log('\n== 3 · DOS O MÁS: recién ahí hay que hilar ==')
     JSON.stringify(cuerpos[0].messages).includes('es mañana'),
     JSON.stringify(cuerpos[0].messages).slice(0, 200))
   const sis = JSON.stringify(cuerpos[0].system ?? '')
-  for (const ley of ['120 palabras', 'Sólo decís lo que está en la lista', 'No diagnostic', 'niños', 'sin pregunta'])
+  for (const ley of ['120 palabras', 'Sólo dices lo que está en la lista', 'No diagnostic', 'niños', 'sin pregunta'])
     exigir(`  la ley dice «${ley}»`, sis.includes(ley))
   exigir('  sonnet, 400 tokens, thinking disabled ESCRITO',
     cuerpos[0].model === 'claude-sonnet-5' && cuerpos[0].max_tokens === 400 &&
