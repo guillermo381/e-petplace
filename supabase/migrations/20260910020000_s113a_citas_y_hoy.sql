@@ -116,6 +116,15 @@ begin
            -- título lo compone el lector. Se manda el detalle crudo y la voz
            -- la pone la superficie, que es donde vive la voz.
            'aviso_tipo', a.tipo, 'detalle', a.detalle,
+           -- 🔴 **EL TEMA, ARRIBA Y CON NOMBRE INEQUÍVOCO** (firma founder,
+           -- 6-sep): el título tiene que decir QUÉ es, y con una key fija por
+           -- tipo la pantalla nunca podría — no sabe el tema. Viaja acá.
+           -- Se llama `tema` y no `nombre` a propósito: dentro de `detalle`,
+           -- `nombre` es el de la PREDISPOSICIÓN («Corazón», «Ojos») y a un
+           -- centímetro está el nombre de la mascota. *Dos cosas distintas
+           -- con el mismo nombre a un campo de distancia es una confusión
+           -- esperando a que alguien tenga apuro.*
+           'tema', a.detalle->>'nombre',
            'fecha', a.fecha)
     into r
     from avisos_coach a
@@ -155,8 +164,15 @@ begin
   if r is not null then return jsonb_build_object('ok', true, 'hoy', r); end if;
 
   -- ④ ANTIPARASITARIO VENCIDO
+  -- 🔴 DICE CUÁL, no «toca desparasitar»: interna y externa son dos actos
+  -- distintos, con productos distintos. *Un título que sirve para los dos no
+  -- le dice a la familia qué tiene que comprar.*
   select jsonb_build_object('tipo','antiparasitario', 'fecha', min(d.fecha_proxima),
-           'dias', (min(d.fecha_proxima) - v_hoy))
+           'dias', (min(d.fecha_proxima) - v_hoy),
+           'tema', (select d2.tipo_desparasitacion
+                      from evento_desparasitacion_aplicada d2
+                     where d2.mascota_id = p_mascota_id and d2.fecha_proxima < v_hoy
+                     order by d2.fecha_proxima limit 1))
     into r
     from evento_desparasitacion_aplicada d
    where d.mascota_id = p_mascota_id and d.fecha_proxima < v_hoy
@@ -168,6 +184,8 @@ begin
   --    El orden es estable (por código) para que sea reproducible: *un tip al
   --    azar no se puede volver a mirar cuando alguien pregunta por qué salió.*
   select jsonb_build_object('tipo','tip', 'codigo', cp.codigo, 'nombre', cp.nombre,
+           -- mismo nombre que en los otros brazos: la pantalla compone igual
+           'tema', cp.nombre,
            'descripcion', cp.descripcion_familia, 'chequeo', cp.chequeo_sugerido,
            'oficio', cp.oficio, 'fuente', 'raza')
     into r

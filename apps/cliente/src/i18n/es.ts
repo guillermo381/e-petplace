@@ -827,11 +827,15 @@ export const clienteEs = {
     tableroPlagas: '{{n}} de {{total}} al día',
     tableroEstimada: 'estimada',
     /* ⭐ HOY — la tarjeta única. **El servidor elige QUÉ**; acá sólo se dice. */
-    hoyAviso: 'Algo para mirar',
-    hoyCita: 'Su próxima cita',
-    hoyVacuna: 'Una vacuna que se acerca',
-    hoyAntiparasitario: 'Toca desparasitar',
-    hoyTip: 'Para conocerlo mejor',
+    hoyAviso: 'Su {{tema}}, con el tiempo',
+    /* Sólo si un aviso viejo no trae tema: un título a medio componer
+       («Su , con el tiempo») es peor que uno genérico. */
+    hoyAvisoSinTema: 'Algo para mirar en su salud',
+    hoyCita: 'Su {{servicio}}, {{cuando}}',
+    hoyVacuna: 'La {{vacuna}} se acerca',
+    hoyAntiparasitario: 'Su antiparasitario {{tema}} está vencido',
+    hoyAntiparasitarioSinTema: 'Su antiparasitario está vencido',
+    hoyTip: 'Sobre su {{tema}}',
     hoyVerAviso: 'Verlo',
     hoyVerCita: 'Ver la cita',
     hoyVerVacuna: 'Ver sus vacunas',

@@ -108,7 +108,7 @@
     "verify:nexo-anticipa": "node scripts/verify-nexo-anticipa.mjs",
     "verify:nexo-alimenta": "node scripts/verify-nexo-alimenta.mjs",
     "verify:union-vs-check": "node scripts/verify-union-vs-check.mjs",
-    "verify:lista-voseo": "node scripts/verify-lista-voseo.mjs"
+    "verify:titulo-dice-que": "node scripts/verify-titulo-dice-que.mjs"
   },
   "devDependencies": {
     "eslint": "^10.9.1",

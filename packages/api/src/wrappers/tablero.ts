@@ -156,14 +156,25 @@ export async function obtenerCitasDeMascota(
  *  cinco y eligiera, cada superficie elegiría distinto.* */
 export type HoyDeMascota =
   | { tipo: 'aviso'; aviso_id: string; aviso_tipo: string;
-      detalle: Record<string, unknown>; fecha: string }
+      detalle: Record<string, unknown>; fecha: string;
+      /** 🔴 **EL TEMA, para que el título diga QUÉ es** (firma founder, 6-sep).
+       *  «Cadera», «Ojos», «Corazón». Con una key fija por tipo la pantalla no
+       *  podría decirlo: no sabe el tema. Se llama `tema` y no `nombre` porque
+       *  dentro de `detalle` hay un `nombre` que es el de la PREDISPOSICIÓN, a
+       *  un campo del nombre de la mascota. */
+      tema: string | null }
   | { tipo: 'cita'; cita_id: string; fecha: string; hora: string;
       servicio: string; prestador: string | null; faltan_dias: number }
   | { tipo: 'vacuna'; vacuna: string; fecha: string; estado: string;
       derivada: boolean; dias: number }
-  | { tipo: 'antiparasitario'; fecha: string; dias: number }
+  | { tipo: 'antiparasitario'; fecha: string; dias: number;
+      /** 'interna' | 'externa': dos actos distintos con productos distintos.
+       *  *Un título que sirve para los dos no le dice a la familia qué comprar.* */
+      tema: string | null }
   | { tipo: 'tip'; codigo: string; nombre: string; descripcion: string;
-      chequeo: string | null; oficio: string | null; fuente: 'raza' };
+      chequeo: string | null; oficio: string | null; fuente: 'raza';
+      /** Mismo nombre que en los otros brazos: la pantalla compone igual. */
+      tema: string | null };
 
 /** `hoy: null` con su razón. `no_activa` = memorial o perdida: nunca se le
  *  muestra nada que mire hacia adelante. `sin_novedades` = hoy no hay nada, y

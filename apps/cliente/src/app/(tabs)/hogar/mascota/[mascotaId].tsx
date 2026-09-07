@@ -1458,7 +1458,15 @@ export default function PerfilDeMascota() {
                   return (
                     <TarjetaHoy
                       clase="anticipacion"
-                      titulo={t('perfil.hoyAviso')}
+                      /* 🔴 EL TEMA EN EL TÍTULO (firma founder, 6-sep). «Algo para
+                         mirar» servía para cualquier aviso; ahora dice «Su cadera,
+                         con el tiempo». El tema lo manda el servidor: la pantalla
+                         no lo sabe. Con fallback, porque un aviso viejo puede no
+                         traerlo — y un título a medio componer es peor que uno
+                         genérico. */
+                      titulo={hoyMascota.tema
+                        ? t('perfil.hoyAviso', { tema: hoyMascota.tema.toLowerCase() })
+                        : t('perfil.hoyAvisoSinTema')}
                       detalle={fechaCortaMono(hoyMascota.fecha, idioma)}
                       vozActo={t('perfil.hoyVerAviso')}
                       onActo={() => router.push({ pathname: '/nexo', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
@@ -1468,7 +1476,7 @@ export default function PerfilDeMascota() {
                   return (
                     <TarjetaHoy
                       clase="cita"
-                      titulo={t('perfil.hoyCita')}
+                      titulo={t('perfil.hoyCita', { servicio: hoyMascota.servicio, cuando: enDias(hoyMascota.faltan_dias) })}
                       detalle={`${hoyMascota.servicio} · ${enDias(hoyMascota.faltan_dias)}`}
                       vozActo={t('perfil.hoyVerCita')}
                       onActo={() => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: mascota.id } })}
@@ -1478,7 +1486,7 @@ export default function PerfilDeMascota() {
                   return (
                     <TarjetaHoy
                       clase="vence"
-                      titulo={t('perfil.hoyVacuna')}
+                      titulo={t('perfil.hoyVacuna', { vacuna: hoyMascota.vacuna })}
                       detalle={`${hoyMascota.vacuna} · ${enDias(hoyMascota.dias)}${hoyMascota.derivada ? ` · ${t('perfil.tableroEstimada')}` : ''}`}
                       vozActo={t('perfil.hoyVerVacuna')}
                       onActo={() => router.push({ pathname: '/hogar/vacunas/[mascotaId]', params: { mascotaId: mascota.id } })}
@@ -1488,7 +1496,9 @@ export default function PerfilDeMascota() {
                   return (
                     <TarjetaHoy
                       clase="vence"
-                      titulo={t('perfil.hoyAntiparasitario')}
+                      titulo={hoyMascota.tema
+                        ? t('perfil.hoyAntiparasitario', { tema: hoyMascota.tema })
+                        : t('perfil.hoyAntiparasitarioSinTema')}
                       detalle={enDias(hoyMascota.dias)}
                       vozActo={t('perfil.hoyVerAntiparasitario')}
                       onActo={() => router.push({ pathname: '/antiparasitario', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
@@ -1498,7 +1508,7 @@ export default function PerfilDeMascota() {
                   return (
                     <TarjetaHoy
                       clase="anticipacion"
-                      titulo={t('perfil.hoyTip')}
+                      titulo={t('perfil.hoyTip', { tema: hoyMascota.nombre.toLowerCase() })}
                       detalle={hoyMascota.descripcion}
                       vozActo={t('perfil.hoyVerTip')}
                       onActo={contanos.abrir}
