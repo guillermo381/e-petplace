@@ -1868,15 +1868,20 @@ export default function Hogar() {
           tarjeta que sube `-SOLAPE_RECO` para pegarse a la banda**, así que la
           tarjeta se le montaba encima. *No era un margen chico: era que otra
           pieza sube a propósito y nadie le avisó que ahora hay algo abajo.*
-          Ahora **la que se monta sobre la banda es la entrada** —queda entera,
-          bajo la tira de mascotas— y «Ponte al día» baja con su aire. */}
-      <View
-        style={{
-          paddingHorizontal: spacing[4],
-          marginTop: -SOLAPE_RECO,
-          zIndex: 3,
-        }}
-      >
+          ⏪ La primera cura la subió `-SOLAPE_RECO` para que se montara sobre
+          la banda, y **quedó a caballo del borde**: mitad sobre el degradado,
+          mitad sobre el papel, con su fondo cortado por la curva del techo.
+          *Una pieza que cruza el borde no está «entre dos zonas»: está rota en
+          las dos.*
+
+          🔴 **DECISIÓN: abajo, sobre el papel, con su aire.** La alternativa
+          —adentro del techo, translúcida— exige un tratamiento de color sobre
+          un degradado que va de magenta a teal, y **eso es diseño, no
+          composición**: su contraste cambia a lo largo del propio techo.
+          Acá abajo la celda es la misma que el resto de la casa y se lee igual
+          en los dos temas. *Reversible: si el rediseño la quiere adentro, la
+          sube con su tratamiento.* */}
+      <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[5] }}>
         <CeldaNavegacion
           icono="lupa"
           titulo={t('busqueda.entrada')}
