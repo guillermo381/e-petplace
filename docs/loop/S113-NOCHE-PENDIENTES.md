@@ -599,3 +599,34 @@ tuteo** (las 7 de `coach` y `extract-papel`, más la del memorial).
 **No extiendo `R66` yo: `lib-voz.mjs` es instrumento de C.** La cura es de una
 línea (sumar `supabase/functions/**` al corpus) y hace falta decidir si las 9
 entran como baseline o se curan — por eso va a la mesa y no lo hago solo.
+
+---
+
+## C · ⑬ Los chips de «comportamiento» — medido: **el catálogo que hace falta no existe**
+
+El founder pide que Comportamiento **no sea una caja** sino los chips que la
+casa ya tiene, «más un texto que los acompaña». Medí los dos candidatos:
+
+| candidato | qué es | ¿sirve? |
+|---|---|---|
+| `cat_conductas_bitacora` · **25 activos** | «Vomitó» · «Durmió tranquilo» · «Rompió algo en casa» | 🔴 **son hechos DEL DÍA, no rasgos** |
+| `evento_temperamento_observacion` | tiene `rasgos` (jsonb) y `contexto` con `'casa'` | 🔴 **`rasgos` es libre: no hay catálogo** — y su escritura es del prestador (`prestador_id`, `empleado_id`) |
+
+⇒ **De los 25 chips de bitácora, sólo dos rozan lo que se pide** (`miedo_ruidos`,
+`convivio_bien`), y aun ésos están redactados en pasado del día —«Se asustó con
+ruidos fuertes»— no como rasgo —«le tienen miedo a los ruidos»—. *Un chip que
+dice qué pasó ayer no dice cómo es.*
+
+**Pido a A un catálogo de rasgos de temperamento** con las cuatro familias que
+el founder nombró: **miedos · manías · con otros animales · con niños**. Y una
+puerta de familia que escriba rasgo + texto por el mismo camino que hoy usa
+`registrarObservacionComportamiento`.
+
+*No los invento del lado del cliente*: un vocabulario cerrado escrito en la app
+es el que después nadie puede consultar desde el motor ni desde Nexo.
+
+### ✅ Lo que sí quedó hecho de esa misma firma
+
+**Recuerdo abre `/recuerdo`**, la pantalla que ya existe con **foto y texto** —no
+una caja—. *Una caja de texto sería una segunda forma, peor, de hacer lo que la
+casa ya hace bien; y la foto es media parte de un recuerdo.*

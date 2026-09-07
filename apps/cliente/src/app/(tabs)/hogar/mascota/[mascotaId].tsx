@@ -2483,6 +2483,14 @@ export default function PerfilDeMascota() {
         titulo={t('contanos.titulo', { nombre: mascota.nombre })}
         entradas={entradasContanos(t, (c) => {
           contanos.cerrar();
+          /* ⭐ **RECUERDO ABRE LA PANTALLA QUE YA EXISTE** (firma del founder):
+             `/recuerdo` toma foto Y texto. *Una caja de texto acá sería una
+             segunda forma —peor— de hacer lo que la casa ya hace bien, y la
+             foto es media parte de un recuerdo.* */
+          if (c === 'recuerdo') {
+            router.push({ pathname: '/recuerdo', params: { mascotaId: mascota.id, nombre: mascota.nombre } });
+            return;
+          }
           setHojaBio(c === 'rasgo' ? 'personalidad' : c); /* la Hoja vieja aún usa `personalidad` */
         })}
         libre={{
