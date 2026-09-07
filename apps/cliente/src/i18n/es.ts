@@ -493,6 +493,8 @@ export const clienteEs = {
     // decide quién anotó (`prestador_id`), jamás el tipo.
     hechoBitacoraFamilia: 'Anotaste cómo estuvo',
     hechoBitacoraCuidador: 'El cuidador anotó cómo estuvo',
+    hechoBitacoraFamiliaCon: 'Anotaste: {{que}}',
+    hechoBitacoraCuidadorCon: 'Lo anotó quien lo cuidó: {{que}}',
     // S91 · LOS HITOS. Voces FIRMADAS verbatim (founder, 8-ago-2026).
     // Solo la de llegada lleva {{nombre}}: «Una vida nueva empieza» sobre la
     // ficha de Thor no necesita decir Thor — así está firmado.

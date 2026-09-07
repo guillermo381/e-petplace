@@ -351,6 +351,8 @@ export const clienteEn = {
     hechoConsulta: 'Vet visit',
     hechoBitacoraFamilia: 'You noted how they were',
     hechoBitacoraCuidador: 'The caretaker noted how they were',
+    hechoBitacoraFamiliaCon: 'You noted: {{que}}',
+    hechoBitacoraCuidadorCon: 'Their carer noted: {{que}}',
     // S91 · milestones. English is A's PROPOSAL — the founder signs.
     hechoHitoVidaNueva: 'A new life begins',
     hechoHitoLlegoALaFamilia: '{{nombre}} joined the family',

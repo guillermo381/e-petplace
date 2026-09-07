@@ -2095,8 +2095,8 @@ export default function PerfilDeMascota() {
                               <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
                                 {/* S113-A · el recuerdo habla con el texto de la
                                     familia; sin texto, la fila no inventa uno. */}
-                                {vozHecho(it, t, mascota.nombre) !== '' ? (
-                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t, mascota.nombre)}</Texto>
+                                {vozHecho(it, t, mascota.nombre, idioma) !== '' ? (
+                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t, mascota.nombre, idioma)}</Texto>
                                 ) : null}
                                 {it.foto_path !== null && fotosRecuerdo.get(it.foto_path) !== undefined ? (
                                   <Image
