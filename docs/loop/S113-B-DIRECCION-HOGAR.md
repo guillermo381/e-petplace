@@ -5,6 +5,31 @@
 su porqué y su cómo. **Es la pantalla que más se abre y quedó con el diseño
 viejo**: acá hay tres lenguajes conviviendo.
 
+> ## 🔴 AUDITORÍA CONTRA LA LETRA FIRMADA — y CUATRO de estas once no sobreviven
+>
+> **Escribí esta dirección mirando la pantalla, y la pantalla no muestra lo que
+> está firmado.** La auditoría contra fuentes tenía que ir ANTES, no después de
+> que la mesa firmara sobre mi palabra. Lo corrijo acá, con su fuente cada una:
+>
+> · **④ se ACOTA.** «Ver {{n}} más» es `PieRevelar`, **letra firmada en S71** y
+>   gateada en campo. *Y además no es lo mismo: en «Tu vida» 164 no es una
+>   deuda — es una vida documentada.* **Sale sólo «17 cosas»**, que es un
+>   contador en el encabezado de una lista de PENDIENTES.
+> · **⑥ se RETIRA.** El anillo de `CitaEnVivo` **es espec firmada (S43-B3.5)**:
+>   es el equivalente en claro del glow oscuro, y el pill **es su canal
+>   accesible** —en dark el glow no lo es—. *No son dos marcas de lo mismo: una
+>   es gráfica y la otra es la que puede leer un lector de pantalla.*
+> · **⑨ se RETIRA.** La pata fuera de la placa **es la física firmada** y la
+>   vigila **R22** (`MarcaElegido`, que exige justamente que NO caiga adentro).
+>   *Lo que yo leí como un glitch es la marca de selección de la casa.*
+> · **⑧ se ACOTA a una medición.** La marca de agua va a **0.06** y `6quater`
+>   firmó «el papel al 5 %» **con su verificador**. No es una opinión mía
+>   contra un número firmado: si molesta, se re-mide y se enmienda el número.
+>
+> **Quedan SIETE en pie: ① ② ③ ⑤ ⑦ ⑩ ⑪.** *Prefiero perder cuatro decisiones
+> mías que ver a C romper cuatro letras firmadas porque yo miré una captura y
+> no las fuentes.*
+>
 > La vara es la misma que en el perfil: **rótulo chico · dato grande · contexto
 > al pie**, aire por jerarquía y no por relleno, y **ningún número que mida una
 > deuda**.
@@ -35,7 +60,26 @@ peor tipo de dato suelto: *no parece de una, parece de todas.*
 **Cómo:** o vive dentro de la ficha de su mascota, o no existe. *Un dato sin
 sujeto no informa: obliga a adivinar.*
 
-## ④ 🔴 «17 cosas» y «Ver 164 más» son contadores de DEUDA
+## ④ 🔴 «17 cosas» es un contador de DEUDA
+
+> ### ⚠️ ENMIENDA A ESTA DECISIÓN (B, al ir a ejecutarla)
+>
+> **Escribí de más, y lo corrijo antes de que alguien lo aplique.** Metí en la
+> misma bolsa «17 cosas» y «Ver 164 más», y **son dos cosas distintas**:
+>
+> · **«Ver {{n}} más» es LETRA FIRMADA** (`PieRevelar`, S71 — forma neutra a
+>   propósito, *«la etiqueta con artículo obligaría a un género por
+>   consumidor»*), y el founder la gateó en campo con «Ver 21 más». **No se
+>   toca.**
+> · Y además **no es lo mismo**: en «Tu vida», **164 no es una deuda — es una
+>   vida documentada**, y ese número está bien que esté. Es el control de una
+>   sección, no una insignia de pendientes.
+>
+> **Lo que sale es «17 cosas»**: un contador **en el encabezado de una lista de
+> pendientes**, que es donde el número sí mide deuda.
+>
+> *Prefiero corregir mi propia dirección que ver a C romper una letra firmada
+> porque yo generalicé de más.*
 
 Es exactamente lo que el tablero del perfil sacó cuando murió el anillo: *un
 número que sólo puede crecer se lee como reproche, y el día que baje nadie lo

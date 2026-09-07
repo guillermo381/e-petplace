@@ -11,6 +11,7 @@ import {
   margenDeTrazo, trazosFueraDeCaja, radioDeAnillo,
 } from '../packages/ui/src/components/tablero-metrica.ts';
 import { fechaCortaHumana } from '../packages/i18n/src/fechas.ts';
+import { respiroDelOrbe, ORBE, AIRE_BORDE, RESPLANDOR_RADIO } from '../packages/ui/src/components/coach-geometria.ts';
 
 let ok = 0, mal = 0;
 const t = (n: string, real: unknown, esp: unknown) => {
@@ -384,6 +385,21 @@ t('🔴 la tarjeta sigue sin truncar en ningún lado', /numberOfLines/.test(MET)
    convierten una fila de estado en una fila de mascotas.* */
 t('el glifo del oficio va con su huella apagada',
   /nombre=\{props\.glifo\}[\s\S]{0,80}montaje="control"/.test(MET), true);
+
+console.log('\n── ㉓ EL ORBE RESERVA SU LUGAR (3.1 ⑪) ──');
+/* ⏪ En el Hogar del founder el orbe se dibujó **encima de «Ver cómo va» y de
+   «Ver 164 más»**, dos veces en la misma pantalla. *No es que esté mal puesto:
+   flota, y una lista que scrollea no tiene cómo saber cuánto apartarse.* */
+t('🔴 el respiro incluye el RESPLANDOR, no sólo el disco',
+  respiroDelOrbe(0) > ORBE, true, );
+t('…y su cuenta es la del alcance visible',
+  respiroDelOrbe(0), AIRE_BORDE + (ORBE * RESPLANDOR_RADIO) / 2 + ORBE / 2);
+/* El `insets.bottom` entra sumando: *el orbe se ancla desde abajo, así que la
+   barra del sistema lo empuja hacia el contenido.* */
+t('🔴 el inset del sistema SUMA', respiroDelOrbe(34) - respiroDelOrbe(0), 34);
+/* 🔴 CONTROL · reservar sólo el disco deja el halo encima del texto — que es
+   exactamente lo que se vio en la captura. */
+t('CONTROL · sólo el disco NO alcanza', respiroDelOrbe(0) > AIRE_BORDE + ORBE, true);
 
 console.log('\n── ⑪ NINGUNA COMPONE VOZ (Ley 3) ──');
 for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {
