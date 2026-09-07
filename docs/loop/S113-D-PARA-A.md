@@ -20,6 +20,45 @@
 > ✅ Verificado en git: `681bf7b4` es ancestro de la punta, así que **mergear la
 > punta trae los dos**. El riesgo es sólo si alguien saca ese commit suelto.
 
+## 🔴 LO ÚNICO ABIERTO DEL ARCO CLÍNICO, y es la última puerta
+
+**Los resultados de tipo `papel` de `buscar_en_mi_familia` tienen que salir sin
+ningún juicio: título, origen y fecha, nunca un valor comentado.**
+
+El router de `coach` ya dejó de mandar ahí las preguntas clínicas —«mostrame sus
+análisis» iba a `busqueda` y **esquivaba el muro**; medido 1 de 5 mal ruteadas →
+0 de 5, con las 4/4 búsquedas de verdad intactas—. Pero lo que igual llegue a la
+lista **es la última puerta por la que un examen puede llegar a una familia sin
+pasar por el muro clínico**.
+
+Contexto de por qué importa ahora y no antes: la bóveda ya llega a Nexo (lo
+cablé, ver abajo) y **el muro quedó medido con sujeto por primera vez: 0 cruces
+en 32**. Esa puerta es la que queda sin cubrir.
+
+## El contador de `packages/ui`, verificado por dos pistas
+
+B lo midió y me lo enrutó por error (creyó que yo era A). **Lo verifiqué contra
+`origin/main` antes de pasarlo**, así que va con dos mediciones y no con una:
+
+    ls packages/ui/src/components/*.tsx | grep -v '\.web\.tsx' | wc -l   → 172
+    − `capturaFoto` (infra, no se dibuja)                                → **171**
+
+**El canon publica 53.** Y lo que lo vuelve urgente no es el desvío: es que **esa
+línea trae su propia advertencia adentro** — dice *«decía 44 desde S82 — L-141»*,
+o sea que **ya se re-midió una vez por esta misma causa y volvió a decaer**.
+*No es un número viejo: es uno que ya demostró que decae, con su lección citada
+al lado y sin instrumento que la haga cumplir.*
+
+**La cura tiene precedente probado dos veces en esta casa**: la fila de
+`supabase/` declara el COMANDO tras cuatro caídas del contador de migraciones, y
+los números de ficha pasaron a `pnpm proximo:ficha` — que además **sale en rojo
+con exit 2 en vez de entregar un número dudoso**. Ése es el molde: no sólo
+declarar el comando, **que exista como script**, porque un comando escrito en
+prosa también se copia mal.
+⚠️ Si se escribe, `verify:gates-existen` mide en las dos direcciones: nombrar un
+`verify:` que no exista frena el commit. La nota completa de B está en
+`docs/loop/S113-B-PARA-A-CONTADOR.md`.
+
 **Medido por CONTENIDO contra `origin/main`, no por nombre de archivo**
 (`git grep -c … origin/main`).
 

@@ -17,7 +17,17 @@
  *
  * ⚠️ Mide el CABLEADO —que se pida de nuevo, una sola vez, sin tocar el system
  * cacheado, y que un truncado NO se reintente— **jamás que el modelo se
- * recupere**. La tasa de recuperación la mide E contra la edge.
+ * recupere**.
+ *
+ * ✅ **Y LA EFICACIA YA SE MIDIÓ, contra la edge desplegada (E):**
+ *     antes del reintento  **8 de 16** (50 %)
+ *     después              **16 de 16** (100 %), cero fallos individuales
+ * **La línea de base es lo que lo vuelve afirmable**: desde una tasa del 50 %,
+ * sacar 16 de 16 por azar es **1 en 65.536**. *Sin ella, un 16/16 era
+ * indistinguible de una buena racha.* Y su costo fue barato de otra manera: al
+ * tomarla apareció que **una de las cuatro frases no estaba rota** —recuperaba
+ * 4/4 sola— y la habíamos metido en la lista por un solo fallo. *Sin la base
+ * habríamos curado algo sano y contado su acierto como mérito del reintento.*
  */
 import { declararObjeto, exigirCasos } from './declarar-objeto.ts'
 
@@ -25,8 +35,8 @@ await declararObjeto({
   mide: ['supabase/functions/_shared/ia/mod.ts'],
   modeloReal: false,
   noCubre:
-    'si el modelo se recupera al segundo pedido: eso sólo lo dice la edge con las 4 frases ' +
-    'que hoy rompen en producción. Un reintento cuya eficacia no se midió es una esperanza con reintento.',
+    'si el modelo se recupera al segundo pedido — pero eso YA se midió y el número está abajo: ' +
+    'este arnés sigue probando sólo el cableado, y su verde no dice nada de la eficacia.',
 })
 
 Deno.env.set('ANTHROPIC_API_KEY', 'sk-ant-FALSA')
