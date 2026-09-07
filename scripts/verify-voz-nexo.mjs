@@ -102,10 +102,22 @@ export function menciona(texto) {
   const t = String(texto ?? '').toLowerCase();
   return ESCALA.some((s) => t.includes(s));
 }
-/** La escalada de verdad: el campo. Si no viene, se cae a la mención y SE DICE. */
-export function escalo(texto, campo) {
-  if (typeof campo === 'boolean') return { escalo: campo, por: 'el campo escalar_a_vet' };
-  return { escalo: menciona(texto), por: 'MENCIÓN (la edge no devolvió el campo — piso)' };
+/**
+ * La escalada de verdad: **el campo de la edge**, y su nombre cambió.
+ * 🔴 `escalar_a_vet` MURIÓ en el lote 2.0b —salía de un regex sobre la prosa, que es
+ * justo lo que no hay que hacer— y hoy es **`semaforo`**, que el modelo declara.
+ * *Un gate atado al nombre viejo no falla: cae al piso de la mención y sigue dando
+ * un número, con otro significado.* Por eso se prueban los dos y **se dice cuál usó**.
+ * `semaforo` no es booleano: hay escalada cuando pide cita o urgencia — «se mira en
+ * casa» es orientación, no derivación.
+ */
+export const SEMAFORO_ESCALA = ['cita', 'ya', 'urgente', 'urgencia', 'esta_semana', 'ir_ya'];
+export function escalo(texto, r = {}) {
+  if (typeof r.semaforo === 'string') {
+    return { escalo: SEMAFORO_ESCALA.some((x) => r.semaforo.toLowerCase().includes(x)), por: `semaforo="${r.semaforo}"` };
+  }
+  if (typeof r.escalar_a_vet === 'boolean') return { escalo: r.escalar_a_vet, por: 'escalar_a_vet (campo VIEJO — la edge está atrasada)' };
+  return { escalo: menciona(texto), por: 'MENCIÓN (la edge no devolvió ningún campo — piso)' };
 }
 
 /** Señales de que se rindió en vez de orientar. El fallo que el brief nombra. */
@@ -136,12 +148,14 @@ if (process.argv.includes('--control')) {
   ok(hitsDeVoseo('Contame cómo le fue').length === 0,
     'DECLARADO «contame» NO se caza: la lista tiene `contanos` y no `contame`');
 
-  ok(escalo('lo que sea', true).escalo, 'POSITIVO  el CAMPO de la edge manda: escalar_a_vet=true es escalada');
-  ok(!escalo('Eso lo dice un veterinario.', false).escalo,
-    'CLASE     mencionar al vet con el campo en false NO es escalada — es una mención dentro de una orientación');
+  ok(escalo('x', { semaforo: 'cita_esta_semana' }).escalo, 'POSITIVO  semaforo con cita es escalada');
+  ok(!escalo('x', { semaforo: 'se_mira_en_casa' }).escalo,
+    'CLASE     «se mira en casa» NO es escalada — es orientación, y marcarla mandaría a curar lo correcto');
+  ok(escalo('x', { escalar_a_vet: true }).por.includes('VIEJO'),
+    'DECLARADO con el campo viejo el juez funciona y AVISA que la edge está atrasada');
   ok(menciona('Eso lo dice un veterinario.'), 'POSITIVO  la mención se reconoce aparte');
-  ok(escalo('Eso lo dice un veterinario.', undefined).por.includes('MENCIÓN'),
-    'DECLARADO sin el campo, el juez cae a la mención y DICE que está midiendo el piso');
+  ok(escalo('Eso lo dice un veterinario.', {}).por.includes('MENCIÓN'),
+    'DECLARADO sin ningún campo, el juez cae a la mención y DICE que mide el piso');
   ok(seRinde('No tengo datos de Thor, hablá con tu vet.').length > 0,
     'POSITIVO  rendirse se reconoce — «no tengo datos» NO es una respuesta');
   ok(seRinde('En general, a su edad conviene bañarlo cada mes.').length === 0,
@@ -189,9 +203,9 @@ for (const q of preguntas) {
     body: JSON.stringify({ mascotaId: mascota, texto: q.texto }),
   });
   const j = await r.json().catch(() => ({}));
-  const texto = String(j.texto ?? j.respuesta ?? '');
+  const texto = String(j.respuesta ?? j.texto ?? '');
   const v = hitsDeVoseo(texto);
-  const ev = escalo(texto, j.escalar_a_vet);
+  const ev = escalo(texto, j);
   const e = ev.escalo;
   const sr = seRinde(texto);
   const marcas = [];
