@@ -1,5 +1,49 @@
 # S113 · lo que espera al founder
 
+## ⚖️ ESTADO FIRMADO — 7-sep-2026, firma del founder
+
+> **Esto rige por encima de todo lo que sigue.** Lo de abajo es la bitácora de
+> la noche, con su historia y sus mediciones; esto es la decisión.
+
+### ① La placa: `verify:placas-lote` queda **ROJO DECLARADO**
+
+**No se fuerza, no se baja el baseline, no se corre con `service_role`.** Espera
+proveedor. **Su rojo es la verdad y hay que leerlo como tal**: `crear_lote_placas`
+existe, está desplegada y **nunca corrió** (medido: 0 lotes, 0 placas) — *una
+puerta sin tráfico no puede mostrar que está rota* (L-402). El runbook de tres
+pasos está escrito en `S113-PLACAS-IMPRESION.md` §⑤; son ~60 s el día que haya
+proveedor. Ficha: **`D-1049`**.
+
+⚠️ **Para quien vea este rojo en un cierre futuro y sienta la tentación de
+limpiarlo:** bajarlo a verde con la credencial de servicio da el mismo verde y
+**no prueba nada**, porque saltea el gate de admin, que es la única parte sin
+estrenar. *Un verde flojo acá es peor que el rojo honesto: el rojo dice la
+verdad y el verde la esconde.*
+
+### ② La fase 3 está **CERRADA**. No se abre fase 4.
+
+**Su acta: `docs/loop/S113-FASE-3-CIERRE.md`** — qué se construyó, qué quedó
+abierto con dueño, y las seis leyes nuevas de la sesión.
+
+Lo publicado: cliente `d668fae0` · prestador `c81479b3` · **ancla `f4fbe740`** ·
+`dirty: None` · rt 1.0.7.
+
+### ③ Lo que queda hasta el 30, **en este orden**
+
+| | qué | dueño · estado |
+|---|---|---|
+| **1º** | **EL REDISEÑO** — dos sesiones | C · B |
+| **2º** | **LA BUILD NATIVA de ANDROID, UNA SOLA, con el NFC adentro.** 🔴 **iPhone queda FUERA: el founder espera el DUNS de Apple.** El entitlement de NFC se pide desde una cuenta que todavía no existe — *quien planifique ese día contando con iPhone lo descubre al final, cuando no hay margen* — se corta **después** del rediseño | **`S113-NFC-BUILD.md` es LA LISTA VIVA**: cinco capacidades anotadas (NFC · galería · compartir · micrófono de Nexo · selector de PDF). ⚠️ **Nada nativo se instala: se ANOTA ahí.** `s113-a-nfc` y `s113-b-nfc` quedan fuera de `main` **a propósito**. Hasta ese día **todo sale por OTA** y **`ota:deps` es el discriminador de cada candidato** |
+| **3º** | **EL PULIDO** — las **tres de C** del último OTA · las **cuatro del Hogar** de B · los **128 eventos sin voz**, con `fin_vida` a la cabeza · las **fechas crudas de la búsqueda** | C y B. **Cuando cierren, el candidato** |
+| **4º** | **LO LEGAL** | **no depende de nosotros** — es espera, no trabajo |
+
+**El candidato del pulido lo armo cuando C y B cierren.** Hasta entonces no hay
+nada que publicar: *un candidato armado a mitad de un pulido publica media cura,
+y media cura de voz se lee como una voz que cambió de idea.*
+
+---
+
+
 > **Repaso del 7-sep** (A). Lo cerrado se marca **con su medición al lado** y su
 > texto queda plegado: *una deuda cerrada sin la medición que la cerró se vuelve
 > a abrir en el próximo censo.*

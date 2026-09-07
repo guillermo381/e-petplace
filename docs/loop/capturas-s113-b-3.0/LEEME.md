@@ -78,3 +78,34 @@ Un `keyevent 4` me sacó de la sonda a la raíz de la app, que estaba sin red:
 guardé dos PNG de la pantalla de error **con md5 distintos entre sí**. *El md5
 prueba que la captura cambió, jamás que muestre lo que uno cree.* Lo que lo
 cazó fue mirar, y después contar por volcado.
+
+
+---
+
+# El HOGAR — el antes, para la dirección de diseño
+
+`07-hogar-antes-arriba` y `08-hogar-antes-abajo`: la pantalla **real** de la
+cuenta del founder, 7-sep-2026. Son el «antes» de
+**`docs/loop/S113-B-DIRECCION-HOGAR.md`**, que las lee una por una.
+
+**Lo que muestran, en corto:** el techo se lleva **740 px de 2000** para decir
+cuatro cosas · *«pulgas · 01 oct 2026»* flota **sin decir de qué mascota es** ·
+**«17 cosas»** y **«Ver 164 más»** son contadores de deuda · «Tus servicios»
+**trunca tres de cuatro** y cada tarjeta muestra una unidad distinta sin rótulo ·
+«Momento de cuidado» se repite **sin nombrar la mascota** · y el orbe de Nexo se
+dibuja **encima** del contenido en las dos capturas.
+
+# ✅ El gate de `papel`, CERRADO — y su riesgo resuelto con la vecindad real
+
+El riesgo declarado era *«a 21 px puede leerse lista»*. **Lo resolvió la
+pantalla donde viven juntos, no una fila de contacto:** en `01-boveda-claro`, a
+21 px y en la misma lista, `papel` (Exámenes) contra `documentos` (Papeles de
+e-PetPlace) — una hoja vertical con renglones contra dos rectángulos apilados.
+**Se distinguen.**
+
+🔴 **Y lo que evita la lectura «lista» es EL MARCO**: *sin el rectángulo los
+renglones quedan sueltos, y renglones sueltos SON una lista.* ⚠️ La tentación de
+sacarlo está **medida**: la masa quedó en +14 %, casi contra el techo de la
+banda, **y el marco es la mitad de ese número** — el día que alguien necesite
+bajarla, lo primero que va a mirar es el rectángulo. Por eso ahora tiene su
+propio rojo en `verify:glifos`.

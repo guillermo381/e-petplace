@@ -29327,3 +29327,63 @@ agujero abierto.
 
 #### Disparo
 El día que el portal tenga sesión. O antes, si alguien mide que ya la tiene.
+
+### `D-1048` 🟡 · El barredor que verifica si el archivo de un papel existe de verdad
+
+**Qué falta.** `papeles_familia.archivo_estado` nace en S113 con tres valores
+—`pendiente` · `presente` · `ausente`— y **nadie lo mueve a `ausente`**.
+Postgres no puede preguntarle a Storage si el objeto está; hace falta un
+barredor (edge function o cron con `service_role`) que recorra los papeles y
+marque los que perdieron su blob.
+
+**Por qué la columna nace igual, sin su barredor.** *Hoy el estado no tiene
+DÓNDE decirse* — y un barredor que no tiene dónde escribir su resultado no se
+puede escribir. Primero el lugar, después quien lo llena. La columna sola ya
+sirve: la puerta declara `presente` al confirmar, así que un papel que quede en
+`pendiente` **ya es una señal**, aunque nadie haya verificado nada.
+
+**Cómo se llegó acá, y por qué no es hipotético.** `archivo_path` es `NOT NULL`,
+así que la fila **siempre** tiene un path — lo que no se podía decir es si el
+blob existe. En esta misma sesión aparecieron **dos filas fantasma** que ni la
+Storage API (404) ni el SQL (`storage.protect_delete`) podían borrar. *No es un
+dato faltante: es un dato que se lee como presente.*
+
+**Disparo.** La primera subida que falle en producción, o el primer barrido de
+Storage que alguien tenga que hacer a mano. **Hasta entonces el estado es
+declarado, no verificado — y la columna lo dice en su `COMMENT`.**
+
+**Bloqueante.** Ninguno: la credencial de servicio existe. Es trabajo, no espera.
+
+### `D-1049` 🔴 ROJO DECLARADO · `crear_lote_placas` nunca corrió — espera proveedor
+
+**Firma del founder, 7-sep-2026: se queda rojo. No se fuerza, no se baja el
+baseline, no se corre con `service_role`.**
+
+**El número.** `pasaporte_placa`: **0 filas**. `crear_lote_placas` existe, es
+`SECURITY DEFINER`, está desplegada y **nunca fue llamada**. `verify:placas-lote`
+da su rojo con ese número.
+
+**Por qué el rojo se queda y no se limpia.** *Una puerta sin tráfico no puede
+mostrar que está rota* (**L-402**: no basta «¿está alcanzable?», hace falta
+«¿CORRIÓ ALGUNA VEZ?» — `aplicar_evento_de_pago` estuvo muerta un día entero
+por eso, sin síntoma, porque no había tráfico que lo revelara).
+
+🔴 **Y la trampa concreta, para quien la vea en un cierre futuro:** correrla con
+`service_role` **daría exactamente el mismo verde** y no habría probado nada,
+porque esa credencial **saltea el gate de admin** — que es la única parte sin
+estrenar. *Un gate se verifica por el camino de la pantalla, jamás por la
+defensa que uno supone* (**L-167**). **El verde flojo es peor que el rojo
+honesto: el rojo dice la verdad y el verde la esconde.**
+
+**Lo que bloquea.** Nada técnico: el portal (`e-petplace-admin/src/pages/Placas.tsx`)
+está construido, la puerta desplegada, el CSV para la imprenta resuelto.
+**Falta el proveedor** — y crear un lote antes de saber quién imprime es fabricar
+tokens que van a quedar sin objeto.
+
+**Disparo.** Hay proveedor. El runbook son tres pasos y vive en
+`docs/loop/S113-PLACAS-IMPRESION.md` §⑤; el gate pasa a verde solo.
+
+⚠️ **Límite del gate, declarado:** `pasaporte_placa` no guarda quién creó el
+lote, así que **el gate no puede distinguir** un lote hecho desde el portal de
+uno hecho con `service_role`. *Se declara en vez de fingir que se mide* — la
+constancia de que fue por la pantalla la deja quien lo hace, en el parte.

@@ -1856,16 +1856,40 @@ export default function Hogar() {
           Lo que queda es **una entrada discreta que dice qué hace** y lleva
           allá.
 
-          🔴 **Sin glifo, y es una decisión.** El founder pidió una lupa y
-          **no existe en el registry** —medido: `explorar` es una BRÚJULA
-          (círculo + aguja), no una lupa—. *Un glifo que significa otra cosa es
-          peor que ninguno: enseña mal el vocabulario y después hay que
-          desenseñarlo.* **Pedida a B por §6b**; entra en una línea. */}
-      <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[4] }}>
+          ⭐ **Y ya tiene su glifo.** Esta entrada nació sin uno: la lupa **no
+          existía en el registry** —medido: `explorar` es una BRÚJULA (círculo +
+          aguja)— y *un glifo que significa otra cosa es peor que ninguno:
+          enseña mal el vocabulario y después hay que desenseñarlo.* Se pidió a
+          B por §6b y llegó en `cb3e34c9`. **La entrada estuvo una tanda sin
+          glifo a propósito**, que es lo que la hizo pedible. */}
+      {/* 🔴 **LA ENTRADA TOMA EL SOLAPE** (ojo del founder: *«quedó tapada,
+          se ve asomar Buscar en tu famili… detrás de Ponte al día»*).
+          Reproducido en el emulador: la entrada quedaba **entre el techo y una
+          tarjeta que sube `-SOLAPE_RECO` para pegarse a la banda**, así que la
+          tarjeta se le montaba encima. *No era un margen chico: era que otra
+          pieza sube a propósito y nadie le avisó que ahora hay algo abajo.*
+          ⏪ La primera cura la subió `-SOLAPE_RECO` para que se montara sobre
+          la banda, y **quedó a caballo del borde**: mitad sobre el degradado,
+          mitad sobre el papel, con su fondo cortado por la curva del techo.
+          *Una pieza que cruza el borde no está «entre dos zonas»: está rota en
+          las dos.*
+
+          🔴 **DECISIÓN: abajo, sobre el papel, con su aire.** La alternativa
+          —adentro del techo, translúcida— exige un tratamiento de color sobre
+          un degradado que va de magenta a teal, y **eso es diseño, no
+          composición**: su contraste cambia a lo largo del propio techo.
+          Acá abajo la celda es la misma que el resto de la casa y se lee igual
+          en los dos temas. *Reversible: si el rediseño la quiere adentro, la
+          sube con su tratamiento.* */}
+      <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[5] }}>
         <CeldaNavegacion
+          icono="lupa"
           titulo={t('busqueda.entrada')}
           registro="tinta"
-          onPress={() => router.push('/nexo')}
+          /* 🔴 **BUSCA, no conversa** (corrección de la mesa). Abría el chat
+             de Nexo: *un control que promete un acto y hace otro no es un
+             atajo, es una promesa incumplida.* */
+          onPress={() => router.push('/buscar')}
         />
       </View>
 
@@ -1886,8 +1910,11 @@ export default function Hogar() {
         const filas = filasReco;
         if (filas.length === 0) return null;
         const visibles = ponteRevelado ? filas : filas.slice(0, 3);
+        /* ⏪ Subía `-SOLAPE_RECO` para pegarse a la banda del techo. **Ese
+           lugar es ahora de la entrada de búsqueda**, y esta tarjeta baja con
+           su aire: dos piezas no pueden ocupar el mismo solape. */
         return (
-          <View style={{ paddingHorizontal: spacing[4], marginTop: -SOLAPE_RECO, zIndex: 2 }}>
+          <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[4], zIndex: 2 }}>
             <Tarjeta elevacion="elevada" relleno="ninguno">
               <View
                 style={{

@@ -184,6 +184,32 @@ export function ejeDeLaFila(ancho: number, aireInferior = 0): { x: number; abajo
   return { x: a.izquierda + ORBE / 2, abajo: a.abajo + ORBE / 2 }
 }
 
+/**
+ * 🔴 **CUÁNTO LUGAR HAY QUE DEJARLE ABAJO A UNA LISTA QUE SCROLLEA
+ * (S113-B · 3.1 ⑪).**
+ *
+ * ⏪ Nace de un defecto visto en el Hogar del founder, **dos veces en la misma
+ * pantalla**: el orbe se dibujó **encima de «Ver cómo va»** y **encima de «Ver
+ * 164 más»**. No es que el orbe esté mal puesto — *es que flota, y una lista
+ * que scrollea no tiene forma de saber cuánto tiene que apartarse.*
+ *
+ * 🔴 **Y ese número no se adivina: hasta hoy la pantalla TENÍA que inventarlo.**
+ * La geometría estaba exportada en piezas sueltas (`ORBE`, `anclaOrbe`,
+ * `AIRE_BORDE`) y cada consumidor las sumaba a su manera — *tres pantallas
+ * sumando lo mismo a mano divergen a la primera vez que el orbe crezca.*
+ *
+ * Incluye **el resplandor**, que es lo que de verdad tapa: el disco mide
+ * `ORBE`, pero lo que se ve llega hasta `ORBE * RESPLANDOR_RADIO`. *Reservar
+ * sólo el disco deja el halo encima del texto, que es exactamente lo que se
+ * vio.*
+ *
+ * @param aireInferior el `insets.bottom` de la pantalla, si lo tiene.
+ */
+export function respiroDelOrbe(aireInferior = 0): number {
+  const alcanceVisible = ORBE * RESPLANDOR_RADIO
+  return AIRE_BORDE + aireInferior + alcanceVisible / 2 + ORBE / 2
+}
+
 /** El orbe chico de «Preguntale a …»: ya violeta, con su brasa. */
 export const ORBE_MINI = 36
 

@@ -1,4 +1,78 @@
-# El día de la build · qué entra, en qué orden y qué se rompe si se saltea
+# El día de la build · LA LISTA VIVA de lo que viaja ese día
+
+## ⚖️ FIRMA DEL FOUNDER (7-sep-2026) — el corte y la regla
+
+**La build se corta DESPUÉS del rediseño: dos sesiones más, y es UNA SOLA, con
+el NFC adentro.** Hasta entonces:
+
+- **TODO sale por OTA.**
+- **Ninguna rama `*-nfc` se mergea** — hoy `pista/s113-a-nfc` y `pista/s113-b-nfc`
+  están fuera de `main` **a propósito**, no por olvido. *Un módulo nativo en
+  `main` no se nota: compila, corre en dev, y el APK que la gente tiene no lo
+  tiene* — el bundle sigue pidiendo algo que el binario no trae, y el fallo
+  aparece en el teléfono de una familia, no acá.
+- **`ota:deps` es el discriminador de cada candidato.** Corre antes de bundlear,
+  siempre. Su verde es lo único que dice que el OTA que estás por publicar
+  **puede** aplicarse sobre el binario que la gente ya tiene.
+
+### 🔴 SI NECESITÁS ALGO NATIVO: SE ANOTA ACÁ, NO SE INSTALA
+
+**Cualquier pista que necesite una capacidad nativa agrega su fila a la tabla de
+abajo y sigue trabajando sin ella** — con el camino degradado que corresponda, y
+diciéndolo en pantalla si la familia lo va a notar.
+
+*Instalarlo «para probar» es exactamente el modo de falla que esta regla existe
+para evitar: pnpm resuelve el peer, funciona en dev, nadie lo declara en ninguna
+app, y el gate queda partido en dos mitades que por separado dan verde.*
+
+### 🔴 EL NFC DE iPHONE QUEDA FUERA DEL ALCANCE — firma del founder, 7-sep-2026
+
+**No es una decisión de producto: no hay con qué.** El founder **todavía no
+tiene cuenta de desarrollador de Apple** — espera el **DUNS**, que es trámite de
+un tercero y **no tiene fecha que dependa de nosotros**.
+
+**Lo que esto significa el día de la build, para que nadie lo dé por hecho:**
+
+- **La build de Android se corta igual.** No espera a Apple. El NFC funciona ahí.
+- **Lo de iPhone viaja cuando Apple habilite la cuenta**, en su propia build.
+- **El entitlement de NFC se pide ENTONCES**, no antes: *es un permiso que se
+  solicita desde una cuenta que todavía no existe.*
+
+⚠️ **La trampa concreta:** el entitlement de NFC en iOS **no es una casilla que
+se marca al compilar** — es una capacidad que Apple concede, y llega después de
+pedirla. Quien planifique el día de la build contando con iPhone va a descubrirlo
+**al final**, cuando ya no hay margen. *Por eso está escrito acá arriba y no en
+una nota al pie: la fila 1 de la lista dice «iOS queda FUERA» y este bloque dice
+por qué.*
+
+**Lo que sí se puede adelantar sin la cuenta:** todo el código NFC vive en
+`pista/s113-a-nfc` y `pista/s113-b-nfc`, sin mergear. *No se pierde nada
+esperando: se pierde si alguien lo mergea antes de la build.*
+
+
+---
+
+## LA LISTA VIVA — lo que viaja el día de la build
+
+> Se agrega, no se reemplaza. Cada fila dice **quién la pidió** y **qué se rompe
+> si ese día falta** — porque el día de la build alguien va a tener que decidir
+> rápido qué se prueba primero, y sin esa columna se prueba lo que se recuerda.
+
+| # | capacidad | paquete / permiso | pidió | qué se rompe si falta |
+|---|---|---|---|---|
+| 1 | **Leer y escribir NFC** (la placa) | `react-native-nfc-manager` | A · B | La placa sólo funciona por QR. 🔴 **iOS queda FUERA — ver el bloque de abajo** |
+| 2 | **Guardar en la galería** | `expo-media-library` (permiso de escritura) | A | La descarga del QR **abre** la imagen en vez de guardarla. Hoy sale por ahí, y se nota |
+| 3 | **Compartir archivos** | `expo-sharing` | A | El pasaporte y el QR no se pueden mandar por WhatsApp desde la app |
+| 4 | **Micrófono de Nexo** (dictar) | `expo-audio` / permiso de micrófono | D | Nexo sólo se escribe. *El dictado es lo que lo vuelve usable con el perro en brazos* |
+| 5 | **Selector de PDF** (la bóveda) | `expo-document-picker` | A | Un examen en PDF no se puede subir: hoy la bóveda sólo toma imagen |
+
+<!-- PISTA QUE NECESITA ALGO NATIVO: agregá tu fila ACÁ ARRIBA, con las cinco
+     columnas. No instales el paquete. Si tu camino queda degradado hasta la
+     build, decilo en pantalla — la familia tiene que entender por qué algo no
+     está, no encontrarse con un botón que no hace nada. -->
+
+---
+
 
 > **Nada nativo entra a `main` antes de la build.** Un módulo nativo **no viaja
 > por OTA**: el JS del bundle lo importa, el binario instalado no lo tiene, y la
