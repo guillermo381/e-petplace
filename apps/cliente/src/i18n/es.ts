@@ -4454,4 +4454,34 @@ export const clienteEs = {
     anotado: 'Anotado en la vida de {{nombre}}',
     noSePudo: 'No pudimos anotarlo. Prueba de nuevo en un rato.',
   },
+  /* ── S114-C · LA POSTVENTA (§1 y §2 de `DIRECCION_POSTVENTA`) ──────────
+     🔴 TUTEO NEUTRO, y la puerta NO es un botón de alarma (§1): «¿Algo salió
+     distinto?» es una pregunta, no un reproche al prestador. */
+  postventa: {
+    // §1 · LA PUERTA, sus tres voces
+    puerta: '¿Algo salió distinto?',
+    puertaFueraDeVentana: 'Este servicio ya pasó su ventana. Si quieres, habla con nosotros.',
+    puertaCasoAbierto: 'Tienes un caso abierto sobre este servicio',
+    // §2 · CONTAR QUÉ PASÓ
+    tituloMotivo: '¿Qué pasó?',
+    /* La última fila. Sale del catálogo cuando el catálogo la trae; esto es
+       el respaldo para que la pantalla nunca quede muda. */
+    contame: 'Es otra cosa · contame',
+    placeholderRelato: 'Cuéntame qué pasó, con tus palabras',
+    /* §2: la foto AYUDA y no es requisito — la frase lo dice entera para que
+       nadie la lea como un paso obligatorio. */
+    fotoOpcional: 'Si tienes una foto, ayuda. Si no, seguimos igual.',
+    agregarFoto: 'Agregar una foto',
+    seguirSinFoto: 'Seguir sin foto',
+    continuar: 'Continuar',
+    /* §2 · LA CONFIRMACIÓN. **Nada se crea sin el sí.** */
+    entendi: 'Entendí: {{resumen}}. ¿Está bien?',
+    esEso: 'Sí, es eso',
+    corregilo: 'No, corrígelo',
+    errorCatalogo: 'No pudimos cargar los motivos. Prueba de nuevo.',
+    // §3.4 · siempre alcanzable
+    motorNoDisponible: 'Todavia no podemos abrir el caso. Estamos terminando esta parte.',
+    hablarConAlguien: '¿Prefieres que te atienda una persona?',
+  },
+
 } as const;

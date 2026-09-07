@@ -3239,4 +3239,23 @@ export const clienteEn = {
     anotado: "Noted in {{nombre}}'s life",
     noSePudo: "We couldn't note it. Try again in a bit.",
   },
+  postventa: {
+    puerta: 'Did something go differently?',
+    puertaFueraDeVentana: 'This service is past its window. If you want, talk to us.',
+    puertaCasoAbierto: 'You have an open case about this service',
+    tituloMotivo: 'What happened?',
+    contame: "It's something else \u00b7 tell me",
+    placeholderRelato: 'Tell me what happened, in your own words',
+    fotoOpcional: 'A photo helps, if you have one. If not, we carry on.',
+    agregarFoto: 'Add a photo',
+    seguirSinFoto: 'Continue without a photo',
+    continuar: 'Continue',
+    entendi: 'I understood: {{resumen}}. Is that right?',
+    esEso: "Yes, that's it",
+    corregilo: 'No, fix it',
+    errorCatalogo: "We couldn't load the reasons. Try again.",
+    motorNoDisponible: "We can't open the case yet. We're still finishing this part.",
+    hablarConAlguien: 'Would you rather a person helped you?',
+  },
+
 } as const satisfies Espejo<typeof clienteEs>;

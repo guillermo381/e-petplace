@@ -53,6 +53,7 @@ import {
   Hoja,
   Icono,
   Insignia,
+  LineaAlgoSalioDistinto,
   SelectorOpcion,
   Tarjeta,
   Separador,
@@ -77,6 +78,8 @@ import {
   type MascotaResumen,
 } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
+
+import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, escaleraMuda, type VocesEscalera } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
@@ -238,6 +241,37 @@ export default function DespensaPedido() {
   function destinoDe(linea: LineaDePedido) {
     return linea.destino;
   }
+
+  /* ══ S114-C · LA PUERTA (§1) ══════════════════════════════════════════
+     El cierre de un pedido es su ENTREGA — el tercer hito del envío, que es
+     el mismo acto que deposita el evento en el expediente. Mientras viaja no
+     hay puerta.
+
+     🔴 **`estadoVida` NO SE PASA, y es una decisión, no un olvido.** §1 apaga
+     la puerta «con la mascota en memorial», y **un pedido no tiene UNA
+     mascota**: sus ítems pueden ir a destinos distintos y el sujeto de la
+     compra es el hogar. Elegir una para aplicarle la regla sería inventar un
+     sujeto que el objeto no tiene. *La regla no aplica acá y decirlo así es
+     más honesto que mandarle un `'activa'` que nadie midió.*
+
+     ⚠️ `casoAbierto` tampoco: el motor del caso no existe todavía. */
+  const puerta = veredictoDeLaPuerta({
+    cerradaEn: typeof detalle === 'object' ? (detalle.envio?.entregado_en ?? null) : null,
+    voces: {
+      disponible: t('postventa.puerta'),
+      fueraDeVentana: t('postventa.puertaFueraDeVentana'),
+      casoAbierto: t('postventa.puertaCasoAbierto'),
+    },
+  });
+
+  const abrirLaPuerta = () => {
+    const destino = destinoDeLaPuerta(
+      puerta,
+      'pedido',
+      typeof detalle === 'object' ? detalle.pedido.pedido_id : null,
+    );
+    if (destino !== null) router.push(destino);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -749,14 +783,38 @@ export default function DespensaPedido() {
               </View>
             ) : detalle.pedido.narrativa !== 'cancelado' ? (
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
-                <Boton
-                  variante="secundario"
-                  bloque
-                  etiqueta={t('despensa.tengoUnProblema')}
-                  onPress={() => void abrirWhatsApp(detalle.pedido.numero_orden)}
-                />
-                {/* §8.4 — el botón dice A DÓNDE va y EN QUÉ HORARIO. */}
-                <Texto variante="apoyo">{t('despensa.problemaDetalle')}</Texto>
+                {/* 🔴 S114-C · LA REGLA DE UNICIDAD, APLICADA — y es una
+                    decisión que C tomó leyendo la letra, servida al founder
+                    para que la ratifique.
+
+                    `LETRA_POSTVENTA` abre con *«dos sistemas de postventa en
+                    la misma base está prohibido. Este documento es EL
+                    sistema»*. Este botón —«tengo un problema» → WhatsApp— es
+                    el otro sistema, y estaba acá primero.
+
+                    **No se retira entero, porque no se solapan entero:** él
+                    cubre TODO pedido no cancelado (incluso uno en camino);
+                    la puerta sólo existe sobre un pedido ENTREGADO y dentro
+                    de los 7 días. ⇒ **donde hay puerta, manda la puerta; en
+                    el resto, WhatsApp sigue siendo el camino** — que además
+                    es lo que §1 llama «hablá con nosotros» para lo que quedó
+                    fuera de ventana. *Retirarlo del todo dejaría sin salida
+                    al pedido que todavía viaja, que es justo cuando más se
+                    necesita.* */}
+                {puerta.hay ? (
+                  <LineaAlgoSalioDistinto estado={puerta.estado} onPress={abrirLaPuerta} />
+                ) : (
+                  <>
+                    <Boton
+                      variante="secundario"
+                      bloque
+                      etiqueta={t('despensa.tengoUnProblema')}
+                      onPress={() => void abrirWhatsApp(detalle.pedido.numero_orden)}
+                    />
+                    {/* §8.4 — el botón dice A DÓNDE va y EN QUÉ HORARIO. */}
+                    <Texto variante="apoyo">{t('despensa.problemaDetalle')}</Texto>
+                  </>
+                )}
               </View>
             ) : null}
           </>

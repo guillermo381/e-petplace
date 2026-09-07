@@ -65,6 +65,7 @@ import {
   EstadoVacio,
   Hoja,
   Insignia,
+  LineaAlgoSalioDistinto,
   MapaRecorrido,
   MarcaDeMapa,
   radius,
@@ -124,6 +125,9 @@ const horaCorta = (iso: string) =>
 
    *Se retira en el acto que lo vuelve reemplazable, no después* (`L-395`). */
 
+import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
+import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
+
 type Estadia =
   | { fase: 'cargando' }
   | { fase: 'noPudimos' }
@@ -143,6 +147,11 @@ export default function DuranteGuarderia() {
     mascotaNombre?: string;
     fecha?: string;
   }>();
+
+  /* 🔴 S114-C · el piso de memorial de la puerta (§1). `mascotaId` viaja por
+     la URL de esta pantalla, así que el hook no necesita esperar a la
+     estadía. */
+  const estadoVida = useEstadoVida(params.mascotaId);
 
   const [estadia, setEstadia] = useState<Estadia>({ fase: 'cargando' });
   const [media, setMedia] = useState<Media>({ fase: 'cargando' });
@@ -373,6 +382,32 @@ export default function DuranteGuarderia() {
       ),
     [t],
   );
+
+  /* ══ S114-C · LA PUERTA (§1) ══════════════════════════════════════════
+     El cierre de una estadía es `entregadaEn` — la hora en que el animal
+     volvió a su casa. Mientras es `null`, la estadía está ocurriendo y la
+     puerta no existe.
+
+     ⚠️ `casoAbierto` no se pasa: el motor del caso no existe todavía, así
+     que no puede haber ninguno. Declarado, no celebrado. */
+  const puerta = veredictoDeLaPuerta({
+    cerradaEn: estadia.fase === 'listo' ? estadia.e.entregadaEn : null,
+    estadoVida,
+    voces: {
+      disponible: t('postventa.puerta'),
+      fueraDeVentana: t('postventa.puertaFueraDeVentana'),
+      casoAbierto: t('postventa.puertaCasoAbierto'),
+    },
+  });
+
+  const abrirLaPuerta = () => {
+    const destino = destinoDeLaPuerta(
+      puerta,
+      'estadia',
+      estadia.fase === 'listo' ? estadia.e.estadiaId : null,
+    );
+    if (destino !== null) router.push(destino);
+  };
 
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -651,6 +686,17 @@ export default function DuranteGuarderia() {
             )}
           </View>
         </Tarjeta>
+
+        {/* ══ S114-C · LA PUERTA (§1) — la última fila, después de todo lo
+            que cuenta cómo fue la estadía (el acta, las fotos, los clips y
+            la bitácora). `entregadaEn` es su cierre: mientras la mascota
+            está en la guardería no hay puerta — no se reclama algo que está
+            ocurriendo. */}
+        {puerta.hay && (
+          <View style={{ marginTop: spacing[2] }}>
+            <LineaAlgoSalioDistinto estado={puerta.estado} onPress={abrirLaPuerta} />
+          </View>
+        )}
       </ScrollView>
 
       {/* LA HOJA DE LA CONFORMIDAD — dos caminos parejos, sin default oscuro.
