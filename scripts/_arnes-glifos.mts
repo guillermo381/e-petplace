@@ -65,6 +65,58 @@ function glifo(nombre: string) {
     huella: /<Huella/.test(cuerpo),
     /** El aire que queda DENTRO del círculo más chico, a 21 px. Ley 9. */
     interiorMin: circulos.length ? Math.min(...circulos.map((r) => (2 * r - TRAZO) * (GATE / GRILLA))) : null,
+    /**
+     * 🔴 **EL MISMO AIRE, PERO PARA CUADRADOS (S113-B · 2.2.4).**
+     *
+     * ⏪ `interiorMin` sólo miraba `<Circle>`, así que **este arnés no podía
+     * ver el modo de falla de un glifo hecho de cuadrados** — y el de
+     * `pasaporte` son las esquinas de un QR. *Un instrumento que no puede
+     * producir el rojo de la pieza que va a medir no está midiendo: está
+     * acompañando* (`L-459`).
+     *
+     * El umbral es el MISMO 2,5 px y eso se declara: el interior de un
+     * cuadrado de lado `s` trazado a 1.9 es un cuadrado de `s − 1.9`, cuyo
+     * círculo inscrito tiene ese mismo diámetro ⇒ **la vara de lo redondo
+     * aplica sin aflojarse.**
+     *
+     * 🔴 **Y MIDE GEOMETRÍA, NO LETRAS — su control positivo lo obligó.** La
+     * primera versión reconocía `M… h… v… h-… Z`, que es **la sintaxis que yo
+     * había escrito**: daba verde en mi glifo y **`null` en `documentos`**,
+     * que dibuja el mismo rectángulo con `H`/`V` absolutos. *Un medidor que
+     * reconoce exactamente la forma en que uno escribe pasa siempre y no ve a
+     * nadie más.* Hoy camina el path y saca su caja: le da igual cómo se
+     * escribió.
+     *
+     * ⚠️ **Sólo los TRAZADOS.** Uno relleno no tiene interior que cerrarse: su
+     * modo de falla es desaparecer, no empastarse, y ése lo mide la masa.
+     */
+    interiorCuadrado: (() => {
+      const cajas = [...cuerpo.matchAll(/d="([^"]+)"([^\n]*)/g)]
+        .filter((m) => !/fill=/.test(m[2] ?? '') && /[Zz]\s*$/.test(m[1] ?? ''))
+        .map((m) => {
+          /* Camina M/L/H/V y sus relativos; junta los puntos y devuelve la
+             caja. No intenta ser un parser de SVG: sólo de rectángulos
+             axis-aligned, que es lo que la casa dibuja. */
+          const d = m[1] ?? '';
+          if (/[CcSsQqTtAa]/.test(d)) return null;
+          let x = 0, y = 0;
+          const xs: number[] = [], ys: number[] = [];
+          for (const tk of d.matchAll(/([MLHVmlhv])\s*(-?[\d.]+)(?:[\s,]+(-?[\d.]+))?/g)) {
+            const c = tk[1] ?? '', a = +(tk[2] ?? 0), b = +(tk[3] ?? 0);
+            if (c === 'M' || c === 'L') { x = a; y = b; }
+            else if (c === 'm' || c === 'l') { x += a; y += b; }
+            else if (c === 'H') x = a;
+            else if (c === 'h') x += a;
+            else if (c === 'V') y = a;
+            else if (c === 'v') y += a;
+            xs.push(x); ys.push(y);
+          }
+          if (xs.length < 4) return null;
+          return Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+        })
+        .filter((v): v is number => v !== null && v > 0);
+      return cajas.length ? Math.min(...cajas.map((l) => (l - TRAZO) * (GATE / GRILLA))) : null;
+    })(),
   };
 }
 
@@ -103,6 +155,35 @@ console.log('\n── ⑤ SON GLIFOS DE CONTROL ⇒ SIN HUELLA (N27 · §6b paso
 for (const g of NUEVOS) t(`\`${g}\` no lleva huella`, glifo(g)!.huella === false);
 /* CONTROL POSITIVO: si el medidor no viera las huellas, ⑤ pasaría siempre. */
 t('CONTROL POSITIVO · el medidor SÍ ve la huella de `vacuna`', VARA.huella === true);
+
+console.log('\n── ⑪ EL GLIFO DE PASAPORTE (S113-B · 2.2.4) ──');
+/* 🔴 **La forma la decidió la ARITMÉTICA y queda escrita acá para que nadie
+   la reabra sin volver a hacerla.** Un QR de TRES esquinas es
+   **INCONSTRUIBLE** bajo las dos leyes de la casa: la masa exige `s ≤ 4,45`
+   y la Ley 9 exige `s ≥ 4,76` — *el intervalo es vacío* (`L-283`, la anatomía
+   incapaz). Y la «tarjeta con QR» pesa 64 sola (+38 %). Gana **dos esquinas +
+   módulos + la huella en el tercer vértice**. */
+{
+  const P = glifo('pasaporte');
+  t('`pasaporte` tiene dibujante', P !== null);
+  if (P) {
+    const d = (P.largo / VARA.largo - 1) * 100;
+    t('masa en banda', Math.abs(P.largo / VARA.largo - 1) <= BANDA, ` · ${P.largo.toFixed(1)} (${d >= 0 ? '+' : ''}${d.toFixed(0)} %)`);
+    t(`≤ ${VARA.trazos} trazos`, P.trazos <= VARA.trazos, ` · ${P.trazos}`);
+    /* 🔴 Ley 9 sobre CUADRADOS — la medida que este arnés no tenía. */
+    t('🔴 las esquinas dejan aire a 21 px (piso 2,5)',
+      P.interiorCuadrado !== null && P.interiorCuadrado >= 2.5,
+      ` · ${P.interiorCuadrado?.toFixed(2) ?? 'sin cuadrado trazado'} px`);
+    /* 🔴 NO es glifo de control: es un documento DE LA MASCOTA, y los cuatro
+       de su fila llevan huella. *Uno sin ella se leería de otra clase.* */
+    t('🔴 lleva huella: no es glifo de control (§6b.6)', P.huella === true);
+  }
+  /* CONTROL POSITIVO del medidor nuevo: si no viera los cuadrados trazados,
+     el assert de arriba pasaría siempre. `documentos` tiene dos. */
+  const DOC = glifo('documentos')!;
+  t('CONTROL POSITIVO · el medidor SÍ ve un cuadrado ajeno',
+    DOC.interiorCuadrado !== null, ` · documentos ${DOC.interiorCuadrado?.toFixed(2) ?? 'null'} px`);
+}
 
 console.log('\n── ④bis LEY 9 PARA LO PUNTIAGUDO · la punta sobrevive a 21 px ──');
 /* 🔴 **`interiorMin` mide lo REDONDO y no ve una estrella.** El modo de falla

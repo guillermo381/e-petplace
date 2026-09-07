@@ -1262,6 +1262,71 @@ function FilaDeContacto({ tamano }: { tamano: number }) {
   )
 }
 
+/* ── §6b PASO 4 · LA HOJA DE CONTACTO DE `pasaporte` (S113-B · 2.2.4) ──────
+ * **Los cinco vecinos son los que pueden confundirse, no cinco cualquiera:**
+ * `carnet` es **el lápiz que este glifo viene a reemplazar** —al lado de
+ * «Pasaporte y QR» leía *editar*— · `documentos` es la otra pila de
+ * rectángulos de la misma familia · `certificaciones` es la hoja con esquina
+ * doblada · `datos` es la otra marca hecha de módulos · `vacuna` es la VARA.
+ * *Cinco vecinos que no se parecen a nada harían una fila linda y una
+ * medición vacía.* */
+const VECINOS_PASAPORTE = ['carnet', 'documentos', 'certificaciones', 'datos', 'vacuna'] as const
+
+/**
+ * 🔴 **CANDIDATA V2 — «QR MACIZO», dibujada ACÁ y no en el registry.**
+ * *Una candidata en el registry es una pieza que alguien va a usar antes de
+ * que se firme.* Vive en la hoja de contacto y muere con el gate (Ley 37).
+ *
+ * Cambia UNA cosa y no es cosmética: **las esquinas van RELLENAS**. Un
+ * cuadrado relleno **no tiene interior que cerrarse**, así que la Ley 9 no lo
+ * limita y puede ser más chico — que es exactamente lo que a 21 px hacía
+ * falta. Masa 46,4: clavada en la vara.
+ *
+ * ⚠️ **Y su medición tiene un límite declarado:** la masa de la casa mide
+ * LARGO DE PATH, que es proxy de tinta **sólo si todo va trazado a 1.9**. La
+ * tinta de un relleno es su ÁREA. *El número de V2 no es comparable al de V1
+ * sin decir esto*, y por eso no decido por él.
+ */
+function CandidataMaciza({ tamano }: { tamano: number }) {
+  const { theme } = useTheme()
+  return (
+    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
+      <Path d="M3.6 3.6h4.2v4.2h-4.2Z" fill={theme.text.primary} />
+      <Path d="M16.2 3.6h4.2v4.2h-4.2Z" fill={theme.text.primary} />
+      <Path d="M12.2 12.2h1.6v1.6h-1.6Z" fill={theme.text.primary} />
+      <Path d="M17.4 16.6h1.6v1.6h-1.6Z" fill={theme.text.primary} />
+      <Huella color={theme.capa.identidad} x={2.6} y={13.4} escala={0.3} />
+    </Svg>
+  )
+}
+
+function FilaPasaporte({ tamano }: { tamano: number }) {
+  const { theme } = useTheme()
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="dato">{`a ${tamano} px — el nuevo, y después sus cinco vecinos`}</Texto>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+        <Icono nombre="pasaporte" tamano={tamano} />
+        <CandidataMaciza tamano={tamano} />
+        <View style={{ width: 1, height: tamano, backgroundColor: theme.bg.border }} />
+        {VECINOS_PASAPORTE.map((n) => (
+          <Icono key={n} nombre={n} tamano={tamano} />
+        ))}
+      </View>
+    </View>
+  )
+}
+
+function PanelOscuroPasaporte() {
+  const { theme } = useTheme()
+  return (
+    <View style={{ gap: spacing[4], padding: spacing[4], borderRadius: radius.lg, backgroundColor: theme.bg.base }}>
+      <FilaPasaporte tamano={21} />
+      <FilaPasaporte tamano={44} />
+    </View>
+  )
+}
+
 /** El panel oscuro. Vive adentro del provider para poder pintar su propio
  *  papel con el slot del tema en vez de un hex. */
 function PanelOscuroCoach() {
@@ -3433,6 +3498,29 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="⭐ GATE S113 — EL GLIFO DE «PASAPORTE Y QR» (lote 2.2.4) · qué decide: (a) que se lea como un CÓDIGO y no como un documento más —al lado de `documentos` y `certificaciones`, que son rectángulos—; (b) que a 21 px las dos esquinas no se cierren; (c) que la HUELLA en el tercer vértice se lea como la tercera esquina del QR y no como un adorno pegado abajo">
+          <Texto variante="apoyo">
+            🔴 La forma la decidió la aritmética, no el gusto. Un QR de TRES esquinas es
+            INCONSTRUIBLE bajo las dos leyes de la casa: la masa contra `vacuna` (46,4 · banda
+            39,4–53,4) exige lado ≤ 4,45 y la Ley 9 exige ≥ 4,76 — el intervalo es vacío. Y la
+            «tarjeta con QR adentro» pesa 64 ella sola (+38 %), y el QR que entraría tendría
+            esquinas de 0,26 px de interior: se cierran enteras.
+          </Texto>
+          <Texto variante="apoyo">
+            Gana «dos esquinas + módulos», con la HUELLA ocupando el tercer vértice — no es
+            adorno: dice de quién es el código. Medido: masa 52,0 (+12 %) · 4 trazos (§6b pide
+            2–4) · interior de esquina 2,71 px a 21 (piso 2,5) · escala de huella 0,30, la misma
+            de `documentos`. NO es glifo de control: los cuatro glifos de su fila llevan huella,
+            y uno sin ella se leería de otra clase.
+          </Texto>
+          <FilaPasaporte tamano={21} />
+          <FilaPasaporte tamano={44} />
+          <Texto variante="dato">el mismo panel en oscuro</Texto>
+          <ThemeProvider mode="dark">
+            <PanelOscuroPasaporte />
+          </ThemeProvider>
+        </Seccion>
+
         <Seccion titulo="⭐ GATE S113 — REGISTRAR Y DESPEDIRSE (lote 1.2) · qué decide: (a) que NINGÚN chip venga preelegido —la raza la dice la persona—; (b) que la confianza en palabras no suene a medición; (c) que la despedida se lea en TINTA, sin una gota de marca, y que el segundo toque alcance como seguridad">
           <View style={{ gap: spacing[5] }}>
             <SugerenciaRazaDemo />
