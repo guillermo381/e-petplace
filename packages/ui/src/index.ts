@@ -1339,6 +1339,12 @@ export {
   TarjetaConociendolo,
   type TarjetaConociendoloProps,
 } from './components/TarjetaConociendolo'
+// 🔴 El hero NO se lleva la navegación: volver, editar y compartir se quedan
+// en la pantalla. *No es identidad — es cromo de una ruta, y meterla acá
+// ataría el hero a tener una flecha atrás, o sea a no poder usarse en otro
+// lado.* Y en memorial el hero SÍ se dibuja: es quién fue, y eso no se apaga —
+// lo que desaparece es la pastilla de estado.
+export { HeroMascota, type HeroMascotaProps } from './components/HeroMascota'
 export {
   DetallePeso,
   type DetallePesoProps,

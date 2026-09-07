@@ -25,6 +25,7 @@ import { HojaConfirmacionDestructiva } from '../components/HojaConfirmacionDestr
 import { ConsecuenciasDelCierre } from '../components/ConsecuenciasDelCierre'
 import { CierreEnCurso } from '../components/CierreEnCurso'
 import { Atmosfera } from '../brand/Atmosfera'
+import { HeroMascota } from '../components/HeroMascota'
 import { TarjetaMetrica } from '../components/TarjetaMetrica'
 import { TarjetaHoy } from '../components/TarjetaHoy'
 import { FilaAcciones } from '../components/FilaAcciones'
@@ -8785,6 +8786,22 @@ function GaleriaInterna() {
 
         <Seccion titulo="⭐ GATE S113 — EL PERFIL COMO TABLERO (2.2) · qué decide: (a) que el dato grande y su mini gráfico se lean de un vistazo sin parecer un dashboard; (b) que la tarjeta SIN dato no dibuje nada y se note que no sabemos, en vez de un cero; (c) que la v2 punteada anuncie sin prometer; (d) que el anillo de Conociéndolo no pida un número">
           <View style={{ gap: spacing[4] }}>
+            <HeroMascota
+              retrato={<AvatarMascota tamano="lg" nombre="Thor" />}
+              nombre="Thor"
+              meta="Bulldog inglés · 6 años · 24 kg"
+              estado="Cuidado al día"
+            />
+            <FranjaSeguridad
+              resumen="Alérgico al pollo · Toma omeprazol hasta el 20 de septiembre"
+              vozAbrir="Ver 3"
+              vozCerrar="Ocultar"
+              items={[
+                { id: 'a', clase: 'alergia', texto: 'Alérgico al pollo', procedencia: 'familia', vozProcedencia: 'lo contaste vos' },
+                { id: 'm', clase: 'medicacion', texto: 'Omeprazol hasta el 20 de septiembre', procedencia: 'prestador', vozProcedencia: 'lo recetó Dra. Salas' },
+                { id: 'c', clase: 'condicion', texto: 'Displasia leve de cadera', procedencia: 'prestador', vozProcedencia: 'lo registró Clínica Aurora' },
+              ]}
+            />
             <FilaAcciones
               citas={{ etiqueta: 'Citas', glifo: 'veterinaria', onPress: () => {} }}
               pasaporte={{ etiqueta: 'Pasaporte', glifo: 'carnet', razonApagado: 'Todavía no activaste su placa' }}

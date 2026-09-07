@@ -41,6 +41,56 @@ el «Hoy», «Conociéndolo» y la acción de Nexo **no se dibujan**. *El dato d
 vida que terminó sigue siendo cierto; lo que se apaga es lo que empuja a
 actuar.*
 
+## 🔴 B6 · el tercer defecto que sólo se ve mirando: **medio par de color**
+
+Receta del B6: Metro **en el puerto propio de B (8092)** — `ARRANQUE_B 21:12:17`
+→ `Android Bundled 12479ms (2998 modules)` **21:12:40**, `adb -s emulator-5554`,
+control de modo en la pantalla, sonda retirada y `git status --porcelain apps/`
+vacío.
+
+**La franja de seguridad quedaba ILEGIBLE en memorial**, y el número lo dice:
+
+| tema | fondo | tinta | contraste |
+|---|---|---|---|
+| claro | `(250,246,232)` | `(29,26,46)` | **15.66:1** |
+| memorial **antes** | `(250,246,232)` | `(232,220,200)` | **1.25:1** |
+| memorial **curado** | `(250,246,232)` | `(42,42,31)` | **13.39:1** |
+
+**La causa no era el tema: era la pieza usando MEDIO PAR.** `bg.warm` es un
+papel **claro en los tres temas** y `text.warm` es su tinta; en memorial la
+tinta *del tema* es clara —para fondo oscuro—, así que pintar el fondo cálido y
+escribir con la default deja la letra encima de sí misma. *En claro y en oscuro
+se ve perfecto: dos de los tres temas tapan el defecto, y por eso ningún ojo lo
+caza.*
+
+**⚠️ Y el instrumento estaba bien todo el tiempo.** `verify:contrast` declara
+`text.warm / bg.warm` desde hace sesiones y **estaba verde con razón**: medía el
+par correcto. *Un gate de pares no puede ver qué token PINTA una pieza* — por
+eso el `⑭` nuevo mide eso, sobre **todas** las piezas del archivo y no sobre la
+mía: el día que otra pinte `bg.warm` la va a medir sola.
+
+**Y faltaba la puerta:** `text.warm` existe en los tres temas desde S43-B2
+—donde se curó **esta misma clase**, con un `1.00:1` anotado en el comentario—
+y **`TextoColor` no lo ofrecía**. *La mitad del par tenía motor y no tenía
+puerta* (`L-318`), así que la única forma de pintar ese fondo era usarlo mal.
+
+## Lo que prueba el B6
+
+**🟢 El hero pasa de ~340 a ~120 de alto** y sigue presidiendo: retrato a la
+izquierda en la escala de la casa (`lg`), nombre y meta al lado.
+⏪ Acá hubo un `RETRATO = 88` exportado y **era un número inventado** —
+`AvatarMascota` va por nombres (`md` 64, `lg` 96) y 88 no existe en esa escala.
+*Una pieza que nombra su propio tamaño abre una segunda escala que compite con
+la de la casa.*
+
+**🟢 La franja resume en UNA línea** con su «Ver 3» y el chevron en la misma
+fila. El truncado acá **sí** va —y es lo contrario del «Contanos»—: *este texto
+es un resumen y su contenido entero está a un toque en el mismo lugar; aquél era
+una invitación cuyo verbo se comía el corte.*
+
+**🟢 En memorial el hero se dibuja y la pastilla no.** *Quién fue no se apaga;
+lo que no tiene sentido es reportar un cuidado al día.*
+
 ## El índice
 
 | archivo | qué prueba |
@@ -49,3 +99,4 @@ actuar.*
 | `03-tablero-memorial` | qué queda y qué se apaga |
 | `04/05-peso` | la serie con punto lleno (clínica) y hueco (casa), y su tabla |
 | `despues-tablero-*` | el **después**: orbe en su caja, chips completos |
+| `06/07/08-hero-franja-*` | **B6** en los tres temas — hero compacto, franja de una línea, y el par cálido curado |

@@ -106,7 +106,20 @@ export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'enfasis
  *  `verify-contrast.ts` contra los dos extremos, blanco y negro puros.**
  *  ⚠️ Se usa SOLO sobre video. Sobre una superficie de la casa es papel contra
  *  papel: invisible. */
-export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo'
+/**
+ * ⚠️ **`'warm'` abre una puerta que faltaba (S113-B · 2.2 · B6).** `text.warm`
+ * existe en los TRES temas desde S43-B2 —donde se curó justamente porque en
+ * memorial la tinta clara sobre el papel cálido daba **1.00:1**— y **ninguna
+ * pieza podía pedirlo**: no estaba en esta unión. *Un token con motor y sin
+ * puerta se lee como decorado hasta que alguien pinta su fondo y descubre, en
+ * el aparato, que la mitad del par no existía* (`L-318`).
+ *
+ * 🔴 **Va SIEMPRE que se pinte `bg.warm`, y sólo ahí.** El papel cálido es
+ * claro en memorial mientras la tinta del tema es clara: *el fondo y la letra
+ * son un PAR, y usar medio par es cómo se fabrica un texto invisible que
+ * ningún typecheck ve.* Medido en el emulador antes de curar: **1.25:1**.
+ */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success' | 'warning' | 'sobreVideo' | 'warm'
 
 export type TextoProps = {
   children: ReactNode

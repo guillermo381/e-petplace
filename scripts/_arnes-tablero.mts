@@ -26,6 +26,8 @@ const HOY = src('TarjetaHoy.tsx');
 const ACC = src('FilaAcciones.tsx');
 const CON = src('TarjetaConociendolo.tsx');
 const PESO = src('DetallePeso.tsx');
+const HERO = src('HeroMascota.tsx');
+const FRANJA = src('FranjaSeguridad.tsx');
 
 console.log('\n── ① ROJO · SIN DATO NO HAY GRÁFICO ──');
 /* Un sparkline de UN punto dibuja una recta horizontal, y esa recta dice
@@ -149,8 +151,48 @@ t('🔴 el orbe del «hoy» va en una caja de tamaño fijo',
 t('🔴 los chips van DEBAJO, no al lado del dato',
   /dibujo\?\.tipo === 'chips'\s*\? \{ gap: spacing\[1\] \}/.test(MET), true);
 
+console.log('\n── ⑬ ROJO · EL HERO Y LA FRANJA, COMPACTOS (B6) ──');
+/* La navegación no es identidad: meterla en el hero lo ataría a tener una
+   flecha atrás, o sea a no poder usarse en otro lado. */
+t('🔴 el hero NO se lleva la navegación', /volver|onAtras|compartir|onEditar/i.test(HERO), false);
+t('…y el retrato entra como SLOT: la casa ya tiene su escalera de fallbacks',
+  /retrato: ReactNode/.test(HERO) && /<AvatarMascota/.test(HERO) === false, true);
+/* En memorial el hero SÍ se dibuja —es quién fue— y lo que se apaga es la
+   pastilla: no hay un cuidado al día que reportar. */
+t('🔴 en memorial el hero se dibuja igual', /theme\.mode === 'memorial'\) return null/.test(HERO), false);
+t('…y la pastilla NO', /estado !== undefined && !esMemorial \?/.test(HERO), true);
+t('la meta va en SANS, no en mono', /family\.mono/.test(HERO), false);
+/* La franja pasa a UNA fila: antes eran dos líneas de resumen más el «ver N»
+   en un renglón aparte — cuatro líneas para decir una cosa. */
+t('🔴 la franja resume en UNA línea cuando está cerrada',
+  /numberOfLines=\{abierta \? undefined : 1\}/.test(FRANJA), true);
+t('…con su «ver N» y el chevron en la MISMA fila',
+  /\{abierta \? vozCerrar : vozAbrir\}<\/Texto>\s*<Chevron/.test(FRANJA), true);
+t('el chevron dice si va a abrir o a cerrar',
+  /direccion=\{abierta \? 'arriba' : 'abajo'\}/.test(FRANJA), true);
+
+console.log('\n── ⑭ ROJO · EL PAR CÁLIDO SE USA ENTERO, JAMÁS LA MITAD ──');
+/* 🔴 **La clase, y no el caso.** `bg.warm` es un papel CLARO en los tres temas;
+   `text.warm` es su tinta. En memorial la tinta del tema es CLARA (fondo
+   oscuro), así que una pieza que pinta el fondo cálido y escribe con la tinta
+   default queda en **1.25:1** — medido en el emulador, no estimado. Y no se ve
+   en claro ni en oscuro: *en dos de los tres temas la mitad del par se ve
+   perfecta, que es exactamente por qué ningún ojo lo caza.*
+
+   ⚠️ Este assert mide **el archivo entero**, no mi pieza: el día que otra
+   pinte `bg.warm` la va a medir sola. Su rojo se ejerció volviendo el
+   `color="warm"` del resumen a la tinta default. */
+for (const [n, s] of [['franja', FRANJA], ['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {
+  if (!/bg\.warm/.test(s)) continue;
+  const textos = s.match(/<Texto[^>]*>/g) ?? [];
+  const sinPar = textos.filter((x) => !/color="warm"/.test(x));
+  t(`${n}: pinta bg.warm ⇒ TODO su texto pide la tinta cálida`, sinPar, []);
+  t(`${n}: …y el chevron y los glifos también`,
+    !/theme\.text\.secondary|registro="tinta"/.test(s), true);
+}
+
 console.log('\n── ⑪ NINGUNA COMPONE VOZ (Ley 3) ──');
-for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO]] as const) {
+for (const [n, s] of [['métrica', MET], ['hoy', HOY], ['acciones', ACC], ['conociéndolo', CON], ['peso', PESO], ['hero', HERO]] as const) {
   /* ⚠️ **ESTE ASSERT MIDE UN PROXY, y su primer rojo fue por eso.** Buscar
      plantillas encuentra la FORMA de componer, no la composición de VOZ: marcó
      `` `${p.x},${p.y}` ``, que son coordenadas de un `points` de SVG y no las
