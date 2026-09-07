@@ -40,7 +40,13 @@ const ESTE = fileURLToPath(import.meta.url) === process.argv[1];
 if (ESTE) exigirArgumentos(['--control'], 0);
 
 const RAIZ = fileURLToPath(new URL('..', import.meta.url));
-const PUERTA = process.env.BOVEDA_PUERTA ?? 'registrar_papel_de_familia';
+/* 🔴 RE-APUNTADO. La bóveda pasó de UNA puerta a DOS —`registrar_papel_extraido`
+   escribe y `confirmar_papel` confirma— que es justo la cura que pedía el rojo ②.
+   El gate salió NO CONCLUYENTE al cambiar el nombre en vez de dar verde, y eso
+   funcionó; pero *un gate anclado a un mundo que ya cambió da no-concluyente
+   para siempre y nadie lo mira*. */
+const PUERTA = process.env.BOVEDA_PUERTA ?? 'registrar_papel_extraido';
+const CONFIRMA = process.env.BOVEDA_CONFIRMA ?? 'confirmar_papel';
 const TABLA = process.env.BOVEDA_TABLA ?? 'papeles_familia';
 const VALORES = process.env.BOVEDA_VALORES ?? 'papel_valor';
 const BUCKET = process.env.BOVEDA_BUCKET ?? 'papeles-familia';
@@ -201,12 +207,25 @@ if (ESTE) {
     }
   } else notas.push('① no encontré un CHECK de `modo_captura`: la regla queda sin medir');
 
-  // ② la confirmación
-  const conf = exigeConfirmacion(f[0]);
-  if (!conf.exige) {
-    rojos.push({ regla: '② confirmación',
-      detalle: 'la puerta ESCRIBE la confirmación pero no la EXIGE: quien la llame desde PostgREST produce un papel firmado que nadie confirmó' });
-  } else di(`   ② la confirmación se exige (${conf.donde})`);
+  /* ② LA CONFIRMACIÓN, con la pregunta que corresponde a la forma NUEVA.
+     Con dos puertas la pregunta deja de ser «¿la exige?» y pasa a ser **¿es un
+     ACTO propio?**: que exista un `confirmar_papel` separado y que el escritor
+     NO estampe la confirmación de paso. *Un acto que se puede llamar solo es
+     una decisión; un campo que se llena al escribir es un efecto.* */
+  const cf = sql(`select pg_get_functiondef(p.oid) as cuerpo, pg_get_function_identity_arguments(p.oid) as args
+                  from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                  where n.nspname='public' and p.proname='${CONFIRMA}'`);
+  if (!cf?.length) {
+    const conf = exigeConfirmacion(f[0]);
+    if (!conf.exige) rojos.push({ regla: '② confirmación', detalle: `no hay acto de confirmación (\`${CONFIRMA}\` no existe) y la puerta tampoco la exige` });
+  } else {
+    const escritorFirma = /confirmado_por\s*,|estado\s*\)[^;]*'confirmado'/.test(String(f[0].cuerpo).replace(/\s+/g, ' '))
+      && /'confirmado'/.test(String(f[0].cuerpo));
+    const confirmaFirma = /set\s+estado\s*=\s*'confirmado'|confirmado_por\s*=/.test(String(cf[0].cuerpo));
+    if (!confirmaFirma) rojos.push({ regla: '② confirmación', detalle: `\`${CONFIRMA}\` existe pero no marca la confirmación` });
+    else if (escritorFirma) rojos.push({ regla: '② confirmación', detalle: `\`${PUERTA}\` estampa la confirmación de paso: el acto separado no sirve si el otro camino ya la da` });
+    else di(`   ② la confirmación es un ACTO propio (\`${CONFIRMA}\`), y el escritor no la estampa`);
+  }
 
   // ③⑥ el literal y el rango
   const cols = sql(`select column_name from information_schema.columns
@@ -272,7 +291,14 @@ if (ESTE) {
     di(`   ⑦ ${conArchivo.length} papel(es) · ${huerfanos.length} sin su archivo`);
     if (huerfanos.length) {
       rojos.push({ regla: '⑦ sin respaldo mudo',
-        detalle: `${huerfanos.length}/${conArchivo.length} papel(es) apuntan a un archivo que ya no está, y ninguna columna lo dice — con el \`literal\` descartado, esa transcripción no se puede cotejar contra nada` });
+        /* ⏪ Esta frase decía «con el `literal` descartado». **A curó ③ y ⑥: el
+           `literal` y el rango crudo ahora SÍ se guardan**, así que la mitad de
+           mi propia advertencia dejó de ser cierta y la estaba repitiendo.
+           *Un texto honesto se retira en el mismo acto que cambia lo que
+           describe.* Lo que queda vivo es lo otro: nada MARCA el papel como sin
+           respaldo, y el original es lo único que deja ver lo que el literal no
+           alcanzó a transcribir. */
+        detalle: `${huerfanos.length}/${conArchivo.length} papel(es) apuntan a un archivo que ya no está y ninguna columna lo dice — el \`literal\` salva la lectura de cada fila, pero no lo que el papel tenía y nadie transcribió` });
     }
   }
 
