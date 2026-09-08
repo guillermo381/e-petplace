@@ -127,6 +127,8 @@ const horaCorta = (iso: string) =>
 
 import { esMemorial } from '@/lib/memorial';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
+import { useCasoDelObjeto } from '@/lib/postventa/useCasoDelObjeto';
+import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
 
 type Estadia =
@@ -153,6 +155,10 @@ export default function DuranteGuarderia() {
      la URL de esta pantalla, así que el hook no necesita esperar a la
      estadía. */
   const estadoVida = useEstadoVida(params.mascotaId);
+  /* Lo que la puerta necesita del motor (§1 · §5). Arriba con los demás
+     hooks: un `return` temprano los saltearía. */
+  const diasDeVentana = useVentanaDeCaso();
+  const casoAbierto = useCasoDelObjeto('estadia', params.estadiaId ?? null);
 
   const [estadia, setEstadia] = useState<Estadia>({ fase: 'cargando' });
   const [media, setMedia] = useState<Media>({ fase: 'cargando' });
@@ -389,11 +395,13 @@ export default function DuranteGuarderia() {
      volvió a su casa. Mientras es `null`, la estadía está ocurriendo y la
      puerta no existe.
 
-     ⚠️ `casoAbierto` no se pasa: el motor del caso no existe todavía, así
-     que no puede haber ninguno. Declarado, no celebrado. */
+     ⏪ `casoAbierto` no se pasaba porque el motor no existía. **Ya existe**
+     (A3), así que se pregunta. */
   const puerta = veredictoDeLaPuerta({
     cerradaEn: estadia.fase === 'listo' ? estadia.e.entregadaEn : null,
     estadoVida,
+    diasDeVentana,
+    ...(casoAbierto != null ? { casoAbierto } : null),
     voces: {
       disponible: t('postventa.puerta'),
       fueraDeVentana: t('postventa.puertaFueraDeVentana'),

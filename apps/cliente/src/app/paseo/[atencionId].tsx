@@ -67,6 +67,8 @@ import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { esMemorial } from '@/lib/memorial';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
+import { useCasoDelObjeto } from '@/lib/postventa/useCasoDelObjeto';
+import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
 
 function horaMono(iso: string | null): string {
   if (iso === null) return '--:--';
@@ -113,6 +115,15 @@ export default function DetallePaseo() {
      cuatro oficios. `undefined` = todavía no se sabe ⇒ la puerta no se dibuja:
      ante la duda, la app se calla. */
   const [estadoVida, setEstadoVida] = useState<string | null | undefined>(undefined);
+
+  /* ══ S114-C · lo que la puerta necesita del MOTOR ═════════════════════
+     Los dos hooks van acá arriba, con los demás, y **no adentro del
+     veredicto**: son hooks y un `return` temprano los saltearía. */
+  const diasDeVentana = useVentanaDeCaso();
+  const casoAbierto = useCasoDelObjeto(
+    'cita',
+    typeof detalle === 'object' ? detalle.atencion_id : null,
+  );
   // S81-B (vara: "el recorrido es el protagonista de su pantalla"):
   // LA BANDA de dos posiciones sobre el mapa a sangre — cliente ASOMADA
   // por default (orden de mesa); el asa alterna. Se ajusta viendo.
@@ -355,14 +366,14 @@ export default function DetallePaseo() {
      El veredicto vive en `lib/postventa/puerta` porque son TRES objetos y
      una sola ley. Acá sólo se le pasa lo que esta pantalla sabe.
 
-     ⚠️ `casoAbierto` NO se pasa, y está declarado: **el motor del caso no
-     existe todavía** (`abrirCaso` no está construido), así que no puede
-     haber ninguno abierto. *Es un verde por ausencia de sujeto y se dice en
-     vez de celebrarse* — el día que A entregue `obtenerCasoDeObjeto`, entra
-     por acá y el resto no se mueve. */
+     ⏪ Acá decía que `casoAbierto` no se pasaba porque el motor no existía —
+     *un verde por ausencia de sujeto*. **A3 aterrizó y ahora puede haber
+     casos**, así que se pregunta. Lo demás no se movió, como estaba previsto. */
   const puerta = veredictoDeLaPuerta({
     cerradaEn: detalle.cerrada_en,
     estadoVida,
+    diasDeVentana,
+    ...(casoAbierto != null ? { casoAbierto } : null),
     voces: {
       disponible: t('postventa.puerta'),
       fueraDeVentana: t('postventa.puertaFueraDeVentana'),
@@ -370,6 +381,8 @@ export default function DetallePaseo() {
     },
   });
 
+  /* ⚠️ Los dos hooks van ANTES del veredicto y no adentro: son hooks, y un
+     `if` arriba los saltearía en algunos renders. */
   /* Los tres estados llevan a lados distintos (B lo dejó en una sola
      función a propósito): el motivo · la conversación con la casa · el caso
      que ya existe. */

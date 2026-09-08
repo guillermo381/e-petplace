@@ -81,6 +81,8 @@ import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { cierreDelPedido } from '@/lib/postventa/cierre-del-pedido';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
+import { useCasoDelObjeto } from '@/lib/postventa/useCasoDelObjeto';
+import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, escaleraMuda, type VocesEscalera } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
@@ -97,6 +99,8 @@ export default function DespensaPedido() {
   const { pedidoId } = useLocalSearchParams<{ pedidoId: string }>();
 
   const [detalle, setDetalle] = useState<Fase<DetallePedido>>('cargando');
+  /* Lo que la puerta necesita del motor (§1 · §5). */
+  const diasDeVentana = useVentanaDeCaso();
   const [codigo, setCodigo] = useState<string | null>(null);
   /** LA FACTURA del pedido. `null` = todavía no hay factura emitida —
    *  **es normal, no un fallo**: medido, 6 facturas sobre 23 pedidos. */
@@ -274,9 +278,17 @@ export default function DespensaPedido() {
      sujeto que el objeto no tiene. *La regla no aplica acá y decirlo así es
      más honesto que mandarle un `'activa'` que nadie midió.*
 
-     ⚠️ `casoAbierto` tampoco: el motor del caso no existe todavía. */
+     ⏪ Acá decía que `casoAbierto` no se pasaba «porque el motor no existe».
+     **Ya existe** (A3), así que se pregunta. */
+  const casoAbierto = useCasoDelObjeto(
+    'pedido',
+    typeof detalle === 'object' ? detalle.pedido.pedido_id : null,
+  );
+
   const puerta = veredictoDeLaPuerta({
     cerradaEn: typeof detalle === 'object' ? cierreDelPedido(detalle) : null,
+    diasDeVentana,
+    ...(casoAbierto != null ? { casoAbierto } : null),
     voces: {
       disponible: t('postventa.puerta'),
       fueraDeVentana: t('postventa.puertaFueraDeVentana'),

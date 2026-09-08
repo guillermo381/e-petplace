@@ -4486,8 +4486,61 @@ export const clienteEs = {
     corregilo: 'No, corrígelo',
     errorCatalogo: 'No pudimos cargar los motivos. Prueba de nuevo.',
     // §3.4 · siempre alcanzable
-    motorNoDisponible: 'Todavia no podemos abrir el caso. Estamos terminando esta parte.',
+    /* Los rebotes del motor, uno por código. **Cada uno dice QUÉ pasó**, no
+       «algo salió mal»: el motor sabe explicarse y esconderlo sería tirar la
+       explicación que ya existe. */
+    reboteFueraDeVentana: 'Este servicio ya pasó su ventana para abrir un caso. Si quieres, habla con nosotros.',
+    reboteMotivo: 'Ese motivo no corresponde a este servicio. Elige otro de la lista.',
+    reboteYaAbierto: 'Ya tienes un caso abierto sobre este servicio.',
+    reboteNoEsTuyo: 'Este servicio no está en tu familia.',
+    reboteNoExiste: 'No encontramos este servicio.',
+    /* 🔴 En memorial el motor rebota, y la voz NO pide nada ni explica
+       mecanismos: dice lo que hay y se calla. */
+    reboteMemorial: 'No vamos a pedirte nada sobre este servicio.',
+    reboteSinSesion: 'Vuelve a entrar a tu cuenta y prueba de nuevo.',
+    reboteGenerico: 'No pudimos abrir el caso. Prueba de nuevo.',
     hablarConAlguien: '¿Prefieres que te atienda una persona?',
+    // §3 · LA PANTALLA DEL CASO
+    tituloCaso: 'Tu caso',
+    casoNoEsTuyo: 'Este caso no es de tu familia.',
+    casoNoSePudo: 'No pudimos abrir el caso. Prueba de nuevo.',
+    objetoSinNombre: 'El servicio',
+    escaleraAlternar: 'Ver o esconder los pasos',
+    etapaRecibido: 'Recibido',
+    etapaConPrestador: 'Con el prestador',
+    etapaConCasa: 'Con e-PetPlace',
+    etapaResuelto: 'Resuelto',
+    etapaCerrado: 'Cerrado',
+    estasEn: 'Estás en: {{etapa}}',
+    estasEnConPlazo: 'Estás en: {{etapa}} · responde antes del {{cuando}}',
+    final_resuelto_entre_partes: 'Resuelto entre ustedes',
+    final_retirado: 'Lo retiraste',
+    final_sin_lugar: 'Sin lugar',
+    asientoCasa: 'e-PetPlace',
+    asientoPrestador: 'El prestador',
+    asientoFamilia: 'Tú',
+    escribirPlaceholder: 'Escribe tu mensaje',
+    conversacionCerrada: 'Esta conversación quedó en lectura',
+    noSeEnvio: 'No se envió · Reintentar',
+    enviarMensaje: 'Enviar',
+    reintentar: 'Reintentar',
+    // §4 · LA PLATA
+    montoTotal: 'Te devolvemos ${{monto}} — el total de este servicio.',
+    montoParcial: 'Te devolvemos ${{monto}} — la parte que no se hizo.',
+    bancoTitulo: 'A tu banco',
+    bancoVoz: 'Vuelve a la tarjeta con la que pagaste.',
+    bancoTiempo: 'Depende de tu banco: en promedio 15 días hábiles.',
+    /* 🔴 Camino manual: **jamás una fecha que no podemos cumplir** (§4). */
+    bancoTiempoManual: 'La hacemos a mano y te avisamos cuando salga.',
+    saldoTitulo: 'Saldo en e-PetPlace',
+    saldoVoz: 'Queda en tu cuenta para usar cuando quieras.',
+    saldoTiempo: 'Disponible en segundos.',
+    saldoTodaviaNoCorto: 'Todavía no está disponible.',
+    /* El rebote dice que es del MOTOR, no de la familia. */
+    saldoTodaviaNo: 'El saldo todavía no está funcionando. Elige tu banco y lo resolvemos igual.',
+    yaElegiste: 'Ya elegiste cómo te devolvemos.',
+    devolucionNoSePudo: 'No pudimos completar la devolución. Prueba de nuevo.',
+    confirmarDevolucion: 'Confirmar',
   },
 
 } as const;

@@ -25,8 +25,19 @@ import type { EstadoDeLaPuerta } from '@epetplace/ui';
 
 import { esMemorial } from '@/lib/memorial';
 
-/** §1: «Ventana para abrir un caso: 7 días desde el cierre o la entrega». */
-export const DIAS_DE_VENTANA = 7;
+/**
+ * ⏪ **ACÁ VIVÍA UN `7` HARDCODEADO, Y A TENÍA RAZÓN EN CORREGIRLO.**
+ *
+ * Yo pedí computar la ventana en la app *«para que el corte no viva en dos
+ * lados»*. A aceptó el riesgo y sacó la conclusión contraria, que es la
+ * correcta: **el motor la exige igual** —un guard que vive sólo en la pantalla
+ * no es un guard, y éste decide si una familia puede reclamar plata—. La
+ * divergencia no se cierra teniendo el número en un solo lado: **se cierra
+ * publicándolo**.
+ *
+ * ⇒ el número lo LEE `useVentanaDeCaso()` de `obtenerVentanaCasoDias()`, y
+ * esta pantalla lo recibe. **Ningún archivo de C escribe un 7.**
+ */
 
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
@@ -57,6 +68,13 @@ export type EntradaDeLaPuerta = {
   casoAbierto?: { casoId: string; vozEstado: string } | null;
   /** Las tres frases ya redactadas (Ley 3: la voz la trae quien lee). */
   voces: { disponible: string; fueraDeVentana: string; casoAbierto: string };
+  /**
+   * 🔴 Los días de ventana, **leídos del motor** (`obtenerVentanaCasoDias`).
+   * `undefined` = todavía no llegó ⇒ **la puerta no se dibuja**: sin saber el
+   * corte no se puede decir si está dentro, y la salida serena es callarse en
+   * vez de ofrecer un reclamo que el motor va a rebotar.
+   */
+  diasDeVentana?: number;
   /** Para poder fijar el reloj en una prueba. Por defecto, ahora. */
   ahora?: Date;
 };
@@ -110,8 +128,11 @@ export function veredictoDeLaPuerta(e: EntradaDeLaPuerta): VeredictoDeLaPuerta {
     return { hay: true, casoId: null, estado: { tipo: 'fueraDeVentana', voz: e.voces.fueraDeVentana } };
   }
 
+  /* Sin el número del motor no se decide: ver `diasDeVentana`. */
+  if (e.diasDeVentana === undefined) return { hay: false, porque: 'sin_cerrar' };
+
   const ahora = (e.ahora ?? new Date()).getTime();
-  const dentro = ahora - cierre <= DIAS_DE_VENTANA * MS_POR_DIA;
+  const dentro = ahora - cierre <= e.diasDeVentana * MS_POR_DIA;
 
   return {
     hay: true,

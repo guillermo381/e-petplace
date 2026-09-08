@@ -60,14 +60,43 @@ import {
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerMotivosDeObjeto, type MotivoPostventa, type ObjetoPostventa } from '@epetplace/api';
+import {
+  abrirCaso,
+  obtenerMotivosDeObjeto,
+  type CodigoAbrirCaso,
+  type MotivoPostventa,
+  type ObjetoPostventa,
+} from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { motivosParaLaPantalla, pideContar } from '@/lib/postventa/motivos';
+import { codigoParaElMotor, motivosParaLaPantalla, pideContar } from '@/lib/postventa/motivos';
 
 type Fase<T> = T | 'cargando' | 'error';
 
 const OBJETOS: readonly ObjetoPostventa[] = ['cita', 'estadia', 'pedido'];
+
+/**
+ * 🔴 CADA REBOTE DEL MOTOR TIENE SU VOZ, y el `Record` es COMPLETO: si A
+ * agrega un código, esto no compila hasta que alguien le escriba la frase —
+ * *que es el momento de escribirla*. Sin el `Record`, un código nuevo caería a
+ * un genérico y la familia leería «algo salió mal» sobre algo que el motor
+ * sabe explicar.
+ */
+const VOZ_REBOTE = {
+  /* ⚠️ Los dos códigos de la CASA (`ResultadoWrapper` los agrega a toda
+     unión) también tienen su voz: sin ellos el `Record` no cubre lo que el
+     tipo puede traer, y un fallo de red caería a `undefined` — la llave
+     cruda en pantalla. */
+  error_desconocido: 'postventa.reboteGenerico',
+  datos_inconsistentes: 'postventa.reboteGenerico',
+  fuera_de_ventana: 'postventa.reboteFueraDeVentana',
+  motivo_no_pertenece: 'postventa.reboteMotivo',
+  caso_ya_abierto: 'postventa.reboteYaAbierto',
+  objeto_no_es_tuyo: 'postventa.reboteNoEsTuyo',
+  objeto_no_existe: 'postventa.reboteNoExiste',
+  mascota_en_memorial: 'postventa.reboteMemorial',
+  sin_sesion: 'postventa.reboteSinSesion',
+} as const satisfies Record<CodigoAbrirCaso | 'error_desconocido' | 'datos_inconsistentes', string>;
 
 function esObjeto(v: unknown): v is ObjetoPostventa {
   return typeof v === 'string' && (OBJETOS as readonly string[]).includes(v);
@@ -129,13 +158,49 @@ export default function PostventaMotivo() {
      puerta no ofrece lo que va a rechazar). */
   const puedeSeguir = elegido !== null && (!contando || relatoLimpio.length > 0);
 
-  /* 🔴 EL SEGURO — ver ① de la cabecera. Cuando A entregue `abrirCaso`, esta
-     función es su llamada y nada más de la pantalla se mueve. */
+  /* ✅ EL SEGURO SE RETIRÓ EN EL MISMO ACTO QUE DEJÓ DE HACER FALTA (`L-395`).
+     Acá había una función que decía «todavía no podemos abrir el caso» porque
+     el motor no existía. **A3 aterrizó y ésta es su llamada** — y fue lo único
+     que cambió de la pantalla, que era el trato. */
   const crearElCaso = useCallback(async () => {
+    if (!esObjeto(objeto) || typeof objetoId !== 'string' || elegido === null) return;
     setEnviando(true);
-    setRebote(t('postventa.motorNoDisponible'));
+    setRebote(null);
+
+    const r = await abrirCaso({
+      objeto,
+      objetoId,
+      /* La pieza emite su clave interna para la última fila; el motor sólo
+         conoce `otra_cosa`. La traducción vive en un solo lado. */
+      motivo: codigoParaElMotor(elegido),
+      ...(relatoLimpio.length > 0 ? { relato: relatoLimpio } : null),
+      /* §11: lo que la familia CONFIRMÓ, no lo que propuso un modelo. Hoy es
+         su propio texto —la casa no puede resumir mejor que ella hasta tener
+         con qué— y por eso la procedencia es `familia` y no `ia_intake`. */
+      ...(confirmando && relatoLimpio.length > 0
+        ? { procedencia: 'familia' as const, modo: 'texto' as const, resumenConfirmado: relatoLimpio }
+        : null),
+    });
     setEnviando(false);
-  }, [t]);
+
+    if (r.ok) {
+      /* `replace` y no `push`: **el caso reemplaza al formulario**. Con
+         `push`, el botón atrás del caso volvería a una pantalla de «contar qué
+         pasó» sobre algo que ya se contó. */
+      router.replace(`/postventa/caso/${r.data.casoId}`);
+      return;
+    }
+
+    /* 🔴 `caso_ya_abierto` LLEVA, no niega — `L-424`: un guard que sólo sabe
+       decir que no manda a «probá de nuevo» sobre algo que va a fallar
+       siempre. A hizo viajar el id justo para esto. */
+    if (r.codigo === 'caso_ya_abierto' && r.casoExistente !== undefined) {
+      router.replace(`/postventa/caso/${r.casoExistente}`);
+      return;
+    }
+
+    setRebote(t(VOZ_REBOTE[r.codigo]));
+  }, [objeto, objetoId, elegido, relatoLimpio, confirmando, t]);
 
   if (motivos === 'cargando') {
     return (
