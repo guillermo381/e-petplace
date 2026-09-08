@@ -283,6 +283,16 @@ export function sistemaDe(c: Contexto): string {
   return `Eres Nexo, el asistente de e-PetPlace. Le hablas a la familia de una mascota
 sobre SU expediente. Tuteo neutro, cálido, frases cortas, sin signos de
 admiración y sin marketing.
+${c.estado_vida === 'perdida' ? `
+🔴 ${c.nombre} ESTÁ PERDIDA (no murió). Acompañá la búsqueda:
+- NO consueles ni hables de duelo. No es un memorial, y este es el momento en
+  que la familia más necesita el producto funcionando.
+- NO sugieras estudios, chequeos ni cuidados por su raza o su etapa mientras
+  esté perdida — eso es hablar de otra cosa.
+- Lo más útil ahora es su pasaporte con el QR y la placa: si alguien la
+  encuentra y lee su placa, va a ver el teléfono de la familia. Recuérdalo y
+  que revisen que su contacto esté visible.
+` : ''}
 
 🔴 TUTEO, NO VOSEO: "quieres" y no "querés", "fíjate" y no "fijate", "tienes" y
 no "tenés". Y nada de "dale" — es el que se escapa
@@ -563,6 +573,24 @@ export function presentacion(c: Contexto): { burbujas: string[]; chips: string[]
       `está tu veterinario.`,
     ],
     chips: chipsDeInicio(c),
+  }
+}
+
+// ── PERDIDA · el Coach acompaña la búsqueda (firma founder, 7-sep-2026) ─────
+// Perdida NO es memorial: no se apaga (①), no consuela ni abre con duelo (②),
+// y lo primero que ofrece es lo único que sirve ahora — el pasaporte con el QR
+// y la placa (③). Las anticipaciones por raza/etapa y los recordatorios de
+// vacuna/antiparasitario/peso (④⑤) ya NO salen: generar_avisos_coach los gatea
+// por estado_vida='activa', así que se apagan solos con perdida y vuelven
+// cuando vuelva ella. La literal de la placa es del founder, verbatim.
+export function presentacionPerdida(c: Contexto): { burbujas: string[]; chips: string[] } {
+  return {
+    burbujas: [
+      `Estoy para ayudarte a buscar a ${c.nombre}.`,
+      `Lo primero es su pasaporte: fíjate que estén el QR y la placa, y que tu ` +
+      `contacto se vea. Si alguien lo encuentra y lee su placa, va a ver tu teléfono.`,
+    ],
+    chips: ['¿Cómo reviso su placa?', '¿Qué hago si lo encuentran?'],
   }
 }
 
@@ -930,8 +958,10 @@ Deno.serve(async (req) => {
 
     // ── PRESENTAR · cero modelo ──────────────────────────────────────────
     if (acto === 'presentar') {
+      // Perdida: acompaña la búsqueda, no abre como si nada ni como memorial.
+      const pres = c.estado_vida === 'perdida' ? presentacionPerdida(c) : presentacion(c)
       return new Response(JSON.stringify({
-        ...presentacion(c), fuente: 'plantilla', aviso_ia: true,
+        ...pres, fuente: 'plantilla', aviso_ia: true,
       }), { status: 200, headers: JSON_HEADERS })
     }
 
