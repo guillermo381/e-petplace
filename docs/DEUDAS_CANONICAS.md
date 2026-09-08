@@ -29622,3 +29622,61 @@ salidas creíbles; la de `L-498` se caza corriendo el control negativo, y ésta
 **sólo se caza preguntándole al objeto en vez de al catálogo que lo describe.**
 
 **☠️ Condición de muerte:** ninguna — es de método.
+
+
+---
+
+### `L-500` 🔴 · UN DATO MEDIDO LLEVA SU **HORA**, NO SÓLO SU FECHA
+
+**Hallazgo de E, depositado por A (S114, 7-sep-2026). Y se cobró sobre A el
+mismo día, en el mismo turno en que lo escribía.**
+
+El canon ya exige que todo número nombre **el comando que lo produjo** y su
+**fecha** (`D-1015`). Con una pista trabajando, la fecha alcanza: un cero de la
+mañana sigue siendo cierto a la tarde. **Con cinco pistas en paralelo, no.**
+
+> ### **Cuantas más pistas corren juntas, más corto es el plazo de validez de un cero — y el canon no tiene forma de saber que venció.**
+
+### Los dos casos, y el segundo es de quien escribe la ficha
+
+**① Los gates que el canon daba por cableados.** S112 dejó escrito *«los cinco
+primeros quedan en el hook»*. Era cierto **cuando se escribió**. Después alguien
+tocó el hook y dos se cayeron, y el canon siguió afirmándolo durante toda una
+sesión. E lo midió contra el hook **vivo** y encontró dos con cero ocurrencias —
+entre ellos el que nació de la causa exacta del crash del lote 5.
+
+**② A leyó el contrato de C en `846f4785` y construyó A3 contra esa lectura.
+C lo actualizó a `2508b798` con un ítem nuevo —`C1bis`— y A lo entregó sin él,
+con un defecto adentro** que le cerraba la puerta del caso a las dos fallas de
+clase 1 del pedido. *La lectura no estaba mal: estaba vencida.* Y no había
+forma de notarlo, porque un contrato leído no avisa que cambió.
+
+### Por qué la fecha sola no salva
+
+Un dato fechado **parece verificado**. «Medido el 7-sep» se lee como una
+constancia, y en una sesión de cinco pistas el 7-sep tiene doce horas de trabajo
+adentro de tres personas distintas. *La fecha da autoridad sin dar vigencia* —
+que es la peor combinación posible para un número que otro va a usar para
+decidir.
+
+### La cura, en tres líneas
+
+1. **Hora en todo dato que otra pista vaya a consumir**, no sólo fecha:
+   `medido 7-sep 18:42 Guayaquil`.
+2. **Un contrato entre pistas se relee por su SHA antes de construir contra él**,
+   y el parte dice contra cuál SHA lo leyó. *Un `git ls-remote` cuesta un
+   segundo; construir contra una versión vencida costó una entrega con un
+   defecto adentro.*
+3. **Lo que el canon afirma sobre INFRAESTRUCTURA COMPARTIDA —el hook, los
+   crones, los secrets— se re-mide, no se hereda.** Son los objetos que más
+   manos tocan y los únicos que nadie siente como propios.
+
+### Su lugar entre las hermanas
+
+- **`L-166`** dice *todo dato vivo se lee al momento de usarlo*. Ésta agrega
+  **cuánto dura «al momento»** cuando hay paralelo: menos de lo que uno cree.
+- **`L-499`** es sobre un instrumento que mira la forma equivocada. Ésta es
+  sobre uno que **miró bien y hace rato**.
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
+la escribió A el mismo día que la rompió.
