@@ -218,6 +218,25 @@ export async function obtenerCasosDelPrestador(): Promise<ResultadoWrapper<CasoE
   })) };
 }
 
+/**
+ * Los casos de la familia (C6 · «Mis casos» en Cuenta > Ayuda).
+ *
+ * Misma forma que `obtenerCasosDelPrestador` con el asiento cambiado: la
+ * familia ve los SUYOS, **abiertos primero** (el orden lo hace el motor, no la
+ * pantalla). Era omisión del primer pedido de C, no del motor.
+ */
+export async function obtenerMisCasos(): Promise<ResultadoWrapper<CasoEnBandeja[], 'error_lectura'>> {
+  const { data, error } = await getClient().rpc('obtener_mis_casos');
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: ERR };
+  const filas = (data ?? []) as Record<string, unknown>[];
+  return { ok: true, data: filas.map((c) => ({
+    casoId: c.caso_id as string, objetoTipo: c.objeto_tipo as ObjetoPostventa,
+    objetoId: c.objeto_id as string, motivo: c.motivo as string,
+    clase: c.clase as 1 | 2 | 3, etapa: c.etapa as EtapaCaso,
+    plazoHasta: (c.plazo_hasta as string | null) ?? null, creadoEn: c.creado_en as string,
+  })) };
+}
+
 export async function responderCaso(casoId: string, texto: string) {
   return enviarMensajeDeCaso(casoId, texto);
 }

@@ -1899,6 +1899,7 @@ export type Database = {
           destino_estado: string | null
           estado_final: string | null
           etapa: string
+          etapa_previa: string | null
           evento_reembolso_id: string | null
           familia_user_id: string
           foto_url: string | null
@@ -1929,6 +1930,7 @@ export type Database = {
           destino_estado?: string | null
           estado_final?: string | null
           etapa?: string
+          etapa_previa?: string | null
           evento_reembolso_id?: string | null
           familia_user_id: string
           foto_url?: string | null
@@ -1959,6 +1961,7 @@ export type Database = {
           destino_estado?: string | null
           estado_final?: string | null
           etapa?: string
+          etapa_previa?: string | null
           evento_reembolso_id?: string | null
           familia_user_id?: string
           foto_url?: string | null
@@ -2001,6 +2004,13 @@ export type Database = {
           {
             foreignKeyName: "casos_postventa_etapa_fkey"
             columns: ["etapa"]
+            isOneToOne: false
+            referencedRelation: "cat_estados_caso"
+            referencedColumns: ["etapa"]
+          },
+          {
+            foreignKeyName: "casos_postventa_etapa_previa_fkey"
+            columns: ["etapa_previa"]
             isOneToOne: false
             referencedRelation: "cat_estados_caso"
             referencedColumns: ["etapa"]
@@ -26188,6 +26198,7 @@ export type Database = {
           titulo: string
         }[]
       }
+      obtener_mis_casos: { Args: never; Returns: Json }
       obtener_mis_estadias_guarderia: {
         Args: { p_mascota_id?: string }
         Returns: {

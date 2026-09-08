@@ -2005,7 +2005,7 @@ export {
 export {
   obtenerCasoDeObjeto, obtenerVentanaCasoDias, abrirCaso, leerCaso,
   leerMensajesDeCaso, enviarMensajeDeCaso, leerOpcionesDeDevolucion,
-  elegirDestinoDevolucion, obtenerCasosDelPrestador, responderCaso,
+  elegirDestinoDevolucion, obtenerCasosDelPrestador, obtenerMisCasos, responderCaso,
   reconocerYResolver, pedirACasa,
   type EtapaCaso, type AsientoCaso, type MensajeCaso, type CasoEnBandeja,
   type CodigoAbrirCaso,
