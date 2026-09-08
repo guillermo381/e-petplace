@@ -2588,6 +2588,31 @@ export default function PerfilDeMascota() {
                 titulo={estaPerdida(mascota.estado_vida) ? t('perfil.aparecio') : t('perfil.sePerdio')}
                 onPress={() => setHojaVida(estaPerdida(mascota.estado_vida) ? 'aparecio' : 'perdida')}
               />
+              <Separador />
+              {/* ⏪ **LA DESPEDIDA VIVÍA DETRÁS DEL LÁPIZ DE EDITAR** —perfil →
+                  icono de edición → menú → última opción tras un separador— y
+                  **el founder no la encontró**, igual que no encontró la de
+                  perdida.
+
+                  El argumento de quien la puso ahí era bueno y está escrito:
+                  *«un acto grave no cuelga de un botón suelto en una ficha que
+                  se abre todos los días»*. **Lo que falló no es el cuidado: es
+                  el lugar** — un menú de EDICIÓN es donde se cambia una foto o
+                  una raza, y *nadie busca «mi perro murió» debajo de un lápiz*.
+
+                  Acá está igual de discreta —abajo, sin color de alarma, sin
+                  presidir nada— pero en la zona que habla de la vida del
+                  animal, que es donde una familia la va a buscar. */}
+              {/* **SIN GLIFO, y es una decisión**: ninguno del registry dice
+                  «despedida» —lo censé— e inventarle uno sería ruido (Ley 12).
+                  Además la distingue de la de arriba, que sí lleva `ubicacion`
+                  porque hablar de buscar es exactamente lo que hace. */}
+              <CeldaNavegacion
+                titulo={t('perfil.menuDespedir', { nombre: mascota.nombre })}
+                onPress={() =>
+                  router.push({ pathname: '/hogar/mascota/despedida', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+                }
+              />
             </Tarjeta>
           </View>
         ) : null}
@@ -2741,19 +2766,16 @@ export default function PerfilDeMascota() {
               setRazaHoja(true);
             }}
           />
-          <Separador />
-          {/* Sola, al final y después del separador. **Sin color de alarma**:
-              el memorial es sereno, y pintar la despedida de rojo la trata como
-              un borrado. No lo es: es el expediente que sigue, en otra clave. */}
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('perfil.menuDespedir', { nombre: mascota.nombre })}
-            onPress={() => {
-              setMenuEdicion(false);
-              router.push({ pathname: '/hogar/mascota/despedida', params: { mascotaId: mascota.id, nombre: mascota.nombre } });
-            }}
-          />
+          {/* ☠️ **ACÁ VIVÍA LA DESPEDIDA Y SE MUDÓ** a la zona «Su vida», abajo
+              en esta misma pantalla. **No queda una copia**: dos puertas al
+              mismo acto es lo que esta casa castiga, y con un acto de esta
+              gravedad sería peor —la familia no tiene que descubrir cuál de
+              las dos es la buena.
+
+              *Lo que se conserva del original es su forma: sola, discreta, sin
+              color de alarma.* El memorial es sereno, y pintarlo de rojo lo
+              trataría como un borrado; no lo es: es el expediente que sigue,
+              en otra clave. */}
         </Hoja>
       ) : null}
 
