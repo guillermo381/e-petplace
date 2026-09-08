@@ -1983,3 +1983,114 @@ Si hay deployment y producción no cambió → es promoción o caché. Si no hay
 deployment pero otro repo sí despliega → es el proyecto. Si ningún repo
 despliega → es la app o la cuenta. **Ninguna de las tres necesita el
 dashboard**, y las tres eran indistinguibles con lo que yo estaba midiendo.
+
+---
+
+# ADENDA 18 · REPLANTEO — qué queda cuando las tres hipótesis caen
+
+**Lo que el founder descartó en el dashboard:** proyecto **conectado** desde el
+30 de abril · app instalada con **All repositories** y permisos completos ·
+repo sin webhook (normal con GitHub App).
+
+**Lo que yo descarté por medición:** la app **funciona ahora mismo** (el
+monorepo recibió deployments a las 21:51, 22:06, 22:29, 22:49 y 23:04).
+
+⇒ **commit en main + proyecto conectado + app con acceso + cero deployments.**
+
+## Lo que MEDÍ recién, y por qué NO es la respuesta
+
+El canon documenta un caso casi idéntico en S105 —*`pagos-web` rebotado por
+«more than 100 per day», ventana MÓVIL de 24 h*— así que conté:
+
+```
+deployments de la cuenta en 24 h (GitHub Deployments, que son un PISO)
+  e-petplace         75      ← mis propios commits de esta sesión
+  e-petplace-admin    3
+  e-petplace-web      0
+                    ───
+  TOTAL              78      ·  techo del plan Hobby: 100
+```
+
+🔴 **Está cerca del techo, y aun así NO es la explicación** — y la razón es la
+misma que descartó las otras: **el techo es de CUENTA, y el monorepo siguió
+desplegando** a las 22:49 y 23:04, después de que el admin dejara de hacerlo.
+*Un techo de cuenta no es selectivo por proyecto.*
+
+⚠️ **Pero se anota igual, porque es un riesgo real y me lo estoy comiendo yo:**
+**75 de los 78 son míos** — cada commit de documentación a `pista/s114-f-1.0`
+dispara un preview. *Estoy consumiendo el cupo de la cuenta con partes de
+trabajo.* Si el admin se destraba y la cuenta está en 98, el deploy que importa
+va a rebotar por culpa de mis notas.
+
+## Lo que QUEDA — tres candidatos, ninguno descartado
+
+**Y lo que los une: los tres son estado del PROYECTO, silenciosos, y ninguno se
+ve desde afuera.**
+
+| # | candidato | por qué encaja | qué lo distingue (dashboard) |
+|---|---|---|---|
+| **1** | **«Ignored Build Step»** en Settings → Git | 🔴 **El que mejor encaja.** Si hay un comando y devuelve 0, **Vercel cancela el build en silencio**: sin deployment, sin error, y el resto de la cuenta desplegando bien — *exactamente lo observado.* Y es lo más fácil de haber quedado de una prueba vieja en un repo que estuvo cuatro meses quieto | ¿el campo está vacío? Si tiene algo, **ésa es la causa** |
+| **2** | **«Production Branch» ≠ `main`** | El founder confirmó el **repo** conectado, **no la rama**. Si apunta a otra, los pushes a `main` no producen deployment de producción | Settings → Git → Production Branch. **Es el dato que falta y no se pidió** |
+| **3** | **Proyecto pausado / límite de gasto** | Un proyecto pausado no construye y **no avisa en el repo**. Encaja con cuatro meses de inactividad previa | Settings → General, o un banner en el proyecto |
+
+🔴 **El #2 es el que más me molesta**, porque **es un dato que no se miró** — no
+está descartado, está **sin preguntar**. *Y encaja con el patrón: los tres
+deployments de hoy (19:56, 19:56, 20:55) podrían haber sido de una rama que sí
+es la de producción, y algo cambió después.*
+
+## ② El Redeploy sobre `73b275c` — qué esperar en cada caso
+
+**El diálogo de Vercel muestra el commit que va a construir. Ese dato es el
+discriminador, más que el resultado.**
+
+| lo que proponga el diálogo | qué significa | cómo lo verifico |
+|---|---|---|
+| **`73b275c`** (el del deployment) | Vercel redeploya **ese** commit, no la punta. **No cura nuestro problema** — pero **prueba que el proyecto PUEDE construir** ⇒ descarta pausa (#3) y build roto | el bundle sigue en **`index-fK9Opg5L.js`** |
+| **`61de31a`** (la punta actual) | 🟢 **Vercel SÍ ve los commits nuevos** ⇒ el vínculo lee bien y el problema es sólo que **no se auto-dispara** ⇒ apunta fuerte a **#1** | el bundle pasa a **`index-B4k1WxEH.js`** |
+| **una rama que no es `main`** | 🔴 **confirma #2 en el acto** | — |
+
+**Y hay un tercer resultado posible que no es del diálogo:** si el Redeploy
+**falla o queda cancelado**, el log dirá por qué — y si dice algo tipo *«build
+skipped»* o *«ignored»*, **es #1 confirmado.**
+
+⚠️ **Un aviso sobre el Redeploy de `73b275c`:** si construye, **produce un
+deployment nuevo del contenido VIEJO**. No rompe nada —es el mismo código que ya
+está sirviendo— pero **consume cupo** (ver arriba) y **no acerca la URL
+canónica**. *Es una medición, no una cura, y conviene tenerlo claro antes de
+tocarlo.*
+
+## ③ Qué se pierde si queda así hasta mañana — medido
+
+**Respuesta corta: NO bloquea nada. Molesta, y tiene un borde feo.**
+
+**Lo que está en producción hoy** es `73b275c`, cuyo `redirectTo` apunta a
+`https://e-petplace-admin.vercel.app` — **una URL que funciona** (200, sirve la
+app, sin protección).
+
+| | |
+|---|---|
+| ¿el admin funciona? | ✅ sí, por los dos dominios |
+| ¿el login por email? | ✅ sí — nunca usó `redirectTo` |
+| ¿el login con Google? | ✅ **funciona** — pero ver el borde |
+| ¿los retiros de adopción y notificaciones? | ✅ ya están en producción desde `79a6cbb` |
+| ¿la cura de Placas? | ✅ ya está desde `73b275c` |
+| ¿el ensayo del pasaporte? | ✅ no dependía de esto |
+
+### 🟡 El borde feo, que es lo único concreto
+
+**Quien entre por `admin.epetplace.com` y toque «Entrar con Google» va a
+aterrizar en `e-petplace-admin.vercel.app`** — el `redirectTo` del bundle viejo.
+
+**No falla: cambia de dominio a mitad del login.** Y como la sesión de Supabase
+vive en el `localStorage` **del dominio**, la sesión queda en `.vercel.app` y no
+en el dominio propio. *Quien vuelva después a `admin.epetplace.com` va a
+encontrar el login otra vez.*
+
+⇒ **Es exactamente el defecto original con menos gravedad**: antes aterrizaba en
+una pantalla de Vercel; ahora aterriza en el admin, pero en el dominio
+equivocado. **Molesta a quien use Google. Con email y contraseña no pasa nada.**
+
+**Y lo que NO se pierde:** el cambio **ya está en el repo y pusheado**. No hay
+trabajo en riesgo, no hay nada que rehacer, y el día que el deploy salga la URL
+canónica rige sola. **Lo único que queda colgado son las dos verificaciones de
+③**, que sin el bundle nuevo darían un falso verde.
