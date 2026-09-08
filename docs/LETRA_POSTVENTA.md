@@ -8,6 +8,11 @@
 > **Regla de unicidad: dos sistemas de postventa en la misma base está prohibido. Este documento
 > es EL sistema** — y por eso F9 retira la pantalla de devoluciones del admin legado con lápida.
 >
+> ### 📌 ENMIENDA ② (founder, 7-sep-2026) — **§8 · el devengo de guardería ancla en la ESTADÍA**
+> No en su cita. La estadía es lo contratado y lo pagado, y §6 le pregunta **al objeto** si tiene
+> devengo: con el ancla ambigua esa pregunta tiene dos respuestas y **el camino de la plata se
+> bifurca sin síntoma**. Letra vieja tachada en §8, no borrada.
+
 > ### 📌 ENMIENDA ①, mesa del 7-sep-2026 — **§14 · `D-888` ya no queda en NULL**
 > **La plata de los tres reversos fuera de ventana ($87,65) salió de tarjeta de PRUEBAS**
 > (dato del founder). ⇒ **no vuelve a nadie: es deuda de motor**, y se cierra construyendo
@@ -188,12 +193,36 @@ descontar una devolución.
 **Los cuatro productores que faltan** (firmados F10), sobre el chasis probado de los tres que
 funcionan — `crear_evento_economico()`, como todo:
 
-| servicio | el acto que devenga |
-|---|---|
-| **veterinaria** y **telemedicina** | el cierre de la atención (mismo patrón que grooming) |
-| **guardería** día y paquete | el acta de `entregar` |
-| **guardería** mensualidad | **por día ejecutado**, no por mes cobrado |
-| **despensa** | el cuarto escalón, `entregado` |
+| servicio | el acto que devenga | 🔴 `origen_tipo` · `origen_id` |
+|---|---|---|
+| **veterinaria** y **telemedicina** | el cierre de la atención (mismo patrón que grooming) | `cita` · la cita |
+| **guardería** día y paquete | el acta de `entregar` | **`estadia` · la ESTADÍA** *(enmienda ②)* |
+| **guardería** mensualidad | **por día ejecutado**, no por mes cobrado | **`estadia` · la ESTADÍA** *(enmienda ②)* |
+| **despensa** | el cuarto escalón, `entregado` | `pedido` · el pedido |
+
+> ### 🔴 ENMIENDA ② (founder, 7-sep-2026) — **el evento de guardería ANCLA EN LA ESTADÍA**
+> ~~*(la letra original no lo decía, y con la cita y la estadía existiendo las dos, el ancla
+> quedaba ambigua)*~~ **El `origen_id` del evento económico de guardería es la ESTADÍA, jamás su
+> cita.**
+>
+> **La razón, y no es de prolijidad:** la estadía es lo contratado y lo pagado. Y §6 manda que
+> al resolver **se le pregunte AL OBJETO si tiene devengo** — con el ancla ambigua **esa pregunta
+> tiene dos respuestas**: preguntada sobre la cita dice «no hay evento» y preguntada sobre la
+> estadía dice «sí». *El camino de la plata se bifurcaría sin un solo síntoma: una devolución se
+> declararía sobre el pago mientras el prestador conserva su devengo, y la casa paga la
+> diferencia sin que nadie lo vea.* Es exactamente el modo de falla que §6 existe para cerrar.
+>
+> ⚠️ **Consecuencia para E:** su permisividad declarada sobre el ancla de guardería **queda
+> cerrada** — el rojo de §8 se mide contra la estadía y sólo contra ella.
+>
+> ⚠️ **Y esta enmienda casi no llega a quien la necesitaba.** Al depositarla, A la
+> puso ENTRE dos filas de la tabla de arriba — con dos efectos: **la fila de
+> despensa quedó fuera de la tabla** (en Markdown una fila después de un bloque
+> ya no es tabla) **y el ancla no quedó donde se escanea.** E leyó las filas, no
+> vio el ancla, y citó la mesa en vez del documento: *hizo lo correcto.*
+> **Por eso el ancla vive ahora EN LA COLUMNA, no en un párrafo al lado** —
+> *una enmienda depositada junto a lo que enmienda no enmienda nada si lo que
+> la gente lee es lo de al lado.*
 
 *La mensualidad devenga por día porque el principio no cambia con la modalidad: el evento
 económico nace de lo ejecutado. Devengar el mes al cobrar sería fabricar un evento sobre servicios
@@ -240,8 +269,16 @@ piso. Una entrega por intención.
 
 **Email de constancia forzado** en: `caso_resuelto`, movimientos de plata, `caso_no_ejecutado_48h`.
 **WhatsApp sólo en dos momentos**: cuando la familia tiene que ACTUAR (`caso_elegir_devolucion`) y
-cuando la plata se movió (`caso_resuelto` / `caso_saldo_acreditado`) — **porque desde el
-1-oct-2026 se cobra por mensaje y Ecuador está en la banda cara** (`FINANCIERO` §11bis).
+cuando la plata se movió (`caso_resuelto` / `caso_saldo_acreditado`) — ~~porque desde el
+1-oct-2026 se cobra por mensaje y Ecuador está en la banda cara~~ **🔴 ENMENDADA (S114,
+7-sep-2026 · la DECISIÓN no cambia, la RAZÓN sí): el costo NO es el límite.** Medido en la
+calculadora de Meta: Ecuador cae en el bucket «Resto de Latinoamérica», una UTILITY entregada
+cuesta **$0,0113** y **un caso completo son $0,023** — despreciable. **El límite es la
+CALIFICACIÓN DE CALIDAD del número**, que gobierna el nivel de mensajería: hoy **250
+conversaciones iniciadas por 24 h**, y **sin calidad medida porque todavía no se envió nada**.
+*Un canal barato con la calidad quemada no manda nada a ningún precio, y la calidad la queman
+los mensajes que la gente no esperaba* — que es exactamente lo que estos dos momentos evitan.
+(`FINANCIERO` §11bis, enmendada el mismo día.)
 
 **Estado medido del canal (7-sep, supersede al canon):** token válido (196 chars, `EAA`, dos
 permisos) · **8 plantillas en UTILITY y aprobadas** — la re-categorización crítica ya está hecha ·
@@ -317,6 +354,10 @@ consecuencias por acumulación · plazos y textos por país.
 
 ## Historial
 
+- **v1.0 · enmienda ② (S114, 7-sep-2026, founder):** §8 fija el ancla del devengo de guardería
+  en la **estadía**. *No es una precisión: con dos anclas posibles, la pregunta que §6 le hace al
+  objeto devuelve dos respuestas distintas y la plata sale por el camino equivocado sin fallar.*
+  Cierra la permisividad que E había declarado.
 - **v1.0 · enmienda ① (S114, 7-sep-2026, mesa):** `D-888` sale de NULL. **La plata era de
   tarjeta de pruebas** ⇒ deuda de motor, no plata de una familia. §14 con la letra vieja
   **tachada y no borrada**, y la marca repetida en la puerta del documento. *Depositar

@@ -29515,3 +29515,168 @@ tokens que van a quedar sin objeto.
 lote, así que **el gate no puede distinguir** un lote hecho desde el portal de
 uno hecho con `service_role`. *Se declara en vez de fingir que se mide* — la
 constancia de que fue por la pantalla la deja quien lo hace, en el parte.
+
+
+---
+
+### `L-498` 🔴 · UN PIPE SE COME EL CÓDIGO DE SALIDA, Y EL `&&` DE ATRÁS PREMIA AL QUE FALLÓ
+
+**S114-A, 7-sep-2026. Error propio, cazado en la corrida siguiente.**
+
+Escribí, para ver el typecheck sin ahogarme en salida:
+
+```bash
+pnpm typecheck 2>&1 | tail -8 && echo "  ✅ verde"
+```
+
+**Imprimió `✅ verde` sobre ocho errores de TypeScript.** El código de salida de
+un pipe es el del **último** comando, y `tail` sale 0 siempre. El `&&` no
+estaba leyendo al typecheck: estaba leyendo a `tail`.
+
+> ### **El `&&` no premia al que hizo el trabajo: premia al último de la fila.**
+
+**Es la misma clase que `L-490`** (el `set -e` que mataba el shell antes de que
+un gate pudiera decir «no concluyente») y que **`L-191`** (*el exit code se lee
+del comando, jamás del pipe*, S81). ⇒ **`L-191` ya existía y la rompí igual**,
+que es el dato que hace a esta ficha algo más que una repetición: *una lección
+escrita no protege del atajo que uno escribe con las manos mientras piensa en
+otra cosa.* La forma peligrosa no es el pipe solo —eso se nota— sino **el pipe
+con un `&&` que imprime un veredicto**, porque produce una salida que se lee
+exactamente como la verdad.
+
+**La cura, y es de una línea:**
+
+```bash
+pnpm typecheck > /tmp/tc.log 2>&1; echo "EXIT=$?"    # el código es del comando
+```
+
+O `set -o pipefail` cuando el pipe es necesario. **Y la regla de forma que se
+lleva de acá: un veredicto impreso por un `echo` encadenado no es un veredicto
+— es una cadena de texto que sale siempre.** Si el veredicto importa, lo dice
+el `$?` del comando que midió.
+
+⚠️ **Su pariente del mismo día, y es peor porque el defecto vivía en un arnés de
+SEGURIDAD:** el rojo de `otorgar_puntos` leyó `HTTP >= 400` como «rebotó por
+permiso» y archivó el agujero como cerrado. El 400 era `23514` —un CHECK que
+rebota **después** de que la función corrió—, o sea que el permiso ya había
+pasado. Sólo un `42501`/`403` prueba una puerta cerrada. **Las dos son la misma
+familia: un instrumento que lee la señal equivocada y produce una salida
+creíble.** *Un rojo por la razón equivocada está tan roto como un verde por la
+razón equivocada* (L-321).
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
+`L-191` estaba escrita, firmada y no alcanzó.
+
+
+---
+
+### `L-499` 🔴 · UN INSTRUMENTO QUE PREGUNTA POR LA **FORMA** EN QUE LA LEY SUELE ESCRIBIRSE NO MIDE LA LEY
+
+**S114-A, 7-sep-2026. Tres casos el mismo día, en tres subsistemas distintos.**
+
+Un censo pregunta por la forma que espera —un CHECK, un literal, un número en
+negrita— y devuelve un veredicto sobre **la ley**. Cuando la ley está escrita en
+otra forma, el censo no falla: **contesta que no está.**
+
+> ### **Y su respuesta es siempre la más creíble de las dos, porque «no hay» se parece mucho a «hay que construirlo».**
+
+### Los tres casos, y ninguno se parece al otro
+
+| # | el instrumento preguntó por… | la ley vivía en… | qué contestó |
+|---|---|---|---|
+| ① | `pg_constraint` con `contype='c'` sobre `origen_tipo` | **un TRIGGER** (`validar_origen_evento`, nueve valores **y** integridad referencial) | *«NINGUNO»* ⇒ la mesa mandó cerrar un vocabulario **que ya estaba cerrado** |
+| ② | `verify:contador-piezas`, una sola forma de escribir el número | el número **también** escrito como cita dentro de la línea ya curada | se marcó **a sí mismo**: no distinguía publicar de citar |
+| ③ | el censo de guards de memorial, por **presencia del guard** | **once sitios sin guard**, que no piden nada y por eso no disparan ninguna regla | los once *«se leían como puestos»* |
+
+**El ① es el que muestra el costo entero.** Del *«no hay CHECK»* salió una
+adenda entera mandando construir `cat_origen_evento`. Construirlo habría sido
+**una segunda fuente para una ley que ya existía y era más fuerte** —el trigger
+valida existencia, no sólo el string—, y el defecto real habría quedado intacto:
+el `WHEN 'estadia'` apuntaba a `estadias`, **una lápida con 0 filas**, mientras
+la tabla viva tiene 96. *El censo no sólo no vio la ley: mandó a escribir una
+copia y dejó pasar el error que la ley tenía adentro.*
+
+### Cómo se rompe, y por qué no alcanza con «buscar mejor»
+
+**No es que el patrón esté mal escrito.** `contype='c'` mide exactamente lo que
+dice medir. El defecto es de **encuadre**: se preguntó *«¿hay un CHECK?»* y se
+respondió *«no hay vocabulario»* — dos frases distintas que el reporte trata
+como una.
+
+### La cura exigible, en dos líneas
+
+1. **Un censo declara la FORMA que miró**, no sólo el resultado: *«cero CHECKs
+   sobre `origen_tipo`»* es una medición; *«`origen_tipo` no tiene vocabulario»*
+   es una conclusión que ese censo no puede sostener.
+2. **Un cero se contrasta contra la PREGUNTA, no contra el patrón.** Antes de
+   reportar *«no existe»*, se intenta **producirlo por el camino real**: un
+   `INSERT` con un valor inventado habría contestado en un segundo que la ley
+   estaba viva. *Escribir cuesta una subtransacción; adivinar costó una adenda.*
+
+### Su hermana, y en qué se diferencian
+
+**`L-498`** es sobre un instrumento que lee **la señal equivocada** (el exit
+code del pipe, el `>= 400` que no distingue un CHECK de un permiso). **Ésta es
+sobre uno que lee la señal correcta de la fuente equivocada.** Las dos producen
+salidas creíbles; la de `L-498` se caza corriendo el control negativo, y ésta
+**sólo se caza preguntándole al objeto en vez de al catálogo que lo describe.**
+
+**☠️ Condición de muerte:** ninguna — es de método.
+
+
+---
+
+### `L-500` 🔴 · UN DATO MEDIDO LLEVA SU **HORA**, NO SÓLO SU FECHA
+
+**Hallazgo de E, depositado por A (S114, 7-sep-2026). Y se cobró sobre A el
+mismo día, en el mismo turno en que lo escribía.**
+
+El canon ya exige que todo número nombre **el comando que lo produjo** y su
+**fecha** (`D-1015`). Con una pista trabajando, la fecha alcanza: un cero de la
+mañana sigue siendo cierto a la tarde. **Con cinco pistas en paralelo, no.**
+
+> ### **Cuantas más pistas corren juntas, más corto es el plazo de validez de un cero — y el canon no tiene forma de saber que venció.**
+
+### Los dos casos, y el segundo es de quien escribe la ficha
+
+**① Los gates que el canon daba por cableados.** S112 dejó escrito *«los cinco
+primeros quedan en el hook»*. Era cierto **cuando se escribió**. Después alguien
+tocó el hook y dos se cayeron, y el canon siguió afirmándolo durante toda una
+sesión. E lo midió contra el hook **vivo** y encontró dos con cero ocurrencias —
+entre ellos el que nació de la causa exacta del crash del lote 5.
+
+**② A leyó el contrato de C en `846f4785` y construyó A3 contra esa lectura.
+C lo actualizó a `2508b798` con un ítem nuevo —`C1bis`— y A lo entregó sin él,
+con un defecto adentro** que le cerraba la puerta del caso a las dos fallas de
+clase 1 del pedido. *La lectura no estaba mal: estaba vencida.* Y no había
+forma de notarlo, porque un contrato leído no avisa que cambió.
+
+### Por qué la fecha sola no salva
+
+Un dato fechado **parece verificado**. «Medido el 7-sep» se lee como una
+constancia, y en una sesión de cinco pistas el 7-sep tiene doce horas de trabajo
+adentro de tres personas distintas. *La fecha da autoridad sin dar vigencia* —
+que es la peor combinación posible para un número que otro va a usar para
+decidir.
+
+### La cura, en tres líneas
+
+1. **Hora en todo dato que otra pista vaya a consumir**, no sólo fecha:
+   `medido 7-sep 18:42 Guayaquil`.
+2. **Un contrato entre pistas se relee por su SHA antes de construir contra él**,
+   y el parte dice contra cuál SHA lo leyó. *Un `git ls-remote` cuesta un
+   segundo; construir contra una versión vencida costó una entrega con un
+   defecto adentro.*
+3. **Lo que el canon afirma sobre INFRAESTRUCTURA COMPARTIDA —el hook, los
+   crones, los secrets— se re-mide, no se hereda.** Son los objetos que más
+   manos tocan y los únicos que nadie siente como propios.
+
+### Su lugar entre las hermanas
+
+- **`L-166`** dice *todo dato vivo se lee al momento de usarlo*. Ésta agrega
+  **cuánto dura «al momento»** cuando hay paralelo: menos de lo que uno cree.
+- **`L-499`** es sobre un instrumento que mira la forma equivocada. Ésta es
+  sobre uno que **miró bien y hace rato**.
+
+**☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
+la escribió A el mismo día que la rompió.

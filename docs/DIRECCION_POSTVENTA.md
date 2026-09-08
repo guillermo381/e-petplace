@@ -9,6 +9,13 @@
 > N24 el control no cambia el tamaño de lo que lo contiene), `DIRECCION_CHAT_ADOPCION` §2 (el chat
 > de la casa se comporta así, sin excepción) y `MODELO_LOYALTY` §7 (memorial apaga todo).
 > **Gemela:** `LETRA_POSTVENTA.md` — el motor. Se leen juntas.
+>
+> ### 📌 ENMIENDA (B, 7-sep-2026) — **§4 · los tiempos declarados van en color de CUERPO**
+> `text.tertiary` da **2,11 en claro y 3,22 en oscuro** contra un piso de 4,5, y el gate lo tumbó.
+> **El daño no era de accesibilidad: era la simetría de §4 rompiéndose por el lado que nadie mira** —
+> el tiempo del banco es la frase larga, y atenuarla esconde justo el dato que esta dirección puso
+> ahí para que la opción lenta no quede escondida. *La letra vieja queda en §4 y la enmienda va
+> debajo, para que se lea qué se firmó y qué se corrigió.*
 
 ---
 
@@ -120,6 +127,12 @@ otra, y **ninguna está preseleccionada**.»
 
 - **Las dos parejas, con sus tiempos declarados.** La rapidez del saldo **se informa, jamás se usa
   para esconder la opción del banco.** Cero default oscuro, cero botón más grande, cero «recomendado».
+- 🔴 **ENMIENDA (B, 7-sep — medida, no supuesta): los tiempos declarados van en color de texto de
+  cuerpo, jamás atenuado.** El gate tumbó `text.tertiary` con 2,11 en claro y 3,22 en oscuro contra
+  un piso de 4,5, **y el daño no era de accesibilidad: era la simetría de este § rompiéndose por el
+  lado que nadie mira.** El tiempo del banco es la frase larga; atenuarla deja menos legible justo
+  el dato que esta letra puso ahí para que la opción lenta no quede escondida. *Un dark pattern no
+  necesita un botón más grande: alcanza con que un dato pese menos de lo que dice el papel.*
 - **El monto se dice antes de elegir**, en una línea sobre las tarjetas: *«Te devolvemos $12,00 —
   el total de este paseo.»* Si es parcial, dice por qué: *«Te devolvemos $6,00 — la mitad del paseo
   que no se hizo.»*

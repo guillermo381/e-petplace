@@ -32,7 +32,7 @@
  * *Un tipo que sólo existe en compilación no se puede recorrer.* Con el array,
  * el arnés censa las siete tablas contra las cinco piezas y el hueco se ve.
  */
-export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte', 'coach_clasifica', 'papel', 'busqueda'] as const
+export const PIEZAS = ['carnet', 'documento', 'nota_clinica', 'presencia', 'raza', 'coach', 'coach_router', 'coach_parte', 'coach_clasifica', 'papel', 'busqueda', 'postventa_intake', 'postventa_hoja'] as const
 
 export type Pieza = typeof PIEZAS[number]
 
@@ -64,6 +64,23 @@ export const MODELOS: Record<Pieza, string> = {
   // trabajo que el router: Haiku sobra. **Y su error es barato** — la clase
   // que no se reconoce cae a `rasgo`, y de todos modos la familia confirma.
   coach_clasifica: 'claude-haiku-4-5',
+  /* 🔴 `postventa_intake` NACE EN HAIKU CON UNA ASIMETRÍA DECLARADA.
+     El trabajo es el del router: elegir uno de 19 códigos y escribir una línea
+     — salida cerrada, `temperature: 0`. Pero **su error NO es barato como el de
+     `coach_clasifica`**: proponer clase 2 donde la fila dice clase 3 manda «mi
+     mascota volvió lastimada» al camino de 24 h al prestador en vez de a la
+     casa ahora. *Lo que sostiene el riesgo no es el modelo: es que la familia
+     CONFIRMA antes de que exista el caso, y la superficie le muestra la lista
+     entera con la propuesta apenas preseleccionada.*
+     ⚠️ No se escribió un detector de urgencia que corrija al modelo: sería el
+     «tercer detector romo» que esta casa ya declaró peor que ninguno en el muro
+     de NEXO. **La tasa de acierto por clase la mide E sobre N corridas**, y si
+     la clase 3 no llega, la pieza sube a Sonnet — que es un cambio de una línea
+     acá y ningún despliegue de prompt. */
+  postventa_intake: 'claude-haiku-4-5',
+  /* Redacta sobre material real (hilo + evidencia del objeto) y su salida la
+     lee la casa para decidir. Es el trabajo de `coach`, no el del router. */
+  postventa_hoja: 'claude-sonnet-5',
 }
 
 /** `max_tokens` por pieza. **Medido**, ver cabecera. */
@@ -102,7 +119,11 @@ export const MAX_TOKENS: Record<Pieza, number> = {
   // acá las filas son más chicas pero pueden ser el doble. 4000, igual que el
   // carnet, y por debajo de `TECHO_SIN_RAZONAR`.
   papel: 4000,
-  coach_clasifica: 300,
+  coach_clasifica: 300,  // Un código + una línea + una lista corta. El techo es holgura, no uso.
+  postventa_intake: 700,
+  // Resumen del hilo + una propuesta con su porqué: es prosa, necesita aire.
+  postventa_hoja: 2000,
+
 }
 
 /**
@@ -121,7 +142,9 @@ export const EDGES: Record<Pieza, string> = {
   busqueda: 'coach',
   coach_parte: 'coach-parte',
   papel: 'extract-papel',
-  coach_clasifica: 'coach',
+  coach_clasifica: 'coach',  postventa_intake: 'postventa-intake',
+  postventa_hoja: 'postventa-hoja',
+
 }
 
 /**
@@ -198,7 +221,13 @@ export const TIMEOUT_MS: Record<Pieza, number> = {
   // Un PDF de laboratorio es lo más pesado que entra por acá; el carnet tiene
   // 170 s por la misma razón y este puede traer varias páginas.
   papel: 170_000,
-  coach_clasifica: 10_000,
+  coach_clasifica: 10_000,  /* La familia está esperando en pantalla: se corta antes que las de fondo.
+     ⚠️ ESTIMADO, no medido contra el proveedor — se declara como tal, igual que
+     hicieron los de D en S113 antes de que A los midiera con credencial. */
+  postventa_intake: 30_000,
+  /* La lee la casa, no la familia: puede tardar. También estimado. */
+  postventa_hoja: 60_000,
+
 }
 
 /**
@@ -335,7 +364,9 @@ export const PENSAR: Record<Pieza, boolean> = {
   busqueda: false,
   coach_parte: false,
   papel: false,
-  coach_clasifica: false,
+  coach_clasifica: false,  postventa_intake: false,
+  postventa_hoja: false,
+
 }
 
 /**
@@ -354,7 +385,9 @@ export const ESFUERZO: Record<Pieza, Esfuerzo | null> = {
   busqueda: null,
   coach_parte: null,
   papel: null,
-  coach_clasifica: null,
+  coach_clasifica: null,  postventa_intake: null,
+  postventa_hoja: null,
+
 }
 
 export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
@@ -379,7 +412,11 @@ export const CACHEAR_SISTEMA: Record<Pieza, boolean> = {
   // cobra 25% de más por escribir algo que nadie va a releer en la ventana.
   coach_parte: false,
   papel: false,
-  coach_clasifica: false,
+  coach_clasifica: false,  /* El `system` lleva los 19 motivos del catálogo y no cambia entre llamadas:
+     es exactamente lo que el caché existe para no volver a pagar. */
+  postventa_intake: true,
+  postventa_hoja: true,
+
 }
 
 
@@ -414,5 +451,9 @@ export const TEMPERATURA_CERO: Record<Pieza, boolean> = {
      de tres valores, cero texto libre. Misma clase que los otros tres. */
   raza: true,
   // Los tres clasificadores de salida cerrada.
-  coach_router: true, coach_clasifica: true, busqueda: true,
+  coach_router: true, coach_clasifica: true, busqueda: true,  // Salida cerrada: el código sale de una lista de 19. Determinismo medible.
+  postventa_intake: true,
+  // Escribe prosa para la casa: `temperature: 0` acá no gana nada y empobrece.
+  postventa_hoja: false,
+
 }
