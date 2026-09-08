@@ -28746,6 +28746,29 @@ tienen deployment. El hecho era verdadero; la regla que le colgué encima, no. *
 distinción tiene nombre: lo que había era una **intermitencia**, no un corte* — y las dos
 producen exactamente las mismas tres observaciones.
 
+> ✅ **ENMIENDA (mismo día): se intentó fundar el umbral de verdad, y el intento
+> FALLÓ por la misma razón — que es lo que vuelve exigible la lección.**
+>
+> El umbral gobierna un gate cableado, así que se re-midió con la muestra más
+> grande disponible (cruce de push events × deployments del monorepo):
+>
+> ```
+> n = 17     mín 39 s · p50 47 s · p90 55 s · p95 63 s · MÁXIMO 92 s
+> 0 de 17 superan los 300 s  (que son 3,3× el máximo observado)
+> ```
+>
+> La muestra pasó de **3 a 17** y el máximo de 60 s a 92 s. **Y el sesgo persiste
+> igual**, porque no puede no persistir: ***un deployment que nunca se creó no tiene
+> latencia***, así que **la muestra de «los que tardaron» no existe** y no se puede
+> construir desde afuera. *Más datos del mismo tipo no curan un sesgo de selección.*
+>
+> ⇒ **La salida, cuando el umbral no se puede fundar, no es afinarlo: es dejar de
+> hacerlo decidir solo.** El gate ahora separa **«el proyecto no despliega»** (rojo)
+> de **«despliega y esta punta quedó saltada»** (no concluyente), con un
+> discriminador que no depende del reloj: *si existe algún deployment posterior al
+> commit, el corte no es del proyecto.* **Y lo declara en su salida** — *un gate que
+> puede gritar en falso y no lo dice entrena a ignorarlo.*
+
 *(Cierra la familia del día con [[L-503]], [[L-504]], [[L-505]] y [[L-506]]: cinco formas
 de que un dato verdadero sostenga una conclusión falsa — la brecha entre aceptar y hacer,
 el texto que describe el caso típico, la sonda parada en el eslabón anterior, la prosa que
