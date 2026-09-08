@@ -1836,3 +1836,150 @@ en el repo y pusheada. **Y las dos verificaciones de ③ siguen sin poder
 correrse**: contra el bundle actual darían un **falso verde**, porque el
 `redirectTo` de `73b275c` apunta a `e-petplace-admin.vercel.app`, **una URL que
 funciona**. *El verde saldría de medir el artefacto equivocado.*
+
+---
+
+# ADENDA 17 · 🟢 SE PUEDE MEDIR SIN DASHBOARD — y el sujeto A queda DESCARTADO
+
+**El founder miró: el repo NO tiene ningún webhook.** Y aportó el dato que
+reordena todo: **la conexión de Vercel es por GitHub App, no por webhook de
+repo.**
+
+⚠️ **Eso corrige mi tabla de la adenda 16.** Su rama ① decía *«sin entregas
+recientes ⇒ GitHub no está emitiendo»*. **La rama era la correcta y la lectura
+estaba incompleta:** con GitHub App, la lista de webhooks del repo está vacía
+**por diseño** — no es que GitHub no emita, es que **ése no es el canal.**
+
+## ① Lo que SÍ se puede medir desde afuera, y con qué comando
+
+| sujeto | ¿medible? | comando |
+|---|---|---|
+| **La instalación de la GitHub App** | 🟢 **SÍ, indirectamente** | `gh api /repos/<owner>/<repo>/deployments` |
+| La conexión del proyecto en Vercel | 🔴 **no** | exige token de Vercel; la sesión CLI se cerró en S101 |
+
+*(El endpoint directo `gh api /user/installations` da **403**: el token de `gh`
+es de usuario y no está autorizado para listar instalaciones de apps. Pero **no
+hace falta**: Vercel crea un **GitHub Deployment** cada vez que despliega, y eso
+sí es legible.)*
+
+## 🟢 EL DISCRIMINADOR — el sujeto A funciona, y sigue funcionando AHORA
+
+```
+repo e-petplace-admin — deployments de vercel[bot], hora local
+  09-07 20:55   73b275c   ✅   ← el último. Después, NADA.
+  09-07 19:56   79a6cbb   ✅
+  09-07 19:56   c0aee5e   ✅
+  05-10 07:09   79eb141   ✅   (el hueco de cuatro meses)
+
+repo e-petplace (el MONOREPO) — deployments de vercel[bot]
+  09-07 23:04   92b27c5   ✅   ← MI COMMIT DE HACE UN RATO
+  09-07 22:49   baa75e6   ✅
+  09-07 22:29   2b14f00   ✅
+  09-07 22:06   aecbdee   ✅
+  09-07 21:51   082ffda   ✅
+```
+
+⇒ **La GitHub App de Vercel funciona y está creando deployments AHORA MISMO**,
+para otro repo de la misma cuenta, **en el mismo lapso** en que el admin no
+recibe ninguno.
+
+**Eso descarta, por medición y no por descarte lógico:**
+- ❌ la instalación de la app rota o sin permisos
+- ❌ la cuenta tocando su techo de deployments *(hipótesis que yo iba a
+  proponer: **cae** — la cuenta desplegó cinco veces en las últimas dos horas)*
+- ❌ un problema de GitHub
+
+⇒ **El sujeto es el PROYECTO `e-petplace-admin` en Vercel, y sólo él.**
+
+### El cuadro por push, que acota aún más
+
+| push (local) | commit | deployment |
+|---|---|---|
+| 19:56 | `c0aee5e` | ✅ |
+| 19:56 | `79a6cbb` | ✅ |
+| 20:03 | `f1db76e` | 🔴 no |
+| 20:54 | `73b275c` | ✅ 20:55 |
+| 21:46 | `8934a30` | 🔴 no |
+| 23:14 | `61de31a` | 🔴 no |
+
+*(El de `f1db76e` sin deployment es coherente y ya lo sabía: Vercel despliega la
+**punta**, y `73b275c` llegó 51 min después arrastrándolo. **No es el mismo caso
+que los dos últimos**, que tuvieron 88 y 25 minutos solos.)*
+
+**Los deployments pararon después de las 20:55.** Todo lo empujado después no
+disparó.
+
+## ② EL ORDEN DE CURA — y por qué reconectar va ÚLTIMO
+
+### 🔴 Lo que NO hay que hacer, y primero
+
+**No desconectar/reconectar el repo como primer paso.** Y no es prudencia
+genérica:
+
+- **Reconectar puede perder configuración del proyecto** — variables de
+  entorno, la asignación de `admin.epetplace.com` (que recién hoy resolvió su
+  DNS y su certificado), y la Deployment Protection. *Se estaría pagando con lo
+  que costó horas de esta sesión.*
+- **Y borra la evidencia.** Si el problema es un estado del proyecto,
+  reconectar lo resetea **sin que nadie sepa qué era** — y vuelve a pasar sin
+  diagnóstico.
+- **Además no está indicado:** la app funciona (medido). Reconectar cura un
+  vínculo roto, y el vínculo de la cuenta **no** está roto.
+
+### El orden, de menos a más invasivo
+
+```
+1 · Vercel → e-petplace-admin → Settings → Git
+      ¿el repo sigue conectado?  ¿Production Branch = main?
+      → si el repo aparece DESCONECTADO, ahí sí se reconecta (y recién ahí)
+      → si dice otra rama de producción, ésa es la causa y se arregla ahí
+
+2 · Settings → Git → «Ignored Build Step»
+      Si hay un comando ahí y devuelve 0, Vercel CANCELA el build en silencio.
+      🔴 Es el sospechoso que MEJOR encaja: produce exactamente lo observado
+      —ningún deployment, ningún error, el resto de la cuenta desplegando bien—
+      y es lo más fácil de haber quedado de una prueba vieja.
+
+3 · Settings → General → ¿el proyecto está PAUSADO?
+      Vercel pausa proyectos (por inactividad o a mano). Un proyecto pausado
+      no construye y no avisa en el repo. Encaja con cuatro meses quieto.
+
+4 · Deployments → ¿hay alguno en estado «Canceled» o «Error» de hoy 21:46+?
+      Si aparece cancelado, confirma el punto 2.
+
+5 · ÚLTIMO · desconectar y reconectar el repo
+      Sólo si 1-4 no explican nada, y anotando ANTES las env vars y los
+      dominios para poder reponerlos.
+```
+
+**El criterio del orden es uno solo: primero lo que se LEE, después lo que se
+TOCA.** Los cuatro primeros son lecturas —no cambian nada y pueden explicar el
+caso—; el quinto es el único que modifica el proyecto, y por eso va después de
+que los otros hayan fallado en explicarlo.
+
+## ③ EL MODO DE FALLA COMPLETO — el que me tuvo dos horas
+
+**Tres causas distintas producen el mismo silencio:**
+
+```
+cola larga              → producción sirve el commit anterior
+webhook que falla       → producción sirve el commit anterior
+repo sin webhook / build ignorado → producción sirve el commit anterior
+```
+
+**Ninguna de las tres se ve desde el sitio publicado.** Y mi tabla de la adenda
+16 tenía las tres ramas — **ésta era la primera, y la acerté**: *«no hay
+entregas ⇒ la cura no es Redeliver»*. Lo que no tenía era que **el canal fuera
+otro**, y por eso la conclusión que colgué de esa rama («GitHub no está
+emitiendo») era falsa.
+
+> ***Tener la rama correcta no alcanza si la premisa de la rama está
+> equivocada.*** La tabla me llevó al lugar correcto por el camino equivocado, y
+> eso sólo se nota cuando alguien mira el otro lado.
+
+🟢 **Y lo que sí quedó como instrumento reutilizable:**
+**`gh api /repos/<owner>/<repo>/deployments` distingue las tres desde afuera.**
+Si hay deployment y producción no cambió → es promoción o caché. Si no hay
+deployment pero otro repo sí despliega → es el proyecto. Si ningún repo
+despliega → es la app o la cuenta. **Ninguna de las tres necesita el
+dashboard**, y las tres eran indistinguibles con lo que yo estaba midiendo.
