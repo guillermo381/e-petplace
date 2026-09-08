@@ -1402,3 +1402,90 @@ de más ni a la plataforma quedándose una comisión que ya no le corresponde.
 *(Y sirve de control positivo de la pantalla de liquidación, que hasta ahora
 sólo se había ejercido contra eventos sin reverso: acá hay uno con su inverso, y
 la suma sigue dando lo que tiene que dar.)*
+
+---
+
+# ADENDA 12 · CONFIRMACIONES DEL DASHBOARD, Y QUÉ FALTA PARA EJERCER EL PASAPORTE
+
+## ① y ② — lo que el founder midió, y qué cierra
+
+**① Attack Challenge Mode OFF en los dos proyectos · cero custom rules.**
+⇒ **El discriminador de la adenda 9 queda confirmado por el dashboard.** Mi 403
+fue mitigación automática, disparada por mi `curl` desde la IP de Telconet del
+founder. *Lo dedujimos sin el dashboard —mismo proyecto, dos dominios, distinto
+comportamiento— y el dashboard dijo lo mismo.*
+
+**② Deployment Protection en `e-petplace-admin`: «Require Log In», Standard.**
+⇒ **Explica la primera anomalía de todo este hilo.** Standard Protection cubre
+**previews, no producción**, y `…-git-main-…vercel.app` **es una URL de preview
+de rama**: por eso devolvía «Log in to Vercel». *No era un misterio de Vercel:
+era la protección haciendo exactamente su trabajo sobre una URL que nunca
+debió ser la canónica.*
+
+⚠️ **Y lo que hay que tener presente al verificar el camino de Google:** la
+prueba se corre contra **producción** (`admin.epetplace.com`), que **no** está
+protegida. Si alguna vez se probara contra una URL de preview, el «Require Log
+In» aparecería y **no sería el defecto que buscamos** — sería la protección.
+
+## ③ El pasaporte nunca fue leído — y falta UNA cosa para ejercerlo
+
+**Cero visitas a `/p/` en 24 h.** Coherente sin placas en la calle, y el estado
+del motor lo explica del todo:
+
+```
+pasaporte_lote   = 0        ← ningún lote creado jamás
+pasaporte_placa  = 0        ← ninguna placa existe
+pasaporte        = 22 (2 vivos)  ← emitidos por `emitir_pasaporte`, NO por placa
+```
+
+⇒ **El circuito de la PLACA nunca corrió.** Los 22 pasaportes entraron por la
+otra puerta.
+
+### Lo que YA está construido — todo, medido
+
+| pieza | dónde | estado |
+|---|---|---|
+| crear el lote | `crear_lote_placas` + **mi pantalla `/placas` del admin** | ✅ |
+| el CSV con los tokens para la imprenta | esa misma pantalla | ✅ |
+| la página pública | `epetplace-web` `/p/[token]` | ✅ (medida: `HIT` a los 3 s) |
+| la pantalla «esta placa espera a su mascota» | `apps/cliente/src/app/placa/[token].tsx` | ✅ |
+| activar contra una mascota | `activarPlaca` / `estadoDePlaca`, **exportados** | ✅ |
+| configurar qué muestra el pasaporte | `hogar/mascota/pasaporte.tsx` | ✅ |
+
+**No falta código. Falta que exista una placa.**
+
+### Qué haría falta, concretamente, para ejercerlo UNA vez
+
+1. **Crear un lote de 1** desde `/placas` del admin — es un acto de la casa y la
+   pantalla ya lo hace. *(⚠️ Y sería el estreno real de esa pantalla: hoy tiene
+   cero lotes en la historia.)*
+2. **Tomar el token del CSV** que la pantalla exporta.
+3. 🔴 **Abrir `/p/<token>` ANTES de activarla** — tiene que decir *«esta placa
+   espera a su mascota»*. **Es el estado `placa_libre`, y nunca se ejerció.**
+4. **Abrir `/placa/<token>` en la app** con sesión, elegir una mascota, activar.
+5. **Volver a abrir `/p/<token>`** — ahora muestra a la mascota.
+
+**Lo único que NO se puede hacer hoy es escanear con la cámara:** `expo-camera`
+no está instalado y **una dependencia nativa no viaja por OTA** (`L-134`), así
+que entra con la próxima build. **El ensayo no lo necesita**: se llega por el
+link del QR, que es exactamente como llega quien encuentra al animal.
+
+### 🔴 Y un hueco de medición que este ejercicio destapa — `L-500` otra vez
+
+`/p/[token]` tiene **CUATRO** estados:
+
+```
+activo · placa_libre · no_disponible · limite
+```
+
+**Yo medí dos** —`activo` (con token real, `HIT`) y `no_disponible` (con token
+inventado, `no-store`)—. **`placa_libre` y `limite` nunca se ejercieron.**
+
+*Y `placa_libre` es justo el que ve alguien que compra una placa y la escanea
+antes de estrenarla: el primer contacto de un cliente con el producto.* El
+ensayo del punto 3 lo cubriría; **el de `limite` —el 429— es el que seguiría sin
+ejercerse**, y ése sí necesita una ráfaga, que es lo que no se hace contra el
+sitio público.
+
+*Es la misma lección de hoy, y por eso se anota: **medí las dos ramas que tenía
+a mano y no las dos que faltaban**.*
