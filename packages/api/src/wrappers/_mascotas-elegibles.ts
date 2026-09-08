@@ -7,10 +7,16 @@
 //  1. MOMENTO VITAL PRIMERO (patrón MODELO_LOYALTY §7.1 — apagado
 //     ESTRUCTURAL, jamás un if de UI): elegible ⇔ estado_vida === 'activa'.
 //     Memorial ('fallecida') NO es elegible para ningún servicio; 'perdida'
-//     tampoco (doble precedente de la casa, regla 67: el mostrador vet ya
-//     filtra .eq('estado_vida','activa') y la convención viva es
-//     es_memorial = estado_vida !== 'activa'). null — fuera del CHECK,
-//     angostado honesto — NO es elegible: la elegibilidad falla CERRADA.
+//     tampoco (el mostrador vet ya filtra .eq('estado_vida','activa')). null —
+//     fuera del CHECK, angostado honesto — NO es elegible: la elegibilidad
+//     falla CERRADA.
+//     🔴 S114-A ② · ELEGIBILIDAD ≠ MEMORIAL, y no se confunden: elegible ⇔
+//     estado_vida === 'activa' (perdida y fallecida ambas fuera); MEMORIAL
+//     (tono sereno, Nexo calla) ⇔ estado_vida === 'fallecida' SOLO. La vieja
+//     convención `es_memorial = estado_vida !== 'activa'` metía a 'perdida'
+//     adentro de memorial —una mascota que la familia BUSCA tratada como
+//     muerta— y la firma del founder dice que perdida NO es memorial. Curado
+//     en el Coach (_contexto_coach_base) y en adiestramiento/grooming.
 //  2. Especie por servicio (§1bis, decisión founder S57: el paseo es solo
 //     perros; cada servicio declara sus especies en
 //     tipos_servicio.especies_elegibles). especiesElegibles === null = el
