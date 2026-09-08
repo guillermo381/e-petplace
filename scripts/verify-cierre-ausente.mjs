@@ -83,18 +83,30 @@ try {
 
   sujeto = dbQuery(`
     with objetos as (
-      select 'cita'::text as obj, c.id, ${FIN_CITA} as fin, c.estado::text as estado
+      /* 🔴 EL UNIVERSO INCLUYE LOS CERRADOS, Y ESA ES LA CURA DE UN DEFECTO
+         DE DISEÑO MÍO. La primera versión los excluía, así que el universo
+         ERA la lista de incumplimientos: **el día que todo se cierre a tiempo
+         quedaría en cero y el arnés saldría NO CONCLUYENTE justo cuando el
+         producto empiece a funcionar** — y nadie lo notaría, porque todo
+         estaria verde. Es la misma clase que se comio el control de
+         verify:postventa-plata.
+         Ahora el universo es **todo objeto pagado cuyo fin declarado pasó**,
+         se haya cerrado o no; el ROJO son los que no se resolvieron de
+         ninguna de las dos formas. *El sujeto de este arnés es el paso del
+         tiempo, que no se arregla nunca.* */
+      select 'cita'::text as obj, c.id, ${FIN_CITA} as fin,
+             (c.estado in ('completada','no_show','cancelada','rechazada','no_realizable')) as resuelto,
+             (c.estado = 'no_ejecutado') as marcado
         from evento_cita_servicio c
-       where c.estado_reserva = 'pagada'
-         and c.estado not in ('completada','no_show','cancelada','rechazada','no_realizable')
-         and c.hora is not null
+       where c.estado_reserva = 'pagada' and c.hora is not null
       union all
-      select 'pedido', p.id, e.promesa_entrega_hasta, p.estado::text
+      select 'pedido', p.id, e.promesa_entrega_hasta,
+             (p.estado in ('entregado','cancelado_cliente','cancelado_sistema','cancelado_vendedor')
+              or e.entregado_en is not null),
+             (p.estado = 'no_ejecutado')
         from pedidos p
         join envios e on e.pedido_id = p.id
        where e.promesa_entrega_hasta is not null
-         and e.entregado_en is null
-         and p.estado not in ('entregado','cancelado_cliente','cancelado_sistema','cancelado_vendedor')
     )
     select obj,
            case when now() - fin > interval '48 hours' then 'c · pasó 48 h'
@@ -102,7 +114,9 @@ try {
                 when now() > fin                       then 'a · terminó, menos de 24 h'
                 else 'z · todavía no termina' end as ventana,
            count(*)::int as n,
-           count(*) filter (where estado = 'no_ejecutado')::int as ya_marcados
+           count(*) filter (where resuelto)::int as cerrados,
+           count(*) filter (where marcado)::int as ya_marcados,
+           count(*) filter (where not resuelto and not marcado)::int as sin_resolver
       from objetos
      group by 1, 2 order by 1, 2`);
 } catch (e) {
@@ -113,12 +127,13 @@ try {
 
 const pasaron48 = sujeto.filter((f) => f.ventana.startsWith('c ·'));
 const total48 = pasaron48.reduce((a, f) => a + f.n, 0);
-const marcados = pasaron48.reduce((a, f) => a + f.ya_marcados, 0);
+const sinResolver = pasaron48.reduce((a, f) => a + f.sin_resolver, 0);
 
 console.log('verify:cierre-ausente · §2 (F1) de LETRA_POSTVENTA\n');
-console.log('  obj      ventana desde el fin declarado        n   ya en no_ejecutado');
+console.log('  obj      ventana desde el fin declarado      n  cerrados  no_ejec  SIN RESOLVER');
 for (const f of sujeto) {
-  console.log(`  ${f.obj.padEnd(8)} ${f.ventana.padEnd(30)} ${String(f.n).padStart(4)}  ${String(f.ya_marcados).padStart(6)}`);
+  console.log(`  ${f.obj.padEnd(8)} ${f.ventana.padEnd(28)} ${String(f.n).padStart(4)}` +
+              ` ${String(f.cerrados).padStart(8)} ${String(f.ya_marcados).padStart(8)} ${String(f.sin_resolver).padStart(12)}`);
 }
 
 // ── ① CONTROL POSITIVO DEL SUJETO — antes de medir nada (orden de §2) ─────
@@ -126,14 +141,18 @@ if (total48 === 0) {
   console.error('\n🟠 NO CONCLUYENTE · CERO objetos con más de 48 h desde su fin declarado.');
   console.error('   Sin sujeto, «ninguno dejó de expirar» es verdad y no significa nada.');
   console.error('   §2 lo pide literal: el arnés confirma que su sujeto existe antes de medir.');
+  console.error('   (El universo son TODOS los objetos pagados cuyo fin pasó, cerrados');
+  console.error('    incluidos: si esto da cero, es que no hay objetos, no que estén sanos.)');
   process.exit(2);
 }
 console.log(`\n  control positivo del sujeto: ${total48} objetos pasaron las 48 h ✅`);
+console.log('  (incluye los cerrados: el sujeto es el paso del tiempo, que no se arregla)');
 
 // ── ② ¿EXISTE EL ESTADO AL QUE HABÍA QUE MOVER? ──────────────────────────
 if (existeEstado === 0) {
   console.error('\n🟠 NO CONCLUYENTE · el estado `no_ejecutado` NO EXISTE en ningún CHECK.');
-  console.error(`   Hay ${total48} objetos que ya deberían estar en él, pero el arnés no puede`);
+  console.error(`   Hay ${sinResolver} objetos SIN RESOLVER que ya deberían estar en él (de ${total48}`);
+  console.error('   que pasaron las 48 h; el resto se cerró bien), pero el arnés no puede');
   console.error('   separar «el cron no corrió» de «el estado al que mover no existe»:');
   console.error('   son dos rojos distintos y mandan a lugares distintos.');
   console.error(`   (reloj que lo mueva: ${existeReloj} funciones — se mide aparte, porque el`);
@@ -150,12 +169,11 @@ if (existeEstado === 0) {
 }
 
 // ── ③ EL ROJO REAL ───────────────────────────────────────────────────────
-const sinMarcar = total48 - marcados;
-if (sinMarcar > 0) {
-  console.error(`\n🔴 ROJO · ${sinMarcar} objetos pasaron las 48 h y NO están en \`no_ejecutado\`.`);
+if (sinResolver > 0) {
+  console.error(`\n🔴 ROJO · ${sinResolver} objetos pasaron las 48 h SIN cerrarse y SIN quedar en \`no_ejecutado\`.`);
   console.error('   El reloj de §2 no corrió sobre ellos: siguen pudiendo devengar.');
   console.error('   (F1: dispara «nada marcado», cualquiera sea la causa — es ausencia');
   console.error('   de cierre, no un índice de prestadores que fallaron.)');
   process.exit(1);
 }
-console.log('\n🟢 VERDE · todo objeto pasado de 48 h sin cierre quedó en `no_ejecutado`.');
+console.log('\n🟢 VERDE · todo objeto pasado de 48 h se cerró o quedó en `no_ejecutado`.');
