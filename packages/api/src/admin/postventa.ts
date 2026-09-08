@@ -47,7 +47,7 @@ import type { ResultadoWrapper } from '../resultado';
    Regenerarlo (`pnpm gen:types`) borra este cast; está pedido por nombre en
    `docs/loop/S114-F-PEDIDOS-A.md`.
 
-   ⚠️ **`L-498` en su forma preventiva:** un tipo escrito a mano sobre datos que
+   ⚠️ **`L-509` en su forma preventiva:** un tipo escrito a mano sobre datos que
    el compilador no puede verificar es exactamente lo que hizo que
    `Placas.tsx` contara 0 placas libres para siempre. Por eso este shape **NO
    se escribió de memoria**: es copia de

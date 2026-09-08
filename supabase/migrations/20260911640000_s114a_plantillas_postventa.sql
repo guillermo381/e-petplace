@@ -18,7 +18,7 @@
 --    envío — y con `transporte_vivo=false` no hay envío que prometer.
 --    **El día que Meta apruebe, no hay que tocar nada.**
 --
--- 🔴 Y SE DECLARA LA HORA, no sólo la fecha (`L-500`): con cinco pistas en
+-- 🔴 Y SE DECLARA LA HORA, no sólo la fecha (`L-515`): con cinco pistas en
 --    paralelo un estado de plantillas dura horas. Este se midió a las 20:50.
 --
 -- VEDA 76(g): NO RIGE — dos UPDATE sobre un catálogo, cero backfill.

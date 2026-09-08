@@ -32,7 +32,7 @@ La condición fina, para que no sea ni de más ni de menos:
   el tipo que **todavía no nació**: quiero que cuando alguien cree
   `caso_resuelto` sin su `plantilla_whatsapp`, **ese commit salga rojo**.
 
-## El estado medido hoy, con hora (L-500)
+## El estado medido hoy, con hora (L-515)
 
 - `plantilla_whatsapp` sembrado: **1** (`pedido_confirmado`).
 - `caso_elegir_devolucion` / `caso_resuelto`: **los tipos NO existen todavía**

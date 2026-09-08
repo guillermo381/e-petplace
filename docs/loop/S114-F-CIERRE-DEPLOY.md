@@ -124,7 +124,7 @@ fue inválido**.
 
 ⚠️ **`bf6bf9b` desplegó por el HOOK, no por su push.** Concluir «la GitHub App
 funciona porque el push siguiente construyó» **es inválido** — es medir una rama y
-concluir sobre la otra (`L-500`). *Ese error se cometió en este mismo hilo.*
+concluir sobre la otra (`L-511`). *Ese error se cometió en este mismo hilo.*
 
 **Dónde quedó escrito, para que el próximo no repita el ciclo:** `DEPLOY.md` del legado
 (nuevo, y es lo que hay que leer **antes** de tocar settings), el README que lo enlaza,

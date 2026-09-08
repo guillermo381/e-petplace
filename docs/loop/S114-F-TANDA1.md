@@ -336,10 +336,10 @@ es copia literal del `jsonb_build_object` de la función.**
 
 `tsc -b` verde · `npm run build` verde.
 
-## La lección — `L-498`
+## La lección — `L-509`
 
 Depositada en `docs/DEUDAS_CANONICAS.md`. **Número pedido con
-`pnpm proximo:ficha`, no elegido** (`L-: tope L-497 · PROXIMO LIBRE L-498`).
+`pnpm proximo:ficha`, no elegido** (`L-: tope L-497 · PROXIMO LIBRE L-509`).
 
 > ***Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para
 > la pantalla.*** TypeScript no valida forma en runtime, así que escribir un
@@ -631,7 +631,7 @@ paquete **sin tocar**.
 
 🔴 **`casos_postventa` tampoco está en `database.types.ts`** —igual que
 `admin_generar_liquidacion`—, así que la lectura va por un cast. **Y el shape se
-declaró COPIADO de `information_schema.columns`, no de memoria**: es `L-498` en
+declaró COPIADO de `information_schema.columns`, no de memoria**: es `L-509` en
 su forma preventiva, y está escrito en el archivo que **lo correcto es que este
 bloque MUERA con `gen:types`**, no que se mantenga a mano. El pedido a A sube de
 prioridad: ahora cubre la puerta de liquidación **y** todo postventa.
@@ -759,10 +759,10 @@ contra qué medirlo.
 `es_mi_prestador`→prestador, si no `no_podes_resolver`— **pero leerlo no es
 probarlo** (`L-321`).
 
-## ② La lección — `L-499`
+## ② La lección — `L-510`
 
 Depositada en `docs/DEUDAS_CANONICAS.md`. Número **pedido** con
-`pnpm proximo:ficha` (`tope L-498 · próximo libre L-499`), verificado que
+`pnpm proximo:ficha` (`tope L-509 · próximo libre L-510`), verificado que
 aparece una sola vez.
 
 > ***Medir sólo la capa que falla da un diagnóstico verdadero e inútil.***
@@ -846,7 +846,7 @@ cero ocurrencias de la URL vieja en el bundle publicado.
 
 ### 🔴 ACTUALIZACIÓN 21:37 — el DNS terminó, el certificado no sale, y qué falta mirar
 
-**Aplicando `L-499`: en vez de concluir sobre la capa que falla, medí las de al
+**Aplicando `L-510`: en vez de concluir sobre la capa que falla, medí las de al
 lado. Las dos están bien.**
 
 ```
@@ -1278,7 +1278,7 @@ ternario —`no-store`— y por eso dio `MISS`. **Reporté «cada lectura va al
 origen» generalizando desde el único caso que jamás se cachea, y con razón: un
 404 cacheado escondería una placa recién activada.**
 
-> **Es `L-499` otra vez, y en su forma más incómoda: la escribí hoy.** Medí una
+> **Es `L-510` otra vez, y en su forma más incómoda: la escribí hoy.** Medí una
 > rama del código y saqué una conclusión sobre la otra. *El dato era verdadero
 > —ese request fue un MISS— y la afirmación que construí encima era falsa.*
 
@@ -1470,7 +1470,7 @@ no está instalado y **una dependencia nativa no viaja por OTA** (`L-134`), así
 que entra con la próxima build. **El ensayo no lo necesita**: se llega por el
 link del QR, que es exactamente como llega quien encuentra al animal.
 
-### 🔴 Y un hueco de medición que este ejercicio destapa — `L-500` otra vez
+### 🔴 Y un hueco de medición que este ejercicio destapa — `L-511` otra vez
 
 `/p/[token]` tiene **CUATRO** estados:
 
@@ -1570,7 +1570,7 @@ Tras ⑥ pedí `/p/` **y esperé 62 segundos a propósito**. Sin esperar habría
 la respuesta cacheada de ⑤ —la del pasaporte mudo, con `max-age=60`— y habría
 concluido que `configurar_pasaporte` no funcionó.
 
-*Es `L-500` esquivada a tiempo: el caché que verifiqué como una virtud es, para
+*Es `L-511` esquivada a tiempo: el caché que verifiqué como una virtud es, para
 la siguiente medición, una trampa.* **Todo lo que se mida sobre una página
 cacheada se mide después de su TTL, o no se mide.**
 

@@ -29205,7 +29205,7 @@ que preguntar.*
 **disparó el anti-bot de Vercel** y me dejó el dominio en 403 — o sea que
 esperar mal no fue neutro: **degradó el sujeto que estaba midiendo.**
 
-*(Cierra la familia del día con [[L-499]], [[L-500]] y [[L-501]]: las cuatro son
+*(Cierra la familia del día con [[L-510]], [[L-511]] y [[L-512]]: las cuatro son
 sobre medir bien lo que uno cree que mide — **la capa**, **la rama**, **el
 momento**, y ahora **si la observación discrimina algo**. Las tres primeras dan
 un dato falso; ésta da un dato verdadero que no sirve para decidir, que es la
@@ -29233,7 +29233,7 @@ forma más cara porque no se siente como un error.)*
 ---
 
 
-### `L-501` — Un instrumento que mide detrás de un caché declara su TTL o invalida
+### `L-512` — Un instrumento que mide detrás de un caché declara su TTL o invalida
 
 **S114-F, ensayo de la placa.** Configuré el pasaporte (`configurar_pasaporte`
 → `ok`) y **esperé 62 segundos antes de volver a pedir la página**. Sin esa
@@ -29265,17 +29265,17 @@ empieza a depurar una cura que funcionaba.
 **Lo que NO vale es medir y no decir nada**: el resultado es correcto la mitad
 de las veces y no hay forma de saber cuál mitad.
 
-*(Hermana de [[L-500]] y [[L-499]] — las tres son sobre **medir bien lo que no
-es lo que uno cree que mide**: `L-499` la capa, `L-500` la rama, `L-501` el
+*(Hermana de [[L-511]] y [[L-510]] — las tres son sobre **medir bien lo que no
+es lo que uno cree que mide**: `L-510` la capa, `L-511` la rama, `L-512` el
 momento. Y de `L-166`: todo dato vivo se lee al momento de usarlo — acá el caché
 convierte un dato «de ahora» en uno de hace un minuto sin avisar.)*
 
 ---
 
 
-### `L-500` — Medir una RAMA del código y concluir sobre la otra
+### `L-511` — Medir una RAMA del código y concluir sobre la otra
 
-**S114-F, y lo incómodo es que pasó el mismo día que se escribió `L-499`.**
+**S114-F, y lo incómodo es que pasó el mismo día que se escribió `L-510`.**
 
 `/p/[token]` del sitio público tiene un ternario:
 
@@ -29317,7 +29317,7 @@ salidas distintas.**
 había corrido tres veces esa tarde para otra cosa. **No fue falta de acceso:
 fue no preguntarme si el caso que tenía a mano era el caso que importaba.**
 
-*(Parienta de [[L-499]] —medir una capa y concluir sobre el sistema— pero cruza
+*(Parienta de [[L-510]] —medir una capa y concluir sobre el sistema— pero cruza
 de eje: aquélla es sobre **capas** apiladas, ésta sobre **ramas** paralelas. Y
 de `L-459`: la primera prueba de algo no es que dé verde, es que dé el resultado
 correcto **sobre el caso real**.)*
@@ -29325,7 +29325,7 @@ correcto **sobre el caso real**.)*
 ---
 
 
-### `L-499` — Medir sólo la capa que falla da un diagnóstico VERDADERO E INÚTIL
+### `L-510` — Medir sólo la capa que falla da un diagnóstico VERDADERO E INÚTIL
 
 **S114-F.** `admin.epetplace.com` no respondía. Lo medí con un `curl`, dio
 `HTTP 000`, y reporté **«el dominio no resuelve»**. Era **cierto**. El founder
@@ -29372,7 +29372,7 @@ acá el problema es **medir una sola capa y creer que se midió el sistema**.)*
 ---
 
 
-### `L-498` — Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para la pantalla
+### `L-509` — Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para la pantalla
 
 **S114-F, hallazgo al medir un commit ajeno antes de empujarlo.** `Placas.tsx`
 del admin declaraba:
@@ -30247,7 +30247,7 @@ constancia de que fue por la pantalla la deja quien lo hace, en el parte.
 
 ---
 
-### `L-498` 🔴 · UN PIPE SE COME EL CÓDIGO DE SALIDA, Y EL `&&` DE ATRÁS PREMIA AL QUE FALLÓ
+### `L-513` 🔴 · UN PIPE SE COME EL CÓDIGO DE SALIDA, Y EL `&&` DE ATRÁS PREMIA AL QUE FALLÓ
 
 **S114-A, 7-sep-2026. Error propio, cazado en la corrida siguiente.**
 
@@ -30298,7 +30298,7 @@ razón equivocada* (L-321).
 
 ---
 
-### `L-499` 🔴 · UN INSTRUMENTO QUE PREGUNTA POR LA **FORMA** EN QUE LA LEY SUELE ESCRIBIRSE NO MIDE LA LEY
+### `L-514` 🔴 · UN INSTRUMENTO QUE PREGUNTA POR LA **FORMA** EN QUE LA LEY SUELE ESCRIBIRSE NO MIDE LA LEY
 
 **S114-A, 7-sep-2026. Tres casos el mismo día, en tres subsistemas distintos.**
 
@@ -30343,10 +30343,10 @@ como una.
 
 ### Su hermana, y en qué se diferencian
 
-**`L-498`** es sobre un instrumento que lee **la señal equivocada** (el exit
+**`L-513`** es sobre un instrumento que lee **la señal equivocada** (el exit
 code del pipe, el `>= 400` que no distingue un CHECK de un permiso). **Ésta es
 sobre uno que lee la señal correcta de la fuente equivocada.** Las dos producen
-salidas creíbles; la de `L-498` se caza corriendo el control negativo, y ésta
+salidas creíbles; la de `L-513` se caza corriendo el control negativo, y ésta
 **sólo se caza preguntándole al objeto en vez de al catálogo que lo describe.**
 
 **☠️ Condición de muerte:** ninguna — es de método.
@@ -30354,7 +30354,7 @@ salidas creíbles; la de `L-498` se caza corriendo el control negativo, y ésta
 
 ---
 
-### `L-500` 🔴 · UN DATO MEDIDO LLEVA SU **HORA**, NO SÓLO SU FECHA
+### `L-515` 🔴 · UN DATO MEDIDO LLEVA SU **HORA**, NO SÓLO SU FECHA
 
 **Hallazgo de E, depositado por A (S114, 7-sep-2026). Y se cobró sobre A el
 mismo día, en el mismo turno en que lo escribía.**
@@ -30403,7 +30403,7 @@ decidir.
 
 - **`L-166`** dice *todo dato vivo se lee al momento de usarlo*. Ésta agrega
   **cuánto dura «al momento»** cuando hay paralelo: menos de lo que uno cree.
-- **`L-499`** es sobre un instrumento que mira la forma equivocada. Ésta es
+- **`L-514`** es sobre un instrumento que mira la forma equivocada. Ésta es
   sobre uno que **miró bien y hace rato**.
 
 **☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
