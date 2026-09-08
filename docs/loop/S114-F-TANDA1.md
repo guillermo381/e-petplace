@@ -844,6 +844,44 @@ TLS en el navegador — **peor que la pantalla de Vercel de hoy**. *No concluyo
 **Se ejecuta en cuanto el certificado exista**, con la verificación de siempre:
 cero ocurrencias de la URL vieja en el bundle publicado.
 
+### 🔴 ACTUALIZACIÓN 21:37 — el DNS terminó, el certificado no sale, y qué falta mirar
+
+**Aplicando `L-499`: en vez de concluir sobre la capa que falla, medí las de al
+lado. Las dos están bien.**
+
+```
+CAPA 1 · DNS ……… 1.1.1.1 → cname.vercel-dns.com   ✅ (el caché negativo expiró)
+                  9.9.9.9 → cname.vercel-dns.com   ✅
+                  → LA PROPAGACIÓN TERMINÓ
+
+CAPA 3 · Vercel … http://admin.epetplace.com → 200 · 466 bytes · NUESTRA APP  ✅
+                  CONTROL: http://pagos.epetplace.com → 404 DEPLOYMENT_NOT_FOUND
+                  → el método DISCRIMINA: admin está asignado, pagos no
+
+CAPA 2 · TLS …… no peer certificate available                                  🔴
+```
+
+⇒ **El dominio está completo en las dos puntas: el DNS resuelve y Vercel lo
+sirve. Falta sólo que Vercel emita el certificado**, que es un acto suyo y
+asíncrono.
+
+**~18 minutos desde el primer sondeo, ~5 desde que el DNS terminó de propagar.**
+**No adivino la causa.** Lo que se puede pensar sin medir —que quedó en backoff
+tras los intentos fallidos de cuando el DNS no existía— **es una hipótesis, no
+un dato**, y no la uso.
+
+🔴 **LA EVIDENCIA QUE FALTA, y está en el dashboard de Vercel** — Project →
+Settings → Domains → `admin.epetplace.com`:
+
+1. **¿Qué dice debajo del dominio?** «Valid Configuration» ⇒ sólo hay que
+   esperar · «Invalid Configuration» ⇒ Vercel todavía no ve el DNS y hay un
+   botón **Refresh** que fuerza el reintento · un error de certificado ⇒ lo dice
+   ahí con su motivo.
+2. **¿Hay un botón «Refresh» / «Renew Certificate»?** Si lo hay, tocarlo es el
+   acto que destraba — Vercel no reintenta inmediatamente después de un fallo.
+
+*Con eso se sabe si es esperar o si es un toque.*
+
 ## 🔴 ④ `pagos.epetplace.com` — DOMINIO PUBLICADO APUNTANDO A LA NADA
 
 ```
