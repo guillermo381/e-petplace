@@ -499,3 +499,141 @@ el auto-deploy no disparó; si dice *Queued*, alcanza con esperar.
 **Y lo que sí está verificado y no depende de eso:** los dos retiros **ya están
 en producción** y Placas **ya carga**. La cura de las dos líneas es lo único que
 falta llegar.
+
+---
+
+# TANDA 2 (7-sep-2026)
+
+## ① EL DESPLIEGUE — ✅ SALIÓ, y verificado en producción
+
+**Bundle en producción: `index-fK9Opg5L.js`** (antes `index-DXeDj3p_.js`).
+
+```
+¿trae la cura de Placas?
+  .mascota_id en el fragmento de Placas ……… 0   ✅
+  .activada   en el fragmento de Placas ……… 1   ✅
+  el contador ahora ……… filter(e=>!e.activada)  ✅
+
+¿trae la URL canónica?
+  URL de rama (protegida) ……… 0 ocurrencias     ✅
+  URL canónica ……………………………… 1 ocurrencia      ✅
+
+control: los retiros siguen
+  "Adoptadas este mes" AUSENTE · "Asunto del email" AUSENTE   ✅
+```
+
+🔴 **Y una corrección a mi propia predicción, que explica la espera:** yo esperaba
+`index-Px6202vT.js` —el build de `f1db76e` sola— y **nunca iba a aparecer**.
+Vercel desplegó **el último commit**, no cada uno: el deploy que salió es de
+`73b275c`, que contiene la cura **y** la corrección de URL juntas. *Predije el
+hash de un commit intermedio; el deploy sigue la punta.* Es la misma clase que
+`L-487`: la medición era correcta y el salto fue mío.
+
+**No hizo falta evidencia del dashboard.** La demora total fue de ~50 min para
+un build de 628 ms, y sigue sin explicación medida — pero **el resultado se
+verificó por contenido, que era lo que importaba.**
+
+## ② LA URL CANÓNICA — corregida y desplegada
+
+`https://e-petplace-admin.vercel.app`, firma del founder. **Excepción nombrada**,
+como la de Placas. Legado `73b275c`.
+
+⚠️ **Eran DOS lugares, no tres:** «el `redirectTo` de `signInWithOAuth`» y
+«`Login.tsx:47`» **son la misma línea**. Los dos reales eran `Login.tsx` y
+`CLAUDE.md:4`; la URL de rama quedó sólo en `CLAUDE.md` **marcada como NO USAR
+con su razón**, para que nadie la reponga.
+
+**El camino de entrada roto está curado en producción:** el bundle publicado ya
+no lleva la URL protegida.
+
+## ③ EL ASIENTO DE LA CASA — la bandeja y la Hoja
+
+### El candado de §9, medido antes de escribir una línea
+
+```
+grants de casos_postventa a authenticated ……… SELECT   ← y nada más
+grants de caso_mensajes  a authenticated ……… SELECT
+INSERT directo por camino real ……… HTTP 403 · 42501 permission denied
+policy de tres asientos ……… familia = auth.uid() OR es_mi_prestador(...) OR is_admin()
+```
+
+⇒ **El `REVOKE` de §9.1 está aplicado y probado por camino real.** Esta capa **no
+podría** escribir directo aunque quisiera. Y **el «rol casa» de §9.2 ES
+`is_admin()`** — el mismo gate del resto del portal, no uno nuevo: dos
+definiciones de «quién es la casa» divergirían.
+
+### Lo que la Hoja muestra (§6), y de dónde sale cada cosa
+
+`leer_caso` trae el caso y el objeto, pero **no** la plata, ni el devengo, ni los
+90 días, ni la propuesta. La capa junta cinco fuentes:
+
+| §6 pide | de dónde sale |
+|---|---|
+| el objeto con su evidencia | `leer_caso` → `objeto{tipo,id,titulo,fecha}` |
+| el hilo entero | `leer_mensajes_caso` (cursor compuesto, 200) |
+| **cuánto se pagó** | del objeto **por tipo** — no hay campo común |
+| **cuánto se puede devolver** | techo = lo pagado |
+| **si tiene devengo** | `_caso_tiene_devengo` — la pregunta al OBJETO, como hace `caso_resolver` |
+| casos de familia / prestador en 90 días | `casos_postventa` por RLS, sin contar éste |
+| **la propuesta, marcada como propuesta** | 🔴 **no existe** — ver abajo |
+
+**Decidir es un toque:** tres alcances medidos del cuerpo de `caso_resolver`
+(`total` · `parcial` · `sin_devolucion`), la parcial exige monto, y **queda
+`decidido_por`**. No se escribe estado a mano: la RPC pregunta el devengo y llama
+a `aplicar_reembolso`, que reversa la comisión proporcionalmente. *Escribir el
+estado a mano dejaría plata sin reversar y el caso diría que sí.*
+
+### 🔴 La propuesta de la máquina NO existe, y la Hoja lo dice
+
+Censado en `pg_proc`: no hay ninguna función de propuesta de postventa (las que
+aparecen —`proponer_memoria_coach`, `proponer_sku_vendedor`— son de otros
+dominios). **Por eso `propuesta` viaja como `null` y su lugar en la Hoja explica
+que todavía no hay motor**, en vez de quedar vacío o —peor— mostrar una
+heurística escrita por mí que se leería como si fuera del sistema. *Una
+propuesta inventada acá tendría autoridad de máquina sobre plata de un tercero,
+y no la respalda nadie.*
+
+### Los vacíos que hablan — ninguno es mudo
+
+- **Bandeja sin casos:** *«el motor está construido y gateado, pero sus puertas
+  —las pantallas desde donde una familia abre un caso— todavía no están en las
+  apps: hasta que existan, esta bandeja no puede recibir nada. No es que
+  estemos filtrando: no hay filas.»* (`casos_postventa` = **0 filas**, medido.)
+- **Hilo vacío · plata que no se pudo determinar · propuesta ausente:** cada uno
+  con su razón. `PlataDelCaso.porQueNoSeSabe` es un campo, no un comentario:
+  **`pagado` es `null` con su motivo, jamás `0`** — *un 0 en «lo pagado» se lee
+  como «esto fue gratis» y decide una devolución mal.*
+- **El botón de decidir apagado dice por qué** lo está (`L-424`).
+- Y `estadia` **no tiene lector de monto** en esta capa: se declara y la casa
+  resuelve indicando el monto a mano, que es lo que `parcial` acepta.
+
+### 🔴 EL ROJO SALIÓ PARCIAL, Y SE DECLARA ASÍ
+
+```
+✅ PROBADO   INSERT directo a casos_postventa → 403 · 42501   (el candado de §9.1)
+🔴 NO PROBADO  que un no-admin no pueda RESOLVER un caso
+```
+
+`caso_resolver` con un uuid inventado devolvió **`caso_no_existe`**, no
+`no_podes_resolver`: **el gate de actor está DESPUÉS de buscar el caso**, así
+que con un caso inexistente **no se llega a evaluarlo**. Y no hay casos reales
+(0 filas) contra los que probarlo.
+
+*Leí el gate en el cuerpo de la función y está bien escrito —`is_admin()`→casa,
+`es_mi_prestador`→prestador, si no `no_podes_resolver`— **pero leerlo no es
+probarlo** (`L-321`: «el permiso está revocado» es una lectura; «rebotó con
+42501» es un hecho).* **Queda pendiente y es del primer caso real.**
+
+### La frontera y los tipos
+
+Wrappers **sólo** bajo `packages/api/src/admin/` (4 archivos). `index.ts` del
+paquete **sin tocar**.
+
+🔴 **`casos_postventa` tampoco está en `database.types.ts`** —igual que
+`admin_generar_liquidacion`—, así que la lectura va por un cast. **Y el shape se
+declaró COPIADO de `information_schema.columns`, no de memoria**: es `L-498` en
+su forma preventiva, y está escrito en el archivo que **lo correcto es que este
+bloque MUERA con `gen:types`**, no que se mantenga a mano. El pedido a A sube de
+prioridad: ahora cubre la puerta de liquidación **y** todo postventa.
+
+Typecheck `apps/admin` verde · `packages/api` verde · build 199,89 kB.

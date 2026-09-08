@@ -24,5 +24,23 @@ export type {
   CodigoErrorGenerar,
 } from './liquidaciones';
 
+export {
+  obtenerBandejaCasos,
+  obtenerHojaDelCaso,
+  resolverCaso,
+  responderEnCaso,
+  ETAPAS_ABIERTAS,
+  ETAPAS_FINALES,
+} from './postventa';
+export type {
+  FilaBandeja,
+  HojaDelCaso,
+  MensajeCaso,
+  PlataDelCaso,
+  AlcanceResolucion,
+  CodigoErrorPostventa,
+  CodigoErrorResolver,
+} from './postventa';
+
 export { initApi, getClient, uidActual } from '../client';
 export type { ResultadoWrapper } from '../resultado';
