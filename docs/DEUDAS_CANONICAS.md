@@ -28899,19 +28899,39 @@ R79                   enRiel: `[^;]{0,80}?` sobre la sentencia
 
 ### ⚠️ EL CONTEO, EXACTO Y SIN INFLAR (`L-499` el mismo día)
 
-| | |
-|---|---|
-| **del mecanismo exacto** —un delimitador que aparece adentro del sujeto— | **TRES**: `[^)]*` en `R78` · el `{` de la anotación de tipo · `[^;]{0,80}?` en `R79` |
-| **de su familia** —no hay delimitador: falta el techo— | **UNA**: la ventana de 286 líneas |
-| **de la clase, en total** | **CUATRO**, en cuatro instrumentos distintos, **todos escritos por el mismo autor el mismo día** |
+> ⏪ **ACÁ DECÍA CUATRO Y SON SIETE** (re-contado el 8-sep). No es que
+> aparecieran tres más y ya: **al sumarlas encontré que el árbol tenía DOS
+> «cuartas» y una «quinta» que salteaba un número** — cada aparición se numeró
+> contra el recuerdo de la anterior, no contra una taxonomía. *Un ordinal
+> escrito de a uno no es un conteo: es una sucesión de estimaciones, y la
+> segunda ya no sabe qué contó la primera.* Se re-contaron **las siete desde el
+> objeto**, con la tabla de abajo como única fuente.
 
-*Decir «cuatro iguales» habría sido más contundente y menos cierto: la del
-techo no comparte mecanismo, comparte consecuencia.*
+| mecanismo | cuántas | cuáles |
+|---|---|---|
+| **① LECTURA** — el patrón corta en un delimitador **que está adentro del contenido** | **3** | `[^)]*` en `R78` · el `{` de la anotación de tipo en `verify:memorial-derivado` · `[^;]{0,80}?` en `R79` |
+| **② ESCRITURA** — el contenido **contiene el terminador de la región donde lo escribo** | **1** | `` `apps/*/src` `` adentro de un JSDoc: el `*/` **cierra el comentario** y voltea el archivo entero |
+| **③ FRONTERA que no coincide con el borde del token** | **2** | falta la izquierda ⇒ **captura de MÁS** (`airedale` ⊃ «dale») · exige una derecha que el caso no tiene ⇒ **captura de MENOS** (`[\s/>]` en `R81`, y el montaje real **termina la línea justo ahí**) |
+| **④ FALTA EL TECHO** — no hay delimitador involucrado | **1** | la ventana de 286 líneas |
+| **de la clase, en total** | **7** | **siete instrumentos distintos, todos del mismo autor y de la misma sesión** |
+
+**Por qué no se dice «siete iguales», que sería más contundente y menos cierto:**
+① y ② son el mismo choque —*contenido ⊃ delimitador*— **en direcciones
+opuestas**, leer y escribir. ③ **no es un delimitador adentro**: es una frontera
+mal puesta, *y sus dos casos tienen signo contrario* —uno captura de más y el
+otro de menos—. ④ **no tiene delimitador**: comparte la consecuencia y no el
+mecanismo.
+
+🔴 **Y la que más enseña de las siete es la de `R81`, por CÓMO se supo:** la
+regla informaba **CERO montajes con uno vivo**, y no lo dijo el rojo — **lo dijo
+el ANCLA**. *Un patrón que captura de menos no falla: da un número más chico, y
+en un lint un número más chico se lee como progreso* (`L-226`). **Sin ancla, esa
+regla habría nacido verde, decorativa y con cara de sana.**
 
 ⚠️ **Y una distinción con su hermana, para que no se mezclen los números:** las
-cuatro de acá son **instrumentos míos de una sesión**. La que **cruzó de
+siete de acá son **instrumentos míos de una sesión**. La que **cruzó de
 subsistema** es `L-499` —SQL · git · JSX · SVG—, y *esa* es su propiedad
-distintiva. **Las dos tienen cuatro y no son el mismo cuatro.**
+distintiva. **Los dos números miden cosas distintas.**
 
 ## ② 🔴 LA PEOR ES LA CURA SIN TECHO, Y ES LA QUE ACUSA A OTRO
 

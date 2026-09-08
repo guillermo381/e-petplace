@@ -5857,8 +5857,11 @@ function r81(archivos) {
       /* 🔴 `[\s/>]` exigía un carácter DESPUÉS, y el montaje real termina la
          línea justo ahí (`      <ModalDosAlturas` + salto): tras el `split('\n')`
          no queda nada que casar y la regla medía CERO montajes con uno vivo.
-         **Quinta aparición de `L-501` en la sesión** — una frontera que supone
-         que hay algo del otro lado. Se mira que NO siga un identificador. */
+         **`L-501`, mecanismo ③** —frontera que no coincide con el borde del
+         token—, en su signo de *captura de MENOS*. **El ordinal vive en la
+         tabla de la lección, no acá.** ⚠️ Y lo delató **el ANCLA, no el rojo**:
+         *un patrón que captura de menos no falla — da un número más chico, y en
+         un lint eso se lee como progreso.* Se mira que NO siga un identificador. */
       if (!/<ModalDosAlturas(?![A-Za-z0-9_])/.test(lineas[i])) continue
       montajes++
       const ventana = lineas.slice(i, i + TECHO_R81).join('\n')

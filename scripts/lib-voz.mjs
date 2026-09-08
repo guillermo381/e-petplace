@@ -250,8 +250,12 @@ const LETRA_QUE_DESCARTA = /[a-rt-záéíóúñü]/i;
  * contenía «dale» y `Airedale Terrier` daba voseo **cinco veces** en el
  * catálogo de razas.
  *
- * 🔴 **Es la cuarta aparición de la clase de `L-501`**: *el patrón aparece
- * adentro de lo que uno quiere capturar.* Acá con una vuelta extra — el
+ * 🔴 **Es de la clase de `L-501`, mecanismo ③ — «frontera que no coincide con
+ * el borde del token»**, en su signo de *captura de MÁS*. **El ordinal no se
+ * escribe acá a propósito: vive en la tabla de `L-501`.** *Un ordinal inline se
+ * numera contra el recuerdo del anterior, y a la tercera nadie sabe qué contó
+ * la primera — pasó, y el árbol llegó a tener dos «cuartas».*
+ * Acá con una vuelta extra — el
  * comentario **explicaba por qué no hacía falta la frontera** y la explicación
  * era verdadera de un solo lado. *Una razón escrita que cubre la mitad del caso
  * es más difícil de dudar que ninguna razón.*
