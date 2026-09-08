@@ -28685,6 +28685,102 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-503` — UN NÚMERO PUBLICADO SE MIDE, NO SE ESCRIBE: LA CURA NO ES CORREGIRLO, ES RETIRARLO Y DECLARAR SU COMANDO
+
+> **Firma del founder (S114-B, 8-sep-2026):** *«Siete veces no es una
+> coincidencia, es una regla que nadie enunció.»*
+>
+> ### **Un ordinal escrito de a uno no es un conteo: es una sucesión de estimaciones, y la segunda ya no sabe qué contó la primera.**
+
+## LA FORMA, Y POR QUÉ ES INVISIBLE
+
+Un número derivado —cuántas piezas, cuántas migraciones, cuál es el próximo
+libre, la enésima aparición de algo— **se escribe una vez y el mundo sigue su
+vida**. Tres cosas lo vuelven la clase de error que más dura en esta casa:
+
+**① No gatea nada, así que nadie lo verifica.** *Un número que no rompe nada se
+lee sin verificarse.* Un typecheck no lo mira, un lint no lo mira, y el lector
+lo usa para decidir.
+
+**② Decae en UNA SOLA dirección.** El mundo crece y el número no ⇒ el error es
+siempre **hacia abajo**, y *en un lint un número más chico se lee como progreso*
+(`L-226`). **Nunca se ve como error: se ve como buena noticia.**
+
+**③ 🔴 Y LA NOTA QUE PARECE CUIDADO LO EMPEORA.** «RE-MEDIDO S85», «(S46)»,
+«medido contra el objeto» **se leen como dato ya verificado**, no como dato que
+caducó. **Es `L-498` en su forma numérica:** *lo que parece cuidado es lo que
+impide que alguien mire.* Un número con su constancia al lado **es más difícil
+de dudar que uno desnudo**.
+
+## LOS OCHO SUJETOS, con su medición
+
+*El founder contó siete; al enumerarlos apareció un octavo **en mi propio
+parte**. Se dice: no se ajusta la lista para que cierre con el número de quien
+la pidió.*
+
+| sujeto | publicado | real | cuánto vivió |
+|---|---|---|---|
+| **migraciones** | cayó **cuatro veces** — 9 → 77 → 138 → 186 | **722** | cada re-medición ya venía vieja al escribirse |
+| **fichas `D-`/`L-`** | cayó **seis veces** | tope real | el número se tomaba dos veces el mismo día |
+| **piezas de `packages/ui`** | 53 · y **cuatro números conviviendo** | **179** | **28 sesiones** |
+| **wrappers de `packages/api`** | 26 «(S46)» | **122** | **~67 sesiones** — el más vencido del canon |
+| **pares de voseo** (`lib-voz`) | «hoy son 138» | **136** (eran 132 al medirlo) | la prosa se escribió una vez |
+| **cadenas de galería** (`R66`) | «134» | **67** — contadas dos veces | informativo, y por eso nadie lo miró |
+| **ordinales de `L-501`** | dos «cuartas» y una «quinta» que salteaba | **7**, en cuatro mecanismos | cada uno numerado contra el recuerdo del anterior |
+| **reglas de `verify:diseno`** | «66» en el pie de mi parte | **71** | *lo escribí yo, en el documento donde denunciaba la clase* |
+
+**Precedente ajeno, y prueba que la clase no nació conmigo:** en **S82** el
+re-censo de los consumidores de `Texto.cuerpo` dio **71** donde la ficha decía
+**3**, con la nota *«el conteo venció»* — **registrado, y nunca generalizado.**
+
+🔴 **El número que la vuelve ley:** hay **28 menciones de re-medición** en el
+canon y sus documentos vecinos *(medido: `grep -rn "RE-MEDIDO\|re-medido\|el
+conteo venció" docs/DEUDAS_CANONICAS.md CLAUDE.md .claude/skills/… packages/ui/CLAUDE.md
+| wc -l`)*. **Veintiocho anotaciones del mismo hecho y ninguna regla.** *Una
+casa que anota veintiocho veces lo mismo no tiene un problema de disciplina:
+tiene una ley sin escribir.*
+
+## LA CURA — tres cláusulas, y ninguna es «acordate de actualizarlo»
+
+**① EL NÚMERO SALE DEL TEXTO Y EN SU LUGAR VA SU COMANDO.** *La prosa decae; el
+objeto no* (`L-141`). El canon declara **cómo se pide**, jamás cuánto da:
+`ls supabase/migrations/*.sql | wc -l` · `pnpm proximo:ficha` ·
+`node scripts/verify-contador-piezas.mjs`.
+
+**② EL GATE FALLA SI ALGUIEN VUELVE A ESCRIBIR EL NÚMERO, aunque ese día
+coincida.** *Un contador correcto hoy es falso en tres sesiones*, y un gate que
+sólo compara valores bendice al que lo escribió bien por casualidad. Lo que se
+prohíbe es **publicarlo**, no equivocarlo.
+
+⚠️ **Y su trampa, medida:** la línea ya curada **cita** el número viejo, y un
+patrón que busca «N piezas» **no distingue una CITA de una PUBLICACIÓN** — el
+gate se cazó a sí mismo. Se resuelve por **semántica** (una línea que declara el
+comando ya no publica: es historia), *jamás* atándolo a un detalle de formato,
+que dura hasta el próximo que escriba distinto.
+
+**③ SI HAY VARIAS ESCALAS, SE NOMBRAN.** Los cuatro números de «piezas» no eran
+cuatro errores: eran **tres escalas sin nombre y un error** —piezas en disco ·
+filas del índice de la skill · número de nacimiento de la serie—. *Sin nombrar
+las escalas, corregir una vuelve falsas a las otras.*
+
+### El corolario del ORDINAL, que es la variante temporal
+
+Un ordinal —«la cuarta vez que…»— **se numera contra el recuerdo del anterior**,
+y por eso es la forma más frágil: no hay objeto que contar, sólo memoria. **La
+cura tiene la misma forma:** una **tabla** como única fuente, y **cada caso
+nombra su MECANISMO y apunta a la tabla en vez de afirmar su número**. *Un
+ordinal escrito al lado de un caso decae en cuanto aparece el siguiente; la
+tabla es el único lugar donde se puede recontar.*
+
+## ⚠️ LO QUE ESTA LEY **NO** DICE
+
+**No prohíbe escribir números.** Un número **medido, fechado y con el comando
+que lo produce** es una medición y vale exactamente por eso. Lo que se prohíbe
+es **publicar un número derivado sin su forma de re-derivarlo** — porque ése,
+el día que caduca, **no avisa**.
+
+---
+
 ### `L-502` — UN TRINQUETE CASTIGA A QUIEN LO MEJORA: AMPLIAR EL ALCANCE LO ENROJECE SOBRE DEUDA VIEJA, Y ASÍ NADIE LO AMPLÍA
 
 > **Firma del founder (S114-B, 8-sep-2026).** *«El instrumento se queda como
