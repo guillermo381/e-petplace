@@ -21,6 +21,9 @@
  *
  * ⏪ **DEROGADO: la primera versión colgaba el piso SÓLO de
  * `theme.mode === 'memorial'`, y ése era un interruptor que nadie aprieta.**
+ * *La clase que lo explica es `L-498` — lo que parece cuidado es lo que impide
+ * que alguien mire: este `return null` traía su comentario en negrita, y por
+ * eso se leía como protección puesta.*
  * Medido (`D-1021`, lo halló C montando): **nadie monta
  * `<ThemeProvider memorial>` en ninguna de las dos apps** — el único provider
  * vivo es el raíz, con `mode={light|dark}`. *Mi «piso estructural» estaba
@@ -38,9 +41,12 @@
  *   pasaporte
  *        → … && !== 'perdida'                            (perdida NO lo es)
  * ```
- * **Para esta puerta manda la segunda: `perdida` NO es memorial y la línea SE
- * MUESTRA.** *Una familia cuyo animal se perdió sigue pudiendo decir que el
- * paseo salió distinto — apagarle el reclamo sería castigarla por su pérdida.*
+ * 🔴 **FIRMA DEL FOUNDER (7-sep-2026): manda la segunda — `perdida` NO es
+ * memorial y la línea SE MUESTRA.** *Una familia cuyo animal se perdió sigue
+ * pudiendo decir que el paseo salió distinto: apagarle el reclamo sería
+ * castigarla por su pérdida.* **Ya no es mi lectura de dos reglas que no
+ * coinciden: es letra.** Y con ella queda ratificada la forma de la prop —
+ * **booleana, no `estado_vida`**.
  * Memorial acá es **fallecida**, y por eso la prop se llama por lo que la
  * letra nombra y no por el estado: *si recibiera `estado_vida` tendría que
  * elegir una de las dos reglas por su cuenta, y la que corresponde depende de
@@ -119,9 +125,10 @@ export type LineaAlgoSalioDistintoProps = {
    * 🔴 LA SEÑAL REAL, OBLIGATORIA SIN DEFAULT: `estado_vida === 'fallecida'`,
    * resuelto por la pantalla contra el perfil que ya tiene cargado.
    *
-   * **`perdida` NO es memorial acá** — ver la cabecera. *No es un default que
-   * se pueda omitir: un `false` por omisión sería exactamente el guard
-   * apagado que esta prop viene a curar.*
+   * **`perdida` NO es memorial acá — FIRMA DEL FOUNDER, 7-sep-2026** (ver la
+   * cabecera). *No es un default que se pueda omitir: un `false` por omisión
+   * sería exactamente el guard apagado que esta prop viene a curar* — la
+   * forma que `L-498` nombra.
    */
   enMemorial: boolean
   /**

@@ -28685,6 +28685,65 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-498` — LO QUE PARECE CUIDADO ES LO QUE IMPIDE QUE ALGUIEN MIRE
+
+> **Firma del founder (S114-B, 7-sep-2026): la clase tiene nombre.**
+
+**Un artefacto que exhibe su propio cuidado deja de ser verificado.** No porque
+engañe: porque **el lector concluye, razonablemente, que ya alguien miró.** Y
+cuanto mejor escrita está la nota, más fuerte es esa conclusión — así que **la
+prolijidad no protege al dato: lo blinda contra la revisión.**
+
+### Los dos casos, y son de la misma sesión
+
+| | lo que exhibía | lo que era |
+|---|---|---|
+| **el contador** | *«RE-MEDIDO S103-A contra el objeto — decía 52, y la brecha era de 29»*, con su método auditable escrito al lado | **decía 81 y eran 171** · 28 sesiones |
+| **el guard de memorial** | `if (theme.mode === 'memorial') return null`, con *«⛔ En memorial no se pide terminar de contar nada»* en negrita encima | **el tema no se enciende en producto** (`D-1021`): once piezas con su protección escrita y apagada |
+
+**Y el contador ya se había predicho a sí mismo.** Su propia nota decía: *«una
+skill se carga en TODA tarea de UI, así que un número viejo acá no desinforma a
+un lector — desinforma a cada construcción»*. **Se cumplió, y la nota no lo
+evitó: la hizo más creíble.**
+
+### Por qué ningún gate la caza
+
+**Los dos artefactos están BIEN ESCRITOS y son CORRECTOS en su lógica.** El
+contador tenía su método; el guard tiene su condición bien puesta. *Lo que
+falla no está adentro del artefacto: está en que su premisa —que el número se
+re-mide, que el interruptor se aprieta— vive afuera y nadie la vuelve a
+comprobar.* Un typecheck ve tipos, un lint ve formas, y **ninguno de los dos ve
+una premisa vencida que el propio texto declara como vigente**.
+
+### La prueba, y es de UNA pregunta
+
+> ### **«¿Este guard PUEDE encenderse? ¿Este número PUEDE cambiar?»**
+> No *«¿está bien escrito?»* ni *«¿tiene su razón al lado?»* — **la nota es
+> justamente la que hay que dejar de leer.**
+
+**Su corolario operativo, que es lo que la vuelve exigible:** toda protección
+que se escribe **se prueba encendida en el mismo acto** — el mismo *rojo
+primero* que la casa ya exige de un gate, aplicado a un `return null`. *Si no
+se puede producir el estado que la enciende, la protección no está puesta:
+está declarada.* Y toda cifra publicada **declara su comando en vez de su
+valor** (precedente: migraciones cayó cuatro veces, fichas seis, piezas tres).
+
+### La hermana que ya estaba escrita, y por qué ésta no la duplica
+
+`L-459` dice *«la primera prueba de un guard nuevo no es que dé verde: es que
+dé rojo sobre el primer caso real»* — **y habla de INSTRUMENTOS**. Ésta habla
+de **la prosa que los acompaña**: no de si el guard sabe decir que no, sino de
+que **su comentario convence al lector de que no hace falta preguntárselo.**
+*`L-459` protege del instrumento que no mide; `L-498`, del texto que hace
+innecesario mirarlo.*
+
+⚠️ **Y las dos veces las encontró alguien MONTANDO, no leyendo** — `D-1021` la
+halló C en el emulador, y el contador salió de correr su gate. *Ningún repaso
+del texto podía cazarlas: el texto era la parte buena.*
+
+---
+
+
 ### `L-497` — Cuando dos personas arman fixtures para el mismo sujeto, LOS DOS los arman más fáciles
 
 **S113-E + S113-D, tres cobros en un día:** ① las frases de búsqueda —**18/23**
