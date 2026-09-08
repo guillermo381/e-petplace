@@ -1186,19 +1186,38 @@ factura, que es el peor lugar.
 | # | el hecho | cuándo |
 |---|---|---|
 | ① | **Meta empieza a cobrar los mensajes `utility`** | **desde el 1-oct-2026** |
-| ② | **Ecuador cuesta ~17× lo que cuesta Colombia** por mensaje | ya |
+| ② | ~~**Ecuador cuesta ~17× lo que cuesta Colombia** por mensaje~~ 🔴 **HEREDADO, NO MEDIDO — corregido S114 (7-sep-2026, leído de la calculadora oficial de Meta): Ecuador NO tiene línea de país propia, cae en el bucket «Resto de Latinoamérica». UTILITY = **$0,0113 USD por mensaje entregado** (hojas vigentes desde el 1-jul-2026, doc actualizado el 5-ago-2026). ⇒ **un caso completo = 2 mensajes = $0,023.**** | ya |
 | ③ | ~~Las 6 plantillas están categorizadas **MARKETING** y deben ser **UTILITY**~~ 🔴 **VENCIDO (S114, 7-sep-2026 — medido en Meta): son 8, todas UTILITY y todas APROBADAS. Cero en MARKETING.** El multiplicador que este ③ le ponía al ① **no existe**: el canal va a arrancar en la tarifa barata. *El ① y el ② siguen enteros — la fecha del 1-oct y la banda de Ecuador no se movieron.* | ~~tarea del founder~~ **hecha** |
 
-**El ② es el que cambia decisiones y el que nadie esperaba.** El precio de
+~~**El ② es el que cambia decisiones y el que nadie esperaba.** El precio de
 WhatsApp es **por país de destino**, y Ecuador —nuestro primer mercado— está
-en una banda cara: **~17 veces Colombia.** *Un modelo que estimara el costo
-del canal con números de la región, o con el promedio de LatAm, se
-equivocaría por más de un orden de magnitud en el único país donde hoy
-operamos.*
+en una banda cara: **~17 veces Colombia.**~~
 
-**El ③ multiplica el ①:** `marketing` cuesta **varias veces** más que
+🔴 **CORREGIDO (S114, 7-sep-2026 — medido en la calculadora de Meta, no
+heredado):** el «~17×» **nunca se midió**; entró al modelo como dato heredado y
+sobrevivió una sesión entera con la autoridad de un número publicado. **Ecuador
+ni siquiera tiene línea de país propia**: cae en el bucket **«Resto de
+Latinoamérica»**, y una UTILITY entregada cuesta **$0,0113 USD**.
+
+> ### **El costo del canal es despreciable: un caso completo son dos mensajes, $0,023.**
+
+*Y el corolario incómodo: la advertencia de esta sección era correcta en su
+forma —«un canal que se enciende sin su número en el modelo se descubre caro en
+la factura»— y su número era falso. **Lo que salvó al modelo no fue el dato:
+fue no haber estimado nada sobre él** (ver «Lo que NO se estima acá»).*
+
+⚠️ **Lo que esto NO vuelve gratis:** el límite del canal **no es la plata, es la
+CALIFICACIÓN DE CALIDAD del número**, que gobierna el nivel de mensajería —hoy
+**250 conversaciones iniciadas por 24 h**, y **sin calidad medida por falta de
+envíos**. *Un canal barato con la calidad quemada no manda nada a ningún
+precio.* Por eso `LETRA_POSTVENTA` §10 sigue limitando WhatsApp a dos momentos:
+**la decisión no cambia, la razón sí.**
+
+~~**El ③ multiplica el ①:** `marketing` cuesta **varias veces** más que
 `utility` por mensaje. Sobre la banda de Ecuador, arrancar mal categorizado
-sería el peor de los dos mundos — el país caro con la tarifa cara.
+sería el peor de los dos mundos — el país caro con la tarifa cara.~~
+🔴 **SIN OBJETO desde S114: las 10 plantillas están en UTILITY.** *El
+multiplicador existía y ya no tiene sobre qué multiplicar.*
 
 ### Lo que esto le exige al modelo
 

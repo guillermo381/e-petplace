@@ -269,8 +269,16 @@ piso. Una entrega por intención.
 
 **Email de constancia forzado** en: `caso_resuelto`, movimientos de plata, `caso_no_ejecutado_48h`.
 **WhatsApp sólo en dos momentos**: cuando la familia tiene que ACTUAR (`caso_elegir_devolucion`) y
-cuando la plata se movió (`caso_resuelto` / `caso_saldo_acreditado`) — **porque desde el
-1-oct-2026 se cobra por mensaje y Ecuador está en la banda cara** (`FINANCIERO` §11bis).
+cuando la plata se movió (`caso_resuelto` / `caso_saldo_acreditado`) — ~~porque desde el
+1-oct-2026 se cobra por mensaje y Ecuador está en la banda cara~~ **🔴 ENMENDADA (S114,
+7-sep-2026 · la DECISIÓN no cambia, la RAZÓN sí): el costo NO es el límite.** Medido en la
+calculadora de Meta: Ecuador cae en el bucket «Resto de Latinoamérica», una UTILITY entregada
+cuesta **$0,0113** y **un caso completo son $0,023** — despreciable. **El límite es la
+CALIFICACIÓN DE CALIDAD del número**, que gobierna el nivel de mensajería: hoy **250
+conversaciones iniciadas por 24 h**, y **sin calidad medida porque todavía no se envió nada**.
+*Un canal barato con la calidad quemada no manda nada a ningún precio, y la calidad la queman
+los mensajes que la gente no esperaba* — que es exactamente lo que estos dos momentos evitan.
+(`FINANCIERO` §11bis, enmendada el mismo día.)
 
 **Estado medido del canal (7-sep, supersede al canon):** token válido (196 chars, `EAA`, dos
 permisos) · **8 plantillas en UTILITY y aprobadas** — la re-categorización crítica ya está hecha ·
