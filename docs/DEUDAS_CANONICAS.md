@@ -28703,6 +28703,57 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-523` — Un cambio de contrato del motor no rompe al consumidor con un error: lo deja mostrando VACÍO
+
+**S114-F.** A curó `listar_lotes()` sobre un hallazgo mío: el gate era `WHERE is_admin()`
+y devolvía `[]`, así que *«no hay lotes»* y *«no podés verlos»* llegaban a la pantalla como
+el mismo valor. **El contrato pasó a hablar:**
+
+```
+antes   [ {…}, {…} ]                                  ← un array
+ahora   { ok:true, lotes:[…] } | { ok:false, codigo }  ← un sobre
+```
+
+🔴 **Y eso rompió, en silencio, el consumidor que yo acababa de desplegar.**
+
+```js
+setLotes((data ?? []) as Lote[])      // data ya no es un array: es un objeto
+```
+
+**No lanza.** `data ?? []` devuelve el objeto, `.map` no encuentra filas, y la pantalla
+dice **«todavía no hay ningún lote» para siempre**.
+
+> ***Que es exactamente el modo de falla que el cambio vino a eliminar.***
+> La cura, consumida sin adaptar, **reprodujo el defecto que curaba** — un piso más arriba.
+
+## La ley
+
+**Cuando un contrato cambia de forma, el consumidor viejo casi nunca falla: interpreta mal
+y sigue.** Un array que pasa a ser objeto, un campo que se anida, una lista que se envuelve
+— *el lenguaje no se queja porque la operación sigue siendo legal sobre el valor nuevo*.
+
+⇒ ***Y el resultado se ve como «no hay datos», que es el estado más común y el menos
+sospechoso de toda pantalla.*** Nadie audita un estado vacío: se lee como una verdad sobre
+el mundo, no como un síntoma.
+
+**Por eso un cambio de contrato exige DOS actos, y el segundo es el que se olvida:**
+① cambiar el motor · ② **censar sus consumidores y adaptarlos en el mismo acto** —
+`grep` del nombre de la función en apps, packages y repos vecinos. *Acá dio 1 (el legado) y
+0 en el monorepo, así que el censo fue barato; el día que dé 6, es la diferencia entre una
+cura y seis pantallas mudas.*
+
+⚠️ **Y lo que lo salvó no fue un gate: fue un aviso.** Ningún typecheck lo veía —el valor
+venía de un `jsonb`, tipado a mano ([[L-498]])— y el build salió en verde. **Se supo porque
+quien cambió el motor avisó al consumidor.** *En una casa con seis pistas eso no es cortesía:
+es el único mecanismo que existe para esta clase.*
+
+*(Familia de [[L-318]] —motor sin puerta— y su reverso: allá la pieza no llega a usarse;
+acá **se usa con la forma vieja y produce un resultado plausible**. Y de [[L-521]]: las dos
+son sobre un verde que no dice nada del contenido.)*
+
+---
+
+
 ### `L-522` — `--filter` en un lockfile lo PODA a la plataforma de quien lo corre
 
 **S114-F, firma del founder.** Para agregar **una** dependencia a **un** paquete del
