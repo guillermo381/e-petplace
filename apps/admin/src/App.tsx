@@ -8,6 +8,8 @@ import { Fallo, Boton } from './ui/piezas'
 import Login from './pantallas/Login'
 import Layout from './componentes/Layout'
 import Liquidaciones from './pantallas/Liquidaciones'
+import Casos from './pantallas/Casos'
+import HojaCaso from './pantallas/HojaCaso'
 
 /**
  * EL GATE, Y LO QUE DE VERDAD LO SOSTIENE.
@@ -102,6 +104,8 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/liquidaciones" replace />} />
           <Route path="/liquidaciones" element={<Liquidaciones />} />
+          <Route path="/casos" element={<Casos />} />
+          <Route path="/casos/:casoId" element={<HojaCaso />} />
           {/* No hay rutas «preparadas»: lo que no pasa la puerta de §2 no se
               nombra (letra §4). Cualquier otra ruta vuelve al inicio. */}
           <Route path="*" element={<Navigate to="/" replace />} />

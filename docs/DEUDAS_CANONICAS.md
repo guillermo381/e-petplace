@@ -28997,6 +28997,440 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-506` — La prosa no es inerte cuando vive adentro de algo que se EJECUTA
+
+**S114-F.** Firmé una cura para que un repo construyera siempre: `vercel.json` con
+`ignoreCommand`, que en Vercel devuelve un código de salida — `0` saltea el build,
+`1` lo construye. Y le puse una explicación adentro, para que quien lo mirara
+entendiera:
+
+```json
+"ignoreCommand": "echo 'construir SIEMPRE — ver README, seccion \"Por que este repo construye siempre\"'; exit 1"
+```
+
+🔴 **Ese commit fue el único de la tanda que NO produjo deployment.** El anterior,
+sin `ignoreCommand`, había construido trece minutos antes. *La cura escrita para
+garantizar el build fue lo único que lo impidió.*
+
+**Lo que se descartó antes de tocar nada**, contra el schema oficial
+(`https://openapi.vercel.sh/vercel.json`) y no contra la intuición:
+
+```
+ignoreCommand existe como propiedad raíz          ✅ válido
+type string|null · maxLength 256 · mi valor 92    ✅ dentro
+additionalProperties: false → sin keys de más     ✅ limpio
+```
+
+⇒ **El archivo no violaba el schema. La causa no era la forma, era el contenido.**
+Las comillas **dobles** adentro del comando lo rompen cuando Vercel lo envuelve
+para ejecutarlo, y un comando roto puede salir con `0` — que en ese campo
+significa *saltear*.
+
+> ***Un texto puesto para explicar terminó cambiando el comportamiento, y en la
+> dirección exactamente contraria a la que explicaba.***
+
+⇒ **Un campo cuyo único trabajo es devolver un código de salida se deja PELADO.**
+La explicación va donde se lee sin ejecutarse — el README, un comentario del
+código, el canon. **Adentro del ejecutable, la prosa es un participante.**
+
+⚠️ **Y el precedente que la vuelve familia y no anécdota: la propia cura llevaba
+adentro el defecto que venía a curar** — igual que la cura de `D-731` en S92-BIS,
+cuyo ensayo de fallo encontró el defecto dentro de la cura misma. *La disciplina
+que las cierra a las dos es la misma: **una cura no está entregada hasta que su
+efecto se midió en el objeto**, no hasta que se escribió bien.*
+
+✅ **Y lo bueno del día: no lo encontré yo — lo encontró el gate que había cableado
+quince minutos antes.** La Action puso una ✗ roja en ese commit por «la punta no
+tiene deployment», que es literalmente el caso para el que fue construida. *Un
+instrumento que estrena su rojo sobre un error de su propio autor es un
+instrumento que sirve* ([[L-459]]).
+
+---
+
+
+### `L-505` — Una sonda puede ser verdadera y medir el eslabón ANTERIOR al que importa
+
+**S114-F.** Verifiqué que «Entrar con Google» estuviera curado en producción.
+El bundle publicado tenía el `redirectTo` correcto y literal, y una sonda al
+endpoint de OAuth devolvió **302 hacia `accounts.google.com`** con la URL
+canónica intacta. Dos verdes, los dos verdaderos. **Iba a reportarlo cerrado.**
+
+Corrí el discriminador antes:
+
+```
+① canónica  admin.epetplace.com          → accounts.google.com  ✅
+② una URL INVENTADA que no existe         → accounts.google.com  ✅  ← acá se cae
+③ la URL vieja que rompía                 → accounts.google.com  ✅
+```
+
+🔴 **Las tres pasan.** La sonda no mide la lista de URLs permitidas: mide que el
+endpoint **despache**. La validación de la allow-list ocurre en el **callback**,
+cuando el usuario vuelve de Google — un eslabón más adelante del que yo miraba.
+
+> ***El 302 era verdadero. Falsa era mi lectura de qué probaba.*** Y esa forma
+> no se parece a un error: se parece a una medición limpia, con su código de
+> estado y su header, sobre el sistema real.
+
+⇒ **Antes de concluir de una sonda, se le pasa el caso que TIENE que rechazar.**
+Si no lo rechaza, la sonda mide otra cosa — y hay que decir cuál, porque *«el
+endpoint despacha»* y *«la URL está permitida»* son dos hechos distintos y sólo
+uno estaba en el encargo.
+
+⚠️ **Y el corolario de honestidad, que es la mitad que se olvida:** lo que la
+sonda no alcanzó **se declara**, no se completa con la conclusión que uno
+esperaba. Acá quedó sin medir la vuelta desde Google, que exige credenciales del
+founder — *y no medirla es correcto; lo incorrecto habría sido no decirlo.*
+
+*(Familia de [[L-459]] — la primera prueba de un guard es su rojo, no su verde.
+El matiz propio: acá el instrumento no era un guard sino una sonda de
+diagnóstico, y el defecto no estaba en el instrumento sino **en qué eslabón de
+la cadena estaba parado**.)*
+
+---
+
+
+### `L-504` — El texto de una interfaz describe el caso TÍPICO; el contrato son los bordes, y no está escrito
+
+**S114-F.** Tres pushes seguidos a `main` no produjeron deployment y producción
+sirvió el bundle viejo **2 h 20 min**, con un camino de entrada roto adentro.
+La causa era el `Ignored Build Step` de Vercel en `Automatic`, cuyo texto dice
+—en la pantalla, con esas palabras— que **salta el build si no cambió nada
+relevante**.
+
+🔴 **Y los tres árboles eran distintos entre sí. Medido, no supuesto.** O sea que
+la heurística compara **algo más que el contenido del repo**, y ese «algo más»
+no está declarado en ninguna parte que se pueda leer.
+
+> ***El texto de una interfaz de terceros está escrito para tranquilizar sobre el
+> caso típico. El contrato es lo que el sistema hace en los bordes — y los bordes
+> no se documentan porque el que escribe el texto tampoco los tiene a la vista.***
+
+**Lo que esto cambia en el momento del diagnóstico:** cuando una conducta
+contradice el texto de la pantalla, la conclusión correcta **no** es *«esto no
+puede estar pasando»* —que fue la mía, y me costó cinco hipótesis descartadas—
+sino ***«el texto describe menos de lo que el sistema hace»***. Lo primero
+protege al texto; lo segundo protege al que va a decidir.
+
+⇒ **Corolario, y es el que se ejecuta:** *una decisión que importa no se deja en
+manos de una heurística ajena cuya regla exacta no se puede leer.* No es
+desconfianza — es que **no hay forma de auditarla**, así que su acierto y su
+error son igual de invisibles. La cura no es entender la heurística: es **sacarla
+del camino** (`vercel.json` con `"ignoreCommand": "… exit 1"`, en el repo y no en
+el dashboard, para que quede versionada y se revise en un diff).
+
+⚠️ **Su modo de falla es el peor de todos: SILENCIO.** No hubo error, ni
+deployment en estado *Skipped*, ni línea en el Activity log — *el build moría
+antes de existir*. Y un silencio se lee exactamente igual que «todavía no llegó»
+([[L-502]] y su enmienda).
+
+*(Pariente invertida de [[L-439]]: allá una limitación estaba declarada en un
+comentario y no protegía a nadie; acá el texto declara MENOS de lo que el sistema
+hace, y confiar en él manda a buscar la causa a cinco lugares equivocados.)*
+
+---
+
+
+### `L-503` — Una respuesta de éxito dice que el pedido se ACEPTÓ, no que el trabajo vaya a ocurrir
+
+**S114-F.** Con el deploy trabado, disparé el Deploy Hook de Vercel a mano. El
+POST devolvió **200** con un cuerpo perfectamente sano:
+
+```json
+{ "job": { "id": "…", "state": "PENDING", "createdAt": … } }
+```
+
+**Y nunca construyó.** `PENDING` no es un problema del sistema: es literalmente
+lo que dice — *encolado*. El éxito del POST describe **la recepción del pedido**,
+y yo estaba a punto de leerlo como **la ejecución del trabajo**.
+
+> ***Entre «lo acepté» y «lo hice» hay una brecha, y las APIs contestan del lado
+> barato de la brecha.*** Un `200` con `PENDING` es una promesa; el hecho es el
+> artefacto que aparece después, y hay que ir a buscarlo.
+
+⇒ **De un `2xx` asíncrono no se concluye nada sobre el resultado: se anota el id,
+se define qué artefacto tiene que aparecer y en cuánto tiempo, y se verifica ESO.**
+
+🔴 **Y el corolario es lo que más rinde, porque da vuelta la lección:** *esa misma
+brecha es un punto de MEDICIÓN.* El `PENDING` sin build posterior fue el
+discriminador que **partió la cadena en dos** y movió la causa aguas abajo del
+disparo — descartó de un saque la conexión con GitHub, el webhook y la GitHub App,
+que eran tres de mis cinco candidatos. *Un sistema que acepta y no ejecuta te está
+diciendo dónde NO está el corte.*
+
+**Precedente directo en la casa, y por eso es familia y no caso aislado:** S107
+curó un actuador que *«ignoraba en silencio lo que no conocía — `ok: true`, sin
+escribir nada»*; S109 dejó firmado que el estado se consulta en las tablas
+*«jamás por el `ok:true` de la edge, que es una señal optimista y no un hecho»*.
+**Esta es la misma ley aplicada a un tercero**, donde además no se puede abrir la
+tabla y hay que elegir el artefacto observable de antemano.
+
+---
+
+
+### `L-502` — Cuando la espera deja de discriminar entre las hipótesis, la espera terminó
+
+**S114-F.** Un deploy no salía. Sondeé **1 h 21 min**. El deploy anterior había
+tardado ~50, así que «todavía puede estar en cola» seguía siendo razonable —
+y era falso: **el deployment no existía**. El webhook de GitHub nunca llegó a
+Vercel.
+
+🔴 **Lo que lo hizo durar no fue el tiempo: fue que las dos hipótesis producían
+el mismo hecho.**
+
+```
+cola larga        → producción sirve el commit anterior
+webhook perdido   → producción sirve el commit anterior
+```
+
+**No hay diferencia observable** — ni en el status, ni en los headers, ni en el
+bundle, ni en el reloj. *Un deploy en cola y un deploy que no existe son
+indistinguibles desde el lado del que espera.*
+
+> ***Y la trampa es que esperar es la respuesta CORRECTA para una de las dos.***
+> Cada minuto sin cambio confirma la hipótesis equivocada **exactamente igual
+> que la correcta**. La espera se siente como diligencia y no aporta un bit.
+
+⇒ **La pregunta no es «¿cuánto llevo esperando?» sino «¿lo que estoy viendo
+distingue entre mis hipótesis?».** Si la respuesta es no, **esperar dejó de ser
+medir** — y lo que sigue no es esperar más: es **pedir el dato que sólo existe
+del otro lado**. Acá era la lista de deployments, que vive en el dashboard, o
+sea **fuera de todo instrumento propio**.
+
+**El corolario operativo, para no depender del juicio en el momento:** un
+proceso asíncrono que no aparece en **2× su tiempo observado** se mira en su
+panel, no se sigue sondeando. *El anterior tardó ~50 min; a los ~100 ya había
+que preguntar.*
+
+⚠️ **Y el costo de no tener la regla, medido:** el sondeo agresivo de esa espera
+**disparó el anti-bot de Vercel** y me dejó el dominio en 403 — o sea que
+esperar mal no fue neutro: **degradó el sujeto que estaba midiendo.**
+
+*(Cierra la familia del día con [[L-499]], [[L-500]] y [[L-501]]: las cuatro son
+sobre medir bien lo que uno cree que mide — **la capa**, **la rama**, **el
+momento**, y ahora **si la observación discrimina algo**. Las tres primeras dan
+un dato falso; ésta da un dato verdadero que no sirve para decidir, que es la
+forma más cara porque no se siente como un error.)*
+
+> 🔴 **ENMIENDA (8-sep-2026, misma sesión): la premisa fáctica de arriba es
+> FALSA, y el hecho verdadero REFUERZA la lección en vez de debilitarla.**
+> Donde dice ~~«El webhook de GitHub nunca llegó a Vercel»~~, léase: **el evento
+> llegaba, y el `Ignored Build Step` en `Automatic` mataba el build tan temprano
+> que no dejaba NI UN registro** — ni deployment en estado *Skipped*, ni error,
+> ni una línea en el Activity log. *No era un evento perdido: era un evento
+> descartado sin dejar rastro, que desde afuera se ve idéntico.*
+>
+> **Y el matiz que la vuelve más filosa: la lección subestimaba su propio caso.**
+> No eran dos hipótesis indistinguibles: eran **tres**, y ***la verdadera no
+> estaba en la lista***. Se descartaron por medición el techo de deployments, el
+> webhook, la GitHub App, un force push y los límites de gasto — cinco candidatos,
+> ninguno correcto — porque **todos producían el mismo hecho observable**.
+> ⇒ *Cuando la observación no discrimina, el problema no es sólo que no sepas
+> cuál de tus hipótesis es: es que **no tenés forma de saber si la correcta está
+> entre ellas**.* Por eso la salida no era pensar mejor la lista, era **pedir el
+> dato del otro lado** — que es lo que esta lección ya decía y hay que obedecer
+> antes, no después de cinco descartes.
+
+---
+
+
+### `L-501` — Un instrumento que mide detrás de un caché declara su TTL o invalida
+
+**S114-F, ensayo de la placa.** Configuré el pasaporte (`configurar_pasaporte`
+→ `ok`) y **esperé 62 segundos antes de volver a pedir la página**. Sin esa
+espera habría leído la respuesta cacheada de la medición anterior —el pasaporte
+todavía mudo, con `max-age=60`— y habría concluido que **`configurar_pasaporte`
+no funcionó**.
+
+> ***El caché que había verificado como una virtud, diez minutos antes, es una
+> trampa para la medición siguiente.*** Es la misma pieza: cambia de rol según
+> si uno la está midiendo o midiendo a través de ella.
+
+🔴 **Y su modo de falla es el peor: no da error, da el valor ANTERIOR.** Una
+lectura cacheada es indistinguible de una lectura fresca — mismo status, mismo
+cuerpo, misma forma. *El único que las separa es un header que hay que ir a
+mirar (`x-vercel-cache`, `age`), y nadie lo mira cuando espera un cambio.*
+
+**Y el daño típico es doble, porque el instrumento miente en la dirección más
+convincente:** confirma que **el cambio no ocurrió** justo cuando uno acaba de
+hacerlo — así que la conclusión natural es «lo que escribí está mal», y se
+empieza a depurar una cura que funcionaba.
+
+⇒ **Todo instrumento que mida detrás de un caché hace UNA de estas tres:**
+1. **espera el TTL** (y lo dice: «esperé 62 s porque el `max-age` es 60»);
+2. **invalida** — cache-buster en la URL, `Cache-Control: no-cache` en el pedido,
+   purga;
+3. **lee el header y lo declara** (`x-vercel-cache: HIT` ⇒ *esto no es fresco* y
+   la medición no vale para lo que se acaba de cambiar).
+
+**Lo que NO vale es medir y no decir nada**: el resultado es correcto la mitad
+de las veces y no hay forma de saber cuál mitad.
+
+*(Hermana de [[L-500]] y [[L-499]] — las tres son sobre **medir bien lo que no
+es lo que uno cree que mide**: `L-499` la capa, `L-500` la rama, `L-501` el
+momento. Y de `L-166`: todo dato vivo se lee al momento de usarlo — acá el caché
+convierte un dato «de ahora» en uno de hace un minuto sin avisar.)*
+
+---
+
+
+### `L-500` — Medir una RAMA del código y concluir sobre la otra
+
+**S114-F, y lo incómodo es que pasó el mismo día que se escribió `L-499`.**
+
+`/p/[token]` del sitio público tiene un ternario:
+
+```js
+Cache-Control: estado === 'activo' ? 'public, max-age=60' : 'no-store'
+```
+
+Lo medí con un **token inexistente** —el que tenía a mano—, cayó en `no-store`,
+dio `x-vercel-cache: MISS`, y **reporté «cada lectura del pasaporte va al
+origen»**. Sobre ese reporte el founder firmó una tarea de cachear la página.
+
+**Medido después con un token REAL:**
+
+```
+request 1 → MISS · age 0
+request 2 → HIT  · age 3     (3 segundos después)
+```
+
+**Ya estaba cacheado, desde su primera versión, con su razón escrita al lado.**
+La rama que medí es justamente **la única que jamás se cachea, y con razón**: un
+404 cacheado escondería una placa recién activada.
+
+> ***El request fue verdadero. La afirmación que construí encima era falsa.***
+> No medí de menos: **medí bien el caso que no importaba.**
+
+🔴 **Y lo que lo vuelve peligroso: la rama que uno tiene a mano suele ser la de
+error**, porque es la que se alcanza sin datos —un id inventado, una tabla
+vacía, un token que no existe—. *Es la más fácil de probar y la menos
+representativa.* La rama feliz casi siempre pide sembrar algo, y por eso se
+saltea.
+
+⇒ **Antes de generalizar desde una medición, la pregunta es «¿por qué camino
+entró esto?»** — y si el código tiene un condicional en el medio, **la medición
+vale para esa rama y nada más.** Con un `if`, un ternario o un `switch` entre el
+estímulo y la respuesta, **hacen falta tantas mediciones como ramas decidan
+salidas distintas.**
+
+**El costo de haberlo evitado, medido:** un token válido era una consulta que ya
+había corrido tres veces esa tarde para otra cosa. **No fue falta de acceso:
+fue no preguntarme si el caso que tenía a mano era el caso que importaba.**
+
+*(Parienta de [[L-499]] —medir una capa y concluir sobre el sistema— pero cruza
+de eje: aquélla es sobre **capas** apiladas, ésta sobre **ramas** paralelas. Y
+de `L-459`: la primera prueba de algo no es que dé verde, es que dé el resultado
+correcto **sobre el caso real**.)*
+
+---
+
+
+### `L-499` — Medir sólo la capa que falla da un diagnóstico VERDADERO E INÚTIL
+
+**S114-F.** `admin.epetplace.com` no respondía. Lo medí con un `curl`, dio
+`HTTP 000`, y reporté **«el dominio no resuelve»**. Era **cierto**. El founder
+miró el dashboard y vio el dominio **asignado al proyecto y sirviendo**.
+
+Las dos cosas eran verdad al mismo tiempo, y la diferencia decide qué se hace:
+
+```
+DNS   → NXDOMAIN en 8.8.8.8, 1.1.1.1 y 9.9.9.9
+TLS   → SSL_ERROR_SYSCALL (no hay certificado)
+HTTP  → vía la IP del proveedor, con Host: admin.epetplace.com
+        200 · 466 bytes · ERA LA APP
+```
+
+⇒ El diagnóstico correcto no era «no existe» sino **«existe en el proveedor y no
+en el DNS»**, y la cura es **un registro CNAME en el registrador** —que ni
+siquiera está del lado que yo estaba mirando—.
+
+> ***«No responde» describe el síntoma en la capa donde uno lo tocó. La acción
+> vive en la capa donde está la causa, y no tienen por qué ser la misma.***
+
+**Por qué es peligroso y no sólo incompleto:** un diagnóstico verdadero **no se
+siente como un error**. Nadie lo va a verificar. *«No resuelve» habría mandado a
+revisar el proveedor —donde todo estaba bien— o a dar el dominio por perdido,
+cuando faltaba una línea en otro lado.* Un diagnóstico falso se choca contra la
+realidad; **uno verdadero-e-inútil se archiva.**
+
+⇒ **La regla: ante una capa que falla, se mide la de arriba y la de abajo antes
+de nombrar la causa.** En red eso es DNS · TLS · HTTP, y la técnica que lo
+separa es **pedirle al servidor con el `Host` correcto salteando el DNS**
+(`curl --resolve`, o HTTP plano cuando el TLS es justamente lo que falta). *Si
+la capa de abajo contesta bien, el problema no está donde uno miró.*
+
+**Corolario que no es de red:** vale para toda pila donde un síntoma puede nacer
+en varios pisos — una RPC que «no existe» (¿no está, o no tiene permiso, o el
+esquema no la expone?), una pantalla vacía (¿no hay datos, o la RLS los filtra,
+o el lector falló?), un deploy que «no sale» (¿no disparó, falló, o está en
+cola?). **En todos, la respuesta de una sola capa es verdadera y no alcanza.**
+
+*(Emparenta con `L-321` —«el permiso está revocado» es una lectura, «rebotó con
+42501» es un hecho— pero mira al otro lado: ahí el problema era **no medir**;
+acá el problema es **medir una sola capa y creer que se midió el sistema**.)*
+
+---
+
+
+### `L-498` — Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para la pantalla
+
+**S114-F, hallazgo al medir un commit ajeno antes de empujarlo.** `Placas.tsx`
+del admin declaraba:
+
+```ts
+type Placa = { token: string; serie: number; activada_en: string | null; mascota_id: string | null }
+```
+
+y `listar_placas_de_lote` devuelve —medido contra la base viva, no leído de la
+migración— exactamente esto:
+
+```sql
+jsonb_build_object('serie', serie, 'token', token, 'activada', activada_en is not null)
+```
+
+**`mascota_id` no viaja. `activada_en` tampoco** (el campo se llama `activada`).
+Pero **TypeScript no valida la forma de un `jsonb` en runtime**: el tipo describe
+lo que el autor cree que viene, y el compilador lo da por cierto. Efecto medido:
+
+- `placas.filter((p) => p.mascota_id === null).length` ⇒ `undefined === null` es
+  **false** ⇒ **el contador de placas libres daba 0 siempre**, aunque el lote
+  entero estuviera sin activar.
+- `{p.mascota_id ? '· activada' : ''}` ⇒ `undefined` es falsy ⇒ **el marcador no
+  aparecía nunca**, ni en una placa activada.
+
+> ***Escribir un campo en el tipo lo hace existir para todos menos para el
+> usuario.*** El compilador lo ve, el editor lo autocompleta, el revisor lo lee
+> como si viniera — y la única que sabe la verdad es la pantalla, que no habla.
+
+🔴 **Y lo que la vuelve difícil de cazar: no falla.** No hay excepción, no hay
+`undefined is not an object`, no hay rojo. Hay **dos números plausibles**, y un
+`0` en «placas libres» se lee como un dato, no como un síntoma. Es la familia de
+*verosímil-falso* (L-139) entrando por una puerta nueva: **no por lo que el
+modelo inventa, sino por lo que el tipo promete.**
+
+⚠️ **Ningún gate de esta casa lo ve, y hay que decirlo:** el typecheck da verde
+—el tipo es coherente consigo mismo—, el build sale, y `verify:diseno` no mira
+contratos. Lo cazó **cotejar el `jsonb_build_object` de la función contra los
+campos que la pantalla consume**, a mano.
+
+⇒ **La regla: el tipo de un retorno `jsonb` se COPIA del `jsonb_build_object`
+de la función, no se escribe de memoria.** Si la función construye tres claves,
+el tipo tiene tres. *Y cuando el tipo tiene un campo que la función no arma, no
+es un tipo incompleto: es un tipo que miente con la autoridad del compilador.*
+
+**Corolario que no es sobre `jsonb`:** vale para toda frontera donde el tipo lo
+declara el consumidor y no el productor — `RETURNS jsonb`, `RETURNS record`, un
+`as` sobre un `fetch`, un `JSON.parse`. **Donde el tipo se escribe a mano, el
+contrato se mide contra el productor o no se mide.**
+
+*(Origen: el commit `c0aee5e` del admin legado, S113 fase 3. La función y la
+pantalla nacieron el mismo día ⇒ **el defecto es de origen, no deriva**: no fue
+que el modelo se moviera debajo. Curado en S114-F como excepción nombrada al
+«cero cambios al legado», con firma del founder.)*
+
+---
+
+
 ### `L-492` — Un gate que mide UNA dirección deja la otra sin vigilancia, y su silencio se lee como salud
 
 **El caso (S113-A · lote 2, 6-sep-2026).** Censando para escribir la puerta de
