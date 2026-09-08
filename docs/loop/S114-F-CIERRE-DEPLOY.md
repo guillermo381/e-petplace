@@ -204,6 +204,20 @@ construye o retirarlo, y eso lo firma el founder.*
 
 Todo en `docs/loop/buzon/S114-F-para-TODAS-y-FOUNDER-el-monorepo-no-despliega.md`.
 
+### Anotado para cuando el founder firme
+
+**① El proyecto Vercel del monorepo se RETIRA, no se acota** (decisión de mesa,
+8-sep). *Un proyecto que construye el monorepo entero para publicar una página de
+juguete sólo puede dar disgustos.* **Antes de tocarlo, el founder mira dos cosas:**
+si tiene dominio asignado, y si `epetplace-pagos-stg` depende de él. **F no lo toca.**
+
+**② TypeScript 5.9 y 6.0 conviven** — avisado a A en
+`docs/loop/buzon/S114-F-para-A-typescript-59-y-60-conviven.md`, **por nombre y sin
+curar**. Corrige mi propio reporte: no es `apps/cliente` sola, son **las dos apps
+Expo**, y el corte limpio «apps Expo vs. todo lo demás» sugiere que puede ser
+deliberado (Expo SDK 57). *Si lo es, lo que falta no es una cura sino la línea que
+lo declare — para que nadie lo unifique por prolijidad y rompa las dos apps.*
+
 ### Sin reproducir, declarado
 
 **Por qué falla `tsc -b` de `@epetplace/admin` en ese run.** En mi rama sale `exit 0`
