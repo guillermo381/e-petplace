@@ -167,12 +167,12 @@ se probó a mano antes de cablearlo, y después la ejerció sola sobre `f3171cc`
 
 | | |
 |---|---|
-| `L-503` | una respuesta de éxito dice que el pedido se **aceptó**, no que el trabajo vaya a ocurrir — y esa brecha es un punto de medición |
+| `L-519` | una respuesta de éxito dice que el pedido se **aceptó**, no que el trabajo vaya a ocurrir — y esa brecha es un punto de medición |
 | `L-504` | el texto de una interfaz describe el **caso típico**; el contrato son los bordes, y no está escrito |
 | `L-505` | una sonda puede ser verdadera y medir el eslabón **anterior** al que importa |
 | `L-506` | la prosa **no es inerte** cuando vive adentro de algo que se ejecuta |
 
-**Y una enmienda:** `L-502` afirmaba que *«el webhook nunca llegó a Vercel»* —
+**Y una enmienda:** `L-518` afirmaba que *«el webhook nunca llegó a Vercel»* —
 falso. El evento llegaba y se descartaba sin rastro. **El hecho verdadero refuerza
 la lección**: no eran dos hipótesis indistinguibles sino tres, y *la correcta no
 estaba en la lista*.
@@ -249,7 +249,7 @@ bf6bf9b ✅   f3171cc 🔴   b5716d1 🔴   66cf314 🔴   2b777e3 ✅   ec79bb7
 buzón: la punta era `a28585ac`, el tope `L-515`, y **la colisión era sólo `L-507`** —D la
 usa para otra lección y los dos huecos del candidato (`L-507`/`L-508`) eran suyos—.
 ⇒ **mi racha pasó a `L-516`**, y el resto de mi trabajo ya estaba adentro **idéntico por
-md5** (`L-503`–`L-506` y la enmienda a `L-502`).
+md5** (`L-504`–`L-506` y `L-519`, y la enmienda a `L-518` — L-502/L-503 se reconciliaron con B, que las cita en código).
 
 *Se conserva el texto tachado y no se borra: **el número viajó a 13 lugares en DOS repos**
 —el canon, el parte, el README del legado, el script del gate y el YAML de la Action— y

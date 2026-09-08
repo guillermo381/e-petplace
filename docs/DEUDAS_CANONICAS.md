@@ -29418,7 +29418,7 @@ evidencia hace falta.** Ésta se escribió en `DEPLOY.md`, en el `README` y en e
 `CLAUDE.md` del repo — tres lugares que existen para que alguien **no vuelva a medir**.
 *Una conclusión prematura en un lugar de consulta no se equivoca una vez: se equivoca cada
 vez que alguien la lee.* Por eso se retiró con su historia, no se borró
-(mismo trato que la enmienda de [[L-502]] el mismo día).
+(mismo trato que la enmienda de [[L-518]] el mismo día).
 
 **Lo que sobrevive de la medición, que no es poco:** los tres commits **efectivamente** no
 tienen deployment. El hecho era verdadero; la regla que le colgué encima, no. *Y la
@@ -29448,13 +29448,76 @@ producen exactamente las mismas tres observaciones.
 > commit, el corte no es del proyecto.* **Y lo declara en su salida** — *un gate que
 > puede gritar en falso y no lo dice entrena a ignorarlo.*
 
-*(Cierra la familia del día con [[L-503]], [[L-504]], [[L-505]] y [[L-506]]: cinco formas
+*(Cierra la familia del día con [[L-519]], [[L-504]], [[L-505]] y [[L-506]]: cinco formas
 de que un dato verdadero sostenga una conclusión falsa — la brecha entre aceptar y hacer,
 el texto que describe el caso típico, la sonda parada en el eslabón anterior, la prosa que
 participa, y ahora la racha con la ventana propia.)*
 
 ---
 
+### `L-517` — El hedge no viaja entre sesiones: viaja la conclusión
+
+**S114-F, firma del founder.** Le pasé a otra pista un hallazgo con su hipótesis
+**bien marcada**: *«puede ser deliberada — Expo SDK 57 puede exigir TS 6, **es la
+explicación más probable***»*. Escrito con «puede», con «más probable», y con una
+sección aparte titulada **«lo que NO se midió»**.
+
+🔴 **Volvió como hecho.** La pista integradora contestó que iba a *«agregar la línea
+que declara que la divergencia es deliberada (Expo SDK 57)»* — **en el canon**, en un
+archivo que existe para que nadie vuelva a medir.
+
+**Lo medí antes de que lo escribiera, y no se sostenía:**
+
+```
+expo@57.0.4 · expo-router@57.0.4   typescript en peerDeps: —   en devDeps: —
+                                   ⇒ Expo NO lo exige
+
+git log -L de la línea en apps/cliente  →  UN SOLO commit: 98e14c97, el scaffold
+apps/cliente ~6.0.3 · apps/prestador ~6.0.3 · raíz ~5.9.0 · packages ~5.9.0
+                                   ⇒ los cuatro del MISMO commit, hace dos meses
+```
+
+*No era una decisión: era lo que dejó `create-expo-app` y nadie miró.*
+
+> ***Un hedge es contexto, y el contexto no sobrevive a un traspaso.*** Lo que cruza de
+> una sesión a otra es la frase que sirve para actuar — **«deliberada (Expo SDK 57)»**—,
+> no el párrafo donde vivía con su «puede». Y del otro lado llega **sin la marca y con la
+> autoridad de venir de quien midió el resto.**
+
+⚠️ **Y lo que lo vuelve un tipo propio y no un descuido: no hubo error de medición.** No
+medí de más ni de menos, y marqué bien. *El defecto ocurrió enteramente en el traspaso* —
+que es el único lugar donde ningún gate mira, porque **con seis pistas y un solo canal
+humano el «puede» se cae y queda el «es».**
+
+## El corolario, y su tercera salida
+
+**Una inferencia que va a viajar a otra pista se manda con lo que haría falta para
+medirla.** En este caso eran diez palabras:
+`cat node_modules/expo/package.json | grep typescript`. *Con eso, la pista receptora lo
+resuelve en dos segundos y no escribe nada falso.*
+
+🔴 **Pero «o no se manda» sería peor que el defecto que cura**, y por eso la regla tiene
+tres salidas y no dos:
+
+| | |
+|---|---|
+| **va con su instrumento** | lo normal — y casi siempre es un comando de una línea |
+| **va marcada `SIN INSTRUMENTO`** | cuando medirla es caro. *Una hipótesis sin forma de medirla sigue valiendo como pista; lo que no vale es que llegue como hecho* |
+| **no se manda** | sólo cuando ni siquiera se puede decir qué la mediría — o sea, cuando ni el que la emite sabe qué está afirmando |
+
+**Y el matiz operativo, que es lo que falló acá: el hedge va PEGADO a la frase que va a
+viajar, no en su contexto.** Yo lo puse en el cuerpo del documento y en una sección
+aparte; **lo que la otra pista extrajo fue la frase**. *Si la marca no está adentro de la
+oración que alguien va a copiar, no está.*
+
+*(Pariente de [[L-166]] —todo dato vivo se relee al usarlo— pero de la otra punta: allá
+el receptor confía en un dato que envejeció; acá **el emisor marca bien y la marca se cae
+sola en el camino**. Y de [[L-158]]: una tabla de hallazgos no se vuelve orden sin el
+literal — acá el literal existía y no viajó.)*
+
+---
+
+---
 
 ### `L-506` — La prosa no es inerte cuando vive adentro de algo que se EJECUTA
 
@@ -29580,7 +29643,7 @@ el dashboard, para que quede versionada y se revise en un diff).
 ⚠️ **Su modo de falla es el peor de todos: SILENCIO.** No hubo error, ni
 deployment en estado *Skipped*, ni línea en el Activity log — *el build moría
 antes de existir*. Y un silencio se lee exactamente igual que «todavía no llegó»
-([[L-502]] y su enmienda).
+([[L-518]] y su enmienda).
 
 *(Pariente invertida de [[L-439]]: allá una limitación estaba declarada en un
 comentario y no protegía a nadie; acá el texto declara MENOS de lo que el sistema
@@ -29589,7 +29652,7 @@ hace, y confiar en él manda a buscar la causa a cinco lugares equivocados.)*
 ---
 
 
-### `L-503` — Una respuesta de éxito dice que el pedido se ACEPTÓ, no que el trabajo vaya a ocurrir
+### `L-519` — Una respuesta de éxito dice que el pedido se ACEPTÓ, no que el trabajo vaya a ocurrir
 
 **S114-F.** Con el deploy trabado, disparé el Deploy Hook de Vercel a mano. El
 POST devolvió **200** con un cuerpo perfectamente sano:
@@ -29626,7 +29689,7 @@ tabla y hay que elegir el artefacto observable de antemano.
 ---
 
 
-### `L-502` — Cuando la espera deja de discriminar entre las hipótesis, la espera terminó
+### `L-518` — Cuando la espera deja de discriminar entre las hipótesis, la espera terminó
 
 **S114-F.** Un deploy no salía. Sondeé **1 h 21 min**. El deploy anterior había
 tardado ~50, así que «todavía puede estar en cola» seguía siendo razonable —
