@@ -40,24 +40,69 @@ export function contar() {
    en disco, desde S46**: unas 67 sesiones— y **nadie lo vio**, porque un
    contador con su sesión al lado («26 wrappers vivos (S46)») se lee como un
    dato fechado y verificado, no como uno vencido. */
+/* 🔴 S114-B · EL GATE MIRABA UNA SOLA FORMA, Y HABÍA DOS NÚMEROS VIVOS EN UN
+   ARCHIVO DE SU PROPIO CORPUS. Lo destapó una adenda del founder pidiendo
+   verificar «otro contador que reporta 53».
+
+   **Lo medido, y corrige la premisa:** el `53` del canon **ya estaba curado**
+   —sus dos apariciones en `CLAUDE.md` son CITAS dentro de la línea que declara
+   el comando y de su lección—. El que estaba VIVO era otro y en otro lado:
+   `packages/ui/CLAUDE.md` publicaba **81** en su encabezado y **49** en su
+   inventario de «Qué hay», **en dos formas que ninguno de estos patrones
+   miraba**.
+
+   ⇒ *el verde de este gate significaba «ninguna fuente escribe el número EN LA
+   FORMA QUE MIRO», jamás «ninguna fuente lo escribe»* — y entre esas dos
+   frases vivían dos números con 122 y 90 de brecha. **Un gate que acota su
+   pregunta al formato que su autor tenía en la cabeza no cierra la clase: la
+   recorta.**
+
+   ⚠️ **Y los patrones nuevos se anclan a la ORACIÓN QUE DECLARA EL ESTADO, no
+   al formato**, porque el archivo está lleno de bandas históricas que citan
+   números («= **85**, menos **3**», «52 → 53», «decía 63») y **esas son la
+   evidencia de por qué se curó**: borrarlas dejaría cada cura sin su razón. */
 const VIGILADOS = [
   ['CLAUDE.md', /tokens v4 \+ \*\*(\d+) componentes/],
   ['packages/ui/CLAUDE.md', /tokens v4 \+ \*\*(\d+) componentes/],
   ['.claude/skills/epetplace-design-system/SKILL.md', /tokens v4 \+ \*\*(\d+) componentes/],
   ['CLAUDE.md', /\*\*(\d+) wrappers vivos/],
+  // el ENCABEZADO de estado de packages/ui
+  ['packages/ui/CLAUDE.md', /^\*\*Estado:[^\n]*?(\d+) componentes/m],
+  // el INVENTARIO de «Qué hay» — la viñeta que abre nombrando el número
+  ['packages/ui/CLAUDE.md', /^- \*\*(\d+) componentes\*\*/m],
 ]
 
 if (process.argv.includes('--control')) {
   /* El control prueba que el detector VE un número escrito cuando lo hay —y no
      lo ve cuando el texto declara el comando. Un gate que no puede producir su
      rojo sobre un caso construido a mano no está midiendo. */
-  const re = VIGILADOS[0][1]
-  const conNumero = 'Design system: tokens v4 + **53 componentes** + 3 temas'
-  const conComando = 'Design system: tokens v4 + **el contador se MIDE** (ver abajo) + 3 temas'
-  const ok = re.test(conNumero) && !re.test(conComando)
+  const casos = [
+    [VIGILADOS[0][1],
+     'Design system: tokens v4 + **53 componentes** + 3 temas',
+     'Design system: tokens v4 + **el contador se MIDE** (ver abajo) + 3 temas'],
+    // S114-B · los dos ciegos que la adenda destapó. Cada uno con su NEGATIVO,
+    // y el negativo es lo que importa: la banda histórica que CITA un número
+    // no puede encender el gate, o curar deja de ser posible sin borrar la
+    // razón de la cura.
+    [VIGILADOS[4][1],
+     '**Estado: S103 — 81 componentes, sistema exigible.**',
+     '**Estado: sistema exigible.** El número **NO SE ESCRIBE ACÁ — se pide:** `node ...`'],
+    [VIGILADOS[5][1],
+     '- **49 componentes** (`src/components/`) — los 11 de S43',
+     '- **Componentes** (`src/components/`) — el número NO SE ESCRIBE ACÁ: `node ...`'],
+    // el NEGATIVO transversal: las bandas históricas de packages/ui/CLAUDE.md
+    [VIGILADOS[4][1], '**Estado: S103 — 81 componentes**', '> Contador re-medido: 52 → 53'],
+    [VIGILADOS[5][1], '- **49 componentes** (`src/`)', '> `ls src/components/*.tsx` = **85**, menos **3**'],
+  ]
+  let ok = true
+  for (const [re, conNumero, sinNumero] of casos) {
+    const bien = re.test(conNumero) && !re.test(sinNumero)
+    if (!bien) ok = false
+    console.log(`${bien ? '  ✓' : '  ✗'} ${String(re).slice(0, 46)}`)
+  }
   console.log(ok
-    ? '✅ control: ve «53 componentes» escrito y deja pasar el texto que declara el comando'
-    : '🔴 control: el patrón no discrimina')
+    ? '✅ control: los TRES patrones ven el número escrito y dejan pasar el texto que declara el comando y las bandas que lo CITAN'
+    : '🔴 control: algún patrón no discrimina')
   process.exit(ok ? 0 : 2)
 }
 

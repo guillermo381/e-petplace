@@ -15,15 +15,41 @@
  * salida, no la entrada»*. Eso lo cumple quien la monta; la pieza no puede
  * saber dónde la pusieron.
  *
- * ── 🔴 EN MEMORIAL NO HAY LÍNEA, Y NO DEPENDE DE QUE ALGUIEN SE ACUERDE ──
+ * ── 🔴 EN MEMORIAL NO HAY LÍNEA — Y LA SEÑAL ES EL DATO, NO EL TEMA ──────
  * §1: *«Con la mascota en memorial no hay línea. Nada.»* (`MODELO_LOYALTY`
- * §7: memorial apaga todo). **La pieza devuelve `null` en el tema memorial**
- * — no porque el tema sea el dato correcto, sino porque **es un piso que no
- * se puede olvidar**.
+ * §7: memorial apaga todo).
  *
- * ⚠️ **Y es un piso, no un reemplazo:** la pantalla igual no debe montarla
- * cuando la mascota está en memorial. *Si la pantalla no fuerza el tema, el
- * piso no se enciende — por eso se declara acá en vez de darlo por hecho.*
+ * ⏪ **DEROGADO: la primera versión colgaba el piso SÓLO de
+ * `theme.mode === 'memorial'`, y ése era un interruptor que nadie aprieta.**
+ * Medido (`D-1021`, lo halló C montando): **nadie monta
+ * `<ThemeProvider memorial>` en ninguna de las dos apps** — el único provider
+ * vivo es el raíz, con `mode={light|dark}`. *Mi «piso estructural» estaba
+ * apagado: un guard correcto colgado de un interruptor que no existe.*
+ *
+ * ⇒ **la señal real llega por prop, y es OBLIGATORIA sin default.** La pieza
+ * está entregada y no montada, así que exigirla no rompe a nadie **y obliga a
+ * decidirla** (19.9: *la prop de identidad va obligatoria sin default*).
+ *
+ * ⚠️ **QUÉ ES «MEMORIAL» ACÁ, porque la casa tiene DOS reglas vivas y no
+ * coinciden.** Medido en `apps/cliente`:
+ * ```
+ *   hogar/index · [mascotaId] · vacunas · atajos.ts
+ *        → estado_vida !== null && !== 'activa'          (perdida ES memorial)
+ *   pasaporte
+ *        → … && !== 'perdida'                            (perdida NO lo es)
+ * ```
+ * **Para esta puerta manda la segunda: `perdida` NO es memorial y la línea SE
+ * MUESTRA.** *Una familia cuyo animal se perdió sigue pudiendo decir que el
+ * paseo salió distinto — apagarle el reclamo sería castigarla por su pérdida.*
+ * Memorial acá es **fallecida**, y por eso la prop se llama por lo que la
+ * letra nombra y no por el estado: *si recibiera `estado_vida` tendría que
+ * elegir una de las dos reglas por su cuenta, y la que corresponde depende de
+ * para qué es la pantalla.*
+ *
+ * 🔴 **Y `theme.mode` SE CONSERVA EN EL `OR`, no se retira** — misma cura que
+ * C escribió en la ficha: **la galería SÍ monta el sub-tema**, y ahí el guard
+ * tiene que seguir valiendo. *Lo que estaba mal no era mirar el tema: era
+ * mirar SÓLO el tema.*
  *
  * ── LAS TRES VOCES SON TRES ESTADOS, Y LA UNIÓN LO DICE ─────────────────
  * ```
@@ -90,6 +116,15 @@ export type EstadoDeLaPuerta =
 export type LineaAlgoSalioDistintoProps = {
   estado: EstadoDeLaPuerta
   /**
+   * 🔴 LA SEÑAL REAL, OBLIGATORIA SIN DEFAULT: `estado_vida === 'fallecida'`,
+   * resuelto por la pantalla contra el perfil que ya tiene cargado.
+   *
+   * **`perdida` NO es memorial acá** — ver la cabecera. *No es un default que
+   * se pueda omitir: un `false` por omisión sería exactamente el guard
+   * apagado que esta prop viene a curar.*
+   */
+  enMemorial: boolean
+  /**
    * A dónde lleva. **Los tres llevan a lados distintos** —el formulario del
    * motivo, la conversación con la casa, el caso— y por eso es una sola
    * función que la pantalla resuelve según el estado que ella misma pasó.
@@ -97,12 +132,19 @@ export type LineaAlgoSalioDistintoProps = {
   onPress: () => void
 }
 
-export function LineaAlgoSalioDistinto({ estado, onPress }: LineaAlgoSalioDistintoProps) {
+export function LineaAlgoSalioDistinto({
+  estado,
+  onPress,
+  enMemorial,
+}: LineaAlgoSalioDistintoProps) {
   const { theme } = useTheme()
 
-  /* 🔴 EL PISO DE MEMORIAL — ver la cabecera. Va ANTES que cualquier otra
-     cosa: en memorial no hay nada que decidir. */
-  if (theme.mode === 'memorial') return null
+  /* 🔴 EL DATO PRIMERO Y EL TEMA DESPUÉS — ver la cabecera. El `OR` no es
+     redundancia: el dato es lo que rige en producto y el tema es lo que rige
+     en la galería, que es el único lugar donde el sub-tema se monta de
+     verdad. Va antes que cualquier otra cosa: en memorial no hay nada que
+     decidir. */
+  if (enMemorial || theme.mode === 'memorial') return null
 
   const label =
     estado.tipo === 'casoAbierto' ? `${estado.voz}. ${estado.estado}` : estado.voz
