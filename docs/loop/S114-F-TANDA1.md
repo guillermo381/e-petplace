@@ -308,3 +308,72 @@ DESPUÉS  commits sin pushear = 0
 (su README y `vercel.json`). Con estos dos actos, el retiro de Adopción y
 Notificaciones **y** la pantalla de Placas entran al deploy. **No verifiqué el
 deploy resultante** — no tengo acceso al dashboard de Vercel.
+
+---
+
+# ADENDA 2 · LA CURA DE PLACAS (excepción nombrada, firma del founder)
+
+**Autorizada como excepción al «cero cambios al legado» de la tanda 1.** Razón,
+verbatim del founder: *«es un defecto conocido, de dos líneas, en un repo que
+acaba de despertar después de cuatro meses — y lo que sobrevive a una sesión así
+sobrevive a octubre.»*
+
+**Legado `e-petplace-admin` @ `f1db76e`** — acto propio, empujado y verificado.
+
+## Qué se curó, y por qué fueron TRES cambios y no dos
+
+| # | dónde | antes | ahora |
+|---|---|---|---|
+| ① | `type Placa` | `activada_en: string \| null; mascota_id: string \| null` | `activada: boolean` |
+| ② | `Placas.tsx:93` | `p.mascota_id === null` | `!p.activada` |
+| ③ | `Placas.tsx:151` | `p.mascota_id ? '· activada' : ''` | `p.activada ? …` |
+
+🔴 **El tipo NO es un tercer cambio cosmético: es la causa.** Curar sólo los dos
+consumos dejaba viva la razón por la que el defecto era invisible — el compilador
+seguiría dando por ciertos dos campos que no viajan, y el próximo que escriba
+`p.mascota_id` en ese archivo no encontraría ninguna resistencia. **El tipo ahora
+es copia literal del `jsonb_build_object` de la función.**
+
+`tsc -b` verde · `npm run build` verde.
+
+## La lección — `L-498`
+
+Depositada en `docs/DEUDAS_CANONICAS.md`. **Número pedido con
+`pnpm proximo:ficha`, no elegido** (`L-: tope L-497 · PROXIMO LIBRE L-498`).
+
+> ***Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para
+> la pantalla.*** TypeScript no valida forma en runtime, así que escribir un
+> campo en el tipo **lo hace existir para todos menos para el usuario**: el
+> compilador lo ve, el editor lo autocompleta, el revisor lo lee como si
+> viniera — y la única que sabe la verdad es la pantalla, que no habla.
+
+**Lo que la hace cara: no falla.** No hay excepción ni rojo; hay dos números
+plausibles. Un `0` en «placas libres» se lee como dato, no como síntoma. Es
+*verosímil-falso* (L-139) entrando por una puerta nueva: **no por lo que un
+modelo inventa, sino por lo que el tipo promete.**
+
+⚠️ **Ningún gate de la casa lo ve, y queda escrito:** el typecheck da verde
+—el tipo es coherente consigo mismo—, el build sale, y `verify:diseno` no mira
+contratos. Lo cazó cotejar a mano el `jsonb_build_object` contra los campos
+consumidos.
+
+⇒ **La regla:** el tipo de un retorno `jsonb` **se copia del
+`jsonb_build_object` de la función, no se escribe de memoria**. Y su corolario,
+que no es sobre `jsonb`: vale para toda frontera donde el tipo lo declara el
+**consumidor** y no el productor — `RETURNS record`, un `as` sobre un `fetch`,
+un `JSON.parse`. *Donde el tipo se escribe a mano, el contrato se mide contra el
+productor o no se mide.*
+
+## Los tres actos del legado, verificados por SHA
+
+```
+c0aee5e  Placas · S113 fase 3                      (medido antes de empujar)
+79a6cbb  Retiro de Adopcion y Notificaciones       (S114-F · F4)
+f1db76e  Placas · la cura del contador             (excepción nombrada)
+         local f1db76e6b34e5c23... == origin f1db76e6b34e5c23...   ✅
+         commits sin pushear = 0
+```
+
+⚠️ **Sigue sin verificarse el deploy**: el legado despliega solo en Vercel al
+push a `main`, y no tengo acceso al dashboard. **Tres pushes ⇒ tres deploys**, y
+no vi ninguno.

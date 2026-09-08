@@ -28703,6 +28703,65 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-498` — Un tipo declarado sobre un `jsonb` es cierto para el compilador y falso para la pantalla
+
+**S114-F, hallazgo al medir un commit ajeno antes de empujarlo.** `Placas.tsx`
+del admin declaraba:
+
+```ts
+type Placa = { token: string; serie: number; activada_en: string | null; mascota_id: string | null }
+```
+
+y `listar_placas_de_lote` devuelve —medido contra la base viva, no leído de la
+migración— exactamente esto:
+
+```sql
+jsonb_build_object('serie', serie, 'token', token, 'activada', activada_en is not null)
+```
+
+**`mascota_id` no viaja. `activada_en` tampoco** (el campo se llama `activada`).
+Pero **TypeScript no valida la forma de un `jsonb` en runtime**: el tipo describe
+lo que el autor cree que viene, y el compilador lo da por cierto. Efecto medido:
+
+- `placas.filter((p) => p.mascota_id === null).length` ⇒ `undefined === null` es
+  **false** ⇒ **el contador de placas libres daba 0 siempre**, aunque el lote
+  entero estuviera sin activar.
+- `{p.mascota_id ? '· activada' : ''}` ⇒ `undefined` es falsy ⇒ **el marcador no
+  aparecía nunca**, ni en una placa activada.
+
+> ***Escribir un campo en el tipo lo hace existir para todos menos para el
+> usuario.*** El compilador lo ve, el editor lo autocompleta, el revisor lo lee
+> como si viniera — y la única que sabe la verdad es la pantalla, que no habla.
+
+🔴 **Y lo que la vuelve difícil de cazar: no falla.** No hay excepción, no hay
+`undefined is not an object`, no hay rojo. Hay **dos números plausibles**, y un
+`0` en «placas libres» se lee como un dato, no como un síntoma. Es la familia de
+*verosímil-falso* (L-139) entrando por una puerta nueva: **no por lo que el
+modelo inventa, sino por lo que el tipo promete.**
+
+⚠️ **Ningún gate de esta casa lo ve, y hay que decirlo:** el typecheck da verde
+—el tipo es coherente consigo mismo—, el build sale, y `verify:diseno` no mira
+contratos. Lo cazó **cotejar el `jsonb_build_object` de la función contra los
+campos que la pantalla consume**, a mano.
+
+⇒ **La regla: el tipo de un retorno `jsonb` se COPIA del `jsonb_build_object`
+de la función, no se escribe de memoria.** Si la función construye tres claves,
+el tipo tiene tres. *Y cuando el tipo tiene un campo que la función no arma, no
+es un tipo incompleto: es un tipo que miente con la autoridad del compilador.*
+
+**Corolario que no es sobre `jsonb`:** vale para toda frontera donde el tipo lo
+declara el consumidor y no el productor — `RETURNS jsonb`, `RETURNS record`, un
+`as` sobre un `fetch`, un `JSON.parse`. **Donde el tipo se escribe a mano, el
+contrato se mide contra el productor o no se mide.**
+
+*(Origen: el commit `c0aee5e` del admin legado, S113 fase 3. La función y la
+pantalla nacieron el mismo día ⇒ **el defecto es de origen, no deriva**: no fue
+que el modelo se moviera debajo. Curado en S114-F como excepción nombrada al
+«cero cambios al legado», con firma del founder.)*
+
+---
+
+
 ### `L-492` — Un gate que mide UNA dirección deja la otra sin vigilancia, y su silencio se lee como salud
 
 **El caso (S113-A · lote 2, 6-sep-2026).** Censando para escribir la puerta de
