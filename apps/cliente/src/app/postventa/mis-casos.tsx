@@ -9,11 +9,15 @@
  * CHANEL (Ley 16): la misma `FilaBandejaCaso` que usa el prestador — *un caso
  * no se ve distinto según quién lo mire*. Y **sin puntaje**: es una lista.
  *
- * ⚠️ **El plazo NO se muestra acá.** `CasoEnBandeja.plazoHasta` es el reloj
- * del PRESTADOR, y §2 de la letra es explícito: *«La familia no ve el reloj de
- * 48 h — un countdown sobre el incumplimiento ajeno convierte la espera en
- * espectáculo.»* La misma pieza, dos asientos: el prestador recibe `reloj` y
- * la familia no.
+ * ⚠️ **El plazo NO se muestra acá** — la misma pieza, dos asientos: el
+ * prestador recibe `reloj` y la familia no.
+ *
+ * 🔴 **Y la LEY no se repite acá: vive en `lib/postventa/voz-de-etapa.ts`.**
+ * ⏪ Este comentario declaraba §2 con todas sus letras… **y la pantalla del
+ * caso mostraba el plazo igual**. *Dos superficies del mismo arco diciéndose
+ * distinto, y la ley escrita dos veces en prosa es exactamente cómo pasa: dos
+ * textos que hoy coinciden y mañana no.* Allá el plazo es INEXPRESABLE, no
+ * «no se pasa».
  */
 
 import { useCallback, useMemo, useState } from 'react';

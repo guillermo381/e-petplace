@@ -68,6 +68,7 @@ import { fechaLargaHumana, horaCortaDeMensaje } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { useSinLeer } from '@/lib/postventa/useSinLeer';
 import { traducirCaso, type CasoParaLaPantalla } from '@/lib/postventa/caso';
+import { lineaDeEstadoParaFamilia, vocesDeLaEscalera, vozDeEtapa } from '@/lib/postventa/voz-de-etapa';
 import { CartaDeDevolucion } from '@/components/postventa/CartaDeDevolucion';
 import { PermisoWhatsApp } from '@/components/postventa/PermisoWhatsApp';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -381,35 +382,17 @@ export default function PantallaDelCaso() {
     );
   }
 
-  const VOZ_ETAPA: Record<EtapaDeLaEscalera, string> = {
-    recibido: t('postventa.etapaRecibido'),
-    con_prestador: t('postventa.etapaConPrestador'),
-    con_epetplace: t('postventa.etapaConCasa'),
-    resuelto: t('postventa.etapaResuelto'),
-    cerrado: t('postventa.etapaCerrado'),
-  };
 
   /* §3.1 · la línea de abajo, ENTERA. **El plazo lo compone la pantalla**: A
      manda `plazoHasta` crudo a propósito, porque el formato de fecha es i18n. */
-  const nombreEtapa = caso.etapaDeLaFila !== null ? VOZ_ETAPA[caso.etapaDeLaFila] : '';
-  /* 🔴 **EL PLAZO NO SE LE MUESTRA A LA FAMILIA, y esto era un defecto MÍO.**
-     Lo vi caminando: decía *«Estás en: Con el prestador · responde antes del
-     9/9/2026, 10:27:56 AM»* — y ahí hay TRES cosas mal a la vez.
-
-     ① §2 de la letra es explícito: *«la familia no ve el reloj de 48 h — un
-     countdown sobre el incumplimiento ajeno convierte la espera en
-     espectáculo»*. ② **«responde antes del» es una instrucción AL PRESTADOR**,
-     dicha a la familia, que no responde nada ahí. ③ y el formato salía de un
-     `toLocaleString()` crudo —`9/9/2026, 10:27:56 AM`—, que es el mismo
-     defecto de región que ya curé una vez en esta pantalla.
-
-     ⚠️ **Y lo que lo vuelve una lección y no un descuido: yo mismo escribí lo
-     contrario en `mis-casos.tsx`** —*«el plazo NO se muestra acá, es el reloj
-     del PRESTADOR»*— dos pantallas del MISMO arco diciéndose distinto. Ningún
-     gate mira eso: la coherencia entre dos superficies no la ve un typecheck.
-
-     La familia ve EN QUÉ ETAPA está. Nada más. */
-  const vozEstado = t('postventa.estasEn', { etapa: nombreEtapa });
+  /* 🔴 **LA LÍNEA DE ESTADO SALE DE LA FUENTE ÚNICA**, y el plazo es
+     INEXPRESABLE desde acá: `lineaDeEstadoParaFamilia` no recibe `plazoHasta`
+     y no puede recibirlo. Ver `voz-de-etapa.ts` para el porqué —lo escribí de
+     dos maneras distintas en dos pantallas del mismo arco, y ningún gate lo
+     vio—. *Dos lugares que coinciden hoy son dos lugares que pueden dejar de
+     coincidir, y el que se desvíe no falla: dice otra cosa.* */
+  const nombreEtapa = caso.etapaDeLaFila !== null ? vozDeEtapa(t, caso.etapaDeLaFila) : '';
+  const vozEstado = lineaDeEstadoParaFamilia(t, caso.etapaDeLaFila) ?? ''
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -467,7 +450,7 @@ export default function PantallaDelCaso() {
                       },
                     }
                   : null)}
-                voces={VOZ_ETAPA}
+                voces={vocesDeLaEscalera(t)}
                 vozEstado={vozEstado}
                 abierta={escaleraAbierta}
                 onAlternar={() => setEscaleraAbierta((v) => !v)}
