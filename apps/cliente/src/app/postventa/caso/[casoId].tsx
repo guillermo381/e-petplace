@@ -1,0 +1,440 @@
+/**
+ * S114-C · LA PANTALLA DEL CASO — §3 de `DIRECCION_POSTVENTA`.
+ *
+ * TESIS (Ley 14): *arriba sé en qué paso estoy; abajo, la conversación.*
+ *
+ * FIRMA (Ley 15): **es la escalera del pedido y el chat de la adopción**, sin
+ * una pieza nueva. §3 lo pide con esas palabras: *«no aprendo nada nuevo»*.
+ * `SuperficieChat` trae el teclado que no tapa, la lista invertida anclada al
+ * final y la barra pegada al teclado — **los tres requisitos de N16 vienen con
+ * ella**, no se re-implementan acá.
+ *
+ * CHANEL (Ley 16): la cabecera **nunca dice el monto** (§3.2) — la plata se
+ * habla en su carta. La pieza de B lo hace inexpresable: no tiene por dónde.
+ *
+ * ── LOS TRES ASIENTOS (§3.3) ────────────────────────────────────────────
+ * Los míos a la derecha; el prestador y la casa a la izquierda, **cada uno con
+ * su cara**. El color marca DE QUIÉN es, jamás importancia (N23).
+ *
+ * ── EL CONTRATO DE PUREZA DE `SuperficieChat`, y por qué el item es gordo ──
+ * Las filas están memoizadas por item, así que **todo lo que la burbuja dibuja
+ * viaja EN el item** — incluido el estado de envío y el reintento. Un
+ * `renderMensaje` que cerrara sobre estado de la pantalla no repintaría cuando
+ * ese estado cambie, y «cero filas redibujadas» sería un número pagado con
+ * datos viejos en pantalla.
+ *
+ * ── §3.4 · «QUIERO HABLAR CON ALGUIEN» ──────────────────────────────────
+ * Al pie, **siempre alcanzable, jamás en un menú**. Va en el encabezado fijo
+ * y no en la lista: en la lista se iría con el scroll, y *nada de lo que hace
+ * la máquina puede tapar esa puerta*.
+ */
+
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import {
+  BarraEscribir,
+  BurbujaMensaje,
+  CabeceraCaso,
+  CARA_EN_HILO,
+  Encabezado,
+  EscaleraCaso,
+  EsqueletoGrupo,
+  Esqueleto,
+  EstadoVacio,
+  EventoDelHilo,
+  Icono,
+  SuperficieChat,
+  Texto,
+  spacing,
+  useTheme,
+  type EtapaCaso as EtapaDeLaEscalera,
+  type FinalCaso,
+} from '@epetplace/ui';
+import {
+  enviarMensajeDeCaso,
+  leerCaso,
+  leerMensajesDeCaso,
+  type AsientoCaso,
+  type MensajeCaso,
+} from '@epetplace/api';
+
+import { fechaLargaHumana, horaCortaDeMensaje } from '@epetplace/i18n';
+
+import { useTraduccion } from '@/i18n';
+import { traducirCaso, type CasoParaLaPantalla } from '@/lib/postventa/caso';
+import { CartaDeDevolucion } from '@/components/postventa/CartaDeDevolucion';
+import { PermisoWhatsApp } from '@/components/postventa/PermisoWhatsApp';
+import { vozServicio } from '@/lib/voz-servicio';
+
+type Fase<T> = T | 'cargando' | 'error' | 'noEsTuyo';
+
+/**
+ * La fila del hilo. **Lleva TODO lo que su burbuja dibuja** — ver el contrato
+ * de pureza de la cabecera.
+ */
+type Fila = {
+  clave: string;
+  mensaje: MensajeCaso;
+  /** Optimista: todavía viajando, o falló y se puede reintentar. */
+  estado?: 'enviando' | 'no_se_envio';
+  /** El texto original, para poder reintentarlo sin releer el hilo. */
+  textoCrudo?: string;
+};
+
+/**
+ * 🔴 EL MAPA DEL FINAL — **y acá se cobró la divergencia de vocabulario.**
+ *
+ * Tenía `t(`postventa.final_${caso.finalAlterno}`)`, e interpolar así **une
+ * dos vocabularios distintos sin que nadie lo note**: `finalAlterno` viene en
+ * el nombre de B (`resuelto_entre_ustedes`) y mis llaves estaban escritas con
+ * el de A (`resuelto_entre_partes`). *El resultado no fue un error: fue la
+ * LLAVE CRUDA en pantalla* — `postventa.final_resuelto_entre_ustedes`, leída
+ * por una familia. **Ningún typecheck lo ve: la interpolación produce un
+ * `string` y el cast lo deja pasar.**
+ *
+ * ⇒ `Record` completo sobre el tipo de B: un final nuevo no compila.
+ */
+const VOZ_FINAL: Record<FinalCaso, 'postventa.final_resuelto_entre_partes' | 'postventa.final_retirado' | 'postventa.final_sin_lugar'> = {
+  resuelto_entre_ustedes: 'postventa.final_resuelto_entre_partes',
+  retirado: 'postventa.final_retirado',
+  sin_lugar: 'postventa.final_sin_lugar',
+};
+
+const VOZ_ASIENTO: Record<AsientoCaso, 'postventa.asientoCasa' | 'postventa.asientoPrestador' | 'postventa.asientoFamilia'> = {
+  casa: 'postventa.asientoCasa',
+  prestador: 'postventa.asientoPrestador',
+  familia: 'postventa.asientoFamilia',
+};
+
+export default function PantallaDelCaso() {
+  const { theme } = useTheme();
+  const { t, idioma } = useTraduccion();
+  const { casoId } = useLocalSearchParams<{ casoId?: string }>();
+
+  const [caso, setCaso] = useState<Fase<CasoParaLaPantalla>>('cargando');
+  const [hilo, setHilo] = useState<Fila[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [escaleraAbierta, setEscaleraAbierta] = useState(true);
+  const [borrador, setBorrador] = useState('');
+  /* Las filas optimistas viven en una ref además del estado: al recargar el
+     hilo desde el motor hay que conservarlas, y leerlas del estado adentro de
+     un callback traería la copia del render viejo. */
+  const optimistasRef = useRef<Fila[]>([]);
+
+  const cargar = useCallback(async () => {
+    if (typeof casoId !== 'string' || casoId.length === 0) return;
+    const [c, m] = await Promise.all([leerCaso(casoId), leerMensajesDeCaso(casoId)]);
+
+    if (!c.ok) {
+      setCaso(c.codigo === 'no_es_tuyo' ? 'noEsTuyo' : 'error');
+      return;
+    }
+    setCaso(traducirCaso(c.data));
+
+    if (m.ok) {
+      const delMotor: Fila[] = m.data.mensajes.map((x) => ({ clave: x.id, mensaje: x }));
+      /* Las optimistas que el motor todavía no devuelve siguen arriba; las
+         que ya volvieron se caen solas al coincidir el id. */
+      const idsDelMotor = new Set(delMotor.map((f) => f.clave));
+      optimistasRef.current = optimistasRef.current.filter((f) => !idsDelMotor.has(f.clave));
+      /* ⚠️ ASCENDENTE — viejo primero, el orden en que el motor entrega
+         (`ORDER BY m.creado_en, m.id`, medido en la migración). Las optimistas
+         son lo MÁS NUEVO y por eso van al final. La inversión para la lista
+         ocurre en UN solo lugar, abajo. */
+      setHilo([...delMotor, ...optimistasRef.current]);
+      setCursor(m.data.cursor);
+    }
+  }, [casoId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void (async () => {
+        if (vigente) await cargar();
+      })();
+      return () => {
+        vigente = false;
+      };
+    }, [cargar]),
+  );
+
+  /**
+   * 🔴 **Trae los SIGUIENTES, no los anteriores** — y el nombre lo dice porque
+   * la prop de la pieza se llama así. Medido en el motor: el cursor filtra
+   * `(creado_en, id) > cursor` (`20260911610000:428`), así que la primera
+   * página son los 50 MÁS VIEJOS y cada página siguiente trae los más nuevos.
+   * La lista invertida, en cambio, pide más cuando el dedo sube hacia lo viejo.
+   *
+   * ⚠️ **Van en direcciones opuestas, y hoy no se nota porque ningún caso llega
+   * a 50 mensajes.** Es un defecto DORMIDO, y su modo de falla es feo: subir en
+   * un hilo largo mostraría lo que vino DESPUÉS. Se reporta a A —paginar hacia
+   * atrás no existe en el motor— y no se disfraza acá: agregar al final es lo
+   * correcto para el arreglo ascendente, y lo que falta es del otro lado.
+   */
+  const cargarAnteriores = useCallback(async () => {
+    if (typeof casoId !== 'string' || cursor === null) return;
+    const m = await leerMensajesDeCaso(casoId, cursor);
+    if (!m.ok) return;
+    setHilo((prev) => [...prev, ...m.data.mensajes.map((x) => ({ clave: x.id, mensaje: x }))]);
+    setCursor(m.data.cursor);
+  }, [casoId, cursor]);
+
+  const enviar = useCallback(
+    async (texto: string) => {
+      if (typeof casoId !== 'string') return;
+      const claveLocal = `local-${Date.now()}`;
+      const optimista: Fila = {
+        clave: claveLocal,
+        estado: 'enviando',
+        textoCrudo: texto,
+        mensaje: {
+          id: claveLocal,
+          autor: 'familia',
+          tipo: 'mensaje',
+          cuerpo: texto,
+          creadoEn: new Date().toISOString(),
+        },
+      };
+      optimistasRef.current = [optimista, ...optimistasRef.current];
+      setHilo((prev) => [optimista, ...prev]);
+      setBorrador('');
+
+      const r = await enviarMensajeDeCaso(casoId, texto);
+      if (r.ok) {
+        await cargar();
+        return;
+      }
+      /* «No se envió · Reintentar» — el texto NO se pierde: viaja en el item,
+         que es de donde el reintento lo va a sacar. */
+      const fallida: Fila = { ...optimista, estado: 'no_se_envio' };
+      optimistasRef.current = optimistasRef.current.map((f) => (f.clave === claveLocal ? fallida : f));
+      setHilo((prev) => prev.map((f) => (f.clave === claveLocal ? fallida : f)));
+    },
+    [casoId, cargar],
+  );
+
+  const renderFila = useCallback(
+    (f: Fila) => {
+      /* §3.3 · los hechos del trámite van CENTRADOS, como etiqueta. */
+      if (f.mensaje.tipo === 'hecho') {
+        return <EventoDelHilo etiqueta={f.mensaje.cuerpo} />;
+      }
+
+      const hora = horaCortaDeMensaje(f.mensaje.creadoEn, idioma);
+
+      if (f.mensaje.autor === 'familia') {
+        /* 🔴 LAS TRES RAMAS SON EXPLÍCITAS y no un spread condicional: la
+           unión de B exige que `no_se_envio` traiga **su salida Y su palabra
+           juntas** —*un fallo sin salida deja a la persona creyendo que mandó
+           algo que no mandó*— y un spread no se lo puede probar al tipo. */
+        if (f.estado === 'no_se_envio' && f.textoCrudo !== undefined) {
+          const texto = f.textoCrudo;
+          return (
+            <BurbujaMensaje
+              mio
+              texto={f.mensaje.cuerpo}
+              hora={hora}
+              estado="no_se_envio"
+              onReintentar={() => {
+                void enviar(texto);
+              }}
+              vozReintentar={t('postventa.noSeEnvio')}
+            />
+          );
+        }
+        return (
+          <BurbujaMensaje
+            mio
+            texto={f.mensaje.cuerpo}
+            hora={hora}
+            estado={f.estado === 'enviando' ? 'enviando' : 'enviado'}
+          />
+        );
+      }
+
+      /* §3.3 · los otros dos asientos, cada uno con su cara y su nombre. El
+         color marca DE QUIÉN es, jamás importancia (N23). */
+      return (
+        <BurbujaMensaje
+          mio={false}
+          texto={f.mensaje.cuerpo}
+          hora={hora}
+          autor={t(VOZ_ASIENTO[f.mensaje.autor])}
+          cara={
+            <View
+              style={{
+                width: CARA_EN_HILO,
+                height: CARA_EN_HILO,
+                borderRadius: CARA_EN_HILO / 2,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.bg.overlay,
+              }}
+            >
+              <Icono nombre={f.mensaje.autor === 'casa' ? 'ayuda' : 'atender'} tamano={16} />
+            </View>
+          }
+        />
+      );
+    },
+    [enviar, idioma, t, theme.bg.overlay],
+  );
+
+  /* 🔴 EL ÚNICO `reverse`, y está acá para que sea el único — copiado del
+     vecino ya gateado (`armarHilo`, `packages/domain/src/hiloAdopcion.ts:182`),
+     que resolvió esto mismo con su razón escrita: *«agrupar sobre la lista ya
+     invertida es donde nacen los grupos dados vuelta»*.
+
+     Lo caminé y lo vi al revés: «Se resolvió…» arriba y «Recibimos tu caso»
+     abajo. La causa no era el orden del motor —entrega ascendente, medido— era
+     que `SuperficieChat` es INVERTIDA y yo le pasaba el arreglo tal cual. *El
+     patrón estaba resuelto a dos archivos de distancia y escribí uno nuevo.*
+
+     Los OBJETOS de fila son los mismos: invertir un arreglo no rompe la
+     memoización por item que exige el contrato N16 de B. */
+  const filas = useMemo(() => [...hilo].reverse(), [hilo]);
+
+  if (caso === 'cargando') {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+        <View style={{ padding: spacing[5] }}>
+          <EsqueletoGrupo>
+            <Esqueleto alto={64} />
+            <Esqueleto alto={44} />
+            <Esqueleto alto={120} />
+          </EsqueletoGrupo>
+        </View>
+      </View>
+    );
+  }
+
+  if (caso === 'error' || caso === 'noEsTuyo') {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+        <EstadoVacio titulo={t(caso === 'noEsTuyo' ? 'postventa.casoNoEsTuyo' : 'postventa.casoNoSePudo')} />
+      </View>
+    );
+  }
+
+  const VOZ_ETAPA: Record<EtapaDeLaEscalera, string> = {
+    recibido: t('postventa.etapaRecibido'),
+    con_prestador: t('postventa.etapaConPrestador'),
+    con_epetplace: t('postventa.etapaConCasa'),
+    resuelto: t('postventa.etapaResuelto'),
+    cerrado: t('postventa.etapaCerrado'),
+  };
+
+  /* §3.1 · la línea de abajo, ENTERA. **El plazo lo compone la pantalla**: A
+     manda `plazoHasta` crudo a propósito, porque el formato de fecha es i18n. */
+  const nombreEtapa = caso.etapaDeLaFila !== null ? VOZ_ETAPA[caso.etapaDeLaFila] : '';
+  const vozEstado =
+    caso.plazoHasta !== null
+      ? t('postventa.estasEnConPlazo', {
+          etapa: nombreEtapa,
+          cuando: new Date(caso.plazoHasta).toLocaleString(),
+        })
+      : t('postventa.estasEn', { etapa: nombreEtapa });
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <Encabezado variante="navegacion" titulo={t('postventa.tituloCaso')} atras onAtras={() => router.back()} />
+      <SuperficieChat<Fila>
+        encabezado={
+          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3], gap: spacing[3] }}>
+            <CabeceraCaso
+              objeto={{
+                /* La voz de familia del comprable, por el riel de la casa —
+                   el motor manda el CÓDIGO (`paseo`) y pintarlo crudo es
+                   exactamente lo que `vozServicio` existe para evitar. */
+                nombre: vozServicio(t, caso.objeto.titulo) ?? t('postventa.objetoSinNombre'),
+                /* Y la fecha por `fechaLargaHumana`, no por `toLocaleDateString`:
+                   ése daba `9/7/2026` —formato de otra región— sobre una app
+                   que ya tiene su riel de fechas. */
+                fecha: caso.objeto.fecha !== null ? fechaLargaHumana(caso.objeto.fecha, idioma) : '',
+              }}
+              contraparte={{ nombre: t('postventa.asientoPrestador') }}
+            />
+
+            {/* §3.1 · la escalera. **No se dibuja cuando la etapa no vive en
+                ella** —lo dice el catálogo del motor, no un `switch` acá. */}
+            {caso.etapaDeLaFila !== null ? (
+              <EscaleraCaso
+                etapa={caso.etapaDeLaFila}
+                {...(caso.finalDeLaFila !== null
+                  ? {
+                      /* §3.1 · el final REEMPLAZA la línea de abajo y la fila
+                         queda congelada donde estaba. ⏪ Antes se dibujaba la
+                         etiqueta sola, sin escalera, porque la etapa previa se
+                         perdía en el motor. A entregó `etapaEnEscalera` y ahora
+                         se cumple entero. */
+                      final: {
+                        tipo: caso.finalDeLaFila,
+                        etiqueta: t(VOZ_FINAL[caso.finalDeLaFila]),
+                      },
+                    }
+                  : null)}
+                voces={VOZ_ETAPA}
+                vozEstado={vozEstado}
+                abierta={escaleraAbierta}
+                onAlternar={() => setEscaleraAbierta((v) => !v)}
+                etiquetaAlternar={t('postventa.escaleraAlternar')}
+                acento="control"
+              />
+            ) : caso.finalDeLaFila !== null ? (
+              /* Sin paso en la fila pero con final: se dice el final solo.
+                 Hoy es inalcanzable —`etapaEnEscalera` siempre viene— y se
+                 conserva porque el tipo lo admite. */
+              <Texto variante="cuerpo">{t(VOZ_FINAL[caso.finalDeLaFila])}</Texto>
+            ) : null}
+
+            {/* §4 · LA CARTA DE LA PLATA — UNA a la vez (§3.3). */}
+            {caso.accionPendiente === 'elegir_devolucion' && (
+              <CartaDeDevolucion casoId={caso.casoId} onElegido={() => void cargar()} />
+            )}
+
+            {/* ⓶ EL PERMISO DE WHATSAPP — firma del founder: **una vez, en
+                contexto, en el caso recién creado**. Va antes del pie porque
+                pertenece a este caso; el pie es de la casa. Con el caso
+                cerrado no se pregunta: no hay avisos que mandar. */}
+            {!caso.cerrado && <PermisoWhatsApp casoId={caso.casoId} />}
+
+            {/* §3.4 · siempre alcanzable, jamás en un menú. Va en el
+                encabezado FIJO: en la lista se iría con el scroll. */}
+            <Texto variante="apoyo">{t('postventa.hablarConAlguien')}</Texto>
+          </View>
+        }
+        datosDelMasNuevoAlMasViejo={filas}
+        claveDe={(f) => f.clave}
+        renderMensaje={renderFila}
+        onCargarAnteriores={() => void cargarAnteriores()}
+        barra={
+          caso.cerrado ? (
+            /* §3.3 · la barra se REEMPLAZA por una línea en el mismo lugar.
+               Sigo pudiendo leer todo. */
+            <BarraEscribir enLectura={t('postventa.conversacionCerrada')} />
+          ) : (
+            <BarraEscribir
+              valor={borrador}
+              onCambio={(v) => {
+                setBorrador(v);
+                /* §3.1: «se colapsa sola cuando empiezo a escribir». Sólo al
+                   empezar — colapsarla en cada tecla pelearía con quien la
+                   abrió a propósito. */
+                if (v.length > 0 && borrador.length === 0) setEscaleraAbierta(false);
+              }}
+              onEnviar={(texto) => {
+                void enviar(texto);
+              }}
+              placeholder={t('postventa.escribirPlaceholder')}
+              glifoEnviar={<Icono nombre="enviar" tamano={20} />}
+              etiquetaEnviar={t('postventa.enviarMensaje')}
+            />
+          )
+        }
+      />
+    </View>
+  );
+}

@@ -56,6 +56,20 @@ const HUELLA = 56
 
 interface ConociendoloBase {
   /**
+   * 🔴 LA SEÑAL REAL, OBLIGATORIA SIN DEFAULT: `estado_vida === 'fallecida'`,
+   * resuelta por la pantalla contra el perfil que ya tiene cargado.
+   *
+   * ⏪ **El piso de esta pieza colgaba SÓLO de `theme.mode === 'memorial'`, y
+   * ése es un interruptor que nadie aprieta** (`D-1021`: nadie monta
+   * `<ThemeProvider memorial>` en ninguna de las dos apps). *La protección
+   * estaba escrita, se leía como protección, y la app igual le pedía algo a
+   * quien perdió a su animal.*
+   *
+   * **`perdida` NO es memorial** (firma del founder, 7-sep).
+   */
+  enMemorial: boolean
+
+  /**
    * 🔴 **CINCO BOOLEANOS, CERO NÚMEROS.** Van a las cinco almohadillas y a
    * ningún otro lado. La pieza no los cuenta, no los suma y no los muestra.
    */
@@ -106,7 +120,10 @@ export function TarjetaConociendolo(props: TarjetaConociendoloProps) {
 
   /* ⛔ Un anillo de progreso sobre una vida que terminó mide algo que ya no
      va a cambiar. */
-  if (theme.mode === 'memorial') return null
+    /* 🔴 **EL DATO MANDA, Y `theme.mode` SE CONSERVA EN EL `OR`** — misma cura
+     que `LineaAlgoSalioDistinto`: la galería SÍ monta el sub-tema. *Lo que
+     estaba mal no era mirar el tema: era mirar SÓLO el tema.* */
+  if (props.enMemorial || theme.mode === 'memorial') return null
 
   const completo = props.completo === true
 

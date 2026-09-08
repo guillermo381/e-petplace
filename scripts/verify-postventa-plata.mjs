@@ -57,6 +57,12 @@
 import { dbQuery } from './lib-db.mjs';
 
 const TABLAS_CANDIDATAS = ['casos_postventa', 'postventa_casos', 'casos'];
+/* 🔴 EL CONTRATO SE ESCRIBIÓ ANTES QUE LA TABLA, Y EL NOMBRE NO COINCIDIÓ.
+   Este arnés pedía `camino_plata`; A construyó `camino`, con el vocabulario
+   `aplicar_reembolso | declarado_sobre_pago` (CHECK medido). *El gate se
+   adapta al objeto — el objeto no se renombra para que el gate pase.* */
+const COL_CAMINO = 'camino';
+const VAL_DECLARADO = 'declarado_sobre_pago';
 
 // ── ① Dos objetos REALES que discriminan: uno con evento y uno sin él ─────
 let conEvento, sinEvento;
@@ -101,16 +107,16 @@ function consultaSobre(fuenteCasos) {
         from casos k
     )
     select etiqueta, camino_plata, tiene_evento,
-           (camino_plata = 'declarado' and tiene_evento) as es_rojo
+           (camino_plata = '${VAL_DECLARADO}' and tiene_evento) as es_rojo
       from marcados order by etiqueta`;
 }
 
 const CONTROLES = `
   select '1 · NEGATIVO declarado sobre objeto CON evento'::text as etiqueta,
          'cita'::text as objeto_tipo, '${conEvento}'::uuid as objeto_id,
-         'declarado'::text as camino_plata
+         '${VAL_DECLARADO}'::text as camino_plata
   union all
-  select '2 · positivo declarado sobre objeto SIN evento', 'cita', '${sinEvento}'::uuid, 'declarado'
+  select '2 · positivo declarado sobre objeto SIN evento', 'cita', '${sinEvento}'::uuid, '${VAL_DECLARADO}'
   union all
   select '3 · positivo aplicar_reembolso sobre objeto CON evento', 'cita', '${conEvento}'::uuid, 'aplicar_reembolso'`;
 
@@ -151,7 +157,7 @@ const cols = dbQuery(`
    join pg_class cl on cl.oid = a.attrelid join pg_namespace n on n.oid = cl.relnamespace
   where n.nspname = 'public' and cl.relname = '${tabla}' and a.attnum > 0 and not a.attisdropped`,
 )[0].c.split(',');
-const faltan = ['objeto_tipo', 'objeto_id', 'camino_plata'].filter((c) => !cols.includes(c));
+const faltan = ['objeto_tipo', 'objeto_id', COL_CAMINO].filter((c) => !cols.includes(c));
 if (faltan.length) {
   console.error(`\n🟠 NO CONCLUYENTE · \`${tabla}\` existe pero le faltan columnas: ${faltan.join(', ')}`);
   console.error('   §6 exige registrar por cuál de los dos caminos salió la plata.');
@@ -159,9 +165,9 @@ if (faltan.length) {
 }
 
 const reales = dbQuery(consultaSobre(`
-  select coalesce(estado::text,'?') || ' · ' || id::text as etiqueta,
-         objeto_tipo, objeto_id, camino_plata
-    from ${tabla} where camino_plata is not null`));
+  select coalesce(etapa::text,'?') || ' · clase ' || clase::text || ' · ' || id::text as etiqueta,
+         objeto_tipo, objeto_id, ${COL_CAMINO} as camino_plata
+    from ${tabla} where ${COL_CAMINO} is not null`));
 const rojos = reales.filter((r) => r.es_rojo);
 console.log(`\n  casos con camino de plata registrado: ${reales.length}`);
 if (rojos.length) {

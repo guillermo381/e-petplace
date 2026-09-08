@@ -60,7 +60,7 @@
 
 import { useState } from 'react';
 import { Linking, ScrollView, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton, CeldaNavegacion, Encabezado, Tarjeta, Texto, spacing, useTheme,
@@ -131,7 +131,20 @@ export default function AyudaCuenta() {
           </View>
         </Tarjeta>
 
-        {/* ② LOS LEGALES — se navegan (N21: el grupo rotulado va en carta).
+        {/* ② MIS CASOS — §: «Mis casos en Cuenta > Ayuda, con los abiertos
+            arriba». Va DESPUÉS del soporte y ANTES de los legales: quien entra
+            acá viene a resolver algo, y un caso abierto es lo más cerca de
+            resuelto que tiene. */}
+        <Tarjeta>
+          <CeldaNavegacion
+            icono="caso"
+            titulo={t('cuenta.misCasosTitulo')}
+            detalle={t('cuenta.misCasosDetalle')}
+            onPress={() => router.push('/postventa/mis-casos')}
+          />
+        </Tarjeta>
+
+        {/* ③ LOS LEGALES — se navegan (N21: el grupo rotulado va en carta).
 
             🔴 **UNA fila, no dos.** ⏪ Nacieron dos («Términos» y
             «Privacidad», cada una a su documento) y **A las corrigió con la

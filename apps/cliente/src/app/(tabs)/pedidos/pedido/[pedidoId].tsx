@@ -53,6 +53,7 @@ import {
   Hoja,
   Icono,
   Insignia,
+  LineaAlgoSalioDistinto,
   SelectorOpcion,
   Tarjeta,
   Separador,
@@ -77,6 +78,11 @@ import {
   type MascotaResumen,
 } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
+
+import { cierreDelPedido } from '@/lib/postventa/cierre-del-pedido';
+import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
+import { useCasoDelObjeto } from '@/lib/postventa/useCasoDelObjeto';
+import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
 import { FilaMonto } from '@/components/despensa-piezas';
 import { escaleraDePedido, escaleraMuda, type VocesEscalera } from '@/lib/despensa/escalera';
 import { ventanaVencida } from '@/lib/despensa/ventana';
@@ -93,6 +99,8 @@ export default function DespensaPedido() {
   const { pedidoId } = useLocalSearchParams<{ pedidoId: string }>();
 
   const [detalle, setDetalle] = useState<Fase<DetallePedido>>('cargando');
+  /* Lo que la puerta necesita del motor (§1 · §5). */
+  const diasDeVentana = useVentanaDeCaso();
   const [codigo, setCodigo] = useState<string | null>(null);
   /** LA FACTURA del pedido. `null` = todavía no hay factura emitida —
    *  **es normal, no un fallo**: medido, 6 facturas sobre 23 pedidos. */
@@ -238,6 +246,64 @@ export default function DespensaPedido() {
   function destinoDe(linea: LineaDePedido) {
     return linea.destino;
   }
+
+  /* ══ S114-C · LA PUERTA (§1) ══════════════════════════════════════════
+     🔴 **EL CIERRE DE UN PEDIDO NO ES SU ENTREGA: ES QUE HAYA TERMINADO.**
+     Lo tenía anclado en `entregado_en` y **eso dejaba sin puerta justo a las
+     dos fallas de clase 1 del catálogo** — `no_entregado` («No llegó») y
+     `cancelado_vendedor` («Lo canceló el vendedor»)—, porque en las dos el
+     pedido **nunca se entregó** y `entregado_en` es `null`. *La puerta se
+     abría para todo salvo para los casos en que el motor YA SABE que a la
+     familia le fallaron, que son los que la letra resuelve sola.*
+
+     Lo destapó la corrección de la mesa: si «todo lo que la letra llama caso
+     entra por ahí, **sin excepción**», entonces las tres narrativas
+     terminales tienen que llegar.
+
+     ⚠️ **Y `actualizado_en` es una APROXIMACIÓN, dicha y no disimulada:** es
+     la última escritura de la fila, no el instante en que el pedido terminó,
+     y cualquier update posterior la corre hacia adelante. **Se elige a
+     propósito el error que ABRE y no el que cierra:** el motor rebota
+     `fuera_de_ventana` si corresponde —está en el contrato pedido a A—,
+     mientras que negar la puerta deja a la familia sin lo que la letra ya le
+     prometió, y de eso no se entera nadie. **La cura de raíz es un
+     `cerrado_en` por objeto, y va en el pedido a A.** */
+
+  /* Mientras viaja no hay puerta.
+
+     🔴 **`estadoVida` NO SE PASA, y es una decisión, no un olvido.** §1 apaga
+     la puerta «con la mascota en memorial», y **un pedido no tiene UNA
+     mascota**: sus ítems pueden ir a destinos distintos y el sujeto de la
+     compra es el hogar. Elegir una para aplicarle la regla sería inventar un
+     sujeto que el objeto no tiene. *La regla no aplica acá y decirlo así es
+     más honesto que mandarle un `'activa'` que nadie midió.*
+
+     ⏪ Acá decía que `casoAbierto` no se pasaba «porque el motor no existe».
+     **Ya existe** (A3), así que se pregunta. */
+  const casoAbierto = useCasoDelObjeto(
+    'pedido',
+    typeof detalle === 'object' ? detalle.pedido.pedido_id : null,
+  );
+
+  const puerta = veredictoDeLaPuerta({
+    cerradaEn: typeof detalle === 'object' ? cierreDelPedido(detalle) : null,
+    diasDeVentana,
+    ...(casoAbierto != null ? { casoAbierto } : null),
+    voces: {
+      disponible: t('postventa.puerta'),
+      fueraDeVentana: t('postventa.puertaFueraDeVentana'),
+      casoAbierto: t('postventa.puertaCasoAbierto'),
+    },
+  });
+
+  const abrirLaPuerta = () => {
+    const destino = destinoDeLaPuerta(
+      puerta,
+      'pedido',
+      typeof detalle === 'object' ? detalle.pedido.pedido_id : null,
+    );
+    if (destino !== null) router.push(destino);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -749,16 +815,64 @@ export default function DespensaPedido() {
               </View>
             ) : detalle.pedido.narrativa !== 'cancelado' ? (
               <View style={{ paddingHorizontal: spacing[5], gap: spacing[2] }}>
+                {/* ══ S114-C · DOS PUERTAS QUE NO COMPITEN ═══════════════
+                    **Ratificación con corrección de la mesa (7-sep).** Mi
+                    primera lectura las trató como el mismo sistema —y por
+                    eso las hizo excluyentes: donde había puerta, la otra
+                    desaparecía—. **No son dos sistemas de postventa: son
+                    dos cosas distintas**, y la letra lo dice sola cuando
+                    aclara que *«¿dónde está mi pedido?» NO es un caso*.
+
+                    ① **«¿Algo salió distinto?» es la ÚNICA puerta de
+                       reclamo.** Todo lo que la letra llama caso entra por
+                       ahí, sin excepción y sin solapamiento.
+                    ② **WhatsApp queda SÓLO para lo que explícitamente no es
+                       un caso** — y por eso lo que cambió no fue su
+                       condición: fue su NOMBRE.
+
+                    🔴 *Lo que estaba mal no era que convivieran: era que se
+                    llamaban parecido.* «Tengo un problema» y «¿Algo salió
+                    distinto?» le piden a la familia que adivine cuál le
+                    toca, **y la que elija mal la deja sin lo que la letra ya
+                    le prometió.** Con «Necesito ayuda con este pedido» cada
+                    una dice de qué es, y pueden estar juntas sin que nadie
+                    tenga que elegir a ciegas. */}
                 <Boton
                   variante="secundario"
                   bloque
-                  etiqueta={t('despensa.tengoUnProblema')}
+                  etiqueta={t('despensa.necesitoAyudaPedido')}
                   onPress={() => void abrirWhatsApp(detalle.pedido.numero_orden)}
                 />
                 {/* §8.4 — el botón dice A DÓNDE va y EN QUÉ HORARIO. */}
                 <Texto variante="apoyo">{t('despensa.problemaDetalle')}</Texto>
               </View>
             ) : null}
+
+            {/* ══ S114-C · LA PUERTA DEL RECLAMO, GOBERNADA SOLA ═════════
+                🔴 **Vive AFUERA del ternario de arriba, y ése es el punto.**
+                Estaba adentro de su rama del medio, así que un pedido
+                `cancelado` no la veía **y `cancelado_vendedor` es un motivo
+                de clase 1 del catálogo**: la familia a la que el vendedor le
+                canceló el pedido se quedaba sin puerta.
+
+                ① de la mesa dice *«todo lo que la letra llama caso entra por
+                ahí, sin excepción»*. Una excepción escondida en la forma de
+                un `else` es igual de excepción — y ésta no se veía porque el
+                ternario decide por narrativa y la puerta decide por cierre.
+                **Ahora la gobierna `puerta.hay` y nada más.** */}
+            {puerta.hay && (
+              <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[2] }}>
+                {/* `false` con su razón, no por omisión: **un pedido no
+                    tiene UNA mascota** (ver la nota del veredicto, arriba),
+                    así que la regla de memorial no aplica y elegir una para
+                    aplicársela sería inventarle un sujeto. */}
+                <LineaAlgoSalioDistinto
+                  estado={puerta.estado}
+                  enMemorial={false}
+                  onPress={abrirLaPuerta}
+                />
+              </View>
+            )}
           </>
         )}
       </ScrollView>

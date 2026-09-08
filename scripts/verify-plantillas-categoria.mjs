@@ -42,6 +42,40 @@
  * · no existe `cat_notificacion_tipos.plantilla_whatsapp` ⇒ no se puede saber
  *   qué está cableado
  *
+ * ── ④ CONTRA QUÉ WABA MIDIÓ — DICHO, NO INFERIDO ────────────────────────
+ * **Hay DOS WABAs con el mismo nombre en el portafolio**, así que *una medición
+ * que no nombra su `WABA_ID` no es interpretable: un identificador correcto y
+ * uno equivocado se leen igual.*
+ *
+ * **La edge no lo devuelve** (ver abajo), pero **no hace falta que lo derive**:
+ * `supabase secrets list` publica, por cada secreto, **`sha256` CRUDO de su
+ * valor** (censo de A, `S114-A-CENSO-DIGEST-SECRETS.md`). ⇒ el gate **compara
+ * el digest publicado contra los candidatos declarados** y confirma cuál está
+ * configurado **sin leer el secreto nunca**.
+ *
+ * ⚠️ **No es heredar la respuesta de A: es re-correr su método.** El gate
+ * vuelve a hacer la comparación en cada corrida, así que **el día que alguien
+ * cambie el secreto al WABA gemelo, se pone rojo solo.**
+ *
+ * 🔒 **Sólo lee la entrada `META_WABA_ID`.** El listado trae los digests de
+ * TODOS los secretos y —por el propio hallazgo de A— para los de baja entropía
+ * *el digest ES el valor*. Este gate no los imprime ni los toca.
+ *
+ * ── 🔴 LO QUE SIGUE SIN PODERSE MEDIR DESDE ACÁ ─────────────────────────
+ * **Hay DOS WABAs con el mismo nombre en el portafolio.** ⇒ *una medición de
+ * WhatsApp que no nombra su `WABA_ID` no es interpretable: un identificador
+ * correcto y uno equivocado se leen igual*, y las diez plantillas que este
+ * gate lee podrían ser las de la cuenta que el producto **no** usa. Con eso,
+ * una deriva a `marketing` en la cuenta buena **pasaría invisible**.
+ *
+ * **El par WABA↔NÚMERO.** La edge LEE plantillas de `META_WABA_ID` y ENVÍA
+ * desde `META_PHONE_NUMBER_ID`. **Si esos dos apuntaran a WABAs distintos**
+ * —justo lo que dos cuentas homónimas vuelven fácil— *el gate leería las
+ * plantillas de una cuenta y el producto mandaría desde la otra, y las dos
+ * lecturas serían creíbles*. **Eso exige preguntarle a Meta
+ * `/{waba}/phone_numbers` con el token, y desde afuera de la edge no se puede.**
+ * Queda **pedido a A por el buzón**, no supuesto.
+ *
  * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ────────────────────────────
  * **Sí, una cosa y se declara: no mira el IDIOMA.** Una plantilla cableada en
  * `es` que en Meta sólo existe en `en` pasa este gate y falla al enviar. Ese
@@ -51,6 +85,7 @@
  * Salidas: 0 verde · 1 rojo · 2 no concluyente.
  */
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { dbQuery } from './lib-db.mjs';
 
 const ESPERADA = 'UTILITY';
@@ -59,6 +94,44 @@ const ESPERADA = 'UTILITY';
 const EXCEPCIONES = Object.create(null); // p.ej. { promo_navidad: 'campaña firmada S120' }
 
 const EDGE = 'https://zyltipqscdsdsxnjclhp.supabase.co/functions/v1/despachar-whatsapp?verificar=1';
+
+/** Los dos WABAs homónimos del portafolio. El gate dice CUÁL está configurado
+ *  comparando digests; no elige por nombre, que es lo que los hace confundibles. */
+const WABAS_CONOCIDOS = {
+  '1352301540326788': 'la del número ecuatoriano (+593) — la que el producto usa',
+};
+/** Control negativo: un id fabricado NUNCA puede coincidir. Si coincidiera, la
+ *  comparación no discrimina y todo lo de abajo es ruido. */
+const WABA_FALSO = '9999999999999999';
+
+/**
+ * Confirma el `META_WABA_ID` configurado comparando el **sha256 crudo** que
+ * publica `supabase secrets list` contra los candidatos. **Nunca lee el valor**
+ * y **sólo mira la entrada `META_WABA_ID`**: el listado trae los digests de
+ * todos los secretos y, para los de baja entropía, *el digest es el valor*.
+ */
+function wabaConfigurado() {
+  let crudo;
+  try {
+    crudo = execFileSync('npx', ['supabase', 'secrets', 'list'], { encoding: 'utf8' });
+  } catch { return { err: 'no se pudo leer `supabase secrets list` (¿CLI sin sesión?)' }; }
+  const ini = crudo.indexOf('{');
+  if (ini === -1) return { err: 'la salida de `secrets list` no trae JSON' };
+  let lista;
+  try { lista = JSON.parse(crudo.slice(ini)).secrets ?? []; }
+  catch { return { err: 'no se pudo parsear `secrets list`' }; }
+  const fila = lista.find((x) => x.name === 'META_WABA_ID');
+  if (!fila?.value) return { err: 'el listado no trae `META_WABA_ID`' };
+
+  const sha = (v) => createHash('sha256').update(String(v)).digest('hex');
+  if (sha(WABA_FALSO) === fila.value) {
+    return { err: 'el CONTROL NEGATIVO coincidió: la comparación de digests no discrimina' };
+  }
+  const hit = Object.keys(WABAS_CONOCIDOS).find((id) => sha(id) === fila.value);
+  return hit
+    ? { id: hit, nota: WABAS_CONOCIDOS[hit] }
+    : { err: 'el digest de `META_WABA_ID` no coincide con NINGÚN candidato conocido' };
+}
 
 // ── ① La categoría VIVA, de Meta ─────────────────────────────────────────
 let vivo;
@@ -81,6 +154,19 @@ try {
 }
 
 const enCuenta = Array.isArray(vivo.plantillas) ? vivo.plantillas : [];
+
+// ── ④ IDENTIDAD DE LA MEDICIÓN — contra qué se midió ─────────────────────
+const numero = vivo.numero ?? {};
+const huella = [...enCuenta.map((p) => p.name)].sort().join('|');
+const huellaCorta = [...huella].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(16);
+const waba = vivo.waba_id ? { id: vivo.waba_id, nota: 'devuelto por la edge' } : wabaConfigurado();
+console.log('  ── IDENTIDAD DE LA MEDICIÓN ──');
+console.log(`   waba_id ................. ${waba.id ?? `🔴 ${waba.err}`}`);
+if (waba.id) console.log(`                            ${waba.nota}`);
+console.log('                            (confirmado por sha256 del secreto, con su control negativo)');
+console.log(`   número que ENVÍA ........ ${numero.display_phone_number ?? '?'} · ${numero.verified_name ?? '?'}`);
+console.log(`   huella de plantillas .... ${huellaCorta} (${enCuenta.length} nombres)`);
+console.log('');
 if (enCuenta.length === 0) {
   console.error('🟠 NO CONCLUYENTE · la cuenta devolvió CERO plantillas.');
   console.error(`   http_plantillas=${vivo.http_plantillas} · error=${vivo.error_plantillas ?? '—'}`);
@@ -115,13 +201,19 @@ const fallos = [];
 console.log('verify:plantillas-categoria · la deriva silenciosa de Meta');
 console.log(`  esperada: ${ESPERADA} · leída de Meta (categoría APROBADA, no la declarada)\n`);
 console.log('  plantilla                        idioma  categoría   estado      cableada por');
+let pendientes = 0;
 for (const p of enCuenta) {
   const cab = cableadas.filter((c) => c.plantilla === p.name).map((c) => c.codigo);
   const exenta = p.name in EXCEPCIONES;
+  /* 🔴 UNA PLANTILLA EN REVISIÓN TRAE SU CATEGORÍA **DECLARADA**, NO LA APROBADA.
+     Meta todavía no falló, y con `allow_category_change` puede aprobarla en otra.
+     ⇒ su `UTILITY` **no confirma nada**: se cuenta aparte y jamás como verde. */
+  const enRevision = p.status !== 'APPROVED';
+  if (enRevision) pendientes += 1;
   const mal = p.category !== ESPERADA && !exenta;
   console.log(
-    `  ${mal ? '🔴' : '  '} ${String(p.name).padEnd(30)} ${String(p.language).padEnd(6)} ` +
-    `${String(p.category).padEnd(11)} ${String(p.status).padEnd(11)} ${cab.join(', ') || '—'}` +
+    `  ${mal ? '🔴' : enRevision ? '⏳' : '  '} ${String(p.name).padEnd(30)} ${String(p.language).padEnd(6)} ` +
+    `${(String(p.category) + (enRevision ? '*' : '')).padEnd(11)} ${String(p.status).padEnd(11)} ${cab.join(', ') || '—'}` +
     (exenta ? `  (excepción: ${EXCEPCIONES[p.name]})` : ''),
   );
   if (mal) {
@@ -141,8 +233,13 @@ for (const c of cableadas) {
   }
 }
 
-console.log(`\n  en la cuenta: ${enCuenta.length} · cableadas: ${nombresCableados.size}` +
+console.log(`\n  en la cuenta: ${enCuenta.length} · aprobadas: ${enCuenta.length - pendientes}` +
+            ` · en revisión: ${pendientes} · cableadas: ${nombresCableados.size}` +
             ` (${cableadas.map((c) => c.codigo).join(', ') || 'ninguna'})`);
+if (pendientes) {
+  console.log(`  ⏳ las marcadas con * están EN REVISIÓN: su categoría es la DECLARADA al`);
+  console.log('     enviarlas, no la que Meta aprobó. No confirman nada todavía.');
+}
 if (nombresCableados.size === 0) {
   console.log('  ⚠️ NOTA: hoy no hay ninguna plantilla cableada, así que el nivel ① no tiene');
   console.log('     sujeto. El nivel ② sí lo tiene y por eso el gate igual mide.');
@@ -155,5 +252,15 @@ if (fallos.length) {
   console.error('   consola de Meta, no editando este gate.');
   process.exit(1);
 }
-console.log(`\n🟢 VERDE · las ${enCuenta.length} plantillas de la cuenta están en ${ESPERADA}.`);
+if (!waba.id) {
+  console.error(`\n🟠 NO CONCLUYENTE · ninguna plantilla está fuera de ${ESPERADA}, **pero el gate`);
+  console.error('   no puede decir contra qué WABA midió** y hay DOS homónimos en el portafolio.');
+  console.error(`   ${waba.err}`);
+  console.error('   Un identificador correcto y uno equivocado se leen igual.');
+  process.exit(2);
+}
+console.log(`\n🟢 VERDE · las ${enCuenta.length} plantillas del WABA ${waba.id} están en ${ESPERADA}.`);
+console.log('   ⚠️ QUEDA SIN MEDIR, y es pedido a A: que `META_WABA_ID` y `META_PHONE_NUMBER_ID`');
+console.log('      sean el MISMO par. Exige `/{waba}/phone_numbers` con el token, y desde');
+console.log('      afuera de la edge no se puede. Con dos homónimas eso no se supone.');
 console.log('   (Vale para AHORA: la deriva de Meta es silenciosa — se vuelve a correr.)');

@@ -70,7 +70,6 @@ import {
   TarjetaMetrica,
   FranjaSeguridad,
   BotonContanos,
-  PastillaConociendolo,
   CeldasHoy,
   FiltrosLineaDeVida,
   type TipoLineaDeVida,
@@ -242,6 +241,13 @@ function FilaIdentidad({ etiqueta, valor, mono, accion }: { etiqueta: string; va
 import { fechaCortaMono } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+/* 🔴 LA DEFINICIÓN ÚNICA (firma founder 7-sep: **perdida NO es memorial**).
+   Alias porque esta pantalla ya tiene su `esMemorial`, que es el OR del dato
+   con el tema — dos cosas distintas y por eso dos nombres.
+   ⏪ Las tres derivaciones que vivían acá decían `!== null && !== 'activa'` y
+   metían a `perdida` adentro: al perfil de una mascota que la familia está
+   BUSCANDO le apagaban el producto. */
+import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
 
 type TraductorPerfil = ReturnType<typeof useTraduccion>['t'];
 
@@ -364,9 +370,7 @@ export default function PerfilDeMascota() {
            acá el compilador lo dice — en otros lados no.* Misma regla, misma
            fuente (`estado_vida`), sin el brazo del tema, que acá no aplica. */
         memorial:
-          typeof perfil === 'object' &&
-          perfil.mascota.estado_vida !== null &&
-          perfil.mascota.estado_vida !== 'activa'
+          typeof perfil === 'object' && mascotaEnMemorial(perfil.mascota.estado_vida)
             ? '1'
             : '0',
       },
@@ -541,9 +545,7 @@ export default function PerfilDeMascota() {
      valiendo. */
   const esMemorial =
     theme.mode === 'memorial' ||
-    (typeof perfil === 'object' &&
-      perfil.mascota.estado_vida !== null &&
-      perfil.mascota.estado_vida !== 'activa');
+    (typeof perfil === 'object' && mascotaEnMemorial(perfil.mascota.estado_vida));
   // r10-1: el techo pinta bajo la barra de estado → íconos CLAROS
   // mientras la pantalla tiene foco; al salir se restaura la voz del
   // tema (patrón BarraTabs/Hogar — packages/ui no conoce el foco).
@@ -988,7 +990,7 @@ export default function PerfilDeMascota() {
       ? calcularMomentoVital({
           edadMeses: meses,
           tieneCondicionCronica: tiene_condicion_cronica,
-          esMemorial: mascota.estado_vida !== null && mascota.estado_vida !== 'activa',
+          esMemorial: mascotaEnMemorial(mascota.estado_vida),
           umbrales,
         })
       : null;
@@ -1569,6 +1571,20 @@ export default function PerfilDeMascota() {
 
             ⚠️ **En memorial no se monta**: las cinco ramas apuntan a algo por
             venir (`A3.9`, `LOYALTY §8`). */}
+        {/* ⚠️ **ESTE CONDICIONAL NO ES REDUNDANTE, Y SE MIDIÓ** (S114-C).
+            `TarjetaHoy` ya trae su propio piso por `enMemorial`, así que la
+            tentación es quitarlo «porque la pieza guarda». **Medido en el
+            aparato con Sombra, neutralizando este `!esMemorial`: las piezas
+            NO se dibujan —el piso funciona— pero el `<View>` y el encabezado
+            de sección SÍ**, y queda un título sobre una mascota en memorial
+            con nada abajo.
+
+            *La pieza se protege a sí misma; no puede proteger a la sección que
+            la contiene, porque no sabe que tiene hermanas ni que hay un título
+            arriba.* **Son dos capas anidadas y las dos hacen falta.**
+
+            (La nota gemela vive en el guard de `TarjetaConociendolo`, con su
+            propia medición: **cada una se sostiene sola**.) */}
         {!esMemorial && hoyMascota !== null ? (
           <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
             {(() => {
@@ -1594,7 +1610,7 @@ export default function PerfilDeMascota() {
                     str('nombre') ??
                     fechaCortaMono(hoyMascota.fecha, idioma);
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="anticipacion"
                       /* 🔴 EL TEMA EN EL TÍTULO (firma founder, 6-sep). «Algo para
                          mirar» servía para cualquier aviso; ahora dice «Su cadera,
@@ -1629,7 +1645,7 @@ export default function PerfilDeMascota() {
                 }
                 case 'cita':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="cita"
                       titulo={t('perfil.hoyCita', { servicio: hoyMascota.servicio, cuando: enDias(hoyMascota.faltan_dias) })}
                       detalle={`${hoyMascota.servicio} · ${enDias(hoyMascota.faltan_dias)}`}
@@ -1639,7 +1655,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'vacuna':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="vence"
                       titulo={t('perfil.hoyVacuna', { vacuna: hoyMascota.vacuna })}
                       detalle={`${hoyMascota.vacuna} · ${enDias(hoyMascota.dias)}${hoyMascota.derivada ? ` · ${t('perfil.tableroEstimada')}` : ''}`}
@@ -1649,7 +1665,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'antiparasitario':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="vence"
                       titulo={hoyMascota.tema
                         ? t('perfil.hoyAntiparasitario', { tema: hoyMascota.tema })
@@ -1661,7 +1677,7 @@ export default function PerfilDeMascota() {
                   );
                 case 'tip':
                   return (
-                    <TarjetaHoy
+                    <TarjetaHoy enMemorial={esMemorial}
                       clase="anticipacion"
                       titulo={t('perfil.hoyTip', { tema: hoyMascota.nombre.toLowerCase() })}
                       detalle={hoyMascota.descripcion}
@@ -1734,6 +1750,21 @@ export default function PerfilDeMascota() {
             mudó acá**: era esto mismo dicho en prosa. *Nada se pierde.*
 
             ⛔ En memorial no se monta: pide (`A3.9`). */}
+        {/* ⚠️ **ESTE CONDICIONAL NO ES REDUNDANTE, Y SE MIDIÓ** (S114-C).
+            `TarjetaConociendolo` y `BotonContanos` ya traen su propio piso por
+            `enMemorial`, así que la tentación es quitarlo «porque la pieza ya
+            guarda». **Medido en el aparato con Sombra, neutralizando este
+            `!esMemorial`: las dos piezas NO se dibujan —el piso funciona— pero
+            el encabezado «Conociéndolo» SÍ**, y queda un título sobre una
+            mascota en memorial con nada abajo.
+
+            *La pieza se protege a sí misma; no puede proteger a la sección que
+            la contiene, porque no sabe que tiene hermanas ni que hay un título
+            arriba.* **Son dos capas anidadas y las dos hacen falta.**
+
+            (La nota gemela vive en el guard de `TarjetaHoy`, con su propia
+            medición: **cada una se sostiene sola** — si alguien las separa,
+            ninguna pierde su evidencia.) */}
         {!esMemorial ? (() => {
           /* ⭐ **LAS CINCO DIMENSIONES DEL VÍNCULO** (S113-B · 2.2.3 → C 2.2.4).
              B cambió `fraccion: number` por **cinco booleanos** —*cero
@@ -1770,24 +1801,24 @@ export default function PerfilDeMascota() {
               {/* El estado completo llega cuando las CINCO están: la pieza
                   felicita en vez de pedir (ojo del founder, 2.2.2 · ⑤). */}
               {cuantas === total ? (
-                <TarjetaConociendolo
+                <TarjetaConociendolo enMemorial={esMemorial}
                   dimensiones={dimensiones}
                   voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   completo
                   vozFelicitacion={t('perfil.conociendoloCompleto', { nombre: mascota.nombre })}
                   masSobre={
-                    <BotonContanos
+                    <BotonContanos enMemorial={esMemorial}
                       etiqueta={t('perfil.conociendoloMas', { nombre: mascota.nombre })}
                       onPress={contanos.abrir}
                     />
                   }
                 />
               ) : (
-                <TarjetaConociendolo
+                <TarjetaConociendolo enMemorial={esMemorial}
                   dimensiones={dimensiones}
                   voz={t('perfil.conociendoloVoz', { n: cuantas, total, nombre: mascota.nombre })}
                   invitacion={
-                    <BotonContanos
+                    <BotonContanos enMemorial={esMemorial}
                       etiqueta={t('perfil.conociendoloInvita', { nombre: mascota.nombre })}
                       onPress={contanos.abrir}
                     />
@@ -2619,8 +2650,17 @@ export default function PerfilDeMascota() {
           quien ya no está se lee, no se pide nada (`A3.9`). El botón que la
           abre ya cuelga del guard; la Hoja también, porque *un texto
           inalcanzable hoy es alcanzable mañana*. */}
-      {!esMemorial ? (
-      <HojaContanos
+      {/* ⏪ **ACÁ ENVOLVÍA UN `{!esMemorial ? …}` Y SE RETIRA EN EL MISMO ACTO
+          QUE DEJÓ DE HACER FALTA** (Ley 37). Envolvía **exactamente y sólo**
+          esta pieza, y desde que `HojaContanos` recibe `enMemorial` el guard
+          vive ADENTRO: dos guards para la misma regla es uno que alguien va a
+          mover sin mover el otro.
+
+          🔴 **Y es lo que vuelve MEDIBLE la cura:** mientras el condicional
+          estuviera, la Hoja no aparecía en memorial **por el condicional**, y
+          no se podía saber si la prop hacía algo. Sin él, que no aparezca es
+          la señal. *Un guard que no puede producir su rojo no está midiendo.* */}
+      <HojaContanos enMemorial={esMemorial}
         visible={contanos.visible}
         onCerrar={contanos.cerrar}
         titulo={t('contanos.titulo', { nombre: mascota.nombre })}
@@ -2654,7 +2694,6 @@ export default function PerfilDeMascota() {
         }}
         propuesta={contanos.propuestaUi}
       />
-      ) : null}
 
       {/* ⛔ Bajo el mismo guard que el resto del «cuéntanos»: pide. */}
       {!esMemorial ? chips.hoja : null}

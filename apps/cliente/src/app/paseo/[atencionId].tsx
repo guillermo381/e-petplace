@@ -41,6 +41,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Insignia,
+  LineaAlgoSalioDistinto,
   MapaRecorrido,
   Separador,
   Tarjeta,
@@ -64,6 +65,10 @@ import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
+import { esMemorial } from '@/lib/memorial';
+import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
+import { useCasoDelObjeto } from '@/lib/postventa/useCasoDelObjeto';
+import { useVentanaDeCaso } from '@/lib/postventa/useVentanaDeCaso';
 
 function horaMono(iso: string | null): string {
   if (iso === null) return '--:--';
@@ -104,6 +109,21 @@ export default function DetallePaseo() {
   // avatar + estado en voz de familia (no hay track en una silla de
   // grooming; el hueco del mapa NO deja cicatriz).
   const [mascota, setMascota] = useState<{ nombre: string; fotoUrl?: string } | null>(null);
+  /* 🔴 S114-C · `estado_vida` DE LA MASCOTA — el piso de memorial de la puerta
+     (§1). Se guarda aparte de `mascota` porque **`mascota` sólo se llena en
+     grooming** (es el hero de esa cara) y la ley de memorial rige en los
+     cuatro oficios. `undefined` = todavía no se sabe ⇒ la puerta no se dibuja:
+     ante la duda, la app se calla. */
+  const [estadoVida, setEstadoVida] = useState<string | null | undefined>(undefined);
+
+  /* ══ S114-C · lo que la puerta necesita del MOTOR ═════════════════════
+     Los dos hooks van acá arriba, con los demás, y **no adentro del
+     veredicto**: son hooks y un `return` temprano los saltearía. */
+  const diasDeVentana = useVentanaDeCaso();
+  const casoAbierto = useCasoDelObjeto(
+    'cita',
+    typeof detalle === 'object' ? detalle.atencion_id : null,
+  );
   // S81-B (vara: "el recorrido es el protagonista de su pantalla"):
   // LA BANDA de dos posiciones sobre el mapa a sangre — cliente ASOMADA
   // por default (orden de mesa); el asa alterna. Se ajusta viendo.
@@ -240,11 +260,24 @@ export default function DetallePaseo() {
           sondeo = setInterval(() => void recargar('silencioso'), SONDEO_MS);
           tick = setInterval(() => setTick((n) => n + 1), TICK_ETIQUETA_MS);
         }
-        // S60: el hero del grooming necesita a la mascota (avatar +
-        // nombre) — se pide UNA vez; si falla, la voz genérica cubre.
-        if (d.ok && d.data.oficio === 'grooming' && d.data.mascota_id !== null) {
+        /* S60: el hero del grooming necesita a la mascota (avatar +
+           nombre) — se pide UNA vez; si falla, la voz genérica cubre.
+
+           🔴 S114-C · LA CONDICIÓN SE ENSANCHÓ, y el porqué importa: era
+           `oficio === 'grooming'`, y el piso de memorial de la puerta (§1)
+           rige en LOS CUATRO OFICIOS. El perfil ya traía `estado_vida` y esta
+           pantalla lo tiraba — *no faltaba el dato: faltaba pedírselo* (mismo
+           patrón que `D-1021`). **Lo que se paga es un viaje más en paseo**, y
+           se declara: es UNO, por montaje, fuera del sondeo — el intervalo de
+           §7.4 no lo repite. Sin él la única salida era no dibujar la puerta o
+           dibujarla sobre un memorial, y las dos son peores. */
+        if (d.ok && d.data.mascota_id !== null) {
           const p = await obtenerPerfilMascota(d.data.mascota_id);
           if (!vigente || !p.ok) return;
+          setEstadoVida(p.data.mascota.estado_vida);
+          /* El hero sigue siendo SÓLO de grooming: la cara del paseo tiene su
+             mapa y no lo cede. */
+          if (d.data.oficio !== 'grooming') return;
           const url = p.data.mascota.foto_url !== null ? await resolverUrlFoto(p.data.mascota.foto_url) : null;
           if (!vigente) return;
           /* ⭐ S109-D · LA ESCALERA, y acá el dato YA ESTABA A MANO: el perfil
@@ -328,6 +361,35 @@ export default function DetallePaseo() {
   // S60: el oficio bifurca el HERO (paseo = mapa/GPS honesto; grooming =
   // la mascota preside — sin mapa, sin cicatriz) y la voz del título.
   const esGrooming = detalle.oficio === 'grooming';
+
+  /* ══ S114-C · LA PUERTA (§1) ══════════════════════════════════════════
+     El veredicto vive en `lib/postventa/puerta` porque son TRES objetos y
+     una sola ley. Acá sólo se le pasa lo que esta pantalla sabe.
+
+     ⏪ Acá decía que `casoAbierto` no se pasaba porque el motor no existía —
+     *un verde por ausencia de sujeto*. **A3 aterrizó y ahora puede haber
+     casos**, así que se pregunta. Lo demás no se movió, como estaba previsto. */
+  const puerta = veredictoDeLaPuerta({
+    cerradaEn: detalle.cerrada_en,
+    estadoVida,
+    diasDeVentana,
+    ...(casoAbierto != null ? { casoAbierto } : null),
+    voces: {
+      disponible: t('postventa.puerta'),
+      fueraDeVentana: t('postventa.puertaFueraDeVentana'),
+      casoAbierto: t('postventa.puertaCasoAbierto'),
+    },
+  });
+
+  /* ⚠️ Los dos hooks van ANTES del veredicto y no adentro: son hooks, y un
+     `if` arriba los saltearía en algunos renders. */
+  /* Los tres estados llevan a lados distintos (B lo dejó en una sola
+     función a propósito): el motivo · la conversación con la casa · el caso
+     que ya existe. */
+  const abrirLaPuerta = () => {
+    const destino = destinoDeLaPuerta(puerta, 'cita', detalle.atencion_id);
+    if (destino !== null) router.push(destino);
+  };
 
   // §7.4 — la etiqueta de frescura dice la verdad (envejece si el
   // sondeo falla; se renueva con cada carga buena).
@@ -831,6 +893,28 @@ export default function DetallePaseo() {
 
         {/* el parte completo — piezas compartidas con la cara MAPA (S81-B) */}
         {seccionesParte}
+
+        {/* ══ S114-C · LA PUERTA (§1) — **la última fila, después de todo lo
+            que cuenta cómo fue el servicio.** No está acá por comodidad de
+            layout: *«lo primero que ve la familia es lo que pasó; el reclamo
+            es la salida, no la entrada»*. Y por eso NO se dibuja mientras el
+            paseo está en vivo — no se reclama algo que está ocurriendo: el
+            veredicto lo resuelve con `cerrada_en === null`. */}
+        {puerta.hay && (
+          <View style={{ marginTop: spacing[2] }}>
+                {/* `enMemorial` es el PISO de la pieza y no su decisión: el
+                    veredicto ya devolvió `hay: false` en memorial, así que
+                    acá nunca llega encendido. **Se pasa igual, con la misma
+                    definición única**, porque un piso que depende de que el
+                    llamador se acuerde es el guard que esta tanda vino a
+                    curar. */}
+            <LineaAlgoSalioDistinto
+              estado={puerta.estado}
+              enMemorial={esMemorial(estadoVida)}
+              onPress={abrirLaPuerta}
+            />
+          </View>
+        )}
       </ScrollView>
 
       <VisorFoto

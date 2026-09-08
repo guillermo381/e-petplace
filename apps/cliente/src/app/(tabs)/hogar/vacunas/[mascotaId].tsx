@@ -107,6 +107,8 @@ import {
 import { CantoCurva } from '@/components/canto-curva';
 import { FiltroPills, type OpcionFiltro } from '@/components/filtro-pills';
 import { useTraduccion } from '@/i18n';
+/* Alias: acá también hay un `esMemorial` local. Ver la nota del Hogar. */
+import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
 
 /** Cuántas filas se ven antes del pie que revela (la lámina: 3). */
 const TOPE_VISIBLE = 3;
@@ -259,7 +261,7 @@ export default function PlanDeVacunas() {
      estaba escrito y muerto. */
   const esMemorial =
     theme.mode === 'memorial' ||
-    (perfil.mascota.estado_vida !== null && perfil.mascota.estado_vida !== 'activa');
+    mascotaEnMemorial(perfil.mascota.estado_vida);
 
   const identidad = [
     perfil.mascota.raza,
