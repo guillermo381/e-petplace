@@ -188,6 +188,29 @@ se probó a mano antes de cablearlo, y después la ejerció sola sobre `f3171cc`
 > pegada a lo que alguien va a copiar, no está.** Un lector de este parte se lleva el
 > número, no el contexto donde vivía.)*
 
+## La tanda del asiento — lo anotado
+
+| | |
+|---|---|
+| **`tomarCaso` sin exportar** | `L-318`, *la lección que venía citando*. Una función que la puerta única no exporta **no existe** para la app. Cazada antes de subir. |
+| **voseo en un mensaje de pantalla** | «tenés que tomar el caso» → curado. Censo de los 14 mensajes: **cero con voseo**. El comentario del código queda en voseo a propósito: es habla del equipo, no voz de producto. |
+| **el botón, montado sólo en `con_prestador`** | y **`Decidir` no se dibuja ahí**. Ley 23 — *la puerta no ofrece lo que va a rechazar*: el motor rebota `caso_no_tomado`, así que mostrar los dos controles sería invitar a un rebote. |
+| **🔴 `L-521`** | el build del admin **no compilaba la aplicación** y yo reporté su peso como prueba. Ver abajo. |
+
+### ¿El bundle vacío llegó a producción? — **NO**, medido
+
+```
+admin.epetplace.com → index-B4k1WxEH.js · 1,86 MB
+  Placas 2 · Logística 5    → es el LEGADO, entero
+  Tomar el caso 0           → nada de apps/admin
+  Faltan VITE_SUPABASE 0    → nada del bundle vacío
+```
+
+⚠️ **Lo salvaron tres accidentes, no una defensa:** `apps/admin` no está en `main` · el
+proyecto Vercel del monorepo no construye desde el 6-sep · `admin.epetplace.com` sirve
+otro repo. **Los tres están en cola de resolverse** — el día que cualquiera se destrabe,
+el bundle vacío se publica solo. *Por eso la cura no podía esperar.*
+
 ## Las cuatro lecciones
 
 | | |
