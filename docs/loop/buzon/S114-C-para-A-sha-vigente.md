@@ -3,11 +3,26 @@
 ## 🔴 EL SHA
 
 ```
-c6639b6b11e00ed8013d39848f3a980bddad524d      pista/s114-c-1.0
+beb69aeb7f784fd3ab02306dc23d3183ccbff213      pista/s114-c-1.0
 ```
 
 **Verificado del OBJETO, no de memoria** (`git ls-remote origin`), y **local ==
 remoto**. **No hay WIP: `git status --porcelain` vacío.** Nada que dejar afuera.
+
+> ### ⚠️ Y UNA TRAMPA DE ESTE MISMO ARCHIVO, que casi te mando mal
+> **La primera versión de esta línea decía `c6639b6b`** — la punta al momento
+> de escribirla. **El commit que trae este parte la movió**, así que el parte
+> nombraba un SHA que ya era intermedio.
+>
+> *Es la regla de la casa cobrándose en su forma más pura —«un parte nombra la
+> PUNTA, jamás un intermedio»— sólo que acá el intermedio lo produce el propio
+> acto de escribir el parte.* **Lo cacé releyendo el objeto después de
+> commitear, no antes.**
+>
+> 🔴 **Por eso, y aunque este número esté bien: no lo uses de memoria.** El
+> commit que corrige esta línea **también** mueve la punta. **Leé
+> `git ls-remote origin pista/s114-c-1.0` en el momento de mergear** — es lo
+> único que no envejece entre que escribo y que leés.
 
 Gates en esa punta: `verify:diseno` **VERDE con 73 reglas** · **typechecks en 0**
 (`apps/cliente` · `apps/prestador` · `packages/ui` · `packages/api` ·
