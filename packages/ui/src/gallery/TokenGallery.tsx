@@ -6550,6 +6550,7 @@ function GaleriaInterna() {
               </Texto>
               <LineaAlgoSalioDistinto
                 estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="mascota"
                 enMemorial={false}
                 onPress={() => {}}
               />
@@ -6558,6 +6559,7 @@ function GaleriaInterna() {
                   tipo: 'fueraDeVentana',
                   voz: 'Este servicio ya pasó su ventana. Si querés, hablá con nosotros.',
                 }}
+                sujeto="mascota"
                 enMemorial={false}
                 onPress={() => {}}
               />
@@ -6567,6 +6569,7 @@ function GaleriaInterna() {
                   voz: 'Tenés un caso abierto sobre este paseo',
                   estado: 'Con el paseador',
                 }}
+                sujeto="mascota"
                 enMemorial={false}
                 onPress={() => {}}
               />
@@ -6581,7 +6584,25 @@ function GaleriaInterna() {
               </Texto>
               <LineaAlgoSalioDistinto
                 estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="mascota"
                 enMemorial
+                onPress={() => {}}
+              />
+
+              {/* 🔴 EL SEGUNDO DISCRIMINADOR — el PEDIDO, firma del founder
+                  7-sep: es del HOGAR y **no se apaga por nada**. Va JUNTO al
+                  de arriba a propósito: la misma prop, el mismo estado, y una
+                  desaparece y la otra no. *Sin este par, el catálogo mostraría
+                  que la puerta sabe apagarse y no mostraría dónde tiene
+                  prohibido hacerlo.*
+                  ⚠️ Y en el pedido `enMemorial` **no se puede escribir**: el
+                  campo no existe en su rama del tipo. */}
+              <Texto variante="apoyo" color="tertiary">
+                ⬇︎ el PEDIDO (`sujeto="hogar"`) SÍ se dibuja — no tiene apagado
+              </Texto>
+              <LineaAlgoSalioDistinto
+                estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="hogar"
                 onPress={() => {}}
               />
             </View>

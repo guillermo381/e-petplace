@@ -13,72 +13,90 @@
 
 **Sí, con tres avisos. Dos son baratos y el tercero es una decisión de letra.**
 
-### La prop, recordada en una línea
+### 🔴 LA LETRA — FIRMA DEL FOUNDER, 7-sep-2026
+
+> ### **EL PEDIDO NUNCA SE APAGA POR MEMORIAL: ES DEL HOGAR, NO DE UNA MASCOTA.**
+> **Precedente: `bonos.familia_id`.** *Apagar el reclamo de un pedido porque una
+> de las mascotas de la casa falleció le quita a la familia la puerta sobre lo
+> que compró para las otras* — y un pedido tiene **N destinos y puede tener
+> donación**, así que *«la mascota» en singular no existe ahí*.
+
+**Y la letra vive en el TIPO, no en una nota:**
 
 ```ts
-enMemorial: boolean   // = estado_vida === 'fallecida'   · OBLIGATORIA sin default
-```
-🔴 **`perdida` NO cuenta** — firma del founder, 7-sep-2026: *una familia cuyo
-animal se perdió sigue pudiendo decir que el paseo salió distinto.*
-
-### 🔴 AVISO 1 — ninguna de las tres pantallas del §1 tiene `estado_vida` hoy
-
-```
-grep -c estado_vida  →  0  ·  parte/[eventoId].tsx
-                        0  ·  guarderia/[estadiaId].tsx
-                        0  ·  (tabs)/pedidos/pedido/[pedidoId].tsx
+sujeto: 'mascota'  →  enMemorial OBLIGATORIA     · la cita · la estadía
+sujeto: 'hogar'    →  enMemorial INEXPRESABLE    · el pedido
 ```
 
-**Si al montar se pasa `false` por comodidad, se reintroduce exactamente el
-guard apagado que la prop vino a curar** — `L-498` en su forma más barata, y
-esta vez con la lección ya escrita al lado.
+```ts
+enMemorial: boolean   // = estado_vida === 'fallecida'
+```
+🔴 **`perdida` NO cuenta** — firma del founder: *una familia cuyo animal se
+perdió sigue pudiendo decir que el paseo salió distinto.*
 
-### ✅ AVISO 2 — las tres SÍ tienen con qué cruzar, y **cero motor nuevo**
+**Probado en las DOS direcciones, y las dos son errores de compilación:**
 
-| pantalla | el id de la mascota | de dónde |
-|---|---|---|
-| `parte/[eventoId]` | ✅ `ParteConsulta.mascotaId` | **ya está en el tipo** (`veterinaria-nota-clinica.ts:403`, poblado en `:474`) — *la pantalla no lo usa todavía, pero el dato le llega* |
-| `guarderia/[estadiaId]` | ✅ `mascotaId` | ya lo usa la pantalla |
-| `pedidos/pedido/[pedidoId]` | ✅ `mascota_id` **por línea** (el destino) | ya lo usa la pantalla |
-
-Y **`obtenerMascotasDeFamilia` trae `estado_vida`** (`onboarding.ts`, está en el
-`select` explícito) ⇒ el cruce por id lo resuelve.
-
-> ### ✅ Y LA SEGUNDA PUERTA ESTÁ CERRADA, verificada antes de decirlo
-> La pregunta obvia era *«¿ese lector filtra a las memoriales?»* — si las
-> filtrara, el cruce por id no encontraría nada y **el default sería `false`
-> otra vez, por otra puerta**. **Medido: NO filtra.** Su consulta es
-> `.eq('familia_id', …)` y nada más. *Se dice acá para que C no tenga que ir a
-> comprobarlo.*
-
-**Y la pantalla del pedido YA LO LLAMA** (`[pedidoId].tsx:151`) ⇒ ahí no hace
-falta ni una lectura nueva.
-
-### 🔴 AVISO 3 — el PEDIDO necesita una DECISIÓN, no un dato
-
-Un pedido tiene **N destinos por línea** y puede tener **donación** (sin
-mascota). §1 dice *«con la mascota en memorial»*, **en singular, hablando de un
-servicio que tiene UNA**. Para un pedido hay tres lecturas y la letra no
-contesta:
-
-| | |
+| lo que alguien intenta | qué pasa |
 |---|---|
-| (a) | si TODAS las mascotas del pedido están en memorial → no hay línea |
-| (b) | si ALGUNA lo está → no hay línea |
-| **(c)** | **el pedido nunca se apaga: no es de una mascota, es del HOGAR** |
+| el pedido pasa `enMemorial={false}` | 🔴 **no compila** (`TS2322`) |
+| la cita **olvida** `enMemorial` | 🔴 **no compila** (`TS2322`) |
 
-**Mi voto es (c), con su precedente medido:** la casa ya resolvió que *«el bono
-es del hogar»* (`bonos.familia_id`). *Apagar el reclamo de un pedido de comida
-porque una de las cuatro mascotas del hogar falleció le quita a la familia el
-reclamo de lo que compró para las otras tres.*
+> *Un `false` por decisión y un `false` por comodidad **se ven idénticos en el
+> código**, y el segundo es cómo vuelve el guard apagado que la prop vino a
+> curar (`L-498`). La única forma de que no vuelva es que no se pueda
+> escribir.*
 
-⚠️ **Con (c), `enMemorial={false}` en el pedido es CORRECTO — y que la prop sea
-obligatoria es lo que hace que se escriba por decisión y no por omisión.**
-**Es letra: la firma el founder, no yo ni C.**
+⚠️ **Y el `theme.mode` también cuelga de `sujeto === 'mascota'`.** El tema
+memorial es un sustituto de *«esta mascota está en memorial»*, y **un hogar no
+tiene mascota**: dejarlo suelto apagaría el pedido por una vía lateral justo
+después de que la firma dijera que no se apaga. *La letra no se cumple a medias
+por un `OR` heredado.*
 
 ---
 
-## ② LAS ONCE DE `packages/ui` — **el número real no es once**
+## ② 🔴 EXIGIBLE — DE DÓNDE SALE EL DATO, PANTALLA POR PANTALLA
+
+> **El rojo, con todas las letras:** *si al montar se pasa `false` por
+> comodidad porque `estado_vida` no está en la pantalla, se reintroduce el
+> guard apagado que la prop vino a curar.* Con la firma del sujeto, **en el
+> pedido eso ya es imposible**; en las otras dos **sigue siendo posible y por
+> eso está esta tabla.**
+
+**Medido: ninguna de las tres tiene `estado_vida` hoy.**
+```
+grep -c estado_vida  →  0 · parte/[eventoId].tsx
+                        0 · guarderia/[estadiaId].tsx
+                        0 · (tabs)/pedidos/pedido/[pedidoId].tsx
+```
+**Pero las tres tienen con qué cruzar, y no hace falta motor nuevo:**
+
+| pantalla | `sujeto` | el id de la mascota | de dónde sale `estado_vida` |
+|---|---|---|---|
+| `parte/[eventoId]` | `mascota` | ✅ **`ParteConsulta.mascotaId`** — está en el tipo (`veterinaria-nota-clinica.ts:403`, poblado en `:474`); *la pantalla no lo usa todavía, pero el dato le llega* | `obtenerMascotasDeFamilia` → cruzar por id |
+| `guarderia/[estadiaId]` | `mascota` | ✅ `mascotaId`, **ya lo usa la pantalla** | ídem |
+| `pedidos/pedido/[pedidoId]` | 🔴 **`hogar`** | — | **NINGUNA. No recibe señal y no tiene apagado** (firma). *Y ya no puede pasarla ni queriendo.* |
+
+### 🔴 LA MEDICIÓN QUE IMPIDE QUE EL `false` VUELVA POR OTRA PUERTA
+
+**`obtenerMascotasDeFamilia` trae `estado_vida` en su `select` explícito Y NO
+FILTRA A LAS MEMORIALES.** Su consulta es `.eq('familia_id', …)` y nada más
+(`onboarding.ts`).
+
+> **Por qué esto es parte del contrato y no una nota al pie:** *si ese lector
+> filtrara a las memoriales, el cruce por id no encontraría nada y el default
+> volvería a ser `false`* — el mismo defecto entrando por una puerta que nadie
+> estaba mirando. **Está verificado acá para que C no tenga que ir a
+> comprobarlo, y para que quien lo cambie sepa qué rompe.**
+
+✅ **Y la pantalla del pedido YA la llama** (`[pedidoId].tsx:151`) — dato que
+ahora no necesita, y que queda escrito porque *el día que el pedido gane
+cualquier señal por mascota, el lector ya está ahí.*
+
+---
+
+---
+
+## ③ LAS ONCE DE `packages/ui` — **el número real no es once**
 
 `R78` cuenta **11 piezas** que deciden si existen mirando sólo el tema. Pero
 para MONTAR lo que importa no es cuántas piezas son: **es cuántos puntos hay
@@ -146,7 +164,32 @@ memorial se mide montando, que es como apareció todo esto.**
 
 ---
 
-## ③ EL BARRIDO DE `R77` SOBRE `apps/` — NO SE ABRIÓ
+## ④ `MarcaDeAgua` — DECLARADA APARTE Y **NO SE CURA EN ESTA TANDA**
+
+**No es un olvido: es la única de las once que de verdad depende del tema, y
+se dice acá con su razón para que nadie la lea de otro modo.**
+
+| | |
+|---|---|
+| **no tiene mascota** | es la marca de agua del fondo. **No hay señal que pasarle**: ninguna de las ~90 pantallas que la montan tiene un sujeto del cual derivarla |
+| **su inercia cuesta ESTÉTICA, no respeto** | lo que no ocurre es que la marca degrade. **No le pide nada a nadie** — es cromo, no un pedido |
+| **~90 pantallas en las DOS apps** | `login` · `registro` · `recuperar` · todo `ventas/` · todo `veterinaria/` · los cuatro oficios · adopción… |
+
+⇒ **su cura no es una prop: es que el tema memorial llegue a montarse alguna
+vez** —o aceptar que no degrada—. **Es decisión de mesa, no trabajo de esta
+tanda**, y por eso queda **dentro del baseline de `R78`** en vez de exenta:
+*una exención la saca del conteo y la vuelve invisible; el baseline la deja a
+la vista cada corrida.*
+
+⚠️ **Consecuencia, dicha para que el número no engañe: `R78` no puede llegar a
+0.** Su piso real es **2** —`MarcaDeAgua` y `PastillaConociendolo`— y **llegar
+ahí tampoco significa que memorial funcione**: significa que ninguna pieza
+depende sólo del tema. *Que la app se comporte en memorial se mide montando,
+que es como apareció todo esto.*
+
+---
+
+## ⑤ EL BARRIDO DE `R77` SOBRE `apps/` — NO SE ABRIÓ
 
 Tanda propia después de S114, por orden del founder. **`R77` declara en su
 propio `info` que no ve `apps/`**, así que su alcance vive en el gate y no en

@@ -28685,6 +28685,60 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-499` — UN CENSO POR LA FORMA DEL MONTAJE MIDE LA CONVENCIÓN, NO EL HECHO
+
+> **Firma del founder (S114-B, 7-sep-2026).** *Lo que la vuelve regla y no
+> anécdota es que **la clase cruzó de subsistema**.*
+
+**El caso.** Censando qué piezas de `packages/ui` protegen algo con el tema
+memorial, declaré que `PastillaConociendolo` **no la montaba nadie**. Evidencia:
+`grep -rl "<PastillaConociendolo" apps/*/src` ⇒ vacío.
+
+**Al verificar antes de entregar: SÍ estaba importada**
+(`[mascotaId].tsx:73`) — usada cero veces. **El hecho no cambió** —no se
+dibuja— **pero la evidencia era incompleta**, y *quien grepeara el nombre
+habría encontrado un hit y concluido lo contrario del que yo publicaba.*
+
+### 🔴 LA CLASE YA EXISTÍA EN OTROS DOS SUBSISTEMAS, Y ÉSA ES LA NOVEDAD
+
+```
+SQL   · L-170 · un censo por `pg_get_functiondef` lee los COMENTARIOS como código
+      · L-437 · un censo por patrón ACOTA, no cierra — un 0 no prueba ausencia
+git   · L-494 · `ls-tree | grep` mide el NOMBRE DEL ARCHIVO; la función vive
+                adentro de uno que no la nombra
+JSX   · ésta  · `grep "<Pieza"` mide LA FORMA DEL MONTAJE; el consumo puede
+                estar en un import, un slot, una variable o un salto de línea
+```
+
+> ### **Tres lenguajes, tres instrumentos, el mismo error: preguntarle a la superficie del código por un hecho que vive un piso más adentro.**
+> *Mientras vivía en SQL se leía como una peculiaridad de `pg_proc`. Al aparecer
+> en git y en JSX deja de ser del subsistema y pasa a ser del método:* **no es
+> que `pg_get_functiondef` engañe — es que TODO censo por texto responde la
+> pregunta que su patrón sabe hacer, y ninguna otra.**
+
+### La prueba, y es de una línea
+
+> **«¿Mi patrón puede fallar con el hecho PRESENTE?»** Si la respuesta es sí
+> —y con texto casi siempre lo es— **el cero no es una conclusión: es un
+> candidato.**
+
+**Su cura no es un patrón mejor: son DOS instrumentos que fallan distinto.**
+Acá alcanzó con el más barato posible —el nombre pelado, sin `<`— y **encontró
+el hit que el otro no veía**. *Un segundo instrumento tosco vale más que un
+primero refinado: no comparten el supuesto.*
+
+⚠️ **Y lo que la hizo aparecer no fue revisar el código: fue verificar lo que
+estaba por ENTREGAR como si lo hubiera escrito otro.** *El censo era mío, la
+conclusión era mía, y por eso ninguna relectura de mi propio razonamiento podía
+cazarla — sólo volver a preguntarle al objeto.*
+
+**Hermana de `L-498`, y no la duplica:** aquélla es sobre **la prosa que
+convence de no mirar**; ésta, sobre **el instrumento que mira mal**. *Las dos se
+cobraron el mismo día y en el mismo censo.*
+
+---
+
+
 ### `L-498` — LO QUE PARECE CUIDADO ES LO QUE IMPIDE QUE ALGUIEN MIRE
 
 > **Firma del founder (S114-B, 7-sep-2026): la clase tiene nombre.**
