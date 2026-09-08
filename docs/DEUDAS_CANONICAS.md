@@ -28703,6 +28703,69 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-517` — El hedge no viaja entre sesiones: viaja la conclusión
+
+**S114-F, firma del founder.** Le pasé a otra pista un hallazgo con su hipótesis
+**bien marcada**: *«puede ser deliberada — Expo SDK 57 puede exigir TS 6, **es la
+explicación más probable***»*. Escrito con «puede», con «más probable», y con una
+sección aparte titulada **«lo que NO se midió»**.
+
+🔴 **Volvió como hecho.** La pista integradora contestó que iba a *«agregar la línea
+que declara que la divergencia es deliberada (Expo SDK 57)»* — **en el canon**, en un
+archivo que existe para que nadie vuelva a medir.
+
+**Lo medí antes de que lo escribiera, y no se sostenía:**
+
+```
+expo@57.0.4 · expo-router@57.0.4   typescript en peerDeps: —   en devDeps: —
+                                   ⇒ Expo NO lo exige
+
+git log -L de la línea en apps/cliente  →  UN SOLO commit: 98e14c97, el scaffold
+apps/cliente ~6.0.3 · apps/prestador ~6.0.3 · raíz ~5.9.0 · packages ~5.9.0
+                                   ⇒ los cuatro del MISMO commit, hace dos meses
+```
+
+*No era una decisión: era lo que dejó `create-expo-app` y nadie miró.*
+
+> ***Un hedge es contexto, y el contexto no sobrevive a un traspaso.*** Lo que cruza de
+> una sesión a otra es la frase que sirve para actuar — **«deliberada (Expo SDK 57)»**—,
+> no el párrafo donde vivía con su «puede». Y del otro lado llega **sin la marca y con la
+> autoridad de venir de quien midió el resto.**
+
+⚠️ **Y lo que lo vuelve un tipo propio y no un descuido: no hubo error de medición.** No
+medí de más ni de menos, y marqué bien. *El defecto ocurrió enteramente en el traspaso* —
+que es el único lugar donde ningún gate mira, porque **con seis pistas y un solo canal
+humano el «puede» se cae y queda el «es».**
+
+## El corolario, y su tercera salida
+
+**Una inferencia que va a viajar a otra pista se manda con lo que haría falta para
+medirla.** En este caso eran diez palabras:
+`cat node_modules/expo/package.json | grep typescript`. *Con eso, la pista receptora lo
+resuelve en dos segundos y no escribe nada falso.*
+
+🔴 **Pero «o no se manda» sería peor que el defecto que cura**, y por eso la regla tiene
+tres salidas y no dos:
+
+| | |
+|---|---|
+| **va con su instrumento** | lo normal — y casi siempre es un comando de una línea |
+| **va marcada `SIN INSTRUMENTO`** | cuando medirla es caro. *Una hipótesis sin forma de medirla sigue valiendo como pista; lo que no vale es que llegue como hecho* |
+| **no se manda** | sólo cuando ni siquiera se puede decir qué la mediría — o sea, cuando ni el que la emite sabe qué está afirmando |
+
+**Y el matiz operativo, que es lo que falló acá: el hedge va PEGADO a la frase que va a
+viajar, no en su contexto.** Yo lo puse en el cuerpo del documento y en una sección
+aparte; **lo que la otra pista extrajo fue la frase**. *Si la marca no está adentro de la
+oración que alguien va a copiar, no está.*
+
+*(Pariente de [[L-166]] —todo dato vivo se relee al usarlo— pero de la otra punta: allá
+el receptor confía en un dato que envejeció; acá **el emisor marca bien y la marca se cae
+sola en el camino**. Y de [[L-158]]: una tabla de hallazgos no se vuelve orden sin el
+literal — acá el literal existía y no viajó.)*
+
+---
+
+
 ### `L-516` — Una racha de observaciones no prueba una regla si la ventana la elegí yo
 
 **S114-F.** Tres commits seguidos no produjeron deployment. Sondeé cada uno **5 minutos**
