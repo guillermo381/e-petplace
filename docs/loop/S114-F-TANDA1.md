@@ -1660,3 +1660,107 @@ verificaciones que quedan —cero ocurrencias de la URL vieja en el bundle, y el
 clic en «Entrar con Google»— **siguen sin poder correrse, y correrlas ahora
 daría un falso verde**: medirían el bundle de `73b275c`, cuyo `redirectTo`
 apunta a `e-petplace-admin.vercel.app`, **una URL que funciona**.
+
+---
+
+# ADENDA 15 · EL WEBHOOK QUE NO DISPARÓ — y por qué me tuvo 1h21 midiendo
+
+**El founder miró Deployments: `8934a30` NO EXISTE.** El último es `73b275c`,
+Ready, el que está en producción.
+
+⇒ **Se descarta mi hipótesis ③ (Ready sin promover).** Queda: el webhook de
+GitHub no llegó a Vercel.
+
+## ① El commit está donde debe — verificado contra el REMOTO
+
+```
+git ls-remote --heads origin
+  → 8934a30e6e80…  refs/heads/main        ← UNA sola rama, y apunta al commit
+
+git show origin/main:src/pages/Login.tsx | grep redirectTo
+  → 61:  redirectTo: 'https://admin.epetplace.com'    ← el cambio ESTÁ en el objeto remoto
+```
+
+**No quedó en otra rama, no es un push a medias, y el contenido es el correcto.**
+El commit está en GitHub y Vercel no se enteró.
+
+## 🔴 ④ EL MODO DE FALLA — el que me tuvo 1h21 sondeando
+
+> ***Un webhook que no dispara se ve EXACTAMENTE igual que una cola larga.***
+
+Desde afuera, las dos producen el mismo hecho: **producción sirviendo el commit
+anterior**. No hay diferencia observable — ni en el status, ni en los headers, ni
+en el bundle, ni en el tiempo. *Un deploy en cola y un deploy que no existe son
+indistinguibles desde el lado del que espera.*
+
+**Y lo único que los separa es la lista de deployments, que vive en el
+dashboard — o sea fuera de todo instrumento mío.** Ninguna cantidad de sondeo lo
+resolvía: **el sondeo mide el resultado, y las dos causas comparten el
+resultado.**
+
+⚠️ **Y la trampa que lo hace durar: esperar es la respuesta correcta para una de
+las dos.** Si fuera cola, esperar es exactamente lo que hay que hacer — así que
+cada minuto sin cambio *confirma* la hipótesis equivocada tanto como la
+correcta. **Por eso escalé a las tres hipótesis en vez de seguir esperando: no
+porque el tiempo fuera mucho, sino porque el tiempo no aportaba información
+nueva.**
+
+⇒ **La regla que deja: cuando la espera deja de discriminar entre las hipótesis,
+la espera terminó** — aunque el reloj diga que podría faltar. Lo que sigue no es
+esperar más: es pedir el dato que sólo existe del otro lado.
+
+*(Y el corolario para el próximo: **un deploy que no aparece en 2× el tiempo
+observado se mira en Deployments, no se sigue sondeando.** El anterior tardó
+~50 min; a los ~100 ya había que preguntar.)*
+
+## ② La propuesta para re-disparar — y por qué ésa
+
+**No se ejecutó: el founder pidió la propuesta antes.**
+
+### Lo que NO sirve, descartado antes de proponer
+
+| opción | por qué no |
+|---|---|
+| **«Redeploy» en el dashboard** | Vercel redeploya **el commit de ese deployment** ⇒ volvería a construir `73b275c`. *Reconstruiría lo que ya está.* |
+| **Re-pushear `main` tal cual** | El push no cambia la ref ⇒ **GitHub no emite webhook**. Un `git push` que no mueve nada es un no-op también para el hook. |
+| **`--amend` + force push** | Dispararía, **pero reescribe un commit ya pusheado** — y encima uno que otra pista podría haber leído. La casa no reescribe historia publicada por una razón operativa. |
+| **`vercel --prod` por CLI** | La sesión CLI de Vercel **se cerró en el barrido de seguridad de S101** (canon). Reabrirla es un acto del founder y una superficie nueva por un deploy. |
+
+### 🟢 Lo que propongo: **commit vacío**
+
+```bash
+git commit --allow-empty -m "chore: re-disparar el deploy de 8934a30 (webhook perdido)"
+git push origin main
+```
+
+**Por qué ésa y no un commit con contenido:**
+
+🔴 **Porque aísla la variable.** Si meto contenido, estoy mezclando dos cosas —
+*«necesito disparar el deploy»* y *«hago un cambio»*— y **si el deploy vuelve a
+fallar no sé cuál de las dos falló.** Un commit vacío no puede romper un build:
+si no sale, la causa es el hook y sólo el hook.
+
+*Es el mismo principio que un discriminador: se mueve UNA cosa por vez, y la que
+se mueve es la que se está probando.*
+
+**Y lo segundo, que es de honestidad del log:** un commit vacío **dice en su
+mensaje exactamente por qué existe**. Un commit con contenido inventado para
+disparar un hook es un commit que miente sobre su motivo, y dentro de tres
+sesiones nadie va a saber que se hizo por esto.
+
+**El costo, declarado:** agrega un commit al historial que no aporta código. *Es
+ruido — pero ruido documentado, y menos caro que un diagnóstico ambiguo la
+próxima vez.*
+
+### Si el commit vacío tampoco dispara
+
+**Entonces el webhook está roto, no perdido**, y son dos cosas distintas: una se
+cura reintentando, la otra no. Ahí lo que hay que mirar es
+**GitHub → Settings → Webhooks → el de Vercel → Recent Deliveries**: si el envío
+de `8934a30` figura con error, lo dice; si no figura, el hook no se disparó del
+lado de GitHub. **Y ahí hay un botón «Redeliver» que reenvía ESE evento** — que
+es más preciso que cualquier commit nuevo, porque replica el evento original en
+vez de fabricar uno.
+
+*(Lo pongo segundo y no primero porque exige entrar a la config del repo, y el
+commit vacío no.)*
