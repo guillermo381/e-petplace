@@ -2117,6 +2117,19 @@ const FIXTURES = {
         ⚠️ El `path` importa: los cinco guards buscan SU pieza y sin ella
         salen por «ancla rota», que es otro rojo — un fixture que enrojece
         por el ancla no prueba el brazo que dice probar. ══════════════════ */
+  /* R78 · la pieza número doce: el tema decidiendo existencia, solo. El corpus
+     trae 20 archivos para pasar el ancla, y 12 guards para superar el baseline
+     de 11 — con menos, la regla saldría verde y no probaría nada. */
+  R78: [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `const x${i} = 1\n`,
+    })),
+    ...Array.from({ length: 12 }, (_, i) => ({
+      path: `packages/ui/src/components/Apagada${i}.tsx`,
+      src: `if (theme.mode === 'memorial') return null\n`,
+    })),
+  ],
   /* R77 · el sitio DECLARADO exhaustivo al que le falta un miembro. El corpus
      trae 20 archivos y 10 uniones para pasar las dos anclas — sin eso el
      fixture enrojecería por «no pude medir», que es otro rojo. */
@@ -6398,6 +6411,89 @@ function piezaDe(archivos, nombre) {
  *  Mide los TRES conjuntos —unión, orden y glifos— y exige que coincidan.
  *  ⚠️ Su verde dice «las cinco etapas están las tres veces», jamás «la
  *  escalera cuenta bien la historia». */
+/** R78 · EL TEMA MEMORIAL NO PUEDE SER LA ÚNICA SEÑAL (S114-B · adenda).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **ONCE PIEZAS DE `packages/ui` DECIDEN SI EXISTEN MIRANDO
+ * `theme.mode === 'memorial'`. LAS ONCE ESTÁN APAGADAS EN PRODUCTO.**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Medido en `D-1021` (lo halló C montando, no leyendo): **nadie monta
+ * `<ThemeProvider memorial>` en ninguna de las dos apps** — el único provider
+ * vivo es el raíz, con `mode={light|dark}`. *El tema memorial existe en
+ * `packages/ui` desde S43 y jamás se usó en producto.*
+ *
+ * ── LO QUE ESAS ONCE DICEN DE SÍ MISMAS, y ninguna se cumple ────────────
+ * ```
+ *   PastillaConociendolo  «En memorial no se pide terminar de contar nada»
+ *   ChipsSugerencia       «El Coach no existe en memorial»
+ *   AvisoAnticipacion     «Nada que adelantar cuando ya no hay mañana»
+ *   TarjetaHoy            «No hay un "hoy" que resolver»
+ * ```
+ * **La casa escribió la protección once veces, con su porqué en negrita, y las
+ * once están inertes.** No porque la lógica esté mal: porque cuelgan de un
+ * interruptor que nadie aprieta. *Es el mecanismo exacto de `D-1021` — a una
+ * familia que perdió a su animal, la app le pidió el peso de hoy.*
+ *
+ * ── 🔴 POR QUÉ ESTA REGLA MIDE **ESTA** FORMA Y NO LAS 60 ───────────────
+ * El censo halló **60 usos** de `mode === 'memorial'` en 51 archivos, y **la
+ * mayoría son legítimos**: degradar un color o apagar una animación **es para
+ * lo que existe un tema**, y su inercia cuesta estética, no respeto.
+ *
+ * **La clase que importa es la que decide EXISTENCIA** —`if (…) return null`—
+ * porque ahí el tema no está pintando: está apagando un PEDIDO. *Un guard que
+ * midiera los 60 confundiría «este color no degrada» con «la app le pide algo
+ * a quien perdió a su animal», y son dos cosas de distinto precio.*
+ *
+ * ── LA FORMA CORRECTA, y ya tiene su precedente ─────────────────────────
+ * `LineaAlgoSalioDistinto` (S114-B) y `Atmosfera` la cumplen: **el DATO por
+ * prop, y el tema conservado en el `OR`** — porque la galería SÍ monta el
+ * sub-tema y ahí el guard tiene que seguir valiendo. *Lo que está mal no es
+ * mirar el tema: es mirar SÓLO el tema.*
+ *
+ * ⚠️ **SU VERDE DICE «NO CRECIÓ», JAMÁS «LAS ONCE ANDAN».** Las once siguen
+ * inertes; esta regla **no las cura, impide la doce**. Curarlas exige que cada
+ * pieza reciba su señal y que su pantalla se la pase — trabajo de dos
+ * territorios, tanda propia. *Se dice acá para que el número no se lea como
+ * salud.* */
+const BASE_R78 = 11
+function r78(archivos) {
+  const porRuta = new Map()
+  for (const a of archivos) if (/packages\/ui\/src\/.*\.tsx?$/.test(a.path)) porRuta.set(a.path, a)
+  const uis = [...porRuta.values()]
+  const fallos = [...ancla('R78', uis.length, 20, 'archivo(s) de `packages/ui/src` en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  const solos = []
+  let conDato = 0
+  for (const { path, src } of uis) {
+    const t = sinComentarios(src ?? '')
+    for (const m of t.matchAll(/if\s*\(([^)]*mode\s*===\s*'memorial'[^)]*)\)\s*return\s+null/g)) {
+      // ¿el guard mira ALGO MÁS que el tema? Entonces ya está curado.
+      if (/\|\||&&/.test(m[1])) { conDato++; continue }
+      solos.push(`${path.replace('packages/ui/src/', '')}:${lineaDe(t, m.index)}`)
+    }
+  }
+  if (solos.length > BASE_R78) {
+    fallos.push(
+      `R78 **${solos.length} pieza(s) deciden si existen mirando SÓLO el tema memorial, y el baseline es ${BASE_R78}.** ` +
+      `Nueva(s): las que no estén en la lista del cierre. **En producto ese guard NO SE ENCIENDE NUNCA** ` +
+      `(\`D-1021\`: nadie monta \`<ThemeProvider memorial>\` en ninguna app) ⇒ *escribís la protección, se lee ` +
+      `como protección, y la app igual le pide algo a quien perdió a su animal.* ` +
+      `**La forma correcta: el DATO por prop, con \`theme.mode\` conservado en el \`OR\`** — la galería sí monta ` +
+      `el sub-tema. Precedentes vivos: \`LineaAlgoSalioDistinto\` y \`Atmosfera\`.`,
+    )
+    for (const s of solos) fallos.push(`R78   · ${s}`)
+  }
+  return {
+    fallos,
+    info:
+      `${solos.length} pieza(s) con el tema como ÚNICA señal de existencia · baseline ${BASE_R78} SOLO-BAJA · ` +
+      `${conDato} ya reciben el dato por prop · 60 usos de \`mode === 'memorial'\` en total (los demás son color y ` +
+      `movimiento: su inercia cuesta estética, no respeto) · ` +
+      `⚠️ su verde dice «no creció», JAMÁS «las ${BASE_R78} andan»: las ${BASE_R78} siguen inertes`,
+  }
+}
+
 /** R77 · LO QUE ENUMERA UNA UNIÓN A MANO SE DECLARA (S114-B · adenda).
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -6906,7 +7002,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -7364,6 +7460,7 @@ corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAIC
 /* S114-B · LAS CINCO DE LA POSTVENTA. Corren sobre `packages/ui/src` entero:
    cada guard busca SU pieza y sale por «ancla rota» si no la encuentra — así
    un rename de archivo no las deja mudas. */
+corridas.push(['R78 (el tema memorial no puede ser la única señal)', r78([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
 corridas.push(['R77 (lo que enumera una unión a mano se declara)', r77([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
 corridas.push(['R72 (ninguna etapa del caso se pierde del orden)', r72(ui)])
 corridas.push(['R73 (las dos tarjetas del dinero son parejas)', r73(ui)])

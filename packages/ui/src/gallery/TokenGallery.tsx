@@ -6550,6 +6550,7 @@ function GaleriaInterna() {
               </Texto>
               <LineaAlgoSalioDistinto
                 estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                enMemorial={false}
                 onPress={() => {}}
               />
               <LineaAlgoSalioDistinto
@@ -6557,6 +6558,7 @@ function GaleriaInterna() {
                   tipo: 'fueraDeVentana',
                   voz: 'Este servicio ya pasó su ventana. Si querés, hablá con nosotros.',
                 }}
+                enMemorial={false}
                 onPress={() => {}}
               />
               <LineaAlgoSalioDistinto
@@ -6565,6 +6567,21 @@ function GaleriaInterna() {
                   voz: 'Tenés un caso abierto sobre este paseo',
                   estado: 'Con el paseador',
                 }}
+                enMemorial={false}
+                onPress={() => {}}
+              />
+              {/* 🔴 EL DISCRIMINADOR, y es lo único que hay que mirar acá: la
+                  MISMA puerta con `enMemorial` produce NADA. Sin este cuarto
+                  montaje el catálogo mostraría tres líneas que aparecen y
+                  ninguna prueba de que la que importa no aparece — *un guard
+                  que sólo se ve encendido no se puede juzgar apagado.* */}
+              <Texto variante="apoyo" color="tertiary">
+                ⬇︎ con `enMemorial` no se dibuja NADA (acá abajo no hay nada, y
+                eso es el gate)
+              </Texto>
+              <LineaAlgoSalioDistinto
+                estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                enMemorial
                 onPress={() => {}}
               />
             </View>
