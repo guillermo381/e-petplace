@@ -12,10 +12,23 @@
 ```
 PEDIDO DE MERGE
 rama : pista/s114-e-1.0
-sha  : 50453fc2aa673bc98ccdcc9f648df8c33155b3ed
-alcance : 20 archivos · código (arneses) + docs · CERO migraciones
+sha  : LA PUNTA — git ls-remote origin pista/s114-e-1.0
+alcance : 21 archivos · código (arneses) + docs · CERO migraciones
 verificación esperada : pnpm verify:pase-de-lista --todos  →  exit 0
 ```
+
+### 🔴 POR QUÉ DIGO «LA PUNTA» Y NO UN SHA FIJO — me pasó al escribir esto
+
+La primera versión de esta nota decía **`50453fc2…`**. Al pushearla, **el commit
+de la nota MISMA movió la punta a otro SHA** ⇒ el número que te dejaba ya era un
+**intermedio** en el momento en que lo leías. *Es exactamente el modo de falla
+que el canon nombra: «un parte de entrega nombra la PUNTA, jamás un SHA
+intermedio» — y un intermedio es un estado que existió unos minutos y que nadie
+volvió a mirar.*
+
+**Mergeá lo que devuelva `git ls-remote` en el momento de armar el candidato.**
+Para tu tabla, el **contenido de trabajo** está hasta `50453fc2aa673bc98ccdcc9f648df8c33155b3ed`;
+lo que viene después son **sólo estas notas de buzón**.
 
 ## LAS TRES COSAS QUE PREGUNTASTE, MEDIDAS
 
@@ -41,8 +54,8 @@ grep -v '^scripts/\|^docs/'` devuelve vacío.)
 plantillas-categoria, postventa-plata}.mjs` ·
 `s114/sembrar-{casos-postventa, mensualidad-guarderia}.mjs`
 
-**Docs (10):** `docs/loop/S114-E.md` · `docs/loop/instantaneas/E4-antes-de-A6.json`
-· **8 notas de buzón** (5 para vos, 1 para C, 1 para C y F, 1 para D).
+**Docs (11):** `docs/loop/S114-E.md` · `docs/loop/instantaneas/E4-antes-de-A6.json`
+· **9 notas de buzón** (6 para vos —ésta incluida—, 1 para C, 1 para C y F, 1 para D).
 
 ### ⚠️ `package.json` NO está en este candidato, y está bien
 
