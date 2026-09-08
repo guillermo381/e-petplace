@@ -531,6 +531,22 @@
   [
    "abrís",
    "abres"
+  ],
+  [
+   "marcá",
+   "marca"
+  ],
+  [
+   "firmá",
+   "firma"
+  ],
+  [
+   "operás",
+   "operas"
+  ],
+  [
+   "registrá",
+   "registra"
   ]
  ],
  "_union": "Esta lista es la UNIÓN con lib-voz al 6-sep-2026. El gate de voz de E mide la unión y ACREDITA cuál de las dos cazó: si sólo la caza lib-voz, hay que ampliar el cinturón; si sólo la caza ésta, el hueco es de lib-voz.",

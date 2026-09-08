@@ -51,6 +51,7 @@ import { spacing } from '../tokens/spacing'
 import { sobreVideo } from '../tokens/sobreVideo'
 import { useTheme } from '../ThemeProvider'
 import { Chevron } from './chevron'
+import { TecladoResueltoArriba } from './teclado-resuelto'
 import { Texto } from './Texto'
 
 export type AlturaModal = 'cerrado' | 'medio' | 'completo'
@@ -63,11 +64,35 @@ export interface ModalDosAlturasProps {
   children: ReactNode
   /** Voz del asa (a11y). */
   etiquetaAsa: string
+  /**
+   * 🔴 EL ENCABEZADO — y **arrastra igual que el asa** (S114-B).
+   *
+   * `DIRECCION_ARTE_VIDEOCONSULTA` §3 lo pide con todas las letras: *«Se
+   * arrastra por el asa **o por cualquier parte de su encabezado**»*. **Estaba
+   * en la letra firmada y no estaba construido** — el gesto vivía sólo sobre
+   * los 28 px del asa. *Un asa de 28 px es un blanco chico para el pulgar, y
+   * la mitad que lo arreglaba ya estaba escrita.*
+   *
+   * Va DENTRO del mismo `GestureDetector`, así que no hay un segundo gesto que
+   * competir. **Los toques siguen pasando**: `Pan` activa recién con
+   * movimiento, así que un botón o un chip acá adentro se toca normal.
+   */
+  encabezado?: ReactNode
   /** Si hay texto sin guardar, bajar a `cerrado` pide confirmación. */
   hayCambiosSinGuardar?: boolean
   /** Lo llama en vez de cerrar cuando hay cambios. El consumidor decide cómo pregunta. */
   onPedirConfirmacion?: () => void
-  /** Alto que ocupa el teclado. El modal crece POR DENTRO — el video no se mueve. */
+  /**
+   * Alto que ocupa el teclado, **tal como lo reporta la plataforma y SIN la
+   * barra de gestos** (`endCoordinates.height`).
+   *
+   * 🔴 **No le sumes el inset: lo suma la pieza.** Bajo edge-to-edge el número
+   * del teclado no incluye la barra, y componerlos acá es lo que evita que cada
+   * consumidor tenga que acordarse — *y que uno se olvide y su campo quede
+   * recortado sin que nada falle.*
+   *
+   * El modal crece POR DENTRO: el video no se mueve.
+   */
   altoTeclado?: number
   insetBottom?: number
 }
@@ -91,6 +116,7 @@ export function ModalDosAlturas({
   altoPantalla,
   children,
   etiquetaAsa,
+  encabezado,
   hayCambiosSinGuardar = false,
   onPedirConfirmacion,
   altoTeclado = 0,
@@ -108,9 +134,41 @@ export function ModalDosAlturas({
     [sinViaje],
   )
 
+  /**
+   * 🔴 CON EL TECLADO ABIERTO, `medio` SUBE A `completo` — Y VIVE ACÁ, NO EN
+   * LA PANTALLA (S114-B, pedido de C).
+   *
+   * **La aritmética la midió C en aparato:** el teclado se lleva el **34 %** de
+   * la pantalla; en `medio` queda el 50 % menos eso, y **no alcanza para la
+   * barra**. *La hoja hace lo correcto y aun así la barra queda tapada — es
+   * aritmética, no defecto.*
+   *
+   * **C lo curó del lado del consumidor y preguntó si debía vivir acá. Sí, y
+   * por mi propia `R81`:** *una garantía que el consumidor tiene que acordarse
+   * de pedir no es una garantía.* **No es una decisión de esa pantalla: es una
+   * propiedad de un panel que reserva el teclado adentro de sí mismo** — le
+   * pasa a CUALQUIER consumidor que ponga un campo en `medio`, y el único que
+   * conoce la aritmética es este archivo. *El consumidor no puede saber que su
+   * barra no entra; la hoja sí.*
+   *
+   * ⚠️ **NO MEDIDO, y se dice:** qué se siente al ARRASTRAR la hoja con el
+   * teclado abierto —el imán calcula contra las alturas nominales y la
+   * geometría está en la efectiva— **no se probó en aparato**. En el uso normal
+   * el gesto de bajar guarda el teclado primero (`keyboardDismissMode`), así
+   * que el caso puede no existir; *pero «puede no existir» no es una medición.*
+   *
+   * ⚠️ **No toca `altura`, y eso importa:** el ESTADO sigue diciendo `medio`
+   * —que es lo que el usuario eligió— y lo que sube es la GEOMETRÍA. Al cerrar
+   * el teclado vuelve solo, sin que nadie tenga que devolver nada. *Mover el
+   * estado del consumidor desde adentro sería la pieza discutiéndole al dueño
+   * de la verdad.*
+   */
+  const alturaEfectiva: AlturaModal =
+    altoTeclado > 0 && altura === 'medio' ? 'completo' : altura
+
   const altoDe = useCallback((a: AlturaModal) => Math.round(altoPantalla * FRACCION[a]) + ASA_ALTO, [altoPantalla])
 
-  const h = useSharedValue(altoDe(altura))
+  const h = useSharedValue(altoDe(alturaEfectiva))
   const iniH = useSharedValue(0)
 
   /* 🔴 EL TOPE Y EL PISO VIVEN EN SHARED VALUES, NO SE CALCULAN EN EL GESTO.
@@ -134,8 +192,8 @@ export function ModalDosAlturas({
   }, [altoDe, tope, piso])
 
   useEffect(() => {
-    h.value = asentar(altoDe(altura))
-  }, [altura, altoDe, asentar, h])
+    h.value = asentar(altoDe(alturaEfectiva))
+  }, [alturaEfectiva, altoDe, asentar, h])
 
   /** A dónde va al soltar: la más cercana, con el envión contando. */
   const resolver = useCallback(
@@ -151,13 +209,17 @@ export function ModalDosAlturas({
       }
       // 🔴 Bajar del todo con trabajo sin guardar: se pregunta, no se cierra.
       if (mejor === 'cerrado' && hayCambiosSinGuardar && onPedirConfirmacion) {
-        h.value = asentar(altoDe(altura))
+        /* Vuelve a la EFECTIVA y no a `altura`: con el teclado abierto el panel
+           está en la geometría de `completo` aunque el estado diga `medio`, y
+           rebotar a la nominal lo haría saltar hacia abajo justo cuando el
+           usuario está escribiendo. */
+        h.value = asentar(altoDe(alturaEfectiva))
         onPedirConfirmacion()
         return
       }
       onAltura(mejor)
     },
-    [altoDe, altura, asentar, h, hayCambiosSinGuardar, onAltura, onPedirConfirmacion],
+    [altoDe, alturaEfectiva, asentar, h, hayCambiosSinGuardar, onAltura, onPedirConfirmacion],
   )
 
   const arrastre = Gesture.Pan()
@@ -189,22 +251,55 @@ export function ModalDosAlturas({
         estilo,
       ]}
     >
-      {/* ── EL ASA. Nunca se esconde: es la única pista de que hay algo abajo. */}
+      {/* ── EL ASA **Y SU ENCABEZADO**: los dos arrastran (§3). El asa nunca se
+             esconde — es la única pista de que hay algo abajo. */}
       <GestureDetector gesture={arrastre}>
-        <View
-          accessibilityRole="adjustable"
-          accessibilityLabel={etiquetaAsa}
-          accessibilityValue={{ text: altura }}
-          style={{ height: ASA_ALTO, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <View style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: theme.border.default }} />
+        <View>
+          <View
+            accessibilityRole="adjustable"
+            accessibilityLabel={etiquetaAsa}
+            accessibilityValue={{ text: altura }}
+            style={{ height: ASA_ALTO, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <View style={{ width: 40, height: 4, borderRadius: radius.full, backgroundColor: theme.border.default }} />
+          </View>
+          {encabezado}
         </View>
       </GestureDetector>
 
       {/* ── El contenido. El teclado se compensa ACÁ ADENTRO: el panel reserva
              su alto y el video de arriba no se entera. */}
-      <View style={{ flex: 1, paddingBottom: altoTeclado > 0 ? altoTeclado : insetBottom, paddingHorizontal: spacing[4] }}>
-        {children}
+      {/* 🔴 EL TECLADO **Y** LA BARRA DE GESTOS SE SUMAN — no es «o» (S114-B).
+          ⏪ Acá decía `altoTeclado > 0 ? altoTeclado : insetBottom`, y con el
+          teclado abierto **la caja del campo quedaba recortada** por su borde
+          inferior. C lo midió en aparato y la causa tiene nombre:
+          **bajo edge-to-edge, `endCoordinates.height` reporta el teclado SIN la
+          barra de gestos** — y esa barra es exactamente `insetBottom`. Con el
+          teclado abierto el hueco de abajo son las DOS cosas, una encima de la
+          otra, así que el ternario perdía siempre una.
+
+          ⚠️ **Y por eso no se curó con un `+6`**: el faltante *parecía* 6 px en
+          ese teléfono y **es `insetBottom`, un número que cambia con el
+          dispositivo**. *Un padding fijo habría tapado el síntoma en el
+          emulador de C y reaparecido en el primer teléfono con otra barra.*
+
+          El ternario muere: con el teclado cerrado `altoTeclado` es 0 y la
+          suma da `insetBottom`, que es lo que hacía antes. **La misma cuenta
+          para los dos estados es una cuenta menos que puede estar mal en uno.**
+
+          🔴 **LA COMPOSICIÓN LA HACE LA PIEZA, y es `R81` otra vez:** el
+          consumidor pasa lo que la plataforma le da y **no tiene que acordarse
+          de sumarle el inset** — si tuviera que hacerlo, sería *una opción con
+          buen nombre*. ⇒ `altoTeclado` = lo que reporta el teclado, **sin** la
+          barra; el inset lo pone este archivo. */}
+      <View style={{ flex: 1, paddingBottom: altoTeclado + insetBottom, paddingHorizontal: spacing[4] }}>
+        {/* 🔴 ACÁ SE DECLARA QUIÉN PAGA EL TECLADO (S114-B). El panel acaba de
+            reservarlo arriba, así que **todo lo que caiga adentro NO debe
+            resolverlo otra vez** — `SuperficieChat` lo lee y no monta su
+            `EvitaTeclado`. *No hay prop que pasar, así que no hay prop que
+            olvidar: es mi propia `R81` aplicada a esta frontera.*
+            Ver `teclado-resuelto.tsx`. */}
+        <TecladoResueltoArriba>{children}</TecladoResueltoArriba>
       </View>
     </Animated.View>
   )
@@ -275,7 +370,30 @@ export function ModalDosAlturas({
  * **No se agranda para verse.** *El defecto nunca fue el tamaño — 40×4 es la
  * convención, y engordar la barra sólo habría dado una línea más gorda.*
  */
-export function AsaModal({ etiqueta, onPress }: { etiqueta: string; onPress: () => void }) {
+export function AsaModal({
+  etiqueta,
+  onPress,
+  sobre = 'video',
+}: {
+  etiqueta: string
+  onPress: () => void
+  /**
+   * 🔴 SOBRE QUÉ SE APOYA (S114-B). `'video'` es el default y **no mueve un
+   * píxel de la videoconsulta**.
+   *
+   * Nació cableada a los tokens `sobreVideo` porque su único consumidor era
+   * una llamada. **Esos tokens miden su contraste CONTRA VIDEO** —fondo no
+   * controlado— y sobre una superficie de la app son **la respuesta a otra
+   * pregunta**: una banda semitransparente pensada para sobrevivir a un
+   * fotograma cualquiera, apoyada sobre papel.
+   *
+   * *No es que se vería mal: es que su contraste estaría medido contra algo
+   * que no está en la pantalla.*
+   */
+  sobre?: 'video' | 'superficie'
+}) {
+  const { theme } = useTheme()
+  const enVideo = sobre === 'video'
   return (
     <View style={{ alignItems: 'center' }}>
       <Pressable
@@ -289,16 +407,24 @@ export function AsaModal({ etiqueta, onPress }: { etiqueta: string; onPress: () 
           gap: spacing[1],
           paddingHorizontal: spacing[4],
           borderRadius: radius.full,
-          backgroundColor: sobreVideo.banda,
+          backgroundColor: enVideo ? sobreVideo.banda : theme.bg.card,
+          /* Sobre papel la banda no se separa sola: la separa la elevación de
+             reposo, como toda superficie de la casa. Sobre video NO — ahí la
+             sombra no separa (§1.2 de la dirección, la enmienda del anillo). */
+          ...(enVideo ? null : { boxShadow: theme.elevacion.reposo }),
         }}
       >
         {/* El rótulo dice QUÉ sube. La barra sola nunca pudo decirlo — y eso
             era la mitad cara del reporte: no «no la veo», sino «no sé que hay
             algo». */}
-        <Texto variante="apoyo" color="sobreVideo">
+        <Texto variante="apoyo" color={enVideo ? 'sobreVideo' : 'secondary'}>
           {etiqueta}
         </Texto>
-        <Chevron direccion="arriba" color={sobreVideo.contenido} lado={16} />
+        <Chevron
+          direccion="arriba"
+          color={enVideo ? sobreVideo.contenido : theme.text.secondary}
+          lado={16}
+        />
       </Pressable>
     </View>
   )

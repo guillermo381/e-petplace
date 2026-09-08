@@ -147,4 +147,14 @@ if (escritos.length > 0) {
   console.log('    node scripts/verify-contador-piezas.mjs')
   process.exit(1)
 }
+/* 🔴 EL ALCANCE, PUBLICADO (`L-500` · la ley es `L-503`). Este gate cubre DOS
+   de los OCHO sujetos que la casa ya se equivocó, y su verde no dice nada de
+   los otros seis. *Un gate que no nombra lo que no mira deja creer que lo
+   mira* — y esta clase se distingue justamente por ser invisible. */
 console.log('✅ ninguna fuente escribe el número; el comando es la fuente')
+console.log(
+  `   alcance: ${VIGILADOS.length} fuente(s) · 2 sujetos (piezas · wrappers)` +
+  ' · ⚠️ SIN instrumento, y ya se cayeron: migraciones · fichas · pares de voseo' +
+  ' · cadenas de galería de R66 · ordinales · el conteo de reglas de este lint' +
+  ' — ver `L-503`',
+)

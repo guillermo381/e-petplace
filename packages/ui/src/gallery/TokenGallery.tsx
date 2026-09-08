@@ -4161,6 +4161,38 @@ function GaleriaInterna() {
           </View>
           <View style={{ height: spacing[2] }} />
           <Boton variante="secundario" etiqueta={`Modal: ${altModal} — cambiar`} onPress={() => setAltModal((a) => (a === 'cerrado' ? 'medio' : a === 'medio' ? 'completo' : 'cerrado'))} />
+
+          {/* ── S114-B · LOS DOS DISCRIMINADORES DEL ENSANCHE PARA POSTVENTA ──
+                 ① la misma hoja CON ENCABEZADO, que ahora arrastra igual que el
+                 asa (`§3` lo pedía y no estaba construido) · ② `AsaModal` sobre
+                 SUPERFICIE, para la barra «Abrir chat» donde no hay video.
+                 *Se montan al lado de las de video para que la diferencia se
+                 vea comparando, que es la única forma de gatear un token.* */}
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="apoyo">
+            El mismo modal con ENCABEZADO: se arrastra por el asa o por cualquier
+            parte de su encabezado. Y abajo, el asa sobre SUPERFICIE (sin video):
+            la barra que dice qué sube.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ height: 320, borderRadius: radius.md, overflow: 'hidden', backgroundColor: theme.bg.hundido }}>
+            <ModalDosAlturas
+              altura={altModal}
+              onAltura={setAltModal}
+              altoPantalla={320}
+              etiquetaAsa="Hilo del caso"
+              altoTeclado={0}
+              encabezado={
+                <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[2] }}>
+                  <Texto variante="titulo">Caso F-2026-000050</Texto>
+                </View>
+              }
+            >
+              <Texto>El encabezado de arriba también arrastra.</Texto>
+            </ModalDosAlturas>
+          </View>
+          <View style={{ height: spacing[2] }} />
+          <AsaModal etiqueta="Abrir chat" onPress={() => setAltModal('medio')} sobre="superficie" />
         </Seccion>
 
         {/* ═══ S85-B13 · LOS GLIFOS QUE ESPERAN SU OJO. Suben acá por el

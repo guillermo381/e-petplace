@@ -53,7 +53,7 @@ const MENSAJES_ERROR_PASEO: Record<
   track_excede_limite:               'La ruta alcanzó el máximo de puntos GPS.',
   gps_motivo_innecesario:            'Hay ruta registrada: no corresponde motivo de fallo.',
   gps_motivo_fallo_required:         'Sin ruta GPS, cuéntanos qué pasó antes de terminar.',
-  falta_novedad_paseo:               'Registrá el parte del perro para poder cerrar.',
+  falta_novedad_paseo:               'Registra el parte del perro para poder cerrar.',
   novedad_codigo_invalido:           'La novedad elegida no existe en el catálogo.',
   novedad_codigo_inactivo:           'La novedad elegida ya no está disponible.',
   cita_no_promovible:                'La cita de esta atención quedó en un estado que no permite completarla — avisá al equipo.',

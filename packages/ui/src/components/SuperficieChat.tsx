@@ -115,6 +115,7 @@ import { memo, useCallback, useRef } from 'react'
 import { FlatList, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { EvitaTeclado } from './EvitaTeclado'
+import { useTecladoYaResuelto } from './teclado-resuelto'
 import { mismaFila } from './misma-fila'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
@@ -204,6 +205,12 @@ export function SuperficieChat<T>({
 }: SuperficieChatProps<T>) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
+  /* 🔴 ¿ALGUIEN ARRIBA YA PAGÓ EL TECLADO? (S114-B) — ver `teclado-resuelto.tsx`.
+     Adentro de `ModalDosAlturas` el panel ya reservó el alto y **montar acá
+     otro manejador lo pagaría DOS VECES**: la barra queda flotando sobre un
+     hueco. *No es una prop porque una prop se olvida, y olvidarla no falla:
+     se ve raro.* Mi propia `R81`. */
+  const tecladoResueltoArriba = useTecladoYaResuelto()
 
   /* LAS DOS FUNCIONES DE LA PANTALLA, ESTABILIZADAS ACÁ. La `ref` se
      actualiza en cada render —así la última versión es la que corre— y las
@@ -229,11 +236,19 @@ export function SuperficieChat<T>({
     [onAlFondoCambia],
   )
 
-  return (
-    /* `EvitaTeclado` envuelve la superficie ENTERA —lista y barra— para que
-       el empuje mueva las dos juntas. Envolver sólo la barra la despegaría
-       de la lista, que es el defecto que esto viene a no tener. */
-    <EvitaTeclado>
+  /* `EvitaTeclado` envuelve la superficie ENTERA —lista y barra— para que el
+     empuje mueva las dos juntas. Envolver sólo la barra la despegaría de la
+     lista, que es el defecto que esto viene a no tener.
+
+     🔴 **Y se monta SÓLO si nadie lo resolvió arriba.** Los dos manejadores a
+     la vez no se pueden expresar: el `false` de este hook es el default fuera
+     de una hoja, y el `true` **sólo lo puede producir la pieza que de verdad
+     reservó el alto**. */
+  const conTeclado = (dentro: ReactNode) =>
+    tecladoResueltoArriba ? dentro : <EvitaTeclado>{dentro}</EvitaTeclado>
+
+  return conTeclado(
+    <>
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
         {encabezado}
 
@@ -272,8 +287,10 @@ export function SuperficieChat<T>({
         {/* LA BARRA. Va FUERA del contenedor de la lista para que su alto no
             se lo coma al hilo. Con el teclado cerrado respeta el borde
             seguro; con el teclado abierto, `EvitaTeclado` empuja todo. */}
-        <View style={{ paddingBottom: insets.bottom }}>{barra}</View>
+        {/* Con el teclado resuelto ARRIBA el borde seguro ya lo paga la hoja
+            (su `insetBottom`): sumarlo acá lo cobraría dos veces. */}
+        <View style={{ paddingBottom: tecladoResueltoArriba ? 0 : insets.bottom }}>{barra}</View>
       </View>
-    </EvitaTeclado>
+    </>,
   )
 }
