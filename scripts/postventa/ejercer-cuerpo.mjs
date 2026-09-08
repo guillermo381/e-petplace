@@ -145,26 +145,54 @@ export default async function correr({ entrar, llamar, reVoseo, reUsted, N }) {
      Por eso cada caso se corre en DOS variantes: con su etapa real (honesto) y
      sin la etapa (lo que la casa ve cuando abre el caso). **No se inventa una
      etapa abierta**: se omite el campo y se dice que se omitió. */
-  /* 🔴 SE PREFIERE EL CASO ABIERTO, Y SI NO HAY SE DICE — NO SE MIDE Y SE
-     LLAMA «camino principal».
-     La hoja existe para un caso que la casa TIENE QUE RESOLVER. Sobre uno
-     cerrado el modelo contesta bien («ya está resuelto») y eso mide que lee el
-     material, no que sabe proponer. *Reportar ese número como si fuera el
-     camino principal sería un verde por la razón equivocada.* */
+  /* 🔴 LOS SUJETOS SE APUNTAN POR ID, NO POR HEURÍSTICA — Y LA CORRECCIÓN ES
+     DE E, QUE TENÍA RAZÓN.
+     La versión anterior elegía «el mejor caso de clase 2» ordenando por abierto
+     y por turnos. Funciona hoy y **deja de funcionar sin avisar**: el día que
+     alguien siembre otro caso de clase 2 con más turnos, el arnés cambia de
+     sujeto solo y las corridas dejan de ser comparables **sin que nada falle**.
+     *Un índice o un «el primero que cumpla» no identifica un sujeto: lo
+     describe, y la descripción se la puede quedar otro.*
+
+     Se aceptan por prefijo porque es lo que un humano copia y pega, pero se
+     RESUELVEN contra la base y se imprime el uuid entero: lo que se reporta
+     tiene que poder buscarse después. Si un id no resuelve —o resuelve a más de
+     uno— es NO CONCLUYENTE, jamás un fallback a la heurística: caer al «mejor
+     disponible» mediría otro caso con el nombre del que pediste. */
   const ABIERTAS = ['recibido', 'con_prestador', 'con_casa']
   const abierto = (x) => ABIERTAS.includes(x.etapa)
-  const elegir = (clase) =>
-    casos.filter((x) => x.clase === clase).sort((a, b) =>
-      (abierto(b) - abierto(a)) || (b.turnos - a.turnos))[0]
-  const sujetos = [elegir(2), elegir(3)]
+
+  const pedidos = process.argv.slice(3).filter((a) => a.startsWith('--caso='))
+    .map((a) => a.slice('--caso='.length))
+  let sujetos
+  if (pedidos.length > 0) {
+    sujetos = []
+    for (const pref of pedidos) {
+      const m = casos.filter((c) => c.caso.startsWith(pref))
+      if (m.length !== 1) {
+        console.log(`\n  🔴 NO CONCLUYENTE — \`${pref}\` resuelve a ${m.length} casos. No se elige uno por mí.`)
+        process.exit(2)
+      }
+      sujetos.push(m[0])
+    }
+    console.log(`  sujetos POR ID (${sujetos.length}):`)
+    for (const c of sujetos) console.log(`    ${c.caso}  clase ${c.clase} · ${c.etapa} · ${c.turnos} turnos`)
+  } else {
+    const elegir = (clase) =>
+      casos.filter((x) => x.clase === clase).sort((a, b) =>
+        (abierto(b) - abierto(a)) || (b.turnos - a.turnos))[0]
+    sujetos = [elegir(2), elegir(3)].filter(Boolean)
+    console.log(`  ⚠️ sujetos ELEGIDOS POR HEURÍSTICA (no se pasó --caso=): el día que`)
+    console.log(`     aparezca otro caso que la cumpla mejor, esto cambia de sujeto solo.`)
+    for (const c of sujetos) console.log(`     ${c.caso}  clase ${c.clase} · ${c.etapa}`)
+  }
 
   const hayAbierto = sujetos.some((c) => c && abierto(c))
   if (!hayAbierto) {
-    console.log(`\n  🔴 NO CONCLUYENTE PARA EL CAMINO PRINCIPAL — no hay ningún caso abierto.`)
-    console.log(`     Los ${casos.length} casos de la base están en \`${[...new Set(casos.map((c) => c.etapa))].join('`, `')}\`.`)
+    console.log(`\n  🔴 NO CONCLUYENTE PARA EL CAMINO PRINCIPAL — ningún sujeto está abierto.`)
     console.log(`     Lo que sigue mide que la hoja LEE el material, no que sabe PROPONER.`)
-    console.log(`     Falta el sujeto, no la pieza: pedido a E en \`docs/loop/S114-D.md\`.`)
   }
+
   for (const c of sujetos) {
     if (!c) { console.log('  ⚠️ falta un sujeto para esta clase'); continue }
    for (const variante of ['con etapa real', 'sin etapa']) {

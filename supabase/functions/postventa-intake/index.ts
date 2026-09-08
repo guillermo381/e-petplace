@@ -165,11 +165,15 @@ Deno.serve(async (req) => {
      código propio repetido de cita no pasaba nada, y el día que A agregó
      `no_ejecutado` el duplicado nació sin que nada fallara.*
 
-     ⚠️ SE CURA DEL LADO CONSUMIDOR Y SE REPORTA A A, porque la vista es suya y
-     el defecto le pega a cualquiera que la lea. **Y queda descartable**: si A
-     desduplica en la vista, esto pasa a ser un no-op inofensivo, no una
-     segunda verdad. La regla —lo específico gana sobre lo heredado— es la
-     natural y la que la propia vista permite aplicar porque trae `procedencia`. */
+     ✅ ENMENDADO (7-sep, medido): **A ya aplicó el `DISTINCT ON` en la vista.**
+     Verificado contra el objeto: 0 códigos duplicados, `estadia` de 13 a 12, y
+     `no_ejecutado`/estadía con `procedencia='propio'`. O sea que **esto es hoy
+     un no-op**, tal como se había declarado que quedaría.
+     Se CONSERVA como defensa en profundidad —cuesta un Map sobre 12 filas— y,
+     lo que importa: **el propio código dice si sigue haciendo falta**. La línea
+     de log de abajo sólo se imprime cuando de verdad desduplica algo; si no
+     aparece nunca, no está haciendo nada y se puede retirar sin medir otra vez.
+     *Un guard que no puede decir si sirve es el que sobrevive a su río.* */
   const crudas = data as Array<Record<string, unknown>>
   const porCodigo = new Map<string, Record<string, unknown>>()
   for (const m of crudas) {
