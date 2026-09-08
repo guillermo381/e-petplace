@@ -82,7 +82,17 @@ export interface ModalDosAlturasProps {
   hayCambiosSinGuardar?: boolean
   /** Lo llama en vez de cerrar cuando hay cambios. El consumidor decide cómo pregunta. */
   onPedirConfirmacion?: () => void
-  /** Alto que ocupa el teclado. El modal crece POR DENTRO — el video no se mueve. */
+  /**
+   * Alto que ocupa el teclado, **tal como lo reporta la plataforma y SIN la
+   * barra de gestos** (`endCoordinates.height`).
+   *
+   * 🔴 **No le sumes el inset: lo suma la pieza.** Bajo edge-to-edge el número
+   * del teclado no incluye la barra, y componerlos acá es lo que evita que cada
+   * consumidor tenga que acordarse — *y que uno se olvide y su campo quede
+   * recortado sin que nada falle.*
+   *
+   * El modal crece POR DENTRO: el video no se mueve.
+   */
   altoTeclado?: number
   insetBottom?: number
 }
@@ -259,7 +269,30 @@ export function ModalDosAlturas({
 
       {/* ── El contenido. El teclado se compensa ACÁ ADENTRO: el panel reserva
              su alto y el video de arriba no se entera. */}
-      <View style={{ flex: 1, paddingBottom: altoTeclado > 0 ? altoTeclado : insetBottom, paddingHorizontal: spacing[4] }}>
+      {/* 🔴 EL TECLADO **Y** LA BARRA DE GESTOS SE SUMAN — no es «o» (S114-B).
+          ⏪ Acá decía `altoTeclado > 0 ? altoTeclado : insetBottom`, y con el
+          teclado abierto **la caja del campo quedaba recortada** por su borde
+          inferior. C lo midió en aparato y la causa tiene nombre:
+          **bajo edge-to-edge, `endCoordinates.height` reporta el teclado SIN la
+          barra de gestos** — y esa barra es exactamente `insetBottom`. Con el
+          teclado abierto el hueco de abajo son las DOS cosas, una encima de la
+          otra, así que el ternario perdía siempre una.
+
+          ⚠️ **Y por eso no se curó con un `+6`**: el faltante *parecía* 6 px en
+          ese teléfono y **es `insetBottom`, un número que cambia con el
+          dispositivo**. *Un padding fijo habría tapado el síntoma en el
+          emulador de C y reaparecido en el primer teléfono con otra barra.*
+
+          El ternario muere: con el teclado cerrado `altoTeclado` es 0 y la
+          suma da `insetBottom`, que es lo que hacía antes. **La misma cuenta
+          para los dos estados es una cuenta menos que puede estar mal en uno.**
+
+          🔴 **LA COMPOSICIÓN LA HACE LA PIEZA, y es `R81` otra vez:** el
+          consumidor pasa lo que la plataforma le da y **no tiene que acordarse
+          de sumarle el inset** — si tuviera que hacerlo, sería *una opción con
+          buen nombre*. ⇒ `altoTeclado` = lo que reporta el teclado, **sin** la
+          barra; el inset lo pone este archivo. */}
+      <View style={{ flex: 1, paddingBottom: altoTeclado + insetBottom, paddingHorizontal: spacing[4] }}>
         {/* 🔴 ACÁ SE DECLARA QUIÉN PAGA EL TECLADO (S114-B). El panel acaba de
             reservarlo arriba, así que **todo lo que caiga adentro NO debe
             resolverlo otra vez** — `SuperficieChat` lo lee y no monta su
