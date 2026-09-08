@@ -28685,6 +28685,97 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-508` — Si la línea base del defecto es más chica que el ruido, el gate va en la ENTRADA: medir la salida vende falta de poder como resultado
+
+**El caso (S114-D · lote 7, 8-sep-2026).** La mesa firmó que el `porque` de la
+Hoja de postventa le habla **siempre a la casa, nunca a la familia**, sobre una
+observación real: en 1 de 5 corridas había salido *«el dato del GPS que
+aportaste»*. La orden incluía **medir que no vuelva**.
+
+Antes de tocar el prompt medí la línea base: **1 caso en 15 corridas (~7 %)**, y
+**0 de 10** en la corrida dedicada con el prompt viejo. Ese número decide todo lo
+que viene después:
+
+> Con una base de ~7 %, **un `0/20` después de la cura es indistinguible del
+> `0/10` que ya daba antes de tocar nada.**
+
+O sea que la medición pedida —«que no vuelva»— **no la puede contestar la
+salida**: no tiene poder para separar la cura del azar. Y presentar ese `0/N`
+como evidencia sería exactamente el error: *vender falta de poder como
+resultado*, con la agravante de que el número se ve idéntico a una prueba.
+
+**La ley.** Cuando la tasa base de un defecto es tan baja que la N disponible no
+puede distinguir la cura del ruido, **el gate no va en la salida: va en la
+entrada, donde el hecho es exacto**. Acá la entrada es el prompt, y lo que se
+hace cumplir es que **no ofrezca** la forma prohibida — determinístico, en cada
+commit, sin depender del modelo. La salida se sigue corriendo, pero se reporta
+como **control de no-regresión**, y se dice que eso es.
+
+**El correctivo, exigible:** antes de prometer «medí que no vuelva» sobre un
+sujeto que es un modelo, se mide la línea base. Si el defecto aparece con una
+frecuencia que la N alcanzable no separa del ruido, **se declara y se mueve el
+gate a la entrada** en vez de correr N grande hasta que salga cero.
+
+**Su corolario, y es lo que la vuelve exigible en vez de teórica:** un `0/N` de
+salida no es inútil — dice que la cura **no rompió otra cosa**. En este caso el
+acto de resolución pasó de 10/10 a 9/10 (ruido con esa N) y el anclaje subió de
+2,2 a 2,5 sobre 4. *Ese es su trabajo: control, no prueba.* Confundirlos es lo
+que la ley prohíbe.
+
+**Hermana:** `L-462` (un empate en pocos casos fáciles es ausencia de evidencia,
+no una recomendación). La misma aritmética, del otro lado: allá el conjunto no
+podía distinguir dos opciones; acá no puede distinguir una cura de su ausencia.
+
+---
+
+### `L-507` — En un prompt, un EJEMPLO pesa más que una DECLARACIÓN — y el peor viene copiado de un contexto donde era correcto
+
+**El caso (S114-D · lote 7, 8-sep-2026).** El `system` de `postventa-hoja`
+**declaraba** su destinatario en la primera línea —*«Sos quien prepara el
+material para la persona de e-PetPlace que va a resolver un caso»*— y lo
+**desmentía en la última con un ejemplo**:
+
+```
+Escribí en tuteo neutro ("tu mascota", "te cobraron"), nunca voseo.
+```
+
+Esas dos formas son exactamente las que le hablan a la familia. El modelo
+obedeció al ejemplo: en 1 de 5 el `porque` le escribió a la familia —*«el dato
+del GPS que aportaste»*— en una pieza que sólo lee la casa.
+
+**De dónde salió el ejemplo, que es lo que da la forma exacta:** de
+`_shared/postventa/plantillas.ts`, **donde es correcto** — ahí se redactan los
+mensajes PARA la familia. Lo copié de una pieza a otra sin notar que el
+destinatario no viajaba con él. ⇒ **copiar un ejemplo sin copiar su destinatario.**
+
+**La ley.** En un prompt, **un ejemplo pesa más que una declaración**: el modelo
+copia lo que ve escrito, no lo que se le enuncia. Y por eso el ejemplo copiado
+de otro contexto es el más peligroso — *llega con la autoridad de haber
+funcionado*, igual que `D-976` con los criterios trasplantados, y su error no se
+ve leyendo la regla porque la regla dice lo correcto.
+
+**Hermana mayor:** el muro de NEXO ya tiene escrita la forma general —*«dos
+líneas del mismo system que se contradicen no dejan una regla a medias: dejan la
+que invita»*— y esta ficha le agrega el giro: **la que invitaba no era otra
+regla, era un ejemplo**, que ni siquiera se lee como una instrucción y por eso
+sobrevive a las relecturas.
+
+**El correctivo, exigible:** todo ejemplo dentro de un prompt se lee
+preguntando *«¿a quién le habla ESTE texto?»* antes de moverlo de pieza. Y donde
+el destinatario importa, el prompt **manda la persona gramatical explícita** —
+tercera para las partes— en vez de sólo prohibir la otra: *una prohibición sin
+alternativa obliga al modelo a adivinar la forma.*
+
+**Lo que lo hace cumplir, y por qué ahí:** `verify:postventa-contrato` mide que
+el `system` no OFREZCA formas de segunda persona — y **discrimina por posición**,
+porque el prompt curado las cita como ejemplo de lo prohibido. La primera versión
+del gate preguntaba «¿hay una negación en la línea?» y **la línea vieja pasaba**:
+termina en *«nunca voseo»*, que es una negación de otra cosa y viene después.
+*Un rojo por la razón equivocada está tan roto como un verde por la razón
+equivocada, porque manda a arreglar lo que no es.*
+
+---
+
 ### `L-497` — Cuando dos personas arman fixtures para el mismo sujeto, LOS DOS los arman más fáciles
 
 **S113-E + S113-D, tres cobros en un día:** ① las frases de búsqueda —**18/23**
