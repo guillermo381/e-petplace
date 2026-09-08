@@ -49,6 +49,7 @@ import {
   type PerfilMascota,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
 
 const BASE = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 /** 🔴 **LA PÁGINA VIVE EN EL SITIO, no en la edge.** La edge quedó con
@@ -95,7 +96,13 @@ export default function Pasaporte() {
       /* 🔴 **En memorial NO se emite.** El motor lo rebota
          (`mascota_en_memorial`), pero pedirlo igual sería mandar a la familia
          un error que nosotros provocamos. */
-      const enMemoria = p.data.mascota.estado_vida !== null && p.data.mascota.estado_vida !== 'activa' && p.data.mascota.estado_vida !== 'perdida';
+      /* ⑤ **LA QUINTA DERIVACIÓN DE MEMORIAL, curada.** Acá decía
+         `!== null && !== 'activa' && !== 'perdida'` — escrita a mano, con la
+         regla de `perdida` embebida por casualidad. B censó CUATRO copias de
+         esta lógica; ésta era la quinta y su censo quedó corto (avisado).
+         *Una regla escrita cinco veces es cinco lugares donde puede cambiar
+         una sola.* */
+      const enMemoria = mascotaEnMemorial(p.data.mascota.estado_vida);
       if (enMemoria) return;
       const e = await emitirPasaporte(mascotaId);
       if (!vivo) return;
@@ -107,6 +114,20 @@ export default function Pasaporte() {
     };
   }, [mascotaId, aviso]);
 
+  /**
+   * ⏳ **ESTE CONTROL SE RETIRA — firma del founder, 8-sep.** *Marcar que tu
+   * perro se perdió no es una perilla de configuración: es un hecho de la vida
+   * del animal.* La puerta buena YA VIVE en el perfil, en su zona «Su vida»
+   * (`hogar/mascota/[mascotaId].tsx`), con la hoja de ayuda y su «Apareció».
+   *
+   * 🔴 **No lo puedo retirar desde acá**: las cuatro props de perdida de
+   * `AccionesPasaporte` son OBLIGATORIAS (`perdida`, `vozPerdida`,
+   * `vozConfirmarPerdida`, `onCambiarPerdida`) — medido. **El retiro es de B**
+   * y está pedido; el día que salgan, esto y sus llaves mueren (Ley 37).
+   *
+   * En Pasaporte queda lo que sí es suyo: **la visibilidad del contacto**, que
+   * es la promesa que la hoja del perfil hace y que acá se cumple.
+   */
   const cambiarPerdida = useCallback(
     (v: boolean) => {
       if (mascotaId === undefined || trabajando) return;
@@ -159,7 +180,7 @@ export default function Pasaporte() {
   }
 
   const m = perfil.mascota;
-  const enMemoria = m.estado_vida !== null && m.estado_vida !== 'activa' && m.estado_vida !== 'perdida';
+  const enMemoria = mascotaEnMemorial(m.estado_vida);
 
   /* 🔴 **En memorial la pantalla NO SE DIBUJA**, y lo dice con la voz serena de
      la casa en vez de un error: la familia llegó acá por un camino que ya no
@@ -210,7 +231,18 @@ export default function Pasaporte() {
               accessibilityLabel={t('pasaporte.ampliarQr')}
               onPress={() => setQrGrande(true)}
             >
+            {/* 🔴 `enMemoria` pasa a ser OBLIGATORIA en la pieza (S114-B, orden
+                del founder): su default `false` era el guard apagado por
+                omisión, escrito en el tipo. **Acá la variable ya existía** —se
+                calcula arriba con la regla que la firma del 7-sep ratificó,
+                `&& !== 'perdida'`— así que la cura es pasarla.
+                ⚠️ **Cruce de territorio declarado y MÍNIMO:** el cambio de API
+                es de `packages/ui` (B) y esto es su única consecuencia en la
+                app; una prop, cero lógica nueva. *Se toca acá porque dejar el
+                árbol sin compilar para que otro escriba una palabra es peor que
+                escribirla.* */}
             <TarjetaPasaporte
+              enMemoria={enMemoria}
               nombre={m.nombre}
               fotoUrl={foto}
               especieYRaza={[m.especie, m.raza].filter((x) => x !== null && x !== '').join(' · ')}
