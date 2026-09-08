@@ -72,22 +72,26 @@ try {
      where exists (select 1 from eventos_economicos e
                     where e.origen_tipo = 'cita' and e.origen_id = c.id)
      limit 1`)[0]?.id ?? null;
-  sinEvento = dbQuery(`
-    select c.id from evento_cita_servicio c
-     where c.estado in ('completada','no_show') and c.estado_reserva = 'pagada'
-       and not exists (select 1 from eventos_economicos e
-                        where e.origen_tipo = 'cita' and e.origen_id = c.id)
-     limit 1`)[0]?.id ?? null;
+  /* 🔴 EL «SIN EVENTO» ES UN UUID FABRICADO, Y ESA ES LA CURA DE UN DEFECTO
+     DE DISEÑO MÍO. La primera versión lo buscaba en la base — y funcionó
+     mientras hubo objetos sin devengo. **El día que A6 llevó los 19 a 0, este
+     arnés se quedó sin su control positivo y salió NO CONCLUYENTE justo cuando
+     el sistema se puso sano.**
+     *Un instrumento que necesita que el sistema esté roto para poder medir se
+     apaga exactamente cuando deja de hacer falta arreglarlo.* Un uuid que no
+     existe no tiene evento POR CONSTRUCCIÓN, y sirve igual para probar que el
+     predicado distingue. */
+  sinEvento = '00000000-0000-0000-0000-00000000515e';
 } catch (e) {
   console.error('🟠 NO CONCLUYENTE · la consulta no corrió — el gate NO dice verde.');
   console.error(`   ${e.message.slice(0, 300)}`);
   process.exit(2);
 }
 
-if (!conEvento || !sinEvento) {
-  console.error('🟠 NO CONCLUYENTE · no hay en la base una cita CON evento y otra SIN evento.');
-  console.error(`   con evento: ${conEvento ?? 'ninguna'} · sin evento: ${sinEvento ?? 'ninguna'}`);
-  console.error('   Sin los dos casos el arnés no puede probar que discrimina.');
+if (!conEvento) {
+  console.error('🟠 NO CONCLUYENTE · no hay en la base ninguna cita CON evento económico.');
+  console.error('   Sin ella el control positivo es sintético de los dos lados y el arnés');
+  console.error('   no puede probar que encuentra un evento cuando existe.');
   process.exit(2);
 }
 
@@ -116,7 +120,7 @@ const CONTROLES = `
          'cita'::text as objeto_tipo, '${conEvento}'::uuid as objeto_id,
          '${VAL_DECLARADO}'::text as camino_plata
   union all
-  select '2 · positivo declarado sobre objeto SIN evento', 'cita', '${sinEvento}'::uuid, '${VAL_DECLARADO}'
+  select '2 · positivo declarado sobre objeto SIN evento (uuid fabricado)', 'cita', '${sinEvento}'::uuid, '${VAL_DECLARADO}'
   union all
   select '3 · positivo aplicar_reembolso sobre objeto CON evento', 'cita', '${conEvento}'::uuid, 'aplicar_reembolso'`;
 

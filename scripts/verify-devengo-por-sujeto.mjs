@@ -47,12 +47,13 @@
  * ⇒ **un evento anclado a la cita de una estadía ya NO cuenta**, y el arnés
  * es más estricto que ayer, no menos.
  *
- * **Queda una tolerancia chica y es de VOCABULARIO, no de ancla:** el literal
- * de `origen_tipo` no está fijado —medido: **no hay CHECK sobre esa columna** y
- * el único valor vivo es `cita`—, así que se aceptan `estadia` y
- * `guarderia_estadia`. *Las dos apuntan al mismo objeto; lo que se decidió es
- * cuál es el objeto, no cómo se escribe su nombre.* El día que exista el
- * CHECK, esta lista sale de acá y se lee de él.
+ * **Y la tolerancia de VOCABULARIO también se cerró** (7-sep, tras A6): cuando
+ * no había un solo evento de guardería, el literal de `origen_tipo` era una
+ * incógnita y el gate aceptaba `estadia` **o** `guarderia_estadia`. **Medido
+ * ahora que el productor existe: el motor escribe `estadia`** (`origen_tipo`
+ * vivo: `cita` 53 · `estadia` 1 · `pedido` 3). ⇒ **se acepta sólo ése.**
+ * *Una tolerancia se abre cuando el objeto no puede contestar y se cierra el
+ * día que contesta — dejarla abierta después sería no haber preguntado.*
  *
  * **Y sigue sin mirar el MONTO**, sólo la existencia del evento.
  *
@@ -71,7 +72,33 @@
  *
  * Salidas: 0 verde · 1 rojo (hay objetos sin evento) · 2 no concluyente.
  */
+import { execFileSync } from 'node:child_process';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dbQuery } from './lib-db.mjs';
+import { arbolAlDia, lineaDeArbol } from './lib-arbol.mjs';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ANTES / DESPUÉS — la medición que prueba que el ledger dejó de estar mudo
+ * ═══════════════════════════════════════════════════════════════════════════
+ *   node scripts/verify-devengo-por-sujeto.mjs --instantanea <ruta>
+ *   node scripts/verify-devengo-por-sujeto.mjs --contra <ruta>
+ *
+ * 🔴 **UNA BAJA DEL NÚMERO NO PRUEBA, POR SÍ SOLA, QUE APARECIERON LOS
+ * PRODUCTORES.** «19 → 9» puede significar tres cosas distintas y sólo una es
+ * la buena:
+ *   · el universo quedó igual y aparecieron eventos ⇒ **el productor nació** ✅
+ *   · el universo se achicó ⇒ **desaparecieron objetos**, no nacieron eventos
+ *   · el universo creció y los sin-evento también ⇒ tráfico nuevo sin productor
+ * Por eso la comparación es **por oficio y en dos columnas** (`n` y
+ * `sin evento`), y el veredicto **nombra cuál de los tres pasó**. *Mirar sólo
+ * el total deja las tres indistinguibles.*
+ *
+ * ⚠️ **La instantánea lleva FECHA, HORA y SHA.** En una sesión de seis pistas
+ * un cero del motor vence en horas; sin su hora, un «antes» no se puede
+ * comparar con nada. */
+const arg = (n) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : null; };
+const RUTA_GUARDAR = arg('--instantanea');
+const RUTA_CONTRA = arg('--contra');
 
 const NEG = '00000000-0000-0000-0000-0000000000ff'; // ejecutado SIN evento
 const POS = '00000000-0000-0000-0000-0000000000aa'; // ejecutado CON evento
@@ -113,7 +140,7 @@ marcados as (
            select 1 from eventos ee
             where ee.origen_id = o.id
               and ( ee.origen_tipo = o.obj
-                 or (o.obj = 'estadia' and ee.origen_tipo in ('estadia','guarderia_estadia'))
+                 or (o.obj = 'estadia' and ee.origen_tipo = 'estadia')
                  or (o.obj = 'pedido'  and ee.origen_tipo in ('pedido','compra')) )
          ) as sin_evento
     from objetos o
@@ -155,6 +182,68 @@ if (!cp || cp.sin_evento !== 0) {
 }
 
 const reales = filas.filter((f) => !f.sintetico);
+
+// ── INSTANTÁNEA ──────────────────────────────────────────────────────────
+if (RUTA_GUARDAR) {
+  const sha = (() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return null; } })();
+  /* La instantánea guarda TAMBIÉN si el árbol estaba al día: un «antes» tomado
+     desde un árbol viejo compara supuestos viejos con actuales, y el delta
+     resultante mezcla la cura con el cambio de instrumento. */
+  const arbolSnap = arbolAlDia();
+  writeFileSync(RUTA_GUARDAR, JSON.stringify({
+    arbol_al_dia: arbolSnap.ok, commits_ajenos: arbolSnap.ajenos,
+    tomada_en: new Date().toISOString(),
+    tomada_en_local: new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' }),
+    sha, filas: reales,
+  }, null, 1));
+  console.log(`instantánea guardada en ${RUTA_GUARDAR}`);
+  console.log(`   ${new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })} Guayaquil · sha ${sha?.slice(0, 8)}`);
+  console.log(`   ${lineaDeArbol(arbolSnap)}`);
+}
+
+// ── COMPARACIÓN ──────────────────────────────────────────────────────────
+if (RUTA_CONTRA) {
+  if (!existsSync(RUTA_CONTRA)) {
+    console.error(`🟠 NO CONCLUYENTE · no existe la instantánea ${RUTA_CONTRA}.`);
+    process.exit(2);
+  }
+  const antes = JSON.parse(readFileSync(RUTA_CONTRA, 'utf8'));
+  const clave = (f) => `${f.obj}·${f.via}`;
+  const mapA = new Map(antes.filas.map((f) => [clave(f), f]));
+  const mapD = new Map(reales.map((f) => [clave(f), f]));
+  const todas = [...new Set([...mapA.keys(), ...mapD.keys()])].sort();
+
+  console.log('\n═══ ANTES / DESPUÉS ═══');
+  console.log(`  ANTES   ${antes.tomada_en_local} Guayaquil · sha ${String(antes.sha).slice(0, 8)}` +
+              (antes.arbol_al_dia === false ? '  🔴 tomada desde un ÁRBOL VIEJO' : ''));
+  console.log(`  DESPUÉS ${new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })} Guayaquil · sha ${(() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim().slice(0, 8); } catch { return '?'; } })()}`);
+  console.log(`          ${lineaDeArbol()}`);
+  console.log('\n  vía                            n antes→después   sin evento antes→después');
+  for (const k of todas) {
+    const a = mapA.get(k), d = mapD.get(k);
+    const nA = a?.n ?? 0, nD = d?.n ?? 0, sA = a?.sin_evento ?? 0, sD = d?.sin_evento ?? 0;
+    const marca = sD < sA ? '🟢' : sD > sA ? '🔴' : '  ';
+    console.log(`  ${marca} ${k.padEnd(30)} ${String(nA).padStart(3)} → ${String(nD).padEnd(6)}    ${String(sA).padStart(3)} → ${String(sD)}`);
+  }
+  const uA = antes.filas.reduce((x, f) => x + f.n, 0), uD = reales.reduce((x, f) => x + f.n, 0);
+  const sAt = antes.filas.reduce((x, f) => x + f.sin_evento, 0), sDt = reales.reduce((x, f) => x + f.sin_evento, 0);
+  console.log(`\n  universo ${uA} → ${uD}  ·  SIN evento ${sAt} → ${sDt}`);
+
+  // 🔴 EL VEREDICTO NOMBRA CUÁL DE LOS TRES PASÓ.
+  if (sDt < sAt && uD >= uA) {
+    console.log(`\n🟢 EL LEDGER DEJÓ DE ESTAR MUDO en ${sAt - sDt} sujeto(s).`);
+    console.log('   El universo NO se achicó, así que la baja es por eventos que antes');
+    console.log('   no existían: **nacieron productores**, no desaparecieron objetos.');
+  } else if (sDt < sAt && uD < uA) {
+    console.log(`\n🟠 El número bajó (${sAt} → ${sDt}) PERO el universo también (${uA} → ${uD}).`);
+    console.log('   No se puede atribuir a productores nuevos: desaparecieron objetos.');
+    console.log('   *Una baja con universo menor no prueba nada del ledger.*');
+  } else if (sDt > sAt) {
+    console.log(`\n🔴 SUBIÓ: ${sAt} → ${sDt}. Entraron objetos ejecutados sin productor.`);
+  } else {
+    console.log('\n⚪ Sin cambio en los sujetos sin evento.');
+  }
+}
 const universo = reales.reduce((a, f) => a + f.n, 0);
 const sinEvento = reales.reduce((a, f) => a + f.sin_evento, 0);
 const conEvento = universo - sinEvento;
@@ -177,8 +266,8 @@ if (conEvento === 0) {
 console.log('verify:devengo-por-sujeto · §8 de LETRA_POSTVENTA');
 console.log('  controles: negativo produjo su rojo ✅ · positivo no marcó ✅');
 console.log('  ancla de guardería: LA ESTADÍA (mesa 7-sep) — un evento colgado de');
-console.log('  su cita ya no cuenta. Sólo queda abierto el literal de `origen_tipo`,');
-console.log('  que no tiene CHECK: se aceptan `estadia` y `guarderia_estadia`.\n');
+console.log('  su cita no cuenta, y el literal quedó fijado en `estadia`: medido');
+console.log('  contra el motor una vez que su productor existió. Cero tolerancias.\n');
 console.log('  obj      vía                        estado       n   sin evento');
 for (const f of reales) {
   const marca = f.sin_evento > 0 ? '🔴' : '  ';

@@ -25,6 +25,7 @@
  * mide**, jamás para calibrar un umbral.
  */
 import { dbQuery } from './lib-db.mjs';
+import { arbolAlDia, lineaDeArbol } from './lib-arbol.mjs';
 
 const existe = (t) => dbQuery(`select to_regclass('public.${t}') as x`)[0].x !== null;
 const TABLA_CASO = ['casos_postventa', 'postventa_casos'].find(existe) ?? null;
@@ -178,8 +179,10 @@ medir(14, '«¿Quedó resuelto?» (un toque al cerrar)',
   () => null, sinCaso);
 
 // ── Salida ───────────────────────────────────────────────────────────────
+const arbol = arbolAlDia();
 console.log('metricas:postventa · §12 de LETRA_POSTVENTA');
 console.log(`corrida: ${new Date().toISOString()}`);
+console.log(lineaDeArbol(arbol));
 console.log('⚠️ ningún dato de servicio de la base es real — producción es octubre.');
 console.log('   Estos números dicen si el instrumento mide, JAMÁS calibran un umbral.\n');
 for (const f of filas) {
@@ -190,5 +193,17 @@ for (const f of filas) {
 }
 const medidos = filas.filter((f) => f.estado === 'MEDIDO').length;
 console.log(`\n  ${medidos} de ${filas.length} tienen sujeto hoy.`);
+/* 🔴 PASO FIJO ANTES DE PUBLICAR CUALQUIER NÚMERO (regla del founder, 7-sep).
+   Los números salen igual —se ven, y a veces alcanzan para orientarse— pero el
+   tablero **no se declara publicable** desde un árbol viejo: *un número medido
+   con supuestos viejos es creíble y equivocado, que es el peor tipo.* */
+if (arbol.ok === false) {
+  console.error(`\n🔴 ESTOS NÚMEROS NO SON PUBLICABLES: ${lineaDeArbol(arbol)}`);
+  console.error('   Traé `main` y volvé a correr. La base está al día; lo que envejece');
+  console.error('   es el instrumento —sus nombres de columna, sus supuestos y la letra');
+  console.error('   contra la que compara—. Hoy eso costó un urgente que ya estaba curado.');
+  process.exit(2);
+}
+if (arbol.ok === null) console.error(`\n🟠 ${lineaDeArbol(arbol)}`);
 if (!TABLA_CASO)  console.log('  El resto espera la tabla del caso (§5).');
 if (!TABLA_SALDO) console.log('  El saldo de §7 tampoco existe: no hay tabla de saldo de la familia.');
