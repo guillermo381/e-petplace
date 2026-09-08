@@ -69,6 +69,21 @@ ensucia el número que después decide.*
 - **La familia no ve el reloj de 48 h.** Ve su caso cuando existe. *Un countdown sobre el
   incumplimiento ajeno convierte la espera en espectáculo.*
 
+> ### 🔴 EL CORTE DEL RELOJ (mesa, 7-sep-2026) — el reloj arranca sin backlog
+> **El reloj sólo expira objetos cuyo fin declarado sea `>= 2026-09-07`.** Los
+> **107 citas + 18 estadías** con fin anterior (medido el 7-sep: 126 objetos
+> saltados en la primera corrida) **quedan fuera de alcance por decisión de
+> mesa, NO porque el instrumento no los vea.** *Son ruido de construcción, no
+> incumplimientos —ningún dato de servicio es real, producción es octubre— y
+> procesarlos crearía 125 casos y 125 devoluciones que ensuciarían los números
+> que E dejó limpios: casos por objeto, tiempo a resolución, plata devuelta por
+> causa.*
+>
+> La fecha del corte vive como DATO en `app_config.f1_corte_cierre_ausente`
+> (`'2026-09-07'`), no como literal en el código, **para que en octubre se pueda
+> ver contra qué se cortó** — y moverla es cambiar una fila, no una función.
+> Sin corte configurado el reloj **no corre a ciegas: sale `sin_corte_configurado`.**
+
 ### 🔴 §2bis · La puerta que esta firma abre, y nace con ella
 
 Si el `no_show` **es un acto del prestador y le hace cobrar**, entonces existe el no-show marcado
