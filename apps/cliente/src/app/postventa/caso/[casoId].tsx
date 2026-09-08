@@ -49,6 +49,7 @@ import {
   spacing,
   useTheme,
   type EtapaCaso as EtapaDeLaEscalera,
+  type FinalCaso,
 } from '@epetplace/ui';
 import {
   enviarMensajeDeCaso,
@@ -58,12 +59,13 @@ import {
   type MensajeCaso,
 } from '@epetplace/api';
 
-import { horaCortaDeMensaje } from '@epetplace/i18n';
+import { fechaLargaHumana, horaCortaDeMensaje } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { darFormaAlCaso, type CasoLeido } from '@/lib/postventa/caso';
 import { CartaDeDevolucion } from '@/components/postventa/CartaDeDevolucion';
 import { PermisoWhatsApp } from '@/components/postventa/PermisoWhatsApp';
+import { vozServicio } from '@/lib/voz-servicio';
 
 type Fase<T> = T | 'cargando' | 'error' | 'noEsTuyo';
 
@@ -78,6 +80,25 @@ type Fila = {
   estado?: 'enviando' | 'no_se_envio';
   /** El texto original, para poder reintentarlo sin releer el hilo. */
   textoCrudo?: string;
+};
+
+/**
+ * 🔴 EL MAPA DEL FINAL — **y acá se cobró la divergencia de vocabulario.**
+ *
+ * Tenía `t(`postventa.final_${caso.finalAlterno}`)`, e interpolar así **une
+ * dos vocabularios distintos sin que nadie lo note**: `finalAlterno` viene en
+ * el nombre de B (`resuelto_entre_ustedes`) y mis llaves estaban escritas con
+ * el de A (`resuelto_entre_partes`). *El resultado no fue un error: fue la
+ * LLAVE CRUDA en pantalla* — `postventa.final_resuelto_entre_ustedes`, leída
+ * por una familia. **Ningún typecheck lo ve: la interpolación produce un
+ * `string` y el cast lo deja pasar.**
+ *
+ * ⇒ `Record` completo sobre el tipo de B: un final nuevo no compila.
+ */
+const VOZ_FINAL: Record<FinalCaso, 'postventa.final_resuelto_entre_partes' | 'postventa.final_retirado' | 'postventa.final_sin_lugar'> = {
+  resuelto_entre_ustedes: 'postventa.final_resuelto_entre_partes',
+  retirado: 'postventa.final_retirado',
+  sin_lugar: 'postventa.final_sin_lugar',
 };
 
 const VOZ_ASIENTO: Record<AsientoCaso, 'postventa.asientoCasa' | 'postventa.asientoPrestador' | 'postventa.asientoFamilia'> = {
@@ -297,8 +318,14 @@ export default function PantallaDelCaso() {
           <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3], gap: spacing[3] }}>
             <CabeceraCaso
               objeto={{
-                nombre: caso.objeto.titulo ?? t('postventa.objetoSinNombre'),
-                fecha: caso.objeto.fecha !== null ? new Date(caso.objeto.fecha).toLocaleDateString() : '',
+                /* La voz de familia del comprable, por el riel de la casa —
+                   el motor manda el CÓDIGO (`paseo`) y pintarlo crudo es
+                   exactamente lo que `vozServicio` existe para evitar. */
+                nombre: vozServicio(t, caso.objeto.titulo) ?? t('postventa.objetoSinNombre'),
+                /* Y la fecha por `fechaLargaHumana`, no por `toLocaleDateString`:
+                   ése daba `9/7/2026` —formato de otra región— sobre una app
+                   que ya tiene su riel de fechas. */
+                fecha: caso.objeto.fecha !== null ? fechaLargaHumana(caso.objeto.fecha, idioma) : '',
               }}
               contraparte={{ nombre: t('postventa.asientoPrestador') }}
             />
@@ -321,9 +348,7 @@ export default function PantallaDelCaso() {
                   `etapa` con el final y la etapa previa se pierde; dibujar la
                   fila exigiría inventar en qué paso quedó. **Se dice el final,
                   que es verdadero.** */
-              <Texto variante="cuerpo">
-                {t(`postventa.final_${caso.finalAlterno}` as 'postventa.final_retirado')}
-              </Texto>
+              <Texto variante="cuerpo">{t(VOZ_FINAL[caso.finalAlterno])}</Texto>
             ) : null}
 
             {/* §4 · LA CARTA DE LA PLATA — UNA a la vez (§3.3). */}

@@ -113,13 +113,13 @@ export function CartaDeDevolucion({
 
   return (
     <View style={{ gap: spacing[3] }}>
-      {/* §4 · EL MONTO ANTES DE ELEGIR, con su porqué si es parcial. */}
-      <Texto variante="cuerpo">
-        {opciones.parcial
-          ? t('postventa.montoParcial', { monto })
-          : t('postventa.montoTotal', { monto })}
-      </Texto>
-
+      {/* ⏪ **ACÁ ESTABA EL MONTO POR SEGUNDA VEZ.** §4 pide que se diga
+          antes de elegir, y yo lo puse en un `Texto` propio **además** de
+          pasarlo por `vozMonto` — que es la prop con la que la PIEZA lo
+          dibuja arriba de las tarjetas. En pantalla salía la misma frase dos
+          veces seguidas. *Ningún gate lo ve: los dos montajes son correctos
+          por separado; sólo se ve juntos, en el aparato.* La pieza es la
+          dueña del lugar, así que el `Texto` sale. */}
       <TarjetaDestinoPlata
         banco={{
           titulo: t('postventa.bancoTitulo'),
