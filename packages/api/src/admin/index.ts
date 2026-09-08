@@ -27,6 +27,10 @@ export type {
 export {
   obtenerBandejaCasos,
   obtenerHojaDelCaso,
+  /* 🔴 `tomarCaso` va acá y no en el archivo solo: una función que la puerta
+     única no exporta NO EXISTE para la app — es `L-318`, motor sin puerta.
+     Casi la dejo afuera. */
+  tomarCaso,
   resolverCaso,
   responderEnCaso,
   ETAPAS_ABIERTAS,

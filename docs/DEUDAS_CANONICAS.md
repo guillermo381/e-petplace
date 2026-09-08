@@ -28703,6 +28703,60 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-521` — Un guard de RUNTIME no protege el BUILD: produce un artefacto vacío que dice «✓ built»
+
+**S114-F.** `apps/admin/src/lib/supabase.ts` lanza si faltan sus variables de entorno.
+Es fail-closed, está bien puesto, y **su comentario dice exactamente lo que hay que
+decir**. No alcanzó.
+
+🔴 **Un `throw` a nivel de módulo no frena el build: vuelve inalcanzable todo lo que
+viene detrás, y Rollup hace tree-shaking de la aplicación entera.**
+
+```
+sin variables   199,89 kB · exit 0 · «✓ built»   → React + el guard. NADA de la app.
+con variables   482,67 kB · exit 0               → la aplicación completa
+```
+
+*El de 199 kB no da un error, no avisa, y **pesa lo suficiente para parecer real**.
+Se publica limpio y sirve una página en blanco.*
+
+⚠️ **Y lo peor no es el bundle: es que yo reporté ese número como «el admin construido»
+durante toda una tanda.** «199,89 kB» aparece en mi parte, en un commit y en dos mensajes
+a otra pista — *como evidencia de que la app compilaba.*
+
+### Cómo se destapó, y ninguna de las dos primeras vueltas alcanzó
+
+1. **`exit 0` y `✓ built`** — verde, y falso.
+2. **El sourcemap listaba mis 14 archivos** — y también era engañoso: *el map lista lo que
+   Rollup **procesó**, no lo que **quedó** en el output.* Casi lo tomo por prueba.
+3. **Lo cerró el `grep`**: ninguna cadena de mi UI en el bundle. Y **la causa apareció
+   leyendo los últimos 500 caracteres**, donde el bundle literalmente termina en
+   `throw … Error(\`Faltan VITE_SUPABASE_URL…\`)`.
+
+> ***El artefacto lo dice todo si uno lo abre; ninguna de sus señales lo decía.***
+
+⇒ **Lo que gatea un build es su propia falla, no un throw adentro del código que produce.**
+La cura vive en `vite.config.ts` y **aborta con `process.exit(1)`** — mismo criterio que
+`apps/pagos-web/build.mjs`, cuyo comentario ya lo tenía escrito: *«una página servida con
+config incompleta se ve bien y no funciona»*. **Ese archivo tenía la respuesta y yo estaba
+citándolo en un aviso el mismo día.**
+
+⚠️ **Su control se prueba en las DOS direcciones y las dos están medidas:** sin variables
+**exit 1** con el mensaje; con variables **exit 0** y las cadenas de la app adentro
+(`Tomar el caso`=1, `caso_pedir_casa`=1, 482 kB). *Un guard de build que sólo se probó
+fallando podría estar rompiendo también el caso bueno.*
+
+**Y la regla que deja para verificar cualquier build:** *el peso no es una medición, es una
+pista.* Lo que prueba que un bundle tiene la app es **buscar adentro una cadena que sólo
+pueda venir de ella** — y ese control hay que correrlo **la primera vez**, no la décima.
+
+*(Familia de [[L-318]] —motor sin puerta— pero al revés: acá la puerta existe, funciona, y
+lo que falla es que **su falla no viaja al artefacto**. Y de [[L-503]]: un `exit 0` dice
+que el proceso terminó, no que hizo lo que uno cree.)*
+
+---
+
+
 ### `L-517` — El hedge no viaja entre sesiones: viaja la conclusión
 
 **S114-F, firma del founder.** Le pasé a otra pista un hallazgo con su hipótesis
