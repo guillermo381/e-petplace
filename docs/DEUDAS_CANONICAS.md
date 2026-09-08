@@ -29566,3 +29566,59 @@ razón equivocada* (L-321).
 
 **☠️ Condición de muerte:** ninguna — es de método. Su recordatorio útil es que
 `L-191` estaba escrita, firmada y no alcanzó.
+
+
+---
+
+### `L-499` 🔴 · UN INSTRUMENTO QUE PREGUNTA POR LA **FORMA** EN QUE LA LEY SUELE ESCRIBIRSE NO MIDE LA LEY
+
+**S114-A, 7-sep-2026. Tres casos el mismo día, en tres subsistemas distintos.**
+
+Un censo pregunta por la forma que espera —un CHECK, un literal, un número en
+negrita— y devuelve un veredicto sobre **la ley**. Cuando la ley está escrita en
+otra forma, el censo no falla: **contesta que no está.**
+
+> ### **Y su respuesta es siempre la más creíble de las dos, porque «no hay» se parece mucho a «hay que construirlo».**
+
+### Los tres casos, y ninguno se parece al otro
+
+| # | el instrumento preguntó por… | la ley vivía en… | qué contestó |
+|---|---|---|---|
+| ① | `pg_constraint` con `contype='c'` sobre `origen_tipo` | **un TRIGGER** (`validar_origen_evento`, nueve valores **y** integridad referencial) | *«NINGUNO»* ⇒ la mesa mandó cerrar un vocabulario **que ya estaba cerrado** |
+| ② | `verify:contador-piezas`, una sola forma de escribir el número | el número **también** escrito como cita dentro de la línea ya curada | se marcó **a sí mismo**: no distinguía publicar de citar |
+| ③ | el censo de guards de memorial, por **presencia del guard** | **once sitios sin guard**, que no piden nada y por eso no disparan ninguna regla | los once *«se leían como puestos»* |
+
+**El ① es el que muestra el costo entero.** Del *«no hay CHECK»* salió una
+adenda entera mandando construir `cat_origen_evento`. Construirlo habría sido
+**una segunda fuente para una ley que ya existía y era más fuerte** —el trigger
+valida existencia, no sólo el string—, y el defecto real habría quedado intacto:
+el `WHEN 'estadia'` apuntaba a `estadias`, **una lápida con 0 filas**, mientras
+la tabla viva tiene 96. *El censo no sólo no vio la ley: mandó a escribir una
+copia y dejó pasar el error que la ley tenía adentro.*
+
+### Cómo se rompe, y por qué no alcanza con «buscar mejor»
+
+**No es que el patrón esté mal escrito.** `contype='c'` mide exactamente lo que
+dice medir. El defecto es de **encuadre**: se preguntó *«¿hay un CHECK?»* y se
+respondió *«no hay vocabulario»* — dos frases distintas que el reporte trata
+como una.
+
+### La cura exigible, en dos líneas
+
+1. **Un censo declara la FORMA que miró**, no sólo el resultado: *«cero CHECKs
+   sobre `origen_tipo`»* es una medición; *«`origen_tipo` no tiene vocabulario»*
+   es una conclusión que ese censo no puede sostener.
+2. **Un cero se contrasta contra la PREGUNTA, no contra el patrón.** Antes de
+   reportar *«no existe»*, se intenta **producirlo por el camino real**: un
+   `INSERT` con un valor inventado habría contestado en un segundo que la ley
+   estaba viva. *Escribir cuesta una subtransacción; adivinar costó una adenda.*
+
+### Su hermana, y en qué se diferencian
+
+**`L-498`** es sobre un instrumento que lee **la señal equivocada** (el exit
+code del pipe, el `>= 400` que no distingue un CHECK de un permiso). **Ésta es
+sobre uno que lee la señal correcta de la fuente equivocada.** Las dos producen
+salidas creíbles; la de `L-498` se caza corriendo el control negativo, y ésta
+**sólo se caza preguntándole al objeto en vez de al catálogo que lo describe.**
+
+**☠️ Condición de muerte:** ninguna — es de método.

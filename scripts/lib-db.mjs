@@ -2,11 +2,45 @@
 // Solo SELECT — un verify-* jamás escribe por acá. Usa el CLI linkeado
 // (mismo canal que opera Code, keychain — cero secretos en el repo).
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve, join } from 'node:path';
+
+/**
+ * 🔴 S114-E · EL LINK NO VIAJA AL WORKTREE, Y ESO VOLVÍA MUDOS A LOS GATES DE BASE.
+ *
+ * `supabase/.temp/project-ref` es config POR CHECKOUT y está gitignored ⇒ **un
+ * worktree nuevo no lo tiene**, y `db query --linked` rebota con
+ * `LegacyProjectNotLinkedError`. Todo arnés que importe este helper sale
+ * NO CONCLUYENTE **por el entorno, no por el motor**.
+ *
+ * **Medido el 7-sep-2026: 53 de 91 worktrees no tenían el link.** Y uno de los
+ * gates del pre-commit (`verify:rutas-de-aviso`) lo importa ⇒ en la mayoría de
+ * los árboles ese gate **no medía nada y su silencio se leía como salud**.
+ *
+ * La cura es de UBICACIÓN, no de permiso: el proyecto linkeado es una propiedad
+ * del REPO, no del worktree, así que si el árbol local no lo tiene se corre el
+ * CLI **con el cwd del árbol principal**, que es donde vive. *No se copia nada
+ * ni se escribe en el árbol ajeno: sólo se lee desde donde el dato está.*
+ *
+ * ⚠️ **Estrictamente aditivo:** si el worktree TIENE su `.temp`, el
+ * comportamiento es byte-idéntico al de antes — el fallback no puede pisar un
+ * link deliberado, porque sólo se consulta cuando el local no existe.
+ * ⚠️ Y si **ninguno** lo tiene, el error DICE qué falta y cómo se arregla, en
+ * vez de devolver el críptico «Cannot find project ref».
+ */
+function cwdConLink() {
+  if (existsSync('supabase/.temp/project-ref')) return undefined;   // el local sirve
+  const g = spawnSync('git', ['rev-parse', '--git-common-dir'], { encoding: 'utf8' });
+  if (g.status !== 0) return undefined;
+  const principal = resolve(g.stdout.trim(), '..');
+  return existsSync(join(principal, 'supabase/.temp/project-ref')) ? principal : undefined;
+}
 
 export function dbQuery(sql) {
+  const cwd = cwdConLink();
   const r = spawnSync('npx', ['supabase', '--experimental', 'db', 'query', '--linked', sql], {
     encoding: 'utf8',
+    ...(cwd ? { cwd } : {}),
   });
   /* 🔴 S110-A · UN TIMEOUT DE TELEMETRÍA HACÍA FALLAR UNA CONSULTA QUE RESPONDIÓ.
      Medido: el CLI imprime las filas y DESPUÉS sale con `exit 1` y
@@ -45,6 +79,18 @@ export function dbQuery(sql) {
       .filter((l) => l.trim() && !ruido.test(l))
       .join(' ')
       .slice(0, 600);
+    /* Si lo que falta es el LINK, se dice con todas las letras: el mensaje del
+       CLI («Cannot find project ref») manda a correr `supabase link`, que es la
+       cura equivocada — el link existe, está en otro árbol. */
+    if (/LegacyProjectNotLinkedError|Cannot find project ref/.test(salida)) {
+      throw new Error(
+        'db query falló: este worktree NO tiene `supabase/.temp/project-ref` y tampoco ' +
+        'lo tiene el árbol principal. NO es un fallo del motor: es que el árbol no puede ' +
+        'mirar. Cura: copiar `supabase/.temp` del árbol principal (está gitignored, por eso ' +
+        'no viaja). Un gate que importa lib-db y no encuentra el link sale NO CONCLUYENTE, ' +
+        'jamás verde.',
+      );
+    }
     throw new Error(`db query falló (exit ${r.status}): ${salida || '(sin salida)'}`);
   }
   const inicio = r.stdout.indexOf('{');

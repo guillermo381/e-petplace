@@ -386,6 +386,58 @@ if [ -f scripts/_censo-hoisting-nativo.mjs ]; then
   fi
 fi
 
+# ── verify:ref-antes-de-uso ── S112-A · CABLEADO EN S114-A ─────────────────
+# 🔴 NACIÓ DE LA CAUSA EXACTA DEL CRASH DEL LOTE 5 DE S112: un `useMemo` leía
+#    dos `useRef` declarados DESPUÉS. Compila, corre en dev, y revienta en el
+#    aparato. El script se escribió en S112, el canon lo dio por cableado, y
+#    E midió contra el hook vivo: CERO ocurrencias. **Existía y no corría.**
+#    *Un gate que nadie cableó es peor que uno que falta: su ausencia se lee
+#    como salud en cada commit.*
+if [ -f scripts/verify-ref-antes-de-uso.mjs ]; then
+  # Binario (0 ó 1), así que `if ! comando` alcanza — la negación no dispara
+  # `set -e` por la propia spec de POSIX.
+  if ! node scripts/verify-ref-antes-de-uso.mjs >/dev/null 2>&1; then
+    echo ""
+    echo "✗ UN ref SE LEE ANTES DE DECLARARSE — el commit NO ocurre."
+    node scripts/verify-ref-antes-de-uso.mjs 2>&1 | grep -E "🔴|✗|→" | head -6
+    echo ""
+    echo "  Es TDZ, no dato: compila, anda en dev, y crashea en el aparato."
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+fi
+
+# ── verify:fila-memoizada ── S112-B · CABLEADO EN S114-A ───────────────────
+# ⚠️ ESTE TIENE TRES ESTADOS (0 · 1 · 2), así que NO se cablea con `if !`:
+#    un exit 2 bajo `set -e` mata el shell antes de que el gate pueda decir
+#    «no concluyente» (L-490, medido en las dos direcciones). Va con el patrón
+#    `if comando; then …; else X=$?; fi`, que la spec de POSIX exime.
+if [ ! -f scripts/verify-fila-memoizada.mjs ]; then
+  echo ""
+  echo "⚠️  verify:fila-memoizada NO CONCLUYENTE — el script no existe en este árbol."
+  echo "   (worktree anterior al gate; NO es una fila sin memoizar. El commit SIGUE.)"
+  echo ""
+else
+  if npx tsx scripts/verify-fila-memoizada.mjs >/dev/null 2>&1; then
+    ESTADO_FILA=0
+  else
+    ESTADO_FILA=$?
+  fi
+  if [ "$ESTADO_FILA" = "2" ]; then
+    echo ""
+    echo "⚠️  verify:fila-memoizada NO CONCLUYENTE — le falta una fuente."
+    echo "   (no es que haya una fila sin memoizar: es que no pudo mirar. El commit SIGUE.)"
+    echo ""
+  elif [ "$ESTADO_FILA" != "0" ]; then
+    echo ""
+    echo "✗ UNA FILA DE LISTA SE RE-RENDERIZA ENTERA — el commit NO ocurre."
+    npx tsx scripts/verify-fila-memoizada.mjs 2>&1 | grep -E "🔴|✗|→" | head -6
+    echo ""
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    exit 1
+  fi
+fi
+
 if [ ! -f scripts/verify-sin-byte-nul.mjs ]; then
   echo ""
   echo "⚠️  verify:sin-byte-nul NO CONCLUYENTE — el script no existe en este árbol."
