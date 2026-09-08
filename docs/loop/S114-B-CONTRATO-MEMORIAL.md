@@ -270,7 +270,97 @@ montando, que es como apareció todo esto.*
 
 ---
 
-## ⑤ EL BARRIDO DE `R77` SOBRE `apps/` — NO SE ABRIÓ
+## ⑥ ① · QUIÉN DERIVA «ES MEMORIAL» EN `packages/ui`, Y QUÉ QUEDA MAL CON LA FIRMA
+
+### ✅ CERO piezas lo derivan del estado de vida. Las que lo saben, lo RECIBEN.
+
+Censado con las cuatro formas (`estado_vida` · `'perdida'` · `'fallecida'` ·
+`theme.mode`):
+
+| pieza | forma | ¿exige la señal? |
+|---|---|---|
+| `LineaAlgoSalioDistinto` | `enMemorial` dentro de la unión de sujeto | 🟢 **OBLIGATORIA**, y en el pedido **inexpresable** |
+| `FichaMascotaHogar` | `enMemoria?: boolean` **`\|\| theme.mode`** — *el mismo patrón que B8, y ya existía* | 🟡 **OPCIONAL** ⇒ sin ella cae al tema, **que está inerte** |
+| `TarjetaPasaporte` | `enMemoria?: boolean = false` | 🔴 **default `false`** — el guard apagado por omisión, escrito |
+
+⚠️ **Y las 60 de `theme.mode === 'memorial'` son la cuarta forma**: no derivan del
+estado de vida, derivan del TEMA. Ya censadas en §③.
+
+> ### ⚠️ UN FALSO POSITIVO DE MI PROPIO CENSO, declarado
+> El conteo por token daba **29 `M6`** en `packages/ui`, y parecían derivaciones
+> del momento vital. **Los 29 son paths SVG** (`d="M6 6l12 12…"`). *`L-499`
+> otra vez, en el mismo día: el token se cuenta, el hecho se lee.*
+
+### 🔴 QUÉ QUEDA MAL CON LA FIRMA — y el dato lo calcula la PANTALLA
+
+| llamador | su regla | con la firma |
+|---|---|---|
+| `hogar/index.tsx` (`enMemoriaDe` :1233 · :1661) → `FichaMascotaHogar` | `!== null && !== 'activa'` | 🔴 **MAL** — una mascota **PERDIDA se dibuja como memorial en el Hogar** |
+| `[mascotaId].tsx:961` → el tablero | ídem | 🔴 **MAL**, misma razón |
+| `pasaporte.tsx` (:98 · :162) → `TarjetaPasaporte` | `… && !== 'perdida'` | ✅ **la única que la cumple** |
+
+### ⚠️ Y LA SALVEDAD QUE EL CENSO OBLIGA A DECIR
+
+**Que sea «mal» supone que la firma GENERALIZA fuera de la puerta de postventa,
+y se firmó sobre la línea de reclamo.** Antes de aplicarla en el Hogar hay algo
+que el censo no puede contestar:
+
+> ### **`perdida` no es memorial — pero tampoco es `activa`, y la casa hoy sólo tiene DOS tratamientos.**
+> *Aplicar la firma a la ficha del Hogar no arregla el caso: lo mueve del
+> tratamiento equivocado a otro tratamiento equivocado.* **`perdida` necesita el
+> suyo, y eso es letra, no censo.**
+
+---
+
+## ⑦ ② · DÓNDE DEBERÍA VIVIR LA DEFINICIÓN ÚNICA — opciones con su costo
+
+> **No la escribo: es decisión de mesa y cruza territorios.** Traigo las cuatro
+> con lo que cada una cuesta y lo que NO resuelve.
+
+### 🔴 EL LUGAR YA EXISTE, Y HASTA EL ARCHIVO
+
+**`packages/domain` está VIVO** —11 módulos— **y lo consumen LOS CUATRO
+paquetes** (`api`, `ui`, `cliente`, `prestador`; medido en sus `package.json`).
+**Y tiene `momentoVital.ts`, cuya función hace esto:**
+
+```ts
+export function calcularMomentoVital(entrada: { esMemorial: boolean; … }) {
+  if (entrada.esMemorial) return 'M6'
+```
+
+⇒ **la casa YA trató este dato como de dominio: `domain` lo CONSUME como
+argumento y nunca lo definió.** *El lugar no hay que elegirlo — hay que llenarlo.*
+
+| opción | costo | qué NO resuelve |
+|---|---|---|
+| **(a) `packages/domain`** ⭐ | mover `EstadoVidaMascota` desde `packages/api/src/wrappers/_mascotas-elegibles.ts` y que `api` lo re-exporte — **`api` ya depende de `domain`, la capa da**. Un archivo, un re-export, cero consumidores rotos | **no alcanza al SERVIDOR**, que hoy decide por su cuenta (el nexo, por código de la edge) |
+| (b) `packages/api` | 🔴 **`ui` no lo ve.** Agregar `ui → api` **invierte la capa** —presentación dependiendo de la puerta a la DB— y arrastra `supabase-js` al bundle de un paquete de presentación | — |
+| (c) el MOTOR (Postgres) | ✅ **es la única que alcanza al servidor**, que ya decide ahí | 🔴 **no alcanza a `packages/ui`**, que no habla con la DB ⇒ *no es alternativa: es complemento de (a)* |
+| (d) donde está hoy (`apps/cliente/src/lib/nexo/atajos.ts:87`) | — | 🔴 **el prestador no lo alcanza**, y su regla es `!== 'activa'`: **la que la firma contradice** |
+
+**Mi voto: (a) con (c) como su espejo** — y con la consecuencia dicha: *si el
+motor y `domain` deciden lo mismo por separado, van a divergir; la única forma de
+que no pase es que alguien lo MIDA*, con un gate que compare el vocabulario de
+los dos. **Eso es lo que hoy no existe y es por lo que hay cuatro definiciones.**
+
+### 🔴 Y LA FORMA IMPORTA MÁS QUE EL LUGAR: **NO un booleano**
+
+**Un booleano es lo que causó la divergencia.** Obliga a cada llamador a decidir
+**por su cuenta** dónde cae `perdida` — y **cuatro decidieron distinto.**
+
+```ts
+type MomentoDeVida = 'activa' | 'perdida' | 'memorial'
+```
+
+⇒ **el llamador no puede colapsar `perdida` sin escribirlo**, y un `switch`
+exhaustivo lo obliga a decir qué hace con ella. *Un booleano esconde la
+decisión; una unión de tres la exige.* **Es la misma cura que `R77` pide para
+los órdenes y que la unión de sujeto de B8 aplicó al pedido: volver la pregunta
+inexpresable de contestar mal.**
+
+---
+
+## ⑧ EL BARRIDO DE `R77` SOBRE `apps/` — NO SE ABRIÓ
 
 Tanda propia después de S114, por orden del founder. **`R77` declara en su
 propio `info` que no ve `apps/`**, así que su alcance vive en el gate y no en
