@@ -31,24 +31,30 @@ import {
   validarIntake,
 } from '../supabase/functions/_shared/postventa/contrato.ts'
 
-/** FIXTURE — declarado como tal. Sólo se usa si no hay credencial. */
+/** FIXTURE — declarado como tal, y es el conjunto RESUELTO de `cita` (lo que la
+ *  vista devuelve para ese objeto), no una muestra de la tabla entera. */
 const FIXTURE: MotivoCatalogo[] = [
   { codigo: 'no_ejecutado', objeto: 'cita', clase: 1, urgente: false, voz: 'No vino / no me atendieron', pide_foto: false },
   { codigo: 'calidad', objeto: 'cita', clase: 2, urgente: false, voz: 'El servicio no fue como esperaba', pide_foto: false },
   { codigo: 'mascota_afectada', objeto: 'cita', clase: 3, urgente: true, voz: 'Mi mascota volvió lastimada o enferma', pide_foto: true },
-  { codigo: 'devolucion_tarde', objeto: 'estadia', clase: 2, urgente: false, voz: 'Lo devolvieron fuera de hora', pide_foto: false },
   { codigo: 'otra_cosa', objeto: 'todos', clase: 2, urgente: false, voz: 'Es otra cosa · contame', pide_foto: false },
 ]
 
+/* 🔴 SE LEE EL MISMO OBJETO QUE LEE LA EDGE: `v_motivos_resueltos` filtrada
+   por `objeto_resuelto`, no la tabla cruda. Antes el arnés cargaba las 19 filas
+   de los tres objetos y esperaba que `validarIntake` filtrara — o sea que
+   medía una responsabilidad que la función ya no tiene (la herencia la resuelve
+   la vista de A). *Un arnés que le da a la función una entrada que el producto
+   nunca le va a dar mide otra cosa que el producto.* */
 function catalogoVivo(): { filas: MotivoCatalogo[]; fuente: string } {
   try {
     const salida = execFileSync('npx', [
       'supabase', '--experimental', 'db', 'query', '--linked',
-      'select codigo, objeto, clase, urgente, voz, pide_foto, activo from public.cat_motivos_postventa;',
+      "select codigo, objeto_origen as objeto, clase, urgente, voz, pide_foto, true as activo from public.v_motivos_resueltos where objeto_resuelto = 'cita';",
     ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 120_000, cwd: process.env.EPP_RAIZ ?? process.cwd() })
     const json = JSON.parse(salida.slice(salida.indexOf('{')))
     if (!Array.isArray(json.rows) || json.rows.length === 0) throw new Error('sin filas')
-    return { filas: json.rows as MotivoCatalogo[], fuente: `BASE VIVA (${json.rows.length} filas)` }
+    return { filas: json.rows as MotivoCatalogo[], fuente: `v_motivos_resueltos · objeto_resuelto='cita' (${json.rows.length} filas)` }
   } catch {
     return { filas: FIXTURE, fuente: `FIXTURE de ${FIXTURE.length} filas — SIN credencial, no se midió contra la base` }
   }
@@ -103,7 +109,6 @@ for (const campo of CAMPOS_DE_CONFIRMACION) {
 
 // ── ROJO ② · MOTIVO FUERA DEL CATÁLOGO ──────────────────────────────────────
 debeRechazar('② motivo inventado', { ...BUENA, motivo: 'servicio_pesimo' }, 'motivo_fuera_de_catalogo')
-debeRechazar('② motivo de OTRO objeto', { ...BUENA, motivo: 'devolucion_tarde' }, 'motivo_fuera_de_catalogo', 'cita')
 debeRechazar('② motivo vacío', { ...BUENA, motivo: '   ' }, 'forma_invalida')
 debeRechazar('② salida que no es objeto', 'calidad', 'forma_invalida')
 
@@ -119,7 +124,12 @@ debeRechazar('③ decide · `resolución` (con tilde)', { ...BUENA, 'resolución
 debePasar('salida limpia', BUENA)
 debePasar('sin evidencia', { motivo: 'calidad', resumen: 'No fue como esperaba.' })
 debePasar('motivo `todos` sobre cita', { motivo: 'otra_cosa', resumen: 'Es otra cosa.' })
-debePasar('estadía hereda motivos de cita', { motivo: 'calidad', resumen: 'No fue como esperaba.' }, 'estadia')
+/* La herencia ya no la resuelve `validarIntake` — la resuelve la vista de A
+   desde `cat_motivos_herencia`. Lo que se mide acá es que un motivo que NO está
+   en el conjunto que la edge recibió cae, sin importar de qué objeto sea: es la
+   propiedad que queda del lado de esta función. */
+debeRechazar('② motivo que no está en el conjunto recibido',
+  { ...BUENA, motivo: 'devolucion_tarde' }, 'motivo_fuera_de_catalogo')
 
 // ── ROJO ④ · LA CLASE LA TRAE LA FILA, NUNCA EL MODELO ──────────────────────
 // Es el control de §4, y **su alcance está medido, no supuesto** — el control

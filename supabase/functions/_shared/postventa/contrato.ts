@@ -176,17 +176,18 @@ export function validarIntake(
   if (motivo === '') {
     return { ok: false, rechazo: 'forma_invalida', detalle: 'falta `motivo`' }
   }
-  // Se busca el par (codigo, objeto) — que es la PK real del catálogo — y se
-  // acepta también `objeto='todos'`, que es donde vive `otra_cosa`.
-  // ⚠️ §4: la estadía HEREDA los motivos de cita, y esa herencia la resuelve el
-  // LECTOR (así lo dice el COMMENT de la tabla de A), no el catálogo. Acá está
-  // el lector, así que la herencia vive acá y en un solo lugar.
-  const objetosValidos = objeto === 'estadia'
-    ? ['estadia', 'cita', 'todos']
-    : [objeto, 'todos']
-  const fila = catalogo.find(
-    (m) => m.codigo === motivo && objetosValidos.includes(m.objeto) && m.activo !== false,
-  )
+  /* 🔴 LA HERENCIA NO SE RESUELVE ACÁ, Y ANTES SÍ — ES UNA CURA, NO UN DISEÑO.
+     La primera versión traía `objeto === 'estadia' ? ['estadia','cita','todos']`
+     escrito a mano. Medido después contra la base: A la resolvió en la vista
+     `v_motivos_resueltos`, y la suya sale de una TABLA (`cat_motivos_herencia`),
+     no de un literal. Hoy las dos dicen lo mismo —hay una sola fila, `estadia
+     hereda_de cita`— **y ahí está el problema: coinciden por casualidad**. El
+     día que el founder agregue una herencia, la vista la refleja y mi copia se
+     queda muda, sin que nada falle. *Dos verdades que hoy coinciden son peores
+     que una sola, porque nadie las va a ir a comparar.*
+     Ahora el catálogo llega YA RESUELTO desde la vista y esta función sólo
+     verifica pertenencia al conjunto que recibió. Una cosa, una puerta. */
+  const fila = catalogo.find((m) => m.codigo === motivo && m.activo !== false)
   if (fila === undefined) {
     return {
       ok: false,

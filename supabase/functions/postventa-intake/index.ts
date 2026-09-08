@@ -134,20 +134,64 @@ Deno.serve(async (req) => {
   const clave = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!url || !clave) return error('catalogo_no_disponible', 'No se pudo leer el catálogo.', 500)
 
-  // ⚠️ §4: la estadía HEREDA los motivos de cita. La herencia vive en el lector
-  // —así lo dejó dicho A en el COMMENT de la tabla— y el lector es esto.
-  const objetosPedidos = objeto === 'estadia' ? ['estadia', 'cita', 'todos'] : [objeto, 'todos']
+  /* 🔴 SE LEE `v_motivos_resueltos`, EL RESOLVEDOR DE A — NO LA TABLA CRUDA.
+     La primera versión leía `cat_motivos_postventa` y armaba la herencia acá
+     con un literal. La vista de A la arma desde `cat_motivos_herencia`, o sea
+     desde DATO: hoy las dos dan lo mismo porque hay una sola fila de herencia,
+     y ése era justamente el riesgo — *coincidir por casualidad es la forma en
+     que dos verdades conviven sin que nadie las compare*. Además la vista trae
+     `procedencia` (propio | heredado | universal), que la tabla no tiene.
+     `objeto_resuelto` ya contempla la herencia, así que el filtro es uno solo. */
   const { data, error: errDb } = await createClient(url, clave)
-    .from('cat_motivos_postventa')
-    .select('codigo, objeto, clase, urgente, voz, pide_foto, activo')
-    .in('objeto', objetosPedidos)
-    .eq('activo', true)
+    .from('v_motivos_resueltos')
+    .select('codigo, objeto_origen, clase, urgente, voz, pide_foto, procedencia')
+    .eq('objeto_resuelto', objeto)
 
   if (errDb || !Array.isArray(data) || data.length === 0) {
     console.error('[postventa-intake] catálogo no legible:', errDb?.message)
     return error('catalogo_no_disponible', 'No se pudo leer el catálogo.', 500)
   }
-  const catalogo = data as MotivoCatalogo[]
+  /* 🔴 LO PROPIO PISA A LO HEREDADO — Y ESTO NO ES UNA PRECAUCIÓN: ES UN
+     DEFECTO MEDIDO EL 7-SEP, QUE SÓLO APARECIÓ EJERCIENDO LA EDGE.
+     `no_ejecutado` existe para `cita` **y** para `estadia`, y como estadía
+     hereda de cita, `v_motivos_resueltos` lo devuelve DOS VECES para
+     `objeto_resuelto='estadia'`, con dos voces distintas:
+       · propio/estadia  → «No lo cuidaron / no me lo devolvieron»
+       · heredado/cita   → «No vino / no me atendieron»
+     Un `find()` sobre ese array toma la primera que venga, y **una vista sin
+     `ORDER BY` no garantiza cuál es**. O sea: la familia de una guardería podía
+     ver la voz de una cita, y la propuesta viajar con `objeto: 'cita'`.
+     *Es la clase «coinciden por casualidad»: mientras estadía no tuviera un
+     código propio repetido de cita no pasaba nada, y el día que A agregó
+     `no_ejecutado` el duplicado nació sin que nada fallara.*
+
+     ⚠️ SE CURA DEL LADO CONSUMIDOR Y SE REPORTA A A, porque la vista es suya y
+     el defecto le pega a cualquiera que la lea. **Y queda descartable**: si A
+     desduplica en la vista, esto pasa a ser un no-op inofensivo, no una
+     segunda verdad. La regla —lo específico gana sobre lo heredado— es la
+     natural y la que la propia vista permite aplicar porque trae `procedencia`. */
+  const crudas = data as Array<Record<string, unknown>>
+  const porCodigo = new Map<string, Record<string, unknown>>()
+  for (const m of crudas) {
+    const codigo = m.codigo as string
+    const previa = porCodigo.get(codigo)
+    // `propio` gana; entre `heredado` y `universal` gana la primera que llegue,
+    // porque ésas no pueden colisionar entre sí (un código universal es único).
+    if (previa === undefined || m.procedencia === 'propio') porCodigo.set(codigo, m)
+  }
+  if (porCodigo.size !== crudas.length) {
+    console.log(`[postventa-intake] ${crudas.length - porCodigo.size} motivo(s) duplicado(s) en \`${objeto}\`, resueltos a favor de \`propio\``)
+  }
+
+  const catalogo: MotivoCatalogo[] = [...porCodigo.values()].map((m) => ({
+    codigo: m.codigo as string,
+    objeto: m.objeto_origen as string,
+    clase: m.clase as number,
+    urgente: m.urgente as boolean,
+    voz: m.voz as string,
+    pide_foto: m.pide_foto as boolean,
+    activo: true,
+  }))
 
   /** Lo que la familia ve pase lo que pase: la lista entera, en su voz. */
   const opciones = catalogo.map((m) => ({
