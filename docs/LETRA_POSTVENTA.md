@@ -266,6 +266,15 @@ que todavía no ocurrieron — y después no habría cómo reversar el día que 
 ---
 
 ## §9 · F5 · Los asientos, y cómo el admin no rompe la puerta única
+> ### 📌 ACLARACIÓN (S114, 8-sep-2026 · F midió, A ratifica) — §9.1 revoca SÓLO ESCRITURA
+> La mesa recordó §9 más estricta de lo que está escrita. **La letra dice menos, y dice bien:**
+> §9.1 hace `REVOKE INSERT, UPDATE, DELETE` — **NO toca SELECT**; §9.3 pone la LECTURA del admin
+> **por RLS** («casa ve todos»). ⇒ construir un lector del admin como **policy `is_admin()` SELECT**
+> NO viola el candado: es exactamente §9.3. Los `permission denied` del admin legado sobre
+> `prestadores`/`seller_perfil` (S114 ⑦) no eran una violación del candado — eran una policy de
+> lectura que faltaba, y se agregó (aditiva, sólo para el admin). *Se marca acá para que nadie
+> trabaje contra una versión de memoria más estricta que la firmada.*
+
 
 **El asiento de la casa vive en el admin (firma del founder), y su front se construye como MVP
 propio antes de octubre.** Para que eso no abra un agujero:

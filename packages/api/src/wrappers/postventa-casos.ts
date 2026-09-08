@@ -326,13 +326,17 @@ export interface ServicioSinCerrar {
 }
 
 export async function obtenerServiciosSinCerrar(): Promise<
-  ResultadoWrapper<{ cantidad: number; items: ServicioSinCerrar[] }, 'error_lectura'>
+  // `cantidad`/`items` son SÓLO lo accionable (fin >= el corte de F1, lo que el
+  // reloj puede tocar). `fueraDeCorte` es el backlog viejo, aparte, para
+  // diagnóstico — NUNCA se mezcla en el número que ve el prestador (S114-A ⑥).
+  ResultadoWrapper<{ cantidad: number; items: ServicioSinCerrar[]; fueraDeCorte: number }, 'error_lectura'>
 > {
   const { data, error } = await getClient().rpc('obtener_servicios_sin_cerrar');
   if (error) return { ok: false, codigo: 'error_lectura', mensaje: ERR };
-  const d = (data ?? {}) as { cantidad?: number; items?: Record<string, unknown>[] };
+  const d = (data ?? {}) as { cantidad?: number; items?: Record<string, unknown>[]; fuera_de_corte?: number };
   return { ok: true, data: {
     cantidad: d.cantidad ?? 0,
+    fueraDeCorte: d.fuera_de_corte ?? 0,
     items: (d.items ?? []).map((i) => ({
       objetoId: i.objeto_id as string, objetoTipo: i.objeto_tipo as ObjetoPostventa,
       servicio: i.servicio as string, mascotaNombre: (i.mascota_nombre as string | null) ?? null,

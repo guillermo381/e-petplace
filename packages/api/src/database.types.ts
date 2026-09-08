@@ -25615,6 +25615,7 @@ export type Database = {
         }
         Returns: Json
       }
+      listar_lotes: { Args: never; Returns: Json }
       listar_memoria_coach: { Args: { p_mascota_id: string }; Returns: Json }
       listar_placas_de_lote: { Args: { p_lote_id: string }; Returns: Json }
       listar_propuestas_memoria: {

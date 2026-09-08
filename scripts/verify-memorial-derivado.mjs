@@ -56,7 +56,13 @@ import { join } from 'node:path'
  * **La autoridad es el gate**: el censo en prosa es una lectura, éste es una
  * medición reproducible. Es `L-503` entre dos artefactos del mismo autor.
  */
-const BASELINE = 9
+// 🔴 S114-A · bajado 9→2 al integrar la cura de C (la quinta derivación en
+// pasaporte.tsx, ahora vía esMemorial de lib/memorial) + el merge que retiró
+// cambiarPerdida. El founder pidió «bajá a 8» desde la vista de B (9→8, un
+// arreglo); el piso MEDIDO en el candidato ensamblado es 2 — se mueve al piso
+// real, no al número de otra rama (el gate lo exige: el que cura mueve el
+// baseline en el mismo acto, L-502). Si sube de 2, una derivación nueva entró.
+const BASELINE = 2
 /** Exentos POR NOMBRE, jamás por patrón (mismo criterio que `R78` §④). */
 const EXENTOS = new Set([
   // La definición vive acá: es el destino, no una copia.
