@@ -2166,6 +2166,12 @@ const FIXTURES = {
      un wrapper que exporta una función y un index que no la nombra. Con uno
      solo la regla saldría por «corpus incompleto», que no es verde pero
      tampoco prueba que sepa decir que no. */
+  /* R82 · el brazo ⑵: una pieza de `ui` que monta `EvitaTeclado` sin preguntar.
+     El corpus trae la hoja PROVEYENDO para que ⑴ no sea lo que enrojezca. */
+  R82: [
+    { path: 'packages/ui/src/components/ModalDosAlturas.tsx', src: '  <TecladoResueltoArriba>{children}</TecladoResueltoArriba>\n' },
+    { path: 'packages/ui/src/components/PiezaConCampo.tsx', src: '  return (\n    <EvitaTeclado>\n      <Campo />\n    </EvitaTeclado>\n  )\n' },
+  ],
   /* R81 · el brazo ⑵, que es el que ya falló en campo: un montaje sin
      `altoTeclado`. El corpus trae la pieza intacta para que ⑴ no sea lo que
      enrojezca — un fixture que enciende el brazo equivocado no prueba el que
@@ -5790,6 +5796,79 @@ function r66(archivos) {
 }
 
 /**
+ * ═══ R82 · DOS MANEJADORES DE TECLADO NO PUEDEN ESTAR VIVOS A LA VEZ ═══════
+ *
+ * **Lo midió C y frenó antes de improvisar:** `SuperficieChat` se envuelve en
+ * `EvitaTeclado` y **se empuja entera**; `ModalDosAlturas` **no se mueve y
+ * crece por dentro** reservando `altoTeclado`. **Montar la primera adentro de
+ * la segunda paga el alto del teclado DOS VECES** — la barra queda flotando
+ * sobre un hueco.
+ *
+ * ── LA CURA ES DE FORMA, NO DE PROP — y es mi propia `R81` ────────────────
+ * Una prop `tecladoYaResuelto` sería *«una opción con buen nombre»*: olvidarla
+ * deja los dos manejadores vivos **y nada falla** —se ve como un hueco raro—,
+ * que es la clase de defecto que nadie reporta. ⇒ **lo declara un CONTEXTO que
+ * monta la pieza que de verdad resuelve el teclado**, en el subárbol exacto
+ * donde la afirmación es cierta. *No hay nada que pasar, así que no hay nada
+ * que olvidar.*
+ *
+ * ── LOS DOS BRAZOS ────────────────────────────────────────────────────────
+ * ⑴ **La hoja PROVEE.** Si deja de hacerlo, quien esté adentro vuelve a montar
+ *    su manejador y **nadie se entera**: el defecto no lanza, sólo se ve mal.
+ * ⑵ **Toda pieza de `packages/ui` que monte `EvitaTeclado` consulta primero el
+ *    hook.** Hoy es una sola; la regla existe para la segunda.
+ *
+ * ── ⚠️ LO QUE NO MIRA, Y ES DECISIÓN, NO OLVIDO (`L-502`) ─────────────────
+ * **Las 57 pantallas de `apps/` que montan `EvitaTeclado` quedan AFUERA.** Una
+ * pantalla raíz **no vive adentro de una hoja**, así que ahí montar el manejador
+ * es correcto — meterlas enrojecería **57 archivos de código sano** el día que
+ * alguien amplíe el alcance. *La regla mira dónde el defecto puede existir: una
+ * pieza que otra pieza puede envolver.*
+ */
+function r82(archivos) {
+  const fallos = []
+
+  const de = (n) => archivos.find((a) => a.path.endsWith(`components/${n}`))
+
+  /* ⑴ la hoja PROVEE */
+  const hoja = de('ModalDosAlturas.tsx')
+  if (hoja === undefined) {
+    fallos.push(...ancla('R82', 0, 1, 'la pieza `ModalDosAlturas.tsx` en el corpus'))
+  } else if (!/<TecladoResueltoArriba>/.test(sinComentarios(hoja.src ?? ''))) {
+    fallos.push(
+      'R82 **`ModalDosAlturas` dejó de declarar que ya resolvió el teclado.** Sin ese aviso, lo que se monte adentro **vuelve a montar su propio manejador** y el alto se paga dos veces. *No lanza, no rompe: la barra queda flotando sobre un hueco* — la clase de defecto que nadie reporta.',
+    )
+  }
+
+  /* ⑵ ninguna pieza de `ui` monta `EvitaTeclado` sin consultar el hook.
+     ⚠️ DEDUPLICADO POR RUTA: el corpus llega como `ui` + `archivosCodigo`, así
+     que cada `.tsx` entra dos veces y el contador decía 2 con UNA pieza. */
+  let piezas = 0
+  const vistas = new Set()
+  for (const { path, src } of archivos) {
+    if (!/^packages\/ui\/src\/components\/.*\.tsx$/.test(path)) continue
+    if (vistas.has(path)) continue
+    vistas.add(path)
+    const cuerpo = sinComentarios(src ?? '')
+    if (!/<EvitaTeclado[\s/>]|<EvitaTeclado>/.test(cuerpo)) continue
+    piezas++
+    if (/useTecladoYaResuelto\s*\(/.test(cuerpo)) continue
+    fallos.push(
+      `R82 **${path} monta \`EvitaTeclado\` sin preguntar si alguien ya resolvió el teclado.** Una pieza de \`packages/ui\` **puede quedar adentro de otra** —y \`ModalDosAlturas\` ya reserva el alto—: los dos juntos lo pagan dos veces. *Las pantallas de \`apps/\` están exentas con su razón: una raíz no vive adentro de una hoja.* Consultá \`useTecladoYaResuelto()\`.`,
+    )
+  }
+  fallos.push(...ancla('R82', piezas, 1, 'pieza(s) de `ui` que montan `EvitaTeclado` (0 = la regla perdió su sujeto)'))
+
+  return {
+    fallos,
+    info:
+      `${piezas} pieza(s) de \`ui\` montan \`EvitaTeclado\` · la hoja declara que ya lo resolvió · ` +
+      `⚠️ las 57 pantallas de \`apps/\` quedan AFUERA con su razón (una raíz no vive adentro de una hoja — meterlas sería \`L-502\`) · ` +
+      `⚠️ su verde dice «no hay dos manejadores en \`ui\`», jamás «el teclado se ve bien»: eso se mira en aparato`,
+  }
+}
+
+/**
  * ═══ R81 · LA HOJA ARRASTRABLE NO QUEDA A MEDIAS NI LA EMPUJA EL TECLADO ═══
  *
  * **Los dos rojos que el founder nombró al pedirla para postventa** — y la
@@ -7679,7 +7758,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8159,6 +8238,7 @@ corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([.
 const migraciones = existsSync('supabase/migrations')
   ? leer(readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql')).map((f) => `supabase/migrations/${f}`))
   : [];
+corridas.push(['R82 (dos manejadores de teclado no viven juntos)', r82([...ui, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R81 (la hoja no queda a medias ni la empuja el teclado)', r81([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R80 (la voz que nace en el motor)', r80(migraciones)]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
