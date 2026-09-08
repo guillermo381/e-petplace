@@ -70,7 +70,6 @@ import {
   TarjetaMetrica,
   FranjaSeguridad,
   BotonContanos,
-  PastillaConociendolo,
   CeldasHoy,
   FiltrosLineaDeVida,
   type TipoLineaDeVida,

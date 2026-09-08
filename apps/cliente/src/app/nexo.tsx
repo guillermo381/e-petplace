@@ -275,6 +275,31 @@ export default function Nexo() {
           { id: 'etapa', texto: t('nexo.sugEtapa'), onPress: () => void enviar(t('nexo.sugEtapa')) },
         ].filter((x) => x !== null) as SugerenciaNexo[]);
 
+  /* ══ S114-C · EL COACH NO EXISTE EN MEMORIAL ══════════════════════════
+     Las cinco piezas del Coach que se montan acá —`AvisoAnticipacion`,
+     `PresentacionNexo`, `RespuestaNexo`, `ChipsSugerencia`, `PanelMemoria`—
+     traen su guard escrito **y colgado de `theme.mode === 'memorial'`, que no
+     se enciende nunca** (`D-1021`). *La protección estaba escrita, se leía
+     como protección, y Nexo igual le hablaba a quien perdió a su animal.*
+
+     🔴 **SE CURA ACÁ Y NO CON UNA PROP EN CADA UNA, y es el contrato de B:**
+     las cinco se montan en ESTA pantalla y la señal es *la mascota EN FOCO*,
+     que es un dato de la pantalla y no de cada pieza. **Cinco props para un
+     solo punto de montaje es cinco veces la misma decisión** — y quien monte
+     la sexta tendría que acordarse.
+
+     ⚠️ Y por eso se corta la PANTALLA entera y no pieza por pieza: en
+     memorial Nexo no tiene nada que decir. *Dejar el encabezado y vaciar el
+     cuerpo sería ofrecer una conversación que no va a existir.* */
+  if (enMemorial) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Encabezado variante="navegacion" titulo={nombreVivo ?? t('nexo.titulo')} />
+        <EstadoVacio titulo={t('nexo.enMemorial')} />
+      </View>
+    );
+  }
+
   return (
     <EvitaTeclado>
       <View style={{ flex: 1 }}>
@@ -292,7 +317,7 @@ export default function Nexo() {
               siguiente detrás de otro toque es hacer que la familia lo busque
               (la pieza lo dice y tiene razón). */}
           {avisos.map((a) => (
-            <AvisoAnticipacion enMemorial={enMemorial}
+            <AvisoAnticipacion
               key={a.id}
               forma="tarjeta"
               contexto={String(a.detalle.contexto ?? '')}
@@ -312,7 +337,7 @@ export default function Nexo() {
               presentamos* — un flag aparte se desincroniza del hilo el día que
               alguien borra la conversación. */}
           {lineas.length === 0 && grupos === null && typeof contexto === 'object' ? (
-            <PresentacionNexo enMemorial={enMemorial}
+            <PresentacionNexo
               autor={t('nexo.autor')}
               hora={hora()}
               burbujas={[
@@ -347,7 +372,7 @@ export default function Nexo() {
                 estado="enviado"
               />
             ) : l.primera === true ? (
-              <RespuestaNexo enMemorial={enMemorial}
+              <RespuestaNexo
                 key={l.id}
                 primera
                 notaIA={t('nexo.avisoIa')}
@@ -363,7 +388,7 @@ export default function Nexo() {
                 vozVerVet={l.escalarAVet === true ? t('nexo.verVet') : undefined}
               />
             ) : (
-              <RespuestaNexo enMemorial={enMemorial}
+              <RespuestaNexo
                 key={l.id}
                 texto={l.texto}
                 hora={l.hora}
@@ -392,13 +417,13 @@ export default function Nexo() {
           ) : null}
 
           {sugerencias.length > 0 && lineas.length === 0 ? (
-            <ChipsSugerencia enMemorial={enMemorial} sugerencias={sugerencias} />
+            <ChipsSugerencia sugerencias={sugerencias} />
           ) : null}
 
           {/* «Lo que sé de {{mascota}}» — editable, porque **la memoria es de la
               familia**: lo que no puede corregirse deja de ser memoria y pasa a
               ser una afirmación nuestra sobre su mascota. */}
-          <PanelMemoria enMemorial={enMemorial}
+          <PanelMemoria
             titulo={
               nombreVivo !== null
                 ? t('nexo.memoriaTitulo', { nombre: nombreVivo })

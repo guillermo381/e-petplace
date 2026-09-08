@@ -37,6 +37,7 @@ export const clienteEn = {
     abanico: 'Waiting for you',
   },
   nexo: {
+    enMemorial: "There's nothing to ask here.",
     titulo: 'Nexo',
     autor: 'Nexo',
     enviar: 'Send',

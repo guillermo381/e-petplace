@@ -65,6 +65,8 @@ export const clienteEs = {
    * exactamente la clase de defecto que ningún typecheck ve* (el riel exige
    * que la KEY exista, jamás que los NOMBRES de las variables coincidan). */
   nexo: {
+    /* En memorial Nexo no pide nada: dice lo que hay y se calla. */
+    enMemorial: 'Acá no hay nada que preguntar.',
     titulo: 'Nexo',
     autor: 'Nexo',
     enviar: 'Enviar',

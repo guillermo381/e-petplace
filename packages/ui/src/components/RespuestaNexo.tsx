@@ -73,20 +73,6 @@ export interface PropuestaDeMemoria {
 }
 
 type Comun = {
-  /**
-   * 🔴 LA SEÑAL REAL, OBLIGATORIA SIN DEFAULT: `estado_vida === 'fallecida'`,
-   * resuelta por la pantalla contra el perfil que ya tiene cargado.
-   *
-   * ⏪ **El piso de esta pieza colgaba SÓLO de `theme.mode === 'memorial'`, y
-   * ése es un interruptor que nadie aprieta** (`D-1021`: nadie monta
-   * `<ThemeProvider memorial>` en ninguna de las dos apps). *La protección
-   * estaba escrita, se leía como protección, y la app igual le pedía algo a
-   * quien perdió a su animal.*
-   *
-   * **`perdida` NO es memorial** (firma del founder, 7-sep).
-   */
-  enMemorial: boolean
-
   /** Lo que dijo. **Vacío ⇒ no se monta** (ver la cabecera). */
   texto: string
   /** «14:32», ya redactada por el riel. */
@@ -122,10 +108,7 @@ export function RespuestaNexo(props: RespuestaNexoProps) {
   const { texto, hora, autor, fuente, propuesta, franja, onVerVet, vozVerVet } = props
 
   /* ⛔ El Coach no existe en memorial. */
-    /* 🔴 **EL DATO MANDA, Y `theme.mode` SE CONSERVA EN EL `OR`** — misma cura
-     que `LineaAlgoSalioDistinto`: la galería SÍ monta el sub-tema. *Lo que
-     estaba mal no era mirar el tema: era mirar SÓLO el tema.* */
-  if (props.enMemorial || theme.mode === 'memorial') return null
+  if (theme.mode === 'memorial') return null
 
   /* 🔴 Sin texto no hay burbuja. Antes del primer token no hay nada que
      decir, y una burbuja vacía se lee como una respuesta en blanco. */
