@@ -32,6 +32,13 @@
  *
  * *Precedente de la casa: un estado malo no se documenta, se vuelve
  * inexpresable.*
+ *
+ * ── 🔒 Y ADEMÁS TIENE GUARD: `R83` de `verify:diseno` ─────────────────────
+ * Mide que `.plazoHasta` no se USE en ninguna superficie del cliente —usos, no
+ * menciones, así que este comentario no la enciende—. Nació como script suelto
+ * mío y **B lo cableó a la regla y le agregó lo que le faltaba: el ancla.**
+ * *Suelto, con el corpus vacío imprimía `0 archivo(s)` y salía VERDE — `L-192`
+ * puro: un cero sin corpus no dice «no hay», dice «no miré».*
  */
 
 import type { EtapaCaso as EtapaDeLaEscalera } from '@epetplace/ui';
