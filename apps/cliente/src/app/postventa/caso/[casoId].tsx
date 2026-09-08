@@ -128,6 +128,36 @@ export default function PantallaDelCaso() {
      un callback traería la copia del render viejo. */
   const optimistasRef = useRef<Fila[]>([]);
 
+  /**
+   * 🔴 **LA FUSIÓN, y sin ella el sondeo sería peor que el problema.**
+   *
+   * `cargar()` arma filas NUEVAS cada vez; para React eso es una lista distinta
+   * aunque el contenido sea idéntico ⇒ **con un sondeo cada 5 s se repintaría
+   * el hilo entero, cada 5 s**, y eso rompe el contrato N16 de B (la fila está
+   * memoizada por su item).
+   *
+   * Devuelve **los objetos anteriores** cuando el contenido no cambió, y el
+   * arreglo anterior entero si no cambió ninguno. Mismo criterio que el vecino
+   * de adopción (`fusionarPorId`, `packages/domain`); **no lo reuso porque su
+   * tipo exige `mensajeId` y el mío tiene `id`** — adaptarlo sería tocar
+   * `packages/domain`, territorio ajeno, por quince líneas.
+   */
+  const fusionar = useCallback((previas: Fila[], nuevas: Fila[]): Fila[] => {
+    const antes = new Map(previas.map((f) => [f.clave, f]));
+    let cambio = previas.length !== nuevas.length;
+    const salida = nuevas.map((n, i) => {
+      const a = antes.get(n.clave);
+      /* Mismo id Y mismo cuerpo Y mismo estado de envío ⇒ es la misma fila. */
+      if (a !== undefined && a.mensaje.cuerpo === n.mensaje.cuerpo && a.estado === n.estado) {
+        if (previas[i] !== a) cambio = true;
+        return a;
+      }
+      cambio = true;
+      return n;
+    });
+    return cambio ? salida : previas;
+  }, []);
+
   /* ═══ §3 (enmienda firmada) · LA HOJA DEL CHAT ══════════════════════════
      *«Al entrar veo el seguimiento del caso, entero y sin nada encima; el chat
      vive abajo, en una hoja que subo cuando quiero hablar.»*
@@ -197,10 +227,10 @@ export default function PantallaDelCaso() {
          (`ORDER BY m.creado_en, m.id`, medido en la migración). Las optimistas
          son lo MÁS NUEVO y por eso van al final. La inversión para la lista
          ocurre en UN solo lugar, abajo. */
-      setHilo([...delMotor, ...optimistasRef.current]);
+      setHilo((prev) => fusionar(prev, [...delMotor, ...optimistasRef.current]));
       setCursor(m.data.cursor);
     }
-  }, [casoId]);
+  }, [casoId, fusionar]);
 
   useFocusEffect(
     useCallback(() => {
@@ -208,8 +238,38 @@ export default function PantallaDelCaso() {
       void (async () => {
         if (vigente) await cargar();
       })();
+
+      /* ═══ ② EL SONDEO — decisión declarada, y es un PUENTE ════════════════
+         🔴 **Medido y reportado: esta pantalla NO tenía realtime NI sondeo.**
+         Lo único que refrescaba era el foco, y eso explica literalmente lo que
+         el founder vio: *«sin salir del hilo no llega el mensaje del otro;
+         saliendo y entrando sí»*. **No es una suscripción que se re-suscribe:
+         es que no había ninguna.**
+
+         **Por qué SÍ y no espero al realtime:** A tiene que extender el motor
+         —`suscribirseAlHilo` va por `solicitud_id` y los casos van por
+         `caso_id`— y hasta entonces **el chat no funciona como chat**: dos
+         personas conversando no se ven. *Dejarlo así por tiempo indefinido es
+         dejar roto lo que el founder acaba de reportar.*
+
+         **Sólo con la pantalla EN FOCO** (`useFocusEffect` lo garantiza: el
+         intervalo se limpia al salir), y **con fusión**, que es la condición
+         que lo vuelve barato: sin ella se repintaría el hilo entero cada 5 s.
+
+         ⏳ **Muere cuando llegue el realtime.** No es «así se queda»: es lo que
+         sostiene la conversación mientras tanto, y la dirección lo permite.
+
+         ⚠️ **Y lo que esto NO cura, declarado:** el founder reportó que un
+         mensaje «llegó 30 veces y no paró». **No lo reproduje** —no pasó en el
+         hilo del caso, donde no había suscripción— así que **no lo doy por
+         resuelto ni por inexistente**. Si el sondeo lo destapa, se ve acá. */
+      const cada5s = setInterval(() => {
+        if (vigente) void cargar();
+      }, 5000);
+
       return () => {
         vigente = false;
+        clearInterval(cada5s);
       };
     }, [cargar]),
   );
