@@ -4161,6 +4161,38 @@ function GaleriaInterna() {
           </View>
           <View style={{ height: spacing[2] }} />
           <Boton variante="secundario" etiqueta={`Modal: ${altModal} — cambiar`} onPress={() => setAltModal((a) => (a === 'cerrado' ? 'medio' : a === 'medio' ? 'completo' : 'cerrado'))} />
+
+          {/* ── S114-B · LOS DOS DISCRIMINADORES DEL ENSANCHE PARA POSTVENTA ──
+                 ① la misma hoja CON ENCABEZADO, que ahora arrastra igual que el
+                 asa (`§3` lo pedía y no estaba construido) · ② `AsaModal` sobre
+                 SUPERFICIE, para la barra «Abrir chat» donde no hay video.
+                 *Se montan al lado de las de video para que la diferencia se
+                 vea comparando, que es la única forma de gatear un token.* */}
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="apoyo">
+            El mismo modal con ENCABEZADO: se arrastra por el asa o por cualquier
+            parte de su encabezado. Y abajo, el asa sobre SUPERFICIE (sin video):
+            la barra que dice qué sube.
+          </Texto>
+          <View style={{ height: spacing[2] }} />
+          <View style={{ height: 320, borderRadius: radius.md, overflow: 'hidden', backgroundColor: theme.bg.hundido }}>
+            <ModalDosAlturas
+              altura={altModal}
+              onAltura={setAltModal}
+              altoPantalla={320}
+              etiquetaAsa="Hilo del caso"
+              altoTeclado={0}
+              encabezado={
+                <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[2] }}>
+                  <Texto variante="titulo">Caso F-2026-000050</Texto>
+                </View>
+              }
+            >
+              <Texto>El encabezado de arriba también arrastra.</Texto>
+            </ModalDosAlturas>
+          </View>
+          <View style={{ height: spacing[2] }} />
+          <AsaModal etiqueta="Abrir chat" onPress={() => setAltModal('medio')} sobre="superficie" />
         </Seccion>
 
         {/* ═══ S85-B13 · LOS GLIFOS QUE ESPERAN SU OJO. Suben acá por el
@@ -5378,14 +5410,22 @@ function GaleriaInterna() {
             chip="985112004123456" etiquetaChip="Chip"
             qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
             estado={{ estado: 'activo' }}
+            enMemoria={false}
           />
           {/* 🔴 PERDIDA: la franja preside y DICE DESDE CUÁNDO — entre ayer y
-              hace tres meses cambia lo que hace quien la encuentra. */}
+              hace tres meses cambia lo que hace quien la encuentra.
+
+              🔴 **Y ES EL DISCRIMINADOR DE LA FIRMA DEL 7-sep: `perdida` NO es
+              memorial y la tarjeta SE DIBUJA.** Va con `enMemoria={false}`
+              explícito, al lado de la que no se dibuja: *la placa existe
+              justamente para esto, y apagarle el pasaporte a una familia que
+              está buscando a su animal le quitaría su única herramienta.* */}
           <TarjetaPasaporte
             nombre="Thor" especieYRaza="Perro · Labrador" sexoYEdad="Macho · 4 años"
             qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
             estado={{ estado: 'perdida', desde: '2026-09-05' }}
             vozPerdida="Perdida desde el 5 de septiembre"
+            enMemoria={false}
           />
           <Texto variante="apoyo">↓ en memoria la tarjeta NO EXISTE: abajo de esta línea no hay nada</Texto>
           <TarjetaPasaporte
@@ -6550,6 +6590,7 @@ function GaleriaInterna() {
               </Texto>
               <LineaAlgoSalioDistinto
                 estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="mascota"
                 enMemorial={false}
                 onPress={() => {}}
               />
@@ -6558,6 +6599,7 @@ function GaleriaInterna() {
                   tipo: 'fueraDeVentana',
                   voz: 'Este servicio ya pasó su ventana. Si querés, hablá con nosotros.',
                 }}
+                sujeto="mascota"
                 enMemorial={false}
                 onPress={() => {}}
               />
@@ -6567,6 +6609,7 @@ function GaleriaInterna() {
                   voz: 'Tenés un caso abierto sobre este paseo',
                   estado: 'Con el paseador',
                 }}
+                sujeto="mascota"
                 enMemorial={false}
                 onPress={() => {}}
               />
@@ -6581,7 +6624,25 @@ function GaleriaInterna() {
               </Texto>
               <LineaAlgoSalioDistinto
                 estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="mascota"
                 enMemorial
+                onPress={() => {}}
+              />
+
+              {/* 🔴 EL SEGUNDO DISCRIMINADOR — el PEDIDO, firma del founder
+                  7-sep: es del HOGAR y **no se apaga por nada**. Va JUNTO al
+                  de arriba a propósito: la misma prop, el mismo estado, y una
+                  desaparece y la otra no. *Sin este par, el catálogo mostraría
+                  que la puerta sabe apagarse y no mostraría dónde tiene
+                  prohibido hacerlo.*
+                  ⚠️ Y en el pedido `enMemorial` **no se puede escribir**: el
+                  campo no existe en su rama del tipo. */}
+              <Texto variante="apoyo" color="tertiary">
+                ⬇︎ el PEDIDO (`sujeto="hogar"`) SÍ se dibuja — no tiene apagado
+              </Texto>
+              <LineaAlgoSalioDistinto
+                estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="hogar"
                 onPress={() => {}}
               />
             </View>

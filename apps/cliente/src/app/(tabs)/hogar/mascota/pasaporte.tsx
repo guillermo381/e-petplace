@@ -210,7 +210,18 @@ export default function Pasaporte() {
               accessibilityLabel={t('pasaporte.ampliarQr')}
               onPress={() => setQrGrande(true)}
             >
+            {/* 🔴 `enMemoria` pasa a ser OBLIGATORIA en la pieza (S114-B, orden
+                del founder): su default `false` era el guard apagado por
+                omisión, escrito en el tipo. **Acá la variable ya existía** —se
+                calcula arriba con la regla que la firma del 7-sep ratificó,
+                `&& !== 'perdida'`— así que la cura es pasarla.
+                ⚠️ **Cruce de territorio declarado y MÍNIMO:** el cambio de API
+                es de `packages/ui` (B) y esto es su única consecuencia en la
+                app; una prop, cero lógica nueva. *Se toca acá porque dejar el
+                árbol sin compilar para que otro escriba una palabra es peor que
+                escribirla.* */}
             <TarjetaPasaporte
+              enMemoria={enMemoria}
               nombre={m.nombre}
               fotoUrl={foto}
               especieYRaza={[m.especie, m.raza].filter((x) => x !== null && x !== '').join(' · ')}

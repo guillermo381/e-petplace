@@ -28685,6 +28685,478 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-502` — UN TRINQUETE CASTIGA A QUIEN LO MEJORA: AMPLIAR EL ALCANCE LO ENROJECE SOBRE DEUDA VIEJA, Y ASÍ NADIE LO AMPLÍA
+
+> **Firma del founder (S114-B, 8-sep-2026).** *«El instrumento se queda como
+> está, y nadie tomó esa decisión: la tomó su forma.»*
+
+## LA FORMA
+
+Un **trinquete** (baseline solo-baja) promete: *lo que ya está se cura cuando se
+toca; lo nuevo no entra.* La promesa se cumple mientras el **alcance** no se
+mueva.
+
+**Pero el alcance de casi todo trinquete vive en un dato editable** — una lista
+de términos, una tabla de baselines por archivo, un conjunto de rutas — y **es
+más angosto que el fenómeno que el trinquete nombra**. ⇒ el día que alguien lo
+enriquece —que es exactamente lo que uno quiere que pase— **aparece deuda vieja
+que nadie introdujo hoy, y el gate se pone rojo sobre quien mejoró el
+instrumento, no sobre quien escribió el defecto.**
+
+**El costo del buen acto lo paga el que lo hace. ⇒ nadie lo hace.** Y lo peor
+no es la fricción: es que **la omisión no se ve como una decisión**. Nadie
+escribió «no ampliemos la lista»; simplemente nunca hubo un momento cómodo, y
+el resultado —un instrumento congelado— **se lee igual que un instrumento
+completo**.
+
+## LA EVIDENCIA, MEDIDA — y corrige mi propia afirmación
+
+`R66` mide la voz con una **lista de 132 formas**. C midió que `marcá` no está;
+B verificó y encontró que `firmá` tampoco. **La lista lleva meses sin crecer, y
+nadie decidió no agregarlos.**
+
+**Lo que costaría agregarlos, medido en vez de supuesto:**
+
+| ampliación | archivos que se pondrían en rojo |
+|---|---|
+| sólo `marcá` + `firmá` (+2 enclíticos) | **0** |
+| una tanda realista de **17 formas** halladas censando el corpus | **9** — 4 en `R66`, 5 en `R80` |
+
+🔴 **La primera fila corrige lo que yo había afirmado sin medir:** dije que
+agregarlos «puede poner el gate en rojo» y **para esos dos verbos no pasa
+nada**. *La ley es cierta; mi ejemplo no la probaba.* **La prueba es la segunda
+fila** — y su contenido es lo que la vuelve seria: entre los 9 aparecen **tres
+`«No operás este negocio.»` en `packages/api`** y un **`«Registrá el parte del
+perro»`**, o sea *voz que le llega a una persona en el peor momento*, en el
+paquete cuyo baseline el founder firmó porque **«A curó 160 voseos acá y nada lo
+sostenía»**. **Sobrevivieron a la barrida porque la lista no tenía los verbos**,
+y siguen ahí porque enriquecerla enrojece a quien la enriquece.
+
+## LA CURA, Y ES EXIGIBLE PORQUE ES UNA LÍNEA
+
+**Quien amplía el alcance sube en el mismo commit los baselines que la
+ampliación destape, y declara el número viejo al lado del nuevo.**
+
+*No es hacer trampa:* **un trinquete mide voz nueva, no cobertura nueva.** Subir
+un baseline porque el instrumento ahora ve más **no es lo mismo** que subirlo
+porque alguien escribió más — y confundirlos es lo que hace que nadie se anime a
+tocar el instrumento. El commit que amplía **dice cuál de las dos cosas está
+haciendo**, y con eso el trinquete vuelve a medir lo que dice medir.
+
+⚠️ **Y la mitad que no se olvida:** la deuda que la ampliación destapa **es
+real y hay que verla**. La ley no dice «no amplíes»: dice **que el rojo no caiga
+sobre el que amplió**. *Lo que estaba mal escrito sigue estando mal escrito, y
+ahora además tiene número.*
+
+## ① EL CENSO DE LA CLASE — cuáles la tienen, cuáles no, y qué costaría
+
+**El test, en tres condiciones que se cumplen JUNTAS:** ① el alcance vive en un
+dato editable (lista · tabla · conjunto de rutas) · ② ampliarlo **sólo puede
+sumar** hits · ③ ampliarlo es un **acto deseable** que alguien haría por su
+cuenta.
+
+| trinquete | alcance hoy | ampliación previsible | costo **medido** |
+|---|---|---|---|
+| **`R66`** · la voz | lista de 132 formas · `apps`+`ui`+`api` | sumar verbos | **+4 archivos** (17 formas) · **0** (2 formas) |
+| **`R80`** · la voz en SQL | la misma lista · 722 migraciones | sumar verbos | **+5 archivos**, y **ninguno curable en su lugar**: es lápida |
+| **`R66`/`R80`** · corpus | dejan afuera `supabase/functions` | mirarlo | **18 hits / 10 archivos** |
+| **`R77`** · uniones enumeradas a mano | `packages/ui/src` · 13 sitios | a `apps/` | **3 sitios**, y **uno está incompleto** — un hallazgo real |
+| **`R78`** · memorial por tema | `packages/ui/src` · base 11 | a `apps/` | **0 · NO tiene la propiedad**: hay 5 usos de `mode === 'memorial'` en `apps/` y **ningún gate de existencia** |
+| **`verify:memorial-derivado`** | base 9 · **exime `packages/domain`** | quitar la exención | **2 menciones** — y la exención existe **para que la deuda se pague ahí**, no para esconderla |
+
+**Dos resultados que valen más que la lista:**
+
+① **`R78` no la tiene**, y eso importa: *la propiedad no es universal, así que
+se testea y no se supone.* Un trinquete cuyo sujeto no existe fuera de su
+corpus no se congela por ampliarlo.
+
+② 🔴 **La ampliación de `R77` estaba diferida a *«una tanda propia»* por
+suponer que era cara y NADIE la había medido.** *El diferimiento no lo produjo
+el costo: lo produjo no conocerlo* — que es la misma ley un piso más arriba.
+**Se ejecutó el 8-sep** (13 sitios → 31), **y del otro lado había un defecto de
+producto**: dos de las TRES copias del guard de especie del mostrador tenían
+**9 de las 11** — *un caballo llegaba al mostrador y el guard decía que su
+especie no existe*, y `readonly AvatarMascotaEspecie[]` **compila con nueve**.
+**Ése es el precio real de diferir por un costo que nadie midió.**
+
+## ② EL EJEMPLO CANÓNICO — y son DOS autocorrecciones en direcciones OPUESTAS
+
+**Firma del founder (8-sep-2026).** El censo de arriba se hizo dos veces, y la
+primera falló *de la misma manera que la ley describe*:
+
+| lo que publiqué | lo que midió el detector de verdad |
+|---|---|
+| ampliar `R77` a `apps/` cuesta **3 sitios** | **18** — mi patrón no tenía la puerta de arrays anotados ni la de `push` |
+| «hay un hallazgo real esperando: `ClaveEscalon` incompleto 4/5» | **no lo era** — son dos caminos deliberados y la cabecera del archivo lo explica |
+
+> **Un censo hecho con un instrumento más débil que el que va a correr no mide
+> el trabajo: mide su propio alcance.**
+
+🔴 **Y que los dos errores apunten en direcciones OPUESTAS es la evidencia de
+que no había sesgo, sino falta de medición.** *Un sesgo empuja siempre para el
+mismo lado —a favor de lo que uno quiere concluir—; esto subestimó el costo y
+sobreestimó el hallazgo a la vez.* **Eso sólo lo produce no haber mirado.**
+
+⇒ **la regla operativa que sale:** el número con el que se decide si una
+ampliación es cara **se mide con el detector que va a correr**, jamás con una
+aproximación escrita para el censo. *Si medir con el detector real es caro, el
+censo declara que su número es una cota y de qué lado.*
+
+## ③ CURAR UNA VOZ SIN AGREGAR SU VERBO DEJA LA CURA SIN GUARD
+
+**Ratificado por la mesa (8-sep-2026)**, y es la otra mitad de ④: *ampliar
+después de curar no es sólo más barato — es lo único que sostiene la cura.*
+
+Las cuatro voces de `packages/api` **sobrevivieron a una barrida entera** porque
+la lista no tenía sus verbos. Curarlas sin agregar `operás` y `registrá` habría
+sido **la quinta barrida sin guard**, que es exactamente el estado del que `R66`
+nació para sacarnos. **El discriminador, corrido en las dos direcciones:**
+
+```
+lista NUEVA + el voseo reintroducido …… ROJO   ✅ el guard sostiene la cura
+lista VIEJA + el MISMO voseo ………………… exit 0  🔴 habría pasado invisible
+```
+
+⇒ **una cura de voz incluye el verbo que la vigila**, o es una barrida con otro
+nombre.
+
+### ⚠️ Y CÓMO SE TOCA UNA LISTA QUE NO ES DE UNO
+
+La lista vive en territorio ajeno. **El primer intento la reformateó entera —
+552 líneas por un cambio de 4— y se revirtió.** *Un diff irrevisable en
+territorio ajeno esconde el cambio que uno vino a hacer*, y el dueño no tiene
+cómo saber qué se le tocó. **Inserción quirúrgica: 16 líneas, cero borrados**,
+respetando el formato existente al carácter.
+
+## ④ LA PARTE PRÁCTICA — CURAR PRIMERO VUELVE GRATIS LA AMPLIACIÓN
+
+**Firma del founder (8-sep-2026): «es lo que la vuelve accionable en vez de una
+advertencia».**
+
+El mismo día se ejecutó el ciclo entero y el orden importó:
+
+```
+1 · curar las 4 voces …………………… packages/api a tuteo
+2 · ampliar la lista 132 → 136 …… marcá · firmá · operás · registrá
+3 · correr el gate ………………………… VERDE. La ampliación destapó CERO.
+```
+
+**Al revés, el paso 2 habría enrojecido cuatro archivos que nadie tocó hoy** —
+que es la ley cobrándose. ⇒ **ampliar el alcance DESPUÉS de curar lo que la
+ampliación va a destapar convierte el rojo en nada**, y el trabajo de subir
+baselines desaparece porque no hay nada que subir.
+
+⚠️ **Con su límite, que es donde la ley sigue mordiendo:** funciona **si la
+deuda es curable**. En `R80` —una lápida sobre migraciones aplicadas— **no lo
+es**, y por eso `pasá` y `hablá` siguen fuera de la lista con su costo escrito:
+enrojecerían **5 migraciones que no se pueden curar en su lugar**. *Ahí la única
+puerta es la de la cura: subir la lápida en el mismo commit, con su razón.*
+
+## ⚠️ EL ALCANCE DE ESTE CENSO, declarado
+
+**Se midieron 6 trinquetes de los 48 que hay en la casa** (43 baselines en
+`verify:diseno` + 5 gates con baseline propio). De ésos, **13 tienen baseline
+> 0** y **15 tienen su alcance en una tabla, un conjunto o una lista** — que es
+la población donde el test de arriba puede dar positivo. **Los otros 42 no se
+testearon**, y se dice: *un censo que no declara su denominador se lee como
+completo.*
+
+---
+
+### `L-501` — EL DELIMITADOR APARECE ADENTRO DE LO QUE QUERÉS CAPTURAR, Y UN INSTRUMENTO QUE ACUSA A OTRO NECESITA TECHO ANTES QUE PATRÓN
+
+> **Firma del founder (S114-B, 7-sep-2026).** Sale de dos defectos propios en
+> una sola sesión, **los dos cazados produciendo el rojo — ninguno leyendo.**
+
+## ① LA FORMA: `[^X]*` supone que `X` no está adentro. En código real, siempre puede estar.
+
+**Los TRES casos, de la misma sesión y del mismo autor** — y el conteo va
+exacto abajo, en su propia sección.
+
+```
+R78                   \(([^)]*mode === 'memorial'[^)]*)\)
+  el guard curado …… if (esDeUnaMascota && (props.enMemorial || theme.mode === '…'))
+  ⇒ `[^)]*` corta en el paréntesis INTERIOR ⇒ la pieza desapareció de la medición
+
+verify:memorial-derivado   desde = lastIndexOf('{', idx)
+  el sitio real …… const esMemorial = (m: {estado_vida: string|null}) => m.estado_vida !== '…'
+  ⇒ el `{` más cercano es el de la ANOTACIÓN DE TIPO ⇒ la ventana arrancaba
+    DESPUÉS del nombre ⇒ **el caso que el gate existe para cazar salía VERDE**
+```
+
+**Y la familia es más ancha que el regex:** `lastIndexOf(delim)` tiene el mismo
+defecto sin ser una clase de caracteres. *No es un problema de expresiones
+regulares: es suponer que el símbolo que uso para delimitar no aparece adentro
+del sujeto.* **En código anidado —JSX, genéricos, tipos inline— siempre aparece.**
+
+```
+R79                   enRiel: `[^;]{0,80}?` sobre la sentencia
+  el caso real de C …… objeto: t(`postventa.objeto_${…}`),
+                       motivo: c.motivo,
+  ⇒ el `t(` del renglón de ARRIBA queda a <80 caracteres del `c.motivo` de
+    abajo ⇒ **el defecto que la regla existe para cazar salía VERDE**
+```
+
+### ⚠️ EL CONTEO, EXACTO Y SIN INFLAR (`L-499` el mismo día)
+
+| | |
+|---|---|
+| **del mecanismo exacto** —un delimitador que aparece adentro del sujeto— | **TRES**: `[^)]*` en `R78` · el `{` de la anotación de tipo · `[^;]{0,80}?` en `R79` |
+| **de su familia** —no hay delimitador: falta el techo— | **UNA**: la ventana de 286 líneas |
+| **de la clase, en total** | **CUATRO**, en cuatro instrumentos distintos, **todos escritos por el mismo autor el mismo día** |
+
+*Decir «cuatro iguales» habría sido más contundente y menos cierto: la del
+techo no comparte mecanismo, comparte consecuencia.*
+
+⚠️ **Y una distinción con su hermana, para que no se mezclen los números:** las
+cuatro de acá son **instrumentos míos de una sesión**. La que **cruzó de
+subsistema** es `L-499` —SQL · git · JSX · SVG—, y *esa* es su propiedad
+distintiva. **Las dos tienen cuatro y no son el mismo cuatro.**
+
+## ② 🔴 LA PEOR ES LA CURA SIN TECHO, Y ES LA QUE ACUSA A OTRO
+
+Al curar el `{`, la ventana pasó a caminar hacia atrás **buscando el inicio de
+la sentencia — y sin tope.** Dentro de un JSX caminó **286 líneas** hasta un
+`return (`, se tragó un `{!esMemorial` de otra sección, y **reportó un décimo
+sitio como derivación de memorial en un archivo de OTRA PISTA.**
+
+> **Era verosímil, en un archivo real, y estaba a punto de irse como defecto
+> ajeno.** *La cura del primer defecto produjo uno más caro: el primero contaba
+> de menos y el segundo acusaba de más.*
+
+### La regla, en la palabra del founder
+
+> ### **Un instrumento que acusa a otro merece un TECHO antes que un patrón mejor.**
+
+**Un falso negativo cuesta una medición; un falso positivo cuesta el tiempo de
+otro y su confianza en el instrumento.** *Y el que recibe la acusación no tiene
+cómo distinguirla de una real: le llega con `archivo:línea`, en su archivo, de
+un gate que corre.*
+
+**Lo exigible, y es barato:**
+- **toda ventana declara su tope EN LÍNEAS** —acá 4: *una decisión se escribe en
+  una a tres; más que eso ya no es la sentencia, es el vecindario*—;
+- **y su otro borde**: la línea en blanco. *Los comentarios se blanquean para no
+  correr la numeración, así que una línea vacía es el borde real del bloque.*
+- **antes de reportar en territorio ajeno, se abre el sitio.** Acá alcanzó con
+  mirar la línea acusada: su ventana empezaba 286 líneas más arriba.
+
+## ③ Y LO QUE NO SE HACE: un patrón más listo
+
+**La salida instintiva es refinar el regex** —balancear paréntesis, contar
+llaves—. *Es el camino largo hacia el mismo error*: un parser a medias falla
+distinto, no menos. **Lo que cierra la clase son dos cosas baratas:** el techo,
+y **un segundo instrumento que falle distinto** — en `L-499` el más tosco
+posible encontró lo que el refinado no veía.
+
+**Hermana de `L-500` y no la duplica:** aquélla dice *qué publicar para que la
+ceguera se note*; ésta, *qué limitar para que el instrumento no invente*.
+
+---
+
+
+### `L-500` — UN GATE PUBLICA CIFRAS, NO ADJETIVOS: «VERDE» NO PUEDE DELATAR CEGUERA, UN CONTADOR SÍ
+
+> **Firma del founder (S114, 7-sep-2026), y nace de DOS pistas el mismo día
+> con el mismo error y distinta ropa.**
+
+**Un instrumento puede seguir dando el veredicto correcto y haber dejado de
+ver parte de su sujeto.** Eso **no es un fallo**: es una pérdida de COBERTURA —
+y **un booleano no tiene forma de expresarla.** *«Verde» significa lo mismo
+cuando el gate miró todo que cuando miró la mitad.*
+
+⇒ **la única señal que un instrumento correcto puede dar de que se quedó ciego
+es una CIFRA que se mueve sin que nadie haya tocado ese sujeto.**
+
+### Los dos casos
+
+**① F — el comparador de desigualdad** *(citado de `docs/loop/S114-F-TANDA1.md`;
+**lo midió F, no yo**)*. Un watcher de deploy con
+`if [ "$H" != "index-fK9Opg5L.js" ]`: cuando un 403 dejó sin bundle que
+extraer, **la cadena vacía también es distinta** y el watcher anunció
+
+```
+✅ DEPLOY NUEVO ·  · 22:02:00
+```
+
+> *«Un comparador de desigualdad trata «cambió» y «no pude leerlo» como la
+> misma cosa.»* — **«Lo cazó que el propio mensaje imprimiera el hash y saliera
+> en blanco: si sólo hubiera dicho "DEPLOY NUEVO", me lo creía.»**
+
+**② B — el matcher que corta en el primer paréntesis.** `R78` mide qué piezas
+deciden si existen mirando sólo el tema memorial. Su patrón era
+`\(([^)]*mode === 'memorial'[^)]*)\)` — y al curar una pieza con condición
+**anidada** (`if (esDeUnaMascota && (props.enMemorial || theme.mode === 'memorial')))`)
+**`[^)]*` corta en el primer paréntesis y la pieza desapareció de la
+medición.**
+
+**El brazo del rojo seguía andando** —revertir el guard a sólo-tema seguía
+dando 12 y rojo, verificado—, **así que la regla no estaba rota: contaba de
+menos.** Y lo único que lo dijo fue **`conDato`, que bajó de 2 a 1**.
+
+### 🔴 LO QUE LOS HERMANA, y es más incómodo que el error
+
+**En los dos, el instrumento seguía siendo CORRECTO en su veredicto.** El
+watcher habría anunciado un deploy real; `R78` sigue enrojeciendo ante la
+regresión. *Lo que se rompió no fue la respuesta: fue de cuánto la estaba
+sacando.* **Y una pérdida de alcance no tiene síntoma** — por eso hizo falta que
+algo NUMÉRICO estuviera a la vista.
+
+**Los dos se cazaron por el mismo mecanismo:** *el instrumento imprimía un valor
+que podía moverse solo, y se movió.*
+
+### La regla, exigible
+
+> ### **Todo gate publica, junto a su veredicto, al menos UNA cifra que pueda moverse sin que nadie toque su sujeto:** el tamaño del corpus, el hash leído, cuántos casos clasificó, cuántos ya están curados.
+
+**Y su corolario operativo, que es el que hay que ejecutar:** *cuando un número
+de un gate cambia y nadie tocó ese sujeto, **eso es el hallazgo** — no un
+detalle de la salida.* **No se re-alinea el número: se pregunta qué dejó de
+ver.**
+
+⚠️ **Y no basta con imprimir cualquier cosa: tiene que ser una cifra CAPAZ de
+moverse sola.** «OK», «verde» y «0 fallos» no pueden. *Un `0` que siempre fue
+`0` y un `0` que acaba de quedarse ciego se imprimen idénticos* — de ahí que la
+cifra útil sea la del ALCANCE (cuánto miró), no la del resultado.
+
+### El trío, y cada uno cubre lo que el otro no
+
+```
+L-459 · ¿el instrumento SABE decir que no?     → su rojo se prueba
+L-498 · ¿su prosa convence de no revisarlo?    → la nota es lo que hay que dejar de leer
+L-500 · ¿su salida puede DELATAR su ceguera?   → publicá cifras, no adjetivos
+```
+*Los tres se cobraron en la misma sesión, y ninguno habría cazado a los otros
+dos.*
+
+---
+
+
+### `L-499` — UN CENSO POR LA FORMA DEL MONTAJE MIDE LA CONVENCIÓN, NO EL HECHO
+
+> **Firma del founder (S114-B, 7-sep-2026).** *Lo que la vuelve regla y no
+> anécdota es que **la clase cruzó de subsistema**.*
+
+**El caso.** Censando qué piezas de `packages/ui` protegen algo con el tema
+memorial, declaré que `PastillaConociendolo` **no la montaba nadie**. Evidencia:
+`grep -rl "<PastillaConociendolo" apps/*/src` ⇒ vacío.
+
+**Al verificar antes de entregar: SÍ estaba importada**
+(`[mascotaId].tsx:73`) — usada cero veces. **El hecho no cambió** —no se
+dibuja— **pero la evidencia era incompleta**, y *quien grepeara el nombre
+habría encontrado un hit y concluido lo contrario del que yo publicaba.*
+
+### 🔴 LA CLASE YA EXISTÍA EN OTROS DOS SUBSISTEMAS, Y ÉSA ES LA NOVEDAD
+
+```
+SQL   · L-170 · un censo por `pg_get_functiondef` lee los COMENTARIOS como código
+      · L-437 · un censo por patrón ACOTA, no cierra — un 0 no prueba ausencia
+git   · L-494 · `ls-tree | grep` mide el NOMBRE DEL ARCHIVO; la función vive
+                adentro de uno que no la nombra
+JSX   · ésta  · `grep "<Pieza"` mide LA FORMA DEL MONTAJE; el consumo puede
+                estar en un import, un slot, una variable o un salto de línea
+SVG   · ésta  · contar el token `M6` da 29 «momentos vitales» en `packages/ui`
+                y **los 29 son paths** (`d="M6 6l12 12…"`)
+```
+
+> ### ⚠️ TERCERA VEZ EL MISMO DÍA, y la tercera fue la más tonta y la más útil
+> El censo de memorial contó **29 `M6`** en `packages/ui` como si fueran
+> derivaciones del momento vital. **Son coordenadas de dibujo.** *Un token de
+> dos caracteres no tiene contexto, y contarlo mide su ORTOGRAFÍA.*
+>
+> **Que la clase se cobre tres veces en una sesión, en tres formas distintas y
+> al mismo autor, es lo que la separa de un descuido:** no es que uno se
+> distraiga — es que **el instrumento barato siempre está a mano y siempre
+> contesta algo.**
+
+> ### **Tres lenguajes, tres instrumentos, el mismo error: preguntarle a la superficie del código por un hecho que vive un piso más adentro.**
+> *Mientras vivía en SQL se leía como una peculiaridad de `pg_proc`. Al aparecer
+> en git y en JSX deja de ser del subsistema y pasa a ser del método:* **no es
+> que `pg_get_functiondef` engañe — es que TODO censo por texto responde la
+> pregunta que su patrón sabe hacer, y ninguna otra.**
+
+### La prueba, y es de una línea
+
+> **«¿Mi patrón puede fallar con el hecho PRESENTE?»** Si la respuesta es sí
+> —y con texto casi siempre lo es— **el cero no es una conclusión: es un
+> candidato.**
+
+**Su cura no es un patrón mejor: son DOS instrumentos que fallan distinto.**
+Acá alcanzó con el más barato posible —el nombre pelado, sin `<`— y **encontró
+el hit que el otro no veía**. *Un segundo instrumento tosco vale más que un
+primero refinado: no comparten el supuesto.*
+
+⚠️ **Y lo que la hizo aparecer no fue revisar el código: fue verificar lo que
+estaba por ENTREGAR como si lo hubiera escrito otro.** *El censo era mío, la
+conclusión era mía, y por eso ninguna relectura de mi propio razonamiento podía
+cazarla — sólo volver a preguntarle al objeto.*
+
+**Hermana de `L-498`, y no la duplica:** aquélla es sobre **la prosa que
+convence de no mirar**; ésta, sobre **el instrumento que mira mal**. *Las dos se
+cobraron el mismo día y en el mismo censo.*
+
+---
+
+
+### `L-498` — LO QUE PARECE CUIDADO ES LO QUE IMPIDE QUE ALGUIEN MIRE
+
+> **Firma del founder (S114-B, 7-sep-2026): la clase tiene nombre.**
+
+**Un artefacto que exhibe su propio cuidado deja de ser verificado.** No porque
+engañe: porque **el lector concluye, razonablemente, que ya alguien miró.** Y
+cuanto mejor escrita está la nota, más fuerte es esa conclusión — así que **la
+prolijidad no protege al dato: lo blinda contra la revisión.**
+
+### Los dos casos, y son de la misma sesión
+
+| | lo que exhibía | lo que era |
+|---|---|---|
+| **el contador** | *«RE-MEDIDO S103-A contra el objeto — decía 52, y la brecha era de 29»*, con su método auditable escrito al lado | **decía 81 y eran 171** · 28 sesiones |
+| **el guard de memorial** | `if (theme.mode === 'memorial') return null`, con *«⛔ En memorial no se pide terminar de contar nada»* en negrita encima | **el tema no se enciende en producto** (`D-1021`): once piezas con su protección escrita y apagada |
+
+**Y el contador ya se había predicho a sí mismo.** Su propia nota decía: *«una
+skill se carga en TODA tarea de UI, así que un número viejo acá no desinforma a
+un lector — desinforma a cada construcción»*. **Se cumplió, y la nota no lo
+evitó: la hizo más creíble.**
+
+### Por qué ningún gate la caza
+
+**Los dos artefactos están BIEN ESCRITOS y son CORRECTOS en su lógica.** El
+contador tenía su método; el guard tiene su condición bien puesta. *Lo que
+falla no está adentro del artefacto: está en que su premisa —que el número se
+re-mide, que el interruptor se aprieta— vive afuera y nadie la vuelve a
+comprobar.* Un typecheck ve tipos, un lint ve formas, y **ninguno de los dos ve
+una premisa vencida que el propio texto declara como vigente**.
+
+### La prueba, y es de UNA pregunta
+
+> ### **«¿Este guard PUEDE encenderse? ¿Este número PUEDE cambiar?»**
+> No *«¿está bien escrito?»* ni *«¿tiene su razón al lado?»* — **la nota es
+> justamente la que hay que dejar de leer.**
+
+**Su corolario operativo, que es lo que la vuelve exigible:** toda protección
+que se escribe **se prueba encendida en el mismo acto** — el mismo *rojo
+primero* que la casa ya exige de un gate, aplicado a un `return null`. *Si no
+se puede producir el estado que la enciende, la protección no está puesta:
+está declarada.* Y toda cifra publicada **declara su comando en vez de su
+valor** (precedente: migraciones cayó cuatro veces, fichas seis, piezas tres).
+
+### La hermana que ya estaba escrita, y por qué ésta no la duplica
+
+`L-459` dice *«la primera prueba de un guard nuevo no es que dé verde: es que
+dé rojo sobre el primer caso real»* — **y habla de INSTRUMENTOS**. Ésta habla
+de **la prosa que los acompaña**: no de si el guard sabe decir que no, sino de
+que **su comentario convence al lector de que no hace falta preguntárselo.**
+*`L-459` protege del instrumento que no mide; `L-498`, del texto que hace
+innecesario mirarlo.*
+
+⚠️ **Y las dos veces las encontró alguien MONTANDO, no leyendo** — `D-1021` la
+halló C en el emulador, y el contador salió de correr su gate. *Ningún repaso
+del texto podía cazarlas: el texto era la parte buena.*
+
+---
+
+
 ### `L-497` — Cuando dos personas arman fixtures para el mismo sujeto, LOS DOS los arman más fáciles
 
 **S113-E + S113-D, tres cobros en un día:** ① las frases de búsqueda —**18/23**
