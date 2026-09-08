@@ -2221,8 +2221,11 @@ const FIXTURES = {
   /* R77 · el sitio DECLARADO exhaustivo al que le falta un miembro. El corpus
      trae 20 archivos y 10 uniones para pasar las dos anclas — sin eso el
      fixture enrojecería por «no pude medir», que es otro rojo. */
+  /* ⚠️ 250 rellenos y no 20: al ampliar el corpus a `apps/` el ancla subió de
+     20 a 250, y un fixture que no la alcanza enrojece POR EL ANCLA — que es
+     otro rojo y no prueba el brazo que dice probar. */
   R77: [
-    ...Array.from({ length: 20 }, (_, i) => ({
+    ...Array.from({ length: 250 }, (_, i) => ({
       path: `packages/ui/src/components/relleno${i}.tsx`,
       src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
     })),
@@ -6965,6 +6968,35 @@ function r78(archivos) {
  * unión** — y el censo por FORMA de `packages/ui` encontró **once**.
  * ═══════════════════════════════════════════════════════════════════════════
  *
+ * ── 🔴 S114-B · LA AMPLIACIÓN A `apps/` — 13 SITIOS → 31 ─────────────────
+ * **El número viejo va acá porque la cura de `L-502` lo exige:** *quien amplía
+ * el alcance sube los baselines que la ampliación destape EN EL MISMO COMMIT y
+ * declara el número viejo.* Antes: **13 sitios · 76 uniones · sólo
+ * `packages/ui`**. Hoy: **31 sitios · 96 uniones · `ui` + las dos apps**.
+ *
+ * **Se difirió a «una tanda propia» por SUPONER que era cara.** Nadie la había
+ * medido — *el diferimiento no lo produjo el costo: lo produjo no conocerlo.*
+ *
+ * ⚠️ **Y mi propio censo previo dijo TRES y eran DIECIOCHO.** Lo medí con un
+ * patrón más pobre que el de esta regla —sin la puerta ② (arrays anotados) ni
+ * la ④ (`push`)— y publiqué el número como si fuera el del detector. *Un censo
+ * hecho con un instrumento más débil que el que va a correr no mide el
+ * trabajo: mide su propio alcance.*
+ *
+ * ── ✅ Y DEL OTRO LADO HABÍA UN DEFECTO REAL, que es lo que la justifica ──
+ * `CODIGOS_ESPECIE_UI` tenía **9 de las 11 especies** en las DOS pantallas del
+ * mostrador —faltaban `otro` y `equino`—, mientras la copia buena
+ * (`params.ts::CODIGOS_UI`) tenía las once con su comentario. **Son tres
+ * copias del mismo type guard y dos habían quedado atrás.** Consecuencia: *un
+ * caballo llegaba al mostrador y el guard decía que su especie no existe* —
+ * y `readonly AvatarMascotaEspecie[]` **compila con nueve**, así que nada
+ * fallaba. Curado en el mismo acto.
+ *
+ * ⚠️ **Lo que NO era un hallazgo, y lo había reportado como tal:**
+ * `escalera-pedido.ts` no está incompleto — son **dos caminos deliberados**
+ * (despacho y retiro) y su propia cabecera lo explica. *Mi censo midió una
+ * forma y yo leí un defecto; el archivo decía otra cosa.*
+ *
  * ── 🔴 POR QUÉ ES **UN** GUARD Y NO CUATRO ──────────────────────────────
  * `R72` mide UNA pieza y por eso pudo ser específica. Cuatro reglas gemelas
  * serían el clon que la Ley 19 caza un piso más arriba: *lo que se copia,
@@ -7025,6 +7057,57 @@ const TABLA_R77 = new Map([
   // ── ACUMULADOR: nace vacío y se llena. Su exhaustividad la sostiene el
   //    `push:ClaseCoach` de arriba, que es donde de verdad se decide ──
   ['coach-geometria.ts::vivas', 'acumulador'],
+
+  /* ══ S114-B · LA AMPLIACIÓN A `apps/` — de 13 sitios a 31 ═══════════════
+     🔴 **Se difirió a «una tanda propia» por SUPONER que era cara, y nadie la
+     había medido.** Cuando se midió con el detector de verdad —y no con la
+     aproximación que yo mismo publiqué— **eran 18 sitios, no 3**: mi censo
+     usaba un patrón más pobre que el de la regla y erró por seis veces.
+     *Un censo hecho con un instrumento más débil que el que va a correr no
+     mide el trabajo: mide su propio alcance.*
+
+     **Y del otro lado había un defecto real**, que es la razón por la que esta
+     ampliación valía: los DOS guards del mostrador tenían **9 de las 11
+     especies** — ver la cura en `nueva.tsx` y `autorizar.tsx`. ═══════════ */
+
+  // ── EXHAUSTIVOS de `apps/`: la lista ES el universo y tiene que seguir
+  //    siéndolo. Verificados array-contra-unión, uno por uno ──
+  ['[mascotaId].tsx::ORDEN_TIPOS', 'exhaustivo'],        // 9/9 · el orden de la línea de vida
+  ['busqueda.tsx::ORDEN', 'exhaustivo'],                 // 7/7 · los grupos del buscador
+  ['[solicitudId].tsx::CONOCIDAS', 'exhaustivo'],        // 6/6 · las claves del formulario
+  ['mascotas.tsx::ESCALA', 'exhaustivo'],                // 4/4 · las capas del gráfico
+  ['atajos.ts::ORDEN_DE_PATA', 'exhaustivo'],            // 4/4 · los atajos de la pata
+  ['hoy.ts::CONOCIDAS', 'exhaustivo'],                   // 4/4 · las plagas
+  ['params.ts::CODIGOS_UI', 'exhaustivo'],               // 11/11 · LA COPIA BUENA del guard de especie
+  ['nueva.tsx::CODIGOS_ESPECIE_UI', 'exhaustivo'],       // 11/11 tras la cura (era 9)
+  ['autorizar.tsx::CODIGOS_ESPECIE_UI', 'exhaustivo'],   // 11/11 tras la cura (era 9)
+
+  /* ── SUBCONJUNTOS de `apps/`, cada uno con su razón LEÍDA en el archivo y
+        no supuesta. *Declarar «subconjunto» sin leer es la forma de esconder
+        un defecto con la bendición de un lint.* ── */
+  // `mascota` cae en «recuerdos» (declarado en su propio `mapa`) y `papeles`
+  // no tiene productor ahí: el orden cubre lo que el mapa puede producir.
+  ['nexo.tsx::orden', 'subconjunto'],
+  // adopción v1 es perro + gato.
+  ['adoptar.tsx::ESPECIES', 'subconjunto'],
+  // grooming es perro + gato por letra (`MODELO_GROOMING` §1).
+  ['taller.tsx::ESPECIES_TECHO', 'subconjunto'],
+  /* Los dos CAMINOS del pedido, y el archivo lo dice en su cabecera: «en
+     despacho la factura es el REQUISITO del escalón Despachado, no un escalón
+     propio; en retiro no hay despacho y la factura sí se ve como paso».
+     ⚠️ **Mi censo los leyó como UN sitio incompleto de 4/5 y reporté «un
+     hallazgo real esperando».** No lo era: son dos rutas deliberadas. */
+  ['escalera-pedido.ts::PASOS_DESPACHO', 'subconjunto'],
+  ['escalera-pedido.ts::PASOS_RETIRO', 'subconjunto'],
+
+  /* ── ACUMULADORES de `apps/`: `pendientes.ts` arma su lista por `push` según
+        lo que encuentre. Los tres `push:` NO son órdenes — son los miembros que
+        esa lib usa (3 de 72 glifos, 3 de 10 errores): pedirle exhaustividad
+        sería pedirle que nombre el registry entero. ── */
+  ['pendientes.ts::clases', 'acumulador'],
+  ['pendientes.ts::push:ClasePendiente', 'acumulador'],
+  ['pendientes.ts::push:IconoNombre', 'acumulador'],
+  ['pendientes.ts::push:FamiliaErrorVet', 'acumulador'],
 ])
 
 function r77(archivos) {
@@ -7035,9 +7118,9 @@ function r77(archivos) {
      que reporta dos veces el mismo defecto enseña a leer sus números al
      descuido. */
   const porRuta = new Map()
-  for (const a of archivos) if (/packages\/ui\/src\/.*\.tsx?$/.test(a.path)) porRuta.set(a.path, a)
+  for (const a of archivos) if (/(packages\/ui|apps\/[a-z-]+)\/src\/.*\.tsx?$/.test(a.path)) porRuta.set(a.path, a)
   const uis = [...porRuta.values()]
-  const fallos = [...ancla('R77', uis.length, 20, 'archivo(s) de `packages/ui/src` en el corpus')]
+  const fallos = [...ancla('R77', uis.length, 250, 'archivo(s) de `packages/ui/src` + `apps/*/src` en el corpus')]
   if (fallos.length > 0) return { fallos, info: 'ancla rota' }
 
   // ① las uniones de literales del paquete (≥3 miembros: con dos, un array de
@@ -7124,8 +7207,9 @@ function r77(archivos) {
     fallos,
     info:
       `${vistos.size} sitio(s) que enumeran una unión a mano · ${exh} declarados EXHAUSTIVOS · ` +
-      `${TABLA_R77.size - exh} incompletos a propósito (lotes de la galería + 1 acumulador) · ` +
-      `${uniones.size} unión(es) en el corpus · ⚠️ NO ve \`switch\` sin \`never\`, ni arrays armados por \`map\`, ni \`apps/\``,
+      `${TABLA_R77.size - exh} incompletos a propósito (4 lotes de la galería · 5 subconjuntos con su razón · 5 acumuladores) · ` +
+      `${uniones.size} unión(es) · corpus \`packages/ui\` + \`apps/*/src\` (ampliado S114-B: era 13 sitios y 76 uniones sobre \`ui\` sola) · ` +
+      `⚠️ NO ve \`switch\` sin \`never\`, ni arrays armados por \`map\`, ni \`packages/api\`/\`domain\`/\`mensajeria\``,
   }
 }
 
@@ -7581,8 +7665,11 @@ const EXTRAS_BRAZOS = [
         REALES** —mutando el ORDEN de adopción, la cadena de `push` del orbe,
         y borrando un array de la tabla—. *El fixture dice que el brazo sabe
         decir que no; la mutación dice que sabe encontrarlo donde vive.* ══ */
+  /* ⚠️ 250 rellenos: el ancla subió con la ampliación a `apps/` y un brazo que
+     no la alcanza enrojece POR EL ANCLA — seguiría "pasando" su assert y no
+     probaría nada. */
   ['R77·el sitio SIN CLASIFICAR (no digo que esté mal: digo que no sé)', r77, [
-    ...Array.from({ length: 20 }, (_, i) => ({
+    ...Array.from({ length: 250 }, (_, i) => ({
       path: `packages/ui/src/components/relleno${i}.tsx`,
       src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
     })),
@@ -7594,7 +7681,7 @@ const EXTRAS_BRAZOS = [
     },
   ]],
   ['R77·la entrada de la tabla cuyo sitio DESAPARECIÓ', r77, [
-    ...Array.from({ length: 20 }, (_, i) => ({
+    ...Array.from({ length: 250 }, (_, i) => ({
       path: `packages/ui/src/components/relleno${i}.tsx`,
       src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
     })),
@@ -7948,7 +8035,7 @@ corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAIC
    un rename de archivo no las deja mudas. */
 corridas.push(['R79 (un código del motor no se renderiza sin su riel)', r79([...apps, ...appsCodigo])])
 corridas.push(['R78 (el tema memorial no puede ser la única señal)', r78([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
-corridas.push(['R77 (lo que enumera una unión a mano se declara)', r77([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
+corridas.push(['R77 (lo que enumera una unión a mano se declara)', r77([...ui, ...leer(archivosCodigo('packages/ui/src')), ...apps, ...appsCodigo])])
 corridas.push(['R72 (ninguna etapa del caso se pierde del orden)', r72(ui)])
 corridas.push(['R73 (las dos tarjetas del dinero son parejas)', r73(ui)])
 corridas.push(['R74 (la cabecera del caso no dice el monto)', r74(ui)])

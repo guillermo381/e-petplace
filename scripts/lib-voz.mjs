@@ -182,9 +182,19 @@ export const ALCANCE_VOZ = {
   formas: _FORMAS.length,
   enclíticos: ENCL.length,
   conFrontera: CON_FRONTERA.length,
-  /** Huecos MEDIDOS, con su fecha. No es la lista de todo lo que falta: es la
-   *  prueba de que la lista es una lista. */
-  huecosMedidos: ['marcá', 'firmá'],
+  /** Huecos MEDIDOS, con su razón. **No es la lista de todo lo que falta: es
+   *  la prueba de que la lista es una lista.**
+   *
+   *  ⏪ Acá decían `marcá` y `firmá` — **entraron a la lista el 8-sep-2026** y
+   *  el campo se actualizó en el mismo acto: *un ejemplo que ya se curó deja
+   *  de enseñar y empieza a mentir.*
+   *
+   *  🔴 Los dos de ahora **no están afuera por olvido, y ésa es la lección**:
+   *  `pasá` y `hablá` son voseo real, están medidos, y agregarlos pondría en
+   *  ROJO **cinco migraciones que no se pueden curar en su lugar** (`R80` es
+   *  lápida). ⇒ entran el día que alguien pague ese costo por la puerta de
+   *  `L-502`: subir la lápida en el mismo commit, con su razón. */
+  huecosMedidos: ['pasá', 'hablá'],
 };
 
 /**

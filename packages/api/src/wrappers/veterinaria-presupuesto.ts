@@ -74,7 +74,7 @@ export type CodigoErrorPresupuesto = (typeof CODIGOS_PRESUPUESTO)[number];
 
 const MENSAJES: Record<CodigoErrorPresupuesto, string> = {
   acceso_denegado: 'No tienes permiso para esta acción.',
-  no_opera_cuenta: 'No operás este negocio.',
+  no_opera_cuenta: 'No operas este negocio.',
   sin_acceso_mascota: 'No tienes acceso a esta mascota.',
   country_invalido: 'El país no es válido.',
   presupuesto_no_existe: 'Ese presupuesto ya no existe.',
