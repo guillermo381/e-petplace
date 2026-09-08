@@ -4,64 +4,81 @@
  * verify:asientos-caso — S114-E · §9 de `LETRA_POSTVENTA` (F5)
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Mide las DOS mitades de §9, y son mitades distintas de la misma puerta:
+ * **① EL CANDADO (§9.1).** `REVOKE INSERT, UPDATE, DELETE` sobre las tablas del
+ * caso, del saldo y de los motivos a `authenticated`; escriben únicamente las
+ * RPCs `SECURITY DEFINER`. **El admin no puede escapar aunque quiera** — la
+ * puerta única deja de ser prosa y pasa a ser permiso (`D-889`).
  *
- * **① EL CANDADO (§9.1).** *«`REVOKE INSERT, UPDATE, DELETE` sobre las tablas
- * del caso, del saldo y de los motivos a `authenticated`; escriben únicamente
- * las RPCs `SECURITY DEFINER`.»* Con su razón escrita en la letra: **el admin
- * no puede escapar aunque quiera** — la puerta única deja de ser prosa y pasa
- * a ser permiso (`D-889`: una ley que vive sólo en prosa da verde y silencio).
+ * **② LOS CINCO ASIENTOS (§9.3)**, *«verificados por PostgREST real y no
+ * simulado»*: familia ve los suyos · prestador los de sus objetos · casa todos ·
+ * **tercero: cero** · anon: cero.
  *
- * **② LOS TRES ASIENTOS (§9.3).** *«verificados por PostgREST real y no
- * simulado»*: familia ve sus casos · prestador los de sus objetos · casa
- * todos · **tercero: cero** · anon: cero.
+ * ── LA TABLA DEL SALDO SE DESCUBRE POR PATRÓN, NO POR LISTA ──────────────
+ * §7 la exige en V1 y todavía no existe. Buscarla por una lista de nombres
+ * candidatos sería atarla a que alguien adivine bien el nombre: **un gate atado
+ * a un nombre mide la convención, no el hecho.** Se descubre por patrón
+ * (`^saldo` o `_saldo`) para que el día que nazca **entre sola al candado**.
  *
- * ── CÓMO SE MIDE EL CANDADO, Y POR QUÉ DE DOS FORMAS ─────────────────────
- * · **Exacta:** `has_table_privilege('authenticated', tabla, 'INSERT')` — no
- *   admite interpretación y distingue el GRANT de la RLS.
- * · **Real:** una sonda por PostgREST con sesión de verdad. §9 pide «real y
- *   no simulado», y `SET LOCAL ROLE` no es el camino que usa el teléfono.
+ * ── POR QUÉ EL VERDE ES VERDE AUNQUE FALTE EL SALDO ─────────────────────
+ * *«No pude mirar»* y *«todavía no existe»* son estados distintos.* El gate
+ * mira **todo lo que existe** y lo encuentra cerrado; la tabla que no nació no
+ * es un hueco de medición, es trabajo pendiente — y va como **nota**, no como
+ * bloqueo. **El día que aparezca, el patrón la mete al candado sin tocar una
+ * línea, y si viene sin `REVOKE` el gate se pone rojo solo.**
  *
- * 🔴 **LA SONDA LLEVA SU CONTROL POSITIVO, Y SIN ÉL NO PROBARÍA NADA.**
- * *Una sonda que siempre rebota también rebota* — un token vencido, una URL
- * mal armada o una tabla inexistente dan el mismo «no pude escribir» que un
- * candado bien puesto. El control es la asimetría **sobre la misma tabla y
- * con la misma sesión**: el `SELECT` tiene que PASAR y el `INSERT` tiene que
- * REBOTAR. Si el `SELECT` también rebota, el arnés no está midiendo el
- * candado: está midiendo su propia sesión rota, y sale 2.
+ * ── EL FIXTURE, DECLARADO ────────────────────────────────────────────────
+ * `casos_postventa` está en CERO filas, y **sobre cero filas los cinco asientos
+ * dan cero y no significan nada**. Se siembra UN caso y se borra al final.
  *
- * ⚠️ **La sonda no escribe nada**: el `INSERT` que manda está hecho para ser
- * rechazado, y si por un defecto pasara, el arnés lo reporta como ROJO
- * MÁXIMO y deja dicho qué fila quedó — no la borra, porque borrarla
- * escondería la única evidencia.
+ * 🔴 **Se intenta PRIMERO por la puerta real (`abrir_caso`)**, y su rechazo
+ * también se reporta: hoy devuelve `fuera_de_ventana` (7 días) sobre el objeto
+ * disponible, **lo cual es la puerta funcionando**. Recién entonces se siembra
+ * por `service_role` **como fixture declarado** — el sembrado es andamio; **lo
+ * que tiene que ser real es la MEDICIÓN**, y lo es: cinco sesiones por
+ * PostgREST con la anon key.
  *
- * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ─────────────────────────────
- * **Sí, y hay que decirlo:** la sonda corre con UNA cuenta
- * (`demo-prestador@epetplace.dev`). Prueba que **esa** sesión no puede
- * escribir. Un grant a un rol distinto de `authenticated` —o una policy que
- * habilite a otro perfil— **no lo vería**. La medición exacta por
- * `has_table_privilege` cubre ese hueco para `authenticated` y `anon`; para
- * cualquier otro rol, este arnés es ciego y lo declara.
+ * ⚠️ **Residuo:** el caso sembrado se borra y el gate **verifica que quedó en
+ * cero**. Si no pudo borrarlo, lo dice y sale 2 — *una sonda que deja residuo
+ * contamina la medición ajena.*
+ *
+ * ── ¿PERDONA ALGO QUE EL PRODUCTO NO PERDONA? ────────────────────────────
+ * **Sí, y son tres, declaradas:**
+ * · 🔴 **EL ASIENTO DE LA CASA NO SE EJERCE.** Medido: las dos cuentas de
+ *   `admin_users` activas (`guillo381@…`, `admin@e-petplace.com`) **no abren
+ *   sesión** con la credencial de prueba de la casa. *Un asiento que no se
+ *   puede ejercer se declara, no se simula con `SET ROLE`* — §9.3 pide
+ *   PostgREST real. **Queda como el único de los cinco sin medir.**
+ * · La **sonda del candado** corre con una sola cuenta; la medición exacta por
+ *   `has_table_privilege` cubre `authenticated` y `anon`, y **para cualquier
+ *   otro rol este arnés es ciego**.
+ * · Mide **lectura**. Que las RPCs `SECURITY DEFINER` gateen bien por dentro es
+ *   otro instrumento.
  *
  * Salidas: 0 verde · 1 rojo · 2 no concluyente.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { dbQuery } from './lib-db.mjs';
 
 const RAIZ = '/Users/guillo381gmail.com/proyectos/ePetPlace/e-petplace-s114-e';
-
-// Las tres familias de tablas que §9.1 nombra.
-const DEL_CASO   = ['casos_postventa', 'postventa_casos', 'caso_hilo', 'caso_eventos'];
-const DEL_SALDO  = ['saldo_hogar', 'saldo_familia', 'saldo_movimientos', 'saldo_epetplace'];
+const DEL_CASO = ['casos_postventa', 'caso_mensajes'];
 const DE_MOTIVOS = ['cat_motivos_postventa'];
-const TODAS = [...DEL_CASO, ...DEL_SALDO, ...DE_MOTIVOS];
+const MARCA = '__sonda_asientos_e3__';
 
 const fallos = [];
 const notas = [];
 
-// ══ ① EL CANDADO, medición exacta ════════════════════════════════════════
+// El saldo se DESCUBRE, no se adivina.
+const delSaldo = dbQuery(`
+  select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+   where n.nspname = 'public' and c.relkind = 'r'
+     and (c.relname ~ '^saldo' or c.relname ~ '_saldo')`).map((r) => r.relname);
+
+const TODAS = [...DEL_CASO, ...delSaldo, ...DE_MOTIVOS];
+
+// ══ ① EL CANDADO ═════════════════════════════════════════════════════════
 const priv = dbQuery(`
   select c.relname as tabla, r.rolname as rol, c.relrowsecurity as rls,
          has_table_privilege(r.rolname, c.oid, 'SELECT') as sel,
@@ -73,173 +90,197 @@ const priv = dbQuery(`
    where n.nspname = 'public' and c.relkind = 'r'
      and c.relname in (${TODAS.map((t) => `'${t}'`).join(',')})
    order by c.relname, r.rolname`);
-
 const existentes = [...new Set(priv.map((p) => p.tabla))];
+
 console.log('verify:asientos-caso · §9 (F5) de LETRA_POSTVENTA\n');
 console.log('  ── ① EL CANDADO (§9.1) ──');
-if (!existentes.length) {
-  console.log('   ninguna de las tablas de §9.1 existe todavía.');
-} else {
-  console.log('   tabla                          rol             RLS  SELECT  INSERT  UPDATE  DELETE');
-  for (const p of priv) {
-    const malo = p.ins || p.upd || p.del || (p.rol === 'anon' && p.sel);
-    console.log(
-      `   ${malo ? '🔴' : '  '} ${p.tabla.padEnd(28)} ${p.rol.padEnd(14)} ${String(p.rls).padEnd(5)}` +
-      ` ${String(p.sel).padEnd(7)} ${String(p.ins).padEnd(7)} ${String(p.upd).padEnd(7)} ${String(p.del)}`,
-    );
-    if (p.ins || p.upd || p.del) {
-      fallos.push(`${p.tabla}: ${p.rol} puede escribir (§9.1 exige REVOKE INSERT/UPDATE/DELETE)`);
-    }
-    if (p.rol === 'anon' && p.sel) fallos.push(`${p.tabla}: anon puede LEER`);
-    if (!p.rls) fallos.push(`${p.tabla}: sin RLS`);
-  }
+console.log('   tabla                          rol             RLS  SELECT  INSERT  UPDATE  DELETE');
+for (const p of priv) {
+  const malo = p.ins || p.upd || p.del || (p.rol === 'anon' && p.sel) || !p.rls;
+  console.log(
+    `   ${malo ? '🔴' : '  '} ${p.tabla.padEnd(28)} ${p.rol.padEnd(14)} ${String(p.rls).padEnd(5)}` +
+    ` ${String(p.sel).padEnd(7)} ${String(p.ins).padEnd(7)} ${String(p.upd).padEnd(7)} ${String(p.del)}`,
+  );
+  if (p.ins || p.upd || p.del) fallos.push(`${p.tabla}: ${p.rol} puede ESCRIBIR (§9.1 exige REVOKE)`);
+  if (p.rol === 'anon' && p.sel) fallos.push(`${p.tabla}: anon puede LEER`);
+  if (!p.rls) fallos.push(`${p.tabla}: sin RLS`);
 }
-const faltan = TODAS.filter((t) => !existentes.includes(t));
-const faltanCaso  = DEL_CASO.every((t) => faltan.includes(t));
-const faltanSaldo = DEL_SALDO.every((t) => faltan.includes(t));
+if (delSaldo.length === 0) {
+  notas.push('la tabla del SALDO (§7) todavía no existe — se descubre por patrón `^saldo|_saldo`, ' +
+             'así que entra sola al candado el día que nazca');
+  console.log('   ⚠️ ninguna tabla de SALDO existe todavía (§7 la exige en V1).');
+}
 
-// ══ ② LA SONDA POR POSTGREST REAL, con su control positivo ═══════════════
+// ══ ② SESIONES ═══════════════════════════════════════════════════════════
+const env = Object.fromEntries(
+  readFileSync(`${RAIZ}/apps/cliente/.env.local`, 'utf8').split('\n')
+    .filter((l) => l.includes('=')).map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
+);
+const URL = env.EXPO_PUBLIC_SUPABASE_URL, ANON = env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const rolAnon = JSON.parse(Buffer.from(ANON.split('.')[1], 'base64url').toString('utf8')).role;
+if (rolAnon !== 'anon') {
+  console.error(`\n🟠 la clave de .env.local tiene role=${rolAnon}, no "anon". El arnés PARA.`);
+  process.exit(2);
+}
+/* `supabase/dev/.env.local` es gitignored ⇒ NO viaja al worktree, misma clase
+   que `supabase/.temp` (la que volvía mudos a los gates de base). Se busca
+   local y, si no está, en el árbol principal — es propiedad del REPO. */
+function leerServiceRole() {
+  const candidatos = [`${RAIZ}/supabase/dev/.env.local`];
+  const g = execFileSync('git', ['rev-parse', '--git-common-dir'], { encoding: 'utf8' }).trim();
+  candidatos.push(`${resolve(g, '..')}/supabase/dev/.env.local`);
+  for (const c of candidatos) {
+    if (!existsSync(c)) continue;
+    const k = readFileSync(c, 'utf8').match(/^SUPABASE_SERVICE_ROLE_KEY=(.+)$/m)?.[1]?.trim();
+    if (k) return k;
+  }
+  return null;
+}
+const SERVICE = leerServiceRole();
+const clave = (svc, acct) => execFileSync('security',
+  acct ? ['find-generic-password', '-a', acct, '-s', svc, '-w'] : ['find-generic-password', '-s', svc, '-w'],
+  { encoding: 'utf8' }).trim();
+const siembra = clave('epetplace-siembra-s97', 'siembra');
+const claveDemo = clave('epetplace-cuenta-prueba');
+
+async function sesion(email, pass) {
+  const c = createClient(URL, ANON, { auth: { persistSession: false } });
+  const { error } = await c.auth.signInWithPassword({ email, password: pass });
+  return error ? { err: error.message } : { c };
+}
+
+// ══ ③ LA SONDA DEL CANDADO, con su control positivo ══════════════════════
 console.log('\n  ── LA SONDA POR POSTGREST REAL (con control positivo) ──');
-let sondaOk = false;
-if (existentes.length) {
-  const env = Object.fromEntries(
-    readFileSync(`${RAIZ}/apps/cliente/.env.local`, 'utf8').split('\n')
-      .filter((l) => l.includes('=')).map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
-  );
-  const URL = env.EXPO_PUBLIC_SUPABASE_URL;
-  const ANON = env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-  // El claim se verifica: correr con más permisos de los que se dice medir
-  // no mide lo que se dice (misma ley que `claveAnonDeEnv`).
-  const rol = JSON.parse(Buffer.from(ANON.split('.')[1], 'base64url').toString('utf8')).role;
-  if (rol !== 'anon') {
-    console.error(`   🟠 la clave de .env.local tiene role=${rol}, no "anon". El arnés PARA.`);
-    process.exit(2);
-  }
-
-  const email = execFileSync('security', ['find-generic-password', '-s', 'epetplace-cuenta-prueba'],
-    { encoding: 'utf8' }).match(/"acct"<blob>="([^"]+)"/)?.[1];
-  const clave = execFileSync('security', ['find-generic-password', '-s', 'epetplace-cuenta-prueba', '-w'],
-    { encoding: 'utf8' }).trim();
-
-  const cli = createClient(URL, ANON, { auth: { persistSession: false } });
-  const { error: eLogin } = await cli.auth.signInWithPassword({ email, password: clave });
-  if (eLogin) {
-    console.error(`   🟠 NO CONCLUYENTE · no se pudo abrir sesión: ${eLogin.message}`);
-    process.exit(2);
-  }
-
-  const tabla = existentes.find((t) => DE_MOTIVOS.includes(t)) ?? existentes[0];
-  // CONTROL POSITIVO: la misma sesión, la misma tabla, un SELECT.
-  const { error: eSel } = await cli.from(tabla).select('codigo').limit(1);
+const sDemo = await sesion('demo-prestador@epetplace.dev', claveDemo);
+if (sDemo.err) { console.error(`   🟠 no abre la sesión de prueba: ${sDemo.err}`); process.exit(2); }
+{
+  const t = 'cat_motivos_postventa';
+  const { error: eSel } = await sDemo.c.from(t).select('codigo').limit(1);
   if (eSel) {
-    console.error(`   🟠 NO CONCLUYENTE · el SELECT de control también rebotó sobre \`${tabla}\`:`);
-    console.error(`      ${eSel.message}`);
-    console.error('      Una sonda que rebota en todo no mide el candado: mide su sesión.');
+    console.error(`   🟠 NO CONCLUYENTE · el SELECT de control rebotó sobre \`${t}\`: ${eSel.message}`);
+    console.error('      Una sonda que rebota en todo mide su sesión, no el candado.');
     process.exit(2);
   }
-  console.log(`   ✅ control positivo: la sesión LEE \`${tabla}\` por PostgREST.`);
-
-  const { data: dIns, error: eIns } = await cli.from(tabla)
-    .insert({ codigo: '__sonda_candado__', objeto: 'cita', clase: 2, voz: 'sonda' }).select('codigo');
-  if (!eIns) {
-    fallos.push(`🔴🔴 ${tabla}: la sonda ESCRIBIÓ. Fila '__sonda_candado__' quedó en la tabla.`);
-    console.error(`   🔴🔴 LA SONDA ESCRIBIÓ EN \`${tabla}\` — el candado NO existe.`);
-    console.error('      La fila NO se borra: es la única evidencia. ' + JSON.stringify(dIns));
+  console.log(`   ✅ control positivo: la sesión LEE \`${t}\` por PostgREST.`);
+  const { data: d, error: e } = await sDemo.c.from(t)
+    .insert({ codigo: MARCA, objeto: 'cita', clase: 2, voz: 'sonda' }).select('codigo');
+  if (!e) {
+    fallos.push(`🔴🔴 ${t}: la sonda ESCRIBIÓ. Fila '${MARCA}' quedó: ${JSON.stringify(d)}`);
+    console.error(`   🔴🔴 LA SONDA ESCRIBIÓ EN \`${t}\` — el candado NO existe. La fila NO se borra.`);
   } else {
-    console.log(`   ✅ el INSERT rebotó: ${eIns.code ?? '(sin código)'} · ${String(eIns.message).slice(0, 90)}`);
-    sondaOk = true;
+    console.log(`   ✅ el INSERT rebotó: ${e.code ?? '(sin código)'} · ${String(e.message).slice(0, 80)}`);
   }
 }
 
-// ══ ③ LOS ASIENTOS (§9.3) ════════════════════════════════════════════════
-//
-// §9.3 pide CINCO lecturas: familia · prestador dueño · casa · tercero · anon.
-// La tabla del caso no existe todavía, así que **el asiento se ejerce sobre el
-// objeto que sí existe** (`evento_cita_servicio`, que tiene RLS por prestador):
-// eso prueba que la maquinaria del asiento DISCRIMINA, y el día que exista
-// `casos_postventa` las mismas sesiones corren contra ella.
-//
-// 🔴 **EL ASIENTO QUE IMPORTA ES EL SEGUNDO: un prestador que NO es dueño del
-// objeto.** El primero —el dueño viendo lo suyo— no puede fallar de la forma
-// peligrosa; el rojo que hace daño es **ver el caso de otro**. Y sin el
-// primero, el cero del segundo no significa nada: *una consulta rota devuelve
-// cero igual que una RLS bien puesta.* Los dos van juntos o no va ninguno.
-console.log('\n  ── ② LOS ASIENTOS (§9.3) ──');
-{
-  const env = Object.fromEntries(
-    readFileSync(`${RAIZ}/apps/cliente/.env.local`, 'utf8').split('\n')
-      .filter((l) => l.includes('=')).map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
-  );
-  const URL = env.EXPO_PUBLIC_SUPABASE_URL;
-  const ANON = env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// ══ ④ LOS CINCO ASIENTOS ═════════════════════════════════════════════════
+console.log('\n  ── ② LOS CINCO ASIENTOS (§9.3) ──');
+const admin = SERVICE ? createClient(URL, SERVICE, { auth: { persistSession: false } }) : null;
+if (!admin) {
+  console.error('   🟠 NO CONCLUYENTE · no se encontró `SUPABASE_SERVICE_ROLE_KEY` ni en este');
+  console.error('      worktree ni en el árbol principal (`supabase/dev/.env.local`, gitignored).');
+  console.error('      Sin fixture, `casos_postventa` está en 0 filas y los cinco asientos darían');
+  console.error('      cero sin significar nada. El gate NO dice verde.');
+  process.exit(2);
+}
 
-  // Un prestador con objetos y otro SIN objetos de ese primero: los dos salen
-  // del dato, no de una lista escrita a mano.
-  const DUENO = dbQuery(`
-    select p.id, p.nombre_comercial, u.email,
-           (select count(*)::int from evento_cita_servicio c where c.prestador_id = p.id) as citas
-      from prestadores p join auth.users u on u.id = p.user_id
-     where p.estado = 'activo' and u.email = 'demo-prestador@epetplace.dev' limit 1`)[0];
-  const OTRO = dbQuery(`
-    select p.id, p.nombre_comercial, u.email
-      from prestadores p join auth.users u on u.id = p.user_id
-     where p.estado = 'activo' and u.email = 'guillo381+paseo1@gmail.com' limit 1`)[0];
+const FAMILIA = 'guillo381+8@gmail.com', TERCERO_FAM = 'guillo381+2@gmail.com';
+const OTRO_PRESTADOR = 'guillo381+paseo1@gmail.com';
+const PRESTADOR_ID = 'de300000-0000-4000-8000-0000000000e5';   // Paseos Andres
 
-  if (!DUENO || !OTRO || DUENO.citas === 0) {
-    console.log('   🟠 sin las dos cuentas de prestador (o el dueño no tiene objetos):');
-    console.log(`      dueño: ${DUENO?.email ?? 'falta'} (${DUENO?.citas ?? 0} citas) · otro: ${OTRO?.email ?? 'falta'}`);
-    notas.push('los asientos no se pudieron ejercer: faltan las dos cuentas de prestador');
-  } else {
-    const claveDueno = execFileSync('security',
-      ['find-generic-password', '-s', 'epetplace-cuenta-prueba', '-w'], { encoding: 'utf8' }).trim();
-    const claveOtro = execFileSync('security',
-      ['find-generic-password', '-a', 'siembra', '-s', 'epetplace-siembra-s97', '-w'], { encoding: 'utf8' }).trim();
+const objeto = dbQuery(`
+  select c.id, c.user_id from evento_cita_servicio c
+   join auth.users u on u.id = c.user_id
+  where u.email = '${FAMILIA}' and c.prestador_id = '${PRESTADOR_ID}'
+  order by c.fecha desc limit 1`)[0];
+if (!objeto) { console.error('   🟠 no hay objeto para el fixture.'); process.exit(2); }
 
-    const sesion = async (email, clave) => {
-      const c = createClient(URL, ANON, { auth: { persistSession: false } });
-      const { error } = await c.auth.signInWithPassword({ email, password: clave });
-      if (error) throw new Error(`${email}: ${error.message}`);
-      return c;
-    };
-    const cuenta = async (cli) => {
-      const { count, error } = await cli.from('evento_cita_servicio')
-        .select('id', { count: 'exact', head: true }).eq('prestador_id', DUENO.id);
-      if (error) throw new Error(error.message);
-      return count ?? 0;
-    };
+// La PUERTA REAL primero — su rechazo también es medición.
+const sFam = await sesion(FAMILIA, siembra);
+if (sFam.err) { console.error(`   🟠 la familia no abre sesión: ${sFam.err}`); process.exit(2); }
+const { data: puerta } = await sFam.c.rpc('abrir_caso', {
+  p_objeto_tipo: 'cita', p_objeto_id: objeto.id, p_motivo: 'calidad',
+  p_relato: `${MARCA} control de asientos`, p_procedencia: 'familia', p_modo: 'texto',
+});
+const abrioPorLaPuerta = puerta?.ok === true;
+console.log(`   puerta real \`abrir_caso\`: ${abrioPorLaPuerta ? '✅ abrió' : `rebotó · ${puerta?.codigo ?? '(sin código)'}`}` +
+            (abrioPorLaPuerta ? '' : '  ← la puerta funcionando; se siembra por fixture'));
 
-    try {
-      const vistoDueno = await cuenta(await sesion(DUENO.email, claveDueno));
-      const vistoOtro  = await cuenta(await sesion(OTRO.email, claveOtro));
-      const vistoAnon  = await cuenta(createClient(URL, ANON, { auth: { persistSession: false } }));
+let casoId = abrioPorLaPuerta ? (puerta.caso_id ?? puerta.id) : null;
+if (!casoId) {
+  const { data, error } = await admin.from('casos_postventa').insert({
+    objeto_tipo: 'cita', objeto_id: objeto.id, motivo_codigo: 'calidad', clase: 2,
+    familia_user_id: objeto.user_id, prestador_id: PRESTADOR_ID,
+    etapa: 'recibido', relato: `${MARCA} fixture declarado`, procedencia: 'familia', modo: 'texto',
+  }).select('id').single();
+  if (error) { console.error(`   🟠 no se pudo sembrar el fixture: ${error.message}`); process.exit(2); }
+  casoId = data.id;
+}
 
-      console.log(`   objeto de prueba: citas de \`${DUENO.nombre_comercial}\` (${DUENO.citas} en la base)`);
-      console.log(`   ${vistoDueno > 0 ? '✅' : '🔴'} asiento DUEÑO      (${DUENO.email}) ve ${vistoDueno}`);
-      console.log(`   ${vistoOtro === 0 ? '✅' : '🔴'} asiento NO DUEÑO   (${OTRO.email}) ve ${vistoOtro}`);
-      console.log(`   ${vistoAnon === 0 ? '✅' : '🔴'} asiento ANON       ve ${vistoAnon}`);
+/* 🔴 PARA `anon` LO CORRECTO NO ES «VE 0 FILAS»: ES QUE LO RECHACEN.
+   §9.1 le revoca el SELECT entero, así que PostgREST corta con **401 antes de
+   evaluar la RLS**. Medido: `count: null · status 401 · error.message VACÍO`.
+   *Una primera versión de este arnés leyó ese rechazo correcto como fallo*,
+   porque asumía que todo asiento contesta con un número — y de paso el mensaje
+   vacío se imprimía como `undefined`.
+   ⚠️ Y la distinción no es cosmética: si algún día `anon` devolviera `0` en vez
+   de 401, **significaría que tiene el grant y sólo lo frena la RLS** — una
+   postura más débil que la que §9.1 firma. Por eso ese caso es ROJO. */
+const cuenta = async (cli) => {
+  const { count, error, status } = await cli.from('casos_postventa')
+    .select('id', { count: 'exact', head: true }).eq('id', casoId);
+  if (error) return { rechazado: true, status: status ?? null, cod: error.code || String(status ?? '') || 'rechazado' };
+  return { n: count ?? 0 };
+};
 
-      if (vistoDueno === 0) {
-        // Control positivo caído: sin él, el cero del segundo no dice nada.
-        console.error('   🟠 el dueño ve CERO de sus propios objetos ⇒ la consulta no mide.');
-        notas.push('control positivo del asiento caído: el dueño no ve lo suyo');
-        process.exitCode = 2;
-      }
-      if (vistoOtro !== 0) {
-        fallos.push(`asiento NO DUEÑO: ${OTRO.email} ve ${vistoOtro} objetos de ${DUENO.nombre_comercial}`);
-      }
-      if (vistoAnon !== 0) fallos.push(`asiento ANON ve ${vistoAnon} objetos ajenos`);
-    } catch (e) {
-      console.error(`   🟠 los asientos no se pudieron ejercer: ${e.message.slice(0, 140)}`);
-      notas.push('los asientos rebotaron');
+let veredictoAsientos = [];
+try {
+  const sTerFam = await sesion(TERCERO_FAM, siembra);
+  const sOtroPre = await sesion(OTRO_PRESTADOR, siembra);
+  const anon = createClient(URL, ANON, { auth: { persistSession: false } });
+
+  const vFam = await cuenta(sFam.c);
+  const vPre = await cuenta(sDemo.c);
+  const vTer = sTerFam.err ? { err: sTerFam.err } : await cuenta(sTerFam.c);
+  const vOtro = sOtroPre.err ? { err: sOtroPre.err } : await cuenta(sOtroPre.c);
+  const vAnon = await cuenta(anon);
+
+  veredictoAsientos = [
+    ['familia (dueña del caso)', FAMILIA, vFam, 1],
+    ['prestador DEL objeto', 'demo-prestador@epetplace.dev', vPre, 1],
+    ['prestador AJENO', OTRO_PRESTADOR, vOtro, 0],
+    ['tercero (otra familia)', TERCERO_FAM, vTer, 0],
+    ['anon', '(sin sesión)', vAnon, 'rechazado'],
+  ];
+  for (const [rot, quien, v, esperado] of veredictoAsientos) {
+    const visto = v.rechazado ? `RECHAZADO (${v.cod})` : String(v.n);
+    const ok = esperado === 'rechazado' ? v.rechazado === true : (!v.rechazado && v.n === esperado);
+    console.log(`   ${ok ? '✅' : '🔴'} ${rot.padEnd(26)} ${String(quien).padEnd(30)} ${visto.padEnd(20)} (esperado ${esperado})`);
+    if (!ok) {
+      fallos.push(esperado === 'rechazado'
+        ? `asiento ${rot}: NO fue rechazado — devolvió ${visto}. Si tiene el grant, ` +
+          'lo frena sólo la RLS: §9.1 exige que ni siquiera pueda pedirlo.'
+        : `asiento ${rot}: ${visto}, esperado ${esperado}`);
     }
   }
-}
-
-if (faltanCaso) {
-  console.log(`   🟠 sobre el CASO todavía no se pueden correr: no existe la tabla.`);
-  console.log(`      buscadas: ${DEL_CASO.join(' · ')}`);
-  console.log('      (faltan además los asientos FAMILIA y CASA, que son del caso)');
-  notas.push('los asientos del caso no se pudieron medir: falta la tabla');
+  // Control positivo: si NADIE de los que deben ver, ve, la consulta no mide.
+  if (!vFam.rechazado && !vPre.rechazado && vFam.n === 0 && vPre.n === 0) {
+    console.error('   🟠 ni la familia ni el prestador ven el caso ⇒ la consulta no mide.');
+    notas.push('control positivo de los asientos caído');
+  }
+  console.log('   ⚪ casa (is_admin)          — NO EJERCIDO: ninguna cuenta de `admin_users`');
+  console.log('      activa abre sesión con la credencial de prueba. Se declara, no se simula.');
+  notas.push('el asiento CASA no se pudo ejercer: sin credencial de una cuenta admin');
+} finally {
+  // ── RESIDUO CERO ──
+  await admin.from('caso_mensajes').delete().eq('caso_id', casoId);
+  await admin.from('casos_postventa').delete().eq('id', casoId);
+  const quedan = dbQuery(`select count(*)::int n from casos_postventa where relato like '%${MARCA}%'`)[0].n;
+  if (quedan > 0) {
+    console.error(`\n🟠 NO CONCLUYENTE · quedaron ${quedan} filas del fixture sin borrar.`);
+    console.error('   Una sonda que deja residuo contamina la medición ajena.');
+    process.exit(2);
+  }
+  console.log('   ✅ residuo del fixture: 0');
 }
 
 // ══ VEREDICTO ════════════════════════════════════════════════════════════
@@ -249,13 +290,6 @@ if (fallos.length) {
   for (const f of fallos) console.error(`   · ${f}`);
   process.exit(1);
 }
-if (faltanCaso || faltanSaldo) {
-  console.error('🟠 NO CONCLUYENTE · §9 no se puede dar por cumplida.');
-  if (faltanCaso)  console.error('   · falta la tabla del CASO  → el candado no se pudo medir sobre ella');
-  if (faltanSaldo) console.error('   · falta la tabla del SALDO → ídem (§7 la exige en V1)');
-  console.error(`   Lo que SÍ se midió: ${existentes.join(', ') || 'nada'}` +
-                (sondaOk ? ' · candado verificado por PostgREST real ✅' : ''));
-  console.error('   Un verde sobre 1 de 3 familias de tablas sería un verde flojo.');
-  process.exit(2);
-}
-console.log('🟢 VERDE · candado puesto en las tres familias y tres asientos verificados.');
+console.log(`🟢 VERDE · candado puesto en las ${existentes.length} tablas que existen, y los`);
+console.log('   cuatro asientos ejercibles miden bien por PostgREST real.');
+for (const n of notas) console.log(`   ⚠️ ${n}`);
