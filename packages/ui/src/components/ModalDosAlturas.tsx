@@ -124,9 +124,41 @@ export function ModalDosAlturas({
     [sinViaje],
   )
 
+  /**
+   * 🔴 CON EL TECLADO ABIERTO, `medio` SUBE A `completo` — Y VIVE ACÁ, NO EN
+   * LA PANTALLA (S114-B, pedido de C).
+   *
+   * **La aritmética la midió C en aparato:** el teclado se lleva el **34 %** de
+   * la pantalla; en `medio` queda el 50 % menos eso, y **no alcanza para la
+   * barra**. *La hoja hace lo correcto y aun así la barra queda tapada — es
+   * aritmética, no defecto.*
+   *
+   * **C lo curó del lado del consumidor y preguntó si debía vivir acá. Sí, y
+   * por mi propia `R81`:** *una garantía que el consumidor tiene que acordarse
+   * de pedir no es una garantía.* **No es una decisión de esa pantalla: es una
+   * propiedad de un panel que reserva el teclado adentro de sí mismo** — le
+   * pasa a CUALQUIER consumidor que ponga un campo en `medio`, y el único que
+   * conoce la aritmética es este archivo. *El consumidor no puede saber que su
+   * barra no entra; la hoja sí.*
+   *
+   * ⚠️ **NO MEDIDO, y se dice:** qué se siente al ARRASTRAR la hoja con el
+   * teclado abierto —el imán calcula contra las alturas nominales y la
+   * geometría está en la efectiva— **no se probó en aparato**. En el uso normal
+   * el gesto de bajar guarda el teclado primero (`keyboardDismissMode`), así
+   * que el caso puede no existir; *pero «puede no existir» no es una medición.*
+   *
+   * ⚠️ **No toca `altura`, y eso importa:** el ESTADO sigue diciendo `medio`
+   * —que es lo que el usuario eligió— y lo que sube es la GEOMETRÍA. Al cerrar
+   * el teclado vuelve solo, sin que nadie tenga que devolver nada. *Mover el
+   * estado del consumidor desde adentro sería la pieza discutiéndole al dueño
+   * de la verdad.*
+   */
+  const alturaEfectiva: AlturaModal =
+    altoTeclado > 0 && altura === 'medio' ? 'completo' : altura
+
   const altoDe = useCallback((a: AlturaModal) => Math.round(altoPantalla * FRACCION[a]) + ASA_ALTO, [altoPantalla])
 
-  const h = useSharedValue(altoDe(altura))
+  const h = useSharedValue(altoDe(alturaEfectiva))
   const iniH = useSharedValue(0)
 
   /* 🔴 EL TOPE Y EL PISO VIVEN EN SHARED VALUES, NO SE CALCULAN EN EL GESTO.
@@ -150,8 +182,8 @@ export function ModalDosAlturas({
   }, [altoDe, tope, piso])
 
   useEffect(() => {
-    h.value = asentar(altoDe(altura))
-  }, [altura, altoDe, asentar, h])
+    h.value = asentar(altoDe(alturaEfectiva))
+  }, [alturaEfectiva, altoDe, asentar, h])
 
   /** A dónde va al soltar: la más cercana, con el envión contando. */
   const resolver = useCallback(
@@ -167,13 +199,17 @@ export function ModalDosAlturas({
       }
       // 🔴 Bajar del todo con trabajo sin guardar: se pregunta, no se cierra.
       if (mejor === 'cerrado' && hayCambiosSinGuardar && onPedirConfirmacion) {
-        h.value = asentar(altoDe(altura))
+        /* Vuelve a la EFECTIVA y no a `altura`: con el teclado abierto el panel
+           está en la geometría de `completo` aunque el estado diga `medio`, y
+           rebotar a la nominal lo haría saltar hacia abajo justo cuando el
+           usuario está escribiendo. */
+        h.value = asentar(altoDe(alturaEfectiva))
         onPedirConfirmacion()
         return
       }
       onAltura(mejor)
     },
-    [altoDe, altura, asentar, h, hayCambiosSinGuardar, onAltura, onPedirConfirmacion],
+    [altoDe, alturaEfectiva, asentar, h, hayCambiosSinGuardar, onAltura, onPedirConfirmacion],
   )
 
   const arrastre = Gesture.Pan()

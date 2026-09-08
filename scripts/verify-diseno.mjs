@@ -143,6 +143,32 @@ const MIGRACIONES_CON_VOSEO = {
   '20260909840000_s113a_contanos.sql': 3,
   '20260909900000_s113a_firma_predisposiciones.sql': 1,
   '20260910040000_s113a_cat_rasgos.sql': 1,
+
+  /* ══ S114-A · LA POSTVENTA — entradas MEDIDAS Y ENTREGADAS POR A ═════════
+     🔴 **Estos tres archivos NO están en el árbol de B todavía**: viven en la
+     rama de A hasta el merge. Entran por adelantado **porque R80 es
+     precondición para el hook compartido** — sin ellos, la punta de B bloquea a
+     toda pista que la mergee, y C ya lleva tres tandas con `--no-verify`.
+     *Un gate que obliga a saltearse el gate deja de proteger y pasa a enseñar a
+     ignorarlo.*
+
+     ⚠️ **La voz VIVA de los tres ya está en TUTEO** (migración
+     `20260911830000_s114a_r80_voz_a_tuteo.sql`, verificada por A contra
+     `pg_proc`). Lo que la lápida tapa es **el archivo histórico**, que no se
+     puede editar — que es exactamente para lo que la lápida existe.
+
+     ⏪ **Y una corrección al parte de A, de la clase que esta casa mide:** A
+     midió contra la punta `bedacc78` y reportó que `f1_cierre_ausente.sql` daba
+     **0 hits porque `marcá` no estaba en los 132 pares**. **Ya no: `marcá`
+     entró en `3f10092c` y hoy la lista tiene 136** ⇒ el archivo da **1**, y el
+     `: 1` que A eligió es exacto. *Su número era cierto cuando lo midió y
+     estaba viejo cuando llegó — por eso el `: 1` cubría los dos escenarios, y
+     esa precaución es la que lo salvó.* */
+  '20260911000000_s114a_cat_motivos_postventa.sql': 1,   // «contame»
+  '20260911610000_s114a_rpcs_del_caso.sql': 1,           // «…para vos.»
+  '20260911730000_s114a_f1_cierre_ausente.sql': 1,       // «marcá el cierre»
+  /* `20260911830000` NO entra: da 0 hits. Cita las formas viejas en su header,
+     pero son comentarios `--` y el instrumento ya los filtra. */
 };
 
 const BASELINE_VOSEO = {
@@ -6056,7 +6082,7 @@ function r80(archivos) {
     fallos,
     info:
       `${total} cadena(s) en voseo en ${porArchivo.size} de ${sql.length} migración(es)` +
-      (idas.length ? ` · ⚠️ ${idas.length} de la lápida ya no están en el corpus (una migración no se borra: revisar)` : '') +
+      (idas.length ? ` · ${idas.length} de la lápida NO está(n) en este árbol — normal mientras su migración viva en otra rama (hoy: las 3 de S114-A); si ya se mergeó, alguien borró historia` : '') +
       ` · ${VOZ_LO_QUE_NO_VE}` +
       ` · ⚠️ mide lo que una migración ESCRIBE, jamás lo VIVO (eso está en \`pg_proc\`)` +
       ` · ${VOZ_COMO_AMPLIAR}` +
