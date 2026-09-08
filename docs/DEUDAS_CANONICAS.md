@@ -28685,6 +28685,77 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-501` — EL DELIMITADOR APARECE ADENTRO DE LO QUE QUERÉS CAPTURAR, Y UN INSTRUMENTO QUE ACUSA A OTRO NECESITA TECHO ANTES QUE PATRÓN
+
+> **Firma del founder (S114-B, 7-sep-2026).** Sale de dos defectos propios en
+> una sola sesión, **los dos cazados produciendo el rojo — ninguno leyendo.**
+
+## ① LA FORMA: `[^X]*` supone que `X` no está adentro. En código real, siempre puede estar.
+
+**Los dos casos, de la misma sesión y del mismo autor:**
+
+```
+R78                   \(([^)]*mode === 'memorial'[^)]*)\)
+  el guard curado …… if (esDeUnaMascota && (props.enMemorial || theme.mode === '…'))
+  ⇒ `[^)]*` corta en el paréntesis INTERIOR ⇒ la pieza desapareció de la medición
+
+verify:memorial-derivado   desde = lastIndexOf('{', idx)
+  el sitio real …… const esMemorial = (m: {estado_vida: string|null}) => m.estado_vida !== '…'
+  ⇒ el `{` más cercano es el de la ANOTACIÓN DE TIPO ⇒ la ventana arrancaba
+    DESPUÉS del nombre ⇒ **el caso que el gate existe para cazar salía VERDE**
+```
+
+**Y la familia es más ancha que el regex:** `lastIndexOf(delim)` tiene el mismo
+defecto sin ser una clase de caracteres. *No es un problema de expresiones
+regulares: es suponer que el símbolo que uso para delimitar no aparece adentro
+del sujeto.* **En código anidado —JSX, genéricos, tipos inline— siempre aparece.**
+
+⚠️ **Y el conteo va sin inflar** (`L-499` el mismo día): **dos son de esta forma
+exacta**; la tercera —abajo— es de su familia y no del mismo mecanismo. *Decir
+«tres iguales» habría sido más contundente y menos cierto.*
+
+## ② 🔴 LA PEOR ES LA CURA SIN TECHO, Y ES LA QUE ACUSA A OTRO
+
+Al curar el `{`, la ventana pasó a caminar hacia atrás **buscando el inicio de
+la sentencia — y sin tope.** Dentro de un JSX caminó **286 líneas** hasta un
+`return (`, se tragó un `{!esMemorial` de otra sección, y **reportó un décimo
+sitio como derivación de memorial en un archivo de OTRA PISTA.**
+
+> **Era verosímil, en un archivo real, y estaba a punto de irse como defecto
+> ajeno.** *La cura del primer defecto produjo uno más caro: el primero contaba
+> de menos y el segundo acusaba de más.*
+
+### La regla, en la palabra del founder
+
+> ### **Un instrumento que acusa a otro merece un TECHO antes que un patrón mejor.**
+
+**Un falso negativo cuesta una medición; un falso positivo cuesta el tiempo de
+otro y su confianza en el instrumento.** *Y el que recibe la acusación no tiene
+cómo distinguirla de una real: le llega con `archivo:línea`, en su archivo, de
+un gate que corre.*
+
+**Lo exigible, y es barato:**
+- **toda ventana declara su tope EN LÍNEAS** —acá 4: *una decisión se escribe en
+  una a tres; más que eso ya no es la sentencia, es el vecindario*—;
+- **y su otro borde**: la línea en blanco. *Los comentarios se blanquean para no
+  correr la numeración, así que una línea vacía es el borde real del bloque.*
+- **antes de reportar en territorio ajeno, se abre el sitio.** Acá alcanzó con
+  mirar la línea acusada: su ventana empezaba 286 líneas más arriba.
+
+## ③ Y LO QUE NO SE HACE: un patrón más listo
+
+**La salida instintiva es refinar el regex** —balancear paréntesis, contar
+llaves—. *Es el camino largo hacia el mismo error*: un parser a medias falla
+distinto, no menos. **Lo que cierra la clase son dos cosas baratas:** el techo,
+y **un segundo instrumento que falle distinto** — en `L-499` el más tosco
+posible encontró lo que el refinado no veía.
+
+**Hermana de `L-500` y no la duplica:** aquélla dice *qué publicar para que la
+ceguera se note*; ésta, *qué limitar para que el instrumento no invente*.
+
+---
+
+
 ### `L-500` — UN GATE PUBLICA CIFRAS, NO ADJETIVOS: «VERDE» NO PUEDE DELATAR CEGUERA, UN CONTADOR SÍ
 
 > **Firma del founder (S114, 7-sep-2026), y nace de DOS pistas el mismo día

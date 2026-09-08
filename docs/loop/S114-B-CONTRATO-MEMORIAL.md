@@ -360,6 +360,44 @@ inexpresable de contestar mal.**
 
 ---
 
+## ⑥bis 🔴 NO ERAN CUATRO CAPAS — LA CUARTA TENÍA DOS HABITANTES MÁS
+
+**Y los encontró el GATE, no la lectura.** Al construir
+`verify:memorial-derivado` y correrlo sobre el árbol entero aparecieron **nueve
+sitios que deciden memorial fuera de `packages/domain`**, y **dos no estaban en
+mi censo**:
+
+```
+🔴 packages/api/src/wrappers/adiestramiento-antes.ts:195   es_memorial: …
+🔴 packages/api/src/wrappers/grooming-atencion.ts:397      es_memorial: …
+```
+
+> ### `packages/api` también deriva memorial — y es la capa que alimenta al PRESTADOR.
+> *Mi censo de §⑥ miró `packages/ui` porque eso fue lo que se pidió, y el
+> resultado —«cero piezas lo derivan»— era cierto **para `packages/ui`**. Lo que
+> no vi es que la pregunta tenía otra mitad al lado.*
+
+**Los nueve, con su línea:**
+
+```
+apps/cliente · hogar/index.tsx:1661
+             · hogar/mascota/[mascotaId].tsx 369 · 546 · 991
+             · hogar/mascota/pasaporte.tsx 98 · 162
+             · hogar/vacunas/[mascotaId].tsx:262
+packages/api · adiestramiento-antes.ts:195 · grooming-atencion.ts:397
+```
+
+⚠️ **Y el décimo que el gate llegó a reportar era FALSO** —artefacto de su
+propia ventana sin techo (`L-501`)—: **`[mascotaId].tsx:2507` NO es una
+derivación de memorial.** *Se retira acá antes de que alguien lo cure.*
+
+**Lo que esto cambia para la firma del lugar:** la definición única en
+`packages/domain` **no alcanza sólo a las apps** — `packages/api` **ya depende
+de `domain`**, así que las dos de arriba pueden consumirla sin ninguna capa
+nueva. *La firma sigue siendo la correcta; lo que cambia es cuánto cubre.*
+
+---
+
 ## ⑨ 🔴 FIRMADO — LA FORMA, EL LUGAR, Y QUÉ ES `perdida`
 
 > **Firmas del founder, 7-sep-2026.** Lo de abajo **ya no es propuesta.**
