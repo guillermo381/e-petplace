@@ -40,6 +40,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { tituloDelObjeto } from '@/lib/voz-del-caso';
+import { vozServicio } from '@/lib/voz-servicio';
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -100,7 +101,12 @@ export default function MisCasos() {
       })
       .map((c) => ({
         clave: c.casoId,
-        objeto: tituloDelObjeto(c, idioma, t(`postventa.objeto_${c.objetoTipo}` as 'postventa.objeto_cita')),
+        objeto: tituloDelObjeto(
+          c,
+          idioma,
+          t(`postventa.objeto_${c.objetoTipo}` as 'postventa.objeto_cita'),
+          vozServicio(t, c.servicio),
+        ),
         contraparte: t('postventa.asientoPrestador'),
         motivo: vozDeMotivo[c.motivo] ?? c.motivo,
         ...(c.mascotaNombre !== null ? { nombreMascota: c.mascotaNombre } : null),

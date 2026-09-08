@@ -119,7 +119,23 @@ export default function CasosDelPrestador() {
         /* §5 · **de qué servicio hablan.** ⏪ Decía «Una cita» genérico porque
            `CasoEnBandeja` no traía el título; **A lo entregó** y ahora la fila
            dice «Paseo de Thor · martes 9». */
-        objeto: tituloDelObjeto(c, idioma, t(`postventa.objeto_${c.objetoTipo}` as 'postventa.objeto_cita')),
+        /* 🔴 `null` es una DECISIÓN declarada, no una omisión. El cliente
+           tiene `voz-servicio.ts` (mapa código→voz, gateado); el prestador
+           NO — medido: cero claves `servicioVoz` en su diccionario. Y el
+           código crudo no sale a pantalla ni acá ni allá.
+
+           Por qué se puede: **el prestador ya sabe a qué se dedica.** Lo que
+           necesita para distinguir una fila de otra es mascota y fecha —
+           «Una cita de Thor · martes 9» —; el tipo de comprable es el dato
+           primario para la FAMILIA, que sí tiene servicios de varias clases.
+           Si la mesa quiere la voz fina acá, son ~12 cadenas nuevas es/en
+           con su gate, y eso se pide, no se inventa. */
+        objeto: tituloDelObjeto(
+          c,
+          idioma,
+          t(`postventa.objeto_${c.objetoTipo}` as 'postventa.objeto_cita'),
+          null,
+        ),
         contraparte: t('postventa.laFamilia'),
         /* Si el catálogo todavía no llegó, se muestra el código antes que un
            hueco: **una fila sin motivo no dice de qué es el caso**. Es feo un

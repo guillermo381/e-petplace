@@ -138,7 +138,11 @@ export default function PantallaDelCaso() {
          que ya volvieron se caen solas al coincidir el id. */
       const idsDelMotor = new Set(delMotor.map((f) => f.clave));
       optimistasRef.current = optimistasRef.current.filter((f) => !idsDelMotor.has(f.clave));
-      setHilo([...optimistasRef.current, ...delMotor]);
+      /* ⚠️ ASCENDENTE — viejo primero, el orden en que el motor entrega
+         (`ORDER BY m.creado_en, m.id`, medido en la migración). Las optimistas
+         son lo MÁS NUEVO y por eso van al final. La inversión para la lista
+         ocurre en UN solo lugar, abajo. */
+      setHilo([...delMotor, ...optimistasRef.current]);
       setCursor(m.data.cursor);
     }
   }, [casoId]);
@@ -155,6 +159,19 @@ export default function PantallaDelCaso() {
     }, [cargar]),
   );
 
+  /**
+   * 🔴 **Trae los SIGUIENTES, no los anteriores** — y el nombre lo dice porque
+   * la prop de la pieza se llama así. Medido en el motor: el cursor filtra
+   * `(creado_en, id) > cursor` (`20260911610000:428`), así que la primera
+   * página son los 50 MÁS VIEJOS y cada página siguiente trae los más nuevos.
+   * La lista invertida, en cambio, pide más cuando el dedo sube hacia lo viejo.
+   *
+   * ⚠️ **Van en direcciones opuestas, y hoy no se nota porque ningún caso llega
+   * a 50 mensajes.** Es un defecto DORMIDO, y su modo de falla es feo: subir en
+   * un hilo largo mostraría lo que vino DESPUÉS. Se reporta a A —paginar hacia
+   * atrás no existe en el motor— y no se disfraza acá: agregar al final es lo
+   * correcto para el arreglo ascendente, y lo que falta es del otro lado.
+   */
   const cargarAnteriores = useCallback(async () => {
     if (typeof casoId !== 'string' || cursor === null) return;
     const m = await leerMensajesDeCaso(casoId, cursor);
@@ -264,7 +281,19 @@ export default function PantallaDelCaso() {
     [enviar, idioma, t, theme.bg.overlay],
   );
 
-  const filas = useMemo(() => hilo, [hilo]);
+  /* 🔴 EL ÚNICO `reverse`, y está acá para que sea el único — copiado del
+     vecino ya gateado (`armarHilo`, `packages/domain/src/hiloAdopcion.ts:182`),
+     que resolvió esto mismo con su razón escrita: *«agrupar sobre la lista ya
+     invertida es donde nacen los grupos dados vuelta»*.
+
+     Lo caminé y lo vi al revés: «Se resolvió…» arriba y «Recibimos tu caso»
+     abajo. La causa no era el orden del motor —entrega ascendente, medido— era
+     que `SuperficieChat` es INVERTIDA y yo le pasaba el arreglo tal cual. *El
+     patrón estaba resuelto a dos archivos de distancia y escribí uno nuevo.*
+
+     Los OBJETOS de fila son los mismos: invertir un arreglo no rompe la
+     memoización por item que exige el contrato N16 de B. */
+  const filas = useMemo(() => [...hilo].reverse(), [hilo]);
 
   if (caso === 'cargando') {
     return (

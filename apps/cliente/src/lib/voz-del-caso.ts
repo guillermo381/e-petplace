@@ -22,9 +22,10 @@ import { fechaLargaHumana } from '@epetplace/i18n';
 import type { CasoEnBandeja } from '@epetplace/api';
 
 export function tituloDelObjeto(
-  c: Pick<CasoEnBandeja, 'servicio' | 'mascotaNombre' | 'objetoFecha' | 'pedidoNumero' | 'objetoTipo'>,
+  c: Pick<CasoEnBandeja, 'mascotaNombre' | 'objetoFecha' | 'pedidoNumero' | 'objetoTipo'>,
   idioma: 'es' | 'en',
   vozGenerica: string,
+  vozDelServicio: string | null,
 ): string {
   const partes: string[] = [];
 
@@ -32,10 +33,19 @@ export function tituloDelObjeto(
      familia y el vendedor usan para hablar de él. */
   if (c.objetoTipo === 'pedido' && c.pedidoNumero !== null) {
     partes.push(`#${c.pedidoNumero}`);
-  } else if (c.servicio !== null && c.mascotaNombre !== null) {
-    partes.push(`${c.servicio} de ${c.mascotaNombre}`);
-  } else if (c.servicio !== null) {
-    partes.push(c.servicio);
+  } else {
+    /* 🔴 `c.servicio` NO se lee acá: es el CÓDIGO del motor (`guarderia_dia`,
+       `paseo`), y pintarlo crudo es lo que `voz-servicio.ts` prohíbe con todas
+       las letras — *«el caller OMITE, jamás pinta el código crudo»*. Cuando
+       ese diccionario no conoce el código, entra la voz genérica del objeto
+       («Una estadía»), que dice MENOS pero no dice mal.
+
+       Lo caminé y lo vi: la lista decía «guarderia_dia de Pepe». Es la
+       TERCERA vez que esta clase se cobra en la casa (las dos notas de
+       `telemedicina` y `guarderia_dia` viven en ese archivo), y la variante
+       nueva es peor: no faltaba una clave — yo no pasaba por el mapa. */
+    const voz = vozDelServicio ?? vozGenerica;
+    partes.push(c.mascotaNombre !== null ? `${voz} de ${c.mascotaNombre}` : voz);
   }
 
   if (c.objetoFecha !== null) partes.push(fechaLargaHumana(c.objetoFecha, idioma));
