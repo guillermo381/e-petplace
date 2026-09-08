@@ -92,6 +92,22 @@ líneas `Android Bundled` en su log** tras dos deep links, con los dos schemes
 (`exp+prestador://` y `prestador://`), con el `reverse` tendido y verificado
 (`adb reverse --list` muestra 8086) y con el puerto libre antes de arrancar.
 
+> ### ⚠️ LA HIPÓTESIS ALTERNATIVA, MEDIDA Y DESCARTADA
+> A mitad de la tanda el sistema mató dos procesos **por falta de memoria**
+> (~58 MB libres, con dos Metros y un emulador compitiendo), y al medirlo
+> apareció que **el Metro del prestador estaba muerto**: cero procesos en 8086.
+>
+> *Eso hacía que mi medición fuera verdadera —cero `Bundled`— con la causa
+> equivocada: no había con quién bundlear.* **Es `L-500` otra vez**, y por eso
+> se repitió el experimento en campo limpio antes de dejar nada escrito:
+> Metro del cliente apagado, emulador relanzado, un solo Metro (200 en
+> `/status` desde el host), `reverse` tendido, `force-stop` de la app y deep
+> link nuevo — **con los TRES schemes**.
+>
+> **Resultado: sigue en 0.** ⇒ la memoria era un factor que ensuciaba las
+> mediciones intermedias, **no la causa**. La conclusión se sostiene, ahora
+> con su alternativa descartada y no sólo con su primera lectura.
+
 La app **corre** —pinta la bienvenida, el login, entra con la cuenta de prueba
 y muestra los esqueletos— pero **sobre el bundle embebido del APK 1.0.3**, que
 no es mi árbol.
