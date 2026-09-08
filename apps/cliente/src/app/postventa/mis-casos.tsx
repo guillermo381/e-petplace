@@ -40,6 +40,11 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { tituloDelObjeto } from '@/lib/voz-del-caso';
+import {
+  FiltrosDeCaso,
+  type FiltroEstadoCaso,
+  type FiltroFechaCaso,
+} from '@/components/postventa/filtros-de-caso';
 import { vozServicio } from '@/lib/voz-servicio';
 
 type Fase<T> = T | 'cargando' | 'error';
@@ -55,6 +60,8 @@ export default function MisCasos() {
   const insets = useSafeAreaInsets();
   const [casos, setCasos] = useState<Fase<CasoEnBandeja[]>>('cargando');
   const [vozDeMotivo, setVozDeMotivo] = useState<Record<string, string>>({});
+  const [filtroEstado, setFiltroEstado] = useState<FiltroEstadoCaso>('todos');
+  const [filtroFecha, setFiltroFecha] = useState<FiltroFechaCaso>('todos');
 
   useFocusEffect(
     useCallback(() => {
@@ -88,11 +95,47 @@ export default function MisCasos() {
     }, []),
   );
 
+  /**
+   * 🔴 **EL FILTRO DE FECHA VIVE EN LA VISTA, Y ESO ESTÁ MEDIDO — no supuesto.**
+   *
+   * B me dejó el contrato del patrón: *«la ventana temporal es la CONSULTA, no
+   * un filtro de vista — filtrar en memoria miente en cuanto la ventana no
+   * trae todo»*. Es cierto, y por eso fui a ver si acá la ventana trae todo:
+   *
+   * `obtener_mis_casos` (`20260911650000:114-125`) **no tiene `LIMIT`**: es un
+   * `SELECT … WHERE c.familia_user_id = auth.uid()` con su `ORDER BY`. Trae
+   * TODOS los casos de la familia ⇒ **acá el filtro de vista no puede mentir**,
+   * porque no hay nada afuera de la ventana.
+   *
+   * ⚠️ **Y la garantía no es este comentario: es el TIPO.** `obtenerMisCasos`
+   * devuelve `CasoEnBandeja[]` **pelado, sin cursor**. El día que A pagine
+   * tendrá que devolver `{ casos, cursor }` y **este archivo deja de
+   * compilar** — que es exactamente lo que quiero: *una condición que se
+   * rompe en silencio no es una condición.*
+   *
+   * *La diferencia con el histórico del prestador, que sí consulta: ahí la
+   * ventana ES grande y el motor pagina. Acá una familia tiene pocos casos y
+   * muchas citas — se pide por el lado chico.*
+   */
   const filas: FilaDeBandeja[] = useMemo(() => {
     if (typeof casos === 'string') return [];
     /* 🔴 LOS ABIERTOS ARRIBA, y dentro de cada grupo lo más nuevo primero.
        `sort` sobre una copia: ordenar el arreglo del estado lo mutaría. */
+    const desde =
+      filtroFecha === 'todos'
+        ? null
+        : new Date(Date.now() - (filtroFecha === 'semana' ? 7 : 30) * 24 * 60 * 60 * 1000).toISOString();
+
     return [...casos]
+      .filter((c) => {
+        if (filtroEstado === 'abiertos' && TERMINADAS.has(c.etapa)) return false;
+        if (filtroEstado === 'cerrados' && !TERMINADAS.has(c.etapa)) return false;
+        /* Por CUÁNDO SE ABRIÓ el caso, no por la fecha del servicio: la
+           familia busca «el reclamo que hice la semana pasada», y el servicio
+           puede ser bastante anterior al reclamo. */
+        if (desde !== null && c.creadoEn < desde) return false;
+        return true;
+      })
       .sort((a, b) => {
         const ta = TERMINADAS.has(a.etapa) ? 1 : 0;
         const tb = TERMINADAS.has(b.etapa) ? 1 : 0;
@@ -112,7 +155,7 @@ export default function MisCasos() {
         ...(c.mascotaNombre !== null ? { nombreMascota: c.mascotaNombre } : null),
         /* Sin `reloj`: el plazo es del prestador — ver la cabecera. */
       }));
-  }, [casos, idioma, t, vozDeMotivo]);
+  }, [casos, idioma, t, vozDeMotivo, filtroEstado, filtroFecha]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -137,13 +180,29 @@ export default function MisCasos() {
         ) : casos === 'error' ? (
           /* Ley 13: el error jamás se disfraza de vacío. */
           <EstadoVacio titulo={t('postventa.misCasosNoSePudo')} />
-        ) : filas.length === 0 ? (
+        ) : casos.length === 0 ? (
           /* Vacío SERENO — no haber tenido que reclamar nada es la buena
              noticia, no un hueco que llenar. */
           <EstadoVacio titulo={t('postventa.misCasosVacio')} />
         ) : (
           <>
             <Texto variante="apoyo">{t('postventa.misCasosIntro')}</Texto>
+            {/* Los filtros van ARRIBA de la lista y sólo cuando hay algo que
+                filtrar: dos hileras de pastillas sobre una lista vacía son
+                controles que no controlan nada (Ley 23 — la puerta no ofrece
+                lo que no tiene). */}
+            <FiltrosDeCaso
+              estado={filtroEstado}
+              onEstado={setFiltroEstado}
+              fecha={filtroFecha}
+              onFecha={setFiltroFecha}
+            />
+            {/* 🔴 **DOS VACÍOS DISTINTOS, y por eso son dos ramas.** Uno dice
+                «no tuviste que reclamar nada» —la buena noticia— y el otro
+                «lo que buscás no está con estos filtros», que se resuelve
+                tocando una pastilla. *Un solo texto para los dos le diría a
+                una familia que no tiene casos cuando tiene seis.* */}
+            {filas.length === 0 ? <EstadoVacio titulo={t('postventa.filtroSinNada')} /> : null}
             {filas.map((f) => (
               <FilaBandejaCaso
                 key={f.clave}

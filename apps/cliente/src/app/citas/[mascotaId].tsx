@@ -69,6 +69,7 @@ import {
 import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { esMemorial } from '@/lib/memorial';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
 import { useCasosPorObjeto } from '@/lib/postventa/useCasosPorObjeto';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
@@ -292,7 +293,13 @@ export default function CitasDeMascota() {
       <View style={{ marginTop: spacing[1] }}>
         <LineaAlgoSalioDistinto
           estado={v.estado}
-          enMemorial={false}
+          sujeto="mascota"
+          /* 🔴 La SEÑAL, jamás un `false` de comodidad — B lo dejó escrito:
+             pasar `false` reintroduce el guard apagado que la prop vino a
+             curar. El veredicto ya devolvió `hay:false` en memorial, así que
+             acá nunca llega encendida; se pasa igual porque un piso que
+             depende de que el llamador se acuerde no es un piso. */
+          enMemorial={esMemorial(estadoVida)}
           onPress={() => {
             /* `casoAbierto` no tiene destino en `destinoDeLaPuerta` —nació
                cuando los casos no existían— así que el caso se navega acá,

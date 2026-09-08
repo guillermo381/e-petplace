@@ -950,6 +950,7 @@ export default function DetallePaseo() {
                     curar. */}
             <LineaAlgoSalioDistinto
               estado={puerta.estado}
+              sujeto="mascota"
               enMemorial={esMemorial(estadoVida)}
               onPress={abrirLaPuerta}
             />
