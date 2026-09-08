@@ -120,9 +120,11 @@ if (existeEstado === 0) {
   console.error(`   Hay ${total48} objetos que ya deberían estar en él, pero el arnés no puede`);
   console.error('   separar «el cron no corrió» de «el estado al que mover no existe»:');
   console.error('   son dos rojos distintos y mandan a lugares distintos.');
-  console.error('   BLOQUEANTE NOMBRADO: agregar `no_ejecutado` al CHECK de');
-  console.error('   `evento_cita_servicio.estado` (y su gemelo en pedido), y recién');
-  console.error('   entonces este arnés puede dar rojo de verdad.');
+  console.error('   BLOQUEANTE NOMBRADO, con su dueño: el estado nace con **A6**, el arco');
+  console.error('   de la regla del cierre ausente (F1). Hasta entonces falta agregar');
+  console.error('   `no_ejecutado` al CHECK de `evento_cita_servicio.estado` (y su gemelo');
+  console.error('   en pedido). **Este naranja NO se fuerza a verde**: mientras el estado');
+  console.error('   no exista, un verde acá diría que el reloj corrió, y no hay reloj.');
   process.exit(2);
 }
 

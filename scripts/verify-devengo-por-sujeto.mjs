@@ -71,7 +71,32 @@
  *
  * Salidas: 0 verde · 1 rojo (hay objetos sin evento) · 2 no concluyente.
  */
+import { execFileSync } from 'node:child_process';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dbQuery } from './lib-db.mjs';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ANTES / DESPUÉS — la medición que prueba que el ledger dejó de estar mudo
+ * ═══════════════════════════════════════════════════════════════════════════
+ *   node scripts/verify-devengo-por-sujeto.mjs --instantanea <ruta>
+ *   node scripts/verify-devengo-por-sujeto.mjs --contra <ruta>
+ *
+ * 🔴 **UNA BAJA DEL NÚMERO NO PRUEBA, POR SÍ SOLA, QUE APARECIERON LOS
+ * PRODUCTORES.** «19 → 9» puede significar tres cosas distintas y sólo una es
+ * la buena:
+ *   · el universo quedó igual y aparecieron eventos ⇒ **el productor nació** ✅
+ *   · el universo se achicó ⇒ **desaparecieron objetos**, no nacieron eventos
+ *   · el universo creció y los sin-evento también ⇒ tráfico nuevo sin productor
+ * Por eso la comparación es **por oficio y en dos columnas** (`n` y
+ * `sin evento`), y el veredicto **nombra cuál de los tres pasó**. *Mirar sólo
+ * el total deja las tres indistinguibles.*
+ *
+ * ⚠️ **La instantánea lleva FECHA, HORA y SHA.** En una sesión de seis pistas
+ * un cero del motor vence en horas; sin su hora, un «antes» no se puede
+ * comparar con nada. */
+const arg = (n) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : null; };
+const RUTA_GUARDAR = arg('--instantanea');
+const RUTA_CONTRA = arg('--contra');
 
 const NEG = '00000000-0000-0000-0000-0000000000ff'; // ejecutado SIN evento
 const POS = '00000000-0000-0000-0000-0000000000aa'; // ejecutado CON evento
@@ -155,6 +180,60 @@ if (!cp || cp.sin_evento !== 0) {
 }
 
 const reales = filas.filter((f) => !f.sintetico);
+
+// ── INSTANTÁNEA ──────────────────────────────────────────────────────────
+if (RUTA_GUARDAR) {
+  const sha = (() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return null; } })();
+  writeFileSync(RUTA_GUARDAR, JSON.stringify({
+    tomada_en: new Date().toISOString(),
+    tomada_en_local: new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' }),
+    sha, filas: reales,
+  }, null, 1));
+  console.log(`instantánea guardada en ${RUTA_GUARDAR}`);
+  console.log(`   ${new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })} Guayaquil · sha ${sha?.slice(0, 8)}`);
+}
+
+// ── COMPARACIÓN ──────────────────────────────────────────────────────────
+if (RUTA_CONTRA) {
+  if (!existsSync(RUTA_CONTRA)) {
+    console.error(`🟠 NO CONCLUYENTE · no existe la instantánea ${RUTA_CONTRA}.`);
+    process.exit(2);
+  }
+  const antes = JSON.parse(readFileSync(RUTA_CONTRA, 'utf8'));
+  const clave = (f) => `${f.obj}·${f.via}`;
+  const mapA = new Map(antes.filas.map((f) => [clave(f), f]));
+  const mapD = new Map(reales.map((f) => [clave(f), f]));
+  const todas = [...new Set([...mapA.keys(), ...mapD.keys()])].sort();
+
+  console.log('\n═══ ANTES / DESPUÉS ═══');
+  console.log(`  ANTES   ${antes.tomada_en_local} Guayaquil · sha ${String(antes.sha).slice(0, 8)}`);
+  console.log(`  DESPUÉS ${new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' })} Guayaquil · sha ${(() => { try { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim().slice(0, 8); } catch { return '?'; } })()}`);
+  console.log('\n  vía                            n antes→después   sin evento antes→después');
+  for (const k of todas) {
+    const a = mapA.get(k), d = mapD.get(k);
+    const nA = a?.n ?? 0, nD = d?.n ?? 0, sA = a?.sin_evento ?? 0, sD = d?.sin_evento ?? 0;
+    const marca = sD < sA ? '🟢' : sD > sA ? '🔴' : '  ';
+    console.log(`  ${marca} ${k.padEnd(30)} ${String(nA).padStart(3)} → ${String(nD).padEnd(6)}    ${String(sA).padStart(3)} → ${String(sD)}`);
+  }
+  const uA = antes.filas.reduce((x, f) => x + f.n, 0), uD = reales.reduce((x, f) => x + f.n, 0);
+  const sAt = antes.filas.reduce((x, f) => x + f.sin_evento, 0), sDt = reales.reduce((x, f) => x + f.sin_evento, 0);
+  console.log(`\n  universo ${uA} → ${uD}  ·  SIN evento ${sAt} → ${sDt}`);
+
+  // 🔴 EL VEREDICTO NOMBRA CUÁL DE LOS TRES PASÓ.
+  if (sDt < sAt && uD >= uA) {
+    console.log(`\n🟢 EL LEDGER DEJÓ DE ESTAR MUDO en ${sAt - sDt} sujeto(s).`);
+    console.log('   El universo NO se achicó, así que la baja es por eventos que antes');
+    console.log('   no existían: **nacieron productores**, no desaparecieron objetos.');
+  } else if (sDt < sAt && uD < uA) {
+    console.log(`\n🟠 El número bajó (${sAt} → ${sDt}) PERO el universo también (${uA} → ${uD}).`);
+    console.log('   No se puede atribuir a productores nuevos: desaparecieron objetos.');
+    console.log('   *Una baja con universo menor no prueba nada del ledger.*');
+  } else if (sDt > sAt) {
+    console.log(`\n🔴 SUBIÓ: ${sAt} → ${sDt}. Entraron objetos ejecutados sin productor.`);
+  } else {
+    console.log('\n⚪ Sin cambio en los sujetos sin evento.');
+  }
+}
 const universo = reales.reduce((a, f) => a + f.n, 0);
 const sinEvento = reales.reduce((a, f) => a + f.sin_evento, 0);
 const conEvento = universo - sinEvento;
