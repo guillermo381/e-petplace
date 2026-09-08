@@ -1137,3 +1137,106 @@ importa** — así el que importa queda limpio para la verificación final.
 `e-petplace-admin.vercel.app` → `index-fK9Opg5L.js`, 23 min después del push.
 El anterior había tardado ~50 min. **Sigue esperando, y desde ahora se sondea
 espaciado y por el otro dominio.**
+
+---
+
+# ADENDA 9 · EL CHECKPOINT DE VERCEL — qué es, y qué significa para el pasaporte
+
+**Medido sin cambiar nada y sin volver a sondear en ráfaga** (una request por
+dominio; el umbral NO se prueba a propósito — ver el final).
+
+## Es defensa AUTOMÁTICA de la plataforma, no configuración del proyecto
+
+**El discriminador es limpio y no necesita el dashboard:**
+
+```
+admin.epetplace.com          → 403 · x-vercel-mitigated: challenge
+e-petplace-admin.vercel.app  → 200 · sin header de mitigación
+                               ↑ EL MISMO PROYECTO
+```
+
+⇒ **Si fuera «Attack Challenge Mode» —que se enciende por proyecto— aplicaría a
+TODOS sus dominios.** No aplica al otro. **No es configuración del proyecto.**
+
+Y la plataforma lo dice con todas las letras en su propio header:
+
+```
+x-vercel-mitigated: challenge
+x-vercel-challenge-token: 2.1788836897.60.…
+cache-control: private, no-store, max-age=0
+```
+
+**`mitigated`** es el vocabulario de una mitigación reactiva, no de una política
+declarada. Se suma la evidencia temporal: **las primeras ~15 requests pasaron
+bien** y el 403 apareció después — *una configuración no espera quince
+requests.*
+
+## Dónde aplica hoy
+
+| dominio | estado | mitigación |
+|---|---|---|
+| `admin.epetplace.com` | 403 | 🔴 **activa** (la disparé yo) |
+| `www.epetplace.com` | 200 | ✅ **no** — con y sin UA de navegador |
+| `e-petplace-admin.vercel.app` | 200 | ✅ no |
+| `epetplace-pagos-stg.vercel.app` | 200 | ✅ no |
+| `pagos.epetplace.com` | 000 | — no llega a evaluarse: **no tiene certificado** |
+
+**Es por (IP × dominio), no por proyecto ni por cuenta.** Mi IP quedó marcada
+para `admin.epetplace.com` y para nada más.
+
+## 🔴 Lo que importa para octubre: el pasaporte con QR
+
+El QR apunta a **`https://www.epetplace.com/p/{token}`** (`Placas.tsx:30`).
+Medido:
+
+```
+GET /p/<token inexistente>  → 404 · 2.606 bytes · <title>Pasaporte</title>
+                              x-vercel-cache: MISS
+                              SIN x-vercel-mitigated
+```
+
+**La página existe, responde, y hoy no tiene checkpoint.**
+
+**Pero la respuesta honesta a la pregunta del founder es que el riesgo NO está
+descartado, y por dos razones medidas:**
+
+1. **La mitigación es automática y por frecuencia** — no hay que encenderla para
+   que aparezca: apareció sola en `admin` sin que nadie la configurara. *Lo que
+   protege a `www` hoy no es una exención: es que nadie le mandó una ráfaga.*
+2. **`x-vercel-cache: MISS` en `/p/`** ⇒ **cada lectura de pasaporte va al
+   origen**, no se sirve de caché. Una ráfaga de lecturas es una ráfaga de
+   requests reales — exactamente el patrón que dispara la mitigación.
+
+⚠️ **Y el detalle que lo vuelve peor de lo que suena para este caso concreto:**
+un pasaporte se lee **desde el teléfono de quien encontró a la mascota**,
+muchas veces **desde la misma red** (una veterinaria, un refugio, un evento).
+*Varias lecturas seguidas desde una IP compartida son, para el mitigador, una
+ráfaga desde una IP.* **Y el checkpoint le pide JavaScript al navegador** — mi
+prueba mostró que un navegador real lo resuelve en <8 s, pero **son 8 segundos
+en el peor momento posible**: alguien con un animal perdido en la mano.
+
+## Lo que NO medí, y por qué
+
+- **El umbral exacto** (cuántas requests por minuto disparan la mitigación).
+  **No se prueba: probarlo es dispararlo**, y hacerlo sobre `www.epetplace.com`
+  sería dejar el sitio público con un checkpoint activo por mi culpa. *La
+  medición cuesta exactamente el daño que se quiere evitar.*
+- **Si el proyecto tiene reglas de firewall configuradas.** El discriminador
+  descarta el *Attack Challenge Mode* global, **pero una regla puntual del
+  Firewall sí viviría en el dashboard** — Settings → Security/Firewall es lo que
+  lo diría.
+- **Cuánto dura.** El token trae `…60…`, que *parece* un TTL en segundos, pero
+  la mitigación seguía activa mucho después. **No lo afirmo: no lo medí.**
+
+## Lo que se puede hacer antes de octubre, para la mesa
+
+*(No lo ejecuto: es decisión y es del dashboard.)*
+
+- **Caché en `/p/`.** Hoy es `MISS`: si la página del pasaporte se pudiera servir
+  cacheada, la ráfaga no llegaría al origen y no parecería un ataque. Es la cura
+  que ataca la causa y no el síntoma.
+- **Verificar en Settings → Firewall** si hay reglas propias, y si el plan
+  permite excluir `/p/` de la mitigación.
+- **Y no dejar el descubrimiento para octubre:** esto se prueba con una ráfaga
+  controlada contra `/p/` **antes** de que haya placas en la calle, sabiendo que
+  la prueba deja el dominio marcado un rato.
