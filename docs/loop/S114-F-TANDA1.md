@@ -1333,3 +1333,72 @@ me tocó figura como mitigación automática y no como una regla.
 dashboard: si hay reglas propias, y el umbral. **El discriminador de la adenda 9
 —mismo proyecto, dos dominios, distinto comportamiento— descarta el modo global,
 pero no descarta una regla puntual.**
+
+---
+
+# ADENDA 11 · EL ASIENTO, EJERCIDO CONTRA CASOS REALES
+
+Cuando construí la bandeja y la Hoja había **0 casos**: se escribieron sin
+sujeto. Con los tres que sembró E y el asiento de casa que entregó A, **se
+ejercieron las dos, por camino real, con la sesión de la casa.**
+
+## La bandeja — `obtenerBandejaCasos()`
+
+La consulta exacta del wrapper, con la sesión de casa:
+
+```
+filas que ve la casa: 3   ← las tres clases y los tres tipos de objeto
+
+2c9c3fe9 · cita     · calidad                · clase 2 · resuelto_entre_partes
+9860ef35 · pedido   · producto_en_mal_estado · clase 3 · resuelto
+3a52bb19 · estadia  · no_recogida_prestador  · clase 1 · resuelto
+```
+
+**El orden de la bandeja funciona** (te-lo-pidieron → vencido → abierto →
+cerrado). Hoy los tres caen en «cerrado» porque **resolví el único abierto al
+ejercer el discriminador** — así que la pantalla mostraría su vacío con causa y
+el botón «Ver los 3 cerrados», que es exactamente el caso que `VacioQueHabla`
+cubre.
+
+## La Hoja — las cinco fuentes, sobre `2c9c3fe9`
+
+```
+① leer_caso            → cita «paseo» · clase 2 · resuelto_entre_partes
+                         resolución: parcial · $4,50 · camino aplicar_reembolso
+                                     destino saldo · destino_estado aplicado
+② leer_mensajes_caso   → 3 mensajes:
+                           casa      · hecho · «Recibimos tu caso.»
+                           prestador · hecho · «Se resolvió: hay una devolución para vos.»
+                           casa      · hecho · «Elegiste saldo. Ya está disponible…»
+③ _caso_tiene_devengo  → 0eeb7c24 (evento VIVO)
+④ precio del objeto    → $6,27
+⑤ contadores 90 días   → familia 2 · prestador 0
+   decidido_por        → c5d54e3a  ← el prestador; coherente con «entre partes»
+```
+
+**Las cinco responden y la Hoja se puede pintar entera.** Nada quedó en `null`
+por sorpresa.
+
+## 🔴 El cruce que verifica las DOS pantallas a la vez
+
+Perseguí el evento de ese caso y encontré su par:
+
+```
+0eeb7c24 · cita_pagada · payout +5,64 · plataforma +0,63 · pendiente_liquidar
+62dcdc73 · reembolso   · payout −4,05 · plataforma −0,45 · pendiente_liquidar
+                                                            inverso_de 0eeb7c24
+```
+
+- **Neto al prestador: 5,64 − 4,05 = 1,59.** Mi `obtenerCuentasLiquidables` suma
+  los `pendiente_liquidar` de la cuenta ⇒ **muestra 1,59, que es lo correcto.**
+- **La comisión se reversó proporcionalmente:** se devolvió $4,50 de $6,27
+  (71,8 %) y la plataforma bajó 0,45 de 0,63 (71,4 %). *Es lo que la letra dice
+  que hace `aplicar_reembolso`, verificado sobre plata real y no sobre la prosa.*
+
+⇒ **El caso de postventa y la liquidación se conectan bien, y mis dos pantallas
+leen lo mismo desde los dos lados.** Un reembolso no deja al prestador cobrando
+de más ni a la plataforma quedándose una comisión que ya no le corresponde.
+
+*(Y sirve de control positivo de la pantalla de liquidación, que hasta ahora
+sólo se había ejercido contra eventos sin reverso: acá hay uno con su inverso, y
+la suma sigue dando lo que tiene que dar.)*

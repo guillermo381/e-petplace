@@ -28703,6 +28703,58 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-500` — Medir una RAMA del código y concluir sobre la otra
+
+**S114-F, y lo incómodo es que pasó el mismo día que se escribió `L-499`.**
+
+`/p/[token]` del sitio público tiene un ternario:
+
+```js
+Cache-Control: estado === 'activo' ? 'public, max-age=60' : 'no-store'
+```
+
+Lo medí con un **token inexistente** —el que tenía a mano—, cayó en `no-store`,
+dio `x-vercel-cache: MISS`, y **reporté «cada lectura del pasaporte va al
+origen»**. Sobre ese reporte el founder firmó una tarea de cachear la página.
+
+**Medido después con un token REAL:**
+
+```
+request 1 → MISS · age 0
+request 2 → HIT  · age 3     (3 segundos después)
+```
+
+**Ya estaba cacheado, desde su primera versión, con su razón escrita al lado.**
+La rama que medí es justamente **la única que jamás se cachea, y con razón**: un
+404 cacheado escondería una placa recién activada.
+
+> ***El request fue verdadero. La afirmación que construí encima era falsa.***
+> No medí de menos: **medí bien el caso que no importaba.**
+
+🔴 **Y lo que lo vuelve peligroso: la rama que uno tiene a mano suele ser la de
+error**, porque es la que se alcanza sin datos —un id inventado, una tabla
+vacía, un token que no existe—. *Es la más fácil de probar y la menos
+representativa.* La rama feliz casi siempre pide sembrar algo, y por eso se
+saltea.
+
+⇒ **Antes de generalizar desde una medición, la pregunta es «¿por qué camino
+entró esto?»** — y si el código tiene un condicional en el medio, **la medición
+vale para esa rama y nada más.** Con un `if`, un ternario o un `switch` entre el
+estímulo y la respuesta, **hacen falta tantas mediciones como ramas decidan
+salidas distintas.**
+
+**El costo de haberlo evitado, medido:** un token válido era una consulta que ya
+había corrido tres veces esa tarde para otra cosa. **No fue falta de acceso:
+fue no preguntarme si el caso que tenía a mano era el caso que importaba.**
+
+*(Parienta de [[L-499]] —medir una capa y concluir sobre el sistema— pero cruza
+de eje: aquélla es sobre **capas** apiladas, ésta sobre **ramas** paralelas. Y
+de `L-459`: la primera prueba de algo no es que dé verde, es que dé el resultado
+correcto **sobre el caso real**.)*
+
+---
+
+
 ### `L-499` — Medir sólo la capa que falla da un diagnóstico VERDADERO E INÚTIL
 
 **S114-F.** `admin.epetplace.com` no respondía. Lo medí con un `curl`, dio
