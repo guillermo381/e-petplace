@@ -12162,6 +12162,7 @@ export type Database = {
           no_recogida_detalle: string | null
           no_recogida_en: string | null
           no_recogida_motivo: string | null
+          nota_siembra: string | null
           retorno_en: string | null
           tramo_devolucion_id: string | null
           tramo_recogida_id: string | null
@@ -12179,6 +12180,7 @@ export type Database = {
           no_recogida_detalle?: string | null
           no_recogida_en?: string | null
           no_recogida_motivo?: string | null
+          nota_siembra?: string | null
           retorno_en?: string | null
           tramo_devolucion_id?: string | null
           tramo_recogida_id?: string | null
@@ -12196,6 +12198,7 @@ export type Database = {
           no_recogida_detalle?: string | null
           no_recogida_en?: string | null
           no_recogida_motivo?: string | null
+          nota_siembra?: string | null
           retorno_en?: string | null
           tramo_devolucion_id?: string | null
           tramo_recogida_id?: string | null
@@ -23075,11 +23078,13 @@ export type Database = {
         Row: {
           calculado_en: string | null
           citas_mes: number | null
+          cobrado_sin_devengar: number | null
           gmv_crecimiento_pct: number | null
           gmv_hoy: number | null
           gmv_mes: number | null
           mascotas_total: number | null
           mau: number | null
+          objetos_sin_ejecutar: number | null
           pedidos_hoy: number | null
           pedidos_mes: number | null
           revenue_mes: number | null
@@ -23494,6 +23499,10 @@ export type Database = {
       }
     }
     Functions: {
+      _abrir_caso_no_ejecutado: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: string
+      }
       _adiestramiento_atencion_terminada: {
         Args: { p_adiestramiento_id: string }
         Returns: Record<string, unknown>
@@ -23712,6 +23721,12 @@ export type Database = {
         }[]
       }
       _deuna_base36: { Args: { p_n: number }; Returns: string }
+      _devengar_cita: {
+        Args: { p_cita_id: string; p_via: string }
+        Returns: string
+      }
+      _devengar_estadia: { Args: { p_estadia_id: string }; Returns: string }
+      _devengar_pedido: { Args: { p_pedido_id: string }; Returns: string }
       _dias_sin_repetidos: { Args: { p_dias: number[] }; Returns: boolean }
       _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
       _empleado_matricula_ok: {
@@ -23897,6 +23912,10 @@ export type Database = {
         Returns: boolean
       }
       _pago_aprobado: { Args: { p_crudo: Json }; Returns: boolean }
+      _pago_del_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: number
+      }
       _path_es_de_mi_publicacion: {
         Args: { p_nombre: string }
         Returns: boolean
@@ -23912,6 +23931,10 @@ export type Database = {
       }
       _puede_operar_pedido: { Args: { p_pedido_id: string }; Returns: boolean }
       _renderizar_acta: { Args: { p_solicitud_id: string }; Returns: Json }
+      _resolver_caso_clase1: {
+        Args: { p_actor?: string; p_caso_id: string }
+        Returns: undefined
+      }
       _resolver_fee_aplicable: {
         Args: {
           p_categoria_origen?: string
@@ -25275,6 +25298,7 @@ export type Database = {
       expirar_bonos_sin_pago: { Args: never; Returns: number }
       expirar_citas_pendientes: { Args: never; Returns: undefined }
       expirar_mensualidades_sin_pago: { Args: never; Returns: number }
+      expirar_objetos_sin_cierre: { Args: never; Returns: Json }
       expirar_pedidos_sin_pago: { Args: never; Returns: Json }
       expirar_planes_sin_pago: { Args: never; Returns: number }
       expirar_programas_sin_pago: { Args: never; Returns: number }
@@ -26598,6 +26622,7 @@ export type Database = {
         }[]
       }
       obtener_serie_recurrente: { Args: { p_serie_id: string }; Returns: Json }
+      obtener_servicios_sin_cerrar: { Args: never; Returns: Json }
       obtener_slots_disponibles: {
         Args: {
           p_desde: string
