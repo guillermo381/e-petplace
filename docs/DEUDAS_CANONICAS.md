@@ -28703,6 +28703,46 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-501` — Un instrumento que mide detrás de un caché declara su TTL o invalida
+
+**S114-F, ensayo de la placa.** Configuré el pasaporte (`configurar_pasaporte`
+→ `ok`) y **esperé 62 segundos antes de volver a pedir la página**. Sin esa
+espera habría leído la respuesta cacheada de la medición anterior —el pasaporte
+todavía mudo, con `max-age=60`— y habría concluido que **`configurar_pasaporte`
+no funcionó**.
+
+> ***El caché que había verificado como una virtud, diez minutos antes, es una
+> trampa para la medición siguiente.*** Es la misma pieza: cambia de rol según
+> si uno la está midiendo o midiendo a través de ella.
+
+🔴 **Y su modo de falla es el peor: no da error, da el valor ANTERIOR.** Una
+lectura cacheada es indistinguible de una lectura fresca — mismo status, mismo
+cuerpo, misma forma. *El único que las separa es un header que hay que ir a
+mirar (`x-vercel-cache`, `age`), y nadie lo mira cuando espera un cambio.*
+
+**Y el daño típico es doble, porque el instrumento miente en la dirección más
+convincente:** confirma que **el cambio no ocurrió** justo cuando uno acaba de
+hacerlo — así que la conclusión natural es «lo que escribí está mal», y se
+empieza a depurar una cura que funcionaba.
+
+⇒ **Todo instrumento que mida detrás de un caché hace UNA de estas tres:**
+1. **espera el TTL** (y lo dice: «esperé 62 s porque el `max-age` es 60»);
+2. **invalida** — cache-buster en la URL, `Cache-Control: no-cache` en el pedido,
+   purga;
+3. **lee el header y lo declara** (`x-vercel-cache: HIT` ⇒ *esto no es fresco* y
+   la medición no vale para lo que se acaba de cambiar).
+
+**Lo que NO vale es medir y no decir nada**: el resultado es correcto la mitad
+de las veces y no hay forma de saber cuál mitad.
+
+*(Hermana de [[L-500]] y [[L-499]] — las tres son sobre **medir bien lo que no
+es lo que uno cree que mide**: `L-499` la capa, `L-500` la rama, `L-501` el
+momento. Y de `L-166`: todo dato vivo se lee al momento de usarlo — acá el caché
+convierte un dato «de ahora» en uno de hace un minuto sin avisar.)*
+
+---
+
+
 ### `L-500` — Medir una RAMA del código y concluir sobre la otra
 
 **S114-F, y lo incómodo es que pasó el mismo día que se escribió `L-499`.**

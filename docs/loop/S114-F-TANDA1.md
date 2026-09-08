@@ -1598,3 +1598,65 @@ del circuito y sirven de fixture para el próximo que lo toque —igual que la
 cita `cfce1d43` de S56—. Están marcados en el nombre del lote, en el proveedor y
 **en el texto que la página muestra**. Se revocan con `revocar_pasaporte(Zeus)`
 el día que estorben.
+
+---
+
+# ADENDA 14 · EL DEPLOY QUE NO SALE — lo que ya está descartado y lo que falta
+
+**`8934a30` (la URL canónica) lleva 1 h 21 min sin desplegarse.** El deploy
+anterior tardó ~50 min, así que **esto ya excede lo observado**.
+
+## Lo que YA está descartado, medido de mi lado
+
+| pregunta | medición | ⇒ |
+|---|---|---|
+| ¿el commit llegó a GitHub? | `local == origin/main == 8934a30` · 0 sin pushear | ✅ sí |
+| ¿el auto-deploy funciona? | el deploy anterior (`73b275c`) **salió solo** | ✅ sí |
+| ¿el deployment de rama existe? | `…-git-main-…` responde **302** (redirige al SSO) | ✅ existe algo |
+| ¿qué está sirviendo producción? | `index-fK9Opg5L.js` = build de **`73b275c`** | 🔴 el anterior |
+| ¿el sitio está caído? | `admin.epetplace.com` y `e-petplace-admin.vercel.app` → **200** | ✅ sano |
+
+**No es que el push no llegó, ni que el auto-deploy esté roto, ni que el sitio
+esté caído.** Producción sirve el commit anterior y punto.
+
+## 🔴 Lo que NO puedo medir desde afuera, y por qué
+
+**El deployment de rama está protegido** («Require Log In», Standard) ⇒ **no
+puedo leer su bundle** para saber si el build de `8934a30` existe y sólo falta
+la promoción, o si nunca se construyó. *Es la protección haciendo su trabajo —
+pero me deja sin el único canal por el que podría distinguir las dos cosas.*
+
+**Y no adivino entre ellas.** Las tres hipótesis que se pueden pensar sin medir
+—cola, build fallido, hook que no disparó— **producen exactamente lo mismo desde
+afuera: producción sirviendo el commit anterior.**
+
+## La evidencia que falta, en el orden en que la miraría
+
+**Vercel → proyecto `e-petplace-admin` → Deployments**, buscando `8934a30`:
+
+1. **¿Existe un deployment para ese commit?**
+   - **No existe** ⇒ el hook de GitHub no disparó. Se ve en GitHub → Settings →
+     Webhooks (si el envío falló) o volviendo a pushear algo trivial.
+   - **Existe** ⇒ seguir a 2.
+2. **¿En qué estado?**
+   - **Error** ⇒ el log dice por qué; sería raro (`tsc -b` y `npm run build`
+     dieron verde local), pero un build local verde no prueba el de Vercel.
+   - **Queued / Building** ⇒ hay cola: sólo esperar.
+   - **Ready pero no promovido a producción** ⇒ es el caso más silencioso, y
+     encaja con lo que veo: el deployment existe, la URL de rama responde, y
+     producción sigue en el anterior. **Se promueve con «Promote to Production».**
+3. **Si dice Ready y en Production**, entonces el problema es de caché de borde
+   y se descarta pidiendo con `?v=<algo>`.
+
+> *La tercera es la que más se parece a lo medido y la que ningún sondeo mío
+> puede confirmar: **desde afuera, «no se construyó» y «se construyó y no se
+> promovió» son el mismo silencio**.*
+
+## Lo que NO cambia mientras tanto
+
+**Nada de lo verificado hoy depende de este deploy.** La URL canónica ya está
+**en el repo y pusheada**; lo que falta es que producción la sirva. Y las dos
+verificaciones que quedan —cero ocurrencias de la URL vieja en el bundle, y el
+clic en «Entrar con Google»— **siguen sin poder correrse, y correrlas ahora
+daría un falso verde**: medirían el bundle de `73b275c`, cuyo `redirectTo`
+apunta a `e-petplace-admin.vercel.app`, **una URL que funciona**.
