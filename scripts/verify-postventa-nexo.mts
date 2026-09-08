@@ -28,7 +28,7 @@
  * «para que Nexo entienda mejor», esto se pone rojo y obliga a declararlo.
  */
 import { execFileSync } from 'node:child_process'
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -112,11 +112,23 @@ Deno.exit(0)
 `
   let temp: string | null = null
   try {
-    temp = mkdtempSync(join(tmpdir(), 'nexo-caso-'))
+    /* Temp ESTABLE, no uno nuevo por corrida: pnpm y deno no comparten la forma
+       de `node_modules`, así que deno resuelve las suyas con `nodeModulesDir:
+       auto` — y con `mkdtemp` reinstalaba supabase-js y sus ocho dependencias
+       en CADA corrida del gate. Sigue estando fuera del repo, que es lo único
+       que importa para que `deno` no le escriba una clave `workspaces` a
+       `package.json`. */
+    temp = join(tmpdir(), 'epp-nexo-gate')
+    mkdirSync(temp, { recursive: true })
     cpSync(new URL('../supabase/functions', import.meta.url).pathname, join(temp, 'functions'), { recursive: true })
+    writeFileSync(join(temp, 'deno.json'), JSON.stringify({ nodeModulesDir: 'auto' }))
     writeFileSync(join(temp, 'g.ts'), guion)
-    const salida = execFileSync('deno', ['run', '--allow-read', '--allow-env', '--allow-net=0.0.0.0:8000', 'g.ts'],
-      { cwd: temp, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 180_000 })
+    const salida = execFileSync('deno', /* `--allow-net` entero y `--allow-write`: deno los necesita para BAJAR e
+       instalar las dependencias npm del temp, no sólo para el `Deno.serve` que
+       arranca al importar la edge. Acotarlo al 8000 dejaba el gate en NO
+       CONCLUYENTE para siempre — que es honesto, pero no mide. */
+      ['run', '--allow-read', '--allow-env', '--allow-net', '--allow-write', 'g.ts'],
+      { cwd: temp, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 300_000 })
     const r = JSON.parse(salida.slice(salida.indexOf('@@') + 2).split('\n')[0])
 
     // El control: fuera de un caso el muro CORTA una dosis inventada. Sin esto,
@@ -139,10 +151,21 @@ Deno.exit(0)
       fallas.push(`✗ la derivación no se agregó (fuera=${r.deriva_fuera.deriva} dentro=${r.deriva_dentro.deriva})`)
     } else verdes++
   } catch (e) {
-    fallas.push(`✗ NO CONCLUYENTE: no se pudo ejercer el muro con \`deno\` — ${String(e).split('\n')[0]}`)
-  } finally {
-    if (temp !== null) rmSync(temp, { recursive: true, force: true })
+    /* 🔴 EL CHOQUE DE PUERTO ES UNA CAUSA PROPIA Y SE NOMBRA. Importar la edge
+       arranca su `Deno.serve` en el 8000; si otra corrida que también importa
+       `coach` está viva —la medición de `medir:nexo-caso`, por ejemplo— la
+       segunda no puede escuchar y muere. *Reportarlo como «no se pudo ejercer
+       el muro» mandaría a buscar un defecto donde sólo hay dos procesos.* */
+    const err = (e as { stderr?: string }).stderr ?? String(e)
+    if (/AddrInUse|Address already in use|address in use/i.test(err)) {
+      fallas.push('✗ NO CONCLUYENTE: el puerto 8000 está ocupado — hay otra corrida que importa `coach` viva (¿`medir:nexo-caso`?). Esperá a que termine y repetí.')
+    } else {
+      fallas.push(`✗ NO CONCLUYENTE: no se pudo ejercer el muro con \`deno\` — ${String(e).split('\n')[0]}`)
+      console.error(`     (stderr: ${err.slice(0, 300)})`)
+    }
   }
+  // El temp NO se borra: su `node_modules` es lo que hace que la próxima
+  // corrida del gate no vuelva a instalar nueve paquetes.
 }
 
 console.log(`\n  controles en verde: ${verdes}`)
