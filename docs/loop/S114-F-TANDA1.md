@@ -976,3 +976,112 @@ acuerde en el momento.*
 - y **③ tampoco**: probar «Entrar con Google» **ahora** mediría el bundle
   anterior, cuyo `redirectTo` es `e-petplace-admin.vercel.app`. *Eso daría verde
   y no probaría lo que hay que probar.* Se corre contra el bundle nuevo.
+
+---
+
+# ADENDA 7 · 🔴 FRENO — `pagos.epetplace.com` NO se puede asignar todavía
+
+**Medido sin cambiar nada, antes de la firma del founder.**
+
+## ① `epetplace-pagos-stg` ES staging — y no lo digo por el nombre
+
+El nombre podría ser heredado. **Lo que lo prueba es el `config.js` que el
+propio sitio publica**, generado por su build desde las variables del proyecto
+de Vercel:
+
+```js
+// https://epetplace-pagos-stg.vercel.app/config.js  · HTTP 200 · 425 bytes
+var CONFIG = {
+  "MODO": "stg",                              // ← el ambiente, explícito
+  "APP_CODE": "EPETPLACESTG-EC-CLIENT",       // ← credencial de STAGING de Nuvei
+  "APP_KEY":  "…",                            // (pública por diseño, juego CLIENT)
+  "API_ALTA": "https://zyltipqscdsdsxnjclhp.supabase.co/functions/v1/pagos-alta-tarjeta",
+  …
+};
+```
+
+🔴 **Y el dato que cambia cómo se lee todo esto: el ambiente NO lo define el
+repo — lo define la variable `PAGOS_MODO` del proyecto de Vercel**, con default
+`stg` (README de `apps/pagos-web`, tabla de variables). *El mismo código es
+staging o producción según el proyecto que lo despliegue.* Por eso la pregunta
+no se contesta leyendo el repo: se contesta leyendo **qué publicó el build**.
+
+⇒ **Es staging de verdad, en las dos puntas: el modo del SDK y las credenciales
+del proveedor.**
+
+## ② NO existe un proyecto de producción
+
+```
+epetplace-pagos.vercel.app        → 404
+epetplace-pagos-prod.vercel.app   → 404
+pagos-epetplace.vercel.app        → 404
+epetplace-pagos-web.vercel.app    → 404
+CONTROL epetplace-pagos-stg       → 200   ← el método discrimina
+
+menciones en TODO el repo: `epetplace-pagos-stg` ×19 · cualquier otro nombre ×0
+```
+
+⚠️ **Limitación declarada:** un 404 en `<nombre>.vercel.app` **no prueba que un
+proyecto no exista** — puede existir sin deployment, o con otro nombre que no
+adiviné. **Sólo el dashboard lista proyectos.** Lo que sí es concluyente es la
+otra mitad: **en todo el repo no hay una sola referencia a un proyecto de pagos
+que no sea el de staging.**
+
+## 🔴 EL FRENO, que es la respuesta a la pregunta del founder
+
+**Lo que falta no es asignar el dominio: es que exista el proyecto de
+producción.** Asignar `pagos.epetplace.com` a `epetplace-pagos-stg` haría que
+**el subdominio de pagos de la marca sirva el SDK en modo `stg` con credenciales
+`EPETPLACESTG`** — y lo peor es que *se vería perfecto*: la página carga, el
+formulario monta, el usuario tipea su tarjeta.
+
+*Es la misma clase de mezcla que dos WABAs homónimas: dos ambientes con el mismo
+nombre visible, y el que decide cuál es no es el que mira la URL.*
+
+**Y no es hipotético para octubre:** `DEFINICION_SOFTLAUNCH` §3.5 tiene abiertas
+—de terceros— las **credenciales productivas** y el **host productivo**. Este
+dominio ES ese host. Apuntarlo a staging cerraría la ficha sin cerrar el hecho.
+
+## ③ El servicio está VIVO y la app del cliente lo consume
+
+**No es un resto que nadie mantiene.**
+
+```
+https://epetplace-pagos-stg.vercel.app/       → 200 · 63.938 bytes
+                       /config.js             → 200 · 425 bytes
+carga: jquery 3.7.1 · cdn.paymentez.com/ccapi/sdk/payment_stable.min.js · ./config.js
+```
+
+**Quién lo abre, rastreado hasta la app:**
+
+```
+apps/cliente/src/app/pagos/alta-tarjeta.tsx:30   const BASE = process.env.EXPO_PUBLIC_PAGOS_ALTA_URL
+apps/cliente/src/lib/pagos/alta-tarjeta.ts:23    idem
+apps/cliente/.../cuenta/index.tsx:68             la celda de pagos SÓLO se dibuja si la variable existe
+```
+
+y esa variable **vive en el environment `development` de EAS** (S101-B) y
+**apunta a `epetplace-pagos-stg.vercel.app`** (medido en S101-D §④).
+
+⇒ **Es la página que abre el navegador cuando una familia guarda su tarjeta.**
+En el repo la URL sólo aparece en scripts de ensayo y documentos porque **la app
+no la lleva escrita: la lleva en una variable de EAS.** *Buscarla por grep en el
+código habría dado «nadie la usa», y es falso.*
+
+⚠️ **Y un cruce que conviene tener a la vista:** su `API_ALTA` apunta a
+`zyltipqscdsdsxnjclhp` — **la base de producción**. Es coherente con lo que el
+canon declara (*el ambiente es sandbox de punta a punta*), pero significa que
+**hoy staging de Nuvei escribe contra la base real**, y eso es lo que hay que
+separar al crear el proyecto productivo.
+
+## Lo que le sirve al founder para decidir
+
+| | |
+|---|---|
+| **Asignar `pagos.epetplace.com` a `epetplace-pagos-stg`** | 🔴 **NO** — pondría el dominio de pagos de la marca sobre el SDK en modo `stg` con credenciales de staging |
+| **Crear el proyecto de producción y asignarlo ahí** | ✅ el camino — necesita las credenciales productivas de Nuvei, que §3.5 declara pendientes de terceros |
+| **Dejar el dominio sin asignar hasta entonces** | 🟡 hoy devuelve `DEPLOYMENT_NOT_FOUND`, que es feo pero **honesto**: nadie puede tipear una tarjeta ahí |
+
+*El founder tiene razón en que un subdominio de la marca devolviendo un error de
+Vercel es peor que uno que no existe. **Pero servir staging desde él es peor que
+las dos cosas**, porque deja de avisar.*
