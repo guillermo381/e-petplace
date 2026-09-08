@@ -181,11 +181,17 @@ estaba en la lista*.
 
 ## Lo que queda vivo, con dueño
 
-### 🔴 El push → deployment del legado sigue roto — riesgo vivo
+### El legado quedó AL DÍA — y mi conclusión anterior era prematura
 
-Tres commits (`f3171cc`, `b5716d1`, `66cf314`) con ✗ roja de la Action. **El sitio
-responde 200 y sirve contenido correcto**, así que no hay síntoma; lo que no llega es
-lo nuevo. Los seis candidatos descartados y lo que falta mirar están en `DEPLOY.md`.
+> 🔴 **CORRECCIÓN.** Una versión anterior de este parte decía que el push → deployment
+> del legado **seguía roto**. **Falso.** `2b777e3` construyó en **26 segundos** y
+> producción sirve el bundle correcto. La conclusión salió de **tres observaciones con
+> una ventana que elegí yo**, y el cuarto commit la desmintió (`L-507`).
+
+**Lo que sobrevive:** los tres commits del medio efectivamente no tienen deployment.
+*Era una **intermitencia**, no un corte* — y las dos producen las mismas observaciones.
+Sin explicación medida; la hipótesis viva (la heurística decidiendo por tamaño del diff)
+está en `DEPLOY.md` declarada como no probada.
 
 ### El proyecto Vercel del monorepo — medido, y no es de esta pista
 

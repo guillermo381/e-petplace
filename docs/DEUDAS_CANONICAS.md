@@ -28703,6 +28703,57 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-507` — Una racha de observaciones no prueba una regla si la ventana la elegí yo
+
+**S114-F.** Tres commits seguidos no produjeron deployment. Sondeé cada uno **5 minutos**
+—un número que no era arbitrario: **5× el peor caso medido**, 26 s · 33 s · ~60 s— y con
+esas tres observaciones escribí *«el camino `push → deployment` está ROTO»* **en tres
+archivos del repo**.
+
+🔴 **El cuarto commit construyó en 26 segundos y tiró abajo la conclusión.**
+
+```
+bf6bf9b   ✅ 2 m 21 s
+f3171cc   🔴 ninguno   ⎫
+b5716d1   🔴 ninguno   ⎬ tres seguidos ⇒ «está roto»
+66cf314   🔴 ninguno   ⎭
+2b777e3   ✅ 26 s      ← lo desmiente
+```
+
+**Dónde estuvo el error, y es fino:** mi ventana salió de **deployments que sí
+ocurrieron**. Eso mide *cuánto tarda uno que va a salir*, **no cuánto puede tardar uno
+que va a salir tarde** — o cuánto hay que esperar antes de decir que no va a salir.
+***Es sesgo de supervivencia en la elección del umbral***, y produce un umbral que se
+siente medido porque cada uno de sus números lo está.
+
+> ***Tres «no» seguidos se leen como una regla, y son tres muestras con el mismo sesgo.***
+> La repetición no agrega evidencia cuando el instrumento es el mismo y su límite es el
+> que está en duda.
+
+⇒ **Una racha autoriza a decir «pasó tres veces», jamás «siempre pasa».** Para la segunda
+hace falta **una observación de otra clase**: el mecanismo, el panel del otro lado, o un
+caso que la regla prohíba y sin embargo ocurra.
+
+⚠️ **Y el corolario que la vuelve exigible: el costo de la conclusión decide cuánta
+evidencia hace falta.** Ésta se escribió en `DEPLOY.md`, en el `README` y en el
+`CLAUDE.md` del repo — tres lugares que existen para que alguien **no vuelva a medir**.
+*Una conclusión prematura en un lugar de consulta no se equivoca una vez: se equivoca cada
+vez que alguien la lee.* Por eso se retiró con su historia, no se borró
+(mismo trato que la enmienda de [[L-502]] el mismo día).
+
+**Lo que sobrevive de la medición, que no es poco:** los tres commits **efectivamente** no
+tienen deployment. El hecho era verdadero; la regla que le colgué encima, no. *Y la
+distinción tiene nombre: lo que había era una **intermitencia**, no un corte* — y las dos
+producen exactamente las mismas tres observaciones.
+
+*(Cierra la familia del día con [[L-503]], [[L-504]], [[L-505]] y [[L-506]]: cinco formas
+de que un dato verdadero sostenga una conclusión falsa — la brecha entre aceptar y hacer,
+el texto que describe el caso típico, la sonda parada en el eslabón anterior, la prosa que
+participa, y ahora la racha con la ventana propia.)*
+
+---
+
+
 ### `L-506` — La prosa no es inerte cuando vive adentro de algo que se EJECUTA
 
 **S114-F.** Firmé una cura para que un repo construyera siempre: `vercel.json` con
