@@ -181,11 +181,36 @@ tanda**, y por eso queda **dentro del baseline de `R78`** en vez de exenta:
 *una exención la saca del conteo y la vuelve invisible; el baseline la deja a
 la vista cada corrida.*
 
-⚠️ **Consecuencia, dicha para que el número no engañe: `R78` no puede llegar a
-0.** Su piso real es **2** —`MarcaDeAgua` y `PastillaConociendolo`— y **llegar
-ahí tampoco significa que memorial funcione**: significa que ninguna pieza
-depende sólo del tema. *Que la app se comporte en memorial se mide montando,
-que es como apareció todo esto.*
+### 🔴 EL PISO VIVE EN EL GATE, NO EN ESTE DOCUMENTO
+
+**`R78` no puede llegar a 0: su piso es 2**, y desde hoy **lo imprime en cada
+corrida con los dos nombres y sus razones**:
+
+```
+🔴 PISO 2, NO 0 — MarcaDeAgua (duro) · PastillaConociendolo (blando):
+   NO se curan con una prop y bajar de ahí NO es deuda
+```
+
+*Un ratchet que sólo dice «baseline 11 SOLO-BAJA» se lee como «faltan once», y
+en tres sesiones alguien intenta llevarlo a 0 — y para lograrlo tendría que
+inventarle una señal a algo que no la tiene, que es la cura falsa que este gate
+existe para no invitar.* **Un piso que hay que recordar no es un piso.**
+
+**Y se verifica, no se recuerda:** si alguien baja el baseline por debajo del
+piso, la regla **sale roja diciendo por qué** (probado en rojo). Si una del piso
+**desaparece de la medición**, la salida lo dice y pide confirmar que se curó de
+verdad y no con una señal inventada.
+
+**Los dos son piso por razones DISTINTAS, y confundirlas es el error opuesto:**
+
+| | por qué | cuándo baja |
+|---|---|---|
+| `MarcaDeAgua` | **DURO** · no tiene mascota de la cual sacar señal | sólo si el tema memorial llega a montarse |
+| `PastillaConociendolo` | **BLANDO** · hoy no la monta nadie, no hay a quién pedirle la señal | sola, el día que gane consumidor — o el día que se borre |
+
+⚠️ **Y llegar a 2 tampoco significa que memorial funcione**: significa que
+ninguna pieza depende sólo del tema. *Que la app se comporte en memorial se mide
+montando, que es como apareció todo esto.*
 
 ---
 

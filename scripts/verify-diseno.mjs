@@ -6456,6 +6456,19 @@ function piezaDe(archivos, nombre) {
  * territorios, tanda propia. *Se dice acá para que el número no se lea como
  * salud.* */
 const BASE_R78 = 11
+/* 🔴 EL PISO, Y VIVE ACÁ PORQUE UN PISO QUE NADIE RECUERDA SE LEE COMO DEUDA.
+   *Un ratchet que dice «baseline 11 SOLO-BAJA» y nada más se lee como «faltan
+   once» — y en tres sesiones alguien va a intentar llevarlo a 0.* **Llegar a 0
+   exigiría "curar" piezas que no se pueden curar con una prop**, y la única
+   forma de hacerlo sería inventarle una señal a algo que no la tiene: la cura
+   falsa que este gate existe para no invitar.
+
+   ⚠️ **Los dos son piso por razones DISTINTAS, y la diferencia importa** —
+   tratar al blando como permanente es el error opuesto y también cuesta: */
+const PISO_R78 = new Map([
+  ['MarcaDeAgua', 'DURO · no tiene mascota de la cual sacar señal (es cromo de fondo en ~90 pantallas de las DOS apps) ⇒ sólo baja el día que el tema memorial llegue a montarse'],
+  ['PastillaConociendolo', 'BLANDO · hoy NO la monta nadie (está importada y usada cero veces), así que no hay a quién pedirle la señal ⇒ baja sola el día que gane consumidor, o el día que se borre'],
+])
 function r78(archivos) {
   const porRuta = new Map()
   for (const a of archivos) if (/packages\/ui\/src\/.*\.tsx?$/.test(a.path)) porRuta.set(a.path, a)
@@ -6467,11 +6480,44 @@ function r78(archivos) {
   let conDato = 0
   for (const { path, src } of uis) {
     const t = sinComentarios(src ?? '')
-    for (const m of t.matchAll(/if\s*\(([^)]*mode\s*===\s*'memorial'[^)]*)\)\s*return\s+null/g)) {
+    /* 🔴 EL MATCHER CRUZA PARÉNTESIS ANIDADOS, y lo destapó su propio número.
+       ⏪ Era `\(([^)]*mode === 'memorial'[^)]*)\)`: `[^)]*` **corta en el
+       primer paréntesis**, así que un guard curado con condición anidada
+       —`if (esDeUnaMascota && (props.enMemorial || theme.mode === 'memorial'))`—
+       **no matcheaba de ningún lado y desaparecía de la medición.**
+
+       **Lo delató `conDato`, que bajó de 2 a 1 al curar `LineaAlgoSalioDistinto`
+       con su unión de sujeto.** *El brazo del rojo seguía andando —revertir el
+       guard a sólo-tema sigue dando 12 y rojo, verificado— así que la regla no
+       estaba rota: estaba contando de menos, y el único que lo dijo fue el
+       número que la propia regla imprime.* **Ésa es la razón por la que su
+       `info` lleva números y no adjetivos.**
+
+       La cura es un `.*?` anclado en `) return null`: se queda con el `)` que
+       cierra el `if` y el grupo trae la condición entera. Sigue siendo
+       por línea (sin flag `s`), que es la forma real de estos guards. */
+    for (const m of t.matchAll(/if\s*\((.*?)\)\s*return\s+null/g)) {
+      if (!/mode\s*===\s*'memorial'/.test(m[1])) continue
       // ¿el guard mira ALGO MÁS que el tema? Entonces ya está curado.
       if (/\|\||&&/.test(m[1])) { conDato++; continue }
       solos.push(`${path.replace('packages/ui/src/', '')}:${lineaDe(t, m.index)}`)
     }
+  }
+  /* 🔴 EL PISO SE VERIFICA, NO SE RECUERDA. Si alguien baja el baseline por
+     debajo de lo que no se puede curar con una prop, el número dejó de decir
+     «cuánto falta» y pasó a pedir una cura falsa. */
+  /* ⚠️ ESTE BRAZO NO TIENE FIXTURE Y NO PUEDE TENERLO, y se declara en vez de
+     fingir cobertura: depende de una CONSTANTE DEL MÓDULO, no del corpus, así
+     que ningún fixture de archivos puede encenderlo. **Se probó en rojo
+     editando la constante a 1** (exit 1, con su mensaje). *Un brazo sin
+     fixture declarado vale más que uno con un fixture que no lo ejecuta.* */
+  if (BASE_R78 < PISO_R78.size) {
+    fallos.push(
+      `R78 **el baseline (${BASE_R78}) quedó por debajo de su PISO (${PISO_R78.size}).** ` +
+      `Ese piso NO es deuda: son piezas que **no se pueden curar con una prop** — ` +
+      [...PISO_R78].map(([n, p]) => `\`${n}\` (${p})`).join(' · ') + '. ' +
+      `*Bajar de ahí sólo se logra inventándole una señal a algo que no la tiene.*`,
+    )
   }
   if (solos.length > BASE_R78) {
     fallos.push(
@@ -6484,13 +6530,23 @@ function r78(archivos) {
     )
     for (const s of solos) fallos.push(`R78   · ${s}`)
   }
+  /* Cuáles del piso siguen medidas. Si una desaparece, el número baja y hay
+     que poder distinguir «se curó bien» de «se le inventó una señal». */
+  const pisoPresente = [...PISO_R78.keys()].filter((n) => solos.some((s) => s.includes(`${n}.tsx`)))
+  const pisoIdo = [...PISO_R78.keys()].filter((n) => !pisoPresente.includes(n))
+
   return {
     fallos,
     info:
       `${solos.length} pieza(s) con el tema como ÚNICA señal de existencia · baseline ${BASE_R78} SOLO-BAJA · ` +
       `${conDato} ya reciben el dato por prop · 60 usos de \`mode === 'memorial'\` en total (los demás son color y ` +
       `movimiento: su inercia cuesta estética, no respeto) · ` +
-      `⚠️ su verde dice «no creció», JAMÁS «las ${BASE_R78} andan»: las ${BASE_R78} siguen inertes`,
+      // 🔴 EL PISO, EN CADA CORRIDA Y NO EN UN PARTE. Ver su declaración.
+      `🔴 PISO ${PISO_R78.size}, NO 0 — ${[...PISO_R78.keys()].join(' (duro) · ')} (blando): NO se curan con una prop y bajar de ahí NO es deuda` +
+      (pisoIdo.length === 0
+        ? ''
+        : ` · ⚠️ ${pisoIdo.join(', ')} ya no aparece(n): confirmá que se curó de verdad y no con una señal inventada`) +
+      ` · ⚠️ su verde dice «no creció», JAMÁS «las ${BASE_R78} andan»: las ${BASE_R78} siguen inertes`,
   }
 }
 
