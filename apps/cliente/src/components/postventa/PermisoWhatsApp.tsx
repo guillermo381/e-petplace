@@ -109,11 +109,31 @@ export function PermisoWhatsApp({ casoId }: { casoId: string }) {
     setEstado('callado');
   }, [casoId]);
 
+  /* El acuse se retira solo. `4 s` alcanza para leer una línea y no tanto como
+     para volverse parte de la pantalla; y se limpia al desmontar, porque un
+     timer que sobrevive a su componente escribe estado en un fantasma. */
+  useEffect(() => {
+    if (estado !== 'listo') return;
+    const t = setTimeout(() => setEstado('callado'), 4000);
+    return () => clearTimeout(t);
+  }, [estado]);
+
   if (estado === 'callado') return null;
 
   if (estado === 'listo') {
-    /* La confirmación es UNA línea y se queda: dice qué pasó y dónde se
-       cambia. No se convierte en un cartel permanente. */
+    /* 🔴 **LA CONFIRMACIÓN SE VA SOLA, y acá mi propio comentario mentía.**
+       ⏪ Decía *«no se convierte en un cartel permanente»*… y eso es
+       exactamente lo que era: `listo` no volvía nunca a `callado`, así que la
+       línea quedaba fija en la pantalla del caso para siempre. **El founder la
+       vio ahí y tenía razón.**
+
+       *Una confirmación es un acuse: dice que el acto ocurrió y se retira.* El
+       permiso se pide UNA vez; su recibo no puede vivir en la pantalla más que
+       el momento en que confirma. Dónde se cambia sigue estando —Preferencias—
+       y ahí no envejece.
+
+       ⚠️ *Un comentario que afirma lo contrario de lo que hace el código es
+       peor que ninguno: le dice al próximo que ya está resuelto.* */
     return <Texto variante="apoyo">{t('postventa.whatsappListo')}</Texto>;
   }
 

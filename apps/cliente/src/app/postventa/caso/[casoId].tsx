@@ -179,8 +179,20 @@ export default function PantallaDelCaso() {
       const delMotor: Fila[] = m.data.mensajes.map((x) => ({ clave: x.id, mensaje: x }));
       /* Las optimistas que el motor todavía no devuelve siguen arriba; las
          que ya volvieron se caen solas al coincidir el id. */
-      const idsDelMotor = new Set(delMotor.map((f) => f.clave));
-      optimistasRef.current = optimistasRef.current.filter((f) => !idsDelMotor.has(f.clave));
+      /* 🔴 **ACÁ ESTABA LA DUPLICACIÓN QUE EL FOUNDER VIO** —«uno con check y
+         otro con punto»— y era un guard que no podía funcionar nunca.
+
+         ⏪ Decía: `idsDelMotor.has(f.clave)`. Pero la clave de una optimista es
+         `local-<timestamp>` y la del motor es un UUID: **jamás coinciden**, así
+         que el filtro devolvía SIEMPRE true y la optimista sobrevivía al lado
+         de la fila real. *Un guard que compara dos cosas que por construcción
+         no pueden ser iguales no filtra nada — y no falla: acumula.*
+
+         La cura no es comparar mejor: es preguntar lo correcto. **Si el envío
+         salió bien y el motor ya devolvió el hilo, toda optimista que estaba
+         `enviando` YA ESTÁ ahí.** Sobreviven sólo las que fallaron, que son las
+         que la familia puede reintentar y cuyo texto no se puede perder. */
+      optimistasRef.current = optimistasRef.current.filter((f) => f.estado === 'no_se_envio');
       /* ⚠️ ASCENDENTE — viejo primero, el orden en que el motor entrega
          (`ORDER BY m.creado_en, m.id`, medido en la migración). Las optimistas
          son lo MÁS NUEVO y por eso van al final. La inversión para la lista
@@ -239,8 +251,12 @@ export default function PantallaDelCaso() {
           creadoEn: new Date().toISOString(),
         },
       };
-      optimistasRef.current = [optimista, ...optimistasRef.current];
-      setHilo((prev) => [optimista, ...prev]);
+      /* 🔴 **AL FINAL, no al principio.** El estado `hilo` es ASCENDENTE
+         (viejo→nuevo) desde que curé el orden; ponerlo primero lo dibujaba
+         como el MÁS VIEJO — arriba de todo en la lista invertida. *El mismo
+         arreglo dado vuelta dos veces: una en el orden y otra en el envío.* */
+      optimistasRef.current = [...optimistasRef.current, optimista];
+      setHilo((prev) => [...prev, optimista]);
       setBorrador('');
 
       const r = await enviarMensajeDeCaso(casoId, texto);
