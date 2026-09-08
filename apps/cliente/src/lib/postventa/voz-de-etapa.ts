@@ -43,6 +43,13 @@
 
 import type { EtapaCaso as EtapaDeLaEscalera } from '@epetplace/ui';
 
+/** Los estados que el MOTOR devuelve en `etapa`: la escalera + los finales. */
+export type EstadoDeCasoDelMotor =
+  | EtapaDeLaEscalera
+  | 'resuelto_entre_partes'
+  | 'retirado'
+  | 'sin_lugar';
+
 /** La firma angosta: el `t` tipado de la app es asignable. */
 type TEtapa = (
   clave:
@@ -94,4 +101,35 @@ export function vocesDeLaEscalera(t: TEtapa): Record<EtapaDeLaEscalera, string> 
     resuelto: t(CLAVE.resuelto),
     cerrado: t(CLAVE.cerrado),
   };
+}
+
+/**
+ * 🔴 **LA VOZ DE CUALQUIER ESTADO QUE EL MOTOR DEVUELVA** — etapas Y finales.
+ *
+ * ⏪ **Nació de un código crudo que vi caminando**: la fila de una cita pasada
+ * decía *«Tienes un caso abierto sobre este servicio · **resuelto_entre_partes**»*
+ * — el valor del motor, sin traducir, saliendo a una familia. Es la TERCERA vez
+ * en esta sesión que esta clase se cobra (antes fueron `guarderia_dia` y
+ * `paseo`), y las tres veces por lo mismo: **el dato viajó a la pantalla y
+ * nadie lo pasó por su riel.**
+ *
+ * Vive acá y no en la pantalla del caso —donde ya existía como `VOZ_FINAL`
+ * local— porque **eso es exactamente la duplicación que este archivo vino a
+ * curar**: dos tablas que hoy dicen lo mismo son dos que pueden dejar de
+ * decirlo.
+ */
+export function vozDeEstadoDeCaso(
+  t: TEtapa & ((c: 'postventa.final_resuelto_entre_partes' | 'postventa.final_retirado' | 'postventa.final_sin_lugar') => string),
+  estado: EstadoDeCasoDelMotor,
+): string {
+  switch (estado) {
+    case 'resuelto_entre_partes':
+      return t('postventa.final_resuelto_entre_partes');
+    case 'retirado':
+      return t('postventa.final_retirado');
+    case 'sin_lugar':
+      return t('postventa.final_sin_lugar');
+    default:
+      return vozDeEtapa(t, estado);
+  }
 }

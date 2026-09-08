@@ -61,15 +61,18 @@ import {
 import {
   aprobarPresupuestoFamilia,
   obtenerCitasActivasMascota,
+  obtenerHistorialCitasMascota,
   obtenerPresupuestosFamilia,
   rechazarPresupuesto,
   type CitaActivaMascota,
+  type CitaHistorialMascota,
   type PresupuestoFamilia,
 } from '@epetplace/api';
 import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { esMemorial } from '@/lib/memorial';
+import { vozDeEstadoDeCaso } from '@/lib/postventa/voz-de-etapa';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
 import { useCasosPorObjeto } from '@/lib/postventa/useCasosPorObjeto';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
@@ -153,6 +156,22 @@ export default function CitasDeMascota() {
   const [itemsAbiertos, setItemsAbiertos] = useState<Record<string, boolean>>({});
   const [procesando, setProcesando] = useState<string | null>(null);
 
+  /* ═══ ① EL HISTORIAL — la mitad que faltaba, y era `L-318` puro ═══════════
+     🔴 **El lector existía y esta pantalla no lo llamaba.** A lo entregó
+     (`obtenerHistorialCitasMascota`) y tenía CERO consumidores: *motor sin
+     puerta, con la puerta de este lado.* Sin esto el founder camina y ve sólo
+     lo que viene, que es exactamente el hueco que el censo del 8-sep midió:
+     **265 citas pasadas de su familia, 142 de ellas «confirmada» que nadie
+     atendió**, sin superficie en ningún lado.
+
+     Se carga APARTE de las activas y no en el mismo `Promise.all`: son dos
+     preguntas distintas —qué viene y qué pasó— y **un fallo del historial no
+     puede llevarse puesta la lista de lo que viene** (Ley 13). */
+  const [pasadas, setPasadas] = useState<CitaHistorialMascota[]>([]);
+  const [cursorPasadas, setCursorPasadas] = useState<string | null>(null);
+  const [fasePasadas, setFasePasadas] = useState<'cargando' | 'listo' | 'error'>('cargando');
+  const [trayendoMas, setTrayendoMas] = useState(false);
+
   /* ═══ S114-C · LA PUERTA EN LA FILA (firma del founder, 8-sep) ═══════════
      🔴 **EL HALLAZGO QUE LA ORDENA, MEDIDO Y NO SUPUESTO.** El founder no
      encontró «¿Algo salió distinto?» en ningún lado, y el censo dijo por qué:
@@ -181,7 +200,21 @@ export default function CitasDeMascota() {
       let vivo = true;
       void (async () => {
         if (typeof mascotaId !== 'string' || mascotaId.length === 0) return;
-        const [rc, rp] = await Promise.all([obtenerCitasActivasMascota(mascotaId), obtenerPresupuestosFamilia()]);
+        /* El historial entra al MISMO `Promise.all`: son tres lecturas en una
+           ola, no tres olas encadenadas (`L-223` — el peaje es por petición). */
+        const [rc, rp, rh] = await Promise.all([
+          obtenerCitasActivasMascota(mascotaId),
+          obtenerPresupuestosFamilia(),
+          obtenerHistorialCitasMascota(mascotaId),
+        ]);
+        if (!vivo) return;
+        if (rh.ok) {
+          setPasadas(rh.data.citas);
+          setCursorPasadas(rh.data.cursor);
+          setFasePasadas('listo');
+        } else {
+          setFasePasadas('error');
+        }
         if (!vivo) return;
         setEstado(rc.ok ? rc.data : 'error');
         setPresupuestos(
@@ -267,18 +300,34 @@ export default function CitasDeMascota() {
    * mudo (la cura de `sin_ventana`).
    */
   const puertaDeLaFila = (c: CitaActivaMascota) => {
-    /* Estrictamente pasada: ver la nota de la fila. `fecha` es `YYYY-MM-DD`,
-       así que la comparación de cadenas es correcta y no fabrica husos. */
-    const hoy = new Date().toISOString().slice(0, 10);
-    const yaPaso = c.fecha !== null && c.fecha < hoy;
-    if (!yaPaso) return null;
+    /* 🔴 **EL ANCLA ES `cerrada_en` CUANDO EXISTE, y eso CURA una limitación
+       que yo había declarado.** Escribí que «una cita de hoy gana su puerta
+       mañana» porque `fecha` es día sin hora y no podía distinguir «no vino»
+       de «todavía no es la hora». A entregó `cerrada_en` —el instante de fin,
+       **consistente con el motor** (`COALESCE(atencion.cerrada_en, fecha+hora)`)—
+       así que **una cita que terminó hace un rato ya tiene su puerta**.
+
+       El fallback a `fecha < hoy` queda para las activas, que no traen el
+       campo: ahí sigue rigiendo el criterio conservador y su razón. */
+    const cerradaEn = 'cerrada_en' in c ? (c as CitaHistorialMascota).cerrada_en : null;
+    if (cerradaEn !== null) {
+      if (Date.parse(cerradaEn) > Date.now()) return null;
+    } else {
+      const hoy = new Date().toISOString().slice(0, 10);
+      if (c.fecha === null || c.fecha >= hoy) return null;
+    }
 
     const caso = casosPorCita?.get(c.cita_id);
     const v = veredictoDeLaPuerta({
-      cerradaEn: c.fecha,
+      cerradaEn: cerradaEn ?? c.fecha,
       estadoVida,
       diasDeVentana,
-      ...(caso !== undefined ? { casoAbierto: caso } : null),
+      /* La VOZ la pone quien dibuja (Ley 3): el hook entrega el código del
+         motor y acá pasa por el riel. Sin esto salía `resuelto_entre_partes`
+         crudo en la fila — lo vi caminando. */
+      ...(caso !== undefined
+        ? { casoAbierto: { casoId: caso.casoId, vozEstado: vozDeEstadoDeCaso(t, caso.estadoDelMotor) } }
+        : null),
       voces: {
         disponible: t('postventa.puerta'),
         fueraDeVentana: t('postventa.puertaFueraDeVentana'),
@@ -604,6 +653,51 @@ export default function CitasDeMascota() {
             ) : null}
             {otras.length > 0 ? (
               <PieRevelar n={otras.length} revelado={desplegado} onPress={() => setDesplegado((d) => !d)} />
+            ) : null}
+
+            {/* ═══ ① LO QUE YA PASÓ — la sección que faltaba ════════════════
+                Va DESPUÉS de lo que viene, y ése es el orden correcto: la
+                familia entra a esta pantalla por su próxima cita. *Lo pasado
+                se lee después, no compite con lo que hay que hacer.*
+
+                🔴 **Y no es sólo para reclamar.** Acá vive el parte, las
+                fotos y el acta de un servicio que ocurrió — el reclamo es UNO
+                de los motivos y el menos frecuente. Que no existiera es lo que
+                el founder encontró caminando. */}
+            {fasePasadas === 'error' ? (
+              /* Ley 13: el error del historial NO se disfraza de «no hay
+                 historial», y no se lleva puesto lo de arriba. */
+              <EstadoVacio titulo={t('citasMascota.historialNoSePudo')} registro="seccion" />
+            ) : pasadas.length > 0 ? (
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="seccion">{t('citasMascota.yaPasaron')}</Texto>
+                {pasadas.map((c) => (
+                  <View key={c.cita_id}>{detalleHero(c)}</View>
+                ))}
+                {/* El paginado es por CURSOR y lo dice el motor: `cursor:
+                    null` = no hay más, así que el pie DESAPARECE en vez de
+                    ofrecer una carga que no trae nada. */}
+                {cursorPasadas !== null ? (
+                  <Boton
+                    variante="apoyada"
+                    etiqueta={t('citasMascota.verMasPasadas')}
+                    cargando={trayendoMas}
+                    onPress={() => {
+                      if (typeof mascotaId !== 'string') return;
+                      setTrayendoMas(true);
+                      void obtenerHistorialCitasMascota(mascotaId, { cursor: cursorPasadas }).then((r) => {
+                        setTrayendoMas(false);
+                        if (!r.ok) return;
+                        /* Se AGREGA al final: el motor entrega de más nuevo a
+                           más viejo, así que la página siguiente es más
+                           vieja y va abajo. */
+                        setPasadas((prev) => [...prev, ...r.data.citas]);
+                        setCursorPasadas(r.data.cursor);
+                      });
+                    }}
+                  />
+                ) : null}
+              </View>
             ) : null}
           </>
         )}

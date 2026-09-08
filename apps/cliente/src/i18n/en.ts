@@ -2563,6 +2563,9 @@ export const clienteEn = {
     coordinaranSinNombre: "You'll be contacted to schedule",
     quienAtiende: 'Provider',
     otrasActivas: 'Their other appointments',
+    yaPasaron: 'What already happened',
+    verMasPasadas: 'See earlier appointments',
+    historialNoSePudo: 'We could not load what already happened. Try again.',
     verVideoconsulta: 'View the video consultation ›',
     vacio: 'No upcoming appointments',
     vacioDetalle: "When you book an appointment, you'll see it here.",
@@ -3245,7 +3248,7 @@ export const clienteEn = {
   postventa: {
     puerta: 'Did something go differently?',
     puertaFueraDeVentana: 'This service is past its window. If you want, talk to us.',
-    puertaCasoAbierto: 'You have an open case about this service',
+    puertaCasoAbierto: 'You have a case about this service',
     tituloMotivo: 'What happened?',
     contame: "It's something else \u00b7 tell me",
     placeholderRelato: 'Tell me what happened, in your own words',

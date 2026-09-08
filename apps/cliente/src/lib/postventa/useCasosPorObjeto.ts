@@ -20,7 +20,18 @@ import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { obtenerMisCasos, type ObjetoPostventa } from '@epetplace/api';
 
-export type CasoDeObjeto = { casoId: string; vozEstado: string; etapa: string };
+import type { EstadoDeCasoDelMotor } from './voz-de-etapa';
+
+export type CasoDeObjeto = {
+  casoId: string;
+  /** 🔴 El CÓDIGO del motor (`resuelto_entre_partes`, `con_prestador`…), NO una
+   *  voz. ⏪ Este campo se llamaba `vozEstado` y llevaba `c.etapa` crudo: el
+   *  nombre prometía una traducción que nadie hacía, y **salió a pantalla**.
+   *  *Un campo que se llama «voz» y lleva un código miente en su nombre,* así
+   *  que ahora se llama como lo que es y la traducción la pone quien dibuja
+   *  (Ley 3), con `vozDeEstadoDeCaso`. */
+  estadoDelMotor: EstadoDeCasoDelMotor;
+};
 
 export function useCasosPorObjeto(
   tipo: ObjetoPostventa,
@@ -42,7 +53,7 @@ export function useCasosPorObjeto(
           /* Si hubiera más de uno sobre el mismo objeto gana el PRIMERO, que
              viene primero por el orden del motor (abiertos arriba): llevar al
              abierto es más útil que llevar a uno cerrado. */
-          if (!m.has(c.objetoId)) m.set(c.objetoId, { casoId: c.casoId, vozEstado: c.etapa, etapa: c.etapa });
+          if (!m.has(c.objetoId)) m.set(c.objetoId, { casoId: c.casoId, estadoDelMotor: c.etapa as EstadoDeCasoDelMotor });
         }
         setMapa(m);
       })();
