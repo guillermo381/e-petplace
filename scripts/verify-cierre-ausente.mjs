@@ -61,9 +61,25 @@ const FIN_CITA = "(c.fecha + c.hora + make_interval(mins => coalesce(c.duracion_
 
 let existeEstado, sujeto;
 try {
-  existeEstado = dbQuery(
-    "select count(*)::int as n from pg_constraint where pg_get_constraintdef(oid) like '%no_ejecutado%'",
-  )[0].n;
+  /* 🔴 `no_ejecutado` EXISTE COMO MOTIVO Y NO COMO ESTADO — y esa colisión de
+     nombre es una trampa. Quien haga `grep no_ejecutado` lo encuentra en
+     `cat_motivos_postventa` (objeto `cita`, clase 1: «No vino / no me
+     atendieron») y concluye que la regla está construida. **No lo está:** ése
+     es el MOTIVO que la familia elige, no el ESTADO al que el reloj mueve al
+     objeto a las 48 h. Por eso se busca el estado donde un estado vive —un
+     CHECK o un enum— y NUNCA en una fila de catálogo. */
+  existeEstado = dbQuery(`
+    select (select count(*) from pg_constraint
+             where pg_get_constraintdef(oid) like '%no_ejecutado%')
+         + (select count(*) from pg_type t join pg_enum e on e.enumtypid = t.oid
+             where e.enumlabel = 'no_ejecutado') as n`)[0].n;
+  /* Y se mide aparte si existe QUIEN lo mueva: sin reloj, el estado solo no
+     alcanza — serían dos verdes distintos y uno no implica al otro. */
+  var existeReloj = dbQuery(`
+    select count(*)::int as n from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+     where ns.nspname = 'public'
+       and (p.proname ~ 'cierre_ausente|sin_cerrar|no_ejecut'
+            or pg_get_functiondef(p.oid) ~ 'cierre ausente')`)[0].n;
 
   sujeto = dbQuery(`
     with objetos as (
@@ -120,6 +136,11 @@ if (existeEstado === 0) {
   console.error(`   Hay ${total48} objetos que ya deberían estar en él, pero el arnés no puede`);
   console.error('   separar «el cron no corrió» de «el estado al que mover no existe»:');
   console.error('   son dos rojos distintos y mandan a lugares distintos.');
+  console.error(`   (reloj que lo mueva: ${existeReloj} funciones — se mide aparte, porque el`);
+  console.error('   estado sin reloj y el reloj sin estado son dos verdes distintos.)');
+  console.error('   ⚠️ OJO CON EL NOMBRE: `no_ejecutado` SÍ existe como MOTIVO en');
+  console.error('   `cat_motivos_postventa` (clase 1). Ése es el que la familia elige, NO el');
+  console.error('   estado al que el reloj mueve el objeto. Un grep lo confunde.');
   console.error('   BLOQUEANTE NOMBRADO, con su dueño: el estado nace con **A6**, el arco');
   console.error('   de la regla del cierre ausente (F1). Hasta entonces falta agregar');
   console.error('   `no_ejecutado` al CHECK de `evento_cita_servicio.estado` (y su gemelo');

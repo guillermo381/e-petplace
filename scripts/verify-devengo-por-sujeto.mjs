@@ -47,12 +47,13 @@
  * ⇒ **un evento anclado a la cita de una estadía ya NO cuenta**, y el arnés
  * es más estricto que ayer, no menos.
  *
- * **Queda una tolerancia chica y es de VOCABULARIO, no de ancla:** el literal
- * de `origen_tipo` no está fijado —medido: **no hay CHECK sobre esa columna** y
- * el único valor vivo es `cita`—, así que se aceptan `estadia` y
- * `guarderia_estadia`. *Las dos apuntan al mismo objeto; lo que se decidió es
- * cuál es el objeto, no cómo se escribe su nombre.* El día que exista el
- * CHECK, esta lista sale de acá y se lee de él.
+ * **Y la tolerancia de VOCABULARIO también se cerró** (7-sep, tras A6): cuando
+ * no había un solo evento de guardería, el literal de `origen_tipo` era una
+ * incógnita y el gate aceptaba `estadia` **o** `guarderia_estadia`. **Medido
+ * ahora que el productor existe: el motor escribe `estadia`** (`origen_tipo`
+ * vivo: `cita` 53 · `estadia` 1 · `pedido` 3). ⇒ **se acepta sólo ése.**
+ * *Una tolerancia se abre cuando el objeto no puede contestar y se cierra el
+ * día que contesta — dejarla abierta después sería no haber preguntado.*
  *
  * **Y sigue sin mirar el MONTO**, sólo la existencia del evento.
  *
@@ -138,7 +139,7 @@ marcados as (
            select 1 from eventos ee
             where ee.origen_id = o.id
               and ( ee.origen_tipo = o.obj
-                 or (o.obj = 'estadia' and ee.origen_tipo in ('estadia','guarderia_estadia'))
+                 or (o.obj = 'estadia' and ee.origen_tipo = 'estadia')
                  or (o.obj = 'pedido'  and ee.origen_tipo in ('pedido','compra')) )
          ) as sin_evento
     from objetos o
@@ -256,8 +257,8 @@ if (conEvento === 0) {
 console.log('verify:devengo-por-sujeto · §8 de LETRA_POSTVENTA');
 console.log('  controles: negativo produjo su rojo ✅ · positivo no marcó ✅');
 console.log('  ancla de guardería: LA ESTADÍA (mesa 7-sep) — un evento colgado de');
-console.log('  su cita ya no cuenta. Sólo queda abierto el literal de `origen_tipo`,');
-console.log('  que no tiene CHECK: se aceptan `estadia` y `guarderia_estadia`.\n');
+console.log('  su cita no cuenta, y el literal quedó fijado en `estadia`: medido');
+console.log('  contra el motor una vez que su productor existió. Cero tolerancias.\n');
 console.log('  obj      vía                        estado       n   sin evento');
 for (const f of reales) {
   const marca = f.sin_evento > 0 ? '🔴' : '  ';
