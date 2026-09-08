@@ -19,8 +19,8 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@api-admin": ["../../packages/api/src/admin/index.ts"],
-      "@api/*": ["../../packages/api/src/*"]
+      "@api-admin": ["./node_modules/@epetplace/api/src/admin/index.ts"],
+      "@api/*": ["./node_modules/@epetplace/api/src/*"]
     }
   },
   "include": ["src"]

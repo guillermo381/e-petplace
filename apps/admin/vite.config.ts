@@ -58,8 +58,14 @@ export default defineConfig(({ mode }) => {
   plugins: [react()],
   resolve: {
     alias: {
-      '@api-admin': fileURLToPath(new URL('../../packages/api/src/admin/index.ts', import.meta.url)),
-      '@api': fileURLToPath(new URL('../../packages/api/src', import.meta.url)),
+      /* 🔴 Por PAQUETE, no por ruta relativa — y es la diferencia entre que el
+         deploy funcione o no. Con `../../packages/api` el import SALE del
+         directorio de la app: si el build corre con Root Directory `apps/admin`,
+         esa ruta puede no existir. Declarando `@epetplace/api` como dependencia
+         del workspace, pnpm pone el symlink en `node_modules` y **resuelve
+         igual desde cualquier raíz**. */
+      '@api-admin': '@epetplace/api/src/admin/index.ts',
+      '@api': '@epetplace/api/src',
     },
   },
   server: { port: 5273 },

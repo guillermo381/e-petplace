@@ -11,14 +11,15 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@epetplace/api": "workspace:*",
     "@supabase/supabase-js": "^2.105.1",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-router-dom": "^7.14.2"
   },
   "devDependencies": {
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "~19.2.14",
+    "@types/react-dom": "~19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "typescript": "~5.9.2",
     "vite": "^8.0.10"
