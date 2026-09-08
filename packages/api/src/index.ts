@@ -2005,8 +2005,13 @@ export {
 export {
   obtenerCasoDeObjeto, obtenerVentanaCasoDias, abrirCaso, leerCaso,
   leerMensajesDeCaso, enviarMensajeDeCaso, leerOpcionesDeDevolucion,
-  elegirDestinoDevolucion, obtenerCasosDelPrestador, responderCaso,
+  elegirDestinoDevolucion, obtenerCasosDelPrestador, obtenerMisCasos, obtenerServiciosSinCerrar, responderCaso,
   reconocerYResolver, pedirACasa,
-  type EtapaCaso, type AsientoCaso, type MensajeCaso, type CasoEnBandeja,
-  type CodigoAbrirCaso,
+  ETAPAS_EN_ESCALERA,
+  type EtapaCaso, type FinalAlterno, type AsientoCaso, type MensajeCaso,
+  type CasoEnBandeja, type CodigoAbrirCaso, type CasoDetalle, type ServicioSinCerrar,
 } from './wrappers/postventa-casos';
+
+// S114 · A4 · el saldo e-PetPlace (F6). Un lector; acreditar/consumir son del
+// motor, sin EXECUTE para authenticated (D-314).
+export { obtenerMiSaldo } from './wrappers/postventa-saldo';

@@ -192,7 +192,7 @@ export async function obtenerFichaAntesAdiestramiento(
       raza: mascota.data.raza,
       foto_url: mascota.data.foto_url,
       fecha_nacimiento: mascota.data.fecha_nacimiento,
-      es_memorial: mascota.data.estado_vida !== null && mascota.data.estado_vida !== 'activa',
+      es_memorial: mascota.data.estado_vida === 'fallecida',   // S114-A ②: memorial = fallecida; perdida NO es memorial (elegibilidad sigue en mascotasElegibles)
       umbrales: catalogoUmbrales.error ? null : parsearUmbrales(catalogoUmbrales.data?.momentos_vitales_jsonb),
       tiene_alergias: Array.isArray(alergias) && alergias.length > 0,
       tiene_condicion_cronica: Array.isArray(condiciones) && condiciones.length > 0,

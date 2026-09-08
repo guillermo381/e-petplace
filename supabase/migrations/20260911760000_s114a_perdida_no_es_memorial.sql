@@ -1,0 +1,155 @@
+-- S114-A · ② perdida NO es memorial — la capa servidor del Coach
+-- _contexto_coach_base mapeaba TODO estado_vida != 'activa' a 'memorial', así que una
+-- mascota 'perdida' (que la familia está BUSCANDO) le llegaba al Coach como memorial y
+-- Nexo se callaba (404). Firma del founder: perdida ≠ memorial. Ahora memorial = fallecida
+-- SOLO, y 'perdida' viaja como 'perdida' (el Coach la deja pasar y podrá darle su propio
+-- tono más adelante — decisión de voz, de C).
+-- Elegibilidad NO cambia: mascotasElegibles sigue exigiendo 'activa' (perdida no reserva).
+-- 76(g): NO RIGE — cambia una función, sin datos.
+-- Reversa: docs/relevamientos/2026-09-07-s114a-REVERSA-memorial-perdida.sql
+BEGIN;
+CREATE OR REPLACE FUNCTION public._contexto_coach_base(p_mascota_id uuid, p_user_id uuid DEFAULT NULL::uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+declare
+  v_uid uuid; v_adoptada boolean := false;
+  v_m record; v_perfil record; v_ficha jsonb; v_base jsonb;
+  v_hoy date := public.hoy_local(); v_edad text; v_memorial boolean;
+begin
+  /* La puerta, SIN el corte por memorial (ver ① arriba): se resuelve quién
+     pregunta y que tenga acceso, nada más. */
+  if auth.uid() is not null then
+    if p_user_id is not null and p_user_id <> auth.uid() then
+      raise exception 'suplantacion_prohibida' using errcode = '42501';
+    end if;
+    v_uid := auth.uid();
+  else
+    if p_user_id is null or current_user in ('authenticated','anon') then
+      raise exception 'auth_required' using errcode = '42501';
+    end if;
+    v_uid := p_user_id;
+  end if;
+
+  if not exists (
+    select 1 from mascotas m join familia_miembro fm on fm.familia_id = m.familia_id
+     where m.id = p_mascota_id and fm.user_id = v_uid and fm.hasta is null
+       and fm.rol in ('adulto_titular','adulto_autorizado')
+  ) then
+    raise exception 'no_access_to_mascota' using errcode = '42501';
+  end if;
+
+  -- la identidad se presta para lo anidado y **se devuelve al salir**
+  if auth.uid() is null then
+    v_adoptada := true;
+    perform set_config('request.jwt.claim.sub', v_uid::text, true);
+    perform set_config('request.jwt.claims',
+      json_build_object('sub', v_uid, 'role','authenticated')::text, true);
+  end if;
+
+  select m.*, m.especie as esp into v_m from mascotas m where m.id = p_mascota_id;
+  v_memorial := (v_m.estado_vida = 'fallecida');   -- S114-A ② · perdida NO es memorial (firma founder)
+
+  select p.peso_clinico_kg, p.peso_clinico_medido_en, p.condiciones_cronicas,
+         p.medicacion_actual, p.alergias
+    into v_perfil from mascota_perfil_vigente p where p.mascota_id = p_mascota_id;
+
+  v_ficha := public.resolver_ficha_de_raza(v_m.especie, coalesce(v_m.raza, ''));
+
+  v_edad := case when v_m.fecha_nacimiento is null then null
+    else (extract(year from age(v_hoy, v_m.fecha_nacimiento))::int)::text || ' años' end;
+
+  v_base := jsonb_build_object(
+    'ok', true,
+    -- ── la forma PLANA, que es la que nombra la edge ──────────────────────
+    'nombre', v_m.nombre,
+    'especie', v_m.especie,
+    'sujeto', v_m.sujeto,
+    -- ② la palabra del producto, no la de la tabla
+    'estado_vida', case when v_memorial then 'memorial' else v_m.estado_vida end,   -- perdida viaja como 'perdida', no como 'memorial'
+    'sexo', v_m.sexo,
+    'edad_texto', v_edad,
+    'etapa', case when v_m.fecha_nacimiento is not null
+                  then public.calcular_etapa_vida(v_m.fecha_nacimiento, v_m.especie) end,
+    'raza', v_m.raza,
+    'peso_kg', v_perfil.peso_clinico_kg,
+    'peso_fecha', v_perfil.peso_clinico_medido_en,
+    'alergias', (select coalesce(jsonb_agg(a->>'alergeno'), '[]'::jsonb)
+                   from jsonb_array_elements(coalesce(v_perfil.alergias,'[]'::jsonb)) a
+                  where coalesce(a->>'estado','confirmada') not in ('resuelta','descartada')),
+    'medicacion_actual', (select coalesce(jsonb_agg(x->>'medicamento'), '[]'::jsonb)
+                            from jsonb_array_elements(coalesce(v_perfil.medicacion_actual,'[]'::jsonb)) x),
+    'condiciones_cronicas', (select coalesce(jsonb_agg(
+                               case when jsonb_typeof(x) = 'string' then x else to_jsonb(x->>'nombre') end), '[]'::jsonb)
+                            from jsonb_array_elements(coalesce(v_perfil.condiciones_cronicas,'[]'::jsonb)) x),
+    'proxima_cita', (
+      select jsonb_build_object('fecha', c.fecha, 'servicio', ts.nombre, 'prestador', pr.nombre_comercial)
+        from evento_cita_servicio c
+        left join tipos_servicio ts on ts.codigo = c.tipo_servicio
+        left join prestadores pr on pr.id = c.prestador_id
+       where c.mascota_id = p_mascota_id and c.fecha >= v_hoy
+         and c.estado in ('confirmada','pendiente','en_curso')
+       order by c.fecha, c.hora limit 1),
+    'plan_vacunal', (
+      select coalesce(jsonb_agg(jsonb_build_object(
+               'vacuna', pv.nombre, 'estado', pv.estado, 'fecha', pv.proxima)), '[]'::jsonb)
+        from public.obtener_plan_vacunal(p_mascota_id, v_hoy, 60) pv),
+    'ultimos_eventos', (
+      select coalesce(jsonb_agg(jsonb_build_object(
+               'tipo', t.tipo, 'fecha', t.fecha_evento, 'detalle', t.datos->>'texto')
+             order by t.fecha_evento desc), '[]'::jsonb)
+        from (select e.tipo, e.fecha_evento, e.datos
+                from eventos_mascota e
+               where e.mascota_id = p_mascota_id and not e.soft_delete
+                 and (e.creado_por_user_id is null or e.creado_por_user_id not in (
+                       select fm.user_id from familia_miembro fm
+                        where fm.familia_id = v_m.familia_id and fm.rol = 'menor' and fm.hasta is null))
+               order by e.fecha_evento desc limit 10) t),
+    'ficha_raza', case when (v_ficha->>'encontrada')::boolean is true
+      then jsonb_build_object('temperamento', v_ficha->'contenido'->>'temperamento',
+                              'cuidados', v_ficha->'contenido'->'cuidados_por_etapa') end,
+    'memoria', (select coalesce(jsonb_agg(hecho order by creado_en), '[]'::jsonb)
+                  from coach_memoria where mascota_id = p_mascota_id and activo),
+    /* Si esta familia puede abrir una teleconsulta AHORA. Se MIDE del catálogo
+       en vez de creerle al canon: sin esto, Nexo ofrecería un botón que puede
+       no existir — y prometer lo que no se puede dar es peor que ofrecer lo
+       que sí. */
+    'telemedicina_disponible', exists (
+      select 1 from tipos_servicio ts
+        join prestador_servicios ps on ps.tipo_servicio = ts.codigo
+       where ts.codigo = 'telemedicina' and ts.activo and ts.reservable and ps.activo),
+
+    -- ── la forma AGRUPADA, que ya consume la app ──────────────────────────
+    'mascota', jsonb_build_object(
+      'id', v_m.id, 'nombre', v_m.nombre, 'especie', v_m.especie, 'raza', v_m.raza,
+      'sexo', v_m.sexo, 'sujeto', v_m.sujeto, 'fecha_nacimiento', v_m.fecha_nacimiento,
+      'precision_nacimiento', v_m.fecha_nacimiento_precision,
+      'momento_vital', case when v_m.fecha_nacimiento is not null
+                            then public.calcular_etapa_vida(v_m.fecha_nacimiento, v_m.especie) end),
+    'salud', jsonb_build_object(
+      'peso_kg', v_perfil.peso_clinico_kg,
+      'alergias', coalesce(v_perfil.alergias, '[]'::jsonb),
+      'condiciones_cronicas', coalesce(v_perfil.condiciones_cronicas, '[]'::jsonb),
+      'medicacion_actual', coalesce(v_perfil.medicacion_actual, '[]'::jsonb),
+      'desparasitaciones', (
+        select coalesce(jsonb_agg(jsonb_build_object(
+                 'producto', t.producto, 'fecha', t.fecha_aplicada,
+                 'proxima', t.fecha_proxima, 'plagas', t.plagas) order by t.fecha_aplicada desc), '[]'::jsonb)
+          from (select producto, fecha_aplicada, fecha_proxima, plagas
+                  from evento_desparasitacion_aplicada where mascota_id = p_mascota_id
+                 order by fecha_aplicada desc nulls last limit 3) t)),
+    'pedidos_en_curso', (select count(*) from pedidos p
+                          where p.user_id = v_uid
+                            and p.estado not in ('entregado','cancelado_cliente','cancelado_vendedor','cancelado_sistema'))
+  );
+
+  if v_adoptada then
+    perform set_config('request.jwt.claim.sub', '', true);
+    perform set_config('request.jwt.claims', '', true);
+  end if;
+  return v_base;
+end $function$
+;;
+COMMIT;

@@ -13,6 +13,10 @@
 > devengo: con el ancla ambigua esa pregunta tiene dos respuestas y **el camino de la plata se
 > bifurca sin síntoma**. Letra vieja tachada en §8, no borrada.
 
+> ### 📌 ENMIENDA ⑤ (F1 · adenda, 7-sep-2026) — **§4 · la elección de destino aparece ⟺ hay monto**
+> La carta banco/saldo la gatea el MONTO, no la clase. Sin plata no hay destino que elegir; la
+> clase 1 que debe plata la produce F1 con `monto_devuelto` puesto. Detalle en §4.
+
 > ### 📌 ENMIENDA ①, mesa del 7-sep-2026 — **§14 · `D-888` ya no queda en NULL**
 > **La plata de los tres reversos fuera de ventana ($87,65) salió de tarjeta de PRUEBAS**
 > (dato del founder). ⇒ **no vuelve a nadie: es deuda de motor**, y se cierra construyendo
@@ -64,6 +68,21 @@ ensucia el número que después decide.*
   diciendo que sí lo hizo, es un caso de clase 2 **suyo**, no un UPDATE.
 - **La familia no ve el reloj de 48 h.** Ve su caso cuando existe. *Un countdown sobre el
   incumplimiento ajeno convierte la espera en espectáculo.*
+
+> ### 🔴 EL CORTE DEL RELOJ (mesa, 7-sep-2026) — el reloj arranca sin backlog
+> **El reloj sólo expira objetos cuyo fin declarado sea `>= 2026-09-07`.** Los
+> **107 citas + 18 estadías** con fin anterior (medido el 7-sep: 126 objetos
+> saltados en la primera corrida) **quedan fuera de alcance por decisión de
+> mesa, NO porque el instrumento no los vea.** *Son ruido de construcción, no
+> incumplimientos —ningún dato de servicio es real, producción es octubre— y
+> procesarlos crearía 125 casos y 125 devoluciones que ensuciarían los números
+> que E dejó limpios: casos por objeto, tiempo a resolución, plata devuelta por
+> causa.*
+>
+> La fecha del corte vive como DATO en `app_config.f1_corte_cierre_ausente`
+> (`'2026-09-07'`), no como literal en el código, **para que en octubre se pueda
+> ver contra qué se cortó** — y moverla es cambiar una fila, no una función.
+> Sin corte configurado el reloj **no corre a ciegas: sale `sin_corte_configurado`.**
 
 ### 🔴 §2bis · La puerta que esta firma abre, y nace con ella
 
@@ -158,6 +177,20 @@ nadie lo vea.* **Rojo de E: una devolución declarada sobre un objeto que tiene 
    estado `en_camino_manual`, quien la ejecuta la marca en el caso, y la superficie **no promete
    fecha**.
 2. **Saldo e-PetPlace** (F6, §7).
+
+> ### 🔴 ENMIENDA ⑤ (F1 · adenda, 7-sep-2026) — **la elección de destino aparece ⟺ hay monto**
+> La carta donde el dueño elige entre medio original y saldo **se ofrece sólo
+> cuando hay plata a devolver** (`leer_caso`: `resuelto ∧ destino IS NULL ∧
+> monto_devuelto > 0`). **La CLASE no la gatea, el MONTO sí.**
+>
+> *No existe un «sabor clase 1 sin monto»:* la elección de destino es sobre
+> PLATA, y sin plata no hay destino que elegir. Un caso resuelto **sin
+> devolución** (alcance `sin_devolucion`) o con una resolución no monetaria
+> **no ofrece la carta, y es correcto**. La clase 1 que SÍ debe plata —un
+> servicio pagado que quedó `no_ejecutado`— la produce F1 **con su
+> `monto_devuelto` puesto** (= lo que la familia pagó), y entonces cae en este
+> mismo único camino. *Un caso de clase 1 que llega a la carta sin monto sería
+> un defecto de F1, no de esta condición.*
 
 ### F4 · La comisión
 **En falla del prestador, e-PetPlace devuelve también su comisión.** Reembolso total = comisión
@@ -269,8 +302,16 @@ piso. Una entrega por intención.
 
 **Email de constancia forzado** en: `caso_resuelto`, movimientos de plata, `caso_no_ejecutado_48h`.
 **WhatsApp sólo en dos momentos**: cuando la familia tiene que ACTUAR (`caso_elegir_devolucion`) y
-cuando la plata se movió (`caso_resuelto` / `caso_saldo_acreditado`) — **porque desde el
-1-oct-2026 se cobra por mensaje y Ecuador está en la banda cara** (`FINANCIERO` §11bis).
+cuando la plata se movió (`caso_resuelto` / `caso_saldo_acreditado`) — ~~porque desde el
+1-oct-2026 se cobra por mensaje y Ecuador está en la banda cara~~ **🔴 ENMENDADA (S114,
+7-sep-2026 · la DECISIÓN no cambia, la RAZÓN sí): el costo NO es el límite.** Medido en la
+calculadora de Meta: Ecuador cae en el bucket «Resto de Latinoamérica», una UTILITY entregada
+cuesta **$0,0113** y **un caso completo son $0,023** — despreciable. **El límite es la
+CALIFICACIÓN DE CALIDAD del número**, que gobierna el nivel de mensajería: hoy **250
+conversaciones iniciadas por 24 h**, y **sin calidad medida porque todavía no se envió nada**.
+*Un canal barato con la calidad quemada no manda nada a ningún precio, y la calidad la queman
+los mensajes que la gente no esperaba* — que es exactamente lo que estos dos momentos evitan.
+(`FINANCIERO` §11bis, enmendada el mismo día.)
 
 **Estado medido del canal (7-sep, supersede al canon):** token válido (196 chars, `EAA`, dos
 permisos) · **8 plantillas en UTILITY y aprobadas** — la re-categorización crítica ya está hecha ·

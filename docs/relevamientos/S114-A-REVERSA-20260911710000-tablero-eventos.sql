@@ -1,0 +1,5 @@
+-- REVERSA de `20260911710000_s114a_tablero_eventos.sql`. Escrita ANTES.
+-- 🔴 Repone las vistas leyendo pedidos.kushki_status (motor muerto, 0 filas):
+--    el tablero de inversores vuelve a mostrar CERO y ciego a los eventos
+--    devengados. Recrear las definiciones previas exige su versión anterior
+--    (migración 20260911050000, la de D-759). No es un DROP simple.
