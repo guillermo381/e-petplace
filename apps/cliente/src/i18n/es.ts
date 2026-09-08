@@ -2925,6 +2925,8 @@ export const clienteEs = {
     biometricoRechazado: 'No pudimos confirmarlo. Prueba de nuevo.',
   },
   despensa: {
+    pagarConSaldo: 'Pagar con tu saldo ({{saldo}})',
+    saldoNoAlcanza: 'Tu saldo no alcanza: faltan {{falta}}.',
     titulo: 'Despensa',
     tituloProducto: 'Producto',
 

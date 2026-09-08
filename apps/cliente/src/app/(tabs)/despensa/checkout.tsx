@@ -79,6 +79,8 @@ import {
   cancelarPedidoDespensa,
   configurarRecurrencia,
   crearPedidoDespensa,
+  obtenerMiSaldo,
+  pagarCompraConSaldo,
   crearCompraDesdePedidos,
   crearIntentoPago,
   verificarCompuertas,
@@ -257,6 +259,16 @@ export default function DespensaCheckout() {
    *  no lo suma: sumar acá sería el segundo lugar donde se calcula una
    *  plata, y el día que discrepe es en una factura. */
   const [compraTotal, setCompraTotal] = useState<number | null>(null);
+
+  /* ═══ EL SALDO — se lee al llegar al resumen, no antes ════════════════════
+     🔴 **Y se OFRECE sólo si alcanza.** Enseñarle a una familia un saldo que no
+     le da para pagar es ofrecerle algo que va a rebotar; el número que igual
+     necesita ver —cuánto tiene y cuánto le falta— se lo dice el rebote, que
+     ahora trae `saldo` y `total` (se los pedí a A y los devolvió).
+
+     `null` = todavía no se sabe ⇒ no se ofrece. *Ante la duda, la app no
+     promete un medio de pago.* */
+  const [saldo, setSaldo] = useState<number | null>(null);
   /** F6 · qué tienda prepara cada pedido. Sin entrada = no se pudo leer,
    *  y la línea NO se dibuja: jamás «Lo prepara: —». */
   const [tiendas, setTiendas] = useState<Record<string, string>>({});
@@ -512,6 +524,11 @@ export default function DespensaCheckout() {
     setPedidos(okIds);
     setCompraId(c.data.compra_id);
     setCompraTotal(c.data.total);
+    /* En la misma ola que el nombre de la tienda: el saldo es un dato del
+       resumen, y pedirlo aparte sería otro viaje del peaje de `L-223`. */
+    void obtenerMiSaldo().then((rs) => {
+      if (rs.ok) setSaldo(rs.data);
+    });
     // F6: el nombre de la tienda, en UN viaje para los N pedidos.
     const nom = await obtenerNombresTiendaPorPedido(okIds.map((p) => p.pedido_id));
     if (nom.ok) setTiendas(nom.data);
@@ -801,6 +818,55 @@ export default function DespensaCheckout() {
          Ley 19.7 / 22c: EJECUTA (cancela el pedido y vuelve a armado) ⇒
          label sin chevron. */
       <>
+        {/* ═══ PAGAR CON SALDO — sólo si alcanza ═══════════════════════════
+            🔴 **Va ARRIBA del pago con tarjeta y sin competirle**: si la
+            familia tiene plata a favor, usarla es lo obvio, y hacerla elegir
+            entre dos sólidos sería el defecto que G-12 ya corrigió acá —*dos
+            bloques del mismo peso significan que nadie decidió cuál importa*.
+            Éste es `apoyada`; el sólido sigue siendo el de siempre.
+
+            **Un solo llamado por COMPRA, no por pedido.** Lo frené cuando medí
+            que el checkout agrupa N pedidos en una compra y el wrapper cobraba
+            por pedido: con dos tiendas, un rebote en la segunda dejaba la
+            primera ya cobrada. A lo hizo atómico por compra. *El saldo es
+            plata: un cobro parcial no es un caso borde.* */}
+        {saldo !== null && compraTotal !== null && saldo >= compraTotal ? (
+          <Boton
+            variante="apoyada"
+            bloque
+            /* `?? ''` inalcanzable: el guard de arriba ya exige `saldo !== null`. Se
+               pone porque TS no estrecha a través de la condición del JSX, y un
+               `!` forzado es lo que la regla 34 prohíbe. */
+            etiqueta={t('despensa.pagarConSaldo', { saldo: dinero(saldo) ?? '' })}
+            cargando={trabajando}
+            onPress={() => {
+              if (compraId === null || trabajando) return;
+              setTrabajando(true);
+              void pagarCompraConSaldo(compraId).then((r) => {
+                setTrabajando(false);
+                if (r.ok) {
+                  /* `duplicado` = ya estaba pagada. No se celebra dos veces ni
+                     se trata como error: se dice lo que hay y se sigue. */
+                  setFase('exito');
+                  return;
+                }
+                /* 🔴 El rebote DICE CUÁNTO FALTA — `saldo_insuficiente` trae
+                   `saldo` y `total` (unión discriminada). *«No alcanza» sin el
+                   número deja a la familia sin saber qué hacer con eso.* */
+                mostrar({
+                  variante: 'error',
+                  texto:
+                    r.codigo === 'saldo_insuficiente'
+                      ? t('despensa.saldoNoAlcanza', { falta: dinero(r.total - r.saldo) ?? '' })
+                      : r.mensaje,
+                });
+                /* Si no alcanzaba, el número de arriba estaba viejo: se relee
+                   en vez de dejar una oferta que ya sabemos falsa. */
+                if (r.codigo === 'saldo_insuficiente') setSaldo(r.saldo);
+              });
+            }}
+          />
+        ) : null}
         <BotonPagar
           medio={medio}
           trabajando={trabajando}

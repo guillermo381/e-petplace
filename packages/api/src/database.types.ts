@@ -14000,6 +14000,7 @@ export type Database = {
       }
       mascotas: {
         Row: {
+          bienvenida_regreso_pendiente: boolean
           country_code: string
           creado_por_sistema: string | null
           created_at: string
@@ -14036,6 +14037,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          bienvenida_regreso_pendiente?: boolean
           country_code?: string
           creado_por_sistema?: string | null
           created_at?: string
@@ -14072,6 +14074,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          bienvenida_regreso_pendiente?: boolean
           country_code?: string
           creado_por_sistema?: string | null
           created_at?: string
@@ -26751,6 +26754,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      pagar_compra_con_saldo: { Args: { p_compra_id: string }; Returns: Json }
       pagos_aprobados_sin_sujeto_movido: { Args: never; Returns: Json }
       pagos_conciliacion_cobertura: { Args: never; Returns: Json }
       pagos_huerfanos_por_sujeto: {
@@ -27632,6 +27636,7 @@ export type Database = {
         Args: { p_email?: string; p_invite_code?: string }
         Returns: Json
       }
+      vencer_casos_sin_respuesta: { Args: never; Returns: Json }
       vencer_links_mensuales: { Args: never; Returns: Json }
       vencer_paquetes_salidas: { Args: never; Returns: Json }
       vencer_programas_adiestramiento: { Args: never; Returns: Json }
