@@ -28703,6 +28703,176 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-506` — La prosa no es inerte cuando vive adentro de algo que se EJECUTA
+
+**S114-F.** Firmé una cura para que un repo construyera siempre: `vercel.json` con
+`ignoreCommand`, que en Vercel devuelve un código de salida — `0` saltea el build,
+`1` lo construye. Y le puse una explicación adentro, para que quien lo mirara
+entendiera:
+
+```json
+"ignoreCommand": "echo 'construir SIEMPRE — ver README, seccion \"Por que este repo construye siempre\"'; exit 1"
+```
+
+🔴 **Ese commit fue el único de la tanda que NO produjo deployment.** El anterior,
+sin `ignoreCommand`, había construido trece minutos antes. *La cura escrita para
+garantizar el build fue lo único que lo impidió.*
+
+**Lo que se descartó antes de tocar nada**, contra el schema oficial
+(`https://openapi.vercel.sh/vercel.json`) y no contra la intuición:
+
+```
+ignoreCommand existe como propiedad raíz          ✅ válido
+type string|null · maxLength 256 · mi valor 92    ✅ dentro
+additionalProperties: false → sin keys de más     ✅ limpio
+```
+
+⇒ **El archivo no violaba el schema. La causa no era la forma, era el contenido.**
+Las comillas **dobles** adentro del comando lo rompen cuando Vercel lo envuelve
+para ejecutarlo, y un comando roto puede salir con `0` — que en ese campo
+significa *saltear*.
+
+> ***Un texto puesto para explicar terminó cambiando el comportamiento, y en la
+> dirección exactamente contraria a la que explicaba.***
+
+⇒ **Un campo cuyo único trabajo es devolver un código de salida se deja PELADO.**
+La explicación va donde se lee sin ejecutarse — el README, un comentario del
+código, el canon. **Adentro del ejecutable, la prosa es un participante.**
+
+⚠️ **Y el precedente que la vuelve familia y no anécdota: la propia cura llevaba
+adentro el defecto que venía a curar** — igual que la cura de `D-731` en S92-BIS,
+cuyo ensayo de fallo encontró el defecto dentro de la cura misma. *La disciplina
+que las cierra a las dos es la misma: **una cura no está entregada hasta que su
+efecto se midió en el objeto**, no hasta que se escribió bien.*
+
+✅ **Y lo bueno del día: no lo encontré yo — lo encontró el gate que había cableado
+quince minutos antes.** La Action puso una ✗ roja en ese commit por «la punta no
+tiene deployment», que es literalmente el caso para el que fue construida. *Un
+instrumento que estrena su rojo sobre un error de su propio autor es un
+instrumento que sirve* ([[L-459]]).
+
+---
+
+
+### `L-505` — Una sonda puede ser verdadera y medir el eslabón ANTERIOR al que importa
+
+**S114-F.** Verifiqué que «Entrar con Google» estuviera curado en producción.
+El bundle publicado tenía el `redirectTo` correcto y literal, y una sonda al
+endpoint de OAuth devolvió **302 hacia `accounts.google.com`** con la URL
+canónica intacta. Dos verdes, los dos verdaderos. **Iba a reportarlo cerrado.**
+
+Corrí el discriminador antes:
+
+```
+① canónica  admin.epetplace.com          → accounts.google.com  ✅
+② una URL INVENTADA que no existe         → accounts.google.com  ✅  ← acá se cae
+③ la URL vieja que rompía                 → accounts.google.com  ✅
+```
+
+🔴 **Las tres pasan.** La sonda no mide la lista de URLs permitidas: mide que el
+endpoint **despache**. La validación de la allow-list ocurre en el **callback**,
+cuando el usuario vuelve de Google — un eslabón más adelante del que yo miraba.
+
+> ***El 302 era verdadero. Falsa era mi lectura de qué probaba.*** Y esa forma
+> no se parece a un error: se parece a una medición limpia, con su código de
+> estado y su header, sobre el sistema real.
+
+⇒ **Antes de concluir de una sonda, se le pasa el caso que TIENE que rechazar.**
+Si no lo rechaza, la sonda mide otra cosa — y hay que decir cuál, porque *«el
+endpoint despacha»* y *«la URL está permitida»* son dos hechos distintos y sólo
+uno estaba en el encargo.
+
+⚠️ **Y el corolario de honestidad, que es la mitad que se olvida:** lo que la
+sonda no alcanzó **se declara**, no se completa con la conclusión que uno
+esperaba. Acá quedó sin medir la vuelta desde Google, que exige credenciales del
+founder — *y no medirla es correcto; lo incorrecto habría sido no decirlo.*
+
+*(Familia de [[L-459]] — la primera prueba de un guard es su rojo, no su verde.
+El matiz propio: acá el instrumento no era un guard sino una sonda de
+diagnóstico, y el defecto no estaba en el instrumento sino **en qué eslabón de
+la cadena estaba parado**.)*
+
+---
+
+
+### `L-504` — El texto de una interfaz describe el caso TÍPICO; el contrato son los bordes, y no está escrito
+
+**S114-F.** Tres pushes seguidos a `main` no produjeron deployment y producción
+sirvió el bundle viejo **2 h 20 min**, con un camino de entrada roto adentro.
+La causa era el `Ignored Build Step` de Vercel en `Automatic`, cuyo texto dice
+—en la pantalla, con esas palabras— que **salta el build si no cambió nada
+relevante**.
+
+🔴 **Y los tres árboles eran distintos entre sí. Medido, no supuesto.** O sea que
+la heurística compara **algo más que el contenido del repo**, y ese «algo más»
+no está declarado en ninguna parte que se pueda leer.
+
+> ***El texto de una interfaz de terceros está escrito para tranquilizar sobre el
+> caso típico. El contrato es lo que el sistema hace en los bordes — y los bordes
+> no se documentan porque el que escribe el texto tampoco los tiene a la vista.***
+
+**Lo que esto cambia en el momento del diagnóstico:** cuando una conducta
+contradice el texto de la pantalla, la conclusión correcta **no** es *«esto no
+puede estar pasando»* —que fue la mía, y me costó cinco hipótesis descartadas—
+sino ***«el texto describe menos de lo que el sistema hace»***. Lo primero
+protege al texto; lo segundo protege al que va a decidir.
+
+⇒ **Corolario, y es el que se ejecuta:** *una decisión que importa no se deja en
+manos de una heurística ajena cuya regla exacta no se puede leer.* No es
+desconfianza — es que **no hay forma de auditarla**, así que su acierto y su
+error son igual de invisibles. La cura no es entender la heurística: es **sacarla
+del camino** (`vercel.json` con `"ignoreCommand": "… exit 1"`, en el repo y no en
+el dashboard, para que quede versionada y se revise en un diff).
+
+⚠️ **Su modo de falla es el peor de todos: SILENCIO.** No hubo error, ni
+deployment en estado *Skipped*, ni línea en el Activity log — *el build moría
+antes de existir*. Y un silencio se lee exactamente igual que «todavía no llegó»
+([[L-502]] y su enmienda).
+
+*(Pariente invertida de [[L-439]]: allá una limitación estaba declarada en un
+comentario y no protegía a nadie; acá el texto declara MENOS de lo que el sistema
+hace, y confiar en él manda a buscar la causa a cinco lugares equivocados.)*
+
+---
+
+
+### `L-503` — Una respuesta de éxito dice que el pedido se ACEPTÓ, no que el trabajo vaya a ocurrir
+
+**S114-F.** Con el deploy trabado, disparé el Deploy Hook de Vercel a mano. El
+POST devolvió **200** con un cuerpo perfectamente sano:
+
+```json
+{ "job": { "id": "…", "state": "PENDING", "createdAt": … } }
+```
+
+**Y nunca construyó.** `PENDING` no es un problema del sistema: es literalmente
+lo que dice — *encolado*. El éxito del POST describe **la recepción del pedido**,
+y yo estaba a punto de leerlo como **la ejecución del trabajo**.
+
+> ***Entre «lo acepté» y «lo hice» hay una brecha, y las APIs contestan del lado
+> barato de la brecha.*** Un `200` con `PENDING` es una promesa; el hecho es el
+> artefacto que aparece después, y hay que ir a buscarlo.
+
+⇒ **De un `2xx` asíncrono no se concluye nada sobre el resultado: se anota el id,
+se define qué artefacto tiene que aparecer y en cuánto tiempo, y se verifica ESO.**
+
+🔴 **Y el corolario es lo que más rinde, porque da vuelta la lección:** *esa misma
+brecha es un punto de MEDICIÓN.* El `PENDING` sin build posterior fue el
+discriminador que **partió la cadena en dos** y movió la causa aguas abajo del
+disparo — descartó de un saque la conexión con GitHub, el webhook y la GitHub App,
+que eran tres de mis cinco candidatos. *Un sistema que acepta y no ejecuta te está
+diciendo dónde NO está el corte.*
+
+**Precedente directo en la casa, y por eso es familia y no caso aislado:** S107
+curó un actuador que *«ignoraba en silencio lo que no conocía — `ok: true`, sin
+escribir nada»*; S109 dejó firmado que el estado se consulta en las tablas
+*«jamás por el `ok:true` de la edge, que es una señal optimista y no un hecho»*.
+**Esta es la misma ley aplicada a un tercero**, donde además no se puede abrir la
+tabla y hay que elegir el artefacto observable de antemano.
+
+---
+
+
 ### `L-502` — Cuando la espera deja de discriminar entre las hipótesis, la espera terminó
 
 **S114-F.** Un deploy no salía. Sondeé **1 h 21 min**. El deploy anterior había
@@ -28746,6 +28916,25 @@ sobre medir bien lo que uno cree que mide — **la capa**, **la rama**, **el
 momento**, y ahora **si la observación discrimina algo**. Las tres primeras dan
 un dato falso; ésta da un dato verdadero que no sirve para decidir, que es la
 forma más cara porque no se siente como un error.)*
+
+> 🔴 **ENMIENDA (8-sep-2026, misma sesión): la premisa fáctica de arriba es
+> FALSA, y el hecho verdadero REFUERZA la lección en vez de debilitarla.**
+> Donde dice ~~«El webhook de GitHub nunca llegó a Vercel»~~, léase: **el evento
+> llegaba, y el `Ignored Build Step` en `Automatic` mataba el build tan temprano
+> que no dejaba NI UN registro** — ni deployment en estado *Skipped*, ni error,
+> ni una línea en el Activity log. *No era un evento perdido: era un evento
+> descartado sin dejar rastro, que desde afuera se ve idéntico.*
+>
+> **Y el matiz que la vuelve más filosa: la lección subestimaba su propio caso.**
+> No eran dos hipótesis indistinguibles: eran **tres**, y ***la verdadera no
+> estaba en la lista***. Se descartaron por medición el techo de deployments, el
+> webhook, la GitHub App, un force push y los límites de gasto — cinco candidatos,
+> ninguno correcto — porque **todos producían el mismo hecho observable**.
+> ⇒ *Cuando la observación no discrimina, el problema no es sólo que no sepas
+> cuál de tus hipótesis es: es que **no tenés forma de saber si la correcta está
+> entre ellas**.* Por eso la salida no era pensar mejor la lista, era **pedir el
+> dato del otro lado** — que es lo que esta lección ya decía y hay que obedecer
+> antes, no después de cinco descartes.
 
 ---
 
