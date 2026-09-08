@@ -93,7 +93,8 @@ de `apps/admin` ya dice «e-PetPlace · Operaciones»** — *el nombre ya existe
 |---|---|---|
 | **1 · las que ya no sirven** | `Liquidaciones` · `Dashboard` · `Financiero` · `Sellers` | **están ROTAS** (tablas inexistentes) y **la mesa nueva ya tiene Liquidaciones andando**. *Retirar algo roto no le quita nada a nadie.* |
 | **2 · lo clínico muerto** | `MascotaDetalle` · `UserTimeline` · `UsuarioDetalle` · `Citas` | leen `citas`/`vacunas`/`historia_clinica`, **el modelo viejo que el monorepo reemplazó por eventos**. Reconstruirlas es rehacerlas, no migrarlas |
-| **3 · las de permiso** | `Placas` · `Prestadores` · `PrestadorDetalle` · `Servicios` · `Productos` | **`permission denied`** — se destraban con una RPC cada una (`listar_lotes()` es la primera, pedida a A). *Pueden curarse en el legado o nacer en la mesa nueva: es la única tanda donde hay elección* |
+| **3 · las de permiso — YA DESTRABADAS** | `Placas` · `Prestadores` · `PrestadorDetalle` · `Servicios` | ✅ **A entregó** `listar_lotes()` (RPC con `is_admin`) y **dos policies `is_admin()` de SELECT** sobre `prestadores` y `seller_perfil`. *Placas se cablea contra la RPC; las otras tres se destraban **sin tocarlas**.* |
+| **3bis · las que parecían de permiso y NO lo eran** | `MascotaDetalle` · `Citas` · `Sellers` · `Productos` | 🔴 **la policy no las salva: leen ADEMÁS tablas que no existen** (`citas`, `historia_clinica`, `seller_comisiones`). **Van con la tanda 2, no con la 3** — su causa es el modelo viejo, no el permiso. *Contarlas como destrabadas sería declarar arregladas cuatro pantallas que van a seguir en blanco.* |
 | **4 · las 12 que andan** | `Usuarios` · `Pedidos` · `Promociones` · `Roles` · `Paises` · `Mascotas` · `BetaUsers` · `PlanesPrime` · `Gamificacion` · `Inversores` · `PedidoDetalle` · `Login` | **últimas, y sólo cuando la mesa nueva las cubra.** *Migrar algo que funciona es el único trabajo que puede dejar al founder peor que antes* |
 
 ---

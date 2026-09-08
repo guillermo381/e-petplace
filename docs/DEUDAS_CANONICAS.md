@@ -28703,6 +28703,56 @@ lo construye y la otra lo mide **sobre el objeto que ya existe**.
 ---
 
 
+### `L-522` — `--filter` en un lockfile lo PODA a la plataforma de quien lo corre
+
+**S114-F, firma del founder.** Para agregar **una** dependencia a **un** paquete del
+monorepo corrí lo que parece la forma cuidadosa —tocar sólo lo mío—:
+
+```bash
+pnpm install --lockfile-only --filter @epetplace/admin
+```
+
+🔴 **Borró 146 líneas del lock. Entre ellas, los 30 binarios de `lightningcss-linux`** —
+*los que necesita el build de Vercel, que corre en Linux.*
+
+```
+--filter          9 insertions · 146 deletions   🔴 lock podado a macOS
+sin --filter     19 insertions ·  16 deletions   ✅ los 30 binarios de linux intactos
+```
+
+> ***Un lock podado compila perfecto en la máquina que lo podó y rompe en el CI.***
+> El daño es de la clase que no se ve: no falla nada, no avisa nada, y el archivo queda
+> más chico — *que en un lockfile se lee como limpieza.*
+
+⚠️ **Y lo que lo vuelve peligroso no es el comando: es que `--filter` significa lo
+contrario de lo que uno lee.** Uno lo pone para **acotar el alcance del cambio**; pnpm lo
+entiende como **acotar el universo a resolver**, y lo que queda fuera del filtro **no se
+conserva: se cae**. *La intención y la semántica apuntan en direcciones opuestas, y la
+salida es exitosa en las dos lecturas.*
+
+⇒ **En un monorepo, el lockfile se regenera SIN `--filter`.** Acotar el commit se hace con
+el pathspec, no con el resolvedor.
+
+## Lo que lo cazó, y no fue un error
+
+**El `--stat`.** `1 file changed, 9 insertions(+), 146 deletions(-)` sobre un cambio que
+tenía que agregar **una línea**. *Ninguna otra señal habló*: `exit 0`, «Done in 3.6s», y el
+build local siguió funcionando — **porque la plataforma local es justamente la que el lock
+conservó.**
+
+⇒ **Un `git diff --stat` antes de commitear un lockfile no es prolijidad: es el único
+lugar donde este daño es visible.** Un lock es ilegible de a línea, así que la única
+pregunta que se puede hacer es *«¿el tamaño del cambio se parece a lo que hice?»* — y acá
+la respuesta era no por dos órdenes de magnitud.
+
+*(Familia de [[L-521]] del mismo arco —un artefacto que se produce con éxito y no contiene
+lo que uno cree— pero en un archivo que **nadie lee**: en un bundle uno puede grepear una
+cadena propia; en un lockfile de 20 000 líneas **la única medición al alcance es el
+tamaño del diff**.)*
+
+---
+
+
 ### `L-521` — Un artefacto que se construye con ÉXITO no prueba que contenga lo que uno cree
 
 **S114-F, firma del founder — la más cara del arco.**
