@@ -164,6 +164,62 @@ memorial se mide montando, que es como apareció todo esto.**
 
 ---
 
+## ③bis 🔴 LA SEGUNDA REGLA VIVA — censada a pedido del founder
+
+**C declaró que en Sombra las piezas ya estaban apagadas por el `{!esMemorial …}`
+de la pantalla. Es cierto — y el censo da algo más grande que «dos reglas».**
+
+### Lo medido (por balance de llaves, no por ventana de líneas)
+
+| grupo | ¿la pantalla tiene su propia regla? | **qué forma tiene esa regla** |
+|---|---|---|
+| **la ficha** · `TarjetaHoy` · `TarjetaConociendolo` · `HojaContanos` · `BotonContanos` | 🔴 **SÍ — los 10 montajes caen dentro de un condicional `esMemorial`** | `estado_vida !== null && !== 'activa'`, derivado del perfil. **`esMemorial` aparece ~17 veces en esa pantalla**: no es un condicional, es una regla que la atraviesa |
+| **el nexo** · `ChipsSugerencia` · `PresentacionNexo` · `RespuestaNexo` · `PanelMemoria` · `AvisoAnticipacion` | 🔴 **SÍ, pero es OTRA regla y de otra forma** | **no hay `esMemorial` en `nexo.tsx`**: la EDGE devuelve `codigo === 'memorial'` y la pantalla hace **`router.back()`**. *Es un rebote de navegación desde el servidor* |
+| `MarcaDeAgua` · **85 montajes** | ✅ **NO — cero gateadas.** Verificado por balance de llaves en los 7 archivos que siquiera mencionan «memorial» | — |
+| `PastillaConociendolo` | — (0 montajes) | — |
+
+> ### 🔴 NO SON DOS REGLAS: SON **TRES**, EN TRES CAPAS DISTINTAS
+> ```
+> servidor  · la edge devuelve `codigo === 'memorial'`      → el nexo rebota
+> pantalla  · estado_vida !== null && !== 'activa'          → la ficha apaga
+> pieza     · theme.mode === 'memorial'                     → INERTE
+> ```
+> **Y con la que ya estaba medida —el pasaporte, que además excluye
+> `perdida`— son CUATRO definiciones del mismo hecho conviviendo.**
+
+### 🔴 LA CONSECUENCIA, y es la que importa para montar
+
+**Las nueve están protegidas por la capa que SÍ se enciende, no por la que dice
+protegerlas.** *El apagado que C vio en Sombra es real y no es de la pieza.*
+
+⇒ **si mañana una de esas piezas se monta en OTRA pantalla —o el condicional se
+refactoriza— la protección desaparece, y el guard de la pieza no la salva
+porque está inerte.** *Una protección que vive sólo en el llamador protege esa
+llamada, no a la pieza.*
+
+### ⚠️ Y LO QUE **NO** HAY QUE HACER CON ESE CONDICIONAL: BORRARLO
+
+**Medido antes de recomendar, porque la conclusión obvia era la equivocada:**
+dos de los tres condicionales de la ficha **apagan una SECCIÓN ENTERA**, no una
+pieza —`{!esMemorial && hoyMascota !== null ? (` envuelve **cinco** `TarjetaHoy`,
+y otro envuelve `TarjetaConociendolo` **+** `BotonContanos` juntos—. **Eso la
+pieza no lo puede hacer: no sabe que tiene hermanas.**
+
+⇒ **no son duplicados: son capas anidadas, y las dos hacen falta.**
+- la **pantalla** apaga *lo que la sección significa* (un bloque que no
+  corresponde);
+- la **pieza** se apaga *a sí misma* y **viaja con ella** a cualquier pantalla.
+
+**El defecto no es que haya dos: es que la de adentro está apagada.** *Lo que
+hay que cerrar no es la de la pantalla — es que la protección deje de depender
+de que cada pantalla nueva se acuerde.*
+
+**Y la que sí es candidata a morir es la de `HojaContanos`** (`{!esMemorial ? (`),
+que envuelve **una sola pieza**: ahí la de la pantalla y la de la pieza dicen
+literalmente lo mismo. *Pero eso es decisión de C sobre su archivo, no mía.*
+
+---
+
 ## ④ `MarcaDeAgua` — DECLARADA APARTE Y **NO SE CURA EN ESTA TANDA**
 
 **No es un olvido: es la única de las once que de verdad depende del tema, y
