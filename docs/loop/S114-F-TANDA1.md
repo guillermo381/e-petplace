@@ -637,3 +637,79 @@ bloque MUERA con `gen:types`**, no que se mantenga a mano. El pedido a A sube de
 prioridad: ahora cubre la puerta de liquidación **y** todo postventa.
 
 Typecheck `apps/admin` verde · `packages/api` verde · build 199,89 kB.
+
+---
+
+# ADENDA 4 · `admin.epetplace.com` — el founder tenía razón, y falta UNA cosa
+
+**Mi medición anterior decía «no resuelve» y era verdadera pero incompleta.** El
+founder ve el dominio asignado en el dashboard; las dos cosas son ciertas a la
+vez, y la diferencia importa.
+
+## ① La medición, en tres capas
+
+```
+DNS   admin.epetplace.com  → NXDOMAIN en 8.8.8.8, 1.1.1.1 y 9.9.9.9
+      (no es caché local: los tres resolvers públicos coinciden)
+      control: www.epetplace.com → cname.vercel-dns.com ✅ el instrumento discrimina
+
+TLS   https vía la IP de Vercel → curl (35) SSL_ERROR_SYSCALL
+      Vercel no pudo emitir el certificado: no puede verificar un dominio sin DNS
+
+HTTP  http vía 76.76.21.21 con Host: admin.epetplace.com
+      → HTTP 200 · 466 bytes · **es NUESTRA app** (mismo index.html)
+      control: mismo método sobre www → HTTP 200 · 52.905 bytes ✅
+```
+
+## El diagnóstico, que separa lo que está bien de lo que falta
+
+| capa | estado |
+|---|---|
+| **Vercel** | ✅ **el dominio está asignado y ya sirve la app** — probado con Host header |
+| **DNS** | 🔴 **NXDOMAIN: el registro no existe** |
+| **TLS** | 🔴 sin certificado, **como consecuencia** del DNS |
+
+**Por qué falta:** los nameservers de `epetplace.com` son
+`ns1/ns2.dns-parking.com` — **Hostinger, no Vercel DNS**. Vercel no controla la
+zona, así que **no puede crear el registro solo**. Alguien ya creó el de `www`
+a mano (por eso `www` funciona); falta el de `admin`.
+
+**La cura es un registro en Hostinger**, idéntico al que `www` ya tiene:
+
+```
+CNAME   admin   →   cname.vercel-dns.com
+```
+
+*(o `A admin → 76.76.21.21`; el CNAME es lo que el propio dominio ya usa para `www`).*
+
+## 🔴 ② POR QUÉ NO CAMBIÉ LA URL — y no es cautela, es que rompería
+
+El founder pidió la medición **antes** de tocar. La medición dice **que todavía
+no**: apuntar el `redirectTo` a `https://admin.epetplace.com` hoy dejaría el
+login con Google **peor que antes**. Hoy aterriza en una pantalla de Vercel;
+con NXDOMAIN el navegador diría «no se puede acceder a este sitio».
+
+*El criterio del founder es correcto —un dominio propio sobrevive a un cambio de
+proveedor y una URL de `.vercel.app` no— y por eso esto es un «todavía no», no
+un «no».* **En cuanto el CNAME exista y el certificado se emita, se cambia en
+los dos lugares reales** (`Login.tsx` y `CLAUDE.md`) **y se verifica igual que
+esta vez: por contenido del bundle publicado.**
+
+## ③ La cura de Placas — SÍ está en producción
+
+**Y la pregunta llevaba una premisa mía equivocada, que corrijo:** esperar
+`index-Px6202vT.js` era un error **de mi parte**. Ese hash era el build de
+`f1db76e` *sola*, y **Vercel despliega la punta, no cada commit**. El deploy que
+salió es de **`73b275c`**, que trae la cura **y** la corrección de URL juntas.
+
+```
+bundle en producción: index-fK9Opg5L.js
+  .mascota_id en el fragmento de Placas ……… 0   ✅
+  contador ahora ……………… filter(e=>!e.activada)  ✅
+  URL de rama en el bundle ………………………………… 0   ✅
+  los retiros siguen ausentes …………………………… ✅
+```
+
+*Predije el hash de un commit intermedio y esperé un hash que nunca iba a
+existir. La medición del deploy era correcta; el salto fue mío* — misma clase
+que `L-487`.
