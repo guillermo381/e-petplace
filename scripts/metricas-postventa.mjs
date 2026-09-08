@@ -129,6 +129,17 @@ const TARIFA_UTILITY_RESTO_LATAM = 0.0113;
 const TARIFA_PROCEDENCIA = 'bucket «Resto de Latinoamérica» (EC no tiene línea propia) · ' +
   'hojas vigentes 1-jul-2026 · doc actualizado 5-ago-2026 · calculadora oficial de Meta ' +
   '(el CSV del CDN devuelve 403)';
+/* 🟢 LA WABA QUEDÓ EN **USD** Y **America/Guayaquil** (consola, 7-sep).
+   Las dos mitades importan y por razones distintas:
+   · **USD** ⇒ la tarifa se aplica tal cual, sin conversión ni spread. El número
+     de arriba es el número que se factura.
+   · **America/Guayaquil** ⇒ **el corte del 1-oct-2026 cae en NUESTRA hora**.
+     *Antes había que saber en qué huso caía la medianoche de Meta para saber
+     qué mensaje entra al régimen pago; ahora la frontera es la del reloj de
+     acá.* Un costo que depende de una zona horaria ajena tiene un borde que
+     nadie puede verificar desde su propia pantalla. */
+const WABA_MONEDA = 'USD';
+const WABA_HUSO = 'America/Guayaquil';
 const MENSAJES_POR_CASO = 2;   // §10: sólo ACTUAR y PLATA MOVIDA
 
 medir(13, 'costo de WhatsApp por caso',
@@ -154,6 +165,8 @@ medir(13, 'costo de WhatsApp por caso',
       `familias con opt-in: ${optin} (filas whatsapp: ${c.optin_si} sí / ${c.optin_no} no · exige_evidencia=${c.exige_evidencia})`,
       `⇒ TECHO HOY: ${MENSAJES_POR_CASO} × ${TARIFA_UTILITY_RESTO_LATAM} × ${optin} = USD ${(porCaso * (optin ?? 0)).toFixed(4)} — exacto, no estimado`,
       `canal transporte_vivo=${c.transporte_vivo} · mensajes por WhatsApp enviados: ${c.enviados}`,
+      `WABA en ${WABA_MONEDA} y ${WABA_HUSO}: la tarifa se factura sin conversión, y el`,
+      `  corte del 1-oct-2026 cae en NUESTRA hora — no depende de un huso ajeno.`,
       `NO se estima el VOLUMEN (casos por familia): ese dato no existe, y §11bis`,
       `  existe para no tenerlo inventado. Lo de arriba es costo POR CASO y su techo,`,
       `  jamás un gasto proyectado.`,
