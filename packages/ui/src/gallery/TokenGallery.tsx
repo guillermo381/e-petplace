@@ -166,6 +166,24 @@ import type { EstadoConvivencia } from '../components/Convivencia'
 import { SenalesAdoptable } from '../components/SenalesAdoptable'
 import { SelectorDestinoDonacion } from '../components/SelectorDestinoDonacion'
 import { EscaleraSolicitud } from '../components/EscaleraSolicitud'
+import { EscaleraCaso } from '../components/EscaleraCaso'
+import { CabeceraCaso } from '../components/CabeceraCaso'
+import { SelectorMotivo } from '../components/SelectorMotivo'
+import { TarjetaDestinoPlata } from '../components/TarjetaDestinoPlata'
+import { BannerPlazo } from '../components/BannerPlazo'
+import { FilaBandejaCaso } from '../components/FilaBandejaCaso'
+import { LineaAlgoSalioDistinto } from '../components/LineaAlgoSalioDistinto'
+import { CARA_EN_HILO } from '../components/BurbujaMensaje'
+
+/* Las cinco voces del caso, una sola vez: la galería monta CUATRO escaleras y
+   repetir el objeto en cada una es la clase de copia que después diverge. */
+const VOCES_CASO = {
+  recibido: 'Recibido',
+  con_prestador: 'Con el paseador',
+  con_epetplace: 'Con e-PetPlace',
+  resuelto: 'Resuelto',
+  cerrado: 'Cerrado',
+} as const
 import { EvidenciaClip } from '../components/EvidenciaClip'
 import { TarjetaPedido } from '../components/TarjetaPedido'
 import { TarjetaProducto } from '../components/TarjetaProducto'
@@ -5360,14 +5378,22 @@ function GaleriaInterna() {
             chip="985112004123456" etiquetaChip="Chip"
             qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
             estado={{ estado: 'activo' }}
+            enMemoria={false}
           />
           {/* 🔴 PERDIDA: la franja preside y DICE DESDE CUÁNDO — entre ayer y
-              hace tres meses cambia lo que hace quien la encuentra. */}
+              hace tres meses cambia lo que hace quien la encuentra.
+
+              🔴 **Y ES EL DISCRIMINADOR DE LA FIRMA DEL 7-sep: `perdida` NO es
+              memorial y la tarjeta SE DIBUJA.** Va con `enMemoria={false}`
+              explícito, al lado de la que no se dibuja: *la placa existe
+              justamente para esto, y apagarle el pasaporte a una familia que
+              está buscando a su animal le quitaría su única herramienta.* */}
           <TarjetaPasaporte
             nombre="Thor" especieYRaza="Perro · Labrador" sexoYEdad="Macho · 4 años"
             qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
             estado={{ estado: 'perdida', desde: '2026-09-05' }}
             vozPerdida="Perdida desde el 5 de septiembre"
+            enMemoria={false}
           />
           <Texto variante="apoyo">↓ en memoria la tarjeta NO EXISTE: abajo de esta línea no hay nada</Texto>
           <TarjetaPasaporte
@@ -6377,6 +6403,215 @@ function GaleriaInterna() {
                   una_vida_nueva: 'Una vida nueva',
                 }}
                 acento="oficio"
+              />
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="⭐ LA POSTVENTA (S114) — «algo salió distinto»">
+          {/* ENTRADA DE CATÁLOGO de las OCHO piezas de `DIRECCION_POSTVENTA`.
+              Su gate es el aparato, montadas; acá se ve QUE ESTÁN.
+
+              🔴 QUÉ HAY QUE MIRAR, en orden de riesgo:
+              ① **las dos tarjetas del dinero**: ¿alguna pesa más que la otra?
+                 Mismo alto, mismo borde, mismo color, ninguna preseleccionada.
+                 Es la pieza donde un dark pattern entra sin que nadie lo note.
+              ② **el candado del nodo 5**: es el único glifo nuevo. ¿Se lee como
+                 «cerrado» a este tamaño, o como una caja? Su gate por ícono a
+                 21px está PENDIENTE.
+              ③ **el plazo**: ¿se lee como información o como reto? Si parece un
+                 reto, el tono falló — no pasó nada malo todavía.
+              ④ **la línea de la puerta**: tiene que ser lo más discreto de la
+                 pantalla. Si llama la atención, invita a reclamar. */}
+          <View style={{ gap: spacing[6] }}>
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">CabeceraCaso — el objeto con su fecha y la contraparte. NUNCA el monto.</Texto>
+              <CabeceraCaso
+                objeto={{ nombre: 'Paseo de Thor', fecha: 'martes 9, 16:00', onPress: () => {} }}
+                contraparte={{ nombre: 'Paseos Andrés', onPress: () => {} }}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">BannerPlazo — neutro y tabular. Si se lee como alarma, falló.</Texto>
+              <BannerPlazo voz="Te quedan 14 horas para responder" />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">⭐ EscaleraCaso — las cinco etapas, cada una con su glifo</Texto>
+              <EscaleraCaso
+                etapa="con_prestador"
+                abierta
+                onAlternar={() => {}}
+                etiquetaAlternar="Ver los pasos"
+                vozEstado="Estás en: Con el paseador · responde antes del jueves a las 14:00"
+                voces={VOCES_CASO}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                ⭐ final alterno — la etiqueta REEMPLAZA la línea y la fila queda donde estaba
+              </Texto>
+              <EscaleraCaso
+                etapa="con_epetplace"
+                final={{ tipo: 'sin_lugar', etiqueta: 'Sin lugar · 12 sep' }}
+                abierta
+                onAlternar={() => {}}
+                etiquetaAlternar="Ver los pasos"
+                vozEstado="Estás en: Con e-PetPlace"
+                voces={VOCES_CASO}
+                acento="oficio"
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">COLAPSADA — queda sólo la línea, y el toque la abre</Texto>
+              <EscaleraCaso
+                etapa="cerrado"
+                abierta={false}
+                onAlternar={() => {}}
+                etiquetaAlternar="Ver los pasos"
+                vozEstado="Estás en: Cerrado"
+                voces={VOCES_CASO}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                SelectorMotivo — sin scroll interno, y la última fila es «contame», jamás «Otro»
+              </Texto>
+              <SelectorMotivo
+                motivos={[
+                  { clave: 'no_vino', etiqueta: 'No vino', glifo: 'paseo' },
+                  { clave: 'ausencia', etiqueta: 'Me cobraron una ausencia que no fue', glifo: 'pagos' },
+                  { clave: 'no_esperaba', etiqueta: 'El servicio no fue como esperaba', glifo: 'caso' },
+                  { clave: 'volvio_mal', etiqueta: 'Mi mascota volvió mal', glifo: 'veterinaria', pideFoto: true },
+                ]}
+                elegido={null}
+                onElegir={() => {}}
+                vozContame="Es otra cosa · contame"
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                ⭐ TarjetaDestinoPlata — DOS del mismo tamaño, ninguna elegida, cada una con su tiempo
+              </Texto>
+              <TarjetaDestinoPlata
+                vozMonto="Te devolvemos $12,00 — el total de este paseo."
+                banco={{
+                  titulo: 'A tu banco',
+                  voz: 'Vuelve a la tarjeta con la que pagaste.',
+                  tiempo: 'Depende de tu banco: en promedio 15 días hábiles.',
+                }}
+                saldo={{
+                  titulo: 'Saldo en e-PetPlace',
+                  voz: 'Queda en tu cuenta para usar cuando quieras.',
+                  tiempo: 'Disponible en segundos.',
+                }}
+                elegido={null}
+                onElegir={() => {}}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">FilaBandejaCaso — los cuatro datos de §5, memoizada</Texto>
+              <FilaBandejaCaso
+                caso={{
+                  clave: 'c1',
+                  objeto: 'Paseo de Thor · martes 9',
+                  contraparte: 'La familia de Thor',
+                  motivo: 'El paseo duró menos de lo pagado',
+                  reloj: 'Te quedan 14 horas',
+                  nombreMascota: 'Thor',
+                }}
+                onPress={() => {}}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                ⭐ BurbujaMensaje · el TERCER ASIENTO — la casa con su logo, a la izquierda
+              </Texto>
+              <BurbujaMensaje
+                mio={false}
+                autor="e-PetPlace"
+                posicion="solo"
+                texto="Tomamos tu caso. Le pedimos al paseador que responda antes del jueves."
+                hora="16:04"
+                cara={<LogoNegocio nombre="e-PetPlace" tamano={CARA_EN_HILO} />}
+              />
+              <BurbujaMensaje
+                mio={false}
+                autor="Paseos Andrés"
+                posicion="solo"
+                texto="Perdón, salimos tarde. Lo compensamos."
+                hora="16:20"
+                cara={<LogoNegocio nombre="Paseos Andrés" tamano={CARA_EN_HILO} />}
+              />
+            </View>
+
+            <View style={{ gap: spacing[2] }}>
+              <Texto variante="apoyo">
+                LineaAlgoSalioDistinto — las tres voces. La última fila de la pantalla, discreta.
+              </Texto>
+              <LineaAlgoSalioDistinto
+                estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="mascota"
+                enMemorial={false}
+                onPress={() => {}}
+              />
+              <LineaAlgoSalioDistinto
+                estado={{
+                  tipo: 'fueraDeVentana',
+                  voz: 'Este servicio ya pasó su ventana. Si querés, hablá con nosotros.',
+                }}
+                sujeto="mascota"
+                enMemorial={false}
+                onPress={() => {}}
+              />
+              <LineaAlgoSalioDistinto
+                estado={{
+                  tipo: 'casoAbierto',
+                  voz: 'Tenés un caso abierto sobre este paseo',
+                  estado: 'Con el paseador',
+                }}
+                sujeto="mascota"
+                enMemorial={false}
+                onPress={() => {}}
+              />
+              {/* 🔴 EL DISCRIMINADOR, y es lo único que hay que mirar acá: la
+                  MISMA puerta con `enMemorial` produce NADA. Sin este cuarto
+                  montaje el catálogo mostraría tres líneas que aparecen y
+                  ninguna prueba de que la que importa no aparece — *un guard
+                  que sólo se ve encendido no se puede juzgar apagado.* */}
+              <Texto variante="apoyo" color="tertiary">
+                ⬇︎ con `enMemorial` no se dibuja NADA (acá abajo no hay nada, y
+                eso es el gate)
+              </Texto>
+              <LineaAlgoSalioDistinto
+                estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="mascota"
+                enMemorial
+                onPress={() => {}}
+              />
+
+              {/* 🔴 EL SEGUNDO DISCRIMINADOR — el PEDIDO, firma del founder
+                  7-sep: es del HOGAR y **no se apaga por nada**. Va JUNTO al
+                  de arriba a propósito: la misma prop, el mismo estado, y una
+                  desaparece y la otra no. *Sin este par, el catálogo mostraría
+                  que la puerta sabe apagarse y no mostraría dónde tiene
+                  prohibido hacerlo.*
+                  ⚠️ Y en el pedido `enMemorial` **no se puede escribir**: el
+                  campo no existe en su rama del tipo. */}
+              <Texto variante="apoyo" color="tertiary">
+                ⬇︎ el PEDIDO (`sujeto="hogar"`) SÍ se dibuja — no tiene apagado
+              </Texto>
+              <LineaAlgoSalioDistinto
+                estado={{ tipo: 'disponible', voz: '¿Algo salió distinto?' }}
+                sujeto="hogar"
+                onPress={() => {}}
               />
             </View>
           </View>

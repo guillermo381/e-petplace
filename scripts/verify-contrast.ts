@@ -323,6 +323,31 @@ function paresDe(t: Theme, nombre: string): Pair[] {
     add('SelectorEspecie ELEGIDA: text.primary / accent.controlBg⊕base', t.text.primary, tinteEleccion, t.bg.base)
   }
 
+  /* ══ S114-B · LOS DOS PARES NUEVOS DE LA POSTVENTA ═══════════════════════
+     Los censé antes de darlos por medidos: **de los cuatro que mis piezas
+     pintan, DOS ya estaban** —`text.primary / accent.controlBg⊕card`
+     (`SelectorMotivo` elegido) y `accent.control / accent.controlBg⊕chip`
+     (su borde y su glifo)—, y estos dos NO.
+
+     ① **`text.tertiary` sobre el tinte de la elección** — el TIEMPO declarado
+        de `TarjetaDestinoPlata` («Depende de tu banco: en promedio 15 días
+        hábiles»). Es el par más frágil de la tanda: la tinta más apagada de
+        la casa sobre un fondo teñido. **Y no es decorativo: §4 dice que los
+        dos tiempos se declaran**, así que si no se lee, la simetría se rompe
+        por el lado que no se ve.
+     ② **`text.secondary` sobre `bg.hundido`** — la línea de `BannerPlazo`.
+        Este par YA existía en el archivo **como NO TEXTUAL** (el punto de las
+        ausencias del carnet, piso 3:1). *Acá es TEXTO y su piso es 4.5* —
+        el mismo color sobre el mismo fondo con dos requisitos distintos, y
+        dar el primero por bueno para el segundo habría sido exactamente el
+        verde flojo que este archivo existe para no tener. */
+  if ('capaBg' in t) {
+    const tinteEleccion = 'controlBg' in t.accent ? (t.accent as { controlBg: string }).controlBg : t.accent.brandBg
+    add('TarjetaDestinoPlata · el TIEMPO: text.secondary / accent.controlBg⊕card', t.text.secondary, tinteEleccion, t.bg.card)
+    add('TarjetaDestinoPlata · el TIEMPO, brazo oficio: text.secondary / accent.primaryBg⊕card', t.text.secondary, t.accent.primaryBg, t.bg.card)
+  }
+  add('BannerPlazo · la línea: text.secondary / bg.hundido (TEXTO, piso 4.5)', t.text.secondary, t.bg.hundido)
+
   // LEY 22 (S58) — TONAL: el TEXTO del acento sobre SU tinte, sobre la
   // superficie real del chip (card en claro, elevated en dark). Los
   /* S103-B · LA PATA DE `SelectorSegmentado` — el ÚNICO otro caso de la

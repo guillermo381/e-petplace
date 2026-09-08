@@ -28685,6 +28685,300 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-501` — EL DELIMITADOR APARECE ADENTRO DE LO QUE QUERÉS CAPTURAR, Y UN INSTRUMENTO QUE ACUSA A OTRO NECESITA TECHO ANTES QUE PATRÓN
+
+> **Firma del founder (S114-B, 7-sep-2026).** Sale de dos defectos propios en
+> una sola sesión, **los dos cazados produciendo el rojo — ninguno leyendo.**
+
+## ① LA FORMA: `[^X]*` supone que `X` no está adentro. En código real, siempre puede estar.
+
+**Los TRES casos, de la misma sesión y del mismo autor** — y el conteo va
+exacto abajo, en su propia sección.
+
+```
+R78                   \(([^)]*mode === 'memorial'[^)]*)\)
+  el guard curado …… if (esDeUnaMascota && (props.enMemorial || theme.mode === '…'))
+  ⇒ `[^)]*` corta en el paréntesis INTERIOR ⇒ la pieza desapareció de la medición
+
+verify:memorial-derivado   desde = lastIndexOf('{', idx)
+  el sitio real …… const esMemorial = (m: {estado_vida: string|null}) => m.estado_vida !== '…'
+  ⇒ el `{` más cercano es el de la ANOTACIÓN DE TIPO ⇒ la ventana arrancaba
+    DESPUÉS del nombre ⇒ **el caso que el gate existe para cazar salía VERDE**
+```
+
+**Y la familia es más ancha que el regex:** `lastIndexOf(delim)` tiene el mismo
+defecto sin ser una clase de caracteres. *No es un problema de expresiones
+regulares: es suponer que el símbolo que uso para delimitar no aparece adentro
+del sujeto.* **En código anidado —JSX, genéricos, tipos inline— siempre aparece.**
+
+```
+R79                   enRiel: `[^;]{0,80}?` sobre la sentencia
+  el caso real de C …… objeto: t(`postventa.objeto_${…}`),
+                       motivo: c.motivo,
+  ⇒ el `t(` del renglón de ARRIBA queda a <80 caracteres del `c.motivo` de
+    abajo ⇒ **el defecto que la regla existe para cazar salía VERDE**
+```
+
+### ⚠️ EL CONTEO, EXACTO Y SIN INFLAR (`L-499` el mismo día)
+
+| | |
+|---|---|
+| **del mecanismo exacto** —un delimitador que aparece adentro del sujeto— | **TRES**: `[^)]*` en `R78` · el `{` de la anotación de tipo · `[^;]{0,80}?` en `R79` |
+| **de su familia** —no hay delimitador: falta el techo— | **UNA**: la ventana de 286 líneas |
+| **de la clase, en total** | **CUATRO**, en cuatro instrumentos distintos, **todos escritos por el mismo autor el mismo día** |
+
+*Decir «cuatro iguales» habría sido más contundente y menos cierto: la del
+techo no comparte mecanismo, comparte consecuencia.*
+
+⚠️ **Y una distinción con su hermana, para que no se mezclen los números:** las
+cuatro de acá son **instrumentos míos de una sesión**. La que **cruzó de
+subsistema** es `L-499` —SQL · git · JSX · SVG—, y *esa* es su propiedad
+distintiva. **Las dos tienen cuatro y no son el mismo cuatro.**
+
+## ② 🔴 LA PEOR ES LA CURA SIN TECHO, Y ES LA QUE ACUSA A OTRO
+
+Al curar el `{`, la ventana pasó a caminar hacia atrás **buscando el inicio de
+la sentencia — y sin tope.** Dentro de un JSX caminó **286 líneas** hasta un
+`return (`, se tragó un `{!esMemorial` de otra sección, y **reportó un décimo
+sitio como derivación de memorial en un archivo de OTRA PISTA.**
+
+> **Era verosímil, en un archivo real, y estaba a punto de irse como defecto
+> ajeno.** *La cura del primer defecto produjo uno más caro: el primero contaba
+> de menos y el segundo acusaba de más.*
+
+### La regla, en la palabra del founder
+
+> ### **Un instrumento que acusa a otro merece un TECHO antes que un patrón mejor.**
+
+**Un falso negativo cuesta una medición; un falso positivo cuesta el tiempo de
+otro y su confianza en el instrumento.** *Y el que recibe la acusación no tiene
+cómo distinguirla de una real: le llega con `archivo:línea`, en su archivo, de
+un gate que corre.*
+
+**Lo exigible, y es barato:**
+- **toda ventana declara su tope EN LÍNEAS** —acá 4: *una decisión se escribe en
+  una a tres; más que eso ya no es la sentencia, es el vecindario*—;
+- **y su otro borde**: la línea en blanco. *Los comentarios se blanquean para no
+  correr la numeración, así que una línea vacía es el borde real del bloque.*
+- **antes de reportar en territorio ajeno, se abre el sitio.** Acá alcanzó con
+  mirar la línea acusada: su ventana empezaba 286 líneas más arriba.
+
+## ③ Y LO QUE NO SE HACE: un patrón más listo
+
+**La salida instintiva es refinar el regex** —balancear paréntesis, contar
+llaves—. *Es el camino largo hacia el mismo error*: un parser a medias falla
+distinto, no menos. **Lo que cierra la clase son dos cosas baratas:** el techo,
+y **un segundo instrumento que falle distinto** — en `L-499` el más tosco
+posible encontró lo que el refinado no veía.
+
+**Hermana de `L-500` y no la duplica:** aquélla dice *qué publicar para que la
+ceguera se note*; ésta, *qué limitar para que el instrumento no invente*.
+
+---
+
+
+### `L-500` — UN GATE PUBLICA CIFRAS, NO ADJETIVOS: «VERDE» NO PUEDE DELATAR CEGUERA, UN CONTADOR SÍ
+
+> **Firma del founder (S114, 7-sep-2026), y nace de DOS pistas el mismo día
+> con el mismo error y distinta ropa.**
+
+**Un instrumento puede seguir dando el veredicto correcto y haber dejado de
+ver parte de su sujeto.** Eso **no es un fallo**: es una pérdida de COBERTURA —
+y **un booleano no tiene forma de expresarla.** *«Verde» significa lo mismo
+cuando el gate miró todo que cuando miró la mitad.*
+
+⇒ **la única señal que un instrumento correcto puede dar de que se quedó ciego
+es una CIFRA que se mueve sin que nadie haya tocado ese sujeto.**
+
+### Los dos casos
+
+**① F — el comparador de desigualdad** *(citado de `docs/loop/S114-F-TANDA1.md`;
+**lo midió F, no yo**)*. Un watcher de deploy con
+`if [ "$H" != "index-fK9Opg5L.js" ]`: cuando un 403 dejó sin bundle que
+extraer, **la cadena vacía también es distinta** y el watcher anunció
+
+```
+✅ DEPLOY NUEVO ·  · 22:02:00
+```
+
+> *«Un comparador de desigualdad trata «cambió» y «no pude leerlo» como la
+> misma cosa.»* — **«Lo cazó que el propio mensaje imprimiera el hash y saliera
+> en blanco: si sólo hubiera dicho "DEPLOY NUEVO", me lo creía.»**
+
+**② B — el matcher que corta en el primer paréntesis.** `R78` mide qué piezas
+deciden si existen mirando sólo el tema memorial. Su patrón era
+`\(([^)]*mode === 'memorial'[^)]*)\)` — y al curar una pieza con condición
+**anidada** (`if (esDeUnaMascota && (props.enMemorial || theme.mode === 'memorial')))`)
+**`[^)]*` corta en el primer paréntesis y la pieza desapareció de la
+medición.**
+
+**El brazo del rojo seguía andando** —revertir el guard a sólo-tema seguía
+dando 12 y rojo, verificado—, **así que la regla no estaba rota: contaba de
+menos.** Y lo único que lo dijo fue **`conDato`, que bajó de 2 a 1**.
+
+### 🔴 LO QUE LOS HERMANA, y es más incómodo que el error
+
+**En los dos, el instrumento seguía siendo CORRECTO en su veredicto.** El
+watcher habría anunciado un deploy real; `R78` sigue enrojeciendo ante la
+regresión. *Lo que se rompió no fue la respuesta: fue de cuánto la estaba
+sacando.* **Y una pérdida de alcance no tiene síntoma** — por eso hizo falta que
+algo NUMÉRICO estuviera a la vista.
+
+**Los dos se cazaron por el mismo mecanismo:** *el instrumento imprimía un valor
+que podía moverse solo, y se movió.*
+
+### La regla, exigible
+
+> ### **Todo gate publica, junto a su veredicto, al menos UNA cifra que pueda moverse sin que nadie toque su sujeto:** el tamaño del corpus, el hash leído, cuántos casos clasificó, cuántos ya están curados.
+
+**Y su corolario operativo, que es el que hay que ejecutar:** *cuando un número
+de un gate cambia y nadie tocó ese sujeto, **eso es el hallazgo** — no un
+detalle de la salida.* **No se re-alinea el número: se pregunta qué dejó de
+ver.**
+
+⚠️ **Y no basta con imprimir cualquier cosa: tiene que ser una cifra CAPAZ de
+moverse sola.** «OK», «verde» y «0 fallos» no pueden. *Un `0` que siempre fue
+`0` y un `0` que acaba de quedarse ciego se imprimen idénticos* — de ahí que la
+cifra útil sea la del ALCANCE (cuánto miró), no la del resultado.
+
+### El trío, y cada uno cubre lo que el otro no
+
+```
+L-459 · ¿el instrumento SABE decir que no?     → su rojo se prueba
+L-498 · ¿su prosa convence de no revisarlo?    → la nota es lo que hay que dejar de leer
+L-500 · ¿su salida puede DELATAR su ceguera?   → publicá cifras, no adjetivos
+```
+*Los tres se cobraron en la misma sesión, y ninguno habría cazado a los otros
+dos.*
+
+---
+
+
+### `L-499` — UN CENSO POR LA FORMA DEL MONTAJE MIDE LA CONVENCIÓN, NO EL HECHO
+
+> **Firma del founder (S114-B, 7-sep-2026).** *Lo que la vuelve regla y no
+> anécdota es que **la clase cruzó de subsistema**.*
+
+**El caso.** Censando qué piezas de `packages/ui` protegen algo con el tema
+memorial, declaré que `PastillaConociendolo` **no la montaba nadie**. Evidencia:
+`grep -rl "<PastillaConociendolo" apps/*/src` ⇒ vacío.
+
+**Al verificar antes de entregar: SÍ estaba importada**
+(`[mascotaId].tsx:73`) — usada cero veces. **El hecho no cambió** —no se
+dibuja— **pero la evidencia era incompleta**, y *quien grepeara el nombre
+habría encontrado un hit y concluido lo contrario del que yo publicaba.*
+
+### 🔴 LA CLASE YA EXISTÍA EN OTROS DOS SUBSISTEMAS, Y ÉSA ES LA NOVEDAD
+
+```
+SQL   · L-170 · un censo por `pg_get_functiondef` lee los COMENTARIOS como código
+      · L-437 · un censo por patrón ACOTA, no cierra — un 0 no prueba ausencia
+git   · L-494 · `ls-tree | grep` mide el NOMBRE DEL ARCHIVO; la función vive
+                adentro de uno que no la nombra
+JSX   · ésta  · `grep "<Pieza"` mide LA FORMA DEL MONTAJE; el consumo puede
+                estar en un import, un slot, una variable o un salto de línea
+SVG   · ésta  · contar el token `M6` da 29 «momentos vitales» en `packages/ui`
+                y **los 29 son paths** (`d="M6 6l12 12…"`)
+```
+
+> ### ⚠️ TERCERA VEZ EL MISMO DÍA, y la tercera fue la más tonta y la más útil
+> El censo de memorial contó **29 `M6`** en `packages/ui` como si fueran
+> derivaciones del momento vital. **Son coordenadas de dibujo.** *Un token de
+> dos caracteres no tiene contexto, y contarlo mide su ORTOGRAFÍA.*
+>
+> **Que la clase se cobre tres veces en una sesión, en tres formas distintas y
+> al mismo autor, es lo que la separa de un descuido:** no es que uno se
+> distraiga — es que **el instrumento barato siempre está a mano y siempre
+> contesta algo.**
+
+> ### **Tres lenguajes, tres instrumentos, el mismo error: preguntarle a la superficie del código por un hecho que vive un piso más adentro.**
+> *Mientras vivía en SQL se leía como una peculiaridad de `pg_proc`. Al aparecer
+> en git y en JSX deja de ser del subsistema y pasa a ser del método:* **no es
+> que `pg_get_functiondef` engañe — es que TODO censo por texto responde la
+> pregunta que su patrón sabe hacer, y ninguna otra.**
+
+### La prueba, y es de una línea
+
+> **«¿Mi patrón puede fallar con el hecho PRESENTE?»** Si la respuesta es sí
+> —y con texto casi siempre lo es— **el cero no es una conclusión: es un
+> candidato.**
+
+**Su cura no es un patrón mejor: son DOS instrumentos que fallan distinto.**
+Acá alcanzó con el más barato posible —el nombre pelado, sin `<`— y **encontró
+el hit que el otro no veía**. *Un segundo instrumento tosco vale más que un
+primero refinado: no comparten el supuesto.*
+
+⚠️ **Y lo que la hizo aparecer no fue revisar el código: fue verificar lo que
+estaba por ENTREGAR como si lo hubiera escrito otro.** *El censo era mío, la
+conclusión era mía, y por eso ninguna relectura de mi propio razonamiento podía
+cazarla — sólo volver a preguntarle al objeto.*
+
+**Hermana de `L-498`, y no la duplica:** aquélla es sobre **la prosa que
+convence de no mirar**; ésta, sobre **el instrumento que mira mal**. *Las dos se
+cobraron el mismo día y en el mismo censo.*
+
+---
+
+
+### `L-498` — LO QUE PARECE CUIDADO ES LO QUE IMPIDE QUE ALGUIEN MIRE
+
+> **Firma del founder (S114-B, 7-sep-2026): la clase tiene nombre.**
+
+**Un artefacto que exhibe su propio cuidado deja de ser verificado.** No porque
+engañe: porque **el lector concluye, razonablemente, que ya alguien miró.** Y
+cuanto mejor escrita está la nota, más fuerte es esa conclusión — así que **la
+prolijidad no protege al dato: lo blinda contra la revisión.**
+
+### Los dos casos, y son de la misma sesión
+
+| | lo que exhibía | lo que era |
+|---|---|---|
+| **el contador** | *«RE-MEDIDO S103-A contra el objeto — decía 52, y la brecha era de 29»*, con su método auditable escrito al lado | **decía 81 y eran 171** · 28 sesiones |
+| **el guard de memorial** | `if (theme.mode === 'memorial') return null`, con *«⛔ En memorial no se pide terminar de contar nada»* en negrita encima | **el tema no se enciende en producto** (`D-1021`): once piezas con su protección escrita y apagada |
+
+**Y el contador ya se había predicho a sí mismo.** Su propia nota decía: *«una
+skill se carga en TODA tarea de UI, así que un número viejo acá no desinforma a
+un lector — desinforma a cada construcción»*. **Se cumplió, y la nota no lo
+evitó: la hizo más creíble.**
+
+### Por qué ningún gate la caza
+
+**Los dos artefactos están BIEN ESCRITOS y son CORRECTOS en su lógica.** El
+contador tenía su método; el guard tiene su condición bien puesta. *Lo que
+falla no está adentro del artefacto: está en que su premisa —que el número se
+re-mide, que el interruptor se aprieta— vive afuera y nadie la vuelve a
+comprobar.* Un typecheck ve tipos, un lint ve formas, y **ninguno de los dos ve
+una premisa vencida que el propio texto declara como vigente**.
+
+### La prueba, y es de UNA pregunta
+
+> ### **«¿Este guard PUEDE encenderse? ¿Este número PUEDE cambiar?»**
+> No *«¿está bien escrito?»* ni *«¿tiene su razón al lado?»* — **la nota es
+> justamente la que hay que dejar de leer.**
+
+**Su corolario operativo, que es lo que la vuelve exigible:** toda protección
+que se escribe **se prueba encendida en el mismo acto** — el mismo *rojo
+primero* que la casa ya exige de un gate, aplicado a un `return null`. *Si no
+se puede producir el estado que la enciende, la protección no está puesta:
+está declarada.* Y toda cifra publicada **declara su comando en vez de su
+valor** (precedente: migraciones cayó cuatro veces, fichas seis, piezas tres).
+
+### La hermana que ya estaba escrita, y por qué ésta no la duplica
+
+`L-459` dice *«la primera prueba de un guard nuevo no es que dé verde: es que
+dé rojo sobre el primer caso real»* — **y habla de INSTRUMENTOS**. Ésta habla
+de **la prosa que los acompaña**: no de si el guard sabe decir que no, sino de
+que **su comentario convence al lector de que no hace falta preguntárselo.**
+*`L-459` protege del instrumento que no mide; `L-498`, del texto que hace
+innecesario mirarlo.*
+
+⚠️ **Y las dos veces las encontró alguien MONTANDO, no leyendo** — `D-1021` la
+halló C en el emulador, y el contador salió de correr su gate. *Ningún repaso
+del texto podía cazarlas: el texto era la parte buena.*
+
+---
+
+
 ### `L-497` — Cuando dos personas arman fixtures para el mismo sujeto, LOS DOS los arman más fáciles
 
 **S113-E + S113-D, tres cobros en un día:** ① las frases de búsqueda —**18/23**

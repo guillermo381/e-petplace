@@ -78,8 +78,36 @@ export const GLIFOS_PEDIDO: Readonly<Record<string, IconoNombre>> = {
   entregado: 'ubicacion', // la gota — TU casa, que es donde termina el camino
 };
 
-/** El tamaño del glifo dentro del nodo. Ver cabecera: es dato del nodo. */
-const TAMANO_EN_NODO = 12;
+/**
+ * ☠️ EL 12 ES LEGADO, Y ACÁ ESTÁ SU MEDICIÓN (S114-B).
+ *
+ * 🔴 **`EscaleraEstados` pasa el `tamano` DERIVADO del nodo y esta función lo
+ * TIRABA.** Su propio slot lo dice con todas las letras: *«`tamano` lo pasa LA
+ * PIEZA, derivado del nodo: el consumidor lo recibe y no lo inventa. Si el
+ * nodo crece y el glifo se queda, el defecto sale en la pantalla y no en
+ * ningún gate»*. **El único consumidor del slot en toda la casa era
+ * exactamente el defecto que ese párrafo existe para prevenir**: el nodo pasó
+ * de 20 a 32 (`GLIFO_EN_NODO` = 24) y el glifo se quedó en 12.
+ *
+ * ⚠️ **NO SE CURA CAMBIANDO EL DEFAULT, y el porqué es una medición ajena:**
+ * los cuatro `nodo*` de despensa *«nacieron con la anatomía de silueta
+ * rellena porque un check de trazo a 12 px se convierte en una mancha»* —
+ * subirlos a 24 de un saque **cambia lo que el founder ya aprobó en dos
+ * pantallas de despensa y una de adopción**, desde un frente que no es el
+ * suyo. *La cura correcta de una deuda ajena no se aplica de sorpresa.*
+ *
+ * ⇒ **el legado queda como DEFAULT y el comportamiento correcto entra por
+ * opción**, con su nombre. `D-1006` sigue viva y ahora tiene su salida
+ * escrita: el día que alguien mire los cuatro glifos, pasa a `'delNodo'` y
+ * este número muere.
+ */
+const TAMANO_LEGADO = 12;
+
+/**
+ * `'delNodo'` = el glifo mide lo que la escalera dice que mida (lo correcto).
+ * Un número = se fija a mano, y hoy sólo lo usa el legado de arriba.
+ */
+export type TamanoDelGlifo = number | 'delNodo';
 
 /**
  * Devuelve los mismos pasos con su glifo montado.
@@ -103,14 +131,25 @@ const TAMANO_EN_NODO = 12;
 export function conIconos(
   pasos: PasoEscalera[],
   mapa: Readonly<Record<string, IconoNombre | undefined>>,
+  /**
+   * 🔴 **Default LEGADO a propósito** — ver la lápida de `TAMANO_LEGADO`.
+   * Los tres mapas vivos (despensa, adopción) lo heredan sin cambiar un
+   * píxel; lo nuevo pasa `'delNodo'`, que es lo que la pieza pide.
+   */
+  tamano: TamanoDelGlifo = TAMANO_LEGADO,
 ): PasoEscalera[] {
   return pasos.map((paso) => {
     const glifo = mapa[paso.clave];
     if (glifo === undefined) return paso;
     return {
       ...paso,
-      icono: ({ color }: { color: string }) => (
-        <Icono nombre={glifo} tamano={TAMANO_EN_NODO} registro="tinta" tinta={color} />
+      icono: ({ color, tamano: delNodo }: { color: string; tamano: number }) => (
+        <Icono
+          nombre={glifo}
+          tamano={tamano === 'delNodo' ? delNodo : tamano}
+          registro="tinta"
+          tinta={color}
+        />
       ),
     };
   });

@@ -1363,3 +1363,93 @@ export {
   fraccionDelAnillo,
   trazoDeProgreso,
 } from './components/tablero-metrica'
+
+/* ══════════════════════════════════════════════════════════════════════════
+   S114-B · LAS PIEZAS DE LA POSTVENTA — «algo salió distinto»
+   `docs/DIRECCION_POSTVENTA.md`. Ocho piezas, y **cinco de las ocho no son
+   piezas nuevas: son la de despensa o la de adopción con otro vocabulario.**
+   Eso no es economía: es la letra —*«es la misma escalera del pedido de la
+   despensa y el mismo chat de la adopción — no aprendo nada nuevo»* (§3)—.
+   TODAS entregadas y NO montadas.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+// EscaleraCaso — B1: `EscaleraEstados` con los cinco glifos y las voces del
+// caso, exactamente como `EscaleraSolicitud` lo hizo para adopción. Los
+// finales alternos NO son etapas: reemplazan la línea de abajo. `ORDEN_CASO`
+// se exporta porque `R72` lo mide contra la unión — el tipo garantiza que
+// toda etapa tenga glifo, pero **sólo un guard puede garantizar que toda
+// etapa esté en el orden**, y una que falte desaparece sin que nada falle.
+export {
+  EscaleraCaso,
+  ORDEN_CASO,
+  type EscaleraCasoProps,
+  type EtapaCaso,
+  type FinalCaso,
+} from './components/EscaleraCaso'
+
+// CabeceraCaso — B2: el objeto (foto chica + nombre + fecha) y la contraparte.
+// 🔴 **El monto es INEXPRESABLE**: ni prop de monto ni slot `ReactNode` — que
+// es la puerta por la que habría entrado igual (§3.2 · `R73`).
+export { CabeceraCaso, type CabeceraCasoProps } from './components/CabeceraCaso'
+
+// SelectorMotivo — B3: lista corta, un motivo por fila con su glifo, sin
+// scroll interno. 🔴 **No hay «Otro»**: la última fila la pone la pieza con su
+// clave propia (`MOTIVO_CONTAME`), así que un catálogo no puede traer su
+// propio cajón (§2 · `R74`).
+export {
+  SelectorMotivo,
+  MOTIVO_CONTAME,
+  type SelectorMotivoProps,
+  type MotivoDelCaso,
+} from './components/SelectorMotivo'
+
+// TarjetaDestinoPlata — B4: **dibuja LAS DOS**, con una sola receta de estilo
+// y `alignItems: 'stretch'`. Si dibujara una, la simetría sería
+// responsabilidad de quien la monta — y es la pieza donde un dark pattern
+// entraría sin que nadie lo note (§4 · `R73`).
+export {
+  TarjetaDestinoPlata,
+  type TarjetaDestinoPlataProps,
+  type DestinoPlata,
+  /* ⚠️ `OpcionDeDevolucion` y NO `OpcionDestino`: ese nombre YA EXISTE en
+     `SelectorDestinoDonacion` y es **otro vocabulario** —a quién va una
+     donación (mascota o refugio)—, no a dónde vuelve la plata (banco o
+     saldo). Lo cazó el compilador, que es tarde: si el choque hubiera sido
+     por una letra en vez de exacto, quedaban dos vocabularios conviviendo
+     bajo nombres casi iguales y nadie se enteraba. *Antes de exportar un
+     tipo desde `packages/api` o `packages/ui` se grepea su nombre.* */
+  type OpcionDeDevolucion,
+} from './components/TarjetaDestinoPlata'
+
+// BannerPlazo — B5: «Te quedan 14 horas para responder». Neutro, **jamás
+// rojo** (el rojo es alarma y acá no pasó nada malo) y **sin reloj adentro**:
+// no hay `setInterval` ni estado propio (§5 · `R75`).
+export { BannerPlazo, type BannerPlazoProps } from './components/BannerPlazo'
+
+// FilaBandejaCaso — B6: objeto · contraparte · motivo · reloj, los cuatro que
+// §5 nombra. **Memoizada** con `mismoCaso`, que vive en su propio módulo para
+// poder medirse (mismo movimiento que `mismaFila`).
+export {
+  FilaBandejaCaso,
+  type FilaBandejaCasoProps,
+  type CasoEnBandeja,
+} from './components/FilaBandejaCaso'
+
+// LineaAlgoSalioDistinto — B8: la puerta del §1, con sus tres voces. 🔴 **En
+// memorial devuelve `null`** — piso estructural, no un recordatorio.
+export {
+  LineaAlgoSalioDistinto,
+  type LineaAlgoSalioDistintoProps,
+  type EstadoDeLaPuerta,
+} from './components/LineaAlgoSalioDistinto'
+
+// CARA_EN_HILO — B7: el ancho de la columna de la cara en el hilo. Se exporta
+// para que quien monte el avatar o el logo lo PIDA en vez de teclear un 28
+// que después se separa de la columna (L-284). NÚMERO, no pieza: misma clase
+// que `ALTO_PIE_CAMPO`.
+export { CARA_EN_HILO } from './components/BurbujaMensaje'
+
+// TamanoDelGlifo — B1: `conIconos` deja de tirar el `tamano` que la escalera
+// le pasa. El default sigue siendo el LEGADO 12 (los cuatro `nodo*` de
+// despensa nacieron dibujados para ese tamaño); lo nuevo pasa `'delNodo'`.
+export type { TamanoDelGlifo } from './components/EscaleraIconos'

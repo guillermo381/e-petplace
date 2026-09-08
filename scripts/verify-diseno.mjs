@@ -2112,6 +2112,85 @@ const FIXTURES = {
      un wrapper que exporta una función y un index que no la nombra. Con uno
      solo la regla saldría por «corpus incompleto», que no es verde pero
      tampoco prueba que sepa decir que no. */
+  /* ══ S114-B · LOS CINCO FIXTURES DE LA POSTVENTA — cada uno es EL CASO
+        que su guard existe para cazar, escrito ANTES de cablear la regla.
+        ⚠️ El `path` importa: los cinco guards buscan SU pieza y sin ella
+        salen por «ancla rota», que es otro rojo — un fixture que enrojece
+        por el ancla no prueba el brazo que dice probar. ══════════════════ */
+  /* R79 · los DOS casos REALES de C, verbatim de sus commits anteriores
+     (`6982e17e~1` y `f65ca58c~1`) — jamás un caso que yo escribiera. El corpus
+     lleva 10 archivos para pasar el ancla. */
+  R79: [
+    ...Array.from({ length: 10 }, (_, i) => ({
+      path: `apps/cliente/src/app/relleno${i}.tsx`,
+      src: 'const x = 1\n',
+    })),
+    {
+      path: 'apps/cliente/src/app/postventa/caso/[casoId].tsx',
+      src: "                nombre: caso.objeto.titulo ?? t('postventa.objetoSinNombre'),\n",
+    },
+    {
+      path: 'apps/prestador/src/app/negocio/casos.tsx',
+      src: '        motivo: c.motivo,\n',
+    },
+  ],
+  /* R78 · la pieza número doce: el tema decidiendo existencia, solo. El corpus
+     trae 20 archivos para pasar el ancla, y 12 guards para superar el baseline
+     de 11 — con menos, la regla saldría verde y no probaría nada. */
+  R78: [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `const x${i} = 1\n`,
+    })),
+    ...Array.from({ length: 12 }, (_, i) => ({
+      path: `packages/ui/src/components/Apagada${i}.tsx`,
+      src: `if (theme.mode === 'memorial') return null\n`,
+    })),
+  ],
+  /* R77 · el sitio DECLARADO exhaustivo al que le falta un miembro. El corpus
+     trae 20 archivos y 10 uniones para pasar las dos anclas — sin eso el
+     fixture enrojecería por «no pude medir», que es otro rojo. */
+  R77: [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
+    })),
+    {
+      path: 'packages/ui/src/components/EscaleraCaso.tsx',
+      src:
+        "export type EtapaCaso = 'recibido' | 'con_prestador' | 'cerrado'\n" +
+        "const ORDEN_CASO: readonly EtapaCaso[] = ['recibido', 'con_prestador']\n",
+    },
+  ],
+  /* R72 · la etapa que existe en la unión y falta en el orden: compila, no
+     falla, y el paso desaparece de la escalera. */
+  R72: [{
+    path: 'packages/ui/src/components/EscaleraCaso.tsx',
+    src:
+      "export type EtapaCaso =\n  | 'recibido'\n  | 'con_prestador'\n  | 'cerrado'\n\n" +
+      "export const ORDEN_CASO: readonly EtapaCaso[] = ['recibido', 'con_prestador']\n" +
+      "const GLIFO: Record<EtapaCaso, IconoNombre> = {\n  recibido: 'sobre',\n  con_prestador: 'atender',\n  cerrado: 'candado',\n}\n",
+  }],
+  /* R73 · la rama por destino: la puerta de toda asimetría. */
+  R73: [{
+    path: 'packages/ui/src/components/TarjetaDestinoPlata.tsx',
+    src: "const opciones = ['banco', 'saldo']\nconst borde = destino === 'banco' ? theme.accent.cta : theme.border.default\n",
+  }],
+  /* R74 · el monto en la cabecera, con el nombre puesto. */
+  R74: [{
+    path: 'packages/ui/src/components/CabeceraCaso.tsx',
+    src: "export type CabeceraCasoProps = { contraparte: { nombre: string }; monto: string }\n",
+  }],
+  /* R75 · el cajón con su nombre: exactamente lo que §2 prohíbe. */
+  R75: [{
+    path: 'packages/ui/src/components/SelectorMotivo.tsx',
+    src: "export const MOTIVO_CONTAME = '__contame__'\nconst extra = { clave: 'otro', etiqueta: 'Otro' }\n",
+  }],
+  /* R76 · el countdown que late. */
+  R76: [{
+    path: 'packages/ui/src/components/BannerPlazo.tsx',
+    src: "export function BannerPlazo({ voz }) {\n  setInterval(() => {}, 1000)\n  return null\n}\n",
+  }],
   R71: [
     { path: 'packages/api/src/index.ts', src: "export { otraCosa } from './wrappers/otra';" },
     { path: 'packages/api/src/wrappers/fixture-r71.ts', src: 'export async function puertaQueNadieAbre() { return 1 }' },
@@ -6319,6 +6398,782 @@ function r68(archivos) {
  * que nadie puede abrir.** *Su verde dice «todo wrapper es alcanzable», jamás
  * «todo wrapper anda».*
  */
+/* ══════════════════════════════════════════════════════════════════════════
+   S114-B · LOS CUATRO GUARDS DE LA POSTVENTA (`docs/DIRECCION_POSTVENTA.md`)
+   Los cuatro nacieron ROJO PRIMERO: se escribió el caso que tienen que cazar,
+   se corrió, salió rojo, y recién ahí se cablearon. *La primera prueba de un
+   guard nuevo no es que dé verde: es que dé rojo sobre el primer caso real.*
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/** Devuelve el archivo del corpus, o `null`. Los cuatro guards de abajo miran
+ *  UNA pieza, y sin ella su silencio diría «no miré» — por eso todos empiezan
+ *  con su ancla (L-192, tercera capa). */
+function piezaDe(archivos, nombre) {
+  const re = new RegExp(`components/${nombre}\\.tsx$`)
+  return archivos.find((a) => re.test(a.path)) ?? null
+}
+
+/** R72 · NINGUNA ETAPA DEL CASO SE PIERDE DEL ORDEN (S114-B · §3.1).
+ *
+ *  🔴 QUÉ MIDE, Y ES LO QUE EL TIPO **NO** PUEDE: `GLIFO` es un
+ *  `Record<EtapaCaso, IconoNombre>`, así que **una etapa sin glifo no
+ *  compila** — ése rojo ya está cerrado y este guard no lo necesita. Pero
+ *  `ORDEN_CASO` es un `readonly EtapaCaso[]`, y **un array de un tipo compila
+ *  con MENOS miembros que el tipo**: una etapa que exista en la unión y falte
+ *  en el orden **desaparece de la escalera y nada falla**.
+ *
+ *  *Es la clase más cara de la casa: no rompe, no avisa, y la pantalla se ve
+ *  perfectamente normal con un paso menos.*
+ *
+ *  Mide los TRES conjuntos —unión, orden y glifos— y exige que coincidan.
+ *  ⚠️ Su verde dice «las cinco etapas están las tres veces», jamás «la
+ *  escalera cuenta bien la historia». */
+/** R79 · UN CÓDIGO DEL MOTOR NO SE RENDERIZA SIN PASAR POR SU RIEL (S114-B).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **EL SUJETO NO ES EL STRING: ES EL CAMPO.** Lo dijo C midiendo, y decide
+ * todo el patrón: *«`paseo` no se distingue de un nombre propio mirando el
+ * texto; se distingue sabiendo que sale de `objeto.titulo`, que es un código
+ * del motor»*.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * **Un patrón por FORMA del texto** —«palabras en minúscula sin espacios»—
+ * **marcaría apellidos y perdería «Baño y corte».** Por eso la regla mira la
+ * PROCEDENCIA: un campo declarado como código del motor, montado sin riel.
+ *
+ * ── LOS DOS CASOS REALES, y son de C (no de un fixture mío) ─────────────
+ * ```
+ * ① apps/cliente/…/postventa/caso/[casoId].tsx  · 6982e17e~1
+ *      nombre: caso.objeto.titulo ?? t('postventa.objetoSinNombre')
+ *      se veía `paseo` · debía verse `Paseo`  ⇒ faltaba `vozServicio`
+ * ③ apps/prestador/…/negocio/casos.tsx         · f65ca58c~1
+ *      motivo: c.motivo
+ *      se veía `calidad` · debía verse la voz del catálogo
+ * ```
+ * *Su rojo se probó contra ESOS commits, no contra un caso que yo escribiera*
+ * (`L-459`: un fixture del mismo autor comparte sus supuestos).
+ *
+ * ── 🔴 EL FALLBACK DECLARADO NO ES UNA VIOLACIÓN, y C avisó a tiempo ────
+ * La cura de ③ es `vozDeMotivo[c.motivo] ?? c.motivo` — **deja el código como
+ * fallback a propósito**: *si el catálogo no llegó, se muestra el código antes
+ * que un hueco.* ⇒ **si el campo aparece AL MENOS UNA VEZ dentro de un riel en
+ * la misma sentencia, la sentencia está curada** y su ocurrencia desnuda es la
+ * salida honesta. *Sin esta cláusula el gate daría rojo sobre la línea ya
+ * curada — me lo dijo C antes de que lo escribiera.*
+ *
+ * ── QUÉ CUENTA COMO «PASAR POR UN RIEL» ────────────────────────────────
+ * Que el campo sea **argumento de una llamada** (`vozServicio(t, X)`) o
+ * **índice de un mapa** (`vozDeMotivo[X]`). *No se lista qué rieles existen: se
+ * mira la FORMA de la resolución* — un `Record` nuevo o un helper nuevo cuentan
+ * sin tocar esta regla.
+ *
+ * ── ⚠️ LO QUE NO VE, declarado ─────────────────────────────────────────
+ * · **la llave de i18n construida en ejecución** (`t(\`x_${v}\` as '…')`) —
+ *   compila y el `as` la vuelve indistinguible de los **64 usos interpolados
+ *   legítimos** que C censó. **Ésa la caza su `missingKeyHandler` de runtime**,
+ *   que ya existe y ya la cazó. *Los dos instrumentos conviven y no se
+ *   duplican: el mío no ve una llave armada en ejecución, el suyo no corre en
+ *   CI.*
+ * · campos del motor que nadie declaró en la tabla de abajo;
+ * · el valor que pasa por una variable intermedia antes de renderizarse.
+ *
+ * **Su verde dice «ningún campo DECLARADO se monta sin riel», jamás «no hay
+ * códigos en pantalla».** */
+/* La tabla se DECLARA, no se deriva (mismo criterio que `R77`): un campo es
+   código del motor porque alguien lo sabe, no porque se parezca. */
+/* 🔴 SE DECLARA LA RUTA **Y SU ÁMBITO**, y las dos hacen falta. Medido antes
+   de escribirlo: el NOMBRE del campo no sirve de ancla en esta casa —
+   `\.titulo` da **50 ocurrencias** (casi todas llaves de i18n adentro de un
+   `t('avisos.titulo')`) y **38 aun despojando los literales de string**
+   (`carnet.titulo`, `parte.motivo`, `direccion.titulo`…). *Un patrón por
+   nombre de campo mediría la ortografía del árbol, no la procedencia del
+   dato* — que es exactamente contra lo que C avisó, un piso más adentro de lo
+   que ella nombró. */
+const CAMPOS_DEL_MOTOR_R79 = [
+  {
+    ruta: /\bobjeto\.titulo\b/g,
+    que: 'el `tipo_servicio` crudo — su voz vive en `vozServicio` (S61)',
+    ambito: /./,
+  },
+  {
+    ruta: /\b[A-Za-z_$][\w$]*\.motivo\b/g,
+    que: 'el `codigo` del catálogo — su voz vive en `v_motivos_resueltos`',
+    /* ÁMBITO declarado: donde vive el catálogo de motivos. Sin él, `.motivo`
+       marca el parte del paseo y la reserva de guardería, que hablan de otra
+       cosa con la misma palabra. */
+    ambito: /(postventa|casos)/,
+  },
+]
+const BASE_R79 = 0
+const TECHO_R79 = 4 // líneas de la sentencia — `L-501`: toda ventana declara su tope
+
+function r79(archivos) {
+  const apps = archivos.filter((a) => /^apps\/[^/]+\/src\/.*\.tsx?$/.test(a.path))
+  const fallos = [...ancla('R79', apps.length, 10, 'archivo(s) de `apps/*/src` en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  let mirados = 0
+  /* 🔴 EL FALLBACK DECLARADO SE EXIME POR RENGLÓN, y el renglón es el borde
+     exacto — ni menos ni más.
+     · **Menos** (por ocurrencia) daría rojo sobre `vozDeMotivo[c.motivo] ?? c.motivo`,
+       que es **la línea YA CURADA**: C me avisó de esto antes de que lo
+       escribiera, y su rojo lo confirmó.
+     · **Más** (por sentencia de 4 líneas) daba verde sobre el caso real de ③,
+       porque el `t(` del renglón de arriba entraba en la ventana.
+     ⇒ si el campo pasa por un riel **en su propio renglón**, lo desnudo de al
+     lado es la salida honesta; si no, es el defecto. */
+  const conRiel = new Set()
+  const crudos = []
+  const blanquear = (x) => x.replace(/[^\n]/g, ' ')
+  for (const { path, src } of apps) {
+    /* 🔴 SE DESPOJAN TAMBIÉN LOS LITERALES DE STRING, **sin colapsar líneas**:
+       las llaves de i18n viven adentro de `t('avisos.titulo')` y el 76 % del
+       ruido medido salía de ahí. *Un censo por texto lee una llave como si
+       fuera un acceso.* */
+    /* 🔴 Y SE DESPOJA **SIN COLAPSAR LÍNEAS**: el `sinComentarios` compartido
+       borra los bloques enteros y **corre la numeración** — su propio rojo lo
+       destapó acá, señalando la línea 259 de un defecto que vive en la 300.
+       *Un guard que apunta mal manda a buscar a otro lado* (la misma cura que
+       `R70` ya lleva escrita). */
+    const t = (src ?? '')
+      .replace(/\/\*[\s\S]*?\*\//g, blanquear)
+      .replace(/(^|[^:/'"`])(\/\/(?!\/)[^\n]*)/g, (_, pre, com) => pre + blanquear(com))
+      .replace(/'[^'\n]*'|"[^"\n]*"|`[^`]*`/g, blanquear)
+    const lineas = t.split('\n')
+    for (const { ruta, ambito } of CAMPOS_DEL_MOTOR_R79) {
+      if (!ambito.test(path)) continue
+      for (const m of t.matchAll(new RegExp(ruta.source, 'g'))) {
+        mirados++
+        const iLinea = t.slice(0, m.index).split('\n').length - 1
+        /* La sentencia, CON TECHO y con la línea en blanco como borde
+           (`L-501`): sin tope, una ventana dentro de un JSX camina cientos de
+           líneas y acusa por lo que encuentra de paso. */
+        let ini = iLinea
+        while (
+          ini > 0 &&
+          iLinea - ini < TECHO_R79 &&
+          lineas[ini].trim() !== '' &&
+          !/^\s*(const|let|var|return|if|function|export)\b/.test(lineas[ini])
+        ) ini--
+        const sentencia = lineas.slice(ini, iLinea + 1).join(' ')
+        /* ¿Aparece ALGUNA vez dentro de un riel? Entonces el desnudo de al
+           lado es el fallback declarado — ver la nota del encabezado. */
+        /* 🔴 ¿ESTA ocurrencia está dentro de un riel? Se mira **hacia atrás
+           desde ELLA y sobre SU renglón**, contando aperturas sin cerrar.
+
+           ⏪ Era un regex `[^;]{0,80}?` sobre la sentencia entera, **y su rojo
+           lo destapó**: en
+           ```
+           objeto: t(`postventa.objeto_${c.objetoTipo}`…),
+           motivo: c.motivo,
+           ```
+           el `t(` del renglón de ARRIBA quedaba a menos de 80 caracteres del
+           `c.motivo` de abajo ⇒ **el gate lo daba por curado y el caso real de
+           C salía VERDE.** *`L-501` en su forma exacta, tercera vez: el
+           delimitador —acá el paréntesis de otra sentencia— aparece adentro de
+           la ventana.* ⇒ balance acotado al renglón, que no puede cruzar. */
+        const renglon = lineas[iLinea]
+        const hasta = m.index - t.lastIndexOf('\n', m.index - 1) - 1
+        let prof = 0
+        let enRiel = false
+        for (let k = hasta - 1; k >= 0; k--) {
+          const ch = renglon[k]
+          if (ch === ')' || ch === ']') prof++
+          else if (ch === '(' || ch === '[') {
+            if (prof > 0) { prof--; continue }
+            // apertura SIN cerrar: ¿la abrió un identificador? entonces es
+            // llamada o índice — o sea, un riel.
+            enRiel = /[\w$]/.test(renglon.slice(0, k).trimEnd().slice(-1))
+            break
+          }
+        }
+        if (enRiel) { conRiel.add(`${path}:${iLinea}`); continue }
+        crudos.push({ clave: `${path}:${iLinea}`, texto: `${path}:${iLinea + 1} · ${m[0]}` })
+      }
+    }
+  }
+  const sueltos = crudos.filter((c) => !conRiel.has(c.clave)).map((c) => c.texto)
+  if (sueltos.length > BASE_R79) {
+    fallos.push(
+      `R79 **${sueltos.length} campo(s) del motor se renderizan sin pasar por su riel** (baseline ${BASE_R79}). ` +
+      `*El sujeto no es el string: es el CAMPO* — \`paseo\` no se distingue de un apellido mirando el texto. ` +
+      `**Pasalo por su riel de voz**; si el riel puede no resolver, dejá el código como \`?? campo\` y esta regla lo acepta.`,
+    )
+    for (const c of sueltos) fallos.push(`R79   · ${c}`)
+  }
+  /* 🔴 CERO OCURRENCIAS NO ES VERDE: ES «NO ESTOY MIDIENDO», y lo dice en cada
+     corrida. **Hoy las dos rutas declaradas viven en la rama de C** —las
+     pantallas de postventa no están en `main` todavía— así que este número
+     arranca en 0 y **pasa a N el día que su lote merge**. *Ese salto es la
+     señal (`L-500`): un contador que se mueve solo delata que la regla empezó —
+     o dejó— de mirar.
+
+     🔴 **NO FRENA EL COMMIT, y es FIRMA DEL FOUNDER (7-sep-2026):** *bloquear
+     por un corpus que todavía no llegó castiga a todos por algo que nadie
+     rompió.*
+
+     ⚠️ **Y LA OTRA MITAD DE LA FIRMA, que es la que hay que leer después del
+     merge: SI EL SALTO DE 0 A N NO OCURRE CUANDO EL LOTE DE C ENTRE A `main`,
+     LA REGLA DEJÓ DE MIRAR.** No es que no haya defectos: es que **las rutas
+     declaradas dejaron de existir con ese nombre** —un rename, una pantalla
+     que se movió, un campo que cambió— y su `0` volvió a significar «no vi».
+     *El día del merge este número es lo único que hay que mirar acá: si sigue
+     en 0, lo roto es la regla y no el código.* */
+  const midiendo = mirados > 0
+  return {
+    fallos,
+    info:
+      (midiendo ? '' : '🔴 NO ESTÁ MIDIENDO (0 ocurrencias de las rutas declaradas: la postventa vive en la rama de C) · ') +
+      `${sueltos.length} campo(s) crudo(s) · baseline ${BASE_R79} · ` +
+      `alcance: ${mirados} ocurrencia(s) de ${CAMPOS_DEL_MOTOR_R79.length} ruta(s) declarada(s) en ${apps.length} archivo(s) · ` +
+      `⚠️ NO ve la llave de i18n armada en ejecución (ésa la caza el \`missingKeyHandler\` de C, que no corre en CI) · ` +
+      `su verde dice «ningún campo DECLARADO se monta sin riel», jamás «no hay códigos en pantalla»`,
+  }
+}
+
+/** R78 · EL TEMA MEMORIAL NO PUEDE SER LA ÚNICA SEÑAL (S114-B · adenda).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **ONCE PIEZAS DE `packages/ui` DECIDEN SI EXISTEN MIRANDO
+ * `theme.mode === 'memorial'`. LAS ONCE ESTÁN APAGADAS EN PRODUCTO.**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Medido en `D-1021` (lo halló C montando, no leyendo): **nadie monta
+ * `<ThemeProvider memorial>` en ninguna de las dos apps** — el único provider
+ * vivo es el raíz, con `mode={light|dark}`. *El tema memorial existe en
+ * `packages/ui` desde S43 y jamás se usó en producto.*
+ *
+ * ── LO QUE ESAS ONCE DICEN DE SÍ MISMAS, y ninguna se cumple ────────────
+ * ```
+ *   PastillaConociendolo  «En memorial no se pide terminar de contar nada»
+ *   ChipsSugerencia       «El Coach no existe en memorial»
+ *   AvisoAnticipacion     «Nada que adelantar cuando ya no hay mañana»
+ *   TarjetaHoy            «No hay un "hoy" que resolver»
+ * ```
+ * **La casa escribió la protección once veces, con su porqué en negrita, y las
+ * once están inertes.** No porque la lógica esté mal: porque cuelgan de un
+ * interruptor que nadie aprieta. *Es el mecanismo exacto de `D-1021` — a una
+ * familia que perdió a su animal, la app le pidió el peso de hoy.*
+ *
+ * ── 🔴 POR QUÉ ESTA REGLA MIDE **ESTA** FORMA Y NO LAS 60 ───────────────
+ * El censo halló **60 usos** de `mode === 'memorial'` en 51 archivos, y **la
+ * mayoría son legítimos**: degradar un color o apagar una animación **es para
+ * lo que existe un tema**, y su inercia cuesta estética, no respeto.
+ *
+ * **La clase que importa es la que decide EXISTENCIA** —`if (…) return null`—
+ * porque ahí el tema no está pintando: está apagando un PEDIDO. *Un guard que
+ * midiera los 60 confundiría «este color no degrada» con «la app le pide algo
+ * a quien perdió a su animal», y son dos cosas de distinto precio.*
+ *
+ * ── LA FORMA CORRECTA, y ya tiene su precedente ─────────────────────────
+ * `LineaAlgoSalioDistinto` (S114-B) y `Atmosfera` la cumplen: **el DATO por
+ * prop, y el tema conservado en el `OR`** — porque la galería SÍ monta el
+ * sub-tema y ahí el guard tiene que seguir valiendo. *Lo que está mal no es
+ * mirar el tema: es mirar SÓLO el tema.*
+ *
+ * ⚠️ **SU VERDE DICE «NO CRECIÓ», JAMÁS «LAS ONCE ANDAN».** Las once siguen
+ * inertes; esta regla **no las cura, impide la doce**. Curarlas exige que cada
+ * pieza reciba su señal y que su pantalla se la pase — trabajo de dos
+ * territorios, tanda propia. *Se dice acá para que el número no se lea como
+ * salud.* */
+const BASE_R78 = 11
+/* 🔴 EL PISO, Y VIVE ACÁ PORQUE UN PISO QUE NADIE RECUERDA SE LEE COMO DEUDA.
+   *Un ratchet que dice «baseline 11 SOLO-BAJA» y nada más se lee como «faltan
+   once» — y en tres sesiones alguien va a intentar llevarlo a 0.* **Llegar a 0
+   exigiría "curar" piezas que no se pueden curar con una prop**, y la única
+   forma de hacerlo sería inventarle una señal a algo que no la tiene: la cura
+   falsa que este gate existe para no invitar.
+
+   ⚠️ **Los dos son piso por razones DISTINTAS, y la diferencia importa** —
+   tratar al blando como permanente es el error opuesto y también cuesta: */
+const PISO_R78 = new Map([
+  ['MarcaDeAgua', 'DURO · no tiene mascota de la cual sacar señal (es cromo de fondo en ~90 pantallas de las DOS apps) ⇒ sólo baja el día que el tema memorial llegue a montarse'],
+  ['PastillaConociendolo', 'BLANDO · hoy NO la monta nadie (está importada y usada cero veces), así que no hay a quién pedirle la señal ⇒ baja sola el día que gane consumidor, o el día que se borre'],
+])
+function r78(archivos) {
+  const porRuta = new Map()
+  for (const a of archivos) if (/packages\/ui\/src\/.*\.tsx?$/.test(a.path)) porRuta.set(a.path, a)
+  const uis = [...porRuta.values()]
+  const fallos = [...ancla('R78', uis.length, 20, 'archivo(s) de `packages/ui/src` en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  const solos = []
+  let conDato = 0
+  for (const { path, src } of uis) {
+    const t = sinComentarios(src ?? '')
+    /* 🔴 EL MATCHER CRUZA PARÉNTESIS ANIDADOS, y lo destapó su propio número.
+       ⏪ Era `\(([^)]*mode === 'memorial'[^)]*)\)`: `[^)]*` **corta en el
+       primer paréntesis**, así que un guard curado con condición anidada
+       —`if (esDeUnaMascota && (props.enMemorial || theme.mode === 'memorial'))`—
+       **no matcheaba de ningún lado y desaparecía de la medición.**
+
+       **Lo delató `conDato`, que bajó de 2 a 1 al curar `LineaAlgoSalioDistinto`
+       con su unión de sujeto.** *El brazo del rojo seguía andando —revertir el
+       guard a sólo-tema sigue dando 12 y rojo, verificado— así que la regla no
+       estaba rota: estaba contando de menos, y el único que lo dijo fue el
+       número que la propia regla imprime.* **Ésa es la razón por la que su
+       `info` lleva números y no adjetivos.**
+
+       La cura es un `.*?` anclado en `) return null`: se queda con el `)` que
+       cierra el `if` y el grupo trae la condición entera. Sigue siendo
+       por línea (sin flag `s`), que es la forma real de estos guards. */
+    for (const m of t.matchAll(/if\s*\((.*?)\)\s*return\s+null/g)) {
+      if (!/mode\s*===\s*'memorial'/.test(m[1])) continue
+      // ¿el guard mira ALGO MÁS que el tema? Entonces ya está curado.
+      if (/\|\||&&/.test(m[1])) { conDato++; continue }
+      solos.push(`${path.replace('packages/ui/src/', '')}:${lineaDe(t, m.index)}`)
+    }
+  }
+  /* 🔴 EL PISO SE VERIFICA, NO SE RECUERDA. Si alguien baja el baseline por
+     debajo de lo que no se puede curar con una prop, el número dejó de decir
+     «cuánto falta» y pasó a pedir una cura falsa. */
+  /* ⚠️ ESTE BRAZO NO TIENE FIXTURE Y NO PUEDE TENERLO, y se declara en vez de
+     fingir cobertura: depende de una CONSTANTE DEL MÓDULO, no del corpus, así
+     que ningún fixture de archivos puede encenderlo. **Se probó en rojo
+     editando la constante a 1** (exit 1, con su mensaje). *Un brazo sin
+     fixture declarado vale más que uno con un fixture que no lo ejecuta.* */
+  if (BASE_R78 < PISO_R78.size) {
+    fallos.push(
+      `R78 **el baseline (${BASE_R78}) quedó por debajo de su PISO (${PISO_R78.size}).** ` +
+      `Ese piso NO es deuda: son piezas que **no se pueden curar con una prop** — ` +
+      [...PISO_R78].map(([n, p]) => `\`${n}\` (${p})`).join(' · ') + '. ' +
+      `*Bajar de ahí sólo se logra inventándole una señal a algo que no la tiene.*`,
+    )
+  }
+  if (solos.length > BASE_R78) {
+    fallos.push(
+      `R78 **${solos.length} pieza(s) deciden si existen mirando SÓLO el tema memorial, y el baseline es ${BASE_R78}.** ` +
+      `Nueva(s): las que no estén en la lista del cierre. **En producto ese guard NO SE ENCIENDE NUNCA** ` +
+      `(\`D-1021\`: nadie monta \`<ThemeProvider memorial>\` en ninguna app) ⇒ *escribís la protección, se lee ` +
+      `como protección, y la app igual le pide algo a quien perdió a su animal.* ` +
+      `**La forma correcta: el DATO por prop, con \`theme.mode\` conservado en el \`OR\`** — la galería sí monta ` +
+      `el sub-tema. Precedentes vivos: \`LineaAlgoSalioDistinto\` y \`Atmosfera\`.`,
+    )
+    for (const s of solos) fallos.push(`R78   · ${s}`)
+  }
+  /* Cuáles del piso siguen medidas. Si una desaparece, el número baja y hay
+     que poder distinguir «se curó bien» de «se le inventó una señal». */
+  const pisoPresente = [...PISO_R78.keys()].filter((n) => solos.some((s) => s.includes(`${n}.tsx`)))
+  const pisoIdo = [...PISO_R78.keys()].filter((n) => !pisoPresente.includes(n))
+
+  return {
+    fallos,
+    info:
+      `${solos.length} pieza(s) con el tema como ÚNICA señal de existencia · baseline ${BASE_R78} SOLO-BAJA · ` +
+      `${conDato} ya reciben el dato por prop · 60 usos de \`mode === 'memorial'\` en total (los demás son color y ` +
+      `movimiento: su inercia cuesta estética, no respeto) · ` +
+      // 🔴 EL PISO, EN CADA CORRIDA Y NO EN UN PARTE. Ver su declaración.
+      `🔴 PISO ${PISO_R78.size}, NO 0 — ${[...PISO_R78.keys()].join(' (duro) · ')} (blando): NO se curan con una prop y bajar de ahí NO es deuda` +
+      (pisoIdo.length === 0
+        ? ''
+        : ` · ⚠️ ${pisoIdo.join(', ')} ya no aparece(n): confirmá que se curó de verdad y no con una señal inventada`) +
+      ` · ⚠️ su verde dice «no creció», JAMÁS «las ${BASE_R78} andan»: las ${BASE_R78} siguen inertes`,
+  }
+}
+
+/** R77 · LO QUE ENUMERA UNA UNIÓN A MANO SE DECLARA (S114-B · adenda).
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🔴 **LA CLASE NO ERA DE MI PIEZA.** `R72` cazó que `ORDEN_CASO` puede quedar
+ * corto porque **un array de un tipo compila con MENOS miembros que el tipo**.
+ * Eso vale para **todo array que hace de orden o de registro sobre una
+ * unión** — y el censo por FORMA de `packages/ui` encontró **once**.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * ── 🔴 POR QUÉ ES **UN** GUARD Y NO CUATRO ──────────────────────────────
+ * `R72` mide UNA pieza y por eso pudo ser específica. Cuatro reglas gemelas
+ * serían el clon que la Ley 19 caza un piso más arriba: *lo que se copia,
+ * diverge* — y la quinta escalera que nazca no tendría la suya.
+ *
+ * ── 🔴 Y POR QUÉ ES POR **DECLARACIÓN** Y NO POR DERIVACIÓN ─────────────
+ * **Porque la forma NO distingue el defecto, y eso se midió.** De los once
+ * sitios, **cuatro están incompletos A PROPÓSITO**: los lotes de íconos de la
+ * galería (`LOTE`, `LOTE3`, `NUEVOS_COACH`, `VECINOS_COACH`) son subconjuntos
+ * curados para un gate por ícono, y **uno nace vacío por diseño** (`vivas`, un
+ * acumulador). Un guard que midiera «¿está completo?» sobre la forma sola
+ * saldría rojo cinco veces sobre cinco sitios correctos.
+ *
+ * ⇒ **la tabla es una CLASIFICACIÓN de lo que el objeto ya contiene**, no una
+ * lista de deseos. Mismo precedente que `verify:jornada-completa`, y por la
+ * misma razón.
+ *
+ * ── LOS TRES ROJOS ──────────────────────────────────────────────────────
+ * ① un sitio `exhaustivo` al que le falta un miembro de su unión;
+ * ② **un sitio que la tabla no clasifica** — *no dice «está mal»: dice «no
+ *    puedo decir si está bien», y en un lint que sólo sabe rojo y verde eso
+ *    es rojo.* Un requisito no se pierde en silencio;
+ * ③ una entrada de la tabla cuyo sitio **desapareció** — un lector que se fue
+ *    deja la tabla afirmando algo sobre nada.
+ *
+ * ── 🔴 LA SEGUNDA PUERTA, que apareció midiendo y no leyendo ────────────
+ * El primer censo miraba arrays **con anotación de tipo**. Al cerrar sus dos
+ * ciegos aparecieron **dos formas más del MISMO defecto**:
+ * · arrays **sin anotación** (`= [...] as const`) que enumeran la unión igual;
+ * · **cadenas de `push()`** que la enumeran sin ser un array — `clasesConAlgo`
+ *   arma las cuatro `ClaseCoach` con cuatro `if`, y **si mañana nace una
+ *   quinta, el orbe del Coach dibuja tres arcos donde hay cuatro**: compila,
+ *   no falla, y se ve normal.
+ * *Un censo por la forma que uno tiene en la cabeza acota; no cierra.*
+ *
+ * ⚠️ **LO QUE NO VE, declarado:** `switch` sin `never` exhaustivo · arrays
+ * armados por `map`/`filter` · el mismo defecto en `apps/` (esta regla mira
+ * SÓLO `packages/ui`, que es su territorio). Su verde dice «lo que enumera a
+ * mano en `packages/ui` está declarado y completo», **jamás «nadie enumera a
+ * mano en ningún lado»**. */
+const TABLA_R77 = new Map([
+  // ── EXHAUSTIVOS: si le falta un miembro, la pantalla pierde un paso ──
+  ['ConvivenciaInput.tsx::ORDEN', 'exhaustivo'],
+  ['EscaleraCaso.tsx::ORDEN_CASO', 'exhaustivo'],
+  ['EscaleraSolicitud.tsx::ORDEN', 'exhaustivo'],
+  ['HojaFiltros.tsx::ORDEN_CONVIVENCIA', 'exhaustivo'],
+  ['ModalDosAlturas.tsx::candidatas', 'exhaustivo'],
+  ['TokenGallery.tsx::TIPOS_VIDA', 'exhaustivo'],
+  // La cadena de `if` del orbe: enumera las cuatro clases a mano.
+  ['coach-geometria.ts::push:ClaseCoach', 'exhaustivo'],
+  ['coach-geometria.ts::push:ClasePastilla', 'exhaustivo'],
+  // ── SUBCONJUNTOS CURADOS: incompletos a propósito. Son los LOTES del gate
+  //    por ícono — mostrar los 72 de una vez no es un gate, es una pared ──
+  ['TokenGallery.tsx::LOTE', 'subconjunto'],
+  ['TokenGallery.tsx::LOTE3', 'subconjunto'],
+  ['TokenGallery.tsx::NUEVOS_COACH', 'subconjunto'],
+  ['TokenGallery.tsx::VECINOS_COACH', 'subconjunto'],
+  // ── ACUMULADOR: nace vacío y se llena. Su exhaustividad la sostiene el
+  //    `push:ClaseCoach` de arriba, que es donde de verdad se decide ──
+  ['coach-geometria.ts::vivas', 'acumulador'],
+])
+
+function r77(archivos) {
+  /* 🔴 SE DEDUPLICA POR RUTA, y no es prolijidad: la corrida arma su corpus
+     con `ui` (los `.tsx`) MÁS `archivosCodigo('packages/ui/src')` (los `.ts` **y
+     los `.tsx`**), así que **cada componente entra dos veces** y cada fallo se
+     imprimía duplicado. *Lo vi en el rojo, no leyendo el código* — y un guard
+     que reporta dos veces el mismo defecto enseña a leer sus números al
+     descuido. */
+  const porRuta = new Map()
+  for (const a of archivos) if (/packages\/ui\/src\/.*\.tsx?$/.test(a.path)) porRuta.set(a.path, a)
+  const uis = [...porRuta.values()]
+  const fallos = [...ancla('R77', uis.length, 20, 'archivo(s) de `packages/ui/src` en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  // ① las uniones de literales del paquete (≥3 miembros: con dos, un array de
+  //    uno se lee como una elección y no como un orden incompleto)
+  const uniones = new Map()
+  for (const { src } of uis) {
+    for (const m of sinComentarios(src ?? '').matchAll(
+      /(?:export\s+)?type\s+([A-Z][A-Za-z0-9]*)\s*=\s*((?:\s*\|?\s*'[^']+')+)\s*(?:\n|$)/g,
+    )) {
+      const ms = [...m[2].matchAll(/'([^']+)'/g)].map((x) => x[1])
+      if (ms.length >= 3) uniones.set(m[1], ms)
+    }
+  }
+  fallos.push(...ancla('R77', uniones.size, 10, 'unión(es) de literales (sin ellas no hay contra qué medir)'))
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  const vistos = new Set()
+  const anota = (archivo, nombre, miembros, presentes) => {
+    const base = archivo.split('/').pop()
+    const clave = `${base}::${nombre}`
+    vistos.add(clave)
+    const clase = TABLA_R77.get(clave)
+    if (clase === undefined) {
+      fallos.push(
+        `R77 **\`${clave}\` enumera a mano los miembros de una unión y la tabla no lo clasifica.** ` +
+        `No digo que esté mal: **digo que no puedo decir si está bien**, y en un lint eso es rojo. ` +
+        `*Un orden incompleto compila y la pantalla se ve normal con un paso menos.* ` +
+        `Clasificalo en \`TABLA_R77\`: \`exhaustivo\` · \`subconjunto\` (incompleto a propósito) · \`acumulador\`.`,
+      )
+      return
+    }
+    if (clase !== 'exhaustivo') return
+    const faltan = miembros.filter((x) => !presentes.includes(x))
+    if (faltan.length > 0) {
+      fallos.push(
+        `R77 **\`${clave}\` está declarado EXHAUSTIVO y le faltan ${faltan.length}: ${faltan.join(', ')}.** ` +
+        `El tipo no lo ve —un array de un tipo compila con menos miembros que el tipo— así que ` +
+        `**el miembro que falta desaparece y nada falla**.`,
+      )
+    }
+  }
+
+  for (const { path, src } of uis) {
+    const t = sinComentarios(src ?? '')
+    // ② arrays CON anotación sobre la unión
+    for (const m of t.matchAll(
+      /const\s+([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(?:readonly\s+)?([A-Z][A-Za-z0-9]*)\[\]\s*=\s*\[([^\]]*)\]/g,
+    )) {
+      const ms = uniones.get(m[2])
+      if (ms === undefined) continue
+      anota(path, m[1], ms, [...m[3].matchAll(/'([^']+)'/g)].map((x) => x[1]))
+    }
+    // ③ arrays SIN anotación cuyos miembros caen todos en UNA unión
+    for (const m of t.matchAll(/const\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\[([^\]]*)\]/g)) {
+      const vals = [...m[2].matchAll(/'([^']+)'/g)].map((x) => x[1])
+      if (vals.length < 2) continue
+      // sólo literales sueltos: un array con expresiones adentro no es un orden
+      if (/[^\s',]/.test(m[2].replace(/'[^']*'/g, '').replace(/,/g, ''))) continue
+      for (const [, ms] of uniones) {
+        if (!vals.every((v) => ms.includes(v))) continue
+        anota(path, m[1], ms, vals)
+        break
+      }
+    }
+    // ④ LA SEGUNDA PUERTA: el enumerado a mano que NO es un array
+    for (const [tipo, ms] of uniones) {
+      const p = [...new Set([...t.matchAll(/\.push\(\s*'([^']+)'\s*\)/g)].map((x) => x[1]).filter((v) => ms.includes(v)))]
+      if (p.length < 2) continue
+      anota(path, `push:${tipo}`, ms, p)
+    }
+  }
+
+  for (const clave of TABLA_R77.keys()) {
+    if (!vistos.has(clave)) {
+      fallos.push(
+        `R77 **\`${clave}\` está en la tabla y NO EXISTE en el corpus.** Un lector que se fue deja la tabla ` +
+        `afirmando algo sobre nada — y el próximo censo la lee como si siguiera cubriendo ese sitio.`,
+      )
+    }
+  }
+
+  const exh = [...TABLA_R77.values()].filter((v) => v === 'exhaustivo').length
+  return {
+    fallos,
+    info:
+      `${vistos.size} sitio(s) que enumeran una unión a mano · ${exh} declarados EXHAUSTIVOS · ` +
+      `${TABLA_R77.size - exh} incompletos a propósito (lotes de la galería + 1 acumulador) · ` +
+      `${uniones.size} unión(es) en el corpus · ⚠️ NO ve \`switch\` sin \`never\`, ni arrays armados por \`map\`, ni \`apps/\``,
+  }
+}
+
+function r72(archivos) {
+  const f = piezaDe(archivos, 'EscaleraCaso')
+  if (f === null) {
+    return {
+      fallos: ['R72: ANCLA ROTA — `EscaleraCaso.tsx` no está en el corpus. Un cero acá diría «no miré», no «está bien».'],
+      info: 'corpus incompleto',
+    }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const bloqueUnion = src.match(/export type EtapaCaso\s*=((?:\s*\|\s*'[a-z_]+')+)/)
+  const bloqueOrden = src.match(/ORDEN_CASO[^=]*=\s*\[([^\]]*)\]/)
+  const bloqueGlifo = src.match(/const GLIFO\s*:\s*Record<EtapaCaso[^>]*>\s*=\s*\{([^}]*)\}/)
+  const literales = (t) => [...(t ?? '').matchAll(/'([a-z_]+)'/g)].map((m) => m[1])
+  const union = literales(bloqueUnion?.[1])
+  const orden = literales(bloqueOrden?.[1])
+  const glifos = [...(bloqueGlifo?.[1] ?? '').matchAll(/^\s*([a-z_]+)\s*:/gm)].map((m) => m[1])
+
+  const fallos = [...ancla('R72', union.length, 2, 'etapa(s) en la unión `EtapaCaso`')]
+  fallos.push(...ancla('R72', orden.length, 2, 'entrada(s) en `ORDEN_CASO`'))
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const etapa of union) {
+    if (!orden.includes(etapa)) {
+      fallos.push(
+        `R72 **la etapa \`${etapa}\` existe en \`EtapaCaso\` y NO está en \`ORDEN_CASO\`.** ` +
+        `El tipo no lo ve —un array de un tipo compila con menos miembros que el tipo— así que ` +
+        `**el paso desaparece de la escalera y nada falla**. *La familia ve cuatro escalones donde hay cinco.*`,
+      )
+    }
+    if (glifos.length > 0 && !glifos.includes(etapa)) {
+      fallos.push(`R72 **la etapa \`${etapa}\` no tiene glifo en \`GLIFO\`** — §3.1 pide «un glifo por etapa».`)
+    }
+  }
+  for (const paso of orden) {
+    if (!union.includes(paso)) {
+      fallos.push(`R72 **\`ORDEN_CASO\` nombra \`${paso}\`, que no existe en \`EtapaCaso\`.**`)
+    }
+  }
+  return {
+    fallos,
+    info: `${union.length} etapa(s) en la unión · ${orden.length} en el orden · ${glifos.length} con glifo · su verde dice «las tres listas coinciden», jamás «la escalera cuenta bien»`,
+  }
+}
+
+/** R73 · LAS DOS TARJETAS DEL DINERO SON PAREJAS (S114-B · §4).
+ *
+ *  🔴 **ES LA PIEZA DONDE UN DARK PATTERN ENTRA SIN QUE NADIE LO NOTE**, y por
+ *  eso tiene guard propio. §4: *«las dos parejas, con sus tiempos declarados…
+ *  cero default oscuro, cero botón más grande, cero "recomendado"»*.
+ *
+ *  TRES BRAZOS, y el primero es el que importa:
+ *  ① **ninguna rama por destino** — un `=== 'banco'` o `=== 'saldo'` en la
+ *     pieza es por donde entraría cualquier asimetría de peso, tamaño o
+ *     acento. Sin comparación no hay rama, y sin rama las dos salen iguales.
+ *  ② **ningún default de elección** — `elegido` no puede nacer puesto.
+ *  ③ **la palabra «recomendado» no existe** en la pieza.
+ *
+ *  ⚠️ Su verde dice «la pieza no puede hacerlas distintas», **jamás «se ven
+ *  parejas en el aparato»**: el alto lo iguala `alignItems: 'stretch'` y eso
+ *  se mira, no se grepea. */
+function r73(archivos) {
+  const f = piezaDe(archivos, 'TarjetaDestinoPlata')
+  if (f === null) {
+    return {
+      fallos: ['R73: ANCLA ROTA — `TarjetaDestinoPlata.tsx` no está en el corpus.'],
+      info: 'corpus incompleto',
+    }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const menciones = [...src.matchAll(/'(banco|saldo)'/g)].length
+  const fallos = [...ancla('R73', menciones, 2, "mención(es) de 'banco'/'saldo' (sin ellas la pieza no es la que creo)")]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/(===|!==)\s*'(banco|saldo)'|'(banco|saldo)'\s*(===|!==)/g)) {
+    fallos.push(
+      `R73 **la pieza compara contra un destino (\`${m[0].trim()}\`, línea ${lineaDe(src, m.index)}).** ` +
+      `Es la puerta por la que entra la asimetría: basta que una rama dé un borde, un peso o un acento distinto ` +
+      `y §4 se rompe sin que nadie lo vea. *Las dos se dibujan con UNA receta; lo único que puede diferir es cuál está elegida.*`,
+    )
+  }
+  if (/\belegido\s*=\s*['"]/.test(src)) {
+    fallos.push('R73 **`elegido` tiene un default.** §4: *«ninguna está preseleccionada»* — el arranque es `null` y lo declara quien monta.')
+  }
+  if (/recomend/i.test(src)) {
+    fallos.push('R73 **aparece «recomendado» en la pieza.** §4 lo prohíbe con esa palabra.')
+  }
+  return {
+    fallos,
+    info: `${menciones} mención(es) de destino · 0 rama(s) por destino · su verde dice «la pieza no puede hacerlas distintas», jamás «se ven parejas» (el alto lo iguala \`stretch\`, y eso se mira)`,
+  }
+}
+
+/** R74 · LA CABECERA DEL CASO NO DICE EL MONTO (S114-B · §3.2).
+ *
+ *  §3.2, literal: *«la cabecera nunca dice el monto: la plata se habla en su
+ *  carta, no en el título»*.
+ *
+ *  🔴 **Y el segundo brazo es el que de verdad cierra la puerta: NINGÚN SLOT
+ *  `ReactNode`.** `CabeceraHilo` —su hermana— tiene uno (`acciones`), y por
+ *  ahí el monto entra igual sin que ninguna prop se llame «monto». *Una ley
+ *  que se puede saltear por un slot no está puesta.*
+ *
+ *  ⚠️ Los comentarios se despojan antes de medir (L-170): la cabecera del
+ *  archivo NOMBRA el monto para explicar por qué no está, y un censo que
+ *  leyera prosa se acusaría a sí mismo. */
+function r74(archivos) {
+  const f = piezaDe(archivos, 'CabeceraCaso')
+  if (f === null) {
+    return { fallos: ['R74: ANCLA ROTA — `CabeceraCaso.tsx` no está en el corpus.'], info: 'corpus incompleto' }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const fallos = [...ancla('R74', /contraparte/.test(src) ? 1 : 0, 1, 'mención de `contraparte` (sin ella la pieza no es la que creo)')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/\b(monto|precio|total|importe|PrecioText)\b/gi)) {
+    fallos.push(
+      `R74 **la cabecera nombra \`${m[1]}\` (línea ${lineaDe(src, m.index)}).** §3.2: *«la cabecera nunca dice el monto»*.`,
+    )
+  }
+  if (/\bReactNode\b/.test(src)) {
+    fallos.push(
+      'R74 **la cabecera tiene un slot `ReactNode`.** Es la puerta por la que el monto entra sin llamarse monto — ' +
+      'por eso esta pieza NO copió el `acciones` de `CabeceraHilo`. *Una ley que se puede saltear por un slot no está puesta.*',
+    )
+  }
+  /* 🔴 `L-500`: publica una CIFRA DE ALCANCE, no sólo su resultado. Dos ceros
+     que siempre fueron cero se imprimen igual estén midiendo todo o nada; **el
+     número de props es el universo donde el monto podría entrar**, y se mueve
+     solo el día que alguien agregue una. */
+  const props = [...src.matchAll(/^\s{2,4}\w+\??:/gm)].length
+  return {
+    fallos,
+    info: `0 mención(es) de plata · 0 slot(s) abiertos · ${props} prop(s) miradas (el universo donde el monto podría entrar) · su verde dice «el monto es inexpresable acá», jamás «la plata se cuenta bien»`,
+  }
+}
+
+/** R75 · «OTRO» NO ES UN MOTIVO, Y LA LISTA NO SCROLLEA (S114-B · §2).
+ *
+ *  §2, literal: *«Sin "Otro" al final de la lista: si ninguno encaja, el
+ *  último dice "Es otra cosa · contame" y abre el campo. "Otro" es un cajón
+ *  donde va a parar todo lo que no supimos nombrar; "contame" es una
+ *  invitación.»* Y: *«se leen en una pantalla, **sin scroll interno**»*.
+ *
+ *  DOS BRAZOS:
+ *  ① ningún motivo se llama `otro`/`other` — ni por clave ni por etiqueta.
+ *  ② la pieza no monta ningún contenedor desplazable. *Un scroll interno
+ *     convierte «la lista es larga» en un problema invisible.*
+ *
+ *  ⚠️ **Mide la PIEZA, no los catálogos de las apps.** El catch-all lo pone
+ *  la pieza (`MOTIVO_CONTAME`), así que un catálogo no puede traer el suyo —
+ *  pero si alguien agregara un motivo llamado «Otro» desde una pantalla, este
+ *  guard no lo ve. *Se declara para que su verde no se lea de más.* */
+function r75(archivos) {
+  const f = piezaDe(archivos, 'SelectorMotivo')
+  if (f === null) {
+    return { fallos: ['R75: ANCLA ROTA — `SelectorMotivo.tsx` no está en el corpus.'], info: 'corpus incompleto' }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const fallos = [...ancla('R75', /MOTIVO_CONTAME/.test(src) ? 1 : 0, 1, 'mención de `MOTIVO_CONTAME` (sin ella la pieza no es la que creo)')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/(clave|etiqueta)\s*:\s*['"]\s*(otro|other|otros)\s*['"]/gi)) {
+    fallos.push(
+      `R75 **la pieza tiene un motivo «${m[2]}» (línea ${lineaDe(src, m.index)}).** §2 lo prohíbe por su nombre: ` +
+      `*«"Otro" es un cajón donde va a parar todo lo que no supimos nombrar; "contame" es una invitación»*.`,
+    )
+  }
+  for (const m of src.matchAll(/\b(ScrollView|FlatList|SectionList|VirtualizedList)\b/g)) {
+    fallos.push(
+      `R75 **la pieza monta \`${m[1]}\` (línea ${lineaDe(src, m.index)}).** §2 pide la lista **sin scroll interno**: ` +
+      `si el catálogo creciera hasta no entrar, el defecto tiene que verse en la pantalla y no esconderse adentro de un scroll.`,
+    )
+  }
+  /* 🔴 `L-500`: la cifra de alcance. Los campos del motivo son el vocabulario
+     donde un cajón podría aparecer, y los tocables son las filas que la pieza
+     de verdad dibuja — los dos se mueven solos si la pieza cambia de forma. */
+  const campos = [...src.matchAll(/^\s{2,4}\w+\??:/gm)].length
+  const tocables = [...src.matchAll(/<Pressable\b/g)].length
+  return {
+    fallos,
+    info: `0 cajón(es) «otro» · 0 contenedor(es) desplazable(s) · alcance: ${campos} campo(s) del vocabulario · ${tocables} tocable(s) dibujados · mide LA PIEZA, jamás los catálogos de las apps`,
+  }
+}
+
+/** R76 · EL PLAZO NO ES UNA ALARMA NI UN CONTADOR (S114-B · §5).
+ *
+ *  §5, literal: *«El reloj se ve, y **no es rojo**»* y *«sin countdown que
+ *  lata»*.
+ *
+ *  DOS BRAZOS, y los dos son sobre lo que la pieza NO puede tener:
+ *  ① **ningún color de alarma** — `danger` ni `warning`. El rojo dice que
+ *     algo salió mal, y a un prestador al que le llegó un caso **todavía no le
+ *     salió nada mal**: le pidieron que conteste.
+ *  ② **ningún reloj adentro** — ni temporizador, ni efecto, ni estado propio.
+ *     *Un contador que corre en pantalla mete apuro donde la letra pidió que
+ *     no lo hubiera, y el apuro es una presión que no se ve como presión.*
+ *
+ *  ⚠️ Su verde dice «la pieza no puede latir ni gritar», jamás «el plazo está
+ *  bien calculado»: la cuenta es del motor y la frase llega redactada. */
+function r76(archivos) {
+  const f = piezaDe(archivos, 'BannerPlazo')
+  if (f === null) {
+    return { fallos: ['R76: ANCLA ROTA — `BannerPlazo.tsx` no está en el corpus.'], info: 'corpus incompleto' }
+  }
+  const src = sinComentarios(f.src ?? '')
+  const fallos = [...ancla('R76', /\bvoz\b/.test(src) ? 1 : 0, 1, 'mención de `voz` (sin ella la pieza no es la que creo)')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  for (const m of src.matchAll(/status\.(danger|warning)|color\s*=\s*["']\s*(danger|warning)\s*["']/g)) {
+    fallos.push(
+      `R76 **el plazo se pinta de alarma (\`${m[0]}\`, línea ${lineaDe(src, m.index)}).** §5: *«el reloj se ve, y no es rojo»* — ` +
+      `no pasó nada malo todavía, y teñirlo convierte «hay algo que resolver» en «estás en falta».`,
+    )
+  }
+  for (const m of src.matchAll(/\b(setInterval|setTimeout|requestAnimationFrame|withRepeat|useEffect|useState|Animated)\b/g)) {
+    fallos.push(
+      `R76 **la pieza tiene un reloj adentro (\`${m[1]}\`, línea ${lineaDe(src, m.index)}).** §5: *«sin countdown que lata»*. ` +
+      `El número baja cuando la persona vuelve, no mientras mira.`,
+    )
+  }
+  /* 🔴 `L-500`: la cifra de alcance. Cada lectura del tema es un lugar donde
+     un color de alarma podría entrar; el número se mueve solo si la pieza gana
+     o pierde estilo, y un `0` acá diría «no miré», no «no hay alarma». */
+  const delTema = [...src.matchAll(/\btheme\.[a-zA-Z.]+/g)].length
+  const fallosAlcance = ancla('R76', delTema, 1, 'lectura(s) del tema (sin ellas la pieza no pinta nada y el cero no dice nada)')
+  return {
+    fallos: [...fallos, ...fallosAlcance],
+    info: `0 color(es) de alarma · 0 reloj(es) adentro · alcance: ${delTema} lectura(s) del tema miradas · su verde dice «no puede latir ni gritar», jamás «el plazo está bien calculado»`,
+  }
+}
+
 function r71(archivos) {
   const fallos = []
   let sinPuerta = 0
@@ -6447,7 +7302,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -6524,6 +7379,67 @@ const EXTRAS_R16 = [
  *  declarados y cobertura exigida) queda CANDIDATO con su costo medido:
  *  21 funciones, ~42 sitios, más el runner. Esto es la vía incremental. */
 const EXTRAS_BRAZOS = [
+  /* ══ S114-B · LOS SEIS BRAZOS DE LA POSTVENTA QUE EL FIXTURE ÚNICO NO
+        ENCIENDE. El genérico de cada regla ya sale rojo por SU brazo, así que
+        sin esto los demás **podrían dejar de andar sin que la auto-prueba se
+        entere** — seguiría roja por la otra razón.
+
+        ⚠️ Los once brazos se probaron ADEMÁS en rojo contra los archivos
+        REALES, mutándolos de a uno (11/11). *Esa medición es de una vez;
+        estos fixtures son los que la sostienen en cada corrida* — y son dos
+        pruebas distintas: la de acá dice que el brazo sabe decir que no, la
+        del objeto real dice que sabe encontrarlo donde de verdad vive. ══ */
+  /* ══ S114-B · LOS DOS BRAZOS DE R77 QUE SU FIXTURE ÚNICO NO ENCIENDE.
+        El genérico prueba ① (el exhaustivo incompleto). Estos prueban los
+        otros dos, y **los tres se probaron ADEMÁS en rojo contra los archivos
+        REALES** —mutando el ORDEN de adopción, la cadena de `push` del orbe,
+        y borrando un array de la tabla—. *El fixture dice que el brazo sabe
+        decir que no; la mutación dice que sabe encontrarlo donde vive.* ══ */
+  ['R77·el sitio SIN CLASIFICAR (no digo que esté mal: digo que no sé)', r77, [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
+    })),
+    {
+      path: 'packages/ui/src/components/PiezaNueva.tsx',
+      src:
+        "export type EstadoX = 'a' | 'b' | 'c'\n" +
+        "const ORDEN_X: readonly EstadoX[] = ['a', 'b', 'c']\n",
+    },
+  ]],
+  ['R77·la entrada de la tabla cuyo sitio DESAPARECIÓ', r77, [
+    ...Array.from({ length: 20 }, (_, i) => ({
+      path: `packages/ui/src/components/relleno${i}.tsx`,
+      src: `export type Relleno${i} = 'a' | 'b' | 'c'\n`,
+    })),
+  ]],
+  ['R72·la etapa sin glifo (el orden está completo)', r72, [{
+    path: 'packages/ui/src/components/EscaleraCaso.tsx',
+    src:
+      "export type EtapaCaso =\n  | 'recibido'\n  | 'cerrado'\n\n" +
+      "export const ORDEN_CASO: readonly EtapaCaso[] = ['recibido', 'cerrado']\n" +
+      "const GLIFO: Record<EtapaCaso, IconoNombre> = {\n  recibido: 'sobre',\n}\n",
+  }]],
+  ['R73·el default de elección (sin rama por destino)', r73, [{
+    path: 'packages/ui/src/components/TarjetaDestinoPlata.tsx',
+    src: "const orden = ['banco', 'saldo']\nfunction T({ elegido = 'saldo' }) { return elegido }\n",
+  }]],
+  ['R73·la palabra «recomendado» (sin rama ni default)', r73, [{
+    path: 'packages/ui/src/components/TarjetaDestinoPlata.tsx',
+    src: "const orden = ['banco', 'saldo']\nconst nota = 'recomendado'\n",
+  }]],
+  ['R74·el slot ReactNode (sin nombrar el monto)', r74, [{
+    path: 'packages/ui/src/components/CabeceraCaso.tsx',
+    src: "import type { ReactNode } from 'react'\nexport type P = { contraparte: string; acciones?: ReactNode }\n",
+  }]],
+  ['R75·el scroll interno (sin cajón «otro»)', r75, [{
+    path: 'packages/ui/src/components/SelectorMotivo.tsx',
+    src: "export const MOTIVO_CONTAME = '__contame__'\nimport { ScrollView } from 'react-native'\n",
+  }]],
+  ['R76·el rojo de alarma (sin reloj adentro)', r76, [{
+    path: 'packages/ui/src/components/BannerPlazo.tsx',
+    src: "export function B({ voz }) {\n  return <Texto color=\"danger\">{voz}</Texto>\n}\n",
+  }]],
   /* S103-B · EL BRAZO `ui` DE R62, aislado. El fixture principal supera el
      baseline de `apps/` (15) y por eso saldría rojo igual con este brazo
      apagado: un brazo que nunca se ejecuta no está probado aunque la regla
@@ -6841,6 +7757,17 @@ corridas.push(['R70 (un path svg no va en posicion de texto)', r70([...leer(RAIC
 /* 🔴 R71 NO recibe corpus: lee `packages/api` del disco. Su pregunta no es
    sobre el contenido de un archivo sino sobre la RELACIÓN entre dos —los
    wrappers y su index—, y esa relación no se ve mirando uno solo. */
+/* S114-B · LAS CINCO DE LA POSTVENTA. Corren sobre `packages/ui/src` entero:
+   cada guard busca SU pieza y sale por «ancla rota» si no la encuentra — así
+   un rename de archivo no las deja mudas. */
+corridas.push(['R79 (un código del motor no se renderiza sin su riel)', r79([...apps, ...appsCodigo])])
+corridas.push(['R78 (el tema memorial no puede ser la única señal)', r78([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
+corridas.push(['R77 (lo que enumera una unión a mano se declara)', r77([...ui, ...leer(archivosCodigo('packages/ui/src'))])])
+corridas.push(['R72 (ninguna etapa del caso se pierde del orden)', r72(ui)])
+corridas.push(['R73 (las dos tarjetas del dinero son parejas)', r73(ui)])
+corridas.push(['R74 (la cabecera del caso no dice el monto)', r74(ui)])
+corridas.push(['R75 («otro» no es un motivo, y la lista no scrollea)', r75(ui)])
+corridas.push(['R76 (el plazo no es una alarma ni un contador)', r76(ui)])
 corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);

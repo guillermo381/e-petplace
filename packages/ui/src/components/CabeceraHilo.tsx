@@ -36,13 +36,12 @@
  * El hilo en las dos apps (C3 · C6). **Entregada y no montada.**
  */
 import type { ReactNode } from 'react'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 import { AvatarMascota } from './AvatarMascota'
-import { Chevron } from './chevron'
+import { FilaDeCabecera } from './fila-de-cabecera'
 import { LogoNegocio } from './LogoNegocio'
-import { Texto } from './Texto'
 
 export type CabeceraHiloProps = {
   /** EL ANIMAL — el porqué de la conversación. */
@@ -65,37 +64,12 @@ export type CabeceraHiloProps = {
   acciones?: ReactNode
 }
 
-/** Fila tocable-o-no: el chevron y la presión existen sólo si lleva. */
-function Fila({
-  cara,
-  nombre,
-  onPress,
-  variante,
-}: {
-  cara: ReactNode
-  nombre: string
-  onPress?: () => void
-  variante: 'titulo' | 'apoyo'
-}) {
-  const contenido = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-      {cara}
-      <View style={{ flex: 1 }}>
-        <Texto variante={variante === 'titulo' ? 'enfasis' : 'apoyo'} numberOfLines={1}>
-          {nombre}
-        </Texto>
-      </View>
-      {onPress === undefined ? null : <Chevron direccion="derecha" />}
-    </View>
-  )
-  if (onPress === undefined) return contenido
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={nombre}>
-      {contenido}
-    </Pressable>
-  )
-}
-
+/* ☠️ ACÁ VIVÍA `Fila`. S114-B la SACÓ a `fila-de-cabecera.tsx` sin tocar una
+   línea de su craft ni un carácter de la API de esta pieza: la cabecera del
+   caso de postventa (§3.2) tiene la MISMA anatomía, y dos copias de la misma
+   fila son la clase que la Ley 19.9 nombra —*lo que se copia, diverge*—.
+   Lo único que ganó allá es `detalle`, la segunda línea en voz de máquina,
+   que esta cabecera no usa. */
 export function CabeceraHilo({ animal, contraparte, acciones }: CabeceraHiloProps) {
   const { theme } = useTheme()
 
@@ -112,7 +86,7 @@ export function CabeceraHilo({ animal, contraparte, acciones }: CabeceraHiloProp
     >
       {/* EL ANIMAL PRESIDE: es el sujeto de la conversación, y su foto es
           chica porque acá no se lo presenta —eso es la ficha— se lo nombra. */}
-      <Fila
+      <FilaDeCabecera
         cara={
           <AvatarMascota
             nombre={animal.nombre}
@@ -123,17 +97,17 @@ export function CabeceraHilo({ animal, contraparte, acciones }: CabeceraHiloProp
         }
         nombre={animal.nombre}
         onPress={animal.onPress}
-        variante="titulo"
+        jerarquia="preside"
       />
 
       {/* LA CONTRAPARTE — `LogoNegocio` y no `AvatarMascota`: del otro lado
           hay una organización o una persona, nunca un animal, y su fallback
           honesto es el monograma de su nombre. */}
-      <Fila
+      <FilaDeCabecera
         cara={<LogoNegocio nombre={contraparte.nombre} logoUrl={contraparte.fotoUrl} tamano={28} />}
         nombre={contraparte.nombre}
         onPress={contraparte.onPress}
-        variante="apoyo"
+        jerarquia="apoyo"
       />
 
       {acciones}
