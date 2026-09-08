@@ -1,39 +1,30 @@
 /**
- * LA FORMA DEL CASO — el `leerCaso` de A llega sin tipar y acá se le da forma.
+ * LA TRADUCCIÓN ENTRE LOS DOS VOCABULARIOS DEL CASO.
  *
- * 🔴 **A devuelve `Record<string, unknown>`**, así que el tipo no protege
- * nada: si el motor renombra una clave, la pantalla lee `undefined` y **no
- * falla — dibuja un hueco**. Esta frontera existe para que ese riesgo viva en
- * UN archivo y no repartido por el render.
+ * ⏪ **Este archivo era una frontera de tipos**: `leerCaso` devolvía
+ * `Record<string, unknown>` y acá se le daba forma a mano. **A lo tipó**
+ * (`CasoDetalle`) y esa mitad se retira — *un puente que sobrevive a su río
+ * manda al próximo a construir otro* (`L-395`).
  *
- * ⚠️ **No inventa defaults cómodos.** Lo que no viene queda `null` y la
- * pantalla decide qué decir — `L-139`: un dato verosímil-falso es más caro que
- * un hueco declarado.
+ * 🔴 **Lo que SÍ queda, porque no lo resuelve un tipo: `EtapaCaso` existe DOS
+ * VECES**, en `@epetplace/api` y en `@epetplace/ui`, con el mismo nombre y
+ * distinto contenido:
+ * ```
+ *   A: … con_casa      … + resuelto_entre_partes  (los finales DENTRO)
+ *   B: … con_epetplace …   FinalCaso aparte: resuelto_entre_ustedes
+ * ```
+ * Los dos modelos coinciden en ESTRUCTURA y divergen sólo en los nombres.
+ * *Lo cazó el compilador porque el choque fue exacto; con una letra de
+ * diferencia habrían quedado los dos conviviendo.*
+ *
+ * ⇒ **la traducción es TOTAL**: `Record` completo sobre los tipos de A, así
+ * una etapa o un final nuevos **no compilan** hasta que alguien decida su
+ * equivalente. *Un mapa parcial dejaría una etapa nueva cayendo en silencio.*
  */
 
-import type { EtapaCaso as EtapaDelMotor, ObjetoPostventa } from '@epetplace/api';
+import type { CasoDetalle, EtapaCaso as EtapaDelMotor, FinalAlterno } from '@epetplace/api';
 import type { EtapaCaso as EtapaDeLaEscalera, FinalCaso } from '@epetplace/ui';
 
-/**
- * 🔴 **DOS VOCABULARIOS PARA LO MISMO, Y SÓLO SE VEN MONTÁNDOLOS.**
- *
- * `EtapaCaso` existe en `@epetplace/api` (A) **y** en `@epetplace/ui` (B), con
- * el mismo nombre y contenido distinto. Los dos modelos **coinciden en
- * estructura** —cinco pasos en la escalera y tres finales fuera de ella,
- * `cat_estados_caso.en_escalera` lo dice— y divergen **sólo en los nombres**:
- * ```
- *   A: con_casa               ·  B: con_epetplace
- *   A: resuelto_entre_partes  ·  B: resuelto_entre_ustedes
- *   A: los tres finales DENTRO de EtapaCaso  ·  B: aparte, en FinalCaso
- * ```
- * *Lo cazó el compilador porque el choque de nombres fue exacto; con una letra
- * de diferencia habrían quedado los dos conviviendo y nadie se entera.*
- *
- * ⇒ **La traducción es TOTAL y vive acá.** `Record` completo sobre el tipo de
- * A: si mañana el motor agrega una etapa, esto no compila hasta que alguien
- * decida de qué lado va. *Un mapa parcial dejaría que una etapa nueva cayera
- * en «no está en la escalera» sin que nadie lo note.*
- */
 const A_ESCALERA: Record<EtapaDelMotor, EtapaDeLaEscalera | null> = {
   recibido: 'recibido',
   con_prestador: 'con_prestador',
@@ -46,98 +37,35 @@ const A_ESCALERA: Record<EtapaDelMotor, EtapaDeLaEscalera | null> = {
   sin_lugar: null,
 };
 
-const A_FINAL: Record<EtapaDelMotor, FinalCaso | null> = {
-  recibido: null,
-  con_prestador: null,
-  con_casa: null,
-  /* ⚠️ `resuelto` y `cerrado` son `es_final=true` en el catálogo del motor
-     **y NO son finales alternos**: son el camino normal. El discriminador
-     correcto no es `es_final` sino `en_escalera`, y por eso van en `null`. */
-  resuelto: null,
-  cerrado: null,
+const A_FINAL: Record<FinalAlterno, FinalCaso> = {
   resuelto_entre_partes: 'resuelto_entre_ustedes',
   retirado: 'retirado',
   sin_lugar: 'sin_lugar',
 };
 
-export type CasoLeido = {
-  casoId: string;
-  /** La etapa **en el vocabulario de la escalera**. `null` = final alterno. */
-  etapa: EtapaDeLaEscalera | null;
+export type CasoParaLaPantalla = CasoDetalle & {
   /**
-   * El final alterno, si lo hay (§3.1).
+   * 🔴 **EL PASO DONDE SE CONGELA LA FILA** — y ahora existe de verdad.
    *
-   * 🔴 **Y con él la escalera NO se dibuja, que es una degradación declarada.**
-   * §3.1 quiere la fila *congelada donde estaba* con la línea de abajo
-   * reemplazada — pero el motor pisa `etapa` con el final y **la etapa previa
-   * se pierde**: `estado_final = p_hasta` y `etapa = p_hasta` guardan lo
-   * mismo. Sin ese dato, dibujar la fila exigiría **inventar** en qué paso
-   * quedó. *Se muestra la etiqueta del final sola, que es verdadera, en vez de
-   * una escalera verosímil-falsa.* Pedido a A: `etapa_en_escalera`.
+   * ⏪ Yo dibujaba **la etiqueta del final sola, sin escalera**, porque el
+   * motor pisaba `etapa` con el final y la etapa previa se perdía. Lo pedí en
+   * C② y **A lo entregó** (`etapaEnEscalera`), así que §3.1 se puede cumplir
+   * entero: *la fila queda congelada donde estaba y la línea de abajo la
+   * reemplaza su etiqueta.*
    */
-  finalAlterno: FinalCaso | null;
-  clase: 1 | 2 | 3;
-  motivo: string;
-  /** ¿Esta etapa se dibuja en la escalera? Lo dice el catálogo del motor. */
-  enEscalera: boolean;
-  /** El caso terminó ⇒ la barra pasa a lectura (§3.3). */
-  cerrado: boolean;
-  /** El plazo del prestador, CRUDO. La frase la compone la pantalla (i18n). */
-  plazoHasta: string | null;
-  objeto: { tipo: ObjetoPostventa | null; id: string | null; titulo: string | null; fecha: string | null };
-  resolucion: {
-    alcance: string | null;
-    monto: number | null;
-    camino: string | null;
-    destino: string | null;
-    destinoEstado: string | null;
-  };
-  /** §3.3: «si el hecho pide algo mío, debajo va la carta» — UNA a la vez. */
-  accionPendiente: 'elegir_devolucion' | null;
+  etapaDeLaFila: EtapaDeLaEscalera | null;
+  /** El final en el vocabulario de la pieza. `null` = no hay final alterno. */
+  finalDeLaFila: FinalCaso | null;
 };
 
-function texto(v: unknown): string | null {
-  return typeof v === 'string' && v.length > 0 ? v : null;
-}
-function objeto(v: unknown): Record<string, unknown> {
-  return v !== null && typeof v === 'object' ? (v as Record<string, unknown>) : {};
-}
-
-export function darFormaAlCaso(d: Record<string, unknown>): CasoLeido | null {
-  const casoId = texto(d.caso_id);
-  const etapa = texto(d.etapa) as EtapaDelMotor | null;
-  if (casoId === null || etapa === null) return null;
-  /* Una etapa que el mapa no conoce **no se adivina**: el caso no se dibuja y
-     la pantalla dice que no pudo. Es la salida ruidosa. */
-  if (!(etapa in A_ESCALERA)) return null;
-
-  const o = objeto(d.objeto);
-  const r = objeto(d.resolucion);
-
+export function traducirCaso(c: CasoDetalle): CasoParaLaPantalla {
+  /* `etapaEnEscalera` manda cuando viene: es el paso congelado. Si no viene,
+     se traduce la etapa actual — y con un final alterno eso da `null`, que es
+     lo correcto: ese final no es un paso de la fila. */
+  const base = c.etapaEnEscalera ?? c.etapa;
   return {
-    casoId,
-    etapa: A_ESCALERA[etapa],
-    finalAlterno: A_FINAL[etapa],
-    clase: (typeof d.clase === 'number' ? d.clase : 2) as 1 | 2 | 3,
-    motivo: texto(d.motivo) ?? '',
-    /* Si el motor no lo dice, se DIBUJA la escalera: esconderla por una clave
-       ausente dejaría a la familia sin saber en qué paso está. */
-    enEscalera: d.en_escalera !== false,
-    cerrado: d.cerrado === true,
-    plazoHasta: texto(d.plazo_hasta),
-    objeto: {
-      tipo: (texto(o.tipo) as ObjetoPostventa | null) ?? null,
-      id: texto(o.id),
-      titulo: texto(o.titulo),
-      fecha: texto(o.fecha),
-    },
-    resolucion: {
-      alcance: texto(r.alcance),
-      monto: typeof r.monto === 'number' ? r.monto : null,
-      camino: texto(r.camino),
-      destino: texto(r.destino),
-      destinoEstado: texto(r.destino_estado),
-    },
-    accionPendiente: texto(d.accion_pendiente) === 'elegir_devolucion' ? 'elegir_devolucion' : null,
+    ...c,
+    etapaDeLaFila: A_ESCALERA[base],
+    finalDeLaFila: c.final !== null ? A_FINAL[c.final] : null,
   };
 }

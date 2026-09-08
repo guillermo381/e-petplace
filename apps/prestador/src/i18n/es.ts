@@ -4753,6 +4753,11 @@ export const prestadorEs = {
     puntero: 'Casos',
     punteroDetalle: 'Lo que una familia te pide resolver',
     punteroPendientes: '{{n}} esperando tu respuesta',
+    /* C8 · pide, sin drama. El número va porque decir «tenés servicios sin
+       cerrar» sin cuántos obliga a ir a contarlos. */
+    sinCerrar: 'Tienes {{n}} servicios sin cerrar. Ciérralos para cobrarlos.',
+    /* Y a las 48 h la verdad, sin adorno: ya pasó. */
+    sinCerrarVencidos: '{{n}} quedaron sin cerrar: no se cobran y la familia recibió su devolución.',
     casoTitulo: 'El caso',
     asientoCasa: 'e-PetPlace',
     asientoFamilia: 'La familia',

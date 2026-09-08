@@ -3750,6 +3750,8 @@ export const prestadorEn = {
     puntero: 'Cases',
     punteroDetalle: 'What a family is asking you to resolve',
     punteroPendientes: '{{n}} waiting for your reply',
+    sinCerrar: 'You have {{n}} services left to close. Close them to get paid.',
+    sinCerrarVencidos: "{{n}} were left unclosed: they aren't paid and the family got their refund.",
     casoTitulo: 'The case',
     asientoCasa: 'e-PetPlace',
     asientoFamilia: 'The family',

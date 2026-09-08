@@ -93,14 +93,43 @@ export type MotivosParaLaPantalla = {
  * código) y el wrapper de A lo declara. Reordenar acá sería fabricarle una
  * prioridad a los motivos que la letra no fijó.
  */
+/**
+ * 🔴 **LA MISMA CLAVE DOS VECES, CON DOS VOCES DISTINTAS — y lo avisó D.**
+ *
+ * `estadia` hereda de `cita` y A agregó `no_ejecutado` **a las dos**
+ * (`20260911730000:51`), así que `v_motivos_resueltos` devuelve para estadía:
+ * ```
+ *   no_ejecutado · propio    · «No lo cuidaron / no me lo devolvieron»
+ *   no_ejecutado · heredado  · «No vino / no me atendieron»
+ * ```
+ * **No es cosmético:** `SelectorMotivo` usa `clave` como identidad, así que
+ * dos filas con la misma clave son dos filas que se seleccionan juntas — y la
+ * familia lee dos frases distintas para lo mismo.
+ *
+ * ⇒ **lo PROPIO pisa a lo HEREDADO**, que es la única resolución posible: la
+ * voz propia está escrita para ESE objeto («no me lo devolvieron» es de una
+ * estadía, no de una cita). *Misma cura que hizo D del lado consumidor; la de
+ * raíz está pedida a A en la vista.*
+ */
+function sinDuplicados(motivos: readonly MotivoPostventa[]): MotivoPostventa[] {
+  const porCodigo = new Map<string, MotivoPostventa>();
+  for (const m of motivos) {
+    const previo = porCodigo.get(m.codigo);
+    /* Sin previo entra; con previo, sólo lo propio desplaza. */
+    if (previo === undefined || m.procedencia === 'propio') porCodigo.set(m.codigo, m);
+  }
+  return [...porCodigo.values()];
+}
+
 export function motivosParaLaPantalla(
   motivos: readonly MotivoPostventa[],
   vozContameDeRespaldo: string,
 ): MotivosParaLaPantalla {
-  const contame = motivos.find((m) => m.codigo === CODIGO_CONTAME);
+  const unicos = sinDuplicados(motivos);
+  const contame = unicos.find((m) => m.codigo === CODIGO_CONTAME);
 
   return {
-    lista: motivos
+    lista: unicos
       .filter((m) => m.codigo !== CODIGO_CONTAME)
       .map((m) => ({
         clave: m.codigo,
@@ -111,7 +140,7 @@ export function motivosParaLaPantalla(
     /* Si la fila universal no viniera, la pantalla NO se queda muda: el
        respaldo es i18n de C. Pero se prefiere la del catálogo siempre. */
     vozContame: contame?.voz ?? vozContameDeRespaldo,
-    sinGlifo: glifosDeMotivoQueFaltan(motivos),
+    sinGlifo: glifosDeMotivoQueFaltan(unicos),
   };
 }
 

@@ -49,6 +49,7 @@ import {
   pedirACasa,
   reconocerYResolver,
   type AsientoCaso,
+  type CasoDetalle,
   type MensajeCaso,
 } from '@epetplace/api';
 import { horaCortaDeMensaje } from '@epetplace/i18n';
@@ -69,7 +70,7 @@ export default function CasoDelPrestador() {
   const { t, idioma } = useTraduccion();
   const { casoId } = useLocalSearchParams<{ casoId?: string }>();
 
-  const [caso, setCaso] = useState<Fase<Record<string, unknown>>>('cargando');
+  const [caso, setCaso] = useState<Fase<CasoDetalle>>('cargando');
   const [hilo, setHilo] = useState<Fila[]>([]);
   const [borrador, setBorrador] = useState('');
   const [hojaResolver, setHojaResolver] = useState(false);
@@ -213,8 +214,8 @@ export default function CasoDelPrestador() {
     );
   }
 
-  const cerrado = caso.cerrado === true;
-  const plazo = typeof caso.plazo_hasta === 'string' ? caso.plazo_hasta : null;
+  const cerrado = caso.cerrado;
+  const plazo = caso.plazoHasta;
   const horas = plazo !== null ? Math.round((new Date(plazo).getTime() - Date.now()) / 3_600_000) : null;
   const conLaCasa = caso.etapa === 'con_casa';
 

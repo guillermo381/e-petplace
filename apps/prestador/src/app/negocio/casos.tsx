@@ -45,6 +45,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { tituloDelObjeto } from '@/lib/voz-del-caso';
 
 /**
  * 🔴 **LAS ETAPAS QUE YA NO ESPERAN NADA DEL PRESTADOR.** Sobre ellas **no se
@@ -64,7 +65,7 @@ type Fase<T> = T | 'cargando' | 'error';
 
 export default function CasosDelPrestador() {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const [casos, setCasos] = useState<Fase<CasoEnBandeja[]>>('cargando');
   /* 🔴 EL MOTIVO LLEGA COMO CÓDIGO, NO COMO VOZ — y sin esto la fila decía
@@ -115,7 +116,10 @@ export default function CasosDelPrestador() {
           : null;
       return {
         clave: c.casoId,
-        objeto: t(`postventa.objeto_${c.objetoTipo}` as 'postventa.objeto_cita'),
+        /* §5 · **de qué servicio hablan.** ⏪ Decía «Una cita» genérico porque
+           `CasoEnBandeja` no traía el título; **A lo entregó** y ahora la fila
+           dice «Paseo de Thor · martes 9». */
+        objeto: tituloDelObjeto(c, idioma, t(`postventa.objeto_${c.objetoTipo}` as 'postventa.objeto_cita')),
         contraparte: t('postventa.laFamilia'),
         /* Si el catálogo todavía no llegó, se muestra el código antes que un
            hueco: **una fila sin motivo no dice de qué es el caso**. Es feo un
@@ -126,7 +130,7 @@ export default function CasosDelPrestador() {
         ...(horas !== null && horas > 0 ? { reloj: t('postventa.teQuedan', { horas }) } : null),
       };
     });
-  }, [casos, t, vozDeMotivo]);
+  }, [casos, idioma, t, vozDeMotivo]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

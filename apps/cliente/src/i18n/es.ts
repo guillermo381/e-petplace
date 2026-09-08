@@ -2480,6 +2480,8 @@ export const clienteEs = {
     terminosTitulo: 'Términos y condiciones',
     privacidadTitulo: 'Política de privacidad',
     /* La puerta ÚNICA al índice legal del sitio (A, con la fuente de B). */
+    misCasosTitulo: 'Mis casos',
+    misCasosDetalle: 'Lo que abriste cuando algo salió distinto',
     legalesTitulo: 'Términos y privacidad',
     /* ☠️ `legalPlaceholder` MURIÓ (S103-C, mesa 104). Decía, publicado:
        «Esta app está en fase de pruebas: NO SE COBRA DINERO REAL…».
@@ -4502,6 +4504,13 @@ export const clienteEs = {
     reboteSinSesion: 'Vuelve a entrar a tu cuenta y prueba de nuevo.',
     reboteGenerico: 'No pudimos abrir el caso. Prueba de nuevo.',
     hablarConAlguien: '¿Prefieres que te atienda una persona?',
+    misCasosTitulo: 'Mis casos',
+    misCasosIntro: 'Lo que abriste y en qué quedó.',
+    misCasosVacio: 'No tienes casos.',
+    misCasosNoSePudo: 'No pudimos cargar tus casos. Prueba de nuevo.',
+    objeto_cita: 'Un servicio',
+    objeto_estadia: 'Una estadía',
+    objeto_pedido: 'Un pedido',
     // §3 · LA PANTALLA DEL CASO
     tituloCaso: 'Tu caso',
     casoNoEsTuyo: 'Este caso no es de tu familia.',

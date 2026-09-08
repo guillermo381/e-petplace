@@ -62,7 +62,7 @@ import {
 import { fechaLargaHumana, horaCortaDeMensaje } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
-import { darFormaAlCaso, type CasoLeido } from '@/lib/postventa/caso';
+import { traducirCaso, type CasoParaLaPantalla } from '@/lib/postventa/caso';
 import { CartaDeDevolucion } from '@/components/postventa/CartaDeDevolucion';
 import { PermisoWhatsApp } from '@/components/postventa/PermisoWhatsApp';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -112,7 +112,7 @@ export default function PantallaDelCaso() {
   const { t, idioma } = useTraduccion();
   const { casoId } = useLocalSearchParams<{ casoId?: string }>();
 
-  const [caso, setCaso] = useState<Fase<CasoLeido>>('cargando');
+  const [caso, setCaso] = useState<Fase<CasoParaLaPantalla>>('cargando');
   const [hilo, setHilo] = useState<Fila[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [escaleraAbierta, setEscaleraAbierta] = useState(true);
@@ -130,8 +130,7 @@ export default function PantallaDelCaso() {
       setCaso(c.codigo === 'no_es_tuyo' ? 'noEsTuyo' : 'error');
       return;
     }
-    const forma = darFormaAlCaso(c.data);
-    setCaso(forma ?? 'error');
+    setCaso(traducirCaso(c.data));
 
     if (m.ok) {
       const delMotor: Fila[] = m.data.mensajes.map((x) => ({ clave: x.id, mensaje: x }));
@@ -301,7 +300,7 @@ export default function PantallaDelCaso() {
 
   /* §3.1 · la línea de abajo, ENTERA. **El plazo lo compone la pantalla**: A
      manda `plazoHasta` crudo a propósito, porque el formato de fecha es i18n. */
-  const nombreEtapa = caso.etapa !== null ? VOZ_ETAPA[caso.etapa] : '';
+  const nombreEtapa = caso.etapaDeLaFila !== null ? VOZ_ETAPA[caso.etapaDeLaFila] : '';
   const vozEstado =
     caso.plazoHasta !== null
       ? t('postventa.estasEnConPlazo', {
@@ -332,9 +331,22 @@ export default function PantallaDelCaso() {
 
             {/* §3.1 · la escalera. **No se dibuja cuando la etapa no vive en
                 ella** —lo dice el catálogo del motor, no un `switch` acá. */}
-            {caso.etapa !== null ? (
+            {caso.etapaDeLaFila !== null ? (
               <EscaleraCaso
-                etapa={caso.etapa}
+                etapa={caso.etapaDeLaFila}
+                {...(caso.finalDeLaFila !== null
+                  ? {
+                      /* §3.1 · el final REEMPLAZA la línea de abajo y la fila
+                         queda congelada donde estaba. ⏪ Antes se dibujaba la
+                         etiqueta sola, sin escalera, porque la etapa previa se
+                         perdía en el motor. A entregó `etapaEnEscalera` y ahora
+                         se cumple entero. */
+                      final: {
+                        tipo: caso.finalDeLaFila,
+                        etiqueta: t(VOZ_FINAL[caso.finalDeLaFila]),
+                      },
+                    }
+                  : null)}
                 voces={VOZ_ETAPA}
                 vozEstado={vozEstado}
                 abierta={escaleraAbierta}
@@ -342,13 +354,11 @@ export default function PantallaDelCaso() {
                 etiquetaAlternar={t('postventa.escaleraAlternar')}
                 acento="control"
               />
-            ) : caso.finalAlterno !== null ? (
-              /* 🔴 FINAL ALTERNO SIN ESCALERA — degradación declarada, ver la
-                  nota de `finalAlterno` en `lib/postventa/caso`. El motor pisa
-                  `etapa` con el final y la etapa previa se pierde; dibujar la
-                  fila exigiría inventar en qué paso quedó. **Se dice el final,
-                  que es verdadero.** */
-              <Texto variante="cuerpo">{t(VOZ_FINAL[caso.finalAlterno])}</Texto>
+            ) : caso.finalDeLaFila !== null ? (
+              /* Sin paso en la fila pero con final: se dice el final solo.
+                 Hoy es inalcanzable —`etapaEnEscalera` siempre viene— y se
+                 conserva porque el tipo lo admite. */
+              <Texto variante="cuerpo">{t(VOZ_FINAL[caso.finalDeLaFila])}</Texto>
             ) : null}
 
             {/* §4 · LA CARTA DE LA PLATA — UNA a la vez (§3.3). */}
