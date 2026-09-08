@@ -273,18 +273,30 @@ export interface CasoEnBandeja {
   casoId: string; objetoTipo: ObjetoPostventa; objetoId: string;
   motivo: string; clase: 1 | 2 | 3; etapa: EtapaCaso;
   plazoHasta: string | null; creadoEn: string;
+  // §5 · de qué servicio hablan — la app pone la voz del servicio y el formato
+  // de fecha ("Paseo de Thor · martes 9"). El motor entrega los datos, no la voz.
+  servicio: string | null; mascotaNombre: string | null;
+  objetoFecha: string | null; pedidoNumero: string | null;
+}
+
+function mapearBandeja(c: Record<string, unknown>): CasoEnBandeja {
+  return {
+    casoId: c.caso_id as string, objetoTipo: c.objeto_tipo as ObjetoPostventa,
+    objetoId: c.objeto_id as string, motivo: c.motivo as string,
+    clase: c.clase as 1 | 2 | 3, etapa: c.etapa as EtapaCaso,
+    plazoHasta: (c.plazo_hasta as string | null) ?? null, creadoEn: c.creado_en as string,
+    servicio: (c.servicio as string | null) ?? null,
+    mascotaNombre: (c.mascota_nombre as string | null) ?? null,
+    objetoFecha: (c.objeto_fecha as string | null) ?? null,
+    pedidoNumero: (c.pedido_numero as string | null) ?? null,
+  };
 }
 
 export async function obtenerCasosDelPrestador(): Promise<ResultadoWrapper<CasoEnBandeja[], 'error_lectura'>> {
   const { data, error } = await getClient().rpc('obtener_casos_del_prestador');
   if (error) return { ok: false, codigo: 'error_lectura', mensaje: ERR };
   const filas = (data ?? []) as Record<string, unknown>[];
-  return { ok: true, data: filas.map((c) => ({
-    casoId: c.caso_id as string, objetoTipo: c.objeto_tipo as ObjetoPostventa,
-    objetoId: c.objeto_id as string, motivo: c.motivo as string,
-    clase: c.clase as 1 | 2 | 3, etapa: c.etapa as EtapaCaso,
-    plazoHasta: (c.plazo_hasta as string | null) ?? null, creadoEn: c.creado_en as string,
-  })) };
+  return { ok: true, data: filas.map(mapearBandeja) };
 }
 
 /**
@@ -298,12 +310,7 @@ export async function obtenerMisCasos(): Promise<ResultadoWrapper<CasoEnBandeja[
   const { data, error } = await getClient().rpc('obtener_mis_casos');
   if (error) return { ok: false, codigo: 'error_lectura', mensaje: ERR };
   const filas = (data ?? []) as Record<string, unknown>[];
-  return { ok: true, data: filas.map((c) => ({
-    casoId: c.caso_id as string, objetoTipo: c.objeto_tipo as ObjetoPostventa,
-    objetoId: c.objeto_id as string, motivo: c.motivo as string,
-    clase: c.clase as 1 | 2 | 3, etapa: c.etapa as EtapaCaso,
-    plazoHasta: (c.plazo_hasta as string | null) ?? null, creadoEn: c.creado_en as string,
-  })) };
+  return { ok: true, data: filas.map(mapearBandeja) };
 }
 
 export async function responderCaso(casoId: string, texto: string) {
