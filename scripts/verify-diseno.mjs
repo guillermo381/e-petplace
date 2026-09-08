@@ -33,7 +33,7 @@ import { construirArbol, hitSlopsVecinos, autoPruebaArbol } from './lib-arbol-mo
 /* R66 · la lógica de voz vive en UN solo lugar: es el instrumento de la pista C
    movido a biblioteca. Importar en vez de reimplementar es la regla, no una
    preferencia — una copia del matcher divergiría sin avisar. */
-import { hitsDeVoseo } from './lib-voz.mjs';
+import { hitsDeVoseo, VOZ_LO_QUE_NO_VE } from './lib-voz.mjs';
 import { decodificar as decodificarPng, cuerpo as cuerpoPng, puntoRedondo as puntoRedondoPng } from './medir-png.mjs';
 
 /** El sha256 del isotipo de Deuna **sobre el que se hizo la cuenta de R65**.
@@ -91,6 +91,60 @@ const MIN_SIMBOLO_DEUNA = 16;
  * — no se les hace lugar. *Un baseline se mueve cuando la realidad se mueve,
  * y acá la realidad dice 47.*
  */
+/**
+ * ═══ LA LÁPIDA DE R80 — LO QUE EL MOTOR YA ESCRIBIÓ (S114-B) ═══════════════
+ *
+ * **No es un baseline: es una lápida.** Una migración aplicada no se edita, así
+ * que estos números **no pueden bajar** y pedirles que bajen sería pedir que
+ * alguien reescriba historia. Su único trabajo es que **una migración NUEVA
+ * con voseo salga roja**.
+ *
+ * ⚠️ **Medida, no heredada:** salió de correr `hitsDeArchivo` sobre las 722 del
+ * repo con los tres arreglos de instrumento ya aplicados. **Sin ellos daba 69 y
+ * el 44 % era ruido** — comentarios `--` que citan voz, códigos `LIKE` y
+ * «dale» adentro de «airedale».
+ *
+ * 🔴 **Y NO están clasificadas una por una, a propósito.** Se ve a simple vista
+ * que adentro conviven cosas distintas —la voz de producto de verdad, **las
+ * regex de las propias migraciones que curaron voseo**, fixtures de arnés y
+ * texto de `RAISE`/`HINT` que sólo lee un operador—. *Clasificar 48 cadenas de
+ * historia es un barrido con firma; esta tabla existe para que el número 49 se
+ * vea.*
+ */
+const MIGRACIONES_CON_VOSEO = {
+  /* ── la barrida a tuteo de S89 y sus vecinas: acá vive el texto viejo Y la
+        regex que lo buscaba — una barrida tiene que nombrar lo que caza ── */
+  '20260724120000_s76a2bis_recepcion_piso_al_entrar.sql': 1,
+  '20260804160000_s86_lectores_datos_negocio.sql': 1,
+  '20260805090000_lote1_caller_en_revision.sql': 4,
+  '20260805310000_d667_voz_plan_renovado.sql': 1,
+  '20260805320000_lote_de_voces.sql': 5,
+  '20260805340000_d539_voseo_avisos_prestador.sql': 1,
+  '20260805350000_rename_operador_y_unificacion_voces.sql': 5,
+  '20260806160000_s89a_d673_productores_cita_en_sombra.sql': 5,
+  '20260806190000_s89a_d669_gracia_del_plan.sql': 5,
+  '20260806200000_s89a_lote_voces_motor_a_tuteo.sql': 1,
+  /* ── despensa y adopción ─────────────────────────────────────────────── */
+  '20260811230000_s95_m12_ledger_comercial.sql': 1,
+  '20260812130000_s96_b2_entrega_con_evidencia_y_destino.sql': 1,
+  '20260812140000_s96_b3_cupo_ventana_fecha.sql': 1,
+  '20260812190000_s96_b10_cinco_avisos.sql': 1,
+  '20260819050000_s99a_banda_de_precio.sql': 1,
+  '20260904120000_s108b2_renovacion_guarderia_apagada.sql': 1,
+  '20260907520000_s111a_tres_destinos_actor_refugio.sql': 1,
+  '20260907540000_s111a_mensajeria_adopcion.sql': 1,
+  '20260908300000_s112d_purga_clasifica.sql': 1,
+  /* ── 🔴 S113: LO MÁS NUEVO Y LO MÁS VIVO DE LA TABLA. El «contanos» le
+        habla a una familia HOY («¿Sabés cuándo nació X?», «Contame algo del
+        carácter de X», «Guardá un recuerdo de X») y las fichas de raza son
+        texto PUBLICADO. *Entran a la lápida porque ya están aplicadas, no
+        porque estén bien* — su cura es una migración nueva. ─────────────── */
+  '20260909280000_s113a_segundo_batch.sql': 5,
+  '20260909840000_s113a_contanos.sql': 3,
+  '20260909900000_s113a_firma_predisposiciones.sql': 1,
+  '20260910040000_s113a_cat_rasgos.sql': 1,
+};
+
 const BASELINE_VOSEO = {
   /* ── VOZ DE LAS APPS ──────────────────────────────────────────────────── */
   'apps/cliente/src/i18n/es.ts': 2,      // ⚠️ ver ⑪: las destapó `sos`, no son nuevas
@@ -2112,6 +2166,23 @@ const FIXTURES = {
      un wrapper que exporta una función y un index que no la nombra. Con uno
      solo la regla saldría por «corpus incompleto», que no es verde pero
      tampoco prueba que sepa decir que no. */
+  /* R80 · el caso REAL, verbatim de `20260909840000_s113a_contanos.sql:141`,
+     bajo un nombre que la lápida NO tiene — que es el modo de falla exacto:
+     **voz de producto nueva, en voseo, saliendo a una familia desde el motor**.
+     ⚠️ El corpus lleva 400 rellenos `.sql` para pasar el ancla; sin ellos el
+     fixture enrojecería por «no pude medir», que es otro rojo.
+     ⚠️ Y el `path` TIENE que empezar en `supabase/migrations/`: la regla filtra
+     por ahí, y con cualquier otro prefijo no vería nada. */
+  R80: [
+    ...Array.from({ length: 400 }, (_, i) => ({
+      path: `supabase/migrations/2026010100${String(i).padStart(4, '0')}_relleno.sql`,
+      src: 'select 1;\n',
+    })),
+    {
+      path: 'supabase/migrations/20261231000000_s999_voz_nueva.sql',
+      src: "        'clase', 'recuerdo', 'texto', 'Guardá un recuerdo de ' || v_m.nombre,\n",
+    },
+  ],
   /* ══ S114-B · LOS CINCO FIXTURES DE LA POSTVENTA — cada uno es EL CASO
         que su guard existe para cazar, escrito ANTES de cablear la regla.
         ⚠️ El `path` importa: los cinco guards buscan SU pieza y sin ella
@@ -5647,7 +5718,17 @@ function r66(archivos) {
   let total = 0;
   const porArchivo = new Map();
 
+  /* ☠️ **EL 134 DE LA GALERÍA ERAN 67, CONTADOS DOS VECES** (S114-B). El corpus
+     llega como `[...uiCodigo, ...galeria]` y `packages/ui/src/gallery` está
+     ADENTRO de `packages/ui/src`: cada archivo de galería entraba dos veces y
+     su contador se duplicaba. *Es informativo —la galería se excluye igual— y
+     por eso nadie lo miró: un número que no gatea nada se lee sin verificarse.*
+     Se deduplica por path, que es la clave real del corpus. */
+  const vistos = new Set();
+
   for (const { path, src } of archivos) {
+    if (vistos.has(path)) continue;
+    vistos.add(path);
     const n = hitsDeVoseo(src).length;
     if (n === 0) continue;
     if (ES_GALERIA.test(path)) { enGaleria += n; continue; }
@@ -5684,8 +5765,111 @@ function r66(archivos) {
       `${total} cadena(s) en voseo en ${porArchivo.size} archivo(s) de producto` +
       (enGaleria ? ` · ${enGaleria} en galería (NO cuentan: son cadenas de demostración, ver ES_GALERIA)` : '') +
       (enCero.length ? ` · ${enCero.length} baseline(s) YA EN 0` : '') +
-      ` · lógica de \`lib-voz.mjs\` (instrumento de C, 9 trampas)` +
-      ` · ⚠️ su verde dice «no creció», jamás «la voz está bien»: no mira gramática, ni tono, ni el inglés`,
+      ` · ${VOZ_LO_QUE_NO_VE}` +
+      ` · CORPUS: apps + ui + api (la voz que nace en SQL la mide R80; \`supabase/functions\` NO la mira NADIE — 18 hits medidos S114-B)` +
+      ` · ⚠️ su verde dice «no creció», jamás «la voz está bien»`,
+  };
+}
+
+/**
+ * ═══ R80 · LA VOZ QUE NACE EN EL MOTOR (S114-B) ════════════════════════════
+ *
+ * **Lo midió C y la deuda es de B:** *«la voz de producto del caso nace en SQL
+ * —`migración 610000:295`, en voseo, saliendo a una familia— y `R66` no mira
+ * `supabase/migrations`.»* **Tenía razón, y el número era más grande que su
+ * caso: 48 hits en 23 migraciones.**
+ *
+ * ── POR QUÉ ES UNA REGLA APARTE Y NO UN BRAZO DE R66 ───────────────────────
+ * **Porque una migración aplicada NO SE PUEDE CURAR.** R66 es un trinquete
+ * *solo-baja*: su promesa es *«el voseo que ya está se cura cuando se toca su
+ * pantalla»*. Acá esa frase es falsa — el archivo es historia, y la cura es
+ * **una migración NUEVA que reemplaza el cuerpo**. ⇒ un baseline que sólo
+ * puede bajar sería un baseline que nunca baja, *y un trinquete que no se
+ * mueve deja de leerse como una medición y pasa a leerse como decorado.*
+ *
+ * ⇒ **la tabla de abajo es una LÁPIDA, no un baseline**: nombra lo escrito
+ * hasta hoy y **su único trabajo es que una migración NUEVA con voseo salga
+ * roja**.
+ *
+ * ── 🔴 LO QUE ESTA REGLA NO VE, Y ES LO MÁS IMPORTANTE QUE DICE (`L-500`) ──
+ * ① **Mide lo que una migración ESCRIBE, jamás lo que está VIVO.** Un cuerpo
+ *    de función se reemplaza en una migración posterior: de las 23 de la
+ *    lápida, varias son *el texto viejo que otra migración ya curó* —y esta
+ *    regla no puede saber cuál gana—. **La voz viva está en `pg_proc`, y eso
+ *    es una consulta a la base: fuera del alcance de un lint estático.**
+ * ② **Las 48 no están clasificadas una por una.** Adentro conviven, al menos:
+ *    la voz de producto de verdad, **las regex de las propias migraciones que
+ *    curaron voseo** (una barrida tiene que nombrar lo que busca), los
+ *    fixtures de arnés y el texto de `RAISE`/`HINT` que sólo lee un operador.
+ *    *Clasificarlas es un barrido con firma, no un gate.*
+ * ③ **`supabase/functions` sigue sin mirar NADIE** — 18 hits en 10 archivos,
+ *    medidos el mismo día. **Es territorio de D y se declara en vez de
+ *    gatearse**: *una zona medida y declarada tiene dueño; una zona callada no
+ *    tiene ni eso.*
+ *
+ * ── 🔴 LA LÁPIDA SE CONGELÓ CONTRA **MI** ÁRBOL, Y ESO TIENE CONSECUENCIA ──
+ * **El caso que C reportó no está en este worktree**: la migración del caso de
+ * postventa vive en la rama de A. ⇒ **el día que esa migración entre a `main`,
+ * R80 va a salir ROJA sobre ella — y eso es la regla funcionando, no un falso
+ * positivo.** Quien mergee tiene dos caminos y los dos son legítimos: **curar la
+ * voz** (una migración nueva que reemplace el cuerpo) o **agregarla a la lápida
+ * con su razón escrita**. *Lo que no vale es agregarla en silencio: una
+ * excepción sin razón es un olvido con permiso.*
+ *
+ * ⚠️ **Y si después del merge la lápida NO se movió y R80 sigue verde, la regla
+ * dejó de mirar** — porque el salto de 23 a 24 archivos es el único que prueba
+ * que el arma está viva sobre trabajo ajeno.
+ *
+ * ── LOS TRES ARREGLOS DE INSTRUMENTO QUE ESTA REGLA OBLIGÓ ─────────────────
+ * Sin ellos el arma nacía con **el 44 % de ruido** (69 hits contra 48):
+ *   · `--` de SQL blanqueado (`_sinComentariosSql`) — la prosa de un comentario
+ *     que CITA voz no es voz: **69 → 66**, dos archivos enteros.
+ *   · ⑭ un `LIKE` tipado sigue siendo identificador (`'no_sos_admin%'`) — el
+ *     `%` derrotaba la exclusión ⑩ **doce veces**.
+ *   · ⑮ frontera IZQUIERDA — `airedale` contenía «dale», **cinco veces** en el
+ *     catálogo de razas.
+ * **Los tres se midieron contra el corpus de R66 antes de aplicarse: delta
+ * CERO sobre 116 hits de TS** — no callan un solo voseo real.
+ */
+function r80(archivos) {
+  const sql = archivos.filter((a) => /^supabase\/migrations\/.+\.sql$/.test(a.path));
+
+  /* ANCLA: el corpus real tiene 722. Si llegan cuatro, el cero de esta regla
+     significaría «no miré» y no «no hay» (L-192). */
+  const fallos = [...ancla('R80', sql.length, 400, 'migración(es) `.sql` en el corpus')];
+
+  let total = 0;
+  const porArchivo = new Map();
+  for (const { path, src } of sql) {
+    const n = hitsDeVoseo(src, { lenguaje: 'sql' }).length;
+    if (n === 0) continue;
+    porArchivo.set(path.split('/').pop(), n);
+    total += n;
+  }
+
+  for (const [nombre, n] of porArchivo) {
+    const tope = MIGRACIONES_CON_VOSEO[nombre];
+    if (tope === undefined) {
+      fallos.push(
+        `R80 **${nombre}** escribe ${n} cadena(s) en voseo y **es una migración nueva**. La casa firmó TUTEO NEUTRO en S51 y **la voz que sale de una función del motor le llega a una familia igual que la de una pantalla**. *Si es voz de producto, se escribe en tuteo; si es un \`RAISE\` que sólo lee un operador o la regex de una barrida, entra a la lápida CON SU RAZÓN — que es la diferencia entre una excepción y un olvido.*`,
+      );
+    } else if (n > tope) {
+      fallos.push(
+        `R80 **${nombre}**: ${n} cadena(s) en voseo sobre las ${tope} de la lápida. **Una migración aplicada no se edita** — si este número subió, alguien tocó historia. *La cura de una voz que nació mal es una migración NUEVA que reemplaza el cuerpo, jamás un parche sobre el archivo viejo.*`,
+      );
+    }
+  }
+
+  const idas = Object.keys(MIGRACIONES_CON_VOSEO).filter((n) => !porArchivo.has(n));
+
+  return {
+    fallos,
+    info:
+      `${total} cadena(s) en voseo en ${porArchivo.size} de ${sql.length} migración(es)` +
+      (idas.length ? ` · ⚠️ ${idas.length} de la lápida ya no están en el corpus (una migración no se borra: revisar)` : '') +
+      ` · ${VOZ_LO_QUE_NO_VE}` +
+      ` · ⚠️ mide lo que una migración ESCRIBE, jamás lo VIVO (eso está en \`pg_proc\`)` +
+      ` · ⚠️ \`supabase/functions\` queda AFUERA y sin dueño: 18 hits medidos S114-B`,
   };
 }
 
@@ -7302,7 +7486,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -7771,6 +7955,15 @@ corridas.push(['R76 (el plazo no es una alarma ni un contador)', r76(ui)])
 corridas.push(['R71 (un wrapper sin exportar es un motor sin puerta)', r71(leer(['packages/api/src/index.ts', ...archivosCodigo('packages/api/src/wrappers')]))])
 corridas.push(['R69 (nada absoluto despues de SuperficieLlamada)', r69([...apps, ...appsCodigo])]);
 corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
+/* R80 · el corpus de MIGRACIONES. Se lee acá y no arriba porque es el único
+   consumidor: 722 archivos que ninguna otra regla mira.
+   ⚠️ `existsSync` — un worktree sin `supabase/` daría el ancla rota, que es el
+   rojo correcto (no miré), pero un `readdirSync` a secas tiraría una excepción
+   y el lint entero moriría sin decir por qué. */
+const migraciones = existsSync('supabase/migrations')
+  ? leer(readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql')).map((f) => `supabase/migrations/${f}`))
+  : [];
+corridas.push(['R80 (la voz que nace en el motor)', r80(migraciones)]);
 corridas.push(['R66 (la voz no vuelve al voseo)', r66([...appsCodigo, ...leer(archivosCodigo('packages/ui/src')), ...leer(archivosCodigo('packages/api/src')), ...galeria])]);
 corridas.push(['R65 (el area de reserva de una marca ajena sigue entrando)', r65(apps)]);
 corridas.push(['R63 (una superficie no promete una ruta que nadie sirve)', r63([...apps, ...appsCodigo])]);

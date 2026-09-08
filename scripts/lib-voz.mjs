@@ -97,7 +97,13 @@ import { readFileSync as _leerVoseo } from 'node:fs'
    Las dos listas eran complementarias —72 formas sólo en la mía, 24 sólo en la
    suya— y ninguna de las dos estaba mal: *cada una había medido su propio
    territorio, y ese es exactamente el modo en que tres copias divergen sin que
-   ninguna sea la equivocada.* Hoy son 138 pares, en un solo archivo.
+   ninguna sea la equivocada.* Hoy viven en un solo archivo.
+
+   ☠️ **ACÁ DECÍA «138 pares» Y SON 132** (medido S114-B). Nadie lo movió:
+   la prosa se escribió una vez y la lista siguió su vida. **Es el sexto
+   contador escrito que se cae en esta casa** —piezas, wrappers, migraciones,
+   fichas— y la cura es siempre la misma: *el número se pide, no se escribe.*
+   Está abajo, en `ALCANCE_VOZ`, derivado del objeto.
 
    ⚠️ Un `null` en la segunda columna significa DETECTA PERO NO CURA: la raíz
    puede diptongar (`mostrá`→`muestra`) y derivarlo a ciegas metería un tuteo
@@ -137,6 +143,59 @@ const CON_FRONTERA = [...CON_TILDE, ...PRON];
    entra por lo que lo PRECEDE.
    *Una forma de tres letras no es una palabra rara: es una sílaba común, y
    buscarla sin frontera izquierda encuentra el idioma entero.* */
+/**
+ * ═══ EL ALCANCE, PUBLICADO — S114-B (`L-500`) ══════════════════════════════
+ *
+ * 🔴 **Lo pidió C midiendo, y su control negativo estaba limpio:** `marcá` **no
+ * está en la lista**, así que *«Marcá el caso como resuelto»* pasa invisible y
+ * `R66` informa «no creció». **B verificó y encontró un segundo hueco del mismo
+ * día: `firmá` tampoco está** — y *firmar* es vocabulario de postventa y de
+ * adopción (el acta, la firma). *Dos huecos en la misma tarde no son dos
+ * olvidos: son la forma del instrumento.*
+ *
+ * ── EL MECANISMO NO SE TOCA, Y C TIENE RAZÓN ───────────────────────────────
+ * En español la clase `-á` es **ambigua** —`acá`, `allá`, `quizá`, `ojalá`,
+ * `está`, `Panamá`— así que un detector por terminación encontraría el idioma
+ * entero. *Por eso alguien eligió una lista, y esa elección sigue siendo la
+ * correcta.* **Lo que faltaba no era otro mecanismo: era que la salida dijera
+ * QUÉ NO VE.**
+ *
+ * ── LA CIFRA ÚTIL ES LA DEL ALCANCE, NO LA DEL RESULTADO (`L-500`) ─────────
+ * *Un gate publica cifras, no adjetivos: «verde» no puede delatar ceguera, un
+ * contador sí.* El número que importa acá **no es cuántos hits encontró** —ése
+ * baja cuando la voz mejora **y también cuando el instrumento se ciega**— sino
+ * **cuántas formas puede ver**. Si alguien enriquece la lista, este número
+ * sube y el verde de ayer deja de ser comparable con el de hoy, que es
+ * exactamente lo que uno quiere saber.
+ *
+ * ── ⚠️ Y EL INCENTIVO PERVERSO, QUE HAY QUE DECIR EN VOZ ALTA ─────────────
+ * `R66` es un **trinquete solo-baja**. ⇒ **agregar una forma a esta lista
+ * puede poner el gate en ROJO** sobre voseo que ya estaba y que nadie
+ * introdujo hoy. *Un instrumento que castiga a quien lo mejora se queda como
+ * está para siempre* — y ésa es, medida, la razón por la que la lista lleva
+ * meses sin crecer. **Quien sume formas sube los baselines afectados en el
+ * mismo commit, y eso no es hacer trampa: es que el trinquete mide voz nueva,
+ * no cobertura nueva.**
+ */
+export const ALCANCE_VOZ = {
+  /** Se MIDE del objeto. Jamás se escribe: ver la lápida del 138 arriba. */
+  formas: _FORMAS.length,
+  enclíticos: ENCL.length,
+  conFrontera: CON_FRONTERA.length,
+  /** Huecos MEDIDOS, con su fecha. No es la lista de todo lo que falta: es la
+   *  prueba de que la lista es una lista. */
+  huecosMedidos: ['marcá', 'firmá'],
+};
+
+/** La línea que todo consumidor pega en su salida. **Una sola redacción para
+ *  los dos** —el CLI de C y `R66`— porque *dos textos que dicen el alcance se
+ *  desincronizan igual que dos contadores.* */
+export const VOZ_LO_QUE_NO_VE =
+  `lista de ${ALCANCE_VOZ.formas} forma(s)` +
+  ` · ⚠️ NO VE el imperativo voseante de un verbo que nadie agregó` +
+  ` (medidos: ${ALCANCE_VOZ.huecosMedidos.map((f) => `\`${f}\``).join(' · ')})` +
+  ` · tampoco ve gramática, tono ni el inglés`;
+
 const CORTAS = new Set(CON_FRONTERA.filter((f) => f.length <= 3));
 const _dosFronteras = (linea, x) =>
   new RegExp(`(^|[^a-záéíóúñü])${x}([^a-záéíóúñü]|$)`, 'i').test(linea);
@@ -150,8 +209,78 @@ const LETRA_QUE_DESCARTA = /[a-rt-záéíóúñü]/i;
  * Hits de voseo en un texto fuente. **Ignora comentarios** (línea y bloque).
  * @returns {{n:number, t:string, v:string}[]} línea, término y la cadena.
  */
-export function hitsDeVoseo(src) {
-  const lineas = src.split('\n');
+/**
+ * ⑮ · LA FRONTERA IZQUIERDA — S114-B.
+ *
+ * Los enclíticos se buscaban con `includes` **sin frontera de ningún lado**:
+ * el comentario decía *«palabra entera, sin frontera derecha (ya la traen)»* y
+ * era cierto a medias — **traen la derecha y no la izquierda**. ⇒ `airedale`
+ * contenía «dale» y `Airedale Terrier` daba voseo **cinco veces** en el
+ * catálogo de razas.
+ *
+ * 🔴 **Es la cuarta aparición de la clase de `L-501`**: *el patrón aparece
+ * adentro de lo que uno quiere capturar.* Acá con una vuelta extra — el
+ * comentario **explicaba por qué no hacía falta la frontera** y la explicación
+ * era verdadera de un solo lado. *Una razón escrita que cubre la mitad del caso
+ * es más difícil de dudar que ninguna razón.*
+ *
+ * ⚠️ **Un imperativo voseante ARRANCA su palabra**: no existe el caso legítimo
+ * en que una letra lo precede. **Medido antes de aplicarlo: sobre el corpus
+ * entero de `apps` + `ui` + `api` el delta es CERO** —116 antes, 116 después,
+ * y la lista de hits es idéntica—, así que no calla un solo voseo real.
+ */
+/**
+ * ═══ LOS COMENTARIOS DE SQL — S114-B ═══════════════════════════════════════
+ *
+ * `hitsDeVoseo` limpia comentarios de **JavaScript** (`//` y `/* … *\/`). Sobre
+ * una migración eso deja **la prosa de los `--` adentro del corpus**, y la
+ * prosa de esta casa cita voz constantemente: `-- → "No pudimos registrar.
+ * Probá de nuevo."` daba rojo por una frase que **nadie recibe** —está en un
+ * comentario explicando un defecto ya curado—.
+ *
+ * *No es cambiar el mecanismo: es aplicar la limpieza que ya existía al
+ * comentario del lenguaje correcto.* Medido: **69 → 66 hits, y dos archivos
+ * enteros que sólo eran comentario.**
+ *
+ * ⚠️ **Blanquea sin mover renglones y respetando las cadenas** — un `--`
+ * adentro de un literal no abre comentario, y `''` es el escape de comilla en
+ * SQL. *Cortar por `indexOf('--')` habría partido cualquier texto con un guion
+ * doble adentro.*
+ */
+function _sinComentariosSql(src) {
+  const fuera = [];
+  for (const linea of src.split('\n')) {
+    let dentro = null;
+    let corte = -1;
+    for (let i = 0; i < linea.length; i++) {
+      const c = linea[i];
+      if (dentro) {
+        if (c === dentro) {
+          if (linea[i + 1] === dentro) i++;
+          else dentro = null;
+        }
+        continue;
+      }
+      if (c === "'" || c === '"') { dentro = c; continue; }
+      if (c === '-' && linea[i + 1] === '-') { corte = i; break; }
+    }
+    fuera.push(corte === -1 ? linea : linea.slice(0, corte));
+  }
+  return fuera.join('\n');
+}
+
+function _arrancaPalabra(b, x) {
+  let desde = 0;
+  for (;;) {
+    const k = b.indexOf(x, desde);
+    if (k === -1) return false;
+    if (k === 0 || !LETRA_QUE_DESCARTA.test(b[k - 1])) return true;
+    desde = k + 1;
+  }
+}
+
+export function hitsDeVoseo(src, { lenguaje = 'js' } = {}) {
+  const lineas = (lenguaje === 'sql' ? _sinComentariosSql(src) : src).split('\n');
   let enBloque = false;
   const hits = [];
 
@@ -164,7 +293,9 @@ export function hitsDeVoseo(src) {
     }
     l = l.replace(/\/\*[\s\S]*?\*\//g, '');
     if (l.includes('/*')) { l = l.slice(0, l.indexOf('/*')); enBloque = true; }
-    l = l.replace(/\/\/.*$/, '');
+    /* ⚠️ En SQL `//` no es comentario y una URL adentro de una cadena se
+       comería media línea. Ver `_sinComentariosSql`. */
+    if (lenguaje !== 'sql') l = l.replace(/\/\/.*$/, '');
 
     for (const m of l.matchAll(/'([^'\\]{4,})'|"([^"\\]{4,})"/g)) {
       const v = m[1] ?? m[2];
@@ -172,7 +303,16 @@ export function hitsDeVoseo(src) {
          de error tipado, no voz: cambiarlo rompe el matching y no le habla a
          nadie. Se descarta por FORMA (snake_case puro), que es inequívoco —
          ninguna voz de producto se escribe así. */
-      if (/^[a-z0-9_]+$/.test(v)) continue;
+      /* ⑭ · **Y UN `LIKE` TIPADO SIGUE SIENDO UN IDENTIFICADOR** (S114-B).
+         `'no_sos_el_vendedor%'` daba voseo por «sos» **doce veces** en el
+         motor: el `%` de un `LIKE` rompía la forma snake_case y ⑩ dejaba de
+         reconocerlo. *Un carácter de sintaxis de SQL derrotaba la exclusión
+         entera* — y son códigos de error tipados, exactamente lo que ⑩ existe
+         para no contar.
+         ⚠️ El `%` va **opcional y sólo al final**: `'mascota_sin_acceso: no
+         podés atar esa compra'` tiene un espacio, así que NO cae acá y sigue
+         contando — *un código con una frase pegada ES voz.* */
+      if (/^[a-z0-9_]+%?$/.test(v)) continue;
 
       /* ⑪ — **UNA RUTA DE IMPORT NO ES VOZ, y esto lo cobró B.** Su
          `'./components/HojaContanos'` daba rojo por «contanos»: un
@@ -205,7 +345,7 @@ export function hitsDeVoseo(src) {
       const b = v.toLowerCase();
 
       /* Enclíticos: palabra entera, sin frontera derecha (ya la traen). */
-      let t = ENCL.find((x) => b.includes(x));
+      let t = ENCL.find((x) => _arrancaPalabra(b, x));
 
       /* trampa ⑧ — imperativo/pronombre seguido de letra NO es voz. */
       if (!t) {
@@ -216,7 +356,9 @@ export function hitsDeVoseo(src) {
             const k = b.indexOf(x, desde);
             if (k === -1) return false;
             const sig = b[k + x.length];
-            if (sig === undefined || !LETRA_QUE_DESCARTA.test(sig)) return true;
+            /* ⑮ — y la IZQUIERDA, que faltaba: `airedale` contenía «dale». */
+            const izq = k === 0 || !LETRA_QUE_DESCARTA.test(b[k - 1]);
+            if (izq && (sig === undefined || !LETRA_QUE_DESCARTA.test(sig))) return true;
             desde = k + 1;
           }
         });
@@ -234,8 +376,10 @@ export function hitsDeVoseo(src) {
   return hits;
 }
 
-/** Igual, leyendo del disco. */
-export const hitsDeArchivo = (ruta) => hitsDeVoseo(readFileSync(ruta, 'utf8'));
+/** Igual, leyendo del disco. **El lenguaje sale de la extensión** — un
+ *  consumidor que pase una migración no tiene que acordarse de decirlo. */
+export const hitsDeArchivo = (ruta) =>
+  hitsDeVoseo(readFileSync(ruta, 'utf8'), { lenguaje: /\.sql$/i.test(String(ruta)) ? 'sql' : 'js' });
 
 /* ═══════════════════════════════════════════════════════════════════════
  * ⑫ · EL HUECO DEL AVISO CLÍNICO — S106 (lo halló B, lo curó A)
