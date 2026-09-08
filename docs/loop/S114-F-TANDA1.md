@@ -377,3 +377,125 @@ f1db76e  Placas · la cura del contador             (excepción nombrada)
 ⚠️ **Sigue sin verificarse el deploy**: el legado despliega solo en Vercel al
 push a `main`, y no tengo acceso al dashboard. **Tres pushes ⇒ tres deploys**, y
 no vi ninguno.
+
+---
+
+# ADENDA 3 · DÓNDE QUEDA PUBLICADO Y QUÉ SALIÓ
+
+## 🔴 La URL: el repo la dice MAL, y el dato correcto se midió
+
+**El repo NO tiene `.vercel/project.json`** — y **`.vercel` tampoco está en el
+`.gitignore`**, así que no es que esté oculto: nunca se linkeó desde este árbol.
+`vercel.json` sólo tiene el rewrite de SPA. Lo único que declara un dominio son
+dos lugares, y **los dos dicen lo mismo y es la URL equivocada**:
+
+```
+CLAUDE.md:4        > Deploy: https://e-petplace-admin-git-main-guillo381-8993s-projects.vercel.app
+Login.tsx:47       redirectTo: 'https://e-petplace-admin-git-main-...vercel.app'
+```
+
+**Medidas las dos:**
+
+| URL | resultado |
+|---|---|
+| `e-petplace-admin-git-main-…vercel.app` *(la que el repo declara)* | **HTTP 200 · 338.841 bytes de la pantalla de Vercel**: «Log in to Vercel», «Protected Deployment», «SSO» |
+| **`e-petplace-admin.vercel.app`** | **HTTP 200 · 466 bytes — la app**, con nuestro `<title>e-petplace-admin</title>`, `#root` y el bundle compilado |
+
+⇒ **EL DOMINIO DE PRODUCCIÓN ES `https://e-petplace-admin.vercel.app`.** La que
+el repo llama «Deploy» es una **URL de deployment de rama con Deployment
+Protection**: no sirve la app, sirve el login de Vercel.
+
+*(No hay dominio custom: `admin.epetplace.com` no resuelve · `www.epetplace.com/admin` da 404.)*
+
+### 🔴 Y eso rompe algo vivo: el login con Google
+
+El bundle **publicado** contiene, literal:
+
+```js
+signInWithOAuth({provider:`google`,options:{redirectTo:`https://e-petplace-admin-git-main-…vercel.app`}})
+```
+
+⇒ **quien entre por «Continuar con Google» desde producción aterriza en la
+pantalla de login de Vercel, no en el admin.** El login por email/contraseña no
+usa `redirectTo` y **sí funciona**.
+
+**No lo curé:** la excepción firmada era para Placas. Es una línea, y va con la
+decisión de qué URL es la canónica —que es del founder, no mía.
+
+## Qué salió con los pushes — medido sobre el BUNDLE, no sobre las rutas
+
+⚠️ **Por qué no se verifica pidiendo `/adopcion`:** `vercel.json` reescribe
+`/(.*)` a `/`, así que **toda ruta devuelve el mismo `index.html` con HTTP 200**.
+*Un 200 en `/adopcion` no probaría que la pantalla existe, y un 200 tampoco
+probaría que se fue.* La verificación real es sobre el JS publicado.
+
+Bundle medido: `/assets/index-DXeDj3p_.js` · 1.854.729 chars.
+
+```
+① LAS DOS RETIRADAS — deben estar AUSENTES
+   Adoptadas este mes ✅   Entrevista programada ✅   adopcion_seguimiento ✅
+   mascotas_adopcion  ✅   Asunto del email      ✅   Enviadas este mes    ✅
+   Cita recordatorio  ✅   Editar mascota        ✅            → 8 de 8 AUSENTES
+
+② PLACAS — debe estar PRESENTE
+   crear_lote_placas ✅  listar_placas_de_lote ✅  pasaporte_lote ✅
+   "Proveedor de impresión" ✅  "Crear un lote" ✅   → 5 de 5 PRESENTES
+
+③ CONTROL POSITIVO — pantallas que siguen
+   "Activar todas las zonas" ✅  Arrepentimiento ✅
+   Liquidaciones (6) ✅  Gamificación (3) ✅          → el instrumento SÍ encuentra
+```
+
+**Sin el bloque ③ el ① no valdría nada:** ocho ausencias podrían ser un
+buscador roto. El control positivo prueba que encuentra cuando hay.
+
+> ⚠️ **Un instrumento propio salió mal y se declara:** la primera corrida usó
+> `grep -c … || echo 0`, que imprime **dos** ceros cuando no encuentra —
+> `grep` ya emite `0` y el `||` agrega otro— y mi test leía `"0\n0"` como
+> «presente». **Los ocho retirados salieron 🔴 PRESENTE, y era falso.** Se rehízo
+> con un contador limpio. *Un instrumento que reporta lo contrario de la verdad
+> no falla: contesta.*
+
+## Estado del tercer deploy (la cura de Placas)
+
+**El bundle publicado corresponde a `79a6cbb`** (los retiros), **no a
+`f1db76e`** (la cura). Medido en el propio bundle:
+
+```
+fragmento de Placas en producción: filter(e=>e.mascota_id===null)   ← el defecto, vivo
+```
+
+**El auto-deploy SÍ funciona** —ese mismo bundle ya trae Placas, que sólo salió
+con mi push de `c0aee5e`— así que lo que falta es que corra el tercero.
+**Hash esperado cuando salga: `index-Px6202vT.js`** (build local de `f1db76e`,
+verificado: `.mascota_id`=0 · `.activada`=1 en el fragmento de Placas).
+
+🔴 **Se deja escrito en vez de darlo por hecho:** *pushear no es desplegar.* Si
+hubiera asumido que el push implica el deploy, habría reportado la cura como
+viva en producción cuando el defecto todavía está sirviéndose.
+
+### 🔴 A los 12 minutos NO había salido — y eso ya no es «esperá un poco»
+
+```
+commit de la cura   f1db76e   20:03:52 -05
+última medición               20:15:55 -05   → 12 min 03 s
+bundle servido                index-DXeDj3p_.js  (sin la cura), en 9 sondeos
+```
+
+**El build tarda 628 ms.** Doce minutos sin cambiar el bundle **no es latencia
+de build**: o el deploy está en cola, o falló, o el auto-deploy no disparó esta
+vez. **No lo puedo distinguir sin el dashboard de Vercel**, y no voy a elegir
+una de las tres.
+
+*Hipótesis no medida, anotada como hipótesis:* el proyecto podría estar tocando
+el techo de deploys de Vercel (ventana móvil de 24 h) — le pasó a `pagos-web` en
+S105. **Fueron tres pushes en 90 minutos sobre un repo que llevaba cuatro meses
+sin desplegar.** No lo verifiqué.
+
+**Lo que hay que mirar en el dashboard**, en este orden: ¿hay un deployment para
+`f1db76e`? ¿en qué estado? Si dice *Error*, el log dice por qué; si no existe,
+el auto-deploy no disparó; si dice *Queued*, alcanza con esperar.
+
+**Y lo que sí está verificado y no depende de eso:** los dos retiros **ya están
+en producción** y Placas **ya carga**. La cura de las dos líneas es lo único que
+falta llegar.
