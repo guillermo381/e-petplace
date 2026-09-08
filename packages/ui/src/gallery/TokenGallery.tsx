@@ -5433,13 +5433,14 @@ function GaleriaInterna() {
             qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="" estado={{ estado: 'activo' }} enMemoria
           />
           <PlacaQR svgQr={QR_DEMO} nombre="Thor" marca="e-PetPlace" vozPrevia="Así se va a ver la placa" />
-          {/* 🔴 SIN NFC el botón no está: ausente, jamás apagado. */}
+          {/* 🔴 SIN NFC el botón no está: ausente, jamás apagado.
+              ☠️ S114-B · **el toggle de «se perdió» salió de esta pieza** por
+              firma del founder: esa puerta vive en el PERFIL y no queda ninguna
+              acá. *Marcar que tu perro se perdió no es una perilla de
+              configuración.* Ver la lápida en `AccionesPasaporte`. */}
           <AccionesPasaporte
             vozCompartir="Compartir" onCompartir={() => {}}
             vozDescargarQr="Descargar QR" onDescargarQr={() => {}}
-            perdida={false} vozPerdida="Se perdió"
-            vozConfirmarPerdida="Sí, publicar el pasaporte de Thor"
-            onCambiarPerdida={() => {}}
           />
           <ConfiguracionPasaporte
             visibilidad={{ contacto: true, salud: true, chip: false }}
