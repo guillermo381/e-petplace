@@ -50,6 +50,30 @@ Los cuatro exponen **TypeScript crudo**. Entonces:
 > ***El mismo archivo se juzga con dos compiladores de versión MAYOR distinta, y cada gate
 > ve sólo su veredicto.***
 
+### ✅ MEDIDO, no inferido (8-sep) — y cambia lo que hay que hacer
+
+Lo de arriba salía de leer `main`/`types`. **Se ejerció con una sonda real**: un error de
+tipo introducido en `packages/ui/src/tokens/spacing.ts`, corriendo el typecheck de
+`apps/cliente` (TS **6.0.3**), y revertido en el acto.
+
+```
+exit del typecheck de cliente: 2
+../../packages/ui/src/tokens/spacing.ts(34,14): error TS2322:
+    Type 'string' is not assignable to type 'number'.
+```
+
+Y el programa de `apps/cliente` **incluye 378 archivos de `packages/*/src`**, con su ruta
+real (`packages/ui/src/…`), no vía `node_modules` — pnpm usa symlinks y TS los resuelve.
+
+🔴 **Estar en el programa no bastaba: hacía falta probar que los errores SE REPORTAN.**
+Ahora está probado, en la dirección que importa.
+
+⇒ **Y de ahí sale lo práctico: no hay que construir ningún gate nuevo.** Los cuatro
+typechecks que ya existen **corren las dos versiones sobre `packages/*/src`** — los de las
+apps con 6.0.3, los de los packages con 5.9.3. *Correrlos todos ya es la cobertura
+completa; lo que falta no es un instrumento sino la línea que declare si la divergencia es
+deliberada.*
+
 **El modo de falla concreto:** una construcción que 5.9 acepta y 6.0 rechaza (o al revés)
 **pasa un typecheck y rompe el otro** — y quien la escriba en `packages/ui` verá su gate
 verde. *No falla hoy: los cuatro typechecks están en 0. Está latente, que es la forma en
