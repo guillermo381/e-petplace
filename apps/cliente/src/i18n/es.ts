@@ -3519,6 +3519,9 @@ export const clienteEs = {
     coordinaranSinNombre: 'Te van a contactar para agendar',
     quienAtiende: 'Quien la atiende',
     otrasActivas: 'Sus otras citas',
+    yaPasaron: 'Lo que ya pasó',
+    verMasPasadas: 'Ver citas anteriores',
+    historialNoSePudo: 'No pudimos cargar lo que ya pasó. Prueba de nuevo.',
     /* S106-C t3 · la señal de que la tarjeta de una teleconsulta NAVEGA.
        «Ver» y no «Entrar»: la antesala puede decir que todavía no se puede,
        y prometer entrada desde acá sería prometer lo que no controlamos. */
@@ -4471,7 +4474,7 @@ export const clienteEs = {
     // §1 · LA PUERTA, sus tres voces
     puerta: '¿Algo salió distinto?',
     puertaFueraDeVentana: 'Este servicio ya pasó su ventana. Si quieres, habla con nosotros.',
-    puertaCasoAbierto: 'Tienes un caso abierto sobre este servicio',
+    puertaCasoAbierto: 'Tienes un caso sobre este servicio',
     // §2 · CONTAR QUÉ PASÓ
     tituloMotivo: '¿Qué pasó?',
     /* La última fila. Sale del catálogo cuando el catálogo la trae; esto es
