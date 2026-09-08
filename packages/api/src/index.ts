@@ -1999,3 +1999,14 @@ export {
   type ObjetoPostventa,
   type ProcedenciaMotivo,
 } from './wrappers/postventa-motivos';
+
+// S114 · postventa — el motor del caso (A3). Las tablas tienen la escritura
+// revocada a `authenticated`: SOLO estas RPCs escriben.
+export {
+  obtenerCasoDeObjeto, obtenerVentanaCasoDias, abrirCaso, leerCaso,
+  leerMensajesDeCaso, enviarMensajeDeCaso, leerOpcionesDeDevolucion,
+  elegirDestinoDevolucion, obtenerCasosDelPrestador, responderCaso,
+  reconocerYResolver, pedirACasa,
+  type EtapaCaso, type AsientoCaso, type MensajeCaso, type CasoEnBandeja,
+  type CodigoAbrirCaso,
+} from './wrappers/postventa-casos';
