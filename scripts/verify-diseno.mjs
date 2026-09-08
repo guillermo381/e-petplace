@@ -2192,6 +2192,25 @@ const FIXTURES = {
      un wrapper que exporta una función y un index que no la nombra. Con uno
      solo la regla saldría por «corpus incompleto», que no es verde pero
      tampoco prueba que sepa decir que no. */
+  /* R83 · el defecto REAL de C, verbatim: la pantalla del caso usando el reloj
+     del prestador. El corpus lleva 100 rellenos del cliente para pasar el ancla
+     —sin ellos enrojecería por «no pude medir», que es otro rojo—, y **uno de
+     ellos es el CONTROL NEGATIVO**: un comentario que nombra el campo y NO debe
+     encender la regla. */
+  R83: [
+    ...Array.from({ length: 100 }, (_, i) => ({
+      path: `apps/cliente/src/app/relleno${i}.tsx`,
+      src: 'const x = 1\n',
+    })),
+    {
+      path: 'apps/cliente/src/lib/postventa/voz-de-etapa.ts',
+      src: '/* `plazoHasta` es el reloj del PRESTADOR y no se dibuja acá. */\n',
+    },
+    {
+      path: 'apps/cliente/src/app/postventa/caso/[casoId].tsx',
+      src: '        <Texto>{`responde antes del ${fmt(caso.plazoHasta)}`}</Texto>\n',
+    },
+  ],
   /* R82 · el brazo ⑵: una pieza de `ui` que monta `EvitaTeclado` sin preguntar.
      El corpus trae la hoja PROVEYENDO para que ⑴ no sea lo que enrojezca. */
   R82: [
@@ -5822,6 +5841,100 @@ function r66(archivos) {
 }
 
 /**
+ * ═══ R83 · EL DATO DEL OTRO ASIENTO NO SE DIBUJA (S114 · lógica de C) ══════
+ *
+ * 🔴 **LA LÓGICA ES DE LA PISTA C**, de su `verify-dato-del-otro-asiento.mjs`.
+ * **Se cablea acá sin cambiarle una regla** — y con ella viene lo que la vuelve
+ * correcta y costó encontrar:
+ *
+ * **① CUENTA USOS, NO MENCIONES.** Busca `.campo` como acceso de propiedad
+ * sobre el cuerpo **sin comentarios**. *Los comentarios que explican la cura
+ * nombran `plazoHasta` legítimamente; un detector por texto daría rojo sobre su
+ * propia documentación* — **el mismo modo de falla que el contador de piezas se
+ * cobró esta misma sesión** (`L-503`). Medido en la rama de C: las **cuatro**
+ * ocurrencias de `plazoHasta` son comentarios, y el gate está **verde ahí**.
+ *
+ * **② ES ANGOSTO A PROPÓSITO, y C escribió por qué.** La mesa preguntó si se
+ * podía cazar *«dos superficies del mismo objeto diciendo cosas distintas»*: en
+ * general **no**, haría falta entender qué AFIRMA cada pantalla. *Un detector
+ * romo es peor que ninguno, porque su verde se lee como salud.* ⇒ mide **el
+ * hecho concreto**: un campo que no debe aparecer de un lado.
+ *
+ * ── DE DÓNDE SALE: UN DEFECTO REAL QUE NINGÚN GATE PODÍA VER ──────────────
+ * `mis-casos.tsx` declaraba en su cabecera que el plazo no se muestra **y la
+ * pantalla del caso lo mostraba** —*«responde antes del 9/9/2026, 10:27:56
+ * AM»*—, que además es **una instrucción AL PRESTADOR dicha a la familia**.
+ * *La cabecera decía una cosa y la pantalla hacía otra, y las dos compilaban.*
+ *
+ * ── LO QUE LE AGREGO AL CABLEARLO: EL ANCLA ──────────────────────────────
+ * Suelto, con el corpus vacío imprimía `0 archivo(s)` y **salía verde**. `L-192`
+ * puro. Acá el corpus colapsado sale **NO CONCLUYENTE**, que es lo que un cero
+ * sin corpus significa de verdad.
+ *
+ * ── ⚠️ LOS DOS LÍMITES, DECLARADOS ────────────────────────────────────────
+ * **① Vigila un NOMBRE.** Si el campo se renombra, la regla **calla y sigue
+ * verde** — es la clase de `R62`/`L-499`: *un gate atado a un nombre mide la
+ * convención, no el hecho.* Por eso la tabla lleva la razón al lado: el día que
+ * el nombre cambie, alguien tiene que poder saber qué vigilaba.
+ * **② Su verde dice «el reloj del prestador no llega al cliente», JAMÁS «las
+ * dos pantallas dicen lo mismo».** *Lo segundo no lo mide nadie* (C).
+ *
+ * ── 🔴 HOY NACE SIN SUJETO, y se dice ─────────────────────────────────────
+ * En este árbol `plazoHasta` tiene **0 ocurrencias**: la postventa del cliente
+ * vive en la rama de C. **La regla no frena el commit por eso** —firma del
+ * founder— *pero si después del merge el campo sigue sin aparecer NI UNA VEZ
+ * ni siquiera en un comentario, la regla dejó de mirar y hay que ir a ver por
+ * qué.*
+ */
+const DATOS_DEL_OTRO_ASIENTO = [
+  {
+    campo: 'plazoHasta',
+    donde: /^apps\/cliente\//,
+    razon: 'el reloj de 48 h es del PRESTADOR (§2) — y decirlo en el asiento de la familia es darle a ella una instrucción que no es suya',
+  },
+]
+
+function r83(archivos) {
+  const vistos = new Set()
+  const cliente = []
+  for (const a of archivos) {
+    if (!/^apps\/cliente\/src\/.*\.tsx?$/.test(a.path) || vistos.has(a.path)) continue
+    vistos.add(a.path)
+    cliente.push(a)
+  }
+  const fallos = [...ancla('R83', cliente.length, 100, 'archivo(s) de `apps/cliente/src` en el corpus')]
+  if (fallos.length > 0) return { fallos, info: 'ancla rota' }
+
+  let usos = 0
+  let menciones = 0
+  for (const { path, src } of cliente) {
+    for (const { campo, donde, razon } of DATOS_DEL_OTRO_ASIENTO) {
+      if (!donde.test(path)) continue
+      /* La MENCIÓN se cuenta sobre el texto entero y NO enrojece: es lo que
+         permite decir «vigilo un nombre que existe» sin castigar la prosa. */
+      if (new RegExp(`\\b${campo}\\b`).test(src ?? '')) menciones++
+      const n = sinComentarios(src ?? '').match(new RegExp(`\\.${campo}\\b`, 'g'))
+      if (n === null) continue
+      usos += n.length
+      fallos.push(
+        `R83 **${path} usa \`.${campo}\` ${n.length} vez(ces)** — ${razon}. *Cuenta USOS y no menciones: un comentario que lo nombre no enciende esto.*`,
+      )
+    }
+  }
+
+  return {
+    fallos,
+    info:
+      `${cliente.length} archivo(s) del cliente · ${DATOS_DEL_OTRO_ASIENTO.length} dato(s) vigilado(s) · ` +
+      `${usos} uso(s) · ${menciones} mención(es) en prosa (no cuentan) · ` +
+      (menciones === 0
+        ? '🔴 el nombre no aparece NI EN UN COMENTARIO: o la postventa del cliente no está en este árbol, o el campo se renombró y la regla dejó de mirar · '
+        : '') +
+      `⚠️ vigila un NOMBRE (si se renombra, calla) · su verde dice «el reloj del prestador no llega al cliente», jamás «las dos pantallas dicen lo mismo»`,
+  }
+}
+
+/**
  * ═══ R82 · DOS MANEJADORES DE TECLADO NO PUEDEN ESTAR VIVOS A LA VEZ ═══════
  *
  * **Lo midió C y frenó antes de improvisar:** `SuperficieChat` se envuelve en
@@ -7784,7 +7897,7 @@ function r69(archivos) {
   return { fallos, info: `${ofensores} absoluto(s) después del montaje · ${declarados} declarado(s)` }
 }
 
-const REGLAS = { R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
+const REGLAS = { R83: r83, R82: r82, R81: r81, R80: r80, R79: r79, R78: r78, R77: r77, R76: r76, R75: r75, R74: r74, R73: r73, R72: r72, R71: r71, R70: r70, R69: r69, R68: r68, R67: r67, R66: r66, R65: r65, R64: r64, R63: r63, R62: r62, R60: r60, R59: r59, R58: r58, R57: r57, R56: r56, R55: r55, R54: r54, R53: r53, R52: r52, R51: r51, R50: r50, R49: r49, R48: r48, R47: r47, R46: r46, R45: r45, R44: r44, R43: r43, R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33, R34: r34, R35: r35, R36: r36, R37: r37, R38: r38, R39: r39, R40: r40, R41: r41, R42: r42 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -8264,6 +8377,7 @@ corridas.push(['R68 (nada del componente dentro de un worklet de gesto)', r68([.
 const migraciones = existsSync('supabase/migrations')
   ? leer(readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql')).map((f) => `supabase/migrations/${f}`))
   : [];
+corridas.push(['R83 (el dato del otro asiento no se dibuja)', r83([...apps, ...appsCodigo])]);
 corridas.push(['R82 (dos manejadores de teclado no viven juntos)', r82([...ui, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R81 (la hoja no queda a medias ni la empuja el teclado)', r81([...ui, ...apps, ...appsCodigo, ...leer(archivosCodigo('packages/ui/src'))])]);
 corridas.push(['R80 (la voz que nace en el motor)', r80(migraciones)]);
