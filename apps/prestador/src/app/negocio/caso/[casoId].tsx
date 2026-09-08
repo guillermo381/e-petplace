@@ -226,7 +226,11 @@ export default function CasoDelPrestador() {
           <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[3], gap: spacing[3] }}>
             {/* §5 · EL RELOJ SE VE Y NO ES ROJO. **Y cuando vence se le
                 DICE** — no se le oculta que la casa tomó el caso. */}
-            {conLaCasa ? (
+            {/* 🔴 Con el caso CERRADO no se dice ningún plazo: la barra ya
+                pasó a lectura y un «te quedan N horas para responder» encima
+                promete una acción que la misma pantalla acaba de cerrar.
+                *Lo vi en el aparato — los dos son correctos por separado.* */}
+            {cerrado ? null : conLaCasa ? (
               <BannerPlazo voz={t('postventa.laCasaTomoElCaso')} />
             ) : horas !== null && horas > 0 ? (
               <BannerPlazo voz={t('postventa.teQuedan', { horas })} />

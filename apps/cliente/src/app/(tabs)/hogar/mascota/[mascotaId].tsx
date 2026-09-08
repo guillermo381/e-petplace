@@ -1577,8 +1577,14 @@ export default function PerfilDeMascota() {
             aparato con Sombra, neutralizando este `!esMemorial`: las piezas
             NO se dibujan —el piso funciona— pero el `<View>` y el encabezado
             de sección SÍ**, y queda un título sobre una mascota en memorial
-            con nada abajo. *La pieza se protege a sí misma; no puede proteger
-            al layout que la rodea.* */}
+            con nada abajo.
+
+            *La pieza se protege a sí misma; no puede proteger a la sección que
+            la contiene, porque no sabe que tiene hermanas ni que hay un título
+            arriba.* **Son dos capas anidadas y las dos hacen falta.**
+
+            (La nota gemela vive en el guard de `TarjetaConociendolo`, con su
+            propia medición: **cada una se sostiene sola**.) */}
         {!esMemorial && hoyMascota !== null ? (
           <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
             {(() => {
@@ -1744,9 +1750,21 @@ export default function PerfilDeMascota() {
             mudó acá**: era esto mismo dicho en prosa. *Nada se pierde.*
 
             ⛔ En memorial no se monta: pide (`A3.9`). */}
-        {/* ⚠️ Mismo caso que el de arriba, medido igual: sin este guard el
-            encabezado «Conociéndolo» aparece sobre un memorial aunque la
-            tarjeta no se dibuje. El piso de la pieza es cierto y no alcanza. */}
+        {/* ⚠️ **ESTE CONDICIONAL NO ES REDUNDANTE, Y SE MIDIÓ** (S114-C).
+            `TarjetaConociendolo` y `BotonContanos` ya traen su propio piso por
+            `enMemorial`, así que la tentación es quitarlo «porque la pieza ya
+            guarda». **Medido en el aparato con Sombra, neutralizando este
+            `!esMemorial`: las dos piezas NO se dibujan —el piso funciona— pero
+            el encabezado «Conociéndolo» SÍ**, y queda un título sobre una
+            mascota en memorial con nada abajo.
+
+            *La pieza se protege a sí misma; no puede proteger a la sección que
+            la contiene, porque no sabe que tiene hermanas ni que hay un título
+            arriba.* **Son dos capas anidadas y las dos hacen falta.**
+
+            (La nota gemela vive en el guard de `TarjetaHoy`, con su propia
+            medición: **cada una se sostiene sola** — si alguien las separa,
+            ninguna pierde su evidencia.) */}
         {!esMemorial ? (() => {
           /* ⭐ **LAS CINCO DIMENSIONES DEL VÍNCULO** (S113-B · 2.2.3 → C 2.2.4).
              B cambió `fraccion: number` por **cinco booleanos** —*cero

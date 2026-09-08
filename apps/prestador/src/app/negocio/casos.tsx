@@ -37,9 +37,28 @@ import {
   useTheme,
   type CasoEnBandeja as FilaDeBandeja,
 } from '@epetplace/ui';
-import { obtenerCasosDelPrestador, type CasoEnBandeja } from '@epetplace/api';
+import {
+  obtenerCasosDelPrestador,
+  obtenerMotivosDeObjeto,
+  type CasoEnBandeja,
+  type ObjetoPostventa,
+} from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+
+/**
+ * 🔴 **LAS ETAPAS QUE YA NO ESPERAN NADA DEL PRESTADOR.** Sobre ellas **no se
+ * dice un plazo**: «Te quedan 22 horas para responder» en un caso cerrado es
+ * un dato verosímil-falso — la frase es correcta como plantilla y **miente
+ * sobre el mundo**, porque ahí ya no se puede responder.
+ *
+ * *Lo vi en el aparato: el banner y la barra «en lectura» convivían en la
+ * misma pantalla, uno prometiendo una acción que el otro ya había cerrado.*
+ * Ningún gate lo ve: los dos son correctos por separado.
+ */
+const YA_NO_ESPERAN: ReadonlySet<string> = new Set([
+  'resuelto', 'cerrado', 'resuelto_entre_partes', 'retirado', 'sin_lugar',
+]);
 
 type Fase<T> = T | 'cargando' | 'error';
 
@@ -48,6 +67,14 @@ export default function CasosDelPrestador() {
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const [casos, setCasos] = useState<Fase<CasoEnBandeja[]>>('cargando');
+  /* 🔴 EL MOTIVO LLEGA COMO CÓDIGO, NO COMO VOZ — y sin esto la fila decía
+     `calidad` en la pantalla de un prestador. `CasoEnBandeja.motivo` es el
+     `codigo` del catálogo; su `voz` vive en `v_motivos_resueltos`, que ya
+     tiene su puerta. *Pintar el código crudo es exactamente lo que el riel de
+     voz existe para evitar, y es la tercera vez en esta tanda que aparece la
+     misma clase.* Mapa `codigo → voz`, pedido UNA vez por tipo de objeto
+     presente (a lo sumo tres) y no por fila. */
+  const [vozDeMotivo, setVozDeMotivo] = useState<Record<string, string>>({});
 
   useFocusEffect(
     useCallback(() => {
@@ -56,6 +83,18 @@ export default function CasosDelPrestador() {
         const r = await obtenerCasosDelPrestador();
         if (!vigente) return;
         setCasos(r.ok ? r.data : 'error');
+        if (!r.ok) return;
+
+        /* Sólo los tipos que de verdad aparecen: sin casos, cero viajes. */
+        const tipos = [...new Set(r.data.map((c) => c.objetoTipo))] as ObjetoPostventa[];
+        const listas = await Promise.all(tipos.map((t) => obtenerMotivosDeObjeto(t)));
+        if (!vigente) return;
+        const mapa: Record<string, string> = {};
+        for (const l of listas) {
+          if (!l.ok) continue;
+          for (const m of l.data) mapa[m.codigo] = m.voz;
+        }
+        setVozDeMotivo(mapa);
       })();
       return () => {
         vigente = false;
@@ -71,20 +110,23 @@ export default function CasosDelPrestador() {
     const ahora = Date.now();
     return casos.map((c) => {
       const horas =
-        c.plazoHasta !== null
+        c.plazoHasta !== null && !YA_NO_ESPERAN.has(c.etapa)
           ? Math.max(0, Math.round((new Date(c.plazoHasta).getTime() - ahora) / 3_600_000))
           : null;
       return {
         clave: c.casoId,
         objeto: t(`postventa.objeto_${c.objetoTipo}` as 'postventa.objeto_cita'),
         contraparte: t('postventa.laFamilia'),
-        motivo: c.motivo,
+        /* Si el catálogo todavía no llegó, se muestra el código antes que un
+           hueco: **una fila sin motivo no dice de qué es el caso**. Es feo un
+           instante y honesto siempre. */
+        motivo: vozDeMotivo[c.motivo] ?? c.motivo,
         /* Ausente cuando ya no espera nada mío: una línea vacía donde iba un
            plazo se lee como «sin plazo», que es otra cosa. */
         ...(horas !== null && horas > 0 ? { reloj: t('postventa.teQuedan', { horas }) } : null),
       };
     });
-  }, [casos, t]);
+  }, [casos, t, vozDeMotivo]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
