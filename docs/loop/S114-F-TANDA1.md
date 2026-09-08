@@ -1240,3 +1240,96 @@ en el peor momento posible**: alguien con un animal perdido en la mano.
 - **Y no dejar el descubrimiento para octubre:** esto se prueba con una ráfaga
   controlada contra `/p/` **antes** de que haya placas en la calle, sabiendo que
   la prueba deja el dominio marcado un rato.
+
+---
+
+# ADENDA 10 · 🔴 CORRECCIÓN — `/p/` YA ESTÁ CACHEADO. Mi «MISS» midió el caso equivocado
+
+**El founder pidió cachear `/p/{token}` sobre un dato que yo reporté, y el dato
+estaba mal.** Se corrige acá, con la medición que lo prueba.
+
+## Lo que ya existe, desde S113-A
+
+`epetplace-web/src/pages/p/[token].astro` **ya trae el caché**, con su razón
+escrita al lado:
+
+```js
+// Cache corto: si la familia marca «perdida», esto tiene que decirlo casi ya.
+Astro.response.headers.set('Cache-Control',
+  estado === 'activo' ? 'public, max-age=60' : 'no-store')
+```
+
+## Y funciona — medido con un token REAL, dos requests
+
+```
+REQUEST 1   HTTP 200 · cache-control: public, max-age=60 · x-vercel-cache: MISS · age: 0
+REQUEST 2   HTTP 200 · cache-control: public, max-age=60 · x-vercel-cache: HIT  · age: 3
+   (3 segundos después)
+```
+
+⇒ **El CDN de Vercel sí cachea el pasaporte activo.** Una ráfaga de N lecturas
+dentro de la ventana es **1 sola request al origen**, no N. *La protección que
+el founder pedía construir ya estaba construida.*
+
+## 🔴 Por qué me equivoqué, y es la misma lección de hoy
+
+**Medí `/p/` con un token INEXISTENTE.** Ese caso cae en la otra rama del
+ternario —`no-store`— y por eso dio `MISS`. **Reporté «cada lectura va al
+origen» generalizando desde el único caso que jamás se cachea, y con razón: un
+404 cacheado escondería una placa recién activada.**
+
+> **Es `L-499` otra vez, y en su forma más incómoda: la escribí hoy.** Medí una
+> rama del código y saqué una conclusión sobre la otra. *El dato era verdadero
+> —ese request fue un MISS— y la afirmación que construí encima era falsa.*
+
+**Lo que lo habría evitado:** un token válido cuesta una consulta, y la había
+hecho tres veces esa misma tarde para otras cosas. **No fue falta de acceso: fue
+no preguntarme si el caso que tenía a mano era el caso que importaba.**
+
+⚠️ **Y una hipótesis mía que también cayó:** pensé que haría falta `s-maxage`
+porque «`max-age` es del navegador y `s-maxage` del CDN». **Medido: Vercel usa
+`max-age` como TTL de CDN cuando no hay `s-maxage`.** El `HIT` lo prueba.
+
+## ① El TTL, y qué pasa cuando el dueño cambia algo
+
+**60 segundos, y no lo elegí yo: ya estaba, con su razón.**
+
+| | |
+|---|---|
+| **Ventana** | 60 s |
+| **Ráfaga de 100 lecturas en un minuto** | **1** request al origen |
+| **La familia marca «perdida»** | se ve en **≤ 60 s** en cualquier lectura nueva |
+| **Token inexistente o revocado** | `no-store` — **jamás se cachea**, y es correcto: una placa recién activada tiene que dejar de decir «esta placa espera a su mascota» al instante |
+
+*El TTL corto es exactamente la decisión correcta para este objeto: los datos
+cambian poco, salvo el único que no puede esperar —«perdida»—, y 60 s es el
+techo de esa espera.* **No propongo cambiarlo.**
+
+## ③ La ráfaga controlada — no se corrió, y ahora tampoco hace falta
+
+El founder ya lo había prohibido contra el sitio público. **Y con el caché
+medido y funcionando, el supuesto que motivaba la prueba se cayó**: la ráfaga
+no llega al origen. *Correrla ahora sería medir el rate-limit del CDN, no el
+riesgo que preocupaba.*
+
+## ④ Dónde mirar el Firewall (es lectura del founder)
+
+El sitio público es **otro proyecto de Vercel** que el que sirve `admin` — repo
+`epetplace-web`, Astro 5 con `@astrojs/vercel`, `output: 'static'` salvo `/p/`.
+
+```
+Vercel → el proyecto de epetplace-web → Settings → Security
+  · «Attack Challenge Mode»  → tiene que estar OFF
+      (si estuviera ON, TODO el sitio pediría challenge, no sólo bajo ráfaga)
+  · Firewall → Custom Rules  → ver si hay reglas propias sobre /p/ o sobre el sitio
+  · Firewall → Observability → muestra qué mitigó y cuándo: ahí se vería si
+      /p/ ya recibió alguna, y es el único lugar donde eso se puede saber
+```
+
+**Y lo mismo para el proyecto de `admin`** — ahí se confirmaría que el 403 que
+me tocó figura como mitigación automática y no como una regla.
+
+⚠️ **Lo que sigue sin poder medirse desde afuera** y por eso es lectura del
+dashboard: si hay reglas propias, y el umbral. **El discriminador de la adenda 9
+—mismo proyecto, dos dominios, distinto comportamiento— descarta el modo global,
+pero no descarta una regla puntual.**
