@@ -1571,6 +1571,14 @@ export default function PerfilDeMascota() {
 
             ⚠️ **En memorial no se monta**: las cinco ramas apuntan a algo por
             venir (`A3.9`, `LOYALTY §8`). */}
+        {/* ⚠️ **ESTE CONDICIONAL NO ES REDUNDANTE, Y SE MIDIÓ** (S114-C).
+            `TarjetaHoy` ya trae su propio piso por `enMemorial`, así que la
+            tentación es quitarlo «porque la pieza guarda». **Medido en el
+            aparato con Sombra, neutralizando este `!esMemorial`: las piezas
+            NO se dibujan —el piso funciona— pero el `<View>` y el encabezado
+            de sección SÍ**, y queda un título sobre una mascota en memorial
+            con nada abajo. *La pieza se protege a sí misma; no puede proteger
+            al layout que la rodea.* */}
         {!esMemorial && hoyMascota !== null ? (
           <View style={{ marginTop: spacing[6], paddingHorizontal: spacing[5] }}>
             {(() => {
@@ -1736,6 +1744,9 @@ export default function PerfilDeMascota() {
             mudó acá**: era esto mismo dicho en prosa. *Nada se pierde.*
 
             ⛔ En memorial no se monta: pide (`A3.9`). */}
+        {/* ⚠️ Mismo caso que el de arriba, medido igual: sin este guard el
+            encabezado «Conociéndolo» aparece sobre un memorial aunque la
+            tarjeta no se dibuje. El piso de la pieza es cierto y no alcanza. */}
         {!esMemorial ? (() => {
           /* ⭐ **LAS CINCO DIMENSIONES DEL VÍNCULO** (S113-B · 2.2.3 → C 2.2.4).
              B cambió `fraccion: number` por **cinco booleanos** —*cero
@@ -2621,7 +2632,16 @@ export default function PerfilDeMascota() {
           quien ya no está se lee, no se pide nada (`A3.9`). El botón que la
           abre ya cuelga del guard; la Hoja también, porque *un texto
           inalcanzable hoy es alcanzable mañana*. */}
-      {!esMemorial ? (
+      {/* ⏪ **ACÁ ENVOLVÍA UN `{!esMemorial ? …}` Y SE RETIRA EN EL MISMO ACTO
+          QUE DEJÓ DE HACER FALTA** (Ley 37). Envolvía **exactamente y sólo**
+          esta pieza, y desde que `HojaContanos` recibe `enMemorial` el guard
+          vive ADENTRO: dos guards para la misma regla es uno que alguien va a
+          mover sin mover el otro.
+
+          🔴 **Y es lo que vuelve MEDIBLE la cura:** mientras el condicional
+          estuviera, la Hoja no aparecía en memorial **por el condicional**, y
+          no se podía saber si la prop hacía algo. Sin él, que no aparezca es
+          la señal. *Un guard que no puede producir su rojo no está midiendo.* */}
       <HojaContanos enMemorial={esMemorial}
         visible={contanos.visible}
         onCerrar={contanos.cerrar}
@@ -2656,7 +2676,6 @@ export default function PerfilDeMascota() {
         }}
         propuesta={contanos.propuestaUi}
       />
-      ) : null}
 
       {/* ⛔ Bajo el mismo guard que el resto del «cuéntanos»: pide. */}
       {!esMemorial ? chips.hoja : null}
