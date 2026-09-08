@@ -41,14 +41,43 @@
  * fuerte: **este pase de lista prueba que el gate PUEDE medir, no que mida en
  * la máquina de todos.** ② No mide el hook `prepare-commit-msg`.
  *
+ * ── `--todos` · DESPUÉS DE UNA CURA AJENA, SE CORREN TODOS ──────────────
+ * **Regla de la casa (founder, 7-sep):** *después de una cura ajena, corrés
+ * todos.* No es prolijidad: **el peor defecto de esta sesión sólo apareció así.**
+ * `verify:postventa-plata` se quedó mudo cuando A6 llevó los 19 objetos sin
+ * devengo a 0 — *se apagó justo cuando el sistema se puso sano*, sin rojo y con
+ * todo el tablero en verde. **Mirando sólo el gate que uno tocó, seguía mudo.**
+ *
+ * Por eso `--todos` suma los gates de esta pista, que **no están en el hook a
+ * propósito** (pegan a la base), y **avisa cuando `main` se movió**:
+ * `git rev-list --count HEAD..main` dice cuántos commits ajenos hay sin
+ * mezclar — *sin archivo de estado que se pueda quedar viejo, que es el mismo
+ * defecto una capa más arriba.*
+ *
+ * ⚠️ **NO corre los gates de base de OTRAS pistas.** Se listan y se dice que no
+ * se corren: *algunos escriben sondas, y correr a ciegas lo que no es tuyo no
+ * es diligencia — es efecto colateral.*
+ *
  * ⚠️ **No va al hook**: corre otros gates, y un pase de lista adentro del
  * pre-commit sería recursivo y caro. Va al paso ⓪ y al cierre.
  *
  * Salidas: 0 verde · 1 hay mudos o ausentes · 2 no concluyente.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+
+const TODOS = process.argv.includes('--todos');
+
+/** Los gates de ESTA pista. No están en el hook a propósito: pegan a la base.
+ *  Se declaran acá porque `--todos` no puede derivarlos del hook. */
+const MIS_GATES = [
+  'verify-devengo-por-sujeto.mjs',
+  'verify-cierre-ausente.mjs',
+  'verify-postventa-plata.mjs',
+  'verify-asientos-caso.mjs',
+  'verify-plantillas-categoria.mjs',
+];
 
 /** Dueño declarado, SÓLO para los gates cuyo hook no lo dice. */
 const DUENOS = {
@@ -113,23 +142,59 @@ if (sinDueno.length) {
   process.exit(2);
 }
 
+// ── ②bis ¿SE MOVIÓ `main` DESDE ESTA RAMA? ───────────────────────────────
+let ajenos = null;
+try {
+  ajenos = Number(execFileSync('git', ['rev-list', '--count', 'HEAD..main'], { encoding: 'utf8' }).trim());
+} catch { /* sin main local, se declara abajo */ }
+
 // ── ③ PASE DE LISTA ──────────────────────────────────────────────────────
 console.log('verify:pase-de-lista · los gates del hook, uno por uno');
 console.log(`  hook vivo: ${hookRuta}`);
 console.log(`  (L-490: ruta ABSOLUTA al árbol principal — no es el .githooks de este worktree)\n`);
 
 const mudos = [], rojos = [];
+const aCorrer = TODOS
+  ? [...enElHook, ...MIS_GATES.filter((g) => !enElHook.includes(g))]
+  : enElHook;
+if (TODOS) {
+  const faltantes = MIS_GATES.filter((g) => !existsSync(`scripts/${g}`));
+  if (faltantes.length) {
+    console.error(`🟠 NO CONCLUYENTE · gates declarados que no existen: ${faltantes.join(', ')}`);
+    process.exit(2);
+  }
+}
 console.log('  estado   gate                             dueño   fuente del dueño');
-for (const script of enElHook) {
-  const d = duenoDe(script);
+for (const script of aCorrer) {
+  const d = duenoDe(script) ?? { dueno: 'E', fuente: 'de esta pista (no está en el hook: pega a la base)' };
   const r = spawnSync('node', [`scripts/${script}`], { encoding: 'utf8' });
   const cod = r.status;
   const est = cod === 0 ? '🟢 verde ' : cod === 1 ? '🔴 ROJO  ' : `🟠 MUDO(${cod})`;
   console.log(`  ${est} ${script.replace(/\.mjs$/, '').padEnd(32)} ${d.dueno.padEnd(7)} ${d.fuente}`);
   if (cod === 2) {
-    const razon = `${r.stdout}${r.stderr}`.split('\n')
-      .find((l) => /NO CONCLUYENTE|no se pudo|falta|ausente/i.test(l))?.trim().slice(0, 150) ?? '(sin razón impresa)';
-    mudos.push({ script, dueno: d.dueno, razon });
+    /* ⚠️ La razón se busca por el MARCADOR de no-concluyente, no por palabras
+       sueltas. La primera versión buscaba /falta|ausente/ y matcheaba el TÍTULO
+       de `verify:cierre-ausente` — el nombre del gate contenía la palabra que
+       el patrón cazaba, así que imprimía su encabezado como si fuera la causa.
+       *Un extractor por palabra suelta encuentra la palabra, no el hecho.* */
+    const lineas = `${r.stdout}${r.stderr}`.split('\n').map((l) => l.trim()).filter(Boolean);
+    const razon = (lineas.find((l) => /^🟠|NO CONCLUYENTE/.test(l))
+                ?? lineas.find((l) => /no se pudo|no existe|no puede/i.test(l))
+                ?? '(sin razón impresa)').slice(0, 150);
+    /* 🔴 DOS MUDOS DISTINTOS, Y TRATARLOS IGUAL DULA LA ALARMA.
+       · **Mudo DECLARADO** — el gate imprime `BLOQUEANTE NOMBRADO`: sabe por
+         qué no puede medir y a quién le toca. Se MUESTRA, no frena. *Un exit 1
+         permanente por un estado conocido entrena a saltear el pase de lista, y
+         entonces deja de avisar del que sí importa.*
+       · **Mudo SIN DECLARAR** — no pudo medir y no sabe por qué: sorpresa, y
+         ésos frenan.
+       ⚠️ El criterio sale del gate, no de una lista acá — *una lista de
+         excepciones envejece; la declaración vive al lado del bloqueante.*
+       ⚠️ Y su costo: un gate puede acallarse imprimiendo esa frase. Es
+         deliberado — **exige que su autor NOMBRE el bloqueante**, que es la
+         conducta que se quiere, y el pase de lista lo sigue mostrando igual. */
+    const declarado = /BLOQUEANTE NOMBRADO/i.test(`${r.stdout}${r.stderr}`);
+    mudos.push({ script, dueno: d.dueno, razon, declarado });
   } else if (cod !== 0) {
     rojos.push({ script, dueno: d.dueno });
   }
@@ -145,15 +210,43 @@ if (ausentes.length) {
   }
 }
 
+// ── LOS DE BASE DE OTRAS PISTAS: se listan, NO se corren ─────────────────
+if (TODOS) {
+  const conBase = readdirSync('scripts')
+    .filter((f) => /^verify-.*\.mjs$/.test(f))
+    .filter((f) => { try { return readFileSync(`scripts/${f}`, 'utf8').includes("from './lib-db.mjs'"); } catch { return false; } })
+    .filter((f) => !aCorrer.includes(f) && f !== 'verify-pase-de-lista.mjs');
+  if (conBase.length) {
+    console.log(`\n  ── ${conBase.length} gates de base de OTRAS pistas: se listan, NO se corren ──`);
+    console.log(`     ${conBase.join(' · ')}`);
+    console.log('     (algunos escriben sondas; correr a ciegas lo ajeno no es diligencia,');
+    console.log('      es efecto colateral. Su dueño los corre.)');
+  }
+}
+
 // ── VEREDICTO ────────────────────────────────────────────────────────────
 console.log('');
+if (ajenos === null) {
+  console.log('⚠️ no se pudo comparar contra `main` (¿sin main local?): no sé si hubo curas ajenas.');
+} else if (ajenos > 0) {
+  console.log(`⚠️ \`main\` tiene ${ajenos} commit(s) que esta rama no tiene.`);
+  console.log('   Si alguno es una CURA, este pase de lista corrió contra un árbol viejo:');
+  console.log('   traé main y volvé a correr. *Después de una cura ajena, se corren todos —');
+  console.log('   el peor defecto de S114 sólo apareció así.*');
+} else {
+  console.log('✅ esta rama tiene todo lo de `main`: el pase de lista corrió contra el árbol al día.');
+}
+const mudosSorpresa = mudos.filter((m) => !m.declarado);
 if (mudos.length) {
   console.error('🟠 GATES MUDOS — corrieron y NO pudieron medir:');
   for (const m of mudos) {
-    console.error(`   · ${m.script}  ·  DUEÑO: ${m.dueno}`);
+    console.error(`   · ${m.script}  ·  DUEÑO: ${m.dueno}  ${m.declarado ? '· bloqueante DECLARADO' : '🔴 SIN DECLARAR'}`);
     console.error(`     ${m.razon}`);
   }
   console.error('   Un gate mudo en el hook se ve igual que uno sano: silencio.');
+  if (!mudosSorpresa.length) {
+    console.error('   Los de arriba NOMBRAN su bloqueante: se muestran y no frenan.');
+  }
 }
 if (ausentes.length) {
   console.error(`\n🔴 ${ausentes.length} gate(s) que el canon da por cableados NO están en el hook vivo:`);
@@ -164,7 +257,7 @@ if (rojos.length) {
   console.error(`\n🔴 ${rojos.length} gate(s) en rojo (eso SÍ frena commits, y está bien):`);
   for (const r of rojos) console.error(`   · ${r.script} · dueño ${r.dueno}`);
 }
-if (mudos.length || ausentes.length) process.exit(1);
+if (mudosSorpresa.length || ausentes.length) process.exit(1);
 if (rojos.length) {
   console.log('🟢 ningún gate mudo ni ausente. Los rojos de arriba son gates funcionando.');
   process.exit(0);
