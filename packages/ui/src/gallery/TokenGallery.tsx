@@ -5378,14 +5378,22 @@ function GaleriaInterna() {
             chip="985112004123456" etiquetaChip="Chip"
             qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
             estado={{ estado: 'activo' }}
+            enMemoria={false}
           />
           {/* 🔴 PERDIDA: la franja preside y DICE DESDE CUÁNDO — entre ayer y
-              hace tres meses cambia lo que hace quien la encuentra. */}
+              hace tres meses cambia lo que hace quien la encuentra.
+
+              🔴 **Y ES EL DISCRIMINADOR DE LA FIRMA DEL 7-sep: `perdida` NO es
+              memorial y la tarjeta SE DIBUJA.** Va con `enMemoria={false}`
+              explícito, al lado de la que no se dibuja: *la placa existe
+              justamente para esto, y apagarle el pasaporte a una familia que
+              está buscando a su animal le quitaría su única herramienta.* */}
           <TarjetaPasaporte
             nombre="Thor" especieYRaza="Perro · Labrador" sexoYEdad="Macho · 4 años"
             qr={{ tipo: 'svg', svg: QR_DEMO }} vozQr="Código del pasaporte de Thor"
             estado={{ estado: 'perdida', desde: '2026-09-05' }}
             vozPerdida="Perdida desde el 5 de septiembre"
+            enMemoria={false}
           />
           <Texto variante="apoyo">↓ en memoria la tarjeta NO EXISTE: abajo de esta línea no hay nada</Texto>
           <TarjetaPasaporte

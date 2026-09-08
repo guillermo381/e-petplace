@@ -28785,7 +28785,19 @@ git   · L-494 · `ls-tree | grep` mide el NOMBRE DEL ARCHIVO; la función vive
                 adentro de uno que no la nombra
 JSX   · ésta  · `grep "<Pieza"` mide LA FORMA DEL MONTAJE; el consumo puede
                 estar en un import, un slot, una variable o un salto de línea
+SVG   · ésta  · contar el token `M6` da 29 «momentos vitales» en `packages/ui`
+                y **los 29 son paths** (`d="M6 6l12 12…"`)
 ```
+
+> ### ⚠️ TERCERA VEZ EL MISMO DÍA, y la tercera fue la más tonta y la más útil
+> El censo de memorial contó **29 `M6`** en `packages/ui` como si fueran
+> derivaciones del momento vital. **Son coordenadas de dibujo.** *Un token de
+> dos caracteres no tiene contexto, y contarlo mide su ORTOGRAFÍA.*
+>
+> **Que la clase se cobre tres veces en una sesión, en tres formas distintas y
+> al mismo autor, es lo que la separa de un descuido:** no es que uno se
+> distraiga — es que **el instrumento barato siempre está a mano y siempre
+> contesta algo.**
 
 > ### **Tres lenguajes, tres instrumentos, el mismo error: preguntarle a la superficie del código por un hecho que vive un piso más adentro.**
 > *Mientras vivía en SQL se leía como una peculiaridad de `pg_proc`. Al aparecer

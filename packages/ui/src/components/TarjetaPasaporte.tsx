@@ -54,8 +54,23 @@ export interface TarjetaPasaporteProps {
   estado: EstadoPasaporte
   /** *«Perdida desde el 5 de septiembre»* — la pantalla compone la fecha. */
   vozPerdida?: string
-  /** 🔴 **En memoria la tarjeta no existe.** Ver la cabecera. */
-  enMemoria?: boolean
+  /**
+   * 🔴 **EN MEMORIA LA TARJETA NO EXISTE — Y ES OBLIGATORIA SIN DEFAULT**
+   * (S114-B, orden del founder 7-sep-2026).
+   *
+   * ⏪ **DEROGADO: `enMemoria?: boolean = false`.** *Un default `false` es el
+   * guard apagado por omisión, escrito* — cualquier montaje que no la pasara
+   * heredaba la protección apagada y nada lo decía. **Es la forma que `L-498`
+   * nombra**, y acá estaba en el tipo.
+   *
+   * ⚠️ **Y `memoria` ACÁ ES SÓLO `fallecida`, por firma del founder:
+   * `perdida` NO es memorial y esta tarjeta es JUSTAMENTE su superficie
+   * propia** —la placa existe para eso—. *Apagar el pasaporte de una mascota
+   * perdida sería quitarle a la familia la única herramienta que tiene para
+   * encontrarla.* El estado `'perdida'` viaja por `estado`, aparte, y **la
+   * tarjeta se dibuja igual**.
+   */
+  enMemoria: boolean
 }
 
 export function TarjetaPasaporte({
@@ -69,10 +84,16 @@ export function TarjetaPasaporte({
   vozQr,
   estado,
   vozPerdida,
-  enMemoria = false,
+  enMemoria,
 }: TarjetaPasaporteProps) {
   const { theme } = useTheme()
-  if (!sePintaPasaporte({ enMemoria })) return null
+  /* 🔴 EL DATO PRIMERO Y EL TEMA DESPUÉS — el mismo patrón que
+     `LineaAlgoSalioDistinto` (S114-B). El `OR` no es redundancia: **el dato es
+     lo que rige en producto** —`theme.mode === 'memorial'` no se enciende en
+     ninguna de las dos apps (`D-1021`)— **y el tema es lo que rige en la
+     galería**, único lugar donde el sub-tema se monta de verdad.
+     *Lo que estaba mal no era mirar el dato: era que sin él no había nada.* */
+  if (!sePintaPasaporte({ enMemoria }) || theme.mode === 'memorial') return null
 
   const perdida = estado.estado === 'perdida'
 

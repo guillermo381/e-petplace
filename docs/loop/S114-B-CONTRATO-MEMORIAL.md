@@ -360,6 +360,147 @@ inexpresable de contestar mal.**
 
 ---
 
+## ⑨ 🔴 FIRMADO — LA FORMA, EL LUGAR, Y QUÉ ES `perdida`
+
+> **Firmas del founder, 7-sep-2026.** Lo de abajo **ya no es propuesta.**
+
+### ① LA FORMA: una unión de tres, jamás un booleano
+
+```ts
+EstadoVidaMascota = 'activa' | 'perdida' | 'memorial'
+```
+
+**El booleano es lo que causó la divergencia:** obliga a cada llamador a decidir
+**por su cuenta** dónde cae `perdida`, y **cuatro decidieron distinto**. Con la
+unión, *el llamador no puede colapsarla sin escribirlo.*
+
+### ② EL LUGAR: `packages/domain`, con el MOTOR como espejo
+
+**El lugar ya existía:** `domain` lo consumen **los cuatro paquetes**, y
+`momentoVital.ts` **ya recibe `esMemorial` como argumento** — la casa ya trató
+este dato como de dominio y nunca lo definió ahí.
+
+### ③ 🔴 `perdida` ES SU PROPIO ESTADO — QUÉ **NO** SE APAGA
+
+> **Firma, verbatim:** *«La app entera disponible, sin ninguna pieza de duelo,
+> sin apagar el Hoy ni el Coach — quien está buscando a su animal necesita el
+> producto funcionando. Su única superficie propia es el pasaporte en modo "se
+> perdió", que es para lo que existe la placa.»*
+
+| | con `perdida` |
+|---|---|
+| `TarjetaHoy` · `TarjetaConociendolo` · `PastillaConociendolo` | ✅ **se dibujan** |
+| el Coach entero (`ChipsSugerencia` · `PresentacionNexo` · `RespuestaNexo` · `PanelMemoria` · `AvisoAnticipacion` · `BotonContanos` · `HojaContanos`) | ✅ **se dibuja** — *y `nexo.tsx` NO debe rebotar* |
+| `LineaAlgoSalioDistinto` | ✅ **se dibuja** (`enMemorial={false}`) |
+| `TarjetaPasaporte` | ✅ **se dibuja, y es SU superficie**: la franja «se perdió» con su fecha |
+| **cualquier pieza de duelo** | 🔴 **NO se monta** |
+
+⇒ **`estado_vida === 'perdida'` NO alimenta `enMemorial` / `enMemoria` en
+ninguna pieza.** *Hoy `hogar/index.tsx` (2 sitios) y `[mascotaId].tsx:961` lo
+hacen con `!== 'activa'` — ésos son los dos que la firma deja mal, y su cura es
+de C.*
+
+---
+
+## ⑩ ✅ CURADO EN ESTA TANDA — `TarjetaPasaporte`
+
+`enMemoria` era `?: boolean = false`: **el guard apagado por omisión, escrito en
+el tipo.** Ahora es **obligatoria sin default**, con el patrón de B8:
+
+```ts
+if (!sePintaPasaporte({ enMemoria }) || theme.mode === 'memorial') return null
+```
+
+**Rompió exactamente UN sitio** (`pasaporte.tsx:213`) y **la variable ya existía
+ahí**, calculada con la regla que la firma ratificó (`&& !== 'perdida'`). ⚠️
+**Cruce de territorio declarado y mínimo:** el cambio de API es de
+`packages/ui`; pasar la prop es su única consecuencia — *dejar el árbol sin
+compilar para que otro escriba una palabra es peor que escribirla.* **Los cuatro
+typechecks en 0.**
+
+**Y la galería ganó el discriminador de la firma:** la tarjeta con
+`estado: 'perdida'` + `enMemoria={false}` **se dibuja**, al lado de la que no.
+
+---
+
+## ⑪ CÓMO SE MEDIRÍA EL ESPEJO — *«si deciden lo mismo por separado, divergen»*
+
+> **Es lo que no existe hoy, y es la razón de las cuatro definiciones.**
+
+🔴 **Y lo primero es que los dos vocabularios NO son la misma palabra:** el motor
+**almacena** `estado_vida ∈ {activa, perdida, fallecida}`; el dominio
+**clasifica** en `{activa, perdida, memorial}`. *`fallecida` es el hecho;
+`memorial` es lo que la casa hace con él.* **Esa traducción es exactamente la
+costura donde van a divergir**, así que es lo que hay que medir.
+
+### Dos gates, partidos por si necesitan red — el corte que la casa ya usa
+
+**① LA TABLA DE VERDAD (exige la DB) — *sin nombre de gate todavía, y es a
+propósito*.**
+
+> ⚠️ **NO lleva prefijo `verify:` porque NO EXISTE, y su sujeto tampoco:** la
+> definición en `domain` está firmada y sin escribir. **Un nombre `verify:*` en
+> el canon se lee como vigilancia que corre** — y lo cazó `verify:gates-existen`
+> frenándome el commit por nombrarlo. *El gate que vigila que no se nombren
+> gates inexistentes me frenó a mí, que acababa de escribir `L-498` sobre lo
+> que parece cuidado.* Se bautiza el día que se construya.
+
+Para **cada valor del CHECK de `estado_vida`**, comparar qué dice el motor y qué
+dice `domain`:
+
+```
+valor del CHECK    motor          domain            ¿coinciden?
+activa          →  activa      ·  activa           ✅
+perdida         →  perdida     ·  perdida          ✅
+fallecida       →  memorial    ·  memorial         ✅
+```
+
+- **rojo** si una fila difiere **o si el CHECK tiene un valor que `domain` no
+  clasifica** — *un estado nuevo que nadie tradujo cae en silencio al lado
+  equivocado*;
+- 🔴 **publica su ALCANCE** (`L-500`): **cuántos valores del CHECK comparó.** *Si
+  el CHECK gana un valor y el gate sigue comparando tres, el número se mueve y
+  delata la ceguera — un «✅ coinciden» no puede.*
+- **exige la DB ⇒ sin ella sale NO CONCLUYENTE, jamás verde** (`L-197`), y su
+  lugar es el **paso ⓪ y el cierre**, al lado de `verify:censo`. *Un gate que
+  exige red se saltea por costumbre.*
+
+**② `verify:memorial-derivado` — EL RATCHET · ✅ CONSTRUIDO EN ESTA TANDA**
+
+**Baseline medido: 9 sitios**, y el censo corrige lo que yo había reportado:
+
+```
+apps/cliente · hogar/index.tsx:1661 · [mascotaId] 369 · 546 · 991
+             · pasaporte.tsx 98 · 162 · vacunas/[mascotaId]:262
+🔴 packages/api · adiestramiento-antes.ts:195 · grooming-atencion.ts:397
+```
+
+🔴 **DOS de las nueve viven en `packages/api`**, o sea que **`es_memorial`
+también se deriva en la capa que alimenta al PRESTADOR.** *No eran cuatro
+definiciones: la cuarta capa tenía dos habitantes más que nadie había contado,
+y los encontró el gate, no la lectura.*
+
+**Nadie fuera de `packages/domain` compara contra `'activa'` / `'perdida'` /
+`'fallecida'` para decidir si algo es memorial.** Mide por grep sobre `apps/` y
+`packages/` **excluyendo `domain`**, con baseline solo-baja.
+
+- su baseline de arranque son **los sitios que el censo de §⑥ ya nombró** (los
+  dos de `hogar/index.tsx`, el de `[mascotaId].tsx:961`, el de `pasaporte.tsx`,
+  y `atajos.ts:87`);
+- **cada cura lo baja sola**, como `R78`;
+- ⚠️ **y su piso no es 0**: `domain` mismo y los tests quedan exentos —
+  **declarados por nombre, jamás por patrón** (`R78` §④).
+
+### ⚠️ LO QUE NINGUNO DE LOS DOS RESUELVE, dicho para que no se lea de más
+
+**El servidor decide en su propio idioma.** Hoy la edge del nexo devuelve
+`codigo === 'memorial'` **sin pasar por ninguna de las dos fuentes**. ⇒ el gate ①
+compara **motor↔dominio**; que la EDGE use la clasificación del motor en vez de
+la suya **es cableado, no medición** — y es de A. *Se dice acá porque un espejo
+de dos caras no cubre una tercera.*
+
+---
+
 ## ⑧ EL BARRIDO DE `R77` SOBRE `apps/` — NO SE ABRIÓ
 
 Tanda propia después de S114, por orden del founder. **`R77` declara en su

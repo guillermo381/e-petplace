@@ -85,6 +85,7 @@
     "verify:jornada-completa": "node scripts/verify-jornada-completa.mjs",
     "verify:linea-jornada": "tsx apps/prestador/scripts/verify-linea-jornada.mts",
     "verify:lista-voseo": "node scripts/verify-lista-voseo.mjs",
+    "verify:memorial-derivado": "node scripts/verify-memorial-derivado.mjs",
     "verify:mensajeria": "tsx scripts/verify-mensajeria.mjs",
     "verify:migraciones": "node scripts/verify-migraciones.mjs",
     "verify:mis-hilos-realtime": "node scripts/verify-s112a-mis-hilos-realtime.mjs",
