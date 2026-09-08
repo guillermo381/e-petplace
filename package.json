@@ -100,6 +100,7 @@
     "verify:nexo-anticipa": "node scripts/verify-nexo-anticipa.mjs",
     "verify:nexo-antispam": "node scripts/verify-nexo-antispam.mjs",
     "verify:nexo-rojos": "node scripts/verify-nexo-rojos.mjs",
+    "verify:pase-de-lista": "node scripts/verify-pase-de-lista.mjs",
     "verify:papel": "node scripts/verify-papel.mjs",
     "verify:papel-sin-valores": "node scripts/verify-papel-sin-valores.mjs",
     "verify:pasaporte": "tsx scripts/_arnes-pasaporte.mts",
