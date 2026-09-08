@@ -2010,3 +2010,7 @@ export {
   type EtapaCaso, type AsientoCaso, type MensajeCaso, type CasoEnBandeja,
   type CodigoAbrirCaso,
 } from './wrappers/postventa-casos';
+
+// S114 · A4 · el saldo e-PetPlace (F6). Un lector; acreditar/consumir son del
+// motor, sin EXECUTE para authenticated (D-314).
+export { obtenerMiSaldo } from './wrappers/postventa-saldo';

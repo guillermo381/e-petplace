@@ -19557,6 +19557,60 @@ export type Database = {
           },
         ]
       }
+      saldo_hogar_movimientos: {
+        Row: {
+          clave_idempotencia: string
+          creado_en: string
+          creado_por: string | null
+          descripcion: string | null
+          familia_id: string
+          id: string
+          lote_id: string | null
+          monto: number
+          origen_id: string | null
+          origen_tipo: string
+        }
+        Insert: {
+          clave_idempotencia: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          familia_id: string
+          id?: string
+          lote_id?: string | null
+          monto: number
+          origen_id?: string | null
+          origen_tipo: string
+        }
+        Update: {
+          clave_idempotencia?: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          familia_id?: string
+          id?: string
+          lote_id?: string | null
+          monto?: number
+          origen_id?: string | null
+          origen_tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saldo_hogar_movimientos_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saldo_hogar_movimientos_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "saldo_hogar_movimientos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seguidores: {
         Row: {
           created_at: string
@@ -23675,6 +23729,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      _familia_del_user: { Args: { p_user: string }; Returns: string }
       _familia_tiene_miembros_vigentes: {
         Args: { p_familia_id: string }
         Returns: boolean
@@ -24059,6 +24114,16 @@ export type Database = {
         Returns: Json
       }
       aceptar_vinculo_repartidor: { Args: never; Returns: Json }
+      acreditar_saldo_hogar: {
+        Args: {
+          p_clave: string
+          p_familia: string
+          p_monto: number
+          p_origen_id?: string
+          p_origen_tipo: string
+        }
+        Returns: Json
+      }
       activar_avisos_nexo: {
         Args: { p_activar?: boolean; p_familia_id: string }
         Returns: Json
@@ -24568,6 +24633,15 @@ export type Database = {
       confirmar_propuesta_memoria: { Args: { p_id: string }; Returns: Json }
       congelar_desglose_mensualidad_guarderia: {
         Args: { p_periodo: string; p_suscripcion_id: string }
+        Returns: Json
+      }
+      consumir_saldo_hogar: {
+        Args: {
+          p_clave: string
+          p_compra_id?: string
+          p_familia: string
+          p_monto: number
+        }
         Returns: Json
       }
       contar_citas_despegables: {
@@ -27332,6 +27406,7 @@ export type Database = {
         Args: { p_cuenta_comercial_id: string; p_motivo?: string }
         Returns: Json
       }
+      saldo_hogar_disponible: { Args: { p_familia: string }; Returns: number }
       saltar_cita_plan: {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
         Returns: Json

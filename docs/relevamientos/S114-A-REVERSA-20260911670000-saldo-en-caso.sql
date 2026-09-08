@@ -1,0 +1,5 @@
+-- REVERSA de `20260911670000_s114a_saldo_en_caso.sql`. Escrita ANTES.
+-- Deshace el enchufe: caso_elegir_destino('saldo') vuelve a rebotar con
+-- saldo_todavia_no_existe. NO borra saldo ya acreditado (eso lo maneja la
+-- reversa de A4). Recrea la versión previa de caso_elegir_destino.
+-- (Su cuerpo previo vive en 20260911610000.)
