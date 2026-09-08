@@ -13,6 +13,10 @@
 > devengo: con el ancla ambigua esa pregunta tiene dos respuestas y **el camino de la plata se
 > bifurca sin síntoma**. Letra vieja tachada en §8, no borrada.
 
+> ### 📌 ENMIENDA ⑤ (F1 · adenda, 7-sep-2026) — **§4 · la elección de destino aparece ⟺ hay monto**
+> La carta banco/saldo la gatea el MONTO, no la clase. Sin plata no hay destino que elegir; la
+> clase 1 que debe plata la produce F1 con `monto_devuelto` puesto. Detalle en §4.
+
 > ### 📌 ENMIENDA ①, mesa del 7-sep-2026 — **§14 · `D-888` ya no queda en NULL**
 > **La plata de los tres reversos fuera de ventana ($87,65) salió de tarjeta de PRUEBAS**
 > (dato del founder). ⇒ **no vuelve a nadie: es deuda de motor**, y se cierra construyendo
@@ -158,6 +162,20 @@ nadie lo vea.* **Rojo de E: una devolución declarada sobre un objeto que tiene 
    estado `en_camino_manual`, quien la ejecuta la marca en el caso, y la superficie **no promete
    fecha**.
 2. **Saldo e-PetPlace** (F6, §7).
+
+> ### 🔴 ENMIENDA ⑤ (F1 · adenda, 7-sep-2026) — **la elección de destino aparece ⟺ hay monto**
+> La carta donde el dueño elige entre medio original y saldo **se ofrece sólo
+> cuando hay plata a devolver** (`leer_caso`: `resuelto ∧ destino IS NULL ∧
+> monto_devuelto > 0`). **La CLASE no la gatea, el MONTO sí.**
+>
+> *No existe un «sabor clase 1 sin monto»:* la elección de destino es sobre
+> PLATA, y sin plata no hay destino que elegir. Un caso resuelto **sin
+> devolución** (alcance `sin_devolucion`) o con una resolución no monetaria
+> **no ofrece la carta, y es correcto**. La clase 1 que SÍ debe plata —un
+> servicio pagado que quedó `no_ejecutado`— la produce F1 **con su
+> `monto_devuelto` puesto** (= lo que la familia pagó), y entonces cae en este
+> mismo único camino. *Un caso de clase 1 que llega a la carta sin monto sería
+> un defecto de F1, no de esta condición.*
 
 ### F4 · La comisión
 **En falla del prestador, e-PetPlace devuelve también su comisión.** Reembolso total = comisión

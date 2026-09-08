@@ -43,7 +43,7 @@
     "proximo:migracion": "node scripts/proximo-numero-migracion.mjs",
     "tipos:rutas": "node scripts/tipos-rutas.mjs",
     "typecheck": "turbo run typecheck",
-    "censo:productores-de-aviso": "node scripts/censo-productores-de-aviso.mjs",
+    "censo:productores-de-aviso": "node scripts/s114/verify-aviso-emitio-sin-productor.mjs",
     "metricas:postventa": "node scripts/metricas-postventa.mjs",
     "verify:asientos-caso": "node scripts/verify-asientos-caso.mjs",
     "verify:cierre-ausente": "node scripts/verify-cierre-ausente.mjs",
