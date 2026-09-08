@@ -28685,6 +28685,83 @@ rojo: no corre, y su silencio se lee como salud.**
 
 ---
 
+### `L-500` — UN GATE PUBLICA CIFRAS, NO ADJETIVOS: «VERDE» NO PUEDE DELATAR CEGUERA, UN CONTADOR SÍ
+
+> **Firma del founder (S114, 7-sep-2026), y nace de DOS pistas el mismo día
+> con el mismo error y distinta ropa.**
+
+**Un instrumento puede seguir dando el veredicto correcto y haber dejado de
+ver parte de su sujeto.** Eso **no es un fallo**: es una pérdida de COBERTURA —
+y **un booleano no tiene forma de expresarla.** *«Verde» significa lo mismo
+cuando el gate miró todo que cuando miró la mitad.*
+
+⇒ **la única señal que un instrumento correcto puede dar de que se quedó ciego
+es una CIFRA que se mueve sin que nadie haya tocado ese sujeto.**
+
+### Los dos casos
+
+**① F — el comparador de desigualdad** *(citado de `docs/loop/S114-F-TANDA1.md`;
+**lo midió F, no yo**)*. Un watcher de deploy con
+`if [ "$H" != "index-fK9Opg5L.js" ]`: cuando un 403 dejó sin bundle que
+extraer, **la cadena vacía también es distinta** y el watcher anunció
+
+```
+✅ DEPLOY NUEVO ·  · 22:02:00
+```
+
+> *«Un comparador de desigualdad trata «cambió» y «no pude leerlo» como la
+> misma cosa.»* — **«Lo cazó que el propio mensaje imprimiera el hash y saliera
+> en blanco: si sólo hubiera dicho "DEPLOY NUEVO", me lo creía.»**
+
+**② B — el matcher que corta en el primer paréntesis.** `R78` mide qué piezas
+deciden si existen mirando sólo el tema memorial. Su patrón era
+`\(([^)]*mode === 'memorial'[^)]*)\)` — y al curar una pieza con condición
+**anidada** (`if (esDeUnaMascota && (props.enMemorial || theme.mode === 'memorial')))`)
+**`[^)]*` corta en el primer paréntesis y la pieza desapareció de la
+medición.**
+
+**El brazo del rojo seguía andando** —revertir el guard a sólo-tema seguía
+dando 12 y rojo, verificado—, **así que la regla no estaba rota: contaba de
+menos.** Y lo único que lo dijo fue **`conDato`, que bajó de 2 a 1**.
+
+### 🔴 LO QUE LOS HERMANA, y es más incómodo que el error
+
+**En los dos, el instrumento seguía siendo CORRECTO en su veredicto.** El
+watcher habría anunciado un deploy real; `R78` sigue enrojeciendo ante la
+regresión. *Lo que se rompió no fue la respuesta: fue de cuánto la estaba
+sacando.* **Y una pérdida de alcance no tiene síntoma** — por eso hizo falta que
+algo NUMÉRICO estuviera a la vista.
+
+**Los dos se cazaron por el mismo mecanismo:** *el instrumento imprimía un valor
+que podía moverse solo, y se movió.*
+
+### La regla, exigible
+
+> ### **Todo gate publica, junto a su veredicto, al menos UNA cifra que pueda moverse sin que nadie toque su sujeto:** el tamaño del corpus, el hash leído, cuántos casos clasificó, cuántos ya están curados.
+
+**Y su corolario operativo, que es el que hay que ejecutar:** *cuando un número
+de un gate cambia y nadie tocó ese sujeto, **eso es el hallazgo** — no un
+detalle de la salida.* **No se re-alinea el número: se pregunta qué dejó de
+ver.**
+
+⚠️ **Y no basta con imprimir cualquier cosa: tiene que ser una cifra CAPAZ de
+moverse sola.** «OK», «verde» y «0 fallos» no pueden. *Un `0` que siempre fue
+`0` y un `0` que acaba de quedarse ciego se imprimen idénticos* — de ahí que la
+cifra útil sea la del ALCANCE (cuánto miró), no la del resultado.
+
+### El trío, y cada uno cubre lo que el otro no
+
+```
+L-459 · ¿el instrumento SABE decir que no?     → su rojo se prueba
+L-498 · ¿su prosa convence de no revisarlo?    → la nota es lo que hay que dejar de leer
+L-500 · ¿su salida puede DELATAR su ceguera?   → publicá cifras, no adjetivos
+```
+*Los tres se cobraron en la misma sesión, y ninguno habría cazado a los otros
+dos.*
+
+---
+
+
 ### `L-499` — UN CENSO POR LA FORMA DEL MONTAJE MIDE LA CONVENCIÓN, NO EL HECHO
 
 > **Firma del founder (S114-B, 7-sep-2026).** *Lo que la vuelve regla y no

@@ -6848,7 +6848,15 @@ function r74(archivos) {
       'por eso esta pieza NO copió el `acciones` de `CabeceraHilo`. *Una ley que se puede saltear por un slot no está puesta.*',
     )
   }
-  return { fallos, info: '0 mención(es) de plata · 0 slot(s) abiertos · su verde dice «el monto es inexpresable acá», jamás «la plata se cuenta bien»' }
+  /* 🔴 `L-500`: publica una CIFRA DE ALCANCE, no sólo su resultado. Dos ceros
+     que siempre fueron cero se imprimen igual estén midiendo todo o nada; **el
+     número de props es el universo donde el monto podría entrar**, y se mueve
+     solo el día que alguien agregue una. */
+  const props = [...src.matchAll(/^\s{2,4}\w+\??:/gm)].length
+  return {
+    fallos,
+    info: `0 mención(es) de plata · 0 slot(s) abiertos · ${props} prop(s) miradas (el universo donde el monto podría entrar) · su verde dice «el monto es inexpresable acá», jamás «la plata se cuenta bien»`,
+  }
 }
 
 /** R75 · «OTRO» NO ES UN MOTIVO, Y LA LISTA NO SCROLLEA (S114-B · §2).
@@ -6888,7 +6896,15 @@ function r75(archivos) {
       `si el catálogo creciera hasta no entrar, el defecto tiene que verse en la pantalla y no esconderse adentro de un scroll.`,
     )
   }
-  return { fallos, info: '0 cajón(es) «otro» · 0 contenedor(es) desplazable(s) · mide LA PIEZA, jamás los catálogos de las apps' }
+  /* 🔴 `L-500`: la cifra de alcance. Los campos del motivo son el vocabulario
+     donde un cajón podría aparecer, y los tocables son las filas que la pieza
+     de verdad dibuja — los dos se mueven solos si la pieza cambia de forma. */
+  const campos = [...src.matchAll(/^\s{2,4}\w+\??:/gm)].length
+  const tocables = [...src.matchAll(/<Pressable\b/g)].length
+  return {
+    fallos,
+    info: `0 cajón(es) «otro» · 0 contenedor(es) desplazable(s) · alcance: ${campos} campo(s) del vocabulario · ${tocables} tocable(s) dibujados · mide LA PIEZA, jamás los catálogos de las apps`,
+  }
 }
 
 /** R76 · EL PLAZO NO ES UNA ALARMA NI UN CONTADOR (S114-B · §5).
@@ -6927,7 +6943,15 @@ function r76(archivos) {
       `El número baja cuando la persona vuelve, no mientras mira.`,
     )
   }
-  return { fallos, info: '0 color(es) de alarma · 0 reloj(es) adentro · su verde dice «no puede latir ni gritar», jamás «el plazo está bien calculado»' }
+  /* 🔴 `L-500`: la cifra de alcance. Cada lectura del tema es un lugar donde
+     un color de alarma podría entrar; el número se mueve solo si la pieza gana
+     o pierde estilo, y un `0` acá diría «no miré», no «no hay alarma». */
+  const delTema = [...src.matchAll(/\btheme\.[a-zA-Z.]+/g)].length
+  const fallosAlcance = ancla('R76', delTema, 1, 'lectura(s) del tema (sin ellas la pieza no pinta nada y el cero no dice nada)')
+  return {
+    fallos: [...fallos, ...fallosAlcance],
+    info: `0 color(es) de alarma · 0 reloj(es) adentro · alcance: ${delTema} lectura(s) del tema miradas · su verde dice «no puede latir ni gritar», jamás «el plazo está bien calculado»`,
+  }
 }
 
 function r71(archivos) {
