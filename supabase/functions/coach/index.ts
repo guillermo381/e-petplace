@@ -109,6 +109,9 @@ interface Contexto {
   especie: string
   sujeto?: string | null
   estado_vida?: string | null
+  /** ⑦ · true SÓLO tras la vuelta de perdida→activa, hasta que el Coach muestra
+   *  la bienvenida una vez. */
+  bienvenida_regreso?: boolean | null
   sexo?: string | null
   edad_texto?: string | null
   etapa?: string | null
@@ -741,9 +744,10 @@ export function saneaPropuesta(
  *  ③ deja MEDIBLE cuántas se proponen y cuántas se confirman, que es lo único
  *     que va a decir si esto sirve.
  *
- *  ⚠️ CONTRATO CON A (no existe todavía; medido el 6-sep):
- *    `propuestas_memoria(id, mascota_id, hecho, clase, origen, estado, creado_por, creado_en)`
- *      origen ∈ 'contanos' | 'chat'   ·   estado ∈ 'pendiente'|'confirmada'|'descartada'
+ *  ✅ ESQUEMA REAL (S113, migración 20260909860000; corregido S114-A el 7-sep):
+ *    `propuestas_memoria(id, mascota_id, hecho, clase, estado, turno_id, creada_en, resuelta_en, resuelta_por)`
+ *      estado default 'pendiente'. NO tiene `origen` ni `creado_por` — el edge
+ *      los escribía por error y el INSERT rebotaba para toda mascota.
  *    y su puerta `confirmar_propuesta_memoria(id)`, que escribe `coach_memoria`
  *    con `fuente='confirmado_de_ia'`. **Esta edge NUNCA toca `coach_memoria`.**
  */
@@ -753,10 +757,17 @@ async function crearPropuestas(
   hechos: { hecho: string; clase: string }[], origen: 'contanos' | 'chat',
 ): Promise<{ id: string; hecho: string; clase: string }[] | null> {
   if (!hechos.length) return []
+  // 🔴 S114-A · el esquema real de propuestas_memoria (S113, 20260909860000) es
+  // (mascota_id, hecho, clase, estado, turno_id, creada_en, resuelta_*): NO tiene
+  // `origen` ni `creado_por`. El edge los escribía y el INSERT rebotaba
+  // (`propuesta_no_guardada`) para TODA mascota — el «contanos» estaba roto de
+  // nacimiento, no sólo con perdida. `estado` cae al default 'pendiente'.
+  // `origen`/`uid` se dejan en la firma por estabilidad pero no viajan a la DB
+  // (nada los lee; la procedencia del hecho es la misma para todos — §⑥).
+  void origen; void uid;
   const { data, error: err } = await sb.from('propuestas_memoria').insert(
     hechos.map((h) => ({
       mascota_id: mascotaId, hecho: h.hecho, clase: h.clase,
-      origen, estado: 'pendiente', creado_por: uid,
     })),
   ).select('id, hecho, clase')
   if (err) {
@@ -959,7 +970,25 @@ Deno.serve(async (req) => {
     // ── PRESENTAR · cero modelo ──────────────────────────────────────────
     if (acto === 'presentar') {
       // Perdida: acompaña la búsqueda, no abre como si nada ni como memorial.
-      const pres = c.estado_vida === 'perdida' ? presentacionPerdida(c) : presentacion(c)
+      if (c.estado_vida === 'perdida') {
+        return new Response(JSON.stringify({
+          ...presentacionPerdida(c), fuente: 'plantilla', aviso_ia: true,
+        }), { status: 200, headers: JSON_HEADERS })
+      }
+      const pres = presentacion(c)
+      // ⑦ · la bienvenida de regreso, UNA sola vez y sin ceremonia. Se consume
+      // atómicamente (update where flag=true): si ESTE llamado lo apagó, muestra
+      // la línea; si otro se adelantó, no la repite. Nada más — ni resumen de
+      // los días perdidos, ni pendientes de golpe; los recordatorios vuelven
+      // solos por el gate dinámico. La línea es del founder, verbatim.
+      if (c.bienvenida_regreso) {
+        const { data: consumido } = await sb.from('mascotas')
+          .update({ bienvenida_regreso_pendiente: false })
+          .eq('id', mascotaId).eq('bienvenida_regreso_pendiente', true).select('id')
+        if (Array.isArray(consumido) && consumido.length > 0) {
+          pres.burbujas = ['Qué bueno tenerlo de vuelta.', ...pres.burbujas]
+        }
+      }
       return new Response(JSON.stringify({
         ...pres, fuente: 'plantilla', aviso_ia: true,
       }), { status: 200, headers: JSON_HEADERS })
