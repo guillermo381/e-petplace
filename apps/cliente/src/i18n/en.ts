@@ -2498,7 +2498,7 @@ export const clienteEn = {
     cancelarConfirmar: 'Yes, cancel',
     cancelarNo: 'No, keep it',
     canceladoOk: 'The order was canceled.',
-    tengoUnProblema: 'I have a problem',
+    necesitoAyudaPedido: 'I need help with this order',
     // 🔏 Hours SIGNED by the founder (Aug 12 2026, via A): 8:00–21:00.
     problemaDetalle: "Takes you to the e-PetPlace team's WhatsApp. We answer from 8:00 to 21:00.",
     problemaMensaje: 'Hi, I have a problem with my order {{numero}}.',

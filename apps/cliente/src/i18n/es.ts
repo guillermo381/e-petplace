@@ -3439,7 +3439,13 @@ export const clienteEs = {
     cancelarConfirmar: 'Sí, cancelar',
     cancelarNo: 'No, lo dejo',
     canceladoOk: 'El pedido quedó cancelado.',
-    tengoUnProblema: 'Tengo un problema',
+    /* 🔴 S114-C · «Tengo un problema» MURIÓ COMO ETIQUETA (mesa, 7-sep).
+       Convive con «¿Algo salió distinto?» —la puerta del reclamo— y **dos
+       puertas con nombres que compiten obligan a la familia a adivinar cuál
+       le toca; la que elija mal la deja sin lo que la letra le prometió.**
+       Ésta es AYUDA GENERAL: «¿dónde está mi pedido?», que la letra dice
+       explícitamente que NO es un caso. El nombre ahora lo dice. */
+    necesitoAyudaPedido: 'Necesito ayuda con este pedido',
     // 🔏 Horario FIRMADO por el founder (12-ago-2026, vía A): 8:00–21:00.
     problemaDetalle: 'Te lleva al WhatsApp del equipo de e-PetPlace. Contestamos de 8:00 a 21:00.',
     problemaMensaje: 'Hola, tengo un problema con mi pedido {{numero}}.',

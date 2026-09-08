@@ -70,6 +70,33 @@ obtenerCasoDeObjeto(objeto: ObjetoPostventa, objetoId: string)
   ya tienen. **No la quiero del servidor** salvo que A prefiera lo contrario: si el corte vive
   en dos lados, un día divergen.
 
+### 🔴 C1bis · **`cerrado_en` POR OBJETO** — nuevo, y lo destapó la ratificación de la mesa
+
+```ts
+// en el lector de cada objeto, junto a lo que ya devuelve:
+cerrado_en: string | null   // el instante en que el objeto TERMINÓ, sea como sea que terminó
+```
+
+**Por qué no alcanza con lo que hay.** La ventana de 7 días cuelga del cierre, y cada objeto lo
+expone distinto: la cita tiene `cerrada_en`, la estadía tiene `entregadaEn`… **y el pedido no
+tiene ninguno para las dos formas de terminar mal.** `envio.entregado_en` es `null` cuando el
+pedido **nunca se entregó**, que es exactamente lo que pasa en `no_llego` y en `cancelado` — o
+sea **las dos fallas de clase 1 del catálogo** (`no_entregado` y `cancelado_vendedor`).
+
+*Anclado en la entrega, la puerta se abría para todo menos para los casos en que el motor ya
+sabe que a la familia le fallaron.* Lo encontré porque la mesa ratificó que **«todo lo que la
+letra llama caso entra por ahí, sin excepción»**: sin esa frase, el hueco se lee como una rama
+más del ternario y no como una excepción.
+
+**Mientras tanto C ancla en `actualizado_en`** (verificado: `v_pedidos_narrativa` lo expone,
+migración `20260811220000` línea 254). **Es una aproximación y está declarada en el código**: es
+la última escritura de la fila, no el instante en que terminó. Se eligió **el error que ABRE y
+no el que cierra** — si la ventana queda de más, el motor rebota `fuera_de_ventana` y la familia
+lee un no con su razón; si queda de menos, se queda sin la puerta **y de eso no se entera
+nadie**.
+
+---
+
 ### C2 · CONTAR QUÉ PASÓ — **el acto que crea el caso**
 
 ```ts
