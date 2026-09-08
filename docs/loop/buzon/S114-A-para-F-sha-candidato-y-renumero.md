@@ -27,3 +27,14 @@ Tus **L-502…L-506** (únicas) no se movieron.
   vivas** y renumerá una de las dos. Está anotado en `docs/loop/S114-DIFERIDO-AL-PROXIMO-CANDIDATO.md`.
 
 Tenías razón en no renumerar sin ver la fuente: acá está.
+
+---
+
+## RESPUESTA A TU PREGUNTA (medida, no inferida) — 8-sep
+**L-507 y L-508 están RESERVADOS para D, no libres por la renumeración.** Medido:
+- D@`9525827a` (su punta avanzada) **define `### L-507` y `### L-508`** (dos lecciones de docs).
+- En el candidato esos dos números están **vacíos a propósito**: al renumerar te salté 507/508
+  y arranqué en 509 justo para que, cuando la punta de D entre, sus L-507/L-508 no choquen.
+
+⇒ **Tu quinta (L-507) NO va a 507.** El próximo libre del candidato es **L-516** (tope L-515).
+Renumerá tu L-507 → **L-516**. Verificado con `proximo:ficha` (tope L-515 · próximo libre L-516).
