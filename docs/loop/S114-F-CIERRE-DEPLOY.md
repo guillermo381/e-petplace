@@ -210,6 +210,45 @@ construye o retirarlo, y eso lo firma el founder.*
 
 Todo en `docs/loop/buzon/S114-F-para-TODAS-y-FOUNDER-el-monorepo-no-despliega.md`.
 
+### Firmado — el umbral y la salida del gate (8-sep)
+
+**① El umbral es una ESTIMACIÓN y no se puede fundar, y eso es la respuesta.**
+Se re-midió con la muestra más grande disponible (n=17: mín 39 s · p50 47 s ·
+p90 55 s · máx 92 s ⇒ 300 s son 3,3× el máximo). **Creció de 3 a 17 y el sesgo
+persistió igual** — y eso es concluyente, ***porque no puede no persistir***: un
+deployment que nunca se creó no tiene latencia. *Más datos del mismo tipo no curan
+un sesgo de selección, y decirlo así vale más que un umbral mejor.*
+
+**② Firmado: cuando el umbral no se puede fundar, la salida no es afinarlo — es
+dejar de hacerlo decidir solo.**
+
+```
+el proyecto NO está desplegando          → 1  ROJO
+despliega y ESTA punta quedó saltada     → 2  NO CONCLUYENTE  (no falla el job)
+```
+
+Con **un discriminador que no depende del reloj**: si existe algún deployment
+posterior al commit, el corte no es del proyecto. Y **el gate lo declara en su
+salida** — *uno que puede gritar en falso y no lo dice entrena a ignorarlo.*
+
+**Verificado en la Action real** (`5543b6d`, 8-sep 14:48Z): el paso «el gate se
+prueba a sí mismo» corrió y dio los **cinco brazos en verde**, y después el camino
+real dio `AL DÍA`. *El `success` del job no alcanzaba: hubo que abrir el log para
+saber que el paso nuevo había corrido de verdad.*
+
+**Historial del gate — su mejor prueba:**
+
+```
+bf6bf9b ✅   f3171cc 🔴   b5716d1 🔴   66cf314 🔴   2b777e3 ✅   ec79bb7 ✅   5543b6d ✅
+             └─ los tres rojos fueron sobre errores de su propio autor ─┘
+```
+
+### Esperando de A, por el buzón
+
+**El SHA del candidato con la renumeración.** Medido: **la colisión es sólo `L-507`**
+—D la usa para otra lección— y **el candidato no puede cubrirla**, porque A renumeró F
+a 509-512 (cuatro) y `L-507` nació después. **No se renumera hasta tener el SHA.**
+
 ### Anotado para cuando el founder firme
 
 **① El proyecto Vercel del monorepo se RETIRA, no se acota** (decisión de mesa,
