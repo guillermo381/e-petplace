@@ -210,3 +210,101 @@ acababa de curar.
 - **Archivos nuevos:** `apps/admin/` (13) · `packages/api/src/admin/` (3) · letra · 3 docs de loop · 1 reversa.
 - **Legado:** 2 archivos borrados, 3 modificados, 1 lápida nueva. **Cero cambios más**, como pedía el encargo.
 - ⚠️ **Las 5 migraciones de A copiadas al worktree para desbloquear `db push` NO se commitean.**
+
+---
+
+# ADENDA · EL PUSH DEL LEGADO (7-sep-2026)
+
+`e-petplace-admin` tenía **dos** commits sin empujar. Se midió el ajeno **antes**
+de empujar nada, y se empujaron como **actos separados**.
+
+## ① El commit de Placas — MEDIDO, **NO obsoleto**, empujado
+
+`c0aee5e` · «Placas · los lotes de códigos se crean acá (S113 fase 3)» ·
+3 archivos, **167 líneas, todas aditivas**.
+
+**Corrección de premisa, con el dato:** no estuvo *semanas* sin salir — es del
+**7-sep 00:02**, unas 18 horas antes de empujarlo. *Lo que sí estuvo meses
+quieto es el repo: el commit anterior es del 10 de mayo.* Son dos cosas
+distintas y la segunda es la que engaña.
+
+**Contra qué modelo apunta, medido contra la base viva:**
+
+| lo que la pantalla usa | estado |
+|---|---|
+| `pasaporte_lote` → `id, nombre, cantidad, proveedor, creado_en` | ✅ existe, las 6 columnas |
+| `crear_lote_placas(p_nombre text, p_cantidad integer, p_proveedor text)` | ✅ firma exacta |
+| `listar_placas_de_lote(p_lote_id uuid)` | ✅ firma exacta |
+| gate de las dos | ✅ `is_admin` en el cuerpo · `anon=false` · `auth=true` |
+| rebote por camino real como no-admin | ✅ `42501 solo_admin` · tabla `HTTP 403` |
+
+**Y lo decisivo: ninguna migración posterior tocó el modelo.** El único archivo
+que menciona `pasaporte_lote` / `crear_lote_placas` / `listar_placas_de_lote` en
+todo el monorepo es `20260909680000_s113a_placas.sql`, **la que las creó**.
+
+⇒ **No es el caso de adopción ni de notificaciones.** Esas dos apuntaban a un
+modelo que se movió debajo. Ésta apunta a un modelo **intacto**. Se empujó.
+
+### 🔴 Pero apareció otra cosa, y no es obsolescencia: un defecto DE ORIGEN
+
+Cotejando el contrato de salida con lo que la pantalla consume:
+
+```
+listar_placas_de_lote devuelve : { serie, token, activada }      ← booleano
+Placas.tsx declara y consume   : { serie, token, activada_en, mascota_id }
+```
+
+**`mascota_id` no existe en la respuesta, y `activada_en` tampoco** (el campo se
+llama `activada`). Efecto medido por lectura:
+
+- `Placas.tsx:93` — `placas.filter((p) => p.mascota_id === null).length`
+  ⇒ `undefined === null` es **false** ⇒ **el contador «libres» da 0 siempre**,
+  aunque el lote entero esté sin activar.
+- `Placas.tsx:151` — `{p.mascota_id ? '· activada' : ''}`
+  ⇒ `undefined` es falsy ⇒ **nunca marca una placa como activada**.
+
+**No es deriva: la función y la pantalla nacieron el mismo día, en S113.** La
+función siempre devolvió esos tres campos. *La pantalla nació con el defecto.*
+
+**Por qué se empujó igual, y no es indulgencia:**
+1. Es **aditivo**: no rompe nada de lo que ya funcionaba.
+2. **Lo esencial funciona**: crear el lote, listar, y el **CSV con los tokens** —
+   que es lo único que no se puede regenerar— sale correcto.
+3. **Cero lotes creados en la historia** (`select count(*) from pasaporte_lote` = 0)
+   ⇒ el defecto **nunca mostró un número mal a nadie**.
+4. No escribe nada mal: los dos campos rotos son de **lectura**.
+5. Y `79a6cbb` es **hijo** de `c0aee5e`: no empujarlo bloqueaba también el retiro,
+   y separarlos exigía reescribir historia por dos indicadores.
+
+**Cura propuesta, NO aplicada** (fuera del alcance de esta tanda, que dice «cero
+cambios al legado salvo los dos retiros»): es de **dos líneas** y usa el campo
+que sí viene —
+
+```
+type Placa = { token: string; serie: number; activada: boolean }
+const libres = placas.filter((p) => !p.activada).length
+{p.serie}. {p.token} {p.activada ? '· activada' : ''}
+```
+
+*El tipo declarado es lo que hizo invisible el defecto: TypeScript no valida la
+forma de un `jsonb` en runtime, así que declarar `mascota_id` en el tipo lo
+volvió cierto para el compilador y falso para la pantalla.*
+
+## ② Los dos actos, verificados por SHA contra origin
+
+```
+ANTES   origin/main = 79eb141   (10-may-2026)
+
+acto 1  c0aee5e  Placas · S113 fase 3
+        local c0aee5e0844e1bbf... == origin c0aee5e0844e1bbf...   ✅
+
+acto 2  79a6cbb  Retiro de Adopcion y Notificaciones · S114-F
+        local 79a6cbb82c786353... == origin 79a6cbb82c786353...   ✅
+
+DESPUÉS  commits sin pushear = 0
+```
+
+⚠️ **Efecto declarado:** el legado **despliega solo en Vercel al push a `main`**
+(su README y `vercel.json`). Con estos dos actos, el retiro de Adopción y
+Notificaciones **y** la pantalla de Placas entran al deploy. **No verifiqué el
+deploy resultante** — no tengo acceso al dashboard de Vercel.
