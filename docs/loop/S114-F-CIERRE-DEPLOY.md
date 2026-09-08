@@ -181,11 +181,17 @@ estaba en la lista*.
 
 ## Lo que queda vivo, con dueño
 
-### 🔴 El push → deployment del legado sigue roto — riesgo vivo
+### El legado quedó AL DÍA — y mi conclusión anterior era prematura
 
-Tres commits (`f3171cc`, `b5716d1`, `66cf314`) con ✗ roja de la Action. **El sitio
-responde 200 y sirve contenido correcto**, así que no hay síntoma; lo que no llega es
-lo nuevo. Los seis candidatos descartados y lo que falta mirar están en `DEPLOY.md`.
+> 🔴 **CORRECCIÓN.** Una versión anterior de este parte decía que el push → deployment
+> del legado **seguía roto**. **Falso.** `2b777e3` construyó en **26 segundos** y
+> producción sirve el bundle correcto. La conclusión salió de **tres observaciones con
+> una ventana que elegí yo**, y el cuarto commit la desmintió (`L-516`).
+
+**Lo que sobrevive:** los tres commits del medio efectivamente no tienen deployment.
+*Era una **intermitencia**, no un corte* — y las dos producen las mismas observaciones.
+Sin explicación medida; la hipótesis viva (la heurística decidiendo por tamaño del diff)
+está en `DEPLOY.md` declarada como no probada.
 
 ### El proyecto Vercel del monorepo — medido, y no es de esta pista
 
@@ -203,6 +209,51 @@ fallaran. ⇒ *La cura no es cargar variables en un proyecto sin destino — es 
 construye o retirarlo, y eso lo firma el founder.*
 
 Todo en `docs/loop/buzon/S114-F-para-TODAS-y-FOUNDER-el-monorepo-no-despliega.md`.
+
+### Firmado — el umbral y la salida del gate (8-sep)
+
+**① El umbral es una ESTIMACIÓN y no se puede fundar, y eso es la respuesta.**
+Se re-midió con la muestra más grande disponible (n=17: mín 39 s · p50 47 s ·
+p90 55 s · máx 92 s ⇒ 300 s son 3,3× el máximo). **Creció de 3 a 17 y el sesgo
+persistió igual** — y eso es concluyente, ***porque no puede no persistir***: un
+deployment que nunca se creó no tiene latencia. *Más datos del mismo tipo no curan
+un sesgo de selección, y decirlo así vale más que un umbral mejor.*
+
+**② Firmado: cuando el umbral no se puede fundar, la salida no es afinarlo — es
+dejar de hacerlo decidir solo.**
+
+```
+el proyecto NO está desplegando          → 1  ROJO
+despliega y ESTA punta quedó saltada     → 2  NO CONCLUYENTE  (no falla el job)
+```
+
+Con **un discriminador que no depende del reloj**: si existe algún deployment
+posterior al commit, el corte no es del proyecto. Y **el gate lo declara en su
+salida** — *uno que puede gritar en falso y no lo dice entrena a ignorarlo.*
+
+**Verificado en la Action real** (`5543b6d`, 8-sep 14:48Z): el paso «el gate se
+prueba a sí mismo» corrió y dio los **cinco brazos en verde**, y después el camino
+real dio `AL DÍA`. *El `success` del job no alcanzaba: hubo que abrir el log para
+saber que el paso nuevo había corrido de verdad.*
+
+**Historial del gate — su mejor prueba:**
+
+```
+bf6bf9b ✅   f3171cc 🔴   b5716d1 🔴   66cf314 🔴   2b777e3 ✅   ec79bb7 ✅   5543b6d ✅
+             └─ los tres rojos fueron sobre errores de su propio autor ─┘
+```
+
+### Esperando de A, por el buzón
+
+~~**El SHA del candidato con la renumeración.**~~ ✅ **RESUELTO.** A confirmó por el
+buzón: la punta era `a28585ac`, el tope `L-515`, y **la colisión era sólo `L-507`** —D la
+usa para otra lección y los dos huecos del candidato (`L-507`/`L-508`) eran suyos—.
+⇒ **mi racha pasó a `L-516`**, y el resto de mi trabajo ya estaba adentro **idéntico por
+md5** (`L-503`–`L-506` y la enmienda a `L-502`).
+
+*Se conserva el texto tachado y no se borra: **el número viajó a 13 lugares en DOS repos**
+—el canon, el parte, el README del legado, el script del gate y el YAML de la Action— y
+quien encuentre un `L-507` viejo en algún lado necesita saber que hubo un corrimiento.*
 
 ### Anotado para cuando el founder firme
 

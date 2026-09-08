@@ -50,6 +50,30 @@ Los cuatro exponen **TypeScript crudo**. Entonces:
 > ***El mismo archivo se juzga con dos compiladores de versión MAYOR distinta, y cada gate
 > ve sólo su veredicto.***
 
+### ✅ MEDIDO, no inferido (8-sep) — y cambia lo que hay que hacer
+
+Lo de arriba salía de leer `main`/`types`. **Se ejerció con una sonda real**: un error de
+tipo introducido en `packages/ui/src/tokens/spacing.ts`, corriendo el typecheck de
+`apps/cliente` (TS **6.0.3**), y revertido en el acto.
+
+```
+exit del typecheck de cliente: 2
+../../packages/ui/src/tokens/spacing.ts(34,14): error TS2322:
+    Type 'string' is not assignable to type 'number'.
+```
+
+Y el programa de `apps/cliente` **incluye 378 archivos de `packages/*/src`**, con su ruta
+real (`packages/ui/src/…`), no vía `node_modules` — pnpm usa symlinks y TS los resuelve.
+
+🔴 **Estar en el programa no bastaba: hacía falta probar que los errores SE REPORTAN.**
+Ahora está probado, en la dirección que importa.
+
+⇒ **Y de ahí sale lo práctico: no hay que construir ningún gate nuevo.** Los cuatro
+typechecks que ya existen **corren las dos versiones sobre `packages/*/src`** — los de las
+apps con 6.0.3, los de los packages con 5.9.3. *Correrlos todos ya es la cobertura
+completa; lo que falta no es un instrumento sino la línea que declare si la divergencia es
+deliberada.*
+
 **El modo de falla concreto:** una construcción que 5.9 acepta y 6.0 rechaza (o al revés)
 **pasa un typecheck y rompe el otro** — y quien la escriba en `packages/ui` verá su gate
 verde. *No falla hoy: los cuatro typechecks están en 0. Está latente, que es la forma en
@@ -57,16 +81,49 @@ que este tipo de cosa espera.*
 
 ---
 
-## Lo que NO se midió, y por qué importa antes de decidir
+## 🔴 De dónde viene — MEDIDO, y NO es deliberada
 
-- **Si es deliberado.** Expo SDK 57 puede exigir TS 6 en las apps — **es la explicación más
-  probable** y encaja con que el corte sea exactamente «apps Expo vs. todo lo demás».
-  *Si es deliberado, lo que falta no es una cura: es la línea que lo declare*, para que
-  nadie lo «unifique» por prolijidad y rompa las dos apps.
-- **Qué construcciones difieren entre 5.9 y 6.0.** No lo medí: exige compilar el mismo
-  corpus con las dos y diffear los errores.
+> **CORRECCIÓN de este mismo aviso.** Una versión anterior decía que ser deliberada era
+> *«la explicación más probable (Expo SDK 57)»*. **Se midió y NO se sostiene.**
 
----
+**① Expo 57.0.4 no exige TypeScript 6.** No declara `typescript` en `peerDependencies`
+ni en `devDependencies` — ni `expo` ni `expo-router`. *No hay tal requisito.*
+
+**② Las cuatro versiones vienen del MISMO commit — el scaffold original:**
+
+```
+98e14c97 · 2026-07-05 · chore: scaffold monorepo — apps Expo, packages, tipos, skills (S43-B0)
+
+apps/cliente     ~6.0.3        packages/*       ~5.9.0
+apps/prestador   ~6.0.3        package.json     ~5.9.0
+```
+
+Y la línea de `apps/cliente` **nunca se tocó desde entonces** — `git log -L` sobre esa
+línea devuelve **un solo commit**, el scaffold.
+
+⇒ ***No es una decisión: es lo que dejó `create-expo-app` hace dos meses, y nadie la
+miró.*** El corte «apps Expo vs. todo lo demás» es limpio **porque el generador de Expo
+puso una versión y el resto del scaffold puso otra**, no porque alguien lo eligiera.
+
+⚠️ **Y por eso NO se escribe «es deliberada»:** sería una razón inventada con autoridad
+de canon, en un archivo que existe para que nadie vuelva a medir. *El próximo que la lea
+no la va a re-verificar — y el día que alguien necesite unificar, va a encontrar una
+prohibición fundada en un requisito que no existe.*
+
+**Lo que sí corresponde escribir:** que viene del scaffold `98e14c97`, que **nadie la
+decidió**, que **Expo no la exige**, y que **unificar es una decisión abierta** — con el
+dato de que hoy no rompe nada (los cuatro typechecks en 0) y de que los mismos `.ts` se
+compilan con las dos versiones.
+
+*Nota de método: la hipótesis la ofrecí yo, con «puede» y «más probable». **Que una
+inferencia esté bien marcada no la vuelve inocua** — otra pista estaba por escribirla
+como hecho, y el hedge no viaja: viaja la conclusión.*
+
+## Lo que NO se midió
+
+- **Qué construcciones difieren entre 5.9 y 6.0.** Exige compilar el mismo corpus con las
+  dos y diffear los errores. *Hoy los cuatro typechecks están en 0, así que ninguna
+  diferencia se manifiesta con el código actual.*
 
 ## Cómo verificarlo en un comando
 
