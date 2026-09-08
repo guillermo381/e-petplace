@@ -30876,6 +30876,39 @@ salidas creíbles; la de `L-513` se caza corriendo el control negativo, y ésta
 
 ---
 
+### `L-520` — UN CENSO POR EL NOMBRE QUE EL EQUIPO USA HOY, NO POR EL HECHO, REPORTA AUSENCIA SOBRE ALGO ENTERO
+
+> **Firma del founder (S114, 8-sep-2026).** Es `L-499` en su forma MÁS CARA: esta
+> vez el costo no era un número inflado, era **construir dos veces lo mismo**.
+
+**El caso.** La mesa pidió construir el memorial (`cambiar_estado_vida` / la puerta
+de fallecida): *«MEMORIAL NO TIENE PUERTA NI MOTOR — C midió cero funciones en
+`packages/api`, cero superficies».* Medido antes de escribir una línea, el memorial
+estaba **entero**: motor (`registrar_fin_de_vida`, con fecha, dueño-adulto,
+idempotente, y el un-solo-sentido enforced en `marcar_perdida` con
+`RAISE 'mascota_en_memorial'`), wrapper (`registrarFinDeVida`, `perfilMascota.ts`),
+y superficie (`despedida.tsx`). **Construir la puerta habría duplicado una feature
+completa** — y dos lugares decidiendo lo mismo es la clase que este arco cazó todo
+el tiempo.
+
+**La causa del censo falso, medida.** C grepeó **`memorial`**. La feature se llama
+**`finDeVida`** (función y wrapper) y **`despedida`** (pantalla). **Ninguna contiene
+la palabra `memorial`** — vive sólo en los comentarios. *El censo preguntó por el
+NOMBRE que el equipo usa al hablar del hecho, y el código nombra el hecho de otra
+manera; así un grep del nombre-de-conversación reporta CERO sobre algo que está
+entero y andando.*
+
+**La cura.** Un censo de existencia se hace por el HECHO, no por el nombre de
+conversación: por la TABLA que toca (`estado_vida`, `eventos_mascota` tipo
+`fin_vida`), por la COLUMNA, por la INTENCIÓN (el enum `'fallecida'`), y se cruza
+con la puerta única (`packages/api/index.ts`). *Preguntar «¿hay algo que se llame
+X?» y concluir «no existe la feature» son dos cosas distintas, y la distancia entre
+ellas se paga construyendo el duplicado.* Hermana de [[L-499]] (lo que parece
+cuidado impide mirar) y de [[L-459]] (un gate atado a un NOMBRE mide la convención,
+no el hecho). Y su corolario operativo es la regla de la casa ya firmada: *antes de
+escribir una función se lista lo que ya toca esa intención — por cuerpo en el motor
+y por import en la puerta — y la lista va al cierre AUNQUE ESTÉ VACÍA.*
+
 ### `L-515` 🔴 · UN DATO MEDIDO LLEVA SU **HORA**, NO SÓLO SU FECHA
 
 **Hallazgo de E, depositado por A (S114, 7-sep-2026). Y se cobró sobre A el
