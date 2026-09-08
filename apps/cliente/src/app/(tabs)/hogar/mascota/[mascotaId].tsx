@@ -242,6 +242,13 @@ function FilaIdentidad({ etiqueta, valor, mono, accion }: { etiqueta: string; va
 import { fechaCortaMono } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+/* 🔴 LA DEFINICIÓN ÚNICA (firma founder 7-sep: **perdida NO es memorial**).
+   Alias porque esta pantalla ya tiene su `esMemorial`, que es el OR del dato
+   con el tema — dos cosas distintas y por eso dos nombres.
+   ⏪ Las tres derivaciones que vivían acá decían `!== null && !== 'activa'` y
+   metían a `perdida` adentro: al perfil de una mascota que la familia está
+   BUSCANDO le apagaban el producto. */
+import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
 
 type TraductorPerfil = ReturnType<typeof useTraduccion>['t'];
 
@@ -364,9 +371,7 @@ export default function PerfilDeMascota() {
            acá el compilador lo dice — en otros lados no.* Misma regla, misma
            fuente (`estado_vida`), sin el brazo del tema, que acá no aplica. */
         memorial:
-          typeof perfil === 'object' &&
-          perfil.mascota.estado_vida !== null &&
-          perfil.mascota.estado_vida !== 'activa'
+          typeof perfil === 'object' && mascotaEnMemorial(perfil.mascota.estado_vida)
             ? '1'
             : '0',
       },
@@ -541,9 +546,7 @@ export default function PerfilDeMascota() {
      valiendo. */
   const esMemorial =
     theme.mode === 'memorial' ||
-    (typeof perfil === 'object' &&
-      perfil.mascota.estado_vida !== null &&
-      perfil.mascota.estado_vida !== 'activa');
+    (typeof perfil === 'object' && mascotaEnMemorial(perfil.mascota.estado_vida));
   // r10-1: el techo pinta bajo la barra de estado → íconos CLAROS
   // mientras la pantalla tiene foco; al salir se restaura la voz del
   // tema (patrón BarraTabs/Hogar — packages/ui no conoce el foco).
@@ -988,7 +991,7 @@ export default function PerfilDeMascota() {
       ? calcularMomentoVital({
           edadMeses: meses,
           tieneCondicionCronica: tiene_condicion_cronica,
-          esMemorial: mascota.estado_vida !== null && mascota.estado_vida !== 'activa',
+          esMemorial: mascotaEnMemorial(mascota.estado_vida),
           umbrales,
         })
       : null;

@@ -23,6 +23,8 @@
 
 import type { EstadoDeLaPuerta } from '@epetplace/ui';
 
+import { esMemorial } from '@/lib/memorial';
+
 /** §1: «Ventana para abrir un caso: 7 días desde el cierre o la entrega». */
 export const DIAS_DE_VENTANA = 7;
 
@@ -74,10 +76,15 @@ export type VeredictoDeLaPuerta =
 export function veredictoDeLaPuerta(e: EntradaDeLaPuerta): VeredictoDeLaPuerta {
   /* ── EL PISO, ANTES QUE TODO (§1: «Con la mascota en memorial no hay
         línea. Nada.»). Va primero a propósito: en memorial no se evalúa
-        ventana ni caso — no hay nada que decidir. */
-  const enMemorial =
-    e.estadoVida !== undefined && e.estadoVida !== null && e.estadoVida !== 'activa';
-  if (enMemorial) return { hay: false, porque: 'memorial' };
+        ventana ni caso — no hay nada que decidir.
+
+     ⏪ **Acá decía `!== null && !== 'activa'`, y eso metía a `perdida`
+     adentro de memorial: a una familia que está buscando a su animal le
+     apagaba el reclamo del último paseo.** Lo escribí copiando la forma
+     dominante del repo sin preguntarme qué decía — *que es exactamente cómo
+     una regla equivocada se propaga: pareciendo la convención*. Hoy delega
+     en la definición única, con la firma del founder adentro. */
+  if (esMemorial(e.estadoVida)) return { hay: false, porque: 'memorial' };
 
   if (e.cerradaEn === null) return { hay: false, porque: 'sin_cerrar' };
 

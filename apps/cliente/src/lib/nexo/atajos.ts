@@ -49,6 +49,7 @@
  */
 
 import type { MascotaResumen } from '@epetplace/api'
+import { esMemorial as esMemorialPorDato } from '@/lib/memorial'
 
 export type AtajoNexo = 'peso' | 'vacuna' | 'antiparasitario' | 'foto'
 
@@ -81,11 +82,20 @@ export function razonDeApagado(
  * no comparten guard* — por eso son dos valores del retorno y no un `[]`.
  */
 
-/** Memorial en el sentido de la casa: `null` cuenta como activa (angostado
- *  honesto — el CHECK admite null y la elegibilidad falla cerrada). Espejo
- *  literal del criterio que ya usa `CoachHoja`. */
+/**
+ * Memorial, sobre una mascota. **DELEGA en la definición única de la casa**
+ * (`@/lib/memorial`) y conserva su firma porque el arnés la llama con el
+ * objeto.
+ *
+ * ⏪ **Acá vivía una SEGUNDA definición** —`!== null && !== 'activa'`— que
+ * metía a `perdida` adentro de memorial, y su propio comentario decía que era
+ * *«espejo literal del criterio que ya usa CoachHoja»*. **Un espejo de una
+ * copia sigue siendo una copia**, y así fue como la regla equivocada llegó a
+ * nueve ocurrencias contra dos. La firma del founder (7-sep) la deroga:
+ * **perdida NO es memorial** — la que se busca conserva la app entera.
+ */
 export function esMemorial(m: Pick<MascotaResumen, 'estado_vida'>): boolean {
-  return m.estado_vida !== null && m.estado_vida !== 'activa'
+  return esMemorialPorDato(m.estado_vida)
 }
 
 export type FocoNexo =

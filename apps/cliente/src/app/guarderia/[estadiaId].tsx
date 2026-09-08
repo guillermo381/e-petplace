@@ -125,6 +125,7 @@ const horaCorta = (iso: string) =>
 
    *Se retira en el acto que lo vuelve reemplazable, no después* (`L-395`). */
 
+import { esMemorial } from '@/lib/memorial';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
 import { useEstadoVida } from '@/lib/postventa/useEstadoVida';
 
@@ -694,7 +695,17 @@ export default function DuranteGuarderia() {
             ocurriendo. */}
         {puerta.hay && (
           <View style={{ marginTop: spacing[2] }}>
-            <LineaAlgoSalioDistinto estado={puerta.estado} onPress={abrirLaPuerta} />
+                {/* `enMemorial` es el PISO de la pieza y no su decisión: el
+                    veredicto ya devolvió `hay: false` en memorial, así que
+                    acá nunca llega encendido. **Se pasa igual, con la misma
+                    definición única**, porque un piso que depende de que el
+                    llamador se acuerde es el guard que esta tanda vino a
+                    curar. */}
+            <LineaAlgoSalioDistinto
+              estado={puerta.estado}
+              enMemorial={esMemorial(estadoVida)}
+              onPress={abrirLaPuerta}
+            />
           </View>
         )}
       </ScrollView>

@@ -124,6 +124,11 @@ import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { composicionDe } from '@/lib/composicion-sujeto';
 import { CantoCurva } from '@/components/canto-curva';
 import { FiltroPills } from '@/components/filtro-pills';
+/* 🔴 ALIAS A PROPÓSITO: este archivo ya tiene un `esMemorial` local que es
+   el del TEMA (línea ~775), y son DOS preguntas distintas — «¿el tema está
+   en memorial?» y «¿la mascota falleció?». *Importarla con su nombre las
+   confundiría en el peor lugar: el compilador avisó, pero un lector no.* */
+import { esMemorial as mascotaEnMemorial } from '@/lib/memorial';
 
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
@@ -1206,7 +1211,7 @@ export default function Hogar() {
        al día» o «Necesita tu atención» a quien ya no está. *El dato para
        callarla estaba acá, en la lista de mascotas, y nadie lo miraba.* */
     const m = Array.isArray(mascotas) ? mascotas.find((x) => x.id === id) : undefined;
-    if (m !== undefined && m.estado_vida !== null && m.estado_vida !== 'activa') return null;
+    if (m !== undefined && mascotaEnMemorial(m.estado_vida)) return null;
     const s = senalesPorMascota.get(id);
     if (!s) return null;
     return calcularVozHogar(
@@ -1232,7 +1237,7 @@ export default function Hogar() {
    *  filas y la lib de pendientes, que antes decían cosas distintas. */
   const enMemoriaDe = (id: string): boolean => {
     const m = mascotaDe(id);
-    return m !== undefined && m.estado_vida !== null && m.estado_vida !== 'activa';
+    return m !== undefined && mascotaEnMemorial(m.estado_vida);
   };
 
   const filasReco: FilaReco_[] = (() => {
@@ -1658,7 +1663,7 @@ export default function Hogar() {
                   /* Mismo criterio que `vozDe`: sin punto de estado para quien
                      ya no está. *Dos lugares que dibujan el mismo hecho tienen
                      que callarse por la misma razón.* */
-                  const enMemoria = m.estado_vida !== null && m.estado_vida !== 'activa';
+                  const enMemoria = mascotaEnMemorial(m.estado_vida);
                   const s = enMemoria ? undefined : senalesPorMascota.get(m.id);
                   const v = s
                     ? calcularVozHogar(

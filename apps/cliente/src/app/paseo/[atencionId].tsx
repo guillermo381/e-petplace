@@ -65,6 +65,7 @@ import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
+import { esMemorial } from '@/lib/memorial';
 import { destinoDeLaPuerta, veredictoDeLaPuerta } from '@/lib/postventa/puerta';
 
 function horaMono(iso: string | null): string {
@@ -888,7 +889,17 @@ export default function DetallePaseo() {
             veredicto lo resuelve con `cerrada_en === null`. */}
         {puerta.hay && (
           <View style={{ marginTop: spacing[2] }}>
-            <LineaAlgoSalioDistinto estado={puerta.estado} onPress={abrirLaPuerta} />
+                {/* `enMemorial` es el PISO de la pieza y no su decisión: el
+                    veredicto ya devolvió `hay: false` en memorial, así que
+                    acá nunca llega encendido. **Se pasa igual, con la misma
+                    definición única**, porque un piso que depende de que el
+                    llamador se acuerde es el guard que esta tanda vino a
+                    curar. */}
+            <LineaAlgoSalioDistinto
+              estado={puerta.estado}
+              enMemorial={esMemorial(estadoVida)}
+              onPress={abrirLaPuerta}
+            />
           </View>
         )}
       </ScrollView>

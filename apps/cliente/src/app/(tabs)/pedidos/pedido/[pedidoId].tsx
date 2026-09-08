@@ -850,7 +850,15 @@ export default function DespensaPedido() {
                 **Ahora la gobierna `puerta.hay` y nada más.** */}
             {puerta.hay && (
               <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[2] }}>
-                <LineaAlgoSalioDistinto estado={puerta.estado} onPress={abrirLaPuerta} />
+                {/* `false` con su razón, no por omisión: **un pedido no
+                    tiene UNA mascota** (ver la nota del veredicto, arriba),
+                    así que la regla de memorial no aplica y elegir una para
+                    aplicársela sería inventarle un sujeto. */}
+                <LineaAlgoSalioDistinto
+                  estado={puerta.estado}
+                  enMemorial={false}
+                  onPress={abrirLaPuerta}
+                />
               </View>
             )}
           </>
