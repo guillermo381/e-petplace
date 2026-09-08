@@ -775,3 +775,112 @@ choca contra la realidad; uno verdadero-e-inútil se archiva.* Su regla: ante un
 capa que falla, se mide la de arriba y la de abajo **antes de nombrar la causa**
 — y en red la técnica que las separa es pedirle al servidor con el `Host`
 correcto **salteando el DNS**.
+
+---
+
+# ADENDA 5 · EL CNAME, EL DISCRIMINADOR, Y UN DOMINIO APUNTANDO A LA NADA
+
+## ③ EL ROJO PARCIAL — ✅ COMPLETO, con sus DOS mitades
+
+El founder entregó las dos llaves que faltaban: el asiento de casa (A, adenda 13)
+y tres casos sembrados por E. **Ahora sí se puede saber cuál rebote es.**
+
+Caso usado: **`9860ef35`** — pedido · `producto_en_mal_estado` · clase 3 ·
+etapa `con_casa` · **el único de los tres que estaba sin resolver**.
+
+```
+MITAD 1 · cuenta de prueba (is_admin=false, ni familia ni prestador del caso)
+  caso_resolver → {"ok": false, "codigo": "no_podes_resolver"}   ← EL GATE
+  leer_caso     → {"ok": false, "codigo": "no_es_tuyo"}          ← EL GATE
+
+MITAD 2 · cuenta de casa (is_admin=true)
+  is_admin      → true
+  leer_caso     → ok:true · clase 3 · etapa con_casa
+  caso_resolver → ok:true · etapa "resuelto" · tenia_devengo:false
+```
+
+🔴 **Por qué hacían falta las DOS, y no alcanzaba con el rebote:** *un gate que
+le niega a TODOS también rebota.* La mitad 1 sola probaba que algo frenaba; sólo
+la mitad 2 prueba que **discrimina**. Y la mitad 1 ya no es `caso_no_existe`
+—el rebote inútil de la tanda anterior— sino `no_podes_resolver` **sobre un caso
+que existe**: ahora se sabe cuál rebote es.
+
+### Y §6 verificado sobre el hecho, no sobre la promesa
+
+```
+decidido_por        = a0d19727   ← quedó escrito quién decidió
+etapa / estado_final = resuelto
+resolucion_alcance  = sin_devolucion
+mensajes en el hilo = 2          ← el hecho entró al hilo
+eventos del objeto  = 0          ← NO movió plata
+```
+
+**La escritura se hizo con cuidado y se declara:** antes de resolver medí
+`_caso_tiene_devengo` → `NULL`, y usé `sin_devolucion`, que pone `camino = NULL`.
+*Sobre un caso de prueba, sin devengo y sin mover plata* — no sobre un objeto
+real de una familia.
+
+## ① EL CNAME — DNS ✅ · TLS 🔴 todavía
+
+```
+DNS   8.8.8.8         → cname.vercel-dns.com ✅
+      9.9.9.9         → cname.vercel-dns.com ✅
+      208.67.222.222  → cname.vercel-dns.com ✅
+      resolver local  → 76.76.21.93          ✅
+      1.1.1.1         → NXDOMAIN  ← caché negativo suyo; control: www SÍ resuelve ahí
+
+TLS   no peer certificate available   🔴
+      control: www.epetplace.com → issuer=Let's Encrypt ✅ (el instrumento discrimina)
+```
+
+**Vercel todavía no emitió el certificado.** Es la capa 2 y depende de que Vercel
+verifique el dominio; el DNS ya está para la mayoría de los resolvers.
+
+🔴 **Por eso ② NO se ejecutó todavía, y es la misma razón de antes:** apuntar el
+`redirectTo` a `https://admin.epetplace.com` sin certificado daría un error de
+TLS en el navegador — **peor que la pantalla de Vercel de hoy**. *No concluyo
+«no anda» sobre una capa: el DNS está, el TLS falta, y falta porque va después.*
+
+**Se ejecuta en cuanto el certificado exista**, con la verificación de siempre:
+cero ocurrencias de la URL vieja en el bundle publicado.
+
+## 🔴 ④ `pagos.epetplace.com` — DOMINIO PUBLICADO APUNTANDO A LA NADA
+
+```
+DNS   8.8.8.8 y 1.1.1.1 → cname.vercel-dns.com   ✅ resuelve
+TLS   no peer certificate available               🔴
+HTTP  vía 76.76.21.98 → 404 · "The deployment could not be found on Vercel"
+                             DEPLOYMENT_NOT_FOUND
+```
+
+⇒ **El CNAME está cargado y el dominio NO está asignado a ningún proyecto de
+Vercel.** Es exactamente lo que el founder quería saber antes de octubre.
+
+**Y es el espejo de `admin`, lo que lo vuelve fácil de recordar:**
+
+| | DNS | asignado en Vercel |
+|---|---|---|
+| `admin.epetplace.com` | ✅ (recién) | ✅ ya estaba |
+| `pagos.epetplace.com` | ✅ | 🔴 **falta** |
+
+*Las dos mitades del mismo trámite, cada una faltando en un dominio distinto.*
+
+**Dónde vive pagos-web hoy, medido:** `epetplace-pagos-stg.vercel.app` →
+**HTTP 200 · 63.938 bytes**. La pieza de S105 **está viva**, sólo que en la URL
+de Vercel. Lo confirma `MOTOR_DE_PAGOS_ESTADO.md:266`.
+
+**Contexto que encontré y explica el estado:** `pagos.epetplace.com` es el **host
+productivo** declarado del motor de pagos, con *«CNAME firmado, sin ejecutar»*
+anotado en `S101-B.md` como pendiente del founder. **El CNAME sí se ejecutó; la
+asignación en Vercel no.** Media ejecución.
+
+**Hoy no rompe nada** —ningún código del monorepo ni del legado apunta ahí, sólo
+documentos— **pero está declarado como el host productivo**, así que alguien lo
+va a usar. Asignarlo al proyecto de `pagos-web` es un acto del dashboard.
+
+> ⚠️ **Un instrumento propio salió mal otra vez y se declara:** la primera
+> medición de `pagos` leyó `<title>Thor</title>` de `/tmp/pg.html` — **residuo de
+> una corrida anterior**, con `bytes=0` en la misma línea. *Un archivo que no se
+> sobrescribe se lee como si fuera de ahora.* Se repitió borrando el archivo
+> antes, y ahí apareció el `DEPLOYMENT_NOT_FOUND`. Misma clase que el volcado de
+> `uiautomator` que la casa ya tiene medido.
